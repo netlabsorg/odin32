@@ -1,4 +1,4 @@
-/* $Id: span.h,v 1.1 2000-02-29 00:48:38 sandervl Exp $ */
+/* $Id: span.h,v 1.2 2000-05-23 20:34:56 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -37,13 +37,13 @@
 
 extern void gl_write_index_span( GLcontext *ctx,
                                  GLuint n, GLint x, GLint y, const GLdepth z[],
-				 GLuint index[], GLenum primitive );
+                                 GLuint index[], GLenum primitive );
 
 
 extern void gl_write_monoindex_span( GLcontext *ctx,
                                      GLuint n, GLint x, GLint y,
                                      const GLdepth z[],
-				     GLuint index, GLenum primitive );
+                                     GLuint index, GLenum primitive );
 
 
 extern void gl_write_rgba_span( GLcontext *ctx,
@@ -60,30 +60,31 @@ extern void gl_write_monocolor_span( GLcontext *ctx,
 extern void gl_write_texture_span( GLcontext *ctx,
                                    GLuint n, GLint x, GLint y,
                                    const GLdepth z[],
-				   const GLfloat s[], const GLfloat t[],
+                                   const GLfloat s[], const GLfloat t[],
                                    const GLfloat u[], GLfloat lambda[],
-				   GLubyte rgba[][4], CONST GLubyte spec[][4],
+                                   GLubyte rgba[][4], CONST GLubyte spec[][4],
                                    GLenum primitive );
 
 
-extern void gl_write_multitexture_span( GLcontext *ctx, GLuint texSets,
-                                        GLuint n, GLint x, GLint y,
-                                        const GLdepth z[],
-                                        CONST GLfloat s[][MAX_WIDTH],
-                                        CONST GLfloat t[][MAX_WIDTH],
-                                        CONST GLfloat u[][MAX_WIDTH],
-                                        GLfloat lambda[][MAX_WIDTH],
-                                        GLubyte rgba[][4],
-                                        CONST GLubyte spec[][4],
-                                        GLenum primitive );
+extern void
+gl_write_multitexture_span( GLcontext *ctx, GLuint texSets,
+                            GLuint n, GLint x, GLint y,
+                            const GLdepth z[],
+                            CONST GLfloat s[MAX_TEXTURE_UNITS][MAX_WIDTH],
+                            CONST GLfloat t[MAX_TEXTURE_UNITS][MAX_WIDTH],
+                            CONST GLfloat u[MAX_TEXTURE_UNITS][MAX_WIDTH],
+                            GLfloat lambda[MAX_TEXTURE_UNITS][MAX_WIDTH],
+                            GLubyte rgba[][4],
+                            CONST GLubyte spec[][4],
+                            GLenum primitive );
 
 
-extern void gl_read_rgba_span( GLcontext *ctx,
+extern void gl_read_rgba_span( GLcontext *ctx, GLframebuffer *buffer,
                                GLuint n, GLint x, GLint y,
                                GLubyte rgba[][4] );
 
 
-extern void gl_read_index_span( GLcontext *ctx,
+extern void gl_read_index_span( GLcontext *ctx, GLframebuffer *buffer,
                                 GLuint n, GLint x, GLint y, GLuint indx[] );
 
 

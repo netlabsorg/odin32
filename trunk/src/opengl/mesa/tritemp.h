@@ -1,8 +1,8 @@
-/* $Id: tritemp.h,v 1.1 2000-02-29 00:48:40 sandervl Exp $ */
+/* $Id: tritemp.h,v 1.2 2000-05-23 20:34:58 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -51,6 +51,10 @@
  *    PIXEL_ADDRESS(X,Y)  - returns the address of pixel at (X,Y) where
  *                          Y==0 at bottom of screen and increases upward.
  *
+ * Similarly, for direct depth buffer access, this type is used for depth
+ * buffer addressing:
+ *    DEPTH_TYPE          - either GLushort or GLuint
+ *
  * Optionally, one may provide one-time setup code per triangle:
  *    SETUP_CODE    - code which is to be executed once per triangle
  *
@@ -83,7 +87,13 @@
         GLfixed fx0;    /* fixed pt X of lower endpoint */
    } EdgeT;
 
-   struct vertex_buffer *VB = ctx->VB;
+#ifdef INTERP_Z
+   const GLint depthBits = ctx->Visual->DepthBits;
+   const GLint fixedToDepthShift = depthBits <= 16 ? FIXED_SHIFT : 0;
+   const GLfloat maxDepth = ctx->Visual->DepthMaxF;
+#define FixedToDepth(F)  ((F) >> fixedToDepthShift)
+#endif
+   const struct vertex_buffer *VB = ctx->VB;
    EdgeT eMaj, eTop, eBot;
    GLfloat oneOverArea;
    int vMin, vMid, vMax;       /* vertex indexes:  Y(vMin)<=Y(vMid)<=Y(vMax) */
@@ -134,15 +144,11 @@
 
    /* compute oneOverArea */
    {
-      GLfloat area = eMaj.dx * eBot.dy - eBot.dx * eMaj.dy;
+      const GLfloat area = eMaj.dx * eBot.dy - eBot.dx * eMaj.dy;
 
       /* Do backface culling */
-      if (
-         area * bf < 0 ||
-         area * area < .0025
-         )
+      if (area * bf < 0 || area * area < .0025)
          return;
-
 
       oneOverArea = 1.0F / area;
    }
@@ -226,36 +232,36 @@
 
    {
       GLint ltor;               /* true if scanning left-to-right */
-#if INTERP_Z
+#ifdef INTERP_Z
       GLfloat dzdx, dzdy;      GLfixed fdzdx;
 #endif
-#if INTERP_RGB
+#ifdef INTERP_RGB
       GLfloat drdx, drdy;      GLfixed fdrdx;
       GLfloat dgdx, dgdy;      GLfixed fdgdx;
       GLfloat dbdx, dbdy;      GLfixed fdbdx;
 #endif
-#if INTERP_SPEC
+#ifdef INTERP_SPEC
       GLfloat dsrdx, dsrdy;    GLfixed fdsrdx;
       GLfloat dsgdx, dsgdy;    GLfixed fdsgdx;
       GLfloat dsbdx, dsbdy;    GLfixed fdsbdx;
 #endif
-#if INTERP_ALPHA
+#ifdef INTERP_ALPHA
       GLfloat dadx, dady;      GLfixed fdadx;
 #endif
-#if INTERP_INDEX
+#ifdef INTERP_INDEX
       GLfloat didx, didy;      GLfixed fdidx;
 #endif
-#if INTERP_INT_ST
+#ifdef INTERP_INT_ST
       GLfloat dsdx, dsdy;      GLfixed fdsdx;
       GLfloat dtdx, dtdy;      GLfixed fdtdx;
 #endif
-#if INTERP_STUV
+#ifdef INTERP_STUV
       GLfloat dsdx, dsdy;
       GLfloat dtdx, dtdy;
       GLfloat dudx, dudy;
       GLfloat dvdx, dvdy;
 #endif
-#if INTERP_STUV1
+#ifdef INTERP_STUV1
       GLfloat ds1dx, ds1dy;
       GLfloat dt1dx, dt1dy;
       GLfloat du1dx, du1dy;
@@ -272,13 +278,13 @@
       ltor = (oneOverArea < 0.0F);
 
       /* compute d?/dx and d?/dy derivatives */
-#if INTERP_Z
+#ifdef INTERP_Z
       {
          GLfloat eMaj_dz, eBot_dz;
          eMaj_dz = VB->Win.data[vMax][2] - VB->Win.data[vMin][2];
          eBot_dz = VB->Win.data[vMid][2] - VB->Win.data[vMin][2];
          dzdx = oneOverArea * (eMaj_dz * eBot.dy - eMaj.dy * eBot_dz);
-         if (dzdx>DEPTH_SCALE || dzdx<-DEPTH_SCALE) {
+         if (dzdx > maxDepth || dzdx < -maxDepth) {
             /* probably a sliver triangle */
             dzdx = 0.0;
             dzdy = 0.0;
@@ -286,14 +292,13 @@
          else {
             dzdy = oneOverArea * (eMaj.dx * eBot_dz - eMaj_dz * eBot.dx);
          }
-#if DEPTH_BITS==16
-         fdzdx = SignedFloatToFixed(dzdx);
-#else
-         fdzdx = (GLint) dzdx;
-#endif
+         if (depthBits <= 16)
+            fdzdx = SignedFloatToFixed(dzdx);
+         else
+            fdzdx = (GLint) dzdx;
       }
 #endif
-#if INTERP_RGB
+#ifdef INTERP_RGB
       {
          GLfloat eMaj_dr, eBot_dr;
          eMaj_dr = (GLint) VB->ColorPtr->data[vMax][0] - (GLint) VB->ColorPtr->data[vMin][0];
@@ -319,7 +324,7 @@
          dbdy = oneOverArea * (eMaj.dx * eBot_db - eMaj_db * eBot.dx);
       }
 #endif
-#if INTERP_SPEC
+#ifdef INTERP_SPEC
       {
          GLfloat eMaj_dsr, eBot_dsr;
          eMaj_dsr = (GLint) VB->Specular[vMax][0] - (GLint) VB->Specular[vMin][0];
@@ -345,7 +350,7 @@
          dsbdy = oneOverArea * (eMaj.dx * eBot_dsb - eMaj_dsb * eBot.dx);
       }
 #endif
-#if INTERP_ALPHA
+#ifdef INTERP_ALPHA
       {
          GLfloat eMaj_da, eBot_da;
          eMaj_da = (GLint) VB->ColorPtr->data[vMax][3] - (GLint) VB->ColorPtr->data[vMin][3];
@@ -355,7 +360,7 @@
          dady = oneOverArea * (eMaj.dx * eBot_da - eMaj_da * eBot.dx);
       }
 #endif
-#if INTERP_INDEX
+#ifdef INTERP_INDEX
       {
          GLfloat eMaj_di, eBot_di;
          eMaj_di = (GLint) VB->IndexPtr->data[vMax] - (GLint) VB->IndexPtr->data[vMin];
@@ -365,7 +370,7 @@
          didy = oneOverArea * (eMaj.dx * eBot_di - eMaj_di * eBot.dx);
       }
 #endif
-#if INTERP_INT_ST
+#ifdef INTERP_INT_ST
       {
          GLfloat eMaj_ds, eBot_ds;
          eMaj_ds = (VB->TexCoordPtr[0]->data[vMax][0] - VB->TexCoordPtr[0]->data[vMin][0]) * S_SCALE;
@@ -389,7 +394,7 @@
       }
 
 #endif
-#if INTERP_STUV
+#ifdef INTERP_STUV
       {
          GLfloat wMax = VB->Win.data[vMax][3];
          GLfloat wMin = VB->Win.data[vMin][3];
@@ -441,7 +446,7 @@
          }
       }
 #endif
-#if INTERP_STUV1
+#ifdef INTERP_STUV1
       {
          GLfloat wMax = VB->Win.data[vMax][3];
          GLfloat wMin = VB->Win.data[vMin][3];
@@ -460,41 +465,41 @@
             eMaj_dt = VB->TexCoordPtr[1]->data[vMax][1]*wMax - VB->TexCoordPtr[1]->data[vMin][1]*wMin;
             eBot_dt = VB->TexCoordPtr[1]->data[vMid][1]*wMid - VB->TexCoordPtr[1]->data[vMin][1]*wMin;
             dt1dx = oneOverArea * (eMaj_dt * eBot.dy - eMaj.dy * eBot_dt);
-	    dt1dy = oneOverArea * (eMaj.dx * eBot_dt - eMaj_dt * eBot.dx);
-	 }
-	 else
-	 {
-	    dt1dx = 0;
-	    dt1dy = 0;
-	 }
+            dt1dy = oneOverArea * (eMaj.dx * eBot_dt - eMaj_dt * eBot.dx);
+         }
+         else
+         {
+            dt1dx = 0;
+            dt1dy = 0;
+         }
 
-	 if (VB->TexCoordPtr[1]->size > 2)
-	 {
-	    eMaj_du = VB->TexCoordPtr[1]->data[vMax][2]*wMax - VB->TexCoordPtr[1]->data[vMin][2]*wMin;
-	    eBot_du = VB->TexCoordPtr[1]->data[vMid][2]*wMid - VB->TexCoordPtr[1]->data[vMin][2]*wMin;
-	    du1dx = oneOverArea * (eMaj_du * eBot.dy - eMaj.dy * eBot_du);
-	    du1dy = oneOverArea * (eMaj.dx * eBot_du - eMaj_du * eBot.dx);
-	 }
-	 else
-	 {
-	    du1dx = 0;
-	    du1dy = 0;
-	 }
+         if (VB->TexCoordPtr[1]->size > 2)
+         {
+            eMaj_du = VB->TexCoordPtr[1]->data[vMax][2]*wMax - VB->TexCoordPtr[1]->data[vMin][2]*wMin;
+            eBot_du = VB->TexCoordPtr[1]->data[vMid][2]*wMid - VB->TexCoordPtr[1]->data[vMin][2]*wMin;
+            du1dx = oneOverArea * (eMaj_du * eBot.dy - eMaj.dy * eBot_du);
+            du1dy = oneOverArea * (eMaj.dx * eBot_du - eMaj_du * eBot.dx);
+         }
+         else
+         {
+            du1dx = 0;
+            du1dy = 0;
+         }
 
-	 if (VB->TexCoordPtr[1]->size > 3)
-	 {
-	    eMaj_dv = VB->TexCoordPtr[1]->data[vMax][3]*wMax - VB->TexCoordPtr[1]->data[vMin][3]*wMin;
-	    eBot_dv = VB->TexCoordPtr[1]->data[vMid][3]*wMid - VB->TexCoordPtr[1]->data[vMin][3]*wMin;
-	    dv1dx = oneOverArea * (eMaj_dv * eBot.dy - eMaj.dy * eBot_dv);
-	    dv1dy = oneOverArea * (eMaj.dx * eBot_dv - eMaj_dv * eBot.dx);
-	 }
-	 else
-	 {
-	    eMaj_dv = wMax - wMin;
-	    eBot_dv = wMid - wMin;
-	    dv1dx = oneOverArea * (eMaj_dv * eBot.dy - eMaj.dy * eBot_dv);
-	    dv1dy = oneOverArea * (eMaj.dx * eBot_dv - eMaj_dv * eBot.dx);
-	 }
+         if (VB->TexCoordPtr[1]->size > 3)
+         {
+            eMaj_dv = VB->TexCoordPtr[1]->data[vMax][3]*wMax - VB->TexCoordPtr[1]->data[vMin][3]*wMin;
+            eBot_dv = VB->TexCoordPtr[1]->data[vMid][3]*wMid - VB->TexCoordPtr[1]->data[vMin][3]*wMin;
+            dv1dx = oneOverArea * (eMaj_dv * eBot.dy - eMaj.dy * eBot_dv);
+            dv1dy = oneOverArea * (eMaj.dx * eBot_dv - eMaj_dv * eBot.dx);
+         }
+         else
+         {
+            eMaj_dv = wMax - wMin;
+            eBot_dv = wMid - wMin;
+            dv1dx = oneOverArea * (eMaj_dv * eBot.dy - eMaj.dy * eBot_dv);
+            dv1dy = oneOverArea * (eMaj.dx * eBot_dv - eMaj_dv * eBot.dx);
+         }
       }
 #endif
 
@@ -559,38 +564,40 @@
          PIXEL_TYPE *pRow;
          int dPRowOuter, dPRowInner;  /* offset in bytes */
 #endif
-#if INTERP_Z
-         GLdepth *zRow;
+#ifdef INTERP_Z
+#  ifdef DEPTH_TYPE
+         DEPTH_TYPE *zRow;
          int dZRowOuter, dZRowInner;  /* offset in bytes */
+#  endif
          GLfixed fz, fdzOuter, fdzInner;
 #endif
-#if INTERP_RGB
+#ifdef INTERP_RGB
          GLfixed fr, fdrOuter, fdrInner;
          GLfixed fg, fdgOuter, fdgInner;
          GLfixed fb, fdbOuter, fdbInner;
 #endif
-#if INTERP_SPEC
+#ifdef INTERP_SPEC
          GLfixed fsr, fdsrOuter, fdsrInner;
          GLfixed fsg, fdsgOuter, fdsgInner;
          GLfixed fsb, fdsbOuter, fdsbInner;
 #endif
-#if INTERP_ALPHA
+#ifdef INTERP_ALPHA
          GLfixed fa, fdaOuter, fdaInner;
 #endif
-#if INTERP_INDEX
+#ifdef INTERP_INDEX
          GLfixed fi, fdiOuter, fdiInner;
 #endif
-#if INTERP_INT_ST
+#ifdef INTERP_INT_ST
          GLfixed fs, fdsOuter, fdsInner;
          GLfixed ft, fdtOuter, fdtInner;
 #endif
-#if INTERP_STUV
+#ifdef INTERP_STUV
          GLfloat sLeft, dsOuter, dsInner;
          GLfloat tLeft, dtOuter, dtInner;
          GLfloat uLeft, duOuter, duInner;
          GLfloat vLeft, dvOuter, dvInner;
 #endif
-#if INTERP_STUV1
+#ifdef INTERP_STUV1
          GLfloat s1Left, ds1Outer, ds1Inner;
          GLfloat t1Left, dt1Outer, dt1Inner;
          GLfloat u1Left, du1Outer, du1Inner;
@@ -664,7 +671,7 @@
 
 #ifdef PIXEL_ADDRESS
                {
-                  pRow = (PIXEL_TYPE *) PIXEL_ADDRESS( FixedToInt(fxLeftEdge), iy );
+                  pRow = (PIXEL_TYPE *)PIXEL_ADDRESS( FixedToInt(fxLeftEdge), iy );
                   dPRowOuter = -((int)BYTES_PER_ROW) + idxOuter * sizeof(PIXEL_TYPE);
                   /* negative because Y=0 at bottom and increases upward */
                }
@@ -679,29 +686,30 @@
                 * pixel that's actually inside the triangle.
                 */
 
-#if INTERP_Z
+#ifdef INTERP_Z
                {
-                  GLfloat z0, tmp;
-                  z0 = VB->Win.data[vLower][2] + ctx->PolygonZoffset;
-#if DEPTH_BITS==16
-                  /* interpolate fixed-pt values */
-                  tmp = (z0 * FIXED_SCALE + dzdx * adjx + dzdy * adjy) + FIXED_HALF;
-                  if (tmp < MAX_GLUINT/2)
-                     fz = (GLfixed) tmp;
-                  else
-                     fz = MAX_GLUINT/2;
-                  fdzOuter = SignedFloatToFixed(dzdy + dxOuter * dzdx);
-#else
-                  (void) tmp;
-                  /* interpolate depth values exactly */
-                  fz = (GLint) (z0 + dzdx*FixedToFloat(adjx) + dzdy*FixedToFloat(adjy));
-                  fdzOuter = (GLint) (dzdy + dxOuter * dzdx);
-#endif
-                  zRow = Z_ADDRESS( ctx, FixedToInt(fxLeftEdge), iy );
-                  dZRowOuter = (ctx->Buffer->Width + idxOuter) * sizeof(GLdepth);
+                  GLfloat z0 = VB->Win.data[vLower][2] + ctx->PolygonZoffset;
+                  if (depthBits <= 16) {
+                     /* interpolate fixed-pt values */
+                     GLfloat tmp = (z0 * FIXED_SCALE + dzdx * adjx + dzdy * adjy) + FIXED_HALF;
+                     if (tmp < MAX_GLUINT / 2)
+                        fz = (GLfixed) tmp;
+                     else
+                        fz = MAX_GLUINT / 2;
+                     fdzOuter = SignedFloatToFixed(dzdy + dxOuter * dzdx);
+                  }
+                  else {
+                     /* interpolate depth values exactly */
+                     fz = (GLint) (z0 + dzdx*FixedToFloat(adjx) + dzdy*FixedToFloat(adjy));
+                     fdzOuter = (GLint) (dzdy + dxOuter * dzdx);
+                  }
+#  ifdef DEPTH_TYPE
+                  zRow = (DEPTH_TYPE *) _mesa_zbuffer_address(ctx, FixedToInt(fxLeftEdge), iy);
+                  dZRowOuter = (ctx->DrawBuffer->Width + idxOuter) * sizeof(DEPTH_TYPE);
+#  endif
                }
 #endif
-#if INTERP_RGB
+#ifdef INTERP_RGB
                fr = (GLfixed)(IntToFixed(VB->ColorPtr->data[vLower][0]) + drdx * adjx + drdy * adjy)
                     + FIXED_HALF;
                fdrOuter = SignedFloatToFixed(drdy + dxOuter * drdx);
@@ -714,7 +722,7 @@
                     + FIXED_HALF;
                fdbOuter = SignedFloatToFixed(dbdy + dxOuter * dbdx);
 #endif
-#if INTERP_SPEC
+#ifdef INTERP_SPEC
                fsr = (GLfixed)(IntToFixed(VB->Specular[vLower][0]) + dsrdx * adjx + dsrdy * adjy)
                     + FIXED_HALF;
                fdsrOuter = SignedFloatToFixed(dsrdy + dxOuter * dsrdx);
@@ -727,101 +735,101 @@
                     + FIXED_HALF;
                fdsbOuter = SignedFloatToFixed(dsbdy + dxOuter * dsbdx);
 #endif
-#if INTERP_ALPHA
+#ifdef INTERP_ALPHA
                fa = (GLfixed)(IntToFixed(VB->ColorPtr->data[vLower][3]) + dadx * adjx + dady * adjy)
                     + FIXED_HALF;
                fdaOuter = SignedFloatToFixed(dady + dxOuter * dadx);
 #endif
-#if INTERP_INDEX
+#ifdef INTERP_INDEX
                fi = (GLfixed)(VB->IndexPtr->data[vLower] * FIXED_SCALE + didx * adjx
                               + didy * adjy) + FIXED_HALF;
                fdiOuter = SignedFloatToFixed(didy + dxOuter * didx);
 #endif
-#if INTERP_INT_ST
+#ifdef INTERP_INT_ST
                {
                   GLfloat s0, t0;
                   s0 = VB->TexCoordPtr[0]->data[vLower][0] * S_SCALE;
                   fs = (GLfixed)(s0 * FIXED_SCALE + dsdx * adjx + dsdy * adjy) + FIXED_HALF;
                   fdsOuter = SignedFloatToFixed(dsdy + dxOuter * dsdx);
 
-		  if (VB->TexCoordPtr[0]->size > 1)
-		  {
-		     t0 = VB->TexCoordPtr[0]->data[vLower][1] * T_SCALE;
-		     ft = (GLfixed)(t0 * FIXED_SCALE + dtdx * adjx + dtdy * adjy) + FIXED_HALF;
-		     fdtOuter = SignedFloatToFixed(dtdy + dxOuter * dtdx);
-		  }
-		  else
-		  {
-		     t0 = 0;
-		     ft = (GLfixed) FIXED_HALF;
-		     fdtOuter = SignedFloatToFixed(0);
-		  }
-	       }
+                  if (VB->TexCoordPtr[0]->size > 1)
+                  {
+                     t0 = VB->TexCoordPtr[0]->data[vLower][1] * T_SCALE;
+                     ft = (GLfixed)(t0 * FIXED_SCALE + dtdx * adjx + dtdy * adjy) + FIXED_HALF;
+                     fdtOuter = SignedFloatToFixed(dtdy + dxOuter * dtdx);
+                  }
+                  else
+                  {
+                     t0 = 0;
+                     ft = (GLfixed) FIXED_HALF;
+                     fdtOuter = SignedFloatToFixed(0);
+                  }
+               }
 #endif
-#if INTERP_STUV
+#ifdef INTERP_STUV
                {
                   GLfloat invW = VB->Win.data[vLower][3];
                   GLfloat s0, t0, u0, v0;
                   s0 = VB->TexCoordPtr[0]->data[vLower][0] * invW;
                   sLeft = s0 + (dsdx * adjx + dsdy * adjy) * (1.0F/FIXED_SCALE);
                   dsOuter = dsdy + dxOuter * dsdx;
-		  if (VB->TexCoordPtr[0]->size > 1)
-		  {		
-		     t0 = VB->TexCoordPtr[0]->data[vLower][1] * invW;
-		     tLeft = t0 + (dtdx * adjx + dtdy * adjy) * (1.0F/FIXED_SCALE);
-		     dtOuter = dtdy + dxOuter * dtdx;
-		  } else {
-		     tLeft = dtOuter = 0;
-		  }
-		  if (VB->TexCoordPtr[0]->size > 2)
-		  {		
-		     u0 = VB->TexCoordPtr[0]->data[vLower][2] * invW;
-		     uLeft = u0 + (dudx * adjx + dudy * adjy) * (1.0F/FIXED_SCALE);
-		     duOuter = dudy + dxOuter * dudx;
-		  } else {
-		     uLeft = duOuter = 0;
-		  }
-		  if (VB->TexCoordPtr[0]->size > 3)
-		  {		
-		     v0 = VB->TexCoordPtr[0]->data[vLower][3] * invW;
-		  } else {
-		     v0 = invW;
-		  }
-		  vLeft = v0 + (dvdx * adjx + dvdy * adjy) * (1.0F/FIXED_SCALE);
-		  dvOuter = dvdy + dxOuter * dvdx;
+                  if (VB->TexCoordPtr[0]->size > 1)
+                  {
+                     t0 = VB->TexCoordPtr[0]->data[vLower][1] * invW;
+                     tLeft = t0 + (dtdx * adjx + dtdy * adjy) * (1.0F/FIXED_SCALE);
+                     dtOuter = dtdy + dxOuter * dtdx;
+                  } else {
+                     tLeft = dtOuter = 0;
+                  }
+                  if (VB->TexCoordPtr[0]->size > 2)
+                  {
+                     u0 = VB->TexCoordPtr[0]->data[vLower][2] * invW;
+                     uLeft = u0 + (dudx * adjx + dudy * adjy) * (1.0F/FIXED_SCALE);
+                     duOuter = dudy + dxOuter * dudx;
+                  } else {
+                     uLeft = duOuter = 0;
+                  }
+                  if (VB->TexCoordPtr[0]->size > 3)
+                  {
+                     v0 = VB->TexCoordPtr[0]->data[vLower][3] * invW;
+                  } else {
+                     v0 = invW;
+                  }
+                  vLeft = v0 + (dvdx * adjx + dvdy * adjy) * (1.0F/FIXED_SCALE);
+                  dvOuter = dvdy + dxOuter * dvdx;
                }
 #endif
-#if INTERP_STUV1
+#ifdef INTERP_STUV1
                {
                   GLfloat invW = VB->Win.data[vLower][3];
                   GLfloat s0, t0, u0, v0;
                   s0 = VB->TexCoordPtr[1]->data[vLower][0] * invW;
                   s1Left = s0 + (ds1dx * adjx + ds1dy * adjy) * (1.0F/FIXED_SCALE);
                   ds1Outer = ds1dy + dxOuter * ds1dx;
-		  if (VB->TexCoordPtr[0]->size > 1)
-		  {		
-		     t0 = VB->TexCoordPtr[1]->data[vLower][1] * invW;
-		     t1Left = t0 + (dt1dx * adjx + dt1dy * adjy) * (1.0F/FIXED_SCALE);
-		     dt1Outer = dt1dy + dxOuter * dt1dx;
-		  } else {
-		     t1Left = dt1Outer = 0;
-		  }
-		  if (VB->TexCoordPtr[0]->size > 2)
-		  {		
-		     u0 = VB->TexCoordPtr[1]->data[vLower][2] * invW;
-		     u1Left = u0 + (du1dx * adjx + du1dy * adjy) * (1.0F/FIXED_SCALE);
-		     du1Outer = du1dy + dxOuter * du1dx;
-		  } else {
-		     u1Left = du1Outer = 0;
-		  }
-		  if (VB->TexCoordPtr[0]->size > 3)
-		  {		
-		     v0 = VB->TexCoordPtr[1]->data[vLower][3] * invW;
-		  } else {
-		     v0 =  invW;
-		  }
-		  v1Left = v0 + (dv1dx * adjx + dv1dy * adjy) * (1.0F/FIXED_SCALE);
-		  dv1Outer = dv1dy + dxOuter * dv1dx;
+                  if (VB->TexCoordPtr[0]->size > 1)
+                  {
+                     t0 = VB->TexCoordPtr[1]->data[vLower][1] * invW;
+                     t1Left = t0 + (dt1dx * adjx + dt1dy * adjy) * (1.0F/FIXED_SCALE);
+                     dt1Outer = dt1dy + dxOuter * dt1dx;
+                  } else {
+                     t1Left = dt1Outer = 0;
+                  }
+                  if (VB->TexCoordPtr[0]->size > 2)
+                  {
+                     u0 = VB->TexCoordPtr[1]->data[vLower][2] * invW;
+                     u1Left = u0 + (du1dx * adjx + du1dy * adjy) * (1.0F/FIXED_SCALE);
+                     du1Outer = du1dy + dxOuter * du1dx;
+                  } else {
+                     u1Left = du1Outer = 0;
+                  }
+                  if (VB->TexCoordPtr[0]->size > 3)
+                  {
+                     v0 = VB->TexCoordPtr[1]->data[vLower][3] * invW;
+                  } else {
+                     v0 =  invW;
+                  }
+                  v1Left = v0 + (dv1dx * adjx + dv1dy * adjy) * (1.0F/FIXED_SCALE);
+                  dv1Outer = dv1dy + dxOuter * dv1dx;
                }
 #endif
 
@@ -842,75 +850,76 @@
 #ifdef PIXEL_ADDRESS
             dPRowInner = dPRowOuter + sizeof(PIXEL_TYPE);
 #endif
-#if INTERP_Z
-            dZRowInner = dZRowOuter + sizeof(GLdepth);
+#ifdef INTERP_Z
+#  ifdef DEPTH_TYPE
+            dZRowInner = dZRowOuter + sizeof(DEPTH_TYPE);
+#  endif
             fdzInner = fdzOuter + fdzdx;
 #endif
-#if INTERP_RGB
+#ifdef INTERP_RGB
             fdrInner = fdrOuter + fdrdx;
             fdgInner = fdgOuter + fdgdx;
             fdbInner = fdbOuter + fdbdx;
 #endif
-#if INTERP_SPEC
+#ifdef INTERP_SPEC
             fdsrInner = fdsrOuter + fdsrdx;
             fdsgInner = fdsgOuter + fdsgdx;
             fdsbInner = fdsbOuter + fdsbdx;
 #endif
-#if INTERP_ALPHA
+#ifdef INTERP_ALPHA
             fdaInner = fdaOuter + fdadx;
 #endif
-#if INTERP_INDEX
+#ifdef INTERP_INDEX
             fdiInner = fdiOuter + fdidx;
 #endif
-#if INTERP_INT_ST
+#ifdef INTERP_INT_ST
             fdsInner = fdsOuter + fdsdx;
             fdtInner = fdtOuter + fdtdx;
 #endif
-#if INTERP_STUV
-	    dsInner = dsOuter + dsdx;
-	    dtInner = dtOuter + dtdx;
-	    duInner = duOuter + dudx;
-	    dvInner = dvOuter + dvdx;
+#ifdef INTERP_STUV
+            dsInner = dsOuter + dsdx;
+            dtInner = dtOuter + dtdx;
+            duInner = duOuter + dudx;
+            dvInner = dvOuter + dvdx;
 #endif
-#if INTERP_STUV1
-	    ds1Inner = ds1Outer + ds1dx;
-	    dt1Inner = dt1Outer + dt1dx;
-	    du1Inner = du1Outer + du1dx;
-	    dv1Inner = dv1Outer + dv1dx;
+#ifdef INTERP_STUV1
+            ds1Inner = ds1Outer + ds1dx;
+            dt1Inner = dt1Outer + dt1dx;
+            du1Inner = du1Outer + du1dx;
+            dv1Inner = dv1Outer + dv1dx;
 #endif
 
             while (lines>0) {
                /* initialize the span interpolants to the leftmost value */
                /* ff = fixed-pt fragment */
-#if INTERP_Z
+#ifdef INTERP_Z
                GLfixed ffz = fz;
-               /*GLdepth *zp = zRow;*/
 #endif
-#if INTERP_RGB
+#ifdef INTERP_RGB
                GLfixed ffr = fr,  ffg = fg,  ffb = fb;
 #endif
-#if INTERP_SPEC
+#ifdef INTERP_SPEC
                GLfixed ffsr = fsr,  ffsg = fsg,  ffsb = fsb;
 #endif
-#if INTERP_ALPHA
+#ifdef INTERP_ALPHA
                GLfixed ffa = fa;
 #endif
-#if INTERP_INDEX
+#ifdef INTERP_INDEX
                GLfixed ffi = fi;
 #endif
-#if INTERP_INT_ST
+#ifdef INTERP_INT_ST
                GLfixed ffs = fs,  fft = ft;
 #endif
-#if INTERP_STUV
+#ifdef INTERP_STUV
                GLfloat ss = sLeft, tt = tLeft, uu = uLeft, vv = vLeft;
 #endif
-#if INTERP_STUV1
+#ifdef INTERP_STUV1
                GLfloat ss1 = s1Left, tt1 = t1Left, uu1 = u1Left, vv1 = v1Left;
 #endif
                GLint left = FixedToInt(fxLeftEdge);
                GLint right = FixedToInt(fxRightEdge);
 
-#if INTERP_RGB
+#ifdef INTERP_RGB
                {
                   /* need this to accomodate round-off errors */
                   GLfixed ffrend = ffr+(right-left-1)*fdrdx;
@@ -924,7 +933,7 @@
                   if (ffb<0) ffb = 0;
                }
 #endif
-#if INTERP_SPEC
+#ifdef INTERP_SPEC
                {
                   /* need this to accomodate round-off errors */
                   GLfixed ffsrend = ffsr+(right-left-1)*fdsrdx;
@@ -938,14 +947,14 @@
                   if (ffsb<0) ffsb = 0;
                }
 #endif
-#if INTERP_ALPHA
+#ifdef INTERP_ALPHA
                {
                   GLfixed ffaend = ffa+(right-left-1)*fdadx;
                   if (ffaend<0) ffa -= ffaend;
                   if (ffa<0) ffa = 0;
                }
 #endif
-#if INTERP_INDEX
+#ifdef INTERP_INDEX
                if (ffi<0) ffi = 0;
 #endif
 
@@ -968,74 +977,78 @@
                if (fError >= 0) {
                   fError -= FIXED_ONE;
 #ifdef PIXEL_ADDRESS
-                  pRow = (PIXEL_TYPE*) ((GLubyte*)pRow + dPRowOuter);
+                  pRow = (PIXEL_TYPE *) ((GLubyte*)pRow + dPRowOuter);
 #endif
-#if INTERP_Z
-                  zRow = (GLdepth*) ((GLubyte*)zRow + dZRowOuter);
+#ifdef INTERP_Z
+#  ifdef DEPTH_TYPE
+                  zRow = (DEPTH_TYPE *) ((GLubyte*)zRow + dZRowOuter);
+#  endif
                   fz += fdzOuter;
 #endif
-#if INTERP_RGB
+#ifdef INTERP_RGB
                   fr += fdrOuter;   fg += fdgOuter;   fb += fdbOuter;
 #endif
-#if INTERP_SPEC
+#ifdef INTERP_SPEC
                   fsr += fdsrOuter;   fsg += fdsgOuter;   fsb += fdsbOuter;
 #endif
-#if INTERP_ALPHA
+#ifdef INTERP_ALPHA
                   fa += fdaOuter;
 #endif
-#if INTERP_INDEX
+#ifdef INTERP_INDEX
                   fi += fdiOuter;
 #endif
-#if INTERP_INT_ST
+#ifdef INTERP_INT_ST
                   fs += fdsOuter;   ft += fdtOuter;
 #endif
-#if INTERP_STUV
-		  sLeft += dsOuter;
-		  tLeft += dtOuter;
-		  uLeft += duOuter;
-		  vLeft += dvOuter;
+#ifdef INTERP_STUV
+                  sLeft += dsOuter;
+                  tLeft += dtOuter;
+                  uLeft += duOuter;
+                  vLeft += dvOuter;
 #endif
-#if INTERP_STUV1
-		  s1Left += ds1Outer;
-		  t1Left += dt1Outer;
-		  u1Left += du1Outer;
-		  v1Left += dv1Outer;
+#ifdef INTERP_STUV1
+                  s1Left += ds1Outer;
+                  t1Left += dt1Outer;
+                  u1Left += du1Outer;
+                  v1Left += dv1Outer;
 #endif
                }
                else {
 #ifdef PIXEL_ADDRESS
-                  pRow = (PIXEL_TYPE*) ((GLubyte*)pRow + dPRowInner);
+                  pRow = (PIXEL_TYPE *) ((GLubyte*)pRow + dPRowInner);
 #endif
-#if INTERP_Z
-                  zRow = (GLdepth*) ((GLubyte*)zRow + dZRowInner);
+#ifdef INTERP_Z
+#  ifdef DEPTH_TYPE
+                  zRow = (DEPTH_TYPE *) ((GLubyte*)zRow + dZRowInner);
+#  endif
                   fz += fdzInner;
 #endif
-#if INTERP_RGB
+#ifdef INTERP_RGB
                   fr += fdrInner;   fg += fdgInner;   fb += fdbInner;
 #endif
-#if INTERP_SPEC
+#ifdef INTERP_SPEC
                   fsr += fdsrInner;   fsg += fdsgInner;   fsb += fdsbInner;
 #endif
-#if INTERP_ALPHA
+#ifdef INTERP_ALPHA
                   fa += fdaInner;
 #endif
-#if INTERP_INDEX
+#ifdef INTERP_INDEX
                   fi += fdiInner;
 #endif
-#if INTERP_INT_ST
+#ifdef INTERP_INT_ST
                   fs += fdsInner;   ft += fdtInner;
 #endif
-#if INTERP_STUV
-		  sLeft += dsInner;
-		  tLeft += dtInner;
-		  uLeft += duInner;
-		  vLeft += dvInner;
+#ifdef INTERP_STUV
+                  sLeft += dsInner;
+                  tLeft += dtInner;
+                  uLeft += duInner;
+                  vLeft += dvInner;
 #endif
-#if INTERP_STUV1
-		  s1Left += ds1Inner;
-		  t1Left += dt1Inner;
-		  u1Left += du1Inner;
-		  v1Left += dv1Inner;
+#ifdef INTERP_STUV1
+                  s1Left += ds1Inner;
+                  t1Left += dt1Inner;
+                  u1Left += du1Inner;
+                  v1Left += dv1Inner;
 #endif
                }
             } /*while lines>0*/
@@ -1064,3 +1077,5 @@
 
 #undef S_SCALE
 #undef T_SCALE
+
+#undef FixedToDepth

@@ -1,4 +1,4 @@
-/* $Id: mesa_extend.h,v 1.1 2000-02-29 00:48:33 sandervl Exp $ */
+/* $Id: mesa_extend.h,v 1.2 2000-05-23 20:34:53 jeroen Exp $ */
 /* mesa_extend.h
  * for wmesa-2.3
  *  Written by Li Wei (liwei@aiar.xjtu.edu.cn)
@@ -8,15 +8,6 @@
  * revision 1.01
  * struct DisplayOptions defined for tk_ddmesa.c to read the initial file
  */
-
-#include "gl.h"
-#include <stdlib.h>
-#ifdef __WIN32OS2__
-#include <os2win.h>
-#else
-#include <windows.h>
-#include <winbase.h>
-#endif
 
 typedef enum SHIFT{ SHIFT_NONE, SHIFT_LEFT,SHIFT_RIGHT,SHIFT_UP,SHIFT_DOWN,SHIFT_FAR,SHIFT_NEAR};
 

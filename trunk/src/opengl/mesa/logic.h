@@ -1,8 +1,8 @@
-/* $Id: logic.h,v 1.1 2000-02-29 00:48:33 sandervl Exp $ */
+/* $Id: logic.h,v 1.2 2000-05-23 20:34:52 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -35,7 +35,8 @@
 #include "types.h"
 
 
-extern void gl_LogicOp( GLcontext *ctx, GLenum opcode );
+extern void
+_mesa_LogicOp( GLenum opcode );
 
 
 extern void gl_logicop_ci_span( GLcontext *ctx,

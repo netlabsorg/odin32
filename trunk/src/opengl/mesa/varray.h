@@ -1,4 +1,4 @@
-/* $Id: varray.h,v 1.1 2000-02-29 00:48:42 sandervl Exp $ */
+/* $Id: varray.h,v 1.2 2000-05-23 20:34:59 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -32,76 +32,77 @@
 #include "types.h"
 
 
-extern void gl_VertexPointer( GLcontext *ctx,
-                              GLint size, GLenum type, GLsizei stride,
-                              const GLvoid *ptr );
+extern void
+_mesa_VertexPointer(GLint size, GLenum type, GLsizei stride,
+                    const GLvoid *ptr);
 
 
-extern void gl_NormalPointer( GLcontext *ctx,
-                              GLenum type, GLsizei stride, const GLvoid *ptr );
+extern void
+_mesa_NormalPointer(GLenum type, GLsizei stride, const GLvoid *ptr);
 
 
-extern void gl_ColorPointer( GLcontext *ctx,
-                             GLint size, GLenum type, GLsizei stride,
-                             const GLvoid *ptr );
+extern void
+_mesa_ColorPointer(GLint size, GLenum type, GLsizei stride, const GLvoid *ptr);
 
 
-extern void gl_IndexPointer( GLcontext *ctx,
-                                GLenum type, GLsizei stride,
-                                const GLvoid *ptr );
+extern void
+_mesa_IndexPointer(GLenum type, GLsizei stride, const GLvoid *ptr);
 
 
-extern void gl_TexCoordPointer( GLcontext *ctx,
-                                GLint size, GLenum type, GLsizei stride,
-                                const GLvoid *ptr );
+extern void
+_mesa_TexCoordPointer(GLint size, GLenum type, GLsizei stride,
+                      const GLvoid *ptr);
 
 
-extern void gl_EdgeFlagPointer( GLcontext *ctx,
-                                GLsizei stride, const GLboolean *ptr );
+extern void
+_mesa_EdgeFlagPointer(GLsizei stride, const GLvoid *ptr);
 
 
-extern void gl_GetPointerv( GLcontext *ctx, GLenum pname, GLvoid **params );
+extern void
+_mesa_ArrayElement( GLint );
 
 
-
-extern void gl_DrawArrays( GLcontext *ctx,
-                           GLenum mode, GLint first, GLsizei count );
-
-extern void gl_save_DrawArrays( GLcontext *ctx,
-                                GLenum mode, GLint first, GLsizei count );
+extern void
+_mesa_DrawArrays(GLenum mode, GLint first, GLsizei count);
 
 
-extern void gl_DrawElements( GLcontext *ctx,
-                             GLenum mode, GLsizei count,
+extern void
+_mesa_save_DrawArrays(GLenum mode, GLint first, GLsizei count);
+
+
+extern void
+_mesa_DrawElements(GLenum mode, GLsizei count, GLenum type,
+                   const GLvoid *indices);
+
+
+extern void
+_mesa_save_DrawElements(GLenum mode, GLsizei count,
+                        GLenum type, const GLvoid *indices);
+
+
+extern void
+_mesa_InterleavedArrays(GLenum format, GLsizei stride, const GLvoid *pointer);
+
+extern void
+_mesa_save_InterleavedArrays(GLenum format, GLsizei stride,
+                             const GLvoid *pointer);
+
+
+extern void
+_mesa_DrawRangeElements(GLenum mode, GLuint start,
+                        GLuint end, GLsizei count, GLenum type,
+                        const GLvoid *indices);
+
+extern void
+_mesa_save_DrawRangeElements(GLenum mode,
+                             GLuint start, GLuint end, GLsizei count,
                              GLenum type, const GLvoid *indices );
-
-extern void gl_save_DrawElements( GLcontext *ctx,
-                                  GLenum mode, GLsizei count,
-                                  GLenum type, const GLvoid *indices );
-
-
-extern void gl_InterleavedArrays( GLcontext *ctx,
-                                  GLenum format, GLsizei stride,
-                                  const GLvoid *pointer );
-
-extern void gl_save_InterleavedArrays( GLcontext *ctx,
-                                       GLenum format, GLsizei stride,
-                                       const GLvoid *pointer );
-
-
-extern void gl_DrawRangeElements( GLcontext *ctx, GLenum mode, GLuint start,
-                                  GLuint end, GLsizei count, GLenum type,
-                                  const GLvoid *indices );
-
-extern void gl_save_DrawRangeElements( GLcontext *ctx, GLenum mode,
-                                       GLuint start, GLuint end, GLsizei count,
-                                       GLenum type, const GLvoid *indices );
 
 
 extern void gl_exec_array_elements( GLcontext *ctx,
-				    struct immediate *IM,
-				    GLuint start,
-				    GLuint end );
+                                    struct immediate *IM,
+                                    GLuint start,
+                                    GLuint end );
 
 extern void gl_update_client_state( GLcontext *ctx );
 

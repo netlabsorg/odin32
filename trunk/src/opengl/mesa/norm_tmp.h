@@ -1,4 +1,4 @@
-/* $Id: norm_tmp.h,v 1.1 2000-02-29 00:48:34 sandervl Exp $ */
+/* $Id: norm_tmp.h,v 1.2 2000-05-23 20:34:53 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -29,12 +29,12 @@
  */
 
 
-static void TAG(transform_normalize_normals)( const GLmatrix *mat,
-					      GLfloat scale,
-					      const GLvector3f *in,
-					      const GLfloat *lengths,
-					      const GLubyte mask[],
-					      GLvector3f *dest )
+static void _XFORMAPI TAG(transform_normalize_normals)( const GLmatrix *mat,
+                                              GLfloat scale,
+                                              const GLvector3f *in,
+                                              const GLfloat *lengths,
+                                              const GLubyte mask[],
+                                              GLvector3f *dest )
 {
    GLuint i;
    const GLfloat *from = in->start;
@@ -49,66 +49,66 @@ static void TAG(transform_normalize_normals)( const GLmatrix *mat,
    (void) mask;
    if (!lengths) {
       STRIDE_LOOP {
-	 CULL_CHECK {
-	    GLfloat tx, ty, tz;
-	    {
-	       const GLfloat ux = from[0],  uy = from[1],  uz = from[2];
-	       tx = ux * m0 + uy * m1 + uz * m2;
-	       ty = ux * m4 + uy * m5 + uz * m6;
-	       tz = ux * m8 + uy * m9 + uz * m10;
-	    }
-	    {
-	       GLdouble len = tx*tx + ty*ty + tz*tz;
-	       if (len > 1e-20) {
-		  GLdouble scale = 1.0 / GL_SQRT(len);
-		  out[i][0] = (GLfloat) (tx * scale);
-		  out[i][1] = (GLfloat) (ty * scale);
-		  out[i][2] = (GLfloat) (tz * scale);
-	       }
-	       else
-	       {
-		  out[i][0] = out[i][1] = out[i][2] = 0;
-	       }
-	    }
-	 }
+         CULL_CHECK {
+            GLfloat tx, ty, tz;
+            {
+               const GLfloat ux = from[0],  uy = from[1],  uz = from[2];
+               tx = ux * m0 + uy * m1 + uz * m2;
+               ty = ux * m4 + uy * m5 + uz * m6;
+               tz = ux * m8 + uy * m9 + uz * m10;
+            }
+            {
+               GLdouble len = tx*tx + ty*ty + tz*tz;
+               if (len > 1e-20) {
+                  GLdouble scale = 1.0 / GL_SQRT(len);
+                  out[i][0] = (GLfloat) (tx * scale);
+                  out[i][1] = (GLfloat) (ty * scale);
+                  out[i][2] = (GLfloat) (tz * scale);
+               }
+               else
+               {
+                  out[i][0] = out[i][1] = out[i][2] = 0;
+               }
+            }
+         }
       }
    } else {
 
       /* scale has been snapped to 1.0 if it is close.
        */
       if (scale != 1.0) {
-	 m0 *= scale,  m4 *= scale,  m8 *= scale;
-	 m1 *= scale,  m5 *= scale,  m9 *= scale;
-	 m2 *= scale,  m6 *= scale,  m10 *= scale;
+         m0 *= scale,  m4 *= scale,  m8 *= scale;
+         m1 *= scale,  m5 *= scale,  m9 *= scale;
+         m2 *= scale,  m6 *= scale,  m10 *= scale;
       }
 
       STRIDE_LOOP {
-	 CULL_CHECK {
-	    GLfloat tx, ty, tz;
-	    {
-	       const GLfloat ux = from[0],  uy = from[1],  uz = from[2];
-	       tx = ux * m0 + uy * m1 + uz * m2;
-	       ty = ux * m4 + uy * m5 + uz * m6;
-	       tz = ux * m8 + uy * m9 + uz * m10;
-	    }
-	    {
-	       GLfloat len = lengths[i];
-	       out[i][0] = tx * len;
-	       out[i][1] = ty * len;
-	       out[i][2] = tz * len;
-	    }
-	 }
+         CULL_CHECK {
+            GLfloat tx, ty, tz;
+            {
+               const GLfloat ux = from[0],  uy = from[1],  uz = from[2];
+               tx = ux * m0 + uy * m1 + uz * m2;
+               ty = ux * m4 + uy * m5 + uz * m6;
+               tz = ux * m8 + uy * m9 + uz * m10;
+            }
+            {
+               GLfloat len = lengths[i];
+               out[i][0] = tx * len;
+               out[i][1] = ty * len;
+               out[i][2] = tz * len;
+            }
+         }
       }
    }
    dest->count = in->count;
 }
 
-static void TAG(transform_normalize_normals_no_rot)( const GLmatrix *mat,
-						     GLfloat scale,
-						     const GLvector3f *in,
-						     const GLfloat *lengths,
-						     const GLubyte mask[],
-						     GLvector3f *dest )
+static void _XFORMAPI TAG(transform_normalize_normals_no_rot)( const GLmatrix *mat,
+                                                     GLfloat scale,
+                                                     const GLvector3f *in,
+                                                     const GLfloat *lengths,
+                                                     const GLubyte mask[],
+                                                     GLvector3f *dest )
 {
    GLuint i;
    const GLfloat *from = in->start;
@@ -122,66 +122,66 @@ static void TAG(transform_normalize_normals_no_rot)( const GLmatrix *mat,
    (void) mask;
    if (!lengths) {
       STRIDE_LOOP {
-	 CULL_CHECK {
-	    GLfloat tx, ty, tz;
-	    {
-	       const GLfloat ux = from[0],  uy = from[1],  uz = from[2];
-	       tx = ux * m0                    ;
-	       ty =           uy * m5          ;
-	       tz =                     uz * m10;
-	    }
-	    {
-	       GLdouble len = tx*tx + ty*ty + tz*tz;
-	       if (len > 1e-20) {
-		  GLdouble scale = 1.0 / GL_SQRT(len);
-		  out[i][0] = (GLfloat) (tx * scale);
-		  out[i][1] = (GLfloat) (ty * scale);
-		  out[i][2] = (GLfloat) (tz * scale);
-	       }
-	       else
-	       {
-		  out[i][0] = out[i][1] = out[i][2] = 0;
-	       }
-	    }
-	 }
+         CULL_CHECK {
+            GLfloat tx, ty, tz;
+            {
+               const GLfloat ux = from[0],  uy = from[1],  uz = from[2];
+               tx = ux * m0                    ;
+               ty =           uy * m5          ;
+               tz =                     uz * m10;
+            }
+            {
+               GLdouble len = tx*tx + ty*ty + tz*tz;
+               if (len > 1e-20) {
+                  GLdouble scale = 1.0 / GL_SQRT(len);
+                  out[i][0] = (GLfloat) (tx * scale);
+                  out[i][1] = (GLfloat) (ty * scale);
+                  out[i][2] = (GLfloat) (tz * scale);
+               }
+               else
+               {
+                  out[i][0] = out[i][1] = out[i][2] = 0;
+               }
+            }
+         }
       }
    } else {
       /* scale has been snapped to 1.0 if it is close.
        */
       if (scale != 1.0) {
-	 m0 *= scale;
-	 m5 *= scale;
-	 m10 *= scale;
+         m0 *= scale;
+         m5 *= scale;
+         m10 *= scale;
       }
 
       STRIDE_LOOP {
-	 CULL_CHECK {
-	    GLfloat tx, ty, tz;
-	    {
-	       const GLfloat ux = from[0],  uy = from[1],  uz = from[2];
-	       tx = ux * m0                    ;
-	       ty =           uy * m5          ;
-	       tz =                     uz * m10;
-	    }
-	    {
-	       GLfloat len = lengths[i];
-	       out[i][0] = tx * len;
-	       out[i][1] = ty * len;
-	       out[i][2] = tz * len;
-	    }
-	 }
+         CULL_CHECK {
+            GLfloat tx, ty, tz;
+            {
+               const GLfloat ux = from[0],  uy = from[1],  uz = from[2];
+               tx = ux * m0                    ;
+               ty =           uy * m5          ;
+               tz =                     uz * m10;
+            }
+            {
+               GLfloat len = lengths[i];
+               out[i][0] = tx * len;
+               out[i][1] = ty * len;
+               out[i][2] = tz * len;
+            }
+         }
       }
    }
    dest->count = in->count;
 }
 
 
-static void TAG(transform_rescale_normals_no_rot)( const GLmatrix *mat,
-						   GLfloat scale,
-						   const GLvector3f *in,
-						   const GLfloat *lengths,
-						   const GLubyte mask[],
-						   GLvector3f *dest )
+static void _XFORMAPI TAG(transform_rescale_normals_no_rot)( const GLmatrix *mat,
+                                                   GLfloat scale,
+                                                   const GLvector3f *in,
+                                                   const GLfloat *lengths,
+                                                   const GLubyte mask[],
+                                                   GLvector3f *dest )
 {
    GLuint i;
    const GLfloat *from = in->start;
@@ -196,21 +196,21 @@ static void TAG(transform_rescale_normals_no_rot)( const GLmatrix *mat,
    (void) mask;
    STRIDE_LOOP {
       CULL_CHECK {
-	 GLfloat ux = from[0],  uy = from[1],  uz = from[2];
-	 out[i][0] = ux * m0;
-	 out[i][1] =           uy * m5;
-	 out[i][2] =                     uz * m10;
+         GLfloat ux = from[0],  uy = from[1],  uz = from[2];
+         out[i][0] = ux * m0;
+         out[i][1] =           uy * m5;
+         out[i][2] =                     uz * m10;
       }
    }
    dest->count = in->count;
 }
 
-static void TAG(transform_rescale_normals)( const GLmatrix *mat,
-					    GLfloat scale,
-					    const GLvector3f *in,
-					    const GLfloat *lengths,
-					    const GLubyte mask[],
-					    GLvector3f *dest )
+static void _XFORMAPI TAG(transform_rescale_normals)( const GLmatrix *mat,
+                                            GLfloat scale,
+                                            const GLvector3f *in,
+                                            const GLfloat *lengths,
+                                            const GLubyte mask[],
+                                            GLvector3f *dest )
 {
    GLuint i;
    const GLfloat *from = in->start;
@@ -228,22 +228,22 @@ static void TAG(transform_rescale_normals)( const GLmatrix *mat,
    (void) mask;
    STRIDE_LOOP {
       CULL_CHECK {
-	 GLfloat ux = from[0],  uy = from[1],  uz = from[2];
-	 out[i][0] = ux * m0 + uy * m1 + uz * m2;
-	 out[i][1] = ux * m4 + uy * m5 + uz * m6;
-	 out[i][2] = ux * m8 + uy * m9 + uz * m10;
+         GLfloat ux = from[0],  uy = from[1],  uz = from[2];
+         out[i][0] = ux * m0 + uy * m1 + uz * m2;
+         out[i][1] = ux * m4 + uy * m5 + uz * m6;
+         out[i][2] = ux * m8 + uy * m9 + uz * m10;
       }
    }
    dest->count = in->count;
 }
 
 
-static void TAG(transform_normals_no_rot)(const GLmatrix *mat,
-					  GLfloat scale,
-					  const GLvector3f *in,
-					  const GLfloat *lengths,
-					  const GLubyte mask[],
-					  GLvector3f *dest )
+static void _XFORMAPI TAG(transform_normals_no_rot)(const GLmatrix *mat,
+                                          GLfloat scale,
+                                          const GLvector3f *in,
+                                          const GLfloat *lengths,
+                                          const GLubyte mask[],
+                                          GLvector3f *dest )
 {
    GLuint i;
    const GLfloat *from = in->start;
@@ -259,21 +259,21 @@ static void TAG(transform_normals_no_rot)(const GLmatrix *mat,
    (void) mask;
    STRIDE_LOOP {
       CULL_CHECK {
-	 GLfloat ux = from[0],  uy = from[1],  uz = from[2];
-	 out[i][0] = ux * m0;
-	 out[i][1] =           uy * m5;
-	 out[i][2] =                     uz * m10;
+         GLfloat ux = from[0],  uy = from[1],  uz = from[2];
+         out[i][0] = ux * m0;
+         out[i][1] =           uy * m5;
+         out[i][2] =                     uz * m10;
       }
    }
    dest->count = in->count;
 }
 
-static void TAG(transform_normals)( const GLmatrix *mat,
-				    GLfloat scale,
-				    const GLvector3f *in,
-				    const GLfloat *lengths,
-				    const GLubyte mask[],
-				    GLvector3f *dest )
+static void _XFORMAPI TAG(transform_normals)( const GLmatrix *mat,
+                                    GLfloat scale,
+                                    const GLvector3f *in,
+                                    const GLfloat *lengths,
+                                    const GLubyte mask[],
+                                    GLvector3f *dest )
 {
    GLuint i;
    const GLfloat *from = in->start;
@@ -289,22 +289,22 @@ static void TAG(transform_normals)( const GLmatrix *mat,
    (void) mask;
    STRIDE_LOOP {
       CULL_CHECK {
-	 GLfloat ux = from[0],  uy = from[1],  uz = from[2];
-	 out[i][0] = ux * m0 + uy * m1 + uz * m2;
-	 out[i][1] = ux * m4 + uy * m5 + uz * m6;
-	 out[i][2] = ux * m8 + uy * m9 + uz * m10;
+         GLfloat ux = from[0],  uy = from[1],  uz = from[2];
+         out[i][0] = ux * m0 + uy * m1 + uz * m2;
+         out[i][1] = ux * m4 + uy * m5 + uz * m6;
+         out[i][2] = ux * m8 + uy * m9 + uz * m10;
       }
    }
    dest->count = in->count;
 }
 
 
-static void TAG(normalize_normals)( const GLmatrix *mat,
-				    GLfloat scale,
-				    const GLvector3f *in,
-				    const GLfloat *lengths,
-				    const GLubyte mask[],
-				    GLvector3f *dest )
+static void _XFORMAPI TAG(normalize_normals)( const GLmatrix *mat,
+                                    GLfloat scale,
+                                    const GLvector3f *in,
+                                    const GLfloat *lengths,
+                                    const GLubyte mask[],
+                                    GLvector3f *dest )
 {
    GLuint i;
    const GLfloat *from = in->start;
@@ -316,44 +316,44 @@ static void TAG(normalize_normals)( const GLmatrix *mat,
    (void) scale;
    if (lengths) {
       STRIDE_LOOP {
-	 CULL_CHECK {
-	    const GLfloat x = from[0], y = from[1], z = from[2];
-	    GLfloat invlen = lengths[i];
-	    out[i][0] = x * invlen;
-	    out[i][1] = y * invlen;
-	    out[i][2] = z * invlen;
-	 }	
+         CULL_CHECK {
+            const GLfloat x = from[0], y = from[1], z = from[2];
+            GLfloat invlen = lengths[i];
+            out[i][0] = x * invlen;
+            out[i][1] = y * invlen;
+            out[i][2] = z * invlen;
+         }
       }
    }
    else {
       STRIDE_LOOP {
-	 CULL_CHECK {
-	    const GLfloat x = from[0], y = from[1], z = from[2];
-	    GLdouble len = x * x + y * y + z * z;
-	    if (len > 1e-50) {
-	       len = 1.0 / GL_SQRT(len);
-	       out[i][0] = (GLfloat) (x * len);
-	       out[i][1] = (GLfloat) (y * len);
-	       out[i][2] = (GLfloat) (z * len);
-	    }
-	    else {
-	       out[i][0] = x;
-	       out[i][1] = y;
-	       out[i][2] = z;
-	    }
-	 }	
+         CULL_CHECK {
+            const GLfloat x = from[0], y = from[1], z = from[2];
+            GLdouble len = x * x + y * y + z * z;
+            if (len > 1e-50) {
+               len = 1.0 / GL_SQRT(len);
+               out[i][0] = (GLfloat) (x * len);
+               out[i][1] = (GLfloat) (y * len);
+               out[i][2] = (GLfloat) (z * len);
+            }
+            else {
+               out[i][0] = x;
+               out[i][1] = y;
+               out[i][2] = z;
+            }
+         }
       }
    }
    dest->count = in->count;
 }
 
 
-static void TAG(rescale_normals)( const GLmatrix *mat,
-				  GLfloat scale,
-				  const GLvector3f *in,
-				  const GLfloat *lengths,
-				  const GLubyte mask[],
-				  GLvector3f *dest )
+static void _XFORMAPI TAG(rescale_normals)( const GLmatrix *mat,
+                                  GLfloat scale,
+                                  const GLvector3f *in,
+                                  const GLfloat *lengths,
+                                  const GLubyte mask[],
+                                  GLvector3f *dest )
 {
    GLuint i;
    const GLfloat *from = in->start;
@@ -366,14 +366,14 @@ static void TAG(rescale_normals)( const GLmatrix *mat,
 
    STRIDE_LOOP {
       CULL_CHECK {
-	 SCALE_SCALAR_3V( out[i], scale, from );
+         SCALE_SCALAR_3V( out[i], scale, from );
       }
    }
    dest->count = in->count;
 }
 
 
-static void TAG(init_c_norm_transform)( void )
+static void _XFORMAPI TAG(init_c_norm_transform)( void )
 {
    gl_normal_tab[NORM_TRANSFORM_NO_ROT][IDX] =
       TAG(transform_normals_no_rot);

@@ -1,8 +1,8 @@
-/* $Id: polygon.h,v 1.1 2000-02-29 00:48:36 sandervl Exp $ */
+/* $Id: polygon.h,v 1.2 2000-05-23 20:34:54 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -35,18 +35,26 @@
 #include "types.h"
 
 
-extern void gl_CullFace( GLcontext *ctx, GLenum mode );
+extern void
+_mesa_CullFace( GLenum mode );
 
-extern void gl_FrontFace( GLcontext *ctx, GLenum mode );
+extern void
+_mesa_FrontFace( GLenum mode );
 
-extern void gl_PolygonMode( GLcontext *ctx, GLenum face, GLenum mode );
+extern void
+_mesa_PolygonMode( GLenum face, GLenum mode );
 
-extern void gl_PolygonOffset( GLcontext *ctx,
-                              GLfloat factor, GLfloat units );
+extern void
+_mesa_PolygonOffset( GLfloat factor, GLfloat units );
 
-extern void gl_PolygonStipple( GLcontext *ctx, const GLuint pattern[32] );
+extern void
+_mesa_PolygonOffsetEXT( GLfloat factor, GLfloat bias );
 
-extern void gl_GetPolygonStipple( GLcontext *ctx, GLubyte *mask );
+extern void
+_mesa_PolygonStipple( const GLubyte *mask );
+
+extern void
+_mesa_GetPolygonStipple( GLubyte *mask );
 
 
 #endif

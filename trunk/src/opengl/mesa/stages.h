@@ -1,8 +1,8 @@
-/* $Id: stages.h,v 1.1 2000-02-29 00:48:38 sandervl Exp $ */
+/* $Id: stages.h,v 1.2 2000-05-23 20:34:56 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -34,7 +34,7 @@ extern CONST struct gl_pipeline_stage gl_default_pipeline[];
 extern void gl_init_vbxform( void );
 
 extern void gl_import_client_data( struct vertex_buffer *VB,
-				   GLuint required,
-				   GLuint vec_flags );
+                                   GLuint required,
+                                   GLuint vec_flags );
 
 #endif

@@ -1,8 +1,8 @@
-/* $Id: stencil.h,v 1.1 2000-02-29 00:48:38 sandervl Exp $ */
+/* $Id: stencil.h,v 1.2 2000-05-23 20:34:57 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -35,48 +35,45 @@
 #include "types.h"
 
 
-extern void gl_ClearStencil( GLcontext *ctx, GLint s );
+extern void
+_mesa_ClearStencil( GLint s );
 
 
-extern void gl_StencilFunc( GLcontext *ctx, GLenum func,
-                            GLint ref, GLuint mask );
+extern void
+_mesa_StencilFunc( GLenum func, GLint ref, GLuint mask );
 
 
-extern void gl_StencilMask( GLcontext *ctx, GLuint mask );
+extern void
+_mesa_StencilMask( GLuint mask );
 
 
-extern void gl_StencilOp( GLcontext *ctx, GLenum fail,
-                          GLenum zfail, GLenum zpass );
+extern void
+_mesa_StencilOp( GLenum fail, GLenum zfail, GLenum zpass );
 
 
 
-extern GLint gl_stencil_span( GLcontext *ctx,
-                              GLuint n, GLint x, GLint y, GLubyte mask[] );
+extern GLboolean
+gl_stencil_and_depth_test_span( GLcontext *ctx, GLuint n, GLint x, GLint y,
+                                const GLdepth z[], GLubyte mask[] );
+
+#ifdef VMS /* VMS allows externals of 31 characters maximum */
+#define gl_stencil_and_depth_test_pixels gl_stencil_and_depth_test_pixel
+#endif
+extern GLboolean
+gl_stencil_and_depth_test_pixels( GLcontext *ctx, GLuint n,
+                                  const GLint x[], const GLint y[],
+                                  const GLdepth z[], GLubyte mask[] );
 
 
-extern void gl_depth_stencil_span( GLcontext *ctx, GLuint n, GLint x, GLint y,
-				   const GLdepth z[], GLubyte mask[] );
+
+extern void
+gl_read_stencil_span( GLcontext *ctx, GLint n, GLint x, GLint y,
+                      GLstencil stencil[] );
 
 
-extern GLint gl_stencil_pixels( GLcontext *ctx,
-                                GLuint n, const GLint x[], const GLint y[],
-			        GLubyte mask[] );
-
-
-extern void gl_depth_stencil_pixels( GLcontext *ctx,
-                                     GLuint n, const GLint x[],
-				     const GLint y[], const GLdepth z[],
-				     GLubyte mask[] );
-
-
-extern void gl_read_stencil_span( GLcontext *ctx,
-                                  GLuint n, GLint x, GLint y,
-				  GLstencil stencil[] );
-
-
-extern void gl_write_stencil_span( GLcontext *ctx,
-                                   GLuint n, GLint x, GLint y,
-				   const GLstencil stencil[] );
+extern void
+gl_write_stencil_span( GLcontext *ctx, GLint n, GLint x, GLint y,
+                       const GLstencil stencil[] );
 
 
 extern void gl_alloc_stencil_buffer( GLcontext *ctx );

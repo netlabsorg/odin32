@@ -1,8 +1,8 @@
-/* $Id: xform.h,v 1.2 2000-03-01 18:49:41 jeroen Exp $ */
+/* $Id: xform.h,v 1.3 2000-05-23 20:35:00 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -34,37 +34,44 @@
 
 #include "types.h"
 
+#ifdef USE_X86_ASM
+#define _XFORMAPI _ASMAPI
+#define _XFORMAPIP _ASMAPIP
+#else
+#define _XFORMAPI
+#define _XFORMAPIP *
+#endif
 
 /*
  * Transform a point (column vector) by a matrix:   Q = M * P
  */
-#define TRANSFORM_POINT( Q, M, P )					\
-   Q[0] = M[0] * P[0] + M[4] * P[1] + M[8] *  P[2] + M[12] * P[3];	\
-   Q[1] = M[1] * P[0] + M[5] * P[1] + M[9] *  P[2] + M[13] * P[3];	\
-   Q[2] = M[2] * P[0] + M[6] * P[1] + M[10] * P[2] + M[14] * P[3];	\
+#define TRANSFORM_POINT( Q, M, P )                                      \
+   Q[0] = M[0] * P[0] + M[4] * P[1] + M[8] *  P[2] + M[12] * P[3];      \
+   Q[1] = M[1] * P[0] + M[5] * P[1] + M[9] *  P[2] + M[13] * P[3];      \
+   Q[2] = M[2] * P[0] + M[6] * P[1] + M[10] * P[2] + M[14] * P[3];      \
    Q[3] = M[3] * P[0] + M[7] * P[1] + M[11] * P[2] + M[15] * P[3];
 
 
-#define TRANSFORM_POINT3( Q, M, P )				\
-   Q[0] = M[0] * P[0] + M[4] * P[1] + M[8] *  P[2] + M[12];	\
-   Q[1] = M[1] * P[0] + M[5] * P[1] + M[9] *  P[2] + M[13];	\
-   Q[2] = M[2] * P[0] + M[6] * P[1] + M[10] * P[2] + M[14];	\
+#define TRANSFORM_POINT3( Q, M, P )                             \
+   Q[0] = M[0] * P[0] + M[4] * P[1] + M[8] *  P[2] + M[12];     \
+   Q[1] = M[1] * P[0] + M[5] * P[1] + M[9] *  P[2] + M[13];     \
+   Q[2] = M[2] * P[0] + M[6] * P[1] + M[10] * P[2] + M[14];     \
    Q[3] = M[3] * P[0] + M[7] * P[1] + M[11] * P[2] + M[15];
 
 
 /*
  * Transform a normal (row vector) by a matrix:  [NX NY NZ] = N * MAT
  */
-#define TRANSFORM_NORMAL( TO, N, MAT )				\
-do {								\
-   TO[0] = N[0] * MAT[0] + N[1] * MAT[1] + N[2] * MAT[2];	\
-   TO[1] = N[0] * MAT[4] + N[1] * MAT[5] + N[2] * MAT[6];	\
-   TO[2] = N[0] * MAT[8] + N[1] * MAT[9] + N[2] * MAT[10];	\
+#define TRANSFORM_NORMAL( TO, N, MAT )                          \
+do {                                                            \
+   TO[0] = N[0] * MAT[0] + N[1] * MAT[1] + N[2] * MAT[2];       \
+   TO[1] = N[0] * MAT[4] + N[1] * MAT[5] + N[2] * MAT[6];       \
+   TO[2] = N[0] * MAT[8] + N[1] * MAT[9] + N[2] * MAT[10];      \
 } while (0)
 
 
 extern void gl_transform_vector( GLfloat u[4],
-				 const GLfloat v[4],
+                                 const GLfloat v[4],
                                  const GLfloat m[16] );
 
 
@@ -103,12 +110,11 @@ extern void gl_init_transformation( void );
  * into a straight-forward matrix transformation, with asm acceleration
  * automatically available.
  */
-typedef GLvector4f *(* __cdecl clip_func)( GLvector4f *vClip,
+typedef GLvector4f * (_XFORMAPIP clip_func)( GLvector4f *vClip,
                                   GLvector4f *vProj,
                                   GLubyte clipMask[],
                                   GLubyte *orMask,
                                   GLubyte *andMask );
-
 
 typedef void (*dotprod_func)( GLvector4f *out_vec,
                               GLuint elt,
@@ -128,7 +134,7 @@ typedef void (*vec_copy_func)( GLvector4f *to,
  *     when the mask byte is zero.  This is always present as a
  *     parameter, to allow a unified interface.
  */
-typedef void (* __cdecl transform_func)( GLvector4f *to_vec,
+typedef void (_XFORMAPIP transform_func)( GLvector4f *to_vec,
                                 const GLmatrix *mat,
                                 const GLvector4f *from_vec,
                                 const GLubyte *clipmask,
@@ -140,11 +146,11 @@ extern GLvector4f *gl_project_points( GLvector4f *to,
 
 extern void gl_transform_bounds3( GLubyte *orMask, GLubyte *andMask,
                            const GLmatrix *mat,
-			   CONST GLfloat src[][3] );
+                           CONST GLfloat src[][3] );
 
 extern void gl_transform_bounds2( GLubyte *orMask, GLubyte *andMask,
-			   const GLmatrix *mat,
-			   CONST GLfloat src[][3] );
+                           const GLmatrix *mat,
+                           CONST GLfloat src[][3] );
 
 
 extern dotprod_func  gl_dotprod_tab[2][5];
@@ -159,7 +165,7 @@ extern transform_func **(gl_transform_tab[2]);
 
 
 extern void gl_transform_point_sz( GLfloat Q[4], const GLfloat M[16],
-				   const GLfloat P[4], GLuint sz );
+                                   const GLfloat P[4], GLuint sz );
 
 
 #define TransformRaw( to, mat, from ) \
@@ -168,7 +174,7 @@ extern void gl_transform_point_sz( GLfloat Q[4], const GLfloat M[16],
 
 #define Transform( to, mat, from, mask, cull ) \
       ( (*gl_transform_tab[cull!=0][(from)->size][(mat)->type])( to, mat, from, mask, cull ), \
-	(to) )
+        (to) )
 
 
 #endif

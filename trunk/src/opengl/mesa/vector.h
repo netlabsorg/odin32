@@ -1,8 +1,8 @@
-/* $Id: vector.h,v 1.1 2000-02-29 00:48:43 sandervl Exp $ */
+/* $Id: vector.h,v 1.2 2000-05-23 20:35:00 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -32,8 +32,6 @@
 #ifndef _VECTOR_H_
 #define _VECTOR_H_
 
-#include "gl.h"
-
 /* Wrap all the information about vertices up in a struct.  Has
  * additional fields compared to the other vectors to help us track of
  * different vertex sizes, and whether we need to clean columns out
@@ -47,30 +45,30 @@ typedef struct {
    GLfloat (*data)[4];           /* may be malloced or point to client data */
    GLfloat *start;
    GLuint count;
-   GLuint stride;		 /* start to start */
-   GLuint size;			 /* 2-4 for vertices and 1-4 for texcoords */
-   GLuint flags;		 /* which columns are dirty */
+   GLuint stride;                /* start to start */
+   GLuint size;                  /* 2-4 for vertices and 1-4 for texcoords */
+   GLuint flags;                 /* which columns are dirty */
    void *storage;
 } GLvector4f;
 
 
 extern void gl_vector4f_print( GLvector4f *v, GLubyte *, GLboolean );
 extern void gl_vector4f_init( GLvector4f *v, GLuint flags,
-			      GLfloat (*storage)[4] );
+                              GLfloat (*storage)[4] );
 extern void gl_vector4f_alloc( GLvector4f *v, GLuint sz, GLuint flags,
-			       GLuint count, GLuint alignment );
+                               GLuint count, GLuint alignment );
 extern void gl_vector4f_free( GLvector4f *v );
 extern void gl_vector4f_clean_elem( GLvector4f *vec, GLuint nr, GLuint elt );
 
 
-#define VEC_DIRTY_0        0x1	/* dirty flags not really used any more */
+#define VEC_DIRTY_0        0x1  /* dirty flags not really used any more */
 #define VEC_DIRTY_1        0x2
 #define VEC_DIRTY_2        0x4
 #define VEC_DIRTY_3        0x8
 #define VEC_MALLOC         0x10
-#define VEC_WRITABLE       0x20	/* keep both + and - bits for easy testing */
+#define VEC_WRITABLE       0x20 /* keep both + and - bits for easy testing */
 #define VEC_NOT_WRITABLE   0x40
-#define VEC_GOOD_STRIDE    0x80	
+#define VEC_GOOD_STRIDE    0x80
 #define VEC_BAD_STRIDE     0x100
 
 #define VEC_WRITABLE_FLAGS (VEC_WRITABLE|VEC_NOT_WRITABLE)
@@ -99,7 +97,7 @@ extern void gl_vector3f_print( GLvector3f *v, GLubyte *, GLboolean );
 extern void gl_vector3f_free( GLvector3f *v );
 extern void gl_vector3f_init( GLvector3f *v, GLuint flags, GLfloat (*)[3] );
 extern void gl_vector3f_alloc( GLvector3f *v, GLuint flags, GLuint count,
-			       GLuint alignment );
+                               GLuint alignment );
 
 
 /* For 4ub rgba values.
@@ -108,16 +106,16 @@ typedef struct {
    GLubyte (*data)[4];
    GLubyte *start;
    GLuint count;
-   GLuint stride;		
+   GLuint stride;
    GLuint flags;
    void *storage;
 } GLvector4ub;
 
 extern void gl_vector4ub_init( GLvector4ub *v, GLuint flags,
-			       GLubyte (*storage)[4] );
+                               GLubyte (*storage)[4] );
 extern void gl_vector4ub_free( GLvector4ub * );
 extern void gl_vector4ub_alloc( GLvector4ub *v, GLuint flags, GLuint count,
-				GLuint alignment );
+                                GLuint alignment );
 
 
 
@@ -128,7 +126,7 @@ typedef struct {
    GLubyte *data;
    GLubyte *start;
    GLuint count;
-   GLuint stride;		
+   GLuint stride;
    GLuint flags;
    void *storage;
 } GLvector1ub;
@@ -136,7 +134,7 @@ typedef struct {
 extern void gl_vector1ub_init( GLvector1ub *v, GLuint flags, GLubyte *storage);
 extern void gl_vector1ub_free( GLvector1ub * );
 extern void gl_vector1ub_alloc( GLvector1ub *v, GLuint flags, GLuint count,
-				GLuint alignment );
+                                GLuint alignment );
 
 
 
@@ -155,7 +153,7 @@ typedef struct {
 extern void gl_vector1ui_init( GLvector1ui *v, GLuint flags, GLuint *storage );
 extern void gl_vector1ui_free( GLvector1ui * );
 extern void gl_vector1ui_alloc( GLvector1ui *v, GLuint flags, GLuint count,
-				GLuint alignment );
+                                GLuint alignment );
 
 
 

@@ -1,8 +1,8 @@
-/* $Id: winpos.h,v 1.1 2000-02-29 00:48:44 sandervl Exp $ */
+/* $Id: winpos.h,v 1.2 2000-05-23 20:35:00 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -36,36 +36,77 @@
 #include "types.h"
 
 
-#ifndef GL_MESA_window_pos
+extern void
+_mesa_WindowPos2dMESA(GLdouble x, GLdouble y);
 
-extern void glWindowPos2iMESA( GLint x, GLint y );
-extern void glWindowPos2fMESA( GLfloat x, GLfloat y );
-extern void glWindowPos2dMESA( GLdouble x, GLdouble y );
+extern void
+_mesa_WindowPos2fMESA(GLfloat x, GLfloat y);
 
-extern void glWindowPos2ivMESA( const GLint *p );
-extern void glWindowPos2fvMESA( const GLfloat *p );
-extern void glWindowPos2dvMESA( const GLdouble *p );
+extern void
+_mesa_WindowPos2iMESA(GLint x, GLint y);
 
-extern void glWindowPos3iMESA( GLint x, GLint y, GLint z );
-extern void glWindowPos3fMESA( GLfloat x, GLfloat y, GLfloat z );
-extern void glWindowPos3dMESA( GLdouble x, GLdouble y, GLdouble z );
+extern void
+_mesa_WindowPos2sMESA(GLshort x, GLshort y);
 
-extern void glWindowPos3ivMESA( const GLint *p );
-extern void glWindowPos3fvMESA( const GLfloat *p );
-extern void glWindowPos3dvMESA( const GLdouble *p );
+extern void
+_mesa_WindowPos3dMESA(GLdouble x, GLdouble y, GLdouble z);
 
-extern void glWindowPos4iMESA( GLint x, GLint y, GLint z, GLint w );
-extern void glWindowPos4fMESA( GLfloat x, GLfloat y, GLfloat z, GLfloat w );
-extern void glWindowPos4dMESA( GLdouble x, GLdouble y, GLdouble z, GLdouble w);
+extern void
+_mesa_WindowPos3fMESA(GLfloat x, GLfloat y, GLfloat z);
 
-extern void glWindowPos4ivMESA( const GLint *p );
-extern void glWindowPos4fvMESA( const GLfloat *p );
-extern void glWindowPos4dvMESA( const GLdouble *p );
+extern void
+_mesa_WindowPos3iMESA(GLint x, GLint y, GLint z);
 
-#endif
+extern void
+_mesa_WindowPos3sMESA(GLshort x, GLshort y, GLshort z);
 
+extern void
+_mesa_WindowPos4dMESA(GLdouble x, GLdouble y, GLdouble z, GLdouble w);
 
-extern void gl_WindowPos4fMESA( GLcontext *ctx,
-                                GLfloat x, GLfloat y, GLfloat z, GLfloat w );
+extern void
+_mesa_WindowPos4fMESA(GLfloat x, GLfloat y, GLfloat z, GLfloat w);
+
+extern void
+_mesa_WindowPos4iMESA(GLint x, GLint y, GLint z, GLint w);
+
+extern void
+_mesa_WindowPos4sMESA(GLshort x, GLshort y, GLshort z, GLshort w);
+
+extern void
+_mesa_WindowPos2dvMESA(const GLdouble *v);
+
+extern void
+_mesa_WindowPos2fvMESA(const GLfloat *v);
+
+extern void
+_mesa_WindowPos2ivMESA(const GLint *v);
+
+extern void
+_mesa_WindowPos2svMESA(const GLshort *v);
+
+extern void
+_mesa_WindowPos3dvMESA(const GLdouble *v);
+
+extern void
+_mesa_WindowPos3fvMESA(const GLfloat *v);
+
+extern void
+_mesa_WindowPos3ivMESA(const GLint *v);
+
+extern void
+_mesa_WindowPos3svMESA(const GLshort *v);
+
+extern void
+_mesa_WindowPos4dvMESA(const GLdouble *v);
+
+extern void
+_mesa_WindowPos4fvMESA(const GLfloat *v);
+
+extern void
+_mesa_WindowPos4ivMESA(const GLint *v);
+
+extern void
+_mesa_WindowPos4svMESA(const GLshort *v);
+
 
 #endif

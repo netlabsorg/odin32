@@ -1,8 +1,8 @@
-/* $Id: macros.h,v 1.1 2000-02-29 00:48:33 sandervl Exp $ */
+/* $Id: macros.h,v 1.2 2000-05-23 20:34:52 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -24,10 +24,6 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-
-
-
-
 /*
  * A collection of useful macros.
  */
@@ -36,19 +32,33 @@
 #ifndef MACROS_H
 #define MACROS_H
 
-#ifndef XFree86Server
-#include <assert.h>
-#include <math.h>
-#include <string.h>
-#else
-#include <GL/glx_ansic.h>
-#endif
-
-
-#ifdef DEBUG
+#if defined(DEBUG)
 #  define ASSERT(X)   assert(X)
+#define ABORT()       abort()
+#define EXIT(rc)      exit(rc)
 #else
 #  define ASSERT(X)
+#define ABORT()       abort()
+#define EXIT(rc)      exit(rc)
+#endif
+
+#if defined(__WIN32OS2__)
+#ifdef DEBUG
+#undef ASSERT
+#undef ABORT
+#undef EXIT
+#define ASSERT(X) if(!(X)) { char msg[200]; sprintf(msg,"Assertion failed at line %d in %s",__LINE__,__FILE__); \
+MessageBox(0,msg,"Error",MB_OK); \
+}
+#define ABORT() {char msg[200]; sprintf(msg,"ABORT at line %d in %s",__FILE__,__LINE__); \
+abort(); }
+#define EXIT(rc) {char msg[200]; sprintf(msg,"EXIT at line %d in %s - rc %d",__FILE__,__LINE__,rc); \
+exit(rc); }
+#else
+#define ASSERT(X)
+#define ABORT()       abort()
+#define EXIT(rc)      exit(rc)
+#endif
 #endif
 
 
@@ -61,16 +71,48 @@
 #endif
 
 
+/* Limits: */
+#define MAX_GLUSHORT    0xffff
+#define MAX_GLUINT      0xffffffff
+
+
+/* Some compilers don't like some of Mesa's const usage */
+#ifdef NO_CONST
+#  define CONST
+#else
+#  define CONST const
+#endif
+
+
+/* Pi */
+#ifndef M_PI
+#define M_PI (3.1415926)
+#endif
+
+
+/* Degrees to radians conversion: */
+#define DEG2RAD (M_PI/180.0)
+
+
+#ifndef NULL
+#define NULL 0
+#endif
+
+
+
+/*
+ * Bitmask helpers
+ */
+#define SET_BITS(WORD, BITS)    (WORD) |= (BITS)
+#define CLEAR_BITS(WORD, BITS)  (WORD) &= ~(BITS)
+#define TEST_BITS(WORD, BITS)   ((WORD) & (BITS))
+
+
 /* Stepping a GLfloat pointer by a byte stride
  */
 #define STRIDE_F(p, i)  (p = (GLfloat *)((GLubyte *)p + i))
 #define STRIDE_UI(p, i)  (p = (GLuint *)((GLubyte *)p + i))
 #define STRIDE_T(p, t, i)  (p = (t *)((GLubyte *)p + i))
-
-
-/* Limits: */
-#define MAX_GLUSHORT    0xffff
-#define MAX_GLUINT      0xffffffff
 
 
 #define ZERO_2V( DST )  (DST)[0] = (DST)[1] = 0
@@ -80,252 +122,252 @@
 
 /* Copy short vectors: */
 #define COPY_2V( DST, SRC )                     \
-/*do*/ {                                            \
+do {                                            \
    (DST)[0] = (SRC)[0];                         \
    (DST)[1] = (SRC)[1];                         \
-}                                                              /* while (0)*/
+} while (0)
 
 
 #define COPY_3V( DST, SRC )                     \
-/*do */{                                            \
+do {                                            \
    (DST)[0] = (SRC)[0];                         \
    (DST)[1] = (SRC)[1];                         \
    (DST)[2] = (SRC)[2];                         \
-}                                                              /* while (0)*/
+} while (0)
 
 #define COPY_4V( DST, SRC )                     \
-/*do */{                                            \
+do {                                            \
    (DST)[0] = (SRC)[0];                         \
    (DST)[1] = (SRC)[1];                         \
    (DST)[2] = (SRC)[2];                         \
    (DST)[3] = (SRC)[3];                         \
-}                                                              /* while (0)*/
+} while (0)
 
 
 #define COPY_2FV( DST, SRC )                    \
-/*do*/ {                                            \
+do {                                            \
    const GLfloat *_tmp = (SRC);                 \
    (DST)[0] = _tmp[0];                          \
    (DST)[1] = _tmp[1];                          \
-}                                                              /* while (0)*/
+} while (0)
 
 
 #define COPY_3FV( DST, SRC )                    \
-/*do*/ {                                            \
+do {                                            \
    const GLfloat *_tmp = (SRC);                 \
    (DST)[0] = _tmp[0];                          \
    (DST)[1] = _tmp[1];                          \
    (DST)[2] = _tmp[2];                          \
-}                                                              /* while (0)*/
+} while (0)
 
 #define COPY_4FV( DST, SRC )                    \
-/*do*/ {                                            \
+do {                                            \
    const GLfloat *_tmp = (SRC);                 \
    (DST)[0] = _tmp[0];                          \
    (DST)[1] = _tmp[1];                          \
    (DST)[2] = _tmp[2];                          \
    (DST)[3] = _tmp[3];                          \
-}                                                              /* while (0)*/
+} while (0)
 
 
 
 #define COPY_SZ_4V(DST, SZ, SRC)                \
-/*do */{                                            \
+do {                                            \
    switch (SZ) {                                \
    case 4: (DST)[3] = (SRC)[3];                 \
    case 3: (DST)[2] = (SRC)[2];                 \
    case 2: (DST)[1] = (SRC)[1];                 \
    case 1: (DST)[0] = (SRC)[0];                 \
    }                                            \
-}                                                               /* while(0)*/
+} while(0)
 
 #define SUB_4V( DST, SRCA, SRCB )               \
-/*do */{                                            \
+do {                                            \
       (DST)[0] = (SRCA)[0] - (SRCB)[0];         \
       (DST)[1] = (SRCA)[1] - (SRCB)[1];         \
       (DST)[2] = (SRCA)[2] - (SRCB)[2];         \
       (DST)[3] = (SRCA)[3] - (SRCB)[3];         \
-}                                                              /* while (0)*/
+} while (0)
 
 #define ADD_4V( DST, SRCA, SRCB )               \
-/*do*/ {                                            \
+do {                                            \
       (DST)[0] = (SRCA)[0] + (SRCB)[0];         \
       (DST)[1] = (SRCA)[1] + (SRCB)[1];         \
       (DST)[2] = (SRCA)[2] + (SRCB)[2];         \
       (DST)[3] = (SRCA)[3] + (SRCB)[3];         \
-}                                                              /* while (0)*/
+} while (0)
 
 #define SCALE_4V( DST, SRCA, SRCB )             \
-/*do*/ {                                            \
+do {                                            \
       (DST)[0] = (SRCA)[0] * (SRCB)[0];         \
       (DST)[1] = (SRCA)[1] * (SRCB)[1];         \
       (DST)[2] = (SRCA)[2] * (SRCB)[2];         \
       (DST)[3] = (SRCA)[3] * (SRCB)[3];         \
-}                                                              /* while (0)*/
+} while (0)
 
 #define ACC_4V( DST, SRC )                      \
-/*do*/ {                                            \
-      (DST)[0] += (SRC)[0];                             \
-      (DST)[1] += (SRC)[1];                             \
-      (DST)[2] += (SRC)[2];                             \
-      (DST)[3] += (SRC)[3];                             \
-}                                                              /* while (0)*/
+do {                                            \
+      (DST)[0] += (SRC)[0];                     \
+      (DST)[1] += (SRC)[1];                     \
+      (DST)[2] += (SRC)[2];                     \
+      (DST)[3] += (SRC)[3];                     \
+} while (0)
 
 #define ACC_SCALE_4V( DST, SRCA, SRCB )         \
-/*do*/ {                                            \
-      (DST)[0] += (SRCA)[0] * (SRCB)[0];                \
-      (DST)[1] += (SRCA)[1] * (SRCB)[1];                \
-      (DST)[2] += (SRCA)[2] * (SRCB)[2];                \
-      (DST)[3] += (SRCA)[3] * (SRCB)[3];                \
-}                                                              /* while (0)*/
+do {                                            \
+      (DST)[0] += (SRCA)[0] * (SRCB)[0];        \
+      (DST)[1] += (SRCA)[1] * (SRCB)[1];        \
+      (DST)[2] += (SRCA)[2] * (SRCB)[2];        \
+      (DST)[3] += (SRCA)[3] * (SRCB)[3];        \
+} while (0)
 
 #define ACC_SCALE_SCALAR_4V( DST, S, SRCB )     \
-/*do*/ {                                            \
-      (DST)[0] += S * (SRCB)[0];                        \
-      (DST)[1] += S * (SRCB)[1];                        \
-      (DST)[2] += S * (SRCB)[2];                        \
-      (DST)[3] += S * (SRCB)[3];                        \
-}                                                              /* while (0)*/
+do {                                            \
+      (DST)[0] += S * (SRCB)[0];                \
+      (DST)[1] += S * (SRCB)[1];                \
+      (DST)[2] += S * (SRCB)[2];                \
+      (DST)[3] += S * (SRCB)[3];                \
+} while (0)
 
 #define SCALE_SCALAR_4V( DST, S, SRCB )         \
-/*do*/ {                                            \
+do {                                            \
       (DST)[0] = S * (SRCB)[0];                 \
       (DST)[1] = S * (SRCB)[1];                 \
       (DST)[2] = S * (SRCB)[2];                 \
       (DST)[3] = S * (SRCB)[3];                 \
-}                                                              /* while (0)*/
+} while (0)
 
 
 #define SELF_SCALE_SCALAR_4V( DST, S )          \
-/*do*/ {                                            \
+do {                                            \
       (DST)[0] *= S;                            \
       (DST)[1] *= S;                            \
       (DST)[2] *= S;                            \
       (DST)[3] *= S;                            \
-}                                                              /* while (0)*/
+} while (0)
 
 
 /*
  * Similarly for 3-vectors.
  */
 #define SUB_3V( DST, SRCA, SRCB )               \
-/*do*/ {                                            \
+do {                                            \
       (DST)[0] = (SRCA)[0] - (SRCB)[0];         \
       (DST)[1] = (SRCA)[1] - (SRCB)[1];         \
       (DST)[2] = (SRCA)[2] - (SRCB)[2];         \
-}                                                              /* while (0)*/
+} while (0)
 
 #define ADD_3V( DST, SRCA, SRCB )               \
-/*do*/ {                                            \
+do {                                            \
       (DST)[0] = (SRCA)[0] + (SRCB)[0];         \
       (DST)[1] = (SRCA)[1] + (SRCB)[1];         \
       (DST)[2] = (SRCA)[2] + (SRCB)[2];         \
-}                                                              /* while (0)*/
+} while (0)
 
 #define SCALE_3V( DST, SRCA, SRCB )             \
-/*do*/ {                                            \
+do {                                            \
       (DST)[0] = (SRCA)[0] * (SRCB)[0];         \
       (DST)[1] = (SRCA)[1] * (SRCB)[1];         \
       (DST)[2] = (SRCA)[2] * (SRCB)[2];         \
-}                                                              /* while (0)*/
+} while (0)
 
 #define ACC_3V( DST, SRC )                      \
-/*do*/ {                                            \
+do {                                            \
       (DST)[0] += (SRC)[0];                     \
       (DST)[1] += (SRC)[1];                     \
       (DST)[2] += (SRC)[2];                     \
-}                                                              /* while (0)*/
+} while (0)
 
 #define ACC_SCALE_3V( DST, SRCA, SRCB )         \
-/*do*/ {                                            \
+do {                                            \
       (DST)[0] += (SRCA)[0] * (SRCB)[0];        \
       (DST)[1] += (SRCA)[1] * (SRCB)[1];        \
       (DST)[2] += (SRCA)[2] * (SRCB)[2];        \
-}                                                              /* while (0)*/
+} while (0)
 
 #define SCALE_SCALAR_3V( DST, S, SRCB )         \
-/*do*/ {                                            \
+do {                                            \
       (DST)[0] = S * (SRCB)[0];                 \
       (DST)[1] = S * (SRCB)[1];                 \
       (DST)[2] = S * (SRCB)[2];                 \
-}                                                              /* while (0)*/
+} while (0)
 
 #define ACC_SCALE_SCALAR_3V( DST, S, SRCB )     \
-/*do*/ {                                            \
+do {                                            \
       (DST)[0] += S * (SRCB)[0];                \
       (DST)[1] += S * (SRCB)[1];                \
       (DST)[2] += S * (SRCB)[2];                \
-}                                                              /* while (0)*/
+} while (0)
 
 #define SELF_SCALE_SCALAR_3V( DST, S )          \
-/*do*/ {                                            \
+do {                                            \
       (DST)[0] *= S;                            \
       (DST)[1] *= S;                            \
       (DST)[2] *= S;                            \
-}                                                              /* while (0)*/
+} while (0)
 
 #define ACC_SCALAR_3V( DST, S )                 \
-/*do*/ {                                            \
+do {                                            \
       (DST)[0] += S;                            \
       (DST)[1] += S;                            \
       (DST)[2] += S;                            \
-}                                                              /* while (0)*/
+} while (0)
 
 /* And also for 2-vectors
  */
 #define SUB_2V( DST, SRCA, SRCB )               \
-/*do*/ {                                            \
+do {                                            \
       (DST)[0] = (SRCA)[0] - (SRCB)[0];         \
       (DST)[1] = (SRCA)[1] - (SRCB)[1];         \
-}                                                              /* while (0)*/
+} while (0)
 
 #define ADD_2V( DST, SRCA, SRCB )               \
-/*do*/ {                                            \
+do {                                            \
       (DST)[0] = (SRCA)[0] + (SRCB)[0];         \
       (DST)[1] = (SRCA)[1] + (SRCB)[1];         \
-}                                                              /* while (0)*/
+} while (0)
 
 #define SCALE_2V( DST, SRCA, SRCB )             \
-/*do*/ {                                            \
+do {                                            \
       (DST)[0] = (SRCA)[0] * (SRCB)[0];         \
       (DST)[1] = (SRCA)[1] * (SRCB)[1];         \
-}                                                              /* while (0)*/
+} while (0)
 
 #define ACC_2V( DST, SRC )                      \
-/*do*/ {                                            \
+do {                                            \
       (DST)[0] += (SRC)[0];                     \
       (DST)[1] += (SRC)[1];                     \
-}                                                              /* while (0)*/
+} while (0)
 
 #define ACC_SCALE_2V( DST, SRCA, SRCB )         \
-/*do*/ {                                            \
+do {                                            \
       (DST)[0] += (SRCA)[0] * (SRCB)[0];        \
       (DST)[1] += (SRCA)[1] * (SRCB)[1];        \
-}                                                              /* while (0)*/
+} while (0)
 
 #define SCALE_SCALAR_2V( DST, S, SRCB )         \
-/*do*/ {                                            \
+do {                                            \
       (DST)[0] = S * (SRCB)[0];                 \
       (DST)[1] = S * (SRCB)[1];                 \
-}                                                              /* while (0)*/
+} while (0)
 
 #define ACC_SCALE_SCALAR_2V( DST, S, SRCB )     \
-/*do*/ {                                            \
+do {                                            \
       (DST)[0] += S * (SRCB)[0];                \
       (DST)[1] += S * (SRCB)[1];                \
-}                                                              /* while (0)*/
+} while (0)
 
 #define SELF_SCALE_SCALAR_2V( DST, S )          \
-/*do*/ {                                            \
+do {                                            \
       (DST)[0] *= S;                            \
       (DST)[1] *= S;                            \
-}                                                              /* while (0)*/
+} while (0)
 
 #define ACC_SCALAR_2V( DST, S )                 \
-/*do*/ {                                            \
+do {                                            \
       (DST)[0] += S;                            \
       (DST)[1] += S;                            \
-}                                                              /* while (0)*/
+} while (0)
 
 
 
@@ -333,7 +375,7 @@
  * Copy a vector of 4 GLubytes from SRC to DST.
  */
 #define COPY_4UBV(DST, SRC)                     \
-/*do*/ {                                        \
+do {                                            \
    if (sizeof(GLuint)==4*sizeof(GLubyte)) {     \
       *((GLuint*)(DST)) = *((GLuint*)(SRC));    \
    }                                            \
@@ -343,23 +385,23 @@
       (DST)[2] = (SRC)[2];                      \
       (DST)[3] = (SRC)[3];                      \
    }                                            \
-}                                                              /* while (0)*/
+} while (0)
 
 
 /* Assign scalers to short vectors: */
 #define ASSIGN_2V( V, V0, V1 )  \
-/*do*/ { V[0] = V0;  V[1] = V1; } //while(0)
+do { V[0] = V0;  V[1] = V1; } while(0)
 
 #define ASSIGN_3V( V, V0, V1, V2 )  \
-/*do*/ { V[0] = V0;  V[1] = V1;  V[2] = V2; } //while(0)
+do { V[0] = V0;  V[1] = V1;  V[2] = V2; } while(0)
 
 #define ASSIGN_4V( V, V0, V1, V2, V3 )          \
-/*do*/ {                                            \
+do {                                            \
     V[0] = V0;                                  \
     V[1] = V1;                                  \
     V[2] = V2;                                  \
     V[3] = V3;                                  \
-}                                                               /* while(0)*/
+} while(0)
 
 
 
@@ -421,17 +463,11 @@ do {                                            \
  * Integer / float conversion for colors, normals, etc.
  */
 
-
-
-
 #define BYTE_TO_UBYTE(b)   (b < 0 ? 0 : (GLubyte) b)
 #define SHORT_TO_UBYTE(s)  (s < 0 ? 0 : (GLubyte) (s >> 7))
 #define USHORT_TO_UBYTE(s)              (GLubyte) (s >> 8)
 #define INT_TO_UBYTE(i)    (i < 0 ? 0 : (GLubyte) (i >> 23))
 #define UINT_TO_UBYTE(i)                (GLubyte) (i >> 24)
-
-
-
 
 /* Convert GLubyte in [0,255] to GLfloat in [0.0,1.0] */
 #define UBYTE_TO_FLOAT(B)       ((GLfloat) (B) * (1.0F / 255.0F))
@@ -477,95 +513,6 @@ do {                                            \
 */
 /* a close approximation: */
 #define FLOAT_TO_INT(X)         ( (GLint) (2147483647.0 * (X)) )
-
-
-
-/*
- * Memory allocation
- * XXX these should probably go into a new glmemory.h file.
- */
-#ifdef DEBUG
-extern void *gl_malloc(size_t bytes);
-extern void *gl_calloc(size_t bytes);
-extern void gl_free(void *ptr);
-#define MALLOC(BYTES)      gl_malloc(BYTES)
-#define CALLOC(BYTES)      gl_calloc(BYTES)
-#define MALLOC_STRUCT(T)   (struct T *) gl_malloc(sizeof(struct T))
-#define CALLOC_STRUCT(T)   (struct T *) gl_calloc(sizeof(struct T))
-#define FREE(PTR)          gl_free(PTR)
-#else
-#define MALLOC(BYTES)      (void *) malloc(BYTES)
-#define CALLOC(BYTES)      (void *) calloc(1, BYTES)
-#define MALLOC_STRUCT(T)   (struct T *) malloc(sizeof(struct T))
-#define CALLOC_STRUCT(T)   (struct T *) calloc(1,sizeof(struct T))
-#define FREE(PTR)          free(PTR)
-#endif
-
-
-/* Memory copy: */
-#ifdef SUNOS4
-#define MEMCPY( DST, SRC, BYTES) \
-        memcpy( (char *) (DST), (char *) (SRC), (int) (BYTES) )
-#else
-#define MEMCPY( DST, SRC, BYTES) \
-        memcpy( (void *) (DST), (void *) (SRC), (size_t) (BYTES) )
-#endif
-
-
-/* Memory set: */
-#ifdef SUNOS4
-#define MEMSET( DST, VAL, N ) \
-        memset( (char *) (DST), (int) (VAL), (int) (N) )
-#else
-#define MEMSET( DST, VAL, N ) \
-        memset( (void *) (DST), (int) (VAL), (size_t) (N) )
-#endif
-
-
-/* MACs and BeOS don't support static larger than 32kb, so... */
-#if defined(macintosh) && !defined(__MRC__)
-  extern char *AGLAlloc(int size);
-  extern void AGLFree(char* ptr);
-#  define DEFARRAY(TYPE,NAME,SIZE)                      TYPE *NAME = (TYPE*)AGLAlloc(sizeof(TYPE)*(SIZE))
-#  define DEFMARRAY(TYPE,NAME,SIZE1,SIZE2)              TYPE (*NAME)[SIZE2] = (TYPE(*)[SIZE2])AGLAlloc(sizeof(TYPE)*(SIZE1)*(SIZE2))
-#  define CHECKARRAY(NAME,CMD)                          do {if (!(NAME)) {CMD;}} while (0)
-#  define UNDEFARRAY(NAME)                              do {if ((NAME)) {AGLFree((char*)NAME);}  }while (0)
-#elif defined(__BEOS__)
-#  define DEFARRAY(TYPE,NAME,SIZE)                      TYPE *NAME = (TYPE*)malloc(sizeof(TYPE)*(SIZE))
-#  define DEFMARRAY(TYPE,NAME,SIZE1,SIZE2)              TYPE (*NAME)[SIZE2] = (TYPE(*)[SIZE2])malloc(sizeof(TYPE)*(SIZE1)*(SIZE2))
-#  define CHECKARRAY(NAME,CMD)                          do {if (!(NAME)) {CMD;}} while (0)
-#  define UNDEFARRAY(NAME)                              do {if ((NAME)) {free((char*)NAME);}  }while (0)
-#else
-#  define DEFARRAY(TYPE,NAME,SIZE)                      TYPE NAME[SIZE]
-#  define DEFMARRAY(TYPE,NAME,SIZE1,SIZE2)              TYPE NAME[SIZE1][SIZE2]
-#  define CHECKARRAY(NAME,CMD)                          do {} while(0)
-#  define UNDEFARRAY(NAME)
-#endif
-
-
-/* Some compilers don't like some of Mesa's const usage */
-#ifdef NO_CONST
-#  define CONST
-#else
-#  define CONST const
-#endif
-
-
-
-/* Pi */
-#ifndef M_PI
-#define M_PI (3.1415926)
-#endif
-
-
-/* Degrees to radians conversion: */
-#define DEG2RAD (M_PI/180.0)
-
-
-#ifndef NULL
-#define NULL 0
-#endif
-
 
 
 #endif /*MACROS_H*/
