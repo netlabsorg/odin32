@@ -1,7 +1,16 @@
-/* $Id: ChangeLog,v 1.1205 2001-01-06 16:43:06 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1206 2001-01-08 20:11:03 bird Exp $ */
+
+ 2001-01-08: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - tools\dailybuild:
+                o Updated with temporary server address.
+                o Put ftp userid/passwords into separate file.
+
+    - Win32k:   o Added support for the ldrCheckInternalName bug. :-)
+                  (see /src/win32k/ldr/myldrCheckInternalName.cpp for details.)
+                o Made pe.exe default.
 
  2001-01-06: Sander van Leeuwen <sandervl@xs4all.nl>
-    - install:  o Win32k installation temporarily disabled due to a WarpIn bug 
+    - install:  o Win32k installation temporarily disabled due to a WarpIn bug
                   (config.sys lines removed)
                 o Added check for WarpIn 0.9.6 or higher
                 o Added check for OS/2 3.x or higher
@@ -20,7 +29,7 @@
     - USER32:   o Rewrote window handle management; only start reusing window
                   handles when max handle has been assigned.
     - GDI32/USER32/KERNEL32:
-                o Don't export private Odin functions by name (we import 
+                o Don't export private Odin functions by name (we import
                   everything by ordinal)
 
  2001-01-01: Sander van Leeuwen <sandervl@xs4all.nl>
