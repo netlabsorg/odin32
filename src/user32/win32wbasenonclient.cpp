@@ -1,4 +1,4 @@
-/* $Id: win32wbasenonclient.cpp,v 1.44 2002-10-15 09:18:12 sandervl Exp $ */
+/* $Id: win32wbasenonclient.cpp,v 1.45 2002-12-29 17:17:16 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (non-client methods)
  *
@@ -1065,6 +1065,11 @@ VOID Win32BaseWindow::DoNCPaint(HRGN clip,BOOL suppress_menupaint)
     */
 
     dprintf(("DoNCPaint %x %x %d", getWindowHandle(), clip, suppress_menupaint));
+
+    if ( getStyle() & WS_MINIMIZE ||
+         !IsWindowVisible( getWindowHandle() )) {
+        return; /* Nothing to do */
+    }
 
     rect.top    = rect.left = 0;
     rect.right  = rectWindow.right - rectWindow.left;
