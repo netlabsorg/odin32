@@ -1,4 +1,4 @@
-/* $Id: odin32.e,v 1.2 2000-01-28 14:53:53 bird Exp $
+/* $Id: odin32.e,v 1.3 2000-02-19 08:41:43 bird Exp $
  *
  * Visual SlickEdit Documentation Macros.
  *
@@ -204,13 +204,14 @@ void odin32_funcbox()
         _insert_text("; @cproto    \n");
         _insert_text("; @returns   \n");
         _insert_text("; @param     \n");
+        _insert_text("; @uses      \n");
         _insert_text("; @equiv     \n");
         _insert_text("; @time      \n");
         _insert_text("; @sketch    \n");
         _insert_text("; @status    \n");
         _insert_text("; @author    "sOdin32UserName" (" sOdin32UserEmail ")\n");
         _insert_text("; @remark    \n");
-        up(10);
+        up(11);
         p_col = 3;
     }
     else
@@ -302,7 +303,7 @@ void odin32_modulebox()
     _begin_line();
     if (file_eq(p_extension, 'asm'))
     {
-        _insert_text("; $Id: odin32.e,v 1.2 2000-01-28 14:53:53 bird Exp $\n");
+        _insert_text("; $Id: odin32.e,v 1.3 2000-02-19 08:41:43 bird Exp $\n");
         _insert_text("; \n");
         _insert_text("; \n");
         _insert_text("; \n");
@@ -315,7 +316,7 @@ void odin32_modulebox()
     }
     else
     {
-        _insert_text("/* $Id: odin32.e,v 1.2 2000-01-28 14:53:53 bird Exp $\n");
+        _insert_text("/* $Id: odin32.e,v 1.3 2000-02-19 08:41:43 bird Exp $\n");
         _insert_text(" * \n");
         _insert_text(" * \n");
         _insert_text(" * \n");
