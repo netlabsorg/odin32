@@ -1,18 +1,19 @@
-/* $Id: asyncthread.cpp,v 1.1 2000-03-22 20:01:04 sandervl Exp $ */
+/* $Id: asyncthread.cpp,v 1.2 2000-03-23 19:21:53 sandervl Exp $ */
 
 /*
  * Async thread help functions
  *
  * Copyright 2000 Sander van Leeuwen (sandervl@xs4all.nl)
  *
- * 
- * Not everything is thread safe 
+ * TODO: Not everything is 100% thread safe  (i.e. async parameter updates)
  *
  * Project Odin Software License can be found in LICENSE.TXT
+ *
  */
 #define INCL_BASE
 #include <os2wrap.h>
 #include <os2sel.h>
+#include <stdlib.h>
 #include <wprocess.h>
 #include <win32api.h>
 #include <misc.h>
@@ -34,13 +35,19 @@ static void APIENTRY AsyncThread(ULONG arg)
 
   pThreadParm->asyncProc((PVOID)arg);
 
-  WSASetBlocking(TRUE, pThreadParm->hThread);
+//only for blocking hooks (currently not implemented
+////  if(pThreadParm->request == ASYNC_BLOCKHOOK)
+////	WSASetBlocking(FALSE, pThreadParm->hThread);
+
+  pThreadParm->fActive = FALSE;
+  RemoveFromQueue(pThreadParm); 
+  free((PVOID)pThreadParm);
 
   DosExit(EXIT_THREAD, 0);
 }
 //******************************************************************************
 //******************************************************************************
-ULONG QueueAsyncJob(ASYNCTHREADPROC asyncproc, PASYNCTHREADPARM pThreadParm)
+ULONG QueueAsyncJob(ASYNCTHREADPROC asyncproc, PASYNCTHREADPARM pThreadParm, BOOL fSetBlocking)
 {
  APIRET rc;
  TID    tid;
@@ -54,13 +61,13 @@ ULONG QueueAsyncJob(ASYNCTHREADPROC asyncproc, PASYNCTHREADPARM pThreadParm)
    pThreadParm->hThread           = GetCurrentThread();
    AddToQueue(pThreadParm);
 
-   WSASetBlocking(TRUE);
+   if(fSetBlocking) WSASetBlocking(TRUE);
 
    rc = DosCreateThread(&tid, AsyncThread, (ULONG)pThreadParm, CREATE_READY, 16384);
    if(rc)
    {
    	dprintf(("QueueAsyncJob: DosCreateThread failed with error %x", rc));
-   	WSASetBlocking(FALSE);
+   	if(fSetBlocking) WSASetBlocking(FALSE);
 	RemoveFromQueue(pThreadParm);
    	WSASetLastError(WSAEFAULT);
 	return 0;
@@ -82,23 +89,23 @@ void AddToQueue(PASYNCTHREADPARM pThreadParm)
 //******************************************************************************
 void RemoveFromQueue(PASYNCTHREADPARM pThreadParm)
 {
- PASYNCTHREADPARM parm;
+ PASYNCTHREADPARM pThreadInfo;
 
    asyncThreadMutex.enter();
-   parm = threadList;
+   pThreadInfo = threadList;
 
-   if(parm == pThreadParm) {
+   if(pThreadInfo == pThreadParm) {
 	threadList = pThreadParm->next;
    }
    else {
-	while(parm->next) {
-		if(parm->next == pThreadParm) {
-			parm->next = pThreadParm->next;
+	while(pThreadInfo->next) {
+		if(pThreadInfo->next == pThreadParm) {
+			pThreadInfo->next = pThreadParm->next;
 			break;
 		}
-		parm = parm->next;
+		pThreadInfo = pThreadInfo->next;
 	}
-	if(parm == NULL) {
+	if(pThreadInfo == NULL) {
 		dprintf(("RemoveFromQueue: parm %x not found!!", pThreadParm));
 		DebugInt3();
 	}
@@ -110,20 +117,20 @@ void RemoveFromQueue(PASYNCTHREADPARM pThreadParm)
 //******************************************************************************
 int WIN32API WSACancelAsyncRequest(LHANDLE hAsyncTaskHandle)
 {
- PASYNCTHREADPARM parm;
+ PASYNCTHREADPARM pThreadInfo;
  BOOL             found = FALSE;
 
    dprintf(("WSACancelAsyncRequest: cancel task %x", hAsyncTaskHandle));
    asyncThreadMutex.enter();
-   parm = threadList;
+   pThreadInfo = threadList;
 
-   while(parm) {
-	if(parm->hAsyncTaskHandle == hAsyncTaskHandle) {
-		parm->fCancelled = TRUE;
+   while(pThreadInfo) {
+	if(pThreadInfo->hAsyncTaskHandle == hAsyncTaskHandle) {
+		pThreadInfo->fCancelled = TRUE;
 		found = TRUE;
 		break;
 	}
-	parm = parm->next;
+	pThreadInfo = pThreadInfo->next;
    }
    asyncThreadMutex.leave();
    if(found == FALSE) {
@@ -133,15 +140,104 @@ int WIN32API WSACancelAsyncRequest(LHANDLE hAsyncTaskHandle)
    return (found) ? NO_ERROR : SOCKET_ERROR;
 }
 //******************************************************************************
+//Only to cancel blocking hooks
+//******************************************************************************
+int WIN32API WSACancelBlockingCall()
+{
+ HANDLE hThread = GetCurrentThread();
+
+   dprintf(("WSACancelBlockingCall"));
+#if 0
+   asyncThreadMutex.enter();
+   pThreadInfo = threadList;
+
+   while(pThreadInfo) {
+	if(pThreadInfo->hThread == hThread) {
+		pThreadInfo->fCancelled = TRUE;
+
+		if(pThreadInfo->request == ASYNC_BLOCKHOOK) {
+            		ret = so_cancel(pThreadInfo->blockedsocket);
+		}
+
+		found = TRUE;
+		break;
+	}
+	pThreadInfo = pThreadInfo->next;
+   }
+   asyncThreadMutex.leave();
+#endif
+   return SOCKET_ERROR;
+}
+//******************************************************************************
+//Assumes caller owns async thread mutex!
+//******************************************************************************
+static PASYNCTHREADPARM FindAsyncEvent(SOCKET s)
+{
+ PASYNCTHREADPARM pThreadInfo;
+
+   pThreadInfo = threadList;
+   while(pThreadInfo) {
+	if(pThreadInfo->u.asyncselect.s == s) {
+		return pThreadInfo;
+	}
+	pThreadInfo = pThreadInfo->next;
+   }
+   return NULL;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL FindAndSetAsyncEvent(SOCKET s, HWND hwnd, int msg, ULONG lEvent)
+{
+ PASYNCTHREADPARM pThreadInfo;
+ 
+   asyncThreadMutex.enter();
+   pThreadInfo = FindAsyncEvent(s);
+   if(pThreadInfo) {
+	pThreadInfo->u.asyncselect.lEvents = lEvent;
+	pThreadInfo->hwnd                  = hwnd;
+	pThreadInfo->msg                   = msg;
+	//cancel pending select in async select thread (if any)
+	so_cancel(s);
+
+	//unblock async thread if it was waiting
+	pThreadInfo->u.asyncselect.asyncSem->post();
+   }
+   asyncThreadMutex.leave();
+   return(pThreadInfo != NULL);
+}
+//******************************************************************************
 //******************************************************************************
 void EnableAsyncEvent(SOCKET s, ULONG flags)
 {
+ PASYNCTHREADPARM pThreadInfo;
+
+   asyncThreadMutex.enter();
+   pThreadInfo = FindAsyncEvent(s);
+   if(pThreadInfo) {
+	pThreadInfo->u.asyncselect.lEventsPending |= (pThreadInfo->u.asyncselect.lEvents & flags);
+	//cancel pending select in async select thread (if any)
+	so_cancel(s);
+
+	//unblock async thread if it was waiting
+	pThreadInfo->u.asyncselect.asyncSem->post();
+   }
+   asyncThreadMutex.leave();
 }
 //******************************************************************************
 //******************************************************************************
 BOOL QueryAsyncEvent(SOCKET s, HWND *pHwnd, int *pMsg, ULONG *plEvent)
 {
-   return FALSE;
+ PASYNCTHREADPARM pThreadInfo;
+
+   asyncThreadMutex.enter();
+   pThreadInfo = FindAsyncEvent(s);
+   if(pThreadInfo) {
+	*pHwnd   = pThreadInfo->hwnd;
+	*pMsg    = pThreadInfo->msg;
+	*plEvent = pThreadInfo->u.asyncselect.lEvents;
+   }
+   asyncThreadMutex.leave();
+   return(pThreadInfo != NULL);
 }
 //******************************************************************************
 //******************************************************************************
