@@ -1,4 +1,4 @@
-/* $Id: virtual.cpp,v 1.11 1999-08-27 16:51:01 sandervl Exp $ */
+/* $Id: virtual.cpp,v 1.12 1999-09-01 19:12:18 phaller Exp $ */
 
 /*
  * Win32 virtual memory functions
@@ -49,8 +49,8 @@ HANDLE WINAPI CreateFileMappingA(
  *             CreateFileMapping32W   (KERNEL32.47)
  * See CreateFileMapping32A
  */
-HANDLE WINAPI CreateFileMappingW( HFILE hFile, LPSECURITY_ATTRIBUTES attr, 
-                                      DWORD protect, DWORD size_high,  
+HANDLE WINAPI CreateFileMappingW( HFILE hFile, LPSECURITY_ATTRIBUTES attr,
+                                      DWORD protect, DWORD size_high,
                                       DWORD size_low, LPCWSTR name )
 {
     LPSTR nameA = HEAP_strdupWtoA( GetProcessHeap(), 0, name );
@@ -106,7 +106,7 @@ LPVOID WINAPI MapViewOfFile(
               DWORD offset_high, /* [in] High-order 32 bits of file offset */
               DWORD offset_low,  /* [in] Low-order 32 bits of file offset */
               DWORD count        /* [in] Number of bytes to map */
-) 
+)
 {
     return MapViewOfFileEx( mapping, access, offset_high,
                             offset_low, count, NULL );
@@ -128,7 +128,7 @@ LPVOID WINAPI MapViewOfFileEx(
               DWORD offset_low,  /* [in] Low-order 32 bits of file offset */
               DWORD count,       /* [in] Number of bytes to map */
               LPVOID addr        /* [in] Suggested starting address for mapped view */
-) 
+)
 {
   return HMMapViewOfFileEx(handle, access, offset_high, offset_low, count, addr);
 }
@@ -145,7 +145,7 @@ LPVOID WINAPI MapViewOfFileEx(
 BOOL WINAPI FlushViewOfFile(
               LPCVOID base, /* [in] Start address of byte range to flush */
               DWORD cbFlush /* [in] Number of bytes in range */
-) 
+)
 {
  Win32MemMap *map;
  DWORD offset;
@@ -176,7 +176,7 @@ BOOL WINAPI FlushViewOfFile(
  *	FALSE: Failure
  */
 BOOL WINAPI UnmapViewOfFile(LPVOID addr /* [in] Address where mapped view begins */
-) 
+)
 {
  Win32MemMap *map;
  Win32MemMapView *view;
@@ -200,14 +200,14 @@ BOOL WINAPI UnmapViewOfFile(LPVOID addr /* [in] Address where mapped view begins
  *             VIRTUAL_MapFileW
  *
  * Helper function to map a file to memory:
- *  name			-	file name 
+ *  name			-	file name
  *  [RETURN] ptr		-	pointer to mapped file
  */
 HANDLE WINAPI VIRTUAL_MapFileW( LPCWSTR name , LPVOID *lpMapping)
 {
     HANDLE hFile, hMapping = -1;
 
-    hFile = CreateFileW( name, GENERIC_READ, FILE_SHARE_READ, NULL, 
+    hFile = CreateFileW( name, GENERIC_READ, FILE_SHARE_READ, NULL,
                            OPEN_EXISTING, FILE_FLAG_RANDOM_ACCESS, 0);
     if (hFile != INVALID_HANDLE_VALUE)
     {
@@ -225,14 +225,14 @@ HANDLE WINAPI VIRTUAL_MapFileW( LPCWSTR name , LPVOID *lpMapping)
  *             VIRTUAL_MapFileA
  *
  * Helper function to map a file to memory:
- *  name			-	file name 
+ *  name			-	file name
  *  [RETURN] ptr		-	pointer to mapped file
  */
 HANDLE WINAPI VIRTUAL_MapFileA( LPCSTR name , LPVOID *lpMapping)
 {
     HANDLE hFile, hMapping = -1;
 
-    hFile = CreateFileA(name, GENERIC_READ, FILE_SHARE_READ, NULL, 
+    hFile = CreateFileA(name, GENERIC_READ, FILE_SHARE_READ, NULL,
                         OPEN_EXISTING, FILE_FLAG_RANDOM_ACCESS, 0);
     if (hFile != INVALID_HANDLE_VALUE)
     {
@@ -253,7 +253,7 @@ LPVOID WIN32API VirtualAlloc(LPVOID lpvAddress, DWORD cbSize, DWORD fdwAllocatio
 {
  PVOID Address = lpvAddress;
  ULONG flag = 0, base;
- APIRET rc;
+ DWORD rc;
 
   dprintf(("VirtualAlloc at %X; %d bytes, fAlloc %d, fProtect %d\n", (int)lpvAddress, cbSize, fdwAllocationType, fdwProtect));
 
@@ -359,7 +359,7 @@ LPVOID WIN32API VirtualAlloc(LPVOID lpvAddress, DWORD cbSize, DWORD fdwAllocatio
 //******************************************************************************
 BOOL WIN32API VirtualFree(LPVOID lpvAddress, DWORD cbSize, DWORD FreeType)
 {
- APIRET rc;
+ DWORD rc;
 
   dprintf(("VirtualFree at %d; %d bytes, freetype %d\n", (int)lpvAddress, cbSize, FreeType));
 
@@ -389,7 +389,7 @@ BOOL WIN32API VirtualFree(LPVOID lpvAddress, DWORD cbSize, DWORD FreeType)
 BOOL WIN32API VirtualProtect(LPVOID lpvAddress, DWORD cbSize, DWORD fdwNewProtect,
                              DWORD *pfdwOldProtect)
 {
- APIRET rc;
+ DWORD rc;
  ULONG  pageFlags = 0;
  int npages;
 
@@ -459,12 +459,12 @@ DWORD WIN32API VirtualQuery(LPCVOID lpvAddress, LPMEMORY_BASIC_INFORMATION pmbiB
                             DWORD cbLength)
 {
  ULONG  cbRangeSize, dAttr;
- APIRET rc;
+ DWORD rc;
 
   if(lpvAddress == NULL || pmbiBuffer == NULL || cbLength == 0) {
    	return 0;
   }
-  
+
   cbRangeSize = cbLength & ~0xFFF;
   if(cbLength & 0xFFF) {
 	cbRangeSize += PAGE_SIZE;

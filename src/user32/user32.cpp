@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.22 1999-08-31 14:37:27 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.23 1999-09-01 19:12:18 phaller Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -1282,7 +1282,7 @@ HWND WIN32API ChildWindowFromPoint( HWND arg1, POINT  arg2)
  *****************************************************************************/
 
 
-HWND WIN32API ChildWindowFromPointEx (HWND hwndParent, POINT pt, UINT uFlags) 
+HWND WIN32API ChildWindowFromPointEx (HWND hwndParent, POINT pt, UINT uFlags)
 {
         RECT rect;
         HWND hWnd;
@@ -1898,7 +1898,7 @@ BOOL WIN32API EqualRect( const RECT * arg1, const RECT *  arg2)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API ExcludeUpdateRgn( HDC arg1, HWND  arg2)
+INT WIN32API ExcludeUpdateRgn( HDC arg1, HWND  arg2)
 {
 #ifdef DEBUG
     WriteLog("USER32:  ExcludeUpdateRgn\n");
@@ -2762,7 +2762,7 @@ BOOL WIN32API ScrollWindow( HWND arg1, int arg2, int arg3, const RECT * arg4, co
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API ScrollWindowEx( HWND arg1, int arg2, int arg3, const RECT * arg4, const RECT * arg5, HRGN arg6, PRECT arg7, UINT  arg8)
+INT WIN32API ScrollWindowEx( HWND arg1, int arg2, int arg3, const RECT * arg4, const RECT * arg5, HRGN arg6, PRECT arg7, UINT  arg8)
 {
 #ifdef DEBUG
     WriteLog("USER32:  ScrollWindowEx\n");
@@ -4421,7 +4421,8 @@ UINT WIN32API GetKBCodePage(VOID)
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
 
-BOOL WIN32API GetKeyboardLayoutNameA(LPTSTR pwszKLID)
+//@@@PH Win32 BOOLs are casted to INTs.
+INT WIN32API GetKeyboardLayoutNameA(LPTSTR pwszKLID)
 {
   dprintf(("USER32:GetKeyboardLayoutNameA (%08x) not implemented.",
          pwszKLID));
@@ -4445,7 +4446,8 @@ BOOL WIN32API GetKeyboardLayoutNameA(LPTSTR pwszKLID)
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
 
-BOOL WIN32API GetKeyboardLayoutNameW(LPWSTR pwszKLID)
+//@@@PH Win32 BOOLs are casted to INTs.
+INT  WIN32API GetKeyboardLayoutNameW(LPWSTR pwszKLID)
 {
   dprintf(("USER32:GetKeyboardLayoutNameW (%08x) not implemented.",
          pwszKLID));
@@ -4905,7 +4907,8 @@ int WIN32API MessageBoxExW(HWND    hWnd,
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
 
-BOOL WIN32API MessageBoxIndirectW(LPMSGBOXPARAMSW lpMsgBoxParams)
+//@@@PH Win32 BOOLs are casted to INTs.
+INT  WIN32API MessageBoxIndirectW(LPMSGBOXPARAMSW lpMsgBoxParams)
 {
   dprintf(("USER32:MessageBoxIndirectW (%08x) not implemented.\n",
          lpMsgBoxParams));
@@ -4929,7 +4932,8 @@ BOOL WIN32API MessageBoxIndirectW(LPMSGBOXPARAMSW lpMsgBoxParams)
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
 
-BOOL WIN32API MessageBoxIndirectA(LPMSGBOXPARAMSA lpMsgBoxParams)
+//@@@PH Win32 BOOLs are casted to INTs.
+INT  WIN32API MessageBoxIndirectA(LPMSGBOXPARAMSA lpMsgBoxParams)
 {
   dprintf(("USER32:MessageBoxIndirectA (%08x) not implemented.\n",
          lpMsgBoxParams));

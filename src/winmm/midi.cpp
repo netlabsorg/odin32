@@ -1,4 +1,4 @@
-/* $Id: midi.cpp,v 1.5 1999-08-24 21:21:11 phaller Exp $ */
+/* $Id: midi.cpp,v 1.6 1999-09-01 19:12:23 phaller Exp $ */
 
 /*
  * RTMIDI code
@@ -960,8 +960,8 @@ MidiIn::~MidiIn()
 MMRESULT MidiIn::open()
 {
    // Enable Appl instance to receive and the hardware instance to send
-   iAppInstance->enableReceive( TRUE );
-   iHwdInstance->enableSend( TRUE );
+   iAppInstance->enableReceive( (ULONG)TRUE );
+   iHwdInstance->enableSend( (ULONG)TRUE );
 
    // Link the two instances
    iHwdInstance->addLink( iAppInstance );
@@ -1111,8 +1111,8 @@ MMRESULT MidiOut::open()
 {
    dprintf(( "WINMM: MidiOut::open(%s)\n",iHwdInstance->name()));
    // Enable Appl instance to send and the hwd instance to receive
-   iAppInstance->enableSend( TRUE );
-   iHwdInstance->enableReceive( TRUE );
+   iAppInstance->enableSend( (ULONG)TRUE );
+   iHwdInstance->enableReceive( (ULONG)TRUE );
 
    // Link the two instances
    iAppInstance->addLink( iHwdInstance );

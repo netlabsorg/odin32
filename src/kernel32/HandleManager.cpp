@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.19 1999-08-31 23:48:36 phaller Exp $ */
+/* $Id: HandleManager.cpp,v 1.20 1999-09-01 19:12:16 phaller Exp $ */
 
 /*
  *
@@ -82,7 +82,7 @@ typedef struct _HMDEVICE
 {
   struct _HMDEVICE *pNext;                /* pointer to next device in chain */
 
-  PSZ             pszDeviceName;       /* name or alias of the pseudo-device */
+  LPSTR           pszDeviceName;       /* name or alias of the pseudo-device */
   HMDeviceHandler *pDeviceHandler;         /* handler for this pseudo-device */
 } HMDEVICE, *PHMDEVICE;
 
@@ -132,7 +132,7 @@ struct _HMGlobals
  *****************************************************************************/
 
                         /* get appropriate device handler by the device name */
-static HMDeviceHandler*  _Optlink _HMDeviceFind(PSZ pszDeviceName);
+static HMDeviceHandler*  _Optlink _HMDeviceFind(LPSTR pszDeviceName);
 
                                /* get next free handle from the handle table */
 static ULONG            _Optlink _HMHandleGetFree(void);
@@ -155,7 +155,7 @@ static ULONG            _Optlink _HMHandleQuery(HANDLE hHandle);
  * Author    : Patrick Haller [Wed, 1998/02/11 20:42]
  *****************************************************************************/
 
-static HMDeviceHandler *_HMDeviceFind (PSZ pszDeviceName)
+static HMDeviceHandler *_HMDeviceFind (LPSTR pszDeviceName)
 {
   PHMDEVICE pHMDevice;                     /* iterator over the device table */
 
@@ -246,7 +246,7 @@ static ULONG _HMHandleQuery(HANDLE hHandle)
  * Author    : Patrick Haller [Wed, 1998/02/12 20:44]
  *****************************************************************************/
 
-DWORD   HMDeviceRegister(PSZ             pszDeviceName,
+DWORD   HMDeviceRegister(LPSTR           pszDeviceName,
                          HMDeviceHandler *pDeviceHandler)
 {
   PHMDEVICE pHMDevice;                     /* our new device to be allocated */
@@ -766,7 +766,7 @@ HFILE HMCreateFile(LPCSTR lpFileName,
   }
   else
   {
-    pDeviceHandler = _HMDeviceFind((PSZ)lpFileName);          /* find device */
+    pDeviceHandler = _HMDeviceFind((LPSTR)lpFileName);        /* find device */
 
     if (NULL == pDeviceHandler)                /* this name is unknown to us */
     {
@@ -899,7 +899,7 @@ HANDLE HMOpenFile(LPCSTR    lpFileName,
   DWORD           rc;                                     /* API return code */
 
 
-  pDeviceHandler = _HMDeviceFind((PSZ)lpFileName);            /* find device */
+  pDeviceHandler = _HMDeviceFind((LPSTR)lpFileName);          /* find device */
   if (NULL == pDeviceHandler)                  /* this name is unknown to us */
   {
     SetLastError(ERROR_FILE_NOT_FOUND);
