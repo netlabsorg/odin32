@@ -1,4 +1,4 @@
-/* $Id: heapshared.cpp,v 1.5 2000-03-10 16:11:58 sandervl Exp $ */
+/* $Id: heapshared.cpp,v 1.6 2000-06-14 02:27:33 phaller Exp $ */
 /*
  * Shared heap functions for OS/2
  *
@@ -133,7 +133,9 @@ void * _LNK_CONV getmoreShared(Heap_t pHeap, size_t *size, int *clean)
           *clean));
 
   /* round the size up to a multiple of 4K */
-  *size = (*size / 4096) * 4096 + 4096;
+  // *size = (*size / 4096) * 4096 + 4096;
+  // @@@PH speed improvement
+  *size = (*size + 4096) & 0xFFFFF000;
   *size = max(*size, INCR_HEAPSIZE);
 
   for(int i=0;i<MAX_HEAPPAGES;i++)
