@@ -1,8 +1,9 @@
-/* $Id: changelog,v 1.2027 2002-03-22 12:52:06 sandervl Exp $ */
+/* $Id: changelog,v 1.2028 2002-03-22 13:49:25 sandervl Exp $ */
 
  2002-03-22: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Removed FindResource hooks
     - USER32:   o Added LoadImageW hook for custom builds
+    - DDRAW:    o Do not use XFree driver unless fullscreen mode is enabled
 
  2002-03-22: Yuri Dario <mc6530@mclink.it>
     - USER32:   o EnumThreadWindows fix (necessary due to recent process &
