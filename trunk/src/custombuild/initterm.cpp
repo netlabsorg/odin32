@@ -100,7 +100,7 @@ ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
          /* A DosExitList routine must be used to clean up if runtime calls */
          /* are required and the runtime is dynamically linked.             */
          /*******************************************************************/
-         rc = DosExitList(EXITLIST_ODINCRT|EXLST_ADD, cleanup);
+         rc = DosExitList(EXITLIST_KERNEL32|EXLST_ADD, cleanup);
          if(rc)
                 return 0UL;
 
