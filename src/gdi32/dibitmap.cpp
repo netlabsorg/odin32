@@ -1,4 +1,4 @@
-/* $Id: dibitmap.cpp,v 1.5 2000-03-16 19:18:14 sandervl Exp $ */
+/* $Id: dibitmap.cpp,v 1.6 2000-03-24 19:24:47 sandervl Exp $ */
 
 /*
  * GDI32 dib & bitmap code
@@ -68,7 +68,7 @@ HBITMAP WIN32API CreateBitmap(int nWidth, int nHeight, UINT cPlanes,
  HBITMAP rc;
 
     rc = O32_CreateBitmap(nWidth, nHeight, cPlanes, cBitsPerPel, lpvBits);
-    dprintf(("GDI32: CreateBitmap (%d,%d) bps %d returned %d\n", nWidth, nHeight, cBitsPerPel, rc));
+    dprintf(("GDI32: CreateBitmap (%d,%d) bps %d returned %x", nWidth, nHeight, cBitsPerPel, rc));
     return(rc);
 }
 //******************************************************************************
