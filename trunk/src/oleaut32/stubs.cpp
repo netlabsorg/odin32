@@ -1,4 +1,4 @@
-/* $Id: stubs.cpp,v 1.9 2001-07-12 17:16:12 sandervl Exp $ */
+/* $Id: stubs.cpp,v 1.10 2001-08-10 19:22:25 sandervl Exp $ */
 /* 
  * Win32 COM/OLE stubs for OS/2
  * 
@@ -168,7 +168,7 @@ HRESULT WIN32API VarUI1FromDisp(IDispatch * pdispIn, LCID lcid, BYTE * pbOut)
 
 //*****************************************************************************
 //*****************************************************************************
-HRESULT WINAPI DispCallFunc(void* pvInstance, ULONG oVft, CALLCONV_OLE2 cc,
+HRESULT WINAPI DispCallFunc(void* pvInstance, ULONG oVft, CALLCONV cc,
             VARTYPE vtReturn, UINT  cActuals, VARTYPE* prgvt,
             VARIANTARG** prgpvarg, VARIANT* pvargResult)
 {
