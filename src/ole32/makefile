@@ -1,10 +1,8 @@
-# $Id: makefile,v 1.3 1999-06-10 17:05:54 phaller Exp $
-
 #
-# PD-Win32 API
+# PD-Win32 API 
 #
 #	ole32.dll makefile
-#
+# 
 
 PDWIN32_INCLUDE = ..\..\include
 PDWIN32_LIB = ..\..\lib
@@ -20,14 +18,23 @@ CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
 
 TARGET = ole32
 
-OBJS =  ole32.obj initterm.obj
+OBJS =  ole32.obj \
+	initterm.obj \
+	oString.obj \
+	clsid.obj \
+	guid.obj \
+	initialise.obj \
+	stubs.obj
 
 all: $(TARGET).dll $(TARGET).lib
 
 
-$(TARGET).dll: $(OBJS) $(TARGET).def
+$(TARGET).dll: $(OBJS) $(TARGET).def 
 	$(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) $(TARGET).def \
-              $(PDWIN32_LIB)/pmwinx.lib $(PDWIN32_LIB)/kernel32.lib
+              $(PDWIN32_LIB)\pmwinx.lib \
+              $(PDWIN32_LIB)\ntdll.lib \
+              $(PDWIN32_LIB)\advapi32.lib \
+              $(PDWIN32_LIB)\kernel32.lib
 	$(CP) $@ $(PDWIN32_BIN)
 
 
@@ -36,10 +43,13 @@ $(TARGET).lib: $(TARGET).dll
 	$(CP) $@ $(PDWIN32_LIB)
 
 
-
-
-ole32.obj: ole32.cpp ole32.h
-initterm.obj: initterm.cpp
+oString.obj:	oString.cpp 
+ole32.obj:	ole32.cpp 
+initialise.obj:	initialise.cpp 
+clsid.obj:	clsid.cpp 
+guid.obj:	guid.cpp 
+stubs.obj:	stubs.cpp 
+initterm.obj:	initterm.c
 
 
 clean:
