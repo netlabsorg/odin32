@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.106 2000-10-23 13:42:47 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.107 2000-11-05 13:40:47 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -790,10 +790,10 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HANDLE hFile, DWORD dwFla
      *      Endif
      *  Endif
      */
-    //only call Open32 if LX binary or win32k process
+    //only call OS/2 if LX binary or win32k process
     if(!fPeLoader || fPE != ERROR_SUCCESS)
     {
-        hDll = O32_LoadLibrary(szModname);
+        hDll = OSLibDosLoadModule(szModname);
         if (hDll)
         {
             /* OS/2 dll, system dll, converted dll or win32k took care of it. */
@@ -817,11 +817,11 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HANDLE hFile, DWORD dwFla
             else
                 return hDll; //happens when LoadLibrary is called in kernel32's initterm (nor harmful)
 
-            dprintf(("KERNEL32: LoadLibraryExA(%s, 0x%x, 0x%x): returns 0x%x. Loaded %s using O32_LoadLibrary.",
+            dprintf(("KERNEL32: LoadLibraryExA(%s, 0x%x, 0x%x): returns 0x%x. Loaded %s using DosLoadModule.",
                      lpszLibFile, hFile, dwFlags, hDll, szModname));
             return pModule->getInstanceHandle();
         }
-        dprintf(("KERNEL32: LoadLibraryExA(%s, 0x%x, 0x%x): O32_LoadLibrary(%s) failed. LastError=%d",
+        dprintf(("KERNEL32: LoadLibraryExA(%s, 0x%x, 0x%x): DosLoadModule (%s) failed. LastError=%d",
                  lpszLibFile, hFile, dwFlags, szModname, GetLastError()));
     }
     else
