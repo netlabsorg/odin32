@@ -1,4 +1,4 @@
-/* $Id: CmdQd.c,v 1.6 2001-09-04 13:29:49 bird Exp $
+/* $Id: CmdQd.c,v 1.7 2001-09-30 05:26:52 bird Exp $
  *
  * Command Queue Daemon / Client.
  *
@@ -266,8 +266,8 @@ char*fileNormalize(char *pszFilename, char *pszCurDir);
 APIRET fileExist(const char *pszFilename);
 int  Submit(int rcIgnore);
 int  Wait(void);
+int  QueryRunning(void);
 int  Kill(void);
-
 /* shared memory helpers */
 int  shrmemCreate(void);
 int  shrmemOpen(void);
@@ -317,6 +317,10 @@ int main(int argc, char **argv)
     else if (!stricmp(argv[1], "wait"))
     {
         return Wait();
+    }
+    else if (!strcmp(argv[1], "queryrunning"))
+    {
+        return QueryRunning();
     }
     else if (!strcmp(argv[1], "kill"))
     {
@@ -377,6 +381,9 @@ void syntax(void)
         "    kill\n"
         "        Kills the daemon. Daemon will automatically die after\n"
         "        idling for some time.\n"
+        "    queryrunning\n"
+        "        Checks if the daemon is running.\n"
+        "        rc = 0 if running; rc != 0 if not running.\n"
         "\n"
         "Copyright (c) 2001 knut st. osmundsen (kosmunds@csc.com)\n"
         );
@@ -1360,6 +1367,22 @@ int Wait(void)
 
     rc = pShrMem->u1.WaitResponse.rc;
     shrmemFree();
+    return rc;
+}
+
+
+/**
+ * Checks if the daemon is running.
+ */
+int QueryRunning(void)
+{
+    APIRET rc;
+    rc = DosGetNamedSharedMem((PPVOID)(PVOID)&pShrMem,
+                              SHARED_MEM_NAME,
+                              PAG_READ | PAG_WRITE);
+    if (!rc)
+        DosFreeMem(pShrMem);
+
     return rc;
 }
 
