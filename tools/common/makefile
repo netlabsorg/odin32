@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.8 2000-11-19 08:29:54 bird Exp $
+# $Id: makefile,v 1.9 2000-11-21 04:37:23 bird Exp $
 
 #
 # PD-Win32 API
@@ -11,62 +11,89 @@
 #            clean: Back to a "virgin" state.
 #            dep: Creates the .depend file.
 #            needed: Builds the tools used during compilation of the src tree.
-#            commonicc.lib: Build the IBM VA for C++ version of the library.
-#            commongcc.a:   Build the gcc version of the library - aout
-#            commongcc.lib: Build the gcc version of the library - OMF.
+#            common.lib or libs: Make common.lib.
+#            kDef2Wat.exe: kDef2Wat.exe
+#            kDump.exe: kDump.exe
 #
 #
 
+
+#
+# Compiler, tools, and interference rules.
+#
 !include ..\..\include\pdwin32.mk
 
 
-all:    commonicc.lib commongcc.a commongcc.lib \
+#
+# All rule.
+#
+all:    $(OBJDIR)\common.lib \
+!ifdef GCC
+        $(OBJDIR)\common.a \
+!endif
         $(PDWIN32_TOOLS)\kDef2Wat.exe
 #        $(PDWIN32_TOOLS)\kDump.exe
 
 
-needed: commonicc.lib $(PDWIN32_TOOLS)\kDef2Wat.exe
+#
+# The neede tools
+#
+needed:     $(OBJDIR)\common.lib \
+            $(PDWIN32_TOOLS)\kDef2Wat.exe
 
 
-commonicc.lib: dummy
+#
+# The library.
+#
+libs $(OBJDIR)\common.lib: force
     -@echo $@
-    @$(MAKE_CMD) -f makefile.icc
+    @$(MAKE_CMD) -f common.mak all
 
-commongcc.a: dummy
+#
+# The Aout library.
+#
+$(OBJDIR)\common.a: force
     -@echo $@
-    @$(MAKE_CMD) OMF=0 -f makefile.gcc
+    @$(MAKE_CMD) OMF=1 -f common.mak all
 
-commongcc.lib: dummy
+
+#
+# Tools.
+#
+$(PDWIN32_TOOLS)\kDump.exe    $(OBJDIR)\kDump.exe    kDump.exe \
+$(PDWIN32_TOOLS)\kDef2Wat.exe $(OBJDIR)\kDef2Wat.exe kDef2Wat.exe : force
     -@echo $@
-    @$(MAKE_CMD) OMF=1 -f makefile.gcc
+    @$(MAKE_CMD) -f $(@B).mak all
 
 
-$(PDWIN32_TOOLS)\kDump.exe $(OBJDIR)\kDump.exe kDump.exe: dummy
-    -@echo $@
-    @$(MAKE_CMD) -f makefile.icc $@
+#
+# Clean rule.
+#
+clean:
+    $(MAKE_CMD) -f common.mak clean
+    $(MAKE_CMD) -f kDef2Wat.mak clean
+    $(MAKE_CMD) -f kDump.mak clean
 
 
-$(PDWIN32_TOOLS)\kDef2Wat.exe $(OBJDIR)\kDef2Wat.exe kDef2Wat.exe: dummy
-    -@echo $@
-    @$(MAKE_CMD) -f makefile.icc $@
+#
+# Dep rule - makes depenencies for C, C++ and Asm files.
+#
+dep:
+    $(DEPEND) $(CINCLUDES) *.c *.cpp *.h *.asm *.inc \
+        *.rc *.dlg $(PDWIN32_INCLUDE)\*.h -robj *.orc \
+        -objo    *.c *.cpp \
+        -objgobj *.c *.cpp
 
 
-#a simple hack to make nmake process the target.
-dummy:
+#
+# A simple hack to make nmake process the target.
+#
+force:
      -@echo ...
 
 
-clean:
-    @$(MAKE_CMD) -f makefile.icc clean
-    @$(MAKE_CMD) OMF=0 -f makefile.gcc clean
-    @$(MAKE_CMD) OMF=1 -f makefile.gcc clean
-
-
-dep:
-    $(DEPEND) -I$(PDWIN32_INCLUDE);$(PDWIN32_INCLUDE)\win \
-        *.h *.asm *.inc $(PDWIN32_INCLUDE)\*.h *.c *.cpp -objo *.c *.cpp -objgobj *.c *.cpp
-
 #
-# Do not includes the common rules.
+# Lib rule - dummy rule
 #
+lib:
 
