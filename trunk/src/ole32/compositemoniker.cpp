@@ -1,4 +1,4 @@
-/* $Id: compositemoniker.cpp,v 1.1 1999-09-24 21:49:42 davidr Exp $ */
+/* $Id: compositemoniker.cpp,v 1.2 2000-09-14 14:57:01 davidr Exp $ */
 /* 
  * CompositeMonikers functions.
  * 
@@ -13,7 +13,7 @@
 #include "ole32.h"
 #include "debugtools.h"
 
-DEFAULT_DEBUG_CHANNEL(ole)
+DEFAULT_DEBUG_CHANNEL(moniker)
 
 #define  BLOCK_TAB_SIZE 5 /* represent the first size table and it's increment block size */
 
@@ -41,7 +41,7 @@ typedef struct CompositeMonikerImpl{
 /* EnumMoniker data structure */
 typedef struct EnumMonikerImpl{
 
-    ICOM_VTABLE(IEnumMoniker)*  lpvtbl;  /* VTable relative to the IEnumMoniker interface.*/
+    ICOM_VFIELD(IEnumMoniker);  /* VTable relative to the IEnumMoniker interface.*/
 
     ULONG ref; /* reference counter for this object */
 
@@ -284,10 +284,10 @@ HRESULT WINAPI CompositeMonikerImpl_IsDirty(IMoniker* iface)
  ******************************************************************************/
 HRESULT WINAPI CompositeMonikerImpl_Load(IMoniker* iface,IStream* pStm)
 {
-    HRESULT res;
-    DWORD constant;
-    CLSID clsid;
-    WCHAR string[1]={0};
+    HRESULT	res;
+    CLSID	clsid;
+    WCHAR	string[1]={0};
+    ULONG	countMoniker;
     
     ICOM_THIS(CompositeMonikerImpl,iface);    
 
@@ -295,62 +295,53 @@ HRESULT WINAPI CompositeMonikerImpl_Load(IMoniker* iface,IStream* pStm)
 
     /* this function call OleLoadFromStream function for each moniker within this object */
 
-    /* read the a constant writen by CompositeMonikerImpl_Save (see CompositeMonikerImpl_Save for more details)*/
-    res=IStream_Read(pStm,&constant,sizeof(DWORD),NULL);
+    /* read the number of monikers within the composite moniker*/
+    res=IStream_Read(pStm,&countMoniker,sizeof(countMoniker),NULL);
 
-    if (SUCCEEDED(res)&& constant!=3)
-        return E_FAIL;
-
-    while(1){
+    for(This->tabLastIndex=0; This->tabLastIndex < countMoniker; This->tabLastIndex++)
+    {
 #if 0
         res=OleLoadFromStream(pStm,&IID_IMoniker,(void**)&This->tabMoniker[This->tabLastIndex]);
 #endif
         res=ReadClassStm(pStm,&clsid);
-        printf("res=%ld",res);
-        if (FAILED(res))
-            break;
 
-        if (IsEqualIID(&clsid,&CLSID_FileMoniker)){
+        if (FAILED(res))
+            return res;
+
+        if (IsEqualIID(&clsid,&CLSID_FileMoniker))
+        {
             res=CreateFileMoniker(string,&This->tabMoniker[This->tabLastIndex]);
             if (FAILED(res))
-                break;
-            res=IMoniker_Load(This->tabMoniker[This->tabLastIndex],pStm);
-            if (FAILED(res))
-                break;
+                return res;
         }
-        else if (IsEqualIID(&clsid,&CLSID_ItemMoniker)){
+        else if (IsEqualIID(&clsid,&CLSID_ItemMoniker))
+        {
             CreateItemMoniker(string,string,&This->tabMoniker[This->tabLastIndex]);
-            if (res!=S_OK)
-                break;
-            IMoniker_Load(This->tabMoniker[This->tabLastIndex],pStm);
             if (FAILED(res))
-                break;
+                return res;
         }
-        else if (IsEqualIID(&clsid,&CLSID_AntiMoniker)){
+        else if (IsEqualIID(&clsid,&CLSID_AntiMoniker))
+        {
             CreateAntiMoniker(&This->tabMoniker[This->tabLastIndex]);
             if (FAILED(res))
-                break;
-            IMoniker_Load(This->tabMoniker[This->tabLastIndex],pStm);
-            if (FAILED(res))
-                break;
+                return res;
         }
-        else if (IsEqualIID(&clsid,&CLSID_CompositeMoniker))
+        else
             return E_FAIL;
 
-        else{
-            FIXME("()");
-            break;
-            return E_NOTIMPL;
-        }
+	res=IMoniker_Load(This->tabMoniker[This->tabLastIndex],pStm);
+	if (FAILED(res))
+	    return res;
 
         /* resize the table if needed */
-        if (++This->tabLastIndex==This->tabSize){
+        if (This->tabLastIndex==This->tabSize){
                 
             This->tabSize+=BLOCK_TAB_SIZE;
-            This->tabMoniker=(IMoniker**)HeapReAlloc(GetProcessHeap(),0,This->tabMoniker,This->tabSize*sizeof(IMoniker));
+            This->tabMoniker=(IMoniker**)HeapReAlloc(
+		GetProcessHeap(),0,This->tabMoniker,This->tabSize*sizeof(IMoniker));
 
             if (This->tabMoniker==NULL)
-            return E_OUTOFMEMORY;
+		return E_OUTOFMEMORY;
         }
     }
 
@@ -365,15 +356,15 @@ HRESULT WINAPI CompositeMonikerImpl_Save(IMoniker* iface,IStream* pStm,BOOL fCle
     HRESULT res;
     IEnumMoniker *enumMk;
     IMoniker *pmk;
-    DWORD constant=3;
+
+    ICOM_THIS(CompositeMonikerImpl,iface);
     
     TRACE("(%p,%p,%d)\n",iface,pStm,fClearDirty);
 
     /* this function call OleSaveToStream function for each moniker within this object */
 
-    /* when I tested this function in windows system ! I usually found this constant in the begining of */
-    /* the stream  I dont known why (there's no indication in specification) ! */
-    res=IStream_Write(pStm,&constant,sizeof(constant),NULL);
+    /* write the number of monikers within the composite moniker*/
+    res=IStream_Write(pStm,&(This->tabLastIndex),sizeof(This->tabLastIndex),NULL);
 
     IMoniker_Enum(iface,TRUE,&enumMk);
 
@@ -409,10 +400,10 @@ HRESULT WINAPI CompositeMonikerImpl_GetSizeMax(IMoniker* iface,ULARGE_INTEGER* p
 
     TRACE("(%p,%p)\n",iface,pcbSize);
 
-    if (pcbSize!=NULL)
+    if (pcbSize==NULL)
         return E_POINTER;
 
-    pcbSize->LowPart =0;
+    pcbSize->LowPart =sizeof(DWORD) + 48;
     pcbSize->HighPart=0;
 
     IMoniker_Enum(iface,TRUE,&enumMk);
@@ -423,7 +414,7 @@ HRESULT WINAPI CompositeMonikerImpl_GetSizeMax(IMoniker* iface,ULARGE_INTEGER* p
 
         IMoniker_Release(pmk);
 
-        pcbSize->LowPart +=ptmpSize.LowPart;
+        pcbSize->LowPart +=ptmpSize.LowPart;	// FIXME - 64bit Math
         pcbSize->HighPart+=ptmpSize.HighPart;
     }
 
@@ -431,6 +422,40 @@ HRESULT WINAPI CompositeMonikerImpl_GetSizeMax(IMoniker* iface,ULARGE_INTEGER* p
 
     return S_OK;
 }
+
+#if 0
+/******************************************************************************
+ *         CompositeMonikerImpl_GetSizeToSave (Local)
+ *******************************************************************************/
+HRESULT CompositeMonikerImpl_GetSizeToSave(IMoniker* iface,ULARGE_INTEGER* pcbSize)
+{
+    IEnumMoniker *enumMk;
+    IMoniker *pmk;
+    HRESULT hRes;
+    ULARGE_INTEGER ptmpSize;
+
+    if (pcbSize==NULL)
+        return E_POINTER;
+
+    pcbSize->LowPart = sizeof(DWORD);
+    pcbSize->HighPart=0;
+
+    IMoniker_Enum(iface,TRUE,&enumMk);
+
+    while((hRes = IEnumMoniker_Next(enumMk,1,&pmk,NULL))==S_OK){
+
+        GetSizeToSaveMoniker(pmk,&ptmpSize);
+        IMoniker_Release(pmk);
+
+        pcbSize->LowPart +=ptmpSize.LowPart;	// FIXME - 64bit math
+        pcbSize->HighPart+=ptmpSize.HighPart;
+    }
+    IEnumMoniker_Release(enumMk);
+
+    return S_OK;
+}
+#endif
+
 
 /******************************************************************************
  *         Composite-Moniker_Construct (local function)
@@ -1508,9 +1533,8 @@ ULONG   WINAPI EnumMonikerImpl_AddRef(IEnumMoniker* iface)
 ULONG   WINAPI EnumMonikerImpl_Release(IEnumMoniker* iface)
 {
     ICOM_THIS(EnumMonikerImpl,iface);
-    ULONG i
-        ;
-    TRACE("(%p)\n",This);
+
+    ULONG i;
 
     This->ref--;
 
@@ -1609,13 +1633,13 @@ HRESULT WINAPI EnumMonikerImpl_CreateEnumMoniker(IMoniker** tabMoniker,
         return E_INVALIDARG;
     
     /* Initialize the virtual function table. */
-    newEnumMoniker->lpvtbl      = &VT_EnumMonikerImpl;
-    newEnumMoniker->ref          = 0;
+    ICOM_VTBL(newEnumMoniker)  = &VT_EnumMonikerImpl;
+    newEnumMoniker->ref        = 0;
 
-    newEnumMoniker->tabSize=tabSize;
-    newEnumMoniker->currentPos=currentPos;
+    newEnumMoniker->tabSize    = tabSize;
+    newEnumMoniker->currentPos = currentPos;
 
-    newEnumMoniker->tabMoniker=(IMoniker**)HeapAlloc(GetProcessHeap(),0,tabSize*sizeof(IMoniker));
+    newEnumMoniker->tabMoniker =(IMoniker**)HeapAlloc(GetProcessHeap(),0,tabSize*sizeof(IMoniker));
 
     if (newEnumMoniker->tabMoniker==NULL)
         return E_OUTOFMEMORY;
