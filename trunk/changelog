@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.1380 2001-04-26 13:25:12 sandervl Exp $ */
+/* $Id: changelog,v 1.1381 2001-04-26 16:59:30 sandervl Exp $ */
 
  2001-04-26: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Implemented FreeLibraryAndExitThread
@@ -6,9 +6,12 @@
                   for mailslot APIs (using named pipes)
                 o Fixed wrong return values for some CloseHandle methods
                 o Fixed CreateNamedPipe; must not call DosCreateNPipe for existing pipe
-                  (at least according to SDK docs; must verify this in NT!)
+                  (at least according to the SDK docs; must verify this in NT!)
                 o Implemented CreateFile and CloseHandle for named pipe class
                 o Implemented SetNamedPipeHandleState
+                o GetEnvironmentVariableW fix (breakpoint hit in debug build)
+    - ADVAPI32: o IsTextUnicode forwarded to RtlIsTextUnicode (ntdll)
+    - GDI32:    o InternalTextOutW fix (breakpoint hit in debug build)
 
  2001-04-25: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Check visibility of parents in IsWindowVisible
