@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.56 1999-11-24 19:32:22 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.57 1999-11-26 17:06:08 cbratschi Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -177,13 +177,13 @@ BOOL InitPM()
    WinQueryWindowRect(HWND_DESKTOP, &desktopRectl);
    ScreenWidth  = desktopRectl.xRight;
    ScreenHeight = desktopRectl.yTop;
-   
-    
+
+
    HDC   hdc;              /* Device-context handle                */
    /* context data structure */
    DEVOPENSTRUC dop = {NULL, "DISPLAY", NULL, NULL, NULL, NULL,
                        NULL, NULL, NULL};
- 
+
    /* create memory device context */
    hdc = DevOpenDC(hab, OD_MEMORY, "*", 5L, (PDEVOPENDATA)&dop, NULLHANDLE);
    DevQueryCaps(hdc, CAPS_COLOR_BITCOUNT, 1, (PLONG)&ScreenBitsPerPel);
@@ -212,8 +212,8 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         goto RunDefWndProc;
   }
   if(msg == WIN32APP_POSTMSG && (ULONG)mp1 == WIN32PM_MAGIC) {
-        //win32 app user message      
-	win32wnd->PostMessage((POSTMSG_PACKET *)mp2);
+        //win32 app user message
+        win32wnd->PostMessage((POSTMSG_PACKET *)mp2);
         return (MRESULT)0;
   }
   switch( msg )
@@ -868,14 +868,18 @@ VirtualKeyFound:
     case WM_ERASEBACKGROUND:
     {
         dprintf(("OS2: WM_ERASEBACKGROUND %x", win32wnd->getWindowHandle()));
+        //CB: handled in WM_PAINT too, don't do it twice!
+
         if (WinQueryUpdateRect (hwnd, NULL) && !win32wnd->isSupressErase()) {
             BOOL erased = sendEraseBkgnd (win32wnd);
             win32wnd->setEraseBkgnd (!erased, !erased);
         }
+
         break;
     }
 
     case WM_PAINT:
+    {
         dprintf(("OS2: WM_PAINT %x", hwnd));
 
         if (WinQueryUpdateRect (hwnd, NULL)) {
@@ -884,13 +888,14 @@ VirtualKeyFound:
                 win32wnd->setEraseBkgnd (!erased, !erased);
             }
         }
+
         win32wnd->setSupressErase (FALSE);
 
-        if(win32wnd->MsgPaint(0, 0)) {
-                goto RunDefWndProc;
-        }
-        //Apparently there are apps that return 0, but don't do anything during WM_PAINT
+        win32wnd->MsgPaint(0, 0);
+
+        //validate the update region, WM_PAINT has no return value
         goto RunDefWndProc;
+    }
 
     case WM_HITTEST:
     // Only send this message if the window is enabled

@@ -1,4 +1,4 @@
-/* $Id: syscolor.cpp,v 1.11 1999-11-21 12:32:59 achimha Exp $ */
+/* $Id: syscolor.cpp,v 1.12 1999-11-26 17:06:08 cbratschi Exp $ */
 
 /*
  * Win32 system color API functions for OS/2
@@ -244,8 +244,6 @@ HBRUSH WIN32API GetSysColorBrush(int nIndex)
   else return(GetStockObject(LTGRAY_BRUSH));
 
 }
-//******************************************************************************
-//******************************************************************************
 /***********************************************************************
  * This function is new to the Wine lib -- it does not exist in
  * Windows. However, it is a natural complement for GetSysColorBrush
@@ -261,4 +259,16 @@ HPEN WIN32API GetSysColorPen(INT index)
 
     if (index >= 0 && index < NUM_SYS_COLORS) return SysColorPens[index];
     else return 0;
+}
+//******************************************************************************
+//******************************************************************************
+INT SYSCOLOR_GetLastColor(VOID)
+{
+  return NUM_SYS_COLORS-1;
+}
+//******************************************************************************
+//******************************************************************************
+INT SYSCOLOR_GetNumColors(VOID)
+{
+  return NUM_SYS_COLORS;
 }
