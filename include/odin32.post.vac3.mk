@@ -1,4 +1,4 @@
-# $Id: odin32.post.vac3.mk,v 1.24 2001-10-29 14:20:12 bird Exp $
+# $Id: odin32.post.vac3.mk,v 1.25 2001-12-09 22:03:07 sandervl Exp $
 
 #
 # Odin32 API
@@ -366,6 +366,9 @@ $(ODIN32_LIB)\$(TARGET)$(CUST).$(TARGET_EXTENSION): $(OBJDIR)\$(TARGET)$(CUST).$
 !endif
     @if not exist $(@D) $(CREATEPATH) $(@D)
     $(CP) $** $@
+!if "$(CUSTOMBUILD)" == "1"
+    $(RM) dummy.c
+!endif
 
 
 #
