@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.105 2001-07-04 06:39:01 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.106 2001-07-05 18:10:56 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -975,11 +975,11 @@ BOOL WIN32API WinHelpA( HWND hwnd, LPCSTR lpszHelp, UINT uCommand, DWORD  dwData
   static WORD WM_WINHELP = 0;
   HWND hDest;
   LPWINHELP lpwh;
-  HGLOBAL hwh;
   HINSTANCE winhelp;
   int size,dsize,nlen;
+  BOOL ret;
 
-  dprintf(("USER32:  WinHelpA %s\n", lpszHelp));
+  dprintf(("USER32: WinHelpA %x %s %d %x", hwnd, lpszHelp, uCommand, dwData));
 
   if(!WM_WINHELP)
   {
@@ -1035,13 +1035,9 @@ BOOL WIN32API WinHelpA( HWND hwnd, LPCSTR lpszHelp, UINT uCommand, DWORD  dwData
   else
     nlen = 0;
   size = sizeof(WINHELP) + nlen + dsize;
-#if 1
-  hwh = GlobalAlloc(GMEM_SHARE,size);
-  lpwh = (WINHELP*)GlobalLock(hwh);
-#else
-  hwh  = (HANDLE)_smalloc(size);
-  lpwh = (WINHELP*)hwh;
-#endif
+
+  //allocate shared memory
+  lpwh = (WINHELP*)_smalloc(size);
   lpwh->size = size;
   lpwh->command = uCommand;
   lpwh->data = dwData;
@@ -1057,9 +1053,10 @@ BOOL WIN32API WinHelpA( HWND hwnd, LPCSTR lpszHelp, UINT uCommand, DWORD  dwData
     lpwh->ofsData = sizeof(WINHELP)+nlen;
   } else
       lpwh->ofsData = 0;
-  GlobalUnlock(hwh);
 
-  return SendMessageA(hDest,WM_WINHELP,hwnd,hwh);
+  ret = SendMessageA(hDest,WM_WINHELP,hwnd,(LPARAM)lpwh);
+  free(lpwh);
+  return ret;
 }
 //******************************************************************************
 //******************************************************************************
