@@ -261,13 +261,15 @@ BOOL CFT2Module::Ft2GetTextExtentW(HPS hps, LONG lCount1,LPCWSTR pchString, PPOI
 
         calcDimensions(aptlPoints, pwidthHeight);
 
-        if(GetTextMetricsW( hps, &tmW ) == TRUE)
+        DecreaseLogCount();
+        if(GetTextMetricsW( hps, &tmW ) == TRUE) 
         {
             pwidthHeight->y = tmW.tmHeight;    // *Must* use the maximum height of the font
         }
 #ifdef DEBUG
         else DebugInt3();
 #endif
+        IncreaseLogCount();
     }
 
     free( pplos2 );
