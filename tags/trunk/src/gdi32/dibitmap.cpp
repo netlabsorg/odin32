@@ -1,4 +1,4 @@
-/* $Id: dibitmap.cpp,v 1.23 2001-06-13 10:29:05 sandervl Exp $ */
+/* $Id: dibitmap.cpp,v 1.24 2001-07-04 08:03:54 sandervl Exp $ */
 
 /*
  * GDI32 dib & bitmap code
@@ -138,10 +138,14 @@ HBITMAP WIN32API CreateBitmap(int nWidth, int nHeight, UINT cPlanes,
 }
 //******************************************************************************
 //******************************************************************************
-HBITMAP WIN32API CreateBitmapIndirect( const BITMAP * arg1)
+HBITMAP WIN32API CreateBitmapIndirect( const BITMAP *pBitmap)
 {
-    dprintf(("GDI32: CreateBitmapIndirect"));
-    return O32_CreateBitmapIndirect(arg1);
+    HBITMAP hBitmap;
+
+    dprintf(("GDI32: CreateBitmapIndirect (%d,%d) bpp %d bits %x", pBitmap->bmWidth, pBitmap->bmHeight, pBitmap->bmBitsPixel, pBitmap->bmBits));
+    hBitmap = O32_CreateBitmapIndirect(pBitmap);
+    dprintf(("GDI32: CreateBitmapIndirect returned %x", hBitmap));
+    return hBitmap;
 }
 //******************************************************************************
 //*********************************************************************************
