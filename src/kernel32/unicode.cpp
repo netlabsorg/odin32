@@ -1,4 +1,4 @@
-/* $Id: unicode.cpp,v 1.12 1999-08-04 00:44:33 phaller Exp $ */
+/* $Id: unicode.cpp,v 1.13 1999-08-19 10:25:27 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -189,6 +189,18 @@ char * WIN32API UnicodeToAsciiString(WCHAR *ustring)
   if(ustring == NULL)  return(NULL);
 
   astring = (char *)malloc( 1 + UniStrlen((UniChar*)ustring) );
+  UnicodeToAscii( ustring, astring );
+  return(astring);
+}
+//******************************************************************************
+//******************************************************************************
+char * WIN32API UnicodeToAsciiStringN(WCHAR *ustring, ULONG length)
+{
+  char *astring;
+
+  if(ustring == NULL)  return(NULL);
+
+  astring = (char *)malloc( 1 + length );
   UnicodeToAscii( ustring, astring );
   return(astring);
 }
