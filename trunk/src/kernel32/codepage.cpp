@@ -105,14 +105,14 @@ ULONG GetDisplayCodepage()
 {
     if (!ansi_cptable) CODEPAGE_Init();
 
-    return oem_cptable->info.codepage;
+    return ansi_cptable->info.codepage;
 }
 
 ULONG GetWindowsCodepage()
 {
     if (!ansi_cptable) CODEPAGE_Init();
 
-    return oem_cptable->info.codepage;
+    return ansi_cptable->info.codepage;
 }
 
 static UconvObject GetObjectByCP(ULONG codepage)
