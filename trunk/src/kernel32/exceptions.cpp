@@ -1,4 +1,4 @@
-/* $Id: exceptions.cpp,v 1.23 1999-10-09 15:03:10 sandervl Exp $ */
+/* $Id: exceptions.cpp,v 1.24 1999-10-13 11:21:45 phaller Exp $ */
 
 /*
  * Win32 Device IOCTL API functions for OS/2
@@ -12,7 +12,7 @@
  *
  *
  * (dlls\ntdll\exception.c)
- * 
+ *
  * Copyright 1999 Turchanov Sergey
  * Copyright 1999 Alexandre Julliard
  *
@@ -954,7 +954,7 @@ ULONG APIENTRY OS2ExceptionHandler(PEXCEPTIONREPORTRECORD       pERepRec,
   	dprintf(("KERNEL32: OS2ExceptionHandler: FPU exception, fix and continue\n"));
 	if(fIsOS2Image == FALSE)  //Only for real win32 apps
 	{
-		if(OSLibDispatchException(pERepRec, pERegRec, pCtxRec, p) == FALSE) 
+		if(OSLibDispatchException(pERepRec, pERegRec, pCtxRec, p) == FALSE)
 		{
 		        pCtxRec->ctx_env[0] |= 0x1F;
 		        pCtxRec->ctx_stack[0].losig = 0;
@@ -1014,13 +1014,12 @@ continueFail:
   case XCPT_INTEGER_DIVIDE_BY_ZERO:
   case XCPT_INTEGER_OVERFLOW:
   case XCPT_SINGLE_STEP:
-  case XCPT_GUARD_PAGE_VIOLATION:
   case XCPT_UNABLE_TO_GROW_STACK:
   case XCPT_IN_PAGE_ERROR:
 CrashAndBurn:
 	if(fIsOS2Image == FALSE)  //Only for real win32 apps
 	{
-		if(OSLibDispatchException(pERepRec, pERegRec, pCtxRec, p) == TRUE) 
+		if(OSLibDispatchException(pERepRec, pERegRec, pCtxRec, p) == TRUE)
 		{
 		      	return (XCPT_CONTINUE_EXECUTION);
 		}
@@ -1031,6 +1030,11 @@ CrashAndBurn:
     	pCtxRec->ctx_RegEax = pERepRec->ExceptionNum;
     	pCtxRec->ctx_RegEbx = pCtxRec->ctx_RegEip;
     	return (XCPT_CONTINUE_EXECUTION);
+
+  //@@@PH: growing thread stacks might need special treatment
+  case XCPT_GUARD_PAGE_VIOLATION:
+    dprintf(("KERNEL32: OS2ExceptionHandler: trying to grow stack (continue)\n"));
+    return (XCPT_CONTINUE_SEARCH);
 
   case XCPT_SIGNAL:
       if(pERepRec->ExceptionInfo[0] == XCPT_SIGNAL_KILLPROC)          /* resolve signal information */
