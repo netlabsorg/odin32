@@ -1,4 +1,4 @@
-# $Id: setup.optional.ilink.mk,v 1.1 2002-08-28 03:42:43 bird Exp $
+# $Id: setup.optional.ilink.mk,v 1.2 2002-08-28 04:40:58 bird Exp $
 
 #
 # Helper file for all the option stuff for the ibm linker (ilink).
@@ -26,10 +26,10 @@ _LD_BASE        = /Base:$(LD_BASE)
 !if defined(LD_DEFAULT_LIBS) || defined(ALL_DEFAULT_LIBS)
 _LD_DEFAULT_LIBS = /Def
 !endif
-!if defined(LD_DEFAULT_LIBS) || defined(ALL_DEFAULT_LIBS)
+!if defined(LD_EXTDIC)
 _LD_EXTDIC      = /Ext
 !endif
-!if defined(LD_NO_EXTDIC) || defined(ALL_NO_EXTDIC)
+!if defined(LD_NO_EXTDIC)
 _LD_EXTDIC      = /NoE
 !endif
 !if defined(LD_NO_PACKCODE)
