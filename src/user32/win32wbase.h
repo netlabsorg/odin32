@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.146 2002-11-20 12:59:06 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.147 2002-12-04 15:23:41 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -61,26 +61,6 @@ typedef struct tagPROPERTY
     HANDLE              handle;   /* User's data */
     LPSTR               string;   /* Property string (or atom) */
 } PROPERTY;
-
-//PostThreadMessage is done through Open32; which means the message id will be translated
-//(0xc00 added)
-#define OPEN32_MSGDIFF            0xC00
-#define WIN32APP_POSTMSG          (0x1000+OPEN32_MSGDIFF)
-
-//PM doesn't allow SetFocus during WM_SETFOCUS message processing; must delay
-//this by posting a message
-//NOTE Must be smaller than WIN32APP_POSTMSG!
-#define WIN32APP_SETFOCUSMSG      (WIN32APP_POSTMSG-1)
-#define WIN32APP_POSTPONEDESTROY  (WIN32APP_POSTMSG-2)
-
-#define WIN32MSG_MAGICA           0x12345678
-#define WIN32MSG_MAGICW           0x12345679
-
-typedef struct
-{
-        ULONG           wParam;
-        ULONG           lParam;
-} POSTMSG_PACKET;
 
 #define HAS_DLGFRAME(style,exStyle) \
     (((exStyle) & WS_EX_DLGMODALFRAME) || \
