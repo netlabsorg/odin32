@@ -1,14 +1,8 @@
-/* $Id: initsystem.h,v 1.1 1999-12-09 11:59:28 sandervl Exp $ */
+/* $Id: initsystem.h,v 1.2 2000-03-03 11:15:58 sandervl Exp $ */
 
 #ifndef _INITSYSTEM_H_
 #define _INITSYSTEM_H_
 
 BOOL InitSystemEnvironment(ULONG nrCPUs);
-
-#ifndef OS2_INCLUDED
-extern LONG (WIN32API *ADVAPI32_RegCloseKey)(HKEY);
-extern LONG (WIN32API *ADVAPI32_RegCreateKeyA)(HKEY,LPCSTR,LPHKEY);
-extern LONG (WIN32API *ADVAPI32_RegSetValueExA)(HKEY,LPSTR,DWORD,DWORD,LPBYTE,DWORD);
-#endif
 
 #endif //_INITSYSTEM_H_

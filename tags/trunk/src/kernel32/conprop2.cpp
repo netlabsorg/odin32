@@ -1,4 +1,4 @@
-/* $Id: conprop2.cpp,v 1.5 2000-03-03 09:06:19 sandervl Exp $ */
+/* $Id: conprop2.cpp,v 1.6 2000-03-03 11:15:57 sandervl Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -39,6 +39,7 @@
 #include <builtin.h>
 
 #include <win32type.h>
+#include <win32api.h>
 #include <misc.h>
 #include <stdio.h>
 
@@ -55,42 +56,6 @@ ODINDEBUGCHANNEL(KERNEL32-CONPROP2)
 /*****************************************************************************
  * Defines                                                                   *
  *****************************************************************************/
-
-#define ERROR_SUCCESS 0
-
-#define REG_NONE                         0  /* no type */
-#define REG_SZ                           1  /* string type (ASCII) */
-#define REG_EXPAND_SZ                    2  /* string, includes %ENVVAR% (expanded by caller) (ASCII) */
-#define REG_BINARY                       3  /* binary format, callerspecific */
-                                /* YES, REG_DWORD == REG_DWORD_LITTLE_ENDIAN */
-#define REG_DWORD                        4  /* DWORD in little endian format */
-#define REG_DWORD_LITTLE_ENDIAN          4  /* DWORD in little endian format */
-#define REG_DWORD_BIG_ENDIAN             5  /* DWORD in big endian format  */
-#define REG_LINK                         6  /* symbolic link (UNICODE) */
-#define REG_MULTI_SZ                     7  /* multiple strings, delimited by \0, terminated by \0\0 (ASCII) */
-#define REG_RESOURCE_LIST                8  /* resource list? huh? */
-#define REG_FULL_RESOURCE_DESCRIPTOR     9  /* full resource descriptor? huh? */
-
-#define HKEY_LOCAL_MACHINE_O32      0xFFFFFFEFL
-#define HKEY_CURRENT_USER_O32       0xFFFFFFEEL
-#define HKEY_USERS_O32              0xFFFFFFEDL
-#define HKEY_CLASSES_ROOT_O32       0xFFFFFFECL
-
-#define KEY_ALL_ACCESS 0x0000003f
-
-typedef unsigned long HKEY;
-typedef HKEY* LPHKEY;
-typedef DWORD REGSAM;
-
-LONG  _System _O32_RegOpenKeyEx(HKEY,LPCSTR,DWORD,REGSAM,LPHKEY);
-LONG  _System _O32_RegCreateKeyEx(HKEY,LPCSTR,DWORD,LPSTR,DWORD,REGSAM,
-                              LPSECURITY_ATTRIBUTES,LPHKEY,LPDWORD);
-LONG  _System _O32_RegQueryValueEx(HKEY,LPSTR,LPDWORD,LPDWORD,LPBYTE,LPDWORD);
-LONG  _System _O32_RegCloseKey(HKEY);
-LONG  _System _O32_RegSetValueEx( HKEY, LPCSTR, DWORD, DWORD, LPBYTE, DWORD );
-
-DWORD WIN32API GetModuleFileNameA(HMODULE,LPSTR,DWORD);
-
 
 /*****************************************************************************
  * Name      : iQueryModuleKeyName
@@ -174,7 +139,7 @@ DWORD ConsolePropertyLoad(PICONSOLEOPTIONS pConsoleOptions)
             pConsoleOptions));
 
   // HKEY_CURRENT_USER/SOFTWARE/ODIN/ConsoleProperties/<process name>/<option name>
-  LONG  lRes = ERROR_SUCCESS;
+  LONG  lRes = ERROR_SUCCESS_W;
   HKEY  hkConsole;
   char  szKey[256];
   char  szProcessName[256];
@@ -197,7 +162,7 @@ DWORD ConsolePropertyLoad(PICONSOLEOPTIONS pConsoleOptions)
              "Software\\ODIN\\ConsoleProperties\\%s",
              szProcessName);
 
-    lRes = _O32_RegOpenKeyEx(HKEY_CURRENT_USER_O32,
+    lRes = RegOpenKeyExA(HKEY_CURRENT_USER,
                          szKey,
                          0,
                          KEY_ALL_ACCESS,
@@ -205,15 +170,15 @@ DWORD ConsolePropertyLoad(PICONSOLEOPTIONS pConsoleOptions)
   }
 
   // try to open DEFAULT
-  if (lRes != ERROR_SUCCESS)
-    lRes = _O32_RegOpenKeyEx(HKEY_CURRENT_USER_O32,
+  if (lRes != ERROR_SUCCESS_W)
+    lRes = RegOpenKeyExA(HKEY_CURRENT_USER,
                          "Software\\ODIN\\ConsoleProperties\\DEFAULT",
                          0,
                          KEY_ALL_ACCESS,
                          &hkConsole);
 
   // now it's time to retrieve information
-  if (lRes != ERROR_SUCCESS)
+  if (lRes != ERROR_SUCCESS_W)
   {
     // load hardcoded defaults instead
     ConsolePropertyDefault(pConsoleOptions);
@@ -224,7 +189,7 @@ DWORD ConsolePropertyLoad(PICONSOLEOPTIONS pConsoleOptions)
   // OK, finally retrieve tokens
 #define REGQUERYVALUE(name,var)              \
   dwSize = sizeof(pConsoleOptions->var);             \
-  lRes = _O32_RegQueryValueEx(hkConsole, name, NULL, &dwType, \
+  lRes = RegQueryValueExA(hkConsole, name, NULL, &dwType, \
            (LPBYTE)&pConsoleOptions->var, &dwSize);
 
   REGQUERYVALUE("AutomaticTermination",     fTerminateAutomatically)
@@ -252,7 +217,7 @@ DWORD ConsolePropertyLoad(PICONSOLEOPTIONS pConsoleOptions)
   REGQUERYVALUE("ApplicationPriorityDelta", ulAppThreadPriorityDelta)
 #undef REGQUERYVALUE
 
-  _O32_RegCloseKey(hkConsole);
+  RegCloseKey(hkConsole);
 
   return (NO_ERROR);
 }
@@ -276,7 +241,7 @@ DWORD ConsolePropertySave(PICONSOLEOPTIONS pConsoleOptions)
             pConsoleOptions));
 
   // HKEY_CURRENT_USER/SOFTWARE/ODIN/ConsoleProperties/<process name>/<option name>
-  LONG  lRes = ERROR_SUCCESS;
+  LONG  lRes = ERROR_SUCCESS_W;
   HKEY  hkConsole;
   char  szKey[256];
   char  szProcessName[256];
@@ -300,7 +265,7 @@ DWORD ConsolePropertySave(PICONSOLEOPTIONS pConsoleOptions)
              "Software\\ODIN\\ConsoleProperties\\%s",
              szProcessName);
 
-    lRes = _O32_RegCreateKeyEx(HKEY_CURRENT_USER_O32,
+    lRes = RegCreateKeyExA(HKEY_CURRENT_USER,
                                szKey,
                                0,
                                "",
@@ -309,13 +274,13 @@ DWORD ConsolePropertySave(PICONSOLEOPTIONS pConsoleOptions)
                                NULL,
                                &hkConsole,
                                &dwDisposition);
-    if (lRes != ERROR_SUCCESS)
+    if (lRes != ERROR_SUCCESS_W)
        return lRes;
   }
 
 
 #define REGSAVEVALUE(name,var) \
-  lRes = _O32_RegSetValueEx(hkConsole, name, 0, REG_DWORD, \
+  lRes = RegSetValueExA(hkConsole, name, 0, REG_DWORD, \
                  (LPBYTE)&pConsoleOptions->var, sizeof(pConsoleOptions->var));
 
   REGSAVEVALUE("AutomaticTermination",     fTerminateAutomatically)
@@ -343,7 +308,7 @@ DWORD ConsolePropertySave(PICONSOLEOPTIONS pConsoleOptions)
   REGSAVEVALUE("ApplicationPriorityDelta", ulAppThreadPriorityDelta)
 #undef REGSAVEVALUE
 
-  _O32_RegCloseKey(hkConsole);
+  RegCloseKey(hkConsole);
 
   return (NO_ERROR);
 

@@ -1,4 +1,4 @@
-; $Id: kernel32.def,v 1.71 2000-02-15 19:06:12 sandervl Exp $
+; $Id: kernel32.def,v 1.72 2000-03-03 11:15:58 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is Windows95 KERNEL32
@@ -1075,6 +1075,55 @@ EXPORTS
     _SupportsCPUID        @2003
     _GetCPUFeatures       @2004
     CPUFeatures          @2005
+
+;registry apis imported by advapi32
+    RegCloseKey                           = _RegCloseKey@4                     @2280
+    RegConnectRegistryA                   = _RegConnectRegistryA@12            @2281
+    RegConnectRegistryW                   = _RegConnectRegistryW@12            @2282
+    RegCreateKeyA                         = _RegCreateKeyA@12                  @2283
+    RegCreateKeyExA                       = _RegCreateKeyExA@36                @2284
+    RegCreateKeyExW                       = _RegCreateKeyExW@36                @2285
+    RegCreateKeyW                         = _RegCreateKeyW@12                  @2286
+    RegDeleteKeyA                         = _RegDeleteKeyA@8                   @2287
+    RegDeleteKeyW                         = _RegDeleteKeyW@8                   @2288
+    RegDeleteValueA                       = _RegDeleteValueA@8                 @2289
+    RegDeleteValueW                       = _RegDeleteValueW@8                 @2290
+    RegEnumKeyA                           = _RegEnumKeyA@16                    @2291
+    RegEnumKeyExA                         = _RegEnumKeyExA@32                  @2292
+    RegEnumKeyExW                         = _RegEnumKeyExW@32                  @2293
+    RegEnumKeyW                           = _RegEnumKeyW@16                    @2294
+    RegEnumValueA                         = _RegEnumValueA@32                  @2295
+    RegEnumValueW                         = _RegEnumValueW@32                  @2296
+    RegFlushKey                           = _RegFlushKey@4                     @2297
+    RegGetKeySecurity                     = _RegGetKeySecurity@16              @2298
+    RegLoadKeyA                           = _RegLoadKeyA@12                    @2299
+    RegLoadKeyW                           = _RegLoadKeyW@12                    @2300
+    RegNotifyChangeKeyValue               = _RegNotifyChangeKeyValue@20        @2301
+    RegOpenKeyA                           = _RegOpenKeyA@12                    @2302
+    RegOpenKeyExA                         = _RegOpenKeyExA@20                  @2303
+    RegOpenKeyExW                         = _RegOpenKeyExW@20                  @2304
+    RegOpenKeyW                           = _RegOpenKeyW@12                    @2305
+    RegQueryInfoKeyA                      = _RegQueryInfoKeyA@48               @2306
+    RegQueryInfoKeyW                      = _RegQueryInfoKeyW@48               @2307
+    RegQueryMultipleValuesA               = _RegQueryMultipleValuesA@20        @2308
+    RegQueryMultipleValuesW               = _RegQueryMultipleValuesW@20        @2309
+    RegQueryValueA                        = _RegQueryValueA@16                 @2310
+    RegQueryValueExA                      = _RegQueryValueExA@24               @2311
+    RegQueryValueExW                      = _RegQueryValueExW@24               @2312
+    RegQueryValueW                        = _RegQueryValueW@16                 @2313
+    RegReplaceKeyA                        = _RegReplaceKeyA@16                 @2314
+    RegReplaceKeyW                        = _RegReplaceKeyW@16                 @2315
+    RegRestoreKeyA                        = _RegRestoreKeyA@12                 @2316
+    RegRestoreKeyW                        = _RegRestoreKeyW@12                 @2317
+    RegSaveKeyA                           = _RegSaveKeyA@12                    @2318
+    RegSaveKeyW                           = _RegSaveKeyW@12                    @2319
+    RegSetKeySecurity                     = _RegSetKeySecurity@12              @2320
+    RegSetValueA                          = _RegSetValueA@20                   @2321
+    RegSetValueExA                        = _RegSetValueExA@24                 @2322
+    RegSetValueExW                        = _RegSetValueExW@24                 @2323
+    RegSetValueW                          = _RegSetValueW@20                   @2324
+    RegUnLoadKeyA                         = _RegUnLoadKeyA@8                   @2325
+    RegUnLoadKeyW                         = _RegUnLoadKeyW@8                   @2326
 
     GetDisplayCodepage__Fv                  @3000
     GetWindowsCodepage__Fv                  @3001
