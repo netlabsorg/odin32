@@ -1,8 +1,13 @@
-/* $Id: changelog,v 1.2138 2002-06-08 07:32:12 sandervl Exp $ */
+/* $Id: changelog,v 1.2139 2002-06-08 11:38:47 sandervl Exp $ */
 
- 2002-06-08: Sander van Leeuwen <sandervl@innotek.de>
+ 2002-06-08: Sander van Leeuwen <sandervl@xs4all.nl>
     - SHELL32:  o Moved resource files to subdir
     - COMDLG32: o Compile fix + moved resource files to subdir
+    - KERNEL32: o Export OSLibDosDevIOCtl
+    - WNASPI32: o Use ASPI interface in os2cdrom.dmd instead of aspirout
+                  (requires os2cdrom.dmd from Convenience Pack 2, IDEDASD
+                   package from May 2001 (or newer) or recent JJSCDROM)
+    - DDRAW:    o Fixed clipping bug with non-frame windows
 
  2002-06-08: knut st. osmundsen <bird@anduin.net>
     - TOOLS\WRC:o Compile fix
