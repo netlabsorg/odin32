@@ -1,4 +1,8 @@
-/* $Id: ChangeLog,v 1.2520 2003-03-17 17:58:30 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2521 2003-03-19 10:29:36 sandervl Exp $ */
+
+ 2003-03-18: Platon Fomichev <platon@innotek   >
+    - USER32:   o Shift/Ctrl/Alt+Numpad keys illegal behaviour. Generic numpad
+                  keys like (/*-+) produced garbage. 
 
  2003-03-12: Platon Fomichev <stauff@innotek   >
     - USER32:   o GetKeyState and GetAsyncKeyState fixes for numpad keyboard
