@@ -1,4 +1,4 @@
-/* $Id: dinput.cpp,v 1.8 2000-06-27 18:20:46 mike Exp $ */
+/* $Id: dinput.cpp,v 1.9 2000-06-27 21:32:41 mike Exp $ */
 /*              DirectInput
  *
  * Copyright 1998 Marcus Meissner
@@ -1003,7 +1003,7 @@ static HRESULT WINAPI SysMouseAImpl_SetDataFormat(
   ICOM_THIS(SysMouseAImpl,iface);
   int i;
 
-  TRACE("(this=%p,%p)\n",This,df);
+  TRACE("DINPUT-SMAI: SetDataFormat(this=%p,%p)\n",This,df);
 
   TRACE("(df.dwSize=%ld)\n",df->dwSize);
   TRACE("(df.dwObjsize=%ld)\n",df->dwObjSize);
@@ -1176,7 +1176,7 @@ static HRESULT WINAPI SysMouseAImpl_Acquire(LPDIRECTINPUTDEVICE2A iface)
   ICOM_THIS(SysMouseAImpl,iface);
   RECT  rect;
 
-  TRACE("SysMouseAImpl_Acquire: (this=%p)\n",This);
+  TRACE("DINPUT-SMAI: Acquire(this=%p)\n",This);
 
   if (This->acquired == 0) {
     POINT       point;
@@ -1222,7 +1222,7 @@ static HRESULT WINAPI SysMouseAImpl_Unacquire(LPDIRECTINPUTDEVICE2A iface)
 {
   ICOM_THIS(SysMouseAImpl,iface);
 
-  TRACE("SysMouseAImpl_Unacquire: (this=%p)\n",This);
+  TRACE("DINPUT-SMAI: Unacquire (this=%p)\n",This);
 
   /* Reinstall previous mouse event handler */
   MOUSE_Enable(This->prev_handler);
@@ -1250,7 +1250,7 @@ static HRESULT WINAPI SysMouseAImpl_GetDeviceState(
   DWORD rx, ry, state;
   struct DIMOUSESTATE *mstate = (struct DIMOUSESTATE *) ptr;
 
-  TRACE("(this=%p,0x%08lx,%p): \n",This,len,ptr);
+  TRACE("DINPUT-SMAI: GetDeviceState (this=%p,0x%08lx,%p): \n",This,len,ptr);
 
   /* Check if the buffer is big enough */
   if (len < sizeof(struct DIMOUSESTATE)) {
@@ -1318,7 +1318,7 @@ static HRESULT WINAPI SysMouseAImpl_GetDeviceData(LPDIRECTINPUTDEVICE2A iface,
   ICOM_THIS(SysMouseAImpl,iface);
 
   EnterCriticalSection(&(This->crit));
-  TRACE("(%p)->(dods=%ld,entries=%ld,fl=0x%08lx)\n",This,dodsize,*entries,flags);
+  TRACE("DINPUT-SMAI: GetDeviceData (%p)->(dods=%ld,entries=%ld,fl=0x%08lx)\n",This,dodsize,*entries,flags);
 
   if (flags & DIGDD_PEEK)
     FIXME("DIGDD_PEEK\n");
@@ -1387,7 +1387,7 @@ static HRESULT WINAPI SysMouseAImpl_SetProperty(LPDIRECTINPUTDEVICE2A iface,
   else
     sprintf(xbuf,"<special guid %ld>",(DWORD)rguid);
 
-  TRACE("(this=%p,%s,%p)\n",This,xbuf,ph);
+  TRACE("DINPUT-SMAI: SetProperty (this=%p,%s,%p)\n",This,xbuf,ph);
 
   if (!HIWORD(rguid)) {
 #ifdef __WIN32OS2__
@@ -1434,7 +1434,7 @@ static HRESULT WINAPI SysMouseAImpl_SetEventNotification(LPDIRECTINPUTDEVICE2A i
                                                          HANDLE hnd) {
   ICOM_THIS(SysMouseAImpl,iface);
 
-  TRACE("(this=%p,0x%08lx)\n",This,(DWORD)hnd);
+  TRACE("DINPUT-SMAI: SetEventNotification (this=%p,0x%08lx)\n",This,(DWORD)hnd);
 
   This->hEvent = hnd;
 
