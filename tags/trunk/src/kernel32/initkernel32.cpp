@@ -1,4 +1,4 @@
-/* $Id: initkernel32.cpp,v 1.14 2002-04-07 15:44:10 sandervl Exp $
+/* $Id: initkernel32.cpp,v 1.15 2002-04-29 17:05:30 sandervl Exp $
  *
  * KERNEL32 DLL entry point
  *
@@ -228,6 +228,8 @@ void APIENTRY cleanupKernel32(ULONG ulReason)
     DestroySharedHeap();
     DestroyCodeHeap();
 
+    HMTerminate(); /* shutdown handlemanager */
+
 #if defined(DEBUG) && defined(__IBMCPP__) && __IBMCPP__ == 300
     ULONG totalmemalloc, nrcalls_malloc, nrcalls_free;
 
@@ -237,6 +239,8 @@ void APIENTRY cleanupKernel32(ULONG ulReason)
     dprintf(("Total nr of free   calls %d", nrcalls_free));
     dprintf(("Leaked memory: %d bytes", totalmemalloc));
     dprintf(("*************  KERNEL32 STATISTICS END   *****************"));
+
+    _dump_allocated(0);
 #endif
 
     //NOTE: Must be done after DestroyTIB

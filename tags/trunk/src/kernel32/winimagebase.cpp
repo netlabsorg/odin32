@@ -1,4 +1,4 @@
-/* $Id: winimagebase.cpp,v 1.34 2002-02-06 16:33:39 sandervl Exp $ */
+/* $Id: winimagebase.cpp,v 1.35 2002-04-29 17:05:30 sandervl Exp $ */
 
 /*
  * Win32 PE Image base class
@@ -321,6 +321,8 @@ ULONG Win32ImageBase::isPEImage(char *szFileName, DWORD *Characteristics,
   if(subsystem) {
         *subsystem = oh.Subsystem;
   }
+  
+  free(win32file);
   DosClose(win32handle);
   return ERROR_SUCCESS_W;
 
