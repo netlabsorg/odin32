@@ -1,4 +1,10 @@
- /* $Id: ChangeLog,v 1.1076 2000-08-18 21:42:52 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.1077 2000-08-19 12:59:39 sandervl Exp $ */
+
+ 2000-08-19: Sander van Leeuwen <sandervl@xs4all.nl>
+    - GDI32:    Changed File and Product version to 0x0400, 0x0565012A (NT4, SP6)
+    - KERNEL32: Changed File and Product version to 0x0400, 0x0565012C (NT4, SP6)
+    - USER32:   Changed File and Product version to 0x0400, 0x05650136 (NT4, SP6)
+    - ADVAPI32: Changed File and Product version to 0x0400, 0x05650119 (NT4, SP6)
 
  2000-08-18: Sander van Leeuwen <sandervl@xs4all.nl>
     - GDI32:    Added support for level 2 debug logging
