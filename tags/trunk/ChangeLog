@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.1168 2000-10-03 20:17:49 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.1169 2000-10-04 15:16:05 bird Exp $ */
+
+ 2000-10-04: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - tools\ImpDef: Corrected wrong DESCRIPTION statement.
 
  2000-10-03: Sander van Leeuwen <sandervl@xs4all.nl>
     - Include\uniconv.h
@@ -39,7 +42,7 @@
                 incomplete. It's better to use the native windows version.
     - KERNEL32: Ported Wine's LoadModule (previously used Open32)
                 Changed version apis
-                You can now tell Odin to pretend to be Windows 98 or 
+                You can now tell Odin to pretend to be Windows 98 or
                 Windows NT 4.0 (default = NT40)
                 Odin.ini:
                 [WinVersion]
