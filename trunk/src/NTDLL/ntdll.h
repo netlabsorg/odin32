@@ -1,4 +1,4 @@
-/* $Id: ntdll.h,v 1.12 2000-08-20 15:16:57 phaller Exp $ */
+/* $Id: ntdll.h,v 1.13 2001-04-22 10:38:59 sandervl Exp $ */
 
 /*
    this file defines interfaces mainly exposed to device drivers and
@@ -452,50 +452,7 @@ NTSTATUS WINAPI RtlGetGroupSecurityDescriptor(
    PSID *Group,
    PBOOLEAN GroupDefaulted);
 
-/* ##############################
-   ######   ACL FUNCTIONS                ######
-   ##############################
-*/
 
-DWORD WINAPI RtlCreateAcl(PACL acl,DWORD size,DWORD rev);
-
-BOOLEAN WINAPI RtlFirstFreeAce(
-   PACL acl,
-   PACE_HEADER *x);
-
-NTSTATUS WINAPI RtlAddAce(
-   PACL acl,
-   DWORD rev,
-   DWORD xnrofaces,
-   PACE_HEADER acestart,
-   DWORD acelen);
-
-DWORD WINAPI RtlAddAccessAllowedAce(DWORD x1,DWORD x2,DWORD x3,DWORD x4);
-DWORD WINAPI RtlGetAce(PACL pAcl,DWORD dwAceIndex,LPVOID *pAce );
-
-/*
- * string functions
- */
-
-DWORD WINAPI RtlAnsiStringToUnicodeString(PUNICODE_STRING uni,PANSI_STRING ansi,BOOLEAN doalloc);
-DWORD WINAPI RtlOemStringToUnicodeString(PUNICODE_STRING uni,PSTRING ansi,BOOLEAN doalloc);
-DWORD WINAPI RtlMultiByteToUnicodeN(LPWSTR unistr,DWORD unilen,LPDWORD reslen,LPSTR oemstr,DWORD oemlen);
-DWORD WINAPI RtlOemToUnicodeN(LPWSTR unistr,DWORD unilen,LPDWORD reslen,LPSTR oemstr,DWORD oemlen);
-VOID WINAPI RtlInitAnsiString(PANSI_STRING target,LPCSTR source);
-VOID WINAPI RtlInitString(PSTRING target,LPCSTR source);
-VOID WINAPI RtlInitUnicodeString(PUNICODE_STRING target,LPCWSTR source);
-VOID WINAPI RtlFreeUnicodeString(PUNICODE_STRING str);
-VOID WINAPI RtlFreeAnsiString(PANSI_STRING AnsiString);
-DWORD WINAPI RtlUnicodeToOemN(LPSTR oemstr,DWORD oemlen,LPDWORD reslen,LPWSTR unistr,DWORD unilen);
-DWORD WINAPI RtlUnicodeStringToOemString(PANSI_STRING oem,PUNICODE_STRING uni,BOOLEAN alloc);
-DWORD WINAPI RtlUnicodeStringToAnsiString(PANSI_STRING oem,PUNICODE_STRING uni,BOOLEAN alloc);
-DWORD WINAPI RtlEqualUnicodeString(PUNICODE_STRING s1,PUNICODE_STRING s2,DWORD x);
-DWORD WINAPI RtlUpcaseUnicodeString(PUNICODE_STRING dest,PUNICODE_STRING src,BOOLEAN doalloc);
-UINT WINAPI RtlxOemStringToUnicodeSize(PSTRING str);
-UINT WINAPI RtlxAnsiStringToUnicodeSize(PANSI_STRING str);
-DWORD WINAPI RtlIsTextUnicode(LPVOID buf, DWORD len, DWORD *pf);
-DWORD WINAPI RtlCompareUnicodeString(PUNICODE_STRING String1, PUNICODE_STRING String2, BOOLEAN CaseInSensitive);
-DWORD WINAPI RtlUpcaseUnicodeStringToOemString(PANSI_STRING oem, PUNICODE_STRING uni, BOOLEAN alloc);
 
 /*
  * resource functions

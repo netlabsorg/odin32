@@ -1,4 +1,4 @@
-/* $Id: sec.cpp,v 1.7 2000-10-26 17:26:00 sandervl Exp $ */
+/* $Id: sec.cpp,v 1.8 2001-04-22 10:38:59 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -731,16 +731,14 @@ NTSTATUS WINAPI RtlAddAce(PACL acl,
 /******************************************************************************
  *  RtlAddAccessAllowedAce                  [NTDLL]
  */
-DWORD WINAPI RtlAddAccessAllowedAce(DWORD x1,
-                                    DWORD x2,
-                                    DWORD x3,
-                                    DWORD x4)
+NTSTATUS WINAPI RtlAddAccessAllowedAce(IN OUT PACL pAcl, IN DWORD dwAceRevision, 
+                                       IN DWORD AccessMask, IN PSID pSid)
 {
   dprintf(("NTDLL: RtlAddAccessAllowedAce(%08xh,%08xh,%08xh,%08xh) not implemented.\n",
-           x1,
-           x2,
-           x3,
-           x4));
+           pAcl,
+           dwAceRevision,
+           AccessMask,
+           pSid));
 
   return 0;
 }
@@ -749,16 +747,41 @@ DWORD WINAPI RtlAddAccessAllowedAce(DWORD x1,
 /******************************************************************************
  *  RtlGetAce     [NTDLL]
  */
-DWORD WINAPI RtlGetAce(PACL  pAcl,
-                       DWORD dwAceIndex,
-                       LPVOID *pAce )
+NTSTATUS WINAPI RtlGetAce(PACL  pAcl,
+                          DWORD dwAceIndex,
+                          LPVOID *pAce )
 {
-  dprintf(("NTDLL: RtlGetAce(%08x,%08x,%08x) not implemented.\n",
+  PACE_HEADER ace;
+  int      i;
+
+  dprintf(("NTDLL: RtlGetAce(%08x,%08x,%08x) test implementation",
            pAcl,
            dwAceIndex,
            pAce));
 
-  return 0;
+
+  *pAce = 0;
+  if(dwAceIndex > pAcl->AceCount) {
+      dprintf(("index out of range"));
+      return STATUS_INVALID_PARAMETER;
+  }
+  ace = (PACE_HEADER)(pAcl+1);
+
+  for (i=0;
+       i<dwAceIndex;
+       i++)
+  {
+    if ((DWORD)ace>=(((DWORD)pAcl)+pAcl->AclSize))
+       return STATUS_BUFFER_OVERFLOW;
+
+    ace = (PACE_HEADER)(((BYTE*)ace)+ace->AceSize);
+  }
+
+  if ((DWORD)ace>=(((DWORD)pAcl)+pAcl->AclSize))
+     return STATUS_BUFFER_OVERFLOW;
+
+  *pAce = ace;
+  return STATUS_SUCCESS;
 }
 
 
