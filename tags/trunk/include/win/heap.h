@@ -1,4 +1,4 @@
-/* $Id: heap.h,v 1.1 1999-05-24 20:19:12 ktk Exp $ */
+/* $Id: heap.h,v 1.2 1999-06-01 19:48:18 phaller Exp $ */
 
 /*
  * Win32 heap definitions
@@ -33,10 +33,13 @@ extern LPSTR HEAP_strdupWtoA( HANDLE heap, DWORD flags, LPCWSTR str );
          (HIWORD(str) ? HEAP_strdupA( SegptrHeap, 0, (str) ) : (LPSTR)(str))
 #define SEGPTR_STRDUP_WtoA(str) \
          (HIWORD(str) ? HEAP_strdupWtoA( SegptrHeap, 0, (str) ) : (LPSTR)(str))
-	/* define an inline function, a macro won't do */
-static __inline__ SEGPTR WINE_UNUSED SEGPTR_Get(LPCVOID ptr) {
-         return (HIWORD(ptr) ? HEAP_GetSegptr( SegptrHeap, 0, ptr ) : (SEGPTR)ptr);
+
+/* define an inline function, a macro won't do */
+static SEGPTR SEGPTR_Get(LPCVOID ptr)
+{
+  return (HIWORD(ptr) ? HEAP_GetSegptr( SegptrHeap, 0, ptr ) : (SEGPTR)ptr);
 }
+
 #define SEGPTR_GET(ptr) SEGPTR_Get(ptr)
 #define SEGPTR_FREE(ptr) \
          (HIWORD(ptr) ? HeapFree( SegptrHeap, 0, (ptr) ) : 0)
