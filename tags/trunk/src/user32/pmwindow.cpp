@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.210 2003-04-24 14:32:02 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.211 2003-04-25 11:13:16 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -1504,7 +1504,7 @@ adjustend:
         // PM default processing for it that basicly moved this window to 0,0 point
         // and changed frame controls. Now do our own processing.
 
-        if ((pswp->fl & SWP_MAXIMIZE) && (win32wnd->getExStyle() & WS_EX_MDICHILD_W)) 
+        if ((pswp->fl & SWP_MAXIMIZE) && (win32wnd->getExStyle() & WS_EX_MDICHILD_W))
         {
          SendMessageA(win32wnd->getWindowHandle(), WM_SYSCOMMAND_W, SC_MAXIMIZE_W, 0);
          goto PosChangedEnd;
@@ -2122,7 +2122,9 @@ MRESULT EXPENTRY Win32FakeWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp
         goto RunDefWndProc;
     }
 
+    RestoreOS2TIB();
     rc = pfnOldWindowProc(hwnd, msg, mp1, mp2);
+    SetWin32TIB();
     switch(msg) {
     case WM_WINDOWPOSCHANGED:
     {
