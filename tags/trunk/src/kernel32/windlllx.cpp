@@ -1,4 +1,4 @@
-/* $Id: windlllx.cpp,v 1.5 1999-11-26 00:05:19 sandervl Exp $ */
+/* $Id: windlllx.cpp,v 1.6 1999-12-13 21:07:40 sandervl Exp $ */
 
 /*
  * Win32 LX Dll class (compiled in OS/2 using Odin32 api)
@@ -8,6 +8,9 @@
  *
  * TODO: Unloading of dlls probably needs to be fixed due to OS/2 bug 
  *       (wrong unload order of dlls)
+ * TODO: Unloading of system dlls is not correct for the PE loader
+ *       (they're always put at the head of the list even though there
+ *        might be a dependency with a win32 dll)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *

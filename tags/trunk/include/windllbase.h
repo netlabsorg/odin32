@@ -1,4 +1,4 @@
-/* $Id: windllbase.h,v 1.5 1999-11-26 00:04:32 sandervl Exp $ */
+/* $Id: windllbase.h,v 1.6 1999-12-13 21:04:58 sandervl Exp $ */
 
 /*
  * Win32 Dll base class
@@ -37,7 +37,7 @@
 class Win32DllBase : public virtual Win32ImageBase
 {
 public:
-                  Win32DllBase(HINSTANCE hInstance, WIN32DLLENTRY DllEntryPoint);
+                  Win32DllBase(HINSTANCE hInstance, WIN32DLLENTRY DllEntryPoint, Win32ImageBase *parent = NULL);
 virtual          ~Win32DllBase();
 
 	ULONG     AddRef() 	     { return ++referenced; };

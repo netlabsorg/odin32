@@ -1,10 +1,13 @@
-/* $Id: windllbase.cpp,v 1.6 1999-12-06 21:31:43 sandervl Exp $ */
+/* $Id: windllbase.cpp,v 1.7 1999-12-13 21:07:40 sandervl Exp $ */
 
 /*
  * Win32 Dll base class
  *
  * Copyright 1998-1999 Sander van Leeuwen (sandervl@xs4all.nl)
  *
+ * TODO: Unloading of system dlls is not correct for the PE loader
+ *       (they're always put at the head of the list even though there
+ *        might be a dependency with a win32 dll)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -38,7 +41,8 @@ VMutex dlllistmutex;   //protects linked lists of heaps
 
 //******************************************************************************
 //******************************************************************************
-Win32DllBase::Win32DllBase(HINSTANCE hinstance, WIN32DLLENTRY DllEntryPoint)
+Win32DllBase::Win32DllBase(HINSTANCE hinstance, WIN32DLLENTRY DllEntryPoint, 
+                           Win32ImageBase *parent)
                  : Win32ImageBase(hinstance),
   	           referenced(0), fSkipEntryCalls(FALSE),
                    fAttachedToProcess(FALSE), fUnloaded(FALSE)
@@ -46,9 +50,41 @@ Win32DllBase::Win32DllBase(HINSTANCE hinstance, WIN32DLLENTRY DllEntryPoint)
   dllEntryPoint = DllEntryPoint;
 
   dlllistmutex.enter();
-  next = head;
-  head = this;
+  //unload of dlls needs to be done in reverse order of dependencies
+  //Note: Only necessary for pe loader; the OS/2 loader takes care of this 
+  //for win32k/pe2lx 
+  if(parent && parent->isDll()) {
+	Win32DllBase *dll = head;
+	while(dll) {
+		if(dll->getInstanceHandle() == parent->getInstanceHandle()) {
+			break;
+		}
+		dll = dll->next;
+	}
+	if(dll) {
+		//insert this dll in list after it's parent
+		next = dll->next;
+		dll->next = this;
+	}
+	else 	DebugInt3();
+  }
+  else {
+  	next = head;
+  	head = this;
+  }
   dlllistmutex.leave();
+
+#ifdef DEBUG_ENABLELOG_LEVEL2
+  dlllistmutex.enter();
+  Win32DllBase *dll = head;
+
+  dprintf2(("Win32DllBase::Win32DllBase: List of loaded dlls:"));
+  while(dll) {
+	dprintf2(("DLL %s", dll->szModule));
+	dll = dll->next;
+  }
+  dlllistmutex.leave();
+#endif
 
   dprintf(("Win32DllBase::Win32DllBase %x %s", hinstance, szModule));
 }
