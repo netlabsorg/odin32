@@ -1,4 +1,4 @@
-/* $Id: font.cpp,v 1.25 2002-05-15 11:43:18 sandervl Exp $ */
+/* $Id: font.cpp,v 1.26 2002-07-15 10:02:28 sandervl Exp $ */
 
 /*
  * GDI32 font apis
@@ -96,6 +96,8 @@ static CHARSETINFO FONT_tci[MAXTCIINDEX] = {
   { DEFAULT_CHARSET, 0, FS(0)},
 };
 
+HFONT hFntDefaultGui = NULL;
+
 /*****************************************************************************
  * Name      : static void iFontRename
  * Purpose   : font remapping table to map win32 fonts to OS/2 pendants
@@ -141,18 +143,6 @@ static void iFontRename(LPCSTR lpstrFaceOriginal,
                                   lpstrFaceOriginal,
                                   lpstrFaceTemp,
                                   LF_FACESIZE);
-}
-
-//******************************************************************************
-HFONT hFntDefaultGui = NULL;
-//TODO: more??
-//******************************************************************************
-BOOL WIN32API IsSystemFont(HFONT hFont)
-{
-    if(hFont == hFntDefaultGui) {
-        return TRUE;
-    }
-    return FALSE;
 }
 //******************************************************************************
 //******************************************************************************

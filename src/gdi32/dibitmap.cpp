@@ -1,4 +1,4 @@
-/* $Id: dibitmap.cpp,v 1.30 2001-12-30 22:19:05 sandervl Exp $ */
+/* $Id: dibitmap.cpp,v 1.31 2002-07-15 10:02:28 sandervl Exp $ */
 
 /*
  * GDI32 dib & bitmap code
@@ -19,6 +19,8 @@
 #include "dibsect.h"
 #include "rgbcvt.h"
 #include <stats.h>
+#include "oslibgpi.h"
+#include <objhandle.h>
 
 #define DBG_LOCALLOG    DBG_dibitmap
 #include "dbglocal.h"
@@ -67,7 +69,7 @@ HBITMAP WIN32API CreateDIBitmap(HDC hdc, const BITMAPINFOHEADER *lpbmih,
                     pbSrc -= lLineByte;
                 }
                 rc = CreateDIBitmap(hdc, lpbmih, fdwInit, newbits, lpbmi, fuUsage);
-		free( newbits );
+		        free( newbits );
             }
 
             ((BITMAPINFOHEADER *)lpbmih)->biHeight = iHeight;
@@ -92,15 +94,15 @@ HBITMAP WIN32API CreateDIBitmap(HDC hdc, const BITMAPINFOHEADER *lpbmih,
     switch(lpbmih->biBitCount) {
     case 15:
     case 16: //Default if BI_BITFIELDS not set is RGB 555
-        bitfields[0] = (lpbmih->biCompression == BI_BITFIELDS) ? *(DWORD *)lpbmi->bmiColors : 0x7c00;
-        bitfields[1] = (lpbmih->biCompression == BI_BITFIELDS) ?  *((DWORD *)lpbmi->bmiColors + 1) : 0x03e0;
-        bitfields[2] = (lpbmih->biCompression == BI_BITFIELDS) ?  *((DWORD *)lpbmi->bmiColors + 2) : 0x001f;
+        bitfields[0] = (lpbmih->biCompression == BI_BITFIELDS) ? *(DWORD *)lpbmi->bmiColors       : DEFAULT_16BPP_RED_MASK;
+        bitfields[1] = (lpbmih->biCompression == BI_BITFIELDS) ? *((DWORD *)lpbmi->bmiColors + 1) : DEFAULT_16BPP_GREEN_MASK;
+        bitfields[2] = (lpbmih->biCompression == BI_BITFIELDS) ? *((DWORD *)lpbmi->bmiColors + 2) : DEFAULT_16BPP_BLUE_MASK;
         break;
     case 24:
     case 32:
-        bitfields[0] = (lpbmih->biCompression == BI_BITFIELDS) ? *(DWORD *)lpbmi->bmiColors        : 0xff0000;
-        bitfields[1] = (lpbmih->biCompression == BI_BITFIELDS) ?  *((DWORD *)lpbmi->bmiColors + 1) : 0xff00;
-        bitfields[2] = (lpbmih->biCompression == BI_BITFIELDS) ?  *((DWORD *)lpbmi->bmiColors + 2) : 0xff;
+        bitfields[0] = (lpbmih->biCompression == BI_BITFIELDS) ? *(DWORD *)lpbmi->bmiColors       : DEFAULT_24BPP_RED_MASK;
+        bitfields[1] = (lpbmih->biCompression == BI_BITFIELDS) ? *((DWORD *)lpbmi->bmiColors + 1) : DEFAULT_24BPP_GREEN_MASK;
+        bitfields[2] = (lpbmih->biCompression == BI_BITFIELDS) ? *((DWORD *)lpbmi->bmiColors + 2) : DEFAULT_24BPP_BLUE_MASK;
         break;
     default:
         bitfields[0] = 0;
@@ -108,7 +110,7 @@ HBITMAP WIN32API CreateDIBitmap(HDC hdc, const BITMAPINFOHEADER *lpbmih,
         bitfields[2] = 0;
         break;
     }
-    if(bitfields[1] == 0x3E0 && lpbInit && fdwInit == CBM_INIT)
+    if(bitfields[1] == RGB555_GREEN_MASK && lpbInit && fdwInit == CBM_INIT)
     {//RGB 555?
         dprintf(("RGB 555->565 conversion required %x %x %x", bitfields[0], bitfields[1], bitfields[2]));
 
@@ -131,7 +133,16 @@ HBITMAP WIN32API CreateDIBitmap(HDC hdc, const BITMAPINFOHEADER *lpbmih,
     ((BITMAPINFOHEADER *)lpbmih)->biHeight   = iHeight;
     ((BITMAPINFOHEADER *)lpbmih)->biBitCount = biBitCount;
 
-    if(rc) STATS_CreateDIBitmap(rc, hdc, lpbmih, fdwInit, lpbInit, lpbmi, fuUsage);
+    if(rc) { 
+        STATS_CreateDIBitmap(rc, hdc, lpbmih, fdwInit, lpbInit, lpbmi, fuUsage);
+#ifdef NEW_GDIHANDLES
+        if(bitfields[1] == RGB565_GREEN_MASK) {
+            //mark bitmap as RGB565
+            dprintf(("RGB565 bitmap"));
+            ObjSetHandleFlag(rc, OBJHANDLE_FLAG_BMP_RGB565, TRUE);
+        }
+#endif
+    }
 
     return rc;
 }
@@ -140,10 +151,28 @@ HBITMAP WIN32API CreateDIBitmap(HDC hdc, const BITMAPINFOHEADER *lpbmih,
 HBITMAP WIN32API CreateCompatibleBitmap( HDC hdc, int nWidth, int nHeight)
 {
     HBITMAP hBitmap;
+#ifdef NEW_GDIHANDLES
+    pDCData pHps;  
+
+    pHps = (pDCData)OSLibGpiQueryDCData((HPS)hdc);
+    if(!pHps)
+    {
+        SetLastError(ERROR_INVALID_HANDLE);
+        return 0;
+    }
+#endif
 
     hBitmap = O32_CreateCompatibleBitmap(hdc, nWidth, nHeight);
     dprintf(("GDI32: CreateCompatibleBitmap %x (%d,%d) returned %x", hdc, nWidth, nHeight, hBitmap));
-    if(hBitmap) STATS_CreateCompatibleBitmap(hBitmap,hdc, nWidth, nHeight);
+    if(hBitmap) {
+        STATS_CreateCompatibleBitmap(hBitmap,hdc, nWidth, nHeight);
+#ifdef NEW_GDIHANDLES
+        if(pHps->hwnd == 1) { //1 == HWND_DESKTOP
+            dprintf(("Screen compatible bitmap"));
+            ObjSetHandleFlag(hBitmap, OBJHANDLE_FLAG_BMP_SCREEN_COMPATIBLE, 1);
+        }
+#endif
+    }
 
     return hBitmap;
 }
@@ -152,7 +181,7 @@ HBITMAP WIN32API CreateCompatibleBitmap( HDC hdc, int nWidth, int nHeight)
 //******************************************************************************
 HBITMAP WIN32API CreateDiscardableBitmap(HDC hDC, int nWidth, int nHeight)
 {
-    dprintf(("GDI32: CreateDisardableBitmap\n"));
+    dprintf(("GDI32: CreateDisardableBitmap"));
     return CreateCompatibleBitmap(hDC, nWidth, nHeight);
 }
 //******************************************************************************
@@ -160,7 +189,7 @@ HBITMAP WIN32API CreateDiscardableBitmap(HDC hDC, int nWidth, int nHeight)
 HBITMAP WIN32API CreateBitmap(int nWidth, int nHeight, UINT cPlanes,
                               UINT cBitsPerPel, const void *lpvBits)
 {
- HBITMAP hBitmap;
+    HBITMAP hBitmap;
 
     hBitmap = O32_CreateBitmap(nWidth, nHeight, cPlanes, cBitsPerPel, lpvBits);
     dprintf(("GDI32: CreateBitmap (%d,%d) bps %d returned %x", nWidth, nHeight, cBitsPerPel, hBitmap));
@@ -186,12 +215,12 @@ HBITMAP WIN32API CreateBitmapIndirect( const BITMAP *pBitmap)
 HBITMAP WIN32API CreateDIBSection( HDC hdc, BITMAPINFO *pbmi, UINT iUsage,
                                    VOID **ppvBits, HANDLE hSection, DWORD dwOffset)
 {
- HBITMAP res = 0;
- BOOL    fFlip = 0;
- int     iHeight, iWidth;
- BOOL    fCreateDC = FALSE;
-
-  dprintf(("GDI32: CreateDIBSection %x %x %x %x %x %d", hdc, pbmi, iUsage, ppvBits, hSection, dwOffset));
+    HBITMAP res = 0;
+    BOOL    fFlip = 0;
+    int     iHeight, iWidth;
+    BOOL    fCreateDC = FALSE;
+    
+    dprintf(("GDI32: CreateDIBSection %x %x %x %x %x %d", hdc, pbmi, iUsage, ppvBits, hSection, dwOffset));
 
     //SvL: 13-9-98: StarCraft uses bitmap with negative height
     iWidth = pbmi->bmiHeader.biWidth;
@@ -367,19 +396,41 @@ int WIN32API GetDIBits(HDC hdc, HBITMAP hBitmap, UINT uStartScan, UINT cScanLine
         switch(lpbi->bmiHeader.biBitCount) {
         case 15:
         case 16: //RGB 565
-           ((DWORD*)(lpbi->bmiColors))[0] = 0x7c00;
-           ((DWORD*)(lpbi->bmiColors))[1] = 0x03E0;
-           ((DWORD*)(lpbi->bmiColors))[2] = 0x001F;
-           break;
+        {
+#ifdef NEW_GDIHANDLES
+            DWORD dwFlags;
+
+            dwFlags = ObjQueryHandleFlags(hBitmap);
+            if(dwFlags & (OBJHANDLE_FLAG_BMP_SCREEN_COMPATIBLE|OBJHANDLE_FLAG_BMP_RGB565)) {
+                ((DWORD*)(lpbi->bmiColors))[0] = RGB565_RED_MASK;
+                ((DWORD*)(lpbi->bmiColors))[1] = RGB565_GREEN_MASK;
+                ((DWORD*)(lpbi->bmiColors))[2] = RGB565_BLUE_MASK;
+            }
+            else {
+                ((DWORD*)(lpbi->bmiColors))[0] = RGB555_RED_MASK;
+                ((DWORD*)(lpbi->bmiColors))[1] = RGB555_GREEN_MASK;
+                ((DWORD*)(lpbi->bmiColors))[2] = RGB555_BLUE_MASK;
+            }
+            break;
+#else
+            ((DWORD*)(lpbi->bmiColors))[0] = RGB555_RED_MASK;
+            ((DWORD*)(lpbi->bmiColors))[1] = RGB555_GREEN_MASK;
+            ((DWORD*)(lpbi->bmiColors))[2] = RGB555_BLUE_MASK;
+#endif
+        }
         case 24:
         case 32:
-           ((DWORD*)(lpbi->bmiColors))[0] = 0xFF0000;
-           ((DWORD*)(lpbi->bmiColors))[1] = 0x00FF00;
-           ((DWORD*)(lpbi->bmiColors))[2] = 0x0000FF;
-           break;
+            ((DWORD*)(lpbi->bmiColors))[0] = DEFAULT_24BPP_RED_MASK;
+            ((DWORD*)(lpbi->bmiColors))[1] = DEFAULT_24BPP_GREEN_MASK;
+            ((DWORD*)(lpbi->bmiColors))[2] = DEFAULT_24BPP_BLUE_MASK;
+            break;
+        }
+        if(lpbi->bmiHeader.biCompression == BI_RGB && lpbi->bmiHeader.biBitCount > 8) {
+            lpbi->bmiHeader.biCompression = BI_BITFIELDS;
+            dprintf(("BI_BITFIELDS: %x %x %x", ((DWORD*)(lpbi->bmiColors))[0], ((DWORD*)(lpbi->bmiColors))[1], ((DWORD*)(lpbi->bmiColors))[2]));
         }
     }
-    if(nrlines && lpvBits && lpbi->bmiHeader.biBitCount == 16 && ((DWORD*)(lpbi->bmiColors))[1] == 0x3E0)
+    if(nrlines && lpvBits && lpbi->bmiHeader.biBitCount == 16 && ((DWORD*)(lpbi->bmiColors))[1] == RGB555_GREEN_MASK)
     {//RGB 555?
         dprintf(("RGB 565->555 conversion required"));
 
@@ -456,16 +507,16 @@ int WIN32API SetDIBits(HDC hdc, HBITMAP hBitmap, UINT startscan, UINT numlines, 
     switch(pBitmapInfo->bmiHeader.biBitCount) {
     case 15:
     case 16: //Default if BI_BITFIELDS not set is RGB 555
-        bitfields[0] = (pBitmapInfo->bmiHeader.biCompression == BI_BITFIELDS) ? *(DWORD *)pBitmapInfo->bmiColors : 0x7c00;
-        bitfields[1] = (pBitmapInfo->bmiHeader.biCompression == BI_BITFIELDS) ?  *((DWORD *)pBitmapInfo->bmiColors + 1) : 0x03e0;
-        bitfields[2] = (pBitmapInfo->bmiHeader.biCompression == BI_BITFIELDS) ?  *((DWORD *)pBitmapInfo->bmiColors + 2) : 0x001f;
+        bitfields[0] = (pBitmapInfo->bmiHeader.biCompression == BI_BITFIELDS) ?  *(DWORD *)pBitmapInfo->bmiColors       : DEFAULT_16BPP_RED_MASK;
+        bitfields[1] = (pBitmapInfo->bmiHeader.biCompression == BI_BITFIELDS) ?  *((DWORD *)pBitmapInfo->bmiColors + 1) : DEFAULT_16BPP_GREEN_MASK;
+        bitfields[2] = (pBitmapInfo->bmiHeader.biCompression == BI_BITFIELDS) ?  *((DWORD *)pBitmapInfo->bmiColors + 2) : DEFAULT_16BPP_BLUE_MASK;
         break;
 
     case 24:
     case 32:
-        bitfields[0] = (pBitmapInfo->bmiHeader.biCompression == BI_BITFIELDS) ? *(DWORD *)pBitmapInfo->bmiColors : 0xff0000;
-        bitfields[1] = (pBitmapInfo->bmiHeader.biCompression == BI_BITFIELDS) ?  *((DWORD *)pBitmapInfo->bmiColors + 1) : 0xff00;
-        bitfields[2] = (pBitmapInfo->bmiHeader.biCompression == BI_BITFIELDS) ?  *((DWORD *)pBitmapInfo->bmiColors + 2) : 0xff;
+        bitfields[0] = (pBitmapInfo->bmiHeader.biCompression == BI_BITFIELDS) ?  *(DWORD *)pBitmapInfo->bmiColors       : DEFAULT_24BPP_RED_MASK;
+        bitfields[1] = (pBitmapInfo->bmiHeader.biCompression == BI_BITFIELDS) ?  *((DWORD *)pBitmapInfo->bmiColors + 1) : DEFAULT_24BPP_GREEN_MASK;
+        bitfields[2] = (pBitmapInfo->bmiHeader.biCompression == BI_BITFIELDS) ?  *((DWORD *)pBitmapInfo->bmiColors + 2) : DEFAULT_24BPP_BLUE_MASK;
         break;
     default:
         bitfields[0] = 0;
@@ -473,7 +524,7 @@ int WIN32API SetDIBits(HDC hdc, HBITMAP hBitmap, UINT startscan, UINT numlines, 
         bitfields[2] = 0;
         break;
     }
-    if(pBits && bitfields[1] == 0x3E0)
+    if(pBits && bitfields[1] == RGB555_GREEN_MASK)
     {//RGB 555?
         dprintf(("RGB 555->565 conversion required %x %x %x", bitfields[0], bitfields[1], bitfields[2]));
 

@@ -1,4 +1,4 @@
-/* $Id: region.cpp,v 1.27 2002-02-05 11:45:46 sandervl Exp $ */
+/* $Id: region.cpp,v 1.28 2002-07-15 10:02:29 sandervl Exp $ */
 
 /*
  * GDI32 region code
@@ -395,7 +395,7 @@ ODINFUNCTIONNODBG2(int, SelectClipRgn, HDC, hdc, HRGN, hrgn)
     dprintf(("SelectClipRgn: %x %x", hdc, hrgn));
     if(hrgn)
     {
-        hrgn = ObjGetHandleData(hrgn, GDIOBJ_REGION);
+        hrgn = ObjQueryHandleData(hrgn, HNDL_REGION);
         if(hrgn == HANDLE_OBJ_ERROR) {
             dprintf(("WARNING: SelectClipRgn: invalid region!", hdc, hrgn1));
             SetLastError(ERROR_INVALID_HANDLE_W);
@@ -487,7 +487,7 @@ ODINFUNCTIONNODBG3(int, ExtSelectClipRgn, HDC, hdc, HRGN, hrgn, int, mode)
 
    if(hrgn)
    {
-        hrgn = ObjGetHandleData(hrgn, GDIOBJ_REGION);
+        hrgn = ObjQueryHandleData(hrgn, HNDL_REGION);
         if(hrgn == HANDLE_OBJ_ERROR) {
             dprintf(("WARNING: ExtSelectRgn %x %x %d invalid region handle", hdc, hrgn1, mode));
             SetLastError(ERROR_INVALID_HANDLE_W);
@@ -636,7 +636,7 @@ ODINFUNCTIONNODBG2(int, GetClipRgn, HDC, hdc, HRGN, hrgn)
    HRGN       hrgn1 = hrgn;
 #endif
 
-    hrgn = ObjGetHandleData(hrgn, GDIOBJ_REGION);
+    hrgn = ObjQueryHandleData(hrgn, HNDL_REGION);
     if(hrgn == HANDLE_OBJ_ERROR || !pHps) {
         dprintf(("WARNING: GetClipRgn %x %x invalid handle", hdc, hrgn1));
         SetLastError(ERROR_INVALID_HANDLE_W);
@@ -831,7 +831,7 @@ ODINFUNCTIONNODBG4(HRGN, CreatePolyPolygonRgn, const POINT * , lppt, const int *
         return 0;
    }
 
-   if(ObjAllocateHandle(&hrgn, hrgn, GDIOBJ_REGION) == FALSE) {
+   if(ObjAllocateHandle(&hrgn, hrgn, HNDL_REGION) == FALSE) {
         GpiDestroyRegion(hpsRegion, hrgn);
         SetLastError(ERROR_OUTOFMEMORY_W);
         return 0;
@@ -855,7 +855,7 @@ ODINFUNCTIONNODBG4(HRGN, CreateRectRgn, int, left, int, top, int, right, int, bo
         return 0;
    }
 
-   if(ObjAllocateHandle(&hrgn, hrgn, GDIOBJ_REGION) == FALSE) {
+   if(ObjAllocateHandle(&hrgn, hrgn, HNDL_REGION) == FALSE) {
         GpiDestroyRegion(hpsRegion, hrgn);
         SetLastError(ERROR_OUTOFMEMORY_W);
         return 0;
@@ -890,7 +890,7 @@ ODINFUNCTIONNODBG6(HRGN, CreateRoundRectRgn, int, left, int, top, int, right, in
         return 0;
    }
 
-   if(ObjAllocateHandle(&hrgn, hrgn, GDIOBJ_REGION) == FALSE) {
+   if(ObjAllocateHandle(&hrgn, hrgn, HNDL_REGION) == FALSE) {
         GpiDestroyRegion(hpsRegion, hrgn);
         SetLastError(ERROR_OUTOFMEMORY_W);
         return 0;
@@ -1003,7 +1003,7 @@ ODINFUNCTIONNODBG3(HRGN, ExtCreateRegion, const XFORM_W *, pXform, DWORD, count,
             }
     }
 
-    if(ObjAllocateHandle(&hrgn, hrgn, GDIOBJ_REGION) == FALSE) {
+    if(ObjAllocateHandle(&hrgn, hrgn, HNDL_REGION) == FALSE) {
         GpiDestroyRegion(hpsRegion, hrgn);
         SetLastError(ERROR_OUTOFMEMORY_W);
         return 0;
@@ -1026,7 +1026,7 @@ ODINFUNCTIONNODBG4(HRGN, CreateEllipticRgn, int, left, int, top, int, right, int
     dprintf(("CreateEllipticRgn (%d,%d)(%d,%d)", left, top, right, bottom));
     hrgn = GpiCreateEllipticRegion(hpsRegion, &rectl);
 
-    if(ObjAllocateHandle(&hrgn, hrgn, GDIOBJ_REGION) == FALSE) {
+    if(ObjAllocateHandle(&hrgn, hrgn, HNDL_REGION) == FALSE) {
         GpiDestroyRegion(hpsRegion, hrgn);
         SetLastError(ERROR_OUTOFMEMORY_W);
         return 0;
@@ -1076,7 +1076,7 @@ ODINFUNCTIONNODBG3(HRGN, CreatePolygonRgn, const POINT *, lppt, int, cPoints, in
     GpiMove(hpsRegion, (PPOINTL)lppt);
     hrgn = GpiCreatePolygonRegion(hpsRegion, 1, &polygon, POLYGON_BOUNDARY | flMode);
 
-    if(ObjAllocateHandle(&hrgn, hrgn, GDIOBJ_REGION) == FALSE) {
+    if(ObjAllocateHandle(&hrgn, hrgn, HNDL_REGION) == FALSE) {
         GpiDestroyRegion(hpsRegion, hrgn);
         SetLastError(ERROR_OUTOFMEMORY_W);
         return 0;
@@ -1119,9 +1119,9 @@ ODINFUNCTIONNODBG4(int, CombineRgn, HRGN, hrgnDest, HRGN, hrgnSrc1, HRGN, hrgnSr
         return ERROR_W;
     }
 
-    hrgnDest = ObjGetHandleData(hrgnDest, GDIOBJ_REGION);
-    hrgnSrc1 = ObjGetHandleData(hrgnSrc1, GDIOBJ_REGION);
-    hrgnSrc2 = ObjGetHandleData(hrgnSrc2, GDIOBJ_REGION);
+    hrgnDest = ObjQueryHandleData(hrgnDest, HNDL_REGION);
+    hrgnSrc1 = ObjQueryHandleData(hrgnSrc1, HNDL_REGION);
+    hrgnSrc2 = ObjQueryHandleData(hrgnSrc2, HNDL_REGION);
     if(hrgnDest == HANDLE_OBJ_ERROR || hrgnSrc1 == HANDLE_OBJ_ERROR  || (hrgnSrc2 == HANDLE_OBJ_ERROR && combineMode != RGN_COPY_W)) {
         dprintf(("WARNING: CombineRgn %x %x %x %d invalid region", hrgn1, hrgn2, hrgn3, combineMode));
         SetLastError(ERROR_INVALID_HANDLE_W);
@@ -1148,8 +1148,8 @@ ODINFUNCTIONNODBG2(BOOL, EqualRgn, HRGN, hrgn1, HRGN, hrgn2)
    HRGN hrgnt2 = hrgn2;
 #endif
 
-   hrgn1 = ObjGetHandleData(hrgn1, GDIOBJ_REGION);
-   hrgn2 = ObjGetHandleData(hrgn2, GDIOBJ_REGION);
+   hrgn1 = ObjQueryHandleData(hrgn1, HNDL_REGION);
+   hrgn2 = ObjQueryHandleData(hrgn2, HNDL_REGION);
    if(hrgn1 == HANDLE_OBJ_ERROR || hrgn2 == HANDLE_OBJ_ERROR) {
         dprintf(("WARNING: EqualRgn %x %x invalid region", hrgnt1, hrgnt2));
         SetLastError(ERROR_INVALID_HANDLE_W);
@@ -1178,7 +1178,7 @@ ODINFUNCTIONNODBG5(BOOL, SetRectRgn, HRGN, hrgn, int, left, int, top, int, right
    HRGN      hrgn1 = hrgn;
 #endif
 
-    hrgn = ObjGetHandleData(hrgn, GDIOBJ_REGION);
+    hrgn = ObjQueryHandleData(hrgn, HNDL_REGION);
     if(hrgn == HANDLE_OBJ_ERROR) {
         dprintf(("WARNING: SetRectRgn %x (%d,%d)(%d,%d) invalid region handle", hrgn1, left, top, right, bottom));
         SetLastError(ERROR_INVALID_HANDLE_W);
@@ -1207,7 +1207,7 @@ ODINFUNCTIONNODBG3(ULONG, GetRegionData, HRGN, hrgn, ULONG, count, PRGNDATA, pDa
         SetLastError(ERROR_INVALID_PARAMETER_W);
         return 0;
     }
-    hrgn = ObjGetHandleData(hrgn, GDIOBJ_REGION);
+    hrgn = ObjQueryHandleData(hrgn, HNDL_REGION);
     if(hrgn == HANDLE_OBJ_ERROR) {
         dprintf(("WARNING: GetRegionData %x %d %x; invalid region handle", hrgn1, count, pData));
         SetLastError(ERROR_INVALID_HANDLE_W);
@@ -1268,7 +1268,7 @@ ODINFUNCTIONNODBG2(int, GetRgnBox, HRGN, hrgn, PRECT, pRect)
    HRGN      hrgn1 = hrgn;
 #endif
 
-    hrgn = ObjGetHandleData(hrgn, GDIOBJ_REGION);
+    hrgn = ObjQueryHandleData(hrgn, HNDL_REGION);
     if(hrgn == HANDLE_OBJ_ERROR) {
         dprintf(("WARNING: GetRgnBox %x %x invalid region!", hrgn1, pRect));
         SetLastError(ERROR_INVALID_HANDLE_W);
@@ -1304,7 +1304,7 @@ ODINFUNCTIONNODBG2(BOOL, InvertRgn, HDC, hdc, HRGN, hrgn)
 #endif
     pDCData pHps = (pDCData)OSLibGpiQueryDCData((HPS)hdc);
 
-    hrgn = ObjGetHandleData(hrgn, GDIOBJ_REGION);
+    hrgn = ObjQueryHandleData(hrgn, HNDL_REGION);
     if(!pHps || hrgn == HANDLE_OBJ_ERROR) {
         dprintf(("WARNING: InvertRgn %x %x invalid handle!", hdc, hrgn));
         SetLastError(ERROR_INVALID_HANDLE_W);
@@ -1355,7 +1355,7 @@ ODINFUNCTIONNODBG3(int, OffsetRgn, HRGN, hrgn, int, xOffset, int, yOffset)
    HRGN      hrgn1 = hrgn;
 #endif
 
-    hrgn = ObjGetHandleData(hrgn, GDIOBJ_REGION);
+    hrgn = ObjQueryHandleData(hrgn, HNDL_REGION);
     if(hrgn == HANDLE_OBJ_ERROR) {
         dprintf(("WARNING: OffsetRgn %x %d %d invalid handle!", hrgn, xOffset, yOffset));
         SetLastError(ERROR_INVALID_HANDLE_W);
@@ -1404,7 +1404,7 @@ ODINFUNCTIONNODBG5(BOOL, FrameRgn, HDC, hdc, HRGN, hrgn, HBRUSH, hBrush, int, wi
 #endif
     pDCData  pHps = (pDCData)OSLibGpiQueryDCData((HPS)hdc);
 
-    hrgn = ObjGetHandleData(hrgn, GDIOBJ_REGION);
+    hrgn = ObjQueryHandleData(hrgn, HNDL_REGION);
     if(!pHps || hrgn == HANDLE_OBJ_ERROR) {
         dprintf(("WARNING: FrameRgn %x %x %x (%d,%d) invalid handle!", hdc, hrgn, hBrush, width, height));
         SetLastError(ERROR_INVALID_HANDLE_W);
@@ -1451,7 +1451,7 @@ ODINFUNCTIONNODBG3(BOOL, FillRgn, HDC, hdc, HRGN, hrgn, HBRUSH, hBrush)
 
     pDCData  pHps = (pDCData)OSLibGpiQueryDCData((HPS)hdc);
 
-    hrgn = ObjGetHandleData(hrgn, GDIOBJ_REGION);
+    hrgn = ObjQueryHandleData(hrgn, HNDL_REGION);
     if(!pHps || hrgn == HANDLE_OBJ_ERROR) {
         dprintf(("WARNING: FillRgn %x %x %x invalid handle!", hdc, hrgn1, hBrush));
         SetLastError(ERROR_INVALID_HANDLE_W);
@@ -1505,7 +1505,7 @@ ODINFUNCTIONNODBG3(BOOL, PtInRegion, HRGN, hrgn, int, x, int, y)
    HRGN      hrgn1 = hrgn;
 #endif
 
-    hrgn = ObjGetHandleData(hrgn, GDIOBJ_REGION);
+    hrgn = ObjQueryHandleData(hrgn, HNDL_REGION);
     if(hrgn == HANDLE_OBJ_ERROR) {
         dprintf(("WARNING: PtInRgn %x (%d,%d) invalid region!", hrgn1, x, y));
         SetLastError(ERROR_INVALID_HANDLE_W);
@@ -1543,7 +1543,7 @@ ODINFUNCTIONNODBG2(BOOL, RectInRegion, HRGN, hrgn, const RECT *, pRect)
         SetLastError(ERROR_INVALID_PARAMETER_W);
         return FALSE;
     }
-    hrgn = ObjGetHandleData(hrgn, GDIOBJ_REGION);
+    hrgn = ObjQueryHandleData(hrgn, HNDL_REGION);
     if(hrgn == HANDLE_OBJ_ERROR) {
         dprintf(("WARNING: RectInRgn %x %x invalid region", hrgn1, pRect));
         SetLastError(ERROR_INVALID_HANDLE_W);
@@ -1594,7 +1594,7 @@ ODINFUNCTIONNODBG1(HRGN, PathToRegion, HDC, hdc)
         goto error;
 
     hrgnwin = CreateRectRgn(1, 1, 2, 2);
-    hrgn = ObjGetHandleData(hrgnwin, GDIOBJ_REGION);
+    hrgn = ObjQueryHandleData(hrgnwin, HNDL_REGION);
     if(hrgn == HANDLE_OBJ_ERROR) {
         dprintf(("WARNING: PathToRegion invalid region", hrgnwin));
         SetLastError(ERROR_INVALID_HANDLE_W);
