@@ -1,4 +1,4 @@
-/* $Id: winexebase.h,v 1.1 2000-03-09 19:03:22 sandervl Exp $ */
+/* $Id: winexebase.h,v 1.2 2000-09-12 04:29:58 bird Exp $ */
 
 /*
  * Win32 PE Exe base class
@@ -22,10 +22,6 @@ class Win32ExeBase : public virtual Win32ImageBase
 public:
 	Win32ExeBase(HINSTANCE hInstance);
 virtual ~Win32ExeBase();
-
-	void   setCommandLine(char *cline);
-	LPSTR  getCommandLineA()                { return cmdLineA;  };
-	LPWSTR getCommandLineW()                { return cmdLineW;  };
 
 	BOOL  isConsoleApp()                   { return fConsoleApp; };
 

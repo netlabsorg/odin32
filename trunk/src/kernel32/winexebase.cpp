@@ -1,4 +1,4 @@
-/* $Id: winexebase.cpp,v 1.9 2000-05-02 20:53:14 sandervl Exp $ */
+/* $Id: winexebase.cpp,v 1.10 2000-09-12 04:29:58 bird Exp $ */
 
 /*
  * Win32 exe base class
@@ -47,7 +47,7 @@ BOOL IsExeStarted()
 }
 //******************************************************************************
 //******************************************************************************
-Win32ExeBase::Win32ExeBase(HINSTANCE hInstance) 
+Win32ExeBase::Win32ExeBase(HINSTANCE hInstance)
                  : Win32ImageBase(hInstance),
                    fConsoleApp(FALSE),
                    cmdLineA(NULL), cmdLineW(NULL)
@@ -61,7 +61,7 @@ Win32ExeBase::~Win32ExeBase()
  QueueItem    *item;
  Win32DllBase *dll;
 
-  //First delete all dlls loaded by LoadLibrary 
+  //First delete all dlls loaded by LoadLibrary
   //Then delete all dlls that were loaded by the exe
   //(NOTE: This is what NT does; first delete loadlib dlls in LIFO order and
   //       then the exe dlls)
@@ -134,17 +134,6 @@ ULONG Win32ExeBase::start()
 BOOL Win32ExeBase::isDll()
 {
   return FALSE;
-}
-//******************************************************************************
-//******************************************************************************
-void Win32ExeBase::setCommandLine(char *cline)
-{
- ULONG cmdlength = strlen(cline) + 1;
-
-  cmdLineA = (LPSTR)malloc(cmdlength);
-  strcpy(cmdLineA, cline);
-  cmdLineW = (LPWSTR)malloc(cmdlength*sizeof(WCHAR));
-  AsciiToUnicode(cmdLineA, cmdLineW);
 }
 //******************************************************************************
 //******************************************************************************
