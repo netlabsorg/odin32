@@ -1,4 +1,4 @@
-/* $Id: header.h,v 1.9 2000-04-08 18:30:11 cbratschi Exp $ */
+/* $Id: header.h,v 1.10 2000-04-18 16:04:55 cbratschi Exp $ */
 
 /*
  * Header window definitions
@@ -60,8 +60,16 @@ typedef struct
     HEADER_ITEM *items;         /* pointer to array of HEADER_ITEM's */
 } HEADER_INFO;
 
-extern DWORD HEADER_GetExpandedColumnTextWidth(HWND hwnd,INT iItem);
+extern LRESULT HEADER_DeleteItem(HWND hwnd,WPARAM wParam);
+extern DWORD   HEADER_GetExpandedColumnTextWidth(HWND hwnd,INT iItem);
+extern LRESULT HEADER_GetItem(HWND hwnd,WPARAM wParam,LPARAM lParam,BOOL unicode);
+extern LRESULT HEADER_GetItemCount(HWND hwnd);
 extern LRESULT HEADER_GetItemRect(HWND hwnd,WPARAM wParam,LPARAM lParam);
+extern LRESULT HEADER_InsertItem(HWND hwnd,WPARAM wParam,LPARAM lParam,BOOL unicode);
+extern LRESULT HEADER_SetItem(HWND hwnd,WPARAM wParam,LPARAM lParam,BOOL unicode);
+extern LRESULT HEADER_SetOrderArray(HWND hwnd,WPARAM wParam,LPARAM lParam);
+extern LRESULT HEADER_GetOrderArray(HWND hwnd,WPARAM wParam,LPARAM lParam);
+extern LRESULT HEADER_Layout(HWND hwnd,WPARAM wParam,LPARAM lParam);
 
 extern VOID HEADER_Register (VOID);
 extern VOID HEADER_Unregister (VOID);
