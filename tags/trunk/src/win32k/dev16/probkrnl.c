@@ -1,4 +1,4 @@
-/* $Id: probkrnl.c,v 1.29 2000-12-02 23:28:51 bird Exp $
+/* $Id: probkrnl.c,v 1.30 2000-12-11 06:34:44 bird Exp $
  *
  * Description:   Autoprobes the os2krnl file and os2krnl[*].sym files.
  *                Another Hack!
@@ -103,12 +103,16 @@ IMPORTKRNLSYM DATA16_GLOBAL aImportTab[NBR_OF_KRNLIMPORTS] =
     {FALSE, -1,  9, "_ldrClose",            "@4",  -1,  -1,  -1,  -1, EPT_PROC32},
     {FALSE, -1, 12, "_LDRQAppType",         "@8",  -1,  -1,  -1,  -1, EPT_PROC32},
     {FALSE, -1, 20, "_ldrEnum32bitRelRecs", "@24", -1,  -1,  -1,  -1, EPT_PROC32},
+    {FALSE, -1, 14, "_ldrFindModule",       "@16", -1,  -1,  -1,  -1, EPT_PROC32},
+    {FALSE, -1, 21, "_ldrCheckInternalName","@4",  -1,  -1,  -1,  -1, EPT_PROC32},
     {FALSE, -1, 11, "g_tkExecPgm",          "",    -1,  -1,  -1,  -1, EPT_PROC32},
     {FALSE, -1, 15, "_tkStartProcess",      "",    -1,  -1,  -1,  -1, EPT_PROC32},
     {FALSE, -1, 12, "_LDRClearSem",         "@0",  -1,  -1,  -1,  -1, EPT_PROCIMPORT32},
     {FALSE, -1, 21, "_ldrASMpMTEFromHandle","@4",  -1,  -1,  -1,  -1, EPT_PROCIMPORT32},
-    {FALSE, -1, 14, "_ldrFindModule",       "@16", -1,  -1,  -1,  -1, EPT_PROCIMPORT32},
     {FALSE, -1, 21, "_ldrValidateMteHandle","@4",  -1,  -1,  -1,  -1, EPT_PROCIMPORT32},
+    {FALSE, -1, 13, "_ldrTransPath",        "@4",  -1,  -1,  -1,  -1, EPT_PROCIMPORT32},
+    {FALSE, -1, 15, "_ldrGetFileName",      "@12", -1,  -1,  -1,  -1, EPT_PROCIMPORT32},
+    {FALSE, -1, 15, "_ldrUCaseString",      "@8",  -1,  -1,  -1,  -1, EPT_PROCIMPORT32},
     {FALSE, -1, 11, "_VMAllocMem",          "@36", -1,  -1,  -1,  -1, EPT_PROCIMPORT32},
     {FALSE, -1, 10, "_VMFreeMem",           "@12", -1,  -1,  -1,  -1, EPT_PROCIMPORT32},
     {FALSE, -1, 11, "_VMGetOwner",          "@8",  -1,  -1,  -1,  -1, EPT_PROCIMPORT32},
@@ -136,6 +140,14 @@ IMPORTKRNLSYM DATA16_GLOBAL aImportTab[NBR_OF_KRNLIMPORTS] =
     {FALSE, -1, 11, "ptda_handle",          "",    -1,  -1,  -1,  -1, EPT_VARIMPORT16},
     {FALSE, -1, 11, "ptda_module",          "",    -1,  -1,  -1,  -1, EPT_VARIMPORT16},
     {FALSE, -1, 18, "ptda_pBeginLIBPATH",   "",    -1,  -1,  -1,  -1, EPT_VARIMPORT16},
+    {FALSE, -1, 11, "_LDRLibPath",          "",    -1,  -1,  -1,  -1, EPT_VARIMPORT32},
+    {FALSE, -1,  6, "_mte_h",               "",    -1,  -1,  -1,  -1, EPT_VARIMPORT32},
+    {FALSE, -1,  9, "_global_h",            "",    -1,  -1,  -1,  -1, EPT_VARIMPORT32},
+    {FALSE, -1,  9, "_global_l",            "",    -1,  -1,  -1,  -1, EPT_VARIMPORT32},
+    {FALSE, -1, 11, "_specific_h",          "",    -1,  -1,  -1,  -1, EPT_VARIMPORT32},
+    {FALSE, -1, 11, "_specific_l",          "",    -1,  -1,  -1,  -1, EPT_VARIMPORT32},
+    {FALSE, -1, 10, "_program_h",           "",    -1,  -1,  -1,  -1, EPT_VARIMPORT32},
+    {FALSE, -1, 10, "_program_l",           "",    -1,  -1,  -1,  -1, EPT_VARIMPORT32},
     {FALSE, -1, 14, "SecPathFromSFN",       "",    -1,  -1,  -1,  -1, EPT_PROCIMPORTNR32},
 #if 0 /* not used */
     {FALSE, -1,  9, "_KSEMInit",            "@12", -1,  -1,  -1,  -1, EPT_PROCIMPORT32},
@@ -144,7 +156,6 @@ IMPORTKRNLSYM DATA16_GLOBAL aImportTab[NBR_OF_KRNLIMPORTS] =
     {FALSE, -1, 15, "_IOSftTransPath",      "@4",  -1,  -1,  -1,  -1, EPT_PROCIMPORT32},
     {FALSE, -1, 12, "_IOSftReadAt",         "@20", -1,  -1,  -1,  -1, EPT_PROCIMPORT32},
     {FALSE, -1, 13, "_IOSftWriteAt",        "@20", -1,  -1,  -1,  -1, EPT_PROCIMPORT32},
-    {FALSE, -1, 11, "_LDRLibPath",          "",    -1,  -1,  -1,  -1, EPT_VARIMPORT32},
 #endif
 #if 0/* experimenting...*/
     {FALSE, -1, 14, "_ldrSetVMflags",       "@16", -1,  -1,  -1,  -1, EPT_PROC32},
@@ -402,7 +413,7 @@ void     kmemcpy(char *psz1, const char *psz2, int cch)
  * @returns   Pointer to occurence of psz2 in psz1.
  * @param     psz1  String to be search.
  * @param     psz2  Substring to search for.
- * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @author    knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  */
 char *kstrstr(const char *psz1, const char *psz2)
 {
@@ -512,7 +523,7 @@ int kstrlen(register const char * psz)
  * @returns   Pointer to target string.
  * @param     pszTarget  Target string.
  * @param     pszSource  Source string.
- * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @author    knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  */
 char * kstrcpy(char * pszTarget, register const char * pszSource)
 {
@@ -585,7 +596,7 @@ int kargncpy(char * pszTarget, const char * pszArg, unsigned cchMaxlen)
  * @returns Pointer to error text. NULL if not found.
  * @param   sErr  Error code id.
  * @status  completely implemented.
- * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @author    knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  */
 const char * GetErrorMsg(short sErr)
 {
@@ -615,7 +626,7 @@ const char * GetErrorMsg(short sErr)
  * @param     cObjects      Count of object in the running kernel.
  * @sketch    Loop thru the table.
  * @status    completely implemented.
- * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @author    knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  */
 int LookupKrnlEntry(unsigned short usBuild, unsigned short fKernel, unsigned char cObjects)
 {
