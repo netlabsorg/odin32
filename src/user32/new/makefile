@@ -1,0 +1,84 @@
+# $Id: makefile,v 1.1 1999-07-14 08:35:35 sandervl Exp $
+
+#
+# PD-Win32 API
+#
+#       user32.dll makefile
+#
+
+PDWIN32_INCLUDE = ..\..\..\include
+PDWIN32_LIB = ..\..\..\lib
+PDWIN32_BIN = ..\..\..\bin
+
+
+!include $(PDWIN32_INCLUDE)/pdwin32.mk
+
+
+CFLAGS = $(CFLAGS) -I$(PDWIN32_INCLUDE)
+CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
+
+
+TARGET = user32
+
+OBJS =  user32.obj resstring.obj dialog.obj loadres.obj \
+        dde.obj \
+        icon.obj hook.obj hooks.obj menu.obj \
+        usrcall.obj defwndproc.obj syscolor.obj char.obj initterm.obj \
+        uitools.obj unknown.obj spy.obj wndmsg.obj \
+        pmwindow.obj win32class.obj win32wnd.obj win32dlg.obj \
+ 	msgbox.obj window.obj windowmsg.obj windowclass.obj \
+        windowword.obj gen_object.obj oslibwin.obj
+
+
+all: $(TARGET).dll $(TARGET).lib
+
+
+$(TARGET).dll: $(OBJS) $(TARGET).def
+        $(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) $(TARGET).def \
+              $(PDWIN32_LIB)/pmwinx.lib $(PDWIN32_LIB)/gdi32.lib $(PDWIN32_LIB)/kernel32.lib $(PDWIN32_LIB)/libuls.lib
+        $(CP) $@ $(PDWIN32_BIN)
+
+
+$(TARGET).lib: $(TARGET)exp.def
+        $(IMPLIB) $(IMPLIBFLAGS) $@ $(TARGET)exp.def
+        $(CP) $@ $(PDWIN32_LIB)
+
+
+user32.obj: user32.cpp $(PDWIN32_INCLUDE)\wndproc.h \
+            icon.h syscolor.h
+resstring.obj: resstring.cpp resstring.h
+char.obj: char.cpp user32.h
+loadres.obj: loadres.cpp user32.h
+icon.obj: icon.cpp icon.h
+menu.obj: menu.cpp user32.h
+syscolor.obj: syscolor.cpp syscolor.h
+usrcall.obj: usrcall.cpp usrcall.h
+dialog.obj: dialog.cpp
+dde.obj: dde.cpp
+hook.obj: hook.cpp hooks.h
+defwndproc.obj: defwndproc.cpp syscolor.h
+hooks.obj: hooks.cpp hooks.h
+initterm.obj: initterm.cpp $(PDWIN32_INCLUDE)\spy.h pmwindow.h
+uitools.obj: uitools.cpp
+unknown.obj: unknown.cpp
+wndmsg.obj: wndmsg.cpp wndmsg.h
+
+spy.obj: spy.cpp $(PDWIN32_INCLUDE)\spy.h
+
+msgbox.obj:    msgbox.cpp
+window.obj:    window.cpp win32class.h win32wnd.h
+windowmsg.obj: windowmsg.cpp win32class.h win32wnd.h
+windowclass.obj: windowclass.cpp win32class.h win32wnd.h
+windowword.obj:  windowword.cpp win32class.h win32wnd.h win32dlg.h
+
+pmwindow.obj:   pmwindow.cpp win32class.h win32wnd.h win32dlg.h pmwindow.h
+win32class.obj: win32class.cpp win32class.h win32wnd.h win32dlg.h gen_object.h oslibwin.h
+win32wnd.obj:   win32wnd.cpp win32class.h win32wnd.h win32dlg.h gen_object.h oslibwin.h
+win32dlg.obj:   win32dlg.cpp win32class.h win32wnd.h win32dlg.h gen_object.h oslibwin.h
+gen_object.obj: gen_object.cpp gen_object.h
+oslibwin.obj:   oslibwin.cpp oslibwin.h
+
+clean:
+        $(RM) *.obj *.lib *.dll *~ *.map *.pch
+        $(RM) $(PDWIN32_BIN)\$(TARGET).dll
+        $(RM) $(PDWIN32_LIB)\$(TARGET).lib
