@@ -1,4 +1,4 @@
-/* $Id: kKLInitHlp.h,v 1.3 2001-09-17 02:27:55 bird Exp $
+/* $Id: kKLInitHlp.h,v 1.4 2001-11-18 04:08:53 bird Exp $
  *
  * Definition of the R0 initiation helper IOCtl interface.
  *
@@ -8,8 +8,8 @@
  *
  */
 
-#ifndef _kKInitHlp_h_
-#define _kKInitHlp_h_
+#ifndef _kKLInitHlp_h_
+#define _kKLInitHlp_h_
 
 
 
