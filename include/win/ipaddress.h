@@ -1,4 +1,4 @@
-/* $Id: ipaddress.h,v 1.1 1999-05-24 20:19:13 ktk Exp $ */
+/* $Id: ipaddress.h,v 1.2 2000-02-25 16:58:33 cbratschi Exp $ */
 
 /*
  * IP Address class extra info
@@ -12,18 +12,20 @@
 
 typedef struct tagIPADDRESS_INFO
 {
-	BYTE LowerLimit[4];
-	BYTE UpperLimit[4];
+        COMCTL32_HEADER header;
 
-	RECT 	rcClient;
-	INT	uFocus;
+        BYTE LowerLimit[4];
+        BYTE UpperLimit[4];
+
+        RECT    rcClient;
+        INT     uFocus;
 } IPADDRESS_INFO;
 
 typedef struct tagIP_SUBCLASS_INFO
 {
     WNDPROC wpOrigProc[4];
     HWND    hwndIP[4];
-	IPADDRESS_INFO *infoPtr;
+        IPADDRESS_INFO *infoPtr;
     HWND    hwnd;
     UINT    uRefCount;
 } IP_SUBCLASS_INFO, *LPIP_SUBCLASS_INFO;

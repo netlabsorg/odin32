@@ -1,4 +1,4 @@
-/* $Id: commctrl.h,v 1.22 2000-02-20 18:26:07 cbratschi Exp $ */
+/* $Id: commctrl.h,v 1.23 2000-02-25 16:58:32 cbratschi Exp $ */
 /*
  * Common controls definitions
  */
@@ -2717,16 +2717,30 @@ typedef struct tagLVHITTESTINFO
 #define _LV_HITTESTINFO tagLVHITTESTINFO
 #define LVHITTESTINFO_V1_SIZE CCSIZEOF_STRUCT(LVHITTESTINFO,iItem)
 
-typedef struct tagLVFINDINFO
+typedef struct tagLVFINDINFOA
 {
         UINT flags;
         LPCSTR psz;
         LPARAM lParam;
         POINT pt;
         UINT vkDirection;
-} LVFINDINFO, *LPLVFINDINFO;
+} LVFINDINFOA, *LPLVFINDINFOA;
 
-#define LV_FINDINFO LVFINDINFO
+#define LV_FINDINFOA LVFINDINFOA
+
+typedef struct tagLVFINDINFOW
+{
+        UINT flags;
+        LPCWSTR psz;
+        LPARAM lParam;
+        POINT pt;
+        UINT vkDirection;
+} LVFINDINFOW, *LPLVFINDINFOW;
+
+#define LV_FINDINFOW LVFINDINFOW
+
+#define LV_FINDINFO   WINELIB_NAME_AW(LV_FINDINFO)
+#define LVFINDINFO    WINELIB_NAME_AW(LVFINDINFO)
 
 typedef struct tagTCHITTESTINFO
 {
@@ -2749,70 +2763,312 @@ typedef struct tagNMLVCACHEHINT
 #define PNM_CACHEHINT  LPNMLVCACHEHINT
 #define NM_CACHEHINT   NMLVCACHEHINT
 
-#define ListView_GetNextItem(hwnd,nItem,flags) \
-    (INT)SendMessageA((hwnd),LVM_GETNEXTITEM,(WPARAM)(INT)(nItem),(LPARAM)(MAKELPARAM(flags,0)))
-#define ListView_FindItem(hwnd,nItem,plvfi) \
-    (INT)SendMessageA((hwnd),LVM_FINDITEMA,(WPARAM)(INT)(nItem),(LPARAM)(LVFINDINFO*)(plvfi))
-#define ListView_Arrange(hwnd,code) \
-    (INT)SendMessageA((hwnd),LVM_ARRANGE,(WPARAM)(INT)(code),0L)
-#define ListView_GetItemPosition(hwnd,i,ppt) \
-    (INT)SendMessageA((hwnd),LVM_GETITEMPOSITION,(WPARAM)(INT)(i),(LPARAM)(LPPOINT)(ppt))
-#define ListView_GetItemRect(hwnd,i,prc) \
-    (INT)SendMessageA((hwnd),LVM_GETITEMRECT,(WPARAM)(INT)(i),(LPARAM)(LPRECT)(prc))
-#define ListView_SetItemA(hwnd,pitem) \
-    (INT)SendMessageA((hwnd),LVM_SETITEMA,0,(LPARAM)(const LVITEMA *)(pitem))
-#define ListView_SetItemState(hwnd,i,pitem) \
-    (BOOL)SendMessageA((hwnd),LVM_SETITEMSTATE,(WPARAM)(UINT)(i),(LPARAM)(LPLVITEMA)(pitem))
-#define ListView_GetItemState(hwnd,i,mask) \
-    (BOOL)SendMessageA((hwnd),LVM_GETITEMSTATE,(WPARAM)(UINT)(i),(LPARAM)(UINT)(mask))
-#define ListView_GetCountPerPage(hwnd) \
-    (BOOL)SendMessageW((hwnd),LVM_GETCOUNTPERPAGE,0,0L)
-#define ListView_GetImageList(hwnd,iImageList) \
-    (HIMAGELIST)SendMessageA((hwnd),LVM_GETIMAGELIST,(WPARAM)(INT)(iImageList),0L)
-#define ListView_GetStringWidthA(hwnd,pstr) \
-    (INT)SendMessageA((hwnd),LVM_GETSTRINGWIDTHA,0,(LPARAM)(LPCSTR)(pstr))
-#define ListView_GetTopIndex(hwnd) \
-    (BOOL)SendMessageA((hwnd),LVM_GETTOPINDEX,0,0L)
-#define ListView_Scroll(hwnd,dx,dy) \
-    (BOOL)SendMessageA((hwnd),LVM_SCROLL,(WPARAM)(INT)(dx),(LPARAM)(INT)(dy))
-#define ListView_EnsureVisible(hwnd,i,fPartialOk) \
-    (BOOL)SendMessageA((hwnd),LVM_ENSUREVISIBLE,(WPARAM)(INT)i,(LPARAM)(BOOL)fPartialOk)
-#define ListView_EditLabel(hwnd,i) \
-    (HWND)SendMessageA((hwnd),LVM_EDITLABELA,(WPARAM)(INT)i,0L)
-#define ListView_SetBkColor(hwnd,clrBk) \
-    (BOOL)SendMessageA((hwnd),LVM_SETBKCOLOR,0,(LPARAM)(COLORREF)(clrBk))
-#define ListView_GetImageList(hwnd,iImageList) \
-    (HIMAGELIST)SendMessageA((hwnd),LVM_GETIMAGELIST,(WPARAM)(INT)(iImageList),0L)
-#define ListView_SetImageList(hwnd,himl,iImageList) \
-    (HIMAGELIST)(UINT)SendMessageA((hwnd),LVM_SETIMAGELIST,(WPARAM)(iImageList),(LPARAM)(UINT)(HIMAGELIST)(himl))
-#define ListView_GetItemCount(hwnd) \
-    (INT)SendMessageA((hwnd),LVM_GETITEMCOUNT,0,0L)
-#define ListView_GetItemA(hwnd,pitem) \
-    (BOOL)SendMessageA((hwnd),LVM_GETITEMA,0,(LPARAM)(LVITEMA *)(pitem))
-#define ListView_GetItemW(hwnd,pitem) \
-    (BOOL)SendMessageW((hwnd),LVM_GETITEMW,0,(LPARAM)(LVITEMW *)(pitem))
-#define ListView_GetItem WINELIB_NAME_AW(ListView_GetItem)
-#define ListView_HitTest(hwnd,pinfo) \
-    (INT)SendMessageA((hwnd),LVM_HITTEST,0,(LPARAM)(LPLVHITTESTINFO)(pinfo))
-#define ListView_InsertItemA(hwnd,pitem) \
-    (INT)SendMessageA((hwnd),LVM_INSERTITEMA,0,(LPARAM)(const LVITEMA *)(pitem))
-#define ListView_InsertItemW(hwnd,pitem) \
-    (INT)SendMessageW((hwnd),LVM_INSERTITEMW,0,(LPARAM)(const LVITEMW *)(pitem))
-#define ListView_InsertItem WINELIB_NAME_AW(ListView_InsertItem)
-#define ListView_DeleteAllItems(hwnd) \
-    (BOOL)SendMessageA((hwnd),LVM_DELETEALLITEMS,0,0L)
-#define ListView_InsertColumnA(hwnd,iCol,pcol) \
-    (INT)SendMessageA((hwnd),LVM_INSERTCOLUMNA,(WPARAM)(INT)(iCol),(LPARAM)(const LVCOLUMNA *)(pcol))
-#define ListView_InsertColumnW(hwnd,iCol,pcol) \
-    (INT)SendMessageW((hwnd),LVM_INSERTCOLUMNW,(WPARAM)(INT)(iCol),(LPARAM)(const LVCOLUMNW *)(pcol))
-#define ListView_InsertColumn WINELIB_NAME_AW(ListView_InsertColumn)
-#define ListView_SortItems(hwndLV,_pfnCompare,_lPrm) \
-    (BOOL)SendMessageA((hwndLV),LVM_SORTITEMS,(WPARAM)(LPARAM)_lPrm,(LPARAM)(PFNLVCOMPARE)_pfnCompare)
-#define ListView_SetItemPosition(hwndLV, i, x, y) \
-    (BOOL)SendMessageA((hwndLV),LVM_SETITEMPOSITION,(WPARAM)(INT)(i),MAKELPARAM((x),(y)))
-#define ListView_GetSelectedCount(hwndLV) \
-    (UINT)SendMessageA((hwndLV),LVM_GETSELECTEDCOUNT,0,0L)
+#define ListView_SetUnicodeFormat(hwnd, fUnicode)  \
+    (BOOL)SendMessageA((hwnd), LVM_SETUNICODEFORMAT, (WPARAM)(fUnicode), 0)
 
+#define ListView_GetUnicodeFormat(hwnd)  \
+    (BOOL)SendMessageA((hwnd), LVM_GETUNICODEFORMAT, 0, 0)
+
+#define ListView_GetBkColor(hwnd)  \
+    (COLORREF)SendMessageA((hwnd), LVM_GETBKCOLOR, 0, 0L)
+
+#define ListView_SetBkColor(hwnd, clrBk) \
+    (BOOL)SendMessageA((hwnd), LVM_SETBKCOLOR, 0, (LPARAM)(COLORREF)(clrBk))
+
+#define ListView_GetImageList(hwnd, iImageList) \
+    (HIMAGELIST)SendMessageA((hwnd), LVM_GETIMAGELIST, (WPARAM)(INT)(iImageList), 0L)
+
+#define ListView_SetImageList(hwnd, himl, iImageList) \
+    (HIMAGELIST)SendMessageA((hwnd), LVM_SETIMAGELIST, (WPARAM)(iImageList), (LPARAM)(HIMAGELIST)(himl))
+
+#define ListView_GetItemCount(hwnd) \
+    (int)SendMessageA((hwnd), LVM_GETITEMCOUNT, 0, 0L)
+
+#define ListView_GetItemA(hwnd, pitem) \
+    (BOOL)SendMessageA((hwnd), LVM_GETITEMA, 0, (LPARAM)(LVITEMA*)(pitem))
+
+#define ListView_GetItemW(hwnd, pitem) \
+    (BOOL)SendMessageA((hwnd), LVM_GETITEMW, 0, (LPARAM)(LVITEMW*)(pitem))
+
+#define ListView_SetItemA(hwnd, pitem) \
+    (BOOL)SendMessageA((hwnd), LVM_SETITEMA, 0, (LPARAM)(const LVITEMA*)(pitem))
+
+#define ListView_SetItemW(hwnd, pitem) \
+    (BOOL)SendMessageA((hwnd), LVM_SETITEMW, 0, (LPARAM)(const LVITEMW*)(pitem))
+
+#define ListView_InsertItemA(hwnd, pitem)   \
+    (int)SendMessageA((hwnd), LVM_INSERTITEMA, 0, (LPARAM)(const LVITEMA*)(pitem))
+
+#define ListView_InsertItemW(hwnd, pitem)   \
+    (int)SendMessageA((hwnd), LVM_INSERTITEMW, 0, (LPARAM)(const LVITEMW*)(pitem))
+
+#define ListView_DeleteItem(hwnd, i) \
+    (BOOL)SendMessageA((hwnd), LVM_DELETEITEM, (WPARAM)(int)(i), 0L)
+
+#define ListView_DeleteAllItems(hwnd) \
+    (BOOL)SendMessageA((hwnd), LVM_DELETEALLITEMS, 0, 0L)
+
+#define ListView_GetCallbackMask(hwnd) \
+    (BOOL)SendMessageA((hwnd), LVM_GETCALLBACKMASK, 0, 0)
+
+#define ListView_SetCallbackMask(hwnd, mask) \
+    (BOOL)SendMessageA((hwnd), LVM_SETCALLBACKMASK, (WPARAM)(UINT)(mask), 0)
+
+#define ListView_GetNextItem(hwnd, i, flags) \
+    (int)SendMessageA((hwnd), LVM_GETNEXTITEM, (WPARAM)(int)(i), MAKELPARAM((flags), 0))
+
+#define ListView_FindItemA(hwnd, iStart, plvfi) \
+    (int)SendMessageA((hwnd), LVM_FINDITEMA, (WPARAM)(int)(iStart), (LPARAM)(const LVFINDINFOA*)(plvfi))
+
+#define ListView_FindItemW(hwnd, iStart, plvfi) \
+    (int)SendMessageA((hwnd), LVM_FINDITEMW, (WPARAM)(int)(iStart), (LPARAM)(const LVFINDINFOW*)(plvfi))
+
+#define ListView_GetItemRect(hwnd, i, prc, code) \
+     (BOOL)SendMessageA((hwnd), LVM_GETITEMRECT, (WPARAM)(int)(i), \
+           ((prc) ? (((RECT*)(prc))->left = (code),(LPARAM)(RECT*)(prc)) : (LPARAM)(RECT*)NULL))
+
+#define ListView_SetItemPosition(hwndLV, i, x, y) \
+    (BOOL)SendMessageA((hwndLV), LVM_SETITEMPOSITION, (WPARAM)(int)(i), MAKELPARAM((x), (y)))
+
+#define ListView_GetItemPosition(hwndLV, i, ppt) \
+    (BOOL)SendMessageA((hwndLV), LVM_GETITEMPOSITION, (WPARAM)(int)(i), (LPARAM)(POINT*)(ppt))
+
+#define ListView_GetStringWidthA(hwndLV, psz) \
+    (int)SendMessageA((hwndLV), LVM_GETSTRINGWIDTHA, 0, (LPARAM)(LPCTSTR)(psz))
+
+#define ListView_GetStringWidthW(hwndLV, psz) \
+    (int)SendMessageA((hwndLV), LVM_GETSTRINGWIDTHW, 0, (LPARAM)(LPWSTR)(psz))
+
+#define ListView_HitTest(hwndLV, pinfo) \
+    (int)SendMessageA((hwndLV), LVM_HITTEST, 0, (LPARAM)(LV_HITTESTINFO*)(pinfo))
+
+#define ListView_EnsureVisible(hwndLV, i, fPartialOK) \
+    (BOOL)SendMessageA((hwndLV), LVM_ENSUREVISIBLE, (WPARAM)(int)(i), MAKELPARAM((fPartialOK), 0))
+
+#define ListView_Scroll(hwndLV, dx, dy) \
+    (BOOL)SendMessageA((hwndLV), LVM_SCROLL, (WPARAM)(int)(dx), (LPARAM)(int)(dy))
+
+#define ListView_RedrawItems(hwndLV, iFirst, iLast) \
+    (BOOL)SendMessageA((hwndLV), LVM_REDRAWITEMS, (WPARAM)(int)(iFirst), (LPARAM)(int)(iLast))
+
+#define ListView_Arrange(hwndLV, code) \
+    (BOOL)SendMessageA((hwndLV), LVM_ARRANGE, (WPARAM)(UINT)(code), 0L)
+
+#define ListView_EditLabel(hwndLV, i) \
+    (HWND)SendMessageA((hwndLV), LVM_EDITLABEL, (WPARAM)(int)(i), 0L)
+
+#define ListView_GetEditControl(hwndLV) \
+    (HWND)SendMessageA((hwndLV), LVM_GETEDITCONTROL, 0, 0L)
+
+#define ListView_GetColumnA(hwnd, iCol, pcol) \
+    (BOOL)SendMessageA((hwnd), LVM_GETCOLUMNA, (WPARAM)(int)(iCol), (LPARAM)(LVCOLUMNA*)(pcol))
+
+#define ListView_GetColumnW(hwnd, iCol, pcol) \
+    (BOOL)SendMessageA((hwnd), LVM_GETCOLUMNW, (WPARAM)(int)(iCol), (LPARAM)(LVCOLUMNW*)(pcol))
+
+#define ListView_SetColumnA(hwnd, iCol, pcol) \
+    (BOOL)SendMessageA((hwnd), LVM_SETCOLUMNA, (WPARAM)(int)(iCol), (LPARAM)(const LVCOLUMNA*)(pcol))
+
+#define ListView_SetColumnW(hwnd, iCol, pcol) \
+    (BOOL)SendMessageA((hwnd), LVM_SETCOLUMNW, (WPARAM)(int)(iCol), (LPARAM)(const LVCOLUMNW*)(pcol))
+
+#define ListView_InsertColumnA(hwnd, iCol, pcol) \
+    (int)SendMessageA((hwnd), LVM_INSERTCOLUMNA, (WPARAM)(int)(iCol), (LPARAM)(const LVCOLUMNA*)(pcol))
+
+#define ListView_InsertColumnW(hwnd, iCol, pcol) \
+    (int)SendMessageA((hwnd), LVM_INSERTCOLUMNW, (WPARAM)(int)(iCol), (LPARAM)(const LVCOLUMNW*)(pcol))
+
+#define ListView_DeleteColumn(hwnd, iCol) \
+    (BOOL)SendMessageA((hwnd), LVM_DELETECOLUMN, (WPARAM)(int)(iCol), 0)
+
+#define ListView_GetColumnWidth(hwnd, iCol) \
+    (int)SendMessageA((hwnd), LVM_GETCOLUMNWIDTH, (WPARAM)(int)(iCol), 0)
+
+#define ListView_SetColumnWidth(hwnd, iCol, cx) \
+    (BOOL)SendMessageA((hwnd), LVM_SETCOLUMNWIDTH, (WPARAM)(int)(iCol), MAKELPARAM((cx), 0))
+
+#define ListView_GetHeader(hwnd)\
+    (HWND)SendMessageA((hwnd), LVM_GETHEADER, 0, 0L)
+
+#define ListView_CreateDragImage(hwnd, i, lpptUpLeft) \
+    (HIMAGELIST)SendMessageA((hwnd), LVM_CREATEDRAGIMAGE, (WPARAM)(int)(i), (LPARAM)(LPPOINT)(lpptUpLeft))
+
+#define ListView_GetViewRect(hwnd, prc) \
+    (BOOL)SendMessageA((hwnd), LVM_GETVIEWRECT, 0, (LPARAM)(RECT*)(prc))
+
+#define ListView_GetTextColor(hwnd)  \
+    (COLORREF)SendMessageA((hwnd), LVM_GETTEXTCOLOR, 0, 0L)
+
+#define ListView_SetTextColor(hwnd, clrText) \
+    (BOOL)SendMessageA((hwnd), LVM_SETTEXTCOLOR, 0, (LPARAM)(COLORREF)(clrText))
+
+#define ListView_GetTextBkColor(hwnd)  \
+    (COLORREF)SendMessageA((hwnd), LVM_GETTEXTBKCOLOR, 0, 0L)
+
+#define ListView_SetTextBkColor(hwnd, clrTextBk) \
+    (BOOL)SendMessageA((hwnd), LVM_SETTEXTBKCOLOR, 0, (LPARAM)(COLORREF)(clrTextBk))
+
+#define ListView_GetTopIndex(hwndLV) \
+    (int)SendMessageA((hwndLV), LVM_GETTOPINDEX, 0, 0)
+
+#define ListView_GetCountPerPage(hwndLV) \
+    (int)SendMessageA((hwndLV), LVM_GETCOUNTPERPAGE, 0, 0)
+
+#define ListView_GetOrigin(hwndLV, ppt) \
+    (BOOL)SendMessageA((hwndLV), LVM_GETORIGIN, (WPARAM)0, (LPARAM)(POINT*)(ppt))
+
+#define ListView_Update(hwndLV, i) \
+    (BOOL)SendMessageA((hwndLV), LVM_UPDATE, (WPARAM)(i), 0L)
+
+#define ListView_SetItemState(hwndLV, i, data, mask) \
+{ LVITEMW _lvi;\
+  _lvi.stateMask = mask;\
+  _lvi.state = data;\
+  SendMessageA((hwndLV), LVM_SETITEMSTATE, (WPARAM)(i), (LPARAM)(LVITEMW*)&_lvi);\
+}
+
+#define ListView_SetCheckState(hwndLV, i, fCheck) \
+  ListView_SetItemState(hwndLV, i, INDEXTOSTATEIMAGEMASK((fCheck)?2:1), LVIS_STATEIMAGEMASK)
+
+#define ListView_GetItemState(hwndLV, i, mask) \
+   (UINT)SendMessageA((hwndLV), LVM_GETITEMSTATE, (WPARAM)(i), (LPARAM)(mask))
+
+#define ListView_GetCheckState(hwndLV, i) \
+   ((((UINT)(SendMessageA((hwndLV), LVM_GETITEMSTATE, (WPARAM)(i), LVIS_STATEIMAGEMASK))) >> 12) -1)
+
+#define ListView_GetItemTextA(hwndLV, i, iSubItem_, pszText_, cchTextMax_) \
+{ LVITEMA _lvi;\
+  _lvi.iSubItem = iSubItem_;\
+  _lvi.cchTextMax = cchTextMax_;\
+  _lvi.pszText = pszText_;\
+  SendMessageA((hwndLV), LVM_GETITEMTEXTA, (WPARAM)(i), (LPARAM)(LVITEMA*)&_lvi);\
+}
+
+#define ListView_GetItemTextW(hwndLV, i, iSubItem_, pszText_, cchTextMax_) \
+{ LVITEMW _lvi;\
+  _lvi.iSubItem = iSubItem_;\
+  _lvi.cchTextMax = cchTextMax_;\
+  _lvi.pszText = pszText_;\
+  SendMessageA((hwndLV), LVM_GETITEMTEXTW, (WPARAM)(i), (LPARAM)(LVITEMW*)&_lvi);\
+}
+
+#define ListView_SetItemTextA(hwndLV, i, iSubItem_, pszText_) \
+{ LVITEMA _lvi;\
+  _lvi.iSubItem = iSubItem_;\
+  _lvi.pszText = pszText_;\
+  SendMessageA((hwndLV), LVM_SETITEMTEXTA, (WPARAM)(i), (LPARAM)(LVITEMA*)&_lvi);\
+}
+
+#define ListView_SetItemTextW(hwndLV, i, iSubItem_, pszText_) \
+{ LVITEMW _lvi;\
+  _lvi.iSubItem = iSubItem_;\
+  _lvi.pszText = pszText_;\
+  SendMessageA((hwndLV), LVM_SETITEMTEXTW, (WPARAM)(i), (LPARAM)(LVITEMW*)&_lvi);\
+}
+
+#define ListView_SetItemCount(hwndLV, cItems) \
+  SendMessageA((hwndLV), LVM_SETITEMCOUNT, (WPARAM)(cItems), 0)
+
+#define ListView_SetItemCountEx(hwndLV, cItems, dwFlags) \
+  SendMessageA((hwndLV), LVM_SETITEMCOUNT, (WPARAM)(cItems), (LPARAM)(dwFlags))
+
+#define ListView_SortItems(hwndLV, _pfnCompare, _lPrm) \
+  (BOOL)SendMessageA((hwndLV), LVM_SORTITEMS, (WPARAM)(LPARAM)(_lPrm), \
+  (LPARAM)(PFNLVCOMPARE)(_pfnCompare))
+
+#define ListView_SetItemPosition32(hwndLV, i, x0, y0) \
+{   POINT ptNewPos; \
+    ptNewPos.x = x0; ptNewPos.y = y0; \
+    SendMessageA((hwndLV), LVM_SETITEMPOSITION32, (WPARAM)(int)(i), (LPARAM)&ptNewPos); \
+}
+
+#define ListView_GetSelectedCount(hwndLV) \
+    (UINT)SendMessageA((hwndLV), LVM_GETSELECTEDCOUNT, 0, 0L)
+
+#define ListView_GetItemSpacing(hwndLV, fSmall) \
+        (DWORD)SendMessageA((hwndLV), LVM_GETITEMSPACING, fSmall, 0L)
+
+#define ListView_GetISearchStringA(hwndLV, lpsz) \
+        (BOOL)SendMessageA((hwndLV), LVM_GETISEARCHSTRINGA, 0, (LPARAM)(LPTSTR)(lpsz))
+
+#define ListView_GetISearchStringW(hwndLV, lpsz) \
+        (BOOL)SendMessageA((hwndLV), LVM_GETISEARCHSTRINGW, 0, (LPARAM)(LPWSTR)(lpsz))
+
+#define ListView_SetIconSpacing(hwndLV, cx, cy) \
+        (DWORD)SendMessageA((hwndLV), LVM_SETICONSPACING, 0, MAKELONG(cx,cy))
+
+#define ListView_SetExtendedListViewStyle(hwndLV, dw)\
+        (DWORD)SendMessageA((hwndLV), LVM_SETEXTENDEDLISTVIEWSTYLE, 0, dw)
+
+#define ListView_SetExtendedListViewStyleEx(hwndLV, dwMask, dw)\
+        (DWORD)SendMessageA((hwndLV), LVM_SETEXTENDEDLISTVIEWSTYLE, dwMask, dw)
+
+#define ListView_GetExtendedListViewStyle(hwndLV)\
+        (DWORD)SendMessageA((hwndLV), LVM_GETEXTENDEDLISTVIEWSTYLE, 0, 0)
+
+#define ListView_GetSubItemRect(hwnd, iItem, iSubItem, code, prc) \
+        (BOOL)SendMessageA((hwnd), LVM_GETSUBITEMRECT, (WPARAM)(int)(iItem), \
+                ((prc) ? ((((LPRECT)(prc))->top = iSubItem), (((LPRECT)(prc))->left = code), (LPARAM)(prc)) : (LPARAM)(LPRECT)NULL))
+
+#define ListView_SubItemHitTest(hwnd, plvhti) \
+        (int)SendMessageA((hwnd), LVM_SUBITEMHITTEST, 0, (LPARAM)(LPLVHITTESTINFO)(plvhti))
+
+#define ListView_SetColumnOrderArray(hwnd, iCount, pi) \
+        (BOOL)SendMessageA((hwnd), LVM_SETCOLUMNORDERARRAY, (WPARAM)(iCount), (LPARAM)(LPINT)(pi))
+
+#define ListView_GetColumnOrderArray(hwnd, iCount, pi) \
+        (BOOL)SendMessageA((hwnd), LVM_GETCOLUMNORDERARRAY, (WPARAM)(iCount), (LPARAM)(LPINT)(pi))
+
+#define ListView_SetHotItem(hwnd, i) \
+        (int)SendMessageA((hwnd), LVM_SETHOTITEM, (WPARAM)(i), 0)
+
+#define ListView_GetHotItem(hwnd) \
+        (int)SendMessageA((hwnd), LVM_GETHOTITEM, 0, 0)
+
+#define ListView_SetHotCursor(hwnd, hcur) \
+        (HCURSOR)SendMessageA((hwnd), LVM_SETHOTCURSOR, 0, (LPARAM)(hcur))
+
+#define ListView_GetHotCursor(hwnd) \
+        (HCURSOR)SendMessageA((hwnd), LVM_GETHOTCURSOR, 0, 0)
+
+#define ListView_ApproximateViewRect(hwnd, iWidth, iHeight, iCount) \
+        (DWORD)SendMessageA((hwnd), LVM_APPROXIMATEVIEWRECT, iCount, MAKELPARAM(iWidth, iHeight))
+
+#define ListView_SetWorkAreas(hwnd, nWorkAreas, prc) \
+    (BOOL)SendMessageA((hwnd), LVM_SETWORKAREAS, (WPARAM)(int)(nWorkAreas), (LPARAM)(RECT*)(prc))
+
+#define ListView_GetWorkAreas(hwnd, nWorkAreas, prc) \
+    (BOOL)SendMessageA((hwnd), LVM_GETWORKAREAS, (WPARAM)(int)(nWorkAreas), (LPARAM)(RECT*)(prc))
+
+#define ListView_GetNumberOfWorkAreas(hwnd, pnWorkAreas) \
+    (BOOL)SendMessageA((hwnd), LVM_GETNUMBEROFWORKAREAS, 0, (LPARAM)(UINT *)(pnWorkAreas))
+
+#define ListView_GetSelectionMark(hwnd) \
+    (int)SendMessageA((hwnd), LVM_GETSELECTIONMARK, 0, 0)
+
+#define ListView_SetSelectionMark(hwnd, i) \
+    (int)SendMessageA((hwnd), LVM_SETSELECTIONMARK, 0, (LPARAM)(i))
+
+#define ListView_SetHoverTime(hwndLV, dwHoverTimeMs)\
+        (DWORD)SendMessageA((hwndLV), LVM_SETHOVERTIME, 0, (LPARAM)(dwHoverTimeMs))
+
+#define ListView_GetHoverTime(hwndLV)\
+        (DWORD)SendMessageA((hwndLV), LVM_GETHOVERTIME, 0, 0)
+
+#define ListView_SetToolTips(hwndLV, hwndNewHwnd)\
+        (HWND)SendMessageA((hwndLV), LVM_SETTOOLTIPS, (WPARAM)(hwndNewHwnd), 0)
+
+#define ListView_GetToolTips(hwndLV)\
+        (HWND)SendMessageA((hwndLV), LVM_GETTOOLTIPS, 0, 0)
+
+#define ListView_SortItemsEx(hwndLV, _pfnCompare, _lPrm) \
+  (BOOL)SendMessageA((hwndLV), LVM_SORTITEMSEX, (WPARAM)(LPARAM)(_lPrm), (LPARAM)(PFNLVCOMPARE)(_pfnCompare))
+
+#define ListView_SetBkImage(hwnd, plvbki) \
+    (BOOL)SendMessageA((hwnd), LVM_SETBKIMAGE, 0, (LPARAM)(plvbki))
+
+#define ListView_GetBkImage(hwnd, plvbki) \
+    (BOOL)SendMessageA((hwnd), LVM_GETBKIMAGE, 0, (LPARAM)(plvbki))
 
 /* Tab Control */
 

@@ -1,4 +1,4 @@
-/* $Id: datetime.h,v 1.2 1999-08-14 17:23:24 achimha Exp $ */
+/* $Id: datetime.h,v 1.3 2000-02-25 16:58:33 cbratschi Exp $ */
 
 /*
  * Date and time picker class extra info
@@ -12,6 +12,7 @@
 
 typedef struct tagDATETIME_INFO
 {
+        COMCTL32_HEADER header;
         HWND hMonthCal;
         HWND hUpdown;
         SYSTEMTIME date;
