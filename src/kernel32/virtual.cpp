@@ -1,4 +1,4 @@
-/* $Id: virtual.cpp,v 1.30 2000-05-02 20:53:13 sandervl Exp $ */
+/* $Id: virtual.cpp,v 1.31 2000-08-04 21:12:09 sandervl Exp $ */
 
 /*
  * Win32 virtual memory functions
@@ -51,6 +51,7 @@ HANDLE WINAPI CreateFileMappingA(
                 DWORD size_low,  /* [in] Low-order 32 bits of object size */
                 LPCSTR name      /* [in] Name of file-mapping object */ )
 {
+   dprintf(("CreateFileMappingA: %x %x %x%x %s", hFile, protect, size_high, size_low, name));
    return HMCreateFileMapping(hFile, sa, protect, size_high, size_low, name);
 }
 

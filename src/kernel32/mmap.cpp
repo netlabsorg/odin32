@@ -1,4 +1,4 @@
-/* $Id: mmap.cpp,v 1.42 2000-07-01 09:50:55 sandervl Exp $ */
+/* $Id: mmap.cpp,v 1.43 2000-08-04 21:12:08 sandervl Exp $ */
 
 /*
  * Win32 Memory mapped file & view classes
@@ -103,8 +103,20 @@ BOOL Win32MemMap::Init(HANDLE hMemMap)
   mapMutex.enter();
   if(hMemFile != -1)
   {
+#if 0
      	if(DuplicateHandle(mProcessId, hMemFile, GetCurrentProcess(),
                            &hMemFile, 0, FALSE, DUPLICATE_SAME_ACCESS) == FALSE)
+#else
+	DWORD dwOdinOptions;
+
+	if(!(mProtFlags & PAGE_READWRITE)) {
+		dwOdinOptions = DUPLICATE_ACCESS_READ | DUPLICATE_SHARE_DENYNONE;
+	}
+	else 	dwOdinOptions = DUPLICATE_ACCESS_READWRITE | DUPLICATE_SHARE_DENYNONE;
+
+     	if(HMDuplicateHandleOdin(mProcessId, hMemFile, GetCurrentProcess(),
+                           &hMemFile, 0, FALSE, DUPLICATE_SAME_ACCESS, dwOdinOptions) == FALSE)
+#endif
      	{
 		dprintf(("Win32MemMap::Init: DuplicateHandle failed!"));
 		goto fail;

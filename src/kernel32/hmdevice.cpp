@@ -1,4 +1,4 @@
-/* $Id: hmdevice.cpp,v 1.21 2000-07-12 18:21:42 sandervl Exp $ */
+/* $Id: hmdevice.cpp,v 1.22 2000-08-04 21:12:06 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -116,9 +116,10 @@ BOOL HMDeviceHandler::DuplicateHandle(PHMHANDLEDATA pHMHandleData, HANDLE  srcpr
                                PHMHANDLEDATA pHMSrcHandle,
                                HANDLE  destprocess,
                                PHANDLE desthandle,
-                       		DWORD   fdwAccess,
-                       		BOOL    fInherit,
-                       		DWORD   fdwOptions)
+                      	       DWORD   fdwAccess,
+                      	       BOOL    fInherit,
+                               DWORD   fdwOptions,
+                               DWORD   fdwOdinOptions)
 {
   dprintf(("KERNEL32:HandleManager::DuplicateHandle %s(%08x,%08x,%08x,%08x,%08x) - NOT IMPLEMENTED!!!!!!!!\n",
            lpHMDeviceName,
