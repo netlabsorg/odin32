@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.9 2003-02-28 10:27:00 sandervl Exp $
+# $Id: makefile,v 1.10 2003-08-15 15:07:34 bird Exp $
 
 #
 # Odin32 API
@@ -24,6 +24,12 @@ all:    $(ODIN32_LIB) \
         $(ODIN32_LIB)\kProfile.lib \
 !endif
         $(ODIN32_LIB)\wgss50.lib
+
+#
+# lib is all.
+#
+lib: all
+
 
 #
 # Clean all rule.
@@ -86,7 +92,7 @@ clean:
 #
 # Dummy rules.
 #
-dep lib:
+dep:
 
 
 #
