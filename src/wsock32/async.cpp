@@ -1,4 +1,4 @@
-/* $Id: async.cpp,v 1.16 1999-11-22 08:18:01 phaller Exp $ */
+/* $Id: async.cpp,v 1.17 1999-11-23 19:32:27 sandervl Exp $ */
 
 /*
  *
@@ -29,6 +29,9 @@
 #define INCL_DOSERRORS
 #define INCL_DOSSEMAPHORES
 #include <os2.h>
+
+#include <types.h>
+#include <utils.h>
 
 #include <netdb.h>
 #include <nerrno.h>
