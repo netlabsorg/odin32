@@ -79,5 +79,6 @@ ULONG APIENTRY inittermComctl32(ULONG hModule, ULONG ulFlag);
 ULONG APIENTRY inittermGdi32(ULONG hModule, ULONG ulFlag);
 ULONG APIENTRY inittermWsock32(ULONG hModule, ULONG ulFlag);
 ULONG APIENTRY inittermRpcrt4(ULONG hModule, ULONG ulFlag);
+ULONG APIENTRY inittermAvifil32(ULONG hModule, ULONG ulFlag);
 
 #endif //__INITDLL_H__
