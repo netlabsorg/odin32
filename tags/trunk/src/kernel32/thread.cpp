@@ -1,4 +1,4 @@
-/* $Id: thread.cpp,v 1.15 1999-10-14 17:18:58 phaller Exp $ */
+/* $Id: thread.cpp,v 1.16 1999-10-15 11:36:13 phaller Exp $ */
 
 /*
  * Win32 Thread API functions
@@ -54,7 +54,9 @@ ODINFUNCTION6(HANDLE,CreateThread,LPSECURITY_ATTRIBUTES,  lpsa,
 #ifdef DEBUG
   // @@@PH Note: with debug code enabled, ODIN might request more stack space!
   if (cbStack > 0)
-     cbStack <<= 1;
+     cbStack <<= 1;     // double stack
+  else
+     cbStack = 1048576; // per default 1MB stack per thread
 #endif
 
   return(O32_CreateThread(lpsa,
