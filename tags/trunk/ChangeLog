@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.21 1999-06-24 19:27:48 phaller Exp $ */
+ /* $Id: ChangeLog,v 1.22 1999-06-25 15:58:05 sandervl Exp $ */
+
+ 99-06-25: Christoph Bratschi
+	- USER32: GetSysColorPen bugfix (syscolor.cpp)
 
  99-06-24: Patrick Haller
         - SHELL32: partial port form WINE
