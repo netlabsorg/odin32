@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.15 1999-06-21 15:28:43 cbratschi Exp $ */
+ /* $Id: changelog,v 1.16 1999-06-21 17:47:48 sandervl Exp $ */
+ 99-21-06: Sander van Leeuwen
+	- include\os2wrap.h, removed calling convention
+
  99-21-06: Christoph Bratschi
         - COMCTL32: Progress bar finished (progress.c, USER32 bugs to fix)
         - COMCTL32: Trackbar finished (trackbar.c)
