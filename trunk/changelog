@@ -1,29 +1,32 @@
- /* $Id: changelog,v 1.353 1999-10-22 18:02:17 sandervl Exp $ */
+ /* $Id: changelog,v 1.354 1999-10-22 19:46:33 dengert Exp $ */
+
+ 99-10-22: Daniela Engert <dani@ngrt.de>
+	- KERNEL32: fixed bad icon masks
 
  99-10-22: Sander van Leeuwen <sandervl@xs4all.nl>
 	- WINMM: Fixes for waveout playback (don't use callback when there
-                 were errors when opening the device; return the correct
-                 number of devices present) (Pinball no longer crashes when
-                 there's no soundcard (driver) in OS/2)
-                 Disabled logging of timeGetTime
- 	- KERNEL32: Disabled logging for _lread (calls ReadFile which does it's own logging)
-                    Return XCPT_CONTINUE_SEARCH for unhandled exceptions if
-                    an OS/2 app uses the Odin32 api. (instead of killing the app)
+		 were errors when opening the device; return the correct
+		 number of devices present) (Pinball no longer crashes when
+		 there's no soundcard (driver) in OS/2)
+		 Disabled logging of timeGetTime
+	- KERNEL32: Disabled logging for _lread (calls ReadFile which does it's own logging)
+		    Return XCPT_CONTINUE_SEARCH for unhandled exceptions if
+		    an OS/2 app uses the Odin32 api. (instead of killing the app)
 
-        - COMCTL32: Fixed tab width bug. (GetTextExtentPoint32A used for unicode strings)
-                    Use Wine resource compiled with wrc. Removed all Native* resource loading.
-                    Added version resource.
+	- COMCTL32: Fixed tab width bug. (GetTextExtentPoint32A used for unicode strings)
+		    Use Wine resource compiled with wrc. Removed all Native* resource loading.
+		    Added version resource.
 
 	- USER32: Fixed corruption of OS/2 exception chain in dc.cpp & caret.cpp
-                  (fixes dll loading after the exe has started; i.e. after clicking
-                   on the Find tab in winhlp32's Search dialog)
-                  Do not send WM_COMMAND messages to the window handler before
-                  it has receive it's WM_CREATE msg.
-                  Winhlp32 crashes when that's done before WM_INITDIALOG, but
-                  VPBuddy no longer responds to buttons when you refuse to
-                  send messages before WM_INITDIALOG. (TODO)
-                  Send WM_WINDOWPOSCHANGING/CHANGED messages from frame handler.
-                  Fixed MapWindowPoints.
+		  (fixes dll loading after the exe has started; i.e. after clicking
+		   on the Find tab in winhlp32's Search dialog)
+		  Do not send WM_COMMAND messages to the window handler before
+		  it has receive it's WM_CREATE msg.
+		  Winhlp32 crashes when that's done before WM_INITDIALOG, but
+		  VPBuddy no longer responds to buttons when you refuse to
+		  send messages before WM_INITDIALOG. (TODO)
+		  Send WM_WINDOWPOSCHANGING/CHANGED messages from frame handler.
+		  Fixed MapWindowPoints.
 	- INCLUDE\os2wrap.h: Fixed infinite recursion in GpiDestroyPS
 
  99-10-22: Edgar Buerkle <Edgar.Buerkle@gmx.net>
@@ -32,26 +35,26 @@
 
  99-10-21: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Increase reference count for LX dlls. (RegisterLxDll)
-                    Set memory protection flags to READONLY for PAGE_NOACCESS
+		    Set memory protection flags to READONLY for PAGE_NOACCESS
 	- USER32: Added support for SWP_NOSIZECHANGING to SetWindowPos
-                  Fixed WM_ADJUSTWINDOWPOS (when position/size changed by app)
-                  Combobox fixes (simple combobox works, more complex don't)
-                  Don't check instance handle if handle == handle of exe for
-                  class lookup.
-        - GDI32: Fixed bug in DIBSection ctor (next ptr not initialized)
+		  Fixed WM_ADJUSTWINDOWPOS (when position/size changed by app)
+		  Combobox fixes (simple combobox works, more complex don't)
+		  Don't check instance handle if handle == handle of exe for
+		  class lookup.
+	- GDI32: Fixed bug in DIBSection ctor (next ptr not initialized)
 
  99-10-20: Edgar Buerkle <Edgar.Buerkle@gmx.net>
 	- GDI32: Implemented EnumFontFamiliesA/W
 
  99-10-20: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Added support for WM_WINDOWPOSCHANGING in default window handler
-                  (ported from Wine 990815)
-                  Convert back windowpos structure in WM_ADJUSTWINDOWPOS (NOT DONE)
-                  Bugfixes for PM WM_WINDOWPOSCHANGED handling & OSLibMapSWPtoWINDOWPOS.
-                  (Win32 WM_WINDOWPOSCHANGED now also sends window coordinates, not client)
-                  Rewrote MapWindowPoints. (NOTE: Needs to be tested!)
-                  Combobox bugfix (resizing listbox using old rectangle -> get current
-                  one)
+		  (ported from Wine 990815)
+		  Convert back windowpos structure in WM_ADJUSTWINDOWPOS (NOT DONE)
+		  Bugfixes for PM WM_WINDOWPOSCHANGED handling & OSLibMapSWPtoWINDOWPOS.
+		  (Win32 WM_WINDOWPOSCHANGED now also sends window coordinates, not client)
+		  Rewrote MapWindowPoints. (NOTE: Needs to be tested!)
+		  Combobox bugfix (resizing listbox using old rectangle -> get current
+		  one)
 
  99-10-20: Patrick Haller <phaller@gmx.net>
 	- WSOCK32:  Partial rewrite of WSA async sockets completed.
@@ -62,18 +65,18 @@
 
  99-10-19: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: FindResource bugfix: "DIB" type is the same as "BITMAP"
-                    (VPBuddy fix)
-                    NOTE: Currently disabled. VPBuddy expects something other
-                          than a pointer to the raw resource data for such
-                          bitmaps. (TODO)
-        - USER32: Windows without a parent have the desktop window as parent.
-                  MDI additions.
-                  Combobox bugfixes.
-                  GetWindowTextA/W bugfixes (return 0 if there's no window name)
+		    (VPBuddy fix)
+		    NOTE: Currently disabled. VPBuddy expects something other
+			  than a pointer to the raw resource data for such
+			  bitmaps. (TODO)
+	- USER32: Windows without a parent have the desktop window as parent.
+		  MDI additions.
+		  Combobox bugfixes.
+		  GetWindowTextA/W bugfixes (return 0 if there's no window name)
 
  99-10-19: Yuri Dario <mc6530@mclink.it>
 	- USER32: Initialize MDI client variables before calling Win32BaseWindow
-                  constructor
+		  constructor
 
  99-10-19: Jens Wiessner <wiessnej@rfi.de>
 	- RASAPI32: Added stubs
@@ -83,9 +86,9 @@
 
  99-10-18: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Set/clear WS_VISIBLE flag in ShowWindow
-                  Fix for scrollbar redraw
-                  Put back original Wine code for LISTBOX_UpdateScroll.
-                  Rewrote EnumChildWindows (winzip works quite well now!)
+		  Fix for scrollbar redraw
+		  Put back original Wine code for LISTBOX_UpdateScroll.
+		  Rewrote EnumChildWindows (winzip works quite well now!)
 
  99-10-18: Edgar Buerkle <Edgar.Buerkle@gmx.net>
 	- COMDLG32: Disable comdlg hooks for now. They don't work anyway.
