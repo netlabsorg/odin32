@@ -1,4 +1,4 @@
-; $Id: odincrtp.def,v 1.5 2002-10-08 09:49:08 sandervl Exp $
+; $Id: odincrtp.def,v 1.6 2003-01-22 17:06:44 sandervl Exp $
 ; Odin VAC++ 3.08 shared multithreaded runtime
 LIBRARY ODINCRTP INITINSTANCE TERMINSTANCE
 DESCRIPTION 'Odin32 System DLL - VAC++ 3.08 Profile OdinCRT'
@@ -28,52 +28,50 @@ EXPORTS
 ; -----------------
 ; memory management
 ; -----------------
-       calloc = os2calloc                           @346    NONAME
-       realloc = os2realloc                         @583    NONAME
-       malloc = os2malloc                           @351    NONAME
-       free = os2free                               @219    NONAME
-       _debug_calloc = os2_debug_calloc                 @117    NONAME
-       _debug_realloc = os2_debug_realloc           @182    NONAME
-       _debug_malloc = os2_debug_malloc         @119    NONAME
-       _debug_free = os2_debug_free             @59 NONAME
-       _umalloc = os2_umalloc                           @749    NONAME
-       _debug_umalloc =os2_debug_umalloc                @185    NONAME
-       _ucalloc = os2_ucalloc                           @704    NONAME
-       _debug_ucalloc = os2_debug_ucalloc               @181    NONAME
-    __nw__FUiPCcT1 = os2__nw__FUiPCcT1                  @172    NONAME
-    __dl__FPvPCcUi = os2__dl__FPvPCcUi                  @201    NONAME
+       odin_calloc                           @346    NONAME
+       odin_realloc                         @583    NONAME
+       odin_malloc                           @351    NONAME
+       odin_free                               @219    NONAME
+       odin__debug_calloc                 @117    NONAME
+       odin__debug_realloc           @182    NONAME
+       odin__debug_malloc         @119    NONAME
+       odin__debug_free             @59 NONAME
+       odin__umalloc                           @749    NONAME
+       odin__debug_umalloc                @185    NONAME
+       odin__ucalloc                           @704    NONAME
+       odin__debug_ucalloc               @181    NONAME
+    __nw__FUiPCcT1 = odin___nw__FUiPCcT1                  @172    NONAME
+    __dl__FPvPCcUi = odin___dl__FPvPCcUi                  @201    NONAME
 
-    fread = os2_fread                                             @265  NONAME
-    fwrite = os2_fwrite                                            @430 NONAME
-    fopen = os2_fopen                                             @293  NONAME
-    fputc = os2_fputc                                             @305  NONAME
-    fputs = os2_fputs                                             @311  NONAME
-    fsetpos = os2_fsetpos                                           @652    NONAME
-    fclose = os2_fclose                                            @354 NONAME
-    fflush = os2_fflush                                            @370 NONAME
-    freopen = os2_freopen                                           @612    NONAME
-    fgetpos = os2_fgetpos                                           @630    NONAME
-    vfprintf = os2_vfprintf                                          @755   NONAME
-    feof = os2_feof                                              @230   NONAME
-    ferror = os2_ferror                                            @414 NONAME
-    fseek = os2_fseek                                             @271  NONAME
-    ftell = os2_ftell                                             @273  NONAME
-    fgetc = os2_fgetc                                             @262  NONAME
-    fgets = os2_fgets                                            @267   NONAME
-    fgetwc = os2_fgetwc                                            @343 NONAME
-    fgetws = os2_fgetws                                            @369 NONAME
-    fputwc = os2_fputwc                                            @435 NONAME
-    fputws = os2_fputws                                            @478 NONAME
+    odin_fread                                             @265  NONAME
+    odin_fwrite                                            @430 NONAME
+    odin_fopen                                             @293  NONAME
+    odin_fputc                                             @305  NONAME
+    odin_fputs                                             @311  NONAME
+    odin_fsetpos                                           @652    NONAME
+    odin_fclose                                            @354 NONAME
+    odin_fflush                                            @370 NONAME
+    odin_freopen                                           @612    NONAME
+    odin_fgetpos                                           @630    NONAME
+    odin_vfprintf                                          @755   NONAME
+    odin_feof                                              @230   NONAME
+    odin_ferror                                            @414 NONAME
+    odin_fseek                                             @271  NONAME
+    odin_ftell                                             @273  NONAME
+    odin_fgetc                                             @262  NONAME
+    odin_fgets                                            @267   NONAME
+    odin_fgetwc                                            @343 NONAME
+    odin_fgetws                                            @369 NONAME
+    odin_fputwc                                            @435 NONAME
+    odin_fputws                                            @478 NONAME
 
-    _fdopen = os2_fdopen                                           @605 NONAME
+    odin_fdopen                                           @605 NONAME
 
 ;;TODO!
     fprintf                                           @647  NONAME
 
      strdup                                     @472    NONAME
-    ;strncpy doesn't stop at 0 terminator!
-    strncpy = __strncpy                                 @751    NONAME
-    __strncpy                                           @919    NONAME
+    strncpy                                      @751    NONAME
 
 ; original exports
     __ct__8ifstreamFPCciT2                             @1   NONAME
