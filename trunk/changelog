@@ -1,4 +1,28 @@
-/* $Id: changelog,v 1.1608 2001-07-17 12:09:49 sandervl Exp $ */
+/* $Id: changelog,v 1.1609 2001-07-19 17:41:25 achimha Exp $ */
+
+ 2001-07-19: Achim Hasenmueller <achimha@innotek.de>
+    - LICENSE:  o added WGSS50.LIC which contains the official license
+                  of the WGSS50.DLL module that is included with all
+                  Odin builds. This is a license contract between
+                  InnoTek Systemberatung GmbH (http://www.innotek.de)
+                  and the individual Odin user. The library is provided
+                  free of charge. The main requirement is that every user
+                  need to own a valid OS/2 license (this also includes
+                  eComStation of course).
+                  Every distribution of Odin will also contain this
+                  license file and the WarpIn archives will show the
+                  license during installation and require acceptance.
+                  For any questions about the license, please contact
+                  me via email. Note that the Odin license specifically
+                  allows redistribution of Odin with custom applications
+                  and as soon as the WGSS50 license is included, this also
+                  applies to WGSS50.DLL.
+
+                  The reason we include WGSS50 (a subset of Open32 used
+                  by IBM for Netscape Communicator 4.61 for OS/2) is that
+                  it contains numerous improvements over Open32 and it
+                  allows us more easily to replace Open32/WGSS50 APIs
+                  by custom functions.
 
  2001-07-17: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o HeapCreate now creates a separate heap (_ucreate) instead
