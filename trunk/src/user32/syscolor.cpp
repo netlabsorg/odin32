@@ -1,4 +1,4 @@
-/* $Id: syscolor.cpp,v 1.28 2001-06-12 17:02:35 sandervl Exp $ */
+/* $Id: syscolor.cpp,v 1.29 2001-08-27 08:42:11 sandervl Exp $ */
 
 /*
  * Win32 system color API functions for OS/2
@@ -260,7 +260,7 @@ HBRUSH WIN32API GetSysColorBrush(int nIndex)
   if( ((nIndex >= 0) && (nIndex < NUM_SYS_COLORS))  )
       return SysColorBrushes[nIndex];
 
-  //MED calls FillRect with (hardcoded) zero brush -> index -1
+  //TODO: is this still necessary (check in NT)
   dprintf2(("WARNING: Unknown index(%d)", nIndex ));
   return GetStockObject(LTGRAY_BRUSH);
 }
