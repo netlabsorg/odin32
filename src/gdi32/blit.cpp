@@ -1,4 +1,4 @@
-/* $Id: blit.cpp,v 1.25 2001-05-10 17:03:17 sandervl Exp $ */
+/* $Id: blit.cpp,v 1.26 2001-05-11 14:59:26 sandervl Exp $ */
 
 /*
  * GDI32 blit code
@@ -98,7 +98,8 @@ static INT SetDIBitsToDevice_(HDC hdc, INT xDest, INT yDest, DWORD cx,
     INT result, imgsize, palsize, height, width;
     char *ptr;
     ULONG compression = 0, bmpsize;
-    WORD *newbits = 0;
+    WORD *newbits = NULL;
+    DWORD bitfields[3];
 
     dprintf(("GDI32: SetDIBitsToDevice hdc:%X xDest:%d yDest:%d, cx:%d, cy:%d, xSrc:%d, ySrc:%d, startscan:%d, lines:%d \nGDI32: bits 0x%X, info 0x%X, coloruse %d",
               hdc, xDest, yDest, cx, cy, xSrc, ySrc, startscan, lines, (LPVOID) bits, (PBITMAPINFO)info, coloruse));
@@ -129,6 +130,8 @@ static INT SetDIBitsToDevice_(HDC hdc, INT xDest, INT yDest, DWORD cx,
 
     //SvL: RP7's bitmap size is not correct; fix it here or else
     //     the blit is messed up in Open32
+    imgsize = CalcBitmapSize(info->bmiHeader.biBitCount,
+                             info->bmiHeader.biWidth, info->bmiHeader.biHeight);
     bmpsize = info->bmiHeader.biSizeImage;
     if(info->bmiHeader.biCompression == 0 && info->bmiHeader.biSizeImage && 
        info->bmiHeader.biSizeImage < imgsize)
@@ -136,26 +139,42 @@ static INT SetDIBitsToDevice_(HDC hdc, INT xDest, INT yDest, DWORD cx,
 	((BITMAPINFO *)info)->bmiHeader.biSizeImage = imgsize;
     }
 
+    switch(info->bmiHeader.biBitCount) {
+    case 15:
+    case 16:
+        bitfields[0] = (info->bmiHeader.biCompression == BI_BITFIELDS) ? *(DWORD *)info->bmiColors : 0x7c00;
+        bitfields[1] = (info->bmiHeader.biCompression == BI_BITFIELDS) ?  *((DWORD *)info->bmiColors + 1) : 0x03e0;
+        bitfields[2] = (info->bmiHeader.biCompression == BI_BITFIELDS) ?  *((DWORD *)info->bmiColors + 2) : 0x001f;
+        break;
+    case 32:
+        bitfields[0] = (info->bmiHeader.biCompression == BI_BITFIELDS) ? *(DWORD *)info->bmiColors : 0xff0000;
+        bitfields[1] = (info->bmiHeader.biCompression == BI_BITFIELDS) ?  *((DWORD *)info->bmiColors + 1) : 0xff00;
+        bitfields[2] = (info->bmiHeader.biCompression == BI_BITFIELDS) ?  *((DWORD *)info->bmiColors + 2) : 0xff;
+        break;
+    default:
+        bitfields[0] = 0;
+        bitfields[1] = 0;
+        bitfields[2] = 0;
+        break;
+    }
+    if(bitfields[1] == 0x3E0) 
+    {//RGB 555?
+        dprintf(("BI_BITFIELDS compression %x %x %x", *bitfields, *(bitfields+1), *(bitfields+2)));
+
+        newbits = (WORD *)malloc(imgsize);
+        if(CPUFeatures & CPUID_MMX) {
+             RGB555to565MMX(newbits, (WORD *)bits, imgsize/sizeof(WORD));
+        }
+        else RGB555to565(newbits, (WORD *)bits, imgsize/sizeof(WORD));
+        bits = newbits;
+    }
+
     //SvL: Ignore BI_BITFIELDS type (SetDIBitsToDevice fails otherwise)
     if(info->bmiHeader.biCompression == BI_BITFIELDS) {
-        DWORD *bitfields = (DWORD *)info->bmiColors;
-
         ((BITMAPINFO *)info)->bmiHeader.biCompression = 0;
         compression = BI_BITFIELDS;
 
-        if(*(bitfields+1) == 0x3E0) 
-	{//RGB 555?
-        	dprintf(("BI_BITFIELDS compression %x %x %x", *bitfields, *(bitfields+1), *(bitfields+2)));
-
-                newbits = (WORD *)malloc(imgsize);
-		if(CPUFeatures & CPUID_MMX) {
-			RGB555to565MMX(newbits, (WORD *)bits, imgsize/sizeof(WORD));
-		}
-		else   	RGB555to565(newbits, (WORD *)bits, imgsize/sizeof(WORD));
-                bits = newbits;
-        }
     }
-
     if(startscan != 0 || lines != info->bmiHeader.biHeight) {
 	dprintf(("WARNING: SetDIBitsToDevice startscan != 0 || lines != info->bmiHeader.biHeight"));
     }
@@ -189,8 +208,8 @@ static INT SetDIBitsToDevice_(HDC hdc, INT xDest, INT yDest, DWORD cx,
 
     if(compression == BI_BITFIELDS) {
         ((BITMAPINFO *)info)->bmiHeader.biCompression = BI_BITFIELDS;
-        if(newbits) free(newbits);
     }
+    if(newbits) free(newbits);
     ((BITMAPINFO *)info)->bmiHeader.biSizeImage = bmpsize;
     return result;
 
