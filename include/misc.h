@@ -1,4 +1,4 @@
-/* $Id: misc.h,v 1.13 1999-12-17 17:25:28 sandervl Exp $ */
+/* $Id: misc.h,v 1.14 2000-01-06 20:03:03 sandervl Exp $ */
 
 /*
  * Miscellaneous definitions
@@ -9,7 +9,7 @@
 #ifndef __MISC_H__
 #define __MISC_H__
 
-#if !defined(_OS2WIN_H) && !defined(__INCLUDE_WINUSER_H) && !defined(__WINE_WINBASE_H)
+#if !defined(_OS2WIN_H) && !defined(__INCLUDE_WINUSER_H) && !defined(__WINE_WINBASE_H) && !defined(__WINE_WINDEF_H)
   #include <win32type.h>
 #endif
 
@@ -68,6 +68,7 @@
 
 
 // necessary types
+#ifndef __WINE_WINDEF_H
 #ifdef ULONG
   #error ULONG definition is bad.
   #define ULONG nope.
@@ -76,6 +77,7 @@
   typedef unsigned long ULONG;
   typedef unsigned long HMODULE;
 #endif
+#endif //!__WINE_WINDEF_H
 
 #ifndef SYSTEM
 #  define SYSTEM _System
