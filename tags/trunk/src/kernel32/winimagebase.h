@@ -1,9 +1,10 @@
-/* $Id: winimagebase.h,v 1.15 2000-09-08 18:07:51 sandervl Exp $ */
+/* $Id: winimagebase.h,v 1.16 2000-09-12 22:45:19 bird Exp $ */
 
 /*
  * Win32 PE Image base class
  *
  * Copyright 1998-1999 Sander van Leeuwen (sandervl@xs4all.nl)
+ * Copyright 1999-2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  *
  *
  * Project Odin Software License can be found in LICENSE.TXT
@@ -40,82 +41,82 @@
 class Win32Resource;
 class Win32DllBase;
 
+
 class Win32ImageBase
 {
 protected:
         DWORD magic;
 public:
-        void checkObject()
-        {
-                if(magic != MAGIC_WINIMAGE) {
-                        eprintf(("Corrupt this pointer %X %X!!", this, magic));
-                        DebugInt3();
-                }
-        };
+    void checkObject()
+    {
+        if (magic != MAGIC_WINIMAGE) {
+            eprintf(("Corrupt this pointer %X %X!!", this, magic));
+            DebugInt3();
+        }
+    };
 
 public:
          // Constructors and destructors
          Win32ImageBase(HINSTANCE hInstance);
 virtual ~Win32ImageBase();
 
-        ULONG     getError()          { return errorState; };
-        HINSTANCE getInstanceHandle() { return hinstance; };
+    ULONG     getError()          { return errorState; };
+    HINSTANCE getInstanceHandle() { return hinstance; };
 
 //Returns required OS version for this image
 virtual ULONG getVersion();
 
 virtual void  setFullPath(char *name);
-        char *getFullPath()           { return fullpath; };
-
-	char *getModuleName()	      { return szModule; };
+    char *getFullPath()           { return fullpath; };
+    char *getModuleName()         { return szModule; };
 
         //findResource returns the pointer of the resource's IMAGE_RESOURCE_DATA_ENTRY structure
-	HRSRC findResourceA(LPCSTR lpszName, LPSTR lpszType, ULONG lang = MAKELANGID(LANG_NEUTRAL, SUBLANG_NEUTRAL));
-	HRSRC findResourceW(LPWSTR lpszName, LPWSTR lpszType, ULONG lang = MAKELANGID(LANG_NEUTRAL, SUBLANG_NEUTRAL));
+    HRSRC findResourceA(LPCSTR lpszName, LPSTR lpszType, ULONG lang = MAKELANGID(LANG_NEUTRAL, SUBLANG_NEUTRAL));
+    HRSRC findResourceW(LPWSTR lpszName, LPWSTR lpszType, ULONG lang = MAKELANGID(LANG_NEUTRAL, SUBLANG_NEUTRAL));
 
-	ULONG getResourceSizeA(LPSTR lpszName, LPSTR lpszType, ULONG lang = MAKELANGID(LANG_NEUTRAL, SUBLANG_NEUTRAL));
-        ULONG getResourceSizeW(LPWSTR lpszName, LPWSTR lpszType, ULONG lang = MAKELANGID(LANG_NEUTRAL, SUBLANG_NEUTRAL));
-	BOOL  enumResourceNamesA(HMODULE hmod, LPCTSTR  lpszType, ENUMRESNAMEPROCA lpEnumFunc, LONG lParam);
-	BOOL  enumResourceNamesW(HMODULE hmod, LPCWSTR  lpszType, ENUMRESNAMEPROCW lpEnumFunc, LONG lParam);
-	BOOL  enumResourceTypesA(HMODULE hmod, ENUMRESTYPEPROCA lpEnumFunc, 
-                                 LONG lParam);
-	BOOL  enumResourceTypesW(HMODULE hmod, ENUMRESTYPEPROCW lpEnumFunc, 
-                                 LONG lParam);
-	BOOL  enumResourceLanguagesA(HMODULE hmod, LPCSTR lpType, LPCSTR lpName, 
-                                     ENUMRESLANGPROCA lpEnumFunc, LONG lParam);
-	BOOL  enumResourceLanguagesW(HMODULE hmod, LPCWSTR lpType, LPCWSTR lpName, 
-                                     ENUMRESLANGPROCW lpEnumFunc, LONG lParam);
+    ULONG getResourceSizeA(LPSTR lpszName, LPSTR lpszType, ULONG lang = MAKELANGID(LANG_NEUTRAL, SUBLANG_NEUTRAL));
+    ULONG getResourceSizeW(LPWSTR lpszName, LPWSTR lpszType, ULONG lang = MAKELANGID(LANG_NEUTRAL, SUBLANG_NEUTRAL));
+    BOOL  enumResourceNamesA(HMODULE hmod, LPCTSTR  lpszType, ENUMRESNAMEPROCA lpEnumFunc, LONG lParam);
+    BOOL  enumResourceNamesW(HMODULE hmod, LPCWSTR  lpszType, ENUMRESNAMEPROCW lpEnumFunc, LONG lParam);
+    BOOL  enumResourceTypesA(HMODULE hmod, ENUMRESTYPEPROCA lpEnumFunc,
+                             LONG lParam);
+    BOOL  enumResourceTypesW(HMODULE hmod, ENUMRESTYPEPROCW lpEnumFunc,
+                             LONG lParam);
+    BOOL  enumResourceLanguagesA(HMODULE hmod, LPCSTR lpType, LPCSTR lpName,
+                                 ENUMRESLANGPROCA lpEnumFunc, LONG lParam);
+    BOOL  enumResourceLanguagesW(HMODULE hmod, LPCWSTR lpType, LPCWSTR lpName,
+                                 ENUMRESLANGPROCW lpEnumFunc, LONG lParam);
 
-	ULONG getVersionSize();
-	BOOL  getVersionStruct(char *verstruct, ULONG bufLength);
+    ULONG getVersionSize();
+    BOOL  getVersionStruct(char *verstruct, ULONG bufLength);
 
-        //Returns pointer to data of resource handle
-        char *getResourceAddr(HRSRC hResource);
-        ULONG getResourceSize(HRSRC hResource);
+    //Returns pointer to data of resource handle
+    char *getResourceAddr(HRSRC hResource);
+    ULONG getResourceSize(HRSRC hResource);
 
-        //returns ERROR_SUCCESS or error code
+    //returns ERROR_SUCCESS or error code
 static  ULONG isPEImage(char *szFileName);
 static  BOOL  findDll(const char *pszFileName, char *pszFullName,
                       int cchFullName, const char *pszAltPath = NULL);
 
-	void  setEntryPoint(ULONG startAddress) { entryPoint = startAddress; };
+    void  setEntryPoint(ULONG startAddress)         { entryPoint = startAddress; };
 
-        void  setTLSAddress(LPVOID dwTlsAddress)     	{ tlsAddress = dwTlsAddress; };
-        void  setTLSIndexAddr(LPDWORD dwTlsIndexAddr)	{ tlsIndexAddr = dwTlsIndexAddr; };
-        void  setTLSInitSize(ULONG dwTlsSize)		{ tlsInitSize = dwTlsSize; };
-        void  setTLSTotalSize(ULONG dwTlsSize)		{ tlsTotalSize = dwTlsSize; };
-        void  setTLSCallBackAddr(PIMAGE_TLS_CALLBACK *dwTlsCallBackAddr)
-	{
-	   tlsCallBackAddr = dwTlsCallBackAddr;
-	};
+    void  setTLSAddress(LPVOID dwTlsAddress)        { tlsAddress = dwTlsAddress; };
+    void  setTLSIndexAddr(LPDWORD dwTlsIndexAddr)   { tlsIndexAddr = dwTlsIndexAddr; };
+    void  setTLSInitSize(ULONG dwTlsSize)           { tlsInitSize = dwTlsSize; };
+    void  setTLSTotalSize(ULONG dwTlsSize)          { tlsTotalSize = dwTlsSize; };
+    void  setTLSCallBackAddr(PIMAGE_TLS_CALLBACK *dwTlsCallBackAddr)
+    {
+       tlsCallBackAddr = dwTlsCallBackAddr;
+    };
 
-	void  tlsAttachThread();	//setup TLS structures for new thread
-	void  tlsDetachThread();	//destroy TLS structures
+    void  tlsAttachThread();    //setup TLS structures for new thread
+    void  tlsDetachThread();    //destroy TLS structures
 
 virtual BOOL  insideModule(ULONG address);
 virtual BOOL  insideModuleCode(ULONG address);
 
-virtual	ULONG getApi(char *name)  = 0;
+virtual ULONG getApi(char *name)  = 0;
 virtual ULONG getApi(int ordinal) = 0;
 
 virtual ULONG getImageSize();
@@ -123,50 +124,53 @@ virtual ULONG getImageSize();
 virtual BOOL  isDll() = 0;
 
 static Win32ImageBase * findModule(HMODULE hModule);
+    BOOL  matchModName(const char *pszFilename) const;
 
-	//Add image to dependency list of this image
-	void  addDependency(Win32DllBase *dll);
-        BOOL  dependsOn(Win32DllBase *dll);
+    /* @cat Depencies */
+    //Add image to dependency list of this image
+    void  addDependency(Win32DllBase *dll);
+    BOOL  dependsOn(Win32DllBase *dll);
 
 protected:
-	void tlsAlloc();		//Allocate TLS index for this module
-	void tlsDelete();		//Destroy TLS index for this module
+    void tlsAlloc();        //Allocate TLS index for this module
+    void tlsDelete();       //Destroy TLS index for this module
 
-        ULONG                 errorState, entryPoint;
+    ULONG                   errorState,
+                            entryPoint;
 
-        char                 *fullpath;
-	char      	      szModule[CCHMAXPATH];
-	char                  szFileName[CCHMAXPATH];
+    char *                  fullpath;
+    char                    szModule[CCHMAXPATH];
+    char                    szFileName[CCHMAXPATH];
 
-        HINSTANCE             hinstance;
+    HINSTANCE               hinstance;
 
-  	LPVOID 	              tlsAddress;		//address of TLS data
-  	LPDWORD		      tlsIndexAddr;		//address of DWORD that receives the TLS index
-  	ULONG 		      tlsInitSize;		//size of initialized TLS memory block
-  	ULONG 		      tlsTotalSize;		//size of TLS memory block
-  	PIMAGE_TLS_CALLBACK  *tlsCallBackAddr;	//ptr to TLS callback array
-	ULONG                 tlsIndex;		//module TLS index
+    LPVOID                  tlsAddress;         //address of TLS data
+    LPDWORD                 tlsIndexAddr;       //address of DWORD that receives the TLS index
+    ULONG                   tlsInitSize;        //size of initialized TLS memory block
+    ULONG                   tlsTotalSize;       //size of TLS memory block
+    PIMAGE_TLS_CALLBACK *   tlsCallBackAddr;    //ptr to TLS callback array
+    ULONG                   tlsIndex;           //module TLS index
 
-        PIMAGE_RESOURCE_DIRECTORY  getResSubDirW(PIMAGE_RESOURCE_DIRECTORY pResDir, LPCWSTR lpszName);
-        PIMAGE_RESOURCE_DIRECTORY  getResSubDirA(PIMAGE_RESOURCE_DIRECTORY pResDir, LPCTSTR lpszName);
+    PIMAGE_RESOURCE_DIRECTORY  getResSubDirW(PIMAGE_RESOURCE_DIRECTORY pResDir, LPCWSTR lpszName);
+    PIMAGE_RESOURCE_DIRECTORY  getResSubDirA(PIMAGE_RESOURCE_DIRECTORY pResDir, LPCTSTR lpszName);
 
-	PIMAGE_RESOURCE_DATA_ENTRY getResDataLang(PIMAGE_RESOURCE_DIRECTORY pResDir, ULONG language, BOOL fGetDefault = FALSE);
+    PIMAGE_RESOURCE_DATA_ENTRY getResDataLang(PIMAGE_RESOURCE_DIRECTORY pResDir, ULONG language, BOOL fGetDefault = FALSE);
 
-        HRSRC                      getResourceLang(PIMAGE_RESOURCE_DIRECTORY pResDirToSearch);
-        HRSRC                      getResourceLangEx(PIMAGE_RESOURCE_DIRECTORY pResDirToSearch,
-                                                     DWORD lang);
+    HRSRC                      getResourceLang(PIMAGE_RESOURCE_DIRECTORY pResDirToSearch);
+    HRSRC                      getResourceLangEx(PIMAGE_RESOURCE_DIRECTORY pResDirToSearch,
+                                                 DWORD lang);
 
-        PIMAGE_RESOURCE_DIRECTORY pResRootDir;
+    PIMAGE_RESOURCE_DIRECTORY   pResRootDir;
 
-        //substracted from RVA data offsets
-        ULONG                     ulRVAResourceSection;
+    //substracted from RVA data offsets
+    ULONG                   ulRVAResourceSection;
 
-	//linked list of dlls loaded on behalf of this executable image (dll or exe)
-        Queue         		   loadedDlls;
+    //linked list of dlls loaded on behalf of this executable image (dll or exe)
+    Queue                   loadedDlls;
+
 private:
-
-        friend class Win32Resource;
-        friend ULONG SYSTEM GetVersionSize(char *modname);
+    friend class Win32Resource;
+    friend ULONG SYSTEM GetVersionSize(char *modname);
 };
 
 //SvL: This structure is placed at the end of the first page of the image (header
@@ -179,6 +183,6 @@ typedef struct
   ULONG           magic2;
 } WINIMAGE_LOOKUP;
 
-#define WINIMAGE_LOOKUPADDR(a)	(WINIMAGE_LOOKUP *)((ULONG)a + PAGE_SIZE - sizeof(WINIMAGE_LOOKUP))
+#define WINIMAGE_LOOKUPADDR(a)  (WINIMAGE_LOOKUP *)((ULONG)a + PAGE_SIZE - sizeof(WINIMAGE_LOOKUP))
 
 #endif //__WINIMAGEBASE_H__

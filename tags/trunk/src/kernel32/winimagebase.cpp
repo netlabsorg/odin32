@@ -1,10 +1,10 @@
-/* $Id: winimagebase.cpp,v 1.25 2000-08-12 16:58:40 sandervl Exp $ */
+/* $Id: winimagebase.cpp,v 1.26 2000-09-12 22:45:19 bird Exp $ */
 
 /*
  * Win32 PE Image base class
  *
  * Copyright 1998-1999 Sander van Leeuwen (sandervl@xs4all.nl)
- * Copyright 1998 Knut St. Osmundsen
+ * Copyright 1998-2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -38,7 +38,7 @@
 #include <win\virtual.h>
 #include <winconst.h>
 
-#define DBG_LOCALLOG	DBG_winimagebase
+#define DBG_LOCALLOG    DBG_winimagebase
 #include "dbglocal.h"
 
 //******************************************************************************
@@ -106,11 +106,11 @@ BOOL Win32ImageBase::dependsOn(Win32DllBase *image)
   dlllistmutex.enter();
   item = loadedDlls.Head();
   while(item) {
-	if(loadedDlls.getItem(item) == (ULONG)image) {
-		ret = TRUE;
-		break;
-	}	  
-	item = loadedDlls.getNext(item);
+    if(loadedDlls.getItem(item) == (ULONG)image) {
+        ret = TRUE;
+        break;
+    }
+    item = loadedDlls.getNext(item);
   }
   dlllistmutex.leave();
   return ret;
@@ -146,7 +146,7 @@ ULONG Win32ImageBase::getImageSize()
 }
 //******************************************************************************
 //******************************************************************************
-BOOL Win32ImageBase::findDll(const char *szFileName, char *szFullName, 
+BOOL Win32ImageBase::findDll(const char *szFileName, char *szFullName,
                              int cchFullFileName, const char *pszAltPath)
 {
  char   modname[CCHMAXPATH];
@@ -156,7 +156,7 @@ BOOL Win32ImageBase::findDll(const char *szFileName, char *szFullName,
   strcpy(szFullName, szFileName);
   strupr(szFullName);
   if(!strchr(szFullName, (int)'.')) {
-    	strcat(szFullName,".DLL");
+        strcat(szFullName,".DLL");
   }
 
   //search order:
@@ -166,39 +166,40 @@ BOOL Win32ImageBase::findDll(const char *szFileName, char *szFullName,
   //4) windows dir
   //5) path
   if(WinExe) {
-  	strcpy(modname, WinExe->getFullPath());
-  	//remove file name from full path
-  	imagepath = modname + strlen(modname) - 1;
-  	while(*imagepath != '\\') imagepath--;
-  	imagepath[1] = 0;
-  	strcat(modname, szFullName);
-  	dllfile = OSLibDosOpen(modname, OSLIB_ACCESS_READONLY|OSLIB_ACCESS_SHAREDENYNONE);
+    strcpy(modname, WinExe->getFullPath());
+    //remove file name from full path
+    imagepath = modname + strlen(modname) - 1;
+    while(*imagepath != '\\') imagepath--;
+    imagepath[1] = 0;
+    strcat(modname, szFullName);
+    dllfile = OSLibDosOpen(modname, OSLIB_ACCESS_READONLY|OSLIB_ACCESS_SHAREDENYNONE);
   }
   if(dllfile == NULL) {
-	strcpy(modname, szFullName);
-  	dllfile = OSLibDosOpen(szFullName, OSLIB_ACCESS_READONLY|OSLIB_ACCESS_SHAREDENYNONE);
-	if(dllfile == NULL) {
-	    	strcpy(modname, InternalGetSystemDirectoryA());
-		strcat(modname, "\\");
-	    	strcat(modname, szFullName);
-		dllfile = OSLibDosOpen(modname, OSLIB_ACCESS_READONLY|OSLIB_ACCESS_SHAREDENYNONE);
-		if(dllfile == NULL) {
-			strcpy(modname, InternalGetWindowsDirectoryA());
-			strcat(modname, "\\");
-	    		strcat(modname, szFullName);
-			dllfile = OSLibDosOpen(modname, OSLIB_ACCESS_READONLY|OSLIB_ACCESS_SHAREDENYNONE);
-			if(dllfile == NULL) {
-				if(OSLibDosSearchPath(OSLIB_SEARCHENV, "PATH", szFullName, modname, sizeof(modname)) == 0) {
-					return FALSE;
-				}
-			}
-		}
-	}
+    strcpy(modname, szFullName);
+    dllfile = OSLibDosOpen(szFullName, OSLIB_ACCESS_READONLY|OSLIB_ACCESS_SHAREDENYNONE);
+    if(dllfile == NULL) {
+            strcpy(modname, InternalGetSystemDirectoryA());
+        strcat(modname, "\\");
+            strcat(modname, szFullName);
+        dllfile = OSLibDosOpen(modname, OSLIB_ACCESS_READONLY|OSLIB_ACCESS_SHAREDENYNONE);
+        if(dllfile == NULL) {
+            strcpy(modname, InternalGetWindowsDirectoryA());
+            strcat(modname, "\\");
+                strcat(modname, szFullName);
+            dllfile = OSLibDosOpen(modname, OSLIB_ACCESS_READONLY|OSLIB_ACCESS_SHAREDENYNONE);
+            if(dllfile == NULL) {
+                if(OSLibDosSearchPath(OSLIB_SEARCHENV, "PATH", szFullName, modname, sizeof(modname)) == 0) {
+                    return FALSE;
+                }
+            }
+        }
+    }
   }
   strcpy(szFullName, modname);
   if(dllfile) OSLibDosClose(dllfile);
   return TRUE;
 }
+
 //******************************************************************************
 //returns ERROR_SUCCESS or error code
 //******************************************************************************
@@ -251,12 +252,12 @@ ULONG Win32ImageBase::isPEImage(char *szFileName)
   }
   rc = DosRead(win32handle, pdoshdr, sizeof(IMAGE_DOS_HEADER), &ulRead);
   if(rc != NO_ERROR || ulRead != sizeof(IMAGE_DOS_HEADER)) {
-	free(pdoshdr);
+    free(pdoshdr);
         DosClose(win32handle);                /* Close the file */
         return ERROR_INVALID_EXE_SIGNATURE_W;
   }
   if(pdoshdr->e_magic != IMAGE_DOS_SIGNATURE) {
-	free(pdoshdr);
+    free(pdoshdr);
         DosClose(win32handle);                /* Close the file */
         return ERROR_INVALID_EXE_SIGNATURE_W;
   }
@@ -330,3 +331,45 @@ Win32ImageBase * Win32ImageBase::findModule(HMODULE hModule)
 }
 
 
+/**
+ * Matches a given filename or module name with the module name of
+ * this object.
+ * @returns     TRUE:   The modulenames matches.
+ *              FALSE:  Don't match.
+ * @param       pszFilename     Pointer to filename or module name.
+ * @status      completely implemented.
+ * @author      knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @remark      Just a clarification:
+ *              A module name is the filename of a executable image without
+ *              path and without extention.
+ */
+BOOL Win32ImageBase::matchModName(const char *pszFilename) const
+{
+    const char *pszModName;             /* Pointer to the modulename. */
+    const char *pszModNameEnd = NULL;   /* Pointer to the dot starting the extention. (if any) */
+    register char ch;
+
+    /** @sketch
+     * Search the filename string finding the modulename start and end.
+     * The loop ends when we have passed one char left of the module name.
+     */
+    pszModName = pszFilename + strlen(pszFilename) - 1;
+    while (pszModName >= pszFilename
+           && (ch = *pszModName) != '\\'
+           && ch != '/'
+           && ch != ':'
+           )
+    {
+        if (ch == '.' && pszModNameEnd != NULL)
+            pszModName = pszModName;
+        pszModName--;
+    }
+    pszModName++;
+
+    /** @sketch
+     * Compare the names caseinsensitivly.
+     */
+    if (pszModNameEnd)
+        return strnicmp(pszModName, szModule, pszModNameEnd - pszModName) == 0;
+    return stricmp(pszModName, szModule) == 0;
+}
