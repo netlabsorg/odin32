@@ -1,4 +1,4 @@
-/* $Id: oslibmisc.h,v 1.9 2002-02-19 13:08:19 sandervl Exp $ */
+/* $Id: oslibmisc.h,v 1.10 2003-01-02 11:50:46 sandervl Exp $ */
 /*
  * Misc util. procedures
  *
@@ -43,6 +43,7 @@ ULONG OSLibAllocThreadLocalMemory(int nrdwords);
 
 ULONG OSLibWinInitialize();
 ULONG OSLibWinQueryMsgQueue(ULONG hab);
+ULONG OSLibWinSetCp(ULONG hmq, ULONG codepage);
 
 //#define CTRY_NONE                        0
 #define CTRY_USA                         1

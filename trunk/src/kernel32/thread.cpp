@@ -1,4 +1,4 @@
-/* $Id: thread.cpp,v 1.46 2002-06-11 16:36:54 sandervl Exp $ */
+/* $Id: thread.cpp,v 1.47 2003-01-02 11:50:46 sandervl Exp $ */
 
 /*
  * Win32 Thread API functions
@@ -32,6 +32,7 @@
 #include "oslibmisc.h"
 #include "oslibdos.h"
 #include <handlemanager.h>
+#include <codepage.h>
 
 #define DBG_LOCALLOG	DBG_thread
 #include "dbglocal.h"
@@ -100,6 +101,9 @@ void WIN32API dbg_IncThreadCallDepth()
 }
 //******************************************************************************
 #define MAX_CALLSTACK_SIZE 128
+#ifdef DEBUG
+static char *pszLastCaller = NULL;
+#endif
 //******************************************************************************
 void WIN32API dbg_ThreadPushCall(char *pszCaller)
 {
@@ -111,8 +115,6 @@ void WIN32API dbg_ThreadPushCall(char *pszCaller)
   if(teb == NULL)
     return;
     
-  teb->o.odin.dbgCallDepth++;
-  
   // add caller name to call stack trace
   int iIndex = teb->o.odin.dbgCallDepth;
   
@@ -123,6 +125,10 @@ void WIN32API dbg_ThreadPushCall(char *pszCaller)
   // insert entry
   if (iIndex < MAX_CALLSTACK_SIZE)
     teb->o.odin.arrstrCallStack[iIndex] = (PVOID)pszCaller;
+
+  teb->o.odin.dbgCallDepth++;
+
+  pszLastCaller = pszCaller;
 #endif
 }
 //******************************************************************************
@@ -304,6 +310,9 @@ DWORD OPEN32API Win32ThreadProc(LPVOID lpData)
 
     winteb->o.odin.hab = OSLibWinInitialize();
     winteb->o.odin.hmq = OSLibWinQueryMsgQueue(winteb->o.odin.hab);
+    rc = OSLibWinSetCp(winteb->o.odin.hmq, GetDisplayCodepage());
+    dprintf(("WinSetCP was %sOK", rc ? "" : "not "));
+
     dprintf(("Win32ThreadProc: hab %x hmq %x", winteb->o.odin.hab, winteb->o.odin.hmq));
     dprintf(("Stack top 0x%x, stack end 0x%x", winteb->stack_top, winteb->stack_low));
 

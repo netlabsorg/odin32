@@ -1,4 +1,4 @@
-/* $Id: oslibmisc.cpp,v 1.13 2001-08-09 08:45:06 sandervl Exp $ */
+/* $Id: oslibmisc.cpp,v 1.14 2003-01-02 11:50:46 sandervl Exp $ */
 /*
  * Misc OS/2 util. procedures
  *
@@ -267,6 +267,12 @@ ULONG OSLibWinQueryMsgQueue(ULONG hab)
       hmq = WinQueueFromID(hab, ppib->pib_ulpid, ptib->tib_ptib2->tib2_ultid);
   }
   return hmq;
+}
+//******************************************************************************
+//******************************************************************************
+ULONG OSLibWinSetCp(ULONG hmq, ULONG codepage)
+{
+  return WinSetCp(hmq, codepage);
 }
 //******************************************************************************
 //******************************************************************************
