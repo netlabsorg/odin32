@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.36 2000-01-25 20:39:41 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.37 2000-01-27 17:21:08 cbratschi Exp $ */
 
 /*
  * DC functions for USER32
@@ -827,14 +827,14 @@ int WIN32API ReleaseDC (HWND hwnd, HDC hdc)
 
    if (hwnd)
    {
-      	Win32BaseWindow *wnd = Win32BaseWindow::GetWindowFromHandle (hwnd);
-	if(wnd == NULL) {
-   		dprintf(("ERROR: ReleaseDC %x %x failed", hwnd, hdc));
-		return 0;
-	}
-      	//SvL: Hack for memory.exe (doesn't get repainted properly otherwise)
+        Win32BaseWindow *wnd = Win32BaseWindow::GetWindowFromHandle (hwnd);
+        if(wnd == NULL) {
+                dprintf(("ERROR: ReleaseDC %x %x failed", hwnd, hdc));
+                return 0;
+        }
+        //SvL: Hack for memory.exe (doesn't get repainted properly otherwise)
 //      isOwnDC = wnd->isOwnDC() && wnd->getOwnDC();
-      	isOwnDC = wnd->isOwnDC() && (wnd->getOwnDC() == hdc);
+        isOwnDC = wnd->isOwnDC() && (wnd->getOwnDC() == hdc);
    }
    if (isOwnDC)
       rc = TRUE;
@@ -1039,7 +1039,7 @@ error:
 BOOL WIN32API InvalidateRect (HWND hwnd, const RECT *pRect, BOOL erase)
 {
    BOOL result;
-   
+
    result = RedrawWindow (hwnd, pRect, NULLHANDLE,
                           RDW_ALLCHILDREN_W | RDW_INVALIDATE_W |
                           (erase ? RDW_ERASE_W : 0) |
@@ -1249,9 +1249,9 @@ BOOL WIN32API ScrollWindow(HWND hwnd, int dx, int dy, const RECT *pScroll, const
  Win32BaseWindow *window;
  APIRET  rc;
  RECTL   clientRect;
+ PRECT   pClientRect;
  RECTL   scrollRect;
  RECTL   clipRect;
- PRECT   pClientRect;
  PRECTL  pScrollRect = NULL;
  PRECTL  pClipRect   = NULL;
  ULONG   scrollFlags = SW_INVALIDATERGN;
@@ -1262,11 +1262,13 @@ BOOL WIN32API ScrollWindow(HWND hwnd, int dx, int dy, const RECT *pScroll, const
         return 0;
     }
     dprintf(("ScrollWindow %x %d %d %x %x", hwnd, dx, dy, pScroll, pClip));
+
     pClientRect = window->getClientRectPtr();
     clientRect.xLeft   = 0;
     clientRect.yBottom = 0;
     clientRect.xRight  = pClientRect->right - pClientRect->left;
     clientRect.yTop    = pClientRect->bottom - pClientRect->top;
+
     if(pScroll) {
          mapWin32ToOS2Rect(window,(RECT *)pScroll, (PRECTLOS2)&scrollRect);
          pScrollRect = &scrollRect;
