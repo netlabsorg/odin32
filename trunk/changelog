@@ -1,7 +1,10 @@
-/* $Id: changelog,v 1.2204 2002-07-03 09:47:09 sandervl Exp $ */
+/* $Id: changelog,v 1.2205 2002-07-03 15:43:57 sandervl Exp $ */
 
  2002-07-03: Sander van Leeuwen <sandervl@innotek.de> 
     - WS2_32:   o Added WSASendDisconnect stub
+    - DDRAW:    o MoveRect fixes (src & dest surfaces the same + overlap)
+                o Fill fixes for single lines (horizontal & vertical)
+                o Optimized 8, 16 & 32bpp Fills
 
  2002-07-02: Sander van Leeuwen <sandervl@innotek.de>
     - DDRAW:    o Removed RGB555->565 conversion in Fill16on16 & SurfReleaseDC
