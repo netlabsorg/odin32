@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.2144 2002-06-09 15:08:22 bird Exp $ */
+/* $Id: changelog,v 1.2145 2002-06-09 16:36:17 sandervl Exp $ */
 
  2002-06-09: knut st. osmundsen <bird@anduin.net>
     - Makefiles:
@@ -17,6 +17,7 @@
                   numeric id)
                   (fixes OpenOffice 1.0 file open dialog crash)
     - WININET:  o Fixed shlwapi imports
+    - OLE32:    o Resync with latest Wine
 
  2002-06-08: Sander van Leeuwen <sandervl@xs4all.nl>
     - SHELL32:  o Moved resource files to subdir
