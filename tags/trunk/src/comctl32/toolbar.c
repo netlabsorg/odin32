@@ -1,4 +1,4 @@
-/* $Id: toolbar.c,v 1.20 1999-12-20 17:54:26 achimha Exp $ */
+/* $Id: toolbar.c,v 1.21 1999-12-20 18:22:28 achimha Exp $ */
 /*
  * Toolbar control
  *
@@ -1567,6 +1567,43 @@ static BOOL TBCUSTOMIZE_MeasureItem(HWND hwnd,WPARAM wParam,LPARAM lParam)
  * TOOLBAR_CustomizeDialogProc
  * This function implements the toolbar customization dialog.
  */
+
+/***********************************************************************
+ * TOOLBAR_CustomizeDialogProc
+ * This function implements the toolbar customization dialog.
+ */
+static BOOL WINAPI
+TOOLBAR_CustomizeDialogProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+    TOOLBAR_INFO *infoPtr;
+
+    switch (uMsg)
+    {
+        case WM_INITDIALOG:
+            return TBCUSTOMIZE_InitDialog(hwnd,wParam,lParam);
+
+        case WM_CLOSE:
+            return TBCUSTOMIZE_Close(hwnd,wParam,lParam);
+
+        case WM_COMMAND:
+            return TBCUSTOMIZE_Command(hwnd,wParam,lParam);
+
+        case WM_DESTROY:
+            return TBCUSTOMIZE_Destroy(hwnd,wParam,lParam);
+
+        case WM_DRAWITEM:
+            return TBCUSTOMIZE_DrawItem(hwnd,wParam,lParam);
+
+        case WM_MEASUREITEM:
+            return TBCUSTOMIZE_MeasureItem(hwnd,wParam,lParam);
+
+        default:
+            return FALSE;
+    }
+}
+
+//WINE version - not currently used
+#if 0
 static BOOL WINAPI
 TOOLBAR_CustomizeDialogProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
@@ -1726,6 +1763,7 @@ else
 	    return FALSE;
     }
 }
+#endif
 
 
 /***********************************************************************
