@@ -1,4 +1,4 @@
-/* $Id: comctl32undoc.cpp,v 1.6 2000-06-12 12:52:03 phaller Exp $ */
+/* $Id: comctl32undoc.cpp,v 1.7 2000-08-02 15:10:23 bird Exp $ */
 /*
  * Undocumented functions from COMCTL32.DLL
  *
@@ -2542,7 +2542,7 @@ DWORD WINAPI COMCTL32_389(DWORD x1, DWORD x2)
 DWORD WINAPI COMCTL32_390(DWORD x1, DWORD x2, DWORD x3, DWORD x4)
 {
   dprintf(("comctl32_390: %x %x %x %x not implemented!!", x1, x2, x3, x4));
-  
+
   /* Pseudo Assembler
    push [esp+arg_C]
    mov  eax, [esp+4+arg_0]
@@ -2553,20 +2553,20 @@ DWORD WINAPI COMCTL32_390(DWORD x1, DWORD x2, DWORD x3, DWORD x4)
    call ds:SetDIBColorTable
    retn 10h
   */
-  
+
    return 0;
 }
 
 
 /*****************************************************************************
- * Name      : 
- * Purpose   : 
- * Parameters: 
+ * Name      :
+ * Purpose   :
+ * Parameters:
  * Variables :
- * Result    : 
+ * Result    :
  * Remark    : COMCTL32.9
  *             Likely to have something to do with COM object.
- * Status    : UNTESTED UNKNOWN
+ * Status    : UNTESTED UNKNOWN STUB
  *
  * Author    : Patrick Haller [Sun, 2000/06/09 09:00]
  *****************************************************************************/
@@ -2581,19 +2581,19 @@ DWORD WINAPI COMCTL32_9(DWORD arg0,
            arg1,
            arg2,
            arg3));
-  
+
   return 0;
 }
 
 /*****************************************************************************
- * Name      : 
- * Purpose   : 
- * Parameters: 
+ * Name      :
+ * Purpose   :
+ * Parameters:
  * Variables :
- * Result    : 
+ * Result    :
  * Remark    : COMCTL32.10
  *             Likely to have something to do with COM object.
- * Status    : UNTESTED UNKNOWN
+ * Status    : UNTESTED UNKNOWN STUB
  *
  * Author    : Patrick Haller [Sun, 2000/06/09 09:00]
  *****************************************************************************/
@@ -2608,6 +2608,6 @@ DWORD WINAPI COMCTL32_10(DWORD arg0,
            arg1,
            arg2,
            arg3));
-  
+
   return 0;
 }
