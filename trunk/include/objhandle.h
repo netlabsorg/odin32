@@ -1,4 +1,3 @@
-/* $Id: objhandle.h,v 1.5 2001-07-06 13:44:19 sandervl Exp $ */
 /*
  * Win32 Handle Management Code for OS/2 (GDI32)
  *
@@ -26,7 +25,8 @@ typedef enum {
   USEROBJ_MENU   = 0xD6,
   USEROBJ_ACCEL  = 0xD7,
   USEROBJ_CURSORICON = 0xD8,
-  GDIOBJ_OPEN32  = 0xE0
+  GDIOBJ_OPEN32  = 0xE0,
+  GDIOBJ_INVALID = 0xFF
 //...
 } ObjectType;
 

@@ -1,4 +1,9 @@
-/* $Id: changelog,v 1.1581 2001-07-08 19:18:37 achimha Exp $ */
+/* $Id: changelog,v 1.1582 2001-07-09 07:56:51 sandervl Exp $ */
+
+ 2001-07-09: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Directly import registry functions from REGISTRY.DLL
+    - GDI32:    o Never use object handle 0
+                  (fixes bad icons in dialogs)
 
  2001-07-08: Achim Hasenmueller <achimha@innotek.de>
     - WSOCK32:  o error message to human readable text translation
