@@ -1,4 +1,4 @@
-/* $Id: spy.h,v 1.4 1999-06-26 13:21:53 sandervl Exp $ */
+/* $Id: spy.h,v 1.5 1999-06-27 16:23:36 sandervl Exp $ */
 
 /*
  *
@@ -12,6 +12,7 @@
 #define Q_NAME       "ODIN32SPY"
 #define Q_SPYMSG_WNDMSG 	1
 #define Q_SPYMSG_NEWWND 	2
+#define Q_SPYMSG_KILLSERVER     3
 
 typedef struct _Q_SPYMSG {
 	ULONG hwnd;
