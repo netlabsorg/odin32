@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.127 2001-06-27 13:35:47 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.128 2001-07-03 13:23:09 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -832,15 +832,17 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HANDLE hFile, DWORD dwFla
                 }
                 pModule->incDynamicLib();
             }
-            else if (fExeStarted) {
+            else if (fExeStarted && !fIsOS2Image) {
                 OSLibDosFreeModule(hDll);
                 SetLastError(ERROR_INVALID_EXE_SIGNATURE);
                 dprintf(("Dll %s is not an Odin dll; unload & return failure", szModname));
                 return 0;
             }
-            else
+            else {
+                dprintf(("KERNEL32: LoadLibraryExA(%s, 0x%x, 0x%x): returns 0x%x. Loaded OS/2 dll %s using DosLoadModule.",
+                         lpszLibFile, hFile, dwFlags, hDll, szModname));
                 return hDll; //happens when LoadLibrary is called in kernel32's initterm (nor harmful)
-
+            }
             dprintf(("KERNEL32: LoadLibraryExA(%s, 0x%x, 0x%x): returns 0x%x. Loaded %s using DosLoadModule.",
                      lpszLibFile, hFile, dwFlags, hDll, szModname));
             return pModule->getInstanceHandle();
