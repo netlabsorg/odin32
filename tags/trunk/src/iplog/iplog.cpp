@@ -80,7 +80,7 @@ void main(void)
        exit(2);
    }
 
-   logfile = fopen("odin32.log", "w");
+   logfile = fopen("odin32.log", "wb");
 
    while(TRUE) {
        /*
@@ -113,6 +113,8 @@ void main(void)
        if(buf[len-1] != '\n') {
            fwrite("\n", 1, 1, logfile);
        }
+
+       if(ftell(logfile) > 250*1024*1024) fseek(logfile, 0, SEEK_SET);
    }
     
    /*
