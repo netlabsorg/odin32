@@ -1,4 +1,4 @@
-/* $Id: hmdisk.cpp,v 1.49 2002-06-26 13:35:13 sandervl Exp $ */
+/* $Id: hmdisk.cpp,v 1.50 2002-06-26 15:26:42 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -52,6 +52,7 @@ typedef struct
     HFILE     hTemplate;
     BOOL      fPhysicalDisk;
     BOOL      fCDPlaying;
+    BOOL      fShareViolation;
     LARGE_INTEGER StartingOffset;
     LARGE_INTEGER PartitionSize;
     LARGE_INTEGER CurrentFilePointer;
@@ -243,7 +244,9 @@ DWORD HMDeviceDiskClass::CreateFile (LPCSTR        lpFileName,
     }
     SetErrorMode(oldmode);
 
-    if (hFile != INVALID_HANDLE_ERROR || GetLastError() == ERROR_NOT_READY)
+    DWORD lasterror = GetLastError();
+    if(hFile != INVALID_HANDLE_ERROR || lasterror == ERROR_NOT_READY ||
+       lasterror == ERROR_SHARING_VIOLATION)
     {
         if(hFile == INVALID_HANDLE_ERROR) {
              dprintf(("Drive not ready"));
@@ -259,6 +262,10 @@ DWORD HMDeviceDiskClass::CreateFile (LPCSTR        lpFileName,
              return ERROR_OUTOFMEMORY;
         }
         pHMHandleData->dwUserData = (DWORD)drvInfo;
+
+        if(lasterror == ERROR_SHARING_VIOLATION) {
+            drvInfo->fShareViolation = TRUE;
+        }
 
         memset(drvInfo, 0, sizeof(DRIVE_INFO));
         drvInfo->dwAccess  = pHMHandleData->dwAccess;
@@ -688,7 +695,7 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
     case IOCTL_DISK_IS_WRITABLE:
     {
         APIRET rc;
-	    DWORD ret;
+        DWORD  ret;
         ULONG  ulBytesRead    = 0;      /* Number of bytes read by DosRead */
         ULONG  ulWrote        = 0;      /* Number of bytes written by DosWrite */
         ULONG  ulLocal        = 0;      /* File pointer position after DosSetFilePtr */
@@ -699,7 +706,7 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
             pHMHandleData->hHMHandle = OpenDisk(drvInfo);
             if(!pHMHandleData->hHMHandle) {
                 dprintf(("No disk inserted; aborting"));
-                SetLastError(ERROR_NOT_READY);
+                SetLastError((drvInfo->fShareViolation) ? ERROR_SHARING_VIOLATION : ERROR_NOT_READY);
                 return FALSE;
             }
         }
@@ -765,9 +772,39 @@ writecheckfail:
         SetErrorMode(oldmode);
         return FALSE;
     }
-    case IOCTL_DISK_GET_DRIVE_GEOMETRY:
+    //Basically the same as IOCTL_DISK_GET_DRIVE_GEOMETRY, but these two ioctls
+    //are supposed to work even without media in the drive
     case IOCTL_STORAGE_GET_MEDIA_TYPES:
     case IOCTL_DISK_GET_MEDIA_TYPES:
+    {
+        PDISK_GEOMETRY pGeom = (PDISK_GEOMETRY)lpOutBuffer;
+        if(nOutBufferSize < sizeof(DISK_GEOMETRY) || !pGeom) {
+            SetLastError(ERROR_INSUFFICIENT_BUFFER);
+            return FALSE;
+        }
+        if(lpBytesReturned) {
+            *lpBytesReturned = 0;
+        }
+        if(!pHMHandleData->hHMHandle) {
+            pHMHandleData->hHMHandle = OpenDisk(drvInfo);
+            //we don't care if there's a disk present or not
+        }
+
+        if(OSLibDosGetDiskGeometry(pHMHandleData->hHMHandle, drvInfo->driveLetter, pGeom) == FALSE) {
+            dprintf(("!ERROR!: IOCTL_DISK_GET_MEDIA_TYPES: OSLibDosGetDiskGeometry failed!!"));
+            return FALSE;
+        }
+        if(lpBytesReturned) {
+            *lpBytesReturned = sizeof(DISK_GEOMETRY);
+        }
+        SetLastError(ERROR_SUCCESS);
+        return TRUE;
+    }
+
+    //This ioctl is different from IOCTL_DISK_GET_MEDIA_TYPES; some applications
+    //use it to determine if a disk is present or whether a media change has
+    //occurred
+    case IOCTL_DISK_GET_DRIVE_GEOMETRY:
     {
         PDISK_GEOMETRY pGeom = (PDISK_GEOMETRY)lpOutBuffer;
         if(nOutBufferSize < sizeof(DISK_GEOMETRY) || !pGeom) {
@@ -783,11 +820,9 @@ writecheckfail:
 
         if(!pHMHandleData->hHMHandle) {
             pHMHandleData->hHMHandle = OpenDisk(drvInfo);
-            //IOCTL_DISK_GET_DRIVE_GEOMETRY must fail if no disk inserted
-            //the other two shouldn't
-            if(!pHMHandleData->hHMHandle && dwIoControlCode == IOCTL_DISK_GET_DRIVE_GEOMETRY) {
+            if(!pHMHandleData->hHMHandle) {
                 dprintf(("No disk inserted; aborting"));
-                SetLastError(ERROR_NOT_READY);
+                SetLastError((drvInfo->fShareViolation) ? ERROR_SHARING_VIOLATION : ERROR_NOT_READY);
                 return FALSE;
             }
         }
@@ -797,7 +832,7 @@ writecheckfail:
         //volume label from the disk and return ERROR_MEDIA_CHANGED if the volume
         //label has changed
         //TODO: Find better way to determine if floppy was removed or switched
-        if(drvInfo->driveType != DRIVE_FIXED && pHMHandleData->hHMHandle) 
+        if(drvInfo->driveType != DRIVE_FIXED) 
         {
             rc = OSLibDosQueryVolumeSerialAndName(1 + drvInfo->driveLetter - 'A', &volumelabel, NULL, 0);
             if(rc) {
@@ -815,8 +850,14 @@ writecheckfail:
         }
 
         if(OSLibDosGetDiskGeometry(pHMHandleData->hHMHandle, drvInfo->driveLetter, pGeom) == FALSE) {
+            dprintf(("!ERROR!: IOCTL_DISK_GET_DRIVE_GEOMETRY: OSLibDosGetDiskGeometry failed!!"));
             return FALSE;
         }
+        dprintf(("Cylinders         %d", pGeom->Cylinders));
+        dprintf(("TracksPerCylinder %d", pGeom->TracksPerCylinder));
+        dprintf(("SectorsPerTrack   %d", pGeom->SectorsPerTrack));
+        dprintf(("BytesPerSector    %d", pGeom->BytesPerSector));
+        dprintf(("MediaType         %d", pGeom->MediaType));
         if(lpBytesReturned) {
             *lpBytesReturned = sizeof(DISK_GEOMETRY);
         }
@@ -1364,7 +1405,7 @@ writecheckfail:
             pHMHandleData->hHMHandle = OpenDisk(drvInfo);
             if(!pHMHandleData->hHMHandle) {
                 dprintf(("No disk inserted; aborting"));
-                SetLastError(ERROR_NOT_READY);
+                SetLastError((drvInfo->fShareViolation) ? ERROR_SHARING_VIOLATION : ERROR_NOT_READY);
                 return FALSE;
             }
         }
@@ -1592,7 +1633,7 @@ BOOL HMDeviceDiskClass::ReadFile(PHMHANDLEDATA pHMHandleData,
         pHMHandleData->hHMHandle = OpenDisk(drvInfo);
         if(!pHMHandleData->hHMHandle) {
             dprintf(("No disk inserted; aborting"));
-            SetLastError(ERROR_NOT_READY);
+            SetLastError((drvInfo->fShareViolation) ? ERROR_SHARING_VIOLATION : ERROR_NOT_READY);
             return FALSE;
         }
     }
@@ -1674,7 +1715,7 @@ DWORD HMDeviceDiskClass::SetFilePointer(PHMHANDLEDATA pHMHandleData,
         pHMHandleData->hHMHandle = OpenDisk(drvInfo);
         if(!pHMHandleData->hHMHandle) {
             dprintf(("No disk inserted; aborting"));
-            SetLastError(ERROR_NOT_READY);
+            SetLastError((drvInfo->fShareViolation) ? ERROR_SHARING_VIOLATION : ERROR_NOT_READY);
             return -1;
         }
     }
@@ -1823,7 +1864,7 @@ BOOL HMDeviceDiskClass::WriteFile(PHMHANDLEDATA pHMHandleData,
         pHMHandleData->hHMHandle = OpenDisk(drvInfo);
         if(!pHMHandleData->hHMHandle) {
             dprintf(("No disk inserted; aborting"));
-            SetLastError(ERROR_NOT_READY);
+            SetLastError((drvInfo->fShareViolation) ? ERROR_SHARING_VIOLATION : ERROR_NOT_READY);
             return FALSE;
         }
     }
@@ -1895,7 +1936,7 @@ DWORD HMDeviceDiskClass::GetFileSize(PHMHANDLEDATA pHMHandleData,
         pHMHandleData->hHMHandle = OpenDisk(drvInfo);
         if(!pHMHandleData->hHMHandle) {
             dprintf(("No disk inserted; aborting"));
-            SetLastError(ERROR_NOT_READY);
+            SetLastError((drvInfo->fShareViolation) ? ERROR_SHARING_VIOLATION : ERROR_NOT_READY);
             return -1; //INVALID_SET_FILE_POINTER
         }
     }
