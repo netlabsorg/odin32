@@ -1,4 +1,4 @@
-/* $Id: pe2lx.cpp,v 1.18.4.10 2000-08-29 04:08:24 bird Exp $
+/* $Id: pe2lx.cpp,v 1.18.4.11 2000-09-01 08:01:37 bird Exp $
  *
  * Pe2Lx class implementation. Ring 0 and Ring 3
  *
@@ -1374,8 +1374,11 @@ ULONG  Pe2Lx::openPath(PCHAR pachFilename, USHORT cchFilename, ldrlv_t *pLdrLv, 
  *              if successfull then break the loop.
  *          endloop
  *      endif
+ * @remark      cchFilename has to be ULONG due to an optimization bug in VA 3.08.
+ *              (cchFilename should have been USHORT. But, then the compiler would
+ *               treat it as an ULONG.)
  */
-ULONG  Pe2Lx::openPath2(PCHAR pachFilename, USHORT cchFilename, ldrlv_t *pLdrLv, PULONG pful, BOOL fOdin32PathValid)
+ULONG  Pe2Lx::openPath2(PCHAR pachFilename, ULONG cchFilename, ldrlv_t *pLdrLv, PULONG pful, BOOL fOdin32PathValid)
 {
     #ifdef RING0
 
@@ -1537,7 +1540,7 @@ ULONG  Pe2Lx::openPath2(PCHAR pachFilename, USHORT cchFilename, ldrlv_t *pLdrLv,
              */
             memcpy(pVars->sz, pszPath, cch);
             pVars->sz[cch++] = '\\';
-            memcpy(&pVars->sz[cch], pachFilename, cchFilename);
+            memcpy(&pVars->sz[cch], pachFilename, (size_t)cchFilename);
             if (cchExt != 0)
                 memcpy(&pVars->sz[cch + cchFilename], ".DLL", 5);
             else
@@ -1583,7 +1586,7 @@ ULONG  Pe2Lx::openPath2(PCHAR pachFilename, USHORT cchFilename, ldrlv_t *pLdrLv,
      * Since we haven't found the file yet we'll return thru ldrOpenPath.
      */
     rfree(pVars);
-    return ldrOpenPath(pachFilename, cchFilename, pLdrLv, pful);
+    return ldrOpenPath(pachFilename, (USHORT)cchFilename, pLdrLv, pful);
 
     #else
     NOREF(pachFilename);
