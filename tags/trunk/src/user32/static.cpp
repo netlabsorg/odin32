@@ -1,4 +1,4 @@
-/* $Id: static.cpp,v 1.20 2000-10-22 10:01:34 sandervl Exp $ */
+/* $Id: static.cpp,v 1.21 2000-12-16 15:42:12 sandervl Exp $ */
 /*
  * Static control
  *
@@ -8,6 +8,15 @@
  *
  * Corel version: 20000317
  * (WINE version: 990923)
+ *
+ * SvL:
+ * SS_REALSIZEIMAGE is supposed to prevent control resizing, but that doesn't
+ * appear to happen in NT (although the SDK docs are very clear about this)
+ * Need to figure out why. (not resizing messes up the bitmap control in
+ * the Microsoft Visual C++ 4.2 install program)
+ * Same thing happens with a very simply test app, so the installer
+ * does nothing special.
+ *
  *
  * Status:  complete
  * Version: 5.00
@@ -102,7 +111,12 @@ static HICON STATIC_SetIcon( HWND hwnd, HICON hicon )
       bmp.bmHeight /= 2;
     }
 
+#if 1
+    //SvL: Breaks MS Visual C++ install dialogs with static controls (no resize)
+    if (!(dwStyle & (SS_CENTERIMAGE))) STATIC_ResizeWindow(hwnd,dwStyle,bmp.bmWidth,bmp.bmHeight);
+#else
     if (!(dwStyle & (SS_CENTERIMAGE | SS_REALSIZEIMAGE))) STATIC_ResizeWindow(hwnd,dwStyle,bmp.bmWidth,bmp.bmHeight);
+#endif
 
     if (ii.hbmColor) DeleteObject(ii.hbmColor);
     if (ii.hbmMask) DeleteObject(ii.hbmMask);
@@ -132,7 +146,12 @@ static HBITMAP STATIC_SetBitmap( HWND hwnd, HBITMAP hBitmap )
     }
     hOldBitmap = infoPtr->hIcon;
     infoPtr->hIcon = hBitmap;
+#if 1
+    //SvL: Breaks MS Visual C++ install dialogs with static controls (no resize)
+    if (hBitmap && !(dwStyle & (SS_CENTERIMAGE)))
+#else
     if (hBitmap && !(dwStyle & (SS_CENTERIMAGE | SS_REALSIZEIMAGE)))
+#endif
     {
       BITMAP bm;
 
