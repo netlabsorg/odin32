@@ -1,4 +1,4 @@
-/* $Id: edit.cpp,v 1.4 1999-10-12 20:16:22 sandervl Exp $ */
+/* $Id: edit.cpp,v 1.5 1999-10-19 19:44:23 phaller Exp $ */
 /*
  *      Edit control
  *
@@ -2808,13 +2808,14 @@ static LRESULT EDIT_WM_EraseBkGnd(HWND hwnd, EDITSTATE *es, HDC dc)
  */
 static INT EDIT_WM_GetText(HWND hwnd, EDITSTATE *es, INT count, LPSTR text)
 {
-        INT len = lstrlenA(es->text);
+  INT len;
 
-        if (count > len) {
-                lstrcpyA(text, es->text);
-                return len;
-        } else
-                return -1;
+  if (es->text == NULL)  // the only case of failure i can imagine
+    return 0;
+
+  len = min(count, lstrlenA(es->text)); // determine length
+  lstrcpynA(text, es->text, len);       // copy as much as possible
+  return len;
 }
 
 
