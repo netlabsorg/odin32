@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.59 1999-10-22 18:11:48 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.60 1999-10-23 10:21:44 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -24,7 +24,6 @@
 #include <heapstring.h>
 #include <win32wbase.h>
 #include <winres.h>
-#include <spy.h>
 #include "wndmsg.h"
 #include "hooks.h"
 #include "oslibwin.h"
@@ -1617,10 +1616,7 @@ LRESULT Win32BaseWindow::SendMessageA(ULONG Msg, WPARAM wParam, LPARAM lParam)
         return 0;
   }
 
-  if(Msg != WM_GETDLGCODE && Msg != WM_ENTERIDLE) {//sent *very* often
-        if(PostSpyMessage(getWindowHandle(), Msg, wParam, lParam) == FALSE)
-            dprintf(("SendMessageA %s for %x %x %x", GetMsgText(Msg), getWindowHandle(), wParam, lParam));
-  }
+  DebugPrintMessage(getWindowHandle(), Msg, wParam, lParam, FALSE, FALSE);
 
   if(HkCBT::OS2HkCBTProc(getWindowHandle(), Msg, wParam, lParam) == TRUE) {//hook swallowed msg
         return(0);
@@ -1678,10 +1674,7 @@ LRESULT Win32BaseWindow::SendMessageW(ULONG Msg, WPARAM wParam, LPARAM lParam)
         return 0;
   }
 
-  if(Msg != WM_GETDLGCODE && Msg != WM_ENTERIDLE) {//sent *very* often
-        if(PostSpyMessage(getWindowHandle(), Msg, wParam, lParam) == FALSE)
-            dprintf(("SendMessageW %s for %x %x %x", GetMsgText(Msg), getWindowHandle(), wParam, lParam));
-  }
+  DebugPrintMessage(getWindowHandle(), Msg, wParam, lParam, TRUE, FALSE);
 
   if(HkCBT::OS2HkCBTProc(getWindowHandle(), Msg, wParam, lParam) == TRUE) {//hook swallowed msg
         return(0);
@@ -1732,8 +1725,7 @@ LRESULT Win32BaseWindow::SendInternalMessageA(ULONG Msg, WPARAM wParam, LPARAM l
  LRESULT rc;
  BOOL    fInternalMsgBackup = fInternalMsg;
 
-  if(PostSpyMessage(getWindowHandle(), Msg, wParam, lParam) == FALSE)
-        dprintf(("SendInternalMessageA %s for %x %x %x", GetMsgText(Msg), getWindowHandle(), wParam, lParam));
+  DebugPrintMessage(getWindowHandle(), Msg, wParam, lParam, FALSE, TRUE);
 
   if(HkCBT::OS2HkCBTProc(getWindowHandle(), Msg, wParam, lParam) == TRUE) {//hook swallowed msg
         return(0);
@@ -1779,8 +1771,7 @@ LRESULT Win32BaseWindow::SendInternalMessageW(ULONG Msg, WPARAM wParam, LPARAM l
  LRESULT rc;
  BOOL    fInternalMsgBackup = fInternalMsg;
 
-  if(PostSpyMessage(getWindowHandle(), Msg, wParam, lParam) == FALSE)
-        dprintf(("SendInternalMessageW %s for %x %x %x", GetMsgText(Msg), getWindowHandle(), wParam, lParam));
+  DebugPrintMessage(getWindowHandle(), Msg, wParam, lParam, TRUE, TRUE);
 
   if(HkCBT::OS2HkCBTProc(getWindowHandle(), Msg, wParam, lParam) == TRUE) {//hook swallowed msg
         return(0);

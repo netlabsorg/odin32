@@ -1,4 +1,4 @@
-/* $Id: pmframe.cpp,v 1.9 1999-10-22 18:11:46 sandervl Exp $ */
+/* $Id: pmframe.cpp,v 1.10 1999-10-23 10:21:43 sandervl Exp $ */
 /*
  * Win32 Frame Managment Code for OS/2
  *
@@ -179,7 +179,7 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
 
   switch(msg)
   {
-#if 1
+#if 0
     case WM_ADJUSTWINDOWPOS:
     {
       PSWP     pswp = (PSWP)mp1;
@@ -193,7 +193,7 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
         if ((pswp->fl & (SWP_SIZE | SWP_MOVE | SWP_ZORDER)) == 0)
             goto RunDefFrameProc;
         if(!win32wnd->CanReceiveSizeMsgs()) {
-            break;
+            goto RunDefFrameProc;
         }
 
         WinQueryWindowPos(hwnd, &swpOld);
@@ -232,110 +232,6 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
         break;
     }
 
-    case WM_WINDOWPOSCHANGED:
-    {
-      PSWP      pswp   = (PSWP)mp1;
-      SWP       swpOld = *(pswp + 1);
-      WINDOWPOS wp;
-      ULONG     parentHeight = 0;
-      HWND      hParent = NULLHANDLE, hFrame = NULLHANDLE;
-      LONG      yDelta = pswp->cy - swpOld.cy;
-      LONG      xDelta = pswp->cx - swpOld.cx;
-
-        dprintf(("PMFRAME: WM_WINDOWPOSCHANGED (%x) %x %x (%d,%d) (%d,%d)", mp2, hwnd, pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
-        RestoreOS2TIB();
-        rc = OldFrameProc(hwnd,msg,mp1,mp2);
-        SetWin32TIB();
-//        dprintf(("After calling frameproc: (%x) %x %x (%d,%d) (%d,%d)", mp2, hwnd, pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
-
-        if ((pswp->fl & (SWP_SIZE | SWP_MOVE | SWP_ZORDER)) == 0)
-            break;
-
-        if(pswp->fl & (SWP_MOVE | SWP_SIZE)) {
-            if (win32wnd->isChild()) {
-                if(win32wnd->getParent()) {
-                        hParent = win32wnd->getParent()->getOS2WindowHandle();
-                }
-                else    break; //parent has just been destroyed
-            }
-        }
-        OSLibMapSWPtoWINDOWPOSFrame(pswp, &wp, &swpOld, hParent, hwnd);
-
-        //delta is difference between old and new client height
-        yDelta = swpOld.cy - win32wnd->getWindowHeight();
-
-        win32wnd->setWindowRect(wp.x, wp.y, wp.x+wp.cx, wp.y+wp.cy);
-        win32wnd->setClientRect(swpOld.x, swpOld.y, swpOld.x + swpOld.cx, swpOld.y + swpOld.cy);
-
-        if(!win32wnd->CanReceiveSizeMsgs())
-            break;
-
-        wp.hwnd = win32wnd->getWindowHandle();
-        if ((pswp->fl & SWP_ZORDER) && (pswp->hwndInsertBehind > HWND_BOTTOM))
-        {
-           Win32BaseWindow *wndAfter = Win32BaseWindow::GetWindowFromOS2Handle(pswp->hwndInsertBehind);
-           if(wndAfter) wp.hwndInsertAfter = wndAfter->getWindowHandle();
-        }
-
-        if (yDelta != 0 || xDelta != 0)
-        {
-            HENUM henum = WinBeginEnumWindows(WinWindowFromID(pswp->hwnd, FID_CLIENT));
-            SWP swp[10];
-            int i = 0;
-            HWND hwnd;
-
-            while ((hwnd = WinGetNextWindow(henum)) != NULLHANDLE)
-            {
-#if 0
-                if (mdiClient )
-                {
-                  continue;
-                }
-#endif
-                WinQueryWindowPos(hwnd, &(swp[i]));
-
-#ifdef DEBUG
-                Win32BaseWindow *window = Win32BaseWindow::GetWindowFromOS2Handle(hwnd);
-                dprintf(("ENUMERATE %x delta %d (%d,%d) (%d,%d) %x", (window) ? window->getWindowHandle() : hwnd,
-                         yDelta, swp[i].x, swp[i].y, swp[i].cx, swp[i].cy, swp[i].fl));
-#endif
-
-                if(swp[i].y != 0) {
-                    //child window at offset <> 0 from client area -> offset now changes
-                    swp[i].y  += yDelta;
-                    swp[i].fl &= ~(SWP_NOREDRAW);
-                }
-                //else child window with the same start coorindates as the client area
-                //The app should resize it.
-
-               if (i == 9)
-                {
-                    WinSetMultWindowPos(GetThreadHAB(), swp, 10);
-                    i = 0;
-                }
-                else
-                {
-                    i++;
-                }
-            }
-
-            WinEndEnumWindows(henum);
-
-            if (i)
-               WinSetMultWindowPos(GetThreadHAB(), swp, i);
-        }
-        if (yDelta != 0)
-        {
-            POINT pt;
-            if(GetCaretPos (&pt) == TRUE)
-            {
-                pt.y -= yDelta;
-                SetCaretPos (pt.x, pt.y);
-            }
-        }
-        win32wnd->MsgPosChanged((LPARAM)&wp);
-        break;
-    }
 #else
     case WM_ADJUSTWINDOWPOS:
     {

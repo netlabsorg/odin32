@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.40 1999-10-22 18:11:47 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.41 1999-10-23 10:21:43 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -245,6 +245,157 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
                 goto RunDefWndProc;
         }
         break;
+
+#if 1
+    case WM_ADJUSTWINDOWPOS:
+    {
+      PSWP     pswp = (PSWP)mp1;
+      SWP      swpOld;
+      WINDOWPOS wp;
+      ULONG     parentHeight = 0;
+      HWND      hParent = NULLHANDLE, hFrame = NULLHANDLE, hwndAfter;
+
+        dprintf(("OS2: WM_ADJUSTWINDOWPOS %x %x %x (%d,%d) (%d,%d)", hwnd, pswp->hwnd, pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
+
+        if ((pswp->fl & (SWP_SIZE | SWP_MOVE | SWP_ZORDER)) == 0) goto RunDefWndProc;;
+
+        //SvL: TODO: Workaround. Why is this happening?
+        //     When this flag is set the coordinates are 0, even though SWP_SIZE & SWP_MOVE are set.
+//        if ((pswp->fl & SWP_NOADJUST)) goto RunDefWndProc;
+
+        if(!win32wnd->CanReceiveSizeMsgs()) goto RunDefWndProc;;
+
+        WinQueryWindowPos(hwnd, &swpOld);
+
+        if(pswp->fl & (SWP_MOVE | SWP_SIZE)) {
+            if (win32wnd->isChild()) {
+                if(win32wnd->getParent()) {
+                        hParent = win32wnd->getParent()->getOS2WindowHandle();
+                }
+                else    goto RunDefWndProc;;
+            }
+        }
+        hwndAfter = pswp->hwndInsertBehind;
+        hFrame = win32wnd->getOS2FrameWindowHandle();
+        OSLibMapSWPtoWINDOWPOS(pswp, &wp, &swpOld, hParent, hFrame);
+
+        wp.hwnd = win32wnd->getWindowHandle();
+        if ((pswp->fl & SWP_ZORDER) && (pswp->hwndInsertBehind > HWND_BOTTOM))
+        {
+           Win32BaseWindow *wndAfter = Win32BaseWindow::GetWindowFromOS2Handle(pswp->hwndInsertBehind);
+           if(wndAfter) wp.hwndInsertAfter = wndAfter->getWindowHandle();
+        }
+        if(win32wnd->MsgPosChanging((LPARAM)&wp) == 0)
+        {//app or default window handler changed wp
+            dprintf(("OS2: WM_ADJUSTWINDOWPOS, app changed windowpos struct"));
+            dprintf(("%x (%d,%d), (%d,%d)", pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
+            OSLibMapWINDOWPOStoSWP(&wp, pswp, &swpOld, hParent, hFrame);
+            dprintf(("%x (%d,%d), (%d,%d)", pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
+            pswp->fl |= SWP_NOADJUST;
+            pswp->hwndInsertBehind = hwndAfter;
+            pswp->hwnd = hFrame;
+
+            WinSetMultWindowPos(GetThreadHAB(), pswp, 1);
+            return (MRESULT)0;
+        }
+        break;
+    }
+#endif
+
+    case WM_WINDOWPOSCHANGED:
+    {
+      PSWP      pswp  = (PSWP)mp1;
+      SWP       swpOld = *(pswp + 1);
+      WINDOWPOS wp;
+      HWND      hParent = NULLHANDLE;
+      LONG      yDelta = pswp->cy - swpOld.cy;
+      LONG      xDelta = pswp->cx - swpOld.cx;
+
+        dprintf(("OS2: WM_WINDOWPOSCHANGED %x %x (%d,%d) (%d,%d)", hwnd, pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
+
+        if ((pswp->fl & (SWP_SIZE | SWP_MOVE | SWP_ZORDER)) == 0) break;
+        if (!win32wnd->CanReceiveSizeMsgs())    break;
+
+        if(pswp->fl & (SWP_MOVE | SWP_SIZE)) {
+            if (win32wnd->isChild()) {
+                if(win32wnd->getParent()) {
+                        hParent = win32wnd->getParent()->getOS2WindowHandle();
+                }
+                else    goto RunDefWndProc; //parent has just been destroyed
+            }
+        }
+        OSLibMapSWPtoWINDOWPOS(pswp, &wp, &swpOld, hParent, hwnd);
+
+        win32wnd->setWindowRect(wp.x, wp.y, wp.x+wp.cx, wp.y+wp.cy);
+        win32wnd->setClientRect(swpOld.x, swpOld.y, swpOld.x + swpOld.cx, swpOld.y + swpOld.cy);
+
+        wp.hwnd = win32wnd->getWindowHandle();
+        if ((pswp->fl & SWP_ZORDER) && (pswp->hwndInsertBehind > HWND_BOTTOM))
+        {
+           Win32BaseWindow *wndAfter = Win32BaseWindow::GetWindowFromOS2Handle(pswp->hwndInsertBehind);
+           wp.hwndInsertAfter = wndAfter->getWindowHandle();
+        }
+
+        if (yDelta != 0 || xDelta != 0)
+        {
+            HENUM henum = WinBeginEnumWindows(pswp->hwnd);
+            SWP swp[10];
+            int i = 0;
+            HWND hwnd;
+
+            while ((hwnd = WinGetNextWindow(henum)) != NULLHANDLE)
+            {
+#if 0
+                if (mdiClient )
+                {
+                  continue;
+                }
+#endif
+                WinQueryWindowPos(hwnd, &(swp[i]));
+
+#ifdef DEBUG
+                Win32BaseWindow *window = Win32BaseWindow::GetWindowFromOS2Handle(hwnd);
+                dprintf(("ENUMERATE %x delta %d (%d,%d) (%d,%d) %x", (window) ? window->getWindowHandle() : hwnd,
+                         yDelta, swp[i].x, swp[i].y, swp[i].cx, swp[i].cy, swp[i].fl));
+#endif
+
+                if(swp[i].y != 0) {
+                    //child window at offset <> 0 from client area -> offset now changes
+                    swp[i].y  += yDelta;
+                    swp[i].fl &= ~(SWP_NOREDRAW);
+                }
+                //else child window with the same start coorindates as the client area
+                //The app should resize it.
+
+               if (i == 9)
+                {
+                    WinSetMultWindowPos(GetThreadHAB(), swp, 10);
+                    i = 0;
+                }
+                else
+                {
+                    i++;
+                }
+            }
+
+            WinEndEnumWindows(henum);
+
+            if (i)
+               WinSetMultWindowPos(GetThreadHAB(), swp, i);
+        }
+        if (yDelta != 0)
+        {
+            POINT pt;
+            if(GetCaretPos (&pt) == TRUE)
+            {
+                pt.y -= yDelta;
+                SetCaretPos (pt.x, pt.y);
+            }
+        }
+        win32wnd->MsgPosChanged((LPARAM)&wp);
+
+        goto RunDefWndProc;
+    }
 
     case WM_SIZE:
     {
