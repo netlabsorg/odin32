@@ -1,4 +1,8 @@
- /* $Id: ChangeLog,v 1.47 1999-07-12 17:51:15 phaller Exp $ */
+ /* $Id: ChangeLog,v 1.48 1999-07-14 08:39:22 sandervl Exp $ */
+ 99-07-13: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32/NEW: *VERY* preliminary/alpha code for Open32 replacement in user32
+                      Compiles, but not tested at all.
+
  99-07-12: Patrick Haller <phaller@gmx.net>
        - KERNEL32: various console fixes
 
