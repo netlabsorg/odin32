@@ -40,14 +40,20 @@ extern "C" {
 //Win32 resource table (produced by wrc)
 extern DWORD _Resource_PEResTab;
 
+#if 0
 extern FARPROC   WINAPI GetProcAddress(HMODULE,LPCSTR);
 extern HMODULE   WINAPI LoadLibraryA(LPCSTR);
 extern BOOL      WINAPI FreeLibrary(HMODULE);
+#endif
 extern int WINAPI PROFILE_GetOdinIniInt(LPCSTR section,LPCSTR key_name,int def);
 TW_UINT16 (APIENTRY *TWAINOS2_DSM_Entry)( pTW_IDENTITY, pTW_IDENTITY,
-    	                                  TW_UINT32, TW_UINT16, TW_UINT16, TW_MEMREF) = 0;
-static HINSTANCE hTWAIN = 0;
-
+                                        TW_UINT32, TW_UINT16, TW_UINT16, TW_MEMREF) = 0;
+#if 0
+  static HINSTANCE hTWAIN = 0;
+#else
+  static HMODULE hTWAIN = 0;
+  char szLoadError[256];
+#endif
 }
 static HMODULE dllHandle = 0;
 
@@ -58,15 +64,15 @@ BOOL WINAPI LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
    switch (fdwReason)
    {
    case DLL_PROCESS_ATTACH:
-	return TRUE;
+  return TRUE;
 
    case DLL_THREAD_ATTACH:
    case DLL_THREAD_DETACH:
-	return TRUE;
+  return TRUE;
 
    case DLL_PROCESS_DETACH:
-	ctordtorTerm();
-	return TRUE;
+  ctordtorTerm();
+  return TRUE;
    }
    return FALSE;
 }
@@ -97,61 +103,92 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
 
          CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
 
-	twaintype = PROFILE_GetOdinIniInt("TWAIN","TwainIF",1);
-	switch(twaintype) 
-	{
-	 case 1:
-	 default:
+  twaintype = PROFILE_GetOdinIniInt("TWAIN","TwainIF",1);
+  switch(twaintype)
+  {
+   case 1:
+   default:
          {
             dprintf(("TWAIN_32: Using CFM-Twain as Twain Source.\n\n"));
+#if 0
             hTWAIN = LoadLibraryA("TWAINOS2.DLL");
-            if(hTWAIN) 
-            {   
-                *(VOID **)&TWAINOS2_DSM_Entry=(void*)GetProcAddress(hTWAIN, (LPCSTR)"DSM_Entry");
+            if(hTWAIN)
+            {
+              *(VOID **)&TWAINOS2_DSM_Entry=(void*)GetProcAddress(hTWAIN, (LPCSTR)"DSM_Entry");
             }
-	    else
-	    {
+            else
+            {
               return 0UL;
-	    }
-	    break;
+            }
+#else
+            rc = DosLoadModule( szLoadError, sizeof(szLoadError), "TWAINOS2.DLL", &hTWAIN);
+            if(rc==0)
+            {
+              rc = DosQueryProcAddr(hTWAIN, 0, "DSM_Entry",(PFN*)&TWAINOS2_DSM_Entry);
+            }
+            else
+            {
+              dprintf(("TWAIN_32: Error Loading DLL: %s",szLoadError));
+            }
+            if(rc!=0)
+            {
+              return 0UL;
+            }
+#endif
+      break;
          }
-	 case 2:
+   case 2:
          {
             dprintf(("TWAIN_32: Using STI-Twain as Twain Source.\n\n"));
+#if 0
             hTWAIN = LoadLibraryA("TWAIN.DLL");
-            if(hTWAIN) 
-            {   
-                *(VOID **)&TWAINOS2_DSM_Entry=(void*)GetProcAddress(hTWAIN, (LPCSTR)"DSM_ENTRY");
+            if(hTWAIN)
+            {
+              *(VOID **)&TWAINOS2_DSM_Entry=(void*)GetProcAddress(hTWAIN, (LPCSTR)"DSM_ENTRY");
             }
-	    else
-	    {
+            else
+            {
               return 0UL;
-	    }
-	    break;
+            }
+#else
+            rc = DosLoadModule( szLoadError, sizeof(szLoadError), "TWAIN.DLL", &hTWAIN);
+            if(rc==0)
+            {
+              rc = DosQueryProcAddr(hTWAIN, 0, "DSM_Entry",(PFN*)&TWAINOS2_DSM_Entry);
+            }
+            else
+            {
+              dprintf(("TWAIN_32: Error Loading DLL: %s",szLoadError));
+            }
+            if(rc!=0)
+            {
+              return 0UL;
+            }
+#endif
+      break;
          }
-	 case 3:
+   case 3:
          {
             dprintf(("TWAIN_32: Using SANE as Twain Source  (currently not supported).\n\n"));
-//            hTWAIN = LoadLibraryA("TWAINSNE.DLL");
-//            if(hTWAIN) 
-//            {   
-//                *(VOID **)&TWAINOS2_DSM_Entry=(void*)GetProcAddress(hTWAIN, (LPCSTR)"DSM_Entry");
-//            }
             return 0UL;
          }
-	}
+  }
 
-	 dllHandle = RegisterLxDll(hModule, LibMain, (PVOID)&_Resource_PEResTab);
-         if(dllHandle == 0) 
-		return 0UL;
+   dllHandle = RegisterLxDll(hModule, LibMain, (PVOID)&_Resource_PEResTab);
+         if(dllHandle == 0)
+    return 0UL;
 
          break;
       case 1 :
-         if(hTWAIN) 
-	 	FreeLibrary(hTWAIN);
+         if(hTWAIN)
+#if 0
+    FreeLibrary(hTWAIN);
+#else
+    DosFreeModule(hTWAIN);
+#endif
          hTWAIN = 0;
          if(dllHandle) {
-	 	UnregisterLxDll(dllHandle);
+    UnregisterLxDll(dllHandle);
          }
          break;
       default  :

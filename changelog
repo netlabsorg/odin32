@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.1535 2001-06-22 19:40:55 sandervl Exp $ */
+/* $Id: changelog,v 1.1536 2001-06-22 20:27:11 hugh Exp $ */
+ 2001-06-22: Markus Montkowski <mmontkowski@gmx.de>
+    - TWAIN_32: o Updated initterm.cpp to use OS/2 and not Win32 APIs when loading
+                  the OS/2 twain DLL. needed because of kernel32 change 2001-06-12
 
  2001-06-22: Dietrich Teickner <Dietrich_Teickner@t-online.de>
     - COMCTL32: o Check for invalid lpItem in LISTVIEW_GetItemA
