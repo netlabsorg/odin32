@@ -1,4 +1,4 @@
-/* $Id: colorconv.cpp,v 1.3 2000-03-03 19:21:21 hugh Exp $ */
+/* $Id: colorconv.cpp,v 1.4 2001-03-09 22:48:47 mike Exp $ */
 
 /*
  * ColorConversion routines
@@ -294,7 +294,7 @@
   DWORD *pSrcLine;
   WORD  *pDstLine;
 
-  dprintf(("DDRAW: Conv32to16 (assuming R565) \n"));
+  dprintf(("DDRAW: Conv32to16 (assuming R565)"));
 
   pSrcLine = (DWORD*)(pFB + (dwTop*dwPitchDB) + (dwLeft*4));
   pDstLine = (WORD*)(pDB + (dwTop*dwPitchFB) + (dwLeft*2));
@@ -304,9 +304,11 @@
 
     for(int x=0;x<dwWidth;x++)
     {
-      pDstLine[x] = ((pSrcLine[x] & 0xF8000000) >> 16) +
-                    ((pSrcLine[x] & 0x00FE0000) >> 13) +
+      DWORD tmp;
+      tmp         = ((pSrcLine[x] & 0xF8000000) >> 16) |
+                    ((pSrcLine[x] & 0x00FC0000) >> 13) |
                     ((pSrcLine[x] & 0x0000F800) >> 11);
+      pDstLine[x] = (WORD)tmp;
     }
     pSrcLine = (DWORD*)((char*)pSrcLine + dwPitchFB);
     pDstLine = (WORD*)((char*)pDstLine + dwPitchDB);

@@ -1,4 +1,4 @@
-/* $Id: OS2PALSET.CPP,v 1.8 2000-03-17 22:05:40 mike Exp $ */
+/* $Id: OS2PALSET.CPP,v 1.9 2001-03-09 22:48:47 mike Exp $ */
 
 /*
  * Functions used to Set the Physical Palette in OS/2 when in 8 Bit mode
@@ -47,7 +47,7 @@ void OS2SetPhysPalette(void *pal)
                           LCOLF_CONSECRGB,
                           0,
                           256,
-                          (PLONG)&os2rgb);
+                          (PLONG)&os2rgb[0]);
   Gre32Entry3( hdc,
                0L,
                0x000060C6L);

@@ -1,4 +1,4 @@
-/* $Id: OS2UTIL.CPP,v 1.1 2000-04-07 18:21:08 mike Exp $ */
+/* $Id: OS2UTIL.CPP,v 1.2 2001-03-09 22:48:48 mike Exp $ */
 
 /*
  * OS/2 Utility functions
@@ -56,7 +56,7 @@ void InverseDC(HDC hdc, LONG lHeight)
 {
  USHORT sel = RestoreOS2FS();
 
- _GpiEnableYInversion( WinGetPS( Win32ToOS2Handle( WindowFromDC(hdc) ) ), lHeight);
+// _GpiEnableYInversion( WinGetPS( Win32ToOS2Handle( WindowFromDC(hdc) ) ), lHeight);
  SetFS(sel);
 
 }
