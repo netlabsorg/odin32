@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.61 1999-12-18 16:31:49 cbratschi Exp $ */
+/* $Id: user32.cpp,v 1.62 1999-12-20 16:45:17 cbratschi Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -876,7 +876,7 @@ BOOL WIN32API SystemParametersInfoA(UINT uiAction, UINT uiParam, PVOID pvParam, 
         *(BOOL *)pvParam = FALSE;
         break;
     case SPI_GETDRAGFULLWINDOWS:
-        *(BOOL *)pvParam = FALSE;
+        *(BOOL *)pvParam = FALSE; //CB: where is the Warp 4 setting stored?
         break;
     case SPI_GETNONCLIENTMETRICS:
         memset(cmetric, 0, sizeof(NONCLIENTMETRICSA));
@@ -911,7 +911,7 @@ BOOL WIN32API SystemParametersInfoA(UINT uiAction, UINT uiParam, PVOID pvParam, 
 
         /* from now on we always have an alias for MS Sans Serif */
         strcpy(lpLogFont->lfFaceName, "MS Sans Serif");
-        lpLogFont->lfHeight = -GetProfileIntA("Desktop","IconTitleSize", 8);
+        lpLogFont->lfHeight = -GetProfileIntA("Desktop","IconTitleSize", /*8*/12); //CB: 8 is too small
         lpLogFont->lfWidth = 0;
         lpLogFont->lfEscapement = lpLogFont->lfOrientation = 0;
         lpLogFont->lfWeight = FW_NORMAL;
