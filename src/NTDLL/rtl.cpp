@@ -1,4 +1,4 @@
-/* $Id: rtl.cpp,v 1.11 2000-08-20 15:16:59 phaller Exp $ */
+/* $Id: rtl.cpp,v 1.12 2001-04-22 10:38:59 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -22,7 +22,6 @@
 #include <os2win.h>
 
 #include "debugtools.h"
-#include "ntdll.h"
 
 #include "winuser.h"
 #include "windef.h"

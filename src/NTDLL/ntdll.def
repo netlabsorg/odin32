@@ -1,4 +1,4 @@
-; $Id: ntdll.def,v 1.36 2000-12-16 22:53:25 bird Exp $
+; $Id: ntdll.def,v 1.37 2001-04-22 10:38:58 sandervl Exp $
 
 ;
 ; Based on NT 4.0 SP6: NTDLL.DLL
@@ -491,9 +491,9 @@ EXPORTS
 ;   RtlLookupElementGenericTable                    @475
 ;   RtlMakeSelfRelativeSD                       @476
 ;   RtlMapGenericMask                           @477
-    RtlMoveMemory                  = _RtlMoveMemory@12              @478
+    RtlMoveMemory                  = _RtlMoveMemory@12                  @478
     RtlMultiByteToUnicodeN         = _RtlMultiByteToUnicodeN@20         @479
-;   RtlMultiByteToUnicodeSize                       @480
+    RtlMultiByteToUnicodeSize      = _RtlMultiByteToUnicodeSize@12      @480
 ;   RtlNewInstanceSecurityObject                    @481
 ;   RtlNewSecurityGrantedAccess                     @482
     RtlNewSecurityObject          = _RtlNewSecurityObject@24        @483
@@ -502,15 +502,15 @@ EXPORTS
 ;   RtlNumberGenericTableElements                   @486
 ;   RtlNumberOfClearBits                        @487
 ;   RtlNumberOfSetBits                          @488
-;   RtlOemStringToUnicodeSize                       @489
+    RtlOemStringToUnicodeSize     = _RtlOemStringToUnicodeSize@4        @489
     RtlOemStringToUnicodeString   = _RtlOemStringToUnicodeString@12     @490
     RtlOemToUnicodeN              = _RtlOemToUnicodeN@20                @491
 ;   RtlOnMappedStreamEvent                      @492
     RtlOpenCurrentUser            = _RtlOpenCurrentUser@8       @493
 ;   RtlPcToFileHeader                           @494
 ;   RtlPinAtomInAtomTable                       @495
-;   RtlPrefixString                         @496
-;   RtlPrefixUnicodeString                      @497
+    RtlPrefixString               = _RtlPrefixString@12                 @496
+    RtlPrefixUnicodeString        = _RtlPrefixUnicodeString@12          @497
 ;   RtlPropertySetNameToGuid                        @498
 ;   RtlProtectHeap                          @499
 ;   RtlQueryAtomInAtomTable                     @500
@@ -577,29 +577,28 @@ EXPORTS
     RtlTimeToSecondsSince1980     = _RtlTimeToSecondsSince1980@8        @560
 ;   RtlTimeToTimeFields                         @561
 ;   RtlTryEnterCriticalSection                      @562
-;   RtlUnicodeStringToAnsiSize                      @563
-;   RtlUnicodeStringToAnsiString                    @564
+    RtlUnicodeStringToAnsiSize    = _RtlUnicodeStringToAnsiSize@4       @563
+    RtlUnicodeStringToAnsiString  = _RtlUnicodeStringToAnsiString@12    @564
 ;   RtlUnicodeStringToCountedOemString                  @565
 ;   RtlUnicodeStringToInteger                       @566
-;   RtlUnicodeStringToOemSize                       @567
+    RtlUnicodeStringToOemSize     = _RtlUnicodeStringToOemSize@4        @567
     RtlUnicodeStringToOemString   = _RtlUnicodeStringToOemString@12     @568
 ;   RtlUnicodeToCustomCPN                       @569
     RtlUnicodeToMultiByteN        = _RtlUnicodeToMultiByteN@20          @570
-;   RtlUnicodeToMultiByteSize                       @571
+    RtlUnicodeToMultiByteSize     = _RtlUnicodeToMultiByteSize@12       @571
     RtlUnicodeToOemN              = _RtlUnicodeToOemN@20                @572
 ;   RtlUniform                              @573
 ;   RtlUnlockHeap                           @574
     RtlUnwind                  = _RtlUnwind@16                      @575
 ;   RtlUpcaseUnicodeChar                        @576
     RtlUpcaseUnicodeString        = _RtlUpcaseUnicodeString@12          @577
-    RtlUnicodeStringToAnsiString  = _RtlUnicodeStringToAnsiString@12    @578
 ;   RtlUpcaseUnicodeStringToCountedOemString                @579
     RtlUpcaseUnicodeStringToOemString = _RtlUpcaseUnicodeStringToOemString@12 @580
 ;   RtlUpcaseUnicodeToCustomCPN                     @581
-;   RtlUpcaseUnicodeToMultiByteN                    @582
-;   RtlUpcaseUnicodeToOemN                      @583
+    RtlUpcaseUnicodeToMultiByteN  = _RtlUpcaseUnicodeToMultiByteN@20    @582
+    RtlUpcaseUnicodeToOemN        = _RtlUpcaseUnicodeToOemN@20          @583
 ;   RtlUpperChar                            @584
-;   RtlUpperString                          @585
+    RtlUpperString                = _RtlUpperString@8                   @585
 ;   RtlUsageHeap                            @586
 ;   RtlValidAcl                             @587
     RtlValidSecurityDescriptor    = _RtlValidSecurityDescriptor@4       @588
@@ -619,8 +618,8 @@ EXPORTS
 ;   RtlpNtSetValueKey                           @601
 ;   RtlpUnWaitCriticalSection                       @602
 ;   RtlpWaitForCriticalSection                      @603
-    RtlxAnsiStringToUnicodeSize   = _RtlxAnsiStringToUnicodeSize@4      @604
-    RtlxOemStringToUnicodeSize    = _RtlxOemStringToUnicodeSize@4       @605
+    RtlxAnsiStringToUnicodeSize   = _RtlAnsiStringToUnicodeSize@4      @604
+    RtlxOemStringToUnicodeSize    = _RtlOemStringToUnicodeSize@4       @605
 ;   RtlxUnicodeStringToAnsiSize                     @606
 ;   RtlxUnicodeStringToOemSize                      @607
 ;   SaveEm87Context                         @608
@@ -1073,5 +1072,4 @@ EXPORTS
 
 ;   Not found in NTDLL-SP6:
     DebugBreak                    = ___regs_DebugBreak@4
-    RtlInitOemString              = _RtlInitOemString@8
     NtPowerInformation            = _NtPowerInformation@20
