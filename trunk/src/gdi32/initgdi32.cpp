@@ -1,4 +1,4 @@
-/* $Id: initgdi32.cpp,v 1.10 2001-12-16 15:29:55 sandervl Exp $
+/* $Id: initgdi32.cpp,v 1.11 2001-12-31 12:08:23 sandervl Exp $
  *
  * DLL entry point
  *
@@ -25,20 +25,23 @@
 /* Include files */
 #define  INCL_DOSMODULEMGR
 #define  INCL_DOSPROCESS
+#define  INCL_GPI
 #include <os2wrap.h>    //Odin32 OS/2 api wrappers
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <odin.h>
-#include <win32type.h>
+#include <win32api.h>
 #include <winconst.h>
 #include <odinlx.h>
 #include <misc.h>       /*PLF Wed  98-03-18 23:18:15*/
-#define DBG_LOCALLOG    DBG_initterm
-#include "dbglocal.h"
 #include "region.h"
 #include <initdll.h>
 #include <stats.h>
+#include "dibsect.h"
+
+#define DBG_LOCALLOG    DBG_initterm
+#include "dbglocal.h"
 
 extern "C" {
  //Win32 resource table (produced by wrc)
@@ -93,6 +96,7 @@ ULONG APIENTRY inittermGdi32(ULONG hModule, ULONG ulFlag)
          if(InitRegionSpace() == FALSE) {
              return 0UL;
          }
+         DIBSection::initDIBSection();
          dllHandle = RegisterLxDll(hModule, OdinLibMain, (PVOID)&gdi32_PEResTab,
                                    GDI32_MAJORIMAGE_VERSION, GDI32_MINORIMAGE_VERSION,
                                    IMAGE_SUBSYSTEM_NATIVE);

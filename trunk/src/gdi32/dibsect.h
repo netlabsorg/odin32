@@ -1,4 +1,4 @@
-/* $Id: dibsect.h,v 1.25 2001-05-29 09:45:21 sandervl Exp $ */
+/* $Id: dibsect.h,v 1.26 2001-12-31 12:08:21 sandervl Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -8,7 +8,7 @@
 #ifndef __DIBSECT_H__
 #define __DIBSECT_H__
 
-#ifdef OS2_ONLY
+#ifdef OS2_INCLUDED
 typedef struct
 {
   BYTE rgbBlue;
@@ -60,7 +60,7 @@ typedef struct {
 } BITMAPINFO_W;
 typedef BITMAPINFO *LPBITMAPINFO;
 
-#ifdef OS2_ONLY
+#ifdef OS2_INCLUDED
 #define DIB_RGB_COLORS   0
 #define DIB_PAL_COLORS   1
 
@@ -112,6 +112,12 @@ public:
  static DIBSection *findObj(HANDLE handle);
  static DIBSection *findHDC(HDC hdc);
  static       void  deleteSection(HANDLE handle);
+
+ static       void  initDIBSection();
+
+ static       void  lock()   { EnterCriticalSection(&dibcritsect); };
+ static       void  unlock() { LeaveCriticalSection(&dibcritsect); };
+
 protected:
 
 private:
@@ -128,6 +134,8 @@ private:
                              // Linked list management
               DIBSection*    next;                   // Next DIB section
     static    DIBSection*    section;                // List of DIB sections
+
+    static    CRITICAL_SECTION dibcritsect;
 };
 
 #endif

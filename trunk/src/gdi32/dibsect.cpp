@@ -1,4 +1,4 @@
-/* $Id: dibsect.cpp,v 1.61 2001-12-20 19:57:01 sandervl Exp $ */
+/* $Id: dibsect.cpp,v 1.62 2001-12-31 12:08:20 sandervl Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -19,21 +19,17 @@
 #include <string.h>
 #include <win32type.h>
 #include <misc.h>
-#define  OS2_ONLY
-#include "dibsect.h"
-#include <vmutex.h>
 #include <win32api.h>
 #include <winconst.h>
 #include <winuser32.h>
 #include <cpuhlp.h>
 #include <dcdata.h>
+#include "dibsect.h"
 #include "oslibgpi.h"
 #include "rgbcvt.h"
 
 #define DBG_LOCALLOG  DBG_dibsect
 #include "dbglocal.h"
-
-static VMutex dibMutex;
 
 //******************************************************************************
 //******************************************************************************
@@ -175,7 +171,7 @@ DIBSection::DIBSection(BITMAPINFOHEADER_W *pbmi, char *pColors, DWORD iUsage, DW
    this->handle = handle;
    this->iUsage = iUsage;
 
-   dibMutex.enter();
+   lock();
    if(section == NULL)
    {
      dprintf(("section was NULL\n"));
@@ -194,7 +190,7 @@ DIBSection::DIBSection(BITMAPINFOHEADER_W *pbmi, char *pColors, DWORD iUsage, DW
      }
      dsect->next = this;
    }
-   dibMutex.leave();
+   unlock();
 }
 //******************************************************************************
 //******************************************************************************
@@ -215,7 +211,7 @@ DIBSection::~DIBSection()
    if(pOS2bmp)
         free(pOS2bmp);
 
-   dibMutex.enter();
+   lock();
    if(section == this)
    {
      section = this->next;
@@ -230,7 +226,7 @@ DIBSection::~DIBSection()
      }
      dsect->next = this->next;
    }
-   dibMutex.leave();
+   unlock();
 }
 //******************************************************************************
 //******************************************************************************
@@ -488,49 +484,42 @@ BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nDestWidth,
         else  GetClientRect(hwndDest, &rect);
         hdcHeight = rect.bottom - rect.top;
         hdcWidth  = rect.right - rect.left;
+        dprintf(("DIBSection::BitBlt hdc size (%d,%d) (WINDOW)", hdcWidth, hdcHeight));
   }
   else {
         hdcHeight = pHps->bitmapHeight;
         hdcWidth  = pHps->bitmapWidth;
+        dprintf(("DIBSection::BitBlt hdc size (%d,%d) (BMP)", hdcWidth, hdcHeight));
   }
 
   //Don't clip destination size to destination DC size
   //This messes up the two bitmaps in the opening window of Opera 6
   //(choice between MDI & SDI interface)
-#if 0
-  if(nXdest + nDestWidth > hdcWidth) {
-        nDestWidth  = hdcWidth - nXdest;
-  }
-
-  if(nYdest + nDestHeight > hdcHeight) {
-        nDestHeight = hdcHeight - nYdest;
-  }
-#endif
 
   //win32 coordinates are relative to left top, OS/2 expects left bottom
   //source rectangle is non-inclusive (top, right not included)
   //destination rectangle is incl.-inclusive (everything included)
 
   point[0].x = nXdest;
-  point[0].y = hdcHeight - nYdest - nDestHeight;
   point[1].x = nXdest + nDestWidth - 1;
+#ifdef INVERT
+  point[0].y = hdcHeight - nYdest - nDestHeight;
   point[1].y = hdcHeight - nYdest - 1;
-
-#if 0
-  //Don't check size here either. Let GpiDrawBits do that for us
-  if(nXsrc + nSrcWidth > pOS2bmp->cx) {
-        nSrcWidth  = pOS2bmp->cx - nXsrc;
-  }
-  if(nYsrc + nSrcHeight > pOS2bmp->cy) {
-        nSrcHeight = pOS2bmp->cy - nYsrc;
-  }
+#else
+  point[0].y = nYdest;
+  point[1].y = nYdest + nDestHeight - 1;
 #endif
 
   //target rectangle is inclusive-inclusive
   point[2].x = nXsrc;
-  point[2].y = pOS2bmp->cy - nYsrc - nSrcHeight;
   point[3].x = nXsrc + nSrcWidth;
+#ifdef INVERT
+  point[2].y = pOS2bmp->cy - nYsrc - nSrcHeight;
   point[3].y = pOS2bmp->cy - nYsrc;
+#else
+  point[2].y = nYsrc;
+  point[3].y = nYsrc + nSrcHeight - 1;
+#endif
 
   dprintf(("DIBSection::BitBlt (%d,%d)(%d,%d) from (%d,%d)(%d,%d) dim (%d,%d)(%d,%d)", point[0].x, point[0].y,
            point[1].x, point[1].y, point[2].x, point[2].y, point[3].x, point[3].y,
@@ -539,6 +528,11 @@ BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nDestWidth,
 #ifdef INVERT
   oldyinversion = GpiQueryYInversion(hps);
   if(oldyinversion != 0) {
+#ifdef DEBUG
+        POINT point;
+        GetViewportOrgEx(hps, &point);
+        dprintf(("Viewport origin (%d,%d)", point.x, point.y));
+#endif
         GpiEnableYInversion(hps, 0);
         fRestoryYInversion = TRUE;
   }
@@ -630,7 +624,7 @@ BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nDestWidth,
         //restore old y inversion height
         if(fRestoryYInversion) GpiEnableYInversion(hps, oldyinversion);
 #endif
-            SetLastError(ERROR_SUCCESS_W);
+        SetLastError(ERROR_SUCCESS_W);
 
         return(TRUE);
   }
@@ -660,6 +654,11 @@ void DIBSection::sync(HDC hdc, DWORD nYdest, DWORD nDestHeight, BOOL orgYInversi
       oldyinversion = GpiQueryYInversion(hdc);
       dprintf(("Sync destination dibsection: hdc y inversion = %d", oldyinversion));
       if(oldyinversion != 0) {
+#ifdef DEBUG
+          POINT point;
+          GetViewportOrgEx(hdc, &point);
+          dprintf(("Viewport origin (%d,%d)", point.x, point.y));
+#endif
           GpiEnableYInversion(hdc, 0);
       }
   }
@@ -773,20 +772,20 @@ DIBSection *DIBSection::findObj(HANDLE handle)
       return NULL;
 
   DIBSection *dsect = section;
-  dibMutex.enter();
+  lock();
 
   do
   {
     if(dsect->handle == handle)
     {
-        dibMutex.leave();
+        unlock();
         return(dsect);
     }
     dsect = dsect->next;
   }
   while(dsect);
 
-  dibMutex.leave();
+  unlock();
   return(NULL);
 }
 //******************************************************************************
@@ -800,16 +799,19 @@ DIBSection *DIBSection::findHDC(HDC hdc)
   
   DIBSection *dsect = section;
   
+  lock();
   do
   {
         if(dsect->hdc == hdc)
         {
+            unlock();
             return(dsect);
         }
         dsect = dsect->next;
   }
   while(dsect);
-    
+
+  unlock();   
   return(NULL);
 }
 //******************************************************************************
@@ -872,4 +874,11 @@ int DIBSection::GetWidth()
 }
 //******************************************************************************
 //******************************************************************************
-DIBSection *DIBSection::section = NULL;
+void DIBSection::initDIBSection() 
+{
+    InitializeCriticalSection(&dibcritsect);
+}
+//******************************************************************************
+//******************************************************************************
+DIBSection      *DIBSection::section = NULL;
+CRITICAL_SECTION DIBSection::dibcritsect;

@@ -1,4 +1,4 @@
-/* $Id: oslibgdi.cpp,v 1.7 2001-06-08 11:03:33 sandervl Exp $ */
+/* $Id: oslibgdi.cpp,v 1.8 2001-12-31 12:08:23 sandervl Exp $ */
 
 /*
  * GDI32 support code
@@ -13,9 +13,8 @@
 #include <os2wrap.h>    //Odin32 OS/2 api wrappers
 #include <stdlib.h>
 #include <string.h>
-#include <win32type.h>
+#include <win32api.h>
 #include <misc.h>
-#define  OS2_ONLY
 #include "dibsect.h"
 #include "oslibgdi.h"
 
