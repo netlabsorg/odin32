@@ -1,4 +1,4 @@
-/* $Id: dlgs.h,v 1.3 1999-11-28 12:33:11 sandervl Exp $ */
+/* $Id: dlgs.h,v 1.4 2000-01-12 12:41:46 sandervl Exp $ */
 /******************************************************************************
 * dlgs.h -      Common dialog's dialog control ID numbers                     *
 ******************************************************************************/
@@ -6,7 +6,7 @@
 #ifndef __WINE_DLGS_H
 #define __WINE_DLGS_H
 
-#include "wine/obj_shellview.h"
+////#include "wine/obj_shellview.h"
 
 #define ctlFirst    0x0400
 #define ctlLast     0x04ff
