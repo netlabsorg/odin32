@@ -1,4 +1,4 @@
-/* $Id: os2util.cpp,v 1.4 1999-06-19 13:57:51 sandervl Exp $ */
+/* $Id: os2util.cpp,v 1.5 1999-06-19 17:58:32 sandervl Exp $ */
 
 /*
  * Misc util. procedures
@@ -283,4 +283,20 @@ ULONG OS2GetPIB(int piboff)
    }
 }
 //******************************************************************************
+//Allocate local thread memory
 //******************************************************************************
+ULONG OS2AllocThreadLocalMemory(int nrdwords)
+{
+ APIRET rc;
+ PULONG thrdaddr;
+
+   rc = DosAllocThreadLocalMemory(nrdwords, &thrdaddr);
+   if(rc) {
+	dprintf(("DosAllocThreadLocalMemory failed %d", rc));
+	return 0;
+   }
+   return (ULONG)thrdaddr;
+}
+//******************************************************************************
+//******************************************************************************
+

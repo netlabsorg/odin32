@@ -1,4 +1,4 @@
-/* $Id: wprocess.h,v 1.1 1999-06-19 13:58:26 sandervl Exp $ */
+/* $Id: wprocess.h,v 1.2 1999-06-19 17:58:50 sandervl Exp $ */
 /*
  * Process help functions
  *
@@ -10,6 +10,8 @@
 
 #ifndef _WPROCESS_H__
 #define _WPROCESS_H__
+
+//#define WIN32_TIBSEL
 
 void InitializeTIB(BOOL fMainThread = FALSE);
 void DestroyTIB();

@@ -1,4 +1,4 @@
-/* $Id: thread.H,v 1.3 1999-06-10 19:11:31 phaller Exp $ */
+/* $Id: thread.H,v 1.4 1999-06-19 17:58:33 sandervl Exp $ */
 
 /*
  *
@@ -21,7 +21,7 @@ typedef DWORD (* WIN32API WIN32THREADPROC)(LPVOID);
 class Win32Thread
 {
 public:
-    Win32Thread(LPTHREAD_START_ROUTINE pUserCallback, LPVOID lpData);
+    Win32Thread(LPTHREAD_START_ROUTINE pUserCallback, LPVOID lpData, DWORD dwFlags);
     ~Win32Thread();
 
     PTHREAD_START_ROUTINE_O32 GetOS2Callback();
@@ -29,6 +29,8 @@ private:
 
  LPVOID      lpUserData;
  LPTHREAD_START_ROUTINE pCallback;
+ DWORD       dwFlags;
+
  friend static DWORD OPEN32API Win32ThreadProc(LPVOID lpData);
 };
 

@@ -1,4 +1,4 @@
-/* $Id: os2util.h,v 1.4 1999-06-19 13:57:51 sandervl Exp $ */
+/* $Id: os2util.h,v 1.5 1999-06-19 17:58:33 sandervl Exp $ */
 
 /*
  *
@@ -57,6 +57,8 @@ ULONG OS2GetTIB(int tiboff);
 #define TASKTYPE_VIO	1
 
 ULONG OS2GetPIB(int piboff);
+
+ULONG OS2AllocThreadLocalMemory(int nrdwords);
 
 #ifdef __cplusplus
       }
