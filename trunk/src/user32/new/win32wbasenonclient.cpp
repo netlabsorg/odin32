@@ -1,4 +1,4 @@
-/* $Id: win32wbasenonclient.cpp,v 1.9 2000-01-15 15:05:37 sandervl Exp $ */
+/* $Id: win32wbasenonclient.cpp,v 1.10 2000-01-15 15:37:31 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (non-client methods)
  *
@@ -193,8 +193,7 @@ VOID Win32BaseWindow::TrackScrollBar(WPARAM wParam,POINT pt)
   {
     if ((wParam & 0x0f) != HTHSCROLL) return;
     scrollbar = SB_HORZ;
-  }
-  else  /* SC_VSCROLL */
+  } else  /* SC_VSCROLL */
   {
     if ((wParam & 0x0f) != HTVSCROLL) return;
     scrollbar = SB_VERT;
@@ -203,7 +202,7 @@ VOID Win32BaseWindow::TrackScrollBar(WPARAM wParam,POINT pt)
   pt.x -= rectWindow.left;
   pt.y -= rectWindow.top;
   SCROLL_HandleScrollEvent(Win32Hwnd,0,MAKELONG(pt.x,pt.y),scrollbar,WM_LBUTTONDOWN);
-  if (GetCapture() != getWindowHandle()) return;
+  if (GetCapture() != Win32Hwnd) return;
   do
   {
     GetMessageA(&msg, 0, 0, 0);
@@ -236,8 +235,7 @@ VOID Win32BaseWindow::TrackScrollBar(WPARAM wParam,POINT pt)
       ReleaseCapture();
       break;
     }
-  }
-  while (msg.message != WM_LBUTTONUP);
+  } while (msg.message != WM_LBUTTONUP);
 }
 //******************************************************************************
 //******************************************************************************
