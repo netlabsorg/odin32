@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.18 1999-08-16 16:28:02 sandervl Exp $
+# $Id: makefile,v 1.19 1999-08-19 12:53:18 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -342,7 +342,7 @@ async.OBJ: \
         $(PDWIN32_INCLUDE)\unicode.h
 
 pefile.OBJ:    pefile.cpp $(PDWIN32_INCLUDE)\pefile.h
-winimage.OBJ:  winimage.cpp $(PDWIN32_INCLUDE)\winimage.h $(PDWIN32_INCLUDE)\windll.h $(PDWIN32_INCLUDE)\pefile.h
+winimage.OBJ:  winimage.cpp $(PDWIN32_INCLUDE)\winimage.h $(PDWIN32_INCLUDE)\windll.h $(PDWIN32_INCLUDE)\pefile.h $(PDWIN32_INCLUDE)\winres.h
 winimgres.OBJ: winimgres.cpp $(PDWIN32_INCLUDE)\winimage.h $(PDWIN32_INCLUDE)\windll.h $(PDWIN32_INCLUDE)\pefile.h $(PDWIN32_INCLUDE)\winexe.h $(PDWIN32_INCLUDE)\winres.h
 windll.OBJ:    windll.cpp $(PDWIN32_INCLUDE)\winimage.h $(PDWIN32_INCLUDE)\windll.h
 winexe.OBJ:    winexe.cpp $(PDWIN32_INCLUDE)\winimage.h $(PDWIN32_INCLUDE)\windll.h $(PDWIN32_INCLUDE)\winexe.h
