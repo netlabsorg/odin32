@@ -1,4 +1,4 @@
-/* $Id: devio.cpp,v 1.4 1999-08-22 11:11:09 sandervl Exp $ */
+/* $Id: hmdevio.cpp,v 1.1 1999-11-12 14:57:14 sandervl Exp $ */
 
 /*
  * Win32 Device IOCTL API functions for OS/2
@@ -22,7 +22,7 @@
 
 #include <win32type.h>
 #include <misc.h>
-#include "devio.h"
+#include "hmdevio.h"
 #include "cio.h"
 #include "map.h"
 #include "exceptutil.h"
@@ -38,31 +38,105 @@ static BOOL MAPMEMIOCtl(HANDLE hDevice, DWORD dwIoControlCode, LPVOID lpInBuffer
 static BOOL FXMEMMAPIOCtl(HANDLE hDevice, DWORD dwIoControlCode, LPVOID lpInBuffer, DWORD nInBufferSize, LPVOID lpOutBuffer, DWORD nOutBufferSize, LPDWORD lpBytesReturned, LPOVERLAPPED lpOverlapped);
 
 static WIN32DRV knownDriver[] =
-    {{"GpdDev", "", TRUE, 666,          GpdDevIOCtl},
-    {"MAPMEM", "PMAP$", FALSE, 0,       MAPMEMIOCtl},
-    {"FXMEMMAP.VXD", "PMAP$", FALSE, 0,     FXMEMMAPIOCtl}};
+    {{"\\\\.\\GpdDev", "",      TRUE,  666,   GpdDevIOCtl},
+    { "\\\\.\\MAPMEM", "PMAP$", FALSE, 0,     MAPMEMIOCtl},
+    { "FXMEMMAP.VXD",  "PMAP$", FALSE, 0,     FXMEMMAPIOCtl}};
 
 static int nrKnownDrivers = sizeof(knownDriver)/sizeof(WIN32DRV);
 
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API DeviceIoControl(HANDLE hDevice, DWORD dwIoControlCode,
-                 LPVOID lpInBuffer, DWORD nInBufferSize,
-                 LPVOID lpOutBuffer, DWORD nOutBufferSize,
-                 LPDWORD lpBytesReturned, LPOVERLAPPED lpOverlapped)
+void RegisterDevices()
 {
- int i;
+ HMDeviceDriver *driver;
+ DWORD rc;
 
-  for(i=0;i<nrKnownDrivers;i++) {
-    if(hDevice == knownDriver[i].hDevice) {
-        return knownDriver[i].devIOCtl(hDevice, dwIoControlCode,
-                           lpInBuffer, nInBufferSize,
-                           lpOutBuffer, nOutBufferSize,
-                           lpBytesReturned, lpOverlapped);
+    for(int i=0;i<nrKnownDrivers;i++) 
+    {
+	driver = new HMDeviceDriver(knownDriver[i].szWin32Name,
+                                    knownDriver[i].szOS2Name,
+                                    knownDriver[i].fCreateFile,
+                                    knownDriver[i].devIOCtl);
+
+	rc = HMDeviceRegister(knownDriver[i].szWin32Name, driver);
+    	if (rc != NO_ERROR)                                  /* check for errors */
+      		dprintf(("KERNEL32:RegisterDevices: registering %s failed with %u.\n",
+              		  knownDriver[i].szWin32Name, rc));
     }
+    return;
+}
+//******************************************************************************
+//******************************************************************************
+HMDeviceDriver::HMDeviceDriver(LPCSTR lpDeviceName, LPSTR lpOS2DevName, BOOL fCreate, 
+                               WINIOCTL pDevIOCtl)
+                : HMDeviceKernelObjectClass(lpDeviceName)
+{
+    this->fCreateFile = fCreateFile;
+    this->szOS2Name   = lpOS2DevName;
+    this->devIOCtl    = pDevIOCtl;
+}
+//******************************************************************************
+//******************************************************************************
+DWORD HMDeviceDriver::CreateFile (LPCSTR lpFileName,
+                                  PHMHANDLEDATA pHMHandleData,
+                                  PVOID         lpSecurityAttributes,
+                                  PHMHANDLEDATA pHMHandleDataTemplate)
+{
+ APIRET rc;
+ HFILE  hfFileHandle   = 0L;     /* Handle for file being manipulated */
+ ULONG  ulAction       = 0;      /* Action taken by DosOpen */
+ ULONG  sharetype = 0;
+
+  if(pHMHandleData->dwAccess & (GENERIC_READ | GENERIC_WRITE))
+    sharetype |= OPEN_ACCESS_READWRITE;
+  else
+  if(pHMHandleData->dwAccess & GENERIC_WRITE)
+    sharetype |= OPEN_ACCESS_WRITEONLY;
+
+  if(pHMHandleData->dwShare == 0)
+    sharetype |= OPEN_SHARE_DENYREADWRITE;
+  else
+  if(pHMHandleData->dwShare & (FILE_SHARE_READ | FILE_SHARE_WRITE))
+    sharetype |= OPEN_SHARE_DENYNONE;
+  else
+  if(pHMHandleData->dwShare & FILE_SHARE_WRITE)
+    sharetype |= OPEN_SHARE_DENYREAD;
+  else
+  if(pHMHandleData->dwShare & FILE_SHARE_READ)
+    sharetype |= OPEN_SHARE_DENYWRITE;
+
+  rc = DosOpen(	szOS2Name,                        /* File path name */
+               	&hfFileHandle,                  /* File handle */
+               	&ulAction,                      /* Action taken */
+	       	0,
+         	FILE_NORMAL,
+           	FILE_OPEN,
+           	sharetype,
+               	0L);                            /* No extended attribute */
+
+  dprintf(("DosOpen %s returned %d\n", szOS2Name, rc));
+
+  if(rc == NO_ERROR) {
+     	pHMHandleData->hHMHandle = hfFileHandle;
+     	return (NO_ERROR);
   }
-  dprintf(("DeviceIoControl: Device not found!\n"));
-  return(FALSE);
+  else  return(rc);
+}
+//******************************************************************************
+//******************************************************************************
+DWORD HMDeviceDriver::CloseHandle(PHMHANDLEDATA pHMHandleData)
+{
+   return DosClose(pHMHandleData->hHMHandle);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL HMDeviceDriver::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoControlCode,
+                                     LPVOID lpInBuffer, DWORD nInBufferSize,
+                                     LPVOID lpOutBuffer, DWORD nOutBufferSize,
+                                     LPDWORD lpBytesReturned, LPOVERLAPPED lpOverlapped)
+{
+   return devIOCtl(pHMHandleData->hHMHandle, dwIoControlCode, lpInBuffer, nInBufferSize,
+                   lpOutBuffer, nOutBufferSize, lpBytesReturned, lpOverlapped);
 }
 //******************************************************************************
 //******************************************************************************
@@ -71,9 +145,9 @@ static BOOL GpdDevIOCtl(HANDLE hDevice, DWORD dwIoControlCode, LPVOID lpInBuffer
  ULONG port, val = 0;
 
   if(fX86Init == FALSE) {
-    if(io_init() == 0)
-        fX86Init = TRUE;
-    else    return(FALSE);
+    	if(io_init() == 0)
+        	fX86Init = TRUE;
+    	else   	return(FALSE);
   }
 
   *lpBytesReturned = 0;
@@ -174,7 +248,6 @@ static BOOL FXMEMMAPIOCtl(HANDLE hDevice, DWORD dwIoControlCode, LPVOID lpInBuff
     case 1:
         break;
     case 2:
-//      _interrupt(3);
         memmap.a.phys = (DWORD)vxdmem->mdr_PhysicalAddress;
         memmap.size = vxdmem->mdr_SizeInBytes;
         dprintf(("DeviceIoControl map phys address %X length %X\n", memmap.a.phys, memmap.size));
@@ -195,72 +268,6 @@ static BOOL FXMEMMAPIOCtl(HANDLE hDevice, DWORD dwIoControlCode, LPVOID lpInBuff
 }
 //******************************************************************************
 //******************************************************************************
-void OS2CloseFile(HANDLE hDevice)
-{
-  DosClose((HFILE)hDevice);
-}
-//******************************************************************************
-//******************************************************************************
-HANDLE OS2CreateFile(char *szName, DWORD fdwAccess, DWORD fdwShareMode)
-{
- APIRET rc;
- int    i;
- char  *drvname = NULL;
- HFILE  hfFileHandle   = 0L;     /* Handle for file being manipulated */
- ULONG  ulAction       = 0;      /* Action taken by DosOpen */
- ULONG  sharetype = 0;
-
-  for(i=0;i<nrKnownDrivers;i++) {
-    if(strcmp(szName, knownDriver[i].szWin32Name) == 0) {
-        drvname = knownDriver[i].szOS2Name;
-        break;
-    }
-  }
-  if(drvname == 0) {
-    return(0);
-  }
-
-  //TODO
-  if(knownDriver[i].fCreateFile == TRUE)
-    return(knownDriver[i].hDevice);
-
-  if(fdwAccess & (GENERIC_READ | GENERIC_WRITE))
-    sharetype |= OPEN_ACCESS_READWRITE;
-  else
-  if(fdwAccess & GENERIC_WRITE)
-    sharetype |= OPEN_ACCESS_WRITEONLY;
-
-  if(fdwShareMode == 0)
-    sharetype |= OPEN_SHARE_DENYREADWRITE;
-  else
-  if(fdwShareMode & (FILE_SHARE_READ | FILE_SHARE_WRITE))
-    sharetype |= OPEN_SHARE_DENYNONE;
-  else
-  if(fdwShareMode & FILE_SHARE_WRITE)
-    sharetype |= OPEN_SHARE_DENYREAD;
-  else
-  if(fdwShareMode & FILE_SHARE_READ)
-    sharetype |= OPEN_SHARE_DENYWRITE;
-
-  rc = DosOpen(	drvname,                        /* File path name */
-               	&hfFileHandle,                  /* File handle */
-               	&ulAction,                      /* Action taken */
-	       	0,
-         	FILE_NORMAL,
-           	FILE_OPEN,
-           	sharetype,
-               	0L);                            /* No extended attribute */
-
-  dprintf(("DosOpen %s returned %d\n", drvname, rc));
-
-  if(rc == NO_ERROR) {
-    knownDriver[i].hDevice = (DWORD)hfFileHandle;
-    return((HANDLE)hfFileHandle);
-  }
-  else  return(0);
-}
-//******************************************************************************
-//******************************************************************************
 BOOL WIN32API QueryPerformanceCounter(LARGE_INTEGER *lpPerformanceCount)
 {
  QWORD  time;
@@ -268,8 +275,8 @@ BOOL WIN32API QueryPerformanceCounter(LARGE_INTEGER *lpPerformanceCount)
 
   rc = DosTmrQueryTime(&time);
   if(rc) {
-    dprintf(("DosTmrQueryTime returned %d\n", rc));
-    return(FALSE);
+    	dprintf(("DosTmrQueryTime returned %d\n", rc));
+    	return(FALSE);
   }
   lpPerformanceCount->u.LowPart  = time.ulLo;
   lpPerformanceCount->u.HighPart = time.ulHi;
@@ -284,8 +291,8 @@ BOOL WIN32API QueryPerformanceFrequency(LARGE_INTEGER *lpFrequency)
 
   rc = DosTmrQueryFreq(&freq);
   if(rc) {
-    dprintf(("DosTmrQueryFreq returned %d\n", rc));
-    return(FALSE);
+    	dprintf(("DosTmrQueryFreq returned %d\n", rc));
+    	return(FALSE);
   }
   lpFrequency->u.LowPart  = freq;
   lpFrequency->u.HighPart = 0;
@@ -294,4 +301,3 @@ BOOL WIN32API QueryPerformanceFrequency(LARGE_INTEGER *lpFrequency)
 }
 //******************************************************************************
 //******************************************************************************
-

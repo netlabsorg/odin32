@@ -1,4 +1,4 @@
-/* $Id: hmopen32.cpp,v 1.10 1999-11-12 11:38:39 sandervl Exp $ */
+/* $Id: hmopen32.cpp,v 1.11 1999-11-12 14:57:15 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -154,8 +154,10 @@ DWORD HMDeviceOpen32Class::CreateFile (LPCSTR        lpFileName,
 
   if (strncmp(lpFileName,       // "support" for local unc names
               "\\\\.\\",
-              4) == 0)
-    lpFileName+=4;
+              4) == 0) 
+  {
+  	lpFileName+=4;
+  }
 
   // create from template
   if (pHMHandleDataTemplate != NULL)

@@ -1,4 +1,4 @@
-/* $Id: hmdevice.h,v 1.9 1999-09-01 19:12:17 phaller Exp $ */
+/* $Id: hmdevice.h,v 1.10 1999-11-12 14:57:14 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -26,6 +26,7 @@
 
 #define HMTYPE_UNKNOWN	0
 #define HMTYPE_MEMMAP	1
+#define HMTYPE_DEVICE   2
 //.....
 
 /*****************************************************************************
@@ -278,6 +279,12 @@ public:
                                      DWORD                      dwFileOffsetLow,
                                      DWORD                      dwNumberOfBytesToMap,
 			             LPVOID                     lpBaseAddress);
+
+                    /* this is a handler method for calls to DeviceIoControl() */
+  virtual BOOL   DeviceIoControl    (PHMHANDLEDATA pHMHandleData, DWORD dwIoControlCode,
+                                     LPVOID lpInBuffer, DWORD nInBufferSize,
+                                     LPVOID lpOutBuffer, DWORD nOutBufferSize,
+                                     LPDWORD lpBytesReturned, LPOVERLAPPED lpOverlapped);
 
 };
 

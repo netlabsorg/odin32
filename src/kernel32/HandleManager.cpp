@@ -1,16 +1,14 @@
-/* $Id: HandleManager.cpp,v 1.24 1999-11-12 13:41:53 davidr Exp $ */
+/* $Id: HandleManager.cpp,v 1.25 1999-11-12 14:57:13 sandervl Exp $ */
 
-/*
- *
- * Project Odin Software License can be found in LICENSE.TXT
- *
- */
 /*
  * Win32 Unified Handle Manager for OS/2
  *
  * 1998/02/11 PH Patrick Haller (haller@zebra.fh-weingarten.de)
  *
  * @(#) HandleManager.Cpp       1.0.0   1998/02/11 PH start
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
+ *
  */
 
 #undef DEBUG_LOCAL
@@ -2546,3 +2544,41 @@ DWORD HMWaitForMultipleObjectsEx (DWORD   cObjects,
                                    dwTimeout));
 }
 
+/*****************************************************************************
+ * Name      : HMDeviceIoControl
+ * Purpose   : router function for DeviceIoControl
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Sander van Leeuwen
+ *****************************************************************************/
+
+BOOL WIN32API DeviceIoControl(HANDLE hDevice, DWORD dwIoControlCode,
+                              LPVOID lpInBuffer, DWORD nInBufferSize,
+                              LPVOID lpOutBuffer, DWORD nOutBufferSize,
+                              LPDWORD lpBytesReturned, LPOVERLAPPED lpOverlapped)
+{
+  int       iIndex;                           /* index into the handle table */
+  BOOL      fResult;       /* result from the device handler's CloseHandle() */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+                                                          /* validate handle */
+  iIndex = _HMHandleQuery(hDevice);                           /* get the index */
+  if (-1 == iIndex)                                               /* error ? */
+  {
+    SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
+    return (FALSE);                                        /* signal failure */
+  }
+
+  pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
+  fResult = pHMHandle->pDeviceHandler->DeviceIoControl(&pHMHandle->hmHandleData,
+                                                dwIoControlCode,
+                                                lpInBuffer, nInBufferSize,
+                                                lpOutBuffer, nOutBufferSize,
+                                                lpBytesReturned, lpOverlapped);
+
+  return (fResult);                                   /* deliver return code */
+}

@@ -1,4 +1,4 @@
-/* $Id: hmdevice.cpp,v 1.8 1999-09-01 19:12:17 phaller Exp $ */
+/* $Id: hmdevice.cpp,v 1.9 1999-11-12 14:57:13 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -1054,4 +1054,30 @@ LPVOID HMDeviceHandler::MapViewOfFileEx(PHMHANDLEDATA pHMHandleData,
            dwNumberOfBytesToMap, lpBaseAddress));
 
   return(NULL);
+}
+
+/*****************************************************************************
+ * Name      : DWORD HMDeviceHandler::DeviceIoControl
+ * Purpose   : send command to device driver
+ * Variables :
+ * Result    : 
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Sander van Leeuwen
+ *****************************************************************************/
+
+BOOL HMDeviceHandler::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoControlCode,
+                                      LPVOID lpInBuffer, DWORD nInBufferSize,
+                                      LPVOID lpOutBuffer, DWORD nOutBufferSize,
+                                      LPDWORD lpBytesReturned, LPOVERLAPPED lpOverlapped)
+{
+  dprintf(("KERNEL32: HandleManager::DeviceHandler::DeviceIoControl(%08xh,%08xh,%08xh,%08xh,%08xh,%08xh)\n",
+           pHMHandleData->hHMHandle,
+           dwIoControlCode,
+           lpInBuffer,
+           nInBufferSize,
+           lpOutBuffer, nOutBufferSize));
+
+  return(FALSE);
 }
