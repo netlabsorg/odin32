@@ -1,4 +1,4 @@
-/* $Id: os2heap.cpp,v 1.17 2001-04-27 17:35:41 sandervl Exp $ */
+/* $Id: os2heap.cpp,v 1.18 2001-06-23 08:43:17 sandervl Exp $ */
 
 /*
  * Heap class for OS/2
@@ -271,9 +271,24 @@ int OS2Heap::GetLockCnt(LPVOID lpMem)
 //******************************************************************************
 DWORD OS2Heap::Size(DWORD dwFlags, PVOID lpMem)
 {
-//  dprintf(("OS2Heap::Size, %X\n", lpMem));
-  if(lpMem == NULL)
-    return(0);
+ HEAPELEM *helem = (HEAPELEM *)((char *)lpMem - sizeof(HEAPELEM));
+
+  if(lpMem == NULL) {
+    	dprintf(("OS2Heap::Size lpMem == NULL\n"));
+    	return -1;
+  }
+  /* verify lpMem address */
+  if (lpMem >= (LPVOID)ulMaxAddr || lpMem < (LPVOID)0x10000)
+  {
+    	dprintf(("OS2Heap::Size ERROR BAD HEAP POINTER:%X\n", lpMem));
+    	return -1;
+  }
+
+  if(helem->magic != MAGIC_NR_HEAP)
+  {
+    	dprintf(("OS2Heap::Size ERROR BAD HEAP POINTER:%X\n", lpMem));
+    	return -1;
+  }
 
   return(_msize((char *)lpMem - sizeof(HEAPELEM)) - HEAP_OVERHEAD);
 }
