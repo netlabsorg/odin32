@@ -213,6 +213,7 @@ typedef short           INT16;
 typedef unsigned short  UINT16;
 typedef int             INT;
 typedef unsigned int    UINT;
+typedef unsigned int    INT32;
 typedef UINT *          UINT_PTR;
 typedef unsigned short  WORD;
 typedef unsigned long   DWORD;
@@ -728,13 +729,6 @@ typedef struct tagRECTL
 } RECTL, *PRECTL, *LPRECTL;
 
 typedef const RECTL *LPCRECTL;
-
-#define CONV_RECT16TO32(r16,r32) \
-    ((r32)->left  = (INT)(r16)->left,  (r32)->top    = (INT)(r16)->top, \
-     (r32)->right = (INT)(r16)->right, (r32)->bottom = (INT)(r16)->bottom)
-#define CONV_RECT32TO16(r32,r16) \
-    ((r16)->left  = (INT16)(r32)->left,  (r16)->top    = (INT16)(r32)->top, \
-     (r16)->right = (INT16)(r32)->right, (r16)->bottom = (INT16)(r32)->bottom)
 
 /*
  * 8.9.99 DJR DECIMAL support
