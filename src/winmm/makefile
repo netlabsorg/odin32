@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.11 1999-10-05 19:24:00 phaller Exp $
+# $Id: makefile,v 1.12 1999-10-22 18:09:16 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -68,7 +68,7 @@ playsound.obj:  playsound.cpp
 joyos2.obj:     joyos2.cpp joyos2.h
 
 clean:
-        $(RM) *.obj *.lib *.dll *~ *.map *.pch
+        $(RM) *.obj *.lib *.dll *.map *.pch
         $(RM) $(PDWIN32_BIN)\$(TARGET).dll
         $(RM) $(PDWIN32_LIB)\$(TARGET).lib
 
