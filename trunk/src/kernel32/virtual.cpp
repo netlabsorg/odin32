@@ -1,4 +1,4 @@
-/* $Id: virtual.cpp,v 1.29 2000-03-28 17:11:50 sandervl Exp $ */
+/* $Id: virtual.cpp,v 1.30 2000-05-02 20:53:13 sandervl Exp $ */
 
 /*
  * Win32 virtual memory functions
@@ -436,10 +436,13 @@ ODINFUNCTION3(BOOL, VirtualFree, LPVOID, lpvAddress,
     rc = OSLibDosSetMem(lpvAddress, cbSize, PAG_DECOMMIT);
     if(rc)
     {
-      dprintf(("KERNEL32:VirtualFree:OsLibSetMem rc = #%d\n",
-               rc));
-      SetLastError(ERROR_INVALID_ADDRESS);
-      return(FALSE);
+	if(rc == 32803) { //SvL: ERROR_ALIAS
+      		dprintf(("KERNEL32:VirtualFree:OsLibSetMem rc = #%d; app tries to decommit aliased memory; ignore", rc));
+		return(TRUE);
+	}
+      	dprintf(("KERNEL32:VirtualFree:OsLibSetMem rc = #%d\n", rc));
+      	SetLastError(ERROR_INVALID_ADDRESS);
+	return(FALSE);
     }
   }
 

@@ -1,4 +1,4 @@
-/* $Id: exceptutil.h,v 1.7 2000-03-18 19:49:44 sandervl Exp $ */
+/* $Id: exceptutil.h,v 1.8 2000-05-02 20:53:13 sandervl Exp $ */
 
 /*
  * Exception + misc functions for OS/2
@@ -33,6 +33,7 @@ void  PrintExceptionChain();
 
 ULONG  getEAX();
 ULONG  getEBX();
+ULONG  getESP();
 USHORT getSS();
 USHORT getDS();
 USHORT getCS();

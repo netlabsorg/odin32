@@ -1,4 +1,4 @@
-/* $Id: stubs.cpp,v 1.21 2000-03-30 15:37:14 cbratschi Exp $ */
+/* $Id: stubs.cpp,v 1.22 2000-05-02 20:53:13 sandervl Exp $ */
 
 /*
  * Win32 KERNEL32 Subsystem for OS/2
@@ -1364,39 +1364,6 @@ DWORD WIN32API EraseTape( HANDLE hDevice, DWORD dwEraseType, BOOL bImmediate)
   return (ERROR_NOT_SUPPORTED);
 }
 
-
-/*****************************************************************************
- * Name      : HANDLE WIN32API FindFirstChangeNotificationW
- * Purpose   : The FindFirstChangeNotification function creates a change
- *             notification handle and sets up initial change notification
- *             filter conditions. A wait on a notification handle succeeds when
- *             a change matching the filter conditions occurs in the specified
- *             directory or subtree.
- * Parameters: LPCWSTR lpPathName           pointer to name of directory to watch
- *             BOOL bWatchSubtree           flag for monitoring directory or
- *                                          directory tree
- *             DWORD dwNotifyFilter         filter conditions to watch for
- * Variables :
- * Result    : If the function succeeds, the return value is a handle to a find
- *             change notification object.
- *             If the function fails, the return value is INVALID_HANDLE_VALUE
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Markus Montkowski [Tha, 1998/05/21 20:57]
- *****************************************************************************/
-
-HANDLE WIN32API FindFirstChangeNotificationW( LPCWSTR lpPathName,
-                                                BOOL bWatchSubtree,
-                                                DWORD dwNotifyFilter)
-{
-
-  dprintf(("KERNEL32: FindFirstChangeNotificationW(%08x,%08x,%08x) not implemented - INVALID_HANDLE_VALUE\n",
-            lpPathName, bWatchSubtree, dwNotifyFilter
-          ));
-
-  return (INVALID_HANDLE_VALUE);
-}
 
 /*****************************************************************************
  * Name      : HANDLE WIN32API FindFirstFileExA

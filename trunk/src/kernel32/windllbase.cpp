@@ -1,4 +1,4 @@
-/* $Id: windllbase.cpp,v 1.12 2000-03-18 19:49:44 sandervl Exp $ */
+/* $Id: windllbase.cpp,v 1.13 2000-05-02 20:53:14 sandervl Exp $ */
 
 /*
  * Win32 Dll base class
@@ -741,6 +741,24 @@ Win32DllBase *Win32DllBase::findModule(HINSTANCE hinstance)
    while(mod != NULL) {
 	dbgCheckObj(mod);
 	if(mod->hinstance == hinstance) {
+		dlllistmutex.leave();
+		return(mod);
+        }
+	mod = mod->next;
+   }
+   dlllistmutex.leave();
+   return(NULL);
+}
+//******************************************************************************
+//******************************************************************************
+Win32DllBase *Win32DllBase::findModuleByAddr(ULONG address)
+{
+   dlllistmutex.enter();
+
+   Win32DllBase *mod = Win32DllBase::head;
+   while(mod != NULL) {
+	dbgCheckObj(mod);
+	if(mod->insideModule(address)) {
 		dlllistmutex.leave();
 		return(mod);
         }

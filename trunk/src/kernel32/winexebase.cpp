@@ -1,4 +1,4 @@
-/* $Id: winexebase.cpp,v 1.8 2000-04-16 18:05:04 sandervl Exp $ */
+/* $Id: winexebase.cpp,v 1.9 2000-05-02 20:53:14 sandervl Exp $ */
 
 /*
  * Win32 exe base class
@@ -119,6 +119,9 @@ ULONG Win32ExeBase::start()
 
   //Set default FPU control word (no exceptions); same as in NT
   _control87(0x27F, 0xFFF);
+  ULONG Size = 16, Attr;
+  rc = DosQueryMem((PVOID) (entryPoint), &Size, &Attr);
+  dprintf(("Start exe; Attr = %x, rc = %d", Attr, rc));
   rc = ((WIN32EXEENTRY)entryPoint)(NULL);
   RestoreOS2TIB();
 

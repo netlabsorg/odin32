@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.h,v 1.1 2000-03-10 16:12:03 sandervl Exp $ */
+/* $Id: winimagepeldr.h,v 1.2 2000-05-02 20:53:15 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -81,6 +81,9 @@ virtual ~Win32PeLdrImage();
         //any dlls are loaded, so that exes without fixups can be loaded at a low
         //address)
 virtual BOOL  init(ULONG reservedMem);
+
+    virtual BOOL  insideModule(ULONG address);
+    virtual BOOL  insideModuleCode(ULONG address);
 
     virtual ULONG getApi(char *name);
     virtual ULONG getApi(int ordinal);

@@ -1,4 +1,4 @@
-/* $Id: misc.cpp,v 1.21 2000-04-13 18:48:02 sandervl Exp $ */
+/* $Id: misc.cpp,v 1.22 2000-05-02 20:53:13 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -297,6 +297,52 @@ int SYSTEM EXPORT WriteLog(char *tekst, ...)
 
     if(tekst[strlen(tekst)-1] != '\n')
       fprintf(flog, "\n");
+  }
+  SetFS(sel);
+  return 1;
+}
+//******************************************************************************
+//******************************************************************************
+int SYSTEM EXPORT WriteLogNoEOL(char *tekst, ...)
+{
+  USHORT  sel = RestoreOS2FS();
+  va_list argptr;
+
+  ODIN_HEAPCHECK();
+
+  if(!init)
+  {
+    init = TRUE;
+
+#ifdef DEFAULT_LOGGING_OFF
+    if(getenv("WIN32LOG_ENABLED")) {
+#else
+    if(!getenv("NOWIN32LOG")) {
+#endif
+	char logname[CCHMAXPATH];
+
+	sprintf(logname, "odin32_%d.log", loadNr);
+      	flog = fopen(logname, "w");
+	if(flog == NULL) {//probably running exe on readonly device
+		sprintf(logname, "%sodin32_%d.log", kernel32Path, loadNr);
+	      	flog = fopen(logname, "w");
+	}
+    }
+    else
+      fLogging = FALSE;
+  }
+
+  if(fLogging && flog && (dwEnableLogging > 0))
+  {
+    THDB *thdb = GetThreadTHDB();
+
+    va_start(argptr, tekst);
+    if(thdb) { 
+	thdb->logfile = (DWORD)flog;
+    }
+    vfprintf(flog, tekst, argptr);
+    if(thdb) thdb->logfile = 0;
+    va_end(argptr);
   }
   SetFS(sel);
   return 1;
