@@ -1,4 +1,4 @@
-# $Id: kKrnlLib.mak,v 1.4 2002-04-07 22:40:16 bird Exp $
+# $Id: kKrnlLib.mak,v 1.5 2002-08-20 05:49:14 bird Exp $
 
 #
 # kKrnlLib.
@@ -65,7 +65,7 @@ $(PATH_OBJ)\kKrnlLib_devhelp.$(EXT_LIB)\kKrnlLib_devhelp.$(EXT_LIB)\
 $(PATH_OBJ)\kKrnlLib_clib16.$(EXT_LIB)\kKrnlLib_clib16.$(EXT_LIB)\
 $(PATH_OBJ)\kKrnlLib_last.$(EXT_LIB)\kKrnlLib_last.$(EXT_LIB)
 
-SUBDIRS     = include src kLib
+SUBDIRS     = include src kLib\src
 PREMAKEFILES= clib16.mak devhelp16.mak
 
 
@@ -75,12 +75,6 @@ PREMAKEFILES= clib16.mak devhelp16.mak
 #
 !include $(MAKE_INCLUDE_PROCESS)
 
-
-#
-# Commandline for working in kLib.
-#
-cmd:
-    $(COMSPEC) /K
 
 #
 # kKrnlLib Import library.
@@ -96,3 +90,4 @@ $(PATH_LIB)\$(TARGET).lib: $(PATH_TOOLS)\MkCallTab.exe
 #
 $(TARGET_IDEF): .force
     $(TOOL_DODIRS) "src" $(TOOL_MAKE) -f MkCallTab.mak ..\$(TARGET_IDEF)
+
