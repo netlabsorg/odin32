@@ -1,20 +1,30 @@
-/* $Id: comdlg32.cpp,v 1.8 1999-06-29 16:24:17 achimha Exp $ */
+/* $Id: comdlg32.cpp,v 1.9 1999-08-19 16:41:40 cbratschi Exp $ */
 
 /*
  * COMDLG32 implementation
  *
  * Copyright 1998 Sander van Leeuwen
- *
+ * Copyright 1999 Patrick Haller
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+
+
+/****************************************************************************
+ * Includes                                                                 *
+ ****************************************************************************/
+
 #include <os2win.h>
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
 #include <misc.h>
+#include <odinwrap.h>
 #include <wndproc.h>
+
+
+ODINDEBUGCHANNEL(COMDLG32)
 
 
 #define COMDLG32_CHECKHOOK(a,b,c)           \
@@ -50,12 +60,10 @@
  * Author    : Patrick Haller [Tue, 1998/02/10 01:55]
  *****************************************************************************/
 
-BOOL WIN32API GetSaveFileNameA(LPOPENFILENAMEA lpofn)
+ODINFUNCTION1(BOOL, GetSaveFileNameA,
+              LPOPENFILENAMEA, lpofn)
 {
   Win32WindowProc *wndproc;
-
-  dprintf(("COMDLG32: GetSaveFileNameA(%08xh)\n",
-           lpofn));
 
   COMDLG32_CHECKHOOK(lpofn, OFN_ENABLEHOOK, WNDPROC)
 
@@ -75,12 +83,10 @@ BOOL WIN32API GetSaveFileNameA(LPOPENFILENAMEA lpofn)
  * Author    : Patrick Haller [Tue, 1998/02/10 01:55]
  *****************************************************************************/
 
-BOOL WIN32API GetOpenFileNameA(LPOPENFILENAMEA lpofn)
+ODINFUNCTION1(BOOL, GetOpenFileNameA,
+              LPOPENFILENAMEA, lpofn)
 {
   Win32WindowProc *wndproc;
-
-  dprintf(("COMDLG32: GetOpenFileNameA(%08xh)\n",
-           lpofn));
 
   COMDLG32_CHECKHOOK(lpofn, OFN_ENABLEHOOK, WNDPROC)
 
@@ -100,15 +106,11 @@ BOOL WIN32API GetOpenFileNameA(LPOPENFILENAMEA lpofn)
  * Author    : Patrick Haller [Tue, 1998/02/10 01:55]
  *****************************************************************************/
 
-INT16 WIN32API GetFileTitleA(LPCSTR lpFile,
-                             LPSTR  lpTitle,
-                             UINT    cbBuf)
+ODINFUNCTION3(INT16, GetFileTitleA,
+              LPCSTR, lpFile,
+              LPSTR, lpTitle,
+              UINT, cbBuf)
 {
-  dprintf(("COMDLG32: GetFileTitleA(%s,%08xh,%08xh)\n",
-           lpFile,
-           lpTitle,
-           cbBuf));
-
   return O32_GetFileTitle(lpFile,
                           lpTitle,
                           cbBuf);
@@ -127,12 +129,10 @@ INT16 WIN32API GetFileTitleA(LPCSTR lpFile,
  * Author    : Patrick Haller [Tue, 1998/02/10 01:55]
  *****************************************************************************/
 
-BOOL WIN32API ChooseColorA(LPCHOOSECOLORA lpcc)
+ODINFUNCTION1(BOOL, ChooseColorA,
+              LPCHOOSECOLORA, lpcc)
 {
   Win32WindowProc *wndproc;
-
-  dprintf(("COMDLG32: ChooseColorA(%08xh)\n",
-           lpcc));
 
   COMDLG32_CHECKHOOK(lpcc, CC_ENABLEHOOK, LPCCHOOKPROC)
 
@@ -153,14 +153,12 @@ BOOL WIN32API ChooseColorA(LPCHOOSECOLORA lpcc)
  * Author    : Patrick Haller [Tue, 1998/02/10 01:55]
  *****************************************************************************/
 
-BOOL WIN32API ChooseColorW(LPCHOOSECOLORW lpcc)
+ODINFUNCTION1(BOOL, ChooseColorW,
+              LPCHOOSECOLORW, lpcc)
 {
   Win32WindowProc *wndproc;
   BOOL            bResult;
   LPCWSTR         lpTemplateNameBackup = lpcc->lpTemplateName;
-
-  dprintf(("COMDLG32: ChooseColorW(%08xh).\n",
-           lpcc));
 
   // if no template is to convert, we can take this shortcut
   if (!(lpcc->Flags & CC_ENABLETEMPLATE))
@@ -198,12 +196,10 @@ BOOL WIN32API ChooseColorW(LPCHOOSECOLORW lpcc)
  * Author    : Patrick Haller [Tue, 1998/02/10 01:55]
  *****************************************************************************/
 
-BOOL WIN32API ChooseFontA(LPCHOOSEFONTA lpcf)
+ODINFUNCTION1(BOOL, ChooseFontA,
+              LPCHOOSEFONTA, lpcf)
 {
   Win32WindowProc *wndproc;
-
-  dprintf(("COMDLG32: ChooseFontA(%08xh).\n",
-           lpcf));
 
   COMDLG32_CHECKHOOK(lpcf, CF_ENABLEHOOK, WNDPROC)
 
@@ -224,7 +220,8 @@ BOOL WIN32API ChooseFontA(LPCHOOSEFONTA lpcf)
  *             Edgar Buerkle  [Mon, 1999/06/28 19:35]
  *****************************************************************************/
 
-BOOL WIN32API ChooseFontW(LPCHOOSEFONTW lpcf)
+ODINFUNCTION1(BOOL, ChooseFontW,
+              LPCHOOSEFONTW, lpcf)
 {
   Win32WindowProc *wndproc;
   BOOL            bResult;
@@ -233,8 +230,7 @@ BOOL WIN32API ChooseFontW(LPCHOOSEFONTW lpcf)
   char            szAsciiStyle[64];
 
   // NOTE: LOGFONTW/A is NOT converted !
-  dprintf(("COMDLG32: ChooseFontW(%08xh) not correctly implemented.\n",
-           lpcf));
+  dprintf(("COMDLG32: ChooseFontW not correctly implemented.\n"));
 
   // convert to ASCII string
   memcpy(&asciicf,     // make binary copy of CHOOSEFONTW
@@ -299,10 +295,8 @@ BOOL WIN32API ChooseFontW(LPCHOOSEFONTW lpcf)
  * Author    : Patrick Haller [Tue, 1998/02/10 01:55]
  *****************************************************************************/
 
-DWORD WIN32API CommDlgExtendedError(void)
+ODINFUNCTION0(DWORD, CommDlgExtendedError)
 {
-  dprintf(("COMDLG32: ComDlgExtendedError()\n"));
-
   return O32_CommDlgExtendedError();
 }
 
@@ -319,12 +313,10 @@ DWORD WIN32API CommDlgExtendedError(void)
  * Author    : Patrick Haller [Tue, 1998/02/10 01:55]
  *****************************************************************************/
 
-HWND WIN32API FindTextA(LPFINDREPLACEA lpfr)
+ODINFUNCTION1(HWND, FindTextA,
+              LPFINDREPLACEA, lpfr)
 {
   Win32WindowProc *wndproc;
-
-  dprintf(("COMDLG32: FindTextA(%08xh).\n",
-           lpfr));
 
   COMDLG32_CHECKHOOK(lpfr, FR_ENABLEHOOK, WNDPROC)
 
@@ -344,14 +336,12 @@ HWND WIN32API FindTextA(LPFINDREPLACEA lpfr)
  * Author    : Patrick Haller [Tue, 1998/02/10 01:55]
  *****************************************************************************/
 
-HWND WIN32API FindTextW(LPFINDREPLACEW lpfr)
+ODINFUNCTION1(HWND, FindTextW,
+              LPFINDREPLACEW, lpfr)
 {
   Win32WindowProc *wndproc;
   BOOL            bResult;
   FINDREPLACEA    fr;
-
-  dprintf(("COMDLG32: FindTextW(%08xh)\n",
-           lpfr));
 
   memcpy(&fr,          // make binary copy first to save all the fields
          lpfr,
@@ -416,18 +406,14 @@ HWND WIN32API FindTextW(LPFINDREPLACEW lpfr)
  * Author    : Patrick Haller [Tue, 1998/02/10 01:55]
  *****************************************************************************/
 
-INT16 WIN32API GetFileTitleW(LPCWSTR lpFile,
-                             LPWSTR  lpTitle,
-                             UINT    cbBuf)
+ODINFUNCTION3(INT16, GetFileTitleW,
+              LPCWSTR, lpFile,
+              LPWSTR, lpTitle,
+              UINT, cbBuf)
 {
   LPSTR lpFileBackup;
   char  szTitle[256];
   INT16 iResult;
-
-  dprintf(("COMDLG32: GetFileTitleW(%08xh,%08xh,%08xh).\n",
-           lpFile,
-           lpTitle,
-           cbBuf));
 
   lpFileBackup = UnicodeToAsciiString((LPWSTR)lpFile);
   iResult      = O32_GetFileTitle(lpFileBackup,
@@ -456,7 +442,8 @@ INT16 WIN32API GetFileTitleW(LPCWSTR lpFile,
  * Author    : Patrick Haller [Tue, 1998/02/10 01:55]
  *****************************************************************************/
 
-BOOL WIN32API GetOpenFileNameW(LPOPENFILENAMEW lpofn)
+ODINFUNCTION1(BOOL, GetOpenFileNameW,
+              LPOPENFILENAMEW, lpofn)
 {
   Win32WindowProc *wndproc;
   OPENFILENAMEA   ofn;
@@ -464,9 +451,6 @@ BOOL WIN32API GetOpenFileNameW(LPOPENFILENAMEW lpofn)
   char*           szFileTitle;
   char*           szCustFilter;
   BOOL            bResult;
-
-  dprintf(("COMDLG32: GetOpenFileNameW(%08xh)\n",
-           lpofn));
 
   memcpy(&ofn,          // make binary copy first to save all the fields
          lpofn,
@@ -578,7 +562,8 @@ BOOL WIN32API GetOpenFileNameW(LPOPENFILENAMEW lpofn)
  * Author    : Patrick Haller [Tue, 1998/02/10 01:55]
  *****************************************************************************/
 
-BOOL WIN32API GetSaveFileNameW(LPOPENFILENAMEW lpofn)
+ODINFUNCTION1(BOOL, GetSaveFileNameW,
+              LPOPENFILENAMEW, lpofn)
 {
   Win32WindowProc *wndproc;
   OPENFILENAMEA   ofn;
@@ -586,9 +571,6 @@ BOOL WIN32API GetSaveFileNameW(LPOPENFILENAMEW lpofn)
   char*           szFileTitle;
   char*           szCustFilter;
   BOOL            bResult;
-
-  dprintf(("COMDLG32: GetSaveFileNameW(%08xh)\n",
-           lpofn));
 
   memcpy(&ofn,          // make binary copy first to save all the fields
          lpofn,
@@ -700,12 +682,10 @@ BOOL WIN32API GetSaveFileNameW(LPOPENFILENAMEW lpofn)
  * Author    : Patrick Haller [Tue, 1998/02/10 01:55]
  *****************************************************************************/
 
-BOOL WIN32API PrintDlgA(LPPRINTDLGA lppd)
+ODINFUNCTION1(BOOL, PrintDlgA,
+              LPPRINTDLGA, lppd)
 {
   Win32WindowProc *wndproc;
-
-  dprintf(("COMDLG32: PrintDlgA(%08xh)\n",
-           lppd));
 
   COMDLG32_CHECKHOOK2(lppd, PD_ENABLEPRINTHOOK, LPPRINTHOOKPROC,lpfnPrintHook)
   COMDLG32_CHECKHOOK2(lppd, PD_ENABLESETUPHOOK, LPSETUPHOOKPROC,lpfnSetupHook)
@@ -726,15 +706,13 @@ BOOL WIN32API PrintDlgA(LPPRINTDLGA lppd)
  * Author    : Patrick Haller [Tue, 1998/02/10 01:55]
  *****************************************************************************/
 
-BOOL WIN32API PrintDlgW(LPPRINTDLGW lppd)
+ODINFUNCTION1(BOOL, PrintDlgW,
+              LPPRINTDLGW, lppd)
 {
   Win32WindowProc *wndproc;
 
   PRINTDLGA pd;
   BOOL      bResult;
-
-  dprintf(("COMDLG32: PrintDlgW(%08xh)\n",
-           lppd));
 
   memcpy(&pd,          // make binary copy first to save all the fields
          lppd,
@@ -786,12 +764,10 @@ BOOL WIN32API PrintDlgW(LPPRINTDLGW lppd)
  * Author    : Patrick Haller [Tue, 1998/02/10 01:55]
  *****************************************************************************/
 
-HWND WIN32API ReplaceTextA(LPFINDREPLACEA lpfr)
+ODINFUNCTION1(HWND, ReplaceTextA,
+              LPFINDREPLACEA, lpfr)
 {
   Win32WindowProc *wndproc;
-
-  dprintf(("COMDLG32: ReplaceTextA(%08xh).\n",
-           lpfr));
 
   COMDLG32_CHECKHOOK(lpfr, FR_ENABLEHOOK, WNDPROC)
 
@@ -811,7 +787,8 @@ HWND WIN32API ReplaceTextA(LPFINDREPLACEA lpfr)
  * Author    : Patrick Haller [Tue, 1998/02/10 01:55]
  *****************************************************************************/
 
-HWND WIN32API ReplaceTextW(LPFINDREPLACEW lpfr)
+ODINFUNCTION1(HWND, ReplaceTextW,
+              LPFINDREPLACEW, lpfr)
 {
   Win32WindowProc *wndproc;
   BOOL            bResult;
@@ -883,12 +860,12 @@ HWND WIN32API ReplaceTextW(LPFINDREPLACEW lpfr)
  * Author    : Patrick Haller [Tue, 1998/02/10 01:55]
  *****************************************************************************/
 
-BOOL WIN32API PageSetupDlgA(LPPAGESETUPDLGA lppsd)
+ODINFUNCTION1(BOOL, PageSetupDlgA,
+              LPPAGESETUPDLGA, lppsd)
 {
   Win32WindowProc *wndproc;
 
-  dprintf(("COMDLG32: PageSetupDlgA(%08xh) not implemented.\n",
-           lppsd));
+  dprintf(("COMDLG32: PageSetupDlgA not implemented.\n"));
 
   //COMDLG32_CHECKHOOK2(lppsd, PSD_ENABLESETUPHOOK, LPPAGESETUPHOOK, lpfnPageSetupHook)
 
@@ -908,14 +885,15 @@ BOOL WIN32API PageSetupDlgA(LPPAGESETUPDLGA lppsd)
  * Author    : Patrick Haller [Tue, 1998/02/10 01:55]
  *****************************************************************************/
 
-BOOL WIN32API PageSetupDlgW(LPPAGESETUPDLGW lppsd)
+ODINFUNCTION1(BOOL, PageSetupDlgW,
+              LPPAGESETUPDLGW, lppsd)
 {
   Win32WindowProc *wndproc;
 
-  dprintf(("COMDLG32: PageSetupDlgW(%08xh) not implemented.\n",
-           lppsd));
+  dprintf(("COMDLG32: PageSetupDlgW(%08xh) not implemented.\n"));
 
   //COMDLG32_CHECKHOOK2(lppsd, PSD_ENABLESETUPHOOK, LPPAGESETUPHOOK, lpfnPageSetupHook)
 
   return(FALSE);
 }
+
