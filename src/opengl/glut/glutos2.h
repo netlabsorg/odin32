@@ -1,4 +1,4 @@
-/* $Id: glutos2.h,v 1.5 2000-03-11 21:52:50 sandervl Exp $ */
+/* $Id: glutos2.h,v 1.6 2000-05-20 13:48:23 jeroen Exp $ */
 #ifndef __glutos2_h__
 #define __glutos2_h__
 
@@ -10,7 +10,6 @@
 
 #include "os2_x11.h"
 #include "os2_glx.h"
-#include <misc.h>
 /* KSO: Dirty trick to get around problems with gettimeofday being
  * defined in the sys\time.h in the toolkit. (at least in CSD2)
  */

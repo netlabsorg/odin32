@@ -1,4 +1,4 @@
-/* $Id: glut_cursor.c,v 1.3 2000-03-11 15:07:44 sandervl Exp $ */
+/* $Id: glut_cursor.c,v 1.4 2000-05-20 13:48:22 jeroen Exp $ */
 /* Copyright (c) Mark J. Kilgard, 1995, 1998. */
 
 /* This program is freely distributable without licensing fees
@@ -164,7 +164,7 @@ __glutSetCursor(GLUTwindow *window)
       break;
     case GLUT_CURSOR_FULL_CROSSHAIR:
 #if defined(_WIN32) || defined(__WIN32OS2__)
-      xcursor = IDC_CROSS;
+      xcursor = (Cursor)IDC_CROSS;
 #else
       if (fullCrosshairCusor == None) {
         fullCrosshairCusor = getFullCrosshairCursor();

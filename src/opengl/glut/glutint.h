@@ -1,4 +1,4 @@
-/* $Id: glutint.h,v 1.7 2000-03-11 17:07:46 sandervl Exp $ */
+/* $Id: glutint.h,v 1.8 2000-05-20 13:48:23 jeroen Exp $ */
 #ifndef __glutint_h__
 #define __glutint_h__
 
@@ -92,13 +92,13 @@ extern int sys$gettim(struct timeval *);
     (dest).tv_sec = (src1).tv_sec + (src2).tv_sec + 1; \
   } else { \
     (dest).tv_sec = (src1).tv_sec + (src2).tv_sec; \
-    if(((dest).tv_sec >= 1) && (((dest).tv_usec <0))) { \
+    if(((dest).tv_sec >= 1) && (((LONG)(dest).tv_usec <0))) { \
       (dest).tv_sec --;(dest).tv_usec += 1000000; \
     } \
   } \
 }
 #define TIMEDELTA(dest, src1, src2) { \
-  if(((dest).tv_usec = (src1).tv_usec - (src2).tv_usec) < 0) { \
+  if((LONG)((dest).tv_usec = (src1).tv_usec - (src2).tv_usec) < 0) { \
     (dest).tv_usec += 1000000; \
     (dest).tv_sec = (src1).tv_sec - (src2).tv_sec - 1; \
   } else { \
