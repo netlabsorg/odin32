@@ -1547,6 +1547,8 @@ BOOL FILEDLG95_OnOpen(HWND hwnd)
 	    /* FIXME we are sending ASCII-structures. Does not work with NT */
 	    /* first old style */
 	    TRACE("---\n");
+#ifndef __WIN32OS2__
+//-->> crashes Adobe Acrobat 4.0
 	    CallWindowProcA((WNDPROC)fodInfos->ofnInfos->lpfnHook, hwnd,
 	    		 fodInfos->HookMsg.fileokstring, 0, (LPARAM)fodInfos->ofnInfos);
 	    if (GetWindowLongA(hwnd, DWL_MSGRESULT))
@@ -1555,6 +1557,7 @@ BOOL FILEDLG95_OnOpen(HWND hwnd)
 	      ret = FALSE;
 	      goto ret;
 	    }
+#endif
 	  }
 
           TRACE("close\n");
