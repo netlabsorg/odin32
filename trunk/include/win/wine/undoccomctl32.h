@@ -1,4 +1,4 @@
-/* $Id: undoccomctl32.h,v 1.2 2002-02-06 16:58:45 sandervl Exp $ */
+/* $Id: undoccomctl32.h,v 1.3 2002-02-06 20:14:15 sandervl Exp $ */
 #ifndef __WINE_WINE_UNDOCCOMCTL32_H__
 #define __WINE_WINE_UNDOCCOMCTL32_H__
 
