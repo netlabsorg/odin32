@@ -1,4 +1,4 @@
-/* $Id: dibsect.cpp,v 1.8 1999-11-12 11:38:38 sandervl Exp $ */
+/* $Id: dibsect.cpp,v 1.9 1999-11-24 19:30:18 sandervl Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -144,6 +144,70 @@ DIBSection::~DIBSection()
         }
         dsect->next = this->next;
    }
+}
+//******************************************************************************
+//******************************************************************************
+int DIBSection::SetDIBits(HDC hdc, HBITMAP hbitmap, UINT startscan, UINT
+                          lines, const VOID *bits, WINBITMAPINFOHEADER *pbmi,
+                          UINT coloruse)
+{
+  lines = (int)lines >= 0 ? (int)lines : (int)-lines;
+  int  os2bmpsize;
+  int  palsize=0;
+
+  bmpsize = pbmi->biWidth;
+  os2bmpsize = sizeof(BITMAPINFO2);
+
+  switch(pbmi->biBitCount)
+  {
+        case 1:
+                bmpsize /= 8;
+                palsize = ((1 << pbmi->biBitCount))*sizeof(RGB2);
+                os2bmpsize += palsize;
+                break;
+        case 4:
+                bmpsize /= 2;
+                palsize = ((1 << pbmi->biBitCount))*sizeof(RGB2);
+                os2bmpsize += palsize;
+                break;
+        case 8:
+                palsize = ((1 << pbmi->biBitCount))*sizeof(RGB2);
+                os2bmpsize += palsize;
+                break;
+        case 16:
+                bmpsize *= 2;
+                break;
+        case 24:
+                bmpsize *= 3;
+                break;
+        case 32:
+                bmpsize *= 4;
+                break;
+   }
+   if(bmpsize & 3) {
+        bmpsize = (bmpsize + 3) & ~3;
+   }
+
+   bmpBits    = (char *)realloc(bmpBits, bmpsize*pbmi->biHeight);
+   pOS2bmp    = (BITMAPINFO2 *)realloc(pOS2bmp, os2bmpsize);
+
+   pOS2bmp->cbFix         = sizeof(BITMAPINFO2) - sizeof(RGB2);
+   pOS2bmp->cx            = pbmi->biWidth;
+   pOS2bmp->cy            = pbmi->biHeight;
+   pOS2bmp->cPlanes       = pbmi->biPlanes;
+   pOS2bmp->cBitCount     = pbmi->biBitCount;
+   pOS2bmp->ulCompression = pbmi->biCompression;
+   pOS2bmp->cbImage       = pbmi->biSizeImage;
+
+   if(palsize)
+     memcpy(pOS2bmp->argbColor, (char *)pbmi + 1 , palsize);
+
+   if(bits)
+   {
+     int size = bmpsize*lines;
+     memcpy(bmpBits+bmpsize*startscan, bits, size);
+   }
+   return(lines);
 }
 //******************************************************************************
 //******************************************************************************
