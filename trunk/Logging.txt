@@ -1,4 +1,4 @@
-/* $Id: Logging.txt,v 1.2 2000-02-16 19:32:37 sandervl Exp $ */
+/* $Id: Logging.txt,v 1.3 2000-02-18 17:49:06 sandervl Exp $ */
 
             	Odin Logging
             	~~~~~~~~~~~~
@@ -23,7 +23,7 @@ To disable logging again, you must clear this variable:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Disabling or enabling logging for all the Odin dlls isn't exactly useful
-when debugging bugs.
+while debugging.
 To make logging more flexible, you can now disable or enable separate
 source files for each dll (NOTE: Only implemented in kernel32, user32 & gdi32
 for now)
