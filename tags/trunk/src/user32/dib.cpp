@@ -1,4 +1,4 @@
-/* $Id: dib.cpp,v 1.1 1999-09-15 23:18:49 sandervl Exp $ */
+/* $Id: dib.cpp,v 1.2 1999-09-16 14:57:05 phaller Exp $ */
 
 /*
  * Win32 DIB functions for OS/2
@@ -131,27 +131,33 @@ void DIB_FixColorsToLoadflags(BITMAPINFO * bmi, UINT loadflags, BYTE pix)
   char *colorptr;
 
   //SvL: Wine code doesn't work for OS/2 1.3 bitmaps
-  if (bmi->bmiHeader.biSize == sizeof(BITMAPINFOHEADER)) {
-  	if (bmi->bmiHeader.biBitCount > 8) return;
-  	colors = bmi->bmiHeader.biClrUsed;
-	bitcount = bmi->bmiHeader.biBitCount;
-	colorptr = (char*)bmi->bmiColors;
+  if (bmi->bmiHeader.biSize == sizeof(BITMAPINFOHEADER))
+  {
+    if (bmi->bmiHeader.biBitCount > 8) return;
+    colors   = bmi->bmiHeader.biClrUsed;
+    bitcount = bmi->bmiHeader.biBitCount;
+    colorptr = (char*)bmi->bmiColors;
+    incr     = 4;
   }
   else
-  if (bmi->bmiHeader.biSize == sizeof(BITMAPCOREHEADER)) {
-        BITMAPCOREHEADER *core = (BITMAPCOREHEADER *)bmi;
+    if (bmi->bmiHeader.biSize == sizeof(BITMAPCOREHEADER))
+    {
+      BITMAPCOREHEADER *core = (BITMAPCOREHEADER *)bmi;
 
-  	if (core->bcBitCount > 8) return;
-  	colors = (1 << core->bcBitCount);
-	bitcount = core->bcBitCount;
-	colorptr = (char*)(core + 1);
-  }
-  else {
-    dprintf(("Wrong bitmap header size!\n"));
-    return;
-  }
+      if (core->bcBitCount > 8) return;
+      colors   = (1 << core->bcBitCount);
+      bitcount = core->bcBitCount;
+      colorptr = (char*)(core + 1);
+      incr     = 3;
+    }
+    else
+    {
+      dprintf(("Wrong bitmap header size!\n"));
+      return;
+    }
+
   if (!colors && (bitcount <= 8))
-	colors = 1 << bitcount;
+    colors = 1 << bitcount;
 
   c_W = GetSysColor(COLOR_WINDOW);
   c_S = GetSysColor(COLOR_3DSHADOW);
@@ -162,8 +168,8 @@ void DIB_FixColorsToLoadflags(BITMAPINFO * bmi, UINT loadflags, BYTE pix)
       	case 1: pix = pix >> 7; break;
       	case 4: pix = pix >> 4; break;
       	case 8: break;
-      	default: 
-        	dprintf(("(%d): Unsupported depth\n", bitcount)); 
+      	default:
+        	dprintf(("(%d): Unsupported depth\n", bitcount));
 		return;
     	}
     	if (pix >= colors) {
@@ -181,20 +187,20 @@ void DIB_FixColorsToLoadflags(BITMAPINFO * bmi, UINT loadflags, BYTE pix)
   	for (i=0; i<colors; i++) {
   		ptr = (RGBQUAD*)(colorptr +i*incr);
   		c_C = RGB(ptr->rgbRed, ptr->rgbGreen, ptr->rgbBlue);
-  		if (c_C == RGB(128, 128, 128)) { 
+  		if (c_C == RGB(128, 128, 128)) {
 			ptr->rgbRed = GetRValue(c_S);
 			ptr->rgbGreen = GetGValue(c_S);
 			ptr->rgbBlue = GetBValue(c_S);
-      		} else if (c_C == RGB(192, 192, 192)) { 
+      		} else if (c_C == RGB(192, 192, 192)) {
 			ptr->rgbRed = GetRValue(c_F);
 			ptr->rgbGreen = GetGValue(c_F);
 			ptr->rgbBlue = GetBValue(c_F);
-      		} else if (c_C == RGB(223, 223, 223)) { 
+      		} else if (c_C == RGB(223, 223, 223)) {
 			ptr->rgbRed = GetRValue(c_L);
 			ptr->rgbGreen = GetGValue(c_L);
 			ptr->rgbBlue = GetBValue(c_L);
-      		} 
+      		}
     	}
   }
-  
+
 }
