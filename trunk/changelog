@@ -1,10 +1,15 @@
- /* $Id: changelog,v 1.687 2000-02-03 10:25:41 dengert Exp $ */
+ /* $Id: changelog,v 1.688 2000-02-03 13:30:50 sandervl Exp $ */
 
  2000-02-03: Daniela Engert <dani@ngrt.de>
 	- GDI32: Implement RGB 555 to RGB 565 conversion in assembler
 
- 2000-02-01: Sander van Leeuwen <sandervl@xs4all.nl>
+ 2000-03-01: Sander van Leeuwen <sandervl@xs4all.nl>
 	- GDI32: Prelimary RGB 555 to RGB 565 conversion in SetDIBitsToDevice
+                 (will be rewritten in assembly for better performance)
+                 (for RealPlayer videos in 16 bits mode)
+	         BitBlt fix (return after dibsection blit -> fixes Quake 2)
+	- COMDLG32: Merged with latest Wine version (20000109)
+	- INCLUDE\WIN: Fixes to compile comdlg32 in C mode
 		 (will be rewritten in assembly for better performance)
 		 (for RealPlayer videos in 16 bits mode)
 		 BitBlt fix (return after dibsection blit -> fixes Quake 2)
