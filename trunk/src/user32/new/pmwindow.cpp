@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.32 2000-01-01 17:07:42 cbratschi Exp $ */
+/* $Id: pmwindow.cpp,v 1.33 2000-01-05 21:25:05 cbratschi Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -242,69 +242,8 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         win32wnd->MsgShow((ULONG)mp1);
         break;
 
-#if 1
     case WM_ADJUSTWINDOWPOS:
-    {
-//      PSWP     pswp = (PSWP)mp1;
-
-//        dprintf(("OS2: WM_ADJUSTWINDOWPOS %x %x %x (%d,%d) (%d,%d)", hwnd, pswp->hwnd, pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
         goto RunDefWndProc;
-    }
-#else
-    case WM_ADJUSTWINDOWPOS:
-    {
-      PSWP     pswp = (PSWP)mp1;
-      SWP      swpOld, swpNew;
-      WINDOWPOS wp;
-      ULONG     parentHeight = 0;
-      HWND      hParent = NULLHANDLE, hFrame = NULLHANDLE, hwndAfter;
-
-        dprintf(("OS2: WM_ADJUSTWINDOWPOS %x %x %x (%d,%d) (%d,%d)", hwnd, pswp->hwnd, pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
-
-        if ((pswp->fl & (SWP_SIZE | SWP_MOVE | SWP_ZORDER)) == 0) goto RunDefWndProc;;
-
-        //SvL: TODO: Workaround. Why is this happening?
-        //     When this flag is set the coordinates are 0, even though SWP_SIZE & SWP_MOVE are set.
-//        if ((pswp->fl & SWP_NOADJUST)) goto RunDefWndProc;
-
-        if(!win32wnd->CanReceiveSizeMsgs()) goto RunDefWndProc;;
-
-        WinQueryWindowPos(hwnd, &swpOld);
-
-        if(pswp->fl & (SWP_MOVE | SWP_SIZE)) {
-            if (win32wnd->isChild()) {
-                if(win32wnd->getParent()) {
-                        hParent = win32wnd->getParent()->getOS2WindowHandle();
-                }
-                else    goto RunDefWndProc;;
-            }
-        }
-        hwndAfter = pswp->hwndInsertBehind;
-        hFrame = win32wnd->getOS2FrameWindowHandle();
-        OSLibMapSWPtoWINDOWPOS(pswp, &wp, &swpOld, hParent, hFrame);
-
-        wp.hwnd = win32wnd->getWindowHandle();
-        if ((pswp->fl & SWP_ZORDER) && (pswp->hwndInsertBehind > HWND_BOTTOM))
-        {
-           Win32BaseWindow *wndAfter = Win32BaseWindow::GetWindowFromOS2Handle(pswp->hwndInsertBehind);
-           if(wndAfter) wp.hwndInsertAfter = wndAfter->getWindowHandle();
-        }
-        if(win32wnd->MsgPosChanging((LPARAM)&wp) == 0)
-        {//app or default window handler changed wp
-            dprintf(("OS2: WM_ADJUSTWINDOWPOS, app changed windowpos struct"));
-            dprintf(("%x (%d,%d), (%d,%d)", pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
-            OSLibMapWINDOWPOStoSWP(&wp, &swpNew, &swpOld, hParent, hFrame);
-            dprintf(("%x (%d,%d), (%d,%d)", swpNew.fl, swpNew.x, swpNew.y, swpNew.cx, swpNew.cy));
-            swpNew.fl |= SWP_NOADJUST;
-            swpNew.hwndInsertBehind = hwndAfter;
-            swpNew.hwnd = hFrame;
-
-            WinSetMultWindowPos(GetThreadHAB(), &swpNew, 1);
-            return (MRESULT)0;
-        }
-        break;
-    }
-#endif
 
     case WM_WINDOWPOSCHANGED:
     {
@@ -583,7 +522,7 @@ MRESULT EXPENTRY Win32SubclassWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARA
         OSLibMapSWPtoWINDOWPOS(pswp,&wp, &swpOld,hParent,hFrame);
 
         win32wnd->setWindowRect(swpOld.x, swpOld.y, swpOld.x + swpOld.cx, swpOld.y + swpOld.cy);
-        win32wnd->setClientRect(swpOld.x, swpOld.y, swpOld.x + swpOld.cx, swpOld.y + swpOld.cy);
+        //win32wnd->setClientRect(swpOld.x, swpOld.y, swpOld.x + swpOld.cx, swpOld.y + swpOld.cy);
         wp.x = swpOld.x;
         wp.y = swpOld.y;
         wp.cx = swpOld.cx;

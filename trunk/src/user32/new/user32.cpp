@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.23 2000-01-01 14:57:25 cbratschi Exp $ */
+/* $Id: user32.cpp,v 1.24 2000-01-05 21:25:06 cbratschi Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -702,11 +702,56 @@ int WIN32API GetSystemMetrics(int nIndex)
         break;
 
     case SM_CXBORDER:
+    case SM_CYBORDER:
         rc = 1;
         break;
 
-    case SM_CYBORDER:
-        rc = 1;
+    case SM_CXDLGFRAME:
+    case SM_CYDLGFRAME:
+        rc = 3;
+        break;
+
+    case SM_CYMENU:
+    case SM_CXMENUSIZE:
+    case SM_CYMENUSIZE:
+        rc = 19;
+        break;
+
+    case SM_CXSIZE:
+    case SM_CYSIZE:
+        rc = GetSystemMetrics(SM_CYCAPTION)-2;
+        break;
+
+    case SM_CXFRAME:
+    case SM_CYFRAME:
+        rc = 4;
+        break;
+
+    case SM_CXEDGE:
+    case SM_CYEDGE:
+        rc = 2;
+        break;
+
+    case SM_CXMINSPACING:
+        rc = 160;
+        break;
+
+    case SM_CYMINSPACING:
+        rc = 24;
+        break;
+
+    case SM_CXSMICON:
+    case SM_CYSMICON:
+        rc = 16;
+        break;
+
+    case SM_CYSMCAPTION:
+        rc = 16;
+        break;
+
+    case SM_CXSMSIZE:
+    case SM_CYSMSIZE:
+        rc = 15;
         break;
 
 //CB: todo: add missing metrics
@@ -727,45 +772,10 @@ int WIN32API GetSystemMetrics(int nIndex)
     case SM_DBCSENABLED:
         rc = FALSE;
         break;
-    case SM_CXEDGE: //size of 3D window edge
-        rc = 1;
-        break;
-    case SM_CYEDGE:
-        rc = 1;
-        break;
-    case SM_CXMINSPACING: //can be SM_CXMINIMIZED or larger
-        //CB: replace with const
-        rc = O32_GetSystemMetrics(SM_CXMINIMIZED);
-        break;
-    case SM_CYMINSPACING:
-        //CB: replace with const
-        rc = GetSystemMetrics(SM_CYMINIMIZED);
-        break;
     case SM_CXICON:
     case SM_CYICON:
         rc = 32;  //CB: Win32: only 32x32, OS/2 32x32/40x40
                   //    we must implement 32x32 for all screen resolutions
-        break;
-    case SM_CXSMICON: //recommended size of small icons (TODO: adjust to screen res.)
-        rc = 16;
-        break;
-    case SM_CYSMICON:
-        rc = 16;
-        break;
-    case SM_CYSMCAPTION:    //size in pixels of a small caption (TODO: ????)
-        rc = 8;
-        break;
-    case SM_CXSMSIZE:   //size of small caption buttons (pixels) (TODO: implement properly)
-        rc = 16;
-        break;
-    case SM_CYSMSIZE:
-        rc = 16;
-        break;
-    case SM_CXMENUSIZE: //TODO: size of menu bar buttons (such as MDI window close)
-        rc = 16;
-        break;
-    case SM_CYMENUSIZE:
-        rc = 16;
         break;
     case SM_ARRANGE:
         rc = ARW_BOTTOMLEFT | ARW_LEFT;

@@ -1,4 +1,4 @@
-/* $Id: pmframe.cpp,v 1.4 2000-01-03 20:53:50 cbratschi Exp $ */
+/* $Id: pmframe.cpp,v 1.5 2000-01-05 21:25:05 cbratschi Exp $ */
 /*
  * Win32 Frame Managment Code for OS/2
  *
@@ -261,6 +261,7 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
     {
       PSWP pswp = (PSWP)mp1,swpClient;
       RECTL *client = (PRECTL)mp2,rect;
+      RECT winRect;
       INT ccount;
 
       if (!win32wnd->IsWindowCreated()) goto RunDefFrameProc;
@@ -268,9 +269,12 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
       RestoreOS2TIB();
       ccount = (INT)OldFrameProc(hwnd,msg,mp1,mp2);
       SetWin32TIB();
+      dprintf(("Frame size: %d %d",win32wnd->getWindowWidth(),win32wnd->getWindowHeight()));
+      win32wnd->MsgFormatFrame();
+      //CB: todo: use result for WM_CALCVALIDRECTS
       mapWin32ToOS2Rect(WinQueryWindow(hwnd,QW_PARENT),win32wnd->getClientRectPtr(),(PRECTLOS2)&rect);
       WinMapWindowPoints(WinQueryWindow(hwnd,QW_PARENT),hwnd,(PPOINTL)&rect,2);
-//dprintf(("CB: %d %d %d %d",rect.xLeft,rect.yBottom,rect.xRight,rect.yTop));
+      dprintf(("New client position: %d %d %d %d",rect.xLeft,rect.yBottom,rect.xRight,rect.yTop));
       swpClient = &pswp[ccount-1];
       swpClient->x = rect.xLeft;
       swpClient->y = rect.yBottom;
@@ -338,7 +342,7 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
         res = HT_NORMAL;
       else
       {
-        dprintf(("USER32: WM_HITTEST %x (%d,%d)",hwnd,(*(POINTS *)&mp1).x,(*(POINTS *)&mp1).y));
+        dprintf(("PMFRAME: WM_HITTEST %x (%d,%d)",hwnd,(*(POINTS *)&mp1).x,(*(POINTS *)&mp1).y));
 
         //CB: WinWindowFromPoint: PM sends WM_HITTEST -> loop -> stack overflow
         win32wnd->setIgnoreHitTest(TRUE);
@@ -350,12 +354,16 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
     }
 
     case WM_PAINT:
+        //CB: todo: call defframe if minimized
         dprintf(("PMFRAME: WM_PAINT"));
         if (win32wnd->IsWindowCreated())
           win32wnd->MsgNCPaint();
         goto RunDefWndProc;
 
-//CB: not yet checked
+    case WM_SIZE:
+        dprintf(("PMFRAME: WM_SIZE"));
+        goto RunDefFrameProc;
+
     case WM_ADJUSTWINDOWPOS:
     {
       PSWP     pswp = (PSWP)mp1;
@@ -380,11 +388,8 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
         if ((pswp->fl & (SWP_SIZE | SWP_MOVE | SWP_ZORDER)) == 0)
             goto RunDefFrameProc;
 
-        if(!win32wnd->CanReceiveSizeMsgs()) {
-//SvL: Doing this breaks button.exe, header4(a).exe & style.exe
-//            goto RunDefFrameProc; //CB: must call def frame proc or frame control activation is broken
-            break;
-        }
+        if(!win32wnd->CanReceiveSizeMsgs())
+           break;
 
         WinQueryWindowPos(hwnd, &swpOld);
 
@@ -418,11 +423,10 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
             pswp->hwndInsertBehind = hwndAfter;
             pswp->hwnd = hwnd;
 
-//            goto RunDefFrameProc; //CB: must call def frame proc or frame control activation is broken
             RestoreOS2TIB();
             return (MRESULT)0xf;
         }
-        goto RunDefFrameProc; //CB: must call def frame proc or frame control activation is broken
+        goto RunDefFrameProc;
     }
 
     case WM_WINDOWPOSCHANGED:
@@ -433,10 +437,6 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
       HWND      hParent = NULLHANDLE;
 
         dprintf(("PMFRAME: WM_WINDOWPOSCHANGED (%x) %x %x (%d,%d) (%d,%d)", mp2, win32wnd->getWindowHandle(), pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
-
-        RestoreOS2TIB();
-        rc = OldFrameProc(hwnd,msg,mp1,mp2);
-        SetWin32TIB();
 
         if ((pswp->fl & (SWP_SIZE | SWP_MOVE | SWP_ZORDER)) == 0)
             goto PosChangedEnd;
@@ -452,12 +452,16 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
         OSLibMapSWPtoWINDOWPOSFrame(pswp, &wp, &swpOld, hParent, hwnd);
 
         win32wnd->setWindowRect(wp.x, wp.y, wp.x+wp.cx, wp.y+wp.cy);
-        win32wnd->setClientRect(swpOld.x, swpOld.y, swpOld.x + swpOld.cx, swpOld.y + swpOld.cy);
-
+dprintf(("CB: %d %d %d %d",wp.x,wp.y,wp.x+wp.cx,wp.y+wp.cy));
         if(win32wnd->CanReceiveSizeMsgs())
           win32wnd->MsgPosChanged((LPARAM)&wp);
 
 PosChangedEnd:
+        //calls WM_FORMATFRAME if SWP_SIZE is set
+        RestoreOS2TIB();
+        rc = OldFrameProc(hwnd,msg,mp1,mp2);
+        SetWin32TIB();
+
         RestoreOS2TIB();
         return rc;
     }

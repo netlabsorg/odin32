@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.21 2000-01-03 20:53:50 cbratschi Exp $ */
+/* $Id: win32wbase.cpp,v 1.22 2000-01-05 21:25:07 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -672,6 +672,7 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndFrame, HWND hwndClient)
   /* Set the window menu */
   if ((dwStyle & (WS_CAPTION | WS_CHILD)) == WS_CAPTION )
   {
+#if 0 //CB: todo
         if (cs->hMenu) {
             SetMenu(cs->hMenu);
         }
@@ -681,6 +682,7 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndFrame, HWND hwndClient)
                         if (cs->hMenu) SetMenu(cs->hMenu );
                 }
         }
+#endif
   }
   else
   {
@@ -696,21 +698,19 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndFrame, HWND hwndClient)
   rectWindow.right = cs->x+cs->cx;
   rectWindow.top = cs->y;
   rectWindow.bottom = cs->y+cs->cy;
-  rectClient = rectWindow;
-  if (getParent()) MapWindowPoints(getParent()->getWindowHandle(),0,(PPOINT)&rectWindow,2);
+  rectClient = rectWindow; //dummy client rect
+  MapWindowPoints(getParent() ? getParent()->getWindowHandle():OSLIB_HWND_DESKTOP,0,(PPOINT)&rectWindow,2);
   /* Send the WM_CREATE message
    * Perhaps we shouldn't allow width/height changes as well.
    * See p327 in "Internals".
    */
   maxPos.x = rectWindow.left; maxPos.y = rectWindow.top;
 
-  //SetWindowPos(hwndLinkAfter,cs->x,cs->y,cs->cx,cs->cy,SWP_NOACTIVATE | SWP_NOREDRAW);
-
   //Note: Solitaire crashes when receiving WM_SIZE messages before WM_CREATE
-  fNoSizeMsg = FALSE;
+  //fNoSizeMsg = FALSE;
   fCreated = TRUE;
 
-  if(SendInternalMessageA(WM_NCCREATE, 0, (LPARAM)cs) )
+  if (SendInternalMessageA(WM_NCCREATE,0,(LPARAM)cs))
   {
         RECT rect;
 
@@ -720,13 +720,13 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndFrame, HWND hwndClient)
         rectWindow.top = cs->y;
         rectWindow.bottom = cs->y+cs->cy;
         rectClient = rectWindow;
-        if (getParent()) MapWindowPoints(getParent()->getWindowHandle(),0,(PPOINT)&rectWindow,2);
-        SendNCCalcSize(FALSE, &rectWindow, NULL, NULL, 0, &rectClient );
+        MapWindowPoints(getParent() ? getParent()->getWindowHandle():OSLIB_HWND_DESKTOP,0,(PPOINT)&rectWindow,2);
         OffsetRect(&rectWindow, maxPos.x - rectWindow.left, maxPos.y - rectWindow.top);
         //set the window size and update the client
         rect = rectWindow;
-        if (getParent()) MapWindowPoints(0,getParent()->getWindowHandle(),(PPOINT)&rect,2);
+        MapWindowPoints(0,getParent() ? getParent()->getWindowHandle():OSLIB_HWND_DESKTOP,(PPOINT)&rect,2);
         SetWindowPos(hwndLinkAfter,rect.left,rect.top,rect.right-rect.left,rect.bottom-rect.top,SWP_NOACTIVATE | SWP_NOREDRAW | SWP_FRAMECHANGED);
+        fNoSizeMsg = FALSE;
         if( (SendInternalMessageA(WM_CREATE, 0, (LPARAM)cs )) != -1 )
         {
             if(!(flags & WIN_NEED_SIZE)) {
@@ -736,7 +736,7 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndFrame, HWND hwndClient)
                 SendInternalMessageA(WM_MOVE, 0, MAKELONG( rectClient.left, rectClient.top ) );
             }
 
-            if( getStyle() & WS_CHILD && !(getExStyle() & WS_EX_NOPARENTNOTIFY) )
+            if( (getStyle() & WS_CHILD) && !(getExStyle() & WS_EX_NOPARENTNOTIFY) )
             {
                 /* Notify the parent window only */
                 SendInternalMessageA(WM_PARENTNOTIFY, MAKEWPARAM(WM_CREATE, getWindowId()), (LPARAM)getWindowHandle());
@@ -885,7 +885,7 @@ ULONG Win32BaseWindow::MsgScroll(ULONG msg, ULONG scrollCode, ULONG scrollPos)
 //******************************************************************************
 ULONG Win32BaseWindow::MsgHitTest(MSG *msg)
 {
-  lastHitTestVal = SendInternalMessageA(WM_NCHITTEST, 0, MAKELONG((USHORT)msg->pt.x, (USHORT)msg->pt.y));
+  lastHitTestVal = SendInternalMessageA(WM_NCHITTEST,msg->wParam,msg->lParam);
   dprintf2(("MsgHitTest returned %x", lastHitTestVal));
 
   if (lastHitTestVal == HTERROR)
@@ -1106,6 +1106,25 @@ ULONG Win32BaseWindow::MsgNCPaint()
 
   hrgn = 0; //CB: todo: set to frame update region
   return SendInternalMessageA(WM_NCPAINT,hrgn,0);
+}
+//******************************************************************************
+//******************************************************************************
+ULONG  Win32BaseWindow::MsgFormatFrame()
+{
+  RECT window = rectWindow,client = rectClient,rect;
+  WINDOWPOS wndPos;
+
+  wndPos.hwnd = Win32Hwnd;
+  wndPos.hwndInsertAfter = 0;
+  rect = rectWindow;
+  MapWindowPoints(Win32Hwnd,(getParent()) ? getParent()->getWindowHandle():HWND_DESKTOP,(PPOINT)&rect,2);
+  wndPos.x = rect.left;
+  wndPos.y = rect.top;
+  wndPos.cx = rect.right-rect.left;
+  wndPos.cy = rect.bottom-rect.top;
+  wndPos.flags = 0;
+
+  return SendNCCalcSize(TRUE,&window,&window,&client,&wndPos,&rectClient);
 }
 //******************************************************************************
 //******************************************************************************
@@ -1479,7 +1498,7 @@ VOID Win32BaseWindow::AdjustRectOuter(LPRECT rect,BOOL menu)
   if(dwStyle & WS_ICONIC) return;
 
   /* Decide if the window will be managed (see CreateWindowEx) */
-  if (!WindowNeedsWMBorder())
+  //if (!WindowNeedsWMBorder()) //CB: check Options.managed
   {
     if (HAS_THICKFRAME(dwStyle,dwExStyle ))
       InflateRect( rect, GetSystemMetrics(SM_CXFRAME), GetSystemMetrics(SM_CYFRAME) );
@@ -1519,23 +1538,34 @@ VOID Win32BaseWindow::AdjustRectInner(LPRECT rect)
 }
 //******************************************************************************
 //******************************************************************************
-LONG Win32BaseWindow::HandleNCCalcSize(RECT *winRect)
+LONG Win32BaseWindow::HandleNCCalcSize(BOOL calcValidRects,RECT *winRect)
 {
-  RECT tmpRect = { 0, 0, 0, 0 };
-  LONG result = 0;
-  UINT style = (UINT) GetClassLongA(Win32Hwnd,GCL_STYLE);
+  RECT tmpRect = { 0, 0, 0, 0 },*clientRect;
+  LONG result = WVR_ALIGNTOP | WVR_ALIGNLEFT;
+  UINT style;
+
+  if (!calcValidRects) return 0;
+
+  style = (UINT) GetClassLongA(Win32Hwnd,GCL_STYLE);
 
   if (style & CS_VREDRAW) result |= WVR_VREDRAW;
   if (style & CS_HREDRAW) result |= WVR_HREDRAW;
 
-  if( !( dwStyle & WS_MINIMIZE ) )
-  {
-    AdjustRectOuter(&tmpRect,FALSE);
+  clientRect = &((NCCALCSIZE_PARAMS*)winRect)->rgrc[2];
+  clientRect->left = 0;
+  clientRect->right = rectWindow.right-rectWindow.left;
+  clientRect->top = 0;
+  clientRect->bottom = rectWindow.bottom-rectWindow.top;
+  mapWin32Rect(OS2HwndFrame,getParent() ? getParent()->getWindowHandle():OSLIB_HWND_DESKTOP,clientRect);
 
-    winRect->left   -= tmpRect.left;
-    winRect->top    -= tmpRect.top;
-    winRect->right  -= tmpRect.right;
-    winRect->bottom -= tmpRect.bottom;
+  if(!(dwStyle & WS_MINIMIZE))
+  {
+    AdjustRectOuter(&tmpRect,FALSE); //CB: todo: menu
+
+    clientRect->left   -= tmpRect.left;
+    clientRect->top    -= tmpRect.top;
+    clientRect->right  -= tmpRect.right;
+    clientRect->bottom -= tmpRect.bottom;
 
     if (HAS_MENU(this))
     {
@@ -1549,10 +1579,10 @@ LONG Win32BaseWindow::HandleNCCalcSize(RECT *winRect)
 
     SetRect (&tmpRect, 0, 0, 0, 0);
     AdjustRectInner(&tmpRect);
-    winRect->left   -= tmpRect.left;
-    winRect->top    -= tmpRect.top;
-    winRect->right  -= tmpRect.right;
-    winRect->bottom -= tmpRect.bottom;
+    clientRect->left   -= tmpRect.left;
+    clientRect->top    -= tmpRect.top;
+    clientRect->right  -= tmpRect.right;
+    clientRect->bottom -= tmpRect.bottom;
   }
 
   return result;
@@ -1572,8 +1602,8 @@ LONG Win32BaseWindow::HandleNCHitTest(POINT pt)
     /* Check borders */
     if (HAS_THICKFRAME(dwStyle,dwExStyle))
     {
-      InflateRect( &rect, -GetSystemMetrics(SM_CXFRAME), -GetSystemMetrics(SM_CYFRAME) );
-      if (!PtInRect( &rect, pt ))
+      InflateRect(&rect,-GetSystemMetrics(SM_CXFRAME),-GetSystemMetrics(SM_CYFRAME));
+      if (!PtInRect(&rect,pt))
       {
         /* Check top sizing border */
         if (pt.y < rect.top)
@@ -1604,8 +1634,7 @@ LONG Win32BaseWindow::HandleNCHitTest(POINT pt)
           return HTRIGHT;
         }
       }
-    }
-    else  /* No thick frame */
+    } else  /* No thick frame */
     {
       if (HAS_DLGFRAME(dwStyle,dwExStyle))
         InflateRect(&rect, -GetSystemMetrics(SM_CXDLGFRAME), -GetSystemMetrics(SM_CYDLGFRAME));
@@ -1619,10 +1648,10 @@ LONG Win32BaseWindow::HandleNCHitTest(POINT pt)
     if ((dwStyle & WS_CAPTION) == WS_CAPTION)
     {
       if (dwExStyle & WS_EX_TOOLWINDOW)
-        rect.top += GetSystemMetrics(SM_CYSMCAPTION) - 1;
+        rect.top += GetSystemMetrics(SM_CYSMCAPTION)-1;
       else
-        rect.top += GetSystemMetrics(SM_CYCAPTION) - 1;
-      if (!PtInRect( &rect, pt ))
+        rect.top += GetSystemMetrics(SM_CYCAPTION)-1;
+      if (!PtInRect(&rect,pt))
       {
         /* Check system menu */
         if(dwStyle & WS_SYSMENU)
@@ -1664,7 +1693,7 @@ LONG Win32BaseWindow::HandleNCHitTest(POINT pt)
   /* Check client area */
 
   ScreenToClient(Win32Hwnd,&pt);
-  rect = rectClient;
+  getClientRect(&rect);
   if (PtInRect(&rect,pt)) return HTCLIENT;
 
   /* Check vertical scroll bar */
@@ -2450,7 +2479,7 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
         return 0;
 
     case WM_NCCALCSIZE:
-        return HandleNCCalcSize((RECT*)lParam);
+        return HandleNCCalcSize((BOOL)wParam,(RECT*)lParam);
 
     case WM_CTLCOLORMSGBOX:
     case WM_CTLCOLOREDIT:

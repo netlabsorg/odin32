@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.4 2000-01-03 20:53:49 cbratschi Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.5 2000-01-05 21:25:04 cbratschi Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -111,6 +111,7 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
 
   memset(winMsg, 0, sizeof(MSG));
   win32wnd = Win32BaseWindow::GetWindowFromOS2Handle(os2Msg->hwnd);
+  if (!win32wnd) win32wnd = Win32BaseWindow::GetWindowFromOS2FrameHandle(os2Msg->hwnd);
   //PostThreadMessage posts WIN32APP_POSTMSG msg without window handle
   if((win32wnd == 0) && (os2Msg->msg != WM_CREATE) && (os2Msg->msg != WIN32APP_POSTMSG))
   {
@@ -119,6 +120,7 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
   winMsg->time = os2Msg->time;
   winMsg->pt.x = os2Msg->ptl.x;
   winMsg->pt.y = mapScreenY(os2Msg->ptl.y);
+
   if(win32wnd) //==0 for WM_CREATE
     winMsg->hwnd = win32wnd->getWindowHandle();
 
@@ -205,15 +207,9 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
 
       case WM_HITTEST:
       {
-        OSLIBPOINT pt;
-
-        pt.x = (*(POINTS *)&os2Msg->mp1).x;
-        pt.y = (*(POINTS *)&os2Msg->mp1).y;
-
-        mapOS2ToWin32Point(os2Msg->hwnd,OSLIB_HWND_DESKTOP,&pt);
         winMsg->message  = WINWM_NCHITTEST;
         winMsg->wParam  = 0;
-        winMsg->lParam  = MAKELONG((USHORT)pt.x, (USHORT)pt.y);
+        winMsg->lParam  = MAKELONG(winMsg->pt.x,winMsg->pt.y);
         return TRUE;
       }
     }
@@ -275,56 +271,7 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
         break;
 
     case WM_WINDOWPOSCHANGED:
-    {
-      PSWP      pswp  = (PSWP)os2Msg->mp1;
-      SWP       swpOld = *(pswp + 1);
-      HWND      hParent = NULLHANDLE;
-      LONG      yDelta = pswp->cy - swpOld.cy;
-      LONG      xDelta = pswp->cx - swpOld.cx;
-
-        dprintf(("OS2: WM_WINDOWPOSCHANGED %x %x (%d,%d) (%d,%d)", win32wnd->getWindowHandle(), pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
-
-        if ((pswp->fl & (SWP_SIZE | SWP_MOVE | SWP_ZORDER)) == 0) goto dummymessage;
-
-        if(pswp->fl & (SWP_MOVE | SWP_SIZE)) {
-            if (win32wnd->isChild()) {
-                if(win32wnd->getParent()) {
-                        hParent = win32wnd->getParent()->getOS2WindowHandle();
-                }
-                else    goto dummymessage; //parent has just been destroyed
-            }
-        }
-        OSLibMapSWPtoWINDOWPOS(pswp, &thdb->wp, &swpOld, hParent, win32wnd->getOS2FrameWindowHandle());
-
-        if (!win32wnd->CanReceiveSizeMsgs())    goto dummymessage;
-//CB: todo: send WM_NCCALCSIZE
-#if 0   //CB: ignore it
-        dprintf(("Set client rectangle to (%d,%d)(%d,%d)", swpOld.x, swpOld.y, swpOld.x + swpOld.cx, swpOld.y + swpOld.cy));
-        win32wnd->setClientRect(swpOld.x, swpOld.y, swpOld.x + swpOld.cx, swpOld.y + swpOld.cy);
-
-        thdb->wp.hwnd = win32wnd->getWindowHandle();
-        if ((pswp->fl & SWP_ZORDER) && (pswp->hwndInsertBehind > HWND_BOTTOM))
-        {
-           Win32BaseWindow *wndAfter = Win32BaseWindow::GetWindowFromOS2Handle(pswp->hwndInsertBehind);
-           thdb->wp.hwndInsertAfter = wndAfter->getWindowHandle();
-        }
-
-        PRECT lpRect = win32wnd->getWindowRect();
-        //SvL: Only send it when the client has changed & the frame hasn't
-        //     If the frame size/position has changed, pmframe.cpp will send
-        //     this message
-        if(lpRect->right == thdb->wp.x+thdb->wp.cx && lpRect->bottom == thdb->wp.y+thdb->wp.cy) {
-                winMsg->message    = WINWM_WINDOWPOSCHANGED;
-                winMsg->lParam = (LPARAM)&thdb->wp;
-        }
-        else {
-            win32wnd->setWindowRect(thdb->wp.x, thdb->wp.y, thdb->wp.x+thdb->wp.cx, thdb->wp.y+thdb->wp.cy);
-            goto dummymessage;
-        }
-#else
         goto dummymessage;
-#endif
-    }
 
     case WM_ACTIVATE:
     {
@@ -667,15 +614,9 @@ VirtualKeyFound:
 
     case WM_HITTEST:
     {
-        OSLIBPOINT pt;
-
-        pt.x = (*(POINTS *)&os2Msg->mp1).x;
-        pt.y = (*(POINTS *)&os2Msg->mp1).y;
-
-        mapOS2ToWin32Point(os2Msg->hwnd,OSLIB_HWND_DESKTOP,&pt);
         winMsg->message  = WINWM_NCHITTEST;
         winMsg->wParam  = 0;
-        winMsg->lParam  = MAKELONG((USHORT)pt.x, (USHORT)pt.y);
+        winMsg->lParam  = MAKELONG(winMsg->pt.x,winMsg->pt.y);
         break;
     }
 
