@@ -1,4 +1,3 @@
-/* $Id: filetitle.c,v 1.5 2001-09-05 12:12:01 bird Exp $ */
 /*
  * COMMDLG - File Dialogs
  *

@@ -1,4 +1,3 @@
-/* $Id: colordlg.c,v 1.4 2001-09-05 12:11:59 bird Exp $ */
 /*
  * COMMDLG - Color Dialog
  *
