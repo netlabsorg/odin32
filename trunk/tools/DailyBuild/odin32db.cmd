@@ -1,15 +1,17 @@
-/* $Id: odin32db.cmd,v 1.5 2001-10-26 20:53:02 bird Exp $
+/* $Id: odin32db.cmd,v 1.6 2002-02-26 17:25:37 bird Exp $
  *
  * Updates the Odin32 API database.
  *
- * Copyright (c) 1999-2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * Copyright (c) 1999-2002 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
-    /* load rexxutils functions */
+    /* load rexxutils functions and Ftp Utils. */
     call RxFuncAdd 'SysLoadFuncs', 'RexxUtil', 'SysLoadFuncs';
     call SysloadFuncs;
+    call RxFuncAdd 'FtpLoadFuncs','rxFtp','FtpLoadFuncs';
+    call FtpLoadFuncs;
 
     /*
      * Get source directory of this script
