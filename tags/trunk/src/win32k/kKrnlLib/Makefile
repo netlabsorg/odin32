@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.27 2002-04-15 23:13:26 bird Exp $
+# $Id: Makefile,v 1.28 2002-04-29 11:12:55 bird Exp $
 
 #
 # kKrnlLib main file.
@@ -15,11 +15,22 @@ PATH_ROOT = ..\..\..
 
 
 #
+# kLib overrides variables.
+#
+!if [SET KLIB_INC=$(MAKEDIR)\kLibR3.inc]
+!endif
+
+
+#
 # Config.
 #
 TARGET_MODE = EMPTY
 TARGET_NAME = kKrnlLib_empty
+!if [$(TOOL_EXISTS) kLib\Makefile] == 0
+SUBDIRS     = kLib tools include
+!else
 SUBDIRS     = tools include
+!endif
 PREMAKEFILES= kKrnlLib.mak kKrnlLibR3Tst.mak
 BUILD_OWN_TESTCASE_RULE = 1
 
