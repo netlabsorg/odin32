@@ -1,4 +1,4 @@
-/* $Id: winimgres.cpp,v 1.4 1999-06-23 19:36:24 phaller Exp $ */
+/* $Id: winimgres.cpp,v 1.5 1999-08-09 22:55:11 phaller Exp $ */
 
 /*
  *
@@ -15,6 +15,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <odincrt.h>
+
 #include "misc.h"
 #include "nameid.h"
 #include "winimage.h"
@@ -158,13 +160,18 @@ Win32Resource *Win32Image::getPEResource(ULONG id, ULONG type, ULONG lang)
     for(i=0;i<stringid;i++) {
         unicodestr += *unicodestr;
     }
+    ODIN_FS_BEGIN
     res = new Win32Resource(this, id, NTRT_STRING, (ULONG)*unicodestr, (char *)unicodestr);
+    ODIN_FS_END
     if(res == NULL) {
         dprintf(("new Win32Resource failed!\n"));
         return(NULL);
     }
   }
-  else  res = new Win32Resource(this, id, type, pData->Size, resdata);
+  else
+    ODIN_FS_BEGIN
+    res = new Win32Resource(this, id, type, pData->Size, resdata);
+    ODIN_FS_END
 
   return res;
 }
@@ -297,14 +304,20 @@ HRSRC Win32Image::findResourceA(LPCSTR lpszName, LPSTR lpszType)
     else dprintf(("FindResource %d\n", (int)lpszName));
 
     hres = O32_FindResource(hinstance, lpszName, szType);
-    if(hres) {
+    if(hres)
+    {
+      ODIN_FS_BEGIN
       res = new Win32Resource(this, hres, (ULONG)lpszName, (ULONG)szType);
+      ODIN_FS_END
     }
 
     if(hres == NULL && (int)lpszName >> 16 == 0 && (int)szType == NTRT_STRING) {
       hres = O32_FindResource(hinstance, (LPCSTR)(((int)lpszName - 1)*16), (LPCSTR)NTRT_RCDATA);
-      if(hres) {
+      if(hres)
+      {
+         ODIN_FS_BEGIN
          res = new Win32Resource(this, hres, (ULONG)lpszName, (ULONG)szType);
+         ODIN_FS_END
       }
       else    dprintf(("FindResourceA can't find string %d\n", (int)lpszName));
     }
@@ -392,14 +405,20 @@ HRSRC Win32Image::findResourceW(LPWSTR lpszName, LPWSTR lpszType)
     else dprintf(("FindResourceW %X %d\n", hinstance, (int)lpszName));
 
     hres = O32_FindResource(hinstance, (LPCSTR)lpszName, (LPCSTR)szType);
-    if(hres) {
+    if(hres)
+    {
+      ODIN_FS_BEGIN
       res = new Win32Resource(this, hres, (ULONG)lpszName, (ULONG)szType);
+      ODIN_FS_END
     }
 
     if(hres == NULL && (int)lpszName >> 16 == 0 && (int)szType == NTRT_STRING) {
       hres = O32_FindResource(hinstance, (LPCSTR)(((ULONG)lpszName - 1)*16), (LPCSTR)NTRT_RCDATA);
-      if(hres) {
-         res = new Win32Resource(this, hres, (ULONG)lpszName, (ULONG)szType);
+      if(hres)
+      {
+        ODIN_FS_BEGIN
+        res = new Win32Resource(this, hres, (ULONG)lpszName, (ULONG)szType);
+        ODIN_FS_END
       }
       else    dprintf(("FindResourceW can't find string %d\n", (int)lpszName));
     }
