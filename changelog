@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.1344 2001-04-03 14:11:23 sandervl Exp $ */
+/* $Id: changelog,v 1.1345 2001-04-03 17:44:27 sandervl Exp $ */
 
  2001-04-03: Sander van Leeuwen <sandervl@xs4all.nl>   
     - DDRAW:    o Only reset physical palette in DirectDraw destructor if 
@@ -9,10 +9,10 @@
                 o Ported Wine's codepage, string & unicode functions (codepage.cpp)
                 o Ported Wine's codepage unicode conversion functions & tables
                   (kernel32\unicode)
-                o Return OEM codepage in GetWindows/DisplayCodepage (message queue/hps)
-                  (works for both Acrobat Distiller & StarOffice)
                   TODO: Rewrite heapstring functions to use WideCharToMultiByte
                         and MultiByteToWideChar
+                o Rewrote string functions (heapstring.cpp) to use new unicode
+                  functions.
 
  2001-04-02: Sander van Leeuwen <sandervl@xs4all.nl>   
     - USER32:   o Mouse message translation fix (check capture)
