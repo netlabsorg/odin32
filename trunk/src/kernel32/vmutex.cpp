@@ -1,4 +1,4 @@
-/* $Id: vmutex.cpp,v 1.9 2000-03-23 19:23:47 sandervl Exp $ */
+/* $Id: vmutex.cpp,v 1.10 2002-04-07 15:44:11 sandervl Exp $ */
 
 /*
  * Mutex class
@@ -18,8 +18,9 @@
 #define INCL_DOSSEMAPHORES
 #define INCL_DOSERRORS
 #include <os2wrap.h>	//Odin32 OS/2 api wrappers
-#include <vmutex.h>
 #include <win32type.h>
+#include <vmutex.h>
+#include <odincrt.h>
 #include <misc.h>
 
 #define DBG_LOCALLOG	DBG_vmutex
@@ -27,70 +28,15 @@
 
 /******************************************************************************/
 /******************************************************************************/
-VMutex::VMutex(int fShared, HMTX *phMutex) : waiting(0)
+VMutex::VMutex()
 {
- APIRET rc;
-
-  this->fShared = fShared;
-  rc = DosCreateMutexSem(NULL, &sem_handle, (fShared == VMUTEX_SHARED) ? DC_SEM_SHARED : 0, FALSE);
-  if(rc != 0) {
-    dprintf(("Error creating mutex %X\n", rc));
-    sem_handle = 0;
-  }
-  if(fShared) {
-	*phMutex = sem_handle;
-  }
+  DosInitializeCriticalSection(&critsect, NULL);
 }
 /******************************************************************************/
 /******************************************************************************/
 VMutex::~VMutex()
 {
- int i;
-
-  if(sem_handle) {
-	if(fShared != VMUTEX_SHARED) {
-    		for(i=0;i<waiting;i++) {
-        		DosReleaseMutexSem(sem_handle);
-    		}
-	}
-    	DosCloseMutexSem(sem_handle);
-  }
-}
-/******************************************************************************/
-/******************************************************************************/
-void VMutex::enter(ULONG timeout, HMTX *phMutex)
-{
- APIRET rc;
-
-  if(fShared == VMUTEX_SHARED && phMutex == NULL) {
-	DebugInt3();
-	return;
-  }
-  if(sem_handle) {
-	if(fShared == VMUTEX_SHARED && *phMutex == 0) {
-		//must open the shared semaphore first (other process created it)
-		*phMutex = sem_handle;
-		rc = DosOpenMutexSem(NULL, phMutex);
-		if(rc) {
-			DebugInt3();
-		}
-	}
-    	waiting++;
-    	rc = DosRequestMutexSem((fShared == VMUTEX_SHARED) ? *phMutex : sem_handle, timeout);
-    	waiting--;
-  }
-}
-/******************************************************************************/
-/******************************************************************************/
-void VMutex::leave(HMTX *phMutex)
-{
-  if((fShared == VMUTEX_SHARED && phMutex == NULL) ||
-     (fShared == VMUTEX_SHARED && *phMutex == 0)) {
-	DebugInt3();
-	//should always call enter first...
-	return;
-  }
-  DosReleaseMutexSem((fShared == VMUTEX_SHARED) ? *phMutex : sem_handle);
+  DosDeleteCriticalSection(&critsect);
 }
 /******************************************************************************/
 /******************************************************************************/

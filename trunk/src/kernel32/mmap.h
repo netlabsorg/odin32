@@ -1,4 +1,4 @@
-/* $Id: mmap.h,v 1.20 2001-12-05 18:06:02 sandervl Exp $ */
+/* $Id: mmap.h,v 1.21 2002-04-07 15:44:11 sandervl Exp $ */
 
 /*
  * Memory mapped class
@@ -21,6 +21,8 @@
 #ifndef PAGE_SHIFT
 #define PAGE_SHIFT  12
 #endif
+
+#define MEMMAP_CRITSECTION_NAME	"\\SEM32\\ODIN_MMAP.SEM"
 
 //commit 4 pages at once when the app accesses it
 #define NRPAGES_TOCOMMIT    16
@@ -167,5 +169,7 @@ private:
 };
 //******************************************************************************
 //******************************************************************************
+
+void InitializeMemMaps();
 
 #endif //__MMAP_H__

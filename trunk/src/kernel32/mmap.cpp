@@ -1,4 +1,4 @@
-/* $Id: mmap.cpp,v 1.54 2002-03-24 13:10:30 sandervl Exp $ */
+/* $Id: mmap.cpp,v 1.55 2002-04-07 15:44:11 sandervl Exp $ */
 
 /*
  * Win32 Memory mapped file & view classes
@@ -28,7 +28,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <win\virtual.h>
-#include <vmutex.h>
+#include <odincrt.h>
 #include <handlemanager.h>
 #include "mmap.h"
 #include "oslibdos.h"
@@ -37,29 +37,36 @@
 #define DBG_LOCALLOG    DBG_mmap
 #include "dbglocal.h"
 
-//NOTE: This must be in the local data segment -> if a shared semaphore was
-//      created by a different process, the handle returned by DosOpenMutexSem
-//      will be returned in hGlobalMapMutex
-HMTX             hGlobalMapMutex = 0;
-
 //Global DLL Data
 #pragma data_seg(_GLOBALDATA)
-Win32MemMap     *Win32MemMap::memmaps = NULL;
-VMutex           globalmapMutex(VMUTEX_SHARED, &hGlobalMapMutex);
+Win32MemMap  *Win32MemMap::memmaps = NULL;
+CRITICAL_SECTION_OS2       globalmapcritsect = {0};
 #pragma data_seg()
-VMutex           globalviewMutex;
 Win32MemMapView *Win32MemMapView::mapviews = NULL;
 
+//******************************************************************************
+//******************************************************************************
+void InitializeMemMaps()
+{
+    if(globalmapcritsect.hmtxLock == 0) {
+         dprintf(("InitializeMemMaps -> create shared critical section"));
+         DosInitializeCriticalSection(&globalmapcritsect, MEMMAP_CRITSECTION_NAME);
+    }
+    else {
+         dprintf(("InitializeMemMaps -> access shared critical section"));
+         DosAccessCriticalSection(&globalmapcritsect, MEMMAP_CRITSECTION_NAME);
+    }
+}
 //******************************************************************************
 //TODO: sharing between processes
 //******************************************************************************
 Win32MemMap::Win32MemMap(HFILE hfile, ULONG size, ULONG fdwProtect, LPSTR lpszName)
                : nrMappings(0), pMapping(NULL), mMapAccess(0), referenced(0), image(0)
 {
-    globalmapMutex.enter(VMUTEX_WAIT_FOREVER, &hGlobalMapMutex);
+    DosEnterCriticalSection(&globalmapcritsect);
     next    = memmaps;
     memmaps = this;
-    globalmapMutex.leave(&hGlobalMapMutex);
+    DosLeaveCriticalSection(&globalmapcritsect);
 
     hMemFile   = hfile;
 
@@ -79,10 +86,10 @@ Win32MemMap::Win32MemMap(HFILE hfile, ULONG size, ULONG fdwProtect, LPSTR lpszNa
 Win32MemMap::Win32MemMap(Win32PeLdrImage *pImage, ULONG baseAddress, ULONG size)
                : nrMappings(0), pMapping(NULL), mMapAccess(0), referenced(0), image(0)
 {
-    globalmapMutex.enter(VMUTEX_WAIT_FOREVER, &hGlobalMapMutex);
+    DosEnterCriticalSection(&globalmapcritsect);
     next    = memmaps;
     memmaps = this;
-    globalmapMutex.leave(&hGlobalMapMutex);
+    DosLeaveCriticalSection(&globalmapcritsect);
 
     hMemFile   = -1;
 
@@ -168,7 +175,7 @@ Win32MemMap::~Win32MemMap()
     }
     mapMutex.leave();
 
-    globalmapMutex.enter(VMUTEX_WAIT_FOREVER, &hGlobalMapMutex);
+    DosEnterCriticalSection(&globalmapcritsect);
     Win32MemMap *map = memmaps;
 
     if(map == this) {
@@ -185,7 +192,7 @@ Win32MemMap::~Win32MemMap()
         }
         else dprintf(("Win32MemMap::~Win32MemMap: map not found!! (%x)", this));
     }
-    globalmapMutex.leave(&hGlobalMapMutex);
+    DosLeaveCriticalSection(&globalmapcritsect);
 }
 //******************************************************************************
 //If memory map has no more views left, then we can safely delete it when
@@ -510,7 +517,7 @@ Win32MemMap *Win32MemMap::findMap(LPSTR lpszName)
   if(lpszName == NULL)
     return NULL;
 
-  globalmapMutex.enter(VMUTEX_WAIT_FOREVER, &hGlobalMapMutex);
+  DosEnterCriticalSection(&globalmapcritsect);
   Win32MemMap *map = memmaps;
 
   if(map != NULL) {
@@ -520,7 +527,7 @@ Win32MemMap *Win32MemMap::findMap(LPSTR lpszName)
         map = map->next;
     }
   }
-  globalmapMutex.leave(&hGlobalMapMutex);
+  DosLeaveCriticalSection(&globalmapcritsect);
   if(!map) dprintf(("Win32MemMap::findMap: couldn't find map %s", lpszName));
   return map;
 }
@@ -528,7 +535,7 @@ Win32MemMap *Win32MemMap::findMap(LPSTR lpszName)
 //******************************************************************************
 Win32MemMap *Win32MemMap::findMap(ULONG address)
 {
-  globalmapMutex.enter(VMUTEX_WAIT_FOREVER, &hGlobalMapMutex);
+  DosEnterCriticalSection(&globalmapcritsect);
   Win32MemMap *map = memmaps;
 
   if(map != NULL) {
@@ -541,7 +548,7 @@ Win32MemMap *Win32MemMap::findMap(ULONG address)
         map = map->next;
     }
   }
-  globalmapMutex.leave(&hGlobalMapMutex);
+  DosLeaveCriticalSection(&globalmapcritsect);
   return map;
 }
 //******************************************************************************
@@ -552,7 +559,7 @@ void Win32MemMap::deleteAll()
  DWORD processId = GetCurrentProcessId();
 
   //delete all maps created by this process
-  globalviewMutex.enter();
+  DosEnterCriticalSection(&globalmapcritsect);
   while(map) {
     nextmap = map->next;
     if(map->getProcessId() == processId) {
@@ -570,7 +577,7 @@ void Win32MemMap::deleteAll()
     }
     map = nextmap;
   }
-  globalviewMutex.leave();
+  DosLeaveCriticalSection(&globalmapcritsect);
 }
 //******************************************************************************
 //******************************************************************************
@@ -629,7 +636,7 @@ Win32MemMapView::Win32MemMapView(Win32MemMap *map, ULONG offset, ULONG size,
     }
     dprintf(("Win32MemMapView::Win32MemMapView: created %x (alias for %x), size %d", pMapView, viewaddr, size));
 
-    globalviewMutex.enter();
+    DosEnterCriticalSection(&globalmapcritsect);
     if(tmpview == NULL || tmpview->getViewAddr() > pMapView) {
         next     = mapviews;
         mapviews = this;
@@ -644,7 +651,7 @@ Win32MemMapView::Win32MemMapView(Win32MemMap *map, ULONG offset, ULONG size,
         next          = tmpview->next;
         tmpview->next = this;
     }
-    globalviewMutex.leave();
+    DosLeaveCriticalSection(&globalmapcritsect);
 }
 //******************************************************************************
 //******************************************************************************
@@ -666,7 +673,7 @@ Win32MemMapView::~Win32MemMapView()
         OSLibDosFreeMem(pShareViewAddr);
     }
 
-    globalviewMutex.enter();
+    DosEnterCriticalSection(&globalmapcritsect);
     Win32MemMapView *view = mapviews;
 
     if(view == this) {
@@ -683,13 +690,13 @@ Win32MemMapView::~Win32MemMapView()
         }
         else    dprintf(("Win32MemMapView::~Win32MemMapView: map not found!! (%x)", this));
     }
-    globalviewMutex.leave();
+    DosLeaveCriticalSection(&globalmapcritsect);
 }
 //******************************************************************************
 //******************************************************************************
 void Win32MemMapView::deleteViews(Win32MemMap *map)
 {
-  globalviewMutex.enter();
+  DosEnterCriticalSection(&globalmapcritsect);
   Win32MemMapView *view = mapviews, *nextview;
 
   if(view != NULL) {
@@ -697,14 +704,14 @@ void Win32MemMapView::deleteViews(Win32MemMap *map)
         nextview = view->next;
         if(view->getParentMap() == map)
         {
-            globalviewMutex.leave();
+            DosLeaveCriticalSection(&globalmapcritsect);
             delete view;
-            globalviewMutex.enter();
+            DosEnterCriticalSection(&globalmapcritsect);
         }
         view = nextview;
     }
   }
-  globalviewMutex.leave();
+  DosLeaveCriticalSection(&globalmapcritsect);
 }
 //******************************************************************************
 //******************************************************************************
@@ -715,7 +722,7 @@ Win32MemMap *Win32MemMapView::findMapByView(ULONG address,
 {
   if(mapviews == NULL) return NULL;
 
-  globalviewMutex.enter();
+  DosEnterCriticalSection(&globalmapcritsect);
   Win32MemMapView *view = mapviews;
   ULONG ulViewAddr;
 
@@ -763,7 +770,7 @@ success:
                *offset));
 #endif
 
-  globalviewMutex.leave();
+  DosLeaveCriticalSection(&globalmapcritsect);
 
   if(pView)
       *pView = view;
@@ -776,7 +783,7 @@ Win32MemMapView *Win32MemMapView::findView(LPVOID address)
 {
   Win32MemMapView *view = mapviews;
 
-  globalviewMutex.enter();
+  DosEnterCriticalSection(&globalmapcritsect);
   if(view != NULL) {
     while(view) {
         if(view->getViewAddr() == address)
@@ -786,7 +793,7 @@ Win32MemMapView *Win32MemMapView::findView(LPVOID address)
         view = view->next;
     }
   }
-  globalviewMutex.leave();
+  DosLeaveCriticalSection(&globalmapcritsect);
   return view;
 }
 //******************************************************************************

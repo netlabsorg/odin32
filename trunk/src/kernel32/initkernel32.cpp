@@ -1,4 +1,4 @@
-/* $Id: initkernel32.cpp,v 1.13 2002-02-24 20:29:56 sandervl Exp $
+/* $Id: initkernel32.cpp,v 1.14 2002-04-07 15:44:10 sandervl Exp $
  *
  * KERNEL32 DLL entry point
  *
@@ -134,6 +134,8 @@ ULONG APIENTRY inittermKernel32(ULONG hModule, ULONG ulFlag)
 
             if (InitializeCodeHeap() == FALSE)
                 return 0UL;
+
+            InitializeMemMaps();
 
             PROFILE_LoadOdinIni();
             dllHandle = RegisterLxDll(hModule, 0, (PVOID)&kernel32_PEResTab);
