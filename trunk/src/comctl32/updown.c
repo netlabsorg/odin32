@@ -1,4 +1,4 @@
-/* $Id: updown.c,v 1.6 1999-07-12 15:58:51 cbratschi Exp $ */
+/* $Id: updown.c,v 1.7 1999-08-14 16:13:16 cbratschi Exp $ */
 /*
  * Updown control
  *
@@ -7,8 +7,6 @@
  * Copyright 1999 Christoph Bratschi
  *
  * TODO:
- *   - subclass the buddy window (in UPDOWN_SetBuddyHandle) to process the
- *     arrow keys
  *   - I am not sure about the default values for the Min, Max, Pos
  *     (in the UPDOWN_INFO the fields: MinVal, MaxVal, CurVal)
  *   - I think I do not handle correctly the WS_BORDER style.
@@ -55,6 +53,7 @@
 #define DEFAULT_XSEP      0  /* default separation between buddy and crtl */
 #define DEFAULT_ADDTOP    0  /* amount to extend above the buddy window */
 #define DEFAULT_ADDBOT    0  /* amount to extend below the buddy window */
+#define DEFAULT_BUDDYBORDER  2  /* Width/height of the buddy border */
 
 
 /* Work constants */
@@ -66,6 +65,8 @@
 
 #define TIMERID1         1
 #define TIMERID2         2
+#define BUDDY_UPDOWN_HWND        "buddyUpDownHWND"
+#define BUDDY_SUPERCLASS_WNDPROC "buddySupperClassWndProc"
 
 static int accelIndex = -1;
 
@@ -76,6 +77,8 @@ static int accelIndex = -1;
 
 #define UPDOWN_GetInfoPtr(hwnd) ((UPDOWN_INFO *)GetWindowLongA(hwnd,0))
 
+static LRESULT CALLBACK
+UPDOWN_Buddy_SubclassProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 /***********************************************************************
  *           UPDOWN_InBounds
@@ -118,6 +121,22 @@ static BOOL UPDOWN_OffsetVal(HWND hwnd, int delta)
 }
 
 /***********************************************************************
+ * UPDOWN_HasBuddyBorder [Internal]
+ *
+ * When we have a buddy set and that we are aligned on our buddy, we
+ * want to draw a sunken edge to make like we are part of that control.
+ */
+static BOOL UPDOWN_HasBuddyBorder(HWND hwnd)
+{
+  UPDOWN_INFO* infoPtr = UPDOWN_GetInfoPtr (hwnd);
+  DWORD        dwStyle = GetWindowLongA (hwnd, GWL_STYLE);
+
+  return  ( ((dwStyle & (UDS_ALIGNLEFT | UDS_ALIGNRIGHT)) != 0) &&
+	    (SendMessageA(hwnd, UDM_GETBUDDY, 0, 0) != 0) &&
+	    (lstrcmpiA(infoPtr->szBuddyClass, "EDIT") == 0 ) );
+}
+
+/***********************************************************************
  *           UPDOWN_GetArrowRect
  * wndPtr   - pointer to the up-down wnd
  * rect     - will hold the rectangle
@@ -127,20 +146,43 @@ static BOOL UPDOWN_OffsetVal(HWND hwnd, int delta)
  */
 static void UPDOWN_GetArrowRect (HWND hwnd, RECT *rect, BOOL incr)
 {
-  int len; /* will hold the width or height */
+  DWORD dwStyle = GetWindowLongA (hwnd, GWL_STYLE);
+  int   len; /* will hold the width or height */
 
   GetClientRect (hwnd, rect);
 
-  if (GetWindowLongA(hwnd, GWL_STYLE) & UDS_HORZ)
+  /*
+   * Make sure we calculate the rectangle to fit even if we draw the
+   * border.
+   */
+  if (UPDOWN_HasBuddyBorder(hwnd))
   {
-    len = rect->right-rect->left; /* compute the width */
-    if (incr) rect->left = len/2+1;
-    else rect->right = len/2;
-  } else
-  {
-    len = rect->bottom-rect->top; /* compute the height */
-    if (incr) rect->bottom = len/2;
-    else rect->top = len/2+1;
+    if (dwStyle & UDS_ALIGNLEFT)
+      rect->left+=DEFAULT_BUDDYBORDER;
+    else
+      rect->right-=DEFAULT_BUDDYBORDER;
+
+    InflateRect(rect, 0, -DEFAULT_BUDDYBORDER);
+  }
+
+  /*
+   * We're calculating the midpoint to figure-out where the
+   * separation between the buttons will lay. We make sure that we
+   * round the uneven numbers by adding 1.
+   */
+  if (dwStyle & UDS_HORZ) {
+    len = rect->right - rect->left + 1; /* compute the width */
+    if (incr)
+      rect->left = rect->left + len/2;
+    else
+      rect->right =  rect->left + len/2;
+  }
+  else {
+    len = rect->bottom - rect->top + 1; /* compute the height */
+    if (incr)
+      rect->bottom =  rect->top + len/2;
+    else
+      rect->top =  rect->top + len/2;
   }
 }
 
@@ -276,6 +318,25 @@ static BOOL UPDOWN_SetBuddyInt (HWND hwnd)
 }
 
 /***********************************************************************
+ * UPDOWN_DrawBuddyBorder [Internal]
+ *
+ * When we have a buddy set and that we are aligned on our buddy, we
+ * want to draw a sunken edge to make like we are part of that control.
+ */
+static void UPDOWN_DrawBuddyBorder (HWND hwnd, HDC hdc)
+{
+  DWORD dwStyle = GetWindowLongA (hwnd, GWL_STYLE);
+  RECT  clientRect;
+
+  GetClientRect(hwnd, &clientRect);
+
+  if (dwStyle & UDS_ALIGNLEFT)
+    DrawEdge(hdc, &clientRect, EDGE_SUNKEN, BF_BOTTOM | BF_LEFT | BF_TOP);
+  else
+    DrawEdge(hdc, &clientRect, EDGE_SUNKEN, BF_BOTTOM | BF_RIGHT | BF_TOP);
+}
+
+/***********************************************************************
  * UPDOWN_Draw [Internal]
  *
  * Draw the arrows. The background need not be erased.
@@ -286,6 +347,12 @@ static void UPDOWN_Draw(HWND hwnd,HDC hdc)
   DWORD dwStyle = GetWindowLongA(hwnd, GWL_STYLE);
   BOOL prssed;
   RECT rect;
+
+  /*
+   * Draw the common border between ourselves and our buddy.
+   */
+  if (UPDOWN_HasBuddyBorder(hwnd))
+    UPDOWN_DrawBuddyBorder(hwnd, hdc);
 
   /* Draw the incr button */
   UPDOWN_GetArrowRect (hwnd, &rect, TRUE);
@@ -331,18 +398,23 @@ static void UPDOWN_Refresh (HWND hwnd)
  * Asynchronous drawing (must ONLY be used in WM_PAINT).
  * Calls UPDOWN_Draw.
  */
-static void UPDOWN_Paint (HWND hwnd)
+static void UPDOWN_Paint (HWND hwnd, HDC passedDC)
 {
     PAINTSTRUCT ps;
-    HDC hdc;
+    HDC         hdc = passedDC;
 
-    hdc = BeginPaint (hwnd, &ps);
+    if (passedDC == 0)
+      hdc = BeginPaint (hwnd, &ps);
+
     UPDOWN_Draw (hwnd, hdc);
-    EndPaint (hwnd, &ps);
+
+    if (passedDC == 0)
+      EndPaint (hwnd, &ps);
 }
 
 /***********************************************************************
  *           UPDOWN_SetBuddyHandle
+ * CB: UPDOWN_SetBuddy == message handler
  * Tests if 'hwndBud' is a valid window handle. If not, returns FALSE.
  * Else, sets it as a new Buddy.
  * Then, it should subclass the buddy
@@ -353,37 +425,57 @@ static void UPDOWN_Paint (HWND hwnd)
  */
 static BOOL UPDOWN_SetBuddyHandle (HWND hwnd, HWND hwndBud)
 {
-  UPDOWN_INFO *infoPtr = UPDOWN_GetInfoPtr (hwnd);
-  DWORD dwStyle = GetWindowLongA (hwnd, GWL_STYLE);
-  RECT budRect; /* new coord for the buddy */
-  int x;          /* new x position and width for the up-down */
-
-  *infoPtr->szBuddyClass = '\0';
-
-  /* Is is a valid bud? */
+  UPDOWN_INFO* infoPtr = UPDOWN_GetInfoPtr (hwnd);
+  DWORD        dwStyle = GetWindowLongA (hwnd, GWL_STYLE);
+  RECT         budRect;  /* new coord for the buddy */
+  int          x,width;  /* new x position and width for the up-down */
+ 	
+  /* Is it a valid bud? */
   if(!IsWindow(hwndBud))
     return FALSE;
 
-  /* Store buddy wundow handle */
+  /* there is already a body assigned */
+  if ( infoPtr->Buddy )
+    RemovePropA(infoPtr->Buddy, BUDDY_UPDOWN_HWND);
+
+  /* Store buddy window handle */
   infoPtr->Buddy = hwndBud;
 
+  /* keep upDown ctrl hwnd in a buddy property */
+  SetPropA( hwndBud, BUDDY_UPDOWN_HWND, hwnd);
+
   /* Store buddy window clas name */
-  GetClassNameA (hwndBud, infoPtr->szBuddyClass, 40);
+  memset(infoPtr->szBuddyClass, 0, UPDOWN_BUDDYCLASSNAMELEN);
+  GetClassNameA (hwndBud, infoPtr->szBuddyClass, UPDOWN_BUDDYCLASSNAMELEN-1);
 
   if(dwStyle & UDS_ARROWKEYS){
-//    FIXME(updown, "we need to subclass the buddy to process the arrow keys.\n");
+    /* Note that I don't clear the BUDDY_SUPERCLASS_WNDPROC property
+       when we reset the upDown ctrl buddy to another buddy because it is not
+       good to break the window proc chain. */
+
+    /* keep buddy supperclass wndproc in prop instead of in ptr struct
+       to prevent accessing freed memory */
+    SetPropA(
+      hwndBud,
+      BUDDY_SUPERCLASS_WNDPROC,
+      (LONG)GetWindowLongA(hwndBud, GWL_WNDPROC) );
+
+    /* Assign the buddy wndproc to local wndproc in order to override
+       keyboard's up and down arrow */
+    SetWindowLongA(
+      hwndBud,
+      GWL_WNDPROC,
+      (LONG)UPDOWN_Buddy_SubclassProc);
   }
 
   /* do we need to do any adjustments? */
   if(!(dwStyle & (UDS_ALIGNLEFT | UDS_ALIGNRIGHT)))
     return TRUE;
 
-  infoPtr->Buddy = hwndBud;
-
   /* Get the rect of the buddy relative to its parent */
   GetWindowRect(infoPtr->Buddy, &budRect);
   MapWindowPoints(HWND_DESKTOP, GetParent(infoPtr->Buddy),
-                  (POINT *)(&budRect.left), 2);
+		  (POINT *)(&budRect.left), 2);
 
   /* now do the positioning */
   if(dwStyle & UDS_ALIGNRIGHT){
@@ -397,19 +489,34 @@ static BOOL UPDOWN_SetBuddyHandle (HWND hwnd, HWND hwndBud)
 
   /* first adjust the buddy to accomodate the up/down */
   SetWindowPos(infoPtr->Buddy, 0, budRect.left, budRect.top,
-               budRect.right  - budRect.left, budRect.bottom - budRect.top,
-               SWP_NOACTIVATE|SWP_NOZORDER);
+	       budRect.right  - budRect.left, budRect.bottom - budRect.top,
+	       SWP_NOACTIVATE|SWP_NOZORDER);
 
   /* now position the up/down */
   /* Since the UDS_ALIGN* flags were used, */
   /* we will pick the position and size of the window. */
+  width = DEFAULT_WIDTH;
 
-  SetWindowPos (hwnd, 0, x, budRect.top-DEFAULT_ADDTOP,DEFAULT_WIDTH,
-                 (budRect.bottom-budRect.top)+DEFAULT_ADDTOP+DEFAULT_ADDBOT,
-                 SWP_NOACTIVATE|SWP_NOZORDER);
+  /*
+   * If the updown has a buddy border, it has to overlap with the buddy
+   * to look as if it is integrated with the buddy control.
+   * We nudge the control or change it size to overlap.
+   */
+  if (UPDOWN_HasBuddyBorder(hwnd))
+  {
+    if(dwStyle & UDS_ALIGNRIGHT)
+      x-=DEFAULT_BUDDYBORDER;
+    else
+      width+=DEFAULT_BUDDYBORDER;
+  }
+
+  SetWindowPos (hwnd, infoPtr->Buddy,
+		x, budRect.top-DEFAULT_ADDTOP,
+		width, (budRect.bottom-budRect.top)+DEFAULT_ADDTOP+DEFAULT_ADDBOT,
+		SWP_NOACTIVATE);
 
   return TRUE;
-}
+}	
 
 /***********************************************************************
  *           UPDOWN_DoAction
@@ -639,6 +746,9 @@ static LRESULT UPDOWN_Destroy(HWND hwnd,WPARAM wParam,LPARAM lParam)
 
   if(infoPtr->AccelVect) COMCTL32_Free(infoPtr->AccelVect);
 
+  if ( IsWindow(infoPtr->Buddy) ) /* Cleanup */
+        RemovePropA(infoPtr->Buddy, BUDDY_UPDOWN_HWND);
+
   COMCTL32_Free (infoPtr);
 
 //      TRACE(updown, "UpDown Ctrl destruction, hwnd=%04x\n", hwnd);
@@ -651,7 +761,8 @@ static LRESULT UPDOWN_Enable(HWND hwnd,WPARAM wParam,LPARAM lParam)
   DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
 
   if (dwStyle & WS_DISABLED) UPDOWN_CancelMode(hwnd);
-  UPDOWN_Paint(hwnd);
+
+  UPDOWN_Refresh(hwnd);
 
   return 0;
 }
@@ -810,7 +921,6 @@ static LRESULT UPDOWN_SetBuddy(HWND hwnd,WPARAM wParam,LPARAM lParam)
 
   if (lParam) UNKNOWN_PARAM(UDM_SETBUDDY,wParam,lParam);
   temp = infoPtr->Buddy;
-  infoPtr->Buddy = wParam;
   UPDOWN_SetBuddyHandle(hwnd,wParam);
 //      TRACE(updown, "UpDown Ctrl new buddy(%04x), hwnd=%04x\n",
 //                   infoPtr->Buddy, hwnd);
@@ -900,7 +1010,7 @@ static LRESULT UPDOWN_SetRange32(HWND hwnd,WPARAM wParam,LPARAM lParam)
 /***********************************************************************
  *           UpDownWndProc
  */
-LRESULT WINAPI UpDownWindowProc(HWND hwnd, UINT message, WPARAM wParam,
+static LRESULT WINAPI UpDownWindowProc(HWND hwnd, UINT message, WPARAM wParam,
                                 LPARAM lParam)
 {
   switch(message)
@@ -941,7 +1051,7 @@ LRESULT WINAPI UpDownWindowProc(HWND hwnd, UINT message, WPARAM wParam,
       return UPDOWN_KeyDown(hwnd,wParam,lParam);
 
     case WM_PAINT:
-      UPDOWN_Paint(hwnd);
+      UPDOWN_Paint(hwnd,(HDC)wParam);
       break;
 
     case UDM_GETACCEL:
@@ -990,6 +1100,53 @@ LRESULT WINAPI UpDownWindowProc(HWND hwnd, UINT message, WPARAM wParam,
     return 0;
 }
 
+/***********************************************************************
+ * UPDOWN_Buddy_SubclassProc used to handle messages sent to the buddy
+ *                           control.
+ */
+LRESULT CALLBACK
+UPDOWN_Buddy_SubclassProc (
+  HWND   hwnd,
+  UINT   uMsg,
+  WPARAM wParam,
+  LPARAM lParam)
+{
+  LONG superClassWndProc = GetPropA(hwnd, BUDDY_SUPERCLASS_WNDPROC);
+  //TRACE("hwnd=%04x, wndProc=%d, uMsg=%04x, wParam=%d, lParam=%d\n",
+  // hwnd, (INT)superClassWndProc, uMsg, wParam, (UINT)lParam);
+
+  switch (uMsg)
+  {
+    case WM_KEYDOWN:
+    {
+      if ( ((int)wParam == VK_UP ) || ((int)wParam == VK_DOWN ) )
+      {
+        HWND upDownHwnd      = GetPropA(hwnd, BUDDY_UPDOWN_HWND);
+        UPDOWN_INFO *infoPtr = UPDOWN_GetInfoPtr(upDownHwnd);
+
+        if (!lstrcmpA (infoPtr->szBuddyClass, "ListBox"))
+        {
+          /* if the buddy is a list window, we must update curr index */
+          INT oldVal = SendMessageA(hwnd, LB_GETCURSEL, 0, 0);
+          SendMessageA(hwnd, LB_SETCURSEL, oldVal+1, 0);
+        }
+        else
+        {
+	  UPDOWN_GetBuddyInt(upDownHwnd);
+          UPDOWN_DoAction(upDownHwnd, 1, wParam==VK_UP);
+        }
+
+        break;
+      }
+      /* else Fall Through */
+    }
+
+    default:
+      return CallWindowProcA( (WNDPROC)superClassWndProc, hwnd, uMsg, wParam, lParam);
+  }
+
+  return 0;
+}
 
 /***********************************************************************
  *              UPDOWN_Register [Internal]

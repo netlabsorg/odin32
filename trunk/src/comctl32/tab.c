@@ -1,4 +1,4 @@
-/* $Id: tab.c,v 1.9 1999-07-12 15:58:48 cbratschi Exp $ */
+/* $Id: tab.c,v 1.10 1999-08-14 16:13:13 cbratschi Exp $ */
 /*
  * Tab control
  *
@@ -799,7 +799,10 @@ static void TAB_DrawItem(
          * Background color.
          */
         if (!(lStyle & TCS_OWNERDRAWFIXED))
+        {
+          DeleteObject(hbr);
           hbr = CreateSolidBrush(GetSysColor(COLOR_3DHILIGHT));
+        }
 
         /*
          * Erase the background.
@@ -848,6 +851,7 @@ static void TAB_DrawItem(
       /*
        * Background color.
        */
+      DeleteObject(hbr);
       hbr = CreateSolidBrush(GetSysColor(COLOR_BTNFACE));
 
       /*
@@ -962,6 +966,8 @@ static void TAB_DrawItem(
      */
     SetBkMode(hdc, oldBkMode);
     SelectObject(hdc, holdPen);
+    DeleteObject(hfocusPen);
+    DeleteObject(hbr);
   }
 }
 
@@ -1097,6 +1103,8 @@ static LRESULT TAB_EraseBackground(
 
   if (givenDC==0)
     ReleaseDC(hwnd, hdc);
+
+  DeleteObject(brush);
 
   return 0;
 }
@@ -1419,7 +1427,7 @@ TAB_SetItemA (HWND hwnd, WPARAM wParam, LPARAM lParam)
    len = lstrlenA (tabItem->pszText);
    if (len>wineItem->cchTextMax)
      wineItem->pszText = COMCTL32_ReAlloc (wineItem->pszText, (len+1)*sizeof(WCHAR));
-   lstrcpynAtoW (wineItem->pszText, tabItem->pszText, len+1);
+   lstrcpyAtoW (wineItem->pszText, tabItem->pszText);
   }
 
   return TRUE;
@@ -1455,7 +1463,7 @@ static LRESULT TAB_SetItemW (HWND hwnd, WPARAM wParam, LPARAM lParam)
    len = lstrlenW (tabItem->pszText);
    if (len>wineItem->cchTextMax)
      wineItem->pszText = COMCTL32_ReAlloc (wineItem->pszText, (len+1)*sizeof(WCHAR));
-   lstrcpynW (wineItem->pszText, tabItem->pszText, len+1);
+   lstrcpyW (wineItem->pszText, tabItem->pszText);
   }
 
   return TRUE;
@@ -1783,7 +1791,7 @@ TAB_Destroy (HWND hwnd, WPARAM wParam, LPARAM lParam)
   return 0;
 }
 
-LRESULT WINAPI
+static LRESULT WINAPI
 TAB_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     switch (uMsg)

@@ -1,4 +1,4 @@
-/* $Id: toolbar.c,v 1.11 1999-07-12 15:58:49 cbratschi Exp $ */
+/* $Id: toolbar.c,v 1.12 1999-08-14 16:13:13 cbratschi Exp $ */
 /*
  * Toolbar control
  *
@@ -13,7 +13,6 @@
  *   - Notifications.
  *   - Fix TB_SETROWS.
  *   - Tooltip support (almost complete).
- *   - Internal COMMCTL32 bitmaps.
  *   - Fix TOOLBAR_SetButtonInfo32A.
  *   - Drag & drop of buttons
  *
@@ -44,7 +43,7 @@
 #define TOP_BORDER         2
 #define BOTTOM_BORDER      2
 
-#define TOOLBAR_GetInfoPtr(wndPtr) ((TOOLBAR_INFO *)GetWindowLongA(hwnd,0))
+#define TOOLBAR_GetInfoPtr(hwnd) ((TOOLBAR_INFO *)GetWindowLongA(hwnd,0))
 
 
 static void
@@ -129,10 +128,17 @@ TOOLBAR_DrawMasked (TOOLBAR_INFO *infoPtr, TBUTTON_INFO *btnPtr,
     /* FIXME: this function is a hack since it uses image list
               internals directly */
 
-    HDC hdcImageList = CreateCompatibleDC (0);
-    HDC hdcMask = CreateCompatibleDC (0);
     HIMAGELIST himl = infoPtr->himlDef;
     HBITMAP hbmMask;
+    HDC hdcImageList;
+    HDC hdcMask;
+
+    if (!himl)
+	return;
+
+    /* create new dc's */
+    hdcImageList = CreateCompatibleDC (0);
+    hdcMask = CreateCompatibleDC (0);
 
     /* create new bitmap */
     hbmMask = CreateBitmap (himl->cx, himl->cy, 1, 1, NULL);
@@ -178,9 +184,11 @@ TOOLBAR_DrawButton (HWND hwnd, TBUTTON_INFO *btnPtr, HDC hdc)
     if (btnPtr->fsState & TBSTATE_HIDDEN) return;
 
     rc = btnPtr->rect;
+
+    /* separator */
     if (btnPtr->fsStyle & TBSTYLE_SEP)
     {
-      if ((dwStyle & TBSTYLE_FLAT) && (btnPtr->idCommand == 0))
+      if ((dwStyle & TBSTYLE_FLAT) && (btnPtr->iBitmap == 0))
           TOOLBAR_DrawFlatSeparator (&rc, hdc);
       return;
     }
@@ -1543,7 +1551,7 @@ static BOOL TBCUSTOMIZE_MeasureItem(HWND hwnd,WPARAM wParam,LPARAM lParam)
  * TOOLBAR_CustomizeDialogProc
  * This function implements the toolbar customization dialog.
  */
-BOOL WINAPI
+static BOOL WINAPI
 TOOLBAR_CustomizeDialogProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     TOOLBAR_INFO *infoPtr;
@@ -1584,6 +1592,7 @@ TOOLBAR_AddBitmap (HWND hwnd, WPARAM wParam, LPARAM lParam)
     TOOLBAR_INFO *infoPtr = TOOLBAR_GetInfoPtr (hwnd);
     LPTBADDBITMAP lpAddBmp = (LPTBADDBITMAP)lParam;
     INT nIndex = 0,nButtons;
+    HBITMAP hbmLoad;
 
     if (!lpAddBmp)
         return -1;
@@ -1601,7 +1610,7 @@ TOOLBAR_AddBitmap (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
 //        TRACE ("adding %d internal bitmaps!\n", nButtons);
 
-        /* Windows resize all the buttons to the size of a newly added STandard Image*/
+        /* Windows resize all the buttons to the size of a newly added standard Image*/
         if (lpAddBmp->nID & 1)
         {
             /* large icons */
@@ -1649,21 +1658,68 @@ TOOLBAR_AddBitmap (HWND hwnd, WPARAM wParam, LPARAM lParam)
     }
     else if (lpAddBmp->hInst == HINST_COMMCTRL)
     {
-        /* add internal bitmaps */
-//        FIXME ("internal bitmaps not supported!\n");
+	/* Add system bitmaps */
+	switch (lpAddBmp->nID)
+      {
+	    case IDB_STD_SMALL_COLOR:
+		hbmLoad = LoadBitmapA (COMCTL32_hModule,
+				       MAKEINTRESOURCEA(IDB_STD_SMALL));
+		nIndex = ImageList_AddMasked (infoPtr->himlDef,
+					      hbmLoad, CLR_DEFAULT);
+		DeleteObject (hbmLoad);
+		break;
 
-        /* Hack to "add" some reserved images within the image list
-           to get the right image indices */
-        nIndex = ImageList_GetImageCount (infoPtr->himlDef);
-        ImageList_SetImageCount (infoPtr->himlDef, nIndex + nButtons);
+	    case IDB_STD_LARGE_COLOR:
+		hbmLoad = LoadBitmapA (COMCTL32_hModule,
+				       MAKEINTRESOURCEA(IDB_STD_LARGE));
+		nIndex = ImageList_AddMasked (infoPtr->himlDef,
+					      hbmLoad, CLR_DEFAULT);
+		DeleteObject (hbmLoad);
+		break;
+
+	    case IDB_VIEW_SMALL_COLOR:
+		hbmLoad = LoadBitmapA (COMCTL32_hModule,
+				       MAKEINTRESOURCEA(IDB_VIEW_SMALL));
+		nIndex = ImageList_AddMasked (infoPtr->himlDef,
+					      hbmLoad, CLR_DEFAULT);
+		DeleteObject (hbmLoad);
+		break;
+
+	    case IDB_VIEW_LARGE_COLOR:
+		hbmLoad = LoadBitmapA (COMCTL32_hModule,
+				       MAKEINTRESOURCEA(IDB_VIEW_LARGE));
+		nIndex = ImageList_AddMasked (infoPtr->himlDef,
+					      hbmLoad, CLR_DEFAULT);
+		DeleteObject (hbmLoad);
+		break;
+
+	    case IDB_HIST_SMALL_COLOR:
+		hbmLoad = LoadBitmapA (COMCTL32_hModule,
+				       MAKEINTRESOURCEA(IDB_HIST_SMALL));
+		nIndex = ImageList_AddMasked (infoPtr->himlDef,
+					      hbmLoad, CLR_DEFAULT);
+		DeleteObject (hbmLoad);
+		break;
+
+	    case IDB_HIST_LARGE_COLOR:
+		hbmLoad = LoadBitmapA (COMCTL32_hModule,
+				       MAKEINTRESOURCEA(IDB_HIST_LARGE));
+		nIndex = ImageList_AddMasked (infoPtr->himlDef,
+					      hbmLoad, CLR_DEFAULT);
+		DeleteObject (hbmLoad);
+		break;
+
+	    default:
+	nIndex = ImageList_GetImageCount (infoPtr->himlDef);
+		//ERR ("invalid imagelist!\n");
+		break;
+	}
     }
     else
     {
-        HBITMAP hBmp =
-            LoadBitmapA (lpAddBmp->hInst, (LPSTR)lpAddBmp->nID);
-        nIndex = ImageList_AddMasked (infoPtr->himlDef, hBmp, CLR_DEFAULT);
-
-        DeleteObject (hBmp);
+	hbmLoad = LoadBitmapA (lpAddBmp->hInst, (LPSTR)lpAddBmp->nID);
+	nIndex = ImageList_AddMasked (infoPtr->himlDef, hbmLoad, CLR_DEFAULT);
+	DeleteObject (hbmLoad);
     }
 
     infoPtr->nNumBitmaps += nButtons;
@@ -3824,7 +3880,7 @@ TOOLBAR_StyleChanged (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
 
 
-LRESULT WINAPI
+static LRESULT WINAPI
 ToolbarWindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     switch (uMsg)

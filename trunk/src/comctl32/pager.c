@@ -1,4 +1,4 @@
-/* $Id: pager.c,v 1.3 1999-06-10 16:22:01 achimha Exp $ */
+/* $Id: pager.c,v 1.4 1999-08-14 16:13:12 cbratschi Exp $ */
 /*
  * Pager control
  *
@@ -92,15 +92,15 @@ PAGER_RecalcSize (HWND hwnd, WPARAM wParam, LPARAM lParam)
     NMPGCALCSIZE nmpgcs;
 
     if (infoPtr->hwndChild) {
-	ZeroMemory (&nmpgcs, sizeof (NMPGCALCSIZE));
-	nmpgcs.hdr.hwndFrom = hwnd;
-	nmpgcs.hdr.idFrom   = GetWindowLongA (hwnd, GWL_ID);
-	nmpgcs.hdr.code = PGN_CALCSIZE;
-	nmpgcs.dwFlag = (dwStyle & PGS_HORZ) ? PGF_CALCWIDTH : PGF_CALCHEIGHT;
-	SendMessageA (GetParent (hwnd), WM_NOTIFY,
-			(WPARAM)nmpgcs.hdr.idFrom, (LPARAM)&nmpgcs);
+        ZeroMemory (&nmpgcs, sizeof (NMPGCALCSIZE));
+        nmpgcs.hdr.hwndFrom = hwnd;
+        nmpgcs.hdr.idFrom   = GetWindowLongA (hwnd, GWL_ID);
+        nmpgcs.hdr.code = PGN_CALCSIZE;
+        nmpgcs.dwFlag = (dwStyle & PGS_HORZ) ? PGF_CALCWIDTH : PGF_CALCHEIGHT;
+        SendMessageA (GetParent (hwnd), WM_NOTIFY,
+                        (WPARAM)nmpgcs.hdr.idFrom, (LPARAM)&nmpgcs);
 
-	infoPtr->nChildSize = (dwStyle & PGS_HORZ) ? nmpgcs.iWidth : nmpgcs.iHeight;
+        infoPtr->nChildSize = (dwStyle & PGS_HORZ) ? nmpgcs.iWidth : nmpgcs.iHeight;
 
 
 //        FIXME (pager, "Child size %d\n", infoPtr->nChildSize);
@@ -167,9 +167,14 @@ PAGER_SetChild (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
     /* FIXME: redraw */
     if (infoPtr->hwndChild) {
-	SetParent (infoPtr->hwndChild, hwnd);
-	SetWindowPos (infoPtr->hwndChild, HWND_TOP,
-			0, 0, 0, 0, SWP_SHOWWINDOW | SWP_NOSIZE);
+        RECT rect;
+
+        GetClientRect(hwnd,&rect);
+        SetParent (infoPtr->hwndChild, hwnd);
+        SetWindowPos (infoPtr->hwndChild, HWND_TOP,
+                        0, 0, 0, 0, SWP_SHOWWINDOW | SWP_NOSIZE);
+
+        MoveWindow (infoPtr->hwndChild, 0, 0, rect.right, rect.bottom, TRUE);
     }
 
     return 0;
@@ -187,7 +192,7 @@ PAGER_SetPos (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
     /* FIXME: redraw */
     SetWindowPos (infoPtr->hwndChild, HWND_TOP,
-		    0, 0, 0, 0, SWP_SHOWWINDOW | SWP_NOSIZE);
+                    0, 0, 0, 0, SWP_SHOWWINDOW | SWP_NOSIZE);
 
     return 0;
 }
@@ -267,90 +272,90 @@ PAGER_Size (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
     GetClientRect (hwnd, &rect);
     if (infoPtr->hwndChild) {
-	SetWindowPos (infoPtr->hwndChild, HWND_TOP, rect.left, rect.top,
-			rect.right - rect.left, rect.bottom - rect.top,
-			SWP_SHOWWINDOW);
-/*	MoveWindow32 (infoPtr->hwndChild, 1, 1, rect.right - 2, rect.bottom-2, TRUE); */
-/*	UpdateWindow32 (infoPtr->hwndChild); */
+        SetWindowPos (infoPtr->hwndChild, HWND_TOP, rect.left, rect.top,
+                        rect.right - rect.left, rect.bottom - rect.top,
+                        SWP_SHOWWINDOW);
+/*      MoveWindow (infoPtr->hwndChild, 1, 1, rect.right - 2, rect.bottom-2, TRUE); */
+/*      UpdateWindow (infoPtr->hwndChild); */
 
     }
-/*    FillRect32 ((HDC32)wParam, &rect, hBrush); */
-/*    DeleteObject32 (hBrush); */
+/*    FillRect ((HDC)wParam, &rect, hBrush); */
+/*    DeleteObject (hBrush); */
     return TRUE;
 }
 
 
 
-LRESULT WINAPI
+static LRESULT WINAPI
 PAGER_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     switch (uMsg)
     {
-	case PGM_FORWARDMOUSE:
-	    return PAGER_ForwardMouse (hwnd, wParam);
+        case PGM_FORWARDMOUSE:
+            return PAGER_ForwardMouse (hwnd, wParam);
 
-	case PGM_GETBKCOLOR:
-	    return PAGER_GetBkColor (hwnd, wParam, lParam);
+        case PGM_GETBKCOLOR:
+            return PAGER_GetBkColor (hwnd, wParam, lParam);
 
-	case PGM_GETBORDER:
-	    return PAGER_GetBorder (hwnd, wParam, lParam);
+        case PGM_GETBORDER:
+            return PAGER_GetBorder (hwnd, wParam, lParam);
 
-	case PGM_GETBUTTONSIZE:
-	    return PAGER_GetButtonSize (hwnd, wParam, lParam);
+        case PGM_GETBUTTONSIZE:
+            return PAGER_GetButtonSize (hwnd, wParam, lParam);
 
-	case PGM_GETBUTTONSTATE:
-	    return PAGER_GetButtonState (hwnd, wParam, lParam);
+        case PGM_GETBUTTONSTATE:
+            return PAGER_GetButtonState (hwnd, wParam, lParam);
 
-/*	case PGM_GETDROPTARGET: */
+/*      case PGM_GETDROPTARGET: */
 
-	case PGM_GETPOS:
-	    return PAGER_SetPos (hwnd, wParam, lParam);
+        case PGM_GETPOS:
+            return PAGER_SetPos (hwnd, wParam, lParam);
 
-	case PGM_RECALCSIZE:
-	    return PAGER_RecalcSize (hwnd, wParam, lParam);
+        case PGM_RECALCSIZE:
+            return PAGER_RecalcSize (hwnd, wParam, lParam);
 
-	case PGM_SETBKCOLOR:
-	    return PAGER_SetBkColor (hwnd, wParam, lParam);
+        case PGM_SETBKCOLOR:
+            return PAGER_SetBkColor (hwnd, wParam, lParam);
 
-	case PGM_SETBORDER:
-	    return PAGER_SetBorder (hwnd, wParam, lParam);
+        case PGM_SETBORDER:
+            return PAGER_SetBorder (hwnd, wParam, lParam);
 
-	case PGM_SETBUTTONSIZE:
-	    return PAGER_SetButtonSize (hwnd, wParam, lParam);
+        case PGM_SETBUTTONSIZE:
+            return PAGER_SetButtonSize (hwnd, wParam, lParam);
 
-	case PGM_SETCHILD:
-	    return PAGER_SetChild (hwnd, wParam, lParam);
+        case PGM_SETCHILD:
+            return PAGER_SetChild (hwnd, wParam, lParam);
 
-	case PGM_SETPOS:
-	    return PAGER_SetPos (hwnd, wParam, lParam);
+        case PGM_SETPOS:
+            return PAGER_SetPos (hwnd, wParam, lParam);
 
-	case WM_CREATE:
-	    return PAGER_Create (hwnd, wParam, lParam);
+        case WM_CREATE:
+            return PAGER_Create (hwnd, wParam, lParam);
 
-	case WM_DESTROY:
-	    return PAGER_Destroy (hwnd, wParam, lParam);
+        case WM_DESTROY:
+            return PAGER_Destroy (hwnd, wParam, lParam);
 
-	case WM_ERASEBKGND:
-	    return PAGER_EraseBackground (hwnd, wParam, lParam);
+        case WM_ERASEBKGND:
+            return PAGER_EraseBackground (hwnd, wParam, lParam);
 
-	case WM_MOUSEMOVE:
-	    return PAGER_MouseMove (hwnd, wParam, lParam);
+        case WM_MOUSEMOVE:
+            return PAGER_MouseMove (hwnd, wParam, lParam);
 
-	case WM_NOTIFY:
-	case WM_COMMAND:
-	    return SendMessageA (GetParent (hwnd), uMsg, wParam, lParam);
+        case WM_NOTIFY:
+        case WM_COMMAND:
+            return SendMessageA (GetParent (hwnd), uMsg, wParam, lParam);
 
-/*	case WM_PAINT: */
-/*	    return PAGER_Paint (hwnd, wParam); */
+/*      case WM_PAINT: */
+/*          return PAGER_Paint (hwnd, wParam); */
 
-	case WM_SIZE:
-	    return PAGER_Size (hwnd, wParam, lParam);
+        case WM_SIZE:
+            return PAGER_Size (hwnd, wParam, lParam);
 
-	default:
-//	    if (uMsg >= WM_USER)
-//		ERR (pager, "unknown msg %04x wp=%08x lp=%08lx\n",
-//		     uMsg, wParam, lParam);
-	    return DefWindowProcA (hwnd, uMsg, wParam, lParam);
+        default:
+//          if (uMsg >= WM_USER)
+//              ERR (pager, "unknown msg %04x wp=%08x lp=%08lx\n",
+//                   uMsg, wParam, lParam);
+            return DefWindowProcA (hwnd, uMsg, wParam, lParam);
     }
     return 0;
 }
@@ -371,7 +376,7 @@ PAGER_Register (VOID)
     wndClass.hCursor       = LoadCursorA (0, IDC_ARROWA);
     wndClass.hbrBackground = 0;
     wndClass.lpszClassName = WC_PAGESCROLLERA;
- 
+
     RegisterClassA (&wndClass);
 }
 
@@ -380,6 +385,6 @@ VOID
 PAGER_Unregister (VOID)
 {
     if (GlobalFindAtomA (WC_PAGESCROLLERA))
-	UnregisterClassA (WC_PAGESCROLLERA, (HINSTANCE)NULL);
+        UnregisterClassA (WC_PAGESCROLLERA, (HINSTANCE)NULL);
 }
 

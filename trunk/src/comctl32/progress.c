@@ -1,4 +1,4 @@
-/* $Id: progress.c,v 1.7 1999-06-28 15:46:25 cbratschi Exp $ */
+/* $Id: progress.c,v 1.8 1999-08-14 16:13:12 cbratschi Exp $ */
 /*
  * Progress control
  *
@@ -492,7 +492,7 @@ static LRESULT PROGRESS_SetBkColor(HWND hwnd,WPARAM wParam,LPARAM lParam)
 /***********************************************************************
  *           ProgressWindowProc
  */
-LRESULT WINAPI ProgressWindowProc(HWND hwnd, UINT message,
+static LRESULT WINAPI ProgressWindowProc(HWND hwnd, UINT message,
                                   WPARAM wParam, LPARAM lParam)
 {
   switch(message)
