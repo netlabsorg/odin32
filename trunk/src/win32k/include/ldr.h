@@ -1,8 +1,8 @@
-/* $Id: ldr.h,v 1.6 2000-09-02 21:08:02 bird Exp $
+/* $Id: ldr.h,v 1.7 2000-12-11 06:44:35 bird Exp $
  *
  * ldr - Our loader "subsystem" public header file.
  *
- * Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -124,6 +124,13 @@ extern ULONG    ulLdrState;
                      ulLdrState, state)); \
         }                          \
     }
+
+
+/*
+ * This flag is used by myldrOpenPath to communicate to myldrOpen that
+ * the .DLL extention should be removed before opening the file.
+ */
+extern BOOL fldrOpenExtentionFix;
 
 
 /*

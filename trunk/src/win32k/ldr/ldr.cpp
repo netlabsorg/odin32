@@ -1,4 +1,4 @@
-/* $Id: ldr.cpp,v 1.8 2000-09-02 21:08:06 bird Exp $
+/* $Id: ldr.cpp,v 1.9 2000-12-11 06:44:34 bird Exp $
  *
  * ldr.cpp - Loader helpers.
  *
@@ -51,7 +51,13 @@ static PAVLNODECORE    pMTERoot = NULL;
 /*
  * Loader State. (See ldr.h for more info.)
  */
-ULONG          ulLdrState = LDRSTATE_UNKNOWN;
+ULONG           ulLdrState = LDRSTATE_UNKNOWN;
+
+
+/*
+ * ldrOpen extention fix flag. (See ldr.h, myldrOpenPath.cpp and myldrOpen.cpp.)
+ */
+BOOL            fldrOpenExtentionFix = FALSE;
 
 
 /*
