@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.110 2001-07-20 15:34:16 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.111 2001-07-30 12:02:15 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -533,7 +533,7 @@ LONG WIN32API clientHeight(HWND hwnd, pDCData pHps)
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API setMapMode(pDCData pHps, int mode)
+int WIN32API setMapModeDC(pDCData pHps, int mode)
 {
  Win32BaseWindow *wnd;
 

@@ -208,6 +208,19 @@ static void APIENTRY cleanup(ULONG ulReason)
 }
 //******************************************************************************
 //******************************************************************************
+ULONG APIENTRY O32__DLL_InitTerm(ULONG handle, ULONG flag);
+//******************************************************************************
+ULONG APIENTRY InitializeKernel32()
+{
+    HMODULE hModule;
+
+    DosQueryModuleHandle("OPWGSS50", &hModule);
+    O32__DLL_InitTerm(hModule, 0);
+    DosQueryModuleHandle("OPODIN32", &hModule);
+    return inittermKernel32(hModule, 0);
+}
+//******************************************************************************
+//******************************************************************************
 #else
 #error message("compiler is not supported");
 #endif
