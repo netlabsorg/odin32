@@ -1,4 +1,4 @@
-/* $Id: clipboard.cpp,v 1.5 2000-02-16 14:34:06 sandervl Exp $ */
+/* $Id: clipboard.cpp,v 1.6 2000-03-24 17:12:19 cbratschi Exp $ */
 
 /*
  * Win32 Clipboard API functions for OS/2
@@ -17,7 +17,7 @@
 #include <os2win.h>
 #include "win32wbase.h"
 
-#define DBG_LOCALLOG	DBG_clipboard
+#define DBG_LOCALLOG    DBG_clipboard
 #include "dbglocal.h"
 
 //******************************************************************************
@@ -29,17 +29,17 @@ BOOL WIN32API ChangeClipboardChain( HWND hwndRemove, HWND hwndNext)
     wndRemove = Win32BaseWindow::GetWindowFromHandle(hwndRemove);
     if(!wndRemove) {
         dprintf(("ChangeClipboardChain, window %x not found", hwndRemove));
-	SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+        SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
     wndNext = Win32BaseWindow::GetWindowFromHandle(hwndNext);
     if(!wndNext) {
         dprintf(("ChangeClipboardChain, window %x not found", hwndNext));
-	SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+        SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
     dprintf(("USER32:  ChangeClipboardChain\n"));
-    return O32_ChangeClipboardChain(wndRemove->getOS2FrameWindowHandle(), 
+    return O32_ChangeClipboardChain(wndRemove->getOS2FrameWindowHandle(),
                                     wndNext->getOS2FrameWindowHandle());
 }
 //******************************************************************************
@@ -79,22 +79,23 @@ HANDLE WIN32API GetClipboardData( UINT arg1)
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API GetClipboardFormatNameA( UINT arg1, LPSTR arg2, int  arg3)
+int WIN32API GetClipboardFormatNameA(UINT format,LPSTR lpszFormatName,int cchMaxCount)
 {
-    dprintf(("USER32:  GetClipboardFormatNameA %s\n", arg2));
-    return O32_GetClipboardFormatName(arg1, arg2, arg3);
+  dprintf(("USER32:  GetClipboardFormatNameA %d\n",format));
+  return O32_GetClipboardFormatName(format,lpszFormatName,cchMaxCount);
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API GetClipboardFormatNameW(UINT arg1, LPWSTR arg2, int arg3)
+int WIN32API GetClipboardFormatNameW(UINT format,LPWSTR lpszFormatName,int cchMaxCount)
 {
- int   rc;
- char *astring = UnicodeToAsciiString(arg2);
+  int   rc;
+  char *astring = (CHAR*)malloc(cchMaxCount);
 
-    dprintf(("USER32:  GetClipboardFormatNameW %s\n", astring));
-    rc = O32_GetClipboardFormatName(arg1, astring, arg3);
-    FreeAsciiString(astring);
-    return(rc);
+  dprintf(("USER32:  GetClipboardFormatNameW %d\n",format));
+  rc = O32_GetClipboardFormatName(format,astring,cchMaxCount);
+  if (rc) AsciiToUnicode(astring,lpszFormatName);
+  free(astring);
+  return(rc);
 }
 //******************************************************************************
 //******************************************************************************
@@ -108,8 +109,8 @@ HWND WIN32API GetClipboardOwner(void)
 
     window = Win32BaseWindow::GetWindowFromOS2FrameHandle(hwndOwner);
     if(!window) {
-	//an OS/2 window probably owns the clipboard, we pretend nobody owns it
-	return NULL;
+        //an OS/2 window probably owns the clipboard, we pretend nobody owns it
+        return NULL;
     }
     return window->getWindowHandle();
 }
@@ -125,8 +126,8 @@ HWND WIN32API GetClipboardViewer(void)
 
     window = Win32BaseWindow::GetWindowFromOS2FrameHandle(hwndViewer);
     if(!window) {
-	//probably an OS/2 window, we pretend it's nobody
-	return NULL;
+        //probably an OS/2 window, we pretend it's nobody
+        return NULL;
     }
     return window->getWindowHandle();
 }
@@ -142,8 +143,8 @@ HWND WIN32API GetOpenClipboardWindow(void)
 
     window = Win32BaseWindow::GetWindowFromOS2FrameHandle(hwnd);
     if(!window) {
-	//probably an OS/2 window, we pretend it's nobody
-	return NULL;
+        //probably an OS/2 window, we pretend it's nobody
+        return NULL;
     }
     return window->getWindowHandle();
 }
@@ -170,7 +171,7 @@ BOOL WIN32API OpenClipboard( HWND hwnd)
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("OpenClipboard, window %x not found", hwnd));
-	SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+        SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
     dprintf(("USER32:  OpenClipboard\n"));
@@ -213,7 +214,7 @@ HWND WIN32API SetClipboardViewer( HWND hwndNew)
     wndnew = Win32BaseWindow::GetWindowFromHandle(hwndNew);
     if(!wndnew) {
         dprintf(("OpenClipboard, window %x not found", hwndNew));
-	SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+        SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
     dprintf(("USER32:  SetClipboardViewer\n"));
@@ -221,7 +222,7 @@ HWND WIN32API SetClipboardViewer( HWND hwndNew)
 
     wndold = Win32BaseWindow::GetWindowFromOS2FrameHandle(hwndOld);
     if(!wndold) {
-	//probably an OS/2 window, so pretend it's nobody
+        //probably an OS/2 window, so pretend it's nobody
         return 0;
     }
     return wndold->getWindowHandle();
