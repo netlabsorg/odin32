@@ -12,3 +12,4 @@
 *.res
 .depend
 *exp.def
+resource.asm
