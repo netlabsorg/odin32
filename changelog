@@ -1,4 +1,8 @@
- /* $Id: changelog,v 1.667 2000-01-25 21:01:03 sandervl Exp $ */
+ /* $Id: changelog,v 1.668 2000-01-26 11:26:57 sandervl Exp $ */
+
+ 2000-01-26: Sander van Leeuwen <sandervl@xs4all.nl>
+	- OLEAUT32: Don't create logfile when logging is turned off
+	- PELDR:    Don't modify cmd line in PIB structure
 
  2000-01-25: Sander van Leeuwen <sandervl@xs4all.nl>
 	- PELDR/KERNEL32: Allocate low memory at right address and with right size
