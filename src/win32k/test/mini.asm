@@ -1,4 +1,4 @@
-; $Id: mini.asm,v 1.1.2.10 2001-08-16 12:13:56 bird Exp $
+; $Id: mini.asm,v 1.1.2.11 2001-08-16 15:14:40 bird Exp $
 ;
 ; Haveing great fun making small executables...
 ;
@@ -28,7 +28,7 @@ extrn DosPutMessage:PROC                ; system, tree parameters.
 endif
 
 
-CODE32 segment byte public use32 'STACK'
+CODE32 segment byte stack use32 'STACK'
 public minilx
 
 ;
@@ -64,7 +64,7 @@ else
     add     esp, 12
     ret
 endif
-
+db 1000h-$ dup(?)
 CODE32 ends
 
 

@@ -1,4 +1,4 @@
-# $Id: mini.mak,v 1.1.2.6 2001-08-14 22:51:54 bird Exp $
+# $Id: mini.mak,v 1.1.2.7 2001-08-16 15:14:41 bird Exp $
 
 #
 # Odin32 API
@@ -73,16 +73,29 @@ TARGET  = mini
 !ifdef NORMAL
 !if 1
 $(OBJDIR)\$(TARGET).exe: $(OBJS)  $(DEFFILE) $(OBJDIR)\$(TARGET).lrf
+!ifdef WATCOM
     wlink system os2v2 file {$(OBJS)} name $(OBJDIR)\.exe \
     import vprintf LIBCN.150 \
 #    import DosPutMessage MSG.5   \
         option offset=0x0000 option alignment=1 option stack=4060
     mv $(OBJDIR)\.exe $@
-#    link386 /ALIGNMENT:1 /NONULLSDOSSEG /NOSECTORALIGNCODE /BASE:0x10000 /PACKCODE /PACKDATA \
-#        $(OBJS), $(OBJDIR)\$(TARGET).exe, $(OBJDIR)\$(TARGET).map, os2386.lib, mini.def;
-#    -8 ilink /NOFREE /FORCE /ALIGNMENT:1 /Map /BASE:0x10000 /PACKCODE /PACKDATA /EXEPACK:1 \
-#        $(OBJS), $(OBJDIR)\$(TARGET).exe, $(OBJDIR)\$(TARGET).map, os2386.lib, mini.def;
-    $(LXLITE) /AN:1 /ZS:1024 /ZX:1024 /MF3 /YXD /YND $@
+!else
+!if 0
+    link386 /ALIGNMENT:1 /NONULLSDOSSEG /NOSECTORALIGNCODE /BASE:0x10000 /PACKCODE /PACKDATA \
+        $(OBJS), $(OBJDIR)\$(TARGET).exe, $(OBJDIR)\$(TARGET).map, os2386.lib, mini.def;
+!else
+!ifndef VAC36
+    -12 ilink /NOFREE /FORCE /ALIGNMENT:1 /Map /BASE:0x10000 /PACKCODE /PACKDATA /NOEXEPACK \
+        $(OBJS), $(OBJDIR)\$(TARGET).exe, $(OBJDIR)\$(TARGET).map, os2386.lib, mini.def;
+!else
+    -12 ilink /FORCE /ALIGNFILE:1 /Map /BASE:0x10000 /FIXED /PACKCODE /PACKDATA /NOEXEPACK /STACK:4060 \
+        $(OBJS) /OUT:$(OBJDIR)\$(TARGET).exe /MAP:$(OBJDIR)\$(TARGET).map mini.def \
+        /section:CODE32,RW
+!endif
+    exehdr /RESETERROR $@
+!endif
+!endif
+    $(LXLITE) /MR1 /AN:1 /ZS:1024 /ZX:1024 /MF3 /YXD /YND $@
 !else
 $(OBJDIR)\$(TARGET).exe: $(OBJS)  $(DEFFILE) $(OBJDIR)\$(TARGET).lrf
     -8 ilink /NOFREE /FORCE /ALIGNMENT:1 /Map /BASE:0x10000 \

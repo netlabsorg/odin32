@@ -1,4 +1,6 @@
-;$Id: mini.def,v 1.1.2.3 2001-08-14 21:17:31 bird Exp $
+;$Id: mini.def,v 1.1.2.4 2001-08-16 15:14:41 bird Exp $
 NAME '' WINDOWCOMPAT
 STUB NONE
 
+IMPORTS
+    vprintf = LIBCN.150
