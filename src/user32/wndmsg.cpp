@@ -1,4 +1,4 @@
-/* $Id: wndmsg.cpp,v 1.17 2002-02-06 16:31:49 sandervl Exp $ */
+/* $Id: wndmsg.cpp,v 1.18 2002-06-03 13:37:19 sandervl Exp $ */
 /*
  * Win32 window message text function for OS/2
  *
@@ -745,7 +745,7 @@ MSGDESC gaMsgs[] =
     //WM_APP                          0x8000
 };
 
-INT gcMessages = sizeof(gaMsgs) / sizeof(MSGDESC);
+static INT gcMessages = sizeof(gaMsgs) / sizeof(MSGDESC);
 
 
 char *GetMsgText(int Msg)
