@@ -1,4 +1,4 @@
-/* $Id: misc.cpp,v 1.8 2000-08-18 02:01:16 phaller Exp $ */
+/* $Id: misc.cpp,v 1.9 2000-08-24 09:35:06 sandervl Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -40,6 +40,17 @@
 
 ODINDEBUGCHANNEL(SHELL32-MISC)
 
+
+BOOL SHELL_OsIsUnicode(void)
+{
+ static version = 0;
+
+  if(version == 0) {
+    	version = GetVersion();
+  }
+  /* if high-bit of version is 0, we are emulating NT */
+  return !(version & 0x80000000);
+}
 
 /*****************************************************************************
  * Name      : ExtractAssociatedIconExA
@@ -171,71 +182,6 @@ ODINFUNCTION4(BOOL,   StrToOleStrN,
                               nMulti,
                               lpWide,
                               nWide);
-}
-
-
-/*****************************************************************************
- * Name      : StrRetToStrN
- * Purpose   : converts a STRRET to a normal string
- * Parameters: the pidl is for STRRET OFFSET
- * Variables :
- * Result    :
- * Remark    : SHELL32.96
- * Status    : UNTESTED UNKNOWN STUB
- *
- * Author    : Patrick Haller [Tue, 1998/06/15 03:00]
- *****************************************************************************/
-
-ODINFUNCTION4(HRESULT,      StrRetToStrN,
-              LPVOID,       dest,
-              DWORD,        len,
-              LPSTRRET,     src,
-              LPITEMIDLIST, pidl)
-{
-  switch (src->uType)
-  {
-    case STRRET_WSTR:
-      WideCharToMultiByte(CP_ACP,
-                          0,
-                          src->u.pOleStr,
-                          -1,
-                          (LPSTR)dest,
-                          len,
-                          NULL,
-                          NULL);
-      SHFree(src->u.pOleStr);
-      break;
-
-    case STRRET_CSTRA:
-      //if (VERSION_OsIsUnicode())
-      //  lstrcpynAtoW((LPWSTR)dest, src->u.cStr, len);
-      //else
-        strncpy((LPSTR)dest,
-                src->u.cStr,
-                len);
-      break;
-
-    case STRRET_OFFSETA:
-      if (pidl)
-      {
-        //if(VERSION_OsIsUnicode())
-        //  lstrcpynAtoW((LPWSTR)dest, ((LPCSTR)&pidl->mkid)+src->u.uOffset, len);
-        //else
-          strncpy((LPSTR)dest,
-                  ((LPCSTR)&pidl->mkid)+src->u.uOffset,
-                  len);
-        break;
-      }
-
-    default:
-      dprintf(("SHELL32: StrRetToStrN: unknown type!\n"));
-
-      if (len)
-        *(LPSTR)dest = '\0';
-
-      return(FALSE);
-  }
-  return(TRUE);
 }
 
 
