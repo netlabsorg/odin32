@@ -1,4 +1,4 @@
--- $Id: CreateTables.sql,v 1.12 2000-07-20 11:39:59 bird Exp $
+-- $Id: CreateTables.sql,v 1.13 2000-07-29 21:19:34 bird Exp $
 --
 -- Create all tables.
 --
@@ -27,6 +27,17 @@ CREATE TABLE author (
 --    UNIQUE i5(email)  UNIQUE columns have to be defined NOT NULL in mySql.
 );
 
+
+
+--
+-- Support table for Codes
+--
+CREATE TABLE code (
+    codegroup   CHAR(4) NOT NULL,
+    code        CHAR(4) NOT NULL,
+    description VARCHAR(128) NOT NULL,
+    UNIQUE  u1(codegroup, code)
+);
 
 
 --
@@ -136,6 +147,7 @@ CREATE TABLE function (
     UNIQUE i3(intname, dll, refcode),
     INDEX  i4(dll, file),
     INDEX  i5(file),
+    INDEX  i6(state),
     UNIQUE u1(refcode),
     UNIQUE u2(name, dll),
     UNIQUE u3(type, refcode)
