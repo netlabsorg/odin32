@@ -1556,6 +1556,9 @@ BOOL        WINAPI GetNumberOfEventLogRecords(HANDLE,PDWORD);
 UINT      WINAPI GetOEMCP(void);
 BOOL        WINAPI GetOldestEventLogRecord(HANDLE,PDWORD);
 DWORD       WINAPI GetPriorityClass(HANDLE);
+BOOL        WINAPI GetProcessAffinityMask(HANDLE  hProcess,
+                                          LPDWORD lpProcessAffinityMask,
+                                          LPDWORD lpSystemAffinityMask);
 HANDLE    WINAPI GetProcessHeap(void);
 DWORD       WINAPI GetProcessVersion(DWORD);
 //BOOL        WINAPI GetSecurityDescriptorControl(PSECURITY_DESCRIPTOR,PSECURITY_DESCRIPTOR_CONTROL,LPDWORD);
@@ -1732,6 +1735,7 @@ BOOL        WINAPI SetFileTime(HFILE,const FILETIME*,const FILETIME*,const FILET
 BOOL        WINAPI SetHandleInformation(HANDLE,DWORD,DWORD);
 BOOL        WINAPI SetLocalTime(const SYSTEMTIME*);
 BOOL        WINAPI SetPriorityClass(HANDLE,DWORD);
+BOOL        WINAPI SetProcessAffinityMask( HANDLE hProcess, DWORD affmask );
 BOOL        WINAPI SetSecurityDescriptorDacl(PSECURITY_DESCRIPTOR,BOOL,PACL,BOOL);
 BOOL        WINAPI SetSecurityDescriptorGroup(PSECURITY_DESCRIPTOR,PSID,BOOL);
 BOOL        WINAPI SetSecurityDescriptorOwner(PSECURITY_DESCRIPTOR,PSID,BOOL);
