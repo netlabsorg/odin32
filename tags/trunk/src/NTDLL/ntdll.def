@@ -1,4 +1,4 @@
-; $Id: ntdll.def,v 1.52 2005-02-11 19:26:27 sao2l02 Exp $
+; $Id: ntdll.def,v 1.53 2005-02-15 17:36:13 sao2l02 Exp $
 
 ;
 ; Based on NT 4.0 SP6: NTDLL.DLL
@@ -467,7 +467,7 @@ EXPORTS
 ;   RtlInitializeContext                        			@443
     RtlInitializeCriticalSection  = _InitializeCriticalSection@4        @444
     RtlInitializeCriticalSectionAndSpinCount  = _InitializeCriticalSectionAndSpinCount@8	@445
-    RtlInitializeGenericTable     = _RtlInitializeGenericTable@0        @446
+    RtlInitializeGenericTable     = _RtlInitializeGenericTable@20       @446
 ;   RtlInitializeHandleTable                        			@447
 ;   RtlInitializeRXact                          			@448
     RtlInitializeResource         = _RtlInitializeResource@4            @449

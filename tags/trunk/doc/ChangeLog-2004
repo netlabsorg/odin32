@@ -326,6 +326,9 @@
  2004-02-11: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o HODIN_PREWINDOWCREATEDA extension added
 
+ 2004-02-10: Unknown
+    - COMCTL32: o listview.c resync, changes
+
  2004-02-10: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o Added ODIN_SetProcessDword function to change the startup
                   information about size, position and state of the main

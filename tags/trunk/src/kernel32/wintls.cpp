@@ -1,4 +1,4 @@
-/* $Id: wintls.cpp,v 1.21 2005-02-08 20:48:51 sao2l02 Exp $ */
+/* $Id: wintls.cpp,v 1.22 2005-02-15 17:36:25 sao2l02 Exp $ */
 /*
  * Win32 TLS API functions
  *
@@ -161,13 +161,11 @@ DWORD WIN32API TlsAlloc()
 
   EnterCriticalSection(&pdb->crit_section);
   index = search_zero_bit(TLS_MINIMUM_AVAILABLE >> 5, &pdb->tls_bits);
-  if((-1 == index) || set_bit(index, &pdb->tls_bits)) {
-      LeaveCriticalSection(&pdb->crit_section);
-      SetLastError(ERROR_NO_MORE_ITEMS);  //TODO: correct error?
-      return -1;
-  }
+  if (-1 != index) {
+     set_bit(index, &pdb->tls_bits);
+     teb->tls_array[index] = 0;
+  } else SetLastError(ERROR_NO_MORE_ITEMS);  //TODO: correct error?
   LeaveCriticalSection(&pdb->crit_section);
-  teb->tls_array[index] = 0;
   dprintf(("KERNEL32: %x,%x TlsAlloc returned %d", pdb, teb, index));
   return index;
 }
@@ -175,8 +173,7 @@ DWORD WIN32API TlsAlloc()
 TEB *WIN32API TestTlsIndex(DWORD index)
 {
   TEB *teb = NULL;
-  PDB *pdb = PROCESS_Current();
-  if ((index >= TLS_MINIMUM_AVAILABLE) || (index < 0) || !test_bit(index, &pdb->tls_bits) || !(teb = GetThreadTEB(),teb))
+  if ((index >= TLS_MINIMUM_AVAILABLE) || (index < 0) || !(teb = GetThreadTEB(),teb))
   {
         SetLastError(ERROR_INVALID_PARAMETER);
   }
@@ -188,6 +185,7 @@ BOOL WIN32API TlsFree(DWORD index)
 {
   TEB *teb = TestTlsIndex(index);
   PDB *pdb = PROCESS_Current();
+  BOOL rc;
 
   dprintf(("KERNEL32: TlsFree %d", index));
   if (!teb)
@@ -195,19 +193,17 @@ BOOL WIN32API TlsFree(DWORD index)
         return FALSE;
   }
 
-//  EnterCriticalSection(&pdb->crit_section);
-  if(clear_bit(index, &pdb->tls_bits)) {
-        teb->tls_array[index] = 0;
-//        clear_bit(index, &pdb->tls_bits);
-//        LeaveCriticalSection(&pdb->crit_section);
-        SetLastError(ERROR_SUCCESS);
-        return TRUE;
-  }
-//  LeaveCriticalSection(&pdb->crit_section);
-  SetLastError(ERROR_INVALID_PARAMETER); //TODO: correct error? (does NT even change the last error?)
-  return FALSE;
+  EnterCriticalSection(&pdb->crit_section);
+  rc = clear_bit(index, &pdb->tls_bits);
+  LeaveCriticalSection(&pdb->crit_section);
+  if (rc) {
+     SetLastError(ERROR_SUCCESS);
+     teb->tls_array[index] = 0;
+  } else {
+     SetLastError(ERROR_INVALID_PARAMETER);
+  } /* endif */
+  return rc;
 }
-
 //******************************************************************************
 //******************************************************************************
 LPVOID WIN32API TlsGetValue(DWORD index)

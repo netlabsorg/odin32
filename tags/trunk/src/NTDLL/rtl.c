@@ -1,4 +1,4 @@
-/* $Id: rtl.c,v 1.6 2003-04-08 12:47:07 sandervl Exp $ */
+/* $Id: rtl.c,v 1.7 2005-02-15 17:36:18 sao2l02 Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -12,7 +12,23 @@
  * This file contains the Rtl* API functions. These should be implementable.
  *
  * Copyright 1996-1998 Marcus Meissner
- *      1999 Alex Korobka
+ * Copyright 1999      Alex Korobka
+ * Copyright 2003      Thomas Mertes
+ * Crc32 code Copyright 1986 Gary S. Brown (Public domain)
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
 #include <stdlib.h>
@@ -93,7 +109,7 @@ static const DWORD CRC_table[256] =
 #define SIZE_T UINT
 
 /*
- * resource functions
+ *	resource functions
  */
 
 /***********************************************************************
@@ -106,17 +122,17 @@ void WINAPI RtlInitializeResource(LPRTL_RWLOCK rwl)
 {
   dprintf(("NTDLL: RtlInitializeResource(%08xh)\n", rwl));
 
-  if( rwl )
-  {
-    rwl->iNumberActive     = 0;
-    rwl->uExclusiveWaiters = 0;
-    rwl->uSharedWaiters    = 0;
-    rwl->hOwningThreadId   = 0;
-    rwl->dwTimeoutBoost    = 0; /* no info on this one, default value is 0 */
+    if( rwl )
+    {
+	rwl->iNumberActive = 0;
+	rwl->uExclusiveWaiters = 0;
+	rwl->uSharedWaiters = 0;
+	rwl->hOwningThreadId = 0;
+	rwl->dwTimeoutBoost = 0; /* no info on this one, default value is 0 */
     InitializeCriticalSection( &rwl->rtlCS );
     rwl->hExclusiveReleaseSemaphore = CreateSemaphoreA( NULL, 0, 65535, NULL );
     rwl->hSharedReleaseSemaphore    = CreateSemaphoreA( NULL, 0, 65535, NULL );
-  }
+    }
 }
 
 
@@ -128,68 +144,63 @@ void WINAPI RtlDeleteResource(LPRTL_RWLOCK rwl)
   dprintf(("NTDLL: RtlDeleteResource(%08xh)\n",
            rwl));
 
-  if( rwl )
-  {
+    if( rwl )
+    {
     EnterCriticalSection( &rwl->rtlCS );
-    if( rwl->iNumberActive || rwl->uExclusiveWaiters || rwl->uSharedWaiters )
+	if( rwl->iNumberActive || rwl->uExclusiveWaiters || rwl->uSharedWaiters )
        dprintf(("NTDLL: RtlDeleteResource active MRSW lock (%p), expect failure\n",
                 rwl));
-
-    rwl->hOwningThreadId   = 0;
-    rwl->uExclusiveWaiters = rwl->uSharedWaiters = 0;
-    rwl->iNumberActive     = 0;
+	rwl->hOwningThreadId = 0;
+	rwl->uExclusiveWaiters = rwl->uSharedWaiters = 0;
+	rwl->iNumberActive = 0;
     CloseHandle( rwl->hExclusiveReleaseSemaphore );
     CloseHandle( rwl->hSharedReleaseSemaphore );
     LeaveCriticalSection( &rwl->rtlCS );
     DeleteCriticalSection( &rwl->rtlCS );
-  }
+    }
 }
 
 
 /***********************************************************************
  *          RtlAcquireResourceExclusive  (NTDLL.256)
  */
-BYTE WINAPI RtlAcquireResourceExclusive(LPRTL_RWLOCK rwl,
-                                        BYTE         fWait)
+BYTE WINAPI RtlAcquireResourceExclusive(LPRTL_RWLOCK rwl, BYTE fWait)
 {
-  BYTE retVal = 0;
-
-  if( !rwl )
-    return 0;
+    BYTE retVal = 0;
+    if( !rwl ) return 0;
 
   dprintf(("NTDLL: RtlAcquireResourceExclusive(%08xh,%08xh)\n",
            rwl,
            fWait));
-
 start:
     EnterCriticalSection( &rwl->rtlCS );
     if( rwl->iNumberActive == 0 ) /* lock is free */
     {
-   rwl->iNumberActive = -1;
-   retVal = 1;
+	rwl->iNumberActive = -1;
+	retVal = 1;
     }
     else if( rwl->iNumberActive < 0 ) /* exclusive lock in progress */
     {
     if( rwl->hOwningThreadId == GetCurrentThreadId() )
-    {
-        retVal = 1;
-        rwl->iNumberActive--;
-        goto done;
-    }
+	 {
+	     retVal = 1;
+	     rwl->iNumberActive--;
+	     goto done;
+	 }
 wait:
-    if( fWait )
-    {
-        rwl->uExclusiveWaiters++;
+	 if( fWait )
+	 {
+	     rwl->uExclusiveWaiters++;
 
         LeaveCriticalSection( &rwl->rtlCS );
         if( WaitForSingleObject( rwl->hExclusiveReleaseSemaphore, INFINITE ) == WAIT_FAILED )
-       goto done;
-        goto start; /* restart the acquisition to avoid deadlocks */
-    }
+		 goto done;
+	     goto start; /* restart the acquisition to avoid deadlocks */
+	 }
     }
     else  /* one or more shared locks are in progress */
-    if( fWait )
-        goto wait;
+	 if( fWait )
+	     goto wait;
 
     if( retVal == 1 )
    rwl->hOwningThreadId = GetCurrentThreadId();
@@ -201,44 +212,40 @@ done:
 /***********************************************************************
  *          RtlAcquireResourceShared     (NTDLL.257)
  */
-BYTE WINAPI RtlAcquireResourceShared(LPRTL_RWLOCK rwl,
-                                     BYTE         fWait)
+BYTE WINAPI RtlAcquireResourceShared(LPRTL_RWLOCK rwl, BYTE fWait)
 {
-  DWORD dwWait = WAIT_FAILED;
-  BYTE retVal = 0;
-
-  if( !rwl )
-    return 0;
+    DWORD dwWait = WAIT_FAILED;
+    BYTE retVal = 0;
+    if( !rwl ) return 0;
 
   dprintf(("NTDLL: RtlAcquireResourceShared(%08xh,%08xh)\n",
            rwl,
            fWait));
-
 start:
     EnterCriticalSection( &rwl->rtlCS );
     if( rwl->iNumberActive < 0 )
     {
    if( rwl->hOwningThreadId == GetCurrentThreadId() )
-   {
-       rwl->iNumberActive--;
-       retVal = 1;
-       goto done;
-   }
+	{
+	    rwl->iNumberActive--;
+	    retVal = 1;
+	    goto done;
+	}
 
-   if( fWait )
-   {
-       rwl->uSharedWaiters++;
+	if( fWait )
+	{
+	    rwl->uSharedWaiters++;
        LeaveCriticalSection( &rwl->rtlCS );
        if( (dwWait = WaitForSingleObject( rwl->hSharedReleaseSemaphore, INFINITE )) == WAIT_FAILED )
-      goto done;
-       goto start;
-   }
+		goto done;
+	    goto start;
+	}
     }
     else
     {
-   if( dwWait != WAIT_OBJECT_0 ) /* otherwise RtlReleaseResource() has already done it */
-       rwl->iNumberActive++;
-   retVal = 1;
+	if( dwWait != WAIT_OBJECT_0 ) /* otherwise RtlReleaseResource() has already done it */
+	    rwl->iNumberActive++;
+	retVal = 1;
     }
 done:
     LeaveCriticalSection( &rwl->rtlCS );
@@ -258,34 +265,34 @@ void WINAPI RtlReleaseResource(LPRTL_RWLOCK rwl)
 
     if( rwl->iNumberActive > 0 ) /* have one or more readers */
     {
-   if( --rwl->iNumberActive == 0 )
-   {
-       if( rwl->uExclusiveWaiters )
-       {
+	if( --rwl->iNumberActive == 0 )
+	{
+	    if( rwl->uExclusiveWaiters )
+	    {
 wake_exclusive:
-      rwl->uExclusiveWaiters--;
+		rwl->uExclusiveWaiters--;
       ReleaseSemaphore( rwl->hExclusiveReleaseSemaphore, 1, NULL );
-       }
-   }
+	    }
+	}
     }
     else
     if( rwl->iNumberActive < 0 ) /* have a writer, possibly recursive */
     {
-   if( ++rwl->iNumberActive == 0 )
-   {
-       rwl->hOwningThreadId = 0;
-       if( rwl->uExclusiveWaiters )
-      goto wake_exclusive;
-       else
-      if( rwl->uSharedWaiters )
-      {
-          UINT n = rwl->uSharedWaiters;
-          rwl->iNumberActive = rwl->uSharedWaiters; /* prevent new writers from joining until
-                                                * all queued readers have done their thing */
-          rwl->uSharedWaiters = 0;
+	if( ++rwl->iNumberActive == 0 )
+	{
+	    rwl->hOwningThreadId = 0;
+	    if( rwl->uExclusiveWaiters )
+		goto wake_exclusive;
+	    else
+		if( rwl->uSharedWaiters )
+		{
+		    UINT n = rwl->uSharedWaiters;
+		    rwl->iNumberActive = rwl->uSharedWaiters; /* prevent new writers from joining until
+							       * all queued readers have done their thing */
+		    rwl->uSharedWaiters = 0;
           ReleaseSemaphore( rwl->hSharedReleaseSemaphore, n, NULL );
-      }
-   }
+		}
+	}
     }
     LeaveCriticalSection( &rwl->rtlCS );
 }
@@ -299,18 +306,17 @@ void WINAPI RtlDumpResource(LPRTL_RWLOCK rwl)
   dprintf(("NTDLL: RtlDumpResource(%08x)\n",
            rwl));
 
-  if( rwl )
-  {
+    if( rwl )
+    {
     dprintf(("NTDLL: RtlDumpResource(%p):\n\tactive count = %i\n\twaiting readers = %i\n\twaiting writers = %i\n",
              rwl,
              rwl->iNumberActive,
              rwl->uSharedWaiters,
              rwl->uExclusiveWaiters));
-
-    if( rwl->iNumberActive )
+	if( rwl->iNumberActive )
        dprintf(("NTDLL: \towner thread = %08x\n",
                 rwl->hOwningThreadId ));
-  }
+    }
 }
 
 
@@ -326,16 +332,15 @@ void WINAPI RtlDumpResource(LPRTL_RWLOCK rwl)
 
 
 /******************************************************************************
- *  RtlAcquirePebLock                       [NTDLL]
+ *  RtlAcquirePebLock		[NTDLL.@]
  */
 VOID WINAPI RtlAcquirePebLock(void)
 {
   EnterCriticalSection( &peb_lock );
 }
 
-
 /******************************************************************************
- *  RtlReleasePebLock                       [NTDLL]
+ *  RtlReleasePebLock		[NTDLL.@]
  */
 VOID WINAPI RtlReleasePebLock(void)
 {
@@ -515,16 +520,13 @@ DWORD WINAPI RtlQueryEnvironmentVariable_U(DWORD           x1,
 }
 
 /******************************************************************************
- *  RtlInitializeGenericTable		[NTDLL] 
+ *  RtlInitializeGenericTable           [NTDLL.@]
  */
-DWORD WINAPI RtlInitializeGenericTable(void)
+PVOID WINAPI RtlInitializeGenericTable(PVOID pTable, PVOID arg2, PVOID arg3, PVOID arg4, PVOID arg5)
 {
-	FIXME("\n");
-	return 0;
+  FIXME("(%p,%p,%p,%p,%p) stub!\n", pTable, arg2, arg3, arg4, arg5);
+  return NULL;
 }
-
-
-
 
 /******************************************************************************
  *  RtlCopyMemory   [NTDLL] 
@@ -537,7 +539,17 @@ VOID WINAPI RtlCopyMemory( VOID *Destination, CONST VOID *Source, SIZE_T Length 
 }	
 
 /******************************************************************************
- *  RtlMoveMemory   [NTDLL] 
+ *  RtlMoveMemory   [NTDLL.@]
+ *
+ * Move a block of memory that may overlap.
+ *
+ * PARAMS
+ *  Destination [O] End destination for block
+ *  Source      [O] Where to start copying from
+ *  Length      [I] Number of bytes to copy
+ *
+ * RETURNS
+ *  Nothing.
  */
 #undef RtlMoveMemory
 VOID WINAPI RtlMoveMemory( VOID *Destination, CONST VOID *Source, SIZE_T Length )
@@ -546,16 +558,35 @@ VOID WINAPI RtlMoveMemory( VOID *Destination, CONST VOID *Source, SIZE_T Length 
 }
 
 /******************************************************************************
- *  RtlFillMemory   [NTDLL] 
+ *  RtlFillMemory   [NTDLL.@]
+ *
+ * Set a block of memory with a value.
+ *
+ * PARAMS
+ *  Destination [O] Block to fill
+ *  Length      [I] Number of bytes to fill
+ *  Fill        [I] Value to set
+ *
+ * RETURNS
+ *  Nothing.
  */
 #undef RtlFillMemory
-VOID WINAPI RtlFillMemory( VOID *Destination, SIZE_T Length, UINT Fill )
+VOID WINAPI RtlFillMemory( VOID *Destination, SIZE_T Length, BYTE Fill )
 {
     memset(Destination, Fill, Length);
 }
 
 /******************************************************************************
- *  RtlZeroMemory   [NTDLL] 
+ *  RtlZeroMemory   [NTDLL.@]
+ *
+ * Set a block of memory with 0's.
+ *
+ * PARAMS
+ *  Destination [O] Block to fill
+ *  Length      [I] Number of bytes to fill
+ *
+ * RETURNS
+ *  Nothing.
  */
 #undef RtlZeroMemory
 VOID WINAPI RtlZeroMemory( VOID *Destination, SIZE_T Length )
@@ -564,44 +595,40 @@ VOID WINAPI RtlZeroMemory( VOID *Destination, SIZE_T Length )
 }
 
 /******************************************************************************
- *  RtlCompareMemory   [NTDLL] 
+ *  RtlCompareMemory   [NTDLL.@]
+ *
+ * Compare one block of memory with another
+ *
+ * PARAMS
+ *  Source1 [I] Source block
+ *  Source2 [I] Block to compare to Source1
+ *  Length  [I] Number of bytes to compare
+ *
+ * RETURNS
+ *  The length of the first byte at which Source1 and Source2 differ, or Length
+ *  if they are the same.
  */
 SIZE_T WINAPI RtlCompareMemory( const VOID *Source1, const VOID *Source2, SIZE_T Length)
 {
-    int i;
-    for(i=0; (i<Length) && (((LPBYTE)Source1)[i]==((LPBYTE)Source2)[i]); i++);
+    SIZE_T i;
+    for(i=0; (i<Length) && (((const BYTE*)Source1)[i]==((const BYTE*)Source2)[i]); i++);
     return i;
 }
 
 /******************************************************************************
- *  RtlAssert                           [NTDLL]
+ *  RtlAssert                           [NTDLL.@]
  *
+ * Fail a debug assertion.
+ *
+ * RETURNS
+ *  Nothing. This call does not return control to its caller.
+ *
+ * NOTES
  * Not implemented in non-debug versions.
  */
 void WINAPI RtlAssert(LPVOID x1,LPVOID x2,DWORD x3, DWORD x4)
 {
 	FIXME("(%p,%p,0x%08lx,0x%08lx),stub\n",x1,x2,x3,x4);
-}
-
-/*****************************************************************************
- * Name      : RtlCopyLuid
- * Purpose   : copy local unique identifier?
- * Parameters: PLUID pluid1
- *             PLUID pluid2
- * Variables :
- * Result    :
- * Remark    : NTDLL.321
- * Status    : COMPLETELY ? IMPLEMENTED TESTED ?
- *
- * Author    : Patrick Haller [Tue, 1999/11/09 09:00]
- *****************************************************************************/
-
-PLUID WINAPI RtlCopyLuid(PLUID pluid1,
-                         PLUID pluid2)
-{
-  pluid2->LowPart  = pluid1->LowPart;
-  pluid2->HighPart = pluid1->HighPart;
-  return (pluid1);
 }
 
 /******************************************************************************
@@ -639,7 +666,7 @@ void WINAPI RtlGetNtVersionNumbers(LPDWORD major, LPDWORD minor, LPDWORD build)
  *
  * PARAMS
  *  lpDest  [I] Bitmap pointer
- *  ulCount [I] Number of dwords to write
+ *  ulCount [I] Number of bytes to write
  *  ulValue [I] Value to fill with
  *
  * RETURNS
@@ -649,8 +676,16 @@ VOID WINAPI RtlFillMemoryUlong(ULONG* lpDest, ULONG ulCount, ULONG ulValue)
 {
   TRACE("(%p,%ld,%ld)\n", lpDest, ulCount, ulValue);
 
+#if 0
+  ulCount /= sizeof(ULONG);
+ __asm__ __volatile__("rep stosl"
+                       :
+                       :"D" (lpDest), "c" (ulCount), "a" (ulValue));
+#else
+  ulCount /= sizeof(ULONG);
   while(ulCount--)
     *lpDest++ = ulValue;
+#endif
 }
 
 /*************************************************************************
@@ -696,4 +731,81 @@ DWORD WINAPI RtlComputeCrc32(DWORD dwInitial, PBYTE pData, INT iLen)
     iLen--;
   }
   return ~crc;
+}
+
+
+/*****************************************************************************
+ * Name      : RtlCopyLuid
+ * Purpose   : copy local unique identifier?
+ * Parameters: PLUID pluid1
+ *             PLUID pluid2
+ * Variables :
+ * Result    :
+ * Remark    : NTDLL.321
+ * Status    : COMPLETELY ? IMPLEMENTED TESTED ?
+ *
+ * Author    : Patrick Haller [Tue, 1999/11/09 09:00]
+ *****************************************************************************/
+/*************************************************************************
+ * RtlCopyLuid   [NTDLL.@]
+ *
+ * Copy a local unique ID.
+ *
+ * PARAMS
+ *  LuidDest [O] Destination for the copied Luid
+ *  LuidSrc  [I] Source Luid to copy to LuidDest
+ *
+ * RETURNS
+ */
+PLUID WINAPI RtlCopyLuid(PLUID pluid1,
+                         PLUID pluid2)
+{
+  pluid2->LowPart  = pluid1->LowPart;
+  pluid2->HighPart = pluid1->HighPart;
+  return (pluid1);
+}
+
+/*************************************************************************
+ * RtlEqualLuid   [NTDLL.@]
+ *
+ * Compare two local unique ID's.
+ *
+ * PARAMS
+ *  Luid1 [I] First Luid to compare to Luid2
+ *  Luid2 [I] Second Luid to compare to Luid1
+ *
+ * RETURNS
+ *  TRUE: The two LUID's are equal.
+ *  FALSE: Otherwise
+ */
+BOOLEAN WINAPI RtlEqualLuid (const LUID *Luid1, const LUID *Luid2)
+{
+  return (Luid1->LowPart ==  Luid2->LowPart && Luid1->HighPart == Luid2->HighPart);
+}
+
+
+/*************************************************************************
+ * RtlCopyLuidAndAttributesArray   [NTDLL.@]
+ *
+ * Copy an array of local unique ID's and attributes.
+ *
+ * PARAMS
+ *  Count [I] Number of Luid/attributes in Src
+ *  Src   [I] Source Luid/attributes to copy
+ *  Dest  [O] Destination for copied Luid/attributes
+ *
+ * RETURNS
+ *  Nothing.
+ *
+ * NOTES
+ *  Dest must be large enough to hold Src.
+ */
+void WINAPI RtlCopyLuidAndAttributesArray(
+    ULONG Count,
+    const LUID_AND_ATTRIBUTES *Src,
+    PLUID_AND_ATTRIBUTES Dest)
+{
+    ULONG i;
+
+    for (i = 0; i < Count; i++) Dest[i] = Src[i];
 }
