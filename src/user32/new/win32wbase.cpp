@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.32 2000-01-11 13:06:26 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.33 2000-01-11 13:52:19 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1607,6 +1607,28 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
 
         return 0;
 
+    case WM_SYSCHAR:
+    {
+	    int iMenuSysKey = 0;
+	    if (wParam == VK_RETURN && (getStyle() & WS_MINIMIZE))
+        {
+	        PostMessageA(getWindowHandle(), WM_SYSCOMMAND,
+                         (WPARAM)SC_RESTORE, 0L );
+	        break;
+        }
+	    if ((HIWORD(lParam) & KEYDATA_ALT) && wParam)
+        {
+	        if (wParam == VK_TAB || wParam == VK_ESCAPE) break;
+	        if (wParam == VK_SPACE && (getStyle() & WS_CHILD))
+                getParent()->SendMessageA(Msg, wParam, lParam );
+	        else
+                SendMessageA(WM_SYSCOMMAND, (WPARAM)SC_KEYMENU, (LPARAM)(DWORD)wParam );
+        }
+	    else /* check for Ctrl-Esc */
+            if (wParam != VK_ESCAPE) MessageBeep(0);
+	    break;
+    }
+
     case WM_SHOWWINDOW:
         if (!lParam) return 0; /* sent from ShowWindow */
         if (!(dwStyle & WS_POPUP) || !owner) return 0;
@@ -1674,6 +1696,7 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
     default:
         return 0;
     }
+    return 0;
 }
 //******************************************************************************
 //******************************************************************************

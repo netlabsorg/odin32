@@ -1,4 +1,4 @@
-/* $Id: pmwindow.h,v 1.4 2000-01-01 17:07:42 cbratschi Exp $ */
+/* $Id: pmwindow.h,v 1.5 2000-01-11 13:52:18 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -10,6 +10,7 @@
 
 #define WIN32_STDCLASS   "Win32WindowClass"
 #define WIN32_STDCLASS2  "Win32WindowClass2"
+#define WIN32_INNERFRAME "Win32InnerFrameClass"
 
 BOOL InitPM();
 
