@@ -213,7 +213,7 @@ DEBUGWRAP24(ThunkConnect32);
 
 
 #undef DBG_LOCALLOG
-#define DBG_LOCALLOG	DBG_directory
+#define DBG_LOCALLOG    DBG_directory
 
 DEBUGWRAP24(SearchPathA);
 DEBUGWRAP24(SearchPathW);
@@ -303,6 +303,7 @@ DEBUGWRAP_LVL2_12(lstrncmpiA);
 DEBUGWRAP_LVL2_12(lstrncmpiW);
 DEBUGWRAP_LVL2_8(lstrlenAtoW);
 DEBUGWRAP_LVL2_8(lstrlenWtoA);
+DEBUGWRAP_LVL2_8(lstrtrunc);
 
 #undef DBG_LOCALLOG
 #define DBG_LOCALLOG    DBG_console
@@ -362,7 +363,7 @@ DEBUGWRAP4(SetConsoleActiveScreenBuffer);
 
 
 #undef DBG_LOCALLOG
-#define DBG_LOCALLOG	DBG_profile
+#define DBG_LOCALLOG    DBG_profile
 
 DEBUGWRAP12(WritePrivateProfileSectionA);
 DEBUGWRAP12(WritePrivateProfileSectionW);
@@ -395,7 +396,7 @@ DEBUGWRAP12(WriteProfileStringW);
 
 
 #undef DBG_LOCALLOG
-#define DBG_LOCALLOG	DBG_atom
+#define DBG_LOCALLOG    DBG_atom
 
 DEBUGWRAP4(AddAtomA);
 DEBUGWRAP4(AddAtomW);
@@ -505,7 +506,7 @@ DEBUGWRAP28(DuplicateHandle);
 
 
 #undef DBG_LOCALLOG
-#define DBG_LOCALLOG	DBG_environ
+#define DBG_LOCALLOG    DBG_environ
 
 DEBUGWRAP0(GetEnvironmentStringsA);
 DEBUGWRAP0(GetEnvironmentStringsW);
@@ -520,7 +521,7 @@ DEBUGWRAP8(SetEnvironmentVariableW);
 
 
 #undef DBG_LOCALLOG
-#define DBG_LOCALLOG	DBG_resource
+#define DBG_LOCALLOG    DBG_resource
 
 DEBUGWRAP12(VerLanguageNameA);
 DEBUGWRAP12(VerLanguageNameW);
@@ -547,7 +548,7 @@ DEBUGWRAP24(UpdateResourceW);
 
 
 #undef DBG_LOCALLOG
-#define DBG_LOCALLOG	DBG_heap
+#define DBG_LOCALLOG    DBG_heap
 
 DEBUGWRAP_LVL2_8(LocalAlloc);
 DEBUGWRAP_LVL2_4(LocalCompact);
@@ -587,7 +588,7 @@ DEBUGWRAP_LVL2_8(HeapWalk);
 
 
 #undef DBG_LOCALLOG
-#define DBG_LOCALLOG	DBG_npipe
+#define DBG_LOCALLOG    DBG_npipe
 
 DEBUGWRAP28(GetNamedPipeHandleStateA);
 DEBUGWRAP28(GetNamedPipeHandleStateW);
@@ -607,7 +608,7 @@ DEBUGWRAP8(WaitNamedPipeW);
 
 
 #undef DBG_LOCALLOG
-#define DBG_LOCALLOG	DBG_event
+#define DBG_LOCALLOG    DBG_event
 
 DEBUGWRAP16(CreateEventA);
 DEBUGWRAP16(CreateEventW);
@@ -623,7 +624,7 @@ DEBUGWRAP12(WaitForSingleObjectEx);
 
 
 #undef DBG_LOCALLOG
-#define DBG_LOCALLOG	DBG_mutex
+#define DBG_LOCALLOG    DBG_mutex
 
 DEBUGWRAP12(CreateMutexA);
 DEBUGWRAP12(CreateMutexW);
@@ -633,7 +634,7 @@ DEBUGWRAP4(ReleaseMutex);
 
 
 #undef DBG_LOCALLOG
-#define DBG_LOCALLOG	DBG_semaphore
+#define DBG_LOCALLOG    DBG_semaphore
 DEBUGWRAP12(OpenSemaphoreA);
 DEBUGWRAP12(OpenSemaphoreW);
 DEBUGWRAP16(CreateSemaphoreA);
@@ -743,7 +744,7 @@ DEBUGWRAP0(GetCommandLineA);
 DEBUGWRAP0(GetCommandLineW);
 
 #undef DBG_LOCALLOG
-#define DBG_LOCALLOG	DBG_debug
+#define DBG_LOCALLOG    DBG_debug
 
 DEBUGWRAP4(DebugActiveProcess);
 DEBUGWRAP0_NORET(DebugBreak);
@@ -755,7 +756,7 @@ DEBUGWRAP12(ContinueDebugEvent);
 
 
 #undef DBG_LOCALLOG
-#define DBG_LOCALLOG	DBG_nls
+#define DBG_LOCALLOG    DBG_nls
 DEBUGWRAP0(GetACP);
 DEBUGWRAP8(GetCPInfo);
 DEBUGWRAP4(ConvertDefaultLocale);
@@ -790,12 +791,12 @@ DEBUGWRAP16(GetLocaleInfoA);
 DEBUGWRAP16(GetLocaleInfoW);
 
 #undef DBG_LOCALLOG
-#define DBG_LOCALLOG	DBG_time
+#define DBG_LOCALLOG    DBG_time
 DEBUGWRAP4(GetTimeZoneInformation);
 DEBUGWRAP12(DosDateTimeToFileTime);
 DEBUGWRAP4(GetSystemTime);
 DEBUGWRAP12(GetSystemTimeAdjustment);
-DEBUGWRAP4(GetSystemTimeAsFileTime);
+DEBUGWRAP4_NORET(GetSystemTimeAsFileTime);
 DEBUGWRAP4_NORET(GetLocalTime);
 DEBUGWRAP4(SetLocalTime);
 DEBUGWRAP4_NORET(SetSystemTime);
@@ -814,7 +815,7 @@ DEBUGWRAP_LVL2_8(TlsSetValue);
 
 
 #undef DBG_LOCALLOG
-#define DBG_LOCALLOG	DBG_critsection
+#define DBG_LOCALLOG    DBG_critsection
 DEBUGWRAP_LVL2_4(DeleteCriticalSection);
 DEBUGWRAP_LVL2_4(EnterCriticalSection);
 DEBUGWRAP_LVL2_4(InitializeCriticalSection);
