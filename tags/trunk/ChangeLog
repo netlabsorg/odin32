@@ -1,7 +1,8 @@
-/* $Id: ChangeLog,v 1.1704 2001-09-28 14:08:02 phaller Exp $ */
+/* $Id: ChangeLog,v 1.1705 2001-09-28 14:31:39 phaller Exp $ */
 
  2001-09-28: Patrick Haller <patrick.haller@innotek.de>
     - USER32:   o added experimental support for WH_KEYBOARD_LL hook
+                o implemented keybd_event, mouse_event (-> SendInput )
 
  2001-09-28: Sander van Leeuwen <sandervl@xs4all.nl>
     - PE2LX:    o Added options to remove fixups and to reroute all
