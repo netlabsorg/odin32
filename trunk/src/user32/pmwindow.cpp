@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.220 2003-10-20 17:17:22 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.221 2003-10-20 17:18:14 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -505,9 +505,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
  MRESULT          rc = 0;
  POSTMSG_PACKET  *postmsg;
  OSLIBPOINT       point, ClientPoint;
- EXCEPTIONREGISTRATIONRECORD exceptRegRec = {0,0};
 
-    ODIN_SetExceptionHandler(&exceptRegRec);
     // restore our FS selector
     SetWin32TIB();
 
@@ -584,7 +582,6 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         }
         RELEASE_WNDOBJ(win32wnd);
         RestoreOS2TIB();
-        ODIN_UnsetExceptionHandler(&exceptRegRec);
 
 #ifdef DEBUG
         dbg_ThreadPopCall();
@@ -1157,7 +1154,6 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
     }
     if(win32wnd) RELEASE_WNDOBJ(win32wnd);
     RestoreOS2TIB();
-    ODIN_UnsetExceptionHandler(&exceptRegRec);
 
 #ifdef DEBUG
     dbg_ThreadPopCall();
@@ -1169,7 +1165,6 @@ RunDefWndProc:
     if(win32wnd) RELEASE_WNDOBJ(win32wnd);
 
     RestoreOS2TIB();
-    ODIN_UnsetExceptionHandler(&exceptRegRec);
 
 #ifdef DEBUG
     dbg_ThreadPopCall();
@@ -1186,13 +1181,11 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
  TEB             *teb;
  MRESULT          rc = 0;
  MSG              winMsg, *pWinMsg;
- EXCEPTIONREGISTRATIONRECORD exceptRegRec = {0,0};
 
 #ifdef DEBUG
     dbg_ThreadPushCall("Win32FrameWindowProc");
 #endif
 
-    ODIN_SetExceptionHandler(&exceptRegRec);
     //Restore our FS selector
     SetWin32TIB();
 
@@ -2178,7 +2171,6 @@ PosChangedEnd:
     }
     if(win32wnd) RELEASE_WNDOBJ(win32wnd);
     RestoreOS2TIB();
-    ODIN_UnsetExceptionHandler(&exceptRegRec);
 
 #ifdef DEBUG
     dbg_ThreadPopCall();
@@ -2189,7 +2181,6 @@ RunDefFrameWndProc:
     dprintf2(("RunDefFrameWndProc"));
     if(win32wnd) RELEASE_WNDOBJ(win32wnd);
     RestoreOS2TIB();
-    ODIN_UnsetExceptionHandler(&exceptRegRec);
 
 #ifdef DEBUG
     dbg_ThreadPopCall();
@@ -2200,7 +2191,6 @@ RunDefWndProc:
     dprintf2(("RunDefWndProc"));
     if(win32wnd) RELEASE_WNDOBJ(win32wnd);
     RestoreOS2TIB();
-    ODIN_UnsetExceptionHandler(&exceptRegRec);
 
     //calling WinDefWindowProc here breaks Opera hotlist window (WM_ADJUSTWINDOWPOS)
 //    return pfnFrameWndProc(hwnd, msg, mp1, mp2);
@@ -2238,7 +2228,6 @@ MRESULT EXPENTRY Win32FakeWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp
     RestoreOS2TIB();
     rc = pfnOldWindowProc(hwnd, msg, mp1, mp2);
 
-    ODIN_SetExceptionHandler(&exceptRegRec);
     SetWin32TIB();
     switch(msg) {
     case WM_WINDOWPOSCHANGED:
@@ -2260,7 +2249,6 @@ MRESULT EXPENTRY Win32FakeWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp
     }
     if(win32wnd) RELEASE_WNDOBJ(win32wnd);
     RestoreOS2TIB();
-    ODIN_UnsetExceptionHandler(&exceptRegRec);
     return rc;
 
 RunDefWndProc:
