@@ -1,4 +1,4 @@
-/* $Id: hmdisk.cpp,v 1.32 2001-11-29 16:33:01 phaller Exp $ */
+/* $Id: hmdisk.cpp,v 1.33 2001-11-29 19:58:09 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -122,16 +122,6 @@ DWORD HMDeviceDiskClass::CreateFile (HANDLE        hHandle,
         return ERROR_INVALID_PARAMETER;
     }
   
-#if 0
-  // will never be triggered
-    if(strncmp(lpFileName,       // "support" for local unc names
-             "\\\\.\\",
-             4) == 0)
-    {
-        lpFileName+=4;
-    }
-#endif
-
     //Disable error popus. NT allows an app to open a cdrom/dvd drive without a disk inside
     //OS/2 fails in that case with error ERROR_NOT_READY
     ULONG oldmode = SetErrorMode(SEM_FAILCRITICALERRORS);
