@@ -1,4 +1,4 @@
-/* $Id: OS2CLIPPER.CPP,v 1.15 2001-10-05 12:33:08 sandervl Exp $ */
+/* $Id: OS2CLIPPER.CPP,v 1.16 2001-10-18 07:49:37 sandervl Exp $ */
 
 /*
  * DX clipper class routines
@@ -297,7 +297,7 @@ BOOL WIN32API ClipVisRgnCallback(HWND hwnd, BOOL fDrawingAllowed, DWORD dwUserDa
       }
       else {
           me->fDrawingAllowed = TRUE;
-          me->lpRgnData = OSLibQueryVisibleRegion(hwnd, me->lpDraw->GetScreenHeight());
+          me->lpRgnData = OSLibQueryVisibleRegion(hwnd, (me->lpDraw) ? me->lpDraw->GetScreenHeight() : 0);
       }
       free(lpRgnOld);
   }
@@ -324,7 +324,7 @@ HRESULT WIN32API ClipSetHWnd(THIS This, DWORD reserved, HWND hwnd)
   WinSetVisibleRgnNotifyProc(hwnd, ClipVisRgnCallback, (DWORD)me);
 
 #if 1
-  me->lpRgnData = OSLibQueryVisibleRegion(hwnd, me->lpDraw->GetScreenHeight());
+  me->lpRgnData = OSLibQueryVisibleRegion(hwnd, (me->lpDraw) ? me->lpDraw->GetScreenHeight() : 0);
   me->fClipListChanged    = TRUE;
   me->fClipListChangedInt = TRUE; //internal flag
 #else

@@ -1,4 +1,4 @@
-/* $Id: oslibgpi.cpp,v 1.2 2001-10-01 07:06:10 sandervl Exp $ */
+/* $Id: oslibgpi.cpp,v 1.3 2001-10-18 07:49:37 sandervl Exp $ */
 
 /*
  * GPI interface code
@@ -32,6 +32,12 @@ LPRGNDATA OSLibQueryVisibleRegion(HWND hwnd, DWORD screenHeight)
     LONG temp, i;
     ULONG bufSizeNeeded;
     PRECTL pRectl;
+
+    if(screenHeight == 0) {
+        RECTL desktopRectl;
+        WinQueryWindowRect(HWND_DESKTOP, &desktopRectl);
+        screenHeight  = desktopRectl.xRight;
+    }
 
     hps = WinGetPS(Win32ToOS2FrameHandle(hwnd));
     if(hps == NULL) {
@@ -97,3 +103,4 @@ failure:
 }
 //******************************************************************************
 //******************************************************************************
+
