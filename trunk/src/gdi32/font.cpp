@@ -1,4 +1,4 @@
-/* $Id: font.cpp,v 1.18 2001-04-25 20:53:02 sandervl Exp $ */
+/* $Id: font.cpp,v 1.19 2001-05-24 19:26:30 sandervl Exp $ */
 
 /*
  * GDI32 font apis
@@ -163,25 +163,39 @@ ODINFUNCTIONNODBG14(HFONT,  CreateFontA, int,    nHeight,
   CHAR  lpstrFaceNew[LF_FACESIZE];
   HFONT hFont;
 
+  if(lpszFace == NULL)
+      lpszFace = "";
+
+  if(strlen(lpszFace) >= LF_FACESIZE)
+  {
+      dprintf(("ERROR: Invalid string length for font name!!"));
+      SetLastError(ERROR_INVALID_PARAMETER);
+      return 0;
+  }
+
   iFontRename(lpszFace, lpstrFaceNew);
 
   dprintf(("lpszFace = %s -> %s\n", lpszFace, lpstrFaceNew));
 
-  hFont = O32_CreateFont(nHeight,
-                         nWidth,
-                         nEscapement,
-                         nOrientation,
-                         fnWeight,
-                         fdwItalic,
-                         fdwUnderline,
-                         fdwStrikeOut,
-                         fdwCharSet,
-                         fdwOutputPrecision,
-                         fdwClipPrecision,
-                         fdwQuality,
-                         fdwPitchAndFamily,
-                         lpszFace != NULL ? lpstrFaceNew : NULL);
-  return hFont;
+  LOGFONTA logFont =
+  {
+      nHeight,
+      nWidth,
+      nEscapement,
+      nOrientation,
+      fnWeight,
+      (BYTE)fdwItalic,
+      (BYTE)fdwUnderline,
+      (BYTE)fdwStrikeOut,
+      (BYTE)fdwCharSet,
+      (BYTE)fdwOutputPrecision,
+      (BYTE)fdwClipPrecision,
+      (BYTE)fdwQuality,
+      (BYTE)fdwPitchAndFamily
+  };
+  strcpy(logFont.lfFaceName, lpszFace);
+
+  return CreateFontIndirectA(&logFont);
 }
 //******************************************************************************
 //******************************************************************************

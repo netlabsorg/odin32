@@ -1,4 +1,4 @@
-/* $Id: text.cpp,v 1.20 2001-05-19 13:50:19 sandervl Exp $ */
+/* $Id: text.cpp,v 1.21 2001-05-24 19:26:31 sandervl Exp $ */
 
 /*
  * GDI32 text apis
@@ -869,6 +869,12 @@ BOOL WIN32API PolyTextOutW(HDC hdc,POLYTEXTW *pptxt,int cStrings)
 BOOL WIN32API GetTextExtentPointA(HDC hdc, LPCTSTR lpsz, int cbString,
                                   LPSIZE lpsSize)
 {
+#if 1
+   //SvL: This works better than the code below. Can been seen clearly
+   //     in the Settings dialog box of VirtualPC. Strings are clipped.
+   //     (e.g.: Hard Disk 1 -> Hard Disk)
+   return O32_GetTextExtentPoint(hdc, lpsz, cbString, lpsSize);
+#else
    BOOL       rc;
    POINTLOS2  pts[TXTBOXOS_COUNT];
    POINTLOS2  widthHeight = { 0, 0};
@@ -939,6 +945,7 @@ BOOL WIN32API GetTextExtentPointA(HDC hdc, LPCTSTR lpsz, int cbString,
    dprintf(("GDI32: GetTextExtentPointA %x %s %d returned %d (%d,%d)", hdc, lpsz, cbString, rc, lpsSize->cx, lpsSize->cy));
    SetLastError(ERROR_SUCCESS);
    return TRUE;
+#endif
 }
 //******************************************************************************
 //******************************************************************************
