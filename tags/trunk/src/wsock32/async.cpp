@@ -1,4 +1,4 @@
-/* $Id: async.cpp,v 1.8 1999-10-25 23:17:18 phaller Exp $ */
+/* $Id: async.cpp,v 1.9 1999-10-26 21:43:00 phaller Exp $ */
 
 /*
  *
@@ -50,10 +50,17 @@ ODINDEBUGCHANNEL(WSOCK32-ASYNC)
 
 // prototype of the OS/2 select!
 int _System os2_select(int* socket,
-                       int fd_read,
-                       int fd_write,
-                       int fd_exception,
+                       int  fd_read,
+                       int  fd_write,
+                       int  fd_exception,
                        long timeout);
+
+int _System bsd_select(int,
+                       fd_set *,
+                       fd_set *,
+                       fd_set *,
+                       struct timeval);
+
 
 
 /*****************************************************************************
@@ -989,9 +996,9 @@ void WSAAsyncWorker::asyncSelect(PASYNCREQUEST pRequest)
 
   // finally do the select!
   irc = os2_select(&sockWin,
-                   (ulEvent & FD_READ),
-                   (ulEvent & FD_WRITE),
-                   (ulEvent & FD_OOB),
+                   (ulEvent & FD_READ)  ? 1 : 0,
+                   (ulEvent & FD_WRITE) ? 1 : 0,
+                   (ulEvent & FD_OOB)   ? 1 : 0,
                    10000);              // @@@PH timeout
   if (irc < 0)                                          /* an error occurred */
   {

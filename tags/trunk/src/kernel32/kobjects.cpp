@@ -1,4 +1,4 @@
-/* $Id: kobjects.cpp,v 1.4 1999-08-31 21:03:26 phaller Exp $ */
+/* $Id: kobjects.cpp,v 1.5 1999-10-26 21:42:25 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -13,10 +13,17 @@
 /*****************************************************************************
  * Includes                                                                  *
  *****************************************************************************/
+
+#include <odin.h>
+#include <odinwrap.h>
+#include <os2sel.h>
+
 #include <os2win.h>
 #include "misc.h"
 #include "handlemanager.h"
 
+
+ODINDEBUGCHANNEL(KERNEL32-KOBJECTS)
 
 
 // REMARK: THIS IS IN PREPARATION FOR HANDLEMANAGER SUPPORT (PH) !!
@@ -53,7 +60,7 @@
 
 
 /*****************************************************************************
- * Name      : BOOL WIN32API CreateEventA
+ * Name      : BOOL CreateEventA
  * Purpose   : forward call to Open32
  * Parameters:
  * Variables :
@@ -64,17 +71,12 @@
  * Author    : Patrick Haller [Fri, 1998/06/12 03:44]
  *****************************************************************************/
 
-HANDLE WIN32API CreateEventA(LPSECURITY_ATTRIBUTES lpsa,
-                             BOOL                  fManualReset,
-                             BOOL                  fInitialState,
-                             LPCTSTR               lpszEventName)
+ODINFUNCTION4(HANDLE, CreateEventA,
+              LPSECURITY_ATTRIBUTES, lpsa,
+              BOOL, fManualReset,
+              BOOL, fInitialState,
+              LPCTSTR, lpszEventName)
 {
-  dprintf(("KERNEL32: CreateEventA(%08xh, %08xh, %08xh, %s)\n",
-           lpsa,
-           fManualReset,
-           fInitialState,
-           lpszEventName));
-
   return(HMCreateEvent(lpsa,                         /* create event semaphore */
                        fManualReset,
                        fInitialState,
@@ -83,7 +85,7 @@ HANDLE WIN32API CreateEventA(LPSECURITY_ATTRIBUTES lpsa,
 
 
 /*****************************************************************************
- * Name      : BOOL WIN32API CreateEventW
+ * Name      : BOOL CreateEventW
  * Purpose   : forward call to Open32
  * Parameters:
  * Variables :
@@ -94,19 +96,17 @@ HANDLE WIN32API CreateEventA(LPSECURITY_ATTRIBUTES lpsa,
  * Author    : Patrick Haller [Fri, 1998/06/12 03:44]
  *****************************************************************************/
 
-HANDLE WIN32API CreateEventW(LPSECURITY_ATTRIBUTES arg1,
-                             BOOL                  arg2,
-                             BOOL                  arg3,
-                             LPCWSTR               arg4)
+ODINFUNCTION4(HANDLE, CreateEventW,
+              LPSECURITY_ATTRIBUTES, arg1,
+              BOOL, arg2,
+              BOOL, arg3,
+              LPCWSTR, arg4)
 {
   HANDLE rc;
   char  *astring;
 
-  dprintf(("KERNEL32: CreateEventW(%08xh, %08xh, %08xh, %s)\n",
-           arg1,
-           arg2,
-           arg3,
-           arg4));
+  dprintf(("KERNEL32: CreateEventW(%s)\n",
+           astring));
 
   astring = UnicodeToAsciiString((LPWSTR)arg4);
 
@@ -122,7 +122,7 @@ HANDLE WIN32API CreateEventW(LPSECURITY_ATTRIBUTES arg1,
 
 
 /*****************************************************************************
- * Name      : BOOL WIN32API CreateMutexA
+ * Name      : BOOL CreateMutexA
  * Purpose   : forward call to Open32
  * Parameters:
  * Variables :
@@ -133,13 +133,12 @@ HANDLE WIN32API CreateEventW(LPSECURITY_ATTRIBUTES arg1,
  * Author    : Patrick Haller [Fri, 1999/06/18 03:44]
  *****************************************************************************/
 
-HANDLE WIN32API CreateMutexA(LPSECURITY_ATTRIBUTES lpsa,
-                              BOOL                  fInitialOwner,
-                              LPCTSTR               lpszMutexName)
+ODINFUNCTION3(HANDLE, CreateMutexA,
+              LPSECURITY_ATTRIBUTES, lpsa,
+              BOOL, fInitialOwner,
+              LPCTSTR, lpszMutexName)
 {
-  dprintf(("KERNEL32: CreateMutexA(%08xh,%08xh,%s)\n",
-           lpsa,
-           fInitialOwner,
+  dprintf(("KERNEL32: CreateMutexA(%s)\n",
            lpszMutexName));
 
   return(HMCreateMutex(lpsa,
@@ -149,7 +148,7 @@ HANDLE WIN32API CreateMutexA(LPSECURITY_ATTRIBUTES lpsa,
 
 
 /*****************************************************************************
- * Name      : BOOL WIN32API CreateMutexW
+ * Name      : BOOL CreateMutexW
  * Purpose   : forward call to Open32
  * Parameters:
  * Variables :
@@ -160,19 +159,19 @@ HANDLE WIN32API CreateMutexA(LPSECURITY_ATTRIBUTES lpsa,
  * Author    : Patrick Haller [Fri, 1999/06/18 03:44]
  *****************************************************************************/
 
-HANDLE WIN32API CreateMutexW(PSECURITY_ATTRIBUTES arg1,
-                             BOOL                 arg2,
-                             LPCWSTR              arg3)
+ODINFUNCTION3(HANDLE, CreateMutexW,
+              PSECURITY_ATTRIBUTES, arg1,
+              BOOL, arg2,
+              LPCWSTR, arg3)
 {
   HANDLE rc;
   char  *astring;
 
-  dprintf(("KERNEL32: CreateMutexW(%08xh,%08xh,%08xh)\n",
-           arg1,
-           arg2,
-           arg3));
-
   astring = UnicodeToAsciiString((LPWSTR)arg3);
+
+  dprintf(("KERNEL32: CreateMutexW(%s)\n",
+           astring));
+
   rc = HMCreateMutex(arg1,
                      arg2,
                      astring);
@@ -183,7 +182,7 @@ HANDLE WIN32API CreateMutexW(PSECURITY_ATTRIBUTES arg1,
 
 
 /*****************************************************************************
- * Name      : BOOL WIN32API ReleaseMutex
+ * Name      : BOOL ReleaseMutex
  * Purpose   : forward call to Open32
  * Parameters:
  * Variables :
@@ -194,17 +193,15 @@ HANDLE WIN32API CreateMutexW(PSECURITY_ATTRIBUTES arg1,
  * Author    : Patrick Haller [Fri, 1999/06/18 03:44]
  *****************************************************************************/
 
-BOOL WIN32API ReleaseMutex(HANDLE mutex)
+ODINFUNCTION1(BOOL, ReleaseMutex,
+              HANDLE, mutex)
 {
-  dprintf(("KERNEL32: ReleaseMutex%08xh)\n",
-           mutex));
-
   return(HMReleaseMutex(mutex));
 }
 
 
 /*****************************************************************************
- * Name      : BOOL WIN32API SetEvent
+ * Name      : BOOL SetEvent
  * Purpose   : forward call to Open32
  * Parameters:
  * Variables :
@@ -215,17 +212,15 @@ BOOL WIN32API ReleaseMutex(HANDLE mutex)
  * Author    : Patrick Haller [Fri, 1999/06/18 03:44]
  *****************************************************************************/
 
-BOOL WIN32API SetEvent(HANDLE hEvent)
+ODINFUNCTION1(BOOL, SetEvent,
+              HANDLE, hEvent)
 {
-  dprintf(("KERNEL32: SetEvent(%08xh)\n",
-           hEvent));
-
   return(HMSetEvent(hEvent));
 }
 
 
 /*****************************************************************************
- * Name      : BOOL WIN32API WaitForSingleObject
+ * Name      : BOOL WaitForSingleObject
  * Purpose   : forward call to Open32
  * Parameters:
  * Variables :
@@ -236,13 +231,10 @@ BOOL WIN32API SetEvent(HANDLE hEvent)
  * Author    : Patrick Haller [Fri, 1999/06/18 03:44]
  *****************************************************************************/
 
-DWORD WIN32API WaitForSingleObject(HANDLE hObject,
-                                   DWORD  timeout)
+ODINFUNCTION2(DWORD, WaitForSingleObject,
+              HANDLE, hObject,
+              DWORD, timeout)
 {
-  dprintf(("KERNEL32: WaitForSingleObject (%08xh, %08xh)\n",
-           hObject,
-           timeout));
-
   return(HMWaitForSingleObject(hObject,
                                timeout));
 }
@@ -267,9 +259,10 @@ DWORD WIN32API WaitForSingleObject(HANDLE hObject,
  * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
  *****************************************************************************/
 
-DWORD WIN32API WaitForSingleObjectEx(HANDLE hObject,
-                                        DWORD        dwTimeout,
-                                        BOOL         fAlertable)
+ODINFUNCTION3(DWORD, WaitForSingleObjectEx,
+              HANDLE, hObject,
+              DWORD, dwTimeout,
+              BOOL, fAlertable)
 {
   dprintf(("Kernel32: WaitForSingleObjectEx(%08xh,%08xh,%08xh) not implemented correctly.\n",
            hObject,
@@ -283,7 +276,7 @@ DWORD WIN32API WaitForSingleObjectEx(HANDLE hObject,
 
 
 /*****************************************************************************
- * Name      : BOOL WIN32API FlushFileBuffers
+ * Name      : BOOL FlushFileBuffers
  * Purpose   : forward call to Open32
  * Parameters:
  * Variables :
@@ -294,17 +287,15 @@ DWORD WIN32API WaitForSingleObjectEx(HANDLE hObject,
  * Author    : Patrick Haller [Fri, 1999/06/18 03:44]
  *****************************************************************************/
 
-BOOL WIN32API FlushFileBuffers(HANDLE hFile)
+ODINFUNCTION1(BOOL, FlushFileBuffers,
+              HANDLE, hFile)
 {
-  dprintf(("KERNEL32: FlushFileBuffers(%08xh)\n",
-           hFile));
-
   return(HMFlushFileBuffers(hFile));
 }
 
 
 /*****************************************************************************
- * Name      : UINT WIN32API SetHandleCount
+ * Name      : UINT SetHandleCount
  * Purpose   : forward call to Open32
  * Parameters:
  * Variables :
@@ -315,17 +306,15 @@ BOOL WIN32API FlushFileBuffers(HANDLE hFile)
  * Author    : Patrick Haller [Fri, 1999/06/18 03:44]
  *****************************************************************************/
 
-UINT WIN32API SetHandleCount(UINT cHandles)
+ODINFUNCTION1(UINT, SetHandleCount,
+              UINT, cHandles)
 {
-  dprintf(("KERNEL32: SetHandleCount(%08xh)\n",
-           cHandles));
-
   return(HMSetHandleCount(cHandles));
 }
 
 
 /*****************************************************************************
- * Name      : BOOL WIN32API DuplicateHandle
+ * Name      : BOOL DuplicateHandle
  * Purpose   : forward call to Open32
  * Parameters:
  * Variables :
@@ -340,24 +329,16 @@ UINT WIN32API SetHandleCount(UINT cHandles)
 //SvL: 24-6-'97 - Added
 //SvL: 28-6-'97: Fix for timeSetEvent in Red Alert Map Editor
 //******************************************************************************
-BOOL WIN32API DuplicateHandle(HANDLE  srcprocess,
-                              HANDLE  srchandle,
-                              HANDLE  destprocess,
-                              PHANDLE desthandle,
-                              DWORD   arg5,
-                              BOOL    arg6,
-                              DWORD   arg7)
+ODINFUNCTION7(BOOL, DuplicateHandle,
+              HANDLE, srcprocess,
+              HANDLE, srchandle,
+              HANDLE, destprocess,
+              PHANDLE, desthandle,
+              DWORD, arg5,
+              BOOL, arg6,
+              DWORD, arg7)
 {
   BOOL rc;
-
-  dprintf(("KERNEL32: DuplicateHandle(%08xh,%08xh,%08xh,%08xh,%08xh,%08xh,%08xh,%08xh)\n",
-           srcprocess,
-           srchandle,
-           destprocess,
-           desthandle,
-           arg5,
-           arg6,
-           arg7));
 
   rc = HMDuplicateHandle(srcprocess,
                          srchandle,
@@ -381,7 +362,7 @@ BOOL WIN32API DuplicateHandle(HANDLE  srcprocess,
 
 
 /*****************************************************************************
- * Name      : BOOL WIN32API CreateSemaphoreA
+ * Name      : BOOL CreateSemaphoreA
  * Purpose   : forward call to Open32
  * Parameters:
  * Variables :
@@ -392,15 +373,13 @@ BOOL WIN32API DuplicateHandle(HANDLE  srcprocess,
  * Author    : Patrick Haller [Fri, 1999/06/18 03:44]
  *****************************************************************************/
 
-HANDLE WIN32API CreateSemaphoreA(LPSECURITY_ATTRIBUTES arg1,
-                                 LONG                  arg2,
-                                 LONG                  arg3,
-                                 LPCSTR                arg4)
+ODINFUNCTION4(HANDLE, CreateSemaphoreA,
+              LPSECURITY_ATTRIBUTES, arg1,
+              LONG, arg2,
+              LONG, arg3,
+              LPCSTR, arg4)
 {
-  dprintf(("KERNEL32: CreateSemaphoreA(%08xh,%08xh,%08xh,%s)\n",
-           arg1,
-           arg2,
-           arg3,
+  dprintf(("KERNEL32: CreateSemaphoreA(%s)\n",
            arg4));
 
   return HMCreateSemaphore(arg1,
@@ -411,7 +390,7 @@ HANDLE WIN32API CreateSemaphoreA(LPSECURITY_ATTRIBUTES arg1,
 
 
 /*****************************************************************************
- * Name      : BOOL WIN32API CreateSemaphoreW
+ * Name      : BOOL CreateSemaphoreW
  * Purpose   : forward call to Open32
  * Parameters:
  * Variables :
@@ -422,21 +401,20 @@ HANDLE WIN32API CreateSemaphoreA(LPSECURITY_ATTRIBUTES arg1,
  * Author    : Patrick Haller [Fri, 1999/06/18 03:44]
  *****************************************************************************/
 
-HANDLE WIN32API CreateSemaphoreW(PSECURITY_ATTRIBUTES arg1,
-                                 LONG                 arg2,
-                                 LONG                 arg3,
-                                 LPCWSTR              arg4)
+ODINFUNCTION4(HANDLE, CreateSemaphoreW,
+              PSECURITY_ATTRIBUTES, arg1,
+              LONG, arg2,
+              LONG, arg3,
+              LPCWSTR, arg4)
 {
   HANDLE rc;
   char   *astring;
 
-  dprintf(("KERNEL32: CreateSemaphoreW(%08xh,%08xh,%08xh,%08xh)\n",
-           arg1,
-           arg2,
-           arg3,
-           arg4));
-
   astring = UnicodeToAsciiString((LPWSTR)arg4);
+
+  dprintf(("KERNEL32: CreateSemaphoreW(%s)\n",
+           astring));
+
   rc = HMCreateSemaphore(arg1,
                          arg2,
                          arg3,
@@ -447,7 +425,7 @@ HANDLE WIN32API CreateSemaphoreW(PSECURITY_ATTRIBUTES arg1,
 
 
 /*****************************************************************************
- * Name      : BOOL WIN32API GetOverlappedResult
+ * Name      : BOOL GetOverlappedResult
  * Purpose   : forward call to Open32
  * Parameters:
  * Variables :
@@ -458,17 +436,12 @@ HANDLE WIN32API CreateSemaphoreW(PSECURITY_ATTRIBUTES arg1,
  * Author    : Patrick Haller [Fri, 1999/06/18 03:44]
  *****************************************************************************/
 
-BOOL WIN32API GetOverlappedResult(HANDLE       arg1,
-                                  LPOVERLAPPED arg2,
-                                  LPDWORD      arg3,
-                                  BOOL         arg4)
+ODINFUNCTION4(BOOL,         GetOverlappedResult,
+              HANDLE,       arg1,
+              LPOVERLAPPED, arg2,
+              LPDWORD,      arg3,
+              BOOL,         arg4)
 {
-  dprintf(("KERNEL32: GetOverlappedResult (%08xh,%08xh,%08xh,%08xh)\n",
-           arg1,
-           arg2,
-           arg3,
-           arg4));
-
   return HMGetOverlappedResult(arg1,
                                arg2,
                                arg3,
@@ -477,7 +450,7 @@ BOOL WIN32API GetOverlappedResult(HANDLE       arg1,
 
 
 /*****************************************************************************
- * Name      : BOOL WIN32API OpenEventA
+ * Name      : BOOL OpenEventA
  * Purpose   : forward call to Open32
  * Parameters:
  * Variables :
@@ -488,13 +461,12 @@ BOOL WIN32API GetOverlappedResult(HANDLE       arg1,
  * Author    : Patrick Haller [Fri, 1999/06/18 03:44]
  *****************************************************************************/
 
-HANDLE WIN32API OpenEventA(DWORD  arg1,
-                           BOOL   arg2,
-                           LPCSTR arg3)
+ODINFUNCTION3(HANDLE, OpenEventA,
+              DWORD,  arg1,
+              BOOL,   arg2,
+              LPCSTR, arg3)
 {
-  dprintf(("KERNEL32: OpenEventA(%08xh,%08xh,%s)\n",
-           arg1,
-           arg2,
+  dprintf(("KERNEL32: OpenEventA(%s)\n",
            arg3));
 
   return HMOpenEvent(arg1,
@@ -504,7 +476,7 @@ HANDLE WIN32API OpenEventA(DWORD  arg1,
 
 
 /*****************************************************************************
- * Name      : BOOL WIN32API OpenEventW
+ * Name      : BOOL OpenEventW
  * Purpose   : forward call to Open32
  * Parameters:
  * Variables :
@@ -515,19 +487,19 @@ HANDLE WIN32API OpenEventA(DWORD  arg1,
  * Author    : Patrick Haller [Fri, 1999/06/18 03:44]
  *****************************************************************************/
 
-HANDLE WIN32API OpenEventW(DWORD  dwDesiredAccess,
-                           BOOL    bInheritHandle,
-                           LPCWSTR lpName)
+ODINFUNCTION3(HANDLE,  OpenEventW,
+              DWORD,   dwDesiredAccess,
+              BOOL,    bInheritHandle,
+              LPCWSTR, lpName)
 {
   char  *asciiname;
   HANDLE rc;
 
-  dprintf(("KERNEL32: OpenEventW(%08xh,%08xh,%08xh\n",
-           dwDesiredAccess,
-           bInheritHandle,
-           lpName));
-
   asciiname = UnicodeToAsciiString((LPWSTR)lpName);
+
+  dprintf(("KERNEL32: OpenEventW(%s)\n",
+           asciiname));
+
   rc = HMOpenEvent(dwDesiredAccess,
                    bInheritHandle,
                    asciiname);
@@ -537,7 +509,7 @@ HANDLE WIN32API OpenEventW(DWORD  dwDesiredAccess,
 
 
 /*****************************************************************************
- * Name      : BOOL WIN32API OpenMutexA
+ * Name      : BOOL OpenMutexA
  * Purpose   : forward call to Open32
  * Parameters:
  * Variables :
@@ -548,13 +520,12 @@ HANDLE WIN32API OpenEventW(DWORD  dwDesiredAccess,
  * Author    : Patrick Haller [Fri, 1999/06/18 03:44]
  *****************************************************************************/
 
-HANDLE WIN32API OpenMutexA(DWORD  arg1,
-                           BOOL   arg2,
-                           LPCSTR arg3)
+ODINFUNCTION3(HANDLE, OpenMutexA,
+              DWORD,  arg1,
+              BOOL,   arg2,
+              LPCSTR, arg3)
 {
-  dprintf(("KERNEL32: OpenMutexA(%08xh,%08xh,%s)\n",
-           arg1,
-           arg2,
+  dprintf(("KERNEL32: OpenMutexA(%s)\n",
            arg3));
 
   return HMOpenMutex(arg1,
@@ -564,7 +535,7 @@ HANDLE WIN32API OpenMutexA(DWORD  arg1,
 
 
 /*****************************************************************************
- * Name      : BOOL WIN32API OpenMutexW
+ * Name      : BOOL OpenMutexW
  * Purpose   : forward call to Open32
  * Parameters:
  * Variables :
@@ -575,19 +546,19 @@ HANDLE WIN32API OpenMutexA(DWORD  arg1,
  * Author    : Patrick Haller [Fri, 1999/06/18 03:44]
  *****************************************************************************/
 
-HANDLE WIN32API OpenMutexW(DWORD   dwDesiredAccess,
-                           BOOL    bInheritHandle,
-                           LPCWSTR lpName)
+ODINFUNCTION3(HANDLE,  OpenMutexW,
+              DWORD,   dwDesiredAccess,
+              BOOL,    bInheritHandle,
+              LPCWSTR, lpName)
 {
   char  *asciiname;
   HANDLE rc;
 
-  dprintf(("KERNEL32: OpenMutexW(%08xh,%08xh,%08xh)\n",
-           dwDesiredAccess,
-           bInheritHandle,
-           lpName));
-
   asciiname = UnicodeToAsciiString((LPWSTR)lpName);
+
+  dprintf(("KERNEL32: OpenMutexW(%s)\n",
+           asciiname));
+
   rc = HMOpenMutex(dwDesiredAccess,
                    bInheritHandle,
                    asciiname);
@@ -597,7 +568,7 @@ HANDLE WIN32API OpenMutexW(DWORD   dwDesiredAccess,
 
 
 /*****************************************************************************
- * Name      : BOOL WIN32API OpenSemaphoreA
+ * Name      : BOOL OpenSemaphoreA
  * Purpose   : forward call to Open32
  * Parameters:
  * Variables :
@@ -608,13 +579,12 @@ HANDLE WIN32API OpenMutexW(DWORD   dwDesiredAccess,
  * Author    : Patrick Haller [Fri, 1999/06/18 03:44]
  *****************************************************************************/
 
-HANDLE WIN32API OpenSemaphoreA(DWORD   arg1,
-                               BOOL    arg2,
-                               LPCSTR  arg3)
+ODINFUNCTION3(HANDLE, OpenSemaphoreA,
+              DWORD,  arg1,
+              BOOL,   arg2,
+              LPCSTR, arg3)
 {
-  dprintf(("KERNEL32: OpenSemaphoreA(%08xh,%08xh,%s)\n",
-           arg1,
-           arg2,
+  dprintf(("KERNEL32: OpenSemaphoreA(%s)\n",
            arg3));
 
   return HMOpenSemaphore(arg1,
@@ -624,7 +594,7 @@ HANDLE WIN32API OpenSemaphoreA(DWORD   arg1,
 
 
 /*****************************************************************************
- * Name      : BOOL WIN32API OpenSemaphoreW
+ * Name      : BOOL OpenSemaphoreW
  * Purpose   : forward call to Open32
  * Parameters:
  * Variables :
@@ -635,19 +605,19 @@ HANDLE WIN32API OpenSemaphoreA(DWORD   arg1,
  * Author    : Patrick Haller [Fri, 1999/06/18 03:44]
  *****************************************************************************/
 
-HANDLE WIN32API OpenSemaphoreW(DWORD   dwDesiredAccess,
-                               BOOL    bInheritHandle,
-                               LPCWSTR lpName)
+ODINFUNCTION3(HANDLE,  OpenSemaphoreW,
+              DWORD,   dwDesiredAccess,
+              BOOL,    bInheritHandle,
+              LPCWSTR, lpName)
 {
   char  *asciiname;
   HANDLE rc;
 
-  dprintf(("KERNEL32: OpenSemaphoreW(%08xh,%08xh,%08xh)\n",
-           dwDesiredAccess,
-           bInheritHandle,
-           lpName));
-
   asciiname = UnicodeToAsciiString((LPWSTR)lpName);
+
+  dprintf(("KERNEL32: OpenSemaphoreW(%s)\n",
+           asciiname));
+
   rc = HMOpenSemaphore(dwDesiredAccess,
                        bInheritHandle,
                        asciiname);
@@ -657,7 +627,7 @@ HANDLE WIN32API OpenSemaphoreW(DWORD   dwDesiredAccess,
 
 
 /*****************************************************************************
- * Name      : BOOL WIN32API PulseEvent
+ * Name      : BOOL PulseEvent
  * Purpose   : forward call to Open32
  * Parameters:
  * Variables :
@@ -668,17 +638,15 @@ HANDLE WIN32API OpenSemaphoreW(DWORD   dwDesiredAccess,
  * Author    : Patrick Haller [Fri, 1999/06/18 03:44]
  *****************************************************************************/
 
-BOOL WIN32API PulseEvent(HANDLE arg1)
+ODINFUNCTION1(BOOL, PulseEvent,
+              HANDLE, arg1)
 {
-  dprintf(("KERNEL32: PulseEvent(%08xh)\n",
-           arg1));
-
   return HMPulseEvent(arg1);
 }
 
 
 /*****************************************************************************
- * Name      : BOOL WIN32API ReleaseSemaphore
+ * Name      : BOOL ReleaseSemaphore
  * Purpose   : forward call to Open32
  * Parameters:
  * Variables :
@@ -689,15 +657,11 @@ BOOL WIN32API PulseEvent(HANDLE arg1)
  * Author    : Patrick Haller [Fri, 1999/06/18 03:44]
  *****************************************************************************/
 
-BOOL WIN32API ReleaseSemaphore(HANDLE arg1,
-                               LONG   arg2,
-                               PLONG  arg3)
+ODINFUNCTION3(BOOL,   ReleaseSemaphore,
+              HANDLE, arg1,
+              LONG,   arg2,
+              PLONG,  arg3)
 {
-  dprintf(("KERNEL32: ReleaseSemaphore(%08xh,%08xh,%08xh)\n",
-           arg1,
-           arg2,
-           arg3));
-
   return HMReleaseSemaphore(arg1,
                             arg2,
                             arg3);
@@ -705,7 +669,7 @@ BOOL WIN32API ReleaseSemaphore(HANDLE arg1,
 
 
 /*****************************************************************************
- * Name      : BOOL WIN32API ResetEvent
+ * Name      : BOOL ResetEvent
  * Purpose   : forward call to Open32
  * Parameters:
  * Variables :
@@ -716,17 +680,15 @@ BOOL WIN32API ReleaseSemaphore(HANDLE arg1,
  * Author    : Patrick Haller [Fri, 1999/06/18 03:44]
  *****************************************************************************/
 
-BOOL WIN32API ResetEvent(HANDLE arg1)
+ODINFUNCTION1(BOOL,   ResetEvent,
+              HANDLE, arg1)
 {
-  dprintf(("KERNEL32: ResetEvent(%08xh)\n",
-           arg1));
-
   return HMResetEvent(arg1);
 }
 
 
 /*****************************************************************************
- * Name      : BOOL WIN32API WaitForMultipleObjects
+ * Name      : BOOL WaitForMultipleObjects
  * Purpose   : forward call to Open32
  * Parameters:
  * Variables :
@@ -737,17 +699,12 @@ BOOL WIN32API ResetEvent(HANDLE arg1)
  * Author    : Patrick Haller [Fri, 1999/06/18 03:44]
  *****************************************************************************/
 
-DWORD WIN32API WaitForMultipleObjects(DWORD        arg1,
-                                      const HANDLE *arg2,
-                                      BOOL         arg3,
-                                      DWORD        arg4)
+ODINFUNCTION4(DWORD,          WaitForMultipleObjects,
+              DWORD,          arg1,
+              const HANDLE *, arg2,
+              BOOL,           arg3,
+              DWORD,          arg4)
 {
-  dprintf(("KERNEL32:  OS2WaitForMultipleObjects(%08xh,%08xh,%08xh,%08xh)\n",
-           arg1,
-           arg2,
-           arg3,
-           arg4));
-
   return HMWaitForMultipleObjects(arg1,
                                   (PHANDLE)arg2,
                                   arg3,
@@ -777,19 +734,13 @@ DWORD WIN32API WaitForMultipleObjects(DWORD        arg1,
  * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
  *****************************************************************************/
 
-DWORD WIN32API WaitForMultipleObjectsEx(DWORD        cObjects,
-                                           CONST HANDLE *lphObjects,
-                                           BOOL         fWaitAll,
-                                           DWORD        dwTimeout,
-                                           BOOL         fAlertable)
+ODINFUNCTION5(DWORD, WaitForMultipleObjectsEx,
+              DWORD, cObjects,
+              CONST HANDLE *, lphObjects,
+              BOOL, fWaitAll,
+              DWORD, dwTimeout,
+              BOOL, fAlertable)
 {
-  dprintf(("Kernel32: WaitForMultipleObjectsEx(%08xh,%08xh,%08xh,%08xh,%08xh) not implemented correctly.\n",
-           cObjects,
-           lphObjects,
-           fWaitAll,
-           dwTimeout,
-           fAlertable));
-
   return(HMWaitForMultipleObjectsEx(cObjects,
                                     (PHANDLE)lphObjects,
                                     fWaitAll,
@@ -799,7 +750,7 @@ DWORD WIN32API WaitForMultipleObjectsEx(DWORD        cObjects,
 
 
 /*****************************************************************************
- * Name      : HANDLE WIN32API ConvertToGlobalHandle
+ * Name      : HANDLE ConvertToGlobalHandle
  * Purpose   : forward call to Open32
  * Parameters:
  * Variables :
@@ -810,13 +761,14 @@ DWORD WIN32API WaitForMultipleObjectsEx(DWORD        cObjects,
  * Author    : Patrick Haller [Fri, 1999/06/18 03:44]
  *****************************************************************************/
 
-HANDLE WIN32API ConvertToGlobalHandle(HANDLE hHandle)
-//HANDLE WIN32API ConvertToGlobalHandle(HANDLE hHandle,
-//                                      BOOL   fInherit)
-{
-  dprintf(("KERNEL32: ConvertToGlobalHandle(%08xh)\n",
-           hHandle));
+ODINFUNCTION1(HANDLE, ConvertToGlobalHandle,
+              HANDLE, hHandle)
 
+//ODINFUNCTION2(HANDLE, ConvertToGlobalHandle,
+//              HANDLE, hHandle,
+//              BOOL,   fInherit)
+{
   return (hHandle);
 }
+
 
