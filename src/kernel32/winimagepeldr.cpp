@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.68 2001-02-25 16:05:39 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.69 2001-03-12 14:16:33 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -1674,20 +1674,18 @@ BOOL Win32PeLdrImage::processImports(char *win32file)
 
     if(WinDll == NULL)
     {  //not found, so load it
-        WinDll = loadDll(pszCurModule);
+        if (WinExe != NULL && WinExe->matchModName(pszCurModule)) {
+             WinImage = (Win32ImageBase *)WinExe;
+        }
+        else {
+             WinDll = loadDll(pszCurModule);
+        }
     }
     else {
         WinDll->AddRef();
         dprintf((LOG, "Already found ", pszCurModule));
     }
-    if(WinDll == NULL) {
-        //TODO: might not be the right order (check executable first and only then dll??)
-        if (WinExe != NULL && WinExe->matchModName(pszCurModule)) {
-             WinImage = (Win32ImageBase *)WinExe;
-        }
-        else return FALSE;
-    }
-    else {
+    if(WinDll != NULL) {
         //add the dll we just loaded to dependency list for this image
         addDependency(WinDll);
 

@@ -1,4 +1,4 @@
-/* $Id: hmstd.cpp,v 1.1 2001-01-23 18:31:26 sandervl Exp $ */
+/* $Id: hmstd.cpp,v 1.2 2001-03-12 14:16:33 sandervl Exp $ */
 
 /*
  * Handle Manager class for standard in, out & error handles
@@ -69,6 +69,7 @@ BOOL HMDeviceStandardClass::ReadFile(PHMHANDLEDATA pHMHandleData,
                                  LPOVERLAPPED  lpOverlapped)
 {
   BOOL         bRC;
+  DWORD        bytesread;
 
   dprintf2(("KERNEL32: HMDeviceStandardClass::ReadFile %s(%08x,%08x,%08x,%08x,%08x) - NOT IMPLEMENTED\n",
            lpHMDeviceName,
@@ -79,7 +80,14 @@ BOOL HMDeviceStandardClass::ReadFile(PHMHANDLEDATA pHMHandleData,
            lpOverlapped));
 
 
-  return FALSE;
+  if(lpNumberOfBytesRead == NULL) {
+     lpNumberOfBytesRead = &bytesread;
+  }
+  if(pHMHandleData->dwUserData != STD_INPUT_HANDLE) {
+     return FALSE;
+  }
+  return O32_ReadFile(pHMHandleData->hHMHandle, (LPVOID)lpBuffer, nNumberOfBytesToRead,
+                      lpNumberOfBytesRead, lpOverlapped);
 }
 
 /*****************************************************************************
