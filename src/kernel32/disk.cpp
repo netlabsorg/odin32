@@ -1,4 +1,4 @@
-/* $Id: disk.cpp,v 1.40 2004-03-24 09:23:47 sandervl Exp $ */
+/* $Id: disk.cpp,v 1.41 2004-03-25 09:19:46 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -344,7 +344,7 @@ proceed:
     }
     if(lpFileSystemNameBuffer || lpMaximumComponentLength || lpFileSystemFlags) 
     {
-        if(!lpFileSystemNameBuffer) {
+        if(!lpFileSystemNameBuffer || (nFileSystemNameSize == 0)) {
             lpFileSystemNameBuffer = tmpstring;
             nFileSystemNameSize    = sizeof(tmpstring);
         }
@@ -361,7 +361,7 @@ proceed:
             dprintf2(("File system name: %s", lpFileSystemNameBuffer));
             if(!strcmp(lpFileSystemNameBuffer, "JFS")) 
             {
-                strcpy(lpFileSystemNameBuffer, "NTFS");
+                strncpy(lpFileSystemNameBuffer, "NTFS", nFileSystemNameSize);
             }
             else
             if(!strcmp(lpFileSystemNameBuffer, "CDFS") ||
