@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.421 1999-11-08 14:20:08 phaller Exp $ */
+ /* $Id: ChangeLog,v 1.422 1999-11-08 20:54:56 sandervl Exp $ */
 
  99-11-08: Patrick Haller <phaller@gmx.net>
 	- COMCTL32:	Fix: EDIT: if obtaining font information fails, 
@@ -7,6 +7,9 @@
  99-11-08: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Fixed bug in thread handler (exception handler set
                     at wrong moment)
+                    Ported Wine critical section code (991031), Open32
+                    doesn't correctly fill in the CRITICAL_SECTION structure.
+                    Limit size of memory mapped files.
 	- USER32: PostThreadMessageA/W fix
 
  99-11-06: Sander van Leeuwen <sandervl@xs4all.nl>
