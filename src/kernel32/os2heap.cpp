@@ -1,4 +1,4 @@
-/* $Id: os2heap.cpp,v 1.18 2001-06-23 08:43:17 sandervl Exp $ */
+/* $Id: os2heap.cpp,v 1.19 2001-07-06 13:47:19 sandervl Exp $ */
 
 /*
  * Heap class for OS/2
@@ -92,7 +92,7 @@ OS2Heap::~OS2Heap()
 
   while(heapelem) {
     hnext = heapelem->next;
-    free(heapelem);
+    free(heapelem->lpMem);
     heapelem = hnext;
   }
   if(hmutex)
@@ -121,157 +121,45 @@ OS2Heap::~OS2Heap()
 //******************************************************************************
 LPVOID OS2Heap::Alloc(DWORD dwFlags, DWORD dwBytes)
 {
- LPVOID lpMem;
+ HEAPELEM *lpHeapObj;
+ LPVOID    lpMem;
 
 //  dprintf(("OS2Heap::Alloc\n"));
   lpMem = malloc(dwBytes + HEAP_OVERHEAD);
   if(lpMem == NULL) {
-    dprintf(("OS2Heap::Alloc, lpMem == NULL"));
-    return(NULL);
+      dprintf(("OS2Heap::Alloc, lpMem == NULL"));
+      return(NULL);
   }
   if(dwFlags & HEAP_ZERO_MEMORY) {
-    memset((char *)lpMem, 0, dwBytes+HEAP_OVERHEAD);
+      memset(lpMem, 0, dwBytes+HEAP_OVERHEAD);
   }
   totalAlloc += dwBytes;
 
+  //align at 8 byte boundary
+  lpHeapObj = (HEAPELEM *)(((ULONG)lpMem+7) & ~7);
+  lpHeapObj->lpMem = lpMem;
+
   if(hmutex)
-    hmutex->enter();
+      hmutex->enter();
 
+  lpHeapObj->next    = heapelem;
+  lpHeapObj->prev    = NULL;
+  lpHeapObj->magic   = MAGIC_NR_HEAP;
   if(heapelem) {
-   HEAPELEM *hnext;
-
-    hnext = heapelem;
-
-    heapelem       = (HEAPELEM *)lpMem;
-    hnext->prev    = heapelem;
-    heapelem->next = hnext;
+      heapelem->prev = lpHeapObj;
   }
-  else {
-    heapelem = (HEAPELEM *)lpMem;
-    heapelem->next = NULL;
-  }
-  heapelem->prev    = NULL;
-  heapelem->flags   = 0;    //only used when allocated with LocalAlloc
-  heapelem->lockCnt = 0;    //..    ..
-  heapelem->magic   = MAGIC_NR_HEAP;
+  heapelem           = lpHeapObj;
 
   if(hmutex) {
-    hmutex->leave();
+      hmutex->leave();
   }
-  return(LPVOID)((char *)lpMem+sizeof(HEAPELEM));
-}
-//******************************************************************************
-//******************************************************************************
-LPVOID OS2Heap::Alloc(DWORD dwFlags, DWORD dwBytes, DWORD LocalAllocFlags)
-{
- HEAPELEM *helem;
- LPVOID    lpMem = Alloc(dwFlags, dwBytes);
-
-  if(lpMem == NULL)
-    return(NULL);
-
-  helem = (HEAPELEM *)((char *)lpMem - sizeof(HEAPELEM));
-  helem->flags   = LocalAllocFlags;
-  return(lpMem);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL OS2Heap::Lock(LPVOID lpMem)
-{
- HEAPELEM *helem = (HEAPELEM *)((char *)lpMem - sizeof(HEAPELEM));
-
-  if((ULONG)lpMem > ADDRESS_SPACE_LIMIT) {
-	//SvL: Some apps lock and unlock gdi handles; just ignore this here
-	dprintf(("Lock: invalid address %x", lpMem));
-	return FALSE;
-  }
-
-  if(lpMem == NULL)
-    	return(FALSE);
-
-  if(helem->magic != MAGIC_NR_HEAP)
-  {
-    	dprintf(("OS2Heap::Lock ERROR BAD HEAP POINTER:%X\n", lpMem));
-    	return FALSE;
-  }
-
-  helem->lockCnt++;
-
-  return(TRUE);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL OS2Heap::Unlock(LPVOID lpMem)
-{
- HEAPELEM *helem = (HEAPELEM *)((char *)lpMem - sizeof(HEAPELEM));
-
-  if((ULONG)lpMem > ADDRESS_SPACE_LIMIT) {
-	//SvL: Some apps lock and unlock gdi handles; just ignore this here
-	dprintf(("Unlock: invalid address %x", lpMem));
-	return FALSE;
-  }
-
-  if(lpMem == NULL)
-    return(FALSE);
-
-  if(helem->lockCnt == 0)
-    return(FALSE);
-
-  if(helem->magic != MAGIC_NR_HEAP)
-  {
-    dprintf(("OS2Heap::UnLock ERROR BAD HEAP POINTER:%X\n", lpMem));
-    return FALSE;
-  }
-
-  helem->lockCnt--;
-
-  return(TRUE);
-}
-//******************************************************************************
-//******************************************************************************
-DWORD OS2Heap::GetFlags(LPVOID lpMem)
-{
- HEAPELEM *helem = (HEAPELEM *)((char *)lpMem - sizeof(HEAPELEM));
-
-  if(lpMem == NULL)
-    return(0);
-
-  if(helem->magic != MAGIC_NR_HEAP)
-  {
-    dprintf(("OS2Heap::GetFlags ERROR BAD HEAP POINTER:%X\n", lpMem));
-    return 0;
-  }
-
-  return(helem->lockCnt | (helem->flags << 8));
-}
-//******************************************************************************
-//******************************************************************************
-int OS2Heap::GetLockCnt(LPVOID lpMem)
-{
- HEAPELEM *helem = (HEAPELEM *)((char *)lpMem - sizeof(HEAPELEM));
-
-  if((ULONG)lpMem > ADDRESS_SPACE_LIMIT) {
-	//SvL: Some apps lock and unlock gdi handles; just ignore this here
-	dprintf(("GetLockCnt: invalid address %x", lpMem));
-	return FALSE;
-  }
-
-  if(lpMem == NULL)
-    	return(0);
-
-  if(helem->magic != MAGIC_NR_HEAP)
-  {
-    	dprintf(("OS2Heap::GetLockCnt ERROR BAD HEAP POINTER:%X\n", lpMem));
-    	return 0;
-  }
-
-  return(helem->lockCnt);
+  return(LPVOID)(lpHeapObj+1);
 }
 //******************************************************************************
 //******************************************************************************
 DWORD OS2Heap::Size(DWORD dwFlags, PVOID lpMem)
 {
- HEAPELEM *helem = (HEAPELEM *)((char *)lpMem - sizeof(HEAPELEM));
+ HEAPELEM *helem = GET_HEAPOBJ(lpMem);
 
   if(lpMem == NULL) {
     	dprintf(("OS2Heap::Size lpMem == NULL\n"));
@@ -290,13 +178,13 @@ DWORD OS2Heap::Size(DWORD dwFlags, PVOID lpMem)
     	return -1;
   }
 
-  return(_msize((char *)lpMem - sizeof(HEAPELEM)) - HEAP_OVERHEAD);
+  return(_msize(helem->lpMem) - HEAP_OVERHEAD);
 }
 //******************************************************************************
 //******************************************************************************
 LPVOID OS2Heap::ReAlloc(DWORD dwFlags, LPVOID lpMem, DWORD dwBytes)
 {
-  HEAPELEM *helem = (HEAPELEM *)((char *)lpMem - sizeof(HEAPELEM));
+  HEAPELEM *helem = GET_HEAPOBJ(lpMem);
   LPVOID lpNewMem;
   int    i, oldSize;
 
@@ -333,7 +221,7 @@ LPVOID OS2Heap::ReAlloc(DWORD dwFlags, LPVOID lpMem, DWORD dwBytes)
 //******************************************************************************
 BOOL OS2Heap::Free(DWORD dwFlags, LPVOID lpMem)
 {
- HEAPELEM *helem = (HEAPELEM *)((char *)lpMem - sizeof(HEAPELEM));
+  HEAPELEM *helem = GET_HEAPOBJ(lpMem);
 
   if(lpMem == NULL) {
     	dprintf(("OS2Heap::Free lpMem == NULL\n"));
@@ -371,7 +259,7 @@ BOOL OS2Heap::Free(DWORD dwFlags, LPVOID lpMem)
     	hmutex->leave();
   }
 
-  free((void *)helem);
+  free(helem->lpMem);
   return(TRUE);
 }
 //******************************************************************************
