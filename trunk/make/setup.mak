@@ -1,4 +1,4 @@
-# $Id: setup.mak,v 1.6 2002-04-22 02:23:05 bird Exp $
+# $Id: setup.mak,v 1.7 2002-04-30 06:19:13 bird Exp $
 
 #
 # Generic makefile system.
@@ -147,7 +147,9 @@ PATH_HLP    = $(PATH_ROOT)\bin\$(BUILD_MODE)
 # -----------------------------------------------------------------------------
 
 # The default definitions.
-BUILD_DEFINES = -D__WIN32OS2__ -D__WINE__ -D__i386__
+BUILD_DEFINES           = -D__WIN32OS2__ -D__WINE__ -D__i386__
+BUILD_BLDLEVEL_FLAGS    = -V^"^#define=ODIN32_VERSION,$(PATH_ROOT)\include\odinbuild.h^" \
+                          -M^"^#define=ODIN32_BUILD_NR,$(PATH_ROOT)\include\odinbuild.h^"
 
 # This is the process file to include at end of the makefile.
 MAKE_INCLUDE_PROCESS    = $(PATH_MAKE)\process.mak

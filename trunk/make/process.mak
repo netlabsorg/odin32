@@ -1,4 +1,4 @@
-# $Id: process.mak,v 1.9 2002-04-29 12:04:37 bird Exp $
+# $Id: process.mak,v 1.10 2002-04-30 06:19:13 bird Exp $
 
 #
 # Unix-like tools for OS/2
@@ -111,6 +111,10 @@ TARGET      = $(PATH_TARGET)\$(TARGET_NAME).$(TARGET_EXT)
 ! endif
 !endif
 
+# Default target .sym file. (output)
+!ifndef TARGET_SYM
+TARGET_SYM  = $(PATH_TARGET)\$(TARGET_NAME).$(EXT_SYM)
+!endif
 
 # Default object file. (output)
 !ifndef TARGET_OBJS
@@ -127,6 +131,11 @@ TARGET_LIBS = $(LIB_C_DLL) $(LIB_OS) $(LIB_C_RTDLL)
 TARGET_DEF  = $(MAKEDIR)\$(PATH_DEF)\$(TARGET_NAME).def
 !endif
 
+# Default modified definition filename. (output)
+!ifndef TARGET_DEF_LINK
+TARGET_DEF_LINK = $(PATH_TARGET)\$(TARGET_NAME)_link.def
+!endif
+
 # Default definition file for generating the import library. (input)
 !ifndef TARGET_IDEF
 TARGET_IDEF = $(TARGET_DEF)
@@ -134,7 +143,7 @@ TARGET_IDEF = $(TARGET_DEF)
 
 # Default map file. (output)
 !ifndef TARGET_MAP
-TARGET_MAP  = $(PATH_TARGET)\$(TARGET_NAME).map
+TARGET_MAP  = $(PATH_TARGET)\$(TARGET_NAME).$(EXT_MAP)
 !endif
 
 # Default link file. (output)
@@ -515,23 +524,27 @@ install:
 ! if "$(TARGET_MODE)" == "EXE"
     @$(ECHO) Installing $(CLRFIL)$(TARGET)$(CLRTXT) in directory $(CLRFIL)$(PATH_BIN)$(CLRRST)
     @if not exist $(TARGET) $(ECHO) $(CLRERR)WARNING: $(CLRFIL)$(TARGET)$(CLRERR) doesn't exist. $(CLRRST)
-    @if exist $(TARGET)     $(TOOL_COPY) $(TARGET) $(PATH_BIN)
+    @if exist $(TARGET)     $(TOOL_COPY) $(TARGET)     $(PATH_BIN)
+    @if exist $(TARGET_SYM) $(TOOL_COPY) $(TARGET_SYM) $(PATH_BIN)
 ! endif
 ! if "$(TARGET_MODE)" == "DLL" || "$(TARGET_MODE)" == "CRT"
     @$(ECHO) Installing $(CLRFIL)$(TARGET)$(CLRTXT) in directory $(CLRFIL)$(PATH_DLL)$(CLRRST)
     @if not exist $(TARGET) $(ECHO) $(CLRERR)WARNING: $(CLRFIL)$(TARGET)$(CLRERR) doesn't exist. $(CLRRST)
-    @if exist $(TARGET)     $(TOOL_COPY) $(TARGET) $(PATH_DLL)
+    @if exist $(TARGET)     $(TOOL_COPY) $(TARGET)     $(PATH_DLL)
+    @if exist $(TARGET_SYM) $(TOOL_COPY) $(TARGET_SYM) $(PATH_DLL)
 ! endif
 ! if "$(TARGET_MODE)" == "SYS" || "$(TARGET_MODE)" == "IFS"
     @$(ECHO) Installing $(CLRFIL)$(TARGET)$(CLRTXT) in directory $(CLRFIL)$(PATH_SYS)$(CLRRST)
     @if not exist $(TARGET) $(ECHO) $(CLRERR)WARNING: $(CLRFIL)$(TARGET)$(CLRERR) doesn't exist. $(CLRRST)
-    @if exist $(TARGET)     $(TOOL_COPY) $(TARGET) $(PATH_SYS)
+    @if exist $(TARGET)     $(TOOL_COPY) $(TARGET)     $(PATH_SYS)
+    @if exist $(TARGET_SYM) $(TOOL_COPY) $(TARGET_SYM) $(PATH_SYS)
 ! endif
 !if 1 # these targets are either TARGET_PUBLIC or all private.
 !  if "$(TARGET_MODE)" == "LIB" || "$(TARGET_MODE)" == "SYSLIB" || "$(TARGET_MODE)" == "IFSLIB"
     @$(ECHO) Installing $(CLRFIL)$(TARGET)$(CLRTXT) in directory $(CLRFIL)$(PATH_LIB)$(CLRRST)
     @if not exist $(TARGET) $(ECHO) $(CLRERR)WARNING: $(CLRFIL)$(TARGET)$(CLRERR) doesn't exist. $(CLRRST)
-    @if exist $(TARGET)     $(TOOL_COPY) $(TARGET) $(PATH_LIB)
+    @if exist $(TARGET)     $(TOOL_COPY) $(TARGET)     $(PATH_LIB)
+    @if exist $(TARGET_SYM) $(TOOL_COPY) $(TARGET_SYM) $(PATH_LIB)
 !  endif
 ! endif
 !endif
@@ -623,12 +636,14 @@ clean:
         $(PATH_TARGET)\*.$(EXT_ILIB) \
         $(PATH_TARGET)\*.$(EXT_EXE) \
         $(PATH_TARGET)\*.$(EXT_DLL) \
-        $(PATH_TARGET)\*.$(EXT_RES) \
-        $(PATH_TARGET)\*.$(EXT_SYS) \
-        $(PATH_TARGET)\*.$(EXT_LIB)
+        $(PATH_TARGET)\*.$(EXT_RES)
     $(TOOL_RM) \
+        $(PATH_TARGET)\*.$(EXT_SYS) \
+        $(PATH_TARGET)\*.$(EXT_LIB) \
         $(PATH_TARGET)\*.$(EXT_IFS) \
-        $(PATH_TARGET)\*.map \
+        $(PATH_TARGET)\*.$(EXT_MAP) \
+        $(PATH_TARGET)\*.$(EXT_SYM)
+    $(TOOL_RM) \
         $(PATH_TARGET)\*.s \
         $(PATH_TARGET)\*.lst \
         $(PATH_TARGET)\*.lnk \
@@ -652,7 +667,7 @@ clean:
 # The $(TARGET) rule - For EXE, DLL, SYS and IFS targets
 # -----------------------------------------------------------------------------
 !if "$(TARGET_MODE)" == "EXE" || "$(TARGET_MODE)" == "DLL" || "$(TARGET_MODE)" == "CRT" || "$(TARGET_MODE)" == "SYS" || "$(TARGET_MODE)" == "IFS" || "$(TARGET_MODE)" == "VDD"
-$(TARGET): $(TARGET_OBJS) $(TARGET_RES) $(TARGET_DEF) $(TARGET_LNK) $(TARGET_DEPS)
+$(TARGET): $(TARGET_OBJS) $(TARGET_RES) $(TARGET_DEF_LINK) $(TARGET_LNK) $(TARGET_DEPS)
     @$(ECHO) Linking $(TARGET_MODE) $(CLRFIL)$@ $(CLRRST)
 !ifndef BUILD_VERBOSE
     @ \
@@ -689,6 +704,12 @@ $(TARGET): $(TARGET_OBJS) $(TARGET_RES) $(TARGET_DEF) $(TARGET_LNK) $(TARGET_DEP
 ! endif
     $(TOOL_DLLRNAME) $(TARGET) $(TARGET_DLLRNAME)
 !endif
+!if "$(TOOL_MAPSYM)" != "" && "$(TARGET_SYM)" != "" && "$(TARGET_MAP)" != ""
+! ifndef BUILD_VERBOSE
+    @ \
+! endif
+    $(TOOL_MAPSYM) $(TARGET_MAP) $(TARGET_SYM)
+!endif
 
 
 #
@@ -702,6 +723,22 @@ $(LINK_LNK3)
 $(LINK_LNK4)
 $(LINK_LNK5)
 <<KEEP
+
+
+#
+# Builddef modified definition file.
+#
+!if "$(TARGET_DEF_LINK)" != "$(TARGET_DEF)"
+$(TARGET_DEF_LINK): $(TARGET_DEF)
+! ifndef BUILD_QUIET
+    @$(ECHO) Stamping deffile with build level info.$(CLRRST)
+! endif
+! ifndef BUILD_VERBOSE
+    @ \
+! endif
+    $(TOOL_BLDLEVEL) $(BUILD_BLDLEVEL_FLAGS) $(TARGET_BLDLEVEL_FLAGS) -R$** $** $@
+!endif
+
 !endif
 
 
@@ -744,6 +781,7 @@ $(TARGET_PUBNAME): $(TARGET)
     @ \
 !endif
     $(TOOL_COPY) $** $@
+    @if exist $(TARGET_SYM) $(TOOL_COPY) $(TARGET_SYM) $(@R).sym
 !endif
 
 
