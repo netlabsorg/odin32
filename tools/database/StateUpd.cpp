@@ -1,4 +1,4 @@
-/* $Id: StateUpd.cpp,v 1.14 2000-02-14 17:24:47 bird Exp $
+/* $Id: StateUpd.cpp,v 1.15 2000-02-14 17:26:34 bird Exp $
  *
  * StateUpd - Scans source files for API functions and imports data on them.
  *
@@ -292,6 +292,11 @@ int main(int argc, char **argv)
         ul2 = dbGetNumberOfUpdatedFunction(options.lDllRefcode);
         ul1 = dbCountFunctionInDll(options.lDllRefcode, FALSE);
         ul0 = dbCountFunctionInDll(options.lDllRefcode, TRUE);
+        if (ul0 > ul2)
+        {
+            fprintf(phSignal, "%d functions where not found (found=%d, total=%d).\n", ul0 - ul2, ul2, ul0);
+            ulRc += 0x00010000;
+        }
         fprintf(phLog, "-------------------------------------------------\n");
         fprintf(phLog, "-------- Functions which was not updated --------\n");
         dbGetNotUpdatedFunction(options.lDllRefcode, dbNotUpdatedCallBack);
@@ -300,8 +305,6 @@ int main(int argc, char **argv)
         fprintf(phLog,"Number of function in this DLL:        %4ld (%ld)\n", ul1, ul0);
         fprintf(phLog,"Number of successfully processed APIs: %4ld (%ld)\n", (long)(0x0000FFFF & ulRc), ul2);
         fprintf(phLog,"Number of signals:                     %4ld\n", (long)(ulRc >> 16));
-        if (ul0 > ul2)
-            fprintf(phSignal, "%d functions where not found (found=%d, total=%d).\n", ul0 - ul2, ul2, ul0);
 
         /* close the logs */
         closeLogs();
