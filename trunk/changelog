@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2222 2002-07-15 14:39:35 sandervl Exp $ */
+/* $Id: changelog,v 1.2223 2002-07-16 08:13:48 sandervl Exp $ */
+
+ 2002-07-16: Sander van Leeuwen <sandervl@innotek.de> 
+    - KERNEL32: o Fix for loading PE images in low memory (introduced yesterday)
 
  2002-07-15: Sander van Leeuwen <sandervl@innotek.de> 
     - GDI32:    o Graphics handle management updates
