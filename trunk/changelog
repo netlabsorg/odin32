@@ -1,8 +1,11 @@
- /* $Id: changelog,v 1.460 1999-11-21 09:45:19 achimha Exp $ */
+ /* $Id: changelog,v 1.461 1999-11-21 11:06:16 achimha Exp $ */
 
  99-11-21: Achim Hasenmueller <achimha@innotek.de>
         - USER32: issue WM_SETTEXT for edit and static text controls
                   in SetWindowTextA/W
+        - COMCTL32: stubbed ImageList_Read and ImageList_Write
+                    implementation missing because OLE stream support
+                    required
 
  99-11-19: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: fixed listbox scrolling
