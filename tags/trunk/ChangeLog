@@ -1,4 +1,8 @@
- /* $Id: ChangeLog,v 1.552 1999-12-19 10:37:34 achimha Exp $ */
+ /* $Id: ChangeLog,v 1.553 1999-12-19 12:26:48 sandervl Exp $ */
+
+ 99-12-19: Sander van Leeuwen <sandervl@xs4all.nl>
+	- ADVAPI32/NTDLL: Forward sid apis to ntdll (need to check return
+                          type of some Rtl SID apis (bool or status dword?))
 
  99-12-18: Achim Hasenmueller <achimha@innotek.de>
         - COMCTL32: Merged with latest WINE 991212 code
