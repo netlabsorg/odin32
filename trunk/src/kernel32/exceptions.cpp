@@ -1,4 +1,4 @@
-/* $Id: exceptions.cpp,v 1.7 1999-07-13 10:38:33 sandervl Exp $ */
+/* $Id: exceptions.cpp,v 1.8 1999-08-04 14:39:06 phaller Exp $ */
 
 /*
  * Win32 Device IOCTL API functions for OS/2
@@ -331,7 +331,7 @@ LONG WIN32API UnhandledExceptionFilter(PWINEXCEPTION_POINTERS lpexpExceptionInfo
                 message,
                 "Oh, nooo!",
                 0,
-                MB_OK | MB_ERROR);
+                MB_OK);
 
   return WINEXCEPTION_EXECUTE_HANDLER;
 }
