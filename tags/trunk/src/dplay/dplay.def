@@ -1,3 +1,8 @@
+;$Id: dplay.def,v 1.2 1999-12-28 10:31:00 sandervl Exp $
+
+;
+; Based on Windows 98 DirectX7: DPLAY.DLL 
+;
 LIBRARY DPLAY INITINSTANCE TERMINSTANCE
 
 PROTMODE
@@ -10,5 +15,4 @@ IMPORTS
 
 EXPORTS
   DirectPlayCreate           = _DirectPlayCreate@12            @1
-  DirectPlayEnumerateA       = _DirectPlayEnumerateA@8         @2
-  DirectPlayEnumerateW       = _DirectPlayEnumerateW@8         @3
+;  DirectPlayEnumerate       				       @2

@@ -1,6 +1,8 @@
-; $Id: imagehlp.def,v 1.1 1999-08-29 14:54:54 sandervl Exp $
+; $Id: imagehlp.def,v 1.2 1999-12-28 10:31:00 sandervl Exp $
 
-;Created by BLAST for IBM's compiler
+;
+; Based on NT 4.0 SP6: IMAGEHLP.DLL 
+;
 LIBRARY IMAGEHLP INITINSTANCE TERMINSTANCE
 DATA MULTIPLE NONSHARED
 

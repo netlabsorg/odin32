@@ -1,8 +1,8 @@
-; $Id: MPR.DEF,v 1.4 1999-11-04 10:55:31 phaller Exp $
+; $Id: MPR.DEF,v 1.5 1999-12-28 10:31:01 sandervl Exp $
 
-;Created by BLAST for IBMs compiler
-;Basis is  5.05.97  12.00  59152 MPR.DLL (NT4SP3)
-
+;
+; Based on NT 4.0 SP6: MPR.DLL 
+;
 LIBRARY MPR INITINSTANCE
 DATA MULTIPLE NONSHARED
 EXPORTS

@@ -1,6 +1,8 @@
-; $Id: olecli32.def,v 1.1 1999-08-29 08:15:02 sandervl Exp $
+; $Id: olecli32.def,v 1.2 1999-12-28 10:31:02 sandervl Exp $
 
-;Created by BLAST for IBM's compiler
+;
+; Based on NT 4.0 SP6: OLECLI32.DLL 
+;
 LIBRARY OLECLI32 INITINSTANCE
 DATA MULTIPLE NONSHARED
 

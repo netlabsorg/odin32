@@ -1,6 +1,8 @@
-; $Id: psapi.DEF,v 1.1 1999-09-04 09:09:03 sandervl Exp $
+; $Id: psapi.DEF,v 1.2 1999-12-28 10:31:02 sandervl Exp $
 
-;Created by BLAST for IBM's compiler
+;
+; Based on Windows 98 (04/06/98; 45136 Bytes): PSAPI.DLL 
+;
 LIBRARY PSAPI INITINSTANCE
 DATA MULTIPLE NONSHARED
 
@@ -23,3 +25,4 @@ EXPORTS
     GetProcessMemoryInfo	= _GetProcessMemoryInfo@12		@16  
     GetWsChanges		= _GetWsChanges@12			@17  
     InitializeProcessForWsWatch	= _InitializeProcessForWsWatch@4	@18  
+;   QueryWorkingSet							@19
