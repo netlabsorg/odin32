@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.39 1999-09-06 01:48:42 bird Exp $
+# $Id: makefile,v 1.40 1999-09-07 20:27:44 phaller Exp $
 
 #
 # PD-Win32 API
@@ -32,7 +32,7 @@ winimage.OBJ windll.OBJ winexe.OBJ time.obj mmap.obj \
 pefile.OBJ winimgres.OBJ wintls.obj async.OBJ fileio.obj \
 atom.obj disk.obj directory.obj cvtbitmap.obj hmmmap.obj \
 cvtmenu.obj cvtaccel.obj cvticon.obj cvticongrp.obj \
-cvtcursor.obj cvtcursorgrp.obj stubs.obj interlock.obj
+cvtcursor.obj cvtcursorgrp.obj stubs.obj interlock.obj toolhelp.obj
 
 
 TARGET = kernel32
@@ -351,6 +351,7 @@ cvtcursor.obj: cvtcursor.cpp $(PDWIN32_INCLUDE)\wincursor.h $(PDWIN32_INCLUDE)\w
 cvtcursorgrp.obj: cvtcursorgrp.cpp $(PDWIN32_INCLUDE)\wincursor.h $(PDWIN32_INCLUDE)\winicon.h $(PDWIN32_INCLUDE)\misc.h cvtresource.h
 
 interlock.obj: interlock.asm
+toolhelp.obj: toolhelp.cpp
 
 clean:
         $(RM) *.OBJ *.LIB *.dll *.lrf *.res *.map *.pch

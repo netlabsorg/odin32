@@ -1,4 +1,4 @@
-/* $Id: tlhelp32.h,v 1.1 1999-05-24 20:19:20 ktk Exp $ */
+/* $Id: tlhelp32.h,v 1.2 1999-09-07 20:27:43 phaller Exp $ */
 
 #ifndef __WINE_TLHELP32_H
 #define __WINE_TLHELP32_H
@@ -25,7 +25,7 @@ extern "C" {
 #define TH32CS_INHERIT     0x80000000
 
 #ifdef __cplusplus
-extern "C" {
+  }
 #endif
 
 #endif /* __WINE_TLHELP32_H */
