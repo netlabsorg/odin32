@@ -1,4 +1,21 @@
- /* $Id: ChangeLog,v 1.877 2000-04-08 20:13:23 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.878 2000-04-09 11:10:06 sandervl Exp $ */
+
+ 2000-04-09: Sander van Leeuwen <sandervl@xs4all.nl>
+        - GDI32: Y inversion fix for dib sections blits
+
+ 2000-04-09: Yuri Dario <mc6530@mclink.it>
+	- INCLUDE(\WIN): 
+		- odin.h: define NONAMELESSUNION only for VA3.0 (now works with VA4);
+		          remove buildin.h when invoked from resource compiler.
+		- commctrl.h: new macros
+		- mmsystem.h: define DUMMYUNIONNAME with same code used in other
+		              headers to avoid precompiling errors.
+		- shlguid.h: missing ID
+		- shlobj.h: missing shlguid.h include
+		- windows.h: define CINTERFACE only for C compilers or VA3.x
+		- windowsx.h: macros
+		- wingdi.h: few AW defines
+		- winuser.h: new macros
 
  2000-04-08: Christoph Bratschi <cbratschi@datacomm.ch>
 	- COMCTL32: added new styles and functionality, bug fixes
