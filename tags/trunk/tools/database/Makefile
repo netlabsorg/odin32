@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.9 2000-02-14 13:49:14 bird Exp $
+# $Id: Makefile,v 1.10 2000-07-18 07:16:01 bird Exp $
 
 #
 # Common makefile for database utils. ICC edition
@@ -14,11 +14,11 @@ CINCLUDES= -I$(PDWIN32_INCLUDE) -I$(PDWIN32_INCLUDE)\win -Igd -Imysql -I..\commo
 !ifdef DEBUG
 CFLAGS   = $(CFLAGS)   -Ge+ -Tx+ -Tm- $(CINCLUDES)      -DNO_CLIENT_LONG_LONG -Wall+ppt-ppc-inl-cnv-gnr-vft- -Gh+ -DDEBUG_ALLOC
 CXXFLAGS = $(CXXFLAGS) -Ge+ -Gx- -Tx+ -Tm- $(CINCLUDES) -DNO_CLIENT_LONG_LONG -Wall+ppt-ppc-inl-cnv-gnr-vft- -Gh+ -DDEBUG_ALLOC
-LDFLAGS  = $(LDFLAGS)  -Ge+ -Fe$@ /B"/MAP:full" $(RTLLIB) os2386.lib cppopa3.obj
+LDFLAGS  = $(LDFLAGS)  -Ge+ -Fe$@ /B"/MAP:full /STACK:0x50000" $(RTLLIB) os2386.lib cppopa3.obj
 !else
 CFLAGS   = $(CFLAGS)   -Ge+ -Tx+ $(CINCLUDES)      -DNO_CLIENT_LONG_LONG -Wall+ppt-ppc-inl-cnv-gnr-vft-
 CXXFLAGS = $(CXXFLAGS) -Ge+ -Gx- -Tx+ $(CINCLUDES) -DNO_CLIENT_LONG_LONG -Wall+ppt-ppc-inl-cnv-gnr-vft-
-LDFLAGS  = $(LDFLAGS)  -Ge+ -Fe$@ /B"/MAP:full" $(RTLLIB) os2386.lib
+LDFLAGS  = $(LDFLAGS)  -Ge+ -Fe$@ /B"/MAP:full /STACK:0x50000" $(RTLLIB) os2386.lib
 !endif
 
 
