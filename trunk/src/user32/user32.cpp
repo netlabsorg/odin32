@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.37 1999-09-28 18:43:08 cbratschi Exp $ */
+/* $Id: user32.cpp,v 1.38 1999-10-01 15:51:53 cbratschi Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -18,6 +18,9 @@
  * Purpose   : This module maps all Win32 functions contained in USER32.DLL
  *             to their OS/2-specific counterparts as far as possible.
  *****************************************************************************/
+
+//Attention: many functions belong to other subsystems, move them to their
+//           right place!
 
 #include <os2win.h>
 #include "misc.h"
@@ -1251,6 +1254,28 @@ DWORD WIN32API WaitForInputIdle(HANDLE hProcess, DWORD dwTimeOut)
 
 /* Help Functions */
 
+DWORD WIN32API GetWindowContextHelpId(HWND hwnd)
+{
+#ifdef DEBUG
+  WriteLog("USER32:  GetWindowContextHelpId, not implemented\n");
+#endif
+  hwnd = Win32Window::Win32ToOS2Handle(hwnd);
+
+  return(0);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API SetWindowContextHelpId(HWND hwnd, DWORD dwContextHelpId)
+{
+#ifdef DEBUG
+  WriteLog("USER32:  SetWindowContextHelpId, not implemented\n");
+#endif
+  hwnd = Win32Window::Win32ToOS2Handle(hwnd);
+
+  return(TRUE);
+}
+//******************************************************************************
+//******************************************************************************
 BOOL WIN32API WinHelpA( HWND hwnd, LPCSTR lpszHelp, UINT uCommand, DWORD  dwData)
 {
 #ifdef DEBUG
@@ -1297,6 +1322,27 @@ WORD WIN32API GetAsyncKeyState(INT nVirtKey)
     return 0;
 }
 /*****************************************************************************
+ * Name      : UINT WIN32API GetKBCodePage
+ * Purpose   : The GetKBCodePage function is provided for compatibility with
+ *             earlier versions of Windows. In the Win32 application programming
+ *             interface (API) it just calls the GetOEMCP function.
+ * Parameters:
+ * Variables :
+ * Result    : If the function succeeds, the return value is an OEM code-page
+ *             identifier, or it is the default identifier if the registry
+ *             value is not readable. For a list of OEM code-page identifiers,
+ *             see GetOEMCP.
+ * Remark    :
+ * Status    : UNTESTED
+ *
+ * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
+ *****************************************************************************/
+
+UINT WIN32API GetKBCodePage(VOID)
+{
+  return (GetOEMCP());
+}
+/*****************************************************************************
  * Name      : BOOL WIN32API GetKeyboardLayoutNameA
  * Purpose   : The GetKeyboardLayoutName function retrieves the name of the
  *             active keyboard layout.
@@ -1317,6 +1363,24 @@ INT WIN32API GetKeyboardLayoutNameA(LPTSTR pwszKLID)
          pwszKLID));
 
   return(FALSE);
+}
+//******************************************************************************
+//******************************************************************************
+int WIN32API GetKeyboardLayoutList(int nBuff, HKL *lpList)
+{
+#ifdef DEBUG
+  WriteLog("USER32:  GetKeyboardLayoutList, not implemented\n");
+#endif
+  return(0);
+}
+//******************************************************************************
+//******************************************************************************
+HKL WIN32API GetKeyboardLayout(DWORD dwLayout)
+{
+#ifdef DEBUG
+  WriteLog("USER32:  GetKeyboardLayout, not implemented\n");
+#endif
+  return(0);
 }
 /*****************************************************************************
  * Name      : BOOL WIN32API GetKeyboardLayoutNameW
@@ -1755,6 +1819,54 @@ WORD WIN32API VkKeyScanW( WCHAR wch)
     // NOTE: This will not work as is (needs UNICODE support)
     return O32_VkKeyScan((char)wch);
 }
+/*****************************************************************************
+ * Name      : SHORT WIN32API VkKeyScanExW
+ * Purpose   : The VkKeyScanEx function translates a character to the
+ *             corresponding virtual-key code and shift state. The function
+ *             translates the character using the input language and physical
+ *             keyboard layout identified by the given keyboard layout handle.
+ * Parameters: UINT uChar character to translate
+ *             HKL  hkl   keyboard layout handle
+ * Variables :
+ * Result    : see docs
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
+ *****************************************************************************/
+WORD WIN32API VkKeyScanExW(WCHAR uChar,
+                           HKL   hkl)
+{
+  dprintf(("USER32:VkKeyScanExW (%u,%08x) not implemented.\n",
+         uChar,
+         hkl));
+
+  return (uChar);
+}
+/*****************************************************************************
+ * Name      : SHORT WIN32API VkKeyScanExA
+ * Purpose   : The VkKeyScanEx function translates a character to the
+ *             corresponding virtual-key code and shift state. The function
+ *             translates the character using the input language and physical
+ *             keyboard layout identified by the given keyboard layout handle.
+ * Parameters: UINT uChar character to translate
+ *             HKL  hkl   keyboard layout handle
+ * Variables :
+ * Result    : see docs
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
+ *****************************************************************************/
+WORD WIN32API VkKeyScanExA(CHAR uChar,
+                           HKL  hkl)
+{
+  dprintf(("USER32:VkKeyScanExA (%u,%08x) not implemented.\n",
+         uChar,
+         hkl));
+
+  return (uChar);
+}
 
 /* Synchronization Functions */
 
@@ -1874,7 +1986,6 @@ DWORD WIN32API GetWindowThreadProcessId(HWND hWnd, PDWORD  lpdwProcessId)
 
 /* Painting and Drawing Functions */
 
-
 INT WIN32API ExcludeUpdateRgn( HDC hDC, HWND  hWnd)
 {
 #ifdef DEBUG
@@ -1897,6 +2008,29 @@ int WIN32API GetUpdateRgn( HWND hWnd, HRGN hRgn, BOOL bErase)
     return O32_GetUpdateRgn(hWnd,hRgn,bErase);
 }
 #endif
+/*****************************************************************************
+ * Name      : int WIN32API GetWindowRgn
+ * Purpose   : The GetWindowRgn function obtains a copy of the window region of a window.
+ * Parameters: HWND hWnd handle to window whose window region is to be obtained
+ *             HRGN hRgn handle to region that receives a copy of the window region
+ * Variables :
+ * Result    : NULLREGION, SIMPLEREGION, COMPLEXREGION, ERROR
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
+ *****************************************************************************/
+
+int WIN32API GetWindowRgn (HWND hWnd,
+                              HRGN hRgn)
+{
+  dprintf(("USER32:GetWindowRgn (%08xh,%08x) not implemented.\n",
+         hWnd,
+         hRgn));
+  //Attention: Win32 hwnd handle!
+
+  return (NULLREGION);
+}
 //******************************************************************************
 //TODO: Not complete
 //******************************************************************************
@@ -1993,6 +2127,36 @@ BOOL WIN32API PaintDesktop(HDC hdc)
          hdc));
 
   return (FALSE);
+}
+/*****************************************************************************
+ * Name      : int WIN32API SetWindowRgn
+ * Purpose   : The SetWindowRgn function sets the window region of a window. The
+ *             window region determines the area within the window where the
+ *             operating system permits drawing. The operating system does not
+ *             display any portion of a window that lies outside of the window region
+ * Parameters: HWND  hWnd    handle to window whose window region is to be set
+ *             HRGN  hRgn    handle to region
+ *             BOOL  bRedraw window redraw flag
+ * Variables :
+ * Result    : If the function succeeds, the return value is non-zero.
+ *             If the function fails, the return value is zero.
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
+ *****************************************************************************/
+
+int WIN32API SetWindowRgn(HWND hWnd,
+                             HRGN hRgn,
+                             BOOL bRedraw)
+{
+  dprintf(("USER32:SetWindowRgn (%08xh,%08xh,%u) not implemented.\n",
+         hWnd,
+         hRgn,
+         bRedraw));
+  //Attention: Win32 hwnd handle!
+
+  return (0);
 }
 //******************************************************************************
 //******************************************************************************
@@ -2214,10 +2378,6 @@ BOOL WIN32API ScrollDC( HDC arg1, int arg2, int arg3, const RECT * arg4, const R
 
 /* Resource Functions */
 
-//CB: stopped here void aa(){};
-//******************************************************************************
-//TODO:
-//******************************************************************************
 HANDLE WIN32API CopyImage(HANDLE hImage, UINT uType, int cxDesired, int cyDesired, UINT fuFlags)
 {
 #ifdef DEBUG
@@ -2235,26 +2395,9 @@ HANDLE WIN32API CopyImage(HANDLE hImage, UINT uType, int cxDesired, int cyDesire
   }
   return(NULL);
 }
-//******************************************************************************
-//******************************************************************************
-int WIN32API GetKeyboardLayoutList(int nBuff, HKL *lpList)
-{
-#ifdef DEBUG
-  WriteLog("USER32:  GetKeyboardLayoutList, not implemented\n");
-#endif
-  return(0);
-}
-//******************************************************************************
-//******************************************************************************
-HKL WIN32API GetKeyboardLayout(DWORD dwLayout)
-{
-#ifdef DEBUG
-  WriteLog("USER32:  GetKeyboardLayout, not implemented\n");
-#endif
-  return(0);
-}
-//******************************************************************************
-//******************************************************************************
+
+/* Icon Functions */
+
 int WIN32API LookupIconIdFromDirectory(PBYTE presbits, BOOL fIcon)
 {
 #ifdef DEBUG
@@ -2273,26 +2416,9 @@ int WIN32API LookupIconIdFromDirectoryEx(PBYTE presbits, BOOL  fIcon,
 #endif
   return(0);
 }
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API SetWindowContextHelpId(HWND hwnd, DWORD dwContextHelpId)
-{
-#ifdef DEBUG
-  WriteLog("USER32:  SetWindowContextHelpId, not implemented\n");
-#endif
-  return(TRUE);
-}
-//******************************************************************************
-//******************************************************************************
-DWORD WIN32API GetWindowContextHelpId(HWND hwnd)
-{
-#ifdef DEBUG
-  WriteLog("USER32:  GetWindowContextHelpId, not implemented\n");
-#endif
-  return(0);
-}
-//******************************************************************************
-//******************************************************************************
+
+/* Device Context Functions */
+
 BOOL WIN32API GetMonitorInfoA(HMONITOR,LPMONITORINFO)
 {
 #ifdef DEBUG
@@ -2316,6 +2442,8 @@ HMONITOR WIN32API MonitorFromWindow(HWND hwnd, DWORD dwFlags)
 #ifdef DEBUG
   WriteLog("USER32:  MonitorFromWindow not correctly supported??\n");
 #endif
+  //Attention: Win32 hwnd!
+
   return(0);
 }
 //******************************************************************************
@@ -2373,6 +2501,36 @@ BOOL WIN32API EnumDisplaySettingsA(LPCSTR lpszDeviceName, DWORD iModeNum,
     }
     return(TRUE);
 }
+/*****************************************************************************
+ * Name      : BOOL WIN32API EnumDisplaySettingsW
+ * Purpose   : The EnumDisplaySettings function obtains information about one
+ *             of a display device's graphics modes. You can obtain information
+ *             for all of a display device's graphics modes by making a series
+ *             of calls to this function.
+ * Parameters: LPCTSTR   lpszDeviceName specifies the display device
+ *             DWORD     iModeNum       specifies the graphics mode
+ *             LPDEVMODE lpDevMode      points to structure to receive settings
+ * Variables :
+ * Result    : If the function succeeds, the return value is TRUE.
+ *             If the function fails, the return value is FALSE.
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
+ *****************************************************************************/
+BOOL WIN32API EnumDisplaySettingsW(LPCSTR     lpszDeviceName,
+                                      DWORD      iModeNum,
+                                      LPDEVMODEW lpDevMode)
+{
+  dprintf(("USER32:EnumDisplaySettingsW (%s,%08xh,%08x) not implemented.\n",
+         lpszDeviceName,
+         iModeNum,
+         lpDevMode));
+
+  return (EnumDisplaySettingsA(lpszDeviceName,
+                               iModeNum,
+                               (LPDEVMODEA)lpDevMode));
+}
 //******************************************************************************
 //******************************************************************************
 LONG WIN32API ChangeDisplaySettingsA(LPDEVMODEA  lpDevMode, DWORD dwFlags)
@@ -2387,10 +2545,6 @@ LONG WIN32API ChangeDisplaySettingsA(LPDEVMODEA  lpDevMode, DWORD dwFlags)
 #endif
     return(DISP_CHANGE_SUCCESSFUL);
 }
-//******************************************************************************
-//******************************************************************************
-
-
 /*****************************************************************************
  * Name      : LONG WIN32API ChangeDisplaySettingsW
  * Purpose   : The ChangeDisplaySettings function changes the display settings
@@ -2409,7 +2563,6 @@ LONG WIN32API ChangeDisplaySettingsA(LPDEVMODEA  lpDevMode, DWORD dwFlags)
  *
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
-
 LONG WIN32API ChangeDisplaySettingsW(LPDEVMODEW lpDevMode,
                                         DWORD      dwFlags)
 {
@@ -2420,6 +2573,8 @@ LONG WIN32API ChangeDisplaySettingsW(LPDEVMODEW lpDevMode,
   return (ChangeDisplaySettingsA((LPDEVMODEA)lpDevMode,
                                   dwFlags));
 }
+
+/* Window Station and Desktop Functions */
 
 /*****************************************************************************
  * Name      : BOOL WIN32API CloseDesktop
@@ -2437,7 +2592,6 @@ LONG WIN32API ChangeDisplaySettingsW(LPDEVMODEW lpDevMode,
  *
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
-
 BOOL WIN32API CloseDesktop(HDESK hDesktop)
 {
   dprintf(("USER32:CloseDesktop(%08x) not implemented.\n",
@@ -2445,8 +2599,6 @@ BOOL WIN32API CloseDesktop(HDESK hDesktop)
 
   return (FALSE);
 }
-
-
 /*****************************************************************************
  * Name      : BOOL WIN32API CloseWindowStation
  * Purpose   : The CloseWindowStation function closes an open window station handle.
@@ -2460,7 +2612,6 @@ BOOL WIN32API CloseDesktop(HDESK hDesktop)
  *
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
-
 BOOL WIN32API CloseWindowStation(HWINSTA hWinSta)
 {
   dprintf(("USER32:CloseWindowStation(%08x) not implemented.\n",
@@ -2468,8 +2619,6 @@ BOOL WIN32API CloseWindowStation(HWINSTA hWinSta)
 
   return (FALSE);
 }
-
-
 /*****************************************************************************
  * Name      : HDESK WIN32API CreateDesktopA
  * Purpose   : The CreateDesktop function creates a new desktop on the window
@@ -2490,7 +2639,6 @@ BOOL WIN32API CloseWindowStation(HWINSTA hWinSta)
  *
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
-
 HDESK WIN32API CreateDesktopA(LPCTSTR               lpszDesktop,
                               LPCTSTR               lpszDevice,
                               LPDEVMODEA            pDevMode,
@@ -2508,8 +2656,6 @@ HDESK WIN32API CreateDesktopA(LPCTSTR               lpszDesktop,
 
   return (NULL);
 }
-
-
 /*****************************************************************************
  * Name      : HDESK WIN32API CreateDesktopW
  * Purpose   : The CreateDesktop function creates a new desktop on the window
@@ -2530,7 +2676,6 @@ HDESK WIN32API CreateDesktopA(LPCTSTR               lpszDesktop,
  *
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
-
 HDESK WIN32API CreateDesktopW(LPCTSTR               lpszDesktop,
                               LPCTSTR               lpszDevice,
                               LPDEVMODEW            pDevMode,
@@ -2548,8 +2693,6 @@ HDESK WIN32API CreateDesktopW(LPCTSTR               lpszDesktop,
 
   return (NULL);
 }
-
-
 /*****************************************************************************
  * Name      : HWINSTA WIN32API CreateWindowStationA
  * Purpose   : The CreateWindowStation function creates a window station object.
@@ -2570,7 +2713,6 @@ HDESK WIN32API CreateDesktopW(LPCTSTR               lpszDesktop,
  *
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
-
 HWINSTA WIN32API CreateWindowStationA(LPTSTR lpWinSta,
                                          DWORD  dwReserved,
                                          DWORD  dwDesiredAccess,
@@ -2584,8 +2726,6 @@ HWINSTA WIN32API CreateWindowStationA(LPTSTR lpWinSta,
 
   return (NULL);
 }
-
-
 /*****************************************************************************
  * Name      : HWINSTA WIN32API CreateWindowStationW
  * Purpose   : The CreateWindowStation function creates a window station object.
@@ -2606,7 +2746,6 @@ HWINSTA WIN32API CreateWindowStationA(LPTSTR lpWinSta,
  *
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
-
 HWINSTA WIN32API CreateWindowStationW(LPWSTR lpWinSta,
                                          DWORD  dwReserved,
                                          DWORD  dwDesiredAccess,
@@ -2620,7 +2759,6 @@ HWINSTA WIN32API CreateWindowStationW(LPWSTR lpWinSta,
 
   return (NULL);
 }
-
 /*****************************************************************************
  * Name      : BOOL WIN32API EnumDesktopWindows
  * Purpose   : The EnumDesktopWindows function enumerates all windows in a
@@ -2638,7 +2776,6 @@ HWINSTA WIN32API CreateWindowStationW(LPWSTR lpWinSta,
  *
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
-
 BOOL WIN32API EnumDesktopWindows(HDESK       hDesktop,
                                     WNDENUMPROC lpfn,
                                     LPARAM      lParam)
@@ -2650,8 +2787,6 @@ BOOL WIN32API EnumDesktopWindows(HDESK       hDesktop,
 
   return (FALSE);
 }
-
-
 /*****************************************************************************
  * Name      : BOOL WIN32API EnumDesktopsA
  * Purpose   : The EnumDesktops function enumerates all desktops in the window
@@ -2670,7 +2805,6 @@ BOOL WIN32API EnumDesktopWindows(HDESK       hDesktop,
  *
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
-
 BOOL WIN32API EnumDesktopsA(HWINSTA          hWinSta,
                             DESKTOPENUMPROCA lpEnumFunc,
                             LPARAM           lParam)
@@ -2682,8 +2816,6 @@ BOOL WIN32API EnumDesktopsA(HWINSTA          hWinSta,
 
   return (FALSE);
 }
-
-
 /*****************************************************************************
  * Name      : BOOL WIN32API EnumDesktopsW
  * Purpose   : The EnumDesktops function enumerates all desktops in the window
@@ -2702,7 +2834,6 @@ BOOL WIN32API EnumDesktopsA(HWINSTA          hWinSta,
  *
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
-
 BOOL WIN32API EnumDesktopsW(HWINSTA          hWinSta,
                             DESKTOPENUMPROCW lpEnumFunc,
                             LPARAM           lParam)
@@ -2714,42 +2845,6 @@ BOOL WIN32API EnumDesktopsW(HWINSTA          hWinSta,
 
   return (FALSE);
 }
-
-
-
-/*****************************************************************************
- * Name      : BOOL WIN32API EnumDisplaySettingsW
- * Purpose   : The EnumDisplaySettings function obtains information about one
- *             of a display device's graphics modes. You can obtain information
- *             for all of a display device's graphics modes by making a series
- *             of calls to this function.
- * Parameters: LPCTSTR   lpszDeviceName specifies the display device
- *             DWORD     iModeNum       specifies the graphics mode
- *             LPDEVMODE lpDevMode      points to structure to receive settings
- * Variables :
- * Result    : If the function succeeds, the return value is TRUE.
- *             If the function fails, the return value is FALSE.
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
- *****************************************************************************/
-
-BOOL WIN32API EnumDisplaySettingsW(LPCSTR     lpszDeviceName,
-                                      DWORD      iModeNum,
-                                      LPDEVMODEW lpDevMode)
-{
-  dprintf(("USER32:EnumDisplaySettingsW (%s,%08xh,%08x) not implemented.\n",
-         lpszDeviceName,
-         iModeNum,
-         lpDevMode));
-
-  return (EnumDisplaySettingsA(lpszDeviceName,
-                               iModeNum,
-                               (LPDEVMODEA)lpDevMode));
-}
-
-
 /*****************************************************************************
  * Name      : BOOL WIN32API EnumWindowStationsA
  * Purpose   : The EnumWindowStations function enumerates all windowstations
@@ -2766,7 +2861,6 @@ BOOL WIN32API EnumDisplaySettingsW(LPCSTR     lpszDeviceName,
  *
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
-
 BOOL WIN32API EnumWindowStationsA(WINSTAENUMPROCA lpEnumFunc,
                                   LPARAM          lParam)
 {
@@ -2776,8 +2870,6 @@ BOOL WIN32API EnumWindowStationsA(WINSTAENUMPROCA lpEnumFunc,
 
   return (FALSE);
 }
-
-
 /*****************************************************************************
  * Name      : BOOL WIN32API EnumWindowStationsW
  * Purpose   : The EnumWindowStations function enumerates all windowstations
@@ -2794,7 +2886,6 @@ BOOL WIN32API EnumWindowStationsA(WINSTAENUMPROCA lpEnumFunc,
  *
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
-
 BOOL WIN32API EnumWindowStationsW(WINSTAENUMPROCW lpEnumFunc,
                                   LPARAM          lParam)
 {
@@ -2804,32 +2895,6 @@ BOOL WIN32API EnumWindowStationsW(WINSTAENUMPROCW lpEnumFunc,
 
   return (FALSE);
 }
-
-
-
-/*****************************************************************************
- * Name      : UINT WIN32API GetKBCodePage
- * Purpose   : The GetKBCodePage function is provided for compatibility with
- *             earlier versions of Windows. In the Win32 application programming
- *             interface (API) it just calls the GetOEMCP function.
- * Parameters:
- * Variables :
- * Result    : If the function succeeds, the return value is an OEM code-page
- *             identifier, or it is the default identifier if the registry
- *             value is not readable. For a list of OEM code-page identifiers,
- *             see GetOEMCP.
- * Remark    :
- * Status    : UNTESTED
- *
- * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
- *****************************************************************************/
-
-UINT WIN32API GetKBCodePage(VOID)
-{
-  return (GetOEMCP());
-}
-
-
 /*****************************************************************************
  * Name      : HWINSTA WIN32API GetProcessWindowStation
  * Purpose   : The GetProcessWindowStation function returns a handle of the
@@ -2846,16 +2911,12 @@ UINT WIN32API GetKBCodePage(VOID)
  *
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
-
 HWINSTA WIN32API GetProcessWindowStation(VOID)
 {
   dprintf(("USER32:GetProcessWindowStation () not implemented.\n"));
 
   return (NULL);
 }
-
-
-
 /*****************************************************************************
  * Name      : BOOL WIN32API GetUserObjectInformationA
  * Purpose   : The GetUserObjectInformation function returns information about
@@ -2874,7 +2935,6 @@ HWINSTA WIN32API GetProcessWindowStation(VOID)
  *
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
-
 BOOL WIN32API GetUserObjectInformationA(HANDLE  hObj,
                                            int     nIndex,
                                            PVOID   pvInfo,
@@ -2890,8 +2950,6 @@ BOOL WIN32API GetUserObjectInformationA(HANDLE  hObj,
 
   return (FALSE);
 }
-
-
 /*****************************************************************************
  * Name      : BOOL WIN32API GetUserObjectInformationW
  * Purpose   : The GetUserObjectInformation function returns information about
@@ -2910,7 +2968,6 @@ BOOL WIN32API GetUserObjectInformationA(HANDLE  hObj,
  *
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
-
 BOOL WIN32API GetUserObjectInformationW(HANDLE  hObj,
                                            int     nIndex,
                                            PVOID   pvInfo,
@@ -2926,8 +2983,6 @@ BOOL WIN32API GetUserObjectInformationW(HANDLE  hObj,
 
   return (FALSE);
 }
-
-
 /*****************************************************************************
  * Name      : BOOL WIN32API GetUserObjectSecurity
  * Purpose   : The GetUserObjectSecurity function retrieves security information
@@ -2946,7 +3001,6 @@ BOOL WIN32API GetUserObjectInformationW(HANDLE  hObj,
  *
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
-
 BOOL WIN32API GetUserObjectSecurity(HANDLE                hObj,
                                        SECURITY_INFORMATION * pSIRequested,
                                        LPSECURITY_DESCRIPTOR  pSID,
@@ -2962,34 +3016,6 @@ BOOL WIN32API GetUserObjectSecurity(HANDLE                hObj,
 
   return (FALSE);
 }
-
-
-
-/*****************************************************************************
- * Name      : int WIN32API GetWindowRgn
- * Purpose   : The GetWindowRgn function obtains a copy of the window region of a window.
- * Parameters: HWND hWnd handle to window whose window region is to be obtained
- *             HRGN hRgn handle to region that receives a copy of the window region
- * Variables :
- * Result    : NULLREGION, SIMPLEREGION, COMPLEXREGION, ERROR
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
- *****************************************************************************/
-
-int WIN32API GetWindowRgn (HWND hWnd,
-                              HRGN hRgn)
-{
-  dprintf(("USER32:GetWindowRgn (%08xh,%08x) not implemented.\n",
-         hWnd,
-         hRgn));
-
-  return (NULLREGION);
-}
-
-
-
 /*****************************************************************************
  * Name      : HDESK WIN32API OpenDesktopA
  * Purpose   : The OpenDesktop function returns a handle to an existing desktop.
@@ -3010,7 +3036,6 @@ int WIN32API GetWindowRgn (HWND hWnd,
  *
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
-
 HDESK WIN32API OpenDesktopA(LPCTSTR lpszDesktopName,
                                DWORD   dwFlags,
                                BOOL    fInherit,
@@ -3024,8 +3049,6 @@ HDESK WIN32API OpenDesktopA(LPCTSTR lpszDesktopName,
 
   return (NULL);
 }
-
-
 /*****************************************************************************
  * Name      : HDESK WIN32API OpenDesktopW
  * Purpose   : The OpenDesktop function returns a handle to an existing desktop.
@@ -3046,7 +3069,6 @@ HDESK WIN32API OpenDesktopA(LPCTSTR lpszDesktopName,
  *
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
-
 HDESK WIN32API OpenDesktopW(LPCTSTR lpszDesktopName,
                                DWORD   dwFlags,
                                BOOL    fInherit,
@@ -3060,8 +3082,6 @@ HDESK WIN32API OpenDesktopW(LPCTSTR lpszDesktopName,
 
   return (NULL);
 }
-
-
 /*****************************************************************************
  * Name      : HDESK WIN32API OpenInputDesktop
  * Purpose   : The OpenInputDesktop function returns a handle to the desktop
@@ -3080,7 +3100,6 @@ HDESK WIN32API OpenDesktopW(LPCTSTR lpszDesktopName,
  *
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
-
 HDESK WIN32API OpenInputDesktop(DWORD dwFlags,
                                    BOOL  fInherit,
                                    DWORD dwDesiredAccess)
@@ -3092,8 +3111,6 @@ HDESK WIN32API OpenInputDesktop(DWORD dwFlags,
 
   return (NULL);
 }
-
-
 /*****************************************************************************
  * Name      : HWINSTA WIN32API OpenWindowStationA
  * Purpose   : The OpenWindowStation function returns a handle to an existing
@@ -3111,7 +3128,6 @@ HDESK WIN32API OpenInputDesktop(DWORD dwFlags,
  *
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
-
 HWINSTA WIN32API OpenWindowStationA(LPCTSTR lpszWinStaName,
                                        BOOL    fInherit,
                                        DWORD   dwDesiredAccess)
@@ -3123,8 +3139,6 @@ HWINSTA WIN32API OpenWindowStationA(LPCTSTR lpszWinStaName,
 
   return (NULL);
 }
-
-
 /*****************************************************************************
  * Name      : HWINSTA WIN32API OpenWindowStationW
  * Purpose   : The OpenWindowStation function returns a handle to an existing
@@ -3144,7 +3158,6 @@ HWINSTA WIN32API OpenWindowStationA(LPCTSTR lpszWinStaName,
  *
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
-
 HWINSTA WIN32API OpenWindowStationW(LPCTSTR lpszWinStaName,
                                        BOOL    fInherit,
                                        DWORD   dwDesiredAccess)
@@ -3156,28 +3169,6 @@ HWINSTA WIN32API OpenWindowStationW(LPCTSTR lpszWinStaName,
 
   return (NULL);
 }
-
-
-/*****************************************************************************
- * Name      : VOID WIN32API SetDebugErrorLevel
- * Purpose   : The SetDebugErrorLevel function sets the minimum error level at
- *             which Windows will generate debugging events and pass them to a debugger.
- * Parameters: DWORD dwLevel debugging error level
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
- *****************************************************************************/
-
-VOID WIN32API SetDebugErrorLevel(DWORD dwLevel)
-{
-  dprintf(("USER32:SetDebugErrorLevel (%08x) not implemented.\n",
-         dwLevel));
-}
-
-
 /*****************************************************************************
  * Name      : BOOL WIN32API SetProcessWindowStation
  * Purpose   : The SetProcessWindowStation function assigns a window station
@@ -3195,7 +3186,6 @@ VOID WIN32API SetDebugErrorLevel(DWORD dwLevel)
  *
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
-
 BOOL WIN32API SetProcessWindowStation(HWINSTA hWinSta)
 {
   dprintf(("USER32:SetProcessWindowStation (%08x) not implemented.\n",
@@ -3203,8 +3193,6 @@ BOOL WIN32API SetProcessWindowStation(HWINSTA hWinSta)
 
   return (FALSE);
 }
-
-
 /*****************************************************************************
  * Name      : BOOL WIN32API SetThreadDesktop
  * Purpose   : The SetThreadDesktop function assigns a desktop to the calling
@@ -3220,7 +3208,6 @@ BOOL WIN32API SetProcessWindowStation(HWINSTA hWinSta)
  *
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
-
 BOOL WIN32API SetThreadDesktop(HDESK hDesktop)
 {
   dprintf(("USER32:SetThreadDesktop (%08x) not implemented.\n",
@@ -3228,8 +3215,6 @@ BOOL WIN32API SetThreadDesktop(HDESK hDesktop)
 
   return (FALSE);
 }
-
-
 /*****************************************************************************
  * Name      : BOOL WIN32API SetUserObjectInformationA
  * Purpose   : The SetUserObjectInformation function sets information about a
@@ -3247,7 +3232,6 @@ BOOL WIN32API SetThreadDesktop(HDESK hDesktop)
  *
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
-
 BOOL WIN32API SetUserObjectInformationA(HANDLE hObject,
                                            int    nIndex,
                                            PVOID  lpvInfo,
@@ -3261,8 +3245,6 @@ BOOL WIN32API SetUserObjectInformationA(HANDLE hObject,
 
   return (FALSE);
 }
-
-
 /*****************************************************************************
  * Name      : BOOL WIN32API SetUserObjectInformationW
  * Purpose   : The SetUserObjectInformation function sets information about a
@@ -3280,7 +3262,6 @@ BOOL WIN32API SetUserObjectInformationA(HANDLE hObject,
  *
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
-
 BOOL WIN32API SetUserObjectInformationW(HANDLE hObject,
                                            int    nIndex,
                                            PVOID  lpvInfo,
@@ -3294,8 +3275,6 @@ BOOL WIN32API SetUserObjectInformationW(HANDLE hObject,
 
   return (FALSE);
 }
-
-
 /*****************************************************************************
  * Name      : BOOL WIN32API SetUserObjectSecurity
  * Purpose   : The SetUserObjectSecurity function sets the security of a user
@@ -3312,7 +3291,6 @@ BOOL WIN32API SetUserObjectInformationW(HANDLE hObject,
  *
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
-
 BOOL WIN32API SetUserObjectSecurity(HANDLE hObject,
                                        SECURITY_INFORMATION * psi,
                                        LPSECURITY_DESCRIPTOR  psd)
@@ -3324,85 +3302,6 @@ BOOL WIN32API SetUserObjectSecurity(HANDLE hObject,
 
   return (FALSE);
 }
-
-
-/*****************************************************************************
- * Name      : int WIN32API SetWindowRgn
- * Purpose   : The SetWindowRgn function sets the window region of a window. The
- *             window region determines the area within the window where the
- *             operating system permits drawing. The operating system does not
- *             display any portion of a window that lies outside of the window region
- * Parameters: HWND  hWnd    handle to window whose window region is to be set
- *             HRGN  hRgn    handle to region
- *             BOOL  bRedraw window redraw flag
- * Variables :
- * Result    : If the function succeeds, the return value is non-zero.
- *             If the function fails, the return value is zero.
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
- *****************************************************************************/
-
-int WIN32API SetWindowRgn(HWND hWnd,
-                             HRGN hRgn,
-                             BOOL bRedraw)
-{
-  dprintf(("USER32:SetWindowRgn (%08xh,%08xh,%u) not implemented.\n",
-         hWnd,
-         hRgn,
-         bRedraw));
-
-  return (0);
-}
-
-
-/*****************************************************************************
- * Name      : BOOL WIN32API SetWindowsHookW
- * Purpose   : The SetWindowsHook function is not implemented in the Win32 API.
- *             Win32-based applications should use the SetWindowsHookEx function.
- * Parameters:
- * Variables :
- * Result    :
- * Remark    : ARGH ! MICROSOFT !
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
- *****************************************************************************/
-
-HHOOK WIN32API SetWindowsHookW(int nFilterType, HOOKPROC pfnFilterProc)
-
-{
-  return (FALSE);
-}
-
-
-/*****************************************************************************
- * Name      : BOOL WIN32API ShowWindowAsync
- * Purpose   : The ShowWindowAsync function sets the show state of a window
- *             created by a different thread.
- * Parameters: HWND hwnd     handle of window
- *             int  nCmdShow show state of window
- * Variables :
- * Result    : If the window was previously visible, the return value is TRUE.
- *             If the window was previously hidden, the return value is FALSE.
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
- *****************************************************************************/
-
-BOOL WIN32API ShowWindowAsync (HWND hWnd,
-                               int  nCmdShow)
-{
-  dprintf(("USER32:ShowWindowAsync (%08xh,%08x) not implemented.\n",
-         hWnd,
-         nCmdShow));
-
-  return (FALSE);
-}
-
-
 /*****************************************************************************
  * Name      : BOOL WIN32API SwitchDesktop
  * Purpose   : The SwitchDesktop function makes a desktop visible and activates
@@ -3419,7 +3318,6 @@ BOOL WIN32API ShowWindowAsync (HWND hWnd,
  *
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
-
 BOOL WIN32API SwitchDesktop(HDESK hDesktop)
 {
   dprintf(("USER32:SwitchDesktop (%08x) not implemented.\n",
@@ -3428,6 +3326,73 @@ BOOL WIN32API SwitchDesktop(HDESK hDesktop)
   return (FALSE);
 }
 
+/* Debugging Functions */
+
+/*****************************************************************************
+ * Name      : VOID WIN32API SetDebugErrorLevel
+ * Purpose   : The SetDebugErrorLevel function sets the minimum error level at
+ *             which Windows will generate debugging events and pass them to a debugger.
+ * Parameters: DWORD dwLevel debugging error level
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
+ *****************************************************************************/
+VOID WIN32API SetDebugErrorLevel(DWORD dwLevel)
+{
+  dprintf(("USER32:SetDebugErrorLevel (%08x) not implemented.\n",
+         dwLevel));
+}
+
+/* Hook Functions */
+
+/*****************************************************************************
+ * Name      : BOOL WIN32API SetWindowsHookW
+ * Purpose   : The SetWindowsHook function is not implemented in the Win32 API.
+ *             Win32-based applications should use the SetWindowsHookEx function.
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : ARGH ! MICROSOFT !
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
+ *****************************************************************************/
+HHOOK WIN32API SetWindowsHookW(int nFilterType, HOOKPROC pfnFilterProc)
+
+{
+  return (FALSE);
+}
+
+/* CB: move to ShowWindow() */
+
+/*****************************************************************************
+ * Name      : BOOL WIN32API ShowWindowAsync
+ * Purpose   : The ShowWindowAsync function sets the show state of a window
+ *             created by a different thread.
+ * Parameters: HWND hwnd     handle of window
+ *             int  nCmdShow show state of window
+ * Variables :
+ * Result    : If the window was previously visible, the return value is TRUE.
+ *             If the window was previously hidden, the return value is FALSE.
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
+ *****************************************************************************/
+BOOL WIN32API ShowWindowAsync (HWND hWnd,
+                               int  nCmdShow)
+{
+  dprintf(("USER32:ShowWindowAsync (%08xh,%08x) not implemented.\n",
+         hWnd,
+         nCmdShow));
+
+  return (FALSE);
+}
+
+/* CB: move to MDI */
 
 /*****************************************************************************
  * Name      : WORD WIN32API TileWindows
@@ -3447,7 +3412,6 @@ BOOL WIN32API SwitchDesktop(HDESK hDesktop)
  *
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
-
 WORD WIN32API TileWindows(HWND       hwndParent,
                           UINT       wFlags,
                           const LPRECT lpRect,
@@ -3463,104 +3427,6 @@ WORD WIN32API TileWindows(HWND       hwndParent,
 
    return (0);
 }
-
-
-/*****************************************************************************
- * Name      : SHORT WIN32API VkKeyScanExW
- * Purpose   : The VkKeyScanEx function translates a character to the
- *             corresponding virtual-key code and shift state. The function
- *             translates the character using the input language and physical
- *             keyboard layout identified by the given keyboard layout handle.
- * Parameters: UINT uChar character to translate
- *             HKL  hkl   keyboard layout handle
- * Variables :
- * Result    : see docs
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
- *****************************************************************************/
-
-WORD WIN32API VkKeyScanExW(WCHAR uChar,
-                           HKL   hkl)
-{
-  dprintf(("USER32:VkKeyScanExW (%u,%08x) not implemented.\n",
-         uChar,
-         hkl));
-
-  return (uChar);
-}
-
-
-/*****************************************************************************
- * Name      : SHORT WIN32API VkKeyScanExA
- * Purpose   : The VkKeyScanEx function translates a character to the
- *             corresponding virtual-key code and shift state. The function
- *             translates the character using the input language and physical
- *             keyboard layout identified by the given keyboard layout handle.
- * Parameters: UINT uChar character to translate
- *             HKL  hkl   keyboard layout handle
- * Variables :
- * Result    : see docs
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
- *****************************************************************************/
-
-WORD WIN32API VkKeyScanExA(CHAR uChar,
-                           HKL  hkl)
-{
-  dprintf(("USER32:VkKeyScanExA (%u,%08x) not implemented.\n",
-         uChar,
-         hkl));
-
-  return (uChar);
-}
-
-
-/*****************************************************************************
- * Name      : BOOL WIN32API SetShellWindow
- * Purpose   : Unknown
- * Parameters: Unknown
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED UNKNOWN STUB
- *
- * Author    : Patrick Haller [Wed, 1998/06/16 11:55]
- *****************************************************************************/
-
-BOOL WIN32API SetShellWindow(DWORD x1)
-{
-  dprintf(("USER32: SetShellWindow(%08x) not implemented.\n",
-           x1));
-
-  return (FALSE); /* default */
-}
-
-
-/*****************************************************************************
- * Name      : BOOL WIN32API PlaySoundEvent
- * Purpose   : Unknown
- * Parameters: Unknown
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED UNKNOWN STUB
- *
- * Author    : Patrick Haller [Wed, 1998/06/16 11:55]
- *****************************************************************************/
-
-BOOL WIN32API PlaySoundEvent(DWORD x1)
-{
-  dprintf(("USER32: PlaySoundEvent(%08x) not implemented.\n",
-           x1));
-
-  return (FALSE); /* default */
-}
-
-
 /*****************************************************************************
  * Name      : BOOL WIN32API TileChildWindows
  * Purpose   : Unknown
@@ -3572,7 +3438,6 @@ BOOL WIN32API PlaySoundEvent(DWORD x1)
  *
  * Author    : Patrick Haller [Wed, 1998/06/16 11:55]
  *****************************************************************************/
-
 BOOL WIN32API TileChildWindows(DWORD x1,
                                   DWORD x2)
 {
@@ -3582,10 +3447,8 @@ BOOL WIN32API TileChildWindows(DWORD x1,
 
   return (FALSE); /* default */
 }
-
-
 /*****************************************************************************
- * Name      : BOOL WIN32API SetSysColorsTemp
+ * Name      : BOOL WIN32API CascadeChildWindows
  * Purpose   : Unknown
  * Parameters: Unknown
  * Variables :
@@ -3595,127 +3458,17 @@ BOOL WIN32API TileChildWindows(DWORD x1,
  *
  * Author    : Patrick Haller [Wed, 1998/06/16 11:55]
  *****************************************************************************/
-
-BOOL WIN32API SetSysColorsTemp(void)
+BOOL WIN32API CascadeChildWindows(DWORD x1,
+                                     DWORD x2)
 {
-  dprintf(("USER32: SetSysColorsTemp() not implemented.\n"));
-
-  return (FALSE); /* default */
-}
-
-
-/*****************************************************************************
- * Name      : BOOL WIN32API RegisterNetworkCapabilities
- * Purpose   : Unknown
- * Parameters: Unknown
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED UNKNOWN STUB
- *
- * Author    : Patrick Haller [Wed, 1998/06/16 11:55]
- *****************************************************************************/
-
-BOOL WIN32API RegisterNetworkCapabilities(DWORD x1,
-                                             DWORD x2)
-{
-  dprintf(("USER32: RegisterNetworkCapabilities(%08xh,%08xh) not implemented.\n",
+  dprintf(("USER32: CascadeChildWindows(%08xh,%08xh) not implemented.\n",
            x1,
            x2));
 
   return (FALSE); /* default */
 }
 
-
-/*****************************************************************************
- * Name      : BOOL WIN32API EndTask
- * Purpose   : Unknown
- * Parameters: Unknown
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED UNKNOWN STUB
- *
- * Author    : Patrick Haller [Wed, 1998/06/16 11:55]
- *****************************************************************************/
-
-BOOL WIN32API EndTask(DWORD x1,
-                         DWORD x2,
-                         DWORD x3)
-{
-  dprintf(("USER32: EndTask(%08xh,%08xh,%08xh) not implemented.\n",
-           x1,
-           x2,
-           x3));
-
-  return (FALSE); /* default */
-}
-
-
-
-/*****************************************************************************
- * Name      : BOOL WIN32API GetNextQueueWindow
- * Purpose   : Unknown
- * Parameters: Unknown
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED UNKNOWN STUB
- *
- * Author    : Patrick Haller [Wed, 1998/06/16 11:55]
- *****************************************************************************/
-
-BOOL WIN32API GetNextQueueWindow(DWORD x1,
-                                    DWORD x2)
-{
-  dprintf(("USER32: GetNextQueueWindow(%08xh,%08xh) not implemented.\n",
-           x1,
-           x2));
-
-  return (FALSE); /* default */
-}
-
-
-/*****************************************************************************
- * Name      : BOOL WIN32API YieldTask
- * Purpose   : Unknown
- * Parameters: Unknown
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED UNKNOWN STUB
- *
- * Author    : Patrick Haller [Wed, 1998/06/16 11:55]
- *****************************************************************************/
-
-BOOL WIN32API YieldTask(void)
-{
-  dprintf(("USER32: YieldTask() not implemented.\n"));
-
-  return (FALSE); /* default */
-}
-
-
-/*****************************************************************************
- * Name      : BOOL WIN32API WinOldAppHackoMatic
- * Purpose   : Unknown
- * Parameters: Unknown
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED UNKNOWN STUB
- *
- * Author    : Patrick Haller [Wed, 1998/06/16 11:55]
- *****************************************************************************/
-
-BOOL WIN32API WinOldAppHackoMatic(DWORD x1)
-{
-  dprintf(("USER32: WinOldAppHackoMatic(%08x) not implemented.\n",
-           x1));
-
-  return (FALSE); /* default */
-}
-
+/* Drag'n'drop */
 
 /*****************************************************************************
  * Name      : BOOL WIN32API DragObject
@@ -3728,7 +3481,6 @@ BOOL WIN32API WinOldAppHackoMatic(DWORD x1)
  *
  * Author    : Patrick Haller [Wed, 1998/06/16 11:55]
  *****************************************************************************/
-
 DWORD WIN32API DragObject(HWND x1,HWND x2,UINT x3,DWORD x4,HCURSOR x5)
 {
   dprintf(("USER32: DragObject(%08x,%08xh,%08xh,%08xh,%08xh) not implemented.\n",
@@ -3741,9 +3493,10 @@ DWORD WIN32API DragObject(HWND x1,HWND x2,UINT x3,DWORD x4,HCURSOR x5)
   return (FALSE); /* default */
 }
 
+/* Unknown */
 
 /*****************************************************************************
- * Name      : BOOL WIN32API CascadeChildWindows
+ * Name      : BOOL WIN32API SetShellWindow
  * Purpose   : Unknown
  * Parameters: Unknown
  * Variables :
@@ -3753,18 +3506,145 @@ DWORD WIN32API DragObject(HWND x1,HWND x2,UINT x3,DWORD x4,HCURSOR x5)
  *
  * Author    : Patrick Haller [Wed, 1998/06/16 11:55]
  *****************************************************************************/
-
-BOOL WIN32API CascadeChildWindows(DWORD x1,
-                                     DWORD x2)
+BOOL WIN32API SetShellWindow(DWORD x1)
 {
-  dprintf(("USER32: CascadeChildWindows(%08xh,%08xh) not implemented.\n",
+  dprintf(("USER32: SetShellWindow(%08x) not implemented.\n",
+           x1));
+
+  return (FALSE); /* default */
+}
+/*****************************************************************************
+ * Name      : BOOL WIN32API PlaySoundEvent
+ * Purpose   : Unknown
+ * Parameters: Unknown
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED UNKNOWN STUB
+ *
+ * Author    : Patrick Haller [Wed, 1998/06/16 11:55]
+ *****************************************************************************/
+BOOL WIN32API PlaySoundEvent(DWORD x1)
+{
+  dprintf(("USER32: PlaySoundEvent(%08x) not implemented.\n",
+           x1));
+
+  return (FALSE); /* default */
+}
+/*****************************************************************************
+ * Name      : BOOL WIN32API SetSysColorsTemp
+ * Purpose   : Unknown
+ * Parameters: Unknown
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED UNKNOWN STUB
+ *
+ * Author    : Patrick Haller [Wed, 1998/06/16 11:55]
+ *****************************************************************************/
+BOOL WIN32API SetSysColorsTemp(void)
+{
+  dprintf(("USER32: SetSysColorsTemp() not implemented.\n"));
+
+  return (FALSE); /* default */
+}
+/*****************************************************************************
+ * Name      : BOOL WIN32API RegisterNetworkCapabilities
+ * Purpose   : Unknown
+ * Parameters: Unknown
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED UNKNOWN STUB
+ *
+ * Author    : Patrick Haller [Wed, 1998/06/16 11:55]
+ *****************************************************************************/
+BOOL WIN32API RegisterNetworkCapabilities(DWORD x1,
+                                             DWORD x2)
+{
+  dprintf(("USER32: RegisterNetworkCapabilities(%08xh,%08xh) not implemented.\n",
            x1,
            x2));
 
   return (FALSE); /* default */
 }
+/*****************************************************************************
+ * Name      : BOOL WIN32API EndTask
+ * Purpose   : Unknown
+ * Parameters: Unknown
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED UNKNOWN STUB
+ *
+ * Author    : Patrick Haller [Wed, 1998/06/16 11:55]
+ *****************************************************************************/
+BOOL WIN32API EndTask(DWORD x1,
+                         DWORD x2,
+                         DWORD x3)
+{
+  dprintf(("USER32: EndTask(%08xh,%08xh,%08xh) not implemented.\n",
+           x1,
+           x2,
+           x3));
 
+  return (FALSE); /* default */
+}
+/*****************************************************************************
+ * Name      : BOOL WIN32API GetNextQueueWindow
+ * Purpose   : Unknown
+ * Parameters: Unknown
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED UNKNOWN STUB
+ *
+ * Author    : Patrick Haller [Wed, 1998/06/16 11:55]
+ *****************************************************************************/
+BOOL WIN32API GetNextQueueWindow(DWORD x1,
+                                    DWORD x2)
+{
+  dprintf(("USER32: GetNextQueueWindow(%08xh,%08xh) not implemented.\n",
+           x1,
+           x2));
 
+  return (FALSE); /* default */
+}
+/*****************************************************************************
+ * Name      : BOOL WIN32API YieldTask
+ * Purpose   : Unknown
+ * Parameters: Unknown
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED UNKNOWN STUB
+ *
+ * Author    : Patrick Haller [Wed, 1998/06/16 11:55]
+ *****************************************************************************/
+BOOL WIN32API YieldTask(void)
+{
+  dprintf(("USER32: YieldTask() not implemented.\n"));
+
+  return (FALSE); /* default */
+}
+/*****************************************************************************
+ * Name      : BOOL WIN32API WinOldAppHackoMatic
+ * Purpose   : Unknown
+ * Parameters: Unknown
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED UNKNOWN STUB
+ *
+ * Author    : Patrick Haller [Wed, 1998/06/16 11:55]
+ *****************************************************************************/
+BOOL WIN32API WinOldAppHackoMatic(DWORD x1)
+{
+  dprintf(("USER32: WinOldAppHackoMatic(%08x) not implemented.\n",
+           x1));
+
+  return (FALSE); /* default */
+}
 /*****************************************************************************
  * Name      : BOOL WIN32API RegisterSystemThread
  * Purpose   : Unknown
@@ -3776,7 +3656,6 @@ BOOL WIN32API CascadeChildWindows(DWORD x1,
  *
  * Author    : Patrick Haller [Wed, 1998/06/16 11:55]
  *****************************************************************************/
-
 BOOL WIN32API RegisterSystemThread(DWORD x1,
                                       DWORD x2)
 {
@@ -3786,8 +3665,6 @@ BOOL WIN32API RegisterSystemThread(DWORD x1,
 
   return (FALSE); /* default */
 }
-
-
 /*****************************************************************************
  * Name      : BOOL WIN32API IsHungThread
  * Purpose   : Unknown
@@ -3799,7 +3676,6 @@ BOOL WIN32API RegisterSystemThread(DWORD x1,
  *
  * Author    : Patrick Haller [Wed, 1998/06/16 11:55]
  *****************************************************************************/
-
 BOOL WIN32API IsHungThread(DWORD x1)
 {
   dprintf(("USER32: IsHungThread(%08xh) not implemented.\n",
@@ -3807,9 +3683,6 @@ BOOL WIN32API IsHungThread(DWORD x1)
 
   return (FALSE); /* default */
 }
-
-
-
 /*****************************************************************************
  * Name      : BOOL WIN32API UserSignalProc
  * Purpose   : Unknown
@@ -3821,7 +3694,6 @@ BOOL WIN32API IsHungThread(DWORD x1)
  *
  * Author    : Patrick Haller [Wed, 1998/06/16 11:55]
  *****************************************************************************/
-
 BOOL WIN32API UserSignalProc(DWORD x1,
                                 DWORD x2,
                                 DWORD x3,
@@ -3835,8 +3707,6 @@ BOOL WIN32API UserSignalProc(DWORD x1,
 
   return (FALSE); /* default */
 }
-
-
 /*****************************************************************************
  * Name      : BOOL WIN32API GetShellWindow
  * Purpose   : Unknown
@@ -3848,16 +3718,12 @@ BOOL WIN32API UserSignalProc(DWORD x1,
  *
  * Author    : Patrick Haller [Wed, 1998/06/16 11:55]
  *****************************************************************************/
-
 HWND WIN32API GetShellWindow(void)
 {
   dprintf(("USER32: GetShellWindow() not implemented.\n"));
 
   return (0); /* default */
 }
-
-
-
 /***********************************************************************
  *           RegisterTasklist32                [USER32.436]
  */
