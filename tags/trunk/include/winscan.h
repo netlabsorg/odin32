@@ -191,3 +191,5 @@
 #define WINSCAN_MYCOMPUTER      0xEB    // My Computer 
 #define WINSCAN_MAIL            0xEC    // Mail 
 #define WINSCAN_MEDIASELECT     0xED    // Media Select 
+
+#endif
