@@ -1,4 +1,4 @@
-/* $Id: asyncapi.cpp,v 1.5 2000-03-28 19:10:09 sandervl Exp $ */
+/* $Id: asyncapi.cpp,v 1.6 2000-04-23 15:55:52 sandervl Exp $ */
 
 /*
  *
@@ -472,8 +472,10 @@ asyncloopstart:
 
 		case SOCECONNRESET:
 		case SOCEPIPE:
-       			if(lEventsPending & FD_CLOSE)
+       			if(lEventsPending & FD_CLOSE) {
+				dprintf(("FD_CLOSE; broken connection"));
        				AsyncNotifyEvent(pThreadParm, FD_CLOSE, WSAECONNRESET);
+			}
 
 			//remote connection broken (so can't receive data anymore)
                         //but can still send
@@ -481,8 +483,10 @@ asyncloopstart:
 			goto asyncloopstart; 
 
 		case SOCEINVAL:
-       			if(lEventsPending & FD_CLOSE)
+       			if(lEventsPending & FD_CLOSE) {
+				dprintf(("FD_CLOSE; SOCEINVAL"));
        				AsyncNotifyEvent(pThreadParm, FD_CLOSE, selecterr);
+			}
       			break;
 		default:
 			dprintf(("WSAsyncSelectThreadProc: select SOCKET_ERROR %x", selecterr));
@@ -523,6 +527,7 @@ asyncloopstart:
  		{
             		if(lEventsPending & FD_CLOSE) 
 			{
+				dprintf(("FD_CLOSE; ioctl; socket error"));
 				AsyncNotifyEvent(pThreadParm, FD_CLOSE, NO_ERROR);
 				//remote connection broken (so can't receive data anymore)
                         	//but can still send
@@ -551,10 +556,15 @@ asyncloopstart:
 		if((lEventsPending & FD_READ) && bytesread > 0) {
 			AsyncNotifyEvent(pThreadParm, FD_READ, NO_ERROR);
 		}
+#if 0
+//SvL: This generates FD_CLOSE messages when the connection is just fine
+//     (recv executed in another thread when select returns)
        		else 
 		if((lEventsPending & FD_CLOSE) && (state == 0 && bytesread == 0)) {
+			dprintf(("FD_CLOSE; state == 0 && bytesread == 0"));
 			AsyncNotifyEvent(pThreadParm, FD_CLOSE, NO_ERROR);
 		}
+#endif
 	}
       	if(ready(noexcept))
       	{
