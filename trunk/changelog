@@ -1,8 +1,9 @@
-/* $Id: changelog,v 1.2421 2003-01-04 13:44:49 sandervl Exp $ */
+/* $Id: changelog,v 1.2422 2003-01-04 13:59:34 sandervl Exp $ */
 
  2003-01-04: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o Corrected drawing of menubar in OS/2 L&F mode (when highlighted)
                 o Fixed handling of single ALT to select menu
+                o Use different color for highlighted menus (OS/2 L&F)
     - GDI32:    o Removed broken handling of TA_RIGHT in TextOut
 
  2003-01-03: Sander van Leeuwen <sandervl@innotek   >
