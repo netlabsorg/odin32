@@ -1,4 +1,4 @@
-/* $Id: winmouse.cpp,v 1.5 2000-02-16 14:28:28 sandervl Exp $ */
+/* $Id: winmouse.cpp,v 1.6 2000-03-01 13:30:07 sandervl Exp $ */
 /*
  * Mouse handler for DINPUT
  *
@@ -11,6 +11,7 @@
 #include <os2win.h>
 #include <misc.h>
 #include "win32wbase.h"
+#include <win\mouse.h>
 #include "winmouse.h"
 #include "oslibmsg.h"
 #include "pmwindow.h"

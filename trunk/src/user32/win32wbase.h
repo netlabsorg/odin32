@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.86 2000-02-24 19:19:10 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.87 2000-03-01 13:30:06 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -269,8 +269,7 @@ static LRESULT  BroadcastMessageW(int type, UINT msg, WPARAM wParam, LPARAM lPar
 
 Win32BaseWindow *FindWindowById(int id);
 
-    static HWND FindWindowEx(HWND hwndParent, HWND hwndChildAfter, LPSTR lpszClass, LPSTR lpszWindow,
-                             BOOL fUnicode = 0);
+    static HWND FindWindowEx(HWND hwndParent, HWND hwndChildAfter, ATOM atom, LPSTR lpszWindow);
 
            BOOL EnumChildWindows(WNDENUMPROC lpfn, LPARAM lParam);
            BOOL EnumThreadWindows(DWORD dwThreadId, WNDENUMPROC lpfn, LPARAM lParam);

@@ -1,4 +1,4 @@
-/* $Id: win32wbasenonclient.cpp,v 1.15 2000-02-23 17:05:19 cbratschi Exp $ */
+/* $Id: win32wbasenonclient.cpp,v 1.16 2000-03-01 13:30:06 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (non-client methods)
  *
@@ -259,12 +259,15 @@ LONG Win32BaseWindow::HandleNCLButtonDown(WPARAM wParam,LPARAM lParam)
     {
       Win32BaseWindow *topparent = GetTopParent();
 
-      if (GetActiveWindow() != topparent->getWindowHandle())
-        topparent->SetActiveWindow();
+        if (GetActiveWindow() != topparent->getWindowHandle())
+        {
+            //SvL: Calling topparent->SetActiveWindow() causes focus problems
+            OSLibWinSetFocus(topparent->getOS2FrameWindowHandle());
+        }
 
-      if (GetActiveWindow() == topparent->getWindowHandle())
-        SendInternalMessageA(WM_SYSCOMMAND,SC_MOVE+HTCAPTION,lParam);
-      break;
+        if (GetActiveWindow() == topparent->getWindowHandle())
+            SendInternalMessageA(WM_SYSCOMMAND,SC_MOVE+HTCAPTION,lParam);
+        break;
     }
 
     case HTSYSMENU:

@@ -1,4 +1,4 @@
-/* $Id: winmouse.h,v 1.4 2000-01-18 20:08:18 sandervl Exp $ */
+/* $Id: winmouse.h,v 1.5 2000-03-01 13:30:07 sandervl Exp $ */
 /*
  * Mouse handler for DINPUT
  *
@@ -10,8 +10,6 @@
  */
 #ifndef __WINMOUSE_H__
 #define __WINMOUSE_H__
-
-#include <win\mouse.h>
 
 extern LPMOUSE_EVENT_PROC mouseHandler;
 extern WNDPROC            keyboardHandler;
