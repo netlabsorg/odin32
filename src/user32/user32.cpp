@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.47 1999-10-23 16:45:22 cbratschi Exp $ */
+/* $Id: user32.cpp,v 1.48 1999-10-28 18:22:28 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -1174,33 +1174,6 @@ BOOL WIN32API SystemParametersInfoW(UINT uiAction, UINT uiParam, PVOID pvParam, 
 #endif
     return(rc);
 }
-
-/* Timer Functions */
-
-#if 0
-BOOL WIN32API KillTimer(HWND hWnd, UINT uIDEvent)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  KillTimer\n");
-#endif
-    hWnd = Win32Window::Win32ToOS2Handle(hWnd);
-    //WinStopTimer
-    //CB: replace
-    return O32_KillTimer(hWnd,uIDEvent);
-}
-//******************************************************************************
-//******************************************************************************
-UINT WIN32API SetTimer( HWND hwnd, UINT idTimer, UINT uTimeout, TIMERPROC  tmprc)
-{
-#ifdef DEBUG
-    WriteLog("USER32: SetTimer INCORRECT CALLING CONVENTION FOR HANDLER!!!!!\n");
-#endif
-    hwnd = Win32Window::Win32ToOS2Handle(hwnd);
-    //SvL: Write callback handler class for this one
-    //CB: replace
-    return O32_SetTimer(hwnd,idTimer,uTimeout,(TIMERPROC_O32)tmprc);
-}
-#endif
 
 /* Process and Thread Functions */
 

@@ -1,4 +1,4 @@
-/* $Id: windowclass.cpp,v 1.2 1999-10-08 16:28:21 sandervl Exp $ */
+/* $Id: windowclass.cpp,v 1.3 1999-10-28 18:22:31 sandervl Exp $ */
 /*
  * Win32 Window Class Code for OS/2
  *
@@ -180,7 +180,7 @@ BOOL WIN32API GetClassInfoW(HINSTANCE  hinst, LPCWSTR lpszClass, WNDCLASSW *lpwc
   if(wndclass) {
         wndclass->getClassInfo(&wc);
         memcpy(lpwc, &wc.style, sizeof(WNDCLASSW));
-        return(TRUE);
+       return(TRUE);
   }
   return(FALSE);
 }
@@ -214,6 +214,7 @@ BOOL WIN32API GetClassInfoExA(HINSTANCE     hInstance,
   wndclass = Win32WndClass::FindClass(hInstance, (LPSTR)lpszClass);
   if(wndclass) {
         wndclass->getClassInfo(lpwcx);
+	lpwcx->cbSize = sizeof(WNDCLASSEXA);
         return(TRUE);
   }
   return(FALSE);
@@ -255,6 +256,7 @@ BOOL WIN32API GetClassInfoExW(HINSTANCE     hInstance,
 
   if(wndclass) {
         wndclass->getClassInfo(lpwcx);
+	lpwcx->cbSize = sizeof(WNDCLASSEXW);
         return(TRUE);
   }
   return(FALSE);
