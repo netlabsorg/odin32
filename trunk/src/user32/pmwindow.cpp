@@ -1,8 +1,8 @@
-/* $Id: pmwindow.cpp,v 1.105 2000-10-09 17:26:50 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.106 2000-10-22 14:54:35 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
- * Copyright 1998-1999 Sander van Leeuwen (sandervl@xs4all.nl)
+ * Copyright 1998-2000 Sander van Leeuwen (sandervl@xs4all.nl)
  * Copyright 1999      Daniela Engert (dani@ngrt.de)
  *
  *
@@ -378,11 +378,12 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 
         if((pswp->fl & (SWP_MOVE | SWP_SIZE)) && !(win32wnd->getStyle() & WS_MINIMIZE_W))
         {
+          //CB: todo: use result for WM_CALCVALIDRECTS
+          //Get old client rectangle (for invalidation of frame window parts later on)
+          mapWin32ToOS2Rect(win32wnd->getWindowHeight(), win32wnd->getClientRectPtr(), (PRECTLOS2)&rect);
+
           //Note: Also updates the new window rectangle
           win32wnd->MsgFormatFrame(&wp);
-
-          //CB: todo: use result for WM_CALCVALIDRECTS
-          mapWin32ToOS2RectFrame(win32wnd, win32wnd->getClientRectPtr(), (PRECTLOS2)&rect);
 
           if(win32wnd->CanReceiveSizeMsgs())
             win32wnd->MsgPosChanged((LPARAM)&wp);
