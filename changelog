@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.1182 2000-10-08 20:04:39 sandervl Exp $ */
+ /* $Id: changelog,v 1.1183 2000-10-09 02:32:29 phaller Exp $ */
+
+ 2000-10-09: Patrick Haller <phaller@gmx.net>
+    - KERNEL32: Fixed console bug (left offset) reported by Michal
 
  2000-10-08: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32: GetMinMaxInfo fix for windows with both WS_THICKFRAME and
