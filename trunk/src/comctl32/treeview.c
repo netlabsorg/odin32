@@ -1,4 +1,4 @@
-/* $Id: treeview.c,v 1.23 2000-02-10 18:51:19 cbratschi Exp $ */
+/* $Id: treeview.c,v 1.24 2000-02-12 18:10:40 cbratschi Exp $ */
 /* Treeview control
  *
  * Copyright 1998 Eric Kohl <ekohl@abo.rhein-zeitung.de>
@@ -31,7 +31,6 @@
                                   better implementation.
  *   WM_HSCROLL is broken.
  *   use separate routine to get item text/image.
- *   WM_SETREDRAW isn't handled
  *
  *   Separate drawing/calculation.
  *
@@ -43,6 +42,16 @@
  */
 
 /* WINE 991212 level */
+
+/* CB: todo
+
+ - sub parent lines aren't redrawn in expand handler
+ - invisible sibling lines aren't drawn in WM_PAINT
+ - WM_LBUTTONDOWN: bug in highlight code
+ - WM_SIZE: redraw doesn't work
+ - hscroll not set
+
+*/
 
 #include <string.h>
 #include "winbase.h"
@@ -73,6 +82,8 @@ static BOOL    TREEVIEW_SendCustomDrawItemNotify (HWND hwnd, HDC hdc, TREEVIEW_I
 static LRESULT TREEVIEW_DoSelectItem (HWND hwnd, INT action, HTREEITEM newSelect, INT cause);
 static void    TREEVIEW_Refresh(HWND hwnd);
 static void    TREEVIEW_Draw(HWND hwnd,HDC hdc,RECT *updateRect);
+static void    TREEVIEW_UnqueueRefresh(HWND hwnd,BOOL calc,BOOL refresh);
+static void    TREEVIEW_QueueRefresh(HWND hwnd);
 
 static LRESULT CALLBACK TREEVIEW_Edit_SubclassProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
@@ -487,7 +498,8 @@ TREEVIEW_SetInsertMark (HWND hwnd, WPARAM wParam, LPARAM lParam)
   infoPtr->insertMarkItem=(HTREEITEM) lParam;
 
   //CB: todo
-  TREEVIEW_Refresh(hwnd);
+  if (!(infoPtr->uInternalStatus & TV_NOREDRAW))
+    TREEVIEW_Refresh(hwnd);
 
   return 1;
 }
@@ -538,6 +550,27 @@ TREEVIEW_GetTextColor (HWND hwnd)
 
 #define TREEVIEW_LEFT_MARGIN 8
 
+//CB: hack for PS_DOT bug in Open32 pen handling
+
+BOOL drawPixel;
+HDC  drawDC;
+
+VOID CALLBACK TREEVIEW_DDAProc(int x,int y,LPARAM lpData)
+{
+  if (drawPixel) SetPixel(drawDC,x,y,(COLORREF)lpData);
+  else SetPixel(drawDC,x,y,RGB(255,255,255));
+  drawPixel = !drawPixel;
+}
+
+static void TREEVIEW_Polyline(HDC hdc,const POINT *lppt,int cPoints,COLORREF color)
+{
+  INT x;
+
+  drawPixel = TRUE;
+  drawDC = hdc;
+  for (x = 0;x < cPoints-1;x++)
+    LineDDA(lppt[x].x,lppt[x].y,lppt[x+1].x,lppt[x+1].y,TREEVIEW_DDAProc,color);
+}
 
 static void
 TREEVIEW_DrawItem (HWND hwnd, HDC hdc, TREEVIEW_ITEM *wineItem)
@@ -549,21 +582,19 @@ TREEVIEW_DrawItem (HWND hwnd, HDC hdc, TREEVIEW_ITEM *wineItem)
   UINT  uTextJustify = DT_LEFT;
   RECT  r;
 
-
   if (wineItem->state & TVIS_BOLD)
-        hOldFont = SelectObject (hdc, infoPtr->hBoldFont);
+    hOldFont = SelectObject (hdc, infoPtr->hBoldFont);
   else
-        hOldFont = SelectObject (hdc, infoPtr->hFont);
+    hOldFont = SelectObject (hdc, infoPtr->hFont);
 
-  cditem=0;
-  //TRACE ("cdmode:%x\n",infoPtr->cdmode);
-  if (infoPtr->cdmode & CDRF_NOTIFYITEMDRAW) {
-                cditem = TREEVIEW_SendCustomDrawItemNotify(hwnd, hdc,
-                             wineItem, CDDS_ITEMPREPAINT);
+  cditem = 0;
 
-                if (cditem & CDRF_SKIPDEFAULT)
-                        return;
-        }
+  if (infoPtr->cdmode & CDRF_NOTIFYITEMDRAW)
+  {
+    cditem = TREEVIEW_SendCustomDrawItemNotify(hwnd, hdc, wineItem, CDDS_ITEMPREPAINT);
+
+    if (cditem & CDRF_SKIPDEFAULT) return;
+  }
 
   /*
    * Set drawing starting points
@@ -575,7 +606,7 @@ TREEVIEW_DrawItem (HWND hwnd, HDC hdc, TREEVIEW_ITEM *wineItem)
   /*
    * Display the tree hierarchy
    */
-  if ( dwStyle & TVS_HASLINES)
+  if ((dwStyle & TVS_HASLINES) && (wineItem->hItem != infoPtr->TopRootItem))
   {
     /*
      * Write links to parent node
@@ -585,13 +616,13 @@ TREEVIEW_DrawItem (HWND hwnd, HDC hdc, TREEVIEW_ITEM *wineItem)
      * points[1] is the L corner
      * points[2] is attached to the parent or the up sibling
      */
-    if ( dwStyle & TVS_LINESATROOT)
+    if (dwStyle & TVS_LINESATROOT)
     {
       TREEVIEW_ITEM *upNode    = NULL;
-        BOOL  hasParentOrSibling = TRUE;
+      BOOL  hasParentOrSibling = TRUE;
       RECT  upRect             = {0,0,0,0};
       HPEN  hOldPen, hnewPen;
-        POINT points[3];
+      POINT points[3];
       /*
        * determine the target location of the line at root, either be linked
        * to the up sibling or to the parent node.
@@ -605,18 +636,17 @@ TREEVIEW_DrawItem (HWND hwnd, HDC hdc, TREEVIEW_ITEM *wineItem)
 
       if (upNode)
         upRect = upNode->rect;
-
-      if ( wineItem->iLevel == 0 )
+//CB: todo: draw full lines to avoid problems with PS_DOT and scrolling
+      if (wineItem->iLevel == 0)
       {
         points[2].x = points[1].x = upRect.left+8;
         points[0].x = points[2].x + 10;
         points[2].y = upRect.bottom-3;
         points[1].y = points[0].y = center;
-      }
-      else
+      } else
       {
         points[2].x = points[1].x = 8 + (20*wineItem->iLevel);
-        points[2].y = ( upNode->cChildren == 0) ?
+        points[2].y = (upNode->cChildren == 0) ?
                         upRect.top :        /* is linked to the "L" above */
                         ( wineItem->upsibling != NULL) ?
                           upRect.bottom-3:  /* is linked to an icon       */
@@ -628,16 +658,23 @@ TREEVIEW_DrawItem (HWND hwnd, HDC hdc, TREEVIEW_ITEM *wineItem)
       /*
        * Get a dotted pen
        */
+#if 0 //CB: workaround for Open32 PS_DOT bug
       hnewPen = CreatePen(PS_DOT, 0, infoPtr->clrLine);
       hOldPen = SelectObject( hdc, hnewPen );
 
       if (hasParentOrSibling)
-        Polyline (hdc,points,3);
+        Polyline(hdc,points,3);
       else
-        Polyline (hdc,points,2);
+        Polyline(hdc,points,2);
 
       DeleteObject(hnewPen);
       SelectObject(hdc, hOldPen);
+#else
+      if (hasParentOrSibling)
+        TREEVIEW_Polyline(hdc,points,3,infoPtr->clrLine);
+      else
+        TREEVIEW_Polyline(hdc,points,2,infoPtr->clrLine);
+#endif
     }
   }
 
@@ -649,8 +686,8 @@ TREEVIEW_DrawItem (HWND hwnd, HDC hdc, TREEVIEW_ITEM *wineItem)
 
   if (( dwStyle & TVS_HASBUTTONS) && ( dwStyle & TVS_HASLINES))
   {
-          if ( (wineItem->cChildren) ||
-               (wineItem->cChildren == I_CHILDRENCALLBACK))
+    if ( (wineItem->cChildren) ||
+         (wineItem->cChildren == I_CHILDRENCALLBACK))
     {
       /* Setup expand box coordinate to facilitate the LMBClick handling */
       wineItem->expandBox.left   = xpos-4;
@@ -658,20 +695,16 @@ TREEVIEW_DrawItem (HWND hwnd, HDC hdc, TREEVIEW_ITEM *wineItem)
       wineItem->expandBox.right  = xpos+5;
       wineItem->expandBox.bottom = center+5;
 
-                Rectangle (
-        hdc,
-        wineItem->expandBox.left,
-        wineItem->expandBox.top ,
-        wineItem->expandBox.right,
-        wineItem->expandBox.bottom);
+      Rectangle(hdc,wineItem->expandBox.left,wineItem->expandBox.top,wineItem->expandBox.right,wineItem->expandBox.bottom);
 
-                MoveToEx (hdc, xpos-2, center, NULL);
-                LineTo   (hdc, xpos+3, center);
+      MoveToEx (hdc, xpos-2, center, NULL);
+      LineTo   (hdc, xpos+3, center);
 
-                if (!(wineItem->state & TVIS_EXPANDED)) {
-                        MoveToEx (hdc, xpos,   center-2, NULL);
-                        LineTo   (hdc, xpos,   center+3);
-          }
+      if (!(wineItem->state & TVIS_EXPANDED))
+      {
+        MoveToEx (hdc, xpos,   center-2, NULL);
+        LineTo   (hdc, xpos,   center+3);
+      }
     }
   }
 
@@ -679,67 +712,68 @@ TREEVIEW_DrawItem (HWND hwnd, HDC hdc, TREEVIEW_ITEM *wineItem)
    * Display the image associated with this item
    */
   xpos += 13; /* update position */
-  if (wineItem->mask & (TVIF_IMAGE|TVIF_SELECTEDIMAGE)) {
+  if (wineItem->mask & (TVIF_IMAGE|TVIF_SELECTEDIMAGE))
+  {
     INT        imageIndex;
     HIMAGELIST *himlp = NULL;
 
-   /* State images are displayed to the left of the Normal image
-    * image number is in state; zero should be `display no image'.
-    * FIXME: that last sentence looks like it needs some checking.
-    */
-        if (infoPtr->himlState)
-        himlp=&infoPtr->himlState;
-        imageIndex=wineItem->state>>12;
-        imageIndex++;          /* yeah, right */
-        //TRACE ("imindex:%d\n",imageIndex);
+    /* State images are displayed to the left of the Normal image
+     * image number is in state; zero should be `display no image'.
+     * FIXME: that last sentence looks like it needs some checking.
+     */
+    if (infoPtr->himlState)
+      himlp=&infoPtr->himlState;
+    imageIndex=wineItem->state>>12;
+    imageIndex++;          /* yeah, right */
+
     if ((himlp) && (imageIndex))
     {
-          imageIndex--;       /* see FIXME */
+      imageIndex--;       /* see FIXME */
       ImageList_Draw ( *himlp, imageIndex, hdc, xpos-2, r.top+1, ILD_NORMAL);
-          ImageList_GetIconSize (*himlp, &cx, &cy);
-          wineItem->statebitmap.left=xpos-2;
-          wineItem->statebitmap.right=xpos-2+cx;
-          wineItem->statebitmap.top=r.top+1;
-          wineItem->statebitmap.bottom=r.top+1+cy;
-          xpos+=cx;
+      ImageList_GetIconSize (*himlp, &cx, &cy);
+      wineItem->statebitmap.left=xpos-2;
+      wineItem->statebitmap.right=xpos-2+cx;
+      wineItem->statebitmap.top=r.top+1;
+      wineItem->statebitmap.bottom=r.top+1+cy;
+      xpos += cx;
     }
 
-                /* Now, draw the normal image; can be either selected or
-                 * non-selected image.
-                 */
+    /* Now, draw the normal image; can be either selected or
+     * non-selected image.
+     */
 
-        himlp=NULL;
-        if (infoPtr->himlNormal)
+    himlp=NULL;
+    if (infoPtr->himlNormal)
       himlp=&infoPtr->himlNormal; /* get the image list */
 
     imageIndex = wineItem->iImage;
-        if ( (wineItem->state & TVIS_SELECTED) &&
-         (wineItem->iSelectedImage)) {
+    if ( (wineItem->state & TVIS_SELECTED) &&
+         (wineItem->iSelectedImage))
+    {
 
       /* The item is curently selected */
-                  if (wineItem->iSelectedImage == I_IMAGECALLBACK)
-                        TREEVIEW_SendDispInfoNotify
-                                        (hwnd, wineItem, TVN_GETDISPINFO, TVIF_SELECTEDIMAGE);
+      if (wineItem->iSelectedImage == I_IMAGECALLBACK)
+        TREEVIEW_SendDispInfoNotify(hwnd, wineItem, TVN_GETDISPINFO, TVIF_SELECTEDIMAGE);
 
-          imageIndex = wineItem->iSelectedImage;
-          } else {
+      imageIndex = wineItem->iSelectedImage;
+    } else
+    {
       /* The item is not selected */
-                  if (wineItem->iImage == I_IMAGECALLBACK)
-                          TREEVIEW_SendDispInfoNotify
-                                        (hwnd, wineItem, TVN_GETDISPINFO, TVIF_IMAGE);
+      if (wineItem->iImage == I_IMAGECALLBACK)
+        TREEVIEW_SendDispInfoNotify(hwnd, wineItem, TVN_GETDISPINFO, TVIF_IMAGE);
 
       imageIndex = wineItem->iImage;
-        }
+    }
 
     if (himlp)
     {
       ImageList_Draw ( *himlp, imageIndex, hdc, xpos-2, r.top+1, ILD_NORMAL);
-          ImageList_GetIconSize (*himlp, &cx, &cy);
-          wineItem->bitmap.left=xpos-2;
-          wineItem->bitmap.right=xpos-2+cx;
-          wineItem->bitmap.top=r.top+1;
-          wineItem->bitmap.bottom=r.top+1+cy;
-          xpos+=cx;
+      ImageList_GetIconSize (*himlp, &cx, &cy);
+      wineItem->bitmap.left=xpos-2;
+      wineItem->bitmap.right=xpos-2+cx;
+      wineItem->bitmap.top=r.top+1;
+      wineItem->bitmap.bottom=r.top+1+cy;
+      xpos += cx;
     }
   }
 
@@ -762,7 +796,8 @@ TREEVIEW_DrawItem (HWND hwnd, HDC hdc, TREEVIEW_ITEM *wineItem)
     wineItem->text.top   = r.top;
     wineItem->text.bottom= r.bottom;
 
-    if (wineItem->pszText== LPSTR_TEXTCALLBACKA) {
+    if (wineItem->pszText== LPSTR_TEXTCALLBACKA)
+    {
       //TRACE("LPSTR_TEXTCALLBACK\n");
       TREEVIEW_SendDispInfoNotify (hwnd, wineItem, TVN_GETDISPINFO, TVIF_TEXT);
     }
@@ -781,15 +816,17 @@ TREEVIEW_DrawItem (HWND hwnd, HDC hdc, TREEVIEW_ITEM *wineItem)
 
 
     if (!(cditem & CDRF_NOTIFYPOSTPAINT) &&
-        (wineItem->state & (TVIS_SELECTED | TVIS_DROPHILITED)) ) {
-        oldBkMode    = SetBkMode  (hdc, OPAQUE);
-        oldBkColor   = SetBkColor  (hdc, GetSysColor( COLOR_HIGHLIGHT));
-        oldTextColor = SetTextColor(hdc, GetSysColor( COLOR_HIGHLIGHTTEXT));
-        } else {
-        oldBkMode    = SetBkMode  (hdc, TRANSPARENT);
-                oldBkColor   = SetBkColor (hdc, infoPtr->clrBk);
+        (wineItem->state & (TVIS_SELECTED | TVIS_DROPHILITED)) )
+    {
+      oldBkMode    = SetBkMode  (hdc, OPAQUE);
+      oldBkColor   = SetBkColor  (hdc, GetSysColor( COLOR_HIGHLIGHT));
+      oldTextColor = SetTextColor(hdc, GetSysColor( COLOR_HIGHLIGHTTEXT));
+    } else
+    {
+      oldBkMode    = SetBkMode  (hdc, TRANSPARENT);
+      oldBkColor   = SetBkColor (hdc, infoPtr->clrBk);
  /*         oldTextColor = SetTextColor(hdc, infoPtr->clrText);  */
-        }
+    }
 
 
 
@@ -844,37 +881,38 @@ TREEVIEW_DrawItem (HWND hwnd, HDC hdc, TREEVIEW_ITEM *wineItem)
   //if (infoPtr->insertMarkItem)
   //              TRACE ("item:%d,mark:%d\n", (int)wineItem->hItem,
   //                             (int) infoPtr->insertMarkItem);
-  if (wineItem->hItem==infoPtr->insertMarkItem) {
-                HPEN hNewPen, hOldPen;
-                int offset;
+  if (wineItem->hItem==infoPtr->insertMarkItem)
+  {
+    HPEN hNewPen, hOldPen;
+    int offset;
 
-                hNewPen = CreatePen(PS_SOLID, 2, infoPtr->clrInsertMark);
-                hOldPen = SelectObject( hdc, hNewPen );
+    hNewPen = CreatePen(PS_SOLID, 2, infoPtr->clrInsertMark);
+    hOldPen = SelectObject( hdc, hNewPen );
 
-                if (infoPtr->insertBeforeorAfter)
-                        offset=wineItem->text.top+1;
-                else
-                        offset=wineItem->text.bottom-1;
+    if (infoPtr->insertBeforeorAfter)
+      offset=wineItem->text.top+1;
+    else
+      offset=wineItem->text.bottom-1;
 
-                MoveToEx (hdc, wineItem->text.left, offset-3, NULL);
-                LineTo (hdc, wineItem->text.left, offset+3);
+    MoveToEx (hdc, wineItem->text.left, offset-3, NULL);
+    LineTo (hdc, wineItem->text.left, offset+3);
 
-                MoveToEx (hdc, wineItem->text.left, offset, NULL);
-                LineTo (hdc, r.right-2, offset);
+    MoveToEx (hdc, wineItem->text.left, offset, NULL);
+    LineTo (hdc, r.right-2, offset);
 
-                MoveToEx (hdc, r.right-2, offset+3, NULL);
-                LineTo (hdc, r.right-2, offset-3);
+    MoveToEx (hdc, r.right-2, offset+3, NULL);
+    LineTo (hdc, r.right-2, offset-3);
 
-        DeleteObject(hNewPen);
+    DeleteObject(hNewPen);
 
-        SelectObject(hdc, hOldPen);
-        }
+    SelectObject(hdc, hOldPen);
+  }
 
-  if (cditem & CDRF_NOTIFYPOSTPAINT) {
-                cditem=TREEVIEW_SendCustomDrawItemNotify
-                       (hwnd, hdc, wineItem, CDDS_ITEMPOSTPAINT);
-                //TRACE("postpaint:cditem-app returns 0x%x\n",cditem);
-        }
+  if (cditem & CDRF_NOTIFYPOSTPAINT)
+  {
+    cditem = TREEVIEW_SendCustomDrawItemNotify(hwnd, hdc, wineItem, CDDS_ITEMPOSTPAINT);
+    //TRACE("postpaint:cditem-app returns 0x%x\n",cditem);
+  }
 
   SelectObject (hdc, hOldFont);
 }
@@ -893,6 +931,8 @@ TREEVIEW_GetItemRect (HWND hwnd, WPARAM wParam, LPARAM lParam)
    */
   if (lpRect == NULL)
     return FALSE;
+
+  TREEVIEW_UnqueueRefresh(hwnd,TRUE,TRUE);
 
   /*
    * retrieve the item ptr
@@ -1006,21 +1046,12 @@ TREEVIEW_GetItemState (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
 {
     TREEVIEW_INFO *infoPtr = TREEVIEW_GetInfoPtr(hwnd);
-        TREEVIEW_ITEM *wineItem;
+    TREEVIEW_ITEM *wineItem;
 
-        wineItem = TREEVIEW_ValidItem (infoPtr, (HTREEITEM)wParam);
-        if (!wineItem) return 0;
+    wineItem = TREEVIEW_ValidItem (infoPtr, (HTREEITEM)wParam);
+    if (!wineItem) return 0;
 
-        return (wineItem->state & lParam);
-}
-
-static void TREEVIEW_RefreshItem(HWND hwnd,TREEVIEW_ITEM *item)
-{
-  if (item && item->visible)
-  {
-    //CB: todo: only redraw text and icon
-    InvalidateRect(hwnd,&item->rect,TRUE);
-  }
+    return (wineItem->state & lParam);
 }
 
 static void TREEVIEW_Refresh(HWND hwnd)
@@ -1028,50 +1059,149 @@ static void TREEVIEW_Refresh(HWND hwnd)
   InvalidateRect(hwnd,NULL,TRUE);
 }
 
-static void TREEVIEW_CalcItems(HWND hwnd)
+static void TREEVIEW_RefreshItem(HWND hwnd,TREEVIEW_ITEM *item)
 {
-  //CB: todo: TREEVIEW_Draw should only draw, not calculate!
+  if (item && item->visible)
+  {
+    RECT rect = item->rect;
+
+    rect.left += TREEVIEW_LEFT_MARGIN;
+    if (item->iLevel != 0) rect.left += (5*item->iLevel);
+    rect.left += 15;
+    InvalidateRect(hwnd,&rect,TRUE);
+  }
 }
 
-static void TREEVIEW_SetScrollbars(HWND hwnd)
-{
-  //CB: todo: dito
-}
+//CB: HDC parameter is optional
 
-static int TREEVIEW_GetFirstVisibleItem(HWND hwnd)
+static void TREEVIEW_CalcItems(HWND hwnd,HDC hdc,TREEVIEW_INFO *infoPtr)
 {
-  //CB: todo
+  TREEVIEW_ITEM *item,*prevItem;
+  INT iItem, indent, x, y, cx, height, itemHeight;
+  TEXTMETRICA tm;
+  RECT rect,view;
+  BOOL ownDC = FALSE;
 
-  return 0;
+  GetClientRect(hwnd,&rect);
+  infoPtr->uVisibleHeight = rect.bottom-rect.top;
+  infoPtr->uVisibleWidth = rect.right-rect.left;
+  view = rect;
+  OffsetRect(&view,infoPtr->cx,infoPtr->cy);
+
+  iItem = (INT)infoPtr->TopRootItem;
+  infoPtr->firstVisible = 0;
+  item = NULL;
+  indent = 0;
+  x = y = 0;
+
+  while (iItem)
+  {
+    prevItem = item;
+    item = &infoPtr->items[iItem];
+    item->iLevel = indent;
+
+    if ((infoPtr->uInternalStatus & TV_CALCALL) || !item->calculated)
+    {
+      ImageList_GetIconSize(infoPtr->himlNormal,&cx,&itemHeight);
+      if (infoPtr->uItemHeight > itemHeight)
+        itemHeight = infoPtr->uItemHeight;
+
+      if (!hdc)
+      {
+        ownDC = TRUE;
+        hdc = GetDC(hwnd);
+      }
+
+      GetTextMetricsA(hdc,&tm);
+      if ((tm.tmHeight + tm.tmExternalLeading) > itemHeight)
+        itemHeight = tm.tmHeight + tm.tmExternalLeading;
+
+      infoPtr->uRealItemHeight = itemHeight;
+
+      height = itemHeight * item->iIntegral +1;
+      item->calculated = TRUE;
+    } else height = infoPtr->uRealItemHeight*item->iIntegral+1;
+
+    item->rect.top    = y - infoPtr->cy + rect.top;
+    item->rect.bottom = item->rect.top + height ;
+    item->rect.left   = x - infoPtr->cx + rect.left;
+    item->rect.right  = rect.right;
+
+    if ((((y >= view.top) && (y <= view.bottom)) || ((y+height >= view.top) && (y+height <= view.bottom))) &&
+        (x >= view.left) && (x <= view.right))
+    {
+      item->visible     = TRUE;
+      if (!infoPtr->firstVisible)
+        infoPtr->firstVisible = item->hItem;
+    } else item->visible    = FALSE;
+
+    /* look up next item */
+
+    if ((item->firstChild) && (item->state & TVIS_EXPANDED))
+    {
+      iItem = (INT)item->firstChild;
+      indent++;
+      x += infoPtr->uIndent;
+      if (x > infoPtr->uTotalWidth)
+        infoPtr->uTotalWidth=x;
+    } else
+    {
+      iItem = (INT)item->sibling;
+      while ((!iItem) && (indent > 0))
+      {
+        indent--;
+        x -= infoPtr->uIndent;
+        prevItem = item;
+        item =& infoPtr->items[(INT)item->parent];
+        iItem = (INT)item->sibling;
+      }
+    }
+    y +=height;
+  } /* while */
+
+  if (ownDC) ReleaseDC(hwnd,hdc);
+
+/* FIXME: infoPtr->uTotalWidth should also take item label into account */
+
+  infoPtr->uTotalHeight = y;
+
+  infoPtr->uInternalStatus &= ~TV_CALCALL;
+
+//CB: todo: use SetScrollInfo, HSCROLL
+
+  if (infoPtr->uTotalHeight >= infoPtr->uVisibleHeight)
+  {
+    if (!(infoPtr->uInternalStatus & TV_VSCROLL))
+      ShowScrollBar (hwnd, SB_VERT, TRUE);
+    infoPtr->uInternalStatus |= TV_VSCROLL;
+    SetScrollRange (hwnd, SB_VERT, 0, infoPtr->uTotalHeight - infoPtr->uVisibleHeight, FALSE);
+    SetScrollPos (hwnd, SB_VERT, infoPtr->cy, TRUE);
+  } else
+  {
+    if (infoPtr->uInternalStatus & TV_VSCROLL)
+      ShowScrollBar (hwnd, SB_VERT, FALSE);
+    infoPtr->uInternalStatus &= ~TV_VSCROLL;
+  }
 }
 
 static void
 TREEVIEW_Draw(HWND hwnd,HDC hdc,RECT *updateRect)
 {
     TREEVIEW_INFO *infoPtr = TREEVIEW_GetInfoPtr(hwnd);
-    TEXTMETRICA tm;
     HBRUSH hbrBk;
-    RECT rect,view;
-    INT iItem, indent, x, y, cx, height, itemHeight;
-    TREEVIEW_ITEM *wineItem, *prevItem;
+    RECT rect;
+    TREEVIEW_ITEM *item;
+    INT iItem,indent;
+    INT visIndent = -1;
 
-    //TRACE("\n");
+    TREEVIEW_UnqueueRefresh(hwnd,TRUE,FALSE);
 
     GetClientRect (hwnd, &rect);
-    if ((rect.left-rect.right ==0) || (rect.top-rect.bottom==0)) return;
+    if ((rect.left == rect.right) || (rect.top == rect.bottom)) return;
 
-    infoPtr->cdmode=TREEVIEW_SendCustomDrawNotify
-                                                (hwnd, CDDS_PREPAINT, hdc, rect);
+    infoPtr->cdmode = TREEVIEW_SendCustomDrawNotify(hwnd, CDDS_PREPAINT, hdc, rect);
 
-    if (infoPtr->cdmode==CDRF_SKIPDEFAULT) return;
-
-    infoPtr->uVisibleHeight= rect.bottom-rect.top;
-    infoPtr->uVisibleWidth= rect.right-rect.left;
-
-    view = updateRect ? *updateRect:rect;
-    view.left = 0;
-    view.right = rect.right;
-    OffsetRect(&view,infoPtr->cx,infoPtr->cy);
+    if (infoPtr->cdmode == CDRF_SKIPDEFAULT) return;
 
     /* draw background */
 
@@ -1079,94 +1209,67 @@ TREEVIEW_Draw(HWND hwnd,HDC hdc,RECT *updateRect)
     FillRect(hdc, &rect, hbrBk);
     DeleteObject(hbrBk);
 
-    iItem=(INT)infoPtr->TopRootItem;
-    infoPtr->firstVisible=0;
-    wineItem=NULL;
-    indent=0;
-    x=y=0;
+    //draw items
 
-    while (iItem) {
-                prevItem=wineItem;
-        wineItem= & infoPtr->items[iItem];
-                wineItem->iLevel=indent;
+    iItem = (INT)infoPtr->TopRootItem;
+    indent = 0;
 
-        ImageList_GetIconSize (infoPtr->himlNormal, &cx, &itemHeight);
-        if (infoPtr->uItemHeight>itemHeight)
-                    itemHeight=infoPtr->uItemHeight;
+    while (iItem)
+    {
+      item = &infoPtr->items[iItem];
+      /* FIXME: should query item sizes (ie check CDRF_NEWFONT) */
+      if (item->visible)
+      {
+        if (updateRect && IntersectRect(NULL,&item->rect,updateRect)) TREEVIEW_DrawItem(hwnd,hdc,item);
+        visIndent = indent;
+      } else if (visIndent != -1)
+      {
+        //draw vertical connections
 
-            GetTextMetricsA (hdc, &tm);
-            if ((tm.tmHeight + tm.tmExternalLeading) > itemHeight)
-                     itemHeight=tm.tmHeight + tm.tmExternalLeading;
+        if (visIndent == 0) break;
 
-        infoPtr->uRealItemHeight=itemHeight;
-
-                height=itemHeight * wineItem->iIntegral +1;
-                if ((((y >= view.top) && (y <= view.bottom)) || ((y+height >= view.top) && (y+height <= view.bottom))) &&
-                    (x >= view.left) && (x <= view.right))
-                {
-                                wineItem->visible = TRUE;
-                        wineItem->rect.top = y - infoPtr->cy + rect.top;
-                        wineItem->rect.bottom = wineItem->rect.top + height ;
-                        wineItem->rect.left = x - infoPtr->cx + rect.left;
-                        wineItem->rect.right = rect.right;
-                        if (!infoPtr->firstVisible)
-                                infoPtr->firstVisible=wineItem->hItem;
-                TREEVIEW_DrawItem (hwnd, hdc, wineItem);
-                }
-                else {
-                        wineItem->visible   = FALSE;
-                        wineItem->rect.left = wineItem->rect.top    = 0;
-                        wineItem->rect.right= wineItem->rect.bottom = 0;
-                        wineItem->text.left = wineItem->text.top    = 0;
-                        wineItem->text.right= wineItem->text.bottom = 0;
-                }
-
-                /* look up next item */
-
-                if ((wineItem->firstChild) && (wineItem->state & TVIS_EXPANDED)) {
-                        iItem=(INT)wineItem->firstChild;
-                        indent++;
-                        x+=infoPtr->uIndent;
-                        if (x>infoPtr->uTotalWidth)
-                                infoPtr->uTotalWidth=x;
-                }
-                else {
-                        iItem=(INT)wineItem->sibling;
-                        while ((!iItem) && (indent>0)) {
-                                indent--;
-                                x-=infoPtr->uIndent;
-                                prevItem=wineItem;
-                                wineItem=&infoPtr->items[(INT)wineItem->parent];
-                                iItem=(INT)wineItem->sibling;
-                        }
-                }
-        y +=height;
-    }                           /* while */
-
-/* FIXME: infoPtr->uTotalWidth should also take item label into account */
-/* FIXME: or should query item sizes (ie check CDRF_NEWFONT) */
-
-    infoPtr->uTotalHeight=y;
-    if (y >= (view.bottom-view.top)) {
-                if (!(infoPtr->uInternalStatus & TV_VSCROLL))
-                        ShowScrollBar (hwnd, SB_VERT, TRUE);
-                infoPtr->uInternalStatus |=TV_VSCROLL;
-                SetScrollRange (hwnd, SB_VERT, 0,
-                                        y - infoPtr->uVisibleHeight, FALSE);
-                SetScrollPos (hwnd, SB_VERT, infoPtr->cy, TRUE);
+        if (indent < visIndent)
+        {
+//CB: todo
+          visIndent = indent;
         }
-    else {
-                if (infoPtr->uInternalStatus & TV_VSCROLL)
-                        ShowScrollBar (hwnd, SB_VERT, FALSE);
-                infoPtr->uInternalStatus &= ~TV_VSCROLL;
+      }
+      if ((item->firstChild) && (item->state & TVIS_EXPANDED))
+      {
+        iItem = (INT)item->firstChild;
+        indent++;
+      } else
+      {
+        iItem = (INT)item->sibling;
+        while ((!iItem) && (indent > 0))
+        {
+          item = &infoPtr->items[(INT)item->parent];
+          iItem = (INT)item->sibling;
+          indent--;
         }
+      }
+    }
 
+    if (infoPtr->cdmode & CDRF_NOTIFYPOSTPAINT)
+      infoPtr->cdmode = TREEVIEW_SendCustomDrawNotify(hwnd, CDDS_POSTPAINT, hdc, rect);
+}
 
-        if (infoPtr->cdmode & CDRF_NOTIFYPOSTPAINT)
-        infoPtr->cdmode=TREEVIEW_SendCustomDrawNotify
-                                                                (hwnd, CDDS_POSTPAINT, hdc, rect);
+static LRESULT TREEVIEW_SetRedraw(HWND hwnd,WPARAM wParam,LPARAM lParam)
+{
+  TREEVIEW_INFO *infoPtr = TREEVIEW_GetInfoPtr(hwnd);
 
-    //TRACE("done\n");
+  if (wParam)
+  {
+    if (!(infoPtr->uInternalStatus & TV_NOREDRAW)) return 0;
+    infoPtr->uInternalStatus &= ~TV_NOREDRAW;
+    TREEVIEW_CalcItems(hwnd,0,infoPtr);
+    TREEVIEW_Refresh(hwnd);
+  } else
+  {
+    infoPtr->uInternalStatus |= TV_NOREDRAW;
+  }
+
+  return 0;
 }
 
 
@@ -1178,6 +1281,13 @@ TREEVIEW_HandleTimer (HWND hwnd, WPARAM wParam, LPARAM lParam)
 //  TRACE (treeview, " %d\n",wParam);
 
   switch (wParam) {
+        case TV_REFRESH_TIMER:
+                KillTimer (hwnd, TV_REFRESH_TIMER);
+                infoPtr->Timer &= ~TV_REFRESH_TIMER_SET;
+                TREEVIEW_CalcItems(hwnd,0,infoPtr);
+                TREEVIEW_Refresh(hwnd);
+                return 0;
+
         case TV_EDIT_TIMER:
                 KillTimer (hwnd, TV_EDIT_TIMER);
                 infoPtr->Timer &= ~TV_EDIT_TIMER_SET;
@@ -1188,6 +1298,38 @@ TREEVIEW_HandleTimer (HWND hwnd, WPARAM wParam, LPARAM lParam)
  }
 
  return 1;
+}
+
+static void TREEVIEW_QueueRefresh(HWND hwnd)
+
+{
+  TREEVIEW_INFO *infoPtr = TREEVIEW_GetInfoPtr(hwnd);
+
+  if (infoPtr->Timer & TV_REFRESH_TIMER_SET)
+    KillTimer (hwnd, TV_REFRESH_TIMER);
+
+  if (infoPtr->uInternalStatus & TV_NOREDRAW)
+  {
+    infoPtr->Timer &= ~TV_REFRESH_TIMER_SET;
+
+    return;
+  }
+
+  SetTimer (hwnd, TV_REFRESH_TIMER, TV_REFRESH_DELAY, 0);
+  infoPtr->Timer |= TV_REFRESH_TIMER_SET;
+}
+
+static void TREEVIEW_UnqueueRefresh(HWND hwnd,BOOL calc,BOOL refresh)
+{
+  TREEVIEW_INFO *infoPtr = TREEVIEW_GetInfoPtr(hwnd);
+
+  if (infoPtr->Timer & TV_REFRESH_TIMER_SET)
+  {
+    KillTimer (hwnd, TV_REFRESH_TIMER);
+    infoPtr->Timer &= ~TV_REFRESH_TIMER_SET;
+    if (calc) TREEVIEW_CalcItems(hwnd,0,infoPtr);
+    if (refresh) TREEVIEW_Refresh(hwnd);
+  }
 }
 
 static LRESULT
@@ -1274,10 +1416,9 @@ TREEVIEW_GetNextItem (HWND hwnd, WPARAM wParam, LPARAM lParam)
                                         break;
         case TVGN_CARET:retval=(INT)infoPtr->selectedItem;
                                         break;
-        case TVGN_FIRSTVISIBLE: /* FIXME:we should only recalculate, not redraw */
-                                        //CB: todo: remove
-                                        TREEVIEW_Refresh(hwnd);
-                                        retval=(INT)infoPtr->firstVisible;
+        case TVGN_FIRSTVISIBLE:
+                                        TREEVIEW_UnqueueRefresh(hwnd,TRUE,TRUE);
+                                        retval = (INT)infoPtr->firstVisible;
                                         break;
         case TVGN_DROPHILITE:
                                         retval=(INT)infoPtr->dropItem;
@@ -1913,6 +2054,7 @@ TREEVIEW_InsertItemA (HWND hwnd, WPARAM wParam, LPARAM lParam)
   wineItem->expandBox.top    = 0;
   wineItem->expandBox.right  = 0;
   wineItem->expandBox.bottom = 0;
+  wineItem->calculated = FALSE;
 
    if (tvItem->mask & TVIF_IMAGE)
         wineItem->iImage=tvItem->iImage;
@@ -1934,8 +2076,7 @@ TREEVIEW_InsertItemA (HWND hwnd, WPARAM wParam, LPARAM lParam)
         wineItem->stateMask=tvItem->stateMask;
    }
 
-   //CB: todo: calc
-   TREEVIEW_Refresh(hwnd);
+   TREEVIEW_QueueRefresh(hwnd);
 
    return (LRESULT) iItem;
 }
@@ -2011,8 +2152,7 @@ TREEVIEW_DeleteItem (HWND hwnd, WPARAM wParam, LPARAM lParam)
         TREEVIEW_RemoveItem (hwnd, wineItem);
   }
 
-  //CB: todo: calc
-  TREEVIEW_Refresh(hwnd);
+  TREEVIEW_QueueRefresh(hwnd);
 
   return TRUE;
 }
@@ -2183,14 +2323,11 @@ TREEVIEW_Size (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
   if (wParam == SIZE_RESTORED)
   {
-    infoPtr->uTotalWidth  = LOWORD (lParam);
-        infoPtr->uTotalHeight = HIWORD (lParam);
-  } else {
-//      FIXME (treeview,"WM_SIZE flag %x %lx not handled\n", wParam, lParam);
+    TREEVIEW_UnqueueRefresh(hwnd,FALSE,FALSE);
+    TREEVIEW_CalcItems(hwnd,0,infoPtr);
+    TREEVIEW_Refresh(hwnd);
   }
 
-  //CB: todo: calc
-  TREEVIEW_Refresh(hwnd);
   return 0;
 }
 
@@ -2198,9 +2335,11 @@ TREEVIEW_Size (HWND hwnd, WPARAM wParam, LPARAM lParam)
 static LRESULT
 TREEVIEW_StyleChanged (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
-  //TRACE("(%x %lx)\n",wParam,lParam);
-  //CB: todo: calc
-  TREEVIEW_Refresh (hwnd);
+  TREEVIEW_INFO *infoPtr = TREEVIEW_GetInfoPtr(hwnd);
+
+  //CB: todo: check styles
+  infoPtr->uInternalStatus |= TV_CALCALL;
+  TREEVIEW_QueueRefresh(hwnd);
 
   return 0;
 }
@@ -2339,9 +2478,10 @@ TREEVIEW_Destroy (HWND hwnd)
 
    TREEVIEW_RemoveTree (hwnd);
    SetWindowLongA( hwnd, 0, (DWORD)NULL);
-
+   if (infoPtr->Timer & TV_REFRESH_TIMER_SET)
+     KillTimer (hwnd, TV_REFRESH_TIMER);
    if (infoPtr->hwndToolTip)
-                DestroyWindow (infoPtr->hwndToolTip);
+     DestroyWindow (infoPtr->hwndToolTip);
 
    COMCTL32_Free (infoPtr);
 
@@ -2677,7 +2817,7 @@ TREEVIEW_Expand (HWND hwnd, WPARAM wParam, LPARAM lParam)
 //    wineItem->state);
 
   if (wineItem->cChildren==I_CHILDRENCALLBACK) {
-//    FIXME (treeview,"we don't handle I_CHILDRENCALLBACK yet\n");
+    //FIXME (treeview,"we don't handle I_CHILDRENCALLBACK yet\n");
     return 0;
   }
 
@@ -2692,7 +2832,6 @@ TREEVIEW_Expand (HWND hwnd, WPARAM wParam, LPARAM lParam)
   switch (flag)
   {
     case TVE_COLLAPSERESET:
-//      TRACE(treeview, "  case TVE_COLLAPSERESET\n");
       if (!wineItem->state & TVIS_EXPANDED)
         return 0;
 
@@ -2701,7 +2840,6 @@ TREEVIEW_Expand (HWND hwnd, WPARAM wParam, LPARAM lParam)
        break;
 
     case TVE_COLLAPSE:
-//      TRACE(treeview, "  case TVE_COLLAPSE\n");
       if (!wineItem->state & TVIS_EXPANDED)
         return 0;
 
@@ -2709,15 +2847,12 @@ TREEVIEW_Expand (HWND hwnd, WPARAM wParam, LPARAM lParam)
       break;
 
     case TVE_EXPAND:
-//      TRACE(treeview, "  case TVE_EXPAND\n");
       if (wineItem->state & TVIS_EXPANDED)
         return 0;
 
-//      TRACE(treeview, "  is not expanded...\n");
-
       if (!(wineItem->state & TVIS_EXPANDEDONCE))
       {
-//        TRACE(treeview, "  and has never been expanded...\n");
+        //TRACE(treeview, "  and has never been expanded...\n");
         wineItem->state |= TVIS_EXPANDED;
 
         /* this item has never been expanded */
@@ -2728,7 +2863,7 @@ TREEVIEW_Expand (HWND hwnd, WPARAM wParam, LPARAM lParam)
               0,
               (HTREEITEM)expand))
         {
-//          TRACE(treeview, "  TVN_ITEMEXPANDING returned TRUE, exiting...\n");
+          //TRACE(treeview, "  TVN_ITEMEXPANDING returned TRUE, exiting...\n");
           return FALSE;
         }
 
@@ -2743,14 +2878,14 @@ TREEVIEW_Expand (HWND hwnd, WPARAM wParam, LPARAM lParam)
         wineItem = TREEVIEW_ValidItem (infoPtr, (HTREEITEM)expand);
         if (! wineItem)
         {
-//          ERR(treeview,
-//            "Catastropic situation, cannot retreive item #%d\n",
-//            expand);
+          //ERR(treeview,
+          //  "Catastropic situation, cannot retreive item #%d\n",
+          //  expand);
           return FALSE;
         }
 
         wineItem->state |= TVIS_EXPANDEDONCE;
-//        TRACE(treeview, "  TVN_ITEMEXPANDING sent...\n");
+        //TRACE(treeview, "  TVN_ITEMEXPANDING sent...\n");
 
         TREEVIEW_SendTreeviewNotify (
           hwnd,
@@ -2759,7 +2894,7 @@ TREEVIEW_Expand (HWND hwnd, WPARAM wParam, LPARAM lParam)
           0,
           (HTREEITEM)expand);
 
-//        TRACE(treeview, "  TVN_ITEMEXPANDED sent...\n");
+        //TRACE(treeview, "  TVN_ITEMEXPANDED sent...\n");
 
       }
       else
@@ -2770,19 +2905,22 @@ TREEVIEW_Expand (HWND hwnd, WPARAM wParam, LPARAM lParam)
       break;
 
     case TVE_EXPANDPARTIAL:
-//      TRACE(treeview, "  case TVE_EXPANDPARTIAL\n");
-//      FIXME (treeview, "TVE_EXPANDPARTIAL not implemented\n");
+      //TRACE(treeview, "  case TVE_EXPANDPARTIAL\n");
+      //FIXME (treeview, "TVE_EXPANDPARTIAL not implemented\n");
       wineItem->state ^=TVIS_EXPANDED;
       wineItem->state |=TVIS_EXPANDEDONCE;
       break;
   }
 
-//  TRACE(treeview, "Exiting, Item %d state is now %d...\n",
-//    expand,
-//    wineItem->state);
+  //TRACE(treeview, "Exiting, Item %d state is now %d...\n",
+  //  expand,
+  //  wineItem->state);
 
-  //CB: todo: replace
+  //CB: todo: optimize!
+  TREEVIEW_UnqueueRefresh(hwnd,FALSE,FALSE);
+  TREEVIEW_CalcItems(hwnd,0,infoPtr);
   TREEVIEW_Refresh(hwnd);
+
   return TRUE;
 }
 
@@ -3224,7 +3362,8 @@ TREEVIEW_DoSelectItem (HWND hwnd, INT action, HTREEITEM newSelect, INT cause)
      * can expose the item
      */
     TREEVIEW_ITEM *parentItem = TREEVIEW_ValidItem (infoPtr, wineItem->parent);
-    if ( !(parentItem->state & TVIS_EXPANDED))
+
+    if (!(parentItem->state & TVIS_EXPANDED))
       TREEVIEW_Expand (hwnd, TVE_EXPAND, (LPARAM) wineItem->parent);
   }
 
@@ -3254,6 +3393,7 @@ TREEVIEW_DoSelectItem (HWND hwnd, INT action, HTREEITEM newSelect, INT cause)
 
       infoPtr->selectedItem=(HTREEITEM)newSelect;
 
+      TREEVIEW_UnqueueRefresh(hwnd,TRUE,TRUE);
       TREEVIEW_RefreshItem(hwnd,prevItem);
       TREEVIEW_RefreshItem(hwnd,wineItem);
 
@@ -3277,6 +3417,7 @@ TREEVIEW_DoSelectItem (HWND hwnd, INT action, HTREEITEM newSelect, INT cause)
       if (wineItem)
         wineItem->state |=TVIS_DROPHILITED;
 
+      TREEVIEW_UnqueueRefresh(hwnd,TRUE,TRUE);
       TREEVIEW_RefreshItem(hwnd,prevItem);
       TREEVIEW_RefreshItem(hwnd,wineItem);
 
@@ -3316,39 +3457,40 @@ static LRESULT
 TREEVIEW_SetFont (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
 {
- TREEVIEW_INFO *infoPtr = TREEVIEW_GetInfoPtr(hwnd);
- TEXTMETRICA tm;
- LOGFONTA logFont;
- HFONT hFont, hOldFont;
- INT height;
- HDC hdc;
+  TREEVIEW_INFO *infoPtr = TREEVIEW_GetInfoPtr(hwnd);
+  TEXTMETRICA tm;
+  LOGFONTA logFont;
+  HFONT hFont, hOldFont;
+  INT height;
+  HDC hdc;
 
-// TRACE (treeview,"%x %lx\n",wParam, lParam);
+  infoPtr->hFont = (HFONT)wParam;
 
- infoPtr->hFont = (HFONT)wParam;
+  hFont = infoPtr->hFont ? infoPtr->hFont : GetStockObject (SYSTEM_FONT);
 
- hFont = infoPtr->hFont ? infoPtr->hFont : GetStockObject (SYSTEM_FONT);
+  GetObjectA (infoPtr->hFont, sizeof (LOGFONTA), &logFont);
+  logFont.lfWeight=FW_BOLD;
+  infoPtr->hBoldFont = CreateFontIndirectA (&logFont);
 
- GetObjectA (infoPtr->hFont, sizeof (LOGFONTA), &logFont);
- logFont.lfWeight=FW_BOLD;
- infoPtr->hBoldFont = CreateFontIndirectA (&logFont);
+  hdc = GetDC (0);
+  hOldFont = SelectObject (hdc, hFont);
+  GetTextMetricsA (hdc, &tm);
+  height= tm.tmHeight + tm.tmExternalLeading;
+  if (height>infoPtr->uRealItemHeight)
+    infoPtr->uRealItemHeight=height;
+  SelectObject (hdc, hOldFont);
+  ReleaseDC (0, hdc);
 
- hdc = GetDC (0);
- hOldFont = SelectObject (hdc, hFont);
- GetTextMetricsA (hdc, &tm);
- height= tm.tmHeight + tm.tmExternalLeading;
- if (height>infoPtr->uRealItemHeight)
-        infoPtr->uRealItemHeight=height;
- SelectObject (hdc, hOldFont);
- ReleaseDC (0, hdc);
+  if (lParam)
+  {
+    TREEVIEW_UnqueueRefresh(hwnd,FALSE,FALSE);
+    infoPtr->uInternalStatus |= TV_CALCALL;
+    TREEVIEW_CalcItems(hwnd,0,infoPtr);
+    TREEVIEW_Refresh(hwnd);
+  }
 
- //CB: todo: calc
- if (lParam)
-        TREEVIEW_Refresh(hwnd);
-
- return 0;
+  return 0;
 }
-
 
 
 static LRESULT
@@ -3393,6 +3535,7 @@ TREEVIEW_VScroll (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
   }
 
+  TREEVIEW_CalcItems(hwnd,0,infoPtr);
   ScrollWindowEx(hwnd,0,lastPos-infoPtr->cy,NULL,NULL,0,NULL,SW_INVALIDATE);
 
   return TRUE;
@@ -3403,6 +3546,7 @@ TREEVIEW_HScroll (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
   TREEVIEW_INFO *infoPtr = TREEVIEW_GetInfoPtr(hwnd);
   int maxWidth;
+  int lastPos = infoPtr->cx;
 
 //  TRACE (treeview,"wp %lx, lp %x\n", lParam, wParam);
 
@@ -3439,9 +3583,8 @@ TREEVIEW_HScroll (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
   }
 
-  TREEVIEW_Refresh(hwnd);
-
-  //CB: todo: use ScrollWindowEx
+  TREEVIEW_CalcItems(hwnd,0,infoPtr);
+  ScrollWindowEx(hwnd,lastPos-infoPtr->cx,0,NULL,NULL,0,NULL,SW_INVALIDATE);
 
   return TRUE;
 }
@@ -3641,7 +3784,9 @@ TREEVIEW_SetScrollTime (HWND hwnd, UINT uScrollTime)
 {
   TREEVIEW_INFO *infoPtr = TREEVIEW_GetInfoPtr(hwnd);
   UINT uOldScrollTime = infoPtr->uScrollTime;
+
   infoPtr->uScrollTime = min (uScrollTime, 100);
+
   return uOldScrollTime;
 }
 
@@ -3853,7 +3998,9 @@ TREEVIEW_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
                 return TREEVIEW_StyleChanged (hwnd, wParam, lParam);
 
 /*      case WM_SYSCOLORCHANGE: */
-/*      case WM_SETREDRAW: */
+
+        case WM_SETREDRAW:
+                return TREEVIEW_SetRedraw(hwnd,wParam,lParam);
 
         case WM_TIMER:
                 return TREEVIEW_HandleTimer (hwnd, wParam, lParam);
@@ -3892,7 +4039,7 @@ TREEVIEW_Register (VOID)
 //    if (GlobalFindAtomA (WC_TREEVIEWA)) return;
 
     ZeroMemory (&wndClass, sizeof(WNDCLASSA));
-    wndClass.style         = CS_GLOBALCLASS | CS_DBLCLKS | CS_HREDRAW | CS_VREDRAW;
+    wndClass.style         = CS_GLOBALCLASS | CS_DBLCLKS;
     wndClass.lpfnWndProc   = (WNDPROC)TREEVIEW_WindowProc;
     wndClass.cbClsExtra    = 0;
     wndClass.cbWndExtra    = sizeof(TREEVIEW_INFO *);
