@@ -64,11 +64,6 @@ extern "C" {
  extern DWORD kernel32_PEResTab;
 }
 
-//Global DLL Data
-#pragma data_seg(_GLOBALDATA)
-int globLoadNr = 0;
-#pragma data_seg()
-
        ULONG   flAllocMem = 0;    /* flag to optimize DosAllocMem to use all the memory on SMP machines */
        ULONG   ulMaxAddr = 0x20000000; /* end of user address space. */
        int     loadNr = 0;
@@ -88,7 +83,6 @@ ULONG APIENTRY inittermKernel32(ULONG hModule, ULONG ulFlag)
     size_t i;
     APIRET rc;
     ULONG  ulSysinfo, version[2];
-    static BOOL fInit = FALSE;
     
     /*-------------------------------------------------------------------------*/
     /* If ulFlag is zero then the DLL is being loaded so initialization should */
@@ -96,10 +90,6 @@ ULONG APIENTRY inittermKernel32(ULONG hModule, ULONG ulFlag)
     /* termination should be performed.                                        */
     /*-------------------------------------------------------------------------*/
 
-    if(fInit == TRUE && ulFlag == 0) {
-        return 1; //already initialized
-    }
-    fInit = TRUE;
     switch (ulFlag)
     {
         case 0 :
@@ -120,8 +110,6 @@ ULONG APIENTRY inittermKernel32(ULONG hModule, ULONG ulFlag)
                     dprintf(("KERNEL32: initterm: libWin32kSetEnvironment failed with rc=%d\n", rc));
                 }
             }
-
-            loadNr = globLoadNr++;
 
             strcpy(kernel32Path, OSLibGetDllName(hModule));
             char *endofpath = strrchr(kernel32Path, '\\');
