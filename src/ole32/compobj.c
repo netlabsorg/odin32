@@ -538,14 +538,24 @@ HRESULT WINAPI CLSIDFromString(
 	LPCOLESTR idstr,	/* [in] string representation of GUID */
 	CLSID *id		/* [out] GUID represented by above string */
 ) {
+#ifdef __WIN32OS2__
+    HRESULT    ret;
+    LPOLESTR16 xid;
+    STACK_strdupWtoA(idstr, xid)
+    ret = CLSIDFromString16( (LPOLESTR16)xid,id);
+    if(ret != S_OK) { /* It appears a ProgID is also valid */
+        ret = CLSIDFromProgID(idstr, id);
+    }
+    return ret;
+#else
     LPOLESTR16      xid = HEAP_strdupWtoA(GetProcessHeap(),0,idstr);
     HRESULT       ret = CLSIDFromString16(xid,id);
-
     HeapFree(GetProcessHeap(),0,xid);
     if(ret != S_OK) { /* It appears a ProgID is also valid */
         ret = CLSIDFromProgID(idstr, id);
     }
     return ret;
+#endif
 }
 
 /******************************************************************************
@@ -778,11 +788,17 @@ HRESULT WINAPI CLSIDFromProgID(
 	LPCOLESTR progid,	/* [in] program id as found in registry */
 	LPCLSID riid		/* [out] associated CLSID */
 ) {
+#ifdef __WIN32OS2__
+	LPOLESTR16 pid;
+        STACK_strdupWtoA(progid, pid)
+	return CLSIDFromProgID16((LPOLESTR16)pid,riid);
+#else
 	LPOLESTR16 pid = HEAP_strdupWtoA(GetProcessHeap(),0,progid);
 	HRESULT       ret = CLSIDFromProgID16(pid,riid);
 
 	HeapFree(GetProcessHeap(),0,pid);
 	return ret;
+#endif
 }
 
 
