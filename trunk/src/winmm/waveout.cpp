@@ -1,4 +1,4 @@
-/* $Id: waveout.cpp,v 1.25 2002-06-04 17:36:55 sandervl Exp $ */
+/* $Id: waveout.cpp,v 1.26 2003-03-06 15:42:33 sandervl Exp $ */
 //#undef DEBUG
 /*
  * Wave out MM apis
@@ -84,12 +84,14 @@ MMRESULT WINAPI waveOutWrite(HWAVEOUT hwo, LPWAVEHDR pwh, UINT cbwh)
 
     if(WaveOut::find(dwave) == TRUE)
     {
-        if(!(pwh->dwFlags & WHDR_PREPARED) || pwh->lpData == NULL)
+        if(!(pwh->dwFlags & WHDR_PREPARED) || pwh->lpData == NULL) {
+            dprintf(("waveOutWrite: WAVERR_UNPREPARED!!"));
             return WAVERR_UNPREPARED;
-
-        if(pwh->dwFlags & WHDR_INQUEUE)
+        }
+        if(pwh->dwFlags & WHDR_INQUEUE) {
+            dprintf(("waveOutWrite: WAVERR_STILLPLAYING!!"));
             return WAVERR_STILLPLAYING;
-
+        }
         pwh->dwFlags |= WHDR_INQUEUE;
         pwh->dwFlags &= ~WHDR_DONE;
 
