@@ -1,10 +1,11 @@
-# $Id: winmm.mak,v 1.4 2001-07-20 15:35:01 sandervl Exp $
+# $Id: winmm.mak,v 1.5 2001-07-29 19:00:53 sandervl Exp $
 
 #
 # Odin32 API
 #
 #       winmm.dll makefile
 #
+WRC_PREFIX_RESOURCE=1
 
 
 #

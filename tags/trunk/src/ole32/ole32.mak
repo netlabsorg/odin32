@@ -1,10 +1,11 @@
-# $Id: ole32.mak,v 1.12 2001-07-20 15:38:24 sandervl Exp $
+# $Id: ole32.mak,v 1.13 2001-07-29 19:01:40 sandervl Exp $
 
 #
 # Odin32 API
 #
 #       ole32.dll makefile
 #
+WRC_PREFIX_RESOURCE=1
 
 #
 # Tell buildenvironment that we have a non-default makefilename.

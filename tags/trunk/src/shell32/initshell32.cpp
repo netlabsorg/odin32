@@ -37,7 +37,7 @@
 
 extern "C" {
  //Win32 resource table (produced by wrc)
- extern DWORD _Resource_PEResTab;
+ extern DWORD shell32_PEResTab;
 }
 static HMODULE dllHandle = 0;
 
@@ -87,7 +87,7 @@ ULONG APIENTRY inittermShell32(ULONG hModule, ULONG ulFlag)
 
          CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
 
-	 dllHandle = RegisterLxDll(hModule, OdinLibMain, (PVOID)&_Resource_PEResTab, 
+	 dllHandle = RegisterLxDll(hModule, OdinLibMain, (PVOID)&shell32_PEResTab, 
                                    SHELL32_MAJORIMAGE_VERSION, SHELL32_MINORIMAGE_VERSION,
                                    IMAGE_SUBSYSTEM_WINDOWS_GUI);
          if(dllHandle == 0) 

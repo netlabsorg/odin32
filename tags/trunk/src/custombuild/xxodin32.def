@@ -1,4 +1,4 @@
-; $Id: xxodin32.def,v 1.1 2001-07-20 15:41:43 sandervl Exp $
+; $Id: xxodin32.def,v 1.2 2001-07-29 19:02:35 sandervl Exp $
 
 LIBRARY XXODIN32 INITINSTANCE
 DATA MULTIPLE NONSHARED
@@ -29,6 +29,7 @@ IMPORTS
     WinXxAllocMem                 = PMMERGE.5424
     WinXxCreateHeap               = PMMERGE.5425
     WinXxDestroyHeap              = PMMERGE.5426
+    __SwapMouseButton             = PMMERGE.10019
     LookupAtom                    = PMMERGE.10020
 
     _O32_RegCloseKey              = REGISTRY.1
@@ -2236,16 +2237,16 @@ EXPORTS
   DPA_DestroyCallback = _DPA_DestroyCallback@12    @7386
   DSA_EnumCallback    = _DSA_EnumCallback@12       @7387
   DSA_DestroyCallback = _DSA_DestroyCallback@12    @7388
-                        _COMCTL32_389@8            @7389 NONAME
-                        _COMCTL32_390@16           @7390 NONAME
+;;                        _COMCTL32_389@8            @7389 NONAME
+;;                        _COMCTL32_390@16           @7390 NONAME
 
-                        _comctl32_410@16           @7410 NONAME
-                        _comctl32_411@12           @7411 NONAME
-                        _comctl32_412@12           @7412 NONAME
-                        _comctl32_413@16           @7413 NONAME
-                        _COMCTL32_415@20           @7415 NONAME
+;;                        _comctl32_410@16           @7410 NONAME
+;;                        _comctl32_411@12           @7411 NONAME
+;;                        _comctl32_412@12           @7412 NONAME
+;;                        _comctl32_413@16           @7413 NONAME
+;;                        _COMCTL32_415@20           @7415 NONAME
 
-; WIMM
+; WINMM
      PlaySoundA                 = _PlaySoundA@12           @8002
      CloseDriver                = _CloseDriver@12          @8005
      DefDriverProc              = _DefDriverProc@20        @8006

@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.107 2001-07-28 13:43:53 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.108 2001-07-29 18:59:27 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -255,13 +255,6 @@ BOOL OSLibWinAlarm(HWND hwndDeskTop,ULONG flStyle)
 {
     return WinAlarm(hwndDeskTop,flStyle);
 }
-//******************************************************************************
-//******************************************************************************
-APIRET OSLibDosBeep(ULONG freg,ULONG dur)
-{
-    return DosBeep(freg,dur);
-}
-//******************************************************************************
 //******************************************************************************
 HWND OSLibWinQueryFocus(HWND hwndDeskTop)
 {

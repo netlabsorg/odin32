@@ -1,17 +1,20 @@
-# $Id: makefile,v 1.34 2001-07-21 09:07:17 sandervl Exp $
+# $Id: makefile,v 1.35 2001-07-29 19:00:00 sandervl Exp $
 
 #
 # Odin32 API
 #
 #       comctl32.dll makefile
 #
-
+WRC_PREFIX_RESOURCE=1
 
 #
 # Compiler, tools, and interference rules.
 #
 !include ../../makefile.inc
 
+#
+# Overrides.
+#
 
 #
 # Object files. Prefix with OBJDIR and one space before the '\'.

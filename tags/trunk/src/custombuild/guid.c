@@ -1,4 +1,4 @@
-/* $Id: guid.c,v 1.1 2001-07-20 15:41:43 sandervl Exp $ */
+/* $Id: guid.c,v 1.2 2001-07-29 19:02:35 sandervl Exp $ */
 #define ICOM_CINTERFACE 1
 #include <odin.h>
 
@@ -49,4 +49,35 @@ int CDECL CRTDLL__wcsnicmp(LPCWSTR str1, LPCWSTR str2, int n)
         str2++;
     }
     return towupper(*str1) - towupper(*str2);
+}
+
+/*********************************************************************
+ *           wcstombs    (NTDLL.@)
+ */
+INT __cdecl NTDLL_wcstombs( LPSTR dst, LPCWSTR src, INT n )
+{
+    INT ret;
+    if (n <= 0) return 0;
+    ret = WideCharToMultiByte( CP_ACP, 0, src, -1, dst, dst ? n : 0, NULL, NULL );
+    if (!ret) return n;  /* overflow */
+    return ret - 1;  /* do not count terminating NULL */
+}
+
+/*********************************************************************
+ *           _wtol    (NTDLL.@)
+ * Like atol, but for wide character strings.
+ */
+LONG __cdecl _wtol(LPWSTR string)
+{
+    char buffer[30];
+    NTDLL_wcstombs( buffer, string, sizeof(buffer) );
+    return atol( buffer );
+}
+
+/*********************************************************************
+ *           _wtoi    (NTDLL.@)
+ */
+INT __cdecl _wtoi(LPWSTR string)
+{
+    return _wtol(string);
 }
