@@ -1,4 +1,4 @@
-/* $Id: perfview.h,v 1.1 2001-10-11 00:59:59 phaller Exp $ */
+/* $Id: perfview.h,v 1.2 2001-10-12 00:49:51 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -17,7 +17,10 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
+  
+  
+// calibrate the subsystem
+void _Optlink PerfView_Initialize(void);
 
 // register a call to a function
 void _Optlink PerfView_RegisterCall(char* pszFunctionName, 
