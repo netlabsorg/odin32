@@ -1,7 +1,11 @@
- /* $Id: ChangeLog,v 1.866 2000-04-06 12:04:48 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.867 2000-04-06 20:38:41 sandervl Exp $ */
 
  2000-04-06: Sander van Leeuwen <sandervl@xs4all.nl>
 	- WINMM: Fixed message callback once more (previous fix broke rp7)
+
+ 2000-04-08: Michal Necasek <mike@mendelu.cz>
+        - WINMM: Moved phwo == NULL check below format query handling.
+                 (enables sound in Jack Jazzrabbit; still not right though)
 
  2000-04-05: David Raison <djr@lemur.co.uk>
         - OLEAUT32: Turned default DEBUG-info down.
