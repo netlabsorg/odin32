@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.273 2001-07-04 09:55:18 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.274 2001-07-04 17:46:04 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -24,6 +24,14 @@
  * NOTE: Client rectangle always relative to frame window
  *       Window rectangle in parent coordinates (relative to parent's client window)
  *       (screen coord. if no parent)
+ *
+ * NOTE: Status of window:
+ *       Before a window has processed WM_NCCREATE:
+ *       - GetTopWindow can't return that window handle
+ *       - GetWindow(parent, GW_CHILD) can't return that window handle
+ *       - IsChild works
+ *       TODO: Does this affect more functions?? (other GetWindow ops)
+ *       (verified in NT4, SP6)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -104,20 +112,16 @@ void Win32BaseWindow::Init()
   fIsModalDialogOwner = FALSE;
   OS2HwndModalDialog  = 0;
   fInternalMsg     = FALSE;
-  fNoSizeMsg       = FALSE;
   fParentChange    = FALSE;
-  fIsDestroyed     = FALSE;
   fDestroyWindowCalled = FALSE;
-  fCreated         = FALSE;
   fTaskList        = FALSE;
   fParentDC        = FALSE;
   fComingToTop     = FALSE;
-  fCreateSetWindowPos = FALSE;
-  fCreationFinished= FALSE;
   fMinMaxChange    = FALSE;
   fVisibleRegionChanged = FALSE;
   fEraseBkgndFlag  = TRUE;
 
+  state            = STATE_INIT;
   windowNameA      = NULL;
   windowNameW      = NULL;
 
@@ -501,7 +505,7 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
         return FALSE;
     }
     OSLibWinSetVisibleRegionNotify(OS2Hwnd, TRUE);
-    fCreationFinished = TRUE;   //creation done with success
+    state = STATE_CREATED;
     SetLastError(0);
     return TRUE;
 }
@@ -515,8 +519,6 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndOS2)
  LRESULT (* CALLBACK localSend32)(HWND, UINT, WPARAM, LPARAM);
 
     OS2Hwnd      = hwndOS2;
-
-    fNoSizeMsg = TRUE;
 
     if(OSLibWinSetWindowULong(OS2Hwnd, OFFSET_WIN32WNDPTR, getWindowHandle()) == FALSE) {
         dprintf(("WM_CREATE: WinSetWindowULong %X failed!!", OS2Hwnd));
@@ -717,15 +719,13 @@ if (!cs->hMenu) cs->hMenu = LoadMenuA(windowClass->getInstance(),"MYAPP");
      */
     maxPos.x = rectWindow.left; maxPos.y = rectWindow.top;
 
-    //Note: Solitaire crashes when receiving WM_SIZE messages before WM_CREATE
-    fCreated = TRUE;
-
     if(fTaskList) {
         hTaskList = OSLibWinAddToTaskList(OS2HwndFrame, windowNameA, (cs->style & WS_VISIBLE) ? 1 : 0);
     }
 
     localSend32 = (isUnicode) ? ::SendMessageW : ::SendMessageA;
 
+    state = STATE_PRE_WMNCCREATE;
     if(localSend32(getWindowHandle(), WM_NCCREATE,0,(LPARAM)cs))
     {
         RECT tmpRect;
@@ -743,15 +743,17 @@ if (!cs->hMenu) cs->hMenu = LoadMenuA(windowClass->getInstance(),"MYAPP");
             }
         }
         tmpRect = rectWindow;
-
-        fCreateSetWindowPos = TRUE;
+        state   = STATE_POST_WMNCCREATE;
 
         //set the window size and update the client
         SetWindowPos(hwndLinkAfter, tmpRect.left, tmpRect.top, tmpRect.right-tmpRect.left, tmpRect.bottom-tmpRect.top,SWP_NOACTIVATE | SWP_NOREDRAW | SWP_FRAMECHANGED);
-        fNoSizeMsg = FALSE;
+
+        state = STATE_PRE_WMCREATE;
         if (cs->style & WS_VISIBLE) dwStyle |= WS_VISIBLE; //program could change position in WM_CREATE
         if( (localSend32(getWindowHandle(), WM_CREATE, 0, (LPARAM)cs )) != -1 )
         {
+            state = STATE_POST_WMCREATE;
+
             if(!(flags & WIN_NEED_SIZE))
             {
                 SendInternalMessageA(WM_SIZE, SIZE_RESTORED,
@@ -838,7 +840,7 @@ ULONG Win32BaseWindow::MsgDestroy()
  Win32BaseWindow *child;
  HWND hwnd = getWindowHandle();
 
-    fIsDestroyed = TRUE;
+    state = STATE_DESTROYED;
 
     if(fDestroyWindowCalled == FALSE)
     {//this window was destroyed because DestroyWindow was called for it's parent
@@ -862,7 +864,7 @@ ULONG Win32BaseWindow::MsgDestroy()
 
     TIMER_KillTimerFromWindow(getWindowHandle());
 
-    if(getRefCount() == 0 && getFirstChild() == NULL && fCreationFinished) {
+    if(getRefCount() == 0 && getFirstChild() == NULL && state == STATE_CREATED) {
         delete this;
     }
     else {
@@ -894,7 +896,7 @@ ULONG Win32BaseWindow::MsgEnable(BOOL fEnable)
 //******************************************************************************
 ULONG Win32BaseWindow::MsgShow(BOOL fShow)
 {
-    if(fNoSizeMsg || fDestroyWindowCalled) {
+    if(!CanReceiveSizeMsgs() || fDestroyWindowCalled) {
         return 1;
     }
 
@@ -916,7 +918,7 @@ ULONG Win32BaseWindow::MsgPosChanging(LPARAM lp)
 {
     //SvL: Notes crashes when switching views (calls DestroyWindow -> PM sends
     //     a WM_WINDOWPOSCHANGED msg -> crash)
-    if(fNoSizeMsg || fDestroyWindowCalled)
+    if(!CanReceiveSizeMsgs() || fDestroyWindowCalled)
         return 0;
 
     return SendInternalMessageA(WM_WINDOWPOSCHANGING, 0, lp);
@@ -927,7 +929,7 @@ ULONG Win32BaseWindow::MsgPosChanged(LPARAM lp)
 {
     //SvL: Notes crashes when switching views (calls DestroyWindow -> PM sends
     //     a WM_WINDOWPOSCHANGED msg -> crash)
-    if(fNoSizeMsg || fDestroyWindowCalled)
+    if(CanReceiveSizeMsgs() || fDestroyWindowCalled)
         return 1;
 
     return SendInternalMessageA(WM_WINDOWPOSCHANGED, 0, lp);
@@ -1201,14 +1203,14 @@ ULONG Win32BaseWindow::MsgFormatFrame(WINDOWPOS *lpWndPos)
     dprintf(("MsgFormatFrame: old client rect (%d,%d)(%d,%d), new client (%d,%d)(%d,%d)", client.left, client.top, client.right, client.bottom, rectClient.left, rectClient.top, rectClient.right, rectClient.bottom));
     dprintf(("MsgFormatFrame: old window rect (%d,%d)(%d,%d), new window (%d,%d)(%d,%d)", oldWindowRect.left, oldWindowRect.top, oldWindowRect.right, oldWindowRect.bottom, rectWindow.left, rectWindow.top, rectWindow.right, rectWindow.bottom));
 
-    if(fNoSizeMsg || !EqualRect(&client, &rectClient)) {
+    if(!CanReceiveSizeMsgs() || !EqualRect(&client, &rectClient)) {
         OSLibWinSetClientPos(getOS2WindowHandle(), rectClient.left, rectClient.top, getClientWidth(), getClientHeight(), getWindowHeight());
     }
 
 #if 1
 //this doesn't always work
-//  if(!fNoSizeMsg && (client.left != rectClient.left || client.top != rectClient.top))
-  if(!fNoSizeMsg && ((oldWindowRect.right - oldWindowRect.left < rectClient.left
+//  if(CanReceiveSizeMsgs() && (client.left != rectClient.left || client.top != rectClient.top))
+  if(CanReceiveSizeMsgs() && ((oldWindowRect.right - oldWindowRect.left < rectClient.left
                   || oldWindowRect.bottom - oldWindowRect.top < rectClient.top) ||
      (EqualRect(&oldWindowRect, &rectWindow) && (client.left != rectClient.left || client.top != rectClient.top))))
   {
@@ -2446,7 +2448,8 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
     }
 #endif
 
-    if(!fCreateSetWindowPos)
+    //Note: Solitaire crashes when receiving WM_SIZE messages before WM_CREATE
+    if(state < STATE_POST_WMNCCREATE)
     {//don't change size; modify internal structures only
         //TODO: not 100% correct yet (activate)
         if(!(fuFlags & SWP_NOZORDER)) {
@@ -2782,7 +2785,7 @@ HWND Win32BaseWindow::SetParent(HWND hwndNewParent)
 
    /* Windows hides the window first, then shows it again
     * including the WM_SHOWWINDOW messages and all */
-   if(fCreated && (getStyle() & WS_VISIBLE)) {
+   if(IsWindowCreated() && (getStyle() & WS_VISIBLE)) {
         ShowWindow(SW_HIDE);
         fShow = TRUE;
    }
@@ -2831,7 +2834,7 @@ HWND Win32BaseWindow::SetParent(HWND hwndNewParent)
       in the x-order and send the expected WM_WINDOWPOSCHANGING and
       WM_WINDOWPOSCHANGED notification messages.
    */
-   if(fCreated) {
+   if(state >= STATE_PRE_WMNCCREATE) {
         SetWindowPos(HWND_TOPMOST, 0, 0, 0, 0,
                      SWP_NOACTIVATE|SWP_NOMOVE|SWP_NOSIZE|(fShow? SWP_SHOWWINDOW : 0));
 
@@ -2863,20 +2866,26 @@ HWND Win32BaseWindow::GetTopWindow()
     if(!isDesktopWindow())
     {
         topwindow = GetWindowFromOS2FrameHandle(hwndTop);
-        if(topwindow) {
+        //Note: GetTopWindow can't return a window that hasn't processed
+        //      WM_NCCREATE yet (verified in NT4, SP6)
+        if(topwindow && topwindow->state >= STATE_POST_WMNCCREATE) {
             hwndTop = topwindow->getWindowHandle();
             RELEASE_WNDOBJ(topwindow);
             return hwndTop;
         }
+        if(topwindow) RELEASE_WNDOBJ(topwindow);
         return 0;
     }
     while(hwndTop) {
         topwindow = GetWindowFromOS2FrameHandle(hwndTop);
-        if(topwindow) {
+        //Note: GetTopWindow can't return a window that hasn't processed
+        //      WM_NCCREATE yet (verified in NT4, SP6)
+        if(topwindow && topwindow->state >= STATE_POST_WMNCCREATE) {
             hwndTop = topwindow->getWindowHandle();
             RELEASE_WNDOBJ(topwindow);
             return hwndTop;
         }
+        if(topwindow) RELEASE_WNDOBJ(topwindow);
         hwndTop = OSLibWinQueryWindow(hwndTop, QWOS_NEXT);
     }
 
@@ -3200,11 +3209,22 @@ HWND Win32BaseWindow::GetWindow(UINT uCmd)
     case GW_CHILD:
         hwndRelated = OSLibWinQueryWindow(getOS2WindowHandle(), QWOS_TOP);
         window = GetWindowFromOS2FrameHandle(hwndRelated);
+
+        //Before a window has processed WM_NCCREATE:
+        //- GetWindow(parent, GW_CHILD) can't return that window handle
+        //(verified in NT4, SP6)
         if(window) {
-             hwndRelated = window->getWindowHandle();
-             RELEASE_WNDOBJ(window);
+             if(window->state >= STATE_POST_WMNCCREATE) {
+                 hwndRelated = window->getWindowHandle();
+                 RELEASE_WNDOBJ(window); 
+             }
+             else {
+                 hwndRelated = window->GetWindow(GW_HWNDNEXT);
+                 RELEASE_WNDOBJ(window); 
+             }
         }
         else hwndRelated = 0;
+
         break;
     }
 end:

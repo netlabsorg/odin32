@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.122 2001-07-04 09:29:52 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.123 2001-07-04 17:46:05 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -107,6 +107,15 @@ typedef struct
     !(style & (WS_CHILD | WS_POPUP))
 
 #define HAS_MENU() (!(getStyle() & WS_CHILD) && (GetMenu() != 0))
+
+#define STATE_INIT	         0   //initial state
+#define STATE_PRE_WMNCCREATE     1   //before WM_NCCREATE
+#define STATE_POST_WMNCCREATE    2   //after WM_NCCREATE
+#define STATE_PRE_WMCREATE       3   //before WM_CREATE
+#define STATE_POST_WMCREATE      4   //after WM_CREATE
+#define STATE_CREATED            5   //after successful return of WinCreateWindow
+#define STATE_DESTROYED          6   //DestroyWindow called for window
+
 
 class Win32BaseWindow : public GenericObject, public ChildWindow
 {
@@ -251,10 +260,10 @@ virtual  BOOL   DestroyWindow();
          VOID   setModalDialogOwner(BOOL fMDO)    { fIsModalDialogOwner = fMDO; };
          VOID   setOS2HwndModalDialog(HWND aHwnd) { OS2HwndModalDialog = aHwnd; };
          HWND   getOS2HwndModalDialog()       { return OS2HwndModalDialog; };
-         BOOL   CanReceiveSizeMsgs()          { return !fNoSizeMsg; };
+         BOOL   CanReceiveSizeMsgs()          { return state >= STATE_PRE_WMCREATE; };
          BOOL   IsParentChanging()            { return fParentChange; };
-         BOOL   IsWindowCreated()             { return fCreated; }
-         BOOL   IsWindowDestroyed()           { return fIsDestroyed; };
+         BOOL   IsWindowCreated()             { return state >= STATE_PRE_WMNCCREATE; }
+         BOOL   IsWindowDestroyed()           { return state >= STATE_DESTROYED; };
          BOOL   IsWindowIconic();
          //Window procedure type
          BOOL   IsWindowUnicode();
@@ -372,25 +381,19 @@ protected:
                  fIsModalDialogOwner:1,
                  fInternalMsg:1,         //Used to distinguish between messages
                                          //sent by PM and those sent by apps
-                 fNoSizeMsg:1,
                  fParentChange:1,
-                 fIsDestroyed:1,
                  fDestroyWindowCalled:1, //DestroyWindow was called for this window
-                 fCreated:1,
-                 fCreationFinished:1,    //True when window or dialog has been created successfully
-                                         //Needed to prevent DestroyWindow from deleting the window
-                                         //object during construction
                  fTaskList:1,            //should be listed in PM tasklist or not
                  fXDefault:1,
                  fCXDefault:1,
                  fParentDC:1,
 	         fComingToTop:1,
-                 fCreateSetWindowPos:1,  //FALSE -> SetWindowPos in Win32BaseWindow::MsgCreate not yet called
                  isUnicode:1,
                  fMinMaxChange:1,        //set when switching between min/max/restored state
                  fVisibleRegionChanged:1, //set when visible region has changed -> erase background must be sent during next BeginPaint
                  fEraseBkgndFlag:1;
 
+        ULONG   state;
         HRGN    hWindowRegion;
         HRGN    hClipRegion;
 
