@@ -1,4 +1,4 @@
-; $Id: interlock.asm,v 1.1 1999-08-29 14:56:47 sandervl Exp $
+; $Id: interlock.asm,v 1.2 1999-12-05 13:39:21 sandervl Exp $
 
 ;/*
 ; * Interlocked apis
@@ -80,7 +80,7 @@ _InterlockedExchange@8 proc near
         mov     edx,[esp+8]           	; LPLONG target
   	lock 	xchg eax, dword ptr [edx]
 	pop	edx
-       	ret 	4
+       	ret 	8
 _InterlockedExchange@8 endp
 
 
