@@ -1,4 +1,4 @@
-/* $Id: header.c,v 1.9 1999-09-18 12:21:25 cbratschi Exp $ */
+/* $Id: header.c,v 1.10 1999-09-28 16:36:04 cbratschi Exp $ */
 /*
  *  Header control
  *
@@ -20,6 +20,9 @@
  *   - Replace DrawText32A by DrawTextEx32A(...|DT_ENDELLIPSIS) in
  *     HEADER_DrawItem.
  *   - Little flaw when drawing a bitmap on the right side of the text.
+ *
+ * Status: Development in progress
+ * Version: Unknown
  */
 
 #include <string.h>
@@ -35,6 +38,7 @@
 
 #define VERT_BORDER     4
 #define DIVIDER_WIDTH  10
+#define MIN_ITEMWIDTH  0
 
 #define HEADER_GetInfoPtr(hwnd) ((HEADER_INFO *)GetWindowLongA(hwnd,0))
 
@@ -425,7 +429,7 @@ HEADER_DrawTrackLine (HWND hwnd, HDC hdc, INT x)
     hOldPen = SelectObject (hdc, GetStockObject (BLACK_PEN));
     oldRop = SetROP2 (hdc, R2_XORPEN);
     MoveToEx (hdc, x, rect.top, NULL);
-    LineTo (hdc, x, rect.bottom-1);
+    LineTo (hdc, x, rect.bottom);
     SetROP2 (hdc, oldRop);
     SelectObject (hdc, hOldPen);
 }
@@ -1262,18 +1266,26 @@ HEADER_LButtonUp (HWND hwnd, WPARAM wParam, LPARAM lParam)
             ReleaseDC (hwnd, hdc);
             if (HEADER_SendHeaderNotify (hwnd, HDN_ITEMCHANGINGA, infoPtr->iMoveItem))
                 infoPtr->items[infoPtr->iMoveItem].cxy = infoPtr->nOldWidth;
-            else {
+            else
+            {
                 nWidth = pt.x - infoPtr->items[infoPtr->iMoveItem].rect.left + infoPtr->xTrackOffset;
-                if (nWidth < 0)
-                    nWidth = 0;
-                infoPtr->items[infoPtr->iMoveItem].cxy = nWidth;
-                HEADER_SendHeaderNotify (hwnd, HDN_ITEMCHANGEDA, infoPtr->iMoveItem);
-            }
+                if (nWidth < MIN_ITEMWIDTH)
+                    nWidth = MIN_ITEMWIDTH;
 
-            HEADER_SetItemBounds (hwnd);
-            hdc = GetDC (hwnd);
-            HEADER_Refresh (hwnd, hdc);
-            ReleaseDC (hwnd, hdc);
+                if (infoPtr->nOldWidth != nWidth)
+                {
+                  RECT rect;
+
+                  infoPtr->items[infoPtr->iMoveItem].cxy = nWidth;
+                  HEADER_SendHeaderNotify (hwnd, HDN_ITEMCHANGEDA, infoPtr->iMoveItem);
+
+                  GetClientRect(hwnd,&rect);
+                  rect.left = infoPtr->items[infoPtr->iMoveItem].rect.right-2;
+                  HEADER_SetItemBounds (hwnd);
+                  rect.left = MIN(infoPtr->items[infoPtr->iMoveItem].rect.right-2,rect.left);
+                  InvalidateRect(hwnd,&rect,FALSE);
+                }
+            }
         }
     }
 
@@ -1343,8 +1355,8 @@ HEADER_MouseMove (HWND hwnd, WPARAM wParam, LPARAM lParam)
                     infoPtr->items[infoPtr->iMoveItem].cxy = infoPtr->nOldWidth;
                 else {
                     nWidth = pt.x - infoPtr->items[infoPtr->iMoveItem].rect.left + infoPtr->xTrackOffset;
-                    if (nWidth < 0)
-                        nWidth = 0;
+                    if (nWidth < MIN_ITEMWIDTH)
+                        nWidth = MIN_ITEMWIDTH;
                     infoPtr->items[infoPtr->iMoveItem].cxy = nWidth;
                     HEADER_SendHeaderNotify (hwnd, HDN_ITEMCHANGEDA,
                                              infoPtr->iMoveItem);
