@@ -1,4 +1,4 @@
-/* $Id: winimagebase.cpp,v 1.15 2000-04-16 04:19:57 bird Exp $ */
+/* $Id: winimagebase.cpp,v 1.16 2000-04-16 04:27:37 bird Exp $ */
 
 /*
  * Win32 PE Image base class
@@ -165,11 +165,14 @@ ULONG Win32ImageBase::getVersion()
  *                          successful return.
  * @param     cchFullname   Size of the buffer pointer to by pszFullname.
  *                          (A length of at least CCHMAXPATH is recommended.)
- * @parm      pszAltPath    Pointer to alternate first path. If this is NULL
- *                          (which is it by default) the executable path
- *                          is used. If this is specified, this path is used
- *                          instead. This is intented used to implement the
- *                          LoadLibraryEx flag LOAD_WITH_ALTERED_SEARCH_PATH.
+ * @parm      pszAltPath    Pointer to alternate first executable path. This
+ *                          will include a filename or at least a backslash at
+ *                          the end.
+ *                          If this is NULL (which is it by default) the
+ *                          executable path is used. If this is specified,
+ *                          this path is used instead. This is intented used
+ *                          to implement the LoadLibraryEx flag
+ *                          LOAD_WITH_ALTERED_SEARCH_PATH.
  *
  * @status    Completely implemented.
  * @author    Sander van Leeuwen (sandervl@xs4all.nl)
@@ -257,24 +260,24 @@ BOOL Win32ImageBase::findDll(const char *pszFileName,
         switch (iPath)
         {
             case FINDDLL_EXECUTABLEDIR:
-                if (!pszAltPath)
+                if (pszAltPath)
+                    pszPath = strcpy(plv->szPath, pszAltPath);
+                else
                 {
                     /* ASSUMES: getFullPath allways returns a fully qualified
                      *      path, ie. with at least one backslash. and that all
                      *      slashes are backslashes!
                      */
                     pszPath = strcpy(plv->szPath, WinExe->getFullPath());
-                    psz = strrchr(plv->szPath, '\\');
-                    dassert(psz, ("KERNEL32:Win32ImageBase::findDll(%s, 0x%08x, %d): "
-                            "WinExe->getFullPath returned a path not fully qualified: %s",
-                            pszFileName, pszFullName, cchFullName, pszPath));
-                    if (psz)
-                        *psz = '\0';
-                    else
-                        continue;
                 }
+                psz = strrchr(plv->szPath, '\\');
+                dassert(psz, ("KERNEL32:Win32ImageBase::findDll(%s, 0x%08x, %d): "
+                        "WinExe->getFullPath returned a path not fully qualified: %s",
+                        pszFileName, pszFullName, cchFullName, pszPath));
+                if (psz)
+                    *psz = '\0';
                 else
-                    pszPath = pszAltPath;
+                    continue;
                 break;
 
             case FINDDLL_CURRENTDIR:
