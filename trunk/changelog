@@ -1,4 +1,21 @@
-/* $Id: changelog,v 1.1292 2001-02-27 21:13:17 sandervl Exp $ */
+/* $Id: changelog,v 1.1293 2001-02-28 20:22:21 sandervl Exp $ */
+
+ 2001-02-28: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Added support for high memory override key in odin.ini:
+                  [ODINSYSTEM]
+                  HIGHMEM=0
+                  Turns off high memory usage in Odin. Useful for Warp 4 (>fp12) 
+                  systems that still use the old 16 bits TCPIP stack.
+                  (temporary workaround)
+                  NOTE: Turning this option off will prevent Odin from running
+                        applications that must be loaded in high memory 
+                        (like MS Word). 
+    - NTDLL:    o Committed update from Jan. 25th:
+                  Ported latest NtQuerySystemInformation from Wine 
+                  (includes fix for IE5 install)
+    - include\odinwrap.h:
+                o Wrappers only detect FS problems when they should correct them.
+                  (fixes FS corruption in wsock32 (WSAStartup/WSACleanup))
 
  2001-02-27: Sander van Leeuwen <sandervl@xs4all.nl>
     - WINMM:    o Added recording (still untested)
