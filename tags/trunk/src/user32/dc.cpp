@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.91 2001-02-20 15:40:22 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.92 2001-02-22 18:18:59 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -514,6 +514,7 @@ void selectClientArea(Win32BaseWindow *window, pDCData pHps)
    GreDestroyRegion(pHps->hps, hrgnRect);
 
 //testestest
+#if 0
    GpiQueryViewingLimits(pHps->hps, &rectWindowOS2);
    dprintf2(("view limits (%d,%d)(%d,%d)", rectWindowOS2.xLeft, rectWindowOS2.yBottom, rectWindowOS2.xRight, rectWindowOS2.yTop));
    GpiQueryDefViewingLimits(pHps->hps, &rectWindowOS2);
@@ -530,6 +531,10 @@ void selectClientArea(Win32BaseWindow *window, pDCData pHps)
    SIZEL size;
    GpiQueryPickApertureSize(pHps->hps, &size);
    dprintf2(("page viewport (%d,%d)", size.cx, size.cy));
+
+   GpiQueryPS(pHps->hps, &size);
+   dprintf2(("page space (%d,%d)", size.cx, size.cy));
+#endif
 //testestest
 
 }
@@ -1290,6 +1295,7 @@ BOOL WIN32API RedrawWindow(HWND hwnd, const RECT* pRect, HRGN hrgn, DWORD redraw
          LONG temp = pr->yTop;
          pr->yTop = height - pr->yBottom;
          pr->yBottom = height - temp;
+         dprintf2(("Invalid region (%d,%d) (%d,%d)", pr->xLeft, pr->yBottom, pr->xRight, pr->yTop));
       }
 
       hpsTemp = WinGetScreenPS (HWND_DESKTOP);

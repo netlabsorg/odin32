@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.242 2001-02-22 10:37:31 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.243 2001-02-22 18:18:59 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2179,7 +2179,6 @@ BOOL Win32BaseWindow::ShowWindow(ULONG nCmdShow)
  HWND  hWinAfter;
  BOOL  rc,wasVisible,showFlag;
  RECT  newPos = {0, 0, 0, 0};
- BOOL  fInvalidate = FALSE;
 
     dprintf(("ShowWindow %x %x", getWindowHandle(), nCmdShow));
     wasVisible = (getStyle() & WS_VISIBLE) != 0;
@@ -2199,7 +2198,6 @@ BOOL Win32BaseWindow::ShowWindow(ULONG nCmdShow)
         swp |= SWP_SHOWWINDOW;
         /* fall through */
     case SW_MINIMIZE:
-//testesteest
         if(!(getStyle() & WS_CHILD))
         {
             if( !(getStyle() & WS_MINIMIZE) )
@@ -2211,11 +2209,9 @@ BOOL Win32BaseWindow::ShowWindow(ULONG nCmdShow)
             swp |= SWP_FRAMECHANGED;
             if( !(getStyle() & WS_MINIMIZE) ) {
                  swp |= MinMaximize(SW_MINIMIZE, &newPos );
-                 fInvalidate = TRUE;
             }
             else swp |= SWP_NOSIZE | SWP_NOMOVE;
         }
-//testesteest
         break;
 
     case SW_SHOWMAXIMIZED: /* same as SW_MAXIMIZE */
@@ -2252,8 +2248,9 @@ BOOL Win32BaseWindow::ShowWindow(ULONG nCmdShow)
          //TODO: WIN_RESTORE_MAX flag!!!!!!!!!!!!!!
          swp |= SWP_SHOWWINDOW | SWP_FRAMECHANGED;
 
-         if( getStyle() & (WS_MINIMIZE | WS_MAXIMIZE) )
+         if( getStyle() & (WS_MINIMIZE | WS_MAXIMIZE) ) {
               swp |= MinMaximize(SW_RESTORE, &newPos );
+         }
          else swp |= SWP_NOSIZE | SWP_NOMOVE;
          break;
     }
@@ -2291,9 +2288,6 @@ BOOL Win32BaseWindow::ShowWindow(ULONG nCmdShow)
                      MAKELONG(rectClient.right-rectClient.left,
                               rectClient.bottom-rectClient.top));
         SendInternalMessageA(WM_MOVE,0,MAKELONG(rectClient.left,rectClient.top));
-    }
-    if(fInvalidate) {
-        InvalidateRect(getWindowHandle(), NULL, 1);
     }
 END:
     return wasVisible;
@@ -2518,6 +2512,7 @@ void Win32BaseWindow::NotifyFrameChanged(WINDOWPOS *wpos, RECT *oldClientRect)
     }
     else SendInternalMessageA(WM_WINDOWPOSCHANGED, 0, (LPARAM)wpos);
 
+    //Calculate invalid areas
     rect = rectWindow;
     OffsetRect(&rect, -rectWindow.left, -rectWindow.top);
     hrgn = CreateRectRgnIndirect(&rect);
@@ -2526,7 +2521,6 @@ void Win32BaseWindow::NotifyFrameChanged(WINDOWPOS *wpos, RECT *oldClientRect)
          return;
     }
     rect = rectClient;
-    OffsetRect(&rect, -rectClient.left, -rectClient.top);
     hrgnClient = CreateRectRgnIndirect(&rect);
     if (!hrgn) {
          dprintf(("ERROR: NotifyFrameChanged, CreateRectRgnIndirect failed!!"));
@@ -2537,7 +2531,6 @@ void Win32BaseWindow::NotifyFrameChanged(WINDOWPOS *wpos, RECT *oldClientRect)
 
     if(!EqualRect(oldClientRect, &rectClient)) {
          UnionRect(oldClientRect, oldClientRect, &rectClient);
-         OffsetRect(oldClientRect, -rectClient.left, -rectClient.top);
          hrgnClient = CreateRectRgnIndirect(oldClientRect);
          if (!hrgn) {
               dprintf(("ERROR: NotifyFrameChanged, CreateRectRgnIndirect failed!!"));
@@ -2546,7 +2539,8 @@ void Win32BaseWindow::NotifyFrameChanged(WINDOWPOS *wpos, RECT *oldClientRect)
          CombineRgn(hrgn, hrgn, hrgnClient, RGN_OR);
          DeleteObject(hrgnClient);
     }
-    InvalidateRgn(getWindowHandle(), hrgn, TRUE);
+    RedrawWindow(getWindowHandle(), NULL, hrgn, RDW_ALLCHILDREN |
+                 RDW_INVALIDATE | RDW_ERASE | RDW_FRAME);
     DeleteObject(hrgn);
 }
 //******************************************************************************
