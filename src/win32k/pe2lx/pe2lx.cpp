@@ -1,4 +1,4 @@
-/* $Id: pe2lx.cpp,v 1.32 2001-08-08 17:24:45 bird Exp $
+/* $Id: pe2lx.cpp,v 1.33 2001-09-28 07:43:02 sandervl Exp $
  *
  * Pe2Lx class implementation. Ring 0 and Ring 3
  *
@@ -93,6 +93,9 @@
 #include <stdlib.h>                     /* C library stdlib.h. */
 #include <stddef.h>                     /* C library stddef.h. */
 #include <stdarg.h>                     /* C library stdarg.h. */
+#ifndef RING0
+#include <stdio.h>
+#endif
 
 #include "vprintf.h"                    /* win32k printf and vprintf. Not C library! */
 #include "dev32.h"                      /* 32-Bit part of the device driver. (SSToDS) */
@@ -2779,6 +2782,10 @@ ULONG Pe2Lx::makeFixups()
     BufferedRVARead            *pImpNameReader;     /* Buffered reader for names reads; ie. function and module names. */
     BufferedRVARead            *pImpThunkReader;    /* Buffered reader for thunk reads; ie. reading from the OrgiginalFirstThunk array. */
     ULONG                       ulModuleOrdinal;    /* Module ordinal. Valid as long as fImport is set. */
+    #ifndef RING0
+    ULONG                       ulCustomModOrdinal; /* Module ordinal of custom Odin dll. Valid as long as fImport is set. */
+    char                        szModuleName[128];
+    #endif
     ULONG                       ulRVAFirstThunk;    /* Current first thunk array RVA. Points at current entry. */
     ULONG                       ulRVAOrgFirstThunk; /* Current original first thunk array RVA. Points at current entry. */
     #ifndef RING0
@@ -2830,7 +2837,9 @@ ULONG Pe2Lx::makeFixups()
         &&
         (ulRVABaseReloc = pNtHdrs->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC].VirtualAddress) > 0UL
         &&
-        ulRVABaseReloc < pNtHdrs->OptionalHeader.SizeOfImage;
+        ulRVABaseReloc < pNtHdrs->OptionalHeader.SizeOfImage
+        &&
+        areFixupsEnabled();
     #endif
     printInf(("\n"));
     #ifndef RING0
@@ -2884,8 +2893,18 @@ ULONG Pe2Lx::makeFixups()
     }
 
     /* Make sure kernel32 is the first imported module */
-    if (rc == NO_ERROR)
-        rc = addModule("KERNEL32.DLL", (PULONG)SSToDS(&ul));
+    if (rc == NO_ERROR) 
+    {
+        #ifndef RING0
+        if(hasCustomDll()) {
+            rc = addModule(options.pszCustomDll, (PULONG)SSToDS(&ul));
+            ulCustomModOrdinal = ul;
+            strcpy(szModuleName, "KERNEL32");
+        }
+        else
+        #endif
+            rc = addModule("KERNEL32.DLL", (PULONG)SSToDS(&ul));
+    }
 
     /* initiate the import variables */
     if (fImports && rc == NO_ERROR)
@@ -2914,8 +2933,27 @@ ULONG Pe2Lx::makeFixups()
             {
                 rc = pImpNameReader->dupString(ulModuleOrdinal, (PSZ*)SSToDS(&psz));
                 if (rc == NO_ERROR)
-                    rc = addModule(psz, (PULONG)SSToDS(&ulModuleOrdinal));
-                free(psz);
+                {
+                    #ifndef RING0
+                    if(hasCustomDll()) {
+                        ulModuleOrdinal = ulCustomModOrdinal;
+                        strcpy(szModuleName, psz);
+                        char *tmp = szModuleName;
+                        while(*tmp != 0 && *tmp != '.')
+                        {
+                            if(*tmp >= 'a' && *tmp <= 'z') {
+                                *tmp += ('A' - 'a');
+                            }
+                            tmp++;
+                        }
+                        *tmp = 0;
+                    }
+                    else
+                    #endif
+                        rc = addModule(psz, (PULONG)SSToDS(&ulModuleOrdinal));
+
+                    free(psz);
+                }
             }
             else
                 fImports = FALSE;
@@ -2949,14 +2987,25 @@ ULONG Pe2Lx::makeFixups()
         if (paObjects[iObj].Misc.fTIBFixObject
             && ((paObjects[iObj].Misc.offTIBFix + paObjects[iObj].ulRVA) & ~(PAGESIZE-1UL)) == ulRVAPage)
         {
-            rc = addModule("KERNEL32.DLL", (PULONG)SSToDS(&ul));
+            #ifndef RING0
+            if(hasCustomDll()) {
+                rc = addModule(options.pszCustomDll, (PULONG)SSToDS(&ul));
+                ulCustomModOrdinal = ul;
+            }
+            else
+            #endif
+                rc = addModule("KERNEL32.DLL", (PULONG)SSToDS(&ul));
             if (rc == NO_ERROR)
             {
                 printInfA(("TibFix import fixup\n"));
                 rc = add32OrdImportFixup((WORD)((paObjects[iObj].Misc.offTIBFix + paObjects[iObj].ulRVA + TIBFIX_OFF_CALLADDRESS) & (PAGESIZE-1UL)),
                                          ul,
                                          pNtHdrs->FileHeader.Characteristics & IMAGE_FILE_DLL ?
-                                            ORD_REGISTERPE2LXDLL : ORD_REGISTERPE2LXEXE);
+                                            ORD_REGISTERPE2LXDLL : ORD_REGISTERPE2LXEXE
+                #ifndef RING0
+                                         , "KERNEL32"
+                #endif
+                                         );
             }
             if (rc != NO_ERROR)
                 break;
@@ -2976,7 +3025,11 @@ ULONG Pe2Lx::makeFixups()
                 {
                     if (Thunk.u1.Ordinal & (ULONG)IMAGE_ORDINAL_FLAG)
                         rc = add32OrdImportFixup((WORD)(ulRVAFirstThunk & (PAGESIZE-1)),
-                                                 ulModuleOrdinal, Thunk.u1.Ordinal & 0xffff);
+                                                 ulModuleOrdinal, Thunk.u1.Ordinal & 0xffff
+                        #ifndef RING0
+                                                 , szModuleName
+                        #endif
+                                                 );
                     else if (Thunk.u1.Ordinal > 0UL && Thunk.u1.Ordinal < pNtHdrs->OptionalHeader.SizeOfImage)
                     {
                         rc = pImpNameReader->dupString(Thunk.u1.Ordinal + offsetof(IMAGE_IMPORT_BY_NAME, Name),
@@ -2984,7 +3037,11 @@ ULONG Pe2Lx::makeFixups()
                         if (rc != NO_ERROR)
                             break;
                         rc = add32NameImportFixup((WORD)(ulRVAFirstThunk & (PAGESIZE-1)),
-                                                  ulModuleOrdinal, psz);
+                                                  ulModuleOrdinal, psz
+                        #ifndef RING0
+                                                  , szModuleName
+                        #endif
+                                                 );
                         free(psz);
                     }
                     else
@@ -3027,7 +3084,22 @@ ULONG Pe2Lx::makeFixups()
                             rc = pImpNameReader->dupString(ulModuleOrdinal, (PSZ*)SSToDS(&psz));
                             if (rc == NO_ERROR)
                             {
-                                rc = addModule(psz, (PULONG)SSToDS(&ulModuleOrdinal));
+                                #ifndef RING0
+                                if(hasCustomDll()) {
+                                    ulModuleOrdinal = ulCustomModOrdinal;
+                                    strcpy(szModuleName, psz);
+                                    char *tmp = szModuleName;
+                                    while(*tmp != 0 && *tmp != '.') {
+                                        if(*tmp >= 'a' && *tmp <= 'z') {
+                                            *tmp += ('A' - 'a');
+                                        }
+                                        tmp++;
+                                    }
+                                    *tmp = 0;
+                                }
+                                else
+                                #endif
+                                    rc = addModule(psz, (PULONG)SSToDS(&ulModuleOrdinal));
                                 free(psz);
                             }
                         }
@@ -3827,10 +3899,35 @@ ULONG Pe2Lx::add32OffsetFixup(WORD offSource, ULONG ulTarget)
  * This code got a bit dirty while trying to optimize memory usage.
  *
  */
+#ifndef RING0
+ULONG  Pe2Lx::add32OrdImportFixup(WORD offSource, ULONG ulModuleOrdinal, ULONG ulFunctionOrdinal, PSZ pszModuleName)
+#else
 ULONG  Pe2Lx::add32OrdImportFixup(WORD offSource, ULONG ulModuleOrdinal, ULONG ulFunctionOrdinal)
+#endif
 {
     struct r32_rlc *prlc;
     ULONG           cbFixup;         /* size of the fixup record. */
+
+    #ifndef RING0
+    if(hasCustomDll() && pszModuleName)
+    {
+        char  searchstring[256];
+        char *found;
+
+        sprintf(searchstring, "%s.%d", pszModuleName, ulFunctionOrdinal);
+        found = strstr(options.pszCustomExports, searchstring);
+        if(found) {
+            while(*found != '@') {
+                found++;
+            }
+            ulFunctionOrdinal = atoi(++found);
+        }
+        else {
+            printf("Error: Export %s not found in table.\n\n", searchstring);
+            return ERROR_MOD_NOT_FOUND;
+        }
+    }
+    #endif
 
     /* enough memory? */
     AllocateMoreMemory(offCurFixupRec + 10 > cbFRAllocated /* 10 is max size */,
@@ -3952,12 +4049,39 @@ ULONG  Pe2Lx::add32OrdImportFixup(WORD offSource, ULONG ulModuleOrdinal, ULONG u
  * This code got a bit dirty while trying to optimize memory usage.
  *
  */
+#ifndef RING0
+ULONG  Pe2Lx::add32NameImportFixup(WORD offSource, ULONG ulModuleOrdinal, PCSZ pszFnName, PSZ pszModuleName)
+#else
 ULONG  Pe2Lx::add32NameImportFixup(WORD offSource, ULONG ulModuleOrdinal, PCSZ pszFnName)
+#endif
 {
     APIRET          rc;
     struct r32_rlc *prlc;
     ULONG           cbFixup;         /* size of the fixup record. */
     ULONG           offFnName;
+
+    #ifndef RING0
+    if(hasCustomDll())
+    {
+        char  searchstring[256];
+        char *found;
+        int   ordinal;
+
+        sprintf(searchstring, "%s.%s", pszModuleName, pszFnName);
+        found = strstr(options.pszCustomExports, searchstring);
+        if(found) {
+            while(*found != '@') {
+                found++;
+            }
+            ordinal = atoi(++found);
+            return add32OrdImportFixup(offSource, ulModuleOrdinal, ordinal, NULL);
+        }
+        else {
+            printf("Error: Export %s not found in table.\n\n", searchstring);
+            return ERROR_MOD_NOT_FOUND;
+        }
+    }
+    #endif
 
     /* enough memory? */
     AllocateMoreMemory(offCurFixupRec + 10 > cbFRAllocated /* 10 is max size */,
@@ -5008,6 +5132,11 @@ PCSZ Pe2Lx::queryOdin32ModuleName(PCSZ pszWin32ModuleName)
 {
     int i = 0;
 
+    #ifndef RING0
+    if(hasCustomDll()) {
+        return pszWin32ModuleName;
+    }
+    #endif
     while (paLieList[i].pszWin32Name != NULL)
     {
         if (stricmp(paLieList[i].pszWin32Name, pszWin32ModuleName) == 0)
