@@ -1,4 +1,4 @@
-/* $Id: win32k.h,v 1.3 2000-02-18 19:27:29 bird Exp $
+/* $Id: win32k.h,v 1.4 2000-02-26 20:21:42 bird Exp $
  *
  * Top level make file for the Win32k library.
  * Contains library and 32-bit IOCtl definition.
@@ -59,6 +59,7 @@ typedef struct _k32AllocMemEx
 *******************************************************************************/
 APIRET APIENTRY  libWin32kInit(void);
 APIRET APIENTRY  libWin32kTerm(void);
+USHORT APIENTRY  libHelperGetCS(void);
 APIRET APIENTRY  DosAllocMemEx(PPVOID ppv, ULONG cb, ULONG flag);
 
 
