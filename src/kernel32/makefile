@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.98 2000-09-02 21:14:50 bird Exp $
+# $Id: makefile,v 1.99 2000-09-03 18:04:54 phaller Exp $
 
 #
 # Odin32 API
@@ -52,6 +52,7 @@ $(OBJDIR)\LFILE.OBJ \
 $(OBJDIR)\NPIPE.OBJ \
 $(OBJDIR)\oslibdos.obj \
 $(OBJDIR)\oslibmisc.obj \
+$(OBJDIR)\ole2nls.obj \
 $(OBJDIR)\MISC.OBJ \
 $(OBJDIR)\EXCEPTUTIL.OBJ \
 $(OBJDIR)\LANG.OBJ \

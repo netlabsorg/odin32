@@ -1,4 +1,4 @@
-/* $Id: lang.cpp,v 1.26 2000-08-19 18:36:41 sandervl Exp $ */
+/* $Id: lang.cpp,v 1.27 2000-09-03 18:04:55 phaller Exp $ */
 /*
  * Win32 language API functions for OS/2
  *
@@ -148,6 +148,8 @@ BOOL WIN32API IsValidCodePage(UINT CodePage)
 }
 //******************************************************************************
 //******************************************************************************
+#if 0
+PHS: disabled for ole2nls.cpp
 LCID WIN32API GetUserDefaultLCID(void)
 {
   dprintf2(("KERNEL32: GetUserDefaultLCID: returns %x", MAKELCID(GetLanguageId(), SORT_DEFAULT)));
@@ -174,6 +176,7 @@ LANGID WIN32API GetSystemDefaultLangID(void)
   dprintf2(("KERNEL32: GetSystemDefaultLangID returns %x", MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US)));
   return(MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US));
 }
+#endif
 
 //******************************************************************************
 //******************************************************************************
@@ -882,13 +885,6 @@ ODINFUNCTION4(int, GetLocaleInfoA, LCID, lcid, LCTYPE, LCType, LPSTR, buf,
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API IsValidLocale(LCID Locale, DWORD dwFlags)
-{
-  dprintf(("KERNEL32: IsValidLocale, always returns TRUE\n"));
-  return(TRUE);
-}
-//******************************************************************************
-//******************************************************************************
 LCID WIN32API GetThreadLocale()
 {
  THDB *thdb = GetThreadTHDB();
@@ -916,45 +912,11 @@ BOOL WIN32API SetThreadLocale(LCID locale)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API EnumSystemLocalesA(LOCALE_ENUMPROCA lpLocaleEnumProc,
-                                 DWORD dwFlags)
-{
- char buffer[32];
 
-  dprintf(("EnumSystemLocalesA %X %X\n", lpLocaleEnumProc, dwFlags));
-  if(lpLocaleEnumProc == NULL || ((dwFlags & LCID_INSTALLED) && (dwFlags & LCID_SUPPORTED))) {
-        dprintf(("Invalid parameter\n"));
-        SetLastError(ERROR_INVALID_PARAMETER);
-        return(FALSE);
-  }
 
-  sprintf(buffer, "%08lx", GetUserDefaultLCID());
-  lpLocaleEnumProc(buffer);
-  return(TRUE);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API EnumSystemLocalesW(LOCALE_ENUMPROCW lpLocaleEnumProc,
-                                 DWORD            dwFlags)
-{
- WCHAR bufferW[32];
- char  bufferA[32];
 
-  dprintf(("EnumSystemLocalesW %X %X\n", lpLocaleEnumProc, dwFlags));
-  if(lpLocaleEnumProc == NULL || ((dwFlags & LCID_INSTALLED) && (dwFlags & LCID_SUPPORTED))) {
-        dprintf(("Invalid parameter\n"));
-        SetLastError(ERROR_INVALID_PARAMETER);
-        return(FALSE);
-  }
-  sprintf(bufferA, "%08lx", GetUserDefaultLCID());
-  lstrcpyAtoW(bufferW, bufferA);
-
-  lpLocaleEnumProc(bufferW);
-  return(TRUE);
-}
-//******************************************************************************
-//******************************************************************************
-
+#if 0
+PHS: disabled for ole2nls.cpp
 
 /*****************************************************************************
  * Name      : BOOL SetLocaleInfoA
@@ -1124,3 +1086,4 @@ ODINFUNCTION3(DWORD,VerLanguageNameW,DWORD,  wLang,
 }
 
 
+#endif
