@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.1288 2001-02-24 12:58:46 sandervl Exp $ */
+/* $Id: changelog,v 1.1289 2001-02-25 16:05:05 sandervl Exp $ */
+
+ 2001-02-25: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Check executable too when searching for imported modules
+                  (directly imported by PE dlls)
 
  2001-02-24: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Set fExitProcess flag in WinExe destructor to prevent reloading
@@ -41,7 +45,7 @@
                   Useful for creating an Odin window with an OS/2 window as
                   parent.
 
- 2000-02-21: Michal Necasek <mike@mendelu.cz>
+ 2000-02-21: Michal Necasek <michalnec@volny.cz>
     - USER32:   o Translate WM_BUTTONxMOTIONSTART/END to WM_MOUSEMOVE
                   Applications don't expect WM_NULL when fetching mouse
                   messages from the queue.
@@ -167,7 +171,7 @@
                   message (not allowed by PM).
                   (fixes keyboard focus in ElstarFormular 2000)
 
- 2000-02-13: Michal Necasek <mike@mendelu.cz>
+ 2000-02-13: Michal Necasek <michalnec@volny.cz>
     - USER32:   o Wrong unicode<->ascii translation for some listbox & combobox
                   messages. Must check if the control style includes LB/CB_HASSTRINGS.
                   (CB_FINDSTRING, CB_FINDSTRINGEXACT, CB_SELECTSTRING,
@@ -198,7 +202,7 @@
                   (fixes heap corruption in MS Visual C++ 4.2 install)
                   TODO: Needs a permanent and correct solution as this
                         can happen in several other places.
-                        Also a potential problem in user32 classes (InfoPtr).
+                        Also a potential problem in user32 controls (InfoPtr).
                 o Set last error to ERROR_INVALID_INDEX for invalid class word
                   index.
 
