@@ -1,4 +1,4 @@
-/* $Id: Fileio.cpp,v 1.15 1999-11-12 14:57:12 sandervl Exp $ */
+/* $Id: Fileio.cpp,v 1.16 1999-11-27 00:05:39 sandervl Exp $ */
 
 /*
  * Win32 File IO API functions for OS/2
@@ -389,7 +389,7 @@ ODINFUNCTION1(DWORD, GetFileAttributesW,
 
     dprintf(("KERNEL32:  GetFileAttributesW\n"));
     astring = UnicodeToAsciiString((LPWSTR)arg1);
-    rc = O32_GetFileAttributes(astring);
+    rc = ODIN_GetFileAttributesA(astring);
     FreeAsciiString(astring);
     return(rc);
 }
