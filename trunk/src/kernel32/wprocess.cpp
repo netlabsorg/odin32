@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.129 2001-07-10 20:41:50 bird Exp $ */
+/* $Id: wprocess.cpp,v 1.130 2001-07-15 15:18:58 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -42,6 +42,7 @@
 #include "versionos2.h"    /*PLF Wed  98-03-18 02:36:51*/
 #include <wprocess.h>
 #include "mmap.h"
+#include "initterm.h"
 
 #define DBG_LOCALLOG    DBG_wprocess
 #include "dbglocal.h"
@@ -1868,9 +1869,14 @@ HINSTANCE WIN32API WinExec(LPCSTR lpCmdLine, UINT nCmdShow)
     }
     //block until the launched app waits for input (or a timeout of 15 seconds)
     //TODO: Shouldn't call Open32, but the api in user32..
-    rc = O32_WaitForInputIdle(procinfo.hProcess, 15000);
-    if(rc != 0) {
-        dprintf(("WinExec: WaitForInputIdle %x returned %x", procinfo.hProcess, rc));
+    if(fVersionWarp3) {
+        Sleep(1000); //WaitForInputIdle not available in Warp 3
+    }
+    else {
+        rc = O32_WaitForInputIdle(procinfo.hProcess, 15000);
+        if(rc != 0) {
+            dprintf(("WinExec: WaitForInputIdle %x returned %x", procinfo.hProcess, rc));
+        }
     }
     CloseHandle(procinfo.hThread);
     CloseHandle(procinfo.hProcess);
