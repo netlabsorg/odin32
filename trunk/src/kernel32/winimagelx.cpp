@@ -1,4 +1,4 @@
-/* $Id: winimagelx.cpp,v 1.17 2002-07-18 12:01:34 achimha Exp $ */
+/* $Id: winimagelx.cpp,v 1.18 2002-11-18 13:53:54 sandervl Exp $ */
 
 /*
  * Win32 LX Image base class
@@ -72,11 +72,16 @@ Win32LxImage::Win32LxImage(HINSTANCE hInstance, PVOID pResData)
 
     if(lpszCustomDllName) {
        name = lpszCustomDllName;
-       this->dwOrdinalBase = ::dwOrdinalBase;
+       this->dwOrdinalBase    = ::dwOrdinalBase;
+      
+       if(lpszCustomExportPrefix) {
+           this->lpszExportPrefix = strdup(::lpszCustomExportPrefix);
+       }
     }
     else {
        name = OSLibGetDllName(hinstance);
-       this->dwOrdinalBase = 0;
+       this->dwOrdinalBase    = 0;
+       this->lpszExportPrefix = NULL;
     }
 
     strcpy(szFileName, name);
@@ -96,6 +101,8 @@ Win32LxImage::Win32LxImage(HINSTANCE hInstance, PVOID pResData)
 //******************************************************************************
 Win32LxImage::~Win32LxImage()
 {
+    if(lpszExportPrefix) free(lpszExportPrefix);
+
     if(header) {
     	DosFreeMem(header);
     }
@@ -107,11 +114,27 @@ ULONG Win32LxImage::getApi(char *name)
     APIRET      rc;
     ULONG       apiaddr;
 
+    if(lpszExportPrefix) 
+    {//if this dll exports by name with a prefix, then concatenate the prefix
+     //with the export name to get the OS/2 export name
+        char *lpszNewName = (char *)alloca(strlen(name) + strlen(lpszExportPrefix)+1);
+        if(lpszNewName == NULL) {
+            DebugInt3();
+            return 0;
+        }
+        strcpy(lpszNewName, lpszExportPrefix);
+        strcat(lpszNewName, name);
+        rc = DosQueryProcAddr(hinstanceOS2, 0, lpszNewName, (PFN *)&apiaddr);
+        if(rc == NO_ERROR) {
+            return(apiaddr);
+        }
+        //else try with the normal name
+    }
     rc = DosQueryProcAddr(hinstanceOS2, 0, name, (PFN *)&apiaddr);
     if(rc)
     {
-	    dprintf(("Win32LxImage::getApi %x %s -> rc = %d", hinstanceOS2, name, rc));
-	    return(0);
+        dprintf(("Win32LxImage::getApi %x %s -> rc = %d", hinstanceOS2, name, rc));
+        return(0);
     }
     return(apiaddr);
 }
@@ -122,7 +145,7 @@ ULONG Win32LxImage::getApi(int ordinal)
     APIRET      rc;
     ULONG       apiaddr;
 
-    rc = DosQueryProcAddr(hinstanceOS2, dwOrdinalBase + ordinal, NULL, (PFN *)&apiaddr);
+    rc = DosQueryProcAddr(hinstanceOS2, dwOrdinalBase+ordinal, NULL, (PFN *)&apiaddr);
     if(rc) {
     	dprintf(("Win32LxImage::getApi %x %d -> rc = %d", hinstanceOS2, ordinal, rc));
     	return(0);
@@ -130,9 +153,6 @@ ULONG Win32LxImage::getApi(int ordinal)
     return(apiaddr);
 }
 //******************************************************************************
-// here we build a fake PE header for an LX module. In Windows, HINSTANCE handles
-// actually contain the virtual address of of the PE header. We try to fill in
-// sensible values as much as possible...
 //******************************************************************************
 LPVOID Win32LxImage::buildHeader(DWORD MajorImageVersion, DWORD MinorImageVersion,
                                  DWORD Subsystem) 
@@ -143,12 +163,11 @@ LPVOID Win32LxImage::buildHeader(DWORD MajorImageVersion, DWORD MinorImageVersio
     PIMAGE_FILE_HEADER     pfh;
     DWORD *ntsig;
 
-    // AH TODO: we are wasting 60k address space here!!!! (at least without PAG_ANY)
     rc = DosAllocMem(&header, 4096, PAG_READ | PAG_WRITE | PAG_COMMIT | flAllocMem);
     if(rc) {
     	dprintf(("ERROR: buildHeader DosAllocMem failed!! (rc=%x)", rc));
         DebugInt3();
-        return NULL;
+	    return NULL;
     }
     memcpy(header, dosHeader, sizeof(dosHeader));
     ntsig  = (DWORD *)((LPBYTE)header + sizeof(dosHeader));
