@@ -154,6 +154,8 @@ HWND    WIN32API GetCapture(void);
 HWND    WIN32API SetCapture(HWND);
 BOOL    WIN32API IsWindowEnabled(HWND);
 HWND    WIN32API SetActiveWindow( HWND hwnd);
+BOOL    WIN32API IsWindowVisible(HWND);
+HWND    WIN32API GetParent(HWND);
 
 HMODULE WIN32API LoadLibraryA(LPCSTR);
 BOOL    WIN32API FreeLibrary(HMODULE);
