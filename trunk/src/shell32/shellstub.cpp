@@ -1,4 +1,4 @@
-/* $Id: shellstub.cpp,v 1.1 2000-05-18 18:06:59 sandervl Exp $ */
+/* $Id: shellstub.cpp,v 1.2 2001-04-19 08:32:18 sandervl Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -111,11 +111,6 @@ ODINFUNCTION1(DWORD, InvalidateDriveType, DWORD, x1)
   return 0;
 }
 
-ODINFUNCTION1(DWORD, IsNetDrive, DWORD, x1)
-{
-  dprintf(("STUB!"));
-  return 0;
-}
 
 ODINFUNCTION1(DWORD, SHGlobalDefect, DWORD, x1)
 {
