@@ -485,10 +485,11 @@ ODINFUNCTION2(BOOL, ILIsEqual,
 	
 	while (pidltemp1->mkid.cb && pidltemp2->mkid.cb)
 	{
-	    _ILSimpleGetText(pidltemp1, szData1, MAX_PATH);
-	    _ILSimpleGetText(pidltemp2, szData2, MAX_PATH);
-
-	    if (strcasecmp ( szData1, szData2 )!=0 )
+//	    _ILSimpleGetText(pidltemp1, szData1, MAX_PATH);
+//	    _ILSimpleGetText(pidltemp2, szData2, MAX_PATH);
+//
+//	    if (strcasecmp ( szData1, szData2 )!=0 )
+            if (_ILSimpleCompareText(pidltemp1, pidltemp2) != 0)
 	      return FALSE;
 
 	    pidltemp1 = ODIN_ILGetNext(pidltemp1);
@@ -524,11 +525,12 @@ ODINFUNCTION3(BOOL, ILIsParent,
 
 	while (pParent->mkid.cb && pChild->mkid.cb)
 	{
-	  _ILSimpleGetText(pParent, szData1, MAX_PATH);
-	  _ILSimpleGetText(pChild, szData2, MAX_PATH);
-
-	  if (strcasecmp ( szData1, szData2 )!=0 )
-	    return FALSE;
+//	  _ILSimpleGetText(pParent, szData1, MAX_PATH);
+//	  _ILSimpleGetText(pChild, szData2, MAX_PATH);
+//
+//	  if (strcasecmp ( szData1, szData2 )!=0 )
+          if ( _ILSimpleCompareText(pParent, pChild) != 0)
+            return FALSE;
 
 	  pParent = ODIN_ILGetNext(pParent);
 	  pChild = ODIN_ILGetNext(pChild);
@@ -584,10 +586,11 @@ ODINFUNCTION2(LPITEMIDLIST, ILFindChild,
 	{
 	  while (pidltemp1->mkid.cb && pidltemp2->mkid.cb)
 	  {
-	    _ILSimpleGetText(pidltemp1, szData1, MAX_PATH);
-	    _ILSimpleGetText(pidltemp2, szData2, MAX_PATH);
-
-	    if (strcasecmp(szData1,szData2))
+//	    _ILSimpleGetText(pidltemp1, szData1, MAX_PATH);
+//	    _ILSimpleGetText(pidltemp2, szData2, MAX_PATH);
+//
+//	    if (strcasecmp(szData1,szData2))
+            if ( _ILSimpleCompareText( pidltemp1, pidltemp2 ) )
 	      break;
 
 	    pidltemp1 = ODIN_ILGetNext(pidltemp1);
@@ -1608,6 +1611,87 @@ DWORD _ILSimpleGetText (LPCITEMIDLIST pidl, LPSTR szOut, UINT uOutSize)
 	TRACE("-- (%p=%s 0x%08lx)\n",szOut,(char*)szOut,dwReturn);
 	return dwReturn;
 }
+
+
+ /**************************************************************************
+ *  _ILSimpleCompareText
+ *
+ * gets the text for the first item in the pidl (eg. simple pidl)
+ * and compares it with the text for the second pidl
+ *
+ * returns the length of the string
+ */
+int _ILSimpleCompareText (LPCITEMIDLIST pidl1, LPCITEMIDLIST pidl2)
+{
+  LPSTR lpText1;
+  LPSTR lpText2;
+  
+  char szTemp1[MAX_PATH];
+  char szTemp2[MAX_PATH];
+  GUID const * 	riid;
+  
+
+  if (!pidl1 && !pidl2)
+    return 0;
+  
+  if (!pidl1 && pidl2)
+    return -1;
+  
+  if (pidl1 && !pidl2)
+    return 1;
+  
+  
+  // -------------
+  // examine pidl1
+  // -------------
+  if (_ILIsDesktop(pidl1))
+  {
+    HCR_GetClassName(&CLSID_ShellDesktop, szTemp1, MAX_PATH);
+    lpText1 = szTemp1;
+  }
+  else
+    if ( lpText1 = _ILGetTextPointer(pidl1) )
+    {
+      // OK, nice to have a valid pointer :)
+    }
+    else
+      if ( riid = _ILGetGUIDPointer(pidl1) )
+      {
+      /* special folder */
+        HCR_GetClassName(riid, szTemp1, MAX_PATH);
+        lpText1 = szTemp1;
+      }
+      else
+        lpText1 = "undetermined";
+  
+  // -------------
+  // examine pidl2
+  // -------------
+  if (_ILIsDesktop(pidl2))
+  {
+    HCR_GetClassName(&CLSID_ShellDesktop, szTemp2, MAX_PATH);
+    lpText2 = szTemp2;
+  }
+  else
+    if ( lpText2 = _ILGetTextPointer(pidl2) )
+    {
+      // OK, nice to have a valid pointer :)
+    }
+    else
+      if ( riid = _ILGetGUIDPointer(pidl2) )
+      {
+      /* special folder */
+        HCR_GetClassName(riid, szTemp2, MAX_PATH);
+        lpText2 = szTemp2;
+      }
+      else
+        lpText2 = "undetermined";
+  
+  
+  // now finally compare the texts
+  return strcasecmp(lpText1, lpText2);
+}
+
 
 /**************************************************************************
  *
