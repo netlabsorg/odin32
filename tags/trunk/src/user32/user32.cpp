@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.88 2000-11-11 18:39:29 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.89 2000-11-16 16:35:43 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -8,6 +8,10 @@
  * Copyright 1998 Peter Fitzsimmons
  * Copyright 1999 Christoph Bratschi
  * Copyright 1999 Daniela Engert (dani@ngrt.de)
+ *
+ * Partly based on Wine code (windows\sysparams.c: SystemParametersInfoA)
+ *
+ * Copyright 1994 Alexandre Julliard
  *
  *
  * Project Odin Software License can be found in LICENSE.TXT
@@ -787,7 +791,6 @@ int WIN32API GetSystemMetrics(int nIndex)
 BOOL WIN32API SystemParametersInfoA(UINT uiAction, UINT uiParam, PVOID pvParam, UINT fWinIni)
 {
  BOOL rc = TRUE;
- NONCLIENTMETRICSA *cmetric = (NONCLIENTMETRICSA *)pvParam;
 
   switch(uiAction) {
     case SPI_SCREENSAVERRUNNING:
@@ -798,73 +801,79 @@ BOOL WIN32API SystemParametersInfoA(UINT uiAction, UINT uiParam, PVOID pvParam, 
         break;
     case SPI_GETNONCLIENTMETRICS:
     {
-        memset(cmetric, 0, sizeof(NONCLIENTMETRICSA));
-        cmetric->cbSize = sizeof(NONCLIENTMETRICSA);
+	LPNONCLIENTMETRICSA lpnm = (LPNONCLIENTMETRICSA)pvParam;
+		
+	if (lpnm->cbSize == sizeof(NONCLIENTMETRICSA))
+	{
+            memset(lpnm, 0, sizeof(NONCLIENTMETRICSA));
+            lpnm->cbSize = sizeof(NONCLIENTMETRICSA);
 
-#if 0
-        //CB: fonts not handled by Open32, set to WarpSans
-    	lstrcpyA(cmetric->lfSmCaptionFont.lfFaceName,"WarpSans");
-    	cmetric->lfSmCaptionFont.lfHeight = 9;
+            SystemParametersInfoA(SPI_GETICONTITLELOGFONT, 0, (LPVOID)&(lpnm->lfCaptionFont),0);
+            lpnm->lfCaptionFont.lfWeight = FW_BOLD;
+            lpnm->iCaptionWidth    = 32; //TODO
+            lpnm->iCaptionHeight   = 32; //TODO
 
-        lstrcpyA(cmetric->lfCaptionFont.lfFaceName,"WarpSans");
-        cmetric->lfCaptionFont.lfHeight = 9;
+            SystemParametersInfoA(SPI_GETICONTITLELOGFONT, 0, (LPVOID)&(lpnm->lfSmCaptionFont),0);
+            lpnm->iSmCaptionWidth  = GetSystemMetrics(SM_CXSMSIZE);
+            lpnm->iSmCaptionHeight = GetSystemMetrics(SM_CYSMSIZE);
 
-        lstrcpyA(cmetric->lfMenuFont.lfFaceName,"WarpSans");
-        cmetric->lfMenuFont.lfHeight = 9;
+            LPLOGFONTA lpLogFont = &(lpnm->lfMenuFont);
+            GetProfileStringA("Desktop", "MenuFont", "MS Sans Serif",
+                              lpLogFont->lfFaceName, LF_FACESIZE);
 
-        lstrcpyA(cmetric->lfStatusFont.lfFaceName,"WarpSans");
-        cmetric->lfStatusFont.lfHeight = 9;
+            lpLogFont->lfHeight = -GetProfileIntA("Desktop","MenuFontSize", 13);
+            lpLogFont->lfWidth = 0;
+            lpLogFont->lfEscapement = lpLogFont->lfOrientation = 0;
+            lpLogFont->lfWeight = FW_NORMAL;
+            lpLogFont->lfItalic = FALSE;
+            lpLogFont->lfStrikeOut = FALSE;
+            lpLogFont->lfUnderline = FALSE;
+            lpLogFont->lfCharSet = ANSI_CHARSET;
+            lpLogFont->lfOutPrecision = OUT_DEFAULT_PRECIS;
+            lpLogFont->lfClipPrecision = CLIP_DEFAULT_PRECIS;
+            lpLogFont->lfPitchAndFamily = DEFAULT_PITCH | FF_SWISS;
 
-        lstrcpyA(cmetric->lfMessageFont.lfFaceName,"WarpSans");
-        cmetric->lfMessageFont.lfHeight = 9;
+            SystemParametersInfoA(SPI_GETICONTITLELOGFONT, 0,
+     	 	  	      (LPVOID)&(lpnm->lfStatusFont),0);
+            SystemParametersInfoA(SPI_GETICONTITLELOGFONT, 0,
+     		  	      (LPVOID)&(lpnm->lfMessageFont),0);
 
-        cmetric->iBorderWidth     = GetSystemMetrics(SM_CXBORDER);
-        cmetric->iScrollWidth     = GetSystemMetrics(SM_CXHSCROLL);
-        cmetric->iScrollHeight    = GetSystemMetrics(SM_CYHSCROLL);
-        cmetric->iCaptionWidth    = 32; //TODO
-        cmetric->iCaptionHeight   = 16; //TODO
-        cmetric->iSmCaptionWidth  = GetSystemMetrics(SM_CXSMSIZE);
-        cmetric->iSmCaptionHeight = GetSystemMetrics(SM_CYSMSIZE);
-        cmetric->iMenuWidth       = 32; //TODO
-        cmetric->iMenuHeight      = GetSystemMetrics(SM_CYMENU);
-#else
-        SystemParametersInfoA(SPI_GETICONTITLELOGFONT, 0, (LPVOID)&(cmetric->lfSmCaptionFont),0);
-
-        SystemParametersInfoA(SPI_GETICONTITLELOGFONT, 0, (LPVOID)&(cmetric->lfCaptionFont),0);
-        cmetric->lfCaptionFont.lfWeight = FW_BOLD;
-
-        LPLOGFONTA lpLogFont = &(cmetric->lfMenuFont);
-        GetProfileStringA("Desktop", "MenuFont", "MS Sans Serif",
-			  lpLogFont->lfFaceName, LF_FACESIZE);
-
-        lpLogFont->lfHeight = -GetProfileIntA("Desktop","MenuFontSize", 12);
-        lpLogFont->lfWidth = 0;
-        lpLogFont->lfEscapement = lpLogFont->lfOrientation = 0;
-        lpLogFont->lfWeight = FW_NORMAL;
-        lpLogFont->lfItalic = FALSE;
-        lpLogFont->lfStrikeOut = FALSE;
-        lpLogFont->lfUnderline = FALSE;
-        lpLogFont->lfCharSet = ANSI_CHARSET;
-        lpLogFont->lfOutPrecision = OUT_DEFAULT_PRECIS;
-        lpLogFont->lfClipPrecision = CLIP_DEFAULT_PRECIS;
-        lpLogFont->lfPitchAndFamily = DEFAULT_PITCH | FF_SWISS;
-
-        SystemParametersInfoA(SPI_GETICONTITLELOGFONT, 0,
- 	 	  	      (LPVOID)&(cmetric->lfStatusFont),0);
-        SystemParametersInfoA(SPI_GETICONTITLELOGFONT, 0,
- 		  	      (LPVOID)&(cmetric->lfMessageFont),0);
-
-        cmetric->iBorderWidth     = GetSystemMetrics(SM_CXBORDER);
-        cmetric->iScrollWidth     = GetSystemMetrics(SM_CXHSCROLL);
-        cmetric->iScrollHeight    = GetSystemMetrics(SM_CYHSCROLL);
-        cmetric->iCaptionWidth    = 32; //TODO
-        cmetric->iCaptionHeight   = 32; //TODO
-        cmetric->iSmCaptionWidth  = GetSystemMetrics(SM_CXSMSIZE);
-        cmetric->iSmCaptionHeight = GetSystemMetrics(SM_CYSMSIZE);
-        cmetric->iMenuHeight      = GetSystemMetrics(SM_CYMENU);
-        cmetric->iMenuWidth       = cmetric->iMenuHeight; //TODO
-#endif
+            lpnm->iBorderWidth     = GetSystemMetrics(SM_CXBORDER);
+            lpnm->iScrollWidth     = GetSystemMetrics(SM_CXHSCROLL);
+            lpnm->iScrollHeight    = GetSystemMetrics(SM_CYHSCROLL);
+            lpnm->iMenuHeight      = GetSystemMetrics(SM_CYMENU);
+            lpnm->iMenuWidth       = lpnm->iMenuHeight; //TODO
+        }
+	else
+	{
+	    dprintf(("SPI_GETNONCLIENTMETRICS: size mismatch !! (is %d; should be %d)\n", lpnm->cbSize, sizeof(NONCLIENTMETRICSA)));
+	    /* FIXME: SetLastError? */
+	    rc = FALSE;
+	}
         break;
+    }
+
+    case SPI_GETICONMETRICS:			/*     45  WINVER >= 0x400 */
+    {
+	LPICONMETRICSA lpIcon = (LPICONMETRICSA)pvParam;
+	if(lpIcon && lpIcon->cbSize == sizeof(*lpIcon))
+	{
+	    SystemParametersInfoA( SPI_ICONHORIZONTALSPACING, 0,
+				   &lpIcon->iHorzSpacing, FALSE );
+	    SystemParametersInfoA( SPI_ICONVERTICALSPACING, 0,
+				   &lpIcon->iVertSpacing, FALSE );
+	    SystemParametersInfoA( SPI_GETICONTITLEWRAP, 0,
+				   &lpIcon->iTitleWrap, FALSE );
+	    SystemParametersInfoA( SPI_GETICONTITLELOGFONT, 0,
+				   &lpIcon->lfFont, FALSE );
+	}
+	else
+	{
+	    dprintf(("SPI_GETICONMETRICS: size mismatch !! (is %d; should be %d)\n", lpIcon->cbSize, sizeof(ICONMETRICSA)));
+	    /* FIXME: SetLastError? */
+	    rc = FALSE;
+	}
+	break;
     }
 
     case SPI_GETICONTITLELOGFONT:
@@ -897,9 +906,10 @@ BOOL WIN32API SystemParametersInfoA(UINT uiAction, UINT uiParam, PVOID pvParam, 
         );
         break;
 
-    case 104: //TODO: Undocumented
+    case SPI_GETWHEELSCROLLLINES: //TODO: Undocumented
         rc = 16;
         break;
+
     default:
         rc = O32_SystemParametersInfo(uiAction, uiParam, pvParam, fWinIni);
         break;
@@ -912,7 +922,7 @@ BOOL WIN32API SystemParametersInfoA(UINT uiAction, UINT uiParam, PVOID pvParam, 
 //******************************************************************************
 BOOL WIN32API SystemParametersInfoW(UINT uiAction, UINT uiParam, PVOID pvParam, UINT fWinIni)
 {
- BOOL rc;
+ BOOL rc = TRUE;
  NONCLIENTMETRICSW *clientMetricsW = (NONCLIENTMETRICSW *)pvParam;
  NONCLIENTMETRICSA  clientMetricsA = {0};
  PVOID  pvParamA;
@@ -940,13 +950,37 @@ BOOL WIN32API SystemParametersInfoW(UINT uiAction, UINT uiParam, PVOID pvParam, 
         uiParamA = sizeof(NONCLIENTMETRICSA);
         pvParamA = &clientMetricsA;
         break;
+
+    case SPI_GETICONMETRICS:			/*     45  WINVER >= 0x400 */
+    {
+	LPICONMETRICSW lpIcon = (LPICONMETRICSW)pvParam;
+	if(lpIcon && lpIcon->cbSize == sizeof(*lpIcon))
+	{
+	    SystemParametersInfoW( SPI_ICONHORIZONTALSPACING, 0,
+				   &lpIcon->iHorzSpacing, FALSE );
+	    SystemParametersInfoW( SPI_ICONVERTICALSPACING, 0,
+				   &lpIcon->iVertSpacing, FALSE );
+	    SystemParametersInfoW( SPI_GETICONTITLEWRAP, 0,
+				   &lpIcon->iTitleWrap, FALSE );
+	    SystemParametersInfoW( SPI_GETICONTITLELOGFONT, 0,
+				   &lpIcon->lfFont, FALSE );
+            return TRUE;
+	}
+	else
+	{
+	    dprintf(("SPI_GETICONMETRICS: size mismatch !! (is %d; should be %d)\n", lpIcon->cbSize, sizeof(ICONMETRICSA)));
+	    /* FIXME: SetLastError? */
+	    return FALSE;
+	}
+    }
+
     case SPI_GETICONTITLELOGFONT:
     {
         LPLOGFONTW lpLogFont = (LPLOGFONTW)pvParam;
 
         /* from now on we always have an alias for MS Sans Serif */
         lstrcpyW(lpLogFont->lfFaceName, (LPCWSTR)L"MS Sans Serif");
-        lpLogFont->lfHeight = -GetProfileIntA("Desktop","IconTitleSize", 8);
+        lpLogFont->lfHeight = -GetProfileIntA("Desktop","IconTitleSize", /*8*/12); //CB: 8 is too small
         lpLogFont->lfWidth = 0;
         lpLogFont->lfEscapement = lpLogFont->lfOrientation = 0;
         lpLogFont->lfWeight = FW_NORMAL;
