@@ -1,4 +1,411 @@
- /* $Id: ChangeLog-2000,v 1.5 2000-10-05 18:47:35 sandervl Exp $ */
+ /* $Id: ChangeLog-2000,v 1.6 2000-11-06 10:22:08 sandervl Exp $ */
+
+ 2000-10-30: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Forgot to append .dll if no extension is found in 
+                  Win32DllBase::findModule (fixes dependency update
+                  for LX dlls; i.e. winhlp32 now works again)
+
+ 2000-10-28: Sander van Leeuwen <sandervl@xs4all.nl>
+    - SHELL32:  o Print build date in About Odin dialog
+    - include\win\authors.h, tools\install\odin.cmd:
+                o Added Oliver Braun to authors list
+
+ 2000-10-27: knut st. osmundsen<knut.stange.osmundsen@mynd.no>
+    - Win32k:   o Fixed bug which prevented the symbolname to be copied to
+                  the szSymbolfile global variable and displayed during boot
+                  and in Win32kCC.
+                o Added a abort stub which creates an IPE/Int3 instead
+                  of calling DosExit (which isn't recommended at Ring-0 i think.)
+                  There is some Purevirtual stub function which calls abort.
+
+ 2000-10-26: Sander van Leeuwen <sandervl@xs4all.nl>
+    - GDI32:    o GetObjectA/W bugfix; return required size when buffer pointer
+                  is NULL (Open32 doesn't always do this)
+                o GetObjectW bugfix: translate face name for font object from
+                  ascii to unicode
+    - KERNEL32: o RegEnumKeyExW, RegEnumValueW & RegQueryInfoKeyW fixes (heap corruption)
+                o RegEnumValueW fix; must convert value data if it's a string
+                o VirtualAlloc fix for memory that is already committed.
+    - USER32:   o Ported EnumDisplayDevicesA/W from Wine
+
+ 2000-10-26: knut st. osmundsen<knut.stange.osmundsen@mynd.no>
+    - ChangeLog:
+                o The ChangeLog (this file) will sooner or later be viewable
+                  from the web I hope. So to ease the parsing (or AI) I
+                  suggest that we puts an 'o' in front of each point in the
+                  change descriptions. Also HTML tags could be used, especially
+                  pre, br and p. <br>
+                  I've updated this file, and an attempt to convert it to HTML
+                  is found here: http://ktaskmgr.sourceforge.net/ChangeLogTest.html<br>
+                  The PHP script which does this parsing is found in
+                  Tools\Database\www, named Odin32ChangeLog.php.
+    - Win32k:   o Added kernels 14055, 14056 and 14057.
+                o Comment on eComStation preview problem:
+                    The symbols and debug kernels are 14053 with an extra
+                    fix in TKSleep for Time-Critical threads (it seems).
+                    This fix make the debugkernels and probably release
+                    kernel (which I haven't found yet) 0x20 bytes bigger,
+                    and thus aren't supported by the symbols for the testcase
+                    14053 kernel in the symbol database.
+                    The fix is present in later kernels at testcase too,
+                    at least in 14057 (which also is found at service, as
+                    krnl1019(d).zip).<p>
+
+                    Concerning the release kernel of eComStation, it might
+                    acutally be 14052. The kernel on the installation floppy
+                    image (os2image\disk_0) is build 14052, and Oliver Stein
+                    said that the conveniece(?) pack preview were 14052...<p>
+
+                    But, currently I haven't found any other release kernel
+                    on the eComStation preview than the install kernel;
+                    and I haven't had time to install it either.
+
+ 2000-10-25: Michal Necasek <michalnec@volny.cz>
+    - KERNEL32: o SearchPath32A fix for IBM VAC for windows (search directory
+                  consists of multiple paths separated by a semi-colon)
+
+ 2000-10-25: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Add rename entry for winspool.drv to odin.ini. (if not present)
+                o Check pointers in Read/WriteProcessMemory
+                o Add OLE key during installation: <pre>
+                  [HKEY_LOCAL_MACHINE\Software\Microsoft\OLE]
+                  "EnableDCOM"="Y"
+                  "EnableRemoteConnect"="N"</pre>
+
+    - WINSPOOL: Removed changes. (now generates winspool.dll again)
+
+ 2000-10-23: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Vio api doesn't support high memory; need to copy string
+                  to stack.
+                o Rewrote module handling to include extension in module name
+                  when creating it (LoadLibraryExA) and searching (GetModuleHandle)
+                  for it.
+                  (now supports dlls with the same name, but different extension)
+                  i.e.:<pre>
+                  hinst = LoadLibrary("WINSPOOL.DRV");      -> succeeds
+                  hinst2 = GetModuleHandle("WINSPOOL.DRV"); -> succeeds
+                  hinst3 = GetModuleHandle("WINSPOOL.");    -> fails
+                  hinst4 = GetModuleHandle("WINSPOOL");     -> fails
+                  hinst = LoadLibrary("KERNEL32.DLL");      -> succeeds
+                  hinst2 = GetModuleHandle("KERNEL32.DLL"); -> succeeds
+                  hinst3 = GetModuleHandle("KERNEL32.");    -> fails
+                  hinst4 = GetModuleHandle("KERNEL32");     -> succeeds</pre>
+                  Same behaviour as observed in NT4, SP6
+
+                o Rewrote GetVersionStruct & GetVersionSize.
+
+                o lstrcpynWtoA and lstrcpynAtoW must zero-terminate the string
+                  because Wine code depends on this behaviour (i.e. comdlg32)
+                o Changed console calls to these functions for new behaviour.
+                  (fixes error message when selecting a file in the open file
+                   dialog of Acrobat Distiller)
+    - USER32:   o Changes for GetWindowText(Length)A/W for windows created
+                  by a different process. NT doesn't send WM_GETTEXT(LENGTH)
+                  messages in that case, but copies the required information
+                  directly from internal structures. (VERIFIED in NT4, SP6)
+                  (fixes crash at the end of the RealPlayer 8 installation)
+    - DCIMAN32:   Added stub dll
+    - WINSPOOL:   Generate dll with win32 extension (.drv) instead of .dll
+    - INCLUDE\makefiles:
+                  Changed rules for targets with different extension (not .exe
+                  or .dll)
+    - TOOLS\install:
+                  Include winspool.drv in installation package.
+
+ 2000-10-22: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o Paint fix for static controls (fixes common color dialog)
+                o Make sure a window handle can't be used after the window
+                  has received both WM_DESTROY & WM_NCDESTROY (fixes
+                  crash in font dialog after closing it)
+                o After resize wrong parts of the window were invalidated.
+                  (fixes common color dialog after extending it (buttons
+                   previously overwritten))
+                o OBM_TNTYPE missing from user32 bitmap list
+                o Check if a menu handle isn't a window handle before using
+                  assuming it's a pointer. (IS_A_MENU macro)
+                  --> we really shouldn't be using pointers as menu handles
+                o Set hIconSm to 0 in RegisterClassW. (was uninitialized)
+    - COMDLG32:   Wrong type for font dialog bitmap (was 16 bits)
+                  (fixes missing font names in listbox of common font dialog)
+
+ 2000-10-21: Carsten Tenbrink <Carsten@C-Tenbrink.DE>
+    - CAPI32:   Rewrote it. Works correctly now.
+
+ 2000-10-21: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Add DirectPlay & DirectPlayLobby class keys to registry
+                  during installation
+                o Add ProductType key to registry during init<pre>
+                  [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\ProductOptions]
+                  "ProductType"="WinNT"</pre>
+                  (TODO: check if names for win98 & win2k are correct!)
+                o RegSetValueExW/RegQueryValueExW fixes for keys with type
+                  REG_SZ or REG_EXPAND_SZ. (unicode<->ascii translation)
+    - include\win\authors.h, tools\install\odin.cmd:
+                o Added Carsten Tenbrink to authors list
+    - ADVAPI32: o Pretend SetThreadToken succeeded in NT mode
+    - COMDLG32: o Merged with latest Wine version (Wine 20001002 level (10-21-2000))
+                o Now uses Wine color and font dialogs (not tested)
+                  All supported Wine language resources are included.
+
+ 2000-10-20: Michal Necasek <michalnec@volny.cz>
+    - KERNEL32: o FORMAT_MESSAGE_IGNORE_INSERTS support added for message
+                  handling (fixes VACPPWIN 3.5 messages)
+
+ 2000-10-20: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Very basic support for console command line apps (output/input)
+                  + some changes to PM vio support to make it more flexible
+                  Must use special vio pe loader (pec)<br>
+                  <b>TODO</b>: Launch correct version of pe loader in CreateProcess
+                o Fixed the stupid small PM vio window (now defaults to 80x25)
+    - PELDR:    o Build VIO version of PE (PEC.EXE)
+    - TOOLS\INSTALL:
+                o Add PEC.EXE to installation package
+
+ 2000-10-18: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o Fixes for GetWindowPlacement & SetWindowPlacement
+                  (min & max position are initially -1, rcNormalPosition
+                   equals window rectangle)
+                  (Verified in NT4, SP6)
+                o Started with implementation of ToAscii (Putty needs it)
+                o Somebody needs to rewrite our keyboard handling...
+    - KERNEL32: o Add HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem
+                  during install
+                o Removed test code from ::WriteFile (printed buffer)
+                o Fixed closing of memory maps; delete object if no views left (CloseHandle)
+                  (fixes sharing violation in VAC Java install)
+                o Don't use dprintf during guard page violation -> hangs
+                  thread when it occurs during dprintf.
+
+ 2000-10-18: Michal Necasek <michalnec@volny.cz>
+    - KERNEL32: o Ignore dwFlags in LoadLibraryExA for LX images
+                  (used to fail)
+
+ 2000-10-17: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o Added system menu option to trigger int 3 in debug build
+
+ 2000-10-17: Michal Necasek <michalnec@volny.cz>
+    - USER32:   o Changed color value for inactive caption gradient
+
+ 2000-10-17: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - Win32k:   o Corrected dependency rules (dep).
+
+ 2000-10-16: Michal Necasek <michalnec@volny.cz>
+    - GDI32:    o Set color masks in GetDIBits for 16, 24 or 32 bits bitmaps
+                  (Open32 'forgets' this)
+
+ 2000-10-16: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o Fix for SC_CLOSE handling (destroying controls) and added
+                  check to prevent beep when pressing Alt-F4.
+                o SendInternalMessageA/W should check if the destination
+                  window procedure belongs to a different thread or process
+                  and use OSLibSendMessage (WinSendMsg) if true.
+    - KERNEL32: o LoadLibraryExA fix for dlls that have the same name as the
+                  executable
+                o Fix for fixups in TLS section + callback fixups were wrong.
+                o Added code to check if the exception handler didn't already apply
+                  fixups to the addresses in the TLS section. If true, then
+                  search for os/2 virtual address and don't manually apply fixups
+                   for tls index & callback addresses.
+                   (fixes IBM VAC for windows tools)
+    - RPCRT4:   o Added NdrDllRegisterProxy & NdrDllUnregisterProxy stubs
+    - GDI32:    o Fixed FS corruption in font & dda callbacks; need to switch
+                  to win32 selector before calling win32 code.
+
+ 2000-10-11: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o TLS callback fix + modify TLS callback pointers for new base address
+    - USER32:   o Fix for GetWindow(GW_HWNDFIRST); returned os/2 wnd handle instead
+                  of Odin handle (reported by Michal Necasek)
+
+ 2000-10-10: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Print date and time of build during init (log)
+                o Create system32\drivers directory during install
+                o Implemented LOAD_LIBRARY_AS_DATAFILE & DONT_RESOLVE_DLL_REFERENCES
+                  LoadLibraryExA/W features. Removed fake image class; put
+                  it in the pe loader class instead.
+                  LoadLibraryExA now also works for executables
+                  (implies LOAD_LIBRARY_AS_DATAFILE & DONT_RESOLVE_DLL_REFERENCES)
+                o Rewrote GetVersionSize/Struct to use LoadLibraryExA.
+    - MSVCRT:   o Put WriteLog call in util.asm in IFDEF DEBUG statement
+    - INCLUDE\makefiles
+                o Add -D:DEBUG to alp command line for debug build
+
+ 2000-10-10: Michal Necasek <michalnec@volny.cz>
+    - WINMM:    o Timers: Don't reset TimerStatus in timer thread; timer may
+                  have already been started.
+
+ 2000-10-09: Yuri Dario <mc6530@mclink.it>
+    - USER32:   o Corrected background brush for MDI windows
+
+ 2000-10-09: Patrick Haller <phaller@gmx.net>
+    - KERNEL32: o Fixed console bug (left offset) reported by Michal
+
+ 2000-10-09: Michal Necasek <michalnec@volny.cz>
+    - KERNEL32: o IsValidLocale; don't check for kernel32 resources (that aren't there)
+                o Always return true for now -> winhlp32 no longer complains about
+                  different languages when loading helpfiles
+
+ 2000-10-09: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o FrameTrackFrame fix for child windows
+                o Ported Wine's ShowOwnedPopups (not tested)
+    - KERNEL32: o Check for name value -1 in getResSubDirA/W; previously interpreted
+                  as a string pointer resulting in a crash in Quicken.
+                o TLS sections must be read/write as they can contain the
+                  TLS index value (i.e. VACPPWIN ilink + ilib)
+                o Rewrote GetCurrentDirectoryA due to bugs in Open32's version
+                  (returns 0 if bufsize < 3 -> should return required length)
+
+ 2000-10-08: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o GetMinMaxInfo fix for windows with both WS_THICKFRAME and
+                  WS_BORDER style (differs from Wine; see comment in win32basepos.cpp
+                  Win32BaseWindow::GetMinMaxInfo)
+                o Fix for CS_OWNDC windows (origin of client window needs to be changed
+                  after window size/position changes)
+                o Fix for ShowScrollBar (enabling/disabling both scrollbars at once did not work (vert))
+                o AdjustWindowRectEx fix:
+                  Scrollbars aren't checked *UNLESS* the style includes a border (any border)
+                  --> VERIFIED IN NT4, SP6 (fixes MFC apps with scrollbars + bar controls)
+    - KERNEL32: o Do not export the toolhelp apis; NT4 doesn't do that. (only win9x)
+
+ 2000-10-07: Markus Montkowski <mmontkowski@gmx.de>
+    - GDI32:    o Fixed bitblt, it used the size of the source DC
+                  when no destwindow was found. this doesn't work
+                  for bitblt between dibsections if the dest is larger.
+                  so now it checks if the dest DC belongs to a dibsection
+                  and uses sets hdcHeight/Width to the size of the dibsection.
+                  Added GetWidth() member function for this.
+                  Fixes: Civilisation Test of Times
+
+ 2000-10-06: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o PE loader: no longer rely on section names, but on image
+                  directories instead
+                o Init console earlier. (before exe is loaded; some dlls want
+                  to send output to the console while they're being loaded)
+                o EnumResourceNamesW/EnumResourceTypesW fixes (strings not terminated)
+                o CreateProcessA/W fix for setting current directory of new process;
+                  Open32 ignores lpCurrentDirectory parameter
+    - PELDR:    o Special parameter for setting current directory added (/OPT[CURDIR=x])
+    - USER32:   o Ignore class background brush in DefDlgProc for WM_ERASEBKGND
+                  (always use GetSysColorBrush(COLOR_BTNFACE))
+                  (Wine does this and it fixes the 1st dialog of the Netscape 6 install)
+                o OemToCharBuffA fix; put back special characters that got translated
+                  to 0xff (fixes Netscape 6 install license edit control)
+
+ 2000-10-05: Michal Necasek <michalnec@volny.cz>
+    - KERNEL32: o FormatMessageA/W fix; message ids can be larger than 65535
+                  (VACPPWIN)
+
+ 2000-10-05: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Don't print FS warnings for OS/2 Odin applications
+                o EnumResourceNamesA fix (zero terminate resource name)
+    - USER32:   o GetWindow GW_CHILD & GW_HWNDFIRST fixes
+                o EnumDisplaySettingsA; always set refresh rate to 70hz
+                o Z-order bugs fixed; GetWindow returns windows in correct order now
+                  hack for groupbox (clipsiblings) no longer necessary. Same
+                  goes for adding WS_CLIPSIBLINGS style for dialog controls.
+                o Re-enabled usage of invalid region instead of invalid rectangle
+                  in BeginPaint -> lots of paint problems gone (i.e. winzip)
+
+ 2000-10-05: Michal Necasek <michalnec@volny.cz>
+    - KERNEL32: o Fixes for exception handling (as done by MSVCRT)
+
+ 2000-10-05: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - Tools\Common:
+                o Implemented read and write buffering for class kFile
+                  to speed up kDef2Wat and ImpDef.
+
+ 2000-10-04: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Added forwarder support for PE loader (required for msvcrt40.dll)
+
+ 2000-10-04: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - Tools\ImpDef:
+                o Corrected wrong DESCRIPTION statement.
+                o Corrected exception when processing src\icmp\icmp.def.
+
+ 2000-10-03: Sander van Leeuwen <sandervl@xs4all.nl>
+    - Include\uniconv.h
+                o FS wrappers for Unicode api
+    - Include\heapstring.h:
+                o strcasecmp & strncasecmp are case insensitive (fixes
+                  profile apis (and probably some other things too))
+    - KERNEL32: o Calculate cpu speed and set HARDWARE\DESCRIPTION\System\CentralProcessor\x\~Mhz key
+                o Added GetFileType method to conin/out which return FILE_TYPE_CHAR
+                o Create new keys during installation:<pre>
+                  [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Cdfs]
+                  [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Cdrom]</pre>
+                o Fix for failure during DLL_PROCESS_ATTACH for LX system
+                  dlls (pe loader). Didn't fail properly before.
+                o Check if executable exists in CreateProcessA; fixes VMWare
+                  installation
+                o InitCommandLine fix (forgot to copy cmd line)
+    - USER32:   o Fix for EDIT_WM_Char (couldn't type in numbers anymore)
+                o EnumDisplaySettingsA accepts negative indices
+    - ADVAPI32: o Cleanup
+
+ 2000-10-03: Michal Necasek <michalnec@volny.cz>
+    - KERNEL32: o Fix for HMGetFileType. Must return FILE_TYPE_CHAR for standard
+                  handles (in/out/error)
+
+ 2000-10-03: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - Watcom makefiles:
+                o Wrote a converter tool to make wlink input from .def files.
+                  tools/common - kDef2Wat.exe (Need VA C to compiler currently)
+                o Found a problem with Watcom when trying to link
+                  advapi32.dll; It mangles the __stdcall function when
+                  they aren't prototyped/delcared extern "C". Haven't found
+                  any solution to this, other than prototyping the
+                  APIs within extern "C" { }.
+
+ 2000-10-02: Sander van Leeuwen <sandervl@xs4all.nl>
+    - SHLWAPI:  o Rewrote VERSION_OsIsUnicode (same as SHELL_OsIsUnicode now)
+    - RICHED32: o 'Handle' WM_SETTEXT messages. Wine's richedit dll is very
+                  incomplete. It's better to use the native windows version.
+    - KERNEL32: o Ported Wine's LoadModule (previously used Open32)
+                o Changed version apis
+                o You can now tell Odin to pretend to be Windows 98 or
+                  Windows NT 4.0 (default = NT40)<br>
+                  Odin.ini:<pre>
+                  [WinVersion]
+                  Version=Win98</pre>
+    - OLE32:    o Added stubs for CoGetInstanceFromFile & CoGetInstanceFromIStorage
+    - KERNEL32, WSOCK32, WINMM, include\odinwrap.h, SHLWAPI, WNASPI32:
+                o Changes/fixes for new ODINFUNCTION macros
+
+ 2000-10-02: Patrick Haller <phaller@gmx.net>
+    - *:        o major change in ODINWRAP macros
+                  and (all) affected sources
+    - GDI32:    o fixed possible error in text.cpp (strrchr)
+    - WNETAP32: o started implementation of LAN Manager support :)<br>
+                  NetApiBuffer*<br>
+                  NetStatisticsGet<br>
+                  NetWkstaGetInfo<br>
+    - KERNEL32: o added HEAP_size export
+
+ 2000-10-02: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - KERNEL32: o Fixed Pe2Lx (ie. Win32k) TLS problem. Beyond Compare works.
+    - Common:   o Added very limited dump capability to kFilePE. (Used to
+                  understand TLS.)
+    - Win32k    o Added symbols for kernel 14050 (Warp4) and 14054
+                  (Warp4, WS4eB SMP and UNI).
+
+ 2000-10-01: Patrick Haller <phaller@gmx.net>
+    - KERNEL32: o Optimization of PROFILE calls
+    - GDI32:    o Fix for uncompressed/RGB bitmaps (biSizeImage == 0)
+    - WINMM:    o Fix for timer logic - timers still quite untested
+
+ 2000-10-01: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Fixed bug introduced by recent command line changes
+                  (executables with spaces in name/dir)
+    - GDI32:    o Implemented AddFontResourceW
+
+ 2000-10-01: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - Win32k:   o Added IOCtl API for Reading or Writing into another process'
+                  address space. (*ProcessReadWrite)
+                  This is intended used to implemented ReadProcessMemory and
+                  WriteProcessMemory (which is essensial to debuggers I think).
+                  I'll implementet them soon, but it sees that it'll
+                  require more changes in process.c that I first thought.
+                o Simplified maintaince of kernel imports. (mkcalltab)
+                  Removed unused imports.
 
  2000-09-29: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32: Edit control fix; Ignore WM_SETTEXT if string is the same.
