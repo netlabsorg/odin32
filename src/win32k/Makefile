@@ -1,5 +1,5 @@
 ################################################################################
-# $Id: Makefile,v 1.8 1999-10-17 02:03:29 bird Exp $
+# $Id: Makefile,v 1.9 1999-10-17 02:12:19 bird Exp $
 #
 # Copyright 1998-1999 knut st. osmundsen
 #
@@ -274,9 +274,11 @@ win32k.vpj:
 clean:
    @$(ECHO) cleaning....
    @$(ECHO) #do nmake depend > .depend
-   $(RM) $(NAME).sys *.lib $(WIN32KOBJ)\* $(WIN32KLIST)\* *.obj *.exe
-   $(RM) *.sym *.map
-#  @$(RM) $(PDWIN32_BIN)\$(NAME).sys
+   $(RM) $(NAME).sys *.lib *.obj *.exe *.sym *.map
+   $(RM) $(WIN32KOBJ)\*.obj $(WIN32KOBJ)\*.pe_obj
+   $(RM) $(WIN32KLIST)\*.s $(WIN32KLIST)\*.asm $(WIN32KLIST)\*.map \
+   $(RM) $(WIN32KLIST)\*.lst
+   $(RM) $(PDWIN32_BIN)\$(NAME).sys
 
 
 ################################################################################
