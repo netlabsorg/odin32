@@ -1,4 +1,4 @@
-/* $Id: edit.cpp,v 1.45 2002-07-01 14:07:22 sandervl Exp $ */
+/* $Id: edit.cpp,v 1.46 2002-08-17 10:33:54 sandervl Exp $ */
 /*
  *      Edit control
  *
@@ -187,7 +187,7 @@ static void     EDIT_MoveHome(HWND hwnd, EDITSTATE *es, BOOL extend);
 static void     EDIT_MoveWordBackward(HWND hwnd, EDITSTATE *es, BOOL extend);
 static void     EDIT_MoveWordForward(HWND hwnd, EDITSTATE *es, BOOL extend);
 static void     EDIT_PaintLine(HWND hwnd, EDITSTATE *es, HDC hdc, INT line, BOOL rev);
-static VOID     EDIT_PaintText(HWND hwnd, EDITSTATE *es, HDC hdc, INT x, INT y, INT line, INT col, INT count, BOOL rev);
+static INT      EDIT_PaintText(HWND hwnd, EDITSTATE *es, HDC hdc, INT x, INT y, INT line, INT col, INT count, BOOL rev);
 static void     EDIT_SetCaretPos(HWND hwnd, EDITSTATE *es, INT pos, BOOL after_wrap);
 static void     EDIT_SetRectNP(HWND hwnd, EDITSTATE *es, LPRECT lprc);
 static void     EDIT_UnlockBuffer(HWND hwnd, EDITSTATE *es, BOOL force);
@@ -724,6 +724,7 @@ LRESULT WINAPI EditWndProc( HWND hwnd, UINT msg,
                  *              modalless dialog box ???
                  */
                 //DPRINTF_EDIT_MSG32("WM_MOUSEACTIVATE");
+		SetFocus(hwnd);
                 result = MA_ACTIVATE;
                 break;
 
@@ -1660,6 +1661,14 @@ static void EDIT_PaintLine(HWND hwnd, EDITSTATE *es, HDC dc, INT line, BOOL rev)
         s = MIN(li + ll, MAX(li, s));
         e = MIN(li + ll, MAX(li, e));
 
+	if (rev && (s != e) &&
+			((es->flags & EF_FOCUSED) || (es->style & ES_NOHIDESEL))) {
+		x += EDIT_PaintText(hwnd, es, dc, x, y, line, 0, s - li, FALSE);
+		x += EDIT_PaintText(hwnd, es, dc, x, y, line, s - li, e - s, TRUE);
+		x += EDIT_PaintText(hwnd, es, dc, x, y, line, e - li, li + ll - e, FALSE);
+	} else
+		x += EDIT_PaintText(hwnd, es, dc, x, y, line, 0, ll, FALSE);
+#if 0
         if (rev && (s != e) && ((es->flags & EF_FOCUSED) || (es->style & ES_NOHIDESEL)))
         {
           HRGN oldRgn,newRgn,combRgn;
@@ -1717,6 +1726,7 @@ static void EDIT_PaintLine(HWND hwnd, EDITSTATE *es, HDC dc, INT line, BOOL rev)
             DeleteObject(combRgn);
           }
         } else  EDIT_PaintText(hwnd, es, dc, x, y, line, 0, ll, FALSE);
+#endif // 0
 }
 
 
@@ -1725,32 +1735,41 @@ static void EDIT_PaintLine(HWND hwnd, EDITSTATE *es, HDC dc, INT line, BOOL rev)
  *      EDIT_PaintText
  *
  */
-static VOID EDIT_PaintText(HWND hwnd, EDITSTATE *es, HDC dc, INT x, INT y, INT line, INT col, INT count, BOOL rev)
+static INT EDIT_PaintText(HWND hwnd, EDITSTATE *es, HDC dc, INT x, INT y, INT line, INT col, INT count, BOOL rev)
 {
         COLORREF BkColor;
         COLORREF TextColor;
-        INT li;
+	INT ret;
+	INT li;
+	INT BkMode;
+	SIZE size;
 
         if (!count)
-                return;
+                return 0;
+	BkMode = GetBkMode(dc);
         BkColor = GetBkColor(dc);
         TextColor = GetTextColor(dc);
         if (rev)
         {
                 SetBkColor(dc, GetSysColor(COLOR_HIGHLIGHT));
                 SetTextColor(dc, GetSysColor(COLOR_HIGHLIGHTTEXT));
+		SetBkMode( dc, OPAQUE);
         }
         li = EDIT_EM_LineIndex(hwnd, es, line);
         if (es->style & ES_MULTILINE)
         {
-                TabbedTextOutA(dc, x, y, es->text + li + col, count,
-                               es->tabs_count, es->tabs, es->format_rect.left - es->x_offset);
+                //TabbedTextOutA(dc, x, y, es->text + li + col, count,
+                //               es->tabs_count, es->tabs, es->format_rect.left - es->x_offset);
+		ret = (INT)LOWORD(TabbedTextOutA(dc, x, y, (LPCSTR) (es->text + li + col), count,
+					es->tabs_count, es->tabs, es->format_rect.left - es->x_offset));
         } else
         {
           LPSTR text = EDIT_GetPasswordPointer_SL(hwnd, es);
           POINT pt;
 
           TextOutA(dc,x,y,text+li+col,count);
+		GetTextExtentPoint32A(dc, text + li + col, count, &size);
+		ret = size.cx;
           if (es->style & ES_PASSWORD)
             HeapFree(es->heap, 0, text);
         }
@@ -1758,7 +1777,9 @@ static VOID EDIT_PaintText(HWND hwnd, EDITSTATE *es, HDC dc, INT x, INT y, INT l
         {
                 SetBkColor(dc, BkColor);
                 SetTextColor(dc, TextColor);
+		SetBkMode( dc, BkMode);
         }
+	return ret;
 }
 
 
@@ -3251,9 +3272,6 @@ static LRESULT EDIT_WM_EraseBkGnd(HWND hwnd, EDITSTATE *es, HDC dc)
          *              DefWndProc() returns is ... a stock object.
          */
         FillRect(dc, &rc, brush);
-
-        ShowCaret(hwnd);
-
         return -1;
 }
 
@@ -3647,7 +3665,7 @@ static LRESULT EDIT_WM_LButtonDown(HWND hwnd, EDITSTATE *es, DWORD keys, INT x, 
         BOOL after_wrap;
 
         if (!(es->flags & EF_FOCUSED))
-          SetFocus(hwnd);
+          return 0;
 
         es->bCaptureState = TRUE;
         SetCapture(hwnd);
@@ -3935,15 +3953,63 @@ static VOID EDIT_Refresh(HWND hwnd,EDITSTATE *es,BOOL useCache)
  */
 static void EDIT_WM_Paint(HWND hwnd, EDITSTATE *es,WPARAM wParam)
 {
-  PAINTSTRUCT ps;
-  HDC hdc;
+	PAINTSTRUCT ps;
+	INT i;
+	HDC dc;
+	HFONT old_font = 0;
+	RECT rc;
+	RECT rcLine;
+	RECT rcRgn;
+	BOOL rev = es->bEnableState &&
+				((es->flags & EF_FOCUSED) ||
+					(es->style & ES_NOHIDESEL));
+        if (!wParam)
+            dc = BeginPaint(hwnd, &ps);
+        else
+            dc = (HDC) wParam;
+	if(es->style & WS_BORDER) {
+		GetClientRect(hwnd, &rc);
+		if(es->style & ES_MULTILINE) {
+			if(es->style & WS_HSCROLL) rc.bottom++;
+			if(es->style & WS_VSCROLL) rc.right++;
+		}
+		Rectangle(dc, rc.left, rc.top, rc.right, rc.bottom);
+	}
+	IntersectClipRect(dc, es->format_rect.left,
+				es->format_rect.top,
+				es->format_rect.right,
+				es->format_rect.bottom);
+	if (es->style & ES_MULTILINE) {
+		GetClientRect(hwnd, &rc);
+		IntersectClipRect(dc, rc.left, rc.top, rc.right, rc.bottom);
+	}
+	if (es->font)
+		old_font = SelectObject(dc, es->font);
+        if (!es->bEnableState || (es->style & ES_READONLY))
+                EDIT_SEND_CTLCOLORSTATIC(hwnd, dc);
+        else
+                EDIT_SEND_CTLCOLOR(hwnd, dc);
 
-  if (!wParam) hdc = BeginPaint(hwnd, &ps);
-  else hdc = (HDC) wParam;
+	if (!es->bEnableState)
+		SetTextColor(dc, GetSysColor(COLOR_GRAYTEXT));
+	GetClipBox(dc, &rcRgn);
+	if (es->style & ES_MULTILINE) {
+		INT vlc = (es->format_rect.bottom - es->format_rect.top) / es->line_height;
+		for (i = es->y_offset ; i <= min(es->y_offset + vlc, es->y_offset + es->line_count - 1) ; i++) {
+			EDIT_GetLineRect(hwnd, dc, es, i, 0, -1, &rcLine);
+			if (IntersectRect(&rc, &rcRgn, &rcLine))
+				EDIT_PaintLine(hwnd, es, dc, i, rev);
+		}
+	} else {
+		EDIT_GetLineRect(hwnd, dc, es, 0, 0, -1, &rcLine);
+		if (IntersectRect(&rc, &rcRgn, &rcLine))
+			EDIT_PaintLine(hwnd, es, dc, 0, rev);
+	}
+	if (es->font)
+		SelectObject(dc, old_font);
 
-  EDIT_Draw(hwnd,es,hdc,FALSE);
-
-  if (!wParam) EndPaint(hwnd, &ps);
+        if (!wParam)
+            EndPaint(hwnd, &ps);
 }
 
 
@@ -3956,6 +4022,10 @@ static void EDIT_WM_Paste(HWND hwnd, EDITSTATE *es)
 {
         HGLOBAL hsrc;
         LPSTR src;
+
+	/* Protect read-only edit control from modification */
+	if(es->style & ES_READONLY)
+	    return;
 
         OpenClipboard(hwnd);
         hsrc = GetClipboardData(CF_TEXT);
