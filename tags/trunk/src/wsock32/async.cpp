@@ -1,4 +1,4 @@
-/* $Id: async.cpp,v 1.4 1999-10-20 11:04:12 phaller Exp $ */
+/* $Id: async.cpp,v 1.5 1999-10-20 20:10:55 phaller Exp $ */
 
 /*
  *
@@ -29,6 +29,10 @@
 #include <netdb.h>
 #include <nerrno.h>
 #include <sys/socket.h>
+#include <sys/ioctl.h>
+#include <sys/select.h>
+#include <unistd.h>
+
 #include <wsock32const.h>
 
 #include <process.h>
@@ -139,6 +143,7 @@ class WSAAsyncWorker
     void          asyncGetProtoByNumber(PASYNCREQUEST pRequest);
     void          asyncGetServByName   (PASYNCREQUEST pRequest);
     void          asyncGetServByPort   (PASYNCREQUEST pRequest);
+    void          asyncSelect          (PASYNCREQUEST pRequest);
 
   // public members
   public:
@@ -594,8 +599,6 @@ void WSAAsyncWorker::asyncGetHostByAddr   (PASYNCREQUEST pRequest)
 {
   struct hostent* pHostent;
   USHORT          usLength;
-  ULONG           wParam;
-  ULONG           lParam;
   USHORT          rc;
 
   dprintf(("WSOCK32-ASYNC: WSAAsyncWorker::asyncGetHostByAddr (%08xh, %08xh)\n",
@@ -649,8 +652,6 @@ void WSAAsyncWorker::asyncGetHostByName   (PASYNCREQUEST pRequest)
 {
   struct hostent* pHostent;
   USHORT          usLength;
-  ULONG           wParam;
-  ULONG           lParam;
   USHORT          rc;
 
   dprintf(("WSOCK32-ASYNC: WSAAsyncWorker::asyncGetHostByName (%08xh, %08xh)\n",
@@ -702,8 +703,6 @@ void WSAAsyncWorker::asyncGetProtoByName  (PASYNCREQUEST pRequest)
 {
   struct protoent* pProtoent;
   USHORT           usLength;
-  ULONG            wParam;
-  ULONG            lParam;
   USHORT           rc;
 
   dprintf(("WSOCK32-ASYNC: WSAAsyncWorker::asyncGetProtoByName (%08xh, %08xh)\n",
@@ -755,8 +754,6 @@ void WSAAsyncWorker::asyncGetProtoByNumber(PASYNCREQUEST pRequest)
 {
   struct protoent* pProtoent;
   USHORT           usLength;
-  ULONG            wParam;
-  ULONG            lParam;
   USHORT           rc;
 
   dprintf(("WSOCK32-ASYNC: WSAAsyncWorker::asyncGetProtoByNumber (%08xh, %08xh)\n",
@@ -808,8 +805,6 @@ void WSAAsyncWorker::asyncGetServByName(PASYNCREQUEST pRequest)
 {
   struct servent* pServent;
   USHORT          usLength;
-  ULONG           wParam;
-  ULONG           lParam;
   USHORT          rc;
 
   dprintf(("WSOCK32-ASYNC: WSAAsyncWorker::asyncGetServByName (%08xh, %08xh)\n",
@@ -862,8 +857,6 @@ void WSAAsyncWorker::asyncGetServByPort(PASYNCREQUEST pRequest)
 {
   struct servent* pServent;
   USHORT          usLength;
-  ULONG           wParam;
-  ULONG           lParam;
   USHORT          rc;
 
   dprintf(("WSOCK32-ASYNC: WSAAsyncWorker::asyncGetServByPort (%08xh, %08xh)\n",
@@ -898,6 +891,85 @@ void WSAAsyncWorker::asyncGetServByPort(PASYNCREQUEST pRequest)
 
   // M$ says, if PostMessageA fails, spin as long as window exists
 }
+
+
+
+/*****************************************************************************
+ * Name      : WSAAsyncWorker::asyncSelect
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+typedef int SOCKET;
+
+void WSAAsyncWorker::asyncSelect(PASYNCREQUEST pRequest)
+{
+  ULONG           wParam;
+  ULONG           lParam;
+  int             irc;
+  int             iUnknown;
+
+  SOCKET          sockWin;
+  ULONG           ulEvent;
+  USHORT          usResult = 0;
+
+  dprintf(("WSOCK32-ASYNC: WSAAsyncWorker::asyncSelect (%08xh, %08xh) not correctly implemented\n",
+           this,
+           pRequest));
+
+
+  // setup variables
+  sockWin = (SOCKET)pRequest->ul1;
+  ulEvent = (ULONG) pRequest->ul2;
+
+  //@@@PH how to implement other events?
+
+  // finally do the select!
+  irc = os2_select(&sockWin,
+                   (ulEvent & FD_READ),
+                   (ulEvent & FD_WRITE),
+                   (ulEvent & FD_OOB),
+                   10000);              // @@@PH timeout
+  if (irc < 0)                                          /* an error occurred */
+  {
+    lParam = sock_errno();                          /* raise error condition */
+    if (lParam == SOCENOTSOCK)
+    {
+      usResult = FD_CLOSE;
+      lParam   = 0;
+    }
+  }
+  else
+    if (irc == 0)                                      /* this means timeout */
+    {
+      lParam = WSAETIMEDOUT;                        /* raise error condition */
+    }
+    else
+    {
+      //@@@PH check the socket for any event and report!
+      usResult = 0;
+
+      // readiness for reading bytes ?
+      irc = ioctl(sockWin, FIONREAD, &iUnknown, sizeof(iUnknown));
+      if ( (irc == 0) && (iUnknown > 0))
+         usResult |= FD_READ;
+    }
+
+  // post result
+  PostMessageA(pRequest->hwnd,
+               pRequest->ulMessage,
+               (WPARAM)sockWin,
+               (LPARAM)((lParam << 16) | usResult));
+
+  // M$ says, if PostMessageA fails, spin as long as window exists
+}
+
 
 
 /*****************************************************************************
@@ -1261,3 +1333,33 @@ ODINFUNCTION0(BOOL, WSAIsBlocking)
 {
   return(wsaWorker->isBlocking());
 }
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+// the real function calls
+ODINFUNCTION4(HANDLE, WSAAsyncSelect,SOCKET,       s,
+                                     HWND,         hwnd,
+                                     unsigned int, wMsg,
+                                     long,         lEvent)
+{
+  PASYNCREQUEST pRequest = wsaWorker->createRequest(WSAASYNC_SELECT,
+                                                    (HWND) hwnd,
+                                                    (ULONG)wMsg,
+                                                    (PVOID)NULL,
+                                                    (ULONG)0,
+                                                    (ULONG)s,
+                                                    (ULONG)lEvent);
+  wsaWorker->pushRequest(pRequest);
+  return (HANDLE)pRequest;
+}
+

@@ -1,4 +1,4 @@
-/* $Id: wsock32const.h,v 1.1 1999-10-20 10:03:55 phaller Exp $ */
+/* $Id: wsock32const.h,v 1.2 1999-10-20 20:11:03 phaller Exp $ */
 
 /* WSOCK32.H--definitions & conversions for Odin's wsock32.dll.
  * Unused/unneeded Microsoft declarations removed.
@@ -19,6 +19,15 @@
  * Definitions related to sockets: types, address families, options,
  * taken from the BSD file sys/socket.h.
  */
+
+/* WSAAsyncSelect flags */
+#define FD_READ    0x01
+#define FD_WRITE   0x02
+#define FD_OOB     0x04
+#define FD_ACCEPT  0x08
+#define FD_CONNECT 0x10
+#define FD_CLOSE   0x20
+
 
 /*
  * This is used instead of -1, since the

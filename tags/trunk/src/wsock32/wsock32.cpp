@@ -1,4 +1,4 @@
-/* $Id: wsock32.cpp,v 1.7 1999-10-20 11:04:13 phaller Exp $ */
+/* $Id: wsock32.cpp,v 1.8 1999-10-20 20:10:58 phaller Exp $ */
 
 /*
  *
@@ -1459,59 +1459,6 @@ ODINFUNCTION0(int,OS2WSACancelBlockingCall)
   dprintf(("WSOCK32: WSACancelBlockingCall unimplemented\n"));
 
   return -5000; //WSACancelBlockingCall();
-}
-
-
-/*****************************************************************************
- * Name      :
- * Purpose   :
- * Parameters:
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
- *****************************************************************************/
-
-ODINFUNCTION4(int, OS2WSAAsyncSelect, SOCKET, s,
-                                      HWND,   hWnd,
-                                      u_int,  wMsg,
-                                      long,   lEvent)
-{
-  PFNTHREAD   pfnAsyncThread = &AsyncLoop; /* Address of thread program   */
-  ULONG       ulThreadParm = 100;          /* Parameter to thread routine     */
-  APIRET      rc           = NO_ERROR;     /* Return code                     */
-  unsigned long ii;
-  AsyncStatus *as;
-
-  as = FindASY(s);
-  if(as == NULL)
-    return 0;
-
-  CheckThreads(as);
-
-  as->hwnd = hWnd;
-  as->msg = wMsg;
-  as->event = lEvent;
-
-  ulThreadParm = (ULONG)as;
-
-  rc = DosCreateThread(&(as->threadID),  /* Thread ID (returned by function)  */
-                       pfnAsyncThread, /* Address of thread program         */
-                       ulThreadParm,   /* Parameter passed to ThreadProc    */
-                       CREATE_READY |  /* Thread is ready when created      */
-                       STACK_SPARSE,   /* Do not pre-commit stack pages     */
-                       8192L);         /* Stack size, rounded to page bdy   */
-  if (rc != NO_ERROR)
-  {
-    dprintf(("WSOCK32: DosCreateThread error: return code = %u\n",
-             rc));
-    OS2WSASetLastError(rc);
-    return 0;
-  }
-
-  return 1; //WSAAsyncSelect(s,hWnd,wMsg,lEvent);
 }
 
 

@@ -1,4 +1,4 @@
-; $Id: wsock32.def,v 1.7 1999-10-20 11:04:13 phaller Exp $
+; $Id: wsock32.def,v 1.8 1999-10-20 20:11:01 phaller Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY WSOCK32 INITINSTANCE
@@ -48,7 +48,7 @@ EXPORTS
    select =                    _OS2select@20                           @18
    send =                      _OS2send@16                             @19
    sendto =                    _OS2sendto@24                           @20
-   setsockopt =        _OS2setsockopt@20                       @21
+   setsockopt                  =  _OS2setsockopt@20                    @21
    shutdown =                  _OS2shutdown@8                          @22
    socket =                    _OS2socket@12                           @23
 
@@ -60,7 +60,7 @@ EXPORTS
    getservbyport =             _OS2getservbyport@8                     @56
    gethostname =               _OS2gethostname@8                       @57
 
-   WSAAsyncSelect              = _OS2WSAAsyncSelect@16                 @101
+   WSAAsyncSelect              = _WSAAsyncSelect@16                    @101
 
    WSAAsyncGetHostByAddr       = _WSAAsyncGetHostByAddr@28             @102
    WSAAsyncGetHostByName       = _WSAAsyncGetHostByName@20             @103
