@@ -1,4 +1,7 @@
-/* $Id: ChangeLog,v 1.2677 2004-02-16 12:00:57 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2678 2004-02-16 13:20:27 sandervl Exp $ */
+
+ 2004-02-16: KO Myung-Hun <komh@chollian    >
+    - USER32:   o Edit control: DBCS related fixes
 
  2004-02-16: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o EndPaint; fixed region handle leaks
