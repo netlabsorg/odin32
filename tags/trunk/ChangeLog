@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.231 1999-09-23 15:58:01 phaller Exp $ */
+ /* $Id: ChangeLog,v 1.232 1999-09-23 16:43:30 sandervl Exp $ */
 
  99-09-23: Patrick Haller <phaller@gmx.net>
 	- KERNEL32:	Fix: WinImgRes:findResourceW erroneously tried to free 
@@ -26,7 +26,11 @@
                   GetDesktopWindow returns handle of this window.
                   Winhlp32 no longer crashes immediately, but briefly shows
                   it's window before quitting.
-
+                  Create windows always with HWND_TOP. The if statement (hwndLinkAfter)
+                  in the CreateWindowExA method of Win32BaseWindow class messes
+                  up the Z-order of dialog controls (i.e. buttons in a group box)
+	- COMDLG32: Fixed all common dialogs. (translate our handle to real PM handle)
+       
  99-09-22: David Raison <djr@lemur.co.uk>
 	- KERNEL32: Return "Service Pack 3" as CSD string in GetVersionExA/W
 
