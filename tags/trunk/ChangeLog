@@ -1,4 +1,15 @@
-/* $Id: ChangeLog,v 1.1701 2001-09-27 16:34:26 phaller Exp $ */
+/* $Id: ChangeLog,v 1.1702 2001-09-28 07:45:26 sandervl Exp $ */
+
+ 2001-09-28: Sander van Leeuwen <sandervl@xs4all.nl>
+    - PE2LX:    o Added options to remove fixups and to reroute all
+                  imports to a custom odin dll
+
+ 2001-09-26: Sander van Leeuwen <sandervl@xs4all.nl>
+    - WININET/ICMP/WS2_32/WINSPOOL/CTL3D32:
+                o Makefiles added to build library with obj files
+    - WININET:  o Split up initterm
+    - CUSTOMBUILD: 
+                o Ordinals definitions moved into ordinals.h
 
  2001-09-27: Patrick Haller <patrick.haller@innotek.de>
     - USER32:   o partial implementation of SendInput()
