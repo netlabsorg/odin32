@@ -1,4 +1,4 @@
-/* $Id: commctrl.h,v 1.31 2000-05-22 17:18:49 cbratschi Exp $ */
+/* $Id: commctrl.h,v 1.32 2000-06-29 11:10:54 sandervl Exp $ */
 /*
  * Common controls definitions
  */
@@ -3851,6 +3851,7 @@ typedef struct tagNMDATETIMEFORMATQUERYW
  *  UNDOCUMENTED functions
  */
 
+#ifdef COMCTL32UNDOC
 /* private heap memory functions */
 
 LPVOID WINAPI COMCTL32_Alloc (DWORD);
@@ -3937,6 +3938,8 @@ BOOL WINAPI DPA_DestroyCallback (const HDPA, DPAENUMPROC, LPARAM);
 #define DPA_GetPtrCount(hdpa)  (*(INT*)(hdpa))
 #define DPA_GetPtrPtr(hdpa)    (*((LPVOID**)((BYTE*)(hdpa)+sizeof(INT))))
 #define DPA_FastGetPtr(hdpa,i) (DPA_GetPtrPtr(hdpa)[i])
+
+#endif //COMCTL32UNDOC
 
 /* notification helper functions */
 
