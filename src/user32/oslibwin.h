@@ -1,4 +1,4 @@
-/* $Id: oslibwin.h,v 1.72 2003-02-16 15:31:11 sandervl Exp $ */
+/* $Id: oslibwin.h,v 1.73 2003-02-27 14:22:43 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -48,7 +48,7 @@ HWND  OSLibWinCreateWindow(HWND hwndParent,ULONG dwWinStyle, ULONG dwOSFrameStyl
 BOOL  OSLibWinConvertStyle(ULONG dwStyle, ULONG dwExStyle, ULONG *OSWinStyle, 
                            ULONG *OSFrameStyle);
 void  OSLibSetWindowStyle(HWND hwndFrame, HWND hwndClient, ULONG dwStyle, 
-                          ULONG dwExStyle);
+                          ULONG dwExStyle, ULONG dwOldWindowsStyle);
 
 DWORD OSLibQueryWindowStyle(HWND hwnd);
 
@@ -274,6 +274,7 @@ BOOL  OSLibWinSetTitleBarText(HWND hwnd, LPSTR lpsz);
 BOOL  OSLibWinFlashWindow(HWND hwnd, BOOL fFlash);
 HWND  OSLibWinWindowFromPoint(HWND hwnd, PVOID ppoint);
 BOOL  OSLibWinMinimizeWindow(HWND hwnd);
+BOOL  OSLibWinRestoreWindow(HWND hwnd);
 
 BOOL  OSLibWinGetBorderSize(HWND hwnd, OSLIBPOINT *pointl);
 BOOL  OSLibWinSetIcon(HWND hwnd, HANDLE hIcon);

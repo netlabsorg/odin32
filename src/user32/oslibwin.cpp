@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.139 2003-02-16 15:31:10 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.140 2003-02-27 14:22:42 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -566,6 +566,19 @@ HWND OSLibWinWindowFromPoint(HWND hwnd, PVOID ppoint)
 {
   return WinWindowFromPoint((hwnd == OSLIB_HWND_DESKTOP) ? HWND_DESKTOP : hwnd, (PPOINTL)ppoint, TRUE);
 }
+
+//******************************************************************************
+//@PF This is exactly that weird message PM sends when we maximize window from 
+//icon - this coordinates NEVER surface later and this combination of SWP
+//commands is useless, yet it starts the correct reaction of maximiztion from
+//icon state
+//******************************************************************************
+BOOL OSLibWinRestoreWindow(HWND hwnd)
+{
+ BOOL rc = WinSetWindowPos(hwnd, 0, -32000, 32000, 32000, 32000 , SWP_MAXIMIZE | SWP_RESTORE | SWP_ACTIVATE);
+ return (rc);
+}
+
 //******************************************************************************
 //******************************************************************************
 BOOL OSLibWinMinimizeWindow(HWND hwnd)
@@ -971,28 +984,70 @@ void OSLibWinShowTaskList(HWND hwndFrame)
 }
 //******************************************************************************
 //******************************************************************************
+//PF: PM Logic approved by numerous testcases shows this:
+//There is no other way to tweak FID_MINMAX without deleting it
+//Controls are created with size 0,0, invisible and should be immediately 
+//positioned. MINMAX control can't function properly without FID_SYSMENU
+//control if it is present, so we need to recreate BOTH controls.
+//Currently OSLibSetWindowStyle checks for changes and actually do the job
+//only when it is needed so no additional messages are generated.
+//TO-DO: There MAY BE some regressions here but I haven't seen them
+//and yes this code is the only way to do WinCreateFrame controls,
+//first delete old then create new - all other variants create new and
+//leave old, WinCreateFrameControls can't tweak anything.
+
 void OSLibSetWindowStyle(HWND hwndFrame, HWND hwndClient, ULONG dwStyle, 
-                         ULONG dwExStyle)
+                         ULONG dwExStyle, ULONG dwOldWindowsStyle)
 {
     ULONG dwWinStyle;
     ULONG dwOldWinStyle;
 
-    //client window:
-    dwWinStyle    = WinQueryWindowULong(hwndClient, QWL_STYLE);
-    dwOldWinStyle = dwWinStyle;
+    int checksum, checksum2; 
+    DWORD dest_tid, dest_pid;
 
-    if(dwStyle & WS_CLIPCHILDREN_W) {
-         dwWinStyle |= WS_CLIPCHILDREN;
+    static int minmaxwidth  = 0;
+    static int minmaxheight = 0;
+
+
+    //PF We can tweak OS/2 controls ONLY from thread that created them
+    //in other case heavy PM lockups will follow
+
+    dest_tid = GetWindowThreadProcessId(OS2ToWin32Handle(hwndClient) , &dest_pid );
+
+    if (dest_tid != GetCurrentThreadId()) 
+    {
+        dprintf(("OSLibSetWindowStyle: Redirecting Change Frame controls to another thread"));
+        WinSendMsg(hwndFrame, WIN32APP_CHNGEFRAMECTRLS, (MPARAM)dwStyle, (MPARAM)dwOldWindowsStyle);
+        return;
     }
-    else dwWinStyle &= ~WS_CLIPCHILDREN;
+    if(minmaxwidth == 0) {
+        minmaxwidth  = WinQuerySysValue(HWND_DESKTOP, SV_CXMINMAXBUTTON);
+        minmaxheight = WinQuerySysValue(HWND_DESKTOP, SV_CYMINMAXBUTTON);
+    }
+  
+    if (hwndClient)
+    {
+      //client window:
+      dwWinStyle    = WinQueryWindowULong(hwndClient, QWL_STYLE);
+      dwOldWinStyle = dwWinStyle;
 
-    if(dwWinStyle != dwOldWinStyle) {
-         WinSetWindowULong(hwndClient, QWL_STYLE, dwWinStyle);
+      if(dwStyle & WS_CLIPCHILDREN_W) {
+          dwWinStyle |= WS_CLIPCHILDREN;
+      }
+      else dwWinStyle &= ~WS_CLIPCHILDREN;
+
+      if(dwWinStyle != dwOldWinStyle) {
+           WinSetWindowULong(hwndClient, QWL_STYLE, dwWinStyle);
+      }
     }
 
     //Frame window
     dwWinStyle    = WinQueryWindowULong(hwndFrame, QWL_STYLE);
     dwOldWinStyle = dwWinStyle;
+
+    checksum =  (dwOldWindowsStyle & WS_MINIMIZEBOX_W) + (dwOldWindowsStyle & WS_MAXIMIZEBOX_W) + (dwOldWindowsStyle & WS_SYSMENU_W);
+    checksum2 =  (dwStyle & WS_MINIMIZEBOX_W) + (dwStyle & WS_MAXIMIZEBOX_W) + (dwStyle & WS_SYSMENU_W);
+
     if(dwStyle & WS_DISABLED_W) {
          dwWinStyle |= WS_DISABLED;
     }
@@ -1016,94 +1071,102 @@ void OSLibSetWindowStyle(HWND hwndFrame, HWND hwndClient, ULONG dwStyle,
     if(dwStyle & WS_MAXIMIZE_W) {
          dwWinStyle |= WS_MAXIMIZED;
     }
-    else dwWinStyle &= ~WS_MAXIMIZED;
+    else 
+      dwWinStyle &= ~WS_MAXIMIZED;
 
-    if(dwWinStyle != dwOldWinStyle) {
-         WinSetWindowULong(hwndFrame, QWL_STYLE, dwWinStyle);
-    }
     if(fOS2Look) {
         ULONG OSFrameStyle = 0;
+        SWP rc1,rc2,rc3;
+        int totalwidth = 0;
+
         if((dwStyle & WS_CAPTION_W) == WS_CAPTION_W)
         {
             if(WinWindowFromID(hwndFrame, FID_TITLEBAR) == 0) {
                 OSFrameStyle = FCF_TITLEBAR;
             }
-            
+            else
+              WinQueryWindowPos(WinWindowFromID(hwndFrame, FID_TITLEBAR), &rc1);            
+
             if((dwStyle & WS_SYSMENU_W) && !(dwExStyle & WS_EX_TOOLWINDOW_W))
             {
-                if(WinWindowFromID(hwndFrame, FID_SYSMENU) == 0) {
-                    OSFrameStyle |= FCF_SYSMENU;
-                }
+              if(WinWindowFromID(hwndFrame, FID_SYSMENU) == 0)
+                OSFrameStyle |= FCF_SYSMENU;
             }
+            WinQueryWindowPos(WinWindowFromID(hwndFrame, FID_SYSMENU), &rc2);
+            WinQueryWindowPos(WinWindowFromID(hwndFrame, FID_MINMAX), &rc3);
 
-            if((dwStyle & WS_MINIMIZEBOX_W) || (dwStyle & WS_MAXIMIZEBOX_W)) 
+            if (checksum != checksum2)
             {
-                HWND hwndMinMax = WinWindowFromID(hwndFrame, FID_MINMAX);
-                if(dwStyle & WS_MINIMIZEBOX_W) {
-                    if(hwndMinMax == 0) {
-                         OSFrameStyle |= FCF_MINBUTTON;
-                    }
-                    else {
-                        if(WinIsMenuItemValid(hwndMinMax, SC_MINIMIZE) == FALSE) {
-                            //recreate mimize button
-//TODO: this method doesn't work (hang during destruction probably)
-//                            OSFrameStyle |= FCF_MINBUTTON;
-                        }
-                    }
-                }
-                else 
-                if(hwndMinMax) {
-                    WinSendMsg(hwndMinMax, MM_REMOVEITEM, MPFROM2SHORT(SC_MINIMIZE, TRUE), NULL);
-                }
+              dprintf(("OSLibSetWindowStyle: Min/Max/Close state changed. Creating:"));
+              if(dwStyle & WS_MINIMIZEBOX_W)
+              {
+                  OSFrameStyle |= FCF_MINBUTTON;
+                  totalwidth += minmaxwidth/2;
+                  dprintf(("min button"));
+              }
 
-                if(dwStyle & WS_MAXIMIZEBOX_W) {
-                    if(hwndMinMax == 0) {
-                        OSFrameStyle |= FCF_MAXBUTTON;
-                    }
-                    else {
-                        if(WinIsMenuItemValid(hwndMinMax, SC_MAXIMIZE) == FALSE) {
-                            //recreate maximize button
-//TODO: this method doesn't work (hang during destruction probably)
-//                            OSFrameStyle |= FCF_MAXBUTTON;
-                        }
-                    }
-                }
-                else 
-                if(hwndMinMax) {
-                    WinSendMsg(hwndMinMax, MM_REMOVEITEM, MPFROM2SHORT(SC_MAXIMIZE, TRUE), NULL);
-                }
-            }
-            else
-            if(dwStyle & WS_SYSMENU_W) {
-                if(WinWindowFromID(hwndFrame, FID_MINMAX) == 0) {
-                    OSFrameStyle |= FCF_CLOSEBUTTON;
-                }
+              if(dwStyle & WS_MAXIMIZEBOX_W)
+              {
+                  OSFrameStyle |= FCF_MAXBUTTON;
+                  totalwidth += minmaxwidth/2;
+                  dprintf(("max button"));
+              }
+
+              if(dwStyle & WS_SYSMENU_W)
+              {
+                  OSFrameStyle |= FCF_CLOSEBUTTON;
+                  OSFrameStyle |= FCF_SYSMENU;                   
+                  totalwidth += minmaxwidth/2;
+                  dprintf(("close button"));
+              }
             }
        }
-       // no caption, delete all controls if they exist
        else 
        {
           if (WinWindowFromID(hwndFrame, FID_TITLEBAR)) 
               WinDestroyWindow(WinWindowFromID(hwndFrame, FID_TITLEBAR));
-          if (WinWindowFromID(hwndFrame, FID_SYSMENU)) 
-              WinDestroyWindow(WinWindowFromID(hwndFrame, FID_SYSMENU));
-          if (WinWindowFromID(hwndFrame, FID_MINMAX)) 
-              WinDestroyWindow(WinWindowFromID(hwndFrame, FID_MINMAX));
        }
-       
+
+       if (checksum != checksum2)
+       {
+         if (WinWindowFromID(hwndFrame, FID_SYSMENU)) 
+             WinDestroyWindow(WinWindowFromID(hwndFrame, FID_SYSMENU));
+         if (WinWindowFromID(hwndFrame, FID_MINMAX)) 
+             WinDestroyWindow(WinWindowFromID(hwndFrame, FID_MINMAX));
+       }
+
        if(OSFrameStyle) {
             FRAMECDATA FCData = {sizeof (FRAMECDATA), 0, 0, 0};
             char buffer[255];
+            dprintf(("Controls will be created %x",OSFrameStyle));
             FCData.flCreateFlags = OSFrameStyle;
 
             GetWindowTextA(OS2ToWin32Handle(hwndClient), buffer, sizeof(buffer));
             WinCreateFrameControls(hwndFrame, &FCData, buffer );
+ 
+            if (totalwidth != rc3.cx)
+            {
+              rc3.cx =  totalwidth;
+              totalwidth = rc3.cx - totalwidth;
+              rc1.cx = rc1.cx + totalwidth;
+              rc3.x = rc3.x + totalwidth;
+            }
+             
+            WinSetWindowPos(WinWindowFromID(hwndFrame, FID_MINMAX),0,rc3.x,rc3.y,rc3.cx,rc3.cy, SWP_MOVE | SWP_SIZE | SWP_SHOW);     
+            WinSetWindowPos(WinWindowFromID(hwndFrame, FID_SYSMENU),0,rc2.x,rc2.y,rc2.cx,rc2.cy, SWP_MOVE | SWP_SIZE | SWP_SHOW);     
+            WinSetWindowPos(WinWindowFromID(hwndFrame, FID_TITLEBAR),0,rc1.x,rc1.y,rc1.cx,rc1.cy, SWP_MOVE | SWP_SIZE | SWP_SHOW);     
 
             if (WinQueryActiveWindow(HWND_DESKTOP) == hwndFrame)
               WinSendMsg(WinWindowFromID(hwndFrame, FID_TITLEBAR), TBM_SETHILITE, (MPARAM)1, 0);
 
        }
    } // os2look
+
+   if(dwWinStyle != dwOldWinStyle) {
+          dprintf(("Setting new window U long"));
+          WinSetWindowULong(hwndFrame, QWL_STYLE, dwWinStyle);
+   }
+
 }
 //******************************************************************************
 //******************************************************************************
