@@ -1,4 +1,4 @@
-/* $Id: animate.c,v 1.6 1999-10-24 22:49:42 sandervl Exp $ */
+/* $Id: animate.c,v 1.7 2000-02-22 17:11:38 cbratschi Exp $ */
 /*
  * Animation control
  *
@@ -445,9 +445,6 @@ ANIMATE_Register (VOID)
 {
     WNDCLASSA wndClass;
 
-//SvL: Don't check this now
-//    if (GlobalFindAtomA (ANIMATE_CLASSA)) return;
-
     ZeroMemory (&wndClass, sizeof(WNDCLASSA));
     wndClass.style         = CS_GLOBALCLASS | CS_DBLCLKS;
     wndClass.lpfnWndProc   = (WNDPROC)ANIMATE_WindowProc;
@@ -464,7 +461,6 @@ ANIMATE_Register (VOID)
 VOID
 ANIMATE_Unregister (VOID)
 {
-    if (GlobalFindAtomA (ANIMATE_CLASSA))
-        UnregisterClassA (ANIMATE_CLASSA, (HINSTANCE)NULL);
+    UnregisterClassA (ANIMATE_CLASSA, (HINSTANCE)NULL);
 }
 

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.21 2000-02-09 23:46:53 bird Exp $
+# $Id: makefile,v 1.22 2000-02-22 17:11:40 cbratschi Exp $
 #
 # PD-Win32 API
 #
@@ -23,7 +23,8 @@ OBJS =  comctl32.obj initterm.obj progress.obj comctl32undoc.obj imagelist.obj \
         comboex.obj animate.obj datetime.obj flatsb.obj hotkey.obj monthcal.obj \
         nativefont.obj pager.obj tab.obj status.obj header.obj updown.obj \
         rebar.obj cache.obj trackbar.obj tooltips.obj toolbar.obj treeview.obj \
-        propsheet.obj listview.obj draglist.obj ipaddress.obj resource.obj
+        propsheet.obj listview.obj draglist.obj ipaddress.obj resource.obj \
+        ccbase.obj
 
 all: $(TARGET).dll $(TARGET).lib
 
