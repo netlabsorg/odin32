@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.19 2000-02-05 02:44:17 sandervl Exp $
+# $Id: makefile,v 1.20 2000-02-09 15:55:56 sandervl Exp $
 #
 # ddraw.dll makefile
 #
@@ -41,9 +41,12 @@ $(TARGET).dll: $(OBJS) $(TARGET).def
   $(CP) $@ $(PDWIN32_BIN)
 
 
-$(TARGET).lib: $(TARGET).def
+$(TARGET).lib: $(TARGET)exp.def
   $(IMPLIB) $(IMPLIBFLAGS) $@ $**
   $(CP) $@ $(PDWIN32_LIB)
+
+$(TARGET)exp.def: $(TARGET).def
+  $(IMPDEF) $** $@
 
 
 ddraw.obj: ddraw.cpp  \
