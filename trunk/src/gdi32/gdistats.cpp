@@ -195,7 +195,7 @@ void STATS_DeleteObject(HANDLE hObj, DWORD objtype)
 }
 //******************************************************************************
 //******************************************************************************
-void STATS_DumpStats()
+void STATS_DumpStatsGDI32()
 {
     dprintf(("*************  GDI32 STATISTICS BEGIN *****************"));
     dprintf(("Leaked dcs            %d", nrdcscreated));

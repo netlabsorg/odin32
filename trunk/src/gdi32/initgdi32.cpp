@@ -1,4 +1,4 @@
-/* $Id: initgdi32.cpp,v 1.9 2001-12-15 18:50:26 sandervl Exp $
+/* $Id: initgdi32.cpp,v 1.10 2001-12-16 15:29:55 sandervl Exp $
  *
  * DLL entry point
  *
@@ -59,7 +59,7 @@ BOOL WINAPI OdinLibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
     return TRUE;
 
    case DLL_PROCESS_DETACH:
-    STATS_DumpStats();
+    STATS_DumpStatsGDI32();
     ctordtorTerm();
     return TRUE;
    }
