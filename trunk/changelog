@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.238 1999-09-25 14:31:17 sandervl Exp $ */
+ /* $Id: changelog,v 1.239 1999-09-25 15:07:28 cbratschi Exp $ */
+
+ 99-09-25: Christoph Bratschi<cbratschi@datacomm.ch>
+        - USER32: WS_EX_* 3D frame support for child windows
 
  99-09-25: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32:   Cursor fixes. Cursor shown correctly in winhlp32.

@@ -1,4 +1,4 @@
-/* $Id: hotkey.c,v 1.9 1999-09-23 17:26:29 cbratschi Exp $ */
+/* $Id: hotkey.c,v 1.10 1999-09-25 15:10:27 cbratschi Exp $ */
 /*
  * Hotkey control
  *
@@ -105,6 +105,7 @@ HOTKEY_Create (HWND hwnd, WPARAM wParam, LPARAM lParam)
     HOTKEY_INFO *infoPtr;
     TEXTMETRICA tm;
     HDC hdc;
+    RECT rect;
 
     /* allocate memory for info structure */
     infoPtr = (HOTKEY_INFO *)COMCTL32_Alloc (sizeof(HOTKEY_INFO));
@@ -118,8 +119,6 @@ HOTKEY_Create (HWND hwnd, WPARAM wParam, LPARAM lParam)
     infoPtr->bfMods    = 0;
     infoPtr->fwCombInv = 0;
     infoPtr->fwModInv  = 0;
-    infoPtr->cursorPos.x = 3;
-    infoPtr->cursorPos.y = 3;
     infoPtr->bfModsDown = 0;
 
     /* get default font height */
@@ -127,6 +126,10 @@ HOTKEY_Create (HWND hwnd, WPARAM wParam, LPARAM lParam)
     GetTextMetricsA (hdc, &tm);
     infoPtr->nHeight = tm.tmHeight;
     ReleaseDC (hwnd, hdc);
+
+    GetClientRect(hwnd,&rect);
+    infoPtr->cursorPos.x = 0;
+    infoPtr->cursorPos.y = rect.bottom-tm.tmHeight;
 
     return 0;
 }
@@ -302,7 +305,6 @@ HOTKEY_Draw(HWND hwnd,HDC hdc)
 
   HideCaret(hwnd);
   GetClientRect(hwnd,&rect);
-  DrawEdge(hdc,&rect,EDGE_SUNKEN,BF_RECT | BF_ADJUST);
 
   //draw string
   text[0] = 0;
@@ -333,7 +335,7 @@ HOTKEY_Draw(HWND hwnd,HDC hdc)
   DrawTextA(hdc,text,strlen(text),&newRect,DT_LEFT | DT_BOTTOM | DT_SINGLELINE);
   DrawTextA(hdc,text,strlen(text),&newRect,DT_LEFT | DT_BOTTOM | DT_SINGLELINE | DT_CALCRECT);
   if (infoPtr->hFont) SelectObject(hdc,oldFont);
-  infoPtr->cursorPos.x = (newRect.right >= rect.right)? 3:newRect.right;
+  infoPtr->cursorPos.x = (newRect.right >= rect.right)? 0:newRect.right;
   SetCaretPos(infoPtr->cursorPos.x,infoPtr->cursorPos.y);
   ShowCaret(hwnd);
 }
