@@ -1,4 +1,4 @@
-/* $Id: font.cpp,v 1.13 2000-10-01 12:06:32 sandervl Exp $ */
+/* $Id: font.cpp,v 1.14 2000-10-16 22:26:53 sandervl Exp $ */
 
 /*
  * GDI32 font apis
@@ -30,6 +30,7 @@
 #include "unicode.h"
 #include <heapstring.h>
 #include <win\options.h>
+#include <wprocess.h>
 
 #define DBG_LOCALLOG    DBG_font
 #include "dbglocal.h"
@@ -270,8 +271,11 @@ int  EXPENTRY_O32 EnumFontProcA(LPENUMLOGFONTA lpLogFont, LPNEWTEXTMETRICA
 {
  ENUMUSERDATA *lpEnumData = (ENUMUSERDATA *)arg4;
  FONTENUMPROCA proc = (FONTENUMPROCA)lpEnumData->userProc;
+ USHORT selTIB = SetWin32TIB(); // save current FS selector and set win32 sel
 
-  return proc(lpLogFont, lpTextM, arg3, lpEnumData->userData);
+  int rc = proc(lpLogFont, lpTextM, arg3, lpEnumData->userData);
+  SetFS(selTIB);           // switch back to the saved FS selector
+  return rc;
 }
 //******************************************************************************
 //******************************************************************************
@@ -282,6 +286,7 @@ int  EXPENTRY_O32 EnumFontProcW(LPENUMLOGFONTA lpLogFont, LPNEWTEXTMETRICA lpTex
  FONTENUMPROCW proc = (FONTENUMPROCW)lpEnumData->userProc;
  ENUMLOGFONTW LogFont;
  NEWTEXTMETRICW textM;
+ USHORT selTIB = SetWin32TIB(); // save current FS selector and set win32 sel
  int rc;
 
   memcpy(&LogFont, lpLogFont, ((ULONG)&LogFont.elfLogFont.lfFaceName -
@@ -315,7 +320,9 @@ int  EXPENTRY_O32 EnumFontProcW(LPENUMLOGFONTA lpLogFont, LPNEWTEXTMETRICA lpTex
   textM.ntmCellHeight = 0;
   textM.ntmAvgWidth = 0;
 
-  return proc(&LogFont, &textM, arg3, lpEnumData->userData);
+  rc = proc(&LogFont, &textM, arg3, lpEnumData->userData);
+  SetFS(selTIB);           // switch back to the saved FS selector
+  return rc;
 }
 //******************************************************************************
 //TODO: FontEnumdwFlagsEx, script, font signature & NEWTEXTMETRICEX (last part)
@@ -327,6 +334,7 @@ int  EXPENTRY_O32 EnumFontProcExA(LPENUMLOGFONTA lpLogFont, LPNEWTEXTMETRICA
  FONTENUMPROCEXA proc = (FONTENUMPROCEXA)lpEnumData->userProc;
  ENUMLOGFONTEXA logFont;
  NEWTEXTMETRICEXA textM;
+ USHORT selTIB = SetWin32TIB(); // save current FS selector and set win32 sel
 
   memcpy(&logFont, lpLogFont, sizeof(ENUMLOGFONTA));
   memset(logFont.elfScript, 0, sizeof(logFont.elfScript));
@@ -334,7 +342,10 @@ int  EXPENTRY_O32 EnumFontProcExA(LPENUMLOGFONTA lpLogFont, LPNEWTEXTMETRICA
   memset(&textM.ntmeFontSignature, 0, sizeof(textM.ntmeFontSignature));
 
   dprintf(("EnumFontProcExA %s", logFont.elfLogFont.lfFaceName));
-  return proc(&logFont, &textM, arg3, lpEnumData->userData);
+
+  int rc = proc(&logFont, &textM, arg3, lpEnumData->userData);
+  SetFS(selTIB);           // switch back to the saved FS selector
+  return rc;
 }
 //******************************************************************************
 //TODO: FontEnumdwFlagsEx, script, font signature & NEWTEXTMETRICEX (last part)
