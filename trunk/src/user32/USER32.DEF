@@ -1,4 +1,4 @@
-; $Id: USER32.DEF,v 1.16 1999-10-23 23:04:32 sandervl Exp $
+; $Id: USER32.DEF,v 1.17 1999-10-26 11:14:52 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY USER32 INITINSTANCE TERMINSTANCE
@@ -393,7 +393,8 @@ EXPORTS
     LoadKeyboardLayoutA        = _LoadKeyboardLayoutA@8      @367
     LoadKeyboardLayoutW        = _LoadKeyboardLayoutW@8      @368
     LoadMenuA                  = _LoadMenuA@8                @369
-    LoadMenuIndirectA          = _LoadMenuIndirectA@4        @370
+;Menu resources are always in Unicode format
+    LoadMenuIndirectA          = _LoadMenuIndirectW@4        @370
     LoadMenuIndirectW          = _LoadMenuIndirectW@4        @371
     LoadMenuW                  = _LoadMenuW@8                @372
     LoadStringA                = _LoadStringA@16             @373
