@@ -1,4 +1,4 @@
-/* $Id: wintls.cpp,v 1.6 1999-11-09 19:22:33 sandervl Exp $ */
+/* $Id: wintls.cpp,v 1.7 1999-11-27 00:05:40 sandervl Exp $ */
 /*
  * Win32 TLS API functions
  *
@@ -71,7 +71,7 @@ void Win32ImageBase::tlsAttachThread()	//setup TLS structures for new thread
    dprintf(("tlsTotalSize     %x", tlsTotalSize));
    dprintf(("tlsIndexAddr     %x", tlsIndexAddr));
    dprintf(("tlsCallbackAddr  %x", tlsCallBackAddr));
-   dprintf(("*tlsCallbackAddr %x", *tlsCallBackAddr));
+   dprintf(("*tlsCallbackAddr %x", (tlsCallBackAddr) ? *tlsCallBackAddr : 0));
    tibmem = (char *)VirtualAlloc(0, tlsTotalSize, MEM_RESERVE|MEM_COMMIT, PAGE_READWRITE);
    if(tibmem == NULL) {
 	dprintf(("tlsAttachThread: tibmem == NULL!!!!"));
@@ -85,7 +85,7 @@ void Win32ImageBase::tlsAttachThread()	//setup TLS structures for new thread
    winteb->tls_ptr[tlsIndex] = tibmem;
    *tlsIndexAddr = tlsIndex;
 
-   if((ULONG)*tlsCallBackAddr != 0) {
+   if(tlsCallBackAddr && (ULONG)*tlsCallBackAddr != 0) {
 	pCallback = tlsCallBackAddr;
 	while(*pCallback) {
 		dprintf(("tlsAttachThread: calling TLS Callback %x", *pCallback));
@@ -111,7 +111,7 @@ void Win32ImageBase::tlsDetachThread()	//destroy TLS structures
 
    dprintf(("Win32ImageBase::tlsDetachThread for module %x, thread id %x", hinstance, GetCurrentThreadId()));
 
-   if((ULONG)*tlsCallBackAddr != 0) {
+   if(tlsCallBackAddr && (ULONG)*tlsCallBackAddr != 0) {
 	pCallback = tlsCallBackAddr;
 	while(*pCallback) {
 		dprintf(("tlsDetachThread: calling TLS Callback %x", *pCallback));
