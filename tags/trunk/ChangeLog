@@ -1,4 +1,12 @@
- /* $Id: ChangeLog,v 1.919 2000-04-30 23:18:48 phaller Exp $ */
+ /* $Id: ChangeLog,v 1.920 2000-05-02 11:28:17 bird Exp $ */
+
+ 2000-04-27: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+        - makefile and tools/makefile:
+                    tools/install is not a "needed tool" required for
+                    to do the rest of the build; and it'is dependent on
+                    kernel32.lib which haven't been made at the time
+                    the needed_tools are being made. So, the making of
+                    tools/install is the last thing we do in the makeprocess.
 
  2000-04-30: Patrick Haller <phaller@gmx.net>
         - ODINWRAP: added profiling support. The odin wrapper macros now
