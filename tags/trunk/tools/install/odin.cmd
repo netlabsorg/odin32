@@ -1,4 +1,4 @@
-/* $Id: odin.cmd,v 1.41 2002-04-11 16:25:31 bird Exp $
+/* $Id: odin.cmd,v 1.42 2002-06-16 08:34:19 sandervl Exp $
  *
  * Odin32 API WarpIn installation script generator.
  *
@@ -20,7 +20,6 @@
  */
 Call RxFuncAdd 'SysLoadFuncs', 'REXXUTIL', 'SysLoadFuncs'
 Call SysLoadFuncs
-
 
 /*
  * Defaults.
@@ -143,7 +142,8 @@ rc = lineout(sInstFile, '     CREATEOBJECT="WPProgram|WGSS50 License|<ODINFOLDER
 rc = lineout(sInstFile, '     CREATEOBJECT="WPProgram|Registry Editor|<ODINFOLDER>|EXENAME=REGEDIT2.EXE;"');
 rc = lineout(sInstFile, '     CREATEOBJECT="WPProgram|Report Odin Bugs|<ODINFOLDER>|EXENAME=$(1)\ODINBUG.EXE;ASSOCTYPE=Odin-Logfiles;ASSOCFILTER=odin32_?.log;OBJECTID=<Report_Odin_Bugs>;');
 rc = lineout(sInstFile, '     CREATEOBJECT="WPProgram|Report Odin Bugs Readme|<ODINFOLDER>|EXENAME=E.EXE;PARAMETERS=$(1)\README.ODINBUG;TITLE=Report Odin Bugs^ReadMe;OBJECTID=<Report_Odin_Bugs_ReadMe>;');
-rc = lineout(sInstFile, '     CREATEOBJECT="WPProgram|Report Odin Bugs Manual|<ODINFOLDER>|EXENAME=VIEW.EXE;PARAMETERS=$(1)\ODINBUG.HLP Introduction;TITLE=Report Odin Bugs^Manual;OBJECTID=<Report_Odin_Bugs_Help>;');
+rc = lineout(sInstFile, '     CREATEOBJECT="WPProgram|Report Odin Bugs Manual|<ODINFOLDER>|EXENAME=VIEW.EXE;PARAMETERS=$(1)\ODINBUG.HLP;TITLE=Report Odin Bugs^Manual;OBJECTID=<Report_Odin_Bugs_Help>;');
+rc = lineout(sInstFile, '     CREATEOBJECT="WPProgram|Odin User's Manual|<ODINFOLDER>|EXENAME=VIEW.EXE;PARAMETERS=$(1)\ODINUSER.INF;TITLE=Odin User's^Manual;OBJECTID=<Odin_Users_Manual>;');
 rc = lineout(sInstFile, '     CREATEOBJECT="WPUrl|Subscribe to odinusers mailing list|<ODINFOLDER>|TITLE=Subscribe to^odinusers mailing list;URL=http://groups.yahoo.com/group/odinusers/join;OBJECTID=<Subscribe_odinusers@yahoogroups>;');
 rc = lineout(sInstFile, '     TARGET="C:\ODIN" BASE');
 title = "     TITLE=""Odin "sType" ("date()")""";
@@ -214,6 +214,8 @@ rc = lineout(sInstFile, '     Yuri Dario');
 rc = lineout(sInstFile, '     Przemyslaw Dobrowolski');
 rc = lineout(sInstFile, '     Daniela Engert');
 rc = lineout(sInstFile, '     Peter Fitzsimmons');
+rc = lineout(sInstFile, '     Platon Fomichev'),
+rc = lineout(sInstFile, '     Dmitry Froloff'),
 rc = lineout(sInstFile, '     Adrian Gschwend');
 rc = lineout(sInstFile, '     Jeroen van den Horn');
 rc = lineout(sInstFile, '     Patrick Haller');
@@ -231,6 +233,8 @@ rc = lineout(sInstFile, '     Knut Stange Osmundsen');
 rc = lineout(sInstFile, '     Vitali E. Pelenyov');
 rc = lineout(sInstFile, '     Rene Pronk');
 rc = lineout(sInstFile, '     David Raison');
+rc = lineout(sInstFile, '     J”rg Sievers'),
+rc = lineout(sInstFile, '     J”rg Skottke'),
 rc = lineout(sInstFile, '     Dietrich Teickner');
 rc = lineout(sInstFile, '     Kai Sommerfeld');
 rc = lineout(sInstFile, '     Carsten Tenbrink');
@@ -517,7 +521,7 @@ call lineout sWICFile, sInstallArchive '-s' sInstFile '-a'
  * Packet 1
  */
 call lineout sWICFile, '1 -c'||sMainDir 'ChangeLog LICENSE.TXT WGSS50.lic';
-call lineout sWICFile, '1 -c'||sDocDir 'ChangeLog-1999 ChangeLog-2000 ChangeLog-2001 ChangeLog-2002 Readme.txt ReportingBugs.txt Logging.txt Odin.ini.txt Readme.Odinbug';
+call lineout sWICFile, '1 -c'||sDocDir 'ChangeLog-1999 ChangeLog-2000 ChangeLog-2001 ChangeLog-2002 Readme.txt ReportingBugs.txt Logging.txt Odin.ini.txt Readme.Odinbug OdinBug.HLP OdinUser.INF';
 call lineout sWICFile, '1 -c'||sBinDir||' Odinbug.exe';
 
 /*
