@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.17 1999-11-24 19:30:18 sandervl Exp $ */
+/* $Id: gdi32.cpp,v 1.18 1999-12-01 23:30:08 sandervl Exp $ */
 
 /*
  * GDI32 apis
@@ -2135,15 +2135,6 @@ int WIN32API SetAbortProc(HDC hdc, ABORTPROC lpAbortProc)
   return(1);
 }
 //******************************************************************************
-//TODO:
-//Should return the character set of the font currently selected into the hdc
-//******************************************************************************
-UINT WIN32API GetTextCharset(HDC hdc)
-{
-  dprintf(("GDI32: GetTextCharset, not complete\n"));
-  return(ANSI_CHARSET);
-}
-//******************************************************************************
 //Selects the current path as a clipping region for a device context, combining
 //any existing clipping region by using the specified mode
 //TODO: Can be emulated with SelectClipRegion??
@@ -2370,13 +2361,6 @@ int WIN32API DescribePixelFormat(HDC, int, UINT, LPPIXELFORMATDESCRIPTOR)
 }
 //******************************************************************************
 //******************************************************************************
-UINT WIN32API SetSystemPaletteUse(HDC hdc, UINT flags)
-{
-  dprintf(("GDI32: SetSystemPaletteUse %X %X, not implemented (GDI_ERROR)\n", hdc, flags));
-  return(GDI_ERROR);
-}
-//******************************************************************************
-//******************************************************************************
 BOOL WIN32API SetObjectOwner( HGDIOBJ arg1, int arg2 )
 {
   // Here is a guess for a undocumented entry
@@ -2445,26 +2429,6 @@ BOOL WIN32API GetTextExtentExPointW(                                 /*KSO Thu 2
   rc = GetTextExtentExPointA(arg1, astring, arg3, arg4, arg5, arg6, arg7);
   FreeAsciiString(astring);
   return rc;
-}
-//******************************************************************************
-//******************************************************************************
-UINT WIN32API GetTextCharsetInfo(                                             /*KSO Thu 21.05.1998*/
-        HDC     hdc,
-        LPFONTSIGNATURE lpSig,
-        DWORD   dwFlags
-        )
-{
-        dprintf(("GDI32: GetTextCharsetInfo - stub\n"));
-        return FALSE;
-}
-//******************************************************************************
-//******************************************************************************
-UINT WIN32API GetSystemPaletteUse(                                   /*KSO Thu 21.05.1998*/
-        HDC             hdc
-        )
-{
-        dprintf(("GDI32: GetSystemPaletteUse - stub\n"));
-        return FALSE; /*?*/
 }
 //******************************************************************************
 //******************************************************************************
