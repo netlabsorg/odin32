@@ -1,22 +1,27 @@
-; $Id: VERSION.DEF,v 1.4 1999-07-23 07:30:48 sandervl Exp $
+; $Id: VERSION.DEF,v 1.5 1999-08-12 23:33:37 phaller Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY VERSION INITINSTANCE
 DATA MULTIPLE NONSHARED
 
+IMPORTS
+    _LZOpenFileA@12            = LZ32.1
+    _LZCopy@8                  = LZ32.0
+    _LZClose@4                 = LZ32.5
+
 EXPORTS
-    GetFileVersionInfoA        = _VERSION_GetFileVersionInfoA@16     @1
-    GetFileVersionInfoSizeA    = _VERSION_GetFileVersionInfoSizeA@8  @2
-    GetFileVersionInfoSizeW    = _VERSION_GetFileVersionInfoSizeW@8  @3
-    GetFileVersionInfoW        = _VERSION_GetFileVersionInfoW@16     @4
-    VerFindFileA               = _VERSION_VerFindFileA@32            @5
-    VerFindFileW               = _VERSION_VerFindFileW@32            @6
-    VerInstallFileA            = _VERSION_VerInstallFileA@32         @7
-    VerInstallFileW            = _VERSION_VerInstallFileW@32         @8
-    VerLanguageNameA           = _VERSION_VerLanguageNameA@12        @9
-    VerLanguageNameW           = _VERSION_VerLanguageNameW@12        @10
-    VerQueryValueA             = _VERSION_VerQueryValueA@16          @11
-    VerQueryValueW             = _VERSION_VerQueryValueW@16          @12
-;    VerQueryValueIndexA        = _VERSION_VerQueryValueIndexA@16     @12
-;    VerQueryValueIndexW        = _VERSION_VerQueryValueIndexW@16     @13
-;    VerQueryValueW             = _VERSION_VerQueryValueW@16          @14
+    GetFileVersionInfoA        = _GetFileVersionInfoA@16     @1
+    GetFileVersionInfoSizeA    = _GetFileVersionInfoSizeA@8  @2
+    GetFileVersionInfoSizeW    = _GetFileVersionInfoSizeW@8  @3
+    GetFileVersionInfoW        = _GetFileVersionInfoW@16     @4
+    VerFindFileA               = _VerFindFileA@32            @5
+    VerFindFileW               = _VerFindFileW@32            @6
+    VerInstallFileA            = _VerInstallFileA@32         @7
+    VerInstallFileW            = _VerInstallFileW@32         @8
+    VerLanguageNameA           = _VerLanguageNameA@12        @9
+    VerLanguageNameW           = _VerLanguageNameW@12        @10
+    VerQueryValueA             = _VerQueryValueA@16          @11
+    VerQueryValueW             = _VerQueryValueW@16          @12
+;    VerQueryValueIndexA        = _VerQueryValueIndexA@16     @12
+;    VerQueryValueIndexW        = _VerQueryValueIndexW@16     @13
+;    VerQueryValueW             = _VerQueryValueW@16          @14
