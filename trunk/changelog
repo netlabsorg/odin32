@@ -1,10 +1,12 @@
- /* $Id: changelog,v 1.189 1999-09-09 18:01:09 dengert Exp $ */
+ /* $Id: changelog,v 1.190 1999-09-09 21:02:28 phaller Exp $ */
 
  99-09-09: Daniela Engert <dani@ngrt.de>
 	- USER32\NEW: begin new DC/related code. BeginPaint/EndPaint done.
 
  99-09-09: Patrick Haller <phaller@gmx.net>
 	- SHELL32\NEW:	improvement of shell32
+	- USER32:	added stubs for GetMenuInfo + SetMenuInfo
+	- USER32\NEW:	added stubs for GetMenuInfo + SetMenuInfo
 
  99-09-08: David Raison
 	- Src\OleAut32 Added stubs for undefined exports in OLEAut32
