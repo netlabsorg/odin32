@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.38 2000-01-12 19:43:58 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.39 2000-01-12 22:07:28 cbratschi Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -294,29 +294,9 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         goto RunDefWndProc;
     }
 
-#if 0
     case WM_CALCVALIDRECTS:
-    {
-      PRECTL oldRect = (PRECTL)mp1,newRect = oldRect+1;
-      UINT res = CVR_ALIGNLEFT | CVR_ALIGNTOP;
-
-//CB: todo: use WM_NCCALCSIZE result
-      if (win32wnd->getWindowClass())
-      {
-        DWORD dwStyle = win32wnd->getWindowClass()->getClassLongA(GCL_STYLE_W);
-
-        if ((dwStyle & CS_HREDRAW_W) && (newRect->xRight-newRect->xLeft != oldRect->xRight-oldRect->xLeft))
-          res |= CVR_REDRAW;
-        else if ((dwStyle & CS_VREDRAW_W) && (newRect->yTop-newRect->yBottom != oldRect->yTop-oldRect->yBottom))
-          res |= CVR_REDRAW;
-      } else res |= CVR_REDRAW;
-
       RestoreOS2TIB();
-      WinDefWindowProc(hwnd,msg,mp1,mp2);
-      RestoreOS2TIB();
-      return (MRESULT)res;
-    }
-#endif
+      return (MRESULT)(CVR_ALIGNLEFT | CVR_ALIGNTOP);
 
     case WM_SETFOCUS:
     {
@@ -439,7 +419,8 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
     case WM_ERASEBACKGROUND:
     {
         dprintf(("OS2: WM_ERASEBACKGROUND %x", win32wnd->getWindowHandle()));
-        break;
+        RestoreOS2TIB();
+        return (MRESULT)FALSE;
     }
 
     case WM_FOCUSCHANGE:
