@@ -1,4 +1,4 @@
- /* $Id: changelog,v 1.467 1999-11-23 19:35:19 sandervl Exp $ */
+ /* $Id: changelog,v 1.468 1999-11-23 20:02:20 sandervl Exp $ */
 
  99-11-23: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Added stubs for ChangeDisplaySettingsExA/W
@@ -6,6 +6,7 @@
                   Query display color depth during init.
 	- KERNEL32: Ported and adapted Wine GetSystemInfo (now creates
                     both cpu & fpu registry keys)
+                    Added code for SMP machines (GetSystemInfo)
                     Added IsProcessorFeaturePresent
 
  99-11-23: Vitali E. Pelenyov <Vitali.Pelenyov@dpt.ustu.ru>
