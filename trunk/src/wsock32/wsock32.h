@@ -1,4 +1,4 @@
-; $Id: wsock32.h,v 1.12 2000-03-22 20:07:30 sandervl Exp $
+// $Id: wsock32.h,v 1.13 2000-03-22 20:11:04 sandervl Exp $
 
 /* WSOCK32.H--definitions & conversions for Odin's wsock32.dll.
  * Unused/unneeded Microsoft declarations removed.

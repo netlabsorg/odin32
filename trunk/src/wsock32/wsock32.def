@@ -1,4 +1,4 @@
-/* $Id: wsock32.def,v 1.17 2000-03-22 20:07:29 sandervl Exp $ */
+; $Id: wsock32.def,v 1.18 2000-03-22 20:11:03 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY WSOCK32 INITINSTANCE
