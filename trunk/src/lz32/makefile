@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 1999-11-03 23:28:05 sandervl Exp $
+# $Id: makefile,v 1.6 2000-01-03 10:25:57 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -40,11 +40,11 @@ $(TARGET).lib: $(TARGET).def
         $(CP) $@ $(PDWIN32_LIB)
 
 
-lz32.obj: lz32.cpp lz32.h debugtools.h
+lz32.obj: lz32.cpp lz32.h $(PDWIN32_INCLUDE)\win\debugtools.h
 initterm.obj: initterm.cpp
 
 clean:
-        $(RM) *.obj *.lib *.dll *~ *.map *.pch
+        $(RM) *.obj *.lib *.dll *.map *.pch
         $(RM) $(PDWIN32_BIN)\$(TARGET).dll
         $(RM) $(PDWIN32_LIB)\$(TARGET).lib
 
