@@ -1,4 +1,4 @@
-; $Id: shell32.def,v 1.21 1999-12-28 23:16:33 sandervl Exp $
+; $Id: shell32.def,v 1.22 1999-12-28 23:27:41 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 ;based on Windows 95
@@ -420,3 +420,5 @@ EXPORTS
     _StrFormatByteSizeW@12                @1042
     _PathAppendA@8                        @1043
     _PathAppendW@8                        @1044
+    _StrRetToBufA@16                      @1045
+    _StrRetToBufW@16                      @1046
