@@ -1,4 +1,4 @@
-/* $Id: MPR.CPP,v 1.5 1999-11-04 10:32:35 phaller Exp $ */
+/* $Id: MPR.CPP,v 1.6 1999-11-04 10:55:30 phaller Exp $ */
 
 /*
  *
@@ -31,13 +31,9 @@
 // MultinetGetErrorTextW
 // RestoreConnectionA0
 // WNetClearConnections
-// WNetConnectionDialog1A
-// WNetConnectionDialog1W
 // WNetConnectionDialog2
 // WNetDirectoryNotifyA
 // WNetDirectoryNotifyW
-// WNetDisconnectDialog1A
-// WNetDisconnectDialog1W
 // WNetDisconnectDialog2
 // WNetFMXEditPerm         FileManager Extensions ?
 // WNetFMXGetPermCaps
@@ -51,12 +47,8 @@
 // WNetGetDirectoryTypeA
 // WNetGetDirectoryTypeW
 // WNetGetHomeDirectoryW   NT specific
-// WNetGetNetworkInformationA
-// WNetGetNetworkInformationW
 // WNetGetPropertyTextA
 // WNetGetPropertyTextW
-// WNetGetProviderNameA
-// WNetGetProviderNameW
 // WNetGetSearchDialog
 // WNetLogonNotify
 // WNetPasswordChangeNotify
@@ -437,6 +429,46 @@ ODINFUNCTION2(DWORD, WNetConnectionDialog,
 
 
 /*****************************************************************************
+ *             The WNetConnectionDialog1 function starts a general browsing
+ *             dialog box for connecting to network resources.
+ * Parameters: LPCONNECTDLGSTRUCT lpConnDlgStruct
+ * Variables :
+ * Result    : API-Returncode
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Fri, 1998/02/27 11:55]
+ *****************************************************************************/
+
+ODINFUNCTION1(DWORD,               WNetConnectionDialog1A,
+              LPCONNECTDLGSTRUCTA, lpConnDlgStruct)
+{
+  dprintf(("MPR:WNetConnectionDialog1A not implemented.\n"));
+  return (ERROR_NO_NETWORK);
+}
+
+
+/*****************************************************************************
+ *             The WNetConnectionDialog1 function starts a general browsing
+ *             dialog box for connecting to network resources.
+ * Parameters: LPCONNECTDLGSTRUCT lpConnDlgStruct
+ * Variables :
+ * Result    : API-Returncode
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Fri, 1998/02/27 11:55]
+ *****************************************************************************/
+
+ODINFUNCTION1(DWORD,               WNetConnectionDialog1W,
+              LPCONNECTDLGSTRUCTW, lpConnDlgStruct)
+{
+  dprintf(("MPR:WNetConnectionDialog1W not implemented.\n"));
+  return (ERROR_NO_NETWORK);
+}
+
+
+/*****************************************************************************
  *             The WNetDisconnectDialog function starts a general browsing
  *             dialog box for disconnecting from network resources.
  * Parameters: HWND  hwnd            handle of window owning dialog box
@@ -454,6 +486,46 @@ ODINFUNCTION2(DWORD, WNetDisconnectDialog,
               DWORD, fdwResourceType)
 {
   dprintf(("MPR:WNetDisconnectDialog not implemented.\n"));
+  return (ERROR_NO_NETWORK);
+}
+
+
+/*****************************************************************************
+ *             The WNetDisconnectDialog1 function starts a general browsing
+ *             dialog box for disconnecting from network resources.
+ * Parameters: LPDISCDLGSTRUCTA lpDisconnectDlgStruct
+ * Variables :
+ * Result    : API-Returncode
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Fri, 1998/02/27 11:55]
+ *****************************************************************************/
+
+ODINFUNCTION1(DWORD,            WNetDisconnectDialog1A,
+              LPDISCDLGSTRUCTA, lpDisconnectDlgStruct)
+{
+  dprintf(("MPR:WNetDisconnectDialog1A not implemented.\n"));
+  return (ERROR_NO_NETWORK);
+}
+
+
+/*****************************************************************************
+ *             The WNetDisconnectDialog1 function starts a general browsing
+ *             dialog box for disconnecting from network resources.
+ * Parameters: LPDISCDLGSTRUCTW lpDisconnectDlgStruct
+ * Variables :
+ * Result    : API-Returncode
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Fri, 1998/02/27 11:55]
+ *****************************************************************************/
+
+ODINFUNCTION1(DWORD,            WNetDisconnectDialog1W,
+              LPDISCDLGSTRUCTW, lpDisconnectDlgStruct)
+{
+  dprintf(("MPR:WNetDisconnectDialog1W not implemented.\n"));
   return (ERROR_NO_NETWORK);
 }
 
@@ -600,6 +672,51 @@ ODINFUNCTION5(DWORD, WNetGetLastErrorA,
   return (NO_ERROR);
 }
 
+
+/*****************************************************************************
+ *             The WNetGetNetworkInformation function returns extended
+ *             information about a specific network provider whose name was
+ *             returned by a previous network enumeration.
+ * Parameters: LPCSTR lpProvider
+ *             LPNETINFOSTRUCT lpNetInfoStruct
+ * Variables :
+ * Result    : API-Returncode
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Fri, 1998/02/27 11:55]
+ *****************************************************************************/
+
+ODINFUNCTION2(DWORD,           WNetGetNetworkInformationA,
+              LPCSTR,          lpProvider,
+              LPNETINFOSTRUCT, lpNetInfoStruct)
+{
+  dprintf(("MPR:WNetGetNetworkInformationA not implemented.\n"));
+  return (ERROR_NO_NETWORK);
+}
+
+
+/*****************************************************************************
+ *             The WNetGetNetworkInformation function returns extended
+ *             information about a specific network provider whose name was
+ *             returned by a previous network enumeration.
+ * Parameters: LPCWSTR lpProvider
+ *             LPNETINFOSTRUCT lpNetInfoStruct
+ * Variables :
+ * Result    : API-Returncode
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Fri, 1998/02/27 11:55]
+ *****************************************************************************/
+
+ODINFUNCTION2(DWORD,           WNetGetNetworkInformationW,
+              LPCWSTR,         lpProvider,
+              LPNETINFOSTRUCT, lpNetInfoStruct)
+{
+  dprintf(("MPR:WNetGetNetworkInformationW not implemented.\n"));
+  return (ERROR_NO_NETWORK);
+}
 
 
 /*****************************************************************************
@@ -767,6 +884,54 @@ ODINFUNCTION3(DWORD, WNetGetResourceParentW,
 {
   dprintf(("MPR:WNetGetResourceParentW not implemented.\n"));
   return (WN_ACCESS_DENIED);
+}
+
+
+/*****************************************************************************
+ *             The WNetGetProviderName function obtains the provider name for
+ *             a specific type of network.
+ * Parameters: DWORD   dwNetType
+ *             LPSTR   lpProviderName
+ *             LPDWORD lpBufferSize
+ * Variables :
+ * Result    : API-Returncode
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Fri, 1998/02/27 11:55]
+ *****************************************************************************/
+
+ODINFUNCTION3(DWORD,   WNetGetProviderNameA,
+              DWORD,   dwNetType,
+              LPSTR,   lpProviderName,
+              LPDWORD, lpBufferSize)
+{
+  dprintf(("MPR:WNetGetProviderNameA not implemented.\n"));
+  return (ERROR_NO_NETWORK);
+}
+
+
+/*****************************************************************************
+ *             The WNetGetProviderName function obtains the provider name for
+ *             a specific type of network.
+ * Parameters: DWORD   dwNetType
+ *             LPWSTR  lpProviderName
+ *             LPDWORD lpBufferSize
+ * Variables :
+ * Result    : API-Returncode
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Fri, 1998/02/27 11:55]
+ *****************************************************************************/
+
+ODINFUNCTION3(DWORD,   WNetGetProviderNameW,
+              DWORD,   dwNetType,
+              LPWSTR,  lpProviderName,
+              LPDWORD, lpBufferSize)
+{
+  dprintf(("MPR:WNetGetProviderNameW not implemented.\n"));
+  return (ERROR_NO_NETWORK);
 }
 
 

@@ -1,4 +1,4 @@
-; $Id: MPR.DEF,v 1.3 1999-11-04 10:32:36 phaller Exp $
+; $Id: MPR.DEF,v 1.4 1999-11-04 10:55:31 phaller Exp $
 
 ;Created by BLAST for IBMs compiler
 ;Basis is  5.05.97  12.00  59152 MPR.DLL (NT4SP3)
@@ -24,14 +24,14 @@ EXPORTS
   WNetCancelConnectionW                = _WNetCancelConnectionW@8              @15
 ; WNetClearConnections                 = _WNetClearConnections@??              @16
   WNetCloseEnum                        = _WNetCloseEnum@4                      @17
-; WNetConnectionDialog1A               = _WNetConnectionDialog1A@??            @18
-; WNetConnectionDialog1W               = _WNetConnectionDialog1W@??            @19
+  WNetConnectionDialog1A               = _WNetConnectionDialog1A@4             @18
+  WNetConnectionDialog1W               = _WNetConnectionDialog1W@4             @19
 ; WNetConnectionDialog2                = _WNetConnectionDialog2@??             @20
   WNetConnectionDialog                 = _WNetConnectionDialog@8               @21
 ; WNetDirectoryNotifyA                 = _WNetDirectoryNotifyA@??              @22
 ; WNetDirectoryNotifyW                 = _WNetDirectoryNotifyW@??              @23
-; WNetDisconnectDialog1A               = _WNetDisconnectDialog1A@??            @24
-; WNetDisconnectDialog1W               = _WNetDisconnectDialog1W@??            @25
+  WNetDisconnectDialog1A               = _WNetDisconnectDialog1A@4             @24
+  WNetDisconnectDialog1W               = _WNetDisconnectDialog1W@4             @25
 ; WNetDisconnectDialog2                = _WNetDisconnectDialog2@??             @26
   WNetDisconnectDialog                 = _WNetDisconnectDialog@8               @27
   WNetEnumResourceA                    = _WNetEnumResourceA@16                 @28
@@ -52,12 +52,12 @@ EXPORTS
 ; WNetGetHomeDirectoryW                = _WNetGetHomeDirectoryW@??             @43
   WNetGetLastErrorA                    = _WNetGetLastErrorA@20                 @44
   WNetGetLastErrorW                    = _WNetGetLastErrorW@20                 @45
-; WNetGetNetworkInformationA           = _WNetGetNetworkInformationA@??        @46
-; WNetGetNetworkInformationW           = _WNetGetNetworkInformationW@??        @47
+  WNetGetNetworkInformationA           = _WNetGetNetworkInformationA@8         @46
+  WNetGetNetworkInformationW           = _WNetGetNetworkInformationW@8         @47
 ; WNetGetPropertyTextA                 = _WNetGetPropertyTextA@??              @48
 ; WNetGetPropertyTextW                 = _WNetGetPropertyTextW@??              @49
-; WNetGetProviderNameA                 = _WNetGetProviderNameA@??              @50
-; WNetGetProviderNameW                 = _WNetGetProviderNameW@??              @51
+  WNetGetProviderNameA                 = _WNetGetProviderNameA@12              @50
+  WNetGetProviderNameW                 = _WNetGetProviderNameW@12              @51
 ; WNetGetProviderTypeA                 = _WNetGetProviderTypeA@??              @52
 ; WNetGetProviderTypeW                 = _WNetGetProviderTypeW@??              @53
   WNetGetResourceInformationA          = _WNetGetResourceInformationA@16       @54
