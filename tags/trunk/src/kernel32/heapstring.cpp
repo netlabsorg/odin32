@@ -1,4 +1,4 @@
-/* $Id: heapstring.cpp,v 1.19 1999-11-09 19:22:32 sandervl Exp $ */
+/* $Id: heapstring.cpp,v 1.20 1999-12-05 10:02:30 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -508,7 +508,7 @@ int WIN32API lstrcmpiW(LPCWSTR arg1, LPCWSTR arg2)
 // returns string length
 
 int WIN32API lstrcpynWtoA(LPSTR  astring,
-                          LPWSTR ustring,
+                          LPCWSTR ustring,
                           int    unilen)
 {
   int      i;
@@ -587,7 +587,7 @@ int WIN32API lstrcpynWtoA(LPSTR  astring,
 // asciilen: max length of unicode buffer (including end 0)
 // @@@PH 0 termination is NOT necessarily included !
 int WIN32API lstrcpynAtoW(LPWSTR unicode,
-                          LPSTR  ascii,
+                          LPCSTR  ascii,
                           int    asciilen)
 {
   int      rc;
@@ -622,7 +622,7 @@ int WIN32API lstrcpynAtoW(LPWSTR unicode,
        return 0;
     }
 
-    in_buf        = ascii;
+    in_buf        = (LPSTR)ascii;
 
     //@@@PH what's this?
     //in_bytes_left = asciilen-1; //buffer size in bytes
@@ -678,12 +678,12 @@ int WIN32API lstrcpynAtoW(LPWSTR unicode,
  * Author    : Patrick Haller [Thu, 1999/08/05 20:46]
  *****************************************************************************/
 
-LPSTR WIN32API lstrcpyWtoA(LPSTR ascii, LPWSTR unicode)
+LPSTR WIN32API lstrcpyWtoA(LPSTR ascii, LPCWSTR unicode)
 {
   //@@@PH huh? wuz dat?
   if (unicode == NULL)
   {
-    if (unicode != NULL) unicode[0] = 0; //CB: set at least end
+    if (unicode != NULL) ((LPWSTR)unicode)[0] = 0; //CB: set at least end
     return NULL;
   }
 
@@ -711,7 +711,7 @@ LPSTR WIN32API lstrcpyWtoA(LPSTR ascii, LPWSTR unicode)
  * Author    : Patrick Haller [Thu, 1999/08/05 20:46]
  *****************************************************************************/
 
-LPWSTR WIN32API lstrcpyAtoW(LPWSTR unicode, LPSTR ascii)
+LPWSTR WIN32API lstrcpyAtoW(LPWSTR unicode, LPCSTR ascii)
 {
   /* achimha for security, strlen might trap if garbage in */
   /* @@@PH 98/06/07 */
