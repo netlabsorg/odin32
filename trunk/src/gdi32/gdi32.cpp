@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.9 1999-10-11 15:26:35 sandervl Exp $ */
+/* $Id: gdi32.cpp,v 1.10 1999-10-11 20:55:49 sandervl Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -1473,13 +1473,12 @@ int WIN32API GetTextFaceA( HDC arg1, int arg2, LPSTR  arg3)
 //******************************************************************************
 int WIN32API GetTextFaceW( HDC arg1, int arg2, LPWSTR  arg3)
 {
- char *astring = UnicodeToAsciiString((LPWSTR)arg3);
+ char *astring = (char *)malloc(arg2+1);
  int   rc;
 
     dprintf(("GDI32: OS2GetTextFaceW"));
-    // NOTE: This will not work as is (needs UNICODE support)
     rc = O32_GetTextFace(arg1, arg2, astring);
-    FreeAsciiString(astring);
+    AsciiToUnicode(astring, arg3);      
     return rc;
 }
 //******************************************************************************
