@@ -1,4 +1,4 @@
-/* $Id: mixer.cpp,v 1.19 2002-05-27 15:49:54 sandervl Exp $ */
+/* $Id: mixer.cpp,v 1.20 2002-05-27 16:10:24 sandervl Exp $ */
 
 /*
  * Mixer functions
@@ -1014,7 +1014,7 @@ MMRESULT WINAPI mixerGetLineInfoA(HMIXEROBJ hmxobj, LPMIXERLINEA lpMl, DWORD fdw
             dprintf(("ERROR: Invalid destination/source combo (%d,%d)", lpMl->dwDestination, lpMl->dwSource));
             return MIXERR_INVALLINE;
         }
-        memcpy(lpMl, &mixerSource[mixerDest[lpMl->dwDestination].Connections[lpMl->dwSource]], sizeof(MIXERLINEA));
+        memcpy(lpMl, &pmixerLines[mixerDest[lpMl->dwDestination].Connections[lpMl->dwSource]]->line, sizeof(MIXERLINEA));
         dprintf(("found line %s (%s) id %d connections %d controls %d", lpMl->szName, lpMl->szShortName, lpMl->dwLineID, lpMl->cConnections, lpMl->cControls));
     	break;
 
