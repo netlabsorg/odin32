@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.75 2001-10-08 20:47:44 phaller Exp $ */
+/* $Id: oslibdos.cpp,v 1.76 2001-10-10 16:03:27 phaller Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -134,7 +134,10 @@ DWORD error2WinError(APIRET rc,DWORD defaultCode)
 
     case ERROR_INVALID_ACCESS: //12
         return ERROR_INVALID_ACCESS_W;
-
+    
+    case ERROR_CURRENT_DIRECTORY: // 16
+        return ERROR_CURRENT_DIRECTORY_W;
+    
     case ERROR_NO_MORE_FILES: //18
         return ERROR_NO_MORE_FILES_W;
 
