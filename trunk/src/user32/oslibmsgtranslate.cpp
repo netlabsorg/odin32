@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.109 2003-04-11 17:26:11 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.110 2003-05-16 10:59:27 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -928,11 +928,12 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
 //        if (os2Msg->mp2)
 //        {
           BOOL sys;
-          ULONG id;
+          ULONG id, proc;
 
-          if (TIMER_GetTimerInfo(os2Msg->hwnd,(ULONG)os2Msg->mp1,&sys,&id))
+          if (TIMER_GetTimerInfo(os2Msg->hwnd,(ULONG)os2Msg->mp1,&sys,&id, &proc))
           {
                 winMsg->wParam = (WPARAM)id;
+                winMsg->lParam = (LPARAM)proc;
                 winMsg->message= (sys) ? WINWM_SYSTIMER : WINWM_TIMER;
                 break;
           }

@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.cpp,v 1.68 2003-04-11 14:22:05 sandervl Exp $ */
+/* $Id: oslibmsg.cpp,v 1.69 2003-05-16 10:59:26 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -323,28 +323,22 @@ continuegetmsg:
     else
     {
         filtermin = TranslateWinMsg(uMsgFilterMin, TRUE);
-            filtermax = TranslateWinMsg(uMsgFilterMax, FALSE);
-            if(filtermin > filtermax) {
-                ULONG tmp = filtermin;
-                    filtermin = filtermax;
-                    filtermax = filtermin;
-            }
-        do {
-                eaten = FALSE;
-                rc = WinGetMsg(teb->o.odin.hab, &os2msg, 0, filtermin, filtermax);
-                if (os2msg.msg == WM_TIMER)
-                    eaten = TIMER_HandleTimer(&os2msg);
-                if (os2msg.msg == WM_QUIT && ((ULONG)os2msg.mp2 != 0) ) {
-                    // Don't return FALSE when the window list sends us
-                    // a WM_QUIT message, improper killing can lead to
-                    // application crashes.
-                    // In the WM_QUIT handler in pmwindow we send a WM_CLOSE
-                    // in this case. When the app calls PostQuitMessage (mp2 == 0),
-                    // then we handle it the normal way
-                    rc = 1;
-                }
-            }
-        while (eaten);
+        filtermax = TranslateWinMsg(uMsgFilterMax, FALSE);
+        if(filtermin > filtermax) {
+            ULONG tmp = filtermin;
+            filtermin = filtermax;
+            filtermax = filtermin;
+        }
+        rc = WinGetMsg(teb->o.odin.hab, &os2msg, 0, filtermin, filtermax);
+        if (os2msg.msg == WM_QUIT && ((ULONG)os2msg.mp2 != 0) ) {
+            // Don't return FALSE when the window list sends us
+            // a WM_QUIT message, improper killing can lead to
+            // application crashes.
+            // In the WM_QUIT handler in pmwindow we send a WM_CLOSE
+            // in this case. When the app calls PostQuitMessage (mp2 == 0),
+            // then we handle it the normal way
+            rc = 1;
+        }
     }
     if(OS2ToWinMsgTranslate((PVOID)teb, &os2msg, pMsg, isUnicode, MSG_REMOVE) == FALSE) {
         //dispatch untranslated message immediately
@@ -482,8 +476,6 @@ continuepeekmsg:
             ulPMFilter = TranslateWinMsg(uMsgFilterMin+i, TRUE, TRUE);
             if(ulPMFilter) {
                 do {
-                    eaten = FALSE;
-
                     rc = WinPeekMsg(teb->o.odin.hab, &os2msg, hwndOS2, ulPMFilter, ulPMFilter,
                                     (fRemove & PM_REMOVE_W) ? PM_REMOVE : PM_NOREMOVE);
                     //Sadly indeed WinPeekMsg sometimes does not filter well!
@@ -491,11 +483,8 @@ continuepeekmsg:
                        dprintf(("WARNING: WinPeekMsg returns %x even though we filter for %x", os2msg.msg, ulPMFilter));
                        rc = 0;
                     }
-                    if (rc && (fRemove & PM_REMOVE_W) && os2msg.msg == WM_TIMER) {
-                        eaten = TIMER_HandleTimer(&os2msg);
-                    }
                 }
-                while (eaten && rc);
+                while (rc);
             }
             if(rc) {
                 break;
@@ -503,16 +492,7 @@ continuepeekmsg:
         }
     }
     else {
-        do {
-            eaten = FALSE;
-
-            rc = WinPeekMsg(teb->o.odin.hab, &os2msg, hwndOS2, 0, 0, (fRemove & PM_REMOVE_W) ? PM_REMOVE : PM_NOREMOVE);
-
-            if (rc && (fRemove & PM_REMOVE_W) && os2msg.msg == WM_TIMER) {
-                eaten = TIMER_HandleTimer(&os2msg);
-            }
-        }
-        while (eaten && rc);
+        rc = WinPeekMsg(teb->o.odin.hab, &os2msg, hwndOS2, 0, 0, (fRemove & PM_REMOVE_W) ? PM_REMOVE : PM_NOREMOVE);
     }
     if(rc == FALSE) {
         return FALSE;
