@@ -1,4 +1,4 @@
-/* $Id: time.cpp,v 1.22 2002-06-26 10:18:27 sandervl Exp $ */
+/* $Id: time.cpp,v 1.23 2002-12-29 14:11:23 sandervl Exp $ */
 
 /*
  * Win32 time/date API functions
@@ -200,18 +200,17 @@ BOOL WIN32API SetTimeZoneInformation(const LPTIME_ZONE_INFORMATION lpTimeZone)
  * Variables :
  * Result    :
  * Remark    :
- * Status    : UNTESTED
+ * Status    :
  *
  * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
  *****************************************************************************/
 
 VOID WIN32API GetSystemTimeAsFileTime(LPFILETIME lpSystemTimeAsFileTime)
 {
-    FILETIME   ft;                             /* code sequence from WIN32.HLP */
     SYSTEMTIME st;
 
     GetSystemTime(&st);
-    SystemTimeToFileTime(&st, &ft);
+    SystemTimeToFileTime(&st, lpSystemTimeAsFileTime);
 }
 //******************************************************************************
 //******************************************************************************
