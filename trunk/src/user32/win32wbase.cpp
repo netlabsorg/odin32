@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.154 2000-02-05 19:45:17 cbratschi Exp $ */
+/* $Id: win32wbase.cpp,v 1.155 2000-02-06 17:39:34 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -943,7 +943,7 @@ ULONG Win32BaseWindow::MsgButton(MSG *msg)
                          eatMsg = TRUE;
 #endif
                 if(((ret == MA_ACTIVATE) || (ret == MA_ACTIVATEANDEAT))
-                   && hwndTop != GetForegroundWindow() )
+                   && (hwndTop != GetForegroundWindow()) )
                 {
                       ::SetActiveWindow(hwndTop);
                 }

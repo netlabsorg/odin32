@@ -1,4 +1,4 @@
-/* $Id: windlg.cpp,v 1.14 2000-01-18 20:11:05 sandervl Exp $ */
+/* $Id: windlg.cpp,v 1.15 2000-02-06 17:39:35 cbratschi Exp $ */
 /*
  * Win32 dialog apis for OS/2
  *
@@ -129,7 +129,7 @@ INT  WIN32API DialogBoxIndirectParamA(HINSTANCE hInst,
         dialog = (Win32Dialog *)Win32BaseWindow::GetWindowFromHandle(hwnd);
         if(!dialog || !dialog->IsDialog()) {
             dprintf(("DialogBoxIndirectParamA, dialog %x not found", hwnd));
-    	    SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+            SetLastError(ERROR_INVALID_WINDOW_HANDLE);
             return 0;
         }
         return dialog->doDialogBox();
@@ -151,7 +151,7 @@ INT  WIN32API DialogBoxIndirectParamW(HINSTANCE hInst, LPCDLGTEMPLATEW dlgtempla
         dialog = (Win32Dialog *)Win32BaseWindow::GetWindowFromHandle(hwnd);
         if(!dialog || !dialog->IsDialog()) {
             dprintf(("DialogBoxIndirectParamW, dialog %x not found", hwnd));
-    	    SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+            SetLastError(ERROR_INVALID_WINDOW_HANDLE);
             return 0;
         }
         return dialog->doDialogBox();
@@ -172,7 +172,7 @@ int WIN32API DialogBoxParamA(HINSTANCE hInst, LPCSTR lpszTemplate, HWND hwndOwne
         dialog = (Win32Dialog *)Win32BaseWindow::GetWindowFromHandle(hwnd);
         if(!dialog || !dialog->IsDialog()) {
             dprintf(("DialogBoxParamA, dialog %x not found", hwnd));
-    	    SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+            SetLastError(ERROR_INVALID_WINDOW_HANDLE);
             return 0;
         }
         return dialog->doDialogBox();
@@ -193,7 +193,7 @@ int WIN32API DialogBoxParamW(HINSTANCE hInst, LPCWSTR lpszTemplate, HWND hwndOwn
         dialog = (Win32Dialog *)Win32BaseWindow::GetWindowFromHandle(hwnd);
         if(!dialog || !dialog->IsDialog()) {
             dprintf(("DialogBoxParamW, dialog %x not found", hwnd));
-    	    SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+            SetLastError(ERROR_INVALID_WINDOW_HANDLE);
             return 0;
         }
         return dialog->doDialogBox();
@@ -296,8 +296,28 @@ BOOL WIN32API EndDialog(HWND hwnd, int retval)
 BOOL WIN32API CheckDlgButton( HWND hwnd, int id, UINT check)
 {
     dprintf(("USER32:  CheckDlgButton\n"));
-    //CB: set button state
+
     return (BOOL)SendDlgItemMessageA(hwnd, id, BM_SETCHECK, check,0);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API CheckRadioButton( HWND hDlg, UINT nIDFirstButton, UINT nIDLastButton, UINT  nIDCheckButton)
+{
+    dprintf(("USER32:  CheckRadioButton\n"));
+
+    //CB: check radio buttons in interval
+    if (nIDFirstButton > nIDLastButton)
+    {
+      SetLastError(ERROR_INVALID_PARAMETER);
+      return (FALSE);
+    }
+
+    for (UINT x = nIDFirstButton;x <= nIDLastButton;x++)
+    {
+     SendDlgItemMessageA(hDlg,x,BM_SETCHECK,(x == nIDCheckButton) ? BST_CHECKED : BST_UNCHECKED,0);
+    }
+
+    return (TRUE);
 }
 //******************************************************************************
 //******************************************************************************
