@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.176 2000-03-31 14:42:48 cbratschi Exp $ */
+/* $Id: win32wbase.cpp,v 1.177 2000-04-07 12:55:16 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1025,21 +1025,25 @@ ULONG Win32BaseWindow::MsgNCPaint()
     RECT client = rectClient;
 
 ////    mapWin32Rect(getParent() ? getParent()->getOS2WindowHandle():OSLIB_HWND_DESKTOP,OS2HwndFrame,&client);
-    if ((rect.left >= client.left) && (rect.left < client.right) &&
-        (rect.right >= client.left) && (rect.right < client.right) &&
-        (rect.top  >= client.top) && (rect.top < client.bottom) &&
-        (rect.bottom >= client.top) && (rect.bottom < client.bottom))
-      return 0;
+    	if ((rect.left >= client.left) && (rect.left < client.right) &&
+           (rect.right >= client.left) && (rect.right < client.right) &&
+           (rect.top  >= client.top) && (rect.top < client.bottom) &&
+           (rect.bottom >= client.top) && (rect.bottom < client.bottom))
+        {
+      	   	return 0;
+        }
 
-    dprintf(("MsgNCPaint (%d,%d)(%d,%d)", rect.left, rect.top, rect.right, rect.bottom));
-    hrgn = CreateRectRgnIndirect(&rect);
-    if (!hrgn) return 0;
-    rc = SendInternalMessageA(WM_NCPAINT,hrgn,0);
-    DeleteObject(hrgn);
+    	dprintf(("MsgNCPaint (%d,%d)(%d,%d)", rect.left, rect.top, rect.right, rect.bottom));
+	hrgn = CreateRectRgnIndirect(&rect);
+   	if (!hrgn) return 0;
 
-    return rc;
+    	rc = SendInternalMessageA(WM_NCPAINT,hrgn,0);
+
+    	DeleteObject(hrgn);
+
+    	return rc;
   }
-  else return 0;
+  else 	return 0;
 }
 //******************************************************************************
 //Called when either the frame's size or position has changed (lpWndPos != NULL)
@@ -1294,7 +1298,7 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
         dprintf(("WM_SETTEXT of %x to %s\n", Win32Hwnd, lParam));
         if ((dwStyle & WS_CAPTION) == WS_CAPTION)
         {
-          HandleNCPaint((HRGN)1);
+//          HandleNCPaint((HRGN)1);
           OSLibWinSetWindowText(OS2HwndFrame,(LPSTR)windowNameA);
         }
 
