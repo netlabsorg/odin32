@@ -1,4 +1,4 @@
-/* $Id: LdrCalls.h,v 1.2 1999-11-10 01:45:32 bird Exp $
+/* $Id: LdrCalls.h,v 1.3 2000-01-22 18:21:00 bird Exp $
  *
  * Prototypes for the loader overrided function.
  *
@@ -23,7 +23,7 @@ extern "C" {
 /**
  * _ldrClose
  */
-extern ULONG LDRCALL _ldrClose( /* retd  0x04 */
+extern ULONG LDRCALL ldrClose(  /* retd  0x04 */
     SFN p1                      /* ebp + 0x08 */
     );
 
@@ -33,7 +33,7 @@ ULONG LDRCALL myldrClose(SFN);
 /**
  * _ldrOpen
  */
-extern ULONG LDRCALL _ldrOpen(  /* retd  0x0c */
+extern ULONG LDRCALL ldrOpen(   /* retd  0x0c */
     PSFN p1,                    /* ebp + 0x08 */
     PCHAR p2,                   /* ebp + 0x0c */
     ULONG p3                    /* ebp + 0x10 */
@@ -45,7 +45,7 @@ ULONG LDRCALL myldrOpen(PSFN,PCHAR,ULONG);
 /**
  * _ldrRead
  */
-extern ULONG LDRCALL _ldrRead(  /* retd  0x18 */
+extern ULONG LDRCALL ldrRead(   /* retd  0x18 */
     SFN p1,                     /* ebp + 0x08 */
     ULONG p2,                   /* ebp + 0x0c */
     PVOID p3,                   /* ebp + 0x10 */
@@ -68,13 +68,34 @@ ULONG LDRCALL myldrRead(
 /**
  * _LDRQAppType
  */
-extern ULONG LDRCALL _LDRQAppType(  /* retd  0x08 */
+extern ULONG LDRCALL LDRQAppType(   /* retd  0x08 */
     ULONG p1,                       /* ebp + 0x08 */
     ULONG p2                        /* ebp + 0x0c */
     );
 
 ULONG LDRCALL myLDRQAppType(ULONG,ULONG);
 
+
+/**
+ * ldrEnum32bitRelRecs
+ * @param  pMTE           Pointer to MTE for this module.
+ * @param  iObject        Object index. 0-based!
+ * @param  iPageTabl      Page index. 0-based!
+ * @param  pvPage         Pointer to page buffer.
+ * @param  ulPageAddress  Note! Page is not present.
+ * @param  pPTDA
+ *
+ */
+extern ULONG LDRCALL ldrEnum32bitRelRecs( /* retd 0x20 */
+    PMTE pMTE,                      /* ebp + 0x08 */
+    ULONG iObject,                  /* ebp + 0x0c */
+    ULONG iPageTable,               /* ebp + 0x10 */
+    PVOID pvPage,                   /* ebp + 0x14 */
+    ULONG ulPageAddress,            /* ebp + 0x18 */
+    PVOID pvPTDA                    /* ebp + 0x1c */
+    );
+
+ULONG LDRCALL myldrEnum32bitRelRecs(PMTE, ULONG, ULONG, PVOID, ULONG, PVOID);
 
 
 #if 0

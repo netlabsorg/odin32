@@ -1,4 +1,4 @@
-/* $Id: fastdep.c,v 1.6 1999-11-10 01:45:29 bird Exp $
+/* $Id: fastdep.c,v 1.7 2000-01-22 18:20:54 bird Exp $
  *
  * Fast dependants. (Fast = Quick and Dirty!)
  *
@@ -96,6 +96,12 @@ int main(int argc, char **argv)
         FALSE,           /* fNoObjectPath */
         TRUE             /* fSrcWhenObj */
     };
+
+    if (argc == 1)
+    {
+        syntax();
+        return -87;
+    }
 
     /* look for depend filename option "-d <filename>" */
     if (argc >= 3 && strcmp(argv[1], "-d") == 0)

@@ -1,6 +1,6 @@
-/* $Id: myldrOpen.cpp,v 1.5 1999-11-10 01:45:36 bird Exp $
+/* $Id: myldrOpen.cpp,v 1.6 2000-01-22 18:21:02 bird Exp $
  *
- * myldrOpen - _ldrOpen.
+ * myldrOpen - ldrOpen.
  *
  * Copyright (c) 1998-1999 knut st. osmundsen
  *
@@ -38,7 +38,7 @@
 
 
 /**
- * _ldrOpen override.
+ * ldrOpen override.
  * @returns   Return code.
  * @param     phFile       Pointer to file handler. Holds filehandle on output.
  * @param     pszFilename  Pointer to filename.
@@ -47,12 +47,11 @@
 ULONG LDRCALL myldrOpen(PSFN phFile, char *pszFilename, ULONG param3)
 {
     ULONG rc;
-    int i;
 
-    rc = _ldrOpen(phFile, pszFilename, param3);
+    rc = ldrOpen(phFile, pszFilename, param3);
 
     if (rc == NO_ERROR)
-        kprintf(("_ldrOpen:  phFile=%#.4x, flags=%#.8x, pszFn=%s\n", *phFile, param3, pszFilename));
+        kprintf(("ldrOpen:  phFile=%#.4x, flags=%#.8x, pszFn=%s\n", *phFile, param3, pszFilename));
 
     if (rc == NO_ERROR && (options.fElf || options.fPE != FLAGS_PE_NOT || options.fScript))
     {
@@ -65,7 +64,7 @@ ULONG LDRCALL myldrOpen(PSFN phFile, char *pszFilename, ULONG param3)
          * See if this is an recognizable module format.
          * This costs up to two disk reads!
          */
-        rc = _ldrRead(*phFile, 0UL, pMzHdr, 0UL, sizeof(IMAGE_DOS_HEADER), NULL);
+        rc = ldrRead(*phFile, 0UL, pMzHdr, 0UL, sizeof(IMAGE_DOS_HEADER), NULL);
         if (rc == NO_ERROR)
         {
             if ((pMzHdr->e_magic == IMAGE_DOS_SIGNATURE &&
@@ -76,11 +75,11 @@ ULONG LDRCALL myldrOpen(PSFN phFile, char *pszFilename, ULONG param3)
                     return NO_ERROR;
 
                 if (*(PULONG)pach != IMAGE_NT_SIGNATURE)
-                    rc = _ldrRead(*phFile, pMzHdr->e_lfanew, pach, 0UL, sizeof(achBuffer), NULL);
+                    rc = ldrRead(*phFile, pMzHdr->e_lfanew, pach, 0UL, sizeof(achBuffer), NULL);
 
                 if (rc == NO_ERROR && *(PULONG)pach == IMAGE_NT_SIGNATURE)
                 {   /* PE signature found */
-                    kprintf(("_ldrOpen: PE executable...\n"));
+                    kprintf(("ldrOpen: PE executable...\n"));
                     if (options.fPE == FLAGS_PE_PE2LX
                         || (options.fPE == FLAGS_PE_MIXED
                             && !((pNtHdrs->FileHeader.Characteristics & IMAGE_FILE_DLL == 0UL)
@@ -95,28 +94,30 @@ ULONG LDRCALL myldrOpen(PSFN phFile, char *pszFilename, ULONG param3)
                             rc = pPe2Lx->init(pszFilename);
                             if (rc == NO_ERROR)
                             {
-                                kprintf(("_ldrOpen: Successfully init of Pe2Lx object.\n"));
+                                kprintf(("ldrOpen: Successfully init of Pe2Lx object.\n"));
                                 rc = addModule(*phFile, NULL, MOD_TYPE_PE2LX, pPe2Lx);
                                 if (rc == NO_ERROR)
+                                    #pragma info(notrd)
                                     SetState(*phFile, HSTATE_OUR);
+                                    #pragma info(restore)
                                 else
-                                    kprintf(("_ldrOpen: Failed to add the module. rc=%d\n"));
+                                    kprintf(("ldrOpen: Failed to add the module. rc=%d\n"));
                             }
                             else
-                                kprintf(("_ldrOpen: Failed to init Pe2Lx object. rc=%d\n"));
+                                kprintf(("ldrOpen: Failed to init Pe2Lx object. rc=%d\n"));
                             if (rc != NO_ERROR)
                                 delete pPe2Lx;
                         }
                         else
-                            kprintf(("_ldrOpen: Failed to allocate Pe2Lx object.\n"));
+                            kprintf(("ldrOpen: Failed to allocate Pe2Lx object.\n"));
                     }
                     else
                         if (options.fPE == FLAGS_PE_PE || options.fPE == FLAGS_PE_MIXED)
                         {   /* pe.exe */
-                            kprintf(("_ldrOpen: pe.exe - opening\n"));
-                            _ldrClose(*phFile);
-                            rc = _ldrOpen(phFile, "pe.exe", param3);  /* path....! problems! */
-                            kprintf(("_ldrOpen: pe.exe - open returned with rc = %d\n", rc));
+                            kprintf(("ldrOpen: pe.exe - opening\n"));
+                            ldrClose(*phFile);
+                            rc = ldrOpen(phFile, "pe.exe", param3);  /* path....! problems! */
+                            kprintf(("ldrOpen: pe.exe - open returned with rc = %d\n", rc));
                             return rc;
                         }
                 }
@@ -127,7 +128,7 @@ ULONG LDRCALL myldrOpen(PSFN phFile, char *pszFilename, ULONG param3)
                 if (pach[0] == ELFMAG0 && pach[1] == ELFMAG1 && pach[2] == ELFMAG2 && pach[3] == ELFMAG3)
                 {
                     /* ELF signature found */
-                    kprintf(("_ldrOpen: ELF executable! - not implemented yet!\n"));
+                    kprintf(("ldrOpen: ELF executable! - not implemented yet!\n"));
                 }
                 else
                     if (*pach == '#' && pach[1] == '!')
@@ -135,7 +136,7 @@ ULONG LDRCALL myldrOpen(PSFN phFile, char *pszFilename, ULONG param3)
                         /* unix styled script...? Must be more than 64 bytes long? No options. firstline < 64 bytes. */
                         char *pszStart = pach+2;
                         char *pszEnd;
-                        kprintf(("_ldrOpen: unix script?\n"));
+                        kprintf(("ldrOpen: unix script?\n"));
 
                         achBuffer[sizeof(achBuffer)-1] = '\0'; /* just to make sure we don't read to much... */
 
@@ -151,20 +152,20 @@ ULONG LDRCALL myldrOpen(PSFN phFile, char *pszFilename, ULONG param3)
                             if (*pszEnd != '\0')
                             {
                                 *pszEnd = '\0';
-                                kprintf(("_ldrOpen: unix script - opening %s\n", pszStart));
-                                _ldrClose(*phFile);
-                                rc = _ldrOpen(phFile, pszStart, param3);
-                                kprintf(("_ldrOpen: unix script - open returned with rc = %d\n", rc));
+                                kprintf(("ldrOpen: unix script - opening %s\n", pszStart));
+                                ldrClose(*phFile);
+                                rc = ldrOpen(phFile, pszStart, param3);
+                                kprintf(("ldrOpen: unix script - open returned with rc = %d\n", rc));
                             }
                         }
                         else
-                            kprintf(("_ldrOpen: unix script - unexpected end of line/file. (line: %.10s\n", pach));
+                            kprintf(("ldrOpen: unix script - unexpected end of line/file. (line: %.10s\n", pach));
                     }
             }
         }
         else
         {
-            kprintf(("_ldrOpen: _ldrRead failed with rc=%d when reading DosHdr.\n", rc));
+            kprintf(("ldrOpen: ldrRead failed with rc=%d when reading DosHdr.\n", rc));
             rc = NO_ERROR;
         }
     }

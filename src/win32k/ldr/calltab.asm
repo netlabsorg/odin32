@@ -1,4 +1,4 @@
-; $Id: calltab.asm,v 1.2 1999-10-27 02:02:58 bird Exp $
+; $Id: calltab.asm,v 1.3 2000-01-22 18:21:01 bird Exp $
 ;
 ; callTab - Call back again table - table with entry for each function which is overrided.
 ;           It holds the part of the prolog which was replaced by a jmp instruction.
@@ -18,11 +18,16 @@
 ; Exported symbols
 ;
     public callTab
-    public __ldrClose@4
-    public __ldrOpen@12
-    public __ldrRead@24
-    public __LDRQAppType@8
-
+    public _ldrClose@4
+    public _ldrOpen@12
+    public _ldrRead@24
+    public _LDRQAppType@8
+    public _ldrEnum32bitRelRecs@24
+    public _IOSftOpen@20
+    public _IOSftClose@4
+    public _IOSftTransPath@4
+    public _IOSftReadAt@20
+    public _IOSftWriteAt@20
 
 ;
 ; Constants
@@ -30,56 +35,58 @@
 MAXSIZE_PROLOG EQU 10h
 
 
+
 CALLTAB segment
     assume cs:CALLTAB, ds:flat, ss:nothing
-
 ;
-; must match with the aProcTab array in dev16\ProbKrnl.c
+; callTab is an array of evt. function prologs with a jump to the real function.
+; Imported and Overrided OS/2 kernel functions are called tru this table.
+;
+; This array of near procedures are parallel to the aProcTab array in dev16\ProbKrnl.c.
+; Remember to update both!.
 ;
 callTab:
-__ldrRead@24 PROC NEAR
+_ldrRead@24 PROC NEAR
     db MAXSIZE_PROLOG dup(0cch)
-__ldrRead@24 ENDP
+_ldrRead@24 ENDP
 
-__ldrOpen@12 PROC NEAR
+_ldrOpen@12 PROC NEAR
     db MAXSIZE_PROLOG dup(0cch)
-__ldrOpen@12 ENDP
+_ldrOpen@12 ENDP
 
-__ldrClose@4 PROC NEAR
+_ldrClose@4 PROC NEAR
     db MAXSIZE_PROLOG dup(0cch)
-__ldrClose@4 ENDP
+_ldrClose@4 ENDP
 
-__LDRQAppType@8 PROC NEAR
+_LDRQAppType@8 PROC NEAR
     db MAXSIZE_PROLOG dup(0cch)
-__LDRQAppType@8 ENDP
+_LDRQAppType@8 ENDP
 
-if 0
-    public __LDRLoadExe
-__LDRLoadExe PROC NEAR
+_ldrEnum32bitRelRecs@24 PROC NEAR
     db MAXSIZE_PROLOG dup(0cch)
-__LDRLoadExe END
+_ldrEnum32bitRelRecs@24 ENDP
 
-    public __ldrGetResource
-__ldrGetResource PROC NEAR
+
+_IOSftOpen@20 PROC NEAR
     db MAXSIZE_PROLOG dup(0cch)
-__ldrGetResource ENDP
+_IOSftOpen@20 ENDP
 
-    public __ldrOpenNewExe
-__ldrOpenNewExe PROC NEAR
+_IOSftClose@4 PROC NEAR
     db MAXSIZE_PROLOG dup(0cch)
-__ldrOpenNewExe ENDP
+_IOSftClose@4 ENDP
 
-    public __ldrCreateMte
-__ldrCreateMte PROC NEAR
+_IOSftTransPath@4 PROC NEAR
     db MAXSIZE_PROLOG dup(0cch)
-__ldrCreateMte ENDP
+_IOSftTransPath@4 ENDP
 
-    public __ldrGetMte
-__ldrGetMte PROC NEAR
+_IOSftReadAt@20 PROC NEAR
     db MAXSIZE_PROLOG dup(0cch)
-__ldrGetMte ENDP
+_IOSftReadAt@20 ENDP
 
-endif
+_IOSftWriteAt@20 PROC NEAR
+    db MAXSIZE_PROLOG dup(0cch)
+_IOSftWriteAt@20 ENDP
+
 
 CALLTAB ENDS
 

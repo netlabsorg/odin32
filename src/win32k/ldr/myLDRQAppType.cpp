@@ -1,4 +1,4 @@
-/* $Id: myLDRQAppType.cpp,v 1.2 1999-11-10 01:45:36 bird Exp $
+/* $Id: myLDRQAppType.cpp,v 1.3 2000-01-22 18:21:02 bird Exp $
  *
  * _myLDRQAppType - _LDRQAppType overload.
  *
@@ -35,12 +35,12 @@ BOOL fQAppType = FALSE;
  */
 ULONG LDRCALL myLDRQAppType(ULONG p1, ULONG p2)
 {
-    int rc;
+    APIRET rc;
 
     kprintf(("_LDRQAppType: entry\n"));
     fQAppType = 1;
 
-    rc = _LDRQAppType(p1, p2);
+    rc = LDRQAppType(p1, p2);
 
     fQAppType = 0;
     kprintf(("_LDRQAppType: exit\n"));

@@ -1,4 +1,4 @@
-/* $Id: avl.c,v 1.1 1999-10-27 02:02:59 bird Exp $
+/* $Id: avl.c,v 1.2 2000-01-22 18:21:02 bird Exp $
  *
  * AVL-Tree (lookalike) implementation.
  *
@@ -13,15 +13,9 @@
 *******************************************************************************/
 
 /*
- * AVL configuration.
- */
-#define AVL_MAX_HEIGHT      19          /* Up to 2^16 nodes. */
-#define assert
-
-/*
  * AVL helper macros.
  */
-#define AVL_HEIGHTOF(pNode) ((pNode) != NULL ? pNode->uchHeight : 0UL)
+#define AVL_HEIGHTOF(pNode) ((unsigned char)((pNode) != NULL ? pNode->uchHeight : 0))
 #define max(a,b) (((a) > (b)) ? (a) : (b))
 
 
@@ -31,6 +25,9 @@
 #include <os2.h>
 #include "avl.h"
 #include "dev32.h"
+
+#include <builtin.h>
+#define assert(a) ((a) ? (void)0 : __interrupt(3))
 
 
 /*******************************************************************************
@@ -44,6 +41,12 @@ typedef struct _AVLStack
     unsigned     cEntries;
     PPAVLNODECORE aEntries[AVL_MAX_HEIGHT];
 } AVLSTACK, *PAVLSTACK;
+typedef struct _AVLStack2
+{
+    unsigned     cEntries;
+    PAVLNODECORE aEntries[AVL_MAX_HEIGHT];
+    char         achFlags[AVL_MAX_HEIGHT];
+} AVLSTACK2, *PAVLSTACK2;
 
 
 /*******************************************************************************
@@ -199,7 +202,7 @@ PAVLNODECORE AVLRemove(PPAVLNODECORE ppTree, AVLKEY Key)
 
 
 /**
- * Gets node from the tree (does not remove it!)
+ * Gets a node from the tree (does not remove it!)
  * @returns   Pointer to the node holding the given key.
  * @param     ppTree  Pointer to the AVL-tree root node pointer.
  * @param     Key     Key value of the node which is to be found.
@@ -221,6 +224,38 @@ PAVLNODECORE AVLGet(PPAVLNODECORE ppTree, AVLKEY Key)
 
     return pNode;
 }
+
+
+
+/**
+ * Gets a node from the tree and its parent node (if any) (does not remove any nodes!)
+ * @returns   Pointer to the node holding the given key.
+ * @param     ppTree    Pointer to the AVL-tree root node pointer.
+ * @param     ppParent  Pointer to a variable which will hold the pointer to the partent node on
+ *                      return. When no node is found, this will hold the last searched node.
+ * @param     Key       Key value of the node which is to be found.
+ * @sketch
+ * @status    completely implemented.
+ * @author    knut st. osmundsen
+ */
+PAVLNODECORE    AVLGetWithParent(PPAVLNODECORE ppTree, PPAVLNODECORE ppParent, AVLKEY Key)
+{
+    register PAVLNODECORE  pNode = *ppTree;
+    register PAVLNODECORE  pParent = NULL;
+
+    while (pNode != NULL && pNode->Key != Key)
+    {
+        pParent = pNode;
+        if (pNode->Key > Key)
+            pNode = pNode->pLeft;
+        else
+            pNode = pNode->pRight;
+    }
+
+    *ppParent = pParent;
+    return pNode;
+}
+
 
 
 /**
@@ -295,6 +330,261 @@ PAVLNODECORE AVLGetWithAdjecentNodes(PPAVLNODECORE ppTree, AVLKEY Key, PPAVLNODE
 
 
 /**
+ * Iterates tru all nodes in the given tree.
+ * @returns   0 on success. Return from callback on failiure.
+ * @param     ppTree   Pointer to the AVL-tree root node pointer.
+ * @param     fFromLeft    TRUE:  Left to right.
+ *                         FALSE: Right to left.
+ * @param     pfnCallBack  Pointer to callback function.
+ * @param     pvParam      Userparameter passed on to the callback function.
+ * @status    completely implemented.
+ * @author    knut st. osmundsen
+ */
+unsigned AVLDoWithAll(PPAVLNODECORE ppTree, int fFromLeft, PAVLCALLBACK pfnCallBack, void *pvParam)
+{
+    AVLSTACK2       AVLStack;
+    PAVLNODECORE    pNode;
+    unsigned        rc;
+
+    if (*ppTree == NULL)
+        return 0;
+
+    AVLStack.cEntries = 1;
+    AVLStack.achFlags[0] = 0;
+    AVLStack.aEntries[0] = *ppTree;
+
+    if (fFromLeft)
+    {   /* from left */
+        while (AVLStack.cEntries > 0)
+        {
+            pNode = AVLStack.aEntries[AVLStack.cEntries - 1];
+
+            /* left */
+            if (!AVLStack.achFlags[AVLStack.cEntries - 1]++)
+            {
+                if (pNode->pLeft != NULL)
+                {
+                    AVLStack.achFlags[AVLStack.cEntries] = 0; /* 0 first, 1 last */
+                    AVLStack.aEntries[AVLStack.cEntries++] = pNode->pLeft;
+                    continue;
+                }
+            }
+
+            /* center */
+            rc = pfnCallBack(pNode, pvParam);
+            if (rc != 0)
+                return rc;
+
+            /* right */
+            AVLStack.cEntries--;
+            if (pNode->pRight != NULL)
+            {
+                AVLStack.achFlags[AVLStack.cEntries] = 0;
+                AVLStack.aEntries[AVLStack.cEntries++] = pNode->pRight;
+            }
+        } /* while */
+    }
+    else
+    {   /* from right */
+        while (AVLStack.cEntries > 0)
+        {
+            pNode = AVLStack.aEntries[AVLStack.cEntries - 1];
+
+
+            /* right */
+            if (!AVLStack.achFlags[AVLStack.cEntries - 1]++)
+            {
+                if (pNode->pRight != NULL)
+                {
+                    AVLStack.achFlags[AVLStack.cEntries] = 0;  /* 0 first, 1 last */
+                    AVLStack.aEntries[AVLStack.cEntries++] = pNode->pRight;
+                    continue;
+                }
+            }
+
+            /* center */
+            rc = pfnCallBack(pNode, pvParam);
+            if (rc != 0)
+                return rc;
+
+            /* left */
+            AVLStack.cEntries--;
+            if (pNode->pLeft != NULL)
+            {
+                AVLStack.achFlags[AVLStack.cEntries] = 0;
+                AVLStack.aEntries[AVLStack.cEntries++] = pNode->pLeft;
+            }
+        } /* while */
+    }
+
+    return 0;
+}
+
+
+/**
+ * Starts an enumeration of all nodes in the given AVL tree.
+ * @returns   Pointer to the first node in the tree.
+ * @param     ppTree     Pointer to the AVL-tree root node pointer.
+ * @param     pEnumData  Pointer to enumeration control data.
+ * @param     fFromLeft  TRUE:  Left to right.
+ *                       FALSE: Right to left.
+ * @status    completely implemented.
+ * @author    knut st. osmundsen
+ */
+PAVLNODECORE AVLBeginEnumTree(PPAVLNODECORE ppTree, PAVLENUMDATA pEnumData, int fFromLeft)
+{
+    if (*ppTree != NULL)
+    {
+        pEnumData->fFromLeft = fFromLeft;
+        pEnumData->cEntries = 1;
+        pEnumData->aEntries[0] = *ppTree;
+        pEnumData->achFlags[0] = 0;
+    }
+    else
+        pEnumData->cEntries = 0;
+
+    return AVLGetNextNode(pEnumData);
+}
+
+
+/**
+ * Get the next node in the tree enumeration.
+ * @returns   Pointer to the first node in the tree.
+ * @param     pEnumData  Pointer to enumeration control data.
+ * @status    completely implemented.
+ * @author    knut st. osmundsen
+ */
+PAVLNODECORE AVLGetNextNode(PAVLENUMDATA pEnumData)
+{
+    PAVLNODECORE    pNode;
+
+    if (pEnumData->fFromLeft)
+    {   /* from left */
+        while (pEnumData->cEntries > 0)
+        {
+            pNode = pEnumData->aEntries[pEnumData->cEntries - 1];
+
+            /* left */
+            if (pEnumData->achFlags[pEnumData->cEntries - 1] == 0)
+            {
+                pEnumData->achFlags[pEnumData->cEntries - 1]++;
+                if (pNode->pLeft != NULL)
+                {
+                    pEnumData->achFlags[pEnumData->cEntries] = 0; /* 0 left, 1 center, 2 right */
+                    pEnumData->aEntries[pEnumData->cEntries++] = pNode->pLeft;
+                    continue;
+                }
+            }
+
+            /* center */
+            if (pEnumData->achFlags[pEnumData->cEntries - 1] == 1)
+            {
+                pEnumData->achFlags[pEnumData->cEntries - 1]++;
+                return pNode;
+            }
+
+            /* right */
+            pEnumData->cEntries--;
+            if (pNode->pRight != NULL)
+            {
+                pEnumData->achFlags[pEnumData->cEntries] = 0;
+                pEnumData->aEntries[pEnumData->cEntries++] = pNode->pRight;
+            }
+        } /* while */
+    }
+    else
+    {   /* from right */
+        while (pEnumData->cEntries > 0)
+        {
+            pNode = pEnumData->aEntries[pEnumData->cEntries - 1];
+
+
+            /* right */
+            if (pEnumData->achFlags[pEnumData->cEntries - 1] == 0)
+            {
+                pEnumData->achFlags[pEnumData->cEntries - 1]++;
+                if (pNode->pRight != NULL)
+                {
+                    pEnumData->achFlags[pEnumData->cEntries] = 0;  /* 0 right, 1 center, 2 left */
+                    pEnumData->aEntries[pEnumData->cEntries++] = pNode->pRight;
+                    continue;
+                }
+            }
+
+            /* center */
+            if (pEnumData->achFlags[pEnumData->cEntries - 1] == 1)
+            {
+                pEnumData->achFlags[pEnumData->cEntries - 1]++;
+                return pNode;
+            }
+
+            /* left */
+            pEnumData->cEntries--;
+            if (pNode->pLeft != NULL)
+            {
+                pEnumData->achFlags[pEnumData->cEntries] = 0;
+                pEnumData->aEntries[pEnumData->cEntries++] = pNode->pLeft;
+            }
+        } /* while */
+    }
+
+    return NULL;
+
+}
+
+
+
+
+/**
+ * Finds the best fitting node in the tree for the given Key value.
+ * @returns   Pointer to the best fitting node found.
+ * @param     ppTree  Pointer to Pointer to the tree root node.
+ * @param     Key     The Key of which is to be found a best fitting match for..
+ * @param     fAbove  TRUE:  Returned node is have the closest key to Key from above.
+ *                    FALSE: Returned node is have the closest key to Key from below.
+ * @status    completely implemented.
+ * @sketch    The best fitting node is always located in the searchpath above you.
+ *            >= (above): The node where you last turned left.
+ *            <= (below): the node where you last turned right.
+ * @author    knut st. osmundsen
+ */
+PAVLNODECORE    AVLGetBestFit(PPAVLNODECORE ppTree, AVLKEY Key, int fAbove)
+{
+    register PAVLNODECORE   pNode = *ppTree;
+    PAVLNODECORE            pNodeLast = NULL;
+
+    if (fAbove)
+    {   /* pNode->Key >= Key */
+        while (pNode != NULL && pNode->Key != Key)
+        {
+            if (pNode->Key > Key)
+            {
+                pNodeLast = pNode;
+                pNode = pNode->pLeft;
+            }
+            else
+                pNode = pNode->pRight;
+        }
+    }
+    else
+    {   /* pNode->Key <= Key */
+        while (pNode != NULL && pNode->Key != Key)
+        {
+            if (pNode->Key < Key)
+            {
+                pNodeLast = pNode;
+                pNode = pNode->pRight;
+            }
+            else
+                pNode = pNode->pLeft;
+        }
+    }
+
+    return pNode == NULL ? pNodeLast /* best fit */ : pNode /* perfect match */;
+}
+
+
+/**
  * Rewindes a stack of pointer to pointers to nodes, rebalancing the tree.
  * @param     pStack  Pointer to stack to rewind.
  * @sketch    LOOP thru all stack entries
@@ -353,21 +643,21 @@ _Inline void AVLRebalance(PAVLSTACK pStack)
         PPAVLNODECORE   ppNode = pStack->aEntries[--pStack->cEntries];
         PAVLNODECORE    pNode = *ppNode;
         PAVLNODECORE    pLeftNode = pNode->pLeft;
-        unsigned        uLeftHeight = AVL_HEIGHTOF(pLeftNode);
+        unsigned char   uchLeftHeight = AVL_HEIGHTOF(pLeftNode);
         PAVLNODECORE    pRightNode = pNode->pRight;
-        unsigned        uRightHeight = AVL_HEIGHTOF(pRightNode);
+        unsigned char   uchRightHeight = AVL_HEIGHTOF(pRightNode);
 
-        if (uRightHeight + 1 < uLeftHeight)
+        if (uchRightHeight + 1 < uchLeftHeight)
         {
             PAVLNODECORE    pLeftLeftNode = pLeftNode->pLeft;
             PAVLNODECORE    pLeftRightNode = pLeftNode->pRight;
-            unsigned        uLeftRightHeight = AVL_HEIGHTOF(pLeftRightNode);
+            unsigned char   uchLeftRightHeight = AVL_HEIGHTOF(pLeftRightNode);
 
-            if (AVL_HEIGHTOF(pLeftLeftNode) >= uLeftRightHeight)
+            if (AVL_HEIGHTOF(pLeftLeftNode) >= uchLeftRightHeight)
             {
                 pNode->pLeft = pLeftRightNode;
                 pLeftNode->pRight = pNode;
-                pLeftNode->uchHeight = 1 + (pNode->uchHeight = 1 + uLeftRightHeight);
+                pLeftNode->uchHeight = (unsigned char)(1 + (pNode->uchHeight = (unsigned char)(1 + uchLeftRightHeight)));
                 *ppNode = pLeftNode;
             }
             else
@@ -376,22 +666,22 @@ _Inline void AVLRebalance(PAVLSTACK pStack)
                 pNode->pLeft = pLeftRightNode->pRight;
                 pLeftRightNode->pLeft = pLeftNode;
                 pLeftRightNode->pRight = pNode;
-                pLeftNode->uchHeight = pNode->uchHeight = uLeftRightHeight;
-                pLeftRightNode->uchHeight = uLeftHeight;
+                pLeftNode->uchHeight = pNode->uchHeight = uchLeftRightHeight;
+                pLeftRightNode->uchHeight = uchLeftHeight;
                 *ppNode = pLeftRightNode;
             }
         }
-        else if (uLeftHeight + 1 < uRightHeight)
+        else if (uchLeftHeight + 1 < uchRightHeight)
         {
             PAVLNODECORE    pRightLeftNode = pRightNode->pLeft;
-            unsigned        uRightLeftHeight = AVL_HEIGHTOF(pRightLeftNode);
+            unsigned char   uchRightLeftHeight = AVL_HEIGHTOF(pRightLeftNode);
             PAVLNODECORE    pRightRightNode = pRightNode->pRight;
 
-            if (AVL_HEIGHTOF(pRightRightNode) >= uRightLeftHeight)
+            if (AVL_HEIGHTOF(pRightRightNode) >= uchRightLeftHeight)
             {
                 pNode->pRight = pRightLeftNode;
                 pRightNode->pLeft = pNode;
-                pRightNode->uchHeight = 1 + (pNode->uchHeight = 1 + uRightLeftHeight);
+                pRightNode->uchHeight = (unsigned char)(1 + (pNode->uchHeight = (unsigned char)(1 + uchRightLeftHeight)));
                 *ppNode = pRightNode;
             }
             else
@@ -400,17 +690,17 @@ _Inline void AVLRebalance(PAVLSTACK pStack)
                 pNode->pRight = pRightLeftNode->pLeft;
                 pRightLeftNode->pRight = pRightNode;
                 pRightLeftNode->pLeft = pNode;
-                pRightNode->uchHeight = pNode->uchHeight = uRightLeftHeight;
-                pRightLeftNode->uchHeight = uRightHeight;
+                pRightNode->uchHeight = pNode->uchHeight = uchRightLeftHeight;
+                pRightLeftNode->uchHeight = uchRightHeight;
                 *ppNode = pRightLeftNode;
             }
         }
         else
         {
-            register unsigned uHeight = max(uLeftHeight, uRightHeight) + 1;
-            if (uHeight == pNode->uchHeight)
+            register unsigned char uchHeight = (unsigned char)(max(uchLeftHeight, uchRightHeight) + 1);
+            if (uchHeight == pNode->uchHeight)
                 break;
-            pNode->uchHeight = uHeight;
+            pNode->uchHeight = uchHeight;
         }
     }
 }
