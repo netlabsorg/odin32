@@ -1,8 +1,8 @@
-/* $Id: ModuleBase.cpp,v 1.2 2000-01-22 18:21:01 bird Exp $
+/* $Id: ModuleBase.cpp,v 1.3 2000-02-27 02:17:06 bird Exp $
  *
  * ModuleBase - Implementetation.
  *
- * Copyright (c) 1999 knut st. osmundsen
+ * Copyright (c) 1999-2000 knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -249,4 +249,33 @@ VOID ModuleBase::printf(PCSZ pszFormat, ...)
 }
 
 
+#ifndef RING0
+/**
+ *
+ * @returns   OS/2 return code. (NO_ERROR on success...)
+ * @param     hFile     Handle to file. (RING0: Handle to SystemFileNumber (SFN).)
+ * @param     ulOffset  Offset in the file to start reading at.
+ * @param     pvBuffer  Pointer to output buffer.
+ * @param     cbToRead  Count of bytes to read.
+ * @sketch    Set Change filepointer to ulOffset.
+ *            Read cbToRead into pvBufer.
+ * @status    completely tested.
+ * @author    knut st. osmundsen
+ * @remark
+ */
+APIRET ReadAt(SFN hFile, ULONG ulOffset, PVOID pvBuffer, ULONG cbToRead)
+{
+    ULONG cbRead, ulMoved;
+    APIRET rc;
+
+    rc = DosSetFilePtr(hFile, ulOffset, FILE_BEGIN, &ulMoved);
+    if (rc == NO_ERROR)
+        rc = DosRead(hFile, pvBuffer, cbToRead, &cbRead);
+    else
+        printErr(("DosSetFilePtr(hfile, %#8x(%d),..) failed with rc = %d.",
+                  ulOffset, ulOffset, rc));
+
+    return rc;
+}
+#endif
 
