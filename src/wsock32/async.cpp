@@ -1,4 +1,4 @@
-/* $Id: async.cpp,v 1.2 1999-10-20 10:03:52 phaller Exp $ */
+/* $Id: async.cpp,v 1.3 1999-10-20 10:09:49 phaller Exp $ */
 
 /*
  *
@@ -128,7 +128,7 @@ class WSAAsyncWorker
                                   ULONG ul3 = 0);
 
     void          pushRequest    (PASYNCREQUEST pRequest); // put request on queue
-    BOOL          deleteRequest  (PASYNCREQUEST pRequest); // remove particular request
+    BOOL          cancelAsyncRequest   (PASYNCREQUEST pRequest);
 
     // the thread procedure
     friend void _Optlink WorkerThreadProc(void* pParam);
@@ -147,6 +147,7 @@ class WSAAsyncWorker
     void          processingLoop (void);                   // "work"
     int           dispatchRequest(PASYNCREQUEST pRequest); // complete request
     PASYNCREQUEST popRequest     (void);                   // get one request from queue
+    BOOL          deleteRequest  (PASYNCREQUEST pRequest); // remove particular request
 
     void          lockQueue      (void);                   // enter mutex
     void          unlockQueue    (void);                   // leave mutex
@@ -471,6 +472,59 @@ BOOL WSAAsyncWorker::deleteRequest(PASYNCREQUEST pDelete)
 
   unlockQueue();  // unlock queue
   return bResult;
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+BOOL WSAAsyncWorker::cancelAsyncRequest(PASYNCREQUEST pRequest)
+{
+  PASYNCREQUEST pRequestTemp;
+  BOOL          rc = TRUE;
+
+  lockQueue();
+
+  // verify pRequest
+  // find request (optional, just for verification)
+  for (pRequestTemp = pRequestHead;
+       pRequestTemp != NULL;
+       pRequestTemp = pRequestTemp->pNext)
+    if (pRequestTemp == pRequest)
+      break;
+
+  // is request in queue ?
+  if (pRequestTemp == pRequest)
+  {
+    // is it busy?
+    if (pRequest->ulState != RS_BUSY)
+    {
+      // if not: set RS_CANCELLED
+      pRequest->ulState = RS_CANCELLED;
+    }
+    else
+    {
+      // if busy: ???
+      dprintf(("WSOCK32:Async: WSAAsyncWorker::cancelAsyncRequest(%08xh, %08xh) how to cancel?\n",
+               this,
+               pRequest));
+      rc = FALSE;
+    }
+  }
+  else
+    rc = FALSE;
+
+  unlockQueue();
+  return rc;
 }
 
 
@@ -1166,7 +1220,7 @@ ODINFUNCTION1(int, WSACancelAsyncRequest, HANDLE, hAsyncTaskHandle)
   BOOL          rc;
 
   // remove request from queue
-  rc = wsaWorker->deleteRequest(pRequest);
+  rc = wsaWorker->cancelAsyncRequest(pRequest);
   if (rc == TRUE)
     return 0; // success
   else
