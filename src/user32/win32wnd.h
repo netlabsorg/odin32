@@ -1,4 +1,4 @@
-/* $Id: win32wnd.h,v 1.3 2000-01-18 20:08:17 sandervl Exp $ */
+/* $Id: win32wnd.h,v 1.4 2001-09-19 15:39:52 sandervl Exp $ */
 /*
  * Win32 Window Class for OS/2
  *
@@ -20,8 +20,6 @@ public:
                 Win32Window(CREATESTRUCTA *lpCreateStructA, ATOM classAtom, BOOL isUnicode);
 virtual        ~Win32Window();
 
-       LRESULT  DefFrameProcA(HWND hwndMDIClient, UINT Msg, WPARAM wParam, LPARAM lParam);
-       LRESULT  DefFrameProcW(HWND hwndMDIClient, UINT Msg, WPARAM wParam, LPARAM lParam);
 private:
 };
 
