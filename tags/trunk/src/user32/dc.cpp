@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.27 1999-12-07 20:43:39 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.28 1999-12-14 19:13:18 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -609,11 +609,22 @@ HDC WIN32API GetDCEx (HWND hwnd, HRGN hrgn, ULONG flags)
 
    if (hwnd)
    {
-      wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
-      if (flags & DCX_WINDOW_W)
-         hWindow = wnd->getOS2FrameWindowHandle();
-      else
-         hWindow = wnd->getOS2WindowHandle();
+      	wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
+	if(wnd == NULL) {
+   		dprintf (("ERROR: User32: GetDCEx bad window handle %X!!!!!", hwnd));
+		O32_SetLastError(ERROR_INVALID_WINDOW_HANDLE_W);
+		return 0;
+	}
+//SvL: Experimental change (doesn't work right)
+#if 0
+	if(wnd->fHasParentDC() && wnd->getParent()) {
+		wnd = wnd->getParent();
+	}
+#endif
+      	if (flags & DCX_WINDOW_W)
+         	hWindow = wnd->getOS2FrameWindowHandle();
+      	else
+         	hWindow = wnd->getOS2WindowHandle();
    }
    else
       hWindow = HWND_DESKTOP;

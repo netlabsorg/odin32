@@ -1,4 +1,4 @@
-/* $Id: win32wmdichild.cpp,v 1.10 1999-12-09 00:53:38 sandervl Exp $ */
+/* $Id: win32wmdichild.cpp,v 1.11 1999-12-14 19:13:20 sandervl Exp $ */
 /*
  * Win32 MDI Child Window Class for OS/2
  *
@@ -346,25 +346,14 @@ HWND Win32MDIChildWindow::createChild(Win32MDIClientWindow *client, LPMDICREATES
 
     className = (LPSTR)cs->szClass;
     /* Find the class atom */
-    if (!(classAtom = (client->IsUnicode() ? GlobalFindAtomW((LPWSTR)cs->szClass) :
-                                             GlobalFindAtomA(cs->szClass))))
-
+    classAtom = GlobalFindAtomA(cs->szClass);
+    if(classAtom == 0)
     {
         if (!HIWORD(cs->szClass))
         {
-            if(!client->IsUnicode())
-            {
-                sprintf(tmpClassA,"#%d", (int) className);
-                classAtom = GlobalFindAtomA(tmpClassA);
-                className = tmpClassA;
-            }
-            else
-            {
-              sprintf(tmpClassA,"#%d", (int) className);
-              AsciiToUnicode(tmpClassA, tmpClassW);
-              classAtom = GlobalFindAtomW(tmpClassW);
-              className = (LPSTR)tmpClassW;
-            }
+            sprintf(tmpClassA,"#%d", (int) className);
+            classAtom = GlobalFindAtomA(tmpClassA);
+            className = tmpClassA;
         }
         if (!classAtom)
         {
@@ -379,7 +368,7 @@ HWND Win32MDIChildWindow::createChild(Win32MDIClientWindow *client, LPMDICREATES
     }
     createstruct.lpszClass = className;
 
-    newchild = new Win32MDIChildWindow(&createstruct, classAtom, client->IsUnicode());
+    newchild = new Win32MDIChildWindow(&createstruct, classAtom, FALSE);
 
     if(newchild && GetLastError() == 0)
     {

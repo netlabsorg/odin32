@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.63 1999-12-05 14:31:41 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.64 1999-12-14 19:13:19 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -780,6 +780,9 @@ VirtualKeyFound:
     }
 
     case WM_INITMENU:
+	win32wnd->MsgInitMenu((HWND)mp2);
+	break;
+
     case WM_MENUSELECT:
     case WM_MENUEND:
     case WM_NEXTMENU:
