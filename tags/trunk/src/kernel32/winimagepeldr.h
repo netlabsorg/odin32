@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.h,v 1.18 2002-12-20 11:39:43 sandervl Exp $ */
+/* $Id: winimagepeldr.h,v 1.19 2003-01-05 12:31:26 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -86,6 +86,8 @@ virtual ~Win32PeLdrImage();
 
     virtual ULONG getApi(char *name);
     virtual ULONG getApi(int ordinal);
+    virtual ULONG setApi(char *name, ULONG pfnNewProc);
+    virtual ULONG setApi(int ordinal, ULONG pfnNewProc);
 
     virtual ULONG getImageSize();
 
@@ -110,6 +112,9 @@ protected:
      Section *findSectionByAddr(ULONG addr);
      Section *findSectionByOS2Addr(ULONG addr);
      Section *findPreviousSectionByOS2Addr(ULONG addr);
+
+   OrdExport *findApi(int ordinal);
+  NameExport *findApi(char *name);
 
         BOOL  setMemFlags();
         BOOL  setFixups(PIMAGE_BASE_RELOCATION prel);

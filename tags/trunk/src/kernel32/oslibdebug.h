@@ -1,4 +1,4 @@
-/* $Id: oslibdebug.h,v 1.2 2002-05-28 09:53:34 sandervl Exp $ */
+/* $Id: oslibdebug.h,v 1.3 2003-01-05 12:31:23 sandervl Exp $ */
 
 /*
  * OS/2 debug apis
@@ -12,6 +12,10 @@
 #ifndef __OSLIBDEBUG_H__
 #define __OSLIBDEBUG_H__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifndef PAGE_SIZE
 #define PAGE_SIZE 4096
 #endif
@@ -22,4 +26,9 @@ BOOL OSLibContinueDebugEvent(DWORD dwProcessId, DWORD dwThreadId, DWORD dwContin
 BOOL OSLibWaitForDebugEvent(LPDEBUG_EVENT lpde, DWORD dwTimeout);
 VOID OSLibDebugReadMemory(LPCVOID lpBaseAddress,LPVOID lpBuffer, DWORD cbRead, LPDWORD lpNumberOfBytesRead);
 BOOL OSLibAddWin32Event(LPDEBUG_EVENT lpde);
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif //__OSLIBDEBUG_H__

@@ -1,4 +1,4 @@
-/* $Id: oslibtime.h,v 1.1 2002-06-26 07:14:18 sandervl Exp $ */
+/* $Id: oslibtime.h,v 1.2 2003-01-05 12:31:24 sandervl Exp $ */
 /*
  * OS/2 time procedures
  *
@@ -10,6 +10,14 @@
 #ifndef __OSLIBTIME_H__
 #define __OSLIBTIME_H__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 ULONG OSLibDosGetTickCount();
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif //__OSLIBTIME_H__

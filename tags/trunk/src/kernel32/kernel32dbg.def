@@ -1,4 +1,4 @@
-; $Id: kernel32dbg.def,v 1.22 2002-12-20 11:39:41 sandervl Exp $
+; $Id: kernel32dbg.def,v 1.23 2003-01-05 12:31:23 sandervl Exp $
 
 ;Basis is Windows95 KERNEL32
 LIBRARY KERNEL32 INITINSTANCE TERMINSTANCE
@@ -1208,6 +1208,11 @@ EXPORTS
     cp_get_table                                                  @2025 NONAME
 
     OSLibDosDevIOCtl                                              @2026 NONAME
+
+; custom dll hook installer
+    _ODIN_SetDllLoadCallback@4                                    @2100 NONAME
+; override export
+    _ODIN_SetProcAddress@12                                       @2101 NONAME
 
     GetDisplayCodepage                                            @3000 NONAME
     GetWindowsCodepage                                            @3001 NONAME

@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.102 2002-12-20 11:39:42 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.103 2003-01-05 12:31:25 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -43,6 +43,7 @@
 #include <misc.h>
 #include <win32api.h>
 #include <heapcode.h>
+#include <custombuild.h>
 #include "winimagebase.h"
 #include "winimagepeldr.h"
 #include "windllpeldr.h"
@@ -1371,6 +1372,16 @@ void Win32PeLdrImage::StoreImportByName(Win32ImageBase *WinImage, char *impname,
     else  *import = apiaddr;
 }
 //******************************************************************************
+//Install a hook that gets called when the exports have been processed
+//******************************************************************************
+static ODINPROC_DLLLOAD pfnDllLoad = NULL;
+//******************************************************************************
+BOOL WIN32API ODIN_SetDllLoadCallback(ODINPROC_DLLLOAD pfnMyDllLoad)
+{
+    pfnDllLoad = pfnMyDllLoad;
+    return TRUE;
+}
+//******************************************************************************
 //******************************************************************************
 BOOL Win32PeLdrImage::processExports(char *win32file)
 {
@@ -1436,6 +1447,12 @@ BOOL Win32PeLdrImage::processExports(char *win32file)
             AddOrdExport(oh.ImageBase + RVAExport, ord);
         }
     }
+  }
+
+  //Call the dll load hook; must be done here so noone has the opportunity
+  //to use this dll (get exports)
+  if(pfnDllLoad) {
+      pfnDllLoad(hinstance);
   }
 
   return(TRUE);
@@ -1914,7 +1931,7 @@ ULONG Win32PeLdrImage::getImageSize()
 }
 //******************************************************************************
 //******************************************************************************
-ULONG Win32PeLdrImage::getApi(char *name)
+NameExport *Win32PeLdrImage::findApi(char *name)
 {
   ULONG       apiaddr, i, apilen;
   char       *apiname;
@@ -1939,19 +1956,46 @@ ULONG Win32PeLdrImage::getApi(char *name)
            *(ULONG *)curexport->name == *(ULONG *)apiname)
         {
             if(strcmp(curexport->name, apiname) == 0)
-                return(curexport->virtaddr);
+                return curexport;
         }
         curexport = (NameExport *)((ULONG)curexport->name + curexport->nlength);
     }
-    return(0);
+    return NULL;
 }
 //******************************************************************************
 //******************************************************************************
-ULONG Win32PeLdrImage::getApi(int ordinal)
+ULONG Win32PeLdrImage::getApi(char *name)
+{
+    NameExport *curexport;
+
+    curexport = findApi(name);
+    if(curexport) {
+        return(curexport->virtaddr);
+    }
+    return 0;
+}
+//******************************************************************************
+//Override a name export
+//******************************************************************************
+ULONG Win32PeLdrImage::setApi(char *name, ULONG pfnNewProc)
+{
+    NameExport *curexport;
+
+    curexport = findApi(name);
+    if(curexport) {
+        ULONG pfnOldProc = curexport->virtaddr;
+
+        curexport->virtaddr = pfnNewProc;
+        return pfnOldProc;
+    }
+    return -1;
+}
+//******************************************************************************
+//******************************************************************************
+OrdExport *Win32PeLdrImage::findApi(int ordinal)
 {
  ULONG       apiaddr, i;
  OrdExport  *curexport;
- NameExport *nexport;
 
     curexport = ordexports;
 
@@ -1977,7 +2021,7 @@ ULONG Win32PeLdrImage::getApi(int ordinal)
       i += min(iStep, (ordinal-iThisExport)); // move farther down the list
     else
       if (iThisExport == ordinal)   // found the export?
-        return curexport[i].virtaddr;
+        return &curexport[i];
       else
         i -= min(iStep, (iThisExport-ordinal));                 // move farther up the list
 
@@ -2002,7 +2046,7 @@ ULONG Win32PeLdrImage::getApi(int ordinal)
         {
           iThisExport = curexport[i].ordinal;
           if(iThisExport == ordinal)
-            return(curexport[i].virtaddr);
+            return &curexport[i];
           else
             if (iThisExport > ordinal)
             {
@@ -2017,7 +2061,7 @@ ULONG Win32PeLdrImage::getApi(int ordinal)
         {
           iThisExport = curexport[i].ordinal;
           if(curexport[i].ordinal == ordinal)
-            return(curexport[i].virtaddr);
+            return &curexport[i];
           else
             if (iThisExport < ordinal)
               // Oops, cannot find the ordinal in the sorted list
@@ -2029,16 +2073,60 @@ ULONG Win32PeLdrImage::getApi(int ordinal)
       break;
     }
   }
+  return NULL;
+}
+//******************************************************************************
+//******************************************************************************
+ULONG Win32PeLdrImage::getApi(int ordinal)
+{
+    OrdExport  *curexport;
+    NameExport *nexport;
+
+    curexport = findApi(ordinal);
+    if(curexport) {
+        return curexport->virtaddr;
+    }
 
     //Name exports also contain an ordinal, so check this
     nexport = nameexports;
-    for(i=0;i<nrNameExports;i++) {
+    for(int i=0;i<nrNameExports;i++) {
         if(nexport->ordinal == ordinal)
             return(nexport->virtaddr);
 
         nexport = (NameExport *)((ULONG)nexport->name + nexport->nlength);
     }
     return(0);
+}
+//******************************************************************************
+//Override an ordinal export
+//******************************************************************************
+ULONG Win32PeLdrImage::setApi(int ordinal, ULONG pfnNewProc)
+{
+    OrdExport  *curexport;
+    NameExport *nexport;
+
+    curexport = findApi(ordinal);
+    if(curexport) {
+        ULONG pfnOldProc = curexport->virtaddr;
+
+        curexport->virtaddr = pfnNewProc;
+        return pfnOldProc;
+    }
+
+    //Name exports also contain an ordinal, so check this
+    nexport = nameexports;
+    for(int i=0;i<nrNameExports;i++) 
+    {
+        if(nexport->ordinal == ordinal) {
+            ULONG pfnOldProc = nexport->virtaddr;
+
+            nexport->virtaddr = pfnNewProc;
+            return pfnOldProc;
+        }
+
+        nexport = (NameExport *)((ULONG)nexport->name + nexport->nlength);
+    }
+    return -1;
 }
 //******************************************************************************
 //Returns required OS version for this image

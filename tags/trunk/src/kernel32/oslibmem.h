@@ -1,4 +1,4 @@
-/* $Id: oslibmem.h,v 1.2 2002-07-16 08:16:48 sandervl Exp $ */
+/* $Id: oslibmem.h,v 1.3 2003-01-05 12:31:24 sandervl Exp $ */
 /*
  * OS/2 Memory management procedures
  *
@@ -7,6 +7,10 @@
  */
 #ifndef __OSLIBMEM_H__
 #define __OSLIBMISC_H__
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #ifndef __OS2_H__
 
@@ -49,5 +53,8 @@ DWORD OSLibDosAllocSharedMem(LPVOID *lplpMemAddr, DWORD size, DWORD flags, LPSTR
 DWORD OSLibDosGetNamedSharedMem(LPVOID *lplpMemAddr, LPSTR name);
 PVOID OSLibDosFindMemBase(LPVOID lpMemAddr);
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif
