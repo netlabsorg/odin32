@@ -1,5 +1,3 @@
-/* $Id: initterm.cpp,v 1.23 2000-08-11 10:56:26 sandervl Exp $ */
-
 /*
  * USER32 DLL entry point
  *
@@ -43,6 +41,7 @@
 #include "syscolor.h"
 #include "initterm.h"
 #include <exitlist.h>
+#include <initdll.h>
 
 #define DBG_LOCALLOG	DBG_initterm
 #include "dbglocal.h"
@@ -56,9 +55,6 @@
 static void APIENTRY cleanup(ULONG reason);
 
 extern "C" {
-void CDECL _ctordtorInit( void );
-void CDECL _ctordtorTerm( void );
-
  //Win32 resource table (produced by wrc)
  extern DWORD _Resource_PEResTab;
 }
@@ -86,7 +82,7 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
 
    switch (ulFlag) {
       case 0 :
-         _ctordtorInit();
+         __ctordtorInit();
          ParseLogStatus();
 
          CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
@@ -147,7 +143,7 @@ static void APIENTRY cleanup(ULONG ulReason)
    MONITOR_Finalize(&MONITOR_PrimaryMonitor);
    SYSCOLOR_Save();
    CloseSpyQueue();
-   _ctordtorTerm();
+   __ctordtorTerm();
    dprintf(("user32 exit done\n"));
 
    DosExitList(EXLST_EXIT, cleanup);

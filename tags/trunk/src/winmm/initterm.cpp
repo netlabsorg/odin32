@@ -1,5 +1,3 @@
-/* $Id: initterm.cpp,v 1.11 2000-12-03 22:18:17 sandervl Exp $ */
-
 /*
  * WINMM DLL entry point
  *
@@ -37,20 +35,18 @@
 #include <win32type.h>
 #include <winconst.h>
 #include <odinlx.h>
+#include <initdll.h>
 #include "auxiliary.h"
 
 #define DBG_LOCALLOG	DBG_initterm
 #include "dbglocal.h"
 
 BOOL MULTIMEDIA_MciInit(void);
-BOOL	MULTIMEDIA_CreateIData(HINSTANCE hinstDLL);
+BOOL MULTIMEDIA_CreateIData(HINSTANCE hinstDLL);
 void MULTIMEDIA_DeleteIData(void);
 
 extern "C" {
 void IRTMidiShutdown();  // IRTMidi shutdown routine
-void CDECL _ctordtorInit( void );
-void CDECL _ctordtorTerm( void );
-
 
  //Win32 resource table (produced by wrc)
  extern DWORD _Resource_PEResTab;
@@ -84,10 +80,10 @@ BOOL WINAPI LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
 	return TRUE;
 
    case DLL_PROCESS_DETACH:
-     MULTIMEDIA_DeleteIData();
+        MULTIMEDIA_DeleteIData();
         auxOS2Close(); /* SvL: Close aux device if necessary */
    	IRTMidiShutdown;  /* JT: Shutdown RT Midi subsystem, if running. */
-	_ctordtorTerm();
+	__ctordtorTerm();
 	return TRUE;
    }
    return FALSE;
@@ -114,7 +110,7 @@ unsigned long _System _DLL_InitTerm(unsigned long hModule, unsigned long
 
    switch (ulFlag) {
       case 0 :
-         _ctordtorInit();
+         __ctordtorInit();
 
          ParseLogStatus();
 

@@ -1,5 +1,3 @@
-/* $Id: initterm.cpp,v 1.3 2000-08-11 10:56:27 sandervl Exp $ */
-
 /*
  * DLL entry point
  *
@@ -35,12 +33,10 @@
 #include <winconst.h>
 #include <odinlx.h>
 #include <misc.h>       /*PLF Wed  98-03-18 23:18:15*/
+#include <initdll.h>
 #include "wing32impl.h"
 
 extern "C" {
-void CDECL _ctordtorInit( void );
-void CDECL _ctordtorTerm( void );
-
  //Win32 resource table (produced by wrc)
  extern DWORD _Resource_PEResTab;
 }
@@ -53,6 +49,9 @@ BOOL WINAPI LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
    switch (fdwReason)
    {
    case DLL_PROCESS_ATTACH:
+        if(!InitWing32())
+            return FALSE; 
+
 	return TRUE;
 
    case DLL_THREAD_ATTACH:
@@ -60,7 +59,7 @@ BOOL WINAPI LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
 	return TRUE;
 
    case DLL_PROCESS_DETACH:
-	_ctordtorTerm();
+	__ctordtorTerm();
 	return TRUE;
    }
    return FALSE;
@@ -89,12 +88,9 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
    {
       case 0 :
       {
-        _ctordtorInit();
+         __ctordtorInit();
 
-        CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
-
-        if(!InitWing32())
-          return 0UL;
+         CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
 
 	 dllHandle = RegisterLxDll(hModule, LibMain, (PVOID)&_Resource_PEResTab);
          if(dllHandle == 0) 
