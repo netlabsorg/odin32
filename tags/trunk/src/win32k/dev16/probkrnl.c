@@ -1,4 +1,4 @@
-/* $Id: probkrnl.c,v 1.36 2001-07-10 05:18:41 bird Exp $
+/* $Id: probkrnl.c,v 1.37 2001-07-31 21:48:32 bird Exp $
  *
  * Description:   Autoprobes the os2krnl file and os2krnl[*].sym files.
  *                Another Hack!
@@ -6,7 +6,7 @@
  *                16-bit inittime code.
  *
  *                All data has to be initiated because this is 16-bit C code
- *                and is to be linked with 32-bit C/C++ code. Uninitiazlied
+ *                and is to be linked with 32-bit C/C++ code. Uninitialized
  *                data ends up in the BSS segment, and that segment can't
  *                both be 32-bit and 16-bit. I have not found any other way
  *                around this problem that initiating all data.
@@ -20,7 +20,10 @@
  *                5. the entry points are verified. (elf$)
  *                6. finished.
  *
- * Copyright (c) 1998-2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * Copyright (c) 1998-2001 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ *
+ * Initial pmdfvers.lst parsing:
+ * Copyright (c) 2001 Rafal Szymczak (rafalszymczak@discoverfinancial.com)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -217,9 +220,9 @@ int  DATA16_GLOBAL  iProc = -1;         /* The procedure number which failed Ver
 
 
 /*
- * privat data
+ * private data
  */
-static char *   DATA16_INIT apszSym[]        =
+static char *   DATA16_INIT apszSym[]       =
 {
     {"c:\\os2krnl.sym"},                              /* usual for debugkernel */
     {"c:\\os2\\pdpsi\\pmdf\\warp4\\os2krnlr.sym"},    /* warp 4 */
@@ -231,13 +234,20 @@ static char *   DATA16_INIT apszSym[]        =
     {"c:\\os2\\pdpsi\\pmdf\\warp45_s\\os2krnlr.sym"}, /* warp 45 */
     {"c:\\os2\\pdpsi\\pmdf\\warp45_s\\os2krnld.sym"}, /* warp 45 */
     {"c:\\os2\\pdpsi\\pmdf\\warp45_s\\os2krnlb.sym"}, /* warp 45 */
-    {"c:\\os2\\system\\trace\\os2krnl.sym"},          /* warp 3 ?*/
     {"c:\\os2\\system\\pmdf\\os2krnlr.sym"},          /* warp 3 ?*/
+    {"c:\\os2\\system\\pmdf\\os2krnld.sym"},          /* warp 3 ?*/
+    {"c:\\os2\\system\\pmdf\\os2krnlb.sym"},          /* warp 3 ?*/
+    {"c:\\os2\\system\\trace\\os2krnl.sym"},          /* warp 3 ?*/
     {"c:\\os2krnlr.sym"},                             /* custom */
-    {"c:\\os2krnlh.sym"},                             /* custom */
+    {"c:\\os2krnlb.sym"},                             /* custom */
     {"c:\\os2krnld.sym"},                             /* custom */
     NULL
 };
+
+/* Location of PMDF list of custom directories */
+static char DATA16_INIT szPmdfVers[]        =
+    {"c:\\os2\\pdpsi\\pmdf\\pmdfvers.lst"};
+
 
 /* Result from GetKernelInfo/ReadOS2Krnl. */
 unsigned char DATA16_INIT  cObjects = 0;
@@ -323,15 +333,20 @@ HFILE    fopen(const char * pszFilename, const char * pszIgnored);
 int      fread(void * pvBuffer, USHORT cbBlock, USHORT cBlock,  HFILE hFile);
 int      fseek(HFILE hfile, signed long off, int iOrg);
 unsigned long fsize(HFILE hFile);
+int      feof(HFILE hFile);
+char *   fgets(char * psz, int num, HFILE hFile);
 
 /* C-library replacements and additions. */
-void     kmemcpy(char *psz1, const char *psz2, int cch);
+void *   kmemcpy(char *psz1, const char *psz2, int cch);
 char *   kstrstr(const char *psz1, const char *psz2);
 int      kstrcmp(const char *psz1, const char *psz2);
 int      kstrncmp(const char *psz1, const char *psz2, int cch);
 int      kstrnicmp(const char *psz1, const char *psz2, int cch);
 int      kstrlen(const char *psz);
 char *   kstrcpy(char * pszTarget, const char * pszSource);
+char *   kstrncpy(char * pszTarget, const char * pszSource, int cch);
+char *   kstrcat(char * pszTarget, const char * pszSource);
+char *   kstrtok(char * pszTarget, const char * pszToken);
 int      kargncpy(char *pszTarget, const char *pszArg, unsigned cchMaxlen);
 
 /* Workers */
@@ -378,6 +393,8 @@ HFILE fopen(const char * pszFilename, const char * pszIgnored)
         NULL);
 
     pszIgnored = pszIgnored;
+    if (rc != NO_ERROR)
+       hFile = 0;
     return hFile;
 }
 
@@ -406,7 +423,7 @@ int fread(void * pvBuffer, USHORT cbBlock, USHORT cBlock,  HFILE hFile)
 
 
 /**
- * fseek emultation
+ * fseek emulation
  * @returns   Same as DosChgFilePtr
  * @param     hFile   Filehandle
  * @param     off     offset into file from origin
@@ -428,7 +445,7 @@ int fseek(HFILE hFile, signed long off, int iOrg)
 unsigned long fsize(HFILE hFile)
 {
     USHORT rc;
-    unsigned long cb;
+    ULONG  cb;
 
     rc = DosChgFilePtr(hFile, 0, FILE_END, &cb);
 
@@ -437,20 +454,80 @@ unsigned long fsize(HFILE hFile)
 
 
 /**
+ * feof emulation
+ * @returns   EOF (-1) if end-of-file reached, otherwise returns 0
+ * @param     hFile   Filehandle
+ */
+int feof(HFILE hFile)
+{
+    char     achBuffer[1];
+    ULONG    ulActual = 0;
+    USHORT   usActual = 0;
+    USHORT   rc;
+
+    rc = DosRead(hFile, (PVOID)&achBuffer[0], 1, &usActual);
+    if (rc == ERROR_NO_DATA || usActual == 0)
+        return -1;
+
+    rc = DosChgFilePtr(hFile, -1, FILE_CURRENT, &ulActual);
+    return 0;
+}
+
+
+/**
+ * fgets emulation - slow!
+ * @returns   pointer to the read string, or NULL if failed
+ * @param     pszBuf  Pointer to the string buffer to read line into.
+ * @param     cchBuf  String buffer size.
+ * @param     hFile   Filehandle.
+ */
+char * fgets(char * pszBuf, int cchBuf, HFILE hFile)
+{
+    char *  psz = pszBuf;
+    USHORT  usActual;
+
+    if (cchBuf <= 1 || feof(hFile))
+        return NULL;
+
+    cchBuf--;                           /* terminator */
+    do
+    {
+        if (DosRead(hFile, psz, 1, &usActual))
+        {
+            if (psz == pszBuf)
+                return NULL;
+            *psz = '\0';
+            break;
+        }
+    } while (--cchBuf && *psz != '\n' && ++psz);
+
+    /*  "\r\n" -> "\n" */
+    if (pszBuf < psz && *psz == '\n' && psz[-1] == '\r')
+        *(--psz) = '\n';
+    psz[1] = '\0';
+
+    return pszBuf;
+}
+
+#if 0 /* not in use */
+/**
  * kmemcpy - memory copy - slow!
  * @param     psz1  target
  * @param     psz2  source
  * @param     cch length
  */
-void     kmemcpy(char *psz1, const char *psz2, int cch)
+void *   kmemcpy(char *psz1, const char *psz2, int cch)
 {
     while (cch-- != 0)
         *psz1++ = *psz2++;
+
+    return psz1;
 }
+#endif
 
 
 /**
- * Finds psz2 in psz2.
+ * Finds psz2 in psz1.
  * @returns   Pointer to occurence of psz2 in psz1.
  * @param     psz1  String to be search.
  * @param     psz2  Substring to search for.
@@ -460,7 +537,7 @@ char *kstrstr(const char *psz1, const char *psz2)
 {
     while (*psz1 != '\0')
     {
-        register int i = 0;
+        int i = 0;
         while (psz2[i] != '\0' && psz1[i] == psz2[i])
             i++;
 
@@ -502,7 +579,7 @@ int      kstrcmp(const char *psz1, const char *psz2);
  * @param     p2  String 2
  * @param     len length
  */
-int      kstrncmp(register const char *psz1, register const char *psz2, int cch)
+int      kstrncmp(const char *psz1, const char *psz2, int cch)
 {
     int i = 0;
     while (i < cch && *psz1 == *psz2 && *psz1 != '\0' && *psz2 != '\0')
@@ -526,7 +603,7 @@ int      kstrncmp(register const char *psz1, register const char *psz2, int cch)
  */
 int      kstrnicmp(const char *psz1, const char *psz2, int cch)
 {
-    register char ch1, ch2;
+    char ch1, ch2;
 
     do
     {
@@ -550,9 +627,9 @@ int      kstrnicmp(const char *psz1, const char *psz2, int cch)
  * @status    completely implemented and tested.
  * @author    knut st. osmundsen
  */
-int kstrlen(register const char * psz)
+int kstrlen(const char * psz)
 {
-    register int cch = 0;
+    int cch = 0;
     while (*psz++ != '\0')
         cch++;
     return cch;
@@ -566,9 +643,9 @@ int kstrlen(register const char * psz)
  * @param     pszSource  Source string.
  * @author    knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  */
-char * kstrcpy(char * pszTarget, register const char * pszSource)
+char * kstrcpy(char * pszTarget, const char * pszSource)
 {
-    register char *psz = pszTarget;
+    char *psz = pszTarget;
 
     while (*pszSource != '\0')
         *psz++ = *pszSource++;
@@ -577,6 +654,78 @@ char * kstrcpy(char * pszTarget, register const char * pszSource)
 }
 
 
+/**
+ * String 'n' copy
+ * @returns   Pointer to target string.
+ * @param     pszTarget   Target string.
+ * @param     pszSource   Source string.
+ * @param     cch         Number of bytes to copy.
+ */
+char * kstrncpy(char * pszTarget, const char * pszSource, int cch)
+{
+    char *  psz = pszTarget;
+
+    while (cch-- && *pszSource != '\0')
+        *psz++ = *pszSource++;
+
+    if (cch)
+        *psz++ = '\0';
+
+    return pszTarget;
+}
+
+
+/**
+ * String concatenation
+ * @returns   Pointer to target string.
+ * @param     pszTarget   Target string.
+ * @param     pszSource   String to be appended.
+ */
+char * kstrcat(char * pszTarget, const char * pszSource)
+{
+    char   * psz = pszTarget;
+
+    while (*psz != '\0')
+        psz++;
+    while (*pszSource != '\0')
+        *psz++ = *pszSource++;
+    *psz = '\0';
+    return pszTarget;
+}
+
+
+/**
+ * String tokenizer
+ * @returns   Pointer to found token or NULL if failed.
+ * @param     pszTarget   String to be tokenized.
+ * @param     pszToken    Token delimiters string.
+ */
+char * kstrtok(char * pszTarget, const char * pszToken)
+{
+    static char * pszPos = NULL;
+    char        * pszRet = pszTarget;
+
+    if (pszTarget)
+        pszPos = pszTarget;
+    else if (!pszPos || *pszPos == '\0')
+        return NULL;
+    pszRet = pszPos;
+
+    while (*pszPos != '\0')
+    {
+        const char *pszTokenI;
+        for (pszTokenI = pszToken; *pszTokenI; pszTokenI++)
+            if (*pszPos == *pszTokenI)
+            {
+                *pszPos++ = '\0';
+                return pszRet;
+            }
+
+        pszPos++;
+    }
+    pszPos = NULL;
+    return pszRet;
+}
 
 
 /**
@@ -1123,7 +1272,7 @@ void ShowResult(int rc)
      */
     if (!options.fQuiet || rc != NO_ERROR)
     {
-        printf16("Win32k - Odin32 support driver. (Built %s %s)\n",
+        printf16("\nWin32k - Odin32 support driver. (Built %s %s)\n",
                  (NPSZ)szBuildTime, (NPSZ)szBuildDate);
 
         /*
@@ -1171,6 +1320,7 @@ void ShowResult(int rc)
             const char *psz = GetErrorMsg(rc);
             printf16("ProbeKernel failed with rc=%d. iProc=%x\n", rc, iProc);
             if (psz) printf16("%s\n", psz);
+            printf16("\n");
         }
     }
 }
@@ -1188,11 +1338,13 @@ int ProbeKernel(PRPINITIN pReqPack)
     int         rc;
     int         i;
     int         n;
+    APIRET      rc2;
     SEL         selGIS;
     SEL         selLIS;
     PGINFOSEG   pGIS;
     PLINFOSEG   pLIS;
     USHORT      usBootDrive;
+    HFILE       hPmdfVers;
 
     /*----------------*/
     /* parse InitArgs */
@@ -1302,7 +1454,6 @@ int ProbeKernel(PRPINITIN pReqPack)
                 )
             {
                 #if 1 /* ndef R3TST */
-                APIRET rc2;
                 /* search on disk */
                 i = 0;
                 while (apszSym[i] != NULL
@@ -1319,6 +1470,127 @@ int ProbeKernel(PRPINITIN pReqPack)
                     rc = NO_ERROR;
                 }
                 #endif
+            }
+        }
+
+        if (rc != NO_ERROR) /* if symbol file still not found. */
+        {
+            /*
+             * Search pmdfvers.lst for custom directories.
+             */
+            szPmdfVers[0] = (char)usBootDrive;
+            hPmdfVers = fopen(szPmdfVers, "r");
+            if (hPmdfVers)
+            {
+                if (!feof(hPmdfVers))
+                {
+                    char    achBuf[CCHMAXPATH];
+                    while (fgets(achBuf, sizeof(achBuf), hPmdfVers))
+                    {
+                        char *      pszDirTk = kstrtok(achBuf, ":;,");
+                        char *      pszBuild = kstrtok(NULL, ":;,");
+                        ULONG       ulBuild = 0;
+                        ULONG       fKernel = 0;
+
+                        /*
+                         * Parse build number.
+                         * (Note, not all kernel flags are set.)
+                         */
+                        if (pszBuild)
+                        {
+                            for (; (*pszBuild >= '0' && *pszBuild <= '9') || *pszBuild == '.'; pszBuild++)
+                                if (*pszBuild != '.')
+                                    ulBuild = (ulBuild * 10) + *pszBuild - '0';
+
+                            if ((*pszBuild >= 'A' && *pszBuild <= 'Z') || (*pszBuild >= 'a' && *pszBuild <= 'z'))
+                            {
+                                fKernel |= (USHORT)((*pszBuild - (*pszBuild >= 'a' ? 'a'-1 : 'A'-1)) << KF_REV_SHIFT);
+                                pszBuild++;
+                            }
+                            if (*pszBuild == ',') /* This is ignored! */
+                                *pszBuild++;
+
+                            if (pszBuild[0] == '_' && (pszBuild[1] == 'S' || pszBuild[1] == 's'))  /* _SMP  */
+                                fKernel |= KF_SMP;
+                            else
+                                if (*pszBuild != ','
+                                    && (   (pszBuild[0] == '_' && pszBuild[1] == 'W' && pszBuild[2] == '4')  /* _W4 */
+                                        || (pszBuild[0] == '_' && pszBuild[1] == 'U' && pszBuild[2] == 'N' && pszBuild[3] == 'I' && pszBuild[4] == '4')  /* _UNI4 */
+                                        )
+                                    )
+                                fKernel |= KF_W4 | KF_UNI;
+                            else
+                                fKernel |= KF_UNI;
+                        }
+                        else
+                        {
+                            ulBuild = options.ulBuild;
+                            fKernel = options.fKernel;
+                        }
+
+                        /*
+                         * Consider this entry?
+                         */
+                        if (    pszDirTk
+                            && *pszDirTk
+                            &&  ulBuild == options.ulBuild
+                            &&  (fKernel & (KF_REV_MASK | KF_UNI | KF_SMP | KF_W4)) == (options.fKernel & (KF_REV_MASK | KF_UNI | KF_SMP | KF_W4))
+                            &&  (kstrlen(pszDirTk) + 1 + sizeof(szPmdfVers)) < CCHMAXPATH /* no -13 because of os2krnl.sym is appended. */
+                            )
+                        {
+                            char    szName[CCHMAXPATH];
+                            char   *pszName;
+                            kstrcpy(szName, szPmdfVers);
+                            kstrcpy(&szName[sizeof(szPmdfVers) - 13], pszDirTk); /* 13 = strlen("pmdfvers.lst")+1 */
+                            pszName = &szName[kstrlen(szName)];
+                            *pszName++ = '\\';
+
+                            /* search custom kernel first */
+                            kstrcpy(pszName, "os2krnl.sym");
+                            rc2 = ProbeSymFile(szName);
+                            if (rc2 >= ERROR_PROB_SYM_D32_FIRST)
+                                rc = rc2;
+                            if (rc2 == NO_ERROR)
+                            {
+                                kstrcpy(szSymbolFile, szName);
+                                rc = NO_ERROR;
+                                break;
+                            }
+
+                            /* search retail kernel */
+                            if (!(options.fKernel & KF_DEBUG))
+                            {
+                                kstrcpy(pszName, "os2krnlr.sym");
+                                rc2 = ProbeSymFile(szName);
+                                if (rc2 >= ERROR_PROB_SYM_D32_FIRST)
+                                    rc = rc2;
+                                if (rc2 == NO_ERROR)
+                                {
+                                    kstrcpy(szSymbolFile, szName);
+                                    rc = NO_ERROR;
+                                    break;
+                                }
+                            }
+
+                            /* search allstrict kernel */
+                            if (options.fKernel & KF_DEBUG)
+                            {
+                                kstrcpy(pszName, "os2krnld.sym");
+                                rc2 = ProbeSymFile(szName);
+                                if (rc2 >= ERROR_PROB_SYM_D32_FIRST)
+                                    rc = rc2;
+                                if (rc2 == NO_ERROR)
+                                {
+                                    kstrcpy(szSymbolFile, szName);
+                                    rc = NO_ERROR;
+                                    break;
+                                }
+                            }
+
+                        }
+                    } /* while */
+                }
+                fclose(hPmdfVers);
             }
         }
     }
