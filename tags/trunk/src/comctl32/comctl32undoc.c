@@ -1,4 +1,4 @@
-/* $Id: comctl32undoc.c,v 1.11 1999-08-28 09:25:56 achimha Exp $ */
+/* $Id: comctl32undoc.c,v 1.12 1999-09-26 11:01:08 achimha Exp $ */
 /*
  * Undocumented functions from COMCTL32.DLL
  *
@@ -11,7 +11,7 @@
  *
  */
 
-/* WINE 990815 level */
+/* WINE 990923 level */
 
 /* CB: todo
   - porting/implementing string functions
@@ -688,7 +688,7 @@ DSA_SetItem (const HDSA hdsa, INT nIndex, LPVOID pSrc)
         else {
             /* resize the block of memory */
             nNewItems =
-                hdsa->nGrow * ((INT)((nIndex - 1) / hdsa->nGrow) + 1);
+		hdsa->nGrow * ((INT)(((nIndex + 1) - 1) / hdsa->nGrow) + 1);
             nSize = hdsa->nItemSize * nNewItems;
 
             lpTemp = (LPVOID)COMCTL32_ReAlloc (hdsa->pData, nSize);
@@ -1194,7 +1194,7 @@ DPA_SetPtr (const HDPA hdpa, INT i, LPVOID p)
         else {
             /* resize the block of memory */
             INT nNewItems =
-                hdpa->nGrow * ((INT)((i - 1) / hdpa->nGrow) + 1);
+		hdpa->nGrow * ((INT)(((i+1) - 1) / hdpa->nGrow) + 1);
             INT nSize = nNewItems * sizeof(LPVOID);
 
             lpTemp = (LPVOID*)HeapReAlloc (hdpa->hHeap, HEAP_ZERO_MEMORY,
