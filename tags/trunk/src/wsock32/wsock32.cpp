@@ -1,4 +1,4 @@
-/* $Id: wsock32.cpp,v 1.49 2002-02-23 16:39:10 sandervl Exp $ */
+/* $Id: wsock32.cpp,v 1.50 2003-02-17 12:27:28 sandervl Exp $ */
 
 /*
  *
@@ -692,7 +692,7 @@ ODINFUNCTION4(int,OS2recv,
 #ifdef DUMP_PACKETS
        dprintf(("Packet length %d", ret));
        for(int i=0;i<(ret+7)/8;i++) {
-           dprintf(("%02x %02x %02x %02x %02x %02x %02x %02x %c %c %c %c %c %c %c %c", buf[i*8], buf[i*8+1], buf[i*8+2], buf[i*8+3], buf[i*8+4], buf[i*8+5], buf[i*8+6], buf[i*8+7], buf[i*8], buf[i*8+1], buf[i*8+2], buf[i*8+3], buf[i*8+4], buf[i*8+5], buf[i*8+6], buf[i*8+7]));
+           dprintf2(("%02x %02x %02x %02x %02x %02x %02x %02x %c %c %c %c %c %c %c %c", buf[i*8], buf[i*8+1], buf[i*8+2], buf[i*8+3], buf[i*8+4], buf[i*8+5], buf[i*8+6], buf[i*8+7], buf[i*8], buf[i*8+1], buf[i*8+2], buf[i*8+3], buf[i*8+4], buf[i*8+5], buf[i*8+6], buf[i*8+7]));
        }
 #endif
        WSASetLastError(NO_ERROR);
@@ -737,9 +737,9 @@ ODINFUNCTION6(int,OS2recvfrom,
    }
    else {
 #ifdef DUMP_PACKETS
-       dprintf(("Packet length %d", ret));
+       dprintf2(("Packet length %d", ret));
        for(int i=0;i<(ret+7)/8;i++) {
-           dprintf(("%02x %02x %02x %02x %02x %02x %02x %02x %c %c %c %c %c %c %c %c", buf[i*8], buf[i*8+1], buf[i*8+2], buf[i*8+3], buf[i*8+4], buf[i*8+5], buf[i*8+6], buf[i*8+7], buf[i*8], buf[i*8+1], buf[i*8+2], buf[i*8+3], buf[i*8+4], buf[i*8+5], buf[i*8+6], buf[i*8+7]));
+           dprintf2(("%02x %02x %02x %02x %02x %02x %02x %02x %c %c %c %c %c %c %c %c", buf[i*8], buf[i*8+1], buf[i*8+2], buf[i*8+3], buf[i*8+4], buf[i*8+5], buf[i*8+6], buf[i*8+7], buf[i*8], buf[i*8+1], buf[i*8+2], buf[i*8+3], buf[i*8+4], buf[i*8+5], buf[i*8+6], buf[i*8+7]));
        }
 #endif
        WSASetLastError(NO_ERROR);
@@ -782,9 +782,9 @@ ODINFUNCTION4(int,OS2send,
    }
 
 #ifdef DUMP_PACKETS
-   dprintf(("Packet length %d", len));
+   dprintf2(("Packet length %d", len));
    for(int i=0;i<(len+7)/8;i++) {
-           dprintf(("%02x %02x %02x %02x %02x %02x %02x %02x %c %c %c %c %c %c %c %c", buf[i*8], buf[i*8+1], buf[i*8+2], buf[i*8+3], buf[i*8+4], buf[i*8+5], buf[i*8+6], buf[i*8+7], buf[i*8], buf[i*8+1], buf[i*8+2], buf[i*8+3], buf[i*8+4], buf[i*8+5], buf[i*8+6], buf[i*8+7]));
+           dprintf2(("%02x %02x %02x %02x %02x %02x %02x %02x %c %c %c %c %c %c %c %c", buf[i*8], buf[i*8+1], buf[i*8+2], buf[i*8+3], buf[i*8+4], buf[i*8+5], buf[i*8+6], buf[i*8+7], buf[i*8], buf[i*8+1], buf[i*8+2], buf[i*8+3], buf[i*8+4], buf[i*8+5], buf[i*8+6], buf[i*8+7]));
    }
 #endif
    ret = send(s, (char *)buf, len, flags);
@@ -838,9 +838,9 @@ ODINFUNCTION6(int,OS2sendto,
    }
    dprintf(("sending to %s", inet_ntoa(((sockaddr_in*)to)->sin_addr)));
 #ifdef DUMP_PACKETS
-   dprintf(("Packet length %d", len));
+   dprintf2(("Packet length %d", len));
    for(int i=0;i<(len+7)/8;i++) {
-           dprintf(("%02x %02x %02x %02x %02x %02x %02x %02x %c %c %c %c %c %c %c %c", buf[i*8], buf[i*8+1], buf[i*8+2], buf[i*8+3], buf[i*8+4], buf[i*8+5], buf[i*8+6], buf[i*8+7], buf[i*8], buf[i*8+1], buf[i*8+2], buf[i*8+3], buf[i*8+4], buf[i*8+5], buf[i*8+6], buf[i*8+7]));
+           dprintf2(("%02x %02x %02x %02x %02x %02x %02x %02x %c %c %c %c %c %c %c %c", buf[i*8], buf[i*8+1], buf[i*8+2], buf[i*8+3], buf[i*8+4], buf[i*8+5], buf[i*8+6], buf[i*8+7], buf[i*8], buf[i*8+1], buf[i*8+2], buf[i*8+3], buf[i*8+4], buf[i*8+5], buf[i*8+6], buf[i*8+7]));
    }
 #endif
    ret = sendto(s, (char *)buf, len, flags, (struct sockaddr *)to, tolen);
