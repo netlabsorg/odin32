@@ -1,4 +1,4 @@
-/* $Id: menu.cpp,v 1.4 1999-07-06 08:50:11 sandervl Exp $ */
+/* $Id: menu.cpp,v 1.5 1999-07-06 13:24:04 sandervl Exp $ */
 
 /*
  * PE2LX menu conversion code
@@ -80,8 +80,9 @@ void ShowMenu(int id, MenuHeader *menu, int size, int cp)
 static int ProcessSubMenu(PopupMenuItem *popupitem, MT_OS2 *os2menu, MTI_OS2 *menuitem, int size, int cp)
 {
 NormalMenuItem *normalitem;
-MT_OS2             *submenu;
+MT_OS2         *submenu;
 int             len = 0, newsize;
+ULONG           ulCpSize, ulCP;
 
   menuitem->afStyle = MIS_SUBMENU;
 
@@ -139,7 +140,15 @@ int             len = 0, newsize;
   if(len > 4)
         submenu   = (MT_OS2 *)((char *)submenu + len/2 - sizeof(menuitem->c));
   submenu->len      = sizeof(MT_OS2) - sizeof(MTI_OS2);
-  submenu->codepage = 437;
+
+  if(cp == 0)
+    submenu->codepage = 437;
+  else
+  {
+    DosQueryCp(sizeof(ulCP), &ulCP, &ulCpSize);
+    submenu->codepage = ulCP;
+  }
+
   submenu->reserved = 4;
   submenu->cMti     = 0;
   menuitem          = &submenu->rgMti[0];
@@ -245,7 +254,6 @@ int             len = 0;
   os2menu->cMti++;
 
   size -= (sizeof(NormalMenuItem)-2 + len); /*PLF Sat  97-06-21 22:19:57*/
-
 
   return(size);
 }
