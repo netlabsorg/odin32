@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.76 1999-12-31 10:47:11 sandervl Exp $
+# $Id: makefile,v 1.77 2000-01-02 22:09:01 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -232,7 +232,8 @@ network.OBJ: \
 misc.OBJ: \
     .\misc.cpp \
     initterm.h \
-    $(PDWIN32_INCLUDE)\misc.h
+    $(PDWIN32_INCLUDE)\misc.h \
+    $(PDWIN32_INCLUDE)\win\thread.h
 
 win32util.OBJ: \
     .\win32util.cpp \
