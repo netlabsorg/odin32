@@ -1,8 +1,10 @@
-/* $Id: stricmp.c,v 1.2 1999-10-14 01:19:21 bird Exp $
+/* $Id: stricmp.c,v 1.3 1999-11-10 01:45:37 bird Exp $
  *
  * stricmp - Case insensitive string compare.
  *
  * Copyright (c) 1999 knut st. osmundsen
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
  *
  */
 

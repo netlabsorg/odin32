@@ -1,8 +1,10 @@
-/* $Id: libconv.c,v 1.1 1999-09-08 20:50:02 bird Exp $ */
-/*
+/* $Id: libconv.c,v 1.2 1999-11-10 01:45:29 bird Exp $
+ *
  * Very simple OMF/LIB dumper.
  *
  * Copyright (c) 1999 knut st. osmundsen
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
  *
  */
 

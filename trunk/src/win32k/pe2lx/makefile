@@ -1,5 +1,5 @@
 ##############################################################################
-# $Id: makefile,v 1.5 1999-10-27 02:03:01 bird Exp $
+# $Id: makefile,v 1.6 1999-11-10 01:45:37 bird Exp $
 #
 # PD-Win32 API
 #
@@ -17,6 +17,7 @@ PE2LXLIST       = ..\list
 WIN32KBASE      = ..
 WIN32K_INCLUDE  = $(WIN32KBASE)\include
 WIN32K_MISC     = $(WIN32KBASE)\misc
+WIN32K_LDR      = $(WIN32KBASE)\ldr
 OBJEXT = pe_obj
 
 ##############################################################################
@@ -54,6 +55,10 @@ LDFLAGS    = /nologo /NOI /A:16 /NOE /O:$@ /packcode /packdata \
     @echo compiling: $(@B).cpp
     @$(CXX) $(CXXFLAGS) -c -Fa$(PE2LXLIST)\$(@B).asm -Fo$@ $<
 
+{$(WIN32K_LDR)}.cpp{$(PE2LXOBJ)}.$(OBJEXT):
+    @echo compiling: $(@B).cpp
+    @$(CXX) $(CXXFLAGS) -c -Fa$(PE2LXLIST)\$(@B).asm -Fo$@ $<
+
 .cpp{$(PE2LXOBJ)}.$(OBJEXT):
     @echo compiling: $(@B).cpp
     @$(CXX) $(CXXFLAGS) -c -Fa$(PE2LXLIST)\$(@B).asm -Fo$@ $<
@@ -70,6 +75,10 @@ LDFLAGS    = /nologo /NOI /A:16 /NOE /O:$@ /packcode /packdata \
     @echo compiling: $(@B).cpp
     @$(CXX) $(CXXFLAGS) -c -Fa$(PE2LXLIST)\$(@B).asm -Fo$(PE2LXOBJ)\$(@B).$(OBJEXT) $<
 
+{$(WIN32K_LDR)}.cpp.obj:
+    @echo compiling: $(@B).cpp
+    @$(CXX) $(CXXFLAGS) -c -Fa$(PE2LXLIST)\$(@B).asm -Fo$(PE2LXOBJ)\$(@B).$(OBJEXT) $<
+
 .cpp.obj:
     @echo compiling: $(@B).cpp
     @$(CXX) $(CXXFLAGS) -c -Fa$(PE2LXLIST)\$(@B).asm -Fo$(PE2LXOBJ)\$(@B).$(OBJEXT) $<
@@ -80,13 +89,13 @@ LDFLAGS    = /nologo /NOI /A:16 /NOE /O:$@ /packcode /packdata \
 ##############################################################################
 TARGET   = pe2lx
 
-OBJS     =  $(PE2LXOBJ)\pe2lx.$(OBJEXT)         \
-            $(PE2LXOBJ)\pe2lxmain.$(OBJEXT)     \
-            $(PE2LXOBJ)\malloc.$(OBJEXT)        \
-            $(PE2LXOBJ)\new.$(OBJEXT)           \
-            $(PE2LXOBJ)\stricmp.$(OBJEXT)       \
+OBJS     =  $(PE2LXOBJ)\pe2lx.$(OBJEXT)      \
+            $(PE2LXOBJ)\pe2lxmain.$(OBJEXT)  \
+            $(PE2LXOBJ)\modulebase.$(OBJEXT) \
+            $(PE2LXOBJ)\malloc.$(OBJEXT)     \
+            $(PE2LXOBJ)\new.$(OBJEXT)        \
+            $(PE2LXOBJ)\stricmp.$(OBJEXT)    \
             $(PE2LXOBJ)\vprintf.$(OBJEXT)
-#            $(PE2LXOBJ)\vsprintf.$(OBJEXT)
 
 
 
@@ -120,6 +129,14 @@ $(PE2LXOBJ)\pe2lxmain.$(OBJEXT): \
     $(WIN32K_INCLUDE)\pe2lx.h \
     $(WIN32K_INCLUDE)\OS2Krnl.h
 
+$(PE2LXOBJ)\ModuleBase.$(OBJEXT): \
+    $(WIN32K_LDR)\ModuleBase.cpp \
+    $(WIN32K_INCLUDE)\malloc.h \
+    $(WIN32K_INCLUDE)\vprintf.h \
+    $(WIN32K_INCLUDE)\dev32.h \
+    $(WIN32K_INCLUDE)\OS2Krnl.h \
+    $(WIN32K_INCLUDE)\modulebase.h
+
 $(PE2LXOBJ)\malloc.$(OBJEXT): \
     $(WIN32K_MISC)\malloc.c \
     $(WIN32K_INCLUDE)\log.h \
@@ -137,4 +154,5 @@ $(PE2LXOBJ)\vprintf.$(OBJEXT): \
 
 $(PE2LXOBJ)\stricmp.$(OBJEXT): \
     $(WIN32K_MISC)\stricmp.c
+
 

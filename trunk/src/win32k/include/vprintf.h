@@ -1,8 +1,10 @@
-/* $Id: vprintf.h,v 1.1 1999-10-14 01:17:56 bird Exp $
+/* $Id: vprintf.h,v 1.2 1999-11-10 01:45:34 bird Exp $
  *
  * printf/vprintf header file.
  *
  * Copyright (c) 1999 knut st. osmundsen
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
  *
  */
 
@@ -23,6 +25,7 @@ extern "C" {
  */
 int printf(const char *pszFormat, ...);
 int vprintf(const char *pszFormat, va_list args);
+int vprintf2(const char *pszFormat, va_list args);
 
 /*
  * va_start have to be redeclared. Compiler don't accept SSToDS() as va_start argument.

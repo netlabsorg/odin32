@@ -1,8 +1,10 @@
-/* $Id: myLDRQAppType.cpp,v 1.1 1999-09-06 02:20:01 bird Exp $
+/* $Id: myLDRQAppType.cpp,v 1.2 1999-11-10 01:45:36 bird Exp $
  *
  * _myLDRQAppType - _LDRQAppType overload.
  *
  * Copyright (c) 1998-1999 knut  St.  osmundsen
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
  *
  */
 

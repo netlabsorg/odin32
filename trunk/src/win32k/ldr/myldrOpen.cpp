@@ -1,8 +1,10 @@
-/* $Id: myldrOpen.cpp,v 1.4 1999-10-31 23:57:06 bird Exp $
+/* $Id: myldrOpen.cpp,v 1.5 1999-11-10 01:45:36 bird Exp $
  *
  * myldrOpen - _ldrOpen.
  *
  * Copyright (c) 1998-1999 knut st. osmundsen
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
  *
  */
 
@@ -26,6 +28,7 @@
 #include <peexe.h>
 #include <exe386.h>
 #include "OS2Krnl.h"
+#include "ModuleBase.h"
 #include "pe2lx.h"
 #include "elf.h"
 #include "avl.h"
@@ -127,10 +130,10 @@ ULONG LDRCALL myldrOpen(PSFN phFile, char *pszFilename, ULONG param3)
                     kprintf(("_ldrOpen: ELF executable! - not implemented yet!\n"));
                 }
                 else
-                    if (*pach == '#')
+                    if (*pach == '#' && pach[1] == '!')
                     {
                         /* unix styled script...? Must be more than 64 bytes long? No options. firstline < 64 bytes. */
-                        char *pszStart = pach+1;
+                        char *pszStart = pach+2;
                         char *pszEnd;
                         kprintf(("_ldrOpen: unix script?\n"));
 
@@ -141,12 +144,13 @@ ULONG LDRCALL myldrOpen(PSFN phFile, char *pszFilename, ULONG param3)
                             pszStart++;
                         if (*pszStart != '\0' && *pszStart != '\r' && *pszStart != '\n')
                         {   /* find end-of-word */
+                            pszEnd = pszStart + 1;
                             while (*pszEnd != '\0' && *pszEnd != '\n' && *pszEnd != '\r'
                                    && *pszEnd != '\t' && *pszEnd != ' ')
                                 pszEnd++;
-                            *pszEnd = '\0';
                             if (*pszEnd != '\0')
                             {
+                                *pszEnd = '\0';
                                 kprintf(("_ldrOpen: unix script - opening %s\n", pszStart));
                                 _ldrClose(*phFile);
                                 rc = _ldrOpen(phFile, pszStart, param3);

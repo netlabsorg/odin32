@@ -1,9 +1,11 @@
-/* $Id: yield.c,v 1.3 1999-10-31 23:57:08 bird Exp $
+/* $Id: yield.c,v 1.4 1999-11-10 01:45:37 bird Exp $
  *
  * Yield - conversion may take some time. So it is necessary to
  *         check it's time to yield the processor to other processes.
  *
  * Copyright (c) 1998-1999 knut st. osmundsen
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
  *
  */
 
@@ -28,6 +30,7 @@
  */
 BOOL Yield(void)
 {
+    #if 0 /* Don't work on SMP and may cause trouble with logging at all machines... */
     PBYTE  pfbYield;
 
     pfbYield = D32Hlp_GetDOSVar(DHGETDOSV_YIELDFLAG, 0UL);
@@ -36,6 +39,6 @@ BOOL Yield(void)
         D32Hlp_Yield();
         return TRUE;
     }
-
+    #endif
     return FALSE;
 }

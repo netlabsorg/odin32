@@ -1,8 +1,10 @@
-/* $Id: d32init.c,v 1.3 1999-10-31 23:57:02 bird Exp $
+/* $Id: d32init.c,v 1.4 1999-11-10 01:45:30 bird Exp $
  *
  * d32init.c - 32-bits init routines.
  *
  * Copyright (c) 1998-1999 knut st. osmundsen
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
  *
  */
 
@@ -39,8 +41,9 @@
 /*******************************************************************************
 *   Internal Functions                                                         *
 *******************************************************************************/
-static int  interpretFunctionProlog(char *p);
-static int  procInit(void);
+static ULONG    readnum(const char *pszNum);
+static int      interpretFunctionProlog(char *p);
+static int      procInit(void);
 
 
 /* externs located in 16-bit data segement */
@@ -69,8 +72,9 @@ extern char callTab[NUMBER_OF_PROCS][MAXSIZE_PROLOG];
  */
 USHORT _loadds _Far32 _Pascal R0Init32(RP32INIT *pRpInit)
 {
-    char *pszTmp2;
-    char *pszTmp;
+    char   *pszTmp2;
+    char   *pszTmp;
+    ULONG   ul;
 
     pulTKSSBase32 = (PULONG)_TKSSBase16;
 
@@ -113,6 +117,23 @@ USHORT _loadds _Far32 _Pascal R0Init32(RP32INIT *pRpInit)
                     options.fElf = TRUE;
                 break;
 
+            case 'h':
+            case 'H': /* Heap options */
+                pszTmp2 = strpbrk(pszTmp, ":=/- ");
+                if (pszTmp2 != NULL && (int)(pszTmp2-pszTmp) < cch-1
+                    && (*pszTmp2 == ':' || *pszTmp2 == '='))
+                {
+                    ul = readnum(pszTmp2 + 1);
+                    if (ul > 0x1000UL && ul < 0x2000000UL) /* 4KB < ul < 32MB */
+                    {
+                        if (strnicmp(pszTmp, "heapm", 5) == 0)
+                            options.cbHeapMax = ul;
+                        else
+                            options.cbHeap = ul;
+                    }
+                }
+                break;
+
             case 'l':
             case 'L': /* -L[..]<:|=| >[<Y..|E..| > | <N..|D..>] */
                 pszTmp2 = strpbrk(pszTmp, ":=/- ");
@@ -132,7 +153,8 @@ USHORT _loadds _Far32 _Pascal R0Init32(RP32INIT *pRpInit)
             case 'p':
             case 'P': /* PE */
                 pszTmp2 = strpbrk(pszTmp, ":=/- ");
-                if (pszTmp2 != NULL && (*pszTmp == ':' || *pszTmp == '='))
+                if (pszTmp2 != NULL && (int)(pszTmp2-pszTmp) < cch-1
+                    && (*pszTmp2 == ':' || *pszTmp2 == '='))
                 {
                     pszTmp++;
                     if (strnicmp(pszTmp, "pe2lx", 5) == 0)
@@ -155,9 +177,43 @@ USHORT _loadds _Far32 _Pascal R0Init32(RP32INIT *pRpInit)
                 options.fQuiet = TRUE;
                 break;
 
+            case 'r':
+            case 'R': /* ResHeap options */
+                pszTmp2 = strpbrk(pszTmp, ":=/- ");
+                if (pszTmp2 != NULL && (int)(pszTmp2-pszTmp) < cch-1
+                    && (*pszTmp2 == ':' || *pszTmp2 == '='))
+                {
+                    ul = readnum(pszTmp2 + 1);
+                    if (ul > 0x1000UL && ul < 0x700000UL) /* 4KB < ul < 7MB */
+                    {
+                        if (strnicmp(pszTmp, "resheapm", 8) == 0)
+                            options.cbHeapMaxResident = ul;
+                        else
+                            options.cbHeapResident = ul;
+                    }
+                }
+                break;
+
             case 's':
-            case 'S': /* SMP kernel */
-                options.fKernel = KF_SMP;
+            case 'S': /* Sym:<filename> or Script:<Yes|No> or Smp */
+                /* SMP kernel */
+                if (pszTmp[1] == 'm' || pszTmp[1] == 'M')
+                    options.fKernel = KF_SMP;
+                else
+                {
+                    if (pszTmp[1] == 'c' || pszTmp[1] == 'C')
+                    {
+                        pszTmp2 = strpbrk(pszTmp, ":=/- ");
+                        options.fScript = pszTmp2 != NULL && (int)(pszTmp2-pszTmp) < cch-1
+                            && (*pszTmp2 == ':' || *pszTmp2 == '=')
+                            && (pszTmp2[1] == 'Y' || pszTmp2[1] == 'y');
+                    }
+                }
+                break;
+
+            case 'u':
+            case 'U': /* UNI kernel */
+                options.fKernel = KF_UNI;
                 break;
 
             case 'v':
@@ -165,20 +221,37 @@ USHORT _loadds _Far32 _Pascal R0Init32(RP32INIT *pRpInit)
                 options.fQuiet = FALSE;
                 break;
 
-            case 'u':
-            case 'U': /* UNI kernel */
-                options.fKernel = KF_SMP;
+            case 'w':
+            case 'W':
+                if (pszTmp[1] >= '0' && pszTmp[1] <= '4')
+                    options.ulInfoLevel = pszTmp[1] - '0';
+                else
+                {
+                    pszTmp2 = strpbrk(pszTmp, ":=/- ");
+                    if (pszTmp2 != NULL && (int)(pszTmp2-pszTmp) < cch-1
+                        && (*pszTmp2 == ':' || *pszTmp2 == '=')
+                        && pszTmp2[1] >= '0' && pszTmp2[1] <= '4'
+                        )
+                        options.ulInfoLevel = pszTmp2[1] - '0';
+                }
                 break;
+
         }
         pszTmp = strpbrk(pszTmp, "-/");
     }
+
+    /* heap min/max corrections */
+    if (options.cbHeap > options.cbHeapMax)
+        options.cbHeapMax = options.cbHeap;
+    if (options.cbHeapResident > options.cbHeapMaxResident)
+        options.cbHeapMaxResident = options.cbHeapResident;
 
     /* Transfer version and build number from 16-bit probkrnl.c */
     options.ulBuild    = _ulBuild;
     options.usVerMajor = _usVerMajor;
     options.usVerMinor = _usVerMinor;
 
-    /* log option summary */
+    /* log option summary - FIXME */
     kprintf(("Options - Summary\n"));
     kprintf(("\tKernel: ver%d.%d  build %d  type %s\n",
                 options.usVerMajor,
@@ -216,6 +289,49 @@ USHORT _loadds _Far32 _Pascal R0Init32(RP32INIT *pRpInit)
             return STATUS_DONE | STERR | ERROR_I24_QUIET_INIT_FAIL;
 
     return STATUS_DONE;
+}
+
+
+/**
+ * Reads a number (unsigned long integer) for a string.
+ * @returns   number read, ~0UL on error / no number read.
+ * @param     pszNum  Pointer to the string containing the number.
+ * @status    competely implemented.
+ * @author    knut st. osmundsen
+ */
+static ULONG    readnum(const char *pszNum)
+{
+    ULONG ulRet = 0;
+    ULONG ulBase = 10;
+    int   i = 0;
+
+    if (*pszNum == '0')
+        if (pszNum[1] == 'x' || pszNum[1] == 'X')
+        {
+            ulBase == 16;
+            pszNum += 2;
+        }
+        else
+        {
+            ulBase == 8;
+            i = 1;
+        }
+
+    /* read digits */
+    while (ulBase == 16 ? (pszNum[i] >= '0' && pszNum[i] <= '9') || (pszNum[i] >= 'a' && pszNum[i] <= 'f') || (pszNum[i] >= 'A' && pszNum[i] <= 'F')
+           : (pszNum[i] >= '0' && pszNum[i] <= (ulBase == 10 ? '9' : '7'))
+           )
+    {
+        ulRet *= ulBase;
+        if (ulBase <= 10)
+            ulRet += pszNum[i] - '0';
+        else
+            ulRet += pszNum[i] - (pszNum[i] >= 'A' ? 'A' - 10 : (pszNum[i] >= 'a' ? 'a' + 9 : '0'));
+
+        i++;
+    }
+
+    return i > 0 ? ulRet : ~0UL;
 }
 
 
