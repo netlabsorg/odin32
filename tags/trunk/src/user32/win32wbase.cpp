@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.130 2000-01-01 12:18:07 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.131 2000-01-01 14:37:34 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2902,6 +2902,40 @@ BOOL Win32BaseWindow::hasWindowName(LPSTR wndname, BOOL fUnicode)
     }
 
     return res;
+}
+//******************************************************************************
+//******************************************************************************
+CHAR *Win32BaseWindow::getWindowNamePtrA()
+{
+    INT len = GetWindowTextLength();
+    CHAR *text;
+
+    if (len == 0) return NULL;
+    len++;
+    text = (CHAR*)malloc(len*sizeof(CHAR));
+    GetWindowTextA(text,len);
+
+    return text;
+}
+//******************************************************************************
+//******************************************************************************
+WCHAR *Win32BaseWindow::getWindowNamePtrW()
+{
+    INT len = GetWindowTextLength();
+    WCHAR *text;
+
+    if (len == 0) return NULL;
+    len++;
+    text = (WCHAR*)malloc(len*sizeof(WCHAR));
+    GetWindowTextW(text,len);
+
+    return text;
+}
+//******************************************************************************
+//******************************************************************************
+VOID Win32BaseWindow::freeWindowNamePtr(PVOID namePtr)
+{
+    if (namePtr) free(namePtr);
 }
 //******************************************************************************
 //******************************************************************************

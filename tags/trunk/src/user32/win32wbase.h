@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.62 1999-12-30 18:33:00 cbratschi Exp $ */
+/* $Id: win32wbase.h,v 1.63 2000-01-01 14:37:35 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -193,9 +193,12 @@ Win32BaseWindow *GetTopParent();
          BOOL   SetWindowTextA(LPSTR lpsz);
          BOOL   SetWindowTextW(LPWSTR lpsz);
          BOOL   hasWindowName(LPSTR wndname, BOOL fUnicode = 0);
+         CHAR  *getWindowNamePtrA();
+         WCHAR *getWindowNamePtrW();
+         VOID   freeWindowNamePtr(PVOID namePtr);
+         CHAR  *getWindowNameA()              { return windowNameA; }; //only for MDI windows!
+         WCHAR *getWindowNameW()              { return windowNameW; }; //only for MDI windows!
 Win32WndClass  *getClass()  { return windowClass; };
-        //CB: windowNameA isn't always the window name!
-        char   *getWindowNameA()                    { return windowNameA; };
 Win32BaseWindow *getOwner()                         { return owner; };
         void    setOwner(Win32BaseWindow *newOwner) { owner = newOwner; };
 
