@@ -1,4 +1,4 @@
-/* $Id: hmthread.cpp,v 1.14 2002-07-15 14:28:51 sandervl Exp $ */
+/* $Id: hmthread.cpp,v 1.15 2002-07-26 10:47:19 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -93,8 +93,11 @@ HANDLE HMDeviceThreadClass::CreateThread(PHMHANDLEDATA          pHMHandleData,
     TEB *teb = GetTEBFromThreadHandle(hThread);
     if(teb) {
         //store thread id in TEB
-        teb->o.odin.threadId = *lpIDThread;
+        teb->o.odin.threadId  = *lpIDThread;
+        teb->o.odin.dwSuspend = (fdwCreate & CREATE_SUSPENDED) ? 1 : 0;
     }
+    else DebugInt3();
+
     dprintf(("CreateThread created %08x, id %x", pHMHandleData->hHMHandle, *lpIDThread));
   
     return pHMHandleData->hHMHandle;
@@ -103,9 +106,36 @@ HANDLE HMDeviceThreadClass::CreateThread(PHMHANDLEDATA          pHMHandleData,
 //******************************************************************************
 DWORD HMDeviceThreadClass::SuspendThread(HANDLE hThread, PHMHANDLEDATA pHMHandleData)
 {
-    dprintf(("SuspendThread %08xh)\n", pHMHandleData->hHMHandle));
+    DWORD dwSuspend;
 
-    return O32_SuspendThread(pHMHandleData->hHMHandle);
+    TEB *teb = GetTEBFromThreadHandle(hThread);
+    if(teb) {
+        teb->o.odin.dwSuspend++;
+        dprintf(("SuspendThread %08xh): count %d", pHMHandleData->hHMHandle, teb->o.odin.dwSuspend));
+    }
+    dwSuspend = O32_SuspendThread(pHMHandleData->hHMHandle);
+    if(dwSuspend == -1) {
+        teb->o.odin.dwSuspend--;
+        dprintf(("!ERROR!: SuspendThread FAILED"));
+    }
+    return dwSuspend;
+}
+//******************************************************************************
+//******************************************************************************
+DWORD HMDeviceThreadClass::ResumeThread(HANDLE hThread, PHMHANDLEDATA pHMHandleData)
+{
+    DWORD dwSuspend;
+    TEB *teb = GetTEBFromThreadHandle(hThread);
+    if(teb) {
+        teb->o.odin.dwSuspend--;
+        dprintf(("ResumeThread (%08xh) : count %d", pHMHandleData->hHMHandle, teb->o.odin.dwSuspend));
+    }
+    dwSuspend = O32_ResumeThread(pHMHandleData->hHMHandle);
+    if(dwSuspend == -1) {
+        teb->o.odin.dwSuspend++;
+        dprintf(("!ERROR!: ResumeThread FAILED"));
+    }
+    return dwSuspend;
 }
 //******************************************************************************
 //******************************************************************************
@@ -191,15 +221,6 @@ BOOL HMDeviceThreadClass::SetThreadTerminated(HANDLE hThread, PHMHANDLEDATA pHMH
 {
     pHMHandleData->dwUserData = THREAD_TERMINATED;
     return TRUE;
-}
-//******************************************************************************
-//******************************************************************************
-DWORD HMDeviceThreadClass::ResumeThread(HANDLE hThread, PHMHANDLEDATA pHMHandleData)
-{
-    dprintf(("ResumeThread (%08xh)\n",
-             pHMHandleData->hHMHandle));
-
-    return O32_ResumeThread(pHMHandleData->hHMHandle);
 }
 //******************************************************************************
 //******************************************************************************
