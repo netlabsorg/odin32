@@ -1,4 +1,4 @@
-/* $Id: OS2SURFACE.CPP,v 1.45 2002-07-02 09:55:12 sandervl Exp $ */
+/* $Id: OS2SURFACE.CPP,v 1.46 2002-07-03 15:44:37 sandervl Exp $ */
 
 /*
  * DirectDraw Surface class implementaion
@@ -5974,25 +5974,29 @@ void __cdecl MoveRects(char* pBuffer, LPRECT lpDestRect, LPRECT lpSrcRect, int b
   int BlitWidth,BlitHeight;
   static char Scanline[6400];  // sufficient for 1600 at 32 bit
 
+  if(sizeof(Scanline) < lPitch) {
+      DebugInt3(); 	//oh, oh
+      return;
+  }
   // Bridge, we may got a problem ;)
   // Check for Overlapping Rects
 
   pBltPos = pBuffer;
   pSrcPos = pBuffer;
 
-  if(lpDestRect->top <= lpSrcRect->top)
+  if(lpDestRect->top > lpSrcRect->top)
   {
     //  +-------+     +-------+      +-------+
-    //  |S      |     |S      |      |S      |  +---+---+---+
-    //  |   +---|---+ +-------+  +---|---+   |  |S/D|D/S|   |
-    //  |   | D |   | | D     |  | D |   |   |  |   |   |   |
-    //  +-------+   | +-------+  |   +-------+  |   |   |   |
-    //      |       | |       |  |       |      +---+---+---+
+    //  |S      |     |S      |      |S      |  
+    //  |   +---|---+ +-------+  +---|---+   |  
+    //  |   | D |   | | D     |  | D |   |   |  
+    //  +-------+   | +-------+  |   +-------+  
+    //      |       | |       |  |       |      
     //      +-------+ +-------+  +-------+
     //
     // We got one of the above cases (or no overlapping) so copy from bottom up
 
-    pBltPos += (lpDestRect->left * bpp) + lPitch * lpDestRect->top;
+    pBltPos += (lpDestRect->left * bpp) + lPitch * (lpDestRect->bottom-1);
     pSrcPos += (lpSrcRect->left * bpp)  + lPitch * (lpSrcRect->bottom-1);
     BlitHeight = lpDestRect->bottom - lpDestRect->top;
     BlitWidth  = (lpDestRect->right - lpDestRect->left) * bpp;
@@ -6001,7 +6005,7 @@ void __cdecl MoveRects(char* pBuffer, LPRECT lpDestRect, LPRECT lpSrcRect, int b
     {
       memcpy(Scanline,pSrcPos,BlitWidth);
       memcpy(pBltPos,Scanline,BlitWidth);
-      pBltPos += lPitch;
+      pBltPos -= lPitch;
       pSrcPos -= lPitch;
       if(! (--BlitHeight))
         break;
@@ -6011,11 +6015,11 @@ void __cdecl MoveRects(char* pBuffer, LPRECT lpDestRect, LPRECT lpSrcRect, int b
   {
     //  +-------+     +-------+      +-------+
     //  | D     |     | D     |      | D     |
-    //  |   +---|---+ +-------+  +---|---+   |
-    //  |   |S  |   | |S      |  |S  |   |   |
-    //  +-------+   | +-------+  |   +-------+
-    //      |       | |       |  |       |
-    //      +-------+ +-------+  +-------+
+    //  |   +---|---+ +-------+  +---|---+   |  +---+---+---+
+    //  |   |S  |   | |S      |  |S  |   |   |  |S  |S/D| D |
+    //  +-------+   | +-------+  |   +-------+  |   |   |   |
+    //      |       | |       |  |       |      |   |   |   |
+    //      +-------+ +-------+  +-------+      +---+---+---+
     //
     // We got one of the above cases so copy top down
 

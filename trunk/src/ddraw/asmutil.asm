@@ -1,4 +1,4 @@
-; $Id: asmutil.asm,v 1.11 2002-07-02 10:38:40 sandervl Exp $
+; $Id: asmutil.asm,v 1.12 2002-07-03 15:44:38 sandervl Exp $
 
 ;
 ; asmutil.asm Color key bit blitting for DirectDraw
@@ -2095,6 +2095,67 @@ EndOffFlip:
   pop  ebp
   ret
 _MemFlip   ENDP
+
+
+	public _ddmemfill16
+_ddmemfill16 proc near
+
+DEST      equ  [ebp+8]
+VALUE     equ  [ebp+12]
+BUF_LEN   equ  [ebp+16]
+
+        push   ebp
+        mov    ebp,esp
+        push   ecx
+        push   edi
+
+        mov    ecx, BUF_LEN
+        shr    ecx, 2		;length in dwords
+
+        mov    edi, DEST
+        mov    eax, VALUE
+
+        cld
+        rep    stosd
+
+        mov    ecx,BUF_LEN
+        and    ecx,03h
+        shr    ecx, 1		;length in words
+
+        rep    stosw
+
+        pop    edi
+        pop    ecx
+        pop    ebp
+        ret
+_ddmemfill16 endp
+
+	public _ddmemfill32
+_ddmemfill32 proc near
+
+DEST      equ  [ebp+8]
+VALUE     equ  [ebp+12]
+BUF_LEN   equ  [ebp+16]
+
+        push   ebp
+        mov    ebp,esp
+        push   ecx
+        push   edi
+
+        mov    ecx, BUF_LEN
+        shr    ecx, 2		;length in dwords
+
+        mov    edi, DEST
+        mov    eax, VALUE
+
+        cld
+        rep    stosd
+
+        pop    edi
+        pop    ecx
+        pop    ebp
+        ret
+_ddmemfill32 endp
 
 CODE32          ENDS
 
