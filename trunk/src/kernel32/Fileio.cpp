@@ -1,4 +1,4 @@
-/* $Id: Fileio.cpp,v 1.52 2001-08-10 19:32:23 sandervl Exp $ */
+/* $Id: Fileio.cpp,v 1.53 2001-08-31 19:53:11 phaller Exp $ */
 
 /*
  * Win32 File IO API functions for OS/2
@@ -926,13 +926,82 @@ ODINFUNCTION2(BOOL, MoveFileA,
 }
 //******************************************************************************
 //******************************************************************************
+
+
+/*****************************************************************************
+ * Name      : MoveFileExA
+ * Purpose   : Move or delete a file
+ * Parameters: LPCSTR lpExistingFileName
+ *             LPCSTR lpNewFileName
+ *             DWORD  dwFlags
+ * Variables :
+ * Result    :
+ * Remark    : "delete on system-reboot" feature is not supported!
+ * Status    :
+ *
+ * Author    : Patrick Haller [2001-08-30]
+ *****************************************************************************/
+
 ODINFUNCTION3(BOOL, MoveFileExA,
-              LPCSTR, arg1,
-              LPCSTR, arg2,
+              LPCSTR, lpszOldFilename,
+              LPCSTR, lpszNewFilename,
               DWORD, fdwFlags)
 {
-    dprintf(("KERNEL32:  MoveFileExA %s to %s %x, not complete!\n", arg1, arg2, fdwFlags));
-    return OSLibDosMoveFile(arg1, arg2);
+  dprintf(("KERNEL32:  MoveFileExA %s to %s %x, not complete!\n", 
+           lpszOldFilename, 
+           lpszNewFilename,
+           fdwFlags));
+  
+  // this parameter combination is illegal
+  if ( (fdwFlags & MOVEFILE_DELAY_UNTIL_REBOOT) &&
+       (fdwFlags & MOVEFILE_COPY_ALLOWED) )
+  {
+    // Note: error code not verified
+    SetLastError(ERROR_INVALID_PARAMETER);
+    return FALSE;
+  }
+  
+  // first, we take care about the special cases
+  if (fdwFlags && MOVEFILE_DELAY_UNTIL_REBOOT)
+  {
+    // We cannot really support this in any other way than
+    // to call the IBMCSFLK driver. As the first place I've encountered
+    // this call is Microsoft ACMSETUP wanting to replace OLEPRO32.DLL
+    // in the ODIN system directory, we are better skipping the call.
+    
+    // Anyway, this is only supported under Windows NT
+    fdwFlags &= ~MOVEFILE_DELAY_UNTIL_REBOOT;
+    
+    // Until we support this, we have to intercept
+    // lpszNewFilename == NULL
+    if (NULL == lpszNewFilename)
+    {
+      // try to delete the filename
+      dprintf(("KERNEL32-MoveFileExA: trying to delete file [%s], skipped.",
+               lpszOldFilename));
+      
+      SetLastError( NO_ERROR );
+      return TRUE;
+    }
+  }
+  
+  if (fdwFlags && MOVEFILE_COPY_ALLOWED)
+  {
+    // if lpszOldFilename and lpszNewFilename refer to different
+    // volumes, this flag controls if a copy operation is allowed.
+  }
+  
+  if (fdwFlags && MOVEFILE_REPLACE_EXISTING)
+  {
+    // We can only attempt to 
+    // 1 move away the current file if existing,
+    // 2 do the current move operation
+    // 3 if succesful, delete the backup
+    //   otherwise restore the original file
+  }
+  
+  return OSLibDosMoveFile(lpszOldFilename, 
+                          lpszNewFilename);
 }
 //******************************************************************************
 //******************************************************************************
@@ -953,12 +1022,35 @@ ODINFUNCTION2(BOOL, MoveFileW,
 //******************************************************************************
 //******************************************************************************
 ODINFUNCTION3(BOOL, MoveFileExW,
-              LPCWSTR, arg1,
-              LPCWSTR, arg2,
+              LPCWSTR, lpSrc,
+              LPCWSTR, lpDest,
               DWORD, fdwFlags)
 {
-    dprintf(("KERNEL32:  MoveFileExW %ls to %ls %x, not complete!", arg1, arg2, fdwFlags));
-    return MoveFileW(arg1, arg2);
+  dprintf(("KERNEL32: MoveFileExW %ls to %ls %x", 
+           lpSrc, 
+           lpDest,
+           fdwFlags));
+  
+  char *asciisrc, 
+       *asciidest;
+  BOOL rc;
+
+  asciisrc  = UnicodeToAsciiString((LPWSTR)lpSrc);
+  if (NULL != lpDest)
+    asciidest = UnicodeToAsciiString((LPWSTR)lpDest);
+  else
+    asciidest = NULL;
+  
+  rc = MoveFileExA(asciisrc, 
+                   asciidest,
+                   fdwFlags);
+  
+  if (NULL != asciidest)
+    FreeAsciiString(asciidest);
+  
+  FreeAsciiString(asciisrc);
+  
+  return(rc);
 }
 //******************************************************************************
 /*****************************************************************************
