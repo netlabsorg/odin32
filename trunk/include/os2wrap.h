@@ -1,4 +1,4 @@
-/* $Id: os2wrap.h,v 1.4 1999-06-21 17:45:38 sandervl Exp $ */
+/* $Id: os2wrap.h,v 1.5 1999-06-21 18:19:04 phaller Exp $ */
 #ifndef __OS2WRAP_H__
 #define __OS2WRAP_H__
 
@@ -9698,8 +9698,8 @@ inline HPS _GpiCreatePS(HAB a, HDC b, PSIZEL c, ULONG d)
     return yyrc;
 } 
 
-#undef  GpiCreatePS
-#define GpiCreatePS _GpiCreatePS
+#undef  GpiDestroyPS
+#define GpiDestroyPS _GpiDestroyPS
 
 inline BOOL _GpiDestroyPS(HPS a)
 {
