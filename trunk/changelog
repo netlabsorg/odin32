@@ -1,4 +1,10 @@
-/* $Id: changelog,v 1.2375 2002-12-03 11:39:28 sandervl Exp $ */
+/* $Id: changelog,v 1.2376 2002-12-04 10:33:15 sandervl Exp $ */
+
+ 2002-12-04: Sander van Leeuwen <sandervl@innotek   >
+    - DDRAW:    o Cleanup
+                o Don't resize or show the window in SetCooperativeLevel
+    - DINPUT:   o Check initial cursor position in relative mode when acquiring
+                  the mouse
 
  2002-12-03: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o CreateFile/OpenFile: convert file name to long if in hashed 8.3 format.
