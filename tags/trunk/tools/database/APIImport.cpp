@@ -1,4 +1,4 @@
-/* $Id: APIImport.cpp,v 1.6 2000-07-21 21:09:42 bird Exp $ */
+/* $Id: APIImport.cpp,v 1.7 2000-11-19 08:28:13 bird Exp $ */
 /*
  *
  * APIImport - imports a DLL or Dll-.def with functions into the Odin32 database.
@@ -16,6 +16,7 @@
 #include <string.h>
 
 #include "APIImport.h"
+#include "kFile.h"
 #include "kFileFormatBase.h"
 #include "kFilePE.h"
 #include "kFileDef.h"
@@ -241,13 +242,13 @@ static void closeLog(void)
 static long processFile(const char *pszFilename, const POPTIONS pOptions, long &cFunctions)
 {
     kFileFormatBase  *pFile;
-    FILE             *phFile;
     long              lRc = 1;
 
     /* try open file */
-    phFile = fopen(pszFilename, "rb");
-    if (phFile != NULL)
+    try
     {
+        kFile InFile(pszFilename);
+
         try
         {
             char    achDataBuffer[0x200];
@@ -257,12 +258,13 @@ static long processFile(const char *pszFilename, const POPTIONS pOptions, long &
             /* try create file objects */
             try
             {
-                pFile = new kFilePE(phFile);
+                /* pFile = new kFilePE(&InFile); - TODO - FIXME!!! */
+                throw ((int)50);
             }
             catch (int i)
             {
                 i = i;
-                pFile = new kFileDef(phFile);
+                pFile = new kFileDef(&InFile);
             }
 
             if (pFile->queryModuleName(pszModuleName))
@@ -366,10 +368,11 @@ static long processFile(const char *pszFilename, const POPTIONS pOptions, long &
         {
             fprintf(phLog, "%s: error - could not map dll/def into memory, errorno=%d.\n", pszFilename, err);
         }
-        fclose(phFile);
     }
-    else
-        fprintf(phLog, "%s: error - could not open file.\n", pszFilename);
+    catch (int err)
+    {
+        fprintf(phLog, "%s: error - could not open file, errorno=%d.\n", pszFilename, err);
+    }
 
     /* close db */
     dbDisconnect();
