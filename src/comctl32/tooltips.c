@@ -2101,9 +2101,7 @@ TOOLTIPS_SetFont (HWND hwnd, WPARAM wParam, LPARAM lParam)
     if(!GetObjectW((HFONT)wParam, sizeof lf, &lf))
         return 0;
 
-#ifdef __WIN32OS2__
     if(infoPtr->hFont) DeleteObject (infoPtr->hFont);
-#endif
 
     infoPtr->hFont = CreateFontIndirectW(&lf);
 

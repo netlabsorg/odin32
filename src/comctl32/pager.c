@@ -836,7 +836,7 @@ PAGER_Create (HWND hwnd, WPARAM wParam, LPARAM lParam)
     SetWindowLongA (hwnd, 0, (DWORD)infoPtr);
 
     /* set default settings */
-    infoPtr->hwndChild = (HWND)NULL;
+    infoPtr->hwndChild = NULL;
     infoPtr->bNoResize = dwStyle & CCS_NORESIZE;
     infoPtr->clrBk = GetSysColor(COLOR_BTNFACE);
     infoPtr->nBorder = 0;
@@ -897,7 +897,7 @@ PAGER_NCCalcSize(HWND hwnd, WPARAM wParam, LPARAM lParam)
 
     DefWindowProcA (hwnd, WM_NCCALCSIZE, wParam, lParam);
 
-    TRACE("orig rect=(%d,%d)-(%d,%d)\n",
+    TRACE("orig rect=(%ld,%ld)-(%ld,%ld)\n",
 	  lpRect->left, lpRect->top, lpRect->right, lpRect->bottom);
 
     if (PAGER_IsHorizontal(hwnd))
@@ -912,7 +912,7 @@ PAGER_NCCalcSize(HWND hwnd, WPARAM wParam, LPARAM lParam)
 	/* Reset buttons and hide any grey ones */
 	scrollRange = infoPtr->nWidth - (rcmyw.right - rcmyw.left);
 
-	TRACE("nPos=%d, scrollrange=%d, nHeigth=%d, myw=(%d,%d)-(%d,%d), cursor=(%ld,%ld)\n",
+	TRACE("nPos=%d, scrollrange=%d, nHeigth=%d, myw=(%ld,%ld)-(%ld,%ld), cursor=(%ld,%ld)\n",
 	      infoPtr->nPos, scrollRange, infoPtr->nHeight,
 	      rcmyw.left, rcmyw.top,
 	      rcmyw.right, rcmyw.bottom,
@@ -926,7 +926,7 @@ PAGER_NCCalcSize(HWND hwnd, WPARAM wParam, LPARAM lParam)
 	    ltrc.right = ltrc.left + infoPtr->nButtonSize;
 	    rbrc = wnrc;
 	    rbrc.left = rbrc.right - infoPtr->nButtonSize;
-	    TRACE("horz lt rect=(%d,%d)-(%d,%d), rb rect=(%d,%d)-(%d,%d)\n",
+	    TRACE("horz lt rect=(%ld,%ld)-(%ld,%ld), rb rect=(%ld,%ld)-(%ld,%ld)\n",
 		  ltrc.left, ltrc.top, ltrc.right, ltrc.bottom,
 		  rbrc.left, rbrc.top, rbrc.right, rbrc.bottom);
 	    if (PtInRect (&ltrc, cursor) && infoPtr->TLbtnState)
@@ -961,7 +961,7 @@ PAGER_NCCalcSize(HWND hwnd, WPARAM wParam, LPARAM lParam)
 	/* Reset buttons and hide any grey ones */
 	scrollRange = infoPtr->nHeight - (rcmyw.bottom - rcmyw.top);
 
-	TRACE("nPos=%d, scrollrange=%d, nHeigth=%d, myw=(%d,%d)-(%d,%d), cursor=(%ld,%ld)\n",
+	TRACE("nPos=%d, scrollrange=%d, nHeigth=%d, myw=(%ld,%ld)-(%ld,%ld), cursor=(%ld,%ld)\n",
 	      infoPtr->nPos, scrollRange, infoPtr->nHeight,
 	      rcmyw.left, rcmyw.top,
 	      rcmyw.right, rcmyw.bottom,
@@ -986,7 +986,7 @@ PAGER_NCCalcSize(HWND hwnd, WPARAM wParam, LPARAM lParam)
 	    ltrc.right = ltrc.left + infoPtr->nButtonSize;
 	    rbrc = wnrc;
 	    rbrc.left = rbrc.right - infoPtr->nButtonSize;
-	    TRACE("vert lt rect=(%d,%d)-(%d,%d), rb rect=(%d,%d)-(%d,%d)\n",
+	    TRACE("vert lt rect=(%ld,%ld)-(%ld,%ld), rb rect=(%ld,%ld)-(%ld,%ld)\n",
 		  ltrc.left, ltrc.top, ltrc.right, ltrc.bottom,
 		  rbrc.left, rbrc.top, rbrc.right, rbrc.bottom);
 	    if (PtInRect (&ltrc, cursor) && infoPtr->TLbtnState)
@@ -998,12 +998,9 @@ PAGER_NCCalcSize(HWND hwnd, WPARAM wParam, LPARAM lParam)
 	    lpRect->top += infoPtr->nButtonSize;
 	if (infoPtr->BRbtnState && (lpRect->bottom - infoPtr->nButtonSize > lpRect->top))
 	    lpRect->bottom -= infoPtr->nButtonSize;
-	/* ???? */
-	if ((lpRect->bottom < 0) || (lpRect->bottom > infoPtr->nHeight))
-	    lpRect->bottom = infoPtr->nHeight;
     }
 
-    TRACE("[%p] client rect set to %dx%d at (%d,%d) BtnState[%d,%d]\n",
+    TRACE("[%p] client rect set to %ldx%ld at (%ld,%ld) BtnState[%d,%d]\n",
 	  hwnd, lpRect->right-lpRect->left, lpRect->bottom-lpRect->top,
 	  lpRect->left, lpRect->top,
 	  infoPtr->TLbtnState, infoPtr->BRbtnState);
@@ -1232,7 +1229,7 @@ PAGER_MouseMove (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
 	/* If in one of the buttons the capture and draw buttons */
 	if (btnrect) {
-	    TRACE("[%p] draw btn (%d,%d)-(%d,%d), Capture %s, style %08lx\n",
+	    TRACE("[%p] draw btn (%ld,%ld)-(%ld,%ld), Capture %s, style %08lx\n",
 		  hwnd, btnrect->left, btnrect->top,
 		  btnrect->right, btnrect->bottom,
 		  (infoPtr->bCapture) ? "TRUE" : "FALSE",
@@ -1603,5 +1600,5 @@ PAGER_Register (void)
 VOID
 PAGER_Unregister (void)
 {
-    UnregisterClassA (WC_PAGESCROLLERA, (HINSTANCE)NULL);
+    UnregisterClassA (WC_PAGESCROLLERA, NULL);
 }

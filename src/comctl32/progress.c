@@ -257,6 +257,7 @@ static DWORD PROGRESS_SetRange (PROGRESS_INFO *infoPtr, int low, int high)
     infoPtr->MinVal = low;
     infoPtr->MaxVal = high;
     PROGRESS_CoercePos(infoPtr);
+    InvalidateRect(infoPtr->Self, NULL, TRUE);
     return res;
 }
 
@@ -334,7 +335,7 @@ static LRESULT WINAPI ProgressWindowProc(HWND hwnd, UINT message,
 
     case PBM_SETPOS:
     {
-	INT oldVal;
+        UINT oldVal;
         oldVal = infoPtr->CurVal;
         if(oldVal != wParam) {
 	    infoPtr->CurVal = (INT)wParam;
@@ -430,5 +431,5 @@ VOID PROGRESS_Register (void)
  */
 VOID PROGRESS_Unregister (void)
 {
-    UnregisterClassW (PROGRESS_CLASSW, (HINSTANCE)NULL);
+    UnregisterClassW (PROGRESS_CLASSW, NULL);
 }

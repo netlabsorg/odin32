@@ -1227,8 +1227,14 @@ REBAR_ForceResize (REBAR_INFO *infoPtr)
     TRACE("hwnd %p, style=%08lx, setting at (%d,%d) for (%d,%d)\n",
 	infoPtr->hwndSelf, infoPtr->dwStyle,
 	x, y, width, height);
-    SetWindowPos (infoPtr->hwndSelf, 0, x, y, width, height,
-		    SWP_NOZORDER);
+
+//testestest
+#ifdef __WIN32OS2__
+//NOTE: this one is causing problems!!!!
+#endif
+//    SetWindowPos (infoPtr->hwndSelf, 0, x, y, width, height,
+//		    SWP_NOZORDER);
+//testestest
 }
 
 
