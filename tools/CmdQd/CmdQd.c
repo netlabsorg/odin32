@@ -1,4 +1,4 @@
-/* $Id: CmdQd.c,v 1.14 2002-05-07 09:18:09 bird Exp $
+/* $Id: CmdQd.c,v 1.15 2002-05-24 01:11:35 bird Exp $
  *
  * Command Queue Daemon / Client.
  *
@@ -1446,8 +1446,10 @@ void Worker(void * iWorkerId)
             PJOBOUTPUT  pJobOutputLast = NULL;
             RESULTCODES Res;
             PID         pid;
+            HFILE       hStdIn = HF_STDIN;
             HFILE       hStdOut = HF_STDOUT;
             HFILE       hStdErr = HF_STDERR;
+            HFILE       hStdInSave = -1;
             HFILE       hStdOutSave = -1;
             HFILE       hStdErrSave = -1;
             HPIPE       hPipeR = NULLHANDLE;
@@ -1486,16 +1488,26 @@ void Worker(void * iWorkerId)
             {
                 assert(   pJob->JobInfo.szzEnv[pJob->JobInfo.cchEnv-1] == '\0'
                        && pJob->JobInfo.szzEnv[pJob->JobInfo.cchEnv-2] == '\0');
+                DosDupHandle(HF_STDIN, &hStdInSave);
                 DosDupHandle(HF_STDOUT, &hStdOutSave);
                 DosDupHandle(HF_STDERR, &hStdErrSave);
                 DosDupHandle(hPipeW, &hStdOut);
                 DosDupHandle(hPipeW, &hStdErr);
+                DosClose(HF_STDIN);
+                DosSetFHState(hPipeR, OPEN_FLAGS_NOINHERIT);
+                DosSetFHState(hPipeW, OPEN_FLAGS_NOINHERIT);
+                DosSetFHState(hStdInSave, OPEN_FLAGS_NOINHERIT);
+                DosSetFHState(hStdOutSave, OPEN_FLAGS_NOINHERIT);
+                DosSetFHState(hStdErrSave, OPEN_FLAGS_NOINHERIT);
                 rc = DosExecPgm(szObj, sizeof(szObj), EXEC_ASYNCRESULT,
                                 szArg, pJob->JobInfo.szzEnv, &Res, szArg);
+                hStdIn = HF_STDIN;
                 DosClose(hStdOut); hStdOut = HF_STDOUT;
                 DosClose(hStdErr); hStdErr = HF_STDERR;
+                DosDupHandle(hStdInSave, &hStdIn);
                 DosDupHandle(hStdOutSave, &hStdOut);
                 DosDupHandle(hStdErrSave, &hStdErr);
+                DosClose(hStdInSave);
                 DosClose(hStdOutSave);
                 DosClose(hStdErrSave);
                 DosReleaseMutexSem(hmtxExec);
