@@ -1,4 +1,4 @@
-; $Id: kernel32.def,v 1.64 2000-01-08 04:42:12 phaller Exp $
+; $Id: kernel32.def,v 1.65 2000-01-13 20:09:09 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is Windows95 KERNEL32
@@ -965,9 +965,11 @@ EXPORTS
 ; ----------------------------------------------------------------------------
 
     DebugErrorBox                 = DebugErrorBox                 @1201
-    WriteLog                      = WriteLog                      @1202
-    WriteLogError                 = WriteLogError                 @1214
-    WritePrivateLog               = WritePrivateLog               @1208
+    WriteLog                                                      @1202
+    WriteLogError                                                 @1214
+    WritePrivateLog                                               @1208
+    DecreaseLogCount                                              @1273
+    IncreaseLogCount                                              @1274
 
 ;Used by tibfix page in exe (change ordinal in pe2lx.cpp too!!)
     _RegisterPe2LxExe@12                                          @1203
