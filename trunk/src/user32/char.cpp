@@ -1,4 +1,4 @@
-/* $Id: char.cpp,v 1.6 1999-09-15 23:18:48 sandervl Exp $ */
+/* $Id: char.cpp,v 1.7 1999-09-23 15:57:24 phaller Exp $ */
 
 /*
  * Win32 character API functions for OS/2
@@ -103,12 +103,12 @@ LPSTR WIN32API CharPrevA( LPCSTR arg1, LPCSTR  arg2)
 }
 //******************************************************************************
 //******************************************************************************
-LPWSTR WIN32API CharPrevW(LPCWSTR x,
-                          LPCWSTR start)
+LPWSTR WIN32API CharPrevW(LPCWSTR start,
+                          LPCWSTR x)
 {
     dprintf(("USER32: OS2CharPrevW(%08xh,%08xh)\n",
-             x,
-             start));
+             start,
+             x));
 
   /* FIXME: add DBCS / codepage stuff */
   if (x>start)
