@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.139 2001-12-03 12:13:10 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.140 2001-12-07 11:28:11 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -36,6 +36,7 @@
 #include "oslibdos.h"
 #include "oslibmisc.h"
 #include "oslibdebug.h"
+#include "hmcomm.h"
 
 #include "console.h"
 #include "cio.h"
@@ -422,6 +423,8 @@ VOID WIN32API ExitProcess(DWORD exitcode)
         delete(WinExe);
         WinExe = NULL;
     }
+
+    HMDeviceCommClass::CloseOverlappedIOHandlers();
 
     //Note: Needs to be done after deleting WinExe (destruction of exe + dll objects)
     //Flush and delete all open memory mapped files
