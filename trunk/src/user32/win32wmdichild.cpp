@@ -1,4 +1,4 @@
-/* $Id: win32wmdichild.cpp,v 1.24 2000-05-28 16:43:47 sandervl Exp $ */
+/* $Id: win32wmdichild.cpp,v 1.25 2000-11-09 18:15:22 sandervl Exp $ */
 /*
  * Win32 MDI Child Window Class for OS/2
  *
@@ -521,7 +521,8 @@ void Win32MDIChildWindow::childGetMinMaxInfo(MINMAXINFO* lpMinMax )
         dprintf(("Win32MDIChildWindow::childGetMinMaxInfo:: client parent == NULL!!"));
         return;
     }
-    MapWindowPoints(client->getParent()->getWindowHandle(), client->getWindowHandle(), (LPPOINT)&rect, 2);
+    //SvL: No mapping required as our client rectangle is in frame coordinates (not relative to parent!)
+/////    MapWindowPoints(client->getParent()->getWindowHandle(), client->getWindowHandle(), (LPPOINT)&rect, 2);
 
     AdjustWindowRectEx( &rect, getStyle(), 0, getExStyle());
 
