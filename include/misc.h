@@ -1,4 +1,4 @@
-/* $Id: misc.h,v 1.10 1999-11-09 19:21:36 sandervl Exp $ */
+/* $Id: misc.h,v 1.11 1999-12-03 01:20:02 phaller Exp $ */
 
 /*
  * Miscellaneous definitions
@@ -43,6 +43,7 @@
 
 #else
   #define dprintf(a)
+  #define dprintf2(a)
   #define eprintf(a)
   #define dassert(a, b)
   #define dbgCheckObj(a)

@@ -1,4 +1,8 @@
- /* $Id: changelog,v 1.499 1999-12-02 19:32:48 sandervl Exp $ */
+ /* $Id: changelog,v 1.500 1999-12-03 01:22:27 phaller Exp $ */
+
+ 99-12-02: Patrick Haller <phaller@gmx.net>
+	- WSOCK32\NEW:  Improvements.
+	- INCLUDE:	Some macro fixes in misc.h and odinwrap.h
 
  99-12-02: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Rewrote EnumThreadWindows/EnumWindows
