@@ -1,4 +1,4 @@
-/* $Id: wsock32.cpp,v 1.20 2000-03-17 16:06:42 sandervl Exp $ */
+/* $Id: wsock32.cpp,v 1.21 2000-03-20 20:31:30 sandervl Exp $ */
 
 /*
  *
@@ -1201,6 +1201,7 @@ ODINFUNCTION6(LHANDLE,OS2WSAAsyncGetServByName,
   ulNewID = RelayAlloc(hWnd,
                        wMsg,
                        ASYNCREQUEST_GETSERVBYNAME,
+  	 	       NO_SOCKET, 
                        FALSE,
                        buf);
 
@@ -1251,6 +1252,7 @@ ODINFUNCTION6(LHANDLE,OS2WSAAsyncGetServByPort,
   ulNewID = RelayAlloc(hWnd,
                        wMsg,
                        ASYNCREQUEST_GETSERVBYPORT,
+  	 	       NO_SOCKET, 
                        FALSE,
                        buf);
 
@@ -1300,6 +1302,7 @@ ODINFUNCTION5(LHANDLE,OS2WSAAsyncGetProtoByName,
   ulNewID = RelayAlloc(hWnd,
                        wMsg,
                        ASYNCREQUEST_GETPROTOBYNAME,
+  	 	       NO_SOCKET, 
                        FALSE,
                        buf);
 
@@ -1348,6 +1351,7 @@ ODINFUNCTION5(LHANDLE,OS2WSAAsyncGetProtoByNumber,
   ulNewID = RelayAlloc(hWnd,
                        wMsg,
                        ASYNCREQUEST_GETPROTOBYNUMBER,
+  	 	       NO_SOCKET, 
                        FALSE,
                        buf);
 
@@ -1398,6 +1402,7 @@ ODINFUNCTION5(LHANDLE,OS2WSAAsyncGetHostByName,
   ulNewID = RelayAlloc(hWnd,
                        wMsg,
                        ASYNCREQUEST_GETHOSTBYNAME,
+  	 	       NO_SOCKET, 
                        FALSE,
                        (PVOID)buf, (PVOID)buflen);
 
@@ -1448,6 +1453,7 @@ ODINFUNCTION7(LHANDLE,OS2WSAAsyncGetHostByAddr,
   ulNewID = RelayAlloc(hWnd,
                        wMsg,
                        ASYNCREQUEST_GETHOSTBYADDR,
+  	 	       NO_SOCKET, 
                        FALSE,
                        buf);
 
@@ -1535,15 +1541,15 @@ ODINFUNCTION4(int,OS2WSAAsyncSelect,
   if ( (wMsg == 0) && (lEvent == 0) )
   {
     // remove entry from list
-    RelayFreeByHwnd(hWnd);
+    RelayFreeByHwnd(s, hWnd);
   }
   else
     // add entry to list
     ulNewID = RelayAlloc(hWnd,
                          wMsg,
                          ASYNCREQUEST_SELECT,
+			 s, 
 			 FALSE); //SvL: allow multiple selects -> pmwsock should fail if it not allowed
-//                         TRUE);
 
   rc = WSAAsyncSelect(s,
                       hwndRelay,

@@ -77,6 +77,7 @@ static VMutex      relayMutex;
 ULONG RelayAlloc(HWND  hwnd,
                  ULONG ulMsg,
                  ULONG ulRequestType,
+	         ULONG socket,
                  BOOL  fSingleRequestPerWindow,
                  PVOID pvUserData1,
                  PVOID pvUserData2,
@@ -95,6 +96,7 @@ ULONG RelayAlloc(HWND  hwnd,
 	      	arrHwndMsgPair[ulCounter].hwnd          = hwnd;
 	      	arrHwndMsgPair[ulCounter].ulMsg         = ulMsg;
 	      	arrHwndMsgPair[ulCounter].ulRequestType = ulRequestType;
+	      	arrHwndMsgPair[ulCounter].socket        = socket;
 	      	arrHwndMsgPair[ulCounter].pvUserData1   = pvUserData1;
 	      	arrHwndMsgPair[ulCounter].pvUserData2   = pvUserData2;
 	      	arrHwndMsgPair[ulCounter].pvUserData3   = pvUserData3;
@@ -129,6 +131,7 @@ ULONG RelayFree(ULONG ulID)
   arrHwndMsgPair[ulID-1].hwnd = 0; // mark free
   arrHwndMsgPair[ulID-1].ulMsg = 0;
   arrHwndMsgPair[ulID-1].ulRequestType = 0;
+  arrHwndMsgPair[ulID-1].socket = 0;
   arrHwndMsgPair[ulID-1].pvUserData1 = 0;
   arrHwndMsgPair[ulID-1].pvUserData2 = 0;
   arrHwndMsgPair[ulID-1].pvUserData3 = 0;
@@ -150,18 +153,20 @@ ULONG RelayFree(ULONG ulID)
  * Author    : Patrick Haller [Tue, 1999/11/30 23:00]
  *****************************************************************************/
 
-ULONG RelayFreeByHwnd(HWND hwnd)
+ULONG RelayFreeByHwnd(ULONG socket, HWND hwnd)
 {
   ULONG ulCounter;
 
   relayMutex.enter();
   for(ulCounter = 0; ulCounter < MAX_ASYNC_SOCKETS; ulCounter++)
   {
-    	if ( arrHwndMsgPair[ulCounter].hwnd == hwnd )  // same window?
+    	if (arrHwndMsgPair[ulCounter].hwnd == hwnd &&
+            arrHwndMsgPair[ulCounter].socket == socket)  // same window && socket?
     	{
       		arrHwndMsgPair[ulCounter].hwnd  = 0; // free slot
   		arrHwndMsgPair[ulCounter].ulMsg = 0;
   		arrHwndMsgPair[ulCounter].ulRequestType = 0;
+  		arrHwndMsgPair[ulCounter].socket = 0;
   		arrHwndMsgPair[ulCounter].pvUserData1 = 0;
   		arrHwndMsgPair[ulCounter].pvUserData2 = 0;
   		arrHwndMsgPair[ulCounter].pvUserData3 = 0;
@@ -243,7 +248,10 @@ MRESULT EXPENTRY RelayWindowProc(HWND   hwnd,
        **********/
       case ASYNCREQUEST_SELECT:
       {
-        dprintf(("WSOCK32:RelayWindowProc, AsyncSelect notification %x %x (%d,%d) time %x\n", pHM->hwnd, pHM->ulMsg, mp1, mp2, WinQueryMsgTime(hab)));
+        dprintf(("WSOCK32:RelayWindowProc, AsyncSelect notification %x %x (%x,%x) time %x\n", pHM->hwnd, pHM->ulMsg, mp1, mp2, WinQueryMsgTime(hab)));
+	if(SHORT2FROMMP(mp2) == WSAECONNREFUSED) {
+		mp2 = (MPARAM)((WSAENOTCONN << 16) | 0x10);
+	}
         break;
       }
 

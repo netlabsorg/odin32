@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.21 2000-03-17 16:06:42 sandervl Exp $
+# $Id: makefile,v 1.22 2000-03-20 20:31:29 sandervl Exp $
 
 #
 # Odin32 API
@@ -35,6 +35,8 @@ $(OBJDIR)\dbglocal.obj
 
 # Target name - name of the dll without extention and path.
 TARGET = wsock32
+
+CXXFLAGS = $(CXXFLAGS)
 
 
 # All rule - build objs, target dll, copies dll to bin and makes libs.
