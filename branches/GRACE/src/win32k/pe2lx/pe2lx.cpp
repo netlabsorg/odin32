@@ -1,4 +1,4 @@
-/* $Id: pe2lx.cpp,v 1.18.4.3 2000-08-19 14:37:18 bird Exp $
+/* $Id: pe2lx.cpp,v 1.18.4.4 2000-08-20 08:08:47 bird Exp $
  *
  * Pe2Lx class implementation. Ring 0 and Ring 3
  *
@@ -4643,6 +4643,57 @@ PCSZ Pe2Lx::queryOdin32ModuleName(PCSZ pszWin32ModuleName)
     }
 
     return pszWin32ModuleName;
+}
+
+
+BOOL Pe2Lx::initOdin32Path()
+{
+    APIRET rc;
+    PMTE   pMTE;
+
+
+    if (sfnKernel32 != NULLHANDLE)
+        return TRUE;
+
+    /*
+     * Try find it using ldrFindModule.
+     */
+    pMTE = NULL;
+    rc = ldrFindModule("KERNEL32", 8, CLASS_GLOBAL, &pMTE);
+    if (rc == NO_ERROR && pMTE != NULL)
+    {
+        char *psz = pMTE->mte_swapmte->smte_path;
+        if (psz != NULL)
+        {
+            char * pszEnd = psz + strlen(psz) - 1;
+            while (pszEnd > psz && *pszEnd != '\\' && *pszEnd != '/' && *pszEnd != ':')
+                pszEnd--;
+            pszEnd--;
+            while (pszEnd > psz && *pszEnd != '\\' && *pszEnd != '/' && *pszEnd != ':')
+                pszEnd--;
+            if (pszEnd > psz)
+            {
+                char * pszPath = (char*)malloc(pszEnd - psz);
+                memcpy(pszPath, psz, pszEnd - psz);
+                pszPath[pszEnd - psz] = '\0';
+
+                if (pszOdin32Path)
+                    free((void*)pszOdin32Path);
+                pszOdin32Path = pszPath;
+                sfnKernel32 = pMTE->mte_sfn;
+
+                return TRUE;
+            }
+        }
+    }
+
+    /*
+     * Try find it searching the LIBPATHs.
+     * (Don't thing we should use ldrOpenPath since it
+     *  end's up calling ldrOpen - which is overloaded.)
+     */
+
+    return FALSE;
 }
 
 

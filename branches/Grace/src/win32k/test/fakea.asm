@@ -1,4 +1,4 @@
-; $Id: fakea.asm,v 1.1.4.1 2000-08-17 08:23:35 bird Exp $
+; $Id: fakea.asm,v 1.1.4.2 2000-08-20 08:08:50 bird Exp $
 ;
 ; Fake assembly imports.
 ;
@@ -57,6 +57,8 @@ fakeptda_pPTDAExecChild     dd      offset FLAT:fakeptda_start
 fakeptda_dummy              db  123 dup (0)
 fakeptda_environ            dw      1   ; 1 is the hardcoded HOB of the win32ktst.exe's environment.
 fakeptda_module             dw      1   ; 1 is the hardcoded HMTE of the current executable module.
+fakeptda_pBeginLIBPATH      dw      0   ; BEGINLIBPATH not implemented.
+                            dw      0   ; ENDLIBPATH not implemented.
 
 
 ; TCB - just needs some dummy data for reading and writing to the TCBFailErr.
