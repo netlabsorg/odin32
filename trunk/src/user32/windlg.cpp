@@ -1,4 +1,4 @@
-/* $Id: windlg.cpp,v 1.33 2002-06-02 10:07:59 sandervl Exp $ */
+/* $Id: windlg.cpp,v 1.34 2002-06-10 09:12:35 sandervl Exp $ */
 /*
  * Win32 dialog apis for OS/2
  *
@@ -424,7 +424,6 @@ int WIN32API GetDlgCtrlID(HWND hwnd)
         SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
-    dprintf(("USER32: GetDlgCtrlID %x", hwnd));
     ret = dlgcontrol->getWindowId();
     RELEASE_WNDOBJ(dlgcontrol);
     return ret;

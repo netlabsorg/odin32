@@ -1,4 +1,4 @@
-/* $Id: message.cpp,v 1.3 2002-06-09 10:47:50 sandervl Exp $ */
+/* $Id: message.cpp,v 1.4 2002-06-10 09:12:35 sandervl Exp $ */
 /*
  * Win32 window message APIs for OS/2
  *
