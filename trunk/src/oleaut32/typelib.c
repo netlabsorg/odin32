@@ -2912,12 +2912,26 @@ static ITypeLib2* ITypeLib2_Constructor_SLTG(LPVOID pLib, DWORD dwTLBLength)
     /* Skip this WORD and get the next DWORD */
     len = *(DWORD*)(pAfterOTIBlks + 2);
 
-    /* Now add this to pLibBLk and then add 0x216, sprinkle a bit a
-       magic dust and we should be pointing at the beginning of the name
+    /* Now add this to pLibBLk look at what we're pointing at and
+       possibly add 0x20, then add 0x216, sprinkle a bit a magic
+       dust and we should be pointing at the beginning of the name
        table */
+ 
+    pNameTable = (char*)pLibBlk + len;
 
-    pNameTable = (char*)pLibBlk + len + 0x216;
+   switch(*(WORD*)pNameTable) {
+   case 0xffff:
+       break;
+   case 0x0200:
+       pNameTable += 0x20;
+       break;
+   default:
+       FIXME("pNameTable jump = %x\n", *(WORD*)pNameTable);
+       break;
+   }
     
+    pNameTable += 0x216;
+
     pNameTable += 2;
 
     TRACE("Library name is %s\n", pNameTable + pLibBlk->name);
@@ -4044,6 +4058,16 @@ _invoke(LPVOID func,CALLCONV callconv, int nrargs, DWORD *args) {
 		DWORD (* WINAPI xfunc)(DWORD,DWORD,DWORD,DWORD,DWORD,DWORD,DWORD) = func;
 		res = xfunc(args[0],args[1],args[2],args[3],args[4],args[5],args[6]);
 		break;
+        }
+	case 8: {
+		DWORD (* WINAPI xfunc)(DWORD,DWORD,DWORD,DWORD,DWORD,DWORD,DWORD,DWORD) = func;
+		res = xfunc(args[0],args[1],args[2],args[3],args[4],args[5],args[6],args[7]);
+		break;
+	}
+	case 9: {
+		DWORD (* WINAPI xfunc)(DWORD,DWORD,DWORD,DWORD,DWORD,DWORD,DWORD,DWORD,DWORD) = func;
+		res = xfunc(args[0],args[1],args[2],args[3],args[4],args[5],args[6],args[7],args[8]);
+		break;
 	}
 #else
 	case 0: {
@@ -4084,6 +4108,16 @@ _invoke(LPVOID func,CALLCONV callconv, int nrargs, DWORD *args) {
 	case 7: {
 		DWORD (WINAPI *xfunc)(DWORD,DWORD,DWORD,DWORD,DWORD,DWORD,DWORD) = func;
 		res = xfunc(args[0],args[1],args[2],args[3],args[4],args[5],args[6]);
+		break;
+        }
+	case 8: {
+		DWORD (WINAPI *xfunc)(DWORD,DWORD,DWORD,DWORD,DWORD,DWORD,DWORD,DWORD) = func;
+		res = xfunc(args[0],args[1],args[2],args[3],args[4],args[5],args[6],args[7]);
+		break;
+	}
+	case 9: {
+		DWORD (WINAPI *xfunc)(DWORD,DWORD,DWORD,DWORD,DWORD,DWORD,DWORD,DWORD,DWORD) = func;
+		res = xfunc(args[0],args[1],args[2],args[3],args[4],args[5],args[6],args[7],args[8]);
 		break;
 	}
 #endif
