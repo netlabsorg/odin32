@@ -1,4 +1,4 @@
-/* $Id: virtual.cpp,v 1.4 1999-08-25 10:28:41 sandervl Exp $ */
+/* $Id: virtual.cpp,v 1.5 1999-08-25 11:40:18 sandervl Exp $ */
 
 /*
  * Win32 virtual memory functions
@@ -19,6 +19,7 @@
 #include <win\virtual.h>
 #include <heapstring.h>
 #include <handlemanager.h>
+#include "mmap.h"
 
 /***********************************************************************
  *             CreateFileMapping32A   (KERNEL32.46)
@@ -143,8 +144,19 @@ BOOL WINAPI FlushViewOfFile(
               DWORD cbFlush /* [in] Number of bytes in range */
 ) 
 {
-    dprintf(("FlushViewOfFile: NOT IMPLEMENTED"));
-    return TRUE;
+ Win32MemMap *map;
+
+    if (!base)
+    {
+        SetLastError( ERROR_INVALID_PARAMETER );
+        return FALSE;
+    }
+    map = Win32MemMap::findMap((ULONG)base);
+    if(map == NULL) {
+        SetLastError( ERROR_FILE_NOT_FOUND );
+        return FALSE;
+    }
+    return map->flushView((LPVOID)base, cbFlush);
 }
 
 
@@ -162,12 +174,19 @@ BOOL WINAPI FlushViewOfFile(
 BOOL WINAPI UnmapViewOfFile(LPVOID addr /* [in] Address where mapped view begins */
 ) 
 {
+ Win32MemMap *map;
+
     if (!addr)
     {
         SetLastError( ERROR_INVALID_PARAMETER );
         return FALSE;
     }
-    return TRUE;
+    map = Win32MemMap::findMap((ULONG)addr);
+    if(map == NULL) {
+        SetLastError( ERROR_FILE_NOT_FOUND );
+        return FALSE;
+    }
+    return map->unmapViewOfFile();
 }
 
 /***********************************************************************
