@@ -1,4 +1,8 @@
-/* $Id: ChangeLog,v 1.1248 2001-02-11 10:35:49 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1249 2001-02-11 15:36:50 bird Exp $ */
+
+ 2001-02-11: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - Win32k:   o Added symbols for the 14062D kernels.
+                o Added a query API for getting memory information.
 
  2001-02-11: Sander van Leeuwen <sandervl@xs4all.nl>
     - ODINCRT:  o Completed runtime dll for VAC 3.6.5
@@ -31,7 +35,7 @@
                 o shared & code heap umalloc changed (now more meaningful debug
                   messages in case of heap corruption)
     - USER32:   o WM_MINIMIZE/WS_MAXIMIZE support added to CreateWindow
-                  (fixes size of main InstallShield window for Microsoft Visual 
+                  (fixes size of main InstallShield window for Microsoft Visual
                    C++ 4.2)
                 o Fixed FS corruption in DIALOG_DlgDirList (c library function calls)
 
@@ -39,7 +43,7 @@
     - KERNEL32: o Standard in/out/error handle fix. Disable change during
                   console init.
                   (fixes output of console applications; input doesn't work well yet)
-    - USER32:   o Dialog control fix. Creating them with CreateWindowExW does not 
+    - USER32:   o Dialog control fix. Creating them with CreateWindowExW does not
                   work since our standard user32 controls are still ASCII.
                   (fixes missing icon control in Acrobat Distiller window)
 
@@ -77,11 +81,11 @@
                     -: Never applied (use this to debug).   (not checked)
                     *: Allways applied. (default)           (gray)
                   It's also added to Win32kCC as a three state checkbutton.
-                  
-                  WARNING! This option should only be used for debugging 
-                  and will cause your system to crash if used with based 
+
+                  WARNING! This option should only be used for debugging
+                  and will cause your system to crash if used with based
                   images!
-    - tools\Common:   
+    - tools\Common:
                 o Minor changes in the fileformat classes to use kFile.
 
  2001-02-01: Sander van Leeuwen <sandervl@xs4all.nl>
@@ -91,7 +95,7 @@
                   (pHps can be NULL)
                   (fixes crash in Solitaire)
     - INSTALL:  o Include ChangeLog-2001 in daily build
-    - COMDLG32: o Merged some changes from Wine (extra notification in 
+    - COMDLG32: o Merged some changes from Wine (extra notification in
                   FileOpenDlgProc95 & OFN_NOCHANGEDIR support (also added
                   to Unicode version of file open dialog))
                 o Removed workaround for Acrobat Reader file open dialog
