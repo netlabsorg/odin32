@@ -1,4 +1,4 @@
-# $Id: MkCallTab.mak,v 1.5 2002-04-07 22:39:45 bird Exp $
+# $Id: MkCallTab.mak,v 1.6 2002-08-20 04:37:59 bird Exp $
 
 #
 # MkCallTab - 16-bit source generator.
@@ -25,7 +25,7 @@ PATH_BIN   = $(PATH_TOOLS)
 TARGET_MODE = EXE
 TARGET_NAME = MkCallTab
 MAKEFILE    = $(TARGET_NAME).mak
-CC_INCLUDES = -I../include -I$(PATH_DDKBASE)/h -I$(PATH_MSC)/include -I$(PATH_TOOLKIT)/h
+CC_INCLUDES = -I../include -I../kLib/include -I$(PATH_DDKBASE)/h -I$(PATH_MSC)/include -I$(PATH_TOOLKIT)/h
 ALL_DEFINES = -DMKCALLTAB
 
 

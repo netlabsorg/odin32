@@ -1,4 +1,4 @@
-# $Id: srcR3Tst.mak,v 1.3 2002-04-07 22:39:46 bird Exp $
+# $Id: srcR3Tst.mak,v 1.4 2002-08-20 04:38:00 bird Exp $
 
 #
 # kKrnlLib/srcR3Tst makefile.
@@ -19,7 +19,7 @@ PATH_ROOT = ..\..\..\..
 TARGET_MODE  = SYSLIB
 TARGET_NAME  = kKrnlLib_srcR3Tst
 MAKEFILE     = srcR3Tst.mak
-ALL_INCLUDES = -I../include
+ALL_INCLUDES = -I../include -I../kLib/include
 AS_INCLUDES  = -I$(PATH_DDKBASE)\inc
 ALL_DEFINES  = -DKKRNLLIB -DR3TST
 

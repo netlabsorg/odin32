@@ -1,4 +1,4 @@
-# $Id: Extract.mak,v 1.5 2002-04-07 22:39:44 bird Exp $
+# $Id: Extract.mak,v 1.6 2002-08-20 04:37:59 bird Exp $
 
 #
 # kKrnlLib/krnl makefile.
@@ -19,7 +19,7 @@ PATH_BIN   = $(PATH_TOOLS)
 #
 TARGET_NAME = Extract
 MAKEFILE    = $(TARGET_NAME).mak
-ALL_INCLUDES= -I../include
+ALL_INCLUDES= -I../include -I../kLib/include
 ALL_DEFINES = -DEXTRACT -DLOGGING_DISABLED
 TARGET_STACKSIZE = 0x2000
 
