@@ -1,4 +1,4 @@
-/* $Id: options.h,v 1.5 2000-10-02 21:23:05 phaller Exp $ */
+/* $Id: options.h,v 1.6 2001-02-28 20:22:44 sandervl Exp $ */
 
 /*
  * Command-line options.
@@ -85,10 +85,12 @@ extern struct options Options;
 
 /* Odin profile functions */
 /* Odin profile name in KERNEL32.DLL directory */
-#define ODINININAME "ODIN.INI"
-#define ODINCOLORS        "COLORS"
-#define ODINDIRECTORIES   "DEVDIRECTORIES"
-#define ODINCUSTOMIZATION "CUSTOMIZATION"
+#define ODINININAME        "ODIN.INI"
+#define ODINCOLORS         "COLORS"
+#define ODINDIRECTORIES    "DEVDIRECTORIES"
+#define ODINCUSTOMIZATION  "CUSTOMIZATION"
+#define ODINSYSTEM_SECTION "ODINSYSTEM"
+#define HIGHMEM_KEY        "HIGHMEM"
 
 int WINAPI PROFILE_GetOdinIniString(LPCSTR section,LPCSTR key_name,LPCSTR def,LPSTR buffer,UINT len);
 int WINAPI PROFILE_SetOdinIniString(LPCSTR section,LPCSTR key_name,LPCSTR value);
