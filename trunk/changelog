@@ -1,4 +1,10 @@
-/* $Id: changelog,v 1.2396 2002-12-27 15:25:24 sandervl Exp $ */
+/* $Id: changelog,v 1.2397 2002-12-28 09:30:09 sandervl Exp $ */
+
+ 2002-12-28: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o Changed default WM_MOUSEACTIVATE handler (like Wine now)
+
+ 2001-12-28: Dietrich Teickner <Dietrich_Teickner@t-online   >
+    - USER32:   o Listbox fix for WM_SETFONT; update listbox height
 
  2002-12-27: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o Cleaned up console code (hardcoded WriteLog calls)
