@@ -1,4 +1,4 @@
-/* $Id: dc.h,v 1.14 2000-06-08 18:10:09 sandervl Exp $ */
+/* $Id: dc.h,v 1.15 2000-06-17 09:45:02 sandervl Exp $ */
 /*
  * public dc functions
  *
@@ -110,21 +110,6 @@ typedef struct _penobject
 #define RDW_ERASENOW_W         0x0200
 #define RDW_FRAME_W            0x0400
 #define RDW_NOFRAME_W          0x0800
-
-typedef struct _RGNDATAHEADER_W {
-    DWORD       dwSize;
-    DWORD       iType;
-    DWORD       nCount;
-    DWORD       nRgnSize;
-    RECT        rcBound;
-} RGNDATAHEADER_W, *LPRGNDATAHEADER_W;
-
-typedef struct _RGNDATA_W {
-    RGNDATAHEADER_W     rdh;
-    char                Buffer[1];
-} RGNDATA_W , *PRGNDATA_W , *LPRGNDATA_W ;
-
-
 /* Xform FLAGS */
 #define MWT_IDENTITY_W        1
 #define MWT_LEFTMULTIPLY_W    2
@@ -256,18 +241,6 @@ inline int O32_GetUpdateRgn(HWND a, HRGN b, BOOL c)
     return yyrc;
 }
 
-ULONG   OPEN32API _O32_GetRegionData (HRGN hrgn, ULONG count, PRGNDATA_W pData);
-
-inline DWORD O32_GetRegionData(HRGN a, DWORD b, PRGNDATA_W c)
-{
- DWORD yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = _O32_GetRegionData(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-}
 
 BOOL    OPEN32API _O32_DeleteObject (LHANDLE hgdiobj);
 
@@ -303,45 +276,6 @@ inline VOID O32_SetLastError(DWORD a)
 
     _O32_SetLastError(a);
     SetFS(sel);
-}
-
-BOOL    OPEN32API _O32_SetRectRgn (HRGN dest, int left, int top, int right, int bottom);
-
-inline BOOL O32_SetRectRgn(HRGN a, int b, int c, int d, int e)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = _O32_SetRectRgn(a, b, c, d, e);
-    SetFS(sel);
-
-    return yyrc;
-}
-
-int     OPEN32API _O32_CombineRgn (HRGN dest, HRGN src1, HRGN src2, int mode);
-
-inline int O32_CombineRgn(HRGN a, HRGN b, HRGN c, int d)
-{
- int yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = _O32_CombineRgn(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-}
-
-HRGN    OPEN32API _O32_CreateRectRgn (int left, int top, int right, int bottom);
-
-inline HRGN O32_CreateRectRgn(int a, int b, int c, int d)
-{
- HRGN yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = _O32_CreateRectRgn(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
 }
 
 BOOL    OPEN32API _O32_ExcludeUpdateRgn( HDC, HWND );

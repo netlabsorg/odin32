@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.61 2000-06-14 14:25:56 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.62 2000-06-17 09:45:00 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -884,7 +884,7 @@ HDC WIN32API GetDCEx (HWND hwnd, HRGN hrgn, ULONG flags)
    if ((flags & DCX_EXCLUDERGN_W) || (flags & DCX_INTERSECTRGN_W))
    {
       ULONG BytesNeeded;
-      PRGNDATA_W RgnData;
+      PRGNDATA RgnData;
       PRECT pr;
       int i;
       RECTL rectl;
@@ -1052,7 +1052,7 @@ BOOL WIN32API RedrawWindow(HWND hwnd, const RECT* pRect, HRGN hrgn, DWORD redraw
    if (hrgn)
    {
       ULONG BytesNeeded;
-      PRGNDATA_W RgnData;
+      PRGNDATA RgnData;
       PRECTL pr;
       int i;
       LONG height;
@@ -1065,11 +1065,11 @@ BOOL WIN32API RedrawWindow(HWND hwnd, const RECT* pRect, HRGN hrgn, DWORD redraw
       if (!hrgn)
          goto error;
 
-      BytesNeeded = O32_GetRegionData (hrgn, 0, NULL);
-      RgnData = (PRGNDATA_W)_alloca (BytesNeeded);
+      BytesNeeded = GetRegionData (hrgn, 0, NULL);
+      RgnData = (PRGNDATA)_alloca (BytesNeeded);
       if (RgnData == NULL)
           goto error;
-      O32_GetRegionData (hrgn, BytesNeeded, RgnData);
+      GetRegionData (hrgn, BytesNeeded, RgnData);
 
       pr = (PRECTL)(RgnData->Buffer);
       for (i = RgnData->rdh.nCount; i > 0; i--, pr++) {
@@ -1106,8 +1106,9 @@ BOOL WIN32API RedrawWindow(HWND hwnd, const RECT* pRect, HRGN hrgn, DWORD redraw
         if (!pRect && !hrgn)
             success = WinInvalidateRect (hwnd, NULL, IncludeChildren);
         else
-        if (hrgn)
+        if (hrgn) {
             success = WinInvalidateRegion (hwnd, hrgnTemp, IncludeChildren);
+        }
         else
             success = WinInvalidateRect (hwnd, &rectl, IncludeChildren);
 
@@ -1123,8 +1124,9 @@ BOOL WIN32API RedrawWindow(HWND hwnd, const RECT* pRect, HRGN hrgn, DWORD redraw
             if (!pRect && !hrgn)
                 success = WinValidateRect (hwnd, NULL, IncludeChildren);
             else
-            if (hrgn)
+            if (hrgn) {
                 success = WinValidateRegion (hwnd, hrgnTemp, IncludeChildren);
+            }
             else
                 success = WinValidateRect (hwnd, &rectl, IncludeChildren);
             if (!success) goto error;
@@ -1236,26 +1238,26 @@ BOOL setPMRgnIntoWinRgn (HRGN hrgnPM, HRGN hrgnWin, LONG height)
          rgnRect.crc = rgnRect.crcReturned;
          rc = GpiQueryRegionRects (hps, hrgnPM, NULL, &rgnRect, Rcls);
 
-         rc = O32_SetRectRgn (hrgnWin, pRcl->xLeft,
-                                        pRcl->xRight,
-                                        height - pRcl->yTop,
-                                        height - pRcl->yBottom);
+         rc = SetRectRgn(hrgnWin, pRcl->xLeft,
+                         pRcl->xRight,
+                         height - pRcl->yTop,
+                         height - pRcl->yBottom);
 
          if (rgnRect.crcReturned > 1)
          {
             int i;
             HRGN temp;
-            temp = O32_CreateRectRgn (0, 0, 1, 1);
+            temp = CreateRectRgn (0, 0, 1, 1);
 
             for (i = 1, pRcl++; rc && (i < rgnRect.crcReturned); i++, pRcl++)
             {
-              rc = O32_SetRectRgn (temp, pRcl->xLeft,
-                                          pRcl->xRight,
-                                          height - pRcl->yTop,
-                                          height - pRcl->yBottom);
-              rc &= O32_CombineRgn (hrgnWin, hrgnWin, temp, RGN_OR_W);
+              rc = SetRectRgn (temp, pRcl->xLeft,
+                               pRcl->xRight,
+                               height - pRcl->yTop,
+                               height - pRcl->yBottom);
+              rc &= CombineRgn (hrgnWin, hrgnWin, temp, RGN_OR_W);
             }
-            O32_DeleteObject (temp);
+            DeleteObject (temp);
          }
          delete[] Rcls;
       }
@@ -1266,7 +1268,7 @@ BOOL setPMRgnIntoWinRgn (HRGN hrgnPM, HRGN hrgnWin, LONG height)
    }
    else
    {
-      rc = O32_SetRectRgn (hrgnWin, 0, 0, 0, 0);
+      rc = SetRectRgn (hrgnWin, 0, 0, 0, 0);
    }
 
    WinReleasePS (hps);
