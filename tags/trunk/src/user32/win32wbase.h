@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.26 1999-10-17 12:17:45 cbratschi Exp $ */
+/* $Id: win32wbase.h,v 1.27 1999-10-17 15:46:10 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -181,7 +181,6 @@ Win32BaseWindow *getOwner()                   { return owner; };
 
 Win32BaseWindow *getTopParent();
  SCROLLBAR_INFO *getScrollInfo(int nBar);
-       LONG      setScrollInfo(int nBar, SCROLLINFO *info, int fRedraw);
        HWND      getVertScrollHandle()        { return hwndVertScroll; };
        HWND      getHorzScrollHandle()        { return hwndHorzScroll; };
        VOID      subclassScrollBars(BOOL subHorz,BOOL subVert);
@@ -212,6 +211,10 @@ static Win32BaseWindow *GetWindowFromOS2FrameHandle(HWND hwnd);
        VOID  setOldFrameProc(PVOID aOldFrameProc) { pOldFrameProc = aOldFrameProc; };
        ULONG getBorderWidth() { return borderWidth; };
        ULONG getBorderHeight() { return borderHeight; };
+
+static	void  NC_AdjustRectInner(LPRECT rect, DWORD style, DWORD exStyle);
+static	void  NC_AdjustRectOuter(LPRECT rect, DWORD style, BOOL menu, DWORD exStyle);
+static	BOOL  WindowNeedsWMBorder( DWORD style, DWORD exStyle );
 
        PVOID getOldWndProc() { return pOldWndProc; }
        VOID  setOldWndProc(PVOID aOldWndProc) { pOldWndProc = aOldWndProc; }
