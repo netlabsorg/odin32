@@ -1,4 +1,4 @@
-/* $Id: exceptions.cpp,v 1.48 2000-11-18 16:20:06 sandervl Exp $ */
+/* $Id: exceptions.cpp,v 1.49 2001-01-29 01:22:21 bird Exp $ */
 
 /* WARNING: Compiling this module with ICC with optimizations turned on   */
 /* currently breaks this module. To get correct code, it is not necessary */
@@ -667,7 +667,7 @@ void KillWin32Process(void)
  * Author    : Patrick Haller [Tue, 1999/07/01 09:00]
  *****************************************************************************/
 
-void static dprintfException(PEXCEPTIONREPORTRECORD       pERepRec,
+static void dprintfException(PEXCEPTIONREPORTRECORD       pERepRec,
                              PEXCEPTIONREGISTRATIONRECORD pERegRec,
                              PCONTEXTRECORD               pCtxRec,
                              PVOID                        p)
