@@ -1,4 +1,4 @@
-# $Id: setup.os2debwat11.mk,v 1.10 2002-08-20 21:20:10 bird Exp $
+# $Id: setup.os2debwat11.mk,v 1.11 2002-08-24 04:59:47 bird Exp $
 
 # ---OS2, DEBUG, WAT11-------------------------
 ENV_NAME="OS/2, Debug, Watcom C/C++ v11.0c"
@@ -15,6 +15,7 @@ ENV_ENVS_FORCE=vac308 watcomc11c
 # Include some shared standard stuff: ALP, VAC optional stuff.
 #
 !include $(PATH_MAKE)\setup.os2debalp.mk
+!include $(PATH_MAKE)\setup.os2prfwrc.mk
 !include $(PATH_MAKE)\setup.optional.watcom11x.mk
 
 
