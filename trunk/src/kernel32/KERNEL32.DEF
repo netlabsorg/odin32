@@ -1,4 +1,4 @@
-; $Id: KERNEL32.DEF,v 1.73 2000-03-09 19:03:19 sandervl Exp $
+; $Id: KERNEL32.DEF,v 1.74 2000-03-10 16:11:59 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is Windows95 KERNEL32
@@ -133,9 +133,13 @@ EXPORTS
 ;--------------
 
 ;;Not supported; just present
+     _CommonUnimpStub@0                                           @17
      LoadLibrary16              = _LoadLibrary16@4                @35
      FreeLibrary16              = _FreeLibrary16@4                @36
      GetProcAddress16           = _GetProcAddress16@8             @37
+     ReleaseThunkLock           = _ReleaseThunkLock@4             @48
+     RestoreThunkLock           = _RestoreThunkLock@4             @49
+     _ConfirmWin16Lock          = __ConfirmWin16Lock@0            @96
 
 ;;     WrongComctl32@0 @36
      AddAtomA                   = _AddAtomA@4                      @50
@@ -205,7 +209,7 @@ EXPORTS
      CreateDirectoryW           = _CreateDirectoryW@8              @155
      CreateEventA               = _CreateEventA@16                 @156
      CreateEventW               = _CreateEventW@16                 @157
-     CreateFiber                = _CreateFiber@12                  @48    ;NT
+     CreateFiber                = _CreateFiber@12                  @1048    ;NT
      CreateFileA                = _CreateFileA@28                  @158
      CreateFileW                = _CreateFileW@28                  @161
      CreateFileMappingA         = _CreateFileMappingA@24           @159
@@ -462,7 +466,7 @@ EXPORTS
      GetProcAddress             = _GetProcAddress@8           @372
      GetProcessAffinityMask     = _GetProcessAffinityMask@12  @373
      GetProcessDword            = _GetProcessDword@8          @18
-;    GetProcessFlags            = _GetProcessFlags@??         @374      ;W95
+     GetProcessFlags            = _GetProcessFlags@4          @374      ;W95
      GetProcessHeap             = _GetProcessHeap@0           @375
      GetProcessHeaps            = _GetProcessHeaps@8          @376
 ;     GetProcessPriorityBoost    = _GetProcessPriorityBoost@??           ;NT

@@ -1,4 +1,4 @@
-/* $Id: stubs.cpp,v 1.19 2000-02-16 14:25:45 sandervl Exp $ */
+/* $Id: stubs.cpp,v 1.20 2000-03-10 16:12:00 sandervl Exp $ */
 
 /*
  * Win32 KERNEL32 Subsystem for OS/2
@@ -180,6 +180,10 @@ typedef DWORD CALID;
  * Prototypes                                                                *
  *****************************************************************************/
 
+void WIN32API CommonUnimpStub()
+{
+  dprintf(("STUB: KERNEL32.17!!"));
+}
 
 /*****************************************************************************
  * Name      : BOOL WIN32API AreFileApisANSI (VOID)

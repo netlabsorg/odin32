@@ -1,4 +1,4 @@
-/* $Id: thunk.cpp,v 1.4 2000-02-16 14:23:12 sandervl Exp $ */
+/* $Id: thunk.cpp,v 1.5 2000-03-10 16:12:01 sandervl Exp $ */
 
 /*
  * Win32 thunking API functions (mostly stubs)
@@ -23,6 +23,31 @@
 
 #define DBG_LOCALLOG	DBG_thunk
 #include "dbglocal.h"
+
+/************************************************************************
+ *           _ConfirmWin16Lock    (KERNEL32.96)
+ */
+DWORD WINAPI _ConfirmWin16Lock(void)
+{
+	dprintf(("STUB: _ConfirmWin16Lock"));
+        return 0;
+}
+
+/************************************************************************
+ *           ReleaseThunkLock    (KERNEL32.48)
+ */
+VOID WINAPI ReleaseThunkLock(DWORD *mutex_count)
+{
+	dprintf(("STUB: ReleaseThunkLock"));
+}
+
+/************************************************************************
+ *           RestoreThunkLock    (KERNEL32.49)
+ */
+VOID WINAPI RestoreThunkLock(DWORD mutex_count)
+{
+	dprintf(("STUB: RestoreThunkLock"));
+}
 
 //******************************************************************************
 //******************************************************************************
