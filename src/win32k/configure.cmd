@@ -1,4 +1,4 @@
-/* $Id: configure.cmd,v 1.22 2002-04-29 11:29:16 bird Exp $
+/* $Id: configure.cmd,v 1.23 2002-04-29 11:35:24 bird Exp $
  *
  * Configuration script.
  * Generates makefile.inc and an empty .depend file.
@@ -197,6 +197,7 @@
      */
     if (fWithKLib) then
     do
+        say 'Configuring kLib...'
         sDir = directory();
         if (chdir('kKrnlLib')) then
         do
