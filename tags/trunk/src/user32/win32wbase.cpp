@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.161 2000-02-14 17:30:11 cbratschi Exp $ */
+/* $Id: win32wbase.cpp,v 1.162 2000-02-15 14:39:12 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -909,10 +909,7 @@ ULONG Win32BaseWindow::MsgButton(MSG *msg)
         case WM_LBUTTONDBLCLK:
         case WM_RBUTTONDBLCLK:
         case WM_MBUTTONDBLCLK:
-        case WM_NCLBUTTONDBLCLK:
-        case WM_NCRBUTTONDBLCLK:
-        case WM_NCMBUTTONDBLCLK:
-                if (!(windowClass && windowClass->getClassLongA(GCL_STYLE) & CS_DBLCLKS) && (msg->message != WM_NCLBUTTONDBLCLK))
+                if (!(windowClass && windowClass->getClassLongA(GCL_STYLE) & CS_DBLCLKS))
                 {
                     msg->message = msg->message - (WM_LBUTTONDBLCLK - WM_LBUTTONDOWN); //dblclick -> down
                     MsgButton(msg);
@@ -920,6 +917,13 @@ ULONG Win32BaseWindow::MsgButton(MSG *msg)
                     return MsgButton(msg);
                 }
                 break;
+        case WM_NCLBUTTONDBLCLK:
+        case WM_NCRBUTTONDBLCLK:
+        case WM_NCMBUTTONDBLCLK:
+                //Docs say CS_DBLCLKS style doesn't matter for non-client double clicks
+                fClick = TRUE;
+                break;
+
         case WM_LBUTTONDOWN:
         case WM_RBUTTONDOWN:
         case WM_MBUTTONDOWN:
@@ -2106,6 +2110,12 @@ if (cy == 0)
         if (fuFlags & SWP_FRAMECHANGED)
         {
             FrameUpdateClient(this);
+        }
+        if(fHide) {
+            ShowWindow(SW_HIDE);
+        }
+        if(fShow) {
+            ShowWindow(SW_SHOWNA);
         }
         return TRUE;
     }
