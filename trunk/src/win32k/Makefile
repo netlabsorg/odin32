@@ -1,5 +1,5 @@
 ################################################################################
-# $Id: Makefile,v 1.47 2000-09-08 15:20:09 bird Exp $
+# $Id: Makefile,v 1.48 2000-09-08 15:28:59 bird Exp $
 #
 # Win32k makefile.
 #
@@ -339,7 +339,6 @@ OBJS  =\
     $(WIN32KOBJ)\myLDRQAppType.obj \
     $(WIN32KOBJ)\myldrEnum32bitRelRecs.obj \
     $(WIN32KOBJ)\myldrOpenPath.obj \
-    $(WIN32KOBJ)\myldrSetVMflags.obj \
     $(WIN32KOBJ)\OS2KTCB.obj \
     $(WIN32KOBJ)\OS2KPTDA.obj \
     $(WIN32KOBJ)\pe2lx.obj \
@@ -402,7 +401,6 @@ TSTOBJS =\
     $(WIN32KOBJ)\myLDRQAppType.obj \
     $(WIN32KOBJ)\myldrEnum32bitRelRecs.obj \
     $(WIN32KOBJ)\myldrOpenPath.obj \
-    $(WIN32KOBJ)\myldrSetVMflags.obj \
     $(WIN32KOBJ)\OS2KTCB.obj \
     $(WIN32KOBJ)\OS2KPTDA.obj \
     $(WIN32KOBJ)\pe2lx.obj \
