@@ -1,4 +1,4 @@
-/* $Id: shell32_main.cpp,v 1.2 1999-10-09 11:17:03 sandervl Exp $ */
+/* $Id: shell32_main.cpp,v 1.3 1999-10-11 20:17:11 sandervl Exp $ */
 /*
  * 				Shell basics
  *
@@ -836,7 +836,7 @@ static HINSTANCE	hOle32;
 static INT		shell32_RefCount = 0;
 
 INT		shell32_ObjCount = 0;
-HINSTANCE	shell32_hInstance;
+HINSTANCE	shell32_hInstance = 0;
 HIMAGELIST	ShellSmallIconList = 0;
 HIMAGELIST	ShellBigIconList = 0;
 
