@@ -21,6 +21,7 @@
 #define INCL_DOS
 #define INCL_DOSDEVIOCTL
 #define INCL_DOSPROCESS
+#define INCL_DOSERRORS
 #define INCL_DOSMODULEMGR
 #define INCL_DOSDEVICES
 #include <os2wrap.h>
@@ -42,6 +43,7 @@
 
 #ifdef __WIN32OS2__
 #define FX_CSTYLE __stdcall
+#include <misc.h>
 #else
 #define FX_CSTYLE _System
 #endif
@@ -752,17 +754,62 @@ pciInitializeOS2(void)
 
   io_init1();
 
+tryopen1:
   rc = DosOpen("OEMHLP$", &hOemHlp, &ulAction, 0, FILE_NORMAL, OPEN_ACTION_OPEN_IF_EXISTS, OPEN_ACCESS_READWRITE|OPEN_SHARE_DENYREADWRITE, 0L);
+  if(rc == ERROR_TOO_MANY_OPEN_FILES) {
+   ULONG CurMaxFH;
+   LONG  ReqCount = 32;
+
+	rc = DosSetRelMaxFH(&ReqCount, &CurMaxFH);
+	if(rc) {
+		dprintf(("DosSetRelMaxFH returned %d", rc));
+     		pciErrorCode = PCI_ERR_NO_IO_PERM;
+		return FXFALSE;
+	}
+	dprintf(("DosOpen failed -> increased nr open files to %d", CurMaxFH));
+	goto tryopen1;
+  }
+  else
   if(rc) {
      pciErrorCode = PCI_ERR_NO_IO_PERM;
      return FXFALSE;
   }
+tryopen2:
   rc = DosOpen("TESTCFG$", &hTestCfg, &ulAction, 0, FILE_NORMAL, OPEN_ACTION_OPEN_IF_EXISTS, OPEN_ACCESS_READWRITE|OPEN_SHARE_DENYNONE, 0L );
+  if(rc == ERROR_TOO_MANY_OPEN_FILES) {
+   ULONG CurMaxFH;
+   LONG  ReqCount = 32;
+
+	rc = DosSetRelMaxFH(&ReqCount, &CurMaxFH);
+	if(rc) {
+		dprintf(("DosSetRelMaxFH returned %d", rc));
+     		pciErrorCode = PCI_ERR_NO_IO_PERM;
+		return FXFALSE;
+	}
+	dprintf(("DosOpen failed -> increased nr open files to %d", CurMaxFH));
+	goto tryopen2;
+  }
+  else
   if(rc) {
      pciErrorCode = PCI_ERR_NO_IO_PERM;
      return FXFALSE;
   }
+tryopen3:
   rc = DosOpen("SCREEN$", &hScreenDD, &ulAction, 0, FILE_NORMAL, OPEN_ACTION_OPEN_IF_EXISTS, OPEN_ACCESS_READWRITE|OPEN_SHARE_DENYNONE, 0L );
+  if(rc == ERROR_TOO_MANY_OPEN_FILES) {
+   ULONG CurMaxFH;
+   LONG  ReqCount = 32;
+
+	rc = DosSetRelMaxFH(&ReqCount, &CurMaxFH);
+	if(rc) {
+		dprintf(("DosSetRelMaxFH returned %d", rc));
+     		pciErrorCode = PCI_ERR_NO_IO_PERM;
+		return FXFALSE;
+	}
+	dprintf(("DosOpen failed -> increased nr open files to %d", CurMaxFH));
+	goto tryopen3;
+  }
+  else
   if(rc) {
      pciErrorCode = PCI_ERR_NO_IO_PERM;
      return FXFALSE;
