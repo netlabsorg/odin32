@@ -2217,6 +2217,113 @@ function Odin32DBAPIGroupInfo($db, $iRefcode, $fFunctions, $fFiles, $fAuthors, $
 }
 
 
+/**
+ * Displays a design not.
+ * @returns     void
+ * @param       $db             Database handle.
+ * @param       $iRefcode       Author reference code.
+ * @author  knut st. osmundsen (kosmunds@csc.com)
+ * @remark
+ */
+function Odin32DBDesignNote($db, $iRefcode)
+{
+    /*
+     * Navigation - TOP
+     */
+    $sExpand    = "authorrefcode=".$iRefcode."&fDlls=1&fFiles=1&fFunctions=1&fAPIGroups=1&fAuthors=1&dll=".$iDllRefcode;
+    if ($fSortByState)  $sExpand = $sExpand."&fSortByState=".$fSortByState;
+    $sCollapse  = "authorrefcode=".$iRefcode;
+    Odin32DBNavigationTop($sExpand, $sCollapse);
+
+    /*
+     * Fetch (vital) data.
+     */
+    $sql = sprintf("SELECT\n".
+                   "    dn.name          AS name,\n".
+                   "    dn.note          AS note,\n".
+                   "    dn.refcode       AS refcode,\n".
+                   "    dn.dll           AS dllrefcode,\n".
+                   "    dn.file          AS filerefcode,\n".
+                   "    dn.seqnbrnote    AS seqnbnote,\n".
+                   "    dn.level         AS level,\n".
+                   "    dn.seqnbr        AS seqnbr,\n".
+                   "    dn.line          AS line,\n".
+                   "    d.name           AS dll,\n".
+                   "    f.name           AS file\n".
+                   "FROM\n".
+                   "    designnote dn,\n".
+                   "    dll d,\n".
+                   "    file f\n".
+                   "WHERE   dn.refcode = %d\n".
+                   "    AND dn.dll = d.refcode\n".
+                   "    AND dn.file = f.refcode\n".
+                   "ORDER BY dn.seqnbrnote\n",
+                   $iRefcode);
+    if (($result = mysql_query($sql, $db)) && mysql_num_rows($result) > 0 && ($array = mysql_fetch_array($result)))
+    {
+        /*
+         * General
+         */
+        /*Odin32DBNaslov("General", "general");
+        echo "\n<table width=100% border=3 cellpadding=0>\n";
+        Odin32DBInfoRow1("Title", $array, "name","","","","");
+        Odin32DBInfoRow1("Module", $array, "dll","","","","");
+        Odin32DBInfoRow1("File", $array, "file","","","","");
+        Odin32DBInfoRow1("Line", $array, "line","","","","");
+        Odin32DBInfoRow1("Seq#", $array, "seqnbr","","","","");
+        echo "</table>\n";
+        */
+
+        /*
+         * Sections.
+         */
+        $iLevel = 0;
+        $sSectionNbr = "";
+        do
+        {
+            /* make section number */
+            if ($array["level"] <= 0)
+                $sSection = $array["seqnbr"].".0";
+            else
+            {
+                while ($iLevel > 0 && $iLevel < $array["level"])
+                {
+                    echo "debug ".$iLevel." < ".$array["level"]."<br>\n";
+                    $sSection .= '.0';
+                    $iLevel = $iLevel + 1;
+                }
+
+                if ($iLevel == 0) $iLevel++;
+                while ($iLevel >= $array["level"])
+                {
+                    $sSection = substr($sSection, 0, strlen($sSection) - strlen(strrchr($sSection, '.')));
+                    $iLevel = $iLevel - 1;
+                }
+                $sSection = $sSection.".".$array["seqnbr"];
+            }
+            $iLevel = $array["level"];
+
+            /* print it */
+            $sName = $sSection." ".$array["name"];
+            Odin32DBNaslov($sName, $sName);
+            echo $array["note"]."\n";
+
+        } while ($array = mysql_fetch_array($result));
+
+    }
+    else
+    {
+        echo "<p> No data! Invalid refcode? </p>";
+        Odin32DBSqlError($sql);
+    }
+
+    /*
+     * Navigation - Bottom
+     */
+    Odin32DBNavigationBottom($sExpand, $sCollapse);
+}
+
+
 
 
 
