@@ -1,4 +1,4 @@
-/* $Id: pe2lx.cpp,v 1.25 2001-02-10 11:11:47 bird Exp $
+/* $Id: pe2lx.cpp,v 1.26 2001-03-19 14:50:49 bird Exp $
  *
  * Pe2Lx class implementation. Ring 0 and Ring 3
  *
@@ -585,7 +585,8 @@ ULONG Pe2Lx::init(PCSZ pszFilename)
             LXHdr.e32_stacksize = paObjects[i].cbVirtual;
         }
     }
-    LXHdr.e32_mflags = E32PMAPI;
+    LXHdr.e32_mflags = pNtHdrs->OptionalHeader.Subsystem == IMAGE_SUBSYSTEM_WINDOWS_GUI 
+        ? E32PMAPI : E32PMW;
     if (pNtHdrs->FileHeader.Characteristics & IMAGE_FILE_DLL)
         LXHdr.e32_mflags |= E32LIBINIT | E32LIBTERM | E32MODDLL;
     else
