@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.1816 2001-11-06 21:03:54 sandervl Exp $ */
+/* $Id: changelog,v 1.1817 2001-11-07 11:08:51 phaller Exp $ */
+
+ 2001-11-07: Patrick Haller <patrick.haller@innotek.de>
+    - WININET:  o http, internet: WINE sync
 
  2001-11-05: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Call old DosOpen if DosOpenL not available

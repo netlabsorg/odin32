@@ -1,4 +1,4 @@
-/* $Id: internet.c,v 1.5 2001-04-01 10:30:32 sandervl Exp $
+/* $Id: internet.c,v 1.6 2001-11-07 11:08:13 phaller Exp $
  *
  * Wininet
  *
@@ -12,6 +12,7 @@
 #include <wininet.h>
 #include <debugtools.h>
 #include <winerror.h>
+#include <shlwapi.h>
 #include <tchar.h>
 #include <winsock.h>
 #include <ipexport.h>
@@ -216,8 +217,11 @@ BOOL WINAPI InternetGetLastResponseInfoA(LPDWORD lpdwError,
  */
 BOOL WINAPI InternetGetConnectedState(LPDWORD lpdwStatus, DWORD dwReserved)
 {
-  FIXME("Stub\n");
-  return FALSE;
+  if (lpdwStatus) {
+    FIXME("always returning LAN connection.\n");
+    *lpdwStatus = INTERNET_CONNECTION_LAN;
+  }
+  return TRUE;
 }
 
 /***********************************************************************
@@ -703,18 +707,18 @@ INTERNETAPI DWORD WINAPI InternetAttemptConnect(DWORD dwReserved)
 BOOL WINAPI InternetCanonicalizeUrlA(LPCSTR lpszUrl, LPSTR lpszBuffer,
         LPDWORD lpdwBufferLength, DWORD dwFlags)
 {
-  BOOL bSuccess = FALSE;
-
-  FIXME("Stub\n");
-
-  if(lpszUrl)
-  {
-    strncpy(lpszBuffer, lpszUrl, *lpdwBufferLength);
-    *lpdwBufferLength = strlen(lpszUrl);
-    bSuccess = TRUE;
-  }
-
-  return bSuccess;
+  HRESULT hr;
+  TRACE("%s %p %p %08lx\n",debugstr_a(lpszUrl), lpszBuffer,
+        lpdwBufferLength, dwFlags);
+  
+  /* Flip this bit to correspond to URL_ESCAPE_UNSAFE */
+  dwFlags ^= ICU_NO_ENCODE;
+  
+  dwFlags |= 0x80000000; /* Don't know what this means */
+  
+  hr = UrlCanonicalizeA(lpszUrl, lpszBuffer, lpdwBufferLength, dwFlags);
+  
+  return (hr == S_OK) ? TRUE : FALSE;
 }
 
 /***********************************************************************

@@ -1,4 +1,4 @@
-; $Id: wininet.def,v 1.4 2001-11-07 10:56:15 phaller Exp $
+; $Id: wininet.def,v 1.5 2001-11-07 11:08:14 phaller Exp $
 
 ;
 ; Based on NT 4.0 SP3: WININET.DLL
@@ -9,6 +9,7 @@ DATA MULTIPLE NONSHARED
 
 IMPORTS
    _UrlEscapeA@16                    = SHLWAPI.691
+   _UrlCanonicalizeA@16              = SHLWAPI.683
 
 EXPORTS
 
