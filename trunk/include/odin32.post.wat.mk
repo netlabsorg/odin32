@@ -1,4 +1,4 @@
-# $Id: odin32.post.wat.mk,v 1.17 2001-09-30 09:46:16 bird Exp $
+# $Id: odin32.post.wat.mk,v 1.18 2001-10-29 14:20:13 bird Exp $
 
 #
 # Odin32 API
@@ -430,7 +430,7 @@ clean: .SYMBOLIC
 !else
 clean:  clean2 .SYMBOLIC
 !endif
-    $(RM) *.lib *.res *.map *.pch \
+    $(RM) *.lib *.res *.map *.pch dummy.c \
 !if "$(OBJDIR)" != ""
      $(OBJDIR)\* \
 !endif
