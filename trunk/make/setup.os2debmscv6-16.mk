@@ -1,4 +1,4 @@
-# $Id: setup.os2debmscv6-16.mk,v 1.5 2002-08-20 19:14:31 bird Exp $
+# $Id: setup.os2debmscv6-16.mk,v 1.6 2002-08-20 21:16:48 bird Exp $
 
 # ---OS2, DEBUG, MSCV6-------------------------
 ENV_NAME="OS/2, Debug, Microsoft C v6.0a 16-bit"
@@ -170,10 +170,15 @@ RL_FLAGS=-x2 -n
 #
 # Libraries and object files.
 #
+!if "$(TARGET_MODE)" == "DLL" # quirk! TODO/FIXME
+_LIB_TYP = dll
+!else
+_LIB_TYP = ep
+!endif
 LIB_OS      = os2286.lib
-LIB_C_OBJ   = $(_OBJ_MODEL)libcep.lib
-LIB_C_DLL   = $(_OBJ_MODEL)libcep.lib
-LIB_C_RTDLL = $(_OBJ_MODEL)libcep.lib
+LIB_C_OBJ   = $(_OBJ_MODEL)libc$(_LIB_TYP).lib
+LIB_C_DLL   = $(_OBJ_MODEL)libc$(_LIB_TYP).lib
+LIB_C_RTDLL = $(_OBJ_MODEL)libc$(_LIB_TYP).lib
 LIB_C_NRE   =
 LIB_C_DMNGL =
 OBJ_PROFILE =
