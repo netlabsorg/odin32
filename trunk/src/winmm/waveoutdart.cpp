@@ -1,4 +1,4 @@
-/* $Id: waveoutdart.cpp,v 1.16 2003-03-05 14:49:04 sandervl Exp $ */
+/* $Id: waveoutdart.cpp,v 1.17 2003-03-05 14:49:56 sandervl Exp $ */
 
 /*
  * Wave playback class (DART)
@@ -62,7 +62,7 @@ static BOOL fFixedWaveBufferSize = FALSE;
 //       purpose solution.
 // 
 //******************************************************************************
-void WIN32API ODIN_waveOutSetFixedBuffers();
+void WIN32API ODIN_waveOutSetFixedBuffers()
 {
     fFixedWaveBufferSize = TRUE;
 }
