@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.1654 2001-08-19 14:05:48 sandervl Exp $ */
+/* $Id: changelog,v 1.1655 2001-08-23 18:10:48 sandervl Exp $ */
+
+ 2001-08-32: Sander van Leeuwen <sandervl@xs4all.nl>
+    - OLEAUT32: o Wine updates
 
  2001-08-19: Sander van Leeuwen <sandervl@xs4all.nl>
     - QUARTZ:   o Added stub dll from Wine
