@@ -1,8 +1,8 @@
-/* $Id: fastdep.c,v 1.35 2002-02-22 23:48:52 bird Exp $
+/* $Id: fastdep.c,v 1.36 2002-03-14 13:31:10 bird Exp $
  *
  * Fast dependents. (Fast = Quick and Dirty!)
  *
- * Copyright (c) 1999-2001 knut st. osmundsen
+ * Copyright (c) 1999-2002 knut st. osmundsen (bird@anduin.net)
  *
  * PH 2001-03-01 added optional support for a super-dependency
  *
@@ -52,6 +52,13 @@
 #include <assert.h>
 
 #include "avl.h"
+
+#ifdef __WIN32OS2__
+#   define WIN32API
+#   include <odinbuild.h>
+#else
+#   define ODIN32_BUILD_NR -1
+#endif
 
 #ifndef INLINE
 #   if defined(__IBMC__)
@@ -875,7 +882,7 @@ int main(int argc, char **argv)
 void syntax(void)
 {
     printf(
-        "FastDep v0.41\n"
+        "FastDep v0.42 (build %d)\n"
         "Dependency scanner. Creates a makefile readable depend file.\n"
         " - was quick and dirty, now it's just quick -\n"
         "\n"
@@ -919,7 +926,8 @@ void syntax(void)
         "   <files>         Files to scan. Wildchars are allowed.\n"
         "\n"
         "Options and files could be mixed.\n"
-        " copyright (c) 1999-2001 knut st. osmundsen (knut.stange.osmundsen@mynd.no)\n",
+        " copyright (c) 1999-2002 knut st. osmundsen (bird@anduin.net)\n",
+        ODIN32_BUILD_NR,
         pszDefaultDepFile
         );
 }
@@ -1156,7 +1164,13 @@ int langC_CPP(const char *pszFilename, const char *pszNormFilename,
                     if (psz != NULL)
                     {
                         if (options.fExcludeAll || pathlistFindFile2(options.pszExclude, szBuffer))
-                            depAddDepend(pvRule, szFullname, options.fCheckCyclic);
+                        {   /* #include <sys/stats.h> makes trouble, check for '/' and '\'. */
+                            if (!strchr(szFullname, '/') && !strchr(szFullname, '\\'))
+                                depAddDepend(pvRule, szFullname, options.fCheckCyclic);
+                            else
+                                fprintf(stderr, "%s(%d): warning include '%s' is ignored.\n",
+                                        pszFilename, iLine, szFullname);
+                        }
                         else
                             depAddDepend(pvRule, szBuffer, options.fCheckCyclic);
                     }
@@ -1401,7 +1415,13 @@ int langAsm(const char *pszFilename, const char *pszNormFilename,
             if (psz != NULL)
             {
                 if (options.fExcludeAll || pathlistFindFile2(options.pszExclude, szBuffer))
-                    depAddDepend(pvRule, szFullname, options.fCheckCyclic);
+                {   /* include sys/stats.inc makes trouble, check for '/' and '\'. */
+                    if (!strchr(szFullname, '/') && !strchr(szFullname, '\\'))
+                        depAddDepend(pvRule, szFullname, options.fCheckCyclic);
+                    else
+                        fprintf(stderr, "%s(%d): warning include '%s' is ignored.\n",
+                                pszFilename, iLine, szFullname);
+                }
                 else
                     depAddDepend(pvRule, szBuffer, options.fCheckCyclic);
             }
@@ -1569,7 +1589,13 @@ int langRC(const char *pszFilename, const char *pszNormFilename, void *pvFile, B
             if (psz != NULL)
             {
                 if (options.fExcludeAll || pathlistFindFile2(options.pszExclude, szBuffer))
-                    depAddDepend(pvRule, szFullname, options.fCheckCyclic);
+                {   /* #include <sys/stats.h> makes trouble, check for '/' and '\'. */
+                    if (!strchr(szFullname, '/') && !strchr(szFullname, '\\'))
+                        depAddDepend(pvRule, szFullname, options.fCheckCyclic);
+                    else
+                        fprintf(stderr, "%s(%d): warning include '%s' is ignored.\n",
+                                pszFilename, iLine, szFullname);
+                }
                 else
                     depAddDepend(pvRule, szBuffer, options.fCheckCyclic);
             }
@@ -1747,7 +1773,13 @@ int langRC(const char *pszFilename, const char *pszNormFilename,
                     if (psz != NULL)
                     {
                         if (options.fExcludeAll || pathlistFindFile2(options.pszExclude, szBuffer))
-                            depAddDepend(pvRule, szFullname, options.fCheckCyclic);
+                        {   /* #include <sys/stats.h> makes trouble, check for '/' and '\'. */
+                            if (!strchr(szFullname, '/') && !strchr(szFullname, '\\'))
+                                depAddDepend(pvRule, szFullname, options.fCheckCyclic);
+                            else
+                                fprintf(stderr, "%s(%d): warning include '%s' is ignored.\n",
+                                        pszFilename, iLine, szFullname);
+                        }
                         else
                             depAddDepend(pvRule, szBuffer, options.fCheckCyclic);
                     }
@@ -1849,45 +1881,51 @@ int langRC(const char *pszFilename, const char *pszNormFilename,
              * RESOURCE 123 1 ["]filename.ext["]
              */
             char    szLine[1024];
-            char *  pszFilename;
+            char *  pszFile;
             char    chQuote = ' ';
 
             PreProcessLine(szLine, &szBuffer[i]);
 
-            pszFilename = &szLine[strlen(szLine)-1];
-            if (*pszFilename == '\"' || *pszFilename == '\'')
+            pszFile = &szLine[strlen(szLine)-1];
+            if (*pszFile == '\"' || *pszFile == '\'')
             {
-                chQuote = *pszFilename;
-                *pszFilename-- = '\0';
+                chQuote = *pszFile;
+                *pszFile-- = '\0';
             }
-            while (*pszFilename != chQuote)
-                pszFilename--;
-            *pszFilename++ = '\0'; /* We now have extracted the filename - pszFilename. */
-            strlwr(pszFilename);
+            while (*pszFile != chQuote)
+                pszFile--;
+            *pszFile++ = '\0'; /* We now have extracted the filename - pszFile. */
+            strlwr(pszFile);
 
             /* Add filename to the dependencies. */
             if (i1)
-                depAddDepend(pvRule, pszFilename, options.fCheckCyclic);
+                depAddDepend(pvRule, pszFile, options.fCheckCyclic);
             else
             {
                 char *psz;
                 /* find include file! */
-                psz = pathlistFindFile(options.pszInclude, pszFilename, szFullname);
+                psz = pathlistFindFile(options.pszInclude, pszFile, szFullname);
                 if (psz == NULL)
-                    psz = pathlistFindFile(pszIncludeEnv, pszFilename, szFullname);
+                    psz = pathlistFindFile(pszIncludeEnv, pszFile, szFullname);
 
                 /* did we find the include? */
                 if (psz != NULL)
                 {
                     if (options.fExcludeAll || pathlistFindFile2(options.pszExclude, szFullname))
-                        depAddDepend(pvRule, pszFilename, options.fCheckCyclic);
+                    {   /* #include <sys/stats.h> makes trouble, check for '/' and '\'. */
+                        if (!strchr(pszFile, '/') && !strchr(pszFile, '\\'))
+                            depAddDepend(pvRule, pszFile, options.fCheckCyclic);
+                        else
+                            fprintf(stderr, "%s(%d): warning include '%s' is ignored.\n",
+                                    pszFilename, iLine, pszFile);
+                    }
                     else
                         depAddDepend(pvRule, szFullname, options.fCheckCyclic);
                 }
                 else
                 {
                     fprintf(stderr, "%s(%d): warning include file '%s' not found!\n",
-                            pszFilename, iLine, pszFilename);
+                            pszFilename, iLine, pszFile);
                     depMarkNotFound(pvRule);
                 }
             }
@@ -2080,13 +2118,13 @@ int langCOBOL(const char *pszFilename, const char *pszNormFilename,
             strlwr(szFullname);
 
             /* add extention .cpy - hardcoded for the moment. */
-            strcpy(&szFullname[j], ".cpy");
+            strcpy(&szFullname[j], ".cbl");
 
             /* find include file! */
             psz = pathlistFindFile(options.pszInclude, szFullname, szBuffer);
             if (!psz)
             {
-                strcpy(&szFullname[j], ".cbl");
+                strcpy(&szFullname[j], ".cpy");
                 psz = pathlistFindFile(options.pszInclude, szFullname, szBuffer);
             }
 
@@ -2219,7 +2257,7 @@ int langIPF(  const char *pszFilename, const char *pszNormFilename,
             /* find end */
             if (j >= CCHMAXPATH)
             {
-                fprintf(stderr, "%s(%d) warning: Filename too long ignored", pszFilename, iLine);
+                fprintf(stderr, "%s(%d) warning: Filename too long ignored.\n", pszFilename, iLine);
                 continue;
             }
 
@@ -2265,7 +2303,7 @@ int langIPF(  const char *pszFilename, const char *pszNormFilename,
  * @param     pszS1  String 1
  * @param     pszS2  String 2
  * @param     cch    Length to compare (relative to string 1)
- * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @author    knut st. osmundsen (bird@anduin.net)
  */
 int strnicmpwords(const char *pszS1, const char *pszS2, int cch)
 {
@@ -2918,7 +2956,7 @@ BOOL pathlistFindFile2(const char *pszPathList, const char *pszFilename)
  * Finds the first char after word.
  * @returns   Pointer to the first char after word.
  * @param     psz  Where to start.
- * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @author    knut st. osmundsen (bird@anduin.net)
  */
 char *findEndOfWord(char *psz)
 {
@@ -2942,7 +2980,7 @@ char *findEndOfWord(char *psz)
  * @returns   Pointer to first char in word.
  * @param     psz       Where to start.
  * @param     pszStart  Where to stop.
- * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @author    knut st. osmundsen (bird@anduin.net)
  */
 char *findStartOfWord(const char *psz, const char *pszStart)
 {
@@ -2989,7 +3027,7 @@ signed long fsize(FILE *phFile)
  * @returns   Pointer to first not space or tab char in the string.
  * @param     psz   Pointer to the string which is to be trimmed.
  * @status    completely implmented.
- * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @author    knut st. osmundsen (bird@anduin.net)
  */
 INLINE char *trim(char *psz)
 {
@@ -3011,7 +3049,7 @@ INLINE char *trim(char *psz)
  * @returns   Pointer to the string passed in.
  * @param     psz   Pointer to the string which is to be right trimmed.
  * @status    completely implmented.
- * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @author    knut st. osmundsen (bird@anduin.net)
  */
 INLINE char *trimR(char *psz)
 {
@@ -3031,7 +3069,7 @@ INLINE char *trimR(char *psz)
  * @returns   Pointer to the string passed in.
  * @param     psz   Pointer to the string which is to be quote-trimmed.
  * @status    completely implmented.
- * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @author    knut st. osmundsen (bird@anduin.net)
  */
 INLINE char *trimQuotes(char *psz)
 {
@@ -3055,7 +3093,7 @@ INLINE char *trimQuotes(char *psz)
  * @returns Pointer to output buffer.
  * @param   pszOut  Ouput (preprocessed) string.
  * @param   pszIn   Input string.
- * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @author  knut st. osmundsen (bird@anduin.net)
  */
 char *PreProcessLine(char *pszOut, const char *pszIn)
 {
