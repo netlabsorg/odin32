@@ -10,3 +10,5 @@
 *.map
 *.exe
 *.res
+.depend
+*exp.def
