@@ -1,4 +1,4 @@
-/* $Id: toolbar.h,v 1.3 1999-07-10 17:16:44 achimha Exp $ */
+/* $Id: toolbar.h,v 1.4 1999-07-12 05:37:38 achimha Exp $ */
 
 /*
  * Toolbar class extra info
@@ -26,8 +26,9 @@ typedef struct tagTBUTTON_INFO
     INT nRow;
     RECT rect;
     //Customize dialog
-    BOOL bDelete; //can delete
+    BOOL   bDelete; //can delete
     LPWSTR pszName;
+    INT    nCustomID;
 } TBUTTON_INFO;
 
 
@@ -71,7 +72,10 @@ typedef struct tagTOOLBAR_INFO
     TBUTTON_INFO *buttons;      /* pointer to button array */
     LPWSTR       *strings;      /* pointer to string array */
     //Customize dialog
-    HWND hwndToolbar;
+    HWND          hwndToolbar;
+    TBUTTON_INFO* oldButtons;
+    INT           nNumOldButtons;
+    INT           nMaxCustomID;
 } TOOLBAR_INFO;
 
 
@@ -79,3 +83,4 @@ extern VOID TOOLBAR_Register (VOID);
 extern VOID TOOLBAR_Unregister (VOID);
 
 #endif  /* __WINE_TOOLBAR_H */
+
