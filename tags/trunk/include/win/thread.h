@@ -172,6 +172,7 @@ typedef struct _TEB
               // used for call stack tracking
               ULONG          dbgCallDepth;     // is de-/incremented by ODINWRAP macros
               PVOID*         arrstrCallStack;  // keep track of thread's call stack
+              PVOID*         DebugStr;  // pointer for debugstr-handling
 #endif
           } odin;
 #endif

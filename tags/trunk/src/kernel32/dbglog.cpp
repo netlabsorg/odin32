@@ -1,4 +1,4 @@
-/* $Id: dbglog.cpp,v 1.10 2004-11-23 17:25:03 sao2l02 Exp $ */
+/* $Id: dbglog.cpp,v 1.11 2004-12-07 20:12:48 sao2l02 Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -861,74 +861,34 @@ LPSTR debug_c (LPSTR dst, unsigned int c, BOOL LongChar)
    *dst++ = c;
   return dst;
 }
-
 /* ------------------------------------------------------------------------- *
  * Structures for debugstr_wn/an                                             *
  * protects the debugstr_.. same time from overwriting                       *
  * ------------------------------------------------------------------------- */
-struct debugstr_data {
-/* can this made per thread, then can it be shorter */
-LPSTR pToRes [3] /* = { NULL, &res[0] ,&res[sizeof(res)]} */;
 #define _debugstr_data_res_len 512
-char res[_debugstr_data_res_len];
-  };
-#define n_debugstr_data 8
-struct ar_anchor_debug_str {
-  debugstr_data *adr_debugstr_data [n_debugstr_data];
-  };
-static ar_anchor_debug_str* anchor_debug_data = NULL;
-/* ------------------------------------------------------------------------- *
- * protects the common structures from parallelchanging with bad results,    *
- * without making critical.                                                  *
- * ------------------------------------------------------------------------- */
-VOID* WIN32API InterlockedCompareExchange(VOID* dest, VOID* xchg, VOID* compare );
+struct debugstr_data {
+   LPSTR pToRes [3] /* = { NULL, &res[0] ,&res[sizeof(res)]} */;
+   char res[_debugstr_data_res_len];
+};
 /* ------------------------------------------------------------------------- *
  * Helperfunction for semistatic strings                                     *
  * returns as a funktion of the current threadid the debugstr-structure      *
  * ------------------------------------------------------------------------- */
 debugstr_data* GetDebugStrData() {
-  debugstr_data* retData = NULL;
-  ar_anchor_debug_str* ar = anchor_debug_data;
-  if (NULL == ar)
-  {
-    ar_anchor_debug_str* ar1 = (ar_anchor_debug_str*)malloc(sizeof(ar_anchor_debug_str));
-    if (ar1)
-    {
-      memset(ar1, 0, sizeof(ar_anchor_debug_str));
-      ar = (ar_anchor_debug_str*)InterlockedCompareExchange(&anchor_debug_data, ar1, NULL);
-      if (NULL == ar)
-      {
-        ar = ar1;
-      }
-      else
-        free(ar1);
-    } /* endif */
-  } /* endif */
-  if (NULL != ar)
-  {
-    USHORT  sel = RestoreOS2FS();
-    TEB *teb = GetThreadTEB();
-    int i_debugstr_data  = (teb) ? ((teb->o.odin.threadId-1) & (n_debugstr_data-1)):0;
-    SetFS(sel);
-    retData = ar->adr_debugstr_data[i_debugstr_data];
-    if (NULL == retData)
-    {
-      debugstr_data* retData1 = (debugstr_data*)malloc(sizeof(debugstr_data));
-      if (retData1)
-      {
-        retData1->pToRes[0] = retData1->pToRes[1] = &retData1->res[0];
-        retData1->pToRes[2] = &retData1->res[sizeof(retData1->res)];
-        retData = (debugstr_data*)InterlockedCompareExchange(&ar->adr_debugstr_data[i_debugstr_data], retData1, NULL);
-        if (NULL == retData)
-        {
-          retData = retData1;
-        }
-        else
-          free(retData1);
-      } /* endif */
-    } /* endif */
-  } /* endif */
+#ifdef DEBUG
+  TEB *teb = GetThreadTEB();
+  if (!teb) return NULL;
+  debugstr_data* retData = (debugstr_data*)teb->o.odin.DebugStr;
+  if (retData) return retData;
+  retData = (debugstr_data*)malloc(sizeof(debugstr_data));
+  if (!retData) return NULL;
+  retData->pToRes[0] = retData->pToRes[1] = &retData->res[0];
+  retData->pToRes[2] = &retData->res[sizeof(retData->res)];
+  teb->o.odin.DebugStr = (PVOID*)retData;
   return retData;
+#else
+  return NULL;
+#endif
 }
 /* ------------------------------------------------------------------------- *
  * Helperfunction for semistatic strings                                     *
@@ -943,18 +903,16 @@ LPCSTR debugstr_x(LPCSTR src)
     LPSTR dst;
     LPSTR dstend;
     int iLen = strlen(src)+1;
-    do
+    dstend = ad->pToRes[2] - iLen;
+    retdst = dst = ad->pToRes[0];
+    if ((dst < ad->pToRes[1]) || (dst > dstend))
     {
-      dstend = ad->pToRes[2] - iLen;
-      retdst = dst = ad->pToRes[0];
-      if ((dst < ad->pToRes[1]) || (dst > dstend))
-        {
-          if (dst == ad->pToRes[1])
+       if (dst == ad->pToRes[1])
     /* loop, if iLen larger then (ad->pToRes[2] - ad->pToRes[1]) */
-            iLen = (ad->pToRes[2] - ad->pToRes[1]);
-          retdst = ad->pToRes[1];
-        }
-    } while (dst != (LPSTR)InterlockedCompareExchange(&ad->pToRes[0],(retdst + iLen),dst));
+          iLen = (ad->pToRes[2] - ad->pToRes[1]);
+       retdst = ad->pToRes[1];
+    }
+    ad->pToRes[0] = retdst + iLen;
     memcpy(retdst,src,iLen);
     retdst[iLen-1] = '\0';
   }

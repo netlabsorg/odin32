@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.195 2004-12-06 19:42:58 sao2l02 Exp $ */
+/* $Id: wprocess.cpp,v 1.196 2004-12-07 20:12:54 sao2l02 Exp $ */
 
 /*
  * Win32 process functions
@@ -401,6 +401,8 @@ void WIN32API DestroyTEB(TEB *winteb)
 #ifdef DEBUG
     if (winteb->o.odin.arrstrCallStack != NULL)
         free( winteb->o.odin.arrstrCallStack );
+    if (winteb->o.odin.DebugStr != NULL)
+        free( winteb->o.odin.DebugStr );
 #endif
 
     //Restore our original FS selector
