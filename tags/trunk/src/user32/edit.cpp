@@ -1,4 +1,4 @@
-/* $Id: edit.cpp,v 1.12 1999-11-11 17:13:45 cbratschi Exp $ */
+/* $Id: edit.cpp,v 1.13 1999-11-12 17:16:36 cbratschi Exp $ */
 /*
  *      Edit control
  *
@@ -6,7 +6,7 @@
  *      Copyright  William Magro, 1995, 1996
  *      Copyright  Frans van Dorsselaer, 1996, 1997
  *
- *      Copyright  1999 Christoph Bratschi (ported from WINE)
+ *      Copyright  1999 Christoph Bratschi
  *
  * WINE version: 990923
  */
@@ -14,6 +14,14 @@
 /*
  *      please read EDIT.TODO (and update it when you change things)
  */
+
+/* CB: todo
+  - EN_UPDATE: send before update
+  - EN_CHANGE: send after update -> WM_PAINT isn't the right place
+  - EN_HSCROLL/EN_VSCROLL: send before update
+  - still problems with caret
+  - WS_BORDER -> bug in Win32BaseWindow::SetWindowLong
+*/
 
 #include <os2win.h>
 #include <string.h>
@@ -142,6 +150,7 @@ static void     EDIT_MoveDown_ML(HWND hwnd, EDITSTATE *es, BOOL extend);
 static void     EDIT_MovePageDown_ML(HWND hwnd, EDITSTATE *es, BOOL extend);
 static void     EDIT_MovePageUp_ML(HWND hwnd, EDITSTATE *es, BOOL extend);
 static void     EDIT_MoveUp_ML(HWND hwnd, EDITSTATE *es, BOOL extend);
+static VOID     EDIT_UpdateScrollBars(HWND hwnd,EDITSTATE *es,BOOL updateHorz,BOOL updateVert);
 /*
  *      Helper functions valid for both single line _and_ multi line controls
  */
@@ -165,6 +174,9 @@ static void     EDIT_SetCaretPos(HWND hwnd, EDITSTATE *es, INT pos, BOOL after_w
 static void     EDIT_SetRectNP(HWND hwnd, EDITSTATE *es, LPRECT lprc);
 static void     EDIT_UnlockBuffer(HWND hwnd, EDITSTATE *es, BOOL force);
 static INT      EDIT_WordBreakProc(LPSTR s, INT index, INT count, INT action);
+static VOID     EDIT_Draw(HWND hwnd,EDITSTATE *es,HDC hdc);
+static VOID     EDIT_Refresh(HWND hwnd,EDITSTATE *es);
+
 /*
  *      EM_XXX message handlers
  */
@@ -330,7 +342,7 @@ LRESULT WINAPI EditWndProc( HWND hwnd, UINT msg,
                 //DPRINTF_EDIT_MSG32("EM_SETRECT");
                 if ((es->style & ES_MULTILINE) && lParam) {
                         EDIT_SetRectNP(hwnd, es, (LPRECT)lParam);
-                        InvalidateRect(hwnd, NULL, TRUE);
+                        EDIT_Refresh(hwnd,es);
                 }
                 break;
 
@@ -596,7 +608,7 @@ LRESULT WINAPI EditWndProc( HWND hwnd, UINT msg,
         case WM_ENABLE:
                 //DPRINTF_EDIT_MSG32("WM_ENABLE");
                 es->bEnableState = (BOOL)wParam;
-                InvalidateRect(hwnd, NULL, TRUE);
+                EDIT_Refresh(hwnd,es);
                 break;
 
         case WM_ERASEBKGND:
@@ -829,6 +841,7 @@ static void EDIT_BuildLineDefs_ML(HWND hwnd, EDITSTATE *es)
         if (es->font)
                 SelectObject(dc, old_font);
         ReleaseDC(hwnd, dc);
+        EDIT_UpdateScrollBars(hwnd,es,TRUE,TRUE);
 }
 
 
@@ -1633,6 +1646,7 @@ static void EDIT_SetRectNP(HWND hwnd, EDITSTATE *es, LPRECT rc)
                 es->format_rect.bottom = es->format_rect.top + es->line_height;
         if ((es->style & ES_MULTILINE) && !(es->style & ES_AUTOHSCROLL))
                 EDIT_BuildLineDefs_ML(hwnd, es);
+        EDIT_UpdateScrollBars(hwnd,es,TRUE,TRUE);
 }
 
 
@@ -1995,6 +2009,37 @@ static INT EDIT_EM_LineLength(HWND hwnd, EDITSTATE *es, INT index)
         return line_def->net_length;
 }
 
+static VOID EDIT_UpdateScrollBars(HWND hwnd,EDITSTATE *es,BOOL updateHorz,BOOL updateVert)
+{
+  if (updateHorz && (es->style & WS_HSCROLL) && !(es->flags & EF_HSCROLL_TRACK))
+  {
+    SCROLLINFO si;
+    INT fw = es->format_rect.right - es->format_rect.left;
+
+    si.cbSize       = sizeof(SCROLLINFO);
+    si.fMask        = SIF_PAGE | SIF_POS | SIF_RANGE | SIF_DISABLENOSCROLL;
+    si.nMin         = 0;
+    si.nMax         = es->text_width + fw - 1;
+    si.nPage        = fw;
+    si.nPos         = es->x_offset;
+    SetScrollInfo(hwnd, SB_HORZ, &si, TRUE);
+  }
+
+  if (updateVert && (es->style & WS_VSCROLL) && !(es->flags & EF_VSCROLL_TRACK))
+  {
+    INT vlc = (es->format_rect.bottom-es->format_rect.top)/es->line_height;
+    SCROLLINFO si;
+
+    si.cbSize       = sizeof(SCROLLINFO);
+    si.fMask        = SIF_PAGE | SIF_POS | SIF_RANGE | SIF_DISABLENOSCROLL;
+    si.nMin         = 0;
+    si.nMax         = es->line_count + vlc - 2;
+    si.nPage        = vlc;
+    si.nPos         = es->y_offset;
+    SetScrollInfo(hwnd, SB_VERT, &si, TRUE);
+  }
+}
+
 
 /*********************************************************************
  *
@@ -2030,6 +2075,7 @@ static BOOL EDIT_EM_LineScroll(HWND hwnd, EDITSTATE *es, INT dx, INT dy)
                                 NULL, &rc, (HRGN)NULL, NULL, SW_INVALIDATE);
                 es->y_offset = nyoff;
                 es->x_offset += dx;
+                EDIT_UpdateScrollBars(hwnd,es,dx,dy);
         }
         if (dx && !(es->flags & EF_HSCROLL_TRACK))
                 EDIT_NOTIFY_PARENT(hwnd, EN_HSCROLL);
@@ -2203,7 +2249,7 @@ static void EDIT_EM_ReplaceSel(HWND hwnd, EDITSTATE *es, BOOL can_undo, LPCSTR l
         EDIT_EM_ScrollCaret(hwnd, es);
 
         /* FIXME: really inefficient */
-        InvalidateRect(hwnd, NULL, TRUE);
+        EDIT_Refresh(hwnd,es);
 }
 
 
@@ -2291,15 +2337,18 @@ static void EDIT_EM_ScrollCaret(HWND hwnd, EDITSTATE *es)
 
                 x = SLOWORD(EDIT_EM_PosFromChar(hwnd, es, es->selection_end, FALSE));
                 format_width = es->format_rect.right - es->format_rect.left;
-                if (x < es->format_rect.left) {
+                if (x < es->format_rect.left)
+                {
                         goal = es->format_rect.left + format_width / HSCROLL_FRACTION;
                         do {
                                 es->x_offset--;
                                 x = SLOWORD(EDIT_EM_PosFromChar(hwnd, es, es->selection_end, FALSE));
                         } while ((x < goal) && es->x_offset);
                         /* FIXME: use ScrollWindow() somehow to improve performance */
-                        InvalidateRect(hwnd, NULL, TRUE);
-                } else if (x > es->format_rect.right) {
+                        EDIT_Refresh(hwnd,es);
+                        EDIT_UpdateScrollBars(hwnd,es,TRUE,FALSE);
+                } else if (x > es->format_rect.right)
+                {
                         INT x_last;
                         INT len = lstrlenA(es->text);
                         goal = es->format_rect.right - format_width / HSCROLL_FRACTION;
@@ -2309,7 +2358,8 @@ static void EDIT_EM_ScrollCaret(HWND hwnd, EDITSTATE *es)
                                 x_last = SLOWORD(EDIT_EM_PosFromChar(hwnd, es, len, FALSE));
                         } while ((x > goal) && (x_last > es->format_rect.right));
                         /* FIXME: use ScrollWindow() somehow to improve performance */
-                        InvalidateRect(hwnd, NULL, TRUE);
+                        EDIT_Refresh(hwnd,es);
+                        EDIT_UpdateScrollBars(hwnd,es,TRUE,FALSE);
                 }
         }
 }
@@ -2352,8 +2402,9 @@ static void EDIT_EM_SetHandle(HWND hwnd, EDITSTATE *es, HLOCAL hloc)
         es->flags &= ~EF_MODIFIED;
         es->flags &= ~EF_UPDATE;
         EDIT_BuildLineDefs_ML(hwnd, es);
-        InvalidateRect(hwnd, NULL, TRUE);
+        EDIT_Refresh(hwnd,es);
         EDIT_EM_ScrollCaret(hwnd, es);
+        EDIT_UpdateScrollBars(hwnd,es,TRUE,TRUE);
 }
 
 /*********************************************************************
@@ -2430,7 +2481,7 @@ static void EDIT_EM_SetPasswordChar(HWND hwnd, EDITSTATE *es, CHAR c)
                 SetWindowLongA(hwnd,GWL_STYLE,GetWindowLongA(hwnd,GWL_STYLE) & ~ES_PASSWORD);
                 es->style &= ~ES_PASSWORD;
         }
-        InvalidateRect(hwnd, NULL, TRUE);
+        EDIT_Refresh(hwnd,es);
 }
 
 
@@ -2469,7 +2520,6 @@ static void EDIT_EM_SetSel(HWND hwnd, EDITSTATE *es, UINT start, UINT end, BOOL 
         ORDER_UINT(end, old_end);
         ORDER_UINT(start, old_start);
         ORDER_UINT(old_start, old_end);
-        if (es->flags & EF_FOCUSED) HideCaret(hwnd);
         if (end != old_start)
         {
 /*
@@ -2491,7 +2541,6 @@ static void EDIT_EM_SetSel(HWND hwnd, EDITSTATE *es, UINT start, UINT end, BOOL 
             }
         }
         else EDIT_InvalidateText(hwnd, es, start, old_end);
-        if (es->flags & EF_FOCUSED) ShowCaret(hwnd);
 }
 
 
@@ -2530,7 +2579,7 @@ static void EDIT_EM_SetWordBreakProc(HWND hwnd, EDITSTATE *es, EDITWORDBREAKPROC
         es->word_break_procA = wbp;
         if ((es->style & ES_MULTILINE) && !(es->style & ES_AUTOHSCROLL)) {
                 EDIT_BuildLineDefs_ML(hwnd, es);
-                InvalidateRect(hwnd, NULL, TRUE);
+                EDIT_Refresh(hwnd,es);
         }
 }
 
@@ -3325,6 +3374,122 @@ static LRESULT EDIT_WM_NCCreate(HWND hwnd, LPCREATESTRUCTA cs)
         return TRUE;
 }
 
+static VOID EDIT_Draw(HWND hwnd,EDITSTATE *es,HDC hdc,BOOL eraseBkGnd)
+{
+  INT i;
+  HFONT old_font = 0;
+  RECT rc;
+  RECT rcLine;
+  RECT rcRgn;
+  BOOL rev = es->bEnableState && ((es->flags & EF_FOCUSED) || (es->style & ES_NOHIDESEL));
+
+  if (es->flags & EF_UPDATE) EDIT_NOTIFY_PARENT(hwnd, EN_UPDATE);
+
+  if (es->flags & EF_FOCUSED) HideCaret(hwnd);
+
+  if (eraseBkGnd)
+  {
+    HBRUSH brush;
+
+    if (!es->bEnableState || (es->style & ES_READONLY))
+      brush = (HBRUSH)EDIT_SEND_CTLCOLORSTATIC(hwnd, hdc);
+    else
+      brush = (HBRUSH)EDIT_SEND_CTLCOLOR(hwnd, hdc);
+
+    if (!brush)
+      brush = (HBRUSH)GetStockObject(WHITE_BRUSH);
+
+    GetClientRect(hwnd, &rc);
+    /*
+     *      FIXME:  specs say that we should UnrealizeObject() the brush,
+     *              but the specs of UnrealizeObject() say that we shouldn't
+     *              unrealize a stock object.  The default brush that
+     *              DefWndProc() returns is ... a stock object.
+     */
+    FillRect(hdc, &rc, brush);
+  }
+
+  if(es->style & WS_BORDER)
+  {
+    GetClientRect(hwnd, &rc);
+    if(es->style & ES_MULTILINE)
+    {
+      if(es->style & WS_HSCROLL) rc.bottom++;
+      if(es->style & WS_VSCROLL) rc.right++;
+    }
+    Rectangle(hdc, rc.left, rc.top, rc.right, rc.bottom);
+  }
+
+  IntersectClipRect(hdc, es->format_rect.left,
+                        es->format_rect.top,
+                        es->format_rect.right,
+                        es->format_rect.bottom);
+  if (es->style & ES_MULTILINE)
+  {
+    GetClientRect(hwnd, &rc);
+    IntersectClipRect(hdc, rc.left, rc.top, rc.right, rc.bottom);
+  }
+  if (es->font) old_font = SelectObject(hdc, es->font);
+  if (!es->bEnableState || (es->style & ES_READONLY))
+    EDIT_SEND_CTLCOLORSTATIC(hwnd, hdc);
+  else
+    EDIT_SEND_CTLCOLOR(hwnd, hdc);
+  if (!es->bEnableState)
+    SetTextColor(hdc, GetSysColor(COLOR_GRAYTEXT));
+  GetClipBox(hdc, &rcRgn);
+  if (es->style & ES_MULTILINE)
+  {
+    INT vlc = (es->format_rect.bottom - es->format_rect.top) / es->line_height;
+
+    for (i = es->y_offset ; i <= MIN(es->y_offset + vlc, es->y_offset + es->line_count - 1) ; i++)
+    {
+      EDIT_GetLineRect(hwnd, es, i, 0, -1, &rcLine);
+      if (IntersectRect(&rc, &rcRgn, &rcLine))
+        EDIT_PaintLine(hwnd, es, hdc, i, rev);
+    }
+  } else
+  {
+    EDIT_GetLineRect(hwnd, es, 0, 0, -1, &rcLine);
+    if (IntersectRect(&rc, &rcRgn, &rcLine))
+      EDIT_PaintLine(hwnd, es, hdc, 0, rev);
+  }
+  if (es->font) SelectObject(hdc, old_font);
+  if (es->flags & EF_FOCUSED)
+    EDIT_SetCaretPos(hwnd, es, es->selection_end,es->flags & EF_AFTER_WRAP);
+
+  if (es->flags & EF_FOCUSED) ShowCaret(hwnd);
+
+  //CB: replace
+  if (es->flags & EF_UPDATE)
+  {
+    es->flags &= ~EF_UPDATE;
+    EDIT_NOTIFY_PARENT(hwnd, EN_CHANGE);
+  }
+}
+
+static VOID EDIT_Refresh(HWND hwnd,EDITSTATE *es)
+{
+  HDC hdc,hdcCompatible;
+  HBITMAP bitmap,oldbmp;
+  RECT rect;
+
+  //CB: original controls redraws many times, cache drawing
+  if (es->flags & EF_FOCUSED) HideCaret(hwnd);
+  GetClientRect(hwnd,&rect);
+  hdc = GetDC(hwnd);
+  hdcCompatible = CreateCompatibleDC(hdc);
+  bitmap = CreateCompatibleBitmap(hdc,rect.right,rect.bottom);
+  oldbmp = SelectObject(hdcCompatible,bitmap);
+  EDIT_Draw(hwnd,es,hdcCompatible,TRUE);
+  SelectClipRgn(hdcCompatible,0);
+  BitBlt(hdc,0,0,rect.right,rect.bottom,hdcCompatible,0,0,SRCCOPY);
+  SelectObject(hdcCompatible,oldbmp);
+  DeleteObject(bitmap);
+  DeleteDC(hdcCompatible);
+  ReleaseDC(hwnd,hdc);
+  if (es->flags & EF_FOCUSED) ShowCaret(hwnd);
+}
+
 /*********************************************************************
  *
  *      WM_PAINT
@@ -3332,95 +3497,15 @@ static LRESULT EDIT_WM_NCCreate(HWND hwnd, LPCREATESTRUCTA cs)
  */
 static void EDIT_WM_Paint(HWND hwnd, EDITSTATE *es,WPARAM wParam)
 {
-        PAINTSTRUCT ps;
-        INT i;
-        HDC dc;
-        HFONT old_font = 0;
-        RECT rc;
-        RECT rcLine;
-        RECT rcRgn;
-        BOOL rev = es->bEnableState &&
-                                ((es->flags & EF_FOCUSED) ||
-                                        (es->style & ES_NOHIDESEL));
+  PAINTSTRUCT ps;
+  HDC hdc;
 
-        if (es->flags & EF_UPDATE)
-                EDIT_NOTIFY_PARENT(hwnd, EN_UPDATE);
+  if (!wParam) hdc = BeginPaint(hwnd, &ps);
+  else hdc = (HDC) wParam;
 
-        if (!wParam)
-            dc = BeginPaint(hwnd, &ps);
-        else
-            dc = (HDC) wParam;
+  EDIT_Draw(hwnd,es,hdc,FALSE);
 
-        if(es->style & WS_BORDER) {
-                GetClientRect(hwnd, &rc);
-                if(es->style & ES_MULTILINE) {
-                        if(es->style & WS_HSCROLL) rc.bottom++;
-                        if(es->style & WS_VSCROLL) rc.right++;
-                }
-                Rectangle(dc, rc.left, rc.top, rc.right, rc.bottom);
-        }
-        IntersectClipRect(dc, es->format_rect.left,
-                                es->format_rect.top,
-                                es->format_rect.right,
-                                es->format_rect.bottom);
-        if (es->style & ES_MULTILINE) {
-                GetClientRect(hwnd, &rc);
-                IntersectClipRect(dc, rc.left, rc.top, rc.right, rc.bottom);
-        }
-        if (es->font)
-                old_font = SelectObject(dc, es->font);
-        if (!es->bEnableState || (es->style & ES_READONLY))
-                EDIT_SEND_CTLCOLORSTATIC(hwnd, dc);
-        else
-                EDIT_SEND_CTLCOLOR(hwnd, dc);
-        if (!es->bEnableState)
-                SetTextColor(dc, GetSysColor(COLOR_GRAYTEXT));
-        GetClipBox(dc, &rcRgn);
-        if (es->style & ES_MULTILINE) {
-                INT vlc = (es->format_rect.bottom - es->format_rect.top) / es->line_height;
-                for (i = es->y_offset ; i <= MIN(es->y_offset + vlc, es->y_offset + es->line_count - 1) ; i++) {
-                        EDIT_GetLineRect(hwnd, es, i, 0, -1, &rcLine);
-                        if (IntersectRect(&rc, &rcRgn, &rcLine))
-                                EDIT_PaintLine(hwnd, es, dc, i, rev);
-                }
-        } else {
-                EDIT_GetLineRect(hwnd, es, 0, 0, -1, &rcLine);
-                if (IntersectRect(&rc, &rcRgn, &rcLine))
-                        EDIT_PaintLine(hwnd, es, dc, 0, rev);
-        }
-        if (es->font)
-                SelectObject(dc, old_font);
-        if (es->flags & EF_FOCUSED)
-                EDIT_SetCaretPos(hwnd, es, es->selection_end,
-                                 es->flags & EF_AFTER_WRAP);
-        if (!wParam) EndPaint(hwnd, &ps);
-        if ((es->style & WS_VSCROLL) && !(es->flags & EF_VSCROLL_TRACK)) {
-                INT vlc = (es->format_rect.bottom - es->format_rect.top) / es->line_height;
-                SCROLLINFO si;
-                si.cbSize       = sizeof(SCROLLINFO);
-                si.fMask        = SIF_PAGE | SIF_POS | SIF_RANGE | SIF_DISABLENOSCROLL;
-                si.nMin         = 0;
-                si.nMax         = es->line_count + vlc - 2;
-                si.nPage        = vlc;
-                si.nPos         = es->y_offset;
-                SetScrollInfo(hwnd, SB_VERT, &si, TRUE);
-        }
-        if ((es->style & WS_HSCROLL) && !(es->flags & EF_HSCROLL_TRACK)) {
-                SCROLLINFO si;
-                INT fw = es->format_rect.right - es->format_rect.left;
-                si.cbSize       = sizeof(SCROLLINFO);
-                si.fMask        = SIF_PAGE | SIF_POS | SIF_RANGE | SIF_DISABLENOSCROLL;
-                si.nMin         = 0;
-                si.nMax         = es->text_width + fw - 1;
-                si.nPage        = fw;
-                si.nPos         = es->x_offset;
-                SetScrollInfo(hwnd, SB_HORZ, &si, TRUE);
-        }
-
-        if (es->flags & EF_UPDATE) {
-                es->flags &= ~EF_UPDATE;
-                EDIT_NOTIFY_PARENT(hwnd, EN_CHANGE);
-        }
+  if (!wParam) EndPaint(hwnd, &ps);
 }
 
 
@@ -3461,7 +3546,6 @@ static void EDIT_WM_SetFocus(HWND hwnd, EDITSTATE *es, HWND window_losing_focus)
         ShowCaret(hwnd);
         EDIT_NOTIFY_PARENT(hwnd, EN_SETFOCUS);
 }
-
 
 /*********************************************************************
  *
@@ -3504,7 +3588,7 @@ static void EDIT_WM_SetFont(HWND hwnd, EDITSTATE *es, HFONT font, BOOL redraw)
                 EDIT_BuildLineDefs_ML(hwnd, es);
 
         if (redraw)
-                InvalidateRect(hwnd, NULL, TRUE);
+                EDIT_Refresh(hwnd,es);
         if (es->flags & EF_FOCUSED) {
                 DestroyCaret();
                 CreateCaret(hwnd, 0, 2, es->line_height);
@@ -3546,6 +3630,7 @@ static void EDIT_WM_SetText(HWND hwnd, EDITSTATE *es, LPCSTR text)
         es->flags &= ~EF_MODIFIED;
         EDIT_EM_SetSel(hwnd, es, 0, 0, FALSE);
         EDIT_EM_ScrollCaret(hwnd, es);
+        EDIT_UpdateScrollBars(hwnd,es,TRUE,TRUE);
 }
 
 
@@ -3560,7 +3645,7 @@ static void EDIT_WM_Size(HWND hwnd, EDITSTATE *es, UINT action, INT width, INT h
                 RECT rc;
                 SetRect(&rc, 0, 0, width, height);
                 EDIT_SetRectNP(hwnd, es, &rc);
-                InvalidateRect(hwnd, NULL, TRUE);
+                EDIT_Refresh(hwnd,es);
         }
 }
 
