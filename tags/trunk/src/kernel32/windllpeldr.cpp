@@ -1,4 +1,4 @@
-/* $Id: windllpeldr.cpp,v 1.5 1999-12-13 21:07:40 sandervl Exp $ */
+/* $Id: windllpeldr.cpp,v 1.6 2000-02-17 14:08:51 sandervl Exp $ */
 
 /*
  * Win32 PE loader Dll class
@@ -29,6 +29,9 @@
 
 #include "oslibmisc.h"
 #include "oslibdos.h"
+
+#define DBG_LOCALLOG	DBG_windllpeldr
+#include "dbglocal.h"
 
 
 //******************************************************************************
