@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.18 2000-02-24 19:19:08 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.19 2000-03-01 13:30:04 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -30,8 +30,9 @@
 #include <wprocess.h>
 #include "pmwindow.h"
 #include "oslibwin.h"
+#include "winmouse.h"
 
-#define DBG_LOCALLOG	DBG_oslibmsgtranslate
+#define DBG_LOCALLOG    DBG_oslibmsgtranslate
 #include "dbglocal.h"
 
 //Used for key translation while processing WM_CHAR message
@@ -325,15 +326,15 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
 
         if (!win32wnd->CanReceiveSizeMsgs())    goto dummymessage;
 
-	ULONG windowStyle = WinQueryWindowULong(os2Msg->hwnd, QWL_STYLE);
-	win32wnd->setStyle(win32wnd->getStyle() & ~(WS_MAXIMIZE_W|WS_MINIMIZE_W));
-	if (windowStyle & WS_MINIMIZED) {
-		win32wnd->setStyle(win32wnd->getStyle() | WS_MINIMIZE_W);
-	}
-	else
-	if (windowStyle & WS_MAXIMIZED) {
-		win32wnd->setStyle(win32wnd->getStyle() | WS_MAXIMIZE_W);
-	}
+        ULONG windowStyle = WinQueryWindowULong(os2Msg->hwnd, QWL_STYLE);
+        win32wnd->setStyle(win32wnd->getStyle() & ~(WS_MAXIMIZE_W|WS_MINIMIZE_W));
+        if (windowStyle & WS_MINIMIZED) {
+            win32wnd->setStyle(win32wnd->getStyle() | WS_MINIMIZE_W);
+        }
+        else
+        if (windowStyle & WS_MAXIMIZED) {
+            win32wnd->setStyle(win32wnd->getStyle() | WS_MAXIMIZE_W);
+        }
 
         if(pswp->fl & (SWP_MOVE | SWP_SIZE)) {
                 dprintf(("Set client rectangle to (%d,%d)(%d,%d)", swpOld.x, swpOld.y, swpOld.x + swpOld.cx, swpOld.y + swpOld.cy));
@@ -435,6 +436,11 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
             winMsg->wParam  = GetMouseKeyState();
             winMsg->lParam  = MAKELONG(ClientPoint.x, ClientPoint.y); //client coordinates
         }
+        if(ISMOUSE_CAPTURED())
+        {
+            if(DInputMouseHandler(win32wnd->getWindowHandle(), MOUSEMSG_BUTTON, winMsg->pt.x, winMsg->pt.y))
+                goto dummymessage;
+        }
 
         break;
 
@@ -465,6 +471,11 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
           winMsg->message = WINWM_MOUSEMOVE;
           winMsg->wParam  = GetMouseKeyState();
           winMsg->lParam  = MAKELONG(SHORT1FROMMP(os2Msg->mp1),mapY(win32wnd,SHORT2FROMMP(os2Msg->mp1)));
+        }
+        if(ISMOUSE_CAPTURED())
+        {
+            if(DInputMouseHandler(win32wnd->getWindowHandle(), MOUSEMSG_MOVE, winMsg->pt.x, winMsg->pt.y))
+                goto dummymessage;
         }
         //OS/2 Window coordinates -> Win32 Window coordinates
         break;
@@ -621,7 +632,10 @@ VirtualKeyFound:
                     winMsg->lParam |= 1 << 30;                          // bit 30, previous state, 1 means key was pressed
             }
         }
-
+        if(ISKDB_CAPTURED())
+        {
+            DInputKeyBoardHandler(winMsg);
+        }
         break;
     }
 

@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.170 2000-02-29 19:16:12 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.171 2000-03-01 13:30:05 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -44,7 +44,6 @@
 #include "pmwindow.h"
 #include "controls.h"
 #include <wprocess.h>
-#include "winmouse.h"
 #include <win\hook.h>
 #include <menu.h>
 #define INCL_TIMERWIN32
@@ -863,6 +862,8 @@ ULONG Win32BaseWindow::MsgActivate(BOOL fActivate, BOOL fMinimized, HWND hwnd, H
 void Win32BaseWindow::setExtendedKey(ULONG virtualkey, ULONG *lParam)
 {
     switch(virtualkey) {
+    case VK_LEFT:
+    case VK_RIGHT:
     case VK_DOWN:
     case VK_UP:
     case VK_PRIOR:
@@ -938,12 +939,6 @@ ULONG Win32BaseWindow::MsgButton(MSG *msg)
                 break;
     }
 
-    if(ISMOUSE_CAPTURED())
-    {
-        if(DInputMouseHandler(getWindowHandle(), MOUSEMSG_BUTTON, msg->pt.x, msg->pt.y))
-            return 0;
-    }
-
     if(fClick)
     {
      HWND hwndTop;
@@ -964,7 +959,8 @@ ULONG Win32BaseWindow::MsgButton(MSG *msg)
                 if(((ret == MA_ACTIVATE) || (ret == MA_ACTIVATEANDEAT))
                    && (hwndTop != GetForegroundWindow()) )
                 {
-                      ::SetActiveWindow(hwndTop);
+                    //SvL: Calling OSLibSetActiveWindow(hwndTop); causes focus problems
+                    OSLibWinSetFocus(getOS2FrameWindowHandle());
                 }
         }
     }
@@ -1006,11 +1002,6 @@ ULONG Win32BaseWindow::MsgEraseBackGround(HDC hdc)
 //******************************************************************************
 ULONG Win32BaseWindow::MsgMouseMove(MSG *msg)
 {
-    if(ISMOUSE_CAPTURED()) {
-        if(DInputMouseHandler(getWindowHandle(), MOUSEMSG_MOVE, msg->pt.x, msg->pt.y))
-            return 0;
-    }
-
     //TODO: hiword should be 0 if window enters menu mode (SDK docs)
     SendInternalMessageA(WM_SETCURSOR, Win32Hwnd, MAKELONG(lastHitTestVal, msg->message));
 
@@ -1021,10 +1012,6 @@ ULONG Win32BaseWindow::MsgMouseMove(MSG *msg)
 //******************************************************************************
 ULONG Win32BaseWindow::MsgChar(MSG *msg)
 {
-    if(ISKDB_CAPTURED())
-    {
-        DInputKeyBoardHandler(msg);
-    }
     return DispatchMsgA(msg);
 }
 //******************************************************************************
@@ -2416,21 +2403,22 @@ Win32BaseWindow *Win32BaseWindow::FindWindowById(int id)
 //We assume (for now) that if hwndParent or hwndChildAfter are real window handles, that
 //the current process owns them.
 //******************************************************************************
-HWND Win32BaseWindow::FindWindowEx(HWND hwndParent, HWND hwndChildAfter, LPSTR lpszClass, LPSTR lpszWindow,
-                                   BOOL fUnicode)
+HWND Win32BaseWindow::FindWindowEx(HWND hwndParent, HWND hwndChildAfter, ATOM atom, LPSTR lpszWindow)
 {
  Win32BaseWindow *parent = GetWindowFromHandle(hwndParent);
  Win32BaseWindow *child  = GetWindowFromHandle(hwndChildAfter);
 
-    if((hwndParent != OSLIB_HWND_DESKTOP && !parent) ||
+    dprintf(("FindWindowEx %x %x %x %s", hwndParent, hwndChildAfter, atom, lpszWindow));
+    if((hwndParent != 0 && !parent) ||
        (hwndChildAfter != 0 && !child) ||
-       (hwndParent == OSLIB_HWND_DESKTOP && hwndChildAfter != 0))
+       (hwndParent == 0 && hwndChildAfter != 0))
     {
         dprintf(("Win32BaseWindow::FindWindowEx: parent or child not found %x %x", hwndParent, hwndChildAfter));
         SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
-    if(hwndParent != OSLIB_HWND_DESKTOP)
+    SetLastError(0);
+    if(hwndParent != 0)
     {//if the current process owns the window, just do a quick search
         child = (Win32BaseWindow *)parent->getFirstChild();
         if(hwndChildAfter != 0)
@@ -2447,8 +2435,9 @@ HWND Win32BaseWindow::FindWindowEx(HWND hwndParent, HWND hwndChildAfter, LPSTR l
         }
         while(child)
         {
-            if(child->getWindowClass()->hasClassName(lpszClass, fUnicode) &&
-               (!lpszWindow || child->hasWindowName(lpszWindow, fUnicode)))
+            //According to Wine, the class doesn't need to be specified
+            if((!atom || child->getWindowClass()->getAtom() == atom) &&
+               (!lpszWindow || child->hasWindowName(lpszWindow)))
             {
                 dprintf(("FindWindowEx: Found window %x", child->getWindowHandle()));
                 return child->getWindowHandle();
@@ -2473,8 +2462,9 @@ HWND Win32BaseWindow::FindWindowEx(HWND hwndParent, HWND hwndChildAfter, LPSTR l
             }
 
             if(wnd) {
-                if(wnd->getWindowClass()->hasClassName(lpszClass, fUnicode) &&
-                   (!lpszWindow || wnd->hasWindowName(lpszWindow, fUnicode)))
+                //According to Wine, the class doesn't need to be specified
+                if((!atom || wnd->getWindowClass()->getAtom() == atom) &&
+                   (!lpszWindow || wnd->hasWindowName(lpszWindow)))
                 {
                     OSLibWinEndEnumWindows(henum);
                     dprintf(("FindWindowEx: Found window %x", wnd->getWindowHandle()));
@@ -2571,7 +2561,7 @@ HWND Win32BaseWindow::SetActiveWindow()
 
     dprintf(("SetActiveWindow %x", getWindowHandle()));
     if(OSLibWinSetActiveWindow(OS2HwndFrame) == FALSE) {
-	dprintf(("OSLibWinSetActiveWindow %x returned FALSE!", OS2HwndFrame));
+        dprintf(("OSLibWinSetActiveWindow %x returned FALSE!", OS2HwndFrame));
     }
     hwndActive = GetActiveWindow();
     return (hwndActive) ? hwndActive : windowDesktop->getWindowHandle(); //pretend the desktop was active
