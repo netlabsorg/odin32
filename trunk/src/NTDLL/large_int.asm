@@ -452,5 +452,39 @@ _RtlLargeIntegerAdd@16	proc
 	adc	edx,[esp+010h];	b
 	ret	010h
 _RtlLargeIntegerAdd@16	endp
+
+
+; 23 LARGE_INTEGER WINAPI RtlpLargeIntegerAdd( LARGE_INTEGER *a, LARGE_INTEGER *b )
+	align 4h
+
+	public _RtlpLargeIntegerAdd@8
+_RtlpLargeIntegerAdd@8	proc
+
+; 25     return a + b;
+        push    ebp
+        mov     ebp, esp
+        push    esi
+        push    edi
+        push    ecx
+
+	mov	edi,[ebp+08h];	result
+        mov     esi,[ebp+0Ch];  a
+        mov     ecx,[ebp+10h];  b
+
+	mov	eax,[esi];	a
+	mov	edx,[esi+4];	a
+	add	eax,[ecx];	b
+	adc	edx,[ecx+4];	b
+
+        mov     [edi], eax
+        mov     [edi+4], edx
+
+        pop     ecx
+        pop     edi
+        pop     esi
+        pop     ebp
+	ret	0Ch
+_RtlpLargeIntegerAdd@8	endp
+
 CODE32	ends
 end
