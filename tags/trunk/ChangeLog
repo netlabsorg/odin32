@@ -1,4 +1,4 @@
-/* $Id: ChangeLog,v 1.1733 2001-10-10 17:21:27 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1734 2001-10-10 17:38:38 phaller Exp $ */
 
  2001-10-10: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Do not blindly add ODIN_FUNCTION macros to functions that
@@ -23,6 +23,7 @@
                         IOCTL_STORAGE_LOAD_MEDIA
                         IOCTL_DISK_EJECT_MEDIA
                         IOCTL_DISK_CHECK_VERIFY
+    - IPHLPAPI: o added fake version of GetAdaptersInfo()
 
  2001-10-09: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Image header page must be readonly
