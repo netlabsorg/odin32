@@ -1,4 +1,4 @@
-/* $Id */
+/* $Id: profile.h,v 1.2 1999-08-17 18:07:37 phaller Exp $ */
 /*
  * Profile header for initterm
  * Copyright 1999 Christoph Bratschi
