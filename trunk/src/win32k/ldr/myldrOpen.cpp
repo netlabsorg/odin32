@@ -1,4 +1,4 @@
-/* $Id: myldrOpen.cpp,v 1.8 2000-02-21 04:45:47 bird Exp $
+/* $Id: myldrOpen.cpp,v 1.9 2000-02-21 05:00:52 bird Exp $
  *
  * myldrOpen - ldrOpen.
  *
@@ -272,7 +272,7 @@ ULONG LDRCALL myldrOpen(PSFN phFile, char *pszFilename, ULONG param3)
                 if (rc != NO_ERROR)
                 {
                     char *pszStart = pach+2;
-                    kprintf(("ldrOpen: scrtip debug 1\n"));
+                    kprintf(("ldrOpen: script debug 1\n"));
 
                     /* Make sure we don't read to much... */
                     pszBuffer[cchRead] = '\0';
@@ -283,7 +283,7 @@ ULONG LDRCALL myldrOpen(PSFN phFile, char *pszFilename, ULONG param3)
                     pszStart = pszBuffer + 2; /* skips the "#!" stuff. */
                     while (*pszStart != '\0' && (*pszStart == ' ' || *pszStart == '\t'))
                         pszStart++;
-                    kprintf(("ldrOpen: scrtip debug 2\n"));
+                    kprintf(("ldrOpen: script debug 2\n"));
 
                     /* anything left on the line? */
                     if (*pszStart != '\0' && *pszStart != '\r' && *pszStart != '\n')
@@ -296,7 +296,7 @@ ULONG LDRCALL myldrOpen(PSFN phFile, char *pszFilename, ULONG param3)
                          * find linesize and make parameters ready for copying
                          */
                         pszEnd = pszStart;
-                        kprintf(("ldrOpen: scrtip debug 3\n"));
+                        kprintf(("ldrOpen: script debug 3\n"));
                         //pszFirstArg = NULL;
                         while (*pszEnd != '\0' && *pszEnd != '\r' && *pszEnd != '\n')
                         {
@@ -316,26 +316,26 @@ ULONG LDRCALL myldrOpen(PSFN phFile, char *pszFilename, ULONG param3)
                             cchToAdd++;
                         }
                         *pszEnd = '\0';
-                        kprintf(("ldrOpen: scrtip debug 4\n"));
+                        kprintf(("ldrOpen: script debug 4\n"));
 
                         /*
                          * Find the ExecPgm buffer.
                          */
                         pBuffer = QueryBufferPointerFromFilename(pszFilename);
-                        kprintf(("ldrOpen: scrtip debug 5\n"));
+                        kprintf(("ldrOpen: script debug 5\n"));
                         if (pBuffer != NULL)
                         {
                             unsigned cchArguments = getArgsLength(pBuffer->achArgs);
                             kprintf(("ldrOpen: debug1\n"));
 
-                            kprintf(("ldrOpen: scrtip debug 6\n"));
+                            kprintf(("ldrOpen: script debug 6\n"));
 
                             /*
                              * Is there enough space in the struct?
                              */
                             if (cchArguments + cchToAdd < sizeof(pBuffer->achArgs))
                             {
-                                kprintf(("ldrOpen: scrtip debug 7\n"));
+                                kprintf(("ldrOpen: script debug 7\n"));
                                 /*
                                  * Open the interpreter.
                                  */
@@ -347,7 +347,7 @@ ULONG LDRCALL myldrOpen(PSFN phFile, char *pszFilename, ULONG param3)
                                     /* Make space for the addition arguments. */
                                     memmove(&pBuffer->achArgs[cchToAdd], &pBuffer->achArgs[0], cchArguments);
                                     memcpy(&pBuffer->achArgs[0], pszBuffer, cchToAdd);
-                                    kprintf(("ldrOpen: scrtip debug 9\n"));
+                                    kprintf(("ldrOpen: script debug 9\n"));
                                 }
                                 else
                                     kprintf(("ldrOpen: failed to open interpreter (%s), rc=%d\n", pszStart, rc));

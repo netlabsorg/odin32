@@ -1,4 +1,4 @@
-; $Id: buffer.asm,v 1.3 2000-02-19 08:40:31 bird Exp $
+; $Id: buffer.asm,v 1.4 2000-02-21 05:00:53 bird Exp $
 ;
 ; Simple resident buffer for use when overloading tkExecPgm.
 ;
@@ -271,6 +271,7 @@ QueryBufferPointerFromFilename_next:
 QueryBufferPointerFromFilename_nok:
     ; The buffer was not found, return NULL pointer.
     xor     eax, eax
+    pop     ebx
     pop     edx
     pop     ecx
     ret
@@ -278,6 +279,7 @@ QueryBufferPointerFromFilename_nok:
 QueryBufferPointerFromFilename_found:
     ; The buffer was found, return the pointer to it!
     pop     eax
+    pop     ebx
     mov     eax, edx
     pop     edx
     pop     ecx
