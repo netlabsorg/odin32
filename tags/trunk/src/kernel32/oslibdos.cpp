@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.63 2001-06-03 08:59:48 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.64 2001-06-12 17:03:33 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -2446,7 +2446,14 @@ HINSTANCE OSLibDosLoadModule(LPSTR szModName)
   SetLastError(ERROR_SUCCESS_W);
   return hModule;
 }
-
+//******************************************************************************
+//******************************************************************************
+void OSLibDosFreeModule(HINSTANCE hinst)
+{
+  DosFreeModule(hinst);
+}
+//******************************************************************************
+//******************************************************************************
 ULONG OSLibDosQuerySysInfo(ULONG iStart, ULONG iLast, PVOID pBuf, ULONG cbBuf)
 {
   APIRET rc;

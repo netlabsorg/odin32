@@ -1,4 +1,4 @@
-/* $Id: misc.cpp,v 1.37 2001-06-09 19:46:00 sandervl Exp $ */
+/* $Id: misc.cpp,v 1.38 2001-06-12 17:03:33 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -250,6 +250,7 @@ static int  dwEnableLogging = 1;
 static int  oldcrtmsghandle = 0;
 
 static BOOL fDisableThread[5] = {0};
+static BOOL fFlushLines = FALSE;
 
 //#define CHECK_ODINHEAP
 #if defined(DEBUG) && defined(CHECK_ODINHEAP)
@@ -278,6 +279,9 @@ int SYSTEM WriteLog(char *tekst, ...)
   {
     init = TRUE;
 
+    if(getenv("WIN32LOG_FLUSHLINES")) {
+        fFlushLines = TRUE;
+    }
 #ifdef DEFAULT_LOGGING_OFF
     if(getenv("WIN32LOG_ENABLED")) {
 #else
@@ -354,6 +358,9 @@ int SYSTEM WriteLog(char *tekst, ...)
 
     if(tekst[strlen(tekst)-1] != '\n')
       fprintf(flog, "\n");
+
+    if(fFlushLines) 
+      fflush(flog);
   }
   SetFS(sel);
   return 1;

@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.123 2001-06-10 22:32:18 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.124 2001-06-12 17:03:34 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -823,6 +823,13 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HANDLE hFile, DWORD dwFla
                         }
                 }
                 pModule->incDynamicLib();
+            }
+            else
+            if(fExeStarted) {
+                OSLibDosFreeModule(hDll);
+                SetLastError(ERROR_INVALID_EXE_SIGNATURE);
+                dprintf(("Dll %s is not an Odin dll; unload & return failure", szModname));
+                return 0;
             }
             else
                 return hDll; //happens when LoadLibrary is called in kernel32's initterm (nor harmful)
