@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.173 2003-01-16 00:44:32 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.174 2003-01-16 12:47:52 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -2029,7 +2029,7 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
         if(lpCurrentDirectory) {
             char *newcmdline;
 
-            newcmdline = (char *)malloc(strlen(lpCurrentDirectory) + iNewCommandLineLength + strlen(lpszPE) + 16);
+            newcmdline = (char *)malloc(strlen(lpCurrentDirectory) + iNewCommandLineLength + strlen(lpszPE) + 64);
             sprintf(newcmdline, "%s /OPT:[CURDIR=%s] %s %s", lpszPE, lpCurrentDirectory, szAppName, lpCommandLine);
             free(cmdline);
             cmdline = newcmdline;
