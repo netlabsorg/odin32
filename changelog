@@ -1,4 +1,17 @@
- /* $Id: changelog,v 1.404 1999-11-03 19:52:55 sandervl Exp $ */
+ /* $Id: changelog,v 1.405 1999-11-03 19:53:30 sandervl Exp $ */
+
+ 99-11-03: Sander van Leeuwen <sandervl@xs4all.nl>
+	- COMDLG32: Import from shlwapi as the original Wine code does
+	- SHELLL32: Added exports
+	- SHLWAPI:  Link with shell32.lib for forwarders + added exports
+	- USER32:   Fixed mouseactivate for subclassed OS/2 windows (scrollbars)
+                    Fixed CreateIconIndirect (Wine file dialog now shows button
+                    icons correctly)
+                    Don't clear WS_CLIPSIBLINGS bit in OSSetWindowStyle.
+                    Removed fix in PMFRAME WM_ADJUSTWINDOWPOS: Previous fix breaks
+                    a lot of apps (button.exe/style.exe/header4.exe)
+                    (fix = call default frame handler when receiving this msg
+                     when the window hasn't been 'created' yet)
 
  99-11-03: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: fixed modal dialogs
