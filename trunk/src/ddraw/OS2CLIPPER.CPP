@@ -1,4 +1,4 @@
-/* $Id: OS2CLIPPER.CPP,v 1.11 2001-04-04 09:02:14 sandervl Exp $ */
+/* $Id: OS2CLIPPER.CPP,v 1.12 2001-05-28 17:17:09 phaller Exp $ */
 
 /*
  * DX clipper class routines
@@ -21,6 +21,32 @@
 #include <misc.h>
 #include <winerror.h>
 #include <winuser.h>
+
+//******************************************************************************
+//******************************************************************************
+OS2IDirectDrawClipper::OS2IDirectDrawClipper(void) :
+                 Referenced(0), lastError(DD_OK),
+                 clipWindow(0)
+{
+  // this constructor creates an unassociated instance of the ddraw clipper,
+  // no ddraw object is associated
+
+  lpVtbl                  = &Vtbl;
+  Vtbl.AddRef             = ClipAddRef;
+  Vtbl.Release            = ClipRelease;
+  Vtbl.QueryInterface     = ClipQueryInterface;
+  Vtbl.GetClipList        = ClipGetClipList;
+  Vtbl.GetHWnd            = ClipGetHWnd;
+  Vtbl.Initialize         = ClipInitialize;
+  Vtbl.IsClipListChanged  = ClipIsClipListChanged;
+  Vtbl.SetClipList        = ClipSetClipList;
+  Vtbl.SetHWnd            = ClipSetHWnd;
+
+  lpDraw                  = NULL;
+  // lpDraw->Vtbl.AddRef(lpDraw);
+  // hDive                   = lpDirectDraw->GetDiveInstance();
+  windowRect.left = windowRect.right = windowRect.top = windowRect.bottom = 0;
+}
 
 //******************************************************************************
 //******************************************************************************
@@ -146,7 +172,7 @@ HRESULT WIN32API ClipGetClipList(THIS This, LPRECT lpRect, LPRGNDATA lpClipList,
 //******************************************************************************
 HRESULT WIN32API ClipGetHWnd(THIS This, HWND FAR *pHwnd)
 {
- OS2IDirectDrawClipper *me = (OS2IDirectDrawClipper *)This;
+  OS2IDirectDrawClipper *me = (OS2IDirectDrawClipper *)This;
 
   dprintf(("DDRAW: ClipGetHWnd %x %x", This, me->clipWindow));
 
@@ -157,9 +183,41 @@ HRESULT WIN32API ClipGetHWnd(THIS This, HWND FAR *pHwnd)
 //******************************************************************************
 HRESULT WIN32API ClipInitialize(THIS This, LPDIRECTDRAW lpDD, DWORD dwFlags)
 {
+  OS2IDirectDrawClipper *me = (OS2IDirectDrawClipper *)This;
+
   dprintf(("DDRAW: ClipInitialize %x %x %x", This, lpDD, dwFlags));
 
-  return(DDERR_ALREADYINITIALIZED); // Init is done during creation see M$ Doc
+  // check parameters
+  if (dwFlags != 0)
+      return DDERR_INVALIDPARAMS;
+
+  // check if already initialized
+  if (me->hDive != NULL)
+    return(DDERR_ALREADYINITIALIZED); // Init is done during creation see M$ Doc
+
+  // initialize this instance (created with DirectDrawCreateClipper)
+
+  if (lpDD != NULL)
+  {
+      OS2IDirectDraw *os2DD = (OS2IDirectDraw *)lpDD;
+      me->lpDraw = os2DD;
+      me->lpDraw->Vtbl.AddRef(me->lpDraw);
+      me->hDive = me->lpDraw->GetDiveInstance();
+  }
+  else
+  {
+      // we're supposed to create an independent DirectDrawClipper object
+      // now.
+      if (me->lpDraw != NULL)
+      {
+          // we're not handling this any other currently
+          return(DDERR_ALREADYINITIALIZED);
+      }
+      // else
+      //   we've been independent and remain so ...
+  }
+
+  return(DD_OK);
 }
 //******************************************************************************
 //******************************************************************************

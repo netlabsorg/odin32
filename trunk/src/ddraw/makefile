@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.27 2001-03-18 21:44:45 mike Exp $
+# $Id: makefile,v 1.28 2001-05-28 17:17:15 phaller Exp $
 
 #
 # Odin32 API
@@ -18,6 +18,7 @@
 #
 OBJS = \
 $(OBJDIR)\ddraw.obj \
+$(OBJDIR)\ddrawclipper.obj \
 $(OBJDIR)\os2ddraw.obj \
 $(OBJDIR)\os2clipper.obj \
 $(OBJDIR)\os2d3d.obj \
