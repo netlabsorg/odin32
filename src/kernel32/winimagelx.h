@@ -1,4 +1,4 @@
-/* $Id: winimagelx.h,v 1.5 2001-08-06 19:36:42 sandervl Exp $ */
+/* $Id: winimagelx.h,v 1.6 2002-02-03 13:16:23 sandervl Exp $ */
 
 /*
  * Win32 LX Image base class
@@ -34,6 +34,8 @@ protected:
   DWORD  dwOrdinalBase;
 private:
 };
+
+extern BYTE dosHeader[16*15];
 
 #endif //__WINIMAGELX_H__
 

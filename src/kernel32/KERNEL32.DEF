@@ -1,4 +1,4 @@
-; $Id: KERNEL32.DEF,v 1.127 2001-12-06 10:14:45 sandervl Exp $
+; $Id: KERNEL32.DEF,v 1.128 2002-02-03 13:16:22 sandervl Exp $
 
 ;Basis is Windows95 KERNEL32
 LIBRARY KERNEL32 INITINSTANCE TERMINSTANCE
@@ -1073,6 +1073,7 @@ EXPORTS
     _RegisterLxExe@8                                              @1237
     _RegisterLxDll@24                                             @1238
     _UnregisterLxDll@4                                            @1239
+    _RegisterDummyExe@4                                           @1249
 
 ;VMutex
    enter__6VMutexFUlPUl                                           @1204 NONAME
