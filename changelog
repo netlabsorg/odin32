@@ -1,4 +1,15 @@
-/* $Id: changelog,v 1.1609 2001-07-19 17:41:25 achimha Exp $ */
+/* $Id: changelog,v 1.1610 2001-07-19 19:52:07 sandervl Exp $ */
+
+ 2001-07-19: Sander van Leeuwen <sandervl@xs4all.nl>
+    - DOC:      o Added license for WGSS50
+    - TOOLS\INSTALL:
+                o Include new license in WarpIN install script + package
+    - TOOLS\DAILYBUILD:
+                o Add WGSS50.lic to daily zipfiles
+    - COMDLG32: o Use printer dialog function in WGSS50
+    - WGSS50:   o Added new WGSS dll that fixes several printing problems
+    - KERNEL32: o lstrncmpiA/W bugfix; broke resource lookup in Acrobat
+                  Distiller (did not exactly work the way Wine code expected it)
 
  2001-07-19: Achim Hasenmueller <achimha@innotek.de>
     - LICENSE:  o added WGSS50.LIC which contains the official license
