@@ -1,4 +1,4 @@
-/* $Id: hmdevice.h,v 1.29 2001-06-23 16:59:27 sandervl Exp $ */
+/* $Id: hmdevice.h,v 1.30 2001-11-26 14:54:00 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -99,13 +99,15 @@ public:
                                DWORD   fdwOdinOptions);
 
                        /* this is a handler method for calls to CreateFile() */
-  virtual DWORD  CreateFile (LPCSTR        lpFileName,
+  virtual DWORD  CreateFile (HANDLE        hHandle,
+                             LPCSTR        lpFileName,
                              PHMHANDLEDATA pHMHandleData,
                              PVOID         lpSecurityAttributes,
                              PHMHANDLEDATA pHMHandleDataTemplate);
 
                        /* this is a handler method for calls to   OpenFile() */
-  virtual DWORD  OpenFile   (LPCSTR        lpFileName,
+  virtual DWORD  OpenFile   (HANDLE        hHandle,
+                             LPCSTR        lpFileName,
                              PHMHANDLEDATA pHMHandleData,
                              OFSTRUCT*     pOFStruct,
                              UINT          fuMode);
@@ -328,6 +330,8 @@ public:
                                      LPVOID lpInBuffer, DWORD nInBufferSize,
                                      LPVOID lpOutBuffer, DWORD nOutBufferSize,
                                      LPDWORD lpBytesReturned, LPOVERLAPPED lpOverlapped);
+
+  virtual BOOL   CancelIo           (PHMHANDLEDATA pHMHandleData);
 
  /* COM ports */
  virtual BOOL SetupComm( PHMHANDLEDATA pHMHandleData,

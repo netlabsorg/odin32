@@ -1,4 +1,4 @@
-/* $Id: conout.cpp,v 1.10 2001-03-13 18:45:32 sandervl Exp $ */
+/* $Id: conout.cpp,v 1.11 2001-11-26 14:53:59 sandervl Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -93,7 +93,8 @@
  * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
  *****************************************************************************/
 
-DWORD HMDeviceConsoleOutClass::CreateFile (LPCSTR        lpFileName,
+DWORD HMDeviceConsoleOutClass::CreateFile (HANDLE        hHandle,
+                                           LPCSTR        lpFileName,
                                            PHMHANDLEDATA pHMHandleData,
                                            PVOID         lpSecurityAttributes,
                                            PHMHANDLEDATA pHMHandleDataTemplate)

@@ -1,4 +1,4 @@
-/* $Id: hmdevice.cpp,v 1.28 2001-06-21 21:07:53 sandervl Exp $ */
+/* $Id: hmdevice.cpp,v 1.29 2001-11-26 14:54:00 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -168,7 +168,8 @@ BOOL HMDeviceHandler::DuplicateHandle(PHMHANDLEDATA pHMHandleData, HANDLE  srcpr
  * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
  *****************************************************************************/
 
-DWORD HMDeviceHandler::CreateFile (LPCSTR        lpFileName,
+DWORD HMDeviceHandler::CreateFile (HANDLE        hHandle,
+                                   LPCSTR        lpFileName,
                                    PHMHANDLEDATA pHMHandleData,
                                    PVOID         lpSecurityAttributes,
                                    PHMHANDLEDATA pHMHandleDataTemplate)
@@ -625,7 +626,8 @@ DWORD HMDeviceHandler::LockFileEx(PHMHANDLEDATA pHMHandleData,
  * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
  *****************************************************************************/
 
-DWORD HMDeviceHandler::OpenFile (LPCSTR        lpFileName,
+DWORD HMDeviceHandler::OpenFile (HANDLE        hHandle,
+                                 LPCSTR        lpFileName,
                                  PHMHANDLEDATA pHMHandleData,
                                  OFSTRUCT      *pOFStruct,
                                  UINT          arg3)
@@ -1159,7 +1161,23 @@ BOOL HMDeviceHandler::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoCon
   return(FALSE);
 }
 
-
+/*****************************************************************************
+ * Name      : DWORD HMDeviceHandler::CancelIo
+ * Purpose   : cancel pending IO operation
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : SvL
+ *****************************************************************************/
+BOOL HMDeviceHandler::CancelIo(PHMHANDLEDATA pHMHandleData)
+{
+  dprintf(("KERNEL32: HandleManager::DeviceHandler::CancelIo(%08xh)",
+           pHMHandleData->hHMHandle));
+  SetLastError(ERROR_INVALID_HANDLE);
+  return(FALSE);
+}
 /*****************************************************************************
  * Name      : DWORD HMDeviceHandler::SetupComm
  * Purpose   : set com port parameters (queue)

@@ -1,4 +1,4 @@
-/* $Id: stubs.cpp,v 1.33 2001-11-10 12:47:47 sandervl Exp $
+/* $Id: stubs.cpp,v 1.34 2001-11-26 14:54:03 sandervl Exp $
  *
  * Win32 KERNEL32 Subsystem for OS/2
  *
@@ -409,45 +409,6 @@ HANDLE WIN32API BeginUpdateResourceW( LPCWSTR pFileName,
           ));
 
   return (NULL);
-}
-
-/*****************************************************************************
- * Name      : BOOL WIN32API CancelIo
- * Purpose   : The CancelIO function cancels all pending input and output
- *             (I/O) operations that were issued by the calling thread for
- *             the specified file handle. The function does not cancel
- *             I/O operations issued for the file handle by other threads.
- * Parameters: HANDLE hFile   file handle for which to cancel I/O
- * Variables :
- * Result    : If the function succeeds, the return value is nonzero All pending
- *             I/O operations issued by the calling thread for the file handle
- *             were successfully canceled.
- *             If the function fails, the return value is zero.
- *             To get extended error information, call GetLastError.
- * Remark    : If there are any I/O operations in progress for the specified
- *             file handle, and they were issued by the calling thread, the
- *             CancelIO function cancels them.
- *             Note that the I/O operations must have been issued as
- *             overlapped I/O. If they were not, the I/O operations would not
- *             have returned to allow the thread to call the CancelIO function.
- *             Calling the CancelIO function with a file handle that was not
- *             opened with FILE_FLAG_OVERLAPPED does nothing.
- *             All I/O operations that are canceled will complete with the
- *             error ERROR_OPERATION_ABORTED. All completion notifications
- *             for the I/O operations will occur normally.
- * Status    : UNTESTED STUB
- *
- * Author    : Markus Montkowski [Thu, 1998/05/19 11:46]
- *****************************************************************************/
-
-BOOL WIN32API CancelIo(HANDLE hFile)
-{
-
-  dprintf(("KERNEL32:CancelIo(%08x) not implemented\n",
-           hFile
-          ));
-
-  return (FALSE);
 }
 
 /*****************************************************************************

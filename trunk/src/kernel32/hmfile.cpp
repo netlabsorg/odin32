@@ -1,4 +1,4 @@
-/* $Id: hmfile.cpp,v 1.29 2001-11-07 15:35:36 sandervl Exp $ */
+/* $Id: hmfile.cpp,v 1.30 2001-11-26 14:54:01 sandervl Exp $ */
 
 /*
  * File IO win32 apis
@@ -55,7 +55,8 @@ inline void ignore_dprintf(...){}
  * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
  *****************************************************************************/
 
-DWORD HMDeviceFileClass::CreateFile (LPCSTR        lpFileName,
+DWORD HMDeviceFileClass::CreateFile (HANDLE        hHandle,
+                                     LPCSTR        lpFileName,
                                      PHMHANDLEDATA pHMHandleData,
                                      PVOID         lpSecurityAttributes,
                                      PHMHANDLEDATA pHMHandleDataTemplate)
@@ -150,7 +151,8 @@ void HMDeviceFileClass::ParsePath(LPCSTR lpszFileName, LPSTR lpszParsedFileName,
  * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
  *****************************************************************************/
 
-DWORD HMDeviceFileClass::OpenFile (LPCSTR        lpszFileName,
+DWORD HMDeviceFileClass::OpenFile (HANDLE        hHandle,
+                                   LPCSTR        lpszFileName,
                                    PHMHANDLEDATA pHMHandleData,
                                    OFSTRUCT      *pOFStruct,
                                    UINT          fuMode)
@@ -349,7 +351,7 @@ BOOL HMDeviceFileClass::DuplicateHandle(PHMHANDLEDATA pHMHandleData,
         memcpy(&duphdata, pHMHandleData, sizeof(duphdata));
         duphdata.dwCreation = OPEN_EXISTING;
 
-        if(CreateFile(srcfileinfo->lpszFileName, &duphdata,
+        if(CreateFile(0, srcfileinfo->lpszFileName, &duphdata,
                       srcfileinfo->lpSecurityAttributes, NULL) == NO_ERROR)
         {
             memcpy(pHMHandleData, &duphdata, sizeof(duphdata));

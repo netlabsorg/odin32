@@ -1,4 +1,4 @@
-/* $Id: Fileio.cpp,v 1.55 2001-11-14 18:39:52 sandervl Exp $ */
+/* $Id: Fileio.cpp,v 1.56 2001-11-26 14:53:57 sandervl Exp $ */
 
 /*
  * Win32 File IO API functions for OS/2
@@ -1458,6 +1458,38 @@ ODINFUNCTION8(BOOL, DeviceIoControl, HANDLE, hDevice, DWORD, dwIoControlCode,
 {
     return HMDeviceIoControl(hDevice, dwIoControlCode, lpInBuffer, nInBufferSize,
                              lpOutBuffer, nOutBufferSize, lpBytesReturned, lpOverlapped);
+}
+/*****************************************************************************
+ * Name      : BOOL WIN32API CancelIo
+ * Purpose   : The CancelIO function cancels all pending input and output
+ *             (I/O) operations that were issued by the calling thread for
+ *             the specified file handle. The function does not cancel
+ *             I/O operations issued for the file handle by other threads.
+ * Parameters: HANDLE hFile   file handle for which to cancel I/O
+ * Variables :
+ * Result    : If the function succeeds, the return value is nonzero All pending
+ *             I/O operations issued by the calling thread for the file handle
+ *             were successfully canceled.
+ *             If the function fails, the return value is zero.
+ *             To get extended error information, call GetLastError.
+ * Remark    : If there are any I/O operations in progress for the specified
+ *             file handle, and they were issued by the calling thread, the
+ *             CancelIO function cancels them.
+ *             Note that the I/O operations must have been issued as
+ *             overlapped I/O. If they were not, the I/O operations would not
+ *             have returned to allow the thread to call the CancelIO function.
+ *             Calling the CancelIO function with a file handle that was not
+ *             opened with FILE_FLAG_OVERLAPPED does nothing.
+ *             All I/O operations that are canceled will complete with the
+ *             error ERROR_OPERATION_ABORTED. All completion notifications
+ *             for the I/O operations will occur normally.
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Markus Montkowski [Thu, 1998/05/19 11:46]
+ *****************************************************************************/
+ODINFUNCTION1(BOOL, CancelIo, HANDLE, hFile)
+{
+  return HMCancelIo(hFile);
 }
 //******************************************************************************
 //******************************************************************************

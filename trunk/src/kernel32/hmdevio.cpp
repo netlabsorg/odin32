@@ -1,4 +1,4 @@
-/* $Id: hmdevio.cpp,v 1.15 2001-10-28 12:48:04 sandervl Exp $ */
+/* $Id: hmdevio.cpp,v 1.16 2001-11-26 14:54:00 sandervl Exp $ */
 
 /*
  * Win32 Device IOCTL API functions for OS/2
@@ -165,7 +165,8 @@ HMDeviceDriver::HMDeviceDriver(LPCSTR lpDeviceName)
 }
 //******************************************************************************
 //******************************************************************************
-DWORD HMDeviceDriver::CreateFile (LPCSTR lpFileName,
+DWORD HMDeviceDriver::CreateFile (HANDLE        hHandle,
+                                  LPCSTR lpFileName,
                                   PHMHANDLEDATA pHMHandleData,
                                   PVOID         lpSecurityAttributes,
                                   PHMHANDLEDATA pHMHandleDataTemplate)

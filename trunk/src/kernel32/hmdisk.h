@@ -1,4 +1,4 @@
-/* $Id: hmdisk.h,v 1.6 2001-11-22 16:03:23 sandervl Exp $ */
+/* $Id: hmdisk.h,v 1.7 2001-11-26 14:54:01 sandervl Exp $ */
 
 #ifndef __HMDISK_H__
 #define __HMDISK_H__
@@ -24,7 +24,8 @@ public:
   virtual BOOL FindDevice(LPCSTR lpClassDevName, LPCSTR lpDeviceName, int namelength);
 
   /* this is a handler method for calls to CreateFile() */
-  virtual DWORD  CreateFile (LPCSTR        lpFileName,
+  virtual DWORD  CreateFile (HANDLE        hHandle,
+                             LPCSTR        lpFileName,
                              PHMHANDLEDATA pHMHandleData,
                              PVOID         lpSecurityAttributes,
                              PHMHANDLEDATA pHMHandleDataTemplate);

@@ -1,4 +1,4 @@
-/* $Id: hmfile.h,v 1.5 2001-04-26 13:22:45 sandervl Exp $ */
+/* $Id: hmfile.h,v 1.6 2001-11-26 14:54:02 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -44,13 +44,15 @@ public:
   HMDeviceFileClass(LPCSTR lpDeviceName) : HMDeviceHandler(lpDeviceName) {}
 
                        /* this is a handler method for calls to CreateFile() */
-  virtual DWORD  CreateFile (LPCSTR        lpFileName,
+  virtual DWORD  CreateFile (HANDLE        hHandle,
+                             LPCSTR        lpFileName,
                              PHMHANDLEDATA pHMHandleData,
                              PVOID         lpSecurityAttributes,
                              PHMHANDLEDATA pHMHandleDataTemplate);
 
                        /* this is a handler method for calls to   OpenFile() */
-  virtual DWORD  OpenFile   (LPCSTR        lpFileName,
+  virtual DWORD  OpenFile   (HANDLE        hHandle,
+                             LPCSTR        lpFileName,
                              PHMHANDLEDATA pHMHandleData,
                              OFSTRUCT*     pOFStruct,
                              UINT          fuMode);

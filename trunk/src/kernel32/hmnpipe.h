@@ -1,4 +1,4 @@
-/* $Id: hmnpipe.h,v 1.3 2001-11-07 15:35:37 sandervl Exp $ */
+/* $Id: hmnpipe.h,v 1.4 2001-11-26 14:54:03 sandervl Exp $ */
 /*
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -31,7 +31,8 @@ class HMDeviceNamedPipeClass : public HMDeviceFileClass
                                 LPSECURITY_ATTRIBUTES lpSecurityAttributes);
 
   /* this is a handler method for calls to CreateFile() */
-  virtual DWORD  CreateFile (LPCSTR        lpFileName,
+  virtual DWORD  CreateFile (HANDLE        hHandle,
+                             LPCSTR        lpFileName,
                              PHMHANDLEDATA pHMHandleData,
                              PVOID         lpSecurityAttributes,
                              PHMHANDLEDATA pHMHandleDataTemplate);

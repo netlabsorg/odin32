@@ -1,4 +1,4 @@
-/* $Id: conin.h,v 1.3 2000-10-03 17:28:28 sandervl Exp $ */
+/* $Id: conin.h,v 1.4 2001-11-26 14:53:59 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -55,7 +55,8 @@ class HMDeviceConsoleInClass : public HMDeviceHandler
     }
 
                        /* this is a handler method for calls to CreateFile() */
-  virtual DWORD  CreateFile (LPCSTR        lpFileName,
+  virtual DWORD  CreateFile (HANDLE        hHandle,
+                             LPCSTR        lpFileName,
                              PHMHANDLEDATA pHMHandleData,
                              PVOID         lpSecurityAttributes,
                              PHMHANDLEDATA pHMHandleDataTemplate);

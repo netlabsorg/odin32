@@ -1,4 +1,4 @@
-/* $Id: conin.cpp,v 1.14 2000-10-23 19:35:10 sandervl Exp $ */
+/* $Id: conin.cpp,v 1.15 2001-11-26 14:53:58 sandervl Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -67,7 +67,8 @@
  * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
  *****************************************************************************/
 
-DWORD HMDeviceConsoleInClass::CreateFile (LPCSTR        lpFileName,
+DWORD HMDeviceConsoleInClass::CreateFile (HANDLE        hHandle,
+                                          LPCSTR        lpFileName,
                                           PHMHANDLEDATA pHMHandleData,
                                           PVOID         lpSecurityAttributes,
                                           PHMHANDLEDATA pHMHandleDataTemplate)

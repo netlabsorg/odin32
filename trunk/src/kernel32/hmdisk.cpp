@@ -1,4 +1,4 @@
-/* $Id: hmdisk.cpp,v 1.28 2001-11-22 16:03:23 sandervl Exp $ */
+/* $Id: hmdisk.cpp,v 1.29 2001-11-26 14:54:01 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -87,7 +87,8 @@ BOOL HMDeviceDiskClass::FindDevice(LPCSTR lpClassDevName, LPCSTR lpDeviceName, i
 //******************************************************************************
 //TODO: PHYSICALDRIVEn!!
 //******************************************************************************
-DWORD HMDeviceDiskClass::CreateFile (LPCSTR        lpFileName,
+DWORD HMDeviceDiskClass::CreateFile (HANDLE        hHandle,
+                                     LPCSTR        lpFileName,
                                      PHMHANDLEDATA pHMHandleData,
                                      PVOID         lpSecurityAttributes,
                                      PHMHANDLEDATA pHMHandleDataTemplate)
