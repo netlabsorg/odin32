@@ -1,4 +1,9 @@
- /* $Id: ChangeLog,v 1.1096 2000-09-01 01:36:10 phaller Exp $ */
+ /* $Id: ChangeLog,v 1.1097 2000-09-01 16:04:57 bird Exp $ */
+
+ 2000-09-01: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - INCLUDE:  Shut up the OS/2 resource compiler (added -n to OS2RCFLAGS).
+                Added linkage macro for the OS2RC which exepacks the resource
+                object: OS2RCLFLAGS
 
  2000-09-01: Patrick Haller <phaller@gmx.net>
     - GDI32:  - Open32 fix for CreateDIBitmap: some apps claim they have
@@ -29,7 +34,7 @@
     - USER32:   WM_SETFOCUS fix (window can become invalid during processing)
                 (rename folder in file open dialog -> click outside editbox
                  -> crash)
-    - SHELL32:  Complete merge with latest Wine shell32 
+    - SHELL32:  Complete merge with latest Wine shell32
                 (fixes weird file open/save dialog box behaviour)
                 Odin changes/additions in separate files or in #ifdef __WIN32OS2__
                 statements
@@ -37,7 +42,7 @@
  2000-08-29: Michal Necasek <mike@mendelu.cz>
     - INCLUDE:  Watcom makefile fixes
     - ADVAPI32: Sample watcom makefile for advapi32 (not finished)
-                
+
  2000-08-28: Michal Necasek <mike@mendelu.cz>
     - KERNEL32: RaiseException/RtlUnwind fixes
 
