@@ -1,4 +1,4 @@
-/* $Id: treeview.h,v 1.3 1999-06-10 16:21:51 achimha Exp $ */
+/* $Id: treeview.h,v 1.4 1999-08-14 17:23:24 achimha Exp $ */
 /*
  * Treeview class extra info
  *
@@ -14,7 +14,7 @@
 #define MINIMUM_INDENT 10
 #define TV_REFRESH_DELAY 100     /* 100 ms delay between two refreshes */
 #define TV_DEFAULTITEMHEIGHT 16
-#define TVITEM_ALLOC	16	/* default nr of items to allocate at first try */
+#define TVITEM_ALLOC    16      /* default nr of items to allocate at first try */
 
 
 /* internal structures */
@@ -46,20 +46,21 @@ typedef struct {
 
 typedef struct tagTREEVIEW_INFO
 {
-  UINT          uInternalStatus;    
+  UINT          uInternalStatus;
   UINT          bAutoSize;      /* merge with uInternalStatus */
   INT           Timer;
   UINT          uNumItems;      /* number of valid TREEVIEW_ITEMs */
-  UINT          uNumPtrsAlloced; 
+  UINT          uNumPtrsAlloced;
   HTREEITEM     uMaxHandle;     /* needed for delete_item */
   HTREEITEM     TopRootItem;    /* handle to first item in treeview */
   INT           cdmode;         /* last custom draw setting */
+  UINT          uScrollTime;	/* max. time for scrolling in milliseconds*/
   UINT          uItemHeight;    /* item height, -1 for default item height */
   UINT          uRealItemHeight;/* current item height in pixels */
   UINT          uVisibleHeight; /* visible height of treeview in pixels */
   UINT          uTotalHeight;   /* total height of treeview in pixels */
-  UINT          uVisibleWidth;      
-  UINT          uTotalWidth;  
+  UINT          uVisibleWidth;
+  UINT          uTotalWidth;
   UINT          uIndent;        /* indentation in pixels */
   HTREEITEM     selectedItem;   /* handle to selected item or 0 if none */
   HTREEITEM     focusItem;      /* handle to item that has focus, 0 if none */
@@ -69,14 +70,15 @@ typedef struct tagTREEVIEW_INFO
   HTREEITEM     dropItem;       /* handle to item selected by drag cursor */
   HIMAGELIST    dragList;       /* Bitmap of dragged item */
   INT           cx,cy;          /* current x/y place in list */
-  COLORREF      clrBk;    
+  COLORREF      clrBk;
   COLORREF      clrText;
+  COLORREF      clrLine;
   HFONT         hFont;
   HFONT         hBoldFont;
   HWND          hwndToolTip;
   HWND          hwndEdit;
   WNDPROC       wpEditOrig;     /* needed for subclassing edit control */
-  HIMAGELIST    himlNormal;  
+  HIMAGELIST    himlNormal;
   HIMAGELIST    himlState;
   LPTVSORTCB    pCallBackSort; /* ptr to TVSORTCB struct for callback sorting */
   TREEVIEW_ITEM *items;        /* itemlist */
@@ -89,19 +91,19 @@ typedef struct tagTREEVIEW_INFO
 
 /* bitflags for infoPtr->uInternalStatus */
 
-#define TV_HSCROLL 	0x01    /* treeview too large to fit in window */
-#define TV_VSCROLL 	0x02	/* (horizontal/vertical) */
-#define TV_LDRAG		0x04	/* Lbutton pushed to start drag */
-#define TV_LDRAGGING	0x08	/* Lbutton pushed, mouse moved.  */
-#define TV_RDRAG		0x10	/* dito Rbutton */
-#define TV_RDRAGGING	0x20	
+#define TV_HSCROLL      0x01    /* treeview too large to fit in window */
+#define TV_VSCROLL      0x02    /* (horizontal/vertical) */
+#define TV_LDRAG                0x04    /* Lbutton pushed to start drag */
+#define TV_LDRAGGING    0x08    /* Lbutton pushed, mouse moved.  */
+#define TV_RDRAG                0x10    /* dito Rbutton */
+#define TV_RDRAGGING    0x20
 
 /* bitflags for infoPtr->timer */
 
-#define TV_REFRESH_TIMER 1	
+#define TV_REFRESH_TIMER 1
 #define TV_EDIT_TIMER    2
-#define TV_REFRESH_TIMER_SET 1  
-#define TV_EDIT_TIMER_SET 2  
+#define TV_REFRESH_TIMER_SET 1
+#define TV_EDIT_TIMER_SET 2
 
 
 extern VOID TREEVIEW_Register (VOID);

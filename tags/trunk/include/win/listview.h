@@ -41,6 +41,7 @@ typedef struct tagLISTVIEW_INFO
     INT nItemHeight;
     INT nItemWidth;
     INT nSelectionMark;
+    INT nHotItem;
     SHORT notifyFormat;
     RECT rcList;
     RECT rcView;
@@ -55,7 +56,7 @@ typedef struct tagLISTVIEW_INFO
     HDPA hdpaItems;
     PFNLVCOMPARE pfnCompare;
     LPARAM lParamSort;
-    
+
 } LISTVIEW_INFO;
 
 

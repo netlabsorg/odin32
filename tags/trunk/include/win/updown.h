@@ -1,4 +1,4 @@
-/* $Id: updown.h,v 1.1 1999-05-24 20:19:20 ktk Exp $ */
+/* $Id: updown.h,v 1.2 1999-08-14 17:23:24 achimha Exp $ */
 
 /*
  * Up-down class extra info
@@ -12,6 +12,8 @@
 #include "windef.h"
 #include "commctrl.h"
 
+#define UPDOWN_BUDDYCLASSNAMELEN 40
+
 typedef struct
 {
   UINT      AccelCount;   /* Number of elements in AccelVect */
@@ -21,7 +23,7 @@ typedef struct
   INT       MinVal;       /* Minimum up-down value */
   INT       MaxVal;       /* Maximum up-down value */
   HWND      Buddy;        /* Handle to the buddy window */
-  CHAR      szBuddyClass[40]; /* Buddy window class name */
+  CHAR      szBuddyClass[UPDOWN_BUDDYCLASSNAMELEN]; /* Buddy window class name */
   INT       Flags;        /* Internal Flags FLAG_* */
 } UPDOWN_INFO;
 
