@@ -1,4 +1,4 @@
-/* $Id: critsection.cpp,v 1.1 1999-11-08 20:53:24 sandervl Exp $ */
+/* $Id: critsection.cpp,v 1.2 1999-11-14 17:25:04 sandervl Exp $ */
 /*
  * Win32 critical sections
  * 
@@ -71,6 +71,7 @@ void WINAPI EnterCriticalSection( CRITICAL_SECTION *crit )
 {
     DWORD res;
 
+    dprintf2(("EnterCriticalSection %x", crit));
     if (!crit->LockSemaphore)
     {
     	dprintf(("entering uninitialized section(%p)?\n",crit));
@@ -119,6 +120,7 @@ void WINAPI EnterCriticalSection( CRITICAL_SECTION *crit )
  */
 BOOL WINAPI TryEnterCriticalSection( CRITICAL_SECTION *crit )
 {
+    dprintf2(("TryEnterCriticalSection %x", crit));
     if (InterlockedIncrement( &crit->LockCount ))
     {
         if (crit->OwningThread == GetCurrentThreadId())
@@ -141,6 +143,7 @@ BOOL WINAPI TryEnterCriticalSection( CRITICAL_SECTION *crit )
  */
 void WINAPI LeaveCriticalSection( CRITICAL_SECTION *crit )
 {
+    dprintf2(("LeaveCriticalSection %x", crit));
     if (crit->OwningThread != GetCurrentThreadId()) return;
        
     if (--crit->RecursionCount)
