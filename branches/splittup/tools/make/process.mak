@@ -1,4 +1,4 @@
-# $Id: process.mak,v 1.1.2.1 2002-03-06 02:15:10 bird Exp $
+# $Id: process.mak,v 1.1.2.2 2002-03-10 05:24:33 bird Exp $
 
 #
 # Unix-like tools for OS/2
@@ -61,6 +61,9 @@ TARGET_EXT=$(EXT_EXE)
 !if "$(TARGET_MODE)" == "LIB" || "$(TARGET_MODE)" == "PUBLIB" || "$(TARGET_MODE)" == "SYSLIB"
 TARGET_EXT=$(EXT_LIB)
 !endif
+!if "$(TARGET_MODE)" == "EMPTY"
+TARGET_EXT=empty
+!endif
 !ifndef TARGET_EXT
 !error Error: TARGET_EXT not set
 !endif
@@ -80,7 +83,12 @@ TARGET_PUBLIB=
 
 
 !ifndef TARGET_STACKSIZE
+# check if 16-bit target compiler
+! if "$(BUILD_ENV)" == "MSCV6"
+TARGET_STACKSIZE=0x2000
+! else
 TARGET_STACKSIZE=0x10000
+! endif
 !endif
 
 !ifndef MAKEFILE
@@ -269,10 +277,17 @@ all: build
 #
 !ifdef SUBDIRS
 SUBDIRS_BUILD = subbuild
-$(SUBDIRS_BUILD): $(MAKEFILE)
+$(SUBDIRS_BUILD):
     @$(TOOL_DODIRS) "$(SUBDIRS)" $(TOOL_MAKE) build
 !endif
-build: $(SUBDIRS_BUILD) $(TARGET) $(TARGET_ILIB) $(TARGET_PUBLIB)
+
+!ifdef PREMAKEFILES
+PREMAKEFILES_BUILD = premakefiles_build
+$(PREMAKEFILES_BUILD):
+    @$(TOOL_DOMAKES) "$(PREMAKEFILES)" $(TOOL_MAKE) build
+!endif
+
+build: $(SUBDIRS_BUILD) $(PREMAKEFILES_BUILD) $(TARGET) $(TARGET_ILIB) $(TARGET_PUBLIB)
     @$(ECHO) Successfully Built $(CLRFIL)$(TARGET) $(TARGET_ILIB)$(CLRRST)
 !ifdef POSTMAKEFILES
     @$(TOOL_DOMAKES) "$(POSTMAKEFILES)" $(TOOL_MAKE) $@
@@ -284,11 +299,17 @@ build: $(SUBDIRS_BUILD) $(TARGET) $(TARGET_ILIB) $(TARGET_PUBLIB)
 #
 !ifdef SUBDIRS
 SUBDIRS_LIB = subdir_lib
-$(SUBDIRS_LIB): $(MAKEFILE)
+$(SUBDIRS_LIB):
     @$(TOOL_DODIRS) "$(SUBDIRS)" $(TOOL_MAKE) lib
 !endif
 
-lib: $(SUBDIRS_LIB) $(TARGET_ILIB) $(TARGET_PUBLIB)
+!ifdef PREMAKEFILES
+PREMAKEFILES_LIB = premakefiles_lib
+$(PREMAKEFILES_LIB):
+    @$(TOOL_DOMAKES) "$(PREMAKEFILES)" $(TOOL_MAKE) lib
+!endif
+
+lib: $(SUBDIRS_LIB)  $(TARGET_ILIB) $(TARGET_PUBLIB)
 !ifdef POSTMAKEFILES
     @$(TOOL_DOMAKES) "$(POSTMAKEFILES)" $(TOOL_MAKE) $@
 !endif
@@ -316,6 +337,9 @@ install:
 !ifdef SUBDIRS
     @$(TOOL_DODIRS) "$(SUBDIRS)" $(TOOL_MAKE) $@
 !endif
+!ifdef PREMAKEFILES
+    @$(TOOL_DOMAKES) "$(PREMAKEFILES)" $(TOOL_MAKE) $@
+!endif
 !ifdef POSTMAKEFILES
     @$(TOOL_DOMAKES) "$(POSTMAKEFILES)" $(TOOL_MAKE) $@
 !endif
@@ -331,6 +355,15 @@ testcase: install
 !if [$(TOOL_EXISTS) testcase.mak] == 0
     @$(TOOL_DOMAKES) "testcase.mak" $(TOOL_MAKE) $@
 !endif
+!ifdef SUBDIRS
+    @$(TOOL_DODIRS) "$(SUBDIRS)" $(TOOL_MAKE) $@
+!endif
+!ifdef PREMAKEFILES
+    @$(TOOL_DOMAKES) "$(PREMAKEFILES)" $(TOOL_MAKE) $@
+!endif
+!ifdef POSTMAKEFILES
+    @$(TOOL_DOMAKES) "$(POSTMAKEFILES)" $(TOOL_MAKE) $@
+!endif
 
 
 #
@@ -338,12 +371,15 @@ testcase: install
 #
 dep:
     @$(ECHO) Building dependencies $(CLRRST)
-    $(TOOL_DEP) $(TOOL_DEP_FLAGS) -o$$(PATH_TARGET) -d$(BUILD_TARGET_DEPEND) $(TOOL_DEP_FILES)
+    @$(TOOL_DEP) $(TOOL_DEP_FLAGS) -o$$(PATH_TARGET) -d$(BUILD_TARGET_DEPEND) $(TOOL_DEP_FILES)
 !ifdef SUBDIRS
-    @$(TOOL_DODIRS) "$(SUBDIRS)" $(TOOL_MAKE) $@
+    @$(TOOL_DODIRS) "$(SUBDIRS)" $(TOOL_MAKE) NODEP=1 $@
+!endif
+!ifdef PREMAKEFILES
+    @$(TOOL_DOMAKES) "$(PREMAKEFILES)" $(TOOL_MAKE) NODEP=1 $@
 !endif
 !ifdef POSTMAKEFILES
-    @$(TOOL_DOMAKES) "$(POSTMAKEFILES)" $(TOOL_MAKE) $@
+    @$(TOOL_DOMAKES) "$(POSTMAKEFILES)" $(TOOL_MAKE) NODEP=1 $@
 !endif
 
 
@@ -382,6 +418,9 @@ clean:
 !endif
 !ifdef SUBDIRS
     @$(TOOL_DODIRS) "$(SUBDIRS)" $(TOOL_MAKE) $@
+!endif
+!ifdef PREMAKEFILES
+    @$(TOOL_DOMAKES) "$(PREMAKEFILES)" $(TOOL_MAKE) $@
 !endif
 !ifdef POSTMAKEFILES
     @$(TOOL_DOMAKES) "$(POSTMAKEFILES)" $(TOOL_MAKE) $@
@@ -474,12 +513,16 @@ $(TARGET_PUBLIB): $(TARGET)
 #
 # read dependency file from current directory
 #
-!if [$(TOOL_EXISTS) $(BUILD_TARGET_DEPEND)] == 0
-! if [$(ECHO) Including dependency $(CLRFIL)$(BUILD_TARGET_DEPEND)$(CLRRST)]
-! endif
-! include $(BUILD_TARGET_DEPEND)
-!else
-! if [$(ECHO) $(CLRERR)WARNING: Please make dependencies first. $(BUILD_TARGET_DEPEND) is missing.$(CLRRST)]
+!if "$(TARGET_MODE)" != "EMPTY"
+! if [$(TOOL_EXISTS) $(BUILD_TARGET_DEPEND)] == 0
+!  if [$(ECHO) Including dependency $(CLRFIL)$(BUILD_TARGET_DEPEND)$(CLRRST)]
+!  endif
+!  include $(BUILD_TARGET_DEPEND)
+! else
+!  ifndef NODEP
+!    if [$(ECHO) $(CLRERR)WARNING: Please make dependencies first. $(BUILD_TARGET_DEPEND) is missing.$(CLRRST)]
+!    endif
+!  endif
 ! endif
 !endif
 
