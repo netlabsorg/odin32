@@ -1,4 +1,4 @@
-/* $Id: time.cpp,v 1.18 2002-04-30 09:21:33 sandervl Exp $ */
+/* $Id: time.cpp,v 1.19 2002-06-25 17:54:00 sandervl Exp $ */
 
 /*
  * Win32 time/date API functions
@@ -122,10 +122,7 @@ BOOL WIN32API LocalFileTimeToFileTime(const FILETIME * arg1, LPFILETIME arg2)
 //******************************************************************************
 BOOL WIN32API FileTimeToSystemTime(const FILETIME * arg1, LPSYSTEMTIME arg2)
 {
-   /* Another WGSS bug it expects not UCT on input but LocalTime! */
-   FILETIME dummy;
-   FileTimeToLocalFileTime(arg1,&dummy);
-   return O32_FileTimeToSystemTime(&dummy, arg2);
+   return O32_FileTimeToSystemTime(&arg1, arg2);
 }
 //******************************************************************************
 //******************************************************************************
