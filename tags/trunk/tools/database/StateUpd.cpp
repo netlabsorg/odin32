@@ -1,4 +1,4 @@
-/* $Id: StateUpd.cpp,v 1.2 1999-12-02 12:05:47 bird Exp $ */
+/* $Id: StateUpd.cpp,v 1.3 1999-12-02 14:29:14 bird Exp $ */
 /*
  * StateUpd - Scans source files for API functions and imports data on them.
  *
@@ -218,7 +218,9 @@ int main(int argc, char **argv)
             else
                 while (argv[argi] != NULL)
                 {
-                    ulRc += processDir(argv[argi], TRUE, &options);
+                    ulRc += processDir(argv[argi],
+                                       argv[argi][strlen(argv[argi])] == '\\' || argv[argi][strlen(argv[argi])] == '/',
+                                       &options);
                     argi++;
                 }
 
@@ -274,7 +276,7 @@ static void syntax()
     printf("\n"
            "StateUpd v%01d.%02d - Odin32 API Database utility\n"
            "----------------------------------------------\n"
-           "syntax: StateUpd.exe  [-h|-?] [options] [file1 [file2 [file3 ...]]]\n"
+           "syntax: StateUpd.exe  [-h|-?] [options] [FileOrDir1 [FileOrDir2 [...]]]\n"
            "\n"
            "    -h or -?      Syntax help. (this)\n"
            "    -ib<[+]|->    Integrity check at start.     default: enabled\n"
@@ -291,7 +293,7 @@ static void syntax()
            "Scans files for API functions. This util will extract data about the API\n"
            "and insert it into the database.\n"
            "\n"
-           "If no files are given, then all *.c and *.cpp files will be scanned.\n"
+           "If no files are given, then all *.c and *.cpp files will be scanned. (Not correct!)\n"
            "NOTE: When files are given, only *.c and *.cpp files will be scanned.\n"
            "Wildchars are allowed in the file spesifications.\n"
            "\n"
