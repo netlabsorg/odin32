@@ -62,19 +62,6 @@ static int nrofstubs = 0;
 static mid2unknown *proxies = NULL;
 static int nrofproxies = 0;
 
-#ifdef __WIN32OS2__
-inline static HRESULT
-get_facbuf_for_iid(REFIID riid,IPSFactoryBuffer **facbuf) {
-    HRESULT       hres;
-    CLSID         pxclsid;
-
-    if ((hres = CoGetPSClsid(riid,&pxclsid)))
-	return hres;
-    return CoGetClassObject(&pxclsid,CLSCTX_INPROC_SERVER,NULL,&IID_IPSFactoryBuffer,(LPVOID*)facbuf);
-}
-#endif
-
-
 HRESULT
 MARSHAL_Find_Stub_Server(wine_marshal_id *mid,LPUNKNOWN *punk) {
     int i;
