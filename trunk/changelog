@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2361 2002-11-21 11:39:08 sandervl Exp $ */
+/* $Id: changelog,v 1.2362 2002-11-22 12:57:10 sandervl Exp $ */
+
+ 2002-11-22: Platon Fomichev <platon@innotek   >
+    - USER32:   o Static control fix: do not destroy old icon when it is replaced.
 
  2002-11-21: Sander van Leeuwen <sandervl@innotek   >
     - GDI32:    o Fixed bugs in MMX RGB 555<->565 conversion (leftovers)
