@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.1821 2001-11-08 18:31:17 sandervl Exp $ */
+/* $Id: changelog,v 1.1822 2001-11-10 12:46:28 sandervl Exp $ */
+
+ 2001-11-10: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Implemented Get/SetProcessAffinityMask & SetThreadAffinityMask
 
  2001-11-08: Sander van Leeuwen <sandervl@xs4all.nl>
     - COMCTL32: o Ported latest Wine property sheet control
