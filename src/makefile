@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.79 2001-09-30 09:36:03 bird Exp $
+# $Id: makefile,v 1.80 2001-10-01 01:37:38 bird Exp $
 
 #
 # Odin32 API
@@ -37,13 +37,17 @@ NOTWIN32DLLS= $(NOTDLLS);win32k;odincrt;dllentry        # not win32 dlls.
 #   SMP:        Working backwards thru the directories traversed by a rule.
 #   MASSIVE:    Spawn a child processes for each process.
 #
+EXTRA =
 !ifdef SMP
 EXTRA = -r
 !endif
 !ifdef MASSIVE
 EXTRA = -s start "Odin32 Massive Build" /B /C
 !endif
-
+# TEMPORARY: ignore return codes while we're working with watcom and nmake.
+!if defined(WAT) && defined(NMAKE)
+EXTRA = $(EXTRA) -i
+!endif
 
 
 #
@@ -138,4 +142,21 @@ CleanDBLogs:
     @$(DOWITHDIRS) -e$(NOTWIN32DLLS:win32k;=) -cp \
         $(RM) apiimport.log signals.log stateupd.log apiimport.def
     $(RM) signals.log stateupd.log
+
+
+!ifdef NMAKE
+#
+# Common: If MULTIJOBS is defined make sure cmdqd is running.
+#
+!ifndef NO_MULTIJOBS
+!   ifdef MULTIJOBS
+!      if [$(CMDQD) queryrunning] != 0
+!          if [$(DODIRS) "$(ODIN32_BASE)\tools\cmdqd" $(MAKE_CMD) all] == 0
+!          endif
+!          if [$(CMDQD) init 7] == 0
+!          endif
+!      endif
+!   endif
+!endif
+!endif
 
