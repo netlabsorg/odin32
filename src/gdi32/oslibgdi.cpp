@@ -1,4 +1,4 @@
-/* $Id: oslibgdi.cpp,v 1.6 2000-02-16 14:18:11 sandervl Exp $ */
+/* $Id: oslibgdi.cpp,v 1.7 2001-06-08 11:03:33 sandervl Exp $ */
 
 /*
  * GDI32 support code
@@ -22,6 +22,7 @@
 #define DBG_LOCALLOG	DBG_oslibgdi
 #include "dbglocal.h"
 
+#if 0
 //******************************************************************************
 //******************************************************************************
 INT OSLibSetDIBitsToDevice(HDC hdc, INT xDest, INT yDest, DWORD cx, DWORD cy,
@@ -69,3 +70,4 @@ INT OSLibSetDIBitsToDevice(HDC hdc, INT xDest, INT yDest, DWORD cx, DWORD cy,
 }
 //******************************************************************************
 //******************************************************************************
+#endif

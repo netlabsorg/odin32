@@ -1,4 +1,4 @@
-/* $Id: dibitmap.cpp,v 1.20 2001-06-03 14:52:47 sandervl Exp $ */
+/* $Id: dibitmap.cpp,v 1.21 2001-06-08 11:03:32 sandervl Exp $ */
 
 /*
  * GDI32 dib & bitmap code
@@ -285,19 +285,17 @@ BOOL WIN32API SetBitmapDimensionEx( HBITMAP arg1, int arg2, int arg3, PSIZE  arg
 int WIN32API GetDIBits(HDC hdc, HBITMAP hBitmap, UINT uStartScan, UINT cScanLines,
                        void *lpvBits, PBITMAPINFO lpbi, UINT uUsage)
 {
- int rc;
+ int nrlines;
 
     dprintf(("GDI32: GetDIBits %x %x %d %d %x %x (biBitCount %d) %d", hdc, hBitmap, uStartScan, cScanLines, lpvBits, lpbi, lpbi->bmiHeader.biBitCount, uUsage));
 
-#if 1 //def OPEN32
     //SvL: WGSS screws up the DC if it's a memory DC
     //     TODO: Fix in WGSS
     HDC hdcMem = CreateCompatibleDC(0);
-#endif
-    rc = O32_GetDIBits(hdcMem, hBitmap, uStartScan, cScanLines, lpvBits, lpbi, uUsage);
-#if 1 //def OPEN32
+
+    nrlines = O32_GetDIBits(hdcMem, hBitmap, uStartScan, cScanLines, lpvBits, lpbi, uUsage);
+
     DeleteDC(hdcMem);
-#endif
 
     // set proper color masks
     switch(lpbi->bmiHeader.biBitCount) {
@@ -313,12 +311,12 @@ int WIN32API GetDIBits(HDC hdc, HBITMAP hBitmap, UINT uStartScan, UINT cScanLine
        ((DWORD*)(lpbi->bmiColors))[2] = 0xFF0000;
        break;
     }
-    if(lpvBits && lpbi->bmiHeader.biBitCount == 16 && ((DWORD*)(lpbi->bmiColors))[1] == 0x3E0) 
+    if(nrlines && lpvBits && lpbi->bmiHeader.biBitCount == 16 && ((DWORD*)(lpbi->bmiColors))[1] == 0x3E0) 
     {//RGB 555?
         dprintf(("RGB 565->555 conversion required"));
 
         int imgsize = CalcBitmapSize(lpbi->bmiHeader.biBitCount,
-                                     lpbi->bmiHeader.biWidth, lpbi->bmiHeader.biHeight);
+                                     lpbi->bmiHeader.biWidth, nrlines);
 
         if(CPUFeatures & CPUID_MMX) {
              RGB565to555MMX((WORD *)lpvBits, (WORD *)lpvBits, imgsize/sizeof(WORD));
@@ -329,10 +327,10 @@ int WIN32API GetDIBits(HDC hdc, HBITMAP hBitmap, UINT uStartScan, UINT cScanLine
     //WGSS/Open32 returns 0 when querying the bitmap info; must return nr of scanlines
     //as 0 signals failure
     if(lpvBits == NULL) {
-       rc = cScanLines;
+       nrlines = cScanLines;
     }
-    dprintf(("GDI32: GetDIBits return rc %d", rc));
-    return rc;
+    dprintf(("GDI32: GetDIBits returned %d", nrlines));
+    return nrlines;
 }
 //******************************************************************************
 //******************************************************************************
