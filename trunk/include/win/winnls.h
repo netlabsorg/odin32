@@ -1,4 +1,4 @@
-/* $Id: winnls.h,v 1.3 1999-06-01 19:48:18 phaller Exp $ */
+/* $Id: winnls.h,v 1.4 2000-08-16 08:03:57 sandervl Exp $ */
 
 #ifndef __WINE_WINNLS_H
 #define __WINE_WINNLS_H
@@ -155,6 +155,9 @@
 #define WC_DEFAULTCHAR                            0x00000040
 
 #define MAKELCID(l, s)                      (MAKELONG(l, s))
+
+#define LANGIDFROMLCID(lcid)	((WORD)(lcid))
+#define SORTIDFROMLCID(lcid)	((WORD)((((DWORD)(lcid)) >> 16) & 0x0f))
 
 #define MAKELANGID(p, s)                 ((((WORD)(s))<<10) | (WORD)(p))
 #define PRIMARYLANGID(l)                 ((WORD)(l) & 0x3ff)

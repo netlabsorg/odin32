@@ -1,4 +1,4 @@
-/* $Id: winconst.h,v 1.35 2000-06-14 13:19:44 sandervl Exp $ */
+/* $Id: winconst.h,v 1.36 2000-08-16 08:03:57 sandervl Exp $ */
 
 /*
  * Win32 constants
@@ -1422,3 +1422,13 @@
 #define GM_LAST_W           2
 
 #define	RDH_RECTANGLES_W  1
+
+//nls
+#define MAKELANGID(p, s)                 ((((WORD)(s))<<10) | (WORD)(p))
+
+#define LANG_NEUTRAL                     0x00
+
+/* Sublanguage definitions */
+#define SUBLANG_NEUTRAL                  0x00    /* language neutral */
+#define SUBLANG_DEFAULT                  0x01    /* user default */
+#define SUBLANG_SYS_DEFAULT              0x02    /* system default */
