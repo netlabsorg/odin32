@@ -1,4 +1,4 @@
-; $Id: msvcrt.def,v 1.9 1999-11-30 19:44:04 sandervl Exp $
+; $Id: msvcrt.def,v 1.10 1999-12-20 10:12:43 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY MSVCRT INITINSTANCE TERMINSTANCE
@@ -664,7 +664,7 @@ EXPORTS
 ;   _atoldbl							@164
     _beep			= CRTDLL__beep			@165
     _beginthread		= CRTDLL__beginthread		@166
-;   _beginthreadex						@167
+    _beginthreadex		= _MSVCRT__beginthreadex	@167
     _c_exit			= CRTDLL__c_exit		@168
     _cabs			= CRTDLL__cabs			@169
     _cexit			= CRTDLL__cexit			@171
@@ -694,7 +694,7 @@ EXPORTS
     _dup2			= CRTDLL__dup2			@195
     _ecvt			= CRTDLL__ecvt			@196
     _endthread			= CRTDLL__endthread		@197
-;   _endthreadex						@198
+    _endthreadex		= _MSVCRT__endthreadex		@198
     _environ			= MSVCRT__environ    		@199
 
 
@@ -720,13 +720,13 @@ EXPORTS
     _filbuf			= CRTDLL__filbuf		@219
     _fileinfo			= MSVCRT__fileinfo		@220
     _filelength			= CRTDLL__filelength		@221
-;   _filelengthi64						@222
+    _filelengthi64		= _MSVCRT__filelengthi64	@222
     _fileno			= CRTDLL__fileno		@223
     _findclose			= CRTDLL__findclose		@224
     _findfirst			= CRTDLL__findfirst		@225
-;   _findfirsti64						@226
+    _findfirsti64		= _MSVCRT__findfirsti64		@226
     _findnext			= CRTDLL__findnext		@227
-;   _findnexti64						@228
+    _findnexti64		= _MSVCRT__findnexti64		@228
     _finite			= CRTDLL__finite		@229
     _flsbuf			= CRTDLL__flsbuf		@230
     _flushall			= CRTDLL__flushall		@231
@@ -738,7 +738,7 @@ EXPORTS
     _fputwchar			= CRTDLL__fputwchar		@237
     _fsopen			= CRTDLL__fsopen		@238
     _fstat			= CRTDLL__fstat			@239
-;   _fstati64							@240
+    _fstati64			= _MSVCRT__fstati64		@240
     _ftime			= CRTDLL__ftime			@241
     _ftol			= NTDLL__ftol			@242
     _fullpath			= CRTDLL__fullpath		@243
@@ -825,7 +825,7 @@ EXPORTS
     _lrotr			= CRTDLL__lrotr			@323
     _lsearch			= CRTDLL__lsearch		@324
     _lseek			= CRTDLL__lseek			@325
-;   _lseeki64							@326
+    _lseeki64			= _MSVCRT__lseeki64		@326
     _ltoa			= NTDLL__ltoa			@327
     _ltow			= _MSVCRT__ltow			@328
     _makepath			= CRTDLL__makepath		@329
@@ -928,7 +928,7 @@ EXPORTS
     _setjmp			= CRTDLL__setjmp		@424
     _setjmp3			= CRTDLL__setjmp		@425 ; Not correct
     _setmaxstdio		= _MSVCRT__setmaxstdio		@426
-;   _setmbcp							@427
+    _setmbcp			= _MSVCRT__setmbcp		@427
     _setmode							@428
     _setsystime			= CRTDLL__setsystime		@429
     _sleep			= CRTDLL__sleep			@430
@@ -945,7 +945,7 @@ EXPORTS
     _spawnvpe			= CRTDLL__spawnvpe		@441
     _splitpath			= NTDLL__splitpath		@442
     _stat			= CRTDLL__stat			@443
-;   _stati64							@444
+    _stati64			= _MSVCRT__stati64		@444
     _statusfp			= CRTDLL__statusfp		@445
     _strcmpi			= NTDLL__strcmpi		@446
     _strdate			= CRTDLL__strdate		@447
@@ -966,7 +966,7 @@ EXPORTS
     _sys_errlist		= CRTDLL__sys_errlist		@462
     _sys_nerr			= MSVCRT__sys_nerr		@463
     _tell			= CRTDLL__tell			@464
-;   _telli64							@465
+    _telli64			= _MSVCRT__telli64		@465
     _tempnam			= CRTDLL__tempnam		@466
     _timezone			= MSVCRT__timezone		@467
     _tolower			= CRTDLL__tolower		@468
@@ -1016,7 +1016,7 @@ EXPORTS
     _wexecvpe			= _MSVCRT__wexecvpe		@510
     _wfdopen			= _MSVCRT__wfdopen		@511
     _wfindfirst			= _MSVCRT__wfindfirst		@512
-;   _wfindfirsti64						@513
+    _wfindfirsti64		= _MSVCRT__wfindfirsti64	@513
     _wfindnext			= _MSVCRT__wfindnext		@514
 ;    _wfindnexti64		= _MSVCRT__wfindnexti64		@515
     _wfopen			= _MSVCRT__wfopen		@516
