@@ -1,4 +1,4 @@
-/* $Id: winconst.h,v 1.3 1999-08-25 15:47:40 sandervl Exp $ */
+/* $Id: winconst.h,v 1.4 1999-08-28 17:18:50 dengert Exp $ */
 
 /*
  * Win32 constants
@@ -98,6 +98,21 @@
 #define WS_EX_ACCEPTFILES_W      0x00000010L
 #define WS_EX_TRANSPARENT_W      0x00000020L
 
+/* Class Styles
+ */
+ #define CS_VREDRAW_W           0x0001
+ #define CS_HREDRAW_W           0x0002
+ #define CS_KEYCVTWINDOW_W      0x0004
+ #define CS_DBLCLKS_W           0x0008
+ #define CS_OWNDC_W             0x0020
+ #define CS_CLASSDC_W           0x0040
+ #define CS_PARENTDC_W          0x0080
+ #define CS_NOKEYCVT_W          0x0100
+ #define CS_NOCLOSE_W           0x0200
+ #define CS_SAVEBITS_W          0x0800
+ #define CS_BYTEALIGNCLIENT_W   0x1000
+ #define CS_BYTEALIGNWINDOW_W   0x2000
+ #define CS_GLOBALCLASS_W       0x4000
 
 #define DUPLICATE_CLOSE_SOURCE          0x00000001
 #define DUPLICATE_SAME_ACCESS           0x00000002
