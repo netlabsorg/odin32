@@ -12,9 +12,6 @@
 #include "winuser.h"
 #include "winerror.h"
 #include "winreg.h"
-#ifdef __WIN32OS2__
-#include "wine/obj_base.h"
-#endif
 #include "uuids.h"
 #include "wine/unicode.h"
 
