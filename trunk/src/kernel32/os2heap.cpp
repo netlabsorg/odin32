@@ -1,4 +1,4 @@
-/* $Id: os2heap.cpp,v 1.23 2001-07-30 12:01:24 sandervl Exp $ */
+/* $Id: os2heap.cpp,v 1.24 2001-10-06 18:53:11 sandervl Exp $ */
 
 /*
  * Heap class for OS/2
@@ -42,7 +42,7 @@
 VMutex heaplistmutex;   //protects linked lists of heaps
 
 void * _LNK_CONV getmoreHeapMem(Heap_t pHeap, size_t *size, int *clean);
-void _LNK_CONV   releaseHeapMem(Heap_t pHeap, void *block, size_t size);
+void   _LNK_CONV releaseHeapMem(Heap_t pHeap, void *block, size_t size);
 
 //******************************************************************************
 //******************************************************************************
@@ -60,13 +60,6 @@ OS2Heap::OS2Heap(DWORD flOptions, DWORD dwInitialSize, DWORD dwMaximumSize)
   this->dwMaximumSize = dwMaximumSize;
   this->dwInitialSize = dwInitialSize;
   this->flOptions     = flOptions;
-
-  if(!(flOptions & HEAP_NO_SERIALIZE))
-  {
-    hmutex = new VMutex();
-    dassert(hmutex, ("ERROR: new VMutex\n"));
-  }
-  else  hmutex = NULL;
 
   heaplistmutex.enter();
   if(curheap != NULL) {
@@ -103,24 +96,9 @@ OS2Heap::OS2Heap(DWORD flOptions, DWORD dwInitialSize, DWORD dwMaximumSize)
 OS2Heap::~OS2Heap()
 {
  OS2Heap *curheap = OS2Heap::heap;
- HEAPELEM *hnext;
  int i;
 
   dprintf(("dtr OS2Heap, hPrimaryHeap = %X\n", hPrimaryHeap));
-
-  if(hmutex)
-    hmutex->enter();
-
-  while(heapelem) {
-    hnext = heapelem->next;
-    free(heapelem->lpMem);
-    heapelem = hnext;
-  }
-  if(hmutex)
-  {
-    hmutex->leave();
-    delete(hmutex);
-  }
 
   heaplistmutex.enter();
   if(heap == this) {
@@ -170,21 +148,8 @@ LPVOID OS2Heap::Alloc(DWORD dwFlags, DWORD dwBytes)
   //align at 8 byte boundary
   lpHeapObj = (HEAPELEM *)(((ULONG)lpMem+7) & ~7);
   lpHeapObj->lpMem = lpMem;
-
-  if(hmutex)
-      hmutex->enter();
-
-  lpHeapObj->next    = heapelem;
-  lpHeapObj->prev    = NULL;
   lpHeapObj->magic   = MAGIC_NR_HEAP;
-  if(heapelem) {
-      heapelem->prev = lpHeapObj;
-  }
-  heapelem           = lpHeapObj;
 
-  if(hmutex) {
-      hmutex->leave();
-  }
   return(LPVOID)(lpHeapObj+1);
 }
 //******************************************************************************
@@ -277,19 +242,6 @@ BOOL OS2Heap::Free(DWORD dwFlags, LPVOID lpMem)
   dprintf(("OS2Heap::Free lpMem = %X, size %d\n", lpMem, size));
   totalAlloc -= size;
 #endif
-  if(hmutex)
-    hmutex->enter();
-
-  if(helem->prev)
-    	helem->prev->next = helem->next;
-  if(helem->next)
-    	helem->next->prev = helem->prev;
-  if(heapelem == helem)
-    	heapelem = heapelem->next;
-
-  if(hmutex) {
-    	hmutex->leave();
-  }
 
   free(helem->lpMem);
   return(TRUE);
@@ -370,11 +322,12 @@ void * _LNK_CONV getmoreHeapMem(Heap_t pHeap, size_t *size, int *clean)
   /* round the size up to a multiple of 4K */
   *size = (*size / 4096) * 4096 + 4096;
 
-  rc = DosAllocMem(&newblock, *size, PAG_READ|PAG_WRITE|PAG_COMMIT|PAG_EXECUTE);
+  rc = DosAllocMem(&newblock, *size, flAllocMem|PAG_READ|PAG_WRITE|PAG_COMMIT|PAG_EXECUTE);
   if(rc != 0) {
 	dprintf(("getmoreHeapMem: DosAllocMem failed with %d", rc));
 	return FALSE;
   }
+success:
   *clean = _BLOCK_CLEAN;
   dprintf(("KERNEL32: getmoreHeapMem %x %d", newblock, *size));
   return newblock;
