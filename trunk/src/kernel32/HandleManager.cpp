@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.47 2000-09-03 09:32:06 sandervl Exp $ */
+/* $Id: HandleManager.cpp,v 1.48 2000-09-05 20:35:38 sandervl Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -1009,7 +1009,9 @@ HANDLE HMOpenFile(LPCSTR    lpFileName,
                      &pHMHandleData->dwAccess,
                      &pHMHandleData->dwShare);
 
-  pHMHandleData->dwCreation = 0;
+  //SvL; Must be OPEN_EXISTING because mmaps depend on it (to duplicate
+  //     the file handle when this handle is a parameter for CreateFileMappingA/W
+  pHMHandleData->dwCreation = OPEN_EXISTING;
   pHMHandleData->dwFlags    = 0;
   pHMHandleData->lpHandlerData = NULL;
 
