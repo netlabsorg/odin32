@@ -1,4 +1,4 @@
-/* $Id: ADVAPI32.CPP,v 1.18 2001-04-26 17:00:33 sandervl Exp $ */
+/* $Id: ADVAPI32.CPP,v 1.19 2001-08-10 19:31:19 sandervl Exp $ */
 
 /*
  * Win32 advanced API functions for OS/2
@@ -75,18 +75,16 @@ BOOL WIN32API SetTokenInformation(HANDLE                  hToken,
 }
 
 //******************************************************************************
+/* The GetUserName function retrieves the user name of the current
+ *  thread. This is the name of the user currently logged onto the
+ *  system.
+ */
 //******************************************************************************
 BOOL WIN32API GetUserNameA(  /*PLF Wed  98-02-11 13:33:39*/
     LPTSTR lpBuffer,        /* address of name buffer       */
     LPDWORD lpcchBuffer)    /* address of size of name buffer       */
-
-
-    /* The GetUserName function retrieves the user name of the current
-     *  thread. This is the name of the user currently logged onto the
-     *  system.
-     */
-
 {
+    dprintf(("GetUserNameA %x %x %x", lpBuffer, lpcchBuffer, *lpcchBuffer));
     #define USERNAME "USER"
     if(*lpcchBuffer < sizeof(USERNAME))
         return FALSE;
