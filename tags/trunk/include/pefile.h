@@ -1,4 +1,4 @@
-/* $Id: pefile.h,v 1.3 1999-09-22 09:46:18 sandervl Exp $ */
+/* $Id: pefile.h,v 1.4 2000-01-26 23:17:47 sandervl Exp $ */
 
 /*
  *
@@ -13,8 +13,6 @@
 #include <win32type.h>
 #include <peexe.h>
 #include <stdlib.h> //min & max
-
-#define LOWORD(a)   (a & 0xFFFF)
 
 #define IDS_ERRBADFILENAME  1000
 #define IDR_CURSOR      1

@@ -1,4 +1,4 @@
-/* $Id: authors.h,v 1.7 2000-01-22 10:30:30 sandervl Exp $ */
+/* $Id: authors.h,v 1.8 2000-01-26 23:17:48 sandervl Exp $ */
 #ifndef __WINE_AUTHORS_H
 #define __WINE_AUTHORS_H
 
@@ -11,6 +11,7 @@ static const char * const SHELL_People[] =
     "Daniela Engert",
     "Peter Fitzsimmons",
     "Adrian Gschwend",
+    "Jeroen van den Horn",
     "Patrick Haller",
     "Achim Hasenmueller",
     "Bart van Leeuwen",
