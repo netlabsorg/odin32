@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.117 2001-04-02 22:51:58 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.118 2001-04-16 08:31:46 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -564,7 +564,7 @@ HINSTANCE WIN32API LoadLibraryW(LPCWSTR lpszLibFile)
     hDll = LoadLibraryExA(pszAsciiLibFile, NULL, 0);
     dprintf(("KERNEL32: LoadLibraryW(%s) returns 0x%x",
              pszAsciiLibFile, hDll));
-    free(pszAsciiLibFile);
+    FreeAsciiString(pszAsciiLibFile);
 
     return hDll;
 }
@@ -1032,7 +1032,7 @@ HINSTANCE WIN32API LoadLibraryExW(LPCWSTR lpszLibFile, HANDLE hFile, DWORD dwFla
     hDll = LoadLibraryExA(pszAsciiLibFile, hFile, dwFlags);
     dprintf(("KERNEL32: LoadLibraryExW(%s, 0x%x, 0x%x) returns 0x%x",
              pszAsciiLibFile, hFile, dwFlags, hDll));
-    free(pszAsciiLibFile);
+    FreeAsciiString(pszAsciiLibFile);
 
     return hDll;
 }
