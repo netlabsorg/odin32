@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.106 2001-07-15 15:39:03 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.107 2001-07-28 13:43:53 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -298,6 +298,12 @@ ULONG OSLibGetWindowHeight(HWND hwnd)
 LONG OSLibWinQuerySysValue(LONG iSysValue)
 {
     return WinQuerySysValue(HWND_DESKTOP,iSysValue);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibWinSetSysValue(LONG iSysValue, ULONG val)
+{
+    return WinQuerySysValue(iSysValue, val);
 }
 //******************************************************************************
 //******************************************************************************
