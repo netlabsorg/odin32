@@ -1,18 +1,19 @@
-/* $Id: changelog,v 1.2184 2002-06-25 07:14:32 sandervl Exp $ */
+/* $Id: changelog,v 1.2185 2002-06-25 10:26:07 sandervl Exp $ */
+
+ 2002-06-25: Sander van Leeuwen <sandervl@innotek.de>
+    - KERNEL32: o RegQueryValueExA(/W) fix for querying the length of string
+                  key data; registry.dll returns the wrong value (too big;
+                  appears size of internal storage)
 
  2002-06-25: knut st. osmundsen <bird@anduin.net>
-    - UNICODE:
-        o Fancy 16 step fallthru case isn't cool if the src length
-          is bad.
-    - SHELL32:
-        o Bad linked list walking. (accessed node after free)
-    - USER32:
-        o Allocate space the two missing RGB2 entries.
-        o Use "%.*s" and "%.*ls" when we have a string with a length.
-          (Crashing in logging is awfull. Creates zombies!)
-    - ODINCRT:
-        o Reserve low 32MB of address space before initializing
-          the CRT IF we compile with the debug heap (kLib).
+    - UNICODE:  o Fancy 16 step fallthru case isn't cool if the src length
+                  is bad.
+    - SHELL32:  o Bad linked list walking. (accessed node after free)
+    - USER32:   o Allocate space the two missing RGB2 entries.
+                o Use "%.*s" and "%.*ls" when we have a string with a length.
+                  (Crashing in logging is awfull. Creates zombies!)
+    - ODINCRT:  o Reserve low 32MB of address space before initializing
+                  the CRT IF we compile with the debug heap (kLib).
 
  2002-06-24: knut st. osmundsen <bird@anduin.net>
     - Testsuite:
