@@ -1,3 +1,5 @@
+/* $Id: playsound.cpp,v 1.2 1999-06-10 16:24:34 phaller Exp $ */
+
 /*
  * Playsound stubs
  *

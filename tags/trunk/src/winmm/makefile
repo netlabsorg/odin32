@@ -1,3 +1,5 @@
+# $Id: makefile,v 1.3 1999-06-10 16:24:34 phaller Exp $
+
 #
 # PD-Win32 API
 #
@@ -40,15 +42,15 @@ $(TARGET).lib: $(TARGET).dll
         $(CP) $@ $(PDWIN32_LIB)
 
 
-driver.obj:     driver.cpp 
-winmm.obj:      winmm.cpp 
-os2timer.obj:   os2timer.h wintimer.h 
+driver.obj:     driver.cpp
+winmm.obj:      winmm.cpp
+os2timer.obj:   os2timer.h wintimer.h
 waveout.obj:    waveout.cpp  dwaveout.h
-wavein.obj:     wavein.cpp  
+wavein.obj:     wavein.cpp
 mixer.obj:      mixer.cpp  midi.hpp
-mci.obj:        mci.cpp 
-joy.obj:        joy.cpp 
-mmio.obj:       mmio.cpp 
+mci.obj:        mci.cpp
+joy.obj:        joy.cpp
+mmio.obj:       mmio.cpp
 aux.obj:        aux.cpp  aux.h
 auxos2.obj:     auxos2.cpp aux.h
 midi.obj:       midi.cpp midi.hpp  irtmidi.hpp

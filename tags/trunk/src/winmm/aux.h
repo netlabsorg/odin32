@@ -1,3 +1,5 @@
+/* $Id: aux.h,v 1.3 1999-06-10 16:24:33 phaller Exp $ */
+
 /*
  * Auxilary multimedia apis
  *
