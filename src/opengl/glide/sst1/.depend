@@ -1,0 +1,135 @@
+initterm.obj: \
+       initterm.cpp \
+       ..\..\..\..\include\os2wrap.h \
+       k:\ibmcpp\INCLUDE\stdlib.h \
+       k:\ibmcpp\INCLUDE\stdio.h \
+       k:\ibmcpp\INCLUDE\string.h \
+       ..\..\..\..\include\odin.h \
+       ..\..\..\..\include\win32type.h \
+       ..\..\..\..\include\winconst.h \
+       ..\..\..\..\include\odinlx.h \
+       ..\..\..\..\include\misc.h
+glideres.obj: \
+       glideres.asm
+..\..\..\..\include\codepage.h: \
+       k:\toolkit\H\uconv.h
+..\..\..\..\include\comtype.h:
+..\..\..\..\include\cpuhlp.h:
+..\..\..\..\include\dcdata.h:
+..\..\..\..\include\exceptions.h: \
+       ..\..\..\..\include\win32type.h \
+       ..\..\..\..\include\misc.h
+..\..\..\..\include\excpt.h:
+..\..\..\..\include\exitlist.h:
+..\..\..\..\include\HandleManager.h: \
+       ..\..\..\..\include\winos2def.h
+..\..\..\..\include\heap.h: \
+       ..\..\..\..\include\win\winbase.h
+..\..\..\..\include\heapcode.h: \
+       ..\..\..\..\include\heapshared.h
+..\..\..\..\include\heapshared.h: \
+       k:\ibmcpp\INCLUDE\stddef.h \
+       k:\ibmcpp\INCLUDE\stdlib.h \
+       k:\ibmcpp\INCLUDE\umalloc.h
+..\..\..\..\include\heapstring.h: \
+       ..\..\..\..\include\odin.h
+..\..\..\..\include\midimapr.h:
+..\..\..\..\include\misc.h: \
+       ..\..\..\..\include\win32type.h \
+       ..\..\..\..\include\versionos2.h \
+       ..\..\..\..\include\unicode.h
+..\..\..\..\include\nameid.h:
+..\..\..\..\include\odin.h: \
+       k:\ibmcpp\INCLUDE\builtin.h
+..\..\..\..\include\odinlx.h:
+..\..\..\..\include\odinrsrc.h:
+..\..\..\..\include\odinwrap.h: \
+       ..\..\..\..\include\os2sel.h \
+       k:\ibmcpp\INCLUDE\malloc.h
+..\..\..\..\include\os2mewrap.h: \
+       k:\toolkit\H\os2me.h
+..\..\..\..\include\os2newapi.h:
+..\..\..\..\include\os2sel.h:
+..\..\..\..\include\OS2WIN.H: \
+       ..\..\..\..\include\win32type.h \
+       ..\..\..\..\include\odin.h \
+       ..\..\..\..\include\win\windef.h \
+       ..\..\..\..\include\win\winbase.h \
+       ..\..\..\..\include\win\wingdi.h \
+       ..\..\..\..\include\win\winuser.h \
+       ..\..\..\..\include\win\winerror.h \
+       ..\..\..\..\include\win\commdlg.h \
+       ..\..\..\..\include\win\ddeml.h \
+       ..\..\..\..\include\win\mmsystem.h \
+       ..\..\..\..\include\os2sel.h \
+       ..\..\..\..\include\misc.h
+..\..\..\..\include\os2wrap.h: \
+       k:\toolkit\H\os2.h \
+       ..\..\..\..\include\os2sel.h \
+       ..\..\..\..\include\os2newapi.h
+..\..\..\..\include\pefile.h: \
+       k:\toolkit\H\os2.h \
+       ..\..\..\..\include\win32type.h \
+       ..\..\..\..\include\win\peexe.h \
+       k:\ibmcpp\INCLUDE\stdlib.h
+..\..\..\..\include\pmmenu.h:
+..\..\..\..\include\spy.h:
+..\..\..\..\include\unicode.h: \
+       ..\..\..\..\include\uniconv.h
+..\..\..\..\include\uniconv.h: \
+       k:\ibmcpp\INCLUDE\stddef.h \
+       k:\ibmcpp\INCLUDE\time.h
+..\..\..\..\include\versionos2.h:
+..\..\..\..\include\virtual.h:
+..\..\..\..\include\vmutex.h:
+..\..\..\..\include\win32type.h: \
+       ..\..\..\..\include\odin.h
+..\..\..\..\include\win32util.h:
+..\..\..\..\include\win32wnd.h:
+..\..\..\..\include\winaccel.h:
+..\..\..\..\include\winconst.h:
+..\..\..\..\include\wincursor.h:
+..\..\..\..\include\windllbase.h: \
+       ..\..\..\..\include\winimagebase.h \
+       ..\..\..\..\include\odinlx.h
+..\..\..\..\include\windlllx.h: \
+       ..\..\..\..\include\windllbase.h \
+       ..\..\..\..\include\winimagelx.h
+..\..\..\..\include\windllpe2lx.h: \
+       ..\..\..\..\include\windllbase.h \
+       ..\..\..\..\include\winimagepe2lx.h
+..\..\..\..\include\windllpeldr.h: \
+       ..\..\..\..\include\windllbase.h \
+       ..\..\..\..\include\winimagepeldr.h
+..\..\..\..\include\wineuni.h:
+..\..\..\..\include\winexebase.h: \
+       ..\..\..\..\include\winimagebase.h
+..\..\..\..\include\winexelx.h: \
+       ..\..\..\..\include\winexebase.h \
+       ..\..\..\..\include\winimagelx.h \
+       ..\..\..\..\include\odinlx.h
+..\..\..\..\include\winexepe2lx.h: \
+       ..\..\..\..\include\winexebase.h \
+       ..\..\..\..\include\winimagepe2lx.h
+..\..\..\..\include\winexepeldr.h: \
+       ..\..\..\..\include\winexebase.h \
+       ..\..\..\..\include\winimagepeldr.h
+..\..\..\..\include\winfakepeldr.h: \
+       ..\..\..\..\include\winimagepeldr.h
+..\..\..\..\include\winicon.h:
+..\..\..\..\include\winimagebase.h: \
+       ..\..\..\..\include\win\peexe.h
+..\..\..\..\include\winimagelx.h: \
+       ..\..\..\..\include\winimagebase.h
+..\..\..\..\include\winimagepe2lx.h: \
+       ..\..\..\..\include\winimagebase.h
+..\..\..\..\include\winimagepeldr.h: \
+       ..\..\..\..\include\winimagebase.h
+..\..\..\..\include\winkeyboard.h:
+..\..\..\..\include\winmenu.h:
+..\..\..\..\include\winos2def.h:
+..\..\..\..\include\winres.h:
+..\..\..\..\include\wprocess.h: \
+       ..\..\..\..\include\win\winprocess.h \
+       ..\..\..\..\include\winconst.h \
+       ..\..\..\..\include\win\thread.h
