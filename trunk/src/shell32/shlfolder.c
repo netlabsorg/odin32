@@ -1195,7 +1195,11 @@ static HRESULT WINAPI IShellFolder_fnSetNameOf(
 	/* build source path */
 	if (dwFlags & SHGDN_INFOLDER)
 	{
-	  strcpy(szSrc, This->sMyPath);
+#ifdef __WIN32OS2__
+          //@PF Block 'My Computer' and other stuff from crashing us
+          if (!This->sMyPath) return E_FAIL;
+#endif
+          strcpy(szSrc, This->sMyPath);
 	  PathAddBackslashA(szSrc);
 	  len = strlen (szSrc);
 	  _ILSimpleGetText(pidl, szSrc+len, MAX_PATH-len);
@@ -1206,7 +1210,7 @@ static HRESULT WINAPI IShellFolder_fnSetNameOf(
 	}
 
 	/* build destination path */
-	strcpy(szDest, This->sMyPath);
+        strcpy(szDest, This->sMyPath);
 	PathAddBackslashA(szDest);
 	len = strlen (szDest);
         WideCharToMultiByte( CP_ACP, 0, lpName, -1, szDest+len, MAX_PATH-len, NULL, NULL );
