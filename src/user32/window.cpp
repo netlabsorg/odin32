@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.11 1999-10-07 09:28:02 sandervl Exp $ */
+/* $Id: window.cpp,v 1.12 1999-10-09 18:16:57 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -404,7 +404,6 @@ HWND WIN32API GetTopWindow( HWND hwnd)
 	SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
-    dprintf(("GetTopWindow %x", hwnd));
     return window->GetTopWindow();
 }
 //******************************************************************************
@@ -590,10 +589,11 @@ HWND WIN32API SetFocus (HWND hwnd)
 HWND WIN32API GetFocus(void)
 {
     HWND hwnd;
-//    dprintf(("USER32:  GetFocus\n"));
 
     hwnd = OSLibWinQueryFocus(OSLIB_HWND_DESKTOP);
-    return Win32BaseWindow::OS2ToWin32Handle(hwnd);
+    dprintf(("USER32: GetFocus %x\n", hwnd));
+    hwnd = Win32BaseWindow::OS2ToWin32Handle(hwnd);
+    return hwnd;    
 }
 //******************************************************************************
 //******************************************************************************

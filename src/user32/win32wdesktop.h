@@ -1,4 +1,4 @@
-/* $Id: win32wdesktop.h,v 1.1 1999-09-23 10:33:59 sandervl Exp $ */
+/* $Id: win32wdesktop.h,v 1.2 1999-10-09 18:16:57 sandervl Exp $ */
 /*
  * Win32 Desktop Window for OS/2
  *
@@ -30,6 +30,7 @@ private:
 /* Built-in class names (see _Undocumented_Windows_ p.418) */
 #define DESKTOP_CLASS_NAMEA    "#32769"  /* Desktop */
 #define DESKTOP_CLASS_NAMEW   L"#32769"  /* Desktop */
+#undef DESKTOP_CLASS_ATOM
 #define DESKTOP_CLASS_ATOM       32769   /* Desktop */
 
 extern Win32Desktop *windowDesktop;
