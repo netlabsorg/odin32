@@ -1,4 +1,12 @@
-/* $Id: ChangeLog,v 1.1245 2001-02-09 19:49:26 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1246 2001-02-10 10:31:00 sandervl Exp $ */
+
+ 2001-02-10: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o Check if window has been destroyed before accessing
+                  this pointer again in SendInternalMessage.
+                  (fixes heap corruption in MS Visual C++ 4.2 install)
+                  TODO: Needs a permanent and correct solution as this
+                        can happen in several other places.
+                        Also a potential problem in user32 classes (InfoPtr).
 
  2001-02-09: Sander van Leeuwen <sandervl@xs4all.nl>
     - COMCTL32: o Register controls in LibMain, not in DLL_InitTerm
