@@ -1,0 +1,38 @@
+# $Id: setup.os2debwlink.mk,v 1.1 2002-08-28 04:42:05 bird Exp $
+
+#
+# Include optional stuff.
+#
+!include $(PATH_MAKE)\setup.optional.wlink.mk
+
+#
+# The tool(s)
+#
+LINK            = wlink.exe
+TOOL_DEFCONV    = $(PATH_TOOLS)\kDef2Wat.exe $(_LD_FORMAT)
+
+#
+# The flags
+#
+LINK_FLAGS      = Option eliminate, manglednames, caseexact, verbose, cache $(_LD_OPTIONAL) Debug codeview all
+LINK_FLAGS_EXE  = $(LINK_FLAGS)
+LINK_FLAGS_DLL  = $(LINK_FLAGS)
+LINK_FLAGS_SYS  = $(LINK_FLAGS) segment type code preload segment type data preload Option internalrelocs, togglerelocs
+LINK_FLAGS_VDD  = $(LINK_FLAGS_SYS)
+LINK_FLAGS_IFS  = $(LINK_FLAGS) segment type code preload segment type data preload
+
+LINK_CMD_EXE    = $(LINK) $(LINK_FLAGS_EXE) @$(TARGET_LNK)
+LINK_CMD_DLL    = $(LINK) $(LINK_FLAGS_DLL) @$(TARGET_LNK)
+LINK_CMD_SYS    = $(LINK) $(LINK_FLAGS_SYS) @$(TARGET_LNK)
+LINK_CMD_VDD    = $(LINK) $(LINK_FLAGS_VDD) @$(TARGET_LNK)
+LINK_CMD_IFS    = $(LINK) $(LINK_FLAGS_IFS) @$(TARGET_LNK)
+
+LINK_LNK1       = file       $(TARGET_OBJS: =^
+file       )
+!ifdef _LD_LIBPATH
+LINK_LNK2       = libpath    $(_LD_LIBPATH)
+!endif
+LINK_LNK3       = option map=$(TARGET_MAP)
+LINK_LNK4       = library    $(TARGET_LIBS: =^, )
+LINK_LNK5       = name       $(PATH_TARGET)\$(TARGET_NAME).$(TARGET_EXT)
+
