@@ -1,4 +1,4 @@
-/* $Id: asyncthread.cpp,v 1.12 2001-10-13 18:51:07 sandervl Exp $ */
+/* $Id: asyncthread.cpp,v 1.13 2001-10-21 13:43:51 sandervl Exp $ */
 
 /*
  * Async thread help functions
@@ -39,7 +39,7 @@ static void _Optlink AsyncThread(void *arg)
 ////  if(pThreadParm->request == ASYNC_BLOCKHOOK)
 ////	WSASetBlocking(FALSE, pThreadParm->hThread);
 
-  dprintf(("AsyncThread %x exit", pThreadParm->hAsyncTaskHandle));
+  dprintf(("AsyncThread %x socket %x exit", pThreadParm->hAsyncTaskHandle, pThreadParm->u.asyncselect.s));
   free((PVOID)pThreadParm);
 }
 //******************************************************************************
@@ -47,6 +47,8 @@ static void _Optlink AsyncThread(void *arg)
 ULONG QueueAsyncJob(ASYNCTHREADPROC asyncproc, PASYNCTHREADPARM pThreadParm, BOOL fSetBlocking)
 {
  TID tid;
+
+   dprintf(("QueueAsyncJob for socket %x", pThreadParm->u.asyncselect.s));
 
    pThreadParm->asyncProc         = asyncproc;
    pThreadParm->fActive           = TRUE;

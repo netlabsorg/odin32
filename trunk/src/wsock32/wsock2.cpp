@@ -1,4 +1,4 @@
-/* $Id: wsock2.cpp,v 1.3 2001-10-13 18:51:08 sandervl Exp $ */
+/* $Id: wsock2.cpp,v 1.4 2001-10-21 13:43:51 sandervl Exp $ */
 
 /*
  *
@@ -23,7 +23,7 @@
  */
 int WINAPI WSAEventSelect(SOCKET s, WSAEVENT hEvent, LONG lEvent)
 {
-    TRACE("WS2_32: WSAEventSelect socket 0x%x, hEvent 0x%x, event 0x%x", s, hEvent, (unsigned)lEvent);
+    dprintf(("WS2_32: WSAEventSelect socket 0x%x, hEvent 0x%x, event 0x%x", s, hEvent, lEvent));
 
     // forward call to worker function in HEVENT notification mode
     return WSAAsyncSelectWorker(s, WSA_SELECT_HEVENT, (int)hEvent, 0, lEvent);
