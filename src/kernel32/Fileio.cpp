@@ -1,4 +1,4 @@
-/* $Id: Fileio.cpp,v 1.37 2000-09-03 09:32:04 sandervl Exp $ */
+/* $Id: Fileio.cpp,v 1.38 2000-09-10 21:54:05 sandervl Exp $ */
 
 /*
  * Win32 File IO API functions for OS/2
@@ -600,7 +600,7 @@ ODINFUNCTION1(DWORD, GetFileAttributesA,
     else {
 	rc = O32_GetFileAttributes((LPSTR)lpszFileName);
 	if(rc == -1 && lpszFileName[strlen(lpszFileName)-1] != '\\') {
-		char *filename = (char *)alloca(strlen(lpszFileName)+1);
+		char *filename = (char *)alloca(strlen(lpszFileName)+2); //+2!!!!!!
 		strcpy(filename, lpszFileName);
                 strcat(filename, "\\");
 		rc = O32_GetFileAttributes((LPSTR)filename);
