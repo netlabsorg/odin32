@@ -1,8 +1,12 @@
-/* $Id: changelog,v 1.1451 2001-05-28 11:26:50 phaller Exp $ */
+/* $Id: changelog,v 1.1452 2001-05-28 17:18:33 phaller Exp $ */
 
  2001-05-28: Patrick Haller <patrick.haller@innotek.de>
     - GDI32:    o Split GDI32.CPP into ICM.CPP and GDI32.CPP
+    		o CreateDC() accepts "display" instead of "DISPLAY"
+                  (fixes font-not-found problem in ZD Bench 99)
     - KERNEL32: o mmap.cpp: slightly accelerated ::findMapByView()
+    		o directory.cpp: don't trap in CreateDirectory(NULL, NULL)                
+    - DDRAW:    o implemented DirectDrawCreateClipper()
 
  2001-05-27: Sander van Leeuwen <sandervl@xs4all.nl>
     - COMCTL32: o Listview: merged old LISTVIEW_EnsureVisible

@@ -1,4 +1,4 @@
-; $Id: ddraw.DEF,v 1.8 2001-03-18 21:44:44 mike Exp $
+; $Id: ddraw.DEF,v 1.9 2001-05-28 17:17:14 phaller Exp $
 
 ;
 ; Based on Windows 98 DirectX7: DDRAW.DLL
@@ -6,6 +6,8 @@
 LIBRARY DDRAW INITINSTANCE TERMINSTANCE
 DATA MULTIPLE NONSHARED READWRITE LOADONCALL
 CODE LOADONCALL
+
+DESCRIPTION 'Odin32 System DLL - DDraw'
 
 IMPORTS
     _GpiEnableYInversion       = PMGPI.723
@@ -20,7 +22,7 @@ EXPORTS
 ; DDInternalUnlock          @7
 ; DSoundHelp                @8
  DirectDrawCreate         = _OS2DirectDrawCreate@12             @9
-; DirectDrawCreateClipper         @10
+ DirectDrawCreateClipper  = _OS2DirectDrawCreateClipper@12      @10
  DirectDrawCreateEx       = _DirectDrawCreateEx@16              @11
  DirectDrawEnumerateA     = _OS2DirectDrawEnumerateA@8          @12
  DirectDrawEnumerateExA   = _OS2DirectDrawEnumerateExA@12       @13
