@@ -10,7 +10,6 @@
 /* CB: todo
    - window words not right implemented
    - update checkboxes.bmp to Win9x style
-   - LoadBitmapA() doesn't work with native resources
 */
 
 #include <string.h>
@@ -120,7 +119,7 @@ static LRESULT BUTTON_Create(HWND hwnd,WPARAM wParam,LPARAM lParam)
   {
     BITMAP bmp;
 
-    hbitmapCheckBoxes = LoadBitmapA(0, MAKEINTRESOURCEA(OBM_CHECKBOXES));
+    hbitmapCheckBoxes = NativeLoadBitmap(0,MAKEINTRESOURCEA(OBM_CHECKBOXES));
     GetObjectA( hbitmapCheckBoxes, sizeof(bmp), &bmp );
     checkBoxWidth  = bmp.bmWidth / 4;
     checkBoxHeight = bmp.bmHeight / 3;

@@ -1,4 +1,4 @@
-; $Id: user32.def,v 1.1 1999-07-14 08:35:33 sandervl Exp $
+; $Id: user32.def,v 1.2 1999-07-18 20:41:12 cbratschi Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY USER32 INITINSTANCE
@@ -600,3 +600,7 @@ EXPORTS
 
 ; Wine helper function
     GetSysColorPen              = _GetSysColorPen@4              @2002
+; COMCTL32 helper functions
+    NativeDlgBoxIP             = _NativeDlgBoxIP@24          @2003
+    NativeCreateDlgIP          = _NativeCreateDlgIP@24       @2004
+    NativeLoadBitmap           = _NativeLoadBitmap@8         @2005
