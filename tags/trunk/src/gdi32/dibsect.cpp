@@ -1,4 +1,4 @@
-/* $Id: dibsect.cpp,v 1.16 2000-02-09 23:34:30 sandervl Exp $ */
+/* $Id: dibsect.cpp,v 1.17 2000-02-10 00:36:10 sandervl Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -7,6 +7,9 @@
  * Copyright 1998 Patrick Haller
  *
  * Project Odin Software License can be found in LICENSE.TXT
+ *
+ * NOTE:
+ * This is not a complete solution for CreateDIBSection, but enough for Quake 2!
  *
  */
 #define  INCL_GPI
@@ -20,30 +23,20 @@
 #include "dibsect.h"
 #include <vmutex.h>
 #include <winconst.h>
+#include <win32wnd.h>
+#include "oslibgpi.h"
 
+//Win32 apis used:
 HWND WIN32API WindowFromDC(HDC hdc);
-HWND Win32ToOS2Handle(HWND hwnd);
-
-BOOL    APIENTRY _GpiEnableYInversion (HPS hps, LONG lHeight);
-
-inline BOOL APIENTRY GpiEnableYInversion (HPS hps, LONG lHeight)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = _GpiEnableYInversion(hps, lHeight);
-    SetFS(sel);
-
-    return yyrc;
-}
+BOOL   WINAPI UnmapViewOfFile(LPVOID addr);
+LPVOID WINAPI MapViewOfFile(HANDLE mapping, DWORD access, DWORD offset_high,
+                            DWORD offset_low, DWORD count);
 
 static VMutex dibMutex;
 
-//NOTE:
-//This is not a complete solution for CreateDIBSection, but enough for Quake 2!
 //******************************************************************************
 //******************************************************************************
-DIBSection::DIBSection(BITMAPINFOHEADER_W *pbmi, char *pColors, DWORD iUsage, DWORD handle, int fFlip)
+DIBSection::DIBSection(BITMAPINFOHEADER_W *pbmi, char *pColors, DWORD iUsage, DWORD hSection, DWORD dwOffset, DWORD handle, int fFlip)
                 : bmpBits(NULL), pOS2bmp(NULL), next(NULL)
 {
   int  os2bmpsize;
@@ -81,10 +74,20 @@ DIBSection::DIBSection(BITMAPINFOHEADER_W *pbmi, char *pColors, DWORD iUsage, DW
         bmpsize = (bmpsize + 3) & ~3;
    }
 
-   bmpBits    = (char *)malloc(bmpsize*pbmi->biHeight);
+   this->hSection = hSection;
+   if(hSection) {
+	bmpBits = (char *)MapViewOfFile(hSection, FILE_MAP_ALL_ACCESS_W, 0, dwOffset, bmpsize*pbmi->biHeight);
+	if(!bmpBits) {
+		dprintf(("Dibsection: mapViewOfFile %x failed!", hSection));
+		DebugInt3();
+	}
+   }
+   if(!bmpBits) {
+	DosAllocMem((PPVOID)&bmpBits, bmpsize*pbmi->biHeight, PAG_READ|PAG_WRITE|PAG_COMMIT);
+   }
    memset(bmpBits, 0, bmpsize*pbmi->biHeight);
 
-   pOS2bmp    = (BITMAPINFO2 *)malloc(os2bmpsize);
+   pOS2bmp = (BITMAPINFO2 *)malloc(os2bmpsize);
 
    memset(pOS2bmp, /* set header + palette entries to zero */
           0,
@@ -163,8 +166,14 @@ DIBSection::DIBSection(BITMAPINFOHEADER_W *pbmi, char *pColors, DWORD iUsage, DW
 DIBSection::~DIBSection()
 {
    dprintf(("Delete DIBSection %x", handle));
+
+   if(hSection) {
+	UnmapViewOfFile(bmpBits);
+   }
+   else
    if(bmpBits)
-        free(bmpBits);
+        DosFreeMem(bmpBits);
+
    if(pOS2bmp)
         free(pOS2bmp);
 

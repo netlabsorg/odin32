@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.38 2000-02-02 23:45:06 sandervl Exp $ */
+/* $Id: gdi32.cpp,v 1.39 2000-02-10 00:36:10 sandervl Exp $ */
 
 /*
  * GDI32 apis
@@ -478,10 +478,17 @@ HBRUSH WIN32API CreateHatchBrush( int arg1, COLORREF  arg2)
 }
 //******************************************************************************
 //******************************************************************************
-HDC WIN32API CreateICA( LPCSTR arg1, LPCSTR arg2, LPCSTR arg3, const DEVMODEA * arg4)
+HDC WIN32API CreateICA(LPCSTR lpszDriver, LPCSTR lpszDevice, LPCSTR lpszOutput, 
+                       const DEVMODEA *lpdvmInit)
 {
+ static char *szDisplay = "DISPLAY";
+
     dprintf(("GDI32: CreateICA"));
-    return O32_CreateIC(arg1, arg2, arg3, arg4);
+    //SvL: Open32 tests for "DISPLAY"
+    if(lpszDriver && !strcmp(lpszDriver, "display")) {
+	lpszDriver = szDisplay;
+    }
+    return O32_CreateIC(lpszDriver, lpszDevice, lpszOutput, lpdvmInit);
 }
 //******************************************************************************
 //******************************************************************************
@@ -539,10 +546,10 @@ HDC WIN32API CreateICW( LPCWSTR arg1, LPCWSTR arg2, LPCWSTR arg3, const DEVMODEW
       devmode.dmReserved1        = arg4->dmReserved1;
       devmode.dmReserved2        = arg4->dmReserved2;
 
-      rc = O32_CreateIC(astring1,astring2,astring3,&devmode);
+      rc = CreateICA(astring1,astring2,astring3,&devmode);
     }
     else
-      rc = O32_CreateIC(astring1,astring2,astring3, NULL);
+      rc = CreateICA(astring1,astring2,astring3, NULL);
 
     FreeAsciiString(astring1);
     FreeAsciiString(astring2);

@@ -1,4 +1,4 @@
-/* $Id: oslibgpi.h,v 1.3 2000-01-20 21:39:36 sandervl Exp $ */
+/* $Id: oslibgpi.h,v 1.4 2000-02-10 00:36:11 sandervl Exp $ */
 
 /*
  * GPI interface code
@@ -28,6 +28,19 @@ inline PVOID OSLibGpiQueryDCData(ULONG hps)
   SetFS(sel);
 
   return yyrc;
+}
+
+BOOL APIENTRYOS2 _GpiEnableYInversion(ULONG hps, LONG lHeight);
+
+inline BOOL GpiEnableYInversion(ULONG hps, LONG lHeight)
+{
+ BOOL yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = _GpiEnableYInversion(hps, lHeight);
+    SetFS(sel);
+
+    return yyrc;
 }
 
 typedef struct
