@@ -1,4 +1,4 @@
-/* $Id: ddraw.CPP,v 1.12 2000-03-03 19:21:22 hugh Exp $ */
+/* $Id: ddraw.CPP,v 1.13 2000-08-31 12:48:42 sandervl Exp $ */
 
 /*
  * DXDraw DLL implementaion
@@ -58,6 +58,15 @@ HRESULT WIN32API OS2DirectDrawCreate( GUID FAR *lpGUID,
   return(rc);
 }
 //******************************************************************************
+//******************************************************************************
+HRESULT WIN32API DirectDrawCreateEx(LPGUID lpGUID, LPVOID* lplpDD, REFIID iid, LPUNKNOWN pUnkOuter)
+{
+  dprintf(("DirectDrawCreateEx: %x %x %x %x", lpGUID, lplpDD, iid, pUnkOuter));
+  /* I don't know about what functionality is unique to Ex */
+  return OS2DirectDrawCreate(lpGUID,(LPDIRECTDRAW*)lplpDD,pUnkOuter);
+}
+
+//******************************************************************************
 typedef BOOL (FAR PASCAL * LPDDENUMCALLBACKA)(GUID FAR *, LPSTR, LPSTR, LPVOID);
 //******************************************************************************
 HRESULT WIN32API OS2DirectDrawEnumerateA(LPDDENUMCALLBACKA lpCallback,
@@ -65,12 +74,15 @@ HRESULT WIN32API OS2DirectDrawEnumerateA(LPDDENUMCALLBACKA lpCallback,
 {
   dprintf(("DDRAW: DirectDrawEnumerateA\n Callback for DIVE\n"));
   //call it twice for the DirectDraw & Direct3D classes
- if(lpCallback(NULL, "DIVE DirectDraw for OS/2",
+  if(lpCallback(NULL, "DIVE DirectDraw for OS/2",
                 "DirectDraw/2 v0.2", lpContext) == DDENUMRET_CANCEL)
   {
     dprintf(("DDRAW: Cancel Callback\n"));
     return(DD_OK);
   }
+//SvL: Crashes dxview.exe; expects a different vtbl when creating
+//     an IID_IDirect3D object
+#if 0
   else //now for Direct3D
   {
     dprintf(("DDRAW: Callback for 3Dfx Voodoo"));
@@ -81,6 +93,7 @@ HRESULT WIN32API OS2DirectDrawEnumerateA(LPDDENUMCALLBACKA lpCallback,
       return(DD_OK);
     }
   }
+#endif
   dprintf(("DDRAW: Done Enumeration\n\n"));
 
   return(DD_OK);

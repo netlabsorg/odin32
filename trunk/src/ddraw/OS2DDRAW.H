@@ -1,4 +1,4 @@
-/* $Id: OS2DDRAW.H,v 1.11 2000-06-14 20:21:11 hugh Exp $ */
+/* $Id: OS2DDRAW.H,v 1.12 2000-08-31 12:48:41 sandervl Exp $ */
 
 /*
  * DX Draw base class definition
@@ -24,6 +24,9 @@
 #include <fourcc.h>
 #undef THIS
 #define THIS VOID*
+
+#define MAX_FOURCC_CODES	3
+
 class OS2IDirectDraw
 {
   public:
@@ -189,5 +192,8 @@ HRESULT __stdcall D3DCreateLight(THIS, LPDIRECT3DLIGHT*, IUnknown*);
 HRESULT __stdcall D3DCreateMaterial(THIS, LPDIRECT3DMATERIAL*, IUnknown*);
 HRESULT __stdcall D3DCreateViewport(THIS, LPDIRECT3DVIEWPORT*, IUnknown*);
 HRESULT __stdcall D3DFindDevice(THIS, LPD3DFINDDEVICESEARCH, LPD3DFINDDEVICERESULT);
+
+#define FOURCC_YUY2  mmioFOURCC( 'Y', 'U', 'Y', '2' )
+#define FOURCC_UYVY  mmioFOURCC( 'U', 'Y', 'V', 'Y' )
 
 #endif

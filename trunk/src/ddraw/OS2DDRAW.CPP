@@ -1,4 +1,4 @@
-/* $Id: OS2DDRAW.CPP,v 1.21 2000-05-23 18:47:23 sandervl Exp $ */
+/* $Id: OS2DDRAW.CPP,v 1.22 2000-08-31 12:48:41 sandervl Exp $ */
 
 /*
  * DX Draw base class implementation
@@ -255,10 +255,47 @@ HRESULT __stdcall DrawQueryInterface(THIS This, REFIID riid, LPVOID FAR * ppvObj
      !IsEqualGUID(riid, IID_IDirectDraw) &&
      !IsEqualGUID(riid, IID_IDirectDraw2) &&
      !IsEqualGUID(riid, IID_IDirectDraw4) &&
-     !IsEqualGUID(riid, IID_IDirect3D))
-//&& !IsEqualGUID(riid, IID_IUnknown))
+     !IsEqualGUID(riid, IID_IDirect3D) &&
+     !IsEqualGUID(riid, IID_IUnknown))
   return E_NOINTERFACE;
 
+#if 1
+  if(IsEqualGUID(riid, IID_IUnknown)) {
+     *ppvObj = (LPVOID) This;
+     me->lpVtbl2 = me->lpVtbl;
+  }
+  else
+  if(IsEqualGUID(riid, IID_IDirect3D))
+  {
+     me->lpVtbl2 = (IDirectDraw4Vtbl *)&me->Vtbl3D;
+     *ppvObj = (LPVOID) &me->lpVtbl2;
+  }
+  else
+  {
+    if(IsEqualGUID(riid, IID_IDirectDraw4))
+    {
+      dprintf(("DDRAW: IID_IDirectDraw4 Interface\n"));
+      me->lpVtbl2 = (IDirectDraw4Vtbl *)&me->Vtbl4;
+      *ppvObj = (LPVOID) &me->lpVtbl2;
+    }
+    else
+    {
+      if(IsEqualGUID(riid, IID_IDirectDraw2))
+      {
+        dprintf(("DDRAW: IID_IDirectDraw2 Interface\n"));
+        me->lpVtbl2 = (IDirectDraw4Vtbl *)&me->Vtbl2;
+        *ppvObj = (LPVOID) &me->lpVtbl2;
+      }
+      else
+      {
+        dprintf(("DDRAW: IID_IDirectDraw Interface\n"));
+        me->lpVtbl2 = (IDirectDraw4Vtbl *)&me->Vtbl;
+        *ppvObj = (LPVOID) &me->lpVtbl;
+      }
+    }
+  }
+  DrawAddRef(This);
+#else
   // ToDo Better way of returning differnent intterfaces for same class
   if(IsEqualGUID(riid, IID_IDirect3D))
   {
@@ -288,6 +325,7 @@ HRESULT __stdcall DrawQueryInterface(THIS This, REFIID riid, LPVOID FAR * ppvObj
   me->lpVtbl2 = me->lpVtbl;
   *ppvObj = This;
   DrawAddRef(This);
+#endif
 
   return(DD_OK);
 }
@@ -888,13 +926,12 @@ HRESULT __stdcall DrawFlipToGDISurface(THIS)
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall DrawGetCaps(THIS, LPDDCAPS lpDDDriverCaps, LPDDCAPS lpDDHELCaps)
+HRESULT __stdcall DrawGetCaps(THIS This, LPDDCAPS lpDDDriverCaps, LPDDCAPS lpDDHELCaps)
 {
-  DWORD dwSize;
+ DWORD dwSize;
+ OS2IDirectDraw *me = (OS2IDirectDraw *)This;
 
-  #ifdef DEBUG
-    dprintf(("DDRAW: DDGetCaps of "));
-  #endif
+  dprintf(("DDRAW: DDGetCaps %x %x %x", This, lpDDDriverCaps, lpDDHELCaps));
 
   if( (NULL==lpDDDriverCaps) && (NULL==lpDDHELCaps) )
     return(DDERR_INVALIDPARAMS);
@@ -926,30 +963,35 @@ HRESULT __stdcall DrawGetCaps(THIS, LPDDCAPS lpDDDriverCaps, LPDDCAPS lpDDHELCap
 
     // Now report the CAPs back which we support
     lpDDDriverCaps->dwCaps = DDCAPS_BLT |              // We do blitting
+                             DDCAPS_BLTSTRETCH |
                              DDCAPS_BLTCOLORFILL |     // We do colorfills
+                             DDCAPS_BLTDEPTHFILL |
                              DDCAPS_COLORKEY |         // We support Colorkeying
                              DDCAPS_COLORKEYHWASSIST | // But we (may) use the CPU
                              DDCAPS_GDI |              // Maybe check if we are on Voodoo ?
-                             DDCAPS_PALETTEVSYNC;      // Got VSync
+                             DDCAPS_PALETTEVSYNC |     // Got VSync
+//                             DDCAPS_READSCANLINE |
+                             DDCAPS_BLTFOURCC;
 
     lpDDDriverCaps->dwCaps2 = DDCAPS2_CERTIFIED |         // Who cares so say yes
-                              //DDCAPS2_CANRENDERWINDOWED | // Better check for Voodoo ?!
+                              DDCAPS2_CANRENDERWINDOWED | // Better check for Voodoo ?!
                               DDCAPS2_COPYFOURCC |        // yepp memcpy will do this
                               DDCAPS2_NONLOCALVIDMEM |    // All surfaces are in memory
                               DDCAPS2_WIDESURFACES;       // Any size you want!
 
     lpDDDriverCaps->dwCKeyCaps = DDCKEYCAPS_SRCBLT;      // Only source transparent blitting
 
-//    lpDDDriverCaps->dwFXCaps = DDFXCAPS_BLTMIRRORUPDOWN; // DIVE supports this, do we also ?
+    lpDDDriverCaps->dwFXCaps = DDFXCAPS_BLTMIRRORUPDOWN |
+                               DDFXCAPS_BLTMIRRORLEFTRIGHT; // DIVE supports this, do we also ?
                                                          // Maybe later add stretching support?
 
     lpDDDriverCaps->dwPalCaps = DDPCAPS_8BIT |          // Only 8 Bits pals
                                 DDPCAPS_ALLOW256 |      // But all 256 colors
                                 DDPCAPS_VSYNC  |        // Vsync yet
                                 DDPCAPS_PRIMARYSURFACE; //
-    lpDDDriverCaps->dwVidMemTotal = 4096*1024;          // total video memory
-    lpDDDriverCaps->dwVidMemFree  = 4096*1024;          // total free video memory
-    lpDDDriverCaps->dwNumFourCCCodes;        // number of supported FOURCC codes
+    lpDDDriverCaps->dwVidMemTotal = me->dCaps.ulApertureSize;          // total video memory
+    lpDDDriverCaps->dwVidMemFree  = me->dCaps.ulApertureSize;          // total free video memory
+    lpDDDriverCaps->dwNumFourCCCodes = MAX_FOURCC_CODES;        // number of supported FOURCC codes
 /*
     ToDo: must finde out ow the array is used for this
     lpDDDriverCaps->dwRops[DD_ROP_SPACE] = SRCCOPY |
@@ -1051,8 +1093,7 @@ HRESULT __stdcall DrawGetCaps(THIS, LPDDCAPS lpDDDriverCaps, LPDDCAPS lpDDHELCap
     // Caller wants HEL Caps
     dprintf(("DDRAW:  HEL\n"));
 
-#if 1
-//SvL: PowerDVD uses size 316
+    //SvL: PowerDVD uses size 316
     if( (sizeof(DDCAPS)     != lpDDHELCaps->dwSize) &&
         (sizeof(DDCAPS_DX5) != lpDDHELCaps->dwSize) &&
         (sizeof(DDCAPS_DX3) != lpDDHELCaps->dwSize) )
@@ -1061,50 +1102,48 @@ HRESULT __stdcall DrawGetCaps(THIS, LPDDCAPS lpDDDriverCaps, LPDDCAPS lpDDHELCap
                 lpDDHELCaps->dwSize));
       return(DDERR_INVALIDPARAMS);
     }
-#else
-    if(sizeof(DDCAPS)!=lpDDHELCaps->dwSize)
-    {
-      dprintf(("DDRAW: Size Not Set\n"));
-      return(DDERR_INVALIDPARAMS);
-    }
-#endif
     // Clear structure so we only have to set the supported flags
 
-    dwSize = lpDDDriverCaps->dwSize;
-    memset( lpDDDriverCaps,
+    dwSize = lpDDHELCaps->dwSize;
+    memset( lpDDHELCaps,
             0,
-            lpDDDriverCaps->dwSize);
-
+            lpDDHELCaps->dwSize);
 
     // Reset the size
     lpDDHELCaps->dwSize = dwSize;
 
     // Now report the CAPs back which we support
     lpDDHELCaps->dwCaps = DDCAPS_BLT |              // We do blitting
-                             DDCAPS_BLTCOLORFILL |     // We do colorfills
-                             DDCAPS_COLORKEY |         // We support Colorkeying
-                             DDCAPS_COLORKEYHWASSIST | // But we (may) use the CPU
-                             DDCAPS_GDI |              // Maybe check if we are on Voodoo ?
-                             DDCAPS_PALETTEVSYNC;      // Got VSync
+                          DDCAPS_BLTCOLORFILL |     // We do colorfills
+                          DDCAPS_COLORKEY |         // We support Colorkeying
+//SvL: This is the emulation layer; no hw support here
+//                          DDCAPS_COLORKEYHWASSIST | // But we (may) use the CPU
+                          DDCAPS_GDI |              // Maybe check if we are on Voodoo ?
+                          DDCAPS_PALETTEVSYNC |     // Got VSync
+                          DDCAPS_BLTFOURCC;
 
     lpDDHELCaps->dwCaps2 = DDCAPS2_CERTIFIED |         // Who cares so say yes
-                              DDCAPS2_CANRENDERWINDOWED | // Better check for Voodoo ?!
-                              DDCAPS2_COPYFOURCC |        // yepp memcpy will do this
-                              DDCAPS2_NONLOCALVIDMEM |    // All surfaces are in memory
-                              DDCAPS2_WIDESURFACES;       // Any size you want!
+                           DDCAPS2_CANRENDERWINDOWED | // Better check for Voodoo ?!
+                           DDCAPS2_COPYFOURCC |        // yepp memcpy will do this
+                           DDCAPS2_NONLOCALVIDMEM |    // All surfaces are in memory
+                           DDCAPS2_WIDESURFACES;       // Any size you want!
 
     lpDDHELCaps->dwCKeyCaps = DDCKEYCAPS_SRCBLT;      // Only source transparent blitting
 
-//    lpDDDriverCaps->dwFXCaps = DDFXCAPS_BLTMIRRORUPDOWN; // DIVE supports this, do we also ?
+    lpDDHELCaps->dwFXCaps = DDFXCAPS_BLTMIRRORUPDOWN |
+                            DDFXCAPS_BLTMIRRORLEFTRIGHT; // DIVE supports this, do we also ?
                                                          // Maybe later add stretching support?
 
     lpDDHELCaps->dwPalCaps = DDPCAPS_8BIT |          // Only 8 Bits pals
-                                DDPCAPS_ALLOW256 |      // But all 256 colors
-                                DDPCAPS_VSYNC  |        // Vsync yet
-                                DDPCAPS_PRIMARYSURFACE; //
-    lpDDHELCaps->dwVidMemTotal = 2048*1024;           // total video memory
-    lpDDHELCaps->dwVidMemFree  = 2048*1024;            // total free video memory
-    lpDDHELCaps->dwNumFourCCCodes;        // number of supported FOURCC codes
+                             DDPCAPS_ALLOW256 |      // But all 256 colors
+                             DDPCAPS_VSYNC  |        // Vsync yet
+                             DDPCAPS_PRIMARYSURFACE;
+
+    //Video memory for emulation layer must be 0 (verified in NT)
+    lpDDHELCaps->dwVidMemTotal = 0;           // total video memory
+    lpDDHELCaps->dwVidMemFree  = 0;           // total free video memory
+
+    lpDDHELCaps->dwNumFourCCCodes = MAX_FOURCC_CODES;        // number of supported FOURCC codes
     lpDDHELCaps->dwRops[DD_ROP_SPACE];    // supported raster ops
     lpDDHELCaps->dwSVBCaps = DDCAPS_BLT |              // We do blitting
                                 DDCAPS_BLTCOLORFILL |     // We do colorfills
@@ -1130,19 +1169,19 @@ HRESULT __stdcall DrawGetCaps(THIS, LPDDCAPS lpDDDriverCaps, LPDDCAPS lpDDHELCap
     // These are ony in >DX5
     if(dwSize>sizeof(DDCAPS_DX3))
     {
-    	lpDDHELCaps->dwSVBCaps2 = DDCAPS2_CANRENDERWINDOWED | // Better check for Voodoo ?!
-	                          DDCAPS2_COPYFOURCC |        // yepp memcpy will do this
-	                          DDCAPS2_WIDESURFACES;       // Any size you want!
-    	lpDDHELCaps->dwNLVBCaps = DDCAPS_BLT |              // We do blitting
+      lpDDHELCaps->dwSVBCaps2 = DDCAPS2_CANRENDERWINDOWED | // Better check for Voodoo ?!
+                            DDCAPS2_COPYFOURCC |        // yepp memcpy will do this
+                            DDCAPS2_WIDESURFACES;       // Any size you want!
+      lpDDHELCaps->dwNLVBCaps = DDCAPS_BLT |              // We do blitting
                                   DDCAPS_BLTCOLORFILL |     // We do colorfills
                                   DDCAPS_COLORKEY |         // We support Colorkeying
                                   DDCAPS_COLORKEYHWASSIST;
-    	lpDDHELCaps->dwNLVBCaps2 = DDCAPS2_CANRENDERWINDOWED | // Better check for Voodoo ?!
+      lpDDHELCaps->dwNLVBCaps2 = DDCAPS2_CANRENDERWINDOWED | // Better check for Voodoo ?!
                                    DDCAPS2_COPYFOURCC |        // yepp memcpy will do this
                                    DDCAPS2_WIDESURFACES;       // Any size you want!
-    	lpDDHELCaps->dwNLVBCKeyCaps = DDCKEYCAPS_SRCBLT;      // Only source transparent blitting
-    	lpDDHELCaps->dwNLVBFXCaps;            //  .
-    	lpDDHELCaps->dwNLVBRops[DD_ROP_SPACE];//  .
+      lpDDHELCaps->dwNLVBCKeyCaps = DDCKEYCAPS_SRCBLT;      // Only source transparent blitting
+      lpDDHELCaps->dwNLVBFXCaps;            //  .
+      lpDDHELCaps->dwNLVBRops[DD_ROP_SPACE];//  .
     }
 
   }
@@ -1154,9 +1193,8 @@ HRESULT __stdcall DrawGetCaps(THIS, LPDDCAPS lpDDDriverCaps, LPDDCAPS lpDDHELCap
 HRESULT __stdcall DrawGetDisplayMode(THIS This, LPDDSURFACEDESC lpDDSurfaceDesc)
 {
   OS2IDirectDraw        *me = (OS2IDirectDraw *)This;
-  #ifdef DEBUG
-    dprintf(("DDRAW: GetDisplayMode\n"));
-  #endif
+
+  dprintf(("DDRAW: GetDisplayMode %x %x", This, lpDDSurfaceDesc));
 
   // Check Parameter
   if(NULL==lpDDSurfaceDesc)
@@ -1270,9 +1308,8 @@ HRESULT __stdcall DrawGetDisplayMode(THIS This, LPDDSURFACEDESC lpDDSurfaceDesc)
 HRESULT __stdcall DrawGetDisplayMode4(THIS This, LPDDSURFACEDESC2 lpDDSurfaceDesc2)
 {
   OS2IDirectDraw        *me = (OS2IDirectDraw *)This;
-  #ifdef DEBUG
-    dprintf(("DDRAW: GetDisplayMode\n"));
-  #endif
+
+  dprintf(("DDRAW: GetDisplayMode4 %x %x", This, lpDDSurfaceDesc2));
 
   // Check Parameter
   if(NULL==lpDDSurfaceDesc2)
@@ -1383,29 +1420,28 @@ HRESULT __stdcall DrawGetDisplayMode4(THIS This, LPDDSURFACEDESC2 lpDDSurfaceDes
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall DrawGetFourCCCodes(THIS, LPDWORD lpNumCodes, LPDWORD lpCodes)
+HRESULT __stdcall DrawGetFourCCCodes(THIS This, LPDWORD lpNumCodes, LPDWORD lpCodes)
 {
-  DWORD dwFCC[3] = {FOURCC_LUT8,FOURCC_R565,FOURCC_RGB3};
-  #ifdef DEBUG
-    dprintf(("DDRAW: GetFourCCCodes\n"));
-  #endif
+//  DWORD dwFCC[MAX_FOURCC_CODES] = {FOURCC_LUT8,FOURCC_R565,FOURCC_RGB3,FOURCC_YUY2};
+  DWORD dwFCC[MAX_FOURCC_CODES] = {FOURCC_LUT8,FOURCC_R565,FOURCC_RGB3};
+
+  dprintf(("DDRAW: GetFourCCCodes %x %x %x", This, lpNumCodes, lpCodes));
 
   if(NULL==lpNumCodes)
     return(DDERR_INVALIDPARAMS);
 
   if(NULL==lpCodes)
   {
-    *lpNumCodes = 3; // LUT8, R565, RGB3 are the FourCC we support for now
+    *lpNumCodes = MAX_FOURCC_CODES; // LUT8, R565, RGB3 are the FourCC we support for now
   }
   else
   {
-    for(int i=0;(i<3)&&(i<*lpNumCodes);i++)
+    for(int i=0;(i<MAX_FOURCC_CODES)&&(i<*lpNumCodes);i++)
     {
       *lpCodes = dwFCC[i];
-      lpCodes +=4;
+      lpCodes++;
     }
-    if(*lpNumCodes < 3)
-      *lpNumCodes = 3;
+    *lpNumCodes = MAX_FOURCC_CODES;
   }
   return(DD_OK);
 }
