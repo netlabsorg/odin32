@@ -1,3 +1,4 @@
+#/* $Id: makefile,v 1.2 1999-08-22 22:08:47 sandervl Exp $ */
 #
 # PD-Win32 API 
 #

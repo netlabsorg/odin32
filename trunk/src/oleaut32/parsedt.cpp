@@ -1,3 +1,4 @@
+/* $Id: parsedt.cpp,v 1.2 1999-08-22 22:08:48 sandervl Exp $ */
 /*
 PostgreSQL Data Base Management System (formerly known as Postgres, then
 as Postgres95).

@@ -1,3 +1,4 @@
+/* $Id: guid.cpp,v 1.2 1999-08-22 22:08:47 sandervl Exp $ */
 #define INITGUID 1
 /* 
  * GUIDs for OLEAUT32
