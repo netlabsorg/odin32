@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.395 1999-11-02 19:04:47 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.396 1999-11-02 20:35:01 sandervl Exp $ */
 
  99-11-02: Sander van Leeuwen <sandervl@xs4all.nl>
 	- INCLUDE\odinwrap.h: 
@@ -10,7 +10,7 @@
                    arrive before the dialog received it's WM_INITDIALOG msg)
                   Fixed more FS corruption in dc.cpp.
 	- SHELL32: Added extra exports for comdlg32
-	- COMDLG32: Ported Wine file & find common dialogs (990815)
+	- COMDLG32: Ported Wine file & find common dialogs (991031)
                     Find & Replace dialogs enabled, Wine code called for
                     file dialogs if the app supplies a dialog template.
                     NOTE: Disabled for now. Comctl32 isn't stable enough
