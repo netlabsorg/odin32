@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.6 1999-07-18 13:57:47 cbratschi Exp $ */
+/* $Id: user32.cpp,v 1.7 1999-07-18 14:56:36 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -382,7 +382,6 @@ BOOL WIN32API InvalidateRect(HWND hWnd, const RECT *lpRect, BOOL bErase)
 //******************************************************************************
 BOOL WIN32API GetUpdateRect( HWND hWnd, PRECT lpRect, BOOL  bErase)
 {
-    OSRECTL rect;
     ULONG windowH;
     BOOL rc;
 
@@ -390,11 +389,9 @@ BOOL WIN32API GetUpdateRect( HWND hWnd, PRECT lpRect, BOOL  bErase)
     WriteLog("USER32:  GetUpdateRect\n");
 #endif
     if (!lpRect) return FALSE;
+
     hWnd = Win32ToOS2Handle(hWnd);
-    rc = OSLibWinQueryUpdateRect(hWnd,&rect);
-    windowH = OSLibGetWindowHeight(hWnd);
-    OS2ToWin32Rect(lpRect,&rect,windowH);
-    return rc;
+    return OSLibWinQueryUpdateRect(hWnd, (PVOID)&lpRect);
 }
 //******************************************************************************
 //******************************************************************************
