@@ -1,4 +1,4 @@
-/* $Id: kobjects.cpp,v 1.15 2002-02-09 17:27:32 sandervl Exp $ */
+/* $Id: kobjects.cpp,v 1.16 2003-02-04 11:29:01 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -743,6 +743,16 @@ BOOL WIN32API GetThreadContext(HANDLE hThread, PCONTEXT lpContext)
 BOOL WIN32API SetThreadContext(HANDLE hThread, const CONTEXT *lpContext)
 {
   return HMSetThreadContext(hThread, lpContext);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API GetThreadTimes(HANDLE     hThread,
+                             LPFILETIME lpCreationTime,
+                             LPFILETIME lpExitTime,
+                             LPFILETIME lpKernelTime,
+                             LPFILETIME lpUserTime)
+{
+  return HMGetThreadTimes(hThread, lpCreationTime, lpExitTime, lpKernelTime, lpUserTime);
 }
 //******************************************************************************
 //******************************************************************************

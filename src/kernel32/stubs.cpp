@@ -1,4 +1,4 @@
-/* $Id: stubs.cpp,v 1.37 2003-01-10 12:57:14 sandervl Exp $
+/* $Id: stubs.cpp,v 1.38 2003-02-04 11:29:02 sandervl Exp $
  *
  * Win32 KERNEL32 Subsystem for OS/2
  *
@@ -1060,37 +1060,6 @@ BOOL WIN32API GetThreadSelectorEntry(HANDLE      hThread,
 }
 
 
-/*****************************************************************************
- * Name      : BOOL GetThreadTimes
- * Purpose   : The GetThreadTimes function obtains timing information about a specified thread.
- * Parameters: HANDLE     hThread       specifies the thread of interest
- *             LPFILETIME lpCreationTime when the thread was created
- *             LPFILETIME lpExitTime     when the thread exited
- *             LPFILETIME lpKernelTime   time the thread has spent in kernel mode
- *             LPFILETIME lpUserTime     time the thread has spent in user mode
- * Variables :
- * Result    : TRUE / FALSE
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
- *****************************************************************************/
-
-BOOL WIN32API GetThreadTimes(HANDLE     hThread,
-                                LPFILETIME lpCreationTime,
-                                LPFILETIME lpExitTime,
-                                LPFILETIME lpKernelTime,
-                                LPFILETIME lpUserTime)
-{
-  dprintf(("Kernel32: GetThreadTimes(%08xh,%08xh,%08xh,%08xh,%08xh) not implemented.\n",
-           hThread,
-           lpCreationTime,
-           lpExitTime,
-           lpKernelTime,
-           lpUserTime));
-
-  return (FALSE);
-}
 
 
 

@@ -1,4 +1,4 @@
-/* $Id: hmfile.h,v 1.8 2003-01-10 12:57:13 sandervl Exp $ */
+/* $Id: hmfile.h,v 1.9 2003-02-04 11:28:58 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -55,7 +55,7 @@ public:
                              OFSTRUCT*     pOFStruct,
                              UINT          fuMode);
 
-  virtual BOOL DuplicateHandle(PHMHANDLEDATA pHMHandleData, HANDLE  srcprocess,
+  virtual BOOL DuplicateHandle(HANDLE srchandle, PHMHANDLEDATA pHMHandleData, HANDLE  srcprocess,
                                PHMHANDLEDATA pHMSrcHandle,
                                HANDLE  destprocess,
                                PHANDLE desthandle,
