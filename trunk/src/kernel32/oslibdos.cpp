@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.58 2001-02-19 18:12:20 bird Exp $ */
+/* $Id: oslibdos.cpp,v 1.59 2001-02-19 22:07:21 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -293,7 +293,40 @@ DWORD OSLibDosAliasMem(LPVOID pb, ULONG cb, LPVOID *ppbAlias, ULONG fl)
 //******************************************************************************
 //NT returns addresses aligned at 64k, so we do too.
 //******************************************************************************
-DWORD OSLibDosAllocMem(LPVOID *lplpMemAddr, DWORD cb, DWORD flFlags)
+// tries to retrieve an aligned block recursivly
+APIRET OdinAlignMemR(LPVOID *lpMemAddr, DWORD size, DWORD offset, DWORD flags)
+{
+  LPVOID memaddr;
+  APIRET rc, rc2;
+
+  DosEnterCritSec();
+  DosFreeMem(*lpMemAddr);
+  rc2 = DosAllocMem(&memaddr, 64 * 1024 - offset, PAG_READ | flAllocMem);
+  rc  = DosAllocMem(lpMemAddr, size, flags | flAllocMem);
+  DosExitCritSec();
+
+  dprintf2(("OdinAlignMem: DosAllocMem returned %d, %d  and pointers %x, %x for size %x and offset %x", rc, rc2, *lpMemAddr, memaddr, size, offset ));
+
+  if(rc2) {
+    // giving up - return as received
+    return rc;
+  }
+
+  if(rc) {
+    // seems to be out of memory
+    DosFreeMem(memaddr);
+    return rc;
+  }
+
+  if((DWORD) *lpMemAddr & 0xFFFF)
+    rc = OdinAlignMemR(lpMemAddr, size, (DWORD) *lpMemAddr & 0xFFFF, flags);
+
+  DosFreeMem(memaddr);
+  return rc;
+}
+//******************************************************************************
+//******************************************************************************
+DWORD OSLibDosAllocMem(LPVOID *lplpMemAddr, DWORD cbSize, DWORD flFlags)
 {
     PVOID   pvMemAddr;
     DWORD   offset;
@@ -304,7 +337,7 @@ DWORD OSLibDosAllocMem(LPVOID *lplpMemAddr, DWORD cb, DWORD flFlags)
      */
     if (libWin32kInstalled())
     {
-        rc = DosAllocMemEx(lplpMemAddr, cb, flFlags | flAllocMem | OBJ_ALIGN64K);
+        rc = DosAllocMemEx(lplpMemAddr, cbSize, flFlags | flAllocMem | OBJ_ALIGN64K);
         if (rc != ERROR_NOT_SUPPORTED)  /* This call was stubbed until recently. */
             return rc;
     }
@@ -312,32 +345,20 @@ DWORD OSLibDosAllocMem(LPVOID *lplpMemAddr, DWORD cb, DWORD flFlags)
     /*
      * If no or old Win32k fall back to old method.
      */
-    rc = DosAllocMem(&pvMemAddr, cb, PAG_READ | flAllocMem);
-    if (rc)
-    {
+
+    rc = DosAllocMem(&pvMemAddr, cbSize, flFlags | flAllocMem);
+    if(rc) {
         return rc;
     }
-    DosEnterCritSec();
-    DosFreeMem(pvMemAddr);
-    offset = (DWORD)pvMemAddr & 0xFFFF;
-    if (offset)
-    {
-        DosAllocMem(&pvMemAddr, 64*1024 - offset, PAG_READ | flAllocMem);
-    }
-    rc = DosAllocMem(lplpMemAddr, cb, flFlags | flAllocMem);
-    DosExitCritSec();
-    if ((DWORD)*lplpMemAddr & 0xFFFF)
-    {   //still not at 64k boundary?
-        DosFreeMem(*lplpMemAddr);
-        rc = OSLibDosAllocMem(lplpMemAddr, cb, flFlags);
-    }
-    if (offset)
-    {
-        DosFreeMem(pvMemAddr);
-    }
 
+    // already 64k aligned ?
+    if((DWORD) pvMemAddr & 0xFFFF)
+        rc = OdinAlignMemR(&pvMemAddr, cbSize, (DWORD) pvMemAddr & 0xFFFF, flFlags);
 
-    return rc;
+    if(!rc)
+        *lplpMemAddr = pvMemAddr;
+
+    return rc; 
 }
 //******************************************************************************
 //******************************************************************************
