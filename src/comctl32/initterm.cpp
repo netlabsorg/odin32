@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.10 2000-08-11 10:56:12 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.11 2001-02-09 18:31:38 sandervl Exp $ */
 /*
  * COMCTL32 DLL entry point
  *
@@ -55,6 +55,8 @@ BOOL WINAPI LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
    switch (fdwReason)
    {
    case DLL_PROCESS_ATTACH:
+        /* register Win32 window classes implemented in this DLL */
+        RegisterCOMCTL32WindowClasses(hinstDLL);
 	return TRUE;
 
    case DLL_THREAD_ATTACH:
@@ -106,9 +108,6 @@ unsigned long _System _DLL_InitTerm(unsigned long hModule, unsigned long
 		return 0UL;
 
          CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
-
-         /* register Win32 window classes implemented in this DLL */
-         RegisterCOMCTL32WindowClasses(dllHandle);
 
          break;
       case 1 :
