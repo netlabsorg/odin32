@@ -1,4 +1,4 @@
-/* $Id: windowmsg.cpp,v 1.37 2002-08-01 16:10:51 sandervl Exp $ */
+/* $Id: windowmsg.cpp,v 1.38 2002-08-05 09:45:49 sandervl Exp $ */
 /*
  * Win32 window message APIs for OS/2
  *
@@ -883,11 +883,13 @@ DWORD WIN32API MsgWaitForMultipleObjects(DWORD nCount, LPHANDLE pHandles, BOOL f
         return ret;
     }
     if(dwMilliseconds == 0) { //case 2
-        //TODO: what has a higher priority; message presence or signalled object?
-        if(GetQueueStatus(dwWakeMask) == 0) {
-            if(nCount) {
-                return WaitForMultipleObjects(nCount, pHandles, fWaitAll, dwMilliseconds);
+        if(nCount) {
+            ret = WaitForMultipleObjects(nCount, pHandles, fWaitAll, dwMilliseconds);
+            if(ret < WAIT_OBJECT_0 + nCount) {
+                return ret;
             }
+        }
+        if(GetQueueStatus(dwWakeMask) == 0) {
             return WAIT_TIMEOUT;
         }
         return WAIT_OBJECT_0 + nCount;  //right message has arrived
@@ -933,6 +935,11 @@ DWORD WIN32API MsgWaitForMultipleObjects(DWORD nCount, LPHANDLE pHandles, BOOL f
        DebugInt3();
        return WAIT_ABANDONED;
     }
+    //check if any object is already signalled
+    ret = WaitForMultipleObjects(nCount, pHandles, fWaitAll, 0);
+    if(ret < WAIT_OBJECT_0 + nCount) {
+        return ret;
+    }
     //if the msg queue already contains the messages defined by dwWakeMask,
     //then return immediately
     if(GetQueueStatus(dwWakeMask) != 0) {
@@ -946,12 +953,17 @@ DWORD WIN32API MsgWaitForMultipleObjects(DWORD nCount, LPHANDLE pHandles, BOOL f
         }
         memcpy(pHandlesTmp, pHandles, nCount*sizeof(HANDLE));
         pHandlesTmp[nCount] = teb->o.odin.hPostMsgEvent;
+
+        //mark this thread as waiting for window messages
         teb->o.odin.dwWakeMask = dwWakeMask;
 
         ResetEvent(teb->o.odin.hPostMsgEvent);
         ret = HMMsgWaitForMultipleObjects(nCount+1,pHandlesTmp,fWaitAll,dwMilliseconds,dwWakeMask);
-        //nCount + 2 -> message event -> return nCount + 1
+
+        //unmark thread
         teb->o.odin.dwWakeMask = 0;
+
+        //nCount + 2 -> message event -> return nCount + 1
         return (ret == nCount + 2) ? (nCount + 1) : ret;
     }
     //Call handlemanager function as we need to translate handles (KERNEL32)
