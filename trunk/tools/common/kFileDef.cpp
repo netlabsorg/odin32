@@ -1,4 +1,4 @@
-/* $Id: kFileDef.cpp,v 1.8 2002-02-24 02:47:25 bird Exp $
+/* $Id: kFileDef.cpp,v 1.9 2002-05-01 03:58:36 bird Exp $
  *
  * kFileDef - Definition files.
  *
@@ -643,12 +643,13 @@ KBOOL kFileDef::exportLookup(const char *  pszName, kExportEntry *pExport)
  * @returns Success indicator.
  * @param   pFile   File which we're to write to (append).
  *                  Appends at current posistion.
+ * @param   enmOS   The target OS of the link operation.
  * @sketch
  * @status
  * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  * @remark
  */
-KBOOL kFileDef::makeWatcomLinkFileAddtion(kFile *pOut)
+KBOOL kFileDef::makeWatcomLinkFileAddtion(kFile *pOut, int enmOS)
 {
     PDEFSEGMENT pSeg;
     PDEFIMPORT  pImp;
@@ -661,15 +662,34 @@ KBOOL kFileDef::makeWatcomLinkFileAddtion(kFile *pOut)
     pOut->printf("#\n# Directives generated from .DEF-file.\n#\n");
 
     /* Format - Module type */
-    pOut->printf("FORMAT OS2 LX %s %s %s\n",
-                  fLibrary                               ? "DLL" :
-                    (fProgram ? (chAppType == pm         ? "PM"
-                              : (chAppType == fullscreen ? "FULLSCREEN"
-                                                         : "PMCOMPATIBLE"))
-                    : (fVirtualDevice                    ? "VIRTDEVICE"
-                                                         : "PHYSDEVICE" )),
-                  fLibrary ? (fInitGlobal ? "INITGLOBAL" : "INITINSTANCE") : "",
-                  fLibrary ? (fTermGlobal ? "TERMGLOBAL" : "TERMINSTANCE") : "");
+    switch (enmOS)
+    {
+        case kFileDef::os2:
+            pOut->printf("FORMAT OS2 LX %s %s %s\n",
+                          fLibrary                               ? "DLL" :
+                            (fProgram ? (chAppType == pm         ? "PM"
+                                      : (chAppType == fullscreen ? "FULLSCREEN"
+                                                                 : "PMCOMPATIBLE"))
+                            : (fVirtualDevice                    ? "VIRTDEVICE"
+                                                                 : "PHYSDEVICE" )),
+                          fLibrary ? (fInitGlobal ? "INITGLOBAL" : "INITINSTANCE") : "",
+                          fLibrary ? (fTermGlobal ? "TERMGLOBAL" : "TERMINSTANCE") : "");
+            break;
+
+        case kFileDef::win32:
+            if (fLibrary)
+                pOut->printf("FORMAT Window NT DLL %s %s\n"
+                             "Runtime Windows\n",
+                             fLibrary ? (fInitGlobal ? "INITGLOBAL" : "INITINSTANCE") : "",
+                             fLibrary ? (fTermGlobal ? "TERMGLOBAL" : "TERMINSTANCE") : "");
+            else
+                pOut->printf("FORMAT Window NT\n"
+                             "Runtime %s\n",
+                             fProgram ? chAppType == pm  ? "Windows" : "Console" : "Native");
+            break;
+        default:
+            return FALSE;
+    }
 
 
     /* Module name */
@@ -693,7 +713,7 @@ KBOOL kFileDef::makeWatcomLinkFileAddtion(kFile *pOut)
         pOut->printf("OPTION OLDLIBRARY=%s\n", pszOld);
 
     /* Protected mode */
-    if (pszProtmode)
+    if (pszProtmode && (enmOS == kFileDef::os2))
         pOut->printf("OPTION PROTMODE\n", pszProtmode);
 
     /* Stacksize */
@@ -742,7 +762,7 @@ KBOOL kFileDef::makeWatcomLinkFileAddtion(kFile *pOut)
             pOut->printf(".%d", pExp->ulOrdinal);
         if (pExp->pszIntName)
             pOut->printf("='%s'", pExp->pszIntName);
-        if (pExp->fResident)
+        if (pExp->fResident && (enmOS == kFileDef::os2 || enmOS == kFileDef::win16))
             pOut->printf(" RESIDENT");
         if (pExp->cParam != ~0UL)
             pOut->printf(" %d", pExp->cParam * 2); /* .DEFs this is number of words. Watcom should have bytes. */

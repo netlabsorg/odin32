@@ -131,9 +131,10 @@ class kFileDef : public kExportI, public kFileFormatBase, public kModuleI
         char const *queryStub(void) const        { return pszStub;        }
 
         /**@cat Operations */
-        KBOOL       makeWatcomLinkFileAddtion(kFile *pFile) throw(kError);
+        KBOOL       makeWatcomLinkFileAddtion(kFile *pFile, int enmOS) throw(kError);
 
         enum {fullscreen = 0, pmvio = 2, pm = 3, unknown = 255};
+        enum {os2, dos, win32, win16, nlm, qnx, elf};
 };
 
 #endif

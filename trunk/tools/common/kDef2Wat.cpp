@@ -1,4 +1,4 @@
-/* $Id: kDef2Wat.cpp,v 1.3 2002-02-24 02:47:23 bird Exp $
+/* $Id: kDef2Wat.cpp,v 1.4 2002-05-01 03:58:36 bird Exp $
  *
  * Converter for IBM/MS linker definition files (.DEF) to Watcom linker directives and options.
  *
@@ -19,6 +19,9 @@
 #include "kFileInterfaces.h"
 #include "kFileFormatBase.h"
 #include "kFileDef.h"
+
+#include <stdio.h>
+#include <string.h>
 
 /*******************************************************************************
 *   Internal Functions                                                         *
@@ -41,16 +44,39 @@ int main(int argc, char **argv)
     const char *pszInput;
     const char *pszOutput;
     const char *pszAppend;
+    const char *pszOS;
+    int         enmOS;
 
     /* check arguments */
-    if (argc != 3 && argc != 4)
+    if (argc != 4 && argc != 5)
     {
         syntax();
         return -1;
     }
-    pszInput  = argv[1];
-    pszOutput = argv[2];
-    pszAppend = (argc == 4) ? argv[3] : NULL;
+    pszOS     = argv[1];
+    pszInput  = argv[2];
+    pszOutput = argv[3];
+    pszAppend = (argc == 5) ? argv[4] : NULL;
+    if (!stricmp(pszOS, "os2"))
+        enmOS = kFileDef::os2;
+    else if (!stricmp(pszOS, "dos"))
+        enmOS = kFileDef::dos;
+    else if (!stricmp(pszOS, "win32"))
+        enmOS = kFileDef::win32;
+    else if (!stricmp(pszOS, "win16"))
+        enmOS = kFileDef::win16;
+    else if (!stricmp(pszOS, "nlm"))
+        enmOS = kFileDef::nlm;
+    else if (!stricmp(pszOS, "qnx"))
+        enmOS = kFileDef::qnx;
+    else if (!stricmp(pszOS, "elf"))
+        enmOS = kFileDef::elf;
+    else
+    {
+        printf("Invalid os string '%s'.\n", pszOS);
+        syntax();
+        return -1;
+    }
 
     /*
      *
@@ -63,7 +89,7 @@ int main(int argc, char **argv)
             kFile   OutFile(pszOutput, FALSE);
             OutFile.end();
 
-            def.makeWatcomLinkFileAddtion(&OutFile);
+            def.makeWatcomLinkFileAddtion(&OutFile, enmOS);
             if (pszAppend)
             {
                 try
@@ -102,16 +128,17 @@ int main(int argc, char **argv)
 static void syntax(void)
 {
     kFile::StdOut.printf(
-        "kDef2Wat v0.0.0 (untested)\n"
+        "kDef2Wat v0.0.1\n"
         "\n"
-        "syntax: kDef2Wat.exe <def-file> <wlink-file> [extra-file]\n"
+        "syntax: kDef2Wat.exe <os> <def-file> <wlink-file> [extra-file]\n"
         "\n"
         "Where:\n"
+        "    <os>           Target os. os2, dos, win32, win16, nlm, qnx or elf.\n"
         "    <def-file>     The .DEF file to convert.\n"
         "    <wlink-file>   The WLINK directive and option file.\n"
         "    [extra-file]   Extra file with directives which should be appended to\n"
         "                   the wlink-file\n"
         "\n"
-        "Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)\n"
+        "Copyright (c) 2000-2002 knut st. osmundsen (bird@anduin.net)\n"
         );
 }
