@@ -1,9 +1,45 @@
-/* $Id: ChangeLog,v 1.2735 2004-10-08 08:50:10 cinc Exp $ */
+/* $Id: ChangeLog,v 1.2736 2004-10-08 09:21:07 cinc Exp $ */
 
 2004-10-08: Chris Wohlgemuth <cinc@innotek.de>
     - KERNEL32: Added RegOpenCurrentUser() to registry.cpp.
     - OLE32:    ifs.c, Added some more comprehensive debug output to the IMalloc interface.
                 compobj.c, Added stub for CLSIDFromProgIDEx().
+    - OLEAUT32: o Added VT_R8 support to VarCmp (SvL)
+    - OLEAUT32: o Rewrote VarNumFromParseNum()
+                o Added VarDecFromStr() from Wine.
+                o VarParseNumFromStr() updated with Wine code
+                o Updated DECIMAL struct (include\win\windef.h) to Wine level.
+                o updated V_DECIMAL(A) macro (oleaut.h) to Wine level.
+    - OLEAUT32: variant.c, Added stubs for:
+                VarDecAdd()
+                VarDecMul()
+                VarDecSub()
+                VarDecAbs()
+                VarDecFix()
+                VarDecInt()
+                VarDecNeg()
+                VarDecRound()
+                VarDecCmp()
+                VarDecCmpR8()
+                VarOr()
+                VarNeg()
+                VarEqv()
+                VarIdiv()
+                VarAbs()
+                VarMod()
+                VarImp()
+                VarFix()
+                VarRound()
+                VarInt()
+                VarFormatNumber()
+                VarFormatPercent()
+                VarWeekdayName()
+                VarMonthName()
+
+            Added from Wine:
+                VarPow()
+                VarXor()
+                VarAdd()
 
 2004-09-23: Chris Wohlgemuth <cinc@innotek.de>
     -SHLWAPI:   Fix for PathSetDlgItemPathW() by D. Teickner so import of reg files with
