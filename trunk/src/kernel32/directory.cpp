@@ -1,4 +1,4 @@
-/* $Id: directory.cpp,v 1.46 2002-04-29 17:05:29 sandervl Exp $ */
+/* $Id: directory.cpp,v 1.47 2003-01-03 16:34:33 sandervl Exp $ */
 
 /*
  * Win32 Directory functions for OS/2
@@ -105,7 +105,7 @@ void InitDirectories()
 }
 //*****************************************************************************
 //*****************************************************************************
-void InitDirectoriesCustom(char *szSystemDir, char *szWindowsDir)
+void WIN32API InitDirectoriesCustom(char *szSystemDir, char *szWindowsDir)
 {
    int len;
 

@@ -1,4 +1,4 @@
-/* $Id: profile.cpp,v 1.34 2002-02-10 13:12:51 sandervl Exp $ */
+/* $Id: profile.cpp,v 1.35 2003-01-03 16:34:33 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -987,7 +987,7 @@ int WIN32API PROFILE_SetOdinIniBool(LPCSTR section, LPCSTR key_name, int value)
  *
  * Load the odin.ini file.
  */
-int WIN32API PROFILE_LoadOdinIni()
+int WINAPI PROFILE_LoadOdinIni()
 {
     char buffer[MAX_PATHNAME_LEN];
     const char *p;
@@ -1027,7 +1027,7 @@ int WIN32API PROFILE_LoadOdinIni()
 
 static BOOL fDisableOdinIni = FALSE;
 
-void DisableOdinIni()
+void WIN32API DisableOdinIni()
 {
     fDisableOdinIni = TRUE;
 }
