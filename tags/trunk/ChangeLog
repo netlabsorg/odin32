@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.603 2000-01-02 22:12:25 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.604 2000-01-02 22:53:18 sandervl Exp $ */
+
+ 2000-01-02: Przemyslaw Dobrowolski <dobrawka@asua.org.pl>
+	- KERNEL32: Started implementing named pipe apis
 
  2000-01-02: David Raison <djr@lemur.co.uk>
         - OLEAUT32: Typelib fixes - Custom Data & Default values.
@@ -14,6 +17,7 @@
 	- USER32: Implemented Set/GetWindowRgn (not activated)
 	- KERNEL32: Fixed Odin zombie processes when there's a trap inside
                     vfprintf during logging.
+                    Cleaned up file io procedures in oslibdos.cpp
 
  2000-01-01: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Workaround for crash in Lotus Notes when switching to a new
