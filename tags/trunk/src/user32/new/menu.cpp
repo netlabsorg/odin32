@@ -1,4 +1,4 @@
-/* $Id: menu.cpp,v 1.6 2000-01-11 13:06:24 sandervl Exp $*/
+/* $Id: menu.cpp,v 1.7 2000-01-11 17:34:42 cbratschi Exp $*/
 /*
  * Menu functions
  *
@@ -19,12 +19,6 @@
  * have been selected, i.e. their popup menu is currently displayed.
  * This is probably not the meaning this style has in MS-Windows.
  */
-
-/*
- CB: not yet implemented:
- - Win32BaseWindow handling
- - message functions
-*/
 
 #include <assert.h>
 #include <ctype.h>
@@ -1084,13 +1078,13 @@ static void MENU_DrawMenuItem( HWND hwnd, HMENU hmenu, HWND hwndOwner, HDC hdc, 
         else
             FillRect( hdc, &rect, GetSysColorBrush(COLOR_HIGHLIGHT) );
     else {
-	//SvL: TODO: Bug in GDI32; draws black rectangle instead of menu color
+        //SvL: TODO: Bug in GDI32; draws black rectangle instead of menu color
         ///          for everything except the 1st menu item
-	RECT dummy = rect;
-	dummy.bottom = dummy.top+1;
-	dummy.right  = dummy.right+1;
-	FillRect( hdc, &dummy, GetSysColorBrush(COLOR_HIGHLIGHT) );
-	FillRect( hdc, &rect, GetSysColorBrush(COLOR_MENU) );
+        RECT dummy = rect;
+        dummy.bottom = dummy.top+1;
+        dummy.right  = dummy.right+1;
+        FillRect( hdc, &dummy, GetSysColorBrush(COLOR_HIGHLIGHT) );
+        FillRect( hdc, &rect, GetSysColorBrush(COLOR_MENU) );
     }
 
     SetBkMode( hdc, TRANSPARENT );
@@ -1788,7 +1782,7 @@ static MENUITEM *MENU_InsertItem( HMENU hMenu, UINT pos, UINT flags )
 
     /* Find where to insert new item */
 
-    if ((pos==(UINT)-1) || ((flags & MF_BYPOSITION) && (pos == menu->nItems))) 
+    if ((pos==(UINT)-1) || ((flags & MF_BYPOSITION) && (pos == menu->nItems)))
     {
         /* Special case: append to menu */
         /* Some programs specify the menu length to do that */
@@ -2122,8 +2116,8 @@ static HMENU MENU_PtMenu( HMENU hMenu, POINT pt )
    if( !ht )    /* check the current window (avoiding WM_HITTEST) */
    {
         Win32BaseWindow *win32wnd = Win32BaseWindow::GetWindowFromHandle(menu->hWnd);
-	if(win32wnd==NULL)
-		DebugInt3();
+        if(win32wnd==NULL)
+                DebugInt3();
 
         ht = win32wnd->HandleNCHitTest(pt);
         if( menu->wFlags & MF_POPUP )

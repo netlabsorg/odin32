@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.23 2000-01-10 23:37:24 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.24 2000-01-11 17:34:44 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -55,6 +55,38 @@ typedef struct
 
 #define BROADCAST_SEND          0
 #define BROADCAST_POST          1
+
+#define HAS_DLGFRAME(style,exStyle) \
+    (((exStyle) & WS_EX_DLGMODALFRAME) || \
+     (((style) & WS_DLGFRAME) && !((style) & WS_THICKFRAME)))
+
+#define HAS_THICKFRAME(style,exStyle) \
+    (((style) & WS_THICKFRAME) && \
+     !((exStyle) & WS_EX_DLGMODALFRAME) && \
+     !((style) & WS_CHILD))
+
+#define HAS_THINFRAME(style) \
+    (((style) & WS_BORDER) || !((style) & (WS_CHILD | WS_POPUP)))
+
+#define HAS_BIGFRAME(style,exStyle) \
+    (((style) & (WS_THICKFRAME | WS_DLGFRAME)) || \
+     ((exStyle) & WS_EX_DLGMODALFRAME))
+
+#define HAS_ANYFRAME(style,exStyle) \
+    (((style) & (WS_THICKFRAME | WS_DLGFRAME | WS_BORDER)) || \
+     ((exStyle) & WS_EX_DLGMODALFRAME) || \
+     !((style) & (WS_CHILD | WS_POPUP)))
+
+#define HAS_3DFRAME(exStyle) \
+    ((exStyle & WS_EX_CLIENTEDGE) || (exStyle & WS_EX_STATICEDGE) || (exStyle & WS_EX_WINDOWEDGE))
+
+#define HAS_BORDER(style, exStyle) \
+    ((style & WS_BORDER) || HAS_THICKFRAME(style) || HAS_DLGFRAME(style,exStyle))
+
+#define IS_OVERLAPPED(style) \
+    !(style & (WS_CHILD | WS_POPUP))
+
+#define HAS_MENU() (!(getStyle() & WS_CHILD) && (GetMenu() != 0))
 
 class Win32BaseWindow : public GenericObject, public ChildWindow
 {
