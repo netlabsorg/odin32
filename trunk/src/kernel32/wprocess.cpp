@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.53 1999-11-30 19:40:27 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.54 1999-12-01 18:40:49 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -157,6 +157,8 @@ TEB *InitializeTIB(BOOL fMainThread)
     	ProcessPDB.next            = NULL;
     	ProcessPDB.winver          = 0xffff; /* to be determined */
         ProcessPDB.server_pid      = (void *)GetCurrentProcessId();
+
+	GetSystemTime(&ProcessPDB.creationTime);
 
         /* Initialize the critical section */
         InitializeCriticalSection( &ProcessPDB.crit_section );

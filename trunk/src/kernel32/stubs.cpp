@@ -1,4 +1,4 @@
-/* $Id: stubs.cpp,v 1.10 1999-11-30 14:15:54 sandervl Exp $ */
+/* $Id: stubs.cpp,v 1.11 1999-12-01 18:40:48 sandervl Exp $ */
 
 /*
  * Win32 KERNEL32 Subsystem for OS/2
@@ -2131,38 +2131,6 @@ BOOL WIN32API GetNamedPipeInfo(HANDLE  hNamedPipe,
            lpOutBufferSize,
            lpInBufferSize,
            lpMaxInstances));
-
-  return (FALSE);
-}
-
-/*****************************************************************************
- * Name      : BOOL GetProcessTimes
- * Purpose   : The GetProcessTimes function obtains timing information about a specified process.
- * Parameters: HANDLE     hProcess       specifies the process of interest
- *             LPFILETIME lpCreationTime when the process was created
- *             LPFILETIME lpExitTime     when the process exited
- *             LPFILETIME lpKernelTime   time the process has spent in kernel mode
- *             LPFILETIME lpUserTime     time the process has spent in user mode
- * Variables :
- * Result    : TRUE / FALSE
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
- *****************************************************************************/
-
-BOOL WIN32API GetProcessTimes(HANDLE     hProcess,
-                                 LPFILETIME lpCreationTime,
-                                 LPFILETIME lpExitTime,
-                                 LPFILETIME lpKernelTime,
-                                 LPFILETIME lpUserTime)
-{
-  dprintf(("Kernel32: GetProcessTimes(%08xh,%08xh,%08xh,%08xh,%08xh) not implemented.\n",
-           hProcess,
-           lpCreationTime,
-           lpExitTime,
-           lpKernelTime,
-           lpUserTime));
 
   return (FALSE);
 }

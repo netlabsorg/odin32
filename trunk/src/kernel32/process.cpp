@@ -1,4 +1,4 @@
-/* $Id: process.cpp,v 1.2 1999-11-30 19:40:26 sandervl Exp $ */
+/* $Id: process.cpp,v 1.3 1999-12-01 18:40:48 sandervl Exp $ */
 
 /*
  * Win32 process functions for OS/2
@@ -28,6 +28,7 @@
 #include <wprocess.h>
 #include <win\task.h>
 #include <winimagebase.h>
+#include "oslibdos.h"
 
 #define SHUTDOWN_NORETRY 1
 
@@ -388,6 +389,67 @@ void WINAPI SetProcessDword( DWORD dwProcessID, INT offset, DWORD value )
         dprintf(("SetProcessDword: Unknown offset %d\n", offset));
         break;
     }
+}
+/*****************************************************************************
+ * Name      : BOOL GetProcessTimes
+ * Purpose   : The GetProcessTimes function obtains timing information about a specified process.
+ * Parameters: HANDLE     hProcess       specifies the process of interest
+ *             LPFILETIME lpCreationTime when the process was created
+ *             LPFILETIME lpExitTime     when the process exited
+ *             LPFILETIME lpKernelTime   time the process has spent in kernel mode
+ *             LPFILETIME lpUserTime     time the process has spent in user mode
+ * Variables :
+ * Result    : TRUE / FALSE
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
+ *****************************************************************************/
+
+ULONG (WINAPI *NtdllRtlExtendedIntegerMultiply)(LARGE_INTEGER factor1,
+                                                INT    factor2) = 0;
+
+BOOL WIN32API GetProcessTimes(HANDLE     hProcess,
+                              LPFILETIME lpCreationTime,
+                              LPFILETIME lpExitTime,
+                              LPFILETIME lpKernelTime,
+                              LPFILETIME lpUserTime)
+{
+ LARGE_INTEGER *kerneltime, *usertime;
+
+  dprintf(("Kernel32: GetProcessTimes(%08xh,%08xh,%08xh,%08xh,%08xh) partly implemented",
+           hProcess,
+           lpCreationTime,
+           lpExitTime,
+           lpKernelTime,
+           lpUserTime));
+
+  if(!NtdllRtlExtendedIntegerMultiply) {
+   	HINSTANCE hInstance = LoadLibraryA("NTDLL.DLL");
+   	if(hInstance) 
+    		*(VOID **)&NtdllRtlExtendedIntegerMultiply=(void*)GetProcAddress(hInstance, (LPCSTR)"RtlExtendedIntegerMultiply");
+  }
+  if(!lpCreationTime || !lpExitTime || !lpKernelTime || !lpUserTime) {
+	SetLastError(ERROR_INVALID_PARAMETER);
+	return FALSE;
+  }
+  if(hProcess != GetCurrentProcess()) {
+	dprintf(("GetProcessTimes unknown process"));
+	return FALSE;
+  }
+
+  SystemTimeToFileTime(&ProcessPDB.creationTime, lpCreationTime);
+  memset(lpExitTime, 0, sizeof(FILETIME));
+  memset(lpKernelTime, 0, sizeof(FILETIME));
+  memset(lpUserTime, 0, sizeof(FILETIME));
+
+  kerneltime = (LARGE_INTEGER *)lpKernelTime;
+  usertime   = (LARGE_INTEGER *)lpUserTime;
+  OSLibDosQueryProcTimes(GetCurrentProcessId(), &lpKernelTime->dwLowDateTime, &lpUserTime->dwLowDateTime);
+  //TODO: Isn't correct -> (if result's high dword != 0)
+  kerneltime->u.LowPart = NtdllRtlExtendedIntegerMultiply(*kerneltime, 10);
+  usertime->u.LowPart   = NtdllRtlExtendedIntegerMultiply(*usertime, 10);
+  return TRUE;
 }
 //******************************************************************************
 //******************************************************************************
