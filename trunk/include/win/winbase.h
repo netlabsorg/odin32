@@ -1,4 +1,4 @@
-/* $Id: winbase.h,v 1.17 2000-09-21 17:00:10 hugh Exp $ */
+/* $Id: winbase.h,v 1.18 2000-10-03 17:26:04 sandervl Exp $ */
 
 #ifndef __WINE_WINBASE_H
 #define __WINE_WINBASE_H
@@ -1627,6 +1627,8 @@ DWORD       WINAPI QueryDosDeviceA(LPCSTR,LPSTR,DWORD);
 DWORD       WINAPI QueryDosDeviceW(LPCWSTR,LPWSTR,DWORD);
 #define     QueryDosDevice WINELIB_NAME_AW(QueryDosDevice)
 BOOL      WINAPI QueryPerformanceCounter(PLARGE_INTEGER);
+BOOL      WINAPI QueryPerformanceFrequency(LARGE_INTEGER *lpFrequency);
+
 BOOL      WINAPI ReadConsoleA(HANDLE,LPVOID,DWORD,LPDWORD,LPVOID);
 BOOL      WINAPI ReadConsoleW(HANDLE,LPVOID,DWORD,LPDWORD,LPVOID);
 #define     ReadConsole WINELIB_NAME_AW(ReadConsole)
