@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.100 2001-06-12 18:25:11 sandervl Exp $ */
+/* $Id: window.cpp,v 1.101 2001-07-23 19:16:41 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -740,6 +740,9 @@ BOOL WIN32API IsWindowVisible(HWND hwnd)
         if(!(dwStyle & WS_VISIBLE)) {
             dprintf(("IsWindowVisible %x returned FALSE (parent %x invisible)", hwnd, hwndParent));
             return FALSE;
+        }
+        if(!(dwStyle & WS_CHILD)) {
+            break; //GetParent can also return the owner
         }
         hwndParent = GetParent(hwndParent);
     }
