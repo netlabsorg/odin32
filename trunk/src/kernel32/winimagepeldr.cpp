@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.4 1999-10-05 23:23:47 phaller Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.5 1999-10-08 16:27:48 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -1017,15 +1017,23 @@ BOOL Win32PeLdrImage::processImports(char *win32file)
     fout << "************** Import Module " << pszCurModule << endl;
     fout << "**********************************************************************" << endl;
     WinDll = (Win32PeLdrDll *)Win32DllBase::findModule(pszCurModule);
+
     if(WinDll == NULL)
     {  //not found, so load it
 	if(isPEImage(pszCurModule) == FALSE)
 	{//LX image, so let OS/2 do all the work for us
 		APIRET rc;
   		char   szModuleFailure[CCHMAXPATH] = "";
+	        char   szModuleName[CCHMAXPATH];
 		ULONG  hInstanceNewDll;
 
-  		rc = DosLoadModule(szModuleFailure, sizeof(szModuleFailure), pszCurModule, (HMODULE *)&hInstanceNewDll);
+	        strcpy(szModuleName, pszCurModule);
+		char *dot = strchr(szModuleName, '.');
+		if(dot) {
+			*dot = 0;
+		}
+		strcat(szModuleName, ".DLL");
+  		rc = DosLoadModule(szModuleFailure, sizeof(szModuleFailure), szModuleName, (HMODULE *)&hInstanceNewDll);
   		if(rc) {
 			dprintf(("DosLoadModule returned %X for %s\n", rc, szModuleFailure));
 			errorState = rc;
