@@ -1297,6 +1297,16 @@ typedef struct tagKBDLLHOOKSTRUCT {
     DWORD   dwExtraInfo;
 } KBDLLHOOKSTRUCT, *LPKBDLLHOOKSTRUCT, *PKBDLLHOOKSTRUCT;
 
+    /* Mouse hook structure */
+
+typedef struct
+{
+    POINT pt;
+    HWND  hwnd;
+    UINT  wHitTestCode;
+    DWORD   dwExtraInfo;
+} MOUSEHOOKSTRUCT, *PMOUSEHOOKSTRUCT, *LPMOUSEHOOKSTRUCT;
+
 /*
  * Structure used by WH_MOUSE_LL
  */
