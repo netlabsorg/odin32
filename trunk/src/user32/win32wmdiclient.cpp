@@ -1,4 +1,4 @@
-/* $Id: win32wmdiclient.cpp,v 1.4 1999-10-09 14:48:15 achimha Exp $ */
+/* $Id: win32wmdiclient.cpp,v 1.5 1999-10-09 15:09:15 achimha Exp $ */
 /*
  * Win32 MDI Client Window Class for OS/2
  *
@@ -124,7 +124,6 @@ LRESULT Win32MDIClientWindow::MDIClientWndProc(UINT message, WPARAM wParam, LPAR
         retvalue = 0;
         goto END;
 
-    case WM_MDIACTIVATE:
     case WM_MDIACTIVATE:
         mdichild = 0;
         if(activeChild && activeChild->getWindowHandle() != (HWND)wParam)
