@@ -1,4 +1,4 @@
-;/* $Id: kKrnlLibTst.def,v 1.1 2001-09-17 01:17:01 bird Exp $
+;/* $Id: kKrnlLibTst.def,v 1.2 2001-09-23 06:45:21 bird Exp $
 ; *
 ; * Definition file for the Ring-3 test program.
 ; *
@@ -43,7 +43,13 @@ SEGMENTS
 
 
 IMPORTS
+     DosQuerySysState = DOSCALL1.368
+
+     _DosRead         = DOSCALL1.281
      _DosWrite        = DOSCALL1.282
+     _DosOpen         = DOSCALL1.273
+     _DosClose        = DOSCALL1.257
+     _DosSetFilePtr   = DOSCALL1.256
+
      _DOS16OPEN       = DOSCALL1.70
      _DOS16CLOSE      = DOSCALL1.59
-     DosQuerySysState = DOSCALL1.368
