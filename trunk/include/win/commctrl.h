@@ -1687,6 +1687,9 @@ static const WCHAR REBARCLASSNAMEW[] = { 'R','e','B','a','r',
 #define RBBS_VARIABLEHEIGHT     0x00000040
 #define RBBS_GRIPPERALWAYS      0x00000080
 #define RBBS_NOGRIPPER          0x00000100
+#define RBBS_USECHEVRON         0x00000200
+#define RBBS_HIDETITLE          0x00000400
+#define RBBS_TOPALIGN           0x00000800
 
 #define RBNM_ID                 0x00000001
 #define RBNM_STYLE              0x00000002
@@ -1696,16 +1699,16 @@ static const WCHAR REBARCLASSNAMEW[] = { 'R','e','B','a','r',
 #define RBHT_CAPTION            0x0002
 #define RBHT_CLIENT             0x0003
 #define RBHT_GRABBER            0x0004
+#define RBHT_CHEVRON            0x0008
 
-#define RB_INSERTBANDA        (WM_USER+1)
-#define RB_INSERTBANDW        (WM_USER+10)
+#define RB_INSERTBANDA          (WM_USER+1)
+#define RB_INSERTBANDW          (WM_USER+10)
 #define RB_INSERTBAND           WINELIB_NAME_AW(RB_INSERTBAND)
 #define RB_DELETEBAND           (WM_USER+2)
 #define RB_GETBARINFO           (WM_USER+3)
 #define RB_SETBARINFO           (WM_USER+4)
-#define RB_GETBANDINFO        (WM_USER+5)   /* just for compatibility */
-#define RB_SETBANDINFOA       (WM_USER+6)
-#define RB_SETBANDINFOW       (WM_USER+11)
+#define RB_SETBANDINFOA         (WM_USER+6)
+#define RB_SETBANDINFOW         (WM_USER+11)
 #define RB_SETBANDINFO          WINELIB_NAME_AW(RB_SETBANDINFO)
 #define RB_SETPARENT            (WM_USER+7)
 #define RB_HITTEST              (WM_USER+8)
@@ -1725,9 +1728,9 @@ static const WCHAR REBARCLASSNAMEW[] = { 'R','e','B','a','r',
 #define RB_ENDDRAG              (WM_USER+25)
 #define RB_DRAGMOVE             (WM_USER+26)
 #define RB_GETBARHEIGHT         (WM_USER+27)
-#define RB_GETBANDINFOW       (WM_USER+28)
-#define RB_GETBANDINFOA       (WM_USER+29)
-#define RB_GETBANDINFO16          WINELIB_NAME_AW(RB_GETBANDINFO16)
+#define RB_GETBANDINFOW         (WM_USER+28)
+#define RB_GETBANDINFOA         (WM_USER+29)
+#define RB_GETBANDINFO          WINELIB_NAME_AW(RB_GETBANDINFO)
 #define RB_MINIMIZEBAND         (WM_USER+30)
 #define RB_MAXIMIZEBAND         (WM_USER+31)
 #define RB_GETBANDBORDERS       (WM_USER+34)
@@ -1735,6 +1738,8 @@ static const WCHAR REBARCLASSNAMEW[] = { 'R','e','B','a','r',
 #define RB_SETPALETTE           (WM_USER+37)
 #define RB_GETPALETTE           (WM_USER+38)
 #define RB_MOVEBAND             (WM_USER+39)
+#define RB_GETBANDMARGINS       (WM_USER+40)
+#define RB_PUSHCHEVRON          (WM_USER+43)
 #define RB_GETDROPTARGET        CCM_GETDROPTARGET
 #define RB_SETCOLORSCHEME       CCM_SETCOLORSCHEME
 #define RB_GETCOLORSCHEME       CCM_GETCOLORSCHEME
@@ -1752,6 +1757,9 @@ static const WCHAR REBARCLASSNAMEW[] = { 'R','e','B','a','r',
 #define RBN_DELETINGBAND        (RBN_FIRST-6)
 #define RBN_DELETEDBAND         (RBN_FIRST-7)
 #define RBN_CHILDSIZE           (RBN_FIRST-8)
+#define RBN_CHEVRONPUSHED       (RBN_FIRST-10)
+#define RBN_MINMAX              (RBN_FIRST-21)
+#define RBN_AUTOBREAK           (RBN_FIRST-22)
 
 typedef struct tagREBARINFO
 {
@@ -1816,9 +1824,9 @@ typedef REBARBANDINFOW const *LPCREBARBANDINFOW;
 #define LPREBARBANDINFO  WINELIB_NAME_AW(LPREBARBANDINFO)
 #define LPCREBARBANDINFO WINELIB_NAME_AW(LPCREBARBANDINFO)
 
-#define REBARBANDINFO_V3_SIZEA CCSIZEOF_STRUCT(REBARBANDINFOA, wID)
-#define REBARBANDINFO_V3_SIZEW CCSIZEOF_STRUCT(REBARBANDINFOW, wID)
-#define REBARBANDINFO_V3_SIZE WINELIB_NAME_AW(REBARBANDINFO_V3_SIZE)
+#define REBARBANDINFOA_V3_SIZE CCSIZEOF_STRUCT(REBARBANDINFOA, wID)
+#define REBARBANDINFOW_V3_SIZE CCSIZEOF_STRUCT(REBARBANDINFOW, wID)
+#define REBARBANDINFO_V3_SIZE  CCSIZEOF_STRUCT(WINELIB_NAME_AW(REBARBANDINFO), wID)
 
 typedef struct tagNMREBARCHILDSIZE
 {
@@ -1846,6 +1854,16 @@ typedef struct tagNMRBAUTOSIZE
     RECT rcTarget;
     RECT rcActual;
 } NMRBAUTOSIZE, *LPNMRBAUTOSIZE;
+
+typedef struct tagNMREBARCHEVRON
+{
+    NMHDR hdr;
+    UINT uBand;
+    UINT wID;
+    LPARAM lParam;
+    RECT rc;
+    LPARAM lParamNM;
+} NMREBARCHEVRON, *LPNMREBARCHEVRON;
 
 typedef struct _RB_HITTESTINFO
 {
