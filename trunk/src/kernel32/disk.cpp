@@ -1,4 +1,4 @@
-/* $Id: disk.cpp,v 1.5 1999-08-25 11:25:47 sandervl Exp $ */
+/* $Id: disk.cpp,v 1.6 1999-11-09 01:22:32 phaller Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -9,9 +9,19 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+
+
+#include <odin.h>
+#include <odinwrap.h>
+#include <os2sel.h>
+
 #include <os2win.h>
 #include <stdlib.h>
+#include <string.h>
 #include "unicode.h"
+
+
+ODINDEBUGCHANNEL(KERNEL32-DISK)
 
 //******************************************************************************
 //******************************************************************************
@@ -79,37 +89,79 @@ UINT WIN32API GetDriveTypeW(LPCWSTR arg1)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API GetVolumeInformationA(LPCSTR arg1, LPSTR arg2, DWORD arg3, PDWORD arg4,
-                                    PDWORD arg5, PDWORD arg6, LPSTR arg7, DWORD  arg8)
+ODINFUNCTION8(BOOL,    GetVolumeInformationA,
+              LPCSTR,  lpRootPathName,
+              LPSTR,   lpVolumeNameBuffer,
+              DWORD,   nVolumeNameSize,
+              PDWORD,  lpVolumeSerialNumber,
+              PDWORD,  lpMaximumComponentLength,
+              PDWORD,  lpFileSystemFlags,
+              LPSTR,   lpFileSystemNameBuffer,
+              DWORD,   nFileSystemNameSize)
 {
-    dprintf(("KERNEL32:  GetVolumeInformation %s %s\n", arg1, arg2));
-    return O32_GetVolumeInformation(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
+   return O32_GetVolumeInformation(lpRootPathName,
+                                   lpVolumeNameBuffer,
+                                   nVolumeNameSize,
+                                   lpVolumeSerialNumber,
+                                   lpMaximumComponentLength,
+                                   lpFileSystemFlags,
+                                   lpFileSystemNameBuffer,
+                                   nFileSystemNameSize);
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API GetVolumeInformationW(LPCWSTR arg1, LPWSTR arg2, DWORD arg3,
-                                    PDWORD arg4, PDWORD arg5, PDWORD arg6,
-                                    LPWSTR arg7, DWORD  arg8)
+
+ODINFUNCTION8(BOOL,    GetVolumeInformationW,
+              LPCWSTR, lpRootPathName,
+              LPWSTR,  lpVolumeNameBuffer,
+              DWORD,   nVolumeNameSize,
+              PDWORD,  lpVolumeSerialNumber,
+              PDWORD,  lpMaximumComponentLength,
+              PDWORD,  lpFileSystemFlags,
+              LPWSTR,  lpFileSystemNameBuffer,
+              DWORD,   nFileSystemNameSize)
 {
- char *asciiroot, *asciivol, *asciifs;
- BOOL  rc;
+  char *asciiroot,
+       *asciivol,
+       *asciifs;
+  BOOL  rc;
 
-    dprintf(("KERNEL32:  OS2GetVolumeInformationW\n"));
-    asciivol  = (char *)malloc(arg3+1);
-    asciifs   = (char *)malloc(arg8+1);
-    asciiroot = UnicodeToAsciiString((LPWSTR)arg1);
-    rc = O32_GetVolumeInformation(asciiroot, asciivol, arg3, arg4, arg5, arg6, asciifs, arg8);
+  // transform into ascii
+  asciivol  = (char *)malloc(nVolumeNameSize+1);
+  asciifs   = (char *)malloc(nFileSystemNameSize+1);
 
-    if (arg2 != NULL)  /* @@@PH 98/06/07 */
-      AsciiToUnicode(asciivol, arg2);
+  // clear ascii buffers
+  memset (asciivol, 0, (nVolumeNameSize + 1));
+  memset (asciifs,  0, (nFileSystemNameSize + 1));
 
-    if (arg7 != NULL)  /* @@@PH 98/06/07 */
-      AsciiToUnicode(asciifs, arg7);
+  if (lpRootPathName != NULL) // NULL is valid!
+    asciiroot = UnicodeToAsciiString((LPWSTR)lpRootPathName);
+  else
+    asciiroot = NULL;
 
+  // @@@PH switch to ODIN_
+  rc = GetVolumeInformationA(asciiroot,
+                             asciivol,
+                             nVolumeNameSize,
+                             lpVolumeSerialNumber,
+                             lpMaximumComponentLength,
+                             lpFileSystemFlags,
+                             asciifs,
+                             nFileSystemNameSize);
+
+    if (lpVolumeNameBuffer != NULL)  /* @@@PH 98/06/07 */
+      AsciiToUnicodeN(asciivol, lpVolumeNameBuffer, nVolumeNameSize);
+
+    if (lpFileSystemNameBuffer != NULL)  /* @@@PH 98/06/07 */
+      AsciiToUnicodeN(asciifs, lpFileSystemNameBuffer, nFileSystemNameSize);
+
+
+  if (asciiroot != NULL)
     FreeAsciiString(asciiroot);
-    free(asciifs);
-    free(asciivol);
-    return(rc);
+
+  free(asciifs);
+  free(asciivol);
+  return(rc);
 }
 //******************************************************************************
 //******************************************************************************
