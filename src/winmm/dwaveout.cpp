@@ -1,4 +1,4 @@
-/* $Id: dwaveout.cpp,v 1.29 2000-09-03 09:35:14 sandervl Exp $ */
+/* $Id: dwaveout.cpp,v 1.30 2000-11-24 12:14:07 phaller Exp $ */
 
 /*
  * Wave playback class
@@ -7,6 +7,9 @@
  *
  *
  * Project Odin Software License can be found in LICENSE.TXT
+ *
+ * Note:
+ * 2000/11/24 PH MCI_MIXSETUP_PARMS->pMixWrite does alter FS: selector!
  *
  */
 
@@ -423,9 +426,15 @@ MMRESULT DartWaveOut::write(LPWAVEHDR pwh, UINT cbwh)
         wmutex->leave();
 
         //write buffers to DART; starts playback
-        MixSetupParms->pmixWrite(MixSetupParms->ulMixHandle,
-                                 MixBuffer,
-                                 PREFILLBUF_DART);
+        {
+          // MCI_MIXSETUP_PARMS->pMixWrite does alter FS: selector!
+          USHORT selTIB = GetFS(); // save current FS selector
+
+          MixSetupParms->pmixWrite(MixSetupParms->ulMixHandle,
+                                   MixBuffer,
+                                   PREFILLBUF_DART);
+          SetFS(selTIB);           // switch back to the saved FS selector
+        }
         dprintf(("Dart playing\n"));
   }
   else
@@ -515,29 +524,35 @@ MMRESULT DartWaveOut::reset()
 /******************************************************************************/
 MMRESULT DartWaveOut::restart()
 {
- int i, curbuf;
+  int i, curbuf;
 
-    dprintf(("DartWaveOut::restart"));
-    if(State == STATE_PLAYING) {
-	return(MMSYSERR_NOERROR);
-    }
-    //Only write buffers to dart if mixer has been initialized; if not, then
-    //the first buffer write will do this for us.
-    if(fMixerSetup == TRUE) {
-    	wmutex->enter(VMUTEX_WAIT_FOREVER);
-    	State     = STATE_PLAYING;
-    	fUnderrun = FALSE;
-    	wmutex->leave();
-    	curbuf = curPlayBuf;
-
-    	for(i=0;i<PREFILLBUF_DART;i++) {
-  		MixSetupParms->pmixWrite(MixSetupParms->ulMixHandle, &MixBuffer[curbuf], 1);
-		if(++curbuf == PREFILLBUF_DART) {
-			curbuf = 0;
-		}
-    	}
-    }
+  dprintf(("DartWaveOut::restart"));
+  if(State == STATE_PLAYING)
     return(MMSYSERR_NOERROR);
+
+  //Only write buffers to dart if mixer has been initialized; if not, then
+  //the first buffer write will do this for us.
+  if(fMixerSetup == TRUE) 
+  {
+    wmutex->enter(VMUTEX_WAIT_FOREVER);
+    State     = STATE_PLAYING;
+    fUnderrun = FALSE;
+    wmutex->leave();
+    curbuf = curPlayBuf;
+    
+    // MCI_MIXSETUP_PARMS->pMixWrite does alter FS: selector!
+    USHORT selTIB = GetFS(); // save current FS selector
+    
+    for(i=0;i<PREFILLBUF_DART;i++)
+    {
+      MixSetupParms->pmixWrite(MixSetupParms->ulMixHandle, &MixBuffer[curbuf], 1);
+      if(++curbuf == PREFILLBUF_DART) 
+        curbuf = 0;
+    }
+    
+    SetFS(selTIB);           // switch back to the saved FS selector
+  }
+  return(MMSYSERR_NOERROR);
 }
 /******************************************************************************/
 /******************************************************************************/
@@ -746,8 +761,12 @@ void DartWaveOut::handler(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer, ULONG ulFlags
   else  curPlayBuf++;
 
   wmutex->leave();
+  
   //Transfer buffer to DART
+  // MCI_MIXSETUP_PARMS->pMixWrite does alter FS: selector!
+  USHORT selTIB = GetFS(); // save current FS selector
   MixSetupParms->pmixWrite(MixSetupParms->ulMixHandle, &MixBuffer[curPlayBuf], 1);
+  SetFS(selTIB);           // switch back to the saved FS selector
 }
 /******************************************************************************/
 /******************************************************************************/
