@@ -1,4 +1,4 @@
-/* $Id: waveoutdaud.h,v 1.3 2001-04-06 14:36:43 sandervl Exp $ */
+/* $Id: waveoutdaud.h,v 1.4 2001-04-30 21:06:56 sandervl Exp $ */
 
 /*
  * Wave playback class (DirectAudio)
@@ -16,6 +16,9 @@
 #ifdef _OS2WIN_H
 typedef DWORD HEV;
 #endif
+
+#define SECTION_WINMM      "WINMM"
+#define KEY_DIRECTAUDIO    "DirectAudio"
 
 class DAudioWaveOut : public WaveOut
 {

@@ -1,4 +1,4 @@
-/* $Id: DAudioBuffer.h,v 1.1 2001-04-27 17:39:48 sandervl Exp $ */
+/* $Id: DAudioBuffer.h,v 1.2 2001-04-30 21:06:37 sandervl Exp $ */
 
 /*
  * DirectSound SoundBuffer class (DAudio)
@@ -70,6 +70,7 @@ class IDirectAudioBuffer
     HRESULT Restore() ;
 
  private:
+    void    initVtbl();
 
  protected:
     HRESULT lastError;

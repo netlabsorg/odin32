@@ -1,4 +1,4 @@
-/* $Id: waveoutdaud.h,v 1.1 2001-04-27 17:39:49 sandervl Exp $ */
+/* $Id: waveoutdaud.h,v 1.2 2001-04-30 21:06:38 sandervl Exp $ */
 
 /*
  * Wave playback class (DirectAudio)
@@ -20,18 +20,23 @@
 #define STATE_PAUSED    2
 #define STATE_RECORDING 3
 
+#define SECTION_WINMM      "WINMM"
+#define KEY_DIRECTAUDIO    "DirectAudio"
+
 class DAudioWaveOut
 {
 public:
                DAudioWaveOut(LPWAVEFORMATEX pwfx);
               ~DAudioWaveOut();
 
-              MMRESULT write(LPWAVEHDR pwh, UINT cbwh);
+              MMRESULT write(LPVOID lpBuffer, UINT ulSize);
               MMRESULT pause();
               MMRESULT stop();
               MMRESULT restart();
               MMRESULT setVolume(ULONG ulVol);
-              ULONG    getPosition();
+              ULONG    getPosition(PULONG pulWritePos);
+
+              MMRESULT setProperty(int type, ULONG value);
 
               int      getState()               { return State; };
               MMRESULT getError()               { return ulError; };

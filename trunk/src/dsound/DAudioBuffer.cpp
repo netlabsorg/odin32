@@ -1,4 +1,4 @@
-/* $Id: DAudioBuffer.cpp,v 1.1 2001-04-27 17:39:48 sandervl Exp $ */
+/* $Id: DAudioBuffer.cpp,v 1.2 2001-04-30 21:06:37 sandervl Exp $ */
 
 /*
  * DirectSound SoundBuffer (secondary) class (DirectAudio)
@@ -39,29 +39,7 @@ IDirectAudioBuffer *IDirectAudioBuffer::dsbroot = NULL;
 IDirectAudioBuffer::IDirectAudioBuffer(OS2IDirectSound *DSound, const DSBUFFERDESC *lpDSBufferDesc)
         : Referenced(0), lastError(DS_OK), daudio(NULL), lpSndBuffer(NULL)
 {
-    //This is the "normal" constructor
-    lpVtbl = &Vtbl;
-    Vtbl.AddRef               = DAudioBufAddRef;
-    Vtbl.Release              = DAudioBufRelease;
-    Vtbl.QueryInterface       = DAudioBufQueryInterface;
-    Vtbl.GetCaps              = DAudioBufGetCaps;
-    Vtbl.GetFormat            = DAudioBufGetFormat;
-    Vtbl.GetVolume            = DAudioBufGetVolume;
-    Vtbl.GetStatus            = DAudioBufGetStatus;
-    Vtbl.GetCurrentPosition   = DAudioBufGetCurrentPosition;
-    Vtbl.GetPan               = DAudioBufGetPan;
-    Vtbl.GetFrequency         = DAudioBufGetFrequency;
-    Vtbl.Initialize           = DAudioBufInitialize;
-    Vtbl.Restore              = DAudioBufRestore;
-    Vtbl.SetFormat            = DAudioBufSetFormat;
-    Vtbl.SetVolume            = DAudioBufSetVolume;
-    Vtbl.SetCurrentPosition   = DAudioBufSetCurrentPosition;
-    Vtbl.SetPan               = DAudioBufSetPan;
-    Vtbl.SetFrequency         = DAudioBufSetFrequency;
-    Vtbl.Lock                 = DAudioBufLock;
-    Vtbl.Unlock               = DAudioBufUnlock;
-    Vtbl.Stop                 = DAudioBufStop;
-    Vtbl.Play                 = DAudioBufPlay;
+    initVtbl();
 
     dprintf(("DSOUND-IDirectAudioBuffer::IDirectAudioBuffer (buf=%X)", this));
 
@@ -123,29 +101,7 @@ IDirectAudioBuffer::IDirectAudioBuffer(OS2IDirectSound *DSound, const DSBUFFERDE
 IDirectAudioBuffer::IDirectAudioBuffer(OS2IDirectSound *DSound, IDirectAudioBuffer *srcBuf)
         : Referenced(0), lastError(DS_OK), daudio(NULL), lpSndBuffer(NULL)
 {
-    //This is the constructor used for duplicating sound buffers
-    lpVtbl = &Vtbl;
-    Vtbl.AddRef               = DAudioBufAddRef;
-    Vtbl.Release              = DAudioBufRelease;
-    Vtbl.QueryInterface       = DAudioBufQueryInterface;
-    Vtbl.GetCaps              = DAudioBufGetCaps;
-    Vtbl.GetFormat            = DAudioBufGetFormat;
-    Vtbl.GetVolume            = DAudioBufGetVolume;
-    Vtbl.GetStatus            = DAudioBufGetStatus;
-    Vtbl.GetCurrentPosition   = DAudioBufGetCurrentPosition;
-    Vtbl.GetPan               = DAudioBufGetPan;
-    Vtbl.GetFrequency         = DAudioBufGetFrequency;
-    Vtbl.Initialize           = DAudioBufInitialize;
-    Vtbl.Restore              = DAudioBufRestore;
-    Vtbl.SetFormat            = DAudioBufSetFormat;
-    Vtbl.SetVolume            = DAudioBufSetVolume;
-    Vtbl.SetCurrentPosition   = DAudioBufSetCurrentPosition;
-    Vtbl.SetPan               = DAudioBufSetPan;
-    Vtbl.SetFrequency         = DAudioBufSetFrequency;
-    Vtbl.Lock                 = DAudioBufLock;
-    Vtbl.Unlock               = DAudioBufUnlock;
-    Vtbl.Stop                 = DAudioBufStop;
-    Vtbl.Play                 = DAudioBufPlay;
+    initVtbl();
 
     dprintf(("DSOUND-IDirectAudioBuffer::OS2IDirectAudioBuffer/Duplicate (buf=%X)", this));
 
@@ -176,16 +132,18 @@ IDirectAudioBuffer::IDirectAudioBuffer(OS2IDirectSound *DSound, IDirectAudioBuff
     lpSndBuffer  = srcBuf->lpSndBuffer;
     lpSndBuffer->dwReferences++;
 
-    if(daudio) {
-        delete daudio;
-        daudio = 0;
+    daudio = new DAudioWaveOut(lpfxFormat);
+    if(daudio == NULL || daudio->getError()) {
+        dprintf(("DAudioWaveOut ctor failed"));
+        lastError = DSERR_OUTOFMEMORY;
+        return;
     }
+
     wmutex.enter(VMUTEX_WAIT_FOREVER);
     next = dsbroot;
     dsbroot = this;
     wmutex.leave();
 }
-
 //******************************************************************************
 //******************************************************************************
 IDirectAudioBuffer::~IDirectAudioBuffer()
@@ -202,6 +160,11 @@ IDirectAudioBuffer::~IDirectAudioBuffer()
     if (lpfxFormat)
         free(lpfxFormat);
 
+    if(daudio) {
+        delete daudio;
+        daudio = 0;
+    }
+
     // remove ourselves from the linked list
     IDirectAudioBuffer *cur  = dsbroot;
     IDirectAudioBuffer *prev = NULL;
@@ -217,7 +180,33 @@ IDirectAudioBuffer::~IDirectAudioBuffer()
     }
     wmutex.leave();
 }
-
+//******************************************************************************
+//******************************************************************************
+void IDirectAudioBuffer::initVtbl()
+{
+    lpVtbl = &Vtbl;
+    Vtbl.AddRef               = DAudioBufAddRef;
+    Vtbl.Release              = DAudioBufRelease;
+    Vtbl.QueryInterface       = DAudioBufQueryInterface;
+    Vtbl.GetCaps              = DAudioBufGetCaps;
+    Vtbl.GetFormat            = DAudioBufGetFormat;
+    Vtbl.GetVolume            = DAudioBufGetVolume;
+    Vtbl.GetStatus            = DAudioBufGetStatus;
+    Vtbl.GetCurrentPosition   = DAudioBufGetCurrentPosition;
+    Vtbl.GetPan               = DAudioBufGetPan;
+    Vtbl.GetFrequency         = DAudioBufGetFrequency;
+    Vtbl.Initialize           = DAudioBufInitialize;
+    Vtbl.Restore              = DAudioBufRestore;
+    Vtbl.SetFormat            = DAudioBufSetFormat;
+    Vtbl.SetVolume            = DAudioBufSetVolume;
+    Vtbl.SetCurrentPosition   = DAudioBufSetCurrentPosition;
+    Vtbl.SetPan               = DAudioBufSetPan;
+    Vtbl.SetFrequency         = DAudioBufSetFrequency;
+    Vtbl.Lock                 = DAudioBufLock;
+    Vtbl.Unlock               = DAudioBufUnlock;
+    Vtbl.Stop                 = DAudioBufStop;
+    Vtbl.Play                 = DAudioBufPlay;
+}
 //******************************************************************************
 //******************************************************************************
 void IDirectAudioBuffer::DestroyAllBuffers()
@@ -324,9 +313,8 @@ HRESULT IDirectAudioBuffer::GetCurrentPosition(LPDWORD lpdwCurrentPlayCursor,
         return DSERR_INVALIDPARAM;
     }
 
-    dprintf(("  PlayPos %d, WritePos %d", playpos, writepos));
-    *lpdwCurrentPlayCursor  = playpos;
-    *lpdwCurrentWriteCursor = writepos;
+    *lpdwCurrentPlayCursor  = daudio->getPosition(lpdwCurrentWriteCursor);
+    dprintf(("  PlayPos %d, WritePos %d", *lpdwCurrentPlayCursor, *lpdwCurrentWriteCursor));
     return DS_OK;
 }
 //******************************************************************************
@@ -336,6 +324,7 @@ HRESULT IDirectAudioBuffer::SetCurrentPosition(DWORD dwNewPosition)
     dprintf(("DSOUND-IDirectAudioBuffer::DAudioBufSetCurrentPosition %x to %d", this, dwNewPosition));
     playpos   = dwNewPosition;
 
+    //TODO:
     return DS_OK;
 }
 //******************************************************************************
@@ -461,7 +450,9 @@ HRESULT IDirectAudioBuffer::GetFrequency(LPDWORD lpdwFrequency)
 //******************************************************************************
 HRESULT IDirectAudioBuffer::SetFrequency(DWORD dwFrequency)
 {
-    dprintf(("DSOUND-IDirectAudioBuffer::DAudioBufSetFrequency %x %x", this, dwFrequency));
+ DWORD oldfrequency = frequency;
+
+    dprintf(("DSOUND-IDirectAudioBuffer::DAudioBufSetFrequency %x %d (old %d)", this, dwFrequency, oldfrequency));
 
     // zero means default (buffer format) frequency
     if (dwFrequency)
@@ -469,6 +460,9 @@ HRESULT IDirectAudioBuffer::SetFrequency(DWORD dwFrequency)
     else
         frequency = lpfxFormat->nSamplesPerSec;
 
+    if(frequency != oldfrequency) {
+        daudio->setProperty(PROPERTY_FREQUENCY, frequency);
+    }
     return DS_OK;
 }
 //******************************************************************************
@@ -558,16 +552,18 @@ HRESULT IDirectAudioBuffer::Play(DWORD dwRes1, DWORD dwRes2, DWORD dwFlags)
         fPlaying = TRUE;
         status   = DSBSTATUS_PLAYING;
         fLoop    = dwFlags == DSBPLAY_LOOPING;
-        if (fLoop)
+        if (fLoop) {
             status |= DSBSTATUS_LOOPING;
-
-        dprintf(("  Buffer %X: start at pos %d, loop %s",this, playpos, fLoop?"YES":"NO"));
+            daudio->setProperty(PROPERTY_LOOPING, TRUE);
+        }
+        dprintf(("Buffer %X: start at pos %d, loop %s",this, playpos, fLoop?"YES":"NO"));
     }
     else {
         fLoop = dwFlags == DSBPLAY_LOOPING;
         if (fLoop)
             status |= DSBSTATUS_LOOPING;
 
+        daudio->setProperty(PROPERTY_LOOPING, fLoop);
         dprintf(("  Buffer %X: already playing, loop %s",this, fLoop?"YES":"NO"));
     }
 
@@ -580,6 +576,8 @@ HRESULT IDirectAudioBuffer::Stop(  )
     dprintf(("DSOUND-IDirectAudioBuffer::DAudioBufStop %x", this));
     fPlaying = FALSE;
     status  &= ~(DSBSTATUS_PLAYING | DSBSTATUS_LOOPING);
+
+    daudio->stop();
 
     if (notify != NULL)
         notify->CheckStop();
