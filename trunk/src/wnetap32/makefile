@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.19 2001-09-07 08:20:58 phaller Exp $
+# $Id: makefile,v 1.20 2002-03-08 11:37:10 sandervl Exp $
 
 #
 # Odin32 API
@@ -41,16 +41,17 @@ LIBS = \
 $(ODIN32_LIB)/kernel32.lib \
 $(ODIN32_LIB)/user32.lib \
 $(ODIN32_LIB)/$(ODINCRT).lib \
+netapi32.lib \
 OS2386.LIB \
 $(RTLLIB_O)
 
 
 #
-# Target and original target names - names of the dll without extention and path
+# Target and original target names - names of the dll without extension and path
 #
+# @@@PH TARGET      = wnetap32
+# @@@PH ORGTARGET   = netapi32
 TARGET      = wnetap32
-ORGTARGET   = netapi32
-
 
 #
 # Includes the common rules.

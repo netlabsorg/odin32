@@ -1,4 +1,4 @@
-/* $Id: oslibnet.h,v 1.3 2001-09-06 22:23:40 phaller Exp $ */
+/* $Id: oslibnet.h,v 1.4 2002-03-08 11:37:10 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Netbios/Network/LAN API
  *
@@ -16,7 +16,10 @@
 #define NET_API_STATUS DWORD
 
 #define NERR_OK   0
+
+#ifndef NERR_BASE
 #define NERR_BASE 1 /* @@@PH DUMMY ! */
+#endif
 
 
 
