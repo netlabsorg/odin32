@@ -1,14 +1,20 @@
-/* $Id: os2heap.cpp,v 1.31 2001-11-16 14:52:55 phaller Exp $ */
+/* $Id: os2heap.cpp,v 1.32 2002-01-06 16:48:47 sandervl Exp $ */
 
 /*
  * Heap class for OS/2
  *
- * Copyright 1998 Sander van Leeuwen
+ * Copyright 1998-2002 Sander van Leeuwen <sandervl@xs4all.nl>
  *
  *
  * NOTE: ReAlloc allocates memory using Alloc if memory pointer == NULL
  *       WINE controls depend on this, even though it apparently
  *       doesn't work like this in Windows.
+ * NOTE: Round up size to next 8 bytes boundary
+ *       When reallocating memory block, don't use different
+ *       memory block unless new size is larger than old size
+ *       (rounded up to next 8 bytes boundary)
+ *       (Verified this behaviour in NT4 (Global/Heap(Re)Alloc); 
+ *        fixes crashes in Opera 5.12 which relies on this 'feature')
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -149,26 +155,33 @@ LPVOID OS2Heap::Alloc(DWORD dwFlags, DWORD dwBytes)
 {
  HEAPELEM *lpHeapObj;
  LPVOID    lpMem;
+ DWORD     dwAllocBytes;
 
 //  dprintf(("OS2Heap::Alloc\n"));
-  lpMem = _umalloc(uheap, dwBytes + HEAP_OVERHEAD);
+
+  //size must be multiple of 8 bytes
+  dwAllocBytes = HEAP_ALIGN(dwBytes);
+
+  lpMem = _umalloc(uheap, dwAllocBytes + HEAP_OVERHEAD);
   if(lpMem == NULL) {
       dprintf(("OS2Heap::Alloc, lpMem == NULL"));
       return(NULL);
   }
   if(dwFlags & HEAP_ZERO_MEMORY) {
-      memset(lpMem, 0, dwBytes+HEAP_OVERHEAD);
+      memset(lpMem, 0, dwAllocBytes+HEAP_OVERHEAD);
   }
   
 #ifdef DEBUG
-  totalAlloc += dwBytes;
+  totalAlloc += dwAllocBytes;
 #endif
   
   //align at 8 byte boundary
-  lpHeapObj = (HEAPELEM *)(((ULONG)lpMem+7) & ~7);
-  lpHeapObj->lpMem = lpMem;
+  lpHeapObj          = (HEAPELEM *)HEAP_ALIGN(lpMem);
+  lpHeapObj->lpMem   = lpMem;
   lpHeapObj->magic   = MAGIC_NR_HEAP;
-
+  lpHeapObj->orgsize = dwBytes;	//original size
+  lpHeapObj->cursize = dwBytes;	//original size
+ 
   return(LPVOID)(lpHeapObj+1);
 }
 //******************************************************************************
@@ -193,8 +206,7 @@ DWORD OS2Heap::Size(DWORD dwFlags, PVOID lpMem)
     	dprintf(("OS2Heap::Size ERROR BAD HEAP POINTER:%X\n", lpMem));
     	return -1;
   }
-
-  return(_msize(helem->lpMem) - HEAP_OVERHEAD);
+  return helem->cursize;  //return current size of memory block
 }
 //******************************************************************************
 //******************************************************************************
@@ -202,7 +214,7 @@ LPVOID OS2Heap::ReAlloc(DWORD dwFlags, LPVOID lpMem, DWORD dwBytes)
 {
   HEAPELEM *helem = GET_HEAPOBJ(lpMem);
   LPVOID lpNewMem;
-  int    i, oldSize;
+  int    i, maxSize;
 
   if (dwBytes == 0) return NULL;         // intercept stupid parameters
 
@@ -217,13 +229,15 @@ LPVOID OS2Heap::ReAlloc(DWORD dwFlags, LPVOID lpMem, DWORD dwBytes)
     return lpMem;
   }
 
-  oldSize = Size(0,lpMem);
-  if (oldSize >= dwBytes) {
-       dprintf(("ReAlloc with smaller size than original (%d); return old pointer", oldSize));
+  maxSize = HEAP_ALIGN(helem->orgsize); 
+  if (dwBytes <= maxSize) {
+       dprintf(("ReAlloc with smaller size than original (%d); return old pointer", maxSize));
+       //update current size so HeapSize will return the right value
+       helem->cursize = dwBytes;  
        return lpMem; // if reallocation with same size don't do anything
   }
   lpNewMem = Alloc(dwFlags, dwBytes);
-  memcpy(lpNewMem, lpMem, dwBytes < oldSize ? dwBytes : oldSize);
+  memcpy(lpNewMem, lpMem, dwBytes < maxSize ? dwBytes : maxSize);
   Free(0, lpMem);
 
   if(lpNewMem == NULL)
