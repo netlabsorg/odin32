@@ -1,4 +1,4 @@
-# $Id: pdwin32.wat.dbg,v 1.1 2000-08-23 18:05:55 sandervl Exp $
+# $Id: pdwin32.wat.dbg,v 1.2 2000-08-29 21:39:00 sandervl Exp $
 # ODIN / win32os2 Project
 #
 # DEBUG makefile for the Watcom C/C++ compiler environment
@@ -36,7 +36,6 @@ ODINCRT = odincrtd
 # d2		generate symbolic debug information
 # od 		no optimizations
 # bm		multithreaded environment
-# ez		generated OMF objects
 # mf		flat memory model
 # 5r		pentium register calling convention
 # br		use dll for runtime library functions
@@ -45,11 +44,11 @@ ODINCRT = odincrtd
 # fp5		optimize floating-point for pentium
 # fpi87		inline fpu instructions
 # hw		generate Watcom debug information
-CFLAGS           = -w4 -wcd=726 -e25 -od -d2 -hw -bm -ez -mf -5r -br -bt=os2 -zq -fp5 -fpi87 -i$(%WATCOM)\h -i$(PDWIN32_INCLUDE)\Win -i. -i$(PDWIN32_INCLUDE) -D__WIN32OS2__ -D__WINE__ -DDEBUG -D__i386__ -DTCPV40HDRS -DCOMCTL32UNDOC
-CXXFLAGS         = -w4 -wcd=726 -e25 -od -d2 -hw -bm -ez -mf -5r -br -bt=os2 -zq -fp5 -fpi87 -i$(%WATCOM)\h -i$(PDWIN32_INCLUDE)\Win -i. -i$(PDWIN32_INCLUDE) -D__WIN32OS2__ -D__WINE__ -DDEBUG -D__i386__ -DTCPV40HDRS -DCOMCTL32UNDOC
-CXXFLAGS_ODINCRT = -w4 -wcd=726 -e25 -od -d2 -hw -bm -bd -ez -mf -5r -bt=os2 -zq -fp5 -fpi87 -i$(%WATCOM)\h -i$(PDWIN32_INCLUDE)\Win -i. -i$(PDWIN32_INCLUDE) -D__WIN32OS2__ -DDEBUG -D__i386__ -DTCPV40HDRS -DCOMCTL32UNDOC
-CFLAGS_WIN32APP  = -w4 -wcd=726 -e25 -od -d2 -hw -bm -ez -mf -5r -bt=os2 -zq -fp5 -fpi87 -i$(%WATCOM)\h -i$(PDWIN32_INCLUDE)\Win -i. -i$(PDWIN32_INCLUDE) -DDEBUG -D__WIN32OS2__ -D__i386__
-CXXFLAGS_WIN32APP= -w4 -wcd=726 -e25 -od -d2 -hw -bm -ez -mf -5r -bt=os2 -zq -fp5 -fpi87 -i$(%WATCOM)\h -i$(PDWIN32_INCLUDE)\Win -i. -i$(PDWIN32_INCLUDE) -DDEBUG -D__WIN32OS2__ -D__i386__
+CFLAGS           = -w4 -wcd=726 -e25 -od -d2 -hw -bm -mf -5r -br -bt=os2 -zq -fp5 -fpi87 -i$(%WATCOM)\h -i$(PDWIN32_INCLUDE)\Win -i. -i$(PDWIN32_INCLUDE) -D__WIN32OS2__ -D__WINE__ -DDEBUG -D__i386__ -DTCPV40HDRS -DCOMCTL32UNDOC
+CXXFLAGS         = -w4 -wcd=726 -e25 -od -d2 -hw -bm -mf -5r -br -bt=os2 -zq -fp5 -fpi87 -i$(%WATCOM)\h -i$(PDWIN32_INCLUDE)\Win -i. -i$(PDWIN32_INCLUDE) -D__WIN32OS2__ -D__WINE__ -DDEBUG -D__i386__ -DTCPV40HDRS -DCOMCTL32UNDOC
+CXXFLAGS_ODINCRT = -w4 -wcd=726 -e25 -od -d2 -hw -bm -bd -mf -5r -bt=os2 -zq -fp5 -fpi87 -i$(%WATCOM)\h -i$(PDWIN32_INCLUDE)\Win -i. -i$(PDWIN32_INCLUDE) -D__WIN32OS2__ -DDEBUG -D__i386__ -DTCPV40HDRS -DCOMCTL32UNDOC
+CFLAGS_WIN32APP  = -w4 -wcd=726 -e25 -od -d2 -hw -bm -mf -5r -bt=os2 -zq -fp5 -fpi87 -i$(%WATCOM)\h -i$(PDWIN32_INCLUDE)\Win -i. -i$(PDWIN32_INCLUDE) -DDEBUG -D__WIN32OS2__ -D__i386__
+CXXFLAGS_WIN32APP= -w4 -wcd=726 -e25 -od -d2 -hw -bm -mf -5r -bt=os2 -zq -fp5 -fpi87 -i$(%WATCOM)\h -i$(PDWIN32_INCLUDE)\Win -i. -i$(PDWIN32_INCLUDE) -DDEBUG -D__WIN32OS2__ -D__i386__
 
 !ifdef DEBUGALL
 CFLAGS           = $(CFLAGS) -DDEBUG_ENABLELOG_LEVEL2
