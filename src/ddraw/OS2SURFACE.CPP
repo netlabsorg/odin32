@@ -1572,7 +1572,7 @@ HRESULT __stdcall SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lp
 
  OS2IDirectDrawSurface *dest = (OS2IDirectDrawSurface *)This;
  OS2IDirectDrawSurface *src  = (OS2IDirectDrawSurface *)lpDDSrcSurface;
- ISequence<IRectangle*>::Cursor *EnumCursor;
+ ISequence<DDRectangle*>::Cursor *EnumCursor;
 
  HRESULT                rc;
  ULONG                  ulColor, *pColor;
@@ -1583,7 +1583,7 @@ HRESULT __stdcall SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lp
  PLOGPALETTE            pLogPal = (PLOGPALETTE) SysPal;
  char                   *pBltPos, *pSrcPos;
  DDSURFACEDESC2         DestSurfaceDesc, SrcSurfaceDesc;
- IRectangle             *pIRectDest,*pIRectSrc,*pIRectTest;
+ DDRectangle             *pIRectDest,*pIRectSrc,*pIRectTest;
  RECTL                  DestRect, SrcRect;
  BOOL Found;
  DWORD dwSrcColor, dwDestColor;
@@ -1597,15 +1597,15 @@ HRESULT __stdcall SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lp
 
   if (NULL!=lpDestRect)
   {
-    pIRectDest = new IRectangle( lpDestRect->left,
-                                 lpDestRect->bottom,
-                                 lpDestRect->right,
-                                 lpDestRect->top);
+    pIRectDest = new DDRectangle( lpDestRect->top,
+                                  lpDestRect->left,
+                                  lpDestRect->bottom,
+                                  lpDestRect->right);
     memcpy(&DestRect,lpDestRect,sizeof(RECTL) );
   }
   else
   {
-    pIRectDest = new IRectangle( 0, dest->height, dest->width, 0);
+    pIRectDest = new DDRectangle( 0, 0, dest->height, dest->width);
     DestRect.top    = 0;
     DestRect.left   = 0;
     DestRect.bottom = dest->height;
@@ -1736,15 +1736,15 @@ HRESULT __stdcall SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lp
 
   if (NULL!=lpSrcRect)
   {
-    pIRectSrc = new IRectangle( lpSrcRect->left,
-                                lpSrcRect->bottom,
-                                lpSrcRect->right,
-                                lpSrcRect->top);
+    pIRectSrc = new DDRectangle( lpSrcRect->top,
+                                 lpSrcRect->left,
+                                 lpSrcRect->bottom,
+                                 lpSrcRect->right);
     memcpy(&SrcRect,lpSrcRect,sizeof(RECTL) );
   }
   else
   {
-    pIRectSrc = new IRectangle( 0, src->height, src->width, 0);
+    pIRectSrc = new DDRectangle( 0, 0, src->height, src->width);
     SrcRect.top    = 0;
     SrcRect.left   = 0;
     SrcRect.bottom = src->height;
@@ -3637,12 +3637,12 @@ HRESULT __stdcall SurfLock4(THIS This, LPRECT lpRect, LPDDSURFACEDESC2 lpSurface
 {
 
   OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
-  ISequence<IRectangle*>::Cursor *EnumCursor;
+  ISequence<DDRectangle*>::Cursor *EnumCursor;
 
   BOOL Found;
   ULONG  nrScanLines, rc;
   char *pBuffer;
-  IRectangle *pIRectCurrent,*pIRectNew;
+  DDRectangle *pIRectCurrent,*pIRectNew;
   static int times = 0;
 
   #ifdef DEBUG
@@ -3655,9 +3655,9 @@ HRESULT __stdcall SurfLock4(THIS This, LPRECT lpRect, LPDDSURFACEDESC2 lpSurface
     return DDERR_INVALIDPARAMS;
 
   if (NULL!=lpRect)
-    pIRectNew = new IRectangle( lpRect->left, lpRect->bottom, lpRect->right, lpRect->top);
+    pIRectNew = new DDRectangle( lpRect->left, lpRect->top, lpRect->bottom, lpRect->right );
   else
-    pIRectNew = new IRectangle( 0, me->height, me->width, 0);
+    pIRectNew = new DDRectangle( 0, 0, me->height, me->width);
 
   // ToDo : the lockchecking should be done in a critcal seq.
 
@@ -3966,8 +3966,8 @@ HRESULT __stdcall SurfUnlock(THIS This, LPRECT lpSurfaceRect)
 
 
   OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
-  ISequence<IRectangle*>::Cursor *EnumCursor;
-  IRectangle *pIRectUnlock;
+  ISequence<DDRectangle*>::Cursor *EnumCursor;
+  DDRectangle *pIRectUnlock;
   BOOL Found = FALSE;
 
   #ifdef DEBUG
@@ -3985,15 +3985,15 @@ HRESULT __stdcall SurfUnlock(THIS This, LPRECT lpSurfaceRect)
   if(NULL!=lpSurfaceRect)
   {
     WriteLog("Unlock rectangle\n");
-    pIRectUnlock = new IRectangle( lpSurfaceRect->left,
+    pIRectUnlock = new DDRectangle( lpSurfaceRect->top,
+                                   lpSurfaceRect->left,
                                    lpSurfaceRect->bottom,
-                                   lpSurfaceRect->right,
-                                   lpSurfaceRect->top);
+                                   lpSurfaceRect->right);
   }
   else
   {
     WriteLog("Unlock complete surface\n");
-    pIRectUnlock = new IRectangle( 0, me->height, me->width, 0);
+    pIRectUnlock = new DDRectangle( 0, 0, me->height, me->width);
   }
 
   #ifdef DEBUG
