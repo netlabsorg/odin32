@@ -1,10 +1,13 @@
-/* $Id: ddraw.CPP,v 1.13 2000-08-31 12:48:42 sandervl Exp $ */
+/* $Id: ddraw.CPP,v 1.14 2000-08-31 20:51:57 sandervl Exp $ */
 
 /*
  * DXDraw DLL implementaion
  *
  * Copyright 1998 Sander va Leeuwen
  * Copyright 1999 Markus Montkowski
+ *
+ * WARNING: DirectDrawCreate defaults to ddraw v4 if lpGUID == NULL!!
+ *
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -44,7 +47,12 @@ HRESULT WIN32API OS2DirectDrawCreate( GUID FAR *lpGUID,
   }
   else
   {
-    newdraw->Vtbl.AddRef((IDirectDraw2 *)newdraw);
+    if(!lpGUID) {
+         //WARNING: defaults to ddraw v4
+    	 newdraw->Vtbl.QueryInterface((IDirectDraw2 *)newdraw, &IID_IDirectDraw4, (LPVOID *)lplpDD);
+    }
+    else newdraw->Vtbl.QueryInterface((IDirectDraw2 *)newdraw, lpGUID, (LPVOID *)lplpDD);
+
     rc = newdraw->GetLastError();
     if(rc != DD_OK)
     {
@@ -52,8 +60,6 @@ HRESULT WIN32API OS2DirectDrawCreate( GUID FAR *lpGUID,
 
       delete newdraw;
     }
-    else
-      *lplpDD = (LPDIRECTDRAW)newdraw;
   }
   return(rc);
 }
