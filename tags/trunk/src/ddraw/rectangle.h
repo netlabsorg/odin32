@@ -31,9 +31,17 @@ Boolean
 
 Coord
   width() const,
-  height() const;
+  height() const,
+  Top() const,
+  Left() const,
+  Bottom() const,
+  Right() const;
+
+  void* GetMemPtr();
+  void SetMemPtr(void* NewMemPtr);
 
 private:
+  void* pMemPtr; // Pointer to surface memory for this rectangle
   long lTop,lLeft;
   long lBottom,lRight;
 }; // class DDRectangle
