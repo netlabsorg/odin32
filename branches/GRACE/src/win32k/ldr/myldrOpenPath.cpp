@@ -1,4 +1,4 @@
-/* $Id: myldrOpenPath.cpp,v 1.1 2000-07-16 22:21:16 bird Exp $
+/* $Id: myldrOpenPath.cpp,v 1.1.2.1 2000-08-15 06:16:04 bird Exp $
  *
  * myldrOpenPath - ldrOpenPath used to open executables we'll override
  * this to altern the search path for DLLs.
@@ -134,8 +134,8 @@ ULONG LDRCALL myldrOpenPath( /* retd  0x10 */
         else
         {
             struct InfoSegLDT *pInfoSeg;
-            pInfoSeg = (struct InfoSegLDT *)D32Hlp_GetDOSVar(DHGETDOSV_SYSINFOSEG, 0);
-            if (pInfoSeg == NULL)
+            pInfoSeg = (struct InfoSegLDT *)D32Hlp_GetDOSVar(DHGETDOSV_LOCINFOSEG, 0);
+            if (pInfoSeg != NULL)
             {
                 pExe = getModuleByhMTE(pInfoSeg->LIS_DI); /* LIS_DI is the same as hmod in LINFOSEG from bsedos16.h.  */
                 #ifdef DEBUG            /* While testing! */
@@ -145,7 +145,7 @@ ULONG LDRCALL myldrOpenPath( /* retd  0x10 */
             }
             #ifdef DEBUG                /* While testing! */
             else
-                dprintf(("myldrOpenPath: D32Hlp_GetDOSVar(DHGETDOSV_SYSINFOSEG) failed.\n"));
+                dprintf(("myldrOpenPath: D32Hlp_GetDOSVar(DHGETDOSV_LOCINFOSEG) failed.\n"));
             #endif
         }
 

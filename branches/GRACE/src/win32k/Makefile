@@ -1,5 +1,5 @@
 ################################################################################
-# $Id: Makefile,v 1.43.4.3 2000-08-14 08:57:02 bird Exp $
+# $Id: Makefile,v 1.43.4.4 2000-08-15 06:15:55 bird Exp $
 #
 # Win32k makefile.
 #
@@ -461,13 +461,6 @@ $(WIN32KBIN)\extract.exe: dev16\ProbKrnl.c dev16\vprntf16.c \
         $(WIN32KOBJ)\probkrnl_e.obj + $(WIN32KOBJ)\vprntf16_e.obj + $(WIN32KOBJ)\d16globl_e.obj, \
         $@, $(WIN32KBIN)\$(*B).map, \
         $(TOOLKIT)\lib\os2286.lib + $(MSCPATH)\lib\clibcep.lib;
-
-d32init.exe: $(WIN32KBIN)\d32init.exe
-    $(CP) $** $@
-$(WIN32KBIN)\d32init.exe: dev32\d32init.c
-    icc -Ti+ -Ss /Gr+ $(CINCLUDES) -DRING3 -DDEBUGR3 -DDEBUG \
-        -Fo$(WIN32KOBJ)\$(*B).r3obj -Fe$@ -Fm$(WIN32KBIN)\$(*B).map \
-        dev32\$(*B).c
 
 
 
