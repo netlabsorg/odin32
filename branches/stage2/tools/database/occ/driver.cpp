@@ -54,8 +54,8 @@
 static char thisVersion[] = "2.5.11";
 
 static char copyingNote[]
-	= "Copyright (c) 1997-2001 Shigeru Chiba.  All Rights Reserved.\n"
-	  "Copyright (c) 1995, 1996 Xerox Corporation. All Rights Reserved.";
+        = "Copyright (c) 1997-2001 Shigeru Chiba.  All Rights Reserved.\n"
+          "Copyright (c) 1995, 1996 Xerox Corporation. All Rights Reserved.";
 
 const char opencxxErrorMessage[] = " Error(s).  OpenC++ stops.\n";
 
@@ -75,7 +75,7 @@ bool preprocessTwice;
 const int NARGS = 64;
 const char* cppArgv[NARGS];
 const char* ccArgv[NARGS];
-static const char* cc2Argv[NARGS];	// arguments following a source file
+static const char* cc2Argv[NARGS];      // arguments following a source file
 int cppArgc = 0;
 int ccArgc = 0;
 static int cc2Argc = 0;
@@ -115,12 +115,18 @@ void Compile(int argc, char** argv)
 {
     char* src = ParseOptions(argc, argv);
     if(src != nil)
-	ReadFile(src);
+        ReadFile(src);
     else
-	if(numOfObjectFiles == 0)
-	    ReadStdin();
-	else
-	    RunLinker();
+        if(numOfObjectFiles == 0)
+            ReadStdin();
+        else
+            RunLinker();
+    #ifdef ODD
+    /*
+     * Post processing goes here.
+     */
+
+    #endif
 }
 
 static void ReadStdin()
@@ -131,12 +137,12 @@ static void ReadStdin()
     int nerrors = ParseOpencxx(&prog);
 
     if(!showProgram)
-	if(nerrors == 0)
-	    prog.Write(cout, "stdout");
-	else{
-	    cerr << nerrors << opencxxErrorMessage;
-	    exit(1);
-	}
+        if(nerrors == 0)
+            prog.Write(cout, "stdout");
+        else{
+            cerr << nerrors << opencxxErrorMessage;
+            exit(1);
+        }
 }
 
 static void ReadFile(const char* src)
@@ -145,12 +151,12 @@ static void ReadFile(const char* src)
 
     if(doPreprocess){
         char* cppfile = RunPreprocessor(src);
-	occfile = RunOpencxx(cppfile);
-	//unlink(cppfile);
-	delete cppfile;
+        occfile = RunOpencxx(cppfile);
+        //unlink(cppfile);
+        delete cppfile;
     }
     else
-	occfile = RunOpencxx(src);
+        occfile = RunOpencxx(src);
 
     if(doCompile){
         RunCompiler(src, occfile);
@@ -167,33 +173,33 @@ static char* RunOpencxx(const char* src)
     ifstream src_stream(src);
     if(!src_stream){
         perror(src);
-	exit(1);
+        exit(1);
     }
 
     ProgramFile src_prog(src_stream);
     if(verboseMode){
-	if(doTranslate)
-	    cerr << "[Translate... " << src
-		 << " into: " << dest << "]\n";
-	else
-	    cerr << "[Parse... " << src << "]\n";
+        if(doTranslate)
+            cerr << "[Translate... " << src
+                 << " into: " << dest << "]\n";
+        else
+            cerr << "[Parse... " << src << "]\n";
     }
 
     int nerrors = ParseOpencxx(&src_prog);
 
     if(nerrors != 0){
-	cerr << nerrors << opencxxErrorMessage;
-	exit(1);
+        cerr << nerrors << opencxxErrorMessage;
+        exit(1);
     }
 
     if(doTranslate){
-	ofstream dest_stream(dest, (ios::out | ios::trunc));
-	if(!dest_stream){
-	    perror(dest);
-	    exit(1);
-	}
+        ofstream dest_stream(dest, (ios::out | ios::trunc));
+        if(!dest_stream){
+            perror(dest);
+            exit(1);
+        }
 
-	src_prog.Write(dest_stream, dest);
+        src_prog.Write(dest_stream, dest);
     }
 
     src_stream.close();
@@ -208,18 +214,18 @@ static int ParseOpencxx(Program* prog)
     Ptree* def;
 
     while(parse.rProgram(def)){
-	if(showProgram)
-	    def->Display2(cout);
+        if(showProgram)
+            def->Display2(cout);
 
-	if(doTranslate){
-	    Ptree* def2 = w.Translate(def);
-	    Ptree* before = w.GetInsertedPtree();
-	    Ptree* after = w.GetAppendedPtree();
+        if(doTranslate){
+            Ptree* def2 = w.Translate(def);
+            Ptree* before = w.GetInsertedPtree();
+            Ptree* after = w.GetAppendedPtree();
 
-	    prog->Insert(def, before, after);
-	    if(def != def2)
-		prog->MinimumSubst(def2, def);
-	}
+            prog->Insert(def, before, after);
+            if(def != def2)
+                prog->MinimumSubst(def2, def);
+        }
     }
 
     return parse.NumOfErrors();
@@ -251,66 +257,66 @@ void ParseCmdOptions(int from, int argc, char** argv, char*& source_file)
 {
     int i;
     for(i = from; i < argc; ++i)
-	if(strcmp("--", argv[i]) == 0)
-	    break;
-	else if(strcmp("-E", argv[i]) == 0)
-	    doCompile = FALSE;
-	else if(strcmp("-g", argv[i]) == 0)
-	    AddCcOption(argv[i]);
-	else if (strcmp("-n", argv[i]) == 0)
-	    doPreprocess = FALSE;
-	else if(*argv[i] == '-' && argv[i][1] == 'm'){
-	    makeSharedLibrary = TRUE;
-	    sharedLibraryName = &argv[i][2];
-	}
-	else if (strcmp("-P", argv[i]) == 0)
-	    preprocessTwice = TRUE;
+        if(strcmp("--", argv[i]) == 0)
+            break;
+        else if(strcmp("-E", argv[i]) == 0)
+            doCompile = FALSE;
+        else if(strcmp("-g", argv[i]) == 0)
+            AddCcOption(argv[i]);
+        else if (strcmp("-n", argv[i]) == 0)
+            doPreprocess = FALSE;
+        else if(*argv[i] == '-' && argv[i][1] == 'm'){
+            makeSharedLibrary = TRUE;
+            sharedLibraryName = &argv[i][2];
+        }
+        else if (strcmp("-P", argv[i]) == 0)
+            preprocessTwice = TRUE;
         else if (strcmp("-p", argv[i]) == 0)
-	    doTranslate = FALSE;
-	else if (strcmp("-C", argv[i]) == 0) {
-	    AddCppOption("-C");
-	    preprocessTwice = TRUE;
-	}
-	else if(strcmp("-c", argv[i]) == 0)
-	    makeExecutable = FALSE;
-	else if(strcmp("-l", argv[i]) == 0){
-	    cout << "[Loaded metaclasses...]\n";
-	    opcxx_ListOfMetaclass::PrintAllMetaclasses();
-	    exit(0);
-	}
-	else if(*argv[i] == '-' && argv[i][1] == 'S')
-	    LoadMetaclass(&argv[i][2]);
-	else if(strcmp("-s", argv[i]) == 0)
-	    showProgram = TRUE;
-	else if(strcmp("-v", argv[i]) == 0)
-	    verboseMode = TRUE;
-	else if(strcmp("-V", argv[i]) == 0){
-	    ShowVersion();
-	    exit(1);
-	}
-	else if (strcmp("--regular-c++", argv[i]) == 0)
-	    regularCpp = TRUE;
-	else if(*argv[i] == '-'
-		&& (argv[i][1] == 'D' || argv[i][1] == 'I'))
-	    AddCppOption(argv[i]);
-	else if(*argv[i] == '-' && argv[i][1] == 'd' && argv[i][2] != '\0')
-	    AddCppOption(&argv[i][2]);
-	else if(*argv[i] == '-' && argv[i][1] == 'M')
-	    RecordCmdOption(&argv[i][2]);
-	else if(*argv[i] == '-'){
-	    ShowVersion();
-	    ShowHelp(argv);
-	    exit(1);
-	}
-	else if(!ParseTargetSpecificOptions(argv[i], source_file))
-	    ParseCcOptions(argv[i], source_file);
+            doTranslate = FALSE;
+        else if (strcmp("-C", argv[i]) == 0) {
+            AddCppOption("-C");
+            preprocessTwice = TRUE;
+        }
+        else if(strcmp("-c", argv[i]) == 0)
+            makeExecutable = FALSE;
+        else if(strcmp("-l", argv[i]) == 0){
+            cout << "[Loaded metaclasses...]\n";
+            opcxx_ListOfMetaclass::PrintAllMetaclasses();
+            exit(0);
+        }
+        else if(*argv[i] == '-' && argv[i][1] == 'S')
+            LoadMetaclass(&argv[i][2]);
+        else if(strcmp("-s", argv[i]) == 0)
+            showProgram = TRUE;
+        else if(strcmp("-v", argv[i]) == 0)
+            verboseMode = TRUE;
+        else if(strcmp("-V", argv[i]) == 0){
+            ShowVersion();
+            exit(1);
+        }
+        else if (strcmp("--regular-c++", argv[i]) == 0)
+            regularCpp = TRUE;
+        else if(*argv[i] == '-'
+                && (argv[i][1] == 'D' || argv[i][1] == 'I'))
+            AddCppOption(argv[i]);
+        else if(*argv[i] == '-' && argv[i][1] == 'd' && argv[i][2] != '\0')
+            AddCppOption(&argv[i][2]);
+        else if(*argv[i] == '-' && argv[i][1] == 'M')
+            RecordCmdOption(&argv[i][2]);
+        else if(*argv[i] == '-'){
+            ShowVersion();
+            ShowHelp(argv);
+            exit(1);
+        }
+        else if(!ParseTargetSpecificOptions(argv[i], source_file))
+            ParseCcOptions(argv[i], source_file);
 
     while(++i < argc)
-	if(!ParseTargetSpecificOptions(argv[i], source_file))
-	    ParseCcOptions(argv[i], source_file);
+        if(!ParseTargetSpecificOptions(argv[i], source_file))
+            ParseCcOptions(argv[i], source_file);
 
     if(!doTranslate)
-	doCompile = FALSE;
+        doCompile = FALSE;
 }
 
 static void ShowVersion()
@@ -321,66 +327,66 @@ static void ShowVersion()
 static void ShowHelp(char** argv)
 {
     cerr << "Usage: "
-	 << argv[0]
-	 << " [-l][-s][-V][-v][-E][-m[<file name>]][-c][-n][-p][--regular-c++]\n"
-	 << "\t\t[-I<directory>][-D<macro>[=<def>]][-M<option>[=<value>]]\n"
-	 << "\t\t[-g][-d<option>][-S<metaclass>]\n"
-	 << "\t\t[-- <compiler options>] <source file>\n"
-	 << "\n"
-	 << "    -g             Produce debugging information\n"
-	 << "    -M             Specify an <option> with <value> passed to metaobjects\n"
-	 << "    -l             List metaclasses\n"
-	 << "    -S             Load a metaclass\n"
-	 << "    -s             Show program tree on stdout\n"
-	 << "    -V             Show version\n"
-	 << "    -v             Verbose mode\n"
-	 << "\n"
-	 << " Building stages options\n"
-	 << "    -n             Don't preprocess\n"
-	 << "    -p             Don't translate (stop after parsing)\n"
-	 << "    -E             Don't compile (stop after translation)\n"
-	 << "    -c             Don't make executable (stop after compilation)\n"
+         << argv[0]
+         << " [-l][-s][-V][-v][-E][-m[<file name>]][-c][-n][-p][--regular-c++]\n"
+         << "\t\t[-I<directory>][-D<macro>[=<def>]][-M<option>[=<value>]]\n"
+         << "\t\t[-g][-d<option>][-S<metaclass>]\n"
+         << "\t\t[-- <compiler options>] <source file>\n"
+         << "\n"
+         << "    -g             Produce debugging information\n"
+         << "    -M             Specify an <option> with <value> passed to metaobjects\n"
+         << "    -l             List metaclasses\n"
+         << "    -S             Load a metaclass\n"
+         << "    -s             Show program tree on stdout\n"
+         << "    -V             Show version\n"
+         << "    -v             Verbose mode\n"
+         << "\n"
+         << " Building stages options\n"
+         << "    -n             Don't preprocess\n"
+         << "    -p             Don't translate (stop after parsing)\n"
+         << "    -E             Don't compile (stop after translation)\n"
+         << "    -c             Don't make executable (stop after compilation)\n"
 #if !defined(IRIX_CC) && !defined (_MSC_VER)
-	 << "    -P             Preprocess again after translation\n"
+         << "    -P             Preprocess again after translation\n"
 #endif
-	 << "    -m             Compile a metaclass (make a shared library)\n"
-	 << "\n"
-	 << " Preprocessor options\n"
-	 << "    -I<directory>  Add <directory> to the #include path\n"
-	 << "    -D<name>=<def> Define a macro <name> as <def>\n"
-	 << "    -d<option>     Specify a preprocessor option\n"
+         << "    -m             Compile a metaclass (make a shared library)\n"
+         << "\n"
+         << " Preprocessor options\n"
+         << "    -I<directory>  Add <directory> to the #include path\n"
+         << "    -D<name>=<def> Define a macro <name> as <def>\n"
+         << "    -d<option>     Specify a preprocessor option\n"
 #if !defined(IRIX_CC) && !defined (_MSC_VER)
-	 << "    -C             Don't discard comments\n"
+         << "    -C             Don't discard comments\n"
 #endif
-	 << "\n"
-	 << " Other options\n"
-	 << "    --regular-c++  Inhibit the extended syntax\n";
+         << "\n"
+         << " Other options\n"
+         << "    --regular-c++  Inhibit the extended syntax\n";
 }
 
 void AddCppOption(const char* arg)
 {
     if(cppArgc < NARGS)
-	cppArgv[cppArgc++] = arg;
+        cppArgv[cppArgc++] = arg;
     else{
-	cerr << "OpenC++: too many arguments\n";
-	exit(1);
+        cerr << "OpenC++: too many arguments\n";
+        exit(1);
     }
 }
 
 void AddCcOption(const char* arg)
 {
     if(ccArgc < NARGS)
-	ccArgv[ccArgc++] = arg;
+        ccArgv[ccArgc++] = arg;
     else{
-	cerr << "OpenC++: too many arguments\n";
-	exit(1);
+        cerr << "OpenC++: too many arguments\n";
+        exit(1);
     }
 }
 
 void CloseCcOptions()
 {
     for(int i = 0; i < cc2Argc; ++i)
-	AddCcOption(cc2Argv[i]);
+        AddCcOption(cc2Argv[i]);
 
     AddCcOption((char*)0);
 }
@@ -388,50 +394,50 @@ void CloseCcOptions()
 static void AddCc2Option(const char* arg)
 {
     if(cc2Argc < NARGS)
-	cc2Argv[cc2Argc++] = arg;
+        cc2Argv[cc2Argc++] = arg;
     else{
-	cerr << "OpenC++: too many arguments\n";
-	exit(1);
+        cerr << "OpenC++: too many arguments\n";
+        exit(1);
     }
 }
 
 static void RecordCmdOption(char* option)
 {
     if(option == nil || *option == '\0')
-	return;
+        return;
 
     char* value = strchr(option, '=');
     if(value != nil)
-	*value++ = '\0';
+        *value++ = '\0';
 
     if(!Class::RecordCmdLineOption(option, value)){
-	cerr << "OpenC++: Too many -M options.\n";
-	exit(1);
+        cerr << "OpenC++: Too many -M options.\n";
+        exit(1);
     }
 }
 
 static void ParseCcOptions(char* arg, char*& source_file)
 {
     static char* errmsg
-	= "OpenC++: only a single source file is accepted at a time.\n";
+        = "OpenC++: only a single source file is accepted at a time.\n";
 
     if(arg != nil && arg[0] != '-'){
-	if(IsCxxSource(arg))
-	    if(source_file == nil){
-		source_file = arg;
-		return;
-	    }
-	    else{
-		cerr << errmsg;
-		exit(1);
-	    }
+        if(IsCxxSource(arg))
+            if(source_file == nil){
+                source_file = arg;
+                return;
+            }
+            else{
+                cerr << errmsg;
+                exit(1);
+            }
     }
 
     ++numOfObjectFiles;
-    if(source_file == nil)	// source file is already given
-	AddCcOption(arg);
+    if(source_file == nil)      // source file is already given
+        AddCcOption(arg);
     else
-	AddCc2Option(arg);
+        AddCc2Option(arg);
 
     return;
 }
@@ -447,7 +453,7 @@ bool IsCxxSource(char* fname)
 {
     char* ext = strrchr(fname, '.');
     if(ext == nil)
-	return FALSE;
+        return FALSE;
 
     if(strcmp(ext,    ".cc") == 0
        || strcmp(ext, ".C") == 0
@@ -458,7 +464,7 @@ bool IsCxxSource(char* fname)
        || strcmp(ext, ".ii") == 0
        || strcmp(ext, ".i") == 0
        || strcmp(ext, ".occ") == 0)
-	return TRUE;
+        return TRUE;
 
     return FALSE;
 }
@@ -466,5 +472,5 @@ bool IsCxxSource(char* fname)
 void ShowCommandLine(const char*, const char** args)
 {
     while(*args != nil)
-	cerr << ' ' << *args++;
+        cerr << ' ' << *args++;
 }
