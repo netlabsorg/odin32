@@ -1,4 +1,4 @@
-/* $Id: myldrFindModule.cpp,v 1.2 2001-02-10 11:11:46 bird Exp $
+/* $Id: myldrFindModule.cpp,v 1.3 2001-07-07 04:39:11 bird Exp $
  *
  * ldrFindModule - ldrFindModule replacement with support for long DLL names
  *                  and .DLL-extention dependency.
@@ -47,6 +47,11 @@ extern  PPMTE pglobal_l;
 extern  PPMTE pspecific_h;
 extern  PPMTE pspecific_l;
 
+/*******************************************************************************
+*   Internal Functions                                                         *
+*******************************************************************************/
+int     mymemicmp(void *pv1, void *pv2, unsigned int cch);
+
 
 /**
  * Finds a module if it's loaded.
@@ -55,6 +60,7 @@ extern  PPMTE pspecific_l;
  * and names longer than 8 chars.
  *
  * @returns     NO_ERROR on success.
+ *              If not found we'll still return NO_ERROR, but *ppMTE is NULL.
  *              OS/2 errorcode on error.
  * @param       pachFilename    Pointer to module filename.
  *                              If usClass isn't CLASS_GLOBAL then the string
@@ -72,12 +78,24 @@ extern  PPMTE pspecific_l;
  */
 ULONG LDRCALL myldrFindModule(PCHAR pachFilename, USHORT cchFilename, USHORT usClass, PPMTE ppMTE)
 {
+    /*
+     * Log.
+     */
+    kprintf(("myldrFindModule: fn=%.*s  len=%d  class=0x%02x  ppMTE=0x%08x\n", cchFilename, pachFilename, cchFilename, usClass, ppMTE));
+
     /* Check if this feature is enabled */
     if (isDllFixesDisabled())
     {
         #ifdef DEBUG
         APIRET rc = ldrFindModule(pachFilename, cchFilename, usClass, ppMTE);
-        kprintf(("ldrFindModule: fn=%.*s  len=%d  class=0x%02x  ppMTE=0x%08x rc=%d (original)\n", cchFilename, pachFilename, cchFilename, usClass, ppMTE, rc));
+        if (rc == NO_ERROR && *ppMTE == NULL)
+            kprintf(("myldrFindModule: Not Found\n"));
+        else
+            kprintf((usClass == CLASS_GLOBAL
+                     ? "myldrFindModule: Found pmte=0x%08x  hmte=0x%04x  modname=%.8s  path=%s (GLOBAL)\n"
+                     : "myldrFindModule: Found pmte=0x%08x  hmte=0x%04x  modname=%.8s  path=%s (%x)\n",
+                     *ppMTE, (*ppMTE)->mte_handle, (*ppMTE)->mte_modname,
+                     (*ppMTE)->mte_swapmte->smte_path, (*ppMTE)->mte_flags1 & CLASS_MASK));
         return rc;
         #else
         return ldrFindModule(pachFilename, cchFilename, usClass, ppMTE);
@@ -104,6 +122,7 @@ ULONG LDRCALL myldrFindModule(PCHAR pachFilename, USHORT cchFilename, USHORT usC
     PCHAR   pachExt;                    /* Pointer to the extention part of pachFilename. (not dot!) */
     int     cchExt;                     /* Length of the extention part of pachFilename. (not dot!) */
     int     cchName8;                   /* Length of modname in MTE. */
+    int     fDllExt = FALSE;            /* Set if we have a .DLL extention. */
 
     /*
      * Check if everything is the way it used to be... (unsupported kernel changes, etc.)
@@ -122,10 +141,6 @@ ULONG LDRCALL myldrFindModule(PCHAR pachFilename, USHORT cchFilename, USHORT usC
         return ERROR_INVALID_ACCESS;
     }
 
-    /*
-     * Log.
-     */
-    kprintf(("myldrFindModule: fn=%.*s  len=%d  class=0x%02x  ppMTE=0x%08x\n", cchFilename, pachFilename, cchFilename, usClass, ppMTE));
 
     /*
      * Can't find an empty name.
@@ -193,15 +208,23 @@ ULONG LDRCALL myldrFindModule(PCHAR pachFilename, USHORT cchFilename, USHORT usC
             cchName = cchFilename;
             pachExt = "DLL";
             cchExt = 3;
+            fDllExt = TRUE;
         }
         else
         {
             cchName = pachExt - pachName;
-            pachExt++;
             cchExt = cchFilename - cchName - 1;
+            if (    cchExt == 3 && !memcmp(pachExt, ".DLL", 4)
+                ||  cchName < 8 && !memcmp(pachExt, ".DLL", min(3, cchExt))
+                )
+                fDllExt = TRUE;
+            pachExt++;
         }
 
-        cchName8 = cchName > 8 ? 8 : cchName;
+        if (fDllExt)
+            cchName8 = cchName > 8 ? 8 : cchName;
+        else
+            cchName8 = cchFilename > 8 ? 8 : cchFilename;
 
         #ifdef DEBUG
         if (    memchr(pachFilename, '\\', cchFilename)
@@ -263,7 +286,9 @@ ULONG LDRCALL myldrFindModule(PCHAR pachFilename, USHORT cchFilename, USHORT usC
          * are special case.
          */
         if (usClass == CLASS_GLOBAL)
-        {   /*
+        {
+            #if 0 /* fault code... Search for DBE.DLL may hit DBEQ.DLL.. */
+            /*
              * DLLs, match name only:
              *  Check the module name from the resident MTE.
              *  Check the filename part of the fullname in the SwapMTE.
@@ -291,10 +316,65 @@ ULONG LDRCALL myldrFindModule(PCHAR pachFilename, USHORT cchFilename, USHORT usC
                          )
                      )
                 )
+            #else
+            BOOL    fFound;             /* Flag which is set if this mte match the name we're searching for. */
+
+            if (cchName <= 8 && fDllExt)
+            {   /*
+                 * Compatability code.
+                 *      Well only near compatible. If the internalname contains .DLL we will be able
+                 *      to find a few modules which OS2 normally won't find. Disable the latest check
+                 *      to make us 100% compatible.
+                 */
+                fFound =    !memcmp(pmte->mte_modname, pachFilename, cchName)
+                         && (   cchName == 8
+                             || pmte->mte_modname[cchName] == '\0'
+                             || !memcmp(&pmte->mte_modname[cchName], ".DLL", min(5, 8 - cchName)) /* extra feature */
+                             );
+            }
+            else
+            {   /*
+                 * Extention code.
+                 *      There is a part of the name in the mte_modname. Check that first to eliminate
+                 *        the next step where we access swappable code.
+                 *      fDllExt:
+                 *          These may or may not include the .DLL extention in the internal name.
+                 *      !fDllExt:
+                 *          These should contain the entire name in the internal name.
+                 *          If no filename extension, then the internal name should end with a '.'.
+                 *      NB! We have an issue of casesensitivity here... (ARG!!!)
+                 *          That make this stuff a bit more expensive...
+                 *          Possible fix is to use the filename, or to require an uppercased internal name...
+                 */
+                fFound = !memcmp(pmte->mte_modname, pachFilename, cchName8);
+                if (fFound)
+                {
+                    PCHAR   pachResName;                /* Pointer to the internal name - resname.0 */
+                    pachResName = (PCHAR)pmte->mte_swapmte->smte_restab;
+                    if ((char*)pachResName < (char*)0x10000)
+                    {
+                        kprintf(("myldrFindModule: Holy Hand Grenade! there aint any resident names for this mte (0x%x)\n", pmte));
+                        pachResName = "\0";
+                    }
+                    if (fDllExt)
+                        fFound =    (   *pachResName == cchName
+                                     || (   *pachResName == cchName + 4
+                                         && !mymemicmp(&pachResName[1+cchName], ".DLL", 4)
+                                         )
+                                     )
+                                 && !mymemicmp(pachResName + 1, pachFilename, cchName);
+                    else
+                        fFound =    *pachResName == cchName + cchExt + 1
+                                 && !mymemicmp(pachResName+1, pachFilename, cchName + cchExt + 1);
+                }
+            }
+
+            if (fFound)
+            #endif
             {
                 *ppMTE = pmte;
                 kprintf(("myldrFindModule: Found pmte=0x%08x  hmte=0x%04x  modname=%.8s  path=%s (GLOBAL)\n",
-                         pmte, pmte->mte_handle, pmte->mte_modname, pSMTE->smte_path));
+                         pmte, pmte->mte_handle, pmte->mte_modname, pmte->mte_swapmte->smte_path));
                 return NO_ERROR;
             }
         }
@@ -305,9 +385,9 @@ ULONG LDRCALL myldrFindModule(PCHAR pachFilename, USHORT cchFilename, USHORT usC
              *  fullname in the SwapMTE.
              */
             PSMTE   pSMTE = pmte->mte_swapmte;
-            if ((   cchName8 == 0           /* This is 0 if we should not check the mte_modname. */
-                 || !memcmp(pmte->mte_modname, pachName, cchName8)
-                 )
+            if (   (   cchName8 == 0           /* This is 0 if we should not check the mte_modname. */
+                    || !memcmp(pmte->mte_modname, pachName, cchName8)
+                    )
                 &&  pSMTE->smte_pathlen == cchFilename - 1
                 &&  !memcmp(pSMTE->smte_path, pachFilename, cchFilename)    /* checks the '\0' too. */
                 )
@@ -329,3 +409,30 @@ ULONG LDRCALL myldrFindModule(PCHAR pachFilename, USHORT cchFilename, USHORT usC
     return NO_ERROR;
 }
 
+
+
+/**
+ * This function is needed since pv1 might be a mixed case name.
+ * @returns same as memcmp.
+ * @param   pv1 Pointer to resident name or part of that. Might be mixed cased.
+                This is uppercased.
+ * @param   pv2 Pointer to name. ASSUMES Uppercase.
+ * @param   cch Length
+ * @remark
+ */
+int mymemicmp(void *pv1, void *pv2, unsigned int cch)
+{
+#if 0 /* safe code which doesn't modify the resident name... */
+    if (!memcmp(pv1, pv2, cch))
+        return 0;
+    char *pach = (char*)SSToDS(alloca(cch));
+    memcpy(pach, pv2, cch);
+    ldrUCaseString(pach, cch);
+    return memcmp(pv1, pach, cch);
+#else
+    if (!memcmp(pv1, pv2, cch))
+        return 0;
+    ldrUCaseString((PCHAR)pv1, cch);
+    return memcmp(pv1, pv2, cch);
+#endif
+}
