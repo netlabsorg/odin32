@@ -1,4 +1,4 @@
-/* $Id: message.cpp,v 1.8 1999-11-21 13:59:36 achimha Exp $ */
+/* $Id: message.cpp,v 1.9 1999-12-19 20:17:17 sandervl Exp $ */
 
 /*
  * Win32 message API functions for OS/2
@@ -25,7 +25,7 @@
 #include "heap.h"
 #include "heapstring.h"
 
-typedef VOID (*WVSPRINTFAPROC)(LPSTR,LPCSTR,va_list);
+typedef VOID (* WIN32API WVSPRINTFAPROC)(LPSTR,LPCSTR,va_list);
 WVSPRINTFAPROC wvsprintfAProc = NULL;
 
 BOOL LoadwvsprintfA(VOID)
