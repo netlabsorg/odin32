@@ -1,6 +1,6 @@
-/* $Id: commdlg.h,v 1.1 1999-05-24 20:19:09 ktk Exp $ */
+/* $Id: commdlg.h,v 1.2 1999-09-09 21:04:37 phaller Exp $ */
 
-/* 
+/*
  * COMMDLG - Common Wine Dialog ... :-)
  */
 
@@ -31,7 +31,7 @@ extern "C" {
 #define OFN_SHAREAWARE               0x00004000
 #define OFN_NOREADONLYRETURN         0x00008000
 #define OFN_NOTESTFILECREATE         0x00010000
-#define OFN_NONETWORKBUTTON          0x00020000 
+#define OFN_NONETWORKBUTTON          0x00020000
 #define OFN_NOLONGNAMES              0x00040000
 #define OFN_EXPLORER                 0x00080000
 #define OFN_NODEREFERENCELINKS       0x00100000
@@ -133,7 +133,7 @@ typedef struct
 
 DECL_WINELIB_TYPE_AW(OFNOTIFY)
 DECL_WINELIB_TYPE_AW(LPOFNOTIFY)
- 
+
 typedef UINT (* CALLBACK LPCCHOOKPROC) (HWND, UINT, WPARAM, LPARAM);
 
 typedef struct {
@@ -256,7 +256,7 @@ DECL_WINELIB_TYPE_AW(LPFINDREPLACE)
 
 #include "pshpack1.h"
 
-typedef struct 
+typedef struct
 {
 	DWORD			lStructSize;
 	HWND16			hwndOwner;          /* caller's window handle   */
@@ -283,42 +283,42 @@ typedef struct
 
 typedef struct
 {
-	UINT  	lStructSize; 
-	HWND 		hwndOwner; 
-	HDC  		hDC; 
-	LPLOGFONTA    lpLogFont; 
-	INT		iPointSize; 
-	DWORD		Flags; 
-	COLORREF	rgbColors; 
-	LPARAM		lCustData; 
-	WNDPROC 	lpfnHook; 
-	LPCSTR		lpTemplateName; 
-	HINSTANCE	hInstance; 
-	LPSTR		lpszStyle; 
-	UINT16		nFontType; 
-	UINT16	___MISSING_ALIGNMENT__; 
-	INT   	nSizeMin; 
-	INT		nSizeMax; 
+	UINT  	lStructSize;
+	HWND 		hwndOwner;
+	HDC  		hDC;
+	LPLOGFONTA    lpLogFont;
+	INT		iPointSize;
+	DWORD		Flags;
+	COLORREF	rgbColors;
+	LPARAM		lCustData;
+	WNDPROC 	lpfnHook;
+	LPCSTR		lpTemplateName;
+	HINSTANCE	hInstance;
+	LPSTR		lpszStyle;
+	UINT16		nFontType;
+	UINT16	___MISSING_ALIGNMENT__;
+	INT   	nSizeMin;
+	INT		nSizeMax;
 } CHOOSEFONTA, *LPCHOOSEFONTA;
 
 typedef struct
 {
-	UINT  	lStructSize; 
-	HWND 		hwndOwner; 
-	HDC  		hDC; 
-	LPLOGFONTW    lpLogFont; 
-	INT		iPointSize; 
-	DWORD		Flags; 
-	COLORREF	rgbColors; 
-	LPARAM		lCustData; 
-	WNDPROC 	lpfnHook; 
-	LPCWSTR		lpTemplateName; 
-	HINSTANCE	hInstance; 
-	LPWSTR		lpszStyle; 
-	UINT16		nFontType; 
-	UINT16	___MISSING_ALIGNMENT__; 
-	INT   	nSizeMin; 
-	INT		nSizeMax; 
+	UINT  	lStructSize;
+	HWND 		hwndOwner;
+	HDC  		hDC;
+	LPLOGFONTW    lpLogFont;
+	INT		iPointSize;
+	DWORD		Flags;
+	COLORREF	rgbColors;
+	LPARAM		lCustData;
+	WNDPROC 	lpfnHook;
+	LPCWSTR		lpTemplateName;
+	HINSTANCE	hInstance;
+	LPWSTR		lpszStyle;
+	UINT16		nFontType;
+	UINT16	___MISSING_ALIGNMENT__;
+	INT   	nSizeMin;
+	INT		nSizeMax;
 } CHOOSEFONTW, *LPCHOOSEFONTW;
 
 DECL_WINELIB_TYPE_AW(CHOOSEFONT)
@@ -499,6 +499,7 @@ DECL_WINELIB_TYPE_AW(LPPRINTDLG)
 #define PD_DISABLEPRINTTOFILE        0x00080000
 #define PD_HIDEPRINTTOFILE           0x00100000
 
+#ifndef __WINE_DOCOBJ_H
 typedef enum __MIDL_IPrint_0001
 {
 	PRINTFLAG_MAYBOTHERUSER = 1,
@@ -509,7 +510,8 @@ typedef enum __MIDL_IPrint_0001
 	PRINTFLAG_FORCEPROPERTIES       = 32,
 	PRINTFLAG_PRINTTOFILE   = 64
 } PRINTFLAG;
- 
+#endif
+
 typedef struct {
 	UINT16 	wDriverOffset;
 	UINT16 	wDeviceOffset;
@@ -646,7 +648,7 @@ LRESULT WINAPI FormatCharDlgProcA(HWND,UINT,WPARAM,LPARAM);
 LRESULT WINAPI FormatCharDlgProcW(HWND,UINT,WPARAM,LPARAM);
 #define FormatCharDlgProc WINELIB_NAME_AW(FormatCharDlgProc)
 
-void COMDLG32_SetCommDlgExtendedError(DWORD err); 
+void COMDLG32_SetCommDlgExtendedError(DWORD err);
 
 #ifdef __cplusplus
 }
