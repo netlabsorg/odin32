@@ -1,4 +1,7 @@
-/* $Id: ChangeLog,v 1.2596 2003-06-25 17:02:29 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2597 2003-07-07 12:26:47 sandervl Exp $ */
+
+ 2002-07-07: Dmitry Froloff <froloff@os2   >
+    - PMKDBHK:  o Pass Alt-Shift on to PM (Russian language switch hotkey)
 
  2003-06-26: Platon Fomichev <stauff@innotek   >
     - USER32:  o ShowWindow(SW_RESTORE) should start the same PM restoration
