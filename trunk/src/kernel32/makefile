@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.105 2000-11-09 18:18:11 sandervl Exp $
+# $Id: makefile,v 1.106 2000-11-13 06:48:55 phaller Exp $
 
 #
 # Odin32 API
@@ -112,6 +112,7 @@ $(OBJDIR)\process.obj \
 $(OBJDIR)\cvtcursor.obj \
 $(OBJDIR)\cvtcursorgrp.obj \
 $(OBJDIR)\stubs.obj \
+$(OBJDIR)\ordinals.obj \
 $(OBJDIR)\interlock.obj \
 $(OBJDIR)\toolhelp.obj \
 $(OBJDIR)\codepage.obj \
