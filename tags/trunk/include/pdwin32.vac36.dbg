@@ -1,14 +1,13 @@
-# $Id: pdwin32.vac3.dbg,v 1.8 1999-08-25 11:24:08 sandervl Exp $
+# $Id: pdwin32.vac36.dbg,v 1.1 1999-08-25 11:24:08 sandervl Exp $
 # ODIN / win32os2 Project
 #
-# DEBUG makefile for the VAC3 compiler environment
+# DEBUG makefile for the VAC 3.6.5 compiler environment
 #
 # phaller@gmx.net, 1999/05/27
 #
 
-
-RTLLIB   = cppom30.lib
-RTLLIB_O = cppom30o.lib
+RTLLIB   = cpprms36.lib
+RTLLIB_O = cpprmo36.lib
 
 #
 # Tools
