@@ -1,17 +1,18 @@
-# $Id: makefile,v 1.7 2001-09-26 22:52:57 bird Exp $
+# $Id: makefile,v 1.8 2001-09-30 09:39:14 bird Exp $
 
 #
 # Odin32 API
 #
 #       xxodin32.dll makefile
 #
-NOINTERNALFUNCTIONS=1
-IMPDEF_FLAGS=-I:20000
+
 
 #
 # Compiler, tools, and interference rules.
 #
+IMPDEF_FLAGS = -I:20000
 !include ../../makefile.inc
+
 
 #
 # Overrides.
@@ -30,6 +31,7 @@ $(OBJDIR)\initterm.obj \
 $(OBJDIR)\guid.obj \
 $(OBJDIR)\math64.obj \
 $(OBJDIR)\large_int.obj
+
 
 #
 # Libraries. One space before the '\'.
@@ -73,5 +75,4 @@ TARGET = xxodin32
 # Includes the common rules.
 #
 !include $(ODIN32_POST_INC)
-
 

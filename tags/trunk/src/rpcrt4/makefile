@@ -1,16 +1,16 @@
-# $Id: makefile,v 1.7 2001-07-29 19:01:28 sandervl Exp $
+# $Id: makefile,v 1.8 2001-09-30 09:27:19 bird Exp $
 
 #
 # Odin32 API
 #
 #       rpcrt4.dll makefile
 #
-WRC_PREFIX_RESOURCE=1
 
 
 #
 # Compiler, tools, and interference rules.
 #
+WRC_PREFIX_RESOURCE=1
 !include ../../makefile.inc
 
 

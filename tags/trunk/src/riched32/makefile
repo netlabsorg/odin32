@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 2001-09-30 08:45:52 bird Exp $
+# $Id: makefile,v 1.7 2001-09-30 09:34:43 bird Exp $
 
 #
 # Odin32 API
@@ -17,9 +17,7 @@ WRC_PREFIX_RESOURCE=1
 #
 # Overrides.
 #
-!if "$(CUSTOMBUILD)" != "1"
 CDEFINES = $(CDEFINES) -DWIN32 -DSTDARG -DTHINK_C
-!endif
 
 
 #
