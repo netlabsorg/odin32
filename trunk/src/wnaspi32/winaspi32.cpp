@@ -1,4 +1,4 @@
-/* $Id: winaspi32.cpp,v 1.9 2000-09-15 13:25:50 sandervl Exp $ */
+/* $Id: winaspi32.cpp,v 1.10 2000-09-18 19:27:10 sandervl Exp $ */
 /*
  * WNASPI routines
  *
@@ -127,11 +127,42 @@ ASPI_DebugPrintResult(SRB_ExecSCSICmd *prb)
 }
 
 
-static WORD ASPI_ExecScsiCmd( scsiObj *aspi, SRB_ExecSCSICmd *lpPRB)
+static WORD ASPI_ExecScsiCmd( scsiObj *aspi, SRB_ExecSCSICmd *lpPRB, USHORT sel)
 {
   int   status;
   int   error_code = 0;
   LONG rc;
+
+  /* FIXME: hackmode */
+#define MAKE_TARGET_TO_HOST(lpPRB) \
+  	if (!TARGET_TO_HOST(lpPRB)) { \
+	    WARN("program was not sending target_to_host for cmd %x (flags=%x),correcting.\n",lpPRB->CDBByte[0],lpPRB->SRB_Flags); \
+	    lpPRB->SRB_Flags |= 8; \
+	}
+#define MAKE_HOST_TO_TARGET(lpPRB) \
+  	if (!HOST_TO_TARGET(lpPRB)) { \
+	    WARN("program was not sending host_to_target for cmd %x (flags=%x),correcting.\n",lpPRB->CDBByte[0],lpPRB->SRB_Flags); \
+	    lpPRB->SRB_Flags |= 0x10; \
+	}
+  switch (lpPRB->CDBByte[0]) {
+  case 0x12: /* INQUIRY */
+  case 0x5a: /* MODE_SENSE_10 */
+  case 0xa4: /* REPORT_KEY (DVD) MMC-2 */
+  case 0xad: /* READ DVD STRUCTURE MMC-2 */
+        MAKE_TARGET_TO_HOST(lpPRB)
+	break;
+  case 0xa3: /* SEND KEY (DVD) MMC-2 */
+        MAKE_HOST_TO_TARGET(lpPRB)
+	break;
+  default:
+	if ((((lpPRB->SRB_Flags & 0x18) == 0x00) ||
+	     ((lpPRB->SRB_Flags & 0x18) == 0x18)
+	    ) && lpPRB->SRB_BufLen
+	) {
+	    FIXME("command 0x%02x, no data transfer specified, but buflen is %ld!!!\n",lpPRB->CDBByte[0],lpPRB->SRB_BufLen); 
+	}
+	break;
+  }
 
   ASPI_DebugPrintCmd(lpPRB);
 
@@ -208,15 +239,14 @@ static WORD ASPI_ExecScsiCmd( scsiObj *aspi, SRB_ExecSCSICmd *lpPRB)
                   aspi->buffer,
                   lpPRB->SRB_BufLen);
 #ifdef DEBUG_BUFFER
-      char *cdb = (char *)lpPRB->SRB_BufPointer;
-      dprintfNoEOL(("Read SRB buffer["));
-      for (int i = 0; i < lpPRB->SRB_BufLen; i++) {
-          if (i != 0) dprintfNoEOL((",0x%02x", *cdb++));
-	  else        dprintfNoEOL(("0x%02x", *cdb++));
-      }
-      dprintfNoEOL(("]\n"));
+          char *cdb = (char *)lpPRB->SRB_BufPointer;
+          dprintfNoEOL(("Read SRB buffer["));
+          for (int i = 0; i < lpPRB->SRB_BufLen; i++) {
+             if (i != 0) dprintfNoEOL((",0x%02x", *cdb++));
+             else        dprintfNoEOL(("0x%02x", *cdb++));
+          }
+          dprintfNoEOL(("]\n"));
 #endif
-
         }
       }
 
@@ -230,14 +260,30 @@ static WORD ASPI_ExecScsiCmd( scsiObj *aspi, SRB_ExecSCSICmd *lpPRB)
                 sense_len);
       }
 
+#if 0
+      /* FIXME: Should this be != 0 maybe? */
+      if(aspi->SRBlock.u.cmd.target_status == 2 ) {
+      	aspi->SRBlock.status = SS_ERR;
+    	switch (lpPRB->CDBByte[0]) {
+    		case 0xa4: /* REPORT_KEY (DVD) MMC-2 */
+    		case 0xa3: /* SEND KEY (DVD) MMC-2 */
+          		aspi->SRBlock.status              = SS_COMP;
+	  		aspi->SRBlock.u.cmd.target_status = 0;
+	  		FIXME("Program wants to do DVD Region switching, but fails (non compliant DVD drive). Ignoring....\n");
+	  		break;
+    	}
+      }
+#endif
       /* now do posting */
-
       if (lpPRB->SRB_PostProc)
       {
-        if (ASPI_POSTING(lpPRB))
+        if(ASPI_POSTING(lpPRB))
         {
           dprintf(("Post Routine (%lx) called\n", (DWORD) lpPRB->SRB_PostProc));
+          //SvL: Restore win32 FS selector
+          SetFS(sel);
           (*lpPRB->SRB_PostProc)();
+          RestoreOS2FS();
         }
         else
         if (lpPRB->SRB_Flags & SRB_EVENT_NOTIFY)
@@ -247,13 +293,14 @@ static WORD ASPI_ExecScsiCmd( scsiObj *aspi, SRB_ExecSCSICmd *lpPRB)
         }
       }
     }
-    lpPRB->SRB_Status = aspi->SRBlock.status;
-    lpPRB->SRB_HaStat = aspi->SRBlock.u.cmd.ha_status;
-    lpPRB->SRB_TargStat = aspi->SRBlock.u.cmd.target_status;
   }
   else
     lpPRB->SRB_Status = SS_ERR;
 
+  //SvL: Shouldn't this be set before posting?
+  lpPRB->SRB_Status = aspi->SRBlock.status;
+  lpPRB->SRB_HaStat = aspi->SRBlock.u.cmd.ha_status;
+  lpPRB->SRB_TargStat = aspi->SRBlock.u.cmd.target_status;
 
   ASPI_DebugPrintResult(lpPRB);
 
@@ -340,7 +387,7 @@ ODINFUNCTION0(DWORD, GetASPI32SupportInfo)
 /***********************************************************************
  *             SendASPI32Command32 (WNASPI32.1)
  */
-DWORD SendASPICommand(LPSRB lpSRB)
+DWORD SendASPICommand(LPSRB lpSRB, USHORT sel)
 {
     DWORD dwRC;
     ULONG ulParam, ulReturn;
@@ -390,8 +437,7 @@ DWORD SendASPICommand(LPSRB lpSRB)
             break;
 
           case SC_EXEC_SCSI_CMD:
-            dwRC = ASPI_ExecScsiCmd( aspi,
-                                     &lpSRB->cmd);
+            dwRC = ASPI_ExecScsiCmd( aspi, &lpSRB->cmd, sel);
             break;
 
           case SC_ABORT_SRB:
@@ -433,7 +479,7 @@ DWORD CDECL SendASPI32Command(LPSRB lpSRB)
  DWORD yyrc;
  USHORT sel = RestoreOS2FS();
 
-    yyrc = SendASPICommand(lpSRB);
+    yyrc = SendASPICommand(lpSRB, sel);
     SetFS(sel);
 
     return yyrc;
