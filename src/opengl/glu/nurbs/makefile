@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2000-02-09 23:40:51 bird Exp $
+# $Id: makefile,v 1.4 2000-03-04 19:49:03 bird Exp $
 #
 # PD-Win32 API
 #
@@ -27,11 +27,11 @@ all:
 
 dep:
     cd interface
-    $(MAKE_CMD) NODEP=1 dep
+    $(MAKE_CMD) dep
     cd ..\internals
-    $(MAKE_CMD) NODEP=1 dep
+    $(MAKE_CMD) dep
     cd ..\nurbtess
-    $(MAKE_CMD) NODEP=1 dep
+    $(MAKE_CMD) dep
     cd ..
 
 
