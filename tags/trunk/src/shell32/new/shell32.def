@@ -1,4 +1,4 @@
-; $Id: shell32.def,v 1.1 1999-09-02 11:59:13 phaller Exp $
+; $Id: shell32.def,v 1.2 1999-09-09 11:33:18 phaller Exp $
 
 ;Created by BLAST for IBM's compiler
 ;based on Windows 95
@@ -180,7 +180,7 @@ EXPORTS
 ;   SHCreateLinks                     = _SHCreateLinks@?                      @172
     SHValidateUNC                     = _SHValidateUNC@12                     @173
     SHCreateShellFolderViewEx         = _SHCreateShellFolderViewEx@8          @174
-    SHGetSpecialFolderPath            = _SHGetSpecialFolderPath@16            @175
+    SHGetSpecialFolderPathA           = _SHGetSpecialFolderPathA@16           @175
     SHSetInstanceExplorer             = _SHSetInstanceExplorer@4              @176
 ;   DAD_SetDragImageFromListView      = _DAD_SetDragImageFromListView@?       @177
 ;   SHObjectProperties                = _SHObjectProperties@?                 @178
