@@ -1,4 +1,4 @@
-/* $Id: dibsect.cpp,v 1.25 2000-04-02 12:24:40 sandervl Exp $ */
+/* $Id: dibsect.cpp,v 1.26 2000-04-09 11:10:34 sandervl Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -384,6 +384,7 @@ BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nDestWidth,
  PVOID  bitmapBits = NULL;
  int    oldyinversion = 0;
 
+#if 0
   HWND hwndDest = WindowFromDC(hdcDest);
   hwndDest = Win32ToOS2Handle(hwndDest);
   if(hwndDest != 0)
@@ -395,9 +396,11 @@ BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nDestWidth,
     dprintf(("ERROR: DIBSection::BitBlt, hps == 0 hwndDest = %X", hwndDest));
     return(FALSE);
   }
+#endif
 
   dprintf(("DIBSection::BitBlt %x %X (hps %x) %x to(%d,%d)(%d,%d) from (%d,%d)(%d,%d) rop %x flip %x",
-          handle, hdcDest, hps, hwndDest, nXdest, nYdest, nDestWidth, nDestHeight,
+//          handle, hdcDest, hps, hwndDest, nXdest, nYdest, nDestWidth, nDestHeight,
+          handle, hdcDest, hps, 0, nXdest, nYdest, nDestWidth, nDestHeight,
           nXsrc, nYsrc, nSrcWidth, nSrcHeight, Rop, fFlip));
 
   //win32 coordinates are of the left top, OS/2 expects left bottom
@@ -424,7 +427,7 @@ BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nDestWidth,
   oldyinversion = GpiQueryYInversion(hps);
   if(fFlip & FLIP_VERT)
   {
-    	GpiEnableYInversion(hps, nDestHeight-1);
+    	GpiEnableYInversion(hps, pOS2bmp->cy-1);
   }
   else	GpiEnableYInversion(hps, 0);
 
@@ -468,19 +471,19 @@ BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nDestWidth,
         }
 	//restore old y inversion height
 	GpiEnableYInversion(hps, oldyinversion);
-  	if(hwndDest != 0)
-  	{
-    		WinReleasePS(hps);
-  	}
+//  	if(hwndDest != 0)
+//	{
+//    		WinReleasePS(hps);
+//  	}
     	return(TRUE);
   }
   GpiEnableYInversion(hps, oldyinversion);
-  if(hwndDest != 0)
-  {
-    	WinReleasePS(hps);
-  }
+//  if(hwndDest != 0)
+//  {
+//    	WinReleasePS(hps);
+//  }
   dprintf(("DIBSection::BitBlt %X (%d,%d) (%d,%d) to (%d,%d) (%d,%d) returned %d\n", hps, point[0].x, point[0].y, point[1].x, point[1].y, point[2].x, point[2].y, point[3].x, point[3].y, rc));
-  dprintf(("WinGetLastError returned %X\n", WinGetLastError(WinQueryAnchorBlock(hwndDest)) & 0xFFFF));
+//  dprintf(("WinGetLastError returned %X\n", WinGetLastError(WinQueryAnchorBlock(hwndDest)) & 0xFFFF));
   return(FALSE);
 }
 //******************************************************************************
