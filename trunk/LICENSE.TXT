@@ -1,8 +1,8 @@
 Project Odin Software License
 
 You may, without charge, royalty, or other payment, copy and
-distribute copies of this work and derivative works of this work
-in source or binary form provided that:
+distribute copies of this work in source or binary form
+provided that:
 (1) you appropriately publish on each copy an appropriate
 copyright notice; (2) faithfully reproduce all prior copyright
 included in the original work; and (3) agree to indemnify and
@@ -10,28 +10,20 @@ hold all prior authors, copyright holders and licensors of the
 work harmless from and against all damages arising from use of
 or the inability to use the work.
 
-You may distribute binaries and sources of derivative works of
-the work provided that: (1) all modifications to the original
-source code are publically available; (2) all modifications are
-released under this license; (3) all copyrights of the original
-work are included; (4) the modifications are a direct advantage
-for the functionality and completeness of the product or improve
-interoperability of the product with another product and do not
-interfere with the goal of an open source and free emulation
-product.
-
-You may NOT use the work as base of another work that is
-not released under this license agreement meaning that you
-especially are not allowed to develop any other product which
-is based on the sources and/or binaries of the work.
+You may not use the work as base of another work. You are
+encouraged to make changes to this work but you have to
+submit all changes back to the work and only use them if
+they become part of the work. If you have the need to
+create a derivative work you may contact the Odin
+management team and a special arrangement can be done.
 
 However, you are encouraged to use the work for porting your
 free or commercial applications. You can ship software
-converted using the work as long as the original copyright
-for the work is mentioned and you do not charge for
-using any part of the work. You may also ship the work in
-binaries and sources for use with your applications as long
-as you do not violate the distribution regulations of this license.
+using the work as long as the original copyright for the work
+is mentioned and you do not charge for using any part of the
+work. You may also ship the work in binaries and sources for
+use with your applications as long as you do not violate the
+distribution regulations of this license.
 
 These license terms can be amended by a custom license
 agreement between a third party and the administration
@@ -65,3 +57,14 @@ PARTICULAR PURPOSE, MERCHANTABILITY OR TITLE.  EXCEPT AS
 OTHERWISE PROVIDED BY LAW, NO AUTHOR, COPYRIGHT HOLDER OR
 LICENSOR SHALL BE LIABLE TO YOU FOR DAMAGES OF ANY KIND, EVEN IF 
 THEY HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+
+Odin management team
+
+The board of Odin managers is currently consisting of the
+following members:
+
+Patrick Haller
+Achim Hasenmueller
+Sander van Leeuwen
+
+2000/08/21
