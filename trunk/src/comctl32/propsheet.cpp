@@ -1,4 +1,4 @@
-/* $Id: propsheet.cpp,v 1.11 2001-12-02 12:39:49 sandervl Exp $ */
+/* $Id: propsheet.cpp,v 1.12 2001-12-04 11:26:26 sandervl Exp $ */
 /*
  * Property Sheets
  *
@@ -26,6 +26,7 @@
 #include "winnls.h"
 #include "comctl32.h"
 #include "heapstring.h"
+#include <debugtools.h>
 
 /******************************************************************************
  * Data structures
@@ -167,7 +168,7 @@ static BOOL PROPSHEET_CollectSheetInfo(LPCPROPSHEETHEADERA lppsh,
 
   if (dwFlags & PSH_USEPSTARTPAGE)
   {
-    //TRACE(propsheet, "PSH_USEPSTARTPAGE is on");
+    TRACE("PSH_USEPSTARTPAGE is on");
     psInfo->active_page = 0;
   }
   else
@@ -317,7 +318,7 @@ BOOL PROPSHEET_CollectPageInfo(LPCPROPSHEETPAGEA lppsp,
 
   /* Extract the caption */
   psInfo->proppage[index].pszText = (LPCWSTR)p;
-  //TRACE("Tab %d %s\n",index,debugstr_w((LPCWSTR)p));
+  TRACE("Tab %d %s\n",index,debugstr_w((LPCWSTR)p));
   p += lstrlenW((LPCWSTR)p) + 1;
 
   if (dwFlags & PSP_USETITLE)
@@ -480,8 +481,8 @@ static BOOL PROPSHEET_IsTooSmall(HWND hwndDlg, PropSheetInfo* psInfo)
    * Original tab size.
    */
   GetClientRect(hwndTabCtrl, &rcOrigTab);
-//  TRACE(propsheet, "orig tab %d %d %d %d\n", rcOrigTab.left, rcOrigTab.top,
-//        rcOrigTab.right, rcOrigTab.bottom);
+  TRACE("orig tab %d %d %d %d\n", rcOrigTab.left, rcOrigTab.top,
+        rcOrigTab.right, rcOrigTab.bottom);
 
   /*
    * Biggest page size.
@@ -492,8 +493,8 @@ static BOOL PROPSHEET_IsTooSmall(HWND hwndDlg, PropSheetInfo* psInfo)
   rcPage.bottom = psInfo->height;
 
   MapDialogRect(hwndDlg, &rcPage);
-//  TRACE(propsheet, "biggest page %d %d %d %d\n", rcPage.left, rcPage.top,
-//        rcPage.right, rcPage.bottom);
+  TRACE("biggest page %d %d %d %d (old %,%d)\n", rcPage.left, rcPage.top,
+        rcPage.right, rcPage.bottom, rcOrigTab.right, rcOrigTab.bottom);
 
   if (rcPage.right > rcOrigTab.right)
     return TRUE;
@@ -519,8 +520,8 @@ static BOOL PROPSHEET_SizeMismatch(HWND hwndDlg, PropSheetInfo* psInfo)
    * Original tab size.
    */
   GetClientRect(hwndTabCtrl, &rcOrigTab);
-  //TRACE("orig tab %d %d %d %d\n", rcOrigTab.left, rcOrigTab.top,
-  //      rcOrigTab.right, rcOrigTab.bottom);
+  TRACE("orig tab %d %d %d %d\n", rcOrigTab.left, rcOrigTab.top,
+        rcOrigTab.right, rcOrigTab.bottom);
 
   /*
    * Biggest page size.
@@ -531,8 +532,8 @@ static BOOL PROPSHEET_SizeMismatch(HWND hwndDlg, PropSheetInfo* psInfo)
   rcPage.bottom = psInfo->height;
 
   MapDialogRect(hwndDlg, &rcPage);
-  //TRACE("biggest page %d %d %d %d\n", rcPage.left, rcPage.top,
-  //      rcPage.right, rcPage.bottom);
+  TRACE("biggest page %d %d %d %d (old %d,%d %d,%d,)\n", rcPage.left, rcPage.top,
+        rcPage.right, rcPage.bottom, rcOrigTab.left, rcOrigTab.top, rcOrigTab.right, rcOrigTab.bottom);
 
   if ( (rcPage.right - rcPage.left) != (rcOrigTab.right - rcOrigTab.left) )
     return TRUE;
@@ -573,8 +574,8 @@ static BOOL PROPSHEET_IsTooSmallWizard(HWND hwndDlg, PropSheetInfo* psInfo)
   rcPage.bottom = psInfo->height;
 
   MapDialogRect(hwndDlg, &rcPage);
-//  TRACE("biggest page %d %d %d %d\n", rcPage.left, rcPage.top,
-//        rcPage.right, rcPage.bottom);
+  TRACE("biggest page %d %d %d %d (old %d,%d)\n", rcPage.left, rcPage.top,
+        rcPage.right, rcPage.bottom, rcSheetClient.right, rcSheetClient.bottom);
 
   if (rcPage.right > rcSheetClient.right)
     return TRUE;
@@ -627,8 +628,8 @@ static BOOL PROPSHEET_AdjustSize(HWND hwndDlg, PropSheetInfo* psInfo)
 
   GetClientRect(hwndTabCtrl, &rc);
 
-//  TRACE(propsheet, "tab client rc %d %d %d %d\n",
-//        rc.left, rc.top, rc.right, rc.bottom);
+  TRACE("tab client rc %d %d %d %d\n",
+        rc.left, rc.top, rc.right, rc.bottom);
 
   rc.right += ((padding.x * 2) + tabOffsetX);
   rc.bottom += (buttonHeight + (3 * padding.y) + tabOffsetY);
@@ -641,7 +642,6 @@ static BOOL PROPSHEET_AdjustSize(HWND hwndDlg, PropSheetInfo* psInfo)
 
   return TRUE;
 }
-
 /******************************************************************************
  *            PROPSHEET_AdjustSizeWizard
  *
@@ -654,6 +654,8 @@ static BOOL PROPSHEET_AdjustSizeWizard(HWND hwndDlg, PropSheetInfo* psInfo)
   RECT rc;
   int buttonHeight, lineHeight;
   PADDING_INFO padding = PROPSHEET_GetPaddingInfoWizard(hwndDlg,psInfo);
+
+  dprintf(("PROPSHEET_AdjustSizeWizard %x", hwndDlg));
 
   /* Get the height of buttons */
   GetClientRect(hwndButton, &rc);
@@ -672,7 +674,7 @@ static BOOL PROPSHEET_AdjustSizeWizard(HWND hwndDlg, PropSheetInfo* psInfo)
 
   MapDialogRect(hwndDlg, &rc);
 
-//  TRACE("Biggest page %d %d %d %d\n", rc.left, rc.top, rc.right, rc.bottom);
+  TRACE("Biggest page %d %d %d %d\n", rc.left, rc.top, rc.right, rc.bottom);
 
   /* Make room */
   rc.right += (padding.x * 2);
@@ -684,8 +686,10 @@ static BOOL PROPSHEET_AdjustSizeWizard(HWND hwndDlg, PropSheetInfo* psInfo)
   SetWindowPos(hwndDlg, 0, 0, 0, rc.right, rc.bottom,
                SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
 
+  dprintf(("PROPSHEET_AdjustSizeWizard %x DONE", hwndDlg));
   return TRUE;
 }
+
 
 /******************************************************************************
  *            PROPSHEET_AdjustButtons
@@ -917,33 +921,47 @@ static PADDING_INFO PROPSHEET_GetPaddingInfo(HWND hwndDlg)
  *            PROPSHEET_GetPaddingInfoWizard
  *
  * Returns the layout information.
- * Horizontal spacing is the distance between the Cancel and Help buttons.
  * Vertical spacing is the distance between the line and the buttons.
+ * Do NOT use the Help button to gather padding information when it isn't mapped
+ * (PSH_HASHELP), as app writers aren't forced to supply correct coordinates
+ * for it in this case !
+ * FIXME: I'm not sure about any other coordinate problems with these evil
+ * buttons. Fix it in case additional problems appear or maybe calculate
+ * a padding in a completely different way, as this is somewhat messy.
  */
-static PADDING_INFO PROPSHEET_GetPaddingInfoWizard(HWND hwndDlg,PropSheetInfo* psInfo)
+static PADDING_INFO PROPSHEET_GetPaddingInfoWizard(HWND hwndDlg, PropSheetInfo* psInfo)
 {
   PADDING_INFO padding;
   RECT rc;
   HWND hwndControl;
-  POINT ptHelp, ptCancel, ptLine;
+  INT idButton;
+  POINT ptButton, ptLine;
 
-  /* Help button */
-  hwndControl = GetDlgItem(hwndDlg, IDHELP);
+  TRACE("\n");
+  if (psInfo->hasHelp)
+  {
+	idButton = IDHELP;
+  }
+  else
+  {
+    if (psInfo->ppshheader->dwFlags & PSH_WIZARD)
+    {
+	idButton = IDC_NEXT_BUTTON;
+    }
+    else
+    {
+	/* hopefully this is ok */
+	idButton = IDCANCEL;
+    }
+  }
+  
+  hwndControl = GetDlgItem(hwndDlg, idButton);
   GetWindowRect(hwndControl, &rc);
 
-  ptHelp.x = rc.left;
-  ptHelp.y = rc.top;
+  ptButton.x = rc.left;
+  ptButton.y = rc.top;
 
-  ScreenToClient(hwndDlg, &ptHelp);
-
-  /* Cancel button */
-  hwndControl = GetDlgItem(hwndDlg, IDCANCEL);
-  GetWindowRect(hwndControl, &rc);
-
-  ptCancel.x = rc.right;
-  ptCancel.y = rc.top;
-
-  ScreenToClient(hwndDlg, &ptCancel);
+  ScreenToClient(hwndDlg, &ptButton);
 
   /* Line */
   hwndControl = GetDlgItem(hwndDlg, IDC_SUNKEN_LINE);
@@ -954,15 +972,13 @@ static PADDING_INFO PROPSHEET_GetPaddingInfoWizard(HWND hwndDlg,PropSheetInfo* p
 
   ScreenToClient(hwndDlg, &ptLine);
 
-  padding.x = ptHelp.x - ptCancel.x;
-  padding.y = ptHelp.y - ptLine.y;
+  padding.y = ptButton.y - ptLine.y;
 
-//CB: BUG: psInfo->hasHelp not checked -> negative values
-//    add better wizard handling, fix button placement bugs FIXME
-//
-//    workaround for now:
-if (padding.x < 0) padding.x = 0;
-if (padding.y < 0) padding.y = 0;
+  if (padding.y < 0)
+	  ERR("padding negative ! Please report this !\n");
+
+  /* this is most probably not correct, but the best we have now */
+  padding.x = padding.y;
 
   return padding;
 }
@@ -1029,37 +1045,56 @@ static int PROPSHEET_CreatePage(HWND hwndParent,
 {
   DLGTEMPLATE* pTemplate;
   HWND hwndPage;
-
+  RECT rc;
   PropPageInfo* ppInfo = psInfo->proppage;
+  PADDING_INFO padding;
+  UINT pageWidth,pageHeight;
+  DWORD resSize;
+  LPVOID temp = NULL;
 
-  //TRACE("index %d\n", index);
+  TRACE("index %d\n", index);
 
+#ifdef __WIN32OS2__
   //AH: Check if ppshpage is valid
   if (ppshpage == NULL)
   {
     dprintf(("COMCTL32:PROPSHEET_CreatePage: ERROR!!! ppshpage == NULL!!!\n"));
     return FALSE;
   }
+#endif
 
   if (ppshpage->dwFlags & PSP_DLGINDIRECT)
     pTemplate = (DLGTEMPLATE*)ppshpage->pResource;
   else
   {
-    HRSRC hResource = FindResourceA(ppshpage->hInstance,
+    HRSRC hResource;
+    HANDLE hTemplate;
+
+    hResource = FindResourceA(ppshpage->hInstance,
                                     ppshpage->pszTemplate,
                                     RT_DIALOGA);
-    HGLOBAL hTemplate = LoadResource(ppshpage->hInstance, hResource);
+    if(!hResource)
+	return FALSE;
+
+    resSize = SizeofResource(ppshpage->hInstance, hResource);
+
+    hTemplate = LoadResource(ppshpage->hInstance, hResource);
+    if(!hTemplate)
+	return FALSE;
+
     pTemplate = (LPDLGTEMPLATEA)LockResource(hTemplate);
+    /*
+     * Make a copy of the dialog template to make it writable
+     */
+    temp = COMCTL32_Alloc(resSize);
+    if (!temp)
+      return FALSE;
+
+    memcpy(temp, pTemplate, resSize);
+    pTemplate = (DLGTEMPLATE*)temp;
   }
 
-  //AH: Check if pTemplate is valid
-  if (pTemplate == NULL)
-  {
-    dprintf(("COMCTL32:PROPSHEET_CreatePage: ERROR!!! Dialog Template == NULL!!!\n"));
-    return FALSE;
-  }
-
- if (((MyDLGTEMPLATEEX*)pTemplate)->signature == 0xFFFF)
+  if (((MyDLGTEMPLATEEX*)pTemplate)->signature == 0xFFFF)
   {
     ((MyDLGTEMPLATEEX*)pTemplate)->style |= WS_CHILD | DS_CONTROL;
     ((MyDLGTEMPLATEEX*)pTemplate)->style &= ~DS_MODALFRAME;
@@ -1068,18 +1103,22 @@ static int PROPSHEET_CreatePage(HWND hwndParent,
     ((MyDLGTEMPLATEEX*)pTemplate)->style &= ~WS_POPUP;
     ((MyDLGTEMPLATEEX*)pTemplate)->style &= ~WS_DISABLED;
     ((MyDLGTEMPLATEEX*)pTemplate)->style &= ~WS_VISIBLE;
+#ifdef __WIN32OS2__
     ((MyDLGTEMPLATEEX*)pTemplate)->style &= ~WS_THICKFRAME;
+#endif
   }
   else
   {
-    pTemplate->style |= WS_CHILDWINDOW | DS_CONTROL;
+    pTemplate->style |= WS_CHILD | DS_CONTROL;
     pTemplate->style &= ~DS_MODALFRAME;
     pTemplate->style &= ~WS_CAPTION;
     pTemplate->style &= ~WS_SYSMENU;
     pTemplate->style &= ~WS_POPUP;
     pTemplate->style &= ~WS_DISABLED;
     pTemplate->style &= ~WS_VISIBLE;
+#ifdef __WIN32OS2__
     pTemplate->style &= ~WS_THICKFRAME;
+#endif
   }
 
   if (psInfo->proppage[index].useCallback)
@@ -1088,12 +1127,53 @@ static int PROPSHEET_CreatePage(HWND hwndParent,
                                (LPPROPSHEETPAGEA)ppshpage);
 
   hwndPage = CreateDialogIndirectParamA(ppshpage->hInstance,
-                                        pTemplate,
-                                        hwndParent,
-                                        ppshpage->pfnDlgProc,
-                                        (LPARAM)ppshpage);
+					pTemplate,
+					hwndParent,
+					ppshpage->pfnDlgProc,
+					(LPARAM)ppshpage);
+  /* Free a no more needed copy */
+  if(temp)
+      COMCTL32_Free(temp);
 
   ppInfo[index].hwndPage = hwndPage;
+
+  rc.left = psInfo->x;
+  rc.top = psInfo->y;
+  rc.right = psInfo->width;
+  rc.bottom = psInfo->height;
+
+  MapDialogRect(hwndParent, &rc);
+
+  pageWidth = rc.right - rc.left;
+  pageHeight = rc.bottom - rc.top;
+
+  if (psInfo->ppshheader->dwFlags & PSH_WIZARD)
+    padding = PROPSHEET_GetPaddingInfoWizard(hwndParent, (PropSheetInfo* )psInfo);
+  else
+  {
+    /*
+     * Ask the Tab control to fit this page in.
+     */
+
+    HWND hwndTabCtrl = GetDlgItem(hwndParent, IDC_TABCONTROL);
+    SendMessageA(hwndTabCtrl, TCM_ADJUSTRECT, FALSE, (LPARAM)&rc);
+    padding = PROPSHEET_GetPaddingInfo(hwndParent);
+  }
+
+#ifdef __WIN32OS2__
+  //HACK alert!
+  //SvL: CVP multiplies y padding by two to calculate the new height
+  //I have no idea if this is always correct
+  SetWindowPos(hwndPage, HWND_TOP,
+               rc.left + padding.x/2,
+               rc.top + padding.y/2,
+               pageWidth, pageHeight, 0);
+#else
+  SetWindowPos(hwndPage, HWND_TOP,
+               rc.left + padding.x,
+               rc.top + padding.y,
+               pageWidth, pageHeight, 0);
+#endif
 
   return TRUE;
 }
@@ -1167,6 +1247,18 @@ static int PROPSHEET_ShowPage(HWND hwndDlg, int index, PropSheetInfo * psInfo)
      ShowWindow(psInfo->proppage[psInfo->active_page].hwndPage, SW_HIDE);
   }
 
+#if 1
+  ShowWindow(psInfo->proppage[index].hwndPage, SW_SHOW);
+
+  /* Synchronize current selection with tab control
+   * It seems to be needed even in case of PSH_WIZARD (no tab controls there) */
+  HWND hwndTabCtrl;
+  hwndTabCtrl = GetDlgItem(hwndDlg, IDC_TABCONTROL);
+  SendMessageA(hwndTabCtrl, TCM_SETCURSEL, index, 0);
+
+  psInfo->active_page = index;
+  psInfo->activeValid = TRUE;
+#else
   /* HACK: Sometimes a property page doesn't get displayed at the right place inside the
    *       property sheet. This will force the window to be placed at the proper location
    *       before it is displayed.
@@ -1207,7 +1299,7 @@ static int PROPSHEET_ShowPage(HWND hwndDlg, int index, PropSheetInfo * psInfo)
 
   psInfo->active_page = index;
   psInfo->activeValid = TRUE;
-
+#endif
   return 1;
 }
 
@@ -1273,7 +1365,7 @@ static void PROPSHEET_Next(HWND hwndDlg)
 
   msgResult = SendMessageA(hwndPage, WM_NOTIFY, 0, (LPARAM) &psn);
 
-  //TRACE("msg result %ld\n", msgResult);
+  TRACE("msg result %ld\n", msgResult);
 
   if (msgResult == -1)
      return;
@@ -1312,7 +1404,7 @@ static void PROPSHEET_Finish(HWND hwndDlg)
 
   msgResult = SendMessageA(hwndPage, WM_NOTIFY, 0, (LPARAM) &psn);
 
-  //TRACE("msg result %ld\n", msgResult);
+  TRACE("msg result %ld\n", msgResult);
 
   if (msgResult != 0)
     return;
@@ -1628,16 +1720,21 @@ static BOOL PROPSHEET_SetCurSel(HWND hwndDlg,
 
   if (index < 0 || index >= psInfo->nPages)
   {
-    //TRACE("Could not find page to select!\n");
+    TRACE("Could not find page to select!\n");
     return FALSE;
   }
 
+  if (!psInfo->proppage[index].hwndPage) {
+      LPPROPSHEETPAGEA ppshpage = (LPPROPSHEETPAGEA)psInfo->proppage[index].hpage;
+      PROPSHEET_CreatePage(hwndDlg, index, psInfo, ppshpage);
+  }
   hwndPage = psInfo->proppage[index].hwndPage;
 
   /*
    * Notify the new page if it's already created.
    * If not it will get created and notified in PROPSHEET_ShowPage.
    */
+
   if (hwndPage)
   {
     LRESULT result;
@@ -1850,12 +1947,12 @@ static BOOL PROPSHEET_RemovePage(HWND hwndDlg,
   /* Make shure that index is within range */
   if (index < 0 || index >= psInfo->nPages)
   {
-      //TRACE("Could not find page to remove!\n");
+      TRACE("Could not find page to remove!\n");
       return FALSE;
   }
 
-  //TRACE("total pages %d removing page %d active page %d\n",
-  //      psInfo->nPages, index, psInfo->active_page);
+  TRACE("total pages %d removing page %d active page %d\n",
+        psInfo->nPages, index, psInfo->active_page);
   /*
    * Check if we're removing the active page.
    */
@@ -1934,7 +2031,7 @@ static void PROPSHEET_SetWizButtons(HWND hwndDlg, DWORD dwFlags)
   HWND hwndNext   = GetDlgItem(hwndDlg, IDC_NEXT_BUTTON);
   HWND hwndFinish = GetDlgItem(hwndDlg, IDC_FINISH_BUTTON);
 
-  //TRACE("%ld\n", dwFlags);
+  TRACE("%ld\n", dwFlags);
 
   EnableWindow(hwndBack, FALSE);
   EnableWindow(hwndNext, FALSE);
@@ -2006,7 +2103,7 @@ static void PROPSHEET_CleanUp(HWND hwndDlg)
   PropSheetInfo* psInfo = (PropSheetInfo*) RemovePropA(hwndDlg,
                                                        PropSheetInfoStr);
 
-  //TRACE("\n");
+  TRACE("\n");
   if (HIWORD(psInfo->ppshheader->pszCaption))
       HeapFree(GetProcessHeap(), 0, (LPVOID)psInfo->ppshheader->pszCaption);
 
