@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.1684 2001-09-18 16:59:53 phaller Exp $ */
+/* $Id: changelog,v 1.1685 2001-09-19 09:09:34 sandervl Exp $ */
+
+ 2001-09-19: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o Changed GetLastActivePopup (still not complete)
+                o Prevent loop in DIALOG_IsAccelerator
 
  2001-09-17: Patrick Haller <patrick.haller@innotek.de>
     - WS2_32:   o added stub for WSAIoctl() (Parsec)
