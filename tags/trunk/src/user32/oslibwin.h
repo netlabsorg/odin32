@@ -1,4 +1,4 @@
-/* $Id: oslibwin.h,v 1.49 2001-02-19 13:13:04 sandervl Exp $ */
+/* $Id: oslibwin.h,v 1.50 2001-02-20 15:40:22 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -305,5 +305,6 @@ ULONG OSLibGetScreenHeight();
 ULONG OSLibGetScreenWidth();
 
 BOOL   OSLibWinLockWindowUpdate(HWND hwnd);
+BOOL   OSLibWinGetMaxPosition(HWND hwndOS2, RECT *rect);
 
 #endif //__OSLIBWIN_H__

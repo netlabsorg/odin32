@@ -1,4 +1,4 @@
-/* $Id: win32wbasepos.cpp,v 1.18 2001-01-14 17:15:47 sandervl Exp $ */
+/* $Id: win32wbasepos.cpp,v 1.19 2001-02-20 15:40:23 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (nonclient/position methods)
  *
@@ -38,7 +38,7 @@
 #include "win32wdesktop.h"
 #include <win\hook.h>
 
-#define DBG_LOCALLOG	DBG_win32wbasepos
+#define DBG_LOCALLOG    DBG_win32wbasepos
 #include "dbglocal.h"
 
 /*******************************************************************
@@ -53,13 +53,30 @@ void Win32BaseWindow::GetMinMaxInfo(POINT *maxSize, POINT *maxPos,
     INT xinc, yinc;
 
     /* Compute default values */
+    MinMax.ptMaxPosition.x = 0;
+    MinMax.ptMaxPosition.y = 0;
 
-    MinMax.ptMaxSize.x = GetSystemMetrics(SM_CXSCREEN);
-    MinMax.ptMaxSize.y = GetSystemMetrics(SM_CYSCREEN);
-    MinMax.ptMinTrackSize.x = GetSystemMetrics(SM_CXMINTRACK);
-    MinMax.ptMinTrackSize.y = GetSystemMetrics(SM_CYMINTRACK);
-    MinMax.ptMaxTrackSize.x = GetSystemMetrics(SM_CXSCREEN);
-    MinMax.ptMaxTrackSize.y = GetSystemMetrics(SM_CYSCREEN);
+    if(!(getStyle() & (WS_POPUP | WS_CHILD))) {
+        RECT rect;
+        OSLibWinGetMaxPosition(getOS2WindowHandle(), &rect);
+        MinMax.ptMaxPosition.x = rect.left;
+        MinMax.ptMaxPosition.y = rect.top;
+
+        MinMax.ptMaxSize.x = rect.right - rect.left;
+        MinMax.ptMaxSize.y = rect.bottom - rect.top;
+        MinMax.ptMinTrackSize.x = GetSystemMetrics(SM_CXMINTRACK);
+        MinMax.ptMinTrackSize.y = GetSystemMetrics(SM_CYMINTRACK);
+        MinMax.ptMaxTrackSize.x = GetSystemMetrics(SM_CXSCREEN);
+        MinMax.ptMaxTrackSize.y = GetSystemMetrics(SM_CYSCREEN);
+    }
+    else {
+        MinMax.ptMaxSize.x = GetSystemMetrics(SM_CXSCREEN);
+        MinMax.ptMaxSize.y = GetSystemMetrics(SM_CYSCREEN);
+        MinMax.ptMinTrackSize.x = GetSystemMetrics(SM_CXMINTRACK);
+        MinMax.ptMinTrackSize.y = GetSystemMetrics(SM_CYMINTRACK);
+        MinMax.ptMaxTrackSize.x = GetSystemMetrics(SM_CXSCREEN);
+        MinMax.ptMaxTrackSize.y = GetSystemMetrics(SM_CYSCREEN);
+    }
 
     if (HAS_DLGFRAME( dwStyle, dwExStyle ))
     {
@@ -74,10 +91,10 @@ void Win32BaseWindow::GetMinMaxInfo(POINT *maxSize, POINT *maxPos,
             xinc += GetSystemMetrics(SM_CXFRAME);
             yinc += GetSystemMetrics(SM_CYFRAME);
         }
-	//SvL: Wine has no 'else', but I'm seeing different behaviour in NT
+        //SvL: Wine has no 'else', but I'm seeing different behaviour in NT
         //     and it doesn't make much sense either as a window can have
         //     only one kind of border (see drawing code)
-	else
+        else
         if (dwStyle & WS_BORDER)
         {
             xinc += GetSystemMetrics(SM_CXBORDER);
@@ -94,8 +111,8 @@ void Win32BaseWindow::GetMinMaxInfo(POINT *maxSize, POINT *maxPos,
     else
     {
 #endif
-        MinMax.ptMaxPosition.x = -xinc;
-        MinMax.ptMaxPosition.y = -yinc;
+        MinMax.ptMaxPosition.x -= xinc;
+        MinMax.ptMaxPosition.y -= yinc;
 //    }
 
     SendInternalMessageA(WM_GETMINMAXINFO, 0, (LPARAM)&MinMax );
@@ -137,26 +154,26 @@ LONG Win32BaseWindow::SendNCCalcSize(BOOL calcValidRect, RECT *newWindowRect,
    /* Send WM_NCCALCSIZE message to get new client area */
    if((winpos->flags & (SWP_FRAMECHANGED | SWP_NOSIZE)) != SWP_NOSIZE )
    {
-   	params.rgrc[0] = *newWindowRect;
-   	if(calcValidRect)
-   	{
-        	winposCopy = *winpos;
-	        params.rgrc[1] = *oldWindowRect;
-	        params.rgrc[2] = *oldClientRect;
-	        //client rectangel must be in parent coordinates
-	        OffsetRect(&params.rgrc[2], rectWindow.left, rectWindow.top);
+    params.rgrc[0] = *newWindowRect;
+    if(calcValidRect)
+    {
+            winposCopy = *winpos;
+            params.rgrc[1] = *oldWindowRect;
+            params.rgrc[2] = *oldClientRect;
+            //client rectangel must be in parent coordinates
+            OffsetRect(&params.rgrc[2], rectWindow.left, rectWindow.top);
 
-	        params.lppos = &winposCopy;
-   	}
-   	result = SendInternalMessageA(WM_NCCALCSIZE, calcValidRect, (LPARAM)&params );
+            params.lppos = &winposCopy;
+    }
+    result = SendInternalMessageA(WM_NCCALCSIZE, calcValidRect, (LPARAM)&params );
 
-   	/* If the application send back garbage, ignore it */
-   	if(params.rgrc[0].left <= params.rgrc[0].right && params.rgrc[0].top <= params.rgrc[0].bottom)
-   	{
-        	*newClientRect = params.rgrc[0];
-	        //client rectangle now in parent coordinates; convert to 'frame' coordinates
-	        OffsetRect(newClientRect, -rectWindow.left, -rectWindow.top);
-   	}
+    /* If the application send back garbage, ignore it */
+    if(params.rgrc[0].left <= params.rgrc[0].right && params.rgrc[0].top <= params.rgrc[0].bottom)
+    {
+            *newClientRect = params.rgrc[0];
+            //client rectangle now in parent coordinates; convert to 'frame' coordinates
+            OffsetRect(newClientRect, -rectWindow.left, -rectWindow.top);
+    }
 
         /* FIXME: WVR_ALIGNxxx */
         if(newClientRect->left != rectClient.left || newClientRect->top  != rectClient.top)
@@ -168,7 +185,7 @@ LONG Win32BaseWindow::SendNCCalcSize(BOOL calcValidRect, RECT *newWindowRect,
 
    }
    else
-   if(!(winpos->flags & SWP_NOMOVE) && 
+   if(!(winpos->flags & SWP_NOMOVE) &&
        (newClientRect->left != rectClient.left || newClientRect->top != rectClient.top)) {
             winpos->flags &= ~SWP_NOCLIENTMOVE;
    }
@@ -205,75 +222,75 @@ UINT Win32BaseWindow::MinMaximize(UINT cmd, LPRECT lpRect)
     UINT swpFlags = 0;
     POINT size;
 
-    size.x = rectWindow.left; 
+    size.x = rectWindow.left;
     size.y = rectWindow.top;
 
     if(IsRectEmpty(&windowpos.rcNormalPosition)) {
-	CopyRect(&windowpos.rcNormalPosition, &rectWindow);
+    CopyRect(&windowpos.rcNormalPosition, &rectWindow);
     }
     if(!HOOK_CallHooksA(WH_CBT, HCBT_MINMAX, getWindowHandle(), cmd))
     {
-	if(getStyle() & WS_MINIMIZE )
-	{
-	    if(!SendInternalMessageA(WM_QUERYOPEN, 0, 0L))
-		return (SWP_NOSIZE | SWP_NOMOVE);
-	}
-	switch( cmd )
-	{
-	    case SW_MINIMIZE:
-		if( getStyle() & WS_MAXIMIZE)
-		{
-		     	setFlags(getFlags() | WIN_RESTORE_MAX);
-		     	setStyle(getStyle() & ~WS_MAXIMIZE);
+    if(getStyle() & WS_MINIMIZE )
+    {
+        if(!SendInternalMessageA(WM_QUERYOPEN, 0, 0L))
+        return (SWP_NOSIZE | SWP_NOMOVE);
+    }
+    switch( cmd )
+    {
+        case SW_MINIMIZE:
+        if( getStyle() & WS_MAXIMIZE)
+        {
+                setFlags(getFlags() | WIN_RESTORE_MAX);
+                setStyle(getStyle() & ~WS_MAXIMIZE);
                 }
-                else	setFlags(getFlags() & ~WIN_RESTORE_MAX);
+                else    setFlags(getFlags() & ~WIN_RESTORE_MAX);
 
-		setStyle(getStyle() | WS_MINIMIZE);
+        setStyle(getStyle() | WS_MINIMIZE);
 
-		SetRect(lpRect, windowpos.ptMinPosition.x, windowpos.ptMinPosition.y,
-		        GetSystemMetrics(SM_CXICON), GetSystemMetrics(SM_CYICON) );
-		break;
+        SetRect(lpRect, windowpos.ptMinPosition.x, windowpos.ptMinPosition.y,
+                GetSystemMetrics(SM_CXICON), GetSystemMetrics(SM_CYICON) );
+        break;
 
-	    case SW_MAXIMIZE:
+        case SW_MAXIMIZE:
                 GetMinMaxInfo(&size, &windowpos.ptMaxPosition, NULL, NULL );
 
-		if(getStyle() & WS_MINIMIZE )
-		{
-		     setStyle(getStyle() & ~WS_MINIMIZE);
-		}
+        if(getStyle() & WS_MINIMIZE )
+        {
+             setStyle(getStyle() & ~WS_MINIMIZE);
+        }
                 setStyle(getStyle() | WS_MAXIMIZE);
 
-		SetRect(lpRect, windowpos.ptMaxPosition.x, windowpos.ptMaxPosition.y,
-		        size.x, size.y );
-		break;
+        SetRect(lpRect, windowpos.ptMaxPosition.x, windowpos.ptMaxPosition.y,
+                size.x, size.y );
+        break;
 
-	    case SW_RESTORE:
-		if(getStyle() & WS_MINIMIZE)
-		{
-		     	setStyle(getStyle() & ~WS_MINIMIZE);
+        case SW_RESTORE:
+        if(getStyle() & WS_MINIMIZE)
+        {
+                setStyle(getStyle() & ~WS_MINIMIZE);
 
-		     	if( getFlags() & WIN_RESTORE_MAX)
-		     	{
-			 	/* Restore to maximized position */
-                         	GetMinMaxInfo(&size, &windowpos.ptMaxPosition, NULL, NULL);
-			 	setStyle(getStyle() | WS_MAXIMIZE);
-			 	SetRect(lpRect, windowpos.ptMaxPosition.x, windowpos.ptMaxPosition.y, size.x, size.y);
-			 	break;
-		     	}
-		} 
-		else 
-	        if( !(getStyle() & WS_MAXIMIZE) ) 
-			return 0;
- 	        else 	setStyle(getStyle() & ~WS_MAXIMIZE);
+                if( getFlags() & WIN_RESTORE_MAX)
+                {
+                /* Restore to maximized position */
+                            GetMinMaxInfo(&size, &windowpos.ptMaxPosition, NULL, NULL);
+                setStyle(getStyle() | WS_MAXIMIZE);
+                SetRect(lpRect, windowpos.ptMaxPosition.x, windowpos.ptMaxPosition.y, size.x, size.y);
+                break;
+                }
+        }
+        else
+            if( !(getStyle() & WS_MAXIMIZE) )
+            return 0;
+            else    setStyle(getStyle() & ~WS_MAXIMIZE);
 
-		/* Restore to normal position */
+        /* Restore to normal position */
 
-		*lpRect = windowpos.rcNormalPosition;
-		lpRect->right -= lpRect->left; 
-		lpRect->bottom -= lpRect->top;
-		break;
-	}
-    } 
+        *lpRect = windowpos.rcNormalPosition;
+        lpRect->right -= lpRect->left;
+        lpRect->bottom -= lpRect->top;
+        break;
+    }
+    }
     else swpFlags |= SWP_NOSIZE | SWP_NOMOVE;
 
     return swpFlags;
