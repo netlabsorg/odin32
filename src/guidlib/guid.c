@@ -1,4 +1,4 @@
-/* $Id: guid.c,v 1.7 2002-06-15 12:22:55 sandervl Exp $ */
+/* $Id: guid.c,v 1.8 2004-07-06 16:57:30 sandervl Exp $ */
 #define ICOM_CINTERFACE 1
 #include <odin.h>
 
@@ -40,6 +40,7 @@
 #include <wine/obj_shellbrowser.h>
 #include <wine/obj_serviceprovider.h>
 #include <wine/obj_queryassociations.h>
+#include "wine/obj_webbrowser.h"
 #include <wine/unicode.h>
 
 
@@ -58,3 +59,6 @@ DEFINE_AVIGUID(IID_IGetFrame,           0x00020023, 0, 0);
 DEFINE_AVIGUID(IID_IAVIEditStream,      0x00020024, 0, 0);
 
 DEFINE_AVIGUID(CLSID_AVIFile,           0x00020000, 0, 0);
+
+DEFINE_GUID(IID_INotifyDBEvents,
+0xdb526cc0, 0xd188, 0x11cd, 0xad, 0x48, 0x0, 0xaa, 0x0, 0x3c, 0x9c, 0xb6);
