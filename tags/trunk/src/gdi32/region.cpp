@@ -1,4 +1,4 @@
-/* $Id: region.cpp,v 1.26 2002-01-29 14:36:31 sandervl Exp $ */
+/* $Id: region.cpp,v 1.27 2002-02-05 11:45:46 sandervl Exp $ */
 
 /*
  * GDI32 region code
@@ -1290,7 +1290,7 @@ ODINFUNCTIONNODBG2(int, GetRgnBox, HRGN, hrgn, PRECT, pRect)
             lComplexity = ERROR_W;
             dprintf(("WARNING: GetRgnBox error in region!"));
     }
-    dprintf(("GetRgnBox %x (%d,%d)(%d,%d)", hrgn1, pRect->left, pRect->bottom, pRect->right, pRect->top));
+    dprintf(("GetRgnBox %x (%d,%d)(%d,%d)", hrgn1, pRect->left, pRect->top, pRect->right, pRect->bottom));
 
     SetLastError(ERROR_SUCCESS_W);
     return lComplexity;
