@@ -1,4 +1,4 @@
-/* $Id: combo.cpp,v 1.14 1999-11-17 21:32:41 cbratschi Exp $ */
+/* $Id: combo.cpp,v 1.15 1999-11-19 17:59:33 cbratschi Exp $ */
 /*
  * Combo controls
  *
@@ -9,6 +9,11 @@
  *
  * WINE version: 991031
  */
+
+/* CB: bugs
+ - problems with focus handling (Win32 <-> OS/2)
+   will be fixed soon
+*/
 
 #include <string.h>
 #include <os2win.h>
@@ -89,7 +94,7 @@ static BOOL COMBO_Init()
 /***********************************************************************
  *           COMBO_NCCreate
  */
-static LRESULT COMBO_NCCreate(HWND hwnd, LPARAM lParam)
+static LRESULT COMBO_NCCreate(HWND hwnd,WPARAM wParam,LPARAM lParam)
 {
    LPHEADCOMBO          lphc;
 
@@ -124,16 +129,17 @@ static LRESULT COMBO_NCCreate(HWND hwnd, LPARAM lParam)
         //TRACE("[0x%08x], style = %08x\n",
         //             (UINT)lphc, lphc->dwStyle );
 
-        return (LRESULT)(UINT)hwnd;
+        return TRUE;
     }
-    return (LRESULT)FALSE;
+    return FALSE;
 }
 
 /***********************************************************************
  *           COMBO_NCDestroy
  */
-static LRESULT COMBO_NCDestroy( LPHEADCOMBO lphc )
+static LRESULT COMBO_NCDestroy(HWND hwnd,WPARAM wParam,LPARAM lParam)
 {
+   LPHEADCOMBO lphc = (LPHEADCOMBO)GetInfoPtr(hwnd);
 
    if( lphc )
    {
@@ -147,7 +153,8 @@ static LRESULT COMBO_NCDestroy( LPHEADCOMBO lphc )
        HeapFree( GetProcessHeap(), 0, lphc );
        SetInfoPtr(hwnd,0);
    }
-   return 0;
+
+   return DefWindowProcA(hwnd,WM_NCDESTROY,wParam,lParam);
 }
 
 /***********************************************************************
@@ -422,11 +429,11 @@ static void CBGetDroppedControlRect( LPHEADCOMBO lphc, LPRECT lpRect)
 /***********************************************************************
  *           COMBO_WindowPosChanging
  */
-static LRESULT COMBO_WindowPosChanging(
-  HWND        hwnd,
-  LPHEADCOMBO lphc,
-  WINDOWPOS*  posChanging)
+static LRESULT COMBO_WindowPosChanging(HWND hwnd,WPARAM wParam,LPARAM lParam)
 {
+  LPHEADCOMBO lphc = (LPHEADCOMBO)GetInfoPtr(hwnd);
+  WINDOWPOS *posChanging = (WINDOWPOS*)lParam;
+
   dprintf(("COMBO_WindowPosChanging"));
 
   /*
@@ -465,10 +472,11 @@ static LRESULT COMBO_WindowPosChanging(
 /***********************************************************************
  *           COMBO_Create
  */
-static LRESULT COMBO_Create( LPHEADCOMBO lphc, HWND hwnd, LPARAM lParam)
+static LRESULT COMBO_Create(HWND hwnd,WPARAM wParam,LPARAM lParam)
 {
   static char clbName[] = "ComboLBox";
   static char editName[] = "Edit";
+  LPHEADCOMBO lphc = (LPHEADCOMBO)GetInfoPtr(hwnd);
 
   LPCREATESTRUCTA  lpcs = (CREATESTRUCTA*)lParam;
 
@@ -883,17 +891,14 @@ static HBRUSH COMBO_PrepareColors(
 /***********************************************************************
  *           COMBO_EraseBackground
  */
-static LRESULT COMBO_EraseBackground(
-  HWND        hwnd,
-  LPHEADCOMBO lphc,
-  HDC         hParamDC)
+static LRESULT COMBO_EraseBackground(HWND hwnd,WPARAM wParam,LPARAM lParam)
 {
+  LPHEADCOMBO lphc = (LPHEADCOMBO)GetInfoPtr(hwnd);
   HBRUSH  hBkgBrush;
   RECT    clientRect;
   HDC     hDC;
 
-  hDC = (hParamDC) ? hParamDC
-                   : GetDC(hwnd);
+  hDC = (wParam) ? (HDC)wParam:GetDC(hwnd);
 
   /*
    * Calculate the area that we want to erase.
@@ -916,22 +921,27 @@ static LRESULT COMBO_EraseBackground(
 
   FillRect(hDC, &clientRect, hBkgBrush);
 
-  if (!hParamDC)
+  if (!wParam)
     ReleaseDC(hwnd, hDC);
 
   return TRUE;
 }
 
+static LRESULT COMBO_GetDlgCode(HWND hwnd,WPARAM wParam,LPARAM lParam)
+{
+  return DLGC_WANTARROWS | DLGC_WANTCHARS;
+}
+
 /***********************************************************************
  *           COMBO_Paint
  */
-static LRESULT COMBO_Paint(LPHEADCOMBO lphc, HDC hParamDC)
+static LRESULT COMBO_Paint(HWND hwnd,WPARAM wParam,LPARAM lParam)
 {
+  LPHEADCOMBO lphc = (LPHEADCOMBO)GetInfoPtr(hwnd);
   PAINTSTRUCT ps;
   HDC   hDC;
 
-  hDC = (hParamDC) ? hParamDC
-                   : BeginPaint( lphc->hwndself, &ps);
+  hDC = (wParam) ? (HDC)wParam:BeginPaint( lphc->hwndself, &ps);
 
 
   if( hDC && !(lphc->wState & CBF_NOREDRAW) )
@@ -969,10 +979,16 @@ static LRESULT COMBO_Paint(LPHEADCOMBO lphc, HDC hParamDC)
         SelectObject( hDC, hPrevBrush );
   }
 
-  if( !hParamDC )
-    EndPaint(lphc->hwndself, &ps);
+  if(!wParam) EndPaint(lphc->hwndself, &ps);
 
   return 0;
+}
+
+static LRESULT COMBO_PrintClient(HWND hwnd,WPARAM wParam,LPARAM lParam)
+{
+  if (lParam & PRF_ERASEBKGND) COMBO_EraseBackground(hwnd,wParam,lParam);
+
+  return COMBO_Paint(hwnd,wParam,lParam);
 }
 
 /***********************************************************************
@@ -1235,14 +1251,9 @@ BOOL COMBO_FlipListbox( LPHEADCOMBO lphc, BOOL bRedrawButton )
  */
 HWND COMBO_GetLBWindow( HWND hwnd )
 {
-  LPHEADCOMBO   lphc = NULL;
-  LONG          ptr = GetInfoPtr(hwnd);
-  if(ptr)
-  {
-    lphc =  (LPHEADCOMBO )ptr;
-    if( lphc ) return lphc->hWndLBox;
-  }
-  return 0;
+  LPHEADCOMBO lphc = (LPHEADCOMBO)GetInfoPtr(hwnd);
+
+  return lphc ? lphc->hWndLBox:0;
 }
 
 
@@ -1255,66 +1266,90 @@ static void CBRepaintButton( LPHEADCOMBO lphc )
   UpdateWindow(CB_HWND(lphc));
 }
 
+static VOID COMBO_EditSetFocus(LPHEADCOMBO lphc)
+{
+  if(!(lphc->wState & CBF_FOCUSED))
+  {
+    if( CB_GETTYPE(lphc) == CBS_DROPDOWNLIST )
+      SendMessageA( lphc->hWndLBox, LB_CARETON, 0, 0 );
+
+    if( lphc->wState & CBF_EDIT )
+      SendMessageA( lphc->hWndEdit, EM_SETSEL, 0, (LPARAM)(-1) );
+    lphc->wState |= CBF_FOCUSED;
+    if( !(lphc->wState & CBF_EDIT) )
+    {
+      InvalidateRect(CB_HWND(lphc), &lphc->textRect, TRUE);
+    }
+
+    CB_NOTIFY( lphc, CBN_SETFOCUS );
+  }
+}
+
 /***********************************************************************
  *           COMBO_SetFocus
  */
-static void COMBO_SetFocus( LPHEADCOMBO lphc )
+static LRESULT COMBO_SetFocus(HWND hwnd,WPARAM wParam,LPARAM lParam)
 {
-   if( !(lphc->wState & CBF_FOCUSED) )
-   {
-       if( CB_GETTYPE(lphc) == CBS_DROPDOWNLIST )
-           SendMessageA( lphc->hWndLBox, LB_CARETON, 0, 0 );
+   LPHEADCOMBO lphc = (LPHEADCOMBO)GetInfoPtr(hwnd);
 
-       if( lphc->wState & CBF_EDIT )
-           SendMessageA( lphc->hWndEdit, EM_SETSEL, 0, (LPARAM)(-1) );
-       lphc->wState |= CBF_FOCUSED;
-       if( !(lphc->wState & CBF_EDIT) )
-       {
-         InvalidateRect(CB_HWND(lphc), &lphc->textRect, TRUE);
-       }
+   if(lphc->wState & CBF_EDIT)
+     SetFocus(lphc->hWndEdit);
+   else
+     COMBO_EditSetFocus(lphc);
 
-       CB_NOTIFY( lphc, CBN_SETFOCUS );
-   }
+   return 0;
+}
+
+static VOID COMBO_EditKillFocus(LPHEADCOMBO lphc)
+{
+  if( lphc->wState & CBF_FOCUSED )
+  {
+    SendMessageA( lphc->hwndself, WM_LBUTTONUP, 0, (LPARAM)(-1) );
+
+    CBRollUp( lphc, FALSE, TRUE );
+    if( IsWindow( lphc->hwndself ) )
+    {
+      if( CB_GETTYPE(lphc) == CBS_DROPDOWNLIST )
+        SendMessageA( lphc->hWndLBox, LB_CARETOFF, 0, 0 );
+
+      lphc->wState &= ~CBF_FOCUSED;
+
+      /* redraw text */
+      if( lphc->wState & CBF_EDIT )
+        SendMessageA( lphc->hWndEdit, EM_SETSEL, (WPARAM)(-1), 0 );
+      else
+      {
+        InvalidateRect(CB_HWND(lphc), &lphc->textRect, TRUE);
+      }
+
+      CB_NOTIFY( lphc, CBN_KILLFOCUS );
+    }
+  }
 }
 
 /***********************************************************************
  *           COMBO_KillFocus
  */
-static void COMBO_KillFocus( LPHEADCOMBO lphc )
+static LRESULT COMBO_KillFocus(HWND hwnd,WPARAM wParam,LPARAM lParam)
 {
-   HWND hWnd = lphc->hwndself;
+   LPHEADCOMBO lphc = (LPHEADCOMBO)GetInfoPtr(hwnd);
 
-   if( lphc->wState & CBF_FOCUSED )
+   if(!wParam || (wParam != lphc->hWndEdit && wParam != lphc->hWndLBox ))
    {
-       SendMessageA( hWnd, WM_LBUTTONUP, 0, (LPARAM)(-1) );
-
-       CBRollUp( lphc, FALSE, TRUE );
-       if( IsWindow( hWnd ) )
-       {
-           if( CB_GETTYPE(lphc) == CBS_DROPDOWNLIST )
-               SendMessageA( lphc->hWndLBox, LB_CARETOFF, 0, 0 );
-
-           lphc->wState &= ~CBF_FOCUSED;
-
-           /* redraw text */
-           if( lphc->wState & CBF_EDIT )
-               SendMessageA( lphc->hWndEdit, EM_SETSEL, (WPARAM)(-1), 0 );
-           else
-           {
-             InvalidateRect(CB_HWND(lphc), &lphc->textRect, TRUE);
-           }
-
-           CB_NOTIFY( lphc, CBN_KILLFOCUS );
-       }
+     COMBO_EditKillFocus(lphc);
    }
+
+   return 0;
 }
 
 /***********************************************************************
  *           COMBO_Command
  */
-static LRESULT COMBO_Command( LPHEADCOMBO lphc, WPARAM wParam, HWND hWnd )
+static LRESULT COMBO_Command(HWND hwnd,WPARAM wParam,LPARAM lParam)
 {
-   if ( lphc->wState & CBF_EDIT && lphc->hWndEdit == hWnd )
+   LPHEADCOMBO lphc = (LPHEADCOMBO)GetInfoPtr(hwnd);
+
+   if ( lphc->wState & CBF_EDIT && lphc->hWndEdit == hwnd )
    {
        /* ">> 8" makes gcc generate jump-table instead of cmp ladder */
 
@@ -1325,7 +1360,7 @@ static LRESULT COMBO_Command( LPHEADCOMBO lphc, WPARAM wParam, HWND hWnd )
                 //TRACE("[%04x]: edit [%04x] got focus\n",
                 //             CB_HWND(lphc), lphc->hWndEdit );
 
-                if( !(lphc->wState & CBF_FOCUSED) ) COMBO_SetFocus( lphc );
+                if( !(lphc->wState & CBF_FOCUSED) ) COMBO_EditSetFocus(lphc);
                 break;
 
            case (EN_KILLFOCUS >> 8):
@@ -1339,7 +1374,7 @@ static LRESULT COMBO_Command( LPHEADCOMBO lphc, WPARAM wParam, HWND hWnd )
                  * the combo). ?? - AK.
                  */
 
-                COMBO_KillFocus( lphc );
+                COMBO_EditKillFocus(lphc);
                 break;
 
 
@@ -1371,7 +1406,7 @@ static LRESULT COMBO_Command( LPHEADCOMBO lphc, WPARAM wParam, HWND hWnd )
                 CB_NOTIFY( lphc, CBN_ERRSPACE );
        }
    }
-   else if( lphc->hWndLBox == hWnd )
+   else if( lphc->hWndLBox == hwnd )
    {
        switch( HIWORD(wParam) )
        {
@@ -1452,11 +1487,13 @@ static LRESULT COMBO_ItemOp( LPHEADCOMBO lphc, UINT msg,
 /***********************************************************************
  *           COMBO_GetText
  */
-static LRESULT COMBO_GetText( LPHEADCOMBO lphc, UINT N, LPSTR lpText)
+static LRESULT COMBO_GetText(HWND hwnd,WPARAM wParam,LPARAM lParam)
 {
+   LPHEADCOMBO lphc = (LPHEADCOMBO)GetInfoPtr(hwnd);
+
    if( lphc->wState & CBF_EDIT )
        return SendMessageA( lphc->hWndEdit, WM_GETTEXT,
-                             (WPARAM)N, (LPARAM)lpText );
+                             wParam,lParam);
 
    /* get it from the listbox */
 
@@ -1470,10 +1507,10 @@ static LRESULT COMBO_GetText( LPHEADCOMBO lphc, UINT N, LPSTR lpText)
                                                 (WPARAM)idx, 0 );
 
            /* 'length' is without the terminating character */
-           if( length >= N )
+           if( length >= (UINT)wParam )
                lpBuffer = (LPSTR) HeapAlloc( GetProcessHeap(), 0, length + 1 );
            else
-               lpBuffer = lpText;
+               lpBuffer = (LPSTR)lParam;
 
            if( lpBuffer )
            {
@@ -1482,11 +1519,11 @@ static LRESULT COMBO_GetText( LPHEADCOMBO lphc, UINT N, LPSTR lpText)
 
                /* truncate if buffer is too short */
 
-               if( length >= N )
+               if( length >= (UINT)wParam )
                {
-                   if (N && lpText) {
-                   if( n != LB_ERR ) memcpy( lpText, lpBuffer, (N>n) ? n+1 : N-1 );
-                   lpText[N - 1] = '\0';
+                   if ((UINT)wParam && lParam) {
+                   if( n != LB_ERR ) memcpy( (LPSTR)lParam, lpBuffer, ((UINT)wParam>n) ? n+1 : (UINT)wParam-1 );
+                   ((LPSTR)lParam)[(UINT)wParam - 1] = '\0';
                    }
                    HeapFree( GetProcessHeap(), 0, lpBuffer );
                }
@@ -1546,35 +1583,45 @@ static void CBResetPos(
 /***********************************************************************
  *           COMBO_Size
  */
-static void COMBO_Size( LPHEADCOMBO lphc )
-  {
-  dprintf(("COMBO_Size"));
-  CBCalcPlacement(lphc->hwndself,
-                  lphc,
-                  &lphc->textRect,
-                  &lphc->buttonRect,
-                  &lphc->droppedRect);
+static LRESULT COMBO_Size(HWND hwnd,WPARAM wParam,LPARAM lParam)
+{
+  LPHEADCOMBO lphc = (LPHEADCOMBO)GetInfoPtr(hwnd);
 
-  CBResetPos( lphc, &lphc->textRect, &lphc->droppedRect, TRUE );
+  dprintf(("COMBO_Size"));
+
+  if(lphc->hWndLBox && !(lphc->wState & CBF_NORESIZE))
+  {
+    CBCalcPlacement(lphc->hwndself,
+                    lphc,
+                    &lphc->textRect,
+                    &lphc->buttonRect,
+                    &lphc->droppedRect);
+
+    CBResetPos( lphc, &lphc->textRect, &lphc->droppedRect, TRUE );
+  }
+
+  return 0;
 }
 
 
 /***********************************************************************
  *           COMBO_Font
  */
-static void COMBO_Font( LPHEADCOMBO lphc, HFONT hFont, BOOL bRedraw )
+static LRESULT COMBO_SetFont(HWND hwnd,WPARAM wParam,LPARAM lParam)
 {
+  LPHEADCOMBO lphc = (LPHEADCOMBO)GetInfoPtr(hwnd);
+
   /*
    * Set the font
    */
-  lphc->hFont = hFont;
+  lphc->hFont = wParam;
 
   /*
    * Propagate to owned windows.
    */
   if( lphc->wState & CBF_EDIT )
-      SendMessageA( lphc->hWndEdit, WM_SETFONT, (WPARAM)hFont, bRedraw );
-  SendMessageA( lphc->hWndLBox, WM_SETFONT, (WPARAM)hFont, bRedraw );
+      SendMessageA(lphc->hWndEdit,WM_SETFONT,wParam,lParam);
+  SendMessageA(lphc->hWndLBox,WM_SETFONT,wParam,lParam);
 
   /*
    * Redo the layout of the control.
@@ -1593,6 +1640,15 @@ static void COMBO_Font( LPHEADCOMBO lphc, HFONT hFont, BOOL bRedraw )
   {
     CBForceDummyResize(lphc);
   }
+
+  return 0;
+}
+
+static LRESULT COMBO_GetFont(HWND hwnd,WPARAM wParam,LPARAM lParam)
+{
+  LPHEADCOMBO lphc = (LPHEADCOMBO)GetInfoPtr(hwnd);
+
+  return lphc->hFont;
 }
 
 
@@ -1790,54 +1846,50 @@ LRESULT WINAPI ComboWndProc( HWND hwnd, UINT message,
         /* System messages */
 
         case WM_NCCREATE:
-                return COMBO_NCCreate(hwnd, lParam);
+          return COMBO_NCCreate(hwnd,wParam,lParam);
+
         case WM_NCDESTROY:
-                COMBO_NCDestroy(lphc);
-                break;/* -> DefWindowProc */
+          return COMBO_NCDestroy(hwnd,wParam,lParam);
 
         case WM_CREATE:
-                return COMBO_Create(lphc, hwnd, lParam);
+          return COMBO_Create(hwnd,wParam,lParam);
 
         case WM_PRINTCLIENT:
-                if (lParam & PRF_ERASEBKGND)
-                  COMBO_EraseBackground(hwnd, lphc, wParam);
+          return COMBO_PrintClient(hwnd,wParam,lParam);
 
-                /* Fallthrough */
         case WM_PAINT:
-                /* wParam may contain a valid HDC! */
-                return  COMBO_Paint(lphc, wParam);
+          return COMBO_Paint(hwnd,wParam,lParam);
+
         case WM_ERASEBKGND:
-                return  COMBO_EraseBackground(hwnd, lphc, wParam);
+          return COMBO_EraseBackground(hwnd,wParam,lParam);
+
         case WM_GETDLGCODE:
-                return  (LRESULT)(DLGC_WANTARROWS | DLGC_WANTCHARS);
+          return COMBO_GetDlgCode(hwnd,wParam,lParam);
+
         case WM_WINDOWPOSCHANGING:
-                return  COMBO_WindowPosChanging(hwnd, lphc, (LPWINDOWPOS)lParam);
+          return COMBO_WindowPosChanging(hwnd,wParam,lParam);
+
         case WM_SIZE:
-                if( lphc->hWndLBox &&
-                  !(lphc->wState & CBF_NORESIZE) ) COMBO_Size( lphc );
-                return  TRUE;
+          return COMBO_Size(hwnd,wParam,lParam);
+
         case WM_SETFONT:
-                COMBO_Font( lphc, (HFONT)wParam, (BOOL)lParam );
-                return  TRUE;
+          return COMBO_SetFont(hwnd,wParam,lParam);
+
         case WM_GETFONT:
-                return  (LRESULT)lphc->hFont;
+          return COMBO_GetFont(hwnd,wParam,lParam);
+
         case WM_SETFOCUS:
-                if( lphc->wState & CBF_EDIT )
-                    SetFocus( lphc->hWndEdit );
-                else
-                    COMBO_SetFocus( lphc );
-                return  TRUE;
+          return COMBO_SetFocus(hwnd,wParam,lParam);
+
         case WM_KILLFOCUS:
-#define hwndFocus ((HWND)wParam)
-                if( !hwndFocus ||
-                    (hwndFocus != lphc->hWndEdit && hwndFocus != lphc->hWndLBox ))
-                    COMBO_KillFocus( lphc );
-#undef hwndFocus
-                return  TRUE;
+          return COMBO_KillFocus(hwnd,wParam,lParam);
+
         case WM_COMMAND:
-                return  COMBO_Command( lphc, wParam, (HWND)lParam );
+          return COMBO_Command(hwnd,wParam,lParam);
+
         case WM_GETTEXT:
-                return  COMBO_GetText( lphc, (UINT)wParam, (LPSTR)lParam );
+          return COMBO_GetText(hwnd,wParam,lParam);
+//CB:
         case WM_SETTEXT:
         case WM_GETTEXTLENGTH:
         case WM_CLEAR:

@@ -1,4 +1,4 @@
-/* $Id: scroll.cpp,v 1.23 1999-11-17 17:04:54 cbratschi Exp $ */
+/* $Id: scroll.cpp,v 1.24 1999-11-19 17:59:34 cbratschi Exp $ */
 /*
  * Scrollbar control
  *
@@ -1473,10 +1473,12 @@ BOOL WINAPI GetScrollInfo(
                 LPSCROLLINFO info /* [IO] (info.fMask [I] specifies which values are to retrieve) */)
 {
   SCROLLBAR_INFO *infoPtr;
+  HWND hwndScroll;
 
     dprintf(("USER32: GetScrollInfo"));
 
-    if (!(infoPtr = SCROLL_GetInfoPtr(SCROLL_GetScrollHandle(hwnd,nBar),nBar))) return FALSE;
+    hwndScroll = SCROLL_GetScrollHandle(hwnd,nBar);
+    if (!hwndScroll || !(infoPtr = SCROLL_GetInfoPtr(hwndScroll,nBar))) return FALSE;
     if (info->fMask & ~(SIF_ALL | SIF_DISABLENOSCROLL)) return FALSE;
     if ((info->cbSize != sizeof(*info)) &&
         (info->cbSize != sizeof(*info)-sizeof(info->nTrackPos))) return FALSE;
@@ -1484,7 +1486,8 @@ BOOL WINAPI GetScrollInfo(
     if (info->fMask & SIF_PAGE) info->nPage = infoPtr->Page;
     if (info->fMask & SIF_POS) info->nPos = infoPtr->CurVal;
     if ((info->fMask & SIF_TRACKPOS) && (info->cbSize == sizeof(*info)))
-        info->nTrackPos = (SCROLL_TrackingWin==hwnd) ? SCROLL_TrackingVal : infoPtr->CurVal;
+      info->nTrackPos = (SCROLL_MovingThumb && SCROLL_TrackingWin == hwndScroll && SCROLL_TrackingBar == nBar) ? SCROLL_TrackingVal:infoPtr->CurVal;
+
     if (info->fMask & SIF_RANGE)
     {
         info->nMin = infoPtr->MinVal;
@@ -1545,26 +1548,6 @@ INT WINAPI GetScrollPos(
     if (!infoPtr) return 0;
 
     return infoPtr->CurVal;
-}
-
-// CB: functions to get 32bit SB_THUMBTRACK position, for internal use (controls)
-//     not supported by Windows, Windows only delivers the 16bit value
-
-BOOL IsScrollBarTracking(HWND hwnd,INT nBar)
-{
-  HWND hwndScroll = SCROLL_GetScrollHandle(hwnd,nBar);
-
-  return (SCROLL_MovingThumb && SCROLL_TrackingWin == hwnd && SCROLL_TrackingBar == nBar);
-}
-
-INT WINAPI GetScrollTrackPos(HWND hwnd,INT nBar)
-{
-  SCROLLBAR_INFO *infoPtr;
-
-  infoPtr = SCROLL_GetInfoPtr(SCROLL_GetScrollHandle(hwnd,nBar),nBar);
-  if (!infoPtr) return 0;
-
-  return (SCROLL_MovingThumb && SCROLL_TrackingWin == hwnd && SCROLL_TrackingBar == nBar) ? SCROLL_TrackingVal:infoPtr->CurVal;
 }
 
 /*************************************************************************
