@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.12 2000-07-19 19:05:27 sandervl Exp $
+# $Id: makefile,v 1.13 2000-10-02 13:03:00 phaller Exp $
 
 #
 # Odin32 API
@@ -24,6 +24,7 @@ CLEANEXTRAS = netapi32rsrc.asm
 # Object files. All objects should be prefixed with $(OBJDIR)!
 OBJS = \
 $(OBJDIR)\wnetap32.obj \
+$(OBJDIR)\oslibnet.obj \
 $(OBJDIR)\netapi32rsrc.obj \
 $(PDWIN32_LIB)/dllentry.obj
 

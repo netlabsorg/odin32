@@ -1,4 +1,4 @@
-/* $Id: wnetap32.cpp,v 1.6 1999-08-19 13:13:24 phaller Exp $ */
+/* $Id: wnetap32.cpp,v 1.7 2000-10-02 13:03:01 phaller Exp $ */
 
 /*
  *
@@ -9,6 +9,11 @@
  * NETAPI32 stubs
  *
  * Copyright 1998 Patrick Haller
+ *
+ * Note: functions that return structures/buffers seem to append strings
+ * at the end of the buffer. Currently, we just allocate the strings
+ * "normally". Therefore a caller that just does a NetApiBufferFree() on the
+ * returned buffer will leak all allocated strings.
  *
  */
 /*****************************************************************************
@@ -23,12 +28,18 @@
  * Includes                                                                 *
  ****************************************************************************/
 
-#include <os2win.h>
+#include <odin.h>
 #include <odinwrap.h>
-#include "misc.h"
+#include <os2sel.h>
+#include <os2win.h>
+#include <misc.h>
+#include <heapstring.h>
 
+#include "oslibnet.h"
+#include "lmwksta.h"
 
-ODINDEBUGCHANNEL(WNETAP32)
+ODINDEBUGCHANNEL(WNETAP32-WNETAP32)
+
 
 /****************************************************************************
  * Module Global Variables                                                  *
@@ -37,6 +48,7 @@ ODINDEBUGCHANNEL(WNETAP32)
 #undef NET_API_STATUS
 #define NET_API_STATUS DWORD
 
+#define NERR_OK   0
 #define NERR_BASE 1 /* @@@PH DUMMY ! */
 
 #define NCBNAMSZ        16
@@ -196,9 +208,8 @@ ODINFUNCTION2(NET_API_STATUS, OS2NetApiBufferAllocate,
               LPVOID *, Buffer)
 
 {
-  dprintf(("NETAPI32: NetApiBufferAllocate not implemented\n"));
-
-  return (NERR_BASE);
+  *Buffer = HEAP_malloc(ByteCount);
+  return (NERR_OK);
 }
 
 
@@ -220,9 +231,8 @@ ODINFUNCTION1(NET_API_STATUS, OS2NetApiBufferFree,
               LPVOID, Buffer)
 
 {
-  dprintf(("NETAPI32: NetApiBufferFree not implemented\n"));
-
-  return (NERR_BASE);
+  HEAP_free(Buffer);
+  return (NERR_OK);
 }
 
 
@@ -245,12 +255,10 @@ ODINFUNCTION1(NET_API_STATUS, OS2NetApiBufferFree,
 ODINFUNCTION3(NET_API_STATUS, OS2NetApiBufferReallocate,
               LPVOID, OldBuffer,
               DWORD, NewByteCount,
-              LPVOID, NewBuffer)
+              LPVOID*, NewBuffer)
 {
-
-  dprintf(("NETAPI32: NetApiBufferReallocate not implemented\n"));
-
-  return (NERR_BASE);
+  *NewBuffer = HEAP_realloc(OldBuffer, NewByteCount);
+  return (NERR_OK);
 }
 
 
@@ -271,12 +279,10 @@ ODINFUNCTION3(NET_API_STATUS, OS2NetApiBufferReallocate,
 
 ODINFUNCTION2(NET_API_STATUS, OS2NetApiBufferSize,
               LPVOID, buffer,
-              DWORD, ByteCount)
+              LPDWORD, lpByteCount)
 {
-
-  dprintf(("NETAPI32: NetApiBufferSize not implemented\n"));
-
-  return (NERR_BASE);
+  *lpByteCount = HEAP_size(buffer);
+  return (NERR_OK);
 }
 
 
@@ -2762,7 +2768,8 @@ ODINFUNCTION5(NET_API_STATUS, OS2NetUserSetInfo,
  *             LPBYTE *bufptr
  * Variables :
  * Result    :
- * Remark    :
+ * Remark    : NT understands modes 100, 101, 102, 302, 402, and 502
+ *             The APIs allocate the buffer dynamically.
  * Status    : UNTESTED STUB
  *
  * Stub Generated through PE2LX Stubwizard 0.02 from Markus Montkowski
@@ -2775,12 +2782,168 @@ ODINFUNCTION3(NET_API_STATUS, OS2NetWkstaGetInfo,
               LPBYTE *, bufptr)
 
 {
-
-  dprintf(("NETAPI32: NetWkstaGetInfo(%s, %d, %08x) not implemented\n"
+  dprintf(("NETAPI32: NetWkstaGetInfo(%s, %d, %08x)\n"
            ,servername, level, *bufptr
          ));
+  
+  // Convert servername to ASCII
+  char *asciiServername = NULL;
+  if (servername) asciiServername = UnicodeToAsciiString(servername);
+  
+  // @@@PH convert information modes!
+  int iOS2Level = 100;
+  switch (level)
+  {
+    case 100: iOS2Level = 10; break;
+    case 101: iOS2Level = 1; break;
+    case 102: iOS2Level = 1; break;
+    case 302: iOS2Level = 1; break;
+    case 402: iOS2Level = 1; break;
+    case 502: iOS2Level = 1; break;
+  }
+  
+  ULONG  ulBytesAvailable;
+  DWORD  rc;
+  
+  // determine required size of buffer
+  char pOS2Buffer[4096];
+  rc = OSLibNetWkstaGetInfo((const unsigned char*)asciiServername, 
+                            iOS2Level,
+                            (unsigned char*)pOS2Buffer,
+                            sizeof(pOS2Buffer),
+                            &ulBytesAvailable);
+  if (asciiServername) FreeAsciiString(asciiServername);
+  
+  if (rc == NERR_OK)
+  {
+    // @@@PH now convert the requested structure to UNICODE
+    switch (level)
+    {
+      case 100: // system information - guest access
+      {
+        PWKSTA_INFO_100 pwki100;
+        struct wksta_info_10 *pOS2wki10 = (struct wksta_info_10 *)pOS2Buffer;
+        
+        rc = OS2NetApiBufferAllocate(sizeof(pwki100), (LPVOID*)&pwki100);
+        if (!rc)
+        {
+          pwki100->wki100_platform_id = 0; //@@@PH dummy
+          pwki100->wki100_computername = HEAP_strdupAtoW( GetProcessHeap(), 0, (LPCSTR)pOS2wki10->wki10_computername);
+          pwki100->wki100_langroup = HEAP_strdupAtoW( GetProcessHeap(), 0, (LPCSTR)pOS2wki10->wki10_langroup);
+          pwki100->wki100_ver_major = pOS2wki10->wki10_ver_major;
+          pwki100->wki100_ver_minor = pOS2wki10->wki10_ver_minor;
+        }
 
-  return (NERR_BASE);
+        // the caller is responsible for freeing the memory!
+        *bufptr = (LPBYTE)pwki100;
+        break;
+      }
+      
+      
+      case 101: // system information - guest access
+      {
+        PWKSTA_INFO_101 pwki101;
+        struct wksta_info_1 *pOS2wki1 = (struct wksta_info_1 *)pOS2Buffer;
+        
+        rc = OS2NetApiBufferAllocate(sizeof(pwki101), (LPVOID*)&pwki101);
+        if (!rc)
+        {
+          pwki101->wki101_platform_id = 0; //@@@PH dummy
+          pwki101->wki101_computername = HEAP_strdupAtoW( GetProcessHeap(), 0, (LPCSTR)pOS2wki1->wki1_computername);
+          pwki101->wki101_langroup = HEAP_strdupAtoW( GetProcessHeap(), 0, (LPCSTR)pOS2wki1->wki1_langroup);
+          pwki101->wki101_ver_major = pOS2wki1->wki1_ver_major;
+          pwki101->wki101_ver_minor = pOS2wki1->wki1_ver_minor;
+          pwki101->wki101_lanroot = HEAP_strdupAtoW ( GetProcessHeap(), 0, (LPCSTR)pOS2wki1->wki1_root);
+        }
+
+        // the caller is responsible for freeing the memory!
+        *bufptr = (LPBYTE)pwki101;
+        break;
+      }
+      
+      
+      case 102: // system information - guest access
+      {
+        PWKSTA_INFO_102 pwki102;
+        struct wksta_info_1 *pOS2wki1 = (struct wksta_info_1 *)pOS2Buffer;
+        
+        rc = OS2NetApiBufferAllocate(sizeof(pwki102), (LPVOID*)&pwki102);
+        if (!rc)
+        {
+          pwki102->wki102_platform_id = 0; //@@@PH dummy
+          pwki102->wki102_computername = HEAP_strdupAtoW( GetProcessHeap(), 0, (LPCSTR)pOS2wki1->wki1_computername);
+          pwki102->wki102_langroup = HEAP_strdupAtoW( GetProcessHeap(), 0, (LPCSTR)pOS2wki1->wki1_langroup);
+          pwki102->wki102_ver_major = pOS2wki1->wki1_ver_major;
+          pwki102->wki102_ver_minor = pOS2wki1->wki1_ver_minor;
+          pwki102->wki102_lanroot = HEAP_strdupAtoW ( GetProcessHeap(), 0, (LPCSTR)pOS2wki1->wki1_root);
+          pwki102->wki102_logged_on_users = 0; // @@@PH dummy
+        }
+
+        // the caller is responsible for freeing the memory!
+        *bufptr = (LPBYTE)pwki102;
+        break;
+      }
+      
+      
+      case 502: // system information - guest access
+      {
+        PWKSTA_INFO_502 pwki502;
+        struct wksta_info_1 *pOS2wki1 = (struct wksta_info_1 *)pOS2Buffer;
+        
+        rc = OS2NetApiBufferAllocate(sizeof(pwki502), (LPVOID*)&pwki502);;
+        if (!rc)
+        {
+          char *hs = (char *)pOS2wki1->wki1_wrkheuristics;
+          
+          pwki502->wki502_char_wait = pOS2wki1->wki1_charwait;
+          pwki502->wki502_collection_time = pOS2wki1->wki1_chartime;
+          pwki502->wki502_maximum_collection_count = pOS2wki1->wki1_charcount;
+          pwki502->wki502_keep_conn = pOS2wki1->wki1_keepconn;
+          pwki502->wki502_max_cmds = pOS2wki1->wki1_maxcmds;
+          pwki502->wki502_sess_timeout = pOS2wki1->wki1_sesstimeout;
+          pwki502->wki502_siz_char_buf = pOS2wki1->wki1_sizcharbuf;
+          pwki502->wki502_max_threads = pOS2wki1->wki1_maxthreads;
+          
+          pwki502->wki502_lock_quota = 0;
+          pwki502->wki502_lock_increment = 0;
+          pwki502->wki502_lock_maximum = 0;
+          pwki502->wki502_pipe_increment = 0;
+          pwki502->wki502_pipe_maximum = 0;
+          pwki502->wki502_cache_file_timeout = 0;
+          pwki502->wki502_dormant_file_limit = 0;
+          pwki502->wki502_read_ahead_throughput = 0;
+          
+          pwki502->wki502_num_mailslot_buffers = pOS2wki1->wki1_mailslots;
+          pwki502->wki502_num_srv_announce_buffers = pOS2wki1->wki1_numdgrambuf;
+          pwki502->wki502_max_illegal_datagram_events = 0;
+          pwki502->wki502_illegal_datagram_event_reset_frequency = 0;
+          pwki502->wki502_log_election_packets = FALSE;
+          
+          pwki502->wki502_use_opportunistic_locking = (hs[0] != '0') ? TRUE : FALSE;
+          pwki502->wki502_use_unlock_behind = (hs[1] != '0') ? TRUE : FALSE;
+          pwki502->wki502_use_close_behind = (hs[2] != '0') ? TRUE : FALSE;
+          pwki502->wki502_buf_named_pipes = (hs[3] != '0') ? TRUE : FALSE;
+          pwki502->wki502_use_lock_read_unlock = (hs[4] != '0') ? TRUE : FALSE;
+          pwki502->wki502_utilize_nt_caching = TRUE; // sure we do ;-)
+          pwki502->wki502_use_raw_read = (hs[12] != '0') ? TRUE : FALSE;
+          pwki502->wki502_use_raw_write = (hs[13] != '0') ? TRUE : FALSE;
+          pwki502->wki502_use_write_raw_data = (hs[29] != '0') ? TRUE : FALSE;
+          pwki502->wki502_use_encryption = (hs[21] != '0') ? TRUE : FALSE;
+          pwki502->wki502_buf_files_deny_write = (hs[23] != '0') ? TRUE : FALSE;
+          pwki502->wki502_buf_read_only_files = (hs[24] != '0') ? TRUE : FALSE;
+          pwki502->wki502_force_core_create_mode = (hs[27] != '0') ? TRUE : FALSE;
+          pwki502->wki502_use_512_byte_max_transfer =  FALSE; // @@@PH
+        }
+        
+        // the caller is responsible for freeing the memory!
+        *bufptr = (LPBYTE)pwki502;
+        break;
+      }
+    }
+  }
+  
+  // @@@PH convert return code to NT code
+  return (rc);
 }
 
 
