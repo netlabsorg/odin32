@@ -1,8 +1,9 @@
-/* $Id: changelog,v 1.2382 2002-12-11 14:49:31 sandervl Exp $ */
+/* $Id: changelog,v 1.2383 2002-12-11 17:12:40 sandervl Exp $ */
 
  2002-12-11: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o Added custom build function to disable loading of LX dlls
                   (safety precaution)
+                o 16 bits loader command line changes
 
  2002-12-10: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o Closing a root key should just return success
