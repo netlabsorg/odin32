@@ -1,4 +1,4 @@
-/* $Id: ChangeLog,v 1.2552 2003-04-11 14:21:19 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2553 2003-04-11 15:22:53 sandervl Exp $ */
 
  2003-04-11: knut st. osmundsen <bird-odin-spam@anduin   >
     - USER32, KERNEL32, include/win/thread.h:
@@ -6,6 +6,10 @@
 
  2002-04-11: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o Send WM_WINDOWPOSCHANGED for ShowWindow(SW_SHOWWINDOW)
+                o Tool windows (WS_EX_TOOLWINDOW) don't have minimize or maximize
+                  buttons. (testing shows this in NT4)
+                o Display tool window titlebars in win32 style. They are supposed
+                  to be thinner than standard PM titlebar controls.
 
  2003-04-11: Dmitry Froloff <froloff@os2   >
     - KERNEL32: o Console updates
