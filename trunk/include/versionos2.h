@@ -1,4 +1,4 @@
-/* $Id: versionos2.h,v 1.20 2001-01-20 18:18:56 bird Exp $ */
+/* $Id: versionos2.h,v 1.21 2001-08-16 21:34:41 sandervl Exp $ */
 
 #ifndef __VERSIONOS2__H__
 #define __VERSIONOS2__H__
@@ -18,7 +18,7 @@
  *
  *
  */
-#define PE2LX_VERSION 6
+#define PE2LX_VERSION 7
 
 
 #ifndef SYSTEM
