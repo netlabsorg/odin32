@@ -1,4 +1,4 @@
-/* $Id: win32wmdichild.cpp,v 1.1 1999-08-31 10:36:23 sandervl Exp $ */
+/* $Id: win32wmdichild.cpp,v 1.2 1999-08-31 17:14:51 sandervl Exp $ */
 /*
  * Win32 MDI Child Window Class for OS/2
  *
@@ -8,6 +8,9 @@
  *
  * Copyright 1994, Bob Amstadt
  *           1995,1996 Alex Korobka
+ *
+ *
+ * TODO: See #if 0's
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -48,6 +51,200 @@ Win32MDIChildWindow::Win32MDIChildWindow(CREATESTRUCTA *lpCreateStructA, ATOM cl
 //******************************************************************************
 Win32MDIChildWindow::~Win32MDIChildWindow()
 {
+}
+//******************************************************************************
+//******************************************************************************
+LRESULT Win32MDIChildWindow::DefMDIChildProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
+{
+ Win32MDIClientWindow *client = (Win32MDIClientWindow *)getParent();
+
+    switch (Msg)
+    {
+    case WM_SETTEXT:
+	    DefWindowProcA(Msg, wParam, lParam);
+	    menuModifyItem();
+#if 0	
+        if( client->getMaximizedChild() == this )
+	            MDI_UpdateFrameText( clientWnd->parent, ci->self, MDI_REPAINTFRAME, NULL );
+#endif	
+	    return 0;
+
+    case WM_GETMINMAXINFO:
+    {
+        childGetMinMaxInfo((MINMAXINFO *)lParam);
+        return 0;
+    }
+
+    case WM_MENUCHAR:
+	    /* MDI children don't have menu bars */
+	    client->PostMessageA(WM_SYSCOMMAND, (WPARAM)SC_KEYMENU, (LPARAM)LOWORD(wParam) );
+        return 0x00010000L;
+
+    case WM_CLOSE:
+	    client->SendMessageA(WM_MDIDESTROY,(WPARAM16)getWindowHandle(), 0L);
+	    return 0;
+
+    case WM_SETFOCUS:
+	    if(client->getActiveChild() != this )
+	        client->childActivate(this);
+        break;
+
+    case WM_CHILDACTIVATE:
+	    client->childActivate(this);
+        return 0;
+
+    case WM_NCPAINT:
+        break;
+
+    case WM_SYSCOMMAND:
+	    switch( wParam )
+	    {
+		case SC_MOVE:
+            if( client->getMaximizedChild() == this)
+            {
+                return 0;
+            }
+            break;
+	    case SC_RESTORE:
+	    case SC_MINIMIZE:
+	        setStyle(getStyle() | WS_SYSMENU);
+            break;
+
+		case SC_MAXIMIZE:
+            if( client->getMaximizedChild() == this)
+            {
+		          return client->SendMessageA(Msg, wParam, lParam);
+            }
+	        setStyle(getStyle() & ~WS_SYSMENU);
+            break;
+
+		case SC_NEXTWINDOW:
+		     client->SendMessageA(WM_MDINEXT, 0, 0);
+		     return 0;
+
+		case SC_PREVWINDOW: //WM_MDINEXT??
+		     client->SendMessageA(WM_MDINEXT, 0, 0);
+		     return 0;
+	    }
+        break;
+
+    case WM_SETVISIBLE:
+#if 0
+        if( client->getMaximizedChild()) ci->mdiFlags &= ~MDIF_NEEDUPDATE;
+	    else
+            MDI_PostUpdate(clientWnd->hwndSelf, ci, SB_BOTH+1);
+#endif
+    	break;
+
+#if 0    	
+    case WM_SIZE:
+	    /* do not change */
+
+	    if( ci->hwndActiveChild == hwnd && wParam != SIZE_MAXIMIZED )
+	    {
+  	        ci->hwndChildMaximized = 0;
+	
+	        MDI_RestoreFrameMenu( clientWnd->parent, hwnd);
+            MDI_UpdateFrameText( clientWnd->parent, ci->self,
+                                 MDI_REPAINTFRAME, NULL );
+	    }
+
+	    if( wParam == SIZE_MAXIMIZED )
+	    {
+	        HWND16 hMaxChild = ci->hwndChildMaximized;
+
+	        if( hMaxChild == hwnd ) break;
+
+	        if( hMaxChild)
+	        {	
+	            SendMessage16( hMaxChild, WM_SETREDRAW, FALSE, 0L );
+
+	            MDI_RestoreFrameMenu( clientWnd->parent, hMaxChild);
+	            ShowWindow16( hMaxChild, SW_SHOWNOACTIVATE);
+
+	            SendMessage16( hMaxChild, WM_SETREDRAW, TRUE, 0L );
+	        }
+
+	        ci->hwndChildMaximized = hwnd; /* !!! */
+	        ci->hwndActiveChild = hwnd;
+
+	        MDI_AugmentFrameMenu( ci, clientWnd->parent, hwnd);
+	        MDI_UpdateFrameText( clientWnd->parent, ci->self,
+				 MDI_REPAINTFRAME, NULL );
+	    }
+
+	    if( wParam == SIZE_MINIMIZED )
+	    {
+	        HWND16 switchTo = MDI_GetWindow(clientWnd, hwnd, TRUE, WS_MINIMIZE);
+
+	        if( switchTo )
+	            SendMessage16( switchTo, WM_CHILDACTIVATE, 0, 0L);
+	    }
+	
+	    MDI_PostUpdate(clientWnd->hwndSelf, ci, SB_BOTH+1);
+	    break;
+#endif
+
+#if 0
+    case WM_NEXTMENU:
+	    if( wParam == VK_LEFT )		/* switch to frame system menu */
+        {
+            return MAKELONG( GetSubMenu(clientWnd->parent->hSysMenu, 0),
+			   clientWnd->parent->hwndSelf );
+            goto END;
+        }
+	    if( wParam == VK_RIGHT )	/* to frame menu bar */
+        {
+            retvalue = MAKELONG( clientWnd->parent->wIDmenu,
+			   clientWnd->parent->hwndSelf );
+            goto END;
+        }
+#endif
+    case WM_SYSCHAR:
+   	    if (wParam == '-')
+	    {
+	   	    SendMessageA(WM_SYSCOMMAND, (WPARAM)SC_KEYMENU, (LPARAM)(DWORD)VK_SPACE);
+	   	    return 0;
+	    }
+    }
+    return DefWindowProcA(Msg, wParam, lParam);
+}
+//******************************************************************************
+//******************************************************************************
+LRESULT Win32MDIChildWindow::DefMDIChildProcW(UINT Msg, WPARAM wParam, LPARAM lParam)
+{
+    switch (Msg)
+    {
+    case WM_SETTEXT:
+	    DefWindowProcW(Msg, wParam, lParam);
+	    menuModifyItem();
+#if 0	
+	    if( client->getMaximizedChild() == this )
+	            MDI_UpdateFrameText( clientWnd->parent, ci->self, MDI_REPAINTFRAME, NULL );
+#endif	
+	    return 0;
+	
+    case WM_GETMINMAXINFO:
+    case WM_MENUCHAR:
+    case WM_CLOSE:
+    case WM_SETFOCUS:
+    case WM_CHILDACTIVATE:
+    case WM_NCPAINT:
+    case WM_SYSCOMMAND:
+    case WM_SETVISIBLE:
+    case WM_SIZE:
+    case WM_NEXTMENU:
+        return DefMDIChildProcA(Msg, wParam, lParam );
+	
+    case WM_SYSCHAR:
+        if (wParam == '-')
+	    {
+	   	    SendMessageW(WM_SYSCOMMAND, SC_KEYMENU, (LPARAM)(DWORD)VK_SPACE);
+	   	    return 0;
+ 	    }
+ 	    break;
+    }
+    return DefWindowProcW(Msg, wParam, lParam);
 }
 /**********************************************************************
  *                  MDICreateChild

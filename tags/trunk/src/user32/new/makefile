@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.39 1999-08-31 14:38:08 sandervl Exp $
+# $Id: makefile,v 1.40 1999-08-31 17:14:51 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -66,7 +66,7 @@ usrcall.obj: usrcall.cpp usrcall.h
 dialog.obj: dialog.cpp
 dde.obj: dde.cpp
 hook.obj: hook.cpp hooks.h
-defwndproc.obj: defwndproc.cpp syscolor.h
+defwndproc.obj: defwndproc.cpp syscolor.h win32wmdiclient.h win32wbase.h win32wnd.h
 hooks.obj: hooks.cpp hooks.h
 initterm.obj: initterm.cpp $(PDWIN32_INCLUDE)\spy.h pmwindow.h heapshared.h
 uitools.obj: uitools.cpp
@@ -86,7 +86,7 @@ edit.obj: edit.cpp $(PDWIN32_INCLUDE)\win\combo.h
 nativerc.obj: nativerc.cpp
 
 msgbox.obj:    msgbox.cpp
-window.obj:    window.cpp win32class.h win32wbase.h win32wndchild.h oslibwin.h
+window.obj:    window.cpp win32class.h win32wbase.h win32wndchild.h oslibwin.h win32wmdiclient.h
 windowmsg.obj: windowmsg.cpp win32class.h win32wbase.h win32wndchild.h
 winprop.obj:   winprop.cpp
 wingdi.obj:    wingdi.cpp win32wbase.h oslibgdi.h

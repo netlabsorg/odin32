@@ -1,4 +1,4 @@
-/* $Id: winmenu.cpp,v 1.3 1999-08-31 14:38:09 sandervl Exp $ */
+/* $Id: winmenu.cpp,v 1.4 1999-08-31 17:14:52 sandervl Exp $ */
 
 /*
  * Win32 menu API functions for OS/2
@@ -42,18 +42,32 @@ HMENU WIN32API LoadMenuW(HINSTANCE hinst, LPCWSTR lpszMenu)
     return(rc);
 }
 //******************************************************************************
+//TODO: Create PM object?
+//NOTE: menutemplate strings are always in Unicode format
 //******************************************************************************
-HMENU WIN32API LoadMenuIndirectA( const MENUITEMTEMPLATEHEADER * arg1)
+HMENU WIN32API LoadMenuIndirectA( const MENUITEMTEMPLATEHEADER * menuTemplate)
 {
- char  *astring = NULL;
- HMENU rc;
+ Win32MenuRes *winres;
 
     dprintf(("OS2LoadMenuIndirectA\n"));
+    winres = new Win32MenuRes((LPVOID)menuTemplate);
+    if(winres == NULL) {
+        return 0;
+    }
+    return (HMENU)winres;
+}
+//******************************************************************************
+//******************************************************************************
+HMENU WIN32API LoadMenuIndirectW(const MENUITEMTEMPLATEHEADER *menuTemplate)
+{
+ Win32MenuRes *winres;
 
-    rc = O32_LoadMenuIndirect(arg1);
-    if(astring)
-        FreeAsciiString(astring);
-    return(rc);
+    dprintf(("OS2LoadMenuIndirectW\n"));
+    winres = new Win32MenuRes((LPVOID)menuTemplate);
+    if(winres == NULL) {
+        return 0;
+    }
+    return (HMENU)winres;
 }
 //******************************************************************************
 //******************************************************************************
@@ -69,16 +83,6 @@ BOOL WIN32API DestroyMenu(HMENU hmenu)
     winres = (Win32MenuRes *)hmenu;
     delete winres;
     return TRUE;
-}
-//******************************************************************************
-//Won't work...
-//******************************************************************************
-HMENU WIN32API LoadMenuIndirectW(const MENUITEMTEMPLATEHEADER * arg1)
-{
-    dprintf(("OS2LoadMenuIndirectW, improperly implemented!!\n"));
-
-    return 0;
-//    return O32_LoadMenuIndirect(arg1);
 }
 //******************************************************************************
 //******************************************************************************
