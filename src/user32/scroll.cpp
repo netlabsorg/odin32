@@ -1,4 +1,4 @@
-/* $Id: scroll.cpp,v 1.6 1999-10-08 12:10:27 cbratschi Exp $ */
+/* $Id: scroll.cpp,v 1.7 1999-10-08 21:25:47 cbratschi Exp $ */
 /*
  * Scrollbar control
  *
@@ -6,6 +6,8 @@
  *
  * Copyright 1993 Martin Ayotte
  * Copyright 1994, 1996 Alexandre Julliard
+ *
+ * WINE version: 990923
  */
 
 /* CB:
@@ -1181,8 +1183,6 @@ INT SCROLL_SetScrollInfo( HWND hwnd, INT nBar,
     SCROLLBAR_INFO *infoPtr;
     UINT new_flags;
 
-    //dbg_decl_str(scroll, 256);
-
    *action = 0;
 
     if (!(infoPtr = SCROLL_GetScrollInfo(hwnd, nBar))) return 0;
@@ -1193,7 +1193,6 @@ INT SCROLL_SetScrollInfo( HWND hwnd, INT nBar,
     /* Set the page size */
     if (info->fMask & SIF_PAGE)
     {
-        //dsprintf(scroll, " page=%d", info->nPage );
         if( infoPtr->Page != info->nPage )
         {
             infoPtr->Page = info->nPage;
@@ -1215,8 +1214,6 @@ INT SCROLL_SetScrollInfo( HWND hwnd, INT nBar,
     /* Set the scroll range */
     if (info->fMask & SIF_RANGE)
     {
-        //dsprintf(scroll, " min=%d max=%d", info->nMin, info->nMax );
-
         /* Invalid range -> range is set to (0,0) */
         if ((info->nMin > info->nMax) ||
             ((UINT)(info->nMax - info->nMin) >= 0x80000000))
@@ -1235,9 +1232,6 @@ INT SCROLL_SetScrollInfo( HWND hwnd, INT nBar,
             }
         }
     }
-
-    //TRACE("hwnd=%04x bar=%d %s\n",
-    //                hwnd, nBar, dbg_str(scroll));
 
     /* Make sure the page size is valid */
 

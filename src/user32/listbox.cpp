@@ -1,9 +1,11 @@
-/* $Id: listbox.cpp,v 1.1 1999-09-15 23:18:51 sandervl Exp $ */
+/* $Id: listbox.cpp,v 1.2 1999-10-08 21:24:40 cbratschi Exp $ */
 /*
  * Listbox controls
  *
  * Copyright 1996 Alexandre Julliard
  * Copyright 1999 Christoph Bratschi (ported from WINE)
+ *
+ * WINE version: 990923
  */
 
 #include <string.h>
@@ -622,7 +624,6 @@ static BOOL LISTBOX_SetTabStops( HWND hwnd, LB_DESCR *descr, INT count,
     {
         INT i;
         LPINT16 p = (LPINT16)tabs;
-        //dbg_decl_str(listbox, 256);
 
         for (i = 0; i < descr->nb_tabs; i++) {
             descr->tabs[i] = *p++<<1; /* FIXME */
@@ -762,7 +763,7 @@ static INT LISTBOX_FindString( HWND hwnd, LB_DESCR *descr, INT start,
     item = descr->items + start + 1;
     if (HAS_STRINGS(descr))
     {
-        if (!str) return LB_ERR;
+        if (!str || !str[0]) return LB_ERR;
         if (exact)
         {
             for (i = start + 1; i < descr->nb_items; i++, item++)
@@ -1782,6 +1783,102 @@ static LRESULT LISTBOX_HandleLButtonDown( HWND hwnd, LB_DESCR *descr,
 }
 
 
+/*************************************************************************
+ * LISTBOX_HandleLButtonDownCombo [Internal]
+ *
+ * Process LButtonDown message for the ComboListBox
+ *
+ * PARAMS
+ *     pWnd       [I] The windows internal structure
+ *     pDescr     [I] The ListBox internal structure
+ *     wParam     [I] Key Flag (WM_LBUTTONDOWN doc for more info)
+ *     x          [I] X Mouse Coordinate
+ *     y          [I] Y Mouse Coordinate
+ *
+ * RETURNS
+ *     0 since we are processing the WM_LBUTTONDOWN Message
+ *
+ * NOTES
+ *  This function is only to be used when a ListBox is a ComboListBox
+ */
+
+static LRESULT LISTBOX_HandleLButtonDownCombo( HWND hwnd, LB_DESCR *pDescr,
+                                               WPARAM wParam, INT x, INT y)
+{
+    RECT clientRect, screenRect;
+    POINT mousePos;
+
+    mousePos.x = x;
+    mousePos.y = y;
+
+    GetClientRect(hwnd, &clientRect);
+
+    if(PtInRect(&clientRect, mousePos))
+    {
+        /* MousePos is in client, resume normal processing */
+        return LISTBOX_HandleLButtonDown( hwnd, pDescr, wParam, x, y);
+    }
+    else
+    {
+        POINT screenMousePos;
+        HWND hWndOldCapture;
+
+        /* Check the Non-Client Area */
+        screenMousePos = mousePos;
+        hWndOldCapture = GetCapture();
+        ReleaseCapture();
+        GetWindowRect(hwnd, &screenRect);
+        ClientToScreen(hwnd, &screenMousePos);
+
+        if(!PtInRect(&screenRect, screenMousePos))
+        {
+            /* Close The Drop Down */
+            SEND_NOTIFICATION( hwnd, pDescr, LBN_SELCANCEL );
+            return 0;
+        }
+        else
+        {
+            /* Check to see the NC is a scrollbar */
+            INT nHitTestType=0;
+            DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
+            /* Check Vertical scroll bar */
+            if (dwStyle & WS_VSCROLL)
+            {
+                clientRect.right += GetSystemMetrics(SM_CXVSCROLL);
+                if (PtInRect( &clientRect, mousePos ))
+                {
+                    nHitTestType = HTVSCROLL;
+                }
+            }
+              /* Check horizontal scroll bar */
+            if (dwStyle & WS_HSCROLL)
+            {
+                clientRect.bottom += GetSystemMetrics(SM_CYHSCROLL);
+                if (PtInRect( &clientRect, mousePos ))
+                {
+                    nHitTestType = HTHSCROLL;
+                }
+            }
+            /* Windows sends this message when a scrollbar is clicked
+             */
+
+            if(nHitTestType != 0)
+            {
+                SendMessageA(hwnd, WM_NCLBUTTONDOWN, nHitTestType,
+                    MAKELONG(screenMousePos.x, screenMousePos.y));
+            }
+            /* Resume the Capture after scrolling is complete
+             */
+            if(hWndOldCapture != 0)
+            {
+                SetCapture(hWndOldCapture);
+            }
+        }
+    }
+    return 0;
+}
+
+
 /***********************************************************************
  *           LISTBOX_HandleLButtonUp
  */
@@ -2160,31 +2257,31 @@ LRESULT WINAPI ListBoxWndProc( HWND hwnd, UINT msg,
     if (!(descr = (LB_DESCR*)GetInfoPtr(hwnd)))
     {
         switch (msg)
-	{
-	    case WM_CREATE:
-	    {
+        {
+            case WM_CREATE:
+            {
                 if (!LISTBOX_Create( hwnd, NULL ))
-		     return -1;
-		//TRACE("creating wnd=%04x descr=%p\n",
-		//      hwnd, *(LB_DESCR **)wnd->wExtra );
-		return 0;
-	    }
-	    case WM_NCCREATE:
-	    {
-	        DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
-	
-	        /*
-		 * When a listbox is not in a combobox and the look
-		 * is win95,  the WS_BORDER style is replaced with
-		 * the WS_EX_CLIENTEDGE style.
-		 */
-	        if (dwStyle & WS_BORDER)
-		{
-	            SetWindowLongA(hwnd,GWL_EXSTYLE,GetWindowLongA(hwnd,GWL_EXSTYLE) | WS_EX_CLIENTEDGE);
-		    SetWindowLongA(hwnd,GWL_STYLE,GetWindowLongA(hwnd,GWL_STYLE)  & ~ WS_BORDER);
-		}
-	    }
-	}
+                     return -1;
+                //TRACE("creating wnd=%04x descr=%p\n",
+                //      hwnd, *(LB_DESCR **)wnd->wExtra );
+                return 0;
+            }
+            case WM_NCCREATE:
+            {
+                DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
+
+                /*
+                 * When a listbox is not in a combobox and the look
+                 * is win95,  the WS_BORDER style is replaced with
+                 * the WS_EX_CLIENTEDGE style.
+                 */
+                if (dwStyle & WS_BORDER)
+                {
+                    SetWindowLongA(hwnd,GWL_EXSTYLE,GetWindowLongA(hwnd,GWL_EXSTYLE) | WS_EX_CLIENTEDGE);
+                    SetWindowLongA(hwnd,GWL_STYLE,GetWindowLongA(hwnd,GWL_STYLE)  & ~ WS_BORDER);
+                }
+            }
+        }
         /* Ignore all other messages before we get a WM_CREATE */
         return DefWindowProcA( hwnd, msg, wParam, lParam );
     }
@@ -2212,7 +2309,7 @@ LRESULT WINAPI ListBoxWndProc( HWND hwnd, UINT msg,
         if (LISTBOX_RemoveItem( hwnd, descr, wParam) != LB_ERR)
            return descr->nb_items;
         else
-           return LB_ERR;	
+           return LB_ERR;
 
     case LB_GETITEMDATA:
         if (((INT)wParam < 0) || ((INT)wParam >= descr->nb_items))
@@ -2559,25 +2656,23 @@ LRESULT WINAPI ComboLBWndProc( HWND hwnd, UINT msg,
                     * If we are in a dropdown combobox, we simulate that
                     * the mouse is captured to show the tracking of the item.
                     */
-                   captured = descr->captured;
-                   descr->captured = TRUE;
 
-                   LISTBOX_HandleMouseMove( hwnd,
-                                            descr,
-                                            mousePos.x, mousePos.y);
-
-                   descr->captured = captured;
-
-                   /*
-                    * However, when tracking, it is important that we do not
-                    * perform a selection if the cursor is outside the list.
-                    */
                    GetClientRect(hwnd, &clientRect);
-
-                   if (!PtInRect( &clientRect, mousePos ))
-                   {
-                     LISTBOX_MoveCaret( hwnd, descr, -1, FALSE );
+		   if (PtInRect( &clientRect, mousePos ))
+		   {
+		       captured = descr->captured;
+		       descr->captured = TRUE;			
+		
+		       LISTBOX_HandleMouseMove( hwnd, descr,
+						    mousePos.x, mousePos.y);
+                       descr->captured = captured;
                    }
+                   else
+                   {
+		       LISTBOX_HandleMouseMove( hwnd, descr,
+		                		    mousePos.x, mousePos.y);
+                   }
+
 
                    return 0;
                  }
@@ -2618,10 +2713,9 @@ LRESULT WINAPI ComboLBWndProc( HWND hwnd, UINT msg,
                  }
                  return LISTBOX_HandleLButtonUp( hwnd, descr );
             case WM_LBUTTONDOWN:
-                 return LISTBOX_HandleLButtonDown( hwnd, descr, wParam,
+                 return LISTBOX_HandleLButtonDownCombo( hwnd, descr, wParam,
                          (INT16)LOWORD(lParam), (INT16)HIWORD(lParam));
-            /* avoid activation at all costs */
-             case WM_MOUSEACTIVATE:
+            case WM_MOUSEACTIVATE:
                  return MA_NOACTIVATE;
             case WM_NCACTIVATE:
                  return FALSE;
