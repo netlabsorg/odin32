@@ -1,4 +1,4 @@
-/* $Id: glucb32.h,v 1.1 2000-01-27 21:49:12 sandervl Exp $ */
+/* $Id: glucb32.h,v 1.2 2000-02-01 19:41:54 sandervl Exp $ */
 /*****************************************************************************/
 /*                                                                           */
 /* Glu/Glut Callback logic - Header Files                                    */
@@ -41,7 +41,6 @@ extern GLUOS2CALLBACK OS2glucbRegisterCallback(GLbyte  objtype,
                                                 void   *object,
                                                 GLenum  which,
                                                 GLUWINCALLBACK CallBackFunc);
-                                   /* GLvoid  (* WIN32API CallBackFunc)());*/
 extern void           OS2glucbDestroyGlucb(GLUCB *glucb);
 extern void           OS2glucbDestroyCallbackForObject(GLbyte objtype,void *object);
 extern void           OS2glucbDestroyCallbackForObjectWhich(GLbyte objtype,void *object,GLenum which);

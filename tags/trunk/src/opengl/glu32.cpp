@@ -1,4 +1,4 @@
-/* $Id: glu32.cpp,v 1.1 2000-01-27 21:49:12 sandervl Exp $ */
+/* $Id: glu32.cpp,v 1.2 2000-02-01 19:41:53 sandervl Exp $ */
 /*****************************************************************************/
 /*                                                                           */
 /* GLU32 Toolkit                                                             */
@@ -254,7 +254,9 @@ void WIN32API gluPerspective(GLdouble fovy,
                              GLdouble zNear,
                              GLdouble zFar)
 {
+  dprintf(("gluPerspective called - fovy %f\n",fovy));
   OS2gluPerspective(fovy,aspect,zNear,zFar);
+  dprintf(("gluPerspective returned\n"));
 }
 
 void WIN32API gluPickMatrix(GLdouble x,

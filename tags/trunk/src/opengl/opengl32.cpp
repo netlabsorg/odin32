@@ -1,4 +1,4 @@
-/* $Id: opengl32.cpp,v 1.1 2000-01-27 21:49:14 sandervl Exp $ */
+/* $Id: opengl32.cpp,v 1.2 2000-02-01 19:41:55 sandervl Exp $ */
 /*****************************************************************************/
 /*                                                                           */
 /* OpenGL32                                                                  */
@@ -15,7 +15,7 @@
 #include "initterm.h"
 
 HWND WIN32API WindowFromDC(HDC hdc);
-HWND Win32ToOS2Handle(HWND hwnd);
+HWND          Win32ToOS2Handle(HWND hwnd);
 
 #define PFD_TYPE_RGBA       0
 #define PFD_TYPE_COLORINDEX 1
@@ -110,7 +110,6 @@ typedef struct tagPFDINFO
     HGC                    hgc;
     PIXELFORMATDESCRIPTOR  pfd;
     int                    iFormatSelected;
-/*  VISUALCONFIG          *pvc; */
     struct tagPFDINFO     *Next;
   }PFDINFO;
 #pragma pack()
@@ -197,6 +196,7 @@ void VisCfgDump(VISUALCONFIG *p)
 
 void pfdi_destroy_all(void)
 {
+  /* Destroy all allocated structures - called by DLL_term */
   PFDINFO *pi=pfdis;
 
   DosRequestMutexSem(hmtxPfdInfo,SEM_INDEFINITE_WAIT);
@@ -256,6 +256,8 @@ void pfdi_update_or_create(HDC hdc,PIXELFORMATDESCRIPTOR *pfd)
 
 PFDINFO *query_pfdi_by_hdc(HDC hdc)
 {
+  /* Query based upon the HDC - internally map this to the hwnd belonging  */
+  /* to the HDC, since GetDC returnes different HDC's for the same window! */
   PFDINFO *pi=pfdis;
   HWND     hwnd=WindowFromDC(hdc);
 
@@ -280,6 +282,7 @@ PFDINFO *query_pfdi_by_hdc(HDC hdc)
 
 PFDINFO *query_pfdi_by_hwnd(HWND hwnd)
 {
+  /* Query an PFDINFO struct member based upon a hwnd */
   PFDINFO *pi=pfdis;
 
   DosRequestMutexSem(hmtxPfdInfo,SEM_INDEFINITE_WAIT);
@@ -303,6 +306,7 @@ PFDINFO *query_pfdi_by_hwnd(HWND hwnd)
 
 PFDINFO *query_pfdi_by_hgc(HGC hgc)
 {
+  /* Query an PFDINFO struct member based upon an hgc */
   PFDINFO *pi=pfdis;
 
   DosRequestMutexSem(hmtxPfdInfo,SEM_INDEFINITE_WAIT);
@@ -326,6 +330,7 @@ PFDINFO *query_pfdi_by_hgc(HGC hgc)
 
 void pfdi_purge(HDC hdc)
 {
+  /* Remove the PFDINFO for this hdc from the linked list */
   PFDINFO *pi,*pi2=NULL;
   HWND     hwnd=WindowFromDC(hdc);
 
@@ -372,36 +377,26 @@ PVISUALCONFIG GL_QueryConfigs(HDC hdc,PIXELFORMATDESCRIPTOR *pfd)
   PVISUALCONFIG  pvc;
   PFDINFO       *pfdi;
 
-  dprintf(("GL_QueryConfigs - hdc: %08X - hwnd: %08X - pfd is %08X\n",hdc,WindowFromDC(hdc),pfd));
-
   pfdi=query_pfdi_by_hdc(hdc);
 
   if(pfd->dwFlags & PFD_SUPPORT_OPENGL)
     {
-      dprintf(("GL_QueryConfigs - ATTRADD PGL_USE_GL\n"));
       AttrAdd(attrs,&attridx,PGL_USE_GL);
     }
 
   if(pfd->dwFlags & PFD_DOUBLEBUFFER && !(pfd->dwFlags & PFD_DOUBLEBUFFER_DONTCARE))
     {
-      dprintf(("GL_QueryConfigs - ATTRADD PGL_DOUBLEBUFFER\n"));
       AttrAdd(attrs,&attridx,PGL_DOUBLEBUFFER);
     }
 
   if(pfd->dwFlags & PFD_STEREO && !(pfd->dwFlags & PFD_STEREO_DONTCARE))
     {
-      dprintf(("GL_QueryConfigs - ATTRADD PGL_STEREO\n"));
       AttrAdd(attrs,&attridx,PGL_STEREO);
     }
-/*
-  if(pfd->dwFlags & PFD_DRAW_TO_WINDOW)
-  if(pfd->dwFlags & PFD_DRAW_TO_BITMAP)
-  if(pfd->dwFlags & SUPPORT_GDI)
-*/
+
   switch(pfd->iPixelType)
     {
       case PFD_TYPE_RGBA:
-        dprintf(("GL_QueryConfigs - ATTRADD PGL_RGBA\n"));
         AttrAdd(attrs,&attridx,PGL_RGBA);
         break;
 
@@ -427,30 +422,64 @@ PVISUALCONFIG GL_QueryConfigs(HDC hdc,PIXELFORMATDESCRIPTOR *pfd)
         break;
     }
 
-/*AttrAdd(attrs,&attridx,PGL_DEPTH_SIZE);
-  AttrAdd(attrs,&attridx,pfd->cColorBits);*/
+  if(pfd->cDepthBits)
+    {
+      AttrAdd(attrs,&attridx,PGL_DEPTH_SIZE);
 
-/*  pfd->cAlphaShift
-  pfd->cAccumBits
-  pfd->cDepthBits;
- */
+      /* Added JvdH - is my machine bogus? cDepthBits 32 returns no */
+      /* valid configs. Is this Matrox specific??                   */
 
-/*AttrAdd(attrs,&attridx,PGL_STENCIL_SIZE);
-  AttrAdd(attrs,&attridx,pfd->cStencilBits);*/
+      if(pfd->cDepthBits<=24)
+        AttrAdd(attrs,&attridx,pfd->cDepthBits);
+      else
+        AttrAdd(attrs,&attridx,24);
+    }
+
+  if(pfd->cColorBits)
+    {
+      AttrAdd(attrs,&attridx,PGL_BUFFER_SIZE);
+      AttrAdd(attrs,&attridx,pfd->cColorBits);
+    }
+
+  if(pfd->cAuxBuffers)
+    {
+      AttrAdd(attrs,&attridx,PGL_AUX_BUFFERS);
+      AttrAdd(attrs,&attridx,pfd->cAuxBuffers);
+    }
+
+  if(pfd->cRedBits)
+    {
+      AttrAdd(attrs,&attridx,PGL_RED_SIZE);
+      AttrAdd(attrs,&attridx,pfd->cRedBits);
+    }
+
+  if(pfd->cGreenBits)
+    {
+      AttrAdd(attrs,&attridx,PGL_GREEN_SIZE);
+      AttrAdd(attrs,&attridx,pfd->cGreenBits);
+    }
+
+  if(pfd->cBlueBits)
+    {
+      AttrAdd(attrs,&attridx,PGL_BLUE_SIZE);
+      AttrAdd(attrs,&attridx,pfd->cBlueBits);
+    }
+
+  if(pfd->cAlphaBits)
+    {
+      AttrAdd(attrs,&attridx,PGL_ALPHA_SIZE);
+      AttrAdd(attrs,&attridx,pfd->cAlphaBits);
+    }
+
+  if(pfd->cStencilBits)
+    {
+      AttrAdd(attrs,&attridx,PGL_STENCIL_SIZE);
+      AttrAdd(attrs,&attridx,pfd->cStencilBits);
+    }
 
   AttrAdd(attrs,&attridx,None);
 
-  dprintf(("GL_QueryConfigs ->OS2pglChooseConfig: HDC: %08X - HWND: %08X - attrs: %d\n",hdc,WindowFromDC(hdc),attridx));
-
   pvc=OS2pglChooseConfig(hdc,attrs);
-
-  dprintf(("GL_QueryConfigs ->OS2pglChooseConfig complete\n"));
-
-  if(pfdi)
-    {
-      dprintf(("OPENGL32: Context %08X bound to VISUALCFG %08X\n",pfdi,pvc));
-/*    pfdi->pvc=pvc;*/
-    }
 
   return pvc;
 }
@@ -468,16 +497,26 @@ int GL_VisualConfigIndex(PVISUALCONFIG pvc)
   return 0;
 }
 
-void GL_VisualConfig_to_PixelFormat(VISUALCONFIG *pvc,
+void GL_VisualConfig_to_PixelFormat(HDC hdc,
+                                    VISUALCONFIG *pvc,
                                     PIXELFORMATDESCRIPTOR *pfd)
 {
-  /* Map a VisualConfig structure to an identical pixelfmt */
+  /* Map a VisualConfig structure to an identical PixelFmt structure    */
+  /* Win32 uses PIXELFORMATDESCRIPTORs, whereas OS/2 uses VISUALCONFIGs */
+  PFDINFO *pfdi;
+  BOOL     fDirect=FALSE;
+
+  pfdi=query_pfdi_by_hdc(hdc);
+
+  if(pfdi)
+    fDirect=(pfdi->pfd.dwFlags & PFD_DRAW_TO_WINDOW)?TRUE:FALSE;
+
   memset(pfd,0,sizeof(PIXELFORMATDESCRIPTOR));
 
   pfd->nSize=sizeof(PIXELFORMATDESCRIPTOR);
   pfd->nVersion=1;
 
-  pfd->dwFlags=PFD_SUPPORT_OPENGL;
+  pfd->dwFlags=PFD_SUPPORT_OPENGL | (fDirect?PFD_DRAW_TO_WINDOW:0);
 
   if(pvc->stereo)
     pfd->dwFlags+=PFD_STEREO;
@@ -504,7 +543,7 @@ void GL_VisualConfig_to_PixelFormat(VISUALCONFIG *pvc,
   pfd->cAccumGreenBits=pvc->accumGreenSize;
   pfd->cAccumBlueBits=pvc->accumBlueSize;
   pfd->cAccumAlphaBits=pvc->accumAlphaSize;
-  pfd->cDepthBits=/*pvc->depthSize;*/32;
+  pfd->cDepthBits=pvc->depthSize;
   pfd->cStencilBits=pvc->stencilSize;
   pfd->cAuxBuffers=pvc->auxBuffers;
 
@@ -534,6 +573,18 @@ void GL_VisualConfig_to_PixelFormat(VISUALCONFIG *pvc,
 /*                                                                         */
 /***************************************************************************/
 
+BOOL WIN32API wglSwapBuffers(HDC hdc)
+{
+  HWND hWnd;
+
+  hWnd=Win32ToOS2Handle(WindowFromDC(hdc));
+
+  if(hdc)
+    OS2pglSwapBuffers(hdc,hWnd);
+
+  return hdc!=NULL;
+}
+
 int WIN32API wglChoosePixelFormat(HDC hdc,PIXELFORMATDESCRIPTOR *pfd)
 {
   /* The PixelFormatDescriptor hold information about the required context */
@@ -541,13 +592,14 @@ int WIN32API wglChoosePixelFormat(HDC hdc,PIXELFORMATDESCRIPTOR *pfd)
   /* to native OS/2 OpenGL and return a suitable value.                    */
   PVISUALCONFIG pvc;
 
-  dprintf(("OPENGL32: called wglChoosePixelFormat\n"));
+#ifdef DEBUG
+  /* DUMP the pfd */
+  PixFmtDump(pfd);
+#endif
 
   pfdi_update_or_create(hdc,pfd);
 
   pvc=GL_QueryConfigs(hdc,pfd);
-
-  dprintf(("OPENGL32: The query returned %08X\n",pvc));
 
   /* If no valid visualconfig is found there is really no need to keep the */
   /* PFDINFO structure! */
@@ -563,8 +615,6 @@ int WIN32API wglChoosePixelFormat(HDC hdc,PIXELFORMATDESCRIPTOR *pfd)
 GLint WIN32API wglGetPixelFormat(HDC hdc)
 {
   PFDINFO *pfdi;
-
-  dprintf(("OPENGL32: called wglGetPixelFormat\n"));
 
   pfdi=query_pfdi_by_hdc(hdc);
 
@@ -583,8 +633,6 @@ BOOL WIN32API wglSetPixelFormat(HDC hdc,
   /* present in the list. If not, return FALSE!                               */
   PFDINFO *pfdi;
 
-  dprintf(("OPENGL32: called wglSetPixelFormat\n"));
-
   pfdi=query_pfdi_by_hdc(hdc);
 
   if(pfdi)
@@ -599,13 +647,12 @@ BOOL WIN32API wglSetPixelFormat(HDC hdc,
 
 HGC WIN32API wglCreateContext(HDC hdc)
 {
-  /* The PFDI structure must be present! */
+  /* The PFDINFO structure must be present (by a prev call to ChooseConfig !) */
+  /* If not chosen we don't know what we should return...                     */
   PFDINFO       *pfdi;
   HGC            hgc;
   HGC            sharelist=NULL;
   PVISUALCONFIG  pvc;
-
-  dprintf(("OPENGL32: called wglCreateContext - HDC %08X\n",hdc));
 
   pfdi=query_pfdi_by_hdc(hdc);
 
@@ -615,20 +662,14 @@ HGC WIN32API wglCreateContext(HDC hdc)
         {
           pvc=global_visual_config_list[pfdi->iFormatSelected-1];
 
-          dprintf(("OPENGL32: wglCreateContext: HDC %08X, PVC %08X\n",hdc,pvc));
-
           pfdi->hgc=OS2pglCreateContext(hdc,
                                         pvc,
                                         sharelist,
                                         (pfdi->pfd.dwFlags & PFD_DRAW_TO_WINDOW)?TRUE:FALSE);
 
-          dprintf(("OPENGL32: wglCreateContext: HGC %08X\n",pfdi->hgc));
-
           return pfdi->hgc;
         }
     }
-
-  dprintf(("OPENGL32: wglCreateContext - failed! - No wglChooseConfig was called\n"));
 
   return NULL;
 }
@@ -638,8 +679,6 @@ int WIN32API wglDescribePixelFormat(HDC                    hdc,
                                     GLuint                 nBytes,
                                     PIXELFORMATDESCRIPTOR *pfd)
 {
-  dprintf(("OPENGL32: called wglDescribePixelFormat (nBytes %d)\n",nBytes));
-
   if(iFormat<1 || iFormat>global_visual_config_count)
     iFormat=1;                             /* Or should we return an error?*/
 
@@ -647,7 +686,7 @@ int WIN32API wglDescribePixelFormat(HDC                    hdc,
     {
       PIXELFORMATDESCRIPTOR pfd_use;
 
-      GL_VisualConfig_to_PixelFormat(global_visual_config_list[iFormat-1],&pfd_use);
+      GL_VisualConfig_to_PixelFormat(hdc,global_visual_config_list[iFormat-1],&pfd_use);
 
 #ifdef DEBUG
       VisCfgDump(global_visual_config_list[iFormat-1]);
@@ -681,25 +720,7 @@ BOOL WIN32API wglMakeCurrent(HDC hdc,HGC hgc)
 
   rc=OS2pglMakeCurrent(hdc,hgc,hWnd);
 
-  dprintf(("OPENGL32: wglMakeCurrent rc %d\n",rc));
-
   return rc;
-}
-
-BOOL WIN32API wglSwapBuffers(HDC hdc)
-{
-  HWND hWnd;
-
-  dprintf(("OPENGL32: called wglSwapBuffers - HDC is %08X\n",hdc));
-
-  hWnd=Win32ToOS2Handle(WindowFromDC(hdc));
-
-  if(hdc)
-    OS2pglSwapBuffers(hdc,hWnd);
-
-  dprintf(("OPENGL32: call wglSwapBuffers completed",hdc));
-
-  return hdc!=NULL;
 }
 
 BOOL WIN32API wglCopyContext(HGC hgc_src,HGC hgc_dst,GLuint attrib_mask)
@@ -719,6 +740,7 @@ BOOL WIN32API wglUseFontBitmapsA(HDC   hdc,
                                  DWORD count,
                                  DWORD listbase)
 {
+  /* FIXME: how to map to correct font ?? */
   int id=0;
 
   return OS2pglUsePMBitmapFont(hdc,id,first,count,listbase);
@@ -729,6 +751,7 @@ BOOL WIN32API wglUseFontBitmapsW(HDC   hdc,
                                  DWORD count,
                                  DWORD listbase)
 {
+  /* FIXME: how to map to correct font ?? */
   int id=0;
 
   return OS2pglUsePMBitmapFont(hdc,id,first,count,listbase);
@@ -736,11 +759,13 @@ BOOL WIN32API wglUseFontBitmapsW(HDC   hdc,
 
 HGC WIN32API wglGetCurrentContext(void)
 {
+  /* FIXME: parameter '0'! */
   return OS2pglGetCurrentContext(0);
 }
 
 HDC WIN32API wglGetCurrentDC(void)
 {
+  /* FIXME: parameter '0'! */
   HWND     hwnd;
   PFDINFO *pfdi;
 
@@ -970,9 +995,6 @@ void WIN32API glColor3f(GLfloat red,
                         GLfloat green,
                         GLfloat blue)
 {
-  OS2glColor3f(red,green,blue);
-  dprintf(("OPENGL32: called glColor3f\n"));
-
   OS2glColor3f(red,green,blue);
 }
 
@@ -1725,8 +1747,8 @@ void WIN32API glMap1d(GLenum target,
 }
 
 void WIN32API glMap1f(GLenum target,
-                      GLdouble u1,
-                      GLdouble u2,
+                      GLfloat u1,
+                      GLfloat u2,
                       GLint stride,
                       GLint order,
                       const GLfloat *points)
@@ -1749,12 +1771,12 @@ void WIN32API glMap2d(GLenum target,
 }
 
 void WIN32API glMap2f(GLenum target,
-                      GLdouble u1,
-                      GLdouble u2,
+                      GLfloat u1,
+                      GLfloat u2,
                       GLint ustride,
                       GLint uorder,
-                      GLdouble v1,
-                      GLdouble v2,
+                      GLfloat v1,
+                      GLfloat v2,
                       GLint vstride,
                       GLint vorder,
                       const GLfloat *points)
@@ -3050,6 +3072,8 @@ void mod_init(void)
 {
   /* OpenGL32 Initialize - Query all valid configs for this system and */
   /* store them. All indexes returned are based upon this list!        */
+  dprintf(("OPENGL32: INIT\n"));
+
   DosCreateMutexSem(NULL,&hmtxPfdInfo,0,0);
 
   global_visual_config_count=0;
@@ -3071,7 +3095,6 @@ void mod_init(void)
 void mod_cleanup(void)
 {
   /* Cleanup all structures we allocated */
-
   pfdi_destroy_all();
 
   if(global_visual_config_list)
