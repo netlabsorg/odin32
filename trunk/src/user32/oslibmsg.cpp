@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.cpp,v 1.9 1999-11-08 13:44:14 sandervl Exp $ */
+/* $Id: oslibmsg.cpp,v 1.10 1999-11-10 14:16:45 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -230,6 +230,12 @@ BOOL  OSLibWinPeekMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilter
 ULONG OSLibWinQueryMsgTime()
 {
   return WinQueryMsgTime(GetThreadHAB());
+}
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibWinWaitMessage()
+{
+  return WinWaitMsg(GetThreadHAB(), 0, 0);
 }
 //******************************************************************************
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.h,v 1.3 1999-11-08 13:44:14 sandervl Exp $ */
+/* $Id: oslibmsg.h,v 1.4 1999-11-10 14:16:45 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -31,6 +31,7 @@ LONG  OSLibWinDispatchMsg(MSG *msg, BOOL isUnicode = FALSE);
 
 ULONG OSLibWinQueryMsgTime();
 BOOL  OSLibInitMsgQueue();
+BOOL  OSLibWinWaitMessage();
 
 #define WINWM_NULL                  0x0000
 #define WINWM_CREATE                0x0001
