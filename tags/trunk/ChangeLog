@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.310 1999-10-12 18:50:08 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.311 1999-10-12 20:15:25 sandervl Exp $ */
 
  99-10-12: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: DrawMenuBar & DrawCaptionTempA bugfix (window handle translation)
@@ -19,6 +19,12 @@
                   WS_BORDER borderstyle.
                   Fixed y mapping bug in OSLibMapWINDOWPOStoSWP (converted
                   twice (win32 -> os2 -> win32))
+	- USER32: Set focus to edit control when receiving WM_LBUTTONDOWN
+
+        - USER32: Don't send WM_COMMAND during WM_SETFOCUS in edit control when
+                  dialog hasn't been completely created. (crashes VPBuddy; can't
+                  find dialog control that hasn't been created yet)
+                  NOTE: EXPERIMENTAL FIX. NEEDS TO BE CHANGED.
 
  99-10-11: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: pmframe finished
