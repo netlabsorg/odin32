@@ -1,4 +1,4 @@
-/* $Id: odin32ftp2.cmd,v 1.2 2000-06-07 22:47:21 bird Exp $
+/* $Id: odin32ftp2.cmd,v 1.3 2000-06-11 14:10:37 bird Exp $
  *
  * Uploads the relase and debug builds to the FTP sites.
  *
@@ -46,21 +46,21 @@ do i = 1 to 5 /* (Retries 5 times) */
      */
     if (sLoc = '' | sLoc = 'os2') then
     do
-        rc = deletefunction(   '/daily/'sDeleteDbg,    '/daily/'sDeleteRel,     'os2-delete', 'ftp.os2.org', 'user', 'xxxxxxxx');
-        rc = deletefunction('/daily/'sDeleteDbgWPI, '/daily/'sDeleteRelWPI, 'os2-delete-wpi', 'ftp.os2.org', 'user', 'xxxxxxxx');
-        rc = forwardSF(sFileDbg,          'os2-debug', '/daily', 'ftp.os2.org', 'user', 'xxxxxxxx');
-        rc = forwardSF(sFileRel,        'os2-release', '/daily', 'ftp.os2.org', 'user', 'xxxxxxxx');
-        rc = forwardSF(sFileDbgWPI,   'os2-debug-wpi', '/daily', 'ftp.os2.org', 'user', 'xxxxxxxx');
-        rc = forwardSF(sFileRelWPI, 'os2-release-wpi', '/daily', 'ftp.os2.org', 'user', 'xxxxxxxx');
-        rc = forwardSF(sChangeLog,    'os2-ChangeLog', '/daily', 'ftp.os2.org', 'user', 'xxxxxxxx');
+        rc = deletefunction(   '/daily/'sDeleteDbg,    '/daily/'sDeleteRel,     'os2-delete', 'www.os2.org', 'user', 'xxxxxxxx');
+        rc = deletefunction('/daily/'sDeleteDbgWPI, '/daily/'sDeleteRelWPI, 'os2-delete-wpi', 'www.os2.org', 'user', 'xxxxxxxx');
+        rc = forwardSF(sFileDbg,          'os2-debug', '/daily', 'www.os2.org', 'user', 'xxxxxxxx');
+        rc = forwardSF(sFileRel,        'os2-release', '/daily', 'www.os2.org', 'user', 'xxxxxxxx');
+        rc = forwardSF(sFileDbgWPI,   'os2-debug-wpi', '/daily', 'www.os2.org', 'user', 'xxxxxxxx');
+        rc = forwardSF(sFileRelWPI, 'os2-release-wpi', '/daily', 'www.os2.org', 'user', 'xxxxxxxx');
+        rc = forwardSF(sChangeLog,    'os2-ChangeLog', '/daily', 'www.os2.org', 'user', 'xxxxxxxx');
 
     end
 
     if (sLoc = '' | sLoc = 'netlabs') then
     do
         /*                 (                  sDeleteFile1,                   sDeleteFile2,            sLockFile,             sSite,  sUser,    sPasswd); */
-        rc = deletefunction(   '/odinftp/daily/'sDeleteDbg,    '/odinftp/daily/'sDeleteRel,     'netlabs-delete', 'ftp.netlabs.org', 'odin', 'xxxxxxxx');
-        rc = deletefunction('/odinftp/daily/'sDeleteDbgWPI, '/odinftp/daily/'sDeleteRelWPI, 'netlabs-delete-wpi', 'ftp.netlabs.org', 'odin', 'xxxxxxxx');
+        rc = deletefunction(   '/odinftp/daily/'sDeleteDbg,    '/odinftp/daily/'sDeleteRel,     'netlabs-delete', 'ftp.netlabs.org', 'user', 'xxxxxxxx');
+        rc = deletefunction('/odinftp/daily/'sDeleteDbgWPI, '/odinftp/daily/'sDeleteRelWPI, 'netlabs-delete-wpi', 'ftp.netlabs.org', 'user', 'xxxxxxxx');
         /*              (sFile,            sFileRemote,           sLockFile,             sSite,  sUser,    sPasswd); */
         rc = putfunction(sFileDbg,    '/odinftp/daily',     'netlabs-debug', 'ftp.netlabs.org', 'user', 'xxxxxxxx');
         rc = putfunction(sFileRel,    '/odinftp/daily',   'netlabs-release', 'ftp.netlabs.org', 'user', 'xxxxxxxx');
