@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.156 2002-06-26 07:13:00 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.157 2002-07-26 10:47:59 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -464,6 +464,9 @@ USHORT WIN32API SetWin32TIB(BOOL fForceSwitch)
 //******************************************************************************
 VOID WIN32API ExitProcess(DWORD exitcode)
 {
+    HANDLE hThread = GetCurrentThread();
+    TEB   *teb;
+
     dprintf(("KERNEL32:  ExitProcess %d\n", exitcode));
     dprintf(("KERNEL32:  ExitProcess FS = %x\n", GetFS()));
 
@@ -472,6 +475,15 @@ VOID WIN32API ExitProcess(DWORD exitcode)
     SetOS2ExceptionChain(-1);
 
     HMDeviceCommClass::CloseOverlappedIOHandlers();
+
+    //detach all dlls (LIFO order) before really unloading them; this
+    //should take care of circular dependencies (crash while accessing
+    //memory of a dll that has just been freed)
+    dprintf(("********************************************"));
+    dprintf(("**** Detach process from all dlls -- START"));
+    Win32DllBase::detachProcessFromAllDlls();
+    dprintf(("**** Detach process from all dlls -- END"));
+    dprintf(("********************************************"));
 
     if(WinExe) {
         delete(WinExe);
@@ -484,14 +496,18 @@ VOID WIN32API ExitProcess(DWORD exitcode)
 
     //SvL: We must make sure no threads are still suspended (with SuspendThread)
     //     OS/2 seems to be unable to terminate the process otherwise (exitlist hang)
-    TEB *teb = threadList;
     threadListMutex.enter();
+    teb = threadList;
     while(teb) {
-        ResumeThread(teb->o.odin.hThread);
+        if(teb->o.odin.hThread != hThread && teb->o.odin.dwSuspend > 0) {
+            //kill any threads that are suspended; dangerous, but so is calling
+            //SuspendThread; we assume the app knew what it was doing
+            TerminateThread(teb->o.odin.hThread, 0);
+            ResumeThread(teb->o.odin.hThread);
+        }
         teb = teb->o.odin.next;
     }
     threadListMutex.leave();
-
 
 #ifdef PROFILE
     // Note: after this point we do not expect any more Win32-API calls,
