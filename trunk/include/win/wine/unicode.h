@@ -7,7 +7,7 @@
 #ifndef __WINE_UNICODE_H
 #define __WINE_UNICODE_H
 
-#ifndef OS2_INCLUDED
+#if !defined(OS2_INCLUDED) && !defined(__WIN32TYPE_H__)
 #include <windef.h>
 #endif
 

@@ -1,5 +1,3 @@
-/* $Id: unicode.h,v 1.7 1999-11-28 23:23:45 bird Exp $ */
-
 /*
  *
  * Project Odin Software License can be found in LICENSE.TXT
@@ -8,31 +6,16 @@
 #ifndef __UNICODE_H__
 #define __UNICODE_H__
 
-#include <uniconv.h>
+#include <heapstring.h>
 
-#ifdef __cplusplus
- extern "C" {
-#endif
 
-/* also used from Windows only files ported from WINE */
-#ifndef WIN32API
-#define WIN32API WINAPI
-#endif
+#define UnicodeToAsciiString(u)	 HEAP_strdupWtoA(GetProcessHeap(), 0, u)
+#define AsciiToUnicodeString(a)  HEAP_strdupAtoW(GetProcessHeap(), 0, a)
+#define FreeAsciiString(a)       HEAP_free(a)
 
-char *  WIN32API UnicodeToAsciiString(LPCWSTR ustring);
-int     WIN32API UnicodeToAscii(LPCWSTR ustring, char *astring);
-int     WIN32API UnicodeToAsciiN(LPCWSTR ustring, char *astring, int unilen);
-void    WIN32API FreeAsciiString(char *astring);
-LPWSTR  WIN32API AsciiToUnicodeString(const char *astring);
-void    WIN32API AsciiToUnicode(const char *ascii, LPWSTR unicode);
-void    WIN32API AsciiToUnicodeN(const char *ascii, LPWSTR unicode, int asciilen);
-
-#ifdef __cplusplus
- }
-#endif
-
-#ifdef __cplusplus
-char *  WIN32API UnicodeToAsciiStringN(LPCWSTR ustring, ULONG length);
-#endif
+#define UnicodeToAscii(u, a)     lstrcpyWtoA(a, u)
+#define UnicodeToAsciiN(u, a, n) lstrcpynWtoA(a, u, n)
+#define AsciiToUnicode(a, u)     lstrcpyAtoW(u, a)
+#define AsciiToUnicodeN(a, u, n) lstrcpynAtoW(u, a, n)
 
 #endif

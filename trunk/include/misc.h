@@ -131,6 +131,4 @@ void inline BreakPoint(char *szFile, char *szFunction)
 #endif
 
 
-#include "unicode.h"
-
 #endif
