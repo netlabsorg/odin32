@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.21 2003-02-28 10:26:33 sandervl Exp $
+# $Id: makefile,v 1.22 2003-11-11 14:01:51 bird Exp $
 
 #
 # Odin32
@@ -130,3 +130,12 @@ needed_tools: needed
 needed:
     @$(DODIRS) "tools"          $(MAKE_CMD) $@
 
+#
+# Custombuild
+#
+custombuild: 	needed_tools odin_libraries
+    @$(DODIRS) "src" $(MAKE_CMD) custombuild
+
+custombuild_all custombuild_clean custombuild_dep:
+    @$(DODIRS) "src" $(MAKE_CMD) $@
+	
