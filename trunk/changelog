@@ -1,7 +1,8 @@
-/* $Id: changelog,v 1.1335 2001-04-01 10:31:34 sandervl Exp $ */
+/* $Id: changelog,v 1.1336 2001-04-01 12:31:44 sandervl Exp $ */
 
  2001-04-01: Sander van Leeuwen <sandervl@xs4all.nl>   
     - WININET:  o Added missing exports to wininet.def
+    - WINMM:    o Increased nr of DART buffers used for wave playback
 
  2001-03-31: Sander van Leeuwen <sandervl@xs4all.nl>   
     - KERNEL32: o Fix for loading executable with sections not starting on
