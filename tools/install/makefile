@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 2000-12-03 08:13:39 bird Exp $
+# $Id: makefile,v 1.7 2001-04-01 14:34:19 sandervl Exp $
 
 #
 # Odin32 API
@@ -10,6 +10,7 @@
 #
 # Tell that we're producing an executable.
 #
+USERAPP = 1
 EXETARGET = 1
 VIO = 1
 STATIC_CRT = 1
@@ -36,6 +37,8 @@ $(OBJDIR)\odininst.obj
 LIBS = \
 os2386.lib \
 $(RTLLIB) \
+$(ODIN32_LIB)\advapi32.lib \
+$(ODIN32_LIB)\user32.lib \
 $(ODIN32_LIB)\kernel32.lib
 
 
