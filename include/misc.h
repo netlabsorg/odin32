@@ -1,4 +1,4 @@
-/* $Id: misc.h,v 1.5 1999-05-31 22:08:08 phaller Exp $ */
+/* $Id: misc.h,v 1.6 1999-06-01 15:46:21 phaller Exp $ */
 
 /*
  * Miscellaneous definitions
@@ -13,6 +13,11 @@
       extern "C" {
 #endif
 
+
+/* enable support for the _interrupt() statement */
+#if (defined(__IBMCPP__) || defined(__IBMC__))
+#  include <builtin.h>
+#endif
 
 #ifdef DEBUG
   #define DebugInt3()	_interrupt(3)

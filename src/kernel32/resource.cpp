@@ -1,4 +1,4 @@
-/* $Id: resource.cpp,v 1.2 1999-05-31 22:08:12 phaller Exp $ */
+/* $Id: resource.cpp,v 1.3 1999-06-01 15:47:38 phaller Exp $ */
 
 /*
  *
@@ -13,11 +13,12 @@
  *
  */
 #include <os2win.h>
+#include "misc.h"
+
 #include "unicode.h"
 #include "winres.h"
 #include "winimage.h"
 #include "winexe.h"
-#include "misc.h"
 
 
 //******************************************************************************
