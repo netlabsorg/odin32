@@ -1,4 +1,9 @@
-/* $Id: changelog,v 1.2013 2002-03-06 16:20:54 sandervl Exp $ */
+/* $Id: changelog,v 1.2014 2002-03-07 19:40:47 sandervl Exp $ */
+
+ 2002-03-07: Platon Fomichev <platon@innotek.de>
+    - USER32:   o CloseWindow fix (use frame window handle)
+                o Minimize window (WinSetWindowPos, SWP_MINIMIZE) on receival
+                  of minimize syscommand
 
  2002-03-06: Platon Fomichev <platon@innotek.de>
     - USER32:   o Fixes for minimized dragging icon and minimized icon distortion
