@@ -1,4 +1,4 @@
-/* $Id: font.cpp,v 1.12 2000-07-06 21:17:26 sandervl Exp $ */
+/* $Id: font.cpp,v 1.13 2000-10-01 12:06:32 sandervl Exp $ */
 
 /*
  * GDI32 font apis
@@ -481,19 +481,23 @@ DWORD WIN32API GetFontData(HDC hdc, DWORD dwTable, DWORD dwOffset, LPVOID lpvBuf
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API AddFontResourceA( LPCSTR arg1)
+int WIN32API AddFontResourceA( LPCSTR szFont)
 {
-    dprintf(("GDI32: AddFontResourceA"));
-    return O32_AddFontResource(arg1);
+    dprintf(("GDI32: AddFontResourceA %s", szFont));
+    return O32_AddFontResource(szFont);
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API AddFontResourceW( LPCWSTR arg1)
+int WIN32API AddFontResourceW( LPCWSTR szFont)
 {
-    dprintf(("GDI32: AddFontResourceW STUB"));
+ char *astring = UnicodeToAsciiString((LPWSTR)szFont);
+ BOOL  rc;
+
+    dprintf(("GDI32: AddFontResourceW"));
     // NOTE: This will not work as is (needs UNICODE support)
-//    return O32_AddFontResource(arg1);
-    return 0;
+    rc = AddFontResourceA(astring);
+    FreeAsciiString(astring);
+    return rc;
 }
 //******************************************************************************
 //******************************************************************************
@@ -504,13 +508,13 @@ BOOL WIN32API RemoveFontResourceA( LPCSTR arg1)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API RemoveFontResourceW(LPCWSTR arg1)
+BOOL WIN32API RemoveFontResourceW(LPCWSTR szFont)
 {
- char *astring = UnicodeToAsciiString((LPWSTR)arg1);
+ char *astring = UnicodeToAsciiString((LPWSTR)szFont);
  BOOL  rc;
 
-    dprintf(("GDI32: RemoveFontResourceW\n"));
-    rc = O32_RemoveFontResource(astring);
+    dprintf(("GDI32: RemoveFontResourceW"));
+    rc = RemoveFontResourceA(astring);
     FreeAsciiString(astring);
     return(rc);
 }
