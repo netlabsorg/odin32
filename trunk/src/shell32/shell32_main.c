@@ -1,4 +1,4 @@
-/* $Id: shell32_main.c,v 1.8 2002-06-09 12:41:22 sandervl Exp $ */
+/* $Id: shell32_main.c,v 1.9 2003-10-16 10:30:54 sandervl Exp $ */
 /*
  * 				Shell basics
  *
@@ -190,7 +190,7 @@ LPWSTR* WINAPI CommandLineToArgvW(LPCWSTR lpCmdline, int* numargs)
   }
   if (*arg) {
     *d='\0';
-    argv[argc]=arg;
+    argv[argc++]=arg;
   }
   if (numargs)
     *numargs=argc;
