@@ -1,4 +1,4 @@
-/* $Id: rebar.c,v 1.5 1999-06-28 15:46:26 cbratschi Exp $ */
+/* $Id: rebar.c,v 1.6 1999-06-30 15:52:17 cbratschi Exp $ */
 /*
  * Rebar control
  *
@@ -639,7 +639,7 @@ REBAR_GetBandInfoA (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
     if ((lprbbi->fMask & RBBIM_TEXT) &&
         (lprbbi->lpText) && (lpBand->lpText)) {
-            lstrcpynWtoA (lprbbi->lpText, lpBand->lpText, MIN(lprbbi->cch,lstrlenW(lpBand->lpText)));
+            lstrcpynWtoA (lprbbi->lpText, lpBand->lpText,lprbbi->cch);
     }
 
     if (lprbbi->fMask & RBBIM_IMAGE)
@@ -710,7 +710,7 @@ REBAR_GetBandInfoW (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
     if ((lprbbi->fMask & RBBIM_TEXT) &&
         (lprbbi->lpText) && (lpBand->lpText)) {
-            lstrcpynW (lprbbi->lpText, lpBand->lpText, MIN(lprbbi->cch,lstrlenW(lpBand->lpText)));
+            lstrcpynW (lprbbi->lpText, lpBand->lpText, lprbbi->cch);
     }
 
     if (lprbbi->fMask & RBBIM_IMAGE)

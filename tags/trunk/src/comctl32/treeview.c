@@ -1,4 +1,4 @@
-/* $Id: treeview.c,v 1.6 1999-06-28 15:46:28 cbratschi Exp $ */
+/* $Id: treeview.c,v 1.7 1999-06-30 15:52:19 cbratschi Exp $ */
 /* Treeview control
  *
  * Copyright 1998 Eric Kohl <ekohl@abo.rhein-zeitung.de>
@@ -896,7 +896,7 @@ TREEVIEW_SetItemA (HWND hwnd, WPARAM wParam, LPARAM lParam)
         len = lstrlenA (tvItem->pszText);
         if (len > wineItem->cchTextMax)
                         wineItem->pszText = COMCTL32_ReAlloc (wineItem->pszText, len+1);
-        lstrcpynA (wineItem->pszText, tvItem->pszText,len);
+        lstrcpynA (wineItem->pszText, tvItem->pszText,len+1);
                 } else {
                         if (wineItem->cchTextMax) {
                                 COMCTL32_Free (wineItem->pszText);
@@ -1165,7 +1165,7 @@ TREEVIEW_GetItemA (HWND hwnd, WPARAM wParam, LPARAM lParam)
 //              ERR (treeview," GetItem called with LPSTR_TEXTCALLBACK\n");
         }
         else if (wineItem->pszText) {
-            lstrcpynA (tvItem->pszText, wineItem->pszText, MIN(tvItem->cchTextMax,lstrlenA(wineItem->pszText)));
+            lstrcpynA (tvItem->pszText, wineItem->pszText,tvItem->cchTextMax);
         }
    }
 

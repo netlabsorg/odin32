@@ -1,4 +1,4 @@
-/* $Id: header.c,v 1.6 1999-06-28 15:46:24 cbratschi Exp $ */
+/* $Id: header.c,v 1.7 1999-06-30 15:52:16 cbratschi Exp $ */
 /*
  *  Header control
  *
@@ -597,7 +597,7 @@ HEADER_GetItemA (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
     if (phdi->mask & HDI_TEXT) {
         if (lpItem->pszText != LPSTR_TEXTCALLBACKW)
-            lstrcpynWtoA (phdi->pszText, lpItem->pszText, MIN(phdi->cchTextMax,lstrlenW(lpItem->pszText)));
+            lstrcpynWtoA (phdi->pszText, lpItem->pszText, phdi->cchTextMax);
         else
             phdi->pszText = LPSTR_TEXTCALLBACKA;
     }
@@ -645,7 +645,7 @@ HEADER_GetItemW (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
     if (phdi->mask & HDI_TEXT) {
         if (lpItem->pszText != LPSTR_TEXTCALLBACKW)
-            lstrcpynW (phdi->pszText, lpItem->pszText, MIN(phdi->cchTextMax,lstrlenW(lpItem->pszText)));
+            lstrcpynW (phdi->pszText, lpItem->pszText, phdi->cchTextMax);
         else
             phdi->pszText = LPSTR_TEXTCALLBACKW;
     }
