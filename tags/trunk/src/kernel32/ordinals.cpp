@@ -50,9 +50,19 @@
  * Author    : Christoph Bratschi [Wed, 2000/03/29 19:47]
  *****************************************************************************/
 
-VOID WIN32API KERNEL32_99(DWORD x)
+DWORD WIN32API KERNEL32_99(DWORD x)
 {
   dprintf(("KERNEL32: Unknown API KERNEL32.99\n"));
+  return 1;
+}
+
+/**********************************************************************
+ *		_KERNEL32_100
+ */
+BOOL WINAPI KERNEL32_100(HANDLE threadid,DWORD exitcode,DWORD x)
+{
+	dprintf(("_KERNEL32_100 (%d,%ld,0x%08lx): STUB",threadid,exitcode,x));
+	return TRUE;
 }
 
 
