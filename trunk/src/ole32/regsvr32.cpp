@@ -1,4 +1,4 @@
-/* $Id: regsvr32.cpp,v 1.4 2001-04-27 20:19:56 sandervl Exp $ */
+/* $Id: regsvr32.cpp,v 1.5 2001-09-26 13:55:57 phaller Exp $ */
 /* 
  * 
  * Project Odin Software License can be found in LICENSE.TXT
@@ -33,7 +33,7 @@ static	HANDLE	hdlObject;
 // Prototypes.
 // ======================================================================
 extern HRESULT WIN32API OleInitialize(LPVOID reserved);
-extern HRESULT WIN32API OleUninitialize(void);
+extern void    WIN32API OleUninitialize(void);
 
 static	HRESULT	parse_command(int argc, char * argv[]);
 static	HRESULT	load_object(void);
