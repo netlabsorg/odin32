@@ -1,0 +1,16 @@
+* $Id: kKrnlLib.ddp,v 1.1 2001-09-11 01:27:21 bird Exp $
+*
+* kKrnlLib.sys
+*
+* Copyright (c) 1998-2001 knut st. osmundsen (kosmunds@csc.com)
+*
+
+:TITLE
+kKrnlLib - Odin32 Ring-0 Kernel Library
+
+:FILES
+kKrnlLib.sys \os2\boot\kKrnlLib.sys
+kKrnlLib.sym \os2\boot\kKrnlLib.sym
+
+:CONFIG
+device=\os2\boot\kKrnlLib.sys
