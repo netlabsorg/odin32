@@ -1,4 +1,4 @@
-; $Id: odincrt.asm,v 1.1 1999-08-17 12:46:20 sandervl Exp $
+; $Id: odincrt.asm,v 1.2 1999-11-09 11:29:06 achimha Exp $
 
 ;/*
 ; * Project Odin Software License can be found in LICENSE.TXT
@@ -14,7 +14,7 @@
                 NAME    odinfs
 
 CODE32          SEGMENT DWORD PUBLIC USE32 'CODE'
-                ASSUME  CS:FLAT ,DS:FLAT,SS:FLAT
+                ASSUME  DS:FLAT, SS:FLAT
 
                 PUBLIC  __threadid 
 __threadid proc near
