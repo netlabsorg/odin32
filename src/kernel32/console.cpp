@@ -1,4 +1,4 @@
-/* $Id: console.cpp,v 1.23 2000-10-23 19:35:10 sandervl Exp $ */
+/* $Id: console.cpp,v 1.24 2001-01-29 00:43:33 bird Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -49,10 +49,9 @@
 */
 
 
-/*****************************************************************************
- * Includes                                                                  *
- *****************************************************************************/
-
+/*******************************************************************************
+*   Header Files                                                               *
+*******************************************************************************/
 #include <builtin.h>
 #include <stdlib.h>
 #include <string.h>
@@ -92,26 +91,19 @@
 
 #include <os2sel.h>
 
-/*****************************************************************************
- * Defines                                                                   *
- *****************************************************************************/
 
-/*****************************************************************************
- * Structures                                                                *
- *****************************************************************************/
-
-
-/*****************************************************************************
- * Process Global Structures                                                 *
- *****************************************************************************/
-
+/*******************************************************************************
+*   Process Global Structures                                                  *
+*******************************************************************************/
 static ICONSOLEGLOBALS ConsoleGlobals;
 static ICONSOLEINPUT   ConsoleInput;
-       BOOL            flVioConsole = FALSE;
+BOOL                   flVioConsole = FALSE;
 
-/*****************************************************************************
- * Prototypes                                                                *
- *****************************************************************************/
+/*******************************************************************************
+*   Internal Functions                                                         *
+*******************************************************************************/
+static void iConsoleInputQueueLock();
+static void iConsoleInputQueueUnlock();
 
 
 /*****************************************************************************
@@ -126,7 +118,7 @@ static ICONSOLEINPUT   ConsoleInput;
  * Author    : Patrick Haller [Tue, 1998/02/10 01:55]
  *****************************************************************************/
 
-void static iConsoleInputQueueLock()
+static void iConsoleInputQueueLock()
 {
   APIRET rc;
 
@@ -150,7 +142,7 @@ void static iConsoleInputQueueLock()
  * Author    : Patrick Haller [Tue, 1998/02/10 01:55]
  *****************************************************************************/
 
-void static iConsoleInputQueueUnlock()
+static void iConsoleInputQueueUnlock()
 {
   APIRET rc;
 
@@ -325,7 +317,7 @@ APIRET iConsoleDevicesRegister(void)
 
   DWORD rc;
 
-  static fDevicesInitialized;          /* have we been initialized already ? */
+  static BOOL fDevicesInitialized;     /* have we been initialized already ? */
 
   if (fDevicesInitialized == TRUE)                 /* OK, we're already done */
     return (NO_ERROR);
