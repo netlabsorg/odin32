@@ -733,6 +733,15 @@ static HRESULT WINAPI IPersistFile_fnSave(IPersistFile* iface, LPCOLESTR pszFile
             goto found;
         }
     }
+    // not sure if this is correct, but it solves the problem of applications
+    // wanting to save the lnk files in an arbitrary directory
+    link_name = strrchr(filename, '\\');
+    if(link_name) 
+    {
+        bDesktop = TRUE;
+        goto found;
+    }
+    
     goto done;
 
  found:
