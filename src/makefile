@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.49 2000-02-10 23:52:27 bird Exp $
+# $Id: makefile,v 1.50 2000-02-15 09:17:09 bird Exp $
 
 #
 # PD-Win32 API
@@ -168,10 +168,10 @@ APIImport:
     ..\..\tools\bin\APIImport.exe APIImport.def
 
 StateUpd:
-    ..\..\tools\bin\StateUpd.exe -io+
+    ..\tools\bin\StateUpd.exe -io+
     -$(DOWITHDIRS) -e$(NOTWIN32DLLS) -ewnetap32 -cp -i \
         ..\..\tools\bin\StateUpd.exe -ie- -ib-
-    ..\..\tools\bin\StateUpd.exe -io+
+    ..\tools\bin\StateUpd.exe -io+
 
 ReadSignals:
     -$(DOWITHDIRS) -e$(NOTWIN32DLLS) -ewnetap32 -cp -i \
