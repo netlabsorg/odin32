@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.230 2001-01-19 23:03:45 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.231 2001-02-02 19:04:03 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2220,9 +2220,6 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
    HWND hParent = 0;
    RECT oldClientRect = rectClient;
 
-    if(getWindowHandle() == 0x68000010) {
-	hParent = 0;
-    }
     if (fuFlags &
        ~(SWP_NOSIZE     | SWP_NOMOVE     | SWP_NOZORDER     |
          SWP_NOREDRAW   | SWP_NOACTIVATE | SWP_FRAMECHANGED |
@@ -2396,7 +2393,7 @@ void Win32BaseWindow::NotifyFrameChanged(WINDOWPOS *wpos, RECT *oldClientRect)
          wpos->cy     = RECT_HEIGHT(rectWindow);
     }
 
-    if(rectClient.left != oldClientRect->left || 
+    if(rectClient.left != oldClientRect->left ||
        rectClient.top != oldClientRect->top)
     {
          wpos->flags &= ~(SWP_NOMOVE|SWP_NOCLIENTMOVE);
@@ -3230,9 +3227,9 @@ LONG Win32BaseWindow::SetWindowLongA(int index, ULONG value, BOOL fUnicode)
            STYLESTRUCT ss;
 
                 if(dwExStyle == value) {
-            oldval = value;
+                    oldval = value;
                     break;
-        }
+                }
                 ss.styleOld = dwExStyle;
                 ss.styleNew = value;
                 dprintf(("SetWindowLong GWL_EXSTYLE %x old %x new style %x", getWindowHandle(), dwExStyle, value));
@@ -3240,7 +3237,7 @@ LONG Win32BaseWindow::SetWindowLongA(int index, ULONG value, BOOL fUnicode)
                 setExStyle(ss.styleNew);
                 SendInternalMessageA(WM_STYLECHANGED,GWL_EXSTYLE,(LPARAM)&ss);
                 oldval = ss.styleOld;
-        break;
+                break;
         }
         case GWL_STYLE:
         {
@@ -3249,7 +3246,7 @@ LONG Win32BaseWindow::SetWindowLongA(int index, ULONG value, BOOL fUnicode)
                 //SvL: TODO: Can you change minimize or maximize status here too?
 
                 if(dwStyle == value) {
-            oldval = value;
+                    oldval = value;
                     break;
                 }
                 value &= ~(WS_CHILD|WS_VISIBLE);      /* Some bits can't be changed this way (WINE) */
@@ -3269,15 +3266,15 @@ LONG Win32BaseWindow::SetWindowLongA(int index, ULONG value, BOOL fUnicode)
         }
         case GWL_WNDPROC:
         {
-        //Note: Type of SetWindowLong determines new window proc type
+                //Note: Type of SetWindowLong determines new window proc type
                 //      UNLESS the new window proc has already been registered
                 //      (use the old type in that case)
                 //      (VERIFIED in NT 4, SP6)
                 WINDOWPROCTYPE type = WINPROC_GetProcType((HWINDOWPROC)value);
-        if(type == WIN_PROC_INVALID) {
-            type = (fUnicode) ? WIN_PROC_32W : WIN_PROC_32A;
-        }
-            oldval = (LONG)WINPROC_GetProc(win32wndproc, (fUnicode) ? WIN_PROC_32W : WIN_PROC_32A);
+                if(type == WIN_PROC_INVALID) {
+                    type = (fUnicode) ? WIN_PROC_32W : WIN_PROC_32A;
+                }
+                oldval = (LONG)WINPROC_GetProc(win32wndproc, (fUnicode) ? WIN_PROC_32W : WIN_PROC_32A);
                 WINPROC_SetProc((HWINDOWPROC *)&win32wndproc, (WNDPROC)value, type, WIN_PROC_WINDOW);
                 break;
         }
@@ -3303,11 +3300,11 @@ LONG Win32BaseWindow::SetWindowLongA(int index, ULONG value, BOOL fUnicode)
         default:
                 if(index >= 0 && index/4 < nrUserWindowLong)
                 {
-                        oldval = userWindowLong[index/4];
-                        userWindowLong[index/4] = value;
+                    oldval = userWindowLong[index/4];
+                    userWindowLong[index/4] = value;
                     break;
                 }
-            dprintf(("WARNING: SetWindowLong%c %x %d %x returned %x INVALID index!", (fUnicode) ? 'W' : 'A', getWindowHandle(), index, value));
+                dprintf(("WARNING: SetWindowLong%c %x %d %x returned %x INVALID index!", (fUnicode) ? 'W' : 'A', getWindowHandle(), index, value));
                 SetLastError(ERROR_INVALID_PARAMETER);
                 return 0;
     }
@@ -3335,7 +3332,7 @@ ULONG Win32BaseWindow::GetWindowLongA(int index, BOOL fUnicode)
         value = hInstance;
         break;
     case GWL_HWNDPARENT:
-    value = GetParent();
+        value = GetParent();
         break;
     case GWL_ID:
         value = getWindowId();
@@ -3361,14 +3358,14 @@ WORD Win32BaseWindow::SetWindowWord(int index, WORD value)
 {
  WORD oldval;
 
-   if(index >= 0 && index/4 < nrUserWindowLong)
-   {
+    if(index >= 0 && index/4 < nrUserWindowLong)
+    {
         oldval = ((WORD *)userWindowLong)[index/2];
         ((WORD *)userWindowLong)[index/2] = value;
         return oldval;
-   }
-   SetLastError(ERROR_INVALID_PARAMETER);
-   return 0;
+    }
+    SetLastError(ERROR_INVALID_PARAMETER);
+    return 0;
 }
 //******************************************************************************
 //******************************************************************************
@@ -3406,19 +3403,19 @@ Win32BaseWindow *Win32BaseWindow::GetWindowFromOS2Handle(HWND hwnd)
  Win32BaseWindow *win32wnd;
  DWORD        magic;
 
-  if(hwnd == OSLIB_HWND_DESKTOP)
-  {
-    return windowDesktop;
-  }
+    if(hwnd == OSLIB_HWND_DESKTOP)
+    {
+        return windowDesktop;
+    }
 
-  win32wnd = (Win32BaseWindow *)OSLibWinGetWindowULong(hwnd, OFFSET_WIN32WNDPTR);
-  magic    = OSLibWinGetWindowULong(hwnd, OFFSET_WIN32PM_MAGIC);
+    win32wnd = (Win32BaseWindow *)OSLibWinGetWindowULong(hwnd, OFFSET_WIN32WNDPTR);
+    magic    = OSLibWinGetWindowULong(hwnd, OFFSET_WIN32PM_MAGIC);
 
-  if(win32wnd && CheckMagicDword(magic)) {
+    if(win32wnd && CheckMagicDword(magic)) {
         return win32wnd;
-  }
+    }
 //  dprintf2(("Win32BaseWindow::GetWindowFromOS2Handle: not an Odin os2 window %x", hwnd));
-  return 0;
+    return 0;
 }
 //******************************************************************************
 //******************************************************************************
