@@ -1,4 +1,4 @@
-/* $Id: waveoutdaud.h,v 1.2 2001-03-24 15:40:04 sandervl Exp $ */
+/* $Id: waveoutdaud.h,v 1.3 2001-04-06 14:36:43 sandervl Exp $ */
 
 /*
  * Wave playback class (DirectAudio)
@@ -41,7 +41,7 @@ protected:
 
 private:
        MMRESULT resume();
-       void     handler();
+       BOOL     handler();
        MMRESULT sendIOCTL(ULONG cmd, DAUDIO_CMD *pDataPacket);
 
         HEV     hSem;
