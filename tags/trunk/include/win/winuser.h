@@ -790,6 +790,20 @@ typedef struct
 #define WM_NCMOUSEHOVER      0x02A0
 #define WM_NCMOUSELEAVE      0x02A2
 
+#define TME_HOVER       0x00000001
+#define TME_LEAVE       0x00000002
+#define TME_QUERY       0x40000000
+#define TME_CANCEL      0x80000000
+
+#define HOVER_DEFAULT   0xFFFFFFFF
+
+typedef struct tagTRACKMOUSEEVENT {
+    DWORD cbSize;
+    DWORD dwFlags;
+    HWND  hwndTrack;
+    DWORD dwHoverTime;
+} TRACKMOUSEEVENT, *LPTRACKMOUSEEVENT;
+
 #define WM_CUT               0x0300
 #define WM_COPY              0x0301
 #define WM_PASTE             0x0302
@@ -3270,6 +3284,7 @@ BOOL      WINAPI SetMenuItemInfoW(HMENU,UINT,BOOL,const MENUITEMINFOW*);
 BOOL      WINAPI SetWindowContextHelpId(HWND,DWORD);
 WORD        WINAPI TileWindows (HWND, UINT, const LPRECT,
                                 UINT, const HWND *);
+BOOL      WINAPI TrackMouseEvent(LPTRACKMOUSEEVENT);
 BOOL      WINAPI TrackPopupMenuEx(HMENU,UINT,INT,INT,HWND,
                                     LPTPMPARAMS);
 BOOL        WINAPI UnpackDDElParam(UINT,UINT,UINT*,UINT*);

@@ -24,8 +24,15 @@ TEB *  WIN32API InitializeTIB(BOOL fMainThread = FALSE);
 void   WIN32API DestroyTIB();
 ULONG  WIN32API GetProcessTIBSel();
 
+#define TIB_SWITCH_DEFAULT	0
+#define TIB_SWITCH_FORCE_WIN32  1
+//
+//Switch to WIN32 TIB (FS selector)
+//NOTE: This is not done for Odin32 applications (LX), unless
+//      fForceSwitch is TRUE)
+USHORT WIN32API SetWin32TIB(BOOL fForceSwitch = TIB_SWITCH_DEFAULT);
 void   WIN32API RestoreOS2TIB();
-USHORT WIN32API SetWin32TIB();
+
 void   SetPDBInstance(HINSTANCE hInstance);
 
 extern BOOL fExeStarted;
