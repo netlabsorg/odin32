@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.12 1999-08-29 14:55:39 sandervl Exp $
+# $Id: makefile,v 1.13 1999-08-30 22:16:18 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -74,6 +74,8 @@ all:
         $(MAKE_CMD)
         cd ..\olecli32
         $(MAKE_CMD)
+        cd ..\oledlg
+        $(MAKE_CMD)
         cd ..\imm32
         $(MAKE_CMD)
         cd ..\imagehlp
@@ -109,6 +111,8 @@ clean:
         cd ..\imm32
         $(MAKE_CMD) clean
         cd ..\imagehlp
+        $(MAKE_CMD) clean
+        cd ..\oledlg
         $(MAKE_CMD) clean
         cd ..\capi2032
         $(MAKE_CMD) clean
