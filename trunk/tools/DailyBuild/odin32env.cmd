@@ -1,4 +1,4 @@
-/* $Id: odin32env.cmd,v 1.7 2000-06-07 22:15:28 bird Exp $
+/* $Id: odin32env.cmd,v 1.8 2000-06-21 18:42:17 bird Exp $
  *
  * Sets the build environment.
  *
@@ -18,6 +18,7 @@
     call EnvVar_Set 0, 'CVSROOT',   ':pserver:bird@www.netlabs.org:d:/netlabs.src/odin32'
     call EnvVar_Set 0, 'HOME',      'd:\knut\home'
     call EnvVar_Set 0, 'USER',      'bird'
+
 
     /*
      * Call the procedures which configure each tool.
@@ -87,7 +88,7 @@ EMX: procedure
     call EnvVar_Set      fRM, 'GCCOPT',             '-pipe'
     call EnvVar_AddFront fRM, 'INFOPATH',           sEMXForw'/info'
     call EnvVar_Set      fRM, 'EMXBOOK',            'emxdev.inf+emxlib.inf+emxgnu.inf+emxbsd.inf'
-    call EnvVar_AddFront fRM, 'HELPNDX',            'emxbook.ndx', '+'
+    call EnvVar_AddFront fRM, 'HELPNDX',            'emxbook.ndx', '+', 1
     call EnvVar_Set      fRM, 'EMXOPT',             '-c -n -h1024'
     if EnvVar_Get('TERM') = '' then do
         call EnvVar_Set  fRM, 'TERM',               'mono'
@@ -209,6 +210,7 @@ Toolkit40: procedure
     call EnvVar_Set      fRM, 'odtmp',          EnvVar_Get('tmp');
     call EnvVar_Set      fRM, 'sombase',        sTkMain'\SOM'
     call EnvVar_Set      fRM, 'somruntime',     sTkMain'\SOM\COMMON'
+    call EnvVar_AddEnd   fRM, 'helpndx',        'EPMKWHLP.NDX+', '+', 1
 
     call EnvVar_Set      fRM, 'cpref',          'CP1.INF+CP2.INF+CP3.INF'
     call EnvVar_Set      fRM, 'gpiref',         'GPI1.INF+GPI2.INF+GPI3.INF+GPI4.INF'
@@ -268,7 +270,7 @@ Toolkit45: procedure
     call EnvVar_AddEnd   fRM, 'lib',         sTkMain'\SAMPLES\MM\LIB;'
     call EnvVar_AddEnd   fRM, 'lib',         sTkMain'\SPEECH\LIB;'
     call EnvVar_AddFront fRM, 'lib',         sTkMain'\lib;'
-    call EnvVar_AddFront fRM, 'helpndx',     'EPMKWHLP.NDX+', '+'
+    call EnvVar_AddEnd   fRM, 'helpndx',     'EPMKWHLP.NDX', '+', 1
     call EnvVar_AddFront fRM, 'ipfc',        sTkMain'\ipfc;'
     call EnvVar_Set      fRM, 'LANG',        'en_us'
     call EnvVar_Set      fRM, 'CPREF',       'CP1.INF+CP2.INF+CP3.INF'
@@ -336,7 +338,7 @@ VAC30: procedure
     call EnvVar_Set      fRM, 'smclasses',      'WPTYPES.IDL'
 
     /* FIXME THESE USES '+' AS SEPERATOR NOT ';'!!! */
-    call EnvVar_AddFront fRM, 'helpndx',        'EPMKWHLP.NDX+CPP.NDX+CPPBRS.NDX', '+'
+    call EnvVar_AddFront fRM, 'helpndx',        'CPP.NDX+CPPBRS.NDX', '+',1
     call EnvVar_AddFront fRM, 'ipf_keys',       'SHOWNAV'
     return 0;
 
@@ -397,25 +399,26 @@ WarpIn: procedure
  *                 is at the end and don't end with a ';'.
  */
 EnvVar_addFront: procedure
-    parse arg fRM, sEnvVar, sToAdd, sSeparator
+    parse arg fRM, sEnvVar, sToAdd, sSeparator, fNoEnd
 
-    /* sets default separator if not specified. */
+    /* Sets default separator and fNoEnd if not specified. */
     if (sSeparator = '') then sSeparator = ';';
+    if (fNoEnd = '')     then fNoEnd = 0;
 
-    /* checks that sToAdd ends with an ';'. Adds one if not. */
+    /* Add evt. missing separator at end. */
     if (substr(sToAdd, length(sToAdd), 1) <> sSeparator) then
         sToAdd = sToAdd || sSeparator;
 
-    /* check and evt. remove ';' at start of sToAdd */
-    if (substr(sToAdd, 1, 1) = ';') then
+    /* Check and evt. remove separator at start of sToAdd */
+    if (substr(sToAdd, 1, 1) = cSeparator) then
         sToAdd = substr(sToAdd, 2);
 
-    /* loop thru sToAdd */
+    /* Loop thru sToAdd */
     rc = 0;
     i = length(sToAdd);
     do while i > 1 & rc = 0
         j = lastpos(sSeparator, sToAdd, i-1);
-        rc = EnvVar_AddFront2(fRM, sEnvVar, substr(sToAdd, j+1, i - j), sSeparator);
+        rc = _EnvVar_AddFront2(fRM, sEnvVar, substr(sToAdd, j+1, i - j), sSeparator, fNoEnd);
         i = j;
     end
 
@@ -427,32 +430,36 @@ EnvVar_addFront: procedure
  * Known features: Don't remove sToAdd from original value if sToAdd
  *                 is at the end and don't end with a ';'.
  */
-EnvVar_AddFront2: procedure
-    parse arg fRM, sEnvVar, sToAdd, sSeparator
+_EnvVar_AddFront2: procedure
+    parse arg fRM, sEnvVar, sToAdd, sSeparator, fNoEnd
 
-    /* sets default separator if not specified. */
-    if (sSeparator = '') then sSeparator = ';';
-
-    /* checks that sToAdd ends with a separator. Adds one if not. */
+    /* Add evt. missing separator at end. */
     if (substr(sToAdd, length(sToAdd), 1) <> sSeparator) then
         sToAdd = sToAdd || sSeparator;
 
-    /* check and evt. remove the separator at start of sToAdd */
+    /* Check and evt. remove the separator at start of sToAdd */
     if (substr(sToAdd, 1, 1) = sSeparator) then
         sToAdd = substr(sToAdd, 2);
 
-    /* Get original variable value */
-    sOrgEnvVar = EnvVar_Get(sEnvVar);
+    /* Get original variable without sToAdd. */
+    sOrgEnvVar = _EnvVar_RemoveFrom(EnvVar_Get(sEnvVar),,
+                                    sToAdd, sSeparator, fNoEnd);
 
-    /* Remove previously sToAdd if exists. (Changing sOrgEnvVar). */
-    i = pos(translate(sToAdd), translate(sOrgEnvVar));
-    if (i > 0) then
-        sOrgEnvVar = substr(sOrgEnvVar, 1, i-1) || substr(sOrgEnvVar, i + length(sToAdd));
-
-    /* set environment */
+    /* If only removing - nothing more to do */
     if (fRM) then
         return EnvVar_Set(0, sEnvVar, sOrgEnvVar);
-    return EnvVar_Set(0, sEnvVar, sToAdd||sOrgEnvVar);
+
+    /* Create new value */
+    sNewValue = sToAdd || sOrgEnvVar;
+
+    /* Remove or add separator if necessary */
+    if (fNoEnd  & substr(sNewValue, length(sNewValue), 1) =  sSeparator) then
+        sNewValue = substr(sNewValue, 1, length(sNewValue) - 1);
+    if (\fNoEnd & substr(sNewValue, length(sNewValue), 1) <> sSeparator) then
+        sNewValue = sNewValue || sSeparator;
+
+    /* Set environment */
+    return EnvVar_Set(0, sEnvVar, sNewValue);
 
 
 /*
@@ -463,25 +470,26 @@ EnvVar_AddFront2: procedure
  *                 is at the end and don't end with a ';'.
  */
 EnvVar_addEnd: procedure
-    parse arg fRM, sEnvVar, sToAdd, sSeparator
+    parse arg fRM, sEnvVar, sToAdd, sSeparator, fNoEnd
 
-    /* sets default separator if not specified. */
+    /* Sets default separator and fNoEnd if not specified. */
     if (sSeparator = '') then sSeparator = ';';
+    if (fNoEnd = '')     then fNoEnd = 0;
 
-    /* checks that sToAdd ends with a separator. Adds one if not. */
+    /* Add evt. missing separator at end. */
     if (substr(sToAdd, length(sToAdd), 1) <> sSeparator) then
         sToAdd = sToAdd || sSeparator;
 
-    /* check and evt. remove ';' at start of sToAdd */
+    /* Check and evt. remove separator at start of sToAdd */
     if (substr(sToAdd, 1, 1) = sSeparator) then
         sToAdd = substr(sToAdd, 2);
 
-    /* loop thru sToAdd */
+    /* Loop thru sToAdd */
     rc = 0;
     i = length(sToAdd);
     do while i > 1 & rc = 0
         j = lastpos(sSeparator, sToAdd, i-1);
-        rc = EnvVar_AddEnd2(fRM, sEnvVar, substr(sToAdd, j+1, i - j), sSeparator);
+        rc = _EnvVar_AddEnd2(fRM, sEnvVar, substr(sToAdd, j+1, i - j), sSeparator, fNoEnd);
         i = j;
     end
 
@@ -493,35 +501,106 @@ EnvVar_addEnd: procedure
  * Known features: Don't remove sToAdd from original value if sToAdd
  *                 is at the end and don't end with a ';'.
  */
-EnvVar_AddEnd2: procedure
-    parse arg fRM, sEnvVar, sToAdd, sSeparator
+_EnvVar_AddEnd2: procedure
+    parse arg fRM, sEnvVar, sToAdd, sSeparator, fNoEnd
 
-    /* sets default separator if not specified. */
-    if (sSeparator = '') then sSeparator = ';';
-
-    /* checks that sToAdd ends with a separator. Adds one if not. */
-    if (substr(sToAdd, length(sToAdd), 1) <> sSeparator) then
-        sToAdd = sToAdd || sSeparator;
-
-    /* check and evt. remove separator at start of sToAdd */
+    /* Check and evt. remove separator at start of sToAdd */
     if (substr(sToAdd, 1, 1) = sSeparator) then
         sToAdd = substr(sToAdd, 2);
 
-    /* Get original variable value */
-    sOrgEnvVar = EnvVar_Get(sEnvVar);
+    /* Get original variable without sToAdd. */
+    sOrgEnvVar = _EnvVar_RemoveFrom(EnvVar_Get(sEnvVar),,
+                                    sToAdd, sSeparator, fNoEnd);
 
-    /* Remove previously sToAdd if exists. (Changing sOrgEnvVar). */
-    i = pos(translate(sToAdd), translate(sOrgEnvVar));
-    if (i > 0) then
-        sOrgEnvVar = substr(sOrgEnvVar, 1, i-1) || substr(sOrgEnvVar, i + length(sToAdd));
+    /* If we're only to remove the sToAdd value, we're finised now. */
+    if (fRM) then
+        reutrn EnvVar_Set(0, sEnvVar, sOrgEnvVar);
 
-    /* checks that sOrgEnvVar ends with a separator. Adds one if not. */
-    if (substr(sOrgEnvVar, length(sOrgEnvVar), 1) <> sSeparator) then
-        sOrgEnvVar = sOrgEnvVar || sSeparator;
+    /* fNoEnd: remove separator at end (if any) and remove previously sToAdd. */
+    if (fNoEnd & substr(sToAdd, length(sToAdd), 1) = sSeparator) then
+        sToAdd = substr(sToAdd, 1, length(sToAdd) - 1);
 
-    /* set environment */
-    if fRM then return EnvVar_Set(0, sEnvVar, sOrgEnvVar);
+    /* Add separator to sOrgEnvVar if fNoEnd and sOrgEnvVar is not empty */
+    if (fNoEnd & length(sOrgEnvVar) > 0) then
+        return EnvVar_Set(0, sEnvVar, sOrgEnvVar||sSeparator||sToAdd);
     return EnvVar_Set(0, sEnvVar, sOrgEnvVar||sToAdd);
+
+
+/*
+ * Removes a value for a separated enviroment string.
+ */
+_EnvVar_RemoveFrom: procedure
+    parse arg sOrgValue, sValue, sSeparator, fNoEnd
+
+    /* test for empty org value */
+    if (sOrgValue = '') then
+        return '';
+
+    /* remove any separators in front or end of sValue. */
+    if (substr(sValue, 1, 1) = sSeparator) then
+        sValue = substr(sValue, 2);
+    if (substr(sValue, length(sValue), 1) = sSeparator) then
+        sValue = substr(sValue, 1, length(sValue) - 1);
+
+    /* look for sValue */
+    i = pos(translate(sValue), translate(sOrgValue));
+    do while (i > 0)
+        cch = length(sValue);
+        fEnd = length(sOrgValue) <= cch + i;
+
+        /* check if ok */
+        if (i <= 1) then fOkFront = 1;
+        else    fOkFront = (substr(sOrgValue, i - 1, 1) = sSeparator);
+        if (fOkFront & (fEnd | substr(sOrgValue, i + cch, 1) = sSeparator)) then
+        do
+            /* addjust length / index to remove separators */
+            if (i > 1)         then
+            do
+                cch = cch + 1;
+                i = i - 1;
+            end
+            if (\fEnd & i = 1) then
+                cch = cch + 1;
+
+            /* create new sOrgValue */
+            if (i > 1) then
+                sOrgValue = substr(sOrgValue, 1, i - 1) || substr(sOrgValue, i + cch);
+            else if (cch < length(sOrgValue)) then
+                sOrgValue = substr(sOrgValue, i + cch);
+            else
+                sOrgValue = '';
+        end
+        else
+            i = i + 1;
+
+        /* more occurences? */
+        j = i;
+        i = pos(translate(sValue), translate(sOrgValue), i);
+    end
+
+    /* remove any start separator */
+    do while (length(sOrgValue) > 0)
+        if (substr(sOrgValue, 1, 1) <> sSeparator) then
+            leave
+        sOrgValue = substr(sOrgValue, 2);
+    end
+
+    /* Remove all separators at end */
+    do while (length(sOrgValue) > 1)
+        if (substr(sOrgValue, length(sOrgValue), 1) <> sSeparator) then
+            leave;
+        sOrgValue = substr(sOrgValue, 1, length(sOrgValue) - 1);
+    end
+
+    /* Just in case fix for value with only separator. (paranoia) */
+    if (length(sOrgValue) = 1 & sOrgValue = sSeparator) then
+        sOrgValue = '';
+
+    /* Add end separator */
+    if (length(sOrgValue) > 0 & \fNoEnd) then
+        sOrgValue = sOrgValue || sSeparator;
+
+    return sOrgValue;
 
 
 /*
@@ -552,5 +631,6 @@ EnvVar_Set: procedure
 EnvVar_Get: procedure
     parse arg sEnvVar
     return value(sEnvVar,, 'OS2ENVIRONMENT');
+
 
 
