@@ -1,10 +1,11 @@
-/* $Id: waveoutdaud.cpp,v 1.8 2002-06-04 17:36:56 sandervl Exp $ */
+/* $Id: waveoutdaud.cpp,v 1.9 2003-04-03 13:07:04 sandervl Exp $ */
 
 /*
  * Wave playback class (DirectAudio)
  *
- * Copyright 2001 Sander van Leeuwen (sandervl@xs4all.nl)
+ * Copyright 2001-2003 Sander van Leeuwen (sandervl@xs4all.nl)
  *
+ * TODO: mulaw, alaw & adpcm
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -32,13 +33,24 @@
 
 #include "misc.h"
 #include "waveoutdaud.h"
+#include "mixeros2.h"
 
 #define DBG_LOCALLOG    DBG_waveoutdaud
 #include "dbglocal.h"
 
 DWORD WIN32API DAudioThreadHandler(LPVOID pUserData);
 
-//TODO: mulaw, alaw & adpcm
+static char szPDDName[128] = "\\DEV\\";
+static BOOL fUseDirectAudio = TRUE;
+
+/******************************************************************************/
+//Turn off usage of the Uniaud DirectAudio interface
+/******************************************************************************/
+void WIN32API DisableDirectAudio()
+{
+    dprintf(("DisableDirectAudio"));
+    fUseDirectAudio = FALSE;
+}
 /******************************************************************************/
 /******************************************************************************/
 DAudioWaveOut::DAudioWaveOut(LPWAVEFORMATEX pwfx, ULONG fdwOpen, ULONG nCallback, ULONG dwInstance)
@@ -54,7 +66,9 @@ DAudioWaveOut::DAudioWaveOut(LPWAVEFORMATEX pwfx, ULONG fdwOpen, ULONG nCallback
     fUnderrun = FALSE;
     hSem      = 0;
 
-    rc = DosOpen("DAUDIO1$", &hDAudioDrv, &action, 0,
+    dprintf(("DAudioWaveOut::DAudioWaveOut"));
+
+    rc = DosOpen(szPDDName, &hDAudioDrv, &action, 0,
                  FILE_NORMAL, FILE_OPEN, OPEN_ACCESS_READWRITE |
                  OPEN_SHARE_DENYNONE | OPEN_FLAGS_WRITE_THROUGH,
                  NULL );
@@ -285,7 +299,7 @@ BOOL DAudioWaveOut::queryFormat(ULONG formatTag, ULONG nChannels, ULONG nSamples
     ULONG           action;
     HFILE           hDriver;
 
-    rc = DosOpen("DAUDIO1$", &hDriver, &action, 0,
+    rc = DosOpen(szPDDName, &hDriver, &action, 0,
                  FILE_NORMAL, FILE_OPEN, OPEN_ACCESS_READWRITE |
                  OPEN_SHARE_DENYNONE | OPEN_FLAGS_WRITE_THROUGH,
                  NULL );
@@ -330,12 +344,20 @@ BOOL DAudioWaveOut::isDirectAudioAvailable()
     ULONG           action;
     HFILE           hDriver;
 
+    if(!fUseDirectAudio) return FALSE;
+
     if(!fTested) {
         if(PROFILE_GetOdinIniInt(SECTION_WINMM, KEY_DIRECTAUDIO, 1) == 0) {
             fTested = TRUE;
             return FALSE;
         }
-        rc = DosOpen("DAUDIO1$", &hDriver, &action, 0,
+
+        if(OSLibGetAudioPDDName(&szPDDName[5]) == FALSE) {
+            return FALSE;
+        }
+
+        dprintf(("OSLibMixerOpen: PDD name %s", szPDDName));
+        rc = DosOpen(szPDDName, &hDriver, &action, 0,
                      FILE_NORMAL, FILE_OPEN, OPEN_ACCESS_READWRITE |
                      OPEN_SHARE_DENYNONE | OPEN_FLAGS_WRITE_THROUGH,
                      NULL );
@@ -347,7 +369,6 @@ BOOL DAudioWaveOut::isDirectAudioAvailable()
         fAvailable = TRUE;
     }
     return fAvailable;
-
 }
 /******************************************************************************/
 /******************************************************************************/
