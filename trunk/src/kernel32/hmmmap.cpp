@@ -1,4 +1,4 @@
-/* $Id: hmmmap.cpp,v 1.5 1999-08-25 14:27:06 sandervl Exp $ */
+/* $Id: hmmmap.cpp,v 1.6 1999-08-27 16:51:00 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -66,15 +66,41 @@ DWORD HMDeviceMemMapClass::CreateFileMapping(PHMHANDLEDATA         pHMHandleData
 	return ERROR_INVALID_PARAMETER;
   }
 
-  map = new Win32MemMap(hFile, size_low, protect, (LPSTR)name);
-  if(map == NULL) {
-	dprintf(("CreateFileMappingA: can't create Win32MemMap object!"));
-	return ERROR_OUTOFMEMORY;
-  }  
+  map = Win32MemMap::findMap((LPSTR)name);
+  if(map != NULL) {
+	dprintf(("CreateFileMappingA: duplicating map %s!", name));
 
-  if(map->Init(pHMHandleData->hHMHandle) == FALSE) {
-	delete map;
-	return ERROR_GEN_FAILURE;
+  	DWORD protflags = map->getProtFlags();
+  	switch(protect) {
+  	case FILE_MAP_WRITE:
+		if(!(protflags & PAGE_WRITECOPY))
+			dprintf(("Different flags for duplicate!"));
+		break;
+  	case FILE_MAP_READ:
+		if(!(protflags & (PAGE_READWRITE | PAGE_READONLY)))
+			dprintf(("Different flags for duplicate!"));
+		break;
+  	case FILE_MAP_COPY:
+		if(!(protflags & PAGE_WRITECOPY))
+			dprintf(("Different flags for duplicate!"));
+		break;
+  	}
+	//TODO:
+	//Is it allowed to open an existing view with different flags?
+        //(i.e. write access to readonly object)
+  }
+  else {
+	map = new Win32MemMap(hFile, size_low, protect, (LPSTR)name);
+
+  	if(map == NULL) {
+		dprintf(("CreateFileMappingA: can't create Win32MemMap object!"));
+		return ERROR_OUTOFMEMORY;
+  	} 
+
+  	if(map->Init(pHMHandleData->hHMHandle) == FALSE) {
+		delete map;
+		return ERROR_GEN_FAILURE;
+	}
   }
   map->AddRef();
   pHMHandleData->dwUserData = (ULONG)map;

@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.29 1999-08-26 12:55:38 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.30 1999-08-27 16:51:01 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -233,13 +233,6 @@ void WIN32API RegisterExe(WIN32EXEENTRY EntryPoint, PIMAGE_TLS_CALLBACK *TlsCall
    	winexe->setTLSIndexAddr(TlsIndexAddr);
    	winexe->setTLSCallBackAddr(TlsCallbackAddr);
 
-   	char *modname = getenv("WIN32MODULE");
-
-   	if(modname != NULL)
-   	{
-         	dprintf(("Set full path for exe to %s", modname));
-         	winexe->setFullPath(modname);
-   	}
    	winexe->start();
   }
   else {

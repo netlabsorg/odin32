@@ -1,4 +1,4 @@
-/* $Id: exceptions.cpp,v 1.16 1999-08-27 10:44:21 phaller Exp $ */
+/* $Id: exceptions.cpp,v 1.17 1999-08-27 16:50:59 sandervl Exp $ */
 
 /*
  * Win32 Device IOCTL API functions for OS/2
@@ -867,108 +867,88 @@ ULONG APIENTRY OS2ExceptionHandler(PEXCEPTIONREPORTRECORD       pERepRec,
                                    PCONTEXTRECORD               pCtxRec,
                                    PVOID                        p)
 {
-  /*********************************
-   * Internally handled exceptions *
-   *********************************/
-
-  /* Access violation at a known location */
-  if (pERepRec->ExceptionNum == XCPT_ACCESS_VIOLATION)
-  {
-    Win32MemMap *map;
-    BOOL fWriteAccess = FALSE;
-
-    if(pERepRec->ExceptionInfo[1] == 0 &&
-       pERepRec->ExceptionInfo[1] == XCPT_DATA_UNKNOWN)
-      goto continueFail;
-
-    map = Win32MemMap::findMap(pERepRec->ExceptionInfo[1]);
-     if(map == NULL)
-      goto continueFail;
-
-    switch(pERepRec->ExceptionInfo[0])
-    {
-      case XCPT_READ_ACCESS:
-        if(map->hasReadAccess() == FALSE)
-          goto continueFail;
-      break;
-
-      case XCPT_WRITE_ACCESS:
-        if(map->hasWriteAccess() == FALSE)
-           goto continueFail;
-        fWriteAccess = TRUE;
-        break;
-
-      case XCPT_EXECUTE_ACCESS:
-        if(map->hasExecuteAccess() == FALSE)
-          goto continueFail;
-        break;
-
-     default:
-       goto continueFail;
-   }
-
-   //Might want to consider mapping more than one page if access is at
-   //a high offset in the page
-   //@@@PH: mapping 16k or 32k might be significally faster in terms of transfer speed
-   if(map->commitPage((LPVOID)pERepRec->ExceptionInfo[1], 1, fWriteAccess) == TRUE)
-      return (XCPT_CONTINUE_EXECUTION);
-
-   //no break;
-  }
-continueFail:
-
-
-  /************************
-   * Pass-thru exceptions *
-   ************************/
-
   //  pERegRec->prev_structure = 0;
   dprintfException(pERepRec, pERegRec, pCtxRec, p);
 
   /* Access violation at a known location */
   switch(pERepRec->ExceptionNum)
   {
-    case XCPT_FLOAT_DENORMAL_OPERAND:
-    case XCPT_FLOAT_DIVIDE_BY_ZERO:
-    case XCPT_FLOAT_INEXACT_RESULT:
-    case XCPT_FLOAT_INVALID_OPERATION:
-    case XCPT_FLOAT_OVERFLOW:
-    case XCPT_FLOAT_STACK_CHECK:
-    case XCPT_FLOAT_UNDERFLOW:
-      dprintf(("KERNEL32: OS2ExceptionHandler: FPU exception, fix and continue\n"));
+  case XCPT_FLOAT_DENORMAL_OPERAND:
+  case XCPT_FLOAT_DIVIDE_BY_ZERO:
+  case XCPT_FLOAT_INEXACT_RESULT:
+  case XCPT_FLOAT_INVALID_OPERATION:
+  case XCPT_FLOAT_OVERFLOW:
+  case XCPT_FLOAT_STACK_CHECK:
+  case XCPT_FLOAT_UNDERFLOW:
+  	dprintf(("KERNEL32: OS2ExceptionHandler: FPU exception, fix and continue\n"));
         pCtxRec->ctx_env[0] |= 0x1F;
         pCtxRec->ctx_stack[0].losig = 0;
         pCtxRec->ctx_stack[0].hisig = 0;
         pCtxRec->ctx_stack[0].signexp = 0;
-      return (XCPT_CONTINUE_EXECUTION);
 
-    case XCPT_PROCESS_TERMINATE:
-    case XCPT_ASYNC_PROCESS_TERMINATE:
-      SetExceptionChain((ULONG)0);
-      return (XCPT_CONTINUE_SEARCH);
+      	return (XCPT_CONTINUE_EXECUTION);
 
-    case XCPT_ACCESS_VIOLATION:
-    case XCPT_BREAKPOINT:
-    case XCPT_ARRAY_BOUNDS_EXCEEDED:
-    case XCPT_DATATYPE_MISALIGNMENT:
-    case XCPT_ILLEGAL_INSTRUCTION:
-    case XCPT_PRIVILEGED_INSTRUCTION:
-    case XCPT_INVALID_LOCK_SEQUENCE:
-    case XCPT_INTEGER_DIVIDE_BY_ZERO:
-    case XCPT_INTEGER_OVERFLOW:
-    case XCPT_SINGLE_STEP:
-    case XCPT_GUARD_PAGE_VIOLATION:
-    case XCPT_UNABLE_TO_GROW_STACK:
-    case XCPT_IN_PAGE_ERROR:
-    case XCPT_SIGNAL:
-      dprintf(("KERNEL32: OS2ExceptionHandler: Continue and kill\n"));
-      pCtxRec->ctx_RegEip = (ULONG)KillWin32Process;
-      pCtxRec->ctx_RegEsp = pCtxRec->ctx_RegEsp + 0x10;
-      pCtxRec->ctx_RegEax = pERepRec->ExceptionNum;
-      pCtxRec->ctx_RegEbx = pCtxRec->ctx_RegEip;
-      return (XCPT_CONTINUE_EXECUTION);
+  case XCPT_PROCESS_TERMINATE:
+  case XCPT_ASYNC_PROCESS_TERMINATE:
+      	SetExceptionChain((ULONG)0);
+      	return (XCPT_CONTINUE_SEARCH);
 
-    default: //non-continuable exceptions
+  case XCPT_ACCESS_VIOLATION:
+  {	
+   Win32MemMap *map;
+   BOOL  fWriteAccess = FALSE;
+   ULONG offset, accessflag;
+
+	if(pERepRec->ExceptionInfo[1] == 0 && pERepRec->ExceptionInfo[1] == XCPT_DATA_UNKNOWN) {
+		goto continueFail;
+	}
+	switch(pERepRec->ExceptionInfo[0]) {
+	case XCPT_READ_ACCESS:
+		accessflag = MEMMAP_ACCESS_READ;
+		break;
+	case XCPT_WRITE_ACCESS:
+		accessflag = MEMMAP_ACCESS_WRITE;
+		fWriteAccess = TRUE;
+		break;
+	case XCPT_EXECUTE_ACCESS:
+		accessflag = MEMMAP_ACCESS_EXECUTE;
+		break;
+	default:
+		goto continueFail;
+	}
+
+       	map = Win32MemMapView::findMapByView(pERepRec->ExceptionInfo[1], &offset, accessflag);
+	if(map == NULL) {
+		goto continueFail;
+	}
+	if(map->commitPage(offset, fWriteAccess) == TRUE)
+		return (XCPT_CONTINUE_EXECUTION);
+
+	//no break;
+  }
+continueFail:
+
+  case XCPT_BREAKPOINT:
+  case XCPT_ARRAY_BOUNDS_EXCEEDED:
+  case XCPT_DATATYPE_MISALIGNMENT:
+  case XCPT_ILLEGAL_INSTRUCTION:
+  case XCPT_PRIVILEGED_INSTRUCTION:
+  case XCPT_INVALID_LOCK_SEQUENCE:
+  case XCPT_INTEGER_DIVIDE_BY_ZERO:
+  case XCPT_INTEGER_OVERFLOW:
+  case XCPT_SINGLE_STEP:
+  case XCPT_GUARD_PAGE_VIOLATION:
+  case XCPT_UNABLE_TO_GROW_STACK:
+  case XCPT_IN_PAGE_ERROR:
+  case XCPT_SIGNAL:
+    	dprintf(("KERNEL32: OS2ExceptionHandler: Continue and kill\n"));
+    	pCtxRec->ctx_RegEip = (ULONG)KillWin32Process;
+    	pCtxRec->ctx_RegEsp = pCtxRec->ctx_RegEsp + 0x10;
+    	pCtxRec->ctx_RegEax = pERepRec->ExceptionNum;
+    	pCtxRec->ctx_RegEbx = pCtxRec->ctx_RegEip;
+    	return (XCPT_CONTINUE_EXECUTION);
+
+  default: //non-continuable exceptions
         return (XCPT_CONTINUE_SEARCH);
   }
   return (XCPT_CONTINUE_SEARCH);
@@ -1018,7 +998,7 @@ void SetOS2ExceptionChain(ULONG val)
 {
  USHORT sel = GetFS();
 
-    SetExceptionChain(val);
+    SetExceptionChain(val);    
     SetFS(sel);
 }
 
