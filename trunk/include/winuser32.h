@@ -1,5 +1,3 @@
-/* $Id: winuser32.h,v 1.11 2001-06-13 10:28:29 sandervl Exp $ */
-
 /*
  * Internal functions exported by user32
  *
@@ -35,6 +33,8 @@ HWND WIN32API OS2ToWin32Handle(HWND hwnd);
 
 BOOL WIN32API IsSystemPen(HPEN hPen);
 BOOL WIN32API IsSystemBrush(HBRUSH hBrush);
+
+HICON WIN32API GetOS2Icon(HICON hIcon);
 
 //Turns native OS/2 window into window recognized by Odin (with only very
 //limited functionality)
