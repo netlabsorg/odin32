@@ -1,4 +1,4 @@
-/* $Id: pmwindow.h,v 1.11 2001-06-10 12:05:39 sandervl Exp $ */
+/* $Id: pmwindow.h,v 1.12 2001-10-03 18:37:52 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -31,5 +31,6 @@ extern BOOL  fOS2Look;
 #define TFOS_MOVE                    0x000F
 
 VOID FrameTrackFrame(Win32BaseWindow *win32wnd,DWORD flags);
+void Frame_SysCommandSizeMove(Win32BaseWindow *win32wnd, WPARAM wParam);
 
 #endif

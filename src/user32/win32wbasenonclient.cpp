@@ -1,4 +1,4 @@
-/* $Id: win32wbasenonclient.cpp,v 1.35 2001-06-22 07:32:48 sandervl Exp $ */
+/* $Id: win32wbasenonclient.cpp,v 1.36 2001-10-03 18:37:53 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (non-client methods)
  *
@@ -1269,9 +1269,11 @@ LONG Win32BaseWindow::HandleSysCommand(WPARAM wParam,POINT *pt32)
 
     switch (uCommand)
     {
-
     case SC_SIZE:
     {
+#ifdef CUSTOM_TRACKFRAME
+      Frame_SysCommandSizeMove(this, wParam);
+#else
       DWORD flags;
 
       if (dwStyle & WS_MAXIMIZE) break;
@@ -1315,12 +1317,17 @@ LONG Win32BaseWindow::HandleSysCommand(WPARAM wParam,POINT *pt32)
           break;
       }
       if (flags) FrameTrackFrame(this,flags);
+#endif
       break;
     }
 
     case SC_MOVE:
+#ifdef CUSTOM_TRACKFRAME
+        Frame_SysCommandSizeMove(this, wParam);
+#else
         if (dwStyle & WS_MAXIMIZE) break;
         FrameTrackFrame(this,TFOS_MOVE);
+#endif
         break;
 
     case SC_MINIMIZE:
