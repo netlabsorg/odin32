@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.22 2000-02-09 23:46:54 bird Exp $
+# $Id: makefile,v 1.23 2000-03-06 23:38:34 bird Exp $
 #
 # ddraw.dll makefile
 #
@@ -9,67 +9,88 @@
 #
 #
 
+# Directory macros.
 PDWIN32_INCLUDE = ..\..\include
-PDWIN32_LIB = ..\..\lib
-PDWIN32_BIN = ..\..\bin
-PDWIN32_TOOLS = ..\..\tools\bin
+PDWIN32_LIB     = ..\..\lib
+PDWIN32_BIN     = ..\..\$(OBJDIR)
+PDWIN32_TOOLS   = ..\..\tools\bin
 
 
+# Compiler, tools, and interference rules.
 !include $(PDWIN32_INCLUDE)/pdwin32.mk
 
-ASFLAGS = -Sc -Sv:ALP
 
-CFLAGS = $(CFLAGS) -I$(PDWIN32_INCLUDE);
-CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE);
+# Flag overloads and local macros.
+CLEANEXTRAS = ddrawrsrc.asm
+ASFLAGS     = -Sc -Sv:ALP
 
+
+# Object files. All objects should be prefixed with $(OBJDIR)!
+OBJS = \
+$(OBJDIR)\ddraw.obj \
+$(OBJDIR)\os2ddraw.obj \
+$(OBJDIR)\os2clipper.obj \
+$(OBJDIR)\os2d3d.obj \
+$(OBJDIR)\iccio1.obj \
+$(OBJDIR)\asmutil.obj \
+$(OBJDIR)\os2surface.obj \
+$(OBJDIR)\os2palette.obj \
+$(OBJDIR)\os2palset.obj \
+$(OBJDIR)\rectangle.obj \
+$(OBJDIR)\initterm.obj \
+$(OBJDIR)\os2util.obj \
+$(OBJDIR)\bltFunc.obj \
+$(OBJDIR)\fillfunc.obj \
+$(OBJDIR)\colorconv.obj \
+$(OBJDIR)\ddrawrsrc.obj
+
+
+# Target name - name of the dll without extention and path.
 TARGET = ddraw
 
-OBJS =  ddraw.obj os2ddraw.obj os2clipper.obj os2d3d.obj iccio1.obj asmutil.obj\
-        os2surface.obj os2palette.obj os2palset.obj rectangle.obj initterm.obj \
-        os2util.obj bltFunc.obj fillfunc.obj colorconv.obj resource.obj
+
+# All rule - build objs, target dll, copies dll to bin and makes libs.
+all:    $(OBJDIR) \
+        $(OBJDIR)\$(TARGET).dll \
+        $(PDWIN32_BIN)\$(TARGET).dll \
+        lib
 
 
-LIBS =  $(PDWIN32_LIB)\ole32.lib $(PDWIN32_LIB)\advapi32.lib $(PDWIN32_LIB)\gdi32.lib \
-        $(PDWIN32_LIB)\comctl32.lib $(PDWIN32_LIB)\kernel32.lib $(PDWIN32_LIB)\odincrt.lib \
-        $(PDWIN32_LIB)\user32.lib mmpm2.lib OS2386.LIB $(RTLLIB_O)
-
-all: $(TARGET).dll $(TARGET).lib
-
-
-$(TARGET).dll: $(OBJS) $(TARGET).def
-    $(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) $(TARGET).def $(LIBS)
-    $(CP) $@ $(PDWIN32_BIN)
-
-
+# Lib rule - build importlibrary (and evt. other libs)
 lib: $(TARGET).lib $(PDWIN32_LIB)\$(TARGET).lib
 
-$(PDWIN32_LIB)\$(TARGET).lib: $(TARGET).lib
-    $(CP) $** $@
 
-$(TARGET).lib: $(TARGET)exp.def
-    $(IMPLIB) $(IMPLIBFLAGS) $@ $**
-    $(CP) $@ $(PDWIN32_LIB)
-
-$(TARGET)exp.def: $(TARGET).def
-    $(IMPDEF) $** $@
+# Dll rule - builds the target dll.
+$(OBJDIR)\$(TARGET).dll: $(OBJS) $(TARGET).def $(OBJDIR)\$(TARGET).lrf
+    $(LD2) $(LD2FLAGS) @$(OBJDIR)\$(TARGET).lrf
 
 
-resource.asm: $(TARGET).rc
-    $(RC) $(RCFLAGS) -o resource.asm $(TARGET).rc
+# Linker file - creates the parameter file passed on to the linker.
+$(OBJDIR)\$(TARGET).lrf: makefile
+    @echo Creating file <<$@
+/OUT:$(OBJDIR)\$(TARGET).dll
+/MAP:$(OBJDIR)\$(TARGET).map
+$(OBJS)
+$(PDWIN32_LIB)/ole32.lib
+$(PDWIN32_LIB)/advapi32.lib
+$(PDWIN32_LIB)/gdi32.lib
+$(PDWIN32_LIB)/comctl32.lib
+$(PDWIN32_LIB)/kernel32.lib
+$(PDWIN32_LIB)/odincrt.lib
+$(PDWIN32_LIB)/user32.lib
+mmpm2.lib
+OS2386.LIB
+$(RTLLIB_O)
+$(TARGET).def
+<<keep
 
 
+# Dep rule - makes depenencies for C, C++ and Asm files.
 dep:
     $(DEPEND) -I$(PDWIN32_INCLUDE);$(PDWIN32_INCLUDE)\win \
         *.c *.cpp *.h *.asm *.inc $(PDWIN32_INCLUDE)\*.h
 
-!ifndef NODEP
-!include .depend
-!endif
 
-
-clean:
-    $(RM) *.obj *.lib *.dll *.map *.pch \
-        $(PDWIN32_BIN)\$(TARGET).dll \
-        $(PDWIN32_LIB)\$(TARGET).lib \
-        resource.asm $(TARGET)exp.def
+# Includes the common rules.
+!include $(PDWIN32_INCLUDE)/pdwin32.post
 

@@ -1,49 +1,107 @@
-# $Id: Makefile,v 1.10 2000-03-05 10:19:37 jeroen Exp $
+# $Id: Makefile,v 1.11 2000-03-06 23:33:11 bird Exp $
 
 #
-# PD-Win32 API
+# Odin32 API
 #
 #       glut32.dll makefile
 #
 
+# Directory macros.
 PDWIN32_INCLUDE = ..\..\..\include
-PDWIN32_LIB = ..\..\..\lib
-PDWIN32_BIN = ..\..\..\bin
-PDWIN32_TOOLS = ..\..\..\tools\bin
+PDWIN32_LIB     = ..\..\..\lib
+PDWIN32_BIN     = ..\..\..\$(OBJDIR)
+PDWIN32_TOOLS   = ..\..\..\tools\bin
 
 
+# Compiler, tools, and interference rules.
 !include $(PDWIN32_INCLUDE)/pdwin32.mk
 
 
-CFLAGS   = -Tdp -I..\mesa\GL -I..\glu $(CFLAGS) -I$(PDWIN32_INCLUDE) -I..\mesa
-CXXFLAGS = -Tdp -I..\mesa\GL -I..\glu $(CXXFLAGS) -I$(PDWIN32_INCLUDE) -I..\mesa
+# Flag overloads and local macros.
+CLEANEXTRAS = 32rsrc.asm
 
-TARGET=GLUT32
-
-all: $(TARGET).DLL $(TARGET).LIB
-
-OBJS = glut_8x13.obj glut_9x15.obj glut_bitmap.obj glut_bwidth.obj glut_cindex.obj \
-       glut_cmap.obj glut_cursor.obj glut_dials.obj glut_dstr.obj glut_event.obj \
-       glut_ext.obj glut_fullscrn.obj glut_gamemode.obj glut_get.obj glut_hel10.obj \
-       glut_hel12.obj glut_hel18.obj glut_init.obj glut_input.obj glut_joy.obj glut_key.obj \
-       glut_keyctrl.obj glut_keyup.obj glut_mesa.obj glut_modifier.obj glut_mroman.obj \
-       glut_overlay.obj glut_roman.obj glut_shapes.obj glut_space.obj glut_stroke.obj \
-       glut_swap.obj glut_swidth.obj glut_tablet.obj glut_teapot.obj glut_tr10.obj \
-       glut_tr24.obj glut_util.obj glut_vidresize.obj glut_warp.obj glut_win.obj \
-       glut_winmisc.obj win32_glx.obj win32_menu.obj win32_util.obj win32_winproc.obj \
-       win32_x11.obj glut_term.obj initterm.obj resource.obj
-
-all: $(TARGET).DLL
-
-$(TARGET).DLL: $(OBJS) $(TARGET).def $(TARGET).lrf
-    $(LD2) $(LD2FLAGS) /FREE @$(TARGET).lrf
-    $(CP) $@ $(PDWIN32_BIN)
+CFLAGS      = -Tdp -I..\mesa\GL -I..\glu $(CFLAGS) -I..\mesa
+CXXFLAGS    = -Tdp -I..\mesa\GL -I..\glu $(CXXFLAGS) -I..\mesa
 
 
-$(TARGET).lrf: makefile
-    @echo Creating file <<$(@B).lrf
+# Object files. All objects should be prefixed with $(OBJDIR)!
+OBJS = \
+$(OBJDIR)\glut_8x13.obj \
+$(OBJDIR)\glut_9x15.obj \
+$(OBJDIR)\glut_bitmap.obj \
+$(OBJDIR)\glut_bwidth.obj \
+$(OBJDIR)\glut_cindex.obj \
+$(OBJDIR)\glut_cmap.obj \
+$(OBJDIR)\glut_cursor.obj \
+$(OBJDIR)\glut_dials.obj \
+$(OBJDIR)\glut_dstr.obj \
+$(OBJDIR)\glut_event.obj \
+$(OBJDIR)\glut_ext.obj \
+$(OBJDIR)\glut_fullscrn.obj \
+$(OBJDIR)\glut_gamemode.obj \
+$(OBJDIR)\glut_get.obj \
+$(OBJDIR)\glut_hel10.obj \
+$(OBJDIR)\glut_hel12.obj \
+$(OBJDIR)\glut_hel18.obj \
+$(OBJDIR)\glut_init.obj \
+$(OBJDIR)\glut_input.obj \
+$(OBJDIR)\glut_joy.obj \
+$(OBJDIR)\glut_key.obj \
+$(OBJDIR)\glut_keyctrl.obj \
+$(OBJDIR)\glut_keyup.obj \
+$(OBJDIR)\glut_mesa.obj \
+$(OBJDIR)\glut_modifier.obj \
+$(OBJDIR)\glut_mroman.obj \
+$(OBJDIR)\glut_overlay.obj \
+$(OBJDIR)\glut_roman.obj \
+$(OBJDIR)\glut_shapes.obj \
+$(OBJDIR)\glut_space.obj \
+$(OBJDIR)\glut_stroke.obj \
+$(OBJDIR)\glut_swap.obj \
+$(OBJDIR)\glut_swidth.obj \
+$(OBJDIR)\glut_tablet.obj \
+$(OBJDIR)\glut_teapot.obj \
+$(OBJDIR)\glut_tr10.obj \
+$(OBJDIR)\glut_tr24.obj \
+$(OBJDIR)\glut_util.obj \
+$(OBJDIR)\glut_vidresize.obj \
+$(OBJDIR)\glut_warp.obj \
+$(OBJDIR)\glut_win.obj \
+$(OBJDIR)\glut_winmisc.obj \
+$(OBJDIR)\win32_glx.obj \
+$(OBJDIR)\win32_menu.obj \
+$(OBJDIR)\win32_util.obj \
+$(OBJDIR)\win32_winproc.obj \
+$(OBJDIR)\win32_x11.obj \
+$(OBJDIR)\glut_term.obj \
+$(OBJDIR)\initterm.obj \
+$(OBJDIR)\glut32rsrc.obj
+
+
+# Target name - name of the dll without extention and path.
+TARGET  = glut32
+
+
+# All rule - build objs, target dll, copies dll to bin and makes libs.
+all:    $(OBJDIR) \
+        $(OBJDIR)\$(TARGET).dll \
+        $(PDWIN32_BIN)\$(TARGET).dll \
+        lib
+
+
+# Lib rule - build importlibrary (and evt. other libs)
+lib: $(TARGET).lib $(PDWIN32_LIB)\$(TARGET).lib
+
+
+# Dll rule - builds the target dll.
+$(OBJDIR)\$(TARGET).dll: $(OBJS) $(TARGET).def $(OBJDIR)\$(TARGET).lrf
+    $(LD2) $(LD2FLAGS) @$(OBJDIR)\$(TARGET).lrf
+
+
+# Linker file - creates the parameter file passed on to the linker.
+$(OBJDIR)\$(TARGET).lrf: makefile
+    @echo Creating file <<$@
 $(OBJS)
-/OUT:$(TARGET).DLL /DLL
 $(PDWIN32_LIB)\ODINCRT.LIB
 $(RTLLIB_O)
 $(PDWIN32_LIB)\WINMM.LIB
@@ -57,27 +115,12 @@ $(TARGET).def
 <<keep
 
 
-$(TARGET).lib: $(TARGET)exp.def
-    $(IMPLIB) $(IMPLIBFLAGS) $@ $(TARGET)exp.def
-    $(CP) $@ $(PDWIN32_LIB)
-
-$(TARGET)exp.def: $(TARGET).def
-    $(IMPDEF) $** $@
-
-
-resource.asm: $(TARGET).rc
-    $(RC) $(RCFLAGS) -o resource.asm $(TARGET).rc
-
-
+# Dep rule - makes depenencies for C, C++ and Asm files.
 dep:
     $(DEPEND) -I$(PDWIN32_INCLUDE);$(PDWIN32_INCLUDE)\win -I..\mesa\GL \
         *.c *.cpp *.asm *.inc $(PDWIN32_INCLUDE)\*.h
 
-!ifndef NODEP
-!include .depend
-!endif
 
+# Includes the common rules.
+!include $(PDWIN32_INCLUDE)/pdwin32.post
 
-clean:
-    $(RM) *.obj *.lib *.dll *.map *.lrf *exp.def resource.asm \
-        $(PDWIN32_BIN)\$(TARGET).dll $(PDWIN32_LIB)\$(TARGET).lib

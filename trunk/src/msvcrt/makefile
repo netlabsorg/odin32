@@ -1,10 +1,13 @@
-# $Id: makefile,v 1.13 2000-02-10 01:01:39 bird Exp $
+# $Id: makefile,v 1.14 2000-03-06 23:38:46 bird Exp $
 
 #
 # PD-Win32 API
 #
 #       msvcrt.dll makefile
 #
+
+# Kso: not converted.
+OLDBUILD = 1
 
 PDWIN32_INCLUDE = ..\..\include
 PDWIN32_LIB = ..\..\lib

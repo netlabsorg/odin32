@@ -1,69 +1,78 @@
-# $Id: makefile,v 1.4 2000-02-09 23:47:03 bird Exp $
+# $Id: makefile,v 1.5 2000-03-06 23:39:11 bird Exp $
 
 #
-# PD-Win32 API
+# Odin32 API
 #
 #       twain_32.dll makefile
 #
 
+# Directory macros.
 PDWIN32_INCLUDE = ..\..\include
-PDWIN32_LIB = ..\..\lib
-PDWIN32_BIN = ..\..\bin
-PDWIN32_TOOLS = ..\..\tools\bin
+PDWIN32_LIB     = ..\..\lib
+PDWIN32_BIN     = ..\..\$(OBJDIR)
+PDWIN32_TOOLS   = ..\..\tools\bin
 
 
+# Compiler, tools, and interference rules.
 !include $(PDWIN32_INCLUDE)/pdwin32.mk
 
 
-CFLAGS = $(CFLAGS) -I$(PDWIN32_INCLUDE) -DWIN32
-CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE) -DWIN32
+# Flag overloads and local macros.
+CLEANEXTRAS = twain_32rsrc.asm
+
+CFLAGS = $(CFLAGS) -DWIN32
+CXXFLAGS = $(CXXFLAGS) -DWIN32
 
 
+# Object files. All objects should be prefixed with $(OBJDIR)!
+OBJS = \
+$(OBJDIR)\twain_32.obj \
+$(OBJDIR)\initterm.obj \
+$(OBJDIR)\twain_32rsrc.obj
+
+
+# Target name - name of the dll without extention and path.
 TARGET = twain_32
 
-OBJS =   twain_32.obj initterm.obj resource.obj
+
+# All rule - build objs, target dll, copies dll to bin and makes libs.
+all:    $(OBJDIR) \
+        $(OBJDIR)\$(TARGET).dll \
+        $(PDWIN32_BIN)\$(TARGET).dll \
+        lib
 
 
-all: $(TARGET).dll $(TARGET).lib
-
-
-$(TARGET).dll: $(OBJS) $(TARGET).def
-    $(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) $(TARGET).def \
-          $(PDWIN32_LIB)/pmwinx.lib $(PDWIN32_LIB)/kernel32.lib \
-          $(PDWIN32_LIB)/user32.lib $(PDWIN32_LIB)/odincrt.lib OS2386.LIB $(RTLLIB_O)
-    $(CP) $@ $(PDWIN32_BIN)
-
-
+# Lib rule - build importlibrary (and evt. other libs)
 lib: $(TARGET).lib $(PDWIN32_LIB)\$(TARGET).lib
 
-$(PDWIN32_LIB)\$(TARGET).lib: $(TARGET).lib
-    $(CP) $** $@
 
-$(TARGET).lib: $(TARGET)exp.def
-    $(IMPLIB) $(IMPLIBFLAGS) $@ $(TARGET)exp.def
-    $(CP) $@ $(PDWIN32_LIB)
-
-$(TARGET)exp.def: $(TARGET).def
-    $(IMPDEF) $** $@
+# Dll rule - builds the target dll.
+$(OBJDIR)\$(TARGET).dll: $(OBJS) $(TARGET).def $(OBJDIR)\$(TARGET).lrf
+    $(LD2) $(LD2FLAGS) @$(OBJDIR)\$(TARGET).lrf
 
 
-resource.asm: twain_32.rc
-    $(RC) $(RCFLAGS) -o resource.asm twain_32.rc
+# Linker file - creates the parameter file passed on to the linker.
+$(OBJDIR)\$(TARGET).lrf: makefile
+    @echo Creating file <<$@
+/OUT:$(OBJDIR)\$(TARGET).dll
+/MAP:$(OBJDIR)\$(TARGET).map
+$(OBJS)
+$(PDWIN32_LIB)/pmwinx.lib
+$(PDWIN32_LIB)/kernel32.lib
+$(PDWIN32_LIB)/user32.lib
+$(PDWIN32_LIB)/odincrt.lib
+OS2386.LIB
+$(RTLLIB_O)
+$(TARGET).def
+<<keep
 
 
+# Dep rule - makes depenencies for C, C++ and Asm files.
 dep:
     $(DEPEND) -I$(PDWIN32_INCLUDE);$(PDWIN32_INCLUDE)\win \
         *.c *.cpp *.h *.asm *.inc $(PDWIN32_INCLUDE)\*.h
 
-!ifndef NODEP
-!include .depend
-!endif
 
-
-clean:
-    $(RM) *.obj *.lib *.dll *.map *.pch resource.asm \
-        $(PDWIN32_BIN)\$(TARGET).dll $(PDWIN32_LIB)\$(TARGET).lib \
-        $(TARGET)exp.def
-
-
+# Includes the common rules.
+!include $(PDWIN32_INCLUDE)/pdwin32.post
 
