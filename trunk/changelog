@@ -1,9 +1,18 @@
- /* $Id: changelog,v 1.1117 2000-09-09 08:58:59 sandervl Exp $ */
+ /* $Id: changelog,v 1.1118 2000-09-10 21:55:24 sandervl Exp $ */
 
  2000-09-09: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: Don't dispatch exceptions after application has called
                 ExitProcess. (fixes endless loop of exception handler calls 
                 in RealPlayer 7)
+                Create more registry keys during installation:
+                HKEY_LOCAL_MACHINE\CurrentVersion\RunOnce
+                HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager
+                HKEY_LOCAL_MACHINE\Software\\Microsoft\\Windows\\CurrentVersion\\App Paths\\iexplore.exe
+                GetFileAttributesA trashes the stack (EBX register corrupted after return)
+                If CreateFile fails to duplicate the handle, then try DosDupHandle
+                (DuplicateHandle for memory mapped files in IE5)
+                Set dwCreation flag to OPEN_EXISTING for DuplicateHandle (memory mapped files)
+    - PE:       Endless loop when it can't find executable with name in quotes
 
  2000-09-08: Michal Necasek <mike@mendelu.cz>
     - KERNEL32: Changes and fixes for exception handling (now dispatches
