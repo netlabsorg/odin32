@@ -1,4 +1,4 @@
-/* $Id: Win32kCC.h,v 1.3 2000-09-03 23:53:19 bird Exp $
+/* $Id: Win32kCC.h,v 1.4 2000-11-26 13:36:53 bird Exp $
  *
  *
  *
@@ -16,6 +16,7 @@
  */
 #define PB_APPLY                    0xfffe
 #define PB_REFRESH                  0xfffd
+#define PB_UPD_CONFIGSYS            0xfffc
 
 
 /*
@@ -30,13 +31,19 @@
 #define  IDS_ERR_NO_COM_RADIOBUTTON     7
 #define  IDS_ERR_NO_PE_RADIOBUTTON      8
 #define  IDS_ERR_INVALID_INFOLEVEL      9
-#define  IDS_ERR_INVALID_MAXHEAPSIZE   10
-#define  IDS_ERR_SETPOPTIONS           11
+#define  IDS_ERR_INVALID_MAXHEAPSIZE    10
+#define  IDS_ERR_SETPOPTIONS            11
+#define  IDS_ERR_FOPEN_FAILED           12
+#define  IDS_FSIZE_FAILED               13
+#define  IDS_MALLOC_FAILED              14
+#define  IDS_FWRITE_FAILED              15
+
 
 /*
  * Message IDs.
  */
-#define  IDM_INFO_DIRTY             1
+#define  IDM_INFO_DIRTY                 1
+#define  IDM_CONFIGSYS_UPDATED          2
 
 
 /*
