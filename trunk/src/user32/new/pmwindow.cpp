@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.28 1999-09-04 19:51:46 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.29 1999-09-05 17:11:24 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -525,7 +525,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
      ULONG fl = SHORT1FROMMP(mp1);
 
         if(!(fl & KC_CHAR)) {
-            dprintf(("WM_CHAR: no valid character code"));
+//            dprintf(("WM_CHAR: no valid character code"));
             goto RunDefWndProc;
         }
         if(fl & KC_VIRTUALKEY) {

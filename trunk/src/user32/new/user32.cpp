@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.18 1999-09-04 19:42:28 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.19 1999-09-05 17:11:24 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -173,9 +173,6 @@ BOOL WIN32API IntersectRect( PRECT lprcDst, const RECT * lprcSrc1, const RECT * 
 //******************************************************************************
 BOOL WIN32API IsRectEmpty( const RECT * lprc)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  IsRectEmpty\n");
-#endif
     if (!lprc)
     {
       SetLastError(ERROR_INVALID_PARAMETER);
@@ -243,9 +240,6 @@ BOOL WIN32API SetRect( PRECT lprc, int nLeft, int nTop, int nRight, int  nBottom
 //******************************************************************************
 BOOL WIN32API SetRectEmpty( PRECT lprc)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  SetRectEmpty\n");
-#endif
     if (!lprc)
     {
       SetLastError(ERROR_INVALID_PARAMETER);
