@@ -1,4 +1,4 @@
-/* $Id: winconst.h,v 1.12 1999-11-08 13:45:35 sandervl Exp $ */
+/* $Id: winconst.h,v 1.13 1999-11-27 00:05:03 sandervl Exp $ */
 
 /*
  * Win32 constants
@@ -251,3 +251,18 @@
 #define MK_SHIFT_W          0x0004
 #define MK_CONTROL_W        0x0008
 #define MK_MBUTTON_W        0x0010
+
+
+/* Queue status flags */
+#define QS_KEY_W          0x0001
+#define QS_MOUSEMOVE_W    0x0002
+#define QS_MOUSEBUTTON_W  0x0004
+#define QS_MOUSE_W        (QS_MOUSEMOVE_W | QS_MOUSEBUTTON_W)
+#define QS_POSTMESSAGE_W  0x0008
+#define QS_TIMER_W        0x0010
+#define QS_PAINT_W        0x0020
+#define QS_SENDMESSAGE_W  0x0040
+#define QS_HOTKEY_W       0x0080
+#define QS_INPUT_W        (QS_MOUSE_W | QS_KEY_W)
+#define QS_ALLEVENTS_W    (QS_INPUT_W | QS_POSTMESSAGE_W | QS_TIMER_W | QS_PAINT_W | QS_HOTKEY_W)
+#define QS_ALLINPUT_W     (QS_ALLEVENTS_W | QS_SENDMESSAGE_W)
