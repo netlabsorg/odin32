@@ -1,4 +1,4 @@
-/* $Id: oslibgdi.cpp,v 1.5 1999-07-24 14:01:44 sandervl Exp $ */
+/* $Id: oslibgdi.cpp,v 1.6 1999-07-25 08:19:05 sandervl Exp $ */
 /*
  * Window GDI wrapper functions for OS/2
  *
@@ -172,8 +172,11 @@ BOOL OSLibWinInvalidateRect(HWND hwnd, PRECT pRect, BOOL fIncludeChildren)
 {
  RECTLOS2 rectl;
 
-  MapWin32ToOS2Rectl(pRect, &rectl);
-  return WinInvalidateRect(hwnd, (PRECTL)&rectl, fIncludeChildren);
+    if(pRect) {
+        MapWin32ToOS2Rectl(pRect, &rectl);
+        return WinInvalidateRect(hwnd, (PRECTL)&rectl, fIncludeChildren);
+    }
+    return WinInvalidateRect(hwnd, NULL, fIncludeChildren);
 }
 //******************************************************************************
 //Returns rectangle in Win32 window coordinates
