@@ -1,16 +1,16 @@
-/* $Id: taskmem.cpp,v 1.2 1999-09-08 11:29:28 davidr Exp $ */
-/* 
- * 
+/* $Id: taskmem.cpp,v 1.3 1999-11-09 10:47:45 bird Exp $ */
+/*
+ *
  * Project Odin Software License can be found in LICENSE.TXT
- * 
+ *
  */
-/* 
+/*
  * COM/OLE memory management functions.
- * 
+ *
  * 7/7/99
- * 
+ *
  * Copyright 1999 David J. Raison
- * 
+ *
  * Some portions from Wine Implementation
  *	Copyright 1997	Marcus Meissner
  */
@@ -43,7 +43,7 @@ typedef struct
         DWORD                   ref;
 } IMallocImpl;
 
-static ICOM_VTABLE(IMalloc) VT_IMalloc = 
+static ICOM_VTABLE(IMalloc) VT_IMalloc =
 {
     IMalloc_fnQueryInterface,
     IMalloc_fnAddRef,
@@ -114,13 +114,13 @@ BOOL WIN32API IsValidInterface( LPUNKNOWN punk)	/* [in] interface to be tested *
     dprintf(("OLE32: IsValidInterface"));
 
     return !(IsBadReadPtr(punk, 4)
-	    || IsBadReadPtr(punk->lpvtbl, 4)
-	    || IsBadReadPtr(punk->lpvtbl->fnQueryInterface, 9)
-	    || IsBadCodePtr((FARPROC)punk->lpvtbl->fnQueryInterface) );
+        || IsBadReadPtr(ICOM_VTBL(punk), 4)
+        || IsBadReadPtr(ICOM_VTBL(punk)->fnQueryInterface, 9)
+        || IsBadCodePtr((FARPROC)ICOM_VTBL(punk)->fnQueryInterface) );
 }
 
 // ======================================================================
-// IMalloc implementation 
+// IMalloc implementation
 // ======================================================================
 
 // ----------------------------------------------------------------------
@@ -139,7 +139,7 @@ static LPMALLOC IMalloc_Constructor()
 // ----------------------------------------------------------------------
 // IMalloc_fnQueryInterface
 // ----------------------------------------------------------------------
-static HRESULT WIN32API IMalloc_fnQueryInterface(LPMALLOC iface, REFIID refiid, LPVOID * obj) 
+static HRESULT WIN32API IMalloc_fnQueryInterface(LPMALLOC iface, REFIID refiid, LPVOID * obj)
 {
     ICOM_THIS(IMallocImpl, iface);
 
@@ -152,13 +152,13 @@ static HRESULT WIN32API IMalloc_fnQueryInterface(LPMALLOC iface, REFIID refiid, 
 	*obj = This;
 	return S_OK;
     }
-    return OLE_E_ENUM_NOMORE; 
+    return OLE_E_ENUM_NOMORE;
 }
 
 // ----------------------------------------------------------------------
 // IMalloc_fnAddRef
 // ----------------------------------------------------------------------
-static ULONG WIN32API IMalloc_fnAddRef(LPMALLOC iface) 
+static ULONG WIN32API IMalloc_fnAddRef(LPMALLOC iface)
 {
     ICOM_THIS(IMallocImpl, iface);
 
@@ -170,7 +170,7 @@ static ULONG WIN32API IMalloc_fnAddRef(LPMALLOC iface)
 // ----------------------------------------------------------------------
 // IMalloc_fnRelease
 // ----------------------------------------------------------------------
-static ULONG WIN32API IMalloc_fnRelease(LPMALLOC iface) 
+static ULONG WIN32API IMalloc_fnRelease(LPMALLOC iface)
 {
     ICOM_THIS(IMallocImpl, iface);
 
