@@ -1,28 +1,10 @@
-/* $Id: user32rsrc.orc,v 1.5 2000-11-09 20:20:32 sandervl Exp $ */
+/* $Id: user32rsrc.orc,v 1.6 2000-12-17 15:04:11 sandervl Exp $ */
 /* converted from WINE */
 
 #include "winuser.h"
+#include "winnls.h"
 #include "odinrsrc.h"
-
-/* System Menu */
-
-SYSMENU MENU LOADONCALL MOVEABLE DISCARDABLE
-{
- MENUITEM "&Restore", 61728
- MENUITEM "&Move", 61456
- MENUITEM "&Size", 61440
- MENUITEM "Mi&nimize", 61472
- MENUITEM "Ma&ximize", 61488
- MENUITEM SEPARATOR
- MENUITEM "&Close\tAlt-F4", 61536
- MENUITEM SEPARATOR
- MENUITEM "&Switch to ...\tCtrl-Esc", 61744
- MENUITEM SEPARATOR
- MENUITEM "&About Odin ...", 61761
- MENUITEM SEPARATOR
- MENUITEM "&Put mark in debug log", 61762
- MENUITEM "&DebugInt3", 61763
-}
+#include "mdi.h"
 
 /* Frame */
 
@@ -795,21 +777,6 @@ OBM_TRTYPE BITMAP LOADONCALL DISCARDABLE
 #define WM_CLEAR             0x0303
 #define EM_SETSEL            0x00b1
 
-EDITMENU MENU LOADONCALL MOVEABLE DISCARDABLE
-{
-        POPUP ""
-        BEGIN
-                MENUITEM "&Undo", EM_UNDO
-                MENUITEM SEPARATOR
-                MENUITEM "Cu&t", WM_CUT
-                MENUITEM "&Copy", WM_COPY
-                MENUITEM "&Paste", WM_PASTE
-                MENUITEM "&Delete", WM_CLEAR
-                MENUITEM SEPARATOR
-                MENUITEM "Select &All", EM_SETSEL
-        END
-}
-
 /* Icons */
 
 #define OIC_SAMPLE          32512
@@ -899,20 +866,6 @@ OCR_NORMAL CURSOR LOADONCALL DISCARDABLE
 #define OCR_HELP            32651  /* only defined in Odin */
 
 
-MSGBOX DIALOG 100, 80, 216, 168
-STYLE DS_SYSMODAL | DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
-BEGIN
-        ICON "", 1088, 8, 20, 16, 16, WS_CHILD | WS_VISIBLE
-        LTEXT "", 100, 32, 4, 176, 48, WS_CHILD | WS_VISIBLE | WS_GROUP
-        PUSHBUTTON "&OK", 1, 16, 56, 40, 14, WS_CHILD | WS_VISIBLE | WS_TABSTOP
-        PUSHBUTTON "&Cancel", 2, 64, 56, 40, 14, WS_CHILD | WS_VISIBLE | WS_TABSTOP
-        PUSHBUTTON "&Abort", 3, 112, 56, 40, 14, WS_CHILD | WS_VISIBLE | WS_TABSTOP
-        PUSHBUTTON "&Retry", 4, 160, 56, 40, 14, WS_CHILD | WS_VISIBLE | WS_TABSTOP
-        PUSHBUTTON "&Ignore", 5, 208, 56, 40, 14, WS_CHILD | WS_VISIBLE | WS_TABSTOP
-        PUSHBUTTON "&Yes", 6, 256, 56, 40, 14, WS_CHILD | WS_VISIBLE | WS_TABSTOP
-        PUSHBUTTON "&No", 7, 304, 56, 40, 14, WS_CHILD | WS_VISIBLE | WS_TABSTOP
-END
-
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -949,3 +902,32 @@ BEGIN
         VALUE "Translation", 0x409, 0x04E4
     END
 END
+
+/*
+ * Everything specific to any language goes
+ * in one of the specific files.
+ * Note that you can and may override resources
+ * which also have a neutral version. This is to
+ * get localized bitmaps for example.
+ */
+#include "resources\user32_Ca.orc"
+#include "resources\user32_Cs.orc"
+#include "resources\user32_Da.orc"
+#include "resources\user32_De.orc"
+#include "resources\user32_En.orc"
+#include "resources\user32_Eo.orc"
+#include "resources\user32_Es.orc"
+#include "resources\user32_Fi.orc"
+#include "resources\user32_Fr.orc"
+#include "resources\user32_Hu.orc"
+#include "resources\user32_It.orc"
+#include "resources\user32_Ko.orc"
+#include "resources\user32_Nl.orc"
+#include "resources\user32_No.orc"
+#include "resources\user32_Pl.orc"
+#include "resources\user32_Pt.orc"
+#include "resources\user32_Ru.orc"
+#include "resources\user32_Sk.orc"
+#include "resources\user32_Sv.orc"
+#include "resources\user32_Wa.orc"
+#include "resources\user32_Ja.orc"

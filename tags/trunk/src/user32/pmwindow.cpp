@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.108 2000-11-21 11:36:09 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.109 2000-12-17 15:04:10 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -955,7 +955,7 @@ PosChangedEnd:
 #else
 	switch(fsCmd) {
         case QFC_NEXTINCHAIN:
-    		break;
+    		goto RunDefWndProc;
 	case QFC_ACTIVE:
 	case QFC_FRAME:
 		if(win32wnd->GetTopParent()) {
@@ -964,9 +964,9 @@ PosChangedEnd:
 		}
 		break;
 	case QFC_SELECTACTIVE:
-		break;
+		goto RunDefWndProc;
 	case QFC_PARTOFCHAIN:
-		return (MRESULT)TRUE;
+		goto RunDefWndProc;
 	}
         break;
 #endif

@@ -1,4 +1,4 @@
-/* $Id: winicon.cpp,v 1.18 2000-11-24 13:16:26 sandervl Exp $ */
+/* $Id: winicon.cpp,v 1.19 2000-12-17 15:04:14 sandervl Exp $ */
 /*
  * Win32 Icon Code for OS/2
  *
@@ -596,11 +596,6 @@ static HGLOBAL CURSORICON_CreateFromResource( HINSTANCE hInstance, DWORD dwResGr
                 /* Create the AND bitmap */
                 if (DoStretch)
                 {
-                    //TODO: rearrange mask if and & xor mask present!!!!!
-                    if(cbSize - size - colorsize - bwsize == bwsize)
-                    {
-                        dprintf(("TODO: rearrange mask because and & xor mask present!!!!!"));
-                    }
                     if ((hAndBits = CreateBitmap(width, height, 1, 1, NULL)))
                     {
                         HBITMAP hOld;

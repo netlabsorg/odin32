@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.84 2000-11-11 18:39:31 sandervl Exp $ */
+/* $Id: window.cpp,v 1.85 2000-12-17 15:04:13 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -1390,12 +1390,11 @@ HWND WIN32API ChildWindowFromPointEx (HWND hwndParent, POINT pt, UINT uFlags)
                 return NULL;
         }
 
-
         // get first child
         hWnd = GetWindow (hwndParent, GW_CHILD);
 
-        while (hWnd != NULL) {
-
+        while (hWnd != NULL)
+        {
                 // do I need to skip this window?
                 if (((uFlags & CWP_SKIPINVISIBLE) &&
                      (IsWindowVisible (hWnd) == FALSE)) ||
@@ -1403,7 +1402,6 @@ HWND WIN32API ChildWindowFromPointEx (HWND hwndParent, POINT pt, UINT uFlags)
                      (IsWindowEnabled (hWnd) == FALSE)) ||
                     ((uFlags & CWP_SKIPTRANSPARENT) &&
                      (GetWindowLongA (hWnd, GWL_EXSTYLE) & WS_EX_TRANSPARENT)))
-
                 {
                         hWnd = GetWindow (hWnd, GW_HWNDNEXT);
                         continue;
@@ -1420,10 +1418,9 @@ HWND WIN32API ChildWindowFromPointEx (HWND hwndParent, POINT pt, UINT uFlags)
                 // found it!
                 return hWnd;
         }
-
         // the point is in the parentwindow but the parentwindow has no child
         // at this coordinate
-            dprintf(("ChildWindowFromPointEx returned parent %x", hwndParent));
+        dprintf(("ChildWindowFromPointEx returned parent %x", hwndParent));
         return hwndParent;
 }
 //******************************************************************************
@@ -1446,6 +1443,74 @@ BOOL WIN32API CloseWindow(HWND hwnd)
 //******************************************************************************
 HWND WIN32API WindowFromPoint( POINT point)
 {
+#if 0
+    INT     hittest = HTERROR;
+    HWND    retvalue = 0;
+    HWND    hwnd = GetDesktopWindow();
+    DWORD   dwStyle;
+    RECT    rectWindow, rectClient;
+    Win32BaseWindow *window;
+
+    dprintf(("WindowFromPoint (%d,%d)", point.x, point.y));
+
+    while(hwnd)
+    {
+        window = Win32BaseWindow::GetWindowFromHandle(hwnd);
+
+        /* If point is in window, and window is visible, and it  */
+        /* is enabled (or it's a top-level window), then explore */
+        /* its children. Otherwise, go to the next window.       */
+        dwStyle = GetWindowLongA(hwnd, GWL_STYLE);
+
+        if ((dwStyle & WS_VISIBLE) && (!(dwStyle & WS_DISABLED) ||
+           ((dwStyle & (WS_POPUP | WS_CHILD)) != WS_CHILD)))
+        {
+            GetWindowRect(hwnd, &rectWindow);
+            if(PtInRect(&rectWindow, point) == TRUE)
+            {
+                /* If window is minimized or disabled, return at once */
+                if(dwStyle & WS_MINIMIZE)
+                {
+                    break;
+                }
+                if(dwStyle & WS_DISABLED)
+                {
+                    break;
+                }
+                retvalue = hwnd;
+
+                GetClientRect(hwnd, &rectClient);
+                InflateRect(&rectClient, rectWindow.left, rectWindow.top);
+
+                /* If point is not in client area, ignore the children */
+                if(PtInRect(&rectClient, point) == FALSE) {
+                    break;
+                }
+                if(window->getFirstChild()) {
+                     hwnd = ((Win32BaseWindow *)window->getFirstChild())->getWindowHandle();
+                }
+                else break;
+            }
+            else
+            {
+                if(window->getNextChild()) {
+                     hwnd = ((Win32BaseWindow *)window->getNextChild())->getWindowHandle();
+                }
+                else hwnd = 0;
+            }
+        }
+        else
+        {
+            if(window->getNextChild()) {
+                 hwnd = ((Win32BaseWindow *)window->getNextChild())->getWindowHandle();
+            }
+            else hwnd = 0;
+        }
+    }
+
+    dprintf(("WindowFromPoint (%d,%d) -> %x", point.x, point.y, hwnd));
+    return retvalue;
+#else
     HWND  hwndOS2, hwnd;
     POINT wPoint;
 
@@ -1463,6 +1528,7 @@ HWND WIN32API WindowFromPoint( POINT point)
     }
     dprintf(("WindowFromPoint (%d,%d) %x->1\n", point.x, point.y, hwndOS2));
     return windowDesktop->getWindowHandle();
+#endif
 }
 //******************************************************************************
 //******************************************************************************

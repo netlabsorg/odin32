@@ -1,4 +1,4 @@
-/* $Id: win32wmdiclient.cpp,v 1.30 2000-10-09 17:26:54 sandervl Exp $ */
+/* $Id: win32wmdiclient.cpp,v 1.31 2000-12-17 15:04:12 sandervl Exp $ */
 /*
  * Win32 MDI Client Window Class for OS/2
  *
@@ -540,6 +540,18 @@ LRESULT Win32MDIClientWindow::setMDIMenu(HMENU hmenuFrame, HMENU hmenuWindow)
     HWND hwndFrame = ::GetParent(getWindowHandle());
     HMENU oldFrameMenu = ::GetMenu(hwndFrame);
 
+    if (hmenuFrame && !IsMenu(hmenuFrame))
+    {
+	dprintf(("Win32MDIClientWindow::setMDIMenu: hmenuFrame is not a menu handle\n"));
+	return 0L;
+    }
+	
+    if (hmenuWindow && !IsMenu(hmenuWindow))
+    {
+	dprintf(("Win32MDIClientWindow::setMDIMenu: hmenuWindow is not a menu handle\n"));
+	return 0L;
+    }
+
     if( maximizedChild && hmenuFrame && hmenuFrame!=oldFrameMenu )
         restoreFrameMenu(maximizedChild);
 
@@ -555,21 +567,39 @@ LRESULT Win32MDIClientWindow::setMDIMenu(HMENU hmenuFrame, HMENU hmenuWindow)
 
         if( nActiveChildren )
         {
-            INT j = i - nActiveChildren + 1;
-            char buffer[100];
-            UINT id,state;
+            INT j;
+            LPWSTR buffer = NULL;
+	    MENUITEMINFOW mii;
+            INT nbWindowsMenuItems; /* num of documents shown + "More Windows..." if present */
+
+            if (nActiveChildren <= MDI_MOREWINDOWSLIMIT)
+                nbWindowsMenuItems = nActiveChildren;
+            else
+                nbWindowsMenuItems = MDI_MOREWINDOWSLIMIT + 1;
+
+            j = i - nbWindowsMenuItems + 1;
 
             for( ; i >= j ; i-- )
             {
-                id = GetMenuItemID(hWindowMenu,i );
-                state = GetMenuState(hWindowMenu,i,MF_BYPOSITION);
+		memset(&mii, 0, sizeof(mii));
+		mii.cbSize = sizeof(mii);
+		mii.fMask = MIIM_CHECKMARKS | MIIM_DATA | MIIM_ID | MIIM_STATE
+		  | MIIM_SUBMENU | MIIM_TYPE | MIIM_BITMAP;
 
-                GetMenuStringA(hWindowMenu, i, buffer, 100, MF_BYPOSITION);
-
-                DeleteMenu(hWindowMenu, i , MF_BYPOSITION);
-                InsertMenuA(hmenuWindow, pos, MF_BYPOSITION | MF_STRING,
-                              id, buffer);
-                CheckMenuItem(hmenuWindow ,pos , MF_BYPOSITION | (state & MF_CHECKED));
+		GetMenuItemInfoW(hWindowMenu, i, TRUE, &mii);
+		if(mii.cch) { /* Menu is MFT_STRING */
+		    mii.cch++; /* add room for '\0' */
+		    buffer = (LPWSTR)HeapAlloc(GetProcessHeap(), 0,
+				               mii.cch * sizeof(WCHAR));
+		    mii.dwTypeData = buffer;
+		    GetMenuItemInfoW(hWindowMenu, i, TRUE, &mii);
+		}
+                DeleteMenu(hWindowMenu, i, MF_BYPOSITION);
+                InsertMenuItemW(hmenuWindow, pos, TRUE, &mii);
+		if(buffer) {
+		    HeapFree(GetProcessHeap(), 0, buffer);
+		    buffer = NULL;
+		}
             }
         }
 
@@ -579,14 +609,34 @@ LRESULT Win32MDIClientWindow::setMDIMenu(HMENU hmenuFrame, HMENU hmenuWindow)
         hWindowMenu = hmenuWindow;
     }
 
-    if( hmenuFrame && hmenuFrame!=oldFrameMenu)
+    if (hmenuFrame)
     {
         ::SetMenu(hwndFrame, hmenuFrame);
 
-        if (maximizedChild)
-          augmentFrameMenu(maximizedChild);
+        if( hmenuFrame!=oldFrameMenu )
+        {
+          if (maximizedChild)
+            augmentFrameMenu(maximizedChild);
 
-        return oldFrameMenu;
+          return oldFrameMenu;
+        }
+    }
+    else
+    {
+	INT nItems = GetMenuItemCount(oldFrameMenu) - 1;
+	UINT iId = GetMenuItemID(oldFrameMenu,nItems) ;
+
+	if( !(iId == SC_RESTORE || iId == SC_CLOSE) )
+	{
+	    /* SetMenu() may already have been called, meaning that this window
+	     * already has its menu. But they may have done a SetMenu() on
+	     * an MDI window, and called MDISetMenu() after the fact, meaning
+	     * that the "if" to this "else" wouldn't catch the need to
+	     * augment the frame menu.
+	     */
+	    if( maximizedChild )
+		augmentFrameMenu(maximizedChild);
+	}
     }
     return 0;
 }
