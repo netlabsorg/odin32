@@ -1,4 +1,4 @@
-/* $Id: font.cpp,v 1.9 2000-02-16 14:18:09 sandervl Exp $ */
+/* $Id: font.cpp,v 1.10 2000-05-02 20:49:58 sandervl Exp $ */
 
 /*
  * GDI32 font apis
@@ -224,7 +224,7 @@ ODINFUNCTION1(HFONT,CreateFontIndirectA,const LOGFONTA*, lplf)
   memcpy(&afont, lplf, sizeof(LOGFONTA));
   iFontRename(lplf->lfFaceName, afont.lfFaceName);
 
-  dprintf(("lpszFace = %s -> %s\n", lplf->lfFaceName, afont.lfFaceName));
+  dprintf(("lpszFace = (%x) %s -> %s\n", lplf->lfFaceName, lplf->lfFaceName, afont.lfFaceName));
 
   dprintf(("GDI32: CreateFontIndirectA\n"));
   dprintf(("GDI32: lfHeight        = %d\n", lplf->lfHeight));
@@ -256,6 +256,8 @@ ODINFUNCTION1(HFONT, CreateFontIndirectW,const LOGFONTW *, lplf)
   //memcpy(&afont, lplf, ((ULONG)&afont.lfFaceName - (ULONG)&afont));
   memcpy(&afont, lplf, sizeof(LOGFONTA));
   memset(afont.lfFaceName, 0, LF_FACESIZE);
+  dprintf(("lpszFace = (%x)", lplf->lfFaceName));
+
   UnicodeToAsciiN((WCHAR *)lplf->lfFaceName, afont.lfFaceName, LF_FACESIZE-1);
   hfont = CreateFontIndirectA(&afont);
   return(hfont);
