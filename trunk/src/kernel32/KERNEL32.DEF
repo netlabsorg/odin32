@@ -1,4 +1,4 @@
-; $Id: KERNEL32.DEF,v 1.9 1999-06-10 20:47:51 phaller Exp $
+; $Id: KERNEL32.DEF,v 1.10 1999-06-12 18:29:37 hugh Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is Windows95 KERNEL32
@@ -604,7 +604,7 @@ EXPORTS
     LockFileEx                 = _LockFileEx@24              @513
     LockResource               = _LockResource@4             @514
 
-;   MakeCriticalSectionGlobal  = _MakeCriticalSectionGlobal@?? @515
+    MakeCriticalSectionGlobal  = _MakeCriticalSectionGlobal@4 @515
 ;   MapHInstLS                 = _MapHInstLS@??              @516       ;W95
 ;   MapHInstLS_PN              = _MapHInstLS_PN@??           @517       ;W95
 ;   MapHInstSL                 = _MapHInstSL@??              @518       ;W95

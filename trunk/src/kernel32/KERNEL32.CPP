@@ -1,4 +1,4 @@
-/* $Id: KERNEL32.CPP,v 1.3 1999-06-10 20:47:51 phaller Exp $ */
+/* $Id: KERNEL32.CPP,v 1.4 1999-06-12 18:29:37 hugh Exp $ */
 
 /*
  *
@@ -627,6 +627,12 @@ VOID WIN32API InitializeCriticalSection(CRITICAL_SECTION * arg1)
 {
     dprintf(("KERNEL32:  InitializeCriticalSection\n"));
     O32_InitializeCriticalSection(arg1);
+}
+//******************************************************************************
+//******************************************************************************
+void WINAPI MakeCriticalSectionGlobal( CRITICAL_SECTION *arg1 )
+{
+    dprintf(("KERNEL32:  MakeCriticalSectionGlobal not implemented correctly\n"));
 }
 //******************************************************************************
 //******************************************************************************
