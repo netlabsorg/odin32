@@ -1,4 +1,4 @@
-/* $Id: exceptions.cpp,v 1.67 2003-02-18 18:48:53 sandervl Exp $ */
+/* $Id: exceptions.cpp,v 1.68 2003-02-19 12:18:06 sandervl Exp $ */
 
 /*
  * Win32 Exception functions for OS/2
@@ -1242,7 +1242,7 @@ ULONG APIENTRY OS2ExceptionHandler(PEXCEPTIONREPORTRECORD       pERepRec,
             goto continueFail;
         }
         BOOL ret = map->commitPage(offset, fWriteAccess);
-        map->Release();
+        map->Release()
         if(ret == TRUE);
             goto continueexecution;
 
