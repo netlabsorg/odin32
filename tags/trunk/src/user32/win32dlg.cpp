@@ -1,4 +1,4 @@
-/* $Id: win32dlg.cpp,v 1.71 2001-10-28 10:38:13 sandervl Exp $ */
+/* $Id: win32dlg.cpp,v 1.72 2001-11-07 15:36:10 sandervl Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -1080,9 +1080,29 @@ BOOL Win32Dialog::setDefButton(HWND hwndNew )
 //******************************************************************************
 BOOL Win32Dialog::endDialog(int retval)
 {
+    HWND hwnd = getWindowHandle();
+
     dialogFlags |= DF_END;
     idResult = retval;
 
+//    BOOL wasEnabled = (dlgInfo.flags & DF_OWNERENABLED);
+
+//    if (wasEnabled && (owner = GetWindow( hwnd, GW_OWNER )))
+//        DIALOG_EnableOwner( owner );
+
+    /* Windows sets the focus to the dialog itself in EndDialog */
+
+    if (::IsChild(hwnd, GetFocus()))
+       ::SetFocus( hwnd );
+
+    /* Don't have to send a ShowWindow(SW_HIDE), just do
+       SetWindowPos with SWP_HIDEWINDOW as done in Windows */
+
+    ::SetWindowPos(hwnd, (HWND)0, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE
+                 | SWP_NOZORDER | SWP_NOACTIVATE | SWP_HIDEWINDOW);
+
+    /* unblock dialog loop */
+    PostMessageA(hwnd, WM_NULL, 0, 0); 
     return TRUE;
 }
 //******************************************************************************
