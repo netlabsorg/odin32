@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.15 2000-03-04 20:03:42 bird Exp $
+# $Id: makefile,v 1.16 2000-03-04 20:18:05 bird Exp $
 #
 # PD-Win32 API
 #
@@ -16,13 +16,13 @@ PDWIN32_TOOLS = ..\..\tools\bin
 
 #SvL: Only build the release version of glide, mesa & glu(t)
 #     There's no need for debug (even without dbg info) builds in the daily build archive
-MAKE_CMD=nmake
+# MAKE_CMD=nmake
+#KSO: Don't work as we use to have DEBUG defined as an enviroment variable.
+#     I have updated the opengl makefiles to consider NODEBUGINFO. If you don't wan't
+#     any debuginfo you could now add NODEBUGINFO=1 to MAKE_CMD.
 
-CFLAGS = $(CFLAGS) -I$(PDWIN32_INCLUDE)
+CFLAGS   = $(CFLAGS)   -I$(PDWIN32_INCLUDE)
 CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
-!ifdef NODEBUGINFO
-LDFLAGS=$(LDFLAGS) /NODEBUG
-!endif
 
 #TARGET1  = opengl32
 #DTARGET1 = opengl32
