@@ -1,4 +1,11 @@
-/* $Id: changelog,v 1.1347 2001-04-03 20:55:19 sandervl Exp $ */
+/* $Id: changelog,v 1.1348 2001-04-04 08:59:03 sandervl Exp $ */
+
+ 2001-04-04: Sander van Leeuwen <sandervl@xs4all.nl>   
+    - KERNEL32: o Removed AsciiToUnicode* & UnicodeToAscii* functions
+    - INCLUDE\unicode.h:
+                o AsciiToUnicode* & UnicodeToAscii* functions implemented
+                  with functions in heapstring.h
+    - *         o Compile fixes due to header changes
 
  2001-04-03: Sander van Leeuwen <sandervl@xs4all.nl>   
     - DDRAW:    o Only reset physical palette in DirectDraw destructor if 
