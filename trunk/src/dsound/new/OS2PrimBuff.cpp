@@ -465,7 +465,7 @@ HRESULT __stdcall PrimBufSetFormat(THIS_ LPWAVEFORMATEX lpfxFormat )
 
    dprintf(("DSOUND-PrimBuff: BPS = %d, Rate = %d, Ch = %d", me->bps, me->rate, me->channels));
 
-   Dart_SetFormat(&me->usDeviceID, me->vpMixSetup, me->vpBuffParms, me->vpMixBuffer, me->bps, me->rate, me->channels);
+   Dart_SetFormat(&me->usDeviceID, me->vpMixSetup, me->vpBuffParms, &me->vpMixBuffer, me->bps, me->rate, me->channels);
 
    return DS_OK;
 }

@@ -29,8 +29,9 @@
 
 #endif
 
-#define BUFFER_SIZE 16384
-#define NUM_DART_BUFFS 16
+#define BUFFER_SIZE 32768
+
+extern  ULONG ulNumDartBuffs;
 
 long Dart_Open_Device(USHORT *pusDeviceID, void **vpMixBuffer, void **vpMixSetup,
                       void  **vpBuffParms, void **ppvBuffer);
@@ -43,5 +44,5 @@ long Dart_GetPosition(USHORT usDeviceID, LONG *pulPosition);
 long Dart_Stop(USHORT usDeviceID);
 long Dart_Play(USHORT usDeviceID, void *vpMixSetup, void *vpMixBuffer, long playing);
 long Dart_SetFormat(USHORT *pusDeviceID, void *vpMixSetup, void *vpBufferParms,
-                    void *vpMixBuffer, LONG lBPS, LONG lSPS, LONG lChannels );
+                    void **vpMixBuffer, LONG lBPS, LONG lSPS, LONG lChannels );
 

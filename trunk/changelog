@@ -1,4 +1,9 @@
- /* $Id: changelog,v 1.794 2000-03-09 21:49:38 sandervl Exp $ */
+ /* $Id: changelog,v 1.795 2000-03-10 15:19:45 mike Exp $ */
+
+ 2000-03-10: Michal Necasek <mike@mendelu.cz>
+        - dsound\new: Changed DART buffer size calcualation, hopefully
+                      WinAmp will sound better now.
+
 
  2000-03-09: knut st. osmundsen <knut.stange.osmundse@pmsc.no>
         - include\pdwin32.tools: New tool, EXISTS --> \tools\bin\Exists.cmd
