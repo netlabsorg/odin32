@@ -1,5 +1,15 @@
- /* $Id: ChangeLog,v 1.1177 2000-10-06 15:13:40 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.1178 2000-10-07 09:12:21 hugh Exp $ */
+ 
+ 2000-10-07: Markus Montkowski <mmontkowski@gmx.de>
+    - GDI32: Fixed bitblt, it used the size of the source DC
+             when no destwindow was found. this doesn't work
+             for bitblt between dibsections if the dest is larger.
+             so now it checks if the dest DC belongs to a dibsection
+             and uses sets hdcHeight/Width to the size of the dibsection.
+             Added GetWidth() member function for this.
+             Fixes: Civilisation Test of Times
 
+Fixes Civilisation Test of Times.
  2000-10-06: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: PE loader: no longer rely on section names, but on image
                 directories instead
