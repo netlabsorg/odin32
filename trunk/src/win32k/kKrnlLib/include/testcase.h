@@ -1,4 +1,4 @@
-/* $Id: testcase.h,v 1.3 2001-11-09 07:39:33 bird Exp $
+/* $Id: testcase.h,v 1.4 2001-11-19 03:10:22 bird Exp $
  *
  * Definitions and declarations for testcase moduls.
  *
@@ -27,6 +27,12 @@ typedef struct _TstFaker
 #ifdef NBR_OF_KRNLIMPORTS
 extern TSTFAKER aTstFakers[NBR_OF_KRNLIMPORTS];
 #endif
+
+/*******************************************************************************
+*   Global Variables                                                           *
+*******************************************************************************/
+extern int iTestcaseNo;
+
 
 /*******************************************************************************
 *   Function Prototypes.                                                       *
