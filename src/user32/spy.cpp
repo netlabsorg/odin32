@@ -1,4 +1,4 @@
-/* $Id: spy.cpp,v 1.11 2000-03-13 13:10:48 sandervl Exp $ */
+/* $Id: spy.cpp,v 1.12 2002-07-18 19:22:49 achimha Exp $ */
 
 /*
  * Queue procedures to send messages to the spy server
@@ -9,6 +9,11 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+
+// AH TODO
+// we might want to disable the spy queue for custom builds or at least
+// supply a different queue name
+
 #define INCL_DOSPROCESS
 #define INCL_DOSQUEUES
 #define INCL_DOSMEMMGR
