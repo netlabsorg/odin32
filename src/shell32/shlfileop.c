@@ -649,11 +649,12 @@ DWORD WINAPI SHFileOperationA (LPSHFILEOPSTRUCTA lpFileOp)
 		FIXME(__FUNCTION__" Unhandled shell file operation %d stub\n", lpFileOp->wFunc);
 #else
 		FIXME("Unhandled shell file operation %d\n", lpFileOp->wFunc);
+	}
 #endif
 	   return 1;
-	}
 
 #ifdef __WIN32OS2__
+	}
     if (pTempFrom) HeapFree(GetProcessHeap(), 0, pTempFrom);
 
     if (nlpFileOp.fAnyOperationsAborted) {
@@ -739,4 +740,5 @@ BOOL WINAPI IsNetDrive(DWORD drive)
 	root[0] += drive;
 	return (GetDriveTypeA(root) == DRIVE_REMOTE);
 }
+
 
