@@ -1,4 +1,9 @@
- /* $Id: changelog,v 1.399 1999-11-02 22:04:57 achimha Exp $ */
+ /* $Id: changelog,v 1.400 1999-11-02 23:03:14 hugh Exp $ */
+
+ 99-11-02  Markus Montkowski <mmontkowski@gmx.de>
+                 Changed debug output to DDRAW: ...
+                 Copied Framebuffer if in colorconversion mode for Normal Blits to
+                  the primary surface. => Map Editor of Red Alert works.
 
  00-11-02: Achim Hasenmueller <achimha@innotek.de>
         - COMCTL32: Incorporated latest WINE 991031 updates
