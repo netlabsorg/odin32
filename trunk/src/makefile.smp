@@ -1,4 +1,4 @@
-# $Id: makefile.smp,v 1.10 2000-05-29 22:29:59 sandervl Exp $
+# $Id: makefile.smp,v 1.11 2000-08-24 12:00:00 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -83,6 +83,8 @@ all:
         cd ..\..\ddraw
         $(MAKE_CMD)
         cd ..\shell32
+        $(MAKE_CMD)
+        cd ..\shfolder
         $(MAKE_CMD)
         cd ..\comdlg32
         $(MAKE_CMD)
