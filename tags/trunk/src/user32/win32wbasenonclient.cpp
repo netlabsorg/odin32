@@ -1,4 +1,4 @@
-/* $Id: win32wbasenonclient.cpp,v 1.21 2000-04-07 12:55:16 sandervl Exp $ */
+/* $Id: win32wbasenonclient.cpp,v 1.22 2000-04-08 18:31:07 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (non-client methods)
  *
@@ -1011,10 +1011,10 @@ VOID Win32BaseWindow::DoNCPaint(HRGN clip,BOOL suppress_menupaint)
     //     with a region that covers the entire window (RealPlayer 7 Update 1)
     //     As we don't need to clip anything when that occurs, this workaround
     //     solves the problem.
-    if(rectClip.right == getWindowWidth() && rectClip.bottom == getWindowHeight()) 
+    if(rectClip.right == getWindowWidth() && rectClip.bottom == getWindowHeight())
     {
-    	clip = 0;
-    	rectClip = rect;
+        clip = 0;
+        rectClip = rect;
     }
   }
   else
@@ -1055,7 +1055,7 @@ VOID Win32BaseWindow::DoNCPaint(HRGN clip,BOOL suppress_menupaint)
       r.bottom = rect.top + GetSystemMetrics(SM_CYCAPTION);
       rect.top += GetSystemMetrics(SM_CYCAPTION);
     }
-    if( !clip || IntersectRect( &rfuzz, &r, &rectClip ) ) 
+    if( !clip || IntersectRect( &rfuzz, &r, &rectClip ) )
       DrawCaption(hdc,&r,active);
   }
 
@@ -1086,7 +1086,7 @@ VOID Win32BaseWindow::DoNCPaint(HRGN clip,BOOL suppress_menupaint)
     r.left = r.right - GetSystemMetrics(SM_CXVSCROLL) + 1;
     r.top  = r.bottom - GetSystemMetrics(SM_CYHSCROLL) + 1;
     FillRect( hdc, &r,  GetSysColorBrush(COLOR_SCROLLBAR) );
-    //CB: todo: child window have sometimes a size grip (i.e. Notepad)
+    //CB: todo: child windows have sometimes a size grip (i.e. Notepad)
     //    WS_SIZEBOX isn't set in these cases
     if (!(dwStyle & WS_CHILD))
     {
@@ -1319,7 +1319,7 @@ LONG Win32BaseWindow::HandleSysCommand(WPARAM wParam,POINT *pt32)
             ShellAboutA(Win32Hwnd,"Odin","Odin alpha release compiled with IBM VAC++",0);
         }
 #ifdef DEBUG
-	//SvL: Do NOT turn this into a dprintf. 
+        //SvL: Do NOT turn this into a dprintf.
         else
         if (wParam == SC_PUTMARK)
             WriteLog(("Mark requested by user\n"));
