@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.106 2003-03-27 13:54:18 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.107 2003-03-28 11:49:01 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -639,8 +639,6 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
          // It is our internal message, do not work with it more, its function
          // is over, otherwise it will return FALSE and will be dispatched,
          // and retranslated once again.
-    if(win32wnd) RELEASE_WNDOBJ(win32wnd);
-    return TRUE;
 
          winMsg->message = 0;
          winMsg->wParam  = 0;

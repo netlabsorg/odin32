@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.203 2003-03-22 20:27:11 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.204 2003-03-28 11:49:02 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -1256,6 +1256,14 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
         }
         if(win32wnd)
             win32wnd->MsgMouseMove(pWinMsg);
+        break;
+    }
+
+    case WM_CHAR_SPECIAL_CONSOLE_BREAK:
+    {
+        //ignore this message. don't forward it to the default PM frame window handler
+        //as that one sends it to the client. as a result we end up translating 
+        //it twice
         break;
     }
 
