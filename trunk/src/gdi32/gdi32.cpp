@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.66 2001-02-01 18:01:52 sandervl Exp $ */
+/* $Id: gdi32.cpp,v 1.67 2001-03-27 20:47:53 sandervl Exp $ */
 
 /*
  * GDI32 apis
@@ -183,6 +183,15 @@ ODINFUNCTION1(BOOL, DeleteDC, HDC, hdc)
       return 0;
   }
   SetLastError(ERROR_SUCCESS);
+
+  DIBSection *dsect = DIBSection::findHDC(hdc);
+  if(dsect)
+  {
+      //remove previously selected dibsection
+      dprintf(("DeleteDC %x, unselect DIB section %x", hdc, dsect->GetBitmapHandle()));
+      dsect->UnSelectDIBObject();
+  }
+
   //Must call ReleaseDC for window dcs
   if(pHps->hdcType == TYPE_1) {
       return ReleaseDC(OS2ToWin32Handle(pHps->hwnd), hdc);
@@ -1246,8 +1255,9 @@ BOOL WIN32API GdiFlush()
 //******************************************************************************
 BOOL WIN32API GdiComment(HDC hdc, UINT cbSize, CONST BYTE *lpData)
 {
-  dprintf(("GDI32: GdiComment, not implemented (TRUE)\n"));
-  return(TRUE);
+  dprintf(("GDI32: GdiComment %x %d %x NOT IMPLEMENTED", hdc, cbSize, lpData));
+//  return O32_GdiComment(hdc, cbSize, lpData);
+  return TRUE;
 }
 //******************************************************************************
 //******************************************************************************

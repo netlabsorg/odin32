@@ -1,4 +1,4 @@
-/* $Id: dibitmap.cpp,v 1.14 2001-01-14 17:17:45 sandervl Exp $ */
+/* $Id: dibitmap.cpp,v 1.15 2001-03-27 20:47:52 sandervl Exp $ */
 
 /*
  * GDI32 dib & bitmap code
@@ -306,7 +306,7 @@ int WIN32API SetDIBits(HDC hdc, HBITMAP hBitmap, UINT startscan, UINT numlines, 
     {
         DIBSection *dsect;
 
-        dsect = DIBSection::find((DWORD)hBitmap);
+        dsect = DIBSection::findObj(hBitmap);
         if(dsect) {
            return dsect->SetDIBits(hdc, hBitmap, startscan, numlines, pBits, (BITMAPINFOHEADER_W *)&pBitmapInfo->bmiHeader, usage);
         }

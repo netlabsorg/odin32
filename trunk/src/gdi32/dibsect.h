@@ -1,4 +1,4 @@
-/* $Id: dibsect.h,v 1.23 2001-03-19 19:27:53 sandervl Exp $ */
+/* $Id: dibsect.h,v 1.24 2001-03-27 20:47:52 sandervl Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -108,9 +108,9 @@ public:
                int  GetDIBSection(int iSize , void *lpBuffer);
 
  static DIBSection *getSection() { return section; } ;
- static DIBSection *find(DWORD handle);
+ static DIBSection *findObj(HANDLE handle);
  static DIBSection *findHDC(HDC hdc);
- static       void  deleteSection(DWORD handle);
+ static       void  deleteSection(HANDLE handle);
 protected:
 
 private:

@@ -1,4 +1,4 @@
-/* $Id: objhandle.cpp,v 1.11 2001-01-18 18:13:18 sandervl Exp $ */
+/* $Id: objhandle.cpp,v 1.12 2001-03-27 20:47:53 sandervl Exp $ */
 /*
  * Win32 Handle Management Code for OS/2
  *
@@ -176,7 +176,7 @@ int WIN32API GetObjectA( HGDIOBJ hObject, int size, void *lpBuffer)
   }
   if(DIBSection::getSection() != NULL)
   {
-        DIBSection *dsect = DIBSection::find(hObject);
+        DIBSection *dsect = DIBSection::findObj(hObject);
         if(dsect)
         {
                 rc = dsect->GetDIBSection(size, lpBuffer);
@@ -235,41 +235,42 @@ int WIN32API GetObjectW( HGDIOBJ hObject, int size, void *lpBuffer)
 HGDIOBJ WIN32API SelectObject(HDC hdc, HGDIOBJ hObj)
 {
  HGDIOBJ rc;
+ DWORD   handleType = GetObjectType(hObj);
 
-    dprintf2(("GDI32: SelectObject %x %x", hdc, hObj));
+    dprintf2(("GDI32: SelectObject %x %x type %x", hdc, hObj, handleType));
 
-    if(ObjGetHandleType(hObj) == GDIOBJ_REGION) {
+    if(handleType == GDIOBJ_REGION) {
         //Return complexity here; not previously selected clip region
         return (HGDIOBJ)SelectClipRgn(hdc, hObj);
     }
 
-    if(DIBSection::getSection() != NULL)
+    if(handleType == OBJ_BITMAP && DIBSection::getSection() != NULL)
     {
         DIBSection *dsect;
 
-        dsect = DIBSection::find(hdc);
+        dsect = DIBSection::findHDC(hdc);
         if(dsect)
         {
             //remove previously selected dibsection
             dsect->UnSelectDIBObject();
         }
-        dsect = DIBSection::find((DWORD)hObj);
+        dsect = DIBSection::findObj(hObj);
         if(dsect)
         {
             dsect->SelectDIBObject(hdc);
         }
     }
     rc = O32_SelectObject(hdc, hObj);
-    if(rc != 0 && DIBSection::getSection != NULL)
+    if(rc != 0 && GetObjectType(rc) == OBJ_BITMAP && DIBSection::getSection != NULL)
     {
-        DIBSection *dsect = DIBSection::find((DWORD)rc);
+        DIBSection *dsect = DIBSection::findObj(rc);
         if(dsect)
         {
             dsect->UnSelectDIBObject();
         }
     }
 #ifdef USING_OPEN32
-    if(O32_GetObjectType(hObj) == OBJ_BITMAP)
+    if(handleType == OBJ_BITMAP)
     {
         //SvL: Open32 messes up the height of the hdc (for windows)
         pDCData  pHps = (pDCData)OSLibGpiQueryDCData((HPS)hdc);
@@ -283,6 +284,20 @@ HGDIOBJ WIN32API SelectObject(HDC hdc, HGDIOBJ hObj)
     dprintf2(("GDI32: SelectObject %x %x returned %x", hdc, hObj, rc));
 
     return(rc);
+}
+//******************************************************************************
+//Called from user32 ReleaseDC (for non CS_OWNDC hdcs)
+//******************************************************************************
+VOID WIN32API UnselectGDIObjects(HDC hdc)
+{
+    DIBSection *dsect;
+
+    dsect = DIBSection::findHDC(hdc);
+    if(dsect)
+    {
+        //remove previously selected dibsection
+        dsect->UnSelectDIBObject();
+    }
 }
 //******************************************************************************
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.95 2001-03-14 15:55:43 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.96 2001-03-27 20:47:22 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -34,6 +34,7 @@
 #include "oslibmsg.h"
 #include <dcdata.h>
 #include <codepage.h>
+#include <wingdi32.h>
 
 #define INCLUDED_BY_DC
 #include "dc.h"
@@ -965,6 +966,7 @@ int WIN32API ReleaseDC (HWND hwnd, HDC hdc)
         rc = TRUE;
    }
    else {
+        UnselectGDIObjects(hdc);
         rc = O32_ReleaseDC (0, hdc);
    }
 
