@@ -2729,6 +2729,8 @@ static const WCHAR WC_LISTVIEWW[] = { 'S','y','s',
 #define LVIF_PARAM              0x0004
 #define LVIF_STATE              0x0008
 #define LVIF_INDENT             0x0010
+#define LVIF_GROUPID            0x0100
+#define LVIF_COLUMNS            0x0200
 #define LVIF_NORECOMPUTE        0x0800
 #define LVIF_DI_SETITEM         0x1000
 
@@ -2928,6 +2930,9 @@ typedef struct tagLVITEMA
     INT  iImage;
     LPARAM lParam;
     INT  iIndent;	/* (_WIN32_IE >= 0x0300) */
+    int iGroupId;       /* (_WIN32_IE >= 0x560) */
+    UINT cColumns;      /* (_WIN32_IE >= 0x560) */
+    PUINT puColumns;	/* (_WIN32_IE >= 0x560) */
 } LVITEMA, *LPLVITEMA;
 
 typedef struct tagLVITEMW
@@ -2942,6 +2947,9 @@ typedef struct tagLVITEMW
     INT  iImage;
     LPARAM lParam;
     INT  iIndent;	/* (_WIN32_IE >= 0x0300) */
+    int iGroupId;       /* (_WIN32_IE >= 0x560) */
+    UINT cColumns;      /* (_WIN32_IE >= 0x560) */
+    PUINT puColumns;	/* (_WIN32_IE >= 0x560) */
 } LVITEMW, *LPLVITEMW;
 
 /* ListView background image structs and constants
