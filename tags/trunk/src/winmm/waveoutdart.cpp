@@ -1,4 +1,4 @@
-/* $Id: waveoutdart.cpp,v 1.18 2003-03-05 16:45:10 sandervl Exp $ */
+/* $Id: waveoutdart.cpp,v 1.19 2003-03-06 15:42:33 sandervl Exp $ */
 
 /*
  * Wave playback class (DART)
@@ -296,6 +296,9 @@ MMRESULT DartWaveOut::write(LPWAVEHDR pwh, UINT cbwh)
         if(wavehdr) {
             WAVEHDR *chdr = wavehdr;
             while(chdr->lpNext) {
+#ifdef DEBUG
+                if(chdr == pwh) dprintf(("adding already present buffer!!!!!"));
+#endif
                 chdr = chdr->lpNext;
             }
             chdr->lpNext = pwh;
@@ -477,7 +480,7 @@ ULONG DartWaveOut::getPosition()
     mciStatus.ulItem = MCI_STATUS_POSITION;
     rc = mymciSendCommand(DeviceId, MCI_STATUS, MCI_STATUS_ITEM|MCI_WAIT, (PVOID)&mciStatus, 0);
     if((rc & 0xFFFF) == MCIERR_SUCCESS) {
-        nrbytes = (mciStatus.ulReturn * (getAvgBytesPerSecond()/1000));
+        nrbytes = (ULONG)((double)mciStatus.ulReturn * ((double)getAvgBytesPerSecond()/1000.0));
         return nrbytes;;
     }
     mciError(rc);
