@@ -1,10 +1,11 @@
-# $Id: setup.optional.mscvx-16.mk,v 1.2 2002-08-30 21:48:18 bird Exp $
+# $Id: setup.optional.mscvx-16.mk,v 1.3 2002-09-14 23:30:09 bird Exp $
 
 #
 #  Helper file for all the optional stuff which is common for
 #  all mscvx-16 compilers.
 #  Concidering the size of this, it really make sense putting it here.
 #
+MAKE_INCLUDE_CX_OPT = $(PATH_MAKE)\setup.optional.mscvx-16.mk
 
 #
 # C Compiler flags.
@@ -16,8 +17,11 @@ _CC_SEG_DATA    =
 _CC_SEG_XCPT    =
 _CC_DEFAULT_LIBS= /Zl
 _CC_PACK        = /Zp
-_CC_MODEL       = /Asfw
+_CC_MODEL       = /AC
 _OBJ_MODEL      = c
+_CC_MODEL_CODE  =
+_CC_MODEL_DATA  =
+_CC_MODEL_SETUP = w
 _CC_CPU         = 2
 _CC_STACKPROB   = s
 _CC_FASTCALL    =
@@ -92,6 +96,60 @@ _OBJ_MODEL  = l
 ! error Invalid MODEL. CC_MODEL=$(CC_MODEL)
 !endif
 
+!if !defined(CC_MODEL_CODE) && defined(ALL_MODEL_CODE)
+CC_MODEL_CODE = $(ALL_MODEL_CODE)
+!endif
+!if "$(CC_MODEL_CODE)" != ""
+_CC_MODEL_CODE  =
+! if "$(CC_MODEL_CODE)" == "s"
+_CC_MODEL_CODE  = s
+! endif
+! if "$(CC_MODEL_CODE)" == "l"
+_CC_MODEL_CODE  = l
+! endif
+! if "$(_CC_MODEL_CODE)" == ""
+!  error Invalid ALL/CC_MODEL_CODE. Valid options are 'l' for far code and 's' near code.
+! endif
+!endif
+
+!if !defined(CC_MODEL_DATA) && defined(ALL_MODEL_DATA)
+CC_MODEL_DATA = $(ALL_MODEL_DATA)
+!endif
+!if "$(CC_MODEL_DATA)" != ""
+_CC_MODEL_DATA  =
+! if "$(CC_MODEL_DATA)" == "n"
+_CC_MODEL_DATA  = n
+! endif
+! if "$(CC_MODEL_DATA)" == "f"
+_CC_MODEL_DATA  = f
+! endif
+! if "$(CC_MODEL_DATA)" == "h"
+_CC_MODEL_DATA  = h
+! endif
+! if "$(_CC_MODEL_DATA)" == ""
+!  error Invalid ALL/CC_MODEL_DATA. Valid options are 'h' for hugh data, 'f' for far data and 'n' near data.
+! endif
+!endif
+
+!if !defined(CC_MODEL_SETUP) && defined(ALL_MODEL_SETUP)
+CC_MODEL_SETUP= $(ALL_MODEL_SETUP)
+!endif
+!if "$(CC_MODEL_SETUP)" != ""
+_CC_MODEL_SETUP  =
+! if "$(CC_MODEL_SETUP)" == "d"
+_CC_MODEL_SETUP  = d
+! endif
+! if "$(CC_MODEL_SETUP)" == "u"
+_CC_MODEL_SETUP  = u
+! endif
+! if "$(CC_MODEL_SETUP)" == "w"
+_CC_MODEL_SETUP  = w
+! endif
+! if "$(_CC_MODEL_SETUP)" == ""
+!  error Invalid ALL/CC_MODEL_SETUP. Valid options are 'd' for SS==DS, 'u' for DS!=SS and DS reload on entry and 'w' for DS!=SS no DS reload on entry.
+! endif
+!endif
+
 !if defined(CC_STACKPROB) || defined(ALL_STACKPROB)
 _CC_STACKPROB   =
 !endif
@@ -137,7 +195,11 @@ _CC_OPTIM       = /Od
 _CC_WAR         =-W4
 !endif
 
+!if "$(_CC_MODEL_SETUP)" != "" && "$(_CC_MODEL_DATA)" != "" && "$(_CC_MODEL_CODE)" != ""
+_CC_MODEL = /A
+!endif
 
-_CC_OPTIONAL = $(_CC_SEG_TEXT) $(_CC_SEG_DATA) $(_CC_SEG_XCPT) $(_CC_DEFAULT_LIBS) $(_CC_PACK) $(_CC_MODEL) \
+_CC_OPTIONAL = $(_CC_SEG_TEXT) $(_CC_SEG_DATA) $(_CC_SEG_XCPT) $(_CC_DEFAULT_LIBS) $(_CC_PACK)\
+               $(_CC_MODEL)$(_CC_MODEL_SETUP)$(_CC_MODEL_DATA)$(_CC_MODEL_CODE) \
                /G$(_CC_FASTCALL)$(_CC_STACKPROB)$(_CC_CPU) $(_CC_OPTIM) $(_CC_WAR)
 
