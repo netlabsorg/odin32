@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.2555 2003-04-11 17:26:44 sandervl Exp $ */
+/* $Id: changelog,v 1.2556 2003-04-14 23:09:39 bird Exp $ */
+
+ 2003-04-15: knut st. osmundsen <bird-odin-spam@anduin   >
+    - src/makefile:
+                o Build NTDLL too. (netlabs only)
 
  2003-04-11: knut st. osmundsen <bird-odin-spam@anduin   >
     - USER32, KERNEL32, include/win/thread.h:
@@ -27,11 +31,11 @@
                   in release build. (Bug found and corrected by Dietrich)
 
  2002-04-09: Sander van Leeuwen <sandervl@innotek   >
-    - KERNEL32: o Unmap memory view when deleting PE dll object. 
+    - KERNEL32: o Unmap memory view when deleting PE dll object.
                   (problem found by Dietrich)
 
  2003-04-09: Platon Fomichev <stauff@innotek   >
-    - COMCTL32: o Due to flaw in cdecl implementation of GCC temporary 
+    - COMCTL32: o Due to flaw in cdecl implementation of GCC temporary
                   correctly import _wtoi func from NTDLL
     - EMXLIBS:  o Possible endless loop in OS2FS replacement funcs
                   (problem found by Dietrich)
