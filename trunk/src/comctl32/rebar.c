@@ -978,7 +978,7 @@ REBAR_CalcHorzBand (REBAR_INFO *infoPtr, UINT rstart, UINT rend, BOOL notify)
       }
 
       /* text is visible */
-      if (lpBand->fStatus & HAS_TEXT) {
+      if ((lpBand->fStatus & HAS_TEXT) && !(lpBand->fStyle & RBBS_HIDETITLE)) {
 	  lpBand->fDraw |= DRAW_TEXT;
 	  lpBand->rcCapText.right = max(lpBand->rcCapText.left,
 					lpBand->rcCapText.right-REBAR_POST_TEXT);
@@ -1124,7 +1124,7 @@ REBAR_CalcVertBand (REBAR_INFO *infoPtr, UINT rstart, UINT rend, BOOL notify)
 	}
 
 	/* text is visible */
-	if (lpBand->fStatus & HAS_TEXT) {
+	if ((lpBand->fStatus & HAS_TEXT) && !(lpBand->fStyle & RBBS_HIDETITLE)) {
 	    lpBand->fDraw |= DRAW_TEXT;
 	    lpBand->rcCapText.bottom = max(lpBand->rcCapText.top,
 					   lpBand->rcCapText.bottom);
@@ -1171,6 +1171,94 @@ REBAR_CalcVertBand (REBAR_INFO *infoPtr, UINT rstart, UINT rend, BOOL notify)
     }
 }
 
+#ifdef __WIN32OS2__
+// Rewriting the original function below is too much work. Duplicated it
+// instead
+static VOID
+REBAR_ForceResize2 (REBAR_INFO *infoPtr, INT newWidth, INT newHeight)
+     /* Function: This changes the size of the REBAR window to that */
+     /*  calculated by REBAR_Layout.                                */
+{
+    RECT rc;
+    INT x, y, width, height;
+    INT xedge = GetSystemMetrics(SM_CXEDGE);
+    INT yedge = GetSystemMetrics(SM_CYEDGE);
+
+    GetClientRect (infoPtr->hwndSelf, &rc);
+
+    TRACE( " old [%ld x %ld], new [%ld x %ld], client [%ld x %ld]\n",
+	   infoPtr->oldSize.cx, infoPtr->oldSize.cy,
+	   infoPtr->calcSize.cx, infoPtr->calcSize.cy,
+	   rc.right, rc.bottom);
+
+    width = 0;
+    height = 0;
+    x = 0;
+    y = 0;
+
+    if (infoPtr->dwStyle & WS_BORDER) {
+	width = 2 * xedge;
+	height = 2 * yedge;
+    }
+
+    {
+	INT mode = infoPtr->dwStyle & (CCS_VERT | CCS_TOP | CCS_BOTTOM);
+
+	RECT rcPcl;
+
+        rcPcl.left = 0; rcPcl.right = newWidth;
+        rcPcl.top  = 0; rcPcl.bottom = newHeight;
+
+	switch (mode) {
+	case CCS_TOP:
+	    /* _TOP sets width to parents width */
+	    width += (rcPcl.right - rcPcl.left);
+	    height += infoPtr->calcSize.cy;
+	    x += ((infoPtr->dwStyle & WS_BORDER) ? -xedge : 0);
+	    y += ((infoPtr->dwStyle & WS_BORDER) ? -yedge : 0);
+	    y += ((infoPtr->dwStyle & CCS_NODIVIDER) ? 0 : REBAR_DIVIDER);
+	    break;
+	case CCS_BOTTOM:
+	    /* FIXME: wrong wrong wrong */
+	    /* _BOTTOM sets width to parents width */
+	    width += (rcPcl.right - rcPcl.left);
+	    height += infoPtr->calcSize.cy;
+      	    x += -xedge;
+	    y = rcPcl.bottom - height + 1;
+	    break;
+	case CCS_LEFT:
+	    /* _LEFT sets height to parents height */
+	    width += infoPtr->calcSize.cx;
+	    height += (rcPcl.bottom - rcPcl.top);
+	    x += ((infoPtr->dwStyle & WS_BORDER) ? -xedge : 0);
+	    x += ((infoPtr->dwStyle & CCS_NODIVIDER) ? 0 : REBAR_DIVIDER);
+	    y += ((infoPtr->dwStyle & WS_BORDER) ? -yedge : 0);
+	    break;
+	case CCS_RIGHT:
+	    /* FIXME: wrong wrong wrong */
+	    /* _RIGHT sets height to parents height */
+	    width += infoPtr->calcSize.cx;
+	    height += (rcPcl.bottom - rcPcl.top);
+	    x = rcPcl.right - width + 1;
+      	    y = -yedge;
+	    break;
+	default:
+	    width += infoPtr->calcSize.cx;
+	    height += infoPtr->calcSize.cy;
+	}
+    }
+
+    TRACE("hwnd %p, style=%08lx, setting at (%d,%d) for (%d,%d)\n",
+	infoPtr->hwndSelf, infoPtr->dwStyle,
+	x, y, width, height);
+#ifdef __WIN32OS2__
+//NOTE: this one is causing problems!!!!
+    if(height != 0)
+#endif
+    SetWindowPos (infoPtr->hwndSelf, 0, x, y, width, height,
+		    SWP_NOMOVE|SWP_NOZORDER|SWP_NOACTIVATE);
+}
+#endif
 
 static VOID
 REBAR_ForceResize (REBAR_INFO *infoPtr)
@@ -2028,7 +2116,9 @@ REBAR_ValidateBand (REBAR_INFO *infoPtr, REBAR_BAND *lpBand)
     }
 
     /* text is visible */
-    if ((lpBand->fMask & RBBIM_TEXT) && (lpBand->lpText)) {
+    if ((lpBand->fMask & RBBIM_TEXT) && (lpBand->lpText) &&
+        !(lpBand->fStyle & RBBS_HIDETITLE)) 
+    {
 	HDC hdc = GetDC (0);
 	HFONT hOldFont = SelectObject (hdc, infoPtr->hFont);
 	SIZE size;
@@ -4459,8 +4549,9 @@ REBAR_Size (REBAR_INFO *infoPtr, WPARAM wParam, LPARAM lParam)
             INT  width, x, y, height;
             RECT parent_rect, rcWin;
 
-            if(HIWORD(lParam) != (rcClient.bottom - rcClient.top) ||
-               LOWORD(lParam) != (rcClient.right  - rcClient.left))
+            if (!(infoPtr->dwStyle & CCS_NOPARENTALIGN)  &&
+               (HIWORD(lParam) != (rcClient.bottom - rcClient.top) ||
+                LOWORD(lParam) != (rcClient.right  - rcClient.left)))
             {
                 /* Need to resize width to match parent */
                 GetWindowRect ( infoPtr->hwndSelf, &rcWin);
@@ -4469,9 +4560,10 @@ REBAR_Size (REBAR_INFO *infoPtr, WPARAM wParam, LPARAM lParam)
                 /* width and height don't apply */
                 GetClientRect (GetParent(infoPtr->hwndSelf), &parent_rect);
                 width = parent_rect.right - parent_rect.left;
+
                 TRACE("Rebar: resize to match parent");
-                SetWindowPos (infoPtr->hwndSelf, 0, 0, 0, width, height, SWP_NOMOVE|SWP_NOZORDER|SWP_NOACTIVATE);
-                return 0;;
+                REBAR_ForceResize2(infoPtr, width, height);
+                return 0;
             }
 #endif
 	    TRACE("sizing rebar from (%ld,%ld) to (%d,%d), client (%ld,%ld)\n",
