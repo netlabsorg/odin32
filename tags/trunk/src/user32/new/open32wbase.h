@@ -1,4 +1,4 @@
-/* $Id: open32wbase.h,v 1.1 1999-09-04 20:03:10 dengert Exp $ */
+/* $Id: open32wbase.h,v 1.2 1999-09-05 08:34:01 sandervl Exp $ */
 /*
  * Open32 Window fake Base Class for OS/2
  *
@@ -30,13 +30,13 @@ class fakeOpen32WinBaseClass
       LONG              lUserData;
       HWND              hwndThisObject;
       HWND              hwndFocusPartner;
-      ULONG             origStyle;                /* Original windows style */
-      ULONG             origStyleEx;              /* Original extended windows style */
-      ULONG             hevObjWinCreated;         /* Posted by ObjWin thread upon creation of WinobjWin object */
+      ULONG             origStyle;                
+      ULONG             origStyleEx;              
+      ULONG             hevObjWinCreated;         
       #define  PMS_SIZE  10
-      INT               PMSIdx_beginPaint;        /* Poor Man's Stack index for begin paint HPS handles */
-      ULONG             PMS_beginPaint[PMS_SIZE]; /* Poor Man's Stack for begin paint HPS handles       */
-      Win32WndClass    *pWindowClass;             /* ptr to window class        */
+      INT               PMSIdx_beginPaint;        
+      ULONG             PMS_beginPaint[PMS_SIZE]; 
+      Win32WndClass    *pWindowClass;             
       PVOID             pWinExtra;
       PVOID             beginPaintHPS_HDC;
       PVOID             ownDeviceContext;
@@ -44,13 +44,13 @@ class fakeOpen32WinBaseClass
       PVOID             pfnwpWindows;
       PVOID             pfnwpPMOriginal;
 
-      ULONG             bZeroId:1,                /* See Note 1 */
+      ULONG             bZeroId:1,                
                         bInCreate:1,
-                        bDragDrop:1,              /* Set by DragAcceptFiles() */
-                        bEraseBkgnd:1,            /* See Note 2 */
-                        bPSEraseFlag:1,           /* See Note 2 */
-                        bSupressErase:1,          /* See Note 2 */
-                        bPaintNow:1,              /* See Note 2 */
+                        bDragDrop:1,              
+                        bEraseBkgnd:1,            
+                        bPSEraseFlag:1,           
+                        bSupressErase:1,          
+                        bPaintNow:1,              
                         bRedraw:1,
                         bDestroyed:1,
                         bSendSetFocus:1,
@@ -59,27 +59,6 @@ class fakeOpen32WinBaseClass
 };
 
 #pragma pack()
-
-/* NOTES:
- *  1) The window ID for many DAX windows will default to zero.  This is
- *     because the window ID is taken from the hmenu parameter in the
- *     CreateWindow call and this parameter will very often be 0 for child
- *     windows.  Since PM sends many control messages with only an id as a
- *     means of identification, we are forced to substitute another window ID
- *     internally when a window is created with an ID of 0.  The private
- *     bZeroId flag indicates when this happens.  One disadvantage is that
- *     the window ID as queried from PM for a DAX window will not be the real
- *     DAX window ID when it should be zero.  Because of this the windowId
- *     member function should be used any time the ID is going to be passed
- *     back to a DAX app (in a message or structure, for instance).
- *     Fortunately this does not happen often.
- *  2) bEraseBkgnd is set to TRUE if the background needs to be erased.  The
- *     bPSEraseFlag tells BeginPaint what to set the PAINTSTRUCT fErased flag
- *     to when bEraseBkgnd is FALSE.  The bPSEraseFlag is necessary because
- *     RedrawWindow must set bEraseBkgnd to FALSE if RDW_ERASENOW is used,
- *     but BeginPaint must still set fErase to TRUE if the WM_ERASEBKGND
- *     message returned FALSE.
- */
 
 #endif
 
