@@ -1,4 +1,4 @@
-# $Id: setup.os2debvac365.mk,v 1.17 2002-08-28 05:02:20 bird Exp $
+# $Id: setup.os2debvac365.mk,v 1.18 2002-08-29 10:01:43 bird Exp $
 
 # ---OS2, DEBUG, VAC365-------------------------
 ENV_NAME="OS/2, Debug, IBM VisualAge for C++ 3.6.5"
@@ -14,12 +14,12 @@ ENV_ENVS_FORCE=vac365
 #
 # Include some shared standard stuff: ALP, VAC optional stuff.
 #
-!include $(PATH_MAKE)\setup.os2debalp.mk
+!include $(PATH_MAKE)\setup.os2as.mk
 !include $(PATH_MAKE)\setup.os2prfrc.mk
 !include $(PATH_MAKE)\setup.os2prfwrc.mk
-!include $(PATH_MAKE)\setup.os2prfilink.mk
+!include $(PATH_MAKE)\setup.os2ld.mk
 _AR_NOFREE      = 1
-!include $(PATH_MAKE)\setup.os2allilib.mk
+!include $(PATH_MAKE)\setup.os2ar.mk
 !include $(PATH_MAKE)\setup.optional.vac3xx.mk
 
 

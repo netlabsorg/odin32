@@ -1,4 +1,4 @@
-# $Id: setup.os2debmscv6-16.mk,v 1.11 2002-08-28 05:02:20 bird Exp $
+# $Id: setup.os2debmscv6-16.mk,v 1.12 2002-08-29 10:01:42 bird Exp $
 
 # ---OS2, DEBUG, MSCV6-------------------------
 ENV_NAME="OS/2, Debug, Microsoft C v6.0a 16-bit"
@@ -15,11 +15,11 @@ ENV_16BIT = 16
 #
 # Include some shared standard stuff: ALP.
 #
-!include $(PATH_MAKE)\setup.os2debalp.mk
+!include $(PATH_MAKE)\setup.os2as.mk
 !include $(PATH_MAKE)\setup.os2prfrc.mk
 !include $(PATH_MAKE)\setup.os2prfwrc.mk
-!include $(PATH_MAKE)\setup.os2prfilink.mk
-!include $(PATH_MAKE)\setup.os2allilib.mk
+!include $(PATH_MAKE)\setup.os2ld.mk
+!include $(PATH_MAKE)\setup.os2ar.mk
 !include $(PATH_MAKE)\setup.optional.mscvx-16.mk
 
 
