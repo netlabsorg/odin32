@@ -1,4 +1,4 @@
-# $Id: odin32.post.emx.mk,v 1.9 2001-01-08 22:53:03 bird Exp $
+# $Id: odin32.post.emx.mk,v 1.10 2001-01-20 18:18:55 bird Exp $
 
 #
 # Odin32 API
@@ -395,8 +395,8 @@ $(OBJDIR)\$(ORGTARGET)exp.def: $(DEFFILE)
 #
 $(OBJDIR)\bldlevel.$(DEFFILE): $(DEFFILE)
     $(BLDLEVELINF) $(DEFFILE) $@ -R"$(DEFFILE)" \
-        -V"#define=ODIN32_VERSION,$(ODIN32_INCLUDE)\versionos2.h" \
-        -M"#define=ODIN32_BUILD_NR,$(ODIN32_INCLUDE)\versionos2.h"
+        -V"#define=ODIN32_VERSION,$(ODIN32_INCLUDE)\odinbuild.h" \
+        -M"#define=ODIN32_BUILD_NR,$(ODIN32_INCLUDE)\odinbuild.h"
 
 
 #

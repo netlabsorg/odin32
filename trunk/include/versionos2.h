@@ -1,4 +1,4 @@
-/* $Id: versionos2.h,v 1.19 2001-01-20 04:29:26 bird Exp $ */
+/* $Id: versionos2.h,v 1.20 2001-01-20 18:18:56 bird Exp $ */
 
 #ifndef __VERSIONOS2__H__
 #define __VERSIONOS2__H__
@@ -19,15 +19,6 @@
  *
  */
 #define PE2LX_VERSION 6
-
-/*
- * Current Odin version and build number.
- * Used for bldlevel info.
- */
-#define ODIN32_VERSION_MAJOR 0
-#define ODIN32_VERSION_MINOR 5
-#define ODIN32_VERSION       "0.5"
-#define ODIN32_BUILD_NR       309        /* This started at 300 on the 17th Des 2000. */
 
 
 #ifndef SYSTEM
