@@ -1,7 +1,8 @@
- /* $Id: changelog,v 1.857 2000-04-02 09:25:45 sandervl Exp $ */
+ /* $Id: changelog,v 1.858 2000-04-02 10:13:38 sandervl Exp $ */
 
  2000-04-02: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: dc.cpp cleanup
+	- GDI32:  Dib section sync bugfix
 
  2000-04-01: Sander van Leeuwen <sandervl@xs4all.nl>
 	- GDI32: Fixed dibsection bitblits. (wrong updates of realplayer 7
