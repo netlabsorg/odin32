@@ -1,5 +1,5 @@
 ;Created by BLAST for IBM's compiler
-LIBRARY OLE32 INITINSTANCE
+LIBRARY OLE32OS2 INITINSTANCE
 DATA MULTIPLE NONSHARED
 
 ; These are defined to prevent a forward reference to OLEAUT32...
