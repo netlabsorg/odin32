@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.1206 2001-01-08 20:11:03 bird Exp $ */
+/* $Id: changelog,v 1.1207 2001-01-08 20:16:58 bird Exp $ */
 
  2001-01-08: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - tools\dailybuild:
@@ -8,6 +8,9 @@
     - Win32k:   o Added support for the ldrCheckInternalName bug. :-)
                   (see /src/win32k/ldr/myldrCheckInternalName.cpp for details.)
                 o Made pe.exe default.
+
+    - bin\bldlevelinf.cmd:
+                o Removed colon after otherwise to make it work with Object REXX.
 
  2001-01-06: Sander van Leeuwen <sandervl@xs4all.nl>
     - install:  o Win32k installation temporarily disabled due to a WarpIn bug
