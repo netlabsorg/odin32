@@ -1,4 +1,4 @@
-/* $Id: msgbox.cpp,v 1.1 1999-09-15 23:18:52 sandervl Exp $ */
+/* $Id: msgbox.cpp,v 1.2 1999-09-19 08:24:47 sandervl Exp $ */
 /*
  * Win32 message box function for OS/2
  *
@@ -100,10 +100,13 @@ int WIN32API MessageBoxExW(HWND    hWnd,
 // @@@PH Win32 BOOL's are casted to INTs
 INT WIN32API MessageBoxIndirectW(LPMSGBOXPARAMSW lpMsgBoxParams)
 {
-  dprintf(("USER32:MessageBoxIndirectW (%08x) not implemented.\n",
+  dprintf(("USER32:MessageBoxIndirectW (%08x) partially implemented.\n",
          lpMsgBoxParams));
 
-  return (FALSE);
+  return (MessageBoxW(lpMsgBoxParams->hwndOwner,
+                      lpMsgBoxParams->lpszText,
+                      lpMsgBoxParams->lpszCaption,
+                      lpMsgBoxParams->dwStyle));
 }
 
 
@@ -125,10 +128,13 @@ INT WIN32API MessageBoxIndirectW(LPMSGBOXPARAMSW lpMsgBoxParams)
 // @@@PH Win32 BOOL's are casted to INTs
 INT  WIN32API MessageBoxIndirectA(LPMSGBOXPARAMSA lpMsgBoxParams)
 {
-  dprintf(("USER32:MessageBoxIndirectA (%08x) not implemented.\n",
+  dprintf(("USER32:MessageBoxIndirectA (%08x) partially implemented.\n",
          lpMsgBoxParams));
 
-  return (FALSE);
+  return (MessageBoxA(lpMsgBoxParams->hwndOwner,
+                      lpMsgBoxParams->lpszText,
+                      lpMsgBoxParams->lpszCaption,
+                      lpMsgBoxParams->dwStyle));
 }
 //******************************************************************************
 //******************************************************************************
