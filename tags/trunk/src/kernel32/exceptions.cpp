@@ -1,4 +1,4 @@
-/* $Id: exceptions.cpp,v 1.62 2002-07-05 14:48:34 sandervl Exp $ */
+/* $Id: exceptions.cpp,v 1.63 2002-07-05 15:09:59 sandervl Exp $ */
 
 /*
  * Win32 Exception functions for OS/2
@@ -1131,8 +1131,6 @@ ULONG APIENTRY OS2ExceptionHandler(PEXCEPTIONREPORTRECORD       pERepRec,
 
     //print exception name & exception type
     sprintfException(pERepRec, pERegRec, pCtxRec, p, szTrapDump);
-    logException();
-
 
     /* Access violation at a known location */
     switch(pERepRec->ExceptionNum)
@@ -1292,6 +1290,7 @@ CrashAndBurn:
                 dbgPrintStack(pERepRec, pERegRec, pCtxRec, p);
         }
 #endif
+
         if(!fIsOS2Image && !fExitProcess)  //Only for real win32 apps
         {
                 if(OSLibDispatchException(pERepRec, pERegRec, pCtxRec, p) == TRUE)
@@ -1302,6 +1301,10 @@ CrashAndBurn:
         else    goto continuesearch; //pass on to OS/2 RTL or app exception handler
 
         dprintf(("KERNEL32: OS2ExceptionHandler: Continue and kill\n"));
+        
+        //Log fatal exception here
+        logException();
+
         pCtxRec->ctx_RegEip = (ULONG)KillWin32Process;
         pCtxRec->ctx_RegEsp = pCtxRec->ctx_RegEsp + 0x10;
         pCtxRec->ctx_RegEax = pERepRec->ExceptionNum;
