@@ -1,4 +1,4 @@
-/* $Id: hmmmap.cpp,v 1.8 1999-12-01 10:47:51 sandervl Exp $ */
+/* $Id: hmmmap.cpp,v 1.9 1999-12-10 14:06:11 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -52,7 +52,8 @@ DWORD HMDeviceMemMapClass::CreateFileMapping(PHMHANDLEDATA         pHMHandleData
                 	 		     DWORD protect,   /* [in] Protection for mapping object */
                 		   	     DWORD size_high, /* [in] High-order 32 bits of object size */
                 		   	     DWORD size_low,  /* [in] Low-order 32 bits of object size */
-                		   	     LPCSTR name)     /* [in] Name of file-mapping object */ 
+                		   	     LPCSTR name,     /* [in] Name of file-mapping object */ 
+				             HFILE *hOldMap)  // if create an existing memmap, return handle of old one
 {
  Win32MemMap *map;
 
@@ -90,6 +91,11 @@ DWORD HMDeviceMemMapClass::CreateFileMapping(PHMHANDLEDATA         pHMHandleData
 	//TODO:
 	//Is it allowed to open an existing view with different flags?
         //(i.e. write access to readonly object)
+	//Return handle of existing file mapping
+	dprintf(("CreateFileMapping: Return handle of existing file mapping %s", name));
+  	map->AddRef();
+	*hOldMap = map->getMapHandle();
+	return ERROR_ALREADY_EXISTS;
   }
   else {
 	map = new Win32MemMap(hFile, size_low, protect, (LPSTR)name);
