@@ -1,4 +1,4 @@
-/* $Id: debug.cpp,v 1.6 2001-04-05 05:54:51 sandervl Exp $ */
+/* $Id: debug.cpp,v 1.7 2002-02-26 11:11:17 sandervl Exp $ */
 
 /*
  * Win32 debug Subsystem for OS/2
@@ -16,6 +16,7 @@
 #include <misc.h>
 #include <unicode.h>
 #include "oslibdebug.h"
+#include <wprocess.h>
 
 #define DBG_LOCALLOG	DBG_debug
 #include "dbglocal.h"
@@ -72,7 +73,7 @@ BOOL WIN32API ContinueDebugEvent( DWORD dwProcessId, DWORD dwThreadId,
   dprintf(("KERNEL32:  ContinueDebugEvent(%08x,%08x,%08x)not correctly implemented\n",
            dwProcessId, dwThreadId, dwContinueStatus));
 
-  return OSLibContinueDebugEvent(dwProcessId, dwThreadId, dwContinueStatus);
+  return OSLibContinueDebugEvent(dwProcessId, ODIN_TO_OS2_THREADID(dwThreadId), dwContinueStatus);
 }
 //******************************************************************************
 //******************************************************************************
