@@ -1,11 +1,12 @@
- /* $Id: changelog,v 1.275 1999-10-06 08:08:10 sandervl Exp $ */
+ /* $Id: changelog,v 1.276 1999-10-06 09:59:57 phaller Exp $ */
 
  99-10-06: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Fixed memory leaks in SetWindowTextA/W window class methods
 	- KERNEL32: Put back my changes (10/04/99) to winimgres.cpp
 
  99-10-06: Patrick Haller <phaller@gmx.net>
-	- KERNEL32:    Fix for DLLs without Resource Segment (pResDir == NULL)
+	- KERNEL32: Fix: DLLs without Resource Segment (pResDir == NULL)
+	            Fix: VirtualFree not freeing memory fixed, WINHLP32 looks healthier :)
 
  99-10-05: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: rewrote color management
