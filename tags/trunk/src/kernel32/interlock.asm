@@ -1,4 +1,4 @@
-; $Id: interlock.asm,v 1.4 1999-12-06 19:48:11 achimha Exp $
+; $Id: interlock.asm,v 1.5 1999-12-07 18:19:07 sandervl Exp $
 
 ;/*
 ; * Interlocked apis
@@ -33,12 +33,12 @@ CODE32         SEGMENT DWORD PUBLIC USE32 'CODE'
 _InterlockedIncrement@4 proc near
 
 ;@@@PH similar to NT4 
-         mov      ecx, [esp+4]
-         mov      eax, 1
-         nop
-    lock xadd     dword ptr [ecx], eax
-         inc      eax
-         retn 4
+        mov     ecx, [esp+4]
+        mov     eax, 1
+        nop
+    	lock 	xadd     dword ptr [ecx], eax
+        inc     eax
+        retn 4
 
 ; @@@PH 1999/12/06 old implementation similar to W95
 ;var_4   = dword ptr -4
@@ -84,12 +84,12 @@ _InterlockedIncrement@4 endp
 _InterlockedDecrement@4 proc near
 
 ;@@@PH similar to NT4
-         mov      ecx, [esp+4]
-         mov      eax, 0ffffffffh
-         nop
-    lock xadd     dword ptr [ecx], eax
-         dec      eax
-         retn 4
+        mov      ecx, [esp+4]
+        mov      eax, 0ffffffffh
+        nop
+    	lock xadd     dword ptr [ecx], eax
+        dec      eax
+        retn 4
 
 
 ; @@@PH 1999/12/06 old implementation similar to W95
@@ -136,14 +136,14 @@ _InterlockedDecrement@4 endp
 _InterlockedExchange@8 proc near
 
 ;@@@PH similar to NT4
-         mov      ecx, [esp+8]
-         mov      edx, [esp+4]
-         mov      eax, dword ptr [ecx]
+        mov     ecx, [esp+4]		; LPLONG target
+        mov     edx, [esp+8]		; LONG value
+        mov     eax, dword ptr [ecx]
 _ie_1:
-         nop
-    lock cmpxchg  dword ptr [ecx], edx
-         jnz      _ie_1
-         retn 8
+        nop
+    	lock 	cmpxchg  dword ptr [ecx], edx
+        jnz     _ie_1
+        retn 8
 
 ; @@@PH 1999/12/06 old implementation similar to W95
 ;var_4   = dword ptr -4
@@ -192,7 +192,7 @@ _InterlockedCompareExchange@12 proc near
         mov     eax, dword ptr [esp + 4]
 _ice_1:
         nop
-   lock cmpxchg dword ptr [ecx], edx
+   	lock cmpxchg dword ptr [ecx], edx
         retn 12
 
 
@@ -233,7 +233,7 @@ _InterlockedExchangeAdd@8 proc near
         mov     ecx, dword ptr [esp + 4]
         mov     eax, dword ptr [esp + 8]
         nop
-   lock xadd    dword ptr [ecx], eax
+   	lock xadd    dword ptr [ecx], eax
         retn    8
 
 ; @@@PH 1999/12/06 old implementation from WINE
