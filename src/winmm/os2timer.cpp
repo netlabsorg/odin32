@@ -1,4 +1,4 @@
-/* $Id: os2timer.cpp,v 1.8 1999-08-31 15:04:10 phaller Exp $ */
+/* $Id: os2timer.cpp,v 1.9 1999-08-31 15:39:20 phaller Exp $ */
 
 /*
  * OS/2 Timer class
@@ -169,7 +169,7 @@ BOOL OS2TimerResolution::leaveResolutionScope(int dwPeriod)
 
 /*****************************************************************************
  * Name      : OS2TimerResolution::queryCurrentResolution
- * Purpose   : determine the maximum resolution currently requested
+ * Purpose   : determine the minimum resolution currently requested
  * Parameters:
  * Variables :
  * Result    :
@@ -182,18 +182,18 @@ BOOL OS2TimerResolution::leaveResolutionScope(int dwPeriod)
 int OS2TimerResolution::queryCurrentResolution()
 {
   OS2TimerResolution *timeRes = OS2TimerResolution::sTimerResolutions;
-  int                iMax = -1;
+  int                iMin = -1;
 
   if (timeRes != NULL)              // do we have an entry yet?
     for (;                          // walk the linked list
          timeRes->next != NULL;
          timeRes = timeRes->next)
     {
-      if (timeRes->dwPeriod < iMax) // determine minimum time period
-        iMax = timeRes->dwPeriod;
+      if (timeRes->dwPeriod < iMin) // determine minimum time period
+        iMin = timeRes->dwPeriod;
     }
 
-  return iMax;
+  return iMin;
 }
 
 
