@@ -1,4 +1,4 @@
-/* $Id: winbase.h,v 1.12 2000-06-01 11:26:15 sandervl Exp $ */
+/* $Id: winbase.h,v 1.13 2000-06-01 11:56:35 sandervl Exp $ */
 
 #ifndef __WINE_WINBASE_H
 #define __WINE_WINBASE_H
@@ -635,9 +635,9 @@ typedef struct {
         HANDLE hEvent;
 } OVERLAPPED, *LPOVERLAPPED;
 
-typedef VOID (WINAPI *LPOVERLAPPED_COMPLETION_ROUTINE)(DWORD dwErrorCode,
-                                                       DWORD dwNumberOfBytesTransfered,
-                                                       LPOVERLAPPED lpOverlapped);
+typedef VOID (* WINAPI LPOVERLAPPED_COMPLETION_ROUTINE)(DWORD dwErrorCode,
+                                                        DWORD dwNumberOfBytesTransfered,
+                                                        LPOVERLAPPED lpOverlapped);
 
 // LockFileEx flags
 
