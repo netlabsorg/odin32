@@ -1,4 +1,10 @@
-/* $Id: changelog,v 1.1875 2001-12-01 23:07:57 bird Exp $ */
+/* $Id: changelog,v 1.1876 2001-12-02 12:23:10 sandervl Exp $ */
+
+ 2001-12-02: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o Don't send WM_SIZE message to dialog before it receives
+                  WM_INITDIALOG
+                  (winzip 8.0 and Opera crash when sending this message too soon)
+                  (TODO: check in NT if this is really correct)
 
  2001-12-01: knut st. osmundsen <kosmunds@csc.com>
     - CRTDLL:   o Include ctype.h from dir.c and string.c. (Noted by Ye][ow.)
