@@ -557,10 +557,8 @@ void Frame_SysCommandSizeMove(Win32BaseWindow *win32wnd, WPARAM wParam )
     SendMessageA( hwnd, WM_ENTERSIZEMOVE, 0, 0 );
     SetCapture( hwnd );
 
-    BOOL fMove = (wParam & 0xfff0) == SC_MOVE;
-
     //prevent the app from drawing to this window (or its children)    
-    if(!DragFullWindows || fMove) 
+    if(!DragFullWindows) 
         LockWindowUpdate(hwnd);
 
     while(1)
@@ -649,7 +647,7 @@ void Frame_SysCommandSizeMove(Win32BaseWindow *win32wnd, WPARAM wParam )
                 }
                 else SendMessageA( hwnd, WM_SIZING, wpSizingHit, (LPARAM)&newRect );
 
-                dprintf(("WM_SIZING rect (%d,%d)(%d,%d)", newRect.left, newRect.top, newRect.right, newRect.bottom));
+                dprintf(("WM_MOVING/WM_SIZING rect (%d,%d)(%d,%d)", newRect.left, newRect.top, newRect.right, newRect.bottom));
 
                 dprintf(("update capture point dx %d dy %d", dx, dy));
                 capturePoint   = pt;
@@ -658,20 +656,16 @@ void Frame_SysCommandSizeMove(Win32BaseWindow *win32wnd, WPARAM wParam )
 
                 if (!iconic)
                 {
+                    BOOL fMove = (wParam & 0xfff0) == SC_MOVE;
+
                     if(!DragFullWindows)
                         draw_moving_frame( hdc, &newRect, thickframe, hittest, TRUE );
                     else {
-                        if (!fMove) {
-                            LockWindowUpdate(hwnd);
-                        }
                         SetWindowPos( hwnd, 0, newRect.left, newRect.top,
                                       newRect.right - newRect.left,
                                       newRect.bottom - newRect.top, 
                                       ((hittest == HTCAPTION ) ? SWP_NOSIZE : 0 ) | 
                                       ((fControl) ? (SWP_NOACTIVATE|SWP_NOZORDER) : 0));
-                        if (!fMove) {
-                            LockWindowUpdate(NULL);
-                        }
                     }
                 }
             }
@@ -679,7 +673,7 @@ void Frame_SysCommandSizeMove(Win32BaseWindow *win32wnd, WPARAM wParam )
     }
 
     //Enable window update
-    if(!DragFullWindows || fMove) 
+    if(!DragFullWindows) 
         LockWindowUpdate(NULL);
 
     ReleaseCapture();
