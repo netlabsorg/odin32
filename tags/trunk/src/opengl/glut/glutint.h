@@ -1,4 +1,4 @@
-/* $Id: glutint.h,v 1.2 2000-02-09 08:46:19 jeroen Exp $ */
+/* $Id: glutint.h,v 1.3 2000-03-04 19:10:16 jeroen Exp $ */
 #ifndef __glutint_h__
 #define __glutint_h__
 
@@ -252,29 +252,29 @@ typedef struct _DisplayMode {
 } DisplayMode;
 
 /* GLUT  function types */
-typedef void (* APIENTRY GLUTdisplayCB) (void);
-typedef void (* APIENTRY GLUTreshapeCB) (int, int);
-typedef void (* APIENTRY GLUTkeyboardCB) (unsigned char, int, int);
-typedef void (* APIENTRY GLUTmouseCB) (int, int, int, int);
-typedef void (* APIENTRY GLUTmotionCB) (int, int);
-typedef void (* APIENTRY GLUTpassiveCB) (int, int);
-typedef void (* APIENTRY GLUTentryCB) (int);
-typedef void (* APIENTRY GLUTvisibilityCB) (int);
-typedef void (* APIENTRY GLUTwindowStatusCB) (int);
-typedef void (* APIENTRY GLUTidleCB) (void);
-typedef void (* APIENTRY GLUTtimerCB) (int);
-typedef void (* APIENTRY GLUTmenuStateCB) (int);       /* DEPRICATED.      */
-typedef void (* APIENTRY GLUTmenuStatusCB) (int, int, int);
-typedef void (* APIENTRY GLUTselectCB) (int);
-typedef void (* APIENTRY GLUTspecialCB) (int, int, int);
-typedef void (* APIENTRY GLUTspaceMotionCB) (int, int, int);
-typedef void (* APIENTRY GLUTspaceRotateCB) (int, int, int);
-typedef void (* APIENTRY GLUTspaceButtonCB) (int, int);
-typedef void (* APIENTRY GLUTdialsCB) (int, int);
-typedef void (* APIENTRY GLUTbuttonBoxCB) (int, int);
-typedef void (* APIENTRY GLUTtabletMotionCB) (int, int);
-typedef void (* APIENTRY GLUTtabletButtonCB) (int, int, int, int);
-typedef void (* APIENTRY GLUTjoystickCB) (unsigned int buttonMask, int x, int y, int z);
+typedef void (* GLAPIENTRY GLUTdisplayCB) (void);
+typedef void (* GLAPIENTRY GLUTreshapeCB) (int, int);
+typedef void (* GLAPIENTRY GLUTkeyboardCB) (unsigned char, int, int);
+typedef void (* GLAPIENTRY GLUTmouseCB) (int, int, int, int);
+typedef void (* GLAPIENTRY GLUTmotionCB) (int, int);
+typedef void (* GLAPIENTRY GLUTpassiveCB) (int, int);
+typedef void (* GLAPIENTRY GLUTentryCB) (int);
+typedef void (* GLAPIENTRY GLUTvisibilityCB) (int);
+typedef void (* GLAPIENTRY GLUTwindowStatusCB) (int);
+typedef void (* GLAPIENTRY GLUTidleCB) (void);
+typedef void (* GLAPIENTRY GLUTtimerCB) (int);
+typedef void (* GLAPIENTRY GLUTmenuStateCB) (int);     /* DEPRICATED.      */
+typedef void (* GLAPIENTRY GLUTmenuStatusCB) (int, int, int);
+typedef void (* GLAPIENTRY GLUTselectCB) (int);
+typedef void (* GLAPIENTRY GLUTspecialCB) (int, int, int);
+typedef void (* GLAPIENTRY GLUTspaceMotionCB) (int, int, int);
+typedef void (* GLAPIENTRY GLUTspaceRotateCB) (int, int, int);
+typedef void (* GLAPIENTRY GLUTspaceButtonCB) (int, int);
+typedef void (* GLAPIENTRY GLUTdialsCB) (int, int);
+typedef void (* GLAPIENTRY GLUTbuttonBoxCB) (int, int);
+typedef void (* GLAPIENTRY GLUTtabletMotionCB) (int, int);
+typedef void (* GLAPIENTRY GLUTtabletButtonCB) (int, int, int, int);
+typedef void (* GLAPIENTRY GLUTjoystickCB) (unsigned int buttonMask, int x, int y, int z);
 #ifdef SUPPORT_FORTRAN
 typedef void (*GLUTdisplayFCB) (void);
 typedef void (*GLUTreshapeFCB) (int *, int *);
@@ -663,7 +663,7 @@ extern unsigned int __glutModifierMask;
 /* private variables from glut_menu.c */
 extern GLUTmenuItem *__glutItemSelected;
 extern GLUTmenu **__glutMenuList;
-extern void (* APIENTRY __glutMenuStatusFunc) (int, int, int);
+extern void (* GLAPIENTRY __glutMenuStatusFunc) (int, int, int);
 extern void __glutMenuModificationError(void);
 extern void __glutSetMenuItem(GLUTmenuItem * item,
   const char *label, int value, Bool isTrigger);
@@ -745,7 +745,7 @@ extern XVisualInfo *__glutGetVisualInfo(unsigned int mode);
 extern void __glutSetWindow(GLUTwindow * window);
 extern void __glutReshapeFunc(GLUTreshapeCB reshapeFunc,
   int callingConvention);
-extern void  APIENTRY __glutDefaultReshape(int, int);
+extern void  GLAPIENTRY __glutDefaultReshape(int, int);
 extern GLUTwindow *__glutCreateWindow(
   GLUTwindow * parent,
   int x, int y, int width, int height, int gamemode);

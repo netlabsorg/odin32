@@ -1,4 +1,4 @@
-/* $Id: win32_winproc.c,v 1.2 2000-02-09 08:46:23 jeroen Exp $ */
+/* $Id: win32_winproc.c,v 1.3 2000-03-04 19:10:17 jeroen Exp $ */
 /* Copyright (c) Nate Robins, 1997. */
 /* portions Copyright (c) Mark Kilgard, 1997, 1998. */
 
@@ -9,7 +9,7 @@
 
 #include "glutint.h"
 #if defined(__WIN32OS2__)
-#include "wgl.h"
+//#include "wgl.h"
 #include <ctype.h>
 #endif
 #if defined(__CYGWIN32__)
@@ -89,13 +89,13 @@ __glutWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     return 0;
 #endif
   case WM_PAINT:
-    dprintf(("GLUT32: WM_PAINT processing...\n"));
     window = __glutGetWindow(hwnd);
     if (window) {
+/*
 #ifndef __WIN32OS2__
-      BeginPaint(hwnd, &ps);       /* Must have this for some Win32 reason.*/
+      BeginPaint(hwnd, &ps);
       EndPaint(hwnd, &ps);
-#endif
+#endif */
       if (window->win == hwnd) {
         __glutPostRedisplay(window, GLUT_REPAIR_WORK);
       } else if (window->overlay && window->overlay->win == hwnd) {
@@ -313,7 +313,6 @@ __glutWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
       case VK_DELETE:
       handleDelete:
         /* Delete is an ASCII character. */
-        dprintf(("VK_DELETE - wParam is %d\n",wParam));
         key=(unsigned char)127;
         break;
 
@@ -355,8 +354,6 @@ __glutWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
       if(fSendKeyStroke)
         {
-          dprintf(("Sending keystroke %d...\n",key));
-
           GetCursorPos(&point);
           ScreenToClient(window->win, &point);
           __glutSetWindow(window);
@@ -389,8 +386,9 @@ __glutWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     if (__glutMappedMenu) {
       /* TODO: take this out once the menu on middle mouse stuff works
          properly. */
+/*
       if (button == GLUT_MIDDLE_BUTTON)
-        return 0;
+        return 0;*/
       GetCursorPos(&point);
       ScreenToClient(hwnd, &point);
       __glutItemSelected = NULL;
@@ -612,13 +610,12 @@ __glutWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     return 0;
 
   case WM_SIZE:
-    dprintf(("GLUT32: Handling WM_SIZE..."));
     window = __glutGetWindow(hwnd);
     if (window) {
       width = LOWORD(lParam);
       height = HIWORD(lParam);
       if (width != window->width || height != window->height) {
-#if 0  /* Win32 GLUT does not support overlays for now. */
+#if 0                      /* Win32 GLUT does not support overlays for now.*/
         if (window->overlay) {
           XResizeWindow(__glutDisplay, window->overlay->win, width, height);
         }
@@ -629,15 +626,13 @@ __glutWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         /* Do not execute OpenGL out of sequence with respect
            to the SetWindowPos request! */
         GdiFlush();
-        window->reshape(width, height);
+        ((GLUTreshapeCB)(window->reshape))(width, height);
         window->forceReshape = FALSE;
         /* A reshape should be considered like posting a
            repair request. */
-        dprintf(("GLUT32: WM_SIZE processing -> GLUT_REPAIR_WORK\n"));
         __glutPostRedisplay(window, GLUT_REPAIR_WORK);
       }
     }
-    dprintf(("GLUT32: Handled WM_SIZE..."));
     return 0;
 
   case WM_SETCURSOR:
