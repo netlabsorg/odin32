@@ -1,4 +1,4 @@
-/* $Id: mmsystem.h,v 1.10 2000-12-24 12:28:19 sandervl Exp $ */
+/* $Id: mmsystem.h,v 1.11 2002-05-22 15:49:21 sandervl Exp $ */
 /* 
  * MMSYSTEM - Multimedia Wine Extension ... :-)
  */
@@ -218,6 +218,10 @@ LRESULT WINAPI CloseDriver(HDRVR hDriver, LPARAM lParam1, LPARAM lParam2);
 LRESULT WINAPI SendDriverMessage(HDRVR hDriver, UINT message,
 				 LPARAM lParam1, LPARAM lParam2);
 HMODULE WINAPI GetDriverModuleHandle(HDRVR hDriver);
+
+BOOL WINAPI DriverCallback(DWORD dwCallBack, UINT uFlags, HDRVR hDev, 
+			   UINT wMsg, DWORD dwUser, DWORD dwParam1, 
+			   DWORD dwParam2);
 
 DWORD	WINAPI GetDriverFlags(HDRVR hDriver);
 #ifdef __WINE__
@@ -794,6 +798,9 @@ MMRESULT	WINAPI	midiStreamRestart(HMIDISTRM hms);
 MMRESULT16	WINAPI	midiStreamStop16(HMIDISTRM16 hms);
 MMRESULT	WINAPI	midiStreamStop(HMIDISTRM hms);
 
+MMRESULT        WINAPI  midiConnect(HMIDI hMidiIn, HMIDIOUT hMidiOut, LPVOID pReserved);
+MMRESULT        WINAPI  midiDisconnect(HMIDI hMidiIn, HMIDIOUT hMidiOut, LPVOID pReserved);
+
 #define AUX_MAPPER     (-1)
 
 typedef struct {
@@ -1079,6 +1086,7 @@ MMRESULT16	WINAPI	joySetCapture16(HWND16,UINT16,UINT16,BOOL16);
 MMRESULT	WINAPI	joySetCapture(HWND,UINT,UINT,BOOL);
 MMRESULT16	WINAPI	joySetThreshold16(UINT16,UINT16);
 MMRESULT	WINAPI	joySetThreshold(UINT,UINT);
+MMRESULT        WINAPI  joyConfigChanged(DWORD dwFlags);
 
 #define	MIXERR_BASE		1024
 #define	MIXERR_INVALLINE	(MIXERR_BASE + 0)
@@ -1764,6 +1772,15 @@ HTASK		WINAPI	mciGetCreatorTask(UINT);
 
 YIELDPROC	WINAPI	mciGetYieldProc16(UINT16,DWORD*);
 YIELDPROC	WINAPI	mciGetYieldProc(UINT,DWORD*);
+
+BOOL            WINAPI  mciDriverNotify(HWND hwndCallback, UINT uDeviceID, UINT uStatus);
+UINT            WINAPI  mciDriverYield(UINT uDeviceID);
+BOOL            WINAPI  mciExecute(LPCSTR pszCommand);
+BOOL            WINAPI  mciFreeCommandResource(UINT uTable);
+MCIDEVICEID     WINAPI  mciGetDeviceIDFromElementIDW(DWORD dwElementID, LPCWSTR lpstrType);
+DWORD           WINAPI  mciGetDriverData(UINT uDeviceID);
+UINT            WINAPI  mciLoadCommandResource(HINSTANCE hInstance, LPCWSTR lpResName, UINT uType);
+BOOL            WINAPI  mciSetDriverData(UINT uDeviceID, DWORD dwData);
 
 #define MCIERR_INVALID_DEVICE_ID        (MCIERR_BASE + 1)
 #define MCIERR_UNRECOGNIZED_KEYWORD     (MCIERR_BASE + 3)
