@@ -1,8 +1,7 @@
-/* $Id: changelog,v 1.1399 2001-05-07 10:07:29 phaller Exp $ */
+/* $Id: changelog,v 1.1400 2001-05-07 13:29:20 phaller Exp $ */
 
  2001-05-07: Patrick Haller <patrick.haller@innotek.de>
-    - WS2_32:   o created skeleton
-    - WS2HELP:  o created skeleton
+    - WS2_32:   o created skeleton and added forwarders to WSOCK32
     - KERNEL32: o CreateProcess error handling corrected, if
     		  O32_CreateProcess fails with specific reason
 
