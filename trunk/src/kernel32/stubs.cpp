@@ -1,16 +1,14 @@
-/* $Id: stubs.cpp,v 1.6 1999-08-18 22:00:58 phaller Exp $ */
+/* $Id: stubs.cpp,v 1.7 1999-08-21 16:29:28 sandervl Exp $ */
 
-/*
- *
- * Project Odin Software License can be found in LICENSE.TXT
- *
- */
 /*
  * Win32 KERNEL32 Subsystem for OS/2
  *
  * 1998/05/19 PH Patrick Haller (haller@zebra.fh-weingarten.de)
  *
  * @(#) Stubs.H 1.0.0 1998/05/19 PH start
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
+ *
  */
 
 /*****************************************************************************
@@ -1954,32 +1952,6 @@ HRSRC  WIN32API FindResourceExW(HMODULE hModule,
   return (NULL);
 }
 
-/*****************************************************************************
- * Name      : BOOL WIN32API FlushViewOfFile
- * Purpose   : The FlushViewOfFile function writes to the disk a byte range
- *             within a mapped view of a file.
- * Parameters: LPCVOID lpBaseAddress         start address of byte range to flush
- *             DWORD dwNumberOfBytesToFlush  number of bytes in range
- * Variables :
- * Result    : If the function succeeds, the return value is nonzero.
- *             If the function fails, the return value is zero
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Markus Montkowski [Tha, 1998/05/21 20:57]
- *****************************************************************************/
-
-BOOL WIN32API FlushViewOfFile(LPCVOID lpBaseAddress,
-                              DWORD dwNumberOfBytesToFlush)
-{
-
-  dprintf(("KERNEL32:FlushViewOfFile(%08x,%08x) not implemented\n",
-           lpBaseAddress,
-           dwNumberOfBytesToFlush
-          ));
-
-  return (FALSE);
-}
 
 /*****************************************************************************
  * Name      : int WIN32API FoldStringA
@@ -2662,59 +2634,6 @@ BOOL WIN32API GetThreadTimes(HANDLE     hThread,
   return (FALSE);
 }
 
-
-/*****************************************************************************
- * Name      : HANDLE OpenFileMappingA
- * Purpose   : The OpenFileMappingA function opens a named file-mapping object.
- * Parameters: DWORD   dwDesiredAccess access mode
- *             BOOL    bInheritHandle  inherit flag
- *             LPCTSTR lpName          address of name of file-mapping object
- * Variables :
- * Result    : HANDLE to map object
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
- *****************************************************************************/
-
-HANDLE WIN32API OpenFileMappingA(DWORD   dwDesiredAccess,
-                                    BOOL    bInheritHandle,
-                                    LPCTSTR lpName)
-{
-  dprintf(("Kernel32: OpenFileMappingA(%08xh,%08xh,%s) not implemented.\n",
-           dwDesiredAccess,
-           bInheritHandle,
-           lpName));
-
-  return (0);
-}
-
-
-/*****************************************************************************
- * Name      : HANDLE OpenFileMappingW
- * Purpose   : The OpenFileMappingW function opens a named file-mapping object.
- * Parameters: DWORD   dwDesiredAccess access mode
- *             BOOL    bInheritHandle  inherit flag
- *             LPCTSTR lpName          address of name of file-mapping object
- * Variables :
- * Result    : HANDLE to map object
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
- *****************************************************************************/
-
-HANDLE WIN32API OpenFileMappingW(DWORD   dwDesiredAccess,
-                                    BOOL    bInheritHandle,
-                                    LPCWSTR lpName)
-{
-  dprintf(("Kernel32: OpenFileMappingW(%08xh,%08xh,%s) not implemented.\n",
-           dwDesiredAccess,
-           bInheritHandle,
-           lpName));
-
-  return (0);
-}
 
 
 /*****************************************************************************

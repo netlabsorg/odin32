@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.22 1999-08-21 12:29:30 sandervl Exp $
+# $Id: makefile,v 1.23 1999-08-21 16:29:27 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -20,8 +20,7 @@ CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE) /Tm+
 
 OBJS = KERNEL32.OBJ KOBJECTS.OBJ CONSOLE.OBJ CONIN.OBJ CONBUFFER.OBJ \
        CONOUT.OBJ UNICODE.OBJ network.OBJ DEVIO.OBJ profile.obj \
-       THREAD.OBJ \
-       THUNK.OBJ \
+       THREAD.OBJ virtual.obj THUNK.OBJ \
        OBSOLETE.OBJ \
        COMM.OBJ \
        MESSAGE.OBJ \
@@ -32,7 +31,6 @@ OBJS = KERNEL32.OBJ KOBJECTS.OBJ CONSOLE.OBJ CONIN.OBJ CONBUFFER.OBJ \
        OS2NATIVE.OBJ \
        EXCEPTIONS.OBJ \
        LFILE.OBJ \
-       MMAP.OBJ \
        NPIPE.OBJ \
        MISC.OBJ \
        EXCEPT.OBJ \
@@ -238,11 +236,6 @@ conbuffer.OBJ: \
     .\conbuffer.h \
     .\conbuffer.cpp
 
-mmap.OBJ: \
-    .\mmap.cpp \
-    mmap.h \
-    $(PDWIN32_INCLUDE)\unicode.h
-
 lfile.OBJ: \
     .\lfile.cpp \
     $(PDWIN32_INCLUDE)\wprocess.h \
@@ -339,6 +332,8 @@ async.OBJ: \
         $(PDWIN32_INCLUDE)\win32type.h \
         $(PDWIN32_INCLUDE)\misc.h \
         $(PDWIN32_INCLUDE)\unicode.h
+
+virtual.obj:   virtual.cpp $(PDWIN32_INCLUDE)\win\virtual.h
 
 pefile.OBJ:    pefile.cpp $(PDWIN32_INCLUDE)\pefile.h
 winimage.OBJ:  winimage.cpp $(PDWIN32_INCLUDE)\winimage.h $(PDWIN32_INCLUDE)\windll.h $(PDWIN32_INCLUDE)\pefile.h $(PDWIN32_INCLUDE)\winres.h
