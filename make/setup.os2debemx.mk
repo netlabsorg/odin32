@@ -1,4 +1,4 @@
-# $Id: setup.os2debemx.mk,v 1.11 2002-08-30 18:27:23 bird Exp $
+# $Id: setup.os2debemx.mk,v 1.12 2002-09-20 04:10:03 bird Exp $
 
 # ---OS2, DEBUG, EMX----------------------------
 ENV_NAME="OS/2, Debug, EMX/GCC Compiler"
@@ -28,6 +28,7 @@ SPACE=_
 _LD_LAST_LIB = end.$(EXT_LIB)
 !include $(PATH_MAKE)\setup.os2ld.mk
 !include $(PATH_MAKE)\setup.os2ar.mk
+!include $(PATH_MAKE)\setup.os2allipfc.mk
 !include $(PATH_MAKE)\setup.optional.emx.mk
 
 
@@ -52,6 +53,7 @@ CC_FLAGS_IFS=$(CC_FLAGS_SYS:  = ) -Zdll
 CC_OBJ_OUT=-o$(SPACE:_= )
 #CC_LST_OUT=-S -o$(SPACE:_= )
 CC_PC_2_STDOUT=-C -E
+CC_PC_2_STRIPPED_STDOUT=-E -P
 CC_AS_2_FILE=-S -o$(SPACE:_= )
 
 
@@ -66,6 +68,7 @@ CXX_FLAGS_IFS=$(CXX_FLAGS_SYS:  = ) -Zdll
 CXX_OBJ_OUT=-o$(SPACE:_= )
 #CXX_LST_OUT=-S -o$(SPACE:_= )
 CXX_PC_2_STDOUT=-C -E
+CXX_PC_2_STRIPPED_STDOUT=-E -P
 CXX_AS_2_FILE=-S -o$(SPACE:_= )
 
 !if "$(CC_AS_CXX)" != ""

@@ -1,4 +1,4 @@
-# $Id: setup.os2debmscv6.mk,v 1.16 2002-08-30 18:27:23 bird Exp $
+# $Id: setup.os2debmscv6.mk,v 1.17 2002-09-20 04:10:03 bird Exp $
 
 # ---OS2, DEBUG, MSCV6-------------------------
 ENV_NAME="OS/2, Debug, Microsoft C v6.0a 32-bit"
@@ -19,6 +19,7 @@ ENV_ENVS_FORCE=vac308 mscv6
 !include $(PATH_MAKE)\setup.os2allwrc.mk
 !include $(PATH_MAKE)\setup.os2ld.mk
 !include $(PATH_MAKE)\setup.os2ar.mk
+!include $(PATH_MAKE)\setup.os2allipfc.mk
 
 
 #

@@ -1,4 +1,4 @@
-# $Id: setup.os2debmscv7-16.mk,v 1.1 2002-09-14 16:03:38 bird Exp $
+# $Id: setup.os2debmscv7-16.mk,v 1.2 2002-09-20 04:10:03 bird Exp $
 
 # ---OS2, DEBUG, MSCV7-------------------------
 ENV_NAME="OS/2, Debug, Microsoft C v7.0 16-bit"
@@ -20,6 +20,7 @@ ENV_16BIT = 16
 !include $(PATH_MAKE)\setup.os2allwrc.mk
 !include $(PATH_MAKE)\setup.os2ld.mk
 !include $(PATH_MAKE)\setup.os2ar.mk
+!include $(PATH_MAKE)\setup.os2allipfc.mk
 !include $(PATH_MAKE)\setup.optional.mscvx-16.mk
 
 

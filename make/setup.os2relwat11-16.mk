@@ -1,4 +1,4 @@
-# $Id: setup.os2relwat11-16.mk,v 1.15 2002-08-30 19:44:51 bird Exp $
+# $Id: setup.os2relwat11-16.mk,v 1.16 2002-09-20 04:10:06 bird Exp $
 
 #
 # Note! Watcom is unable to do debug info release builds.
@@ -29,6 +29,7 @@ _LD_LIBPATH     = $(PATH_WATCOM)\lib286\os2;$(PATH_WATCOM)\lib286;
 LD_OLDCPP       = 1
 !include $(PATH_MAKE)\setup.os2ld.mk
 !include $(PATH_MAKE)\setup.os2ar.mk
+!include $(PATH_MAKE)\setup.os2allipfc.mk
 !include $(PATH_MAKE)\setup.optional.watcom11x.mk
 
 
@@ -55,9 +56,6 @@ CC_FLAGS_DLL=$(CC_FLAGS) $(_CC_OPTIM_) -zc -bd
 CC_FLAGS_SYS=$(CC_FLAGS) $(_CC_OPTIM_) -s -zff -zgf -zu
 CC_FLAGS_VDD=$(CC_FLAGS_SYS)
 CC_FLAGS_IFS=$(CC_FLAGS) $(_CC_OPTIM_IFS) -s -zff -zgf -zu -bd
-CC_OBJ_OUT=-fo=
-CC_LST_OUT=
-CC_PC_2_STDOUT=-pc
 
 !if "$(_CXX_OPTIM)" == ""
 _CXX_OPTIM_ = -omlinear
@@ -70,9 +68,6 @@ CXX_FLAGS_DLL=$(CXX_FLAGS) $(_CXX_OPTIM_) -zc -bd
 CXX_FLAGS_SYS=$(CXX_FLAGS) $(_CXX_OPTIM_) -s -zff -zgf -zu
 CXX_FLAGS_VDD=$(CXX_FLAGS_SYS)
 CXX_FLAGS_IFS=$(CXX_FLAGS) $(_CXX_OPTIM_)  -s -zff -zgf -zdp -zu -bd
-CXX_OBJ_OUT=-fo=
-CXX_LST_OUT=
-CXX_PC_2_STDOUT=-pc
 
 !if "$(CC_AS_CXX)" != ""
 ! if "$(CXX_AS_CC)" != ""

@@ -1,4 +1,4 @@
-# $Id: setup.os2debvac365.mk,v 1.19 2002-08-30 18:27:24 bird Exp $
+# $Id: setup.os2debvac365.mk,v 1.20 2002-09-20 04:10:04 bird Exp $
 
 # ---OS2, DEBUG, VAC365-------------------------
 ENV_NAME="OS/2, Debug, IBM VisualAge for C++ 3.6.5"
@@ -20,6 +20,7 @@ ENV_ENVS_FORCE=vac365
 !include $(PATH_MAKE)\setup.os2ld.mk
 _AR_NOFREE      = 1
 !include $(PATH_MAKE)\setup.os2ar.mk
+!include $(PATH_MAKE)\setup.os2allipfc.mk
 !include $(PATH_MAKE)\setup.optional.vac3xx.mk
 
 
@@ -41,7 +42,8 @@ CC_FLAGS_VDD=$(CC_FLAGS_SYS)
 CC_FLAGS_IFS=$(CC_FLAGS_SYS) /Ge-
 CC_OBJ_OUT=/Fo
 CC_LST_OUT=/Fa
-CC_PC_2_STDOUT=/Pd+ /P+
+CC_PC_2_STDOUT=/Pd+ /P+ /Pc+
+CC_PC_2_STRIPPED_STDOUT=/Pd+ /P+ /Pc- /Pe+
 
 CXX_FLAGS=/Q /DDEBUG /DOS2 /D__i386__ /DMODEL=FLAT /Ti+ /O- /Ss+ /C+ $(_CXX_OPTIONAL) $(CXX_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CXX_INCLUDES) $(ALL_INCLUDES) /I$(PATH_INCLUDES)
 CXX_FLAGS_EXE=$(CXX_FLAGS) /Gm+ /Ge+
@@ -51,7 +53,8 @@ CXX_FLAGS_VDD=$(CXX_FLAGS_SYS)
 CXX_FLAGS_IFS=$(CXX_FLAGS_SYS) /Ge-
 CXX_OBJ_OUT=/Fo
 CXX_LST_OUT=/Fa
-CXX_PC_2_STDOUT=/Pd+ /P+
+CXX_PC_2_STDOUT=/Pd+ /P+ /Pc+
+CXX_PC_2_STRIPPED_STDOUT=/Pd+ /P+ /Pc- /Pe+
 
 !if "$(CC_AS_CXX)" != ""
 ! if "$(CXX_AS_CC)" != ""
