@@ -1,4 +1,4 @@
-/* $Id: pefile.cpp,v 1.8 2000-05-28 16:45:12 sandervl Exp $ */
+/* $Id: pefile.cpp,v 1.9 2000-06-26 13:21:34 sandervl Exp $ */
 
 /*
  * PE2LX PE utility functions
@@ -58,7 +58,7 @@ BOOL GetPEOptionalHeader (LPVOID lpFile, PIMAGE_OPTIONAL_HEADER pHeader)
 }
 //******************************************************************************
 //******************************************************************************
-LPVOID ImageDirectoryOffset (LPVOID lpFile, DWORD dwIMAGE_DIRECTORY)
+LPVOID ImageDirectoryOffset(LPVOID lpFile, DWORD dwIMAGE_DIRECTORY)
 {
     PIMAGE_OPTIONAL_HEADER   poh = (PIMAGE_OPTIONAL_HEADER)OPTHEADEROFF (lpFile);
     IMAGE_SECTION_HEADER     sh;
@@ -72,6 +72,23 @@ LPVOID ImageDirectoryOffset (LPVOID lpFile, DWORD dwIMAGE_DIRECTORY)
     }
 
     return (LPVOID)((ULONG)lpFile + poh->DataDirectory[dwIMAGE_DIRECTORY].VirtualAddress); 
+}
+//******************************************************************************
+//******************************************************************************
+DWORD ImageDirectorySize(LPVOID lpFile, DWORD dwIMAGE_DIRECTORY)
+{
+    PIMAGE_OPTIONAL_HEADER   poh = (PIMAGE_OPTIONAL_HEADER)OPTHEADEROFF (lpFile);
+    IMAGE_SECTION_HEADER     sh;
+
+    if (dwIMAGE_DIRECTORY >= poh->NumberOfRvaAndSizes)
+	return 0;
+
+    if(GetSectionHdrByRVA(lpFile, &sh, poh->DataDirectory[dwIMAGE_DIRECTORY].VirtualAddress) == FALSE)
+    {
+	return 0;
+    }
+
+    return poh->DataDirectory[dwIMAGE_DIRECTORY].Size;
 }
 //******************************************************************************
 //******************************************************************************
