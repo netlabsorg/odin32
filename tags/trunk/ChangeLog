@@ -1,10 +1,12 @@
-/* $Id: ChangeLog,v 1.1282 2001-02-22 10:37:00 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1283 2001-02-22 18:17:01 sandervl Exp $ */
 
  2001-02-22: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Changed error string when detecting version mismatch.
     - USER32:   o Fixed incorrect index checking for class and window words.
-                o Allow misaligned access to user longs
+                o Allow misaligned access to window words/longs
                   (fixes crash in Quicken 99)
+                o More minimize changes/fixes for MDI windows.
+                o Update region fix in NotifyFrameChanged method
 
  2001-02-21: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Changes for minimizing windows. Not done yet.
