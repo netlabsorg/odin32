@@ -132,7 +132,8 @@ void ParseLogStatusKERNEL32();
 #define DBG_memory         112
 #define DBG_system         113
 #define DBG_string         114
-#define DBG_MAXFILES       115
+#define DBG_char           115
+#define DBG_MAXFILES       116
 
 extern USHORT DbgEnabledKERNEL32[DBG_MAXFILES];
 extern USHORT DbgEnabledLvl2KERNEL32[DBG_MAXFILES];
