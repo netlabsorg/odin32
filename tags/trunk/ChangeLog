@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.479 1999-11-28 12:35:22 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.480 1999-11-28 17:23:13 sandervl Exp $ */
+
+ 99-11-28: Jens Wiessner <wiessnej@rfi.de>
+	- CRTDLL: Implemented several functions that used to be stubs.
 
  99-11-28: Sander van Leeuwen <sandervl@xs4all.nl>
 	- COMDLG32: Merged with latest wine code (CVS tree dated 991126)
