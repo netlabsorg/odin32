@@ -1,4 +1,4 @@
-/* $Id: winexepeldr.cpp,v 1.15 2001-02-24 12:59:44 sandervl Exp $ */
+/* $Id: winexepeldr.cpp,v 1.16 2001-10-12 00:49:23 phaller Exp $ */
 
 /*
  * Win32 PE loader Exe class
@@ -38,6 +38,12 @@
 
 #define DBG_LOCALLOG	DBG_winexepeldr
 #include "dbglocal.h"
+
+
+#ifdef PROFILE
+#include <perfview.h>
+#endif /* PROFILE */
+
 
 extern char szErrorTitle[];
 extern char szErrorModule[];
@@ -140,7 +146,14 @@ BOOL WIN32API CreateWin32PeLdrExe(char *szFileName, char *szCmdLine,
         return FALSE;
   }
   OS2UnsetExceptionHandler(&exceptFrame);
-
+  
+#ifdef PROFILE
+  // Note: after this point, we might start collecting performance
+  // information about the called functions.
+  PerfView_Initialize();
+#endif /* PROFILE */
+  
+  
   WinExe->start();
 
   delete WinExe;
