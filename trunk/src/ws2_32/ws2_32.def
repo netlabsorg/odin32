@@ -1,4 +1,4 @@
-; $Id: ws2_32.def,v 1.9 2001-10-10 17:19:34 sandervl Exp $
+; $Id: ws2_32.def,v 1.10 2001-10-11 19:24:38 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY WS2_32 INITINSTANCE
@@ -28,7 +28,6 @@ IMPORTS
   getservbyname                                    = WSOCK32.55
   getservbyport                                    = WSOCK32.56
   getsockname                                      = WSOCK32.6
-  getsockopt                                       = WSOCK32.7
   htonl                                            = WSOCK32.8
   htons                                            = WSOCK32.9
   inet_addr                                        = WSOCK32.10
@@ -54,7 +53,7 @@ EXPORTS
   connect                                          @4
   getpeername                                      @5
   getsockname                                      @6
-  getsockopt                                       @7
+  getsockopt = _WS2getsockopt@20                   @7
   htonl                                            @8
   htons                                            @9
   ioctlsocket                                      @10
