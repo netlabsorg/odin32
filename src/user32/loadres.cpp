@@ -1,4 +1,4 @@
-/* $Id: loadres.cpp,v 1.17 1999-12-30 11:20:34 sandervl Exp $ */
+/* $Id: loadres.cpp,v 1.18 2000-01-09 14:37:09 sandervl Exp $ */
 
 /*
  * Win32 resource API functions for OS/2
@@ -389,6 +389,8 @@ HBITMAP WIN32API LoadBitmapA(HINSTANCE hinst, LPCSTR lpszBitmap)
 {
  HBITMAP hBitmap = 0;
 
+  return LoadBitmapA((hinst == 0) ? hInstanceUser32:hinst,lpszBitmap,0,0,0);
+#if 0
   if (!hinst)
   {
     if(IsSystemBitmap((ULONG *)&lpszBitmap))
@@ -398,7 +400,7 @@ HBITMAP WIN32API LoadBitmapA(HINSTANCE hinst, LPCSTR lpszBitmap)
     } else hBitmap = 0;
   } else hBitmap = LoadBitmapA(hinst, lpszBitmap, 0, 0, 0);
   dprintf(("LoadBitmapA returned %08xh\n", hBitmap));
-
+#endif
   return(hBitmap);
 }
 //******************************************************************************
@@ -408,23 +410,13 @@ HBITMAP WIN32API LoadBitmapW(HINSTANCE hinst, LPCWSTR lpszBitmap)
 {
  HBITMAP hBitmap = 0;
 
-  if (!hinst)
-  {
-    if(IsSystemBitmap((ULONG *)&lpszBitmap))
-    {
-      hBitmap = O32_LoadBitmap(hInstanceUser32,(LPCSTR)lpszBitmap);
-      if (!hBitmap) hBitmap = O32_LoadBitmap(hinst,(LPCSTR)lpszBitmap);
-    } else hBitmap = 0;
-  } else
-  {
-    if(HIWORD(lpszBitmap) != 0)
-      lpszBitmap = (LPWSTR)UnicodeToAsciiString((LPWSTR)lpszBitmap);
+  if(HIWORD(lpszBitmap) != 0)
+    lpszBitmap = (LPWSTR)UnicodeToAsciiString((LPWSTR)lpszBitmap);
 
-    hBitmap = LoadBitmapA(hinst, (LPSTR)lpszBitmap, 0, 0, 0);
+  hBitmap = LoadBitmapA((hinst == 0) ? hInstanceUser32:hinst, (LPSTR)lpszBitmap, 0, 0, 0);
 
-    if(HIWORD(lpszBitmap) != 0)
-      FreeAsciiString((LPSTR)lpszBitmap);
-  }
+  if(HIWORD(lpszBitmap) != 0)
+    FreeAsciiString((LPSTR)lpszBitmap);
 
   dprintf(("LoadBitmapW returned %08xh\n", hBitmap));
 
