@@ -1,10 +1,10 @@
 ;******************************************************************************
-; Copyright 1998-2001 knut st. osmundsen
+; Copyright 1998-2002 knut st. osmundsen (bird@anduin.net)
 ; Definition file for kKrnlLib
 ; Project Odin Software License can be found in LICENSE.TXT
 ;******************************************************************************
 PHYSICAL DEVICE kKrnlLib
-DESCRIPTION "Odin32 Ring-0 Kernel Library - copyright (c) 1998-2001 knut st. osmundsen"
+DESCRIPTION "Odin32 Ring-0 Kernel Library - copyright (c) 1998-2002 knut st. osmundsen"
 
 CODE PRELOAD EXECUTEREAD
 DATA PRELOAD
@@ -22,7 +22,8 @@ SEGMENTS
     CODE16_IOSEG        class 'CODE'
     CODE16_INIT         class 'CODE'
 
-    CODE32              class 'CODE'
+    LOGDATA_16BIT       class 'LOGDATA_16BIT'
+    CALLTAB16           class 'CALLTAB16_DATA'
 
     DATA32              class 'DATA'
     c_common            class 'DATA'
@@ -30,9 +31,7 @@ SEGMENTS
     _VFT                class 'CONST'
     CONST32_RO          class 'CONST'
 
-    CALLTAB16           class 'CALLTAB16_DATA'
-    LOGDATA_16BIT       class 'LOGDATA_16BIT'
-
     SYMBOLDB32          class 'SYMBOLDB32'
 
+    CODE32              class 'CODE'
 
