@@ -1,4 +1,4 @@
-/* $Id: myldrEnum32bitRelRecs.cpp,v 1.1 2000-01-24 10:11:48 bird Exp $
+/* $Id: myldrEnum32bitRelRecs.cpp,v 1.2 2000-01-27 23:43:07 bird Exp $
  *
  * myldrEnum32bitRelRecs - ldrEnum32bitRelRecs
  *
@@ -57,15 +57,16 @@ ULONG LDRCALL myldrEnum32bitRelRecs(
 {
     PMODULE pMod;
 
-    kprintf(("ldrEnum32BitRelRecs: pMTE=0x%08x iObject=0x%02x iPageTable=0x%03x pvPage=0x%08x\n"
-             "                     ulPageAddress=0x%08x pvPTDA=0x%08x\n",
-             pMTE, iObject, iPageTable, pvPage, ulPageAddress, pvPTDA
-             ));
-
     pMod = getModuleByMTE(pMTE);
     if (pMod != NULL)
     {
         APIRET rc;
+        #if 1
+        kprintf(("ldrEnum32BitRelRecs: pMTE=0x%08x iObject=0x%02x iPageTable=0x%03x pvPage=0x%08x\n"
+                 "                     ulPageAddress=0x%08x pvPTDA=0x%08x\n",
+                 pMTE, iObject, iPageTable, pvPage, ulPageAddress, pvPTDA
+                 ));
+        #endif
         rc = pMod->Data.pModule->applyFixups(pMTE, iObject, iPageTable, pvPage, ulPageAddress, pvPTDA);
         if (rc != NO_ERROR)
             return rc;
