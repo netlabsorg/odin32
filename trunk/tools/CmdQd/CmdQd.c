@@ -1,4 +1,4 @@
-/* $Id: CmdQd.c,v 1.15 2002-05-24 01:11:35 bird Exp $
+/* $Id: CmdQd.c,v 1.16 2002-05-24 01:57:58 bird Exp $
  *
  * Command Queue Daemon / Client.
  *
@@ -1446,14 +1446,8 @@ void Worker(void * iWorkerId)
             PJOBOUTPUT  pJobOutputLast = NULL;
             RESULTCODES Res;
             PID         pid;
-            HFILE       hStdIn = HF_STDIN;
-            HFILE       hStdOut = HF_STDOUT;
-            HFILE       hStdErr = HF_STDERR;
-            HFILE       hStdInSave = -1;
-            HFILE       hStdOutSave = -1;
-            HFILE       hStdErrSave = -1;
             HPIPE       hPipeR = NULLHANDLE;
-            HPIPE       hPipeW = NULLHANDLE;
+            HPIPE       hPipeW = HF_STDOUT;
 
             //printf("debug-%d: start %s\n", iWorkerId, pJob->JobInfo.szCommand);
 
@@ -1462,23 +1456,23 @@ void Worker(void * iWorkerId)
              */
             WorkerArguments(&szArg[0], &pJob->JobInfo.szzEnv[0], &pJob->JobInfo.szCommand[0],
                             &pJob->JobInfo.szCurrentDir[0], &PathCache);
-            rc = DosCreatePipe(&hPipeR, &hPipeW, sizeof(pJobOutput->szOutput) - 1);
-            if (rc)
-            {
-                Error("Internal Error: Failed to create pipe! rc=%d\n", rc);
-                return;
-            }
-
-            if (DosRequestMutexSem(hmtxExec, SEM_INDEFINITE_WAIT))
-            {
-                DosClose(hPipeR);
-                DosClose(hPipeW);
-                return;
-            }
-
             pJob->pJobOutput = pJobOutput = pJobOutputLast = malloc(sizeof(JOBOUTPUT));
             pJobOutput->pNext = NULL;
             pJobOutput->cchOutput = sprintf(pJobOutput->szOutput, "Job: %s\n", pJob->JobInfo.szCommand);
+
+            if (DosRequestMutexSem(hmtxExec, SEM_INDEFINITE_WAIT))
+            {
+                Error("Internal Error: Failed to take exec mutex! rc=%d\n", rc);
+                return;
+            }
+
+            rc = DosCreatePipe(&hPipeR, &hPipeW, sizeof(pJobOutput->szOutput) - 1);
+            if (rc)
+            {
+                DosReleaseMutexSem(hmtxExec);
+                Error("Internal Error: Failed to create pipe! rc=%d\n", rc);
+                return;
+            }
 
             rc = DosSetDefaultDisk(  pJob->JobInfo.szCurrentDir[0] >= 'a'
                                    ? pJob->JobInfo.szCurrentDir[0] - 'a' + 1
@@ -1486,32 +1480,24 @@ void Worker(void * iWorkerId)
             rc += DosSetCurrentDir(pJob->JobInfo.szCurrentDir);
             if (!rc)
             {
+                static BOOL fStdClosed = FALSE;
+                HFILE   hStdErr = HF_STDERR;
                 assert(   pJob->JobInfo.szzEnv[pJob->JobInfo.cchEnv-1] == '\0'
                        && pJob->JobInfo.szzEnv[pJob->JobInfo.cchEnv-2] == '\0');
-                DosDupHandle(HF_STDIN, &hStdInSave);
-                DosDupHandle(HF_STDOUT, &hStdOutSave);
-                DosDupHandle(HF_STDERR, &hStdErrSave);
-                DosDupHandle(hPipeW, &hStdOut);
+                if (!fStdClosed)
+                {   /* only do this once! */
+                    DosClose(HF_STDIN);
+                    DosClose(HF_STDOUT);
+                    DosClose(HF_STDERR);
+                    fStdClosed = TRUE;
+                }
                 DosDupHandle(hPipeW, &hStdErr);
-                DosClose(HF_STDIN);
                 DosSetFHState(hPipeR, OPEN_FLAGS_NOINHERIT);
-                DosSetFHState(hPipeW, OPEN_FLAGS_NOINHERIT);
-                DosSetFHState(hStdInSave, OPEN_FLAGS_NOINHERIT);
-                DosSetFHState(hStdOutSave, OPEN_FLAGS_NOINHERIT);
-                DosSetFHState(hStdErrSave, OPEN_FLAGS_NOINHERIT);
                 rc = DosExecPgm(szObj, sizeof(szObj), EXEC_ASYNCRESULT,
                                 szArg, pJob->JobInfo.szzEnv, &Res, szArg);
-                hStdIn = HF_STDIN;
-                DosClose(hStdOut); hStdOut = HF_STDOUT;
-                DosClose(hStdErr); hStdErr = HF_STDERR;
-                DosDupHandle(hStdInSave, &hStdIn);
-                DosDupHandle(hStdOutSave, &hStdOut);
-                DosDupHandle(hStdErrSave, &hStdErr);
-                DosClose(hStdInSave);
-                DosClose(hStdOutSave);
-                DosClose(hStdErrSave);
-                DosReleaseMutexSem(hmtxExec);
                 DosClose(hPipeW);
+                DosClose(hStdErr);
+                DosReleaseMutexSem(hmtxExec);
 
 
                 /*
@@ -2638,9 +2624,18 @@ int  shrmemSendClient(int enmMsgTypeResponse)
 void Error(const char *pszFormat, ...)
 {
     va_list arg;
-
+    /* won't workin in daemon mode... */
     va_start(arg, pszFormat);
-    vfprintf(stdout, pszFormat, arg);
+    if (vfprintf(stdout, pszFormat, arg) <= 0)
+    {
+        FILE *phFile = fopen(".\\cmdqd.log", "a+");
+        if (phFile)
+        {
+            fprintf(phFile, "%d:", getpid());
+            vfprintf(phFile, pszFormat, arg);
+            fclose(phFile);
+        }
+    }
     va_end(arg);
 }
 
