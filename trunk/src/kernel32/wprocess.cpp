@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.186 2003-04-02 11:03:33 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.187 2003-04-11 14:21:53 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -372,6 +372,13 @@ void WIN32API DestroyTEB(TEB *winteb)
     // free PostMessage event semaphore
     if(winteb->o.odin.hPostMsgEvent) {
         CloseHandle(winteb->o.odin.hPostMsgEvent);
+    }
+
+    // free shared memory for WM_COPYDATA
+    if (winteb->o.odin.pWM_COPYDATA)
+    {
+        dprintf(("DestroyTEB: freeing WM_COPYDATA: %#p", winteb->o.odin.pWM_COPYDATA));
+        _sfree(winteb->o.odin.pWM_COPYDATA);
     }
 
 #ifdef DEBUG
@@ -2004,7 +2011,7 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
       dwCreationFlags |= DEBUG_PROCESS;
 
     //Only use WGSS to launch the app if it's not PE or PE & win32k loaded
-    if(!fPEExe || (fPEExe && fWin32k)) 
+    if(!fPEExe || (fPEExe && fWin32k))
     {
       if(O32_CreateProcess(szAppName, lpCommandLine, lpProcessAttributes,
                          lpThreadAttributes, bInheritHandles, dwCreationFlags,
@@ -2030,12 +2037,12 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
         {
             lpProcessInfo->dwThreadId = MAKE_THREADID(lpProcessInfo->dwProcessId, lpProcessInfo->dwThreadId);
         }
-  
+
         if(cmdline)
             free(cmdline);
         return(TRUE);
       }
-  
+
       // verify why O32_CreateProcess actually failed.
       // If GetLastError() == 191 (ERROR_INVALID_EXE_SIGNATURE)
       // we can continue to call "PE.EXE".

@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.h,v 1.19 2003-01-03 16:35:54 sandervl Exp $ */
+/* $Id: oslibmsg.h,v 1.20 2003-04-11 14:22:05 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -13,12 +13,20 @@
 #define __OSLIBMSG_H__
 
 
+typedef struct tagCOPYDATASTRUCT_W
+{
+    DWORD   dwData;
+    DWORD   cbData;
+    LPVOID  lpData;
+} COPYDATASTRUCT_W, *PCOPYDATASTRUCT_W, *LPCOPYDATASTRUCT_W;
+
+
 #ifdef __cplusplus
 
 ULONG TranslateWinMsg(ULONG msg);
 
-#define MSG_NOREMOVE	0
-#define MSG_REMOVE	1
+#define MSG_NOREMOVE    0
+#define MSG_REMOVE      1
 
 #ifdef OS2DEF_INCLUDED
 BOOL  OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode, BOOL fMsgRemoved);
@@ -26,9 +34,9 @@ void  WinToOS2MsgTranslate(MSG *winMsg, QMSG *os2Msg, BOOL isUnicode);
 
 #endif
 
-BOOL  OSLibWinGetMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, 
+BOOL  OSLibWinGetMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin,
                      UINT uMsgFilterMax, BOOL isUnicode = FALSE);
-BOOL  OSLibWinPeekMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, 
+BOOL  OSLibWinPeekMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin,
                       UINT uMsgFilterMax, DWORD fRemove, BOOL isUnicode = FALSE);
 void  OSLibWinPostQuitMessage(ULONG nExitCode);
 LONG  OSLibWinDispatchMsg(MSG *msg, BOOL isUnicode = FALSE);
