@@ -1,4 +1,4 @@
-/* $Id: winbase.h,v 1.19 2000-10-03 17:42:28 sandervl Exp $ */
+/* $Id: winbase.h,v 1.20 2000-10-03 17:51:06 sandervl Exp $ */
 
 #ifndef __WINE_WINBASE_H
 #define __WINE_WINBASE_H
@@ -1991,22 +1991,22 @@ INT       WINAPI lstrcmpiW(LPCWSTR,LPCWSTR);
 VOID        WINAPI SetLastError(DWORD);
 
 
-BOOL WIN32API SetTokenInformation(HANDLE                  hToken,
+BOOL WINAPI SetTokenInformation(HANDLE                  hToken,
                                      TOKEN_INFORMATION_CLASS tic,
                                      LPVOID                  lpvInformation,
                                      DWORD                   cbInformation);
-BOOL WIN32API GetUserNameA(  /*PLF Wed  98-02-11 13:33:39*/
+BOOL WINAPI GetUserNameA(  /*PLF Wed  98-02-11 13:33:39*/
     LPTSTR lpBuffer,        /* address of name buffer       */
     LPDWORD lpcchBuffer);    /* address of size of name buffer       */
 
-BOOL WIN32API GetUserNameW( /*KSO Thu 21.05.1998 */
+BOOL WINAPI GetUserNameW( /*KSO Thu 21.05.1998 */
    LPWSTR lpBuffer,
    LPDWORD lpccBuffer
    );
 
-BOOL WIN32API AbortSystemShutdownA(LPTSTR lpMachineName);
-BOOL WIN32API AbortSystemShutdownW(LPWSTR lpMachineName);
-BOOL WIN32API AccessCheckAndAuditAlarmA(LPCSTR              SubsystemName,
+BOOL WINAPI AbortSystemShutdownA(LPTSTR lpMachineName);
+BOOL WINAPI AbortSystemShutdownW(LPWSTR lpMachineName);
+BOOL WINAPI AccessCheckAndAuditAlarmA(LPCSTR              SubsystemName,
                                            LPVOID               HandleId,
                                            LPTSTR               ObjectTypeName,
                                            LPTSTR               ObjectName,
@@ -2017,7 +2017,7 @@ BOOL WIN32API AccessCheckAndAuditAlarmA(LPCSTR              SubsystemName,
                                            LPDWORD              GrantedAccess,
                                            LPBOOL               AccessStatus,
                                            LPBOOL               pfGenerateOnClose);
-BOOL WIN32API AccessCheckAndAuditAlarmW(LPCWSTR              SubsystemName,
+BOOL WINAPI AccessCheckAndAuditAlarmW(LPCWSTR              SubsystemName,
                                            LPVOID               HandleId,
                                            LPWSTR               ObjectTypeName,
                                            LPWSTR               ObjectName,
@@ -2028,43 +2028,43 @@ BOOL WIN32API AccessCheckAndAuditAlarmW(LPCWSTR              SubsystemName,
                                            LPDWORD              GrantedAccess,
                                            LPBOOL               AccessStatus,
                                            LPBOOL               pfGenerateOnClose);
-BOOL WIN32API AddAccessAllowedAce(PACL  pAcl,
+BOOL WINAPI AddAccessAllowedAce(PACL  pAcl,
                                      DWORD dwAceRevision,
                                      DWORD AccessMask,
                                      PSID  pSid);
-BOOL WIN32API AddAccessDeniedAce(PACL  pAcl,
+BOOL WINAPI AddAccessDeniedAce(PACL  pAcl,
                                     DWORD dwAceRevision,
                                     DWORD AccessMask,
                                     PSID  pSid);
-BOOL WIN32API AddAce(PACL   pAcl,
+BOOL WINAPI AddAce(PACL   pAcl,
                         DWORD  dwAceRevision,
                         DWORD  dwStartingAceIndex,
                         LPVOID pAceList,
                         DWORD  nAceListLength);
-BOOL WIN32API AddAuditAccessAce(PACL  pAcl,
+BOOL WINAPI AddAuditAccessAce(PACL  pAcl,
                                    DWORD dwAceRevision,
                                    DWORD dwAccessMask,
                                    PSID  pSid,
                                    BOOL  bAuditSuccess,
                                    BOOL  bAuditFailure);
-BOOL WIN32API AdjustTokenGroups(HANDLE         TokenHandle,
+BOOL WINAPI AdjustTokenGroups(HANDLE         TokenHandle,
                                    BOOL           ResetToDefault,
                                    PTOKEN_GROUPS  NewState,
                                    DWORD          BufferLength,
                                    PTOKEN_GROUPS  PreviousState,
                                    LPDWORD         ReturnLength);
-BOOL WIN32API AllocateLocallyUniqueId(PLUID  Luid);
-BOOL WIN32API AreAllAccessesGranted(DWORD  GrantedAccess,
+BOOL WINAPI AllocateLocallyUniqueId(PLUID  Luid);
+BOOL WINAPI AreAllAccessesGranted(DWORD  GrantedAccess,
                                        DWORD  DesiredAccess);
-BOOL WIN32API AreAnyAccessesGranted(DWORD  GrantedAccess,
+BOOL WINAPI AreAnyAccessesGranted(DWORD  GrantedAccess,
                                        DWORD  DesiredAccess);
-BOOL WIN32API CreatePrivateObjectSecurity(PSECURITY_DESCRIPTOR  ParentDescriptor,
+BOOL WINAPI CreatePrivateObjectSecurity(PSECURITY_DESCRIPTOR  ParentDescriptor,
                                              PSECURITY_DESCRIPTOR  CreatorDescriptor,
                                              PSECURITY_DESCRIPTOR *NewDescriptor,
                                              BOOL                  IsDirectoryObject,
                                              HANDLE                Token,
                                              PGENERIC_MAPPING      GenericMapping);
-BOOL WIN32API CreateProcessAsUserA(HANDLE                 hToken,
+BOOL WINAPI CreateProcessAsUserA(HANDLE                 hToken,
                                       LPCSTR                lpApplicationName,
                                       LPTSTR                 lpCommandLine,
                                       LPSECURITY_ATTRIBUTES  lpProcessAttributes,
@@ -2075,7 +2075,7 @@ BOOL WIN32API CreateProcessAsUserA(HANDLE                 hToken,
                                       LPCSTR                 lpCurrentDirectory,
                                       LPSTARTUPINFOA         lpStartupInfo,
                                       LPPROCESS_INFORMATION  lpProcessInformation);
-BOOL WIN32API CreateProcessAsUserW(HANDLE                 hToken,
+BOOL WINAPI CreateProcessAsUserW(HANDLE                 hToken,
                                       LPCWSTR                lpApplicationName,
                                       LPWSTR                 lpCommandLine,
                                       LPSECURITY_ATTRIBUTES  lpProcessAttributes,
@@ -2086,92 +2086,92 @@ BOOL WIN32API CreateProcessAsUserW(HANDLE                 hToken,
                                       LPCWSTR                lpCurrentDirectory,
                                       LPSTARTUPINFOA         lpStartupInfo,
                                       LPPROCESS_INFORMATION  lpProcessInformation);
-BOOL WIN32API DeleteAce(PACL  pAcl,
+BOOL WINAPI DeleteAce(PACL  pAcl,
                            DWORD dwAceIndex);
-BOOL WIN32API DestroyPrivateObjectSecurity(PSECURITY_DESCRIPTOR *ObjectDescriptor);
-BOOL WIN32API DuplicateToken(HANDLE                       ExistingTokenHandle,
+BOOL WINAPI DestroyPrivateObjectSecurity(PSECURITY_DESCRIPTOR *ObjectDescriptor);
+BOOL WINAPI DuplicateToken(HANDLE                       ExistingTokenHandle,
                                 SECURITY_IMPERSONATION_LEVEL ImpersonationLevel,
                                 PHANDLE                      DuplicateTokenHandle);
-BOOL WIN32API FindFirstFreeAce(PACL pAcl,
+BOOL WINAPI FindFirstFreeAce(PACL pAcl,
                                   LPVOID *pAce);
-BOOL WIN32API GetAce(PACL   pAcl,
+BOOL WINAPI GetAce(PACL   pAcl,
                         DWORD  dwAceIndex,
                         LPVOID *pAce);
-BOOL WIN32API GetAclInformation(PACL                  pAcl,
+BOOL WINAPI GetAclInformation(PACL                  pAcl,
                                    LPVOID                pAclInformation,
                                    DWORD                 nAclInformationLength,
                                    ACL_INFORMATION_CLASS dwAclInformationClass);
-BOOL WIN32API GetKernelObjectSecurity(HANDLE               Handle,
+BOOL WINAPI GetKernelObjectSecurity(HANDLE               Handle,
                                          SECURITY_INFORMATION RequestedInformation,
                                          PSECURITY_DESCRIPTOR pSecurityDescriptor,
                                          DWORD                nLength,
                                          LPDWORD              lpnLengthNeeded);
-BOOL WIN32API GetPrivateObjectSecurity(PSECURITY_DESCRIPTOR ObjectDescriptor,
+BOOL WINAPI GetPrivateObjectSecurity(PSECURITY_DESCRIPTOR ObjectDescriptor,
                                           SECURITY_INFORMATION SecurityInformation,
                                           PSECURITY_DESCRIPTOR ResultantDescriptor,
                                           DWORD                DescriptorLength,
                                           LPDWORD               ReturnLength);
-BOOL WIN32API ImpersonateLoggedOnUser(HANDLE hToken);
-BOOL WIN32API ImpersonateNamedPipeClient(HANDLE hNamedPipe);
-BOOL WIN32API InitiateSystemShutdownA(LPTSTR lpMachineName,
+BOOL WINAPI ImpersonateLoggedOnUser(HANDLE hToken);
+BOOL WINAPI ImpersonateNamedPipeClient(HANDLE hNamedPipe);
+BOOL WINAPI InitiateSystemShutdownA(LPTSTR lpMachineName,
                                          LPTSTR lpMessage,
                                          DWORD  dwTimeout,
                                          BOOL   bForceAppsClosed,
                                          BOOL   bRebootAfterShutdown);
-BOOL WIN32API InitiateSystemShutdownW(LPWSTR lpMachineName,
+BOOL WINAPI InitiateSystemShutdownW(LPWSTR lpMachineName,
                                          LPWSTR lpMessage,
                                          DWORD  dwTimeout,
                                          BOOL   bForceAppsClosed,
                                          BOOL   bRebootAfterShutdown);
-DWORD WIN32API IsTextUnicode(CONST LPVOID  lpBuffer,
+DWORD WINAPI IsTextUnicode(CONST LPVOID  lpBuffer,
                                 int           cb,
                                 LPINT         lpi);
-BOOL WIN32API IsValidAcl(PACL pAcl);
-BOOL WIN32API LogonUserA(LPTSTR  lpszUsername,
+BOOL WINAPI IsValidAcl(PACL pAcl);
+BOOL WINAPI LogonUserA(LPTSTR  lpszUsername,
                             LPTSTR  lpszDomain,
                             LPTSTR  lpszPassword,
                             DWORD   dwLogonType,
                             DWORD   dwLogonProvider,
                             PHANDLE phToken);
-BOOL WIN32API LogonUserW(LPWSTR  lpszUsername,
+BOOL WINAPI LogonUserW(LPWSTR  lpszUsername,
                             LPWSTR  lpszDomain,
                             LPWSTR  lpszPassword,
                             DWORD   dwLogonType,
                             DWORD   dwLogonProvider,
                             PHANDLE phToken);
-BOOL WIN32API LookupAccountNameA(LPCSTR       lpSystemName,
+BOOL WINAPI LookupAccountNameA(LPCSTR       lpSystemName,
                                     LPCSTR       lpAccountName,
                                     PSID          Sid,
                                     LPDWORD       cbSid,
                                     LPTSTR        ReferencedDomainName,
                                     LPDWORD       cbReferencedDomainName,
                                     PSID_NAME_USE peUse);
-BOOL WIN32API LookupAccountNameW(LPCWSTR       lpSystemName,
+BOOL WINAPI LookupAccountNameW(LPCWSTR       lpSystemName,
                                     LPCWSTR       lpAccountName,
                                     PSID          Sid,
                                     LPDWORD       cbSid,
                                     LPWSTR        ReferencedDomainName,
                                     LPDWORD       cbReferencedDomainName,
                                     PSID_NAME_USE peUse);
-BOOL WIN32API LookupPrivilegeDisplayNameA(LPCSTR lpSystemName,
+BOOL WINAPI LookupPrivilegeDisplayNameA(LPCSTR lpSystemName,
                                              LPCSTR lpName,
                                              LPTSTR  lpDisplayName,
                                              LPDWORD cbDisplayName,
                                              LPDWORD lpLanguageId);
-BOOL WIN32API LookupPrivilegeDisplayNameW(LPCWSTR lpSystemName,
+BOOL WINAPI LookupPrivilegeDisplayNameW(LPCWSTR lpSystemName,
                                              LPCWSTR lpName,
                                              LPWSTR  lpDisplayName,
                                              LPDWORD cbDisplayName,
                                              LPDWORD lpLanguageId);
-BOOL WIN32API LookupPrivilegeNameA(LPCSTR lpSystemName,
+BOOL WINAPI LookupPrivilegeNameA(LPCSTR lpSystemName,
                                       PLUID   lpLuid,
                                       LPTSTR  lpName,
                                       LPDWORD cbName);
-BOOL WIN32API LookupPrivilegeNameW(LPCWSTR lpSystemName,
+BOOL WINAPI LookupPrivilegeNameW(LPCWSTR lpSystemName,
                                       PLUID   lpLuid,
                                       LPWSTR  lpName,
                                       LPDWORD cbName);
-BOOL WIN32API MakeAbsoluteSD(PSECURITY_DESCRIPTOR  pSelfRelativeSecurityDescriptor,
+BOOL WINAPI MakeAbsoluteSD(PSECURITY_DESCRIPTOR  pSelfRelativeSecurityDescriptor,
                                 PSECURITY_DESCRIPTOR  pAbsoluteSecurityDescriptor,
                                 LPDWORD               lpdwAbsoluteSecurityDescriptorSize,
                                 PACL                  pDacl,
@@ -2182,15 +2182,15 @@ BOOL WIN32API MakeAbsoluteSD(PSECURITY_DESCRIPTOR  pSelfRelativeSecurityDescript
                                 LPDWORD               lpdwOwnerSize,
                                 PSID                  pPrimaryGroup,
                                 LPDWORD               lpdwPrimaryGroupSize);
-VOID WIN32API MapGenericMask(LPDWORD           AccessMask,
+VOID WINAPI MapGenericMask(LPDWORD           AccessMask,
                                 PGENERIC_MAPPING GenericMapping);
-BOOL WIN32API ObjectCloseAuditAlarmA(LPCSTR SubsystemName,
+BOOL WINAPI ObjectCloseAuditAlarmA(LPCSTR SubsystemName,
                                         LPVOID  HandleId,
                                         BOOL    GenerateOnClose);
-BOOL WIN32API ObjectCloseAuditAlarmW(LPCWSTR SubsystemName,
+BOOL WINAPI ObjectCloseAuditAlarmW(LPCWSTR SubsystemName,
                                         LPVOID  HandleId,
                                         BOOL    GenerateOnClose);
-BOOL WIN32API ObjectOpenAuditAlarmA(LPCSTR              SubsystemName,
+BOOL WINAPI ObjectOpenAuditAlarmA(LPCSTR              SubsystemName,
                                        LPVOID               HandleId,
                                        LPTSTR               ObjectTypeName,
                                        LPTSTR               ObjectName,
@@ -2202,7 +2202,7 @@ BOOL WIN32API ObjectOpenAuditAlarmA(LPCSTR              SubsystemName,
                                        BOOL                 ObjectCreation,
                                        BOOL                 AccessGranted,
                                        LPBOOL               GenerateOnClose);
-BOOL WIN32API ObjectOpenAuditAlarmW(LPCWSTR              SubsystemName,
+BOOL WINAPI ObjectOpenAuditAlarmW(LPCWSTR              SubsystemName,
                                        LPVOID               HandleId,
                                        LPWSTR               ObjectTypeName,
                                        LPWSTR               ObjectName,
@@ -2214,39 +2214,39 @@ BOOL WIN32API ObjectOpenAuditAlarmW(LPCWSTR              SubsystemName,
                                        BOOL                 ObjectCreation,
                                        BOOL                 AccessGranted,
                                        LPBOOL               GenerateOnClose);
-BOOL WIN32API ObjectPrivilegeAuditAlarmA(LPCSTR        lpszSubsystem,
+BOOL WINAPI ObjectPrivilegeAuditAlarmA(LPCSTR        lpszSubsystem,
                                             LPVOID         lpvHandleId,
                                             HANDLE         hClientToken,
                                             DWORD          dwDesiredAccess,
                                             PPRIVILEGE_SET pps,
                                             BOOL           fAccessGranted);
-BOOL WIN32API ObjectPrivilegeAuditAlarmW(LPCWSTR        lpszSubsystem,
+BOOL WINAPI ObjectPrivilegeAuditAlarmW(LPCWSTR        lpszSubsystem,
                                             LPVOID         lpvHandleId,
                                             HANDLE         hClientToken,
                                             DWORD          dwDesiredAccess,
                                             PPRIVILEGE_SET pps,
                                             BOOL           fAccessGranted);
-BOOL WIN32API PrivilegeCheck(HANDLE         hClientToken,
+BOOL WINAPI PrivilegeCheck(HANDLE         hClientToken,
                                 PPRIVILEGE_SET pps,
                                 LPBOOL         lpfResult);
-BOOL WIN32API PrivilegedServiceAuditAlarmA(LPCSTR        lpszSubsystem,
+BOOL WINAPI PrivilegedServiceAuditAlarmA(LPCSTR        lpszSubsystem,
                                               LPCSTR        lpszService,
                                               HANDLE         hClientToken,
                                               PPRIVILEGE_SET pps,
                                               BOOL           fAccessGranted);
-BOOL WIN32API PrivilegedServiceAuditAlarmW(LPCWSTR        lpszSubsystem,
+BOOL WINAPI PrivilegedServiceAuditAlarmW(LPCWSTR        lpszSubsystem,
                                               LPCWSTR        lpszService,
                                               HANDLE         hClientToken,
                                               PPRIVILEGE_SET pps,
                                               BOOL           fAccessGranted);
-BOOL WIN32API SetAclInformation(PACL                  pAcl,
+BOOL WINAPI SetAclInformation(PACL                  pAcl,
                                    LPVOID                lpvAclInfo,
                                    DWORD                 cbAclInfo,
                                    ACL_INFORMATION_CLASS aclic);
-BOOL WIN32API SetKernelObjectSecurity(HANDLE               hObject,
+BOOL WINAPI SetKernelObjectSecurity(HANDLE               hObject,
                                          SECURITY_INFORMATION si,
                                          PSECURITY_DESCRIPTOR psd);
-BOOL WIN32API    SetPrivateObjectSecurity(SECURITY_INFORMATION  si,
+BOOL WINAPI    SetPrivateObjectSecurity(SECURITY_INFORMATION  si,
                                           PSECURITY_DESCRIPTOR  psdSource,
                                           PSECURITY_DESCRIPTOR  *lppsdTarget,
                                           PGENERIC_MAPPING      pgm,
