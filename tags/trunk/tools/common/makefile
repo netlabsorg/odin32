@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2000-05-13 16:04:43 bird Exp $
+# $Id: makefile,v 1.6 2000-10-02 04:01:40 bird Exp $
 
 #
 # PD-Win32 API
@@ -17,16 +17,7 @@
 #
 #
 
-PDWIN32_INCLUDE = ..\..\include
-PDWIN32_TOOLS   = ..\bin
-!include $(PDWIN32_INCLUDE)\pdwin32.mk
-
-
-!ifdef DEBUG
-MAKE_CMD = $(MAKE) -nologo DEBUG=1
-!else
-MAKE_CMD = $(MAKE) -nologo
-!endif
+!include ..\..\include\pdwin32.mk
 
 
 all:    commonicc.lib commongcc.a commongcc.lib
@@ -46,6 +37,10 @@ commongcc.a: dummy
 commongcc.lib: dummy
     -@echo $@
     @$(MAKE_CMD) OMF=1 -f makefile.gcc
+
+kDump.exe: dummy
+    -@echo $@
+    @$(MAKE_CMD) -f makefile.icc kDump.exe
 
 
 #a simple hack to make nmake process the target.
