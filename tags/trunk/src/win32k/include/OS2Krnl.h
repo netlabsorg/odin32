@@ -1,4 +1,4 @@
-/* $Id: OS2Krnl.h,v 1.4 2000-01-14 19:21:12 bird Exp $
+/* $Id: OS2Krnl.h,v 1.5 2000-02-01 12:55:28 bird Exp $
  *
  * OS/2 kernel structures, typedefs and macros.
  *
@@ -8,6 +8,16 @@
 
 #ifndef _OS2Krnl_h_
 #define _OS2Krnl_h_
+
+#if !defined(OS2_INCLUDED)
+    /* when used with h2inc.exe */
+    #define UCHAR   unsigned char
+    #define CHAR    char
+    #define USHORT  unsigned short
+    #define ULONG   unsigned long
+    #define PCHAR   char *
+#endif
+
 
 #pragma pack(1)
 
