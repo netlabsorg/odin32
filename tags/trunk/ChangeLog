@@ -1,10 +1,21 @@
-/* $Id: ChangeLog,v 1.1716 2001-10-02 17:16:18 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1717 2001-10-03 13:51:27 sandervl Exp $ */
+
+ 2001-10-03: Sander van Leeuwen <sandervl@xs4all.nl>
+    - WINMM:    o Allocate handle for allocated timers and verify handle
+                  is valid before using it. 
+                  (prevents crashes when app attempts to delete timer twice
+                   (DivX 4))
+    - DDRAW:    o Fixed memory leaks in SurfBlt4 (rectangles)
+                o Take clipping into account in SurfBlt4. Windowed DirectDraw
+                  blitting now seems to work well. 
+                  (only tried DivX 4; needs more testing)
 
  2001-10-02: Sander van Leeuwen <sandervl@xs4all.nl>
     - REGSVR32: o Must use LoadLibrary, not CoLoadLibrary
                   (Some dlls (divx codec) call CoFreeUnusedLibraries which 
                    unloads our dll if we use CoLoadLibrary (-> crash)
                    NT's regsvr32 doesn't use CoLoadLibrary either)
+    - USER32:   o OSLibWinGetMsg bugfix
 
  2001-10-01: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Lastest Wine revision of GetNextDlgGroupItem ported + modified
