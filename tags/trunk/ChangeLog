@@ -1,4 +1,12 @@
- /* $Id: ChangeLog,v 1.1121 2000-09-12 19:01:30 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.1122 2000-09-12 22:52:20 bird Exp $ */
+
+ 2000-09-13: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - KERNEL32: Added method matchModName to Win32ImageBase.
+                Used matchModName in LoadLibraryExA.
+                Documented and enhanced GetModuleFileNameA/W.
+    - Win32k:   Display build time and date on verbose init.
+                Made sure build time and date is updated everytime
+                it's relinked.
 
  2000-09-12: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: GetCommandLine changes broke LX executable support. Fixed now.
