@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2483 2003-02-13 17:15:56 sandervl Exp $ */
+/* $Id: changelog,v 1.2484 2003-02-14 10:05:14 sandervl Exp $ */
+
+ 2003-02-14: Dietrich Teickner <Dietrich_Teickner@t-online   >
+    - SHELL32:  o Shell file operation updates
 
  2003-02-13: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o Handle SetFocus(0) correctly: keystrokes are converted into
