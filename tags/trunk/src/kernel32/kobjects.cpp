@@ -1,4 +1,4 @@
-/* $Id: kobjects.cpp,v 1.9 2000-02-16 14:25:41 sandervl Exp $ */
+/* $Id: kobjects.cpp,v 1.10 2000-03-16 19:20:39 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -785,4 +785,64 @@ ODINFUNCTION1(HANDLE, ConvertToGlobalHandle,
   return (hHandle);
 }
 
-
+//******************************************************************************
+//******************************************************************************
+ODINFUNCTION6(HANDLE,CreateThread,LPSECURITY_ATTRIBUTES,  lpsa,
+                                  DWORD,                  cbStack,
+                                  LPTHREAD_START_ROUTINE, lpStartAddr,
+                                  LPVOID,                 lpvThreadParm,
+                                  DWORD,                  fdwCreate,
+                                  LPDWORD,                lpIDThread)
+{
+    return HMCreateThread(lpsa, cbStack, lpStartAddr, lpvThreadParm, fdwCreate, lpIDThread);
+}
+//******************************************************************************
+//******************************************************************************
+INT WIN32API GetThreadPriority(HANDLE hThread)
+{
+    return HMGetThreadPriority(hThread);
+}
+//******************************************************************************
+//******************************************************************************
+DWORD WIN32API SuspendThread(HANDLE hThread)
+{
+    return HMSuspendThread(hThread);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API SetThreadPriority(HANDLE hThread, int priority)
+{
+  return HMSetThreadPriority(hThread, priority);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API GetThreadContext(HANDLE hThread, PCONTEXT lpContext)
+{
+  return HMGetThreadContext(hThread, lpContext);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API SetThreadContext(HANDLE hThread, const CONTEXT *lpContext)
+{
+  return HMSetThreadContext(hThread, lpContext);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API TerminateThread(HANDLE hThread, DWORD exitcode)
+{
+  return HMTerminateThread(hThread, exitcode);
+}
+//******************************************************************************
+//******************************************************************************
+DWORD WIN32API ResumeThread(HANDLE hThread)
+{
+  return HMResumeThread(hThread);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API GetExitCodeThread(HANDLE hThread, LPDWORD arg2)
+{
+    return HMGetExitCodeThread(hThread, arg2);
+}
+//******************************************************************************
+//******************************************************************************
