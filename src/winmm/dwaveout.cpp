@@ -1,4 +1,4 @@
-/* $Id: dwaveout.cpp,v 1.16 2000-03-02 14:51:15 sandervl Exp $ */
+/* $Id: dwaveout.cpp,v 1.17 2000-03-03 19:18:46 sandervl Exp $ */
 
 /*
  * Wave playback class
@@ -127,24 +127,12 @@ void DartWaveOut::Init(LPWAVEFORMATEX pwfx)
    MixSetupParms = (MCI_MIXSETUP_PARMS *)malloc(sizeof(MCI_MIXSETUP_PARMS));
    BufferParms   = (MCI_BUFFER_PARMS *)malloc(sizeof(MCI_BUFFER_PARMS));
 
-   switch(pwfx->nBlockAlign) {
-    case 1://8 bits mono
-        BitsPerSample = 8;
-        break;
-    case 2://16 bits mono or 8 bits stereo
-        if(nChannels == 1)
-            BitsPerSample = 16;
-        else    BitsPerSample = 8;
-        break;
-    case 4://16 bits stereo
-        BitsPerSample = 16;
-        break;
-   }
+   BitsPerSample   = pwfx->wBitsPerSample;
    SampleRate      = pwfx->nSamplesPerSec;
    this->nChannels = pwfx->nChannels;
    ulBufSize       = DART_BUFSIZE;
 
-   dprintf(("waveOutOpen: samplerate %d, numChan %d bps %d, format %x", SampleRate, nChannels, BitsPerSample, pwfx->wFormatTag));
+   dprintf(("waveOutOpen: samplerate %d, numChan %d bps %d (%d), format %x", SampleRate, nChannels, BitsPerSample, pwfx->nBlockAlign, pwfx->wFormatTag));
    // Setup the open structure, pass the playlist and tell MCI_OPEN to use it
    memset(&AmpOpenParms,0,sizeof(AmpOpenParms));
 
@@ -540,7 +528,7 @@ ULONG DartWaveOut::getPosition()
 /******************************************************************************/
 /******************************************************************************/
 BOOL DartWaveOut::queryFormat(ULONG formatTag, ULONG nChannels,
-                  ULONG nSamplesPerSec, ULONG sampleSize)
+                              ULONG nSamplesPerSec, ULONG wBitsPerSample)
 {
  MCI_WAVE_GETDEVCAPS_PARMS mciAudioCaps;
  MCI_GENERIC_PARMS    GenericParms;
@@ -548,6 +536,8 @@ BOOL DartWaveOut::queryFormat(ULONG formatTag, ULONG nChannels,
  int i, freqbits = 0;
  ULONG rc, DeviceId;
  BOOL winrc;
+
+  dprintf(("DartWaveOut::queryFormat %x srate=%d, nchan=%d, bps=%d", formatTag, nSamplesPerSec, nChannels, wBitsPerSample));
 
   memset(&mciOpenParms,            /* Object to fill with zeros.       */
          0,                        /* Value to place into the object.  */
@@ -567,19 +557,7 @@ BOOL DartWaveOut::queryFormat(ULONG formatTag, ULONG nChannels,
 
   memset( &mciAudioCaps , 0, sizeof(MCI_WAVE_GETDEVCAPS_PARMS));
 
-  switch(sampleSize) {
-    case 1:
-        mciAudioCaps.ulBitsPerSample = 8;
-        break;
-    case 2:
-        if(nChannels == 1)
-            mciAudioCaps.ulBitsPerSample = 16;
-        else    mciAudioCaps.ulBitsPerSample = 8;
-        break;
-    case 4:
-        mciAudioCaps.ulBitsPerSample = 16;
-        break;
-  }
+  mciAudioCaps.ulBitsPerSample = wBitsPerSample;
   mciAudioCaps.ulFormatTag     = DATATYPE_WAVEFORM;
   mciAudioCaps.ulSamplesPerSec = nSamplesPerSec;
   mciAudioCaps.ulChannels      = nChannels;
@@ -587,7 +565,7 @@ BOOL DartWaveOut::queryFormat(ULONG formatTag, ULONG nChannels,
   mciAudioCaps.ulItem          = MCI_GETDEVCAPS_WAVE_FORMAT;
 
   rc = mciSendCommand(DeviceId,   /* Device ID    */
-                  MCI_GETDEVCAPS,
+                      MCI_GETDEVCAPS,
                       MCI_WAIT | MCI_GETDEVCAPS_EXTENDED | MCI_GETDEVCAPS_ITEM,
                       (PVOID) &mciAudioCaps,
                       0);
