@@ -1,4 +1,4 @@
-/* $Id: asyncthread.cpp,v 1.4 2000-04-15 09:23:36 sandervl Exp $ */
+/* $Id: asyncthread.cpp,v 1.5 2000-05-18 09:09:03 sandervl Exp $ */
 
 /*
  * Async thread help functions
@@ -175,7 +175,7 @@ static PASYNCTHREADPARM FindAsyncEvent(SOCKET s)
 
    pThreadInfo = threadList;
    while(pThreadInfo) {
-	if(pThreadInfo->u.asyncselect.s == s) {
+	if(pThreadInfo->u.asyncselect.s == s && !pThreadInfo->fRemoved) {
 		return pThreadInfo;
 	}
 	pThreadInfo = pThreadInfo->next;
@@ -195,6 +195,10 @@ BOOL FindAndSetAsyncEvent(SOCKET s, HWND hwnd, int msg, ULONG lEvent)
         pThreadInfo->u.asyncselect.lEventsPending = lEvent;
 	pThreadInfo->hwnd                  = hwnd;
 	pThreadInfo->msg                   = msg;
+	if(lEvent == 0) {
+		//make sure this thread isn't used anymore
+		pThreadInfo->fRemoved = TRUE;
+	}
 	//cancel pending select in async select thread (if any)
 	so_cancel(s);
 
