@@ -1228,13 +1228,12 @@ REBAR_ForceResize (REBAR_INFO *infoPtr)
 	infoPtr->hwndSelf, infoPtr->dwStyle,
 	x, y, width, height);
 
-//testestest
 #ifdef __WIN32OS2__
 //NOTE: this one is causing problems!!!!
+    if(height != 0)
 #endif
-//    SetWindowPos (infoPtr->hwndSelf, 0, x, y, width, height,
-//		    SWP_NOZORDER);
-//testestest
+    SetWindowPos (infoPtr->hwndSelf, 0, x, y, width, height,
+		    SWP_NOZORDER);
 }
 
 
