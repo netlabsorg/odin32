@@ -1,4 +1,4 @@
-/* $Id: hmmmap.cpp,v 1.6 1999-08-27 16:51:00 sandervl Exp $ */
+/* $Id: hmmmap.cpp,v 1.7 1999-10-24 22:51:21 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -30,6 +30,7 @@
 #include "HandleManager.H"
 #include "HMMMap.h"
 #include "mmap.h"
+#include "heapshared.h"
 
 /*****************************************************************************
  * Defines                                                                   *
@@ -63,6 +64,7 @@ DWORD HMDeviceMemMapClass::CreateFileMapping(PHMHANDLEDATA         pHMHandleData
   {
 
 	dprintf(("CreateFileMappingA: invalid parameter (combination)!"));
+        dprintf(("Parameters: %x %x %x %x %s", hFile, protect, size_high, size_low, name));
 	return ERROR_INVALID_PARAMETER;
   }
 
