@@ -1,5 +1,3 @@
-/* $Id: windef.h,v 1.26 2000-12-27 18:31:54 sandervl Exp $ */
-
 /*
  * Basic types definitions
  *
@@ -79,6 +77,8 @@ extern "C" {
 #endif
 
 
+#include <odin.h>
+
 /* define needed macros as required */
 #ifndef CALLBACK
   #define CALLBACK    __stdcall
@@ -140,6 +140,11 @@ extern "C" {
   #define APIENTRY    WINAPI
 #endif
 
+#ifndef WIN32API
+  #define WIN32API    WINAPI
+#endif
+
+
 #if (__IBMC__ < 400) && (__IBMCPP__ < 360)
 #ifndef __declspec
   #define __declspec(x)
@@ -159,25 +164,6 @@ extern "C" {
 #endif
 
 /* Anonymous union/struct handling */
-
-#if defined(__WINE__) || defined(__WIN32OS2__)
-#if defined(__cplusplus) && !defined(NONAMELESSUNION)
-# undef NONAMELESSSTRUCT
-# undef NONAMELESSUNION
-#else
-# define NONAMELESSSTRUCT
-# define NONAMELESSUNION
-#endif
-#else
-/* Anonymous struct support starts with gcc/g++ 2.96 */
-# if !defined(NONAMELESSSTRUCT) && defined(__GNUC__) && ((__GNUC__ < 2) || ((__GNUC__ == 2) && (__GNUC_MINOR__ < 96)))
-#  define NONAMELESSSTRUCT
-# endif
-/* Anonymous unions support starts with gcc 2.96/g++ 2.95 */
-# if !defined(NONAMELESSUNION) && defined(__GNUC__) && ((__GNUC__ < 2) || ((__GNUC__ == 2) && ((__GNUC_MINOR__ < 95) || ((__GNUC_MINOR__ == 95) && !defined(__cplusplus)))))
-#  define NONAMELESSUNION
-# endif
-#endif
 
 #ifndef NONAMELESSSTRUCT
 #define DUMMYSTRUCTNAME
