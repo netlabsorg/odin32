@@ -1,4 +1,4 @@
-/* $Id: winmouse.cpp,v 1.18 2001-10-09 05:18:05 phaller Exp $ */
+/* $Id: winmouse.cpp,v 1.19 2001-10-12 07:05:15 phaller Exp $ */
 /*
  * Mouse handler for DINPUT
  *
@@ -124,9 +124,16 @@ BOOL DInputMouseHandler(HWND hwnd, ULONG msg, ULONG x, ULONG y)
 }
 //******************************************************************************
 //******************************************************************************
+
+// capture handle "cache"
+static HWND hwndWin32Capture = 0;
+
 ODINFUNCTION0(HWND, GetCapture)
 {
-  return OS2ToWin32Handle(OSLibWinQueryCapture());
+  if (0 == hwndWin32Capture)
+    hwndWin32Capture = OS2ToWin32Handle(OSLibWinQueryCapture());
+  
+  return hwndWin32Capture;
 }
 //******************************************************************************
 //******************************************************************************
@@ -135,7 +142,10 @@ ODINFUNCTION1(HWND, SetCapture,
 {
   HWND hwndPrev = GetCapture();
   BOOL rc;
-
+  
+  // invalidate capture "cache"
+  hwndWin32Capture = 0;
+  
   if(hwnd == 0) 
   {
     ReleaseCapture();
@@ -170,6 +180,10 @@ ODINFUNCTION0(BOOL, ReleaseCapture)
   BOOL ret;
 
   hwndPrev = GetCapture();
+  
+  // invalidate capture "cache"
+  hwndWin32Capture = 0;
+  
   ret = OSLibWinSetCapture(0);
   if(hwndPrev) 
   {
