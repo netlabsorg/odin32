@@ -1,4 +1,4 @@
-# $Id: setup.win32debwat11.mk,v 1.15 2003-06-30 13:19:51 bird Exp $
+# $Id: setup.win32debwat11.mk,v 1.16 2003-09-14 18:53:03 bird Exp $
 
 # ---WIN32, DEBUG, WAT11-------------------------
 ENV_NAME="Win32, Debug, Watcom C/C++ v11.0c"
@@ -26,12 +26,12 @@ TOOL_MAPSYM_TYPE= WLINK
 ! include $(PATH_MAKE)\setup.os2relwlink.mk
 !endif
 !include $(PATH_MAKE)\setup.optional.watcom11x.mk
+!include $(PATH_MAKE)\setup.os2allwlib.mk
 
 
 #
 # The tools
 #
-AR=ilib.exe
 CC=wcc386.exe
 CXX=wpp386.exe
 IMPLIB=implib.exe
@@ -41,13 +41,6 @@ TOOL_STRIP=
 #
 # The flags
 #
-AR_FLAGS=/nologo /noignorecase
-AR_CMD=$(AR) $(AR_FLAGS) $@ @$(TARGET_LNK)
-_AR_LNK1= "$(TARGET_OBJS: ="&^
-")"
-AR_LNK1= $(_AR_LNK1:""=)
-AR_LNK2= $(@R).lst
-
 CC_FLAGS=-bt=nt -dDEBUG -dWIN32 -d__32BIT__ -d__i386__ -zq -fr=nul -bm -ze -w4 -d2 -hc -zc $(_CC_OPTIONAL) $(CC_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CC_INCLUDES:-I=-i=) $(ALL_INCLUDES:-I=-i=) -i=$(PATH_INCLUDES) -i=$(WATCOM)\h\nt -i=$(WATCOM)\h
 CC_FLAGS_EXE=$(CC_FLAGS)
 CC_FLAGS_DLL=$(CC_FLAGS) -bd
