@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.818 2000-03-18 21:17:55 mike Exp $ */
+ /* $Id: ChangeLog,v 1.819 2000-03-19 09:16:54 mike Exp $ */
+
+ 2000-03-19: Michal Necasek <mike@mendelu.cz>
+        - DINPUT: Few fixes, now Fallout 1/2 almost works
 
  2000-03-18: Michal Necasek <mike@mendelu.cz>
         - DDRAW: Fixed messed up DPA callback calling convention

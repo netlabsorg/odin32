@@ -1,4 +1,4 @@
-/* $Id: dinput.cpp,v 1.4 2000-01-22 10:31:06 sandervl Exp $ */
+/* $Id: dinput.cpp,v 1.5 2000-03-19 09:16:58 mike Exp $ */
 /*              DirectInput
  *
  * Copyright 1998 Marcus Meissner
@@ -217,6 +217,7 @@ HRESULT WINAPI DirectInputCreateA(HINSTANCE hinst, DWORD dwVersion, LPDIRECTINPU
         This->ref = 1;
         ICOM_VTBL(This) = &ddiavt;
         *ppDI=(IDirectInputA*)This;
+        OSLibInit();
         return 0;
 }
 /******************************************************************************
@@ -522,11 +523,41 @@ static HRESULT WINAPI SysKeyboardAImpl_GetDeviceState(
         LPDIRECTINPUTDEVICE2A iface,DWORD len,LPVOID ptr
 )
 {
+        ICOM_THIS(SysKeyboardAImpl,iface);
+//        TRACE("DINPUT-SKAI: GetDeviceData (this=%p,%ld,%p)\n",
+//              This, len, ptr);
+
 #ifdef __WIN32OS2__
-        return OSLibGetDIState(len, ptr) ? DI_OK : E_FAIL;
+//        return OSLibGetDIState(len, ptr) ? DI_OK : E_FAIL;
+        if (ptr == NULL || len > 256)
+           return E_FAIL;
+
+        memcpy(ptr, This->keystate, len);
+        return DI_OK;
 #else
         return KEYBOARD_Driver->pGetDIState(len, ptr)?DI_OK:E_FAIL;
 #endif
+}
+
+static ULONG WINAPI SysKeyboardAImpl_Release(LPDIRECTINPUTDEVICE2A iface)
+{
+        ICOM_THIS(SysKeyboardAImpl,iface);
+        TRACE("DINPUT-SKAI: Release (this=%p)\n", This);
+
+        This->ref--;
+        if (This->ref)
+                return This->ref;
+
+        /* Free the data queue */
+        if (This->data_queue != NULL)
+          HeapFree(GetProcessHeap(),0,This->data_queue);
+
+        /* Remeove the previous event handler (in case of releasing an acquired
+           keyboard device) */
+        KEYBOARD_Enable(NULL);
+
+        HeapFree(GetProcessHeap(),0,This);
+        return 0;
 }
 
 static HRESULT WINAPI SysKeyboardAImpl_GetDeviceData(
@@ -593,18 +624,26 @@ LRESULT CALLBACK event_keyHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPa
    TRACE("DINPUT-SKAI: keyHandler (msg=%x wParam=0x%X, lParam=0x%lX)\n", msg, wParam, lParam);
 
    SysKeyboardAImpl* This = (SysKeyboardAImpl*) current_keylock;
+   BYTE  scan = (lParam >> 16) & 0xFF;
 
    // fake a key up transition for typematic repeat
    if (msg == WM_KEYDOWN)
       if (lParam & 0x40000000) {              // key was down before
          dprintf(("Repeat\n"));
-         GEN_KEYEVENT((lParam >> 16) & 0xFF,  // scancode
+         GEN_KEYEVENT(scan,                   // scancode
                       0,                      // key up
                       time(NULL), evsequence++);
       }
-   GEN_KEYEVENT((lParam >> 16) & 0xFF,  // scancode
+
+   GEN_KEYEVENT(scan,  // scancode
                 (lParam & 0x80000000) ? 0 : 0x80,
                 time(NULL), evsequence++);
+
+   if (msg == WM_KEYDOWN)
+         This->keystate[scan] = 0x80;
+   else
+         This->keystate[scan] = 0x00;
+
    return TRUE;
 }
 
@@ -631,10 +670,6 @@ static HRESULT WINAPI SysKeyboardAImpl_Unacquire(LPDIRECTINPUTDEVICE2A iface)
 
         /* unregister the callback */
         KEYBOARD_Enable(NULL);
-
-        /* Free the data queue */
-        if (This->data_queue != NULL)
-          HeapFree(GetProcessHeap(),0,This->data_queue);
 
         /* No more locks */
         current_keylock = NULL;
@@ -986,7 +1021,7 @@ static void WINAPI dinput_mouse_event( DWORD dwFlags, DWORD dx, DWORD dy,
     return ;
   }
 
-  TRACE(" %ld %ld ", posX, posY);
+  TRACE("DINPUT-SMAI: event %ld, %ld", posX, posY);
 
   if ( dwFlags & MOUSEEVENTF_MOVE ) {
     if (This->absolute) {
@@ -1609,7 +1644,7 @@ ICOM_VTABLE(IDirectInputDevice2A) SysKeyboardAvt =
         ICOM_MSVTABLE_COMPAT_DummyRTTIVALUE
         IDirectInputDevice2AImpl_QueryInterface,
         IDirectInputDevice2AImpl_AddRef,
-        IDirectInputDevice2AImpl_Release,
+        SysKeyboardAImpl_Release,
         IDirectInputDevice2AImpl_GetCapabilities,
         IDirectInputDevice2AImpl_EnumObjects,
         IDirectInputDevice2AImpl_GetProperty,
