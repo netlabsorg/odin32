@@ -1,4 +1,4 @@
-/* $Id: npipe.cpp,v 1.10 2002-02-09 17:27:32 sandervl Exp $ */
+/* $Id: npipe.cpp,v 1.11 2003-04-02 12:58:30 sandervl Exp $ */
 /*
  * Win32 Named pipes API
  *
@@ -388,7 +388,7 @@ BOOL WIN32API SetNamedPipeHandleState(HANDLE  hNamedPipe,
 }
 
 /*****************************************************************************
- * Name      : DWORD TransactNamedPipe
+ * Name      : BOOL TransactNamedPipe
  * Purpose   : The TransactNamedPipe function combines into a single network
  *             operation the functions that write a message to and read a
  *             message from the specified named pipe.
@@ -407,13 +407,13 @@ BOOL WIN32API SetNamedPipeHandleState(HANDLE  hNamedPipe,
  * Author    : Przemyslaw Dobrowolski [Mon, 2000/01/03 08:48]
  *****************************************************************************/
 
-DWORD WIN32API TransactNamedPipe(HANDLE  hNamedPipe,
-                                 LPVOID  lpvWriteBuf,
-                                 DWORD   cbWriteBuf,
-                                 LPVOID  lpvReadBuf,
-                                 DWORD   cbReadBuf,
-                                 LPDWORD lpcbRead,
-                                 LPOVERLAPPED lpo)
+BOOL WIN32API TransactNamedPipe(HANDLE  hNamedPipe,
+                                LPVOID  lpvWriteBuf,
+                                DWORD   cbWriteBuf,
+                                LPVOID  lpvReadBuf,
+                                DWORD   cbReadBuf,
+                                LPDWORD lpcbRead,
+                                LPOVERLAPPED lpo)
 {
   return(HMTransactNamedPipe( hNamedPipe,
                               lpvWriteBuf,

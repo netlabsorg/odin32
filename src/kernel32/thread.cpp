@@ -1,4 +1,4 @@
-/* $Id: thread.cpp,v 1.53 2003-03-27 14:00:54 sandervl Exp $ */
+/* $Id: thread.cpp,v 1.54 2003-04-02 12:58:31 sandervl Exp $ */
 
 /*
  * Win32 Thread API functions
@@ -272,6 +272,30 @@ BOOL WIN32API SetPriorityClass(HANDLE hProcess, DWORD dwPriority)
     priorityclass = dwPriority;
     return TRUE;
 //    return O32_SetPriorityClass(hProcess, dwPriority);
+}
+//******************************************************************************
+//******************************************************************************
+/*****************************************************************************
+ * Name      : BOOL SetThreadPriorityBoost
+ * Purpose   : The SetThreadPriorityBoost function disables or enables 
+ *             the ability of the system to temporarily boost the priority 
+ *             of a thread.
+ * Parameters: Unknown (wrong)
+ * Variables :
+ * Result    : Unknown
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1999/06/08 21:44]
+ *****************************************************************************/
+
+BOOL WIN32API SetThreadPriorityBoost(HANDLE hThread,
+                                     BOOL DisablePriorityBoost)
+{
+  dprintf(("KERNEL32: SetThreadPriorityBoost(%08xh, %08xh) not implemented\n",
+           hThread,DisablePriorityBoost));
+
+  return FALSE;
 }
 //******************************************************************************
 //******************************************************************************

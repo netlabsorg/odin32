@@ -1,4 +1,4 @@
-/* $Id: handlenames.cpp,v 1.5 2002-04-29 17:05:29 sandervl Exp $ */
+/* $Id: handlenames.cpp,v 1.6 2003-04-02 12:58:29 sandervl Exp $ */
 
 /*
  * Win32 Handle Manager Object Namespace for OS/2
@@ -30,6 +30,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <win32type.h>
 
 #include <ccollection.h>
 #include "handlenames.h"

@@ -1,4 +1,4 @@
-/* $Id: registry.cpp,v 1.20 2003-01-08 14:25:40 sandervl Exp $ */
+/* $Id: registry.cpp,v 1.21 2003-04-02 12:58:30 sandervl Exp $ */
 
 /*
  * Win32 registry API functions for OS/2
@@ -269,7 +269,7 @@ LONG WIN32API RegCreateKeyExW(HKEY                  hKey,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-LONG WIN32API RegDeleteKeyW(HKEY hKey, LPWSTR lpszSubKey)
+LONG WIN32API RegDeleteKeyW(HKEY hKey, LPCWSTR lpszSubKey)
 {
   char *astring = UnicodeToAsciiString(lpszSubKey);
   LONG  rc;
@@ -877,7 +877,7 @@ LONG WIN32API RegQueryValueW(HKEY    hkey,
  *****************************************************************************/
 
 LONG WIN32API RegQueryValueExA(HKEY   hkey,
-                               LPSTR   lpszValueName,
+                               LPCSTR   lpszValueName,
                                LPDWORD lpdwReserved,
                                LPDWORD lpdwType,
                                LPBYTE  lpbData,
@@ -943,7 +943,7 @@ LONG WIN32API RegQueryValueExA(HKEY   hkey,
  *****************************************************************************/
 
 LONG WIN32API RegQueryValueExW(HKEY   hkey,
-                               LPWSTR  lpszValueName,
+                               LPCWSTR  lpszValueName,
                                LPDWORD lpdwReserved,
                                LPDWORD lpdwType,
                                LPBYTE  lpbData,

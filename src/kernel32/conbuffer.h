@@ -1,4 +1,4 @@
-/* $Id: conbuffer.h,v 1.5 2001-12-05 14:15:57 sandervl Exp $ */
+/* $Id: conbuffer.h,v 1.6 2003-04-02 12:58:28 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -78,7 +78,7 @@ class HMDeviceConsoleBufferClass : public HMDeviceHandler
   /* this is a handler method for calls to GetFileType() */
   virtual DWORD GetFileType (PHMHANDLEDATA pHMHandleData);
 
-  virtual DWORD  CloseHandle(PHMHANDLEDATA pHMHandleData);
+  virtual BOOL  CloseHandle(PHMHANDLEDATA pHMHandleData);
 
   virtual DWORD  _DeviceRequest (PHMHANDLEDATA pHMHandleData,
                                  ULONG         ulRequestCode,
