@@ -1,4 +1,4 @@
-/* $Id: odin32pack.cmd,v 1.5 2000-07-10 17:42:16 bird Exp $
+/* $Id: odin32pack.cmd,v 1.6 2000-12-03 07:24:37 bird Exp $
  *
  * Make the two zip files.
  *
@@ -11,11 +11,9 @@
  */
     sStartDir = directory();
 
-    call ChDir 'bin';
-    call packdir 'debug', 'debug'
-    call packdir 'release', 'release'
-    call ChDir '..';
-
+    /*
+     * Make .WPI files.
+     */
     call ChDir 'tools\install';
     'call odin.cmd debug'
     if (RC <> 0) then call failure rc, 'odin.cmd debug failed.';
@@ -25,8 +23,17 @@
     if (RC <> 0) then call failure rc, 'failed to move the *.wpi ->' sStartDir;
     call ChDir '..\..';
 
+    /*
+     * Make .ZIP files.
+     */
+    call ChDir 'bin';
+    call packdir 'debug', 'debug'
+    call packdir 'release', 'release'
+    call ChDir '..';
 
+    /* return successfully */
     exit(0);
+
 
 packdir: procedure expose sStartDir;
 parse arg sDir, sType;
@@ -44,9 +51,6 @@ parse arg sDir, sType;
     'del /Q /Y /Z /X .\glide\Voodoo2\CVS > nul 2>&1'
     call copy '..\odin.ini'
     call copy '..\..\doc\odin.ini.txt'
-    call copy '..\Glide\readme.txt', 'Glide\readme.txt'
-    call copy '..\Glide\Voodoo1\readme.txt', 'Glide\Voodoo1\readme.txt'
-    call copy '..\Glide\Voodoo2\readme.txt', 'Glide\Voodoo2\readme.txt'
 
     /*
      * Create a pack directory in /bin and go into it.
@@ -57,10 +61,13 @@ parse arg sDir, sType;
     'del /Q /Y /Z *' /* Perform some cleanup */
 
     /* Copy root files into the pack directory. */
-    call copy '..\..\license.txt';
+    call copy '..\..\LICENSE.txt';
     call copy '..\..\ChangeLog';
-    call copy '..\..\doc\readme.txt';
-    call copy '..\..\doc\logging.txt';
+    call copy '..\..\doc\Readme.txt';
+    call copy '..\..\doc\Logging.txt';
+    call copy '..\..\doc\ReportingBugs.txt';
+    call copy '..\..\doc\ChangeLog-2000';
+    call copy '..\..\doc\ChangeLog-1999';
 
     /*
      * Move (=rename) the /bin/<release|debug> dir into /pack/system32
