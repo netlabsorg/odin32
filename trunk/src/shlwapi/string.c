@@ -1,5 +1,25 @@
+/*
+ * Shlwapi string functions
+ *
+ * Copyright 1998 Juergen Schmied
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ */
+
 #include <ctype.h>
-#include <stdlib.h> 
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -9,19 +29,13 @@
 #include "wingdi.h"
 #include "winuser.h"
 #include "winreg.h"
-#ifdef __WIN32OS2__
-#include "shlobj.h"
-#define NO_SHLWAPI_STREAM
-#include "shlwapi.h"
-#else
 #define NO_SHLWAPI_STREAM
 #include "shlwapi.h"
 #include "shlobj.h"
-#endif
 #include "wine/unicode.h"
-#include "debugtools.h"
+#include "wine/debug.h"
 
-DEFAULT_DEBUG_CHANNEL(shell);
+WINE_DEFAULT_DEBUG_CHANNEL(shell);
 
 /*************************************************************************
  * ChrCmpIA					[SHLWAPI.385]
@@ -254,7 +268,7 @@ LPSTR WINAPI StrDupA (LPCSTR lpSrc)
 {
 	int len = strlen(lpSrc);
 	LPSTR lpDest = (LPSTR) LocalAlloc(LMEM_FIXED, len+1);
-	
+
 	TRACE("%s\n", lpSrc);
 
 	if (lpDest) strcpy(lpDest, lpSrc);
@@ -268,7 +282,7 @@ LPWSTR WINAPI StrDupW (LPCWSTR lpSrc)
 {
 	int len = strlenW(lpSrc);
 	LPWSTR lpDest = (LPWSTR) LocalAlloc(LMEM_FIXED, sizeof(WCHAR) * (len+1));
-	
+
 	TRACE("%s\n", debugstr_w(lpSrc));
 
 	if (lpDest) strcpyW(lpDest, lpSrc);
@@ -294,9 +308,9 @@ int WINAPI StrCSpnA (LPCSTR lpStr, LPCSTR lpSet)
 	      pos = j;
 	    }
 	  }
-	}      
+	}
 	TRACE("-- %u\n", pos);
-	return pos;	
+	return pos;
 }
 
 /*************************************************************************
@@ -318,9 +332,9 @@ int WINAPI StrCSpnW (LPCWSTR lpStr, LPCWSTR lpSet)
 	      pos = j;
 	    }
 	  }
-	}      
+	}
 	TRACE("-- %u\n", pos);
-	return pos;	
+	return pos;
 }
 
 /**************************************************************************
@@ -341,7 +355,7 @@ LPSTR WINAPI StrRChrA( LPCSTR lpStart, LPCSTR lpEnd, WORD wMatch )
         if (*lpStart != LOBYTE(wMatch)) continue;
         if (dbcs && lpStart[1] != HIBYTE(wMatch)) continue;
         lpGotIt = lpStart;
-    }    
+    }
     return (LPSTR)lpGotIt;
 }
 
@@ -389,7 +403,7 @@ LPSTR WINAPI StrRChrIA( LPCSTR lpStart, LPCSTR lpEnd, WORD wMatch )
 	} else {
 	    if (toupper(*lpStart) == toupper(wMatch)) lpGotIt = lpStart;
 	}
-    }    
+    }
     return (LPSTR)lpGotIt;
 }
 
@@ -451,7 +465,7 @@ LPWSTR WINAPI StrCatBuffW(LPWSTR front, LPCWSTR back, INT size)
 
 /*************************************************************************
  * StrRetToBufA					[SHLWAPI.@]
- * 
+ *
  * converts a STRRET to a normal string
  *
  * NOTES
@@ -496,7 +510,7 @@ HRESULT WINAPI StrRetToBufA (LPSTRRET src, const ITEMIDLIST *pidl, LPSTR dest, D
 
 /*************************************************************************
  * StrRetToBufW					[SHLWAPI.@]
- * 
+ *
  * converts a STRRET to a normal string
  *
  * NOTES
@@ -563,7 +577,7 @@ LPSTR WINAPI StrFormatByteSizeA ( DWORD dw, LPSTR pszBuf, UINT cchBuf )
 	{ sprintf (buf,"%3.1f GB", (FLOAT)dw/1073741824L);
 	}
 	lstrcpynA (pszBuf, buf, cchBuf);
-	return pszBuf;	
+	return pszBuf;
 }
 
 /*************************************************************************
@@ -619,32 +633,4 @@ BOOL WINAPI StrTrimA(LPSTR pszSource, LPCSTR pszTrimChars)
     }
     TRACE("<- '%s'\n", pszSource);
     return trimmed;
-}
-
-/*************************************************************************
- *      wnsprintfA	[SHLWAPI.@]
- */
-int WINAPIV wnsprintfA(LPSTR lpOut, int cchLimitIn, LPCSTR lpFmt, ...)
-{
-    va_list valist;
-    INT res;
-
-    va_start( valist, lpFmt );
-    res = wvsnprintfA( lpOut, cchLimitIn, lpFmt, valist );
-    va_end( valist );
-    return res;
-}
-
-/*************************************************************************
- *      wnsprintfW	[SHLWAPI.@]
- */
-int WINAPIV wnsprintfW(LPWSTR lpOut, int cchLimitIn, LPCWSTR lpFmt, ...)
-{
-    va_list valist;
-    INT res;
-
-    va_start( valist, lpFmt );
-    res = wvsnprintfW( lpOut, cchLimitIn, lpFmt, valist );
-    va_end( valist );
-    return res;
 }
