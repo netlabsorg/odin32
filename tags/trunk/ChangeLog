@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.630 2000-01-09 19:47:16 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.631 2000-01-10 17:19:51 cbratschi Exp $ */
+
+ 2000-01-10: Christoph Bratschi <cbratschi@datacomm.ch>
+	- USER32/NEW: activated menu code
 
  2000-01-09: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Added border size for top-level windows in OSLibWinConvertStyle 
