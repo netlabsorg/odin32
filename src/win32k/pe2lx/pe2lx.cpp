@@ -1,4 +1,4 @@
-/* $Id: pe2lx.cpp,v 1.7 1999-11-10 01:45:37 bird Exp $
+/* $Id: pe2lx.cpp,v 1.8 1999-11-10 01:53:41 bird Exp $
  *
  * Pe2Lx class implementation. Ring 0 and Ring 3
  *
@@ -4228,5 +4228,6 @@ ULONG BufferedRVARead::readToBuffer(ULONG ulRVA)
 
     return NO_ERROR;
 }
+
 
 /* end of file */
