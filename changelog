@@ -1,9 +1,11 @@
-/* $Id: changelog,v 1.2214 2002-07-12 08:58:50 sandervl Exp $ */
+/* $Id: changelog,v 1.2215 2002-07-12 09:22:27 sandervl Exp $ */
 
  2002-07-12: Sander van Leeuwen <sandervl@innotek.de> 
     - WINMM:    o Changed init order; do not check for MMPM2 presence if
                   wave audio was already disabled
                 o Minor cleanup for mixer code
+                o Touch GETAPIMAP array to force OS/2 to make it valid; some 
+                  braindead audio drivers do not check pointers.
 
  2002-07-11: Platon Fomichev <platon@innotek.de>
     - COMCTL32: o Listview: clear background for area without items (ownerdrawn)
