@@ -1,4 +1,4 @@
-/* $Id: commctrl.h,v 1.23 2000-02-25 16:58:32 cbratschi Exp $ */
+/* $Id: commctrl.h,v 1.24 2000-03-17 17:10:51 cbratschi Exp $ */
 /*
  * Common controls definitions
  */
@@ -1251,7 +1251,7 @@ CreateMappedBitmap (HINSTANCE, INT, UINT, LPCOLORMAP, INT);
 /* Tool tips */
 
 #define TOOLTIPS_CLASS16        "tooltips_class"
-#define TOOLTIPS_CLASSA       "tooltips_class32"
+#define TOOLTIPS_CLASSA         "tooltips_class32"
 #define TOOLTIPS_CLASS32W       L"tooltips_class32"
 #define TOOLTIPS_CLASS          WINELIB_NAME_AW(TOOLTIPS_CLASS)
 
@@ -1271,7 +1271,14 @@ CreateMappedBitmap (HINSTANCE, INT, UINT, LPCOLORMAP, INT);
 #define TTF_ABSOLUTE            0x0080
 #define TTF_TRANSPARENT         0x0100
 #define TTF_DI_SETITEM          0x8000  /* valid only on the TTN_NEEDTEXT callback */
-
+//CB: Odin only position flags (TTF_ABSOLUTE must be set)
+#define TTF_ALIGNRIGHT  0x00000000
+#define TTF_ALIGNLEFT   0x10000000
+#define TTF_HCENTER     0x20000000
+#define TTF_ALIGNBOTTOM 0x00000000
+#define TTF_ALIGNTOP    0x40000000
+#define TTF_VCENTER     0x80000000
+#define TTF_ALIGNMASK   0xF0000000
 
 #define TTDT_AUTOMATIC          0
 #define TTDT_RESHOW             1
