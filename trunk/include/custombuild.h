@@ -91,5 +91,8 @@ void WIN32API DisableASPI();
 //force color to mono cursor conversion
 void WIN32API CustForceMonoCursor();
 
+//force GetVolumeInformation to tell the app all partitions are FAT
+void WIN32API CustForce2GBFileSize();
+
 #endif  /*__CUSTOMBUILD_H__*/
 
