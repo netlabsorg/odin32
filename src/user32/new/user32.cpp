@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.14 1999-08-19 12:53:56 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.15 1999-08-24 15:57:27 cbratschi Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -76,7 +76,7 @@
 // WIN32API WNDPROC_CALLBACK
 // WIN32API YieldTask
 
-//Coordinate transformation
+/* Coordinate Transformation */
 
 inline void OS2ToWin32ScreenPos(POINT *dest,POINT *source)
 {
@@ -89,8 +89,256 @@ inline void Win32ToOS2ScreenPos(POINT *dest,POINT *source)
   OS2ToWin32ScreenPos(dest,source); //transform back
 }
 
+/* Rectangle Functions - parts from wine/windows/rect.c */
+
+BOOL WIN32API CopyRect( PRECT lprcDst, const RECT * lprcSrc)
+{
+//    ddprintf(("USER32:  CopyRect\n"));
+    if (!lprcDst || !lprcSrc) {
+        SetLastError(ERROR_INVALID_PARAMETER);
+        return FALSE;
+    }
+
+    memcpy(lprcDst,lprcSrc,sizeof(RECT));
+
+    return TRUE;
+}
 //******************************************************************************
 //******************************************************************************
+BOOL WIN32API EqualRect( const RECT *lprc1, const RECT *lprc2)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  EqualRect\n");
+#endif
+    if (!lprc1 || !lprc2)
+    {
+      SetLastError(ERROR_INVALID_PARAMETER);
+      return FALSE;
+    }
+
+    return (lprc1->left == lprc2->left &&
+            lprc1->right == lprc2->right &&
+            lprc1->top == lprc2->top &&
+            lprc1->bottom == lprc2->bottom);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API InflateRect( PRECT lprc, int dx, int  dy)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  InflateRect\n");
+#endif
+    if (!lprc)
+    {
+      SetLastError(ERROR_INVALID_PARAMETER);
+      return FALSE;
+    }
+
+    lprc->left   -= dx;
+    lprc->right  += dx;
+    lprc->top    -= dy;
+    lprc->bottom += dy;
+
+    return TRUE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API IntersectRect( PRECT lprcDst, const RECT * lprcSrc1, const RECT * lprcSrc2)
+{
+#ifdef DEBUG
+////    WriteLog("USER32:  IntersectRect\n");
+#endif
+    if (!lprcDst || !lprcSrc1 || !lprcSrc2)
+    {
+      SetLastError(ERROR_INVALID_PARAMETER);
+      return FALSE;
+    }
+
+    if (IsRectEmpty(lprcSrc1) || IsRectEmpty(lprcSrc2) ||
+       (lprcSrc1->left >= lprcSrc2->right) || (lprcSrc2->left >= lprcSrc1->right) ||
+       (lprcSrc1->top >= lprcSrc2->bottom) || (lprcSrc2->top >= lprcSrc1->bottom))
+    {
+      SetLastError(ERROR_INVALID_PARAMETER);
+      SetRectEmpty(lprcDst);
+      return FALSE;
+    }
+    lprcDst->left   = MAX(lprcSrc1->left,lprcSrc2->left);
+    lprcDst->right  = MIN(lprcSrc1->right,lprcSrc2->right);
+    lprcDst->top    = MAX(lprcSrc1->top,lprcSrc2->top);
+    lprcDst->bottom = MIN(lprcSrc1->bottom,lprcSrc2->bottom);
+
+    return TRUE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API IsRectEmpty( const RECT * lprc)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  IsRectEmpty\n");
+#endif
+    if (!lprc)
+    {
+      SetLastError(ERROR_INVALID_PARAMETER);
+      return FALSE;
+    }
+
+    return (lprc->left == lprc->right || lprc->top == lprc->bottom);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API OffsetRect( PRECT lprc, int x, int  y)
+{
+#ifdef DEBUG
+////    WriteLog("USER32:  OffsetRect\n");
+#endif
+    if (!lprc)
+    {
+      SetLastError(ERROR_INVALID_PARAMETER);
+      return FALSE;
+    }
+
+    lprc->left   += x;
+    lprc->right  += x;
+    lprc->top    += y;
+    lprc->bottom += y;
+
+    return TRUE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API PtInRect( const RECT *lprc, POINT pt)
+{
+#ifdef DEBUG1
+    WriteLog("USER32:  PtInRect\n");
+#endif
+    if (!lprc)
+    {
+      SetLastError(ERROR_INVALID_PARAMETER);
+      return FALSE;
+    }
+
+    return (pt.x >= lprc->left &&
+            pt.x < lprc->right &&
+            pt.y >= lprc->top &&
+            pt.y < lprc->bottom);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API SetRect( PRECT lprc, int nLeft, int nTop, int nRight, int  nBottom)
+{
+    if (!lprc)
+    {
+      SetLastError(ERROR_INVALID_PARAMETER);
+      return FALSE;
+    }
+
+    lprc->left   = nLeft;
+    lprc->top    = nTop;
+    lprc->right  = nRight;
+    lprc->bottom = nBottom;
+
+    return TRUE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API SetRectEmpty( PRECT lprc)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  SetRectEmpty\n");
+#endif
+    if (!lprc)
+    {
+      SetLastError(ERROR_INVALID_PARAMETER);
+      return FALSE;
+    }
+
+    lprc->left = lprc->right = lprc->top = lprc->bottom = 0;
+
+    return TRUE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API SubtractRect( PRECT lprcDest, const RECT * lprcSrc1, const RECT * lprcSrc2)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  SubtractRect");
+#endif
+    RECT tmp;
+
+    if (!lprcDest || !lprcSrc1 || !lprcSrc2)
+    {
+      SetLastError(ERROR_INVALID_PARAMETER);
+      return FALSE;
+    }
+
+    if (IsRectEmpty(lprcSrc1))
+    {
+      SetLastError(ERROR_INVALID_PARAMETER);
+      SetRectEmpty(lprcDest);
+      return FALSE;
+    }
+    *lprcDest = *lprcSrc1;
+    if (IntersectRect(&tmp,lprcSrc1,lprcSrc2))
+    {
+      if (EqualRect(&tmp,lprcDest))
+      {
+        SetRectEmpty(lprcDest);
+        return FALSE;
+      }
+      if ((tmp.top == lprcDest->top) && (tmp.bottom == lprcDest->bottom))
+      {
+        if (tmp.left == lprcDest->left) lprcDest->left = tmp.right;
+        else if (tmp.right == lprcDest->right) lprcDest->right = tmp.left;
+      }
+      else if ((tmp.left == lprcDest->left) && (tmp.right == lprcDest->right))
+      {
+        if (tmp.top == lprcDest->top) lprcDest->top = tmp.bottom;
+        else if (tmp.bottom == lprcDest->bottom) lprcDest->bottom = tmp.top;
+      }
+    }
+
+    return TRUE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API UnionRect( PRECT lprcDst, const RECT *lprcSrc1, const RECT *lprcSrc2)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  UnionRect\n");
+#endif
+    if (!lprcDst || !lprcSrc1 || !lprcSrc2)
+    {
+      SetLastError(ERROR_INVALID_PARAMETER);
+      return FALSE;
+    }
+
+    if (IsRectEmpty(lprcSrc1))
+    {
+      if (IsRectEmpty(lprcSrc2))
+      {
+        SetLastError(ERROR_INVALID_PARAMETER);
+        SetRectEmpty(lprcDst);
+        return FALSE;
+      }
+      else *lprcDst = *lprcSrc2;
+    }
+    else
+    {
+      if (IsRectEmpty(lprcSrc2)) *lprcDst = *lprcSrc1;
+      else
+      {
+        lprcDst->left   = MIN(lprcSrc1->left,lprcSrc2->left);
+        lprcDst->right  = MAX(lprcSrc1->right,lprcSrc2->right);
+        lprcDst->top    = MIN(lprcSrc1->top,lprcSrc2->top);
+        lprcDst->bottom = MAX(lprcSrc1->bottom,lprcSrc2->bottom);	
+      }
+    }
+
+    return TRUE;
+}
+
+/* String Manipulating Functions */
+
 int __cdecl wsprintfA(char *lpOut, LPCSTR lpFmt, ...)
 {
  int     rc;
@@ -234,40 +482,6 @@ BOOL WIN32API MessageBeep( UINT uType)
 }
 //******************************************************************************
 //******************************************************************************
-
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API OffsetRect( PRECT lprc, int x, int  y)
-{
-#ifdef DEBUG
-////    WriteLog("USER32:  OffsetRect\n");
-#endif
-    if (lprc)
-    {
-      lprc->left   += x;
-      lprc->right  += x;
-      lprc->top    += y;
-      lprc->bottom += y;
-
-      return TRUE;
-    } else return FALSE;
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API CopyRect( PRECT lprcDst, const RECT * lprcSrc)
-{
-//    ddprintf(("USER32:  CopyRect\n"));
-    if (!lprcDst || !lprcSrc) {
-        SetLastError(ERROR_INVALID_PARAMETER);
-        return FALSE;
-    }
-
-    memcpy(lprcDst,lprcSrc,sizeof(RECT));
-
-    return TRUE;
-}
-//******************************************************************************
-//******************************************************************************
 int WIN32API GetSystemMetrics(int nIndex)
 {
    int rc = 0;
@@ -406,20 +620,6 @@ BOOL WIN32API KillTimer(HWND hWnd, UINT uIDEvent)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API InflateRect( PRECT lprc, int dx, int  dy)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  InflateRect\n");
-#endif
-    if (!lprc) return FALSE;
-    //right?
-    lprc->left   -= dx;
-    lprc->right  += dx;
-    lprc->top    -= dy;
-    lprc->bottom += dy;
-
-    return TRUE;
-}
 //******************************************************************************
 //TODO:How can we emulate this one in OS/2???
 //******************************************************************************
@@ -446,18 +646,6 @@ int WIN32API ShowCursor( BOOL arg1)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API SetRect( PRECT lprc, int nLeft, int nTop, int nRight, int  nBottom)
-{
-    if (!lprc) return FALSE;
-    lprc->left   = nLeft;
-    lprc->top    = nTop;
-    lprc->right  = nRight;
-    lprc->bottom = nBottom;
-
-    return TRUE;
-}
-//******************************************************************************
-//******************************************************************************
 BOOL WIN32API WinHelpA( HWND hwnd, LPCSTR lpszHelp, UINT uCommand, DWORD  dwData)
 {
 #ifdef DEBUG
@@ -467,16 +655,6 @@ BOOL WIN32API WinHelpA( HWND hwnd, LPCSTR lpszHelp, UINT uCommand, DWORD  dwData
 //    return O32_WinHelp(arg1, arg2, arg3, arg4);
 
     return(TRUE);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API SubtractRect( PRECT lprcDest, const RECT * lprcSrc1, const RECT * lprcSrc2)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  SubtractRect");
-#endif
-    //CB: how?
-    return O32_SubtractRect(lprcDest,lprcSrc1,lprcSrc2);
 }
 //******************************************************************************
 //SvL: 24-6-'97 - Added
@@ -684,15 +862,6 @@ BOOL WIN32API EnumWindows(WNDENUMPROC lpfn, LPARAM lParam)
   if(callback)
         delete callback;
   return(rc);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API EqualRect( const RECT * arg1, const RECT *  arg2)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  EqualRect\n");
-#endif
-    return O32_EqualRect(arg1, arg2);
 }
 //******************************************************************************
 //******************************************************************************
@@ -905,15 +1074,6 @@ BOOL WIN32API HideCaret( HWND arg1)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API IntersectRect( PRECT arg1, const RECT *  arg2, const RECT *  arg3)
-{
-#ifdef DEBUG
-////    WriteLog("USER32:  IntersectRect\n");
-#endif
-    return O32_IntersectRect(arg1, arg2, arg3);
-}
-//******************************************************************************
-//******************************************************************************
 BOOL WIN32API InvalidateRgn( HWND arg1, HRGN arg2, BOOL  arg3)
 {
 #ifdef DEBUG
@@ -929,15 +1089,6 @@ BOOL WIN32API InvertRect( HDC arg1, const RECT * arg2)
     WriteLog("USER32:  InvertRect\n");
 #endif
     return O32_InvertRect(arg1, arg2);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API IsRectEmpty( const RECT * arg1)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  IsRectEmpty\n");
-#endif
-    return O32_IsRectEmpty(arg1);
 }
 //******************************************************************************
 //******************************************************************************
@@ -975,15 +1126,6 @@ int WIN32API MapWindowPoints( HWND arg1, HWND arg2, LPPOINT arg3, UINT arg4)
     WriteLog("USER32:  MapWindowPoints\n");
 #endif
     return O32_MapWindowPoints(arg1, arg2, arg3, arg4);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API PtInRect( const RECT * arg1, POINT  arg2)
-{
-#ifdef DEBUG1
-    WriteLog("USER32:  PtInRect\n");
-#endif
-    return O32_PtInRect(arg1, arg2);
 }
 //******************************************************************************
 //******************************************************************************
@@ -1027,15 +1169,6 @@ BOOL WIN32API SetDoubleClickTime( UINT arg1)
     WriteLog("USER32:  SetDoubleClickTime\n");
 #endif
     return O32_SetDoubleClickTime(arg1);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API SetRectEmpty( PRECT arg1)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  SetRectEmpty\n");
-#endif
-    return O32_SetRectEmpty(arg1);
 }
 //******************************************************************************
 //******************************************************************************
@@ -1193,15 +1326,6 @@ LONG WIN32API TabbedTextOutW( HDC arg1, int arg2, int arg3, LPCWSTR arg4, int ar
     rc = O32_TabbedTextOut(arg1, arg2, arg3, astring, arg5, arg6, arg7, arg8);
     FreeAsciiString(astring);
     return rc;
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API UnionRect( PRECT arg1, const RECT * arg2, const RECT *  arg3)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  UnionRect\n");
-#endif
-    return O32_UnionRect(arg1, arg2, arg3);
 }
 //******************************************************************************
 //******************************************************************************
