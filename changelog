@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2691 2004-02-27 20:14:16 sandervl Exp $ */
+/* $Id: changelog,v 1.2692 2004-03-09 10:03:11 sandervl Exp $ */
+
+ 2004-03-09: Vitali Pelenyov <sunlover@innotek   >
+    - GDI32:    o SetDIBitsToDevice: fixes for partial blits
 
  2004-02-27: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o Re-assert DC transformation and y-inversion after SetWindowPos
