@@ -1,4 +1,4 @@
-/* $Id: resource.cpp,v 1.17 2000-09-08 18:07:50 sandervl Exp $ */
+/* $Id: resource.cpp,v 1.18 2002-02-25 12:02:17 sandervl Exp $ */
 
 /*
  * Misc resource procedures
@@ -15,10 +15,24 @@
 #include <winimagebase.h>
 #include <winexebase.h>
 #include <windllbase.h>
+#include <custombuild.h>
 
 #define DBG_LOCALLOG	DBG_resource
 #include "dbglocal.h"
 
+
+static PFNFINDRESOURCEEXA pfnCustomFindResourceA = NULL;
+static PFNFINDRESOURCEEXW pfnCustomFindResourceW = NULL;
+
+//******************************************************************************
+//Called by custom Odin builds to hook FindReource(Ex)A/W calls
+//******************************************************************************
+BOOL WIN32API SetCustomFindResource(PFNFINDRESOURCEEXA pfnFindResourceA, PFNFINDRESOURCEEXW pfnFindResourceW)
+{
+    pfnCustomFindResourceA = pfnFindResourceA;
+    pfnCustomFindResourceW = pfnFindResourceW;
+    return TRUE;
+}
 //******************************************************************************
 //lpszName = integer id (high word 0), else string (name or "#237")
 //Can lpszType contain a pointer to a default resource type name?
@@ -26,28 +40,35 @@
 HRSRC WIN32API FindResourceA(HINSTANCE hModule, LPCSTR lpszName, LPCSTR lpszType)
 {
  Win32ImageBase *module;
+ WORD wLanguage = MAKELANGID(LANG_NEUTRAL, SUBLANG_NEUTRAL);
 
+    if(pfnCustomFindResourceA) {
+        pfnCustomFindResourceA(&hModule, (LPSTR *)&lpszName, (LPSTR *)&lpszType, &wLanguage);
+    }
     module = Win32ImageBase::findModule(hModule);
     if(module == NULL) {
 	  dprintf(("FindResourceA Module %X not found (%x %d)", hModule, lpszName, lpszType));
           return(NULL);
     }
-    return module->findResourceA(lpszName, (LPSTR)lpszType);
+    return module->findResourceA(lpszName, (LPSTR)lpszType, wLanguage);
 }
 //******************************************************************************
 //******************************************************************************
 HRSRC WIN32API FindResourceW(HINSTANCE hModule, LPCWSTR lpszName,
-                          LPCWSTR lpszType)
+                             LPCWSTR lpszType)
 {
  Win32ImageBase *module;
+ WORD wLanguage = MAKELANGID(LANG_NEUTRAL, SUBLANG_NEUTRAL);
 
+    if(pfnCustomFindResourceW) {
+        pfnCustomFindResourceW(&hModule, (LPWSTR *)&lpszName, (LPWSTR *)&lpszType, &wLanguage);
+    }
     module = Win32ImageBase::findModule(hModule);
     if(module == NULL) {
 	  dprintf(("FindResourceW Module %X not found (%x %d)", hModule, lpszName, lpszType));
           return(NULL);
     }
-
-    return module->findResourceW((LPWSTR)lpszName, (LPWSTR)lpszType);
+    return module->findResourceW((LPWSTR)lpszName, (LPWSTR)lpszType, wLanguage);
 }
 /*****************************************************************************
  * Name      : HRSRC WIN32API FindResourceExA
@@ -64,7 +85,7 @@ HRSRC WIN32API FindResourceW(HINSTANCE hModule, LPCWSTR lpszName,
  *             resource, pass this handle to the LoadResource function.
  *             If the function fails, the return value is NULL
  * Remark    :
- * Status    : UNTESTED STUB
+ * Status    : fully implemented
  *
  * Author    : SvL
  *****************************************************************************/
@@ -73,6 +94,10 @@ HRSRC WIN32API FindResourceExA( HMODULE hModule, LPCSTR lpType,
                                 LPCSTR lpName, WORD wLanguage)
 {
  Win32ImageBase *module;
+
+    if(pfnCustomFindResourceA) {
+        pfnCustomFindResourceA(&hModule, (LPSTR *)&lpName, (LPSTR *)&lpType, &wLanguage);
+    }
 
     module = Win32ImageBase::findModule(hModule);
     if(module == NULL) {
@@ -98,17 +123,19 @@ HRSRC WIN32API FindResourceExA( HMODULE hModule, LPCSTR lpType,
  *             resource, pass this handle to the LoadResource function.
  *             If the function fails, the return value is NULL
  * Remark    :
- * Status    : UNTESTED STUB
+ * Status    : fully implemented
  *
  * Author    : SvL
  *****************************************************************************/
 
-HRSRC WIN32API FindResourceExW(HMODULE hModule,
-                               LPCWSTR lpType,
-                               LPCWSTR lpName,
-                               WORD    wLanguage)
+HRSRC WIN32API FindResourceExW(HMODULE hModule, LPCWSTR lpType,
+                               LPCWSTR lpName, WORD wLanguage)
 {
  Win32ImageBase *module;
+
+    if(pfnCustomFindResourceW) {
+        pfnCustomFindResourceW(&hModule, (LPWSTR *)&lpName, (LPWSTR *)&lpType, &wLanguage);
+    }
 
     module = Win32ImageBase::findModule(hModule);
     if(module == NULL) {
@@ -185,7 +212,7 @@ DWORD WIN32API SizeofResource(HINSTANCE hModule, HRSRC hRes)
  * @param    lpszType      pointer to resource type
  * @param    lpEnumFunc    pointer to callback function
  * @param    lParam        application-defined parameter
- * @status   stub
+ * @status   fully implemented
  * @author   knut st. osmundsen
  * @remark   The EnumResourceNames function continues to enumerate resource
  *           names until the callback function returns FALSE or all resource
@@ -224,7 +251,7 @@ BOOL WIN32API EnumResourceNamesA(HINSTANCE        hModule,
  * @param    lpszType      pointer to resource type
  * @param    lpEnumFunc    pointer to callback function
  * @param    lParam        application-defined parameter
- * @status   stub
+ * @status   fully implemented
  * @author   knut st. osmundsen
  * @remark   The EnumResourceNames function continues to enumerate resource
  *           names until the callback function returns FALSE or all resource
@@ -266,7 +293,7 @@ BOOL WIN32API EnumResourceNamesW(HMODULE          hModule,
  * Remark    : The EnumResourceLanguages function continues to enumerate
  *             resource languages until the callback function returns FALSE
  *             or all resource languages have been enumerated.
- * Status    : UNTESTED STUB
+ * Status    : fully implemented
  *
  * Author    : Markus Montkowski [Tha, 1998/05/21 17:46]
  *****************************************************************************/
@@ -307,7 +334,7 @@ BOOL WIN32API EnumResourceLanguagesA(HMODULE hModule, LPCSTR lpType,
  * Remark    : The EnumResourceLanguages function continues to enumerate
  *             resource languages until the callback function returns FALSE
  *             or all resource languages have been enumerated.
- * Status    : UNTESTED STUB
+ * Status    : fully implemented
  *
  * Author    : Markus Montkowski [Tha, 1998/05/21 17:46]
  *****************************************************************************/
@@ -343,7 +370,7 @@ BOOL WIN32API EnumResourceLanguagesW(HMODULE hModule, LPCWSTR lpType,
  * Result    : If the function succeeds, the return value is nonzero.
  *             If the function fails, the return value is zero
  * Remark    :
- * Status    : UNTESTED STUB
+ * Status    : fully implemented
  *
  * Author    : Markus Montkowski [Tha, 1998/05/21 17:46]
  *****************************************************************************/
@@ -378,7 +405,7 @@ BOOL WIN32API EnumResourceTypesA(HMODULE hModule,
  * Result    : If the function succeeds, the return value is nonzero.
  *             If the function fails, the return value is zero
  * Remark    :
- * Status    : UNTESTED STUB
+ * Status    : fully implemented
  *
  * Author    : Markus Montkowski [Tha, 1998/05/21 17:46]
  *****************************************************************************/
@@ -400,3 +427,5 @@ BOOL WIN32API EnumResourceTypesW(HMODULE hModule,
 
     return pModule->enumResourceTypesW(hModule, lpEnumFunc, lParam);
 }
+//******************************************************************************
+//******************************************************************************
