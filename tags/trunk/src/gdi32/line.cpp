@@ -1,4 +1,4 @@
-/* $Id: line.cpp,v 1.7 2000-11-04 16:29:24 sandervl Exp $ */
+/* $Id: line.cpp,v 1.8 2001-01-18 18:13:17 sandervl Exp $ */
 /*
  * Line API's
  *
@@ -197,7 +197,7 @@ BOOL WIN32API Polyline( HDC hdc, const POINT *lppt, int cPoints)
 {
   pDCData pHps = (pDCData)OSLibGpiQueryDCData(hdc);
 
-  dprintf(("GDI32: Polyline"));
+  dprintf(("GDI32: Polyline %x %x %d", hdc, lppt, cPoints));
 
   if (!pHps)
   {
