@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.885 2000-04-14 22:57:02 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.886 2000-04-15 09:24:39 sandervl Exp $ */
+
+ 2000-04-15: Sander van Leeuwen <sandervl@xs4all.nl>
+	- WSOCK32:  Async select fix (VPBuddy can connect again)
 
  2000-04-14: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Hardcoded system & windows dir
