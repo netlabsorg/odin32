@@ -1,4 +1,11 @@
-/* $Id: changelog,v 1.1883 2001-12-04 19:54:02 sandervl Exp $ */
+/* $Id: changelog,v 1.1884 2001-12-05 14:14:04 sandervl Exp $ */
+
+ 2001-12-05: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Merged WriteFile & WriteFileEx, ReadFile & ReadFileEx
+                  handle manager functions
+                o Removed dwType handle manager structure member; added
+                  win32 handle to structure
+                  (NOTE: All work in progress for new framework for overlapped IO)
 
  2001-12-04: Patrick Haller <patrick.haller@innotek.de>
     - KERNEL32: o parallel port support restricted to physical ports
