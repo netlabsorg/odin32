@@ -1,4 +1,4 @@
-/* $Id: dev16.h,v 1.10 2000-09-04 16:40:50 bird Exp $
+/* $Id: dev16.h,v 1.11 2001-07-08 03:05:28 bird Exp $
  * dev16 - 16-bit specific. Should not be used in 32-bit C/C++.
  *
  * Copyright (c) 1999 knut st. osmundsen
@@ -129,6 +129,8 @@ USHORT NEAR CallGetKernelInfo32(ULONG addressKrnlInfoBuf);
 USHORT NEAR CallVerifyImportTab32(void);
 USHORT NEAR CallElfIOCtl(LIN pRpIOCtl);
 USHORT NEAR CallWin32kIOCtl(LIN pRpIOCtl);
+USHORT NEAR CallWin32kOpen(LIN pRpOpen);
+USHORT NEAR CallWin32kClose(LIN pRpClose);
 #if 0 /*ndef CODE16_INIT*/
 #pragma alloc_text(CODE16_INIT, CallR0Init32, CallVerifyImportTab32, CallGetKernelInfo32)
 #endif
