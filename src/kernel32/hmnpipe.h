@@ -1,4 +1,4 @@
-/* $Id: hmnpipe.h,v 1.5 2001-12-05 14:16:02 sandervl Exp $ */
+/* $Id: hmnpipe.h,v 1.6 2002-02-15 19:14:52 sandervl Exp $ */
 /*
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -35,6 +35,22 @@ class HMDeviceNamedPipeClass : public HMDeviceFileClass
                              PHMHANDLEDATA pHMHandleData,
                              PVOID         lpSecurityAttributes,
                              PHMHANDLEDATA pHMHandleDataTemplate);
+
+  /* this is a handler method for calls to ReadFile/Ex */
+  virtual BOOL   ReadFile   (PHMHANDLEDATA pHMHandleData,
+                             LPCVOID       lpBuffer,
+                             DWORD         nNumberOfBytesToRead,
+                             LPDWORD       lpNumberOfBytesRead,
+                             LPOVERLAPPED  lpOverlapped,
+                             LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine);
+
+  /* this is a handler method for calls to WriteFile/Ex */
+  virtual BOOL   WriteFile  (PHMHANDLEDATA pHMHandleData,
+                             LPCVOID       lpBuffer,
+                             DWORD         nNumberOfBytesToWrite,
+                             LPDWORD       lpNumberOfBytesWritten,
+                             LPOVERLAPPED  lpOverlapped,
+                             LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine);
 
   /* this is a handler method for calls to GetFileType() */
   virtual DWORD GetFileType (PHMHANDLEDATA pHMHandleData);
