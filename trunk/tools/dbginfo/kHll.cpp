@@ -1,4 +1,4 @@
-/* $Id: kHll.cpp,v 1.6 2000-03-27 10:20:42 bird Exp $
+/* $Id: kHll.cpp,v 1.7 2000-03-27 12:36:17 bird Exp $
  *
  * kHll - Implementation of the class kHll.
  *        That class is used to create HLL debuginfo.
@@ -581,7 +581,6 @@ int         kHll::write(FILE *phFile)
     /* Make temporary header and write it */
     memcpy(hllHdr.achSignature, "NB04", 4);
     hllHdr.offDirectory = 0;
-    hllHdr.ulReserved = 1;
     cch = fwrite(&hllHdr, 1, sizeof(hllHdr), phFile);
     if (cch != sizeof(hllHdr))
         return -1;
@@ -617,7 +616,8 @@ int         kHll::write(FILE *phFile)
      */
     lPosDir = ftell(phFile);
     hllDir.cEntries = 0;
-    hllDir.ulReserved = 0; //FIXME/TODO - not quite sure what this is or should be!
+    hllDir.cb       = offsetof(HLLDIR, aEntries);
+    hllDir.cbEntry  = sizeof(HLLDIRENTRY);
     cch = fwrite(&hllDir, 1, offsetof(HLLDIR, aEntries), phFile);
     if (cch != offsetof(HLLDIR, aEntries))
         return -1;
