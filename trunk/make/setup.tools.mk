@@ -1,4 +1,4 @@
-# $Id: setup.tools.mk,v 1.10 2002-08-20 03:58:08 bird Exp $
+# $Id: setup.tools.mk,v 1.11 2002-08-22 03:21:10 bird Exp $
 
 
 #
@@ -85,10 +85,12 @@ TOOL_DEP_FLAGS += -F+
 # Default Extensions.
 #
 EXT_DLL = dll
+EXT_DEF = def
 EXT_EXE = exe
 EXT_IFS = ifs
 EXT_ILIB= lib
 EXT_LIB = lib
+EXT_MAK = mak
 EXT_MAP = map
 EXT_OBJ = obj
 EXT_RES = res
