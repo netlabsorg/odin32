@@ -1,4 +1,4 @@
-/* $Id: Fileio.cpp,v 1.67 2002-08-16 09:56:30 sandervl Exp $ */
+/* $Id: Fileio.cpp,v 1.68 2002-08-22 14:21:26 sandervl Exp $ */
 
 /*
  * Win32 File IO API functions for OS/2
@@ -292,7 +292,7 @@ HANDLE WIN32API FindFirstFileExA(LPCSTR lpFileName, FINDEX_INFO_LEVELS fInfoLeve
         }
         else  
             filename = (char *)lpFileName;
-      
+ 
         return (HANDLE)OSLibDosFindFirst(filename, (WIN32_FIND_DATAA *)lpFindFileData);
 
     default: //should never happen
@@ -389,6 +389,7 @@ HANDLE WIN32API FindFirstFileMultiA(LPCSTR lpFileName,
                                     WIN32_FIND_DATAA * lpFindFileData,
                                     DWORD * count)
 {
+    dprintf(("FindFirstFileMultiA %s %x %x", lpFileName, lpFindFileData, count));
     return (HANDLE)OSLibDosFindFirstMulti(lpFileName,lpFindFileData,count);
 }
 //******************************************************************************
@@ -403,7 +404,8 @@ BOOL WIN32API FindNextFileA(HANDLE hFindFile, WIN32_FIND_DATAA * lpFindFileData)
 BOOL WIN32API FindNextFileMultiA(HANDLE hFindFile, WIN32_FIND_DATAA * lpFindFileData,
               DWORD *count)
 {
-  return OSLibDosFindNextMulti(hFindFile,lpFindFileData,count);
+    dprintf(("FindNextFileMultiA %x %x %x", hFindFile, lpFindFileData, count));
+    return OSLibDosFindNextMulti(hFindFile,lpFindFileData,count);
 }
 //******************************************************************************
 //******************************************************************************
@@ -809,24 +811,8 @@ DWORD WIN32API GetFileAttributesA(LPCSTR lpszFileName)
 {
     DWORD rc, error;
 
-    if((NULL!=lpszFileName) && strlen(lpszFileName)==2 && lpszFileName[1] == ':')
-    {
-        char szDrive[4];
-        szDrive[0] = lpszFileName[0];
-        szDrive[1] = lpszFileName[1];
-        szDrive[2] = '\\';
-        szDrive[3] = 0x00;
-        rc = O32_GetFileAttributes((LPSTR)szDrive);
-    }
-    else {
-        rc = O32_GetFileAttributes((LPSTR)lpszFileName);
-        if(rc == -1 && lpszFileName[strlen(lpszFileName)-1] != '\\') {
-            char *filename = (char *)alloca(strlen(lpszFileName)+2); //+2!!!!!!
-            strcpy(filename, lpszFileName);
-            strcat(filename, "\\");
-            rc = O32_GetFileAttributes((LPSTR)filename);
-        }
-    }
+    rc = OSLibGetFileAttributes((LPSTR)lpszFileName);
+
     //SvL: Open32 returns FILE_ATTRIBUTE_DIRECTORY|FILE_ATTRIBUTE_NORMAL for
     //     directories whereas NT 4 (SP6) only returns FILE_ATTRIBUTE_DIRECTORY
     if(rc != -1 && (rc & FILE_ATTRIBUTE_DIRECTORY)) {
