@@ -1,4 +1,4 @@
-; $Id: crtdll.def,v 1.5 1999-09-23 09:38:04 sandervl Exp $
+; $Id: crtdll.def,v 1.6 1999-09-28 13:26:35 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY CRTDLL INITINSTANCE TERMINSTANCE
@@ -160,7 +160,7 @@ EXPORTS
 ;   _commit							@58
     _commode_dll		= CRTDLL_commode_dll		@59
     _control87			= _CRTDLL__control87		@60
-;   _controlfp							@61
+    _controlfp			= _CRTDLL__controlfp		@61
 ;   _copysign							@62
 ;   _cprintf							@63
 ;   _cpumode_dll						@64

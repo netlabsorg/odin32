@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.21 1999-09-15 23:40:37 sandervl Exp $
+# $Id: makefile,v 1.22 1999-09-28 13:26:52 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -82,6 +82,8 @@ all:
         $(MAKE_CMD)
         cd ..\crtdll
         $(MAKE_CMD)
+        cd ..\msvcrt
+        $(MAKE_CMD)
         cd ..\msacm32
         $(MAKE_CMD)
         cd ..\imagehlp
@@ -151,6 +153,8 @@ clean:
         cd ..\winspool
         $(MAKE_CMD) clean
         cd ..\crtdll
+        $(MAKE_CMD) clean
+        cd ..\msvcrt
         $(MAKE_CMD) clean
         cd ..\shell32
         $(MAKE_CMD) clean

@@ -1,4 +1,15 @@
- /* $Id: ChangeLog,v 1.252 1999-09-28 12:44:31 dengert Exp $ */
+ /* $Id: ChangeLog,v 1.253 1999-09-28 13:29:51 sandervl Exp $ */
+
+ 99-09-28: David Raison <djr@lemur.co.uk>
+	- KERNEL32: Fixed GetComputerNameA
+
+ 99-09-28: Jens Wiessner <wiessnej@rfi.de>
+	- CRTDLL: Updated _except_handler2 + added Wine source changes
+	- MSVCRT: Created. Forwards most apis to CRTDLL or NTDLL.
+
+ 99-09-28: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32: Only generate WM_CHAR when TranslateMessage is called for
+                  WM_KEYDOWN. (TODO: WM_SYSCHAR)
 
  99-09-28: Daniela Engert <dani@ngrt.de>
 	- USER32: Caret functions implemented
