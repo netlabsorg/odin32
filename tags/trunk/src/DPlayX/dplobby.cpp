@@ -1,4 +1,4 @@
-// $Id: dplobby.cpp,v 1.4 2001-03-13 23:13:27 hugh Exp $
+// $Id: dplobby.cpp,v 1.5 2001-04-16 17:25:23 sandervl Exp $
 /* Direct Play Lobby 2 & 3 Implementation
  *
  * Copyright 1998,1999,2000 - Peter Hunnisett
@@ -944,7 +944,7 @@ static HRESULT WINAPI IDirectPlayLobbyAImpl_EnumLocalApplications
 
     dplAppInfo.dwSize               = sizeof( dplAppInfo );
     dplAppInfo.guidApplication      = serviceProviderGUID;
-    dplAppInfo.u.lpszAppNameA = subKeyName;
+    dplAppInfo.lpszAppNameA = subKeyName;
 
     EnterCriticalSection( &This->unk->DPL_lock );
 
