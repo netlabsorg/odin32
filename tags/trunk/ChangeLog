@@ -1,4 +1,4 @@
-/* $Id: ChangeLog,v 1.1436 2001-05-22 13:34:17 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1437 2001-05-22 14:24:52 sandervl Exp $ */
 
  2001-05-22: Sander van Leeuwen <sandervl@xs4all.nl>
     - COMCTL32: o Partial merge of listview control with latest Wine
@@ -7,6 +7,10 @@
                   (TODO: sets size for all items only)
                   (fixes wrong item size for VirtualPC main window)
     - USER32:   o Fixed minimizing & restoring of top-level windows
+    - KERNEL32: o Check name before adding dependency for module in
+                  order to avoid circular dependencies (WNETAP32 (== NETAPI32)
+                  imports from NETAPI32)
+                  (fixes crash at exit in VirtualPC)
 
  2001-05-20: Sander van Leeuwen <sandervl@xs4all.nl>
     - GDI32:    o Fixed LPtoDP/DPtoLP again.
