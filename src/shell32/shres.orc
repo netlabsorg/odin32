@@ -1,4 +1,4 @@
-/* $Id: shres.orc,v 1.11 2001-04-19 08:32:18 sandervl Exp $ */
+/* $Id: shres.orc,v 1.12 2001-04-23 10:47:23 sandervl Exp $ */
 /*
  * Top level resource file for Common Dialogs
  *
@@ -141,6 +141,10 @@ STRINGTABLE DISCARDABLE
 	IDS_DELETEFOLDER_CAPTION "Confirm folder delete"
 	IDS_DELETEITEM_TEXT "Are you sure you want to delete '%1'?"
 	IDS_DELETEMULTIPLE_TEXT "Are you sure you want to delete these %1 items?"
+#ifdef __WIN32OS2__
+	IDS_OVERWRITEFILE_TEXT "OverWrite File %1?"
+	IDS_OVERWRITEFILE_CAPTION "Confirm File OverWrite"
+#endif
 }
 
 shv_accel ACCELERATORS
@@ -284,3 +288,4 @@ SHLICON_MYCOMPUTER ICON LOADONCALL DISCARDABLE "ico/mycomputer.ico"
 //#include "shell32_Ru.orc"
 //#include "shell32_Sv.orc"
 //#include "shell32_Wa.orc"
+

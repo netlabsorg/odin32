@@ -1,4 +1,4 @@
-/* $Id: shresdef.h,v 1.8 2001-04-19 08:32:19 sandervl Exp $ */
+/* $Id: shresdef.h,v 1.9 2001-04-23 10:47:23 sandervl Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -44,6 +44,10 @@
 #define IDS_DELETEFOLDER_CAPTION 33
 #define IDS_DELETEITEM_TEXT	34
 #define IDS_DELETEMULTIPLE_TEXT	35
+#ifdef __WIN32OS2__
+#define	IDS_OVERWRITEFILE_TEXT 36
+#define	IDS_OVERWRITEFILE_CAPTION 37
+#endif
 
 #define IDS_SHV_INVALID_FILENAME_TITLE 28
 #define IDS_SHV_INVALID_FILENAME       29
@@ -79,4 +83,5 @@
 #define IDS_525FLOPPY                   116
 
 #endif /* __WINE_SHELL_RES_H */
+
 
