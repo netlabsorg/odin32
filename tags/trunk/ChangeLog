@@ -1,4 +1,8 @@
- /* $Id: ChangeLog,v 1.61 1999-07-23 17:51:16 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.62 1999-07-25 15:53:57 sandervl Exp $ */
+ 99-07-25: Sander van Leeuwen <sandervl@xs4all.nl>
+	- KERNEL32: GetLocateInfoA bugfix
+	- USER32/NEW: Lots of changes; now Solitaire starts, but draws cards incorrectly
+
  99-07-23: Yuri Dario <mc6530@mclink.it>
 	- misc: Changes for compilation with VAC 3.6.5
 
