@@ -54,12 +54,13 @@
 #include "winnls.h"         /* for PRIMARYLANGID */
 #include "winreg.h"         /* for HKEY_LOCAL_MACHINE */
 
+#include "wine/unicode.h"
 #include "wine/obj_base.h"
 #include "heap.h"
 #include "ole2disp.h"
 #include "typelib.h"
-
 #include "debugtools.h"
+#include "ntddk.h"
 
 DEFAULT_DEBUG_CHANNEL(ole);
 DECLARE_DEBUG_CHANNEL(typelib);
@@ -250,7 +251,6 @@ HRESULT WINAPI LoadTypeLib16(
     return E_FAIL;
 }
 #endif
-
 /******************************************************************************
  *		LoadTypeLib	[OLEAUT32.161]
  * Loads and registers a type library
@@ -262,7 +262,7 @@ HRESULT WINAPI LoadTypeLib16(
  *    Success: S_OK
  *    Failure: Status
  */
-int TLB_ReadTypeLib(PCHAR file, ITypeLib2 **ppTypelib);
+int TLB_ReadTypeLib(LPCWSTR file, INT index, ITypeLib2 **ppTypelib);
 
 HRESULT WINAPI LoadTypeLib(
     const OLECHAR *szFile,/* [in] Name of file to load from */
@@ -285,17 +285,35 @@ HRESULT WINAPI LoadTypeLibEx(
     REGKIND  regkind,  /* [in] Specify kind of registration */
     ITypeLib **pptLib) /* [out] Pointer to pointer to loaded type library */
 {
-    LPSTR p=NULL;
-    WCHAR szPath[MAX_PATH+1];
+    WCHAR szPath[MAX_PATH+1], szFileCopy[MAX_PATH+1];
+    const WCHAR *pFile, *pIndexStr;
     HRESULT res;
+    INT index = 1;
     TRACE("(%s,%d,%p)\n",debugstr_w(szFile), regkind, pptLib);
     
-    if(!SearchPathW(NULL,szFile,NULL,sizeof(szPath)/sizeof(WCHAR),szPath,NULL))
-      res = TYPE_E_CANTLOADLIBRARY;
-    else {
-      p=HEAP_strdupWtoA(GetProcessHeap(),0,szPath);
-      res= TLB_ReadTypeLib(p, (ITypeLib2**)pptLib);
+    pFile = szFile;
+    if(!SearchPathW(NULL,szFile,NULL,sizeof(szPath)/sizeof(WCHAR),szPath,
+		    NULL)) {
+
+        /* Look for a trailing '\\' followed by an index */
+        pIndexStr = strrchrW(szFile, '\\');
+	if(pIndexStr && pIndexStr != szFile && *++pIndexStr != '\0') {
+	    index = wcstol(pIndexStr, NULL, 10);
+	    memcpy(szFileCopy, szFile,
+		   (pIndexStr - szFile - 1) * sizeof(WCHAR));
+	    szFileCopy[pIndexStr - szFile - 1] = '\0';
+	    pFile = szFileCopy;
+	    if(!SearchPathW(NULL,szFileCopy,NULL,sizeof(szPath)/sizeof(WCHAR),
+			    szPath,NULL))
+	        return TYPE_E_CANTLOADLIBRARY;
+	} else
+	    return TYPE_E_CANTLOADLIBRARY;
     }
+
+    TRACE("File %s index %d\n", debugstr_w(pFile), index);
+
+    res = TLB_ReadTypeLib(pFile, index, (ITypeLib2**)pptLib);
+
     if (SUCCEEDED(res))
         switch(regkind)
         {
@@ -317,7 +335,6 @@ HRESULT WINAPI LoadTypeLibEx(
                 break;
         }
 
-    if(p) HeapFree(GetProcessHeap(),0,p);
     TRACE(" returns %08lx\n",res);
     return res;
 }
@@ -371,6 +388,9 @@ HRESULT WINAPI RegisterTypeLib(
     LPSTR guidA;
     CHAR keyName[120];
     HKEY key, subKey;
+    UINT types, tidx;
+    TYPEKIND kind;
+    static const char *PSOA = "{00020424-0000-0000-C000-000000000046}";
 
     if (ptlib == NULL || szFullPath == NULL)
         return E_INVALIDARG;
@@ -380,13 +400,8 @@ HRESULT WINAPI RegisterTypeLib(
 
     StringFromGUID2(&attr->guid, guid, 80);
     guidA = HEAP_strdupWtoA(GetProcessHeap(), 0, guid);
-#ifdef __WIN32OS2__
-    sprintf(keyName, "TypeLib\\%s\\%x.%x",
-            guidA, attr->wMajorVerNum, attr->wMinorVerNum);
-#else
     snprintf(keyName, sizeof(keyName), "TypeLib\\%s\\%x.%x",
         guidA, attr->wMajorVerNum, attr->wMinorVerNum);
-#endif
     HeapFree(GetProcessHeap(), 0, guidA);
 
     res = S_OK;
@@ -424,11 +439,7 @@ HRESULT WINAPI RegisterTypeLib(
         {
             CHAR buf[20];
             /* FIXME: is %u correct? */
-#ifdef __WIN32OS2__
-            sprintf(buf, "%u", attr->wLibFlags);
-#else
             snprintf(buf, sizeof(buf), "%u", attr->wLibFlags);
-#endif
             if (RegSetValueExA(subKey, NULL, 0, REG_SZ,
                 buf, lstrlenA(buf) + 1) != ERROR_SUCCESS)
                 res = E_FAIL;
@@ -438,7 +449,90 @@ HRESULT WINAPI RegisterTypeLib(
     else
         res = E_FAIL;
 
+    /* register OLE Automation-compatible interfaces for this typelib */
+    types = ITypeLib_GetTypeInfoCount(ptlib);
+    for (tidx=0; tidx<types; tidx++) {
+	if (SUCCEEDED(ITypeLib_GetTypeInfoType(ptlib, tidx, &kind))) {
+	    LPOLESTR name = NULL;
+	    ITypeInfo *tinfo = NULL;
+	    BOOL stop = FALSE;
+	    ITypeLib_GetDocumentation(ptlib, tidx, &name, NULL, NULL, NULL);
+	    switch (kind) {
+	    case TKIND_INTERFACE:
+		TRACE_(typelib)("%d: interface %s\n", tidx, debugstr_w(name));
+		ITypeLib_GetTypeInfo(ptlib, tidx, &tinfo);
+		break;
+	    case TKIND_DISPATCH:
+		TRACE_(typelib)("%d: dispinterface %s\n", tidx, debugstr_w(name));
+		/* ITypeLib_GetTypeInfo(ptlib, tidx, &tinfo); */
+		break;
+	    case TKIND_COCLASS:
+		TRACE_(typelib)("%d: coclass %s\n", tidx, debugstr_w(name));
+		/* coclasses should probably not be registered? */
+		break;
+	    default:
+		TRACE_(typelib)("%d: %s\n", tidx, debugstr_w(name));
+		break;
+	    }
+	    if (tinfo) {
+		TYPEATTR *tattr = NULL;
+		ITypeInfo_GetTypeAttr(tinfo, &tattr);
+		if (tattr) {
+		    TRACE_(typelib)("guid=%s, flags=%04x\n",
+				    debugstr_guid(&tattr->guid),
+				    tattr->wTypeFlags);
+		    if (tattr->wTypeFlags & TYPEFLAG_FOLEAUTOMATION) {
+			/* register interface<->typelib coupling */
+			StringFromGUID2(&tattr->guid, guid, 80);
+			guidA = HEAP_strdupWtoA(GetProcessHeap(), 0, guid);
+			snprintf(keyName, sizeof(keyName), "Interface\\%s", guidA);
+			HeapFree(GetProcessHeap(), 0, guidA);
+
+			if (RegCreateKeyExA(HKEY_CLASSES_ROOT, keyName, 0, NULL, 0,
+					    KEY_WRITE, NULL, &key, NULL) == ERROR_SUCCESS) {
+			    if (name)
+				RegSetValueExW(key, NULL, 0, REG_SZ,
+					       (BYTE *)name, lstrlenW(name) * sizeof(OLECHAR));
+
+			    if (RegCreateKeyExA(key, "ProxyStubClsid", 0, NULL, 0,
+				KEY_WRITE, NULL, &subKey, NULL) == ERROR_SUCCESS) {
+				RegSetValueExA(subKey, NULL, 0, REG_SZ,
+					       PSOA, strlen(PSOA));
+				RegCloseKey(subKey);
+			    }
+			    if (RegCreateKeyExA(key, "ProxyStubClsid32", 0, NULL, 0,
+				KEY_WRITE, NULL, &subKey, NULL) == ERROR_SUCCESS) {
+				RegSetValueExA(subKey, NULL, 0, REG_SZ,
+					       PSOA, strlen(PSOA));
+				RegCloseKey(subKey);
+			    }
+
+			    if (RegCreateKeyExA(key, "TypeLib", 0, NULL, 0,
+				KEY_WRITE, NULL, &subKey, NULL) == ERROR_SUCCESS) {
+				CHAR ver[32];
+				StringFromGUID2(&attr->guid, guid, 80);
+				snprintf(ver, sizeof(ver), "%x.%x",
+					 attr->wMajorVerNum, attr->wMinorVerNum);
+				RegSetValueExW(subKey, NULL, 0, REG_SZ,
+					       (BYTE *)guid, lstrlenW(guid) * sizeof(OLECHAR));
+				RegSetValueExA(subKey, "Version", 0, REG_SZ,
+					       ver, lstrlenA(ver));
+				RegCloseKey(subKey);
+			    }
+			    RegCloseKey(key);
+			}
+		    }
+		    ITypeInfo_ReleaseTypeAttr(tinfo, tattr);
+		}
+		ITypeInfo_Release(tinfo);
+	    }
+	    SysFreeString(name);
+	    if (stop) break;
+	}
+    }
+
     ITypeLib_ReleaseTLibAttr(ptlib, attr);
+
     return res;
 }
 
@@ -463,7 +557,7 @@ HRESULT WINAPI UnRegisterTypeLib(
     return S_OK;	/* FIXME: pretend everything is OK */
 }
 
-#ifndef __WIN32OS2__
+#ifdef __WIN32OS2__
 /****************************************************************************
  *	OaBuildVersion				(TYPELIB.15)
  *
@@ -1760,68 +1854,18 @@ ITypeInfoImpl * MSFT_DoTypeInfo(
  */
 #define MSFT_SIGNATURE 0x5446534D /* "MSFT" */
 #define SLTG_SIGNATURE 0x47544c53 /* "SLTG" */
-int TLB_ReadTypeLib(LPSTR pszFileName, ITypeLib2 **ppTypeLib)
+int TLB_ReadTypeLib(LPCWSTR pszFileName, INT index, ITypeLib2 **ppTypeLib)
 {
-    int ret = E_FAIL;
+    int ret = TYPE_E_CANTLOADLIBRARY;
     DWORD dwSignature = 0;
     HFILE hFile;
-    int nStrLen = strlen(pszFileName);
-    int i;
 
-    PCHAR pszTypeLibIndex = NULL;
-    PCHAR pszDllName      = NULL;
-
-    TRACE_(typelib)("%s\n", pszFileName);
+    TRACE_(typelib)("%s:%d\n", debugstr_w(pszFileName), index);
 
     *ppTypeLib = NULL;
 
-    /* is it a DLL? */
-	for (i=0 ; i < nStrLen ; ++i)
-	{
-	    pszFileName[i] = tolower(pszFileName[i]);
-	}
-    pszTypeLibIndex = strstr(pszFileName, ".dll");
-
-    /* find if there's a back-slash after .DLL (good sign of the presence of a typelib index) */
-    if (pszTypeLibIndex)
-    {
-      pszTypeLibIndex = strstr(pszTypeLibIndex, "\\");
-    }
-
-    /* is there any thing after trailing back-slash  ? */
-    if (pszTypeLibIndex && pszTypeLibIndex < pszFileName + nStrLen)
-    {
-      /* yes -> it's an index! store DLL name, without the trailing back-slash */
-      size_t nMemToAlloc = pszTypeLibIndex - pszFileName;
-      
-      pszDllName = HeapAlloc(GetProcessHeap(),
-                          HEAP_ZERO_MEMORY, 
-                          nMemToAlloc + 1);
-                          
-      strncpy(pszDllName, pszFileName, nMemToAlloc);
-      
-      /* move index string pointer pass the backslash */
-      while (*pszTypeLibIndex == '\\')
-        ++pszTypeLibIndex;
-    }
-    else
-    {
-      /* No index, reset variable to 1 */
-      pszDllName = HeapAlloc(GetProcessHeap(),
-                          HEAP_ZERO_MEMORY, 
-                          nStrLen + 1);
-                          
-      strncpy(pszDllName, pszFileName, nStrLen);
-      
-      pszTypeLibIndex = "1\0";
-    }
-
-    TRACE_(typelib)("File name without index %s\n", pszDllName);
-    TRACE_(typelib)("Index of typelib %s\n",        pszTypeLibIndex);
-
-
     /* check the signature of the file */
-    hFile = CreateFileA( pszDllName, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, 0 );
+    hFile = CreateFileW( pszFileName, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, 0 );
     if (INVALID_HANDLE_VALUE != hFile)
     {
       HANDLE hMapping = CreateFileMappingA( hFile, NULL, PAGE_READONLY | SEC_COMMIT, 0, 0, NULL );
@@ -1855,11 +1899,12 @@ int TLB_ReadTypeLib(LPSTR pszFileName, ITypeLib2 **ppTypeLib)
     if( (WORD)dwSignature == IMAGE_DOS_SIGNATURE )
     {
       /* find the typelibrary resource*/
-      HINSTANCE hinstDLL = LoadLibraryExA(pszDllName, 0, DONT_RESOLVE_DLL_REFERENCES|
+      HINSTANCE hinstDLL = LoadLibraryExW(pszFileName, 0, DONT_RESOLVE_DLL_REFERENCES|
                                           LOAD_LIBRARY_AS_DATAFILE|LOAD_WITH_ALTERED_SEARCH_PATH);
       if (hinstDLL)
       {
-        HRSRC hrsrc = FindResourceA(hinstDLL, MAKEINTRESOURCEA(atoi(pszTypeLibIndex)), "TYPELIB");
+        HRSRC hrsrc = FindResourceA(hinstDLL, MAKEINTRESOURCEA(index),
+	  "TYPELIB");
         if (hrsrc)
         {
           HGLOBAL hGlobal = LoadResource(hinstDLL, hrsrc);
@@ -1894,12 +1939,11 @@ int TLB_ReadTypeLib(LPSTR pszFileName, ITypeLib2 **ppTypeLib)
       }
     }
 
-    HeapFree(GetProcessHeap(), 0, pszDllName);
-
     if(*ppTypeLib)
       ret = S_OK;
     else
-      ERR("Loading of typelib %s failed with error 0x%08lx\n", pszFileName, GetLastError());
+      ERR("Loading of typelib %s failed with error 0x%08lx\n",
+	  debugstr_w(pszFileName), GetLastError());
 
     return ret;
 }
@@ -2485,23 +2529,29 @@ static SLTG_TypeInfoTail *SLTG_ProcessInterface(char *pBlk, ITypeInfoImpl *pTI,
 
 	for(param = 0; param < (*ppFuncDesc)->funcdesc.cParams; param++) {
 	    char *paramName = pNameTable + *pArg;
-	    /* right, if the arg type follows then paramName points to the 2nd
-	       letter of the name (or there is no name), else if the next
-	       WORD is an offset to the arg type then paramName points to the
-	       first letter. Before the name there always seems to be the byte
-	       0xff or 0x00, so let's take one char off paramName and see what
-	       we're pointing at.  Got that? */
+	    BOOL HaveOffs;
+	    /* If arg type follows then paramName points to the 2nd
+	       letter of the name, else the next WORD is an offset to
+	       the arg type and paramName points to the first letter.
+	       So let's take one char off paramName and see if we're
+	       pointing at an alpha-numeric char.  However if *pArg is
+	       0xffff or 0xfffe then the param has no name, the former
+	       meaning that the next WORD is the type, the latter
+	       meaning the the next WORD is an offset to the type. */
 
-	    if(*pArg == 0xffff) /* If we don't have a name the type seems to
-				   always follow.  FIXME is this correct? */
-	      paramName = NULL;
+	    HaveOffs = FALSE;
+	    if(*pArg == 0xffff)
+	        paramName = NULL;
+	    else if(*pArg == 0xfffe) {
+	        paramName = NULL;
+		HaveOffs = TRUE;
+	    }
+	    else if(!isalnum(*(paramName-1)))
+	        HaveOffs = TRUE;
 
 	    pArg++;
 
-	    if(paramName &&
-	       (*(paramName-1) == '\xff' ||
-	        *(paramName-1) == '\x00')) { /* the next word is an offset to
-					      the type */
+	    if(HaveOffs) { /* the next word is an offset to type */
 	        pType = (WORD*)(pFirstItem + *pArg);
 		SLTG_DoType(pType, pFirstItem,
 			    &(*ppFuncDesc)->funcdesc.lprgelemdescParam[param]);
@@ -2600,7 +2650,7 @@ static SLTG_TypeInfoTail *SLTG_ProcessEnum(char *pBlk, ITypeInfoImpl *pTI,
       pItem = (SLTG_EnumItem *)(pFirstItem + pItem->next), num++) {
       if(pItem->magic != SLTG_ENUMITEM_MAGIC) {
 	  FIXME("enumitem magic = %04x\n", pItem->magic);
-	  return;
+	  return NULL;
       }
       *ppVarDesc = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY,
 			     sizeof(**ppVarDesc));

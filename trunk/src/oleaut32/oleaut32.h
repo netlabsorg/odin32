@@ -1,4 +1,4 @@
-/* $Id: oleaut32.h,v 1.10 2001-04-04 09:02:15 sandervl Exp $ */
+/* $Id: oleaut32.h,v 1.11 2001-10-03 19:21:59 sandervl Exp $ */
 /*
  * Win32 OLE stubs for OS/2
  *
@@ -58,4 +58,5 @@ extern char 	oleaut32Path[];
 void ClosePrivateLogFileTypelib();
 void OpenPrivateLogFileTypelib();
 
+#define snprintf wsnprintfA
 #endif
