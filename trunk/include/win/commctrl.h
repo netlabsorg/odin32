@@ -1,4 +1,3 @@
-/* $Id: commctrl.h,v 1.40 2001-04-29 15:06:15 sandervl Exp $ */
 /*
  * Common controls definitions
  */
@@ -2751,6 +2750,19 @@ typedef struct tagNMLISTVIEW
 #define LPNM_LISTVIEW   LPNMLISTVIEW
 #define NM_LISTVIEW     NMLISTVIEW
 
+typedef struct tagNMITEMACTIVATE
+{
+    NMHDR hdr;
+    int iItem;
+    int iSubItem;
+    UINT uNewState;
+    UINT uOldState;
+    UINT uChanged;
+    POINT ptAction;
+    LPARAM lParam;
+    UINT uKeyFlags;
+} NMITEMACTIVATE, *LPNMITEMACTIVATE;
+
 
 typedef struct tagLVDISPINFO
 {
@@ -2778,6 +2790,31 @@ typedef struct tagLVKEYDOWN
 
 #define LV_KEYDOWN     NMLVKEYDOWN
 
+typedef struct tagNMLVGETINFOTIPA
+{
+    NMHDR hdr;
+    DWORD dwFlags;
+    LPSTR pszText;
+    int cchTextMax;
+    int iItem;
+    int iSubItem;
+    LPARAM lParam;
+} NMLVGETINFOTIPA, *LPNMLVGETINFOTIPA;
+
+typedef struct tagNMLVGETINFOTIPW
+{
+    NMHDR hdr;
+    DWORD dwFlags;
+    LPWSTR pszText;
+    int cchTextMax;
+    int iItem;
+    int iSubItem;
+    LPARAM lParam;
+} NMLVGETINFOTIPW, *LPNMLVGETINFOTIPW;
+
+#define NMLVGETINFOTIP WINELIB_NAME_AW(NMLVGETINFOTIP)
+#define LPNMLVGETINFOTIP WINELIB_NAME_AW(LPNMLVGETINFOTIP)
+
 typedef struct tagLVHITTESTINFO
 {
     POINT pt;
@@ -2797,7 +2834,7 @@ typedef struct tagLVFINDINFOA
         LPARAM lParam;
         POINT pt;
         UINT vkDirection;
-} LVFINDINFOA, *LPLVFINDINFOA;
+} LVFINDINFO, LVFINDINFOA, *LPLVFINDINFOA, *LPLVFINDINFO;
 
 #define LV_FINDINFOA LVFINDINFOA
 
@@ -2825,6 +2862,16 @@ typedef struct tagTCHITTESTINFO
 
 typedef INT (* CALLBACK PFNLVCOMPARE)(LPARAM, LPARAM, LPARAM);
 
+#define NMLVCUSTOMDRAW_V3_SIZE CCSIZEOF_STRUCT(NMLCUSTOMDRW, clrTextBk)
+
+typedef struct tagNMLVCUSTOMDRAW
+{
+    NMCUSTOMDRAW nmcd;
+    COLORREF clrText;
+    COLORREF clrTextBk;
+    int iSubItem;
+} NMLVCUSTOMDRAW, *LPNMLVCUSTOMDRAW;
+
 typedef struct tagNMLVCACHEHINT
 {
         NMHDR   hdr;
@@ -2835,6 +2882,30 @@ typedef struct tagNMLVCACHEHINT
 #define LPNM_CACHEHINT LPNMLVCACHEHINT
 #define PNM_CACHEHINT  LPNMLVCACHEHINT
 #define NM_CACHEHINT   NMLVCACHEHINT
+
+typedef struct tagNMLVFINDITEM
+{
+    NMHDR hdr;
+    int iStart;
+    LVFINDINFO lvfi;
+} NMLVFINDITEM, *LPNMLVFINDITEM;
+
+#define NM_FINDITEM NMLVFINDITEM
+#define PNM_FINDITEM LPNMLVFINDITEM
+#define LPNM_FINDITEM LPNMLVFINDITEM
+
+typedef struct tagNMLVODSTATECHANGE
+{
+    NMHDR hdr;
+    int iFrom;
+    int iTo;
+    UINT uNewState;
+    UINT uOldState;
+} NMLVODSTATECHANGE, *LPNMLVODSTATECHANGE;
+
+#define PNM_ODSTATECHANGE LPNMLVODSTATECHANGE
+#define LPNM_ODSTATECHANGE LPNMLVODSTATECHANGE
+#define NM_ODSTATECHANGE NMLVODSTATECHANGE
 
 typedef struct tagLVBKIMAGEA
 {
@@ -3000,6 +3071,9 @@ typedef struct tagLVBKIMAGEW
 #define ListView_GetColumnWidth(hwnd, iCol) \
     (int)SendMessageA((hwnd), LVM_GETCOLUMNWIDTH, (WPARAM)(int)(iCol), 0)
 
+#define ListView_FindItem(hwnd,nItem,plvfi) \
+    (INT)SendMessageA((hwnd),LVM_FINDITEMA,(WPARAM)(INT)(nItem),(LPARAM)(LVFINDINFO*)(plvfi))
+
 #define ListView_SetColumnWidth(hwnd, iCol, cx) \
     (BOOL)SendMessageA((hwnd), LVM_SETCOLUMNWIDTH, (WPARAM)(int)(iCol), MAKELPARAM((cx), 0))
 
@@ -3042,6 +3116,8 @@ typedef struct tagLVBKIMAGEW
   _lvi.state = data;\
   SendMessageA((hwndLV), LVM_SETITEMSTATE, (WPARAM)(i), (LPARAM)(LVITEMW*)&_lvi);\
 }
+#define ListView_SetItemStateWine(hwnd,i,pitem) \
+    (BOOL)SendMessageA((hwnd),LVM_SETITEMSTATE,(WPARAM)(UINT)(i),(LPARAM)(LPLVITEMA)(pitem))
 
 #define ListView_SetCheckState(hwndLV, i, fCheck) \
   ListView_SetItemState(hwndLV, i, INDEXTOSTATEIMAGEMASK((fCheck)?2:1), LVIS_STATEIMAGEMASK)
