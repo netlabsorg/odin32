@@ -1,11 +1,16 @@
- /* $Id: changelog,v 1.804 2000-03-13 13:12:10 sandervl Exp $ */
+ /* $Id: changelog,v 1.805 2000-03-13 20:33:25 sandervl Exp $ */
 
  2000-03-12: Sander van Leeuwen <sandervl@xs4all.nl>
 	- include\winconst.h: Fixed KEY_ALL_ACCESS definition
                               (reported by Yuri Dario)
 	- DSOUND: Replaced dsound by new version
 	- USER32: Replaced os2.h includes by os2wrap.h
+                  Set message nr, wParam & lParam to 0 for dummy messages
+                  (to prevent keyboard or mouse messages swallowed by dinput
+                   from being dispatched)
 	- KERNEL32: Replaced os2.h includes by os2wrap.h (cvtcursorgrp & oslibdebug)
+        - WSOCK32: Fixed bug in setsockopt for SO_SNDBUF/SO_RCVBUF (OS/2's
+                   winsock returns WSAEINVAL if size > 64k)
 
  2000-03-12: Michal Necasek <mike@mendelu.cz>
         - dsound\new: Fixed sound in Heroes of M&M III
