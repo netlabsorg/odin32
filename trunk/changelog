@@ -1,3 +1,6 @@
+ 99-20-06: Sander van Leeuwen
+	- KERNEL32: Call HMInitialize from initterm, not winexe object creation
+
  99-19-06: Sander van Leeuwen
 	- ALL (except dsound/ddraw): Include <os2wrap.h> instead of <os2.h>
 	- KERNEL32: Changes for win32 TEB (not active)
