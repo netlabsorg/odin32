@@ -1,4 +1,4 @@
-# $Id: pdwin32.vac3.dbg,v 1.18 2000-03-04 19:04:14 bird Exp $
+# $Id: pdwin32.vac3.dbg,v 1.19 2000-03-04 23:45:31 sandervl Exp $
 # ODIN / win32os2 Project
 #
 # DEBUG makefile for the VAC3 compiler environment
@@ -9,6 +9,8 @@
 SOMLIB   = somtk.lib
 RTLLIB   = cppom30.lib
 RTLLIB_O = cppom30o.lib
+
+OBJDIR   = .\bin\debug
 
 #
 # Tools
