@@ -1,7 +1,10 @@
-/* $Id: changelog,v 1.2133 2002-06-06 15:08:14 sandervl Exp $ */
+/* $Id: changelog,v 1.2134 2002-06-08 00:28:29 bird Exp $ */
+
+ 2002-06-06: knut st. osmundsen <bird@anduin.net>
+    - KERNEL32: o Made winimagepe2lx.cpp compilabel with toolkit 4.5.0.
 
  2002-06-06: Mark Paulus <mark.paulus@wcom.com>
-    - KERNEL32: o OSLibDosCreateFile:  Fix a SYS0005 (Access Denied) when 
+    - KERNEL32: o OSLibDosCreateFile:  Fix a SYS0005 (Access Denied) when
                   opening an existing file
 
  2002-06-06: Sander van Leeuwen <sandervl@innotek.de>
@@ -53,7 +56,7 @@
     - COMCTL32: o Added LVN_BEGINDRAG/LVN_BEGINRDRAG notification to listview
                   control (probably not 100% correct)
     - USER32:   o Implemented support for simple drag & drop (WM_DROPFILES)
-                  (works in notepad; drag file object from WPS into notepad 
+                  (works in notepad; drag file object from WPS into notepad
                    window)
 
  2002-05-31: Sander van Leeuwen <sandervl@innotek.de>
@@ -76,7 +79,7 @@
                   (fixes AbiWord keyboard input)
     - WINMM:    o mixerGetLineControlsA (MIXER_GETLINECONTROLSF_ALL) fixes
                 o mixerGetLineInfoW fix
-    - COMCTL32: o ImageList_LoadImageW: match behaviour of ImageList_LoadImageA 
+    - COMCTL32: o ImageList_LoadImageW: match behaviour of ImageList_LoadImageA
                   wrt cx parameter (when set to zero)
                   (fixes properties dialog of sndvol32.exe (windows mixer app))
                 o Updated status control to latest Wine & applied two
@@ -168,7 +171,7 @@
                 o RegQueryInfoKeyW fix
                 o TLS fix for pe2lx images
     - USER32:   o Implemented SPI_SETSCREENSAVETIMEOUT/SPI_GETSCREENSAVETIMEOUT,
-                  SPI_GETSCREENSAVEACTIVE & SPI_SETSCREENSAVEACTIVE 
+                  SPI_GETSCREENSAVEACTIVE & SPI_SETSCREENSAVEACTIVE
                   SystemParametersInfoA parameters
     - OLE32:    o Resync with latest Wine
 
