@@ -294,19 +294,13 @@ int WINAPI SysReAllocStringLen(BSTR* old, const OLECHAR* str, unsigned int len)
     if (*old!=NULL) {
       DWORD newbytelen = len*sizeof(WCHAR);
       DWORD *ptr = HeapReAlloc(GetProcessHeap(),0,((DWORD*)*old)-1,newbytelen+sizeof(WCHAR)+sizeof(DWORD));
-#ifdef __WIN32OS2__
-      if (*old == str) str = NULL;  // if *old == str, we need no memcpy ???
+      if (*old == str) str = NULL;
+// if *old == str, we need no memcpy and HeapReAlloc can also invalid the source ???
       *old = (BSTR)(ptr+1);
       (*old)[len] = 0;
-#else
-      *old = (BSTR)(ptr+1);
-#endif
       *ptr = newbytelen;
       if (str) {
         memcpy(*old, str, newbytelen);
-#ifndef __WIN32OS2__
-        (*old)[len] = 0;
-#endif
       } else {
 	/* Subtle hidden feature: The old string data is still there
 	 * when 'in' is NULL!
@@ -414,21 +408,10 @@ INT WINAPI SysReAllocString(LPBSTR old,LPCOLESTR str)
     /*
      * Sanity check
      */
-    if (old==NULL)
+    if (old==NULL)  // ?? need we this ??
       return 0;
-
-    /*
-     * Make sure we free the old string.
-     */
-    if (*old!=NULL)
-      SysFreeString(*old);
-
-    /*
-     * Allocate the new string
-     */
-    *old = SysAllocString(str);
-
-     return 1;
+    /* Delegate this to the SysReAllocStringLen32 method. */
+    return SysReAllocStringLen(old, str, lstrlenW(str));
 }
 
 /******************************************************************************
@@ -573,7 +556,29 @@ ULONG WINAPI OaBuildVersion()
 		return 0x0;
     }
 }
-
+#if 0
+/******************************************************************************
+ *      GetRecordInfoFromGuids  [OLEAUT32.322]
+ *
+ * RETURNS
+ *  Success: S_OK
+ *  Failure: E_INVALIDARG, if any argument is invalid.
+ *
+ * BUGS
+ *  Unimplemented
+ */
+HRESULT WINAPI GetRecordInfoFromGuids(
+    REFGUID rGuidTypeLib,
+    ULONG uVerMajor,
+    ULONG uVerMinor,
+    LCID lcid,
+    REFGUID rGuidTypeInfo,
+    IRecordInfo** ppRecInfo)
+{
+    FIXME("(%p,%ld,%ld,%ld,%p,%p),stub!\n",rGuidTypeLib, uVerMajor, uVerMinor, lcid, rGuidTypeInfo, ppRecInfo);
+    return E_NOTIMPL;
+}
+#endif
 /******************************************************************************
  *		OleTranslateColor	[OLEAUT32.421]
  *

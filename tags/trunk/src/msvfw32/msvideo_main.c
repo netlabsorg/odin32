@@ -1151,8 +1151,7 @@ err:
 		ICDecompressEnd( hic );
 	if ( bReleaseIC )
 		ICClose(hic);
-	if ( pHdr != NULL )
-		HeapFree(GetProcessHeap(),0,pHdr);
+	HeapFree(GetProcessHeap(),0,pHdr);
 	if ( pMem != NULL )
 		GlobalUnlock( hMem );
 	if ( !bSucceeded && hMem != (HGLOBAL)NULL )

@@ -1,4 +1,4 @@
-// $Id: dplaysp.cpp,v 1.4 2001-03-13 23:13:27 hugh Exp $
+// $Id: dplaysp.cpp,v 1.5 2005-01-15 22:16:31 sao2l02 Exp $
 /* This contains the implementation of the interface Service
  * Providers require to communicate with Direct Play
  *
@@ -941,20 +941,14 @@ static HRESULT WINAPI IDirectPlaySPImpl_SetSPData
   /* If we have data already allocated, free it and replace it */
   if( dwFlags == DPSET_REMOTE )
   {
-    if( This->sp->lpSpRemoteData )
-    {
-      HeapFree( GetProcessHeap(), 0, This->sp->lpSpRemoteData );
-    }
+    HeapFree( GetProcessHeap(), 0, This->sp->lpSpRemoteData );
 
     This->sp->dwSpRemoteDataSize = dwDataSize;
     This->sp->lpSpRemoteData = lpSpData;
   }
   else if ( dwFlags == DPSET_LOCAL )
   {
-    if( This->sp->lpSpLocalData )
-    {
-      HeapFree( GetProcessHeap(), 0, This->sp->lpSpLocalData );
-    }
+    HeapFree( GetProcessHeap(), 0, This->sp->lpSpLocalData );
 
     This->sp->lpSpLocalData     = lpSpData;
     This->sp->dwSpLocalDataSize = dwDataSize;

@@ -1022,8 +1022,7 @@ BOOL OLEMenu_UnInstallHooks( DWORD tid )
 
 CLEANUP:
   /* Release the hook table entry */
-  if (pHookItem)
-    HeapFree(pHookItem->hHeap, 0, pHookItem );
+  HeapFree(pHookItem->hHeap, 0, pHookItem );
 
   return FALSE;
 }
@@ -2761,10 +2760,7 @@ static ULONG WINAPI IEnumFORMATETC_fnRelease(LPENUMFORMATETC iface)
     if (!--(This->ref))
 	{
 	  TRACE(" destroying IEnumFORMATETC(%p)\n",This);
-	  if (This->pFmt)
-	  {
-	    HeapFree(GetProcessHeap(),0, This->pFmt);
-	  }
+      HeapFree(GetProcessHeap(),0, This->pFmt);
 	  HeapFree(GetProcessHeap(),0,This);
 	  return 0;
 	}

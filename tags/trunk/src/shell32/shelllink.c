@@ -775,11 +775,11 @@ static HRESULT WINAPI IPersistFile_fnSave(IPersistFile* iface, LPCOLESTR pszFile
     }
    
  done:
-    if(shell_link_app) HeapFree( GetProcessHeap(), 0, shell_link_app );
-    if(filename) HeapFree( GetProcessHeap(), 0, filename );
-    if(icon_name) HeapFree( GetProcessHeap(), 0, icon_name );
-    if(path_name) HeapFree( GetProcessHeap(), 0, path_name );
-    if(work_dir) HeapFree( GetProcessHeap(), 0, work_dir );
+    HeapFree( GetProcessHeap(), 0, shell_link_app );
+    HeapFree( GetProcessHeap(), 0, filename );
+    HeapFree( GetProcessHeap(), 0, icon_name );
+    HeapFree( GetProcessHeap(), 0, path_name );
+    HeapFree( GetProcessHeap(), 0, work_dir );
     return ret;
 
 #else
@@ -1209,20 +1209,11 @@ static ULONG WINAPI IShellLinkA_fnRelease(IShellLinkA * iface)
 	if (!--(This->ref)) 
 	{ TRACE("-- destroying IShellLink(%p)\n",This);
 	
-	  if (This->sIcoPath)
-	    HeapFree(GetProcessHeap(), 0, This->sIcoPath);
-	    
-	  if (This->sArgs)
-	    HeapFree(GetProcessHeap(), 0, This->sArgs);
-
-	  if (This->sWorkDir)
-	    HeapFree(GetProcessHeap(), 0, This->sWorkDir);
-	    
-	  if (This->sDescription)
-	    HeapFree(GetProcessHeap(), 0, This->sDescription);
-
-	  if (This->sPath)
-	    HeapFree(GetProcessHeap(),0,This->sPath);
+      HeapFree(GetProcessHeap(), 0, This->sIcoPath);
+      HeapFree(GetProcessHeap(), 0, This->sArgs);
+      HeapFree(GetProcessHeap(), 0, This->sWorkDir);
+      HeapFree(GetProcessHeap(), 0, This->sDescription);
+      HeapFree(GetProcessHeap(),0,This->sPath);
 
 	  if (This->pPidl)
 	    SHFree(This->pPidl);
@@ -1285,8 +1276,7 @@ static HRESULT WINAPI IShellLinkA_fnSetDescription(IShellLinkA * iface, LPCSTR p
 	
 	TRACE("(%p)->(pName=%s)\n", This, pszName);
 
-	if (This->sDescription)
-	    HeapFree(GetProcessHeap(), 0, This->sDescription);
+	HeapFree(GetProcessHeap(), 0, This->sDescription);
 	if (!(This->sDescription = heap_strdup(pszName)))
 	    return E_OUTOFMEMORY;
 
@@ -1308,8 +1298,7 @@ static HRESULT WINAPI IShellLinkA_fnSetWorkingDirectory(IShellLinkA * iface, LPC
 	
 	TRACE("(%p)->(dir=%s)\n",This, pszDir);
 
-	if (This->sWorkDir)
-	    HeapFree(GetProcessHeap(), 0, This->sWorkDir);
+    HeapFree(GetProcessHeap(), 0, This->sWorkDir);
 	if (!(This->sWorkDir = heap_strdup(pszDir)))
 	    return E_OUTOFMEMORY;
 
@@ -1331,8 +1320,7 @@ static HRESULT WINAPI IShellLinkA_fnSetArguments(IShellLinkA * iface, LPCSTR psz
 	
 	TRACE("(%p)->(args=%s)\n",This, pszArgs);
 
-	if (This->sArgs)
-	    HeapFree(GetProcessHeap(), 0, This->sArgs);
+    HeapFree(GetProcessHeap(), 0, This->sArgs);
 	if (!(This->sArgs = heap_strdup(pszArgs)))
 	    return E_OUTOFMEMORY;
 
@@ -1390,8 +1378,7 @@ static HRESULT WINAPI IShellLinkA_fnSetIconLocation(IShellLinkA * iface, LPCSTR 
 	
 	TRACE("(%p)->(path=%s iicon=%u)\n",This, pszIconPath, iIcon);
 	
-	if (This->sIcoPath)
-	    HeapFree(GetProcessHeap(), 0, This->sIcoPath);
+    HeapFree(GetProcessHeap(), 0, This->sIcoPath);
 	if (!(This->sIcoPath = heap_strdup(pszIconPath)))
 	    return E_OUTOFMEMORY;	
 	This->iIcoNdx = iIcon;
@@ -1418,8 +1405,7 @@ static HRESULT WINAPI IShellLinkA_fnSetPath(IShellLinkA * iface, LPCSTR pszFile)
 	
 	TRACE("(%p)->(path=%s)\n",This, pszFile);
 
-	if (This->sPath)
-	    HeapFree(GetProcessHeap(), 0, This->sPath);
+    HeapFree(GetProcessHeap(), 0, This->sPath);
 	if (!(This->sPath = heap_strdup(pszFile)))
 	    return E_OUTOFMEMORY;
 	
@@ -1533,8 +1519,7 @@ static HRESULT WINAPI IShellLinkW_fnSetDescription(IShellLinkW * iface, LPCWSTR 
 	
 	TRACE("(%p)->(desc=%s)\n",This, debugstr_w(pszName));
 
-	if (This->sDescription)
-	    HeapFree(GetProcessHeap(), 0, This->sDescription);
+    HeapFree(GetProcessHeap(), 0, This->sDescription);
 	if (!(This->sDescription = HEAP_strdupWtoA(GetProcessHeap(), 0, pszName)))
 	    return E_OUTOFMEMORY;
 		
@@ -1558,8 +1543,7 @@ static HRESULT WINAPI IShellLinkW_fnSetWorkingDirectory(IShellLinkW * iface, LPC
 	
 	TRACE("(%p)->(dir=%s)\n",This, debugstr_w(pszDir));
 
-	if (This->sWorkDir)
-	    HeapFree(GetProcessHeap(), 0, This->sWorkDir);
+    HeapFree(GetProcessHeap(), 0, This->sWorkDir);
 	if (!(This->sWorkDir = HEAP_strdupWtoA(GetProcessHeap(), 0, pszDir)))
 	    return E_OUTOFMEMORY;
 
@@ -1583,8 +1567,7 @@ static HRESULT WINAPI IShellLinkW_fnSetArguments(IShellLinkW * iface, LPCWSTR ps
 	
 	TRACE("(%p)->(args=%s)\n",This, debugstr_w(pszArgs));
 	
-	if (This->sArgs)
-	    HeapFree(GetProcessHeap(), 0, This->sArgs);
+    HeapFree(GetProcessHeap(), 0, This->sArgs);
 	if (!(This->sArgs = HEAP_strdupWtoA(GetProcessHeap(), 0, pszArgs)))
 	    return E_OUTOFMEMORY;
 	
@@ -1643,8 +1626,7 @@ static HRESULT WINAPI IShellLinkW_fnSetIconLocation(IShellLinkW * iface, LPCWSTR
 	
 	TRACE("(%p)->(path=%s iicon=%u)\n",This, debugstr_w(pszIconPath), iIcon);
 
-	if (This->sIcoPath)
-	    HeapFree(GetProcessHeap(), 0, This->sIcoPath);
+    HeapFree(GetProcessHeap(), 0, This->sIcoPath);
 	if (!(This->sIcoPath = HEAP_strdupWtoA(GetProcessHeap(), 0, pszIconPath)))
 	    return E_OUTOFMEMORY;	
 	This->iIcoNdx = iIcon;
@@ -1674,8 +1656,7 @@ static HRESULT WINAPI IShellLinkW_fnSetPath(IShellLinkW * iface, LPCWSTR pszFile
 	
 	TRACE("(%p)->(path=%s)\n",This, debugstr_w(pszFile));
 	
-	if (This->sPath)
-	    HeapFree(GetProcessHeap(), 0, This->sPath);
+    HeapFree(GetProcessHeap(), 0, This->sPath);
 	if (!(This->sPath = HEAP_strdupWtoA(GetProcessHeap(), 0, pszFile)))
 	    return E_OUTOFMEMORY;	
 	

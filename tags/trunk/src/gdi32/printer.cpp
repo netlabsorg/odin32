@@ -1,4 +1,4 @@
-/* $Id: printer.cpp,v 1.3 2004-05-05 09:19:11 sandervl Exp $ */
+/* $Id: printer.cpp,v 1.4 2005-01-15 22:17:17 sao2l02 Exp $ */
 
 /*
  * GDI32 printer apis
@@ -216,12 +216,9 @@ INT WIN32API StartDocW(HDC hdc, const DOCINFOW* doc)
 
     ret = StartDocA(hdc, &docA);
 
-    if(docA.lpszDocName)
-        HeapFree( GetProcessHeap(), 0, (LPSTR)docA.lpszDocName );
-    if(docA.lpszOutput)
-        HeapFree( GetProcessHeap(), 0, (LPSTR)docA.lpszOutput );
-    if(docA.lpszDatatype)
-        HeapFree( GetProcessHeap(), 0, (LPSTR)docA.lpszDatatype );
+    HeapFree( GetProcessHeap(), 0, (LPSTR)docA.lpszDocName );
+    HeapFree( GetProcessHeap(), 0, (LPSTR)docA.lpszOutput );
+    HeapFree( GetProcessHeap(), 0, (LPSTR)docA.lpszDatatype );
 
     return ret;
 }

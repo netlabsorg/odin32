@@ -1486,8 +1486,7 @@ CLEANUP:
   /*
    * Free the array of FORMATETC's
    */
-  if (afmt)
-    HeapFree(GetProcessHeap(), 0, afmt);
+  HeapFree(GetProcessHeap(), 0, afmt);
 
   /*
    * Close Windows clipboard

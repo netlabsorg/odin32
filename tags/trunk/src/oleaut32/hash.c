@@ -193,8 +193,21 @@ static const unsigned char Lookup814[128 * 3] = {
 /***********************************************************************
  *		LHashValOfNameSysA (OLEAUT32.166)
  *
- * Produce a two part hash: The high word is based on skind and lcid,
- * the low word is based on a repeated string hash of skind/str.
+ * Produce a string hash value.
+ *
+ * PARAMS
+ *  skind [I] Type of the system.
+ *  lcid  [I] Locale id for the hash.
+ *  lpStr [I] String to hash.
+ *
+ * RETURNS
+ *  Success: The hash value of the string.
+ *  Failure: 0, if lpStr is NULL.
+ *
+ * NOTES
+ *  This function produces a two part hash: The high word is based on
+ *  skind and lcid, while the low word is based on a repeated string
+ *  hash of skind/str.
  */
 ULONG WINAPI LHashValOfNameSysA( SYSKIND skind, LCID lcid, LPCSTR lpStr)
 {
@@ -249,8 +262,10 @@ ULONG WINAPI LHashValOfNameSysA( SYSKIND skind, LCID lcid, LPCSTR lpStr)
 
 /***********************************************************************
  *		LHashValOfNameSys (OLEAUT32.165)
+ *
+ * See LHashValOfNameSysA.
  */
-ULONG WINAPI LHashValOfNameSys( SYSKIND skind, LCID lcid, LPCOLESTR str)
+ULONG WINAPI LHashValOfNameSys(SYSKIND skind, LCID lcid, LPCOLESTR str)
 {
     LPSTR	strA;
     ULONG	res;

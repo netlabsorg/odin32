@@ -119,14 +119,8 @@ static void OleAdviseHolderImpl_Destructor(
     }
   }
 
-  HeapFree(GetProcessHeap(),
-	   0,
-	   ptrToDestroy->arrayOfSinks);
-
-
-  HeapFree(GetProcessHeap(),
-	   0,
-	   ptrToDestroy);
+  HeapFree(GetProcessHeap(), 0,ptrToDestroy->arrayOfSinks);
+  HeapFree(GetProcessHeap(), 0,ptrToDestroy);
 }
 
 /**************************************************************************

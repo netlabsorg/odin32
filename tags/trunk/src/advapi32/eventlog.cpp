@@ -1,4 +1,4 @@
-/* $Id: eventlog.cpp,v 1.2 2000-05-09 18:59:10 sandervl Exp $ */
+/* $Id: eventlog.cpp,v 1.3 2005-01-15 22:16:35 sao2l02 Exp $ */
 
 /*
  * Win32 advanced API functions for OS/2
@@ -86,10 +86,8 @@ HANDLE WIN32API RegisterEventSourceW(LPCWSTR lpUNCServerName, LPCWSTR lpSourceNa
 
     hEvent = RegisterEventSourceA(lpUNCServerNameA, lpSourceNameA);
 
-    if(lpUNCServerNameA) 
-    	HeapFree(GetProcessHeap(), 0, lpUNCServerNameA);
-    if(lpSourceNameA) 
-    	HeapFree(GetProcessHeap(), 0, lpSourceNameA);
+    HeapFree(GetProcessHeap(), 0, lpUNCServerNameA);
+    HeapFree(GetProcessHeap(), 0, lpSourceNameA);
 
     return hEvent;
 }

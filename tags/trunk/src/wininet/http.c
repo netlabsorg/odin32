@@ -726,8 +726,7 @@ BOOL HTTP_HttpSendRequestA(HINTERNET hHttpRequest, LPCSTR lpszHeaders,
 
 lend:
 
-    if (requestString)
-        HeapFree(GetProcessHeap(), 0, requestString);
+    HeapFree(GetProcessHeap(), 0, requestString);
 
     if (hIC->hdr.dwFlags & INTERNET_FLAG_ASYNC  && hIC->lpfnStatusCB)
     {
@@ -817,7 +816,7 @@ HINTERNET HTTP_Connect(HINTERNET hInternet, LPCSTR lpszServerName,
     bSuccess = TRUE;
 
 lerror:
-    if (!bSuccess && lpwhs)
+    if (!bSuccess)
     {
         HeapFree(GetProcessHeap(), 0, lpwhs);
         lpwhs = NULL;
@@ -1253,27 +1252,20 @@ void HTTP_CloseHTTPRequestHandle(LPWININETHTTPREQA lpwhr)
     if (lpwhr->nSocketFD != INVALID_SOCKET)
         HTTP_CloseConnection(lpwhr);
 
-    if (lpwhr->lpszPath)
-        HeapFree(GetProcessHeap(), 0, lpwhr->lpszPath);
-    if (lpwhr->lpszVerb)
-        HeapFree(GetProcessHeap(), 0, lpwhr->lpszVerb);
-    if (lpwhr->lpszHostName)
-        HeapFree(GetProcessHeap(), 0, lpwhr->lpszHostName);
+    HeapFree(GetProcessHeap(), 0, lpwhr->lpszPath);
+    HeapFree(GetProcessHeap(), 0, lpwhr->lpszVerb);
+    HeapFree(GetProcessHeap(), 0, lpwhr->lpszHostName);
 
     for (i = 0; i <= HTTP_QUERY_MAX; i++)
     {
-           if (lpwhr->StdHeaders[i].lpszField)
-            HeapFree(GetProcessHeap(), 0, lpwhr->StdHeaders[i].lpszField);
-           if (lpwhr->StdHeaders[i].lpszValue)
-            HeapFree(GetProcessHeap(), 0, lpwhr->StdHeaders[i].lpszValue);
+        HeapFree(GetProcessHeap(), 0, lpwhr->StdHeaders[i].lpszField);
+        HeapFree(GetProcessHeap(), 0, lpwhr->StdHeaders[i].lpszValue);
     }
 
     for (i = 0; i < lpwhr->nCustHeaders; i++)
     {
-           if (lpwhr->pCustHeaders[i].lpszField)
-            HeapFree(GetProcessHeap(), 0, lpwhr->pCustHeaders[i].lpszField);
-           if (lpwhr->pCustHeaders[i].lpszValue)
-            HeapFree(GetProcessHeap(), 0, lpwhr->pCustHeaders[i].lpszValue);
+        HeapFree(GetProcessHeap(), 0, lpwhr->pCustHeaders[i].lpszField);
+        HeapFree(GetProcessHeap(), 0, lpwhr->pCustHeaders[i].lpszValue);
     }
 
     HeapFree(GetProcessHeap(), 0, lpwhr->pCustHeaders);
@@ -1291,10 +1283,8 @@ void HTTP_CloseHTTPSessionHandle(LPWININETHTTPSESSIONA lpwhs)
 {
     TRACE("\n");
 
-    if (lpwhs->lpszServerName)
-        HeapFree(GetProcessHeap(), 0, lpwhs->lpszServerName);
-    if (lpwhs->lpszUserName)
-        HeapFree(GetProcessHeap(), 0, lpwhs->lpszUserName);
+    HeapFree(GetProcessHeap(), 0, lpwhs->lpszServerName);
+    HeapFree(GetProcessHeap(), 0, lpwhs->lpszUserName);
     HeapFree(GetProcessHeap(), 0, lpwhs);
 }
 

@@ -477,7 +477,7 @@ static LONG FILEDLG_WMDrawItem(HWND hWnd, WPARAM wParam, LPARAM lParam,
 	    SetBkColor( lpdis->hDC, oldBk );
 	    SetTextColor( lpdis->hDC, oldText );
 	}
-        HeapFree(GetProcessHeap(), 0, str);
+	HeapFree(GetProcessHeap(), 0, str);
 	return TRUE;
     }
 
@@ -506,7 +506,7 @@ static LONG FILEDLG_WMDrawItem(HWND hWnd, WPARAM wParam, LPARAM lParam,
 	    SetTextColor( lpdis->hDC, oldText );
 	}
 	DrawIcon(lpdis->hDC, lpdis->rcItem.left, lpdis->rcItem.top, hFolder);
-        HeapFree(GetProcessHeap(), 0, str);
+	HeapFree(GetProcessHeap(), 0, str);
 	return TRUE;
     }
     if (lpdis->CtlType == ODT_COMBOBOX && lpdis->CtlID == cmb2)
@@ -540,7 +540,7 @@ static LONG FILEDLG_WMDrawItem(HWND hWnd, WPARAM wParam, LPARAM lParam,
 	    SetTextColor( lpdis->hDC, oldText );
 	}
 	DrawIcon(lpdis->hDC, lpdis->rcItem.left, lpdis->rcItem.top, hIcon);
-        HeapFree(GetProcessHeap(), 0, str);
+	HeapFree(GetProcessHeap(), 0, str);
 	return TRUE;
     }
     return FALSE;
@@ -1293,13 +1293,13 @@ void FILEDLG_DestroyPrivate(LFSPRIVATE lfs)
 #endif
     {
        LPOPENFILENAMEW ofnW = lfs->ofnW;
-       if (ofnW->lpstrFilter) HeapFree(GetProcessHeap(), 0, (LPWSTR) ofnW->lpstrFilter);
-       if (ofnW->lpstrCustomFilter) HeapFree(GetProcessHeap(), 0, ofnW->lpstrCustomFilter);
-       if (ofnW->lpstrFile) HeapFree(GetProcessHeap(), 0, ofnW->lpstrFile);
-       if (ofnW->lpstrFileTitle) HeapFree(GetProcessHeap(), 0, ofnW->lpstrFileTitle);
-       if (ofnW->lpstrInitialDir) HeapFree(GetProcessHeap(), 0, (LPWSTR) ofnW->lpstrInitialDir);
-       if (ofnW->lpstrTitle) HeapFree(GetProcessHeap(), 0, (LPWSTR) ofnW->lpstrTitle);
-       if ((ofnW->lpTemplateName) && (HIWORD(ofnW->lpTemplateName)))
+       HeapFree(GetProcessHeap(), 0, (LPWSTR) ofnW->lpstrFilter);
+       HeapFree(GetProcessHeap(), 0, ofnW->lpstrCustomFilter);
+       HeapFree(GetProcessHeap(), 0, ofnW->lpstrFile);
+       HeapFree(GetProcessHeap(), 0, ofnW->lpstrFileTitle);
+       HeapFree(GetProcessHeap(), 0, (LPWSTR) ofnW->lpstrInitialDir);
+       HeapFree(GetProcessHeap(), 0, (LPWSTR) ofnW->lpstrTitle);
+       if (HIWORD(ofnW->lpTemplateName))
            HeapFree(GetProcessHeap(), 0, (LPWSTR) ofnW->lpTemplateName);
        HeapFree(GetProcessHeap(), 0, ofnW);
     }

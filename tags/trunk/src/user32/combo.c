@@ -855,8 +855,7 @@ static void CBPaintText(
      if( hPrevFont )
        SelectObject(hdc, hPrevFont );
    }
-   if (pText)
-    HeapFree( GetProcessHeap(), 0, pText );
+   HeapFree( GetProcessHeap(), 0, pText );
 }
 
 /***********************************************************************
@@ -1108,8 +1107,7 @@ static void CBUpdateEdit( LPHEADCOMBO lphc , INT index )
    if( lphc->wState & CBF_FOCUSED )
       SendMessageW(lphc->hWndEdit, EM_SETSEL, 0, (LPARAM)(-1));
 
-   if( pText )
-       HeapFree( GetProcessHeap(), 0, pText );
+   HeapFree( GetProcessHeap(), 0, pText );
 }
 
 /***********************************************************************

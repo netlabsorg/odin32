@@ -1,4 +1,4 @@
-/* $Id: exceptions.cpp,v 1.74 2004-01-20 13:41:10 sandervl Exp $ */
+/* $Id: exceptions.cpp,v 1.75 2005-01-15 22:17:35 sao2l02 Exp $ */
 
 /*
  * Win32 Exception functions for OS/2
@@ -997,7 +997,7 @@ static void sprintfException(PEXCEPTIONREPORTRECORD       pERepRec,
     }
 
     if (pCtxRec->ContextFlags & CONTEXT_SEGMENTS) {       /* check flags */
-        sprintf(szLineException, "   DS=%04x      ES=%08x  FS=%04x     GS=%04x\n",   pCtxRec->ctx_SegDs, pCtxRec->ctx_SegEs, pCtxRec->ctx_SegFs, pCtxRec->ctx_SegGs);
+        sprintf(szLineException, "   DS=%04x      ES=%04x     FS=%04x     GS=%04x\n",   pCtxRec->ctx_SegDs, pCtxRec->ctx_SegEs, pCtxRec->ctx_SegFs, pCtxRec->ctx_SegGs);
         strcat(szTrapDump, szLineException);
     }
 

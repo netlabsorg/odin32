@@ -1,4 +1,4 @@
-/* $Id: directory.cpp,v 1.47 2003-01-03 16:34:33 sandervl Exp $ */
+/* $Id: directory.cpp,v 1.48 2005-01-15 22:17:27 sao2l02 Exp $ */
 
 /*
  * Win32 Directory functions for OS/2
@@ -676,7 +676,7 @@ DWORD DIR_SearchPath( LPCSTR path, LPCSTR name, LPCSTR ext,
     ret = OSLibDosSearchPath(OSLIB_SEARCHENV, "PATH", (LPSTR)name, full_name, MAX_PATHNAME_LEN);
 
 done:
-    if (tmp) HeapFree( GetProcessHeap(), 0, tmp );
+    HeapFree( GetProcessHeap(), 0, tmp );
     return ret;
 }
 
@@ -736,14 +736,9 @@ DWORD WINAPI SearchPathW(LPCWSTR path, LPCWSTR name, LPCWSTR ext,
     dprintf(("SearchPathA %s %s %s", pathA, nameA, extA));
     DWORD ret = DIR_SearchPath( pathA, nameA, extA, (LPSTR)full_name );
   
-    if (NULL != extA)
-      HeapFree( GetProcessHeap(), 0, extA );
-  
-    if (NULL != nameA)
-      HeapFree( GetProcessHeap(), 0, nameA );
-  
-    if (NULL != pathA)
-      HeapFree( GetProcessHeap(), 0, pathA );
+    HeapFree( GetProcessHeap(), 0, extA );
+    HeapFree( GetProcessHeap(), 0, nameA );
+    HeapFree( GetProcessHeap(), 0, pathA );
   
     if (!ret) return 0;
 

@@ -1,4 +1,4 @@
-/* $Id: Fileio.cpp,v 1.71 2003-03-03 16:39:53 sandervl Exp $ */
+/* $Id: Fileio.cpp,v 1.72 2005-01-15 22:17:21 sao2l02 Exp $ */
 
 /*
  * Win32 File IO API functions for OS/2
@@ -1448,9 +1448,12 @@ DWORD WINAPI GetLongPathNameA( LPCSTR lpszShortPath, LPSTR lpszLongPath,
    }
    tmplongpath[sp] = 0;
 
-   lstrcpynA ( lpszLongPath, tmplongpath, cchBuffer );
-   dprintf(("returning %s\n", lpszLongPath));
-   tmplen = strlen ( lpszLongPath  );
+   tmplen = strlen ( tmplongpath ) + 1;
+   if (tmplen <= cchBuffer) {
+      lstrcpynA ( lpszLongPath, tmplongpath, tmplen );
+      dprintf(("returning %s\n", lpszLongPath));
+      tmplen--;
+   }
 
    HeapFree ( GetProcessHeap(), 0, tmpshortpath );
    HeapFree ( GetProcessHeap(), 0, tmplongpath );

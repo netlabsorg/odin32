@@ -1,4 +1,4 @@
-/* $Id: message.cpp,v 1.14 2003-07-28 11:35:31 sandervl Exp $ */
+/* $Id: message.cpp,v 1.15 2005-01-15 22:17:43 sao2l02 Exp $ */
 
 /*
  * Win32 message API functions for OS/2
@@ -372,8 +372,7 @@ DWORD WIN32API FormatMessageA(DWORD   dwFlags,
   }
 
   HeapFree(GetProcessHeap(),0,target);
-  if (from)
-    HeapFree(GetProcessHeap(),0,from);
+  HeapFree(GetProcessHeap(),0,from);
 
   dprintf(("gives: %s", (dwFlags & FORMAT_MESSAGE_ALLOCATE_BUFFER) ?
            *(LPSTR*)lpBuffer : lpBuffer));
@@ -591,7 +590,7 @@ DWORD WINAPI FormatMessageW(DWORD   dwFlags,
    } else
       lstrcpynAtoW(lpBuffer,target,nSize);
    HeapFree(GetProcessHeap(),0,target);
-   if (from) HeapFree(GetProcessHeap(),0,from);
+   HeapFree(GetProcessHeap(),0,from);
    return (dwFlags & FORMAT_MESSAGE_ALLOCATE_BUFFER) ?
          lstrlenW(*(LPWSTR*)lpBuffer):
          lstrlenW(lpBuffer);

@@ -660,7 +660,7 @@ UINT MENU_FindSubMenu( HMENU *hmenu, HMENU hSubTarget )
 static void MENU_FreeItemData( MENUITEM* item )
 {
     /* delete text */
-    if (IS_STRING_ITEM(item->fType) && item->text)
+    if (IS_STRING_ITEM(item->fType))
         HeapFree( GetProcessHeap(), 0, item->text );
 }
 
@@ -1895,7 +1895,7 @@ static BOOL MENU_SetItemData( MENUITEM *item, UINT flags, UINT id,
     /* Don't call SetRectEmpty here! */
 
 
-    if (prevText) HeapFree( GetProcessHeap(), 0, prevText );
+    HeapFree( GetProcessHeap(), 0, prevText );
 
     debug_print_menuitem("MENU_SetItemData to  : ", item, "");
     return TRUE;
@@ -4439,7 +4439,7 @@ static BOOL SetMenuItemInfo_common(MENUITEM * menu,
 
     if (lpmii->fMask & MIIM_TYPE ) {
     /* Get rid of old string.  */
-    if ( IS_STRING_ITEM(menu->fType) && menu->text) {
+    if ( IS_STRING_ITEM(menu->fType)) {
         HeapFree(GetProcessHeap(), 0, menu->text);
         menu->text = NULL;
     }
@@ -4456,7 +4456,7 @@ static BOOL SetMenuItemInfo_common(MENUITEM * menu,
 
     if (lpmii->fMask & MIIM_FTYPE ) {
     /* free the string when the type is changing */
-    if ( (!IS_STRING_ITEM(lpmii->fType)) && IS_STRING_ITEM(menu->fType) && menu->text) {
+    if ( (!IS_STRING_ITEM(lpmii->fType)) && IS_STRING_ITEM(menu->fType)) {
         HeapFree(GetProcessHeap(), 0, menu->text);
         menu->text = NULL;
     }
@@ -4468,7 +4468,7 @@ static BOOL SetMenuItemInfo_common(MENUITEM * menu,
 
     if (lpmii->fMask & MIIM_STRING ) {
     /* free the string when used */
-    if ( IS_STRING_ITEM(menu->fType) && menu->text) {
+    if ( IS_STRING_ITEM(menu->fType)) {
         HeapFree(GetProcessHeap(), 0, menu->text);
             set_menu_item_text( menu, lpmii->dwTypeData, unicode );
     }

@@ -2929,9 +2929,6 @@ static void *MemAlloc(UINT size)
 
 static void MemFree(void *mem)
 {
-    if(mem)
-    {
-        HeapFree(GetProcessHeap(),0,mem);
-    }
+    HeapFree(GetProcessHeap(),0,mem);
 }
 

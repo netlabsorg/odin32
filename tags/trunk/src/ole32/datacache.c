@@ -1146,8 +1146,7 @@ static HRESULT WINAPI DataCache_GetData(
 
 cleanup:
 
-    if (mfBits)
-      HeapFree(GetProcessHeap(), 0, mfBits);
+    HeapFree(GetProcessHeap(), 0, mfBits);
 
     if (pStream)
       IStream_Release(pStream);

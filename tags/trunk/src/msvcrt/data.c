@@ -363,10 +363,10 @@ void msvcrt_init_args(void)
 void msvcrt_free_args(void)
 {
   /* FIXME: more things to free */
-  if (MSVCRT___initenv) HeapFree(GetProcessHeap(), 0,MSVCRT___initenv);
-  if (MSVCRT___winitenv) HeapFree(GetProcessHeap(), 0,MSVCRT___winitenv);
-  if (MSVCRT__environ) HeapFree(GetProcessHeap(), 0,MSVCRT__environ);
-  if (MSVCRT__wenviron) HeapFree(GetProcessHeap(), 0,MSVCRT__wenviron);
+  HeapFree(GetProcessHeap(), 0,MSVCRT___initenv);
+  HeapFree(GetProcessHeap(), 0,MSVCRT___winitenv);
+  HeapFree(GetProcessHeap(), 0,MSVCRT__environ);
+  HeapFree(GetProcessHeap(), 0,MSVCRT__wenviron);
 }
 
 /*********************************************************************

@@ -1,4 +1,4 @@
-/* $Id: winicon.cpp,v 1.40 2003-01-07 10:26:01 sandervl Exp $ */
+/* $Id: winicon.cpp,v 1.41 2005-01-15 22:20:08 sao2l02 Exp $ */
 /*
  * Win32 Icon Code for OS/2
  *
@@ -860,8 +860,8 @@ BOOL CURSORICON_SimulateLoadingFromResourceW( LPWSTR filename, BOOL fCursor,
     return TRUE;
 
 fail:
-    if (*res) HeapFree( GetProcessHeap(), 0, *res );
-    if (*ptr) HeapFree( GetProcessHeap(), 0, *ptr );
+    HeapFree( GetProcessHeap(), 0, *res );
+    HeapFree( GetProcessHeap(), 0, *ptr );
 
     UnmapViewOfFile( bits );
     CloseHandle(hMapping);

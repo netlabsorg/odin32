@@ -1,4 +1,4 @@
-/* $Id: lz32.cpp,v 1.9 2000-06-13 06:40:41 phaller Exp $ */
+/* $Id: lz32.cpp,v 1.10 2005-01-15 22:17:58 sao2l02 Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -610,7 +610,7 @@ ODINPROCEDURE1(LZClose,HFILE,fd)
         if (!(lzs = GET_LZ_STATE(fd))) _lclose(fd);
         else
         {
-            if (lzs->get) HeapFree( GetProcessHeap(), 0, lzs->get );
+            HeapFree( GetProcessHeap(), 0, lzs->get );
             CloseHandle(lzs->realfd);
             lzstates[fd - 0x400] = NULL;
             HeapFree( GetProcessHeap(), 0, lzs );

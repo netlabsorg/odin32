@@ -435,8 +435,7 @@ static void OLEFontImpl_Destroy(OLEFontImpl* fontDesc)
 {
   TRACE("(%p)\n", fontDesc);
 
-  if (fontDesc->description.lpstrName!=0)
-    HeapFree(GetProcessHeap(), 0, fontDesc->description.lpstrName);
+  HeapFree(GetProcessHeap(), 0, fontDesc->description.lpstrName);
 
   if (fontDesc->gdiFont!=0)
     DeleteObject(fontDesc->gdiFont);
