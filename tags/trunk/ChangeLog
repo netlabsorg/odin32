@@ -1,12 +1,13 @@
- /* $Id: ChangeLog,v 1.964 2000-05-28 19:50:13 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.965 2000-05-29 21:30:14 mike Exp $ */
 
  2000-05-28: Michal Necasek <mike@mendelu.cz>
-    - USER32:   MapVirtualKeyA fix for game Commandos (not complete)
+    - DINPUT:   Discard messages received multiple times. Fixes keyboard
+                in Fallout 1/2.
 
  2000-05-28: Sander van Leeuwen <sandervl@xs4all.nl>
     - SHELL32:  Merged ShellExecuteA/W of latest Wine release (old version
                 did not return process handle)
-    - KERNEL32/USER32: 
+    - KERNEL32/USER32:
                 Rewrote and cleaned up resource handling. FindResource(Ex)
                 now returns IMAGE_RESOURCE_DATA_ENTRY pointer.
 
@@ -57,7 +58,7 @@
                 -> PowerDVD 2.55 install now completes
                 FindResource(Ex)A/W: if resource not found, then try:
                        - resource with user default language
-                       - resource with system default language 
+                       - resource with system default language
                        - first available resource (any language)
                 (TODO: Need to check what NT really does)
                 -> fixes wrong strings (i.e. menu & buttons) in PowerDVD
@@ -77,7 +78,7 @@
                 Set visible state for both client & frame windows (fixes
                 redrawing of toolbar window in mIRC32) in SetWindowPos &
                 ShowWindow
-    - KERNEL32: Partly implemented GetDiskFreeSpaceExA/W; need to add support  
+    - KERNEL32: Partly implemented GetDiskFreeSpaceExA/W; need to add support
                 for 64 bits values!
 
  2000-05-19: Jeroen van den Horn <J.vandenHorn@fibre.a2000.nl>
