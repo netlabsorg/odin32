@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2000-02-25 00:39:57 sandervl Exp $
+# $Id: makefile,v 1.3 2000-03-04 20:03:42 bird Exp $
 #
 # PD-Win32 API
 #
@@ -43,8 +43,8 @@ clean:
 
 dep:
     cd cvg
-    $(MAKE_CMD) NODEP=1 dep
+    $(MAKE_CMD) dep
     cd ..\sst1
-    $(MAKE_CMD) NODEP=1 dep
+    $(MAKE_CMD) dep
     cd ..
 
