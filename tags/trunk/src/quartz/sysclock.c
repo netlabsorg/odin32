@@ -1,3 +1,4 @@
+/* $Id: sysclock.c,v 1.3 2001-09-05 13:36:38 bird Exp $ */
 /*
  * Implementation of CLSID_SystemClock.
  *
@@ -31,21 +32,21 @@ static QUARTZ_IFEntry IFEntries[] =
 
 HRESULT QUARTZ_CreateSystemClock(IUnknown* punkOuter,void** ppobj)
 {
-	CSystemClock*	psc;
+    CSystemClock*   psc;
 
-	TRACE("(%p,%p)\n",punkOuter,ppobj);
+    TRACE("(%p,%p)\n",punkOuter,ppobj);
 
-	psc = (CSystemClock*)QUARTZ_AllocObj( sizeof(CSystemClock) );
-	if ( psc == NULL )
-		return E_OUTOFMEMORY;
+    psc = (CSystemClock*)QUARTZ_AllocObj( sizeof(CSystemClock) );
+    if ( psc == NULL )
+        return E_OUTOFMEMORY;
 
-	QUARTZ_IUnkInit( &psc->unk, punkOuter );
-	CSystemClock_InitIReferenceClock( psc );
+    QUARTZ_IUnkInit( &psc->unk, punkOuter );
+    CSystemClock_InitIReferenceClock( psc );
 
-	psc->unk.pEntries = IFEntries;
-	psc->unk.dwEntries = sizeof(IFEntries)/sizeof(IFEntries[0]);
+    psc->unk.pEntries = IFEntries;
+    psc->unk.dwEntries = sizeof(IFEntries)/sizeof(IFEntries[0]);
 
-	*ppobj = (void*)(&psc->unk);
+    *ppobj = (void*)(&psc->unk);
 
-	return S_OK;
+    return S_OK;
 }
