@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.1132 2000-09-18 19:27:40 sandervl Exp $ */
+ /* $Id: changelog,v 1.1133 2000-09-19 19:04:11 sandervl Exp $ */
+
+ 2000-09-19: Michal Necasek <mike@mendelu.cz>
+    - INCLUDE\makefiles: disable C++ exception handling code generation (FS:0 changes)
 
  2000-09-16: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: Fixed matchModName bugs. (compare name without extension)
