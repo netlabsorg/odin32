@@ -12,17 +12,12 @@
 #include <umalloc.h>
 
 #define PAGE_SIZE		4096
-#define MAX_HEAPSIZE            (512*1024)
-#define MAX_HEAPPAGES		(MAX_HEAPSIZE/PAGE_SIZE)
-#define INCR_HEAPSIZE		(16*1024)
 
-extern Heap_t sharedHeap;
+BOOL   SYSTEM InitializeSharedHeap();
+void   SYSTEM DestroySharedHeap();
 
-BOOL   InitializeSharedHeap();
-void   DestroySharedHeap();
-DWORD  HeapGetSharedMemBase();
-
-#define _smalloc(size)	_umalloc(sharedHeap, size)
-#define _sheapmin()     _uheapmin(sharedHeap)
+void * SYSTEM _smalloc(int size);
+void * SYSTEM _smallocfill(int size, int filler);
+#define _sfree(a)  free(a)
 
 #endif
