@@ -1,4 +1,4 @@
-; $Id: kernel32dbg.def,v 1.5 2002-02-11 09:43:19 sandervl Exp $
+; $Id: kernel32dbg.def,v 1.6 2002-02-11 16:08:15 sandervl Exp $
 
 ;Basis is Windows95 KERNEL32
 LIBRARY KERNEL32 INITINSTANCE TERMINSTANCE
@@ -458,7 +458,7 @@ EXPORTS
 ;    GetLSCallbackTarget        = _DbgGetLSCallbackTarget@??     @337      ;W95
 ;    GetLSCallbackTemplate      = _DbgGetLSCallbackTemplate@??   @338      ;W95
      GetLargestConsoleWindowSize  = _DbgGetLargestConsoleWindowSize@4 @339
-     GetLastError               = _DbgGetLastError@0             @340
+     GetLastError               = _GetLastError@0             @340
      GetLocalTime               = _DbgGetLocalTime@4             @341
      GetLocaleInfoA             = _DbgGetLocaleInfoA@16          @342
      GetLocaleInfoW             = _DbgGetLocaleInfoW@16          @343
@@ -817,7 +817,7 @@ EXPORTS
     SetHandleCount             = _DbgSetHandleCount@4           @652
     SetHandleInformation       = _DbgSetHandleInformation@12    @653
 ;   SetLastConsoleEventActive  = _DbgSetLastConsoleEventActive@??          ;NT
-    SetLastError               = _DbgSetLastError@4             @654
+    SetLastError               = _SetLastError@4             @654
     SetLocalTime               = _DbgSetLocalTime@4             @655
     SetLocaleInfoA             = _DbgSetLocaleInfoA@12          @656
     SetLocaleInfoW             = _DbgSetLocaleInfoW@12          @657

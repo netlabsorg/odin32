@@ -1,4 +1,4 @@
-/* $Id: HOOK.CPP,v 1.34 2001-12-11 17:34:52 sandervl Exp $ */
+/* $Id: HOOK.CPP,v 1.35 2002-02-11 16:05:58 sandervl Exp $ */
 
 /*
  * Windows hook functions
@@ -638,9 +638,7 @@ void HOOK_FreeQueueHooks( DWORD threadId )
 /***********************************************************************
  *           SetWindowsHook32A   (USER32.525)
  */
-ODINFUNCTION2(HHOOK, SetWindowsHookA,
-              INT, id, 
-              HOOKPROC, proc )
+HHOOK WIN32API SetWindowsHookA(INT id, HOOKPROC proc )
 {
     return SetWindowsHookExA( id, proc, 0, GetCurrentThreadId() );
 }
@@ -648,9 +646,7 @@ ODINFUNCTION2(HHOOK, SetWindowsHookA,
 /***********************************************************************
  *           SetWindowsHook32W   (USER32.528)
  */
-ODINFUNCTION2(HHOOK, SetWindowsHookW,
-              INT, id, 
-              HOOKPROC, proc)
+HHOOK WIN32API SetWindowsHookW(INT id, HOOKPROC proc)
 {
     return SetWindowsHookExW( id, proc, 0, GetCurrentThreadId() );
 }
@@ -658,11 +654,8 @@ ODINFUNCTION2(HHOOK, SetWindowsHookW,
 /***********************************************************************
  *           SetWindowsHookEx32A   (USER32.526)
  */
-ODINFUNCTION4(HHOOK, SetWindowsHookExA,
-              INT, id, 
-              HOOKPROC, proc, 
-              HINSTANCE, hInst,
-              DWORD, dwThreadId )
+HHOOK WIN32API SetWindowsHookExA(INT id,  HOOKPROC proc, 
+                                 HINSTANCE hInst, DWORD dwThreadId )
 {
     return HOOK_SetHook( id, proc, HOOK_WIN32A, hInst, dwThreadId );
 }
@@ -670,11 +663,8 @@ ODINFUNCTION4(HHOOK, SetWindowsHookExA,
 /***********************************************************************
  *           SetWindowsHookEx32W   (USER32.527)
  */
-ODINFUNCTION4(HHOOK, SetWindowsHookExW,
-              INT, id, 
-              HOOKPROC, proc, 
-              HINSTANCE, hInst,
-              DWORD, dwThreadId )
+HHOOK WIN32API SetWindowsHookExW(INT id, HOOKPROC proc, HINSTANCE hInst,
+                                 DWORD dwThreadId )
 {
     return HOOK_SetHook( id, proc, HOOK_WIN32W, hInst, dwThreadId );
 }
@@ -682,13 +672,9 @@ ODINFUNCTION4(HHOOK, SetWindowsHookExW,
 /***********************************************************************
  *           UnhookWindowsHook32   (USER32.557)
  */
-ODINFUNCTION2(BOOL, UnhookWindowsHook,
-              INT, id, 
-              HOOKPROC, proc )
+BOOL WIN32API UnhookWindowsHook(INT id, HOOKPROC proc )
 {
     HANDLE hook = HOOK_GetHook( id, GetCurrentThreadId() );
-
-    dprintf(("UnhookWindowsHook: %d %08lx\n", id, (DWORD)proc ));
 
     while (hook)
     {
@@ -704,8 +690,7 @@ ODINFUNCTION2(BOOL, UnhookWindowsHook,
 /***********************************************************************
  *           UnhookWindowHookEx32   (USER32.558)
  */
-ODINFUNCTION1(BOOL, UnhookWindowsHookEx,
-              HHOOK, hhook )
+BOOL WIN32API UnhookWindowsHookEx(HHOOK hhook )
 {
     if (CHECK_MAGIC(hhook) == FALSE) {
 	dprintf(("ERROR: UnhookWindowsHookEx invalid hook %x", hhook));
@@ -748,9 +733,7 @@ LRESULT WINAPI CallNextHookEx(HHOOK hhook, INT code, WPARAM wParam, LPARAM lPara
  * FIXME: There are ANSI and UNICODE versions of this, plus an unspecified
  * version, plus USER (the 16bit one) has a CallMsgFilter32 function.
  */
-ODINFUNCTION2(BOOL, CallMsgFilterA,
-              LPMSG, msg, 
-              INT, code )
+BOOL WIN32API CallMsgFilterA(LPMSG msg, INT code )
 {
 #if 0 //CB: not a Win32 API and unimplemented
     if (GetSysModalWindow()) return FALSE;      /* ??? */
@@ -764,9 +747,7 @@ ODINFUNCTION2(BOOL, CallMsgFilterA,
 /***********************************************************************
  *           CallMsgFilter32W   (USER32.16)
  */
-ODINFUNCTION2(BOOL, CallMsgFilterW,
-              LPMSG, msg, 
-              INT, code )
+BOOL WIN32API CallMsgFilterW(LPMSG msg, INT code )
 {
 #if 0 //CB: not a Win32 API and unimplemented
     if (GetSysModalWindow()) return FALSE;      /* ??? */
