@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.146 2000-01-27 17:21:09 cbratschi Exp $ */
+/* $Id: win32wbase.cpp,v 1.147 2000-01-27 21:50:01 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -819,6 +819,13 @@ ULONG Win32BaseWindow::MsgActivate(BOOL fActivate, BOOL fMinimized, HWND hwnd, H
         return 0;
     }
 #endif
+    /* child windows get WM_CHILDACTIVATE message */
+    if((getStyle() & (WS_CHILD | WS_POPUP)) == WS_CHILD )
+    {
+        SendInternalMessageA(WM_CHILDACTIVATE, 0, 0L);
+        return 0;
+    }
+
     rc = SendInternalMessageA(WM_ACTIVATE, MAKELONG((fActivate) ? WA_ACTIVE : WA_INACTIVE, fMinimized), hwnd);
 
     if(hwndOS2Win) {

@@ -1,4 +1,4 @@
-/* $Id: win32wmdichild.cpp,v 1.19 2000-01-18 20:10:59 sandervl Exp $ */
+/* $Id: win32wmdichild.cpp,v 1.20 2000-01-27 21:50:03 sandervl Exp $ */
 /*
  * Win32 MDI Child Window Class for OS/2
  *
@@ -53,37 +53,6 @@ Win32MDIChildWindow::Win32MDIChildWindow(CREATESTRUCTA *lpCreateStructA, ATOM cl
 //******************************************************************************
 Win32MDIChildWindow::~Win32MDIChildWindow()
 {
-}
-//******************************************************************************
-//******************************************************************************
-ULONG Win32MDIChildWindow::MsgActivate(BOOL fActivate, BOOL fMinimized, HWND hwnd, HWND hwndOS2Win)
-{
- ULONG rc, procidhwnd = -1, threadidhwnd = 0;
-
-    //According to SDK docs, if app returns FALSE & window is being deactivated,
-    //default processing is cancelled
-    //TODO: According to Wine we should proceed anyway if window is sysmodal
-#if 0
-    if(SendInternalMessageA(WM_NCACTIVATE, fActivate, 0) == FALSE && !fActivate)
-    {
-        return 0;
-    }
-#endif
-
-    if(fActivate)
-    {
-         rc = SendInternalMessageA(WM_CHILDACTIVATE, MAKELONG((fActivate) ? WA_ACTIVE : WA_INACTIVE, fMinimized), hwnd);
-    	 if(hwndOS2Win) {
-            threadidhwnd = O32_GetWindowThreadProcessId(hwndOS2Win, &procidhwnd);
-    	 }
-
-    	 if(fActivate) {
-            	SendInternalMessageA(WM_ACTIVATEAPP, 1, dwThreadId);    //activate; specify window thread id
-    	 }
-    	 else   SendInternalMessageA(WM_ACTIVATEAPP, 0, threadidhwnd);  //deactivate; specify thread id of other process
-         return rc;
-    }
-    else return 1;
 }
 //******************************************************************************
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: pmframe.cpp,v 1.39 2000-01-26 18:02:35 cbratschi Exp $ */
+/* $Id: pmframe.cpp,v 1.40 2000-01-27 21:50:01 sandervl Exp $ */
 /*
  * Win32 Frame Managment Code for OS/2
  *
@@ -12,7 +12,6 @@
 #define INCL_WIN
 #define INCL_GPI
 
-#include <os2.h>                        /* PM header file               */
 #include <os2wrap.h>
 #include <stdlib.h>
 #include <string.h>
