@@ -1,7 +1,8 @@
- /* $Id: ChangeLog,v 1.57 1999-07-22 11:22:14 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.58 1999-07-22 13:18:35 sandervl Exp $ */
  99-07-22: Edgar Buerkle <100566.557@compuserve.com>
 	- KERNEL32: Fix for OS2GetResource (os2util.cpp)
 	- PE2LX: Use unique resource id for version resource.
+	- USER32: MapOEMToRealKey fix
 
  99-07-22: Sander van Leeuwen <sandervl@xs4all.nl>
 	- DDRAW: Now compiles
