@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.2112 2002-05-29 16:08:35 sandervl Exp $ */
+/* $Id: changelog,v 1.2113 2002-05-29 18:49:27 sandervl Exp $ */
 
  2002-05-29: Sander van Leeuwen <sandervl@innotek.de>
     - USER32:   o Fix for ToAscii(Ex) & GetKeyboardState (WinTranslateChar2 call)
@@ -13,6 +13,8 @@
 
  2002-05-29: Platon Fomichev <platon@innotek.de>
     - USER32:   o GetAsyncKeyState fix for VK_MENU
+    - COMCTL32: o Status control fix for resize with CCS_NORESIZE style
+                  (invalidate control to prevent leftovers of size grip)
 
  2002-05-28: Sander van Leeuwen <sandervl@innotek.de>
     - REGSVR32: o Fixed startup
