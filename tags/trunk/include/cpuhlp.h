@@ -1,4 +1,4 @@
-/* $Id: cpuhlp.h,v 1.6 2001-07-08 07:19:26 sandervl Exp $ */
+/* $Id: cpuhlp.h,v 1.7 2002-05-17 10:13:20 sandervl Exp $ */
 
 #ifndef _CPUHLP_H_
 #define _CPUHLP_H_
@@ -42,7 +42,11 @@ extern DWORD CPUFeatures;
 #if (__IBMCPP__ == 300) || (__IBMC__ == 300)
 #define CONTROL87(a,b)  _control87(a, b)
 #else
+#ifdef __WATCOMC__
+#define CONTROL87(a,b)  _control87(a, b)
+#else
 #error  CONTROL87 undefined
+#endif
 #endif
 #endif
 
