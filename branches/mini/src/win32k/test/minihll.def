@@ -1,15 +1,14 @@
-; $Id: minihll.def,v 1.1.2.3 2001-08-16 15:57:02 bird Exp $
-NAME ''
+; $Id: minihll.def,v 1.1.2.4 2001-08-16 17:49:55 bird Exp $
+NAME '' WINDOWCOMPAT
 
 STUB    NONE
 
 STACKSIZE 4096
 SEGMENTS
-    'CODE32'      CLASS 'CODE'    SHARED EXECUTEREAD
-    'CONST32_RO'  CLASS 'CODE'    SHARED EXECUTEREAD
-    'CODEDATA32'  CLASS 'CODE'    SHARED EXECUTEREAD
+    'DATA32'      CLASS 'DATA'    READWRITE
+    'STACK'      CLASS 'STACK'    STACK
 
 IMPORTS
-    _printf_ansi = LIBCN.83
+    _printf_ansi  = LIBCN.83
     _printf_ansi_ = LIBCN.83
 
