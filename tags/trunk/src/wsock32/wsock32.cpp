@@ -1,4 +1,4 @@
-/* $Id: wsock32.cpp,v 1.31 2000-05-09 19:01:23 sandervl Exp $ */
+/* $Id: wsock32.cpp,v 1.32 2000-05-18 09:09:04 sandervl Exp $ */
 
 /*
  *
@@ -321,7 +321,8 @@ ODINFUNCTION3(int,OS2ioctlsocket,
 			//nothing to do; already non-blocking
 			return NO_ERROR;
 		}
-		else {
+		else 
+		if(lEvent != 0) {
 			dprintf(("Trying to set socket to blocking mode while async select active -> return error!"));
                   	WSASetLastError(WSAEINVAL);
                   	return SOCKET_ERROR;
