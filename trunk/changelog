@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.1694 2001-09-24 18:39:36 sandervl Exp $ */
+/* $Id: changelog,v 1.1695 2001-09-25 10:54:30 sandervl Exp $ */
+
+ 2001-09-25: Sander van Leeuwen <sandervl@xs4all.nl>
+    - COMCTL32: o Wine updates (MRU functions)
+    - SHELL32:  o Wine updates (SHAddToRecentDocs)
 
  2001-09-24: Sander van Leeuwen <sandervl@xs4all.nl>
     - DDRAW:    o Set screen resolution + bpp of primary surface to those
