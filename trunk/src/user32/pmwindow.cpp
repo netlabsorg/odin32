@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.121 2001-03-30 11:14:35 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.122 2001-04-01 19:38:51 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -1132,12 +1132,6 @@ PosChangedEnd:
         goto RunDefWndProc;
     }
 
-    case WM_OWNERPOSCHANGE:
-    {
-        dprintf(("OS2: WM_OWNERPOSCHANGE"));
-        goto RunDefWndProc;
-    }
-
     case WM_INITMENU:
     case WM_MENUSELECT:
     case WM_MENUEND:
@@ -1247,8 +1241,13 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
         break;
 
     case WM_QUERYFOCUSCHAIN:
-        dprintf(("OS2: WM_QUERYFOCUSCHAIN %x", win32wnd->getWindowHandle()));
-        goto RunDefFrameWndProc;
+        dprintf(("OS2: WM_QUERYFOCUSCHAIN %x fsCmd %x parent %x", win32wnd->getWindowHandle(), SHORT1FROMMP(mp1), mp2));
+        
+        RestoreOS2TIB();
+        rc = pfnFrameWndProc(hwnd, msg, mp1, mp2);
+        SetWin32TIB();
+        dprintf(("OS2: WM_QUERYFOCUSCHAIN %x fsCmd %x parent %x returned %x", win32wnd->getWindowHandle(), SHORT1FROMMP(mp1), mp2, rc));
+        break;
 
     case WM_FOCUSCHANGE:
     {
@@ -1291,6 +1290,14 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
         PSWP pswp   = (PSWP)mp1;
 
         dprintf(("OS2: WM_ADJUSTFRAMEPOS %x %x %x (%d,%d) (%d,%d)", win32wnd->getWindowHandle(), pswp->hwnd, pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
+        goto RunDefFrameWndProc;
+    }
+
+    case WM_OWNERPOSCHANGE:
+    {
+        PSWP pswp   = (PSWP)mp1;
+
+        dprintf(("OS2: WM_OWNERPOSCHANGE %x %x %x (%d,%d) (%d,%d)", win32wnd->getWindowHandle(), pswp->hwnd, pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
         goto RunDefFrameWndProc;
     }
 

@@ -1,4 +1,4 @@
-/* $Id: windowclass.cpp,v 1.17 2001-03-30 22:08:20 sandervl Exp $ */
+/* $Id: windowclass.cpp,v 1.18 2001-04-01 19:38:51 sandervl Exp $ */
 /*
  * Win32 Window Class Code for OS/2
  *
@@ -51,13 +51,6 @@ ATOM WIN32API RegisterClassA(CONST WNDCLASSA *lpWndClass)
     memcpy(&wc.style, lpWndClass, sizeof(WNDCLASSA));
     wc.hIconSm = 0;
  
-    //TODO: not destroyed when class is unregistered (neither does Wine, but that might be a bug)
-    int iSmIconWidth  = GetSystemMetrics(SM_CXSMICON);
-    int iSmIconHeight = GetSystemMetrics(SM_CYSMICON);
-
-    wc.hIconSm = CopyImage(wc.hIcon, IMAGE_ICON, iSmIconWidth, iSmIconHeight,
-                           LR_COPYFROMRESOURCE);
-
     if(Win32WndClass::FindClass(wc.hInstance, (LPSTR)wc.lpszClassName)) {
         if(HIWORD(wc.lpszClassName)) {
                 dprintf(("RegisterClassA %x %s already exists", wc.hInstance, wc.lpszClassName));
@@ -66,6 +59,13 @@ ATOM WIN32API RegisterClassA(CONST WNDCLASSA *lpWndClass)
         SetLastError(ERROR_CLASS_ALREADY_EXISTS);
         return 0;
     }
+
+    //TODO: not destroyed when class is unregistered (neither does Wine, but that might be a bug)
+    int iSmIconWidth  = GetSystemMetrics(SM_CXSMICON);
+    int iSmIconHeight = GetSystemMetrics(SM_CYSMICON);
+
+    wc.hIconSm = CopyImage(wc.hIcon, IMAGE_ICON, iSmIconWidth, iSmIconHeight,
+                           LR_COPYFROMRESOURCE);
 
     wclass = new Win32WndClass(&wc,FALSE);
     if(wclass == NULL) {
@@ -113,13 +113,6 @@ WORD WIN32API RegisterClassW(CONST WNDCLASSW *lpwc)
     wc.cbSize = sizeof(wc);
     memcpy(&wc.style, lpwc, sizeof(WNDCLASSA));
 
-    //TODO: not destroyed when class is unregistered (neither does Wine, but that might be a bug)
-    int iSmIconWidth  = GetSystemMetrics(SM_CXSMICON);
-    int iSmIconHeight = GetSystemMetrics(SM_CYSMICON);
-
-    wc.hIconSm = CopyImage(wc.hIcon, IMAGE_ICON, iSmIconWidth, iSmIconHeight,
-                           LR_COPYFROMRESOURCE);
-
     if(Win32WndClass::FindClass(wc.hInstance, (LPWSTR)wc.lpszClassName)) {
         if(HIWORD(wc.lpszClassName)) {
                 dprintf(("RegisterClassW %x %ls already exists", wc.hInstance, wc.lpszClassName));
@@ -128,6 +121,13 @@ WORD WIN32API RegisterClassW(CONST WNDCLASSW *lpwc)
         SetLastError(ERROR_CLASS_ALREADY_EXISTS);
         return 0;
     }
+
+    //TODO: not destroyed when class is unregistered (neither does Wine, but that might be a bug)
+    int iSmIconWidth  = GetSystemMetrics(SM_CXSMICON);
+    int iSmIconHeight = GetSystemMetrics(SM_CYSMICON);
+
+    wc.hIconSm = CopyImage(wc.hIcon, IMAGE_ICON, iSmIconWidth, iSmIconHeight,
+                           LR_COPYFROMRESOURCE);
 
     winclass = new Win32WndClass((WNDCLASSEXA *)&wc, TRUE);
     if(winclass == NULL) {
