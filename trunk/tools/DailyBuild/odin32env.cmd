@@ -1,4 +1,4 @@
-/* $Id: odin32env.cmd,v 1.4 2000-05-27 14:23:36 bird Exp $
+/* $Id: odin32env.cmd,v 1.5 2000-05-27 14:26:54 bird Exp $
  *
  * Sets the build environment.
  *
@@ -24,6 +24,7 @@
      * (The order this is done is _very_ important!)
      */
     call EMX 0;
+    call mySQL 0;
     call CVS 0;
     call DDKBase 0;
     call MSC60 0;
