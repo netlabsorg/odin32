@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.135 2001-11-24 13:55:14 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.136 2002-01-07 11:18:11 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -165,7 +165,6 @@ virtual  ULONG  MsgEnable(BOOL fEnable);
          ULONG  MsgSetText(LPSTR lpsz, LONG cch);
          ULONG  MsgGetTextLength();
          void   MsgGetText(char *wndtext, ULONG textlength);
-         VOID   updateWindowStyle(DWORD oldExStyle,DWORD oldStyle);
 
 virtual  LONG   SetWindowLong(int index, ULONG value, BOOL fUnicode);
 virtual  ULONG  GetWindowLong(int index, BOOL fUnicode);
@@ -175,6 +174,7 @@ virtual  WORD   GetWindowWord(int index);
          DWORD  getStyle()                      { return dwStyle; };
          DWORD  getOldStyle()                   { return dwOldStyle; };
          void   setStyle(DWORD newstyle)        { dwStyle = newstyle; };
+         void   setOldStyle(DWORD oldStyle)     { dwOldStyle = oldStyle; };
          DWORD  getExStyle()                    { return dwExStyle; };
          void   setExStyle(DWORD newexstyle)    { dwExStyle = newexstyle; };
          ULONG  getInstance()                   { return hInstance; };
@@ -447,7 +447,7 @@ protected:
         char   *userWindowBytes;
         ULONG   nrUserWindowBytes;
 
-        RECT    rectWindow; //relative to parent
+        RECT    rectWindow;  //relative to parent
         RECT    rectClient;  //relative to frame
 WINDOWPLACEMENT windowpos;
 
