@@ -1,24 +1,27 @@
-/* $Id: changelog,v 1.2094 2002-05-23 13:49:15 sandervl Exp $ */
+/* $Id: changelog,v 1.2095 2002-05-24 18:01:48 sandervl Exp $ */
+
+ 2002-05-24: Sander van Leeuwen <sandervl@innotek.de>
+    - WINMM:    o More mixer updates (not yet finished)
 
  2002-05-23: Yuri Dario <mc6530@mclink.it>
     - USER32:   o Don't beep when unable to find menu item when alt key pressed
 
- 2002-05-22: Sander van Leeuwen <sandervl@xs4all.nl>
+ 2002-05-23: Sander van Leeuwen <sandervl@innotek.de>
     - WINMM:    o Mixer updates (not yet finished)
 
  2002-05-23: Platon Fomichev <platon@innotek.de>
     - USER32:   o Keyboard fixes for right alt & right shift
 
- 2002-05-22: Sander van Leeuwen <sandervl@xs4all.nl>
+ 2002-05-22: Sander van Leeuwen <sandervl@innotek.de>
     - KERNEL32: o CreateThread bugfix (returned thread id incorrect)
                   (fixes RealPlayer (PostThreadMessage))
     - WINMM:    o Added debug wrappers
                 o Started with mixer api rewrite
 
- 2002-05-21: Sander van Leeuwen <sandervl@xs4all.nl>
+ 2002-05-21: Sander van Leeuwen <sandervl@innotek.de>
     - KERNEL32: o Round stack top & bottom (TIB) to page boundary
 
- 2002-05-20: Sander van Leeuwen <sandervl@xs4all.nl>
+ 2002-05-20: Sander van Leeuwen <sandervl@innotek.de>
     - KERNEL32: o Make sure LX dlls can never be unloaded (dll object deleted)
                   since a dll that depends on dlls with an exitlist handler
                   doesn't get properly unloaded (initterm not called for unload
@@ -34,7 +37,7 @@
                   if window is not visible (fixes endless loop in
                   property sheet when switching page with keyboard)
 
- 2002-05-17: Sander van Leeuwen <sandervl@xs4all.nl>
+ 2002-05-17: Sander van Leeuwen <sandervl@innotek.de>
     - OLEAUT32: o Resync with latest Wine
     - KERNEL32: o Implemented IOCTL_CDROM_SEEK_AUDIO_MSF & IOCTL_CDROM_READ_Q_CHANNEL
                   (IOCTL_CDROM_CURRENT_POSITION only)
@@ -49,7 +52,7 @@
                   Odin32 yet. But eventually it will replace the existing
                   make system.
 
- 2002-05-16: Sander van Leeuwen <sandervl@xs4all.nl>
+ 2002-05-16: Sander van Leeuwen <sandervl@innotek.de>
     - NTDLL:    o Partial resync with Wine
     - KERNEL32: o Export some functions for NTDLL
                 o Fixed creation of logfile for executables on readonly volumes
@@ -60,12 +63,12 @@
                   SystemParametersInfoA parameters
     - OLE32:    o Resync with latest Wine
 
- 2002-05-15: Sander van Leeuwen <sandervl@xs4all.nl>
+ 2002-05-15: Sander van Leeuwen <sandervl@innotek.de>
     - DINPUT:   o Made mouse code reentrant
     - GDI32:    o Fix for EnumFontFamiliesA/W
     - SETUPAPI: o Resync with latest Wine
 
- 2002-05-14: Sander van Leeuwen <sandervl@xs4all.nl>
+ 2002-05-14: Sander van Leeuwen <sandervl@innotek.de>
     - KERNEL32: o CustForce2GBFileSize function added to force
                   GetVolumeInformation to tell the app all partitions are FAT
                   (2 GB file size limitation)
@@ -79,14 +82,14 @@
     - KERNEL32: o Parallel port updates (use resource manager to query
                   hardware configuration)
 
- 2002-05-10: Sander van Leeuwen <sandervl@xs4all.nl>
+ 2002-05-10: Sander van Leeuwen <sandervl@innotek.de>
     - KERNEL32: o Applications are now allowed to read physical disks or
                   mounted partitions. Write access is only allowed for
                   unmounted partitions or floppy disks.
                 o Implemented GetFileSize for disk objects; corrected
                   return value for some failures (-1)
 
- 2002-05-09: Sander van Leeuwen <sandervl@xs4all.nl>
+ 2002-05-09: Sander van Leeuwen <sandervl@innotek.de>
     - KERNEL32: o Implemented IOCTL_DISK_GET_PARTITION_INFO &
                   IOCTL_VOLUME_GET_VOLUME_DISK_EXTENTS
                 o Implemented GetVolumeNameForVolumeMountPointA/W for disk
@@ -99,7 +102,7 @@
                   NTFS or FAT32
                 o Implemented unmounted volume and physical disk access
 
- 2002-05-08: Sander van Leeuwen <sandervl@xs4all.nl>
+ 2002-05-08: Sander van Leeuwen <sandervl@innotek.de>
     - COMCTL32: o Merged progress, updown, rebar, animate, comboex, flatsb,
                   toolbar, tab, pager, nativefont, imagelist code
                 o Updated license (LGPL) for comctl32
@@ -114,7 +117,7 @@
  2002-05-08: Platon Fomichev <platon@innotek.de>
     - COMCTL32: o Merged listview control with latest Wine
 
- 2002-05-07: Sander van Leeuwen <sandervl@xs4all.nl>
+ 2002-05-07: Sander van Leeuwen <sandervl@innotek.de>
     - USER32:   o WH_MOUSE_LL hook fixes
 
  2002-05-07: Platon Fomichev <platon@innotek.de>
@@ -126,14 +129,14 @@
     - CmdQd:    o The daemon shouldn't inherit standard handles when started.
                   (Hung the daily build, since we use tee to do logging.)
 
- 2002-05-06: Sander van Leeuwen <sandervl@xs4all.nl>
+ 2002-05-06: Sander van Leeuwen <sandervl@innotek.de>
     - WS2_32:   o WSAAccept added (Wine port (X11 license); todo LGPL)
 
- 2002-05-01: Sander van Leeuwen <sandervl@xs4all.nl>
+ 2002-05-01: Sander van Leeuwen <sandervl@innotek.de>
     - USER32:   o PMSCAN_DBE_CONV & PMSCAN_DBE_NOCONV added to keyboard
                   translation array
 
- 2002-04-30: Sander van Leeuwen <sandervl@xs4all.nl>
+ 2002-04-30: Sander van Leeuwen <sandervl@innotek.de>
     - GDI32:    o Font renaming support added to EnumFontFamiliesA/W
     - USER32:   o Implemented WH_MOUSE_LL hook
                 o Removed DInput hack for keyboard & mouse message translation
@@ -147,7 +150,7 @@
                   SystemTimeToFileTime bugfixes
     - USER32:   o Focus fix when minimizing window
 
- 2002-04-29: Sander van Leeuwen <sandervl@xs4all.nl>
+ 2002-04-29: Sander van Leeuwen <sandervl@innotek.de>
     - KERNEL32: o Export RegisterCustomDriver
 
  2002-04-29: Patrick Haller <patrick.haller@innotek.de>
@@ -232,7 +235,7 @@
     - src/makefile:
                 o Update the CUSTOMBUILD module list.
 
- 2002-04-07: Sander van Leeuwen <sandervl@xs4all.nl>
+ 2002-04-07: Sander van Leeuwen <sandervl@innotek.de>
     - ODINCRT:  o Wrote OS/2 version of CriticalSection apis (including
                   support for shared critical sections; which is currently
                   not possible with the Win32 version due to missing
@@ -247,7 +250,7 @@
     - GDI32:    o Rewrote vmutex usage (object handle functions)
     - INCLUDE:  o Debug wrapper fixes (missing 6th argument)
 
- 2002-04-06: Sander van Leeuwen <sandervl@xs4all.nl>
+ 2002-04-06: Sander van Leeuwen <sandervl@innotek.de>
     - KERNEL32: o Do not test for write capability with CDROM drives
                   (IOCTL_DISK_IS_WRITABLE)
 
