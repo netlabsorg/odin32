@@ -1,4 +1,4 @@
-/* $Id: StateUpd.cpp,v 1.23 2000-07-18 07:15:58 bird Exp $
+/* $Id: StateUpd.cpp,v 1.24 2000-07-18 07:33:13 bird Exp $
  *
  * StateUpd - Scans source files for API functions and imports data on them.
  *
