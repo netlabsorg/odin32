@@ -28,6 +28,7 @@
 #include "pidl.h"
 #include "wine/undocshell.h"
 
+#include <heapstring.h>
 #include <misc.h>
 
 DECLARE_DEBUG_CHANNEL(pidl)
@@ -256,7 +257,7 @@ HRESULT WINAPI ILLoadFromStream (IStream * pStream, LPITEMIDLIST * ppPidl)
 	IStream_AddRef (pStream);
 
 	if (SUCCEEDED(IStream_Read(pStream, (LPVOID)&wLen, 2, &dwBytesRead)))
-	{ *ppPidl = SHAlloc (wLen);
+	{ *ppPidl = (ITEMIDLIST*)SHAlloc (wLen);
 	  if (SUCCEEDED(IStream_Read(pStream, *ppPidl , wLen, &dwBytesRead)))
 	  { ret = S_OK;
 	  }
@@ -309,7 +310,7 @@ HRESULT WINAPI SHILCreateFromPathW (LPCWSTR path, LPITEMIDLIST * ppidl, DWORD * 
 
 	if (SUCCEEDED (SHGetDesktopFolder(&sf)))
 	{
-	  ret = IShellFolder_ParseDisplayName(sf,0, NULL, path, &pchEaten, ppidl, attributes);
+	  ret = IShellFolder_ParseDisplayName(sf,0, NULL, (LPOLESTR)path, &pchEaten, ppidl, attributes);
 	  IShellFolder_Release(sf);
 	}
 	return ret;
@@ -317,8 +318,8 @@ HRESULT WINAPI SHILCreateFromPathW (LPCWSTR path, LPITEMIDLIST * ppidl, DWORD * 
 HRESULT WINAPI SHILCreateFromPathAW (LPCVOID path, LPITEMIDLIST * ppidl, DWORD * attributes)
 {
 	if ( VERSION_OsIsUnicode())
-	  return SHILCreateFromPathW (path, ppidl, attributes);
-	return SHILCreateFromPathA (path, ppidl, attributes);
+	  return SHILCreateFromPathW ((LPCWSTR)path, ppidl, attributes);
+	return SHILCreateFromPathA ((LPCSTR)path, ppidl, attributes);
 }
 
 /*************************************************************************
@@ -393,7 +394,7 @@ BOOL WINAPI ILIsEqual(LPCITEMIDLIST pidl1, LPCITEMIDLIST pidl2)
 	    _ILSimpleGetText(pidltemp1, szData1, MAX_PATH);
 	    _ILSimpleGetText(pidltemp2, szData2, MAX_PATH);
 
-	    if (strcasecmp ( szData1, szData2 )!=0 )
+	    if (strcmp ( szData1, szData2 )!=0 )
 	      return FALSE;
 
 	    pidltemp1 = ILGetNext(pidltemp1);
@@ -429,7 +430,7 @@ BOOL WINAPI ILIsParent( LPCITEMIDLIST pidlParent, LPCITEMIDLIST pidlChild, BOOL 
 	  _ILSimpleGetText(pParent, szData1, MAX_PATH);
 	  _ILSimpleGetText(pChild, szData2, MAX_PATH);
 
-	  if (strcasecmp ( szData1, szData2 )!=0 )
+	  if (strcmp ( szData1, szData2 )!=0 )
 	    return FALSE;
 
 	  pParent = ILGetNext(pParent);
@@ -487,7 +488,7 @@ LPITEMIDLIST WINAPI ILFindChild(LPCITEMIDLIST pidl1,LPCITEMIDLIST pidl2)
 	    _ILSimpleGetText(pidltemp1, szData1, MAX_PATH);
 	    _ILSimpleGetText(pidltemp2, szData2, MAX_PATH);
 
-	    if (strcasecmp(szData1,szData2))
+	    if (strcmp(szData1,szData2))
 	      break;
 
 	    pidltemp1 = ILGetNext(pidltemp1);
@@ -538,7 +539,7 @@ LPITEMIDLIST WINAPI ILCombine(LPCITEMIDLIST pidl1,LPCITEMIDLIST pidl2)
 
 	len1  = ILGetSize(pidl1)-2;
 	len2  = ILGetSize(pidl2);
-	pidlNew  = SHAlloc(len1+len2);
+	pidlNew  = (ITEMIDLIST*)SHAlloc(len1+len2);
 
 	if (pidlNew)
 	{
@@ -730,8 +731,8 @@ LPITEMIDLIST WINAPI ILCreateFromPathW (LPCWSTR path)
 LPITEMIDLIST WINAPI ILCreateFromPathAW (LPCVOID path)
 {
 	if ( VERSION_OsIsUnicode())
-	  return ILCreateFromPathW (path);
-	return ILCreateFromPathA (path);
+	  return ILCreateFromPathW ((LPCWSTR)path);
+	return ILCreateFromPathA ((LPCSTR)path);
 }
 /*************************************************************************
  *  SHSimpleIDListFromPath [SHELL32.162]
@@ -775,8 +776,8 @@ LPITEMIDLIST WINAPI SHSimpleIDListFromPathW (LPWSTR lpszPath)
 LPITEMIDLIST WINAPI SHSimpleIDListFromPathAW (LPVOID lpszPath)
 {
 	if ( VERSION_OsIsUnicode())
-	  return SHSimpleIDListFromPathW (lpszPath);
-	return SHSimpleIDListFromPathA (lpszPath);
+	  return SHSimpleIDListFromPathW ((LPWSTR)lpszPath);
+	return SHSimpleIDListFromPathA ((LPSTR)lpszPath);
 }
 
 /*************************************************************************
@@ -845,7 +846,7 @@ HRESULT WINAPI SHGetDataFromIDListA(LPSHELLFOLDER psf, LPCITEMIDLIST pidl, int n
 	{
 	  case SHGDFIL_FINDDATA:
 	    {
-	       WIN32_FIND_DATAA * pfd = dest;
+	       WIN32_FIND_DATAA * pfd = (WIN32_FIND_DATAA*)dest;
 	       CHAR	pszPath[MAX_PATH];
 	       HANDLE	handle;
 
@@ -996,8 +997,8 @@ BOOL WINAPI SHGetPathFromIDListAW(LPCITEMIDLIST pidl,LPVOID pszPath)
 	TRACE_(shell)("(pidl=%p,%p)\n",pidl,pszPath);
 
 	if (VERSION_OsIsUnicode())
-	  return SHGetPathFromIDListW(pidl,pszPath);
-	return SHGetPathFromIDListA(pidl,pszPath);
+	  return SHGetPathFromIDListW(pidl,(LPWSTR)pszPath);
+	return SHGetPathFromIDListA(pidl,(LPSTR)pszPath);
 }
 
 /**************************************************************************
@@ -1144,14 +1145,14 @@ LPITEMIDLIST WINAPI _ILCreate(PIDLTYPE type, LPCVOID pIn, UINT16 uInSize)
 	switch (type)
 	{ case PT_DESKTOP:
 	    uSize = 0;
-	    pidlOut = SHAlloc(uSize + 2);
+	    pidlOut = (ITEMIDLIST*)SHAlloc(uSize + 2);
 	    pidlOut->mkid.cb = uSize;
 	    TRACE_(pidl)("- create Desktop\n");
 	    break;
 
 	  case PT_MYCOMP:
 	    uSize = 2 + 2 + sizeof(GUID);
-	    pidlOut = SHAlloc(uSize + 2);
+	    pidlOut = (ITEMIDLIST*)SHAlloc(uSize + 2);
 	    ZeroMemory(pidlOut, uSize + 2);
 	    pidlOut->mkid.cb = uSize;
 	    pData =_ILGetDataPointer(pidlOut);
@@ -1162,7 +1163,7 @@ LPITEMIDLIST WINAPI _ILCreate(PIDLTYPE type, LPCVOID pIn, UINT16 uInSize)
 
 	  case PT_DRIVE:
 	    uSize = 2 + 23;
-	    pidlOut = SHAlloc(uSize + 2);
+	    pidlOut = (ITEMIDLIST*)SHAlloc(uSize + 2);
 	    ZeroMemory(pidlOut, uSize + 2);
 	    pidlOut->mkid.cb = uSize;
 	    pData =_ILGetDataPointer(pidlOut);
@@ -1175,7 +1176,7 @@ LPITEMIDLIST WINAPI _ILCreate(PIDLTYPE type, LPCVOID pIn, UINT16 uInSize)
 	  case PT_FOLDER:
 	  case PT_VALUE:
 	    uSize = 2 + 12 + uInSize;
-	    pidlOut = SHAlloc(uSize + 2);
+	    pidlOut = (ITEMIDLIST*)SHAlloc(uSize + 2);
 	    ZeroMemory(pidlOut, uSize + 2);
 	    pidlOut->mkid.cb = uSize;
 	    pData =_ILGetDataPointer(pidlOut);
