@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.14 1999-11-30 19:41:07 sandervl Exp $
+# $Id: makefile,v 1.15 1999-12-19 19:53:36 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -20,7 +20,7 @@ CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
 
 TARGET = advapi32
 
-OBJS =  advapi32.obj initterm.obj registry.obj lsa.obj security.obj
+OBJS =  advapi32.obj initterm.obj registry.obj lsa.obj security.obj service.obj
 
 
 all: $(TARGET).dll $(TARGET).lib
@@ -45,6 +45,7 @@ advapi32.obj: advapi32.cpp advapi32.h $(PDWIN32_INCLUDE)\odinwrap.h
 registry.obj: registry.cpp $(PDWIN32_INCLUDE)\odinwrap.h
 lsa.obj:      lsa.cpp $(PDWIN32_INCLUDE)\odinwrap.h
 initterm.obj: initterm.cpp
+service.obj:  service.cpp
 
 clean:
     $(RM) *.obj *.lib *.dll *.map *.pch
