@@ -1,4 +1,4 @@
-/* $Id: context.c,v 1.2 2000-03-01 18:49:25 jeroen Exp $ */
+/* $Id: context.c,v 1.3 2000-03-02 13:27:30 sandervl Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -148,14 +148,23 @@ void gl_free(void *ptr)
 
 #include "mthreads.h"        /* Mesa platform independent threads interface*/
 
+#ifdef __WIN32OS2__
+//SvL: Initialize this struct
+static MesaTSD mesa_ctx_tsd = {-1, -1};
+#else
 static MesaTSD mesa_ctx_tsd;
+#endif
 
 static void mesa_ctx_thread_init() {
   MesaInitTSD(&mesa_ctx_tsd);
 }
 
 GLcontext *gl_get_thread_context( void ) {
+#ifdef __WIN32OS2__
+  return (GLcontext *) MesaGetTSD(&mesa_ctx_tsd, mesa_ctx_thread_init);
+#else
   return (GLcontext *) MesaGetTSD(&mesa_ctx_tsd);
+#endif
 }
 
 static void set_thread_context( GLcontext *ctx ) {

@@ -1,4 +1,4 @@
-/* $Id: context.h,v 1.2 2000-03-01 18:49:25 jeroen Exp $ */
+/* $Id: context.h,v 1.3 2000-03-02 13:27:30 sandervl Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -32,7 +32,7 @@
 #define CONTEXT_H
 
 
-                                       /* #include "types.h"               */
+#include "types.h"
 
 #ifdef THREADS
    /*
