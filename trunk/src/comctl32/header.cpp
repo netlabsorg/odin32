@@ -1,4 +1,4 @@
-/* $Id: header.cpp,v 1.4 2000-03-21 17:30:41 cbratschi Exp $ */
+/* $Id: header.cpp,v 1.5 2000-04-08 18:32:53 cbratschi Exp $ */
 /*
  *  Header control
  *
@@ -39,8 +39,22 @@
 
 #define HEADER_GetInfoPtr(hwnd) ((HEADER_INFO*)getInfoPtr(hwnd))
 
-static VOID
-HEADER_DrawItemImage(HWND hwnd,HDC hdc,HEADER_INFO* infoPtr,HEADER_ITEM* phdi,RECT* r,INT iItem)
+static INT HEADER_CallbackImage(HWND hwnd,HEADER_INFO* infoPtr,HEADER_ITEM* phdi,INT iItem)
+{
+  NMHDDISPINFOW nmhdr;
+
+  nmhdr.iItem      = iItem;
+  nmhdr.mask       = HDI_IMAGE;
+  nmhdr.iImage     = 0;
+  nmhdr.lParam     = phdi->lParam;
+  sendNotify(hwnd,isUnicodeNotify(&infoPtr->header) ? HDN_GETDISPINFOW:HDN_GETDISPINFOA,&nmhdr.hdr);
+
+  if (nmhdr.mask & HDI_DI_SETITEM) phdi->iImage = nmhdr.iImage;
+
+  return nmhdr.iImage;
+}
+
+static VOID HEADER_DrawItemImage(HWND hwnd,HDC hdc,HEADER_INFO* infoPtr,HEADER_ITEM* phdi,RECT* r,INT iItem)
 {
   if (phdi->fmt & HDF_IMAGE)
   {
@@ -49,19 +63,11 @@ HEADER_DrawItemImage(HWND hwnd,HDC hdc,HEADER_INFO* infoPtr,HEADER_ITEM* phdi,RE
     INT x,y,cx,cy,w,h,rx,ry;
 
     if (phdi->iImage == I_IMAGECALLBACK)
-    {
-      NMHDDISPINFOW nmhdr;
+      iImage = HEADER_CallbackImage(hwnd,infoPtr,phdi,iItem);
+    else
+      iImage = phdi->iImage;
 
-      nmhdr.iItem      = iItem;
-      nmhdr.mask       = HDI_IMAGE;
-      nmhdr.iImage     = 0;
-      nmhdr.lParam     = phdi->lParam;
-      sendNotify(hwnd,isUnicodeNotify(&infoPtr->header) ? HDN_GETDISPINFOW:HDN_GETDISPINFOA,&nmhdr.hdr);
-
-      iImage = nmhdr.iImage;
-      if (nmhdr.mask & HDI_DI_SETITEM) phdi->iImage = iImage;
-    } else iImage = phdi->iImage;
-
+    if (iImage == I_IMAGENONE) return;
     if (!ImageList_GetImageInfo(infoPtr->himl,phdi->iImage,&info)) return;
     w = info.rcImage.right-info.rcImage.left;
     h = info.rcImage.bottom-info.rcImage.top;
@@ -187,6 +193,70 @@ HEADER_DrawItemBitmap(HDC hdc,HEADER_INFO* infoPtr,HEADER_ITEM* phdi,RECT* r,WCH
   }
 }
 
+static WCHAR* HEADER_CallbackText(HWND hwnd,HEADER_INFO* infoPtr,HEADER_ITEM* phdi,INT iItem,BOOL* mustFree)
+{
+  NMHDDISPINFOW nmhdr;
+  WCHAR* orgPtr;
+
+  nmhdr.iItem      = iItem;
+  nmhdr.mask       = HDI_TEXT;
+  nmhdr.cchTextMax = phdi->cchTextMax;
+  if (isUnicodeNotify(&infoPtr->header))
+  {
+    orgPtr = (WCHAR*)COMCTL32_Alloc(phdi->cchTextMax*sizeof(WCHAR));
+    nmhdr.pszText    = orgPtr;
+    if (nmhdr.pszText) nmhdr.pszText[0] = 0;
+  } else
+  {
+    orgPtr = (WCHAR*)COMCTL32_Alloc(phdi->cchTextMax*sizeof(CHAR));
+    nmhdr.pszText    = orgPtr;
+    if (nmhdr.pszText) ((LPSTR)nmhdr.pszText)[0] = 0;
+  }
+  nmhdr.lParam     = phdi->lParam;
+  sendNotify(hwnd,isUnicodeNotify(&infoPtr->header) ? HDN_GETDISPINFOW:HDN_GETDISPINFOA,&nmhdr.hdr);
+
+  if (nmhdr.pszText == LPSTR_TEXTCALLBACKW)
+  {
+    *mustFree = FALSE;
+    return NULL;
+  }
+
+  if (nmhdr.mask & HDI_DI_SETITEM)
+  {
+    if (isUnicodeNotify(&infoPtr->header))
+    {
+      INT len = nmhdr.pszText ? lstrlenW(nmhdr.pszText):0;
+
+      if (len)
+      {
+        phdi->pszText = (WCHAR*)COMCTL32_Alloc((len+1)*sizeof(WCHAR));
+        lstrcpyW(phdi->pszText,nmhdr.pszText);
+      } else phdi->pszText = NULL;
+      if (nmhdr.pszText == orgPtr) COMCTL32_Free(nmhdr.pszText);
+    } else
+    {
+      INT len = nmhdr.pszText ? lstrlenA((LPSTR)nmhdr.pszText):0;
+
+      if (len)
+      {
+        phdi->pszText = (WCHAR*)COMCTL32_Alloc((len+1)*sizeof(WCHAR));
+        lstrcpyAtoW(phdi->pszText,(LPSTR)nmhdr.pszText);
+      } else phdi->pszText = NULL;
+    }
+    COMCTL32_Free(orgPtr);
+    *mustFree = FALSE;
+
+    return phdi->pszText;
+  }
+  if (nmhdr.pszText != orgPtr)
+  {
+    COMCTL32_Free(orgPtr);
+    *mustFree = FALSE;
+  } else *mustFree = TRUE;
+
+  return nmhdr.pszText;
+}
+
 static VOID
 HEADER_DrawItemText(HDC hdc,HEADER_INFO* infoPtr,HEADER_ITEM* phdi,RECT* r,WCHAR* pszText,UINT uTextJustify,BOOL bEraseTextBkgnd,BOOL bHotTrack)
 {
@@ -251,7 +321,8 @@ HEADER_DrawItem (HWND hwnd, HDC hdc, INT iItem, BOOL bHotTrack,BOOL bEraseTextBk
     } else
     {
       UINT uTextJustify;
-      WCHAR *pszText = phdi->pszText,*orgPtr;
+      WCHAR *pszText;
+      BOOL mustFree = FALSE;
 
       if ((phdi->fmt & HDF_JUSTIFYMASK) == HDF_CENTER)
         uTextJustify = DT_CENTER;
@@ -260,55 +331,9 @@ HEADER_DrawItem (HWND hwnd, HDC hdc, INT iItem, BOOL bHotTrack,BOOL bEraseTextBk
       else uTextJustify = DT_LEFT;
 
       if (phdi->pszText == LPSTR_TEXTCALLBACKW)
-      {
-        NMHDDISPINFOW nmhdr;
-
-        nmhdr.iItem      = iItem;
-        nmhdr.mask       = HDI_TEXT;
-        nmhdr.cchTextMax = phdi->cchTextMax;
-        if (isUnicodeNotify(&infoPtr->header))
-        {
-          orgPtr = (WCHAR*)COMCTL32_Alloc(phdi->cchTextMax*sizeof(WCHAR));
-          nmhdr.pszText    = orgPtr;
-          if (nmhdr.pszText) nmhdr.pszText[0] = 0;
-        } else
-        {
-          orgPtr = (WCHAR*)COMCTL32_Alloc(phdi->cchTextMax*sizeof(CHAR));
-          nmhdr.pszText    = orgPtr;
-          if (nmhdr.pszText) ((LPSTR)nmhdr.pszText)[0] = 0;
-        }
-        nmhdr.lParam     = phdi->lParam;
-        sendNotify(hwnd,isUnicodeNotify(&infoPtr->header) ? HDN_GETDISPINFOW:HDN_GETDISPINFOA,&nmhdr.hdr);
-
-        pszText = nmhdr.pszText;
-        if (nmhdr.mask & HDI_DI_SETITEM)
-        {
-          if (isUnicodeNotify(&infoPtr->header))
-          {
-            INT len = pszText ? lstrlenW(pszText):0;
-
-            if (len)
-            {
-              phdi->pszText = (WCHAR*)COMCTL32_Alloc((len+1)*sizeof(WCHAR));
-              lstrcpyW(phdi->pszText,pszText);
-            } else phdi->pszText = NULL;
-            if (pszText == orgPtr) COMCTL32_Free(pszText);
-            pszText = phdi->pszText;
-          } else
-          {
-            INT len = nmhdr.pszText ? lstrlenA((LPSTR)nmhdr.pszText):0;
-
-            if (len)
-            {
-              pszText = (WCHAR*)COMCTL32_Alloc((len+1)*sizeof(WCHAR));
-              lstrcpyAtoW(pszText,(LPSTR)nmhdr.pszText);
-            } else pszText = NULL;
-            if (nmhdr.pszText == orgPtr) COMCTL32_Free(nmhdr.pszText);
-
-            phdi->pszText = pszText;
-          }
-        }
-      }
+        pszText = HEADER_CallbackText(hwnd,infoPtr,phdi,iItem,&mustFree);
+      else
+        pszText = phdi->pszText;
 
       if (!(phdi->fmt & HDF_JUSTIFYMASK) || (phdi->fmt & (HDF_LEFT | HDF_CENTER)))
       {
@@ -329,7 +354,7 @@ HEADER_DrawItem (HWND hwnd, HDC hdc, INT iItem, BOOL bHotTrack,BOOL bEraseTextBk
             HEADER_DrawItemText(hdc,infoPtr,phdi,&r,pszText,uTextJustify,bEraseTextBkgnd,bHotTrack);
         }
       }
-      if ((phdi->pszText == LPSTR_TEXTCALLBACKW) && (pszText == orgPtr)) COMCTL32_Free(pszText);
+      if (mustFree) COMCTL32_Free(pszText);
     }
 
     return phdi->rect.right;
@@ -1081,8 +1106,7 @@ HEADER_GetItemCount (HWND hwnd)
 }
 
 
-static LRESULT
-HEADER_GetItemRect (HWND hwnd, WPARAM wParam, LPARAM lParam)
+LRESULT HEADER_GetItemRect (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
     HEADER_INFO *infoPtr = HEADER_GetInfoPtr (hwnd);
     INT iItem = (INT)wParam;
@@ -1096,6 +1120,86 @@ HEADER_GetItemRect (HWND hwnd, WPARAM wParam, LPARAM lParam)
     lpRect->bottom = infoPtr->items[iItem].rect.bottom;
 
     return TRUE;
+}
+
+//useful function for ListView control
+
+DWORD HEADER_GetExpandedColumnTextWidth(HWND hwnd,INT iItem)
+{
+  HEADER_INFO *infoPtr = HEADER_GetInfoPtr (hwnd);
+  INT width = 0;
+  HEADER_ITEM *phdi;
+
+  if ((iItem < 0) || (iItem >= (INT)infoPtr->uNumItem)) return width;
+
+  phdi = &infoPtr->items[iItem];
+
+  if (GetWindowLongA (hwnd, GWL_STYLE) & HDS_BUTTONS)
+    width += 4;
+  else
+    width += 2;
+
+  if (phdi->fmt & HDF_OWNERDRAW)
+  {
+    //can't calculate ownerdraw
+    return infoPtr->items[iItem].rect.right-infoPtr->items[iItem].rect.left;
+  }
+
+  if (phdi->fmt & HDF_BITMAP)
+  {
+    if (phdi->hbm)
+    {
+      BITMAP bmp;
+
+      GetObjectA (phdi->hbm,sizeof(BITMAP),(LPVOID)&bmp);
+
+      width += bmp.bmWidth+2*infoPtr->xBmpMargin;
+    } else width += 2*infoPtr->xBmpMargin;
+  }
+
+  if (phdi->fmt & HDF_IMAGE)
+  {
+    INT iImage;
+    IMAGEINFO info;
+
+    if (phdi->iImage == I_IMAGECALLBACK)
+      iImage = HEADER_CallbackImage(hwnd,infoPtr,phdi,iItem);
+    else
+      iImage = phdi->iImage;
+
+    if (iImage != I_IMAGENONE)
+    {
+      if (ImageList_GetImageInfo(infoPtr->himl,phdi->iImage,&info))
+      {
+        width += info.rcImage.right-info.rcImage.left+2*infoPtr->xBmpMargin;
+      }
+    }
+  }
+
+  if (phdi->fmt & HDF_STRING)
+  {
+    WCHAR* pszText;
+    BOOL mustFree = FALSE;
+    HFONT hFont,hOldFont;
+    SIZE size;
+    HDC hdc = GetDC(hwnd);
+
+    if (phdi->pszText == LPSTR_TEXTCALLBACKW)
+      pszText = HEADER_CallbackText(hwnd,infoPtr,phdi,iItem,&mustFree);
+    else
+      pszText = phdi->pszText;
+
+    hFont = infoPtr->hFont ? infoPtr->hFont:GetStockObject(SYSTEM_FONT);
+    hOldFont = SelectObject(hdc,hFont);
+
+    if (GetTextExtentPoint32W(hdc,pszText,lstrlenW(pszText),&size))
+      width += size.cx+2*TEXT_MARGIN;
+    if (mustFree) COMCTL32_Free(pszText);
+    SelectObject(hdc,hOldFont);
+    ReleaseDC(hwnd,hdc);
+  }
+
+  return width;
 }
 
 static BOOL
