@@ -1,4 +1,4 @@
-/* $Id: menu.cpp,v 1.47 2002-06-02 10:07:57 sandervl Exp $*/
+/* $Id: menu.cpp,v 1.48 2002-07-12 19:49:21 sandervl Exp $*/
 /*
  * Menu functions
  *
@@ -2862,7 +2862,26 @@ static INT MENU_TrackMenu(HMENU hmenu,UINT wFlags,INT x,INT y,HWND hwnd,BOOL inM
 
                 case WM_RBUTTONDBLCLK:
                 case WM_RBUTTONDOWN:
-                    if (!(wFlags & TPM_RIGHTBUTTON)) break;
+                    if (!(wFlags & TPM_RIGHTBUTTON)) 
+                    {
+#ifdef __WIN32OS2__
+                      MENUITEM *item;
+   		      UINT id = 0;
+			
+                       if( IS_SYSTEM_MENU(menu) )
+                          item = menu->items;
+                       else
+                          item = MENU_FindItemByCoords( menu, pt, &id );
+		       //@@PF If our pointer is over the menu - do nothing
+                       if (item) break; 
+		       //@@PF Time to close menu - win2k&98 checked
+                       fEndMenu = 1;
+                       break;
+#else
+		    //@@PF This is totally incorrect. Menu need to be closed.
+		    break;
+#endif
+                    }
                     goto buttondown;
                 case WM_LBUTTONDBLCLK:
                     if (bSysMenu && (hmenu == mt.hTopMenu))
