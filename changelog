@@ -1,11 +1,8 @@
-/* $Id: changelog,v 1.1517 2001-06-15 09:44:46 bird Exp $ */
+/* $Id: changelog,v 1.1518 2001-06-15 10:19:53 achimha Exp $ */
 
  2001-06-14: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
-    - Kernel32: o Correct bug in LoadLibrary which prevented dynamically
-                  loading of Pe2Lx/Win32k images.
-
- 2001-06-14: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
-    - Win32k:   o Forgot to close file on failure in ldrOpen. When Pe2Lx
+    - KERKEN32: o Correct bug in LoadLibrary which prevented dynamically
+    - WIN32K:   o Forgot to close file on failure in ldrOpen. When Pe2Lx
                   failed (due to wrong subsystem), the file remained open.
 
  2001-06-14: Sander van Leeuwen <sandervl@xs4all.nl>
