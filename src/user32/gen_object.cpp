@@ -1,9 +1,9 @@
-/* $Id: gen_object.cpp,v 1.12 2001-07-20 15:34:16 sandervl Exp $ */
+/* $Id: gen_object.cpp,v 1.13 2004-04-20 10:11:42 sandervl Exp $ */
 /*
  * Generic Object Class for OS/2
  *
  * Allocated in shared memory, so other processes can access the objects
- * 
+ *
  * NOTE: Requires safety precautions to use objects in multiple threads or processes
  *
  * Copyright 1999 Sander van Leeuwen (sandervl@xs4all.nl)
@@ -21,13 +21,13 @@
 
 //******************************************************************************
 //******************************************************************************
-GenericObject::GenericObject(GenericObject **head, CRITICAL_SECTION *pLock)
+GenericObject::GenericObject(GenericObject **head, VMutex *pLock)
 {
   this->pLock = pLock;
   this->head  = head;
   this->next  = NULL;
   refCount    = 1;
-  
+
   fLinked     = FALSE;
   fDeletePending = FALSE;
 
