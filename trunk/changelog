@@ -1,4 +1,4 @@
- /* $Id: changelog,v 1.595 1999-12-30 18:54:05 sandervl Exp $ */
+ /* $Id: changelog,v 1.596 1999-12-30 21:26:21 sandervl Exp $ */
 
  99-12-30: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: ported menu control from WINE (not yet activated)
@@ -16,7 +16,11 @@
                     a file mapping with reserved memory has little use
                     as the entire file will be read completely anyway.
                     Added some useful logging for DDE apis.
+                    Fixed problem with combo boxes refusing to expand if it
+                    the edit control doesn't have the focus.
 	- GDI32:    Fixed GetObject for DIB sections
+	- COMCTL32: Increased default height of rebar band from 20 to 36
+                    (temporary hack for AbiWord)
 
  99-12-30: Bart van Leeuwen <Bart_van_Leeuwen@netage.nl>
 	- USER32: Implemented accelerator support
