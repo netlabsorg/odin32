@@ -1,4 +1,4 @@
-/* $Id: hmdevio.cpp,v 1.9 2001-04-26 13:22:44 sandervl Exp $ */
+/* $Id: hmdevio.cpp,v 1.10 2001-05-19 17:17:10 sandervl Exp $ */
 
 /*
  * Win32 Device IOCTL API functions for OS/2
@@ -21,6 +21,7 @@
 #include <string.h>
 
 #include <win32type.h>
+#include <win32api.h>
 #include <misc.h>
 #include "hmdevio.h"
 #include "cio.h"
@@ -39,11 +40,17 @@ char   devname[] = "/dev/fastio$";
 static BOOL GpdDevIOCtl(HANDLE hDevice, DWORD dwIoControlCode, LPVOID lpInBuffer, DWORD nInBufferSize, LPVOID lpOutBuffer, DWORD nOutBufferSize, LPDWORD lpBytesReturned, LPOVERLAPPED lpOverlapped);
 static BOOL MAPMEMIOCtl(HANDLE hDevice, DWORD dwIoControlCode, LPVOID lpInBuffer, DWORD nInBufferSize, LPVOID lpOutBuffer, DWORD nOutBufferSize, LPDWORD lpBytesReturned, LPOVERLAPPED lpOverlapped);
 static BOOL FXMEMMAPIOCtl(HANDLE hDevice, DWORD dwIoControlCode, LPVOID lpInBuffer, DWORD nInBufferSize, LPVOID lpOutBuffer, DWORD nOutBufferSize, LPDWORD lpBytesReturned, LPOVERLAPPED lpOverlapped);
+static BOOL VPCIOCtl(HANDLE hDevice, DWORD dwIoControlCode, LPVOID lpInBuffer, DWORD nInBufferSize, LPVOID lpOutBuffer, DWORD nOutBufferSize, LPDWORD lpBytesReturned, LPOVERLAPPED lpOverlapped);
 
 static WIN32DRV knownDriver[] =
     {{"\\\\.\\GpdDev", "",      TRUE,  666,   GpdDevIOCtl},
     { "\\\\.\\MAPMEM", "PMAP$", FALSE, 0,     MAPMEMIOCtl},
-    { "FXMEMMAP.VXD",  "PMAP$", FALSE, 0,     FXMEMMAPIOCtl}};
+    { "FXMEMMAP.VXD",  "PMAP$", FALSE, 0,     FXMEMMAPIOCtl},
+#if 1
+    { "\\\\.\\VPCAppSv", "",    TRUE,  667,   VPCIOCtl}};
+#else
+    };
+#endif
 
 static int nrKnownDrivers = sizeof(knownDriver)/sizeof(WIN32DRV);
 
@@ -293,6 +300,50 @@ static BOOL FXMEMMAPIOCtl(HANDLE hDevice, DWORD dwIoControlCode, LPVOID lpInBuff
   }
 
   return(TRUE);
+}
+//******************************************************************************
+//******************************************************************************
+static BOOL VPCIOCtl(HANDLE hDevice, DWORD dwIoControlCode, LPVOID lpInBuffer, DWORD nInBufferSize, LPVOID lpOutBuffer, DWORD nOutBufferSize, LPDWORD lpBytesReturned, LPOVERLAPPED lpOverlapped)
+{
+  switch(dwIoControlCode) {
+  case 0x9C402880: //0x00
+        dprintf(("VPCIOCtl func 0x9C402880: %d %x %d %x %x", nInBufferSize, lpOutBuffer, nOutBufferSize, lpBytesReturned, lpOverlapped));
+        if(nOutBufferSize < 4) {
+            SetLastError(ERROR_BAD_LENGTH);
+            return FALSE;
+        }
+        *(DWORD *)lpOutBuffer = 0x50001;
+        *lpBytesReturned = 4;
+        return TRUE;
+  case 0x9C402894: //0x14 (get IDT table)
+  {
+        DWORD *lpBuffer = (DWORD *)lpOutBuffer;
+        dprintf(("VPCIOCtl func 0x9C402894: %d %x %d %x %x", nInBufferSize, lpOutBuffer, nOutBufferSize, lpBytesReturned, lpOverlapped));
+        if(nOutBufferSize < 0x800) {
+            SetLastError(ERROR_BAD_LENGTH);
+            return FALSE;
+        }
+        memset(lpOutBuffer, 0, nOutBufferSize);
+        for(int i=0;i<16;i++) {
+            lpBuffer[i*2]   = 0x01580000;
+            lpBuffer[i*2+1] = 0xFF008E00;
+        }
+        lpBuffer[0xEF*2]   = 0x01580000;
+        lpBuffer[0xEF*2+1] = 0xFF008E00;
+        *lpBytesReturned = 0xF0*8;
+        return TRUE;
+  }
+  case 0x9C40288C: //change IDT
+        dprintf(("VPCIOCtl func 0x9C40288C: %d %x %d %x %x", nInBufferSize, lpOutBuffer, nOutBufferSize, lpBytesReturned, lpOverlapped));
+        if(nInBufferSize < 0x22) {
+            SetLastError(ERROR_BAD_LENGTH);
+            return FALSE;
+        }
+        return TRUE;
+  default:
+        dprintf(("VPCIOCtl unknown func %X\n", dwIoControlCode));
+        return FALSE;
+  }
 }
 //******************************************************************************
 //******************************************************************************
