@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.63 2000-06-23 19:04:10 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.64 2000-06-26 10:27:10 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -1120,6 +1120,12 @@ BOOL WIN32API RedrawWindow(HWND hwnd, const RECT* pRect, HRGN hrgn, DWORD redraw
         else
             success = WinInvalidateRect (hwnd, &rectl, IncludeChildren);
 
+#ifdef DEBUG
+        if(WinQueryUpdateRect(hwnd, NULL) == FALSE) {
+		dprintf(("WARNING: WinQueryUpdateRect %x (%d,%d)(%d,%d) returned false even though we just invalidated part of a window!!!", hwnd, rectl.xLeft, rectl.yBottom, rectl.xRight, rectl.yTop));
+	}
+#endif
+
         if (!success) goto error;
    }
    else if (redraw & RDW_VALIDATE_W)
@@ -1201,6 +1207,24 @@ BOOL WIN32API UpdateWindow (HWND hwnd)
 }
 //******************************************************************************
 //******************************************************************************
+BOOL WIN32API ValidateRect( HWND hwnd, const RECT * lprc)
+{
+    if(lprc) {
+         dprintf(("USER32: ValidateRect %x (%d,%d)(%d,%d)", hwnd, lprc->left, lprc->top, lprc->right, lprc->bottom));
+    }
+    else dprintf(("USER32: ValidateRect %x", hwnd));
+
+    return RedrawWindow( hwnd, lprc, 0, RDW_VALIDATE_W | RDW_NOCHILDREN_W | (hwnd==0 ? RDW_UPDATENOW_W : 0));
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API ValidateRgn( HWND hwnd, HRGN  hrgn)
+{
+    dprintf(("USER32: ValidateRgn %x %x", hwnd, hrgn));
+    return RedrawWindow( hwnd, NULL, hrgn, RDW_VALIDATE_W | RDW_NOCHILDREN_W | (hwnd==0 ? RDW_UPDATENOW_W : 0));
+}
+//******************************************************************************
+//******************************************************************************
 BOOL WIN32API InvalidateRect (HWND hwnd, const RECT *pRect, BOOL erase)
 {
    BOOL result;
@@ -1209,11 +1233,15 @@ BOOL WIN32API InvalidateRect (HWND hwnd, const RECT *pRect, BOOL erase)
    	dprintf(("InvalidateRect %x (%d,%d)(%d,%d) erase=%d", hwnd, pRect->left, pRect->top, pRect->right, pRect->bottom, erase));
    }
    else dprintf(("InvalidateRect %x NULL erase=%d", hwnd, erase));
-   if(hwnd == 0x6800000f) {
-	result = 0;
-   }
    result = RedrawWindow (hwnd, pRect, NULLHANDLE,
-                          RDW_ALLCHILDREN_W | RDW_INVALIDATE_W |
+//SvL: If all children are included, then WinInvalidateRect is called
+//     with fIncludeChildren=1 -> rect of hwnd isn't invalid if child(ren)
+//     overlap(s) it completely (EVEN if window doesn't have WS_CLIPCHILREN!)
+//     -> example: XWing vs Tie Fighter install window
+//     WinInvalidateRect with fIncludeChildren=0 invalidates both the parent
+//     and child windows
+//                          RDW_ALLCHILDREN_W | RDW_INVALIDATE_W |
+                          RDW_NOCHILDREN_W | RDW_INVALIDATE_W |
                           (erase ? RDW_ERASE_W : RDW_NOERASE_W) |
                           (hwnd == NULLHANDLE ? RDW_UPDATENOW_W : 0));
    return (result);
@@ -1226,7 +1254,14 @@ BOOL WIN32API InvalidateRgn (HWND hwnd, HRGN hrgn, BOOL erase)
 
    dprintf(("InvalidateRgn %x %x erase=%d", hwnd, hrgn, erase));
    result = RedrawWindow (hwnd, NULL, hrgn,
-                          RDW_ALLCHILDREN_W | RDW_INVALIDATE_W |
+//SvL: If all children are included, then WinInvalidateRegion is called
+//     with fIncludeChildren=1 -> region of hwnd isn't invalid if child(ren)
+//     overlap(s) it completely (EVEN if window doesn't have WS_CLIPCHILREN!)
+//     -> example: XWing vs Tie Fighter install window
+//     WinInvalidateRegion with fIncludeChildren=0 invalidates both the parent
+//     and child windows
+//                          RDW_ALLCHILDREN_W | RDW_INVALIDATE_W |
+                          RDW_NOCHILDREN_W | RDW_INVALIDATE_W |
                           (erase ? RDW_ERASE_W : RDW_NOERASE_W) |
                           (hwnd == NULLHANDLE ? RDW_UPDATENOW_W : 0));
    return (result);
@@ -1616,24 +1651,6 @@ HWND WIN32API WindowFromDC(HDC hdc)
       return Win32BaseWindow::OS2ToWin32Handle(pHps->hwnd);
    else
       return 0;
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API ValidateRect( HWND hwnd, const RECT * lprc)
-{
-    if(lprc) {
-         dprintf(("USER32: ValidateRect %x (%d,%d)(%d,%d)", hwnd, lprc->left, lprc->top, lprc->right, lprc->bottom));
-    }
-    else dprintf(("USER32: ValidateRect %x", hwnd));
-
-    return RedrawWindow( hwnd, lprc, 0, RDW_VALIDATE_W | RDW_NOCHILDREN_W | (hwnd==0 ? RDW_UPDATENOW_W : 0));
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API ValidateRgn( HWND hwnd, HRGN  hrgn)
-{
-    dprintf(("USER32: ValidateRgn %x %x", hwnd, hrgn));
-    return RedrawWindow( hwnd, NULL, hrgn, RDW_VALIDATE_W | RDW_NOCHILDREN_W | (hwnd==0 ? RDW_UPDATENOW_W : 0));
 }
 //******************************************************************************
 //******************************************************************************
