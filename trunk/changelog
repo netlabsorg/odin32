@@ -1,4 +1,9 @@
- /* $Id: changelog,v 1.850 2000-03-30 10:51:38 sandervl Exp $ */
+ /* $Id: changelog,v 1.851 2000-03-30 15:35:51 cbratschi Exp $ */
+
+ 2000-03-30: Christoph Bratschi <cbratschi@datacomm.ch>
+	- KERNEL32:
+	- SHLWAPI: added stubs for explorer.exe
+	- COMCTL32: treeview: finished info tip
 
  2000-03-30: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Also double thread stack in release build

@@ -1,4 +1,4 @@
-/* $Id: treeview.h,v 1.16 2000-03-21 17:28:20 cbratschi Exp $ */
+/* $Id: treeview.h,v 1.17 2000-03-30 15:36:24 cbratschi Exp $ */
 /*
  * Treeview class extra info
  *
@@ -16,6 +16,7 @@
 #define TV_DEFAULTITEMHEIGHT  16
 #define TVITEM_ALLOC          32      /* default nr of items to allocate at first try */
 #define TV_ISEARCH_DELAY     500
+#define TV_INFOTIP_DELAY     500
 
 
 /* internal structures */
@@ -113,10 +114,12 @@ typedef struct tagTREEVIEW_INFO
 #define TV_REFRESH_TIMER 1
 #define TV_EDIT_TIMER    2
 #define TV_ISEARCH_TIMER 3
+#define TV_INFOTIP_TIMER 4
 
 #define TV_REFRESH_TIMER_SET 1
 #define TV_EDIT_TIMER_SET    2
-#define TV_ISEARCH_TIMER_SET 3
+#define TV_ISEARCH_TIMER_SET 4
+#define TV_INFOTIP_TIMER_SET 8
 
 extern VOID TREEVIEW_Register (VOID);
 extern VOID TREEVIEW_Unregister (VOID);
