@@ -1,4 +1,4 @@
-/* $Id: oleaut32.h,v 1.5 1999-09-08 15:23:23 davidr Exp $ */
+/* $Id: oleaut32.h,v 1.6 1999-11-14 01:26:36 davidr Exp $ */
 /*
  * Win32 OLE stubs for OS/2
  *
@@ -29,7 +29,6 @@
 #include <win/wtypes.h>
 #include <winbase.h>
 #include "oleauto.h"
-//#include <uconv.h>
 #undef CALLCONV
 
 #include <os2win.h>
@@ -37,20 +36,19 @@
 #include <ole.h>
 #include <winreg.h>
 
-
-#include "wine/obj_base.h"
-#include "wine/obj_oleview.h"
-#include "wine/obj_misc.h"
+#include "objbase.h"		// Common obj include
 #include "wine/obj_inplace.h"
-#include "wine/obj_dataobject.h"
 #include "wine/obj_oleobj.h"
-#include "wine/obj_marshal.h"
-#include "wine/obj_moniker.h"
-#include "wine/obj_clientserver.h"
-#include "wine/obj_dragdrop.h"
-#include "wine/obj_property.h"
-#include "wine/obj_olefont.h"
-#include "wine/obj_oleundo.h"
+#include "wine/obj_surrogate.h"
+#include "wine/obj_oleview.h"
+#include "wine/obj_cache.h"
+
+#include "wine/obj_property.h"	// needed for oleundo
+#include "wine/obj_olefont.h"	// needed for oleundo
+#include "wine/obj_oleundo.h"	// for OLE_COLOR of all things :-)
+
+#include "wine/obj_picture.h"
+
 #include <heapstring.h>
 
 #endif

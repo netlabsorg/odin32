@@ -1,4 +1,4 @@
-/* $Id: stubs.cpp,v 1.1 1999-09-08 15:23:23 davidr Exp $ */
+/* $Id: stubs.cpp,v 1.2 1999-11-14 01:26:36 davidr Exp $ */
 /* 
  * Win32 COM/OLE stubs for OS/2
  * 
@@ -989,95 +989,6 @@ HRESULT WIN32API OleCreatePropertyFrame(HWND hwndOwner, UINT x, UINT y,
     LPCLSID pPageClsID, LCID lcid, DWORD dwReserved, LPVOID pvReserved)
 {
     dprintf(("OLEAUT32: OleCreatePropertyFrame - stub"));
-    return S_OK;
-}
-
-//*****************************************************************************
-//*****************************************************************************
-HRESULT WIN32API OleLoadPicture(LPSTREAM lpstream, LONG lSize, BOOL fRunmode,
-    REFIID riid, LPVOID * lplpvObj)
-{
-    dprintf(("OLEAUT32: OleLoadPicture - stub"));
-    return S_OK;
-}
-
-//*****************************************************************************
-//*****************************************************************************
-
-#define PICTYPE_UNINITIALIZED (-1)
-#define PICTYPE_NONE            0
-#define PICTYPE_BITMAP          1
-#define PICTYPE_METAFILE        2
-#define PICTYPE_ICON            3
-#define PICTYPE_ENHMETAFILE     4
-
-typedef struct tagPICTDESC
-{
-    UINT cbSizeofstruct;
-    UINT picType;
-    union
-    {
-        struct
-        {
-            HBITMAP   hbitmap;        // Bitmap
-            HPALETTE  hpal;           // Accompanying palette
-        } bmp;
-
-        struct
-        {
-            HMETAFILE hmeta;          // Metafile
-            int       xExt;
-            int       yExt;           // Extent
-        } wmf;
-
-        struct
-        {
-            HICON hicon;              // Icon
-        } icon;
-
-        struct
-        {
-            HENHMETAFILE hemf;        // Enhanced Metafile
-        } emf;
-    } u;
-
-} PICTDESC, * LPPICTDESC;
-
-HRESULT WIN32API OleCreatePictureIndirect(LPPICTDESC lpPictDesc, REFIID riid,
-    BOOL fOwn, LPVOID * lplpvObj)
-{
-    dprintf(("OLEAUT32: OleCreatePictureIndirect - stub"));
-    return S_OK;
-}
-
-//*****************************************************************************
-//*****************************************************************************
-HRESULT WIN32API OleLoadPictureFile(VARIANT varFileName, LPDISPATCH* lplpdispPicture)
-{
-    dprintf(("OLEAUT32: OleLoadPictureFile - stub"));
-    return S_OK;
-}
-
-//*****************************************************************************
-//*****************************************************************************
-HRESULT WIN32API OleSavePictureFile(LPDISPATCH lpdispPicture,
-    BSTR bstrFileName)
-{
-    dprintf(("OLEAUT32: OleSavePictureFile - stub"));
-    return S_OK;
-}
-
-//*****************************************************************************
-//*****************************************************************************
-HRESULT WIN32API OleLoadPicturePath
-   (LPOLESTR  		szURLorPath,
-    LPUNKNOWN 		punkCaller,
-    DWORD     		dwReserved,
-    OLE_COLOR 		clrReserved,
-    REFIID    		riid,
-    LPVOID *  		ppvRet )
-{
-    dprintf(("OLEAUT32: OleLoadPicturePath - stub"));
     return S_OK;
 }
 
