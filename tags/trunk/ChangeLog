@@ -1,8 +1,9 @@
- /* $Id: ChangeLog,v 1.1113 2000-09-07 22:15:14 phaller Exp $ */
+ /* $Id: ChangeLog,v 1.1114 2000-09-08 04:33:56 phaller Exp $ */
 
  2000-09-07: Patrick Haller <phaller@gmx.net>
-    - KERNEL32: Fixed some FS: bugs in time.cpp, environ.cpp
-    - GDI32:    Fixed some FS: bug in DeleteObject()
+    - KERNEL32: Fixed some FS: bugs in time.cpp, environ.cpp, heap.cpp
+                Fixed language support from WINE sync
+    - GDI32:    Fixed some FS: bug in DeleteObject(), DeleteDC()
 
  2000-09-07: Sander van Leeuwen <sandervl@xs4all.nl>
     - COMCTL32: TOOLBAR_SetBitmapSize & TOOLBAR_SetBitmapSize; do not return
