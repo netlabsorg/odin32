@@ -1,4 +1,4 @@
-/* $Id: windef.h,v 1.10 1999-09-08 13:46:36 sandervl Exp $ */
+/* $Id: windef.h,v 1.11 1999-09-08 19:35:37 sandervl Exp $ */
 
 /*
  * Basic types definitions
@@ -521,7 +521,7 @@ typedef LPCSTR LPCTSTR;
 #define MAX_PATH   260
 #define _MAX_DRIVE 3
 #define _MAX_DIR   256
-#ifndef __WIN32OS2__
+#if !defined(__WIN32OS2__) && !defined(_MAX_FNAME)
 #define _MAX_FNAME 255
 #endif
 #define _MAX_EXT   256
