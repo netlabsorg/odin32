@@ -69,11 +69,10 @@ BOOL WIN32API UnRegisterCustomDriver(LPCSTR lpDriverName);
 BOOL WIN32API SetCustomDialogHook(HOOKPROC pfnDialogProc);
 BOOL WIN32API ClearCustomDialogHook();
 
-//Override FindResource function
-typedef void (* WIN32API PFNFINDRESOURCEEXA)(HINSTANCE *phModule, LPSTR *lplpszName, LPSTR *lplpszType, WORD *lpLanguage);
-typedef void (* WIN32API PFNFINDRESOURCEEXW)(HINSTANCE *phModule, LPWSTR *lplpszName, LPWSTR *lplpszType, WORD *lpLanguage);
+//Override LoadImage function
+typedef void (* WIN32API PFNLOADIMAGEW)(HINSTANCE *phinst, LPWSTR *lplpszName, UINT *lpuType);
 
-BOOL WIN32API SetCustomFindResource(PFNFINDRESOURCEEXA pfnFindResourceA, PFNFINDRESOURCEEXW pfnFindResourceW);
+BOOL WIN32API SetCustomLoadImage(PFNLOADIMAGEW pfnLoadImageW);
 
 //Set the default language in kernel32
 void WIN32API SetDefaultLanguage(DWORD deflang);

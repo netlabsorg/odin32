@@ -1,4 +1,4 @@
-/* $Id: loadres.cpp,v 1.38 2001-07-16 19:32:55 sandervl Exp $ */
+/* $Id: loadres.cpp,v 1.39 2002-03-22 12:51:17 sandervl Exp $ */
 
 /*
  * Win32 resource API functions for OS/2
@@ -25,6 +25,7 @@
 #include "dib.h"
 #include "initterm.h"
 #include <winres.h>
+#include <custombuild.h>
 #include "pmwindow.h"
 
 #define DBG_LOCALLOG    DBG_loadres
@@ -349,6 +350,17 @@ HBITMAP WIN32API LoadBitmapW(HINSTANCE hinst, LPCWSTR lpszBitmap)
 }
 //******************************************************************************
 //******************************************************************************
+static PFNLOADIMAGEW pfnCustomLoadImageW  = NULL;
+//******************************************************************************
+//Called by custom Odin builds to hook LoadImageW
+//******************************************************************************
+BOOL WIN32API SetCustomLoadImage(PFNLOADIMAGEW pfnLoadImageW)
+{
+    pfnCustomLoadImageW = pfnLoadImageW;
+    return TRUE;
+}
+//******************************************************************************
+//******************************************************************************
 HANDLE WIN32API LoadImageA(HINSTANCE hinst, LPCSTR lpszName, UINT uType,
                            int cxDesired, int cyDesired, UINT fuLoad)
 {
@@ -379,10 +391,14 @@ HANDLE WIN32API LoadImageW(HINSTANCE hinst, LPCWSTR lpszName, UINT uType,
 {
  HANDLE hRet = 0;
 
-  if(HIWORD(lpszName)) {
-        dprintf(("LoadImageW %x %ls %d (%d,%d)\n", hinst, lpszName, uType, cxDesired, cyDesired));
+  if(pfnCustomLoadImageW) {
+      pfnCustomLoadImageW(&hinst, (LPWSTR *)&lpszName, &uType);
   }
-  else  dprintf(("LoadImageW %x %x %d (%d,%d)\n", hinst, lpszName, uType, cxDesired, cyDesired));
+
+  if(HIWORD(lpszName)) {
+       dprintf(("LoadImageW %x %ls %d (%d,%d)\n", hinst, lpszName, uType, cxDesired, cyDesired));
+  }
+  else dprintf(("LoadImageW %x %x %d (%d,%d)\n", hinst, lpszName, uType, cxDesired, cyDesired));
 
   if (fuLoad & LR_DEFAULTSIZE) {
         if (uType == IMAGE_ICON) {
