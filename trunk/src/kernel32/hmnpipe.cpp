@@ -1,4 +1,4 @@
-/* $Id: hmnpipe.cpp,v 1.2 2001-04-26 13:22:46 sandervl Exp $ */
+/* $Id: hmnpipe.cpp,v 1.3 2001-11-07 15:35:37 sandervl Exp $ */
 /*
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -33,6 +33,33 @@ inline void ignore_dprintf(...){}
 #  define dprintfl(a) ignore_dprintf(a)
 #endif
 
+/*****************************************************************************
+ Register PIPE device class
+ *****************************************************************************/
+HMDeviceNamedPipeClass::HMDeviceNamedPipeClass(LPCSTR lpDeviceName) : HMDeviceFileClass(lpDeviceName)
+{
+    HMDeviceRegisterEx("\\\\.\\PIPE", this, NULL);
+}
+/*****************************************************************************
+ * Name      : HMDeviceNamedPipeClass::FindDevice
+ * Purpose   : Checks if lpDeviceName belongs to this device class
+ * Parameters: LPCSTR lpClassDevName
+ *             LPCSTR lpDeviceName
+ *             int namelength
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : SvL
+ *****************************************************************************/
+BOOL HMDeviceNamedPipeClass::FindDevice(LPCSTR lpClassDevName, LPCSTR lpDeviceName, int namelength)
+{
+    if(lstrncmpiA("\\\\.\\PIPE\\", lpDeviceName, 9) == 0) {
+        return TRUE;
+    }
+    return FALSE;
+}
 //******************************************************************************
 //******************************************************************************
 BOOL HMDeviceNamedPipeClass::PeekNamedPipe(PHMHANDLEDATA pHMHandleData,
