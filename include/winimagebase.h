@@ -1,4 +1,4 @@
-/* $Id: winimagebase.h,v 1.7 1999-11-29 20:42:20 sandervl Exp $ */
+/* $Id: winimagebase.h,v 1.8 1999-11-30 19:39:14 sandervl Exp $ */
 
 /*
  * Win32 PE Image base class
@@ -57,6 +57,9 @@ virtual ~Win32ImageBase();
 
         ULONG     getError()          { return errorState; };
         HINSTANCE getInstanceHandle() { return hinstance; };
+
+//Returns required OS version for this image
+virtual ULONG     getVersion();
 
 virtual void setFullPath(char *name);
         char *getFullPath()           { return fullpath; };

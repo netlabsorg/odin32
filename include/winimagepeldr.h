@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.h,v 1.7 1999-11-26 00:04:33 sandervl Exp $ */
+/* $Id: winimagepeldr.h,v 1.8 1999-11-30 19:39:14 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -83,6 +83,9 @@ virtual BOOL  init(ULONG reservedMem);
 
     virtual ULONG getApi(char *name);
     virtual ULONG getApi(int ordinal);
+
+    //Returns required OS version for this image
+    virtual ULONG getVersion();
 
         //commits image page(s) when an access violation exception is dispatched
 	BOOL  commitPage(ULONG virtAddress, BOOL fWriteAccess, int fPageCmd = SECTION_PAGES);

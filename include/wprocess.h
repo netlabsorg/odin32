@@ -1,4 +1,4 @@
-/* $Id: wprocess.h,v 1.11 1999-11-30 14:32:50 sandervl Exp $ */
+/* $Id: wprocess.h,v 1.12 1999-11-30 19:39:14 sandervl Exp $ */
 /*
  * Process help functions
  *
@@ -25,6 +25,7 @@ void DestroyTIB();
 
 void   WIN32API RestoreOS2TIB();
 USHORT WIN32API SetWin32TIB();
+void   SetPDBInstance(HINSTANCE hInstance);
 
 extern BOOL fExeStarted;
 extern BOOL fFreeLibrary;
