@@ -1,4 +1,4 @@
-# $Id: process.forwarder.mak,v 1.17 2002-09-20 04:24:05 bird Exp $
+# $Id: process.forwarder.mak,v 1.18 2003-03-05 15:10:07 bird Exp $
 #
 # Generic Buildsystem
 #
@@ -250,7 +250,8 @@ $(TARGET) \
 !endif
 $(TARGET_ILIB) \
 $(RULES_FORWARD) \
-publish publish_target testcase nothing target packing \
+$(OTHERS) \
+publish publish_target testcase nothing target others packing \
 pass1 pass2 pass3 pass4 pass5 pass6 quick \
 # obsoletes:
 miscellaneous executable :
