@@ -1,4 +1,4 @@
-/* $Id: text.cpp,v 1.33 2003-03-03 16:33:35 sandervl Exp $ */
+/* $Id: text.cpp,v 1.34 2003-07-14 13:43:15 sandervl Exp $ */
 
 /*
  * GDI32 text apis
@@ -106,7 +106,7 @@ BOOL InternalTextOutA(HDC hdc,int X,int Y,UINT fuOptions,CONST RECT *lprc,LPCSTR
 #if defined(INVERT) && !defined(INVERT_SETYINVERSION)
   if(pHps->yInvert > 0) {
      Y = pHps->yInvert - Y;
-  } 
+  }
 #endif
 
 #ifdef INVERT_SETYINVERSION
@@ -138,7 +138,7 @@ BOOL InternalTextOutA(HDC hdc,int X,int Y,UINT fuOptions,CONST RECT *lprc,LPCSTR
           int temp       = pHps->yInvert - pmRect.yTop;
           pmRect.yTop    = pHps->yInvert - pmRect.yBottom;
           pmRect.yBottom = temp;
-      }    
+      }
 #endif
 #endif
 
@@ -209,7 +209,7 @@ BOOL InternalTextOutA(HDC hdc,int X,int Y,UINT fuOptions,CONST RECT *lprc,LPCSTR
   {
     BOOL rc;
     PPOINTLOS2 pts = (PPOINTLOS2)malloc((cbCount+1)*sizeof(POINTLOS2));
- 
+
     rc = OSLibGpiQueryCharStringPosAt(pHps,&ptl,flOptions & CHSOS_VECTOR,cbCount,lpszString,lpDx,pts);
     if(rc) {
         for(int i=0;i<cbCount+1;i++) {
@@ -235,7 +235,7 @@ BOOL InternalTextOutA(HDC hdc,int X,int Y,UINT fuOptions,CONST RECT *lprc,LPCSTR
   ptl.y -= getWorldYDeltaFor1Pixel(pHps);
 
   int vertAdjust = 0;
-  if ((pHps->taMode & 0x18) != TA_TOP) 
+  if ((pHps->taMode & 0x18) != TA_TOP)
   {
       vertAdjust = OSLibGpiQueryFontMaxHeight(pHps->hps);
   }
@@ -280,13 +280,15 @@ BOOL InternalTextOutW(HDC hdc,int X,int Y,UINT fuOptions,CONST RECT *lprc,LPCWST
   if(cbCount == -1) {
      astring = UnicodeToAsciiString((LPWSTR)lpszString);
   }
-  else 
-  if(cbCount) {
-     astring = (char *)HEAP_malloc(cbCount+1);
-     UnicodeToAsciiN((LPWSTR)lpszString, astring, cbCount+1);
-     astring[cbCount] = 0;
+  else
+  if(cbCount >= 0) {
+     int n = WideCharToMultiByte( CP_ACP, 0, lpszString, cbCount, 0, 0, NULL, NULL ) + 1;
+
+     astring = (char *)HEAP_malloc( n );
+     UnicodeToAsciiN((LPWSTR)lpszString, astring, n );
   }
-  rc = InternalTextOutA(hdc,X,Y,fuOptions,lprc,(LPCSTR)astring,cbCount,lpDx,IsExtTextOut);
+
+  rc = InternalTextOutA(hdc,X,Y,fuOptions,lprc,(LPCSTR)astring, strlen( astring ),lpDx,IsExtTextOut);
   if(astring) {
       FreeAsciiString(astring);
   }
@@ -319,7 +321,7 @@ BOOL WIN32API ExtTextOutA(HDC hdc,int X,int Y,UINT fuOptions,CONST RECT *lprc,LP
 
   if(astring)
       free(astring);
- 
+
   return(rc);
 }
 //******************************************************************************
@@ -442,7 +444,7 @@ BOOL WIN32API GetTextExtentPointA(HDC hdc, LPCTSTR lpsz, int cbString,
       SetLastError(ERROR_SUCCESS);
       return TRUE;
    }
-   if(cbString > 512) 
+   if(cbString > 512)
    {
       DWORD cbStringNew;
       SIZE  newSize;
@@ -467,7 +469,7 @@ BOOL WIN32API GetTextExtentPointA(HDC hdc, LPCTSTR lpsz, int cbString,
    rc = OSLibGpiQueryTextBox(pHps, cbString, lpsz, TXTBOXOS_COUNT, pts);
    if(rc == FALSE)
    {
-      SetLastError(ERROR_INVALID_PARAMETER);	//todo wrong error
+      SetLastError(ERROR_INVALID_PARAMETER);    //todo wrong error
       return FALSE;
    }
    calcDimensions(pts, &widthHeight);
@@ -495,7 +497,8 @@ BOOL WIN32API GetTextExtentPointW(HDC    hdc,
                                   PSIZE  lpSize)
 {
   char *astring;
-  BOOL  rc;
+  int  len;
+  BOOL rc;
 
    if(lpString == NULL || cbString < 0 || lpSize == NULL)
    {
@@ -517,11 +520,11 @@ BOOL WIN32API GetTextExtentPointW(HDC    hdc,
 
    dprintf(("GDI32: GetTextExtentPointW %x %.*ls %d %x", hdc, cbString, lpString, cbString, lpSize));
 
-   astring = (char *)malloc((cbString+1)*sizeof(WCHAR));
-   UnicodeToAsciiN(lpString, astring, cbString+1);
-
+   len = WideCharToMultiByte( CP_ACP, 0, lpString, cbString, 0, 0, NULL, NULL );
+   astring = (char *)malloc( len + 1 );
+   UnicodeToAsciiN(lpString, astring, len + 1 );
    rc = GetTextExtentPointA(hdc, astring,
-                            cbString, lpSize);
+                            len, lpSize);
 
    free(astring);
    return(rc);
