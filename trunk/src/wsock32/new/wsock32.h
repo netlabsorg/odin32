@@ -1,4 +1,4 @@
-/* $Id: wsock32.h,v 1.5 2000-03-23 19:21:55 sandervl Exp $ */
+/* $Id: wsock32.h,v 1.6 2000-03-24 17:30:28 achimha Exp $ */
 
 /* WSOCK32.H--definitions & conversions for Odin's wsock32.dll.
  * Unused/unneeded Microsoft declarations removed.
@@ -15,6 +15,7 @@
 #ifndef _WINSOCK32CONST_
 #define _WINSOCK32CONST_
 
+#define TCPV40HDRS
 #include <sys\socket.h>
 #include <sys\ioctl.h>
 #include <netdb.h>
