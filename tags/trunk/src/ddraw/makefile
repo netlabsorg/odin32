@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.34 2003-02-07 13:58:17 sandervl Exp $
+# $Id: makefile,v 1.35 2003-08-08 15:43:12 sandervl Exp $
 
 #
 # Odin32 API
@@ -51,6 +51,7 @@ $(OBJDIR)\ddrawrsrc.obj
 LIBS = \
 $(ODIN32_LIB)/ole32.lib \
 $(ODIN32_LIB)/advapi32.lib \
+$(ODIN32_LIB)/libwrap.lib \
 $(ODIN32_LIB)/gdi32.lib \
 $(ODIN32_LIB)/comctl32.lib \
 $(ODIN32_LIB)/kernel32.lib \
