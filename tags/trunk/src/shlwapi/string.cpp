@@ -1,4 +1,4 @@
-/* $Id: string.cpp,v 1.1 2000-05-15 02:43:17 phaller Exp $ */
+/* $Id: string.cpp,v 1.2 2000-05-19 12:10:04 sandervl Exp $ */
 
 /*
  * Win32 Lightweight SHELL32 for OS/2
@@ -306,47 +306,6 @@ LPWSTR WINAPI StrRChrW(LPWSTR lpStart, LPWSTR lpEnd, DWORD wMatch)
         return wptr;
 }
 
-/*************************************************************************
-* StrFormatByteSize                             [SHLWAPI]
-*/
-LPSTR WINAPI StrFormatByteSizeA ( DWORD dw, LPSTR pszBuf, UINT cchBuf )
-{       char buf[64];
-        TRACE("%lx %p %i\n", dw, pszBuf, cchBuf);
-        if ( dw<1024L )
-        { sprintf (buf,"%3.0f bytes", (FLOAT)dw);
-        }
-        else if ( dw<1048576L)
-        { sprintf (buf,"%3.2f KB", (FLOAT)dw/1024);
-        }
-        else if ( dw < 1073741824L)
-        { sprintf (buf,"%3.2f MB", (FLOAT)dw/1048576L);
-        }
-        else
-        { sprintf (buf,"%3.2f GB", (FLOAT)dw/1073741824L);
-        }
-        lstrcpynA (pszBuf, buf, cchBuf);
-        return pszBuf;
-}
-LPWSTR WINAPI StrFormatByteSizeW ( DWORD dw, LPWSTR pszBuf, UINT cchBuf )
-{       char buf[64];
-        TRACE("%lx %p %i\n", dw, pszBuf, cchBuf);
-        if ( dw<1024L )
-        { sprintf (buf,"%3.0f bytes", (FLOAT)dw);
-        }
-        else if ( dw<1048576L)
-        { sprintf (buf,"%3.2f KB", (FLOAT)dw/1024);
-        }
-        else if ( dw < 1073741824L)
-        { sprintf (buf,"%3.2f MB", (FLOAT)dw/1048576L);
-        }
-        else
-        { sprintf (buf,"%3.2f GB", (FLOAT)dw/1073741824L);
-        }
-        lstrcpynAtoW (pszBuf, buf, cchBuf);
-        return pszBuf;
-}
-
-
 /************************************************************************
  *      StrToOleStr                     [SHELL32.163]
  *
@@ -554,4 +513,48 @@ ODINFUNCTION1(INT,StrToIntA,LPSTR,pszPath)
   dprintf(("not implemented"));
 
   return NULL;
+}
+
+/*************************************************************************
+ * StrFormatByteSizeA				[SHLWAPI]
+ */
+ODINFUNCTION3(LPSTR, StrFormatByteSizeA, DWORD, dw, LPSTR, pszBuf, UINT, cchBuf )
+{	char buf[64];
+	TRACE("%lx %p %i\n", dw, pszBuf, cchBuf);
+	if ( dw<1024L )
+	{ sprintf (buf,"%3.1f bytes", (FLOAT)dw);
+	}
+	else if ( dw<1048576L)
+	{ sprintf (buf,"%3.1f KB", (FLOAT)dw/1024);
+	}
+	else if ( dw < 1073741824L)
+	{ sprintf (buf,"%3.1f MB", (FLOAT)dw/1048576L);
+	}
+	else
+	{ sprintf (buf,"%3.1f GB", (FLOAT)dw/1073741824L);
+	}
+	lstrcpynA (pszBuf, buf, cchBuf);
+	return pszBuf;	
+}
+
+/*************************************************************************
+ * StrFormatByteSizeW				[SHLWAPI]
+ */
+ODINFUNCTION3(LPWSTR, StrFormatByteSizeW, DWORD, dw, LPWSTR, pszBuf, UINT, cchBuf)
+{	char buf[64];
+	TRACE("%lx %p %i\n", dw, pszBuf, cchBuf);
+	if ( dw<1024L )
+	{ sprintf (buf,"%3.1f bytes", (FLOAT)dw);
+	}
+	else if ( dw<1048576L)
+	{ sprintf (buf,"%3.1f KB", (FLOAT)dw/1024);
+	}
+	else if ( dw < 1073741824L)
+	{ sprintf (buf,"%3.1f MB", (FLOAT)dw/1048576L);
+	}
+	else
+	{ sprintf (buf,"%3.1f GB", (FLOAT)dw/1073741824L);
+	}
+	lstrcpynAtoW (pszBuf, buf, cchBuf);
+	return pszBuf;	
 }
