@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.624 2000-01-09 14:12:37 cbratschi Exp $ */
+ /* $Id: changelog,v 1.625 2000-01-09 14:15:08 davidr Exp $ */
+
+ 2000-01-09: David Raison <djr@lemur.co.uk>
+        - OLEAUT32: Typelib - Updated TKIND_ALIAS handling.
 
  2000-01-09: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32/NEW: implemented scrollbar nc handling
