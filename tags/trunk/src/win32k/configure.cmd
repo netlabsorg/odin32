@@ -1,4 +1,4 @@
-/* $Id: configure.cmd,v 1.7 2000-02-26 17:52:09 bird Exp $
+/* $Id: configure.cmd,v 1.8 2000-02-26 20:21:20 bird Exp $
  *
  * Configuration script.
  * Generates makefile.inc and an empty .depend file.
@@ -85,7 +85,7 @@
 
         call stream sIncFile, 'c', 'close';
 
-        if (fInteractive = 0) then
+        if (fInteractive = 1) then
         do
             say 'Configuration completed!'
             say ''
@@ -133,8 +133,8 @@ SearchPaths: procedure expose fInteractive;
     if (sPath == '' & sEnv <> '' & sFile == '') then
     do
         say sEnv;
-        if (fInteractive) then
-            pull sPath;
+        if (fInteractive = 1) then
+            sPath = linein();
         else
             say '!ignored!';
     end
