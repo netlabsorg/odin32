@@ -1,3 +1,4 @@
+/* $Id: initriched32.cpp,v 1.2 2001-09-05 13:37:19 bird Exp $ */
 /*
  * DLL entry point
  *
@@ -51,15 +52,15 @@ static BOOL WINAPI OdinLibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpL
    switch (fdwReason)
    {
    case DLL_PROCESS_ATTACH:
-	return RICHED32_LibMain(hinstDLL, fdwReason, fImpLoad);
+    return RICHED32_LibMain(hinstDLL, fdwReason, fImpLoad);
 
    case DLL_THREAD_ATTACH:
    case DLL_THREAD_DETACH:
-	return RICHED32_LibMain(hinstDLL, fdwReason, fImpLoad);
+    return RICHED32_LibMain(hinstDLL, fdwReason, fImpLoad);
 
    case DLL_PROCESS_DETACH:
-	ret = RICHED32_LibMain(hinstDLL, fdwReason, fImpLoad);
-	ctordtorTerm();
+    ret = RICHED32_LibMain(hinstDLL, fdwReason, fImpLoad);
+    ctordtorTerm();
         return ret;
    }
    return FALSE;
@@ -86,14 +87,14 @@ ULONG APIENTRY inittermRiched32(ULONG hModule, ULONG ulFlag)
    switch (ulFlag) {
       case 0 :
          CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
-	 dllHandle = RegisterLxDll(hModule, OdinLibMain, (PVOID)&_Resource_PEResTab);
-         if(dllHandle == 0) 
-		return 0UL;
+     dllHandle = RegisterLxDll(hModule, OdinLibMain, (PVOID)&_Resource_PEResTab);
+         if(dllHandle == 0)
+        return 0UL;
 
          break;
       case 1 :
          if(dllHandle) {
-	 	UnregisterLxDll(dllHandle);
+        UnregisterLxDll(dllHandle);
          }
          break;
       default  :

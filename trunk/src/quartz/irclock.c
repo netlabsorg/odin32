@@ -1,3 +1,4 @@
+/* $Id: irclock.c,v 1.3 2001-09-05 13:36:37 bird Exp $ */
 /*
  * Implementation of CLSID_SystemClock.
  *
@@ -26,86 +27,86 @@ DEFAULT_DEBUG_CHANNEL(quartz);
 static HRESULT WINAPI
 IReferenceClock_fnQueryInterface(IReferenceClock* iface,REFIID riid,void** ppobj)
 {
-	CSystemClock_THIS(iface,refclk);
+    CSystemClock_THIS(iface,refclk);
 
-	TRACE("(%p)->()\n",This);
+    TRACE("(%p)->()\n",This);
 
-	return IUnknown_QueryInterface(This->unk.punkControl,riid,ppobj);
+    return IUnknown_QueryInterface(This->unk.punkControl,riid,ppobj);
 }
 
 static ULONG WINAPI
 IReferenceClock_fnAddRef(IReferenceClock* iface)
 {
-	CSystemClock_THIS(iface,refclk);
+    CSystemClock_THIS(iface,refclk);
 
-	TRACE("(%p)->()\n",This);
+    TRACE("(%p)->()\n",This);
 
-	return IUnknown_AddRef(This->unk.punkControl);
+    return IUnknown_AddRef(This->unk.punkControl);
 }
 
 static ULONG WINAPI
 IReferenceClock_fnRelease(IReferenceClock* iface)
 {
-	CSystemClock_THIS(iface,refclk);
+    CSystemClock_THIS(iface,refclk);
 
-	TRACE("(%p)->()\n",This);
+    TRACE("(%p)->()\n",This);
 
-	return IUnknown_Release(This->unk.punkControl);
+    return IUnknown_Release(This->unk.punkControl);
 }
 
 static HRESULT WINAPI
 IReferenceClock_fnGetTime(IReferenceClock* iface,REFERENCE_TIME* prtTime)
 {
-	CSystemClock_THIS(iface,refclk);
+    CSystemClock_THIS(iface,refclk);
 
-	FIXME( "(%p)->() stub!\n", This );
-	return E_NOTIMPL;
+    FIXME( "(%p)->() stub!\n", This );
+    return E_NOTIMPL;
 }
 
 static HRESULT WINAPI
 IReferenceClock_fnAdviseTime(IReferenceClock* iface,REFERENCE_TIME rtBase,REFERENCE_TIME rtStream,HEVENT hEvent,DWORD_PTR* pdwAdvCookie)
 {
-	CSystemClock_THIS(iface,refclk);
+    CSystemClock_THIS(iface,refclk);
 
-	FIXME( "(%p)->() stub!\n", This );
-	return E_NOTIMPL;
+    FIXME( "(%p)->() stub!\n", This );
+    return E_NOTIMPL;
 }
 
 static HRESULT WINAPI
 IReferenceClock_fnAdvisePeriodic(IReferenceClock* iface,REFERENCE_TIME rtStart,REFERENCE_TIME rtPeriod,HSEMAPHORE hSemaphore,DWORD_PTR* pdwAdvCookie)
 {
-	CSystemClock_THIS(iface,refclk);
+    CSystemClock_THIS(iface,refclk);
 
-	FIXME( "(%p)->() stub!\n", This );
-	return E_NOTIMPL;
+    FIXME( "(%p)->() stub!\n", This );
+    return E_NOTIMPL;
 }
 
 static HRESULT WINAPI
 IReferenceClock_fnUnadvise(IReferenceClock* iface,DWORD_PTR dwAdvCookie)
 {
-	CSystemClock_THIS(iface,refclk);
+    CSystemClock_THIS(iface,refclk);
 
-	FIXME( "(%p)->() stub!\n", This );
-	return E_NOTIMPL;
+    FIXME( "(%p)->() stub!\n", This );
+    return E_NOTIMPL;
 }
 
 static ICOM_VTABLE(IReferenceClock) irefclk =
 {
-	ICOM_MSVTABLE_COMPAT_DummyRTTIVALUE
-	/* IUnknown fields */
-	IReferenceClock_fnQueryInterface,
-	IReferenceClock_fnAddRef,
-	IReferenceClock_fnRelease,
-	/* IReferenceClock fields */
-	IReferenceClock_fnGetTime,
-	IReferenceClock_fnAdviseTime,
-	IReferenceClock_fnAdvisePeriodic,
-	IReferenceClock_fnUnadvise,
+    ICOM_MSVTABLE_COMPAT_DummyRTTIVALUE
+    /* IUnknown fields */
+    IReferenceClock_fnQueryInterface,
+    IReferenceClock_fnAddRef,
+    IReferenceClock_fnRelease,
+    /* IReferenceClock fields */
+    IReferenceClock_fnGetTime,
+    IReferenceClock_fnAdviseTime,
+    IReferenceClock_fnAdvisePeriodic,
+    IReferenceClock_fnUnadvise,
 };
 
 
 void CSystemClock_InitIReferenceClock( CSystemClock* psc )
 {
-	TRACE("(%p)\n",psc);
-	ICOM_VTBL(&psc->refclk) = &irefclk;
+    TRACE("(%p)\n",psc);
+    ICOM_VTBL(&psc->refclk) = &irefclk;
 }

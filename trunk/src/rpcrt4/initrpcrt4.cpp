@@ -1,3 +1,4 @@
+/* $Id: initrpcrt4.cpp,v 1.3 2001-09-05 13:37:51 bird Exp $ */
 /*
  * DLL entry point
  *
@@ -63,19 +64,19 @@ ULONG APIENTRY inittermRpcrt4(unsigned long hModule, unsigned long ulFlag)
 
    switch (ulFlag) {
       case 0 :
-	 dllHandle = RegisterLxDll(hModule, NULL, (PVOID)&rpcrt4_PEResTab);
-         if(dllHandle == 0) 
-		return 0UL;
+     dllHandle = RegisterLxDll(hModule, NULL, (PVOID)&rpcrt4_PEResTab);
+         if(dllHandle == 0)
+        return 0UL;
 
-	 //SvL: Must be done here as the socket calls trash FS!
- 	 /* Init the Uuid subsystem */
- 	 UuidInit();
+     //SvL: Must be done here as the socket calls trash FS!
+     /* Init the Uuid subsystem */
+     UuidInit();
 
          break;
 
       case 1 :
          if(dllHandle) {
-	 	UnregisterLxDll(dllHandle);
+        UnregisterLxDll(dllHandle);
          }
          break;
       default  :

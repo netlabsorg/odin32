@@ -1,3 +1,4 @@
+/* $Id: initterm.cpp,v 1.6 2001-09-05 13:37:19 bird Exp $ */
 /*
  * DLL entry point
  *

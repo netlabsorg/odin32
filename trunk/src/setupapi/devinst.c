@@ -1,3 +1,4 @@
+/* $Id: devinst.c,v 1.2 2001-09-05 13:38:23 bird Exp $ */
 /*
  * SetupAPI device installer
  *
@@ -11,7 +12,7 @@
 DEFAULT_DEBUG_CHANNEL(setupapi);
 
 /***********************************************************************
- *		DiGetClassDevs (SETUPX.304)
+ *      DiGetClassDevs (SETUPX.304)
  * Return a list of installed system devices.
  * Uses HKLM\\ENUM to list devices.
  */
