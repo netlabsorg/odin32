@@ -1,4 +1,8 @@
- /* $Id: changelog,v 1.842 2000-03-27 21:42:58 sandervl Exp $ */
+ /* $Id: changelog,v 1.843 2000-03-28 15:24:40 cbratschi Exp $ */
+
+ 2000-03-28: Christoph Bratschi <cbratschi@datacomm.ch>
+	- SHELL32: don't use pdump() in release build
+	- GDI32: dump ROP2 mode
 
  2000-03-27: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32:   Fixed SetParent; remove child from parent's list (previously
@@ -7,6 +11,8 @@
  2000-03-27: Christoph Bratschi <cbratschi@datacomm.ch>
 	- SHELL32: only scan dir once in CreateFolderEnumList
 		   floppy drives have a fixed name
+		   NOTE: delete 'bin\debug(release)\shres.*' or the resources
+			 won't be updated
 
  2000-03-26: Christoph Bratschi <cbratschi@datacomm.ch>
 	- COMDLG32:
