@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.144 2002-02-09 12:45:14 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.145 2002-02-18 21:33:29 phaller Exp $ */
 
 /*
  * Win32 process functions
@@ -239,12 +239,18 @@ TEB * WIN32API InitializeTIB(BOOL fMainThread)
     }
     SID_IDENTIFIER_AUTHORITY sidIdAuth = {0};
     winteb->o.odin.threadinfo.dwType = SECTYPE_PROCESS | SECTYPE_INITIALIZED;
-    RtlAllocateAndInitializeSid(&sidIdAuth, 1, 0, 0, 0, 0, 0, 0, 0, 0, &winteb->o.odin.threadinfo.SidUser.User.Sid);
+  
+    if (NULL != RtlAllocateAndInitializeSid)
+      RtlAllocateAndInitializeSid(&sidIdAuth, 1, 0, 0, 0, 0, 0, 0, 0, 0, &winteb->o.odin.threadinfo.SidUser.User.Sid);
+  
     winteb->o.odin.threadinfo.SidUser.User.Attributes = 0; //?????????
 
     winteb->o.odin.threadinfo.pTokenGroups = (TOKEN_GROUPS*)malloc(sizeof(TOKEN_GROUPS));
     winteb->o.odin.threadinfo.pTokenGroups->GroupCount = 1;
-    RtlAllocateAndInitializeSid(&sidIdAuth, 1, 0, 0, 0, 0, 0, 0, 0, 0, &winteb->o.odin.threadinfo.PrimaryGroup.PrimaryGroup);
+  
+    if (NULL != RtlAllocateAndInitializeSid)
+      RtlAllocateAndInitializeSid(&sidIdAuth, 1, 0, 0, 0, 0, 0, 0, 0, 0, &winteb->o.odin.threadinfo.PrimaryGroup.PrimaryGroup);
+  
     winteb->o.odin.threadinfo.pTokenGroups->Groups[0].Sid = winteb->o.odin.threadinfo.PrimaryGroup.PrimaryGroup;
     winteb->o.odin.threadinfo.pTokenGroups->Groups[0].Attributes = 0; //????
 //        pPrivilegeSet   = NULL;
@@ -1591,16 +1597,21 @@ HANDLE WIN32API GetModuleHandleA(LPCTSTR lpszModule)
 }
 //******************************************************************************
 //******************************************************************************
-HMODULE WIN32API GetModuleHandleW(LPCWSTR arg1)
+HMODULE WIN32API GetModuleHandleW(LPCWSTR lpwszModuleName)
 {
- HMODULE rc;
- char   *astring;
+  HMODULE rc;
+  char   *astring = NULL;
 
-    astring = UnicodeToAsciiString((LPWSTR)arg1);
-    rc = GetModuleHandleA(astring);
-    dprintf(("KERNEL32:  OS2GetModuleHandleW %s returned %X\n", astring, rc));
+  if (NULL != lpwszModuleName)
+    astring = UnicodeToAsciiString((LPWSTR)lpwszModuleName);
+  
+  rc = GetModuleHandleA(astring);
+  dprintf(("KERNEL32:  OS2GetModuleHandleW %s returned %X\n", astring, rc));
+  
+  if (NULL != astring)
     FreeAsciiString(astring);
-    return(rc);
+  
+  return(rc);
 }
 //******************************************************************************
 //******************************************************************************
