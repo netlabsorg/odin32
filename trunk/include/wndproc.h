@@ -1,4 +1,4 @@
-/* $Id: wndproc.h,v 1.2 1999-05-27 15:18:00 phaller Exp $ */
+/* $Id: wndproc.h,v 1.3 1999-06-20 16:47:37 sandervl Exp $ */
 
 /*
  *
@@ -27,6 +27,9 @@ class Win32WindowProc;
 Win32WindowProc *SYSTEM CreateWindowProc(WNDPROC pUserCallback);
 LRESULT EXPENTRY_O32 WndCallback(HWND, UINT, WPARAM, LPARAM);
 
+//Notify parent window of creation/destruction and buttondown messages (if required)
+void NotifyParent(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam);
+
 class Win32WindowProc
 {
 public:
@@ -39,6 +42,7 @@ public:
 
  static void DeleteWindow(HWND hwnd);
  static Win32WindowProc *FindProc(HWND hwnd);
+ static Win32WindowProc *FindProc(HWND hwnd, DWORD threadid);
 	void SetWindowHandle(HWND hwndProc) { hwnd = hwndProc; };
 
  static BOOL FindWindowProc(Win32WindowProc *wndproc);

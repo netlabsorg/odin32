@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.3 1999-06-19 10:54:47 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.4 1999-06-20 16:47:39 sandervl Exp $ */
 
 /*
  * USER32 DLL entry point
@@ -123,6 +123,7 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
 static void APIENTRY cleanup(ULONG ulReason)
 {
    dprintf(("user32 exit\n"));
+   UnregisterSystemClasses();
    _ctordtorTerm();
    CRT_term();
    dprintf(("user32 exit done\n"));

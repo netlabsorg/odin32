@@ -1,4 +1,4 @@
-/* $Id: wndclass.h,v 1.2 1999-05-27 15:17:57 phaller Exp $ */
+/* $Id: wndclass.h,v 1.3 1999-06-20 16:47:37 sandervl Exp $ */
 
 /*
  *
@@ -19,9 +19,8 @@
 #endif
 
 //SvL: 18-7-'98, Registers system window classes (button, listbox etc etc)
-extern "C" {
 void RegisterSystemClasses(ULONG hModule);
-}
+void UnregisterSystemClasses();
 
 class Win32WindowClass
 {
