@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.213 2003-05-02 15:33:15 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.214 2003-05-02 17:18:55 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -1334,10 +1334,27 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
             //ignore weird messages (TODO: why are they sent?)
             dprintf(("WARNING: WM_ADJUSTWINDOWPOS with SWP_NOADJUST flag!!"));
             break;
+
         }
+      
+        //PF Pure flags should not cause any subsequent messages to win32 windows
+        //we should route them to DefFrameWndProc and check highlight.
+ 
         if ((pswp->fl == SWP_FOCUSACTIVATE) || (pswp->fl == SWP_FOCUSDEACTIVATE))
         {
-           dprintf(("Pure focus flags are not sent to win32 windows"));
+           if (fOS2Look)
+           {
+             if(pswp->fl == SWP_FOCUSACTIVATE)
+             {
+                 dprintf2(("TBM_QUERYHILITE returned %d", WinSendDlgItemMsg(hwnd, FID_TITLEBAR, TBM_QUERYHILITE, 0, 0)));
+                 WinSendDlgItemMsg(hwnd, FID_TITLEBAR, TBM_SETHILITE, (MPARAM)1, 0);
+             }
+             else
+             {
+                 dprintf2(("TBM_QUERYHILITE returned %d", WinSendDlgItemMsg(hwnd, FID_TITLEBAR, TBM_QUERYHILITE, 0, 0)));
+                 WinSendDlgItemMsg(hwnd, FID_TITLEBAR, TBM_SETHILITE, 0, 0);
+             }
+           }
            goto RunDefFrameWndProc;
         }
 
@@ -1709,6 +1726,11 @@ adjustend:
         //PF This is the final step of PM restoration - should end up
         //in default handler.
         if (win32wnd->getOldStyle() & WS_MINIMIZE_W && pswp->fl & SWP_RESTORE)
+              goto RunDefFrameWndProc;
+
+        //PF This is the final step of PM minimization - shoukd end up
+        //in default handler
+        if (win32wnd->getStyle() & WS_MINIMIZE_W && pswp->fl & SWP_MINIMIZE)
               goto RunDefFrameWndProc;
 
 PosChangedEnd:
