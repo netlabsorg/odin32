@@ -1,4 +1,4 @@
-# $Id: pdwin32.post,v 1.4 2000-03-09 16:54:05 bird Exp $
+# $Id: pdwin32.post,v 1.5 2000-03-09 18:05:27 bird Exp $
 #
 # Odin32 API
 #
@@ -84,7 +84,15 @@ clean:  clean2
 !endif
 
 
-# Include the dependencies.
+#
+# Include the .depend file.
+#   If the depend file don't exists we'll make it!
+#
 !ifndef NODEP
-!include .depend
+!   if [$(EXISTS) .depend] == 0
+!       include .depend
+!   else
+!       if [$(ECHO) .depend don't exists]
+!       endif
+!   endif
 !endif
