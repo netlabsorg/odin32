@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.179 2002-06-20 14:18:15 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.180 2002-06-20 14:25:49 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -268,7 +268,7 @@ void WIN32API CustForceMonoCursor()
 }
 //******************************************************************************
 //******************************************************************************
-void WIN32API SetDragDrop(BOOL fDisabled)
+void WIN32API DisableDragDrop(BOOL fDisabled)
 {
     fDragDropDisabled = fDisabled;
 }
