@@ -1,4 +1,4 @@
-/* $Id: service.cpp,v 1.6 2001-05-19 11:13:05 sandervl Exp $ */
+/* $Id: service.cpp,v 1.7 2001-06-12 18:24:10 sandervl Exp $ */
 
 /*
  * Win32 advanced API functions for OS/2
@@ -1165,13 +1165,13 @@ BOOL WIN32API EnumDependentServicesW(SC_HANDLE             hService,
  *****************************************************************************/
 
 BOOL WIN32API EnumServicesStatusA(SC_HANDLE             hSCManager,
-                                     DWORD                 dwServiceType,
-                                     DWORD                 dwServiceState,
-                                     LPENUM_SERVICE_STATUSA lpServices,
-                                     DWORD                 cbBufSize,
-                                     LPDWORD               pcbBytesNeeded,
-                                     LPDWORD               lpServicesReturned,
-                                     LPDWORD               lpResumeHandle)
+                                  DWORD                 dwServiceType,
+                                  DWORD                 dwServiceState,
+                                  LPENUM_SERVICE_STATUSA lpServices,
+                                  DWORD                 cbBufSize,
+                                  LPDWORD               pcbBytesNeeded,
+                                  LPDWORD               lpServicesReturned,
+                                  LPDWORD               lpResumeHandle)
 {
   dprintf(("ADVAPI32: EnumServicesStatusA(%08xh,%08xh,%08xh,%08xh,%08xh,%08xh,%08xh,%08xh) not implemented.\n",
            hSCManager,
@@ -1183,8 +1183,13 @@ BOOL WIN32API EnumServicesStatusA(SC_HANDLE             hSCManager,
            lpServicesReturned,
            lpResumeHandle));
 
-  SetLastError (ERROR_ACCESS_DENIED);
-  return (FALSE); /* signal failure */
+  if(lpServicesReturned) {
+      *lpServicesReturned = 0;
+  }
+  if(pcbBytesNeeded) {
+      *pcbBytesNeeded = sizeof(ENUM_SERVICE_STATUSA);
+  }
+  return TRUE; /* signal failure */
 }
 
 
@@ -1227,8 +1232,13 @@ BOOL WIN32API EnumServicesStatusW(SC_HANDLE             hSCManager,
            lpServicesReturned,
            lpResumeHandle));
 
-  SetLastError (ERROR_ACCESS_DENIED);
-  return (FALSE); /* signal failure */
+  if(lpServicesReturned) {
+      *lpServicesReturned = 0;
+  }
+  if(pcbBytesNeeded) {
+      *pcbBytesNeeded = sizeof(ENUM_SERVICE_STATUSA);
+  }
+  return TRUE; /* signal failure */
 }
 
 /*****************************************************************************
