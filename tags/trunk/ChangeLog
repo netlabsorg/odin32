@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.733 2000-02-16 14:16:33 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.734 2000-02-16 17:19:56 cbratschi Exp $ */
+
+ 2000-02-16: Christoph Bratschi <cbratschi@datacomm.ch>
+	- COMCTL32: treeview: switched to unicode, fixed many bugs
 
  2000-02-16: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32/USER32/GDI32: Added new logging feature which allows users

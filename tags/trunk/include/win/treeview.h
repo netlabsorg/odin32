@@ -1,9 +1,10 @@
-/* $Id: treeview.h,v 1.8 2000-02-14 17:27:55 cbratschi Exp $ */
+/* $Id: treeview.h,v 1.9 2000-02-16 17:20:29 cbratschi Exp $ */
 /*
  * Treeview class extra info
  *
  * Copyright 1998 Eric Kohl
  * Copyright 1998 Alex Priem
+ * Copyright 2000 Christoph Bratschi
  */
 
 #ifndef __WINE_TREEVIEW_H
@@ -23,7 +24,7 @@ typedef struct
   HTREEITEM hItem;
   UINT      state;
   UINT      stateMask;
-  LPSTR     pszText;
+  LPWSTR    pszText;
   int       cchTextMax;
   int       iImage;
   int       iSelectedImage;
@@ -48,7 +49,6 @@ typedef struct
 typedef struct tagTREEVIEW_INFO
 {
   UINT          uInternalStatus;
-  UINT          bAutoSize;      /* merge with uInternalStatus */
   INT           Timer;
   UINT          uNumItems;      /* number of valid TREEVIEW_ITEMs */
   UINT          uNumPtrsAlloced;
