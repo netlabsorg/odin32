@@ -1,8 +1,10 @@
-/* $Id: changelog,v 1.1442 2001-05-24 17:36:04 sandervl Exp $ */
+/* $Id: changelog,v 1.1443 2001-05-24 19:26:05 sandervl Exp $ */
 
  2001-05-24: Sander van Leeuwen <sandervl@xs4all.nl>
     - GDI32:    o Commented out recent changes (color conversion) in
                   SetDIBitsToDevice. Breaks startup bitmap of Acrobat Reader 4
+                o GetTextExtentPointA; call WGSS instead.
+                  Better result (strings not clipped).
     - KERNEL32: o OpenFile fix for OF_REOPEN flag (crashes when looking up
                   handle)
     - IPHLPAPI  o Added stub dll
