@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.42 2000-06-01 11:28:47 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.43 2000-06-21 20:51:52 sandervl Exp $ */
 
 /*
  * KERNEL32 DLL entry point
@@ -172,6 +172,8 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
 		ulSysinfo = 1;
 
             InitSystemInfo(ulSysinfo);
+	    //Set up environment as found in NT
+            InitEnvironment(ulSysinfo);
             break;
 	}
         case 1 :
