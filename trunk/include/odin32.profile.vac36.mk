@@ -1,4 +1,4 @@
-# $Id: odin32.profile.vac36.mk,v 1.7 2003-01-23 12:32:35 sandervl Exp $
+# $Id: odin32.profile.vac36.mk,v 1.8 2003-02-02 14:24:22 sandervl Exp $
 
 #
 # Odin32 API.
@@ -31,6 +31,10 @@ IMPLIB = implib
 ILIB   = ilib
 RC     = $(ODIN32_TOOLS)\wrc
 OS2RC  = rc
+
+!ifdef EXETARGET
+STATIC_CRT=1
+!endif
 
 
 #
