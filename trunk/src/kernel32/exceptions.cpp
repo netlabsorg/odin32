@@ -1,4 +1,4 @@
-/* $Id: exceptions.cpp,v 1.60 2002-06-26 07:14:18 sandervl Exp $ */
+/* $Id: exceptions.cpp,v 1.61 2002-07-01 19:14:31 sandervl Exp $ */
 
 /*
  * Win32 Exception functions for OS/2
@@ -1035,14 +1035,31 @@ static void dprintfException(PEXCEPTIONREPORTRECORD       pERepRec,
            pERepRec->ExceptionAddress));
 
   if(rc == NO_ERROR && ulObject != -1)
+  {
     dprintf(("<%s> (#%u), obj #%u:%08x\n",
              szModule,
              ulModule,
              ulObject,
              ulOffset));
-  else
-    dprintf(("<win32 app>\n"));
-
+  }
+  else 
+  {   /* fault in DosAllocMem allocated memory, hence PE loader.. */
+      Win32ImageBase * pMod;
+      if (WinExe && WinExe->insideModule((ULONG)pERepRec->ExceptionAddress))
+          pMod = WinExe;
+      else
+          pMod = Win32DllBase::findModuleByAddr((ULONG)pERepRec->ExceptionAddress);
+      if (pMod != NULL)
+      {
+          szModule[0] = '\0';
+          strncat(szModule, pMod->getModuleName(), sizeof(szModule) - 1);
+          ulObject = 0xFF;
+          ulOffset = (ULONG)pERepRec->ExceptionAddress - (ULONG)pMod->getInstanceHandle();
+          dprintf(("<%s> (#%u), obj #%u:%08x\n",
+                   szModule, ulModule, ulObject, ulOffset));
+      }
+      else dprintf(("<unknown win32 module>\n"));
+  }
 
   rc = DosGetInfoBlocks (&pTIB,           /* query kernel information blocks */
                          &pPIB);
