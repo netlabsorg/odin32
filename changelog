@@ -1,4 +1,10 @@
- /* $Id: changelog,v 1.388 1999-10-30 18:39:05 cbratschi Exp $ */
+ /* $Id: changelog,v 1.389 1999-10-31 01:15:17 sandervl Exp $ */
+
+ 99-10-31: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32: Remove CS_SYNCPAINT class flag -> fixes VPBuddy resize + paint
+	          Put back methods that belong in the Win32Dialog class.
+                  (MapDialogRect, DIALOG_Init, several x & y unit helpers)
+                  -> fixes calc window controls.
 
  99-10-30: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: added button control text justification
