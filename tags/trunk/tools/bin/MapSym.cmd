@@ -1,4 +1,4 @@
-/* $Id: MapSym.cmd,v 1.2 2002-04-30 03:55:02 bird Exp $
+/* $Id: MapSym.cmd,v 1.3 2002-04-30 04:17:20 bird Exp $
  *
  * Helper script for calling MAPSYM.EXE.
  *
@@ -539,8 +539,8 @@ Do While Lines( mapFile ) <> 0
    watcomText = LineIn( mapFile )
    Parse Value watcomText With seg ':' ofs 10 . 16 declaration
    is_Adress = (is_Hex(seg) = 1) & (is_Hex(ofs) = 1)
-   If (is_Adress = 1) Then Do;
-      ofs = substr(watcomText, pos(':', watcomText)+1, 8); /* bird bird bird fixed!!! */
+   If ((is_Adress = 1) & (seg <> '0000')) Then Do;          /* bird: skip symbols with segment 0. (__DOSseg__) */
+      ofs = substr(watcomText, pos(':', watcomText)+1, 8);  /* bird bird bird fixed!!! */
 
       /*--- Haven't done the work to xlate operator symbols - skip the line. */
       If Pos( '::operator', declaration ) <> 0 Then Iterate;
@@ -572,7 +572,17 @@ Do While Lines( mapFile ) <> 0
 
       call lineout outfile ,' ' || seg || ':' || ofs || '       ' || declaration
    End;
+
+   /* check for entry point, if found we add it and quit. */
+   if (pos('Entry point address', watcomText) > 0) then
+   do
+       parse var watcomText 'Entry point address:' sEntryPoint
+       call lineout outfile, ''
+       call lineout outfile, 'Program entry point at' strip(sEntryPoint)
+       leave;
+   end
 End; /* End While through symbol section, end of input file. */
+
 call stream outfile, 'c', 'close';
 call stream mapfile, 'c', 'close';
 
