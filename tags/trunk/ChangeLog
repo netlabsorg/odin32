@@ -1,4 +1,9 @@
- /* $Id: ChangeLog,v 1.225 1999-09-23 10:33:06 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.226 1999-09-23 13:54:37 phaller Exp $ */
+
+ 99-09-23: Patrick Haller <phaller@gmx.net>
+	- KERNEL32:	Fix: WinImgRes:findResourceW erroneously tried to free 
+			numerical resource IDs instead of translated Unicode
+			strings.
 
  99-09-23: Jens Wiessner <wiessnej@rfi.de>
 	- CRTDLL: Added stubs, implemented some stubs
