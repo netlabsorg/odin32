@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.208 2003-04-11 10:55:02 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.209 2003-04-23 18:00:59 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -30,6 +30,7 @@
 #include <wprocess.h>
 #include <dbglog.h>
 #include <win32wbase.h>
+#include <win32wfake.h>
 #include <win32dlg.h>
 #include "win32wdesktop.h"
 #include "pmwindow.h"
@@ -883,7 +884,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
            rectl.yBottom != rectl.yTop) && !IsIconic(win32wnd->GetTopParent()))
         {
                 win32wnd->DispatchMsgA(pWinMsg);
-                if(WinQueryUpdateRect(hwnd, NULL) == TRUE) 
+                if(WinQueryUpdateRect(hwnd, NULL) == TRUE)
                 {//the application didn't validate the update region; Windows
                  //will only send a WM_PAINT once until another part of the
                  //window is invalidated. Unfortunately PM keeps on sending
@@ -1017,7 +1018,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         if(!DragDropAccept(win32wnd->getWindowHandle())) {
             break;
         }
-  
+
         ULONG ulBytes, cItems;
         char *pszFiles;
 
@@ -1035,7 +1036,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         }
         else {
             rc = (MRFROM2SHORT (DOR_NEVERDROP, 0));
-        }  
+        }
         break;
     }
 
@@ -1271,7 +1272,7 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
     case WM_CHAR_SPECIAL_CONSOLE_BREAK:
     {
         //ignore this message. don't forward it to the default PM frame window handler
-        //as that one sends it to the client. as a result we end up translating 
+        //as that one sends it to the client. as a result we end up translating
         //it twice
         break;
     }
@@ -1365,7 +1366,7 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
              if(fOS2Look) {
                  DWORD dwOldStyle = win32wnd->getOldStyle();
                  DWORD dwStyle    = win32wnd->getStyle();
-    
+
                  win32wnd->setOldStyle(dwStyle);
                  if((dwOldStyle & WS_MINIMIZE_W) && !(dwStyle & WS_MINIMIZE_W)) {
                      //SC_RESTORE -> SC_MINIMIZE
@@ -1552,7 +1553,7 @@ adjustend:
             if(pswp->fl & SWP_HIDE) {
                 WinShowWindow(win32wnd->getOS2WindowHandle(), 0);
             }
-            if(pswp->fl & (SWP_SHOW|SWP_HIDE)) 
+            if(pswp->fl & (SWP_SHOW|SWP_HIDE))
             {//TODO: necessary for more options? (activate?)
                 if(win32wnd->CanReceiveSizeMsgs())
                     win32wnd->MsgPosChanged((LPARAM)&wp);
@@ -1947,9 +1948,9 @@ PosChangedEnd:
         //to do adjustments here as well or PM will calculate it for us and
         //result will be illegal. Btw we do not honour PM border size settings
         //and never will. I was unable to figure out why only X coordinate
-        //is being broken but not Y as well. 
+        //is being broken but not Y as well.
 
-        if ((pswp->fl & SWP_MAXIMIZE) == SWP_MAXIMIZE)  
+        if ((pswp->fl & SWP_MAXIMIZE) == SWP_MAXIMIZE)
         {
             RECT rect;
             rect.left = rect.top = rect.right = rect.bottom = 0;
@@ -2090,19 +2091,7 @@ MRESULT EXPENTRY Win32FakeWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp
     //Restore our FS selector
     SetWin32TIB();
 
-    //We can't query the window object directly from this window as it's not the
-    //real thing. There should be a genuine win32 child window which we can use.
-    HWND hwndChild = WinQueryWindow(hwnd, QW_TOP);
-
-    win32wndchild = Win32BaseWindow::GetWindowFromOS2FrameHandle(hwndChild);
-    if(win32wndchild == NULL) {
-        DebugInt3();
-        goto RunDefWndProc;
-    }
-    //now get the parent window object
-    win32wnd = Win32BaseWindow::GetWindowFromHandle(GetParent(win32wndchild->getWindowHandle()));
-    if(win32wndchild) RELEASE_WNDOBJ(win32wndchild);
-
+    win32wnd = Win32FakeWindow::GetWindowFromOS2Handle(hwnd);
     if(win32wnd == NULL) {
         DebugInt3();
         goto RunDefWndProc;
@@ -2206,7 +2195,7 @@ void FrameReplaceMenuItem(HWND hwndMenu, ULONG nIndex, ULONG idOld, ULONG   idNe
 }
 //******************************************************************************
 //******************************************************************************
-static char *PMDragExtractFiles(PDRAGINFO pDragInfo, ULONG *pcItems, ULONG *pulBytes) 
+static char *PMDragExtractFiles(PDRAGINFO pDragInfo, ULONG *pcItems, ULONG *pulBytes)
 {
     PDRAGITEM pDragItem;
     int       i, cItems;
@@ -2224,7 +2213,7 @@ static char *PMDragExtractFiles(PDRAGINFO pDragInfo, ULONG *pcItems, ULONG *pulB
     cItems = DrgQueryDragitemCount(pDragInfo);
 
     //computer memory required to hold all filenames
-    int bufsize = 0;        
+    int bufsize = 0;
     for (i = 0; i < cItems; i++) {
         pDragItem = DrgQueryDragitemPtr(pDragInfo, i);
 
@@ -2239,7 +2228,7 @@ static char *PMDragExtractFiles(PDRAGINFO pDragInfo, ULONG *pcItems, ULONG *pulB
         DebugInt3();
         goto failure;
     }
-    memset(pszFiles, 0, bufsize); 
+    memset(pszFiles, 0, bufsize);
 
     pszCurFile = pszFiles;
 
@@ -2284,7 +2273,7 @@ failure:
 }
 //******************************************************************************
 //******************************************************************************
-static BOOL PMDragValidate(PDRAGINFO pDragInfo) 
+static BOOL PMDragValidate(PDRAGINFO pDragInfo)
 {
     PDRAGITEM pDragItem;
     ULONG     ulBytes;
@@ -2323,7 +2312,7 @@ static BOOL PMDragValidate(PDRAGINFO pDragInfo)
         }
 
         dprintf(("dropped file %s%s", szContainerName, szFileName));
-        break; 
+        break;
     }
 
     cItems = DrgQueryDragitemCount(pDragInfo);
@@ -2346,7 +2335,7 @@ static BOOL PMDragValidate(PDRAGINFO pDragInfo)
 
 failure:
     DrgFreeDraginfo(pDragInfo);
-    return FALSE;    
+    return FALSE;
 }
 
 // @@PF Three funcs to override std class names we use in Odin
@@ -2375,7 +2364,7 @@ void WIN32API SetCustomStdFrameClassName(LPSTR pszStdFrameClassName)
 static char *DbgGetStringSWPFlags(ULONG flags)
 {
     static char szSWPFlags[512];
-  
+
     szSWPFlags[0] = 0;
 
     if(flags & SWP_SIZE) {
@@ -2401,7 +2390,7 @@ static char *DbgGetStringSWPFlags(ULONG flags)
     }
     if(flags & SWP_ACTIVATE) {
         strcat(szSWPFlags, "SWP_ACTIVATE ");
-    }                                    
+    }
     if(flags & SWP_DEACTIVATE) {
         strcat(szSWPFlags, "SWP_DEACTIVATE ");
     }

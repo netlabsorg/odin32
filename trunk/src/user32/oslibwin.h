@@ -1,4 +1,4 @@
-/* $Id: oslibwin.h,v 1.75 2003-04-11 15:22:33 sandervl Exp $ */
+/* $Id: oslibwin.h,v 1.76 2003-04-23 18:00:58 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -396,5 +396,9 @@ void   OSLibWinLockVisibleRegions(BOOL fLock);
                                 (((colorRef) & 0x00FF0000)>>16)  |   \
                                 (((colorRef) & 0x000000FF)<<16)   )
 
+
+void *  OSLibRemoveProperty(HWND hwnd, const char *psz);
+BOOL    OSLibSetProperty(HWND hwnd, const char *psz, void *pv, unsigned fFlags);
+void *  OSLibQueryProperty(HWND hwnd, const char *psz);
 
 #endif //__OSLIBWIN_H__

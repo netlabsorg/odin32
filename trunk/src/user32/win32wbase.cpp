@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.366 2003-04-11 15:22:33 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.367 2003-04-23 18:00:59 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2359,6 +2359,16 @@ BOOL Win32BaseWindow::ShowWindow(ULONG nCmdShow)
     wasVisible = (getStyle() & WS_VISIBLE) != 0;
 
     dwOldStyle = getStyle();
+
+    /*
+     * SW_SHOWDEFAULT is an reference to the startup info wShowWindow member.
+     */
+    if (nCmdShow == SW_SHOWDEFAULT)
+    {
+        nCmdShow = GetProcessDword(0, GPD_STARTF_SHOWWINDOW);
+        dprintf(("ShowWindow: GetProcessDword(0, GPD_STARTF_SHOWWINDOW) -> %x", nCmdShow));
+    }
+ 
 
     switch(nCmdShow)
     {

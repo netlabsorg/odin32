@@ -1,4 +1,4 @@
-/* $Id: win32wbaseprop.cpp,v 1.1 2000-05-05 11:32:38 sandervl Exp $ */
+/* $Id: win32wbaseprop.cpp,v 1.2 2003-04-23 18:01:00 sandervl Exp $ */
 /*
  * Window properties
  *
@@ -91,18 +91,20 @@ BOOL Win32BaseWindow::setProp(LPCSTR str, HANDLE handle)
     if (!(prop = findWindowProperty(str)))
     {
         /* We need to create it */
-        if (!(prop = (PROPERTY *)HeapAlloc(GetProcessHeap(), 0, sizeof(*prop) )))
+        if (!(prop = (PROPERTY *)_smalloc(sizeof(*prop) )))
         {
              dprintf(("setProp: malloc failed!!"));
              return FALSE;
         }
         if(HIWORD(str))
         {
-             if (!(prop->string = HEAP_strdupA(GetProcessHeap(), 0, str)))
+             unsigned cch = strlen(str) + 1;
+             if (!(prop->string = (LPSTR)_smalloc(cch)))
              {
-                HeapFree( GetProcessHeap(), 0, prop );
+                _sfree(prop);
                 return FALSE;
              }
+             memcpy(prop->string, str, cch);
         }
         else prop->string = (char *)str;  //atom
 
@@ -157,8 +159,8 @@ HANDLE Win32BaseWindow::removeProp(LPCSTR str)
     handle = prop->handle;
     *pprop = prop->next;
     if(HIWORD(prop->string))
-        HeapFree(GetProcessHeap(), 0, prop->string);
-    HeapFree( GetProcessHeap(), 0, prop );
+        _sfree(prop->string);
+    _sfree(prop);
     return handle;
 }
 
@@ -175,8 +177,8 @@ void Win32BaseWindow::removeWindowProps()
     {
         next = prop->next;
         if(HIWORD(prop->string))
-            HeapFree(GetProcessHeap(), 0, prop->string);
-        HeapFree(GetProcessHeap(), 0, prop);
+            _sfree(prop->string);
+        _sfree(prop);
     }
     propertyList = NULL;
 }
