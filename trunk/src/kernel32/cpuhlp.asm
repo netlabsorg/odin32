@@ -1,4 +1,4 @@
-; $Id: cpuhlp.asm,v 1.2 2000-02-03 18:56:39 sandervl Exp $
+; $Id: cpuhlp.asm,v 1.3 2000-02-15 19:06:12 sandervl Exp $
 
 ;/*
 ; * Project Odin Software License can be found in LICENSE.TXT
@@ -20,9 +20,9 @@ DATA32  ENDS
 
 CODE32          SEGMENT DWORD PUBLIC USE32 'CODE'
 
-	public SupportsCPUID
+	public _SupportsCPUID
 
-SupportsCPUID proc near
+_SupportsCPUID proc near
        	pushfd
        	push    ecx
 
@@ -45,11 +45,11 @@ SupportsCPUID proc near
        	pop     ecx
        	popfd
 	ret
-SupportsCPUID endp
+_SupportsCPUID endp
 
-	public GetCPUVendorString
+	public _GetCPUVendorString
 
-GetCPUVendorString proc near
+_GetCPUVendorString proc near
 	push	ebp
 	mov	ebp, esp
 	push	ebx
@@ -71,10 +71,10 @@ GetCPUVendorString proc near
 	pop	ebx
         pop  	ebp
 	ret
-GetCPUVendorString endp
+_GetCPUVendorString endp
 
-	public GetCPUFeatures
-GetCPUFeatures proc near
+	public _GetCPUFeatures
+_GetCPUFeatures proc near
 	push	ebx
 	push	ecx
 	push	edx
@@ -90,10 +90,10 @@ GetCPUFeatures proc near
 	pop	ecx
 	pop	ebx
 	ret
-GetCPUFeatures endp
+_GetCPUFeatures endp
 
-	public GetCPUSignature
-GetCPUSignature proc near
+	public _GetCPUSignature
+_GetCPUSignature proc near
 	push	ebx
 	push	ecx
 	push	edx
@@ -105,7 +105,7 @@ GetCPUSignature proc near
 	pop	ecx
 	pop	ebx
 	ret
-GetCPUSignature endp
+_GetCPUSignature endp
 
 
 CODE32          ENDS
