@@ -1,4 +1,18 @@
- /* $Id: changelog,v 1.1017 2000-06-30 08:38:40 sandervl Exp $ */
+ /* $Id: changelog,v 1.1018 2000-07-01 09:52:22 sandervl Exp $ */
+
+ 2000-06-30: Sander van Leeuwen <sandervl@xs4all.nl>
+    - PELDR:       Fixed bug in command line parser
+    - KERNEL32:    Fixed bugs in commitPage of memory mapped files (when
+                   part of the offending memory area is committed and the
+                   rest is not)
+                   Fixed alias check in ReadFile (include offset & size) and 
+                   added the same check to WriteFile
+    - USER32:      Don't send WM_ACTIVATE in WM_WINDOWPOSCHANGED if window
+                   already active (endless loop in Lotus Notes)
+                   Move children if client area changed (only if window
+                   was previously smaller than client area) -> fixes
+                   install window in AIM installer.
+                   TODO: Must do all the moving ourselves. (not let PM handle it at all)
 
  2000-06-30: Michal Necasek <mike@mendelu.cz>
     - KERNEL32:    Fixed lstrcpynA(toW) calls (wrong length)
