@@ -1,4 +1,4 @@
-/* $Id: windowmsg.cpp,v 1.45 2003-08-04 13:38:39 sandervl Exp $ */
+/* $Id: windowmsg.cpp,v 1.46 2003-08-04 17:01:58 sandervl Exp $ */
 /*
  * Win32 window message APIs for OS/2
  *
@@ -560,7 +560,11 @@ void WINPROC_UnmapMsg32ATo32W( HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam
 /* Multiline edit */
     case EM_GETLINE:
         { LPARAM * ptr = (LPARAM *)lParam - 1;  /* get the old lParam */
+#ifdef __WIN32OS2__
+          WORD len = *(WORD *) ptr;
+#else
           WORD len = *(WORD *) lParam;
+#endif
           lstrcpynWtoA( (LPSTR)*ptr , (LPWSTR)lParam, len );
           HeapFree( GetProcessHeap(), 0, ptr );
         }
