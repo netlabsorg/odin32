@@ -1,4 +1,4 @@
-/* $Id: dbglocal.cpp,v 1.20 2002-02-08 15:09:29 sandervl Exp $ */
+/* $Id: dbglocal.cpp,v 1.21 2002-02-08 16:47:10 sandervl Exp $ */
 
 /*
  * debug logging functions for OS/2
@@ -64,7 +64,7 @@ static char  *DbgFileNames[DBG_MAXFILES] =
 "hmevent",
 "hmmutex",
 "hmcomm",
-"semaphore",
+"hmsemaphore",
 "wprocess",
 "conprop",
 "conprop2",
@@ -127,7 +127,11 @@ static char  *DbgFileNames[DBG_MAXFILES] =
 "hmparport",
 "hmnul",
 "overlappedio",
-"trace"
+"trace",
+"event",
+"mutex",
+"semaphore",
+"nls"
 };
 //******************************************************************************
 //******************************************************************************
