@@ -1,4 +1,14 @@
- /* $Id: ChangeLog,v 1.572 1999-12-24 01:34:54 hugh Exp $ */
+ /* $Id: ChangeLog,v 1.573 1999-12-24 18:37:57 sandervl Exp $ */
+
+ 99-12-24: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32: Fixed bug in OSLibWinQueryQueueStatus (uninitialized local variable)
+	          Changed message handling. Messages are translated in Get/PeekMessage
+                  now. (or in the PM window handler, if it was sent directly)
+                  TranslateMessage now translates WM_(SYS)KEYDOWN/UP to
+                  WM_(SYS)(DEAD)CHAR
+                  Fixed ChildWindowFromPointEx
+	- CRTDLL: Removed excessive logging (compile with DEBUGALL=1 to enable it)
+	- SRC\MAKEFILE: Included dplayx
 
  99-12-24: Markus Montkowski <mmontkowski@gmx.de>
         - dplayx: compiles and links now 
