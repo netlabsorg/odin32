@@ -1,4 +1,4 @@
-/* $Id: OS2KTCB.c,v 1.1 2002-03-10 02:45:49 bird Exp $
+/* $Id: OS2KTCB.c,v 1.2 2002-04-01 12:47:28 bird Exp $
  *
  * TCB - Thread Control Block access methods.
  *
@@ -66,17 +66,17 @@ static BOOL initTCB(void)
      */
 
     /* WS4eB GA and above. */
-    if (options.ulBuild >= 14039)
+    if (ulKernelBuild >= 14039)
     {
         offTCBFailErr = isSMPKernel() ? 0x1fa : 0x1ea;
     }
     else /* Warp 4 GA - fp12 */
-        if (options.ulBuild >= 9023 && options.ulBuild <= 9036)
+        if (ulKernelBuild >= 9023 && ulKernelBuild <= 9036)
     {
         offTCBFailErr = 0x18e;
     }
     else /* Warp 3 fp32 - fp62. */
-        if (options.ulBuild >= 8255 && options.ulBuild <= 8285)
+        if (ulKernelBuild >= 8255 && ulKernelBuild <= 8285)
     {
         offTCBFailErr = isSMPKernel() ? 0x1ba : 0x14e;
     }

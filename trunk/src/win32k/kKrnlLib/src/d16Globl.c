@@ -1,4 +1,4 @@
-/* $Id: d16Globl.c,v 1.1 2002-03-10 02:45:52 bird Exp $
+/* $Id: d16Globl.c,v 1.2 2002-04-01 12:47:53 bird Exp $
  *
  * d16globals - global data (16-bit)
  *
@@ -38,4 +38,10 @@ struct kKLOptions
 
 CHAR        szBuildDate[] = {__DATE__};
 CHAR        szBuildTime[] = {__TIME__};
+
+/* current OS and kernel info */
+ULONG  DATA16_GLOBAL    fKernel = 0xffffffff; /* Smp or uni kernel. */
+ULONG  DATA16_GLOBAL    ulKernelBuild = 0xffffffff; /* Kernel build. */
+USHORT DATA16_GLOBAL    usVerMajor = 0xffff;  /* OS/2 major ver - 20 */
+USHORT DATA16_GLOBAL    usVerMinor = 0xffff;  /* OS/2 minor ver - 30,40 */
 

@@ -1,4 +1,4 @@
-/* $Id: d16ProbeKrnl.c,v 1.1 2002-03-31 19:31:43 bird Exp $
+/* $Id: d16ProbeKrnl.c,v 1.2 2002-04-01 12:48:08 bird Exp $
  *
  * Description:   Autoprobes the os2krnl file and os2krnl[*].sym files.
  *                Another Hack!
@@ -718,7 +718,7 @@ int ProbeSymFile(const char * pszFilename)
 /**
  * Get kernelinformation (OTEs (object table entries), build, type, debug...)
  * @returns 0 on success.
- *              options.ulBuild, fchType, fDebug, cObjects and paKrnlOTEs is set on successful return.
+ *              ulKernelBuild, fchType, fDebug, cObjects and paKrnlOTEs is set on successful return.
  *          Not 0 on error.
  */
 int   GetKernelInfo(void)
@@ -746,8 +746,8 @@ int   GetKernelInfo(void)
             /*
              * Set the exported parameters
              */
-            options.ulBuild = KrnlInfo.ulBuild;
-            options.fKernel = KrnlInfo.fKernel;
+            ulKernelBuild   = KrnlInfo.ulBuild;
+            fKernel         = KrnlInfo.fKernel;
             cObjects        = KrnlInfo.cObjects;
             paKrnlOTEs      = &KrnlInfo.aObjects[0];
 
@@ -799,7 +799,7 @@ void ShowResult(int rc)
         printf16("    Kernel Build:     ");
         if (rc == NO_ERROR || rc > ERROR_PROB_KRNL_LAST)
             printf16("%ld - v%d.%d\n",
-                     options.ulBuild, options.usVerMajor, options.usVerMinor);
+                     ulKernelBuild, usVerMajor, usVerMinor);
         else if (rc >= ERROR_PROB_KRNL_FIRST)
             printf16("Kernel probing failed with rc=%d.\n", rc);
         else
@@ -925,16 +925,16 @@ int ProbeKernel(PRPINITIN pReqPack)
     pGIS = MAKEPGINFOSEG(selGIS);
     usBootDrive = pGIS->bootdrive;
 #ifndef R3TST
-    options.usVerMajor  = pGIS->uchMajorVersion;
-    options.usVerMinor  = pGIS->uchMinorVersion;
+    usVerMajor  = pGIS->uchMajorVersion;
+    usVerMinor  = pGIS->uchMinorVersion;
 #else
     if (usFakeVerMajor == 0)
     {
         usFakeVerMajor = pGIS->uchMajorVersion;
         usFakeVerMinor = pGIS->uchMinorVersion;
     }
-    options.usVerMajor  = usFakeVerMajor;
-    options.usVerMinor  = usFakeVerMinor;
+    usVerMajor  = usFakeVerMajor;
+    usVerMinor  = usFakeVerMinor;
 #endif
     dprintf(("BootDrive: %d\n", usBootDrive));
 
@@ -973,9 +973,9 @@ int ProbeKernel(PRPINITIN pReqPack)
              * Check database - only if not a debug kernel!
              * You usually have a .sym-file when using a debug kernel.
              */
-            if ((options.fKernel & KF_DEBUG) ||
-                (rc = LookupKrnlEntry((unsigned short)options.ulBuild,
-                                      (unsigned short)options.fKernel,
+            if ((fKernel & KF_DEBUG) ||
+                (rc = LookupKrnlEntry((unsigned short)ulKernelBuild,
+                                      (unsigned short)fKernel,
                                       cObjects)
                  ) != NO_ERROR
                 )
@@ -1014,8 +1014,8 @@ int ProbeKernel(PRPINITIN pReqPack)
                     {
                         char *      pszDirTk = kstrtok(achBuf, ":;,");
                         char *      pszBuild = kstrtok(NULL, ":;,");
-                        ULONG       ulBuild = 0;
-                        ULONG       fKernel = 0;
+                        ULONG       ulPMDFBuild = 0;
+                        ULONG       fPMDFKernel = 0;
 
                         /*
                          * Parse build number.
@@ -1025,32 +1025,32 @@ int ProbeKernel(PRPINITIN pReqPack)
                         {
                             for (; (*pszBuild >= '0' && *pszBuild <= '9') || *pszBuild == '.'; pszBuild++)
                                 if (*pszBuild != '.')
-                                    ulBuild = (ulBuild * 10) + *pszBuild - '0';
+                                    ulPMDFBuild = (ulPMDFBuild * 10) + *pszBuild - '0';
 
                             if ((*pszBuild >= 'A' && *pszBuild <= 'Z') || (*pszBuild >= 'a' && *pszBuild <= 'z'))
                             {
-                                fKernel |= (USHORT)((*pszBuild - (*pszBuild >= 'a' ? 'a'-1 : 'A'-1)) << KF_REV_SHIFT);
+                                fPMDFKernel |= (USHORT)((*pszBuild - (*pszBuild >= 'a' ? 'a'-1 : 'A'-1)) << KF_REV_SHIFT);
                                 pszBuild++;
                             }
                             if (*pszBuild == ',') /* This is ignored! */
                                 *pszBuild++;
 
                             if (pszBuild[0] == '_' && (pszBuild[1] == 'S' || pszBuild[1] == 's'))  /* _SMP  */
-                                fKernel |= KF_SMP;
+                                fPMDFKernel |= KF_SMP;
                             else
                                 if (*pszBuild != ','
                                     && (   (pszBuild[0] == '_' && pszBuild[1] == 'W' && pszBuild[2] == '4')  /* _W4 */
                                         || (pszBuild[0] == '_' && pszBuild[1] == 'U' && pszBuild[2] == 'N' && pszBuild[3] == 'I' && pszBuild[4] == '4')  /* _UNI4 */
                                         )
                                     )
-                                fKernel |= KF_W4 | KF_UNI;
+                                fPMDFKernel |= KF_W4 | KF_UNI;
                             else
-                                fKernel |= KF_UNI;
+                                fPMDFKernel |= KF_UNI;
                         }
                         else
                         {
-                            ulBuild = options.ulBuild;
-                            fKernel = options.fKernel;
+                            ulPMDFBuild = ulKernelBuild;
+                            fPMDFKernel = fKernel;
                         }
 
                         /*
@@ -1058,8 +1058,8 @@ int ProbeKernel(PRPINITIN pReqPack)
                          */
                         if (    pszDirTk
                             && *pszDirTk
-                            &&  ulBuild == options.ulBuild
-                            &&  (fKernel & (KF_REV_MASK | KF_UNI | KF_SMP | KF_W4)) == (options.fKernel & (KF_REV_MASK | KF_UNI | KF_SMP | KF_W4))
+                            &&  ulPMDFBuild == ulKernelBuild
+                            &&  (fPMDFKernel & (KF_REV_MASK | KF_UNI | KF_SMP | KF_W4)) == (fKernel & (KF_REV_MASK | KF_UNI | KF_SMP | KF_W4))
                             &&  (kstrlen(pszDirTk) + 1 + sizeof(szPmdfVers)) < CCHMAXPATH /* no -13 because of os2krnl.sym is appended. */
                             )
                         {
@@ -1083,7 +1083,7 @@ int ProbeKernel(PRPINITIN pReqPack)
                             }
 
                             /* search retail kernel */
-                            if (!(options.fKernel & KF_DEBUG))
+                            if (!(fKernel & KF_DEBUG))
                             {
                                 kstrcpy(pszName, "os2krnlr.sym");
                                 rc2 = ProbeSymFile(szName);
@@ -1098,7 +1098,7 @@ int ProbeKernel(PRPINITIN pReqPack)
                             }
 
                             /* search allstrict kernel */
-                            if (options.fKernel & KF_DEBUG)
+                            if (fKernel & KF_DEBUG)
                             {
                                 kstrcpy(pszName, "os2krnld.sym");
                                 rc2 = ProbeSymFile(szName);
