@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.1805 2001-10-28 17:13:59 sandervl Exp $ */
+/* $Id: changelog,v 1.1806 2001-10-28 18:24:59 bird Exp $ */
 
  2001-10-28: Sander van Leeuwen <sandervl@xs4all.nl>
     - COMCTL32: o LISTVIEW_GetItemWidth bugfix: item can never be bigger
@@ -16,6 +16,9 @@
                   DisableAudio = [0|1] (DWORD type)
     - USER32:   o CreateIconIndirect bugfix
 
+ 2001-10-26: knut st. osmundsen <kosmunds@csc.com>
+    - FastDep:  o Corrected crash on bad dependency file.
+
  2001-10-26: Achim Hasenmueller <achimha@innotek.de>
     - WNASPI32: o don't fail DLL loading if ASPI library fails to init
 
@@ -31,7 +34,7 @@
                 o fixed right shift processing (and possibly numerous
                   other extended keys)
                 o fixed this &%$&%! Alt-Gr-Key-Emulation
-                  remaining issues: 
+                  remaining issues:
                     AltGr won't toggle GetAsyncKeyState() or GetKeyState()
 
  2001-10-25: Patrick Haller <patrick.haller@innotek.de>
@@ -46,11 +49,11 @@
     - KERNEL32: o Never use DosError to disable hard errors! Use SetErrorMode
                   *and* restore old error mode afterwards.
                 o IOCTL_DISK_GET_DRIVE_GEOMETRY change:
-                  Applications can use this IOCTL to check if the floppy has 
-                  been changed. OSLibDosGetDiskGeometry won't fail when that 
-                  happens so we read one byte from the disk and return 
+                  Applications can use this IOCTL to check if the floppy has
+                  been changed. OSLibDosGetDiskGeometry won't fail when that
+                  happens so we read one byte from the disk and return
                   ERROR_MEDIA_CHANGED if it fails with ERROR_WRONG_DISK.
-    - COMCTL32: o ListView: LVM_SETITEMA: update item even when 'new' text is 
+    - COMCTL32: o ListView: LVM_SETITEMA: update item even when 'new' text is
                   the same.
                   (CVP depends on this)
 
@@ -99,7 +102,7 @@
 
  2001-10-22: Patrick Haller <patrick.haller@innotek.de>
     - TESTAPP:  o added keyboard test program for low-level testing
-                  of the keyboard routines 
+                  of the keyboard routines
                   (Queue, WH_KEYBOARD, WH_KEYBOARD_LL)
     - PMKBDHK:  o added initial version
     - USER32:   o enabled PMKBDHK
