@@ -1,4 +1,8 @@
- /* $Id: ChangeLog,v 1.586 1999-12-29 12:40:21 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.587 1999-12-29 13:04:07 phaller Exp $ */
+
+ 99-12-29: Patrick Haller <phaller@gmx.net>
+	- INCLUDE: ODINWRAP: new macros to save FS register for callback registration
+	- WINMM:   removed memory leak for win32 tib fs selectors in DartWaveOut::callback
 
  99-12-29: Sander van Leeuwen <sandervl@xs4all.nl>
 	- WINMM: Created wrappers for mci* apis (to save/restore FS)
