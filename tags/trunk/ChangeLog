@@ -1,4 +1,11 @@
- /* $Id: ChangeLog,v 1.387 1999-10-30 15:16:55 dengert Exp $ */
+ /* $Id: ChangeLog,v 1.388 1999-10-30 18:39:05 cbratschi Exp $ */
+
+ 99-10-30: Christoph Bratschi <cbratschi@datacomm.ch>
+	- USER32: added button control text justification
+		  GetNextDlgTabItem/GetNextDlgGroupItem must work with all windows
+		  -> radiobuttons
+		  fixed scrollbar timer handling
+		  pmframe: fixed WM_ACTIVATE bug
 
  99-10-30: Daniela Engert <dani@ngrt.de>
 	- USER32: Fixed missing repaints for transparent windows (VPBuddy!)
@@ -15,6 +22,7 @@
 
  99-10-29: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: rewrote scrollbar code
+		  added static styles
 
  99-10-29: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Changed font size multiply factor, negated it and fixed
