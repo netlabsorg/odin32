@@ -1,4 +1,4 @@
-/* $Id: d32init.c,v 1.7 2000-02-08 12:38:38 bird Exp $
+/* $Id: d32init.c,v 1.8 2000-02-08 12:54:25 bird Exp $
  *
  * d32init.c - 32-bits init routines.
  *
@@ -499,6 +499,10 @@ static int interpretFunctionProlog(char *pach, BOOL fOverload)
                     return 0;
             }
         }
+    }
+    else if (pach[0] == 0x55 && pach[1] == 0xa1) /* ldrEnum32bitRelRecs on WS4eB */
+    {
+        rc = 1 + 5;
     }
     else
     {
