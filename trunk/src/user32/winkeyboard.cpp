@@ -1,4 +1,4 @@
-/* $Id: winkeyboard.cpp,v 1.23 2001-10-26 10:03:34 phaller Exp $ */
+/* $Id: winkeyboard.cpp,v 1.24 2001-10-26 12:46:17 phaller Exp $ */
 /*
  * Win32 <-> PM key translation
  *
@@ -143,7 +143,7 @@ BYTE abPMScanToWinVKey[256][2] =
 /* 0x5A PMSCAN_PADENTER     */ , VK_RETURN                  ,TRUE
 /* 0x5B PMSCAN_CTRLRIGHT    */ , VK_RCONTROL                ,TRUE
 /* 0x5C PMSCAN_PADSLASH     */ , VK_DIVIDE                  ,TRUE
-/* 0x5D PMSCAN_PRINT        */ , VK_PRINT                   ,TRUE
+/* 0x5D PMSCAN_PRINT        */ , VK_SNAPSHOT                ,TRUE
 /* 0x5E PMSCAN_ALTRIGHT     */ , VK_RMENU                   ,TRUE
 /* 0x5F PMSCAN_PAUSE        */ , VK_PAUSE                   ,FALSE
 /* 0x60 PMSCAN_HOME         */ , VK_HOME                    ,TRUE
@@ -361,7 +361,7 @@ WINVKEYTOPMSCAN abWinVKeyToPMScan[256] =
 /* 0x27 VK_RIGHT          */ , PMSCAN_RIGHT           , "Right"
 /* 0x28 VK_DOWN           */ , PMSCAN_DOWN            , "Down"
 /* 0x29 VK_SELECT         */ , 0x00                   , NULL
-/* 0x2A VK_PRINT          */ , PMSCAN_PRINT           , "Print"
+/* 0x2A VK_PRINT          */ , 0x00                   , NULL
 /* 0x2B VK_EXECUTE        */ , 0x00                   , NULL
 /* 0x2C VK_SNAPSHOT       */ , PMSCAN_PRINT           , "Print"  // NT4SP6: appears to be printscreen!
 /* 0x2D VK_INSERT         */ , PMSCAN_INSERT          , "Insert"
