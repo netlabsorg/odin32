@@ -1,4 +1,4 @@
-/* $Id: windowmsg.cpp,v 1.26 2001-06-09 14:50:26 sandervl Exp $ */
+/* $Id: windowmsg.cpp,v 1.27 2001-06-14 14:49:19 sandervl Exp $ */
 /*
  * Win32 window message APIs for OS/2
  *
@@ -203,7 +203,7 @@ BOOL WIN32API PostMessageA(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("PostMessageA, window %x not found", hwnd));
-        return 0;
+        return FALSE;
     }
     hwndOS2 = window->getOS2WindowHandle();
     RELEASE_WNDOBJ(window);
@@ -229,7 +229,7 @@ BOOL WIN32API PostMessageW(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("PostMessageW, window %x not found", hwnd));
-        return 0;
+        return FALSE;
     }
     hwndOS2 = window->getOS2WindowHandle();
     RELEASE_WNDOBJ(window);
