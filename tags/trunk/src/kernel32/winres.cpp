@@ -1,4 +1,4 @@
-/* $Id: winres.cpp,v 1.4 1999-07-19 11:50:35 sandervl Exp $ */
+/* $Id: winres.cpp,v 1.5 1999-07-24 14:14:06 sandervl Exp $ */
 
 /*
  * Win32 resource class
@@ -126,6 +126,7 @@ Win32Resource::Win32Resource(Win32Image *module, HRSRC hRes, ULONG id, ULONG typ
         orgos2type = RT_RCDATA;
         break;
   }
+  OS2ResHandle = 0;
 
   rc = DosQueryResourceSize(module->hinstance, type, id, &ressize);
   if(rc) {
