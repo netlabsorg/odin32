@@ -1,4 +1,4 @@
-/* $Id: header.h,v 1.6 1999-10-07 15:45:41 cbratschi Exp $ */
+/* $Id: header.h,v 1.7 1999-10-07 21:00:05 cbratschi Exp $ */
 
 /*
  * Header window definitions
@@ -57,7 +57,6 @@ typedef struct
     POINT       dragPos;
     INT         iDragItem;
     HEADER_ITEM *items;         /* pointer to array of HEADER_ITEM's */
-    LPINT       pOrder;         /* pointer to order array */
 } HEADER_INFO;
 
 
