@@ -1,4 +1,4 @@
-/* $Id: wsock32.cpp,v 1.29 2000-05-03 18:34:26 sandervl Exp $ */
+/* $Id: wsock32.cpp,v 1.30 2000-05-05 18:22:23 sandervl Exp $ */
 
 /*
  *
@@ -890,11 +890,12 @@ ODINFUNCTION5(int,OS2setsockopt,
 		size = *(ULONG *)optval;
 tryagain:
 		ret = setsockopt(s,level,optname, (char *)&size, sizeof(ULONG));
-		if(ret == SOCKET_ERROR && size > 65535) {
-			dprintf(("setsockopt: change size from %d to 65000", size));
+		if(ret == SOCKET_ERROR && wsaErrno() == WSAENOBUFS && size > 4096) {
+			int newsize = (size > 65535) ? 63*1024 : (size-1024);
+			dprintf(("setsockopt: change size from %d to %d", size, newsize));
 			//SvL: Limit send & receive buffer length to 64k
 	                //     (only happens with 16 bits tcpip stack?)
-			size = 65000;
+			size = newsize;
 			goto tryagain;
 		}
 		break;
