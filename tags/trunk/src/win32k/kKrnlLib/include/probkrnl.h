@@ -1,4 +1,4 @@
-/* $Id: probkrnl.h,v 1.1 2001-09-14 01:55:10 bird Exp $
+/* $Id: probkrnl.h,v 1.2 2001-09-16 03:10:20 bird Exp $
  *
  * Include file for ProbKrnl.
  *
@@ -86,23 +86,30 @@
 #define EXP_PROC16      8
 
 
+/*
+ * Opcode.
+ */
+#define OPCODE_IGNORE   0               /* chOpcode value. */
+
+
 /*******************************************************************************
 *   Structures and Typedefs                                                    *
 *******************************************************************************/
 #pragma pack(1)
 typedef struct tagIMPORTKRNLSYM
 {
-   signed short int    iOrdinal;        /* The ordinal for this entry. (Count two ordinals for proc imports.) */
-   unsigned char       fFound;          /* This is set when name is found */
-   unsigned char       iObject;         /* Object number the name was found in */
-   unsigned short int  cchName;         /* Length of the name (optmize search) (INPUT) */
-   unsigned char       achName[MAX_LENGTH_NAME]; /* Name (INPUT) */
-   unsigned char       achExtra[4];     /* Parameter extra. */
-   unsigned long  int  offObject;       /* Offset into the object */
-   unsigned long  int  ulAddress;       /* 32-bit flat address */
-   unsigned short int  usSel;           /* Select of the object */
-   unsigned char       cbProlog;        /* Size of the prolog needing to be exchanged */
-   unsigned char       fType;           /* Entry-Point Type Flags */
+    signed short int    iOrdinal;       /* The ordinal for this entry. (Count two ordinals for proc imports.) */
+    unsigned char       fFound;         /* This is set when name is found */
+    unsigned char       iObject;        /* Object number the name was found in */
+    unsigned short int  cchName;        /* Length of the name (optmize search) (INPUT) */
+    unsigned char       achName[MAX_LENGTH_NAME]; /* Name (INPUT) */
+    unsigned char       achExtra[4];    /* Parameter extra. */
+    unsigned long  int  offObject;      /* Offset into the object */
+    unsigned long  int  ulAddress;      /* 32-bit flat address */
+    unsigned short int  usSel;          /* Select of the object */
+    unsigned char       cbProlog;       /* Size of the prolog needing to be exchanged */
+    unsigned char       chOpcode;       /* The opcode of the function. 0 if not known. */
+    unsigned char       fType;          /* Entry-Point Type Flags */
 } IMPORTKRNLSYM;
 #pragma pack()
 
@@ -113,13 +120,14 @@ typedef struct tagIMPORTKRNLSYM
 #pragma pack(1)
 typedef struct
 {
-    unsigned short usBuild;             /* Build number */
-    unsigned short fKernel;             /* Kernel flag (KF_* defines in options.h). */
-    unsigned char  cObjects;            /* Count of objects */
+    unsigned short  usBuild;            /* Build number */
+    unsigned short  fKernel;            /* Kernel flag (KF_* defines in options.h). */
+    unsigned char   cObjects;           /* Count of objects */
     struct
     {
-        unsigned char iObject;          /* Object number.  */
-        unsigned long offObject;        /* offset into object of the symbol. */
+        unsigned char   iObject;        /* Object number.  */
+        unsigned long   offObject;      /* offset into object of the symbol. */
+        unsigned char   chOpcode;       /* The opcode of the function. 0 if not known. */
     } aSyms[NBR_OF_KRNLIMPORTS];
 
 } KRNLDBENTRY, *PKRNLDBENTRY;
@@ -143,7 +151,12 @@ extern KRNLDBENTRY   DATA16_INIT    aKrnlSymDB[];                   /* Defined i
     extern struct OTE               KKL_ObjTab_DosCalls[20];        /* calltaba.asm */
     extern char                     KKL_EntryTab[1];                /* calltaba.asm */
     extern char DATA16_INIT         KKL_EntryTabFixups[1];          /* calltaba.asm */
+    #ifdef _OS2KLDR_H_
     extern MTE                      kKrnlLibMTE;                    /* calltaba.asm */
+    #endif
+    extern char                     callTab[1];                     /* calltaba.asm */
+    extern char                     callTab16[1];                   /* calltaba.asm */
+    extern unsigned                 auNopFuncs[NBR_OF_KRNLIMPORTS]; /* calltaba.asm */
 #endif
 
 /*
