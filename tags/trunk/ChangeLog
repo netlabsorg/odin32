@@ -1,7 +1,9 @@
- /* $Id: ChangeLog,v 1.154 1999-08-30 12:00:55 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.155 1999-08-30 14:22:21 sandervl Exp $ */
 
  99-08-30: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32\NEW: Redesign. Create base class for all window types
+                      Delete Open32 class atoms before recreating them.
+                      Added skeleton class for MDI client window.
 
  99-08-29: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32\NEW: Changed behaviour of mouse messages (send NC messages
