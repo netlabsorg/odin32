@@ -1,4 +1,4 @@
-/* $Id: daudio.h,v 1.2 2001-03-24 15:42:20 sandervl Exp $ */
+/* $Id: daudio.h,v 1.3 2001-03-25 21:52:44 sandervl Exp $ */
 #ifndef __DAUDIO_H__
 #define __DAUDIO_H__
 
@@ -27,7 +27,8 @@ typedef struct {
     {
     struct
       {
-      ULONG   Volume;		// left & right volume (high/low word)
+      ULONG   VolumeL;		// left volume (0..100)
+      ULONG   VolumeR;		// right volume (0..100)
       } Vol;
     struct 
       {
