@@ -1,4 +1,4 @@
-/* $Id: dibitmap.cpp,v 1.17 2001-05-29 09:45:21 sandervl Exp $ */
+/* $Id: dibitmap.cpp,v 1.18 2001-06-01 07:49:30 sandervl Exp $ */
 
 /*
  * GDI32 dib & bitmap code
@@ -283,6 +283,7 @@ int WIN32API GetDIBits(HDC hdc, HBITMAP hBitmap, UINT uStartScan, UINT cScanLine
 {
  int rc;
 
+    dprintf(("GDI32: GetDIBits %x %x %d %d %x %x (biBitCount %d) %d", hdc, hBitmap, uStartScan, cScanLines, lpvBits, lpbi, lpbi->bmiHeader.biBitCount, uUsage));
     rc = O32_GetDIBits(hdc, hBitmap, uStartScan, cScanLines, lpvBits, lpbi, uUsage);
     // set proper color masks!
     switch(lpbi->bmiHeader.biBitCount) {
@@ -298,8 +299,12 @@ int WIN32API GetDIBits(HDC hdc, HBITMAP hBitmap, UINT uStartScan, UINT cScanLine
        ((DWORD*)(lpbi->bmiColors))[2] = 0xFF0000;
        break;
     }
-
-    dprintf(("GDI32: GetDIBits %x %x %d %d %x %x %d returned %d", hdc, hBitmap, uStartScan, cScanLines, lpvBits, lpbi, uUsage, rc));
+    //WGSS/Open32 returns 0 when querying the bitmap info; must return nr of scanlines
+    //as 0 signals failure
+    if(lpvBits == NULL) {
+       rc = cScanLines;
+    }
+    dprintf(("GDI32: GetDIBits return rc %d", rc));
     return rc;
 }
 //******************************************************************************
