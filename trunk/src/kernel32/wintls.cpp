@@ -1,4 +1,4 @@
-/* $Id: wintls.cpp,v 1.13 2000-09-21 19:39:57 sandervl Exp $ */
+/* $Id: wintls.cpp,v 1.14 2000-10-08 20:05:05 sandervl Exp $ */
 /*
  * Win32 TLS API functions
  *
@@ -28,7 +28,7 @@ void Win32ImageBase::tlsAlloc() //Allocate TLS index for this module
 
    tlsIndex = TlsAlloc();
    if(tlsIndex >= TLS_MINIMUM_AVAILABLE) {
-        dprintf(("tlsAttachThread: invalid tlsIndex %x!!!!", tlsIndex));
+        dprintf(("tlsAlloc: invalid tlsIndex %x!!!!", tlsIndex));
         DebugInt3();
         return;
    }
@@ -42,7 +42,7 @@ void Win32ImageBase::tlsDelete()  //Free TLS index for this module
         return;
 
    if(tlsIndex >= TLS_MINIMUM_AVAILABLE) {
-        dprintf(("tlsAttachThread: invalid tlsIndex %x!!!!", tlsIndex));
+        dprintf(("tlsDelete: invalid tlsIndex %x!!!!", tlsIndex));
         DebugInt3();
         return;
    }
