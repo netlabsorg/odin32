@@ -1,4 +1,4 @@
-/* $Id: time.cpp,v 1.6 1999-10-26 23:38:25 phaller Exp $ */
+/* $Id: time.cpp,v 1.7 1999-11-26 21:49:22 phaller Exp $ */
 
 /*
  * Timer MM apis
@@ -131,7 +131,7 @@ ODINFUNCTION1(MMRESULT, timeEndPeriod,
 ODINFUNCTION1(MMRESULT, timeKillEvent,
               UINT,     IDEvent)
 {
-  dprintf(("WINMM:timeKillEvent Not Implemented\n"));
+  dprintf(("WINMM:timeKillEvent\n"));
 
   // return OS2Timer::killEvent(UINT IDEvent)
 
