@@ -1,4 +1,4 @@
-/* $Id: dibsect.h,v 1.21 2000-10-07 09:03:50 hugh Exp $ */
+/* $Id: dibsect.h,v 1.22 2000-11-09 18:16:56 sandervl Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -16,6 +16,12 @@ typedef struct
   BYTE rgbRed;
   BYTE rgbReserved;
 } RGBQUAD, *LPRGBQUAD;
+
+typedef struct tagPALETTEENTRY
+{
+	BYTE peRed, peGreen, peBlue, peFlags;
+} PALETTEENTRY, *PPALETTEENTRY, *LPPALETTEENTRY;
+
 #else
 #define BITMAPINFO2     DWORD
 #endif
@@ -93,6 +99,7 @@ public:
               void  sync(HDC hdc, DWORD nYdest, DWORD nDestHeight);
               void  sync(DWORD xDst, DWORD yDst, DWORD widthDst, DWORD heightDst, PVOID bits);
                int  SetDIBColorTable(int startIdx, int cEntries, RGBQUAD *rgb);
+               int  SetDIBColorTable(int startIdx, int cEntries, PALETTEENTRY *rgb);
 
                int  SetDIBits(HDC hdc, HBITMAP hbitmap, UINT startscan, UINT
                               lines, const VOID *bits, BITMAPINFOHEADER_W *pbmi,
