@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.105 1999-12-05 16:37:58 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.106 1999-12-07 12:26:58 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -464,14 +464,6 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
   }
   if (cs->dwExStyle & WS_EX_DLGMODALFRAME) dwStyle &= ~WS_THICKFRAME;
 
-  //TODO?
-#if 0
-  /* Get class or window DC if needed */
-  if (classPtr->style & CS_OWNDC) dce = DCE_AllocDCE(hwnd,DCE_WINDOW_DC);
-  else if (classPtr->style & CS_CLASSDC) wndPtr->dce = classPtr->dce;
-  else wndPtr->dce = NULL;
-#endif
-
   if (cs->style & WS_HSCROLL)
   {
         horzScrollInfo = (SCROLLBAR_INFO*)malloc(sizeof(SCROLLBAR_INFO));
@@ -632,6 +624,21 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndFrame, HWND hwndClient)
   if(windowClass->getIcon())
         SetIcon(windowClass->getIcon());
 
+  /* Get class or window DC if needed */
+  if(windowClass->getStyle() & CS_OWNDC) {
+	dprintf(("Class with CS_OWNDC style"));
+	ownDC = GetWindowDC(getWindowHandle());
+  }
+  else 
+  if (windowClass->getStyle() & CS_PARENTDC)  {
+	dprintf(("ERROR: Class with CS_PARENTDC style -> NOT IMPLEMENTED!"));
+	ownDC = 0;
+  }
+  else
+  if (windowClass->getStyle() & CS_CLASSDC)  {
+	dprintf(("ERROR: Class with CS_CLASSDC style -> NOT IMPLEMENTED!"));
+	ownDC = 0;
+  }
   /* Set the window menu */
   if ((dwStyle & (WS_CAPTION | WS_CHILD)) == WS_CAPTION )
   {
