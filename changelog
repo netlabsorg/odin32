@@ -1,8 +1,10 @@
- /* $Id: changelog,v 1.167 1999-09-02 11:10:18 phaller Exp $ */
+ /* $Id: changelog,v 1.168 1999-09-02 20:57:43 phaller Exp $ */
 
  99-09-01: Patrick Haller <phaller@gmx.net>
-	- *:	Cleanup of include files, some ICOM issues in particular
+	- *:	Cleanup of include files, some ICOM issues in particular, 
+		also fixes LONGLONG problem (now names LONGLONG_W)
 	- SHELL32\NEW:	introduction of a straight port of WINE's SHELL32 implementation
+		18 of 22 files are ported already
 
  99-09-01: Patrick Haller <phaller@gmx.net>
 	- *:	Cleanup of include files. Warning: OS/2's BOOL is ULONG, WIN32 is INT.

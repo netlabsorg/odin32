@@ -1,4 +1,4 @@
-/* $Id: win32type.h,v 1.17 1999-09-01 19:12:13 phaller Exp $ */
+/* $Id: win32type.h,v 1.18 1999-09-02 20:56:29 phaller Exp $ */
 
 /*
  * Win32 type definitions for OS/2
@@ -251,11 +251,11 @@ typedef const unsigned char* LPCBYTE;
 
 // doubles
 typedef double          DOUBLE;
-typedef double          LONGLONG;
-typedef double          ULONGULONG;
-typedef double          DWORDLONG;
-typedef ULONGULONG      *PULONGULONG;
-typedef DWORDLONG       *PDWORDLONG;
+typedef double          LONGLONG_W;
+typedef double          ULONGULONG_W;
+typedef double          DWORDLONG_W;
+typedef ULONGULONG_W    *PULONGULONG_W;
+typedef DWORDLONG_W     *PDWORDLONG_W;
 
 // boolean
 typedef unsigned long   BOOL32;
@@ -417,7 +417,8 @@ typedef union _LARGE_INTEGER {
         ULONG LowPart;
         LONG HighPart;
     } u;
-    ULONGULONG QuadPart;
+    //@@@PH this can't really work ...
+    ULONGULONG_W QuadPart;
 } LARGE_INTEGER;
 
 

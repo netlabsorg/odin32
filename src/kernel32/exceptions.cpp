@@ -1,4 +1,4 @@
-/* $Id: exceptions.cpp,v 1.18 1999-08-28 19:33:44 sandervl Exp $ */
+/* $Id: exceptions.cpp,v 1.19 1999-09-02 20:56:48 phaller Exp $ */
 
 /*
  * Win32 Device IOCTL API functions for OS/2
@@ -1006,7 +1006,7 @@ void SetOS2ExceptionChain(ULONG val)
 {
  USHORT sel = GetFS();
 
-    SetExceptionChain(val);    
+    SetExceptionChain(val);
     SetFS(sel);
 }
 
@@ -1031,7 +1031,7 @@ void ReplaceExceptionHandler()
   static BOOL         fRegistered = FALSE;
   PWINEXCEPTION_FRAME orgframe;
   APIRET          rc;
-  ULONGULONG            timerval;
+  ULONGULONG_W    timerval;
 
   DisableFPUExceptions();
 

@@ -163,7 +163,7 @@ typedef union tagCY
         long Hi;
 #endif
     } u;
-    LONGLONG int64;
+    LONGLONG_W int64;
 } CY;
 #endif /* _tagCY_DEFINED */
 
