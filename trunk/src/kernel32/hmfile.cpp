@@ -1,4 +1,4 @@
-/* $Id: hmfile.cpp,v 1.16 2000-08-12 07:32:18 sandervl Exp $ */
+/* $Id: hmfile.cpp,v 1.17 2000-08-12 09:51:54 sandervl Exp $ */
 
 /*
  * File IO win32 apis
@@ -54,9 +54,6 @@ inline void ignore_dprintf(...){}
 #define DBG_LOCALLOG	DBG_hmfile
 #include "dbglocal.h"
 
-//SvL: Share violation workaround for CreateFile
-#define SHARE_WORKAROUND
-
 /*****************************************************************************
  * Name      : DWORD HMDeviceFileClass::CreateFile
  * Purpose   : this is called from the handle manager if a CreateFile() is
@@ -108,9 +105,6 @@ DWORD HMDeviceFileClass::CreateFile (LPCSTR        lpFileName,
      hTemplate = 0;
 
   //TODO: FILE_SHARE_DELETE
-#ifdef SHARE_WORKAROUND
-  pHMHandleData->dwShare |= (FILE_SHARE_READ | FILE_SHARE_WRITE);
-#endif
   hFile = OSLibDosCreateFile((LPSTR)lpFileName,
                              pHMHandleData->dwAccess,
                              pHMHandleData->dwShare,
