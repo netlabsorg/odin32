@@ -1,4 +1,4 @@
-/* $Id: text.cpp,v 1.5 2000-01-18 20:10:46 sandervl Exp $ */
+/* $Id: text.cpp,v 1.6 2000-01-29 14:23:33 sandervl Exp $ */
 
 /*
  * Font and Text Functions
@@ -47,8 +47,13 @@ HBRUSH CACHE_GetPattern55AABrush(void)
 
 INT WIN32API DrawTextA(HDC hDC,LPCSTR lpString,INT nCount,PRECT lpRect,UINT nFormat)
 {
-  dprintf(("USER32: DrawTextA %x",hDC));
+ int bla;
 
+  dprintf(("USER32: DrawTextA %x %s %d (%d,%d)(%d,%d) %x",hDC, lpString, nCount, lpRect->left, lpRect->top, lpRect->right, lpRect->bottom, nFormat));
+
+  if(nFormat == 0x828) {
+	bla = 1;
+  }
   return InternalDrawTextExA(hDC,lpString,nCount,lpRect,nFormat,NULL,FALSE);
 }
 //******************************************************************************
@@ -63,7 +68,7 @@ INT WIN32API DrawTextW(HDC hDC,LPCWSTR lpString,INT nCount,PRECT lpRect,UINT nFo
 //******************************************************************************
 INT WIN32API DrawTextExA(HDC hdc,LPCSTR lpchText,INT cchText,LPRECT lprc,UINT dwDTFormat,LPDRAWTEXTPARAMS lpDTParams)
 {
-  dprintf(("USER32:DrawTextExA %x\n",hdc));
+  dprintf(("USER32: DrawTextExA %x %s %d (%d,%d)(%d,%d) %x",hdc, lpchText, cchText, lprc->left, lprc->top, lprc->right, lprc->bottom, dwDTFormat));
 
   return InternalDrawTextExA(hdc,lpchText,cchText,lprc,dwDTFormat,lpDTParams,TRUE);
 }
