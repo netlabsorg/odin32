@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.134 1999-08-25 11:23:17 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.135 1999-08-25 12:28:58 sandervl Exp $ */
 
  99-08-25: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Several changes for memory mapped files.
@@ -10,6 +10,9 @@
                        apis without the 'A' or 'W' suffix)
 	- INCLUDE: Added makefile for VAC 3.6.5
                    To compile use i.e.: nmake DEBUG=1 CCENV=VAC36
+	- KERNEL32: Changed VIRTUAL_MapFileA/W
+                    Changed OS2ImageInit from public to protected
+	- USER32\NEW: Changed loadres.cpp call to VIRTUAL_MapFileA
 
  99-08-24: Patrick Haller <phaller@gmx.net>
 	- USER32:   added extended Open32 WinX control styles (OS2CTLWX)
