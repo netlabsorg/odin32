@@ -1,7 +1,9 @@
- /* $Id: changelog,v 1.995 2000-06-17 09:03:03 sandervl Exp $ */
+ /* $Id: changelog,v 1.996 2000-06-17 09:47:10 sandervl Exp $ */
 
  2000-06-17: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32:    Bugfix in resource handling (due to yesterday's change)
+                   DuplicateHandle fix
+    - USER32:      Region fixes (RedrawWindow)
 
  2000-06-16: Sander van Leeuwen <sandervl@xs4all.nl>
     - GDI32:       Put back region 'bugfix' as it's completely wrong and breaks
