@@ -1,4 +1,4 @@
-/* $Id: d32init.c,v 1.37 2001-02-21 07:44:57 bird Exp $
+/* $Id: d32init.c,v 1.38 2001-02-23 02:57:53 bird Exp $
  *
  * d32init.c - 32-bits init routines.
  *
@@ -14,7 +14,7 @@
 /*
  * Calltab entry sizes.
  */
-#define OVERLOAD16_ENTRY    0x18
+#define OVERLOAD16_ENTRY    0x18        /* This is intentionally 4 bytes larger than the one defined in calltaba.asm. */
 #define OVERLOAD32_ENTRY    0x14
 #define IMPORT16_ENTRY      0x08
 #define IMPORT32_ENTRY      0x08
@@ -23,7 +23,7 @@
 #if  0
     #define kprintf2(a) kprintf
 #else
-    #define kprintf2(a) {}//
+    #define kprintf2(a) (void)0
 #endif
 
 #define INCL_DOSERRORS
@@ -55,6 +55,8 @@
 
 #ifdef R3TST
     #include "test.h"
+    #define x86DisableWriteProtect() 0
+    #define x86RestoreWriteProtect(a) (void)0
 #endif
 
 
@@ -95,6 +97,7 @@ extern USHORT   _R0FlatDS16;
 
 /* extern(s) located in calltab.asm */
 extern char     callTab[1];
+extern char     callTab16[1];
 extern unsigned auFuncs[NBR_OF_KRNLIMPORTS];
 
 
@@ -414,11 +417,13 @@ USHORT _loadds _Far32 _Pascal R0Init32(RP32INIT *pRpInit)
     #endif
 
     /* callgate */
+    #ifndef R3TST
     if ((rc = InitCallGate()) != NO_ERROR)
     {
         kprintf(("R0Init32: InitCallGate failed with rc=%d\n", rc));
         return (USHORT)rc;
     }
+    #endif
 
 
     /*
@@ -441,17 +446,6 @@ USHORT _loadds _Far32 _Pascal R0Init32(RP32INIT *pRpInit)
                         SSToDS(&lockhandle));
     if (rc != NO_ERROR)
         kprintf(("data segment lock failed with with rc=%d\n", rc));
-
-    /* 16-bit data segment - is this really necessary? - no!!! */
-    #if 0 /* This should not be necessary!!! it's allocated from the kernel resident heap if I am not much mistaken. */
-    memset(SSToDS(&lockhandle), 0, sizeof(lockhandle));
-    rc = D32Hlp_VMLock2(&DATA16START,
-                        &DATA16END - &DATA16START,
-                        VMDHL_LONG | VMDHL_WRITE,
-                        SSToDS(&lockhandle));
-    if (rc != NO_ERROR)
-        kprintf(("16-bit data segment lock failed with with rc=%d\n", rc));
-    #endif
 
     return NO_ERROR;
 }
@@ -1026,14 +1020,22 @@ int interpretFunctionProlog16(char *pach, BOOL fOverload)
     /*
      * Check for the well known prolog (the only that is supported now)
      * which is:
-     *     push 2
      */
-    if (*pach == 0x6A)                  /* push 2 (don't check for the 2) */
+    if ((*pach == 0x6A && !fOverload)       /* push 2 (don't check for the 2) */
+        ||
+        *pach == 0x60                       /* pushf */
+        ||
+        (*pach == 0x53 && pach[1] == 0x51)  /* push bx, push cx */
+        ||
+        (*pach == 0x8c && pach[1] == 0xd8)  /* mov ax, ds */
+        ||
+        (*pach == 0xb8)                     /* mov ax, imm16 */
+        )
     {
         BOOL fForce;
         int  cOpPrefix = 0;
         cb = 0;
-        while (cb < 8 || fForce)        /* 8 is the size of a 66h prefixed far jump instruction. */
+        while (cb < 5  || fForce)       /* 5 is the size of a 16:16 far jump instruction. */
         {
             int cb2;
             fForce = FALSE;
@@ -1063,6 +1065,31 @@ int interpretFunctionProlog16(char *pach, BOOL fOverload)
                 case 0x55:              /* push bp */
                 case 0x56:              /* push si */
                 case 0x57:              /* push di */
+                case 0x60:              /* pusha */
+                    break;
+
+                /* simple three byte instructions */
+                case 0xb8:              /* mov eax, imm16 */
+                case 0xb9:              /* mov ecx, imm16 */
+                case 0xba:              /* mov edx, imm16 */
+                case 0xbb:              /* mov ebx, imm16 */
+                case 0xbc:              /* mov esx, imm16 */
+                case 0xbd:              /* mov ebx, imm16 */
+                case 0xbe:              /* mov esi, imm16 */
+                case 0xbf:              /* mov edi, imm16 */
+                case 0x2d:              /* sub eax, imm16 */
+                case 0x35:              /* xor eax, imm16 */
+                case 0x3d:              /* cmp eax, imm16 */
+                case 0x68:              /* push <dword> */
+                case 0xa1:              /* mov eax, moffs16 */
+                case 0xa3:              /* mov moffs16, eax */
+                    if (cOpPrefix > 0)  /* FIXME see 32-bit interpreter. */
+                    {
+                        pach += 2;
+                        cb += 2;
+                    }
+                    pach += 2;
+                    cb += 2;
                     break;
 
                 case 0x2e:              /* cs segment override */
@@ -1082,21 +1109,14 @@ int interpretFunctionProlog16(char *pach, BOOL fOverload)
                     break;
 
                 case 0x6a:              /* push <byte> */
+                case 0x3c:              /* mov al, imm8 */
                     pach++;
                     cb++;
                     break;
 
-                case 0x68:              /* push <word> */
-                    if (cOpPrefix > 0)
-                    {
-                        pach += 2;
-                        cb += 2;
-                    }
-                    pach += 2;
-                    cb += 2;
-                    break;
-
                 case 0x8b:              /* mov /r */
+                case 0x8c:              /* mov r/m16,Sreg  (= mov /r) */
+                case 0x8e:              /* mov Sreg, r/m16 (= mov /r) */
                     if ((pach[1] & 0xc0) == 0x80  /* ex. mov ax,bp+1114h */
                         || ((pach[1] & 0xc0) == 0 && (pach[1] & 0x7) == 6)) /* ex. mov bp,0ff23h */
                     {   /* 16-bit displacement */
@@ -1149,6 +1169,9 @@ int interpretFunctionProlog16(char *pach, BOOL fOverload)
                 cOpPrefix--;
         }
     }
+    else
+        kprintf(("interpretFunctionProlog16: unknown prolog 0x%x 0x%x 0x%x\n", pach[0], pach[1], pach[2]));
+
 
     fOverload = fOverload;
     return cb;
@@ -1242,7 +1265,7 @@ USHORT _loadds _Far32 _Pascal VerifyImportTab32(void)
                 else
                 {
                     cb = interpretFunctionProlog16((char*)aImportTab[i].ulAddress, EPT16Proc(aImportTab[i]));
-                    cbmax = OVERLOAD16_ENTRY - 7; /* 7 = Size of the far jump instruction */
+                    cbmax = OVERLOAD16_ENTRY - 5; /* 5 = Size of the jump instruction */
                 }
 
                 /*
@@ -1250,7 +1273,7 @@ USHORT _loadds _Far32 _Pascal VerifyImportTab32(void)
                  */
                 if (cb <= 0 || cb > cbmax)
                 {   /* failed, too small or too large. */
-                    kprintf(("VerifyImportTab32: verify failed for procedure no.%d (cb=%d), %s\n", i, cb, aImportTab[i].achName));
+                    kprintf(("VerifyImportTab32/16: verify failed for procedure no.%d (cb=%d), %s\n", i, cb, aImportTab[i].achName));
                     return (USHORT)(ERROR_D32_TOO_INVALID_PROLOG | (i << ERROR_D32_PROC_SHIFT) | ERROR_D32_PROC_FLAG);
                 }
                 break;
@@ -1280,7 +1303,8 @@ int importTabInit(void)
     int     i;
     int     cb;
     int     cbmax;
-    char *  pchCTEntry;                 /* Pointer to current calltab entry. */
+    char *  pchCTEntry;                 /* Pointer to current 32-bit calltab entry. */
+    char *  pchCTEntry16;               /* Pointer to current 16-bit calltab entry. */
     ULONG   flWP;                       /* CR0 WP flag restore value. */
 
     /*
@@ -1323,7 +1347,7 @@ int importTabInit(void)
         else
         {
             cb = interpretFunctionProlog16((char*)aImportTab[i].ulAddress, EPT16Proc(aImportTab[i]));
-            cbmax = OVERLOAD16_ENTRY - 7; /* 7 = Size of the far jump instruction */
+            cbmax = OVERLOAD16_ENTRY - 5; /* 5 = Size of the jump instruction */
         }
         if (cb <= 0 || cb > cbmax)
         {
@@ -1336,6 +1360,7 @@ int importTabInit(void)
      * rehook / import
      */
     pchCTEntry = &callTab[0];
+    pchCTEntry16 = &callTab16[0];
     flWP = x86DisableWriteProtect();
     for (i = 0; i < NBR_OF_KRNLIMPORTS; i++)
     {
@@ -1390,34 +1415,36 @@ int importTabInit(void)
              */
             case EPT_PROC16:
             {
-                kprintf(("ImportTabInit: Overloading 16-bit procedures are not supported yet!!! Calltable in 32-bit segment!\n", i));
-                Int3();
-
                 cb = interpretFunctionProlog16((char*)aImportTab[i].ulAddress, TRUE);
                 aImportTab[i].cbProlog = (char)cb;
-                if (cb >= 8 && cb + 7 < OVERLOAD16_ENTRY) /* 8: size of a 16:32 jump which jumps to my overloading function (prefixed with 66h in a 16-bit segment) */
-                {                                         /* 7: size of a 16:32 jump which is added to the call tab */
+                if (cb >= 5 && cb + 5 < OVERLOAD16_ENTRY) /* 5:    size of a 16:16 jump which jumps to my overloading function */
+                {                                         /* cb+5: size of a 16:16 jump which is added to the call tab */
                     /*
                      * Copy function prolog which is to be overwritten.
                      */
-                    memcpy(pchCTEntry, (void*)aImportTab[i].ulAddress, (size_t)cb);
+                    memcpy(pchCTEntry16, (void*)aImportTab[i].ulAddress, (size_t)cb);
 
                     /*
                      * Create far jump from calltab to original function.
-                     * 0xEA <four byte target address> <two byte target selector>
+                     * 0xEA <two byte target address> <two byte target selector>
                      */
-                    pchCTEntry[cb] = 0xEA; /* jmp far ptr */
-                    *(unsigned long*)(void*)&pchCTEntry[cb+1] = aImportTab[i].offObject;
-                    *(unsigned short*)(void*)&pchCTEntry[cb+5] = aImportTab[i].usSel;
+                    pchCTEntry16[cb] = 0xEA; /* jmp far ptr */
+                    *(unsigned short*)(void*)&pchCTEntry16[cb+1] = (unsigned short)aImportTab[i].offObject + cb;
+                    *(unsigned short*)(void*)&pchCTEntry16[cb+3] = aImportTab[i].usSel;
+
+                    /*
+                     * We store the far 16:16 pointer to the function in the last four
+                     * bytes of the entry. Set them!
+                     */
+                    *(unsigned short*)(void*)&pchCTEntry16[OVERLOAD16_ENTRY-4] = (unsigned short)aImportTab[i].offObject;
+                    *(unsigned short*)(void*)&pchCTEntry16[OVERLOAD16_ENTRY-2] = aImportTab[i].usSel;
 
                     /*
                      * jump from original function to my function - an cli(?) could be needed here
-                     * 0x66 0xEA <four byte target address> <two byte target selector>
+                     * 0xEA <two byte target address> <two byte target selector>
                      */
-                    *(char*)(aImportTab[i].ulAddress    ) = 0x66;    /* operandsize prefix */
-                    *(char*)(aImportTab[i].ulAddress + 1) = 0xEA;    /* jmp far ptr */
-                    *(unsigned long*)(aImportTab[i].ulAddress + 2) = auFuncs[i];   /* FIXME? */
-                    *(unsigned short*)(aImportTab[i].ulAddress + 6) = _R0FlatCS16; /* FIXME */
+                    *(char*)(aImportTab[i].ulAddress) = 0xEA;    /* jmp far ptr */
+                    *(unsigned long*)(aImportTab[i].ulAddress + 1) = auFuncs[i]; /* The auFuncs entry is a far pointer. */
                 }
                 else
                 {   /* !fatal! - this could never happen really... */
@@ -1426,7 +1453,7 @@ int importTabInit(void)
                     x86RestoreWriteProtect(flWP);
                     return ERROR_D32_IPE | (i << ERROR_D32_PROC_SHIFT) | ERROR_D32_PROC_FLAG;
                 }
-                pchCTEntry += OVERLOAD16_ENTRY;
+                pchCTEntry16 += OVERLOAD16_ENTRY;
                 break;
             }
 

@@ -1,4 +1,4 @@
-; $Id: mytkStartProcess.asm,v 1.3 2000-10-01 02:58:19 bird Exp $
+; $Id: mytkStartProcess.asm,v 1.4 2001-02-23 02:57:55 bird Exp $
 ;
 ; tkStartProcess overloader. Needed to clear the loader semaphore
 ; when a process is being started syncronously.
@@ -25,7 +25,6 @@
     ;
     extrn pLdrSem:DWORD
     extrn _LDRClearSem@0:PROC
-    extrn _KSEMRequestMutex@8:PROC
     extrn _KSEMQueryMutex@8:PROC
 
     ;
@@ -52,6 +51,7 @@
     ; Calltable entry for tkStartProcess
     ;
     extrn _tkStartProcess:PROC
+
 
 ;
 ;   Exported symbols
@@ -87,7 +87,7 @@ _mytkStartProcess PROC NEAR
     add     eax, esp                    ; Added TKSSBase to the usage count pointer
     push    eax                         ; Push address of usage count pointer.
     push    pLdrSem                     ; Push pointer to loader semaphore ( = handle).
-    call    near ptr FLAT:_KSEMQueryMutex@8
+    call    _KSEMQueryMutex@8
     or      eax, eax                    ; Check return code. (1 = our / free; 0 = not our but take)
     pop     eax                         ; Pops usage count.
     jz      mtksp_ret                   ; jmp if not taken by us (rc=FALSE).
@@ -98,13 +98,13 @@ _mytkStartProcess PROC NEAR
     mov     fTkExecPgm, 0               ; Marks global data invalid.
     cmp     eax, 2                      ; If usage count > 1 then issue a release. (should not happen here)
     jl      mtksp_ret                   ; jmp if usage count < 2. (tkStartProcess or tkExecPgm will free the last usage).
-    call    near ptr FLAT:_LDRClearSem@0
+    call    _LDRClearSem@0
 
 mtksp_ret:
     pop     edx
     pop     ecx
     pop     eax
-    jmp     near ptr FLAT:_tkStartProcess
+    jmp     _tkStartProcess
 _mytkStartProcess ENDP
 
 CODE32 ENDS

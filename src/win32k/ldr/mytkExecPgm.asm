@@ -1,4 +1,4 @@
-; $Id: mytkExecPgm.asm,v 1.12 2000-10-01 02:58:19 bird Exp $
+; $Id: mytkExecPgm.asm,v 1.13 2001-02-23 02:57:55 bird Exp $
 ;
 ; mytkExecPgm - tkExecPgm overload
 ;
@@ -175,7 +175,7 @@ OffArg      = -1ah
     ;
     mov     di, dx                      ; bx:di is now filename address
     push    cs                          ; Problem calling far into the calltab segement.
-    call    near ptr FLAT:f_FuStrLen
+    call    f_FuStrLen                  ; NB/TODO/FIXME: this is a 16-bit call...
     jc      tkepgm_backout              ; If the FuStrLen call failed we bail out!
 
     ; if filename length is more that CCHMAXPATH then we don't do anything!.
@@ -194,7 +194,7 @@ OffArg      = -1ah
 
     mov     di, [ebp + OffArg]          ; bx:di -> arguments
     push    cs                          ; Problem calling far into the calltab segement.
-    call    near ptr FLAT:f_FuStrLenZ
+    call    f_FuStrLenZ                 ; NB/TODO/FIXME: this is a 16-bit call...
     jc      tkepgm_backout
 
 tkepgm1:
@@ -268,7 +268,7 @@ tkepgm1:
     ASSUME DS:NOTHING
     mov     cx, [ebp + cchFilename]     ; cx = length of area to copy
     push    cs                          ; Problem calling far into the calltab segement.
-    call    near ptr FLAT:f_FuBuff
+    call    f_FuBuff                    ; NB/TODO/FIXME: this is a 16-bit call...
     jc      tkepgm_backout2             ; In case of error back (quite unlikely).
 
 
@@ -289,7 +289,7 @@ tkepgm1:
     mov     si, [ebp + OffArg]          ; bx:si -> arguments
     mov     cx, [ebp + cchArgs]         ; cx = length of area to copy
     push    cs                          ; Problem calling far into the calltab segement.
-    call    near ptr FLAT:f_FuBuff
+    call    f_FuBuff                    ; NB/TODO/FIXME: this is a 16-bit call...
     jc      tkepgm_backout2             ; In case of error back (quite unlikely).
 
 
@@ -315,7 +315,7 @@ tkepgm_setup_parms:
     ;
 tkepgm_callbehind:
     push    cs                          ; Problem calling far into the calltab segement.
-    call    near ptr FLAT:g_tkExecPgm
+    call    g_tkExecPgm
     pushfd                              ; preserve flags
     push    eax                         ; preserve result.
     push    ecx                         ; preserve ecx just in case
@@ -336,7 +336,7 @@ tkepgm_callbehind:
     add     eax, esp                    ; Added TKSSBase to the usage count pointer
     push    eax                         ; Push address of usage count pointer.
     push    pLdrSem                     ; Push pointer to loader semaphore ( = handle).
-    call    near ptr FLAT:_KSEMQueryMutex@8
+    call    _KSEMQueryMutex@8
     or      eax, eax                    ; Check return code. (1 = our / free; 0 = not our but take)
     pop     eax                         ; Pops usage count.
     je      tkepgm_callbehindret        ; jmp if not taken by us (rc=FALSE).
@@ -410,7 +410,7 @@ tkepgm_backout:
 
 myg_tkExecPgm_CalltkExecPgm:
     push    cs                          ; Problem calling far into the calltab segement.
-    call    near ptr FLAT:g_tkExecPgm
+    call    g_tkExecPgm
     leave
     retf
 myg_tkExecPgm ENDP
@@ -484,7 +484,7 @@ tkepce_ok3:
     push    dword ptr [ebp + cchEnv]    ; Number of bytes to copy
     push    eax                         ; Source buffer pointer. (user)
     push    ebx                         ; Target buffer pointer.
-    call    near ptr FLAT:_TKFuBuff@16
+    call    _TKFuBuff@16
 
 tkepce_ret:
     pop     ebx
@@ -542,7 +542,7 @@ tkepel1:
     ror     edi, 16                     ; bx:di -> [fpachTkExecPgmEnv]
     xor     ecx, ecx
     push    cs                          ; Problem calling far into the calltab segement.
-    call    near ptr FLAT:f_FuStrLenZ
+    call    f_FuStrLenZ                 ; NB/TODO/FIXME: this is a 16-bit call...
     jc      tkepel_err_ret
     movzx   eax, cx
     jmp     tkepel_ret

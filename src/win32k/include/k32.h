@@ -1,4 +1,4 @@
-/* $Id: k32.h,v 1.8 2001-02-21 07:46:10 bird Exp $
+/* $Id: k32.h,v 1.9 2001-02-23 02:57:54 bird Exp $
  *
  * k32 API - definitions.
  *
@@ -19,6 +19,7 @@ extern "C" {
 *   Exported Functions                                                         *
 *******************************************************************************/
 APIRET _System k32AllocMemEx(PPVOID ppb, ULONG cb, ULONG flFlags, ULONG ulCS, ULONG ulEIP);
+APIRET _System k32HandleSystemEvent(ULONG ulEvent, HEV hev, BOOL fHandle);
 APIRET _System k32QueryCallGate(PUSHORT pusCGSelector);
 APIRET _System k32QuerySystemMemInfo(PK32SYSTEMMEMINFO pMemInfo);
 APIRET _System k32QueryOTEs(HMTE hMTE, PQOTEBUFFER pQOte, ULONG cbOte);

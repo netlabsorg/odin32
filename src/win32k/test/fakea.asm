@@ -1,4 +1,4 @@
-; $Id: fakea.asm,v 1.4 2001-02-20 05:05:23 bird Exp $
+; $Id: fakea.asm,v 1.5 2001-02-23 02:57:55 bird Exp $
 ;
 ; Fake assembly imports.
 ;
@@ -43,6 +43,8 @@
     public _fakeldrOpenPath@20
     public fakeKMEnterKmodeSEF
     public fakeKMExitKmodeSEF8
+    public fakeRASRST
+    public fakedh_SendEvent
 
 
 ;
@@ -260,6 +262,28 @@ ffslz_reterr:
 fakef_FuBuff ENDP
 
 
+;;
+; RASRST faker.
+; @status   stupid stub.
+fakeRASRST proc near
+    mov     ax, ds
+    mov     ax, ds
+    mov     ax, ds
+    mov     ax, ds
+    int     3
+fakeRASRST endp
+
+
+;;
+; dh_SendEvent faker.
+; @status   stupid stub.
+fakedh_SendEvent proc near
+    mov     ax, ds
+    mov     ax, ds
+    mov     ax, ds
+    mov     ax, ds
+    int     3
+fakedh_SendEvent endp
 
 
 CODE16 ENDS

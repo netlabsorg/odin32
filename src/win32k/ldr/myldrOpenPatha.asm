@@ -1,4 +1,4 @@
-; $Id: myldrOpenPatha.asm,v 1.4 2000-10-01 02:58:19 bird Exp $
+; $Id: myldrOpenPatha.asm,v 1.5 2001-02-23 02:57:54 bird Exp $
 ;
 ; myldrOpenPatha - assembly helpers for myldrOpenPath.
 ;
@@ -62,7 +62,7 @@ else
     push    dword ptr [esp + 10h]
     push    dword ptr [esp + 10h]
     push    dword ptr [esp + 10h]
-    call    near ptr FLAT:CALLTAB:_ldrOpenPath_wrapped
+    call    _ldrOpenPath_wrapped
     ret     14h
 endif
 
@@ -94,7 +94,7 @@ if 0
 endif
 
 new:
-    jmp     near ptr FLAT:CALLTAB:_ldrOpenPath_wrapped
+    jmp     _ldrOpenPath_wrapped
 _ldrOpenPath@20 ENDP
 
 
