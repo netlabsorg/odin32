@@ -1,4 +1,4 @@
-/* $Id: timer.h,v 1.1 1999-09-26 16:09:04 dengert Exp $ */
+/* $Id: timer.h,v 1.2 1999-10-23 16:45:22 cbratschi Exp $ */
 /*
  * public timer functions
  *
@@ -12,6 +12,7 @@
 #ifndef __TIMER_H__
 #define __TIMER_H__
 
+extern BOOL TIMER_GetTimerInfo(HWND PMhwnd,ULONG PMid,PBOOL sys,PULONG id);
 extern BOOL TIMER_HandleTimer (PQMSG pMsg);
 
 #endif //__TIMER_H__

@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.41 1999-10-23 10:21:43 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.42 1999-10-23 16:45:20 cbratschi Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -28,6 +28,7 @@
 #include "oslibgdi.h"
 #include "oslibmsg.h"
 #include "dc.h"
+#include "timer.h"
 #include <thread.h>
 #include <wprocess.h>
 #include <caret.h>
@@ -766,7 +767,19 @@ VirtualKeyFound:
         goto RunDefWndProc;
 
     case WM_TIMER:
-        if (mp2) win32wnd->MsgTimer((ULONG)mp1);
+        if (mp2)
+        {
+          BOOL sys;
+          ULONG id;
+
+          if (TIMER_GetTimerInfo(hwnd,(ULONG)mp1,&sys,&id))
+          {
+            if (sys)
+              win32wnd->MsgSysTimer(id);
+            else
+              win32wnd->MsgTimer(id);
+          }
+        }
         goto RunDefWndProc;
 
     case WM_SETWINDOWPARAMS:
