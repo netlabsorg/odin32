@@ -1,4 +1,4 @@
- /* $Id: changelog,v 1.492 1999-12-01 10:53:40 sandervl Exp $ */
+ /* $Id: changelog,v 1.493 1999-12-01 18:39:15 sandervl Exp $ */
 
  99-12-01: Edgar Buerkle <Edgar.Buerkle@gmx.net>
 	- KERNEL32: Removed check in CreateFileMapping (hFile == -1 && (protect & SEC_COMMIT))
@@ -9,8 +9,12 @@
 	- ODINCRT: Wrappers for allocation/free functions to prevent them
                    from trashing FS. (happens when called from a thread (
                    that is not the main thread))
+                   Also wrappers for new/delete calls. (for the same reason)
 	- KERNEL32: Increase max nr of open files when DosOpen fails with ERROR_TOO_MANY_OPEN_FILES
                     (OSLibDosOpen)
+                    Don't translate strings if api fails (FindFirstFileW/FindNextFileW)
+                    GetProcessTimes (TODO: Doesn't use RtlExtendedIntegerMultiply correctly!)
+                    Translate only upto min(strlen of unicode string,n) in UnicodeToAsciiN
 	- ADVAPI32: Fix for RegQueryInfoKeyW (return size = 0)
 
  99-11-30: Patrick Haller <phaller@gmx.net>
