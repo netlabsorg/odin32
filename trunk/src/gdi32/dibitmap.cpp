@@ -1,4 +1,4 @@
-/* $Id: dibitmap.cpp,v 1.42 2004-01-11 11:42:10 sandervl Exp $ */
+/* $Id: dibitmap.cpp,v 1.43 2004-03-24 16:55:35 sandervl Exp $ */
 
 /*
  * GDI32 dib & bitmap code
@@ -70,6 +70,44 @@ HBITMAP WIN32API CreateDIBitmap(HDC hdc, const BITMAPINFOHEADER *lpbmih,
             ((BITMAPINFOHEADER *)lpbmih)->biHeight = iHeight;
             return rc;
 	}
+    }
+
+    //  For some reason, GPI messes up the colors in DIB_PAL_COLORS mode.
+    //  Work around it by converting palette indexes to RGB values
+    //  (SetDIBitsToDevice works under the same circumstances though)
+    if(fuUsage == DIB_PAL_COLORS && lpbmi->bmiHeader.biSize == sizeof(BITMAPINFOHEADER) &&
+       lpbmi->bmiHeader.biBitCount <= 8)
+    {
+      	// workaround for open32 bug.
+      	// If syscolors > 256 and wUsage == DIB_PAL_COLORS.
+
+      	int i;
+        UINT biClrUsed;
+      	USHORT *pColorIndex = (USHORT *)lpbmi->bmiColors;
+      	RGBQUAD *pColors;
+      	BITMAPINFO *infoLoc;
+
+        biClrUsed = (lpbmi->bmiHeader.biClrUsed) ? lpbmi->bmiHeader.biClrUsed : (1<<lpbmi->bmiHeader.biBitCount);
+
+        pColors = (RGBQUAD *) alloca(biClrUsed * sizeof(RGBQUAD));
+        infoLoc = (BITMAPINFO *) alloca(sizeof(BITMAPINFO) + biClrUsed * sizeof(RGBQUAD));
+
+      	memcpy(infoLoc, lpbmi, sizeof(BITMAPINFO));
+
+      	if(GetDIBColorTable(hdc, 0, biClrUsed, pColors) == 0) 
+        {
+            dprintf(("ERROR: StretchDIBits: GetDIBColorTable failed!!"));
+            return FALSE;
+        }
+      	for(i=0;i<biClrUsed;i++, pColorIndex++)
+      	{
+            infoLoc->bmiColors[i] = pColors[*pColorIndex];
+      	}
+
+      	rc = CreateDIBitmap(hdc, lpbmih, fdwInit, lpbInit, (PBITMAPINFO)infoLoc,
+                            DIB_RGB_COLORS);
+   
+    	return rc;
     }
 
     // 2000/09/01 PH Netscape 4.7
