@@ -1,4 +1,4 @@
-/* $Id: winimage.cpp,v 1.15 1999-08-23 17:02:35 sandervl Exp $ */
+/* $Id: winimage.cpp,v 1.16 1999-08-25 15:27:20 sandervl Exp $ */
 
 /*
  * Win32 PE Image class
@@ -35,6 +35,7 @@
 #include "winres.h"
 #include "os2util.h"
 #include "initterm.h"
+#include <win\virtual.h>
 
 char szErrorTitle[]     = "Win32 for OS/2";
 char szMemErrorMsg[]    = "Memory allocation failure";
@@ -191,10 +192,7 @@ Win32Image::~Win32Image()
 //******************************************************************************
 BOOL Win32Image::init(ULONG reservedMem)
 {
- HFILE  win32handle;
- ULONG  ulAction       = 0;      /* Action taken by DosOpen */
- ULONG  ulLocal        = 0;      /* File pointer position after DosSetFilePtr */
- APIRET rc             = NO_ERROR;            /* Return code */
+ HANDLE fImgMapping = 0;
  char   szErrorMsg[64];
  LPVOID win32file     = NULL;
  ULONG  filesize, ulRead;
@@ -202,76 +200,35 @@ BOOL Win32Image::init(ULONG reservedMem)
  IMAGE_TLS_DIRECTORY *tlsDir = NULL;
  int    nSections, i;
 
-  rc = DosOpen(szFileName,                     /* File path name */
-           &win32handle,                   /* File handle */
-               &ulAction,                      /* Action taken */
-               0L,                             /* File primary allocation */
-               0L,                     /* File attribute */
-               OPEN_ACTION_FAIL_IF_NEW |
-               OPEN_ACTION_OPEN_IF_EXISTS,     /* Open function type */
-               OPEN_FLAGS_NOINHERIT |
-               OPEN_SHARE_DENYNONE  |
-               OPEN_ACCESS_READONLY,           /* Open mode of the file */
-               0L);                            /* No extended attribute */
+  fImgMapping = VIRTUAL_MapFileA(szFileName, &win32file);
 
-  if (rc != NO_ERROR) {
+  if (fImgMapping == -1) {
     	sprintf(szErrorMsg, "Unable to open %32s\n", szFileName);
         WinMessageBox(HWND_DESKTOP, HWND_DESKTOP, szErrorMsg, szErrorTitle, 0, MB_OK | MB_ERROR | MB_MOVEABLE);
-    	errorState = ERROR_INTERNAL;
-        return(FALSE);
-  }
-
-  /* Move the file pointer back to the beginning of the file */
-  DosSetFilePtr(win32handle, 0L, FILE_BEGIN, &ulLocal);
-  DosSetFilePtr(win32handle, 0L, FILE_END, &filesize);
-  DosSetFilePtr(win32handle, 0L, FILE_BEGIN, &ulLocal);
-
-  win32file = malloc(filesize);
-  if(win32file == NULL) {
-    	fout << "Error allocating memory" << endl;
-        WinMessageBox(HWND_DESKTOP, HWND_DESKTOP, szMemErrorMsg, szErrorTitle, 0, MB_OK | MB_ERROR | MB_MOVEABLE);
-    	DosClose(win32handle);                /* Close the file */
-    	errorState = ERROR_INTERNAL;
-    	return(FALSE);
-  }
-  rc = DosRead(win32handle, win32file, filesize, &ulRead);
-  if(rc != NO_ERROR) {
-    	fout << "DosRead returned " << rc << endl;
-        WinMessageBox(HWND_DESKTOP, HWND_DESKTOP, szFileErrorMsg, szErrorTitle, 0, MB_OK | MB_ERROR | MB_MOVEABLE);
-    	DosClose(win32handle);                /* Close the file */
-    	errorState = ERROR_INTERNAL;
-    	return(FALSE);
+    	goto failure;
   }
 
   if(GetPEFileHeader (win32file, &fh) == FALSE) {
     	fout << "Not a valid PE file (probably a 16 bits windows exe/dll)!" << endl;
         WinMessageBox(HWND_DESKTOP, HWND_DESKTOP, szPEErrorMsg, szErrorTitle, 0, MB_OK | MB_ERROR | MB_MOVEABLE);
-    	DosClose(win32handle);                /* Close the file */
-    	errorState = ERROR_INTERNAL;
-    	return(FALSE);
+    	goto failure;
   }
 
   if(!(fh.Characteristics & IMAGE_FILE_EXECUTABLE_IMAGE)) {//not valid
     	fout << "Not a valid PE file!" << endl;
         WinMessageBox(HWND_DESKTOP, HWND_DESKTOP, szPEErrorMsg, szErrorTitle, 0, MB_OK | MB_ERROR | MB_MOVEABLE);
-    	DosClose(win32handle);                /* Close the file */
-    	errorState = ERROR_INTERNAL;
-    	return(FALSE);
+    	goto failure;
   }
   if(fh.Machine != IMAGE_FILE_MACHINE_I386) {
     	fout << "You need a REAL CPU to run this code" << endl;
         WinMessageBox(HWND_DESKTOP, HWND_DESKTOP, szCPUErrorMsg, szErrorTitle, 0, MB_OK | MB_ERROR | MB_MOVEABLE);
-    	DosClose(win32handle);                /* Close the file */
-    	errorState = ERROR_INTERNAL;
-    	return(FALSE);
+    	goto failure;
   }
   //IMAGE_FILE_SYSTEM == only drivers (device/file system/video etc)?
   if(fh.Characteristics & IMAGE_FILE_SYSTEM) {
     	fout << "Can't convert system files" << endl;
         WinMessageBox(HWND_DESKTOP, HWND_DESKTOP, szExeErrorMsg, szErrorTitle, 0, MB_OK | MB_ERROR | MB_MOVEABLE);
-    	DosClose(win32handle);                /* Close the file */
-    	errorState = ERROR_INTERNAL;
-    	return(FALSE);
+    	goto failure;
   }
 
   if(fh.Characteristics & IMAGE_FILE_RELOCS_STRIPPED) {
@@ -404,9 +361,8 @@ BOOL Win32Image::init(ULONG reservedMem)
             continue;
         }
         fout << "Unknown section" << endl;
-        errorState = ERROR_INTERNAL;
-        return(FALSE);
-        }
+    	goto failure;
+     }
   }
   fout << "*************************PE SECTIONS END **************************" << endl;
   imageSize += imageVirtBase - oh.ImageBase;
@@ -421,12 +377,12 @@ BOOL Win32Image::init(ULONG reservedMem)
   }
   if(allocSections(reservedMem) == FALSE) {
     	fout << "Failed to allocate image memory, rc " << errorState << endl;
-    	return(FALSE);
+    	goto failure;
   }
   fout << "OS/2 base address " << realBaseAddress << endl;
   if(storeSections((char *)win32file) == FALSE) {
     	fout << "Failed to store sections, rc " << errorState << endl;
-    	return(FALSE);
+    	goto failure;
   }
   if(oh.AddressOfEntryPoint) {
   	entryPoint = realBaseAddress + oh.AddressOfEntryPoint;
@@ -441,7 +397,7 @@ BOOL Win32Image::init(ULONG reservedMem)
 
 	if(sect == NULL) {
 		fout << "Couldn't find TLS section!!" << endl;
-		return(FALSE);
+	    	goto failure;
 	}
   	setTLSAddress((char *)(sect->realvirtaddr + (tlsDir->StartAddressOfRawData - sect->virtaddr)));
   	setTLSInitSize(tlsDir->EndAddressOfRawData - tlsDir->StartAddressOfRawData);
@@ -450,14 +406,14 @@ BOOL Win32Image::init(ULONG reservedMem)
 	sect = findSectionByAddr((ULONG)tlsDir->AddressOfIndex);
 	if(sect == NULL) {
 		fout << "Couldn't find TLS AddressOfIndex section!!" << endl;
-		return(FALSE);
+	    	goto failure;
 	}
   	setTLSIndexAddr((LPDWORD)(sect->realvirtaddr + ((ULONG)tlsDir->AddressOfIndex - sect->virtaddr)));
 
 	sect = findSectionByAddr((ULONG)tlsDir->AddressOfCallBacks);
 	if(sect == NULL) {
 		fout << "Couldn't find TLS AddressOfCallBacks section!!" << endl;
-		return(FALSE);
+	    	goto failure;
 	}
   	setTLSCallBackAddr((PIMAGE_TLS_CALLBACK *)(sect->realvirtaddr + ((ULONG)tlsDir->AddressOfCallBacks - sect->virtaddr)));
   }
@@ -465,19 +421,19 @@ BOOL Win32Image::init(ULONG reservedMem)
   if(realBaseAddress != oh.ImageBase) {
   	if(setFixups((PIMAGE_BASE_RELOCATION)ImageDirectoryOffset(win32file, IMAGE_DIRECTORY_ENTRY_BASERELOC)) == FALSE) {
     		fout << "Failed to set fixups" << endl;
-    		return(FALSE);
+	    	goto failure;
 	}
   }
 
   if(processImports((char *)win32file) == FALSE) {
     	fout << "Failed to process imports!" << endl;
-    	return(FALSE);
+    	goto failure;
   }
 
   if(fh.Characteristics & IMAGE_FILE_DLL) {
     	if(processExports((char *)win32file) == FALSE) {
         	fout << "Failed to process exported apis" << endl;
-        	return(FALSE);
+	    	goto failure;
     	}
   }
   IMAGE_SECTION_HEADER sh;
@@ -493,13 +449,15 @@ BOOL Win32Image::init(ULONG reservedMem)
   //set final memory protection flags (storeSections sets them to read/write)
   if(setMemFlags() == FALSE) {
     	fout << "Failed to set memory protection" << endl;
-    	return(FALSE);
+    	goto failure;
   }
 
-  //Now it's safe to free win32file
-  free(win32file);
-  DosClose(win32handle);                /* Close the file */
+  CloseHandle(fImgMapping);
   return(TRUE);
+failure:
+  if(fImgMapping) CloseHandle(fImgMapping);
+  errorState = ERROR_INTERNAL;
+  return FALSE;
 }
 //******************************************************************************
 //******************************************************************************

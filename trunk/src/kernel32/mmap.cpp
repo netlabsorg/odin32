@@ -1,4 +1,4 @@
-/* $Id: mmap.cpp,v 1.11 1999-08-25 14:27:07 sandervl Exp $ */
+/* $Id: mmap.cpp,v 1.12 1999-08-25 15:27:19 sandervl Exp $ */
 
 /*
  * Win32 Memory mapped file class
@@ -149,10 +149,10 @@ BOOL Win32MemMap::commitPage(LPVOID lpPageFaultAddr, ULONG nrpages)
   newProt  = mProtFlags & (PAGE_READONLY | PAGE_READWRITE | PAGE_WRITECOPY);
 
   dprintf(("Win32MemMap::commitPage %x (faultaddr %x), nr of pages %d", pageAddr, lpPageFaultAddr, nrpages));
-  if(VirtualAlloc((LPVOID)pageAddr, nrpages*PAGE_SIZE, MEM_COMMIT, newProt) == FALSE) {
-	goto fail;
-  }
   if(hMemFile != -1) {
+  	if(VirtualAlloc((LPVOID)pageAddr, nrpages*PAGE_SIZE, MEM_COMMIT, PAGE_READWRITE) == FALSE) {
+		goto fail;
+  	}
 	offset = pageAddr - (ULONG)pMapping;
 	size   = nrpages*PAGE_SIZE;
 	if(offset + size > mSize) {
@@ -170,6 +170,19 @@ BOOL Win32MemMap::commitPage(LPVOID lpPageFaultAddr, ULONG nrpages)
 		dprintf(("Win32MemMap::commitPage: ReadFile didn't read all bytes for %x", pageAddr));
 		goto fail;
 	}
+	if(mProtFlags & PAGE_READONLY) {
+//DosSetMem returns flags with EXECUTE bit set, even though the initial allocation is without this bit set!
+//Also returns access denied when trying to set it back to READONLY
+  		VirtualProtect((LPVOID)pageAddr, nrpages*PAGE_SIZE, newProt, &oldProt);
+//  		if(VirtualProtect((LPVOID)pageAddr, nrpages*PAGE_SIZE, newProt, &oldProt) == FALSE) {
+//			goto fail;
+//		}
+	}
+  }
+  else {
+  	if(VirtualAlloc((LPVOID)pageAddr, nrpages*PAGE_SIZE, MEM_COMMIT, newProt) == FALSE) {
+		goto fail;
+  	}
   }
 
 //  mapMutex.leave();
@@ -223,7 +236,7 @@ LPVOID Win32MemMap::mapViewOfFile(ULONG size, ULONG offset, ULONG fdwAccess)
 #endif
 
   if(fMapped == FALSE) {//if not mapped, reserve/commit entire view
-  	pMapping = VirtualAlloc(0, mSize, fAlloc, mProtFlags);
+  	pMapping = VirtualAlloc(0, mSize, fAlloc, memFlags);
   	if(pMapping == NULL) {
 		dprintf(("Win32MemMap::mapFileView: VirtualAlloc %x %x %x failed!", mSize, fAlloc, memFlags));
 		goto fail;
@@ -254,6 +267,7 @@ BOOL Win32MemMap::flushView(LPVOID lpvBase, ULONG cbFlush)
  int   i;
 
 //  mapMutex.enter();
+  dprintf(("Win32MemMap::flushView: %x %x", lpvBase, cbFlush));
   if(fMapped == FALSE)
 	goto parmfail;
 
