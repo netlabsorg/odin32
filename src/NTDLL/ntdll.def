@@ -1,4 +1,4 @@
-; $Id: ntdll.def,v 1.33 2000-03-29 17:37:04 sandervl Exp $
+; $Id: ntdll.def,v 1.34 2000-08-20 15:16:56 phaller Exp $
 
 ;
 ; Based on NT 4.0 SP6: NTDLL.DLL 
@@ -69,13 +69,13 @@ EXPORTS
     NtAdjustPrivilegesToken       = _NtAdjustPrivilegesToken@24	@59
 ;   NtAlertResumeThread								@60
     NtAlertThread                 = _NtAlertThread@8              @61
-;   NtAllocateLocallyUniqueId							@62
+    NtAllocateLocallyUniqueId	  = _NtAllocateLocallyUniqueId@4		@62
     NtAllocateUuids               = _NtAllocateUuids@16          	@63
 ;   NtAllocateVirtualMemory							@64
 ;   NtCallbackReturn								@65
 ;   NtCancelIoFile								@66
 ;   NtCancelTimer									@67
-;   NtClearEvent									@68
+    NtClearEvent		  = _NtClearEvent@4     				@68
     NtClose                       = _NtClose@4                    @69
 ;   NtCloseObjectAuditAlarm							@70
     NtCompleteConnectPort         = _NtCompleteConnectPort@4      @71
@@ -163,13 +163,13 @@ EXPORTS
 ;   NtPrivilegeObjectAuditAlarm						@152
 ;   NtPrivilegedServiceAuditAlarm					@153
 ;   NtProtectVirtualMemory						@154
-;   NtPulseEvent							@155
+    NtPulseEvent		  = _NtPulseEvent@8      		@155
 ;   NtQueryAttributesFile						@156
 ;   NtQueryDefaultLocale						@157
     NtQueryDirectoryFile          = _NtQueryDirectoryFile@44          	@158
     NtQueryDirectoryObject        = _NtQueryDirectoryObject@28          @159
 ;   NtQueryEaFile							@160
-;   NtQueryEvent							@161
+    NtQueryEvent		  = _NtQueryEvent@20    		@161
 ;   NtQueryFullAttributesFile						@162
 ;   NtQueryInformationAtom						@163
     NtQueryInformationFile        = _NtQueryInformationFile@20          @164
@@ -311,15 +311,15 @@ EXPORTS
 ;   RtlAreBitsClear							@299
 ;   RtlAreBitsSet							@300
 
-;   RtlAssert								@301
+    RtlAssert			  = _RtlAssert@16       		@301
 ;   RtlCaptureStackBackTrace						@302
 ;   RtlCharToInteger							@303
 ;   RtlCheckRegistryKey							@304
 ;   RtlClearAllBits							@305
-;   RtlClearBits							@306
+    RtlClearBits		  = _RtlClearBits@12    		@306
 ;   RtlClosePropertySet							@307
 ;   RtlCompactHeap							@308
-;   RtlCompareMemory							@309
+    RtlCompareMemory		  = _RtlCompareMemory@12		@309
 ;   RtlCompareMemoryUlong						@310
 ;   RtlCompareString							@311
     RtlCompareUnicodeString       = _RtlCompareUnicodeString@12		@312
@@ -333,6 +333,7 @@ EXPORTS
     RtlConvertUlongToLargeInteger = _RtlConvertUlongToLargeInteger@4    @320
     RtlCopyLuid                   = _RtlCopyLuid@8                      @321
 ;   RtlCopyLuidAndAttributesArray					@322
+    RtlCopyMemory                 = _RtlCopyMemory@12
 ;   RtlCopySecurityDescriptor						@323
     RtlCopySid                    = _RtlCopySid@12                      @324
 ;   RtlCopySidAndAttributesArray					@325
@@ -404,7 +405,7 @@ EXPORTS
     RtlExtendedMagicDivide         = _RtlExtendedMagicDivide@20         @391
     RtlFillMemory              	   = _RtlFillMemory@12		        @392
 ;   RtlFillMemoryUlong							@393
-;   RtlFindClearBits							@394
+    RtlFindClearBits		  = _RtlFindClearBits@12		@394
 ;   RtlFindClearBitsAndSet						@395
 ;   RtlFindLongestRunClear						@396
 ;   RtlFindLongestRunSet						@397
@@ -443,7 +444,7 @@ EXPORTS
 ;   RtlGuidToPropertySetName						@429
     RtlIdentifierAuthoritySid     = _RtlIdentifierAuthoritySid@4      	@430
 ;   RtlImageDirectoryEntryToData					@431
-;   RtlImageNtHeader							@432
+    RtlImageNtHeader		  = _RtlImageNtHeader@4 		@432
 ;   RtlImageRvaToSection						@433
 ;   RtlImageRvaToVa							@434
 ;   RtlImpersonateSelf							@435
@@ -453,11 +454,11 @@ EXPORTS
     RtlInitString                 = _RtlInitString@8                  	@439
     RtlInitUnicodeString          = _RtlInitUnicodeString@8           	@440
 ;   RtlInitializeAtomPackage						@441
-;   RtlInitializeBitMap							@442
+    RtlInitializeBitMap		  = _RtlInitializeBitMap@12     	@442
 ;   RtlInitializeContext						@443
-    RtlInitializeCriticalSection   = _InitializeCriticalSection@4       @444
+    RtlInitializeCriticalSection  = _InitializeCriticalSection@4        @444
 ;   RtlInitializeCriticalSectionAndSpinCount				@445
-;   RtlInitializeGenericTable						@446
+    RtlInitializeGenericTable	  = _RtlInitializeGenericTable@0        @446
 ;   RtlInitializeHandleTable						@447
 ;   RtlInitializeRXact							@448
     RtlInitializeResource         = _RtlInitializeResource@4            @449
@@ -543,7 +544,7 @@ EXPORTS
 ;   RtlSelfRelativeToAbsoluteSD						@528
 ;   RtlSetAllBits							@529
 ;   RtlSetAttributesSecurityDescriptor					@530
-;   RtlSetBits								@531
+    RtlSetBits			  = _RtlSetBits@12      		@531
 ;   RtlSetCriticalSectionSpinCount					@532
 ;   RtlSetCurrentDirectory_U						@533
 ;   RtlSetCurrentEnvironment						@534
@@ -1072,3 +1073,4 @@ EXPORTS
 ;   Not found in NTDLL-SP6:
     DebugBreak                    = ___regs_DebugBreak@4
     RtlInitOemString              = _RtlInitOemString@8
+    NtPowerInformation            = _NtPowerInformation@20
