@@ -17,6 +17,7 @@ EXPORTS
     CoCreateFreeThreadedMarshaler  = _CoCreateFreeThreadedMarshaler@8  @5
     CoCreateGuid               = _CoCreateGuid@4             @6
     CoCreateInstance           = _CoCreateInstance@20        @7
+    CoCreateInstanceEx         = _CoCreateInstanceEx@24
     CoDisconnectObject         = _CoDisconnectObject@8       @8
     CoDosDateTimeToFileTime    = _CoDosDateTimeToFileTime@12 @9
     CoFileTimeNow              = _CoFileTimeNow@4            @10
