@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.197 1999-09-13 16:13:45 dengert Exp $ */
+ /* $Id: changelog,v 1.198 1999-09-13 19:46:07 phaller Exp $ */
+
+ 99-09-13: Jens Wiessner <wiessnej@rfi.de>
+	- NTDLL: Added CRT-functions.
 
  99-09-13: Daniela Engert <dani@ngrt.de>
 	- USER32\NEW: DC/related code: ReleaseDC, GetWindowDC, DC destruction,..
