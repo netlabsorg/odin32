@@ -1,4 +1,4 @@
-/* $Id: scroll.cpp,v 1.36 2000-03-24 17:12:20 cbratschi Exp $ */
+/* $Id: scroll.cpp,v 1.37 2000-10-08 18:45:36 sandervl Exp $ */
 /*
  * Scrollbar control
  *
@@ -1518,7 +1518,7 @@ BOOL WINAPI ShowScrollBar(
         /* fall through */
 
     case SB_VERT:
-        if (fShowV)
+        if (fShow)
         {
             fShowV = !(win32wnd->getStyle() & WS_VSCROLL);
             win32wnd->setStyle(win32wnd->getStyle() | WS_VSCROLL);
