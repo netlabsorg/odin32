@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.10 1999-06-27 16:23:22 sandervl Exp $
+# $Id: Makefile,v 1.11 1999-06-27 21:59:40 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -55,7 +55,7 @@ dialog.obj: dialog.cpp \
             dlgconvert.h
 dde.obj: dde.cpp
 hook.obj: hook.cpp hooks.h
-defwndproc.obj: defwndproc.cpp syscolor.h
+defwndproc.obj: defwndproc.cpp syscolor.h $(PDWIN32_INCLUDE)\wndproc.h 
 hooks.obj: hooks.cpp hooks.h
 dlgconvert.obj: dlgconvert.cpp \
                 $(PDWIN32_INCLUDE)\wndproc.h $(PDWIN32_INCLUDE)\wndclass.h \
