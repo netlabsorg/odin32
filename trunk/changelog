@@ -1,4 +1,9 @@
-/* $Id: changelog,v 1.1453 2001-05-28 18:15:17 phaller Exp $ */
+/* $Id: changelog,v 1.1454 2001-05-29 09:44:27 sandervl Exp $ */
+
+ 2001-05-29: Sander van Leeuwen <sandervl@xs4all.nl>
+    - GDI32:    o Set/GetDIBColorTable fixes for DIB sections with bpp > 8
+                o Don't sync DIB section in SelectPalette if bForceBackground
+                  is -1. (hack for bitmap buttons in Beyond Compare)
 
  2001-05-28: Patrick Haller <patrick.haller@innotek.de>
     - GDI32:    o Split GDI32.CPP into ICM.CPP and GDI32.CPP
