@@ -1,4 +1,4 @@
-/* $Id: StateUpd.cpp,v 1.7 2000-02-10 23:37:52 bird Exp $
+/* $Id: StateUpd.cpp,v 1.8 2000-02-11 18:35:54 bird Exp $
  *
  * StateUpd - Scans source files for API functions and imports data on them.
  *
@@ -43,6 +43,7 @@ static unsigned long analyseFnHdr(PFNDESC pFnDesc, char **papszLines, int i, con
 static unsigned long analyseFnDcl(PFNDESC pFnDesc, char **papszLines, int i, int &iRet, const char *pszFilename, POPTIONS pOptions);
 static unsigned long analyseFnDcl2(PFNDESC pFnDesc, char **papszLines, int i, int &iRet, const char *pszFilename, POPTIONS pOptions);
 static BOOL  isFunction(char **papszLines, int i, POPTIONS pOptions);
+static long _System dbNotUpdatedCallBack(const char *pszValue, const char *pszFieldName, void *pvUser);
 static char *skipInsignificantChars(char **papszLines, int &i, char *psz);
 static char *readFileIntoMemory(const char *pszFilename);
 static char **createLineArray(char *pszFile);
@@ -65,15 +66,35 @@ int main(int argc, char **argv)
     int            argi;
     BOOL           fFatal = FALSE;
     unsigned long  ulRc = 0;
-    OPTIONS        options = {TRUE, TRUE, FALSE, FALSE, FALSE, TRUE, TRUE, TRUE};
+    char           szDLLName[64];
+    OPTIONS        options = {TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, &szDLLName[0], -1};
     unsigned long  ulRc2;
     char          *pszErrorDesc = NULL;
     char          *pszHost     = "localhost";
     char          *pszDatabase = "Odin32";
     char          *pszUser     = "root";
     char          *pszPasswd   = "";
-
+    ULONG          ul1, ul2;
     DosError(0x3);
+
+    /* get dll name from directory */
+    ul1 = ul2 = 0;
+    DosQueryCurrentDisk(&ul1, &ul2);
+    ul2 = sizeof(szDLLName);
+    DosQueryCurrentDir(ul1, &szDLLName[0], &ul2);
+    if (ul2 != 0)
+    {
+        if (szDLLName[ul2-1] == '\\' || szDLLName[ul2-1] == '/')
+            szDLLName[--ul2] = '\0';
+        ul1 = ul2;
+        while (ul1 != 0 && szDLLName[ul1-1] != '\\' && szDLLName[ul1-1] != '/')
+            ul1--;
+        if (ul1 != 0)
+            options.pszDLLName = &szDLLName[ul1];
+    }
+    else
+        szDLLName[0] = '\0';
+
 
     /**************************************************************************
     * parse arguments.
@@ -86,6 +107,7 @@ int main(int argc, char **argv)
     *           -OS2<[+]|->      Removes 'OS2'-prefix from function name.
     *           -COMCTL32<[+]|-> Removes 'COMCTL32'-prefix from function name.
     *           -VERSION<[+]|->  Removes 'VERSION'-prefix from function name.
+    *           -Dll:<dllname>   Name of the dll being processed.
     *           -d:<dbname>      Database name
     *           -p:<passwd>      Password
     *           -u:<user>        Userid
@@ -100,10 +122,15 @@ int main(int argc, char **argv)
             {
                 case 'd':
                 case 'D':
-                    if (argv[argi][2] == ':')
-                        pszDatabase = &argv[argi][3];
+                    if (strnicmp(argv[argi], "dll:", 4) == 0 )
+                        options.pszDLLName = &argv[argi][5];
                     else
-                        fprintf(stderr, "warning: option '-d:' requires database name.\n");
+                    {
+                        if (argv[argi][2] == ':')
+                            pszDatabase = &argv[argi][3];
+                        else
+                            fprintf(stderr, "warning: option '-d:' requires database name.\n");
+                    }
                     break;
 
                 case 'h':
@@ -216,6 +243,10 @@ int main(int argc, char **argv)
 
         if (!options.fIntegrityOnly)
         {
+            /* find dll */
+            options.lDllRefcode = dbGetDll(options.pszDLLName);
+            fprintf(phLog, "DLL: refcode=%d, name=%s\n", options.lDllRefcode, options.pszDLLName);
+
             /* processing */
             if (argv[argi] == NULL || *argv[argi] == '\0')
                 ulRc = processDir(".", &options);
@@ -252,6 +283,17 @@ int main(int argc, char **argv)
             }
         }
 
+        /* write status to log */
+        fprintf(phLog, "-------------------------------------------------\n");
+        fprintf(phLog, "-------- Functions which was not updated --------\n");
+        dbGetNotUpdatedFunction(options.lDllRefcode, dbNotUpdatedCallBack);
+        fprintf(phLog, "-------------------------------------------------\n");
+        fprintf(phLog, "-------------------------------------------------\n\n");
+        ul1 = dbCountFunctionInDll(options.lDllRefcode);
+        fprintf(phLog,"Number of function in this DLL:        %4ld\n", ul1);
+        fprintf(phLog,"Number of successfully processed APIs: %4ld\n", (long)(0x0000FFFF & ulRc));
+        fprintf(phLog,"Number of signals:                     %4ld\n", (long)(ulRc >> 16));
+
         /* close the logs */
         closeLogs();
 
@@ -259,6 +301,7 @@ int main(int argc, char **argv)
         dbDisconnect();
 
         /* warn if error during processing. */
+        fprintf(stdout,"Number of function in this DLL:        %4ld\n", ul1);
         fprintf(stdout,"Number of successfully processed APIs: %4ld\n", (long)(0x0000FFFF & ulRc));
         fprintf(stdout,"Number of signals:                     %4ld\n", (long)(ulRc >> 16));
         if ((int)(ulRc >> 16) > 0)
@@ -567,7 +610,10 @@ static unsigned long processAPI(char **papszLines, int i, int &iRet, const char 
         ulRc += 0xffff0000UL & ulRcTmp;
 
         /* 3.*/
-        fprintf(phLog, "Name:      '%s'  (refcode=%ld)\n", FnDesc.pszName, FnDesc.lRefCode);
+        fprintf(phLog, "Name:      '%s'  (refcodes=", FnDesc.pszName);
+        for (j = 0; j < FnDesc.cRefCodes; j++)
+            fprintf(phLog, j > 0 ? ", %ld" : "%ld", FnDesc.alRefCode[j]);
+        fprintf(phLog, ")\n");
         fprintf(phLog, "  Returns: '%s'\n", FnDesc.pszReturnType != NULL ? FnDesc.pszReturnType : "<missing>");
         fprintf(phLog, "  cParams: %2d\n", FnDesc.cParams);
         for (j = 0; j < FnDesc.cParams; j++)
@@ -639,25 +685,33 @@ static unsigned long analyseFnDcl(PFNDESC pFnDesc, char **papszLines, int i, int
         return 0x00010000;
     }
 
-    if (FnFindBuf.cFns == 0)
+    pFnDesc->cRefCodes = 0;
+    if (FnFindBuf.cFns != 0)
     {
-        fprintf(phLog, "%s was not an API\n", pFnDesc->pszName);
-        return 0;
-    }
-    else if (FnFindBuf.cFns > 1)
-    {   /* 3b.*/
-        while (lFn < (int)FnFindBuf.cFns && FnFindBuf.alDllRefCode[lFn] != lPrevFnDll)
-            lFn++;
-        if (lPrevFnDll == -1L && lFn >= (int)FnFindBuf.cFns)
+        if (pOptions->lDllRefcode < 0)
         {
-            fprintf(phSignal, "%s, %s: error - more than one function by the name '%s'\n",
-                    pszFilename, pFnDesc->pszName, pFnDesc->pszName);
-            return 0x00010000;
+            if (FnFindBuf.cFns > 1)
+            {
+                fprintf(phSignal, "%s: unknown dll and more than two occurences of this function!\n", pszFilename);
+                return 0x00010000;
+            }
+            pOptions->lDllRefcode = FnFindBuf.alDllRefCode[0];
+            fprintf(phLog, "DllRef = %d\n", pOptions->lDllRefcode);
         }
-    }
-    pFnDesc->lRefCode = FnFindBuf.alRefCode[lFn];
-    lPrevFnDll = FnFindBuf.alDllRefCode[lFn];
 
+        for (lFn = 0; lFn < FnFindBuf.cFns; lFn++)
+        {
+            if (FnFindBuf.alDllRefCode[lFn] == pOptions->lDllRefcode)
+                pFnDesc->alRefCode[pFnDesc->cRefCodes++] = FnFindBuf.alRefCode[lFn];
+        }
+
+        if (pFnDesc->cRefCodes == 0)
+            fprintf(phLog, "%s was not an API in this dll(%d)!\n", pFnDesc->pszName, pOptions->lDllRefcode);
+    }
+    else
+        fprintf(phLog, "%s was not an API\n", pFnDesc->pszName);
+
+    ulRc = pFnDesc->cRefCodes;
     return ulRc;
 }
 
@@ -680,13 +734,14 @@ static unsigned long analyseFnDcl2(PFNDESC pFnDesc, char **papszLines, int i, in
     /** @sketch
      * 1. find the '('
      * 2. find the word ahead of the '(', this is the function name.
+     * 2a. class test.
      * 3. find the closing ')'
      * 4. copy the parameters, which is between the two '()'
      * 5. format the parameters
      */
 
     int     iFn, iP1, iP2, j;
-    char *  pszFn, *pszP1, *pszP2;
+    char *  pszFn, *pszFnEnd, *pszP1, *pszP2;
     char *  psz, *pszEnd;
     int     cArgs;
     char *  apszArgs[30];
@@ -728,7 +783,32 @@ static unsigned long analyseFnDcl2(PFNDESC pFnDesc, char **papszLines, int i, in
         iRet = iP1;
         return 0x00010000;
     }
+    pszFnEnd = pszFn;
     pszFn = findStartOfWord(pszFn, papszLines[i]);
+
+    /* 2a. */
+    psz = pszFn;
+    while (psz >= papszLines[i] && *psz == ' ')
+        psz--;
+    if (psz > papszLines[i] && *psz == ':')
+    {
+        while (psz >= papszLines[i] && *psz == ' ')
+            psz--;
+        if (psz > papszLines[i] && *psz == ':')
+        {
+            while (psz >= papszLines[i] && *psz == ' ')
+                psz--;
+            if (psz > papszLines[i])
+                pszFn = findStartOfWord(psz, papszLines[i]);
+            else
+                fprintf(phLog, "%.*s: class name is not at same line as the ::\n", pszFnEnd - psz-1, psz+1);
+        }
+        else
+        {
+            fprintf(phLog, "%.*s: invalid class '::'\n", pszFnEnd - psz, psz);
+            return 0;
+        }
+    }
 
     /* 3. */
     iP2 = iP1;
@@ -791,13 +871,24 @@ static unsigned long analyseFnDcl2(PFNDESC pFnDesc, char **papszLines, int i, in
     }
     else
     {
+        /* return type - not implemented TODO/FIXME! */
+        *pszEnd = '\0';
+        copy(pszEnd, papszLines[i], i, pszFn-1, iFn, papszLines);
+        pFnDesc->pszReturnType = *pszEnd == '\0' ? NULL : pszEnd;
+        pszEnd = strlen(pszEnd) + pszEnd + 1;
+
         /* function name */
         *pszEnd = '\0';
-        strncat(pszEnd, pszFn, findEndOfWord(pszFn) - pszFn);
-        pFnDesc->pszName = pszEnd;
+        if (pFnDesc->pszReturnType != NULL
+            && stristr(pFnDesc->pszReturnType, "cdecl") != NULL)
+        {   /* cdecl function is prefixed with an '_' */
+            strcpy(pszEnd, "_");
+            strncat(pszEnd+1, pszFn, pszFnEnd - pszFn+1);
+        }
+        else
+            strncat(pszEnd, pszFn, pszFnEnd - pszFn+1);
 
-        /* return type - not implemented TODO/FIXME! */
-        pFnDesc->pszReturnType = NULL;
+        pFnDesc->pszName = pszEnd;
 
         /* arguments */
         pFnDesc->cParams = cArgs;
@@ -1223,6 +1314,25 @@ static BOOL isFunction(char **papszLines, int i, POPTIONS pOptions)
     }
 
     return FALSE;
+}
+
+
+
+/**
+ * Callback function for the dbGetNotUpdatedFunction routine.
+ *
+ */
+static long _System dbNotUpdatedCallBack(const char *pszValue, const char *pszFieldName, void *pvUser)
+{
+    if (stricmp(pszFieldName, "name") == 0)
+        fprintf(phLog, "%s ", pszValue);
+    else if (stricmp(pszFieldName, "updated") == 0)
+        fprintf(phLog, "update=%s ", pszValue);
+    else if (stricmp(pszFieldName, "intname") == 0)
+        fprintf(phLog, "(%s)\n", pszValue);
+
+    pvUser = pvUser;
+    return 0;
 }
 
 

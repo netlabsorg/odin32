@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.5 2000-02-10 22:45:19 bird Exp $
+# $Id: Makefile,v 1.6 2000-02-11 18:35:55 bird Exp $
 
 #
 # Common makefile for database utils. ICC edition
@@ -12,8 +12,8 @@ PDWIN32_TOOLS   = ..\bin
 # Addjust common definitions
 CINCLUDES= -I$(PDWIN32_INCLUDE) -I$(PDWIN32_INCLUDE)\win -Igd -Imysql -I..\common
 !ifdef DEBUG
-CFLAGS   = $(CFLAGS)   -Ge+ -Tx+ $(CINCLUDES)      -DNO_CLIENT_LONG_LONG -Wall+ppt-ppc-inl-cnv-gnr-vft-
-CXXFLAGS = $(CXXFLAGS) -Ge+ -Gx- -Tx+ $(CINCLUDES) -DNO_CLIENT_LONG_LONG -Wall+ppt-ppc-inl-cnv-gnr-vft-
+CFLAGS   = $(CFLAGS)   -Ge+ -Tx+ -Tm- $(CINCLUDES)      -DNO_CLIENT_LONG_LONG -Wall+ppt-ppc-inl-cnv-gnr-vft-
+CXXFLAGS = $(CXXFLAGS) -Ge+ -Gx- -Tx+ -Tm- $(CINCLUDES) -DNO_CLIENT_LONG_LONG -Wall+ppt-ppc-inl-cnv-gnr-vft-
 LDFLAGS  = $(LDFLAGS)  -Ge+ -Fe$@ /B"/MAP:full" $(RTLLIB) os2386.lib
 !else
 CFLAGS   = $(CFLAGS)   -Ge+ -Tx+ $(CINCLUDES)      -DNO_CLIENT_LONG_LONG -Wall+ppt-ppc-inl-cnv-gnr-vft-
