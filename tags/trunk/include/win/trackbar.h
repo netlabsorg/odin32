@@ -1,4 +1,4 @@
-/* $Id: trackbar.h,v 1.2 1999-06-21 15:28:44 cbratschi Exp $ */
+/* $Id: trackbar.h,v 1.3 1999-09-18 12:09:47 sandervl Exp $ */
 
 /*
  * Trackbar class extra info
@@ -21,21 +21,21 @@ typedef struct tagTRACKBAR_INFO
     INT  nPos;
     UINT uThumbLen;
     UINT uNumTics;
-	UINT  uTicFreq;
-	HWND hwndNotify;
+    UINT  uTicFreq;
+    HWND hwndNotify;
     HWND hwndToolTip;
     HWND hwndBuddyLA;
     HWND hwndBuddyRB;
     INT  fLocation;
-	COLORREF clrBk;
-	
-	INT  flags;
+    COLORREF clrBk;
+
+    INT  flags;
     BOOL bFocus;
     RECT rcChannel;
     RECT rcSelection;
     RECT rcFullThumb;
     RECT rcThumb;
-	INT  dragPos;
+    INT  dragPos;
     LPLONG tics;
 } TRACKBAR_INFO;
 
