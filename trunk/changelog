@@ -1,7 +1,11 @@
-/* $Id: changelog,v 1.1490 2001-06-09 19:45:16 sandervl Exp $ */
+/* $Id: changelog,v 1.1491 2001-06-10 01:17:31 bird Exp $ */
+
+ 2001-06-09: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - Win32API.h:
+                o Added APIs required to compile user32.
 
  2001-06-09: Sander van Leeuwen <sandervl@xs4all.nl>
-    - USER32:   o Keep reference count for window and class objects. 
+    - USER32:   o Keep reference count for window and class objects.
                   Only delete the objects when nobody else is using them anymore.
                   (fixes crashes due to premature destruction of objects;
                    e.g. during Napster startup)
