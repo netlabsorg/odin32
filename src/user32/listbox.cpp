@@ -1,4 +1,4 @@
-/* $Id: listbox.cpp,v 1.13 1999-11-17 17:04:53 cbratschi Exp $ */
+/* $Id: listbox.cpp,v 1.14 1999-12-20 19:10:54 cbratschi Exp $ */
 /*
  * Listbox controls
  *
@@ -22,6 +22,8 @@
  * - LBS_USETABSTOPS
  * - Unicode
  * - Locale handling
+ * - real WM_SETREDRAW support + for all other controls
+     bug: LISTBOX_InvalidateItems -> always redraw!
  */
 
 //CB: drive funtions (… la wine drive.c)
