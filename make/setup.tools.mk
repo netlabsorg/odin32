@@ -1,4 +1,4 @@
-# $Id: setup.tools.mk,v 1.9 2002-06-19 02:16:48 bird Exp $
+# $Id: setup.tools.mk,v 1.10 2002-08-20 03:58:08 bird Exp $
 
 
 #
@@ -12,11 +12,13 @@ BUILD_NOCOLORS = 1
 CLRTXT=[32;1m
 CLRERR=[31;1m
 CLRFIL=[33;1m
+CLRMAK=[35;1m
 CLRRST=[0m
 !else
 CLRTXT=
 CLRERR=
 CLRFIL=
+CLRMAK=
 CLRRST=
 !endif
 
