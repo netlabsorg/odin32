@@ -1,4 +1,4 @@
-/* $Id: nt.cpp,v 1.9 2000-08-20 15:16:55 phaller Exp $ */
+/* $Id: nt.cpp,v 1.10 2000-10-02 13:10:10 phaller Exp $ */
 
 
 /*
@@ -11,6 +11,11 @@
  * Copyright 1999      Patrick Haller
  */
 
+#include <odin.h>
+#include <odinwrap.h>
+#include <os2sel.h>
+
+
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
@@ -19,6 +24,9 @@
 
 #include "ntdll.h"
 #include <ntdllsec.h>
+
+
+ODINDEBUGCHANNEL(NTDLL-NT)
 
 
 /* move to winbase.h */
@@ -327,20 +335,16 @@ NTSTATUS WINAPI NtAdjustPrivilegesToken(HANDLE            TokenHandle,
 *  NtQueryInformationToken                  [NTDLL.156]
 *
 */
-NTSTATUS WINAPI NtQueryInformationToken(HANDLE  Token,
-                                        DWORD   TokenInformationClass,
-                                        LPVOID  TokenInformation,
-                                        DWORD   TokenInformationLength,
-                                        LPDWORD ReturnLength)
+ODINFUNCTION5(NTSTATUS, NtQueryInformationToken,
+              HANDLE,   Token,
+              DWORD,    TokenInformationClass,
+              LPVOID,   TokenInformation,
+              DWORD,    TokenInformationLength,
+              LPDWORD,  ReturnLength)
 {
  PROCESSTHREAD_SECURITYINFO *pSecInfo;
 
-  dprintf(("NTDLL: NtQueryInformationToken(%08xh,%08xh,%08xh,%08xh,%08xh) not correctly implemented.\n",
-           Token,
-           TokenInformationClass,
-           TokenInformation,
-           TokenInformationLength,
-           ReturnLength));
+  dprintf(("NTDLL: NtQueryInformationToken not correctly implemented.\n"));
 
   pSecInfo = (PROCESSTHREAD_SECURITYINFO*)HMHandleGetUserData(Token);
   if((ULONG)pSecInfo == -1) {
