@@ -1,4 +1,4 @@
-/* $Id: db.h,v 1.3 2000-02-11 18:35:54 bird Exp $ */
+/* $Id: db.h,v 1.4 2000-02-11 23:54:25 bird Exp $ */
 /*
  * DB - contains all database routines
  *
@@ -18,8 +18,11 @@ extern "C" {
 /*******************************************************************************
 *   Defined Constants                                                          *
 *******************************************************************************/
-#define NBR_FUNCTIONS   20
-#define NBR_AUTHORS     20
+#define NBR_FUNCTIONS       20
+#define NBR_AUTHORS         20
+#define ALIAS_NULL          -1
+#define ALIAS_DONTMIND      -2
+
 
 /*******************************************************************************
 *   Structures and Typedefs                                                    *
@@ -35,6 +38,7 @@ extern "C" {
         char *pszReturnType;
         long  cRefCodes;
         long  alRefCode[NBR_FUNCTIONS];
+        signed long  lImpDll; /* -1 is SQL-NULL, -2 is do not mind, >= 0 ref to dll. */
 
         /* parameters */
         int   cParams;
@@ -57,6 +61,7 @@ extern "C" {
         unsigned long cFns;
         signed long   alRefCode[NBR_FUNCTIONS];
         signed long   alDllRefCode[NBR_FUNCTIONS];
+        signed long   alAliasFn[NBR_FUNCTIONS]; /* -1 is SQL-NULL, -2 is do not mind, >= 0 ref to function. */
     } FNFINDBUF, *PFNFINDBUF;
 
     typedef long (_System DBCALLBACKFETCH)(const char*, const char *, void *);
@@ -85,10 +90,12 @@ extern "C" {
                                                    unsigned long ulOrdinal,
                                                    BOOL fIgnoreOrdinal);
     BOOL            _System dbFindFunction(const char *pszFunctionName,
-                                           PFNFINDBUF pFnFindBuf);
+                                           PFNFINDBUF pFnFindBuf,
+                                           signed long lDll);
     signed long     _System dbFindAuthor(const char *pszAuthor);
     signed long     _System dbGetFunctionState(signed long lRefCode);
     unsigned long   _System dbUpdateFunction(PFNDESC pFnDesc,
+                                             signed long lDll,
                                              char *pszError);
     unsigned long   _System dbCreateHistory(char *pszError);
     unsigned long   _System dbCheckIntegrity(char *pszError);

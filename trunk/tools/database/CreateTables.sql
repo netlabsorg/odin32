@@ -1,4 +1,4 @@
--- $Id: CreateTables.sql,v 1.2 2000-02-11 18:35:54 bird Exp $
+-- $Id: CreateTables.sql,v 1.3 2000-02-11 23:54:24 bird Exp $
 --
 -- Create all tables.
 --
@@ -11,8 +11,8 @@ CREATE TABLE dll (
     refcode TINYINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(32) NOT NULL,
     description VARCHAR(255),
-    UNIQUE i1(refcode),
-    UNIQUE i2(name)
+    UNIQUE u1(refcode),
+    UNIQUE u2(name)
 );
 
 CREATE TABLE state (
@@ -20,24 +20,30 @@ CREATE TABLE state (
     color   CHAR(7) NOT NULL,
     name    VARCHAR(32) NOT NULL,
     description VARCHAR(128),
-    UNIQUE i1(refcode),
-    UNIQUE i2(name),
-    UNIQUE i3(color)
+    UNIQUE u1(refcode),
+    UNIQUE u2(name),
+    UNIQUE u3(color)
 );
 
 CREATE TABLE function (
-    refcode INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    dll     TINYINT NOT NULL,
-    name    VARCHAR(64) NOT NULL,
-    intname VARCHAR(64) NOT NULL,
-    state   TINYINT NOT NULL DEFAULT 0,
-    ordinal INTEGER NOT NULL,
+    refcode  INTEGER  NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    dll      TINYINT  NOT NULL,
+    aliasfn  INTEGER  NOT NULL DEFAULT -1,
+    name     VARCHAR(64) NOT NULL,
+    intname  VARCHAR(64) NOT NULL,
+    state    TINYINT  NOT NULL DEFAULT 0,
+    ordinal  INTEGER  NOT NULL,
     apigroup SMALLINT,
-    return VARCHAR(64),
-    updated TINYINT NOT NULL DEFAULT 0,
-    UNIQUE i1(refcode),
-    UNIQUE i2(name,dll),
-    UNIQUE i3(intname, refcode)
+    return   VARCHAR(64),
+    updated  TINYINT  NOT NULL DEFAULT 0,
+    UNIQUE i1(refcode, aliasfn),
+    UNIQUE i1a(aliasfn, name, dll),
+    UNIQUE i1b(aliasfn, dll, refcode),
+    UNIQUE i1c(aliasfn, intname, dll, refcode),
+    UNIQUE i2(name, dll, refcode),
+    UNIQUE i3(intname, dll, refcode),
+    UNIQUE u1(refcode),
+    UNIQUE u2(name, dll)
 );
 
 CREATE TABLE apigroup (
@@ -45,8 +51,8 @@ CREATE TABLE apigroup (
     dll     TINYINT NOT NULL,
     name    VARCHAR(64) NOT NULL,
     description VARCHAR(128),
-    UNIQUE i1(refcode),
-    UNIQUE i2(name)
+    UNIQUE u1(refcode),
+    UNIQUE u2(name)
 );
 
 CREATE TABLE author (
@@ -57,9 +63,9 @@ CREATE TABLE author (
     email    VARCHAR(64),
     country  VARCHAR(64),
     location VARCHAR(64),
-    UNIQUE i1(refcode),
-    UNIQUE i2(name),
-    UNIQUE i3(initials)
+    UNIQUE u1(refcode),
+    UNIQUE u2(name),
+    UNIQUE u3(initials)
 --   ,UNIQUE i4(alias), UNIQUE columns have to be defined NOT NULL in mySql.
 --    UNIQUE i5(email)  UNIQUE columns have to be defined NOT NULL in mySql.
 );
@@ -67,7 +73,7 @@ CREATE TABLE author (
 CREATE TABLE fnauthor (
     author   SMALLINT NOT NULL,
     function INTEGER NOT NULL,
-    UNIQUE i1(function, author)
+    UNIQUE u1(function, author)
 );
 
 CREATE TABLE historydll (
@@ -75,7 +81,7 @@ CREATE TABLE historydll (
     state SMALLINT NOT NULL,
     date  DATE NOT NULL,
     count SMALLINT NOT NULL,
-    UNIQUE i1(dll, state, date)
+    UNIQUE u1(dll, state, date)
 );
 
 CREATE TABLE historyapigroup (
@@ -83,29 +89,30 @@ CREATE TABLE historyapigroup (
     state SMALLINT NOT NULL,
     date  DATE NOT NULL,
     count SMALLINT NOT NULL,
-    UNIQUE i1(apigroup, state, date)
+    UNIQUE u1(apigroup, state, date)
 );
 
 CREATE TABLE historydlltotal (
     dll SMALLINT NOT NULL,
     date DATE NOT NULL,
     totalcount SMALLINT NOT NULL,
-    UNIQUE i1(dll, DATE)
+    UNIQUE u1(dll, DATE)
 );
 
 CREATE TABLE historyapigrouptotal (
     apigroup SMALLINT NOT NULL,
     date DATE NOT NULL,
     totalcount SMALLINT NOT NULL,
-    UNIQUE i1(apigroup, date)
+    UNIQUE u1(apigroup, date)
 );
 
 CREATE TABLE parameter (
-    function SMALLINT NOT NULL,
+    function INTEGER NOT NULL,
     sequencenbr TINYINT NOT NULL,
-    type     VARCHAR(64) NOT NULL,
     name     VARCHAR(64) NOT NULL,
+    type     VARCHAR(64) NOT NULL,
     description VARCHAR(128),
-    UNIQUE i1(function, name)
+    INDEX  i1(function, name(10)),
+    UNIQUE u1(function, name)
 );
 
