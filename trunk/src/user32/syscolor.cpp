@@ -1,4 +1,4 @@
-/* $Id: syscolor.cpp,v 1.33 2002-11-29 15:03:36 sandervl Exp $ */
+/* $Id: syscolor.cpp,v 1.34 2002-11-29 15:46:34 sandervl Exp $ */
 
 /*
  * Win32 system color API functions for OS/2
@@ -209,17 +209,13 @@ COLORREF WIN32API GetSysColor(INT nIndex)
 {
   if(fColorInit == FALSE)
   {
-    SYSCOLOR_Init();
-    fColorInit = TRUE;
+      SYSCOLOR_Init();
+      fColorInit = TRUE;
   }
 
   if ((nIndex >= 0) && (nIndex < NUM_SYS_COLORS))
   {
-    if (USEWINCOLORS) return SysColors[nIndex];
-    else
-        if(nIndex < NUM_OPEN32_SYSCOLORS)
-                return O32_GetSysColor(nIndex);
-        else    return SysColors[nIndex];
+       return SysColors[nIndex];
   }
   else return 0;
 }
@@ -247,8 +243,6 @@ BOOL WIN32API SetSysColors(INT nChanges, const INT *lpSysColor,
                               const COLORREF *lpColorValues)
 {
     ODIN_SetSysColors(nChanges, lpSysColor, lpColorValues);
-
-    O32_SetSysColors(nChanges, lpSysColor, lpColorValues);
 
     /* Send WM_SYSCOLORCHANGE message to all windows */
 
