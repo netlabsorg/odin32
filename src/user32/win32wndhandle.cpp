@@ -1,4 +1,4 @@
-/* $Id: win32wndhandle.cpp,v 1.9 2001-05-11 08:39:46 sandervl Exp $ */
+/* $Id: win32wndhandle.cpp,v 1.10 2001-10-17 15:16:58 phaller Exp $ */
 /*
  * Win32 Handle Management Code for OS/2
  *
@@ -80,6 +80,10 @@ void HwFreeWindowHandle(HWND hwnd)
 }
 //******************************************************************************
 //******************************************************************************
+/* 2001-10-17 PH
+ * Note: this function is repeated as "inline macro" in win32wbase.cpp.
+ * Changes here must be reflected there, tool.
+ */
 BOOL HwGetWindowHandleData(HWND hwnd, DWORD *pdwUserData)
 {
   if((hwnd & 0xFFFF0000) != WNDHANDLE_MAGIC_HIGHWORD) {

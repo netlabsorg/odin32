@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.291 2001-10-17 14:30:09 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.292 2001-10-17 15:16:57 phaller Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -79,6 +79,31 @@ static fDestroyAll = FALSE;
 static ULONG currentProcessId = -1;
 static int iF10Key = 0;
 static int iMenuSysKey = 0;
+
+
+
+/***
+ * Performance Optimization:
+ * we're directly inlining this micro function from win32wndhandle.cpp.
+ * Changes there must be reflected here.
+ ***/
+extern ULONG WindowHandleTable[MAX_WINDOW_HANDLES];
+
+BOOL INLINE i_HwGetWindowHandleData(HWND hwnd, DWORD *pdwUserData)
+{
+  if((hwnd & 0xFFFF0000) != WNDHANDLE_MAGIC_HIGHWORD) {
+	return FALSE; //unknown window (PM?)
+  }
+  hwnd &= WNDHANDLE_MAGIC_MASK;
+  if(hwnd < MAX_WINDOW_HANDLES) {
+	*pdwUserData = WindowHandleTable[hwnd];
+	return TRUE;
+  }
+  *pdwUserData = 0;
+  return FALSE;
+}
+#define HwGetWindowHandleData(a,b) i_HwGetWindowHandleData(a,b)
+
 
 //******************************************************************************
 //******************************************************************************
