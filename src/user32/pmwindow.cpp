@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.144 2001-09-15 09:16:08 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.145 2001-09-15 15:23:12 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -482,7 +482,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         break;
 
     case WM_SYSCOMMAND:
-        dprintf(("OS2: WM_SYSCOMMAND %x", hwnd));
+        dprintf(("OS2: WM_SYSCOMMAND %x %x %x", win32wnd->getWindowHandle(), mp1, mp2));
         win32wnd->DispatchMsgA(pWinMsg);
         break;
 
@@ -924,13 +924,14 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
             if(pswp->fl & SWP_HIDE) {
                 WinShowWindow(win32wnd->getOS2WindowHandle(), 0);
             }
-
+/*
             if(pswp->fl & SWP_ACTIVATE)
             {
                 //Only send PM WM_ACTIVATE to top-level windows (frame windows)
                 if(!(WinQueryWindowULong(WinWindowFromID(hwnd,FID_CLIENT), OFFSET_WIN32FLAGS) & WINDOWFLAG_ACTIVE))
                 {
-                    WinSendMsg(hwnd, WM_ACTIVATE, (MPARAM)TRUE, (MPARAM)hwnd);
+                    WinSendDlgItemMsg(hwnd, FID_CLIENT, WM_ACTIVATE, (MPARAM)TRUE, (MPARAM)hwnd);
+//                    WinSendMsg(hwnd, WM_ACTIVATE, (MPARAM)TRUE, (MPARAM)hwnd);
                 }
             }
             else
@@ -939,9 +940,11 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
                 //Only send PM WM_ACTIVATE to top-level windows (frame windows)
                 if(WinQueryWindowULong(WinWindowFromID(hwnd,FID_CLIENT), OFFSET_WIN32FLAGS) & WINDOWFLAG_ACTIVE)
                 {
-                    WinSendMsg(hwnd, WM_ACTIVATE, (MPARAM)FALSE, (MPARAM)hwnd);
+                    WinSendDlgItemMsg(hwnd, FID_CLIENT, WM_ACTIVATE, (MPARAM)FALSE, (MPARAM)hwnd);
+//                    WinSendMsg(hwnd, WM_ACTIVATE, (MPARAM)FALSE, (MPARAM)hwnd);
                 }
             }
+*/
 //            goto RunDefWndProc;
             goto RunDefFrameWndProc;
         }
@@ -1082,6 +1085,7 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
              //Only send PM WM_ACTIVATE to top-level windows (frame windows)
              if(!(WinQueryWindowULong(WinWindowFromID(hwnd,FID_CLIENT), OFFSET_WIN32FLAGS) & WINDOWFLAG_ACTIVE))
              {
+//                WinSendDlgItemMsg(hwnd, FID_CLIENT, WM_ACTIVATE, (MPARAM)TRUE, (MPARAM)hwnd);
                 WinSendMsg(hwnd, WM_ACTIVATE, (MPARAM)TRUE, (MPARAM)hwnd);
              }
         }
@@ -1091,6 +1095,7 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
             //Only send PM WM_ACTIVATE to top-level windows (frame windows)
             if(WinQueryWindowULong(WinWindowFromID(hwnd,FID_CLIENT), OFFSET_WIN32FLAGS) & WINDOWFLAG_ACTIVE)
             {
+//                WinSendDlgItemMsg(hwnd, FID_CLIENT, WM_ACTIVATE, (MPARAM)FALSE, (MPARAM)hwnd);
                     WinSendMsg(hwnd, WM_ACTIVATE, (MPARAM)FALSE, (MPARAM)hwnd);
             }
         }
@@ -1227,13 +1232,13 @@ PosChangedEnd:
         dprintf(("PMFRAME:WM_FOCUSCHANGE %x %x (%x) %x %x", win32wnd->getWindowHandle(), OS2ToWin32Handle(hwndFocus), hwndFocus, usSetFocus, fsFocusChange));
         goto RunDefFrameWndProc;
     }
-#endif
 
     case WM_SETFOCUS:
     {
         dprintf(("PMFRAME: WM_SETFOCUS %x %x", win32wnd->getWindowHandle(), hwnd));
         goto RunDefFrameWndProc;
     }
+#endif
 
     case WM_ACTIVATE:
     {
@@ -1306,14 +1311,17 @@ PosChangedEnd:
         break;
     }
 
+#ifdef DEBUG
     case WM_QUERYFRAMEINFO:
         dprintf(("PMFRAME:WM_QUERYFRAMEINFO %x", win32wnd->getWindowHandle()));
         goto RunDefFrameWndProc;
+#endif
 
     case WM_FORMATFRAME:
         dprintf(("PMFRAME:WM_FORMATFRAME %x", win32wnd->getWindowHandle()));
         break;
 
+#ifdef DEBUG
     case WM_ADJUSTFRAMEPOS:
     {
         PSWP pswp   = (PSWP)mp1;
@@ -1329,6 +1337,7 @@ PosChangedEnd:
         dprintf(("PMFRAME:WM_OWNERPOSCHANGE %x %x %x (%d,%d) (%d,%d)", win32wnd->getWindowHandle(), pswp->hwnd, pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
         goto RunDefFrameWndProc;
     }
+#endif
 
     case WM_MINMAXFRAME:
     {
@@ -1363,9 +1372,11 @@ PosChangedEnd:
         goto RunDefWndProc;
     }
 
+#ifdef DEBUG
     case WM_UPDATEFRAME:
         dprintf(("PMFRAME:WM_UPDATEFRAME %x", win32wnd->getWindowHandle()));
         goto RunDefFrameWndProc;
+#endif
 
     case WM_TRACKFRAME:
         dprintf(("PMFRAME: WM_TRACKFRAME %x %x %x", win32wnd->getWindowHandle(), mp1, mp2));
@@ -1376,10 +1387,16 @@ PosChangedEnd:
         break;
 
     case WM_SYSCOMMAND:
-        dprintf(("PMFRAME: WM_SYSCOMMAND %x", win32wnd->getWindowHandle()));
-        win32wnd->DispatchMsgA(pWinMsg);
+        dprintf(("PMFRAME: WM_SYSCOMMAND %x %x %x", win32wnd->getWindowHandle(), mp1, mp2));
+        if(win32wnd->getWindowHandle() != pWinMsg->hwnd) {
+            RELEASE_WNDOBJ(win32wnd);
+            win32wnd = Win32BaseWindow::GetWindowFromHandle(pWinMsg->hwnd);
+        }
+        if(win32wnd)
+            win32wnd->DispatchMsgA(pWinMsg);
         break;
 
+#ifdef DEBUG
     case WM_DDE_INITIATE:
     case WM_DDE_INITIATEACK:
     case WM_DDE_REQUEST:
@@ -1392,6 +1409,7 @@ PosChangedEnd:
     case WM_DDE_TERMINATE:
          dprintf(("PMFRAME: WM_DDE %x %x", msg, win32wnd->getWindowHandle()));
          break;
+#endif
 
     default:
         goto RunDefFrameWndProc;
