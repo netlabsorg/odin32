@@ -1,4 +1,4 @@
-/* $Id: ChangeLog,v 1.1510 2001-06-13 13:28:08 bird Exp $ */
+/* $Id: ChangeLog,v 1.1511 2001-06-13 14:46:03 bird Exp $ */
 
  2001-06-13: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Corrected position of PM titlebar control
@@ -22,6 +22,7 @@
                 o Allowed loading of images using the NATIVE subsystem.
     - DailyBuild:
                 o Moved Odin.ini to system32 in daily .zips.
+    - NTDLL:    o Stubbed NtOpenThread.
 
  2001-06-12: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Partly fixed position of PM frame controls
