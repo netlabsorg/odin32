@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.296 2001-10-25 10:40:45 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.297 2001-10-28 10:38:13 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -3588,7 +3588,7 @@ BOOL Win32BaseWindow::SetWindowTextW(LPWSTR lpsz)
 }
 //******************************************************************************
 //******************************************************************************
-LONG Win32BaseWindow::SetWindowLongA(int index, ULONG value, BOOL fUnicode)
+LONG Win32BaseWindow::SetWindowLong(int index, ULONG value, BOOL fUnicode)
 {
  LONG oldval;
 
@@ -3698,7 +3698,7 @@ LONG Win32BaseWindow::SetWindowLongA(int index, ULONG value, BOOL fUnicode)
 }
 //******************************************************************************
 //******************************************************************************
-ULONG Win32BaseWindow::GetWindowLongA(int index, BOOL fUnicode)
+ULONG Win32BaseWindow::GetWindowLong(int index, BOOL fUnicode)
 {
  ULONG value;
 

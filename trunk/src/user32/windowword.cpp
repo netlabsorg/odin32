@@ -1,4 +1,4 @@
-/* $Id: windowword.cpp,v 1.11 2001-06-09 14:50:26 sandervl Exp $ */
+/* $Id: windowword.cpp,v 1.12 2001-10-28 10:38:14 sandervl Exp $ */
 
 /*
  * Win32 Get/SetWindowLong/Word user32 API functions for OS/2
@@ -27,7 +27,7 @@ LONG WIN32API SetWindowLongA(HWND hwnd, int nIndex, LONG  lNewLong)
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(window)
     {
-        ret = window->SetWindowLongA(nIndex,lNewLong);
+        ret = window->SetWindowLong(nIndex,lNewLong, TYPE_ASCII);
         RELEASE_WNDOBJ(window);
         return ret;
     }
@@ -47,7 +47,7 @@ LONG WIN32API SetWindowLongW(HWND hwnd, int nIndex, LONG  lNewLong)
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(window)
     {
-        ret = window->SetWindowLongA(nIndex,lNewLong, TRUE);
+        ret = window->SetWindowLong(nIndex,lNewLong, TYPE_UNICODE);
         RELEASE_WNDOBJ(window);
         return ret;
     }
@@ -109,7 +109,7 @@ LONG WIN32API GetWindowLongA(HWND hwnd, int nIndex)
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(window)
     {
-        ret = window->GetWindowLongA(nIndex);
+        ret = window->GetWindowLong(nIndex, TYPE_ASCII);
         RELEASE_WNDOBJ(window);
         return ret;
     }
@@ -130,7 +130,7 @@ LONG WIN32API GetWindowLongW(HWND hwnd, int nIndex)
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(window)
     {
-        ret = window->GetWindowLongA(nIndex, TRUE);
+        ret = window->GetWindowLong(nIndex, TYPE_UNICODE);
         RELEASE_WNDOBJ(window);
         return ret;
     }

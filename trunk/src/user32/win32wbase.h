@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.131 2001-10-17 14:30:10 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.132 2001-10-28 10:38:14 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -33,8 +33,11 @@ class Win32BaseWindow;
 
 #define WINDOWFLAG_ACTIVE	  1
 
-#define WIN32PM_MAGIC           0x12345678
-#define CheckMagicDword(a)      (a==WIN32PM_MAGIC)
+#define WIN32PM_MAGIC             0x12345678
+#define CheckMagicDword(a)        (a==WIN32PM_MAGIC)
+
+#define TYPE_ASCII		  0
+#define TYPE_UNICODE		  1
 
 #define GW_HWNDNEXTCHILD          (0x10000 | GW_HWNDNEXT)
 #define GW_HWNDPREVCHILD          (0x10000 | GW_HWNDPREV)
@@ -164,8 +167,8 @@ virtual  ULONG  MsgEnable(BOOL fEnable);
          void   MsgGetText(char *wndtext, ULONG textlength);
          VOID   updateWindowStyle(DWORD oldExStyle,DWORD oldStyle);
 
-virtual  LONG   SetWindowLongA(int index, ULONG value, BOOL fUnicode = FALSE);
-virtual  ULONG  GetWindowLongA(int index, BOOL fUnicode = FALSE);
+virtual  LONG   SetWindowLong(int index, ULONG value, BOOL fUnicode);
+virtual  ULONG  GetWindowLong(int index, BOOL fUnicode);
 virtual  WORD   SetWindowWord(int index, WORD value);
 virtual  WORD   GetWindowWord(int index);
 
