@@ -1,0 +1,7 @@
+MAJOR=253
+
+TRACE TP=@STATIC,
+      MINOR=42,
+      DESC="",
+      FMT="%P%S"
+
