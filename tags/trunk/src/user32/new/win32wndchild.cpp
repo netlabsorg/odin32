@@ -1,4 +1,4 @@
-/* $Id: win32wndchild.cpp,v 1.3 1999-08-31 10:36:23 sandervl Exp $ */
+/* $Id: win32wndchild.cpp,v 1.4 1999-09-05 18:32:27 sandervl Exp $ */
 /*
  * Win32 Child/Parent window class for OS/2
  *
@@ -50,7 +50,7 @@ BOOL ChildWindow::AddChild(ChildWindow *child)
 	while(curchild->getNextChild()) {
 		curchild = curchild->getNextChild();
 	}
-	curchild->setNextChild(this);
+	curchild->setNextChild(child);
    }
    child->setNextChild(NULL);
 
