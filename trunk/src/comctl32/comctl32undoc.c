@@ -611,6 +611,11 @@ FreeMRUList (HANDLE hMRUList)
 }
 
 
+#ifdef __WIN32OS2__
+typedef int (* WIN32API lpComp1)(LPCSTR , LPCSTR );
+typedef int (* WIN32API lpComp2)(LPCVOID, LPCVOID, DWORD);
+#endif
+
 /**************************************************************************
  *                  FindMRUData [COMCTL32.169]
  *
@@ -648,13 +653,21 @@ FindMRUData (HANDLE hList, LPCVOID lpData, DWORD cbData, LPINT lpRegNum)
 
     for(i=0; i<mp->cursize; i++) {
 	if (mp->extview.dwFlags & MRUF_BINARY_LIST) {
+#ifdef __WIN32OS2__
+	    if (!(lpComp2)mp->extview.lpfnCompare(lpData, &mp->array[i]->datastart,
+#else
 	    if (!mp->extview.lpfnCompare(lpData, &mp->array[i]->datastart,
+#endif
 					 cbData))
 		break;
 	}
 	else {
 	    if(mp->isUnicode) {
+#ifdef __WIN32OS2__
+	        if (!((lpComp1)(mp->extview.lpfnCompare))(lpData, &mp->array[i]->datastart))
+#else
 	        if (!mp->extview.lpfnCompare(lpData, &mp->array[i]->datastart))
+#endif
 		    break;
 	    } else {
 	        DWORD len = WideCharToMultiByte(CP_ACP, 0,
@@ -665,7 +678,11 @@ FindMRUData (HANDLE hList, LPCVOID lpData, DWORD cbData, LPINT lpRegNum)
 		WideCharToMultiByte(CP_ACP, 0, (LPWSTR)&mp->array[i]->datastart, -1,
 				    itemA, len, NULL, NULL);
 
+#ifdef __WIN32OS2__
+	        cmp = ((lpComp1)(mp->extview.lpfnCompare))(dataA, itemA);
+#else
 	        cmp = mp->extview.lpfnCompare(dataA, itemA);
+#endif
 		COMCTL32_Free(itemA);
 		if(!cmp)
 		    break;
