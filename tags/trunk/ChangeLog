@@ -1,4 +1,4 @@
-/* $Id: ChangeLog,v 1.1602 2001-07-15 14:57:13 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1603 2001-07-15 15:21:03 sandervl Exp $ */
 
  2001-07-15: Sander van Leeuwen <sandervl@xs4all.nl>
     - COMDLG32: o Ported Wine printer dialog code (inactive due to missing
@@ -6,6 +6,7 @@
     - USER32:   o Translate WM_VSCROLL & WM_HSCROLL
                 o Do not use imports not available in Warp 3's PMWINX
                   (WaitForInputIdle & GetAsyncKeyState)
+    - KERNEL32: o Do not call WaitForInputIdle in WinExec on Warp 3 systems.
 
  2001-07-14: Sander van Leeuwen <sandervl@xs4all.nl>
     - PELDR:    o Fix for parsing cmd line consisting of directory with spaces
