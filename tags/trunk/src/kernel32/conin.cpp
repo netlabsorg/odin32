@@ -1,4 +1,4 @@
-/* $Id: conin.cpp,v 1.3 1999-06-21 18:53:51 phaller Exp $ */
+/* $Id: conin.cpp,v 1.4 1999-07-12 17:20:03 phaller Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -243,6 +243,11 @@ DWORD  HMDeviceConsoleInClass::_DeviceRequest (PHMHANDLEDATA pHMHandleData,
       return (HMDeviceConsoleInClass::
               FlushConsoleInputBuffer(pHMHandleData));
 
+    case DRQ_GETCONSOLEMODE:
+      return (HMDeviceConsoleInClass
+              ::GetConsoleMode(pHMHandleData,
+                               (LPDWORD)arg1));
+
     case DRQ_GETNUMBEROFCONSOLEINPUTEVENTS:
       return (HMDeviceConsoleInClass::
               GetNumberOfConsoleInputEvents(pHMHandleData,
@@ -292,6 +297,11 @@ DWORD  HMDeviceConsoleInClass::_DeviceRequest (PHMHANDLEDATA pHMHandleData,
                                 (PINPUT_RECORD)arg1,
                                 (DWORD)arg2,
                                 (LPDWORD)arg3));
+
+    case DRQ_SETCONSOLEMODE:
+      return (HMDeviceConsoleInClass
+              ::SetConsoleMode(pHMHandleData,
+                               (DWORD)arg1));
 
     case DRQ_WRITECONSOLEINPUTA:
       return (HMDeviceConsoleInClass::

@@ -1,4 +1,4 @@
-/* $Id: console2.h,v 1.6 1999-06-17 18:21:41 phaller Exp $ */
+/* $Id: console2.h,v 1.7 1999-07-12 17:20:04 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -401,12 +401,12 @@ typedef struct _iConsoleInput
   INPUT_RECORD arrInputRecord[CONSOLE_INPUTQUEUESIZE];       /* packet queue */
   HEV          hevInputQueue;             /* becomes posted if input arrives */
 
-  /* HMUTEX hmtxInputQueue; if queue corruption should occur ... */
-
   ULONG        ulIndexFree;              /* index of first free event record */
   ULONG        ulIndexEvent;          /* index of first valid event in queue */
   ULONG        ulEvents;                        /* number of events in queue */
   DWORD        dwConsoleMode;                          /* input console mode */
+
+  HMTX         hmtxInputQueue;        /* console input queue mutex semaphore */
 } ICONSOLEINPUT, *PICONSOLEINPUT;
 
 
