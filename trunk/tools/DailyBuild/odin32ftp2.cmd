@@ -1,4 +1,4 @@
-/* $Id: odin32ftp2.cmd,v 1.12 2001-04-02 01:55:41 bird Exp $
+/* $Id: odin32ftp2.cmd,v 1.13 2001-04-19 11:33:27 bird Exp $
  *
  * Uploads the relase and debug builds to the FTP sites.
  *
@@ -23,6 +23,7 @@ do  /* weekly .wpi build */
     asUploads.1 = 'ChangeLog';
     asUploads.2 = 'odin32bin-'DATE('S')'-release.wpi';
     asUploads.3 = 'odin32bin-'DATE('S')'-debug.wpi';
+    sDirectory  = 'weekly';
 end
 else
 do  /* daily .zip build */
@@ -30,6 +31,7 @@ do  /* daily .zip build */
     asUploads.1 = 'ChangeLog';
     asUploads.2 = 'odin32bin-'DATE('S')'-release.zip';
     asUploads.3 = 'odin32bin-'DATE('S')'-debug.zip';
+    sDirectory  = 'daily';
 end
 
 asDelete.0 = 25;
@@ -60,7 +62,7 @@ do i = 1 to 5 /* (Retries 5 times) */
     do
         rc = cleanFtp('os2-delete', '/daily', 'www.os2.org');
         do j = 1 to asUploads.0
-            rc = forwardSF(asUploads.j, 'os2-'||asUploads.j, '/daily', 'www.os2.org');
+            rc = forwardSF(asUploads.j, 'os2-'||asUploads.j, '/'||sDirectory, 'www.os2.org');
         end
     end
 
@@ -69,7 +71,7 @@ do i = 1 to 5 /* (Retries 5 times) */
      */
     if (sLoc = '' | sLoc = 'netlabs') then
     do
-        rc = cleanFtp('netlabs-delete', '/daily', 'ftp.netlabs.org');
+        rc = cleanFtp('netlabs-delete', '/'||sDirectory, 'ftp.netlabs.org');
         do j = 1 to asUploads.0
             if (1) then
                 rc = putFtp(asUploads.j, 'netlabs-'||asUploads.j, '/daily', 'ftp.netlabs.org');
