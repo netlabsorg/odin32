@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.267 2001-06-13 12:19:09 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.268 2001-06-13 17:28:07 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1342,7 +1342,6 @@ LRESULT Win32BaseWindow::DefWndControlColor(UINT ctlType, HDC hdc)
         SetTextColor(hdc, GetSysColor(COLOR_WINDOWTEXT));
         return GetSysColorBrush(COLOR_BTNFACE);
     }
-
     if( ctlType == CTLCOLOR_SCROLLBAR)
     {
         HBRUSH hb = GetSysColorBrush(COLOR_SCROLLBAR);
@@ -1617,12 +1616,6 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
     {
       RECT rect;
       int rc;
-
-        if(getWindowHandle() == 0x68000044) {
-          rc = GetClipBox( (HDC)wParam, &rect );
-          FillRect( (HDC)wParam, &rect, GetSysColorBrush(COLOR_WINDOWTEXT));
-          return 1;
-        }
 
         if (!windowClass || !windowClass->getBackgroundBrush()) return 0;
 
