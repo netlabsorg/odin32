@@ -1,4 +1,4 @@
-/* $Id: dev1632.h,v 1.1 2001-09-11 01:27:27 bird Exp $
+/* $Id: dev1632.h,v 1.2 2001-11-19 03:07:59 bird Exp $
  * dev1632.h - Common header file for 16-bit and 32-bit C
  *
  * Copyright (c) 1999 knut st. osmundsen
@@ -66,6 +66,13 @@ typedef struct _KRNLINFO
 #define PKRNLINFO void *
 
 #endif
+
+typedef struct _LKE32PARAM
+{
+    unsigned short  usBuild;
+    unsigned short  fKernel;
+    unsigned char   cObjects;
+} LKE32PARAM, *PLKE32PARAM;
 
 #pragma pack()
 
