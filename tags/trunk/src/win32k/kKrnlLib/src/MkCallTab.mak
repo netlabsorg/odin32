@@ -1,4 +1,4 @@
-# $Id: MkCallTab.mak,v 1.13 2002-12-16 00:48:05 bird Exp $
+# $Id: MkCallTab.mak,v 1.14 2002-12-16 02:24:27 bird Exp $
 
 #
 # MkCallTab - source generator.
@@ -48,15 +48,15 @@ RULES_FORWARD = calltaba.asm ..\kKrnlLibImpLib.$(EXT_DEF) TstFakers.c
 
 # kKrnlLib Import library definition file.
 ..\kKrnlLibimplib.$(EXT_DEF): $(TARGET_PUBNAME)
-    $(TARGET_PUBNAME) deffile > $@
+    $(TARGET) deffile > $@
 
 # Generate calltaba.asm
 calltaba.asm:           $(TARGET_PUBNAME)
-    $(TARGET_PUBNAME) calltab > $@
+    $(TARGET) calltab > $@
 
 # Generate TstFakers.c
 TstFakers.c:            $(TARGET_PUBNAME)
-    $(TARGET_PUBNAME) tstfakers > $@
+    $(TARGET) tstfakers > $@
 
 !endif # !BUILD_FORWARDING
 

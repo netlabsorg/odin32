@@ -1,11 +1,28 @@
-/* $Id: dev16.h,v 1.4 2001-11-20 03:43:51 bird Exp $
- * dev16 - 16-bit specific. Should not be used in 32-bit C/C++.
+/* $Id: dev16.h,v 1.5 2002-12-16 02:25:06 bird Exp $
  *
- * Copyright (c) 1999 knut st. osmundsen
+ * 16 bit device stuff.
  *
- * Project Odin Software License can be found in LICENSE.TXT
+ * Copyright (c) 2002 knut st. osmundsen <bird@anduin.net>
+ *
+ *
+ * This file is part of kKrnlLib.
+ *
+ * kKrnlLib is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * kKrnlLib is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with kKrnlLib; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
+
 #ifndef _d16_h_
 #define _d16_h_
 
@@ -103,7 +120,7 @@ extern void NEAR strategyAsm1(void);
  */
 extern DDHDR    aDevHdrs[2];
 extern PFN      Device_Help;
-extern ULONG    TKSSBase16;
+extern ULONG    pulTKSSBase32;
 extern USHORT   R0FlatCS16;
 extern USHORT   R0FlatDS16;
 extern LIN      linDT;
@@ -126,11 +143,7 @@ extern LIN NEAR SSToDS_16a(void NEAR *pStackVar);
 extern char PASCAL DATA16START      ;
 extern char PASCAL DATA16_BSSSTART  ;
 extern char PASCAL DATA16_CONSTSTART;
-extern char PASCAL DATA16_INITSTART      ;
-extern char PASCAL DATA16_INIT_BSSSTART  ;
-extern char PASCAL DATA16_INIT_CONSTSTART;
 extern char PASCAL CODE16START      ;
-extern char PASCAL CODE16_INITSTART      ;
 extern char PASCAL CODE32START      ;
 extern char PASCAL DATA32START      ;
 extern char PASCAL BSS32START       ;
@@ -142,18 +155,15 @@ extern char PASCAL CODE16END      ;
 extern char PASCAL DATA16END      ;
 extern char PASCAL DATA16_BSSEND  ;
 extern char PASCAL DATA16_CONSTEND;
-extern char PASCAL DATA16_INITEND      ;
-extern char PASCAL DATA16_INIT_BSSEND  ;
-extern char PASCAL DATA16_INIT_CONSTEND;
+extern char PASCAL DATA16_ENDEND      ;
 extern char PASCAL CODE16END      ;
-extern char PASCAL CODE16_INITEND      ;
+extern char PASCAL CODE16_ENDEND      ;
 extern char PASCAL CODE32END      ;
 extern char PASCAL DATA32END      ;
 extern char PASCAL BSS32END       ;
 extern char PASCAL CONST32_ROEND  ;
 extern char PASCAL _VFTEND        ;
 extern char PASCAL EH_DATAEND     ;
-
 
 
 #endif

@@ -1,15 +1,31 @@
-/* $Id: kKrnlLib.h,v 1.7 2002-04-01 13:51:16 bird Exp $
+/* $Id: kKrnlLib.h,v 1.8 2002-12-16 02:25:07 bird Exp $
  *
  * Top level header file for kKrnlLib exports.
  *
  * NOTE: This there is no need to include any kLib stuff.
  *       Everything goes thru this header file.
  *
- * Copyright (c) 2002 knut st. osmundsen (bird@anduin.net)
+ * Copyright (c) 2002-2003 knut st. osmundsen <bird@anduin.net>
  *
- * GPL
+ *
+ * This file is part of kKrnlLib.
+ *
+ * kKrnlLib is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * kKrnlLib is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with kKrnlLib; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
+
 #ifndef _kKrnlLib_h_
 #define _kKrnlLib_h_
 
@@ -40,7 +56,7 @@
  * Basic kernel info.
  */
 #ifndef NO_KKL_KERNEL
-    #include <kKLkernel.h>
+    #include "kKLkernel.h"
 #endif
 
 
@@ -48,7 +64,7 @@
  * Standard arg stuff.
  */
 #ifndef NO_KKL_STDARG
-    #include "kKLstdarg.h"
+    #include <kLib/kStdArg.h>
 #endif
 
 
@@ -69,11 +85,14 @@
  * String/IO stuff.
  */
 #ifdef INCL_KKL_SPRINTF
-    #include "kKLsprintf.h"
+    #include <kLib/kString.h>
+    #define sprintf     kStrFormat
+    #define vsprintf    kStrVFormat
 #endif
-#ifdef INCL_KKL_PRINTF
-    #include "kKLprintf.h"
-#endif
+// replaced by kLib/kLog.h
+//#ifdef INCL_KKL_PRINTF
+//    #include "kKLprintf.h"
+//#endif
 
 
 /*
@@ -106,8 +125,6 @@
 #ifdef INCL_KKL_MISC
     #include <kLib/kMisc.h>
 #endif
-
-
 
 #endif
 
