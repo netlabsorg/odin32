@@ -1,4 +1,4 @@
-/* $Id: winicon.cpp,v 1.30 2001-10-14 20:15:15 sandervl Exp $ */
+/* $Id: winicon.cpp,v 1.31 2001-10-14 20:55:46 sandervl Exp $ */
 /*
  * Win32 Icon Code for OS/2
  *
@@ -155,7 +155,7 @@ HICON WINAPI CreateIconIndirect(ICONINFO *iconinfo)
     HICON hObj;
     int sizeXor,sizeAnd,colortablesize;
 
-    dprintf(("USER32: CreateIconIndirect %x", iconinfo));
+    dprintf(("USER32: CreateIconIndirect %x %x %x %s", iconinfo, iconinfo->hbmMask, iconinfo->hbmColor, (iconinfo->fIcon) ? "icon" : "cursor"));
 
     GetObjectA( iconinfo->hbmColor, sizeof(bmpXor), &bmpXor );
     GetObjectA( iconinfo->hbmMask, sizeof(bmpAnd), &bmpAnd );
