@@ -110,14 +110,14 @@ extern void UPDOWN_Register(void);
 extern void UPDOWN_Unregister(void);
 
 
-HANDLE COMCTL32_hHeap = (HANDLE)NULL;
-LPSTR    COMCTL32_aSubclass = (LPSTR)NULL;
+HANDLE COMCTL32_hHeap = NULL;
+LPSTR    COMCTL32_aSubclass = NULL;
 HMODULE COMCTL32_hModule = 0;
 LANGID  COMCTL32_uiLang = MAKELANGID(LANG_NEUTRAL, SUBLANG_NEUTRAL);
-HBRUSH  COMCTL32_hPattern55AABrush = (HANDLE)NULL;
+HBRUSH  COMCTL32_hPattern55AABrush = NULL;
 COMCTL32_SysColor  comctl32_color;
 
-static HBITMAP COMCTL32_hPattern55AABitmap = (HANDLE)NULL;
+static HBITMAP COMCTL32_hPattern55AABitmap = NULL;
 
 static const WORD wPattern55AA[] =
 {
@@ -127,7 +127,7 @@ static const WORD wPattern55AA[] =
 
 
 /***********************************************************************
- * COMCTL32_LibMain [Internal] Initializes the internal 'COMCTL32.DLL'.
+ * DllMain [Internal] Initializes the internal 'COMCTL32.DLL'.
  *
  * PARAMS
  *     hinstDLL    [I] handle to the 'dlls' instance
@@ -139,8 +139,11 @@ static const WORD wPattern55AA[] =
  *     Failure: FALSE
  */
 
-BOOL WINAPI
-COMCTL32_LibMain (HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
+#ifdef __WIN32OS2__
+BOOL WINAPI COMCTL32_DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
+#else
+BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
+#endif
 {
     TRACE("%p,%lx,%p\n", hinstDLL, fdwReason, lpvReserved);
 
@@ -204,19 +207,19 @@ COMCTL32_LibMain (HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 
             /* delete local pattern brush */
             DeleteObject (COMCTL32_hPattern55AABrush);
-            COMCTL32_hPattern55AABrush = (HANDLE)NULL;
+            COMCTL32_hPattern55AABrush = NULL;
             DeleteObject (COMCTL32_hPattern55AABitmap);
-            COMCTL32_hPattern55AABitmap = (HANDLE)NULL;
+            COMCTL32_hPattern55AABitmap = NULL;
 
             /* delete global subclassing atom */
             GlobalDeleteAtom (LOWORD(COMCTL32_aSubclass));
             TRACE("Subclassing atom deleted: %p\n", COMCTL32_aSubclass);
-            COMCTL32_aSubclass = (LPSTR)NULL;
+            COMCTL32_aSubclass = NULL;
 
             /* destroy private heap */
             HeapDestroy (COMCTL32_hHeap);
             TRACE("Heap destroyed: %p\n", COMCTL32_hHeap);
-            COMCTL32_hHeap = (HANDLE)NULL;
+            COMCTL32_hHeap = NULL;
             break;
     }
 
@@ -420,7 +423,7 @@ GetEffectiveClientRect (HWND hwnd, LPRECT lpRect, LPINT lpInfo)
 	if (GetWindowLongA (hwndCtrl, GWL_STYLE) & WS_VISIBLE) {
 	    TRACE("control id 0x%x\n", *lpRun);
 	    GetWindowRect (hwndCtrl, &rcCtrl);
-	    MapWindowPoints ((HWND)0, hwnd, (LPPOINT)&rcCtrl, 2);
+	    MapWindowPoints (NULL, hwnd, (LPPOINT)&rcCtrl, 2);
 	    SubtractRect (lpRect, lpRect, &rcCtrl);
 	}
 	lpRun++;
@@ -882,7 +885,7 @@ CreateMappedBitmap (HINSTANCE hInstance, INT idBitmap, UINT wFlags,
     }
     nWidth  = (INT)lpBitmapInfo->biWidth;
     nHeight = (INT)lpBitmapInfo->biHeight;
-    hdcScreen = GetDC ((HWND)0);
+    hdcScreen = GetDC (NULL);
     hbm = CreateCompatibleBitmap (hdcScreen, nWidth, nHeight);
     if (hbm) {
 	HDC hdcDst = CreateCompatibleDC (hdcScreen);
@@ -895,7 +898,7 @@ CreateMappedBitmap (HINSTANCE hInstance, INT idBitmap, UINT wFlags,
 	SelectObject (hdcDst, hbmOld);
 	DeleteDC (hdcDst);
     }
-    ReleaseDC ((HWND)0, hdcScreen);
+    ReleaseDC (NULL, hdcScreen);
     GlobalFree ((HGLOBAL)lpBitmapInfo);
     FreeResource (hglb);
 
@@ -1040,7 +1043,7 @@ VOID WINAPI InitMUILanguage (LANGID uiLang)
 
 
 /***********************************************************************
- * SetWindowSubclass [COMCTL32.@]
+ * SetWindowSubclass [COMCTL32.410]
  *
  * Starts a window subclass
  *
@@ -1139,19 +1142,19 @@ BOOL WINAPI SetWindowSubclass (HWND hWnd, SUBCLASSPROC pfnSubclass,
 
 
 /***********************************************************************
- * GetWindowSubclass [COMCTL32.@]
+ * GetWindowSubclass [COMCTL32.411]
  *
  * Gets the Reference data from a subclass.
  *
  * PARAMS
  *     hWnd [in] Handle to window which were subclassing
  *     pfnSubclass [in] Pointer to the subclass procedure
- *     iID [in] Unique indentifier of the subclassing procedure
+ *     uID [in] Unique indentifier of the subclassing procedure
  *     pdwRef [out] Pointer to the reference data
  *
  * RETURNS
- *     Success: non-sero
- *     Failure: zero
+ *     Success: Non-zero
+ *     Failure: 0
  */
 
 BOOL WINAPI GetWindowSubclass (HWND hWnd, SUBCLASSPROC pfnSubclass,
@@ -1179,7 +1182,7 @@ BOOL WINAPI GetWindowSubclass (HWND hWnd, SUBCLASSPROC pfnSubclass,
 
 
 /***********************************************************************
- * RemoveWindowSubclass [COMCTL32.@]
+ * RemoveWindowSubclass [COMCTL32.412]
  *
  * Removes a window subclass.
  *
@@ -1243,7 +1246,7 @@ BOOL WINAPI RemoveWindowSubclass(HWND hWnd, SUBCLASSPROC pfnSubclass, UINT_PTR u
 
 
 /***********************************************************************
- * DefSubclassProc [COMCTL32.@]
+ * DefSubclassProc [COMCTL32.413]
  *
  * Calls the next window procedure (ie. the one before this subclass)
  *

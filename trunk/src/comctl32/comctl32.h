@@ -139,6 +139,8 @@ BOOL Str_SetPtrAtoW (LPWSTR *lppDest, LPCSTR lpSrc);
 #ifdef __WIN32OS2__
 #include <heapstring.h>
 
+#define snprintf wsnprintfA
+
 #ifndef __cplusplus
 #undef inline
 #define inline
