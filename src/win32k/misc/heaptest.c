@@ -1,4 +1,4 @@
-/* $Id: heaptest.c,v 1.1 2000-01-22 18:21:03 bird Exp $
+/* $Id: heaptest.c,v 1.2 2000-01-23 03:20:52 bird Exp $
  *
  * Test of resident and swappable heaps.
  *
@@ -12,8 +12,9 @@
 /******************************************************************************
 *   Defined Constants
 *******************************************************************************/
-#define NUMBER_OF_POINTERS      10240
-#define RANDOMTEST_ITERATIONS   10240
+#define NUMBER_OF_POINTERS      16384
+#define RANDOMTEST_ITERATIONS   65536*2
+#define Int3()          __interrupt(3)
 
 
 /*******************************************************************************
@@ -21,8 +22,11 @@
 *******************************************************************************/
 #include "malloc.h"
 #include "rmalloc.h"
+#include "macros.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <memory.h>
+#include <builtin.h>
 
 
 
@@ -35,7 +39,7 @@ int main(int argc, char *argv)
     unsigned      cb = 0;
     unsigned      crmalloc;
     unsigned      crfree;
-
+    unsigned      crealloc;
     int           i;
 
     /*
@@ -53,6 +57,7 @@ int main(int argc, char *argv)
  * resident heap tests
  *
  */
+#if 1
     /*
      * Simple allocation test.
      */
@@ -61,8 +66,10 @@ int main(int argc, char *argv)
         do
         {
             acb[i] = rand();
-        } while(acb[i] == 0 || acb[i] > 64);
+        } while(acb[i] == 0 || acb[i] > 127);
 
+        if ((i % (NUMBER_OF_POINTERS/3)) == 1)
+            acb[i] += 1024*260;
         apv[i] = rmalloc(acb[i]);
         if (apv[i] == NULL)
         {
@@ -70,6 +77,7 @@ int main(int argc, char *argv)
             if (acb[i] > 1000)
                 break;
         }
+        memset(apv[i], 0xA, MIN(acb[i],16));
         cb += acb[i];
     }
 
@@ -82,7 +90,7 @@ int main(int argc, char *argv)
     for (i = 0; i < NUMBER_OF_POINTERS; i++)
     {
         int cb = _res_msize(apv[i]);
-        if (cb != ((acb[i] + 3) & ~3) && (cb < ((acb[i] + 3) & ~3) || cb > 40 + ((acb[i] + 3) & ~3)) )
+        if (cb != ((acb[i] + 3) & ~3) && (cb < ((acb[i] + 3) & ~3) || cb > 52 + ((acb[i] + 3) & ~3)) )
             printf("size of avp[%d] (%d) != acb[%] (%d)\n", i, cb, i, acb[i]);
         rfree(apv[i]);
     }
@@ -100,6 +108,7 @@ int main(int argc, char *argv)
      */
     printf("\n_res_dump_subheaps:\n");
     _res_dump_subheaps();
+#endif
 
 
     /*
@@ -114,14 +123,15 @@ int main(int argc, char *argv)
     cb = 0;
     crfree = 0;
     crmalloc = 0;
+    crealloc = 0;
     while (i++ < RANDOMTEST_ITERATIONS || cAllocations > 0)
     {
         int j;
         j = rand();
         if (cAllocations + (NUMBER_OF_POINTERS/20) < NUMBER_OF_POINTERS &&
-            (i < RANDOMTEST_ITERATIONS*1/4 ? (j % 8) > 1 :
-             i < RANDOMTEST_ITERATIONS*2/4 ? (j % 8) > 2 :
-             i < RANDOMTEST_ITERATIONS*3/4 ? (j % 8) > 3 :
+            (i < RANDOMTEST_ITERATIONS*1/4 ? (j % 8) > 2 :
+             i < RANDOMTEST_ITERATIONS*2/4 ? (j % 8) > 3 :
+             i < RANDOMTEST_ITERATIONS*3/4 ? (j % 8) > 4 :
              i < RANDOMTEST_ITERATIONS     ? (j % 8) > 5 : 0
              )
             )
@@ -133,23 +143,28 @@ int main(int argc, char *argv)
                 do
                 {
                     acb[j] = rand();
-                } while (acb[j] == 0 || acb[j] > 2048);
+                } while (acb[j] == 0 || (acb[j] > 2048 && (i % 11) != 10));
+                if ((i % (RANDOMTEST_ITERATIONS/20)) == 1)
+                    acb[j] += 1024*256;
                 apv[j] = rmalloc(acb[j]);
                 if (apv[j] == NULL)
                 {
                     printf("rmalloc failed, acb[%d] = %d\n", j, acb[j]);
                     if (acb[j] > 10000)
                         continue;
+                    break;
                 }
+                memset(apv[j], 0xA, MIN(acb[j],16));
                 cAllocations++;
                 cb += acb[j];
                 crmalloc++;
             }
         }
         else
-        { /* free */
+        { /* free or realloc */
             if (cAllocations == 0)
                 continue;
+
             if (cAllocations < NUMBER_OF_POINTERS/10)
             {
                 for (j = 0; j < NUMBER_OF_POINTERS && apv[j] == NULL; j++)
@@ -161,7 +176,7 @@ int main(int argc, char *argv)
                 do
                 {
                     j = rand();
-                } while (k < NUMBER_OF_POINTERS/2 && (j >= NUMBER_OF_POINTERS || apv[j] == NULL));
+                } while (k++ < NUMBER_OF_POINTERS/2 && (j >= NUMBER_OF_POINTERS || apv[j] == NULL));
                 if (k >= NUMBER_OF_POINTERS/2)
                 {
                     for (j = 0; j < NUMBER_OF_POINTERS && apv[j] == NULL; j++)
@@ -172,20 +187,47 @@ int main(int argc, char *argv)
             if (j < NUMBER_OF_POINTERS && apv[j] != NULL)
             {
                 int cb = _res_msize(apv[j]);
-                if (cb != ((acb[j] + 3) & ~3) && (cb < ((acb[j] + 3) & ~3) || cb > 40 + ((acb[j] + 3) & ~3)) )
+                if (cb != ((acb[j] + 3) & ~3) && (cb < ((acb[j] + 3) & ~3) || cb > 52 + ((acb[j] + 3) & ~3)) )
                     printf("size of avp[%d] (%d) != acb[%d] (%d)\n", j, cb, j, acb[j]);
-                rfree(apv[j]);
-                apv[j] = NULL;
-                cAllocations--;
-                crfree++;
+                if (i < RANDOMTEST_ITERATIONS*3/4 && j % 3 == 0)
+                {   /* realloc */
+                    int cb;
+                    void *pv;
+                    crealloc++;
+                    do
+                    {
+                        cb = rand();
+                    } while (cb == 0 || cb > 3072);
+                    /*
+                    if (i >= 0x1c14)
+                        Int3();
+                    */
+                    pv = rrealloc(apv[j], cb);
+                    if (pv == NULL)
+                    {
+                        printf("realloc(apv[%d](0x%08), %d) failed\n", j, apv[j], cb);
+                        continue;
+                    }
+                    apv[j] = pv;
+                    acb[j] = cb;
+                }
+                else
+                {   /* free */
+                    rfree(apv[j]);
+                    apv[j] = NULL;
+                    cAllocations--;
+                    crfree++;
+                }
             }
         }
-        _res_heap_check();
-        if (RANDOMTEST_ITERATIONS == i*2)
+        /*_res_heap_check();*/
+        if (RANDOMTEST_ITERATIONS/2 == i)
             _res_dump_subheaps();
+        if ((i % 2048) == 0)
+            printf("i=%d cAllocations=%d\n", i, cAllocations);
     }
 
-    printf("cb=%d crfree=%d crmalloc=%d\n", cb, crfree, crmalloc);
+    printf("cb=%d crfree=%d crmalloc=%d crealloc=%d\n", cb, crfree, crmalloc, crealloc);
 
     printf("_res_dump_subheaps:\n");
     _res_dump_subheaps();
