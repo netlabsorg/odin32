@@ -1,4 +1,4 @@
-/* $Id: dibitmap.cpp,v 1.16 2001-05-25 10:05:28 sandervl Exp $ */
+/* $Id: dibitmap.cpp,v 1.17 2001-05-29 09:45:21 sandervl Exp $ */
 
 /*
  * GDI32 dib & bitmap code
@@ -202,17 +202,24 @@ HBITMAP WIN32API CreateDIBSection( HDC hdc, BITMAPINFO *pbmi, UINT iUsage,
 }
 //******************************************************************************
 //******************************************************************************
-UINT WIN32API GetDIBColorTable( HDC hdc, UINT uStartIndex, UINT cEntries,
-                                  RGBQUAD *pColors)
+UINT WIN32API GetDIBColorTable(HDC hdc, UINT uStartIndex, UINT cEntries,
+                               RGBQUAD *pColors)
 {
- HPALETTE hpal = GetCurrentObject(hdc, OBJ_PAL);
+ DIBSection *dsect = DIBSection::findHDC(hdc);
  UINT rc;
  int i;
 
-  rc = O32_GetPaletteEntries(hpal,
-                         uStartIndex,
-                         cEntries,
-                         (PALETTEENTRY *)pColors);
+  dprintf(("GetDIBColorTable %x %d->%d %x", hdc, uStartIndex, cEntries, pColors));
+
+  if(dsect)
+  {
+       return(dsect->GetDIBColorTable(uStartIndex, cEntries, pColors));
+  }
+  //TODO: Is this correct?????
+  //      Wine returns 0 if bitmap selected into dc with bpp > 8
+  HPALETTE hpal = GetCurrentObject(hdc, OBJ_PAL);
+  rc = O32_GetPaletteEntries(hpal, uStartIndex,
+                             cEntries, (PALETTEENTRY *)pColors);
   for(i=0;
       i<cEntries;
       i++)
@@ -229,11 +236,11 @@ UINT WIN32API GetDIBColorTable( HDC hdc, UINT uStartIndex, UINT cEntries,
 //******************************************************************************
 //******************************************************************************
 UINT WIN32API SetDIBColorTable(HDC hdc, UINT uStartIndex, UINT cEntries,
-                                  RGBQUAD *pColors)
+                               RGBQUAD *pColors)
 {
  DIBSection *dsect = DIBSection::findHDC(hdc);
 
-  dprintf(("GDI32: SetDIBColorTable\n"));
+  dprintf(("GDI32: SetDIBColorTable %x %d,%d %x", hdc, uStartIndex, cEntries, pColors));
   if(dsect)
   {
     return(dsect->SetDIBColorTable(uStartIndex, cEntries, pColors));

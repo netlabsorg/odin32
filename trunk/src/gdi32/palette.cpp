@@ -1,4 +1,4 @@
-/* $Id: palette.cpp,v 1.8 2001-05-25 10:05:29 sandervl Exp $ */
+/* $Id: palette.cpp,v 1.9 2001-05-29 09:45:21 sandervl Exp $ */
 
 /*
  * GDI32 palette apis
@@ -84,7 +84,10 @@ HPALETTE WIN32API SelectPalette(HDC hdc, HPALETTE hPalette, BOOL bForceBackgroun
 
   dprintf(("GDI32: SelectPalette (0x%08X, 0x%08X, 0x%08X)", hdc, hPalette, bForceBackground));
   hPal = O32_SelectPalette(hdc, hPalette, bForceBackground);
-  if(DIBSection::getSection() != NULL)
+
+  //hack for beyond compare buttons (+ other apps)
+  //seems to select old palette into dc before unselecting dib section
+  if(bForceBackground != -1 && DIBSection::getSection() != NULL)
   {
     DIBSection *dsect = DIBSection::findHDC(hdc);
     if(dsect)

@@ -1,4 +1,4 @@
-/* $Id: blit.cpp,v 1.28 2001-05-24 08:18:45 sandervl Exp $ */
+/* $Id: blit.cpp,v 1.29 2001-05-29 09:45:20 sandervl Exp $ */
 
 /*
  * GDI32 blit code
@@ -328,6 +328,7 @@ BOOL WIN32API PatBlt(HDC hdc,int nXLeft,int nYLeft,int nWidth,int nHeight,DWORD 
 {
   BOOL rc;
 
+  dprintf(("PatBlt %x (%d,%d)(%d,%d) %x", hdc, nXLeft,nYLeft,nWidth,nHeight, dwRop));
   //CB: Open32 bug: negative width/height not supported!
   if (nWidth < 0)
   {

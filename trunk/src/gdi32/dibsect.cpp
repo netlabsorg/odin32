@@ -1,4 +1,4 @@
-/* $Id: dibsect.cpp,v 1.51 2001-05-25 10:05:29 sandervl Exp $ */
+/* $Id: dibsect.cpp,v 1.52 2001-05-29 09:45:21 sandervl Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -386,18 +386,23 @@ int DIBSection::SetDIBits(HDC hdc, HBITMAP hbitmap, UINT startscan, UINT
 //******************************************************************************
 int DIBSection::SetDIBColorTable(int startIdx, int cEntries, RGBQUAD *rgb)
 {
- int i;
+ int i, end;
 
   dprintf(("SetDIBColorTable %d %d %x", startIdx, cEntries, rgb));
-  if(startIdx + cEntries > (1 << pOS2bmp->cBitCount))
-  {
-    dprintf(("DIBSection::SetDIBColorTable, invalid nr of entries %d %d\n", startIdx, cEntries));
-    return(0);
+
+  if(pOS2bmp->cBitCount > 8) {
+      dprintf(("DIBSection::SetDIBColorTable: bpp > 8; ignore"));
+      return 0;
+  }
+
+  end = startIdx + cEntries;
+  if(end > (1 << pOS2bmp->cBitCount)) {
+      end = (1 << pOS2bmp->cBitCount);
   }
 
   memcpy(&pOS2bmp->argbColor[startIdx], rgb, cEntries*sizeof(RGB2));
 
-  for(i=startIdx;i<cEntries;i++)
+  for(i=startIdx;i<end;i++)
   {
     pOS2bmp->argbColor[i].fcOptions = 0;
 #ifdef DEBUG_PALETTE
@@ -411,15 +416,18 @@ int DIBSection::SetDIBColorTable(int startIdx, int cEntries, RGBQUAD *rgb)
 //******************************************************************************
 int DIBSection::SetDIBColorTable(int startIdx, int cEntries, PALETTEENTRY *palentry)
 {
- int i;
+ int i, end;
 
-  if(startIdx + cEntries > (1 << pOS2bmp->cBitCount))
-  {
-    dprintf(("DIBSection::SetDIBColorTable, invalid nr of entries %d %d\n", startIdx, cEntries));
-    return(0);
+  if(pOS2bmp->cBitCount > 8) {
+      dprintf(("DIBSection::SetDIBColorTable: bpp > 8; ignore"));
+      return 0;
   }
 
-  for(i=startIdx;i<cEntries;i++)
+  end = startIdx + cEntries;
+  if(end > (1 << pOS2bmp->cBitCount)) {
+      end = (1 << pOS2bmp->cBitCount);
+  }
+  for(i=startIdx;i<end;i++)
   {
     pOS2bmp->argbColor[i].fcOptions = 0;
     pOS2bmp->argbColor[i].bBlue  = palentry[i].peBlue;
@@ -427,7 +435,29 @@ int DIBSection::SetDIBColorTable(int startIdx, int cEntries, PALETTEENTRY *palen
     pOS2bmp->argbColor[i].bRed   = palentry[i].peRed;
   }
 
-  return(cEntries);
+  return end - startIdx;
+}
+//******************************************************************************
+//******************************************************************************
+int DIBSection::GetDIBColorTable(int startIdx, int cEntries, RGBQUAD *rgb)
+{
+  int i, end = startIdx + cEntries;
+
+  if(pOS2bmp->cBitCount > 8) {
+      dprintf(("DIBSection::GetDIBColorTable: bpp > 8 -> return 0"));
+      return 0;
+  }
+  if(end > (1 << pOS2bmp->cBitCount)) {
+      end = (1 << pOS2bmp->cBitCount);
+      dprintf(("DIBSection::GetDIBColorTable: %d->%d", startIdx, end));
+  }
+  memcpy(rgb, &pOS2bmp->argbColor[startIdx], cEntries*sizeof(RGBQUAD));
+
+  for(i=0;i<cEntries;i++) {
+    rgb[i].rgbReserved = 0;
+  }
+
+  return end - startIdx;
 }
 //******************************************************************************
 //******************************************************************************
