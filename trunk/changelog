@@ -1,7 +1,8 @@
-/* $Id: changelog,v 1.1770 2001-10-19 14:47:41 phaller Exp $ */
+/* $Id: changelog,v 1.1771 2001-10-19 16:19:47 phaller Exp $ */
 
  2001-10-19: Patrick Haller <patrick.haller@innotek.de>
     - COMCTL32: o updated listview and status to wine level
+    - COMDLG32: o fix crash in FileDlg95 (used freed memory object)
 
  2001-10-18: knut stange osmundsen <kosmunds@csc.com>
     - odin32.*.vac3*.mk:
