@@ -1,4 +1,4 @@
-/* $Id: winimage.cpp,v 1.8 1999-08-17 16:35:10 phaller Exp $ */
+/* $Id: winimage.cpp,v 1.9 1999-08-17 17:04:52 sandervl Exp $ */
 
 /*
  * Win32 PE Image class
@@ -143,7 +143,7 @@ Win32Image::~Win32Image()
   while(winres)
   {
     res    = winres->next;
-    delete winres;
+    delete(winres);
     winres = res;
   }
   if(realBaseAddress)
@@ -984,7 +984,7 @@ BOOL Win32Image::processImports(char *win32file)
 
         if(WinDll == NULL) {
             fout << "WinDll: Error allocating memory" << endl;
-                WinMessageBox(HWND_DESKTOP, HWND_DESKTOP, szMemErrorMsg, szErrorTitle, 0, MB_OK | MB_ERROR | MB_MOVEABLE);
+            WinMessageBox(HWND_DESKTOP, HWND_DESKTOP, szMemErrorMsg, szErrorTitle, 0, MB_OK | MB_ERROR | MB_MOVEABLE);
             errorState = ERROR_INTERNAL;
             return(FALSE);
         }
