@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.65 2000-02-16 14:34:03 sandervl Exp $
+# $Id: Makefile,v 1.66 2000-03-04 20:13:26 bird Exp $
 
 #
 # PD-Win32 API
@@ -7,21 +7,16 @@
 #
 
 PDWIN32_INCLUDE = ..\..\include
-PDWIN32_LIB = ..\..\lib
-PDWIN32_BIN = ..\..\bin
-PDWIN32_TOOLS = ..\..\tools\bin
+PDWIN32_LIB     = ..\..\lib
+PDWIN32_BIN     = ..\..\bin
+PDWIN32_TOOLS   = ..\..\tools\bin
 
 
 !include $(PDWIN32_INCLUDE)/pdwin32.mk
 
 
-CFLAGS = $(CFLAGS) -I$(PDWIN32_INCLUDE)
+CFLAGS   = $(CFLAGS)   -I$(PDWIN32_INCLUDE)
 CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
-
-!ifdef DEBUGALL
-CFLAGS = $(CFLAGS) -DDEBUG_ENABLELOG_LEVEL2
-CXXFLAGS = $(CXXFLAGS) -DDEBUG_ENABLELOG_LEVEL2
-!endif
 
 TARGET = user32
 
@@ -46,16 +41,18 @@ all: $(TARGET).dll $(TARGET).lib
 
 
 $(TARGET).dll: $(OBJS) $(TARGET).def $(TARGET).lrf
-!ifdef DEBUG
-!ifdef NODEBUGINFO
-        ilink /nodeb /map /noe /NOD /NoLogo /NOFREE @$(TARGET).lrf
-!else
-        ilink /de /map  /noe /NOD /dbgpack /NoLogo /NOFREE @$(TARGET).lrf
-!endif
-!else
-        ilink /map  /noe /NOD /NoLogo /FREE @$(TARGET).lrf
-!endif
+        $(LD2) $(LD2FLAGS) @$(TARGET).lrf
         $(CP) $@ $(PDWIN32_BIN)
+
+#!ifdef DEBUG
+#!ifdef NODEBUGINFO
+#        ilink /nodeb /map /noe /NOD /NoLogo /NOFREE @$(TARGET).lrf
+#!else
+#        ilink /de /map  /noe /NOD /dbgpack /NoLogo /NOFREE @$(TARGET).lrf
+#!endif
+#!else
+#        ilink /map  /noe /NOD /NoLogo /FREE @$(TARGET).lrf
+#!endif
 
 $(TARGET).lrf: makefile
         @echo Creating file <<$(@B).lrf
