@@ -1,4 +1,4 @@
-/* $Id: os2wrap.h,v 1.15 2000-06-17 12:31:55 sandervl Exp $ */
+/* $Id: os2wrap.h,v 1.16 2003-08-08 14:55:15 sandervl Exp $ */
 #ifndef __OS2WRAP_H__
 #define __OS2WRAP_H__
 
@@ -13,1485 +13,541 @@
 
 #ifdef INCL_DOSMEMMGR
 
-APIRET APIENTRY DosAliasMem(PVOID pb, ULONG cb, PPVOID ppbAlias, ULONG fl);
-
-inline APIRET _DosAliasMem(PVOID pb, ULONG cb, PPVOID ppbAlias, ULONG fl)
-{
- APIRET yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosAliasMem(pb, cb, ppbAlias, fl);
-    SetFS(sel);
-
-    return yyrc;
-} 
+APIRET APIENTRY _DosAliasMem(PVOID pb, ULONG cb, PPVOID ppbAlias, ULONG fl);
 
 #undef  DosAliasMem
 #define DosAliasMem _DosAliasMem
 
-inline ULONG _DosAllocMem(PPVOID a, ULONG b, ULONG c)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosAllocMem(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG  APIENTRY _DosAllocMem(PPVOID a, ULONG b, ULONG c);
 
 #undef  DosAllocMem
 #define DosAllocMem _DosAllocMem
 
-inline ULONG _DosAllocSharedMem(PPVOID a, PCSZ b, ULONG c, ULONG d)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosAllocSharedMem(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosAllocSharedMem(PPVOID a, PCSZ b, ULONG c, ULONG d);
 
 #undef  DosAllocSharedMem
 #define DosAllocSharedMem _DosAllocSharedMem
 
-inline ULONG _DosFreeMem(PVOID a)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosFreeMem(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosFreeMem(PVOID a);
 
 #undef  DosFreeMem
 #define DosFreeMem _DosFreeMem
 
-inline ULONG _DosGetNamedSharedMem(PPVOID a, PCSZ b, ULONG c)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosGetNamedSharedMem(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosGetNamedSharedMem(PPVOID a, PCSZ b, ULONG c);
 
 #undef  DosGetNamedSharedMem
 #define DosGetNamedSharedMem _DosGetNamedSharedMem
 
-inline ULONG _DosGetSharedMem(PVOID a, ULONG b)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosGetSharedMem(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosGetSharedMem(PVOID a, ULONG b);
 
 #undef  DosGetSharedMem
 #define DosGetSharedMem _DosGetSharedMem
 
-inline ULONG _DosGiveSharedMem(PVOID a, PID b, ULONG c)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosGiveSharedMem(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosGiveSharedMem(PVOID a, PID b, ULONG c);
 
 #undef  DosGiveSharedMem
 #define DosGiveSharedMem _DosGiveSharedMem
 
-inline ULONG _DosQueryMem(PVOID a, PULONG b, PULONG c)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosQueryMem(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosQueryMem(PVOID a, PULONG b, PULONG c);
 
 #undef  DosQueryMem
 #define DosQueryMem _DosQueryMem
 
-inline ULONG _DosSetMem(PVOID a, ULONG b, ULONG c)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosSetMem(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosSetMem(PVOID a, ULONG b, ULONG c);
 
 #undef  DosSetMem
 #define DosSetMem _DosSetMem
 
-inline ULONG _DosSubAllocMem(PVOID a, PPVOID b, ULONG c)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosSubAllocMem(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosSubAllocMem(PVOID a, PPVOID b, ULONG c);
 
 #undef  DosSubAllocMem
 #define DosSubAllocMem _DosSubAllocMem
 
-inline ULONG _DosSubFreeMem(PVOID a, PVOID b, ULONG c)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosSubFreeMem(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosSubFreeMem(PVOID a, PVOID b, ULONG c);
 
 #undef  DosSubFreeMem
 #define DosSubFreeMem _DosSubFreeMem
 
-inline ULONG _DosSubSetMem(PVOID a, ULONG b, ULONG c)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosSubSetMem(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosSubSetMem(PVOID a, ULONG b, ULONG c);
 
 #undef  DosSubSetMem
 #define DosSubSetMem _DosSubSetMem
 
-inline ULONG _DosSubUnsetMem(PVOID a)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosSubUnsetMem(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosSubUnsetMem(PVOID a);
 
 #undef  DosSubUnsetMem
 #define DosSubUnsetMem _DosSubUnsetMem
 
 #endif
 #ifdef INCL_DOSFILEMGR
-inline ULONG _DosCancelLockRequest(HFILE a, PFILELOCK b)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosCancelLockRequest(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosCancelLockRequest(HFILE a, PFILELOCK b);
 
 #undef  DosCancelLockRequest
 #define DosCancelLockRequest _DosCancelLockRequest
 
-inline ULONG _DosClose(HFILE a)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosClose(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosClose(HFILE a);
 
 #undef  DosClose
 #define DosClose _DosClose
 
-inline ULONG _DosCopy(PCSZ a, PCSZ b, ULONG c)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosCopy(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosCopy(PCSZ a, PCSZ b, ULONG c);
 
 #undef  DosCopy
 #define DosCopy _DosCopy
 
-inline ULONG _DosCreateDir(PCSZ a, PEAOP2 b)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosCreateDir(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosCreateDir(PCSZ a, PEAOP2 b);
 
 #undef  DosCreateDir
 #define DosCreateDir _DosCreateDir
 
-inline ULONG _DosDelete(PCSZ a)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosDelete(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosDelete(PCSZ a);
 
 #undef  DosDelete
 #define DosDelete _DosDelete
 
-inline ULONG _DosDeleteDir(PCSZ a)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosDeleteDir(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosDeleteDir(PCSZ a);
 
 #undef  DosDeleteDir
 #define DosDeleteDir _DosDeleteDir
 
-inline ULONG _DosDupHandle(HFILE a, PHFILE b)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosDupHandle(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosDupHandle(HFILE a, PHFILE b);
 
 #undef  DosDupHandle
 #define DosDupHandle _DosDupHandle
 
-inline ULONG _DosEditName(ULONG a, PCSZ b, PCSZ c, PBYTE d, ULONG e)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosEditName(a, b, c, d, e);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosEditName(ULONG a, PCSZ b, PCSZ c, PBYTE d, ULONG e);
 
 #undef  DosEditName
 #define DosEditName _DosEditName
 
-inline ULONG _DosEnumAttribute(ULONG a, PVOID b, ULONG c, PVOID d, ULONG e, PULONG f, ULONG g)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosEnumAttribute(a, b, c, d, e, f, g);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosEnumAttribute(ULONG a, PVOID b, ULONG c, PVOID d, ULONG e, PULONG f, ULONG g);
 
 #undef  DosEnumAttribute
 #define DosEnumAttribute _DosEnumAttribute
 
-inline ULONG _DosFindClose(HDIR a)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosFindClose(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosFindClose(HDIR a);
 
 #undef  DosFindClose
 #define DosFindClose _DosFindClose
 
-inline ULONG _DosFindFirst(PCSZ a, PHDIR b, ULONG c, PVOID d, ULONG e, PULONG f, ULONG g)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosFindFirst(a, b, c, d, e, f, g);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosFindFirst(PCSZ a, PHDIR b, ULONG c, PVOID d, ULONG e, PULONG f, ULONG g);
 
 #undef  DosFindFirst
 #define DosFindFirst _DosFindFirst
 
-inline ULONG _DosFindNext(HDIR a, PVOID b, ULONG c, PULONG d)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosFindNext(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosFindNext(HDIR a, PVOID b, ULONG c, PULONG d);
 
 #undef  DosFindNext
 #define DosFindNext _DosFindNext
 
-inline ULONG _DosForceDelete(PCSZ a)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosForceDelete(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosForceDelete(PCSZ a);
 
 #undef  DosForceDelete
 #define DosForceDelete _DosForceDelete
 
-inline ULONG _DosFSAttach(PCSZ a, PCSZ b, PVOID c, ULONG d, ULONG e)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosFSAttach(a, b, c, d, e);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosFSAttach(PCSZ a, PCSZ b, PVOID c, ULONG d, ULONG e);
 
 #undef  DosFSAttach
 #define DosFSAttach _DosFSAttach
 
-inline ULONG _DosFSCtl(PVOID a, ULONG b, PULONG c, PVOID d, ULONG e, PULONG f, ULONG g, PCSZ h, HFILE i, ULONG j)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosFSCtl(a, b, c, d, e, f, g, h, i, j);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosFSCtl(PVOID a, ULONG b, PULONG c, PVOID d, ULONG e, PULONG f, ULONG g, PCSZ h, HFILE i, ULONG j);
 
 #undef  DosFSCtl
 #define DosFSCtl _DosFSCtl
 
-inline ULONG _DosMove(PCSZ a, PCSZ b)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosMove(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosMove(PCSZ a, PCSZ b);
 
 #undef  DosMove
 #define DosMove _DosMove
 
-inline ULONG _DosOpen(PCSZ a, PHFILE b, PULONG c, ULONG d, ULONG e, ULONG f, ULONG g, PEAOP2 h)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosOpen(a, b, c, d, e, f, g, h);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosOpen(PCSZ a, PHFILE b, PULONG c, ULONG d, ULONG e, ULONG f, ULONG g, PEAOP2 h);
 
 #undef  DosOpen
 #define DosOpen _DosOpen
 
-inline ULONG _DosProtectClose(HFILE a, FHLOCK b)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosProtectClose(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosProtectClose(HFILE a, FHLOCK b);
 
 #undef  DosProtectClose
 #define DosProtectClose _DosProtectClose
 
-inline ULONG _DosProtectEnumAttribute(ULONG a, PVOID b, ULONG c, PVOID d, ULONG e, PULONG f, ULONG g, FHLOCK h)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosProtectEnumAttribute(a, b, c, d, e, f, g, h);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosProtectEnumAttribute(ULONG a, PVOID b, ULONG c, PVOID d, ULONG e, PULONG f, ULONG g, FHLOCK h);
 
 #undef  DosProtectEnumAttribute
 #define DosProtectEnumAttribute _DosProtectEnumAttribute
 
-inline ULONG _DosProtectOpen(PCSZ a, PHFILE b, PULONG c, ULONG d, ULONG e, ULONG f, ULONG g, PEAOP2 h, PFHLOCK i)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosProtectOpen(a, b, c, d, e, f, g, h, i);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosProtectOpen(PCSZ a, PHFILE b, PULONG c, ULONG d, ULONG e, ULONG f, ULONG g, PEAOP2 h, PFHLOCK i);
 
 #undef  DosProtectOpen
 #define DosProtectOpen _DosProtectOpen
 
-inline ULONG _DosProtectQueryFHState(HFILE a, PULONG b, FHLOCK c)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosProtectQueryFHState(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosProtectQueryFHState(HFILE a, PULONG b, FHLOCK c);
 
 #undef  DosProtectQueryFHState
 #define DosProtectQueryFHState _DosProtectQueryFHState
 
-inline ULONG _DosProtectQueryFileInfo(HFILE a, ULONG b, PVOID c, ULONG d, FHLOCK e)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosProtectQueryFileInfo(a, b, c, d, e);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosProtectQueryFileInfo(HFILE a, ULONG b, PVOID c, ULONG d, FHLOCK e);
 
 #undef  DosProtectQueryFileInfo
 #define DosProtectQueryFileInfo _DosProtectQueryFileInfo
 
-inline ULONG _DosProtectRead(HFILE a, PVOID b, ULONG c, PULONG d, FHLOCK e)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosProtectRead(a, b, c, d, e);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosProtectRead(HFILE a, PVOID b, ULONG c, PULONG d, FHLOCK e);
 
 #undef  DosProtectRead
 #define DosProtectRead _DosProtectRead
 
-inline ULONG _DosProtectSetFHState(HFILE a, ULONG b, FHLOCK c)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosProtectSetFHState(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosProtectSetFHState(HFILE a, ULONG b, FHLOCK c);
 
 #undef  DosProtectSetFHState
 #define DosProtectSetFHState _DosProtectSetFHState
 
-inline ULONG _DosProtectSetFileInfo(HFILE a, ULONG b, PVOID c, ULONG d, FHLOCK e)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosProtectSetFileInfo(a, b, c, d, e);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosProtectSetFileInfo(HFILE a, ULONG b, PVOID c, ULONG d, FHLOCK e);
 
 #undef  DosProtectSetFileInfo
 #define DosProtectSetFileInfo _DosProtectSetFileInfo
 
-inline ULONG _DosProtectSetFileLocks(HFILE a, PFILELOCK b, PFILELOCK c, ULONG d, ULONG e, FHLOCK f)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosProtectSetFileLocks(a, b, c, d, e, f);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosProtectSetFileLocks(HFILE a, PFILELOCK b, PFILELOCK c, ULONG d, ULONG e, FHLOCK f);
 
 #undef  DosProtectSetFileLocks
 #define DosProtectSetFileLocks _DosProtectSetFileLocks
 
-inline ULONG _DosProtectSetFilePtr(HFILE a, LONG b, ULONG c, PULONG d, FHLOCK e)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosProtectSetFilePtr(a, b, c, d, e);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosProtectSetFilePtr(HFILE a, LONG b, ULONG c, PULONG d, FHLOCK e);
 
 #undef  DosProtectSetFilePtr
 #define DosProtectSetFilePtr _DosProtectSetFilePtr
 
-inline ULONG _DosProtectSetFileSize(HFILE a, ULONG b, FHLOCK c)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosProtectSetFileSize(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosProtectSetFileSize(HFILE a, ULONG b, FHLOCK c);
 
 #undef  DosProtectSetFileSize
 #define DosProtectSetFileSize _DosProtectSetFileSize
 
-inline ULONG _DosProtectWrite(HFILE a, PVOID b, ULONG c, PULONG d, FHLOCK e)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosProtectWrite(a, b, c, d, e);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosProtectWrite(HFILE a, PVOID b, ULONG c, PULONG d, FHLOCK e);
 
 #undef  DosProtectWrite
 #define DosProtectWrite _DosProtectWrite
 
-inline ULONG _DosQueryCurrentDir(ULONG a, PBYTE b, PULONG c)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosQueryCurrentDir(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosQueryCurrentDir(ULONG a, PBYTE b, PULONG c);
 
 #undef  DosQueryCurrentDir
 #define DosQueryCurrentDir _DosQueryCurrentDir
 
-inline ULONG _DosQueryCurrentDisk(PULONG a, PULONG b)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosQueryCurrentDisk(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosQueryCurrentDisk(PULONG a, PULONG b);
 
 #undef  DosQueryCurrentDisk
 #define DosQueryCurrentDisk _DosQueryCurrentDisk
 
-inline ULONG _DosQueryFHState(HFILE a, PULONG b)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosQueryFHState(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosQueryFHState(HFILE a, PULONG b);
 
 #undef  DosQueryFHState
 #define DosQueryFHState _DosQueryFHState
 
-inline ULONG _DosQueryFileInfo(HFILE a, ULONG b, PVOID c, ULONG d)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosQueryFileInfo(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosQueryFileInfo(HFILE a, ULONG b, PVOID c, ULONG d);
 
 #undef  DosQueryFileInfo
 #define DosQueryFileInfo _DosQueryFileInfo
 
-inline ULONG _DosQueryFSAttach(PCSZ a, ULONG b, ULONG c, PFSQBUFFER2 d, PULONG e)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosQueryFSAttach(a, b, c, d, e);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosQueryFSAttach(PCSZ a, ULONG b, ULONG c, PFSQBUFFER2 d, PULONG e);
 
 #undef  DosQueryFSAttach
 #define DosQueryFSAttach _DosQueryFSAttach
 
-inline ULONG _DosQueryFSInfo(ULONG a, ULONG b, PVOID c, ULONG d)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosQueryFSInfo(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosQueryFSInfo(ULONG a, ULONG b, PVOID c, ULONG d);
 
 #undef  DosQueryFSInfo
 #define DosQueryFSInfo _DosQueryFSInfo
 
-inline ULONG _DosQueryHType(HFILE a, PULONG b, PULONG c)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosQueryHType(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosQueryHType(HFILE a, PULONG b, PULONG c);
 
 #undef  DosQueryHType
 #define DosQueryHType _DosQueryHType
 
-inline ULONG _DosQueryPathInfo(PCSZ a, ULONG b, PVOID c, ULONG d)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosQueryPathInfo(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosQueryPathInfo(PCSZ a, ULONG b, PVOID c, ULONG d);
 
 #undef  DosQueryPathInfo
 #define DosQueryPathInfo _DosQueryPathInfo
 
-inline ULONG _DosQueryVerify(PBOOL32 a)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosQueryVerify(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosQueryVerify(PBOOL32 a);
 
 #undef  DosQueryVerify
 #define DosQueryVerify _DosQueryVerify
 
-inline ULONG _DosRead(HFILE a, PVOID b, ULONG c, PULONG d)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosRead(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosRead(HFILE a, PVOID b, ULONG c, PULONG d);
 
 #undef  DosRead
 #define DosRead _DosRead
 
-inline ULONG _DosResetBuffer(HFILE a)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosResetBuffer(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosResetBuffer(HFILE a);
 
 #undef  DosResetBuffer
 #define DosResetBuffer _DosResetBuffer
 
-inline ULONG _DosSetCurrentDir(PCSZ a)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosSetCurrentDir(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosSetCurrentDir(PCSZ a);
 
 #undef  DosSetCurrentDir
 #define DosSetCurrentDir _DosSetCurrentDir
 
-inline ULONG _DosSetDefaultDisk(ULONG a)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosSetDefaultDisk(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosSetDefaultDisk(ULONG a);
 
 #undef  DosSetDefaultDisk
 #define DosSetDefaultDisk _DosSetDefaultDisk
 
-inline ULONG _DosSetFHState(HFILE a, ULONG b)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosSetFHState(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosSetFHState(HFILE a, ULONG b);
 
 #undef  DosSetFHState
 #define DosSetFHState _DosSetFHState
 
-inline ULONG _DosSetFileInfo(HFILE a, ULONG b, PVOID c, ULONG d)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosSetFileInfo(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosSetFileInfo(HFILE a, ULONG b, PVOID c, ULONG d);
 
 #undef  DosSetFileInfo
 #define DosSetFileInfo _DosSetFileInfo
 
-inline ULONG _DosSetFileLocks(HFILE a, PFILELOCK b, PFILELOCK c, ULONG d, ULONG e)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosSetFileLocks(a, b, c, d, e);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosSetFileLocks(HFILE a, PFILELOCK b, PFILELOCK c, ULONG d, ULONG e);
 
 #undef  DosSetFileLocks
 #define DosSetFileLocks _DosSetFileLocks
 
-inline ULONG _DosSetFilePtr(HFILE a, LONG b, ULONG c, PULONG d)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosSetFilePtr(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosSetFilePtr(HFILE a, LONG b, ULONG c, PULONG d);
 
 #undef  DosSetFilePtr
 #define DosSetFilePtr _DosSetFilePtr
 
-inline ULONG _DosSetFileSize(HFILE a, ULONG b)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosSetFileSize(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosSetFileSize(HFILE a, ULONG b);
 
 #undef  DosSetFileSize
 #define DosSetFileSize _DosSetFileSize
 
-inline ULONG _DosSetFSInfo(ULONG a, ULONG b, PVOID c, ULONG d)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosSetFSInfo(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosSetFSInfo(ULONG a, ULONG b, PVOID c, ULONG d);
 
 #undef  DosSetFSInfo
 #define DosSetFSInfo _DosSetFSInfo
 
-inline ULONG _DosSetMaxFH(ULONG a)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosSetMaxFH(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosSetMaxFH(ULONG a);
 
 #undef  DosSetMaxFH
 #define DosSetMaxFH _DosSetMaxFH
 
-inline ULONG _DosSetPathInfo(PCSZ a, ULONG b, PVOID c, ULONG d, ULONG e)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosSetPathInfo(a, b, c, d, e);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosSetPathInfo(PCSZ a, ULONG b, PVOID c, ULONG d, ULONG e);
 
 #undef  DosSetPathInfo
 #define DosSetPathInfo _DosSetPathInfo
 
-inline ULONG _DosSetRelMaxFH(PLONG a, PULONG b)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosSetRelMaxFH(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosSetRelMaxFH(PLONG a, PULONG b);
 
 #undef  DosSetRelMaxFH
 #define DosSetRelMaxFH _DosSetRelMaxFH
 
-inline ULONG _DosSetVerify(BOOL32 a)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosSetVerify(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosSetVerify(BOOL32 a);
 
 #undef  DosSetVerify
 #define DosSetVerify _DosSetVerify
 
-inline ULONG _DosShutdown(ULONG a)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosShutdown(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosShutdown(ULONG a);
 
 #undef  DosShutdown
 #define DosShutdown _DosShutdown
 
-inline ULONG _DosWrite(HFILE a, PVOID b, ULONG c, PULONG d)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosWrite(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosWrite(HFILE a, PVOID b, ULONG c, PULONG d);
 
 #undef  DosWrite
 #define DosWrite _DosWrite
 
 #endif
 #ifdef INCL_DOSMISC
-inline ULONG _DosSearchPath(ULONG a, PCSZ b, PCSZ c, PBYTE d, ULONG e)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosSearchPath(a, b, c, d, e);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosSearchPath(ULONG a, PCSZ b, PCSZ c, PBYTE d, ULONG e);
 
 #undef  DosSearchPath
 #define DosSearchPath _DosSearchPath
 
-inline ULONG  _DosError(ULONG error)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosError(error);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY  _DosError(ULONG error);
 
 #undef  DosError
 #define DosError _DosError
 
 #endif
 #ifdef INCL_DOSDEVICES
-inline ULONG _DosDevConfig(PVOID a, ULONG b)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosDevConfig(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosDevConfig(PVOID a, ULONG b);
 
 #undef  DosDevConfig
 #define DosDevConfig _DosDevConfig
 
-inline ULONG _DosDevIOCtl(HFILE a, ULONG b, ULONG c, PVOID d, ULONG e, PULONG f, PVOID g, ULONG h, PULONG i)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosDevIOCtl(a, b, c, d, e, f, g, h, i);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosDevIOCtl(HFILE a, ULONG b, ULONG c, PVOID d, ULONG e, PULONG f, PVOID g, ULONG h, PULONG i);
 
 #undef  DosDevIOCtl
 #define DosDevIOCtl _DosDevIOCtl
 
-inline ULONG _DosPhysicalDisk(ULONG a, PVOID b, ULONG c, PVOID d, ULONG e)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosPhysicalDisk(a, b, c, d, e);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosPhysicalDisk(ULONG a, PVOID b, ULONG c, PVOID d, ULONG e);
 
 #undef  DosPhysicalDisk
 #define DosPhysicalDisk _DosPhysicalDisk
 
 #endif
 #ifdef INCL_DOSNLS
-inline ULONG _DosMapCase(ULONG a, PCOUNTRYCODE b, PCHAR c)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosMapCase(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosMapCase(ULONG a, PCOUNTRYCODE b, PCHAR c);
 
 #undef  DosMapCase
 #define DosMapCase _DosMapCase
 
-inline ULONG _DosQueryCollate(ULONG a, PCOUNTRYCODE b, PCHAR c, PULONG d)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosQueryCollate(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosQueryCollate(ULONG a, PCOUNTRYCODE b, PCHAR c, PULONG d);
 
 #undef  DosQueryCollate
 #define DosQueryCollate _DosQueryCollate
 
-inline ULONG _DosQueryCp(ULONG a, PULONG b, PULONG c)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosQueryCp(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosQueryCp(ULONG a, PULONG b, PULONG c);
 
 #undef  DosQueryCp
 #define DosQueryCp _DosQueryCp
 
-inline ULONG _DosQueryCtryInfo(ULONG a, PCOUNTRYCODE b, PCOUNTRYINFO c, PULONG d)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosQueryCtryInfo(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosQueryCtryInfo(ULONG a, PCOUNTRYCODE b, PCOUNTRYINFO c, PULONG d);
 
 #undef  DosQueryCtryInfo
 #define DosQueryCtryInfo _DosQueryCtryInfo
 
-inline ULONG _DosQueryDBCSEnv(ULONG a, PCOUNTRYCODE b, PCHAR c)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosQueryDBCSEnv(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosQueryDBCSEnv(ULONG a, PCOUNTRYCODE b, PCHAR c);
 
 #undef  DosQueryDBCSEnv
 #define DosQueryDBCSEnv _DosQueryDBCSEnv
 
-inline ULONG _DosSetProcessCp(ULONG a)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosSetProcessCp(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosSetProcessCp(ULONG a);
 
 #undef  DosSetProcessCp
 #define DosSetProcessCp _DosSetProcessCp
 
 #endif
 #ifdef INCL_DOSMODULEMGR
-inline ULONG _DosFreeModule(HMODULE a)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosFreeModule(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosFreeModule(HMODULE a);
 
 #undef  DosFreeModule
 #define DosFreeModule _DosFreeModule
 
-inline ULONG _DosLoadModule(PSZ a, ULONG b, PCSZ c, PHMODULE d)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosLoadModule(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosLoadModule(PSZ a, ULONG b, PCSZ c, PHMODULE d);
 
 #undef  DosLoadModule
 #define DosLoadModule _DosLoadModule
 
-inline ULONG _DosQueryModuleHandle(PCSZ a, PHMODULE b)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosQueryModuleHandle(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosQueryModuleHandle(PCSZ a, PHMODULE b);
 
 #undef  DosQueryModuleHandle
 #define DosQueryModuleHandle _DosQueryModuleHandle
 
-inline ULONG _DosQueryModuleName(HMODULE a, ULONG b, PCHAR c)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosQueryModuleName(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosQueryModuleName(HMODULE a, ULONG b, PCHAR c);
 
 #undef  DosQueryModuleName
 #define DosQueryModuleName _DosQueryModuleName
 
-inline ULONG _DosQueryProcAddr(HMODULE a, ULONG b, PCSZ c, PFN *d)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosQueryProcAddr(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosQueryProcAddr(HMODULE a, ULONG b, PCSZ c, PFN *d);
 
 #undef  DosQueryProcAddr
 #define DosQueryProcAddr _DosQueryProcAddr
 
-inline ULONG _DosQueryProcType(HMODULE a, ULONG b, PCSZ c, PULONG d)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosQueryProcType(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosQueryProcType(HMODULE a, ULONG b, PCSZ c, PULONG d);
 
 #undef  DosQueryProcType
 #define DosQueryProcType _DosQueryProcType
 
 #endif
 #ifdef INCL_DOSRESOURCES
-inline ULONG _DosFreeResource(PVOID a)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosFreeResource(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosFreeResource(PVOID a);
 
 #undef  DosFreeResource
 #define DosFreeResource _DosFreeResource
 
-inline ULONG _DosGetResource(HMODULE a, ULONG b, ULONG c, PPVOID d)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosGetResource(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosGetResource(HMODULE a, ULONG b, ULONG c, PPVOID d);
 
 #undef  DosGetResource
 #define DosGetResource _DosGetResource
 
-inline ULONG _DosQueryResourceSize(HMODULE a, ULONG b, ULONG c, PULONG d)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosQueryResourceSize(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosQueryResourceSize(HMODULE a, ULONG b, ULONG c, PULONG d);
 
 #undef  DosQueryResourceSize
 #define DosQueryResourceSize _DosQueryResourceSize
 
 #endif
 #ifdef INCL_DOSPROCESS
-inline ULONG _DosBeep(ULONG a, ULONG b)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosBeep(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosBeep(ULONG a, ULONG b);
 
 #undef  DosBeep
 #define DosBeep _DosBeep
 
-inline VOID _DosExit(ULONG a, ULONG b)
-{
- USHORT sel = RestoreOS2FS();
-
-    DosExit(a, b);
-    SetFS(sel);
-} 
+VOID APIENTRY _DosExit(ULONG a, ULONG b);
 
 #undef  DosExit
 #define DosExit _DosExit
 
-inline ULONG _DosAllocThreadLocalMemory(ULONG a, PULONG *b)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosAllocThreadLocalMemory(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosAllocThreadLocalMemory(ULONG a, PULONG *b);
 
 #undef  DosAllocThreadLocalMemory
 #define DosAllocThreadLocalMemory _DosAllocThreadLocalMemory
 
-inline ULONG _DosCreateThread(PTID a, PFNTHREAD b, ULONG c, ULONG d, ULONG e)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosCreateThread(a, b, c, d, e);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosCreateThread(PTID a, PFNTHREAD b, ULONG c, ULONG d, ULONG e);
 
 #undef  DosCreateThread
 #define DosCreateThread _DosCreateThread
 
-inline ULONG _DosEnterCritSec()
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosEnterCritSec();
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosEnterCritSec();
 
 #undef  DosEnterCritSec
 #define DosEnterCritSec _DosEnterCritSec
 
-inline ULONG _DosExecPgm(PCHAR a, LONG b, ULONG c, PCSZ d, PCSZ e, PRESULTCODES f, PCSZ g)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosExecPgm(a, b, c, d, e, f, g);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosExecPgm(PCHAR a, LONG b, ULONG c, PCSZ d, PCSZ e, PRESULTCODES f, PCSZ g);
 
 #undef  DosExecPgm
 #define DosExecPgm _DosExecPgm
 
-inline ULONG _DosExitCritSec()
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosExitCritSec();
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosExitCritSec();
 
 #undef  DosExitCritSec
 #define DosExitCritSec _DosExitCritSec
 
-inline ULONG _DosExitList(ULONG a, PFNEXITLIST b)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosExitList(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosExitList(ULONG a, PFNEXITLIST b);
 
 #undef  DosExitList
 #define DosExitList _DosExitList
 
-inline ULONG _DosFreeThreadLocalMemory(ULONG *a)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosFreeThreadLocalMemory(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosFreeThreadLocalMemory(ULONG *a);
 
 #undef  DosFreeThreadLocalMemory
 #define DosFreeThreadLocalMemory _DosFreeThreadLocalMemory
 
-inline ULONG _DosGetInfoBlocks(PTIB *a, PPIB *b)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosGetInfoBlocks(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosGetInfoBlocks(PTIB *a, PPIB *b);
 
 #undef  DosGetInfoBlocks
 #define DosGetInfoBlocks _DosGetInfoBlocks
 
-inline ULONG _DosKillProcess(ULONG a, PID b)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosKillProcess(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosKillProcess(ULONG a, PID b);
 
 #undef  DosKillProcess
 #define DosKillProcess _DosKillProcess
 
-inline ULONG _DosKillThread(TID a)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosKillThread(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosKillThread(TID a);
 
 #undef  DosKillThread
 #define DosKillThread _DosKillThread
 
-inline ULONG _DosResumeThread(TID a)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosResumeThread(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosResumeThread(TID a);
 
 #undef  DosResumeThread
 #define DosResumeThread _DosResumeThread
 
-inline ULONG _DosSetPriority(ULONG a, ULONG b, LONG c, ULONG d)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosSetPriority(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosSetPriority(ULONG a, ULONG b, LONG c, ULONG d);
 
 #undef  DosSetPriority
 #define DosSetPriority _DosSetPriority
 
-inline ULONG _DosSleep(ULONG a)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosSleep(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosSleep(ULONG a);
 
 #undef  DosSleep
 #define DosSleep _DosSleep
 
-inline ULONG _DosSuspendThread(TID a)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosSuspendThread(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosSuspendThread(TID a);
 
 #undef  DosSuspendThread
 #define DosSuspendThread _DosSuspendThread
 
-inline ULONG _DosWaitChild(ULONG a, ULONG b, PRESULTCODES c, PPID d, PID e)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosWaitChild(a, b, c, d, e);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosWaitChild(ULONG a, ULONG b, PRESULTCODES c, PPID d, PID e);
 
 #undef  DosWaitChild
 #define DosWaitChild _DosWaitChild
 
-inline ULONG _DosWaitThread(PTID a, ULONG b)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosWaitThread(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosWaitThread(PTID a, ULONG b);
 
 #undef  DosWaitThread
 #define DosWaitThread _DosWaitThread
@@ -1499,1525 +555,556 @@ inline ULONG _DosWaitThread(PTID a, ULONG b)
 #endif
 
 #ifdef INCL_DOSSESMGR
-inline ULONG _DosQueryAppType(PCSZ a, PULONG b)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosQueryAppType(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosQueryAppType(PCSZ a, PULONG b);
 
 #undef  DosQueryAppType
 #define DosQueryAppType _DosQueryAppType
 
-inline ULONG _DosSelectSession(ULONG a)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosSelectSession(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosSelectSession(ULONG a);
 
 #undef  DosSelectSession
 #define DosSelectSession _DosSelectSession
 
-inline ULONG _DosSetSession(ULONG a, PSTATUSDATA b)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosSetSession(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosSetSession(ULONG a, PSTATUSDATA b);
 
 #undef  DosSetSession
 #define DosSetSession _DosSetSession
 
-inline ULONG _DosStartSession(PSTARTDATA a, PULONG b, PPID c)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosStartSession(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosStartSession(PSTARTDATA a, PULONG b, PPID c);
 
 #undef  DosStartSession
 #define DosStartSession _DosStartSession
 
-inline ULONG _DosStopSession(ULONG a, ULONG b)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosStopSession(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosStopSession(ULONG a, ULONG b);
 
 #undef  DosStopSession
 #define DosStopSession _DosStopSession
 
 #endif
 #ifdef INCL_DOSSEMAPHORES
-inline ULONG _DosCloseEventSem(HEV a)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosCloseEventSem(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosCloseEventSem(HEV a);
 
 #undef  DosCloseEventSem
 #define DosCloseEventSem _DosCloseEventSem
 
-inline ULONG _DosCreateEventSem(PCSZ a, PHEV b, ULONG c, BOOL32 d)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosCreateEventSem(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosCreateEventSem(PCSZ a, PHEV b, ULONG c, BOOL32 d);
 
 #undef  DosCreateEventSem
 #define DosCreateEventSem _DosCreateEventSem
 
-inline ULONG _DosOpenEventSem(PCSZ a, PHEV b)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosOpenEventSem(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosOpenEventSem(PCSZ a, PHEV b);
 
 #undef  DosOpenEventSem
 #define DosOpenEventSem _DosOpenEventSem
 
-inline ULONG _DosPostEventSem(HEV a)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosPostEventSem(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosPostEventSem(HEV a);
 
 #undef  DosPostEventSem
 #define DosPostEventSem _DosPostEventSem
 
-inline ULONG _DosQueryEventSem(HEV a, PULONG b)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosQueryEventSem(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosQueryEventSem(HEV a, PULONG b);
 
 #undef  DosQueryEventSem
 #define DosQueryEventSem _DosQueryEventSem
 
-inline ULONG _DosResetEventSem(HEV a, PULONG b)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosResetEventSem(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosResetEventSem(HEV a, PULONG b);
 
 #undef  DosResetEventSem
 #define DosResetEventSem _DosResetEventSem
 
-inline ULONG _DosWaitEventSem(HEV a, ULONG b)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosWaitEventSem(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosWaitEventSem(HEV a, ULONG b);
 
 #undef  DosWaitEventSem
 #define DosWaitEventSem _DosWaitEventSem
 
-inline ULONG _DosCloseMutexSem(HMTX a)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosCloseMutexSem(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosCloseMutexSem(HMTX a);
 
 #undef  DosCloseMutexSem
 #define DosCloseMutexSem _DosCloseMutexSem
 
-inline ULONG _DosCreateMutexSem(PCSZ a, PHMTX b, ULONG c, BOOL32 d)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosCreateMutexSem(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosCreateMutexSem(PCSZ a, PHMTX b, ULONG c, BOOL32 d);
 
 #undef  DosCreateMutexSem
 #define DosCreateMutexSem _DosCreateMutexSem
 
-inline ULONG _DosOpenMutexSem(PCSZ a, PHMTX b)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosOpenMutexSem(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosOpenMutexSem(PCSZ a, PHMTX b);
 
 #undef  DosOpenMutexSem
 #define DosOpenMutexSem _DosOpenMutexSem
 
-inline ULONG _DosQueryMutexSem(HMTX a, PPID b, PTID c, PULONG d)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosQueryMutexSem(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosQueryMutexSem(HMTX a, PPID b, PTID c, PULONG d);
 
 #undef  DosQueryMutexSem
 #define DosQueryMutexSem _DosQueryMutexSem
 
-inline ULONG _DosReleaseMutexSem(HMTX a)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosReleaseMutexSem(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosReleaseMutexSem(HMTX a);
 
 #undef  DosReleaseMutexSem
 #define DosReleaseMutexSem _DosReleaseMutexSem
 
-inline ULONG _DosRequestMutexSem(HMTX a, ULONG b)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosRequestMutexSem(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosRequestMutexSem(HMTX a, ULONG b);
 
 #undef  DosRequestMutexSem
 #define DosRequestMutexSem _DosRequestMutexSem
 
-inline ULONG _DosAddMuxWaitSem(HMUX a, PSEMRECORD b)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosAddMuxWaitSem(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosAddMuxWaitSem(HMUX a, PSEMRECORD b);
 
 #undef  DosAddMuxWaitSem
 #define DosAddMuxWaitSem _DosAddMuxWaitSem
 
-inline ULONG _DosCloseMuxWaitSem(HMUX a)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosCloseMuxWaitSem(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosCloseMuxWaitSem(HMUX a);
 
 #undef  DosCloseMuxWaitSem
 #define DosCloseMuxWaitSem _DosCloseMuxWaitSem
 
-inline ULONG _DosCreateMuxWaitSem(PCSZ a, PHMUX b, ULONG c, PSEMRECORD d, ULONG e)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosCreateMuxWaitSem(a, b, c, d, e);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosCreateMuxWaitSem(PCSZ a, PHMUX b, ULONG c, PSEMRECORD d, ULONG e);
 
 #undef  DosCreateMuxWaitSem
 #define DosCreateMuxWaitSem _DosCreateMuxWaitSem
 
-inline ULONG _DosDeleteMuxWaitSem(HMUX a, HSEM b)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosDeleteMuxWaitSem(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosDeleteMuxWaitSem(HMUX a, HSEM b);
 
 #undef  DosDeleteMuxWaitSem
 #define DosDeleteMuxWaitSem _DosDeleteMuxWaitSem
 
-inline ULONG _DosOpenMuxWaitSem(PCSZ a, PHMUX b)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosOpenMuxWaitSem(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosOpenMuxWaitSem(PCSZ a, PHMUX b);
 
 #undef  DosOpenMuxWaitSem
 #define DosOpenMuxWaitSem _DosOpenMuxWaitSem
 
-inline ULONG _DosQueryMuxWaitSem(HMUX a, PULONG b, PSEMRECORD c, PULONG d)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosQueryMuxWaitSem(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosQueryMuxWaitSem(HMUX a, PULONG b, PSEMRECORD c, PULONG d);
 
 #undef  DosQueryMuxWaitSem
 #define DosQueryMuxWaitSem _DosQueryMuxWaitSem
 
-inline ULONG _DosWaitMuxWaitSem(HMUX a, ULONG b, PULONG c)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosWaitMuxWaitSem(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosWaitMuxWaitSem(HMUX a, ULONG b, PULONG c);
 
 #undef  DosWaitMuxWaitSem
 #define DosWaitMuxWaitSem _DosWaitMuxWaitSem
 
 #endif
 #ifdef INCL_DOSNMPIPES
-inline ULONG _DosCallNPipe(PCSZ a, PVOID b, ULONG c, PVOID d, ULONG e, PULONG f, ULONG g)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosCallNPipe(a, b, c, d, e, f, g);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosCallNPipe(PCSZ a, PVOID b, ULONG c, PVOID d, ULONG e, PULONG f, ULONG g);
 
 #undef  DosCallNPipe
 #define DosCallNPipe _DosCallNPipe
 
-inline ULONG _DosConnectNPipe(HPIPE a)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosConnectNPipe(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosConnectNPipe(HPIPE a);
 
 #undef  DosConnectNPipe
 #define DosConnectNPipe _DosConnectNPipe
 
-inline ULONG _DosCreateNPipe(PCSZ a, PHPIPE b, ULONG c, ULONG d, ULONG e, ULONG f, ULONG g)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosCreateNPipe(a, b, c, d, e, f, g);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosCreateNPipe(PCSZ a, PHPIPE b, ULONG c, ULONG d, ULONG e, ULONG f, ULONG g);
 
 #undef  DosCreateNPipe
 #define DosCreateNPipe _DosCreateNPipe
 
-inline ULONG _DosDisConnectNPipe(HPIPE a)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosDisConnectNPipe(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosDisConnectNPipe(HPIPE a);
 
 #undef  DosDisConnectNPipe
 #define DosDisConnectNPipe _DosDisConnectNPipe
 
-inline ULONG _DosPeekNPipe(HPIPE a, PVOID b, ULONG c, PULONG d, PAVAILDATA e, PULONG f)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosPeekNPipe(a, b, c, d, e, f);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosPeekNPipe(HPIPE a, PVOID b, ULONG c, PULONG d, PAVAILDATA e, PULONG f);
 
 #undef  DosPeekNPipe
 #define DosPeekNPipe _DosPeekNPipe
 
-inline ULONG _DosQueryNPHState(HPIPE a, PULONG b)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosQueryNPHState(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosQueryNPHState(HPIPE a, PULONG b);
 
 #undef  DosQueryNPHState
 #define DosQueryNPHState _DosQueryNPHState
 
-inline ULONG _DosQueryNPipeInfo(HPIPE a, ULONG b, PVOID c, ULONG d)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosQueryNPipeInfo(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosQueryNPipeInfo(HPIPE a, ULONG b, PVOID c, ULONG d);
 
 #undef  DosQueryNPipeInfo
 #define DosQueryNPipeInfo _DosQueryNPipeInfo
 
-inline ULONG _DosQueryNPipeSemState(HSEM a, PPIPESEMSTATE b, ULONG c)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosQueryNPipeSemState(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosQueryNPipeSemState(HSEM a, PPIPESEMSTATE b, ULONG c);
 
 #undef  DosQueryNPipeSemState
 #define DosQueryNPipeSemState _DosQueryNPipeSemState
 
-//AH: Different definition in 4.5 toolkit headers!!!
-//we don't need it so far, so let's just remove it for now
-#if 0
-inline ULONG _DosRawReadNPipe(PCSZ a, ULONG b, PULONG c, PVOID d)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosRawReadNPipe(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
-
-#undef  DosRawReadNPipe
-#define DosRawReadNPipe _DosRawReadNPipe
-
-inline ULONG _DosRawWriteNPipe(PCSZ a, ULONG b)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosRawWriteNPipe(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
-
-#undef  DosRawWriteNPipe
-#define DosRawWriteNPipe _DosRawWriteNPipe
-
-#endif
-
-inline ULONG _DosSetNPHState(HPIPE a, ULONG b)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosSetNPHState(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosSetNPHState(HPIPE a, ULONG b);
 
 #undef  DosSetNPHState
 #define DosSetNPHState _DosSetNPHState
 
-inline ULONG _DosSetNPipeSem(HPIPE a, HSEM b, ULONG c)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosSetNPipeSem(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosSetNPipeSem(HPIPE a, HSEM b, ULONG c);
 
 #undef  DosSetNPipeSem
 #define DosSetNPipeSem _DosSetNPipeSem
 
-inline ULONG _DosTransactNPipe(HPIPE a, PVOID b, ULONG c, PVOID d, ULONG e, PULONG f)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosTransactNPipe(a, b, c, d, e, f);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosTransactNPipe(HPIPE a, PVOID b, ULONG c, PVOID d, ULONG e, PULONG f);
 
 #undef  DosTransactNPipe
 #define DosTransactNPipe _DosTransactNPipe
 
-inline ULONG _DosWaitNPipe(PCSZ a, ULONG b)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosWaitNPipe(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosWaitNPipe(PCSZ a, ULONG b);
 
 #undef  DosWaitNPipe
 #define DosWaitNPipe _DosWaitNPipe
 
-inline ULONG _DosCreatePipe(PHFILE a, PHFILE b, ULONG c)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosCreatePipe(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosCreatePipe(PHFILE a, PHFILE b, ULONG c);
 
 #undef  DosCreatePipe
 #define DosCreatePipe _DosCreatePipe
 
 #endif
 #ifdef INCL_DOSQUEUES
-inline ULONG _DosCloseQueue(HQUEUE a)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosCloseQueue(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosCloseQueue(HQUEUE a);
 
 #undef  DosCloseQueue
 #define DosCloseQueue _DosCloseQueue
 
-inline ULONG _DosCreateQueue(PHQUEUE a, ULONG b, PCSZ c)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosCreateQueue(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosCreateQueue(PHQUEUE a, ULONG b, PCSZ c);
 
 #undef  DosCreateQueue
 #define DosCreateQueue _DosCreateQueue
 
-inline ULONG _DosOpenQueue(PPID a, PHQUEUE b, PCSZ c)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosOpenQueue(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosOpenQueue(PPID a, PHQUEUE b, PCSZ c);
 
 #undef  DosOpenQueue
 #define DosOpenQueue _DosOpenQueue
 
-inline ULONG _DosPeekQueue(HQUEUE a, PREQUESTDATA b, PULONG c, PPVOID d, PULONG e, BOOL32 f, PBYTE g, HEV h)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosPeekQueue(a, b, c, d, e, f, g, h);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosPeekQueue(HQUEUE a, PREQUESTDATA b, PULONG c, PPVOID d, PULONG e, BOOL32 f, PBYTE g, HEV h);
 
 #undef  DosPeekQueue
 #define DosPeekQueue _DosPeekQueue
 
-inline ULONG _DosPurgeQueue(HQUEUE a)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosPurgeQueue(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosPurgeQueue(HQUEUE a);
 
 #undef  DosPurgeQueue
 #define DosPurgeQueue _DosPurgeQueue
 
-inline ULONG _DosQueryQueue(HQUEUE a, PULONG b)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosQueryQueue(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosQueryQueue(HQUEUE a, PULONG b);
 
 #undef  DosQueryQueue
 #define DosQueryQueue _DosQueryQueue
 
-inline ULONG _DosReadQueue(HQUEUE a, PREQUESTDATA b, PULONG c, PPVOID d, ULONG e, BOOL32 f, PBYTE g, HEV h)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosReadQueue(a, b, c, d, e, f, g, h);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosReadQueue(HQUEUE a, PREQUESTDATA b, PULONG c, PPVOID d, ULONG e, BOOL32 f, PBYTE g, HEV h);
 
 #undef  DosReadQueue
 #define DosReadQueue _DosReadQueue
 
-inline ULONG _DosWriteQueue(HQUEUE a, ULONG b, ULONG c, PVOID d, ULONG e)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosWriteQueue(a, b, c, d, e);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosWriteQueue(HQUEUE a, ULONG b, ULONG c, PVOID d, ULONG e);
 
 #undef  DosWriteQueue
 #define DosWriteQueue _DosWriteQueue
 
 #endif
 #ifdef INCL_DOSEXCEPTIONS
-inline ULONG _DosAcknowledgeSignalException(ULONG a)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosAcknowledgeSignalException(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosAcknowledgeSignalException(ULONG a);
 
 #undef  DosAcknowledgeSignalException
 #define DosAcknowledgeSignalException _DosAcknowledgeSignalException
 
-inline ULONG _DosEnterMustComplete(PULONG a)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosEnterMustComplete(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosEnterMustComplete(PULONG a);
 
 #undef  DosEnterMustComplete
 #define DosEnterMustComplete _DosEnterMustComplete
 
-inline ULONG _DosExitMustComplete(PULONG a)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosExitMustComplete(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosExitMustComplete(PULONG a);
 
 #undef  DosExitMustComplete
 #define DosExitMustComplete _DosExitMustComplete
 
-inline ULONG _DosQueryThreadContext(TID a, ULONG b, PCONTEXTRECORD c)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosQueryThreadContext(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosQueryThreadContext(TID a, ULONG b, PCONTEXTRECORD c);
 
 #undef  DosQueryThreadContext
 #define DosQueryThreadContext _DosQueryThreadContext
 
-inline ULONG _DosRaiseException(PEXCEPTIONREPORTRECORD a)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosRaiseException(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosRaiseException(PEXCEPTIONREPORTRECORD a);
 
 #undef  DosRaiseException
 #define DosRaiseException _DosRaiseException
 
-inline ULONG _DosSendSignalException(PID a, ULONG b)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosSendSignalException(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosSendSignalException(PID a, ULONG b);
 
 #undef  DosSendSignalException
 #define DosSendSignalException _DosSendSignalException
 
-inline ULONG _DosSetExceptionHandler(PEXCEPTIONREGISTRATIONRECORD a)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosSetExceptionHandler(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosSetExceptionHandler(PEXCEPTIONREGISTRATIONRECORD a);
 
 #undef  DosSetExceptionHandler
 #define DosSetExceptionHandler _DosSetExceptionHandler
 
-inline ULONG _DosSetSignalExceptionFocus(BOOL32 a, PULONG b)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosSetSignalExceptionFocus(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosSetSignalExceptionFocus(BOOL32 a, PULONG b);
 
 #undef  DosSetSignalExceptionFocus
 #define DosSetSignalExceptionFocus _DosSetSignalExceptionFocus
 
-inline ULONG _DosUnsetExceptionHandler(PEXCEPTIONREGISTRATIONRECORD a)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosUnsetExceptionHandler(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosUnsetExceptionHandler(PEXCEPTIONREGISTRATIONRECORD a);
 
 #undef  DosUnsetExceptionHandler
 #define DosUnsetExceptionHandler _DosUnsetExceptionHandler
 
-inline ULONG _DosUnwindException(PEXCEPTIONREGISTRATIONRECORD a, PVOID b, PEXCEPTIONREPORTRECORD c)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosUnwindException(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosUnwindException(PEXCEPTIONREGISTRATIONRECORD a, PVOID b, PEXCEPTIONREPORTRECORD c);
 
 #undef  DosUnwindException
 #define DosUnwindException _DosUnwindException
 
 #endif
 #ifdef INCL_DOSMISC
-inline ULONG _DosQuerySysInfo(ULONG a, ULONG b, PVOID c, ULONG d)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosQuerySysInfo(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosQuerySysInfo(ULONG a, ULONG b, PVOID c, ULONG d);
 
 #undef  DosQuerySysInfo
 #define DosQuerySysInfo _DosQuerySysInfo
 
-inline ULONG _DosScanEnv(PCSZ a, PCSZ *b)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosScanEnv(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosScanEnv(PCSZ a, PCSZ *b);
 
 #undef  DosScanEnv
 #define DosScanEnv _DosScanEnv
 
-inline ULONG _DosQueryRASInfo(ULONG a, PPVOID b)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosQueryRASInfo(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosQueryRASInfo(ULONG a, PPVOID b);
 
 #undef  DosQueryRASInfo
 #define DosQueryRASInfo _DosQueryRASInfo
 
 #endif
 #ifdef INCL_DOSDATETIME
-inline ULONG _DosGetDateTime(PDATETIME a)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosGetDateTime(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosGetDateTime(PDATETIME a);
 
 #undef  DosGetDateTime
 #define DosGetDateTime _DosGetDateTime
 
-inline ULONG _DosSetDateTime(PDATETIME a)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosSetDateTime(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosSetDateTime(PDATETIME a);
 
 #undef  DosSetDateTime
 #define DosSetDateTime _DosSetDateTime
 
-inline ULONG _DosAsyncTimer(ULONG a, HSEM b, PHTIMER c)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosAsyncTimer(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosAsyncTimer(ULONG a, HSEM b, PHTIMER c);
 
 #undef  DosAsyncTimer
 #define DosAsyncTimer _DosAsyncTimer
 
-inline ULONG _DosStartTimer(ULONG a, HSEM b, PHTIMER c)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosStartTimer(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosStartTimer(ULONG a, HSEM b, PHTIMER c);
 
 #undef  DosStartTimer
 #define DosStartTimer _DosStartTimer
 
-inline ULONG _DosStopTimer(HTIMER a)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosStopTimer(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosStopTimer(HTIMER a);
 
 #undef  DosStopTimer
 #define DosStopTimer _DosStopTimer
 
 #endif
 #ifdef DosTmrQueryFreq
-inline ULONG _DosTmrQueryFreq(PULONG a)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosTmrQueryFreq(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosTmrQueryFreq(PULONG a);
 
 #undef  DosTmrQueryFreq
 #define DosTmrQueryFreq _DosTmrQueryFreq
 
-inline ULONG _DosTmrQueryTime(PQWORD a)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosTmrQueryTime(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosTmrQueryTime(PQWORD a);
 
 #undef  DosTmrQueryTime
 #define DosTmrQueryTime _DosTmrQueryTime
 
 #endif
 #ifdef INCL_DOSMVDM
-inline ULONG _DosCloseVDD(HVDD a)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosCloseVDD(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosCloseVDD(HVDD a);
 
 #undef  DosCloseVDD
 #define DosCloseVDD _DosCloseVDD
 
-inline ULONG _DosOpenVDD(PCSZ a, PHVDD b)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosOpenVDD(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosOpenVDD(PCSZ a, PHVDD b);
 
 #undef  DosOpenVDD
 #define DosOpenVDD _DosOpenVDD
 
-inline ULONG _DosQueryDOSProperty(SGID a, PCSZ b, ULONG c, PSZ d)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosQueryDOSProperty(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosQueryDOSProperty(SGID a, PCSZ b, ULONG c, PSZ d);
 
 #undef  DosQueryDOSProperty
 #define DosQueryDOSProperty _DosQueryDOSProperty
 
-inline ULONG _DosRequestVDD(HVDD a, SGID b, ULONG c, ULONG d, PVOID e, ULONG f, PVOID g)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosRequestVDD(a, b, c, d, e, f, g);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosRequestVDD(HVDD a, SGID b, ULONG c, ULONG d, PVOID e, ULONG f, PVOID g);
 
 #undef  DosRequestVDD
 #define DosRequestVDD _DosRequestVDD
 
-inline ULONG _DosSetDOSProperty(SGID a, PCSZ b, ULONG c, PCSZ d)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosSetDOSProperty(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosSetDOSProperty(SGID a, PCSZ b, ULONG c, PCSZ d);
 
 #undef  DosSetDOSProperty
 #define DosSetDOSProperty _DosSetDOSProperty
 
 #endif
 #ifdef INCL_DOSPROCESS
-inline ULONG _DosDebug(uDB_t *a)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosDebug(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosDebug(uDB_t *a);
 
 #undef  DosDebug
 #define DosDebug _DosDebug
 
 #endif
 #ifdef INCL_DOSMISC
-inline ULONG _DosGetMessage(PCHAR *a, ULONG b, PCHAR c, ULONG d, ULONG e, PCSZ f, PULONG g)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosGetMessage(a, b, c, d, e, f, g);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosGetMessage(PCHAR *a, ULONG b, PCHAR c, ULONG d, ULONG e, PCSZ f, PULONG g);
 
 #undef  DosGetMessage
 #define DosGetMessage _DosGetMessage
 
-inline ULONG _DosInsertMessage(PCHAR *a, ULONG b, PCSZ c, ULONG d, PCHAR e, ULONG f, PULONG g)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosInsertMessage(a, b, c, d, e, f, g);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosInsertMessage(PCHAR *a, ULONG b, PCSZ c, ULONG d, PCHAR e, ULONG f, PULONG g);
 
 #undef  DosInsertMessage
 #define DosInsertMessage _DosInsertMessage
 
-inline ULONG _DosPutMessage(HFILE a, ULONG b, PCHAR c)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosPutMessage(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosPutMessage(HFILE a, ULONG b, PCHAR c);
 
 #undef  DosPutMessage
 #define DosPutMessage _DosPutMessage
 
-inline ULONG _DosQueryMessageCP(PCHAR a, ULONG b, PCSZ c, PULONG d)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosQueryMessageCP(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosQueryMessageCP(PCHAR a, ULONG b, PCSZ c, PULONG d);
 
 #undef  DosQueryMessageCP
 #define DosQueryMessageCP _DosQueryMessageCP
 
 #endif
 #ifdef INCL_DOSRAS
-inline ULONG _DosDumpProcess(ULONG a, ULONG b, PID c)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosDumpProcess(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosDumpProcess(ULONG a, ULONG b, PID c);
 
 #undef  DosDumpProcess
 #define DosDumpProcess _DosDumpProcess
 
-inline ULONG _DosForceSystemDump(ULONG a)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosForceSystemDump(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosForceSystemDump(ULONG a);
 
 #undef  DosForceSystemDump
 #define DosForceSystemDump _DosForceSystemDump
 
-inline ULONG _DosQueryRASInfo(ULONG a, PPVOID b)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosQueryRASInfo(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosQueryRASInfo(ULONG a, PPVOID b);
 
 #undef  DosQueryRASInfo
 #define DosQueryRASInfo _DosQueryRASInfo
 
-inline ULONG _DosSuppressPopUps(ULONG a, ULONG b)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DosSuppressPopUps(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DosSuppressPopUps(ULONG a, ULONG b);
 
 #undef  DosSuppressPopUps
 #define DosSuppressPopUps _DosSuppressPopUps
 
 #endif
 #ifdef INCL_RXSUBCOM
-inline ULONG _RexxDeregisterSubcom(PCSZ a, PCSZ b)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = RexxDeregisterSubcom(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _RexxDeregisterSubcom(PCSZ a, PCSZ b);
 
 #undef  RexxDeregisterSubcom
 #define RexxDeregisterSubcom _RexxDeregisterSubcom
 
-inline ULONG _RexxQuerySubcom(PCSZ a, PCSZ b, PUSHORT c, PUCHAR d)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = RexxQuerySubcom(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _RexxQuerySubcom(PCSZ a, PCSZ b, PUSHORT c, PUCHAR d);
 
 #undef  RexxQuerySubcom
 #define RexxQuerySubcom _RexxQuerySubcom
 
-inline ULONG _RexxRegisterSubcomDll(PCSZ a, PCSZ b, PCSZ c, PUCHAR d, ULONG e)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = RexxRegisterSubcomDll(a, b, c, d, e);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _RexxRegisterSubcomDll(PCSZ a, PCSZ b, PCSZ c, PUCHAR d, ULONG e);
 
 #undef  RexxRegisterSubcomDll
 #define RexxRegisterSubcomDll _RexxRegisterSubcomDll
 
-inline ULONG _RexxRegisterSubcomExe(PCSZ a, PFN b, PUCHAR c)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = RexxRegisterSubcomExe(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _RexxRegisterSubcomExe(PCSZ a, PFN b, PUCHAR c);
 
 #undef  RexxRegisterSubcomExe
 #define RexxRegisterSubcomExe _RexxRegisterSubcomExe
 
 #endif
 #ifdef INCL_RXSHV
-inline ULONG _RexxVariablePool(PSHVBLOCK a)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = RexxVariablePool(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _RexxVariablePool(PSHVBLOCK a);
 
 #undef  RexxVariablePool
 #define RexxVariablePool _RexxVariablePool
 
 #endif
 #ifdef INCL_RXFUNC
-inline ULONG _RexxDeregisterFunction(PCSZ a)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = RexxDeregisterFunction(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _RexxDeregisterFunction(PCSZ a);
 
 #undef  RexxDeregisterFunction
 #define RexxDeregisterFunction _RexxDeregisterFunction
 
-inline ULONG _RexxQueryFunction(PCSZ a)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = RexxQueryFunction(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _RexxQueryFunction(PCSZ a);
 
 #undef  RexxQueryFunction
 #define RexxQueryFunction _RexxQueryFunction
 
-inline ULONG _RexxRegisterFunctionDll(PCSZ a, PCSZ b, PCSZ c)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = RexxRegisterFunctionDll(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _RexxRegisterFunctionDll(PCSZ a, PCSZ b, PCSZ c);
 
 #undef  RexxRegisterFunctionDll
 #define RexxRegisterFunctionDll _RexxRegisterFunctionDll
 
-inline ULONG _RexxRegisterFunctionExe(PCSZ a, RexxFunctionHandler *b)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = RexxRegisterFunctionExe(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _RexxRegisterFunctionExe(PCSZ a, RexxFunctionHandler *b);
 
 #undef  RexxRegisterFunctionExe
 #define RexxRegisterFunctionExe _RexxRegisterFunctionExe
 
 #endif
 #ifdef INCL_RXSYSEXIT
-inline ULONG _RexxDeregisterExit(PCSZ a, PCSZ b)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = RexxDeregisterExit(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _RexxDeregisterExit(PCSZ a, PCSZ b);
 
 #undef  RexxDeregisterExit
 #define RexxDeregisterExit _RexxDeregisterExit
 
-inline ULONG _RexxQueryExit(PCSZ a, PCSZ b, PUSHORT c, PUCHAR d)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = RexxQueryExit(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _RexxQueryExit(PCSZ a, PCSZ b, PUSHORT c, PUCHAR d);
 
 #undef  RexxQueryExit
 #define RexxQueryExit _RexxQueryExit
 
-inline ULONG _RexxRegisterExitDll(PCSZ a, PCSZ b, PCSZ c, PUCHAR d, ULONG e)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = RexxRegisterExitDll(a, b, c, d, e);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _RexxRegisterExitDll(PCSZ a, PCSZ b, PCSZ c, PUCHAR d, ULONG e);
 
 #undef  RexxRegisterExitDll
 #define RexxRegisterExitDll _RexxRegisterExitDll
 
-inline ULONG _RexxRegisterExitExe(PCSZ a, PFN b, PUCHAR c)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = RexxRegisterExitExe(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _RexxRegisterExitExe(PCSZ a, PFN b, PUCHAR c);
 
 #undef  RexxRegisterExitExe
 #define RexxRegisterExitExe _RexxRegisterExitExe
 
 #endif
 #ifdef INCL_RXARI
-inline ULONG _RexxResetTrace(PID a, TID b)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = RexxResetTrace(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _RexxResetTrace(PID a, TID b);
 
 #undef  RexxResetTrace
 #define RexxResetTrace _RexxResetTrace
 
-inline ULONG _RexxSetHalt(PID a, TID b)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = RexxSetHalt(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _RexxSetHalt(PID a, TID b);
 
 #undef  RexxSetHalt
 #define RexxSetHalt _RexxSetHalt
 
-inline ULONG _RexxSetTrace(PID a, TID b)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = RexxSetTrace(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _RexxSetTrace(PID a, TID b);
 
 #undef  RexxSetTrace
 #define RexxSetTrace _RexxSetTrace
 
 #endif
 #ifdef INCL_RXMACRO
-inline ULONG _RexxAddMacro(PCSZ a, PCSZ b, ULONG c)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = RexxAddMacro(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _RexxAddMacro(PCSZ a, PCSZ b, ULONG c);
 
 #undef  RexxAddMacro
 #define RexxAddMacro _RexxAddMacro
 
-inline ULONG _RexxClearMacroSpace()
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = RexxClearMacroSpace();
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _RexxClearMacroSpace();
 
 #undef  RexxClearMacroSpace
 #define RexxClearMacroSpace _RexxClearMacroSpace
 
-inline ULONG _RexxDropMacro(PCSZ a)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = RexxDropMacro(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _RexxDropMacro(PCSZ a);
 
 #undef  RexxDropMacro
 #define RexxDropMacro _RexxDropMacro
 
-inline ULONG _RexxLoadMacroSpace(ULONG a, PCSZ *b, PCSZ c)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = RexxLoadMacroSpace(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _RexxLoadMacroSpace(ULONG a, PCSZ *b, PCSZ c);
 
 #undef  RexxLoadMacroSpace
 #define RexxLoadMacroSpace _RexxLoadMacroSpace
 
-inline ULONG _RexxQueryMacro(PCSZ a, PUSHORT b)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = RexxQueryMacro(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _RexxQueryMacro(PCSZ a, PUSHORT b);
 
 #undef  RexxQueryMacro
 #define RexxQueryMacro _RexxQueryMacro
 
-inline ULONG _RexxReorderMacro(PCSZ a, ULONG b)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = RexxReorderMacro(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _RexxReorderMacro(PCSZ a, ULONG b);
 
 #undef  RexxReorderMacro
 #define RexxReorderMacro _RexxReorderMacro
 
-inline ULONG _RexxSaveMacroSpace(ULONG a, PCSZ *b, PCSZ c)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = RexxSaveMacroSpace(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _RexxSaveMacroSpace(ULONG a, PCSZ *b, PCSZ c);
 
 #undef  RexxSaveMacroSpace
 #define RexxSaveMacroSpace _RexxSaveMacroSpace
 
-inline LONG _RexxStart(LONG a, PRXSTRING b, PCSZ c, PRXSTRING d, PCSZ e, LONG f, PRXSYSEXIT g, PSHORT h, PRXSTRING i)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = RexxStart(a, b, c, d, e, f, g, h, i);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _RexxStart(LONG a, PRXSTRING b, PCSZ c, PRXSTRING d, PCSZ e, LONG f, PRXSYSEXIT g, PSHORT h, PRXSTRING i);
 
 #undef  RexxStart
 #define RexxStart _RexxStart
@@ -3025,3676 +1112,1371 @@ inline LONG _RexxStart(LONG a, PRXSTRING b, PCSZ c, PRXSTRING d, PCSZ e, LONG f,
 #endif
 #ifdef INCL_WIN
 #ifdef INCL_WINMESSAGEMGR
-inline BOOL _WinCancelShutdown(HMQ a, BOOL b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinCancelShutdown(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinCancelShutdown(HMQ a, BOOL b);
 
 #undef  WinCancelShutdown
 #define WinCancelShutdown _WinCancelShutdown
 
-inline HMQ _WinCreateMsgQueue(HAB a, LONG b)
-{
- HMQ yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinCreateMsgQueue(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HMQ APIENTRY _WinCreateMsgQueue(HAB a, LONG b);
 
 #undef  WinCreateMsgQueue
 #define WinCreateMsgQueue _WinCreateMsgQueue
 
-inline BOOL _WinDestroyMsgQueue(HMQ a)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinDestroyMsgQueue(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinDestroyMsgQueue(HMQ a);
 
 #undef  WinDestroyMsgQueue
 #define WinDestroyMsgQueue _WinDestroyMsgQueue
 
-inline MRESULT _WinDispatchMsg(HAB a, PQMSG b)
-{
- MRESULT yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinDispatchMsg(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+MRESULT APIENTRY _WinDispatchMsg(HAB a, PQMSG b);
 
 #undef  WinDispatchMsg
 #define WinDispatchMsg _WinDispatchMsg
 
-inline BOOL _WinGetMsg(HAB a, PQMSG b, HWND c, ULONG d, ULONG e)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinGetMsg(a, b, c, d, e);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinGetMsg(HAB a, PQMSG b, HWND c, ULONG d, ULONG e);
 
 #undef  WinGetMsg
 #define WinGetMsg _WinGetMsg
 
-inline BOOL _WinLockInput(HMQ a, ULONG b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinLockInput(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinLockInput(HMQ a, ULONG b);
 
 #undef  WinLockInput
 #define WinLockInput _WinLockInput
 
-inline BOOL _WinPeekMsg(HAB a, PQMSG b, HWND c, ULONG d, ULONG e, ULONG f)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinPeekMsg(a, b, c, d, e, f);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinPeekMsg(HAB a, PQMSG b, HWND c, ULONG d, ULONG e, ULONG f);
 
 #undef  WinPeekMsg
 #define WinPeekMsg _WinPeekMsg
 
-inline BOOL _WinPostMsg(HWND a, ULONG b, MPARAM c, MPARAM d)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinPostMsg(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinPostMsg(HWND a, ULONG b, MPARAM c, MPARAM d);
 
 #undef  WinPostMsg
 #define WinPostMsg _WinPostMsg
 
-inline HMQ _WinQueueFromID(HAB a, PID b, TID c)
-{
- HMQ yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinQueueFromID(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HMQ APIENTRY _WinQueueFromID(HAB a, PID b, TID c);
 
 #undef  WinQueueFromID
 #define WinQueueFromID _WinQueueFromID
 
-inline BOOL _WinQueryQueueInfo(HMQ a, PMQINFO b, ULONG c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinQueryQueueInfo(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinQueryQueueInfo(HMQ a, PMQINFO b, ULONG c);
 
 #undef  WinQueryQueueInfo
 #define WinQueryQueueInfo _WinQueryQueueInfo
 
-inline HMQ _WinQuerySendMsg(HAB a, HMQ b, HMQ c, PQMSG d)
-{
- HMQ yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinQuerySendMsg(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HMQ APIENTRY _WinQuerySendMsg(HAB a, HMQ b, HMQ c, PQMSG d);
 
 #undef  WinQuerySendMsg
 #define WinQuerySendMsg _WinQuerySendMsg
 
-inline BOOL _WinRegisterUserDatatype(HAB a, LONG b, LONG c, PLONG d)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinRegisterUserDatatype(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinRegisterUserDatatype(HAB a, LONG b, LONG c, PLONG d);
 
 #undef  WinRegisterUserDatatype
 #define WinRegisterUserDatatype _WinRegisterUserDatatype
 
-inline BOOL _WinRegisterUserMsg(HAB a, ULONG b, LONG c, LONG d, LONG e, LONG f, LONG g)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinRegisterUserMsg(a, b, c, d, e, f, g);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinRegisterUserMsg(HAB a, ULONG b, LONG c, LONG d, LONG e, LONG f, LONG g);
 
 #undef  WinRegisterUserMsg
 #define WinRegisterUserMsg _WinRegisterUserMsg
 
-inline BOOL _WinReplyMsg(HAB a, HMQ b, HMQ c, MRESULT d)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinReplyMsg(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinReplyMsg(HAB a, HMQ b, HMQ c, MRESULT d);
 
 #undef  WinReplyMsg
 #define WinReplyMsg _WinReplyMsg
 
-inline MRESULT _WinSendMsg(HWND a, ULONG b, MPARAM c, MPARAM d)
-{
- MRESULT yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinSendMsg(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+MRESULT APIENTRY _WinSendMsg(HWND a, ULONG b, MPARAM c, MPARAM d);
 
 #undef  WinSendMsg
 #define WinSendMsg _WinSendMsg
 
-inline BOOL _WinSetMsgMode(HAB a, PCSZ b, LONG c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinSetMsgMode(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinSetMsgMode(HAB a, PCSZ b, LONG c);
 
 #undef  WinSetMsgMode
 #define WinSetMsgMode _WinSetMsgMode
 
-inline BOOL _WinSetSynchroMode(HAB a, LONG b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinSetSynchroMode(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinSetSynchroMode(HAB a, LONG b);
 
 #undef  WinSetSynchroMode
 #define WinSetSynchroMode _WinSetSynchroMode
 
-inline BOOL _WinThreadAssocQueue(HAB a, HMQ b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinThreadAssocQueue(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinThreadAssocQueue(HAB a, HMQ b);
 
 #undef  WinThreadAssocQueue
 #define WinThreadAssocQueue _WinThreadAssocQueue
 
-inline BOOL _WinWakeThread(HMQ a)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinWakeThread(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinWakeThread(HMQ a);
 
 #undef  WinWakeThread
 #define WinWakeThread _WinWakeThread
 
 #endif
-inline HWND _WinCreateWindow(HWND a, PCSZ b, PCSZ c, ULONG d, LONG e, LONG f, LONG g, LONG h, HWND i, HWND j, ULONG k, PVOID l, PVOID m)
-{
- HWND yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinCreateWindow(a, b, c, d, e, f, g, h, i, j, k, l, m);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HWND APIENTRY _WinCreateWindow(HWND a, PCSZ b, PCSZ c, ULONG d, LONG e, LONG f, LONG g, LONG h, HWND i, HWND j, ULONG k, PVOID l, PVOID m);
 
 #undef  WinCreateWindow
 #define WinCreateWindow _WinCreateWindow
 
-inline BOOL _WinDrawBitmap(HPS a, HBITMAP b, PRECTL c, PPOINTL d, LONG e, LONG f, ULONG g)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinDrawBitmap(a, b, c, d, e, f, g);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinDrawBitmap(HPS a, HBITMAP b, PRECTL c, PPOINTL d, LONG e, LONG f, ULONG g);
 
 #undef  WinDrawBitmap
 #define WinDrawBitmap _WinDrawBitmap
 
-inline BOOL _WinDrawBorder(HPS a, PRECTL b, LONG c, LONG d, LONG e, LONG f, ULONG g)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinDrawBorder(a, b, c, d, e, f, g);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinDrawBorder(HPS a, PRECTL b, LONG c, LONG d, LONG e, LONG f, ULONG g);
 
 #undef  WinDrawBorder
 #define WinDrawBorder _WinDrawBorder
 
-inline LONG _WinDrawText(HPS a, LONG b, PCH c, PRECTL d, LONG e, LONG f, ULONG g)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinDrawText(a, b, c, d, e, f, g);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _WinDrawText(HPS a, LONG b, PCH c, PRECTL d, LONG e, LONG f, ULONG g);
 
 #undef  WinDrawText
 #define WinDrawText _WinDrawText
 
-inline BOOL _WinEnableWindow(HWND a, BOOL b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinEnableWindow(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinEnableWindow(HWND a, BOOL b);
 
 #undef  WinEnableWindow
 #define WinEnableWindow _WinEnableWindow
 
-inline BOOL _WinEnableWindowUpdate(HWND a, BOOL b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinEnableWindowUpdate(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinEnableWindowUpdate(HWND a, BOOL b);
 
 #undef  WinEnableWindowUpdate
 #define WinEnableWindowUpdate _WinEnableWindowUpdate
 
-inline BOOL _WinInvalidateRect(HWND a, PRECTL b, BOOL c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinInvalidateRect(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinInvalidateRect(HWND a, PRECTL b, BOOL c);
 
 #undef  WinInvalidateRect
 #define WinInvalidateRect _WinInvalidateRect
 
-inline BOOL _WinInvalidateRegion(HWND a, HRGN b, BOOL c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinInvalidateRegion(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinInvalidateRegion(HWND a, HRGN b, BOOL c);
 
 #undef  WinInvalidateRegion
 #define WinInvalidateRegion _WinInvalidateRegion
 
-inline BOOL _WinInvertRect(HPS a, PRECTL b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinInvertRect(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinInvertRect(HPS a, PRECTL b);
 
 #undef  WinInvertRect
 #define WinInvertRect _WinInvertRect
 
-inline BOOL _WinIsChild(HWND a, HWND b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinIsChild(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinIsChild(HWND a, HWND b);
 
 #undef  WinIsChild
 #define WinIsChild _WinIsChild
 
-inline BOOL _WinIsWindow(HAB a, HWND b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinIsWindow(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinIsWindow(HAB a, HWND b);
 
 #undef  WinIsWindow
 #define WinIsWindow _WinIsWindow
 
-inline BOOL _WinIsWindowEnabled(HWND a)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinIsWindowEnabled(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinIsWindowEnabled(HWND a);
 
 #undef  WinIsWindowEnabled
 #define WinIsWindowEnabled _WinIsWindowEnabled
 
-inline BOOL _WinIsWindowVisible(HWND a)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinIsWindowVisible(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinIsWindowVisible(HWND a);
 
 #undef  WinIsWindowVisible
 #define WinIsWindowVisible _WinIsWindowVisible
 
-inline LONG _WinLoadMessage(HAB a, HMODULE b, ULONG c, LONG d, PSZ e)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinLoadMessage(a, b, c, d, e);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _WinLoadMessage(HAB a, HMODULE b, ULONG c, LONG d, PSZ e);
 
 #undef  WinLoadMessage
 #define WinLoadMessage _WinLoadMessage
 
-inline LONG _WinLoadString(HAB a, HMODULE b, ULONG c, LONG d, PSZ e)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinLoadString(a, b, c, d, e);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _WinLoadString(HAB a, HMODULE b, ULONG c, LONG d, PSZ e);
 
 #undef  WinLoadString
 #define WinLoadString _WinLoadString
 
-inline LONG _WinMultWindowFromIDs(HWND a, PHWND b, ULONG c, ULONG d)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinMultWindowFromIDs(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _WinMultWindowFromIDs(HWND a, PHWND b, ULONG c, ULONG d);
 
 #undef  WinMultWindowFromIDs
 #define WinMultWindowFromIDs _WinMultWindowFromIDs
 
-inline HWND _WinQueryDesktopWindow(HAB a, HDC b)
-{
- HWND yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinQueryDesktopWindow(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HWND APIENTRY _WinQueryDesktopWindow(HAB a, HDC b);
 
 #undef  WinQueryDesktopWindow
 #define WinQueryDesktopWindow _WinQueryDesktopWindow
 
-inline HWND _WinQueryObjectWindow(HWND a)
-{
- HWND yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinQueryObjectWindow(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HWND APIENTRY _WinQueryObjectWindow(HWND a);
 
 #undef  WinQueryObjectWindow
 #define WinQueryObjectWindow _WinQueryObjectWindow
 
-inline HPOINTER _WinQueryPointer(HWND a)
-{
- HPOINTER yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinQueryPointer(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HPOINTER APIENTRY _WinQueryPointer(HWND a);
 
 #undef  WinQueryPointer
 #define WinQueryPointer _WinQueryPointer
 
-inline HWND _WinQueryWindow(HWND a, LONG b)
-{
- HWND yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinQueryWindow(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HWND APIENTRY _WinQueryWindow(HWND a, LONG b);
 
 #undef  WinQueryWindow
 #define WinQueryWindow _WinQueryWindow
 
-inline BOOL _WinQueryWindowPos(HWND a, PSWP b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinQueryWindowPos(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinQueryWindowPos(HWND a, PSWP b);
 
 #undef  WinQueryWindowPos
 #define WinQueryWindowPos _WinQueryWindowPos
 
-inline BOOL _WinQueryWindowProcess(HWND a, PPID b, PTID c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinQueryWindowProcess(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinQueryWindowProcess(HWND a, PPID b, PTID c);
 
 #undef  WinQueryWindowProcess
 #define WinQueryWindowProcess _WinQueryWindowProcess
 
-inline LONG _WinQueryWindowText(HWND a, LONG b, PCH c)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinQueryWindowText(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _WinQueryWindowText(HWND a, LONG b, PCH c);
 
 #undef  WinQueryWindowText
 #define WinQueryWindowText _WinQueryWindowText
 
-inline LONG _WinQueryWindowTextLength(HWND a)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinQueryWindowTextLength(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _WinQueryWindowTextLength(HWND a);
 
 #undef  WinQueryWindowTextLength
 #define WinQueryWindowTextLength _WinQueryWindowTextLength
 
-inline BOOL _WinSetMultWindowPos(HAB a, PSWP b, ULONG c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinSetMultWindowPos(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinSetMultWindowPos(HAB a, PSWP b, ULONG c);
 
 #undef  WinSetMultWindowPos
 #define WinSetMultWindowPos _WinSetMultWindowPos
 
-inline BOOL _WinSetOwner(HWND a, HWND b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinSetOwner(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinSetOwner(HWND a, HWND b);
 
 #undef  WinSetOwner
 #define WinSetOwner _WinSetOwner
 
-inline BOOL _WinSetParent(HWND a, HWND b, BOOL c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinSetParent(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinSetParent(HWND a, HWND b, BOOL c);
 
 #undef  WinSetParent
 #define WinSetParent _WinSetParent
 
-inline BOOL _WinSetWindowPos(HWND a, HWND b, LONG c, LONG d, LONG e, LONG f, ULONG g)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinSetWindowPos(a, b, c, d, e, f, g);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinSetWindowPos(HWND a, HWND b, LONG c, LONG d, LONG e, LONG f, ULONG g);
 
 #undef  WinSetWindowPos
 #define WinSetWindowPos _WinSetWindowPos
 
-inline BOOL _WinSetWindowText(HWND a, PCSZ b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinSetWindowText(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinSetWindowText(HWND a, PCSZ b);
 
 #undef  WinSetWindowText
 #define WinSetWindowText _WinSetWindowText
 
-inline BOOL _WinUpdateWindow(HWND a)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinUpdateWindow(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinUpdateWindow(HWND a);
 
 #undef  WinUpdateWindow
 #define WinUpdateWindow _WinUpdateWindow
 
-inline HWND _WinWindowFromID(HWND a, ULONG b)
-{
- HWND yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinWindowFromID(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HWND APIENTRY _WinWindowFromID(HWND a, ULONG b);
 
 #undef  WinWindowFromID
 #define WinWindowFromID _WinWindowFromID
 
 #ifdef INCL_WINFRAMEMGR
-inline HWND _WinCreateStdWindow(HWND a, ULONG b, PULONG c, PCSZ d, PCSZ e, ULONG f, HMODULE g, ULONG h, PHWND i)
-{
- HWND yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinCreateStdWindow(a, b, c, d, e, f, g, h, i);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HWND APIENTRY _WinCreateStdWindow(HWND a, ULONG b, PULONG c, PCSZ d, PCSZ e, ULONG f, HMODULE g, ULONG h, PHWND i);
 
 #undef  WinCreateStdWindow
 #define WinCreateStdWindow _WinCreateStdWindow
 
-inline BOOL _WinCalcFrameRect(HWND a, PRECTL b, BOOL c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinCalcFrameRect(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinCalcFrameRect(HWND a, PRECTL b, BOOL c);
 
 #undef  WinCalcFrameRect
 #define WinCalcFrameRect _WinCalcFrameRect
 
-inline BOOL _WinCreateFrameControls(HWND a, PFRAMECDATA b, PCSZ c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinCreateFrameControls(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinCreateFrameControls(HWND a, PFRAMECDATA b, PCSZ c);
 
 #undef  WinCreateFrameControls
 #define WinCreateFrameControls _WinCreateFrameControls
 
-inline BOOL _WinFlashWindow(HWND a, BOOL b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinFlashWindow(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinFlashWindow(HWND a, BOOL b);
 
 #undef  WinFlashWindow
 #define WinFlashWindow _WinFlashWindow
 
-inline BOOL _WinGetMaxPosition(HWND a, PSWP b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinGetMaxPosition(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinGetMaxPosition(HWND a, PSWP b);
 
 #undef  WinGetMaxPosition
 #define WinGetMaxPosition _WinGetMaxPosition
 
-inline BOOL _WinGetMinPosition(HWND a, PSWP b, PPOINTL c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinGetMinPosition(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinGetMinPosition(HWND a, PSWP b, PPOINTL c);
 
 #undef  WinGetMinPosition
 #define WinGetMinPosition _WinGetMinPosition
 
-inline BOOL _WinSaveWindowPos(HSAVEWP a, PSWP b, ULONG c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinSaveWindowPos(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinSaveWindowPos(HSAVEWP a, PSWP b, ULONG c);
 
 #undef  WinSaveWindowPos
 #define WinSaveWindowPos _WinSaveWindowPos
 
 #endif
 #ifdef INCL_WINWINDOWMGR
-inline HPS _WinBeginPaint(HWND a, HPS b, PRECTL c)
-{
- HPS yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinBeginPaint(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HPS APIENTRY _WinBeginPaint(HWND a, HPS b, PRECTL c);
 
 #undef  WinBeginPaint
 #define WinBeginPaint _WinBeginPaint
 
-inline MRESULT _WinDefWindowProc(HWND a, ULONG b, MPARAM c, MPARAM d)
-{
- MRESULT yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinDefWindowProc(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+MRESULT APIENTRY _WinDefWindowProc(HWND a, ULONG b, MPARAM c, MPARAM d);
 
 #undef  WinDefWindowProc
 #define WinDefWindowProc _WinDefWindowProc
 
-inline BOOL _WinDestroyWindow(HWND a)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinDestroyWindow(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinDestroyWindow(HWND a);
 
 #undef  WinDestroyWindow
 #define WinDestroyWindow _WinDestroyWindow
 
-inline BOOL _WinEndPaint(HPS a)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinEndPaint(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinEndPaint(HPS a);
 
 #undef  WinEndPaint
 #define WinEndPaint _WinEndPaint
 
-inline BOOL _WinFillRect(HPS a, PRECTL b, LONG c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinFillRect(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinFillRect(HPS a, PRECTL b, LONG c);
 
 #undef  WinFillRect
 #define WinFillRect _WinFillRect
 
-inline HPS _WinGetClipPS(HWND a, HWND b, ULONG c)
-{
- HPS yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinGetClipPS(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HPS APIENTRY _WinGetClipPS(HWND a, HWND b, ULONG c);
 
 #undef  WinGetClipPS
 #define WinGetClipPS _WinGetClipPS
 
-inline HPS _WinGetPS(HWND a)
-{
- HPS yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinGetPS(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HPS APIENTRY _WinGetPS(HWND a);
 
 #undef  WinGetPS
 #define WinGetPS _WinGetPS
 
-inline HAB _WinInitialize(ULONG a)
-{
- HAB yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinInitialize(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HAB APIENTRY _WinInitialize(ULONG a);
 
 #undef  WinInitialize
 #define WinInitialize _WinInitialize
 
-inline BOOL _WinIsWindowShowing(HWND a)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinIsWindowShowing(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinIsWindowShowing(HWND a);
 
 #undef  WinIsWindowShowing
 #define WinIsWindowShowing _WinIsWindowShowing
 
-inline HDC _WinOpenWindowDC(HWND a)
-{
- HDC yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinOpenWindowDC(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HDC APIENTRY _WinOpenWindowDC(HWND a);
 
 #undef  WinOpenWindowDC
 #define WinOpenWindowDC _WinOpenWindowDC
 
-inline HAB _WinQueryAnchorBlock(HWND a)
-{
- HAB yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinQueryAnchorBlock(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HAB APIENTRY _WinQueryAnchorBlock(HWND a);
 
 #undef  WinQueryAnchorBlock
 #define WinQueryAnchorBlock _WinQueryAnchorBlock
 
-inline ULONG _WinQueryVersion(HAB a)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinQueryVersion(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _WinQueryVersion(HAB a);
 
 #undef  WinQueryVersion
 #define WinQueryVersion _WinQueryVersion
 
-inline BOOL _WinQueryWindowRect(HWND a, PRECTL b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinQueryWindowRect(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinQueryWindowRect(HWND a, PRECTL b);
 
 #undef  WinQueryWindowRect
 #define WinQueryWindowRect _WinQueryWindowRect
 
-inline BOOL _WinRegisterClass(HAB a, PCSZ b, PFNWP c, ULONG d, ULONG e)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinRegisterClass(a, b, c, d, e);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinRegisterClass(HAB a, PCSZ b, PFNWP c, ULONG d, ULONG e);
 
 #undef  WinRegisterClass
 #define WinRegisterClass _WinRegisterClass
 
-inline BOOL _WinReleasePS(HPS a)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinReleasePS(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinReleasePS(HPS a);
 
 #undef  WinReleasePS
 #define WinReleasePS _WinReleasePS
 
-inline LONG _WinScrollWindow(HWND a, LONG b, LONG c, PRECTL d, PRECTL e, HRGN f, PRECTL g, ULONG h)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinScrollWindow(a, b, c, d, e, f, g, h);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _WinScrollWindow(HWND a, LONG b, LONG c, PRECTL d, PRECTL e, HRGN f, PRECTL g, ULONG h);
 
 #undef  WinScrollWindow
 #define WinScrollWindow _WinScrollWindow
 
-inline BOOL _WinSetActiveWindow(HWND a, HWND b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinSetActiveWindow(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinSetActiveWindow(HWND a, HWND b);
 
 #undef  WinSetActiveWindow
 #define WinSetActiveWindow _WinSetActiveWindow
 
-inline BOOL _WinShowWindow(HWND a, BOOL b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinShowWindow(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinShowWindow(HWND a, BOOL b);
 
 #undef  WinShowWindow
 #define WinShowWindow _WinShowWindow
 
-inline BOOL _WinTerminate(HAB a)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinTerminate(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinTerminate(HAB a);
 
 #undef  WinTerminate
 #define WinTerminate _WinTerminate
 
 #endif
 #ifdef INCL_WINWINDOWMGR
-inline HENUM _WinBeginEnumWindows(HWND a)
-{
- HENUM yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinBeginEnumWindows(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HENUM APIENTRY _WinBeginEnumWindows(HWND a);
 
 #undef  WinBeginEnumWindows
 #define WinBeginEnumWindows _WinBeginEnumWindows
 
-inline BOOL _WinEndEnumWindows(HENUM a)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinEndEnumWindows(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinEndEnumWindows(HENUM a);
 
 #undef  WinEndEnumWindows
 #define WinEndEnumWindows _WinEndEnumWindows
 
-inline LONG _WinExcludeUpdateRegion(HPS a, HWND b)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinExcludeUpdateRegion(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _WinExcludeUpdateRegion(HPS a, HWND b);
 
 #undef  WinExcludeUpdateRegion
 #define WinExcludeUpdateRegion _WinExcludeUpdateRegion
 
-inline HWND _WinGetNextWindow(HENUM a)
-{
- HWND yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinGetNextWindow(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HWND APIENTRY _WinGetNextWindow(HENUM a);
 
 #undef  WinGetNextWindow
 #define WinGetNextWindow _WinGetNextWindow
 
-inline HPS _WinGetScreenPS(HWND a)
-{
- HPS yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinGetScreenPS(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HPS APIENTRY _WinGetScreenPS(HWND a);
 
 #undef  WinGetScreenPS
 #define WinGetScreenPS _WinGetScreenPS
 
-inline BOOL _WinIsThreadActive(HAB a)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinIsThreadActive(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinIsThreadActive(HAB a);
 
 #undef  WinIsThreadActive
 #define WinIsThreadActive _WinIsThreadActive
 
-inline BOOL _WinLockVisRegions(HWND a, BOOL b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinLockVisRegions(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinLockVisRegions(HWND a, BOOL b);
 
 #undef  WinLockVisRegions
 #define WinLockVisRegions _WinLockVisRegions
 
-inline BOOL _WinLockWindowUpdate(HWND a, HWND b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinLockWindowUpdate(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinLockWindowUpdate(HWND a, HWND b);
 
 #undef  WinLockWindowUpdate
 #define WinLockWindowUpdate _WinLockWindowUpdate
 
-inline BOOL _WinMapWindowPoints(HWND a, HWND b, PPOINTL c, LONG d)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinMapWindowPoints(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinMapWindowPoints(HWND a, HWND b, PPOINTL c, LONG d);
 
 #undef  WinMapWindowPoints
 #define WinMapWindowPoints _WinMapWindowPoints
 
-inline HWND _WinQueryActiveWindow(HWND a)
-{
- HWND yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinQueryActiveWindow(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HWND APIENTRY _WinQueryActiveWindow(HWND a);
 
 #undef  WinQueryActiveWindow
 #define WinQueryActiveWindow _WinQueryActiveWindow
 
-inline BOOL _WinQueryClassInfo(HAB a, PCSZ b, PCLASSINFO c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinQueryClassInfo(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinQueryClassInfo(HAB a, PCSZ b, PCLASSINFO c);
 
 #undef  WinQueryClassInfo
 #define WinQueryClassInfo _WinQueryClassInfo
 
-inline LONG _WinQueryClassName(HWND a, LONG b, PCH c)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinQueryClassName(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _WinQueryClassName(HWND a, LONG b, PCH c);
 
 #undef  WinQueryClassName
 #define WinQueryClassName _WinQueryClassName
 
-inline BOOL _WinQueryUpdateRect(HWND a, PRECTL b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinQueryUpdateRect(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinQueryUpdateRect(HWND a, PRECTL b);
 
 #undef  WinQueryUpdateRect
 #define WinQueryUpdateRect _WinQueryUpdateRect
 
-inline LONG _WinQueryUpdateRegion(HWND a, HRGN b)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinQueryUpdateRegion(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _WinQueryUpdateRegion(HWND a, HRGN b);
 
 #undef  WinQueryUpdateRegion
 #define WinQueryUpdateRegion _WinQueryUpdateRegion
 
-inline HWND _WinQuerySysModalWindow(HWND a)
-{
- HWND yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinQuerySysModalWindow(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HWND APIENTRY _WinQuerySysModalWindow(HWND a);
 
 #undef  WinQuerySysModalWindow
 #define WinQuerySysModalWindow _WinQuerySysModalWindow
 
-inline HDC _WinQueryWindowDC(HWND a)
-{
- HDC yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinQueryWindowDC(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HDC APIENTRY _WinQueryWindowDC(HWND a);
 
 #undef  WinQueryWindowDC
 #define WinQueryWindowDC _WinQueryWindowDC
 
-inline PVOID _WinQueryWindowPtr(HWND a, LONG b)
-{
- PVOID yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinQueryWindowPtr(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+PVOID APIENTRY _WinQueryWindowPtr(HWND a, LONG b);
 
 #undef  WinQueryWindowPtr
 #define WinQueryWindowPtr _WinQueryWindowPtr
 
-inline ULONG _WinQueryWindowULong(HWND a, LONG b)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinQueryWindowULong(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _WinQueryWindowULong(HWND a, LONG b);
 
 #undef  WinQueryWindowULong
 #define WinQueryWindowULong _WinQueryWindowULong
 
-inline USHORT _WinQueryWindowUShort(HWND a, LONG b)
-{
- USHORT yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinQueryWindowUShort(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+USHORT APIENTRY _WinQueryWindowUShort(HWND a, LONG b);
 
 #undef  WinQueryWindowUShort
 #define WinQueryWindowUShort _WinQueryWindowUShort
 
-inline BOOL _WinSetSysModalWindow(HWND a, HWND b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinSetSysModalWindow(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinSetSysModalWindow(HWND a, HWND b);
 
 #undef  WinSetSysModalWindow
 #define WinSetSysModalWindow _WinSetSysModalWindow
 
-inline BOOL _WinSetWindowBits(HWND a, LONG b, ULONG c, ULONG d)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinSetWindowBits(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinSetWindowBits(HWND a, LONG b, ULONG c, ULONG d);
 
 #undef  WinSetWindowBits
 #define WinSetWindowBits _WinSetWindowBits
 
-inline BOOL _WinSetWindowPtr(HWND a, LONG b, PVOID c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinSetWindowPtr(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinSetWindowPtr(HWND a, LONG b, PVOID c);
 
 #undef  WinSetWindowPtr
 #define WinSetWindowPtr _WinSetWindowPtr
 
-inline BOOL _WinSetWindowULong(HWND a, LONG b, ULONG c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinSetWindowULong(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinSetWindowULong(HWND a, LONG b, ULONG c);
 
 #undef  WinSetWindowULong
 #define WinSetWindowULong _WinSetWindowULong
 
-inline BOOL _WinSetWindowUShort(HWND a, LONG b, USHORT c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinSetWindowUShort(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinSetWindowUShort(HWND a, LONG b, USHORT c);
 
 #undef  WinSetWindowUShort
 #define WinSetWindowUShort _WinSetWindowUShort
 
-inline PFNWP _WinSubclassWindow(HWND a, PFNWP b)
-{
- PFNWP yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinSubclassWindow(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+PFNWP APIENTRY _WinSubclassWindow(HWND a, PFNWP b);
 
 #undef  WinSubclassWindow
 #define WinSubclassWindow _WinSubclassWindow
 
-inline BOOL _WinValidateRect(HWND a, PRECTL b, BOOL c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinValidateRect(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinValidateRect(HWND a, PRECTL b, BOOL c);
 
 #undef  WinValidateRect
 #define WinValidateRect _WinValidateRect
 
-inline BOOL _WinValidateRegion(HWND a, HRGN b, BOOL c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinValidateRegion(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinValidateRegion(HWND a, HRGN b, BOOL c);
 
 #undef  WinValidateRegion
 #define WinValidateRegion _WinValidateRegion
 
-inline HWND _WinWindowFromDC(HDC a)
-{
- HWND yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinWindowFromDC(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HWND APIENTRY _WinWindowFromDC(HDC a);
 
 #undef  WinWindowFromDC
 #define WinWindowFromDC _WinWindowFromDC
 
-inline HWND _WinWindowFromPoint(HWND a, PPOINTL b, BOOL c)
-{
- HWND yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinWindowFromPoint(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HWND APIENTRY _WinWindowFromPoint(HWND a, PPOINTL b, BOOL c);
 
 #undef  WinWindowFromPoint
 #define WinWindowFromPoint _WinWindowFromPoint
 
 #endif
 #ifdef INCL_WINACCELERATORS
-inline ULONG _WinCopyAccelTable(HACCEL a, PACCELTABLE b, ULONG c)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinCopyAccelTable(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _WinCopyAccelTable(HACCEL a, PACCELTABLE b, ULONG c);
 
 #undef  WinCopyAccelTable
 #define WinCopyAccelTable _WinCopyAccelTable
 
-inline HACCEL _WinCreateAccelTable(HAB a, PACCELTABLE b)
-{
- HACCEL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinCreateAccelTable(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HACCEL APIENTRY _WinCreateAccelTable(HAB a, PACCELTABLE b);
 
 #undef  WinCreateAccelTable
 #define WinCreateAccelTable _WinCreateAccelTable
 
-inline BOOL _WinDestroyAccelTable(HACCEL a)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinDestroyAccelTable(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinDestroyAccelTable(HACCEL a);
 
 #undef  WinDestroyAccelTable
 #define WinDestroyAccelTable _WinDestroyAccelTable
 
-inline HACCEL _WinLoadAccelTable(HAB a, HMODULE b, ULONG c)
-{
- HACCEL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinLoadAccelTable(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HACCEL APIENTRY _WinLoadAccelTable(HAB a, HMODULE b, ULONG c);
 
 #undef  WinLoadAccelTable
 #define WinLoadAccelTable _WinLoadAccelTable
 
-inline HACCEL _WinQueryAccelTable(HAB a, HWND b)
-{
- HACCEL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinQueryAccelTable(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HACCEL APIENTRY _WinQueryAccelTable(HAB a, HWND b);
 
 #undef  WinQueryAccelTable
 #define WinQueryAccelTable _WinQueryAccelTable
 
-inline BOOL _WinSetAccelTable(HAB a, HACCEL b, HWND c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinSetAccelTable(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinSetAccelTable(HAB a, HACCEL b, HWND c);
 
 #undef  WinSetAccelTable
 #define WinSetAccelTable _WinSetAccelTable
 
-inline BOOL _WinTranslateAccel(HAB a, HWND b, HACCEL c, PQMSG d)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinTranslateAccel(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinTranslateAccel(HAB a, HWND b, HACCEL c, PQMSG d);
 
 #undef  WinTranslateAccel
 #define WinTranslateAccel _WinTranslateAccel
 
 #endif
 #ifdef INCL_WINATOM
-inline ATOM _WinAddAtom(HATOMTBL a, PCSZ b)
-{
- ATOM yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinAddAtom(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ATOM APIENTRY _WinAddAtom(HATOMTBL a, PCSZ b);
 
 #undef  WinAddAtom
 #define WinAddAtom _WinAddAtom
 
-inline HATOMTBL _WinCreateAtomTable(ULONG a, ULONG b)
-{
- HATOMTBL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinCreateAtomTable(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HATOMTBL APIENTRY _WinCreateAtomTable(ULONG a, ULONG b);
 
 #undef  WinCreateAtomTable
 #define WinCreateAtomTable _WinCreateAtomTable
 
-inline ATOM _WinDeleteAtom(HATOMTBL a, ATOM b)
-{
- ATOM yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinDeleteAtom(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ATOM APIENTRY _WinDeleteAtom(HATOMTBL a, ATOM b);
 
 #undef  WinDeleteAtom
 #define WinDeleteAtom _WinDeleteAtom
 
-inline HATOMTBL _WinDestroyAtomTable(HATOMTBL a)
-{
- HATOMTBL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinDestroyAtomTable(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HATOMTBL APIENTRY _WinDestroyAtomTable(HATOMTBL a);
 
 #undef  WinDestroyAtomTable
 #define WinDestroyAtomTable _WinDestroyAtomTable
 
-inline ATOM _WinFindAtom(HATOMTBL a, PCSZ b)
-{
- ATOM yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinFindAtom(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ATOM APIENTRY _WinFindAtom(HATOMTBL a, PCSZ b);
 
 #undef  WinFindAtom
 #define WinFindAtom _WinFindAtom
 
-inline ULONG _WinQueryAtomLength(HATOMTBL a, ATOM b)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinQueryAtomLength(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _WinQueryAtomLength(HATOMTBL a, ATOM b);
 
 #undef  WinQueryAtomLength
 #define WinQueryAtomLength _WinQueryAtomLength
 
-inline ULONG _WinQueryAtomName(HATOMTBL a, ATOM b, PSZ c, ULONG d)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinQueryAtomName(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _WinQueryAtomName(HATOMTBL a, ATOM b, PSZ c, ULONG d);
 
 #undef  WinQueryAtomName
 #define WinQueryAtomName _WinQueryAtomName
 
-inline ULONG _WinQueryAtomUsage(HATOMTBL a, ATOM b)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinQueryAtomUsage(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _WinQueryAtomUsage(HATOMTBL a, ATOM b);
 
 #undef  WinQueryAtomUsage
 #define WinQueryAtomUsage _WinQueryAtomUsage
 
-inline HATOMTBL _WinQuerySystemAtomTable()
-{
- HATOMTBL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinQuerySystemAtomTable();
-    SetFS(sel);
-
-    return yyrc;
-} 
+HATOMTBL APIENTRY _WinQuerySystemAtomTable();
 
 #undef  WinQuerySystemAtomTable
 #define WinQuerySystemAtomTable _WinQuerySystemAtomTable
 
 #endif
 #ifdef INCL_WINCLIPBOARD
-inline BOOL _WinCloseClipbrd(HAB a)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinCloseClipbrd(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinCloseClipbrd(HAB a);
 
 #undef  WinCloseClipbrd
 #define WinCloseClipbrd _WinCloseClipbrd
 
-inline BOOL _WinEmptyClipbrd(HAB a)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinEmptyClipbrd(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinEmptyClipbrd(HAB a);
 
 #undef  WinEmptyClipbrd
 #define WinEmptyClipbrd _WinEmptyClipbrd
 
-inline ULONG _WinEnumClipbrdFmts(HAB a, ULONG b)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinEnumClipbrdFmts(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _WinEnumClipbrdFmts(HAB a, ULONG b);
 
 #undef  WinEnumClipbrdFmts
 #define WinEnumClipbrdFmts _WinEnumClipbrdFmts
 
-inline BOOL _WinOpenClipbrd(HAB a)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinOpenClipbrd(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinOpenClipbrd(HAB a);
 
 #undef  WinOpenClipbrd
 #define WinOpenClipbrd _WinOpenClipbrd
 
-inline ULONG _WinQueryClipbrdData(HAB a, ULONG b)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinQueryClipbrdData(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _WinQueryClipbrdData(HAB a, ULONG b);
 
 #undef  WinQueryClipbrdData
 #define WinQueryClipbrdData _WinQueryClipbrdData
 
-inline BOOL _WinQueryClipbrdFmtInfo(HAB a, ULONG b, PULONG c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinQueryClipbrdFmtInfo(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinQueryClipbrdFmtInfo(HAB a, ULONG b, PULONG c);
 
 #undef  WinQueryClipbrdFmtInfo
 #define WinQueryClipbrdFmtInfo _WinQueryClipbrdFmtInfo
 
-inline HWND _WinQueryClipbrdOwner(HAB a)
-{
- HWND yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinQueryClipbrdOwner(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HWND APIENTRY _WinQueryClipbrdOwner(HAB a);
 
 #undef  WinQueryClipbrdOwner
 #define WinQueryClipbrdOwner _WinQueryClipbrdOwner
 
-inline HWND _WinQueryClipbrdViewer(HAB a)
-{
- HWND yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinQueryClipbrdViewer(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HWND APIENTRY _WinQueryClipbrdViewer(HAB a);
 
 #undef  WinQueryClipbrdViewer
 #define WinQueryClipbrdViewer _WinQueryClipbrdViewer
 
-inline BOOL _WinSetClipbrdData(HAB a, ULONG b, ULONG c, ULONG d)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinSetClipbrdData(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinSetClipbrdData(HAB a, ULONG b, ULONG c, ULONG d);
 
 #undef  WinSetClipbrdData
 #define WinSetClipbrdData _WinSetClipbrdData
 
-inline BOOL _WinSetClipbrdOwner(HAB a, HWND b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinSetClipbrdOwner(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinSetClipbrdOwner(HAB a, HWND b);
 
 #undef  WinSetClipbrdOwner
 #define WinSetClipbrdOwner _WinSetClipbrdOwner
 
-inline BOOL _WinSetClipbrdViewer(HAB a, HWND b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinSetClipbrdViewer(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinSetClipbrdViewer(HAB a, HWND b);
 
 #undef  WinSetClipbrdViewer
 #define WinSetClipbrdViewer _WinSetClipbrdViewer
 
+
+BOOL APIENTRY __OpenClipbrd(HAB a, HWND b);
+
+#undef  _OpenClipbrd
+#define _OpenClipbrd __OpenClipbrd
+
+BOOL APIENTRY _Win32AddClipbrdViewer(HWND a);
+
+#undef  Win32AddClipbrdViewer
+#define Win32AddClipbrdViewer _Win32AddClipbrdViewer
+
+BOOL APIENTRY _Win32RemoveClipbrdViewer(HWND a);
+
+#undef  Win32RemoveClipbrdViewer
+#define Win32RemoveClipbrdViewer _Win32RemoveClipbrdViewer
+
+HWND APIENTRY _Win32QueryClipbrdViewerChain();
+
+#undef  Win32QueryClipbrdViewerChain
+#define Win32QueryClipbrdViewerChain _Win32QueryClipbrdViewerChain
+
+HWND APIENTRY _Win32QueryOpenClipbrdWindow();
+
+#undef  Win32QueryOpenClipbrdWindow
+#define Win32QueryOpenClipbrdWindow _Win32QueryOpenClipbrdWindow
+
 #endif
 #ifdef INCL_WINDDE
-inline BOOL _WinDdeInitiate(HWND a, PCSZ b, PCSZ c, PCONVCONTEXT d)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinDdeInitiate(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinDdeInitiate(HWND a, PCSZ b, PCSZ c, PCONVCONTEXT d);
 
 #undef  WinDdeInitiate
 #define WinDdeInitiate _WinDdeInitiate
 
-inline BOOL _WinDdePostMsg(HWND a, HWND b, ULONG c, PDDESTRUCT d, ULONG e)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinDdePostMsg(a, b, c, d, e);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinDdePostMsg(HWND a, HWND b, ULONG c, PDDESTRUCT d, ULONG e);
 
 #undef  WinDdePostMsg
 #define WinDdePostMsg _WinDdePostMsg
 
-inline MRESULT _WinDdeRespond(HWND a, HWND b, PCSZ c, PCSZ d, PCONVCONTEXT e)
-{
- MRESULT yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinDdeRespond(a, b, c, d, e);
-    SetFS(sel);
-
-    return yyrc;
-} 
+MRESULT APIENTRY _WinDdeRespond(HWND a, HWND b, PCSZ c, PCSZ d, PCONVCONTEXT e);
 
 #undef  WinDdeRespond
 #define WinDdeRespond _WinDdeRespond
 
 #endif
 #ifdef INCL_WINCOUNTRY
-inline ULONG _WinCompareStrings(HAB a, ULONG b, ULONG c, PCSZ d, PCSZ e, ULONG f)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinCompareStrings(a, b, c, d, e, f);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _WinCompareStrings(HAB a, ULONG b, ULONG c, PCSZ d, PCSZ e, ULONG f);
 
 #undef  WinCompareStrings
 #define WinCompareStrings _WinCompareStrings
 
-inline UCHAR _WinCpTranslateChar(HAB a, ULONG b, UCHAR c, ULONG d)
-{
- UCHAR yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinCpTranslateChar(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+UCHAR APIENTRY _WinCpTranslateChar(HAB a, ULONG b, UCHAR c, ULONG d);
 
 #undef  WinCpTranslateChar
 #define WinCpTranslateChar _WinCpTranslateChar
 
-inline BOOL _WinCpTranslateString(HAB a, ULONG b, PCSZ c, ULONG d, ULONG e, PSZ f)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinCpTranslateString(a, b, c, d, e, f);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinCpTranslateString(HAB a, ULONG b, PCSZ c, ULONG d, ULONG e, PSZ f);
 
 #undef  WinCpTranslateString
 #define WinCpTranslateString _WinCpTranslateString
 
-inline PCSZ _WinNextChar(HAB a, ULONG b, ULONG c, PCSZ d)
-{
- PCSZ yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinNextChar(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+PCSZ APIENTRY _WinNextChar(HAB a, ULONG b, ULONG c, PCSZ d);
 
 #undef  WinNextChar
 #define WinNextChar _WinNextChar
 
-inline PCSZ _WinPrevChar(HAB a, ULONG b, ULONG c, PCSZ d, PCSZ e)
-{
- PCSZ yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinPrevChar(a, b, c, d, e);
-    SetFS(sel);
-
-    return yyrc;
-} 
+PCSZ APIENTRY _WinPrevChar(HAB a, ULONG b, ULONG c, PCSZ d, PCSZ e);
 
 #undef  WinPrevChar
 #define WinPrevChar _WinPrevChar
 
-inline ULONG _WinQueryCp(HMQ a)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinQueryCp(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _WinQueryCp(HMQ a);
 
 #undef  WinQueryCp
 #define WinQueryCp _WinQueryCp
 
-inline ULONG _WinQueryCpList(HAB a, ULONG b, PULONG c)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinQueryCpList(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _WinQueryCpList(HAB a, ULONG b, PULONG c);
 
 #undef  WinQueryCpList
 #define WinQueryCpList _WinQueryCpList
 
-inline BOOL _WinSetCp(HMQ a, ULONG b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinSetCp(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinSetCp(HMQ a, ULONG b);
 
 #undef  WinSetCp
 #define WinSetCp _WinSetCp
 
-inline ULONG _WinUpper(HAB a, ULONG b, ULONG c, PSZ d)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinUpper(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _WinUpper(HAB a, ULONG b, ULONG c, PSZ d);
 
 #undef  WinUpper
 #define WinUpper _WinUpper
 
-inline ULONG _WinUpperChar(HAB a, ULONG b, ULONG c, ULONG d)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinUpperChar(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _WinUpperChar(HAB a, ULONG b, ULONG c, ULONG d);
 
 #undef  WinUpperChar
 #define WinUpperChar _WinUpperChar
 
 #endif
 #ifdef INCL_WINCURSORS
-inline BOOL _WinCreateCursor(HWND a, LONG b, LONG c, LONG d, LONG e, ULONG f, PRECTL g)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinCreateCursor(a, b, c, d, e, f, g);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinCreateCursor(HWND a, LONG b, LONG c, LONG d, LONG e, ULONG f, PRECTL g);
 
 #undef  WinCreateCursor
 #define WinCreateCursor _WinCreateCursor
 
-inline BOOL _WinDestroyCursor(HWND a)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinDestroyCursor(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinDestroyCursor(HWND a);
 
 #undef  WinDestroyCursor
 #define WinDestroyCursor _WinDestroyCursor
 
-inline BOOL _WinShowCursor(HWND a, BOOL b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinShowCursor(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinShowCursor(HWND a, BOOL b);
 
 #undef  WinShowCursor
 #define WinShowCursor _WinShowCursor
 
-inline BOOL _WinQueryCursorInfo(HWND a, PCURSORINFO b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinQueryCursorInfo(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinQueryCursorInfo(HWND a, PCURSORINFO b);
 
 #undef  WinQueryCursorInfo
 #define WinQueryCursorInfo _WinQueryCursorInfo
 
 #endif
 #ifdef INCL_WINDESKTOP
-inline BOOL _WinQueryDesktopBkgnd(HWND a, PDESKTOP b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinQueryDesktopBkgnd(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinQueryDesktopBkgnd(HWND a, PDESKTOP b);
 
 #undef  WinQueryDesktopBkgnd
 #define WinQueryDesktopBkgnd _WinQueryDesktopBkgnd
 
-inline HBITMAP _WinSetDesktopBkgnd(HWND a, PDESKTOP b)
-{
- HBITMAP yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinSetDesktopBkgnd(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HBITMAP APIENTRY _WinSetDesktopBkgnd(HWND a, PDESKTOP b);
 
 #undef  WinSetDesktopBkgnd
 #define WinSetDesktopBkgnd _WinSetDesktopBkgnd
 
 #endif
 #ifdef INCL_WINDIALOGS
-inline BOOL _WinAlarm(HWND a, ULONG b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinAlarm(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinAlarm(HWND a, ULONG b);
 
 #undef  WinAlarm
 #define WinAlarm _WinAlarm
 
-inline MRESULT _WinDefDlgProc(HWND a, ULONG b, MPARAM c, MPARAM d)
-{
- MRESULT yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinDefDlgProc(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+MRESULT APIENTRY _WinDefDlgProc(HWND a, ULONG b, MPARAM c, MPARAM d);
 
 #undef  WinDefDlgProc
 #define WinDefDlgProc _WinDefDlgProc
 
-inline BOOL _WinDismissDlg(HWND a, ULONG b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinDismissDlg(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinDismissDlg(HWND a, ULONG b);
 
 #undef  WinDismissDlg
 #define WinDismissDlg _WinDismissDlg
 
-inline ULONG _WinDlgBox(HWND a, HWND b, PFNWP c, HMODULE d, ULONG e, PVOID f)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinDlgBox(a, b, c, d, e, f);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _WinDlgBox(HWND a, HWND b, PFNWP c, HMODULE d, ULONG e, PVOID f);
 
 #undef  WinDlgBox
 #define WinDlgBox _WinDlgBox
 
-inline BOOL _WinGetDlgMsg(HWND a, PQMSG b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinGetDlgMsg(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinGetDlgMsg(HWND a, PQMSG b);
 
 #undef  WinGetDlgMsg
 #define WinGetDlgMsg _WinGetDlgMsg
 
-inline HWND _WinLoadDlg(HWND a, HWND b, PFNWP c, HMODULE d, ULONG e, PVOID f)
-{
- HWND yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinLoadDlg(a, b, c, d, e, f);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HWND APIENTRY _WinLoadDlg(HWND a, HWND b, PFNWP c, HMODULE d, ULONG e, PVOID f);
 
 #undef  WinLoadDlg
 #define WinLoadDlg _WinLoadDlg
 
-inline ULONG _WinMessageBox(HWND a, HWND b, PCSZ c, PCSZ d, ULONG e, ULONG f)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinMessageBox(a, b, c, d, e, f);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _WinMessageBox(HWND a, HWND b, PCSZ c, PCSZ d, ULONG e, ULONG f);
 
 #undef  WinMessageBox
 #define WinMessageBox _WinMessageBox
 
-inline ULONG _WinMessageBox2(HWND a, HWND b, PSZ c, PSZ d, ULONG e, PMB2INFO f)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinMessageBox2(a, b, c, d, e, f);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _WinMessageBox2(HWND a, HWND b, PSZ c, PSZ d, ULONG e, PMB2INFO f);
 
 #undef  WinMessageBox2
 #define WinMessageBox2 _WinMessageBox2
 
-inline BOOL _WinQueryDlgItemShort(HWND a, ULONG b, PSHORT c, BOOL d)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinQueryDlgItemShort(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinQueryDlgItemShort(HWND a, ULONG b, PSHORT c, BOOL d);
 
 #undef  WinQueryDlgItemShort
 #define WinQueryDlgItemShort _WinQueryDlgItemShort
 
-inline ULONG _WinQueryDlgItemText(HWND a, ULONG b, LONG c, PSZ d)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinQueryDlgItemText(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _WinQueryDlgItemText(HWND a, ULONG b, LONG c, PSZ d);
 
 #undef  WinQueryDlgItemText
 #define WinQueryDlgItemText _WinQueryDlgItemText
 
-inline LONG _WinQueryDlgItemTextLength(HWND a, ULONG b)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinQueryDlgItemTextLength(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _WinQueryDlgItemTextLength(HWND a, ULONG b);
 
 #undef  WinQueryDlgItemTextLength
 #define WinQueryDlgItemTextLength _WinQueryDlgItemTextLength
 
-inline BOOL _WinSetDlgItemShort(HWND a, ULONG b, USHORT c, BOOL d)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinSetDlgItemShort(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinSetDlgItemShort(HWND a, ULONG b, USHORT c, BOOL d);
 
 #undef  WinSetDlgItemShort
 #define WinSetDlgItemShort _WinSetDlgItemShort
 
-inline BOOL _WinSetDlgItemText(HWND a, ULONG b, PCSZ c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinSetDlgItemText(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinSetDlgItemText(HWND a, ULONG b, PCSZ c);
 
 #undef  WinSetDlgItemText
 #define WinSetDlgItemText _WinSetDlgItemText
 
-inline HWND _WinCreateDlg(HWND a, HWND b, PFNWP c, PDLGTEMPLATE d, PVOID e)
-{
- HWND yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinCreateDlg(a, b, c, d, e);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HWND APIENTRY _WinCreateDlg(HWND a, HWND b, PFNWP c, PDLGTEMPLATE d, PVOID e);
 
 #undef  WinCreateDlg
 #define WinCreateDlg _WinCreateDlg
 
-inline HWND _WinEnumDlgItem(HWND a, HWND b, ULONG c)
-{
- HWND yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinEnumDlgItem(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HWND APIENTRY _WinEnumDlgItem(HWND a, HWND b, ULONG c);
 
 #undef  WinEnumDlgItem
 #define WinEnumDlgItem _WinEnumDlgItem
 
-inline BOOL _WinMapDlgPoints(HWND a, PPOINTL b, ULONG c, BOOL d)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinMapDlgPoints(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinMapDlgPoints(HWND a, PPOINTL b, ULONG c, BOOL d);
 
 #undef  WinMapDlgPoints
 #define WinMapDlgPoints _WinMapDlgPoints
 
-inline ULONG _WinProcessDlg(HWND a)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinProcessDlg(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _WinProcessDlg(HWND a);
 
 #undef  WinProcessDlg
 #define WinProcessDlg _WinProcessDlg
 
-inline MRESULT _WinSendDlgItemMsg(HWND a, ULONG b, ULONG c, MPARAM d, MPARAM e)
-{
- MRESULT yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinSendDlgItemMsg(a, b, c, d, e);
-    SetFS(sel);
-
-    return yyrc;
-} 
+MRESULT APIENTRY _WinSendDlgItemMsg(HWND a, ULONG b, ULONG c, MPARAM d, MPARAM e);
 
 #undef  WinSendDlgItemMsg
 #define WinSendDlgItemMsg _WinSendDlgItemMsg
 
-inline LONG _WinSubstituteStrings(HWND a, PCSZ b, LONG c, PSZ d)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinSubstituteStrings(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _WinSubstituteStrings(HWND a, PCSZ b, LONG c, PSZ d);
 
 #undef  WinSubstituteStrings
 #define WinSubstituteStrings _WinSubstituteStrings
 
 #endif
 #ifdef INCL_WINERRORS
-inline ERRORID _WinGetLastError(HAB a)
-{
- ERRORID yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinGetLastError(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ERRORID APIENTRY _WinGetLastError(HAB a);
 
 #undef  WinGetLastError
 #define WinGetLastError _WinGetLastError
 
-inline BOOL _WinFreeErrorInfo(PERRINFO a)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinFreeErrorInfo(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinFreeErrorInfo(PERRINFO a);
 
 #undef  WinFreeErrorInfo
 #define WinFreeErrorInfo _WinFreeErrorInfo
 
-inline PERRINFO _WinGetErrorInfo(HAB a)
-{
- PERRINFO yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinGetErrorInfo(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+PERRINFO APIENTRY _WinGetErrorInfo(HAB a);
 
 #undef  WinGetErrorInfo
 #define WinGetErrorInfo _WinGetErrorInfo
 
 #endif
 #ifdef INCL_WINHOOKS
-inline BOOL _WinCallMsgFilter(HAB a, PQMSG b, ULONG c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinCallMsgFilter(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinCallMsgFilter(HAB a, PQMSG b, ULONG c);
 
 #undef  WinCallMsgFilter
 #define WinCallMsgFilter _WinCallMsgFilter
 
-inline BOOL _WinReleaseHook(HAB a, HMQ b, LONG c, PFN d, HMODULE e)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinReleaseHook(a, b, c, d, e);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinReleaseHook(HAB a, HMQ b, LONG c, PFN d, HMODULE e);
 
 #undef  WinReleaseHook
 #define WinReleaseHook _WinReleaseHook
 
-inline BOOL _WinSetHook(HAB a, HMQ b, LONG c, PFN d, HMODULE e)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinSetHook(a, b, c, d, e);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinSetHook(HAB a, HMQ b, LONG c, PFN d, HMODULE e);
 
 #undef  WinSetHook
 #define WinSetHook _WinSetHook
 
 #endif
 #ifdef INCL_WININPUT
-inline BOOL _WinFocusChange(HWND a, HWND b, ULONG c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinFocusChange(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinFocusChange(HWND a, HWND b, ULONG c);
 
 #undef  WinFocusChange
 #define WinFocusChange _WinFocusChange
 
-inline BOOL _WinLockupSystem(HAB a)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinLockupSystem(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinLockupSystem(HAB a);
 
 #undef  WinLockupSystem
 #define WinLockupSystem _WinLockupSystem
 
-inline BOOL _WinSetFocus(HWND a, HWND b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinSetFocus(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinSetFocus(HWND a, HWND b);
 
 #undef  WinSetFocus
 #define WinSetFocus _WinSetFocus
 
-inline BOOL _WinUnlockSystem(HAB a, PSZ b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinUnlockSystem(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinUnlockSystem(HAB a, PSZ b);
 
 #undef  WinUnlockSystem
 #define WinUnlockSystem _WinUnlockSystem
 
-inline BOOL _WinCheckInput(HAB a)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinCheckInput(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinCheckInput(HAB a);
 
 #undef  WinCheckInput
 #define WinCheckInput _WinCheckInput
 
-inline BOOL _WinEnablePhysInput(HWND a, BOOL b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinEnablePhysInput(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinEnablePhysInput(HWND a, BOOL b);
 
 #undef  WinEnablePhysInput
 #define WinEnablePhysInput _WinEnablePhysInput
 
-inline LONG _WinGetKeyState(HWND a, LONG b)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinGetKeyState(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _WinGetKeyState(HWND a, LONG b);
 
 #undef  WinGetKeyState
 #define WinGetKeyState _WinGetKeyState
 
-inline LONG _WinGetPhysKeyState(HWND a, LONG b)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinGetPhysKeyState(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _WinGetPhysKeyState(HWND a, LONG b);
 
 #undef  WinGetPhysKeyState
 #define WinGetPhysKeyState _WinGetPhysKeyState
 
-inline BOOL _WinIsPhysInputEnabled(HWND a)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinIsPhysInputEnabled(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinIsPhysInputEnabled(HWND a);
 
 #undef  WinIsPhysInputEnabled
 #define WinIsPhysInputEnabled _WinIsPhysInputEnabled
 
-inline HWND _WinQueryCapture(HWND a)
-{
- HWND yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinQueryCapture(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HWND APIENTRY _WinQueryCapture(HWND a);
 
 #undef  WinQueryCapture
 #define WinQueryCapture _WinQueryCapture
 
-inline HWND _WinQueryFocus(HWND a)
-{
- HWND yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinQueryFocus(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HWND APIENTRY _WinQueryFocus(HWND a);
 
 #undef  WinQueryFocus
 #define WinQueryFocus _WinQueryFocus
 
-inline ULONG _WinQueryVisibleRegion(HWND a, HRGN b)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinQueryVisibleRegion(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _WinQueryVisibleRegion(HWND a, HRGN b);
 
 #undef  WinQueryVisibleRegion
 #define WinQueryVisibleRegion _WinQueryVisibleRegion
 
-inline BOOL _WinSetCapture(HWND a, HWND b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinSetCapture(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinSetCapture(HWND a, HWND b);
 
 #undef  WinSetCapture
 #define WinSetCapture _WinSetCapture
 
-inline BOOL _WinSetKeyboardStateTable(HWND a, PBYTE b, BOOL c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinSetKeyboardStateTable(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinSetKeyboardStateTable(HWND a, PBYTE b, BOOL c);
 
 #undef  WinSetKeyboardStateTable
 #define WinSetKeyboardStateTable _WinSetKeyboardStateTable
 
-inline BOOL _WinSetVisibleRegionNotify(HWND a, BOOL b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinSetVisibleRegionNotify(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinSetVisibleRegionNotify(HWND a, BOOL b);
 
 #undef  WinSetVisibleRegionNotify
 #define WinSetVisibleRegionNotify _WinSetVisibleRegionNotify
 
 #endif
 #ifdef INCL_WINLOAD
-inline BOOL _WinDeleteLibrary(HAB a, HLIB b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinDeleteLibrary(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinDeleteLibrary(HAB a, HLIB b);
 
 #undef  WinDeleteLibrary
 #define WinDeleteLibrary _WinDeleteLibrary
 
-inline BOOL _WinDeleteProcedure(HAB a, PFNWP b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinDeleteProcedure(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinDeleteProcedure(HAB a, PFNWP b);
 
 #undef  WinDeleteProcedure
 #define WinDeleteProcedure _WinDeleteProcedure
 
-inline HLIB _WinLoadLibrary(HAB a, PCSZ b)
-{
- HLIB yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinLoadLibrary(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HLIB APIENTRY _WinLoadLibrary(HAB a, PCSZ b);
 
 #undef  WinLoadLibrary
 #define WinLoadLibrary _WinLoadLibrary
 
-inline PFNWP _WinLoadProcedure(HAB a, HLIB b, PSZ c)
-{
- PFNWP yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinLoadProcedure(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+PFNWP APIENTRY _WinLoadProcedure(HAB a, HLIB b, PSZ c);
 
 #undef  WinLoadProcedure
 #define WinLoadProcedure _WinLoadProcedure
 
 #endif
 #ifdef INCL_WINMENUS
-inline HWND _WinCreateMenu(HWND a, PVOID b)
-{
- HWND yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinCreateMenu(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HWND APIENTRY _WinCreateMenu(HWND a, PVOID b);
 
 #undef  WinCreateMenu
 #define WinCreateMenu _WinCreateMenu
 
-inline HWND _WinLoadMenu(HWND a, HMODULE b, ULONG c)
-{
- HWND yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinLoadMenu(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HWND APIENTRY _WinLoadMenu(HWND a, HMODULE b, ULONG c);
 
 #undef  WinLoadMenu
 #define WinLoadMenu _WinLoadMenu
 
-inline BOOL _WinPopupMenu(HWND a, HWND b, HWND c, LONG d, LONG e, LONG f, ULONG g)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinPopupMenu(a, b, c, d, e, f, g);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinPopupMenu(HWND a, HWND b, HWND c, LONG d, LONG e, LONG f, ULONG g);
 
 #undef  WinPopupMenu
 #define WinPopupMenu _WinPopupMenu
 
 #endif
 #ifdef INCL_WINMESSAGEMGR
-inline BOOL _WinBroadcastMsg(HWND a, ULONG b, MPARAM c, MPARAM d, ULONG e)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinBroadcastMsg(a, b, c, d, e);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinBroadcastMsg(HWND a, ULONG b, MPARAM c, MPARAM d, ULONG e);
 
 #undef  WinBroadcastMsg
 #define WinBroadcastMsg _WinBroadcastMsg
 
-inline BOOL _WinInSendMsg(HAB a)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinInSendMsg(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinInSendMsg(HAB a);
 
 #undef  WinInSendMsg
 #define WinInSendMsg _WinInSendMsg
 
-inline BOOL _WinPostQueueMsg(HMQ a, ULONG b, MPARAM c, MPARAM d)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinPostQueueMsg(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinPostQueueMsg(HMQ a, ULONG b, MPARAM c, MPARAM d);
 
 #undef  WinPostQueueMsg
 #define WinPostQueueMsg _WinPostQueueMsg
 
-inline BOOL _WinQueryMsgPos(HAB a, PPOINTL b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinQueryMsgPos(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinQueryMsgPos(HAB a, PPOINTL b);
 
 #undef  WinQueryMsgPos
 #define WinQueryMsgPos _WinQueryMsgPos
 
-inline ULONG _WinQueryMsgTime(HAB a)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinQueryMsgTime(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _WinQueryMsgTime(HAB a);
 
 #undef  WinQueryMsgTime
 #define WinQueryMsgTime _WinQueryMsgTime
 
-inline ULONG _WinQueryQueueStatus(HWND a)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinQueryQueueStatus(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _WinQueryQueueStatus(HWND a);
 
 #undef  WinQueryQueueStatus
 #define WinQueryQueueStatus _WinQueryQueueStatus
 
-inline ULONG _WinRequestMutexSem(HMTX a, ULONG b)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinRequestMutexSem(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _WinRequestMutexSem(HMTX a, ULONG b);
 
 #undef  WinRequestMutexSem
 #define WinRequestMutexSem _WinRequestMutexSem
 
-inline BOOL _WinSetClassMsgInterest(HAB a, PCSZ b, ULONG c, LONG d)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinSetClassMsgInterest(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinSetClassMsgInterest(HAB a, PCSZ b, ULONG c, LONG d);
 
 #undef  WinSetClassMsgInterest
 #define WinSetClassMsgInterest _WinSetClassMsgInterest
 
-inline BOOL _WinSetMsgInterest(HWND a, ULONG b, LONG c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinSetMsgInterest(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinSetMsgInterest(HWND a, ULONG b, LONG c);
 
 #undef  WinSetMsgInterest
 #define WinSetMsgInterest _WinSetMsgInterest
 
-inline ULONG _WinWaitEventSem(HEV a, ULONG b)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinWaitEventSem(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _WinWaitEventSem(HEV a, ULONG b);
 
 #undef  WinWaitEventSem
 #define WinWaitEventSem _WinWaitEventSem
 
-inline BOOL _WinWaitMsg(HAB a, ULONG b, ULONG c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinWaitMsg(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinWaitMsg(HAB a, ULONG b, ULONG c);
 
 #undef  WinWaitMsg
 #define WinWaitMsg _WinWaitMsg
 
-inline ULONG _WinWaitMuxWaitSem(HMUX a, ULONG b, PULONG c)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinWaitMuxWaitSem(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _WinWaitMuxWaitSem(HMUX a, ULONG b, PULONG c);
 
 #undef  WinWaitMuxWaitSem
 #define WinWaitMuxWaitSem _WinWaitMuxWaitSem
 
 #endif
 #ifdef INCL_WINPALETTE
-inline LONG _WinRealizePalette(HWND a, HPS b, PULONG c)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinRealizePalette(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _WinRealizePalette(HWND a, HPS b, PULONG c);
 
 #undef  WinRealizePalette
 #define WinRealizePalette _WinRealizePalette
 
 #endif
 #ifdef INCL_WINPOINTERS
-inline HPOINTER _WinCreatePointer(HWND a, HBITMAP b, BOOL c, LONG d, LONG e)
-{
- HPOINTER yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinCreatePointer(a, b, c, d, e);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HPOINTER APIENTRY _WinCreatePointer(HWND a, HBITMAP b, BOOL c, LONG d, LONG e);
 
 #undef  WinCreatePointer
 #define WinCreatePointer _WinCreatePointer
 
-inline HPOINTER _WinCreatePointerIndirect(HWND a, PPOINTERINFO b)
-{
- HPOINTER yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinCreatePointerIndirect(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HPOINTER APIENTRY _WinCreatePointerIndirect(HWND a, PPOINTERINFO b);
 
 #undef  WinCreatePointerIndirect
 #define WinCreatePointerIndirect _WinCreatePointerIndirect
 
-inline BOOL _WinDestroyPointer(HPOINTER a)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinDestroyPointer(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinDestroyPointer(HPOINTER a);
 
 #undef  WinDestroyPointer
 #define WinDestroyPointer _WinDestroyPointer
 
-inline BOOL _WinDrawPointer(HPS a, LONG b, LONG c, HPOINTER d, ULONG e)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinDrawPointer(a, b, c, d, e);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinDrawPointer(HPS a, LONG b, LONG c, HPOINTER d, ULONG e);
 
 #undef  WinDrawPointer
 #define WinDrawPointer _WinDrawPointer
 
-inline HBITMAP _WinGetSysBitmap(HWND a, ULONG b)
-{
- HBITMAP yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinGetSysBitmap(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HBITMAP APIENTRY _WinGetSysBitmap(HWND a, ULONG b);
 
 #undef  WinGetSysBitmap
 #define WinGetSysBitmap _WinGetSysBitmap
 
-inline HPOINTER _WinLoadPointer(HWND a, HMODULE b, ULONG c)
-{
- HPOINTER yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinLoadPointer(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HPOINTER APIENTRY _WinLoadPointer(HWND a, HMODULE b, ULONG c);
 
 #undef  WinLoadPointer
 #define WinLoadPointer _WinLoadPointer
 
-inline BOOL _WinLockPointerUpdate(HWND a, HPOINTER b, ULONG c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinLockPointerUpdate(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinLockPointerUpdate(HWND a, HPOINTER b, ULONG c);
 
 #undef  WinLockPointerUpdate
 #define WinLockPointerUpdate _WinLockPointerUpdate
 
-inline BOOL _WinQueryPointerPos(HWND a, PPOINTL b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinQueryPointerPos(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinQueryPointerPos(HWND a, PPOINTL b);
 
 #undef  WinQueryPointerPos
 #define WinQueryPointerPos _WinQueryPointerPos
 
-inline BOOL _WinQueryPointerInfo(HPOINTER a, PPOINTERINFO b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinQueryPointerInfo(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinQueryPointerInfo(HPOINTER a, PPOINTERINFO b);
 
 #undef  WinQueryPointerInfo
 #define WinQueryPointerInfo _WinQueryPointerInfo
 
-inline HPOINTER _WinQuerySysPointer(HWND a, LONG b, BOOL c)
-{
- HPOINTER yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinQuerySysPointer(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HPOINTER APIENTRY _WinQuerySysPointer(HWND a, LONG b, BOOL c);
 
 #undef  WinQuerySysPointer
 #define WinQuerySysPointer _WinQuerySysPointer
 
-inline BOOL _WinQuerySysPointerData(HWND a, ULONG b, PICONINFO c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinQuerySysPointerData(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinQuerySysPointerData(HWND a, ULONG b, PICONINFO c);
 
 #undef  WinQuerySysPointerData
 #define WinQuerySysPointerData _WinQuerySysPointerData
 
-inline BOOL _WinSetPointer(HWND a, HPOINTER b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinSetPointer(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinSetPointer(HWND a, HPOINTER b);
 
 #undef  WinSetPointer
 #define WinSetPointer _WinSetPointer
 
-inline BOOL _WinSetPointerOwner(HPOINTER a, PID b, BOOL c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinSetPointerOwner(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinSetPointerOwner(HPOINTER a, PID b, BOOL c);
 
 #undef  WinSetPointerOwner
 #define WinSetPointerOwner _WinSetPointerOwner
 
-inline BOOL _WinSetPointerPos(HWND a, LONG b, LONG c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinSetPointerPos(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinSetPointerPos(HWND a, LONG b, LONG c);
 
 #undef  WinSetPointerPos
 #define WinSetPointerPos _WinSetPointerPos
 
-inline BOOL _WinSetSysPointerData(HWND a, ULONG b, PICONINFO c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinSetSysPointerData(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinSetSysPointerData(HWND a, ULONG b, PICONINFO c);
 
 #undef  WinSetSysPointerData
 #define WinSetSysPointerData _WinSetSysPointerData
 
-inline BOOL _WinShowPointer(HWND a, BOOL b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinShowPointer(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinShowPointer(HWND a, BOOL b);
 
 #undef  WinShowPointer
 #define WinShowPointer _WinShowPointer
 
 #endif
 #ifdef INCL_WINRECTANGLES
-inline BOOL _WinCopyRect(HAB a, PRECTL b, PRECTL c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinCopyRect(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinCopyRect(HAB a, PRECTL b, PRECTL c);
 
 #undef  WinCopyRect
 #define WinCopyRect _WinCopyRect
 
-inline BOOL _WinEqualRect(HAB a, PRECTL b, PRECTL c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinEqualRect(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinEqualRect(HAB a, PRECTL b, PRECTL c);
 
 #undef  WinEqualRect
 #define WinEqualRect _WinEqualRect
 
-inline BOOL _WinInflateRect(HAB a, PRECTL b, LONG c, LONG d)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinInflateRect(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinInflateRect(HAB a, PRECTL b, LONG c, LONG d);
 
 #undef  WinInflateRect
 #define WinInflateRect _WinInflateRect
 
-inline BOOL _WinIntersectRect(HAB a, PRECTL b, PRECTL c, PRECTL d)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinIntersectRect(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinIntersectRect(HAB a, PRECTL b, PRECTL c, PRECTL d);
 
 #undef  WinIntersectRect
 #define WinIntersectRect _WinIntersectRect
 
-inline BOOL _WinIsRectEmpty(HAB a, PRECTL b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinIsRectEmpty(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinIsRectEmpty(HAB a, PRECTL b);
 
 #undef  WinIsRectEmpty
 #define WinIsRectEmpty _WinIsRectEmpty
 
-inline BOOL _WinMakePoints(HAB a, PPOINTL b, ULONG c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinMakePoints(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinMakePoints(HAB a, PPOINTL b, ULONG c);
 
 #undef  WinMakePoints
 #define WinMakePoints _WinMakePoints
 
-inline BOOL _WinMakeRect(HAB a, PRECTL b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinMakeRect(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinMakeRect(HAB a, PRECTL b);
 
 #undef  WinMakeRect
 #define WinMakeRect _WinMakeRect
 
-inline BOOL _WinOffsetRect(HAB a, PRECTL b, LONG c, LONG d)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinOffsetRect(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinOffsetRect(HAB a, PRECTL b, LONG c, LONG d);
 
 #undef  WinOffsetRect
 #define WinOffsetRect _WinOffsetRect
 
-inline BOOL _WinPtInRect(HAB a, PRECTL b, PPOINTL c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinPtInRect(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinPtInRect(HAB a, PRECTL b, PPOINTL c);
 
 #undef  WinPtInRect
 #define WinPtInRect _WinPtInRect
 
-inline BOOL _WinSetRect(HAB a, PRECTL b, LONG c, LONG d, LONG e, LONG f)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinSetRect(a, b, c, d, e, f);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinSetRect(HAB a, PRECTL b, LONG c, LONG d, LONG e, LONG f);
 
 #undef  WinSetRect
 #define WinSetRect _WinSetRect
 
-inline BOOL _WinSetRectEmpty(HAB a, PRECTL b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinSetRectEmpty(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinSetRectEmpty(HAB a, PRECTL b);
 
 #undef  WinSetRectEmpty
 #define WinSetRectEmpty _WinSetRectEmpty
 
-inline BOOL _WinSubtractRect(HAB a, PRECTL b, PRECTL c, PRECTL d)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinSubtractRect(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinSubtractRect(HAB a, PRECTL b, PRECTL c, PRECTL d);
 
 #undef  WinSubtractRect
 #define WinSubtractRect _WinSubtractRect
 
-inline BOOL _WinUnionRect(HAB a, PRECTL b, PRECTL c, PRECTL d)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinUnionRect(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinUnionRect(HAB a, PRECTL b, PRECTL c, PRECTL d);
 
 #undef  WinUnionRect
 #define WinUnionRect _WinUnionRect
 
 #endif
 #ifdef INCL_WINSYS
-inline LONG _WinQueryControlColors(HWND a, LONG b, ULONG c, ULONG d, PCTLCOLOR e)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinQueryControlColors(a, b, c, d, e);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _WinQueryControlColors(HWND a, LONG b, ULONG c, ULONG d, PCTLCOLOR e);
 
 #undef  WinQueryControlColors
 #define WinQueryControlColors _WinQueryControlColors
 
-inline ULONG _WinQueryPresParam(HWND a, ULONG b, ULONG c, PULONG d, ULONG e, PVOID f, ULONG g)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinQueryPresParam(a, b, c, d, e, f, g);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _WinQueryPresParam(HWND a, ULONG b, ULONG c, PULONG d, ULONG e, PVOID f, ULONG g);
 
 #undef  WinQueryPresParam
 #define WinQueryPresParam _WinQueryPresParam
 
-inline LONG _WinQuerySysColor(HWND a, LONG b, LONG c)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinQuerySysColor(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _WinQuerySysColor(HWND a, LONG b, LONG c);
 
 #undef  WinQuerySysColor
 #define WinQuerySysColor _WinQuerySysColor
 
-inline LONG _WinQuerySysValue(HWND a, LONG b)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinQuerySysValue(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _WinQuerySysValue(HWND a, LONG b);
 
 #undef  WinQuerySysValue
 #define WinQuerySysValue _WinQuerySysValue
 
-inline BOOL _WinRemovePresParam(HWND a, ULONG b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinRemovePresParam(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinRemovePresParam(HWND a, ULONG b);
 
 #undef  WinRemovePresParam
 #define WinRemovePresParam _WinRemovePresParam
 
-inline LONG _WinSetControlColors(HWND a, LONG b, ULONG c, ULONG d, PCTLCOLOR e)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinSetControlColors(a, b, c, d, e);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _WinSetControlColors(HWND a, LONG b, ULONG c, ULONG d, PCTLCOLOR e);
 
 #undef  WinSetControlColors
 #define WinSetControlColors _WinSetControlColors
 
-inline BOOL _WinSetPresParam(HWND a, ULONG b, ULONG c, PVOID d)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinSetPresParam(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinSetPresParam(HWND a, ULONG b, ULONG c, PVOID d);
 
 #undef  WinSetPresParam
 #define WinSetPresParam _WinSetPresParam
 
-inline BOOL _WinSetSysColors(HWND a, ULONG b, ULONG c, LONG d, ULONG e, PLONG f)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinSetSysColors(a, b, c, d, e, f);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinSetSysColors(HWND a, ULONG b, ULONG c, LONG d, ULONG e, PLONG f);
 
 #undef  WinSetSysColors
 #define WinSetSysColors _WinSetSysColors
 
-inline BOOL _WinSetSysValue(HWND a, LONG b, LONG c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinSetSysValue(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinSetSysValue(HWND a, LONG b, LONG c);
 
 #undef  WinSetSysValue
 #define WinSetSysValue _WinSetSysValue
 
 #endif
 #ifdef INCL_WINTHUNKAPI
-inline PFN _WinQueryClassThunkProc(PCSZ a)
-{
- PFN yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinQueryClassThunkProc(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+PFN APIENTRY _WinQueryClassThunkProc(PCSZ a);
 
 #undef  WinQueryClassThunkProc
 #define WinQueryClassThunkProc _WinQueryClassThunkProc
 
-inline LONG _WinQueryWindowModel(HWND a)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinQueryWindowModel(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _WinQueryWindowModel(HWND a);
 
 #undef  WinQueryWindowModel
 #define WinQueryWindowModel _WinQueryWindowModel
 
-inline PFN _WinQueryWindowThunkProc(HWND a)
-{
- PFN yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinQueryWindowThunkProc(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+PFN APIENTRY _WinQueryWindowThunkProc(HWND a);
 
 #undef  WinQueryWindowThunkProc
 #define WinQueryWindowThunkProc _WinQueryWindowThunkProc
 
-inline BOOL _WinSetClassThunkProc(PCSZ a, PFN b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinSetClassThunkProc(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinSetClassThunkProc(PCSZ a, PFN b);
 
 #undef  WinSetClassThunkProc
 #define WinSetClassThunkProc _WinSetClassThunkProc
 
-inline BOOL _WinSetWindowThunkProc(HWND a, PFN b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinSetWindowThunkProc(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinSetWindowThunkProc(HWND a, PFN b);
 
 #undef  WinSetWindowThunkProc
 #define WinSetWindowThunkProc _WinSetWindowThunkProc
 
 #endif
 #ifdef INCL_WINTIMER
-inline ULONG _WinGetCurrentTime(HAB a)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinGetCurrentTime(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _WinGetCurrentTime(HAB a);
 
 #undef  WinGetCurrentTime
 #define WinGetCurrentTime _WinGetCurrentTime
 
-inline ULONG _WinStartTimer(HAB a, HWND b, ULONG c, ULONG d)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinStartTimer(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _WinStartTimer(HAB a, HWND b, ULONG c, ULONG d);
 
 #undef  WinStartTimer
 #define WinStartTimer _WinStartTimer
 
-inline BOOL _WinStopTimer(HAB a, HWND b, ULONG c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinStopTimer(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinStopTimer(HAB a, HWND b, ULONG c);
 
 #undef  WinStopTimer
 #define WinStopTimer _WinStopTimer
 
 #endif
 #ifdef INCL_WINTRACKRECT
-inline BOOL _WinShowTrackRect(HWND a, BOOL b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinShowTrackRect(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinShowTrackRect(HWND a, BOOL b);
 
 #undef  WinShowTrackRect
 #define WinShowTrackRect _WinShowTrackRect
 
-inline BOOL _WinTrackRect(HWND a, HPS b, PTRACKINFO c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinTrackRect(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinTrackRect(HWND a, HPS b, PTRACKINFO c);
 
 #undef  WinTrackRect
 #define WinTrackRect _WinTrackRect
@@ -6702,6297 +2484,2275 @@ inline BOOL _WinTrackRect(HWND a, HPS b, PTRACKINFO c)
 #endif
 #endif
 #ifdef INCL_GPI
-inline LONG _GpiAnimatePalette(HPAL a, ULONG b, ULONG c, ULONG d, PULONG e)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiAnimatePalette(a, b, c, d, e);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiAnimatePalette(HPAL a, ULONG b, ULONG c, ULONG d, PULONG e);
 
 #undef  GpiAnimatePalette
 #define GpiAnimatePalette _GpiAnimatePalette
 
-inline BOOL _GpiBeginArea(HPS a, ULONG b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiBeginArea(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiBeginArea(HPS a, ULONG b);
 
 #undef  GpiBeginArea
 #define GpiBeginArea _GpiBeginArea
 
-inline BOOL _GpiBeginElement(HPS a, LONG b, PCSZ c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiBeginElement(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiBeginElement(HPS a, LONG b, PCSZ c);
 
 #undef  GpiBeginElement
 #define GpiBeginElement _GpiBeginElement
 
-inline BOOL _GpiBeginPath(HPS a, LONG b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiBeginPath(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiBeginPath(HPS a, LONG b);
 
 #undef  GpiBeginPath
 #define GpiBeginPath _GpiBeginPath
 
-inline LONG _GpiBox(HPS a, LONG b, PPOINTL c, LONG d, LONG e)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiBox(a, b, c, d, e);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiBox(HPS a, LONG b, PPOINTL c, LONG d, LONG e);
 
 #undef  GpiBox
 #define GpiBox _GpiBox
 
-inline LONG _GpiCallSegmentMatrix(HPS a, LONG b, LONG c, PMATRIXLF d, LONG e)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiCallSegmentMatrix(a, b, c, d, e);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiCallSegmentMatrix(HPS a, LONG b, LONG c, PMATRIXLF d, LONG e);
 
 #undef  GpiCallSegmentMatrix
 #define GpiCallSegmentMatrix _GpiCallSegmentMatrix
 
-inline LONG _GpiCharString(HPS a, LONG b, PCH c)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiCharString(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiCharString(HPS a, LONG b, PCH c);
 
 #undef  GpiCharString
 #define GpiCharString _GpiCharString
 
-inline LONG _GpiCharStringAt(HPS a, PPOINTL b, LONG c, PCH d)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiCharStringAt(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiCharStringAt(HPS a, PPOINTL b, LONG c, PCH d);
 
 #undef  GpiCharStringAt
 #define GpiCharStringAt _GpiCharStringAt
 
-inline LONG _GpiCharStringPos(HPS a, PRECTL b, ULONG c, LONG d, PCH e, PLONG f)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiCharStringPos(a, b, c, d, e, f);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiCharStringPos(HPS a, PRECTL b, ULONG c, LONG d, PCH e, PLONG f);
 
 #undef  GpiCharStringPos
 #define GpiCharStringPos _GpiCharStringPos
 
-inline LONG _GpiCharStringPosAt(HPS a, PPOINTL b, PRECTL c, ULONG d, LONG e, PCH f, PLONG g)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiCharStringPosAt(a, b, c, d, e, f, g);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiCharStringPosAt(HPS a, PPOINTL b, PRECTL c, ULONG d, LONG e, PCH f, PLONG g);
 
 #undef  GpiCharStringPosAt
 #define GpiCharStringPosAt _GpiCharStringPosAt
 
-inline BOOL _GpiCloseFigure(HPS a)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiCloseFigure(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiCloseFigure(HPS a);
 
 #undef  GpiCloseFigure
 #define GpiCloseFigure _GpiCloseFigure
 
-inline LONG _GpiCombineRegion(HPS a, HRGN b, HRGN c, HRGN d, LONG e)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiCombineRegion(a, b, c, d, e);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiCombineRegion(HPS a, HRGN b, HRGN c, HRGN d, LONG e);
 
 #undef  GpiCombineRegion
 #define GpiCombineRegion _GpiCombineRegion
 
-inline BOOL _GpiComment(HPS a, LONG b, PBYTE c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiComment(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiComment(HPS a, LONG b, PBYTE c);
 
 #undef  GpiComment
 #define GpiComment _GpiComment
 
-inline BOOL _GpiConvert(HPS a, LONG b, LONG c, LONG d, PPOINTL e)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiConvert(a, b, c, d, e);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiConvert(HPS a, LONG b, LONG c, LONG d, PPOINTL e);
 
 #undef  GpiConvert
 #define GpiConvert _GpiConvert
 
-inline BOOL _GpiConvertWithMatrix(HPS a, LONG b, PPOINTL c, LONG d, PMATRIXLF e)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiConvertWithMatrix(a, b, c, d, e);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiConvertWithMatrix(HPS a, LONG b, PPOINTL c, LONG d, PMATRIXLF e);
 
 #undef  GpiConvertWithMatrix
 #define GpiConvertWithMatrix _GpiConvertWithMatrix
 
-inline HMF _GpiCopyMetaFile(HMF a)
-{
- HMF yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiCopyMetaFile(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HMF APIENTRY _GpiCopyMetaFile(HMF a);
 
 #undef  GpiCopyMetaFile
 #define GpiCopyMetaFile _GpiCopyMetaFile
 
-inline BOOL _GpiCreateLogColorTable(HPS a, ULONG b, LONG c, LONG d, LONG e, PLONG f)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiCreateLogColorTable(a, b, c, d, e, f);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiCreateLogColorTable(HPS a, ULONG b, LONG c, LONG d, LONG e, PLONG f);
 
 #undef  GpiCreateLogColorTable
 #define GpiCreateLogColorTable _GpiCreateLogColorTable
 
-inline LONG _GpiCreateLogFont(HPS a, STR8 *b, LONG c, PFATTRS d)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiCreateLogFont(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiCreateLogFont(HPS a, STR8 *b, LONG c, PFATTRS d);
 
 #undef  GpiCreateLogFont
 #define GpiCreateLogFont _GpiCreateLogFont
 
-inline HPAL _GpiCreatePalette(HAB a, ULONG b, ULONG c, ULONG d, PULONG e)
-{
- HPAL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiCreatePalette(a, b, c, d, e);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HPAL APIENTRY _GpiCreatePalette(HAB a, ULONG b, ULONG c, ULONG d, PULONG e);
 
 #undef  GpiCreatePalette
 #define GpiCreatePalette _GpiCreatePalette
 
-inline HRGN _GpiCreateRegion(HPS a, LONG b, PRECTL c)
-{
- HRGN yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiCreateRegion(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HRGN APIENTRY _GpiCreateRegion(HPS a, LONG b, PRECTL c);
 
 #undef  GpiCreateRegion
 #define GpiCreateRegion _GpiCreateRegion
 
-inline BOOL _GpiDeleteElement(HPS a)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiDeleteElement(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiDeleteElement(HPS a);
 
 #undef  GpiDeleteElement
 #define GpiDeleteElement _GpiDeleteElement
 
-inline BOOL _GpiDeleteElementRange(HPS a, LONG b, LONG c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiDeleteElementRange(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiDeleteElementRange(HPS a, LONG b, LONG c);
 
 #undef  GpiDeleteElementRange
 #define GpiDeleteElementRange _GpiDeleteElementRange
 
-inline BOOL _GpiDeleteElementsBetweenLabels(HPS a, LONG b, LONG c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiDeleteElementsBetweenLabels(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiDeleteElementsBetweenLabels(HPS a, LONG b, LONG c);
 
 #undef  GpiDeleteElementsBetweenLabels
 #define GpiDeleteElementsBetweenLabels _GpiDeleteElementsBetweenLabels
 
-inline BOOL _GpiDeleteMetaFile(HMF a)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiDeleteMetaFile(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiDeleteMetaFile(HMF a);
 
 #undef  GpiDeleteMetaFile
 #define GpiDeleteMetaFile _GpiDeleteMetaFile
 
-inline BOOL _GpiDeletePalette(HPAL a)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiDeletePalette(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiDeletePalette(HPAL a);
 
 #undef  GpiDeletePalette
 #define GpiDeletePalette _GpiDeletePalette
 
-inline BOOL _GpiDeleteSetId(HPS a, LONG b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiDeleteSetId(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiDeleteSetId(HPS a, LONG b);
 
 #undef  GpiDeleteSetId
 #define GpiDeleteSetId _GpiDeleteSetId
 
-inline BOOL _GpiDestroyRegion(HPS a, HRGN b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiDestroyRegion(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiDestroyRegion(HPS a, HRGN b);
 
 #undef  GpiDestroyRegion
 #define GpiDestroyRegion _GpiDestroyRegion
 
-inline LONG _GpiElement(HPS a, LONG b, PCSZ c, LONG d, PBYTE e)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiElement(a, b, c, d, e);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiElement(HPS a, LONG b, PCSZ c, LONG d, PBYTE e);
 
 #undef  GpiElement
 #define GpiElement _GpiElement
 
-inline LONG _GpiEndArea(HPS a)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiEndArea(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiEndArea(HPS a);
 
 #undef  GpiEndArea
 #define GpiEndArea _GpiEndArea
 
-inline BOOL _GpiEndElement(HPS a)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiEndElement(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiEndElement(HPS a);
 
 #undef  GpiEndElement
 #define GpiEndElement _GpiEndElement
 
-inline BOOL _GpiEndPath(HPS a)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiEndPath(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiEndPath(HPS a);
 
 #undef  GpiEndPath
 #define GpiEndPath _GpiEndPath
 
-inline LONG _GpiEqualRegion(HPS a, HRGN b, HRGN c)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiEqualRegion(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiEqualRegion(HPS a, HRGN b, HRGN c);
 
 #undef  GpiEqualRegion
 #define GpiEqualRegion _GpiEqualRegion
 
-inline LONG _GpiExcludeClipRectangle(HPS a, PRECTL b)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiExcludeClipRectangle(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiExcludeClipRectangle(HPS a, PRECTL b);
 
 #undef  GpiExcludeClipRectangle
 #define GpiExcludeClipRectangle _GpiExcludeClipRectangle
 
-inline LONG _GpiFillPath(HPS a, LONG b, LONG c)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiFillPath(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiFillPath(HPS a, LONG b, LONG c);
 
 #undef  GpiFillPath
 #define GpiFillPath _GpiFillPath
 
-inline LONG _GpiFrameRegion(HPS a, HRGN b, PSIZEL c)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiFrameRegion(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiFrameRegion(HPS a, HRGN b, PSIZEL c);
 
 #undef  GpiFrameRegion
 #define GpiFrameRegion _GpiFrameRegion
 
-inline LONG _GpiFullArc(HPS a, LONG b, FIXED c)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiFullArc(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiFullArc(HPS a, LONG b, FIXED c);
 
 #undef  GpiFullArc
 #define GpiFullArc _GpiFullArc
 
-inline LONG _GpiImage(HPS a, LONG b, PSIZEL c, LONG d, PBYTE e)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiImage(a, b, c, d, e);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiImage(HPS a, LONG b, PSIZEL c, LONG d, PBYTE e);
 
 #undef  GpiImage
 #define GpiImage _GpiImage
 
-inline LONG _GpiIntersectClipRectangle(HPS a, PRECTL b)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiIntersectClipRectangle(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiIntersectClipRectangle(HPS a, PRECTL b);
 
 #undef  GpiIntersectClipRectangle
 #define GpiIntersectClipRectangle _GpiIntersectClipRectangle
 
-inline BOOL _GpiLabel(HPS a, LONG b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiLabel(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiLabel(HPS a, LONG b);
 
 #undef  GpiLabel
 #define GpiLabel _GpiLabel
 
-inline LONG _GpiLine(HPS a, PPOINTL b)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiLine(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiLine(HPS a, PPOINTL b);
 
 #undef  GpiLine
 #define GpiLine _GpiLine
 
-inline BOOL _GpiLoadFonts(HAB a, PCSZ b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiLoadFonts(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiLoadFonts(HAB a, PCSZ b);
 
 #undef  GpiLoadFonts
 #define GpiLoadFonts _GpiLoadFonts
 
-inline HMF _GpiLoadMetaFile(HAB a, PCSZ b)
-{
- HMF yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiLoadMetaFile(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HMF APIENTRY _GpiLoadMetaFile(HAB a, PCSZ b);
 
 #undef  GpiLoadMetaFile
 #define GpiLoadMetaFile _GpiLoadMetaFile
 
-inline BOOL _GpiLoadPublicFonts(HAB a, PCSZ b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiLoadPublicFonts(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiLoadPublicFonts(HAB a, PCSZ b);
 
 #undef  GpiLoadPublicFonts
 #define GpiLoadPublicFonts _GpiLoadPublicFonts
 
-inline LONG _GpiMarker(HPS a, PPOINTL b)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiMarker(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiMarker(HPS a, PPOINTL b);
 
 #undef  GpiMarker
 #define GpiMarker _GpiMarker
 
-inline BOOL _GpiModifyPath(HPS a, LONG b, LONG c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiModifyPath(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiModifyPath(HPS a, LONG b, LONG c);
 
 #undef  GpiModifyPath
 #define GpiModifyPath _GpiModifyPath
 
-inline BOOL _GpiMove(HPS a, PPOINTL b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiMove(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiMove(HPS a, PPOINTL b);
 
 #undef  GpiMove
 #define GpiMove _GpiMove
 
-inline LONG _GpiOffsetClipRegion(HPS a, PPOINTL b)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiOffsetClipRegion(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiOffsetClipRegion(HPS a, PPOINTL b);
 
 #undef  GpiOffsetClipRegion
 #define GpiOffsetClipRegion _GpiOffsetClipRegion
 
-inline BOOL _GpiOffsetElementPointer(HPS a, LONG b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiOffsetElementPointer(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiOffsetElementPointer(HPS a, LONG b);
 
 #undef  GpiOffsetElementPointer
 #define GpiOffsetElementPointer _GpiOffsetElementPointer
 
-inline BOOL _GpiOffsetRegion(HPS a, HRGN b, PPOINTL c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiOffsetRegion(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiOffsetRegion(HPS a, HRGN b, PPOINTL c);
 
 #undef  GpiOffsetRegion
 #define GpiOffsetRegion _GpiOffsetRegion
 
-inline LONG _GpiOutlinePath(HPS a, LONG b, LONG c)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiOutlinePath(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiOutlinePath(HPS a, LONG b, LONG c);
 
 #undef  GpiOutlinePath
 #define GpiOutlinePath _GpiOutlinePath
 
-inline LONG _GpiPaintRegion(HPS a, HRGN b)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiPaintRegion(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiPaintRegion(HPS a, HRGN b);
 
 #undef  GpiPaintRegion
 #define GpiPaintRegion _GpiPaintRegion
 
-inline LONG _GpiPartialArc(HPS a, PPOINTL b, FIXED c, FIXED d, FIXED e)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiPartialArc(a, b, c, d, e);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiPartialArc(HPS a, PPOINTL b, FIXED c, FIXED d, FIXED e);
 
 #undef  GpiPartialArc
 #define GpiPartialArc _GpiPartialArc
 
-inline HRGN _GpiPathToRegion(HPS a, LONG b, LONG c)
-{
- HRGN yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiPathToRegion(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HRGN APIENTRY _GpiPathToRegion(HPS a, LONG b, LONG c);
 
 #undef  GpiPathToRegion
 #define GpiPathToRegion _GpiPathToRegion
 
-inline LONG _GpiPlayMetaFile(HPS a, HMF b, LONG c, PLONG d, PLONG e, LONG f, PSZ g)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiPlayMetaFile(a, b, c, d, e, f, g);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiPlayMetaFile(HPS a, HMF b, LONG c, PLONG d, PLONG e, LONG f, PSZ g);
 
 #undef  GpiPlayMetaFile
 #define GpiPlayMetaFile _GpiPlayMetaFile
 
-inline LONG _GpiPointArc(HPS a, PPOINTL b)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiPointArc(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiPointArc(HPS a, PPOINTL b);
 
 #undef  GpiPointArc
 #define GpiPointArc _GpiPointArc
 
-inline LONG _GpiPolyFillet(HPS a, LONG b, PPOINTL c)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiPolyFillet(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiPolyFillet(HPS a, LONG b, PPOINTL c);
 
 #undef  GpiPolyFillet
 #define GpiPolyFillet _GpiPolyFillet
 
-inline LONG _GpiPolyFilletSharp(HPS a, LONG b, PPOINTL c, PFIXED d)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiPolyFilletSharp(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiPolyFilletSharp(HPS a, LONG b, PPOINTL c, PFIXED d);
 
 #undef  GpiPolyFilletSharp
 #define GpiPolyFilletSharp _GpiPolyFilletSharp
 
-inline LONG _GpiPolygons(HPS a, ULONG b, PPOLYGON c, ULONG d, ULONG e)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiPolygons(a, b, c, d, e);
-    SetFS(sel);
-
-    return yyrc;
-} 
-
-inline HRGN _GpiCreatePolygonRegion(HPS a, ULONG b, PPOLYGON c, ULONG d)
-{
- HRGN yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiCreatePolygonRegion(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HRGN APIENTRY _GpiCreatePolygonRegion(HPS a, ULONG b, PPOLYGON c, ULONG d);
 
 #undef  GpiCreatePolygonRegion
 #define GpiCreatePolygonRegion _GpiCreatePolygonRegion
 
-inline HRGN _GpiCreateEllipticRegion(HPS a, PRECTL b)
-{
- HRGN yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiCreateEllipticRegion(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HRGN APIENTRY _GpiCreateEllipticRegion(HPS a, PRECTL b);
 
 #undef  GpiCreateEllipticRegion
 #define GpiCreateEllipticRegion _GpiCreateEllipticRegion
 
-inline HRGN _GpiCreateRoundRectRegion(HPS a, PPOINTL b, LONG c, LONG d)
-{
- HRGN yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiCreateRoundRectRegion(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HRGN APIENTRY _GpiCreateRoundRectRegion(HPS a, PPOINTL b, LONG c, LONG d);
 
 #undef  GpiCreateRoundRectRegion
 #define GpiCreateRoundRectRegion _GpiCreateRoundRectRegion
 
+LONG APIENTRY _GpiPolygons(HPS a, ULONG b, PPOLYGON c, ULONG d, ULONG e);
+
 #undef  GpiPolygons
 #define GpiPolygons _GpiPolygons
 
-inline LONG _GpiPolyLine(HPS a, LONG b, PPOINTL c)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiPolyLine(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiPolyLine(HPS a, LONG b, PPOINTL c);
 
 #undef  GpiPolyLine
 #define GpiPolyLine _GpiPolyLine
 
-inline LONG _GpiPolyLineDisjoint(HPS a, LONG b, PPOINTL c)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiPolyLineDisjoint(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiPolyLineDisjoint(HPS a, LONG b, PPOINTL c);
 
 #undef  GpiPolyLineDisjoint
 #define GpiPolyLineDisjoint _GpiPolyLineDisjoint
 
-inline LONG _GpiPolyMarker(HPS a, LONG b, PPOINTL c)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiPolyMarker(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiPolyMarker(HPS a, LONG b, PPOINTL c);
 
 #undef  GpiPolyMarker
 #define GpiPolyMarker _GpiPolyMarker
 
-inline LONG _GpiPolySpline(HPS a, LONG b, PPOINTL c)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiPolySpline(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiPolySpline(HPS a, LONG b, PPOINTL c);
 
 #undef  GpiPolySpline
 #define GpiPolySpline _GpiPolySpline
 
-inline BOOL _GpiPop(HPS a, LONG b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiPop(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiPop(HPS a, LONG b);
 
 #undef  GpiPop
 #define GpiPop _GpiPop
 
-inline LONG _GpiPtInRegion(HPS a, HRGN b, PPOINTL c)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiPtInRegion(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiPtInRegion(HPS a, HRGN b, PPOINTL c);
 
 #undef  GpiPtInRegion
 #define GpiPtInRegion _GpiPtInRegion
 
-inline LONG _GpiPtVisible(HPS a, PPOINTL b)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiPtVisible(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiPtVisible(HPS a, PPOINTL b);
 
 #undef  GpiPtVisible
 #define GpiPtVisible _GpiPtVisible
 
-inline BOOL _GpiQueryArcParams(HPS a, PARCPARAMS b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryArcParams(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiQueryArcParams(HPS a, PARCPARAMS b);
 
 #undef  GpiQueryArcParams
 #define GpiQueryArcParams _GpiQueryArcParams
 
-inline LONG _GpiQueryAttrMode(HPS a)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryAttrMode(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiQueryAttrMode(HPS a);
 
 #undef  GpiQueryAttrMode
 #define GpiQueryAttrMode _GpiQueryAttrMode
 
-inline LONG _GpiQueryAttrs(HPS a, LONG b, ULONG c, PBUNDLE d)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryAttrs(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiQueryAttrs(HPS a, LONG b, ULONG c, PBUNDLE d);
 
 #undef  GpiQueryAttrs
 #define GpiQueryAttrs _GpiQueryAttrs
 
-inline LONG _GpiQueryBackColor(HPS a)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryBackColor(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiQueryBackColor(HPS a);
 
 #undef  GpiQueryBackColor
 #define GpiQueryBackColor _GpiQueryBackColor
 
-inline LONG _GpiQueryBackMix(HPS a)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryBackMix(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiQueryBackMix(HPS a);
 
 #undef  GpiQueryBackMix
 #define GpiQueryBackMix _GpiQueryBackMix
 
-inline BOOL _GpiQueryCharAngle(HPS a, PGRADIENTL b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryCharAngle(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiQueryCharAngle(HPS a, PGRADIENTL b);
 
 #undef  GpiQueryCharAngle
 #define GpiQueryCharAngle _GpiQueryCharAngle
 
-inline BOOL _GpiQueryCharBox(HPS a, PSIZEF b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryCharBox(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiQueryCharBox(HPS a, PSIZEF b);
 
 #undef  GpiQueryCharBox
 #define GpiQueryCharBox _GpiQueryCharBox
 
-inline BOOL _GpiQueryCharBreakExtra(HPS a, PFIXED b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryCharBreakExtra(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiQueryCharBreakExtra(HPS a, PFIXED b);
 
 #undef  GpiQueryCharBreakExtra
 #define GpiQueryCharBreakExtra _GpiQueryCharBreakExtra
 
-inline LONG _GpiQueryCharDirection(HPS a)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryCharDirection(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiQueryCharDirection(HPS a);
 
 #undef  GpiQueryCharDirection
 #define GpiQueryCharDirection _GpiQueryCharDirection
 
-inline BOOL _GpiQueryCharExtra(HPS a, PFIXED b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryCharExtra(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiQueryCharExtra(HPS a, PFIXED b);
 
 #undef  GpiQueryCharExtra
 #define GpiQueryCharExtra _GpiQueryCharExtra
 
-inline LONG _GpiQueryCharMode(HPS a)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryCharMode(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiQueryCharMode(HPS a);
 
 #undef  GpiQueryCharMode
 #define GpiQueryCharMode _GpiQueryCharMode
 
-inline LONG _GpiQueryCharSet(HPS a)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryCharSet(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiQueryCharSet(HPS a);
 
 #undef  GpiQueryCharSet
 #define GpiQueryCharSet _GpiQueryCharSet
 
-inline BOOL _GpiQueryCharShear(HPS a, PPOINTL b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryCharShear(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiQueryCharShear(HPS a, PPOINTL b);
 
 #undef  GpiQueryCharShear
 #define GpiQueryCharShear _GpiQueryCharShear
 
-inline BOOL _GpiQueryCharStringPos(HPS a, ULONG b, LONG c, PCH d, PLONG e, PPOINTL f)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryCharStringPos(a, b, c, d, e, f);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiQueryCharStringPos(HPS a, ULONG b, LONG c, PCH d, PLONG e, PPOINTL f);
 
 #undef  GpiQueryCharStringPos
 #define GpiQueryCharStringPos _GpiQueryCharStringPos
 
-inline BOOL _GpiQueryCharStringPosAt(HPS a, PPOINTL b, ULONG c, LONG d, PCH e, PLONG f, PPOINTL g)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryCharStringPosAt(a, b, c, d, e, f, g);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiQueryCharStringPosAt(HPS a, PPOINTL b, ULONG c, LONG d, PCH e, PLONG f, PPOINTL g);
 
 #undef  GpiQueryCharStringPosAt
 #define GpiQueryCharStringPosAt _GpiQueryCharStringPosAt
 
-inline LONG _GpiQueryClipBox(HPS a, PRECTL b)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryClipBox(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiQueryClipBox(HPS a, PRECTL b);
 
 #undef  GpiQueryClipBox
 #define GpiQueryClipBox _GpiQueryClipBox
 
-inline HRGN _GpiQueryClipRegion(HPS a)
-{
- HRGN yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryClipRegion(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HRGN APIENTRY _GpiQueryClipRegion(HPS a);
 
 #undef  GpiQueryClipRegion
 #define GpiQueryClipRegion _GpiQueryClipRegion
 
-inline LONG _GpiQueryColor(HPS a)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryColor(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiQueryColor(HPS a);
 
 #undef  GpiQueryColor
 #define GpiQueryColor _GpiQueryColor
 
-inline BOOL _GpiQueryColorData(HPS a, LONG b, PLONG c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryColorData(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiQueryColorData(HPS a, LONG b, PLONG c);
 
 #undef  GpiQueryColorData
 #define GpiQueryColorData _GpiQueryColorData
 
-inline LONG _GpiQueryColorIndex(HPS a, ULONG b, LONG c)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryColorIndex(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiQueryColorIndex(HPS a, ULONG b, LONG c);
 
 #undef  GpiQueryColorIndex
 #define GpiQueryColorIndex _GpiQueryColorIndex
 
-inline ULONG _GpiQueryCp(HPS a)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryCp(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _GpiQueryCp(HPS a);
 
 #undef  GpiQueryCp
 #define GpiQueryCp _GpiQueryCp
 
-inline BOOL _GpiQueryCurrentPosition(HPS a, PPOINTL b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryCurrentPosition(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiQueryCurrentPosition(HPS a, PPOINTL b);
 
 #undef  GpiQueryCurrentPosition
 #define GpiQueryCurrentPosition _GpiQueryCurrentPosition
 
-inline BOOL _GpiQueryDefArcParams(HPS a, PARCPARAMS b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryDefArcParams(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiQueryDefArcParams(HPS a, PARCPARAMS b);
 
 #undef  GpiQueryDefArcParams
 #define GpiQueryDefArcParams _GpiQueryDefArcParams
 
-inline BOOL _GpiQueryDefAttrs(HPS a, LONG b, ULONG c, PBUNDLE d)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryDefAttrs(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiQueryDefAttrs(HPS a, LONG b, ULONG c, PBUNDLE d);
 
 #undef  GpiQueryDefAttrs
 #define GpiQueryDefAttrs _GpiQueryDefAttrs
 
-inline BOOL _GpiQueryDefCharBox(HPS a, PSIZEL b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryDefCharBox(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiQueryDefCharBox(HPS a, PSIZEL b);
 
 #undef  GpiQueryDefCharBox
 #define GpiQueryDefCharBox _GpiQueryDefCharBox
 
-inline BOOL _GpiQueryDefTag(HPS a, PLONG b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryDefTag(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiQueryDefTag(HPS a, PLONG b);
 
 #undef  GpiQueryDefTag
 #define GpiQueryDefTag _GpiQueryDefTag
 
-inline BOOL _GpiQueryDefViewingLimits(HPS a, PRECTL b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryDefViewingLimits(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiQueryDefViewingLimits(HPS a, PRECTL b);
 
 #undef  GpiQueryDefViewingLimits
 #define GpiQueryDefViewingLimits _GpiQueryDefViewingLimits
 
-inline BOOL _GpiQueryDefaultViewMatrix(HPS a, LONG b, PMATRIXLF c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryDefaultViewMatrix(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiQueryDefaultViewMatrix(HPS a, LONG b, PMATRIXLF c);
 
 #undef  GpiQueryDefaultViewMatrix
 #define GpiQueryDefaultViewMatrix _GpiQueryDefaultViewMatrix
 
-inline LONG _GpiQueryEditMode(HPS a)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryEditMode(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiQueryEditMode(HPS a);
 
 #undef  GpiQueryEditMode
 #define GpiQueryEditMode _GpiQueryEditMode
 
-inline LONG _GpiQueryElement(HPS a, LONG b, LONG c, PBYTE d)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryElement(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiQueryElement(HPS a, LONG b, LONG c, PBYTE d);
 
 #undef  GpiQueryElement
 #define GpiQueryElement _GpiQueryElement
 
-inline LONG _GpiQueryElementPointer(HPS a)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryElementPointer(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiQueryElementPointer(HPS a);
 
 #undef  GpiQueryElementPointer
 #define GpiQueryElementPointer _GpiQueryElementPointer
 
-inline LONG _GpiQueryElementType(HPS a, PLONG b, LONG c, PSZ d)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryElementType(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiQueryElementType(HPS a, PLONG b, LONG c, PSZ d);
 
 #undef  GpiQueryElementType
 #define GpiQueryElementType _GpiQueryElementType
 
-inline ULONG _GpiQueryFaceString(HPS a, PCSZ b, PFACENAMEDESC c, LONG d, PSZ e)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryFaceString(a, b, c, d, e);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _GpiQueryFaceString(HPS a, PCSZ b, PFACENAMEDESC c, LONG d, PSZ e);
 
 #undef  GpiQueryFaceString
 #define GpiQueryFaceString _GpiQueryFaceString
 
-inline ULONG _GpiQueryFontAction(HAB a, ULONG b)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryFontAction(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _GpiQueryFontAction(HAB a, ULONG b);
 
 #undef  GpiQueryFontAction
 #define GpiQueryFontAction _GpiQueryFontAction
 
-inline LONG _GpiQueryFontFileDescriptions(HAB a, PCSZ b, PLONG c, PFFDESCS d)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryFontFileDescriptions(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiQueryFontFileDescriptions(HAB a, PCSZ b, PLONG c, PFFDESCS d);
 
 #undef  GpiQueryFontFileDescriptions
 #define GpiQueryFontFileDescriptions _GpiQueryFontFileDescriptions
 
-inline BOOL _GpiQueryFontMetrics(HPS a, LONG b, PFONTMETRICS c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryFontMetrics(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiQueryFontMetrics(HPS a, LONG b, PFONTMETRICS c);
 
 #undef  GpiQueryFontMetrics
 #define GpiQueryFontMetrics _GpiQueryFontMetrics
 
-inline LONG _GpiQueryFonts(HPS a, ULONG b, PCSZ c, PLONG d, LONG e, PFONTMETRICS f)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryFonts(a, b, c, d, e, f);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiQueryFonts(HPS a, ULONG b, PCSZ c, PLONG d, LONG e, PFONTMETRICS f);
 
 #undef  GpiQueryFonts
 #define GpiQueryFonts _GpiQueryFonts
 
-inline LONG _GpiQueryFullFontFileDescs(HAB a, PCSZ b, PLONG c, PVOID d, PLONG e)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryFullFontFileDescs(a, b, c, d, e);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiQueryFullFontFileDescs(HAB a, PCSZ b, PLONG c, PVOID d, PLONG e);
 
 #undef  GpiQueryFullFontFileDescs
 #define GpiQueryFullFontFileDescs _GpiQueryFullFontFileDescs
 
-inline BOOL _GpiQueryGraphicsField(HPS a, PRECTL b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryGraphicsField(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiQueryGraphicsField(HPS a, PRECTL b);
 
 #undef  GpiQueryGraphicsField
 #define GpiQueryGraphicsField _GpiQueryGraphicsField
 
-inline LONG _GpiQueryKerningPairs(HPS a, LONG b, PKERNINGPAIRS c)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryKerningPairs(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiQueryKerningPairs(HPS a, LONG b, PKERNINGPAIRS c);
 
 #undef  GpiQueryKerningPairs
 #define GpiQueryKerningPairs _GpiQueryKerningPairs
 
-inline LONG _GpiQueryLineEnd(HPS a)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryLineEnd(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiQueryLineEnd(HPS a);
 
 #undef  GpiQueryLineEnd
 #define GpiQueryLineEnd _GpiQueryLineEnd
 
-inline LONG _GpiQueryLineJoin(HPS a)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryLineJoin(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiQueryLineJoin(HPS a);
 
 #undef  GpiQueryLineJoin
 #define GpiQueryLineJoin _GpiQueryLineJoin
 
-inline LONG _GpiQueryLineType(HPS a)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryLineType(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiQueryLineType(HPS a);
 
 #undef  GpiQueryLineType
 #define GpiQueryLineType _GpiQueryLineType
 
-inline FIXED _GpiQueryLineWidth(HPS a)
-{
- FIXED yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryLineWidth(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+FIXED APIENTRY _GpiQueryLineWidth(HPS a);
 
 #undef  GpiQueryLineWidth
 #define GpiQueryLineWidth _GpiQueryLineWidth
 
-inline LONG _GpiQueryLineWidthGeom(HPS a)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryLineWidthGeom(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiQueryLineWidthGeom(HPS a);
 
 #undef  GpiQueryLineWidthGeom
 #define GpiQueryLineWidthGeom _GpiQueryLineWidthGeom
 
-inline LONG _GpiQueryLogColorTable(HPS a, ULONG b, LONG c, LONG d, PLONG e)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryLogColorTable(a, b, c, d, e);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiQueryLogColorTable(HPS a, ULONG b, LONG c, LONG d, PLONG e);
 
 #undef  GpiQueryLogColorTable
 #define GpiQueryLogColorTable _GpiQueryLogColorTable
 
-inline BOOL _GpiQueryLogicalFont(HPS a, LONG b, PSTR8 c, PFATTRS d, LONG e)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryLogicalFont(a, b, c, d, e);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiQueryLogicalFont(HPS a, LONG b, PSTR8 c, PFATTRS d, LONG e);
 
 #undef  GpiQueryLogicalFont
 #define GpiQueryLogicalFont _GpiQueryLogicalFont
 
-inline LONG _GpiQueryMarker(HPS a)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryMarker(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiQueryMarker(HPS a);
 
 #undef  GpiQueryMarker
 #define GpiQueryMarker _GpiQueryMarker
 
-inline BOOL _GpiQueryMarkerBox(HPS a, PSIZEF b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryMarkerBox(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiQueryMarkerBox(HPS a, PSIZEF b);
 
 #undef  GpiQueryMarkerBox
 #define GpiQueryMarkerBox _GpiQueryMarkerBox
 
-inline LONG _GpiQueryMarkerSet(HPS a)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryMarkerSet(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiQueryMarkerSet(HPS a);
 
 #undef  GpiQueryMarkerSet
 #define GpiQueryMarkerSet _GpiQueryMarkerSet
 
-inline BOOL _GpiQueryMetaFileBits(HMF a, LONG b, LONG c, PBYTE d)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryMetaFileBits(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiQueryMetaFileBits(HMF a, LONG b, LONG c, PBYTE d);
 
 #undef  GpiQueryMetaFileBits
 #define GpiQueryMetaFileBits _GpiQueryMetaFileBits
 
-inline LONG _GpiQueryMetaFileLength(HMF a)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryMetaFileLength(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiQueryMetaFileLength(HMF a);
 
 #undef  GpiQueryMetaFileLength
 #define GpiQueryMetaFileLength _GpiQueryMetaFileLength
 
-inline LONG _GpiQueryMix(HPS a)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryMix(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiQueryMix(HPS a);
 
 #undef  GpiQueryMix
 #define GpiQueryMix _GpiQueryMix
 
-inline BOOL _GpiQueryModelTransformMatrix(HPS a, LONG b, PMATRIXLF c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryModelTransformMatrix(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiQueryModelTransformMatrix(HPS a, LONG b, PMATRIXLF c);
 
 #undef  GpiQueryModelTransformMatrix
 #define GpiQueryModelTransformMatrix _GpiQueryModelTransformMatrix
 
-inline LONG _GpiQueryNearestColor(HPS a, ULONG b, LONG c)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryNearestColor(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiQueryNearestColor(HPS a, ULONG b, LONG c);
 
 #undef  GpiQueryNearestColor
 #define GpiQueryNearestColor _GpiQueryNearestColor
 
-inline LONG _GpiQueryNumberSetIds(HPS a)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryNumberSetIds(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiQueryNumberSetIds(HPS a);
 
 #undef  GpiQueryNumberSetIds
 #define GpiQueryNumberSetIds _GpiQueryNumberSetIds
 
-inline BOOL _GpiQueryPageViewport(HPS a, PRECTL b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryPageViewport(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiQueryPageViewport(HPS a, PRECTL b);
 
 #undef  GpiQueryPageViewport
 #define GpiQueryPageViewport _GpiQueryPageViewport
 
-inline HPAL _GpiQueryPalette(HPS a)
-{
- HPAL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryPalette(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HPAL APIENTRY _GpiQueryPalette(HPS a);
 
 #undef  GpiQueryPalette
 #define GpiQueryPalette _GpiQueryPalette
 
-inline LONG _GpiQueryPaletteInfo(HPAL a, HPS b, ULONG c, ULONG d, ULONG e, PULONG f)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryPaletteInfo(a, b, c, d, e, f);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiQueryPaletteInfo(HPAL a, HPS b, ULONG c, ULONG d, ULONG e, PULONG f);
 
 #undef  GpiQueryPaletteInfo
 #define GpiQueryPaletteInfo _GpiQueryPaletteInfo
 
-inline LONG _GpiQueryPattern(HPS a)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryPattern(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiQueryPattern(HPS a);
 
 #undef  GpiQueryPattern
 #define GpiQueryPattern _GpiQueryPattern
 
-inline BOOL _GpiQueryPatternRefPoint(HPS a, PPOINTL b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryPatternRefPoint(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiQueryPatternRefPoint(HPS a, PPOINTL b);
 
 #undef  GpiQueryPatternRefPoint
 #define GpiQueryPatternRefPoint _GpiQueryPatternRefPoint
 
-inline LONG _GpiQueryPatternSet(HPS a)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryPatternSet(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiQueryPatternSet(HPS a);
 
 #undef  GpiQueryPatternSet
 #define GpiQueryPatternSet _GpiQueryPatternSet
 
-inline LONG _GpiQueryRealColors(HPS a, ULONG b, LONG c, LONG d, PLONG e)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryRealColors(a, b, c, d, e);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiQueryRealColors(HPS a, ULONG b, LONG c, LONG d, PLONG e);
 
 #undef  GpiQueryRealColors
 #define GpiQueryRealColors _GpiQueryRealColors
 
-inline LONG _GpiQueryRegionBox(HPS a, HRGN b, PRECTL c)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryRegionBox(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiQueryRegionBox(HPS a, HRGN b, PRECTL c);
 
 #undef  GpiQueryRegionBox
 #define GpiQueryRegionBox _GpiQueryRegionBox
 
-inline BOOL _GpiQueryRegionRects(HPS a, HRGN b, PRECTL c, PRGNRECT d, PRECTL e)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryRegionRects(a, b, c, d, e);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiQueryRegionRects(HPS a, HRGN b, PRECTL c, PRGNRECT d, PRECTL e);
 
 #undef  GpiQueryRegionRects
 #define GpiQueryRegionRects _GpiQueryRegionRects
 
-inline LONG _GpiQueryRGBColor(HPS a, ULONG b, LONG c)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryRGBColor(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiQueryRGBColor(HPS a, ULONG b, LONG c);
 
 #undef  GpiQueryRGBColor
 #define GpiQueryRGBColor _GpiQueryRGBColor
 
-inline BOOL _GpiQuerySegmentTransformMatrix(HPS a, LONG b, LONG c, PMATRIXLF d)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQuerySegmentTransformMatrix(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiQuerySegmentTransformMatrix(HPS a, LONG b, LONG c, PMATRIXLF d);
 
 #undef  GpiQuerySegmentTransformMatrix
 #define GpiQuerySegmentTransformMatrix _GpiQuerySegmentTransformMatrix
 
-inline BOOL _GpiQuerySetIds(HPS a, LONG b, PLONG c, PSTR8 d, PLONG e)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQuerySetIds(a, b, c, d, e);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiQuerySetIds(HPS a, LONG b, PLONG c, PSTR8 d, PLONG e);
 
 #undef  GpiQuerySetIds
 #define GpiQuerySetIds _GpiQuerySetIds
 
-inline BOOL _GpiQueryTextAlignment(HPS a, PLONG b, PLONG c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryTextAlignment(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiQueryTextAlignment(HPS a, PLONG b, PLONG c);
 
 #undef  GpiQueryTextAlignment
 #define GpiQueryTextAlignment _GpiQueryTextAlignment
 
-inline BOOL _GpiQueryTextBox(HPS a, LONG b, PCH c, LONG d, PPOINTL e)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryTextBox(a, b, c, d, e);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiQueryTextBox(HPS a, LONG b, PCH c, LONG d, PPOINTL e);
 
 #undef  GpiQueryTextBox
 #define GpiQueryTextBox _GpiQueryTextBox
 
-inline BOOL _GpiQueryViewingLimits(HPS a, PRECTL b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryViewingLimits(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiQueryViewingLimits(HPS a, PRECTL b);
 
 #undef  GpiQueryViewingLimits
 #define GpiQueryViewingLimits _GpiQueryViewingLimits
 
-inline BOOL _GpiQueryViewingTransformMatrix(HPS a, LONG b, PMATRIXLF c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryViewingTransformMatrix(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiQueryViewingTransformMatrix(HPS a, LONG b, PMATRIXLF c);
 
 #undef  GpiQueryViewingTransformMatrix
 #define GpiQueryViewingTransformMatrix _GpiQueryViewingTransformMatrix
 
-inline BOOL _GpiQueryWidthTable(HPS a, LONG b, LONG c, PLONG d)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryWidthTable(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiQueryWidthTable(HPS a, LONG b, LONG c, PLONG d);
 
 #undef  GpiQueryWidthTable
 #define GpiQueryWidthTable _GpiQueryWidthTable
 
-inline LONG _GpiRectInRegion(HPS a, HRGN b, PRECTL c)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiRectInRegion(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiRectInRegion(HPS a, HRGN b, PRECTL c);
 
 #undef  GpiRectInRegion
 #define GpiRectInRegion _GpiRectInRegion
 
-inline LONG _GpiRectVisible(HPS a, PRECTL b)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiRectVisible(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiRectVisible(HPS a, PRECTL b);
 
 #undef  GpiRectVisible
 #define GpiRectVisible _GpiRectVisible
 
-inline BOOL _GpiRotate(HPS a, PMATRIXLF b, LONG c, FIXED d, PPOINTL e)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiRotate(a, b, c, d, e);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiRotate(HPS a, PMATRIXLF b, LONG c, FIXED d, PPOINTL e);
 
 #undef  GpiRotate
 #define GpiRotate _GpiRotate
 
-inline BOOL _GpiSaveMetaFile(HMF a, PCSZ b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiSaveMetaFile(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiSaveMetaFile(HMF a, PCSZ b);
 
 #undef  GpiSaveMetaFile
 #define GpiSaveMetaFile _GpiSaveMetaFile
 
-inline BOOL _GpiScale(HPS a, PMATRIXLF b, LONG c, PFIXED d, PPOINTL e)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiScale(a, b, c, d, e);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiScale(HPS a, PMATRIXLF b, LONG c, PFIXED d, PPOINTL e);
 
 #undef  GpiScale
 #define GpiScale _GpiScale
 
-inline HPAL _GpiSelectPalette(HPS a, HPAL b)
-{
- HPAL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiSelectPalette(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HPAL APIENTRY _GpiSelectPalette(HPS a, HPAL b);
 
 #undef  GpiSelectPalette
 #define GpiSelectPalette _GpiSelectPalette
 
-inline BOOL _GpiSetArcParams(HPS a, PARCPARAMS b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiSetArcParams(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiSetArcParams(HPS a, PARCPARAMS b);
 
 #undef  GpiSetArcParams
 #define GpiSetArcParams _GpiSetArcParams
 
-inline BOOL _GpiSetAttrMode(HPS a, LONG b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiSetAttrMode(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiSetAttrMode(HPS a, LONG b);
 
 #undef  GpiSetAttrMode
 #define GpiSetAttrMode _GpiSetAttrMode
 
-inline BOOL _GpiSetAttrs(HPS a, LONG b, ULONG c, ULONG d, PVOID e)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiSetAttrs(a, b, c, d, e);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiSetAttrs(HPS a, LONG b, ULONG c, ULONG d, PVOID e);
 
 #undef  GpiSetAttrs
 #define GpiSetAttrs _GpiSetAttrs
 
-inline BOOL _GpiSetBackColor(HPS a, LONG b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiSetBackColor(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiSetBackColor(HPS a, LONG b);
 
 #undef  GpiSetBackColor
 #define GpiSetBackColor _GpiSetBackColor
 
-inline BOOL _GpiSetBackMix(HPS a, LONG b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiSetBackMix(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiSetBackMix(HPS a, LONG b);
 
 #undef  GpiSetBackMix
 #define GpiSetBackMix _GpiSetBackMix
 
-inline BOOL _GpiSetCharAngle(HPS a, PGRADIENTL b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiSetCharAngle(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiSetCharAngle(HPS a, PGRADIENTL b);
 
 #undef  GpiSetCharAngle
 #define GpiSetCharAngle _GpiSetCharAngle
 
-inline BOOL _GpiSetCharBox(HPS a, PSIZEF b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiSetCharBox(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiSetCharBox(HPS a, PSIZEF b);
 
 #undef  GpiSetCharBox
 #define GpiSetCharBox _GpiSetCharBox
 
-inline BOOL _GpiSetCharBreakExtra(HPS a, FIXED b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiSetCharBreakExtra(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiSetCharBreakExtra(HPS a, FIXED b);
 
 #undef  GpiSetCharBreakExtra
 #define GpiSetCharBreakExtra _GpiSetCharBreakExtra
 
-inline BOOL _GpiSetCharDirection(HPS a, LONG b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiSetCharDirection(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiSetCharDirection(HPS a, LONG b);
 
 #undef  GpiSetCharDirection
 #define GpiSetCharDirection _GpiSetCharDirection
 
-inline BOOL _GpiSetCharExtra(HPS a, FIXED b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiSetCharExtra(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiSetCharExtra(HPS a, FIXED b);
 
 #undef  GpiSetCharExtra
 #define GpiSetCharExtra _GpiSetCharExtra
 
-inline BOOL _GpiSetCharMode(HPS a, LONG b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiSetCharMode(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiSetCharMode(HPS a, LONG b);
 
 #undef  GpiSetCharMode
 #define GpiSetCharMode _GpiSetCharMode
 
-inline BOOL _GpiSetCharSet(HPS a, LONG b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiSetCharSet(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiSetCharSet(HPS a, LONG b);
 
 #undef  GpiSetCharSet
 #define GpiSetCharSet _GpiSetCharSet
 
-inline BOOL _GpiSetCharShear(HPS a, PPOINTL b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiSetCharShear(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiSetCharShear(HPS a, PPOINTL b);
 
 #undef  GpiSetCharShear
 #define GpiSetCharShear _GpiSetCharShear
 
-inline BOOL _GpiSetClipPath(HPS a, LONG b, LONG c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiSetClipPath(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiSetClipPath(HPS a, LONG b, LONG c);
 
 #undef  GpiSetClipPath
 #define GpiSetClipPath _GpiSetClipPath
 
-inline LONG _GpiSetClipRegion(HPS a, HRGN b, PHRGN c)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiSetClipRegion(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiSetClipRegion(HPS a, HRGN b, PHRGN c);
 
 #undef  GpiSetClipRegion
 #define GpiSetClipRegion _GpiSetClipRegion
 
-inline BOOL _GpiSetColor(HPS a, LONG b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiSetColor(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiSetColor(HPS a, LONG b);
 
 #undef  GpiSetColor
 #define GpiSetColor _GpiSetColor
 
-inline BOOL _GpiSetCp(HPS a, ULONG b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiSetCp(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiSetCp(HPS a, ULONG b);
 
 #undef  GpiSetCp
 #define GpiSetCp _GpiSetCp
 
-inline BOOL _GpiSetCurrentPosition(HPS a, PPOINTL b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiSetCurrentPosition(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiSetCurrentPosition(HPS a, PPOINTL b);
 
 #undef  GpiSetCurrentPosition
 #define GpiSetCurrentPosition _GpiSetCurrentPosition
 
-inline BOOL _GpiSetDefArcParams(HPS a, PARCPARAMS b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiSetDefArcParams(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiSetDefArcParams(HPS a, PARCPARAMS b);
 
 #undef  GpiSetDefArcParams
 #define GpiSetDefArcParams _GpiSetDefArcParams
 
-inline BOOL _GpiSetDefAttrs(HPS a, LONG b, ULONG c, PVOID d)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiSetDefAttrs(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiSetDefAttrs(HPS a, LONG b, ULONG c, PVOID d);
 
 #undef  GpiSetDefAttrs
 #define GpiSetDefAttrs _GpiSetDefAttrs
 
-inline BOOL _GpiSetDefaultViewMatrix(HPS a, LONG b, PMATRIXLF c, LONG d)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiSetDefaultViewMatrix(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiSetDefaultViewMatrix(HPS a, LONG b, PMATRIXLF c, LONG d);
 
 #undef  GpiSetDefaultViewMatrix
 #define GpiSetDefaultViewMatrix _GpiSetDefaultViewMatrix
 
-inline BOOL _GpiSetDefTag(HPS a, LONG b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiSetDefTag(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiSetDefTag(HPS a, LONG b);
 
 #undef  GpiSetDefTag
 #define GpiSetDefTag _GpiSetDefTag
 
-inline BOOL _GpiSetDefViewingLimits(HPS a, PRECTL b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiSetDefViewingLimits(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiSetDefViewingLimits(HPS a, PRECTL b);
 
 #undef  GpiSetDefViewingLimits
 #define GpiSetDefViewingLimits _GpiSetDefViewingLimits
 
-inline BOOL _GpiSetEditMode(HPS a, LONG b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiSetEditMode(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiSetEditMode(HPS a, LONG b);
 
 #undef  GpiSetEditMode
 #define GpiSetEditMode _GpiSetEditMode
 
-inline BOOL _GpiSetElementPointer(HPS a, LONG b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiSetElementPointer(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiSetElementPointer(HPS a, LONG b);
 
 #undef  GpiSetElementPointer
 #define GpiSetElementPointer _GpiSetElementPointer
 
-inline BOOL _GpiSetElementPointerAtLabel(HPS a, LONG b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiSetElementPointerAtLabel(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiSetElementPointerAtLabel(HPS a, LONG b);
 
 #undef  GpiSetElementPointerAtLabel
 #define GpiSetElementPointerAtLabel _GpiSetElementPointerAtLabel
 
-inline BOOL _GpiSetGraphicsField(HPS a, PRECTL b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiSetGraphicsField(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiSetGraphicsField(HPS a, PRECTL b);
 
 #undef  GpiSetGraphicsField
 #define GpiSetGraphicsField _GpiSetGraphicsField
 
-inline BOOL _GpiSetLineEnd(HPS a, LONG b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiSetLineEnd(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiSetLineEnd(HPS a, LONG b);
 
 #undef  GpiSetLineEnd
 #define GpiSetLineEnd _GpiSetLineEnd
 
-inline BOOL _GpiSetLineJoin(HPS a, LONG b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiSetLineJoin(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiSetLineJoin(HPS a, LONG b);
 
 #undef  GpiSetLineJoin
 #define GpiSetLineJoin _GpiSetLineJoin
 
-inline BOOL _GpiSetLineType(HPS a, LONG b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiSetLineType(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiSetLineType(HPS a, LONG b);
 
 #undef  GpiSetLineType
 #define GpiSetLineType _GpiSetLineType
 
-inline BOOL _GpiSetLineWidth(HPS a, FIXED b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiSetLineWidth(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiSetLineWidth(HPS a, FIXED b);
 
 #undef  GpiSetLineWidth
 #define GpiSetLineWidth _GpiSetLineWidth
 
-inline BOOL _GpiSetLineWidthGeom(HPS a, LONG b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiSetLineWidthGeom(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiSetLineWidthGeom(HPS a, LONG b);
 
 #undef  GpiSetLineWidthGeom
 #define GpiSetLineWidthGeom _GpiSetLineWidthGeom
 
-inline BOOL _GpiSetMarker(HPS a, LONG b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiSetMarker(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiSetMarker(HPS a, LONG b);
 
 #undef  GpiSetMarker
 #define GpiSetMarker _GpiSetMarker
 
-inline BOOL _GpiSetMarkerBox(HPS a, PSIZEF b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiSetMarkerBox(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiSetMarkerBox(HPS a, PSIZEF b);
 
 #undef  GpiSetMarkerBox
 #define GpiSetMarkerBox _GpiSetMarkerBox
 
-inline BOOL _GpiSetMarkerSet(HPS a, LONG b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiSetMarkerSet(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiSetMarkerSet(HPS a, LONG b);
 
 #undef  GpiSetMarkerSet
 #define GpiSetMarkerSet _GpiSetMarkerSet
 
-inline BOOL _GpiSetMetaFileBits(HMF a, LONG b, LONG c, PBYTE d)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiSetMetaFileBits(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiSetMetaFileBits(HMF a, LONG b, LONG c, PBYTE d);
 
 #undef  GpiSetMetaFileBits
 #define GpiSetMetaFileBits _GpiSetMetaFileBits
 
-inline BOOL _GpiSetMix(HPS a, LONG b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiSetMix(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiSetMix(HPS a, LONG b);
 
 #undef  GpiSetMix
 #define GpiSetMix _GpiSetMix
 
-inline BOOL _GpiSetModelTransformMatrix(HPS a, LONG b, PMATRIXLF c, LONG d)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiSetModelTransformMatrix(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiSetModelTransformMatrix(HPS a, LONG b, PMATRIXLF c, LONG d);
 
 #undef  GpiSetModelTransformMatrix
 #define GpiSetModelTransformMatrix _GpiSetModelTransformMatrix
 
-inline BOOL _GpiSetPageViewport(HPS a, PRECTL b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiSetPageViewport(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiSetPageViewport(HPS a, PRECTL b);
 
 #undef  GpiSetPageViewport
 #define GpiSetPageViewport _GpiSetPageViewport
 
-inline BOOL _GpiSetPaletteEntries(HPAL a, ULONG b, ULONG c, ULONG d, ULONG *e)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiSetPaletteEntries(a, b, c, d, e);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiSetPaletteEntries(HPAL a, ULONG b, ULONG c, ULONG d, ULONG *e);
 
 #undef  GpiSetPaletteEntries
 #define GpiSetPaletteEntries _GpiSetPaletteEntries
 
-inline BOOL _GpiSetPattern(HPS a, LONG b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiSetPattern(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiSetPattern(HPS a, LONG b);
 
 #undef  GpiSetPattern
 #define GpiSetPattern _GpiSetPattern
 
-inline BOOL _GpiSetPatternRefPoint(HPS a, PPOINTL b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiSetPatternRefPoint(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiSetPatternRefPoint(HPS a, PPOINTL b);
 
 #undef  GpiSetPatternRefPoint
 #define GpiSetPatternRefPoint _GpiSetPatternRefPoint
 
-inline BOOL _GpiSetPatternSet(HPS a, LONG b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiSetPatternSet(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiSetPatternSet(HPS a, LONG b);
 
 #undef  GpiSetPatternSet
 #define GpiSetPatternSet _GpiSetPatternSet
 
-inline BOOL _GpiSetRegion(HPS a, HRGN b, LONG c, PRECTL d)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiSetRegion(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiSetRegion(HPS a, HRGN b, LONG c, PRECTL d);
 
 #undef  GpiSetRegion
 #define GpiSetRegion _GpiSetRegion
 
-inline BOOL _GpiSetSegmentTransformMatrix(HPS a, LONG b, LONG c, MATRIXLF *d, LONG e)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiSetSegmentTransformMatrix(a, b, c, d, e);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiSetSegmentTransformMatrix(HPS a, LONG b, LONG c, MATRIXLF *d, LONG e);
 
 #undef  GpiSetSegmentTransformMatrix
 #define GpiSetSegmentTransformMatrix _GpiSetSegmentTransformMatrix
 
-inline BOOL _GpiSetTextAlignment(HPS a, LONG b, LONG c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiSetTextAlignment(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiSetTextAlignment(HPS a, LONG b, LONG c);
 
 #undef  GpiSetTextAlignment
 #define GpiSetTextAlignment _GpiSetTextAlignment
 
-inline BOOL _GpiSetViewingLimits(HPS a, PRECTL b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiSetViewingLimits(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiSetViewingLimits(HPS a, PRECTL b);
 
 #undef  GpiSetViewingLimits
 #define GpiSetViewingLimits _GpiSetViewingLimits
 
-inline BOOL _GpiSetViewingTransformMatrix(HPS a, LONG b, MATRIXLF *c, LONG d)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiSetViewingTransformMatrix(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiSetViewingTransformMatrix(HPS a, LONG b, MATRIXLF *c, LONG d);
 
 #undef  GpiSetViewingTransformMatrix
 #define GpiSetViewingTransformMatrix _GpiSetViewingTransformMatrix
 
-inline LONG _GpiStrokePath(HPS a, LONG b, ULONG c)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiStrokePath(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiStrokePath(HPS a, LONG b, ULONG c);
 
 #undef  GpiStrokePath
 #define GpiStrokePath _GpiStrokePath
 
-inline BOOL _GpiTranslate(HPS a, PMATRIXLF b, LONG c, PPOINTL d)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiTranslate(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiTranslate(HPS a, PMATRIXLF b, LONG c, PPOINTL d);
 
 #undef  GpiTranslate
 #define GpiTranslate _GpiTranslate
 
-inline BOOL _GpiUnloadFonts(HAB a, PCSZ b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiUnloadFonts(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiUnloadFonts(HAB a, PCSZ b);
 
 #undef  GpiUnloadFonts
 #define GpiUnloadFonts _GpiUnloadFonts
 
-inline BOOL _GpiUnloadPublicFonts(HAB a, PCSZ b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiUnloadPublicFonts(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiUnloadPublicFonts(HAB a, PCSZ b);
 
 #undef  GpiUnloadPublicFonts
 #define GpiUnloadPublicFonts _GpiUnloadPublicFonts
 
 #ifdef INCL_GPIBITMAPS
-inline LONG _GpiBitBlt(HPS a, HPS b, LONG c, PPOINTL d, LONG e, ULONG f)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiBitBlt(a, b, c, d, e, f);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiBitBlt(HPS a, HPS b, LONG c, PPOINTL d, LONG e, ULONG f);
 
 #undef  GpiBitBlt
 #define GpiBitBlt _GpiBitBlt
 
-inline BOOL _GpiDeleteBitmap(HBITMAP a)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiDeleteBitmap(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiDeleteBitmap(HBITMAP a);
 
 #undef  GpiDeleteBitmap
 #define GpiDeleteBitmap _GpiDeleteBitmap
 
-inline HBITMAP _GpiLoadBitmap(HPS a, HMODULE b, ULONG c, LONG d, LONG e)
-{
- HBITMAP yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiLoadBitmap(a, b, c, d, e);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HBITMAP APIENTRY _GpiLoadBitmap(HPS a, HMODULE b, ULONG c, LONG d, LONG e);
 
 #undef  GpiLoadBitmap
 #define GpiLoadBitmap _GpiLoadBitmap
 
-inline HBITMAP _GpiSetBitmap(HPS a, HBITMAP b)
-{
- HBITMAP yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiSetBitmap(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HBITMAP APIENTRY _GpiSetBitmap(HPS a, HBITMAP b);
 
 #undef  GpiSetBitmap
 #define GpiSetBitmap _GpiSetBitmap
 
-inline LONG _GpiWCBitBlt(HPS a, HBITMAP b, LONG c, PPOINTL d, LONG e, ULONG f)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiWCBitBlt(a, b, c, d, e, f);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiWCBitBlt(HPS a, HBITMAP b, LONG c, PPOINTL d, LONG e, ULONG f);
 
 #undef  GpiWCBitBlt
 #define GpiWCBitBlt _GpiWCBitBlt
 
-inline HBITMAP _GpiCreateBitmap(HPS a, BITMAPINFOHEADER2 *b, ULONG c, PBYTE d, BITMAPINFO2 *e)
-{
- HBITMAP yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiCreateBitmap(a, b, c, d, e);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HBITMAP APIENTRY _GpiCreateBitmap(HPS a, BITMAPINFOHEADER2 *b, ULONG c, PBYTE d, BITMAPINFO2 *e);
 
 #undef  GpiCreateBitmap
 #define GpiCreateBitmap _GpiCreateBitmap
 
-inline LONG _GpiDrawBits(HPS a, PVOID b, BITMAPINFO2 *c, LONG d, PPOINTL e, LONG f, ULONG g)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiDrawBits(a, b, c, d, e, f, g);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiDrawBits(HPS a, PVOID b, BITMAPINFO2 *c, LONG d, PPOINTL e, LONG f, ULONG g);
 
 #undef  GpiDrawBits
 #define GpiDrawBits _GpiDrawBits
 
-inline LONG _GpiFloodFill(HPS a, LONG b, LONG c)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiFloodFill(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiFloodFill(HPS a, LONG b, LONG c);
 
 #undef  GpiFloodFill
 #define GpiFloodFill _GpiFloodFill
 
-inline LONG _GpiQueryBitmapBits(HPS a, LONG b, LONG c, PBYTE d, PBITMAPINFO2 e)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryBitmapBits(a, b, c, d, e);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiQueryBitmapBits(HPS a, LONG b, LONG c, PBYTE d, PBITMAPINFO2 e);
 
 #undef  GpiQueryBitmapBits
 #define GpiQueryBitmapBits _GpiQueryBitmapBits
 
-inline BOOL _GpiQueryBitmapDimension(HBITMAP a, PSIZEL b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryBitmapDimension(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiQueryBitmapDimension(HBITMAP a, PSIZEL b);
 
 #undef  GpiQueryBitmapDimension
 #define GpiQueryBitmapDimension _GpiQueryBitmapDimension
 
-inline HBITMAP _GpiQueryBitmapHandle(HPS a, LONG b)
-{
- HBITMAP yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryBitmapHandle(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HBITMAP APIENTRY _GpiQueryBitmapHandle(HPS a, LONG b);
 
 #undef  GpiQueryBitmapHandle
 #define GpiQueryBitmapHandle _GpiQueryBitmapHandle
 
-inline BOOL _GpiQueryBitmapInfoHeader(HBITMAP a, PBITMAPINFOHEADER2 b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryBitmapInfoHeader(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiQueryBitmapInfoHeader(HBITMAP a, PBITMAPINFOHEADER2 b);
 
 #undef  GpiQueryBitmapInfoHeader
 #define GpiQueryBitmapInfoHeader _GpiQueryBitmapInfoHeader
 
-inline BOOL _GpiQueryBitmapParameters(HBITMAP a, PBITMAPINFOHEADER b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryBitmapParameters(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiQueryBitmapParameters(HBITMAP a, PBITMAPINFOHEADER b);
 
 #undef  GpiQueryBitmapParameters
 #define GpiQueryBitmapParameters _GpiQueryBitmapParameters
 
-inline BOOL _GpiQueryDeviceBitmapFormats(HPS a, LONG b, PLONG c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryDeviceBitmapFormats(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiQueryDeviceBitmapFormats(HPS a, LONG b, PLONG c);
 
 #undef  GpiQueryDeviceBitmapFormats
 #define GpiQueryDeviceBitmapFormats _GpiQueryDeviceBitmapFormats
 
-inline LONG _GpiSetBitmapBits(HPS a, LONG b, LONG c, PBYTE d, BITMAPINFO2 *e)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiSetBitmapBits(a, b, c, d, e);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiSetBitmapBits(HPS a, LONG b, LONG c, PBYTE d, BITMAPINFO2 *e);
 
 #undef  GpiSetBitmapBits
 #define GpiSetBitmapBits _GpiSetBitmapBits
 
-inline LONG _GpiQueryPel(HPS a, PPOINTL b)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryPel(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiQueryPel(HPS a, PPOINTL b);
 
 #undef  GpiQueryPel
 #define GpiQueryPel _GpiQueryPel
 
-inline BOOL _GpiSetBitmapDimension(HBITMAP a, SIZEL *b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiSetBitmapDimension(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiSetBitmapDimension(HBITMAP a, SIZEL *b);
 
 #undef  GpiSetBitmapDimension
 #define GpiSetBitmapDimension _GpiSetBitmapDimension
 
-inline BOOL _GpiSetBitmapId(HPS a, HBITMAP b, LONG c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiSetBitmapId(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiSetBitmapId(HPS a, HBITMAP b, LONG c);
 
 #undef  GpiSetBitmapId
 #define GpiSetBitmapId _GpiSetBitmapId
 
-inline LONG _GpiSetPel(HPS a, PPOINTL b)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiSetPel(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiSetPel(HPS a, PPOINTL b);
 
 #undef  GpiSetPel
 #define GpiSetPel _GpiSetPel
 
 #endif
 #ifdef INCL_GPICONTROL
-inline BOOL _GpiAssociate(HPS a, HDC b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiAssociate(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiAssociate(HPS a, HDC b);
 
 #undef  GpiAssociate
 #define GpiAssociate _GpiAssociate
 
-inline HPS _GpiCreatePS(HAB a, HDC b, PSIZEL c, ULONG d)
-{
- HPS yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiCreatePS(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HPS APIENTRY _GpiCreatePS(HAB a, HDC b, PSIZEL c, ULONG d);
 
 #undef  GpiCreatePS
 #define GpiCreatePS _GpiCreatePS
 
-inline BOOL _GpiDestroyPS(HPS a)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiDestroyPS(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiDestroyPS(HPS a);
 
 #undef  GpiDestroyPS
 #define GpiDestroyPS _GpiDestroyPS
 
-inline BOOL _GpiErase(HPS a)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiErase(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiErase(HPS a);
 
 #undef  GpiErase
 #define GpiErase _GpiErase
 
-inline HDC _GpiQueryDevice(HPS a)
-{
- HDC yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryDevice(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HDC APIENTRY _GpiQueryDevice(HPS a);
 
 #undef  GpiQueryDevice
 #define GpiQueryDevice _GpiQueryDevice
 
-inline BOOL _GpiRestorePS(HPS a, LONG b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiRestorePS(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiRestorePS(HPS a, LONG b);
 
 #undef  GpiRestorePS
 #define GpiRestorePS _GpiRestorePS
 
-inline LONG _GpiSavePS(HPS a)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiSavePS(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiSavePS(HPS a);
 
 #undef  GpiSavePS
 #define GpiSavePS _GpiSavePS
 
-inline LONG _GpiErrorSegmentData(HPS a, PLONG b, PLONG c)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiErrorSegmentData(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiErrorSegmentData(HPS a, PLONG b, PLONG c);
 
 #undef  GpiErrorSegmentData
 #define GpiErrorSegmentData _GpiErrorSegmentData
 
-inline LONG _GpiQueryDrawControl(HPS a, LONG b)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryDrawControl(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiQueryDrawControl(HPS a, LONG b);
 
 #undef  GpiQueryDrawControl
 #define GpiQueryDrawControl _GpiQueryDrawControl
 
-inline LONG _GpiQueryDrawingMode(HPS a)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryDrawingMode(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiQueryDrawingMode(HPS a);
 
 #undef  GpiQueryDrawingMode
 #define GpiQueryDrawingMode _GpiQueryDrawingMode
 
-inline ULONG _GpiQueryPS(HPS a, PSIZEL b)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryPS(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _GpiQueryPS(HPS a, PSIZEL b);
 
 #undef  GpiQueryPS
 #define GpiQueryPS _GpiQueryPS
 
-inline BOOL _GpiResetPS(HPS a, ULONG b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiResetPS(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiResetPS(HPS a, ULONG b);
 
 #undef  GpiResetPS
 #define GpiResetPS _GpiResetPS
 
-inline LONG _GpiQueryStopDraw(HPS a)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryStopDraw(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiQueryStopDraw(HPS a);
 
 #undef  GpiQueryStopDraw
 #define GpiQueryStopDraw _GpiQueryStopDraw
 
-inline BOOL _GpiSetDrawControl(HPS a, LONG b, LONG c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiSetDrawControl(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiSetDrawControl(HPS a, LONG b, LONG c);
 
 #undef  GpiSetDrawControl
 #define GpiSetDrawControl _GpiSetDrawControl
 
-inline BOOL _GpiSetDrawingMode(HPS a, LONG b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiSetDrawingMode(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiSetDrawingMode(HPS a, LONG b);
 
 #undef  GpiSetDrawingMode
 #define GpiSetDrawingMode _GpiSetDrawingMode
 
-inline BOOL _GpiSetPS(HPS a, SIZEL *b, ULONG c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiSetPS(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiSetPS(HPS a, SIZEL *b, ULONG c);
 
 #undef  GpiSetPS
 #define GpiSetPS _GpiSetPS
 
-inline BOOL _GpiSetStopDraw(HPS a, LONG b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiSetStopDraw(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiSetStopDraw(HPS a, LONG b);
 
 #undef  GpiSetStopDraw
 #define GpiSetStopDraw _GpiSetStopDraw
 
 #endif
 #ifdef INCL_GPICORRELATION
-inline LONG _GpiCorrelateChain(HPS a, LONG b, PPOINTL c, LONG d, LONG e, PLONG f)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiCorrelateChain(a, b, c, d, e, f);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiCorrelateChain(HPS a, LONG b, PPOINTL c, LONG d, LONG e, PLONG f);
 
 #undef  GpiCorrelateChain
 #define GpiCorrelateChain _GpiCorrelateChain
 
-inline LONG _GpiCorrelateFrom(HPS a, LONG b, LONG c, LONG d, PPOINTL e, LONG f, LONG g, PLONG h)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiCorrelateFrom(a, b, c, d, e, f, g, h);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiCorrelateFrom(HPS a, LONG b, LONG c, LONG d, PPOINTL e, LONG f, LONG g, PLONG h);
 
 #undef  GpiCorrelateFrom
 #define GpiCorrelateFrom _GpiCorrelateFrom
 
-inline LONG _GpiCorrelateSegment(HPS a, LONG b, LONG c, PPOINTL d, LONG e, LONG f, PLONG g)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiCorrelateSegment(a, b, c, d, e, f, g);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiCorrelateSegment(HPS a, LONG b, LONG c, PPOINTL d, LONG e, LONG f, PLONG g);
 
 #undef  GpiCorrelateSegment
 #define GpiCorrelateSegment _GpiCorrelateSegment
 
-inline BOOL _GpiQueryBoundaryData(HPS a, PRECTL b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryBoundaryData(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiQueryBoundaryData(HPS a, PRECTL b);
 
 #undef  GpiQueryBoundaryData
 #define GpiQueryBoundaryData _GpiQueryBoundaryData
 
-inline BOOL _GpiQueryPickAperturePosition(HPS a, PPOINTL b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryPickAperturePosition(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiQueryPickAperturePosition(HPS a, PPOINTL b);
 
 #undef  GpiQueryPickAperturePosition
 #define GpiQueryPickAperturePosition _GpiQueryPickAperturePosition
 
-inline BOOL _GpiQueryPickApertureSize(HPS a, PSIZEL b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryPickApertureSize(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiQueryPickApertureSize(HPS a, PSIZEL b);
 
 #undef  GpiQueryPickApertureSize
 #define GpiQueryPickApertureSize _GpiQueryPickApertureSize
 
-inline BOOL _GpiQueryTag(HPS a, PLONG b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryTag(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiQueryTag(HPS a, PLONG b);
 
 #undef  GpiQueryTag
 #define GpiQueryTag _GpiQueryTag
 
-inline BOOL _GpiResetBoundaryData(HPS a)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiResetBoundaryData(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiResetBoundaryData(HPS a);
 
 #undef  GpiResetBoundaryData
 #define GpiResetBoundaryData _GpiResetBoundaryData
 
-inline BOOL _GpiSetPickAperturePosition(HPS a, PPOINTL b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiSetPickAperturePosition(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiSetPickAperturePosition(HPS a, PPOINTL b);
 
 #undef  GpiSetPickAperturePosition
 #define GpiSetPickAperturePosition _GpiSetPickAperturePosition
 
-inline BOOL _GpiSetPickApertureSize(HPS a, LONG b, SIZEL *c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiSetPickApertureSize(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiSetPickApertureSize(HPS a, LONG b, SIZEL *c);
 
 #undef  GpiSetPickApertureSize
 #define GpiSetPickApertureSize _GpiSetPickApertureSize
 
-inline BOOL _GpiSetTag(HPS a, LONG b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiSetTag(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiSetTag(HPS a, LONG b);
 
 #undef  GpiSetTag
 #define GpiSetTag _GpiSetTag
 
 #endif
 #ifdef INCL_GPIINK
-inline BOOL _GpiBeginInkPath(HPS a, LONG b, ULONG c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiBeginInkPath(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiBeginInkPath(HPS a, LONG b, ULONG c);
 
 #undef  GpiBeginInkPath
 #define GpiBeginInkPath _GpiBeginInkPath
 
-inline BOOL _GpiEndInkPath(HPS a, ULONG b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiEndInkPath(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiEndInkPath(HPS a, ULONG b);
 
 #undef  GpiEndInkPath
 #define GpiEndInkPath _GpiEndInkPath
 
-inline LONG _GpiStrokeInkPath(HPS a, LONG b, LONG c, PPOINTL d, ULONG e)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiStrokeInkPath(a, b, c, d, e);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiStrokeInkPath(HPS a, LONG b, LONG c, PPOINTL d, ULONG e);
 
 #undef  GpiStrokeInkPath
 #define GpiStrokeInkPath _GpiStrokeInkPath
 
 #endif
 #ifdef INCL_GPISEGMENTS
-inline BOOL _GpiCloseSegment(HPS a)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiCloseSegment(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiCloseSegment(HPS a);
 
 #undef  GpiCloseSegment
 #define GpiCloseSegment _GpiCloseSegment
 
-inline BOOL _GpiDeleteSegment(HPS a, LONG b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiDeleteSegment(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiDeleteSegment(HPS a, LONG b);
 
 #undef  GpiDeleteSegment
 #define GpiDeleteSegment _GpiDeleteSegment
 
-inline BOOL _GpiDeleteSegments(HPS a, LONG b, LONG c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiDeleteSegments(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiDeleteSegments(HPS a, LONG b, LONG c);
 
 #undef  GpiDeleteSegments
 #define GpiDeleteSegments _GpiDeleteSegments
 
-inline BOOL _GpiDrawChain(HPS a)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiDrawChain(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiDrawChain(HPS a);
 
 #undef  GpiDrawChain
 #define GpiDrawChain _GpiDrawChain
 
-inline BOOL _GpiDrawDynamics(HPS a)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiDrawDynamics(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiDrawDynamics(HPS a);
 
 #undef  GpiDrawDynamics
 #define GpiDrawDynamics _GpiDrawDynamics
 
-inline BOOL _GpiDrawFrom(HPS a, LONG b, LONG c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiDrawFrom(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiDrawFrom(HPS a, LONG b, LONG c);
 
 #undef  GpiDrawFrom
 #define GpiDrawFrom _GpiDrawFrom
 
-inline BOOL _GpiDrawSegment(HPS a, LONG b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiDrawSegment(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiDrawSegment(HPS a, LONG b);
 
 #undef  GpiDrawSegment
 #define GpiDrawSegment _GpiDrawSegment
 
-inline LONG _GpiGetData(HPS a, LONG b, PLONG c, LONG d, LONG e, PBYTE f)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiGetData(a, b, c, d, e, f);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiGetData(HPS a, LONG b, PLONG c, LONG d, LONG e, PBYTE f);
 
 #undef  GpiGetData
 #define GpiGetData _GpiGetData
 
-inline BOOL _GpiOpenSegment(HPS a, LONG b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiOpenSegment(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiOpenSegment(HPS a, LONG b);
 
 #undef  GpiOpenSegment
 #define GpiOpenSegment _GpiOpenSegment
 
-inline LONG _GpiPutData(HPS a, LONG b, PLONG c, PBYTE d)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiPutData(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiPutData(HPS a, LONG b, PLONG c, PBYTE d);
 
 #undef  GpiPutData
 #define GpiPutData _GpiPutData
 
-inline LONG _GpiQueryInitialSegmentAttrs(HPS a, LONG b)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQueryInitialSegmentAttrs(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiQueryInitialSegmentAttrs(HPS a, LONG b);
 
 #undef  GpiQueryInitialSegmentAttrs
 #define GpiQueryInitialSegmentAttrs _GpiQueryInitialSegmentAttrs
 
-inline LONG _GpiQuerySegmentAttrs(HPS a, LONG b, LONG c)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQuerySegmentAttrs(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiQuerySegmentAttrs(HPS a, LONG b, LONG c);
 
 #undef  GpiQuerySegmentAttrs
 #define GpiQuerySegmentAttrs _GpiQuerySegmentAttrs
 
-inline LONG _GpiQuerySegmentNames(HPS a, LONG b, LONG c, LONG d, PLONG e)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQuerySegmentNames(a, b, c, d, e);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiQuerySegmentNames(HPS a, LONG b, LONG c, LONG d, PLONG e);
 
 #undef  GpiQuerySegmentNames
 #define GpiQuerySegmentNames _GpiQuerySegmentNames
 
-inline LONG _GpiQuerySegmentPriority(HPS a, LONG b, LONG c)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiQuerySegmentPriority(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _GpiQuerySegmentPriority(HPS a, LONG b, LONG c);
 
 #undef  GpiQuerySegmentPriority
 #define GpiQuerySegmentPriority _GpiQuerySegmentPriority
 
-inline BOOL _GpiRemoveDynamics(HPS a, LONG b, LONG c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiRemoveDynamics(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiRemoveDynamics(HPS a, LONG b, LONG c);
 
 #undef  GpiRemoveDynamics
 #define GpiRemoveDynamics _GpiRemoveDynamics
 
-inline BOOL _GpiSetInitialSegmentAttrs(HPS a, LONG b, LONG c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiSetInitialSegmentAttrs(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiSetInitialSegmentAttrs(HPS a, LONG b, LONG c);
 
 #undef  GpiSetInitialSegmentAttrs
 #define GpiSetInitialSegmentAttrs _GpiSetInitialSegmentAttrs
 
-inline BOOL _GpiSetSegmentAttrs(HPS a, LONG b, LONG c, LONG d)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiSetSegmentAttrs(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiSetSegmentAttrs(HPS a, LONG b, LONG c, LONG d);
 
 #undef  GpiSetSegmentAttrs
 #define GpiSetSegmentAttrs _GpiSetSegmentAttrs
 
-inline BOOL _GpiSetSegmentPriority(HPS a, LONG b, LONG c, LONG d)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = GpiSetSegmentPriority(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _GpiSetSegmentPriority(HPS a, LONG b, LONG c, LONG d);
 
 #undef  GpiSetSegmentPriority
 #define GpiSetSegmentPriority _GpiSetSegmentPriority
 
 #endif
 #ifdef INCL_DEV
-inline LONG _DevEscape(HDC a, LONG b, LONG c, PBYTE d, PLONG e, PBYTE f)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DevEscape(a, b, c, d, e, f);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _DevEscape(HDC a, LONG b, LONG c, PBYTE d, PLONG e, PBYTE f);
 
 #undef  DevEscape
 #define DevEscape _DevEscape
 
-inline LONG _DevPostEscape(PCSZ a, PCSZ b, PCSZ c, PCSZ d, ULONG e, ULONG f, PBYTE g, ULONG h, PBYTE i)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DevPostEscape(a, b, c, d, e, f, g, h, i);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _DevPostEscape(PCSZ a, PCSZ b, PCSZ c, PCSZ d, ULONG e, ULONG f, PBYTE g, ULONG h, PBYTE i);
 
 #undef  DevPostEscape
 #define DevPostEscape _DevPostEscape
 
-inline LONG _DevPostDeviceModes(HAB a, PDRIVDATA b, PCSZ c, PCSZ d, PCSZ e, ULONG f)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DevPostDeviceModes(a, b, c, d, e, f);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _DevPostDeviceModes(HAB a, PDRIVDATA b, PCSZ c, PCSZ d, PCSZ e, ULONG f);
 
 #undef  DevPostDeviceModes
 #define DevPostDeviceModes _DevPostDeviceModes
 
-inline BOOL _DevQueryDeviceNames(HAB a, PCSZ b, PLONG c, PSTR32 d, PSTR64 e, PLONG f, PSTR16 g)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DevQueryDeviceNames(a, b, c, d, e, f, g);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _DevQueryDeviceNames(HAB a, PCSZ b, PLONG c, PSTR32 d, PSTR64 e, PLONG f, PSTR16 g);
 
 #undef  DevQueryDeviceNames
 #define DevQueryDeviceNames _DevQueryDeviceNames
 
-inline LONG _DevQueryHardcopyCaps(HDC a, LONG b, LONG c, PHCINFO d)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DevQueryHardcopyCaps(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _DevQueryHardcopyCaps(HDC a, LONG b, LONG c, PHCINFO d);
 
 #undef  DevQueryHardcopyCaps
 #define DevQueryHardcopyCaps _DevQueryHardcopyCaps
 
 #endif
-inline HMF _DevCloseDC(HDC a)
-{
- HMF yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DevCloseDC(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HMF APIENTRY _DevCloseDC(HDC a);
 
 #undef  DevCloseDC
 #define DevCloseDC _DevCloseDC
 
-inline HDC _DevOpenDC(HAB a, LONG b, PCSZ c, LONG d, PDEVOPENDATA e, HDC f)
-{
- HDC yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DevOpenDC(a, b, c, d, e, f);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HDC APIENTRY _DevOpenDC(HAB a, LONG b, PCSZ c, LONG d, PDEVOPENDATA e, HDC f);
 
 #undef  DevOpenDC
 #define DevOpenDC _DevOpenDC
 
-inline BOOL _DevQueryCaps(HDC a, LONG b, LONG c, PLONG d)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DevQueryCaps(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _DevQueryCaps(HDC a, LONG b, LONG c, PLONG d);
 
 #undef  DevQueryCaps
 #define DevQueryCaps _DevQueryCaps
 
 #endif
 #ifdef INCL_WINPROGRAMLIST
-inline HPROGRAM _PrfAddProgram(HINI a, PPROGDETAILS b, HPROGRAM c)
-{
- HPROGRAM yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = PrfAddProgram(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HPROGRAM APIENTRY _PrfAddProgram(HINI a, PPROGDETAILS b, HPROGRAM c);
 
 #undef  PrfAddProgram
 #define PrfAddProgram _PrfAddProgram
 
-inline BOOL _PrfChangeProgram(HINI a, HPROGRAM b, PPROGDETAILS c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = PrfChangeProgram(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _PrfChangeProgram(HINI a, HPROGRAM b, PPROGDETAILS c);
 
 #undef  PrfChangeProgram
 #define PrfChangeProgram _PrfChangeProgram
 
-inline HPROGRAM _PrfCreateGroup(HINI a, PCSZ b, UCHAR c)
-{
- HPROGRAM yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = PrfCreateGroup(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HPROGRAM APIENTRY _PrfCreateGroup(HINI a, PCSZ b, UCHAR c);
 
 #undef  PrfCreateGroup
 #define PrfCreateGroup _PrfCreateGroup
 
-inline BOOL _PrfDestroyGroup(HINI a, HPROGRAM b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = PrfDestroyGroup(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _PrfDestroyGroup(HINI a, HPROGRAM b);
 
 #undef  PrfDestroyGroup
 #define PrfDestroyGroup _PrfDestroyGroup
 
-inline PROGCATEGORY _PrfQueryProgramCategory(HINI a, PCSZ b)
-{
- PROGCATEGORY yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = PrfQueryProgramCategory(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+PROGCATEGORY APIENTRY _PrfQueryProgramCategory(HINI a, PCSZ b);
 
 #undef  PrfQueryProgramCategory
 #define PrfQueryProgramCategory _PrfQueryProgramCategory
 
-inline ULONG _PrfQueryProgramHandle(HINI a, PCSZ b, PHPROGARRAY c, ULONG d, PULONG e)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = PrfQueryProgramHandle(a, b, c, d, e);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _PrfQueryProgramHandle(HINI a, PCSZ b, PHPROGARRAY c, ULONG d, PULONG e);
 
 #undef  PrfQueryProgramHandle
 #define PrfQueryProgramHandle _PrfQueryProgramHandle
 
-inline ULONG _PrfQueryProgramTitles(HINI a, HPROGRAM b, PPROGTITLE c, ULONG d, PULONG e)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = PrfQueryProgramTitles(a, b, c, d, e);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _PrfQueryProgramTitles(HINI a, HPROGRAM b, PPROGTITLE c, ULONG d, PULONG e);
 
 #undef  PrfQueryProgramTitles
 #define PrfQueryProgramTitles _PrfQueryProgramTitles
 
-inline ULONG _PrfQueryDefinition(HINI a, HPROGRAM b, PPROGDETAILS c, ULONG d)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = PrfQueryDefinition(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _PrfQueryDefinition(HINI a, HPROGRAM b, PPROGDETAILS c, ULONG d);
 
 #undef  PrfQueryDefinition
 #define PrfQueryDefinition _PrfQueryDefinition
 
-inline BOOL _PrfRemoveProgram(HINI a, HPROGRAM b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = PrfRemoveProgram(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _PrfRemoveProgram(HINI a, HPROGRAM b);
 
 #undef  PrfRemoveProgram
 #define PrfRemoveProgram _PrfRemoveProgram
 
-inline HAPP _WinStartApp(HWND a, PPROGDETAILS b, PCSZ c, PVOID d, ULONG e)
-{
- HAPP yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinStartApp(a, b, c, d, e);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HAPP APIENTRY _WinStartApp(HWND a, PPROGDETAILS b, PCSZ c, PVOID d, ULONG e);
 
 #undef  WinStartApp
 #define WinStartApp _WinStartApp
 
-inline BOOL _WinTerminateApp(HAPP a)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinTerminateApp(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinTerminateApp(HAPP a);
 
 #undef  WinTerminateApp
 #define WinTerminateApp _WinTerminateApp
 
 #endif
 #ifdef INCL_WINSWITCHLIST
-inline HSWITCH _WinAddSwitchEntry(PSWCNTRL a)
-{
- HSWITCH yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinAddSwitchEntry(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HSWITCH APIENTRY _WinAddSwitchEntry(PSWCNTRL a);
 
 #undef  WinAddSwitchEntry
 #define WinAddSwitchEntry _WinAddSwitchEntry
 
-inline ULONG _WinRemoveSwitchEntry(HSWITCH a)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinRemoveSwitchEntry(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _WinRemoveSwitchEntry(HSWITCH a);
 
 #undef  WinRemoveSwitchEntry
 #define WinRemoveSwitchEntry _WinRemoveSwitchEntry
 
-inline ULONG _WinChangeSwitchEntry(HSWITCH a, PSWCNTRL b)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinChangeSwitchEntry(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _WinChangeSwitchEntry(HSWITCH a, PSWCNTRL b);
 
 #undef  WinChangeSwitchEntry
 #define WinChangeSwitchEntry _WinChangeSwitchEntry
 
-inline HSWITCH _WinCreateSwitchEntry(HAB a, PSWCNTRL b)
-{
- HSWITCH yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinCreateSwitchEntry(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HSWITCH APIENTRY _WinCreateSwitchEntry(HAB a, PSWCNTRL b);
 
 #undef  WinCreateSwitchEntry
 #define WinCreateSwitchEntry _WinCreateSwitchEntry
 
-inline ULONG _WinQuerySessionTitle(HAB a, ULONG b, PSZ c, ULONG d)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinQuerySessionTitle(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _WinQuerySessionTitle(HAB a, ULONG b, PSZ c, ULONG d);
 
 #undef  WinQuerySessionTitle
 #define WinQuerySessionTitle _WinQuerySessionTitle
 
-inline ULONG _WinQuerySwitchEntry(HSWITCH a, PSWCNTRL b)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinQuerySwitchEntry(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _WinQuerySwitchEntry(HSWITCH a, PSWCNTRL b);
 
 #undef  WinQuerySwitchEntry
 #define WinQuerySwitchEntry _WinQuerySwitchEntry
 
-inline HSWITCH _WinQuerySwitchHandle(HWND a, PID b)
-{
- HSWITCH yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinQuerySwitchHandle(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HSWITCH APIENTRY _WinQuerySwitchHandle(HWND a, PID b);
 
 #undef  WinQuerySwitchHandle
 #define WinQuerySwitchHandle _WinQuerySwitchHandle
 
-inline ULONG _WinQuerySwitchList(HAB a, PSWBLOCK b, ULONG c)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinQuerySwitchList(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _WinQuerySwitchList(HAB a, PSWBLOCK b, ULONG c);
 
 #undef  WinQuerySwitchList
 #define WinQuerySwitchList _WinQuerySwitchList
 
-inline ULONG _WinQueryTaskSizePos(HAB a, ULONG b, PSWP c)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinQueryTaskSizePos(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _WinQueryTaskSizePos(HAB a, ULONG b, PSWP c);
 
 #undef  WinQueryTaskSizePos
 #define WinQueryTaskSizePos _WinQueryTaskSizePos
 
-inline ULONG _WinQueryTaskTitle(ULONG a, PSZ b, ULONG c)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinQueryTaskTitle(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _WinQueryTaskTitle(ULONG a, PSZ b, ULONG c);
 
 #undef  WinQueryTaskTitle
 #define WinQueryTaskTitle _WinQueryTaskTitle
 
-inline ULONG _WinSwitchToProgram(HSWITCH a)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinSwitchToProgram(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _WinSwitchToProgram(HSWITCH a);
 
 #undef  WinSwitchToProgram
 #define WinSwitchToProgram _WinSwitchToProgram
 
 #endif
 #ifdef INCL_WINSHELLDATA
-inline BOOL _PrfCloseProfile(HINI a)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = PrfCloseProfile(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _PrfCloseProfile(HINI a);
 
 #undef  PrfCloseProfile
 #define PrfCloseProfile _PrfCloseProfile
 
-inline HINI _PrfOpenProfile(HAB a, PCSZ b)
-{
- HINI yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = PrfOpenProfile(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HINI APIENTRY _PrfOpenProfile(HAB a, PCSZ b);
 
 #undef  PrfOpenProfile
 #define PrfOpenProfile _PrfOpenProfile
 
-inline BOOL _PrfQueryProfile(HAB a, PPRFPROFILE b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = PrfQueryProfile(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _PrfQueryProfile(HAB a, PPRFPROFILE b);
 
 #undef  PrfQueryProfile
 #define PrfQueryProfile _PrfQueryProfile
 
-inline BOOL _PrfQueryProfileData(HINI a, PCSZ b, PCSZ c, PVOID d, PULONG e)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = PrfQueryProfileData(a, b, c, d, e);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _PrfQueryProfileData(HINI a, PCSZ b, PCSZ c, PVOID d, PULONG e);
 
 #undef  PrfQueryProfileData
 #define PrfQueryProfileData _PrfQueryProfileData
 
-inline LONG _PrfQueryProfileInt(HINI a, PCSZ b, PCSZ c, LONG d)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = PrfQueryProfileInt(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _PrfQueryProfileInt(HINI a, PCSZ b, PCSZ c, LONG d);
 
 #undef  PrfQueryProfileInt
 #define PrfQueryProfileInt _PrfQueryProfileInt
 
-inline BOOL _PrfQueryProfileSize(HINI a, PCSZ b, PCSZ c, PULONG d)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = PrfQueryProfileSize(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _PrfQueryProfileSize(HINI a, PCSZ b, PCSZ c, PULONG d);
 
 #undef  PrfQueryProfileSize
 #define PrfQueryProfileSize _PrfQueryProfileSize
 
-inline ULONG _PrfQueryProfileString(HINI a, PCSZ b, PCSZ c, PCSZ d, PVOID e, ULONG f)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = PrfQueryProfileString(a, b, c, d, e, f);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _PrfQueryProfileString(HINI a, PCSZ b, PCSZ c, PCSZ d, PVOID e, ULONG f);
 
 #undef  PrfQueryProfileString
 #define PrfQueryProfileString _PrfQueryProfileString
 
-inline BOOL _PrfReset(HAB a, PPRFPROFILE b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = PrfReset(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _PrfReset(HAB a, PPRFPROFILE b);
 
 #undef  PrfReset
 #define PrfReset _PrfReset
 
-inline BOOL _PrfWriteProfileData(HINI a, PCSZ b, PCSZ c, PVOID d, ULONG e)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = PrfWriteProfileData(a, b, c, d, e);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _PrfWriteProfileData(HINI a, PCSZ b, PCSZ c, PVOID d, ULONG e);
 
 #undef  PrfWriteProfileData
 #define PrfWriteProfileData _PrfWriteProfileData
 
-inline BOOL _PrfWriteProfileString(HINI a, PCSZ b, PCSZ c, PCSZ d)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = PrfWriteProfileString(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _PrfWriteProfileString(HINI a, PCSZ b, PCSZ c, PCSZ d);
 
 #undef  PrfWriteProfileString
 #define PrfWriteProfileString _PrfWriteProfileString
 
 #endif
 #ifdef INCL_WINSTDFILE
-inline MRESULT _WinDefFileDlgProc(HWND a, ULONG b, MPARAM c, MPARAM d)
-{
- MRESULT yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinDefFileDlgProc(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+MRESULT APIENTRY _WinDefFileDlgProc(HWND a, ULONG b, MPARAM c, MPARAM d);
 
 #undef  WinDefFileDlgProc
 #define WinDefFileDlgProc _WinDefFileDlgProc
 
-inline HWND _WinFileDlg(HWND a, HWND b, PFILEDLG c)
-{
- HWND yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinFileDlg(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HWND APIENTRY _WinFileDlg(HWND a, HWND b, PFILEDLG c);
 
 #undef  WinFileDlg
 #define WinFileDlg _WinFileDlg
 
-inline BOOL _WinFreeFileDlgList(PAPSZ a)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinFreeFileDlgList(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinFreeFileDlgList(PAPSZ a);
 
 #undef  WinFreeFileDlgList
 #define WinFreeFileDlgList _WinFreeFileDlgList
 
 #endif
 #ifdef INCL_WINSTDFONT
-inline HWND _WinFontDlg(HWND a, HWND b, PFONTDLG c)
-{
- HWND yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinFontDlg(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HWND APIENTRY _WinFontDlg(HWND a, HWND b, PFONTDLG c);
 
 #undef  WinFontDlg
 #define WinFontDlg _WinFontDlg
 
-inline MRESULT _WinDefFontDlgProc(HWND a, ULONG b, MPARAM c, MPARAM d)
-{
- MRESULT yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinDefFontDlgProc(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+MRESULT APIENTRY _WinDefFontDlgProc(HWND a, ULONG b, MPARAM c, MPARAM d);
 
 #undef  WinDefFontDlgProc
 #define WinDefFontDlgProc _WinDefFontDlgProc
 
 #endif
 #ifdef INCL_WINSTDDRAG
-inline BOOL _DrgAcceptDroppedFiles(HWND a, PCSZ b, PCSZ c, ULONG d, ULONG e)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DrgAcceptDroppedFiles(a, b, c, d, e);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _DrgAcceptDroppedFiles(HWND a, PCSZ b, PCSZ c, ULONG d, ULONG e);
 
 #undef  DrgAcceptDroppedFiles
 #define DrgAcceptDroppedFiles _DrgAcceptDroppedFiles
 
-inline BOOL _DrgAccessDraginfo(PDRAGINFO a)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DrgAccessDraginfo(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _DrgAccessDraginfo(PDRAGINFO a);
 
 #undef  DrgAccessDraginfo
 #define DrgAccessDraginfo _DrgAccessDraginfo
 
-inline HSTR _DrgAddStrHandle(PCSZ a)
-{
- HSTR yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DrgAddStrHandle(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HSTR APIENTRY _DrgAddStrHandle(PCSZ a);
 
 #undef  DrgAddStrHandle
 #define DrgAddStrHandle _DrgAddStrHandle
 
-inline PDRAGINFO _DrgAllocDraginfo(ULONG a)
-{
- PDRAGINFO yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DrgAllocDraginfo(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+PDRAGINFO APIENTRY _DrgAllocDraginfo(ULONG a);
 
 #undef  DrgAllocDraginfo
 #define DrgAllocDraginfo _DrgAllocDraginfo
 
-inline PDRAGTRANSFER _DrgAllocDragtransfer(ULONG a)
-{
- PDRAGTRANSFER yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DrgAllocDragtransfer(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+PDRAGTRANSFER APIENTRY _DrgAllocDragtransfer(ULONG a);
 
 #undef  DrgAllocDragtransfer
 #define DrgAllocDragtransfer _DrgAllocDragtransfer
 
-inline BOOL _DrgCancelLazyDrag()
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DrgCancelLazyDrag();
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _DrgCancelLazyDrag();
 
 #undef  DrgCancelLazyDrag
 #define DrgCancelLazyDrag _DrgCancelLazyDrag
 
-inline BOOL _DrgDeleteDraginfoStrHandles(PDRAGINFO a)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DrgDeleteDraginfoStrHandles(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _DrgDeleteDraginfoStrHandles(PDRAGINFO a);
 
 #undef  DrgDeleteDraginfoStrHandles
 #define DrgDeleteDraginfoStrHandles _DrgDeleteDraginfoStrHandles
 
-inline BOOL _DrgDeleteStrHandle(HSTR a)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DrgDeleteStrHandle(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _DrgDeleteStrHandle(HSTR a);
 
 #undef  DrgDeleteStrHandle
 #define DrgDeleteStrHandle _DrgDeleteStrHandle
 
-inline HWND _DrgDrag(HWND a, PDRAGINFO b, PDRAGIMAGE c, ULONG d, LONG e, PVOID f)
-{
- HWND yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DrgDrag(a, b, c, d, e, f);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HWND APIENTRY _DrgDrag(HWND a, PDRAGINFO b, PDRAGIMAGE c, ULONG d, LONG e, PVOID f);
 
 #undef  DrgDrag
 #define DrgDrag _DrgDrag
 
-inline BOOL _DrgDragFiles(HWND a, PCSZ *b, PCSZ *c, PCSZ *d, ULONG e, HPOINTER f, ULONG g, BOOL h, ULONG i)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DrgDragFiles(a, b, c, d, e, f, g, h, i);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _DrgDragFiles(HWND a, PCSZ *b, PCSZ *c, PCSZ *d, ULONG e, HPOINTER f, ULONG g, BOOL h, ULONG i);
 
 #undef  DrgDragFiles
 #define DrgDragFiles _DrgDragFiles
 
-inline BOOL _DrgFreeDraginfo(PDRAGINFO a)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DrgFreeDraginfo(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _DrgFreeDraginfo(PDRAGINFO a);
 
 #undef  DrgFreeDraginfo
 #define DrgFreeDraginfo _DrgFreeDraginfo
 
-inline BOOL _DrgFreeDragtransfer(PDRAGTRANSFER a)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DrgFreeDragtransfer(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _DrgFreeDragtransfer(PDRAGTRANSFER a);
 
 #undef  DrgFreeDragtransfer
 #define DrgFreeDragtransfer _DrgFreeDragtransfer
 
-inline HPS _DrgGetPS(HWND a)
-{
- HPS yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DrgGetPS(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HPS APIENTRY _DrgGetPS(HWND a);
 
 #undef  DrgGetPS
 #define DrgGetPS _DrgGetPS
 
-inline BOOL _DrgLazyDrag(HWND a, PDRAGINFO b, PDRAGIMAGE c, ULONG d, PVOID e)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DrgLazyDrag(a, b, c, d, e);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _DrgLazyDrag(HWND a, PDRAGINFO b, PDRAGIMAGE c, ULONG d, PVOID e);
 
 #undef  DrgLazyDrag
 #define DrgLazyDrag _DrgLazyDrag
 
-inline BOOL _DrgLazyDrop(HWND a, ULONG b, PPOINTL c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DrgLazyDrop(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _DrgLazyDrop(HWND a, ULONG b, PPOINTL c);
 
 #undef  DrgLazyDrop
 #define DrgLazyDrop _DrgLazyDrop
 
-inline BOOL _DrgPostTransferMsg(HWND a, ULONG b, PDRAGTRANSFER c, ULONG d, ULONG e, BOOL f)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DrgPostTransferMsg(a, b, c, d, e, f);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _DrgPostTransferMsg(HWND a, ULONG b, PDRAGTRANSFER c, ULONG d, ULONG e, BOOL f);
 
 #undef  DrgPostTransferMsg
 #define DrgPostTransferMsg _DrgPostTransferMsg
 
-inline BOOL _DrgPushDraginfo(PDRAGINFO a, HWND b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DrgPushDraginfo(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _DrgPushDraginfo(PDRAGINFO a, HWND b);
 
 #undef  DrgPushDraginfo
 #define DrgPushDraginfo _DrgPushDraginfo
 
-inline PDRAGINFO _DrgQueryDraginfoPtr(PDRAGINFO a)
-{
- PDRAGINFO yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DrgQueryDraginfoPtr(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+PDRAGINFO APIENTRY _DrgQueryDraginfoPtr(PDRAGINFO a);
 
 #undef  DrgQueryDraginfoPtr
 #define DrgQueryDraginfoPtr _DrgQueryDraginfoPtr
 
-inline PDRAGINFO _DrgQueryDraginfoPtrFromHwnd(HWND a)
-{
- PDRAGINFO yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DrgQueryDraginfoPtrFromHwnd(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+PDRAGINFO APIENTRY _DrgQueryDraginfoPtrFromHwnd(HWND a);
 
 #undef  DrgQueryDraginfoPtrFromHwnd
 #define DrgQueryDraginfoPtrFromHwnd _DrgQueryDraginfoPtrFromHwnd
 
-inline PDRAGINFO _DrgQueryDraginfoPtrFromDragitem(PDRAGITEM a)
-{
- PDRAGINFO yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DrgQueryDraginfoPtrFromDragitem(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+PDRAGINFO APIENTRY _DrgQueryDraginfoPtrFromDragitem(PDRAGITEM a);
 
 #undef  DrgQueryDraginfoPtrFromDragitem
 #define DrgQueryDraginfoPtrFromDragitem _DrgQueryDraginfoPtrFromDragitem
 
-inline BOOL _DrgQueryDragitem(PDRAGINFO a, ULONG b, PDRAGITEM c, ULONG d)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DrgQueryDragitem(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _DrgQueryDragitem(PDRAGINFO a, ULONG b, PDRAGITEM c, ULONG d);
 
 #undef  DrgQueryDragitem
 #define DrgQueryDragitem _DrgQueryDragitem
 
-inline ULONG _DrgQueryDragitemCount(PDRAGINFO a)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DrgQueryDragitemCount(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DrgQueryDragitemCount(PDRAGINFO a);
 
 #undef  DrgQueryDragitemCount
 #define DrgQueryDragitemCount _DrgQueryDragitemCount
 
-inline PDRAGITEM _DrgQueryDragitemPtr(PDRAGINFO a, ULONG b)
-{
- PDRAGITEM yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DrgQueryDragitemPtr(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+PDRAGITEM APIENTRY _DrgQueryDragitemPtr(PDRAGINFO a, ULONG b);
 
 #undef  DrgQueryDragitemPtr
 #define DrgQueryDragitemPtr _DrgQueryDragitemPtr
 
-inline ULONG _DrgQueryDragStatus()
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DrgQueryDragStatus();
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DrgQueryDragStatus();
 
 #undef  DrgQueryDragStatus
 #define DrgQueryDragStatus _DrgQueryDragStatus
 
-inline BOOL _DrgQueryNativeRMF(PDRAGITEM a, ULONG b, PCHAR c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DrgQueryNativeRMF(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _DrgQueryNativeRMF(PDRAGITEM a, ULONG b, PCHAR c);
 
 #undef  DrgQueryNativeRMF
 #define DrgQueryNativeRMF _DrgQueryNativeRMF
 
-inline ULONG _DrgQueryNativeRMFLen(PDRAGITEM a)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DrgQueryNativeRMFLen(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DrgQueryNativeRMFLen(PDRAGITEM a);
 
 #undef  DrgQueryNativeRMFLen
 #define DrgQueryNativeRMFLen _DrgQueryNativeRMFLen
 
-inline ULONG _DrgQueryStrName(HSTR a, ULONG b, PSZ c)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DrgQueryStrName(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DrgQueryStrName(HSTR a, ULONG b, PSZ c);
 
 #undef  DrgQueryStrName
 #define DrgQueryStrName _DrgQueryStrName
 
-inline ULONG _DrgQueryStrNameLen(HSTR a)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DrgQueryStrNameLen(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DrgQueryStrNameLen(HSTR a);
 
 #undef  DrgQueryStrNameLen
 #define DrgQueryStrNameLen _DrgQueryStrNameLen
 
-inline BOOL _DrgQueryTrueType(PDRAGITEM a, ULONG b, PSZ c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DrgQueryTrueType(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _DrgQueryTrueType(PDRAGITEM a, ULONG b, PSZ c);
 
 #undef  DrgQueryTrueType
 #define DrgQueryTrueType _DrgQueryTrueType
 
-inline ULONG _DrgQueryTrueTypeLen(PDRAGITEM a)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DrgQueryTrueTypeLen(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _DrgQueryTrueTypeLen(PDRAGITEM a);
 
 #undef  DrgQueryTrueTypeLen
 #define DrgQueryTrueTypeLen _DrgQueryTrueTypeLen
 
-inline PDRAGINFO _DrgReallocDraginfo(PDRAGINFO a, ULONG b)
-{
- PDRAGINFO yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DrgReallocDraginfo(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+PDRAGINFO APIENTRY _DrgReallocDraginfo(PDRAGINFO a, ULONG b);
 
 #undef  DrgReallocDraginfo
 #define DrgReallocDraginfo _DrgReallocDraginfo
 
-inline BOOL _DrgReleasePS(HPS a)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DrgReleasePS(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _DrgReleasePS(HPS a);
 
 #undef  DrgReleasePS
 #define DrgReleasePS _DrgReleasePS
 
-inline MRESULT _DrgSendTransferMsg(HWND a, ULONG b, MPARAM c, MPARAM d)
-{
- MRESULT yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DrgSendTransferMsg(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+MRESULT APIENTRY _DrgSendTransferMsg(HWND a, ULONG b, MPARAM c, MPARAM d);
 
 #undef  DrgSendTransferMsg
 #define DrgSendTransferMsg _DrgSendTransferMsg
 
-inline BOOL _DrgSetDragImage(PDRAGINFO a, PDRAGIMAGE b, ULONG c, PVOID d)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DrgSetDragImage(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _DrgSetDragImage(PDRAGINFO a, PDRAGIMAGE b, ULONG c, PVOID d);
 
 #undef  DrgSetDragImage
 #define DrgSetDragImage _DrgSetDragImage
 
-inline BOOL _DrgSetDragitem(PDRAGINFO a, PDRAGITEM b, ULONG c, ULONG d)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DrgSetDragitem(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _DrgSetDragitem(PDRAGINFO a, PDRAGITEM b, ULONG c, ULONG d);
 
 #undef  DrgSetDragitem
 #define DrgSetDragitem _DrgSetDragitem
 
-inline BOOL _DrgSetDragPointer(PDRAGINFO a, HPOINTER b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DrgSetDragPointer(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _DrgSetDragPointer(PDRAGINFO a, HPOINTER b);
 
 #undef  DrgSetDragPointer
 #define DrgSetDragPointer _DrgSetDragPointer
 
-inline BOOL _DrgVerifyNativeRMF(PDRAGITEM a, PCSZ b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DrgVerifyNativeRMF(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _DrgVerifyNativeRMF(PDRAGITEM a, PCSZ b);
 
 #undef  DrgVerifyNativeRMF
 #define DrgVerifyNativeRMF _DrgVerifyNativeRMF
 
-inline BOOL _DrgVerifyRMF(PDRAGITEM a, PCSZ b, PCSZ c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DrgVerifyRMF(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _DrgVerifyRMF(PDRAGITEM a, PCSZ b, PCSZ c);
 
 #undef  DrgVerifyRMF
 #define DrgVerifyRMF _DrgVerifyRMF
 
-inline BOOL _DrgVerifyTrueType(PDRAGITEM a, PCSZ b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DrgVerifyTrueType(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _DrgVerifyTrueType(PDRAGITEM a, PCSZ b);
 
 #undef  DrgVerifyTrueType
 #define DrgVerifyTrueType _DrgVerifyTrueType
 
-inline BOOL _DrgVerifyType(PDRAGITEM a, PCSZ b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DrgVerifyType(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _DrgVerifyType(PDRAGITEM a, PCSZ b);
 
 #undef  DrgVerifyType
 #define DrgVerifyType _DrgVerifyType
 
-inline BOOL _DrgVerifyTypeSet(PDRAGITEM a, PCSZ b, ULONG c, PSZ d)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DrgVerifyTypeSet(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _DrgVerifyTypeSet(PDRAGITEM a, PCSZ b, ULONG c, PSZ d);
 
 #undef  DrgVerifyTypeSet
 #define DrgVerifyTypeSet _DrgVerifyTypeSet
 
 #endif
 #ifdef INCL_WPCLASS
-inline HOBJECT _WinCopyObject(HOBJECT a, HOBJECT b, ULONG c)
-{
- HOBJECT yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinCopyObject(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HOBJECT APIENTRY _WinCopyObject(HOBJECT a, HOBJECT b, ULONG c);
 
 #undef  WinCopyObject
 #define WinCopyObject _WinCopyObject
 
-inline HOBJECT _WinCreateObject(PCSZ a, PCSZ b, PCSZ c, PCSZ d, ULONG e)
-{
- HOBJECT yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinCreateObject(a, b, c, d, e);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HOBJECT APIENTRY _WinCreateObject(PCSZ a, PCSZ b, PCSZ c, PCSZ d, ULONG e);
 
 #undef  WinCreateObject
 #define WinCreateObject _WinCreateObject
 
-inline HOBJECT _WinCreateShadow(HOBJECT a, HOBJECT b, ULONG c)
-{
- HOBJECT yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinCreateShadow(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HOBJECT APIENTRY _WinCreateShadow(HOBJECT a, HOBJECT b, ULONG c);
 
 #undef  WinCreateShadow
 #define WinCreateShadow _WinCreateShadow
 
-inline BOOL _WinDeregisterObjectClass(PCSZ a)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinDeregisterObjectClass(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinDeregisterObjectClass(PCSZ a);
 
 #undef  WinDeregisterObjectClass
 #define WinDeregisterObjectClass _WinDeregisterObjectClass
 
-inline BOOL _WinDestroyObject(HOBJECT a)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinDestroyObject(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinDestroyObject(HOBJECT a);
 
 #undef  WinDestroyObject
 #define WinDestroyObject _WinDestroyObject
 
-inline BOOL _WinEnumObjectClasses(POBJCLASS a, PULONG b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinEnumObjectClasses(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinEnumObjectClasses(POBJCLASS a, PULONG b);
 
 #undef  WinEnumObjectClasses
 #define WinEnumObjectClasses _WinEnumObjectClasses
 
-inline BOOL _WinIsSOMDDReady()
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinIsSOMDDReady();
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinIsSOMDDReady();
 
 #undef  WinIsSOMDDReady
 #define WinIsSOMDDReady _WinIsSOMDDReady
 
-inline BOOL _WinIsWPDServerReady()
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinIsWPDServerReady();
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinIsWPDServerReady();
 
 #undef  WinIsWPDServerReady
 #define WinIsWPDServerReady _WinIsWPDServerReady
 
-inline HOBJECT _WinMoveObject(HOBJECT a, HOBJECT b, ULONG c)
-{
- HOBJECT yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinMoveObject(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HOBJECT APIENTRY _WinMoveObject(HOBJECT a, HOBJECT b, ULONG c);
 
 #undef  WinMoveObject
 #define WinMoveObject _WinMoveObject
 
-inline BOOL _WinOpenObject(HOBJECT a, ULONG b, BOOL c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinOpenObject(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinOpenObject(HOBJECT a, ULONG b, BOOL c);
 
 #undef  WinOpenObject
 #define WinOpenObject _WinOpenObject
 
-inline BOOL _WinQueryActiveDesktopPathname(PSZ a, ULONG b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinQueryActiveDesktopPathname(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinQueryActiveDesktopPathname(PSZ a, ULONG b);
 
 #undef  WinQueryActiveDesktopPathname
 #define WinQueryActiveDesktopPathname _WinQueryActiveDesktopPathname
 
-inline HOBJECT _WinQueryObject(PCSZ a)
-{
- HOBJECT yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinQueryObject(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HOBJECT APIENTRY _WinQueryObject(PCSZ a);
 
 #undef  WinQueryObject
 #define WinQueryObject _WinQueryObject
 
-inline BOOL _WinQueryObjectPath(HOBJECT a, PSZ b, ULONG c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinQueryObjectPath(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinQueryObjectPath(HOBJECT a, PSZ b, ULONG c);
 
 #undef  WinQueryObjectPath
 #define WinQueryObjectPath _WinQueryObjectPath
 
-inline BOOL _WinRegisterObjectClass(PCSZ a, PCSZ b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinRegisterObjectClass(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinRegisterObjectClass(PCSZ a, PCSZ b);
 
 #undef  WinRegisterObjectClass
 #define WinRegisterObjectClass _WinRegisterObjectClass
 
-inline BOOL _WinReplaceObjectClass(PCSZ a, PCSZ b, BOOL c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinReplaceObjectClass(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinReplaceObjectClass(PCSZ a, PCSZ b, BOOL c);
 
 #undef  WinReplaceObjectClass
 #define WinReplaceObjectClass _WinReplaceObjectClass
 
-inline ULONG _WinRestartSOMDD(BOOL a)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinRestartSOMDD(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _WinRestartSOMDD(BOOL a);
 
 #undef  WinRestartSOMDD
 #define WinRestartSOMDD _WinRestartSOMDD
 
-inline ULONG _WinRestartWPDServer(BOOL a)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinRestartWPDServer(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _WinRestartWPDServer(BOOL a);
 
 #undef  WinRestartWPDServer
 #define WinRestartWPDServer _WinRestartWPDServer
 
-inline BOOL _WinSaveObject(HOBJECT a, BOOL b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinSaveObject(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinSaveObject(HOBJECT a, BOOL b);
 
 #undef  WinSaveObject
 #define WinSaveObject _WinSaveObject
 
-inline BOOL _WinSetObjectData(HOBJECT a, PCSZ b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinSetObjectData(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinSetObjectData(HOBJECT a, PCSZ b);
 
 #undef  WinSetObjectData
 #define WinSetObjectData _WinSetObjectData
 
-inline BOOL _WinFreeFileIcon(HPOINTER a)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinFreeFileIcon(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinFreeFileIcon(HPOINTER a);
 
 #undef  WinFreeFileIcon
 #define WinFreeFileIcon _WinFreeFileIcon
 
-inline HPOINTER _WinLoadFileIcon(PCSZ a, BOOL b)
-{
- HPOINTER yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinLoadFileIcon(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HPOINTER APIENTRY _WinLoadFileIcon(PCSZ a, BOOL b);
 
 #undef  WinLoadFileIcon
 #define WinLoadFileIcon _WinLoadFileIcon
 
-inline BOOL _WinRestoreWindowPos(PCSZ a, PCSZ b, HWND c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinRestoreWindowPos(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinRestoreWindowPos(PCSZ a, PCSZ b, HWND c);
 
 #undef  WinRestoreWindowPos
 #define WinRestoreWindowPos _WinRestoreWindowPos
 
-inline BOOL _WinSetFileIcon(PCSZ a, PICONINFO b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinSetFileIcon(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinSetFileIcon(PCSZ a, PICONINFO b);
 
 #undef  WinSetFileIcon
 #define WinSetFileIcon _WinSetFileIcon
 
-inline BOOL _WinShutdownSystem(HAB a, HMQ b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinShutdownSystem(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinShutdownSystem(HAB a, HMQ b);
 
 #undef  WinShutdownSystem
 #define WinShutdownSystem _WinShutdownSystem
 
-inline BOOL _WinStoreWindowPos(PCSZ a, PCSZ b, HWND c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinStoreWindowPos(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinStoreWindowPos(PCSZ a, PCSZ b, HWND c);
 
 #undef  WinStoreWindowPos
 #define WinStoreWindowPos _WinStoreWindowPos
 
 #endif
 #ifdef INCL_SPL
-inline BOOL _SplStdClose(HDC a)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = SplStdClose(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _SplStdClose(HDC a);
 
 #undef  SplStdClose
 #define SplStdClose _SplStdClose
 
-inline BOOL _SplStdDelete(HSTD a)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = SplStdDelete(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _SplStdDelete(HSTD a);
 
 #undef  SplStdDelete
 #define SplStdDelete _SplStdDelete
 
-inline BOOL _SplStdGetBits(HSTD a, LONG b, LONG c, PCH d)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = SplStdGetBits(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _SplStdGetBits(HSTD a, LONG b, LONG c, PCH d);
 
 #undef  SplStdGetBits
 #define SplStdGetBits _SplStdGetBits
 
-inline BOOL _SplStdOpen(HDC a)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = SplStdOpen(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _SplStdOpen(HDC a);
 
 #undef  SplStdOpen
 #define SplStdOpen _SplStdOpen
 
-inline LONG _SplStdQueryLength(HSTD a)
-{
- LONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = SplStdQueryLength(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+LONG APIENTRY _SplStdQueryLength(HSTD a);
 
 #undef  SplStdQueryLength
 #define SplStdQueryLength _SplStdQueryLength
 
-inline BOOL _SplStdStart(HDC a)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = SplStdStart(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _SplStdStart(HDC a);
 
 #undef  SplStdStart
 #define SplStdStart _SplStdStart
 
-inline HSTD _SplStdStop(HDC a)
-{
- HSTD yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = SplStdStop(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HSTD APIENTRY _SplStdStop(HDC a);
 
 #undef  SplStdStop
 #define SplStdStop _SplStdStop
 
-inline SPLERR _SplControlDevice(PSZ a, PSZ b, ULONG c)
-{
- SPLERR yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = SplControlDevice(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+SPLERR APIENTRY _SplControlDevice(PSZ a, PSZ b, ULONG c);
 
 #undef  SplControlDevice
 #define SplControlDevice _SplControlDevice
 
-inline SPLERR _SplCopyJob(PCSZ a, PCSZ b, ULONG c, PCSZ d, PCSZ e, PULONG f)
-{
- SPLERR yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = SplCopyJob(a, b, c, d, e, f);
-    SetFS(sel);
-
-    return yyrc;
-} 
+SPLERR APIENTRY _SplCopyJob(PCSZ a, PCSZ b, ULONG c, PCSZ d, PCSZ e, PULONG f);
 
 #undef  SplCopyJob
 #define SplCopyJob _SplCopyJob
 
-inline SPLERR _SplCreateDevice(PSZ a, ULONG b, PVOID c, ULONG d)
-{
- SPLERR yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = SplCreateDevice(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+SPLERR APIENTRY _SplCreateDevice(PSZ a, ULONG b, PVOID c, ULONG d);
 
 #undef  SplCreateDevice
 #define SplCreateDevice _SplCreateDevice
 
-inline SPLERR _SplCreatePort(PCSZ a, PCSZ b, PCSZ c, ULONG d, PVOID e, ULONG f)
-{
- SPLERR yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = SplCreatePort(a, b, c, d, e, f);
-    SetFS(sel);
-
-    return yyrc;
-} 
+SPLERR APIENTRY _SplCreatePort(PCSZ a, PCSZ b, PCSZ c, ULONG d, PVOID e, ULONG f);
 
 #undef  SplCreatePort
 #define SplCreatePort _SplCreatePort
 
-inline SPLERR _SplCreateQueue(PSZ a, ULONG b, PVOID c, ULONG d)
-{
- SPLERR yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = SplCreateQueue(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+SPLERR APIENTRY _SplCreateQueue(PSZ a, ULONG b, PVOID c, ULONG d);
 
 #undef  SplCreateQueue
 #define SplCreateQueue _SplCreateQueue
 
-inline SPLERR _SplDeleteDevice(PSZ a, PSZ b)
-{
- SPLERR yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = SplDeleteDevice(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+SPLERR APIENTRY _SplDeleteDevice(PSZ a, PSZ b);
 
 #undef  SplDeleteDevice
 #define SplDeleteDevice _SplDeleteDevice
 
-inline SPLERR _SplDeleteJob(PSZ a, PSZ b, ULONG c)
-{
- SPLERR yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = SplDeleteJob(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+SPLERR APIENTRY _SplDeleteJob(PSZ a, PSZ b, ULONG c);
 
 #undef  SplDeleteJob
 #define SplDeleteJob _SplDeleteJob
 
-inline SPLERR _SplDeletePort(PCSZ a, PCSZ b)
-{
- SPLERR yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = SplDeletePort(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+SPLERR APIENTRY _SplDeletePort(PCSZ a, PCSZ b);
 
 #undef  SplDeletePort
 #define SplDeletePort _SplDeletePort
 
-inline SPLERR _SplDeleteQueue(PSZ a, PSZ b)
-{
- SPLERR yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = SplDeleteQueue(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+SPLERR APIENTRY _SplDeleteQueue(PSZ a, PSZ b);
 
 #undef  SplDeleteQueue
 #define SplDeleteQueue _SplDeleteQueue
 
-inline SPLERR _SplEnumDevice(PSZ a, ULONG b, PVOID c, ULONG d, PULONG e, PULONG f, PULONG g, PVOID h)
-{
- SPLERR yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = SplEnumDevice(a, b, c, d, e, f, g, h);
-    SetFS(sel);
-
-    return yyrc;
-} 
+SPLERR APIENTRY _SplEnumDevice(PSZ a, ULONG b, PVOID c, ULONG d, PULONG e, PULONG f, PULONG g, PVOID h);
 
 #undef  SplEnumDevice
 #define SplEnumDevice _SplEnumDevice
 
-inline SPLERR _SplEnumDriver(PSZ a, ULONG b, PVOID c, ULONG d, PULONG e, PULONG f, PULONG g, PVOID h)
-{
- SPLERR yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = SplEnumDriver(a, b, c, d, e, f, g, h);
-    SetFS(sel);
-
-    return yyrc;
-} 
+SPLERR APIENTRY _SplEnumDriver(PSZ a, ULONG b, PVOID c, ULONG d, PULONG e, PULONG f, PULONG g, PVOID h);
 
 #undef  SplEnumDriver
 #define SplEnumDriver _SplEnumDriver
 
-inline SPLERR _SplEnumJob(PSZ a, PSZ b, ULONG c, PVOID d, ULONG e, PULONG f, PULONG g, PULONG h, PVOID i)
-{
- SPLERR yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = SplEnumJob(a, b, c, d, e, f, g, h, i);
-    SetFS(sel);
-
-    return yyrc;
-} 
+SPLERR APIENTRY _SplEnumJob(PSZ a, PSZ b, ULONG c, PVOID d, ULONG e, PULONG f, PULONG g, PULONG h, PVOID i);
 
 #undef  SplEnumJob
 #define SplEnumJob _SplEnumJob
 
-inline SPLERR _SplEnumPort(PCSZ a, ULONG b, PVOID c, ULONG d, PULONG e, PULONG f, PULONG g, PVOID h)
-{
- SPLERR yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = SplEnumPort(a, b, c, d, e, f, g, h);
-    SetFS(sel);
-
-    return yyrc;
-} 
+SPLERR APIENTRY _SplEnumPort(PCSZ a, ULONG b, PVOID c, ULONG d, PULONG e, PULONG f, PULONG g, PVOID h);
 
 #undef  SplEnumPort
 #define SplEnumPort _SplEnumPort
 
-inline SPLERR _SplEnumPrinter(PSZ a, ULONG b, ULONG c, PVOID d, ULONG e, PULONG f, PULONG g, PULONG h, PVOID i)
-{
- SPLERR yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = SplEnumPrinter(a, b, c, d, e, f, g, h, i);
-    SetFS(sel);
-
-    return yyrc;
-} 
+SPLERR APIENTRY _SplEnumPrinter(PSZ a, ULONG b, ULONG c, PVOID d, ULONG e, PULONG f, PULONG g, PULONG h, PVOID i);
 
 #undef  SplEnumPrinter
 #define SplEnumPrinter _SplEnumPrinter
 
-inline SPLERR _SplEnumQueue(PSZ a, ULONG b, PVOID c, ULONG d, PULONG e, PULONG f, PULONG g, PVOID h)
-{
- SPLERR yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = SplEnumQueue(a, b, c, d, e, f, g, h);
-    SetFS(sel);
-
-    return yyrc;
-} 
+SPLERR APIENTRY _SplEnumQueue(PSZ a, ULONG b, PVOID c, ULONG d, PULONG e, PULONG f, PULONG g, PVOID h);
 
 #undef  SplEnumQueue
 #define SplEnumQueue _SplEnumQueue
 
-inline SPLERR _SplEnumQueueProcessor(PSZ a, ULONG b, PVOID c, ULONG d, PULONG e, PULONG f, PULONG g, PVOID h)
-{
- SPLERR yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = SplEnumQueueProcessor(a, b, c, d, e, f, g, h);
-    SetFS(sel);
-
-    return yyrc;
-} 
+SPLERR APIENTRY _SplEnumQueueProcessor(PSZ a, ULONG b, PVOID c, ULONG d, PULONG e, PULONG f, PULONG g, PVOID h);
 
 #undef  SplEnumQueueProcessor
 #define SplEnumQueueProcessor _SplEnumQueueProcessor
 
-inline SPLERR _SplHoldJob(PCSZ a, PCSZ b, ULONG c)
-{
- SPLERR yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = SplHoldJob(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+SPLERR APIENTRY _SplHoldJob(PCSZ a, PCSZ b, ULONG c);
 
 #undef  SplHoldJob
 #define SplHoldJob _SplHoldJob
 
-inline SPLERR _SplHoldQueue(PSZ a, PSZ b)
-{
- SPLERR yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = SplHoldQueue(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+SPLERR APIENTRY _SplHoldQueue(PSZ a, PSZ b);
 
 #undef  SplHoldQueue
 #define SplHoldQueue _SplHoldQueue
 
-inline SPLERR _SplPurgeQueue(PSZ a, PSZ b)
-{
- SPLERR yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = SplPurgeQueue(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+SPLERR APIENTRY _SplPurgeQueue(PSZ a, PSZ b);
 
 #undef  SplPurgeQueue
 #define SplPurgeQueue _SplPurgeQueue
 
-inline SPLERR _SplQueryDevice(PSZ a, PSZ b, ULONG c, PVOID d, ULONG e, PULONG f)
-{
- SPLERR yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = SplQueryDevice(a, b, c, d, e, f);
-    SetFS(sel);
-
-    return yyrc;
-} 
+SPLERR APIENTRY _SplQueryDevice(PSZ a, PSZ b, ULONG c, PVOID d, ULONG e, PULONG f);
 
 #undef  SplQueryDevice
 #define SplQueryDevice _SplQueryDevice
 
-inline SPLERR _SplQueryDriver(PCSZ a, PCSZ b, PCSZ c, ULONG d, PVOID e, ULONG f, PULONG g)
-{
- SPLERR yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = SplQueryDriver(a, b, c, d, e, f, g);
-    SetFS(sel);
-
-    return yyrc;
-} 
+SPLERR APIENTRY _SplQueryDriver(PCSZ a, PCSZ b, PCSZ c, ULONG d, PVOID e, ULONG f, PULONG g);
 
 #undef  SplQueryDriver
 #define SplQueryDriver _SplQueryDriver
 
-inline SPLERR _SplQueryJob(PSZ a, PSZ b, ULONG c, ULONG d, PVOID e, ULONG f, PULONG g)
-{
- SPLERR yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = SplQueryJob(a, b, c, d, e, f, g);
-    SetFS(sel);
-
-    return yyrc;
-} 
+SPLERR APIENTRY _SplQueryJob(PSZ a, PSZ b, ULONG c, ULONG d, PVOID e, ULONG f, PULONG g);
 
 #undef  SplQueryJob
 #define SplQueryJob _SplQueryJob
 
-inline SPLERR _SplQueryPort(PCSZ a, PCSZ b, ULONG c, PVOID d, ULONG e, PULONG f)
-{
- SPLERR yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = SplQueryPort(a, b, c, d, e, f);
-    SetFS(sel);
-
-    return yyrc;
-} 
+SPLERR APIENTRY _SplQueryPort(PCSZ a, PCSZ b, ULONG c, PVOID d, ULONG e, PULONG f);
 
 #undef  SplQueryPort
 #define SplQueryPort _SplQueryPort
 
-inline SPLERR _SplQueryQueue(PSZ a, PSZ b, ULONG c, PVOID d, ULONG e, PULONG f)
-{
- SPLERR yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = SplQueryQueue(a, b, c, d, e, f);
-    SetFS(sel);
-
-    return yyrc;
-} 
+SPLERR APIENTRY _SplQueryQueue(PSZ a, PSZ b, ULONG c, PVOID d, ULONG e, PULONG f);
 
 #undef  SplQueryQueue
 #define SplQueryQueue _SplQueryQueue
 
-inline SPLERR _SplReleaseJob(PCSZ a, PCSZ b, ULONG c)
-{
- SPLERR yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = SplReleaseJob(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+SPLERR APIENTRY _SplReleaseJob(PCSZ a, PCSZ b, ULONG c);
 
 #undef  SplReleaseJob
 #define SplReleaseJob _SplReleaseJob
 
-inline SPLERR _SplReleaseQueue(PSZ a, PSZ b)
-{
- SPLERR yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = SplReleaseQueue(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+SPLERR APIENTRY _SplReleaseQueue(PSZ a, PSZ b);
 
 #undef  SplReleaseQueue
 #define SplReleaseQueue _SplReleaseQueue
 
-inline SPLERR _SplSetDevice(PSZ a, PSZ b, ULONG c, PVOID d, ULONG e, ULONG f)
-{
- SPLERR yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = SplSetDevice(a, b, c, d, e, f);
-    SetFS(sel);
-
-    return yyrc;
-} 
+SPLERR APIENTRY _SplSetDevice(PSZ a, PSZ b, ULONG c, PVOID d, ULONG e, ULONG f);
 
 #undef  SplSetDevice
 #define SplSetDevice _SplSetDevice
 
-inline SPLERR _SplSetDriver(PCSZ a, PCSZ b, PCSZ c, ULONG d, PVOID e, ULONG f, ULONG g)
-{
- SPLERR yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = SplSetDriver(a, b, c, d, e, f, g);
-    SetFS(sel);
-
-    return yyrc;
-} 
+SPLERR APIENTRY _SplSetDriver(PCSZ a, PCSZ b, PCSZ c, ULONG d, PVOID e, ULONG f, ULONG g);
 
 #undef  SplSetDriver
 #define SplSetDriver _SplSetDriver
 
-inline SPLERR _SplSetJob(PSZ a, PSZ b, ULONG c, ULONG d, PVOID e, ULONG f, ULONG g)
-{
- SPLERR yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = SplSetJob(a, b, c, d, e, f, g);
-    SetFS(sel);
-
-    return yyrc;
-} 
+SPLERR APIENTRY _SplSetJob(PSZ a, PSZ b, ULONG c, ULONG d, PVOID e, ULONG f, ULONG g);
 
 #undef  SplSetJob
 #define SplSetJob _SplSetJob
 
-inline SPLERR _SplSetPort(PCSZ a, PCSZ b, ULONG c, PVOID d, ULONG e, ULONG f)
-{
- SPLERR yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = SplSetPort(a, b, c, d, e, f);
-    SetFS(sel);
-
-    return yyrc;
-} 
+SPLERR APIENTRY _SplSetPort(PCSZ a, PCSZ b, ULONG c, PVOID d, ULONG e, ULONG f);
 
 #undef  SplSetPort
 #define SplSetPort _SplSetPort
 
-inline SPLERR _SplSetQueue(PSZ a, PSZ b, ULONG c, PVOID d, ULONG e, ULONG f)
-{
- SPLERR yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = SplSetQueue(a, b, c, d, e, f);
-    SetFS(sel);
-
-    return yyrc;
-} 
+SPLERR APIENTRY _SplSetQueue(PSZ a, PSZ b, ULONG c, PVOID d, ULONG e, ULONG f);
 
 #undef  SplSetQueue
 #define SplSetQueue _SplSetQueue
 
-inline ULONG _SplMessageBox(PSZ a, ULONG b, ULONG c, PSZ d, PSZ e, ULONG f, ULONG g)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = SplMessageBox(a, b, c, d, e, f, g);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _SplMessageBox(PSZ a, ULONG b, ULONG c, PSZ d, PSZ e, ULONG f, ULONG g);
 
 #undef  SplMessageBox
 #define SplMessageBox _SplMessageBox
 
-inline BOOL _SplQmAbort(HSPL a)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = SplQmAbort(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _SplQmAbort(HSPL a);
 
 #undef  SplQmAbort
 #define SplQmAbort _SplQmAbort
 
-inline BOOL _SplQmAbortDoc(HSPL a)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = SplQmAbortDoc(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _SplQmAbortDoc(HSPL a);
 
 #undef  SplQmAbortDoc
 #define SplQmAbortDoc _SplQmAbortDoc
 
-inline BOOL _SplQmClose(HSPL a)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = SplQmClose(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _SplQmClose(HSPL a);
 
 #undef  SplQmClose
 #define SplQmClose _SplQmClose
 
-inline BOOL _SplQmEndDoc(HSPL a)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = SplQmEndDoc(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _SplQmEndDoc(HSPL a);
 
 #undef  SplQmEndDoc
 #define SplQmEndDoc _SplQmEndDoc
 
-inline ULONG _SplQmGetJobID(HSPL a, ULONG b, PVOID c, ULONG d, PULONG e)
-{
- ULONG yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = SplQmGetJobID(a, b, c, d, e);
-    SetFS(sel);
-
-    return yyrc;
-} 
+ULONG APIENTRY _SplQmGetJobID(HSPL a, ULONG b, PVOID c, ULONG d, PULONG e);
 
 #undef  SplQmGetJobID
 #define SplQmGetJobID _SplQmGetJobID
 
-inline BOOL _SplQmNewPage(HSPL a, ULONG b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = SplQmNewPage(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _SplQmNewPage(HSPL a, ULONG b);
 
 #undef  SplQmNewPage
 #define SplQmNewPage _SplQmNewPage
 
-inline HSPL _SplQmOpen(PSZ a, LONG b, PQMOPENDATA c)
-{
- HSPL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = SplQmOpen(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HSPL APIENTRY _SplQmOpen(PSZ a, LONG b, PQMOPENDATA c);
 
 #undef  SplQmOpen
 #define SplQmOpen _SplQmOpen
 
-inline BOOL _SplQmStartDoc(HSPL a, PSZ b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = SplQmStartDoc(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _SplQmStartDoc(HSPL a, PSZ b);
 
 #undef  SplQmStartDoc
 #define SplQmStartDoc _SplQmStartDoc
 
-inline BOOL _SplQmWrite(HSPL a, LONG b, PVOID c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = SplQmWrite(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _SplQmWrite(HSPL a, LONG b, PVOID c);
 
 #undef  SplQmWrite
 #define SplQmWrite _SplQmWrite
 
 #endif
 #ifdef INCL_WINHELP
-inline BOOL _WinAssociateHelpInstance(HWND a, HWND b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinAssociateHelpInstance(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinAssociateHelpInstance(HWND a, HWND b);
 
 #undef  WinAssociateHelpInstance
 #define WinAssociateHelpInstance _WinAssociateHelpInstance
 
-inline HWND _WinCreateHelpInstance(HAB a, PHELPINIT b)
-{
- HWND yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinCreateHelpInstance(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HWND APIENTRY _WinCreateHelpInstance(HAB a, PHELPINIT b);
 
 #undef  WinCreateHelpInstance
 #define WinCreateHelpInstance _WinCreateHelpInstance
 
-inline BOOL _WinCreateHelpTable(HWND a, PHELPTABLE b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinCreateHelpTable(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinCreateHelpTable(HWND a, PHELPTABLE b);
 
 #undef  WinCreateHelpTable
 #define WinCreateHelpTable _WinCreateHelpTable
 
-inline BOOL _WinDestroyHelpInstance(HWND a)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinDestroyHelpInstance(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinDestroyHelpInstance(HWND a);
 
 #undef  WinDestroyHelpInstance
 #define WinDestroyHelpInstance _WinDestroyHelpInstance
 
-inline BOOL _WinLoadHelpTable(HWND a, ULONG b, HMODULE c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinLoadHelpTable(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _WinLoadHelpTable(HWND a, ULONG b, HMODULE c);
 
 #undef  WinLoadHelpTable
 #define WinLoadHelpTable _WinLoadHelpTable
 
-inline HWND _WinQueryHelpInstance(HWND a)
-{
- HWND yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = WinQueryHelpInstance(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HWND APIENTRY _WinQueryHelpInstance(HWND a);
 
 #undef  WinQueryHelpInstance
 #define WinQueryHelpInstance _WinQueryHelpInstance
 
 #endif
 #ifdef INCL_DDF
-inline BOOL _DdfBeginList(HDDF a, ULONG b, ULONG c, ULONG d)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DdfBeginList(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _DdfBeginList(HDDF a, ULONG b, ULONG c, ULONG d);
 
 #undef  DdfBeginList
 #define DdfBeginList _DdfBeginList
 
-inline BOOL _DdfBitmap(HDDF a, HBITMAP b, ULONG c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DdfBitmap(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _DdfBitmap(HDDF a, HBITMAP b, ULONG c);
 
 #undef  DdfBitmap
 #define DdfBitmap _DdfBitmap
 
-inline BOOL _DdfEndList(HDDF a)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DdfEndList(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _DdfEndList(HDDF a);
 
 #undef  DdfEndList
 #define DdfEndList _DdfEndList
 
-inline BOOL _DdfHyperText(HDDF a, PCSZ b, PCSZ c, ULONG d)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DdfHyperText(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _DdfHyperText(HDDF a, PCSZ b, PCSZ c, ULONG d);
 
 #undef  DdfHyperText
 #define DdfHyperText _DdfHyperText
 
-inline BOOL _DdfInform(HDDF a, PCSZ b, ULONG c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DdfInform(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _DdfInform(HDDF a, PCSZ b, ULONG c);
 
 #undef  DdfInform
 #define DdfInform _DdfInform
 
-inline HDDF _DdfInitialize(HWND a, ULONG b, ULONG c)
-{
- HDDF yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DdfInitialize(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+HDDF APIENTRY _DdfInitialize(HWND a, ULONG b, ULONG c);
 
 #undef  DdfInitialize
 #define DdfInitialize _DdfInitialize
 
-inline BOOL _DdfListItem(HDDF a, PCSZ b, PCSZ c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DdfListItem(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _DdfListItem(HDDF a, PCSZ b, PCSZ c);
 
 #undef  DdfListItem
 #define DdfListItem _DdfListItem
 
-inline BOOL _DdfMetafile(HDDF a, HMF b, PRECTL c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DdfMetafile(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _DdfMetafile(HDDF a, HMF b, PRECTL c);
 
 #undef  DdfMetafile
 #define DdfMetafile _DdfMetafile
 
-inline BOOL _DdfPara(HDDF a)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DdfPara(a);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _DdfPara(HDDF a);
 
 #undef  DdfPara
 #define DdfPara _DdfPara
 
-inline BOOL _DdfSetColor(HDDF a, COLOR b, COLOR c)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DdfSetColor(a, b, c);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _DdfSetColor(HDDF a, COLOR b, COLOR c);
 
 #undef  DdfSetColor
 #define DdfSetColor _DdfSetColor
 
-inline BOOL _DdfSetFont(HDDF a, PCSZ b, ULONG c, ULONG d)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DdfSetFont(a, b, c, d);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _DdfSetFont(HDDF a, PCSZ b, ULONG c, ULONG d);
 
 #undef  DdfSetFont
 #define DdfSetFont _DdfSetFont
 
-inline BOOL _DdfSetFontStyle(HDDF a, ULONG b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DdfSetFontStyle(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _DdfSetFontStyle(HDDF a, ULONG b);
 
 #undef  DdfSetFontStyle
 #define DdfSetFontStyle _DdfSetFontStyle
 
-inline BOOL _DdfSetFormat(HDDF a, ULONG b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DdfSetFormat(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _DdfSetFormat(HDDF a, ULONG b);
 
 #undef  DdfSetFormat
 #define DdfSetFormat _DdfSetFormat
 
-inline BOOL _DdfSetTextAlign(HDDF a, ULONG b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DdfSetTextAlign(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _DdfSetTextAlign(HDDF a, ULONG b);
 
 #undef  DdfSetTextAlign
 #define DdfSetTextAlign _DdfSetTextAlign
 
-inline BOOL _DdfText(HDDF a, PCSZ b)
-{
- BOOL yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = DdfText(a, b);
-    SetFS(sel);
-
-    return yyrc;
-} 
+BOOL APIENTRY _DdfText(HDDF a, PCSZ b);
 
 #undef  DdfText
 #define DdfText _DdfText
 
 #endif
+
 #ifdef INCL_AVIO
 inline USHORT _VioAssociate(HDC a, HVPS b)
 {
