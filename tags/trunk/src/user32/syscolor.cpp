@@ -1,4 +1,4 @@
-/* $Id: syscolor.cpp,v 1.21 2000-05-12 18:09:41 sandervl Exp $ */
+/* $Id: syscolor.cpp,v 1.22 2000-05-28 16:43:46 sandervl Exp $ */
 
 /*
  * Win32 system color API functions for OS/2
@@ -245,13 +245,12 @@ BOOL WIN32API SetSysColors(INT nChanges, const INT *lpSysColor,
 //******************************************************************************
 HBRUSH WIN32API GetSysColorBrush(int nIndex)
 {
-  dprintf(("GetSysColorBrush %d returned", nIndex));
   if (!fColorInit)
   {
     SYSCOLOR_Init();
     fColorInit = TRUE;
   }
-
+  dprintf(("GetSysColorBrush %d returned %x ", nIndex, ((nIndex >= 0) && (nIndex < NUM_SYS_COLORS)) ? SysColorBrushes[nIndex]:0));
   return ((nIndex >= 0) && (nIndex < NUM_SYS_COLORS)) ? SysColorBrushes[nIndex]:0;
 }
 /***********************************************************************

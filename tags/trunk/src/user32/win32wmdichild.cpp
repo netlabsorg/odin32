@@ -1,4 +1,4 @@
-/* $Id: win32wmdichild.cpp,v 1.23 2000-05-24 19:30:08 sandervl Exp $ */
+/* $Id: win32wmdichild.cpp,v 1.24 2000-05-28 16:43:47 sandervl Exp $ */
 /*
  * Win32 MDI Child Window Class for OS/2
  *
@@ -36,7 +36,6 @@
 #include <oslibgdi.h>
 #include <oslibres.h>
 #include "oslibdos.h"
-#include <winres.h>
 #include "syscolor.h"
 #include "win32wndhandle.h"
 

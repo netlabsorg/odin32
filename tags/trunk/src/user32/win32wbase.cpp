@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.195 2000-05-26 18:43:34 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.196 2000-05-28 16:43:46 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -28,7 +28,6 @@
 #include <misc.h>
 #include <heapstring.h>
 #include <win32wbase.h>
-#include <winres.h>
 #include "wndmsg.h"
 #include "oslibwin.h"
 #include "oslibmsg.h"

@@ -1,4 +1,4 @@
-/* $Id: winimagelx.cpp,v 1.6 2000-02-16 14:22:12 sandervl Exp $ */
+/* $Id: winimagelx.cpp,v 1.7 2000-05-28 16:45:13 sandervl Exp $ */
 
 /*
  * Win32 LX Image base class
@@ -32,7 +32,6 @@
 #include <winexelx.h>
 #include <pefile.h>
 #include <unicode.h>
-#include <winres.h>
 #include "oslibmisc.h"
 #include "initterm.h"
 #include <win\virtual.h>

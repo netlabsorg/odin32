@@ -1,4 +1,4 @@
-/* $Id: winimagebase.h,v 1.9 2000-05-26 18:42:56 sandervl Exp $ */
+/* $Id: winimagebase.h,v 1.10 2000-05-28 16:45:12 sandervl Exp $ */
 
 /*
  * Win32 PE Image base class
@@ -66,8 +66,10 @@ virtual void setFullPath(char *name);
 
 	char *getModuleName()	      { return szModule; };
 
+        //findResource returns the pointer of the resource's IMAGE_RESOURCE_DATA_ENTRY structure
 virtual HRSRC findResourceA(LPCSTR lpszName, LPSTR lpszType, ULONG lang = LANG_GETFIRST);
         HRSRC findResourceW(LPWSTR lpszName, LPWSTR lpszType, ULONG lang = LANG_GETFIRST);
+
 virtual ULONG getResourceSizeA(LPCSTR lpszName, LPSTR lpszType, ULONG lang = LANG_GETFIRST);
         ULONG getResourceSizeW(LPCWSTR lpszName, LPWSTR lpszType, ULONG lang = LANG_GETFIRST);
 virtual BOOL  enumResourceNamesA(HMODULE hmod, LPCTSTR  lpszType, ENUMRESNAMEPROCA lpEnumFunc, LONG lParam);
@@ -79,6 +81,10 @@ virtual BOOL  enumResourceTypesW(HMODULE hmod, ENUMRESTYPEPROCW lpEnumFunc,
 
 virtual ULONG getVersionSize();
 virtual BOOL  getVersionStruct(char *verstruct, ULONG bufLength);
+
+        //Returns pointer to data of resource handle
+        char *getResourceAddr(HRSRC hResource);
+        ULONG getResourceSize(HRSRC hResource);
 
 static  BOOL  isPEImage(char *szFileName);
 static  BOOL  findDll(const char *pszFileName, char *pszFullName,
@@ -117,8 +123,6 @@ static Win32ImageBase * findModule(HMODULE hModule);
 protected:
 	void tlsAlloc();		//Allocate TLS index for this module
 	void tlsDelete();		//Destroy TLS index for this module
-
-        Win32Resource        *winres;
 
         ULONG                 errorState, entryPoint;
 
