@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.30 2000-11-15 13:56:45 sandervl Exp $
+# $Id: makefile,v 1.31 2000-11-19 09:34:39 bird Exp $
 
 #
 # Odin32 API
@@ -6,27 +6,22 @@
 #       gdi32.dll makefile
 #
 
-# Directory macros.
-PDWIN32_INCLUDE = ..\..\include
-PDWIN32_LIB     = ..\..\lib
-PDWIN32_BIN     = ..\..\$(OBJDIR)
-PDWIN32_TOOLS   = ..\..\tools\bin
 
-
+#
 # Compiler, tools, and interference rules.
-!include $(PDWIN32_INCLUDE)/pdwin32.mk
+#
+!include ../../include/pdwin32.mk
 
 
-# Flag overloads and local macros.
-CLEANEXTRAS = gdi32rsrc.asm
+#
+# Overrides.
+#
+CDEFINES    = $(CDEFINES) -DINVERT -DUSING_OPEN32
 
-#CFLAGS   = $(CFLAGS) -DSTDCALL_ENUMPROCS -DINVERT
-#CXXFLAGS = $(CXXFLAGS) -DSTDCALL_ENUMPROCS -DINVERT
 
-CFLAGS   = $(CFLAGS) -DINVERT -DUSING_OPEN32
-CXXFLAGS = $(CXXFLAGS) -DINVERT -DUSING_OPEN32
-
-# Object files. All objects should be prefixed with $(OBJDIR)!
+#
+# Object files. Prefix with OBJDIR and one space before the '\'.
+#
 OBJS = \
 $(OBJDIR)\gdi32.obj \
 $(OBJDIR)\driver.obj \
@@ -51,48 +46,26 @@ $(OBJDIR)\dbglocal.obj \
 $(OBJDIR)\gdi32rsrc.obj
 
 
+#
+# Libraries. One space before the '\'.
+#
+LIBS = \
+$(PDWIN32_LIB)/kernel32.lib \
+$(PDWIN32_LIB)/user32.lib \
+$(PDWIN32_LIB)/$(ODINCRT).lib \
+$(PDWIN32_LIB)/pmwinx.lib \
+OS2386.LIB \
+$(RTLLIB_O)
+
+
+#
 # Target name - name of the dll without extention and path.
+#
 TARGET = gdi32
 
 
-# All rule - build objs, target dll, copies dll to bin and makes libs.
-all:    $(OBJDIR) \
-        $(OBJDIR)\$(TARGET).dll \
-        $(PDWIN32_BIN)\$(TARGET).dll \
-        lib
-
-
-# Lib rule - build importlibrary (and evt. other libs)
-lib: $(TARGET).lib $(PDWIN32_LIB)\$(TARGET).lib
-
-
-# Dll rule - builds the target dll.
-$(OBJDIR)\$(TARGET).dll: $(OBJS) $(TARGET).def $(OBJDIR)\$(TARGET).lrf
-    -4$(LD2) $(LD2FLAGS) @$(OBJDIR)\$(TARGET).lrf
-
-
-# Linker file - creates the parameter file passed on to the linker.
-$(OBJDIR)\$(TARGET).lrf: makefile
-    @echo Creating file <<$@
-/OUT:$(OBJDIR)\$(TARGET).dll
-/MAP:$(OBJDIR)\$(TARGET).map
-$(OBJS)
-$(PDWIN32_LIB)/pmwinx.lib
-$(PDWIN32_LIB)/kernel32.lib
-$(PDWIN32_LIB)/user32.lib
-$(PDWIN32_LIB)/$(ODINCRT).lib
-OS2386.LIB
-$(RTLLIB_O)
-$(TARGET).def
-<<keep
-
-
-# Dep rule - makes depenencies for C, C++ and Asm files.
-dep:
-    $(DEPEND) -I$(PDWIN32_INCLUDE);$(PDWIN32_INCLUDE)\win \
-        *.c *.cpp *.h *.asm *.inc $(PDWIN32_INCLUDE)\*.h
-
-
+#
 # Includes the common rules.
+#
 !include $(PDWIN32_INCLUDE)/pdwin32.post
 
