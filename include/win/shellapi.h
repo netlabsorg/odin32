@@ -1,4 +1,4 @@
-/* $Id: shellapi.h,v 1.3 1999-09-01 19:12:13 phaller Exp $ */
+/* $Id: shellapi.h,v 1.4 1999-09-02 10:08:38 phaller Exp $ */
 
 #ifndef _WINE_SHELLAPI_H
 #define _WINE_SHELLAPI_H
@@ -190,6 +190,13 @@ DWORD	WIN32API SHFileOperationA (LPSHFILEOPSTRUCTA lpFileOp);
 DWORD	WIN32API SHFileOperationW (LPSHFILEOPSTRUCTW lpFileOp);
 
 
+
+/*************************************
+ * code that is shared with shlobj.h *
+ *************************************/
+
+#ifndef __WINE_SHLOBJ_H
+
 /******************************************
  * ShellExecute
  */
@@ -203,44 +210,6 @@ DWORD	WIN32API SHFileOperationW (LPSHFILEOPSTRUCTW lpFileOp);
 HINSTANCE	WINAPI ShellExecuteA(HWND,LPCSTR,LPCSTR,LPCSTR,LPCSTR,INT);
 HINSTANCE	WINAPI ShellExecuteW(HWND,LPCWSTR,LPCWSTR,LPCWSTR,LPCWSTR,INT);
 
-/******************************************
- * Tray Notification
- */
-typedef struct _NOTIFYICONDATAA
-{	DWORD cbSize;
-	HWND hWnd;
-	UINT uID;
-	UINT uFlags;
-	UINT uCallbackMessage;
-	HICON hIcon;
-	CHAR szTip[64];
-} NOTIFYICONDATAA, *PNOTIFYICONDATAA;
-
-typedef struct _NOTIFYICONDATAW
-{	DWORD cbSize;
-	HWND hWnd;
-	UINT uID;
-	UINT uFlags;
-	UINT uCallbackMessage;
-	HICON hIcon;
-	WCHAR szTip[64];
-} NOTIFYICONDATAW, *PNOTIFYICONDATAW;
-
-
-#define SEE_MASK_CLASSNAME      0x00000001
-#define SEE_MASK_CLASSKEY       0x00000003
-#define SEE_MASK_IDLIST         0x00000004
-#define SEE_MASK_INVOKEIDLIST   0x0000000c
-#define SEE_MASK_ICON           0x00000010
-#define SEE_MASK_HOTKEY         0x00000020
-#define SEE_MASK_NOCLOSEPROCESS 0x00000040
-#define SEE_MASK_CONNECTNETDRV  0x00000080
-#define SEE_MASK_FLAG_DDEWAIT   0x00000100
-#define SEE_MASK_DOENVSUBST     0x00000200
-#define SEE_MASK_FLAG_NO_UI     0x00000400
-#define SEE_MASK_UNICODE        0x00004000
-#define SEE_MASK_NO_CONSOLE     0x00008000
-#define SEE_MASK_ASYNCOK        0x00100000
 
 typedef struct _SHELLEXECUTEINFOA
 {
@@ -281,6 +250,50 @@ typedef struct _SHELLEXECUTEINFOW
         HANDLE hIcon;
         HANDLE hProcess;
 } SHELLEXECUTEINFOW, *LPSHELLEXECUTEINFOW;
+
+#endif
+
+
+
+/******************************************
+ * Tray Notification
+ */
+typedef struct _NOTIFYICONDATAA
+{	DWORD cbSize;
+	HWND hWnd;
+	UINT uID;
+	UINT uFlags;
+	UINT uCallbackMessage;
+	HICON hIcon;
+	CHAR szTip[64];
+} NOTIFYICONDATAA, *PNOTIFYICONDATAA;
+
+typedef struct _NOTIFYICONDATAW
+{	DWORD cbSize;
+	HWND hWnd;
+	UINT uID;
+	UINT uFlags;
+	UINT uCallbackMessage;
+	HICON hIcon;
+	WCHAR szTip[64];
+} NOTIFYICONDATAW, *PNOTIFYICONDATAW;
+
+
+#define SEE_MASK_CLASSNAME      0x00000001
+#define SEE_MASK_CLASSKEY       0x00000003
+#define SEE_MASK_IDLIST         0x00000004
+#define SEE_MASK_INVOKEIDLIST   0x0000000c
+#define SEE_MASK_ICON           0x00000010
+#define SEE_MASK_HOTKEY         0x00000020
+#define SEE_MASK_NOCLOSEPROCESS 0x00000040
+#define SEE_MASK_CONNECTNETDRV  0x00000080
+#define SEE_MASK_FLAG_DDEWAIT   0x00000100
+#define SEE_MASK_DOENVSUBST     0x00000200
+#define SEE_MASK_FLAG_NO_UI     0x00000400
+#define SEE_MASK_UNICODE        0x00004000
+#define SEE_MASK_NO_CONSOLE     0x00008000
+#define SEE_MASK_ASYNCOK        0x00100000
+
 
 /******************************************
  * Misc

@@ -1,4 +1,4 @@
-/* $Id: odin.h,v 1.6 1999-09-01 14:59:49 phaller Exp $ */
+/* $Id: odin.h,v 1.7 1999-09-02 10:10:48 phaller Exp $ */
 /*
  * ODIN - Build Environment Definition
  *
@@ -76,6 +76,7 @@
   #define SYSTEM    _System
   #define PASCAL    _Pascal
   #define UNALIGNED
+  #define NONAMELESSUNION
 #else
 
 /* ---------- ??? ---------- */

@@ -24,7 +24,7 @@ extern const char * const debug_ch_name[];
 
 #define __DPRINTF(dbcl,dbch) \
   (!__GET_DEBUGGING(dbcl,dbch) || \
-     (dprintf(("%s:%s:%s ", debug_cl_name[(dbcl)], debug_ch_name[(dbch)], __FUNCTION__)),0)) \
+     (dprintf(("%s:%s:%s ", debug_cl_name[(dbcl)], debug_ch_name[(dbch)], __line__)),0)) \
     ? 0 : WriteLog
 
 #define __DUMMY_DPRINTF 1 ? (void)0 : (void)((int (*)(char *, ...)) NULL)
@@ -75,5 +75,15 @@ extern const char * const debug_ch_name[];
 #define MESSAGE dbg_printf
 
 #endif  /* __WINE__ */
+
+#ifdef __WIN32OS2__
+#  undef TRACE
+#  define TRACE WriteLog
+#  undef FIXME
+#  define FIXME WriteLog
+#  undef WARN
+#  define WARN  WriteLog
+#endif
+
 
 #endif  /* __WINE_DEBUGTOOLS_H */
