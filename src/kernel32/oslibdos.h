@@ -1,4 +1,4 @@
-/* $Id: oslibdos.h,v 1.14 2000-05-22 19:07:59 sandervl Exp $ */
+/* $Id: oslibdos.h,v 1.15 2000-05-23 18:45:13 sandervl Exp $ */
 
 /*
  * Wrappers for OS/2 Dos* API
@@ -150,5 +150,9 @@ DWORD OSLibDosFindFirstMulti(LPCSTR lpFileName,WIN32_FIND_DATAA *lpFindFileData,
 BOOL  OSLibDosFindNext(DWORD hFindFile,WIN32_FIND_DATAA* lpFindFileData);
 BOOL  OSLibDosFindNextMulti(DWORD hFindFile,WIN32_FIND_DATAA *lpFindFileData,DWORD *count);
 BOOL  OSLibDosFindClose(DWORD hFindFile);
+
+DWORD OSLibDosQueryVolumeFS(int drive, LPSTR lpFileSystemNameBuffer, DWORD nFileSystemNameSize);
+DWORD OSLibDosQueryVolumeSerialAndName(int drive, LPDWORD lpVolumeSerialNumber, LPSTR lpVolumeNameBuffer, DWORD nVolumeNameSize);
+
 
 #endif

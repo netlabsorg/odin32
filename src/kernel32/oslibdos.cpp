@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.27 2000-05-22 19:07:58 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.28 2000-05-23 18:45:12 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -14,6 +14,7 @@
 #define INCL_DOSEXCEPTIONS
 #define INCL_DOSMEMMGR
 #define INCL_DOSPROCESS
+#define INCL_DOSFILEMGR
 #define INCL_DOSERRORS
 #define INCL_NPIPES
 #include <os2wrap.h>                     //Odin32 OS/2 api wrappers
@@ -1216,3 +1217,85 @@ BOOL  OSLibDosFindClose(DWORD hFindFile)
 
   return TRUE;
 }
+//******************************************************************************
+#define FSATTACH_SIZE	256
+//******************************************************************************
+DWORD OSLibDosQueryVolumeFS(int drive, LPSTR lpFileSystemNameBuffer, DWORD nFileSystemNameSize)
+{
+ PFSQBUFFER2 fsinfo = (PFSQBUFFER2) alloca(FSATTACH_SIZE);
+ ULONG       cb     = FSATTACH_SIZE;
+ char        drv[3] = "A:";
+ char       *fsname;
+ APIRET      rc;
+
+   if(lpFileSystemNameBuffer == NULL) {
+	DebugInt3();
+	return ERROR_INVALID_PARAMETER_W;
+   }
+   drv[0] = (char)('A' + drive - 1);
+
+   DosError(FERR_DISABLEHARDERR);
+   rc = DosQueryFSAttach(drv, 1, FSAIL_QUERYNAME, fsinfo, &cb);
+   DosError(FERR_ENABLEHARDERR); 
+
+   switch(rc) {
+   case ERROR_INVALID_DRIVE:
+	return ERROR_INVALID_DRIVE_W;
+   case ERROR_NO_VOLUME_LABEL:
+	return ERROR_NO_VOLUME_LABEL_W;
+   case NO_ERROR:
+	break;
+   default:
+ 	return ERROR_NOT_ENOUGH_MEMORY; //whatever
+   }
+
+   fsname = (char *)&fsinfo->szName[0] + fsinfo->cbName + 1;
+   if(strlen(fsname) < nFileSystemNameSize) {
+ 	strcpy(lpFileSystemNameBuffer, fsname);
+   }
+   else	return ERROR_BUFFER_OVERFLOW_W;
+   return 0;
+}
+//******************************************************************************
+typedef struct _FSINFOBUF 
+{
+	ULONG 		ulVolser;          /* Volume serial number            */
+	VOLUMELABEL	vol;               /* Volume lable                    */
+} FSINFOBUF;
+//******************************************************************************
+DWORD OSLibDosQueryVolumeSerialAndName(int drive, LPDWORD lpVolumeSerialNumber, 
+                                       LPSTR lpVolumeNameBuffer, DWORD nVolumeNameSize)
+{
+ FSINFOBUF fsi;
+ APIRET    rc;
+
+   DosError(FERR_DISABLEHARDERR);
+   rc = DosQueryFSInfo(drive, FSIL_VOLSER, &fsi, sizeof(fsi));
+   DosError(FERR_ENABLEHARDERR);
+
+   switch(rc) {
+   case ERROR_INVALID_DRIVE:
+	return ERROR_INVALID_DRIVE_W;
+   case ERROR_NO_VOLUME_LABEL:
+	return ERROR_NO_VOLUME_LABEL_W;
+   case NO_ERROR:
+	break;
+   default:
+ 	return ERROR_NOT_ENOUGH_MEMORY; //whatever
+   }
+
+   if(lpVolumeSerialNumber) {
+         *lpVolumeSerialNumber = fsi.ulVolser;
+   }
+   if(lpVolumeNameBuffer) 
+   {
+   	if(nVolumeNameSize > fsi.vol.cch) {
+             strcpy(lpVolumeNameBuffer, (PCHAR)fsi.vol.szVolLabel);
+	}
+        else return ERROR_BUFFER_OVERFLOW_W;
+   }
+
+   return ERROR_SUCCESS_W;
+}
+//******************************************************************************
+//******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: disk.cpp,v 1.11 2000-05-20 13:30:27 sandervl Exp $ */
+/* $Id: disk.cpp,v 1.12 2000-05-23 18:45:12 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -19,6 +19,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "unicode.h"
+#include "oslibdos.h"
 
 #define DBG_LOCALLOG  DBG_disk
 #include "dbglocal.h"
@@ -219,19 +220,67 @@ ODINFUNCTION8(BOOL,    GetVolumeInformationA,
               LPSTR,   lpFileSystemNameBuffer,
               DWORD,   nFileSystemNameSize)
 {
+   CHAR   tmpstring[256];
+   ULONG  drive;
+   BOOL   rc;
+
    dprintf(("GetVolumeInformationA %s", lpRootPathName));
-   return O32_GetVolumeInformation(lpRootPathName,
-                                   lpVolumeNameBuffer,
-                                   nVolumeNameSize,
-                                   lpVolumeSerialNumber,
-                                   lpMaximumComponentLength,
-                                   lpFileSystemFlags,
-                                   lpFileSystemNameBuffer,
-                                   nFileSystemNameSize);
+
+   if(lpRootPathName == NULL) {
+	GetCurrentDirectoryA(sizeof(tmpstring), tmpstring);
+	lpRootPathName = tmpstring;
+   }
+
+   if('A' <= *lpRootPathName && *lpRootPathName <= 'Z') {
+      	drive = *lpRootPathName - 'A' + 1;
+   }
+   else 
+   if('a' <= *lpRootPathName && *lpRootPathName <= 'z') {
+      	drive = *lpRootPathName - 'a' + 1;
+   }
+   else {
+	SetLastError(ERROR_INVALID_PARAMETER);
+	return FALSE;
+   }
+
+   if(lpVolumeSerialNumber || lpVolumeNameBuffer) {
+   	rc = OSLibDosQueryVolumeSerialAndName(drive, lpVolumeSerialNumber, lpVolumeNameBuffer, nVolumeNameSize);
+   }
+   if(lpFileSystemNameBuffer || lpMaximumComponentLength) {
+	if(!lpFileSystemNameBuffer) {
+		lpFileSystemNameBuffer = tmpstring;
+	}
+	rc = OSLibDosQueryVolumeFS(drive, lpFileSystemNameBuffer, nFileSystemNameSize);
+   }
+   if(lpMaximumComponentLength) {
+	if(!strcmp(lpFileSystemNameBuffer, "FAT")) {
+		*lpMaximumComponentLength = 11;
+	}
+	else	*lpMaximumComponentLength = 255; //TODO: Always correct? (CDFS?)
+   }
+   if(lpFileSystemFlags) {
+	if(strcmp(lpFileSystemNameBuffer, "FAT")) {
+		*lpFileSystemFlags = FS_CASE_IS_PRESERVED;
+	}
+	else
+	if(!strcmp(lpFileSystemNameBuffer, "CDFS")) {
+		*lpFileSystemFlags = FS_CASE_SENSITIVE; //NT4 returns this
+	}
+	else
+	if(!strcmp(lpFileSystemNameBuffer, "UDF")) {//TODO: correct?
+		*lpFileSystemFlags = FS_CASE_SENSITIVE | FS_UNICODE_STORED_ON_DISK;
+	}
+	else	*lpFileSystemFlags = 0;
+   }
+
+   if(rc) {
+	SetLastError(rc);
+	return FALSE;
+   }
+   return TRUE;
 }
 //******************************************************************************
 //******************************************************************************
-
 ODINFUNCTION8(BOOL,    GetVolumeInformationW,
               LPCWSTR, lpRootPathName,
               LPWSTR,  lpVolumeNameBuffer,
@@ -260,8 +309,7 @@ ODINFUNCTION8(BOOL,    GetVolumeInformationW,
   else
     asciiroot = NULL;
 
-  // @@@PH switch to ODIN_
-  rc = GetVolumeInformationA(asciiroot,
+  rc = ODIN_GetVolumeInformationA(asciiroot,
                              asciivol,
                              nVolumeNameSize,
                              lpVolumeSerialNumber,
