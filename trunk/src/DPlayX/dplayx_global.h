@@ -1,3 +1,4 @@
+// $Id: dplayx_global.h,v 1.2 2000-09-24 22:47:39 hugh Exp $
 
 #ifndef __WINE_DPLAYX_GLOBAL
 #define __WINE_DPLAYX_GLOBAL
@@ -7,18 +8,18 @@
 BOOL DPLAYX_ConstructData(void);
 BOOL DPLAYX_DestructData(void);
 
-HRESULT DPLAYX_GetConnectionSettingsA ( DWORD dwAppID, 
-                                        LPVOID lpData, 
+HRESULT DPLAYX_GetConnectionSettingsA ( DWORD dwAppID,
+                                        LPVOID lpData,
                                         LPDWORD lpdwDataSize );
-HRESULT DPLAYX_GetConnectionSettingsW ( DWORD dwAppID, 
+HRESULT DPLAYX_GetConnectionSettingsW ( DWORD dwAppID,
                                         LPVOID lpData,
                                         LPDWORD lpdwDataSize );
 
-HRESULT DPLAYX_SetConnectionSettingsA ( DWORD dwFlags, 
-                                        DWORD dwAppID, 
+HRESULT DPLAYX_SetConnectionSettingsA ( DWORD dwFlags,
+                                        DWORD dwAppID,
                                         LPDPLCONNECTION lpConn );
-HRESULT DPLAYX_SetConnectionSettingsW ( DWORD dwFlags, 
-                                        DWORD dwAppID, 
+HRESULT DPLAYX_SetConnectionSettingsW ( DWORD dwFlags,
+                                        DWORD dwAppID,
                                         LPDPLCONNECTION lpConn );
 
 BOOL DPLAYX_CreateLobbyApplication( DWORD dwAppID );
@@ -27,9 +28,9 @@ BOOL DPLAYX_DestroyLobbyApplication( DWORD dwAppID );
 BOOL DPLAYX_WaitForConnectionSettings( BOOL bWait );
 BOOL DPLAYX_AnyLobbiesWaitingForConnSettings(void);
 
-BOOL DPLAYX_SetLobbyHandles( DWORD dwAppID, 
+BOOL DPLAYX_SetLobbyHandles( DWORD dwAppID,
                              HANDLE hStart, HANDLE hDeath, HANDLE hConnRead );
-BOOL DPLAYX_GetThisLobbyHandles( LPHANDLE lphStart, 
+BOOL DPLAYX_GetThisLobbyHandles( LPHANDLE lphStart,
                                  LPHANDLE lphDeath,
                                  LPHANDLE lphConnRead, BOOL bClearSetHandles );
 

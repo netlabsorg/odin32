@@ -1,3 +1,4 @@
+// $Id: dplayx_messages.cpp,v 1.2 2000-09-24 22:47:38 hugh Exp $
 /* DirectPlay & DirectPlayLobby messaging implementation
  *
  * Copyright 2000 - Peter Hunnisett

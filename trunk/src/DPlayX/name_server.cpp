@@ -1,3 +1,4 @@
+// $Id: name_server.cpp,v 1.2 2000-09-24 22:47:38 hugh Exp $
 /* DPLAYX.DLL name server implementation
  *
  * Copyright 2000 - Peter Hunnisett

@@ -1,3 +1,4 @@
+// $Id: dplaysp.cpp,v 1.2 2000-09-24 22:47:37 hugh Exp $
 /* This contains the implementation of the interface Service
  * Providers require to communicate with Direct Play
  *

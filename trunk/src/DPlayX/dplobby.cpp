@@ -1,3 +1,4 @@
+// $Id: dplobby.cpp,v 1.2 2000-09-24 22:47:38 hugh Exp $
 /* Direct Play Lobby 2 & 3 Implementation
  *
  * Copyright 1998,1999,2000 - Peter Hunnisett

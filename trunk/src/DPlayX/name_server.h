@@ -1,3 +1,4 @@
+// $Id: name_server.h,v 1.2 2000-09-24 22:47:40 hugh Exp $
 
 #ifndef __WINE_DPLAYX_NAMESERVER
 #define __WINE_DPLAYX_NAMESERVER
@@ -14,14 +15,14 @@ void NS_SetRemoteComputerAsNameServer( LPVOID lpNSAddrHdr,
                                        LPVOID lpNSInfo );
 LPVOID NS_GetNSAddr( LPVOID lpNSInfo );
 
-void NS_ReplyToEnumSessionsRequest( LPVOID lpMsg, 
+void NS_ReplyToEnumSessionsRequest( LPVOID lpMsg,
                                     LPDPSP_REPLYDATA lpReplyData,
                                     IDirectPlay2Impl* lpDP );
 
 HRESULT NS_SendSessionRequestBroadcast( LPCGUID lpcGuid,
                                         DWORD dwFlags,
                                         LPSPINITDATA lpSpData );
-                                        
+
 
 BOOL NS_InitializeSessionCache( LPVOID* lplpNSInfo );
 void NS_DeleteSessionCache( LPVOID lpNSInfo );
