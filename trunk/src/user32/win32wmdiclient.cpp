@@ -1,4 +1,4 @@
-/* $Id: win32wmdiclient.cpp,v 1.1 1999-09-15 23:19:01 sandervl Exp $ */
+/* $Id: win32wmdiclient.cpp,v 1.2 1999-09-23 14:39:53 phaller Exp $ */
 /*
  * Win32 MDI Client Window Class for OS/2
  *
@@ -387,8 +387,11 @@ LONG Win32MDIClientWindow::childActivate(Win32MDIChildWindow *child)
         else
             SetFocus( getWindowHandle() );
     }
-    child->SendMessageA( WM_MDIACTIVATE, (WPARAM)prevActive->getWindowHandle(), (LPARAM)child->getWindowHandle());
 
+    /* @@@PH prevActive may be NULL actually ?! */
+    child->SendMessageA( WM_MDIACTIVATE,
+                         prevActive ? (WPARAM)prevActive->getWindowHandle() : 0,
+                         child->getWindowHandle());
     return TRUE;
 }
 /**********************************************************************
