@@ -1,4 +1,4 @@
-/* $Id: virtual.cpp,v 1.19 1999-10-15 09:25:26 sandervl Exp $ */
+/* $Id: virtual.cpp,v 1.20 1999-10-21 19:24:23 sandervl Exp $ */
 
 /*
  * Win32 virtual memory functions
@@ -286,6 +286,7 @@ ODINFUNCTION4(LPVOID, VirtualAlloc, LPVOID, lpvAddress,
   }
 
   if(fdwProtect & PAGE_READONLY)     flag |= PAG_READ;
+  if(fdwProtect & PAGE_NOACCESS)     flag |= PAG_READ; //can't do this in OS/2
   if(fdwProtect & PAGE_READWRITE)    flag |= (PAG_READ | PAG_WRITE);
   if(fdwProtect & PAGE_WRITECOPY)    flag |= (PAG_READ | PAG_WRITE);
 
@@ -293,7 +294,10 @@ ODINFUNCTION4(LPVOID, VirtualAlloc, LPVOID, lpvAddress,
   if(fdwProtect & PAGE_EXECUTE_READ) flag |= (PAG_EXECUTE | PAG_READ);
   if(fdwProtect & PAGE_EXECUTE)      flag |= PAG_EXECUTE;
 
-  if(fdwProtect & PAGE_GUARD)        flag |= PAG_GUARD;
+  if(fdwProtect & PAGE_GUARD) {
+	dprintf(("ERROR: PAGE_GUARD bit set for VirtualAlloc -> we don't support this right now!"));
+        flag |= PAG_GUARD;
+  }
 
   //just do this if other options are used
   if(!(flag & (PAG_READ | PAG_WRITE | PAG_EXECUTE)) || flag == 0)
