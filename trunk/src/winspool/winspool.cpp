@@ -1,4 +1,4 @@
-/* $Id: winspool.cpp,v 1.4 1999-12-27 18:45:27 sandervl Exp $ */
+/* $Id: winspool.cpp,v 1.5 2000-11-15 10:54:24 sandervl Exp $ */
 
 /*
  *
@@ -7,6 +7,17 @@
  * WINSPOOL stubs
  *
  * Copyright 1998 Patrick Haller
+ * Copyright 2000 Sander van Leeuwen (sandervl@xs4all.nl)
+ *
+ *
+ * Partially based on Wine code (dlls\winspool\info.c (EnumPrinters, DeviceCapabilitiesA/W)
+ *
+ * Copyright 1996 John Harvey
+ * Copyright 1998 Andreas Mohr
+ * Copyright 1999 Klaas van Gend
+ * Copyright 1999, 2000 Huw D M Davies
+ *
+ * TODO: far from complete (although the Spl API seems to provide everything we need!)
  *
  */
 
@@ -17,12 +28,14 @@
 #include <os2win.h>
 #include <winspool.h>
 #include <odinwrap.h>
+#include <heapstring.h>
+#include <win\winnls.h>
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "misc.h"
-
+#include <misc.h>
+#include "oslibspl.h"
 
 ODINDEBUGCHANNEL(WINSPOOL)
 
@@ -34,9 +47,9 @@ ODINDEBUGCHANNEL(WINSPOOL)
  * Variables :
  * Result    :
  * Remark    :
- * Status    : UNTESTED STUB
+ * Status    :
  *
- * Author    : Markus Montkowski [09.07.98 13:39:08]
+ * Author    : SvL
  *****************************************************************************/
 
 ODINFUNCTION7(BOOL,    EnumPrintersA,
@@ -48,13 +61,173 @@ ODINFUNCTION7(BOOL,    EnumPrintersA,
               LPDWORD, lpdwNeeded,
               LPDWORD, lpdwReturned)
 {
-   return(O32_EnumPrinters(dwType,
-                           lpszName,
-                           dwLevel,
-                           lpbPrinters,
-                           cbBuf,
-                           lpdwNeeded,
-                           lpdwReturned));
+ ULONG cReturned, cTotal, cbNeeded, flType;
+ int   used, nameoff;
+ OSLIB_PRINTERINFO *printerInfo;
+ PRINTER_INFO_1A *pi1;
+ PRINTER_INFO_2A *pi2;
+ PRINTER_INFO_4A *pi4;
+ PRINTER_INFO_5A *pi5;
+ LPSTR lpszPrinterStrings;
+
+    if(lpbPrinters)
+        memset(lpbPrinters, 0, cbBuf);
+
+    if(lpdwReturned)
+        *lpdwReturned = 0;
+
+    if (!((dwType & PRINTER_ENUM_LOCAL) || (dwType & PRINTER_ENUM_NAME)))
+    {
+        dprintf(("Invalid parameters !(PRINTER_ENUM_LOCAL & PRINTER_ENUM_NAME)!!"));
+        SetLastError(ERROR_INVALID_FLAGS);
+        return FALSE;
+    }
+
+    if(lpszName) {//TODO:
+        dprintf(("remote printer enumeration not (yet) supported!!"));
+        flType = OSLIB_SPL_PR_ALL;
+    }
+    else flType = OSLIB_SPL_PR_LOCAL_ONLY | OSLIB_SPL_PR_ALL;
+
+    if(OSLibSplEnumPrinters(flType, NULL, 0, &cReturned, &cTotal, &cbNeeded) == FALSE) {
+        SetLastError(ERROR_FILE_NOT_FOUND); //todo wrong error
+        return FALSE;
+    }
+    if(cTotal == 0) {//no printers installed
+        SetLastError(ERROR_SUCCESS);
+        return TRUE;
+    }
+
+    switch(dwLevel) {
+    case 1:
+        used = cTotal * sizeof(PRINTER_INFO_1A);
+        break;
+
+    case 2:
+        used = cTotal * sizeof(PRINTER_INFO_2A);
+        break;
+
+    case 4:
+        used = cTotal * sizeof(PRINTER_INFO_4A);
+        break;
+
+    case 5:
+        used = cTotal * sizeof(PRINTER_INFO_5A);
+        break;
+
+    default:
+        dprintf(("ERROR: EnumPrintersA: Unknown level %d!", dwLevel));
+        SetLastError(ERROR_INVALID_LEVEL);
+        return FALSE;
+    }
+    nameoff = used;
+    used   += cbNeeded;   //add size of printer names
+
+    if(used > cbBuf) {
+        if(lpdwNeeded)
+            *lpdwNeeded = used;
+        SetLastError(ERROR_INSUFFICIENT_BUFFER);
+        return FALSE;
+    }
+
+    printerInfo = (OSLIB_PRINTERINFO *)malloc(cbNeeded);
+    if(OSLibSplEnumPrinters(flType, printerInfo, cbNeeded, &cReturned, &cTotal, &cbNeeded) == FALSE) {
+        free(printerInfo);
+        SetLastError(ERROR_FILE_NOT_FOUND);
+        return FALSE;
+    }
+    lpszPrinterStrings = (char *)lpbPrinters + nameoff;
+
+    for(int i=0;i<cReturned;i++) {
+        switch(dwLevel) {
+        case 1:
+            pi1 = (PRINTER_INFO_1A *)lpbPrinters;
+            lpbPrinters += sizeof(PRINTER_INFO_1A);
+
+            pi1->Flags = PRINTER_ENUM_ICON8;
+            pi1->pName = lpszPrinterStrings;
+            strcpy(lpszPrinterStrings, printerInfo[i].pszPrintDestinationName);
+            lpszPrinterStrings += strlen(printerInfo[i].pszPrintDestinationName)+1;
+
+            if(printerInfo[i].pszDescription) {
+                pi1->pDescription = lpszPrinterStrings;
+                strcpy(lpszPrinterStrings, printerInfo[i].pszDescription);
+                lpszPrinterStrings += strlen(printerInfo[i].pszDescription)+1;
+            }
+            //pComment empty
+            break;
+
+        case 2:
+            pi2 = (PRINTER_INFO_2A *)lpbPrinters;
+            lpbPrinters += sizeof(PRINTER_INFO_2A);
+
+            pi2->pPrinterName = lpszPrinterStrings;
+            strcpy(lpszPrinterStrings, printerInfo[i].pszPrintDestinationName);
+            lpszPrinterStrings += strlen(printerInfo[i].pszPrintDestinationName)+1;
+            pi2->pDriverName = pi2->pPrinterName;   //TODO:might not be correct!
+
+            if(printerInfo[i].pszLocalName) {
+                pi2->pPortName = lpszPrinterStrings;
+                strcpy(lpszPrinterStrings, printerInfo[i].pszLocalName);
+                lpszPrinterStrings += strlen(printerInfo[i].pszLocalName)+1;
+            }
+
+            if(printerInfo[i].pszComputerName) {
+                pi2->pServerName = lpszPrinterStrings;
+                strcpy(lpszPrinterStrings, printerInfo[i].pszComputerName);
+                lpszPrinterStrings += strlen(printerInfo[i].pszComputerName)+1;
+            }
+
+            pi2->Attributes   = PRINTER_ATTRIBUTE_QUEUED;   //todo
+
+            dprintf(("EnumPrinters level 2 NOT COMPLETE!!"));
+            //todo not complete
+            break;
+
+        case 4:
+            pi4 = (PRINTER_INFO_4A *)lpbPrinters;
+            lpbPrinters += sizeof(PRINTER_INFO_4A);
+
+            pi4->Attributes   = PRINTER_ATTRIBUTE_QUEUED;   //todo
+            pi4->pPrinterName = lpszPrinterStrings;
+            strcpy(lpszPrinterStrings, printerInfo[i].pszPrintDestinationName);
+            lpszPrinterStrings += strlen(printerInfo[i].pszPrintDestinationName)+1;
+
+            if(printerInfo[i].pszComputerName) {
+                pi4->pServerName = lpszPrinterStrings;
+                strcpy(lpszPrinterStrings, printerInfo[i].pszComputerName);
+                lpszPrinterStrings += strlen(printerInfo[i].pszComputerName)+1;
+            }
+            dprintf(("EnumPrinters level 4 NOT COMPLETE!!"));
+            break;
+
+        case 5:
+            pi5 = (PRINTER_INFO_5A *)lpbPrinters;
+            lpbPrinters += sizeof(PRINTER_INFO_5A);
+
+            pi5->Attributes   = PRINTER_ATTRIBUTE_QUEUED;   //todo
+            pi5->pPrinterName = lpszPrinterStrings;
+            strcpy(lpszPrinterStrings, printerInfo[i].pszPrintDestinationName);
+            lpszPrinterStrings += strlen(printerInfo[i].pszPrintDestinationName)+1;
+
+            if(printerInfo[i].pszLocalName) {
+                pi5->pPortName = lpszPrinterStrings;
+                strcpy(lpszPrinterStrings, printerInfo[i].pszLocalName);
+                lpszPrinterStrings += strlen(printerInfo[i].pszLocalName)+1;
+            }
+            dprintf(("EnumPrinters level 5 NOT COMPLETE!!"));
+            break;
+        }
+    }
+    free(printerInfo);
+
+    if(lpdwNeeded)
+        *lpdwNeeded = used;
+
+    if(lpdwReturned)
+        *lpdwReturned = cReturned;
+    SetLastError(ERROR_SUCCESS);
+    return TRUE;
 }
 
 
@@ -758,6 +931,40 @@ ODINFUNCTION2(HANDLE, ConnectToPrinterDlg,
 }
 
 
+/***********************************************************
+ *      DEVMODEdupWtoA
+ * Creates an ascii copy of supplied devmode on heap
+ */
+static LPDEVMODEA DEVMODEdupWtoA(HANDLE heap, const DEVMODEW *dmW)
+{
+    LPDEVMODEA dmA;
+    DWORD size;
+    BOOL Formname;
+    ptrdiff_t off_formname = (char *)dmW->dmFormName - (char *)dmW;
+
+    if(!dmW) return NULL;
+    Formname = (dmW->dmSize > off_formname);
+    size = dmW->dmSize - CCHDEVICENAME - (Formname ? CCHFORMNAME : 0);
+    dmA = (LPDEVMODEA)HeapAlloc(heap, HEAP_ZERO_MEMORY, size + dmW->dmDriverExtra);
+    WideCharToMultiByte(CP_ACP, 0, dmW->dmDeviceName, -1, (LPSTR)dmA->dmDeviceName,
+            CCHDEVICENAME, NULL, NULL);
+    if(!Formname) {
+      memcpy(&dmA->dmSpecVersion, &dmW->dmSpecVersion,
+         dmW->dmSize - CCHDEVICENAME * sizeof(WCHAR));
+    } else {
+      memcpy(&dmA->dmSpecVersion, &dmW->dmSpecVersion,
+         off_formname - CCHDEVICENAME * sizeof(WCHAR));
+      WideCharToMultiByte(CP_ACP, 0, dmW->dmFormName, -1, (LPSTR)dmA->dmFormName,
+              CCHFORMNAME, NULL, NULL);
+      memcpy(&dmA->dmLogPixels, &dmW->dmLogPixels, dmW->dmSize -
+         (off_formname + CCHFORMNAME * sizeof(WCHAR)));
+    }
+    dmA->dmSize = size;
+    memcpy((char *)dmA + dmA->dmSize, (char *)dmW + dmW->dmSize,
+       dmW->dmDriverExtra);
+    return dmA;
+}
+
 /*****************************************************************************
  * Name      : DWORD DeviceCapabilitiesA
  * Purpose   :
@@ -783,38 +990,60 @@ ODINFUNCTION5(INT, DeviceCapabilitiesA,
               LPSTR, pOutput,
               DEVMODEA *, pDevMode)
 {
-  dprintf(("WINSPOOL: DeviceCapabilitiesA not implemented\n"));
-  return (0);
+  dprintf(("WINSPOOL: DeviceCapabilitiesA %s %s %x %x %x", pDevice, pPort, fwCapability, pOutput, pDevMode));
+  return O32_DeviceCapabilities(pDevice, pPort, fwCapability, pOutput, pDevMode);
 }
 
 
 /*****************************************************************************
- * Name      : DWORD DeviceCapabilitiesW
- * Purpose   :
- * Parameters: LPCWSTR pDevice  pointer to a printer-name string
- *             LPCWSTR pPort  pointer to a port-name string
- *             WORD fwCapability  device capability to query
- *             LPWSTR pOutput  pointer to the output
- *             CONST DEVMODEW *pDevMode  pointer to structure with device data
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED STUB
+ *          DeviceCapabilitiesW        [WINSPOOL.152]
  *
- * Stub Generated through PE2LX Stubwizard 0.02 from Markus Montkowski
+ * Call DeviceCapabilitiesA since we later call 16bit stuff anyway
  *
- * Author    : Markus Montkowski [09.07.98 14:27:08]
- *****************************************************************************/
-
-ODINFUNCTION5(INT, DeviceCapabilitiesW,
-              LPCWSTR, pDevice,
-              LPCWSTR, pPort,
-              WORD, fwCapability,
-              LPWSTR, pOutput,
-              CONST DEVMODEW *, pDevMode)
+ */
+ODINFUNCTION5(INT, DeviceCapabilitiesW, LPCWSTR, pDevice, LPCWSTR, pPort,
+                                  WORD, fwCapability, LPWSTR, pOutput,
+                                 CONST DEVMODEW *, pDevMode)
 {
-  dprintf(("WINSPOOL: DeviceCapabilitiesW not implemented\n"));
-  return (0);
+    LPDEVMODEA dmA = DEVMODEdupWtoA(GetProcessHeap(), pDevMode);
+    LPSTR pDeviceA = HEAP_strdupWtoA(GetProcessHeap(),0,pDevice);
+    LPSTR pPortA = HEAP_strdupWtoA(GetProcessHeap(),0,pPort);
+    INT ret;
+
+    if(pOutput && (fwCapability == DC_BINNAMES ||
+           fwCapability == DC_FILEDEPENDENCIES ||
+           fwCapability == DC_PAPERNAMES)) {
+      /* These need A -> W translation */
+        INT size = 0, i;
+    LPSTR pOutputA;
+        ret = DeviceCapabilitiesA(pDeviceA, pPortA, fwCapability, NULL,
+                  dmA);
+    if(ret == -1)
+        return ret;
+    switch(fwCapability) {
+    case DC_BINNAMES:
+        size = 24;
+        break;
+    case DC_PAPERNAMES:
+    case DC_FILEDEPENDENCIES:
+        size = 64;
+        break;
+    }
+    pOutputA = (LPSTR)HeapAlloc(GetProcessHeap(), 0, size * ret);
+    ret = DeviceCapabilitiesA(pDeviceA, pPortA, fwCapability, pOutputA,
+                  dmA);
+    for(i = 0; i < ret; i++)
+        MultiByteToWideChar(CP_ACP, 0, pOutputA + (i * size), -1,
+                pOutput + (i * size), size);
+    HeapFree(GetProcessHeap(), 0, pOutputA);
+    } else {
+        ret = DeviceCapabilitiesA(pDeviceA, pPortA, fwCapability,
+                  (LPSTR)pOutput, dmA);
+    }
+    HeapFree(GetProcessHeap(),0,pPortA);
+    HeapFree(GetProcessHeap(),0,pDeviceA);
+    HeapFree(GetProcessHeap(),0,dmA);
+    return ret;
 }
 
 
@@ -2832,8 +3061,8 @@ ODINFUNCTION4(BOOL, WritePrinter,
  *                  DeletePrinterDataA   (WINSPOOL.152)
  */
 ODINFUNCTION2(DWORD, DeletePrinterDataA,
-	      HANDLE, hPrinter,
-	      LPSTR, pValueName)
+          HANDLE, hPrinter,
+          LPSTR, pValueName)
 {
   dprintf(("WINSPOOL: DeletePrinterDataA not implemented\n"));
   return (FALSE);
@@ -2844,8 +3073,8 @@ ODINFUNCTION2(DWORD, DeletePrinterDataA,
  *                  DeletePrinterDataW   (WINSPOOL.153)
  */
 ODINFUNCTION2(DWORD, DeletePrinterDataW,
-	      HANDLE, hPrinter,
-	      LPWSTR, pValueName)
+          HANDLE, hPrinter,
+          LPWSTR, pValueName)
 {
   dprintf(("WINSPOOL: DeletePrinterDataW not implemented\n"));
   return (FALSE);
@@ -2856,12 +3085,12 @@ ODINFUNCTION2(DWORD, DeletePrinterDataW,
  *                  DocumentPropertiesW   (WINSPOOL.166)
  */
 ODINFUNCTION6(LONG, DocumentPropertiesW,
-	      HWND,      hWnd,
-	      HANDLE,    hPrinter,
-	      LPWSTR,    pDeviceName,
-	      PDEVMODEW, pDevModeOutput,
-	      PDEVMODEW, pDevModeInput,
-	      DWORD,     fMode)
+          HWND,      hWnd,
+          HANDLE,    hPrinter,
+          LPWSTR,    pDeviceName,
+          PDEVMODEW, pDevModeOutput,
+          PDEVMODEW, pDevModeInput,
+          DWORD,     fMode)
 {
   dprintf(("WINSPOOL: DocumentPropertiesW not implemented\n"));
   return (FALSE);
