@@ -1,4 +1,4 @@
-/* $Id: hash.cpp,v 1.1 2000-01-05 18:29:27 davidr Exp $ */
+/* $Id: hash.cpp,v 1.2 2001-08-10 19:36:04 sandervl Exp $ */
 /* 
  * LHash functions.
  * 
@@ -14,7 +14,7 @@
 #include "oleaut32.h"
 #include "olectl.h"
 #include "oList.h"	// linked list template
-#include "itypelib.h"
+//#include "itypelib.h"
 
 // ======================================================================
 // Local Data
