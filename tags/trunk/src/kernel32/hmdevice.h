@@ -1,4 +1,4 @@
-/* $Id: hmdevice.h,v 1.18 2000-05-22 19:07:55 sandervl Exp $ */
+/* $Id: hmdevice.h,v 1.19 2000-06-01 11:28:46 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -111,12 +111,26 @@ public:
                              LPDWORD       lpNumberOfBytesRead,
                              LPOVERLAPPED  lpOverlapped);
 
+                        /* this is a handler method for calls to ReadFileEx() */
+  virtual BOOL  ReadFileEx(PHMHANDLEDATA pHMHandleData,
+                           LPVOID       lpBuffer,
+                           DWORD        nNumberOfBytesToRead,
+                           LPOVERLAPPED lpOverlapped,
+                           LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine);
+
                         /* this is a handler method for calls to WriteFile() */
   virtual BOOL   WriteFile  (PHMHANDLEDATA pHMHandleData,
                              LPCVOID       lpBuffer,
                              DWORD         nNumberOfBytesToWrite,
                              LPDWORD       lpNumberOfBytesWritten,
                              LPOVERLAPPED  lpOverlapped);
+
+                        /* this is a handler method for calls to WriteFileEx() */
+  virtual BOOL  WriteFileEx(PHMHANDLEDATA pHMHandleData,
+                            LPVOID       lpBuffer,
+                            DWORD        nNumberOfBytesToWrite,
+                            LPOVERLAPPED lpOverlapped,
+                            LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine);
 
                       /* this is a handler method for calls to GetFileType() */
   virtual DWORD GetFileType (PHMHANDLEDATA pHMHandleData);
@@ -184,7 +198,6 @@ public:
 
                      /* this is a handler method for calls to UnlockFileEx() */
   virtual DWORD UnlockFileEx(PHMHANDLEDATA pHMHandleData,
-                             DWORD         dwFlags,
                              DWORD         dwReserved,
                              DWORD         nNumberOfBytesToLockLow,
                              DWORD         nNumberOfBytesToLockHigh,

@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.45 2000-05-29 22:32:09 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.46 2000-06-01 11:28:48 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -211,7 +211,7 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
   }
 
   if(oh.SizeOfImage == 0) {//just in case
-	oh.SizeOfImage = OSLibDosGetFileSize(hFile);
+	oh.SizeOfImage = OSLibDosGetFileSize(hFile, NULL);
   }
 
   imageSize = oh.SizeOfImage;

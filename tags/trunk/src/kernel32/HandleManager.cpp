@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.39 2000-05-22 19:07:52 sandervl Exp $ */
+/* $Id: HandleManager.cpp,v 1.40 2000-06-01 11:28:42 sandervl Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -51,6 +51,7 @@
 #include "HMDevice.h"
 #include "HMOpen32.h"
 #include "HMEvent.h"
+#include "HMFile.h"
 #include "HMMutex.h"
 #include "HMSemaphore.h"
 #include "HMMMap.h"
@@ -124,6 +125,7 @@ struct _HMGlobals
 
   HMDeviceHandler        *pHMOpen32;      /* default handle manager instance */
   HMDeviceHandler        *pHMEvent;        /* static instances of subsystems */
+  HMDeviceHandler        *pHMFile;
   HMDeviceHandler        *pHMMutex;
   HMDeviceHandler        *pHMSemaphore;
   HMDeviceHandler        *pHMFileMapping;  /* static instances of subsystems */
@@ -353,6 +355,7 @@ DWORD HMInitialize(void)
                         /* create handle manager instance for Open32 handles */
     HMGlobals.pHMOpen32     = new HMDeviceOpen32Class("\\\\.\\");
     HMGlobals.pHMEvent      = new HMDeviceEventClass("\\\\EVENT\\");
+    HMGlobals.pHMFile       = new HMDeviceFileClass("\\\\FILE\\");
     HMGlobals.pHMMutex      = new HMDeviceMutexClass("\\\\MUTEX\\");
     HMGlobals.pHMSemaphore  = new HMDeviceSemaphoreClass("\\\\SEM\\");
     HMGlobals.pHMFileMapping= new HMDeviceMemMapClass("\\\\MEMMAP\\");
@@ -382,6 +385,7 @@ DWORD HMTerminate(void)
 
   delete HMGlobals.pHMOpen32;
   delete HMGlobals.pHMEvent;
+  delete HMGlobals.pHMFile;
   delete HMGlobals.pHMMutex;
   delete HMGlobals.pHMSemaphore;
   delete HMGlobals.pHMFileMapping;
@@ -705,7 +709,7 @@ BOOL HMDuplicateHandle(HANDLE  srcprocess,
   int             iIndexNew;                  /* index into the handle table */
   HMDeviceHandler *pDeviceHandler;         /* device handler for this handle */
   PHMHANDLEDATA   pHMHandleData;
-  DWORD           rc;                                     /* API return code */
+  BOOL            rc;                                     /* API return code */
 
   if(HMHandleValidate(srchandle) != NO_ERROR)
   {
@@ -757,10 +761,9 @@ BOOL HMDuplicateHandle(HANDLE  srcprocess,
   if (fdwOptions & DUPLICATE_CLOSE_SOURCE)
     HMCloseHandle(srchandle);
 
-  if (rc != NO_ERROR)     /* oops, creation failed within the device handler */
+  if(rc == FALSE)     /* oops, creation failed within the device handler */
   {
     TabWin32Handles[iIndexNew].hmHandleData.hHMHandle = INVALID_HANDLE_VALUE;
-    SetLastError(rc);          /* Hehe, OS/2 and NT are pretty compatible :) */
     return FALSE;                           /* signal error */
   }
   else
@@ -826,6 +829,10 @@ HFILE HMCreateFile(LPCSTR lpFileName,
     }
     else
       pHMHandleData  = NULL;
+
+    if(pDeviceHandler == HMGlobals.pHMOpen32) {
+	pDeviceHandler = HMGlobals.pHMFile;
+    }
   }
 
 
@@ -961,6 +968,9 @@ HANDLE HMOpenFile(LPCSTR    lpFileName,
   else
     pHMHandleData  = NULL;
 
+  if(pDeviceHandler == HMGlobals.pHMOpen32) {
+    pDeviceHandler = HMGlobals.pHMFile;
+  }
 
   iIndexNew = _HMHandleGetFree();                         /* get free handle */
   if (-1 == iIndexNew)                            /* oops, no free handles ! */
@@ -1002,14 +1012,27 @@ HANDLE HMOpenFile(LPCSTR    lpFileName,
              rc));
 #endif
 
-  if (rc != NO_ERROR)     /* oops, creation failed within the device handler */
+  if(rc != NO_ERROR)     /* oops, creation failed within the device handler */
   {
-    TabWin32Handles[iIndexNew].hmHandleData.hHMHandle = INVALID_HANDLE_VALUE;
-    SetLastError(rc);          /* Hehe, OS/2 and NT are pretty compatible :) */
-    return (INVALID_HANDLE_VALUE);                           /* signal error */
+    	TabWin32Handles[iIndexNew].hmHandleData.hHMHandle = INVALID_HANDLE_VALUE;
+    	SetLastError(rc);          /* Hehe, OS/2 and NT are pretty compatible :) */
+    	return (INVALID_HANDLE_VALUE);                           /* signal error */
   }
-  else
-    SetLastError(ERROR_SUCCESS); //@@@PH 1999/10/27 rc5desg requires this?
+  else {
+  	if(fuMode & (OF_DELETE|OF_EXIST)) {
+		//file handle already closed
+    		TabWin32Handles[iIndexNew].hmHandleData.hHMHandle = INVALID_HANDLE_VALUE;
+		return TRUE; //TODO: correct?
+	}
+	if(fuMode & OF_PARSE) {
+    		TabWin32Handles[iIndexNew].hmHandleData.hHMHandle = INVALID_HANDLE_VALUE;
+		return 0;
+	}
+	if(fuMode & OF_VERIFY) {
+    		TabWin32Handles[iIndexNew].hmHandleData.hHMHandle = INVALID_HANDLE_VALUE;
+		return 1; //TODO: correct?
+	}
+  }
 
 #ifdef DEBUG_LOCAL
   dprintf(("KERNEL32/HandleManager: OpenFile(%s)=%08xh\n",
@@ -1118,7 +1141,44 @@ BOOL HMReadFile(HANDLE       hFile,
 
   return (fResult);                                   /* deliver return code */
 }
+/*****************************************************************************
+ * Name      : HANDLE  HMReadFileEx
+ * Purpose   : Wrapper for the ReadFileEx() API
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : SvL
+ *****************************************************************************/
+BOOL HMReadFileEx(HANDLE                     hFile,
+                  LPVOID                     lpBuffer,
+                  DWORD                      nNumberOfBytesToRead,
+                  LPOVERLAPPED               lpOverlapped,
+                  LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine)
+{
+  int       iIndex;                           /* index into the handle table */
+  BOOL      fResult;       /* result from the device handler's CloseHandle() */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
 
+                                                          /* validate handle */
+  iIndex = _HMHandleQuery(hFile);                           /* get the index */
+  if (-1 == iIndex)                                               /* error ? */
+  {
+    SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
+    return (FALSE);                                        /* signal failure */
+  }
+
+  pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
+  fResult = pHMHandle->pDeviceHandler->ReadFileEx(&pHMHandle->hmHandleData,
+                                                  lpBuffer,
+                                                  nNumberOfBytesToRead,
+                                                  lpOverlapped,
+                                                  lpCompletionRoutine);
+
+  return (fResult);                                   /* deliver return code */
+}
 
 /*****************************************************************************
  * Name      : HANDLE  HMWriteFile
@@ -1133,10 +1193,10 @@ BOOL HMReadFile(HANDLE       hFile,
  *****************************************************************************/
 
 BOOL HMWriteFile(HANDLE       hFile,
-                        LPCVOID      lpBuffer,
-                        DWORD        nNumberOfBytesToWrite,
-                        LPDWORD      lpNumberOfBytesWritten,
-                        LPOVERLAPPED lpOverlapped)
+                 LPCVOID      lpBuffer,
+                 DWORD        nNumberOfBytesToWrite,
+                 LPDWORD      lpNumberOfBytesWritten,
+                 LPOVERLAPPED lpOverlapped)
 {
   int       iIndex;                           /* index into the handle table */
   BOOL      fResult;       /* result from the device handler's CloseHandle() */
@@ -1156,6 +1216,45 @@ BOOL HMWriteFile(HANDLE       hFile,
                                                  nNumberOfBytesToWrite,
                                                  lpNumberOfBytesWritten,
                                                  lpOverlapped);
+
+  return (fResult);                                   /* deliver return code */
+}
+
+/*****************************************************************************
+ * Name      : HANDLE  HMWriteFileEx
+ * Purpose   : Wrapper for the WriteFileEx() API
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : SvL
+ *****************************************************************************/
+BOOL HMWriteFileEx(HANDLE                     hFile,
+                   LPVOID                     lpBuffer,
+                   DWORD                      nNumberOfBytesToWrite,
+                   LPOVERLAPPED               lpOverlapped,
+                   LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine)
+{
+  int       iIndex;                           /* index into the handle table */
+  BOOL      fResult;       /* result from the device handler's CloseHandle() */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+                                                          /* validate handle */
+  iIndex = _HMHandleQuery(hFile);                           /* get the index */
+  if (-1 == iIndex)                                               /* error ? */
+  {
+    SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
+    return (FALSE);                                        /* signal failure */
+  }
+
+  pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
+  fResult = pHMHandle->pDeviceHandler->WriteFileEx(&pHMHandle->hmHandleData,
+                                                   lpBuffer,
+                                                   nNumberOfBytesToWrite,
+                                                   lpOverlapped,
+                                                   lpCompletionRoutine);
 
   return (fResult);                                   /* deliver return code */
 }
@@ -1597,7 +1696,6 @@ BOOL HMUnlockFile (HFILE         hFile,
  *****************************************************************************/
 
 BOOL HMUnlockFileEx(HANDLE        hFile,
-                    DWORD         dwFlags,
                     DWORD         dwReserved,
                     DWORD         nNumberOfBytesToLockLow,
                     DWORD         nNumberOfBytesToLockHigh,
@@ -1617,7 +1715,6 @@ BOOL HMUnlockFileEx(HANDLE        hFile,
 
   pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
   dwResult = pHMHandle->pDeviceHandler->UnlockFileEx(&pHMHandle->hmHandleData,
-                                                     dwFlags,
                                                      dwReserved,
                                                      nNumberOfBytesToLockLow,
                                                      nNumberOfBytesToLockHigh,

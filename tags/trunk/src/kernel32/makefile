@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.94 2000-05-02 20:53:13 sandervl Exp $
+# $Id: makefile,v 1.95 2000-06-01 11:28:47 sandervl Exp $
 
 #
 # Odin32 API
@@ -71,6 +71,7 @@ $(OBJDIR)\hmdevice.obj \
 $(OBJDIR)\hmopen32.obj \
 $(OBJDIR)\hmobjects.obj \
 $(OBJDIR)\hmevent.obj \
+$(OBJDIR)\hmfile.obj \
 $(OBJDIR)\hmmutex.obj \
 $(OBJDIR)\hmcomm.obj \
 $(OBJDIR)\hmsemaphore.obj \
