@@ -1,4 +1,4 @@
-/* $Id: dc.h,v 1.15 2000-06-17 09:45:02 sandervl Exp $ */
+/* $Id: dc.h,v 1.16 2001-02-18 14:18:38 sandervl Exp $ */
 /*
  * public dc functions
  *
@@ -16,7 +16,15 @@ extern BOOL isYup (struct _DCData *pHps);
 extern HDC sendEraseBkgnd (Win32BaseWindow *wnd);
 extern void releaseOwnDC (HDC hps);
 
+void selectClientArea(Win32BaseWindow *wnd, HDC hdc);
+
 BOOL GetOS2UpdateRect(Win32BaseWindow *window,LPRECT pRect);
+
+#ifdef DEBUG
+void dprintfOrigin(HDC hdc);
+#else
+#define dprintfOrigin(a)
+#endif
 
 #ifdef INCLUDED_BY_DC
 /*********************/

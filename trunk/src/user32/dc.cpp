@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.85 2001-02-17 19:25:08 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.86 2001-02-18 14:18:38 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -347,9 +347,7 @@ VOID removeClientArea(Win32BaseWindow *window, pDCData pHps)
 
    pHps->isClient = FALSE;
 
-#ifdef DEBUG
-   GreGetDCOrigin(pHps->hps, &point);
-#endif
+   dprintfOrigin(pHps->hps);
 
    if(pHps->isClientArea)
    {
@@ -452,6 +450,15 @@ void selectClientArea(Win32BaseWindow *window, pDCData pHps)
 
    // Destroy the region now we have finished with it.
    GreDestroyRegion(pHps->hps, hrgnRect);
+}
+//******************************************************************************
+//******************************************************************************
+void selectClientArea(Win32BaseWindow *wnd, HDC hdc)
+{
+  pDCData pHps = (pDCData)GpiQueryDCData (wnd->getOwnDC());
+
+  if (pHps != NULLHANDLE)
+      selectClientArea(wnd, pHps);
 }
 //******************************************************************************
 //******************************************************************************
@@ -764,11 +771,7 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
    }
    else lpps->fErase = TRUE;
 
-#ifdef DEBUG
-   POINTL point;
-   GreGetDCOrigin(pHps->hps, &point);
-   dprintf(("dc origin (%d,%d)", point.x, point.y));
-#endif
+   dprintfOrigin(pHps->hps);
 
    lpps->hdc    = (HDC)pHps->hps;
 
@@ -808,6 +811,8 @@ BOOL WIN32API EndPaint (HWND hWnd, const PAINTSTRUCT_W *pPaint)
    pHps = (pDCData)GpiQueryDCData((HPS)pPaint->hdc);
    if (pHps && (pHps->hdcType == TYPE_3))
    {
+        dprintfOrigin(pHps->hps);
+
         GpiSetClipRegion(pHps->hps, wnd->GetClipRegion(), &hrgnOld);
         wnd->SetClipRegion(0);
         if(hrgnOld) {
@@ -1788,5 +1793,22 @@ HWND WIN32API WindowFromDC(HDC hdc)
    else
       return 0;
 }
+//******************************************************************************
+//******************************************************************************
+#ifdef DEBUG
+void dprintfOrigin(HDC hdc)
+{
+   POINTL point;
+
+    pDCData  pHps = (pDCData)GpiQueryDCData((HPS)hdc);
+    if(!pHps)
+    {
+	return;
+    }
+
+    GreGetDCOrigin(pHps->hps, &point);
+    dprintf(("HDC %x origin (%d,%d) org (%d,%d)", hdc, point.x, point.y, pHps->ptlOrigin.x, pHps->ptlOrigin.y));
+}
+#endif
 //******************************************************************************
 //******************************************************************************

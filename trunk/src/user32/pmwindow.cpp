@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.115 2001-02-17 17:11:17 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.116 2001-02-18 14:18:38 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -284,6 +284,11 @@ MRESULT ProcessPMMessage(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2, Win32Base
       HWND      hParent = NULLHANDLE, hwndAfter;
 
         dprintf(("OS2: WM_ADJUSTWINDOWPOS %x %x %x (%d,%d) (%d,%d)", win32wnd->getWindowHandle(), pswp->hwnd, pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
+
+        if(win32wnd->getParent() && win32wnd->getParent()->isOwnDC()) {
+            dprintfOrigin(win32wnd->getParent()->getOwnDC());
+            selectClientArea(win32wnd->getParent(), win32wnd->getParent()->getOwnDC());
+        }
 
         if(pswp->fl & SWP_NOADJUST) {
             //ignore weird messages (TODO: why are they sent?)
@@ -595,6 +600,19 @@ PosChangedEnd:
 
                 win32wnd->setComingToTop(FALSE);
                 break;
+        }
+//test
+        if(win32wnd->isOwnDC()) {
+                dprintfOrigin(win32wnd->getOwnDC());
+                selectClientArea(win32wnd, win32wnd->getOwnDC());
+        }
+//test
+        goto RunDefWndProc;
+
+    case WM_VRNDISABLED:
+        dprintf(("OS2: WM_VRNDISABLED %x %x %x", win32wnd->getWindowHandle(), mp1, mp2));
+        if(win32wnd->isOwnDC()) {
+                dprintfOrigin(win32wnd->getOwnDC());
         }
         goto RunDefWndProc;
 

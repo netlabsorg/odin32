@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.235 2001-02-17 14:49:26 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.236 2001-02-18 14:18:39 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2409,6 +2409,13 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
         dprintf(("OSLibWinSetMultWindowPos failed! Error %x",OSLibWinGetLastError()));
         return 0;
     }
+
+//testestest
+    if(getParent() && getParent()->isOwnDC()) {
+        dprintfOrigin(getParent()->getOwnDC());
+        selectClientArea(getParent(), getParent()->getOwnDC());
+    }
+//testestest
 
     if((fuFlags & SWP_FRAMECHANGED) && (fuFlags & (SWP_NOMOVE | SWP_NOSIZE) == (SWP_NOMOVE | SWP_NOSIZE)))
     {

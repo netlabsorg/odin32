@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.90 2000-12-29 18:39:59 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.91 2001-02-18 14:18:39 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -1598,7 +1598,7 @@ BOOL WIN32API PaintDesktop(HDC hdc)
 
 int WIN32API FillRect(HDC hDC, const RECT * lprc, HBRUSH hbr)
 {
-    dprintf(("USER32:  FillRect (%d,%d)(%d,%d) brush %X\n", lprc->left, lprc->top, lprc->right, lprc->bottom, hbr));
+    dprintf(("USER32:  FillRect %x (%d,%d)(%d,%d) brush %X\n", hDC, lprc->left, lprc->top, lprc->right, lprc->bottom, hbr));
     return O32_FillRect(hDC,lprc,hbr);
 }
 //******************************************************************************
