@@ -1,4 +1,4 @@
-/* $Id: dbglog.cpp,v 1.2 2002-10-03 12:49:50 sandervl Exp $ */
+/* $Id: dbglog.cpp,v 1.3 2002-10-03 13:05:55 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -269,7 +269,7 @@ int checkingheap = 0;
 
 //#define LOG_TIME
 //#define SHOW_FPU_CONTROLREG
-//#define WIN32_IP_LOGGING
+#define WIN32_IP_LOGGING
 #define WIN32_IP_LOG_PORT	5001
 
 #ifdef WIN32_IP_LOGGING
@@ -278,7 +278,7 @@ int checkingheap = 0;
 #include <sys/socket.h>
 
 static int logSocket = -1;
-static char *logserver = NULL;
+static struct sockaddr_in servername;
 #endif
 
 int SYSTEM WriteLog(char *tekst, ...)
@@ -303,9 +303,14 @@ int SYSTEM WriteLog(char *tekst, ...)
 #endif
 
 #ifdef WIN32_IP_LOGGING
-        logserver = getenv("WIN32LOG_IPSERVER");
+        char *logserver = getenv("WIN32LOG_IPSERVER");
         if(logserver) {
              sock_init();
+
+             memset(&servername, 0, sizeof(servername));
+             servername.sin_family      = AF_INET;
+             servername.sin_addr.s_addr = inet_addr(logserver);
+             servername.sin_port        = WIN32_IP_LOG_PORT;
 
              logSocket = socket(PF_INET, SOCK_DGRAM, 0);
         }
@@ -444,13 +449,8 @@ int SYSTEM WriteLog(char *tekst, ...)
 
         vsprintf(&logbuffer[prefixlen], tekst, argptr);
 
-        struct sockaddr_in servername;
         int rc;
 
-        memset(&servername, 0, sizeof(servername));
-        servername.sin_family      = AF_INET;
-        servername.sin_addr.s_addr = inet_addr(logserver);
-        servername.sin_port        = WIN32_IP_LOG_PORT;
         rc = sendto(logSocket, logbuffer, strlen(logbuffer)+1, 0, (struct sockaddr *)&servername, sizeof(servername));
 
         if(teb) teb->o.odin.logfile = 0;
