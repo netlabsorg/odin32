@@ -1,4 +1,4 @@
-# $Id: setup.mak,v 1.7 2002-04-30 06:19:13 bird Exp $
+# $Id: setup.mak,v 1.8 2002-04-30 19:48:28 bird Exp $
 
 #
 # Generic makefile system.
@@ -60,11 +60,17 @@ SHT_BLDENV=emx
 !if "$(BUILD_ENV)" == "MSCV6"
 SHT_BLDENV=mscv6
 !endif
+!if "$(BUILD_ENV)" == "MSCV6-16"
+SHT_BLDENV=mscv6-16
+!endif
 !if "$(BUILD_ENV)" == "WAT11C"
 SHT_BLDENV=wat11
 !endif
+!if "$(BUILD_ENV)" == "WAT11C-16"
+SHT_BLDENV=wat11-16
+!endif
 !if "$(SHT_BLDENV)" == ""
-! error Fatal error: Env.var BUILD_ENV is either unspecified or incorrect. ($(BUILD_MODE)) Valid values: VAC308, VAC365, VAC4, EMX, MSCV6 and WATCOM
+! error Fatal error: Env.var BUILD_ENV is either unspecified or incorrect. ($(BUILD_MODE)) Valid values: VAC308, VAC365, VAC4, EMX, MSCV6-16, WAT11C and WAT11C-16.
 !endif
 
 
@@ -85,11 +91,17 @@ SHT_BLDENVFRC=emx
 !if "$(BUILD_ENV_FORCE)" == "MSCV6"
 SHT_BLDENVFRC=mscv6
 !endif
+!if "$(BUILD_ENV_FORCE)" == "MSCV6-16"
+SHT_BLDENVFRC=mscv6-16
+!endif
 !if "$(BUILD_ENV_FORCE)" == "WAT11C"
 SHT_BLDENVFRC=wat11
 !endif
+!if "$(BUILD_ENV_FORCE)" == "WAT11C-16"
+SHT_BLDENVFRC=wat11-16
+!endif
 !if "$(SHT_BLDENVFRC)" == ""
-! error Fatal error: Var BUILD_ENV_FORCE is incorrect. ($(BUILD_ENV_FORCE)) Valid values: VAC308, VAC365, VAC4, EMX, MSCV6 and WATCOM
+! error Fatal error: Var BUILD_ENV_FORCE is incorrect. ($(BUILD_ENV_FORCE)) Valid values: VAC308, VAC365, VAC4, EMX, MSCV6-16, WAT11C and WAT11C-16.
 !endif
 !else
 BUILD_ENV_FORCE=$(BUILD_ENV)
