@@ -1,4 +1,4 @@
-/* $Id: windlg.cpp,v 1.17 2000-07-18 18:35:40 sandervl Exp $ */
+/* $Id: windlg.cpp,v 1.18 2000-10-04 19:35:31 sandervl Exp $ */
 /*
  * Win32 dialog apis for OS/2
  *
@@ -209,6 +209,10 @@ int WIN32API DialogBoxParamW(HINSTANCE hInst, LPCWSTR lpszTemplate, HWND hwndOwn
 BOOL WIN32API MapDialogRect(HWND hwndDlg, LPRECT rect)
 {
   Win32Dialog *dialog;
+#ifdef DEBUG
+  BOOL rc;
+  RECT dlgRect = *rect;
+#endif
 
     dialog = (Win32Dialog *)Win32BaseWindow::GetWindowFromHandle(hwndDlg);
     if(!dialog || !dialog->IsDialog()) {
@@ -216,8 +220,14 @@ BOOL WIN32API MapDialogRect(HWND hwndDlg, LPRECT rect)
         SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
-    dprintf(("USER32: MapDialogRect\n"));
+#ifdef DEBUG
+    rc = dialog->MapDialogRect(rect);
+    dprintf(("USER32: MapDialogRect %x (%d,%d)(%d,%d) -> (%d,%d)(%d,%d)", hwndDlg, dlgRect.left, dlgRect.top, dlgRect.right, dlgRect.bottom, rect->left, rect->top, rect->right, rect->bottom));
+    return rc;
+#else
+    dprintf(("USER32: MapDialogRect %x (%d,%d)(%d,%d)", hwndDlg, rect->left, rect->top, rect->right, rect->bottom));
     return dialog->MapDialogRect(rect);
+#endif
 }
 //******************************************************************************
 //******************************************************************************
@@ -276,7 +286,7 @@ int WIN32API GetDlgCtrlID(HWND hwnd)
         SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
-    dprintf(("USER32:  GetDlgCtrlID\n"));
+    dprintf(("USER32: GetDlgCtrlID %x", hwnd));
     return dlgcontrol->getWindowId();
 }
 //******************************************************************************
@@ -291,14 +301,14 @@ BOOL WIN32API EndDialog(HWND hwnd, int retval)
         SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
-    dprintf(("USER32: EndDialog\n"));
+    dprintf(("USER32: EndDialog %x %d", hwnd, retval));
     return dialog->endDialog(retval);
 }
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API CheckDlgButton( HWND hwnd, int id, UINT check)
 {
-    dprintf(("USER32:  CheckDlgButton\n"));
+    dprintf(("USER32: CheckDlgButton %x %d %d", hwnd, id, check));
 
     return (BOOL)SendDlgItemMessageA(hwnd, id, BM_SETCHECK, check,0);
 }
@@ -306,7 +316,7 @@ BOOL WIN32API CheckDlgButton( HWND hwnd, int id, UINT check)
 //******************************************************************************
 BOOL WIN32API CheckRadioButton( HWND hDlg, UINT nIDFirstButton, UINT nIDLastButton, UINT  nIDCheckButton)
 {
-    dprintf(("USER32:  CheckRadioButton\n"));
+    dprintf(("USER32: CheckRadioButton %x %d %d %d", hDlg, nIDFirstButton, nIDLastButton, nIDCheckButton));
 
     //CB: check radio buttons in interval
     if (nIDFirstButton > nIDLastButton)
