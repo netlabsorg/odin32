@@ -1,4 +1,4 @@
-/* $Id: win32wbasenonclient.cpp,v 1.2 2000-01-11 13:06:27 sandervl Exp $ */
+/* $Id: win32wbasenonclient.cpp,v 1.3 2000-01-11 18:32:07 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (non-client methods)
  *
@@ -40,38 +40,6 @@
 
 #define SC_ABOUTODIN            (SC_SCREENSAVE+1)
 #define SC_PUTMARK              (SC_SCREENSAVE+2)
-
-#define HAS_DLGFRAME(style,exStyle) \
-    (((exStyle) & WS_EX_DLGMODALFRAME) || \
-     (((style) & WS_DLGFRAME) && !((style) & WS_THICKFRAME)))
-
-#define HAS_THICKFRAME(style,exStyle) \
-    (((style) & WS_THICKFRAME) && \
-     !((exStyle) & WS_EX_DLGMODALFRAME) && \
-     !((style) & WS_CHILD))
-
-#define HAS_THINFRAME(style) \
-    (((style) & WS_BORDER) || !((style) & (WS_CHILD | WS_POPUP)))
-
-#define HAS_BIGFRAME(style,exStyle) \
-    (((style) & (WS_THICKFRAME | WS_DLGFRAME)) || \
-     ((exStyle) & WS_EX_DLGMODALFRAME))
-
-#define HAS_ANYFRAME(style,exStyle) \
-    (((style) & (WS_THICKFRAME | WS_DLGFRAME | WS_BORDER)) || \
-     ((exStyle) & WS_EX_DLGMODALFRAME) || \
-     !((style) & (WS_CHILD | WS_POPUP)))
-
-#define HAS_3DFRAME(exStyle) \
-    ((exStyle & WS_EX_CLIENTEDGE) || (exStyle & WS_EX_STATICEDGE) || (exStyle & WS_EX_WINDOWEDGE))
-
-#define HAS_BORDER(style, exStyle) \
-    ((style & WS_BORDER) || HAS_THICKFRAME(style) || HAS_DLGFRAME(style,exStyle))
-
-#define IS_OVERLAPPED(style) \
-    !(style & (WS_CHILD | WS_POPUP))
-
-#define HAS_MENU() (!(getStyle() & WS_CHILD) && (GetMenu() != 0))
 
 /* bits in the dwKeyData */
 #define KEYDATA_ALT         0x2000
