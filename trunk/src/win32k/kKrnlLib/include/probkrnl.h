@@ -1,4 +1,4 @@
-/* $Id: probkrnl.h,v 1.3 2001-09-17 00:11:36 bird Exp $
+/* $Id: probkrnl.h,v 1.4 2001-09-18 04:33:01 bird Exp $
  *
  * Include file for ProbKrnl.
  *
@@ -99,6 +99,8 @@
 #define EXP_VAR32       6
 #define EXP_VAR16       7
 #define EXP_PROC16      8
+#define EXP_ORGPROC32   9
+#define EXP_ORGPROC16   10
 
 
 /*******************************************************************************

@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.8 2001-09-17 02:27:54 bird Exp $
+# $Id: Makefile,v 1.9 2001-09-18 04:33:00 bird Exp $
 
 #
 # kKrnlLib.sys makefile.
@@ -73,6 +73,8 @@ OBJS  =\
 LASTOBJ =\
     $(WIN32KOBJ)\devlast.obj
 
+LASTLIB = $(WIN32KOBJ)\lastlib.lib
+
 LIBS =\
     $(VACPATH)\lib\$(RTLLIB_NRE) \
     $(DDKPATH)\lib\os2386.lib \
@@ -90,7 +92,7 @@ $(WIN32KBIN)\$(NAME).sys:   $(WIN32KBIN)\clfix.exe \
                             $(OBJS) \
                             $(LIBS) \
                             $(WIN32KOBJ)\$(NAME)bldlevel.def \
-                            $(LASTOBJ) \
+                            $(LASTLIB) \
                             $(LIBSINIT) \
                             $(WIN32KOBJ)\$(@B).lnk \
                             Makefile makefile.inc ..\..\..\makefile.inc
@@ -121,7 +123,7 @@ $(OBJS:  =^
 /IG
 $(LIBS:  =^
 )
-$(LASTOBJ)
+$(LASTLIB)
 $(WIN32KOBJ)\$(NAME)bldlevel.def
 <<KEEP
 
@@ -131,6 +133,11 @@ $(WIN32KOBJ)\$(NAME)bldlevel.def: $(NAME).def Makefile
     $(BLDLEVELINF) $(NAME).def $@ -R"$(NAME).def" \
         -V"#define=ODIN32_VERSION,$(ODIN32_INCLUDE)\odinbuild.h" \
         -M"#define=ODIN32_BUILD_NR,$(ODIN32_INCLUDE)\odinbuild.h"
+
+# Last lib - needed to get LASTOBJ in after the importlibraries.
+$(LASTLIB): $(LASTOBJ)
+    -@$(RM) $@ > nul 2> nul
+    $(ILIB) $@ $**;
 
 
 #
@@ -183,6 +190,8 @@ TSTOBJS =\
 
 TSTLASTOBJ = $(LASTOBJ)
 
+TSTLASTLIB = $(WIN32KOBJ)\tstlastlib.lib
+
 TSTLIBS = $(LIBS)
 
 
@@ -198,7 +207,7 @@ $(WIN32KBIN)\$(NAME)tst.exe:    $(WIN32KBIN)\clfix.exe \
                                 $(NAME)tst.def \
                                 $(TSTOBJS:. = ) \
                                 $(TSTLIBS) \
-                                $(TSTLASTOBJ) \
+                                $(TSTLASTLIB) \
                                 $(WIN32KOBJ)\$(@B).lnk \
                                 Makefile makefile.inc ..\..\..\makefile.inc
     -@$(ECHO) linking: $@
@@ -219,10 +228,14 @@ $(TSTOBJS:  =^
 /IG
 $(TSTLIBS:  =^
 )
-$(TSTLASTOBJ)
+$(TSTLASTLIB)
 $(NAME)tst.def
 <<KEEP
 
+# Last lib - needed to get LASTOBJ in after the importlibraries.
+$(TSTLASTLIB): $(TSTLASTOBJ)
+    -@$(RM) $@ > nul 2> nul
+    $(ILIB) $@ $**;
 
 
 #
