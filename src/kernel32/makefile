@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.47 1999-10-26 11:15:33 sandervl Exp $
+# $Id: makefile,v 1.48 1999-10-27 12:38:48 phaller Exp $
 
 #
 # PD-Win32 API
@@ -27,7 +27,7 @@ LFILE.OBJ NPIPE.OBJ oslibdos.obj oslibmisc.obj MISC.OBJ EXCEPTUTIL.OBJ \
 LANG.OBJ ICCIO.OBJ MAP.OBJ WIN32UTIL.OBJ heap.OBJ heapstring.obj \
 os2heap.OBJ vmutex.OBJ initterm.OBJ handlemanager.OBJ  \
 hmdevice.obj hmopen32.obj hmobjects.obj hmevent.obj hmmutex.obj \
-hmsemaphore.obj wprocess.OBJ conprop.OBJ winimagelx.obj \
+hmsemaphore.obj wprocess.OBJ conprop.OBJ conprop2.obj winimagelx.obj \
 winimagebase.OBJ windllbase.OBJ winexebase.OBJ time.obj mmap.obj \
 winimagepe2lx.obj winimagepeldr.obj windllpe2lx.obj windlllx.obj windllpeldr.obj \
 winexepe2lx.obj winexelx.obj winexepeldr.obj WINRES.OBJ \
@@ -80,7 +80,7 @@ kernel32.OBJ: kernel32.cpp \
     exceptutil.h \
     $(PDWIN32_INCLUDE)\unicode.h \
     $(PDWIN32_INCLUDE)\heap.h \
-    $(PDWIN32_INCLUDE)\wprocess.h 
+    $(PDWIN32_INCLUDE)\wprocess.h
 
 kobjects.obj: kobjects.cpp
 
@@ -99,7 +99,7 @@ disk.obj: disk.cpp \
     $(PDWIN32_INCLUDE)\unicode.h
 
 atom.obj: atom.cpp \
-    $(PDWIN32_INCLUDE)\unicode.h 
+    $(PDWIN32_INCLUDE)\unicode.h
 
 time.obj: time.cpp \
     $(PDWIN32_INCLUDE)\unicode.h
@@ -131,7 +131,7 @@ os2heap.OBJ: \
     $(PDWIN32_INCLUDE)\win32type.h \
     os2heap.h
 
-initterm.OBJ: .\initterm.cpp initterm.h  heapshared.h 
+initterm.OBJ: .\initterm.cpp initterm.h  heapshared.h
 
 thunk.OBJ: \
     .\thunk.cpp \
@@ -154,7 +154,7 @@ message.OBJ: \
 oslibexcept.obj: \
     oslibexcept.cpp \
     $(PDWIN32_INCLUDE)\exceptions.h \
-    oslibexcept.h 
+    oslibexcept.h
 
 devio.OBJ: \
     .\devio.cpp \
@@ -315,6 +315,10 @@ conprop.OBJ: \
         .\conprop.h \
         .\conprop.cpp
 
+conprop2.OBJ: \
+        .\conprop.h \
+        .\conprop2.cpp
+
 async.OBJ: \
         .\async.cpp \
         $(PDWIN32_INCLUDE)\win32type.h \
@@ -326,7 +330,7 @@ mmap.obj:      mmap.cpp mmap.h $(PDWIN32_INCLUDE)\vmutex.h oslibdos.h heapshared
 
 pefile.OBJ:    pefile.cpp $(PDWIN32_INCLUDE)\pefile.h $(PDWIN32_INCLUDE)\winres.h
 
-winimagebase.obj:  winimagebase.cpp $(PDWIN32_INCLUDE)\winimagebase.h 
+winimagebase.obj:  winimagebase.cpp $(PDWIN32_INCLUDE)\winimagebase.h
 winimagepe2lx.obj: winimagepe2lx.cpp $(PDWIN32_INCLUDE)\winimagebase.h $(PDWIN32_INCLUDE)\winimagepe2lx.h
 winimagepeldr.obj: winimagepeldr.cpp $(PDWIN32_INCLUDE)\winimagebase.h $(PDWIN32_INCLUDE)\winimagepeldr.h
 winimagelx.obj:    winimagelx.cpp $(PDWIN32_INCLUDE)\winimagebase.h $(PDWIN32_INCLUDE)\winimagelx.h
