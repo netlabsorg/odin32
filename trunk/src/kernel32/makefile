@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.77 2000-01-02 22:09:01 sandervl Exp $
+# $Id: makefile,v 1.78 2000-01-02 22:51:11 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -239,10 +239,6 @@ win32util.OBJ: \
     .\win32util.cpp \
     $(PDWIN32_INCLUDE)\win32util.h
 
-npipe.OBJ: \
-    .\npipe.cpp \
-    $(PDWIN32_INCLUDE)\misc.h
-
 unicode.OBJ: \
     .\unicode.cpp \
     $(PDWIN32_INCLUDE)\unicode.h \
@@ -417,6 +413,7 @@ codepage.obj: codepage.cpp oslibdos.h profile.h $(PDWIN32_INCLUDE)\codepage.h
 
 debug.obj:      debug.cpp oslibdebug.h
 oslibdebug.obj: oslibdebug.cpp oslibdebug.h
+npipe.obj:      npipe.cpp oslibdos.h  $(PDWIN32_INCLUDE)\misc.h
 
 clean:
         $(RM) *.OBJ *.LIB *.dll *.lrf *.res *.map *.pch kernelrsrc.asm

@@ -1,10 +1,9 @@
-/* $Id: oslibdos.cpp,v 1.12 1999-12-01 18:40:48 sandervl Exp $ */
-
 /*
  * Wrappers for OS/2 Dos* API
  *
- * Copyright 1998 Sander van Leeuwen (sandervl@xs4all.nl)
- *
+ * Copyright 1998-2000 Sander van Leeuwen (sandervl@xs4all.nl)
+ * Copyright 1999-2000 Edgar Buerkle <Edgar.Buerkle@gmx.net>
+ * Copyright 2000 Przemyslaw Dobrowolski <dobrawka@asua.org.pl>
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -14,15 +13,23 @@
 #define INCL_DOSMEMMGR
 #define INCL_DOSPROCESS
 #define INCL_DOSERRORS
+#define INCL_NPIPES
 #include <os2wrap.h>                     //Odin32 OS/2 api wrappers
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <win32type.h>
+#include <winconst.h>
 #include <misc.h>
 #include "initterm.h"
 #include "oslibdos.h"
 #include "dosqss.h"
+
+/***********************************
+ * PH: fixups for missing os2win.h *
+ ***********************************/
+
+void _System SetLastError(ULONG ulError);
 
 APIRET APIENTRY DosAliasMem(PVOID pb, ULONG cb, PPVOID ppbAlias, ULONG fl);
 
@@ -402,82 +409,58 @@ DWORD OSLibDosCreate(CHAR *lpFileName,
    DWORD  os2Flags = 0; //OPEN_FLAGS_NOINHERIT;
    DWORD  os2Open=0;
 
-#define GENERIC_READ               0x80000000
-#define GENERIC_WRITE              0x40000000
-    if(dwAccess == (GENERIC_READ | GENERIC_WRITE))
+    if(dwAccess == (GENERIC_READ_W | GENERIC_WRITE_W))
       os2Flags |= OPEN_ACCESS_READWRITE;
-    else if(dwAccess & GENERIC_WRITE)
+    else if(dwAccess & GENERIC_WRITE_W)
       os2Flags |= OPEN_ACCESS_WRITEONLY;
-    else if(dwAccess & GENERIC_READ)
+    else if(dwAccess & GENERIC_READ_W)
       os2Flags |= OPEN_ACCESS_READONLY;
 
-#define FILE_SHARE_READ         0x00000001L
-#define FILE_SHARE_WRITE        0x00000002L
     if(dwShare == 0)
       os2Flags |= OPEN_SHARE_DENYREADWRITE;
-    else if(dwShare == (FILE_SHARE_READ | FILE_SHARE_WRITE))
+    else if(dwShare == (FILE_SHARE_READ_W | FILE_SHARE_WRITE_W))
       os2Flags |= OPEN_SHARE_DENYNONE;
-    else if(dwShare & FILE_SHARE_READ)
+    else if(dwShare & FILE_SHARE_READ_W)
       os2Flags |= OPEN_SHARE_DENYWRITE;
-    else if(dwShare & FILE_SHARE_WRITE)
+    else if(dwShare & FILE_SHARE_WRITE_W)
       os2Flags |= OPEN_SHARE_DENYREAD;
 
-#define CREATE_NEW              1
-#define CREATE_ALWAYS           2
-#define OPEN_EXISTING           3
-#define OPEN_ALWAYS             4
-#define TRUNCATE_EXISTING       5
-    if(dwCreation == CREATE_NEW)
+    if(dwCreation == CREATE_NEW_W)
       os2Open = OPEN_ACTION_FAIL_IF_EXISTS | OPEN_ACTION_CREATE_IF_NEW;
-    else if(dwCreation == CREATE_ALWAYS)
+    else if(dwCreation == CREATE_ALWAYS_W)
       os2Open = OPEN_ACTION_REPLACE_IF_EXISTS | OPEN_ACTION_CREATE_IF_NEW;
-    else if(dwCreation == OPEN_EXISTING)
+    else if(dwCreation == OPEN_EXISTING_W)
       os2Open = OPEN_ACTION_OPEN_IF_EXISTS | OPEN_ACTION_FAIL_IF_NEW;
-    else if(dwCreation == OPEN_ALWAYS)
+    else if(dwCreation == OPEN_ALWAYS_W)
       os2Open = OPEN_ACTION_OPEN_IF_EXISTS | OPEN_ACTION_CREATE_IF_NEW;
-    else if(dwCreation == TRUNCATE_EXISTING)
+    else if(dwCreation == TRUNCATE_EXISTING_W)
       os2Open = OPEN_ACTION_REPLACE_IF_EXISTS;// |OPEN_ACTION_FAIL_IF_NEW;
 
-#define FILE_ATTRIBUTE_READONLY         0x00000001L
-#define FILE_ATTRIBUTE_HIDDEN           0x00000002L
-#define FILE_ATTRIBUTE_SYSTEM           0x00000004L
-#define FILE_ATTRIBUTE_DIRECTORY        0x00000010L
-#define FILE_ATTRIBUTE_ARCHIVE          0x00000020L
-#define FILE_ATTRIBUTE_NORMAL           0x00000080L
-#define FILE_ATTRIBUTE_TEMPORARY        0x00000100L
-    if(dwFlags & FILE_ATTRIBUTE_READONLY)
+    if(dwFlags & FILE_ATTRIBUTE_READONLY_W)
       os2Attrib |= FILE_READONLY;
-    if(dwFlags & FILE_ATTRIBUTE_HIDDEN)
+    if(dwFlags & FILE_ATTRIBUTE_HIDDEN_W)
       os2Attrib |= FILE_HIDDEN;
-    if(dwFlags & FILE_ATTRIBUTE_SYSTEM)
+    if(dwFlags & FILE_ATTRIBUTE_SYSTEM_W)
       os2Attrib |= FILE_SYSTEM;
-    if(dwFlags & FILE_ATTRIBUTE_DIRECTORY)
+    if(dwFlags & FILE_ATTRIBUTE_DIRECTORY_W)
       os2Attrib |= FILE_DIRECTORY;
-    if(dwFlags & FILE_ATTRIBUTE_ARCHIVE)
+    if(dwFlags & FILE_ATTRIBUTE_ARCHIVE_W)
       os2Attrib |= FILE_ARCHIVED;
-    if(dwFlags & FILE_ATTRIBUTE_NORMAL)
+    if(dwFlags & FILE_ATTRIBUTE_NORMAL_W)
       os2Attrib |= FILE_NORMAL;
 
-#define FILE_FLAG_WRITE_THROUGH    0x80000000UL
-#define FILE_FLAG_OVERLAPPED       0x40000000L
-#define FILE_FLAG_NO_BUFFERING     0x20000000L
-#define FILE_FLAG_RANDOM_ACCESS    0x10000000L
-#define FILE_FLAG_SEQUENTIAL_SCAN  0x08000000L
-#define FILE_FLAG_DELETE_ON_CLOSE  0x04000000L
-#define FILE_FLAG_BACKUP_SEMANTICS 0x02000000L
-#define FILE_FLAG_POSIX_SEMANTICS  0x01000000L
-    if(dwFlags & FILE_FLAG_WRITE_THROUGH)
+    if(dwFlags & FILE_FLAG_WRITE_THROUGH_W)
       os2Flags |= OPEN_FLAGS_WRITE_THROUGH;
-    if(dwFlags & FILE_FLAG_NO_BUFFERING)
+    if(dwFlags & FILE_FLAG_NO_BUFFERING_W)
       os2Flags |= OPEN_FLAGS_NO_CACHE;
-    if(dwFlags & FILE_FLAG_RANDOM_ACCESS)
+    if(dwFlags & FILE_FLAG_RANDOM_ACCESS_W)
       os2Flags |= OPEN_FLAGS_RANDOM;
-    if(dwFlags & FILE_FLAG_SEQUENTIAL_SCAN)
+    if(dwFlags & FILE_FLAG_SEQUENTIAL_SCAN_W)
       os2Flags |= OPEN_FLAGS_SEQUENTIAL;
 
     // TODO:
-    // if(dwFlags & FILE_FLAG_OVERLAPPED)
-    // if(dwFlags & FILE_FLAG_DELETE_ON_CLOSE
+    // if(dwFlags & FILE_FLAG_OVERLAPPED_W)
+    // if(dwFlags & FILE_FLAG_DELETE_ON_CLOSE_W
 
     rc = DosOpen(lpFileName, &hFile, &ulAction, 0,
                  os2Attrib, os2Open, os2Flags, 0);
@@ -485,8 +468,8 @@ DWORD OSLibDosCreate(CHAR *lpFileName,
     if(rc)
     {
       // TODO: TEST TEST
-      dprintf(("DosOpen Error rc:%d, try without GENERIC_WRITE", rc));
-      if(dwAccess & GENERIC_WRITE)
+      dprintf(("DosOpen Error rc:%d, try without GENERIC_WRITE_W", rc));
+      if(dwAccess & GENERIC_WRITE_W)
         os2Flags &= ~(OPEN_ACCESS_READWRITE | OPEN_ACCESS_WRITEONLY);
       rc = DosOpen(lpFileName, &hFile, &ulAction, 0,
                    os2Attrib, os2Open, os2Flags, 0);
@@ -583,3 +566,207 @@ tryagain:
 }
 //******************************************************************************
 //******************************************************************************
+// TODO: implement SecurityAttributes parameter
+DWORD OSLibDosCreateNamedPipe(LPCTSTR lpName, 
+                               DWORD   dwOpenMode, 
+                               DWORD   dwPipeMode,
+                               DWORD   nMaxInstances, 
+                               DWORD   nOutBufferSize,
+                               DWORD   nInBufferSize, 
+                               DWORD   nDefaultTimeOut,
+                               void*   lpSecurityAttributes)
+{  DWORD dwOS2Mode     = 0;
+   DWORD dwOS2PipeMode = 0;
+   LPSTR lpOS2Name;  
+   DWORD hPipe;
+   DWORD rc;
+   
+  if (dwOpenMode & PIPE_ACCESS_DUPLEX_W)
+    dwOS2Mode |= NP_ACCESS_DUPLEX;
+  else
+  if (dwOpenMode & PIPE_ACCESS_INBOUND_W)
+    dwOS2Mode |= NP_ACCESS_INBOUND;
+  else
+  if (dwOpenMode & PIPE_ACCESS_OUTBOUND_W)
+    dwOS2Mode |= NP_ACCESS_OUTBOUND;
+  // TODO:
+  // if(dwOpenMode & FILE_FLAG_OVERLAPPED)
+  // if(dwOpenMode & WRITE_DAC)
+  // if(dwOpenMode & WRITE_OWNER)
+  // if(dwOpenMode & ACCESS_SYSTEM_SECURITY)
+  if(dwOpenMode & FILE_FLAG_WRITE_THROUGH_W)
+    dwOS2Mode |= NP_WRITEBEHIND; // FIXME: I'm not sure!
+
+  if (dwPipeMode & PIPE_WAIT_W)
+    dwOS2PipeMode |= NP_WAIT;
+  if (dwPipeMode & PIPE_NOWAIT_W)
+    dwOS2PipeMode |= NP_NOWAIT;
+  if (dwPipeMode & PIPE_READMODE_BYTE_W)
+    dwOS2PipeMode |= NP_READMODE_BYTE;
+  if (dwPipeMode & PIPE_READMODE_MESSAGE_W)
+    dwOS2PipeMode |= NP_READMODE_MESSAGE;
+  if (dwPipeMode & PIPE_TYPE_BYTE_W)
+    dwOS2PipeMode |= NP_TYPE_BYTE;
+  if (dwPipeMode & PIPE_TYPE_MESSAGE_W)
+    dwOS2PipeMode |= NP_TYPE_MESSAGE;
+
+  if (nMaxInstances>0xff)
+  {
+    SetLastError(87); // ERROR_INVALID_PARAMETER
+    return -1; // INVALID_HANDLE_VALUE
+  }
+  dwOS2PipeMode |= nMaxInstances;
+
+  // we must delete string \.\ because
+  // in Windows named pipes scheme is a \.\PIPE\pipename
+  // but in OS/2 only \PIPE\pipename
+  lpOS2Name = (LPSTR)lpName + 3;
+
+
+  dprintf(("DosCreateNPipe(%s,%x,%x,%x,%x,%x)",lpOS2Name,dwOS2Mode,dwOS2PipeMode,nInBufferSize,nOutBufferSize,nDefaultTimeOut));
+  rc=DosCreateNPipe(lpOS2Name,
+                    &hPipe,
+                    dwOS2Mode,
+                    dwOS2PipeMode,
+                    nInBufferSize,
+                    nInBufferSize,  
+                    nDefaultTimeOut); // Timeouts must be tested!
+
+  dprintf(("DosCreateNPipe rc=%d",rc));
+  if (rc)
+  {
+     if ( rc == ERROR_PIPE_BUSY         ) SetLastError(ERROR_PIPE_BUSY_W);
+       else
+     if ( rc == ERROR_PATH_NOT_FOUND    ) SetLastError(ERROR_PATH_NOT_FOUND_W);
+       else
+     if ( rc == ERROR_NOT_ENOUGH_MEMORY ) SetLastError(ERROR_NOT_ENOUGH_MEMORY_W);
+       else
+     if ( rc == ERROR_INVALID_PARAMETER ) SetLastError(ERROR_INVALID_PARAMETER_W);
+       else
+     if ( rc == ERROR_OUT_OF_STRUCTURES ) SetLastError(ERROR_OUT_OF_STRUCTURES_W);
+       else
+         // Unknown error
+         SetLastError(ERROR_INVALID_PARAMETER_W); // fixme!
+     return -1; // INVALID_HANDLE_VALUE
+  }
+  return hPipe;
+}
+
+//******************************************************************************
+//******************************************************************************
+// TODO: implement lpOverlapped parameter!
+BOOL OSLibDosConnectNamedPipe(DWORD hNamedPipe, LPOVERLAPPED lpOverlapped)
+{ 
+ DWORD rc;
+
+  rc=DosConnectNPipe(hNamedPipe);
+  dprintf(("DosConnectNPipe rc=%d",rc));
+
+  if (!rc) return (TRUE);
+    else
+  if (rc==ERROR_BROKEN_PIPE) SetLastError(ERROR_BROKEN_PIPE_W);    
+    else
+  if (rc==ERROR_BAD_PIPE) SetLastError(ERROR_BAD_PIPE_W);
+    else
+  if (rc==ERROR_PIPE_NOT_CONNECTED) SetLastError(ERROR_PIPE_NOT_CONNECTED_W);
+    else
+  // TODO: Implemnt this using Windows Errors
+  // if (rc==ERROR_INTERRUPT)
+  SetLastError(ERROR_PIPE_NOT_CONNECTED_W);
+  
+  return (FALSE);
+}
+
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibDosCallNamedPipe( LPCTSTR lpNamedPipeName,
+                            LPVOID  lpInBuffer,
+                            DWORD   nInBufferSize,
+                            LPVOID  lpOutBuffer,
+                            DWORD   nOutBufferSize,
+                            LPDWORD lpBytesRead,
+                            DWORD   nTimeOut )
+{
+  LPSTR lpOS2Name;
+  DWORD rc;
+  // we must delete string \.\ because
+  // in Windows named pipes scheme is a \.\PIPE\pipename
+  // but in OS/2 only \PIPE\pipename
+  lpOS2Name = (LPSTR)lpNamedPipeName + 3;
+
+  rc=DosCallNPipe(lpOS2Name,
+                  lpInBuffer,
+                  nInBufferSize,
+                  lpOutBuffer,
+                  nOutBufferSize,
+                  lpBytesRead,
+                  nTimeOut );
+
+
+  if (!rc) return (TRUE);
+   else
+  if ( rc==ERROR_FILE_NOT_FOUND     ) SetLastError(ERROR_FILE_NOT_FOUND_W);    
+    else
+  if ( rc==ERROR_PATH_NOT_FOUND     ) SetLastError(ERROR_PATH_NOT_FOUND_W);    
+    else
+  if ( rc==ERROR_ACCESS_DENIED      ) SetLastError(ERROR_ACCESS_DENIED_W);    
+    else
+  if ( rc==ERROR_MORE_DATA          ) SetLastError(ERROR_MORE_DATA_W);    
+    else
+  if ( rc==ERROR_PIPE_BUSY          ) SetLastError(ERROR_PIPE_BUSY_W);    
+    else
+  if ( rc==ERROR_BAD_FORMAT         ) SetLastError(ERROR_BAD_FORMAT_W);    
+    else
+  if ( rc==ERROR_BROKEN_PIPE        ) SetLastError(ERROR_BROKEN_PIPE_W);    
+    else
+  if ( rc==ERROR_BAD_PIPE           ) SetLastError(ERROR_BAD_PIPE_W);
+    else
+  if ( rc==ERROR_PIPE_NOT_CONNECTED ) SetLastError(ERROR_PIPE_NOT_CONNECTED_W);
+    else
+  // TODO: Implemnt this using Windows Errors
+  // if (rc==ERROR_INTERRUPT)
+  SetLastError(233);
+
+  return (FALSE);
+}
+
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibDosTransactNamedPipe( DWORD  hNamedPipe,
+                                LPVOID lpInBuffer,
+                                DWORD nInBufferSize,
+                                LPVOID lpOutBuffer,
+                                DWORD nOutBufferSize,
+                                LPDWORD lpBytesRead,
+                                LPOVERLAPPED lpOverlapped)
+{
+  DWORD rc;
+
+  rc=DosTransactNPipe(hNamedPipe,
+                      lpOutBuffer,
+                      nOutBufferSize,
+                      lpInBuffer,
+                      nInBufferSize,
+                      lpBytesRead);
+
+  if (!rc) return (TRUE);
+   else
+  if ( rc==ERROR_ACCESS_DENIED      ) SetLastError(ERROR_ACCESS_DENIED_W);    
+    else
+  if ( rc==ERROR_MORE_DATA          ) SetLastError(ERROR_MORE_DATA_W);    
+    else
+  if ( rc==ERROR_PIPE_BUSY          ) SetLastError(ERROR_PIPE_BUSY_W);    
+    else
+  if ( rc==ERROR_BAD_FORMAT         ) SetLastError(ERROR_BAD_FORMAT_W);    
+    else
+  if ( rc==ERROR_BROKEN_PIPE        ) SetLastError(ERROR_BROKEN_PIPE_W);    
+    else
+  if ( rc==ERROR_BAD_PIPE           ) SetLastError(ERROR_BAD_PIPE_W);
+    else
+  if ( rc==ERROR_PIPE_NOT_CONNECTED ) SetLastError(ERROR_PIPE_NOT_CONNECTED_W);
+    else
+  // Unknown error
+  SetLastError(ERROR_PIPE_NOT_CONNECTED_W);
+
+  return FALSE;
+}
