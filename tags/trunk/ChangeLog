@@ -1,9 +1,13 @@
-/* $Id: ChangeLog,v 1.1765 2001-10-18 11:01:41 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1766 2001-10-18 13:27:10 sandervl Exp $ */
 
  2001-10-18: Sander van Leeuwen <sandervl@xs4all.nl>
     - DDRAW:    o Check if DirectDraw object is associated with Clipper.
     - SHELL32:  o Compile fix for release build
     - USER32:   o Fix for pointer conversion
+                o Notify visible region callback when WM_SHOW arrives.
+                  For some reason we don't receive a WM_VRNENABLED message
+                  when a window is shown for the first time.
+    - KERNEL32: o Check for NULL handler in RtlRaiseException/RtlUnwind
 
  2001-10-17: knut stange osmundsen <kosmunds@csc.com>
     - common:   o Corrected bug in kFile buffering which caused impdef to
