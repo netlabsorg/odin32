@@ -1,10 +1,11 @@
-/* $Id: waveindart.cpp,v 1.5 2002-06-05 11:05:56 sandervl Exp $ */
+/* $Id: waveindart.cpp,v 1.6 2003-03-05 14:49:04 sandervl Exp $ */
 
 /*
  * Wave record class
  *
  * Copyright 2001 Sander van Leeuwen (sandervl@xs4all.nl)
  *
+ * TODO: mulaw, alaw & adpcm
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -45,7 +46,19 @@
 
 LONG APIENTRY WaveInHandler(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer, ULONG ulFlags);
 
-//TODO: mulaw, alaw & adpcm
+static BOOL fwaveInFixedBuffers = FALSE;
+
+//******************************************************************************
+// ODIN_waveInSetFixedBuffers
+//
+// Tell WINMM to use DART buffers of the same size as the first buffer delivered
+// by waveInAddBuffer
+//
+//******************************************************************************
+void WIN32API ODIN_waveInSetFixedBuffers()
+{
+    fwaveInFixedBuffers = TRUE;
+}
 /******************************************************************************/
 /******************************************************************************/
 DartWaveIn::DartWaveIn(LPWAVEFORMATEX pwfx, ULONG fdwOpen, ULONG nCallback, ULONG dwInstance)
@@ -207,9 +220,15 @@ MMRESULT DartWaveIn::start()
 
         LPWAVEHDR pwh = wavehdr;
         if(pwh) {
-            dprintf(("mix setup %d, %d\n", pwh->dwBufferLength, pwh->dwBufferLength));
-
-            ulBufSize = pwh->dwBufferLength/2;
+            if(fwaveInFixedBuffers) {
+                ulBufSize = pwh->dwBufferLength;
+            }
+            else 
+            {
+                dprintf(("mix setup %d, %d\n", pwh->dwBufferLength, pwh->dwBufferLength));
+    
+                ulBufSize = pwh->dwBufferLength/2;
+            }
             if(ulBufSize > minbufsize) {
                 dprintf(("set buffer size to %d bytes (org size = %d)", minbufsize, pwh->dwBufferLength));
                 ulBufSize = minbufsize;
@@ -386,6 +405,11 @@ ULONG DartWaveIn::getPosition()
 {
     MCI_STATUS_PARMS mciStatus = {0};
     ULONG rc, nrbytes;
+
+    if(State == STATE_STOPPED) {
+        dprintf(("Not recording; return 0 position"));
+        return 0;
+    }
 
     mciStatus.ulItem = MCI_STATUS_POSITION;
     rc = mymciSendCommand(DeviceId, MCI_STATUS, MCI_STATUS_ITEM|MCI_WAIT, (PVOID)&mciStatus, 0);
