@@ -1,8 +1,8 @@
-/* $Id: kFile.cpp,v 1.4 2000-08-31 03:00:12 bird Exp $
+/* $Id: kFile.cpp,v 1.5 2000-10-02 04:01:39 bird Exp $
  *
  * kFile - Simple (for the time being) file class.
  *
- * Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -25,7 +25,14 @@
 #include <stdarg.h>
 #include <stdio.h>
 
-#include <kFile.h>
+#include "kFile.h"
+
+/*******************************************************************************
+*   Global Variables                                                           *
+*******************************************************************************/
+kFile kFile::StdIn((HFILE)0, TRUE);
+kFile kFile::StdOut((HFILE)1, FALSE);
+kFile kFile::StdErr((HFILE)2, FALSE);
 
 
 /**
@@ -36,6 +43,9 @@
  */
 BOOL    kFile::refreshFileStatus()
 {
+    if (fStdDev)
+        return fStatusClean = TRUE;
+
     if (!fStatusClean)
     {
         rc = DosQueryFileInfo(hFile, FIL_QUERYEASIZE, &filestatus, sizeof(filestatus));
@@ -76,6 +86,32 @@ BOOL    kFile::position()
     return TRUE;
 }
 
+/**
+ * Creates a kFile object for a file that is opened allready.
+ *  Intended use for the three standard handles only.
+ *
+ * @returns     <object> with state updated.
+ * @param       pszFilename     Filename.
+ * @param       fReadOnly       TRUE:  Open the file readonly.
+ *                              FALSE: Open the file readwrite appending
+ *                                     existing files.
+ * @author      knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ */
+kFile::kFile(HFILE hFile, BOOL fReadOnly)
+:   fReadOnly(fReadOnly),
+    fStatusClean(FALSE),
+    fThrowErrors(FALSE),
+    offVirtual(0),
+    offReal(0),
+    pszFilename(NULL),
+    hFile(hFile),
+    fStdDev(TRUE)
+{
+    if (!refreshFileStatus())
+        throw ((int)rc);
+    this->pszFilename = strdup("");
+}
+
 
 /**
  * Opens a file for binary reading or readwrite.
@@ -85,7 +121,7 @@ BOOL    kFile::position()
  * @param       fReadOnly       TRUE:  Open the file readonly. (default)
  *                              FALSE: Open the file readwrite appending
  *                                     existing files.
- * @author      knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @author      knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  */
 kFile::kFile(const char *pszFilename, BOOL fReadOnly/*=TRUE*/)
 :   fReadOnly(fReadOnly),
@@ -93,7 +129,8 @@ kFile::kFile(const char *pszFilename, BOOL fReadOnly/*=TRUE*/)
     fThrowErrors(FALSE),
     offVirtual(0),
     offReal(0),
-    pszFilename(NULL)
+    pszFilename(NULL),
+    fStdDev(FALSE)
 {
     ULONG   fulOpenFlags;
     ULONG   fulOpenMode;

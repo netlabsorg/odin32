@@ -1,4 +1,4 @@
-/* $Id: kFile.h,v 1.4 2000-08-31 03:00:13 bird Exp $
+/* $Id: kFile.h,v 1.5 2000-10-02 04:01:39 bird Exp $
  *
  * kFile - Simple (for the time being) file class.
  *
@@ -25,6 +25,7 @@ protected:
     /** @cat Main datamembers */
     HFILE           hFile;              /* Pointer to stdio filehandle */
     BOOL            fReadOnly;          /* True if readonly access, False is readwrite. */
+    BOOL            fStdDev;            /* True if stdio, stderr or stdin. Filestatus is invalid with this is set.*/
     APIRET          rc;                 /* Last error (return code). */
     FILESTATUS4     filestatus;         /* Filestatus data. */
     BOOL            fStatusClean;       /* True if filestatus is clean. False is not clean */
@@ -41,8 +42,10 @@ protected:
     BOOL            refreshFileStatus() throw(int);
     BOOL            position() throw(int);
 
+    /** @cat constructors */
+private:
+    kFile(HFILE hFile, BOOL fReadOnly);
 public:
-    /** @cat constructor */
     kFile(const char *pszFilename, BOOL fReadOnly = TRUE) throw(int);
     ~kFile();
 
@@ -74,6 +77,11 @@ public:
     BOOL            setThrowOnErrors();
     BOOL            setFailOnErrors();
     int             getLastError() const;
+
+    /** standard files */
+    static kFile    StdOut;
+    static kFile    StdIn;
+    static kFile    StdErr;
 };
 
 #endif

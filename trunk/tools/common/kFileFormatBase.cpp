@@ -1,4 +1,4 @@
-/* $Id: kFileFormatBase.cpp,v 1.1 2000-03-27 10:18:40 bird Exp $
+/* $Id: kFileFormatBase.cpp,v 1.2 2000-10-02 04:01:39 bird Exp $
  *
  * kFileFormatBase - Base class for kFile<format> classes.
  *
@@ -70,3 +70,15 @@ void *kFileFormatBase::readfile(const char *pszFilename)
     }
     return pvFile;
 }
+
+/**
+ * Dump function.
+ * @returns Successindicator.
+ * @param   pOut    Output file.
+ */
+BOOL   kFileFormatBase::dump(kFile *pOut)
+{
+    pOut = pOut;
+    return FALSE;
+}
+

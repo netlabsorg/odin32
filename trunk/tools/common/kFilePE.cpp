@@ -33,6 +33,7 @@
 #include <malloc.h>
 #include <assert.h>
 #include <peexe.h>
+#include "kFile.h"
 #include "kFileFormatBase.h"
 #include "kFilePe.h"
 
@@ -44,7 +45,18 @@
  */
 kFilePE::kFilePE(FILE *phFile) throw(int) : pvBase(NULL),
     pDosHdr(NULL), pFileHdr(NULL), pOptHdr(NULL), paDataDir(NULL), paSectionHdr(NULL),
-    pExportDir(NULL)
+    pExportDir(NULL),
+    pImportDir(NULL),
+    pRsrcDir(NULL),
+    pBRelocDir(NULL),
+    pDebugDir(NULL),
+    pCopyright(NULL),
+    pulGlobalPtr(NULL),
+    pTLSDir(NULL),
+    pLoadConfigDir(NULL),
+    pBoundImportDir(NULL),
+    pIATDir(NULL),
+    pDelayImportDir(NULL)
 {
     IMAGE_DOS_HEADER doshdr;
 
@@ -92,9 +104,12 @@ kFilePE::kFilePE(FILE *phFile) throw(int) : pvBase(NULL),
                         pSectionHdr += i;
 
                         cbSection = min(pSectionHdr->Misc.VirtualSize, pSectionHdr->SizeOfRawData);
-                        if (fseek(phFile, pSectionHdr->PointerToRawData, SEEK_SET)
-                            ||
-                            fread((void*)((ULONG)pvBase + pSectionHdr->VirtualAddress), (size_t)cbSection, 1, phFile) != 1
+                        if (cbSection
+                            &&
+                             (fseek(phFile, pSectionHdr->PointerToRawData, SEEK_SET)
+                             ||
+                             fread((void*)((ULONG)pvBase + pSectionHdr->VirtualAddress), (size_t)cbSection, 1, phFile) != 1
+                             )
                             )
                         {
                             /* error */
@@ -119,8 +134,20 @@ kFilePE::kFilePE(FILE *phFile) throw(int) : pvBase(NULL),
                     paSectionHdr = (PIMAGE_SECTION_HEADER)((int)paDataDir +
                                                            pOptHdr->NumberOfRvaAndSizes*sizeof(*paDataDir));
 
-                    if (paDataDir[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress)
-                        pExportDir = (PIMAGE_EXPORT_DIRECTORY)((int)pvBase + paDataDir[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress);
+                    //if (paDataDir[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress)
+                    //    pExportDir = (PIMAGE_EXPORT_DIRECTORY)((int)pvBase + paDataDir[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress);
+                    for (i = 0; i < pOptHdr->NumberOfRvaAndSizes && i < 16; i++)
+                    {
+                        if (paDataDir[i].VirtualAddress != 0)
+                        {
+                            if (paDataDir[i].VirtualAddress < pOptHdr->SizeOfImage)
+                                ((PULONG)&this->pExportDir)[i] = (int)pvBase + paDataDir[i].VirtualAddress;
+                            #ifdef DEBUG
+                            else
+                                fprintf(stderr, "bad directory pointer %d\n", i);
+                            #endif
+                        }
+                    }
                 }
                 else
                     throw(4);
@@ -225,4 +252,142 @@ BOOL  kFilePE::findNextExport(PEXPORTENTRY pExport)
     return TRUE;
 }
 
+
+/**
+ * Mini dump function.
+ */
+BOOL  kFilePE::dump(kFile *pOut)
+{
+    int i,j,k;
+    int c;
+
+    /*
+     * Dump sections.
+     */
+    pOut->printf("Sections\n"
+                 "--------\n");
+    for (i = 0; i < pFileHdr->NumberOfSections; i++)
+    {
+        pOut->printf("%2d  %-8.8s  VirtSize: 0x%08x  RVA: 0x%08x\n"
+                     "    RawSize:  0x%08x  FileOffset: 0x%08x\n"
+                     "    #Relocs:  0x%08x  FileOffset: 0x%08x\n"
+                     "    #LineNbr: 0x%08x  FileOffset: 0x%08x\n"
+                     "    Characteristics: 0x%08x\n",
+                     i,
+                     paSectionHdr[i].Name,
+                     paSectionHdr[i].Misc.VirtualSize,
+                     paSectionHdr[i].VirtualAddress,
+                     paSectionHdr[i].PointerToRawData,
+                     paSectionHdr[i].PointerToRawData,
+                     paSectionHdr[i].NumberOfRelocations,
+                     paSectionHdr[i].PointerToRelocations,
+                     paSectionHdr[i].NumberOfLinenumbers,
+                     paSectionHdr[i].PointerToLinenumbers,
+                     paSectionHdr[i].Characteristics
+                     );
+
+    }
+
+
+    /*
+     * Dump the directories.
+     */
+    pOut->printf("Data Directory\n"
+                 "--------------\n");
+    for (i = 0; i < pOptHdr->NumberOfRvaAndSizes; i++)
+    {
+        static const char * apszDirectoryNames[] =
+        {
+            "Export",
+            "Import",
+            "Resource",
+            "Exception",
+            "Security",
+            "Base Reloc",
+            "Debug",
+            "Copyright",
+            "Global Ptr",
+            "TLS",
+            "Load Config",
+            "Bound Import",
+            "IAT",
+            "Delay Import",
+            "COM Descriptor",
+            "unknown",
+            "unknown"
+        };
+
+        pOut->printf("%2d  %-16s  Size: 0x%08x  RVA: 0x%08x\n",
+                     i,
+                     apszDirectoryNames[i],
+                     pOptHdr->DataDirectory[i].Size,
+                     pOptHdr->DataDirectory[i].VirtualAddress);
+    }
+    pOut->printf("\n");
+
+
+    /*
+     * Dump TLS directory if present
+     */
+    if (pTLSDir)
+    {
+        pOut->printf("TLS Directory\n"
+                     "-------------\n");
+        if (pOptHdr->DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].Size % sizeof(IMAGE_TLS_DIRECTORY))
+            pOut->printf(" Warning! The size directory isn't a multiple of the directory struct!");
+
+        c = (int)(pOptHdr->DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].Size / sizeof(IMAGE_TLS_DIRECTORY));
+        for (i = 0; i < c; i++)
+        {
+
+            pOut->printf("%2d  StartAddressOfRawData %p\n"
+                         "    EndAddressOfRawData   %p\n"
+                         "    AddressOfIndex        %p\n"
+                         "    AddressOfCallBacks    %p\n"
+                         "    SizeOfZeroFill        %p\n"
+                         "    Characteristics       %p\n",
+                         i,
+                         pTLSDir[i].StartAddressOfRawData,
+                         pTLSDir[i].EndAddressOfRawData,
+                         pTLSDir[i].AddressOfIndex,
+                         pTLSDir[i].AddressOfCallBacks,
+                         pTLSDir[i].SizeOfZeroFill,
+                         pTLSDir[i].Characteristics);
+
+            /* Print Callbacks */
+            if (pTLSDir[i].AddressOfCallBacks)
+            {
+                PULONG  paulIndex;
+                PULONG  paulCallback;
+                ULONG   ulBorlandRVAFix = 0UL;
+
+                /* Check if the addresses in the TLSDir is RVAs or real addresses */
+                if (pTLSDir[i].StartAddressOfRawData > pOptHdr->ImageBase)
+                    ulBorlandRVAFix = pOptHdr->ImageBase;
+
+                j = 0;
+                paulIndex    = (PULONG)((ULONG)pTLSDir[i].AddressOfIndex - ulBorlandRVAFix + (ULONG)this->pvBase);
+                paulCallback = (PULONG)((ULONG)pTLSDir[i].AddressOfCallBacks - ulBorlandRVAFix + (ULONG)this->pvBase);
+                if (*paulCallback)
+                {
+                    pOut->printf("    Callbacks:\n");
+                    for (j = 0; paulCallback[j] != 0; j++)
+                    {
+                        pOut->printf("      %02d  Address: 0x%08x  Index: 0x%08x\n",
+                                     paulIndex[j],
+                                     paulCallback[j]);
+                    }
+                }
+                else
+                    pOut->printf("    (Empty callback array!)\n");
+            }
+
+        }
+
+        pOut->printf("\n");
+    }
+
+
+    return TRUE;
+}
 

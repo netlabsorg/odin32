@@ -1,4 +1,4 @@
-/* $Id: kFileFormatBase.h,v 1.3 2000-08-31 03:00:13 bird Exp $
+/* $Id: kFileFormatBase.h,v 1.4 2000-10-02 04:01:39 bird Exp $
  *
  * kFileFormatBase - Base class for kFile<format> classes.
  *
@@ -22,6 +22,8 @@
 *   Structures and Typedefs                                                   *
 ******************************************************************************/
 #pragma pack(4)
+
+class kFile;
 
 /**
  * ExportEntry used by the findFirstExport/findNextExport functions
@@ -56,6 +58,7 @@ public:
     virtual BOOL  isLx() const  { return FALSE;}
 
     static void * readfile(const char *pszFilename);
+    virtual BOOL  dump(kFile *pOut);
 };
 
 #pragma pack()
