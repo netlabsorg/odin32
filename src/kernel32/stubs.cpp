@@ -1,4 +1,4 @@
-/* $Id: stubs.cpp,v 1.11 1999-12-01 18:40:48 sandervl Exp $ */
+/* $Id: stubs.cpp,v 1.12 1999-12-09 11:00:40 sandervl Exp $ */
 
 /*
  * Win32 KERNEL32 Subsystem for OS/2
@@ -1546,67 +1546,6 @@ DWORD WIN32API EraseTape( HANDLE hDevice, DWORD dwEraseType, BOOL bImmediate)
   return (ERROR_NOT_SUPPORTED);
 }
 
-/*****************************************************************************
- * Name      : DWORD WIN32API ExpandEnvironmentStringsA
- * Purpose   : The ExpandEnvironmentStringsA function expands environment-variable
- *             strings and replaces them with their defined values.
- * Parameters: LPCSTR lpSrc  pointer to string with environment variables
- *             LPSTR lpDst   pointer to string with expanded environment variables
- *             DWORD nSize   maximum characters in expanded string
- * Variables :
- * Result    : If the function succeeds, the return value is the number of
- *             characters stored in the destination buffer. If the number of
- *             characters is greater than the size of the destination buffer,
- *             the return value is the size of the buffer required to hold
- *             the expanded strings.
- *             If the function fails, the return value is zero
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Markus Montkowski [Tha, 1998/05/21 20:57]
- *****************************************************************************/
-
-DWORD WIN32API ExpandEnvironmentStringsA(LPCSTR lpSrc,LPSTR lpDst,DWORD nSize)
-{
-
-  dprintf(("KERNEL32:ExpandEnvironmentStringsA(%08x,%08x,%08x) not implemented\n",
-           lpSrc, lpDst, nSize
-          ));
-
-  return (0);
-}
-
-/*****************************************************************************
- * Name      : DWORD WIN32API ExpandEnvironmentStringsW
- * Purpose   : The ExpandEnvironmentStringsA function expands environment-variable
- *             strings and replaces them with their defined values.
- * Parameters: LPCWSTR lpSrc  pointer to string with environment variables
- *             LPWSTR lpDst   pointer to string with expanded environment variables
- *             DWORD nSize   maximum characters in expanded string
- * Variables :
- * Result    : If the function succeeds, the return value is the number of
- *             characters stored in the destination buffer. If the number of
- *             characters is greater than the size of the destination buffer,
- *             the return value is the size of the buffer required to hold
- *             the expanded strings.
- *             If the function fails, the return value is zero
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Markus Montkowski [Tha, 1998/05/21 20:57]
- *****************************************************************************/
-
-DWORD WIN32API ExpandEnvironmentStringsW(LPCWSTR lpSrc,
-                                            LPWSTR lpDst,
-                                            DWORD nSize)
-{
-
-  dprintf(("KERNEL32:ExpandEnvironmentStringsW(%08x,%08x,%08x) not implemented\n",
-           lpSrc, lpDst, nSize
-          ));
-
-  return (0);
-}
 
 /*****************************************************************************
  * Name      : HANDLE WIN32API FindFirstChangeNotificationW
