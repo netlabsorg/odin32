@@ -1,7 +1,9 @@
-/* $Id: changelog,v 1.1424 2001-05-19 09:05:25 sandervl Exp $ */
+/* $Id: changelog,v 1.1425 2001-05-19 09:12:19 sandervl Exp $ */
 
  2001-05-19: Sander van Leeuwen <sandervl@xs4all.nl>
     - WS2_32:   o Added more exports
+    - KERNEL32: o Export TryEnterCriticalSection
+    - SHLWAPI:  o Export SHSetValueW
 
  2001-05-19: Dietrich Teickner <Dietrich_Teickner@t-online.de>
     - KERNEL32: o LOCALE_IFIRSTDAYOFWEEK fix (GetLocaleInfo)
