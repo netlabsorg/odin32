@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.h,v 1.15 2001-10-03 18:37:52 sandervl Exp $ */
+/* $Id: oslibmsg.h,v 1.16 2001-10-24 15:41:53 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -38,6 +38,8 @@ DWORD OSLibWinGetMessagePos();
 LONG  OSLibWinGetMessageTime();
 BOOL  OSLibWinReplyMessage(ULONG result);
 ULONG OSLibWinQueryQueueStatus();
+
+void  SetMenuDoubleClick(BOOL fSet);
 
 BOOL  OSLibPostThreadMessage(ULONG threadid, UINT msg, WPARAM wParam, LPARAM lParam, BOOL fUnicode);
 BOOL  OSLibPostMessage(HWND hwnd, ULONG msg, ULONG wParam, ULONG lParam, BOOL fUnicode);

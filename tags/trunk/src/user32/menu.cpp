@@ -1,4 +1,4 @@
-/* $Id: menu.cpp,v 1.38 2001-10-16 14:49:45 sandervl Exp $*/
+/* $Id: menu.cpp,v 1.39 2001-10-24 15:41:53 sandervl Exp $*/
 /*
  * Menu functions
  *
@@ -34,6 +34,7 @@
 #include <objhandle.h>
 #include "pmwindow.h"
 #include "win32wmisc.h"
+#include "oslibmsg.h"
 
 #define DBG_LOCALLOG    DBG_menu
 #include "dbglocal.h"
@@ -2826,9 +2827,15 @@ static INT MENU_TrackMenu(HMENU hmenu,UINT wFlags,INT x,INT y,HWND hwnd,BOOL inM
         fEndMenu = !fRemove;
     }
 
-    //EVENT_Capture( mt.hOwnerWnd, HTMENU ); //CB: todo
+#ifdef __WIN32OS2__
     //SvL: Set keyboard & mouse event capture
     SetCapture(mt.hOwnerWnd);
+    //SetCapture breaks system menu (double click), must generate double
+    //clicks manually
+    SetMenuDoubleClick(TRUE);
+#else
+    EVENT_Capture( mt.hOwnerWnd, HTMENU );
+#endif
 
     while (!fEndMenu)
     {
@@ -2837,9 +2844,12 @@ static INT MENU_TrackMenu(HMENU hmenu,UINT wFlags,INT x,INT y,HWND hwnd,BOOL inM
 
         /* we have to keep the message in the queue until it's
          * clear that menu loop is not over yet. */
-//        if (!GetMessageA(&msg,msg.hwnd,0,0)) break;
+#ifdef __WIN32OS2__
         //SvL: Getting messages for only the menu delays background paints (i.e. VPBuddy logo)
         if (!GetMessageA(&msg,0,0,0)) break;
+#else
+        if (!GetMessageA(&msg,msg.hwnd,0,0)) break;
+#endif
         TranslateMessage( &msg );
         mt.pt = msg.pt;
 
@@ -2867,6 +2877,10 @@ static INT MENU_TrackMenu(HMENU hmenu,UINT wFlags,INT x,INT y,HWND hwnd,BOOL inM
                 case WM_LBUTTONDBLCLK:
                     if (bSysMenu && (hmenu == mt.hTopMenu))
                     {
+#ifdef __WIN32OS2__
+                        //double click on system menu -> close application
+                        PostMessageA(hwnd, WM_SYSCOMMAND,SC_CLOSE, msg.lParam);
+#endif
                         fEndMenu = TRUE;
                         break;
                     }
@@ -3061,9 +3075,9 @@ static INT MENU_TrackMenu(HMENU hmenu,UINT wFlags,INT x,INT y,HWND hwnd,BOOL inM
         }
         else if (msg.message == WM_SYSCOMMAND)
         {
-                /* The user clicked on the system menu/button */
-        fEndMenu = TRUE;
-        break;
+            /* The user clicked on the system menu/button */
+            fEndMenu = TRUE;
+            break;
         }
         else
         {
@@ -3078,8 +3092,10 @@ static INT MENU_TrackMenu(HMENU hmenu,UINT wFlags,INT x,INT y,HWND hwnd,BOOL inM
             PeekMessageA( &msg, 0, msg.message, msg.message, PM_REMOVE );
         else mt.trackFlags &= ~TF_SKIPREMOVE;
     }
-
+#ifdef __WIN32OS2__
+    SetMenuDoubleClick(FALSE);
     ReleaseCapture();
+#endif
 
     menu = MENU_GetMenu(mt.hTopMenu);
 
