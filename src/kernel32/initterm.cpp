@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.44 2000-08-11 10:56:16 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.45 2000-09-02 21:14:50 bird Exp $ */
 
 /*
  * KERNEL32 DLL entry point
@@ -50,9 +50,11 @@
 #include <exitlist.h>
 #include "oslibdos.h"
 #include <cpuhlp.h>
+#include <Win32k.h>
 
-#define DBG_LOCALLOG	DBG_initterm
+#define DBG_LOCALLOG    DBG_initterm
 #include "dbglocal.h"
+
 
 /*-------------------------------------------------------------------*/
 /* A clean up routine registered with DosExitList must be used if    */
@@ -106,39 +108,42 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
     switch (ulFlag)
     {
         case 0 :
-	{
-	    ParseLogStatus();
+        {
+            libWin32kInit();
+
+            ParseLogStatus();
 
             loadNr = globLoadNr++;
 
-	    strcpy(kernel32Path, OSLibGetDllName(hModule));
-	    char *endofpath = strrchr(kernel32Path, '\\');
-	    *(endofpath+1) = 0;
+            strcpy(kernel32Path, OSLibGetDllName(hModule));
+            char *endofpath = strrchr(kernel32Path, '\\');
+            *(endofpath+1) = 0;
             dprintf(("kernel32 init\n"));
             _ctordtorInit();
 
             CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
 
-	    OpenPrivateLogFiles();
+            OpenPrivateLogFiles();
 
-            if(InitializeSharedHeap() == FALSE)
+            if (InitializeSharedHeap() == FALSE)
                 return 0UL;
 
-            if(InitializeCodeHeap() == FALSE)
+            if (InitializeCodeHeap() == FALSE)
                 return 0UL;
 
             PROFILE_LoadOdinIni();
             dllHandle = RegisterLxDll(hModule, 0, (PVOID)&_Resource_PEResTab);
-            if(dllHandle == 0)
+            if (dllHandle == 0)
                 return 0UL;
 
-	    //SvL: Kernel32 is a special case; pe.exe loads it, so increase
+            //SvL: Kernel32 is a special case; pe.exe loads it, so increase
             //     the reference count here
-  	    Win32DllBase *module = Win32DllBase::findModule(dllHandle);
-  	    if(module) {
-		module->AddRef();
-		module->DisableUnload();
-	    }
+            Win32DllBase *module = Win32DllBase::findModule(dllHandle);
+            if (module)
+            {
+                module->AddRef();
+                module->DisableUnload();
+            }
 
             /*******************************************************************/
             /* A DosExitList routine must be used to clean up if runtime calls */
@@ -155,34 +160,37 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
             {
                 flAllocMem = PAG_ANY;      // high memory support. Let's use it!
                 ulMaxAddr = ulSysinfo * (1024*1024);
-		OSLibInitWSeBFileIO();
+                OSLibInitWSeBFileIO();
             }
             else
                 flAllocMem = 0;        // no high memory support
 
-	    OSLibDosSetInitialMaxFileHandles(ODIN_DEFAULT_MAX_FILEHANDLES);
+            OSLibDosSetInitialMaxFileHandles(ODIN_DEFAULT_MAX_FILEHANDLES);
 
             //SvL: Do it here instead of during the exe object creation
             //(std handles can be used in win32 dll initialization routines
             HMInitialize();             /* store standard handles within HandleManager */
-            InitializeTIB(TRUE); 	//MUST be done after HMInitialize!
+            InitializeTIB(TRUE);    //MUST be done after HMInitialize!
             InitDirectories();
             RegisterDevices();
-	    Win32DllBase::setDefaultRenaming();
+            Win32DllBase::setDefaultRenaming();
             rc = DosQuerySysInfo(QSV_NUMPROCESSORS, QSV_NUMPROCESSORS, &ulSysinfo, sizeof(ulSysinfo));
-            if (rc != 0) 
-		ulSysinfo = 1;
+            if (rc != 0)
+                ulSysinfo = 1;
 
             InitSystemInfo(ulSysinfo);
-	    //Set up environment as found in NT
+            //Set up environment as found in NT
             InitEnvironment(ulSysinfo);
             break;
-	}
+        }
+
         case 1 :
-            if(dllHandle) {
-            	UnregisterLxDll(dllHandle);
-            }
-            break;
+        if (dllHandle)
+        {
+            UnregisterLxDll(dllHandle);
+        }
+        break;
+
         default  :
             return 0UL;
     }
