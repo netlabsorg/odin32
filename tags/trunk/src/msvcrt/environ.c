@@ -22,6 +22,7 @@
  */
 #ifdef __WIN32OS2__
 #include <winbase.h>
+#include <string.h>
 #endif
 
 #include "wine/unicode.h"
@@ -43,12 +44,14 @@ char *MSVCRT_getenv(const char *name)
   char *pp,*pos = NULL;
   unsigned int length=strlen(name);
 
+  dprintf(("MSVCRT: %s",name));
+
   for (pp = environ; (*pp); pp = pp + strlen(pp) +1)
   {
       pos =strchr(pp,'=');
       if ((pos) && ((pos - pp) == length))
       {
-          if (!strncasecmp(pp,name,length)) break;
+          if (!_strnicmp(pp,name,length)) break;
       }
   }
   if ((*pp)&& (pos))
@@ -70,6 +73,8 @@ MSVCRT_wchar_t *_wgetenv(const MSVCRT_wchar_t *name)
   MSVCRT_wchar_t* environ = GetEnvironmentStringsW();
   MSVCRT_wchar_t* pp,*pos = NULL;
   unsigned int length=strlenW(name);
+
+  dprintf(("MSVCRT: _wgetenv %s",debugstr_w(name)));  
 
   for (pp = environ; (*pp); pp = pp + strlenW(pp) + 1)
   {
@@ -94,7 +99,7 @@ MSVCRT_wchar_t *_wgetenv(const MSVCRT_wchar_t *name)
 /*********************************************************************
  *		_putenv (MSVCRT.@)
  */
-int _putenv(const char *str)
+int MSVCRT__putenv(const char *str)
 {
  char name[256], value[512];
  char *dst = name;

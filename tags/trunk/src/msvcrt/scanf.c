@@ -27,11 +27,12 @@
 #include "winternl.h"
 #include "msvcrt.h"
 #include "msvcrt/conio.h"
+#include "msvcrt/ctype.h"
 #include "msvcrt/io.h"
 #include "msvcrt/stdio.h"
 #include "msvcrt/wctype.h"
 #include "wine/debug.h"
-
+#include <ctype.h>
 WINE_DEFAULT_DEBUG_CHANNEL(msvcrt);
 
 /* helper function for *scanf.  Returns the value of character c in the

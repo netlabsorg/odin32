@@ -31,8 +31,10 @@ extern DWORD MSVCRT_tls_index;
 
 typedef struct __MSVCRT_thread_data
 {
-    int                      errno;
+    int                      msv_errno;
     unsigned long            doserrno;
+    char                    *mbstok_next;        /* next ptr for mbstok() */
+    char                    *efcvt_buffer;       /* buffer for ecvt/fcvt */
     terminate_function       terminate_handler;
     unexpected_function      unexpected_handler;
     _se_translator_function  se_translator;
@@ -106,5 +108,25 @@ extern void msvcrt_init_vtables(void);
 #define _RT_TLOSS       122
 #define _RT_CRNL        252
 #define _RT_BANNER      255
+
+/* Signal types */
+
+#define SIGINT_W          2       /* interrupt */
+#define SIGILL_W          4       /* illegal instruction - invalid function image */
+#define SIGFPE_W          8       /* floating point exception */
+#define SIGSEGV_W         11      /* segment violation */
+#define SIGTERM_W         15      /* Software termination signal from kill */
+#define SIGBREAK_W        21      /* Ctrl-Break sequence */
+#define SIGABRT_W         22      /* abnormal termination triggered by abort call */
+
+#define SIG_DFL_W (void (__cdecl *)(int))0           /* default signal action */
+#define SIG_IGN_W (void (__cdecl *)(int))1           /* ignore signal */
+#define SIG_SGE_W (void (__cdecl *)(int))3           /* signal gets error */
+#define SIG_ACK_W (void (__cdecl *)(int))4           /* acknowledge */
+
+/* signal error value (returned by signal call on error) */
+
+#define SIG_ERR (void (__cdecl *)(int))-1          /* signal error value */
+
 
 #endif /* __WINE_MSVCRT_H */
