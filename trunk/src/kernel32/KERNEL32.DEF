@@ -1,4 +1,4 @@
-; $Id: KERNEL32.DEF,v 1.113 2001-07-07 13:58:36 sandervl Exp $
+; $Id: KERNEL32.DEF,v 1.114 2001-07-09 07:58:12 sandervl Exp $
 
 ;Basis is Windows95 KERNEL32
 LIBRARY KERNEL32 INITINSTANCE TERMINSTANCE
@@ -33,6 +33,23 @@ IMPORTS
   WinXxCreateHeap               = PMMERGE.5425
   WinXxDestroyHeap              = PMMERGE.5426
   LookupAtom                    = PMMERGE.10020
+
+  _O32_RegCloseKey              = REGISTRY.1
+  _O32_RegCreateKey             = REGISTRY.3
+  _O32_RegCreateKeyEx           = REGISTRY.4
+  _O32_RegDeleteKey             = REGISTRY.7
+  _O32_RegDeleteValue           = REGISTRY.9
+  _O32_RegEnumKey               = REGISTRY.11
+  _O32_RegEnumKeyEx             = REGISTRY.12
+  _O32_RegEnumValue             = REGISTRY.15
+  _O32_RegFlushKey              = REGISTRY.17
+  _O32_RegOpenKey               = REGISTRY.22
+  _O32_RegOpenKeyEx             = REGISTRY.23
+  _O32_RegQueryInfoKey          = REGISTRY.26
+  _O32_RegQueryValue            = REGISTRY.30
+  _O32_RegQueryValueEx          = REGISTRY.31
+  _O32_RegSetValue              = REGISTRY.42
+  _O32_RegSetValueEx            = REGISTRY.43
 
 EXPORTS
 
