@@ -51,9 +51,21 @@ HANDLE RICHED32_hHeap = (HANDLE)NULL;
                      , \
                      hwnd, (UINT)wParam, (UINT)lParam)
 
+
+static INT CALLBACK EDIT_WordBreakProc(LPWSTR s, INT index, INT count, INT action);
+
 #ifdef __WIN32OS2__
+#include <dbglog.h>
+
 #define RICHEDIT_WND_PROP	"RICHEDIT_PROP"
 
+FARPROC  pfnEditProcA = (FARPROC)DefWindowProcA;
+FARPROC  pfnEditProcW = (FARPROC)DefWindowProcW;
+
+typedef struct {
+  CHARFORMAT2A cf;
+  HBRUSH       hbrBackground;
+} RICHEDIT_INFO;
 #endif
 
 /***********************************************************************
@@ -113,94 +125,61 @@ static LRESULT WINAPI RICHED32_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam,
     LONG newstyle = 0;
     LONG style = 0;
 
-#ifdef __WIN32OS2__
-    HWND hwndEdit;
-    HWND hwndParent;
+    HWND hwndParent = GetParent(hwnd);
     char* rtfBuffer;
     HANDLE hProp = 0;
     int rtfBufferSize;
 
     CHARRANGE *cr;
-#else
-    static HWND hwndEdit;
-    static HWND hwndParent;
-    static char* rtfBuffer;
-    int rtfBufferSize;
+    FARPROC pfnEditProc;
 
-    CHARRANGE *cr;
-    TRACE("previous hwndEdit: %p hwndParent %p\n",hwndEdit,hwndParent);
-#endif
-    hwndEdit = GetWindow(hwnd,GW_CHILD);
-    TRACE("uMsg: 0x%x hwnd: %p hwndEdit: %p\n",uMsg,hwnd,hwndEdit);
+    TRACE("uMsg: 0x%x hwnd: %p",uMsg,hwnd);
+
+    if(IsWindowUnicode(hwnd)) {
+         pfnEditProc = pfnEditProcW;
+    } 
+    else pfnEditProc = pfnEditProcA;
 
     switch (uMsg)
     {
 
     case WM_CREATE :
-	    DPRINTF_EDIT_MSG32("WM_CREATE");
+    {
+        RICHEDIT_INFO *prinfo;
+        LRESULT ret;
 
-	    /* remove SCROLLBARS from the current window style */
-	    hwndParent = ((LPCREATESTRUCTA) lParam)->hwndParent;
+        DPRINTF_EDIT_MSG32("WM_CREATE");
 
-	    newstyle = style = ((LPCREATESTRUCTA) lParam)->style;
-            newstyle &= ~WS_HSCROLL;
-            newstyle &= ~WS_VSCROLL;
-            newstyle &= ~ES_AUTOHSCROLL;
-            newstyle &= ~ES_AUTOVSCROLL;
+        ret = pfnEditProc(hwnd, WM_CREATE, wParam, lParam);
+        if(ret) return ret; /* window creation cancelled */
 
-    TRACE("previous hwndEdit: %p\n",hwndEdit);
-            hwndEdit = CreateWindowA ("edit", ((LPCREATESTRUCTA) lParam)->lpszName,
-                                   style, 0, 0, 0, 0,
-                                   hwnd, (HMENU) ID_EDIT,
-                                   ((LPCREATESTRUCTA) lParam)->hInstance, NULL) ;
-    TRACE("hwndEdit: %p hwnd: %p\n",hwndEdit,hwnd);
+        hProp = GlobalAlloc(GMEM_MOVEABLE|GMEM_ZEROINIT, sizeof(RICHEDIT_INFO));
+        SetPropA(hwnd, RICHEDIT_WND_PROP, hProp);          
+        return 0 ;
+    }
 
-	    SetWindowLongA(hwnd,GWL_STYLE, newstyle);
-#ifdef __WIN32OS2__
-          {
-            CHARFORMAT2A *pcf;
+    case WM_DESTROY:
+    {
+        RICHEDIT_INFO *prinfo;
 
-            hProp = GlobalAlloc(GMEM_MOVEABLE|GMEM_ZEROINIT, sizeof(CHARFORMAT2A));
-            SetPropA(hwnd, RICHEDIT_WND_PROP, hProp);
-            pcf = (CHARFORMAT2A *)GlobalLock(hProp);
-            if(pcf) {
-                pcf->cbSize = sizeof(CHARFORMAT2A);
-                GlobalUnlock(hProp);
-            }
-          }
-#endif
-            return 0 ;
+        hProp = GetPropA(hwnd, RICHEDIT_WND_PROP);
+        prinfo = (RICHEDIT_INFO *)GlobalLock(hProp);
+        if(prinfo) {
+            //Destroy old brush if present
+            if(prinfo->hbrBackground) DeleteObject(prinfo->hbrBackground);
+            GlobalUnlock(hProp);
+        }
 
-    case WM_SETFOCUS :
-	    DPRINTF_EDIT_MSG32("WM_SETFOCUS");
-            SetFocus (hwndEdit) ;
-            return 0 ;
+        if(hProp) GlobalFree(hProp);
+        RemovePropA(hwnd, RICHEDIT_WND_PROP);
 
-    case WM_SIZE :
-            DPRINTF_EDIT_MSG32("WM_SIZE");
-            MoveWindow (hwndEdit, 0, 0, LOWORD (lParam), HIWORD (lParam), TRUE) ;
-            return 0 ;
+        return pfnEditProc(hwnd, uMsg, wParam, lParam);
+    }
 
-    case WM_COMMAND :
-        DPRINTF_EDIT_MSG32("WM_COMMAND");
-	switch(HIWORD(wParam)) {
-		case EN_CHANGE:
-		case EN_HSCROLL:
-		case EN_KILLFOCUS:
-		case EN_SETFOCUS:
-		case EN_UPDATE:
-		case EN_VSCROLL:
-			return SendMessageA(hwndParent, WM_COMMAND,
-				wParam, (LPARAM)(hwnd));
-
-		case EN_ERRSPACE:
-		case EN_MAXTEXT:
-			MessageBoxA (hwnd, "RichEdit control out of space.",
-                                  "ERROR", MB_OK | MB_ICONSTOP) ;
-			return 0 ;
-		}
+    /* Messages specific to Richedit controls */
 
     case EM_STREAMIN:
+    {
             DPRINTF_EDIT_MSG32("EM_STREAMIN");
 
 	    /* setup the RTF parser */
@@ -218,16 +197,15 @@ static LRESULT WINAPI RICHED32_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam,
 	    if(rtfBuffer)
 	    {
 	    	RTFToBuffer(rtfBuffer, rtfBufferSize);
-            	SetWindowTextA(hwndEdit,rtfBuffer);
+            	SetWindowTextA(hwnd,rtfBuffer);
 	    	HeapFree(RICHED32_hHeap, 0,rtfBuffer);
 	    }
 	    else
 		WARN("Not enough memory for a allocating rtfBuffer\n");
 
             return 0;
-
-/* Messages specific to Richedit controls */
-
+    }
+ 
     case EM_AUTOURLDETECT:
             DPRINTF_EDIT_MSG32("EM_AUTOURLDETECT Ignored");
 	    return 0;
@@ -247,7 +225,7 @@ static LRESULT WINAPI RICHED32_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam,
     case EM_EXGETSEL:
             DPRINTF_EDIT_MSG32("EM_EXGETSEL -> EM_GETSEL");
             cr = (VOID *) lParam;
-            if (hwndEdit) SendMessageA( hwndEdit, EM_GETSEL, (INT)&cr->cpMin, (INT)&cr->cpMax);
+            pfnEditProc( hwnd, EM_GETSEL, (INT)&cr->cpMin, (INT)&cr->cpMax);
             TRACE("cpMin: 0x%x cpMax: 0x%x\n",(INT)cr->cpMin,(INT)cr->cpMax);
             return 0;
 
@@ -259,18 +237,17 @@ static LRESULT WINAPI RICHED32_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam,
            {
                 limit = 0xFFFFFFFF;
            }
-           return SendMessageA(hwndEdit,EM_SETLIMITTEXT,limit,0);
+           return pfnEditProc(hwnd,EM_SETLIMITTEXT,limit,0);
         }
 
     case EM_EXLINEFROMCHAR:
             DPRINTF_EDIT_MSG32("EM_EXLINEFROMCHAR -> LINEFROMCHAR");
-            if (hwndEdit) return SendMessageA( hwndEdit, EM_LINEFROMCHAR, lParam, wParam);
-            return 0;
+            return pfnEditProc( hwnd, EM_LINEFROMCHAR, lParam, wParam);
 
     case EM_EXSETSEL:
             DPRINTF_EDIT_MSG32("EM_EXSETSEL -> EM_SETSEL");
             cr = (VOID *) lParam;
-            if (hwndEdit) SendMessageA( hwndEdit, EM_SETSEL, cr->cpMin, cr->cpMax);
+            pfnEditProc( hwnd, EM_SETSEL, cr->cpMin, cr->cpMax);
             return 0;
 
     case EM_FINDTEXT:
@@ -290,8 +267,29 @@ static LRESULT WINAPI RICHED32_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam,
             return 0;
 
     case EM_FINDWORDBREAK:
-            DPRINTF_EDIT_MSG32("EM_FINDWORDBREAK Ignored");
-            return 0;
+    {
+            DWORD ret = 0;
+            DWORD len = GetWindowTextLengthA(hwnd);
+            LPWSTR lpszText = (LPWSTR)HeapAlloc(RICHED32_hHeap, 0, (len+1)*sizeof(WCHAR));
+
+            if(lpszText == NULL) {
+                DebugInt3();
+                return 0;
+            }
+            lpszText[0] = 0;
+            GetWindowTextW(hwnd, lpszText, len);
+
+            DPRINTF_EDIT_MSG32("EM_FINDWORDBREAK: partly implemented");
+            switch(wParam) {
+            case WB_ISDELIMITER:
+            case WB_LEFT:
+            case WB_RIGHT:
+                ret = EDIT_WordBreakProc(lpszText, lParam, len, wParam);
+                break;
+            }
+            HeapFree(RICHED32_hHeap, 0, lpszText);
+            return ret;
+    }
 
     case EM_FORMATRANGE:
             DPRINTF_EDIT_MSG32("EM_FORMATRANGE Ignored");
@@ -359,7 +357,7 @@ static LRESULT WINAPI RICHED32_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam,
 
     case EM_GETSELTEXT:
             DPRINTF_EDIT_MSG32("EM_GETSELTEXT");
-            return RICHEDIT_GetSelText(hwndEdit,(void *)lParam);
+            return RICHEDIT_GetSelText(hwnd,(void *)lParam);
 
     case EM_GETTEXTEX:
             DPRINTF_EDIT_MSG32("EM_GETTEXTEX Ignored");
@@ -375,7 +373,7 @@ static LRESULT WINAPI RICHED32_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam,
 
     case EM_GETTEXTRANGE:
             DPRINTF_EDIT_MSG32("EM_GETTEXTRANGE");
-            return RICHEDIT_GetTextRange(hwndEdit,(TEXTRANGEA *)lParam);
+            return RICHEDIT_GetTextRange(hwnd,(TEXTRANGEA *)lParam);
 
     case EM_GETTYPOGRAPHYOPTIONS:
             DPRINTF_EDIT_MSG32("EM_GETTYPOGRAPHYOPTIONS Ignored");
@@ -426,71 +424,68 @@ static LRESULT WINAPI RICHED32_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam,
             return 0;
 
     case EM_SETBKGNDCOLOR:
-#ifdef __WIN32OS2__
-{
-            CHARFORMAT2A *pcf;
+    {
+            RICHEDIT_INFO *prinfo;
+
+            DPRINTF_EDIT_MSG32("EM_SETBKGNDCOLOR");
 
             hProp = GetPropA(hwnd, RICHEDIT_WND_PROP);
-            pcf = (CHARFORMAT2A *)GlobalLock(hProp);
-            if(pcf) 
+            prinfo = (RICHEDIT_INFO *)GlobalLock(hProp);
+            if(prinfo) 
             {
-                pcf->dwMask     |= CFM_BACKCOLOR;
-                pcf->crBackColor = (wParam) ? GetSysColor(COLOR_BACKGROUND) : (COLORREF)lParam;
+                prinfo->cf.dwMask     |= CFM_BACKCOLOR;
+                prinfo->cf.crBackColor = (wParam) ? GetSysColor(COLOR_BACKGROUND) : (COLORREF)lParam;
 
                 //Destroy old brush if present
-                if(pcf->dwReserved) DeleteObject(pcf->dwReserved);
+                if(prinfo->hbrBackground) DeleteObject(prinfo->hbrBackground);
 
                 //Create a brush that we return in WM_CTLCOLORSTATIC
-                pcf->dwReserved  = (DWORD)CreateSolidBrush(pcf->crBackColor);
+                prinfo->hbrBackground  = (DWORD)CreateSolidBrush(prinfo->cf.crBackColor);
  
-                dprintf(("Set background color to %x brush %x", pcf->crBackColor, pcf->dwReserved));
+                dprintf(("Set background color to %x brush %x", prinfo->cf.crBackColor, prinfo->hbrBackground));
 
                 GlobalUnlock(hProp);
             }
-}
-#endif
-            DPRINTF_EDIT_MSG32("EM_SETBKGNDCOLOR Ignored");
             return 0;
+    }
 
     case EM_SETCHARFORMAT:
-#ifdef __WIN32OS2__
     {
             CHARFORMAT2A *pnewcf = (CHARFORMAT2A *)lParam;
-            CHARFORMAT2A *pcf;
+            RICHEDIT_INFO *prinfo;
+
+            DPRINTF_EDIT_MSG32("EM_SETCHARFORMAT: not completely implemented!!");
 
             hProp = GetPropA(hwnd, RICHEDIT_WND_PROP);
-            pcf = (CHARFORMAT2A *)GlobalLock(hProp);
-            if(pcf && pnewcf && pnewcf->cbSize >= sizeof(CHARFORMATA)) 
+            prinfo = (RICHEDIT_INFO *)GlobalLock(hProp);
+            if(prinfo && pnewcf && pnewcf->cbSize >= sizeof(CHARFORMATA)) 
             {
                 if((pnewcf->dwMask & CFM_COLOR) && !(pnewcf->dwEffects & CFE_AUTOCOLOR)) {
-                    pcf->dwMask     |= CFM_COLOR;
-                    pcf->crTextColor = pnewcf->crTextColor;
-                    dprintf(("Set text color to %x", pcf->crTextColor));
+                    prinfo->cf.dwMask     |= CFM_COLOR;
+                    prinfo->cf.crTextColor = pnewcf->crTextColor;
+                    dprintf(("Set text color to %x", prinfo->cf.crTextColor));
                 }
                 if(pnewcf->cbSize == sizeof(CHARFORMAT2A)) 
                 {
                     if((pnewcf->dwMask & CFM_BACKCOLOR) && !(pnewcf->dwEffects & CFE_AUTOBACKCOLOR)) 
                     {
-                        pcf->dwMask     |= CFM_BACKCOLOR;
-                        pcf->crBackColor = pnewcf->crBackColor;
+                        prinfo->cf.dwMask     |= CFM_BACKCOLOR;
+                        prinfo->cf.crBackColor = pnewcf->crBackColor;
  
                         //Destroy old brush if present
-                        if(pcf->dwReserved) DeleteObject(pcf->dwReserved);
+                        if(prinfo->hbrBackground) DeleteObject(prinfo->hbrBackground);
 
                         //Create a brush that we return in WM_CTLCOLORSTATIC
-                        pcf->dwReserved  = (DWORD)CreateSolidBrush(pcf->crBackColor);
+                        prinfo->hbrBackground = (DWORD)CreateSolidBrush(prinfo->cf.crBackColor);
  
-                        dprintf(("Set background color to %x brush %x", pcf->crBackColor, pcf->dwReserved));
+                        dprintf(("Set background color to %x brush %x", prinfo->cf.crBackColor, prinfo->hbrBackground));
                     }
                 }
             }
 
-            if(pcf) GlobalUnlock(hProp);
-    }
-#else
-            DPRINTF_EDIT_MSG32("EM_SETCHARFORMAT Ignored");
-#endif
+            if(prinfo) GlobalUnlock(hProp);
             return 0;
+    }
 
     case EM_SETEDITSTYLE:
             DPRINTF_EDIT_MSG32("EM_SETEDITSTYLE Ignored");
@@ -584,276 +579,60 @@ static LRESULT WINAPI RICHED32_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam,
             DPRINTF_EDIT_MSG32("EM_STREAMOUT Ignored");
             return 0;
 
-/* Messages dispatched to the edit control */
-     case EM_CANUNDO:
-            DPRINTF_EDIT_MSG32("EM_CANUNDO Passed to edit control");
-	    return SendMessageA( hwndEdit, uMsg, wParam, lParam);
-     case EM_CHARFROMPOS:
-            DPRINTF_EDIT_MSG32("EM_CHARFROMPOS Passed to edit control");
-	    return SendMessageA( hwndEdit, uMsg, wParam, lParam);
-     case EM_EMPTYUNDOBUFFER:
-            DPRINTF_EDIT_MSG32("EM_EMPTYUNDOBUFFER Passed to edit control");
-	    return SendMessageA( hwndEdit, uMsg, wParam, lParam);
-     case EM_FMTLINES:
-            DPRINTF_EDIT_MSG32("EM_FMTLINES Passed to edit control");
-	    return SendMessageA( hwndEdit, uMsg, wParam, lParam);
-     case EM_GETFIRSTVISIBLELINE:
-            DPRINTF_EDIT_MSG32("EM_GETFIRSTVISIBLELINE Passed to edit control");
-	    return SendMessageA( hwndEdit, uMsg, wParam, lParam);
-     case EM_GETHANDLE:
-            DPRINTF_EDIT_MSG32("EM_GETHANDLE Passed to edit control");
-	    return SendMessageA( hwndEdit, uMsg, wParam, lParam);
- /*    case EM_GETIMESTATUS:*/
-     case EM_GETLIMITTEXT:
-            DPRINTF_EDIT_MSG32("EM_GETLIMITTEXT Passed to edit control");
-	    return SendMessageA( hwndEdit, uMsg, wParam, lParam);
-     case EM_GETLINE:
-            DPRINTF_EDIT_MSG32("EM_GETLINE Passed to edit control");
-	    return SendMessageA( hwndEdit, uMsg, wParam, lParam);
-     case EM_GETLINECOUNT:
-            DPRINTF_EDIT_MSG32("EM_GETLINECOUNT Passed to edit control");
-	    return SendMessageA( hwndEdit, uMsg, wParam, lParam);
-     case EM_GETMARGINS:
-            DPRINTF_EDIT_MSG32("EM_GETMARGINS Passed to edit control");
-	    return SendMessageA( hwndEdit, uMsg, wParam, lParam);
-     case EM_GETMODIFY:
-            DPRINTF_EDIT_MSG32("EM_GETMODIFY Passed to edit control");
-	    return SendMessageA( hwndEdit, uMsg, wParam, lParam);
-     case EM_GETPASSWORDCHAR:
-            DPRINTF_EDIT_MSG32("EM_GETPASSWORDCHAR Passed to edit control");
-	    return SendMessageA( hwndEdit, uMsg, wParam, lParam);
-     case EM_GETRECT:
-            DPRINTF_EDIT_MSG32("EM_GETRECT Passed to edit control");
-	    return SendMessageA( hwndEdit, uMsg, wParam, lParam);
-     case EM_GETSEL:
-            DPRINTF_EDIT_MSG32("EM_GETSEL Passed to edit control");
-	    return SendMessageA( hwndEdit, uMsg, wParam, lParam);
-     case EM_GETTHUMB:
-            DPRINTF_EDIT_MSG32("EM_GETTHUMB Passed to edit control");
-	    return SendMessageA( hwndEdit, uMsg, wParam, lParam);
-     case EM_GETWORDBREAKPROC:
-            DPRINTF_EDIT_MSG32("EM_GETWORDBREAKPROC Passed to edit control");
-	    return SendMessageA( hwndEdit, uMsg, wParam, lParam);
-     case EM_LINEFROMCHAR:
-            DPRINTF_EDIT_MSG32("EM_LINEFROMCHAR Passed to edit control");
-	    return SendMessageA( hwndEdit, uMsg, wParam, lParam);
-     case EM_LINEINDEX:
-            DPRINTF_EDIT_MSG32("EM_LINEINDEX Passed to edit control");
-	    return SendMessageA( hwndEdit, uMsg, wParam, lParam);
-     case EM_LINELENGTH:
-            DPRINTF_EDIT_MSG32("EM_LINELENGTH Passed to edit control");
-	    return SendMessageA( hwndEdit, uMsg, wParam, lParam);
-     case EM_LINESCROLL:
-            DPRINTF_EDIT_MSG32("EM_LINESCROLL Passed to edit control");
-	    return SendMessageA( hwndEdit, uMsg, wParam, lParam);
-     case EM_POSFROMCHAR:
-            DPRINTF_EDIT_MSG32("EM_POSFROMCHAR Passed to edit control");
-	    return SendMessageA( hwndEdit, uMsg, wParam, lParam);
-     case EM_REPLACESEL:
-            DPRINTF_EDIT_MSG32("case EM_REPLACESEL Passed to edit control");
-	    return SendMessageA( hwndEdit, uMsg, wParam, lParam);
-     case EM_SCROLL:
-            DPRINTF_EDIT_MSG32("case EM_SCROLL Passed to edit control");
-	    return SendMessageA( hwndEdit, uMsg, wParam, lParam);
-     case EM_SCROLLCARET:
-            DPRINTF_EDIT_MSG32("EM_SCROLLCARET Passed to edit control");
-	    return SendMessageA( hwndEdit, uMsg, wParam, lParam);
-     case EM_SETHANDLE:
-            DPRINTF_EDIT_MSG32("EM_SETHANDLE Passed to edit control");
-	    return SendMessageA( hwndEdit, uMsg, wParam, lParam);
- /*    case EM_SETIMESTATUS:*/
-     case EM_SETLIMITTEXT:
-            DPRINTF_EDIT_MSG32("EM_SETLIMITTEXT Passed to edit control");
-	    return SendMessageA( hwndEdit, uMsg, wParam, lParam);
-     case EM_SETMARGINS:
-            DPRINTF_EDIT_MSG32("case EM_SETMARGINS Passed to edit control");
-	    return SendMessageA( hwndEdit, uMsg, wParam, lParam);
-     case EM_SETMODIFY:
-            DPRINTF_EDIT_MSG32("EM_SETMODIFY Passed to edit control");
-	    return SendMessageA( hwndEdit, uMsg, wParam, lParam);
-     case EM_SETPASSWORDCHAR:
-            DPRINTF_EDIT_MSG32("EM_SETPASSWORDCHAR Passed to edit control");
-	    return SendMessageA( hwndEdit, uMsg, wParam, lParam);
-     case EM_SETREADONLY:
-            DPRINTF_EDIT_MSG32("EM_SETREADONLY Passed to edit control");
-	    return SendMessageA( hwndEdit, uMsg, wParam, lParam);
-     case EM_SETRECT:
-            DPRINTF_EDIT_MSG32("EM_SETRECT Passed to edit control");
-	    return SendMessageA( hwndEdit, uMsg, wParam, lParam);
-     case EM_SETRECTNP:
-            DPRINTF_EDIT_MSG32("EM_SETRECTNP Passed to edit control");
-	    return SendMessageA( hwndEdit, uMsg, wParam, lParam);
-     case EM_SETSEL:
-            DPRINTF_EDIT_MSG32("EM_SETSEL Passed to edit control");
-	    return SendMessageA( hwndEdit, uMsg, wParam, lParam);
-     case EM_SETTABSTOPS:
-            DPRINTF_EDIT_MSG32("EM_SETTABSTOPS Passed to edit control");
-	    return SendMessageA( hwndEdit, uMsg, wParam, lParam);
-     case EM_SETWORDBREAKPROC:
-            DPRINTF_EDIT_MSG32("EM_SETWORDBREAKPROC Passed to edit control");
-	    return SendMessageA( hwndEdit, uMsg, wParam, lParam);
-     case EM_UNDO:
-            DPRINTF_EDIT_MSG32("EM_UNDO Passed to edit control");
-	    return SendMessageA( hwndEdit, uMsg, wParam, lParam);
-
-     case WM_STYLECHANGING:
-            DPRINTF_EDIT_MSG32("WM_STYLECHANGING Passed to edit control");
-	    return SendMessageA( hwndEdit, uMsg, wParam, lParam);
-     case WM_STYLECHANGED:
-            DPRINTF_EDIT_MSG32("WM_STYLECHANGED Passed to edit control");
-	    return SendMessageA( hwndEdit, uMsg, wParam, lParam);
-     case WM_NCCALCSIZE:
-#ifdef __WIN32OS2__
-            break; //this is completely wrong, we resize the control in the WM_SIZE handler
-#else
-            DPRINTF_EDIT_MSG32("WM_NCCALCSIZE Passed to edit control");
-	    return SendMessageA( hwndEdit, uMsg, wParam, lParam);
-#endif
-     case WM_GETTEXT:
-            DPRINTF_EDIT_MSG32("WM_GETTEXT Passed to edit control");
-	    return SendMessageA( hwndEdit, uMsg, wParam, lParam);
-     case WM_GETTEXTLENGTH:
-            DPRINTF_EDIT_MSG32("WM_GETTEXTLENGTH Passed to edit control");
-	    return SendMessageA( hwndEdit, uMsg, wParam, lParam);
-     case WM_SETTEXT:
-            DPRINTF_EDIT_MSG32("WM_SETTEXT Passed to edit control");
-	    return SendMessageA( hwndEdit, uMsg, wParam, lParam);
-     case WM_CUT:
-            DPRINTF_EDIT_MSG32("WM_CUT Passed to edit control");
-	    return SendMessageA( hwndEdit, uMsg, wParam, lParam);
-     case WM_COPY:
-            DPRINTF_EDIT_MSG32("WM_COPY Passed to edit control");
-	    return SendMessageA( hwndEdit, uMsg, wParam, lParam);
-    case WM_PASTE:
-            DPRINTF_EDIT_MSG32("WM_PASTE Passed to edit control");
-	    return SendMessageA( hwndEdit, uMsg, wParam, lParam);
-
-    /* Messages passed to default handler. */
-    case WM_NCPAINT:
-        DPRINTF_EDIT_MSG32("WM_NCPAINT Passed to default");
-        return DefWindowProcA( hwnd,uMsg,wParam,lParam);
-    case WM_PAINT:
-        DPRINTF_EDIT_MSG32("WM_PAINT Passed to default");
-        return DefWindowProcA( hwnd,uMsg,wParam,lParam);
-    case WM_ERASEBKGND:
-        DPRINTF_EDIT_MSG32("WM_ERASEBKGND Passed to default");
-        return DefWindowProcA( hwnd,uMsg,wParam,lParam);
-    case WM_KILLFOCUS:
-        DPRINTF_EDIT_MSG32("WM_KILLFOCUS Passed to default");
-        return DefWindowProcA( hwnd,uMsg,wParam,lParam);
-    case WM_DESTROY:
-#ifdef __WIN32OS2__
-    {
-        CHARFORMAT2A *pcf;
-
-        hProp = GetPropA(hwnd, RICHEDIT_WND_PROP);
-        pcf = (CHARFORMAT2A *)GlobalLock(hProp);
-        if(pcf) {
-            //Destroy old brush if present
-            if(pcf->dwReserved) DeleteObject(pcf->dwReserved);
-            GlobalUnlock(hProp);
-        }
-
-        if(hProp) GlobalFree(hProp);
-        RemovePropA(hwnd, RICHEDIT_WND_PROP);
-    }
-#endif
-        DPRINTF_EDIT_MSG32("WM_DESTROY Passed to default");
-        return DefWindowProcA( hwnd,uMsg,wParam,lParam);
-    case WM_CHILDACTIVATE:
-	DPRINTF_EDIT_MSG32("WM_CHILDACTIVATE Passed to default");
-	return DefWindowProcA( hwnd,uMsg,wParam,lParam);
-
-    case WM_WINDOWPOSCHANGING:
-        DPRINTF_EDIT_MSG32("WM_WINDOWPOSCHANGING Passed to default");
-        return DefWindowProcA( hwnd,uMsg,wParam,lParam);
-    case WM_WINDOWPOSCHANGED:
-        DPRINTF_EDIT_MSG32("WM_WINDOWPOSCHANGED Passed to default");
-        return DefWindowProcA( hwnd,uMsg,wParam,lParam);
-/*    case WM_INITIALUPDATE:
-        DPRINTF_EDIT_MSG32("WM_INITIALUPDATE Passed to default");
-        return DefWindowProcA( hwnd,uMsg,wParam,lParam); */
-#ifndef __WIN32OS2__
-    case WM_CTLCOLOREDIT:
-        DPRINTF_EDIT_MSG32("WM_CTLCOLOREDIT Passed to default");
-        return DefWindowProcA( hwnd,uMsg,wParam,lParam);
-#endif
-    case WM_SETCURSOR:
-        DPRINTF_EDIT_MSG32("WM_SETCURSOR Passed to default");
-        return DefWindowProcA( hwnd,uMsg,wParam,lParam);
-    case WM_MOVE:
-        DPRINTF_EDIT_MSG32("WM_MOVE Passed to default");
-        return DefWindowProcA( hwnd,uMsg,wParam,lParam);
-    case WM_SHOWWINDOW:
-        DPRINTF_EDIT_MSG32("WM_SHOWWINDOW Passed to default");
-        return DefWindowProcA( hwnd,uMsg,wParam,lParam);
-    case WM_NCCREATE:
-        DPRINTF_EDIT_MSG32("WM_NCCREATE Passed to default");
-        return DefWindowProcA( hwnd,uMsg,wParam,lParam);
-    case WM_PARENTNOTIFY:
-        DPRINTF_EDIT_MSG32("WM_PARENTNOTIFY Passed to default");
-        return DefWindowProcA( hwnd,uMsg,wParam,lParam);
-    case WM_SETREDRAW:
-        DPRINTF_EDIT_MSG32("WM_SETREDRAW Passed to default");
-        return DefWindowProcA( hwnd,uMsg,wParam,lParam);
-    case WM_NCDESTROY:
-        DPRINTF_EDIT_MSG32("WM_NCDESTROY Passed to default");
-        return DefWindowProcA( hwnd,uMsg,wParam,lParam);
-    case WM_NCHITTEST:
-        DPRINTF_EDIT_MSG32("WM_NCHITTEST Passed to default");
-        return DefWindowProcA( hwnd,uMsg,wParam,lParam);
+#if 0
     case WM_CTLCOLORSTATIC:
 #ifdef __WIN32OS2__
     case WM_CTLCOLOREDIT:
-{
-            CHARFORMAT2A *pcf;
+    {
+            RICHEDIT_INFO *prinfo;
             HBRUSH hBrush = 0;
             HDC hdc = (HDC)wParam;
 
             hProp = GetPropA(hwnd, RICHEDIT_WND_PROP);
-            pcf = (CHARFORMAT2A *)GlobalLock(hProp);
-            if(pcf)
+            prinfo = (RICHEDIT_INFO *)GlobalLock(hProp);
+            if(prinfo)
             {
-                if(pcf->dwMask & CFM_BACKCOLOR) {
-                    SetBkColor(hdc, pcf->crBackColor);
-                    hBrush = pcf->dwReserved;
+                if(prinfo->cf.dwMask & CFM_BACKCOLOR) {
+                    SetBkColor(hdc, prinfo->cf.crBackColor);
+                    hBrush = prinfo->hbrBackground;
                 }
-                if(pcf->dwMask & CFM_COLOR) {
-                    SetTextColor(hdc, pcf->crTextColor);
+                if(prinfo->cf.dwMask & CFM_COLOR) {
+                    SetTextColor(hdc, prinfo->cf.crTextColor);
                 }
             }
-            if(pcf) GlobalUnlock(hProp);
+            if(prinfo) GlobalUnlock(hProp);
 
             if(hBrush) return hBrush;          
-}
+    }
 #endif
         DPRINTF_EDIT_MSG32("WM_CTLCOLORSTATIC Passed to default");
         return DefWindowProcA( hwnd,uMsg,wParam,lParam);
-    case WM_NCMOUSEMOVE:
-        DPRINTF_EDIT_MSG32("WM_NCMOUSEMOVE Passed to default");
-        return DefWindowProcA( hwnd,uMsg,wParam,lParam);
-    case WM_CLEAR:
-        DPRINTF_EDIT_MSG32("WM_CLEAR Passed to default");
-        return DefWindowProcA( hwnd,uMsg,wParam,lParam);
+#endif
+
+   /* Edit control messages that are different for RichEdit controls */
+   case EM_CHARFROMPOS:
+   {
+        POINTL *lpPoint = (POINTL *)lParam;
+        DWORD   curpos;
+
+        curpos = pfnEditProc(hwnd, EM_CHARFROMPOS, wParam, MAKELPARAM(lpPoint->x, lpPoint->y));
+        TRACE("curpos: 0x%x richedit pos: 0x%x\n", curpos, LOWORD(curpos));
+        return LOWORD(curpos);
+   }
+
    /*
     * used by IE in the EULA box
     */
     case WM_ALTTABACTIVE:
         DPRINTF_EDIT_MSG32("WM_ALTTABACTIVE");
         return DefWindowProcA( hwnd,uMsg,wParam,lParam);
-    case WM_GETDLGCODE:
-        DPRINTF_EDIT_MSG32("WM_GETDLGCODE");
-        return DefWindowProcA( hwnd,uMsg,wParam,lParam);
-    case WM_SETFONT:
-        DPRINTF_EDIT_MSG32("WM_SETFONT");
-        return DefWindowProcA( hwnd,uMsg,wParam,lParam);
-
     }
 
-    FIXME("Unknown message 0x%x Passed to default hwnd=%p, wParam=%08x, lParam=%08x\n",
+    /* pass the rest to the edit window procedure */
+    TRACE("Message 0x%x Passed to pfnEditProc hwnd=%p, wParam=%08x, lParam=%08x\n",
            uMsg, hwnd, (UINT)wParam, (UINT)lParam);
 
-   return DefWindowProcA( hwnd,uMsg,wParam,lParam);
+    return pfnEditProc(hwnd,uMsg,wParam,lParam);
 }
 
 /***********************************************************************
@@ -904,6 +683,30 @@ VOID RICHED32_Register(void)
 {
     WNDCLASSA wndClass;
 
+#ifdef __WIN32OS2__
+    WNDCLASSA classinfoA;
+    WNDCLASSW classinfoW;
+
+    if(GetClassInfoA(NULL, "EDIT", &classinfoA)) 
+    {
+        pfnEditProcA = classinfoA.lpfnWndProc;
+    }
+    else DebugInt3();
+    if(GetClassInfoW(NULL, L"EDIT", &classinfoW)) 
+    {
+        pfnEditProcW = classinfoW.lpfnWndProc;
+    }
+    else DebugInt3();
+
+    ZeroMemory(&wndClass, sizeof(WNDCLASSA));
+    wndClass.style = classinfoA.style;
+    wndClass.lpfnWndProc = (WNDPROC)RICHED32_WindowProc;
+    wndClass.cbClsExtra = classinfoA.cbClsExtra;
+    wndClass.cbWndExtra = classinfoA.cbWndExtra;
+    wndClass.hCursor = classinfoA.hCursor;
+    wndClass.hbrBackground = classinfoA.hbrBackground;
+    wndClass.lpszClassName = RICHEDIT_CLASS10A; /* WC_RICHED32A; */
+#else
     TRACE("\n");
 
     ZeroMemory(&wndClass, sizeof(WNDCLASSA));
@@ -914,6 +717,7 @@ VOID RICHED32_Register(void)
     wndClass.hCursor = LoadCursorA(0, IDC_ARROWA);
     wndClass.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
     wndClass.lpszClassName = RICHEDIT_CLASS10A; /* WC_RICHED32A; */
+#endif
 
     RegisterClassA (&wndClass);
 }
@@ -933,6 +737,11 @@ VOID RICHED32_Unregister(void)
     TRACE("\n");
 
     UnregisterClassA(RICHEDIT_CLASS10A, (HINSTANCE)NULL);
+
+#ifdef __WIN32OS2__
+    pfnEditProcA = (FARPROC)DefWindowProcA;
+    pfnEditProcW = (FARPROC)DefWindowProcW;
+#endif
 }
 
 INT RICHEDIT_GetTextRange(HWND hwnd,TEXTRANGEA *tr)
@@ -966,4 +775,70 @@ INT RICHEDIT_GetSelText(HWND hwnd,LPSTR lpstrBuffer)
     textrange.lpstrText = lpstrBuffer;
     SendMessageA(hwnd,EM_GETSEL,(INT)&textrange.chrg.cpMin,(INT)&textrange.chrg.cpMax);
     return RICHEDIT_GetTextRange(hwnd,&textrange);
+}
+
+/*********************************************************************
+ *
+ *	EDIT_WordBreakProc
+ *
+ *	Find the beginning of words.
+ *	Note:	unlike the specs for a WordBreakProc, this function only
+ *		allows to be called without linebreaks between s[0] upto
+ *		s[count - 1].  Remember it is only called
+ *		internally, so we can decide this for ourselves.
+ *
+ */
+static INT CALLBACK EDIT_WordBreakProc(LPWSTR s, INT index, INT count, INT action)
+{
+	INT ret = 0;
+
+	TRACE("s=%p, index=%d, count=%d, action=%d\n", s, index, count, action);
+
+	if(!s) return 0;
+
+	switch (action) {
+	case WB_LEFT:
+		if (!count)
+			break;
+		if (index)
+			index--;
+		if (s[index] == ' ') {
+			while (index && (s[index] == ' '))
+				index--;
+			if (index) {
+				while (index && (s[index] != ' '))
+					index--;
+				if (s[index] == ' ')
+					index++;
+			}
+		} else {
+			while (index && (s[index] != ' '))
+				index--;
+			if (s[index] == ' ')
+				index++;
+		}
+		ret = index;
+		break;
+	case WB_RIGHT:
+		if (!count)
+			break;
+		if (index)
+			index--;
+		if (s[index] == ' ')
+			while ((index < count) && (s[index] == ' ')) index++;
+		else {
+			while (s[index] && (s[index] != ' ') && (index < count))
+				index++;
+			while ((s[index] == ' ') && (index < count)) index++;
+		}
+		ret = index;
+		break;
+	case WB_ISDELIMITER:
+		ret = (s[index] == ' ');
+		break;
+	default:
+		ERR("unknown action code, please report !\n");
+		break;
+	}
+	return ret;
 }
