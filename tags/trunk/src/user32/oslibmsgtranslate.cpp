@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.8 2000-01-04 19:50:51 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.9 2000-01-08 14:15:06 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -107,19 +107,31 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
   OSLIBPOINT       point, ClientPoint;
   POSTMSG_PACKET  *packet;
   THDB            *thdb = (THDB *)pThdb;
+  BOOL             fIsFrameControl = FALSE, fTranslateFrameControlMsg = FALSE;
   int i;
 
+  if(os2Msg->msg == WM_COMMAND) {
+    i = 0;
+  }
   memset(winMsg, 0, sizeof(MSG));
   win32wnd = Win32BaseWindow::GetWindowFromOS2Handle(os2Msg->hwnd);
+  if(win32wnd == 0) {//test if it's for frame controls
+        HWND hwndFrame = OSLibWinIsFrameControl(os2Msg->hwnd);
+        if(hwndFrame) {
+            win32wnd = Win32BaseWindow::GetWindowFromOS2FrameHandle(hwndFrame);
+            fIsFrameControl = (win32wnd != 0);
+        }
+        //NOTE: We only translate WM_PAINT/WM_HITTEST & mouse messages; the rest must not be seen by win32 apps
+  }
   //PostThreadMessage posts WIN32APP_POSTMSG msg without window handle
-  if((win32wnd == 0 && os2Msg->msg != WM_CREATE && os2Msg->msg != WIN32APP_POSTMSG))
+  if(win32wnd == 0 && (os2Msg->msg != WM_CREATE && os2Msg->msg != WM_QUIT && os2Msg->msg != WIN32APP_POSTMSG))
   {
         goto dummymessage; //not a win32 client window
   }
   winMsg->time = os2Msg->time;
   winMsg->pt.x = os2Msg->ptl.x;
   winMsg->pt.y = mapScreenY(os2Msg->ptl.y);
-  if(win32wnd) //==0 for WM_CREATE
+  if(win32wnd) //==0 for WM_CREATE/WM_QUIT
     winMsg->hwnd = win32wnd->getWindowHandle();
 
   switch(os2Msg->msg)
@@ -282,6 +294,10 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
     case WM_BUTTON3DOWN:
     case WM_BUTTON3UP:
     case WM_BUTTON3DBLCLK:
+        if(fIsFrameControl) {
+            fTranslateFrameControlMsg = TRUE; //we want a win32 app to see this msg for a frame control
+        }
+
         //WM_NC*BUTTON* is posted when the cursor is in a non-client area of the window
         if(win32wnd->lastHitTestVal != HTCLIENT_W) {
             winMsg->message = WINWM_NCLBUTTONDOWN + (os2Msg->msg - WM_BUTTON1DOWN);
@@ -315,6 +331,10 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
     {
         ULONG keystate = 0, setcursormsg = WINWM_MOUSEMOVE;
 
+        if(fIsFrameControl) {
+            fTranslateFrameControlMsg = TRUE; //we want a win32 app to see this msg for a frame control
+        }
+
         if(WinGetKeyState(HWND_DESKTOP, VK_BUTTON1) & 0x8000)
             keystate |= MK_LBUTTON_W;
         if(WinGetKeyState(HWND_DESKTOP, VK_BUTTON2) & 0x8000)
@@ -332,7 +352,8 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
           setcursormsg   = WINWM_NCMOUSEMOVE;
           winMsg->wParam = (WPARAM)win32wnd->lastHitTestVal;
           winMsg->lParam = MAKELONG(winMsg->pt.x,winMsg->pt.y);
-        } else
+        }
+        else
         {
           winMsg->wParam = (WPARAM)keystate;
           winMsg->lParam  = MAKELONG(SHORT1FROMMP(os2Msg->mp1),mapY(win32wnd,SHORT2FROMMP(os2Msg->mp1)));
@@ -557,6 +578,11 @@ VirtualKeyFound:
 
     case WM_PAINT:
     {
+        if(fIsFrameControl) {
+            fTranslateFrameControlMsg = TRUE; //we want a win32 app to see this msg for a frame control
+            winMsg->message = WINWM_NCPAINT;
+        }
+        else
         if(win32wnd->IsIconic()) {
                 winMsg->message = WINWM_PAINTICON;
         }
@@ -567,6 +593,8 @@ VirtualKeyFound:
     case WM_HITTEST:
     {
         OSLIBPOINT pt;
+
+        fTranslateFrameControlMsg = TRUE; //we want a win32 app to see this msg for a frame control
 
         pt.x = (*(POINTS *)&os2Msg->mp1).x;
         pt.y = (*(POINTS *)&os2Msg->mp1).y;
@@ -613,6 +641,12 @@ VirtualKeyFound:
     case WM_SEMANTICEVENT:
     default:
 dummymessage:
+        return FALSE;
+  }
+  if(fIsFrameControl && !fTranslateFrameControlMsg) {
+        winMsg->message = 0;
+        winMsg->wParam  = 0;
+        winMsg->lParam  = 0;
         return FALSE;
   }
   return TRUE;

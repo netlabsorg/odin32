@@ -1,4 +1,4 @@
-/* $Id: oslibmenu.cpp,v 1.5 1999-11-14 12:00:01 sandervl Exp $ */
+/* $Id: oslibmenu.cpp,v 1.6 2000-01-08 14:15:06 sandervl Exp $ */
 /*
  * Window Menu wrapper functions for OS/2
  *
@@ -103,4 +103,9 @@ BOOL OSLibGetMenuItemRect(HWND hMenu, int index, LPRECT pRect)
 }
 //******************************************************************************
 //******************************************************************************
-
+int OSLibGetMenuItemPos(HWND hMenu, int item)
+{
+   return (int)WinSendMsg(hMenu, MM_ITEMPOSITIONFROMID, MPFROM2SHORT(item, FALSE), (MPARAM)0);
+}
+//******************************************************************************
+//******************************************************************************
