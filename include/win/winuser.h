@@ -1,4 +1,4 @@
-/* $Id: winuser.h,v 1.3 1999-07-04 19:02:37 sandervl Exp $ */
+/* $Id: winuser.h,v 1.4 1999-07-04 20:07:33 sandervl Exp $ */
 
 #ifndef __INCLUDE_WINUSER_H
 #define __INCLUDE_WINUSER_H
@@ -2199,6 +2199,7 @@ typedef struct
 
 /* CreateWindow() coordinates */
 #define CW_USEDEFAULT ((INT)0x80000000)
+#define CW_USEDEFAULT16 ((INT16)0x8000)
 
 /* ChildWindowFromPointEx Flags */
 #define CWP_ALL                0x0000
