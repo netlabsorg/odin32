@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.128 2002-08-09 11:19:56 sandervl Exp $ */
+/* $Id: window.cpp,v 1.129 2003-01-02 15:21:45 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -782,8 +782,9 @@ HWND WIN32API SetFocus(HWND hwnd)
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("SetFocus, window %x not found", hwnd));
-        SetLastError(ERROR_INVALID_WINDOW_HANDLE);
-        return 0;
+        //Note: last error not set (NT4, SP6), returns current focus window
+        //SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+        return GetFocus();
     }
 
     hwnd_O = window->getOS2WindowHandle();
