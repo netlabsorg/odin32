@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.138 2003-11-15 18:03:50 sandervl Exp $ */
+/* $Id: window.cpp,v 1.139 2004-02-11 15:37:39 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -44,6 +44,7 @@
 #include <winuser32.h>
 #include "hook.h"
 #include <wprocess.h>
+#include <custombuild.h>
 
 #define DBG_LOCALLOG    DBG_window
 #include "dbglocal.h"
@@ -107,6 +108,9 @@ HWND WIN32API CreateWindowExA(DWORD exStyle,
     cs.lpszName       = windowName;
     cs.lpszClass      = className;
     cs.dwExStyle      = exStyle;
+
+    HOOK_CallOdinHookA(HODIN_PREWINDOWCREATEDA, 0, (DWORD)&cs);
+
     if(HIWORD(className)) {
          dprintf(("CreateWindowExA: class %s parent %x (%d,%d) (%d,%d), %x %x menu=%x", className, parent, x, y, width, height, style, exStyle, menu));
     }
@@ -2191,8 +2195,7 @@ UINT WIN32API GetWindowModuleFileNameA(HWND hwnd, LPTSTR lpszFileName, UINT cchF
         return 0;
     }
     lpfnWindowProc = (WNDPROC)GetWindowLongA(hwnd, GWL_WNDPROC);
-//    return GetProcModuleFileNameA((ULONG)lpfnWindowProc, lpszFileName, cchFileNameMax);
-    return 0;
+    return GetProcModuleFileNameA((ULONG)lpfnWindowProc, lpszFileName, cchFileNameMax);
 }
 //******************************************************************************
 //******************************************************************************
