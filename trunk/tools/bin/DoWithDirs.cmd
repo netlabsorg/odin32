@@ -1,4 +1,4 @@
-/* $Id: DoWithDirs.cmd,v 1.10 2001-01-26 21:33:13 phaller Exp $
+/* $Id: DoWithDirs.cmd,v 1.11 2001-05-16 01:14:03 bird Exp $
  *
  * Syntax: dowithdirs.cmd [-e<list of excludes>] [-c] [-i] [-l] [-r] <cmd with args...>
  *    -e      Exclude directories.
@@ -175,7 +175,7 @@ END
                 if (fOK) then
                 do
                     /* execute command */
-                    sCmds;
+                    'call' sCmds;
                     ret = rc;
 
                     /* unlock directory */
@@ -199,7 +199,7 @@ END
             else
             do
                 /* execute the command with the directory as the last parameter */
-                sCmds filespec('name', asDirs.i);
+                'call' sCmds filespec('name', asDirs.i);
                 if (rc <> 0) then
                 do
                     say '[ - rc = ' || rc']';
