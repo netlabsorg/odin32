@@ -1,4 +1,4 @@
-/* $Id: winres.cpp,v 1.5 1999-07-24 14:14:06 sandervl Exp $ */
+/* $Id: winres.cpp,v 1.6 1999-08-05 11:44:35 sandervl Exp $ */
 
 /*
  * Win32 resource class
@@ -296,13 +296,10 @@ PVOID Win32Resource::ConvertBitmap(void *bmpdata)
     palsize = (1 << bmphdr->bmp2.cBitCount) * sizeof(RGBQUAD);
   }
 
-  // EB: ->>> added imgsize
-  if(bmphdr->bmp2.cbImage == 0)
-    imgsize =  CalcBitmapSize(bmphdr->bmp2.cBitCount,
-                              bmphdr->bmp2.cx,
-                              bmphdr->bmp2.cy);
-  else
-    imgsize = bmphdr->bmp2.cbImage;
+  //SvL: Always recalculate bitmap size (donut.exe has wrong size)
+  imgsize =  CalcBitmapSize(bmphdr->bmp2.cBitCount,
+                            bmphdr->bmp2.cx,
+                            bmphdr->bmp2.cy);
 
   winbmphdr = (WINBITMAPINFOHEADER *)malloc(sizeof(WINBITMAPINFOHEADER) +
                         imgsize + palsize);
@@ -315,7 +312,7 @@ PVOID Win32Resource::ConvertBitmap(void *bmpdata)
   winbmphdr->biBitCount      = bmphdr->bmp2.cBitCount;
   //TODO: Identical except for BI_BITFIELDS (3L) type!
   winbmphdr->biCompression   = bmphdr->bmp2.ulCompression;
-  winbmphdr->biSizeImage     = bmphdr->bmp2.cbImage; //imgsize;
+  winbmphdr->biSizeImage     = imgsize;
   //TODO: Doesn't seem to be completely identical..
   winbmphdr->biClrUsed       = bmphdr->bmp2.cclrUsed;
   winbmphdr->biClrImportant  = bmphdr->bmp2.cclrImportant;
