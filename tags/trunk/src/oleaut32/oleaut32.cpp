@@ -1,4 +1,4 @@
-/* $Id: oleaut32.cpp,v 1.3 1999-09-08 15:23:23 davidr Exp $ */
+/* $Id: oleaut32.cpp,v 1.4 1999-09-24 21:55:24 davidr Exp $ */
 /* 
  * OLEAUT32 
  * 
@@ -29,7 +29,9 @@
 UINT WINAPI OaBuildVersion()
 {
 #if 1
-    return 0x141016;
+    dprintf(("OLEAUT32: OaBuildVersion"));
+    // Patched DJR 22/9/99 for VB6 runtime.
+    return 0x1E0101;
 #else
     WINDOWS_VERSION ver = VERSION_GetVersion();
 
