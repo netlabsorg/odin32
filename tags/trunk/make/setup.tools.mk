@@ -1,4 +1,4 @@
-# $Id: setup.tools.mk,v 1.13 2002-08-24 22:32:12 bird Exp $
+# $Id: setup.tools.mk,v 1.14 2002-08-28 04:41:24 bird Exp $
 
 
 #
@@ -61,7 +61,11 @@ TOOL_JOB_WORKERS= 5
 TOOL_JOB_SUB_MSG= (submitting job)
 !endif
 TOOL_MAKE       = $(MAKE:.exe=).exe -nologo
+!ifndef LD_USE_ILINK
 TOOL_MAPSYM     = $(PATH_TOOLS)\MapSym.cmd $(BUILD_ENV)
+!else
+TOOL_MAPSYM     = $(PATH_TOOLS)\MapSym.cmd VAC308
+!endif
 TOOL_RM         = $(PATH_TOOLS)\rm.exe -fF
 TOOL_RMDIR      = rmdir
 TOOL_STRIP      = $(PATH_TOOLS)\lxlite.cmd
