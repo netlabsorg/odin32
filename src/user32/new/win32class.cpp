@@ -1,4 +1,4 @@
-/* $Id: win32class.cpp,v 1.5 1999-07-23 15:55:46 cbratschi Exp $ */
+/* $Id: win32class.cpp,v 1.6 1999-08-21 12:53:28 sandervl Exp $ */
 /*
  * Win32 Window Class Managment Code for OS/2
  *
@@ -21,6 +21,8 @@
 //******************************************************************************
 Win32WndClass::Win32WndClass(WNDCLASSEXA *wndclass, BOOL isUnicode) : GenericObject(&wndclasses, OBJTYPE_CLASS)
 {
+  this->isUnicode = isUnicode;
+
   if(HIWORD(wndclass->lpszClassName)) {
         if(isUnicode) {
                 INT len = lstrlenW((LPWSTR)wndclass->lpszClassName)+1;
@@ -56,8 +58,6 @@ Win32WndClass::Win32WndClass(WNDCLASSEXA *wndclass, BOOL isUnicode) : GenericObj
   menuNameA = 0;
   menuNameW = 0;
   setMenuName((LPSTR)wndclass->lpszMenuName);
-
-  this->isUnicode       = isUnicode;
 
   dprintf(("USER32:  Win32Class ctor\n"));
   dprintf(("USER32:  wndclass->style %X\n", wndclass->style));
