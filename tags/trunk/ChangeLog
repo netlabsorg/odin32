@@ -1,4 +1,8 @@
-/* $Id: ChangeLog,v 1.2463 2003-01-30 14:00:32 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2464 2003-02-02 14:23:51 sandervl Exp $ */
+
+ 2003-02-02: Sander van Leeuwen <sandervl@innotek   >
+    - INCLUDE\makefiles:
+                o Define STATIC_CRT for all exe targets
 
  2003-01-30: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o CreateProcess changes for parsing the application name
