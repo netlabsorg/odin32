@@ -1,4 +1,4 @@
-; $Id: mytkExecPgm.asm,v 1.8 2000-02-21 15:59:21 bird Exp $
+; $Id: mytkExecPgm.asm,v 1.9 2000-02-23 16:52:18 bird Exp $
 ;
 ; mytkExecPgm - tkExecPgm overload
 ;
@@ -61,10 +61,12 @@ CODE32 SEGMENT
 ;            es:bx  Environment address. (String)
 ;            di:si  Argument address. (String)
 ; @uses      all - bp
+; @sketch    Copy the filename and arguments into a buffer we
+;            may modify later if this is a UNIX shellscript or
+;            a PE-file started by pe.exe.
 ; @status
 ; @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
-; @remark    Current implemententation assumes that there is one buffer,
-;            this serializes the usage of the two pointers.
+; @remark
 ;
 ;   The buffer we are using is a C struct as follows.
 ;   struct Buffer
@@ -88,6 +90,7 @@ cchArgs     = dword ptr -14h
 ;OffArg      = -26h
 
     ASSUME CS:CODE32, DS:NOTHING, SS:NOTHING
+    int     3
     push    ebp
     mov     ebp, esp
     lea     esp, [ebp + cchArgs]
