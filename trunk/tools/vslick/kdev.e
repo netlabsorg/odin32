@@ -1,4 +1,4 @@
-/* $Id: kdev.e,v 1.7 2003-05-31 20:14:47 bird Exp $
+/* $Id: kdev.e,v 1.8 2003-11-26 10:24:09 bird Exp $
  *
  * Visual SlickEdit Documentation Macros.
  *
@@ -673,6 +673,11 @@ static int k_func_enumparams(_str sParams, int iParam, _str &sType, _str &sName,
     if (iParam == iCurParam)
     {   /* (yeah, we did!) */
         sArg = strip(substr(sParams, iStartParam, i - iStartParam));
+        /* remove M$ stuff */
+        sArg = stranslate(sArg, "", "IN", "E");
+        sArg = stranslate(sArg, "", "OUT", "E");
+        sArg = stranslate(sArg, "", "OPTIONAL", "E");
+        sArg = strip(sArg);
 
         /* lazy approach, which doens't support function types */
 
@@ -821,6 +826,9 @@ static _str k_func_getreturntype(boolean fPureType = false)
                 sTypeRaw = stranslate(sTypeRaw, "", "__operator", "I");   /* operator fix */
                 sTypeRaw = stranslate(sTypeRaw, "", "operator__", "I");   /* operator fix */
                 sTypeRaw = stranslate(sTypeRaw, "", "operator", "I");     /* operator fix */
+                sTypeRaw = stranslate(sTypeRaw, "", "IN", "E");
+                sTypeRaw = stranslate(sTypeRaw, "", "OUT", "E");
+                sTypeRaw = stranslate(sTypeRaw, "", "OPTIONAL", "E");
             }
 
             /*
@@ -1085,7 +1093,7 @@ void k_javadoc_classbox()
         k_javadoc_box_line('@version', iPadd);
         k_javadoc_box_line('@verdesc', iPadd);
     }
-    k_javadoc_box_line('@author', iPadd, skUserName " <" skUserEmail ">");
+    k_javadoc_box_line('@author', iPadd, skUserName ' <' skUserEmail '>');
     k_javadoc_box_line('@approval', iPadd);
     k_javadoc_box_end();
 
@@ -1159,10 +1167,11 @@ void k_javadoc_funcbox()
     {
         k_javadoc_box_line('@equiv', iPadd);
         k_javadoc_box_line('@time', iPadd);
-    }
     k_javadoc_box_line('@sketch', iPadd);
+    }
     k_javadoc_box_line('@status', iPadd);
     k_javadoc_box_line('@author', iPadd, skUserName '<' skUserEmail '>');
+    if (fkStyleFullHeaders)
     k_javadoc_box_line('@remark', iPadd);
     k_javadoc_box_end();
 
