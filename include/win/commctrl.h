@@ -542,7 +542,7 @@ typedef struct _IMAGELISTDRAWPARAMS
     DWORD       crEffect;
 } IMAGELISTDRAWPARAMS, *LPIMAGELISTDRAWPARAMS;
 
- 
+
 INT      WINAPI ImageList_Add(HIMAGELIST,HBITMAP,HBITMAP);
 INT      WINAPI ImageList_AddIcon (HIMAGELIST, HICON);
 INT      WINAPI ImageList_AddMasked(HIMAGELIST,HBITMAP,COLORREF);
@@ -684,15 +684,15 @@ LRESULT WINAPI DefSubclassProc(HWND, UINT, WPARAM, LPARAM);
 
 /* Header control */
 
-#define WC_HEADER16		"SysHeader" 
-#define WC_HEADERA		"SysHeader32" 
+#define WC_HEADER16		"SysHeader"
+#define WC_HEADERA		"SysHeader32"
 #ifdef __WIN32OS2__
-#define WC_HEADERW		L"SysHeader32" 
+#define WC_HEADERW		L"SysHeader32"
 #else
 static const WCHAR WC_HEADERW[] = { 'S','y','s','H','e','a','d','e','r','3','2',0 };
 #endif
 #define WC_HEADER		WINELIB_NAME_AW(WC_HEADER)
- 
+
 #define HDS_HORZ                0x0000
 #define HDS_BUTTONS             0x0002
 #define HDS_HOTTRACK            0x0004
@@ -1439,7 +1439,7 @@ typedef struct
 HWND WINAPI
 CreateToolbar(HWND, DWORD, UINT, INT, HINSTANCE,
               UINT, LPCOLDTBBUTTON, INT);
- 
+
 HWND WINAPI
 CreateToolbarEx(HWND, DWORD, UINT, INT,
                 HINSTANCE, UINT, LPCTBBUTTON,
@@ -1462,7 +1462,7 @@ static const WCHAR TOOLTIPS_CLASSW[] = { 't','o','o','l','t','i','p','s','_',
 #define TOOLTIPS_CLASS          WINELIB_NAME_AW(TOOLTIPS_CLASS)
 
 #define INFOTIPSIZE             1024
- 
+
 #define TTS_ALWAYSTIP           0x01
 #define TTS_NOPREFIX            0x02
 
@@ -2205,7 +2205,7 @@ static const WCHAR WC_TREEVIEWW[] = { 'S','y','s',
 #define TVS_FULLROWSELECT	  0x1000
 #define TVS_NOSCROLL     	  0x2000
 #define TVS_NONEVENHEIGHT	  0x4000
-#define TVS_NOHSCROLL         0x8000 
+#define TVS_NOHSCROLL         0x8000
 
 #define TVS_SHAREDIMAGELISTS  0x0000
 #define TVS_PRIVATEIMAGELISTS 0x0400
@@ -2457,7 +2457,7 @@ typedef struct tagTVKEYDOWN
 #define TreeView_InsertItemW(hwnd,phdi) \
   (HTREEITEM)SendMessageW((hwnd), TVM_INSERTITEMW, 0, \
                             (LPARAM)(LPTVINSERTSTRUCTW)(phdi))
-#define TreeView_InsertItem WINELIB_NAME_AW(TreeView_InsertItem) 
+#define TreeView_InsertItem WINELIB_NAME_AW(TreeView_InsertItem)
 
 #define TreeView_DeleteItem(hwnd, hItem) \
   (BOOL)SendMessageA((hwnd), TVM_DELETEITEM, 0, (LPARAM)(HTREEITEM)(hItem))
@@ -2532,12 +2532,12 @@ typedef struct tagTVKEYDOWN
  (BOOL)SendMessageA((hwnd), TVM_GETITEMA, 0, (LPARAM) (TVITEMA *)(pitem))
 #define TreeView_GetItemW(hwnd, pitem) \
  (BOOL)SendMessageW((hwnd), TVM_GETITEMA, 0, (LPARAM) (TVITEMA *)(pitem))
-#define TreeView_GetItem WINELIB_NAME_AW(TreeView_GetItem) 
+#define TreeView_GetItem WINELIB_NAME_AW(TreeView_GetItem)
 
 #define TreeView_SetItemA(hwnd, pitem) \
- (BOOL)SendMessageA((hwnd), TVM_SETITEMA, 0, (LPARAM)(const TVITEMA *)(pitem)) 
+ (BOOL)SendMessageA((hwnd), TVM_SETITEMA, 0, (LPARAM)(const TVITEMA *)(pitem))
 #define TreeView_SetItemW(hwnd, pitem) \
- (BOOL)SendMessageW((hwnd), TVM_SETITEMA, 0, (LPARAM)(const TVITEMA *)(pitem)) 
+ (BOOL)SendMessageW((hwnd), TVM_SETITEMA, 0, (LPARAM)(const TVITEMA *)(pitem))
 #define TreeView_SetItem WINELIB_NAME_AW(TreeView_SetItem)
 
 #define TreeView_EditLabel(hwnd, hitem) \
@@ -3063,6 +3063,10 @@ typedef struct tagNMITEMACTIVATE
     UINT uKeyFlags;
 } NMITEMACTIVATE, *LPNMITEMACTIVATE;
 
+#define LVKF_ALT     0x0001
+#define LVKF_CONTROL 0x0002
+#define LVKF_SHIFT   0x0004
+
 typedef struct tagLVDISPINFO
 {
     NMHDR     hdr;
@@ -3428,11 +3432,11 @@ typedef struct tagNMLVODSTATECHANGE
 
 #define ListView_SetItemTextA(hwndLV, i, _iSubItem, _pszText) \
 { LVITEMA _LVi; _LVi.iSubItem = _iSubItem; _LVi.pszText = _pszText;\
-  SendMessageA(hwndLV, LVM_SETITEMTEXTA, (WPARAM)i, (LPARAM) (LVITEMA*)&_LVi);}                
+  SendMessageA(hwndLV, LVM_SETITEMTEXTA, (WPARAM)i, (LPARAM) (LVITEMA*)&_LVi);}
 
 #define ListView_SetItemTextW(hwndLV, i, _iSubItem, _pszText) \
 { LVITEMW _LVi; _LVi.iSubItem = _iSubItem; _LVi.pszText = _pszText;\
-  SendMessageW(hwndLV, LVM_SETITEMTEXTW, (WPARAM)i, (LPARAM) (LVITEMW*)& _LVi);}                
+  SendMessageW(hwndLV, LVM_SETITEMTEXTW, (WPARAM)i, (LPARAM) (LVITEMW*)& _LVi);}
 
 #define ListView_SetItemText WINELIB_NAME_AW(ListView_SetItemText)
 
@@ -4633,7 +4637,7 @@ BOOL WINAPI DPA_Sort (const HDPA, PFNDPACOMPARE, LPARAM);
 #define DPAS_SORTED             0x0001
 #define DPAS_INSERTBEFORE       0x0002
 #define DPAS_INSERTAFTER        0x0004
- 
+
 INT  WINAPI DPA_Search (const HDPA, LPVOID, INT, PFNDPACOMPARE, LPARAM, UINT);
 
 #define DPAM_NOSORT             0x0001
