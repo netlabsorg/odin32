@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.810 2000-03-16 19:17:43 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.811 2000-03-16 21:14:23 bird Exp $ */
+
+ 2000-03-16: knut st. osmundsen <knut.stange.osmundse@pmsc.no>
+    - TOOLS\FASTDEP: Speed optimizations.
 
  2000-03-16: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Fixed virtual keycode of return key
@@ -11,7 +14,7 @@
 	- KERNEL32: Semaphore protection of handle alloc
                     Added handlemanager class for thread handles
                     Added workaround for Open32 WaitForSingleObject bug
-                    (if thread is terminated and WaitForSingleObject is 
+                    (if thread is terminated and WaitForSingleObject is
                      called with the thread's handle -> never returns
                      (new rp7 hang at exit))
                     TODO: WaitForMultipleObjects can still hang ->
@@ -36,7 +39,7 @@
                   Don't clear WS_CHILD flag either. (HAS_THICKFRAME depends on it)
 
 	- KERNEL32: Clear FILE_SHARE_DELETE flag before calling Open32's
-                    CreateFile. (otherwise it fails) -> fixes RealPlayer 7 
+                    CreateFile. (otherwise it fails) -> fixes RealPlayer 7
                     Basic (new update).
 
         - WSOCK32: Changed workaround for setsockopt bug (SO_SNDBUF/SO_RCVBUF (OS/2's
@@ -46,7 +49,7 @@
                    Added selective logging feature.
 
  2000-03-12: Markus Montkowski <mmontkowski@gmx.de>
-	- KERNEL32: Added fix for GetFileAttributes. Open32 doesn't like 
+	- KERNEL32: Added fix for GetFileAttributes. Open32 doesn't like
                     i.e. 'c:'; needs to be changed into 'c:\'
 
  2000-03-12: Sander van Leeuwen <sandervl@xs4all.nl>
