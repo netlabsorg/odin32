@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.315 2002-03-04 10:45:30 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.316 2002-03-07 19:41:18 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -3347,7 +3347,7 @@ BOOL Win32BaseWindow::EnableWindow(BOOL fEnable)
 //******************************************************************************
 BOOL Win32BaseWindow::CloseWindow()
 {
-  return OSLibWinMinimizeWindow(OS2Hwnd);
+  return OSLibWinMinimizeWindow(getOS2FrameWindowHandle());
 }
 //******************************************************************************
 //TODO: Not be 100% correct; should return active window of current thread

@@ -1,4 +1,4 @@
-/* $Id: win32wbasepos.cpp,v 1.27 2002-02-05 17:59:01 sandervl Exp $ */
+/* $Id: win32wbasepos.cpp,v 1.28 2002-03-07 19:41:18 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (nonclient/position methods)
  *
@@ -189,15 +189,20 @@ LONG Win32BaseWindow::SendNCCalcSize(BOOL calcValidRect, RECT *newWindowRect,
  */
 LONG Win32BaseWindow::HandleWindowPosChanging(WINDOWPOS *winpos)
 {
-    POINT maxSize;
+    POINT maxSize, maxTrack, minTrack;
     if (winpos->flags & SWP_NOSIZE) return 0;
 
     if ((dwStyle & WS_THICKFRAME) ||
         ((dwStyle & (WS_POPUP | WS_CHILD)) == 0))
     {
-        GetMinMaxInfo( &maxSize, NULL, NULL, NULL );
-        winpos->cx = MIN( winpos->cx, maxSize.x );
-        winpos->cy = MIN( winpos->cy, maxSize.y );
+        GetMinMaxInfo( &maxSize, NULL, &minTrack, &maxTrack );
+        winpos->cx = MIN( winpos->cx, MAX( maxSize.x, maxTrack.x) );
+        winpos->cy = MIN( winpos->cy, MAX( maxSize.y, maxTrack.y) );
+	if (!(dwStyle & WS_MINIMIZE))
+	{
+	    if (winpos->cx < minTrack.x ) winpos->cx = minTrack.x;
+	    if (winpos->cy < minTrack.y ) winpos->cy = minTrack.y;
+	}
     }
     return 0;
 }
@@ -308,8 +313,10 @@ UINT Win32BaseWindow::MinMaximize(UINT cmd, LPRECT lpRect)
             setStyle(getStyle() | WS_MINIMIZE);
 
             if(getParent() == NULL) {
-                SetRect(lpRect, -32000, -32000, GetSystemMetrics(SM_CXICON), GetSystemMetrics(SM_CYICON));
-                OSLibSetWindowStyle(getOS2FrameWindowHandle(), getOS2WindowHandle(), getStyle(), getExStyle());
+// @@PF : for now disable windows style - it messes with WV minimize - will fix it soon
+                 SetRect(lpRect, -32000, -32000, GetSystemMetrics(SM_CXICON), GetSystemMetrics(SM_CYICON));
+//                OSLibSetWindowStyle(getOS2FrameWindowHandle(), getOS2WindowHandle(), getStyle(), getExStyle());
+                CloseWindow(); 
             }
             else {
                 iconPos.x = windowpos.ptMinPosition.x;
