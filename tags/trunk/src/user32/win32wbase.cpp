@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.24 1999-10-06 07:55:45 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.25 1999-10-06 07:56:37 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2339,6 +2339,9 @@ BOOL Win32BaseWindow::SetWindowTextW(LPWSTR lpsz)
 {
     if(lpsz == NULL)
         return FALSE;
+
+    if(windowNameA)	free(windowNameA);
+    if(windowNameW)	free(windowNameW);
 
     windowNameW = (LPWSTR)_smalloc((lstrlenW((LPWSTR)lpsz)+1)*sizeof(WCHAR));
     lstrcpyW(windowNameW, (LPWSTR)lpsz);
