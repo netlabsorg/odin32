@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.58 2000-10-09 17:27:47 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.59 2000-10-09 18:35:26 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -885,6 +885,7 @@ BOOL Win32PeLdrImage::setMemFlags()
         case SECTION_INITDATA:
         case SECTION_UNINITDATA:
         case SECTION_IMPORT:
+	case SECTION_TLS:
             	section[i].pageflags = PAG_WRITE | PAG_READ;
             	break;
 
@@ -896,7 +897,6 @@ BOOL Win32PeLdrImage::setMemFlags()
 		break;
 
         case SECTION_READONLYDATA:
-	case SECTION_TLS:
         default:
             	section[i].pageflags = PAG_READ;
             	break;
