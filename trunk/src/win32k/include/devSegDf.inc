@@ -1,4 +1,4 @@
-; $Id: devSegDf.inc,v 1.6 2000-09-02 21:08:01 bird Exp $
+; $Id: devSegDf.inc,v 1.7 2001-02-21 07:46:33 bird Exp $
 ;
 ; Segment definitions for win32k.sys.
 ;
@@ -57,7 +57,7 @@ EH_CODE ends
 
 
 ;DGROUP group BSS32, DATA32
-DGROUP group CALLTAB, BSS32, DATA32, CONST32_RO, _VFT, c_common, DDE4_DATA32, CTOR_DTOR1, CTOR_DTOR2, CTOR_DTOR3, EH_DATA
+DGROUP group BSS32, DATA32, CONST32_RO, _VFT, c_common, DDE4_DATA32, CTOR_DTOR1, CTOR_DTOR2, CTOR_DTOR3, EH_DATA
 
 DATA32  segment dword public 'DATA' use32
 DATA32 ends
@@ -92,6 +92,6 @@ EH_DATA segment byte public 'CONST' use32
 EH_DATA ends
 
 
-CALLTAB segment dword public 'DATA' use32
+CALLTAB segment dword public 'CODE' use32
 CALLTAB ends
 
