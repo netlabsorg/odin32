@@ -1,4 +1,4 @@
-/* $Id: mmap.h,v 1.14 1999-12-30 11:19:54 sandervl Exp $ */
+/* $Id: mmap.h,v 1.15 2000-02-05 14:09:32 sandervl Exp $ */
 
 /*
  * Memory mapped class
@@ -48,6 +48,7 @@ public:
    BOOL   unmapViewOfFile(Win32MemMapView *view);
 
    HFILE  getMapHandle()                 { return hMemMap; };
+   HFILE  getFileHandle()                { return hMemFile; };
    LPSTR  getMemName()                   { return lpszMapName; };
    DWORD  getProtFlags()                 { return mProtFlags; };
    LPVOID getMappingAddr()               { return pMapping; };

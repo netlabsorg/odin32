@@ -1,4 +1,4 @@
-/* $Id: mmap.cpp,v 1.31 1999-12-30 11:19:53 sandervl Exp $ */
+/* $Id: mmap.cpp,v 1.32 2000-02-05 14:09:31 sandervl Exp $ */
 
 /*
  * Win32 Memory mapped file & view classes
@@ -15,6 +15,7 @@
  *
  * TODO: Handles returned should be usable by all apis that accept file handles
  * TODO: Sharing memory mapped files between multiple processes
+ * TODO: Memory mapped files with views that extend the file (not 100% correct now)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -102,8 +103,8 @@ BOOL Win32MemMap::Init(HANDLE hMemMap)
 		goto fail;
 	}
 	//SvL: Temporary limitation of size (Warp Server Advanced doesn't allow
-        //     one to reserve more than 450 MB of continuous memory; (Warp 4
-        //     much less))
+        //     one to reserve more than 450 MB (unless you override the virtual
+        //     memory max limit) of continuous memory; (Warp 4 much less))
 	if(mSize > 64*1024*1024) {
 		mSize = 64*1024*1024;
 	}
@@ -208,26 +209,28 @@ BOOL Win32MemMap::commitPage(ULONG offset, BOOL fWriteAccess, int nrpages)
 	  		if(VirtualAlloc((LPVOID)pageAddr, memInfo.RegionSize, MEM_COMMIT, PAGE_READWRITE) == FALSE) {
 				goto fail;
 	  		}
-			offset = pageAddr - (ULONG)pMapping;
-			size   = memInfo.RegionSize;
-			if(offset + size > mSize) {
-				dprintf(("Adjusting size from %d to %d", size, mSize - offset));
-				size = mSize - offset;
-			}
-			if(SetFilePointer(hMemFile, offset, NULL, FILE_BEGIN) != offset) {
-				dprintf(("Win32MemMap::commitPage: SetFilePointer failed to set pos to %x", offset));
-				goto fail;
-			}
-			if(ReadFile(hMemFile, (LPSTR)pageAddr, size, &nrBytesRead, NULL) == FALSE) {
-				dprintf(("Win32MemMap::commitPage: ReadFile failed for %x", pageAddr));
-				goto fail;
-			}
-			if(nrBytesRead != size) {
-				dprintf(("Win32MemMap::commitPage: ReadFile didn't read all bytes for %x", pageAddr));
-				goto fail;
+			if(!fWriteAccess) {
+				offset = pageAddr - (ULONG)pMapping;
+				size   = memInfo.RegionSize;
+				if(offset + size > mSize) {
+					dprintf(("Adjusting size from %d to %d", size, mSize - offset));
+					size = mSize - offset;
+				}
+				if(SetFilePointer(hMemFile, offset, NULL, FILE_BEGIN) != offset) {
+					dprintf(("Win32MemMap::commitPage: SetFilePointer failed to set pos to %x", offset));
+					goto fail;
+				}
+				if(ReadFile(hMemFile, (LPSTR)pageAddr, size, &nrBytesRead, NULL) == FALSE) {
+					dprintf(("Win32MemMap::commitPage: ReadFile failed for %x", pageAddr));
+					goto fail;
+				}
+				if(nrBytesRead != size) {
+					dprintf(("Win32MemMap::commitPage: ReadFile didn't read all bytes for %x", pageAddr));
+					goto fail;
+				}
 			}
 			if(mProtFlags != PAGE_READWRITE) {
-	  			if(VirtualProtect((LPVOID)pageAddr, memInfo.RegionSize, newProt, &oldProt) == FALSE) {
+		  		if(VirtualProtect((LPVOID)pageAddr, memInfo.RegionSize, newProt, &oldProt) == FALSE) {
 					goto fail;
 				}
 			}
@@ -305,8 +308,13 @@ LPVOID Win32MemMap::mapViewOfFile(ULONG size, ULONG offset, ULONG fdwAccess)
     if((fdwAccess & FILE_MAP_COPY) && !(mProtFlags & PAGE_WRITECOPY))
       goto parmfail;
 
-  if(offset+size > mSize)
+  if(offset+size > mSize && (!(fdwAccess & FILE_MAP_WRITE) || !hMemFile))
 	goto parmfail;
+
+  //SvL: TODO: Doesn't work for multiple views
+  if(offset+size > mSize) {
+	mSize = offset+size;
+  }
 
 //TODO: If committed, read file into memory
 #if 0
@@ -326,7 +334,7 @@ LPVOID Win32MemMap::mapViewOfFile(ULONG size, ULONG offset, ULONG fdwAccess)
 	//     This is most likely an OS/2 bug and doesn't happen in Aurora
         //     when allocating memory with the PAG_ANY bit set. (without this
         //     flag it will also crash)
-	if(lpszMapName) {
+	if(!hMemFile && lpszMapName) {
 		pMapping = VirtualAllocShared(mSize, fAlloc, PAGE_READWRITE, lpszMapName);
 	}
 	else {
@@ -535,12 +543,13 @@ Win32MemMapView::Win32MemMapView(Win32MemMap *map, ULONG offset, ULONG size,
 	break;
   case FILE_MAP_ALL_ACCESS:
   case FILE_MAP_WRITE:
+  case FILE_MAP_WRITE|FILE_MAP_READ:
   case FILE_MAP_COPY:
 	accessAttr = (PAG_READ|PAG_WRITE);
 	mfAccess   = MEMMAP_ACCESS_READ | MEMMAP_ACCESS_WRITE;
 	break;
   }
-  if(map->getMemName() != NULL) {
+  if(map->getMemName() != NULL && !map->getFileHandle()) {
 	//shared memory map, so map it into our address space
 	if(OSLibDosGetNamedSharedMem((LPVOID *)&viewaddr, map->getMemName()) != OSLIB_NOERROR) {
 		dprintf(("new OSLibDosGetNamedSharedMem FAILED"));
