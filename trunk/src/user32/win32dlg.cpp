@@ -1,4 +1,4 @@
-/* $Id: win32dlg.cpp,v 1.51 2000-09-04 18:23:55 sandervl Exp $ */
+/* $Id: win32dlg.cpp,v 1.52 2000-10-05 18:37:26 sandervl Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -669,7 +669,7 @@ BOOL Win32Dialog::createControls(LPCSTR dlgtemplate, HINSTANCE hInst)
         hwndCtrl = ::CreateWindowExA( info.exStyle | WS_EX_NOPARENTNOTIFY,
                                       classNameA,
                                       windowNameA,
-                                      info.style | WS_CHILD | WS_CLIPSIBLINGS,
+                                      info.style | WS_CHILD,
                                       info.x * xUnit / 4,
                                       info.y * yUnit / 8,
                                       info.cx * xUnit / 4,
