@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.634 2000-01-11 13:05:41 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.635 2000-01-11 13:51:14 sandervl Exp $ */
 
  2000-01-11: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32\NEW: Put nonclient code in win32wbasenonclient.cpp
@@ -11,6 +11,8 @@
                       Fixed default return value of DefWndProc (0)
                       Fixed SetMenu (menus should be set when a window is no child)
                       Call correct SetMenu function from MsgCreate Win32BaseWindow method
+                      Use WIN32_INNERFRAME frame class for top level windows again.
+                      (VPBuddy repaint problems were solved by using this class)
 
  2000-01-10: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Fixed message translation for WM_TIMER with no window handle or timer proc
