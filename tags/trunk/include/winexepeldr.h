@@ -1,4 +1,4 @@
-/* $Id: winexepeldr.h,v 1.1 1999-09-15 23:29:37 sandervl Exp $ */
+/* $Id: winexepeldr.h,v 1.2 1999-10-14 09:58:10 sandervl Exp $ */
 
 /*
  * Win32 PE loader Exe class
@@ -23,6 +23,8 @@ class Win32PeLdrExe : public Win32PeLdrImage, public Win32ExeBase
 public:
 	Win32PeLdrExe(char *szFileName);
 virtual ~Win32PeLdrExe();
+
+virtual BOOL init(ULONG reservedMem);
 
 protected:
 private:
