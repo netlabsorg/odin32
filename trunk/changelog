@@ -1,4 +1,15 @@
-/* $Id: changelog,v 1.1314 2001-03-21 12:35:13 sandervl Exp $ */
+/* $Id: changelog,v 1.1315 2001-03-22 18:15:04 sandervl Exp $ */
+
+ 2001-03-22: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Ported Wine's GetBinaryTypeA/W
+                o Wrote assembly wrapper for thread handler calling to cope with
+                  buggy applications that use the wrong calling convention for
+                  thread handlers. (like @#$@#% PowerDVD)
+                  (fixes crash in PowerDVD with release build of kernel32)
+
+ 2001-03-22: Michal Necasek <michalnec@volny.cz>
+    - USER32:   o Show the mouse pointer in the exitlist handler of user32.
+                  (should restore the mouse pointer after a game crashes)
 
  2001-03-21: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Added support for disabling logging for a specific thread
