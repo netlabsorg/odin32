@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.182 2002-07-21 15:55:51 achimha Exp $ */
+/* $Id: pmwindow.cpp,v 1.183 2002-07-24 18:43:11 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -791,7 +791,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         dprintf(("OS2: WM_PAINT %x (%d,%d) (%d,%d) rc=%d", win32wnd->getWindowHandle(), rectl.xLeft, rectl.yBottom, rectl.xRight, rectl.yTop, rc));
 
         if(rc && win32wnd->IsWindowCreated() && (rectl.xLeft != rectl.xRight &&
-           rectl.yBottom != rectl.yTop))
+           rectl.yBottom != rectl.yTop) && !IsIconic(win32wnd->GetTopParent()))
         {
                 win32wnd->DispatchMsgA(pWinMsg);
         }
