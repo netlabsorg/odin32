@@ -1,4 +1,4 @@
-/* $Id: OS2Krnl.h,v 1.7.4.1 2000-07-16 22:43:27 bird Exp $
+/* $Id: OS2Krnl.h,v 1.7.4.2 2000-08-28 22:44:22 bird Exp $
  *
  * OS/2 kernel structures, typedefs and macros.
  *
@@ -240,6 +240,10 @@ typedef USHORT HPTDA, *PHPTDA;
     #define INCL_OS2KRNL_TK
     #define INCL_OS2KRNL_PTDA
     #define INCL_OS2KRNL_TCB
+#endif
+
+#if defined(INCL_OS2KRNL_PTDA) && !defined(INCL_OS2KRNL_SEM)
+    #define INCL_OS2KRNL_SEM
 #endif
 
 #ifdef INCL_OS2KRNL_IO

@@ -1,4 +1,4 @@
-; $Id: calltab.asm,v 1.12.4.7 2000-08-23 04:16:43 bird Exp $
+; $Id: calltab.asm,v 1.12.4.8 2000-08-28 22:44:23 bird Exp $
 ;
 ; callTab - Call back again table - table with entry for each function or
 ;           variable which is overrided.
@@ -84,6 +84,11 @@
     public ptda_environ_offObject
     public _fpptda_environ
     public ptda_environ_sel
+
+    public pptda_ptdasem
+    public ptda_ptdasem_offObject
+    public _fpptda_ptdasem
+    public ptda_ptdasem_sel
 
     public pptda_module
     public ptda_module_offObject
@@ -319,21 +324,27 @@ ptda_environ_sel       dw  0
     db (MAXSIZE_PROLOG - 14) dup(0cch)
 
 ; 37
+pptda_ptdasem          dd  0
+ptda_ptdasem_offObject dd  0
+_fpptda_ptdasem        dd  0
+ptda_ptdasem_sel       dw  0
+    db (MAXSIZE_PROLOG - 14) dup(0cch)
+
+; 38
 pptda_module          dd  0
 ptda_module_offObject dd  0
 _fpptda_module        dd  0
 ptda_module_sel       dw  0
     db (MAXSIZE_PROLOG - 14) dup(0cch)
 
-; 38
+; 39
 pptda_pBeginLIBPATH           dd  0
 ptda_pBeginLIBPATH_offObject  dd  0
 _fpptda_pBeginLIBPATH         dd  0
 pptda_pBeginLIBPATH_sel       dw  0
     db (MAXSIZE_PROLOG - 14) dup(0cch)
 
-
-; 39
+; 40
 pldrpFileNameBuf              dd  0
 pldrpFileNameBuf_offObject    dd  0
 _fpldrpFileNameBuf            dd  0
