@@ -1,4 +1,4 @@
-/* $Id: configure.cmd,v 1.20 2001-06-02 17:50:36 bird Exp $
+/* $Id: configure.cmd,v 1.21 2001-06-10 01:43:36 bird Exp $
  *
  * Configuration script.
  * Generates makefile.inc and an empty .depend file.
@@ -36,7 +36,7 @@
                     fWin32k = 0;
                 when (ch = '?' | ch = 'H' | substr(sArg, 1, 2) = '-H') then
                 do
-                    say 'Odin32 Configure.cmd. $Revision: 1.20 $.'
+                    say 'Odin32 Configure.cmd. $Revision: 1.21 $.'
                     say 'syntax: Configure.cmd [-n] [-w]'
                     say '  -n   Noninteractive.'
                     say '  -w   Don''t build Win32k.'
@@ -79,21 +79,21 @@
         call lineout sIncFile, 'WIN32KMISC       =' sWin32kBase'\misc'
         call lineout sIncFile, 'WIN32KPE2LX      =' sWin32kBase'\pe2lx'
         call lineout sIncFile, '!ifdef DEBUG'
-        call lineout sIncFile, 'WIN32KBIN        =' sWin32kBase'\bin\debug'
-        call lineout sIncFile, 'WIN32KLIST       =' sWin32kBase'\list\debug'
-        call lineout sIncFile, 'WIN32KOBJ        =' sWin32kBase'\object\debug'
+        call lineout sIncFile, 'WIN32KBIN        =' sWin32kBase'\bin\debug.$(CCENV)'
+        call lineout sIncFile, 'WIN32KLIST       =' sWin32kBase'\list\debug.$(CCENV)'
+        call lineout sIncFile, 'WIN32KOBJ        =' sWin32kBase'\object\debug.$(CCENV)'
         call lineout sIncFile, '!else'
-        call lineout sIncFile, 'WIN32KBIN        =' sWin32kBase'\bin\release'
-        call lineout sIncFile, 'WIN32KLIST       =' sWin32kBase'\list\release'
-        call lineout sIncFile, 'WIN32KOBJ        =' sWin32kBase'\object\release'
+        call lineout sIncFile, 'WIN32KBIN        =' sWin32kBase'\bin\release.$(CCENV)'
+        call lineout sIncFile, 'WIN32KLIST       =' sWin32kBase'\list\release.$(CCENV)'
+        call lineout sIncFile, 'WIN32KOBJ        =' sWin32kBase'\object\release.$(CCENV)'
         call lineout sIncFile, '!endif'
         call lineout sIncFile, 'WIN32KOBJECT     = $(WIN32KOBJ)'
         call lineout sIncFile, ''
 
         call lineout sIncFile, '################################################################################'
-        call lineout sIncFile, '# DDKPATH: base directory of ddk base (ie. \DDK\BASE not \DDK for DDK v4.0+).'
+        call lineout sIncFile, '# DDKPATH: base directory of ddk base (i.e. \DDK\BASE not \DDK for DDK v4.0+).'
         call lineout sIncFile, '################################################################################'
-        sDDK = SearchPaths('INCLUDE', '..\h\dhcalls.h', 'PATH', '..\h\dhcalls.h', 'BOOKSHELF', '..\base\.\h\dhcalls.h', 'Path to DDK "\BASE" directory (ie. F:\DDK\BASE):');
+        sDDK = SearchPaths('INCLUDE', '..\h\dhcalls.h', 'PATH', '..\h\dhcalls.h', 'BOOKSHELF', '..\base\.\h\dhcalls.h', 'Path to DDK "\BASE" directory (i.e. F:\DDK\BASE):');
         sDDK = ValidatePath(sDDK, 'h\devhdr.h', 'DDK Base Path');
         call lineout sIncFile, 'DDKPATH          =' sDDK
         call lineout sIncFile, ''
@@ -140,16 +140,22 @@
          * Create output directories.
          */
         '@mkdir Bin > nul 2> nul'
-        '@mkdir Bin\Release > nul 2> nul'
-        '@mkdir Bin\Debug > nul 2> nul'
+        '@mkdir Bin\Release.vac3 > nul 2> nul'
+        '@mkdir Bin\Release.vac36 > nul 2> nul'
+        '@mkdir Bin\Debug.vac3 > nul 2> nul'
+        '@mkdir Bin\Debug.vac36 > nul 2> nul'
 
         '@mkdir List > nul 2> nul'
-        '@mkdir List\Release > nul 2> nul'
-        '@mkdir List\Debug > nul 2> nul'
+        '@mkdir List\Release.vac3 > nul 2> nul'
+        '@mkdir List\Release.vac36 > nul 2> nul'
+        '@mkdir List\Debug.vac3 > nul 2> nul'
+        '@mkdir List\Debug.vac36 > nul 2> nul'
 
         '@mkdir Object > nul 2> nul'
-        '@mkdir Object\Debug > nul 2> nul'
-        '@mkdir Object\Release > nul 2> nul'
+        '@mkdir Object\Debug.vac3 > nul 2> nul'
+        '@mkdir Object\Debug.vac36 > nul 2> nul'
+        '@mkdir Object\Release.vac3 > nul 2> nul'
+        '@mkdir Object\Release.vac36 > nul 2> nul'
 
         /*
          * Display output.
