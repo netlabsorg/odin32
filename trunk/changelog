@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.1891 2001-12-08 12:01:57 sandervl Exp $ */
+/* $Id: changelog,v 1.1892 2001-12-08 14:29:22 sandervl Exp $ */
 
  2001-12-08: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Added read & write functions to custom driver interface
@@ -11,7 +11,8 @@
                   Version=NT4          -> Windows NT4  SP6 (default)
                   Version=Win2000      -> Windows 2000 SP2
                   Version=WinXP        -> Windows XP
-
+                o IOCTL_STORAGE_GET_MEDIA_TYPES is identical to 
+                  IOCTL_DISK_GET_MEDIA_TYPES
 
  2001-12-07: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o GetFileType for parallel port device returns FILE_TYPE_PIPE
