@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.232 2001-02-03 18:52:02 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.233 2001-02-09 18:30:25 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -374,8 +374,8 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
         fXDefault = FALSE;
         if (fCXDefault)
         {
-        fCXDefault = FALSE;
-        cs->cx = cs->cy = 0;
+            fCXDefault = FALSE;
+            cs->cx = cs->cy = 0;
         }
     }
     if (fXDefault && !fCXDefault) fXDefault = FALSE; //CB: only x positioning doesn't work (calc.exe,cdrlabel.exe)
@@ -704,6 +704,17 @@ if (!cs->hMenu) cs->hMenu = LoadMenuA(windowClass->getInstance(),"MYAPP");
 
                 SendInternalMessageA(WM_MOVE,0,MAKELONG(rectClient.left,rectClient.top));
             }
+            if (getStyle() & (WS_MINIMIZE | WS_MAXIMIZE))
+            {
+		        RECT newPos;
+		        UINT swFlag = (getStyle() & WS_MINIMIZE) ? SW_MINIMIZE : SW_MAXIMIZE;
+                setStyle(getStyle() & ~(WS_MAXIMIZE | WS_MINIMIZE));
+		        MinMaximize(swFlag, &newPos);
+                swFlag = ((getStyle() & WS_CHILD) || GetActiveWindow()) ? SWP_NOACTIVATE | SWP_NOZORDER | SWP_FRAMECHANGED
+                                                                        : SWP_NOZORDER | SWP_FRAMECHANGED;
+                SetWindowPos(0, newPos.left, newPos.top,  newPos.right, newPos.bottom, swFlag);
+            }
+
             if( (getStyle() & WS_CHILD) && !(getExStyle() & WS_EX_NOPARENTNOTIFY) )
             {
                 /* Notify the parent window only */
@@ -1357,25 +1368,25 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
         if(windowNameW) free(windowNameW);
         if (lParam)
         {
-          wndNameLength = strlen(lpsz);
-          windowNameA = (LPSTR)_smalloc(wndNameLength+1);
-          strcpy(windowNameA, lpsz);
-          windowNameW = (LPWSTR)_smalloc((wndNameLength+1)*sizeof(WCHAR));
-          lstrcpyAtoW(windowNameW, windowNameA);
+            wndNameLength = strlen(lpsz);
+            windowNameA = (LPSTR)_smalloc(wndNameLength+1);
+            strcpy(windowNameA, lpsz);
+            windowNameW = (LPWSTR)_smalloc((wndNameLength+1)*sizeof(WCHAR));
+            lstrcpyAtoW(windowNameW, windowNameA);
         }
         else
         {
-          windowNameA = NULL;
-          windowNameW = NULL;
-          wndNameLength = 0;
+            windowNameA = NULL;
+            windowNameW = NULL;
+            wndNameLength = 0;
         }
         dprintf(("WM_SETTEXT of %x to %s\n", Win32Hwnd, lParam));
         if ((dwStyle & WS_CAPTION) == WS_CAPTION)
         {
-          HandleNCPaint((HRGN)1);
-          if(hTaskList) {
-        OSLibWinChangeTaskList(hTaskList, OS2Hwnd, getWindowNameA(), (getStyle() & WS_VISIBLE) ? 1 : 0);
-      }
+            HandleNCPaint((HRGN)1);
+            if(hTaskList) {
+                OSLibWinChangeTaskList(hTaskList, OS2Hwnd, getWindowNameA(), (getStyle() & WS_VISIBLE) ? 1 : 0);
+            }
         }
 
         return TRUE;
@@ -1383,20 +1394,20 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
 
     case WM_SETREDRAW:
     {
-      if (wParam)
-      {
-        setStyle(getStyle() | WS_VISIBLE);
-        OSLibWinEnableWindowUpdate(OS2Hwnd,TRUE);
-      }
-      else
-      {
-        if (getStyle() & WS_VISIBLE)
+        if (wParam)
         {
-          setStyle(getStyle() & ~WS_VISIBLE);
-          OSLibWinEnableWindowUpdate(OS2Hwnd,FALSE);
+            setStyle(getStyle() | WS_VISIBLE);
+            OSLibWinEnableWindowUpdate(OS2Hwnd,TRUE);
         }
-      }
-      return 0;
+        else
+        {
+            if (getStyle() & WS_VISIBLE)
+            {
+                setStyle(getStyle() & ~WS_VISIBLE);
+                OSLibWinEnableWindowUpdate(OS2Hwnd,FALSE);
+            }
+        }
+        return 0;
     }
 
     case WM_CTLCOLORMSGBOX:
@@ -3315,7 +3326,7 @@ LONG Win32BaseWindow::SetWindowLongA(int index, ULONG value, BOOL fUnicode)
                     break;
                 }
                 dprintf(("WARNING: SetWindowLong%c %x %d %x returned %x INVALID index!", (fUnicode) ? 'W' : 'A', getWindowHandle(), index, value));
-                SetLastError(ERROR_INVALID_INDEX); 	//verified in NT4, SP6
+                SetLastError(ERROR_INVALID_INDEX);  //verified in NT4, SP6
                 return 0;
     }
     //Note: NT4, SP6 does not set the last error to 0
@@ -3357,7 +3368,7 @@ ULONG Win32BaseWindow::GetWindowLongA(int index, BOOL fUnicode)
             value = userWindowLong[index/4];
             break;
         }
-        SetLastError(ERROR_INVALID_INDEX);	//verified in NT4, SP6
+        SetLastError(ERROR_INVALID_INDEX);  //verified in NT4, SP6
         return 0;
     }
     dprintf2(("GetWindowLongA %x %d %x", getWindowHandle(), index, value));
@@ -3379,7 +3390,7 @@ WORD Win32BaseWindow::SetWindowWord(int index, WORD value)
         SetLastError(ERROR_SUCCESS);
         return oldval;
     }
-    SetLastError(ERROR_INVALID_INDEX); 	//verified in NT4, SP6
+    SetLastError(ERROR_INVALID_INDEX);  //verified in NT4, SP6
     return 0;
 }
 //******************************************************************************
@@ -3392,7 +3403,7 @@ WORD Win32BaseWindow::GetWindowWord(int index)
         SetLastError(ERROR_SUCCESS);
         return ((WORD *)userWindowLong)[index/2];
     }
-    SetLastError(ERROR_INVALID_INDEX); 	//verified in NT4, SP6
+    SetLastError(ERROR_INVALID_INDEX);  //verified in NT4, SP6
     return 0;
 }
 //******************************************************************************
