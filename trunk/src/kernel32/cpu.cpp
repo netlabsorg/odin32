@@ -1,4 +1,4 @@
-/* $Id: cpu.cpp,v 1.13 2002-05-22 12:57:16 sandervl Exp $ */
+/* $Id: cpu.cpp,v 1.14 2003-02-28 15:37:21 sandervl Exp $ */
 /*
  * Odin win32 CPU apis
  *
@@ -157,6 +157,7 @@ VOID WINAPI GetSystemInfo(LPSYSTEM_INFO si)	/* [out] system information */
 					tmp  = (double)time2.LowPart + (double)time2.HighPart*4.0*1024.0*1024.0;
 					tmp1 = (double)time1.LowPart + (double)time1.HighPart*4.0*1024.0*1024.0;
 					millisec = tmp - tmp1;
+
 					frequency= (double)freq.LowPart;
 					frequency= frequency / 1000.0;
 					millisec = millisec / frequency;
@@ -164,13 +165,16 @@ VOID WINAPI GetSystemInfo(LPSYSTEM_INFO si)	/* [out] system information */
 					tmp  = (double)tsc2.LowPart + (double)tsc2.HighPart*4.0*1024.0*1024.0;
 					tmp1 = (double)tsc1.LowPart + (double)tsc1.HighPart*4.0*1024.0*1024.0;
 					clockticks = tmp - tmp1;
-
-					tmp = 1000 / millisec;
-					clockticks = clockticks * tmp;	//ticks per second
-					mhertz = clockticks / 1000000.0;
-					mhz = (DWORD)mhertz;
+        				if(millisec > 0) 
+					{//make sure we have something valid here
+						tmp = 1000 / millisec;
+						clockticks = clockticks * tmp;	//ticks per second
+						mhertz = clockticks / 1000000.0;
+						mhz = (DWORD)mhertz;
+          				}
+					else	mhz = 500;
 				}
-				else	mhz = 100;
+				else	mhz = 500;
 				RegSetValueExA(xhkey,"~Mhz",0,REG_DWORD, (LPBYTE)&mhz, sizeof(DWORD));
 			}
 #endif
