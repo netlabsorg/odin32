@@ -88,7 +88,7 @@ switch ($sOperation)
         $obj = new CVSFile($sFile, 0);
         if ($obj && $obj->fOk)
         {
-            if (!$obj->PrintRevision($sRevision))
+            if ($obj->PrintRevision($sRevision) != 1)
             {
                 echo "<p><i>PrintRevision failed.</i>";
                 echo "<br><i>".$obj->sError."<br>";
