@@ -1,4 +1,4 @@
-/* $Id: text.cpp,v 1.22 2001-05-25 10:05:29 sandervl Exp $ */
+/* $Id: text.cpp,v 1.23 2001-05-27 19:01:14 sandervl Exp $ */
 
 /*
  * GDI32 text apis
@@ -469,6 +469,8 @@ INT SYSTEM EXPORT InternalDrawTextExW(HDC hdc,LPCWSTR lpchText,INT cchText,LPREC
 
   return(rc);
 }
+#if 0
+//Replaced with Wine functions in user32\text.cpp)
 //******************************************************************************
 // CB: USER32 function, but here is the better place
 //******************************************************************************
@@ -487,11 +489,27 @@ DWORD SYSTEM EXPORT InternalGetTabbedTextExtentA(HDC hDC,LPCSTR lpString,INT nCo
     SetLastError(ERROR_STACK_OVERFLOW);
     return 0;
   }
-  if ((lpString == NULL) || (nCount >  512) || ((nTabPositions > 0) && (lpnTabStopPositions == NULL)))
+  if ((lpString == NULL) || ((nTabPositions > 0) && (lpnTabStopPositions == NULL)))
   {
     SetLastError(ERROR_INVALID_PARAMETER);
     return 0;
   }
+  if(nCount > 512) {
+      DWORD cbStringNew;
+      DWORD ret1;
+      DWORD ret = 0;
+
+      dprintf(("WARNING: InternalGetTabbedTextExtentA string longer than 512 chars; splitting up"));
+      while(nCount) {
+         cbStringNew = min(500, nCount);
+
+         ret = InternalGetTabbedTextExtentA(hDC, lpString, cbStringNew, nTabPositions, lpnTabStopPositions);
+         lpString += cbStringNew;
+         nCount   -= cbStringNew;
+      }
+      return ret;
+  }
+
   //CB: Win95 supports negative values for right aligned text
   for (INT i = 0;i < nTabPositions;i++)
   {
@@ -622,6 +640,7 @@ LONG SYSTEM EXPORT InternalTabbedTextOutW(HDC hdc,INT x,INT y,LPCWSTR lpString,I
 
   return(rc);
 }
+#endif
 //******************************************************************************
 // todo: metafile support
 //******************************************************************************
