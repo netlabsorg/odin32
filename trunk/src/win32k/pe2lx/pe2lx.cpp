@@ -1,4 +1,4 @@
-/* $Id: pe2lx.cpp,v 1.10 1999-11-16 17:09:31 bird Exp $
+/* $Id: pe2lx.cpp,v 1.11 1999-11-16 18:07:55 bird Exp $
  *
  * Pe2Lx class implementation. Ring 0 and Ring 3
  *
@@ -3436,7 +3436,7 @@ ULONG  Pe2Lx::addEntry(ULONG ulOrdinal, ULONG ulRVA)
     {
         /* Add unused entry which skips to the new ordinal - 1.*/
         pBundle = (struct b32_bundle *)((ULONG)pEntryBundles + offCurEntryBundle);
-        pBundle->b32_cnt = (UCHAR)(ulOrdinal - ulLastOrdinal + 1);
+        pBundle->b32_cnt = (UCHAR)(ulOrdinal - ulLastOrdinal - 1);
         pBundle->b32_type = EMPTY;
 
         /* Update offCurEntryBundle and offLastEntryBundle */
@@ -3624,7 +3624,7 @@ ULONG  Pe2Lx::addForwarderEntry(ULONG ulOrdinal, PCSZ pszDllName, PCSZ pszFnName
     {
         /* Add unused entry which skips to the new ordinal - 1.*/
         pBundle = (struct b32_bundle *)((ULONG)pEntryBundles + offCurEntryBundle);
-        pBundle->b32_cnt = (UCHAR)(ulOrdinal - ulLastOrdinal + 1);
+        pBundle->b32_cnt = (UCHAR)(ulOrdinal - ulLastOrdinal - 1);
         pBundle->b32_type = EMPTY;
 
         /* Update offCurEntryBundle and offLastEntryBundle */
