@@ -1,4 +1,4 @@
-# $Id: odin32.post.vac3.mk,v 1.26 2002-02-09 17:26:36 sandervl Exp $
+# $Id: odin32.post.vac3.mk,v 1.27 2002-04-11 21:23:57 bird Exp $
 
 #
 # Odin32 API
@@ -156,6 +156,7 @@ $(OBJDIR)\$(TARGET).lrf: $(MAKEFILE) $(ODIN32_INCLUDE)\odin32.post.vac3.mk
 /MAP:$(OBJDIR)\$(TARGET).map
 $(OBJS:  =^
 )
+$(OBJ_PROFILE)
 $(LIBS:  =^
 )
 $(OBJDIR)\bldlevel.$(ORGDEFFILE)
@@ -231,6 +232,7 @@ $(OBJDIR)\$(TARGET).lrf: $(MAKEFILE) $(ODIN32_INCLUDE)\odin32.post.vac3.mk
 /MAP:$(OBJDIR)\$(TARGET).map
 $(OBJS:  =^
 )
+$(OBJ_PROFILE)
 $(LIBS:  =^
 )
 $(OBJDIR)\bldlevel.$(ORGDEFFILE)
