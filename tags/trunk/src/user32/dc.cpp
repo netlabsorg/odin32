@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.59 2000-06-07 14:51:25 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.60 2000-06-08 18:10:09 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -347,7 +347,11 @@ HRGN selectClientArea(Win32BaseWindow *window, pDCData pHps, PRECTL prclPaint)
         //only setup the clip region
 	goto setupclipregion;
    }
-
+   if(pHps->isClientArea) {
+	//TODO: counter
+	dprintf(("WARNING: selectClientArea; already selected!!"));
+	goto setupclipregion;
+   }
    pHps->isClient = TRUE;
 
    hwnd = window->getOS2WindowHandle();
@@ -410,6 +414,7 @@ HRGN selectClientArea(Win32BaseWindow *window, pDCData pHps, PRECTL prclPaint)
 
 setupclipregion:
    if(prclPaint) {
+#if 0
 	hrgnClip = GpiQueryClipRegion(pHps->hps);
       	if(hrgnClip) {
       		rc = GreIntersectClipRectangle(pHps->hps, prclPaint);
@@ -418,9 +423,10 @@ setupclipregion:
 		}
       	}
       	else {
+#endif
       		hrgnClip = GreCreateRectRegion(pHps->hps, prclPaint, 1);
       		GreSelectClipRegion(pHps->hps, hrgnClip, &hrgnOldClip);
-	}
+//	}
    }
 
    return hrgnOldClip;
@@ -609,15 +615,16 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
 	memset(&rectl, 0, sizeof(rectl));
         dprintf (("USER32: WARNING: WinQueryUpdateRect failed (error or no update rectangle)!!"));
 
-	mapWin32ToOS2Rect(wnd->getWindowHeight(), wnd->getClientRectPtr(), (PRECTLOS2)&rectlClient);
-	WinOffsetRect(NULL, &rectlClient, -rectlClient.xLeft, -rectlClient.yBottom);
+//	mapWin32ToOS2Rect(wnd->getWindowHeight(), wnd->getClientRectPtr(), (PRECTLOS2)&rectlClient);
+//	WinOffsetRect(NULL, &rectlClient, -rectlClient.xLeft, -rectlClient.yBottom);
 
-   	hrgnOldClip = selectClientArea(wnd, pHps, &rectlClient);
+   	hrgnOldClip = selectClientArea(wnd, pHps, &rectl);
         //save old clip region (restored for CS_OWNDC windows in EndPaint)
         wnd->SetClipRegion(hrgnOldClip);
 	lComplexity = RGN_NULL;
    }
    else {
+#if 0
    	HRGN hrgnTmp = GpiCreateRegion(pHps->hps, 1, &rectl);
 
    	WinQueryUpdateRegion(hwndClient, hrgnTmp);
@@ -626,7 +633,7 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
    	RECTL   rectls[12], rcltemp;
    	GpiQueryRegionRects(pHps->hps, hrgnTmp, &rcltemp, &rgnrect, &rectls[0]);
 	GpiDestroyRegion(pHps->hps, hrgnTmp);
-
+#endif
         WinValidateRect(hwndClient, &rectl, FALSE);
 
 	mapWin32ToOS2Rect(wnd->getWindowHeight(), wnd->getClientRectPtr(), (PRECTLOS2)&rectlClient);
@@ -695,22 +702,13 @@ BOOL WIN32API EndPaint (HWND hWnd, const PAINTSTRUCT_W *pPaint)
    pHps = (pDCData)GpiQueryDCData((HPS)pPaint->hdc);
    if (pHps && (pHps->hdcType == TYPE_3))
    {
-	removeClientArea(pHps);
+	GpiSetClipRegion(pHps->hps, wnd->GetClipRegion(), &hrgnOld);
+        wnd->SetClipRegion(0);
         if(hrgnOld) {
-        	GpiSetClipRegion(pHps->hps, NULLHANDLE, &hrgnOld);
                 GpiDestroyRegion(pHps->hps, hrgnOld);
         }
-        if(hwnd == HWND_DESKTOP || !wnd->isOwnDC()) {
-   		pHps->hdcType = TYPE_1; //otherwise Open32's ReleaseDC fails
-                ReleaseDC(hwnd, pPaint->hdc);
-        }
-        else
-        if(wnd->GetClipRegion()) {
-                //TODO: What else do we need to restore here???
-                GpiSetClipRegion(pHps->hps, wnd->GetClipRegion(), &hrgnOld);
-                wnd->SetClipRegion(0);
-                pHps->hdcType = TYPE_1;
-        }
+	pHps->hdcType = TYPE_1; //otherwise Open32's ReleaseDC fails
+        ReleaseDC(hwnd, pPaint->hdc);
    }
    else {
         dprintf(("EndPaint: wrong hdc %x!!", pPaint->hdc));
@@ -722,197 +720,6 @@ BOOL WIN32API EndPaint (HWND hWnd, const PAINTSTRUCT_W *pPaint)
 exit:
    SetLastError(0);
    return TRUE;
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API GetClipBox( HDC hdc, PRECT lpRect)
-{
- pDCData  pHps = (pDCData)GpiQueryDCData((HPS)hdc);
- RECTL    rectl;
- LONG     lComplexity;
- int      rc;
-
-    if(!hdc || !lpRect || !pHps) {
-    	dprintf(("GDI32: GetClipBox %x %x ERROR_INVALID_PARAMETER", hdc, lpRect));
-	SetLastError(ERROR_INVALID_PARAMETER_W);
-	return ERROR_W;
-    }
-    if(pHps->isPrinter)
-    {
-        lpRect->left   = 0;
-        lpRect->top    = 0;
-        lpRect->right  = GetDeviceCaps( hdc, HORZRES_W);
-        lpRect->bottom = GetDeviceCaps( hdc, VERTRES_W);
-
-        rc = SIMPLEREGION_W;
-    }
-    else {
-    	lComplexity = GpiQueryClipBox(pHps->hps, &rectl);
-    	if(lComplexity == RGN_ERROR) 
-    	{
-		rc = ERROR_W;
-    	}
-    	else
-	if(lComplexity == RGN_NULL) 
-    	{
-		memset(lpRect, 0, sizeof(*lpRect));
-		rc = NULLREGION_W;
-	}
-	else {
-		lpRect->left   = rectl.xLeft;
-		lpRect->right  = rectl.xRight;
-#if 0
-		lpRect->top    = pHps->height - rectl.yTop;
-		lpRect->bottom = pHps->height - rectl.yBottom;
-#else
-		//No conversion required as GpiQueryClipBox is affected by
-                //the y-inversion of the window
-		lpRect->top    = rectl.yBottom;
-		lpRect->bottom = rectl.yTop;
-#endif
-		//Convert including/including to including/excluding
-		if(lpRect->left != lpRect->right) {
-			lpRect->right++;
-		}
-		if(lpRect->top != lpRect->bottom) {
-			lpRect->bottom++;
-		}
-		rc = (lComplexity == RGN_RECT) ? SIMPLEREGION_W : COMPLEXREGION_W;
-    	}
-    }
-    dprintf(("GDI32: GetClipBox of %X returned %d\n", hdc, rc));
-    return rc;
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API GetClipRgn( HDC hdc, HRGN hRgn)
-{
- int rc;
-
-    rc = O32_GetClipRgn(hdc, hRgn);
-    dprintf(("GDI32: GetClipRgn %x %x returned %x", hdc, hRgn, rc));
-    return rc;
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API GetUpdateRect (HWND hwnd, LPRECT pRect, BOOL erase)
-{
-   if (!hwnd)
-   {
-	dprintf(("GetUpdateRect %x %x %d -> invalid handle!!", hwnd, pRect, erase));
-      	SetLastError(ERROR_INVALID_WINDOW_HANDLE_W);
-      	return FALSE;
-   }
-
-   RECTL rectl;
-   Win32BaseWindow *wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
-
-   if (!wnd)
-   {
-      	SetLastError(ERROR_INVALID_WINDOW_HANDLE_W);
-	dprintf(("GetUpdateRect %x %x %d -> invalid handle!!", hwnd, pRect, erase));
-      	return FALSE;
-   }
-
-   dprintf(("GetUpdateRect %x %x %d", hwnd, pRect, erase));
-
-   BOOL updateRegionExists = WinQueryUpdateRect (wnd->getOS2WindowHandle(), pRect ? &rectl : NULL);
-   if (!pRect) {
-      return (updateRegionExists);
-   }
-
-   if (updateRegionExists)
-   {
-        //CB: for PM empty rect is valid
-        if ((rectl.xLeft == rectl.xRight) || (rectl.yTop == rectl.yBottom)) {
-                if(pRect) {
-                        pRect->left = pRect->top = pRect->right = pRect->bottom = 0;
-                }
-                return FALSE;
-        }
-#if 0
-        //SvL: Hack for memory.exe (doesn't get repainted properly otherwise)
-//      if (wnd->isOwnDC() && wnd->getOwnDC())
-        if (wnd->isOwnDC())
-        {
-                pDCData pHps = NULL;
-                pHps = (pDCData)GpiQueryDCData(wnd->getOwnDC());
-                if (!pHps)
-                {
-                        SetLastError(ERROR_INVALID_HANDLE_W);
-                        return FALSE;
-                }
-                GpiConvert (pHps->hps, CVTC_DEVICE, CVTC_WORLD, 2, (PPOINTL)&rectl);
-        }
-        else
-        {
-#endif
-                long height   = wnd->getClientHeight();
-                rectl.yTop    = height - rectl.yTop;
-                rectl.yBottom = height - rectl.yBottom;
-//////////              }
-
-        if (pRect)
-                WINRECT_FROM_PMRECT (*pRect, rectl);
-
-        if (erase)
-                sendEraseBkgnd (wnd);
-   }
-   else
-   {
-        if(pRect) {
-                pRect->left = pRect->top = pRect->right = pRect->bottom = 0;
-        }
-   }
-
-   return updateRegionExists;
-}
-//******************************************************************************
-//functions for WM_NCPAINT
-//******************************************************************************
-INT SYSTEM GetOS2UpdateRgn(HWND hwnd,HRGN hrgn)
-{
-  return O32_GetUpdateRgn(hwnd,hrgn,FALSE);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL GetOS2UpdateRect(Win32BaseWindow *window, LPRECT pRect)
-{
-   RECTL rectl;
-   BOOL updateRegionExists = WinQueryUpdateRect(window->getOS2WindowHandle(),pRect ? &rectl:NULL);
-
-   if (!pRect)
-     return (updateRegionExists);
-
-   if (updateRegionExists)
-   {
-     //CB: for PM empty rect is valid
-     if ((rectl.xLeft == rectl.xRight) || (rectl.yTop == rectl.yBottom)) return FALSE;
-     mapOS2ToWin32Rect(window->getWindowHeight(), (PRECTLOS2)&rectl,pRect);
-   }
-   else
-       pRect->left = pRect->top = pRect->right = pRect->bottom = 0;
-
-   return updateRegionExists;
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API GetUpdateRgn (HWND hwnd, HRGN hrgn, BOOL erase)
-{
-   LONG Complexity;
-
-   Win32BaseWindow *wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
-
-   if (!wnd)
-   {
-      SetLastError(ERROR_INVALID_WINDOW_HANDLE_W);
-      return ERROR_W;
-   }
-
-   Complexity = O32_GetUpdateRgn (wnd->getOS2WindowHandle(), hrgn, FALSE);
-   if (erase && (Complexity > NULLREGION_W)) sendEraseBkgnd(wnd);
-
-   return Complexity;
 }
 //******************************************************************************
 //******************************************************************************
@@ -928,8 +735,6 @@ int WIN32API ReleaseDC (HWND hwnd, HDC hdc)
                 dprintf(("ERROR: ReleaseDC %x %x failed", hwnd, hdc));
                 return 0;
         }
-        //SvL: Hack for memory.exe (doesn't get repainted properly otherwise)
-//      isOwnDC = wnd->isOwnDC() && wnd->getOwnDC();
         isOwnDC = wnd->isOwnDC() && (wnd->getOwnDC() == hdc);
    	if(!isOwnDC)
    	{
@@ -1001,30 +806,29 @@ HDC WIN32API GetDCEx (HWND hwnd, HRGN hrgn, ULONG flags)
    }
 
    isWindowOwnDC = (((hWindow == HWND_DESKTOP) ? FALSE : (wnd->isOwnDC()))
-                 && !(flags & DCX_CACHE_W));
+                 && !(flags & (DCX_CACHE_W|DCX_WINDOW_W)));
 
-   if(isWindowOwnDC)
+   if(isWindowOwnDC) //own dc always for client area
    {
       hps = wnd->getOwnDC();
       if (hps)
       {
-         pDCData pHps = (pDCData)GpiQueryDCData (hps);
-         if (!pHps)
+        pDCData pHps = (pDCData)GpiQueryDCData (hps);
+        if (!pHps)
             goto error;
 
-         if(flags & DCX_WINDOW_W)
-            removeClientArea(pHps);
-         else
-            selectClientArea(wnd, pHps, NULL);
+        selectClientArea(wnd, pHps, NULL);
 
-         setPageXForm (wnd, pHps);
-         pHps->hdcType = TYPE_1;
+	//TODO: Is this always necessary??
+        setPageXForm (wnd, pHps);
+        pHps->hdcType = TYPE_1;
 
-         dprintf (("User32: GetDCEx hwnd %x (%x %x) -> wnd %x hdc %x", hwnd, hrgn, flags, wnd, hps));
-         return (HDC)hps;
+	//TODO: intersect/exclude clip region?
+        dprintf (("User32: GetDCEx hwnd %x (%x %x) -> wnd %x hdc %x", hwnd, hrgn, flags, wnd, hps));
+        return (HDC)hps;
       }
       else
-         creatingOwnDC = TRUE;
+        creatingOwnDC = TRUE;
    }
 
    if(isWindowOwnDC)
@@ -1084,7 +888,6 @@ HDC WIN32API GetDCEx (HWND hwnd, HRGN hrgn, ULONG flags)
  	selectClientArea(wnd, pHps, NULL);
    }
    else removeClientArea(pHps);
-
 
    setMapMode(wnd, pHps, MM_TEXT_W);
 
@@ -1199,6 +1002,9 @@ HDC WIN32API GetWindowDC (HWND hwnd)
 // RDW_VALIDATE
 // RDW_ERASENOW
 // RDW_UPDATENOW
+// RDW_FRAME
+//
+//TODO: Work ok for RDW_FRAME??
 //******************************************************************************
 BOOL WIN32API RedrawWindow(HWND hwnd, const RECT* pRect, HRGN hrgn, DWORD redraw)
 {
@@ -1259,7 +1065,12 @@ BOOL WIN32API RedrawWindow(HWND hwnd, const RECT* pRect, HRGN hrgn, DWORD redraw
       PRGNDATA_W RgnData;
       PRECTL pr;
       int i;
-      LONG height = wnd ? wnd->getClientHeight() : OSLibQueryScreenHeight();
+      LONG height;
+
+      if(wnd) {
+		height = (redraw & RDW_FRAME_W) ? wnd->getWindowHeight() : wnd->getClientHeight();
+      }
+      else 	height = OSLibQueryScreenHeight();
 
       if (!hrgn)
          goto error;
@@ -1283,11 +1094,13 @@ BOOL WIN32API RedrawWindow(HWND hwnd, const RECT* pRect, HRGN hrgn, DWORD redraw
    }
    else if (pRect)
    {
-      LONG height = wnd ? wnd->getClientHeight() : OSLibQueryScreenHeight();
-
-      PMRECT_FROM_WINRECT (rectl, *pRect);
-      rectl.yTop    = height - rectl.yTop;
-      rectl.yBottom = height - rectl.yBottom;
+      if(wnd) {
+		if(redraw & RDW_FRAME_W) {
+			mapWin32ToOS2Rect(wnd->getWindowHeight(), (PRECT)pRect, (PRECTLOS2)&rectl);
+		}
+		else  	mapWin32ToOS2RectClientToFrame(wnd, (PRECT)pRect, (PRECTLOS2)&rectl);
+      }
+      else 	mapWin32ToOS2Rect(OSLibQueryScreenHeight(), (PRECT)pRect, (PRECTLOS2)&rectl);
    }
 
    if (redraw & RDW_INVALIDATE_W)
@@ -1329,7 +1142,8 @@ BOOL WIN32API RedrawWindow(HWND hwnd, const RECT* pRect, HRGN hrgn, DWORD redraw
    {
         //TODO: Does this work if RDW_ALLCHILDREN is set??
         if(redraw & RDW_UPDATENOW_W) {
-                wnd->MsgPaint (0, FALSE);
+		wnd->MsgNCPaint();
+                wnd->MsgPaint(0, FALSE);
         }
         else
 //        if((redraw & RDW_ERASE_W) && (redraw & RDW_ERASENOW_W))
@@ -1338,8 +1152,10 @@ BOOL WIN32API RedrawWindow(HWND hwnd, const RECT* pRect, HRGN hrgn, DWORD redraw
    }
    else if((redraw & RDW_INTERNALPAINT_W) && !(redraw & RDW_INVALIDATE_W))
    {
-        if(redraw & RDW_UPDATENOW_W)
+        if(redraw & RDW_UPDATENOW_W) {
+		wnd->MsgNCPaint();
                 wnd->MsgPaint (0, FALSE);
+	}
         else    PostMessageA(hwnd, WINWM_PAINT, 0, 0);
    }
 
@@ -1465,6 +1281,7 @@ BOOL setPMRgnIntoWinRgn (HRGN hrgnPM, HRGN hrgnWin, LONG height)
 }
 //******************************************************************************
 //TODO: Check if this one works correctly...
+//Have to check if dc is for frame or client!!
 //******************************************************************************
 BOOL WIN32API ScrollDC(HDC hDC, int dx, int dy, const RECT *pScroll,
                        const RECT *pClip, HRGN hrgnUpdate, LPRECT pRectUpdate)
@@ -1790,15 +1607,6 @@ HWND WIN32API WindowFromDC(HDC hdc)
 }
 //******************************************************************************
 //******************************************************************************
-INT WIN32API ExcludeUpdateRgn( HDC hDC, HWND  hWnd)
-{
-    dprintf(("USER32:  ExcludeUpdateRgn\n"));
-    hWnd = Win32BaseWindow::Win32ToOS2Handle(hWnd);
-
-    return O32_ExcludeUpdateRgn(hDC,hWnd);
-}
-//******************************************************************************
-//******************************************************************************
 BOOL WIN32API ValidateRect( HWND hwnd, const RECT * lprc)
 {
     if(lprc) {
@@ -1814,82 +1622,6 @@ BOOL WIN32API ValidateRgn( HWND hwnd, HRGN  hrgn)
 {
     dprintf(("USER32: ValidateRgn %x %x", hwnd, hrgn));
     return RedrawWindow( hwnd, NULL, hrgn, RDW_VALIDATE_W | RDW_NOCHILDREN_W | (hwnd==0 ? RDW_UPDATENOW_W : 0));
-}
-/*****************************************************************************
- * Name      : int WIN32API GetWindowRgn
- * Purpose   : The GetWindowRgn function obtains a copy of the window region of a window.
- * Parameters: HWND hWnd handle to window whose window region is to be obtained
- *             HRGN hRgn handle to region that receives a copy of the window region
- * Variables :
- * Result    : NULLREGION, SIMPLEREGION, COMPLEXREGION, ERROR
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
- *****************************************************************************/
-
-int WIN32API GetWindowRgn(HWND hwnd, HRGN hRgn)
-{
-  Win32BaseWindow *window;
-  HRGN hWindowRegion;
-
-    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
-    if(!window) {
-        dprintf(("SetWindowContextHelpId, window %x not found", hwnd));
-        SetLastError(ERROR_INVALID_WINDOW_HANDLE_W);
-        return 0;
-    }
-    dprintf(("USER32:GetWindowRgn (%x,%x)", hwnd, hRgn));
-    hWindowRegion = window->GetWindowRegion();
-
-    return O32_CombineRgn(hRgn, hWindowRegion, 0, RGN_COPY_W);
-}
-/*****************************************************************************
- * Name      : int WIN32API SetWindowRgn
- * Purpose   : The SetWindowRgn function sets the window region of a window. The
- *             window region determines the area within the window where the
- *             operating system permits drawing. The operating system does not
- *             display any portion of a window that lies outside of the window region
- *             When this function is called, the system sends the WM_WINDOWPOSCHANGING and
- *             WM_WINDOWPOSCHANGED messages to the window.
- *
- * Parameters: HWND  hWnd    handle to window whose window region is to be set
- *             HRGN  hRgn    handle to region
- *             BOOL  bRedraw window redraw flag
- * Variables :
- * Result    : If the function succeeds, the return value is non-zero.
- *             If the function fails, the return value is zero.
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
- *****************************************************************************/
-
-int WIN32API SetWindowRgn(HWND hwnd,
-                          HRGN hRgn,
-                          BOOL bRedraw)
-{
-  Win32BaseWindow *window;
-  HRGN hWindowRegion;
-
-    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
-    if(!window) {
-        dprintf(("SetWindowContextHelpId, window %x not found", hwnd));
-        SetLastError(ERROR_INVALID_WINDOW_HANDLE_W);
-        return 0;
-    }
-    dprintf(("USER32:SetWindowRgn (%x,%x,%d)", hwnd, hRgn, bRedraw));
-    if(window->GetWindowRegion()) {
-        O32_DeleteObject(window->GetWindowRegion());
-    }
-    window->SetWindowRegion(hRgn);
-    if(bRedraw) {
-        RedrawWindow(hwnd, 0, 0, RDW_UPDATENOW_W);
-    }
-//TODO:
-//  When this function is called, the system sends the WM_WINDOWPOSCHANGING and
-//  WM_WINDOWPOSCHANGED messages to the window.
-    return 1;
 }
 //******************************************************************************
 //******************************************************************************

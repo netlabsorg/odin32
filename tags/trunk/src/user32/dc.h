@@ -1,4 +1,4 @@
-/* $Id: dc.h,v 1.13 2000-06-07 14:51:25 sandervl Exp $ */
+/* $Id: dc.h,v 1.14 2000-06-08 18:10:09 sandervl Exp $ */
 /*
  * public dc functions
  *
@@ -457,6 +457,58 @@ inline int O32_GetClipRgn(HDC a, HRGN b)
  USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetClipRgn(a, b);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+int APIENTRY _O32_ExcludeClipRect(HDC a, int b, int c, int d, int e);
+
+inline int O32_ExcludeClipRect(HDC a, int b, int c, int d, int e)
+{
+ int yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = _O32_ExcludeClipRect(a, b, c, d, e);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+int APIENTRY _O32_IntersectClipRect(HDC a, int b, int c, int d, int e);
+
+inline int O32_IntersectClipRect(HDC a, int b, int c, int d, int e)
+{
+ int yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = _O32_IntersectClipRect(a, b, c, d, e);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+int APIENTRY _O32_ExtSelectClipRgn(HDC a, HRGN b, int c);
+
+inline int O32_ExtSelectClipRgn(HDC a, HRGN b, int c)
+{
+ int yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = _O32_ExtSelectClipRgn(a, b, c);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+int APIENTRY _O32_OffsetClipRgn(HDC a, int b, int c);
+
+inline int O32_OffsetClipRgn(HDC a, int b, int c)
+{
+ int yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = _O32_OffsetClipRgn(a, b, c);
     SetFS(sel);
 
     return yyrc;
