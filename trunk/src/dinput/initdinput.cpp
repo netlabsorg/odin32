@@ -1,4 +1,4 @@
-/* $Id: initdinput.cpp,v 1.1 2002-04-30 14:52:03 sandervl Exp $ */
+/* $Id: initdinput.cpp,v 1.2 2002-05-15 09:29:27 sandervl Exp $ */
 /*
  * COMCTL32 DLL entry point
  *
@@ -48,7 +48,7 @@ static HMODULE dllHandle = 0;
 
 //******************************************************************************
 //******************************************************************************
-BOOL WINAPI LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
+BOOL WINAPI DInputLibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
 {
    switch (fdwReason)
    {
@@ -85,7 +85,7 @@ ULONG APIENTRY inittermDInput(ULONG hModule, ULONG ulFlag)
 
    switch (ulFlag) {
       case 0 :
-         dllHandle = RegisterLxDll(hModule, LibMain, (PVOID)&dinput_PEResTab);
+         dllHandle = RegisterLxDll(hModule, DInputLibMain, (PVOID)&dinput_PEResTab);
          if(dllHandle == 0)
              return 0UL;
 
