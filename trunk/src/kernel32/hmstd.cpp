@@ -1,4 +1,4 @@
-/* $Id: hmstd.cpp,v 1.2 2001-03-12 14:16:33 sandervl Exp $ */
+/* $Id: hmstd.cpp,v 1.3 2001-04-21 09:10:14 sandervl Exp $ */
 
 /*
  * Handle Manager class for standard in, out & error handles
@@ -151,7 +151,8 @@ BOOL HMDeviceStandardClass::WriteFile(PHMHANDLEDATA pHMHandleData,
                                       LPDWORD       lpNumberOfBytesWritten,
                                       LPOVERLAPPED  lpOverlapped)
 {
- DWORD byteswritten;
+ DWORD  byteswritten;
+ LPVOID lpLowMemBuffer;
 
   dprintf2(("KERNEL32: HMDeviceStandardClass::WriteFile %s(%08x,%08x,%08x,%08x,%08x) - stub?\n",
            lpHMDeviceName,
@@ -166,8 +167,14 @@ BOOL HMDeviceStandardClass::WriteFile(PHMHANDLEDATA pHMHandleData,
   if(pHMHandleData->dwUserData == STD_INPUT_HANDLE) {
      return FALSE;
   }
-  return O32_WriteFile(pHMHandleData->hHMHandle, lpBuffer, nNumberOfBytesToWrite,
-                      lpNumberOfBytesWritten, lpOverlapped);
+  lpLowMemBuffer = alloca(nNumberOfBytesToWrite);
+  if(lpLowMemBuffer == NULL) {
+     DebugInt3();
+     return FALSE;
+  }
+  memcpy(lpLowMemBuffer, lpBuffer, nNumberOfBytesToWrite);
+  return O32_WriteFile(pHMHandleData->hHMHandle, lpLowMemBuffer, nNumberOfBytesToWrite,
+                       lpNumberOfBytesWritten, lpOverlapped);
 }
 
 /*****************************************************************************

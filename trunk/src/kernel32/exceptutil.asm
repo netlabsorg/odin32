@@ -1,4 +1,4 @@
-; $Id: exceptutil.asm,v 1.14 2001-03-25 22:05:36 sandervl Exp $
+; $Id: exceptutil.asm,v 1.15 2001-04-21 09:10:14 sandervl Exp $
 
 ;/*
 ; * Project Odin Software License can be found in LICENSE.TXT
@@ -9,6 +9,39 @@
 ; */
 .386p
                 NAME    except
+
+DATA32	segment dword use32 public 'DATA'
+DATA32	ends
+CONST32_RO	segment dword use32 public 'CONST'
+CONST32_RO	ends
+BSS32	segment dword use32 public 'BSS'
+BSS32	ends
+EH_CODE	segment dword use32 public 'CODE'
+EH_CODE	ends
+CTOR_DTOR1	segment dword use32 public 'DATA'
+CTOR_DTOR1	ends
+CTOR_DTOR2	segment dword use32 public 'DATA'
+CTOR_DTOR2	ends
+CTOR_DTOR3	segment dword use32 public 'DATA'
+CTOR_DTOR3	ends
+EH_DATA	segment para use32 public 'DATA'
+EH_DATA	ends
+_VFT	segment para use32 public 'DATA'
+_VFT	ends
+DGROUP	group BSS32, DATA32
+	assume	cs:FLAT, ds:FLAT, ss:FLAT, es:FLAT
+
+DATA32	segment dword use32 public 'DATA'
+
+CONST32_RO	segment
+	align 04h
+@CBE8	db "KERNEL32: Calling handle"
+db "r at %p code=%lx flags=%"
+db "lx",0ah,0h
+@CBE9	db "KERNEL32: Handler return"
+db "ed %lx",0ah,0h
+CONST32_RO	ends
+DATA32	ends
 
 CODE32          SEGMENT DWORD PUBLIC USE32 'CODE'
         public  _RaiseException@16
@@ -244,6 +277,138 @@ _AsmCallThreadHandler proc near
         pop     ebp
         ret
 _AsmCallThreadHandler endp
+
+; 281 static DWORD EXC_CallHandler( WINEXCEPTION_RECORD *record, WINEXCEPTION_FRAME *frame,
+        EXTRN WriteLog:PROC
+        EXTRN _GetThreadTEB@0:PROC
+IFDEF DEBUG
+        EXTRN DbgEnabled:DWORD
+ENDIF
+
+EXC_push_frame__FP19_WINEXCEPTION_FRAME	proc
+	push	ebp
+	mov	ebp,esp
+	sub	esp,04h
+	mov	[ebp+08h],eax;	frame
+
+; 132     TEB *teb = GetThreadTEB();
+	call	_GetThreadTEB@0
+	mov	[ebp-04h],eax;	teb
+
+; 133     frame->Prev = (PWINEXCEPTION_FRAME)teb->except;
+	mov	ecx,[ebp-04h];	teb
+	mov	ecx,[ecx]
+	mov	eax,[ebp+08h];	frame
+	mov	[eax],ecx
+
+; 134     teb->except = frame;
+	mov	eax,[ebp-04h];	teb
+	mov	ecx,[ebp+08h];	frame
+	mov	[eax],ecx
+
+; 135     return frame->Prev;
+	mov	eax,[ebp+08h];	frame
+	mov	eax,[eax]
+	leave	
+	ret	
+EXC_push_frame__FP19_WINEXCEPTION_FRAME	endp
+
+; 138 static inline WINEXCEPTION_FRAME * EXC_pop_frame( WINEXCEPTION_FRAME *frame )
+	align 04h
+
+EXC_pop_frame__FP19_WINEXCEPTION_FRAME	proc
+	push	ebp
+	mov	ebp,esp
+	sub	esp,04h
+	mov	[ebp+08h],eax;	frame
+
+; 141     TEB *teb = GetThreadTEB();
+	call	_GetThreadTEB@0
+	mov	[ebp-04h],eax;	teb
+
+; 142     teb->except = frame->Prev;
+	mov	ecx,[ebp+08h];	frame
+	mov	ecx,[ecx]
+	mov	eax,[ebp-04h];	teb
+	mov	[eax],ecx
+
+; 143     return frame->Prev;
+	mov	eax,[ebp+08h];	frame
+	mov	eax,[eax]
+	leave	
+	ret	
+EXC_pop_frame__FP19_WINEXCEPTION_FRAME	endp
+
+	align 04h
+        PUBLIC EXC_CallHandler__FP20_WINEXCEPTION_RECORDP19_WINEXCEPTION_FRAMEP10WINCONTEXTPP19_WINEXCEPTION_FRAMEPFP20_WINEXCEPTION_RECORDP19_WINEXCEPTION_FRAMEP10WINCONTEXTPv_UlT5
+
+EXC_CallHandler__FP20_WINEXCEPTION_RECORDP19_WINEXCEPTION_FRAMEP10WINCONTEXTPP19_WINEXCEPTION_FRAMEPFP20_WINEXCEPTION_RECORDP19_WINEXCEPTION_FRAMEP10WINCONTEXTPv_UlT5	proc
+	push	ebp
+	mov	ebp,esp
+	sub	esp,010h
+	sub	esp,04h
+	mov	[ebp+08h],eax;	record
+	mov	[ebp+0ch],edx;	frame
+	mov	[ebp+010h],ecx;	context
+
+; 296     newframe.frame.Handler = nested_handler;
+	mov	eax,[ebp+01ch];	nested_handler
+	mov	[ebp-08h],eax;	newframe
+
+; 297     newframe.prevFrame     = frame;
+	mov	eax,[ebp+0ch];	frame
+	mov	[ebp-04h],eax;	newframe
+
+; 298     EXC_push_frame( &newframe.frame );
+	lea	eax,[ebp-0ch];	newframe
+	call	EXC_push_frame__FP19_WINEXCEPTION_FRAME
+
+; 299     dprintf(("KERNEL32: Calling handler at %p code=%lx flags=%lx\n",
+IFDEF DEBUG
+	cmp	word ptr  DbgEnabled+020h,01h
+	jne	@BLBL20
+	mov	eax,[ebp+08h];	record
+	push	dword ptr [eax+04h]
+	mov	eax,[ebp+08h];	record
+	push	dword ptr [eax]
+	push	dword ptr [ebp+018h];	handler
+	push	offset FLAT:@CBE8
+	call	WriteLog
+	add	esp,010h
+ENDIF
+
+; 300            handler, record->ExceptionCode, record->ExceptionFlags));
+@BLBL20:
+
+; 301     ret = handler( record, frame, context, dispatcher );
+	push	dword ptr [ebp+014h];	dispatcher
+	push	dword ptr [ebp+010h];	context
+	push	dword ptr [ebp+0ch];	frame
+	push	dword ptr [ebp+08h];	record
+	call	dword ptr [ebp+018h];	handler
+	mov	[ebp-010h],eax;	ret
+
+IFDEF DEBUG
+; 302     dprintf(("KERNEL32: Handler returned %lx\n", ret));
+	cmp	word ptr  DbgEnabled+020h,01h
+	jne	@BLBL21
+	push	dword ptr [ebp-010h];	ret
+	push	offset FLAT:@CBE9
+	call	WriteLog
+	add	esp,08h
+@BLBL21:
+ENDIF
+
+; 303     EXC_pop_frame( &newframe.frame );
+	lea	eax,[ebp-0ch];	newframe
+	call	EXC_pop_frame__FP19_WINEXCEPTION_FRAME
+
+; 304     return ret;
+	mov	eax,[ebp-010h];	ret
+	add	esp,04h
+	leave	
+	ret	
+EXC_CallHandler__FP20_WINEXCEPTION_RECORDP19_WINEXCEPTION_FRAMEP10WINCONTEXTPP19_WINEXCEPTION_FRAMEPFP20_WINEXCEPTION_RECORDP19_WINEXCEPTION_FRAMEP10WINCONTEXTPv_UlT5	endp
 
 CODE32          ENDS
 
