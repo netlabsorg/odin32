@@ -1,4 +1,4 @@
-/* $Id: winres.h,v 1.10 1999-09-15 23:29:08 sandervl Exp $ */
+/* $Id: winres.h,v 1.11 1999-10-26 11:16:14 sandervl Exp $ */
 
 /*
  * Win32 resource class
@@ -26,7 +26,6 @@ class Win32Resource
 public:
                    // Constructors and destructors
                    Win32Resource(); //custum resource (i.e. created by app in runtime)
-                   Win32Resource(Win32ImageBase *module, HRSRC hRes, ULONG id, ULONG type);
                    Win32Resource(Win32ImageBase *module, ULONG id, ULONG type,
 	                         ULONG size, char *resdata);
     virtual       ~Win32Resource();
@@ -46,15 +45,12 @@ public:
 
 protected:
 
-             PVOID convertOS2Bitmap(void *bmpdata);
-
 	     PVOID convertResource(void *win32res);
 
     Win32ImageBase *module;
 
              HRSRC hres;
              ULONG type;
-	     ULONG orgos2type;
              ULONG id;
 
              PVOID os2resdata;
