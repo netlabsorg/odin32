@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.37 2000-03-24 19:25:32 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.38 2000-03-28 17:11:50 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -1177,8 +1177,6 @@ void Win32PeLdrImage::AddNameExport(ULONG virtaddr, char *apiname, ULONG ordinal
 {
  ULONG nsize;
 
-  if(!strcmp(apiname, "At")) 
-	DebugInt3();
   if(nameexports == NULL) {
     	nameExportSize= 4096;
     	nameexports   = (NameExport *)malloc(nameExportSize);
@@ -1527,9 +1525,9 @@ ULONG Win32PeLdrImage::getApi(char *name)
   for(i=0; i<nrNameExports; i++)
   {
     if(apilen == curexport->nlength &&
-       *(ULONG *)curexport->name == *(ULONG *)name)
+       *(ULONG *)curexport->name == *(ULONG *)apiname)
     {
-      	if(strcmp(curexport->name, name) == 0)
+      	if(strcmp(curexport->name, apiname) == 0)
         	return(curexport->virtaddr);
     }
     curexport = (NameExport *)((ULONG)curexport->name + curexport->nlength);

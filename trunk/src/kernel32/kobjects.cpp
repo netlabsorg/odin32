@@ -1,4 +1,4 @@
-/* $Id: kobjects.cpp,v 1.10 2000-03-16 19:20:39 sandervl Exp $ */
+/* $Id: kobjects.cpp,v 1.11 2000-03-28 17:11:49 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -321,7 +321,8 @@ ODINFUNCTION1(BOOL, FlushFileBuffers,
 ODINFUNCTION1(UINT, SetHandleCount,
               UINT, cHandles)
 {
-  return(HMSetHandleCount(cHandles));
+  //SvL: Has no effect in NT; also ignore it
+  return cHandles;
 }
 
 

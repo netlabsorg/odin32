@@ -1,4 +1,4 @@
-/* $Id: Fileio.cpp,v 1.25 2000-03-13 20:39:09 sandervl Exp $ */
+/* $Id: Fileio.cpp,v 1.26 2000-03-28 17:11:48 sandervl Exp $ */
 
 /*
  * Win32 File IO API functions for OS/2
@@ -616,20 +616,20 @@ ODINFUNCTION3(*, :,
  *****************************************************************************/
 
 ODINFUNCTION3(HFILE, OpenFile,
-              LPCSTR, arg1,
-              OFSTRUCT *, arg2,
-              UINT, arg3)
+              LPCSTR, lpszFile,
+              OFSTRUCT *, lpOpenBuff,
+              UINT, fuMode)
 {
   HFILE hFile;
 
   dprintf(("KERNEL32: OpenFile(%s, %08xh, %08xh)\n",
-           arg1,
-           arg2,
-           arg3));
+           lpszFile,
+           lpOpenBuff,
+           fuMode));
 
-  hFile = HMOpenFile(arg1,                                      /* call open32 */
-                     arg2,
-                     arg3);
+  hFile = HMOpenFile(lpszFile,                                      /* call open32 */
+                     lpOpenBuff,
+                     fuMode);
 
   return (hFile);
 }

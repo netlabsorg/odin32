@@ -1,4 +1,4 @@
-/* $Id: virtual.cpp,v 1.28 2000-02-16 14:22:46 sandervl Exp $ */
+/* $Id: virtual.cpp,v 1.29 2000-03-28 17:11:50 sandervl Exp $ */
 
 /*
  * Win32 virtual memory functions
@@ -552,27 +552,26 @@ ODINFUNCTION3(DWORD, VirtualQuery, LPCVOID, lpvAddress,
   DWORD  rc;
   LPVOID lpBase;
 
-  if(pmbiBuffer == NULL || cbLength == 0) // check parameters
+  if(pmbiBuffer == NULL || cbLength != sizeof(MEMORY_BASIC_INFORMATION)) // check parameters
   {
-    return 0;                             // nothing to return
+	SetLastError(ERROR_INVALID_PARAMETER);
+    	return 0;                             // nothing to return
   }
+  SetLastError(ERROR_SUCCESS);
 
   // determine exact page range
   lpBase = (LPVOID)((ULONG)lpvAddress & 0xFFFFF000);
-  cbRangeSize = cbLength & ~0x00000FFF;   // assuming intel page sizes :)
-  if(cbLength & 0x00000FFF)
-    cbRangeSize += PAGE_SIZE;
+  cbRangeSize = -1;
 
   rc = OSLibDosQueryMem(lpBase,
                         &cbRangeSize,
                         &dAttr);
   if(rc)
   {
-    dprintf(("VirtualQuery - OSLibDosQueryMem %x %x returned %d\n",
-             lpBase,
-             cbLength,
-             rc));
-    return 0;
+    	dprintf(("VirtualQuery - OSLibDosQueryMem %x %x returned %d\n",
+             	  lpBase, cbLength, rc));
+	SetLastError(ERROR_INVALID_PARAMETER);
+    	return 0;
   }
 
   memset(pmbiBuffer,
@@ -606,33 +605,30 @@ ODINFUNCTION3(DWORD, VirtualQuery, LPCVOID, lpvAddress,
       pmbiBuffer->State = MEM_RESERVE;
 
   if(!(dAttr & PAG_SHARED))
-    pmbiBuffer->Type = MEM_PRIVATE;
+    	pmbiBuffer->Type = MEM_PRIVATE;
 
   //TODO: This is not correct: AllocationProtect should contain the protection
   //      flags used in the initial call to VirtualAlloc
   pmbiBuffer->AllocationProtect = pmbiBuffer->Protect;
-  if(dAttr & PAG_BASE)
-    pmbiBuffer->AllocationBase = lpBase;
+  if(dAttr & PAG_BASE) {
+    	pmbiBuffer->AllocationBase = lpBase;
+  }
   else
   {
-    while(lpBase > 0)
-    {
-      rc = OSLibDosQueryMem(lpBase, &cbRangeSize, &dAttr);
-      if(rc)
-      {
-         dprintf(("VirtualQuery - OSLibDosQueryMem %x %x returned %d\n",
-                  lpBase,
-                  cbLength,
-                  rc));
-         break;
-      }
-      if(dAttr & PAG_BASE)
-      {
-         pmbiBuffer->AllocationBase = lpBase;
-         break;
-      }
-      lpBase = (LPVOID)((ULONG)lpBase - PAGE_SIZE);
-   }
+    	while(lpBase > 0)
+    	{
+      		rc = OSLibDosQueryMem(lpBase, &cbRangeSize, &dAttr);
+	      	if(rc) {
+	         	dprintf(("VirtualQuery - OSLibDosQueryMem %x %x returned %d\n",
+	                  	  lpBase, cbLength, rc));
+	         	break;
+	      	}
+	      	if(dAttr & PAG_BASE) {
+	         	pmbiBuffer->AllocationBase = lpBase;
+	         	break;
+	      	}
+	     	lpBase = (LPVOID)((ULONG)lpBase - PAGE_SIZE);
+	}
   }
   return sizeof(MEMORY_BASIC_INFORMATION);
 }
