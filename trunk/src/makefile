@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.60 2000-05-20 13:28:15 sandervl Exp $
+# $Id: makefile,v 1.61 2000-05-29 22:29:59 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -142,6 +142,8 @@ all: libs
     cd ..\riched32
     $(MAKE_CMD)
     cd ..\icmp
+    $(MAKE_CMD)
+    cd ..\urlmon
     $(MAKE_CMD)
 
 #
