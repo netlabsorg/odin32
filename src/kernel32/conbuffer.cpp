@@ -1,4 +1,4 @@
-/* $Id: conbuffer.cpp,v 1.18 2003-04-02 12:58:28 sandervl Exp $ */
+/* $Id: conbuffer.cpp,v 1.19 2003-04-11 12:08:35 sandervl Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -428,12 +428,11 @@ DWORD  HMDeviceConsoleBufferClass::_DeviceRequest (PHMHANDLEDATA pHMHandleData,
 
       ULONG2COORD(coordWrite,arg3);
 
-      return (HMDeviceConsoleBufferClass
-              ::FillConsoleOutputAttribute(pHMHandleData,
-                                           (WORD)arg1,
-                                           (DWORD)arg2,
-                                           coordWrite,
-                                           (LPDWORD)arg4));
+      return (FillConsoleOutputAttribute(pHMHandleData,
+                                         (WORD)arg1,
+                                         (DWORD)arg2,
+                                         coordWrite,
+                                         (LPDWORD)arg4));
     }
 
 
@@ -443,11 +442,10 @@ DWORD  HMDeviceConsoleBufferClass::_DeviceRequest (PHMHANDLEDATA pHMHandleData,
 
       ULONG2COORD(coordWrite,arg3);
 
-      return (HMDeviceConsoleBufferClass
-              ::FillConsoleOutputCharacterA(pHMHandleData,
-                                            (UCHAR)arg1,
-                                            (DWORD)arg2,
-                                            coordWrite,
+      return (FillConsoleOutputCharacterA(pHMHandleData,
+                                          (UCHAR)arg1,
+                                          (DWORD)arg2,
+                                          coordWrite,
                                             (LPDWORD)arg4));
     }
 
@@ -458,8 +456,7 @@ DWORD  HMDeviceConsoleBufferClass::_DeviceRequest (PHMHANDLEDATA pHMHandleData,
 
       ULONG2COORD(coordWrite,arg3);
 
-      return (HMDeviceConsoleBufferClass
-              ::FillConsoleOutputCharacterW(pHMHandleData,
+      return (FillConsoleOutputCharacterW(pHMHandleData,
                                             (WCHAR)arg1,
                                             (DWORD)arg2,
                                             coordWrite,
@@ -468,26 +465,22 @@ DWORD  HMDeviceConsoleBufferClass::_DeviceRequest (PHMHANDLEDATA pHMHandleData,
 
 
     case DRQ_GETCONSOLECURSORINFO:
-      return (HMDeviceConsoleBufferClass
-              ::GetConsoleCursorInfo(pHMHandleData,
+      return (GetConsoleCursorInfo(pHMHandleData,
                                      (PCONSOLE_CURSOR_INFO)arg1));
 
 
     case DRQ_GETCONSOLEMODE:
-      return (HMDeviceConsoleBufferClass
-              ::GetConsoleMode(pHMHandleData,
+      return (GetConsoleMode(pHMHandleData,
                                (LPDWORD)arg1));
 
 
     case DRQ_GETCONSOLESCREENBUFFERINFO:
-      return (HMDeviceConsoleBufferClass
-              ::GetConsoleScreenBufferInfo(pHMHandleData,
+      return (GetConsoleScreenBufferInfo(pHMHandleData,
                                            (PCONSOLE_SCREEN_BUFFER_INFO)arg1));
 
 
     case DRQ_GETLARGESTCONSOLEWINDOWSIZE:
-      return (HMDeviceConsoleBufferClass
-              ::GetLargestConsoleWindowSize(pHMHandleData));
+      return (GetLargestConsoleWindowSize(pHMHandleData));
 
 
     case DRQ_READCONSOLEOUTPUTA:
@@ -498,8 +491,7 @@ DWORD  HMDeviceConsoleBufferClass::_DeviceRequest (PHMHANDLEDATA pHMHandleData,
       ULONG2COORD(coordDestBufferSize,  arg2);
       ULONG2COORD(coordDestBufferCoord, arg3);
 
-      return (HMDeviceConsoleBufferClass
-              ::ReadConsoleOutputA(pHMHandleData,
+      return (ReadConsoleOutputA(pHMHandleData,
                                    (PCHAR_INFO)arg1,
                                    coordDestBufferSize,
                                    coordDestBufferCoord,
@@ -515,8 +507,7 @@ DWORD  HMDeviceConsoleBufferClass::_DeviceRequest (PHMHANDLEDATA pHMHandleData,
       ULONG2COORD(coordDestBufferSize,  arg2);
       ULONG2COORD(coordDestBufferCoord, arg3);
 
-      return (HMDeviceConsoleBufferClass
-              ::ReadConsoleOutputW(pHMHandleData,
+      return (ReadConsoleOutputW(pHMHandleData,
                                    (PCHAR_INFO)arg1,
                                    coordDestBufferSize,
                                    coordDestBufferCoord,
@@ -530,8 +521,7 @@ DWORD  HMDeviceConsoleBufferClass::_DeviceRequest (PHMHANDLEDATA pHMHandleData,
 
       ULONG2COORD(coordReadCoord, arg3);
 
-      return (HMDeviceConsoleBufferClass
-              ::ReadConsoleOutputAttribute(pHMHandleData,
+      return (ReadConsoleOutputAttribute(pHMHandleData,
                                    (LPWORD)arg1,
                                    (DWORD)arg2,
                                    coordReadCoord,
@@ -545,8 +535,7 @@ DWORD  HMDeviceConsoleBufferClass::_DeviceRequest (PHMHANDLEDATA pHMHandleData,
 
       ULONG2COORD(coordReadCoord, arg3);
 
-      return (HMDeviceConsoleBufferClass
-              ::ReadConsoleOutputCharacterA(pHMHandleData,
+      return (ReadConsoleOutputCharacterA(pHMHandleData,
                                             (LPTSTR)arg1,
                                             (DWORD)arg2,
                                             coordReadCoord,
@@ -560,8 +549,7 @@ DWORD  HMDeviceConsoleBufferClass::_DeviceRequest (PHMHANDLEDATA pHMHandleData,
 
       ULONG2COORD(coordReadCoord, arg3);
 
-      return (HMDeviceConsoleBufferClass
-              ::ReadConsoleOutputCharacterW(pHMHandleData,
+      return (ReadConsoleOutputCharacterW(pHMHandleData,
                                             (LPWSTR)arg1,
                                             (DWORD)arg2,
                                             coordReadCoord,
@@ -575,8 +563,7 @@ DWORD  HMDeviceConsoleBufferClass::_DeviceRequest (PHMHANDLEDATA pHMHandleData,
 
       ULONG2COORD(coordDestOrigin, arg3);
 
-      return (HMDeviceConsoleBufferClass
-              ::ScrollConsoleScreenBufferA(pHMHandleData,
+      return (ScrollConsoleScreenBufferA(pHMHandleData,
                                            (PSMALL_RECT)arg1,
                                            (PSMALL_RECT)arg2,
                                            coordDestOrigin,
@@ -590,8 +577,7 @@ DWORD  HMDeviceConsoleBufferClass::_DeviceRequest (PHMHANDLEDATA pHMHandleData,
 
       ULONG2COORD(coordDestOrigin, arg3);
 
-      return (HMDeviceConsoleBufferClass
-              ::ScrollConsoleScreenBufferW(pHMHandleData,
+      return (ScrollConsoleScreenBufferW(pHMHandleData,
                                            (PSMALL_RECT)arg1,
                                            (PSMALL_RECT)arg2,
                                            coordDestOrigin,
@@ -600,13 +586,11 @@ DWORD  HMDeviceConsoleBufferClass::_DeviceRequest (PHMHANDLEDATA pHMHandleData,
 
 
     case DRQ_SETCONSOLEACTIVESCREENBUFFER:
-      return (HMDeviceConsoleBufferClass
-              ::SetConsoleActiveScreenBuffer(pHMHandleData));
+      return (SetConsoleActiveScreenBuffer(pHMHandleData));
 
 
     case DRQ_SETCONSOLECURSORINFO:
-      return (HMDeviceConsoleBufferClass
-              ::SetConsoleCursorInfo(pHMHandleData,
+      return (SetConsoleCursorInfo(pHMHandleData,
                                      (PCONSOLE_CURSOR_INFO)arg1));
 
 
@@ -616,15 +600,13 @@ DWORD  HMDeviceConsoleBufferClass::_DeviceRequest (PHMHANDLEDATA pHMHandleData,
 
       ULONG2COORD(coordCursor, arg1);
 
-      return (HMDeviceConsoleBufferClass
-              ::SetConsoleCursorPosition(pHMHandleData,
+      return (SetConsoleCursorPosition(pHMHandleData,
                                          coordCursor));
     }
 
 
     case DRQ_SETCONSOLEMODE:
-      return (HMDeviceConsoleBufferClass
-              ::SetConsoleMode(pHMHandleData,
+      return (SetConsoleMode(pHMHandleData,
                                (DWORD)arg1));
 
 
@@ -634,28 +616,24 @@ DWORD  HMDeviceConsoleBufferClass::_DeviceRequest (PHMHANDLEDATA pHMHandleData,
 
       ULONG2COORD(coordSize,arg1);
 
-      return (HMDeviceConsoleBufferClass::
-                SetConsoleScreenBufferSize(pHMHandleData,
+      return (SetConsoleScreenBufferSize(pHMHandleData,
                                            coordSize));
     }
 
 
     case DRQ_SETCONSOLETEXTATTRIBUTE:
-      return (HMDeviceConsoleBufferClass::
-                SetConsoleTextAttribute(pHMHandleData,
+      return (SetConsoleTextAttribute(pHMHandleData,
                                         (WORD)arg1));
 
 
     case DRQ_SETCONSOLEWINDOWINFO:
-      return (HMDeviceConsoleBufferClass
-              ::SetConsoleWindowInfo(pHMHandleData,
+      return (SetConsoleWindowInfo(pHMHandleData,
                                      (BOOL)arg1,
                                      (PSMALL_RECT)arg2));
 
 
     case DRQ_WRITECONSOLEA:
-      return (HMDeviceConsoleBufferClass
-              ::WriteConsoleA(pHMHandleData,
+      return (WriteConsoleA(pHMHandleData,
                               (CONST VOID*)arg1,
                               (DWORD)arg2,
                               (LPDWORD)arg3,
@@ -663,8 +641,7 @@ DWORD  HMDeviceConsoleBufferClass::_DeviceRequest (PHMHANDLEDATA pHMHandleData,
 
 
     case DRQ_WRITECONSOLEW:
-      return (HMDeviceConsoleBufferClass
-              ::WriteConsoleW(pHMHandleData,
+      return (WriteConsoleW(pHMHandleData,
                               (CONST VOID*)arg1,
                               (DWORD)arg2,
                               (LPDWORD)arg3,
@@ -679,8 +656,7 @@ DWORD  HMDeviceConsoleBufferClass::_DeviceRequest (PHMHANDLEDATA pHMHandleData,
       ULONG2COORD(coordSrcBufferSize,  arg2);
       ULONG2COORD(coordSrcBufferCoord, arg3);
 
-      return (HMDeviceConsoleBufferClass
-              ::WriteConsoleOutputA(pHMHandleData,
+      return (WriteConsoleOutputA(pHMHandleData,
                                     (PCHAR_INFO)arg1,
                                     coordSrcBufferSize,
                                     coordSrcBufferCoord,
@@ -696,8 +672,7 @@ DWORD  HMDeviceConsoleBufferClass::_DeviceRequest (PHMHANDLEDATA pHMHandleData,
       ULONG2COORD(coordSrcBufferSize,  arg2);
       ULONG2COORD(coordSrcBufferCoord, arg3);
 
-      return (HMDeviceConsoleBufferClass
-              ::WriteConsoleOutputA(pHMHandleData,
+      return (WriteConsoleOutputA(pHMHandleData,
                                     (PCHAR_INFO)arg1,
                                     coordSrcBufferSize,
                                     coordSrcBufferCoord,
@@ -711,8 +686,7 @@ DWORD  HMDeviceConsoleBufferClass::_DeviceRequest (PHMHANDLEDATA pHMHandleData,
 
       ULONG2COORD(coordWriteCoord,  arg3);
 
-      return (HMDeviceConsoleBufferClass
-              ::WriteConsoleOutputAttribute(pHMHandleData,
+      return (WriteConsoleOutputAttribute(pHMHandleData,
                                             (LPWORD)arg1,
                                             (DWORD)arg2,
                                             coordWriteCoord,
@@ -726,8 +700,7 @@ DWORD  HMDeviceConsoleBufferClass::_DeviceRequest (PHMHANDLEDATA pHMHandleData,
 
       ULONG2COORD(coordWriteCoord,  arg3);
 
-      return (HMDeviceConsoleBufferClass
-              ::WriteConsoleOutputCharacterA(pHMHandleData,
+      return (WriteConsoleOutputCharacterA(pHMHandleData,
                                              (LPTSTR)arg1,
                                              (DWORD)arg2,
                                              coordWriteCoord,
@@ -741,8 +714,7 @@ DWORD  HMDeviceConsoleBufferClass::_DeviceRequest (PHMHANDLEDATA pHMHandleData,
 
       ULONG2COORD(coordWriteCoord,  arg3);
 
-      return (HMDeviceConsoleBufferClass
-              ::WriteConsoleOutputCharacterW(pHMHandleData,
+      return (WriteConsoleOutputCharacterW(pHMHandleData,
                                              (LPWSTR)arg1,
                                              (DWORD)arg2,
                                              coordWriteCoord,
@@ -2518,7 +2490,7 @@ DWORD HMDeviceConsoleBufferClass::WriteConsoleA(PHMHANDLEDATA pHMHandleData,
 #endif
 
   /* simply forward the request to that routine */
-  return (HMDeviceConsoleBufferClass::WriteFile(pHMHandleData,
+  return (/*HMDeviceConsoleBufferClass::*/WriteFile(pHMHandleData,
                                                 lpvBuffer,
                                                 cchToWrite,
                                                 lpcchWritten,
