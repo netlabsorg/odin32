@@ -453,8 +453,15 @@ HRESULT __stdcall PrimBufSetFormat(THIS_ LPWAVEFORMATEX lpfxFormat )
    dprintf(("DSOUND-PrimBuff: SetFormat"));
    OS2PrimBuff *me = (OS2PrimBuff *)This;
 
-   if (me == NULL) {
+   if (me == NULL || lpfxFormat == NULL) {
       return DSERR_INVALIDPARAM;
+   }
+
+   /* Note: the software mixer doesn't really support mono output but */
+   /*       we can safely mix in stereo anyway                        */
+   if (lpfxFormat->nChannels == 1) {
+      if (me->parentDS->GetCoopLevel() != DSSCL_WRITEPRIMARY)
+         lpfxFormat->nChannels = 2;
    }
 
    memcpy( me->lpfxFormat, lpfxFormat, sizeof(WAVEFORMATEX) );
