@@ -1,4 +1,11 @@
-/* $Id: changelog,v 1.1834 2001-11-16 15:51:25 phaller Exp $ */
+/* $Id: changelog,v 1.1835 2001-11-16 16:10:06 sandervl Exp $ */
+
+ 2001-11-16: Sander van Leeuwen <sandervl@xs4all.nl>
+    - COMCTL32: o LISTVIEW_UpdateScroll update (from old control)
+    - USER32:   o Disallow nested calls to SetScrollRange. This is most likely
+                  not the right fix, but it works so far without negative side
+                  effects.
+                  (fixes crash in CVP listview with 4+ items)
 
  2001-11-16: Patrick Haller <patrick.haller@innotek.de>
     - ODINWRAP: o don't generate any frame procedure for RELEASE build
