@@ -1,4 +1,4 @@
-/* $Id: virtual.cpp,v 1.26 1999-12-30 11:19:54 sandervl Exp $ */
+/* $Id: virtual.cpp,v 1.27 2000-01-26 23:19:06 sandervl Exp $ */
 
 /*
  * Win32 virtual memory functions
@@ -285,7 +285,16 @@ ODINFUNCTION4(LPVOID, VirtualAlloc, LPVOID, lpvAddress,
         dprintf(("VirtualAlloc: commit\n"));
         flag = PAG_COMMIT;
   }
-
+  
+  if(fdwAllocationType & MEM_RESERVE) {
+	//SvL: DosRead crashes if memory is initially reserved with write
+        //     access disabled (OS/2 bug) even if the commit sets the page
+        //     flags to read/write:
+	// DosSetMem does not alter the 16 bit selectors so if you change memory
+	// attributes and then access the memory with a 16 bit API (such as DosRead),
+	// it will have the old (alloc time) attributes
+	flag |= PAG_READ|PAG_WRITE; 
+  }
   if(fdwProtect & PAGE_READONLY)     flag |= PAG_READ;
   if(fdwProtect & PAGE_NOACCESS)     flag |= PAG_READ; //can't do this in OS/2
   if(fdwProtect & PAGE_READWRITE)    flag |= (PAG_READ | PAG_WRITE);
