@@ -1,4 +1,4 @@
-/* $Id: ntdll.h,v 1.3 1999-06-10 17:06:45 phaller Exp $ */
+/* $Id: ntdll.h,v 1.4 1999-08-18 18:43:54 phaller Exp $ */
 
 /*
    this file defines interfaces mainly exposed to device drivers and
@@ -493,6 +493,7 @@ UINT WINAPI RtlxOemStringToUnicodeSize(PSTRING str);
 UINT WINAPI RtlxAnsiStringToUnicodeSize(PANSI_STRING str);
 DWORD WINAPI RtlIsTextUnicode(LPVOID buf, DWORD len, DWORD *pf);
 DWORD WINAPI RtlCompareUnicodeString(PUNICODE_STRING String1, PUNICODE_STRING String2, BOOLEAN CaseInSensitive);
+DWORD WINAPI RtlUpcaseUnicodeStringToOemString(PANSI_STRING oem, PUNICODE_STRING uni, BOOLEAN alloc);
 
 /*
  * resource functions
