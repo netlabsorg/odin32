@@ -1,4 +1,4 @@
-/* $Id: itypeinfo.cpp,v 1.6 2001-05-30 17:43:38 sandervl Exp $ */
+/* $Id: itypeinfo.cpp,v 1.7 2001-05-31 07:14:00 sandervl Exp $ */
 /* 
  * ITypeInfo interface
  * 
@@ -346,10 +346,31 @@ HRESULT WIN32API ITypeInfoImpl_GetRefTypeOfImplType(ITypeInfo2 * iface,
 
     dprintf(("OLEAUT32: ITypeInfoImpl(%p)->GetRefTypeOfImplType()\n", This));
 
-    if (This->pImplements.Count() < index)
+    if(index==(UINT)-1)
+    {
+      /* only valid on dual interfaces;
+         retrieve the associated TKIND_INTERFACE handle for the current TKIND_DISPATCH
+      */
+      if( This->TypeAttr.typekind != TKIND_DISPATCH) return E_INVALIDARG;
+      
+      if (This->TypeAttr.wTypeFlags & TYPEFLAG_FDISPATCHABLE &&
+          This->TypeAttr.wTypeFlags & TYPEFLAG_FDUAL )
+      {
+        *pRefType = -1;
+      }
+      else
+      {
+        if (This->pImplements.Count() == 0) return TYPE_E_ELEMENTNOTFOUND;
+        *pRefType = This->pImplements[0]->reference;
+      }
+    }
+    else
+    {
+      if (This->pImplements.Count() < index)
 	return TYPE_E_ELEMENTNOTFOUND;
 
-    *pRefType = This->pImplements[index]->reference;
+      *pRefType = This->pImplements[index]->reference;
+    }
     return S_OK;
 }
 
@@ -666,6 +687,10 @@ INVOKE_InvokeStdCallFunction(IUnknown*   pIUnk,
         pStackPtr -= sizeof(DWORD);
         * (DWORD*) pStackPtr = * (DWORD*) pIUnk;
         paramsize += sizeof(DWORD);
+
+        //reset to top
+        pStackPtr  = (PBYTE)((char *)pStack + sizeof(double)*pFuncDesc->cParams);
+        pStackPtr -= 4;
 
          /* invoke function */
         if ( pFuncDesc->elemdescFunc.tdesc.vt == VT_R8   ||
@@ -1047,6 +1072,31 @@ HRESULT WIN32API ITypeInfoImpl_GetRefTypeInfo(ITypeInfo2 * iface,
             ICOM_VTBL(pTLib)->fnRelease(pTLib );
         }
         return rc;
+    }
+    else 
+    if (hRefType == -1 && 
+       (((ITypeInfoImpl*) This)->TypeAttr.typekind   == TKIND_DISPATCH) &&
+       (((ITypeInfoImpl*) This)->TypeAttr.wTypeFlags &  TYPEFLAG_FDUAL))
+    {
+	  /* when we meet a DUAL dispinterface, we must create the interface 
+	  * version of it.
+	  */
+	  ITypeInfoImpl* pTypeInfoImpl = (ITypeInfoImpl*) ITypeInfoImpl_Constructor();
+	
+	  /* the interface version contains the same information as the dispinterface
+	   * copy the contents of the structs.
+	   */
+	  *pTypeInfoImpl = *This;
+	  pTypeInfoImpl->ref = 1;
+		
+	  /* change the type to interface */
+	  pTypeInfoImpl->TypeAttr.typekind = TKIND_INTERFACE;
+		
+          *ppTInfo = (ITypeInfo*) pTypeInfoImpl;
+
+	  ITypeInfo_AddRef((ITypeInfo*) pTypeInfoImpl);
+
+          return S_OK;
     }
 
     /* imported type lib */

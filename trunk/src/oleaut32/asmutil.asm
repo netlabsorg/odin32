@@ -1,4 +1,4 @@
-; $Id: asmutil.asm,v 1.1 2001-05-30 17:43:38 sandervl Exp $
+; $Id: asmutil.asm,v 1.2 2001-05-31 07:14:00 sandervl Exp $
 
 ;
 ; asmutil.asm utility functions for typelib::invoke
@@ -44,7 +44,7 @@ _invokeStdCallDouble PROC NEAR
 pushparam:
               mov ebx, dword ptr [eax]
               push ebx
-              add eax, 4
+              sub eax, 4
 
               dec ecx
               jnz pushparam
@@ -71,7 +71,7 @@ _invokeStdCallDword  PROC NEAR
 pushparam:
               mov ebx, dword ptr [eax]
               push ebx
-              add eax, 4
+              sub eax, 4
 
               dec ecx
               jnz pushparam
