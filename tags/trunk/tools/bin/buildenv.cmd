@@ -1,4 +1,4 @@
-/* $Id: buildenv.cmd,v 1.48 2003-03-20 19:52:27 bird Exp $
+/* $Id: buildenv.cmd,v 1.49 2003-06-09 18:02:50 bird Exp $
  *
  * This is the master tools environment script. It contains environment
  * configurations for many development tools. Each tool can be installed
@@ -26,7 +26,7 @@
     /*
      * Version
      */
-    sVersion = '1.0.19 [2003-03-20]';
+    sVersion = '1.0.20 [2003-06-09]';
 
     /*
      * Create argument array with lowercase arguments.
@@ -835,53 +835,53 @@ PathSetDefault: procedure expose aCfg. aPath. sPathFile
     if ((translate(EnvGet('HOSTNAME')) = 'UNIVAC') | (translate(EnvGet('HOSTNAME')) = 'ENIAC')) then
     do
         say 'Info: No or empty path file, using birds defaults.';
-        aPath.i.sPId = 'cvs';                       aPath.i.sPath = 'f:\cvs';                       i = i + 1;
+        aPath.i.sPId = 'cvs';                       aPath.i.sPath = 'f:\cvs\v1.11.2_os2';           i = i + 1;
         aPath.i.sPId = 'db2v52';                    aPath.i.sPath = 'f:\sqllib52';                  i = i + 1;
+        aPath.i.sPId = 'ddk';                       aPath.i.sPath = 'f:\DDK_os2\200204';            i = i + 1;
+        aPath.i.sPId = 'ddkbase';                   aPath.i.sPath = 'f:\DDK_os2\200204\base';       i = i + 1;
+        aPath.i.sPId = 'ddkvideo';                  aPath.i.sPath = 'f:\DDK_os2\200204\video';      i = i + 1;
+        aPath.i.sPId = 'doxygen';                   aPath.i.sPath = 'f:\doxygen\v1.2.11-OS2';       i = i + 1;
         aPath.i.sPId = 'emx';                       aPath.i.sPath = 'f:\emx';                       i = i + 1;
-        aPath.i.sPId = 'emxpgcc';                   aPath.i.sPath = 'f:\emxpgcc';                   i = i + 1;
+        aPath.i.sPId = 'emxpgcc';                   aPath.i.sPath = 'f:\GCC\v2.95.3_os2';           i = i + 1;
         aPath.i.sPId = 'freetypeemx';               aPath.i.sPath = 'f:\Freetype\v1.3.1-emx\emx';   i = i + 1;
-        aPath.i.sPId = 'gcc302';                    aPath.i.sPath = 'f:\gcc302beta';                i = i + 1;
-        aPath.i.sPId = 'gcc303';                    aPath.i.sPath = 'f:\gcc\v3.0.3beta\emx';        i = i + 1;
-        aPath.i.sPId = 'gcc321';                    aPath.i.sPath = 'f:\gcc\v3.2.1beta\emx';        i = i + 1;
-        aPath.i.sPId = 'icatgam';                   aPath.i.sPath = 'f:\icatos2';                   i = i + 1;
-        aPath.i.sPId = 'icatgam406rc1';             aPath.i.sPath = 'f:\icatos2.4.0.6.rc1';         i = i + 1;
-        aPath.i.sPId = 'icatpe';                    aPath.i.sPath = 'f:\icatpe';                    i = i + 1;
-        aPath.i.sPId = 'ida38';                     aPath.i.sPath = 'f:\ida38';                     i = i + 1;
-        aPath.i.sPId = 'ida40';                     aPath.i.sPath = 'f:\ida401';                    i = i + 1;
-        aPath.i.sPId = 'ida414';                    aPath.i.sPath = 'f:\ida414';                    i = i + 1;
+        aPath.i.sPId = 'gcc302';                    aPath.i.sPath = 'f:\GCC\v3.0.2beta_os2\emx';    i = i + 1;
+        aPath.i.sPId = 'gcc303';                    aPath.i.sPath = 'f:\GCC\v3.0.3beta_os2\emx';    i = i + 1;
+        aPath.i.sPId = 'gcc321';                    aPath.i.sPath = 'f:\GCC\v3.2.1beta_os2\emx';    i = i + 1;
+        aPath.i.sPId = 'home';                      aPath.i.sPath = 'e:\user\kso';                  i = i + 1;
+        aPath.i.sPId = 'icatgam';                   aPath.i.sPath = 'f:\Icat\v4.0.6rc1_os2';        i = i + 1;
+        aPath.i.sPId = 'icatgam406rc1';             aPath.i.sPath = 'f:\Icat\v4.0.6rc1_os2';        i = i + 1;
+        aPath.i.sPId = 'icatpe';                    aPath.i.sPath = 'f:\Icat\v4.0.5pe';             i = i + 1;
+        aPath.i.sPId = 'ida38';                     aPath.i.sPath = 'f:\ida\v3.8';                  i = i + 1;
+        aPath.i.sPId = 'ida40';                     aPath.i.sPath = 'f:\ida\v4.0.1';                i = i + 1;
+        aPath.i.sPId = 'ida414';                    aPath.i.sPath = 'f:\ida\v4.1.4';                i = i + 1;
         aPath.i.sPId = 'idasdk';                    aPath.i.sPath = 'f:\idasdk';                    i = i + 1;
         aPath.i.sPId = 'java131';                   aPath.i.sPath = 'e:\java131';                   i = i + 1;
         aPath.i.sPId = 'jpeg';                      aPath.i.sPath = 'f:\jpeg\v6b';                  i = i + 1;
-        aPath.i.sPId = 'ddk';                       aPath.i.sPath = 'f:\ddk\april02';               i = i + 1;
-        aPath.i.sPId = 'ddkbase';                   aPath.i.sPath = 'f:\ddk\april02\base';          i = i + 1;
-        aPath.i.sPId = 'ddkvideo';                  aPath.i.sPath = 'f:\ddk\april02\video';         i = i + 1;
-        aPath.i.sPId = 'doxygen';                   aPath.i.sPath = 'f:\doxygen\v1.2.11-OS2';       i = i + 1;
-        aPath.i.sPId = 'home';                      aPath.i.sPath = 'e:\user\kso';                  i = i + 1;
-        aPath.i.sPId = 'mscv6-16';                  aPath.i.sPath = 'f:\ddktools\toolkits\msc60';   i = i + 1;
+        aPath.i.sPId = 'mscv6-16';                  aPath.i.sPath = 'f:\msc\v6.0a_ibm';             i = i + 1;
         aPath.i.sPId = 'mscv7-16';                  aPath.i.sPath = 'f:\msc\v7.0';                  i = i + 1;
         aPath.i.sPId = 'mysql';                     aPath.i.sPath = 'f:\mysql2';                    i = i + 1;
-        aPath.i.sPId = 'nasm9833';                  aPath.i.sPath = 'f:\nasm\os2\0.98.33';          i = i + 1;
+        aPath.i.sPId = 'nasm9833';                  aPath.i.sPath = 'f:\nasm\v0.98.33_os2';         i = i + 1;
         aPath.i.sPId = 'netqos2';                   aPath.i.sPath = 'f:\netqos2';                   i = i + 1;
-        aPath.i.sPId = 'perl50xxx';                 aPath.i.sPath = 'f:\perllib';                   i = i + 1;
-        aPath.i.sPId = 'perl580';                   aPath.i.sPath = 'f:\perl\v5.8.0';               i = i + 1;
-        aPath.i.sPId = 'python';                    aPath.i.sPath = 'f:\python';                    i = i + 1;
-        aPath.i.sPId = 'toolkit40';                 aPath.i.sPath = 'f:\toolkit\v40csd4';           i = i + 1;
-        aPath.i.sPId = 'toolkit45';                 aPath.i.sPath = 'f:\toolkit\v45';               i = i + 1;
-        aPath.i.sPId = 'toolkit451';                aPath.i.sPath = 'f:\toolkit\v451';              i = i + 1;
-        aPath.i.sPId = 'toolkit452';                aPath.i.sPath = 'f:\toolkit\v452';              i = i + 1;
+        aPath.i.sPId = 'perl50xxx';                 aPath.i.sPath = 'f:\perl\v5.005_53_os2';        i = i + 1;
+        aPath.i.sPId = 'perl580';                   aPath.i.sPath = 'f:\perl\v5.8.0_os2';           i = i + 1;
+        aPath.i.sPId = 'python';                    aPath.i.sPath = 'f:\python\v1.5.2_os2';         i = i + 1;
+        aPath.i.sPId = 'toolkit40';                 aPath.i.sPath = 'f:\toolkit\v4.0csd4';          i = i + 1;
+        aPath.i.sPId = 'toolkit45';                 aPath.i.sPath = 'f:\toolkit\v4.5';              i = i + 1;
+        aPath.i.sPId = 'toolkit451';                aPath.i.sPath = 'f:\toolkit\v4.51';             i = i + 1;
+        aPath.i.sPId = 'toolkit452';                aPath.i.sPath = 'f:\toolkit\v4.52';             i = i + 1;
         aPath.i.sPId = 'unixroot';                  aPath.i.sPath = 'e:\unix';                      i = i + 1;
+        aPath.i.sPId = 'vac308';                    aPath.i.sPath = 'f:\VACpp\v3.08_os2';           i = i + 1;
+        aPath.i.sPId = 'vac365';                    aPath.i.sPath = 'f:\VACpp\v3.65_os2';           i = i + 1;
+        aPath.i.sPId = 'vac40';                     aPath.i.sPath = 'f:\VACpp\v4.0_os2';            i = i + 1;
+        aPath.i.sPId = 'warpin';                    aPath.i.sPath = 'f:\WarpIn\current';            i = i + 1;
+        aPath.i.sPId = 'watcom11';                  aPath.i.sPath = 'f:\watcom\v11.0';              i = i + 1;
+        aPath.i.sPId = 'watcom11c';                 aPath.i.sPath = 'f:\watcom\v11.0c';             i = i + 1;
         aPath.i.sPId = 'xfree86';                   aPath.i.sPath = 'e:\xfree86';                   i = i + 1;
-        aPath.i.sPId = 'vac308';                    aPath.i.sPath = 'f:\vacpp\v308';                i = i + 1;
-        aPath.i.sPId = 'vac365';                    aPath.i.sPath = 'f:\vacpp\v365';                i = i + 1;
-        aPath.i.sPId = 'vac40';                     aPath.i.sPath = 'f:\ibmcpp40';                  i = i + 1;
-        aPath.i.sPId = 'warpin';                    aPath.i.sPath = 'f:\warpin';                    i = i + 1;
-        aPath.i.sPId = 'watcom11';                  aPath.i.sPath = 'f:\watcom';                    i = i + 1;
-        aPath.i.sPId = 'watcom11c';                 aPath.i.sPath = 'f:\watcom11c';                 i = i + 1;
         aPath.i.sPId = 'testcase_drive_unused';     aPath.i.sPath = 'l'; /* reqired */              i = i + 1;
         aPath.i.sPId = 'testcase_drive_fixed';      aPath.i.sPath = 'c'; /* reqired */              i = i + 1;
         aPath.i.sPId = 'testcase_drive_floppy';     aPath.i.sPath = 'a'; /* reqired */              i = i + 1;
-        aPath.i.sPId = 'testcase_drive_cdrom';      aPath.i.sPath = 'k'; /* optional */             i = i + 1;
-        aPath.i.sPId = 'testcase_drive_network';    aPath.i.sPath = 's'; /* optional */             i = i + 1;
+        aPath.i.sPId = 'testcase_drive_cdrom';      aPath.i.sPath = 'i'; /* optional */             i = i + 1;
+        aPath.i.sPId = 'testcase_drive_network';    aPath.i.sPath = 'y'; /* optional */             i = i + 1;
         aPath.i.sPId = 'testcase_drive_ramdisk';    aPath.i.sPath = 'r'; /* optional */             i = i + 1;
         /*aPath.i.sPId = '';          aPath.i.sPath =      i = i + 1;*/
     end
