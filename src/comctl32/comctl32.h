@@ -1,4 +1,4 @@
-/* $Id: comctl32.h,v 1.12 2000-02-18 17:13:37 cbratschi Exp $ */
+/* $Id: comctl32.h,v 1.13 2000-04-16 18:26:57 cbratschi Exp $ */
 /*
  * Win32 common controls implementation
  *
@@ -90,6 +90,39 @@ extern HMODULE COMCTL32_hModule;
 #define IDB_HIST_SMALL      130
 #define IDB_HIST_LARGE      131
 
+//direction bitmaps
+#define IDB_DIRECTION_ALL   132
+#define IDB_DIRECTION_NS    133
+#define IDB_DIRECTION WE    134
+
+//Header filter bitmap
+#define IDB_HEADER_FILTER   140
+
+//cursors
+#define IDC_COMCTL32_ERROR       20480
+#define IDC_COMCTL32_INFORMATION 20481
+#define IDC_COMCTL32_EXCLAMATION 20482
+
+#define IDC_COMCTL32_DRAGRECT      102
+#define IDC_COMCTL32_ARROW1        104
+#define IDC_COMCTL32_ARROW2        105
+#define IDC_COMCTL32_DRAGHLINE     106
+#define IDC_COMCTL32_SPLITHLINE    107
+#define IDC_COMCTL32_HAND          108
+#define IDC_COMCTL32_DIRECTION_NS  109
+#define IDC_COMCTL32_DIRECTION_WE  110
+#define IDC_COMCTL32_DIRECTION_ALL 111
+#define IDC_COMCTL32_DIRECTION_N   112
+#define IDC_COMCTL32_DIRECTION_S   113
+#define IDC_COMCTL32_DIRECTION_E   114
+#define IDC_COMCTL32_DIRECTION_W   115
+#define IDC_COMCTL32_DIRECTION_NE  116
+#define IDC_COMCTL32_DIRECTION_NW  117
+#define IDC_COMCTL32_DIRECTION_SE  118
+#define IDC_COMCTL32_DIRECTION_SW  119
+
+#define IDC_COMCTL32_SPLITVLINE    135
+#define IDC_COMCTL32_ENTER         150
 
 /* Month calendar month menu popup */
 #define IDD_MCMONTHMENU     300

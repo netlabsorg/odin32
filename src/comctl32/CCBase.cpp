@@ -1,4 +1,4 @@
-/* $Id: CCBase.cpp,v 1.7 2000-04-12 16:38:58 cbratschi Exp $ */
+/* $Id: CCBase.cpp,v 1.8 2000-04-16 18:26:55 cbratschi Exp $ */
 /*
  * COMCTL32 Base Functions and Macros for all Controls
  *
@@ -341,6 +341,80 @@ INT lstrcmpAW(WCHAR *textA,BOOL textaunicode,WCHAR *textB,BOOL textbunicode)
     } else
     {
       return lstrcmpA((LPSTR)textA,(LPSTR)textB);
+    }
+  }
+}
+
+//NOTE for lstrcmpni*: both buffers must be at least shortLen+1 characters long!
+
+INT lstrcmpniA(CHAR *textA,CHAR *textB,INT len)
+{
+  CHAR tmp1,tmp2;
+  INT res;
+
+  tmp1 = textA[len];
+  textA[len] = 0;
+  tmp2 = textB[len];
+  textB[len] = 0;
+
+  res = lstrcmpiA(textA,textB);
+
+  textA[len] = tmp1;
+  textB[len] = tmp2;
+  return res;
+}
+
+INT lstrcmpniAtoW(CHAR *textA,WCHAR* textB,INT len)
+{
+  WCHAR *tmp;
+  INT res;
+
+  tmp = (WCHAR*)COMCTL32_Alloc((len+1)*sizeof(WCHAR));
+  lstrcpynAtoW(tmp,textA,len+1);
+
+  res = lstrcmpniW(tmp,textB,len);
+
+  COMCTL32_Free(tmp);
+  return res;
+}
+
+
+INT lstrcmpniW(WCHAR *textA,WCHAR *textB,INT len)
+{
+  WCHAR tmp1,tmp2;
+  INT res;
+
+  tmp1 = textA[len];
+  textA[len] = 0;
+  tmp2 = textB[len];
+  textB[len] = 0;
+
+  res = lstrcmpiW(textA,textB);
+
+  textA[len] = tmp1;
+  textB[len] = tmp2;
+  return res;
+}
+
+INT lstrcmpniAW(WCHAR *textA,BOOL unicodeA,WCHAR *textB,BOOL unicodeB,INT len)
+{
+  if (unicodeA)
+  {
+    if (unicodeB)
+    {
+      return lstrcmpniW(textA,textB,len);
+    } else
+    {
+      return lstrcmpniAtoW((LPSTR)textB,textA,len);
+    }
+  } else
+  {
+    if (unicodeB)
+    {
+      return lstrcmpniAtoW((LPSTR)textA,textB,len);
+    } else
+    {
+      return lstrcmpniA((LPSTR)textA,(LPSTR)textB,len);
     }
   }
 }
