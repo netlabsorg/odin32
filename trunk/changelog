@@ -1,4 +1,4 @@
- /* $Id: changelog,v 1.29 1999-06-27 16:49:31 sandervl Exp $ */
+ /* $Id: changelog,v 1.30 1999-06-27 18:12:48 achimha Exp $ */
  99-06-27: Sander van Leeuwen
 	- USER32: Message handler updates & lots of bugfixes 
 	- USER32: Fix for GetWindowLongA, if Open32 returns 0xffff it really
@@ -8,8 +8,8 @@
 	- USER32: Changes for message spy & several message handler changes
 	- USER32: Restore win32 tib in window msg callback
 	- KERNEL32/include: Restore OS/2 tib on entering Open32 or OS/2 apis
-	- KERNEL32/lang.cpp: Bugfix for GetLocaleInfoA (if buf ptr == null, only 
-	  return size of memory block required to hold info)
+	- KERNEL32/lang.cpp: Bugfix for GetLocaleInfoA (if buf ptr == null,
+          only return size of memory block required to hold info)
 
  99-06-25: Achim Hasenmueller
         - Finally fixed changelog date format to be compliant with
@@ -25,8 +25,8 @@
 	- KERNEL32: Implemented GetLocaleInfoA/W
 
  99-06-24: Sander van Leeuwen
-	- include\winos2def.h: Changed OS/2 apis to use wrappers (FS save/restore)
-	  and added DosQueryCtryInfo
+	- include\winos2def.h: Changed OS/2 apis to use wrappers
+          (FS save/restore) and added DosQueryCtryInfo
 
  99-06-23: Patrick Haller
         - Fixed date format in changlog .g.
