@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.161 2002-12-03 11:39:40 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.162 2002-12-11 14:50:01 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -734,6 +734,14 @@ HINSTANCE WIN32API LoadLibraryW(LPCWSTR lpszLibFile)
     return hDll;
 }
 
+//******************************************************************************
+//Custom build function to disable loading of LX dlls
+static BOOL fDisableLXDllLoading = FALSE;
+//******************************************************************************
+void WIN32API ODIN_DisableLXDllLoading()
+{
+    fDisableLXDllLoading = TRUE;
+}
 
 /**
  * LoadLibraryExA can be used to map a DLL module into the calling process's
@@ -930,7 +938,7 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HANDLE hFile, DWORD dwFla
     fPE = Win32ImageBase::isPEImage(szModname, &Characteristics, NULL);
 
     /** @sketch
-     *  IF (!fPeLoader || fPE == failure) THEN
+     *  IF (fDisableLXDllLoading && (!fPeLoader || fPE == failure)) THEN
      *      Try load the executable using LoadLibrary
      *      IF successfully loaded THEN
      *          IF LX dll and is using the PE Loader THEN
@@ -943,7 +951,7 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HANDLE hFile, DWORD dwFla
      *  Endif
      */
     //only call OS/2 if LX binary or win32k process
-    if (!fPeLoader || fPE != ERROR_SUCCESS)
+    if (!fDisableLXDllLoading && (!fPeLoader || fPE != ERROR_SUCCESS))
     {
         hDll = OSLibDosLoadModule(szModname);
         if (hDll)
@@ -2009,6 +2017,10 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
         cmdline = newcmdline;
         //Force Open32 to use DosStartSession (DosExecPgm won't do)
         dwCreationFlags |= CREATE_NEW_PROCESS_GROUP;
+
+        dprintf(("KERNEL32: CreateProcess starting [%s],[%s]",
+                 szNELoader,
+                 cmdline));
         rc = O32_CreateProcess(szNELoader, (LPCSTR)cmdline, lpProcessAttributes,
                                lpThreadAttributes, bInheritHandles, dwCreationFlags,
                                lpEnvironment, lpCurrentDirectory, lpStartupInfo,
