@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.cpp,v 1.59 2002-07-23 11:04:18 sandervl Exp $ */
+/* $Id: oslibmsg.cpp,v 1.60 2002-08-01 16:04:19 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -610,10 +610,11 @@ ULONG OSLibWinBroadcastMsg(ULONG msg, ULONG wParam, ULONG lParam, BOOL fSend)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL OSLibPostMessage(HWND hwnd, ULONG msg, ULONG wParam, ULONG lParam, BOOL fUnicode)
+BOOL OSLibPostMessage(HWND hwndWin32, HWND hwndOS2, ULONG msg, ULONG wParam, ULONG lParam, BOOL fUnicode)
 {
     POSTMSG_PACKET *packet = (POSTMSG_PACKET *)_smalloc(sizeof(POSTMSG_PACKET));
-  
+    BOOL ret;
+
     if (NULL == packet)
     {
         dprintf(("user32::oslibmsg::OSLibPostMessage - allocated packet structure is NULL"));
@@ -622,9 +623,19 @@ BOOL OSLibPostMessage(HWND hwnd, ULONG msg, ULONG wParam, ULONG lParam, BOOL fUn
         DebugInt3();    
         return FALSE;
     }
+    TEB *teb = GetTEBFromThreadId(GetWindowThreadProcessId(hwndWin32, NULL));
+
     packet->wParam   = wParam;
     packet->lParam   = lParam;
-    return WinPostMsg(hwnd, WIN32APP_POSTMSG+msg, (MPARAM)((fUnicode) ? WIN32MSG_MAGICW : WIN32MSG_MAGICA), (MPARAM)packet);
+    ret = WinPostMsg(hwndOS2, WIN32APP_POSTMSG+msg, (MPARAM)((fUnicode) ? WIN32MSG_MAGICW : WIN32MSG_MAGICA), (MPARAM)packet);
+
+    if(teb && (teb->o.odin.dwWakeMask & QS_POSTMESSAGE_W)) {
+        //thread is blocked in MsgWaitForMultipleObjects waiting for
+        //posted messages
+        dprintf(("PostMessage: Wake up thread %x which is blocked in MsgWaitForMultipleObjects", teb->o.odin.threadId));
+        SetEvent(teb->o.odin.hPostMsgEvent);
+    }
+    return ret;
 }
 //******************************************************************************
 //Direct posting of messages that must remain invisible to the win32 app
@@ -667,6 +678,14 @@ BOOL OSLibPostThreadMessage(ULONG threadid, UINT msg, WPARAM wParam, LPARAM lPar
        SetLastError(ERROR_INVALID_PARAMETER_W);
        return FALSE;
     }
+
+    if(teb->o.odin.dwWakeMask & QS_POSTMESSAGE_W) {
+        //thread is blocked in MsgWaitForMultipleObjects waiting for
+        //posted messages
+        dprintf(("PostMessage: Wake up thread %x which is blocked in MsgWaitForMultipleObjects", teb->o.odin.threadId));
+        SetEvent(teb->o.odin.hPostMsgEvent);
+    }
+
     SetLastError(ERROR_SUCCESS_W);
     return TRUE;
 }
