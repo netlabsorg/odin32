@@ -1,5 +1,5 @@
 ################################################################################
-# $Id: Makefile,v 1.18 2000-01-28 13:17:52 bird Exp $
+# $Id: Makefile,v 1.19 2000-01-31 09:35:49 bird Exp $
 #
 # Copyright 1998-1999 knut st. osmundsen
 #
@@ -62,7 +62,9 @@ CDEFINES16  = $(CDEFINES16) -DDEBUG
 ASDEFINES   = $(ASDEFINES)  -D:DEBUG
 !endif
 
-
+!ifdef NODEBUGINFO
+LFLAGS      = $(LFLAGS)     /NODEB
+!endif
 
 ################################################################################
 # COMPILER/ASSEMBLER INCLUDEPATHS
