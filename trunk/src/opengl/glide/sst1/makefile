@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2000-03-07 11:12:31 bird Exp $
+# $Id: makefile,v 1.5 2000-03-11 15:00:37 sandervl Exp $
 
 #
 # Odin32 API
@@ -8,9 +8,9 @@
 
 # Directory macros.
 PDWIN32_INCLUDE = ..\..\..\..\include
-PDWIN32_LIB = ..\..\..\..\lib
-PDWIN32_BIN = ..\..\..\..\bin
-PDWIN32_TOOLS = ..\..\..\..\tools\bin
+PDWIN32_LIB     = ..\..\..\..\lib
+PDWIN32_BIN     = ..\..\..\..\$(OBJDIR)
+PDWIN32_TOOLS   = ..\..\..\..\tools\bin
 
 
 # Have extra clean rule.
