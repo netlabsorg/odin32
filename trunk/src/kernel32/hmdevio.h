@@ -1,4 +1,4 @@
-/* $Id: hmdevio.h,v 1.8 2001-12-08 10:39:33 sandervl Exp $ */
+/* $Id: hmdevio.h,v 1.9 2001-12-14 10:22:38 sandervl Exp $ */
 
 #ifndef __DEVIO_H__
 #define __DEVIO_H__
@@ -147,7 +147,9 @@ public:
   HMCustomDriver(HINSTANCE hInstance, LPCSTR lpDeviceName);
   HMCustomDriver(PFNDRVOPEN pfnDriverOpen, PFNDRVCLOSE pfnDriverClose, 
                  PFNDRVIOCTL pfnDriverIOCtl, PFNDRVREAD pfnDriverRead,
-                 PFNDRVWRITE pfnDriverWrite, LPCSTR lpDeviceName);
+                 PFNDRVWRITE pfnDriverWrite, PFNDRVCANCELIO pfnDriverCancelIo,
+                 PFNDRVGETOVERLAPPEDRESULT pfnDriverGetOverlappedResult,
+                 LPCSTR lpDeviceName);
 
   virtual ~HMCustomDriver();
 
@@ -159,7 +161,7 @@ public:
 
   virtual BOOL   CloseHandle(PHMHANDLEDATA pHMHandleData);
 
-                    /* this is a handler method for calls to DeviceIoControl() */
+  /* this is a handler method for calls to DeviceIoControl() */
   virtual BOOL   DeviceIoControl    (PHMHANDLEDATA pHMHandleData, DWORD dwIoControlCode,
                                      LPVOID lpInBuffer, DWORD nInBufferSize,
                                      LPVOID lpOutBuffer, DWORD nOutBufferSize,
@@ -181,13 +183,23 @@ public:
                              LPOVERLAPPED  lpOverlapped,
                              LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine);
 
+  virtual BOOL   CancelIo           (PHMHANDLEDATA pHMHandleData);
+
+  /* this is a handler method for calls to GetOverlappedResult */
+  virtual BOOL GetOverlappedResult(PHMHANDLEDATA pHMHandleData,
+                                   LPOVERLAPPED  arg2,
+                                   LPDWORD       arg3,
+                                   BOOL          arg4);
+
 private:
-  PFNDRVOPEN  pfnDriverOpen;
-  PFNDRVREAD  pfnDriverRead;
-  PFNDRVWRITE pfnDriverWrite;
-  PFNDRVIOCTL pfnDriverIOCtl;
-  PFNDRVCLOSE pfnDriverClose;
-  HINSTANCE   hDrvDll;
+  PFNDRVOPEN     pfnDriverOpen;
+  PFNDRVREAD     pfnDriverRead;
+  PFNDRVWRITE    pfnDriverWrite;
+  PFNDRVIOCTL    pfnDriverIOCtl;
+  PFNDRVCLOSE    pfnDriverClose;
+  PFNDRVCANCELIO pfnDriverCancelIo;
+  PFNDRVGETOVERLAPPEDRESULT pfnDriverGetOverlappedResult;
+  HINSTANCE      hDrvDll;
 };
 
 void  RegisterDevices();

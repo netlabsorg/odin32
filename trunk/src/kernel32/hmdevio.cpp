@@ -1,4 +1,4 @@
-/* $Id: hmdevio.cpp,v 1.22 2001-12-09 15:29:41 sandervl Exp $ */
+/* $Id: hmdevio.cpp,v 1.23 2001-12-14 10:22:38 sandervl Exp $ */
 
 /*
  * Win32 Device IOCTL API functions for OS/2
@@ -133,12 +133,14 @@ void RegisterDevices()
 //******************************************************************************
 BOOL WIN32API RegisterCustomDriver(PFNDRVOPEN pfnDriverOpen, PFNDRVCLOSE pfnDriverClose, 
                                    PFNDRVIOCTL pfnDriverIOCtl, PFNDRVREAD pfnDriverRead,
-                                   PFNDRVWRITE pfnDriverWrite, LPCSTR lpDeviceName)
+                                   PFNDRVWRITE pfnDriverWrite, PFNDRVCANCELIO pfnDriverCancelIo,
+                                   PFNDRVGETOVERLAPPEDRESULT pfnDriverGetOverlappedResult,
+                                   LPCSTR lpDeviceName)
 {
  HMDeviceDriver *driver;
  DWORD rc;
  
-    driver = new HMCustomDriver(pfnDriverOpen, pfnDriverClose, pfnDriverIOCtl, pfnDriverRead, pfnDriverWrite, lpDeviceName);
+    driver = new HMCustomDriver(pfnDriverOpen, pfnDriverClose, pfnDriverIOCtl, pfnDriverRead, pfnDriverWrite, pfnDriverCancelIo, pfnDriverGetOverlappedResult, lpDeviceName);
     if(driver == NULL) {
         DebugInt3();
         return FALSE;
@@ -400,17 +402,21 @@ HMCustomDriver::HMCustomDriver(HINSTANCE hInstance, LPCSTR lpDeviceName)
 //******************************************************************************
 HMCustomDriver::HMCustomDriver(PFNDRVOPEN pfnDriverOpen, PFNDRVCLOSE pfnDriverClose, 
                                PFNDRVIOCTL pfnDriverIOCtl, PFNDRVREAD pfnDriverRead,
-                               PFNDRVWRITE pfnDriverWrite, LPCSTR lpDeviceName)
+                               PFNDRVWRITE pfnDriverWrite, PFNDRVCANCELIO pfnDriverCancelIo,
+                               PFNDRVGETOVERLAPPEDRESULT pfnDriverGetOverlappedResult,
+                               LPCSTR lpDeviceName)
                 : HMDeviceDriver(lpDeviceName), hDrvDll(0)
 {
     if(!pfnDriverOpen || !pfnDriverClose) {
         DebugInt3();
     }
-    this->pfnDriverOpen  = pfnDriverOpen;
-    this->pfnDriverClose = pfnDriverClose;
-    this->pfnDriverIOCtl = pfnDriverIOCtl;
-    this->pfnDriverRead  = pfnDriverRead;
-    this->pfnDriverWrite = pfnDriverWrite;
+    this->pfnDriverOpen     = pfnDriverOpen;
+    this->pfnDriverClose    = pfnDriverClose;
+    this->pfnDriverIOCtl    = pfnDriverIOCtl;
+    this->pfnDriverRead     = pfnDriverRead;
+    this->pfnDriverWrite    = pfnDriverWrite;
+    this->pfnDriverCancelIo = pfnDriverCancelIo;
+    this->pfnDriverGetOverlappedResult = pfnDriverGetOverlappedResult;
 }
 //******************************************************************************
 //******************************************************************************
@@ -534,6 +540,66 @@ BOOL HMCustomDriver::WriteFile(PHMHANDLEDATA pHMHandleData,
    dprintf(("pfnDriverWrite %x %x %x %x %x %x returned %x", pHMHandleData->hHMHandle, lpBuffer, nNumberOfBytesToWrite,
             lpNumberOfBytesWritten, lpOverlapped, lpCompletionRoutine, ret));
    return ret;
+}
+/*****************************************************************************
+ * Name      : DWORD HMCustomDriver::CancelIo
+ * Purpose   : cancel pending IO operation
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : SvL
+ *****************************************************************************/
+BOOL HMCustomDriver::CancelIo(PHMHANDLEDATA pHMHandleData)
+{
+   BOOL ret;
+
+   if(pfnDriverCancelIo == NULL) {
+       dprintf(("HMCustomDriver::CancelIo: pfnDriverCancelIo == NULL"));
+       ::SetLastError(ERROR_INVALID_FUNCTION_W);
+       return FALSE;
+   }
+   ret = pfnDriverCancelIo(pHMHandleData->hHMHandle);
+   dprintf(("pfnDriverCancelIo %x returned %x", pHMHandleData->hHMHandle, ret));
+   return ret;
+}
+/*****************************************************************************
+ * Name      : DWORD HMCustomDriver::GetOverlappedResult
+ * Purpose   : asynchronus I/O
+ * Parameters: PHMHANDLEDATA pHMHandleData
+ *             LPOVERLAPPED  arg2
+ *             LPDWORD       arg3
+ *             BOOL          arg4
+ * Variables :
+ * Result    : API returncode
+ * Remark    :
+ * Status    :
+ *
+ * Author    : SvL
+ *****************************************************************************/
+BOOL HMCustomDriver::GetOverlappedResult(PHMHANDLEDATA pHMHandleData,
+                                         LPOVERLAPPED  lpOverlapped,
+                                         LPDWORD       lpcbTransfer,
+                                         BOOL          fWait)
+{
+    dprintf(("KERNEL32-HMCustomDriver: HMCustomDriver::GetOverlappedResult(%08xh,%08xh,%08xh,%08xh)",
+             pHMHandleData->hHMHandle, lpOverlapped, lpcbTransfer, fWait));
+
+    if(!(pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED_W)) {
+        dprintf(("!WARNING!: GetOverlappedResult called for a handle that wasn't opened with FILE_FLAG_OVERLAPPED"));
+        return TRUE; //NT4, SP6 doesn't fail
+    }
+    if(!lpOverlapped) {
+        ::SetLastError(ERROR_INVALID_PARAMETER);
+        return FALSE;
+    }
+    if(pfnDriverGetOverlappedResult == NULL) {
+        dprintf(("HMCustomDriver::GetOverlappedResult: pfnDriverGetOverlappedResult == NULL"));
+        ::SetLastError(ERROR_INVALID_FUNCTION_W);
+        return FALSE;
+    }
+    return pfnDriverGetOverlappedResult(pHMHandleData->hHMHandle, lpOverlapped, lpcbTransfer, fWait);
 }
 //******************************************************************************
 //******************************************************************************
