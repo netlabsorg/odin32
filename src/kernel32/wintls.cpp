@@ -1,4 +1,4 @@
-/* $Id: wintls.cpp,v 1.4 1999-08-22 11:11:11 sandervl Exp $ */
+/* $Id: wintls.cpp,v 1.5 1999-09-15 23:38:02 sandervl Exp $ */
 /*
  * Win32 TLS API functions
  *
@@ -9,7 +9,8 @@
  *
  */
 #include <os2win.h>
-#include <winimage.h>
+#include <string.h>
+#include <winimagebase.h>
 #include <thread.h>
 #include <wprocess.h>
 #include <except.h>
@@ -17,7 +18,7 @@
 
 //******************************************************************************
 //******************************************************************************
-void Win32Image::tlsAlloc()	//Allocate TLS index for this module
+void Win32ImageBase::tlsAlloc()	//Allocate TLS index for this module
 {
    if(!tlsAddress) 
 	return;
@@ -28,11 +29,11 @@ void Win32Image::tlsAlloc()	//Allocate TLS index for this module
 	DebugInt3();
 	return;  	
    }
-   dprintf(("Win32Image::tlsAlloc (%d) for module %x", tlsIndex, hinstance));
+   dprintf(("Win32ImageBase::tlsAlloc (%d) for module %x", tlsIndex, hinstance));
 }
 //******************************************************************************
 //******************************************************************************
-void Win32Image::tlsDelete()	//Free TLS index for this module
+void Win32ImageBase::tlsDelete()	//Free TLS index for this module
 {
    if(!tlsAddress) 
 	return;
@@ -42,13 +43,13 @@ void Win32Image::tlsDelete()	//Free TLS index for this module
 	DebugInt3();
 	return;  	
    }
-   dprintf(("Win32Image::tlsDestroy (%d) for module %x", tlsIndex, hinstance));
+   dprintf(("Win32ImageBase::tlsDestroy (%d) for module %x", tlsIndex, hinstance));
    TlsFree(tlsIndex);
    tlsIndex = -1;
 }
 //******************************************************************************
 //******************************************************************************
-void Win32Image::tlsAttachThread()	//setup TLS structures for new thread
+void Win32ImageBase::tlsAttachThread()	//setup TLS structures for new thread
 {
  EXCEPTION_FRAME exceptFrame;
  PIMAGE_TLS_CALLBACK *pCallback;
@@ -65,7 +66,7 @@ void Win32Image::tlsAttachThread()	//setup TLS structures for new thread
 	return;  	
    }
 
-   dprintf(("Win32Image::tlsAttachThread for module %x, thread id %x", hinstance, GetCurrentThreadId()));
+   dprintf(("Win32ImageBase::tlsAttachThread for module %x, thread id %x", hinstance, GetCurrentThreadId()));
    dprintf(("tlsAddress:      %x", tlsAddress));
    dprintf(("tlsInitSize:     %x", tlsInitSize));
    dprintf(("tlsTotalSize     %x", tlsTotalSize));
@@ -104,7 +105,7 @@ void Win32Image::tlsAttachThread()	//setup TLS structures for new thread
 }
 //******************************************************************************
 //******************************************************************************
-void Win32Image::tlsDetachThread()	//destroy TLS structures
+void Win32ImageBase::tlsDetachThread()	//destroy TLS structures
 {
  EXCEPTION_FRAME exceptFrame;
  PIMAGE_TLS_CALLBACK *pCallback;
@@ -114,7 +115,7 @@ void Win32Image::tlsDetachThread()	//destroy TLS structures
    if(!tlsAddress) 
 	return;
 
-   dprintf(("Win32Image::tlsDetachThread for module %x, thread id %x", hinstance, GetCurrentThreadId()));
+   dprintf(("Win32ImageBase::tlsDetachThread for module %x, thread id %x", hinstance, GetCurrentThreadId()));
 
    if((ULONG)*tlsCallBackAddr != 0) {
 	pCallback = tlsCallBackAddr;
