@@ -1,4 +1,4 @@
-/* $Id: sh.cpp,v 1.6 1999-07-05 13:49:23 phaller Exp $ */
+/* $Id: sh.cpp,v 1.7 1999-08-05 21:03:34 phaller Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -14,7 +14,6 @@
 #include <os2win.h>
 #include <shellapi.h>
 #include <winreg.h>
-//#include <shlobj.h> @@@PH shlobj is yet to be ported
 #include "shell32.h"
 
 #include <stdarg.h>
@@ -35,7 +34,6 @@
 #define LPSHELLVIEWDATA  LPVOID
 #define LPUNKNOWN        LPVOID
 #define IDSTRUCT         VOID
-#define LPSHELLFLAGSTATE LPVOID
 #define IDropTarget      VOID
 
 static LPUNKNOWN SHELL32_IExplorerInterface=0;
@@ -130,8 +128,6 @@ void WIN32API SHGetSettings(LPSHELLFLAGSTATE lpsfs,
             0, 0, 0, KEY_ALL_ACCESS, 0, &hKey, 0))
     return;
 
-//@@@PH: todo
-#if 0
    if ( (SSF_SHOWEXTENSIONS & dwMask) && !RegQueryValueExA(hKey, "HideFileExt", 0, 0, (LPBYTE)&dwData, &dwDataSize))
      lpsfs->fShowExtensions  = ((dwData == 0) ?  0 : 1);
 
@@ -164,7 +160,6 @@ void WIN32API SHGetSettings(LPSHELLFLAGSTATE lpsfs,
        if (SSF_SHOWSYSFILES & dwMask)    lpsfs->fShowSysFiles  = 1;
      }
    }
-#endif
 
   RegCloseKey (hKey);
 }
@@ -499,7 +494,7 @@ HRESULT WIN32API SHRunControlPanel (DWORD x,
 DWORD WIN32API SHCreateDirectory(LPSECURITY_ATTRIBUTES sec,
                                  LPCSTR                path)
 {
-  dprintf(("SHELL32: SHCreateDirectory(%08xh, %08xh) not implemented.\n",
+  dprintf(("SHELL32: SHCreateDirectory(%08xh, %08xh)\n",
            sec,
            path));
 
@@ -610,10 +605,11 @@ DWORD WIN32API SHFree(LPVOID x)
   dprintf(("SHELL32: SHFree(%08xh)\n",
            x));
 
-  if (!HIWORD(x))
-  {
-    *(LPDWORD)0xdeaf0000 = 0;
-  }
+// @@@PH what's that crap?
+//  if (!HIWORD(x))
+//  {
+//    *(LPDWORD)0xdeaf0000 = 0;
+//  }
 
   return HeapFree(GetProcessHeap(),0,x);
 }
