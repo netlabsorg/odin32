@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.19 2000-02-16 14:25:45 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.20 2000-02-23 01:06:58 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -33,7 +33,7 @@
  * PH: fixups for missing os2win.h *
  ***********************************/
 
-void _System SetLastError(ULONG ulError);
+void _System _O32_SetLastError(ULONG ulError);
 
 APIRET APIENTRY DosAliasMem(PVOID pb, ULONG cb, PPVOID ppbAlias, ULONG fl);
 
@@ -620,7 +620,7 @@ DWORD OSLibDosCreateNamedPipe(LPCTSTR lpName,
 
   if (nMaxInstances>0xff)
   {
-    SetLastError(87); // ERROR_INVALID_PARAMETER
+    _O32_SetLastError(87); // ERROR_INVALID_PARAMETER
     return -1; // INVALID_HANDLE_VALUE
   }
   dwOS2PipeMode |= nMaxInstances;
@@ -647,18 +647,18 @@ DWORD OSLibDosCreateNamedPipe(LPCTSTR lpName,
   dprintf(("DosCreateNPipe rc=%d",rc));
   if (rc)
   {
-     if ( rc == ERROR_PIPE_BUSY         ) SetLastError(ERROR_PIPE_BUSY_W);
+     if ( rc == ERROR_PIPE_BUSY         ) _O32_SetLastError(ERROR_PIPE_BUSY_W);
        else
-     if ( rc == ERROR_PATH_NOT_FOUND    ) SetLastError(ERROR_PATH_NOT_FOUND_W);
+     if ( rc == ERROR_PATH_NOT_FOUND    ) _O32_SetLastError(ERROR_PATH_NOT_FOUND_W);
        else
-     if ( rc == ERROR_NOT_ENOUGH_MEMORY ) SetLastError(ERROR_NOT_ENOUGH_MEMORY_W);
+     if ( rc == ERROR_NOT_ENOUGH_MEMORY ) _O32_SetLastError(ERROR_NOT_ENOUGH_MEMORY_W);
        else
-     if ( rc == ERROR_INVALID_PARAMETER ) SetLastError(ERROR_INVALID_PARAMETER_W);
+     if ( rc == ERROR_INVALID_PARAMETER ) _O32_SetLastError(ERROR_INVALID_PARAMETER_W);
        else
-     if ( rc == ERROR_OUT_OF_STRUCTURES ) SetLastError(ERROR_OUT_OF_STRUCTURES_W);
+     if ( rc == ERROR_OUT_OF_STRUCTURES ) _O32_SetLastError(ERROR_OUT_OF_STRUCTURES_W);
        else
          // Unknown error
-         SetLastError(ERROR_INVALID_PARAMETER_W); // fixme!
+         _O32_SetLastError(ERROR_INVALID_PARAMETER_W); // fixme!
      return -1; // INVALID_HANDLE_VALUE
   }
   return hPipe;
@@ -676,15 +676,15 @@ BOOL OSLibDosConnectNamedPipe(DWORD hNamedPipe, LPOVERLAPPED lpOverlapped)
 
   if (!rc) return (TRUE);
     else
-  if (rc==ERROR_BROKEN_PIPE) SetLastError(ERROR_BROKEN_PIPE_W);    
+  if (rc==ERROR_BROKEN_PIPE) _O32_SetLastError(ERROR_BROKEN_PIPE_W);    
     else
-  if (rc==ERROR_BAD_PIPE) SetLastError(ERROR_BAD_PIPE_W);
+  if (rc==ERROR_BAD_PIPE) _O32_SetLastError(ERROR_BAD_PIPE_W);
     else
-  if (rc==ERROR_PIPE_NOT_CONNECTED) SetLastError(ERROR_PIPE_NOT_CONNECTED_W);
+  if (rc==ERROR_PIPE_NOT_CONNECTED) _O32_SetLastError(ERROR_PIPE_NOT_CONNECTED_W);
     else
   // TODO: Implemnt this using Windows Errors
   // if (rc==ERROR_INTERRUPT)
-  SetLastError(ERROR_PIPE_NOT_CONNECTED_W);
+  _O32_SetLastError(ERROR_PIPE_NOT_CONNECTED_W);
   
   return (FALSE);
 }
@@ -723,27 +723,27 @@ BOOL OSLibDosCallNamedPipe( LPCTSTR lpNamedPipeName,
 
   if (!rc) return (TRUE);
    else
-  if ( rc==ERROR_FILE_NOT_FOUND     ) SetLastError(ERROR_FILE_NOT_FOUND_W);    
+  if ( rc==ERROR_FILE_NOT_FOUND     ) _O32_SetLastError(ERROR_FILE_NOT_FOUND_W);    
     else
-  if ( rc==ERROR_PATH_NOT_FOUND     ) SetLastError(ERROR_PATH_NOT_FOUND_W);    
+  if ( rc==ERROR_PATH_NOT_FOUND     ) _O32_SetLastError(ERROR_PATH_NOT_FOUND_W);    
     else
-  if ( rc==ERROR_ACCESS_DENIED      ) SetLastError(ERROR_ACCESS_DENIED_W);    
+  if ( rc==ERROR_ACCESS_DENIED      ) _O32_SetLastError(ERROR_ACCESS_DENIED_W);    
     else
-  if ( rc==ERROR_MORE_DATA          ) SetLastError(ERROR_MORE_DATA_W);    
+  if ( rc==ERROR_MORE_DATA          ) _O32_SetLastError(ERROR_MORE_DATA_W);    
     else
-  if ( rc==ERROR_PIPE_BUSY          ) SetLastError(ERROR_PIPE_BUSY_W);    
+  if ( rc==ERROR_PIPE_BUSY          ) _O32_SetLastError(ERROR_PIPE_BUSY_W);    
     else
-  if ( rc==ERROR_BAD_FORMAT         ) SetLastError(ERROR_BAD_FORMAT_W);    
+  if ( rc==ERROR_BAD_FORMAT         ) _O32_SetLastError(ERROR_BAD_FORMAT_W);    
     else
-  if ( rc==ERROR_BROKEN_PIPE        ) SetLastError(ERROR_BROKEN_PIPE_W);    
+  if ( rc==ERROR_BROKEN_PIPE        ) _O32_SetLastError(ERROR_BROKEN_PIPE_W);    
     else
-  if ( rc==ERROR_BAD_PIPE           ) SetLastError(ERROR_BAD_PIPE_W);
+  if ( rc==ERROR_BAD_PIPE           ) _O32_SetLastError(ERROR_BAD_PIPE_W);
     else
-  if ( rc==ERROR_PIPE_NOT_CONNECTED ) SetLastError(ERROR_PIPE_NOT_CONNECTED_W);
+  if ( rc==ERROR_PIPE_NOT_CONNECTED ) _O32_SetLastError(ERROR_PIPE_NOT_CONNECTED_W);
     else
   // TODO: Implemnt this using Windows Errors
   // if (rc==ERROR_INTERRUPT)
-  SetLastError(233);
+  _O32_SetLastError(233);
 
   return (FALSE);
 }
@@ -770,22 +770,22 @@ BOOL OSLibDosTransactNamedPipe( DWORD  hNamedPipe,
   dprintf(("DosTransactNPipe returned rc=%d");)
   if (!rc) return (TRUE);
    else
-  if ( rc==ERROR_ACCESS_DENIED      ) SetLastError(ERROR_ACCESS_DENIED_W);    
+  if ( rc==ERROR_ACCESS_DENIED      ) _O32_SetLastError(ERROR_ACCESS_DENIED_W);    
     else
-  if ( rc==ERROR_MORE_DATA          ) SetLastError(ERROR_MORE_DATA_W);    
+  if ( rc==ERROR_MORE_DATA          ) _O32_SetLastError(ERROR_MORE_DATA_W);    
     else
-  if ( rc==ERROR_PIPE_BUSY          ) SetLastError(ERROR_PIPE_BUSY_W);    
+  if ( rc==ERROR_PIPE_BUSY          ) _O32_SetLastError(ERROR_PIPE_BUSY_W);    
     else
-  if ( rc==ERROR_BAD_FORMAT         ) SetLastError(ERROR_BAD_FORMAT_W);    
+  if ( rc==ERROR_BAD_FORMAT         ) _O32_SetLastError(ERROR_BAD_FORMAT_W);    
     else
-  if ( rc==ERROR_BROKEN_PIPE        ) SetLastError(ERROR_BROKEN_PIPE_W);    
+  if ( rc==ERROR_BROKEN_PIPE        ) _O32_SetLastError(ERROR_BROKEN_PIPE_W);    
     else
-  if ( rc==ERROR_BAD_PIPE           ) SetLastError(ERROR_BAD_PIPE_W);
+  if ( rc==ERROR_BAD_PIPE           ) _O32_SetLastError(ERROR_BAD_PIPE_W);
     else
-  if ( rc==ERROR_PIPE_NOT_CONNECTED ) SetLastError(ERROR_PIPE_NOT_CONNECTED_W);
+  if ( rc==ERROR_PIPE_NOT_CONNECTED ) _O32_SetLastError(ERROR_PIPE_NOT_CONNECTED_W);
     else
   // Unknown error
-  SetLastError(ERROR_PIPE_NOT_CONNECTED_W);
+  _O32_SetLastError(ERROR_PIPE_NOT_CONNECTED_W);
 
   return (FALSE);
 }
@@ -814,16 +814,16 @@ BOOL OSLibDosPeekNamedPipe(DWORD   hPipe,
     return (TRUE);
   }
    else
-  if ( rc==ERROR_ACCESS_DENIED      ) SetLastError(ERROR_ACCESS_DENIED_W);    
+  if ( rc==ERROR_ACCESS_DENIED      ) _O32_SetLastError(ERROR_ACCESS_DENIED_W);    
     else
-  if ( rc==ERROR_PIPE_BUSY          ) SetLastError(ERROR_PIPE_BUSY_W);    
+  if ( rc==ERROR_PIPE_BUSY          ) _O32_SetLastError(ERROR_PIPE_BUSY_W);    
     else
-  if ( rc==ERROR_BAD_PIPE           ) SetLastError(ERROR_BAD_PIPE_W);
+  if ( rc==ERROR_BAD_PIPE           ) _O32_SetLastError(ERROR_BAD_PIPE_W);
     else
-  if ( rc==ERROR_PIPE_NOT_CONNECTED ) SetLastError(ERROR_PIPE_NOT_CONNECTED_W);
+  if ( rc==ERROR_PIPE_NOT_CONNECTED ) _O32_SetLastError(ERROR_PIPE_NOT_CONNECTED_W);
     else
   // Unknown error
-  SetLastError(ERROR_PIPE_NOT_CONNECTED_W);
+  _O32_SetLastError(ERROR_PIPE_NOT_CONNECTED_W);
 
   return (FALSE);
 }
@@ -839,12 +839,12 @@ BOOL OSLibDosDisconnectNamedPipe(DWORD hPipe)
 
   if (!rc) return TRUE;
     else
-  if ( rc==ERROR_BROKEN_PIPE        ) SetLastError(ERROR_BROKEN_PIPE_W);    
+  if ( rc==ERROR_BROKEN_PIPE        ) _O32_SetLastError(ERROR_BROKEN_PIPE_W);    
     else
-  if ( rc==ERROR_BAD_PIPE           ) SetLastError(ERROR_BAD_PIPE_W);
+  if ( rc==ERROR_BAD_PIPE           ) _O32_SetLastError(ERROR_BAD_PIPE_W);
     else
      // Unknown error
-     SetLastError(ERROR_PIPE_NOT_CONNECTED_W); // Maybe another?
+     _O32_SetLastError(ERROR_PIPE_NOT_CONNECTED_W); // Maybe another?
 
   return (FALSE);
 }
@@ -872,17 +872,17 @@ BOOL OSLibDosWaitNamedPipe(LPCSTR lpszNamedPipeName,
 
   if (!rc) return TRUE;
     else
-  if ( rc == ERROR_PATH_NOT_FOUND ) SetLastError(ERROR_PATH_NOT_FOUND_W);
+  if ( rc == ERROR_PATH_NOT_FOUND ) _O32_SetLastError(ERROR_PATH_NOT_FOUND_W);
     else
-  if ( rc==ERROR_BAD_PIPE         ) SetLastError(ERROR_BAD_PIPE_W);
+  if ( rc==ERROR_BAD_PIPE         ) _O32_SetLastError(ERROR_BAD_PIPE_W);
     else
-  if ( rc == ERROR_PIPE_BUSY      ) SetLastError(ERROR_PIPE_BUSY_W);
+  if ( rc == ERROR_PIPE_BUSY      ) _O32_SetLastError(ERROR_PIPE_BUSY_W);
     else
-  if ( rc == ERROR_SEM_TIMEOUT_W  ) SetLastError(ERROR_SEM_TIMEOUT_W);
+  if ( rc == ERROR_SEM_TIMEOUT_W  ) _O32_SetLastError(ERROR_SEM_TIMEOUT_W);
     else
   // TODO: Implemnt this using Windows Errors
   // if (rc==ERROR_INTERRUPT)
-  SetLastError(ERROR_PIPE_NOT_CONNECTED_W);
+  _O32_SetLastError(ERROR_PIPE_NOT_CONNECTED_W);
 
   return (FALSE);
 }
