@@ -1,4 +1,4 @@
-/* $Id: initsystem.cpp,v 1.10 2000-06-21 20:51:51 sandervl Exp $ */
+/* $Id: initsystem.cpp,v 1.11 2000-08-01 23:20:29 sandervl Exp $ */
 /*
  * Odin system initialization (registry, directories & environment)
  *
@@ -23,12 +23,13 @@
  *	- WINDOWSDIR\Start Menu\Programs
  *	- WINDOWSDIR\Start Menu\Programs\Startup
  *	- WINDOWSDIR\ShellNew
+ *      - x:\Program Files
+ *      - x:\Program Files\Common Files
  *	- and a minimal system registry
  *
- * NOTE: Most of this has to be moved into the Odin install program!!!!!
+ * Copyright 1999-2000 Sander van Leeuwen (sandervl@xs4all.nl)
  *
- * Copyright 1999 Sander van Leeuwen (sandervl@xs4all.nl)
- *
+ * Project Odin Software License can be found in LICENSE.TXT
  */
 
 #include <os2win.h>
@@ -61,6 +62,9 @@
 #define COM_THREADMODEL		"ThreadingModel"
 #define THREAD_BOTH		"Both"
 #define INITREG_ERROR		"InitRegistry: Unable to register system information"
+#define DIR_PROGRAM             "ProgramFilesDir"
+#define DIR_PROGRAM_COMMON	"CommonFilesDir"
+#define DIR_SHARED              "SharedDir"
 
 //******************************************************************************
 //******************************************************************************
@@ -315,6 +319,32 @@ BOOL InitSystemAndRegistry()
    RegSetValueExA(hkey1, COM_THREADMODEL, 0,REG_SZ, (LPBYTE)THREAD_BOTH, sizeof(THREAD_BOTH));
    RegCloseKey(hkey1);
    RegCloseKey(hkey);
+
+   //[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion]
+   //"ProgramFilesDir"="C:\Program Files"
+   //"CommonFilesDir"="C:\Program Files\Common Files"
+   //# This is intended for a centrally managed (server) directory where system files and e.g. fonts can reside. Most installs have this set to C:\WINDOWS, though.
+   //"SharedDir"="C:\WINDOWS"
+   if(RegCreateKeyA(HKEY_LOCAL_MACHINE,"Software\\Microsoft\\Windows\\CurrentVersion",&hkey)!=ERROR_SUCCESS) {
+   	goto initreg_error;
+   }
+   //Create x:\Program Files directory
+   strcpy(shellpath, InternalGetWindowsDirectoryA());
+   shellpath[2] = 0;	//get drive
+   strcat(shellpath, "\\Program Files");
+   CreateDirectoryA(shellpath, NULL);
+   RegSetValueExA(hkey, DIR_PROGRAM, 0,REG_SZ, (LPBYTE)shellpath, strlen(shellpath)+1);
+
+   //Create x:\Program Files\Common Files directory
+   strcat(shellpath, "\\Common Files");
+   CreateDirectoryA(shellpath, NULL);
+   RegSetValueExA(hkey, DIR_PROGRAM_COMMON, 0,REG_SZ, (LPBYTE)shellpath, strlen(shellpath)+1);
+
+   strcpy(shellpath, InternalGetWindowsDirectoryA());
+   RegSetValueExA(hkey, DIR_SHARED, 0,REG_SZ, (LPBYTE)shellpath, strlen(shellpath)+1);
+
+   RegCloseKey(hkey);
+
    return TRUE;
 
 initreg_error:
