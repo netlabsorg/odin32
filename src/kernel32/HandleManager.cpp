@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.63 2001-04-26 13:22:42 sandervl Exp $ */
+/* $Id: HandleManager.cpp,v 1.64 2001-05-24 08:19:17 sandervl Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -1081,8 +1081,10 @@ HANDLE HMOpenFile(LPCSTR    lpFileName,
   PHMHANDLEDATA   pHMHandleData;
   DWORD           rc;                                     /* API return code */
 
-
-  pDeviceHandler = _HMDeviceFind((LPSTR)lpFileName);          /* find device */
+  if(fuMode & OF_REOPEN) {
+       pDeviceHandler = _HMDeviceFind((LPSTR)pOFStruct->szPathName);          /* find device */
+  }
+  else pDeviceHandler = _HMDeviceFind((LPSTR)lpFileName);          /* find device */
   if (NULL == pDeviceHandler)                  /* this name is unknown to us */
   {
     SetLastError(ERROR_FILE_NOT_FOUND);
@@ -1091,7 +1093,11 @@ HANDLE HMOpenFile(LPCSTR    lpFileName,
   else
     pHMHandleData  = NULL;
 
-  pDevData       = _HMDeviceGetData((LPSTR)lpFileName);
+  if(fuMode & OF_REOPEN) {
+       pDevData       = _HMDeviceGetData((LPSTR)pOFStruct->szPathName);
+  }
+  else pDevData       = _HMDeviceGetData((LPSTR)lpFileName);
+  
 
   if(pDeviceHandler == HMGlobals.pHMOpen32) {
     pDeviceHandler = HMGlobals.pHMFile;
