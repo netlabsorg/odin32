@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.2071 2002-05-10 14:52:35 sandervl Exp $ */
+/* $Id: changelog,v 1.2072 2002-05-13 12:11:25 sandervl Exp $ */
+
+ 2002-05-10: Platon Fomichev <platon@innotek.de>
+    - KERNEL32: o Parallel port updates (use resource manager to query
+                  hardware configuration)
 
  2002-05-10: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Applications are now allowed to read physical disks or
