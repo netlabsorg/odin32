@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.875 2000-04-08 09:17:15 sandervl Exp $ */
+ /* $Id: changelog,v 1.876 2000-04-08 18:30:41 cbratschi Exp $ */
+
+ 2000-04-08: Christoph Bratschi <cbratschi@datacomm.ch>
+	- COMCTL32: added new styles and functionality, bug fixes
 
  2000-04-08: Sander van Leeuwen <sandervl@xs4all.nl>
         - WINMM: Restart, pause & underrun fixes

@@ -1,4 +1,4 @@
-/* $Id: commctrl.h,v 1.26 2000-03-26 16:29:38 cbratschi Exp $ */
+/* $Id: commctrl.h,v 1.27 2000-04-08 18:30:10 cbratschi Exp $ */
 /*
  * Common controls definitions
  */
@@ -2464,6 +2464,9 @@ typedef struct tagNMTVGETINFOTIPW
 #define LVHT_BELOW              0x0010
 #define LVHT_TORIGHT            0x0020
 #define LVHT_TOLEFT             0x0040
+
+#define LVSCW_AUTOSIZE              0xFFFF//-1
+#define LVSCW_AUTOSIZE_USEHEADER    0xFFFE//-2
 
 #define LVM_FIRST               0x1000
 #define LVM_GETBKCOLOR          (LVM_FIRST+0)
