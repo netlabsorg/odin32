@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2238 2002-07-29 11:25:44 sandervl Exp $ */
+/* $Id: changelog,v 1.2239 2002-07-30 12:03:30 sandervl Exp $ */
+
+ 2002-07-30: Platon Fomichev <platon@innotek.de>
+    - KERNEL32: o Unicode resync with latest Wine
 
  2002-07-29: Sander van Leeuwen <sandervl@innotek.de> 
     - GDI32:    o Cleanup fixes (call ctordtorTerm in existlist handler)
