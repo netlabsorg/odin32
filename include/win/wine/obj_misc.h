@@ -1,4 +1,4 @@
-/* $Id: obj_misc.h,v 1.5 1999-08-22 22:52:08 sandervl Exp $ */
+/* $Id: obj_misc.h,v 1.6 2002-11-12 17:04:37 sandervl Exp $ */
 /*
  * Defines miscellaneous COM interfaces and APIs defined in objidl.h.
  * These did not really fit into the other categories, whould have 
@@ -94,14 +94,14 @@ ICOM_DEFINE(IEnumUnknown,IUnknown)
 #define ICOM_INTERFACE IMallocSpy
 #define IMallocSpy_METHODS \
     ICOM_METHOD1 (ULONG,PreAlloc,        ULONG,cbRequest) \
-    ICOM_VMETHOD1(      PostAlloc,       void*,pActual) \
-    ICOM_METHOD2 (void*,PreFree,         void*,pRequest, BOOL,fSpyed) \
+    ICOM_METHOD1 (PVOID,PostAlloc,       void*,pActual) \
+    ICOM_METHOD2 (PVOID,PreFree,         void*,pRequest, BOOL,fSpyed) \
     ICOM_VMETHOD1(      PostFree,        BOOL,fSpyed) \
     ICOM_METHOD4 (ULONG,PreRealloc,      void*,pRequest, ULONG,cbRequest, void**,ppNewRequest, BOOL,fSpyed) \
-    ICOM_METHOD2 (void*,PostRealloc,     void*,pActual, BOOL,fSpyed) \
-    ICOM_METHOD2 (void*,PreGetSize,      void*,pRequest, BOOL,fSpyed) \
+    ICOM_METHOD2 (PVOID,PostRealloc,     void*,pActual, BOOL,fSpyed) \
+    ICOM_METHOD2 (PVOID,PreGetSize,      void*,pRequest, BOOL,fSpyed) \
     ICOM_METHOD2 (ULONG,PostGetSize,     ULONG,cbActual, BOOL,fSpyed) \
-    ICOM_METHOD2 (void*,PreDidAlloc,     void*,pRequest, BOOL,fSpyed) \
+    ICOM_METHOD2 (PVOID,PreDidAlloc,     void*,pRequest, BOOL,fSpyed) \
     ICOM_METHOD3 (int,  PostDidAlloc,    void*,pRequest, BOOL,fSpyed, int,fActual) \
     ICOM_METHOD  (int,  PreHeapMinimize) \
     ICOM_METHOD  (int,  PostHeapMinimize)
