@@ -1,4 +1,4 @@
-/* $Id: odinwrap.h,v 1.21 2000-04-30 23:19:36 phaller Exp $ */
+/* $Id: odinwrap.h,v 1.22 2000-05-02 20:49:26 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -25,7 +25,7 @@
 
 // override profiling
 //#undef PROFILE_ODIN
-#define PROFILE_ODIN
+//#define PROFILE_ODIN
 
 
 
