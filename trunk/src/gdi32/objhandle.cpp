@@ -1,4 +1,4 @@
-/* $Id: objhandle.cpp,v 1.27 2002-08-13 14:45:37 sandervl Exp $ */
+/* $Id: objhandle.cpp,v 1.28 2002-09-16 13:58:25 sandervl Exp $ */
 /*
  * Win32 Handle Management Code for OS/2
  *
@@ -51,6 +51,8 @@ static VMutex     objTableMutex;
 //******************************************************************************
 BOOL WIN32API ObjAllocateHandle(HANDLE *hObject, DWORD dwUserData, DWORD dwType)
 {
+    DWORD oldlowestidx;
+
     objTableMutex.enter();
     if(objHandleTable == NULL) {
         objHandleTable = (GdiObject *)malloc(MAX_OBJECT_HANDLES*sizeof(GdiObject));
@@ -78,14 +80,22 @@ BOOL WIN32API ObjAllocateHandle(HANDLE *hObject, DWORD dwUserData, DWORD dwType)
     objHandleTable[lowestFreeIndex].dwType      = dwType;
     objHandleTable[lowestFreeIndex].dwGDI32Data = 0;
     objHandleTable[lowestFreeIndex].dwFlags     = 0;
+
+    oldlowestidx = lowestFreeIndex+1;
+
     lowestFreeIndex = -1;
 
     //find next free handle
-    for(int i=0;i<MAX_OBJECT_HANDLES;i++) {
+findhandle:
+    for(int i=oldlowestidx;i<MAX_OBJECT_HANDLES;i++) {
         if(objHandleTable[i].dwUserData == 0) {
             lowestFreeIndex = i;
             break;
         }
+    }
+    if(lowestFreeIndex == -1) {
+        oldlowestidx = 0; //search from the start
+        goto findhandle;
     }
     objTableMutex.leave();
     return TRUE;
@@ -101,7 +111,8 @@ BOOL WIN32API ObjDeleteHandle(HANDLE hObject, DWORD dwType)
         {
             objHandleTable[hObject].dwUserData = 0;
             objHandleTable[hObject].dwType     = HNDL_NONE;
-            if(lowestFreeIndex == -1 || hObject < lowestFreeIndex)
+////            if(lowestFreeIndex == -1 || hObject < lowestFreeIndex)
+            if(lowestFreeIndex == -1)
                 lowestFreeIndex = hObject;
         }
         else {
@@ -488,7 +499,7 @@ BOOL WIN32API DeleteObject(HANDLE hObj)
         dprintf(("!WARNING!: Can't delete system object"));
         return TRUE;
     }   
-    STATS_DeleteObject(hObj, objtype);
+    STATS_DeleteObject(hObj, GetObjectType(hObj));
 
     if(ObjQueryHandleType(hObj) == HNDL_REGION)
     {
