@@ -1,5 +1,5 @@
 ################################################################################
-# $Id: Makefile,v 1.43.4.5 2000-08-22 03:00:16 bird Exp $
+# $Id: Makefile,v 1.43.4.6 2000-08-23 04:25:39 bird Exp $
 #
 # Win32k makefile.
 #
@@ -407,7 +407,8 @@ TSTOBJS =\
     $(WIN32KOBJ)\d32ElfIOCtl.obj \
     $(WIN32KOBJ)\d32Win32kIOCtl.obj \
     $(WIN32KOBJ)\k32AllocMemEx.obj \
-    $(WIN32KOBJ)\mytkExecPgm.obj
+    $(WIN32KOBJ)\mytkExecPgm.obj\
+    $(WIN32KOBJ)\mytkStartProcess.obj
 
 TSTOBJSINIT = \
     $(WIN32KOBJ)\d16init.obj_tst \

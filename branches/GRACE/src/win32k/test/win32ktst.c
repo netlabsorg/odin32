@@ -1,4 +1,4 @@
-/* $Id: win32ktst.c,v 1.1.4.4 2000-08-17 08:23:35 bird Exp $
+/* $Id: win32ktst.c,v 1.1.4.5 2000-08-23 04:25:46 bird Exp $
  *
  * Win32k test module.
  *
@@ -52,6 +52,9 @@
 #include "asmutils.h"
 #include "macros.h"
 #include "log.h"
+
+
+
 
 
 /** @design Win32k Ring-3 Testing
@@ -135,6 +138,7 @@
  *      6) Start testing...
  *      7) Testing finished - thunk stack back to 32-bit.
  */
+
 
 /*******************************************************************************
 *   Structures and Typedefs                                                    *
@@ -224,7 +228,6 @@
 *   Global Variables                                                           *
 *******************************************************************************/
 extern BOOL     fInited;                /* malloc.c */
-const char *    pszInternalRevision = "\r\nInternal revision 14.040_W4";
 int             cObjectsFake = 14;
 OTE             aKrnlOTE[24];
 
@@ -239,6 +242,7 @@ OTE             aKrnlOTE[24];
                                     TID tid, PVOID pDataBuf, ULONG cbBuf);
     #define QS_MTE         0x0004
 #endif
+
 
 /*******************************************************************************
 *   Internal Functions                                                         *
@@ -532,17 +536,6 @@ int     kernelInit(int iTest, int argc, char **argv)
     return TRUE;
 }
 
-/**
- * Initiate workers (imported kernel functions / vars)
- * @status    partially implemented.
- * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
- */
-void  workersinit(void)
-{
-    DosSetMem(&CODE16START, &CODE16END - &CODE16START, PAG_WRITE | PAG_READ);
-    DosSetMem(&CODE32START, &CODE32END - &CODE32START, PAG_WRITE | PAG_READ);
-}
-
 
 /**
  * Initiates a init reqest packet.
@@ -681,7 +674,9 @@ int TestCase2(void)
 {
     int         rc = 1;
     RP32INIT    rpinit;
-    char *      pszInitArgs = "-C1 -L:N -Verbose -Quiet -Elf:Yes -Pe:Mixed -Script:Yes -W4 -Heap:512000 -ResHeap:0256000 -HeapMax:4096000 -ResHeapMax:0x100000";
+    char *      pszInitArgs = "-C1 -L:E -Verbose -Quiet -Elf:Yes -Pe:Mixed -Script:Yes -W4 -Heap:512000 -ResHeap:0256000 -HeapMax:4096000 -ResHeapMax:0x100000";
+
+    options.fLogging = TRUE;
 
     /* $elf */
     initRPInit(SSToDS(&rpinit), pszInitArgs);
@@ -704,7 +699,7 @@ int TestCase2(void)
             opt.fUNIXScript     = TRUE;
             opt.fPE             = FLAGS_PE_MIXED;
             opt.fQuiet          = TRUE;
-            opt.fLogging        = FALSE;
+            opt.fLogging        = TRUE;
             opt.usCom           = OUTPUT_COM1;
             opt.ulInfoLevel     = INFOLEVEL_INFOALL;
 
