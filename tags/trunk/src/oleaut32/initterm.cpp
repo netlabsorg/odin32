@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.4 2000-01-05 18:29:53 davidr Exp $ */
+/* $Id: initterm.cpp,v 1.5 2000-01-26 11:26:04 sandervl Exp $ */
 
 /*
  * DLL entry point
@@ -84,11 +84,9 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
       {
 	 loadNr = globLoadNr++;
 
-#if 0
- 	 strcpy(oleaut32Path, OSLibGetDllName(hModule));
+	 DosQueryModuleName(hModule, sizeof(oleaut32Path), oleaut32Path);
 	 char *endofpath = strrchr(oleaut32Path, '\\');
 	 *(endofpath+1) = 0;
-#endif
 
          _ctordtorInit();
 
@@ -106,7 +104,13 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
          if(rc)
                 return 0UL;
 
-         OpenPrivateLogFiles();
+#ifdef DEFAULT_LOGGING_OFF
+    	 if(getenv("WIN32LOG_ENABLED")) {
+#else
+    	 if(!getenv("NOWIN32LOG")) {
+#endif
+         	OpenPrivateLogFiles();
+	 }
 
          Hash_Initialise();
 
