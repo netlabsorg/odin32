@@ -1,4 +1,4 @@
-/* $Id: unicode.cpp,v 1.9 1999-06-28 16:59:17 sandervl Exp $ */
+/* $Id: unicode.cpp,v 1.10 1999-06-30 13:25:01 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -7,6 +7,9 @@
  * Copyright 1999 Patrick haller
  * Copyright 1999 Achim Hasenmueller
  * Copyright 1999 Christoph Bratschi
+ *
+ * Read comments about the implementation before using these functions
+ * Attention: length values include terminating 0
  */
 #include <os2win.h>
 #include <winnls.h>
@@ -106,6 +109,8 @@ BOOL WIN32API GetCPInfo(UINT uCodePage, CPINFO *lpCPInfo)
   return(TRUE);
 }
 //******************************************************************************
+// unilen: length of astring buffer (including 0 terminator)
+// returns string length
 //******************************************************************************
 int WIN32API UnicodeToAsciiN(WCHAR *ustring, char *astring, int unilen)
 {
@@ -117,39 +122,59 @@ int WIN32API UnicodeToAsciiN(WCHAR *ustring, char *astring, int unilen)
   UniChar * in_buf;
   char    * out_buf;
 
-  if(ustring == NULL)
-    return(NULL);
+  if (ustring == NULL)
+  {
+    if (astring != NULL && unilen > 0) astring[0] = 0;
+    return 0;
+  }
+
+  if (astring == NULL || unilen <= 0) return 0;
 
 //  dprintf(("KERNEL32: UnicodeToAsciiN\n"));
   if (getUconvObject())
   {
-    uni_chars_left = unilen + 1;
-    out_bytes_left = uni_chars_left;
+    if (unilen == 1)
+    {
+      astring[0] = 0;
+      return 0; //no data
+    }
+
+    uni_chars_left = unilen; //elements
+    out_bytes_left = unilen; //size in bytes
     in_buf  = (UniChar*)ustring;
     out_buf = astring;
     rc = UniUconvFromUcs(uconv_object,
                          &in_buf, &uni_chars_left,
                          (void**)&out_buf, &out_bytes_left,
                          &num_subs);
+
 //    dprintf(("KERNEL32: UnicodeToAsciiN(%d) '%s'\n", rc, astring ));
+  } else
+  {
+    /* idiots unicode conversion :) */
+    for(i = 0; i < unilen-1; i++)
+    {
+      astring[i] = (ustring[i] > 255) ? (char)20 : (char)ustring[i]; //CB: handle invalid characters as space
+      if (ustring[i] == 0) return i; //asta la vista, baby
+    }
   }
-  else
-   /* idiots unicode conversion :) */
-   for(i = 0; i < unilen; i++)
-     astring[i] = (char)ustring[i];
 
-  astring[unilen] = 0; // @@@PH: 1999/06/09 fix - always terminate string
+  astring[unilen-1] = 0; // @@@PH: 1999/06/09 fix - always terminate string
 
-  return(unilen);
+  return(unilen-1);
 }
 //******************************************************************************
+// Converts unicode string to ascii string
+// returns length of ascii string
 //******************************************************************************
 int WIN32API UnicodeToAscii(WCHAR *ustring, char *astring)
 {
   /* forward to function with len parameter */
-  return UnicodeToAsciiN(ustring, astring, UniStrlen((UniChar*)ustring));
+  return UnicodeToAsciiN(ustring, astring, UniStrlen((UniChar*)ustring)+1); //end included
 }
 //******************************************************************************
+// Converts unicode string to ascii string
+// returns pointer to ascii string
 //******************************************************************************
 char * WIN32API UnicodeToAsciiString(WCHAR *ustring)
 {
@@ -170,6 +195,7 @@ void WIN32API FreeAsciiString(char *astring)
     free( astring );
 }
 //******************************************************************************
+// asciilen: max length of unicode buffer (including end 0)
 //******************************************************************************
 void WIN32API AsciiToUnicodeN(char *ascii, WCHAR *unicode, int asciilen)
 {
@@ -186,7 +212,7 @@ void WIN32API AsciiToUnicodeN(char *ascii, WCHAR *unicode, int asciilen)
            ascii,
            unicode));
 
-  //CB: no input, set at least 0
+  //CB: no input, set at least terminator
   if (ascii == NULL)
   {
     if (unicode != NULL && asciilen > 0) unicode[0] = 0;
@@ -198,40 +224,57 @@ void WIN32API AsciiToUnicodeN(char *ascii, WCHAR *unicode, int asciilen)
 //  dprintf(("KERNEL32: AsciiToUnicodeN %s\n", ascii));
   if (getUconvObject())
   {
+    if (asciilen == 1)
+    {
+       unicode[0] = 0;
+       return;
+    }
+
     in_buf        = ascii;
-    in_bytes_left = asciilen;
+    in_bytes_left = asciilen; //buffer size in bytes
     out_buf = (UniChar*)unicode;
 
-    uni_chars_left = in_bytes_left +1;
+    uni_chars_left = asciilen; //elements
     dprintf(("KERNEL32: AsciiToUnicode %d\n", in_bytes_left));
 
     rc = UniUconvToUcs( uconv_object,
                         (void**)&in_buf, &in_bytes_left,
                         &out_buf,        &uni_chars_left,
                         &num_subs );
+
+    //if (rc != ULS_SUCCESS && in_bytes_left > 0) //CB: never the case during my tests
+    //   dprintf(("KERNEL32: AsciiToUnicode failed, %d bytes left!\n",in_bytes_left));
+
   } else
-  {
-    for(i=0;
-        i < asciilen;
-        i++)
+  { //poor man's conversion
+
+    for(i = 0;i < asciilen-1;i++)
+    {
       unicode[i] = ascii[i];
+      if (ascii[i] == 0) return; //work done
+    }
   }
 
-  unicode[asciilen] = 0;
-//SvL: Messes up the heap
-//  unicode[len+1] = 0; /* @@@PH 98/06/07 */
+  unicode[asciilen-1] = 0;
 }
 //******************************************************************************
+// Copies the full string from ascii to unicode
 //******************************************************************************
 void WIN32API AsciiToUnicode(char *ascii, WCHAR *unicode)
 {
   /* achimha for security, strlen might trap if garbage in */
   /* @@@PH 98/06/07 */
-  if ( (ascii   == NULL) ||                     /* garbage in, garbage out ! */
-       (unicode == NULL) )
+  if (ascii == NULL)
+  {
+    if (unicode != NULL) unicode[0] = 0; //CB: set at least end
     return;
+  }
+
+  if (unicode == NULL) return;  /* garbage in, garbage out ! */
+
   /* forward to call with length parameter */
-  AsciiToUnicodeN(ascii, unicode, strlen(ascii));
+  AsciiToUnicodeN(ascii, unicode, strlen(ascii)+1); //end included
 }
+
 
 

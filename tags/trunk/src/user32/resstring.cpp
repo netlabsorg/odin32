@@ -1,4 +1,4 @@
-/* $Id: resstring.cpp,v 1.1 1999-06-19 10:55:41 sandervl Exp $ */
+/* $Id: resstring.cpp,v 1.2 1999-06-30 13:25:28 sandervl Exp $ */
 
 /*
  *
@@ -79,7 +79,7 @@ int OS2LoadStringAscii(HINSTANCE hinst,
 
   UnicodeToAsciiN(szbuf+1,
                   lpBuffer,
-                  min((*szbuf), cchBuffer-1));
+                  min((*szbuf+1), cchBuffer));
 
   dprintf(("USER32: OS2LoadStringA retrieved string '%s' (size %d)\n",
            lpBuffer,
