@@ -1,4 +1,4 @@
-/* $Id: exceptions.cpp,v 1.10 1999-08-22 11:11:10 sandervl Exp $ */
+/* $Id: exceptions.cpp,v 1.11 1999-08-22 22:11:21 sandervl Exp $ */
 
 /*
  * Win32 Device IOCTL API functions for OS/2
@@ -934,7 +934,7 @@ void OS2SetExceptionHandler(void *exceptframe)
 {
  PEXCEPTIONREGISTRATIONRECORD pExceptRec = (PEXCEPTIONREGISTRATIONRECORD)exceptframe;
 
-  pExceptRec->prev_structure   = 0;
+  pExceptRec->prev_structure   = (PEXCEPTIONREGISTRATIONRECORD)-1;
   pExceptRec->ExceptionHandler = OS2ExceptionHandler;
 
   /* disable trap popups */
@@ -957,6 +957,14 @@ void OS2SetExceptionHandler(void *exceptframe)
 void OS2UnsetExceptionHandler(void *exceptframe)
 {
   DosUnsetExceptionHandler((PEXCEPTIONREGISTRATIONRECORD)exceptframe);
+}
+
+void SetOS2ExceptionChain(ULONG val)
+{
+ USHORT sel = GetFS();
+
+    SetExceptionChain(val);    
+    SetFS(sel);
 }
 
 /*****************************************************************************
