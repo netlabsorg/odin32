@@ -1,4 +1,4 @@
-/* $Id: asyncapi.cpp,v 1.17 2001-10-19 18:34:47 achimha Exp $ */
+/* $Id: asyncapi.cpp,v 1.18 2001-10-21 13:43:51 sandervl Exp $ */
 
 /*
  *
@@ -406,16 +406,53 @@ void AsyncSelectNotifyEvent(PASYNCTHREADPARM pThreadParm, ULONG event, ULONG soc
     // for the semaphore notification...
     ULONG eventReply = WSAMAKESELECTREPLY(event, socket_error);
 
+#ifdef DEBUG
+    char *pszEvent = NULL;
+
+    switch(event) {
+    case FD_READ:
+        pszEvent = "FD_READ";
+        break;
+    case FD_WRITE:
+        pszEvent = "FD_WRITE";
+        break;
+    case FD_OOB:
+        pszEvent = "FD_OOB";
+        break;
+    case FD_ACCEPT:
+        pszEvent = "FD_ACCEPT";
+        break;
+    case FD_CONNECT:
+        pszEvent = "FD_CONNECT";
+        break;
+    case FD_CLOSE:
+        pszEvent = "FD_CLOSE";
+        break;
+    case FD_QOS:
+        pszEvent = "FD_QOS";
+        break;
+    case FD_GROUP_QOS:
+        pszEvent = "FD_GROUP_QOS";
+        break;
+    case FD_ROUTING_INTERFACE_CHANGE:
+        pszEvent = "FD_ROUTING_INTERFACE_CHANGE";
+        break;
+    case FD_ADDRESS_LIST_CHANGE:
+        pszEvent = "FD_ADDRESS_LIST_CHANGE";
+        break;
+    }
+#endif
+
     if (pThreadParm->u.asyncselect.mode == WSA_SELECT_HWND)
     {
-        dprintf(("AsyncSelectNotifyEvent: notifying window, socket: 0x%x, window handle: 0x%x, window message: 0x%x, event: 0x%x", pThreadParm->u.asyncselect.s, pThreadParm->notifyHandle, pThreadParm->notifyData, eventReply));
+        dprintf(("AsyncSelectNotifyEvent: WINDOW, socket: 0x%x, window handle: 0x%x, window message: 0x%x, event: %s (0x%x)", pThreadParm->u.asyncselect.s, pThreadParm->notifyHandle, pThreadParm->notifyData, pszEvent, eventReply));
         PostMessageA((HWND)pThreadParm->notifyHandle, (DWORD)pThreadParm->notifyData, (WPARAM)pThreadParm->u.asyncselect.s,
                      (LPARAM)eventReply);
     }
     else
     if (pThreadParm->u.asyncselect.mode == WSA_SELECT_HEVENT)
     {
-        dprintf(("AsyncSelectNotifyEvent: notifying event semaphore, socket: 0x%x, HEVENT: 0x%x, event: 0x%x", pThreadParm->u.asyncselect.s, pThreadParm->notifyHandle, event));
+        dprintf(("AsyncSelectNotifyEvent: SEM, socket: 0x%x, HEVENT: 0x%x, event: %s (0x%x)", pThreadParm->u.asyncselect.s, pThreadParm->notifyHandle, pszEvent, event));
         // set the event bit in the mask
         pThreadParm->u.asyncselect.lLastEvent |= event;
         // set the error code for the right value
@@ -495,7 +532,7 @@ asyncloopstart:
 	pThreadParm->fWaitSelect = FALSE;
 	if(ret == SOCKET_ERROR) {
 		int selecterr = sock_errno();
-        	dprintf2(("WSAsyncSelectThreadProc %x rds=%d, wrs=%d, oos =%d, pending = %x select returned %x", pThreadParm->u.asyncselect.s, noread, nowrite, noexcept, lEventsPending, selecterr));
+        	dprintf(("WSAsyncSelectThreadProc %x rds=%d, wrs=%d, oos =%d, pending = %x select returned %x", pThreadParm->u.asyncselect.s, noread, nowrite, noexcept, lEventsPending, selecterr));
 		if(selecterr && selecterr < SOCBASEERR) {
 			selecterr += SOCBASEERR;
 		}
@@ -590,18 +627,22 @@ asyncloopstart:
 				AsyncSelectNotifyEvent(pThreadParm, FD_ACCEPT, NO_ERROR);
 			}
 		}
-		if((lEventsPending & FD_READ) && bytesread >= 0) {
+		if((lEventsPending & FD_READ) && bytesread > 0) {
 			AsyncSelectNotifyEvent(pThreadParm, FD_READ, NO_ERROR);
 		}
-#if 0
-//SvL: This generates FD_CLOSE messages when the connection is just fine
-//     (recv executed in another thread when select returns)
        		else
-		if((lEventsPending & FD_CLOSE) && (state == 0 && bytesread == 0)) {
-			dprintf(("FD_CLOSE; state == 0 && bytesread == 0"));
-			AsyncSelectNotifyEvent(pThreadParm, FD_CLOSE, NO_ERROR);
+		if((lEventsPending & FD_CLOSE) && (state == 0 && bytesread == 0)) 
+                {
+                        state = ioctl(s, FIOBSTATUS, (char *)&tmp, sizeof(tmp));
+
+                        //Have to make sure this doesn't generates FD_CLOSE 
+                        //messages when the connection is just fine (recv 
+                        //executed in another thread when select returns)
+                        if(state & (SS_CANTRCVMORE|SS_CANTSENDMORE|SS_ISDISCONNECTING|SS_ISDISCONNECTED)) {
+                            dprintf(("FD_CLOSE; state == 0 && bytesread == 0, state = %x", state));
+                            AsyncSelectNotifyEvent(pThreadParm, FD_CLOSE, NO_ERROR);
+                        }
 		}
-#endif
 	}
       	if(ready(noexcept))
       	{
@@ -719,7 +760,7 @@ int WSAAsyncSelectWorker(SOCKET s, int mode, int notifyHandle, int notifyData, l
    // reset all event bits
    pThreadParm->u.asyncselect.lLastEvent     = 0;
    // reset all error bits
-   memset(&pThreadParm->u.asyncselect.iErrorCode, 0, sizeof(int) * FD_MAX_EVENTS);
+   memset(pThreadParm->u.asyncselect.iErrorCode, 0, sizeof(pThreadParm->u.asyncselect.iErrorCode));
    pThreadParm->u.asyncselect.asyncSem       = new VSemaphore;
    if(pThreadParm->u.asyncselect.asyncSem == NULL) {
 	dprintf(("WSAAsyncSelect: VSemaphore alloc failure!"));
