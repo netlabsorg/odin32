@@ -1,4 +1,4 @@
-/* $Id: kKrnlLib.h,v 1.4 2001-10-19 01:47:56 bird Exp $
+/* $Id: kKrnlLib.h,v 1.5 2001-10-24 03:59:04 bird Exp $
  *
  * Top level header file for kKrnlLib exports.
  *
@@ -70,7 +70,6 @@
 #ifdef INCL_KKL_LOG
     #include "kKLstdarg.h"
     #include "kLog.h"
-    #include "kKLlog.h"
 #endif
 
 
