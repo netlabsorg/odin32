@@ -1,4 +1,4 @@
-/* $Id: winkeyboard.cpp,v 1.14 2001-07-15 14:58:12 sandervl Exp $ */
+/* $Id: winkeyboard.cpp,v 1.15 2001-09-24 16:24:59 phaller Exp $ */
 /*
  * Win32 <-> PM key translation
  *
@@ -6,8 +6,13 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
-#include <os2win.h>
+
 #include <odin.h>
+#include <odinwrap.h>
+#include <os2sel.h>
+
+#include <os2win.h>
+
 #include <string.h>
 #include <stdio.h>
 #include <winkeyboard.h>
@@ -19,6 +24,12 @@
 
 #define DBG_LOCALLOG    DBG_winkeyboard
 #include "dbglocal.h"
+
+
+
+
+ODINDEBUGCHANNEL(USER32-WINKBD)
+
 
 BOOL OPEN32API _O32_GetKeyboardState( PBYTE lpKeyState );
 
@@ -560,7 +571,11 @@ BYTE abWinVKeyToPMScan[256] =
 
 //******************************************************************************
 //******************************************************************************
-void WIN32API KeyTranslatePMToWinBuf(BYTE *pmkey, BYTE *winkey, int nrkeys)
+
+ODINPROCEDURE3(KeyTranslatePMToWinBuf,
+               BYTE *, pmkey,
+               BYTE *, winkey,
+               int,    nrkeys)
 {
    for(int i=1;i<nrkeys;i++) {
        if(abWinVKeyToPMScan[i]) {
@@ -573,14 +588,16 @@ void WIN32API KeyTranslatePMToWinBuf(BYTE *pmkey, BYTE *winkey, int nrkeys)
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API GetKeyboardType( int nTypeFlag)
+ODINFUNCTION1(int, GetKeyboardType,
+              int, nTypeFlag)
 {
     dprintf(("USER32: GetKeyboardType %x", nTypeFlag));
     return O32_GetKeyboardType(nTypeFlag);
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API GetKeyboardState(PBYTE lpKeyState)
+ODINFUNCTION1(BOOL,  GetKeyboardState,
+              PBYTE, lpKeyState)
 {
  BYTE   PMKeyState[256];
  BOOL   rc;
@@ -611,7 +628,8 @@ BOOL WIN32API GetKeyboardState(PBYTE lpKeyState)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API SetKeyboardState(PBYTE lpKeyState)
+ODINFUNCTION1(BOOL,  SetKeyboardState,
+              PBYTE, lpKeyState)
 {
   dprintf(("USER32: SetKeyboardState %x not implemented", lpKeyState));
   return(TRUE);
@@ -624,7 +642,8 @@ BOOL WIN32API SetKeyboardState(PBYTE lpKeyState)
  *        - the thread identifier (dwLayout) is also ignored.
  */
 // * Remark    : Based on Wine version (991031)
-HKL WIN32API GetKeyboardLayout(DWORD dwLayout)
+ODINFUNCTION1(HKL,   GetKeyboardLayout,
+              DWORD, dwLayout)
 {
         HKL layout;
         layout = GetSystemDefaultLCID(); /* FIXME */
@@ -646,13 +665,16 @@ HKL WIN32API GetKeyboardLayout(DWORD dwLayout)
  *
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
-INT WIN32API GetKeyboardLayoutNameA(LPTSTR pwszKLID)
+ODINFUNCTION1(INT,   GetKeyboardLayoutNameA,
+              LPSTR, pwszKLID)
 {
-   dprintf(("USER32:GetKeyboardLayoutNameA"));
+   dprintf(("not correctly implemented"));
 
    sprintf(pwszKLID, "%08x",GetKeyboardLayout(0));
    return 1;
 }
+
+
 /*****************************************************************************
  * Name      : BOOL WIN32API GetKeyboardLayoutNameW
  * Purpose   : The GetKeyboardLayoutName function retrieves the name of the
@@ -667,11 +689,11 @@ INT WIN32API GetKeyboardLayoutNameA(LPTSTR pwszKLID)
  *
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
-INT WIN32API GetKeyboardLayoutNameW(LPWSTR pwszKLID)
+ODINFUNCTION1(INT,    GetKeyboardLayoutNameW,
+              LPWSTR, pwszKLID)
 {
    LPSTR buf = (LPSTR)HEAP_xalloc( GetProcessHeap(), 0, strlen("00000409")+1);
 
-   dprintf(("USER32:GetKeyboardLayoutNameA"));
    int res = GetKeyboardLayoutNameA(buf);
    lstrcpyAtoW(pwszKLID,buf);
    HeapFree( GetProcessHeap(), 0, buf );
@@ -688,14 +710,19 @@ INT WIN32API GetKeyboardLayoutNameW(LPWSTR pwszKLID)
  *
  * Remark    : Based on Wine version (991031)
  */
-INT WINAPI GetKeyboardLayoutList(INT nBuff,HKL *layouts)
+ODINFUNCTION2(INT,   GetKeyboardLayoutList,
+              INT,   nBuff,
+              HKL *, layouts)
 {
-        dprintf(("GetKeyboardLayoutList(%d,%p)\n",nBuff,layouts));
-        if (!nBuff || !layouts)
-            return 1;
-    if (layouts)
-        layouts[0] = GetKeyboardLayout(0);
+  dprintf(("not correctly implemented"));
+  
+  if (!nBuff || !layouts)
     return 1;
+  
+  if (layouts)
+    layouts[0] = GetKeyboardLayout(0);
+  
+  return 1;
 }
 /*****************************************************************************
  * Name      : int WIN32API ToAscii
@@ -719,15 +746,14 @@ INT WINAPI GetKeyboardLayoutList(INT nBuff,HKL *layouts)
  *
  * Author    : SvL
  *****************************************************************************/
-int WIN32API ToAscii(UINT   uVirtKey,
-                     UINT   uScanCode,
-                     PBYTE  lpbKeyState,
-                     LPWORD lpwTransKey,
-                     UINT   fuState)
-{
-  dprintf(("USER32:ToAscii (%x,%x,%08xh,%08xh,%x) partially implemented",
-           uVirtKey, uScanCode, lpbKeyState, lpwTransKey,  fuState));
 
+ODINFUNCTION5(int,    ToAscii,
+              UINT,   uVirtKey,
+              UINT,   uScanCode,
+              PBYTE,  lpbKeyState,
+              LPWORD, lpwTransKey,
+              UINT,   fuState)
+{
   INT ret;
 
   if (uScanCode == 0) {
@@ -827,20 +853,16 @@ int WIN32API ToAscii(UINT   uVirtKey,
  *
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
-int WIN32API ToAsciiEx(UINT   uVirtKey,
-                       UINT   uScanCode,
-                       PBYTE  lpbKeyState,
-                       LPWORD lpwTransKey,
-                       UINT   fuState,
-                       HKL    hkl)
+
+ODINFUNCTION6(int,    ToAsciiEx,
+              UINT,   uVirtKey,
+              UINT,   uScanCode,
+              PBYTE,  lpbKeyState,
+              LPWORD, lpwTransKey,
+              UINT,   fuState,
+              HKL,    hkl)
 {
-  dprintf(("USER32:ToAsciiEx (%u,%u,%08xh,%08xh,%u,%08x) partially implemented",
-         uVirtKey,
-         uScanCode,
-         lpbKeyState,
-         lpwTransKey,
-         fuState,
-         hkl));
+  dprintf(("imcompletely implemented"));
 
   return ToAscii(uVirtKey, uScanCode, lpbKeyState, lpwTransKey, fuState);
 }
@@ -877,20 +899,16 @@ int WIN32API ToAsciiEx(UINT   uVirtKey,
  *
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
-int WIN32API ToUnicode(UINT   uVirtKey,
-                          UINT   uScanCode,
-                          PBYTE  lpKeyState,
-                          LPWSTR pwszBuff,
-                          int    cchBuff,
-                          UINT   wFlags)
+
+ODINFUNCTION6(int,    ToUnicode,
+              UINT,   uVirtKey,
+              UINT,   uScanCode,
+              PBYTE,  lpKeyState,
+              LPWSTR, pwszBuff,
+              int,    cchBuff,
+              UINT,   wFlags)
 {
-  dprintf(("USER32:ToUnicode (%u,%u,%08xh,%08xh,%u,%08x) not implemented.\n",
-         uVirtKey,
-         uScanCode,
-         lpKeyState,
-         pwszBuff,
-         cchBuff,
-         wFlags));
+  dprintf(("not implemented.\n"));
 
   return (0);
 }
@@ -911,65 +929,81 @@ int WIN32API ToUnicode(UINT   uVirtKey,
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
 
-UINT WIN32API GetKBCodePage(VOID)
+ODINFUNCTION0(UINT, GetKBCodePage)
 {
   return (GetOEMCP());
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API GetKeyNameTextA( LPARAM lParam, LPSTR lpString, int  nSize)
+ODINFUNCTION3(int,    GetKeyNameTextA,
+              LPARAM, lParam, 
+              LPSTR,  lpString, 
+              int,    nSize)
 {
-    dprintf(("USER32:  GetKeyNameTextA\n"));
-    return O32_GetKeyNameText(lParam,lpString,nSize);
+  return O32_GetKeyNameText(lParam,lpString,nSize);
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API GetKeyNameTextW( LPARAM lParam, LPWSTR lpString, int  nSize)
+ODINFUNCTION3(int,    GetKeyNameTextW,
+              LPARAM, lParam,
+              LPWSTR, lpString,
+              int,    nSize)
 {
-    dprintf(("USER32:  GetKeyNameTextW DOES NOT WORK\n"));
+    dprintf(("USER32:  GetKeyNameTextW DOES NOT WORK (not implemented)\n"));
     // NOTE: This will not work as is (needs UNICODE support)
     return 0;
 //    return O32_GetKeyNameText(arg1, arg2, arg3);
 }
 //******************************************************************************
 //******************************************************************************
-SHORT WIN32API GetKeyState( int nVirtKey)
+ODINFUNCTION1(SHORT, GetKeyState,
+              int,   nVirtKey)
 {
-    dprintf2(("USER32: GetKeyState %x", nVirtKey));
+  return O32_GetKeyState(nVirtKey);
+}
+//******************************************************************************
+//******************************************************************************
+ODINFUNCTION1(WORD,  GetAsyncKeyState,
+              INT,   nVirtKey)
+{
+  if(fVersionWarp3) 
+  {
+    dprintf(("WARNING: not correctly implemented for Warp 3"));
+    //Not present in Warp 3's PMWINX
     return O32_GetKeyState(nVirtKey);
+  }
+  else  
+    return O32_GetAsyncKeyState(nVirtKey);
 }
 //******************************************************************************
 //******************************************************************************
-WORD WIN32API GetAsyncKeyState(INT nVirtKey)
+ODINFUNCTION2(UINT,  MapVirtualKeyA,
+              UINT,  uCode, 
+              UINT,  uMapType)
 {
-    dprintf2(("USER32: GetAsyncKeyState %x", nVirtKey));
-    if(fVersionWarp3) {//Not present in Warp 3's PMWINX
-          return O32_GetKeyState(nVirtKey);
-    }
-    else  return O32_GetAsyncKeyState(nVirtKey);
-}
-//******************************************************************************
-//******************************************************************************
-UINT WIN32API MapVirtualKeyA( UINT uCode, UINT  uMapType)
-{
-    dprintf(("USER32: MapVirtualKeyA %x %x", uCode, uMapType));
-    /* A quick fix for Commandos, very incomplete */
-    switch (uMapType) {
+  dprintf(("imcompletely implemented"));
+  /* A quick fix for Commandos, very incomplete */
+  switch (uMapType) 
+  {
     case 2:
-      if (uCode >= VK_A && uCode <= VK_Z) {
-         return 'A' + uCode - VK_A;
+      if (uCode >= VK_A && uCode <= VK_Z) 
+      {
+        return 'A' + uCode - VK_A;
       }
       break;
-    }
-    return O32_MapVirtualKey(uCode,uMapType);
+  }
+  return O32_MapVirtualKey(uCode, uMapType);
 }
 //******************************************************************************
 //******************************************************************************
-UINT WIN32API MapVirtualKeyW( UINT uCode, UINT  uMapType)
+ODINFUNCTION2(UINT,  MapVirtualKeyW,
+              UINT,  uCode, 
+              UINT,  uMapType)
 {
-    dprintf(("USER32:  MapVirtualKeyW\n"));
-    // NOTE: This will not work as is (needs UNICODE support)
-    return O32_MapVirtualKey(uCode,uMapType);
+  dprintf(("incorrectly implemented\n"));
+  
+  // NOTE: This will not work as is (needs UNICODE support)
+  return O32_MapVirtualKey(uCode,uMapType);
 }
 /*****************************************************************************
  * Name      : UINT WIN32API MapVirtualKeyExA
@@ -988,12 +1022,12 @@ UINT WIN32API MapVirtualKeyW( UINT uCode, UINT  uMapType)
  *
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
-UINT WIN32API MapVirtualKeyExA(UINT uCode, UINT uMapType, HKL  dwhkl)
+ODINFUNCTION3(UINT,  MapVirtualKeyExA,
+              UINT,  uCode, 
+              UINT,  uMapType, 
+              HKL,   dwhkl)
 {
-  dprintf(("USER32:MapVirtualKeyExA (%u,%u,%08x) partially implemented",
-         uCode,
-         uMapType,
-         dwhkl));
+  dprintf(("incompletely implemented"));
 
   return MapVirtualKeyA(uCode, uMapType);
 }
@@ -1014,10 +1048,12 @@ UINT WIN32API MapVirtualKeyExA(UINT uCode, UINT uMapType, HKL  dwhkl)
  *
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
-UINT WIN32API MapVirtualKeyExW(UINT uCode, UINT uMapType, HKL  dwhkl)
+ODINFUNCTION3(UINT, MapVirtualKeyExW,
+              UINT, uCode, 
+              UINT, uMapType, 
+              HKL,  dwhkl)
 {
-  dprintf(("USER32:MapVirtualKeyExW (%u,%u,%08x) partially implemented",
-          uCode, uMapType, dwhkl));
+  dprintf(("incompletely implemented"));
 
   return MapVirtualKeyW(uCode, uMapType);
 }
@@ -1035,45 +1071,55 @@ UINT WIN32API MapVirtualKeyExW(UINT uCode, UINT uMapType, HKL  dwhkl)
  *
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
-DWORD WIN32API OemKeyScan(WORD wOemChar)
+ODINFUNCTION1(DWORD, OemKeyScan,
+              WORD,  wOemChar)
 {
-  dprintf(("USER32:OemKeyScan (%u) not implemented.\n",
-         wOemChar));
+  dprintf(("not implemented.\n"));
 
   return (wOemChar);
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API RegisterHotKey(HWND hwnd, int idHotKey, UINT fuModifiers, UINT uVirtKey)
+ODINFUNCTION4(BOOL,  RegisterHotKey,
+              HWND,  hwnd, 
+              int,   idHotKey, 
+              UINT,  fuModifiers, 
+              UINT,  uVirtKey)
 {
-  dprintf(("USER32:  RegisterHotKey %x %d %x %x not implemented", hwnd, idHotKey, fuModifiers, uVirtKey));
+  dprintf(("not implemented"));
+  
   hwnd = Win32ToOS2Handle(hwnd);
   return(TRUE);
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API UnregisterHotKey(HWND hwnd, int idHotKey)
+ODINFUNCTION2(BOOL, UnregisterHotKey,
+              HWND, hwnd, 
+              int,  idHotKey)
 {
-  dprintf(("USER32:  UnregisterHotKey %x %d not implemented", hwnd, idHotKey));
+  dprintf(("not implemented"));
+  
   hwnd = Win32ToOS2Handle(hwnd);
 
   return(TRUE);
 }
+
 //******************************************************************************
 //SvL: 24-6-'97 - Added
 //******************************************************************************
-WORD WIN32API VkKeyScanA( char ch)
+ODINFUNCTION1(WORD, VkKeyScanA,
+              char, ch)
 {
-    dprintf(("USER32: VkKeyScanA %x", ch));
-    return O32_VkKeyScan(ch);
+  return O32_VkKeyScan(ch);
 }
 //******************************************************************************
 //******************************************************************************
-WORD WIN32API VkKeyScanW( WCHAR wch)
+ODINFUNCTION1(WORD,  VkKeyScanW,
+              WCHAR, wch)
 {
-    dprintf(("USER32:  VkKeyScanW %x", wch));
-    // NOTE: This will not work as is (needs UNICODE support)
-    return O32_VkKeyScan((char)wch);
+  dprintf(("incorrectly implemented"));
+  // NOTE: This will not work as is (needs UNICODE support)
+  return O32_VkKeyScan((char)wch);
 }
 /*****************************************************************************
  * Name      : SHORT WIN32API VkKeyScanExW
@@ -1090,11 +1136,11 @@ WORD WIN32API VkKeyScanW( WCHAR wch)
  *
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
-WORD WIN32API VkKeyScanExW(WCHAR uChar,
-                           HKL   hkl)
+ODINFUNCTION2(WORD,  VkKeyScanExW,
+              WCHAR, uChar,
+              HKL,   hkl)
 {
-  dprintf(("USER32:VkKeyScanExW (%u,%08x) partially implemented",
-          uChar,hkl));
+  dprintf(("partially implemented"));
 
   return VkKeyScanW(uChar);
 }
@@ -1113,11 +1159,11 @@ WORD WIN32API VkKeyScanExW(WCHAR uChar,
  *
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
-WORD WIN32API VkKeyScanExA(CHAR uChar,
-                           HKL  hkl)
+ODINFUNCTION2(WORD, VkKeyScanExA,
+              CHAR, uChar,
+              HKL,  hkl)
 {
-  dprintf(("USER32:VkKeyScanExA (%u,%08x) partially implemented",
-         uChar, hkl));
+  dprintf(("partially implemented"));
 
   return VkKeyScanA(uChar);
 }
@@ -1139,16 +1185,13 @@ WORD WIN32API VkKeyScanExA(CHAR uChar,
  *
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
-VOID WIN32API keybd_event (BYTE bVk,
-                           BYTE bScan,
-                           DWORD dwFlags,
-                           DWORD dwExtraInfo)
+ODINPROCEDURE4(keybd_event,
+               BYTE,  bVk,
+               BYTE,  bScan,
+               DWORD, dwFlags,
+               DWORD, dwExtraInfo)
 {
-  dprintf(("USER32:keybd_event (%u,%u,%08xh,%08x) not implemented.\n",
-         bVk,
-         bScan,
-         dwFlags,
-         dwExtraInfo));
+  dprintf(("not implemented.\n"));
 }
 /*****************************************************************************
  * Name      : HLK WIN32API LoadKeyboardLayoutA
@@ -1167,8 +1210,9 @@ VOID WIN32API keybd_event (BYTE bVk,
  *
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
-HKL WIN32API LoadKeyboardLayoutA(LPCTSTR pwszKLID,
-                                 UINT    Flags)
+ODINFUNCTION2(HKL,     LoadKeyboardLayoutA,
+              LPCSTR,  pwszKLID,
+              UINT,    Flags)
 {
   dprintf(("USER32:LeadKeyboardLayoutA (%s,%u) not implemented.\n",
          pwszKLID,
@@ -1193,10 +1237,11 @@ HKL WIN32API LoadKeyboardLayoutA(LPCTSTR pwszKLID,
  *
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
-HKL WIN32API LoadKeyboardLayoutW(LPCWSTR pwszKLID,
-                                 UINT    Flags)
+ODINFUNCTION2(HKL,     LoadKeyboardLayoutW,
+              LPCWSTR, pwszKLID,
+              UINT,    Flags)
 {
-  dprintf(("USER32:LeadKeyboardLayoutW (%s,%u) not implemented.\n",
+  dprintf(("USER32:LoadKeyboardLayoutW (%ls,%u) not implemented.\n",
          pwszKLID,
          Flags));
 
@@ -1204,9 +1249,11 @@ HKL WIN32API LoadKeyboardLayoutW(LPCWSTR pwszKLID,
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API ActivateKeyboardLayout(HKL hkl, UINT fuFlags)
+ODINFUNCTION2(BOOL,  ActivateKeyboardLayout,
+              HKL,   hkl,
+              UINT,  fuFlags)
 {
-  dprintf(("USER32:  ActivateKeyboardLayout, not implemented\n"));
+  dprintf(("not implemented\n"));
   return(TRUE);
 }
 /*****************************************************************************
@@ -1222,12 +1269,12 @@ BOOL WIN32API ActivateKeyboardLayout(HKL hkl, UINT fuFlags)
  *
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
-BOOL WIN32API UnloadKeyboardLayout (HKL hkl)
+ODINFUNCTION1(BOOL, UnloadKeyboardLayout,
+              HKL,  hkl)
 {
-  dprintf(("USER32:UnloadKeyboardLayout (%08x) not implemented.\n",
-         hkl));
+  dprintf(("not implemented.\n"));
 
-  return (0);
+  return (TRUE);
 }
 //******************************************************************************
 //******************************************************************************
