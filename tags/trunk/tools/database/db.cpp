@@ -1,4 +1,4 @@
-/* $Id: db.cpp,v 1.20 2000-08-02 18:10:17 bird Exp $ *
+/* $Id: db.cpp,v 1.21 2000-08-02 20:20:36 bird Exp $ *
  *
  * DB - contains all database routines.
  *
@@ -2038,12 +2038,12 @@ BOOL             _System dbDeleteNotUpdatedFunctions(signed long lDll, BOOL fAll
         while ((row = mysql_fetch_row(pres)) != NULL)
         {
             /* delete parameters */
-            sprintf(&szQuery[0], "DELETE FROM parameter WHERE function %s", row[0]);
+            sprintf(&szQuery[0], "DELETE FROM parameter WHERE function = %s", row[0]);
             rc = mysql_query(pmysql, &szQuery[0]);
             if (rc) fRc = FALSE;
 
             /* author relations */
-            sprintf(&szQuery[0], "DELETE FROM fnauthor WHERE function %s", row[0]);
+            sprintf(&szQuery[0], "DELETE FROM fnauthor WHERE function = %s", row[0]);
             rc = mysql_query(pmysql, &szQuery[0]);
             if (rc) fRc = FALSE;
         }
