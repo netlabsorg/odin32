@@ -1,4 +1,4 @@
-/* $Id: os2heap.cpp,v 1.8 1999-08-17 17:04:51 sandervl Exp $ */
+/* $Id: os2heap.cpp,v 1.9 1999-08-25 00:03:50 phaller Exp $ */
 
 /*
  * Heap class for OS/2
@@ -306,6 +306,11 @@ BOOL OS2Heap::Walk(void *lpEntry)
 OS2Heap *OS2Heap::find(HANDLE hHeap)
 {
   OS2Heap *curheap = OS2Heap::heap;
+
+  //@@@PH NT programs seem to assume heap 0 is always valid?!
+  if (hHeap == 0)
+     if (curheap != NULL)
+       return curheap;
 
   while(curheap != NULL) {
         if(curheap->hPrimaryHeap == hHeap) {
