@@ -1,4 +1,4 @@
-; $Id: odincrt.def,v 1.18 1999-12-01 18:41:46 sandervl Exp $
+; $Id: odincrt.def,v 1.19 1999-12-09 10:58:14 sandervl Exp $
 ; Odin VAC++ 3.08 shared multithreaded runtime
 LIBRARY ODINCRT INITINSTANCE TERMINSTANCE
 PROTMODE
@@ -33,6 +33,9 @@ EXPORTS
     __dl__FPvPCcUi = os2__dl__FPvPCcUi                  @201
   
      strdup                  			       	@472
+    ;strncpy doesn't stop at 0 terminator!
+    strncpy = __strncpy                                 @751
+    __strncpy                                           @919
 
 ; original exports
     __ct__8ifstreamFPCciT2                             @1
@@ -770,7 +773,6 @@ EXPORTS
     _tmalloc                                          @747
     _makepath                                         @748
     _spawnv                                           @750
-    strncpy                                           @751
     hex__Fli                                          @752
     iswupper                                          @753
     strftime                                          @754
