@@ -1,4 +1,4 @@
-/* $Id: mixer.cpp,v 1.6 2000-04-02 14:51:09 sandervl Exp $ */
+/* $Id: mixer.cpp,v 1.7 2000-09-02 08:32:03 sandervl Exp $ */
 
 /*
  * Mixer stubs
@@ -371,9 +371,10 @@ ODINFUNCTION3(MMRESULT, mixerGetID,
 {
  DEVICE_STRUCT *pMixInfo = (DEVICE_STRUCT *)hmxobj;
 
-  if(pMixInfo && puMxId)
-      *puMxId = pMixInfo->uDeviceID;
-
+  if(pMixInfo && puMxId) {
+       *puMxId = pMixInfo->uDeviceID;
+  }
+  else *puMxId = 0;
   return MMSYSERR_NOERROR;
 }
 /******************************************************************************/
