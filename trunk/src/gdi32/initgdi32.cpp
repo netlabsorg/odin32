@@ -1,4 +1,4 @@
-/* $Id: initgdi32.cpp,v 1.14 2003-07-16 10:46:18 sandervl Exp $
+/* $Id: initgdi32.cpp,v 1.15 2003-07-17 08:03:33 sandervl Exp $
  *
  * DLL entry point
  *
@@ -108,7 +108,7 @@ ULONG APIENTRY inittermGdi32(ULONG hModule, ULONG ulFlag)
          }
          else {
              pRGB555to565 = RGB555to565;
-             pRGB555to565 = RGB565to555;
+             pRGB565to555 = RGB565to555;
          }
          dllHandle = RegisterLxDll(hModule, GdiLibMain, (PVOID)&gdi32_PEResTab,
                                    GDI32_MAJORIMAGE_VERSION, GDI32_MINORIMAGE_VERSION,
