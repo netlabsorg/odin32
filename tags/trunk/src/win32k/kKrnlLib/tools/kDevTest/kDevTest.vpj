@@ -24,27 +24,24 @@ G:\Odin32\Tree\src\win32k\kKrnlLib\tools\kDevTest\kdtSegDef.inc
 G:\Odin32\Tree\src\win32k\kKrnlLib\tools\kDevTest\Makefile
 [ASSOCIATION]
 [STATE]
-SCREEN: 1600 1280 880 21 1094 1233 0 0 M 0 0 0 0 1591 953
-CWD: G:\Odin32\Tree\src\win32k\kKrnlLib\tools\kDevTest
-BUFFER: BN="F:\VSLICK40\OS2\vrestore.slk"
-BI: MA=1 254 1  TABS=1 9  WWS=3 IWT=0 ST=0 IN=0 BW=0 US=0 RO=0 SE=0 SN=0 BIN=0 MN=Fundamental	HM=0 MF=1
-VIEW: LN=.0 CL=1 LE=0 CX=0 CY=1 WI=5 BI=4 HT=0 HN=0 HF=0 HC=4
-BUFFER: BN="G:\odin32\tree\src\win32k\kKrnlLib\tools\kDevTest\kdtDevHelp.asm"
-BI: MA=1 74 1  TABS=1 5  WWS=1 IWT=0 ST=0 IN=1 BW=0 US=32000 RO=0 SE=1 SN=0 BIN=0 MN=Assembly	HM=0 MF=872
-VIEW: LN=.16763 CL=5 LE=0 CX=4 CY=40 WI=5 BI=19 HT=0 HN=0 HF=0 HC=4
-WINDOW: 0 -4 1073 645 -1 -1 M  WF=0 WT=2 "System VIO,12,0,1"
-BUFFER: BN="G:\odin32\tree\src\win32k\kKrnlLib\tools\kDevTest\kdtDevHelp.asm"
-VIEW: LN=.18570 CL=2 LE=0 CX=1 CY=40 WI=88 BI=19 HT=0 HN=0 HF=0 HC=4
+SCREEN: 1600 1280 501 31 1094 1233 0 0 N 0 0 0 0 1077 928
+CWD: G:\src\mozilla\tree
+BUFFER: BN="G:\kBuild\tree\src\kShell\kShell.c"
+BI: MA=1 74 1  TABS=1 9  WWS=1 IWT=0 ST=0 IN=2 BW=0 US=32000 RO=0 SE=1 SN=0 BIN=0 MN=C	HM=0 MF=864
+VIEW: LN=.0 CL=1 LE=0 CX=0 CY=1 WI=5 BI=19 HT=0 HN=0 HF=0 HC=4
+WINDOW: 0 -4 726 629 -1 -1 M  WF=0 WT=2 "System VIO,12,0,1"
+BUFFER: BN="G:\kBuild\tree\src\kShell\kShell.c"
+VIEW: LN=.13450 CL=1 LE=0 CX=0 CY=40 WI=88 BI=19 HT=0 HN=0 HF=0 HC=4
 FILEHIST: 9
-G:\UNIMAC\TREE\GPL\DevInitBase.c
-G:\UNIMAC\TREE\GPL\hello.s
-G:\UNIMAC\TREE\make\setup.os2debvac308.mk
-G:\UNIMAC\TREE\GPL\DevHelp32\DH32GetDOSVar.asm
-G:\UNIMAC\TREE\GPL\DevStackA.asm
-G:\UNIMAC\TREE\GPL\DevStrategyA.asm
-G:\UNIMAC\TREE\ChangeLog
-G:\odin32\tree\src\win32k\kKrnlLib\tools\kDevTest\kdtDevHelp.asm
-f:\ddk\april02\base\inc\devhlp.inc
+G:\php\tree\ChangeLog.OS2
+G:\kTaskMgr\Tree\Generic\src\kLib\files
+G:\kBuild\tree\doc\docdesign.c
+G:\kBuild\tree\doc\kmkdocs.c
+G:\kBuild\tree\src\kmk\kShell\kShell.c
+G:\kBuild\tree\src\kmk\kShell\kShell.h
+G:\kBuild\tree\src\kShell\kShellMain.c
+G:\kBuild\tree\src\kShell\kShell.h
+G:\kBuild\tree\src\kShell\kShell.c
 PRINTER: 2
 PRINTER: 2
 DEFAULT,

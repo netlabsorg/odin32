@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.12 2002-12-16 02:24:27 bird Exp $
+# $Id: Makefile,v 1.13 2002-12-19 01:49:07 bird Exp $
 
 #
 # kKrnlLib/dev32 makefile.
@@ -44,6 +44,9 @@ $(PATH_TARGET)\log.$(EXT_OBJ)\
 \
 $(PATH_TARGET)\env.$(EXT_OBJ)\
 $(PATH_TARGET)\krnlInit.$(EXT_OBJ)\
+$(PATH_TARGET)\krnlImportTable.$(EXT_OBJ)\
+$(PATH_TARGET)\krnlLoadKernelSym.$(EXT_OBJ)\
+$(PATH_TARGET)\krnlLoadKernelSymFile.$(EXT_OBJ)\
 $(PATH_TARGET)\krnlLockedWrite.$(EXT_OBJ)\
 $(PATH_TARGET)\krnlOverloading.$(EXT_OBJ)\
 $(PATH_TARGET)\krnlPrologs.$(EXT_OBJ)\

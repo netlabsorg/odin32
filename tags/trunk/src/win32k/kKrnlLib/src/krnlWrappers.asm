@@ -1,28 +1,46 @@
-; $Id: krnlWrappers.asm,v 1.1 2002-04-01 12:33:28 bird Exp $
+; $Id: krnlWrappers.asm,v 1.2 2002-12-19 01:49:09 bird Exp $
 ;
 ; Wrappers - assembly wrappers for kernel function which have been changed radically.
 ;
-; Copyright (c) 2000-2002 knut st. osmundsen (bird@anduin.net)
+; Copyright (c) 2000-2003 knut st. osmundsen <bird@anduin.net>
 ;
-; Project Odin Software License can be found in LICENSE.TXT
+;
+; This file is part of kKrnlLib.
+;
+; kKrnlLib is free software; you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation; either version 2 of the License, or
+; (at your option) any later version.
+;
+; kKrnlLib is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with kKrnlLib; if not, write to the Free Software
+; Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+;
 ;
     .386p
 
-;
-; Include files
-;
-    include devsegdf.inc
+;*******************************************************************************
+;* Header Files                                                                *
+;*******************************************************************************
+include devsegdf.inc
 
-;
-; Exported symbols
-;
-    public _ldrOpenPath@20
 
-;
-; Externs
-;
-    extrn _ldrOpenPath_wrapped:PROC            ; calltab entry
-    extrn _ulKernelBuild:DWORD
+;*******************************************************************************
+;* Exported Symbols                                                            *
+;*******************************************************************************
+public _ldrOpenPath@20
+
+
+;*******************************************************************************
+;* Global Variables                                                            *
+;*******************************************************************************
+extrn _ldrOpenPath_wrapped:PROC         ; calltab entry
+extrn _ulKernelBuild:DWORD
 
 
 CODE32 segment

@@ -1,11 +1,26 @@
-/* $Id: Extract32.c,v 1.1 2002-03-10 02:45:48 bird Exp $
+/* $Id: Extract32.c,v 1.2 2002-12-19 01:49:07 bird Exp $
  *
- * 32-bit Extract Routines.
  * This is used to get opcodes for a kernel.
+ * (Was 32bit part of mixed program, now everything is 32-bit.)
  *
- * Copyright (c) 2001 knut st. osmundsen (kosmunds@csc.com)
+ * Copyright (c) 2001-2003 knut st. osmundsen <bird@anduin.net>
  *
- * Project Odin Software License can be found in LICENSE.TXT
+ *
+ * This file is part of kKrnlLib.
+ *
+ * kKrnlLib is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * kKrnlLib is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with kKrnlLib; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
 
@@ -25,25 +40,23 @@
 
 #define SSToDS(a) ((void*)(a))
 
-#define INCL_BASE
-#define INCL_OS2KRNL_ALL
-#define FOR_EXEHDR          1           /* OBJEXEC */
-#define DWORD   ULONG                   /* exe386.h */
-#define WORD    USHORT
 
 /*******************************************************************************
 *   Header Files                                                               *
 *******************************************************************************/
+#include <kLib/format/LXexe.h>
+
+#define INCL_BASE
 #include <os2.h>
-#include <exe386.h>
+#define INCL_OS2KRNL_ALL
+#include "os2krnl.h"
+
+#include "krnlImportTable.h"
+#include "krnlPrivate.h"
 
 #include <stdio.h>
 #include <string.h>
 
-#include "devSegDf.h"
-#include "dev32.h"
-#include "Probkrnl.h"
-#include "os2krnl.h"
 
 
 /*******************************************************************************
@@ -134,14 +147,13 @@
 *   Global Variables                                                           *
 *******************************************************************************/
 int             cObjects = 14;
-OTE             aKrnlOTE[24];
+OTE             aKrnlOTE[42];
 HMODULE         hmodKrnl = NULLHANDLE;
 
 
 /*******************************************************************************
 *   Internal Functions                                                         *
 *******************************************************************************/
-void _rmem_init(void);
 int  kernelInit(int iTest, int argc, char **argv);
 
 
@@ -151,19 +163,9 @@ int  kernelInit(int iTest, int argc, char **argv);
 #ifndef QS_MTE
     /* from OS/2 Toolkit v4.5 */
     APIRET APIENTRY DosQuerySysState(ULONG EntityList, ULONG EntityLevel, PID pid,
-                                    TID tid, PVOID pDataBuf, ULONG cbBuf);
+                                     TID tid, PVOID pDataBuf, ULONG cbBuf);
     #define QS_MTE         0x0004
 #endif
-
-
-
-/**
- * Initiates the 32-bit C-runtime library.
- */
-void _Far16 _Cdecl Init32bitCrt(void)
-{
-    _rmem_init();
-}
 
 
 
@@ -180,10 +182,9 @@ void _Far16 _Cdecl Init32bitCrt(void)
  * @remark  This function is called from 16-bit code.
  *          Assumes that Init32bitCrt is called.
  */
-USHORT _Far16 _Cdecl GetOpcodes(char * _Seg16 pszKrnlFile16, unsigned short cSymObjects)
+int GetOpcodes(char * pszKrnlFile, unsigned cSymObjects)
 {
-    USHORT  rc = 0;
-    char *  pszKrnlFile = pszKrnlFile16;
+    int  rc = 0;
     char *  argv[4] = {NULL, NULL, NULL, NULL};
     argv[2] = pszKrnlFile;
 
@@ -213,7 +214,7 @@ USHORT _Far16 _Cdecl GetOpcodes(char * _Seg16 pszKrnlFile16, unsigned short cSym
                 iObj = aImportTab[i].iObject;
                 if (aImportTab[i].offObject >= aKrnlOTE[iObj].ote_size)
                 {
-                    sprintf(pszKrnlFile, "Func %d offset out of object %d (0x%x >= 0x%x)\n",
+                    fprintf(stderr, "Func %d offset out of object %d (0x%x >= 0x%x)\n",
                             i, aImportTab[i].offObject, aKrnlOTE[iObj].ote_size);
                     rc = 1;
                     break;
@@ -224,22 +225,22 @@ USHORT _Far16 _Cdecl GetOpcodes(char * _Seg16 pszKrnlFile16, unsigned short cSym
                  */
                 if ((aKrnlOTE[iObj].ote_flags & (OBJBIGDEF | OBJEXEC)) == (OBJBIGDEF | OBJEXEC))
                 {   /* 32-bit */
-                    cb = interpretFunctionProlog32((char*)aKrnlOTE[iObj].ote_base + aImportTab[i].offObject);
+                    cb = krnlInterpretProlog32((char*)aKrnlOTE[iObj].ote_base + aImportTab[i].offObject);
                 }
                 else if ((aKrnlOTE[iObj].ote_flags & (OBJBIGDEF | OBJEXEC)) == (OBJEXEC))
                 {   /* 16-bit */
-                    cb = interpretFunctionProlog16((char*)aKrnlOTE[iObj].ote_base + aImportTab[i].offObject);
+                    cb = krnlInterpretProlog16((char*)aKrnlOTE[iObj].ote_base + aImportTab[i].offObject);
                 }
                 else
                 {
-                    sprintf(pszKrnlFile, "Func %d isn't in a code segment.\n", i);
+                    fprintf(stderr, "Func %d isn't in a code segment.\n", i);
                     rc = 2;
                     break;
                 }
 
                 if (cb < 5)
                 {
-                    sprintf(pszKrnlFile, "Func %d unknown prolog (obj=0x%x off=0x%x)\n",
+                    fprintf(stderr, "Func %d unknown prolog (obj=0x%x off=0x%x)\n",
                             i, iObj, aImportTab[i].offObject);
                     rc = 3;
                     break;
@@ -253,7 +254,7 @@ USHORT _Far16 _Cdecl GetOpcodes(char * _Seg16 pszKrnlFile16, unsigned short cSym
         }
         else
         {
-            sprintf(pszKrnlFile, "Invalid object count (%d != %d)\n",
+            fprintf(stderr, "Invalid object count (%d != %d)\n",
                     cObjects, aImportTab[0].iObject + 1);
             rc = 4;
         }
@@ -311,7 +312,7 @@ int     kernelInit(int iTest, int argc, char **argv)
     {
         if (argc < 3)
         {
-            printf("Missing parameter!\n");
+            fprintf(stderr, "Missing parameter!\n");
             return FALSE;
         }
         pszSrcName = argv[2];
@@ -322,7 +323,7 @@ int     kernelInit(int iTest, int argc, char **argv)
      */
     if (DosScanEnv("TMP", &pszTmp) != NO_ERROR || pszTmp == NULL)
     {
-        printf("Environment variable TMP is not set.\n");
+        fprintf(stderr, "Environment variable TMP is not set.\n");
         return FALSE;
     }
     strcpy(szName, pszTmp);
@@ -340,7 +341,7 @@ int     kernelInit(int iTest, int argc, char **argv)
     if (rc != NO_ERROR)
     {
         if (rc != ERROR_FILE_NOT_FOUND && rc != ERROR_PATH_NOT_FOUND)
-            printf("Failed to copy %s to %s. rc=%d\n", pszSrcName, szName, rc);
+            fprintf(stderr, "Failed to copy %s to %s. rc=%d\n", pszSrcName, szName, rc);
         return FALSE;
     }
     if (DosQueryPathInfo(szName, FIL_STANDARD, &fsts3, sizeof(fsts3)) != NO_ERROR
@@ -348,7 +349,7 @@ int     kernelInit(int iTest, int argc, char **argv)
         ||  DosSetPathInfo(szName, FIL_STANDARD, &fsts3, sizeof(fsts3), 0) != NO_ERROR
         )
     {
-        printf("Failed to set attributes for %s.\n", szName);
+        fprintf(stderr, "Failed to set attributes for %s.\n", szName);
         return FALSE;
     }
 
@@ -363,21 +364,21 @@ int     kernelInit(int iTest, int argc, char **argv)
                  NULL);
     if (rc != NO_ERROR)
     {
-        printf("Failed to open temporary kernel file. rc = %d\n", rc);
+        fprintf(stderr, "Failed to open temporary kernel file. rc = %d\n", rc);
         return FALSE;
     }
     rc = DosRead(hFile, &achBuffer[0], 0x200, &ulAction);
     if (rc != NO_ERROR)
     {
         DosClose(hFile);
-        printf("Failed to read LX header from temporary kernel file.\n");
+        fprintf(stderr, "Failed to read LX header from temporary kernel file.\n");
         return FALSE;
     }
     pe32 = (struct e32_exe*)(void*)&achBuffer[*(unsigned long*)(void*)&achBuffer[0x3c]];
     if (*(PUSHORT)pe32->e32_magic != E32MAGIC)
     {
         DosClose(hFile);
-        printf("Failed to read LX header from temporary kernel file (2).\n");
+        fprintf(stderr, "Failed to read LX header from temporary kernel file (2).\n");
         return FALSE;
     }
     pe32->e32_eip = 0;
@@ -387,7 +388,7 @@ int     kernelInit(int iTest, int argc, char **argv)
         || (rc = DosWrite(hFile, pe32, sizeof(struct e32_exe), &ulAction)) != NO_ERROR)
     {
         DosClose(hFile);
-        printf("Failed to write patched LX header to temporary kernel file.\n");
+        fprintf(stderr, "Failed to write patched LX header to temporary kernel file.\n");
         return FALSE;
     }
     DosClose(hFile);
@@ -398,7 +399,7 @@ int     kernelInit(int iTest, int argc, char **argv)
     rc = DosLoadModule(szError, sizeof(szError), szName, SSToDS(&hmodKrnl));
     if (rc != NO_ERROR && (rc != ERROR_INVALID_PARAMETER && hmodKrnl == NULLHANDLE))
     {
-        printf("Failed to load OS/2 kernel image %s.");
+        fprintf(stderr, "Failed to load OS/2 kernel image %s.");
         return FALSE;
     }
 
@@ -408,7 +409,7 @@ int     kernelInit(int iTest, int argc, char **argv)
     rc = DosQuerySysState(QS_MTE, QS_MTE, 0L, 0L, pPtrRec, sizeof(achBuffer));
     if (rc != NO_ERROR)
     {
-        printf("DosQuerySysState failed with rc=%d.\n", rc);
+        fprintf(stderr, "DosQuerySysState failed with rc=%d.\n", rc);
         return FALSE;
     }
 
@@ -451,12 +452,12 @@ int     kernelInit(int iTest, int argc, char **argv)
 
     if (pLrec == NULL)
     {
-        printf("DosQuerySysState(os2krnl): not found\n");
+        fprintf(stderr, "DosQuerySysState(os2krnl): not found\n");
         return FALSE;
     }
     if (pLrec->pObjInfo == NULL)
     {
-        printf("DosQuerySysState(os2krnl): no object info\n");
+        fprintf(stderr, "DosQuerySysState(os2krnl): no object info\n");
         return FALSE;
     }
 

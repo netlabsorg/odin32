@@ -14,13 +14,11 @@ SEGMENTS
     DATA16_BSS          class 'FAR_DATA'
     DATA16_CONST        class 'FAR_DATA'
     DATA16_GLOBAL       class 'FAR_DATA'
-    DATA16_INIT         class 'FAR_DATA'
-    DATA16_INIT_BSS     class 'FAR_DATA'
-    DATA16_INIT_CONST   class 'FAR_DATA'
+    DATA16_END          class 'FAR_DATA'
 
     CODE16              class 'CODE'
     CODE16_IOSEG        class 'CODE'
-    CODE16_INIT         class 'CODE'
+    CODE16_END          class 'CODE'
 
     LOGDATA_16BIT       class 'LOGDATA_16BIT'
     CALLTAB16           class 'CALLTAB16_DATA'

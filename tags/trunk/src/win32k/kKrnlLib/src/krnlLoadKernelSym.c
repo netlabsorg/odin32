@@ -1,4 +1,4 @@
-/* $Id: krnlLoadKernelSym.c,v 1.1 2002-12-16 02:23:32 bird Exp $
+/* $Id: krnlLoadKernelSym.c,v 1.2 2002-12-19 01:49:08 bird Exp $
  *
  * Description:   Autoprobes the os2krnl file and os2krnl[*].sym files.
  *
@@ -35,7 +35,7 @@
 
 #define NOFUNCTIONNAME
 #ifndef NOFILEID
-static const char szFileId[] = "$Id: krnlLoadKernelSym.c,v 1.1 2002-12-16 02:23:32 bird Exp $";
+static const char szFileId[] = "$Id: krnlLoadKernelSym.c,v 1.2 2002-12-19 01:49:08 bird Exp $";
 #endif
 
 
@@ -45,12 +45,14 @@ static const char szFileId[] = "$Id: krnlLoadKernelSym.c,v 1.1 2002-12-16 02:23:
 #include <kLib/format/SYMdbg.h>
 #include <kLib/kDevHlp.h>
 #include <kLib/kLog.h>
-#include "krnlImportTable.h"
-#include "krnlPrivate.h"
 #include "devErrors.h"
-
 #include "options.h"
-//#include "kKLkernel.h"
+#include "krnlImportTable.h"
+#define INCL_OS2KRNL_LDR
+#include "OS2Krnl.h"
+#include "krnlPrivate.h"
+
+
 
 #include <string.h>
 
@@ -100,7 +102,6 @@ int krnlLoadKernelSym(void)
 {
     int         rc;
     int         i;
-    int         n;
     PGINFOSEG   pGIS;
     char        chBootDrive;
 
@@ -122,12 +123,9 @@ int krnlLoadKernelSym(void)
      */
     if (szSymbolFile[0] != '\0')
     {
-        rc = krnlLoadKernelSymFile(szSymbolFile);
+        rc = krnlLoadKernelSymFile(szSymbolFile, pKrnlOTE, cKernelObjects);
         if (!rc)
-        {
-            //verify the loaded symfile.
-            //fixme
-        }
+            rc = krnlVerifyImportTab();
 
         if (rc)
         {
@@ -137,23 +135,25 @@ int krnlLoadKernelSym(void)
                      (unsigned)rc >> ERROR_D32_PROC_SHIFT));
         }
     }
+
+    /*
+     * Try the know locations.
+     */
     else
     {
-        /*
-         * Try the know locations.
-         */
         rc = ERROR_PROB_SYM_FILE_NOT_FOUND;
         for (i = 0; apszSym[i] != NULL; i++)
         {
-            int rc2 = krnlLoadKernelSymFile(apszSym[i]);
+            int rc2 = krnlLoadKernelSymFile(apszSym[i], pKrnlOTE, cKernelObjects);
             if (!rc2)
             {
-                //verify the loaded symfile.
-                //fixme
-                if (rc == ERROR_PROB_SYM_FILE_NOT_FOUND)
+                rc2 = krnlVerifyImportTab();
+                if (!rc || rc == ERROR_PROB_SYM_FILE_NOT_FOUND)
                 {
                     strcpy(szSymbolFile, apszSym[i]);
                     rc = rc2;
+                    if (!rc)
+                        break;
                 }
             }
         }
