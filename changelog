@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.1872 2001-11-30 19:18:07 sandervl Exp $ */
+/* $Id: changelog,v 1.1873 2001-12-01 16:02:35 sandervl Exp $ */
+
+ 2000-12-01: Yuri Dario <mc6530@mclink.it>
+    - USER32:   o MENU_FindItem: extra check added for loops in menus
 
  2001-11-30: Patrick Haller <patrick.haller@innotek.de>
     - KERNEL32: o heapstring.cpp: improvement on HEAP_malloc, HEAP_free,
