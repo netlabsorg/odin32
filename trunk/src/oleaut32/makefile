@@ -1,3 +1,4 @@
+# $Id: makefile,v 1.13 2000-01-26 23:48:29 sandervl Exp $
 #
 # PD-Win32 API 
 #
