@@ -1,4 +1,4 @@
-/* $Id: oslibres.cpp,v 1.18 2001-08-11 12:03:36 sandervl Exp $ */
+/* $Id: oslibres.cpp,v 1.19 2001-08-25 10:54:19 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -517,7 +517,7 @@ BOOL OSLibWinGetClipCursor(LPRECT pRect)
 }
 //******************************************************************************
 //******************************************************************************
-char *OSLibStripPath(char *path)
+static char *OSLibStripPath(char *path)
 {
   char *pszFilename;
   char *pszFilename1;
