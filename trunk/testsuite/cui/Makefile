@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.3 2002-06-19 23:16:55 bird Exp $
+# $Id: Makefile,v 1.4 2002-06-20 02:29:35 bird Exp $
 
 #
 # Main script for the CUI part.
@@ -16,7 +16,7 @@ TARGET_NAME = CUI
 # Makefiles
 TESTCASE_MAKEFILES = \
 DoxyGen.mak \
-# watcomc.mak \
+watcomc.mak \
 # vac42.mak \
 # vac50.mak \
 # vac60.mak \
@@ -60,8 +60,8 @@ DoxyGen.mak \
 testcase:
 !if "$(MAKE_INCLUDE_PROCESS:process.forwarder=)" == "$(MAKE_INCLUDE_PROCESS)"
     @echo CUI testcases: >> $(TS_LOGFILE)
-    $(TOOL_DOMAKES) "$(TESTCASE_MAKEFILES)" $(TOOL_MAKE) $@
-    $(TOOL_DODIRS) "$(TESTCASE_SUBDIRS)" $(TOOL_MAKE) -f $(BUILD_MAKEFILE) $@
+    $(TOOL_DOMAKES) "$(TESTCASE_MAKEFILES)" $(TOOL_MAKE)
+    $(TOOL_DODIRS) "$(TESTCASE_SUBDIRS)" $(TOOL_MAKE) -f $(BUILD_MAKEFILE)
     @echo CUI testcases completed >> $(TS_LOGFILE)
 !else
 ! ifndef BUILD_VERBOSE
