@@ -1,4 +1,4 @@
-/* $Id: display.cpp,v 1.11 2001-06-17 21:08:00 sandervl Exp $ */
+/* $Id: display.cpp,v 1.12 2001-06-23 07:27:08 achimha Exp $ */
 /*
  * Display/Monitor Win32 apis
  *
@@ -452,7 +452,7 @@ BOOL WIN32API GetMonitorInfoA(HMONITOR hMonitor, LPMONITORINFO lpMonitorInfo)
 
         return TRUE;
     }
-
+    dprintf(("returning failure\n"));
     return FALSE;
 }
 //******************************************************************************
@@ -480,7 +480,7 @@ BOOL WIN32API GetMonitorInfoW(HMONITOR hMonitor, LPMONITORINFO lpMonitorInfo)
 
         return TRUE;
     }
-
+    dprintf(("returning failure\n"));
     return FALSE;
 }
 //******************************************************************************
