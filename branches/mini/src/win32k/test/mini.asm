@@ -1,4 +1,4 @@
-; $Id: mini.asm,v 1.1.2.7 2001-08-14 22:14:34 bird Exp $
+; $Id: mini.asm,v 1.1.2.8 2001-08-14 22:51:29 bird Exp $
 ;
 ; Haveing great fun making small executables...
 ;
@@ -29,11 +29,19 @@ endif
 
 
 CODE32 segment byte public use32 'STACK'
+public minilx
+
 ;
 ; Data
 ;
-public minilx
-ImReallySmall   db  "I'm really small!",013,0
+ImReallySmall   db  "I'm really small!",013
+ifdef CLIB
+terminator db 0
+endif
+
+;
+; Code
+;
 minilx:
 ifdef CLIB
     inc     eax
