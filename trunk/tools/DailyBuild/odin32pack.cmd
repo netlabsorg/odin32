@@ -1,4 +1,4 @@
-/* $Id: odin32pack.cmd,v 1.10 2001-01-10 13:50:48 bird Exp $
+/* $Id: odin32pack.cmd,v 1.11 2001-01-11 07:57:56 bird Exp $
  *
  * Make the two zip files.
  *
@@ -14,7 +14,7 @@
     /*
      * Make .WPI files.
      */
-/*    call ChDir 'tools\install';
+    call ChDir 'tools\install';
     'call odin.cmd debug'
     if (RC <> 0) then call failure rc, 'odin.cmd debug failed.';
     'call odin.cmd release'
@@ -22,7 +22,7 @@
     'move *.wpi' sStartDir;
     if (RC <> 0) then call failure rc, 'failed to move the *.wpi ->' sStartDir;
     call ChDir '..\..';
-*/
+
 
     /*
      * Make .ZIP files.
