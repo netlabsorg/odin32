@@ -1,4 +1,11 @@
-/* $Id: ChangeLog,v 1.1768 2001-10-18 17:05:53 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1769 2001-10-19 01:39:52 bird Exp $ */
+
+ 2001-10-18: knut stange osmundsen <kosmunds@csc.com>
+    - odin32.*.vac3*.mk:
+                o Added /noignorecase to ILIBFLAGS. Object libraries
+                  is now using case sensitive names. This removes some
+                  warnings during custombuild and fixes a duplicate symbol
+                  problem in kKrnlLibR3.
 
  2001-10-18: Achim Hasenmueller <achimha@innotek.de>
     - USER32:   o temporarily backed out a change from earlier today
@@ -29,9 +36,9 @@
     - DDRAW:    o Fixes for DDBLT_COLORFILL
     - WS2_32:   o Added stubs for WSAEnumProtocolsA/W
     - USER32:   o SetFocus fix; don't always activate window because that
-                  changes the z-order which interferes (among other things) 
-                  with GetNextDlgTabItem & GetNextDlgGroupItem 
-                o Removed some GetNextDlgGroupItem changes which are no longer 
+                  changes the z-order which interferes (among other things)
+                  with GetNextDlgTabItem & GetNextDlgGroupItem
+                o Removed some GetNextDlgGroupItem changes which are no longer
                   necessary due to the SetFocus fix
 
  2001-10-16: Sander van Leeuwen <sandervl@xs4all.nl>
