@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.1201 2001-01-02 18:18:17 sandervl Exp $ */
+/* $Id: changelog,v 1.1202 2001-01-04 18:19:17 sandervl Exp $ */
 
  2001-01-02: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o KERNEL32_99 should return 1 (according to Wine)
@@ -7,7 +7,7 @@
                   handles when max handle has been assigned.
     - GDI32/USER32/KERNEL32:
                 o Don't export private Odin functions by name (we import 
-                  everything by ordinal
+                  everything by ordinal)
 
  2001-01-01: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Menu cast bugfix (bitmap handle is 32 bits)
