@@ -1,4 +1,4 @@
-/* $Id: capi2032.cpp,v 1.5 2000-10-21 09:24:03 sandervl Exp $ */
+/* $Id: capi2032.cpp,v 1.6 2001-08-16 18:13:24 sandervl Exp $ */
 
 /*
  * CAPI2032 implementation
@@ -52,34 +52,33 @@ DWORD WIN32API OS2CAPI_REGISTER(
    dwResult = CAPI_REGISTER( MessageBufferSize, maxLogicalConnection,
                              maxBDataBlocks, maxBDataLen, pApplID );
 
-   SetFS(sel);
    if( dwResult )
    {
       dprintf((" failed (%X)!\n", dwResult ));
+      SetFS(sel);
       return(0x1108);
    }
    dprintf((" successfull (ApplID: %d)\n", *pApplID ));
 
-    // create named semaphore if neccessary
-   if( !hEvent )
+   // create named semaphore with Application ID as last character sequenz
+   rc = DosCreateEventSem( szSemName, &hEvent, DC_SEM_SHARED, FALSE );
+   if( rc )
    {
-      // create named semaphore with Application ID as last character sequenz
-      sprintf( szSemName, "\\SEM32\\CAPI2032\\SEM%d" , *pApplID );
-      rc = DosCreateEventSem( szSemName, &hEvent, DC_SEM_SHARED, FALSE );
-      if( rc )
-      {
-         dprintf((" failed (DosCreateEventSem): %d!\n",rc));
-         return 0x1108; // OS ressource error (error class 0x11..)
-      }
-      dprintf((" ok (DosCreateEventSem): hEvent:%d %s!\n", hEvent, szSemName));
-
-      dwResult = CAPI_SET_SIGNAL( *pApplID, hEvent );
-      if( dwResult )
-      {
-         dprintf((" failed (CAPI_SET_SIGNAL: %X)!\n", dwResult));
-         return 0x1108; // OS ressource error (error class 0x11..)
-      }
+      dprintf((" failed (DosCreateEventSem): %d!\n",rc));
+      SetFS(sel);
+      return 0x1108; // OS ressource error (error class 0x11..)
    }
+   dprintf((" ok (DosCreateEventSem): hEvent:%d %s!\n", hEvent, szSemName));
+
+   dwResult = CAPI_SET_SIGNAL( *pApplID, hEvent );
+   if( dwResult )
+   {
+      dprintf((" failed (CAPI_SET_SIGNAL: %X)!\n", dwResult));
+      SetFS(sel);
+      return 0x1108; // OS ressource error (error class 0x11..)
+   }
+
+   SetFS(sel);
    return dwResult;
 }
 
@@ -96,24 +95,34 @@ DWORD WIN32API OS2CAPI_RELEASE(
 
    dprintf(("CAPI2032: CAPI_RELEASE (ApplID: %d)\n", ApplID));
 
-   // open semaphore
+   // open semaphore ( get the event Handle )
    sprintf( szSemName, "\\SEM32\\CAPI2032\\SEM%d" , ApplID );
+
+   // enter critical section, so no other thread can access the sem
+   DosEnterCritSec();
+   // open semaphore to get the event handle
    rc = DosOpenEventSem( szSemName, &hEvent );
    if(rc)
    {
       dprintf((" failed (DosOpenEventSem) rc: %d!\n",rc));
    }
+   // close semaphore, this will decrement the open count
+   DosCloseEventSem( hEvent );
+
    // cleanup
    if( hEvent )
    {
       dprintf(("(DosCloseEventSem) hEvent:%d %s!\n",hEvent, szSemName));
+      // final cleanup semaphore.
       rc = DosCloseEventSem( hEvent );
-      hEvent = NULLHANDLE;
       if(rc)
       {
          dprintf((" failed (DosCloseEventSem) rc: %d!\n",rc));
       }
+
    }
+   DosExitCritSec();
+
    dwResult = CAPI_RELEASE( ApplID );
 
    SetFS(sel);
@@ -170,14 +179,21 @@ DWORD WIN32API OS2CAPI_WAIT_FOR_SIGNAL(
 
    dprintf(("CAPI2032: CAPI_WAIT_FOR_SIGNAL (ApplID: %d)", ApplID));
 
-   // open semaphore
    sprintf( szSemName, "\\SEM32\\CAPI2032\\SEM%d" , ApplID );
+
+   // enter critical section, so no other thread can access the sem
+   DosEnterCritSec();
+   // open semaphore to get the event handle
    rc = DosOpenEventSem( szSemName, &hEvent );
    if(rc)
    {
+      DosExitCritSec();
       dprintf((" failed (DosOpenEventSem) rc: %d!\n",rc));
       return 0x1101;
    }
+   // close semaphore
+   DosCloseEventSem( hEvent );
+   DosExitCritSec();
 
    // wait for event
    rc = DosWaitEventSem( hEvent, SEM_INDEFINITE_WAIT );
