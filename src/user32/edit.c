@@ -4377,10 +4377,17 @@ static LRESULT EDIT_WM_LButtonDown(HWND hwnd, EDITSTATE *es, DWORD keys, INT x, 
  */
 static LRESULT EDIT_WM_LButtonUp(HWND hwndSelf, EDITSTATE *es)
 {
+#ifdef __WIN32OS2__
+	if (es->bCaptureState) {
+		KillTimer(hwndSelf, 0);
+		if(GetCapture() == hwndSelf) ReleaseCapture();
+	}
+#else
 	if (es->bCaptureState && GetCapture() == hwndSelf) {
 		KillTimer(hwndSelf, 0);
 		ReleaseCapture();
 	}
+#endif
 	es->bCaptureState = FALSE;
 	return 0;
 }
