@@ -1,4 +1,4 @@
-/* $Id: syscolor.h,v 1.3 2000-01-01 14:54:54 cbratschi Exp $ */
+/* $Id: syscolor.h,v 1.4 2000-01-09 17:13:39 cbratschi Exp $ */
 
 /*
  * WINE:
@@ -19,5 +19,6 @@ extern void SYSCOLOR_Save(void);
 
 extern INT SYSCOLOR_GetLastColor(VOID);
 extern INT SYSCOLOR_GetNumColors(VOID);
+extern BOOL SYSCOLOR_GetUseWinColors(VOID);
 
 #endif  /* __WINE_SYSCOLOR_H */
