@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.2127 2002-06-04 17:36:03 sandervl Exp $ */
+/* $Id: changelog,v 1.2128 2002-06-05 09:19:07 sandervl Exp $ */
+
+ 2002-06-05: Sander van Leeuwen <sandervl@innotek.de>
+    - WINMM:    o Put back original DART buffer size selection code
+                  (new one messes up e.g. RealPlayer)
 
  2002-06-04: Sander van Leeuwen <sandervl@innotek.de>
     - USER32:   o Fix for AltGr key combinations
