@@ -170,5 +170,7 @@ UINT    WIN32API GetSystemDirectoryA(LPSTR,UINT);
 UINT    WIN32API GetWindowsDirectoryA(LPSTR,UINT);
 
 BOOL    WIN32API IsIconic( HWND hwnd);
+INT     WIN32API GetSystemMetrics(INT);
+UINT    WIN32API GetDoubleClickTime(void);
 
 #endif

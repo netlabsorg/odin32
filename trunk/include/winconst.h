@@ -1,3 +1,6 @@
+#ifndef __WINCONST_H__
+#define __WINCONST_H__
+
 /*
  * Win32 constants
  *
@@ -1779,3 +1782,91 @@
 #define WM_PENWINLAST_W        0x038F
 
 #define WM_APP_W               0x8000
+
+  /* GetSystemMetrics() codes */
+#define SM_CXSCREEN_W	       0
+#define SM_CYSCREEN_W            1
+#define SM_CXVSCROLL_W           2
+#define SM_CYHSCROLL_W	       3
+#define SM_CYCAPTION_W	       4
+#define SM_CXBORDER_W	       5
+#define SM_CYBORDER_W	       6
+#define SM_CXDLGFRAME_W	       7
+#define SM_CYDLGFRAME_W	       8
+#define SM_CYVTHUMB_W	       9
+#define SM_CXHTHUMB_W	      10
+#define SM_CXICON_W	      11
+#define SM_CYICON_W	      12
+#define SM_CXCURSOR_W	      13
+#define SM_CYCURSOR_W	      14
+#define SM_CYMENU_W	      15
+#define SM_CXFULLSCREEN_W       16
+#define SM_CYFULLSCREEN_W       17
+#define SM_CYKANJIWINDOW_W      18
+#define SM_MOUSEPRESENT_W       19
+#define SM_CYVSCROLL_W	      20
+#define SM_CXHSCROLL_W	      21
+#define SM_DEBUG_W	      22
+#define SM_SWAPBUTTON_W	      23
+#define SM_RESERVED1_W	      24
+#define SM_RESERVED2_W	      25
+#define SM_RESERVED3_W	      26
+#define SM_RESERVED4_W	      27
+#define SM_CXMIN_W	      28
+#define SM_CYMIN_W	      29
+#define SM_CXSIZE_W	      30
+#define SM_CYSIZE_W	      31
+#define SM_CXFRAME_W	      32
+#define SM_CYFRAME_W	      33
+#define SM_CXMINTRACK_W	      34
+#define SM_CYMINTRACK_W	      35
+#define SM_CXDOUBLECLK_W        36
+#define SM_CYDOUBLECLK_W        37
+#define SM_CXICONSPACING_W      38
+#define SM_CYICONSPACING_W      39
+#define SM_MENUDROPALIGNMENT_W  40
+#define SM_PENWINDOWS_W         41
+#define SM_DBCSENABLED_W        42
+#define SM_CMOUSEBUTTONS_W      43
+#define SM_CXFIXEDFRAME_W	      SM_CXDLGFRAME_W
+#define SM_CYFIXEDFRAME_W	      SM_CYDLGFRAME_W
+#define SM_CXSIZEFRAME_W	      SM_CXFRAME_W
+#define SM_CYSIZEFRAME_W	      SM_CYFRAME_W
+#define SM_SECURE_W	      44
+#define SM_CXEDGE_W	      45
+#define SM_CYEDGE_W	      46
+#define SM_CXMINSPACING_W	      47
+#define SM_CYMINSPACING_W	      48
+#define SM_CXSMICON_W	      49
+#define SM_CYSMICON_W	      50
+#define SM_CYSMCAPTION_W	      51
+#define SM_CXSMSIZE_W	      52
+#define SM_CYSMSIZE_W	      53
+#define SM_CXMENUSIZE_W	      54
+#define SM_CYMENUSIZE_W	      55
+#define SM_ARRANGE_W	      56
+#define SM_CXMINIMIZED_W	      57
+#define SM_CYMINIMIZED_W	      58
+#define SM_CXMAXTRACK_W	      59
+#define SM_CYMAXTRACK_W	      60
+#define SM_CXMAXIMIZED_W	      61
+#define SM_CYMAXIMIZED_W	      62
+#define SM_NETWORK_W	      63
+#define SM_CLEANBOOT_W	      67
+#define SM_CXDRAG_W	      68
+#define SM_CYDRAG_W	      69
+#define SM_SHOWSOUNDS_W	      70
+#define SM_CXMENUCHECK_W	      71
+#define SM_CYMENUCHECK_W	      72
+#define SM_SLOWMACHINE_W	      73
+#define SM_MIDEASTENABLED_W     74
+#define SM_MOUSEWHEELPRESENT_W  75
+#define SM_XVIRTUALSCREEN_W     76
+#define SM_YVIRTUALSCREEN_W     77
+#define SM_CXVIRTUALSCREEN_W    78
+#define SM_CYVIRTUALSCREEN_W    79
+#define SM_CMONITORS_W          80
+#define SM_SAMEDISPLAYFORMAT_W  81
+#define SM_CMETRICS_W           83
+
+#endif //__WINCONST_H__
