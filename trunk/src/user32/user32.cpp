@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.107 2001-07-14 08:36:19 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.108 2001-07-14 09:21:46 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -706,7 +706,7 @@ BOOL WIN32API SystemParametersInfoA(UINT uiAction, UINT uiParam, PVOID pvParam, 
         break;
 
     case SPI_GETDRAGFULLWINDOWS:
-        *(BOOL *)pvParam = FALSE; //CB: where is the Warp 4 setting stored?
+        *(BOOL *)pvParam = OSLibWinQuerySysValue(SVOS_DYNAMICDRAG);
         break;
 
     case SPI_GETNONCLIENTMETRICS:
