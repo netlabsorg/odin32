@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.86 2002-11-29 13:46:04 sandervl Exp $ */
+/* $Id: gdi32.cpp,v 1.87 2002-12-28 10:16:20 sandervl Exp $ */
 
 /*
  * GDI32 apis
@@ -404,10 +404,17 @@ HDC WIN32API CreateDCW( LPCWSTR arg1, LPCWSTR arg2, LPCWSTR arg3, const DEVMODEW
       devmode.dmSize             = arg4->dmSize;
       devmode.dmDriverExtra      = arg4->dmDriverExtra;
       devmode.dmFields           = arg4->dmFields;
+#if (__IBMCPP__ == 360)
+      devmode.dmOrientation   = arg4->dmOrientation;
+      devmode.dmPaperSize     = arg4->dmPaperSize;
+      devmode.dmPaperLength   = arg4->dmPaperLength;
+      devmode.dmPaperWidth    = arg4->dmPaperWidth; 
+#else
       devmode.s1.dmOrientation   = arg4->s1.dmOrientation;
       devmode.s1.dmPaperSize     = arg4->s1.dmPaperSize;
       devmode.s1.dmPaperLength   = arg4->s1.dmPaperLength;
-      devmode.s1.dmPaperWidth    = arg4->s1.dmPaperWidth;
+      devmode.s1.dmPaperWidth    = arg4->s1.dmPaperWidth; 
+#endif
       devmode.dmScale            = arg4->dmScale;
       devmode.dmCopies           = arg4->dmCopies;
       devmode.dmDefaultSource    = arg4->dmDefaultSource;
@@ -494,10 +501,17 @@ HDC WIN32API CreateICW( LPCWSTR arg1, LPCWSTR arg2, LPCWSTR arg3, const DEVMODEW
       devmode.dmSize             = arg4->dmSize;
       devmode.dmDriverExtra      = arg4->dmDriverExtra;
       devmode.dmFields           = arg4->dmFields;
+#if (__IBMCPP__ == 360)
+      devmode.dmOrientation      = arg4->dmOrientation;
+      devmode.dmPaperSize        = arg4->dmPaperSize;
+      devmode.dmPaperLength      = arg4->dmPaperLength;
+      devmode.dmPaperWidth       = arg4->dmPaperWidth; 
+#else
       devmode.s1.dmOrientation   = arg4->s1.dmOrientation;
       devmode.s1.dmPaperSize     = arg4->s1.dmPaperSize;
       devmode.s1.dmPaperLength   = arg4->s1.dmPaperLength;
       devmode.s1.dmPaperWidth    = arg4->s1.dmPaperWidth;
+#endif
       devmode.dmScale            = arg4->dmScale;
       devmode.dmCopies           = arg4->dmCopies;
       devmode.dmDefaultSource    = arg4->dmDefaultSource;
