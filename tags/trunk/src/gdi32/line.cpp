@@ -1,4 +1,4 @@
-/* $Id: line.cpp,v 1.6 2000-02-16 14:18:10 sandervl Exp $ */
+/* $Id: line.cpp,v 1.7 2000-11-04 16:29:24 sandervl Exp $ */
 /*
  * Line API's
  *
@@ -13,6 +13,7 @@
 #include "misc.h"
 #include "callback.h"
 #include "oslibgpi.h"
+#include <dcdata.h>
 
 #define DBG_LOCALLOG	DBG_line
 #include "dbglocal.h"
@@ -47,7 +48,7 @@ VOID toWin32LineEnd(PPOINTLOS2 startPt,INT nXEnd,INT nYEnd,PPOINTLOS2 pt)
   }
 }
 
-BOOL drawSingleLinePoint(HDC hdc,PVOID pHps,PPOINTLOS2 pt)
+BOOL drawSingleLinePoint(HDC hdc,pDCData pHps,PPOINTLOS2 pt)
 {
   LOGPEN penInfo;
 
@@ -71,13 +72,22 @@ BOOL drawSingleLinePoint(HDC hdc,PVOID pHps,PPOINTLOS2 pt)
 
 BOOL WIN32API MoveToEx( HDC hdc, int X, int Y, LPPOINT lpPoint)
 {
-  PVOID pHps = OSLibGpiQueryDCData(hdc);
+  pDCData pHps = (pDCData)OSLibGpiQueryDCData(hdc);
 
   dprintf(("GDI32: MoveToEx %x (%d,%d)", hdc, X, Y));
 
   if (pHps)
   {
     POINTLOS2 newPoint = {X,Y};
+
+#ifndef INVERT
+    if(pHps->yInvert > 0) {
+         newPoint.y =  pHps->yInvert - newPoint.y;
+         if (lpPoint) {
+            lpPoint->y = pHps->yInvert - lpPoint->y;
+         }
+    }
+#endif
 
     if (lpPoint)
     {
@@ -104,7 +114,7 @@ BOOL WIN32API MoveToEx( HDC hdc, int X, int Y, LPPOINT lpPoint)
 //******************************************************************************
 BOOL WIN32API LineTo( HDC hdc, int nXEnd, int  nYEnd)
 {
-  PVOID pHps = OSLibGpiQueryDCData(hdc);
+  pDCData pHps = (pDCData)OSLibGpiQueryDCData(hdc);
   BOOL rc = TRUE;
 
   dprintf(("GDI32: LineTo %x (%d,%d)", hdc, nXEnd, nYEnd));
@@ -113,6 +123,12 @@ BOOL WIN32API LineTo( HDC hdc, int nXEnd, int  nYEnd)
   {
     POINTLOS2 oldPoint,newPoint;
     BOOL bWideLine;
+
+#ifndef INVERT
+    if (pHps->yInvert > 0) {
+       nYEnd = pHps->yInvert - nYEnd;
+    }
+#endif
 
     //CB: add metafile info
 
@@ -150,7 +166,9 @@ BOOL WIN32API LineTo( HDC hdc, int nXEnd, int  nYEnd)
 BOOL WIN32API LineDDA( int nXStart, int nYStart, int nXEnd, int nYEnd, LINEDDAPROC lpLineFunc, LPARAM lpData)
 {
   BOOL                 rc;
+#ifndef STDCALL_ENUMPROCS
   LineDDAProcCallback *callback = new LineDDAProcCallback(lpLineFunc, lpData);
+#endif
   POINTLOS2 startPt,endPt;
 
   dprintf(("GDI32: LineDDA\n"));
@@ -159,19 +177,25 @@ BOOL WIN32API LineDDA( int nXStart, int nYStart, int nXEnd, int nYEnd, LINEDDAPR
   startPt.y = nYStart;
   toWin32LineEnd(&startPt,nXEnd,nYEnd,&endPt);
 
-  rc = O32_LineDDA(startPt.x,startPt.y,endPt.x,endPt.y,callback->GetOS2Callback(),(LPARAM)callback);
+  rc = O32_LineDDA(startPt.x,startPt.y,endPt.x,endPt.y, lpLineFunc, lpData);
+#else
+#ifdef STDCALL_ENUMPROCS
+  //should change os2win.h
+  rc = O32_LineDDA(nXStart,nYStart,nXEnd,nYEnd, (LINEDDAPROC_O32)lpLineFunc, lpData);
 #else
   rc = O32_LineDDA(nXStart,nYStart,nXEnd,nYEnd,callback->GetOS2Callback(),(LPARAM)callback);
-#endif
   if(callback)
         delete callback;
+#endif
+
+#endif
   return(rc);
 }
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API Polyline( HDC hdc, const POINT *lppt, int cPoints)
 {
-  PVOID pHps = OSLibGpiQueryDCData(hdc);
+  pDCData pHps = (pDCData)OSLibGpiQueryDCData(hdc);
 
   dprintf(("GDI32: Polyline"));
 
@@ -185,14 +209,12 @@ BOOL WIN32API Polyline( HDC hdc, const POINT *lppt, int cPoints)
   if (cPoints < 0)
   {
     SetLastError(ERROR_INVALID_PARAMETER);
-
     return FALSE;
   }
 
   if (cPoints == 1)
   {
     drawSingleLinePoint(hdc,pHps,(PPOINTLOS2)lppt); //CB: check metafile recording
-
     return TRUE;
   }
 
@@ -210,7 +232,7 @@ BOOL WIN32API Polyline( HDC hdc, const POINT *lppt, int cPoints)
 //******************************************************************************
 BOOL WIN32API PolylineTo( HDC hdc, const POINT * lppt, DWORD cCount)
 {
-  PVOID pHps = OSLibGpiQueryDCData(hdc);
+  pDCData pHps = (pDCData)OSLibGpiQueryDCData(hdc);
 
   dprintf(("GDI32: PolylineTo"));
 
@@ -227,7 +249,6 @@ BOOL WIN32API PolylineTo( HDC hdc, const POINT * lppt, DWORD cCount)
   if (cCount == 1)
   {
     drawSingleLinePoint(hdc,pHps,(PPOINTLOS2)lppt);
-
     return TRUE;
   }
 
