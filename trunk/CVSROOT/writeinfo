@@ -15,7 +15,7 @@
 /src/dinput                                sandervl hugh achimha mike
 /src/dplay                                 sandervl hugh achimha mike
 /src/gdi32                                 sandervl phaller achimha bird cbratschi hugh
-/src/kernel32                              sandervl phaller achimha bird
+/src/kernel32                              sandervl phaller achimha bird cbratschi
 /src/kernel32/new                          sandervl phaller achimha bird buerkle dengert cbratschi
 /src/kernel32/old                          sandervl phaller achimha bird
 /src/Odin32API                             sandervl bird
