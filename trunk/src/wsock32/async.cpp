@@ -1,4 +1,4 @@
-/* $Id: async.cpp,v 1.6 1999-10-21 14:58:53 phaller Exp $ */
+/* $Id: async.cpp,v 1.7 1999-10-25 22:48:27 phaller Exp $ */
 
 /*
  *
@@ -1030,9 +1030,7 @@ int WSAAsyncWorker::dispatchRequest(PASYNCREQUEST pRequest)
     case WSAASYNC_GETPROTOBYNUMBER: asyncGetProtoByNumber(pRequest); rc = 1; break;
     case WSAASYNC_GETSERVBYNAME:    asyncGetServByName   (pRequest); rc = 1; break;
     case WSAASYNC_GETSERVBYPORT:    asyncGetServByPort   (pRequest); rc = 1; break;
-
-//    case WSAASYNC_SELECT:
-//      break;
+    case WSAASYNC_SELECT:           asyncSelect          (pRequest); rc = 1; break;
 
     default:
       dprintf(("WSOCK32: WSAAsyncWorker::dispatchRequest - invalid request type %d\n",
