@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.20 2002-03-08 11:37:10 sandervl Exp $
+# $Id: makefile,v 1.21 2004-02-27 20:15:44 sandervl Exp $
 
 #
 # Odin32 API
@@ -29,7 +29,7 @@ $(OBJDIR)\repl.obj \
 $(OBJDIR)\schedule.obj \
 $(OBJDIR)\mem.obj \
 $(OBJDIR)\errorlog.obj \
-$(OBJDIR)\oslibnet.obj \
+##$(OBJDIR)\oslibnet.obj \
 $(OBJDIR)\netapi32rsrc.obj \
 $(DLLENTRY)
 
@@ -41,7 +41,7 @@ LIBS = \
 $(ODIN32_LIB)/kernel32.lib \
 $(ODIN32_LIB)/user32.lib \
 $(ODIN32_LIB)/$(ODINCRT).lib \
-netapi32.lib \
+##netapi32.lib \
 OS2386.LIB \
 $(RTLLIB_O)
 
@@ -49,9 +49,10 @@ $(RTLLIB_O)
 #
 # Target and original target names - names of the dll without extension and path
 #
-# @@@PH TARGET      = wnetap32
-# @@@PH ORGTARGET   = netapi32
 TARGET      = wnetap32
+ORGTARGET   = netapi32
+
+
 
 #
 # Includes the common rules.
