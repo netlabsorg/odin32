@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.76 2000-03-27 15:06:30 cbratschi Exp $ */
+/* $Id: user32.cpp,v 1.77 2000-04-07 10:01:16 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -890,6 +890,9 @@ BOOL WIN32API SystemParametersInfoA(UINT uiAction, UINT uiParam, PVOID pvParam, 
         cmetric->cbSize = sizeof(NONCLIENTMETRICSA);
 
         //CB: fonts not handled by Open32, set to WarpSans
+    	lstrcpyA(cmetric->lfSmCaptionFont.lfFaceName,"WarpSans");
+    	cmetric->lfSmCaptionFont.lfHeight = 9;
+
         lstrcpyA(cmetric->lfCaptionFont.lfFaceName,"WarpSans");
         cmetric->lfCaptionFont.lfHeight = 9;
 
