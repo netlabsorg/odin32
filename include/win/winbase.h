@@ -1,4 +1,4 @@
-/* $Id: winbase.h,v 1.14 2000-07-18 18:30:38 sandervl Exp $ */
+/* $Id: winbase.h,v 1.15 2000-08-18 02:04:12 phaller Exp $ */
 
 #ifndef __WINE_WINBASE_H
 #define __WINE_WINBASE_H
@@ -1086,6 +1086,10 @@ typedef struct {
         HANDLE LockSemaphore;
         DWORD Reserved;
 }CRITICAL_SECTION;
+
+#ifdef __WINE__
+#define CRITICAL_SECTION_INIT { 0, -1, 0, 0, 0, 0 }
+#endif
 
 typedef struct {
         DWORD dwOSVersionInfoSize;

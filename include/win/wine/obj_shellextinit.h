@@ -1,4 +1,4 @@
-/* $Id: obj_shellextinit.h,v 1.5 1999-08-22 22:52:10 sandervl Exp $ */
+/* $Id: obj_shellextinit.h,v 1.6 2000-08-18 02:04:20 phaller Exp $ */
 /************************************************************
  *    IShellExtInit
  */
@@ -16,7 +16,6 @@ extern "C" {
 #endif /* defined(__cplusplus) */
 
 typedef struct 	IShellExtInit IShellExtInit, *LPSHELLEXTINIT;
-DEFINE_SHLGUID(IID_IShellExtInit,       0x000214E8L, 0, 0);
 
 #define ICOM_INTERFACE IShellExtInit
 #define IShellExtInit_METHODS \
@@ -28,9 +27,11 @@ ICOM_DEFINE(IShellExtInit,IUnknown)
 #undef ICOM_INTERFACE
 
 #ifdef ICOM_CINTERFACE
+/*** IUnknown methods ***/
 #define IShellExtInit_QueryInterface(p,a,b)	ICOM_CALL2(QueryInterface,p,a,b)
 #define IShellExtInit_AddRef(p)			ICOM_CALL(AddRef,p)
 #define IShellExtInit_Release(p)		ICOM_CALL(Release,p)
+/*** IShellExtInit methods ***/
 #define IShellExtInit_Initialize(p,a,b,c)	ICOM_CALL3(Initialize,p,a,b,c)
 #endif
 

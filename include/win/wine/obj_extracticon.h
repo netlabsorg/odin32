@@ -1,4 +1,4 @@
-/* $Id: obj_extracticon.h,v 1.5 1999-08-22 22:52:07 sandervl Exp $ */
+/* $Id: obj_extracticon.h,v 1.6 2000-08-18 02:04:18 phaller Exp $ */
 /************************************************************
  *    IExtractIconA
  */
@@ -14,9 +14,9 @@
 extern "C" {
 #endif /* defined(__cplusplus) */
 
-DEFINE_SHLGUID(IID_IExtractIconA,	0x000214EBL, 0, 0);
-DEFINE_SHLGUID(IID_IExtractIconW,	0x000214FAL, 0, 0);
+#define IID_IExtractIcon WINELIB_NAME_AW(IID_IExtractIcon)
 typedef struct IExtractIconA IExtractIconA,*LPEXTRACTICONA;
+#define LPEXTRACTION_WINELIB_NAME_AW(LPEXTRACTICON)
 
 /* GetIconLocation() input flags*/
 #define GIL_OPENICON     0x0001      /* allows containers to specify an "open" look */

@@ -1,4 +1,4 @@
-/* $Id: obj_contextmenu.h,v 1.5 1999-08-22 22:52:07 sandervl Exp $ */
+/* $Id: obj_contextmenu.h,v 1.6 2000-08-18 02:04:16 phaller Exp $ */
 /************************************************************
  *    IContextMenu
  */
@@ -14,8 +14,6 @@
 extern "C" {
 #endif /* defined(__cplusplus) */
 
-DEFINE_SHLGUID(IID_IContextMenu,        0x000214E4L, 0, 0);
-DEFINE_SHLGUID(IID_IContextMenu2,       0x000214F4L, 0, 0);
 typedef struct IContextMenu IContextMenu, *LPCONTEXTMENU;
 
 /* default menu items*/
