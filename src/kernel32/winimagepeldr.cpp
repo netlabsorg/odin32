@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.66 2001-01-22 18:26:51 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.67 2001-02-14 10:36:45 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -626,6 +626,12 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
         pResRootDir = (PIMAGE_RESOURCE_DIRECTORY)(oh.DataDirectory[IMAGE_DIRECTORY_ENTRY_RESOURCE].VirtualAddress + realBaseAddress);
         ulRVAResourceSection = oh.DataDirectory[IMAGE_DIRECTORY_ENTRY_RESOURCE].VirtualAddress;
     }
+
+    //Allocate TLS index for this module
+    //Must do this before dlls are loaded for this module. Some apps assume
+    //they get TLS index 0 for their main executable
+    tlsAlloc();
+    tlsAttachThread();	//setup TLS (main thread)
 
     if(!(dwFlags & (FLAG_PELDR_LOADASDATAFILE | FLAG_PELDR_SKIPIMPORTS)))
     {

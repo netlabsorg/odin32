@@ -1,4 +1,4 @@
-/* $Id: winexebase.cpp,v 1.13 2001-02-11 10:34:45 sandervl Exp $ */
+/* $Id: winexebase.cpp,v 1.14 2001-02-14 10:36:45 sandervl Exp $ */
 
 /*
  * Win32 exe base class
@@ -108,10 +108,6 @@ ULONG Win32ExeBase::start()
   //      in OS/2
   OS2SetExceptionHandler((void *)&exceptFrame);
   SetWin32TIB();
-
-  //Allocate TLS index for this module
-  tlsAlloc();
-  tlsAttachThread();	//setup TLS (main thread)
 
   //Set default FPU control word (no exceptions); same as in NT
   CONTROL87(0x27F, 0xFFF);
