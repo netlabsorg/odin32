@@ -1,8 +1,11 @@
-/* $Id: ChangeLog,v 1.1572 2001-07-07 14:29:53 achimha Exp $ */
+/* $Id: ChangeLog,v 1.1573 2001-07-07 19:11:16 sandervl Exp $ */
 
  2001-07-07: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Rewrote atom functions (no longer relies on Open32)
                 o Fixed GetAtomNameW
+    - GDI32:    o Don't use Open32 IsBad* memory functions directly
+    - COMDLG32: o PrintDlg fix: must translated open32 to kernel32 global
+                  memory handles (due to Global memory api rewrite)
 
  2001-07-07: Achim Hasenmueller <achimha@innotek.de>
     - WS2_32:   o import WSAEventSelect from WSOCK32 (although a
