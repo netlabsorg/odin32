@@ -1,4 +1,4 @@
-/* $Id: comctl32undoc.cpp,v 1.4 2000-05-22 17:25:07 cbratschi Exp $ */
+/* $Id: comctl32undoc.cpp,v 1.5 2000-05-22 19:30:53 sandervl Exp $ */
 /*
  * Undocumented functions from COMCTL32.DLL
  *
@@ -30,8 +30,142 @@
 #include <wchar.h>
 #include <wcstr.h>
 #include <wctype.h>
+#define CINTERFACE 1
+#include "objbase.h"
+#include "commctrl.h"
+#include "crtdll.h"
+#include "debugtools.h"
+#include "winerror.h"
 
 extern HANDLE COMCTL32_hHeap; /* handle to the private heap */
+
+typedef struct _STREAMDATA
+{
+    DWORD dwSize;
+    DWORD dwData2;
+    DWORD dwItems;
+} STREAMDATA, *PSTREAMDATA;
+
+typedef struct _LOADDATA
+{
+    INT   nCount;
+    PVOID ptr;
+} LOADDATA, *LPLOADDATA;
+
+typedef HRESULT( CALLBACK * DPALOADPROC)(LPLOADDATA,IStream*,LPARAM);
+
+
+/**************************************************************************
+ * DPA_LoadStream [COMCTL32.9]
+ *
+ * Loads a dynamic pointer array from a stream
+ *
+ * PARAMS
+ *     phDpa    [O] pointer to a handle to a dynamic pointer array
+ *     loadProc [I] pointer to a callback function
+ *     pStream  [I] pointer to a stream
+ *     lParam   [I] application specific value
+ *
+ * NOTES
+ *     No more information available yet!
+ */
+
+HRESULT WINAPI
+DPA_LoadStream (HDPA *phDpa, DPALOADPROC loadProc, IStream *pStream, LPARAM lParam)
+{
+    HRESULT errCode;
+    LARGE_INTEGER position;
+    ULARGE_INTEGER newPosition;
+    STREAMDATA  streamData;
+    LOADDATA loadData;
+    ULONG ulRead;
+    HDPA hDpa;
+    PVOID *ptr;
+
+    FIXME ("phDpa=%p loadProc=%p pStream=%p lParam=%lx\n",
+	   phDpa, loadProc, pStream, lParam);
+
+    if (!phDpa || !loadProc || !pStream)
+	return E_INVALIDARG;
+
+    *phDpa = (HDPA)NULL;
+
+    position.LowPart = 0;
+    position.HighPart = 0;
+
+    errCode = IStream_Seek (pStream, position, STREAM_SEEK_CUR, &newPosition);
+    if (errCode != S_OK)
+	return errCode;
+
+    errCode = IStream_Read (pStream, &streamData, sizeof(STREAMDATA), &ulRead);
+    if (errCode != S_OK)
+	return errCode;
+
+    FIXME ("dwSize=%lu dwData2=%lu dwItems=%lu\n",
+	   streamData.dwSize, streamData.dwData2, streamData.dwItems);
+
+    if (lParam < sizeof(STREAMDATA) ||
+	streamData.dwSize < sizeof(STREAMDATA) ||
+	streamData.dwData2 < 1) {
+	errCode = E_FAIL;
+    }
+
+    /* create the dpa */
+    hDpa = DPA_Create (streamData.dwItems);
+    if (!hDpa)
+	return E_OUTOFMEMORY;
+
+    if (!DPA_Grow (hDpa, streamData.dwItems))
+	return E_OUTOFMEMORY;
+
+    /* load data from the stream into the dpa */
+    ptr = hDpa->ptrs;
+    for (loadData.nCount = 0; loadData.nCount < streamData.dwItems; loadData.nCount++) {
+        errCode = (loadProc)(&loadData, pStream, lParam);
+	if (errCode != S_OK) {
+	    errCode = S_FALSE;
+	    break;
+	}
+
+	*ptr = loadData.ptr;
+	ptr++;
+    }
+
+    /* set the number of items */
+    hDpa->nItemCount = loadData.nCount;
+
+    /* store the handle to the dpa */
+    *phDpa = hDpa;
+    FIXME ("new hDpa=%p\n", hDpa);
+
+    return errCode;
+}
+
+
+/**************************************************************************
+ * DPA_SaveStream [COMCTL32.10]
+ *
+ * Saves a dynamic pointer array to a stream
+ *
+ * PARAMS
+ *     hDpa     [I] handle to a dynamic pointer array
+ *     loadProc [I] pointer to a callback function
+ *     pStream  [I] pointer to a stream
+ *     lParam   [I] application specific value
+ *
+ * NOTES
+ *     No more information available yet!
+ */
+
+HRESULT WINAPI
+DPA_SaveStream (const HDPA hDpa, DPALOADPROC loadProc, IStream *pStream, LPARAM lParam)
+{
+
+    FIXME ("hDpa=%p loadProc=%p pStream=%p lParam=%lx\n",
+	   hDpa, loadProc, pStream, lParam);
+
+    return E_FAIL;
+}
 
 /**************************************************************************
  * DPA_Merge [COMCTL32.11]
@@ -2397,4 +2531,16 @@ BOOL WINAPI InitMUILanguage( LANGID uiLang)
    dprintf(("COMCTL32: InitMUILanguage - empty stub!"));
 
    return TRUE;
+}
+
+DWORD WINAPI comctl32_389(DWORD x1, DWORD x2)
+{
+   dprintf(("comctl32_389: %x %X not implemented!!", x1, x2));
+   return 0; //NT 4 comctl32 returns 0
+}
+
+DWORD WINAPI comctl32_390(DWORD x1, DWORD x2, DWORD x3, DWORD x4)
+{
+   dprintf(("comctl32_390: %x %x %x %x not implemented!!", x1, x2, x3, x4));
+   return 0;
 }
