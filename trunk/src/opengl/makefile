@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7 2000-02-09 23:47:01 bird Exp $
+# $Id: makefile,v 1.8 2000-02-10 00:22:07 bird Exp $
 #
 # PD-Win32 API
 #
@@ -30,9 +30,12 @@ CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
 LDFLAGS=$(LDFLAGS) /NODEBUG
 !endif
 
-TARGET1 = opengl32
-TARGET2 = glu\glu32
-TARGET3 = glut\glut32
+TARGET1  = opengl32
+DTARGET1 = opengl32
+TARGET2  = glu\glu32
+DTARGET2 = glu32
+TARGET3  = glut\glut32
+DTARGET3 = glut32
 
 OBJS1=  opengl32.obj initterm.obj resource.obj
 
@@ -83,17 +86,17 @@ $(TARGET3).lib:
     cd ..
 
 
-lib: $(TARGET1).lib $(PDWIN32_LIB)\$(TARGET1).lib \
-     $(TARGET2).lib $(PDWIN32_LIB)\$(TARGET2).lib \
-     $(TARGET3).lib $(PDWIN32_LIB)\$(TARGET3).lib
+lib: $(TARGET1).lib $(PDWIN32_LIB)\$(DTARGET1).lib \
+     $(TARGET2).lib $(PDWIN32_LIB)\$(DTARGET2).lib \
+     $(TARGET3).lib $(PDWIN32_LIB)\$(DTARGET3).lib
 
-$(PDWIN32_LIB)\$(TARGET1).lib: $(TARGET1).lib
+$(PDWIN32_LIB)\$(DTARGET1).lib: $(TARGET1).lib
     $(CP) $** $@
 
-$(PDWIN32_LIB)\$(TARGET2).lib: $(TARGET2).lib
+$(PDWIN32_LIB)\$(DTARGET2).lib: $(TARGET2).lib
     $(CP) $** $@
 
-$(PDWIN32_LIB)\$(TARGET3).lib: $(TARGET3).lib
+$(PDWIN32_LIB)\$(DTARGET3).lib: $(TARGET3).lib
     $(CP) $** $@
 
 dep:
