@@ -1,4 +1,4 @@
-/* $Id: crtinc.h,v 1.6 1999-10-09 09:39:13 sandervl Exp $ */
+/* $Id: crtinc.h,v 1.7 1999-10-09 13:32:26 sandervl Exp $ */
 
 /* Definitions for the CRTDLL library (CRTDLL.DLL)
  *
@@ -11,8 +11,50 @@
 #endif 
 
 // Errno Defs
+#define EPERM		1	/* Operation not permitted */
+#define	ENOFILE		2	/* No such file or directory */
+#define	ENOENT		2
+#define	ESRCH		3	/* No such process */
+#define	EINTR		4	/* Interrupted function call */
+#define	EIO		5	/* Input/output error */
+#define	ENXIO		6	/* No such device or address */
+#define	E2BIG		7	/* Arg list too long */
+#define	ENOEXEC		8	/* Exec format error */
+#define	EBADF		9	/* Bad file descriptor */
+#define	ECHILD		10	/* No child processes */
 #define	EAGAIN		11	/* Resource temporarily unavailable */
+#define	ENOMEM		12	/* Not enough space */
+#define	EACCES		13	/* Permission denied */
+#define	EFAULT		14	/* Bad address */
+/* 15 - Unknown Error */
+#define	EBUSY		16	/* strerror reports "Resource device" */
+#define	EEXIST		17	/* File exists */
+#define	EXDEV		18	/* Improper link (cross-device link?) */
+#define	ENODEV		19	/* No such device */
+#define	ENOTDIR		20	/* Not a directory */
+#define	EISDIR		21	/* Is a directory */
 #define	EINVAL		22	/* Invalid argument */
+#define	ENFILE		23	/* Too many open files in system */
+#define	EMFILE		24	/* Too many open files */
+#define	ENOTTY		25	/* Inappropriate I/O control operation */
+/* 26 - Unknown Error */
+#define	EFBIG		27	/* File too large */
+#define	ENOSPC		28	/* No space left on device */
+#define	ESPIPE		29	/* Invalid seek (seek on a pipe?) */
+#define	EROFS		30	/* Read-only file system */
+#define	EMLINK		31	/* Too many links */
+#define	EPIPE		32	/* Broken pipe */
+#define	EDOM		33	/* Domain error (math functions) */
+#define	ERANGE		34	/* Result too large (possibly too small) */
+/* 35 - Unknown Error */
+#define	EDEADLOCK	36	/* Resource deadlock avoided (non-Cyg) */
+#define	EDEADLK		36
+/* 37 - Unknown Error */
+#define	ENAMETOOLONG	38	/* Filename too long (91 in Cyg?) */
+#define	ENOLCK		39	/* No locks available (46 in Cyg?) */
+#define	ENOSYS		40	/* Function not implemented (88 in Cyg?) */
+#define	ENOTEMPTY	41	/* Directory not empty (90 in Cyg?) */
+#define	EILSEQ		42	/* Illegal byte sequence */
 
 
 // MBC Defs
@@ -41,6 +83,20 @@
 #define _P2     (_P_|__2)
 
 #define CASE_DIFF (0x8281 - 0x8260)
+
+
+// fpclass Defs
+#define FP_SNAN       0x0001  //    signaling NaN
+#define	FP_QNAN       0x0002  //    quiet NaN
+#define	FP_NINF       0x0004  //    negative infinity
+#define FP_PINF       0x0200  //    positive infinity
+#define FP_NDENORM    0x0008  //    negative denormalized non-zero
+#define FP_PDENORM    0x0010  //    positive denormalized non-zero
+#define FP_NZERO      0x0020  //    negative zero
+#define FP_PZERO      0x0040  //    positive zero
+#define FP_NNORM      0x0080  //    negative normalized non-zero
+#define FP_PNORM      0x0100  //    positive normalized non-zero
+
 
 // Defs
 #define DOSFS_GetFullName(a,b,c) strcpy(c,a) 
@@ -91,6 +147,7 @@ static CRTDLL_FILE * const CRTDLL_stdout = &CRTDLL_iob[1];
 static CRTDLL_FILE * const CRTDLL_stderr = &CRTDLL_iob[2];
 static new_handler_type new_handler;
 
+// CRTDLL Exports
 double  *CRTDLL_HUGE_dll;        /* CRTDLL.20 */
 UINT 	CRTDLL_argc_dll;         /* CRTDLL.23 */
 LPSTR 	*CRTDLL_argv_dll;        /* CRTDLL.24 */
@@ -115,8 +172,8 @@ UINT 	CRTDLL_osversion_dll;    /* CRTDLL.243 */
 USHORT CRTDLL_pctype_dll[] = {0,0}; /* CRTDLL.245 */
 LPSTR  	CRTDLL_pgmptr_dll;       /* CRTDLL.246 */
 USHORT *CRTDLL_pwctype_dll;	 /* CRTDLL.253 */
-UINT 	CRTDLL_sys_errlist;      /* CRTDLL.300 */
-UINT 	CRTDLL_sys_nerr_dll;     /* CRTDLL.301 */
+// UINT 	CRTDLL_sys_errlist;      /* CRTDLL.300 */
+// UINT 	CRTDLL_sys_nerr_dll;     /* CRTDLL.301 */
 UINT 	CRTDLL_timezone_dll;	 /* CRTDLL.304 */
 LPSTR	CRTDLL_tzname;		 /* CRTDLL.307 */
 UINT 	CRTDLL_winmajor_dll;     /* CRTDLL.326 */
@@ -124,8 +181,7 @@ UINT 	CRTDLL_winminor_dll;     /* CRTDLL.327 */
 UINT 	CRTDLL_winver_dll;       /* CRTDLL.328 */
 
 
-
-
+// CRTDLL Functions
 CRTDLL_FILE * 	CDECL CRTDLL__fdopen(INT handle, LPCSTR mode);
 INT 		CDECL NTDLL__wcsicmp( LPCWSTR str1, LPCWSTR str2 );
 INT 		CDECL CRTDLL_vfprintf( CRTDLL_FILE *file, LPSTR format, va_list args );
@@ -139,13 +195,16 @@ int 		CDECL CRTDLL__access(const char *path,int mode);
 int 		CDECL CRTDLL__getch(void);
 size_t 		CDECL CRTDLL_fread( void *ptr, size_t size, size_t n, FILE *fp );
 int 		CDECL CRTDLL__mbbtype( unsigned char c, int type );
+unsigned char * CDECL CRTDLL__mbscpy( unsigned char *s1, const unsigned char *s2 );
 LPSTR 		CDECL CRTDLL__mbsinc( LPCSTR str );
+INT 		CDECL CRTDLL__mbslen( LPCSTR str );
 int 		CDECL CRTDLL__ismbbkalnum( unsigned int c );
 int 		CDECL CRTDLL__ismbbkana( unsigned int c );
 int 		CDECL CRTDLL__ismbbalpha( unsigned int c );
 int 		CDECL CRTDLL__ismbbtrail( unsigned int c );
 int 		CDECL CRTDLL__ismbblead( unsigned int c );
 char * 		CDECL CRTDLL_getenv( const char *name );
+
 
 //
 // Definitions for internal functions
@@ -154,6 +213,7 @@ int 		__set_errno (int error);
 unsigned int 	_mbbtoupper(unsigned int c);
 unsigned int 	_mbbtolower(unsigned int c);
 size_t 		_mbclen2(const unsigned int s);
+int 		_isinf(double __x);
 
 
 //
@@ -227,3 +287,60 @@ char _jctype[257] = {
 /*Ex*/  _12,_12,_12,_12,_12,_12,_12,_12,_12,_12,_12,_12,_12,_12,_12,_12,
 /*Fx*/  _12,_12,_12,_12,_12,_12,_12,_12,_12,_12,_12,_12,_12,___,___,___
 };
+
+
+// syserr / sysnerr Defs
+char __syserr00[] = "No Error";
+char __syserr01[] = "Input to function out of range (EDOM)";
+char __syserr02[] = "Output of function out of range (ERANGE)";
+char __syserr03[] = "Argument list too long (E2BIG)";
+char __syserr04[] = "Permission denied (EACCES)";
+char __syserr05[] = "Resource temporarily unavailable (EAGAIN)";
+char __syserr06[] = "Bad file descriptor (EBADF)";
+char __syserr07[] = "Resource busy (EBUSY)";
+char __syserr08[] = "No child processes (ECHILD)";
+char __syserr09[] = "Resource deadlock avoided (EDEADLK)";
+char __syserr10[] = "File exists (EEXIST)";
+char __syserr11[] = "Bad address (EFAULT)";
+char __syserr12[] = "File too large (EFBIG)";
+char __syserr13[] = "Interrupted system call (EINTR)";
+char __syserr14[] = "Invalid argument (EINVAL)";
+char __syserr15[] = "Input or output error (EIO)";
+char __syserr16[] = "Is a directory (EISDIR)";
+char __syserr17[] = "Too many open files (EMFILE)";
+char __syserr18[] = "Too many links (EMLINK)";
+char __syserr19[] = "File name too long (ENAMETOOLONG)";
+char __syserr20[] = "Too many open files in system (ENFILE)";
+char __syserr21[] = "No such device (ENODEV)";
+char __syserr22[] = "No such file or directory (ENOENT)";
+char __syserr23[] = "Unable to execute file (ENOEXEC)";
+char __syserr24[] = "No locks available (ENOLCK)";
+char __syserr25[] = "Not enough memory (ENOMEM)";
+char __syserr26[] = "No space left on drive (ENOSPC)";
+char __syserr27[] = "Function not implemented (ENOSYS)";
+char __syserr28[] = "Not a directory (ENOTDIR)";
+char __syserr29[] = "Directory not empty (ENOTEMPTY)";
+char __syserr30[] = "Inappropriate I/O control operation (ENOTTY)";
+char __syserr31[] = "No such device or address (ENXIO)";
+char __syserr32[] = "Operation not permitted (EPERM)";
+char __syserr33[] = "Broken pipe (EPIPE)";
+char __syserr34[] = "Read-only file system (EROFS)";
+char __syserr35[] = "Invalid seek (ESPIPE)";
+char __syserr36[] = "No such process (ESRCH)";
+char __syserr37[] = "Improper link (EXDEV)";
+char __syserr38[] = "No more files (ENMFILE)";
+
+const char *CRTDLL_sys_errlist[] = {
+__syserr00, __syserr01, __syserr02, __syserr03, __syserr04,
+__syserr05, __syserr06, __syserr07, __syserr08, __syserr09,
+__syserr10, __syserr11, __syserr12, __syserr13, __syserr14,
+__syserr15, __syserr16, __syserr17, __syserr18, __syserr19,
+__syserr20, __syserr21, __syserr22, __syserr23, __syserr24,
+__syserr25, __syserr26, __syserr27, __syserr28, __syserr29,
+__syserr30, __syserr31, __syserr32, __syserr33, __syserr34,
+__syserr35, __syserr36, __syserr37, __syserr38
+};
+
+int __sys_nerr = sizeof(CRTDLL_sys_errlist) / sizeof(CRTDLL_sys_errlist[0]);
+
+int*	CRTDLL_sys_nerr_dll = &__sys_nerr;
