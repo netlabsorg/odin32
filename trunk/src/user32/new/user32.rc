@@ -1,4 +1,4 @@
-/* Attention: names > 8.3 */
+/* $Id */
 /* converted from WINE */
 
 /* Button */
@@ -39,3 +39,8 @@ BITMAP OBM_RGARROW "rgarrow.bmp"
 BITMAP OBM_DNARROW "dnarrow.bmp"
 BITMAP OBM_UPARROW "uparrow.bmp"
 
+/* Combo */
+
+#define OBM_COMBO           32738
+
+BITMAP OBM_COMBO "combo.bmp"

@@ -1,4 +1,4 @@
-/* $Id: button.cpp,v 1.7 1999-07-23 16:46:29 cbratschi Exp $ */
+/* $Id: button.cpp,v 1.8 1999-07-24 12:40:20 cbratschi Exp $ */
 /* File: button.c -- Button type widgets
  *
  * Copyright (c) 1999 Christoph Bratschi (ported from WINE)
@@ -9,7 +9,6 @@
  */
 
 /* CB: todo
-   - window words not right implemented
    - update checkboxes.bmp to Win9x style
 */
 
@@ -920,7 +919,6 @@ BOOL BUTTON_Register()
 
     return RegisterClassA(&wndClass);
 }
-
 
 BOOL BUTTON_Unregister()
 {
