@@ -1,4 +1,4 @@
-/* $Id: dibsect.cpp,v 1.58 2001-10-18 17:01:34 sandervl Exp $ */
+/* $Id: dibsect.cpp,v 1.59 2001-11-13 13:18:22 sandervl Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -156,16 +156,11 @@ DIBSection::DIBSection(BITMAPINFOHEADER_W *pbmi, char *pColors, DWORD iUsage, DW
                 break;
 
            case 24:
-                dibinfo.dsBitfields[0] = 0xff;
-                dibinfo.dsBitfields[1] = 0xff00;
-                dibinfo.dsBitfields[2] = 0xff0000;
-                break;
-
            case 32:
-                dibinfo.dsBitfields[0] = (pbmi->biCompression == BI_BITFIELDS_W) ? *(DWORD *)pColors : 0xff;
-                dibinfo.dsBitfields[1] = (pbmi->biCompression == BI_BITFIELDS_W) ? *((DWORD *)pColors + 1) : 0xff00;
-                dibinfo.dsBitfields[2] = (pbmi->biCompression == BI_BITFIELDS_W) ? *((DWORD *)pColors + 2) : 0xff0000;
-                if(dibinfo.dsBitfields[0] != 0xff && dibinfo.dsBitfields[1] != 0xff00 && dibinfo.dsBitfields[2] != 0xff0000) {
+                dibinfo.dsBitfields[0] = (pbmi->biCompression == BI_BITFIELDS_W) ? *(DWORD *)pColors       : 0xff0000;
+                dibinfo.dsBitfields[1] = (pbmi->biCompression == BI_BITFIELDS_W) ? *((DWORD *)pColors + 1) : 0x00ff00;
+                dibinfo.dsBitfields[2] = (pbmi->biCompression == BI_BITFIELDS_W) ? *((DWORD *)pColors + 2) : 0x0000ff;
+                if(dibinfo.dsBitfields[0] != 0xff0000 && dibinfo.dsBitfields[1] != 0xff00 && dibinfo.dsBitfields[2] != 0xff) {
                     dprintf(("DIBSection: unsupported bitfields for 32 bits bitmap!!"));
                 }
                 break;
@@ -335,16 +330,11 @@ int DIBSection::SetDIBits(HDC hdc, HBITMAP hbitmap, UINT startscan, UINT
                 break;
 
            case 24:
-                dibinfo.dsBitfields[0] = 0xff;
-                dibinfo.dsBitfields[1] = 0xff00;
-                dibinfo.dsBitfields[2] = 0xff0000;
-                break;
-
            case 32:
-                dibinfo.dsBitfields[0] = (pbmi->biCompression == BI_BITFIELDS_W) ? *(DWORD *)pColors : 0xff;
-                dibinfo.dsBitfields[1] = (pbmi->biCompression == BI_BITFIELDS_W) ? *((DWORD *)pColors + 1) : 0xff00;
-                dibinfo.dsBitfields[2] = (pbmi->biCompression == BI_BITFIELDS_W) ? *((DWORD *)pColors + 2) : 0xff0000;
-                if(dibinfo.dsBitfields[0] != 0xff && dibinfo.dsBitfields[1] != 0xff00 && dibinfo.dsBitfields[2] != 0xff0000) {
+                dibinfo.dsBitfields[0] = (pbmi->biCompression == BI_BITFIELDS_W) ? *(DWORD *)pColors       : 0xff0000;
+                dibinfo.dsBitfields[1] = (pbmi->biCompression == BI_BITFIELDS_W) ? *((DWORD *)pColors + 1) : 0x00ff00;
+                dibinfo.dsBitfields[2] = (pbmi->biCompression == BI_BITFIELDS_W) ? *((DWORD *)pColors + 2) : 0x0000ff;
+                if(dibinfo.dsBitfields[0] != 0xff0000 && dibinfo.dsBitfields[1] != 0xff00 && dibinfo.dsBitfields[2] != 0xff) {
                     dprintf(("DIBSection: unsupported bitfields for 32 bits bitmap!!"));
                 }
                 break;
