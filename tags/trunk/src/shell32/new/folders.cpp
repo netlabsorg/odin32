@@ -1,13 +1,28 @@
+/* $Id: folders.cpp,v 1.2 1999-10-07 13:57:30 phaller Exp $ */
+
+/*
+ * Win32 SHELL32 for OS/2
+ *
+ * Copyright 1999 Patrick Haller (haller@zebra.fh-weingarten.de)
+ * Project Odin Software License can be found in LICENSE.TXT
+ *
+ */
+
 /*
  *	Copyright 1997	Marcus Meissner
  *	Copyright 1998	Juergen Schmied
  *
  */
 
+
+/*****************************************************************************
+ * Includes                                                                  *
+ *****************************************************************************/
+
 #include <stdlib.h>
 #include <string.h>
-
 #include <odin.h>
+#include <odinwrap.h>
 
 #define ICOM_CINTERFACE 1
 #define CINTERFACE 1
@@ -24,7 +39,8 @@
 
 #include <misc.h>
 
-DEFAULT_DEBUG_CHANNEL(shell)
+
+ODINDEBUGCHANNEL(SHELL32-FOLDERS)
 
 
 /***********************************************************************
@@ -53,7 +69,10 @@ static HRESULT WINAPI IExtractIconA_fnQueryInterface( IExtractIconA * iface, REF
 
 	char	xriid[50];
 	 WINE_StringFromCLSID((LPCLSID)riid,xriid);
-	 TRACE("(%p)->(\n\tIID:\t%s,%p)\n",This,xriid,ppvObj);
+	 dprintf(("SHELL32:folders IExtractIconA_fnQueryInterface(%p)->(\n\tIID:\t%s,%p)\n",
+           This,
+           xriid,
+           ppvObj));
 
 	*ppvObj = NULL;
 
@@ -69,10 +88,10 @@ static HRESULT WINAPI IExtractIconA_fnQueryInterface( IExtractIconA * iface, REF
 
 	if(*ppvObj)
 	{ IExtractIconA_AddRef((IExtractIconA*) *ppvObj);  	
-	  TRACE("-- Interface: (%p)->(%p)\n",ppvObj,*ppvObj);
+	  dprintf(("SHELL32:folders IExtractIconA_fnQueryInterface-- Interface: (%p)->(%p)\n",ppvObj,*ppvObj));
 	  return S_OK;
 	}
-	TRACE("-- Interface: E_NOINTERFACE\n");
+	dprintf(("SHELL32:folders IExtractIconA_fnQueryInterface-- Interface: E_NOINTERFACE\n"));
 	return E_NOINTERFACE;
 }
 
@@ -83,7 +102,9 @@ static ULONG WINAPI IExtractIconA_fnAddRef(IExtractIconA * iface)
 {
 	ICOM_THIS(IExtractIconAImpl,iface);
 
-	TRACE("(%p)->(count=%lu)\n",This, This->ref );
+	dprintf(("SHELL32:folders IExtractIconA_fnAddRef(%p)->(count=%lu)\n",
+          This,
+          This->ref));
 
 	shell32_ObjCount++;
 
@@ -96,12 +117,14 @@ static ULONG WINAPI IExtractIconA_fnRelease(IExtractIconA * iface)
 {
 	ICOM_THIS(IExtractIconAImpl,iface);
 
-	TRACE("(%p)->()\n",This);
+	dprintf(("SHELL32:folders IExtractIconA_fnRelease(%p)->()\n",
+          This));
 
 	shell32_ObjCount--;
 
 	if (!--(This->ref))
-	{ TRACE(" destroying IExtractIcon(%p)\n",This);
+	{ dprintf(("SHELL32:folders  IExtractIconA_fnRelease destroying IExtractIcon(%p)\n",
+            This));
 	  SHFree(This->pidl);
 	  HeapFree(GetProcessHeap(),0,This);
 	  return 0;
@@ -128,7 +151,13 @@ static HRESULT WINAPI IExtractIconA_fnGetIconLocation(
 	GUID const * riid;
 	LPITEMIDLIST	pSimplePidl = ILFindLastID(This->pidl);
 			
-	TRACE("(%p) (flags=%u %p %u %p %p)\n", This, uFlags, szIconFile, cchMax, piIndex, pwFlags);
+	dprintf(("SHELL32:folders IExtractIconA_fnGetIconLocation(%p) (flags=%u %p %u %p %p)\n",
+          This,
+          uFlags,
+          szIconFile,
+          cchMax,
+          piIndex,
+          pwFlags));
 
 	if (pwFlags)
 	  *pwFlags = 0;
@@ -205,7 +234,9 @@ static HRESULT WINAPI IExtractIconA_fnGetIconLocation(
 	  }
 	}
 
-	TRACE("-- %s %x\n", szIconFile, *piIndex);
+	dprintf(("SHELL32:folders IExtractIconA_fnGetIconLocation -- %s %x\n",
+          szIconFile,
+          *piIndex));
 	return NOERROR;
 }
 /**************************************************************************
@@ -215,7 +246,13 @@ static HRESULT WINAPI IExtractIconA_fnExtract(IExtractIconA * iface, LPCSTR pszF
 {
 	ICOM_THIS(IExtractIconAImpl,iface);
 
-	FIXME("(%p) (file=%p index=%u %p %p size=%u) semi-stub\n", This, pszFile, nIconIndex, phiconLarge, phiconSmall, nIconSize);
+	dprintf(("SHELL32:folders IExtractIconA_fnExtract (%p) (file=%p index=%u %p %p size=%u) semi-stub\n",
+          This,
+          pszFile,
+          nIconIndex,
+          phiconLarge,
+          phiconSmall,
+          nIconSize));
 
 	if (phiconLarge)
 	  *phiconLarge = pImageList_GetIcon(ShellBigIconList, nIconIndex, ILD_TRANSPARENT);
@@ -369,7 +406,8 @@ IExtractIconA* IExtractIconA_Constructor(LPCITEMIDLIST pidl)
 
 	pdump(pidl);
 
-	TRACE("(%p)\n",ei);
+	dprintf(("SHELL32:folders IExtractIconA_Constructor(%p)\n",
+          ei));
 	shell32_ObjCount++;
 	return (IExtractIconA *)ei;
 }
