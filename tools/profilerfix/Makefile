@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.1 2002-04-11 21:15:28 bird Exp $
+# $Id: Makefile,v 1.2 2002-04-11 21:29:13 bird Exp $
 
 #
 # Odin32 API
@@ -16,8 +16,12 @@
 #
 # The all rule.
 #
+!ifdef VAC3
 all:    $(ODIN32_LIB)\cppopa3_fix2.obj \
         $(ODIN32_LIB)\cppopa3.obj
+!else
+all:
+!endif
 
 # aliases for all...
 needed: all
