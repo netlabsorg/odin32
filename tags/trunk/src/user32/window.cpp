@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.113 2001-10-28 15:24:16 sandervl Exp $ */
+/* $Id: window.cpp,v 1.114 2002-01-12 09:55:52 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -262,12 +262,12 @@ ODINFUNCTION12(HWND,      CreateWindowExW,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION1(HWND, CreateFakeWindowEx,
-              HWND, hwndOS2)
+ODINFUNCTION2(HWND, CreateFakeWindowEx,
+              HWND, hwndOS2, ATOM, classAtom)
 {
  Win32BaseWindow *window;
 
-    window = new Win32BaseWindow(hwndOS2, 0);
+    window = new Win32BaseWindow(hwndOS2, classAtom);
     if(window == NULL)
     {
         dprintf(("Win32BaseWindow creation failed!!"));
