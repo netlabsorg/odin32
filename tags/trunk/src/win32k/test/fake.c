@@ -1,8 +1,8 @@
-/* $Id: fake.c,v 1.4 2000-10-01 02:58:21 bird Exp $
+/* $Id: fake.c,v 1.5 2000-12-11 06:53:57 bird Exp $
  *
  * Fake stubs for the ldr and kernel functions we imports or overloads.
  *
- * Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -128,7 +128,7 @@ unsigned short  getSlot(void);
 /**
  * Initiate workers (imported kernel functions / vars)
  * @status    partially implemented.
- * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @author    knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  */
 void  workersinit(void)
 {
@@ -166,7 +166,7 @@ void  workersinit(void)
  * @returns OS2 return code.
  * @param   hFile    Filehandle of the file to be closed.
  * @status  completely impelemented.
- * @author  knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  * @remark
  */
 ULONG LDRCALL fakeldrClose(SFN hFile)
@@ -193,7 +193,7 @@ ULONG LDRCALL fakeldrClose(SFN hFile)
  * @param     pfl           Pointer to media flags? *pfl is set to zero!
  * @sketch    Do a DosOpen on the filename.
  * @status    partially implemented.
- * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @author    knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  * @remark
  */
 ULONG LDRCALL fakeldrOpen(PSFN phFile, PSZ pszFilename, PULONG pfl)
@@ -277,7 +277,7 @@ ULONG LDRCALL fakeldrRead(SFN hFile, ULONG ulOffset, PVOID pvBuffer, ULONG fpBuf
  * @param     pul           Pointer to flag variable to return apptype flags in.
  * @sketch
  * @status    stub.
- * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @author    knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  * @remark
  */
 ULONG LDRCALL fakeLDRQAppType(PSZ pszFilename, PULONG pul)
@@ -938,7 +938,7 @@ ULONG KRNLCALL fakeKSEMReleaseMutex(HKSEMMTX hkmtx)
  * @param       pcusNest    Pointer to variable which is to receive the nesting count.
  *                          (ie. the number of times we have taken this semaphore.)
  * @status      completely implemented.
- * @author      knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @author      knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  */
 BOOL KRNLCALL  fakeKSEMQueryMutex(HKSEMMTX hkmtx, PUSHORT pcusNest)
 {
@@ -977,7 +977,7 @@ BOOL KRNLCALL  fakeKSEMQueryMutex(HKSEMMTX hkmtx, PUSHORT pcusNest)
  * @param       fulType     Semaphore type. (only KSEM_MUTEX is supported)
  * @param       fulFlags    Semaphore flags. (not validated)
  * @status      partially implemented.
- * @author      knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @author      knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  */
 VOID  KRNLCALL  fakeKSEMInit(PKSEM pksem, ULONG fulType, ULONG fulFlags)
 {
@@ -1002,7 +1002,7 @@ VOID  KRNLCALL  fakeKSEMInit(PKSEM pksem, ULONG fulType, ULONG fulFlags)
  * Gets the thread slot number.
  * @returns     Thread slot number.
  * @status      completely implemented.
- * @author      knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @author      knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  */
 unsigned short getSlot(void)
 {
@@ -1154,7 +1154,7 @@ PMTE LDRCALL fakeldrValidateMteHandle(HMTE hMTE)
  * @param     pszFilename   Pointer to filename.
  * @sketch
  * @status
- * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @author    knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  * @remark
  */
 ULONG _Optlink tkExecPgmWorker(ULONG execFlag, PSZ pArg, PSZ pEnv, PSZ pszFilename)
@@ -1195,7 +1195,7 @@ ULONG _Optlink tkExecPgmWorker(ULONG execFlag, PSZ pArg, PSZ pEnv, PSZ pszFilena
  *                          (currently ignored)
  * @sketch
  * @status
- * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @author    knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  * @remark
  */
 ULONG LDRCALL fakeLDRLoadExe(PSZ pszFilename, ldrrei_t *pEI)
@@ -1237,7 +1237,7 @@ ULONG LDRCALL fakeLDRLoadExe(PSZ pszFilename, ldrrei_t *pEI)
  *      Call fakeldrLoadImports.
  *
  * @status
- * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @author    knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  * @remark
  */
 ULONG LDRCALL fakeldrGetModule(PSZ pszFilename, ULONG ul)
@@ -1346,7 +1346,7 @@ ULONG LDRCALL fakeldrGetModule(PSZ pszFilename, ULONG ul)
  *      return.
  *
  * @status
- * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @author    knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  * @remark
  */
 ULONG LDRCALL   fakeldrGetMte(PCHAR pachFilename, USHORT cchFilename, UCHAR fchType, UCHAR fchClass, PPMTE ppmte)
@@ -1472,7 +1472,7 @@ ULONG LDRCALL   fakeldrGetMte(PCHAR pachFilename, USHORT cchFilename, UCHAR fchT
  *      return successfully.
  *
  * @status
- * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @author    knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  * @remark
  */
 ULONG LDRCALL   fakeldrOpenNewExe(PCHAR pachFilename, USHORT cchFilename, ldrlv_t *plv, PUSHORT pus)
@@ -1557,7 +1557,7 @@ ULONG LDRCALL   fakeldrOpenNewExe(PCHAR pachFilename, USHORT cchFilename, ldrlv_
  *
  *
  * @status
- * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @author    knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  * @remark
  */
 ULONG LDRCALL   fakeldrCreateMte(struct e32_exe *pe32, ldrlv_t *plv)
@@ -1741,7 +1741,7 @@ createmte_exit:
  *      'DOSCALLS' is ignored.
  *
  * @status
- * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @author    knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  * @remark
  */
 ULONG LDRCALL   fakeldrLoadImports(PMTE pmte)
@@ -1808,7 +1808,7 @@ ULONG LDRCALL   fakeldrLoadImports(PMTE pmte)
  * @param     cchString     Length of string.
  * @sketch    Loop thru the string converting all english letters to uppercase.
  * @status    partially implemented.
- * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @author    knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  * @remark    This is probably written in assembly and does DBCS checks...
  */
 VOID LDRCALL    fakeldrUCaseString(PCHAR pachString, USHORT cchString)
@@ -1842,7 +1842,7 @@ VOID LDRCALL    fakeldrUCaseString(PCHAR pachString, USHORT cchString)
  * @sketch
  *  Loop thru the validatetbl and update each field (which isn't null) by adding
  *  the off value, and validate that the pointer is ok.
- * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @author    knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  * @remark
  */
 ULONG LDRCALL   fakeldrMTEValidatePtrs(PSMTE psmte, ULONG ulMaxAddr, ULONG off)

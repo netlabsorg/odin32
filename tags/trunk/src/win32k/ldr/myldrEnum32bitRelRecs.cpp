@@ -1,8 +1,8 @@
-/* $Id: myldrEnum32bitRelRecs.cpp,v 1.3 2000-09-02 21:08:08 bird Exp $
+/* $Id: myldrEnum32bitRelRecs.cpp,v 1.4 2000-12-11 06:53:53 bird Exp $
  *
  * myldrEnum32bitRelRecs - ldrEnum32bitRelRecs
  *
- * Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *

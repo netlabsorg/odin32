@@ -1,8 +1,8 @@
-/* $Id: elf.h,v 1.5 2000-02-26 00:46:30 bird Exp $
+/* $Id: elf.h,v 1.6 2000-12-11 06:53:51 bird Exp $
  *
  * ELF stuff.
  *
- * Copyright (c) 1999-2000 knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * Copyright (c) 1999-2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *

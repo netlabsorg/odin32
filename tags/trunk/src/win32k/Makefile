@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.63 2000-12-02 23:32:38 bird Exp $
+# $Id: Makefile,v 1.64 2000-12-11 06:53:47 bird Exp $
 
 #
 # Win32k makefile.
@@ -128,7 +128,7 @@ dep:
 # Generate Visual SlickEdit project file
 #
 win32k.vpj:
-    ..\..\tools\vslick\genproject.cmd $@ $(CINCLUDES)
+    ..\..\tools\vslick\genproject.cmd $@  $(CINCLUDES) -s -r
 
 
 #

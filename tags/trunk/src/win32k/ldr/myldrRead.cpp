@@ -1,4 +1,4 @@
-/* $Id: myldrRead.cpp,v 1.7 2000-09-02 21:08:10 bird Exp $
+/* $Id: myldrRead.cpp,v 1.8 2000-12-11 06:53:53 bird Exp $
  *
  * myldrRead - ldrRead.
  *
@@ -53,7 +53,7 @@
  *            - backout or not our module -
  *            forward request to the original ldrRead.
  * @status    Completely implemented.
- * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @author    knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  */
 ULONG LDRCALL myldrRead(
     SFN     hFile,

@@ -1,8 +1,8 @@
-/* $Id: OS2KVM.h,v 1.7 2000-10-01 02:58:17 bird Exp $
+/* $Id: OS2KVM.h,v 1.8 2000-12-11 06:53:50 bird Exp $
  *
  * OS/2 kernel VM functions.
  *
- * Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
