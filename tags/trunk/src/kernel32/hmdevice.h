@@ -1,4 +1,4 @@
-/* $Id: hmdevice.h,v 1.3 1999-07-06 15:48:46 phaller Exp $ */
+/* $Id: hmdevice.h,v 1.4 1999-08-24 14:36:05 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -237,6 +237,50 @@ public:
   virtual BOOL  ReleaseSemaphore(PHMHANDLEDATA pHMHandleData,
                                  LONG          cReleaseCount,
                                  LPLONG        lpPreviousCount);
+
+
+  /***************************************************************************
+   * File Mappings                                                           *
+   ***************************************************************************/
+
+                /* this is a handler method for calls to CreateFileMapping() */
+  virtual DWORD CreateFileMapping   (PHMHANDLEDATA              pHMHandleData,
+                                     HANDLE                     hFile,
+                                     LPSECURITY_ATTRIBUTES      lpFileMappingAttributes,
+                                     DWORD                      flProtect,
+                                     DWORD                      dwMaximumSizeHigh,
+                                     DWORD                      dwMaximumSizeLow,
+                                     LPCTSTR                    lpName);
+
+                  /* this is a handler method for calls to OpenFileMapping() */
+  virtual DWORD OpenFileMapping     (PHMHANDLEDATA              pHMHandleData,
+                                     BOOL                       fInherit,
+                                     LPCTSTR                    lpName);
+
+                    /* this is a handler method for calls to MapViewOfFile() */
+  virtual LPVOID MapViewOfFile      (PHMHANDLEDATA              pHMHandleData,
+                                     DWORD                      dwDesiredAccess,
+                                     DWORD                      dwFileOffsetHigh,
+                                     DWORD                      dwFileOffsetLow,
+                                     DWORD                      dwNumberOfBytesToMap);
+
+                  /* this is a handler method for calls to MapViewOfFileEx() */
+  virtual LPVOID MapViewOfFileEx    (PHMHANDLEDATA              pHMHandleData,
+                                     DWORD                      dwDesiredAccess,
+                                     DWORD                      dwFileOffsetHigh,
+                                     DWORD                      dwFileOffsetLow,
+                                     DWORD                      dwNumberOfBytesToMap,
+                                     LPVOID                     lpBaseAddress);
+
+                  /* this is a handler method for calls to UnmapViewOfFile() */
+  virtual BOOL UnmapViewOfFile      (PHMHANDLEDATA              pHMHandleData,
+                                     LPVOID                     lpBaseAddress);
+
+                  /* this is a handler method for calls to FlushViewOfFile() */
+  virtual BOOL FlushViewOfFile      (PHMHANDLEDATA              pHMHandleData,
+                                     LPVOID                     lpBaseAddress,
+                                     DWORD                      dwNumberOfBytesToFlush);
+
 };
 
 

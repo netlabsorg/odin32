@@ -1,4 +1,4 @@
-/* $Id: HandleManager.h,v 1.4 1999-07-06 15:48:44 phaller Exp $ */
+/* $Id: HandleManager.h,v 1.5 1999-08-24 14:33:37 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -267,6 +267,34 @@ BOOL   HMReleaseSemaphore           (HANDLE                     hSemaphore,
                                      LONG                       cReleaseCount,
                                      LPLONG                     lpPreviousCount);
 
+HANDLE HMCreateFileMapping          (HANDLE                     hFile,
+                                     LPSECURITY_ATTRIBUTES      lpFileMappingAttributes,
+                                     DWORD                      flProtect,
+                                     DWORD                      dwMaximumSizeHigh,
+                                     DWORD                      dwMaximumSizeLow,
+                                     LPCTSTR                    lpName);
+
+HANDLE HMOpenFileMapping            (DWORD                      fdwAccess,
+                                     BOOL                       fInherit,
+                                     LPCTSTR                    lpName);
+
+LPVOID HMMapViewOfFile              (HANDLE                     hFileMappingObject,
+                                     DWORD                      dwDesiredAccess,
+                                     DWORD                      dwFileOffsetHigh,
+                                     DWORD                      dwFileOffsetLow,
+                                     DWORD                      dwNumberOfBytesToMap);
+
+LPVOID HMMapViewOfFileEx            (HANDLE                     hFileMappingObject,
+                                     DWORD                      dwDesiredAccess,
+                                     DWORD                      dwFileOffsetHigh,
+                                     DWORD                      dwFileOffsetLow,
+                                     DWORD                      dwNumberOfBytesToMap,
+                                     LPVOID                     lpBaseAddress);
+
+BOOL HMUnmapViewOfFile              (LPVOID                     lpBaseAddress);
+
+BOOL HMFlushViewOfFile              (LPVOID                     lpBaseAddress,
+                                     DWORD                      dwNumberOfBytesToFlush);
 
 #ifdef __cplusplus__
   }
