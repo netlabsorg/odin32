@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.2279 2002-08-21 15:38:49 sandervl Exp $ */
+/* $Id: changelog,v 1.2280 2002-08-21 17:22:50 sandervl Exp $ */
+
+ 2002-08-21: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o EV_RLSD/MS_RLSD_ON status corresponds to OS/2 DCD (data carrier detect) status
+                  GetCommModemStatus & GetCommEvent changed
 
  2002-08-21: Platon Fomichev <platon@innotek   >
     - USER32:   o Fixed OSLibWinSetSysValue
