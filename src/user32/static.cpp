@@ -1,4 +1,4 @@
-/* $Id: static.cpp,v 1.18 2000-02-21 17:25:29 cbratschi Exp $ */
+/* $Id: static.cpp,v 1.19 2000-03-18 16:13:37 cbratschi Exp $ */
 /*
  * Static control
  *
@@ -6,8 +6,8 @@
  *
  * Copyright  David W. Metcalfe, 1993
  *
- * Corel version: 20000212
- * WINE version: 990923
+ * Corel version: 20000317
+ * (WINE version: 990923)
  *
  * Status:  complete
  * Version: 5.00
@@ -335,7 +335,6 @@ LRESULT STATIC_SetText(HWND hwnd,WPARAM wParam,LPARAM lParam)
     DefWindowProcA(hwnd,WM_SETTEXT,wParam,lParam);
 
   InvalidateRect(hwnd,NULL,FALSE);
-  UpdateWindow(hwnd);
 
   return TRUE;
 }
@@ -725,12 +724,12 @@ static void STATIC_PaintBitmapfn(HWND hwnd, HDC hdc )
         if(GetObjectType(infoPtr->hIcon) != OBJ_BITMAP) return;
         if (!(hMemDC = CreateCompatibleDC( hdc ))) return;
 
-	GetObjectA(infoPtr->hIcon, sizeof(bm), &bm);
-	oldbitmap = SelectObject(hMemDC, infoPtr->hIcon);
+        GetObjectA(infoPtr->hIcon, sizeof(bm), &bm);
+        oldbitmap = SelectObject(hMemDC, infoPtr->hIcon);
 
-	// Paint the image in center area
-	if(dwStyle & SS_CENTERIMAGE)
-	{
+        // Paint the image in center area
+        if(dwStyle & SS_CENTERIMAGE)
+        {
             SIZE szbm;
             SIZE szdc;
 
@@ -764,8 +763,8 @@ static void STATIC_PaintBitmapfn(HWND hwnd, HDC hdc )
             BitBlt(hdc, 0, 0, bm.bmWidth, bm.bmHeight, hMemDC, 0, 0, SRCCOPY);
         }
 
-	SelectObject(hMemDC, oldbitmap);
-	DeleteDC(hMemDC);
+        SelectObject(hMemDC, oldbitmap);
+        DeleteDC(hMemDC);
     }
 }
 

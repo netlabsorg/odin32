@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.89 2000-03-16 19:19:11 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.90 2000-03-18 16:13:39 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -191,8 +191,7 @@ Win32BaseWindow *getParent();
          void   SetSysMenu(HMENU hSystemMenu)       { hSysMenu = hSystemMenu; };
          HMENU  GetSysMenu()                        { return hSysMenu; }
 
-         HICON  GetIcon()                           { return hIcon; }
-         HICON  GetSmallIcon()                      { return hIconSm; }
+         HICON  IconForWindow(WPARAM fType);
 
          void   SetWindowRegion(HRGN hRegion)       { hWindowRegion = hRegion; };
          HRGN   GetWindowRegion()                   { return hWindowRegion; };
@@ -441,8 +440,8 @@ protected:
          ULONG  EraseBkgndFlag:1,
                 filler:31;
 public:
-         VOID   setEraseBkgnd (BOOL erase) 	{ EraseBkgndFlag = erase; }
-         BOOL   needsEraseBkgnd()   		{ return EraseBkgndFlag; }
+         VOID   setEraseBkgnd (BOOL erase)      { EraseBkgndFlag = erase; }
+         BOOL   needsEraseBkgnd()               { return EraseBkgndFlag; }
 };
 
 #endif //__cplusplus

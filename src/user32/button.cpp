@@ -1,4 +1,4 @@
-/* $Id: button.cpp,v 1.33 2000-02-16 14:34:03 sandervl Exp $ */
+/* $Id: button.cpp,v 1.34 2000-03-18 16:13:25 cbratschi Exp $ */
 /* File: button.cpp -- Button type widgets
  *
  * Copyright (C) 1993 Johannes Ruscheinski
@@ -6,7 +6,8 @@
  * Copyright (C) 1994 Alexandre Julliard
  * Copyright (c) 1999 Christoph Bratschi
  *
- * WINE version: 20000130
+ * Corel version: 20000317
+ * (WINE version: 20000130)
  *
  * Status: complete
  * Version: 5.00
@@ -20,7 +21,7 @@
 #include <misc.h>
 #include "initterm.h"
 
-#define DBG_LOCALLOG	DBG_button
+#define DBG_LOCALLOG    DBG_button
 #include "dbglocal.h"
 
 #ifdef DEBUG
@@ -484,7 +485,11 @@ static LRESULT BUTTON_SetImage(HWND hwnd,WPARAM wParam,LPARAM lParam)
   DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
   HANDLE oldHbitmap = infoPtr->hImage;
 
-  if ((dwStyle & BS_BITMAP) || (dwStyle & BS_ICON)) infoPtr->hImage = (HANDLE)lParam;
+  if ((dwStyle & BS_BITMAP) || (dwStyle & BS_ICON))
+  {
+    infoPtr->hImage = (HANDLE)lParam;
+    InvalidateRect(hwnd,NULL,FALSE);
+  }
 
   return oldHbitmap;
 }

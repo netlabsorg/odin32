@@ -1,10 +1,11 @@
-/* $Id: windlgmsg.cpp,v 1.6 2000-02-16 14:28:25 sandervl Exp $ */
+/* $Id: windlgmsg.cpp,v 1.7 2000-03-18 16:13:41 cbratschi Exp $ */
 /*
  * Win32 dialog message APIs for OS/2
  *
  * Copyright 1999 Sander van Leeuwen (OS/2 port & adaption)
  *
- * Based on Wine code (990815: window\dialog.c)
+ * Based on Corel WINE code (20000317: window\dialog.c)
+ * (Based on Wine code (990815: window\dialog.c))
  *
  * Copyright 1993, 1994, 1996 Alexandre Julliard
  *
@@ -20,7 +21,7 @@
 #include "win32wbase.h"
 #include "win32dlg.h"
 
-#define DBG_LOCALLOG	DBG_windlgmsg
+#define DBG_LOCALLOG    DBG_windlgmsg
 #include "dbglocal.h"
 
 //******************************************************************************
@@ -175,16 +176,42 @@ static BOOL DIALOG_IsAccelerator( HWND hwnd, HWND hwndDlg, WPARAM vKey )
     return RetVal;
 }
 /***********************************************************************
+ *           DIALOG_FindMsgDestination
+ *
+ * The messages that IsDialogMessage send may not go to the dialog
+ * calling IsDialogMessage if that dialog is a child, and it has the
+ * DS_CONTROL style set.
+ * We propagate up until we hit a that does not have DS_CONTROL, or
+ * whose parent is not a dialog.
+ */
+static HWND DIALOG_FindMsgDestination( HWND hwndDlg )
+{
+    while (GetWindowLongA(hwndDlg, GWL_STYLE) & DS_CONTROL)
+    {
+        Win32BaseWindow *pParent;
+        HWND hParent = GetParent(hwndDlg);
+        if (!hParent) break;
+
+        pParent = Win32BaseWindow::GetWindowFromHandle(hParent);
+        if (!pParent) break;
+
+        if (!pParent->IsDialog())
+          break;
+
+        hwndDlg = hParent;
+    }
+
+    return hwndDlg;
+}
+
+/***********************************************************************
  *           DIALOG_IsDialogMessage
  */
-static BOOL DIALOG_IsDialogMessage( HWND hwnd, HWND hwndDlg,
-                                    UINT message, WPARAM wParam,
-                                    LPARAM lParam, BOOL *translate,
-                                    BOOL *dispatch, INT dlgCode )
+static BOOL DIALOG_IsDialogMessage( HWND hwndDlg, BOOL *translate, BOOL *dispatch, INT dlgCode, LPMSG msg )
 {
     *translate = *dispatch = FALSE;
 
-    if (message == WM_PAINT)
+    if (msg->message == WM_PAINT)
     {
         /* Apparently, we have to handle this one as well */
         *dispatch = TRUE;
@@ -192,9 +219,9 @@ static BOOL DIALOG_IsDialogMessage( HWND hwnd, HWND hwndDlg,
     }
 
       /* Only the key messages get special processing */
-    if ((message != WM_KEYDOWN) &&
-        (message != WM_SYSCHAR) &&
-        (message != WM_CHAR))
+    if ((msg->message != WM_KEYDOWN) &&
+        (msg->message != WM_SYSCHAR) &&
+        (msg->message != WM_CHAR))
         return FALSE;
 
     if (dlgCode & DLGC_WANTMESSAGE)
@@ -203,10 +230,12 @@ static BOOL DIALOG_IsDialogMessage( HWND hwnd, HWND hwndDlg,
         return TRUE;
     }
 
-    switch(message)
+    hwndDlg = DIALOG_FindMsgDestination(hwndDlg);
+
+    switch(msg->message)
     {
     case WM_KEYDOWN:
-        switch(wParam)
+        switch(msg->wParam)
         {
         case VK_TAB:
             if (!(dlgCode & DLGC_WANTTAB))
@@ -223,7 +252,7 @@ static BOOL DIALOG_IsDialogMessage( HWND hwnd, HWND hwndDlg,
         case VK_UP:
             if (!(dlgCode & DLGC_WANTARROWS))
             {
-                BOOL fPrevious = (wParam == VK_LEFT || wParam == VK_UP);
+                BOOL fPrevious = (msg->wParam == VK_LEFT || msg->wParam == VK_UP);
                 HWND hwndNext =
                     GetNextDlgGroupItem (hwndDlg, GetFocus(), fPrevious );
                 SendMessageA( hwndDlg, WM_NEXTDLGCTL, hwndNext, 1 );
@@ -251,8 +280,9 @@ static BOOL DIALOG_IsDialogMessage( HWND hwnd, HWND hwndDlg,
                                     (LPARAM)GetDlgItem( hwndDlg, IDOK ) );
 
                 }
+
+                return TRUE;
             }
-            return TRUE;
         }
         *translate = TRUE;
         break; /* case WM_KEYDOWN */
@@ -262,7 +292,7 @@ static BOOL DIALOG_IsDialogMessage( HWND hwnd, HWND hwndDlg,
         /* drop through */
 
     case WM_SYSCHAR:
-        if (DIALOG_IsAccelerator( hwnd, hwndDlg, wParam ))
+        if (DIALOG_IsAccelerator( msg->hwnd, hwndDlg, msg->wParam ))
         {
             /* don't translate or dispatch */
             return TRUE;
@@ -286,9 +316,7 @@ BOOL WIN32API IsDialogMessageA( HWND hwndDlg, LPMSG msg)
         return FALSE;
 
     dlgCode = SendMessageA( msg->hwnd, WM_GETDLGCODE, 0, (LPARAM)msg);
-    ret = DIALOG_IsDialogMessage( msg->hwnd, hwndDlg, msg->message,
-                                  msg->wParam, msg->lParam,
-                                  &translate, &dispatch, dlgCode );
+    ret = DIALOG_IsDialogMessage(hwndDlg,&translate,&dispatch,dlgCode,msg);
     if (translate) TranslateMessage( msg );
     if (dispatch) DispatchMessageA( msg );
 
@@ -305,9 +333,7 @@ BOOL WIN32API IsDialogMessageW(HWND hwndDlg, LPMSG msg)
         return FALSE;
 
     dlgCode = SendMessageW( msg->hwnd, WM_GETDLGCODE, 0, (LPARAM)msg);
-    ret = DIALOG_IsDialogMessage( msg->hwnd, hwndDlg, msg->message,
-                                  msg->wParam, msg->lParam,
-                                  &translate, &dispatch, dlgCode );
+    ret = DIALOG_IsDialogMessage(hwndDlg,&translate,&dispatch,dlgCode,msg);
     if (translate) TranslateMessage( msg );
     if (dispatch) DispatchMessageW( msg );
     return ret;
