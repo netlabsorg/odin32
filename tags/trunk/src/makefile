@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 1999-08-09 12:43:44 phaller Exp $
+# $Id: makefile,v 1.5 1999-08-10 12:43:22 phaller Exp $
 
 #
 # PD-Win32 API
@@ -54,6 +54,8 @@ all:
         $(MAKE_CMD)
         cd ..\NTDLL
         $(MAKE_CMD)
+        cd ..\LZ32
+        $(MAKE_CMD)
         cd ..\peldr
         $(MAKE_CMD)
         cd ..\pe2lx
@@ -108,4 +110,6 @@ clean:
         cd ..\shell32
         $(MAKE_CMD) clean
         cd ..\NTDLL
+        $(MAKE_CMD) clean
+        cd ..\LZ32
         $(MAKE_CMD) clean
