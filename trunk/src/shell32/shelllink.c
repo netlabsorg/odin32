@@ -250,7 +250,8 @@ static HRESULT WINAPI IPersistFile_fnLoad(IPersistFile* iface, LPCOLESTR pszFile
 
 
 #ifdef __WIN32OS2__
-static BOOL SaveIconResAsOS2ICO(GRPICONDIR *pIconDir, HINSTANCE hInstance, const char *szXPMFileName)
+static BOOL SaveIconResAsOS2ICO(GRPICONDIR *pIconDir, HINSTANCE hInstance, 
+                                const char *szXPMFileName)
 {
     FILE *fXPMFile;
     void *lpOS2Icon;
@@ -390,6 +391,26 @@ static int ExtractFromEXEDLL(const char *szFileName, int nIndex, const char *szX
     if (nIndex)
     {
         hResInfo = FindResourceA(hModule, MAKEINTRESOURCEA(nIndex), RT_GROUP_ICONA);
+#ifdef __WIN32OS2__
+        if(!hResInfo) {
+            hResInfo = FindResourceA(hModule, MAKEINTRESOURCEA(nIndex), RT_ICONA);        
+            if(hResInfo) {
+                GRPICONDIR icondir = {0};
+
+                icondir.idReserved = 0;
+                icondir.idType     = 1;
+                icondir.idCount    = 1;
+                icondir.idEntries[0].nID = nIndex;
+
+                if(!SaveIconResAsOS2ICO(&icondir, hModule, szXPMFileName))
+                {
+                    TRACE("Failed saving icon as XPM, error %ld\n", GetLastError());
+                    goto error3;
+                }
+                goto done;
+            }
+        }
+#endif
         TRACE("FindResourceA (%s) called, return 0x%x, error %ld\n", szFileName, hResInfo, GetLastError());
     }
     else
@@ -454,6 +475,8 @@ static int ExtractFromEXEDLL(const char *szFileName, int nIndex, const char *szX
         goto error3;
     }
 #endif
+
+done:
     FreeResource(hResData);
     FreeLibrary(hModule);
 
