@@ -1,4 +1,4 @@
-/* $Id: blit.cpp,v 1.21 2000-11-22 21:03:53 sandervl Exp $ */
+/* $Id: blit.cpp,v 1.22 2001-01-18 18:13:17 sandervl Exp $ */
 
 /*
  * GDI32 blit code
@@ -97,7 +97,7 @@ INT WIN32API SetDIBitsToDevice(HDC hdc, INT xDest, INT yDest, DWORD cx,
 {
     INT result, imgsize, palsize, height, width;
     char *ptr;
-    ULONG compression = 0, iHeight, bmpsize;
+    ULONG compression = 0, bmpsize;
     WORD *newbits = 0;
 
     dprintf(("GDI32: SetDIBitsToDevice hdc:%X xDest:%d yDest:%d, cx:%d, cy:%d, xSrc:%d, ySrc:%d, startscan:%d, lines:%d \nGDI32: bits 0x%X, info 0x%X, coloruse %d",
@@ -171,15 +171,29 @@ INT WIN32API SetDIBitsToDevice(HDC hdc, INT xDest, INT yDest, DWORD cx,
         }
     }
 
-    iHeight = info->bmiHeader.biHeight;
-    if(info->bmiHeader.biHeight < 0) {
-        ((BITMAPINFO *)info)->bmiHeader.biHeight = -info->bmiHeader.biHeight;
-    }
-    result = O32_SetDIBitsToDevice(hdc, xDest, yDest, cx, cy, xSrc, ySrc, startscan, lines, (PVOID) bits, (PBITMAPINFO)info, coloruse);
-    //SvL: Wrong Open32 return value
-//    result = (result == TRUE) ? lines : 0;
-    result = (result == TRUE) ? cy : 0;
+    result = O32_StretchDIBits(hdc, xDest, yDest, cx, cy, xSrc, ySrc,
+                             info->bmiHeader.biWidth, info->bmiHeader.biHeight, (void *)bits,
+                             (PBITMAPINFO)info, coloruse, SRCCOPY);
 
+    //Open32 always returns height of bitmap (regardless of how many scanlines were copied)
+    if(result != info->bmiHeader.biHeight) {
+	dprintf(("SetDIBitsToDevice failed with rc %x", result));
+    }
+    else 
+    {
+	result = info->bmiHeader.biHeight;
+
+  	DIBSection *destdib = DIBSection::findHDC(hdc);
+ 	if(destdib) {
+		if(cx == info->bmiHeader.biWidth && cy == info->bmiHeader.biHeight &&
+                   destdib->GetBitCount() == info->bmiHeader.biBitCount &&
+                   destdib->GetBitCount() == 8) 
+                {
+			destdib->sync(xDest, yDest, cx, cy, (PVOID)bits);
+		}
+		else	destdib->sync(hdc, yDest, cy);
+	}
+    }
     dprintf(("GDI32: SetDIBitsToDevice hdc:%X xDest:%d yDest:%d, cx:%d, cy:%d, xSrc:%d, ySrc:%d, startscan:%d, lines:%d \nGDI32: bits 0x%X, info 0x%X, coloruse %d returned %d",
                  hdc, xDest, yDest, cx, cy, xSrc, ySrc, startscan, lines, (LPVOID) bits, (PBITMAPINFO)info, coloruse, result));
     dprintf(("GDI32: SetDIBitsToDevice %d %d %d %d %x %d", info->bmiHeader.biWidth, info->bmiHeader.biHeight, info->bmiHeader.biPlanes, info->bmiHeader.biBitCount, info->bmiHeader.biCompression, info->bmiHeader.biSizeImage));
@@ -188,7 +202,6 @@ INT WIN32API SetDIBitsToDevice(HDC hdc, INT xDest, INT yDest, DWORD cx,
         ((BITMAPINFO *)info)->bmiHeader.biCompression = BI_BITFIELDS;
         if(newbits) free(newbits);
     }
-    ((BITMAPINFO *)info)->bmiHeader.biHeight = iHeight;
     ((BITMAPINFO *)info)->bmiHeader.biSizeImage = bmpsize;
     return result;
 

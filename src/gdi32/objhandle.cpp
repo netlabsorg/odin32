@@ -1,4 +1,4 @@
-/* $Id: objhandle.cpp,v 1.10 2000-12-30 13:28:32 sandervl Exp $ */
+/* $Id: objhandle.cpp,v 1.11 2001-01-18 18:13:18 sandervl Exp $ */
 /*
  * Win32 Handle Management Code for OS/2
  *
@@ -288,7 +288,7 @@ HGDIOBJ WIN32API SelectObject(HDC hdc, HGDIOBJ hObj)
 //******************************************************************************
 DWORD WIN32API GetObjectType( HGDIOBJ hObj)
 {
-    dprintf2(("GDI32: GetObjectType\n"));
+    dprintf2(("GDI32: GetObjectType %x", hObj));
     if(ObjGetHandleType(hObj) == GDIOBJ_REGION) {
         SetLastError(ERROR_SUCCESS);
         return OBJ_REGION;
