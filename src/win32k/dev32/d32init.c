@@ -1,4 +1,4 @@
-/* $Id: d32init.c,v 1.18 2000-04-17 01:56:48 bird Exp $
+/* $Id: d32init.c,v 1.19 2000-05-03 10:46:06 bird Exp $
  *
  * d32init.c - 32-bits init routines.
  *
@@ -19,7 +19,6 @@
 #else
     #define kprintf2(a) (void)0
 #endif
-
 
 #define INCL_DOSERRORS
 #define INCL_NOPMAPI
@@ -497,17 +496,11 @@ USHORT _loadds _Far32 _Pascal GetKernelInfo32(PKRNLINFO pKrnlInfo)
                                 }
 
                                 /* If this is an Aurora/Warp 4.5 or Warp 3 kernel there is more info! */
-                                if (*psz != ','
-                                    && (   (psz[1] == '_' && (psz[2] == 'S' || psz[2] == 's'))  /* F_SMP */
-                                        || (psz[0] == '_' && (psz[1] == 'S' || psz[1] == 's'))  /* _SMP  */
-                                       )
+                                if ((psz[0] != ',' && psz[1] == '_' && (psz[2] == 'S' || psz[2] == 's'))  /* F_SMP */
+                                    || (psz[0] == '_' && (psz[1] == 'S' || psz[1] == 's'))  /* _SMP  */
                                     )
                                     pKrnlInfo->fchType = TYPE_SMP;
-                                else
-                                    if (*psz != ','
-                                            || (psz[0] == '_'
-                                                && (psz[1] == 'W' || psz[1] == 'w') && psz[2] == '4')  /* _W4  */
-                                        )
+                                else if (psz[0] == '_' && psz[1] == 'W' && psz[2] == '4')    /* _W4  */
                                     pKrnlInfo->fchType = TYPE_W4;
                                 else
                                     pKrnlInfo->fchType = TYPE_UNI;
@@ -518,7 +511,6 @@ USHORT _loadds _Far32 _Pascal GetKernelInfo32(PKRNLINFO pKrnlInfo)
                                 pKrnlInfo->fDebug = FALSE;
                                 while (j < 5)
                                 {
-
                                     /* There should be no iopl object preceding the debugger data object. */
                                     if ((pKrnlOTE[j].ote_flags & OBJIOPL) != 0)
                                         break;
