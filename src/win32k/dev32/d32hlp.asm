@@ -1,4 +1,4 @@
-; $Id: d32hlp.asm,v 1.3.4.2 2000-08-13 09:23:58 bird Exp $
+; $Id: d32hlp.asm,v 1.3.4.3 2000-08-15 06:16:00 bird Exp $
 ;
 ; d32hlp - 32-bit Device Driver Helper Function.
 ;
@@ -109,7 +109,7 @@ D32Hlp_GetDOSVar proc near
     jmp     far ptr CODE16:Thunk16_GetDOSVar
 Thunk32_GetDOSVar::
     jc  Error
-    shl     ebx, 16
+    shl     eax, 16
     mov     bx, ax
     xchg    eax, ebx
     call    D32Hlp_VirtToLin

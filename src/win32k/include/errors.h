@@ -1,4 +1,4 @@
-/* $Id: errors.h,v 1.1.2.1 2000-08-14 08:58:04 bird Exp $
+/* $Id: errors.h,v 1.1.2.2 2000-08-15 06:16:03 bird Exp $
  *
  * Error definitions for Win32k.sys
  *
@@ -46,7 +46,7 @@
 #define ERROR_PROB_KRNL_OTE_SIZE_MIS                (ERROR_PROB_BASE + 20)
 
 #define ERROR_PROB_SYM_FIRST                        ERROR_PROB_SYM_FILE_NOT_FOUND
-#define ERROR_PROB_SYM_LAST                         ERROR_PROB_SYM_IMPORTS_NOTFOUND
+#define ERROR_PROB_SYM_LAST                         ERROR_PROB_SYMDB_KRNL_NOT_FOUND
 #define ERROR_PROB_SYM_FILE_NOT_FOUND               (ERROR_PROB_BASE + 30)
 #define ERROR_PROB_SYM_READERROR                    (ERROR_PROB_BASE + 31)
 #define ERROR_PROB_SYM_INVALID_MOD_NAME             (ERROR_PROB_BASE + 32)
@@ -63,8 +63,8 @@
 #define ERROR_PROB_SYM_                             (ERROR_PROB_BASE + 41)
 #define ERROR_PROB_SYM_                             (ERROR_PROB_BASE + 42) */
 #define ERROR_PROB_SYM_IMPORTS_NOTFOUND             (ERROR_PROB_BASE + 43)
+#define ERROR_PROB_SYMDB_KRNL_NOT_FOUND             (ERROR_PROB_BASE + 44)
 
-#define ERROR_PROB_SYMDB_KRNL_NOT_FOUND             (ERROR_PROB_BASE + 50)
 
 
 /*
