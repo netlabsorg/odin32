@@ -1,4 +1,4 @@
-/* $Id: OS2DDRAW.CPP,v 1.30 2001-09-24 18:42:00 sandervl Exp $ */
+/* $Id: OS2DDRAW.CPP,v 1.31 2001-09-30 22:23:44 sandervl Exp $ */
 
 /*
  * DX Draw base class implementation
@@ -208,8 +208,8 @@ OS2IDirectDraw::OS2IDirectDraw(GUID *lpGUID) :
   pdwUnknownData[236] = dCaps.ulVerticalResolution;
   pdwUnknownData[241] = dCaps.ulDepth;
 
-  screenwidth  = dCaps.ulVerticalResolution;
-  screenheight = dCaps.ulHorizontalResolution;
+  screenwidth  = dCaps.ulHorizontalResolution;
+  screenheight = dCaps.ulVerticalResolution;
   screenbpp    = dCaps.ulDepth;
 
   // Shall we run in FS mode ?

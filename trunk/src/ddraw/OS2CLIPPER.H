@@ -1,4 +1,4 @@
-/* $Id: OS2CLIPPER.H,v 1.8 2001-05-28 17:17:12 phaller Exp $ */
+/* $Id: OS2CLIPPER.H,v 1.9 2001-09-30 22:23:44 sandervl Exp $ */
 
 /*
  * DX clipper class definition
@@ -35,21 +35,26 @@ class OS2IDirectDrawClipper
         OS2IDirectDraw        *lpDraw;
         HDIVE                  hDive;
         HWND                   clipWindow;
-        RECT                   windowRect;
+
+        LPRGNDATA              lpRgnData;
+        BOOL                   fClipListChanged;
+        BOOL                   fDrawingAllowed;
 
                               // Linked list management
               OS2IDirectDrawClipper* next;                   // Next OS2IDirectDraw
     static    OS2IDirectDrawClipper* ddraw;                  // List of OS2IDirectDraw
 
-    friend    HRESULT __stdcall ClipQueryInterface(THIS, REFIID riid, LPVOID FAR * ppvObj);
-    friend    ULONG   __stdcall ClipAddRef(THIS);
-    friend    ULONG   __stdcall ClipRelease(THIS);
-    friend    HRESULT __stdcall ClipGetClipList(THIS, LPRECT, LPRGNDATA, LPDWORD);
-    friend    HRESULT __stdcall ClipGetHWnd(THIS, HWND FAR *);
-    friend    HRESULT __stdcall ClipInitialize(THIS, LPDIRECTDRAW, DWORD);
-    friend    HRESULT __stdcall ClipIsClipListChanged(THIS, BOOL FAR *);
-    friend    HRESULT __stdcall ClipSetClipList(THIS, LPRGNDATA,DWORD);
-    friend    HRESULT __stdcall ClipSetHWnd(THIS, DWORD, HWND );
+    friend    HRESULT WIN32API ClipQueryInterface(THIS, REFIID riid, LPVOID FAR * ppvObj);
+    friend    ULONG   WIN32API ClipAddRef(THIS);
+    friend    ULONG   WIN32API ClipRelease(THIS);
+    friend    HRESULT WIN32API ClipGetClipList(THIS, LPRECT, LPRGNDATA, LPDWORD);
+    friend    HRESULT WIN32API ClipGetHWnd(THIS, HWND FAR *);
+    friend    HRESULT WIN32API ClipInitialize(THIS, LPDIRECTDRAW, DWORD);
+    friend    HRESULT WIN32API ClipIsClipListChanged(THIS, BOOL FAR *);
+    friend    HRESULT WIN32API ClipSetClipList(THIS, LPRGNDATA,DWORD);
+    friend    HRESULT WIN32API ClipSetHWnd(THIS, DWORD, HWND );
+    friend    BOOL    WIN32API ClipVisRgnCallback(HWND hwnd, BOOL fDrawingAllowed, DWORD dwUserData);
+
 };
 
 HRESULT __stdcall ClipQueryInterface(THIS, REFIID riid, LPVOID FAR * ppvObj);
