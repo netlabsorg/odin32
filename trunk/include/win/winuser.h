@@ -3769,7 +3769,8 @@ LONG        WINAPI TabbedTextOutW(HDC,INT,INT,LPCWSTR,INT,INT,INT*,INT);
 INT       WINAPI ToAscii(UINT,UINT,LPBYTE,LPWORD,UINT);
 INT       WINAPI ToAsciiEx(UINT,UINT,LPBYTE,LPWORD,UINT,HKL);
 BOOL      WINAPI TrackPopupMenu(HMENU,UINT,INT,INT,INT,HWND,const RECT*);
-INT       WINAPI TranslateAccelerator(HWND,HACCEL,LPMSG);
+INT       WINAPI TranslateAcceleratorA(HWND,HACCEL,LPMSG);
+#define     TranslateAccelerator TranslateAcceleratorA
 BOOL      WINAPI TranslateMDISysAccel(HWND,LPMSG);
 BOOL      WINAPI TranslateMessage(const MSG*);
 BOOL      WINAPI UnhookWindowsHook(INT,HOOKPROC);
