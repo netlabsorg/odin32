@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.60 1999-12-16 16:53:58 cbratschi Exp $ */
+/* $Id: user32.cpp,v 1.61 1999-12-18 16:31:49 cbratschi Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -2570,80 +2570,6 @@ VOID WIN32API SetDebugErrorLevel(DWORD dwLevel)
 /* Hook Functions */
 
 /* CB: move to MDI */
-
-/*****************************************************************************
- * Name      : WORD WIN32API TileWindows
- * Purpose   : The TileWindows function tiles the specified windows, or the child
- *             windows of the specified parent window.
- * Parameters: HWND       hwndParent     handle of parent window
- *             WORD       wFlags         types of windows not to arrange
- *             LPCRECT    lpRect         rectangle to arrange windows in
- *             WORD       cChildrenb     number of windows to arrange
- *             const HWND *ahwndChildren array of window handles
- * Variables :
- * Result    : If the function succeeds, the return value is the number of
- *               windows arranged.
- *             If the function fails, the return value is zero.
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
- *****************************************************************************/
-WORD WIN32API TileWindows(HWND       hwndParent,
-                          UINT       wFlags,
-                          const LPRECT lpRect,
-                          UINT       cChildrenb,
-                          const HWND *ahwndChildren)
-{
-  dprintf(("USER32:TileWindows (%08xh,%08xh,%08xh,%08xh,%08x) not implemented.\n",
-           hwndParent,
-           wFlags,
-           lpRect,
-           cChildrenb,
-           ahwndChildren));
-
-   return (0);
-}
-/*****************************************************************************
- * Name      : BOOL WIN32API TileChildWindows
- * Purpose   : Unknown
- * Parameters: Unknown
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED UNKNOWN STUB
- *
- * Author    : Patrick Haller [Wed, 1998/06/16 11:55]
- *****************************************************************************/
-BOOL WIN32API TileChildWindows(DWORD x1,
-                                  DWORD x2)
-{
-  dprintf(("USER32: TileChildWindows(%08xh,%08xh) not implemented.\n",
-           x1,
-           x2));
-
-  return (FALSE); /* default */
-}
-/*****************************************************************************
- * Name      : BOOL WIN32API CascadeChildWindows
- * Purpose   : Unknown
- * Parameters: Unknown
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED UNKNOWN STUB
- *
- * Author    : Patrick Haller [Wed, 1998/06/16 11:55]
- *****************************************************************************/
-BOOL WIN32API CascadeChildWindows(DWORD x1,
-                                     DWORD x2)
-{
-  dprintf(("USER32: CascadeChildWindows(%08xh,%08xh) not implemented.\n",
-           x1,
-           x2));
-
-  return (FALSE); /* default */
-}
 
 /* Drag'n'drop */
 
