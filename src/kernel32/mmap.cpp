@@ -1,4 +1,4 @@
-/* $Id: mmap.cpp,v 1.57 2002-06-13 14:11:39 sandervl Exp $ */
+/* $Id: mmap.cpp,v 1.58 2002-07-15 14:28:51 sandervl Exp $ */
 
 /*
  * Win32 Memory mapped file & view classes
@@ -32,6 +32,7 @@
 #include <handlemanager.h>
 #include "mmap.h"
 #include "oslibdos.h"
+#include "oslibmem.h"
 #include <winimagepeldr.h>
 #include <custombuild.h> 
 
@@ -609,24 +610,24 @@ Win32MemMapView::Win32MemMapView(Win32MemMap *map, ULONG offset, ULONG size,
  ULONG            accessAttr = 0;
  Win32MemMapView *tmpview  = mapviews;
 
-    errorState = 0;
-    mParentMap = map;
-    mSize    = size;
-    mOffset  = offset;
-    mProcessId = GetCurrentProcessId();
-    pShareViewAddr = NULL;
+    errorState      = 0;
+    mParentMap      = map;
+    mSize           = size;
+    mOffset         = offset;
+    mProcessId      = GetCurrentProcessId();
+    pShareViewAddr  = NULL;
 
     switch(fdwAccess) {
     case FILE_MAP_READ:
-        accessAttr = PAG_READ;
-        mfAccess   = MEMMAP_ACCESS_READ;
+        accessAttr  = PAG_READ;
+        mfAccess    = MEMMAP_ACCESS_READ;
         break;
     case FILE_MAP_ALL_ACCESS:
     case FILE_MAP_WRITE:
     case FILE_MAP_WRITE|FILE_MAP_READ:
     case FILE_MAP_COPY:
-        accessAttr = (PAG_READ|PAG_WRITE);
-        mfAccess   = MEMMAP_ACCESS_READ | MEMMAP_ACCESS_WRITE;
+        accessAttr  = (PAG_READ|PAG_WRITE);
+        mfAccess    = MEMMAP_ACCESS_READ | MEMMAP_ACCESS_WRITE;
         break;
     }
     //Named file mappings from other processes are always shared;
