@@ -1,4 +1,4 @@
-/* $Id: odin.cmd,v 1.24 2001-01-06 16:42:45 sandervl Exp $
+/* $Id: odin.cmd,v 1.25 2001-01-09 18:17:46 sandervl Exp $
  *
  * Odin32 API WarpIn installation script generator.
  *
@@ -115,25 +115,15 @@ rc = lineout(sInstFile, '     CONFIGSYS="LIBPATH=$(1)\SYSTEM32 | ADDRIGHT"');
 rc = lineout(sInstFile, '     CONFIGSYS="SET PATH=$(1)\SYSTEM32 | ADDRIGHT"');
 rc = lineout(sInstFile, '     >Installation of Odin System files .</PCK>');
 rc = lineout(sInstFile, '');
-/* Win32k installation temporarily disabled due to a WarpIn bug (config.sys lines
- removed)
 rc = lineout(sInstFile, '<PCK INDEX=3');
 rc = lineout(sInstFile, '     PACKAGEID="Odin\Odin\Add Win32k.sys to Config.sys\0\0\5"');
 rc = lineout(sInstFile, '     TARGET="C:\ODIN\SYSTEM32"');
 rc = lineout(sInstFile, '     FIXED');
 title = "     TITLE=""Add Win32k.sys to Config.sys""";
 rc = lineout(sInstFile, title);
-rc = lineout(sInstFile, '     CONFIGSYS="DEVICE=WIN32K.SYS | REMOVELINE"');
-rc = lineout(sInstFile, '     CONFIGSYS="DEVICE=WIN32K.SYS | REMOVELINE"');
-rc = lineout(sInstFile, '     CONFIGSYS="DEVICE=WIN32K.SYS | REMOVELINE"');
-rc = lineout(sInstFile, '     CONFIGSYS="DEVICE=WIN32K.SYS | REMOVELINE"');
-rc = lineout(sInstFile, '     CONFIGSYS="DEVICE=WIN32K.SYS | REMOVELINE"');
-rc = lineout(sInstFile, '     CONFIGSYS="DEVICE=WIN32K.SYS | REMOVELINE"');
-rc = lineout(sInstFile, '     CONFIGSYS="DEVICE=WIN32K.SYS | REMOVELINE"');
-rc = lineout(sInstFile, '     CONFIGSYS="DEVICE=$(1)\SYSTEM32\Win32k.sys -pe:pe -Dllfixes:D | UNIQUE ADDTOP"');
+rc = lineout(sInstFile, '     CONFIGSYS="DEVICE=$(1)\SYSTEM32\Win32k.sys -pe:pe -Dllfixes:D | UNIQUE(WIN32K.SYS) ADDTOP"');
 rc = lineout(sInstFile, '     >Add Win32k.sys to Config.sys .</PCK>');
 rc = lineout(sInstFile, '');
-*/
 rc = lineout(sInstFile, '</HEAD>');
 rc = lineout(sInstFile, '<BODY>');
 rc = lineout(sInstFile, '<PAGE INDEX=1 TYPE=TEXT>');
@@ -358,7 +348,7 @@ if (rc <> 0) then return rc;
 say sWICCmd '2 -c'||sBinDir' *.ini 2 -c'||sDllDir '*.dll pe.exe pec.exe odininst.exe regsvr32.exe win32k.sys win32k.ddp Win32kCC.exe kRx.exe';
 /* sWICCmd '2 -c'||sBinDir' odin.ini'; */
 if (rc <> 0) then return rc;
-sWICCmd '2 -c'||sDllDir 'pe.exe *.dll pec.exe odininst.exe regsvr32.exe win32k.sys win32k.ddp Win32kCC.exe kRx.exe';
+sWICCmd '2 -c'||sDllDir 'pe.exe *.dll ..\wgss50.dll pec.exe odininst.exe regsvr32.exe win32k.sys win32k.ddp Win32kCC.exe kRx.exe';
 if (rc <> 0) then return rc;
 if (pos('DEBUG', translate(filespec('name', sDllDir))) > 0) then
 do
@@ -369,12 +359,8 @@ end
 /*
  * Packet 3 is only win32k.sys config.sys line but it seems like we have to add something.
  */
-/* Win32k installation temporarily disabled due to a WarpIn bug (config.sys lines
- removed) */
-/*
 sWICCmd '3 -c'||sDllDir '*.ddp';
 if (rc <> 0) then return rc;
-*/
 
 return rc;
 
