@@ -1,11 +1,26 @@
- /* $Id: changelog,v 1.277 1999-10-06 10:36:38 dengert Exp $ */
+ /* $Id: changelog,v 1.278 1999-10-07 09:29:11 sandervl Exp $ */
+
+ 99-10-07: Edgar Buerkle <Edgar.Buerkle@gmx.net>
+	- USER32: Set window PM id for Odin windows.
+                  Bugfix for WM_QUERYWINDOWPARAMS handler
+                  Case insensitive string compare in CreateWindowExA/W for
+                  mdi client class check.
+                  Create ascii or unicode mdi child window based on mdi client
+                  window type.
+
+ 99-10-07: Jens Wiessner <wiessnej@rfi.de>
+        - CRTDLL: Includes all functions (added stubs and fully implemented functions)
+         
+ 99-10-07: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32: Only display scrollbars when they need to be shown.
+                  (also fixes redraw problems with inactive scrollbars)
 
  99-10-06: Daniela Engert <dani@ngrt.de>
 	- USER32: fix: adjust caret position if window height changes.
 
  99-10-06: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Fixed memory leaks in SetWindowTextA/W window class methods
-	- KERNEL32: Put back my changes (10/04/99) to winimgres.cpp
+	- KERNEL32: Put back my changes (10/04/99) in winimgres.cpp
 
  99-10-06: Patrick Haller <phaller@gmx.net>
 	- KERNEL32: Fix: DLLs without Resource Segment (pResDir == NULL)
