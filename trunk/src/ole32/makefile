@@ -17,7 +17,8 @@ CFLAGS = $(CFLAGS) -I$(PDWIN32_INCLUDE)
 CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
 
 
-TARGET = ole32
+TARGET = ole32os2
+ORGTARGET = ole32
 
 OBJS =  ole32.obj \
         antimoniker.obj \
@@ -48,11 +49,11 @@ OBJS =  ole32.obj \
 	stubs.obj \
 	taskmem.obj
 
-all: $(TARGET).dll $(TARGET).lib regsvr32.exe
+all: $(TARGET).dll $(ORGTARGET).lib regsvr32.exe
 
 
-$(TARGET).dll: $(OBJS) $(TARGET).def 
-	$(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) $(TARGET).def \
+$(TARGET).dll: $(OBJS) $(ORGTARGET).def 
+	$(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) $(ORGTARGET).def \
               $(PDWIN32_LIB)\pmwinx.lib \
               $(PDWIN32_LIB)\user32.lib \
               $(PDWIN32_LIB)\gdi32.lib \
@@ -63,11 +64,11 @@ $(TARGET).dll: $(OBJS) $(TARGET).def
 	$(CP) $@ $(PDWIN32_BIN)
 #              $(PDWIN32_LIB)\ntdll.lib \
 
-$(TARGET).lib: $(TARGET)exp.def
-        $(IMPLIB) $(IMPLIBFLAGS) $@ $(TARGET)exp.def
+$(ORGTARGET).lib: $(ORGTARGET)exp.def
+        $(IMPLIB) $(IMPLIBFLAGS) $@ $(ORGTARGET)exp.def
         $(CP) $@ $(PDWIN32_LIB)
 
-$(TARGET)exp.def: $(TARGET).def
+$(ORGTARGET)exp.def: $(ORGTARGET).def
         $(IMPDEF) $** $@
 
 .\stubs.obj: \
@@ -412,7 +413,7 @@ regsvr32.exe:	regsvr32.obj regsvr32.def \
 	$(CP) $@ $(PDWIN32_BIN)
 
 clean:
-	$(RM) *.obj *.lib *.dll *~ *.map *.pch	
+	$(RM) *.obj *.lib *.dll *.map *.pch	
 	$(RM) $(PDWIN32_BIN)\$(TARGET).dll
 	$(RM) $(PDWIN32_LIB)\$(TARGET).lib
 	$(RM) $(PDWIN32_BIN)\regsvr32.exe
