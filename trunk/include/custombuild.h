@@ -63,11 +63,13 @@ BOOL WIN32API UnRegisterCustomDriver(LPCSTR lpDriverName);
 //SetDialogHook can be used by a custom Odin build to register a hook procedure
 //that gets called before or after dialog creation
 
-#define HCUSTOM_PREDIALOGCREATION	0
-#define HCUSTOM_POSTDIALOGCREATION	1
+#define HODIN_PREDIALOGCREATION		0
+#define HODIN_POSTDIALOGCREATION	1
+#define HODIN_WINDOWCREATED		2
 
-BOOL WIN32API SetCustomDialogHook(HOOKPROC pfnDialogProc);
-BOOL WIN32API ClearCustomDialogHook();
+HHOOK   WIN32API SetOdinHookA(HOOKPROC proc );
+BOOL    WIN32API UnhookOdinHook(HHOOK hhook);
+LRESULT HOOK_CallOdinHookA(INT code, WPARAM wParam, LPARAM lParam );
 
 //Override LoadImage function
 typedef void (* WIN32API PFNLOADIMAGEW)(HINSTANCE *phinst, LPWSTR *lplpszName, UINT *lpuType);

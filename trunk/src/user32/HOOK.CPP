@@ -1,4 +1,4 @@
-/* $Id: HOOK.CPP,v 1.35 2002-02-11 16:05:58 sandervl Exp $ */
+/* $Id: HOOK.CPP,v 1.36 2002-03-28 16:20:06 sandervl Exp $ */
 
 /*
  * Windows hook functions
@@ -860,3 +860,35 @@ BOOL ProcessKbdHookLL(LPMSG msg, BOOL flagRemove, BOOL flagInjected )
                           (LPARAM)&kbhs )
                           ? TRUE : FALSE);
 }
+
+#ifdef __WIN32OS2__
+//******************************************************************************
+//Custom Odin hooks
+static HOOKPROC pfnOdinHook = NULL;
+//******************************************************************************
+HHOOK WIN32API SetOdinHookA(HOOKPROC proc )
+{
+    if(pfnOdinHook) DebugInt3();
+
+    pfnOdinHook = proc;
+    return (HHOOK)proc;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API UnhookOdinHook(HHOOK hhook)
+{
+    pfnOdinHook = NULL;
+    return TRUE;
+}
+//******************************************************************************
+//******************************************************************************
+LRESULT HOOK_CallOdinHookA(INT code, WPARAM wParam, LPARAM lParam)
+{
+    if(pfnOdinHook) {
+        return pfnOdinHook(code, wParam, lParam);
+    }
+    return 0;
+}
+//******************************************************************************
+//******************************************************************************
+#endif //__WIN32OS2__
