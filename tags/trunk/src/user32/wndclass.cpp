@@ -1,4 +1,4 @@
-/* $Id: wndclass.cpp,v 1.8 1999-06-26 08:25:22 sandervl Exp $ */
+/* $Id: wndclass.cpp,v 1.9 1999-06-26 13:21:11 sandervl Exp $ */
 
 /*
  * Win32 Window Class Managment Code for OS/2
@@ -15,13 +15,16 @@
  */
 #include <os2win.h>
 #include <stdarg.h>
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 #include <assert.h>
-#include "misc.h"
-#include "user32.h"
-#include "wndproc.h"
-#include "wndclass.h"
-#include "hooks.h"
+#include <misc.h>
+#include <wndproc.h>
+#include <wndclass.h>
+#include <nameid.h>
 #include <spy.h>
+#include "hooks.h"
 
 //default window handlers that are registered by RegisterClass are called
 //in this callback handler
@@ -63,8 +66,31 @@ Win32WindowClass *StaticClass = 0;
 //******************************************************************************
 LRESULT WIN32API ButtonCallback(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
+ DWORD dwStyle, dwExStyle;
+
+  PostSpyMessage(hwnd, Msg, wParam, lParam);
   switch(Msg)
   {
+	case WM_MOUSEACTIVATE:
+		//Open32 sends an OS/2 window message for a button click
+		if(HIWORD(lParam) == 0x71)  //WM_BUTTONCLICKFIRST
+		{
+			lParam = (WM_LBUTTONDOWN << 16) | LOWORD(lParam);
+		}
+		dwStyle   = GetWindowLongA(hwnd, GWL_STYLE);
+		dwExStyle = GetWindowLongA(hwnd, GWL_EXSTYLE);
+
+		if(dwStyle & WS_CHILD && !(dwExStyle & WS_EX_NOPARENTNOTIFY) )
+		{
+			HWND hwndParent = GetParent(hwnd);
+
+			Win32WindowProc *parentwnd = Win32WindowProc::FindProc(hwndParent);
+			if(parentwnd) {
+				LRESULT rc = parentwnd->SendMessageA(hwndParent, Msg, wParam, lParam);
+				if(rc) return TRUE;
+			}
+		}
+		break;
 	case WM_CREATE:
 	case WM_DESTROY:
 	case WM_LBUTTONDOWN:
@@ -79,36 +105,42 @@ LRESULT WIN32API ButtonCallback(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lPara
 //******************************************************************************
 LRESULT WIN32API ListboxCallback(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
+  PostSpyMessage(hwnd, Msg, wParam, lParam);
   return ListboxHandler(hwnd, Msg, wParam, lParam);
 }
 //******************************************************************************
 //******************************************************************************
 LRESULT WIN32API ComboboxCallback(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
+  PostSpyMessage(hwnd, Msg, wParam, lParam);
   return ComboboxHandler(hwnd, Msg, wParam, lParam);
 }
 //******************************************************************************
 //******************************************************************************
 LRESULT WIN32API MdiClientCallback(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
+  PostSpyMessage(hwnd, Msg, wParam, lParam);
   return MdiClientHandler(hwnd, Msg, wParam, lParam);
 }
 //******************************************************************************
 //******************************************************************************
 LRESULT WIN32API EditCallback(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
+  PostSpyMessage(hwnd, Msg, wParam, lParam);
   return EditHandler(hwnd, Msg, wParam, lParam);
 }
 //******************************************************************************
 //******************************************************************************
 LRESULT WIN32API ScrollbarCallback(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
+  PostSpyMessage(hwnd, Msg, wParam, lParam);
   return ScrollbarHandler(hwnd, Msg, wParam, lParam);
 }
 //******************************************************************************
 //******************************************************************************
 LRESULT WIN32API StaticCallback(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
+  PostSpyMessage(hwnd, Msg, wParam, lParam);
   return StaticHandler(hwnd, Msg, wParam, lParam);
 }
 //******************************************************************************
@@ -197,13 +229,13 @@ void RegisterSystemClasses(ULONG hModule)
 void UnregisterSystemClasses()
 {
    dprintf(("KERNEL32: UnregisterSystemClasses"));
-   if(hwndButton)    O32_DestroyWindow(hwndButton);
-   if(hwndListbox)   O32_DestroyWindow(hwndListbox);
-   if(hwndCombobox)  O32_DestroyWindow(hwndCombobox);
-   if(hwndMdiClient) O32_DestroyWindow(hwndMdiClient);
-   if(hwndEdit)      O32_DestroyWindow(hwndEdit);
-   if(hwndScrollbar) O32_DestroyWindow(hwndScrollbar);
-   if(hwndStatic)    O32_DestroyWindow(hwndStatic);
+   if(hwndButton)     O32_DestroyWindow(hwndButton);
+   if(hwndListbox)    O32_DestroyWindow(hwndListbox);
+   if(hwndCombobox)   O32_DestroyWindow(hwndCombobox);
+   if(hwndMdiClient)  O32_DestroyWindow(hwndMdiClient);
+   if(hwndEdit)       O32_DestroyWindow(hwndEdit);
+   if(hwndScrollbar)  O32_DestroyWindow(hwndScrollbar);
+   if(hwndStatic)     O32_DestroyWindow(hwndStatic);
    if(ButtonClass)    delete ButtonClass;
    if(ListboxClass)   delete ListboxClass;
    if(EditClass)      delete EditClass;
@@ -256,16 +288,6 @@ ATOM WIN32API RegisterClassA(const WNDCLASSA *lpWndClass)
 #endif
     //These are not supported by Open32
     wc.style &= ~(CS_PARENTDC | CS_CLASSDC);
-
-//SvL: 18-7-'98 Breaks apps (solitaire, rasmol..)  
-#if 0
-    /* @@@PH 98/06/21 experimental fix for WInhlp32 */
-#ifndef CS_SYNCPAINT
-  #define CS_SYNCPAINT 0x02000000L
-#endif
-  
-    wc.style |= CS_SYNCPAINT;
-#endif
 
     wc.lpfnWndProc = (WNDPROC)Win32WindowClass::GetOS2ClassCallback();
     rc = O32_RegisterClass(&wc);
@@ -839,27 +861,36 @@ LRESULT EXPENTRY_O32 OS2ToWinCallback(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM
 		case WM_KEYDOWN:
 		case WM_KEYUP:
 		case WM_CHAR:	//SvL: Correct Open32 key mapping bug
+			//TODO: Not good enough, look at Wine
                         lParam = MapOEMToRealKey(wParam, lParam);
 			break;
-		case WM_ACTIVATE:
-                	if(LOWORD(wParam) != WA_INACTIVE)
-                  {
-                   //EB: I think the problem is not a missing wm_erasebkgnd.
-                   //Maybe some wrong flags in open32 during async repainting.
-                   //SvL: Bugfix, Open32 is NOT sending this to the window (messes up Solitaire)
-                   RECT rect;
-                   HRGN hrgn;
-                   HDC hdc = GetDC(hwnd);
 
-                   // erase the dirty rect
-                   GetUpdateRect(hwnd, &rect, TRUE);
-                   hrgn = CreateRectRgnIndirect(&rect);
-                   SelectClipRgn (hdc, hrgn);
-                   DeleteObject (hrgn);
-                   wclass->GetWinCallback()(hwnd, WM_ERASEBKGND, hdc, (LPARAM)&rect);
-                   SelectClipRgn (hdc, NULL);
-                   ReleaseDC(hwnd, hdc);
-                  }
+		case WM_MOUSEACTIVATE:
+			//Open32 sends an OS/2 window message for a button click
+			if(HIWORD(lParam) == 0x71)  //WM_BUTTONCLICKFIRST
+			{
+				lParam = (WM_LBUTTONDOWN << 16) | LOWORD(lParam);
+			}
+			break;
+
+		case WM_ACTIVATE:
+                  	if(LOWORD(wParam) != WA_INACTIVE)
+                  	{
+                   	  //EB: I think the problem is not a missing wm_erasebkgnd.
+                   	  //Maybe some wrong flags in open32 during async repainting.
+                   	  RECT rect;
+                   	  HRGN hrgn;
+                   	  HDC hdc = GetDC(hwnd);
+
+                   		// erase the dirty rect
+                   		GetUpdateRect(hwnd, &rect, TRUE);
+                   		hrgn = CreateRectRgnIndirect(&rect);
+                   		SelectClipRgn (hdc, hrgn);
+                   		DeleteObject (hrgn);
+                   		wclass->GetWinCallback()(hwnd, WM_ERASEBKGND, hdc, (LPARAM)&rect);
+                   		SelectClipRgn (hdc, NULL);
+                   		ReleaseDC(hwnd, hdc);
+                  	}
 			break;
 		}
 		return wclass->GetWinCallback()(hwnd, Msg, wParam, lParam);

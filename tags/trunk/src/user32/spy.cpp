@@ -1,4 +1,4 @@
-/* $Id: spy.cpp,v 1.1 1999-06-25 21:35:27 sandervl Exp $ */
+/* $Id: spy.cpp,v 1.2 1999-06-26 13:21:12 sandervl Exp $ */
 
 /*
  * Queue procedures to send messages to the spy server
@@ -70,12 +70,12 @@ void CloseSpyQueue()
    	DosFreeMem(pvdQMemory);
 }
 
-VOID PostSpyMessage(HWND hwnd, ULONG Msg, ULONG wParam, ULONG lParam)
+BOOL PostSpyMessage(HWND hwnd, ULONG Msg, ULONG wParam, ULONG lParam)
 {
  APIRET rc;
 
    if (hqQueue == 0)
-	return;
+	return FALSE;
    
    pvdQMemory[msgIndex].hwnd   = hwnd;
    pvdQMemory[msgIndex].Msg    = Msg;
@@ -90,11 +90,12 @@ VOID PostSpyMessage(HWND hwnd, ULONG Msg, ULONG wParam, ULONG lParam)
    {
 	hqQueue = 0; //give up, server probably died
 	dprintf(("PostSpyMessage: DosWriteQueue returned %d", rc));
-	return;
+	return FALSE;
    }
    if(++msgIndex >= MAX_MESSAGES) 
    {
 	msgIndex = 0;
    }
+   return TRUE;
 }
 

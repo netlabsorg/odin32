@@ -1,4 +1,4 @@
-/* $Id: wndproc.h,v 1.3 1999-06-20 16:47:37 sandervl Exp $ */
+/* $Id: wndproc.h,v 1.4 1999-06-26 13:21:53 sandervl Exp $ */
 
 /*
  *
@@ -44,6 +44,8 @@ public:
  static Win32WindowProc *FindProc(HWND hwnd);
  static Win32WindowProc *FindProc(HWND hwnd, DWORD threadid);
 	void SetWindowHandle(HWND hwndProc) { hwnd = hwndProc; };
+
+     LRESULT SendMessageA(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam);
 
  static BOOL FindWindowProc(Win32WindowProc *wndproc);
 
