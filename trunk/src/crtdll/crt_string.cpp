@@ -1,4 +1,4 @@
-/* $Id: crt_string.cpp,v 1.1 2000-02-03 21:37:48 sandervl Exp $ */
+/* $Id: crt_string.cpp,v 1.2 2000-02-21 10:34:01 sandervl Exp $ */
 
 /*
  * The C RunTime DLL
@@ -67,6 +67,16 @@ LPSTR CDECL CRTDLL__strdup(LPCSTR ptr)
 
 
 /*********************************************************************
+ *           _strerror  	 (CRTDLL.284)
+ */
+char * CDECL CRTDLL__strerror(const char *s)
+{
+  dprintf(("CRTDLL: _strerror\n"));
+  return (_strerror((char*)s));
+}
+
+
+/*********************************************************************
  *           _stricmp  	 (CRTDLL.285)
  */
 int CDECL CRTDLL__stricmp(const LPSTR str1,
@@ -130,6 +140,7 @@ size_t CDECL CRTDLL__strncnt( const char *p, size_t l )
     i = strlen(p);
     return( (i>l) ? l : i );
 }
+
 
 /*********************************************************************
  *           CRTDLL__strnextc	 (CRTDLL.290)

@@ -1,4 +1,4 @@
-/* $Id: stubs.cpp,v 1.1 2000-02-03 21:37:50 sandervl Exp $ */
+/* $Id: stubs.cpp,v 1.2 2000-02-21 10:34:02 sandervl Exp $ */
 
 /*
  * The C RunTime DLL
@@ -68,7 +68,7 @@ int CDECL CRTDLL__abnormal_termination(void)
 
 
 /*********************************************************************
- *           CRTDLL__chgsign	 (CRTDLL.53)
+ *           _chgsign	 (CRTDLL.53)
  */
 double CDECL CRTDLL__chgsign(double x)
 {
@@ -79,7 +79,7 @@ double CDECL CRTDLL__chgsign(double x)
 
 
 /*********************************************************************
- *                  CRTDLL__commit    (CRTDLL.58)
+ *                  _commit    (CRTDLL.58)
  */
 int CDECL CRTDLL__commit( int fd )
 {
@@ -90,7 +90,7 @@ int CDECL CRTDLL__commit( int fd )
 
 
 /*********************************************************************
- *                  CRTDLL__copysign    (CRTDLL.62)
+ *                  _copysign    (CRTDLL.62)
  */
 double CDECL CRTDLL__copysign( double d, double s )
 {
@@ -200,16 +200,6 @@ INT CDECL CRTDLL__fpieee_flt( unsigned long exc_code, struct _EXCEPTION_POINTERS
 
 
 /*********************************************************************
- *	_fpreset				(CRTDLL.107)
- */
-void CDECL CRTDLL__fpreset(void)
-{
-  dprintf(("CRTDLL: _fpreset not implemented.\n"));
-  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-}
-
-
-/*********************************************************************
  *	_fputwchar				(CRTDLL.109)
  */
 wint_t CDECL CRTDLL__fputwchar( wint_t )
@@ -226,28 +216,6 @@ wint_t CDECL CRTDLL__fputwchar( wint_t )
 FILE * CDECL CRTDLL__fsopen( const char *file, const char *mode, int shflag )
 {
   dprintf(("CRTDLL: _fsopen not implemented.\n"));
-  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-  return FALSE;
-}
-
-
-/*********************************************************************
- *	_fstat					(CRTDLL.111)
- */
-int CDECL CRTDLL__fstat(int file, struct stat* buf)
-{
-  dprintf(("CRTDLL: _fstat not implemented.\n"));
-  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-  return FALSE;
-}
-
-
-/*********************************************************************
- *	_ftime					(CRTDLL.112)
- */
-int CDECL CRTDLL__ftime( struct timeb *timebuf )
-{
-  dprintf(("CRTDLL: _ftime not implemented.\n"));
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return FALSE;
 }
@@ -1163,28 +1131,6 @@ int  CDECL CRTDLL__snwprintf( wchar_t *buf, size_t bufsize, const wchar_t *fmt, 
 
 
 /*********************************************************************
- *	_sopen					(CRTDLL.268)
- */
-int CDECL CRTDLL__sopen( const char *s, int i1, int i2, ... )
-{
-  dprintf(("CRTDLL: _sopen not implemented.\n"));
-  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-  return FALSE;
-}
-
-
-/*********************************************************************
- *           _strerror  	 (CRTDLL.284)
- */
-char * CDECL CRTDLL__strerror(const char *s)
-{
-  dprintf(("CRTDLL: _strerror not implemented.\n"));
-  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-  return FALSE;
-}
-
-
-/*********************************************************************
  *	_tzset					(CRTDLL.308)
  */
 void CDECL CRTDLL__tzset( void )
@@ -1266,17 +1212,6 @@ INT CDECL CRTDLL_is_wctype(wint_t wc, wctype_t wctype)
 int CDECL CRTDLL_isleadbyte(int i)
 {
   dprintf(("CRTDLL: isleadbyte(%08xh) not implemented.\n", i));
-  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-  return FALSE;
-}
-
-
-/*********************************************************************
- *	ungetc					(CRTDLL.492)
- */
-INT CDECL CRTDLL_ungetc(int c, FILE *f)
-{
-  dprintf(("CRTDLL: ungetc not implemented.\n"));
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return FALSE;
 }
