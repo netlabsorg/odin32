@@ -1,4 +1,4 @@
-/* $Id: status.c,v 1.18 2000-02-10 18:51:19 cbratschi Exp $ */
+/* $Id: status.c,v 1.19 2000-02-14 17:31:39 cbratschi Exp $ */
 /*
  * Interface code to StatusWindow widget/control
  *
@@ -899,16 +899,16 @@ STATUSBAR_WMCreate (HWND hwnd, WPARAM wParam, LPARAM lParam)
         }
     }
 
-    hdc = GetDC(0);
+    hdc = GetDC(hwnd);
     if (hdc) {
         TEXTMETRICA tm;
         HFONT hOldFont;
 
         hOldFont = SelectObject (hdc,infoPtr->hDefaultFont);
         GetTextMetricsA(hdc, &tm);
-        infoPtr->textHeight = tm.tmHeight;
+        infoPtr->textHeight = tm.tmHeight+tm.tmExternalLeading;
         SelectObject (hdc, hOldFont);
-        ReleaseDC(0, hdc);
+        ReleaseDC(hwnd, hdc);
     }
 
     if (GetWindowLongA (hwnd, GWL_STYLE) & SBT_TOOLTIPS) {
@@ -935,7 +935,7 @@ STATUSBAR_WMCreate (HWND hwnd, WPARAM wParam, LPARAM lParam)
     GetClientRect (GetParent (hwnd), &rect);
     width = rect.right - rect.left;
     infoPtr->height = infoPtr->textHeight + 4 + VERT_BORDER;
-//CB: todo: find bug!
+//CB: todo: find bug in font handling!
 infoPtr->height += 4;
     MoveWindow(hwnd,lpCreate->x,lpCreate->y-1,width,infoPtr->height,FALSE);
     STATUSBAR_SetPartBounds (hwnd);
@@ -1069,10 +1069,21 @@ STATUSBAR_WMSetFont (HWND hwnd, WPARAM wParam, LPARAM lParam)
     STATUSWINDOWINFO *infoPtr = STATUSBAR_GetInfoPtr (hwnd);
 
     infoPtr->hFont = (HFONT)wParam;
-    if (LOWORD(lParam) == TRUE) {
-        HDC hdc = GetDC (hwnd);
-        STATUSBAR_Refresh (hwnd, hdc);
-        ReleaseDC (hwnd, hdc);
+    if (LOWORD(lParam) == TRUE)
+    {
+      HDC hdc = GetDC (hwnd);
+      TEXTMETRICA tm;
+      HFONT hOldFont;
+
+      hOldFont = SelectObject(hdc,infoPtr->hFont);
+      GetTextMetricsA(hdc,&tm);
+      infoPtr->textHeight = tm.tmHeight+tm.tmExternalLeading;
+      SelectObject(hdc,hOldFont);
+
+      //CB: todo: move window
+
+      STATUSBAR_Refresh (hwnd, hdc);
+      ReleaseDC (hwnd, hdc);
     }
 
     return 0;

@@ -1,4 +1,4 @@
-/* $Id: propsheet.c,v 1.17 1999-12-18 20:56:59 achimha Exp $ */
+/* $Id: propsheet.c,v 1.18 2000-02-14 17:31:39 cbratschi Exp $ */
 /*
  * Property Sheets
  *
@@ -13,10 +13,6 @@
  */
 
 /* WINE 991212 level */
-
-/* CB: Odin problems:
- - trap in PROPSHEET_DialogProc (tab control creation)
-*/
 
 #include <string.h>
 #include "winbase.h"
@@ -155,7 +151,7 @@ static BOOL PROPSHEET_CollectSheetInfo(LPCPROPSHEETHEADERA lppsh,
   psInfo->hasApply = !(dwFlags & PSH_NOAPPLYNOW);
   psInfo->useCallback = dwFlags & PSH_USECALLBACK;
   psInfo->isModeless = dwFlags & PSH_MODELESS;
-  psInfo->ppshheader = lppsh;
+  psInfo->ppshheader = (PROPSHEETHEADERA*)lppsh;
   psInfo->ppshheader = COMCTL32_Alloc(sizeof(PROPSHEETHEADERA));
   *psInfo->ppshheader = *lppsh;
 
@@ -167,7 +163,7 @@ static BOOL PROPSHEET_CollectSheetInfo(LPCPROPSHEETHEADERA lppsh,
 
   if (dwFlags & PSH_USEPSTARTPAGE)
   {
-//    TRACE(propsheet, "PSH_USEPSTARTPAGE is on");
+    //TRACE(propsheet, "PSH_USEPSTARTPAGE is on");
     psInfo->active_page = 0;
   }
   else
@@ -296,7 +292,7 @@ BOOL PROPSHEET_CollectPageInfo(LPCPROPSHEETPAGEA lppsp,
 
   /* Extract the caption */
   psInfo->proppage[index].pszText = (LPCWSTR)p;
-//  TRACE("Tab %d %s\n",index,debugstr_w((LPCWSTR)p));
+  //TRACE("Tab %d %s\n",index,debugstr_w((LPCWSTR)p));
   p += lstrlenW((LPCWSTR)p) + 1;
 
   if (dwFlags & PSP_USETITLE)
@@ -335,7 +331,7 @@ BOOL PROPSHEET_CollectPageInfo(LPCPROPSHEETPAGEA lppsp,
   if ( hIcon )
     {
       if (psInfo->hImageList == 0 )
-	psInfo->hImageList = ImageList_Create(icon_cx, icon_cy, ILC_COLOR, 1, 1);
+        psInfo->hImageList = ImageList_Create(icon_cx, icon_cy, ILC_COLOR, 1, 1);
 
       ImageList_AddIcon(psInfo->hImageList, hIcon);
     }
@@ -379,7 +375,7 @@ static INT PROPSHEET_DoDialogBox( HWND hwnd, HWND owner)
        }
        EnableWindow( owner, TRUE );
    }
-   retval = dlgInfo->idResult; 
+   retval = dlgInfo->idResult;
 
    WIN_ReleaseWndPtr(wndPtr);
 #endif
@@ -439,7 +435,7 @@ BOOL PROPSHEET_CreateDialog(PropSheetInfo* psInfo)
 
   if (!(psInfo->ppshheader->dwFlags & PSH_MODELESS))
      ret = PROPSHEET_DoDialogBox((HWND)ret, psInfo->ppshheader->hwndParent);
- 
+
   COMCTL32_Free(temp);
 
   return ret;
@@ -1023,7 +1019,7 @@ static int PROPSHEET_CreatePage(HWND hwndParent,
   if (ppshpage == NULL)
   {
     dprintf(("COMCTL32:PROPSHEET_CreatePage: ERROR!!! ppshpage == NULL!!!\n"));
-    return FALSE;  
+    return FALSE;
   }
 
   if (ppshpage->dwFlags & PSP_DLGINDIRECT)
@@ -1129,7 +1125,7 @@ static BOOL PROPSHEET_ShowPage(HWND hwndDlg, int index, PropSheetInfo * psInfo)
      PSHNOTIFY psn;
 
      ppshpage = (LPCPROPSHEETPAGEA)psInfo->proppage[index].hpage;
-     PROPSHEET_CreatePage(hwndDlg, index, psInfo, ppshpage);
+     PROPSHEET_CreatePage(hwndDlg, index, psInfo, (PROPSHEETPAGEA*)ppshpage);
 
      psn.hdr.hwndFrom = hwndDlg;
      psn.hdr.code     = PSN_SETACTIVE;
@@ -1141,7 +1137,7 @@ static BOOL PROPSHEET_ShowPage(HWND hwndDlg, int index, PropSheetInfo * psInfo)
                   WM_NOTIFY, 0, (LPARAM) &psn);
 
      /*
-      * TODO: check return value. 
+      * TODO: check return value.
       */
   }
 
@@ -1180,7 +1176,7 @@ static BOOL PROPSHEET_Back(HWND hwndDlg)
   psn.hdr.hwndFrom = hwndDlg;
   psn.hdr.idFrom   = 0;
   psn.lParam       = 0;
- 
+
   hwndPage = psInfo->proppage[psInfo->active_page].hwndPage;
 
   if (SendMessageA(hwndPage, WM_NOTIFY, 0, (LPARAM) &psn) == -1)
@@ -1216,12 +1212,12 @@ static BOOL PROPSHEET_Next(HWND hwndDlg)
   psn.hdr.hwndFrom = hwndDlg;
   psn.hdr.idFrom   = 0;
   psn.lParam       = 0;
- 
+
   hwndPage = psInfo->proppage[psInfo->active_page].hwndPage;
 
   msgResult = SendMessageA(hwndPage, WM_NOTIFY, 0, (LPARAM) &psn);
 
-  TRACE("msg result %ld\n", msgResult);
+  //TRACE("msg result %ld\n", msgResult);
 
   if (msgResult == -1)
     return FALSE;
@@ -1252,12 +1248,12 @@ static BOOL PROPSHEET_Finish(HWND hwndDlg)
   psn.hdr.hwndFrom = hwndDlg;
   psn.hdr.idFrom   = 0;
   psn.lParam       = 0;
- 
+
   hwndPage = psInfo->proppage[psInfo->active_page].hwndPage;
 
   msgResult = SendMessageA(hwndPage, WM_NOTIFY, 0, (LPARAM) &psn);
 
-  TRACE("msg result %ld\n", msgResult);
+  //TRACE("msg result %ld\n", msgResult);
 
   if (msgResult != 0)
     return FALSE;
@@ -1288,7 +1284,7 @@ static BOOL PROPSHEET_Apply(HWND hwndDlg, LPARAM lParam)
   psn.hdr.hwndFrom = hwndDlg;
   psn.hdr.idFrom   = 0;
   psn.lParam       = 0;
- 
+
 
   /*
    * Send PSN_KILLACTIVE to the current page.
@@ -1305,7 +1301,7 @@ static BOOL PROPSHEET_Apply(HWND hwndDlg, LPARAM lParam)
    */
   psn.hdr.code = PSN_APPLY;
   psn.lParam   = lParam;
- 
+
   for (i = 0; i < psInfo->nPages; i++)
   {
     hwndPage = psInfo->proppage[i].hwndPage;
@@ -1351,13 +1347,13 @@ static void PROPSHEET_Cancel(HWND hwndDlg, LPARAM lParam)
   psn.hdr.hwndFrom = hwndDlg;
   psn.hdr.idFrom   = 0;
   psn.lParam       = 0;
- 
+
   if (SendMessageA(hwndPage, WM_NOTIFY, 0, (LPARAM) &psn))
     return;
 
   psn.hdr.code = PSN_RESET;
   psn.lParam   = lParam;
- 
+
   for (i = 0; i < psInfo->nPages; i++)
   {
     hwndPage = psInfo->proppage[i].hwndPage;
@@ -1393,7 +1389,7 @@ static void PROPSHEET_Help(HWND hwndDlg)
   psn.hdr.hwndFrom = hwndDlg;
   psn.hdr.idFrom   = 0;
   psn.lParam       = 0;
- 
+
   SendMessageA(hwndPage, WM_NOTIFY, 0, (LPARAM) &psn);
 }
 
@@ -1545,7 +1541,7 @@ static BOOL PROPSHEET_SetCurSel(HWND hwndDlg,
 
   if (index < 0 || index >= psInfo->nPages)
   {
-    TRACE("Could not find page to select!\n");
+    //TRACE("Could not find page to select!\n");
     return FALSE;
   }
 
@@ -1568,7 +1564,7 @@ static BOOL PROPSHEET_SetCurSel(HWND hwndDlg,
     result = SendMessageA(hwndPage, WM_NOTIFY, 0, (LPARAM) &psn);
 
     /*
-     * TODO: check return value. 
+     * TODO: check return value.
      */
   }
 
@@ -1689,7 +1685,7 @@ static BOOL PROPSHEET_AddPage(HWND hwndDlg,
   if (ppsp->dwFlags & PSP_PREMATURE)
   {
      /* Create the page but don't show it */
-     PROPSHEET_CreatePage(hwndDlg, psInfo->nPages, psInfo, ppsp);
+     PROPSHEET_CreatePage(hwndDlg, psInfo->nPages, psInfo, (PROPSHEETPAGEA*)ppsp);
   }
 
   /*
@@ -1742,12 +1738,12 @@ static BOOL PROPSHEET_RemovePage(HWND hwndDlg,
   /* Make shure that index is within range */
   if (index < 0 || index >= psInfo->nPages)
   {
-      TRACE("Could not find page to remove!\n");
+      //TRACE("Could not find page to remove!\n");
       return FALSE;
   }
 
-  TRACE("total pages %d removing page %d active page %d\n",
-        psInfo->nPages, index, psInfo->active_page);
+  //TRACE("total pages %d removing page %d active page %d\n",
+  //      psInfo->nPages, index, psInfo->active_page);
   /*
    * Check if we're removing the active page.
    */
@@ -1792,14 +1788,14 @@ static BOOL PROPSHEET_RemovePage(HWND hwndDlg,
 
      DestroyPropertySheetPage(psInfo->proppage[index].hpage);
   }
- 
+
   /* Remove the tab */
   SendMessageA(hwndTabControl, TCM_DELETEITEM, index, 0);
 
   psInfo->nPages--;
   psInfo->proppage = COMCTL32_Alloc(sizeof(PropPageInfo) * psInfo->nPages);
 
-  if (index > 0)  
+  if (index > 0)
     memcpy(&psInfo->proppage[0], &oldPages[0], index * sizeof(PropPageInfo));
 
   if (index < psInfo->nPages)
@@ -1825,7 +1821,7 @@ static void PROPSHEET_SetWizButtons(HWND hwndDlg, DWORD dwFlags)
   HWND hwndNext   = GetDlgItem(hwndDlg, IDC_NEXT_BUTTON);
   HWND hwndFinish = GetDlgItem(hwndDlg, IDC_FINISH_BUTTON);
 
-  TRACE("%ld\n", dwFlags);
+  //TRACE("%ld\n", dwFlags);
 
   EnableWindow(hwndBack, FALSE);
   EnableWindow(hwndNext, FALSE);
@@ -1897,7 +1893,7 @@ static void PROPSHEET_CleanUp(HWND hwndDlg)
   PropSheetInfo* psInfo = (PropSheetInfo*) RemovePropA(hwndDlg,
                                                        PropSheetInfoStr);
 
-  TRACE("\n");
+  //TRACE("\n");
   if (HIWORD(psInfo->ppshheader->pszCaption))
       HeapFree(GetProcessHeap(), 0, (LPVOID)psInfo->ppshheader->pszCaption);
 
@@ -1987,7 +1983,7 @@ HPROPSHEETPAGE WINAPI CreatePropertySheetPageA(
 
   if ( (ppsp->dwFlags & PSP_USEICONID) && HIWORD( ppsp->u2.pszIcon ) )
       ppsp->u2.pszIcon = HEAP_strdupA( GetProcessHeap(), 0, lpPropSheetPage->u2.pszIcon );
-       
+
 
   if ((ppsp->dwFlags & PSP_USETITLE) && HIWORD( ppsp->pszTitle ))
       ppsp->pszTitle = HEAP_strdupA( GetProcessHeap(), 0, lpPropSheetPage->pszTitle );
@@ -2156,7 +2152,7 @@ PROPSHEET_DialogProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
       idx = psInfo->active_page;
       ppshpage = (LPCPROPSHEETPAGEA)psInfo->proppage[idx].hpage;
       psInfo->active_page = -1;
- 
+
       PROPSHEET_SetCurSel(hwnd, idx, psInfo->proppage[idx].hpage);
 
       if (!(psInfo->ppshheader->dwFlags & PSH_WIZARD))
@@ -2328,7 +2324,7 @@ PROPSHEET_DialogProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
       EnableWindow(hwndCancel, FALSE);
       if (LoadStringA(COMCTL32_hModule, IDS_CLOSE, buf, sizeof(buf)))
          SetWindowTextA(hwndOK, buf);
- 
+
       return FALSE;
     }
 
