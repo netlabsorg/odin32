@@ -1,19 +1,10 @@
-# $Id: makefile,v 1.8 2000-11-19 08:58:11 bird Exp $
+# $Id: makefile,v 1.9 2000-12-03 00:26:12 bird Exp $
 
 #
 # Odin32 API
 #
 #       sst1\Glide makefile
 #
-
-
-#
-# Directory macros.
-#
-PDWIN32_INCLUDE = ..\..\..\..\include
-PDWIN32_LIB     = ..\..\..\..\lib
-PDWIN32_BIN     = ..\..\..\..\$(OBJDIR)\Glide\Voodoo1
-PDWIN32_TOOLS   = ..\..\..\..\tools\bin
 
 
 #
@@ -25,7 +16,13 @@ NO_MAIN_BIN_COPY = 1
 #
 # Compiler, tools, and interference rules.
 #
-!include $(PDWIN32_INCLUDE)/pdwin32.mk
+!include ../../../../makefile.inc
+
+
+#
+# Overrides.
+#
+ODIN32_BIN = $(ODIN32_BIN__)\Glide\Voodoo1
 
 
 #
@@ -54,8 +51,8 @@ texus/$(OBJDIR)/texus.lib \
 init/$(OBJDIR)/init.lib \
 init/initvg/$(OBJDIR)/initvg.lib \
 glide/$(OBJDIR)/glide.lib \
-$(PDWIN32_LIB)/kernel32.lib \
-$(PDWIN32_LIB)/$(ODINCRT).lib \
+$(ODIN32_LIB)/kernel32.lib \
+$(ODIN32_LIB)/$(ODINCRT).lib \
 OS2386.LIB \
 $(RTLLIB_O)
 
@@ -69,5 +66,5 @@ TARGET = glide2x
 #
 # Includes the common rules.
 #
-!include $(PDWIN32_INCLUDE)/pdwin32.post
+!include $(ODIN32_POST_INC)
 
