@@ -1,4 +1,10 @@
-/* $Id: changelog,v 1.2492 2003-02-22 09:44:57 sandervl Exp $ */
+/* $Id: changelog,v 1.2493 2003-02-22 09:55:25 sandervl Exp $ */
+
+ 2003-02-22: Platon Fomichev <stauff@innotek   >
+    - USER32:   o Restoring maximized window from iconic state caused window
+                  frame controls to behave badly. General out-of-sync problems
+                  with frame controls. Invisibility of frame controls after
+                  lots of minimizing/restoring.
 
  2003-02-22: Dietrich Teickner <Dietrich_Teickner@t-online   >
     - SHELL32:  o Shell file operation updates
