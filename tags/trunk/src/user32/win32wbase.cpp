@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.342 2002-10-15 09:18:10 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.343 2002-11-20 12:59:06 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2343,7 +2343,7 @@ BOOL Win32BaseWindow::ShowWindow(ULONG nCmdShow)
         swp |= SWP_NOACTIVATE | SWP_NOZORDER;
 
     if (!(getStyle() & WS_MINIMIZE)) {
-         SetWindowPos(HWND_TOP, newPos.left, newPos.top, newPos.right, newPos.bottom, LOWORD(swp));
+         SetWindowPos(HWND_TOP, newPos.left, newPos.top, newPos.right, newPos.bottom, LOWORD(swp), TRUE);
     }
     else OSLibWinMinimizeWindow(getOS2FrameWindowHandle());
 
@@ -2378,13 +2378,15 @@ BOOL Win32BaseWindow::ShowWindow(ULONG nCmdShow)
         InvalidateRect(getWindowHandle(), NULL, TRUE);
     }
 //testestest
+
 END:
     fMinMaxChange = FALSE;
     return wasVisible;
 }
 //******************************************************************************
 //******************************************************************************
-BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, int cy, UINT fuFlags)
+BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, 
+                                   int cy, UINT fuFlags, BOOL fShowWindow)
 {
    BOOL rc = FALSE;
    Win32BaseWindow *window;
@@ -2492,6 +2494,15 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
         }
         OSLibWinQueryWindowPos(OS2HwndFrame, &swpOld);
     }
+    if((dwOldStyle & WS_MINIMIZE) && (getStyle() & WS_MINIMIZE)) 
+    {//don't allow size changes if the window is minimized
+     //we will update the restore position at the end of this method
+        if(!(wpos.flags & SWP_NOSIZE)) {
+            wpos.flags |= SWP_NOSIZE;
+            rectWindow.right  = rectWindow.left + wpos.cx;
+            rectWindow.bottom = rectWindow.top + wpos.cy;
+        }
+    }
 
     if(getParent()) {
           OSLibMapWINDOWPOStoSWP(&wpos, &swp, &swpOld, getParent()->getClientHeight(),
@@ -2504,6 +2515,12 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
         if(fuFlags & SWP_FRAMECHANGED)
         {
             NotifyFrameChanged(&wpos, &oldClientRect);
+        }
+        if(!fShowWindow)
+        {
+            //Restore position always changes when the window position is changed
+            dprintf(("Save new restore position (%d,%d)(%d,%d)", rectWindow.left, rectWindow.top, rectWindow.right, rectWindow.bottom));
+            windowpos.rcNormalPosition = rectWindow;
         }
         return TRUE;
     }
@@ -2539,8 +2556,8 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
         }
     }
     dprintf (("WinSetWindowPos %x %x (%d,%d)(%d,%d) %x", swp.hwnd, swp.hwndInsertBehind, swp.x, swp.y, swp.cx, swp.cy, swp.fl));
-    rc = OSLibWinSetMultWindowPos(&swp, 1);
 
+    rc = OSLibWinSetMultWindowPos(&swp, 1);
     if(rc == FALSE)
     {
         dprintf(("OSLibWinSetMultWindowPos failed! Error %x",OSLibWinGetLastError()));
@@ -2551,7 +2568,8 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
     {
         NotifyFrameChanged(&wpos, &oldClientRect);
     }
-    if(!(getStyle() & (WS_MAXIMIZE|WS_MINIMIZE))) {
+    if(!fShowWindow)
+    {
         //Restore position always changes when the window position is changed
         dprintf(("Save new restore position (%d,%d)(%d,%d)", rectWindow.left, rectWindow.top, rectWindow.right, rectWindow.bottom));
         windowpos.rcNormalPosition = rectWindow;
