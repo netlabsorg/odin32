@@ -1,4 +1,4 @@
-# $Id: ole32.mak,v 1.4 2001-01-25 20:17:23 sandervl Exp $
+# $Id: ole32.mak,v 1.5 2001-04-24 19:44:38 sandervl Exp $
 
 #
 # Odin32 API
@@ -17,6 +17,13 @@ MAKEFILE = ole32.mak
 #
 !include ../../makefile.inc
 
+
+#
+# Overrides.
+#
+!if "$(CCENV)" == "VAC36"
+CDEFINES    = $(CDEFINES) -DNONAMELESSSTRUCT
+!endif
 
 #
 # Object files. Prefix with OBJDIR and one space before the '\'.
