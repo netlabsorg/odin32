@@ -1,4 +1,4 @@
-/* $Id: dwaveout.cpp,v 1.30 2000-11-24 12:14:07 phaller Exp $ */
+/* $Id: dwaveout.cpp,v 1.31 2001-02-27 21:13:59 sandervl Exp $ */
 
 /*
  * Wave playback class
@@ -167,6 +167,7 @@ void DartWaveOut::Init(LPWAVEFORMATEX pwfx)
 
    wmutex   = new VMutex();
    if(wmutex == NULL) {
+    DebugInt3();
     ulError = MMSYSERR_NOTSUPPORTED;
    }
    if(wmutex)
@@ -501,6 +502,8 @@ MMRESULT DartWaveOut::reset()
   while(wavehdr) {
     	wavehdr->dwFlags |= WHDR_DONE;
     	wavehdr->dwFlags &= ~WHDR_INQUEUE;
+        wavehdr = wavehdr->lpNext;
+        wavehdr->lpNext = NULL;
     	wmutex->leave();
     	if(mthdCallback) {
         	callback((ULONG)this, WOM_DONE, dwInstance, (ULONG)wavehdr, 0);
@@ -511,7 +514,6 @@ MMRESULT DartWaveOut::reset()
 	        PostMessageA(hwndCallback, WOM_DONE, (WPARAM)this, (ULONG)wavehdr);
 	}
     	wmutex->enter(VMUTEX_WAIT_FOREVER);
-    	wavehdr = wavehdr->lpNext;
   }
   wavehdr   = NULL;
   State     = STATE_STOPPED;

@@ -1,4 +1,4 @@
-# $Id: winmm.mak,v 1.1 2000-12-16 22:47:28 bird Exp $
+# $Id: winmm.mak,v 1.2 2001-02-27 21:14:00 sandervl Exp $
 
 #
 # Odin32 API
@@ -28,6 +28,7 @@ $(OBJDIR)\waveout.obj \
 $(OBJDIR)\dwaveout.obj \
 $(OBJDIR)\time.obj \
 $(OBJDIR)\wavein.obj \
+$(OBJDIR)\dwavein.obj \
 $(OBJDIR)\auxiliary.obj \
 $(OBJDIR)\auxos2.obj \
 $(OBJDIR)\mixer.obj \
