@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.130 2001-05-15 14:31:39 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.131 2001-05-22 09:33:12 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -772,6 +772,10 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
 
         if ((pswp->fl & (SWP_SIZE | SWP_MOVE | SWP_ZORDER)) == 0)
         {
+            if(pswp->fl & SWP_RESTORE && win32wnd->getStyle() & WS_MINIMIZE_W) {
+                dprintf(("Restoring minimized window %x", win32wnd->getWindowHandle()));
+                win32wnd->ShowWindow(SW_RESTORE_W);
+            }
             if(pswp->fl & SWP_SHOW) {
                 WinShowWindow(win32wnd->getOS2WindowHandle(), 1);
             }
