@@ -1,4 +1,4 @@
-; $Id: ntdll.def,v 1.13 1999-08-18 21:45:13 phaller Exp $
+; $Id: ntdll.def,v 1.14 1999-08-18 22:08:33 phaller Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is NT4.0's NTDLL.DLL
@@ -225,6 +225,7 @@ EXPORTS
     ZwUnloadKey                   = _NtUnloadKey@4
 
     RtlAllocateAndInitializeSid   = _RtlAllocateAndInitializeSid@44   @265
+    RtlConvertSidToUnicodeString  = _RtlConvertSidToUnicodeString@12  @296
     RtlEqualSid                   = _RtlEqualSid@8                    @352
     RtlFreeSid                    = _RtlFreeSid@4                     @376
     RtlLengthRequiredSid          = _RtlLengthRequiredSid@4           @427

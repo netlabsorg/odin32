@@ -1,4 +1,4 @@
-/* $Id: rtl.cpp,v 1.4 1999-08-18 21:45:13 phaller Exp $ */
+/* $Id: rtl.cpp,v 1.5 1999-08-18 22:08:34 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -328,44 +328,6 @@ BOOLEAN WINAPI RtlDestroyHeap(HANDLE Heap)
 /*
  * misc functions
  */
-
-/******************************************************************************
- * DbgPrint [NTDLL]
- */
-/* @@@PH how to port ? */
-#if 0
-void __cdecl DbgPrint(LPCSTR fmt,LPVOID args)
-{
-  dprintf(("NTDLL: DbgPrint(%s,08xh) not supported.\n",
-           fmt,
-           args));
-
-   /* hmm, raise exception? */
-}
-
-DWORD WINAPI NtRaiseException (DWORD           dwExceptionCode,
-                               DWORD           dwExceptionFlags,
-                               DWORD           nNumberOfArguments,
-                               CONST ULONG_PTR *lpArguments)
-{
-  dprintf(("NTDLL: NtRaiseException(%08xh,%08xh,%08xh,%08xh) not implemented.\n",
-           dwExceptionCode,
-           dwExceptionFlags,
-           nNumberOfArguments,
-           lpArguments));
-
-  return 0;
-}
-
-
-DWORD WINAPI RtlRaiseException (DWORD x)
-{
-  dprintf(("NTDLL: RtlRaiseException(%08xh) not implemented.\n",
-           x));
-
-  return 0;
-}
-#endif
 
 
 /******************************************************************************
