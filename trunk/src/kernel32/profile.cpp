@@ -1,4 +1,4 @@
-/* $Id: profile.cpp,v 1.7 1999-08-04 21:22:24 phaller Exp $ */
+/* $Id: profile.cpp,v 1.8 1999-08-06 12:14:12 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -17,7 +17,8 @@
 #include <string.h>
 #include <stdio.h>
 #include <unicode.h>
-//#include "heap.h"
+#include "heap.h"
+#include "heapstring.h"
 
 #include <sys/stat.h>
 
@@ -25,9 +26,6 @@
 //#include "wine/winbase16.h"
 #include "winuser.h"
 #include "winnls.h"
-//#include "heap.h"
-//#include "debugtools.h"
-//#include "options.h"
 
 
 // -------------------------
@@ -38,15 +36,9 @@
 #define MAX_PATHNAME_LEN 260
 #endif
 
-#define HeapFree(a,b,c)          free(c)
-#define HEAP_xalloc(a,b,c)       malloc(c)
-#define HEAP_strdupA(a,b,c)      strdup(c)
+#define SystemHeap               GetProcessHeap()
 #define strcasecmp               strcmp
 #define DOSFS_GetFullName(a,b,c) strcpy(c,a)
-#define HEAP_strdupAtoW(a,b,c)   AsciiToUnicodeString((char *)c)
-#define HEAP_strdupWtoA(a,b,c)   UnicodeToAsciiString((LPWSTR)c)
-#define lstrcpynAtoW(a,b,c)      AsciiToUnicodeN((char*)a,(LPWSTR)b,(int)c)
-#define lstrcpynWtoA(a,b,c)      UnicodeToAsciiN((LPWSTR)a,(char*)b,(int)c)
 //#define lstrcpynA(a,b,c)         strncpy((char*)a,(char*)b,(int)c)
 #define CharLowerA(a)            (a)
 
@@ -1334,7 +1326,7 @@ BOOL WINAPI GetPrivateProfileStructW (LPCWSTR section, LPCWSTR key,
 
     INT ret = GetPrivateProfileStructA( sectionA, keyA, bufferA,
                len, filenameA );
-    lstrcpynAtoW( buffer, bufferA, len );
+    lstrcpynAtoW( (LPWSTR)buffer, bufferA, len );
     HeapFree( GetProcessHeap(), 0, bufferA);
     HeapFree( GetProcessHeap(), 0, sectionA );
     HeapFree( GetProcessHeap(), 0, keyA );
