@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.16 1999-08-25 14:27:04 sandervl Exp $ */
+/* $Id: HandleManager.cpp,v 1.17 1999-08-25 14:41:14 phaller Exp $ */
 
 /*
  *
@@ -635,15 +635,16 @@ BOOL    HMSetStdHandle(DWORD  nStdHandle,
 /*****************************************************************************
  * Name      : HANDLE  HMDuplicateHandle
  * Purpose   : replacement for Open32's HMDuplicateHandle function
- * Parameters: 
- *             
+ * Parameters:
+ *
  * Variables :
  * Result    : BOOL fSuccess
  * Remark    :
  * Status    :
  *
- * Author    : Patrick Haller [Wed, 1998/02/12 20:44]
+ * Author    : Sander van Leeuwen [Wed, 1999/08/25 15:44]
  *****************************************************************************/
+
 BOOL HMDuplicateHandle(HANDLE  srcprocess,
                        HANDLE  srchandle,
                        HANDLE  destprocess,
@@ -658,14 +659,14 @@ BOOL HMDuplicateHandle(HANDLE  srcprocess,
   PHMHANDLEDATA   pHMHandleData;
   DWORD           rc;                                     /* API return code */
 
-  if(HMHandleValidate(srchandle) != NO_ERROR) {
-	dprintf(("HMDuplicateHandle: invalid handle %x", srchandle));
-    	SetLastError(ERROR_INVALID_HANDLE);      /* use this as error message */
-	return FALSE;
+  if(HMHandleValidate(srchandle) != NO_ERROR)
+  {
+    dprintf(("KERNEL32: HMDuplicateHandle: invalid handle %x", srchandle));
+    SetLastError(ERROR_INVALID_HANDLE);      /* use this as error message */
+    return FALSE;
   }
 
-  pDeviceHandler = TabWin32Handles[srchandle].pDeviceHandler;         /* device is predefined */
-
+  pDeviceHandler = TabWin32Handles[srchandle].pDeviceHandler;  /* device is predefined */
   iIndexNew = _HMHandleGetFree();                         /* get free handle */
   if (-1 == iIndexNew)                            /* oops, no free handles ! */
   {
@@ -674,12 +675,12 @@ BOOL HMDuplicateHandle(HANDLE  srcprocess,
   }
 
   /* initialize the complete HMHANDLEDATA structure */
-  pHMHandleData = &TabWin32Handles[iIndexNew].hmHandleData;
-  pHMHandleData->dwType     = TabWin32Handles[srchandle].hmHandleData.dwType;
-  if (fdwOptions & DUPLICATE_SAME_ACCESS) {
-	pHMHandleData->dwAccess   = TabWin32Handles[srchandle].hmHandleData.dwAccess;
-  }
-  else	pHMHandleData->dwAccess   = fdwAccess;
+  pHMHandleData                = &TabWin32Handles[iIndexNew].hmHandleData;
+  pHMHandleData->dwType        = TabWin32Handles[srchandle].hmHandleData.dwType;
+  if (fdwOptions & DUPLICATE_SAME_ACCESS)
+    pHMHandleData->dwAccess    = TabWin32Handles[srchandle].hmHandleData.dwAccess;
+  else
+    pHMHandleData->dwAccess    = fdwAccess;
 
   pHMHandleData->dwShare       = TabWin32Handles[srchandle].hmHandleData.dwShare;
   pHMHandleData->dwCreation    = TabWin32Handles[srchandle].hmHandleData.dwCreation;
@@ -696,16 +697,17 @@ BOOL HMDuplicateHandle(HANDLE  srcprocess,
 
                                                   /* call the device handler */
   rc = pDeviceHandler->DuplicateHandle(&TabWin32Handles[iIndexNew].hmHandleData,
-				       srcprocess, 
-				       &TabWin32Handles[srchandle].hmHandleData, 
-                                       destprocess, desthandle,
-                                       fdwAccess, fInherit, fdwOptions & ~DUPLICATE_CLOSE_SOURCE);
+                                       srcprocess,
+                                       &TabWin32Handles[srchandle].hmHandleData,
+                                       destprocess,
+                                       desthandle,
+                                       fdwAccess,
+                                       fInherit,
+                                       fdwOptions & ~DUPLICATE_CLOSE_SOURCE);
 
   //Don't let Open32 close it for us, but do it manually (regardless of error; see SDK docs))
-  if (fdwOptions & DUPLICATE_CLOSE_SOURCE) 
-  {
-	CloseHandle(srchandle);
-  }
+  if (fdwOptions & DUPLICATE_CLOSE_SOURCE)
+    HMCloseHandle(srchandle);
 
   if (rc != NO_ERROR)     /* oops, creation failed within the device handler */
   {
@@ -1002,12 +1004,14 @@ BOOL HMCloseHandle(HANDLE hObject)
 
   pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
   //SvL: Check if pDeviceHandler is set
-  if (pHMHandle->pDeviceHandler) {
-	fResult = pHMHandle->pDeviceHandler->CloseHandle(&pHMHandle->hmHandleData);
+  if (pHMHandle->pDeviceHandler)
+  {
+    fResult = pHMHandle->pDeviceHandler->CloseHandle(&pHMHandle->hmHandleData);
   }
-  else {
-	dprintf(("HMCloseHAndle(%08xh): pDeviceHandler not set", hObject));
-	fResult = TRUE;
+  else
+  {
+    dprintf(("HMCloseHAndle(%08xh): pDeviceHandler not set", hObject));
+    fResult = TRUE;
   }
 
   if (fResult == TRUE)                   /* remove handle if close succeeded */
