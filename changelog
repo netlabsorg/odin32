@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2314 2002-09-18 10:56:24 sandervl Exp $ */
+/* $Id: changelog,v 1.2315 2002-09-18 10:59:41 sandervl Exp $ */
+
+ 2002-09-18: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o Added code to print leaked heap memory
 
  2002-09-18: Platon Fomichev <platon@innotek   >
     - USER32:   o WM_MOUSEWHEEL update
