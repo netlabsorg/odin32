@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.416 1999-11-05 13:07:58 achimha Exp $ */
+ /* $Id: ChangeLog,v 1.417 1999-11-05 14:09:18 sandervl Exp $ */
 
  99-11-05: Achim Hasenmueller <achimha@innotek.de>
         - COMCTL32: Source code cleanup, remove warnings, corrected typecasts
@@ -15,6 +15,7 @@
                   Rewrote/Ported LoadStringA/W (similar to Wine now)
         - KERNEL32: Changed FindResource, string id translation should be done
                     in LoadStringA/W (done that way in Wine)
+                    Fixed GetModuleHandleA
 
  99-11-05: Jens Wiessner <wiessnej@rfi.de>
 	- MSVFW32: Updated to Wine level 991031
