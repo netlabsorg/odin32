@@ -1,4 +1,4 @@
-/* $Id: ChangeLog,v 1.1571 2001-07-07 13:57:49 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1572 2001-07-07 14:29:53 achimha Exp $ */
 
  2001-07-07: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Rewrote atom functions (no longer relies on Open32)
@@ -8,9 +8,11 @@
     - WS2_32:   o import WSAEventSelect from WSOCK32 (although a
                   Winsock 2.0 API, it makes more sense to be implemented
                   in the Winsock 1.1 stack)
+                o import WSAEnumNetworkEvents from WSOCK32 (same reason)
     - WSOCK32:  o enhanced WSAAsyncSelect processing to allow both
                   window handle and event semaphore notification
                 o implemented WSAEventSelect
+                o implemented WSAEnumNetworkEvents (not correct)
 
  2001-07-03: knut st. osmundsen <kosmunds@csc.com>:
     - URLMON:   o Stubbed HlinkSimpleNavigateToString and RegisterBindStatusCallback
