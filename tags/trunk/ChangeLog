@@ -1,13 +1,26 @@
-/* $Id: ChangeLog,v 1.1340 2001-04-02 09:53:23 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1341 2001-04-02 17:31:30 sandervl Exp $ */
 
  2001-04-02: Sander van Leeuwen <sandervl@xs4all.nl>   
     - USER32:   o Mouse message translation fix (check capture)
+                o Turn off WS_CAPTION style for dialogs with DS_CONTROL flag set
+                  (fixes file dialogs with OFN_ENABLETEMPLATE style)
+                  Verified behaviour in NT4, SP6 with DSShow sample
+                  - about dialog with DS_CONTROL -> no titlebar
+                  - file open dialog without DS_CONTROL -> titlebar + moveable
+                    2nd dialog                   
+                o Temporary workaround for file dialogs with template dialog child.
+                  They don't redraw when switching directories. For some reason
+                  the new child's (syslistview32) update rectangle stays empty 
+                  after its parent is made visible with ShowWindow
+                  TODO: find real cause
     - MSACM32:  o Ported latest Wine version
     - WINMM:    o Ported latest Wine driver.c (necessary for msacm32 update)
 
  2001-04-02: Michal Necasek <michalnec@volny.cz>
     - KERNEL32: o Fix for importing from executable
                   (fixes Blade Runner)
+    - TESTAPP\EXCEPTIONS:
+                o Small test apps to test exception handling
 
  2001-04-01: Sander van Leeuwen <sandervl@xs4all.nl>   
     - WININET:  o Added missing exports to wininet.def
@@ -17,6 +30,6 @@
     - ODININST  o Moved kernel32 init code into odininst
                 o Create [HKEY_USERS\.DEFAULT\Control Panel\International]
                   registry key with international settings
-    - USER32:   o Creating dialog controls with CreateWindowExW
+    - USER32:   o Create dialog controls with CreateWindowExW
                 o Use correct SendMessage(A/W) call during CreateWindow
 
