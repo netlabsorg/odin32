@@ -1,4 +1,4 @@
-/* $Id: os2heap.cpp,v 1.6 1999-08-09 22:10:08 phaller Exp $ */
+/* $Id: os2heap.cpp,v 1.7 1999-08-17 16:35:09 phaller Exp $ */
 
 /*
  * Heap class for OS/2
@@ -16,7 +16,6 @@
 #include <builtin.h>
 #include <stdlib.h>
 #include <string.h>
-#include <odincrt.h>
 
 #include "win32type.h"
 #include "os2heap.h"
@@ -53,9 +52,7 @@ OS2Heap::OS2Heap(HANDLE hHeap, DWORD flOptions, DWORD dwInitialSize, DWORD dwMax
 
   if(!(flOptions & HEAP_NO_SERIALIZE))
   {
-    ODIN_FS_BEGIN
     hmutex = new VMutex();
-    ODIN_FS_END
     dassert(hmutex, ("ERROR: new VMutex\n"));
   }
   else  hmutex = NULL;
@@ -93,7 +90,7 @@ OS2Heap::~OS2Heap()
   if(hmutex)
   {
     hmutex->leave();
-    ODIN_delete(hmutex);
+    delete hmutex;
   }
 
   heaplistmutex.enter();

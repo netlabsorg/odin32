@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.18 1999-08-11 22:27:56 phaller Exp $ */
+/* $Id: wprocess.cpp,v 1.19 1999-08-17 16:35:11 phaller Exp $ */
 
 /*
  * Win32 process functions
@@ -13,7 +13,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <odincrt.h>
 #include <odinwrap.h>
 
 #include "unicode.h"
@@ -42,8 +41,6 @@ DWORD    *TIBFlatPtr    = 0;
 
 extern "C" ULONG QueryExceptionChain();
 
-
-ODINDEBUGCHANNEL(KERNEL32-WPROCESS)
 
 //******************************************************************************
 //******************************************************************************
@@ -210,7 +207,7 @@ void WIN32API RegisterExe(WIN32EXEENTRY EntryPoint, PIMAGE_TLS_CALLBACK *TlsCall
                     LONG Pe2lxVersion, HINSTANCE hinstance, ULONG dwReserved)
 {
   if(WinExe != NULL) //should never happen
-    ODIN_delete(WinExe);
+    delete WinExe;
 
 
   CheckVersion(Pe2lxVersion, OS2GetDllName(hinstance));
@@ -222,9 +219,7 @@ void WIN32API RegisterExe(WIN32EXEENTRY EntryPoint, PIMAGE_TLS_CALLBACK *TlsCall
   //SvL: Use 0 instead of the real instance handle (for resource lookup)
   Win32Exe *winexe;
 
-  ODIN_FS_BEGIN
   winexe = new Win32Exe(0, NameTableId, Win32TableId);
-  ODIN_FS_END
 
   if(winexe) {
    dprintf(("RegisterExe Win32TableId = %x", Win32TableId));
@@ -287,9 +282,7 @@ ULONG WIN32API RegisterDll(WIN32DLLENTRY pfnDllEntry, PIMAGE_TLS_CALLBACK *TlsCa
    }
    else {
       //converted win32 dll loaded by OS/2 loader
-      ODIN_FS_BEGIN
       winmod = new Win32Dll(hinstance, NameTableId, Win32TableId, pfnDllEntry);
-      ODIN_FS_END
       if(winmod == NULL) {
             eprintf(("Failed to allocate module object!\n"));
             DebugInt3();
@@ -327,7 +320,7 @@ void _System Win32DllExitList(ULONG reason)
   dprintf(("Win32DllExitList %d\n", reason));
 
   if(WinExe) {
-    ODIN_delete(WinExe);
+    delete WinExe;
     WinExe = NULL;
   }
   return;
@@ -399,21 +392,19 @@ static HINSTANCE iLoadLibraryA(LPCTSTR lpszLibFile)
         return module->getInstanceHandle();
     }
 
-    ODIN_FS_BEGIN
     module = new Win32Dll((char *)lpszLibFile);
-    ODIN_FS_END
     if(module == NULL)
         return(0);
 
     module->init();
     if(module->getError() != NO_ERROR) {
         dprintf(("LoadLibary %s failed (::init)\n", lpszLibFile));
-        ODIN_delete(module);
+        delete module;
         return(0);
     }
     if(module->attachProcess() == FALSE) {
         dprintf(("LoadLibary %s failed (::attachProcess)\n", lpszLibFile));
-        ODIN_delete(module);
+        delete module;
         return(0);
     }
     module->AddRef();
@@ -424,8 +415,7 @@ static HINSTANCE iLoadLibraryA(LPCTSTR lpszLibFile)
 }
 
 
-ODINFUNCTION1(HINSTANCE,LoadLibraryA,LPCTSTR,lpszLibFile)
-//HINSTANCE WIN32API LoadLibraryA(LPCTSTR lpszLibFile)
+HINSTANCE WIN32API LoadLibraryA(LPCTSTR lpszLibFile)
 {
   HINSTANCE hDll;
 
@@ -473,17 +463,14 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HANDLE hFile, DWORD dwFla
         return module->getInstanceHandle();
     }
 
-    ODIN_FS_BEGIN
     module = new Win32Dll((char *)lpszLibFile);
-    ODIN_FS_END
-
     if(module == NULL)
         return(0);
 
     module->init();
     if(module->getError() != NO_ERROR) {
         dprintf(("LoadLibary %s failed (::init)\n", lpszLibFile));
-        ODIN_delete(module);
+        delete module;
         return(0);
     }
     if(dwFlags & DONT_RESOLVE_DLL_REFERENCES) {
@@ -491,7 +478,7 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HANDLE hFile, DWORD dwFla
     }
     if(module->attachProcess() == FALSE) {
         dprintf(("LoadLibary %s failed (::attachProcess)\n", lpszLibFile));
-        ODIN_delete(module);
+        delete module;
         return(0);
     }
     module->AddRef();

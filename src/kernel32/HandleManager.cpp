@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.8 1999-08-09 22:10:07 phaller Exp $ */
+/* $Id: HandleManager.cpp,v 1.9 1999-08-17 16:35:08 phaller Exp $ */
 
 /*
  *
@@ -45,7 +45,6 @@
 #include <os2win.h>
 #include <stdlib.h>
 #include <string.h>
-#include <odincrt.h>
 
 #include "unicode.h"
 #include "misc.h"
@@ -309,12 +308,10 @@ DWORD HMInitialize(void)
     HMSetStdHandle(STD_ERROR_HANDLE,  GetStdHandle(STD_ERROR_HANDLE));
 
                         /* create handle manager instance for Open32 handles */
-    ODIN_FS_BEGIN
     HMGlobals.pHMOpen32     = new HMDeviceOpen32Class("\\\\.\\");
     HMGlobals.pHMEvent      = new HMDeviceEventClass("\\\\EVENT\\");
     HMGlobals.pHMMutex      = new HMDeviceMutexClass("\\\\MUTEX\\");
     HMGlobals.pHMSemaphore  = new HMDeviceSemaphoreClass("\\\\SEM\\");
-    ODIN_FS_END
   }
   return (NO_ERROR);
 }
@@ -336,12 +333,10 @@ DWORD HMTerminate(void)
 {
   /* @@@PH we could deallocate the device list here */
 
-  ODIN_FS_BEGIN
   delete HMGlobals.pHMOpen32;
   delete HMGlobals.pHMEvent;
   delete HMGlobals.pHMMutex;
   delete HMGlobals.pHMSemaphore;
-  ODIN_FS_END
 
   return (NO_ERROR);
 }

@@ -1,4 +1,4 @@
-/* $Id: KERNEL32.CPP,v 1.12 1999-08-09 22:38:01 phaller Exp $ */
+/* $Id: KERNEL32.CPP,v 1.13 1999-08-17 16:35:09 phaller Exp $ */
 
 /*
  *
@@ -25,7 +25,7 @@
 #include <winnls.h>
 #include <stdlib.h>
 #include <string.h>
-#include <odincrt.h>
+//#include <odincrt.h>
 
 #include "misc.h"
 #include "devio.h"

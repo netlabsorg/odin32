@@ -1,4 +1,4 @@
-/* $Id: profile.cpp,v 1.8 1999-08-06 12:14:12 phaller Exp $ */
+/* $Id: profile.cpp,v 1.9 1999-08-17 16:35:10 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -9,6 +9,7 @@
  * Copyright 1996 Alexandre Julliard
  * Copyright 1998 Sander van Leeuwen (sandervl@xs4all.nl)
  * Copyright 1998 Patrick Haller
+ * Copyright 1999 Christoph Bratschi
  */
 
 #include <os2win.h>
@@ -62,7 +63,8 @@ typedef struct
 {
     BOOL             changed;
     PROFILESECTION  *section;
-    char            *filename;
+    char            *filename; //first open name
+    char            *fullname; //name with path
     time_t           mtime;
 } PROFILE;
 
@@ -78,6 +80,7 @@ static PROFILE *MRUProfile[N_CACHED_PROFILES]={NULL};
 static PROFILESECTION *PROFILE_WineProfile;
 
 #define PROFILE_MAX_LINE_LEN   1024
+#define WINININAME "WIN.INI"
 
 /* Wine profile name in $HOME directory; must begin with slash */
 static const char PROFILE_WineIniName[] = "/.winerc";
@@ -90,7 +93,7 @@ static char PROFILE_WineIniUsed[MAX_PATHNAME_LEN] = "";
 
 #define WINE_INI_GLOBAL ETCDIR "/wine.conf"
 
-static LPCWSTR wininiW = NULL;
+static LPCWSTR wininiW = NULL; //CB: never freed
 
 static CRITICAL_SECTION PROFILE_CritSect;
 
@@ -397,18 +400,18 @@ static BOOL PROFILE_FlushFile(void)
       return TRUE;
 
     // try to open file
-    file = fopen(CurProfile->filename, "w");
+    file = fopen(CurProfile->fullname, "w");
     if (!file)
     {
-        dprintf(("Kernel32:Profile:could not save profile file %s\n", CurProfile->filename));
+        dprintf(("Kernel32:Profile:could not save profile file %s\n", CurProfile->fullname));
         return FALSE;
     }
 
-    dprintf(("Kernel32:Profile:Saving %s\n", CurProfile->filename ));
+    dprintf(("Kernel32:Profile:Saving %s\n", CurProfile->fullname ));
     PROFILE_Save( file, CurProfile->section );
     fclose( file );
     CurProfile->changed = FALSE;
-    if(!stat(CurProfile->filename,&buf))
+    if(!stat(CurProfile->fullname,&buf))
        CurProfile->mtime=buf.st_mtime;
     return TRUE;
 }
@@ -424,9 +427,11 @@ static void PROFILE_ReleaseFile(void)
     PROFILE_FlushFile();
     PROFILE_Free( CurProfile->section );
     if (CurProfile->filename) HeapFree( SystemHeap, 0, CurProfile->filename );
+    if (CurProfile->fullname) HeapFree(SystemHeap,0,CurProfile->fullname);
     CurProfile->changed   = FALSE;
     CurProfile->section   = NULL;
     CurProfile->filename  = NULL;
+    CurProfile->fullname  = NULL;
     CurProfile->mtime     = 0;
 }
 
@@ -438,11 +443,12 @@ static void PROFILE_ReleaseFile(void)
  */
 static BOOL PROFILE_Open( LPCSTR filename )
 {
-    char buffer[MAX_PATHNAME_LEN];
     FILE *file = NULL;
     int i,j;
     struct stat buf;
     PROFILE *tempProfile;
+
+    if (!filename || filename[0] == 0) return FALSE;
 
     /* First time around */
 
@@ -453,23 +459,15 @@ static BOOL PROFILE_Open( LPCSTR filename )
           MRUProfile[i]->changed=FALSE;
           MRUProfile[i]->section=NULL;
           MRUProfile[i]->filename=NULL;
+          MRUProfile[i]->fullname=NULL;
           MRUProfile[i]->mtime=0;
          }
 
     /* Check for a match */
 
-    if (!strchr( filename, '/' ) &&
-        !strchr( filename, '\\' ) &&
-        !strchr( filename, ':' ))
-    {
-        GetWindowsDirectoryA( buffer, sizeof(buffer) );
-        strcat( buffer, "\\" );
-        strcat( buffer, filename );
-    }
-
     for(i=0;i<N_CACHED_PROFILES;i++)
       {
-       if ((MRUProfile[i]->filename && !strcmp( filename, MRUProfile[i]->filename )))
+       if (MRUProfile[i]->filename && (!strcmp(filename,MRUProfile[i]->filename) || !strcmp(filename,MRUProfile[i]->fullname)))
          {
           if(i)
             {
@@ -479,7 +477,7 @@ static BOOL PROFILE_Open( LPCSTR filename )
                 MRUProfile[j]=MRUProfile[j-1];
              CurProfile=tempProfile;
             }
-          if(!stat(CurProfile->filename,&buf) && CurProfile->mtime==buf.st_mtime)
+          if(!stat(CurProfile->fullname,&buf) && CurProfile->mtime==buf.st_mtime)
              dprintf(("Kernel32:Profile:(%s): already opened (mru=%d)\n",
                               filename, i ));
           else
@@ -503,23 +501,37 @@ static BOOL PROFILE_Open( LPCSTR filename )
 
     if(CurProfile->filename) PROFILE_ReleaseFile();
 
-    CurProfile->filename  = HEAP_strdupA( SystemHeap, 0, filename );
+    CurProfile->filename  = HEAP_strdupA(SystemHeap,0,filename);
 
-    file = fopen( filename, "r" );
+    /* check for path */
+
+    if (!strchr( filename,'/') ||
+        !strchr( filename,'\\') ||
+        !strchr( filename,':'))
+    {
+      char fullname[MAX_PATHNAME_LEN];
+
+      GetWindowsDirectoryA(fullname,sizeof(fullname));
+      strcat(fullname,"\\");
+      strcat(fullname,filename);
+      CurProfile->fullname  = HEAP_strdupA(SystemHeap,0,fullname);
+    } else CurProfile->fullname  = HEAP_strdupA(SystemHeap,0,filename);
+
+    file = fopen(CurProfile->fullname,"r");
     if (file)
     {
       dprintf(("Kernel32:Profile:(%s): found it in %s\n",
-               filename, filename ));
+               filename, CurProfile->fullname ));
 
         CurProfile->section = PROFILE_Load( file );
         fclose( file );
-        if(!stat(CurProfile->filename,&buf))
+        if(!stat(CurProfile->fullname,&buf))
            CurProfile->mtime=buf.st_mtime;
     }
     else
     {
         /* Does not exist yet, we will create it in PROFILE_FlushFile */
-        dprintf(("Kernel32:Profile:profile file %s not found\n", filename ));
+        dprintf(("Kernel32:Profile:profile file %s not found\n", CurProfile->fullname ));
     }
     return TRUE;
 }
@@ -965,7 +977,7 @@ char* PROFILE_GetStringItem( char* start )
  */
 UINT WINAPI GetProfileIntA( LPCSTR section, LPCSTR entry, INT def_val )
 {
-    return GetPrivateProfileIntA( section, entry, def_val, "win.ini" );
+    return GetPrivateProfileIntA( section, entry, def_val, WINININAME );
 }
 
 /***********************************************************************
@@ -973,7 +985,7 @@ UINT WINAPI GetProfileIntA( LPCSTR section, LPCSTR entry, INT def_val )
  */
 UINT WINAPI GetProfileIntW( LPCWSTR section, LPCWSTR entry, INT def_val )
 {
-    if (!wininiW) wininiW = HEAP_strdupAtoW( SystemHeap, 0, "win.ini" );
+    if (!wininiW) wininiW = HEAP_strdupAtoW( SystemHeap, 0, WINININAME );
     return GetPrivateProfileIntW( section, entry, def_val, wininiW );
 }
 
@@ -984,7 +996,7 @@ INT WINAPI GetProfileStringA( LPCSTR section, LPCSTR entry, LPCSTR def_val,
                LPSTR buffer, UINT len )
 {
     return GetPrivateProfileStringA( section, entry, def_val,
-                 buffer, len, "win.ini" );
+                 buffer, len, WINININAME );
 }
 
 /***********************************************************************
@@ -993,7 +1005,7 @@ INT WINAPI GetProfileStringA( LPCSTR section, LPCSTR entry, LPCSTR def_val,
 INT WINAPI GetProfileStringW( LPCWSTR section, LPCWSTR entry,
                LPCWSTR def_val, LPWSTR buffer, UINT len )
 {
-    if (!wininiW) wininiW = HEAP_strdupAtoW( SystemHeap, 0, "win.ini" );
+    if (!wininiW) wininiW = HEAP_strdupAtoW( SystemHeap, 0, WINININAME );
     return GetPrivateProfileStringW( section, entry, def_val,
                  buffer, len, wininiW );
 }
@@ -1004,7 +1016,7 @@ INT WINAPI GetProfileStringW( LPCWSTR section, LPCWSTR entry,
 BOOL WINAPI WriteProfileStringA( LPCSTR section, LPCSTR entry,
              LPCSTR string )
 {
-    return WritePrivateProfileStringA( section, entry, string, "win.ini" );
+    return WritePrivateProfileStringA( section, entry, string, WINININAME );
 }
 
 /***********************************************************************
@@ -1013,7 +1025,7 @@ BOOL WINAPI WriteProfileStringA( LPCSTR section, LPCSTR entry,
 BOOL WINAPI WriteProfileStringW( LPCWSTR section, LPCWSTR entry,
                                      LPCWSTR string )
 {
-    if (!wininiW) wininiW = HEAP_strdupAtoW( SystemHeap, 0, "win.ini" );
+    if (!wininiW) wininiW = HEAP_strdupAtoW( SystemHeap, 0, WINININAME );
     return WritePrivateProfileStringW( section, entry, string, wininiW );
 }
 
@@ -1061,7 +1073,7 @@ INT WINAPI GetPrivateProfileStringA( LPCSTR section, LPCSTR entry,
     int     ret;
 
     if (!filename)
-   filename = "win.ini";
+   filename = WINININAME;
 
     EnterCriticalSection( &PROFILE_CritSect );
 
@@ -1144,7 +1156,7 @@ INT WINAPI GetPrivateProfileSectionW (LPCWSTR section, LPWSTR buffer,
  */
 INT WINAPI GetProfileSectionA( LPCSTR section, LPSTR buffer, DWORD len )
 {
-    return GetPrivateProfileSectionA( section, buffer, len, "win.ini" );
+    return GetPrivateProfileSectionA( section, buffer, len, WINININAME );
 }
 
 /***********************************************************************
@@ -1152,7 +1164,7 @@ INT WINAPI GetProfileSectionA( LPCSTR section, LPSTR buffer, DWORD len )
  */
 INT WINAPI GetProfileSectionW( LPCWSTR section, LPWSTR buffer, DWORD len )
 {
-    if (!wininiW) wininiW = HEAP_strdupAtoW( SystemHeap, 0, "win.ini" );
+    if (!wininiW) wininiW = HEAP_strdupAtoW( SystemHeap, 0, WINININAME );
     return GetPrivateProfileSectionW( section, buffer, len, wininiW );
 }
 
@@ -1232,7 +1244,7 @@ BOOL WINAPI WritePrivateProfileSectionW( LPCWSTR section,
 BOOL WINAPI WriteProfileSectionA( LPCSTR section, LPCSTR keys_n_values)
 
 {
-    return WritePrivateProfileSectionA( section, keys_n_values, "win.ini");
+    return WritePrivateProfileSectionA( section, keys_n_values, WINININAME);
 }
 
 /***********************************************************************
@@ -1240,7 +1252,7 @@ BOOL WINAPI WriteProfileSectionA( LPCSTR section, LPCSTR keys_n_values)
  */
 BOOL WINAPI WriteProfileSectionW( LPCWSTR section, LPCWSTR keys_n_values)
 {
-   if (!wininiW) wininiW = HEAP_strdupAtoW( SystemHeap, 0, "win.ini");
+   if (!wininiW) wininiW = HEAP_strdupAtoW( SystemHeap, 0, WINININAME);
 
    return (WritePrivateProfileSectionW (section,keys_n_values, wininiW));
 }
@@ -1374,3 +1386,29 @@ BOOL WINAPI WritePrivateProfileStructW (LPCWSTR section, LPCWSTR key,
 
     return ret;
 }
+
+/***********************************************************************
+ *           WriteOutProfiles   (KERNEL.315)
+ * CB: original: 16 bit function
+ *     here: necessary to save open ini files
+ */
+void WINAPI WriteOutProfiles(void)
+{
+    PROFILE *lastCurProfile;
+    INT x;
+
+    EnterCriticalSection(&PROFILE_CritSect);
+    PROFILE_FlushFile(); //flash current
+    lastCurProfile = CurProfile;
+    for(x = 1;x < N_CACHED_PROFILES;x++)
+    {
+      if (MRUProfile[x]->filename)
+      {
+        CurProfile = MRUProfile[x];
+        PROFILE_FlushFile();
+      }
+    }
+    CurProfile = lastCurProfile;
+    LeaveCriticalSection(&PROFILE_CritSect);
+}
+
