@@ -1,9 +1,11 @@
-/* $Id: BldLevelInf.cmd,v 1.5 2001-01-26 21:33:13 phaller Exp $
+/* $Id: BldLevelInf.cmd,v 1.6 2002-08-24 04:36:04 bird Exp $
  *
  * Adds a Description string to the given .def-file.
  * Fills in default values; like build time and host.
  *
  */
+
+signal on novalue name NoValueHandler
 
 if RxFuncQuery('SysLoadFuncs') = 1 then
 do
@@ -28,6 +30,16 @@ sMiniVer        = '';
 sVendor         = 'Project Odin';
 sVersion        = '0.5';
 
+
+/*
+ * Config stuff.
+ */
+iVerbose        = 1;                    /* 0, 1 or 2. */
+if (getenv("BUILD_QUIET") <> '') then
+    iVerbose    = 0;
+else if (getenv("BUILD_VERBOSE") <> '') then
+    iVerbose    = 2;
+sGlobals = 'iVerbose'
 
 /*
  * Parse parameters.
@@ -108,8 +120,8 @@ do while (sArgs <> '')
             when (ch = 'N') then /* Vendor */
                 sVendor         = sValue;
 
-            when (ch = 'R') then /* Vendor */
-                sDescription    = ReadDescription(sValue, sDefFile);
+            when (ch = 'R') then /* Description */
+                sDescription    = ReadDescription(sValue, sDefFileIn);
 
             when (ch = 'P') then /* Fixpak version */
                 sFixPakVer      = sValue;
@@ -187,13 +199,15 @@ sDescription =  '@#'sVendor':'sVersion'#@'sEnhSign||,
  * Update .def-file.
  */
 rc = UpdateDefFile(sDefFileIn, sDefFileOut, sDescription);
+if (rc = 0 & iVerbose >= 1) then
+    say 'BldLevelInf: Applied build info to '''sDefFileOut'''.';
 exit(rc);
 
 
 /**
  * Display script syntax.
  */
-syntax: procedure
+syntax: procedure expose (sGlobals);
     say 'Syntax: MakeDesc.cmd [options] <deffile in> <deffile out> [options]'
     say '   <deffile>   Defitionfile which will have an DESCRIPTION appended.'
     say 'Options:'
@@ -226,7 +240,7 @@ syntax: procedure
  * @param   A string on the form: "#define=DEFINETOFIND,includefile.h"
  * @remark  Write only code... - let's hope it works.
  */
-LookupDefine: procedure
+LookupDefine: procedure expose (sGlobals);
     parse arg '#'sDefine'='sMacro','sIncludeFile
 
     /*
@@ -337,7 +351,8 @@ LookupDefine: procedure
 
             call stream sIncludeFile, 'c', 'close';
             sValue = substr(sLine, 2, iLastQuote - 2);
-            say 'Found 'sMacro'='sValue;
+            if (iVerbose >= 2) then
+                say 'Found 'sMacro'='sValue;
             return sValue;
         end
         else
@@ -374,7 +389,8 @@ LookupDefine: procedure
                 say 'warning: The #define has no value.';
 
             call stream sIncludeFile, 'c', 'close';
-            say 'Found 'sMacro'='sValue;
+            if (iVerbose >= 2) then
+                say 'Found 'sMacro'='sValue;
             return sValue;
         end
     end
@@ -394,7 +410,7 @@ LookupDefine: procedure
  * @param   sDefFile2   Used if sDefFile is empty.
  * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  */
-ReadDescription: procedure;
+ReadDescription: procedure expose (sGlobals);
     parse arg sDefFile, sDefFile2
 
     /*
@@ -448,7 +464,8 @@ ReadDescription: procedure;
 
         call stream sDefFile, 'c', 'close';
         sValue = substr(sLine, 2, iEnd - 2);
-        say 'Found Description:' sValue;
+        if (iVerbose >= 2) then
+            say 'Found Description:' sValue;
         return sValue;
     end
 
@@ -469,7 +486,7 @@ ReadDescription: procedure;
  * @param   sDescription    New description string.
  * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  */
-UpdateDefFile: procedure;
+UpdateDefFile: procedure expose (sGlobals);
     parse arg sDefFileIn, sDefFileOut, sDescription
 
     /*
@@ -564,4 +581,23 @@ UpdateDefFile: procedure;
      */
     call stream sDefFileOut, 'c', 'close';
     return 0;
+
+
+/**
+ * Get environment variable value.
+ * @returns Environment variable value if set.
+ *          '' if not set.
+ * @param   sVar    Variable name.
+ */
+getenv: procedure
+parse arg sVar
+return value(sVar,,'OS2ENVIRONMENT');
+
+
+/**
+ * No value handler
+ */
+NoValueHandler:
+    say 'NoValueHandler: line 'SIGL;
+return 0;
 
