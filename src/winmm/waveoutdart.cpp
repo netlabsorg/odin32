@@ -1,4 +1,4 @@
-/* $Id: waveoutdart.cpp,v 1.10 2002-06-05 11:44:11 sandervl Exp $ */
+/* $Id: waveoutdart.cpp,v 1.11 2002-07-31 13:51:21 sandervl Exp $ */
 
 /*
  * Wave playback class (DART)
@@ -10,6 +10,7 @@
  *
  * Note:
  * 2000/11/24 PH MCI_MIXSETUP_PARMS->pMixWrite does alter FS: selector!
+ * TODO: mulaw, alaw & adpcm
  *
  */
 
@@ -49,7 +50,18 @@
 
 LONG APIENTRY WaveOutHandler(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer, ULONG ulFlags);
 
-//TODO: mulaw, alaw & adpcm
+static BOOL fFixedWaveBufferSize = FALSE;
+
+/******************************************************************************/
+//Call to tell winmm to expect simple fixed size buffers, so
+//it doesn't have to use very small DART buffers; this will
+//only work in very specific cases; it is not a good general
+//purpose solution)
+/******************************************************************************/
+void WIN32API SetFixedWaveBufferSize()
+{
+    fFixedWaveBufferSize = TRUE;
+}
 /******************************************************************************/
 /******************************************************************************/
 DartWaveOut::DartWaveOut(LPWAVEFORMATEX pwfx, ULONG fdwOpen, ULONG nCallback, ULONG dwInstance)
@@ -193,14 +205,19 @@ MMRESULT DartWaveOut::write(LPWAVEHDR pwh, UINT cbwh)
         dprintf(("mix setup %d, %d\n", pwh->dwBufferLength, pwh->dwBufferLength));
 
 #if 1
-        int consumerate = getAvgBytesPerSecond();
-        int minbufsize = consumerate/32;
+        if(fFixedWaveBufferSize == FALSE) 
+        {//by default we need to select a small enough buffer to be able to
+         //signal buffer completion in time 
+            int consumerate = getAvgBytesPerSecond();
+            int minbufsize = consumerate/32;
 
-        ulBufSize = pwh->dwBufferLength/2;
-        if(ulBufSize > minbufsize) {
-            dprintf(("set buffer size to %d bytes (org size = %d)", minbufsize, pwh->dwBufferLength));
-            ulBufSize = minbufsize;
+            ulBufSize = pwh->dwBufferLength/2;
+            if(ulBufSize > minbufsize) {
+                dprintf(("set buffer size to %d bytes (org size = %d)", minbufsize, pwh->dwBufferLength));
+                ulBufSize = minbufsize;
+            }
         }
+        else ulBufSize = pwh->dwBufferLength;
 #else
         if(pwh->dwBufferLength >= 512 && pwh->dwBufferLength <= 1024)
                 ulBufSize = pwh->dwBufferLength;
