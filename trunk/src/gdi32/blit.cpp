@@ -1,4 +1,4 @@
-/* $Id: blit.cpp,v 1.49 2004-03-09 14:24:34 sandervl Exp $ */
+/* $Id: blit.cpp,v 1.50 2004-03-12 18:13:51 sandervl Exp $ */
 
 /*
  * GDI32 blit code
@@ -183,6 +183,13 @@ static INT SetDIBitsToDevice_(HDC hdc, INT xDest, INT yDest, DWORD cx,
         break;
     }
 
+    // GPI will crash when the app accidentally specifies PAL indexes with
+    // high bpp bitmap data
+    if(coloruse == DIB_PAL_COLORS && info->bmiHeader.biBitCount >= 15) {
+        dprintf(("WARNING: DIB_PAL_COLORS can't be used for high color bitmaps!!"));
+        coloruse = DIB_RGB_COLORS;
+    }
+
     if(bitfields[1] == 0x3E0) 
     {//RGB 555?
         dprintf(("RGB 555->565 conversion required %x %x %x", bitfields[0], bitfields[1], bitfields[2]));
@@ -190,6 +197,7 @@ static INT SetDIBitsToDevice_(HDC hdc, INT xDest, INT yDest, DWORD cx,
         newbits = (WORD *)malloc(imgsize);
         pRGB555to565(newbits, (WORD *)bits, imgsize/sizeof(WORD));
         bits = newbits;
+        dprintf(("RGB 555->565 new bits %x", newbits));
     }
 
     //SvL: Ignore BI_BITFIELDS type (SetDIBitsToDevice fails otherwise)
@@ -496,6 +504,13 @@ static INT StretchDIBits_(HDC hdc, INT xDst, INT yDst, INT widthDst,
         bitfields[1] = 0;
         bitfields[2] = 0;
         break;
+    }
+
+    // GPI will crash when the app accidentally specifies PAL indexes with
+    // high bpp bitmap data
+    if(wUsage == DIB_PAL_COLORS && info->bmiHeader.biBitCount >= 15) {
+        dprintf(("WARNING: DIB_PAL_COLORS can't be used for high color bitmaps!!"));
+        wUsage = DIB_RGB_COLORS;
     }
 
     if(bitfields[1] == RGB555_GREEN_MASK) 
