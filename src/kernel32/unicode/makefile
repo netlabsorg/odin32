@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2001-06-26 00:23:17 bird Exp $
+# $Id: makefile,v 1.5 2003-11-21 11:30:16 sandervl Exp $
 
 #
 # Odin32 API
@@ -62,6 +62,7 @@ $(OBJDIR)\c_949.obj \
 $(OBJDIR)\c_950.obj \
 $(OBJDIR)\c_1006.obj \
 $(OBJDIR)\c_1026.obj \
+$(OBJDIR)\c_1125.obj \
 $(OBJDIR)\c_1250.obj \
 $(OBJDIR)\c_1251.obj \
 $(OBJDIR)\c_1252.obj \
