@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.29 1999-10-14 19:31:30 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.30 1999-10-17 12:17:43 cbratschi Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -72,8 +72,8 @@ HWND OSLibWinCreateWindow(HWND hwndParent, ULONG dwWinStyle, ULONG dwFrameStyle,
         dwClientStyle = dwWinStyle & ~(WS_TABSTOP | WS_GROUP);
 
         dwFrameStyle |= FCF_NOBYTEALIGN;
-        if (hwndParent == HWND_DESKTOP && dwFrameStyle & FCF_TITLEBAR) 
-           	dwFrameStyle |= FCF_TASKLIST | FCF_NOMOVEWITHOWNER;
+        if (hwndParent == HWND_DESKTOP && dwFrameStyle & FCF_TITLEBAR)
+                dwFrameStyle |= FCF_TASKLIST | FCF_NOMOVEWITHOWNER;
 
         dwWinStyle   &= ~WS_CLIPCHILDREN;
 
@@ -146,7 +146,7 @@ BOOL OSLibWinConvertStyle(ULONG dwStyle, ULONG *dwExStyle, ULONG *OSWinStyle, UL
     {
       *OSFrameStyle |= FCF_SIZEBORDER;
       *borderHeight = *borderWidth = 2;
-    } 
+    }
     else
     if(dwStyle & WS_BORDER_W)
     {
@@ -159,7 +159,7 @@ BOOL OSLibWinConvertStyle(ULONG dwStyle, ULONG *dwExStyle, ULONG *OSWinStyle, UL
           *OSFrameStyle |= FCF_VERTSCROLL;
     if(dwStyle & WS_HSCROLL_W)
           *OSFrameStyle |= FCF_HORZSCROLL;
-  } 
+  }
   else
   {
     if((dwStyle & WS_CAPTION_W) == WS_CAPTION_W)
@@ -190,7 +190,7 @@ BOOL OSLibWinConvertStyle(ULONG dwStyle, ULONG *dwExStyle, ULONG *OSWinStyle, UL
 
   //Clear certain frame bits when the window doesn't have a titlebar
   if(!(*OSFrameStyle & FCF_TITLEBAR)) {
-	*OSFrameStyle &= ~(FCF_MINBUTTON|FCF_MAXBUTTON|FCF_SYSMENU);
+        *OSFrameStyle &= ~(FCF_MINBUTTON|FCF_MAXBUTTON|FCF_SYSMENU);
   }
   return TRUE;
 }
@@ -641,7 +641,7 @@ void OSLibMapWINDOWPOStoSWP(PWINDOWPOS pwpos, PSWP pswp, PSWP pswpOld, HWND hPar
             y = parentHeight - y - pswpOld->cy;
          }
       }
- 
+
       if (flags & SWP_SIZE)
       {
          if (cy != pswpOld->cy)
@@ -653,7 +653,7 @@ void OSLibMapWINDOWPOStoSWP(PWINDOWPOS pwpos, PSWP pswp, PSWP pswpOld, HWND hPar
          cy = pswpOld->cy;
       }
       y  = parentHeight - y - cy;
-      
+
 
        if ((pswpOld->x == x) && (pswpOld->y == y))
          flags &= ~SWP_MOVE;
@@ -677,7 +677,7 @@ void OSLibMapWINDOWPOStoSWP(PWINDOWPOS pwpos, PSWP pswp, PSWP pswpOld, HWND hPar
 BOOL  OSLibWinCalcFrameRect(HWND hwndFrame, RECT *pRect, BOOL fClient)
 {
  BOOL rc;
- 
+
    WinMapWindowPoints(hwndFrame, HWND_DESKTOP, (PPOINTL)pRect, 2);
 
    rc = WinCalcFrameRect(hwndFrame, (PRECTL)pRect, fClient);
@@ -763,7 +763,7 @@ BOOL OSLibWinEnableScrollBar(HWND hwndParent, int scrollBar, BOOL fEnable)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL OSLibWinShowScrollBar(HWND hwndParent, HWND hwndScroll, int scrollBar, 
+BOOL OSLibWinShowScrollBar(HWND hwndParent, HWND hwndScroll, int scrollBar,
                            BOOL fShow, BOOL fForceChange)
 {
    if(hwndScroll == NULL) {
@@ -955,3 +955,10 @@ BOOL OSLibSetWindowID(HWND hwnd, ULONG value)
 }
 //******************************************************************************
 //******************************************************************************
+PVOID OSLibWinSubclassWindow(HWND hwnd,PVOID newWndProc)
+{
+  return WinSubclassWindow(hwnd,(PFNWP)newWndProc);
+}
+//******************************************************************************
+//******************************************************************************
+

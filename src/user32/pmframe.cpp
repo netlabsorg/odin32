@@ -1,4 +1,4 @@
-/* $Id: pmframe.cpp,v 1.6 1999-10-14 21:37:44 sandervl Exp $ */
+/* $Id: pmframe.cpp,v 1.7 1999-10-17 12:17:44 cbratschi Exp $ */
 /*
  * Win32 Frame Managment Code for OS/2
  *
@@ -182,19 +182,19 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
       Win32BaseWindow *wndchild;
 
       wndchild = Win32BaseWindow::GetWindowFromOS2FrameHandle(pswp->hwnd);
-      if(wndchild && wndchild->isChild()) 
+      if(wndchild && wndchild->isChild())
       {
 #if 0
        SWP swp = *pswp;
 
-  	MRESULT rc = OldFrameProc(hwnd, msg, mp1, mp2);
-	pswp->x = swp.x;
-	pswp->y = swp.y;
-	pswp->fl = swp.fl;
+        MRESULT rc = OldFrameProc(hwnd, msg, mp1, mp2);
+        pswp->x = swp.x;
+        pswp->y = swp.y;
+        pswp->fl = swp.fl;
 #endif
-      	dprintf(("PMFRAME: WM_ADJUSTWINDOWPOS %x %x %x (%d,%d) (%d,%d)", hwnd, pswp->hwnd, pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
-      	RestoreOS2TIB();
-      	return (MRESULT)0;
+        dprintf(("PMFRAME: WM_ADJUSTWINDOWPOS %x %x %x (%d,%d) (%d,%d)", hwnd, pswp->hwnd, pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
+        RestoreOS2TIB();
+        return (MRESULT)0;
       }
       goto RunDefFrameProc;
     }
@@ -271,7 +271,7 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
           SetWin32TIB();
 
           GetSizeBox(win32wnd,&rect);
-          hps = WinGetPS(hwnd);
+          hps = WinGetClipPS(hwnd,0,PSF_CLIPCHILDREN);
           DrawSizeBox(hps,rect);
           WinReleasePS(hps);
 
@@ -288,10 +288,12 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
         res = OldFrameProc(hwnd,msg,mp1,mp2);
         SetWin32TIB();
 
-        hps = WinGetClipPS(hwnd,0,PSF_CLIPCHILDREN);
         WinQueryWindowRect(hwnd,&rect);
+        rect.xRight = rect.xRight-rect.xLeft;
+        rect.yTop = rect.yTop-rect.yBottom;
+        rect.xLeft = rect.yBottom = 0;
+        hps = WinGetClipPS(hwnd,0,PSF_CLIPCHILDREN);
         DrawFrame(hps,&rect,win32wnd);
-        WinFillRect(hps,&rect,SYSCLR_DIALOGBACKGROUND);
         WinReleasePS(hps);
 
         RestoreOS2TIB();
@@ -315,30 +317,33 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
           SetWin32TIB();
 
           GetSizeBox(win32wnd,&rect);
-          hps = WinGetPS(hwnd);
+          hps = WinGetClipPS(hwnd,0,PSF_CLIPCHILDREN);
           DrawSizeBox(hps,rect);
           WinReleasePS(hps);
 
           RestoreOS2TIB();
           return res;
         } else goto RunDefFrameProc;
-      } 
-//SvL: I doubt this is necessary. Just look at winhlp32. First it draws the
-//     the background gray and then white.
-#if 0
-      else
+      } else
       {
         RECTL rect;
-        HPS hps = WinBeginPaint(hwnd,0,&rect);
+        HPS hps;
 
+        RestoreOS2TIB();
+        OldFrameProc(hwnd,msg,mp1,mp2);
+        SetWin32TIB();
+
+        WinQueryWindowRect(hwnd,&rect);
+        rect.xRight = rect.xRight-rect.xLeft;
+        rect.yTop = rect.yTop-rect.yBottom;
+        rect.xLeft = rect.yBottom = 0;
+        hps = WinGetClipPS(hwnd,0,PSF_CLIPCHILDREN);
         DrawFrame(hps,&rect,win32wnd);
-        WinFillRect(hps,&rect,SYSCLR_DIALOGBACKGROUND);
-        WinEndPaint(hps);
+        WinReleasePS(hps);
 
         RestoreOS2TIB();
         return (MRESULT)0;
       }
-#endif
 
     default:
       RestoreOS2TIB();

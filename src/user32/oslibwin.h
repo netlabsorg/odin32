@@ -1,4 +1,4 @@
-/* $Id: oslibwin.h,v 1.16 1999-10-14 18:27:57 sandervl Exp $ */
+/* $Id: oslibwin.h,v 1.17 1999-10-17 12:17:43 cbratschi Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -37,7 +37,7 @@ BOOL  OSLibWinSetOwner(HWND hwnd, HWND hwndOwner);
 
 
 HWND  OSLibWinCreateWindow(HWND hwndParent, ULONG dwWinStyle, ULONG dwFrameStyle,
-                           char *pszName, HWND Owner, ULONG fHWND_BOTTOM, 
+                           char *pszName, HWND Owner, ULONG fHWND_BOTTOM,
                            HWND *hwndFrame, ULONG id);
 
 BOOL  OSLibWinConvertStyle(ULONG dwStyle, ULONG *dwExStyle, ULONG *OSWinStyle, ULONG *OSFrameStyle, ULONG *borderWidth, ULONG *borderHeight);
@@ -271,5 +271,7 @@ BOOL  OSLibWinSetScrollPageSize(HWND hwndParent, HWND hwndScroll, int pagesize,
                                 int totalsize, int fRedraw);
 
 void  OSLibTranslateScrollCmdAndMsg(ULONG *msg, ULONG *scrollcmd);
+
+PVOID OSLibWinSubclassWindow(HWND hwnd,PVOID newWndProc);
 
 #endif //__OSLIBWIN_H__
