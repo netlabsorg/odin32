@@ -16,7 +16,7 @@
 #include "heap.h"
 #include "resource.h"
 #include "dlgs.h"
-#include "ldt.h"
+//#include "ldt.h"
 #include "sysmetrics.h"
 #include "debugtools.h"
 #include "winreg.h"
@@ -541,6 +541,8 @@ BOOL WINAPI AboutDlgProc( HWND hWnd, UINT msg, WPARAM wParam,
 	}
 	break;
 
+#if 0
+// @@@PH turned off
     case WM_LBTRACKPOINT:
 	hWndCtl = GetDlgItem(hWnd, IDC_LISTBOX);
 	if( (INT)GetKeyState( VK_CONTROL ) < 0 )
@@ -614,6 +616,8 @@ BOOL WINAPI AboutDlgProc( HWND hWnd, UINT msg, WPARAM wParam,
 	    }
 	}
 	break;
+#endif
+
 
     case WM_COMMAND:
         if (wParam == IDOK)

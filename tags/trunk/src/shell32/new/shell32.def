@@ -1,4 +1,4 @@
-; $Id: shell32.def,v 1.3 1999-09-09 15:44:23 phaller Exp $
+; $Id: shell32.def,v 1.4 1999-09-09 20:17:45 phaller Exp $
 
 ;Created by BLAST for IBM's compiler
 ;based on Windows 95
@@ -35,7 +35,7 @@ EXPORTS
 ;   ILSaveToStream                    = _ILSaveToStream@8                     @27
 ;   SHILCreateFromPath                = _SHILCreateFromPath@12                @28
     PathIsRoot                        = _PathIsRootAW@4                       @29
-    PathBuildRoot                     = _PathBuildRoot@8                      @30
+    PathBuildRoot                     = _PathBuildRootA@8                     @30
     PathFindExtension                 = _PathFindExtensionAW@4                @31
     PathAddBackslash                  = _PathAddBackslashAW@4                 @32
     PathRemoveBlanks                  = _PathRemoveBlanksAW@4                 @33
@@ -50,7 +50,7 @@ EXPORTS
 ;   Control_RunDLLW                   = _Control_RunDLLW@16                   @42
     PathIsExe                         = _PathIsExeAW@4                        @43
     DoEnvironmentSubstA               = _DoEnvironmentSubstA@8                @44
-    PathFileExists                    = _PathFileExists@4                     @45
+    PathFileExists                    = _PathFileExistsA@4                    @45
     PathMatchSpec                     = _PathMatchSpecAW@8                    @46
 ;   PathMakeUniqueName                = _PathMakeUniqueNameAW@20              @47
     PathSetDlgItemPath                = _PathSetDlgItemPathAW@12              @48
@@ -361,7 +361,9 @@ EXPORTS
 ;   PathIsSameRoot                    = _PathIsSameRootAW@8                   @650
     ReadCabinetState                  = _ReadCabinetState@8                   @651
     WriteCabinetState                 = _WriteCabinetState@4                  @652
-    PathProcessCommand                = _PathProcessCommand@16                @653
+    PathProcessCommandA               = _PathProcessCommandA@16               @653
+    PathProcessCommandW               = _PathProcessCommandW@16
+    PathProcessCommand                = _PathProcessCommandAW@16
                                         _SHELL32_654@8                        @654
     FileIconInit                      = _FileIconInit@4                       @660
     IsUserAdmin                       = _IsUserAdmin@0                        @680
