@@ -1,4 +1,4 @@
-/* $Id: hmfile.cpp,v 1.2 2000-06-08 18:08:56 sandervl Exp $ */
+/* $Id: hmfile.cpp,v 1.3 2000-06-16 00:04:29 phaller Exp $ */
 
 /*
  * File IO win32 apis
@@ -268,40 +268,65 @@ DWORD HMDeviceFileClass::OpenFile (LPCSTR        lpszFileName,
  *
  * Author    : SvL
  *****************************************************************************/
-BOOL HMDeviceFileClass::DuplicateHandle(PHMHANDLEDATA pHMHandleData, HANDLE  srcprocess,
-                               PHMHANDLEDATA pHMSrcHandle,
-                               HANDLE  destprocess,
-                               PHANDLE desthandle,
-                       	       DWORD   fdwAccess,
-                       	       BOOL    fInherit,
-                               DWORD   fdwOptions)
+BOOL HMDeviceFileClass::DuplicateHandle(PHMHANDLEDATA pHMHandleData, 
+                                        HANDLE  srcprocess,
+                                        PHMHANDLEDATA pHMSrcHandle,
+                                        HANDLE  destprocess,
+                                        PHANDLE desthandle,
+                                        DWORD   fdwAccess,
+                                        BOOL    fInherit,
+                                        DWORD   fdwOptions)
 {
  HMFileInfo *srcfileinfo = (HMFileInfo *)pHMSrcHandle->dwUserData;
- BOOL rc;
+ DWORD rc;
 
   dprintf(("KERNEL32:HMDeviceFileClass::DuplicateHandle (%08x,%08x,%08x,%08x,%08x)",
            pHMHandleData,
-           srcprocess, pHMSrcHandle->hHMHandle, destprocess, desthandle));
+           srcprocess, 
+           pHMSrcHandle->hHMHandle, 
+           destprocess, 
+           desthandle));
 
   //TODO: Inheritance of file handles won't work!
 
-  if(destprocess != srcprocess) {
-	//TODO:!!!!
-	dprintf(("ERROR: DuplicateHandle; different processes not yet supported!!"));
-	return FALSE;
+  if(destprocess != srcprocess) 
+  {
+    //TODO:!!!!
+    dprintf(("ERROR: DuplicateHandle; different processes not yet supported!!"));
+    return FALSE;
   }
 
-  if(srcfileinfo) {
-	if(CreateFile(srcfileinfo->lpszFileName, pHMHandleData,
-                      srcfileinfo->lpSecurityAttributes, NULL) == NO_ERROR) {
-		return TRUE;
-	}
-	dprintf(("ERROR: DuplicateHandle; CreateFile %s failed!", srcfileinfo->lpszFileName));
-	return FALSE;
+  if(srcfileinfo)
+  {
+#if 0
+    // @@@PH Why createfile here? Why not OSLibDupHandle() ?
+    if(CreateFile(srcfileinfo->lpszFileName, pHMHandleData,
+                  srcfileinfo->lpSecurityAttributes, NULL) == NO_ERROR) 
+    {
+      return TRUE;
+    }
+    dprintf(("ERROR: DuplicateHandle; CreateFile %s failed!", 
+             srcfileinfo->lpszFileName));
+    return FALSE;
+#endif
+
+    rc = OSLibDosDupHandle(pHMSrcHandle->hHMHandle,
+                           desthandle);
+    if (rc)
+    {
+      dprintf(("ERROR: DulicateHandle: OSLibDosDupHandle(%s) failed = %u\n",
+               rc,
+               srcfileinfo->lpszFileName));
+      SetLastError(rc);
+      return FALSE;   // ERROR
+    }
+    else
+      return TRUE;    // OK
   }
-  else {
-	SetLastError(ERROR_INVALID_PARAMETER);
-	return FALSE;
+  else
+  {
+    SetLastError(ERROR_INVALID_PARAMETER);
+    return FALSE;
   }
 }
 

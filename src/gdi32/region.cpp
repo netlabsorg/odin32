@@ -1,4 +1,4 @@
-/* $Id: region.cpp,v 1.7 2000-06-14 14:26:59 sandervl Exp $ */
+/* $Id: region.cpp,v 1.8 2000-06-16 00:05:49 phaller Exp $ */
 
 /*
  * GDI32 region code
@@ -69,8 +69,10 @@ static LONG clientHeight(HWND hwnd, pDCData pHps)
 {
     if(hwnd == 0 && pHps != 0)
         hwnd = pHps->hwnd;
-
-    if(hwnd != 0 || pHps == 0)
+  
+    // @@@pH Note: hwnd == 0 == HWND_DESKTOP !
+    // if(hwnd != 0 || pHps == 0)
+    if (pHps == 0)
     {
         RECT rect;
         RECTL rectl;
@@ -114,8 +116,10 @@ static LONG clientWidth(HWND hwnd, pDCData pHps)
 {
     if(hwnd == 0 && pHps != 0)
         hwnd = pHps->hwnd;
-
-    if(hwnd != 0 || pHps == 0)
+  
+    // @@@pH Note: hwnd == 0 == HWND_DESKTOP !
+    // if(hwnd != 0 || pHps == 0)
+    if (pHps == 0)
     {
         RECT rect;
         RECTL rectl;
@@ -133,7 +137,8 @@ static LONG clientWidth(HWND hwnd, pDCData pHps)
 
         return x;
    }
-   else DebugInt3();
+   else
+     DebugInt3();
    return 0;
 }
 //******************************************************************************

@@ -1,4 +1,15 @@
- /* $Id: changelog,v 1.991 2000-06-14 18:31:32 sandervl Exp $ */
+ /* $Id: changelog,v 1.992 2000-06-16 00:06:51 phaller Exp $ */
+
+ 2000-06-14: Patrick Haller <phaller@gmx.net>
+    - KERNEL32:     - fix in HandleManager::DuplicateHandler to call
+                      OSLibDosDupHandle() instead of CreateFile
+                    - fix oslibdos.h FILE_ SetFilePointer constants 
+                      were shifted by 1
+                    - fix for signed negative 32-bit seek from llseek()
+                      forwarded to the 64-bit OS/2 DosSetFilePtrL()
+                      Note: need to check file locking APIs !
+                    - fix GPI32 region: clientHeight, clientWidth:
+                      hwnd == 0 == HWND_DESKTOP seems to be valid !
 
  2000-06-14: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:       Rewrote ExcludeUpdateRgn & GetUpdateRgn

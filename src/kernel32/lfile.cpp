@@ -1,4 +1,4 @@
-/* $Id: lfile.cpp,v 1.6 2000-02-16 14:25:41 sandervl Exp $ */
+/* $Id: lfile.cpp,v 1.7 2000-06-16 00:04:30 phaller Exp $ */
 
 /*
  *
@@ -225,11 +225,12 @@ LONG WIN32API _llseek(HFILE arg1,
       dprintf(("KERNEL32: _llseek - incorrect origin - fails.\n" ));
       return -1;
    }
-
+  
    rc = SetFilePointer(arg1,
                        arg2,
                        NULL,
-                       arg3);   //returns -1 on error (-1 == 0xffffffff)
+                       arg3);   
+  //returns -1 on error (-1 == 0xffffffff)
 
    dprintf(("KERNEL32: _llseek returns %08xh", rc));
 
