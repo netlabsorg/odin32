@@ -1,4 +1,4 @@
-/* $Id: windef.h,v 1.1 1999-05-24 20:19:21 ktk Exp $ */
+/* $Id: windef.h,v 1.2 1999-05-31 17:04:19 phaller Exp $ */
 
 /*
  * Basic types definitions
@@ -78,33 +78,85 @@ extern "C" {
 #endif
 #endif  /* __i386__ */
 
-#define CALLBACK    __stdcall
-#define WINAPI      __stdcall
-#define APIPRIVATE  __stdcall
-//SvL: Conflict with OS/2 headers
-#ifdef __WIN32OS2__
-#define PASCAL      _Pascal
-#define UNALIGNED
-#else
-#define PASCAL      __stdcall
-#define pascal      __stdcall
-#define _pascal     __stdcall
+
+/* define needed macros as required */
+#ifndef CALLBACK
+  #define CALLBACK    __stdcall
 #endif
-#define _stdcall    __stdcall
-#define _fastcall   __stdcall
-#define __export    __stdcall
-#define CDECL       __cdecl
-#define _CDECL      __cdecl
-#define cdecl       __cdecl
-#define _cdecl      __cdecl
-#define WINAPIV     __cdecl
-#define APIENTRY    WINAPI
 
-#define __declspec(x)
-#define dllimport
-#define dllexport
+#ifndef WINAPI
+  #define WINAPI      __stdcall
+#endif
 
-#define CONST       const
+#ifndef APIPRIVATE
+  #define APIPRIVATE  __stdcall
+#endif
+
+#ifndef PASCAL
+  #define PASCAL      __stdcall
+#endif
+
+#ifndef pascal 
+  #define pascal      __stdcall
+#endif
+
+#ifndef _pascal
+  #define _pascal     __stdcall
+#endif
+
+#ifndef _stdcall
+  #define _stdcall    __stdcall
+#endif
+
+#ifndef _fastcall
+  #define _fastcall   __stdcall
+#endif
+
+#ifndef __export
+  #define __export    __stdcall
+#endif
+
+#ifndef CDECL
+  #define CDECL       __cdecl
+#endif
+
+#ifndef _CDECL
+  #define _CDECL      __cdecl
+#endif
+
+#ifndef cdecl
+  #define cdecl       __cdecl
+#endif
+
+#ifndef _cdecl
+  #define _cdecl      __cdecl
+#endif
+
+#ifndef WINAPIV
+  #define WINAPIV     __cdecl
+#endif
+
+#ifndef APIENTRY
+  #define APIENTRY    WINAPI
+#endif
+
+#ifndef __declspec
+  #define __declspec(x)
+#endif
+
+#ifndef dllimport
+  #define dllimport
+#endif
+
+#ifndef dllexport
+  #define dllexport
+#endif
+
+#ifndef CONST
+  #define CONST       const
+#endif
+
+
 
 /* Standard data types. These are the same for emulator and library. */
 
