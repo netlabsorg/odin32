@@ -1,4 +1,4 @@
-/* $Id: winmenu.cpp,v 1.4 1999-09-23 14:53:05 phaller Exp $ */
+/* $Id: winmenu.cpp,v 1.5 1999-09-23 14:58:57 phaller Exp $ */
 
 /*
  * Win32 menu API functions for OS/2
@@ -263,26 +263,32 @@ ODINFUNCTION2(HMENU, GetSubMenu,
 
   hMenuReturned = O32_GetSubMenu(menu->getOS2Handle(), arg2);
   /* @@@PH allocate Win32MenuRes object ! */
-  menuReturned = new Win32MenuRes(hMenu);
+  menuReturned = new Win32MenuRes(hMenuReturned);
   return ((HMENU)menuReturned);
 }
 //******************************************************************************
 //******************************************************************************
-HMENU WIN32API GetSystemMenu(HWND hSystemWindow, BOOL bRevert)
+ODINFUNCTION2(HMENU, GetSystemMenu,
+              HWND,  hSystemWindow,
+              BOOL,  bRevert)
 {
-  dprintf(("USER32: GetSystemMenu not implemented correctly."));
-  //Win32BaseWindow *window;
-  //
-  //window = Win32BaseWindow::GetWindowFromHandle(hSystemWindow);
-  //if(!window)
-  //{
-  //  dprintf(("GetSystemMenu, window %x not found", hSystemWindow));
-  //  return 0;
-  //}
-  //
-  //dprintf(("GetSystemMenu %x", hSystemWindow));
-  //return window->GetSystemMenu();
-  return O32_GetSystemMenu(hSystemWindow, bRevert);
+  Win32MenuRes *menuReturned;
+  HMENU        hMenuReturned;
+  Win32BaseWindow *window;
+
+  window = Win32BaseWindow::GetWindowFromHandle(hSystemWindow);
+  if(!window)
+  {
+    dprintf(("GetSystemMenu, window %x not found", hSystemWindow));
+    return 0;
+  }
+
+  //hMenuReturned = window->GetSystemMenu();
+  hMenuReturned =  O32_GetSystemMenu(hSystemWindow, bRevert);
+
+  /* @@@PH allocate Win32MenuRes object ! */
+  menuReturned = new Win32MenuRes(hMenuReturned);
+  return ((HMENU)menuReturned);
 }
 //******************************************************************************
 //******************************************************************************
