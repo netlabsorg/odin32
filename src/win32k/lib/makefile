@@ -1,5 +1,5 @@
 ##############################################################################
-# $Id: makefile,v 1.1 2000-02-26 17:48:23 bird Exp $
+# $Id: makefile,v 1.2 2000-02-26 20:20:46 bird Exp $
 #
 # PD-Win32 API
 #
@@ -20,9 +20,9 @@ OBJEXT     = obj
 
 CINCLUDES  = -I$(WIN32KINCLUDE) -I$(PDWIN32_INCLUDE)
 CFLAGS     = $(CINCLUDES) $(CFLAGS) -DRING3 -DWIN32KLIB \
-             -Ge+ -Wall+ppt-ppc-inl-cnv-gnr-vft-gen-uni-ext- -Gm- -Gn- -Ti+ -Rn
+             -Wall+ppt-ppc-inl-cnv-gnr-vft-gen-uni-ext- -Ge+ -Gm- -Gn- -Ti+ -Rn
 CXXFLAGS   = $(CINCLUDES) $(CXXFLAGS) -DRING3 -DPE2LX \
-             -Ge+ -Wall+ppt-ppc-inl-cnv-gnr-vft- -Gm- -Gn- -Ti+ -Gx -Rn
+             -Wall+ppt-ppc-inl-cnv-gnr-vft- -Ge+ -Gm- -Gn- -Ti+ -Gx -Rn
 
 
 ##############################################################################
@@ -30,7 +30,11 @@ CXXFLAGS   = $(CINCLUDES) $(CXXFLAGS) -DRING3 -DPE2LX \
 ##############################################################################
 {$(WIN32KLIB)}.c{$(WIN32KOBJ)}.$(OBJEXT):
     @$(ECHO) compiling: $(@B).c
-    $(CC) $(CFLAGS) -c -Fa$(WIN32KLIST)\$(@B).asm -Fo$@ $<
+    @$(CC) $(CFLAGS) -c -Fa$(WIN32KLIST)\$(@B).asm -Fo$@ $<
+
+{$(WIN32KLIB)}.asm{$(WIN32KOBJ)}.$(OBJEXT):
+    @$(ECHO) assmbling: $(@B).c
+    $(AS) $(ASFLAGS) $< -Fo:$@ -Fl:$(WIN32KLIST)\$(*B).lst
 
 {$(WIN32KLIB)}.cpp.obj:
     @$(ECHO) compiling: $(@B).cpp
@@ -44,7 +48,8 @@ TARGET   = win32k.lib
 
 OBJS     =  $(WIN32KOBJ)\libInit.$(OBJEXT)         \
             $(WIN32KOBJ)\libTerm.$(OBJEXT)     \
-            $(WIN32KOBJ)\libDosAllocMemEx.$(OBJEXT)
+            $(WIN32KOBJ)\libDosAllocMemEx.$(OBJEXT) \
+            $(WIN32KOBJ)\libGetCS.obj
 
 
 
@@ -54,17 +59,26 @@ all: $(TARGET)
 # win32k.lib rule.
 ##############################################################################
 $(TARGET): $(OBJS)
-    @echo making library $@
+    @$(ECHO) making library $@
     -$(RM) $@
     $(ILIB) $(ILIBFLAGS) $@ $(OBJS);
     $(CP) $@ $(PDWIN32_LIB)
+
+##############################################################################
+# libtest.exe - test program for the library.
+##############################################################################
+libtest.exe: libTest.c $(TARGET)
+    @$(ECHO) making $@
+    $(CC) $(CFLAGS) -Ge+ -Gn+ -Re -Fe$(WIN32KOBJ)\libTest.obj \
+        -Fe$@ $(TARGET) -Fm$(*B).map libTest.c
 
 
 ##############################################################################
 # Cleanup
 ##############################################################################
 clean:
-    @$(RM) $(OBJS) $(TARGET) $(PDWIN32_LIB)\$(TARGET) ..\$(TARGET) *.pch
+    @$(RM) $(OBJS) $(PDWIN32_LIB)\$(TARGET) ..\$(TARGET) *.pch \
+        $(WIN32KOBJ)\libTest.obj *.obj *.exe *.lib *.map
 
 
 ##############################################################################
