@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.7 2001-09-28 07:50:08 sandervl Exp $
+/* $Id: initwininet.cpp,v 1.1 2001-09-28 07:50:10 sandervl Exp $
  *
  * DLL entry point
  *
@@ -25,7 +25,7 @@
 /* Include files */
 #define  INCL_DOSMODULEMGR
 #define  INCL_DOSPROCESS
-#include <os2wrap.h>    //Odin32 OS/2 api wrappers
+#include <os2wrap.h>                   /* Odin32 OS/2 api wrappers         */
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -33,8 +33,39 @@
 #include <win32type.h>
 #include <winconst.h>
 #include <odinlx.h>
-#include <misc.h>       /*PLF Wed  98-03-18 23:18:15*/
+#include <misc.h>                      /* PLF Wed  98-03-18 23:18:15       */
 #include <initdll.h>
+
+
+extern "C" {
+ //Win32 resource table (produced by wrc)
+ extern DWORD wininet_PEResTab;
+}
+static HMODULE dllHandle = 0;
+
+BOOL WINAPI WININET_LibMain (HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved);
+
+//******************************************************************************
+//******************************************************************************
+BOOL WINAPI WininetLibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
+{
+ BOOL ret;
+
+   switch (fdwReason)
+   {
+   case DLL_PROCESS_ATTACH:
+   case DLL_THREAD_ATTACH:
+   case DLL_THREAD_DETACH:
+    return WININET_LibMain(hinstDLL, fdwReason, fImpLoad);
+
+   case DLL_PROCESS_DETACH:
+    ret = WININET_LibMain(hinstDLL, fdwReason, fImpLoad);
+    ctordtorTerm();
+    return ret;
+   }
+   return FALSE;
+}
+
 
 /****************************************************************************/
 /* _DLL_InitTerm is the function that gets called by the operating system   */
@@ -44,7 +75,7 @@
 /* linkage convention MUST be used because the operating system loader is   */
 /* calling this function.                                                   */
 /****************************************************************************/
-ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
+ULONG APIENTRY inittermWininet(ULONG hModule, ULONG ulFlag)
 {
    size_t i;
    APIRET rc;
@@ -57,12 +88,23 @@ ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
 
    switch (ulFlag) {
       case 0 :
-         ctordtorInit();
+         CheckVersionFromHMOD(PE2LX_VERSION, hModule);/* PLF Wed  98-03-18 05:28:48*/
 
-         return inittermWininet(hModule, ulFlag);
+         /*******************************************************************/
+         /* A DosExitList routine must be used to clean up if runtime calls */
+         /* are required and the runtime is dynamically linked.             */
+         /*******************************************************************/
 
+         dllHandle = RegisterLxDll(hModule, WininetLibMain, (PVOID)&wininet_PEResTab);
+         if(dllHandle == 0)
+             return 0UL;
+
+         break;
       case 1 :
-         return inittermWininet(hModule, ulFlag);
+         if(dllHandle) {
+             UnregisterLxDll(dllHandle);
+         }
+         break;
 
       default  :
          return 0UL;
