@@ -1,4 +1,4 @@
-/* $Id: ReportingBugs.txt,v 1.6 2001-01-09 20:54:31 sandervl Exp $ */
+/* $Id: ReportingBugs.txt,v 1.7 2001-04-23 17:06:35 sandervl Exp $ */
 
 Reporting Odin bugs
 -------------------
@@ -64,6 +64,8 @@ win32 apps:            	win32k/pe.exe
 OS/2 version:		OS/2 Warp 4 or OS/2 Warp Server for e-Business 
                         (Warp 3 not officially supported)
 Fixpack level:		
+
+xf86sup.sys loaded:     yes/no
 
 Windows  dir: 	        (search for 'Windows  dir' in odin32_0.log)
 System32 dir:           (search for 'System32 dir' in odin32_0.log)
