@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.91 2000-03-16 19:20:39 sandervl Exp $
+# $Id: makefile,v 1.92 2000-03-23 19:23:46 sandervl Exp $
 
 #
 # Odin32 API
@@ -19,6 +19,9 @@ PDWIN32_TOOLS   = ..\..\tools\bin
 
 # Flag overloads and local macros.
 CLEANEXTRAS = kernelrsrc.asm
+
+#CFLAGS   = $(CFLAGS) -DDEBUG
+#CXXFLAGS = $(CXXFLAGS) /Fa+
 
 
 # Object files. All objects should be prefixed with $(OBJDIR)!
@@ -58,6 +61,7 @@ $(OBJDIR)\heap.OBJ \
 $(OBJDIR)\heapstring.obj \
 $(OBJDIR)\os2heap.OBJ \
 $(OBJDIR)\vmutex.OBJ \
+$(OBJDIR)\vsemaphore.OBJ \
 $(OBJDIR)\initterm.OBJ \
 $(OBJDIR)\handlemanager.OBJ \
 $(OBJDIR)\environ.obj \

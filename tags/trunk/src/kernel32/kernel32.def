@@ -1,4 +1,4 @@
-; $Id: kernel32.def,v 1.74 2000-03-10 16:11:59 sandervl Exp $
+; $Id: kernel32.def,v 1.75 2000-03-23 19:23:46 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is Windows95 KERNEL32
@@ -978,9 +978,9 @@ EXPORTS
     _UnregisterLxDll@4                                            @1239
 
 ;VMutex
-   enter__6VMutexFUl                                              @1204
-   leave__6VMutexFv                                               @1205
-   __ct__6VMutexFi                                                @1206
+   enter__6VMutexFUlPUl                                           @1204
+   leave__6VMutexFPUl                                             @1205
+   __ct__6VMutexFiPUl                                             @1206
    __dt__6VMutexFv                                                @1207
 
 ;Unicode
@@ -1062,6 +1062,13 @@ EXPORTS
 
 ;code memory allocation
     _cmalloc__FUi                                                 @1272
+
+;VSemaphore
+   wait__10VSemaphoreFUlPUl                                       @1280
+   post__10VSemaphoreFPUl                                         @1281
+   reset__10VSemaphoreFPUl                                        @1282
+   __ct__10VSemaphoreFiPUl                                        @1283
+   __dt__10VSemaphoreFv                                           @1284
 
 ;Export for MSACM32
     _wsnprintfA                                                   @2000
