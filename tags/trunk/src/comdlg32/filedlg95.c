@@ -1,4 +1,4 @@
-/* $Id: filedlg95.c,v 1.10 2000-05-12 18:07:43 sandervl Exp $*/
+/* $Id: filedlg95.c,v 1.11 2000-08-20 09:45:23 sandervl Exp $*/
 /*
  * COMMDLG - File Open Dialogs Win95 look and feel
  *
@@ -14,6 +14,7 @@
 #include <winuser.h>
 #include <heapstring.h>
 #include <misc.h>
+#include <win\shlwapi.h>
 
 #define MapHModuleSL(a) a
 #define MapHModuleLS(a) a
