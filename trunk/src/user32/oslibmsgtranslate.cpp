@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.94 2002-09-17 17:37:10 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.95 2002-09-18 10:56:49 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -937,12 +937,12 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
                mapScreenPoint((OSLIBPOINT*)&CursorPoint);
  
             if (SHORT2FROMMP(os2Msg->mp2) == SB_LINEDOWN)
-                winMsg->wParam  = MAKELONG(0, -WHEEL_DELTA/OS2_WHEEL_CORRECTION);  
+                winMsg->wParam  = MAKELONG(GetMouseKeyState(), -WHEEL_DELTA/OS2_WHEEL_CORRECTION);  
             else
             if (SHORT2FROMMP(os2Msg->mp2) == SB_LINEUP)
-                winMsg->wParam  = MAKELONG(0, WHEEL_DELTA/OS2_WHEEL_CORRECTION);  
+                winMsg->wParam  = MAKELONG(GetMouseKeyState(), WHEEL_DELTA/OS2_WHEEL_CORRECTION);  
             else
-                winMsg->wParam  = 0;
+                winMsg->wParam  = MAKELONG(GetMouseKeyState(), 0);  
 
             winMsg->lParam  = MAKELONG(CursorPoint.x, CursorPoint.y); 
 
@@ -954,10 +954,10 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
 	            hook.pt.x       = os2Msg->ptl.x & 0xFFFF;
 	            hook.pt.y       = mapScreenY(os2Msg->ptl.y);
 	            if (SHORT2FROMMP(os2Msg->mp2) == SB_LINEDOWN)
-	                hook.mouseData   = MAKELONG(0, -WHEEL_DELTA/OS2_WHEEL_CORRECTION);  
+	                hook.mouseData   = MAKELONG(GetMouseKeyState(), -WHEEL_DELTA/OS2_WHEEL_CORRECTION);  
 	            else
 	            if (SHORT2FROMMP(os2Msg->mp2) == SB_LINEUP)
-	                hook.mouseData   = MAKELONG(0, WHEEL_DELTA/OS2_WHEEL_CORRECTION);  
+	                hook.mouseData   = MAKELONG(GetMouseKeyState(), WHEEL_DELTA/OS2_WHEEL_CORRECTION);  
 	            else goto dummymessage; // IBM driver produces other messages as well sometimes
 
 	            hook.flags       = LLMHF_INJECTED;
