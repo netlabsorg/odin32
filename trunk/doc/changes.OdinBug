@@ -1,3 +1,13 @@
+version 0.5.8  10-01-2003
+                         Fixed: Uninitialized variable in SciTech detection
+                                code (another one...)
+                         Fixed: New notebook looked ugly for high resolutions
+                         Changed: Get SDDHELP.SYS location from CONFIG.SYS, do
+                                  not assume it is always in \OS2
+                         Added: Support for NUCLEUS_PATH variable for SciTech
+                                SNAP and SciTech Display Doctor
+                         Added: Check box for people using private builds.
+                                This a very simplicistic approach...
 version 0.5.7  16-08-2002
                          Changed: Ported the whole program to my new Warp 4
                                   style notebook emulation.

@@ -1,4 +1,4 @@
-Odin Bug Report Generator Version 0.5.7
+Odin Bug Report Generator Version 0.5.8
 =======================================
 
 0. Disclaimer
@@ -15,17 +15,10 @@ The current sourcecode is freely available upon request to the author.
 The main goal of this program is to make creating proper bug reports for Team
 Odin more comfortable.
 
-The reason I started to write this program was, that I saw every day that
-Sander van Leeuwen and other Team Odin members write emails, telling  us users
-to bring in proper bug reports (I don't exclude myself).
-
-Well, I would like Sander and all the others to spend there time on Odin and
-not writing emails about things that should be a non-issue.
-
 2. Installation
 ===============
 
-As OdinBug.EXE is written in VX-REXX it needs the VROBJ.DLL runtime.
+OdinBug.EXE is written in VX-REXX and it needs the VROBJ.DLL runtime.
 
 VROBJ.DLL can be found in the directory x:\IMAGES (x=CD-ROM drive) of  your
 original Warp 4 CD-ROM and has to be copied into into d:\OS2\DLL
@@ -61,7 +54,7 @@ editor/viewer.
 Before pressing "Create" for the first time you have to configure your  email
 client on the "EMail" page.
 
-3. WHAT IT DOES
+3. What it does
 
 OdinBug presents a notebook of forms to fill in the information  needed
 by Team Odin and generates a report that follows the standards  defined by
@@ -89,18 +82,18 @@ complete.
 
 The exception is presented on the exceptions page of OdinBug.
 
-4. USAGE
+4. Usage
 
 OdinBug is quite self explanatory anyway and there is a full featured
 online help and manual available. Please, read it!
 
-5. BUG REPORTS AND FEATURE REQUESTS FOR THIS PROGRAM (OdinBug)
+5. Bug reports and feature requests for this program (OdinBug)
 
 Just email *me* and tell me what you think or what you would like to see!  I
 will try to implement or fix it.
 
 
-6. AUTHOR:
+6. Author
 
-Herwig Bauernfeind, 11-08-2002
+Herwig Bauernfeind, 10-01-2002
 EMail: herwig.bauernfeind@aon.at 
