@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.2302 2002-09-12 03:21:54 bird Exp $ */
+/* $Id: changelog,v 1.2303 2002-09-12 09:26:49 sandervl Exp $ */
+
+ 2002-09-12: Platon Fomichev <platon@innotek   >
+    - USER32:   o Translate PM WM_VSCROLL to WM_MOUSEWHEEL messages (currently
+                  only dispatched to (dinput) hook handler)
 
  2002-09-12: knut st. osmundsen <bird@anduin   >
     - MAKE:     o Corrected bug in process which made it put the libraries in
