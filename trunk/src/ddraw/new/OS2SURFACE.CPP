@@ -1,4 +1,4 @@
-/* $Id: OS2SURFACE.CPP,v 1.1 2000-04-07 18:21:05 mike Exp $ */
+/* $Id: OS2SURFACE.CPP,v 1.2 2000-09-25 20:54:01 mike Exp $ */
 
 /*
  * Direct/X Surface class implementaion
@@ -730,9 +730,7 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
   DPA_SurfaceAttached = DPA_Create(8);
   if(NULL==DPA_SurfaceAttached)
   {
-    #ifdef DEBUG
-      dprintf(("DDRAW: Internal : Error creating DPA for attached surfaces\n"));
-    #endif
+    dprintf(("DDRAW: Internal : Error creating DPA for attached surfaces\n"));
     lastError = DDERR_OUTOFMEMORY ;
     return;
   }
@@ -740,9 +738,7 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
   DPA_LockedRects = DPA_Create(8);
   if(NULL==DPA_LockedRects)
   {
-    #ifdef DEBUG
-      dprintf(("DDRAW: Internal : Error creating DPA for Locked Rectangles\n"));
-    #endif
+    dprintf(("DDRAW: Internal : Error creating DPA for Locked Rectangles\n"));
     lastError = DDERR_OUTOFMEMORY ;
     return;
   }
@@ -750,9 +746,7 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
   DPA_SurfacePrivateData = DPA_Create(8);
   if(NULL==DPA_SurfacePrivateData)
   {
-    #ifdef DEBUG
-      dprintf(("DDRAW: Internal : Error creating DPA for priva surface Data\n"));
-    #endif
+    dprintf(("DDRAW: Internal : Error creating DPA for priva surface Data\n"));
     lastError = DDERR_OUTOFMEMORY ;
     return;
   }
@@ -966,9 +960,8 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
 
       // Update passed in and local Surface description
 
-      #ifdef DEBUG
-        dprintf(("DDRAW: Setting up Surface\n"));
-      #endif
+      dprintf(("DDRAW: Setting up Surface\n"));
+
       DDSurfaceDesc.dwFlags     |= DDSD_WIDTH | DDSD_HEIGHT |
                                    DDSD_PITCH | DDSD_LPSURFACE |
                                    DDSD_PIXELFORMAT;
@@ -2191,7 +2184,7 @@ HRESULT __stdcall SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lp
  DWORD dwSrcColor, dwDestColor;
 
   #ifdef DEBUG
-    dprintf(("DDRAW: SurfBlt4 To Surf %08X, from Surf %08X\n",dest,src));
+    dprintf(("DDRAW: SurfBlt4 To Surf %08X, from Surf %08X, flags %08X", dest, src, dwFlags));
     if ( (NULL!=lpDestRect)&& (NULL!=lpSrcRect))
       dprintf(("DDRAW: SurfBlt4 to (%d,%d)(%d,%d) at %08X from (%d,%d)(%d,%d) at %08X\n", lpDestRect->left, lpDestRect->top,
                lpDestRect->right, lpDestRect->bottom, dest, lpSrcRect->left, lpSrcRect->top,
@@ -2599,6 +2592,7 @@ HRESULT __stdcall SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lp
     if(0==src->diveBufNr)
     {
       // copy from the screen to a buffer
+      dprintf(("DDRAW: Screen to buffer"));
 
       if( (NULL==lpDestRect) &&
           (NULL==lpSrcRect) &&
@@ -2664,6 +2658,7 @@ HRESULT __stdcall SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lp
     else
     {
       // DIVE => DIVE  or Mem => Dive can be handelt in the same way
+      dprintf(("DDRAW: Buffer to screen"));
 
       if( (src->pDiveBuffer == dest->pDiveBuffer) &&
           (pIRectDest->intersects(*pIRectSrc) ) )
@@ -3250,9 +3245,7 @@ HRESULT __stdcall SurfBltFast4( THIS This,
   char *pBltPos, *pSrcPos;
   DWORD dwDestColor, dwSrcColor, BlitWidth, BlitHeight,x,y;
 
-  #ifdef DEBUG
-    dprintf(("DDRAW: SurfBltFast4 %08X at(%d/%d) onto %08X with flags %08X\n",src, dwX,dwY, dest, dwTrans));
-  #endif
+  dprintf(("DDRAW: SurfBltFast4 %08X at(%d/%d) onto %08X with flags %08X\n",src, dwX,dwY, dest, dwTrans));
 
   if( (NULL==lpDDSrcSurface) ||
       (dwX<0) || (dwY<0) ||
@@ -3291,18 +3284,17 @@ HRESULT __stdcall SurfBltFast4( THIS This,
 
   if(DDBLTFAST_NOCOLORKEY == dwTrans )
   {
-    dprintf(( "Solid Blit, %d bits => %d bytes per line\n",
+    dprintf(( "Solid Blit, %d pels wide => %d bytes per line\n",
               (SrcRect.right - SrcRect.left),
               BlitWidth) );
     #ifdef USE_ASM
       BltRec(pBltPos, pSrcPos, BlitWidth, BlitHeight,
-             dest->dwPitchDB,
-             src->dwPitchDB);
+             dest->dwPitchDB, src->dwPitchDB);
     #else
       // Solid Blit
       while(1)
       {
-        memcpy(pBltPos,pSrcPos,BlitWidth);
+        memcpy(pBltPos, pSrcPos, BlitWidth);
         pBltPos += dest->dwPitchDB;
         pSrcPos += src->dwPitchDB;
         if(! (--BlitHeight))
@@ -3315,7 +3307,7 @@ HRESULT __stdcall SurfBltFast4( THIS This,
   {
     dprintf(("DDRAW: TransBlit\n"));
 
-    if(dwTrans & DDBLTFAST_SRCCOLORKEY)
+    if (dwTrans & DDBLTFAST_SRCCOLORKEY)
     {
       dprintf(("DDRAW: Trans SRC\n"));
       // transparent source
@@ -3580,17 +3572,17 @@ HRESULT __stdcall SurfBltFast4( THIS This,
 
   return(DD_OK);
 }
+
 //******************************************************************************
 //******************************************************************************
 HRESULT __stdcall SurfDeleteAttachedSurface(THIS This, DWORD dwFlags, LPDIRECTDRAWSURFACE2 lpDDSurface)
 {
   OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
-  #ifdef DEBUG
-    dprintf(("DDRAW: SurfDeleteAttachedSurface\n"));
-  #endif
+  dprintf(("DDRAW: SurfDeleteAttachedSurface\n"));
 
   return(SurfDeleteAttachedSurface4(me, dwFlags, (LPDIRECTDRAWSURFACE4)lpDDSurface));
 }
+
 //******************************************************************************
 //******************************************************************************
 HRESULT __stdcall SurfDeleteAttachedSurface3(THIS This, DWORD dwFlags, LPDIRECTDRAWSURFACE3 lpDDSurface)
