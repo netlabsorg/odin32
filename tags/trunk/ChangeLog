@@ -1,4 +1,19 @@
- /* $Id: ChangeLog,v 1.631 2000-01-10 17:19:51 cbratschi Exp $ */
+ /* $Id: ChangeLog,v 1.632 2000-01-10 23:38:04 sandervl Exp $ */
+
+ 2000-01-10: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32: Fixed message translation for WM_TIMER with no window handle or timer proc
+                  Bugfix for OSLibWinGetMsg & OSLibWinPeekMsg (wrong return value)
+	- WINMM:  Fixed wrong error code for waveOutOpen & waveOutGetDevCaps when 
+                  there's no audio device
+	- USER32\NEW: Fixed message translation for WM_TIMER with no window handle or timer proc
+                  Changed WM_NCHITTEST behaviour. Now sent during WM_MOUSEMOVE
+                  or button down/up message translation.
+                  Fixed LoadBitmap (only load from user32 if it's a system bitmap)
+                  Added WM_NCACTIVATE message generation
+                  Bugfix for OSLibWinGetMsg & OSLibWinPeekMsg (wrong return value)
+                  Changed GetSystemMenu; added method to Win32BaseWindow class
+                  (destroy old menu if present and switch back to default system
+                   menu if bRevert = TRUE; needs changes in non-client code)
 
  2000-01-10: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32/NEW: activated menu code
