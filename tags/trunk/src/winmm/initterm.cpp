@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.6 1999-09-15 23:26:10 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.7 1999-10-05 19:24:00 phaller Exp $ */
 
 /*
  * WINMM DLL entry point
@@ -35,7 +35,7 @@
 #include <odin.h>
 #include <win32type.h>
 #include <odinlx.h>
-#include "aux.h"
+#include "auxiliary.h"
 
 
 extern "C" {
