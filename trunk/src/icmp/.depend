@@ -1,0 +1,163 @@
+$(OBJDIR)\icmp.obj: \
+    o:\odin\src\icmp\icmp.cpp \
+    d:\ibmcpp\include\sys\types.h \
+    d:\ibmcpp\include\time.h \
+    d:\ibmcpp\include\malloc.h \
+    d:\ibmcpp\include\string.h \
+    d:\ibmcpp\include\errno.h \
+    o:\odin\include\win\windef.h \
+    o:\odin\include\win\winbase.h \
+    o:\odin\include\win\winsock.h \
+    o:\odin\include\win\winerror.h \
+    d:\toolkit\h\netinet\in_systm.h \
+    d:\toolkit\h\netinet\ip.h \
+    d:\ibmcpp\include\process.h \
+    o:\odin\include\win\ipexport.h \
+    o:\odin\include\win\icmpapi.h \
+    o:\odin\src\icmp\icmp.h \
+    o:\odin\include\misc.h
+
+o:\odin\include\codepage.h: \
+    d:\toolkit\h\uconv.h
+
+o:\odin\include\comtype.h:
+
+o:\odin\include\cpuhlp.h:
+
+o:\odin\include\dcdata.h:
+
+o:\odin\include\exceptions.h: \
+    o:\odin\include\win32type.h \
+    o:\odin\include\misc.h
+
+o:\odin\include\excpt.h:
+
+o:\odin\include\exitlist.h:
+
+o:\odin\include\handlemanager.h: \
+    o:\odin\include\winos2def.h
+
+o:\odin\include\heap.h: \
+    o:\odin\include\win\winbase.h
+
+o:\odin\include\heapcode.h: \
+    o:\odin\include\heapshared.h
+
+o:\odin\include\heapshared.h: \
+    d:\ibmcpp\include\stddef.h \
+    d:\ibmcpp\include\stdlib.h \
+    d:\ibmcpp\include\umalloc.h
+
+o:\odin\include\heapstring.h: \
+    o:\odin\include\odin.h
+
+o:\odin\include\midimapr.h:
+
+o:\odin\include\misc.h: \
+    o:\odin\include\win32type.h \
+    d:\ibmcpp\include\builtin.h \
+    o:\odin\include\versionos2.h \
+    o:\odin\include\unicode.h
+
+o:\odin\include\nameid.h:
+
+o:\odin\include\odin.h: \
+    d:\ibmcpp\include\builtin.h
+
+o:\odin\include\odin32validate.h:
+
+o:\odin\include\odininst.h:
+
+o:\odin\include\odinlx.h:
+
+o:\odin\include\odinrsrc.h:
+
+o:\odin\include\odinwrap.h: \
+    o:\odin\include\os2sel.h \
+    d:\ibmcpp\include\malloc.h
+
+o:\odin\include\os2mewrap.h: \
+    d:\toolkit\h\os2me.h
+
+o:\odin\include\os2newapi.h:
+
+o:\odin\include\os2sel.h:
+
+o:\odin\include\os2win.h: \
+    o:\odin\include\win32type.h \
+    o:\odin\include\odin.h \
+    o:\odin\include\win\windef.h \
+    o:\odin\include\win\winbase.h \
+    o:\odin\include\win\wingdi.h \
+    o:\odin\include\win\winuser.h \
+    o:\odin\include\win\winerror.h \
+    o:\odin\include\win\commdlg.h \
+    o:\odin\include\win\ddeml.h \
+    o:\odin\include\win\mmsystem.h \
+    o:\odin\include\os2sel.h \
+    o:\odin\include\misc.h
+
+o:\odin\include\os2wrap.h: \
+    d:\toolkit\h\os2.h \
+    o:\odin\include\os2sel.h \
+    o:\odin\include\os2newapi.h
+
+o:\odin\include\pefile.h: \
+    o:\odin\include\os2wrap.h \
+    o:\odin\include\win32type.h \
+    o:\odin\include\win\peexe.h \
+    d:\ibmcpp\include\stdlib.h
+
+o:\odin\include\pmmenu.h:
+
+o:\odin\include\spy.h:
+
+o:\odin\include\unicode.h: \
+    o:\odin\include\uniconv.h
+
+o:\odin\include\uniconv.h: \
+    d:\ibmcpp\include\stddef.h \
+    d:\ibmcpp\include\time.h
+
+o:\odin\include\versionos2.h:
+
+o:\odin\include\vmutex.h:
+
+o:\odin\include\vsemaphore.h:
+
+o:\odin\include\win32api.h: \
+    o:\odin\include\win32type.h \
+    o:\odin\include\winconst.h
+
+o:\odin\include\win32type.h: \
+    o:\odin\include\odin.h
+
+o:\odin\include\win32util.h:
+
+o:\odin\include\win32wnd.h:
+
+o:\odin\include\winaccel.h:
+
+o:\odin\include\winconst.h:
+
+o:\odin\include\wincursor.h:
+
+o:\odin\include\wineuni.h:
+
+o:\odin\include\winicon.h:
+
+o:\odin\include\winkeyboard.h:
+
+o:\odin\include\winmenu.h:
+
+o:\odin\include\winos2def.h:
+
+o:\odin\include\winres.h:
+
+o:\odin\include\wprocess.h: \
+    o:\odin\include\win\winprocess.h \
+    o:\odin\include\winconst.h \
+    o:\odin\include\win\thread.h
+
+o:\odin\src\icmp\icmp.h:
+
