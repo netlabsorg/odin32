@@ -1,4 +1,4 @@
-/* $Id: disk.cpp,v 1.7 1999-11-11 19:10:09 sandervl Exp $ */
+/* $Id: disk.cpp,v 1.8 2000-01-08 04:48:10 phaller Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -67,6 +67,74 @@ BOOL WIN32API GetDiskFreeSpaceW(LPCWSTR arg1, PDWORD arg2, PDWORD arg3, PDWORD a
     FreeAsciiString(astring);
     return(rc);
 }
+
+
+/*****************************************************************************
+ * Name      : GetDiskFreeSpaceEx
+ * Purpose   :
+ * Parameters: lpDirectoryName [in] Pointer to a null-terminated string that 
+ *                             specifies a directory on the disk of interest.
+ *                             This string can be a UNC name. If this 
+ *                             parameter is a UNC name, you must follow it 
+ *                             with an additional backslash. For example, you 
+ *                             would specify \\MyServer\MyShare as 
+ *                             \\MyServer\MyShare\.
+ *                             If lpDirectoryName is NULL, the 
+ *                             GetDiskFreeSpaceEx function obtains 
+ *                             information about the object store.
+ *                             Note that lpDirectoryName does not have to 
+ *                             specify the root directory on a disk. The 
+ *                             function accepts any directory on the disk.
+ *
+ *             lpFreeBytesAvailableToCaller
+ *                             [out] Pointer to a variable to receive the 
+ *                             total number of free bytes on the disk that 
+ *                             are available to the user associated with the 
+ *                             calling thread.
+ *             lpTotalNumberOfBytes
+ *                             [out] Pointer to a variable to receive the 
+ *                             total number of bytes on the disk that are 
+ *                             available to the user associated with the 
+ *                             calling thread.
+ *             lpTotalNumberOfFreeBytes
+ *                             [out] Pointer to a variable to receive the 
+ *                             total number of free bytes on the disk.
+ *                             This parameter can be NULL.
+ * Variables :
+ * Result    : Nonzero indicates success. Zero indicates failure. To get 
+ *             extended error information, call GetLastError.
+ * Remark    : Note that the values obtained by this function are of type 
+ *             ULARGE_INTEGER. Be careful not to truncate these values to 
+ *             32 bits.
+ * Status    :
+ *
+ * Author    : Patrick Haller [Fri, 2000/01/08 23:44]
+ *****************************************************************************/
+
+ODINFUNCTION4(BOOL,GetDiskFreeSpaceExA,
+              LPCSTR,          lpDirectoryName,
+              PULARGE_INTEGER, lpFreeBytesAvailableToCaller,
+              PULARGE_INTEGER, lpTotalNumberOfBytes,
+              PULARGE_INTEGER, lpTotalNumberOfFreeBytes )
+{
+  dprintf(("not yet implemented"));
+  
+  return TRUE;
+}
+
+
+ODINFUNCTION4(BOOL,GetDiskFreeSpaceExW,
+              LPCWSTR,         lpDirectoryName,
+              PULARGE_INTEGER, lpFreeBytesAvailableToCaller,
+              PULARGE_INTEGER, lpTotalNumberOfBytes,
+              PULARGE_INTEGER, lpTotalNumberOfFreeBytes )
+{
+  dprintf(("not yet implemented"));
+  
+  return TRUE;
+}
+
+
 //******************************************************************************
 //******************************************************************************
 UINT WIN32API GetDriveTypeA( LPCSTR arg1)
