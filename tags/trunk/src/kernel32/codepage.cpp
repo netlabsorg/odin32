@@ -98,6 +98,9 @@ void CODEPAGE_Init(void)
 
     TRACE( "ansi=%03d oem=%03d mac=%03d\n", ansi_cptable->info.codepage,
            oem_cptable->info.codepage, mac_cptable->info.codepage );
+#ifdef __WIN32OS2__
+    dprintf(("Language %s", getenv("LANG")));
+#endif
 }
 
 #ifdef __WIN32OS2__
