@@ -1,4 +1,8 @@
- /* $Id: ChangeLog,v 1.805 2000-03-13 20:33:25 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.806 2000-03-13 20:39:39 sandervl Exp $ */
+
+ 2000-03-12: Markus Montkowski <mmontkowski@gmx.de>
+	- KERNEL32: Added fix for GetFileAttributes. Open32 doesn't like 
+                    i.e. 'c:'; needs to be changed into 'c:\'
 
  2000-03-12: Sander van Leeuwen <sandervl@xs4all.nl>
 	- include\winconst.h: Fixed KEY_ALL_ACCESS definition
