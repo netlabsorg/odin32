@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.41 2000-06-08 18:08:54 sandervl Exp $ */
+/* $Id: HandleManager.cpp,v 1.42 2000-07-12 18:21:40 sandervl Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -58,6 +58,7 @@
 #include "HMComm.h"
 #include "HMToken.h"
 #include "HMThread.h"
+#include "HMNPipe.h"
 #include <vmutex.h>
 
 #define DBG_LOCALLOG	DBG_handlemanager
@@ -132,6 +133,7 @@ struct _HMGlobals
   HMDeviceHandler        *pHMComm;                   /* serial communication */
   HMDeviceHandler        *pHMToken;         /* security tokens */
   HMDeviceHandler        *pHMThread;
+  HMDeviceHandler        *pHMNamedPipe;
 
   ULONG         ulHandleLast;                   /* index of last used handle */
 } HMGlobals;
@@ -362,6 +364,7 @@ DWORD HMInitialize(void)
     HMGlobals.pHMComm       = new HMDeviceCommClass("\\\\COM\\");
     HMGlobals.pHMToken      = new HMDeviceTokenClass("\\\\TOKEN\\");
     HMGlobals.pHMThread     = new HMDeviceThreadClass("\\\\THREAD\\");
+    HMGlobals.pHMNamedPipe  = new HMDeviceNamedPipeClass("\\\\PIPE\\");
   }
   return (NO_ERROR);
 }
@@ -3406,4 +3409,443 @@ BOOL HMSetThreadTerminated(HANDLE hThread)
   lpResult = pHMHandle->pDeviceHandler->SetThreadTerminated(&TabWin32Handles[iIndex].hmHandleData);
 
   return (lpResult);                                  /* deliver return code */
+}
+
+/*****************************************************************************
+ * Name      : HMPeekNamedPipe
+ * Purpose   : 
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Przemyslaw Dobrowolski
+ *****************************************************************************/
+BOOL   HMPeekNamedPipe(HANDLE hPipe,
+                       LPVOID  lpvBuffer,
+                       DWORD   cbBuffer,
+                       LPDWORD lpcbRead,
+                       LPDWORD lpcbAvail,
+                       LPDWORD lpcbMessage)
+{
+  int       iIndex;                           /* index into the handle table */
+  BOOL      lpResult;                /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+  SetLastError(ERROR_SUCCESS);
+                                                          /* validate handle */
+  iIndex = _HMHandleQuery(hPipe);              /* get the index */
+  if (-1 == iIndex)                                               /* error ? */
+  {
+    SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
+    return FALSE;                                         /* signal failure */
+  }
+
+  pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
+  lpResult = pHMHandle->pDeviceHandler->PeekNamedPipe(&TabWin32Handles[iIndex].hmHandleData, 
+                                                      lpvBuffer,
+                                                      cbBuffer,
+                                                      lpcbRead,
+                                                      lpcbAvail,
+                                                      lpcbMessage);
+
+  return (lpResult);                                  /* deliver return code */
+}
+
+/*****************************************************************************
+ * Name      : HMCreateNamedPipe
+ * Purpose   : 
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Przemyslaw Dobrowolski
+ *****************************************************************************/
+DWORD HMCreateNamedPipe(LPCTSTR lpName, 
+                      DWORD   dwOpenMode, 
+                      DWORD   dwPipeMode,
+                      DWORD   nMaxInstances, 
+                      DWORD   nOutBufferSize,
+                      DWORD   nInBufferSize, 
+                      DWORD   nDefaultTimeOut,
+                      LPSECURITY_ATTRIBUTES lpSecurityAttributes)
+{
+  int             iIndex;                     /* index into the handle table */
+  int             iIndexNew;                  /* index into the handle table */
+  HMDeviceHandler *pDeviceHandler;         /* device handler for this handle */
+  PHMHANDLEDATA   pHMHandleData;
+  HANDLE          rc;                                     /* API return code */
+
+  SetLastError(ERROR_SUCCESS);
+
+  pDeviceHandler = HMGlobals.pHMNamedPipe;         /* device is predefined */
+
+  iIndexNew = _HMHandleGetFree();                         /* get free handle */
+  if (-1 == iIndexNew)                            /* oops, no free handles ! */
+  {
+    SetLastError(ERROR_NOT_ENOUGH_MEMORY);      /* use this as error message */
+    return 0; 
+  }
+
+  /* initialize the complete HMHANDLEDATA structure */
+  pHMHandleData = &TabWin32Handles[iIndexNew].hmHandleData;
+  pHMHandleData->dwType     = FILE_TYPE_PIPE;
+  pHMHandleData->dwAccess   = 0;
+  pHMHandleData->dwShare    = 0;
+  pHMHandleData->dwCreation = 0;
+  pHMHandleData->dwFlags    = 0;
+  pHMHandleData->lpHandlerData = NULL;
+
+  /* we've got to mark the handle as occupied here, since another device */
+  /* could be created within the device handler -> deadlock */
+
+  /* write appropriate entry into the handle table if open succeeded */
+  TabWin32Handles[iIndexNew].hmHandleData.hHMHandle = iIndexNew;
+  TabWin32Handles[iIndexNew].pDeviceHandler         = pDeviceHandler;
+
+  /* call the device handler */
+
+  rc = pDeviceHandler->CreateNamedPipe(&TabWin32Handles[iIndexNew].hmHandleData,
+                                       lpName,dwOpenMode,
+                                       dwPipeMode,nMaxInstances,
+                                       nOutBufferSize,nInBufferSize,
+                                       nDefaultTimeOut,lpSecurityAttributes);
+
+  if (rc == 0)     /* oops, creation failed within the device handler */
+  {
+    	TabWin32Handles[iIndexNew].hmHandleData.hHMHandle = INVALID_HANDLE_VALUE;
+	return 0;                                           /* signal error */
+  }
+
+  dprintf(("Win32 Handle -> %08x",iIndexNew));
+
+  return iIndexNew;
+}
+
+/*****************************************************************************
+ * Name      : HMConnectNamedPipe
+ * Purpose   : 
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Przemyslaw Dobrowolski
+ *****************************************************************************/
+BOOL HMConnectNamedPipe(HANDLE hPipe, LPOVERLAPPED lpOverlapped)
+{
+  int       iIndex;                           /* index into the handle table */
+  BOOL      lpResult;                /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+  SetLastError(ERROR_SUCCESS);
+                                                          /* validate handle */
+  iIndex = _HMHandleQuery(hPipe);              /* get the index */
+  if (-1 == iIndex)                                               /* error ? */
+  {
+    SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
+    return FALSE;                                         /* signal failure */
+  }
+
+  pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
+  lpResult = pHMHandle->pDeviceHandler->ConnectNamedPipe(&TabWin32Handles[iIndex].hmHandleData, 
+                                                         lpOverlapped);
+
+  return (lpResult);                                  /* deliver return code */
+}
+
+/*****************************************************************************
+ * Name      : HMDisconnectNamedPipe
+ * Purpose   : 
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Przemyslaw Dobrowolski
+ *****************************************************************************/
+BOOL HMDisconnectNamedPipe(HANDLE hPipe)
+{
+  int       iIndex;                           /* index into the handle table */
+  BOOL      lpResult;                /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+  SetLastError(ERROR_SUCCESS);
+                                                          /* validate handle */
+  iIndex = _HMHandleQuery(hPipe);              /* get the index */
+  if (-1 == iIndex)                                               /* error ? */
+  {
+    SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
+    return FALSE;                                         /* signal failure */
+  }
+
+  pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
+  lpResult = pHMHandle->pDeviceHandler->DisconnectNamedPipe(&TabWin32Handles[iIndex].hmHandleData);
+
+  return (lpResult);                                  /* deliver return code */
+}
+
+/*****************************************************************************
+ * Name      : HMGetNamedPipeHandleState
+ * Purpose   : 
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Przemyslaw Dobrowolski
+ *****************************************************************************/
+BOOL HMGetNamedPipeHandleState(HANDLE hPipe,
+                               LPDWORD lpState,
+                               LPDWORD lpCurInstances,
+                               LPDWORD lpMaxCollectionCount,
+                               LPDWORD lpCollectDataTimeout,
+                               LPTSTR  lpUserName,
+                               DWORD   nMaxUserNameSize)
+{
+  int       iIndex;                           /* index into the handle table */
+  BOOL      lpResult;                /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+  SetLastError(ERROR_SUCCESS);
+                                                          /* validate handle */
+  iIndex = _HMHandleQuery(hPipe);              /* get the index */
+  if (-1 == iIndex)                                               /* error ? */
+  {
+    SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
+    return FALSE;                                         /* signal failure */
+  }
+
+  pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
+  lpResult = pHMHandle->pDeviceHandler->GetNamedPipeHandleState(&TabWin32Handles[iIndex].hmHandleData,
+                                                                lpState,
+                                                                lpCurInstances,
+                                                                lpMaxCollectionCount,
+                                                                lpCollectDataTimeout,
+                                                                lpUserName,
+                                                                nMaxUserNameSize);
+
+
+  return (lpResult);                                  /* deliver return code */
+}
+
+/*****************************************************************************
+ * Name      : HMGetNamedPipeInfo
+ * Purpose   : 
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Przemyslaw Dobrowolski
+ *****************************************************************************/
+BOOL HMGetNamedPipeInfo(HANDLE hPipe,
+                        LPDWORD lpFlags,
+                        LPDWORD lpOutBufferSize,
+                        LPDWORD lpInBufferSize,
+                        LPDWORD lpMaxInstances)
+{
+  int       iIndex;                           /* index into the handle table */
+  BOOL      lpResult;                /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+  SetLastError(ERROR_SUCCESS);
+                                                          /* validate handle */
+  iIndex = _HMHandleQuery(hPipe);              /* get the index */
+  if (-1 == iIndex)                                               /* error ? */
+  {
+    SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
+    return FALSE;                                         /* signal failure */
+  }
+
+  pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
+  lpResult = pHMHandle->pDeviceHandler->GetNamedPipeInfo(&TabWin32Handles[iIndex].hmHandleData,
+                                                         lpFlags,
+                                                         lpOutBufferSize,
+                                                         lpInBufferSize,
+                                                         lpMaxInstances);
+
+  return (lpResult);                                  /* deliver return code */
+}
+
+/*****************************************************************************
+ * Name      : HMTransactNamedPipe
+ * Purpose   : 
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Przemyslaw Dobrowolski
+ *****************************************************************************/
+DWORD HMTransactNamedPipe(HANDLE hPipe,
+                          LPVOID       lpvWriteBuf,
+                          DWORD        cbWriteBuf,
+                          LPVOID       lpvReadBuf,
+                          DWORD        cbReadBuf,
+                          LPDWORD      lpcbRead,
+                          LPOVERLAPPED lpo)
+{
+  int       iIndex;                           /* index into the handle table */
+  DWORD     lpResult;                /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+  SetLastError(ERROR_SUCCESS);
+                                                          /* validate handle */
+  iIndex = _HMHandleQuery(hPipe);              /* get the index */
+  if (-1 == iIndex)                                               /* error ? */
+  {
+    SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
+    return FALSE;                                         /* signal failure */
+  }
+
+  pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
+  lpResult = pHMHandle->pDeviceHandler->TransactNamedPipe(&TabWin32Handles[iIndex].hmHandleData,
+                                                          lpvWriteBuf,
+                                                          cbWriteBuf,
+                                                          lpvReadBuf,
+                                                          cbReadBuf,
+                                                          lpcbRead,
+                                                          lpo);
+
+  return (lpResult);                                  /* deliver return code */
+}
+
+/*****************************************************************************
+ * Name      : HMSetNamedPipeHandleState
+ * Purpose   : 
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Przemyslaw Dobrowolski
+ *****************************************************************************/
+BOOL HMSetNamedPipeHandleState(HANDLE  hPipe,
+                               LPDWORD lpdwMode,
+                               LPDWORD lpcbMaxCollect,
+                               LPDWORD lpdwCollectDataTimeout)
+{
+  int       iIndex;                           /* index into the handle table */
+  BOOL      lpResult;                /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+  SetLastError(ERROR_SUCCESS);
+                                                          /* validate handle */
+  iIndex = _HMHandleQuery(hPipe);              /* get the index */
+  if (-1 == iIndex)                                               /* error ? */
+  {
+    SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
+    return FALSE;                                         /* signal failure */
+  }
+
+  pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
+  lpResult = pHMHandle->pDeviceHandler->SetNamedPipeHandleState(&TabWin32Handles[iIndex].hmHandleData,
+                                                                lpdwMode,
+                                                                lpcbMaxCollect,
+                                                                lpdwCollectDataTimeout);
+
+  return (lpResult);                                  /* deliver return code */
+}
+
+/*****************************************************************************
+ * Name      : HMCreatePipe
+ * Purpose   : 
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : NOT TESTED!
+ *
+ * Author    : Przemyslaw Dobrowolski
+ *****************************************************************************/
+BOOL HMCreatePipe(PHANDLE phRead,
+                PHANDLE phWrite,
+                LPSECURITY_ATTRIBUTES lpsa, 
+                DWORD                 cbPipe)
+{
+  int             iIndex;                     /* index into the handle table */
+  int             iIndexNewRead;              /* index into the handle table */
+  int             iIndexNewWrite;             /* index into the handle table */
+  HMDeviceHandler *pDeviceHandler;            /* device handler for this handle */
+  PHMHANDLEDATA   pHMHandleData;
+  HANDLE          rc;                                     /* API return code */
+
+  SetLastError(ERROR_SUCCESS);
+
+  pDeviceHandler = HMGlobals.pHMNamedPipe;         /* device is predefined */
+
+  iIndexNewRead = _HMHandleGetFree();              /* get free handle */
+  if (-1 == iIndexNewRead)                         /* oops, no free handles ! */
+  {
+    SetLastError(ERROR_NOT_ENOUGH_MEMORY);      /* use this as error message */
+    return 0; 
+  }
+
+  iIndexNewWrite = _HMHandleGetFree();              /* get free handle */
+  if (-1 == iIndexNewWrite)                         /* oops, no free handles ! */
+  {
+    SetLastError(ERROR_NOT_ENOUGH_MEMORY);      /* use this as error message */
+    return 0; 
+  }
+
+
+  /* initialize the complete HMHANDLEDATA structure */
+  pHMHandleData = &TabWin32Handles[iIndexNewRead].hmHandleData;
+  pHMHandleData->dwType     = FILE_TYPE_PIPE;
+  pHMHandleData->dwAccess   = 0;
+  pHMHandleData->dwShare    = 0;
+  pHMHandleData->dwCreation = 0;
+  pHMHandleData->dwFlags    = 0;
+  pHMHandleData->lpHandlerData = NULL;
+
+  /* we've got to mark the handle as occupied here, since another device */
+  /* could be created within the device handler -> deadlock */
+
+  /* write appropriate entry into the handle table if open succeeded */
+  TabWin32Handles[iIndexNewRead].hmHandleData.hHMHandle = iIndexNewRead;
+  TabWin32Handles[iIndexNewRead].pDeviceHandler         = pDeviceHandler;
+
+  /* initialize the complete HMHANDLEDATA structure */
+  pHMHandleData = &TabWin32Handles[iIndexNewWrite].hmHandleData;
+  pHMHandleData->dwType     = FILE_TYPE_PIPE;
+  pHMHandleData->dwAccess   = 0;
+  pHMHandleData->dwShare    = 0;
+  pHMHandleData->dwCreation = 0;
+  pHMHandleData->dwFlags    = 0;
+  pHMHandleData->lpHandlerData = NULL;
+
+  /* we've got to mark the handle as occupied here, since another device */
+  /* could be created within the device handler -> deadlock */
+
+  /* write appropriate entry into the handle table if open succeeded */
+  TabWin32Handles[iIndexNewWrite].hmHandleData.hHMHandle = iIndexNewWrite;
+  TabWin32Handles[iIndexNewWrite].pDeviceHandler         = pDeviceHandler;
+  /* call the device handler */
+
+  rc = pDeviceHandler->CreatePipe(&TabWin32Handles[iIndexNewRead].hmHandleData,
+                                  &TabWin32Handles[iIndexNewWrite].hmHandleData,
+                                  lpsa,
+                                  cbPipe);
+
+  if (rc == 0)     /* oops, creation failed within the device handler */
+  {
+    	TabWin32Handles[iIndexNewRead].hmHandleData.hHMHandle = INVALID_HANDLE_VALUE;
+    	TabWin32Handles[iIndexNewWrite].hmHandleData.hHMHandle = INVALID_HANDLE_VALUE;
+	return FALSE;                                           /* signal error */
+  }
+
+  *phRead  = iIndexNewRead;
+  *phWrite = iIndexNewWrite;
+
+  return TRUE;
 }

@@ -1,4 +1,4 @@
-/* $Id: dbglocal.cpp,v 1.8 2000-06-01 11:28:44 sandervl Exp $ */
+/* $Id: dbglocal.cpp,v 1.9 2000-07-12 18:21:41 sandervl Exp $ */
 
 /*
  * debug logging functions for OS/2
@@ -118,7 +118,8 @@ char  *DbgFileNames[DBG_MAXFILES] =
 "hmprocess",
 "vsemaphore",
 "exceptstackdump",
-"hmfile"
+"hmfile",
+"hmnpipe"
 };
 //******************************************************************************
 //******************************************************************************

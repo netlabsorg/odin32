@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.34 2000-07-06 21:18:44 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.35 2000-07-12 18:21:45 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -1338,7 +1338,7 @@ DWORD OSLibDosCreateNamedPipe(LPCTSTR lpName,
                                DWORD   nOutBufferSize,
                                DWORD   nInBufferSize,
                                DWORD   nDefaultTimeOut,
-                               void*   lpSecurityAttributes)
+                               LPSECURITY_ATTRIBUTES lpSecurityAttributes)
 {  DWORD dwOS2Mode     = 0;
    DWORD dwOS2PipeMode = 0;
    LPSTR lpOS2Name;
@@ -1911,7 +1911,7 @@ DWORD OSLibDosQueryVolumeSerialAndName(int drive, LPDWORD lpVolumeSerialNumber,
 //******************************************************************************
 BOOL OSLibDosCreatePipe(PHANDLE phfRead,
                         PHANDLE phfWrite,
-                        void*   lpsa,
+                        LPSECURITY_ATTRIBUTES lpsa,
                         DWORD   dwSize)
 {
   APIRET rc;
