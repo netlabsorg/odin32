@@ -1,10 +1,11 @@
-/* $Id: syscolor.h,v 1.4 1999-09-15 23:18:56 sandervl Exp $ */
+/* $Id: syscolor.h,v 1.5 1999-10-05 16:02:53 cbratschi Exp $ */
 
 /*
  * WINE:
  * System color objects
  *
  * Copyright  Alexandre Julliard, 1994
+ * Copyright 1999 Christoph Bratschi
  */
 
 #ifndef __WINE_SYSCOLOR_H
@@ -32,43 +33,6 @@
 BOOL   WIN32API OS2UpdateWindow(HWND hwnd);
 HBRUSH WIN32API OS2GetSysColorBrush(int nIndex);
 
-struct SysColorObjects
-{
-    HBRUSH hbrushScrollbar;        /* COLOR_SCROLLBAR           */
-    HBRUSH hbrushBackground;       /* COLOR_BACKGROUND          */
-    HBRUSH hbrushActiveCaption;    /* COLOR_ACTIVECAPTION       */
-    HBRUSH hbrushInactiveCaption;  /* COLOR_INACTIVECAPTION     */
-    HBRUSH hbrushMenu;             /* COLOR_MENU                */
-    HBRUSH hbrushWindow;           /* COLOR_WINDOW              */
-    HBRUSH hbrushWindowFrame;      /* COLOR_WINDOWFRAME         */
-    HBRUSH hbrushMenuText;         /* COLOR_MENUTEXT            */
-    HBRUSH hbrushWindowText;       /* COLOR_WINDOWTEXT          */
-    HBRUSH hbrushCaptionText;      /* COLOR_CAPTIONTEXT         */
-    HBRUSH hbrushActiveBorder;     /* COLOR_ACTIVEBORDER        */
-    HBRUSH hbrushInactiveBorder;   /* COLOR_INACTIVEBORDER      */
-    HBRUSH hbrushAppWorkspace;     /* COLOR_APPWORKSPACE        */
-    HBRUSH hbrushHighlight;        /* COLOR_HIGHLIGHT           */
-    HBRUSH hbrushHighlightText;    /* COLOR_HIGHLIGHTTEXT       */
-    HBRUSH hbrushBtnFace;          /* COLOR_BTNFACE             */
-    HBRUSH hbrushBtnShadow;        /* COLOR_BTNSHADOW           */
-    HBRUSH hbrushGrayText;         /* COLOR_GRAYTEXT            */
-    HBRUSH hbrushBtnText;          /* COLOR_BTNTEXT             */
-    HBRUSH hbrushInactiveCaptionText; /* COLOR_INACTIVECAPTIONTEXT */
-    HBRUSH hbrushBtnHighlight;     /* COLOR_BTNHIGHLIGHT        */
-    HBRUSH hbrush3DDkShadow;       /* COLOR_3DDKSHADOW          */
-    HBRUSH hbrush3DLight;          /* COLOR_3DLIGHT             */
-    HBRUSH hbrushInfoText;         /* COLOR_INFOTEXT            */
-    HBRUSH hbrushInfoBk;           /* COLOR_INFOBK              */
-    HBRUSH hbrushAlternateBtnFace; /* COLOR_ALTERNATEBTNFACE */
-    HBRUSH hbrushHotLight;         /* COLOR_HOTLIGHT */
-    HBRUSH hbrushGradientActiveCaption; /* COLOR_GRADIENTACTIVECAPTION */
-    HBRUSH hbrushGradientInactiveCaption; /* COLOR_GRADIENTINACTIVECAPTION */
-
-    HPEN   hpenWindowFrame;        /* COLOR_WINDOWFRAME         */
-    HPEN   hpenWindowText;         /* COLOR_WINDOWTEXT          */
-};
-
 extern void SYSCOLOR_Init(void);
-extern struct SysColorObjects sysColorObjects;
 
 #endif  /* __WINE_SYSCOLOR_H */
