@@ -1,4 +1,10 @@
-/* $Id: changelog,v 1.1842 2001-11-20 15:25:37 sandervl Exp $ */
+/* $Id: changelog,v 1.1843 2001-11-21 11:50:42 sandervl Exp $ */
+
+ 2001-11-21: Sander van Leeuwen <sandervl@xs4all.nl>
+    - COMCTL32: o Tooltips bugfixes (wrong pointer used to free memory)
+    - USER32:   o GetMenu: check that window menu is indeed a menu and not an id
+                  (fixes failed assertion in ZOC)
+                o Groupbox fix: if text changes; erase top border + old text
 
  2001-11-20: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Destroy CD notification window during dll unload
