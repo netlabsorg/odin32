@@ -1,4 +1,8 @@
- /* $Id: ChangeLog,v 1.1072 2000-08-17 18:28:23 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.1073 2000-08-18 01:44:49 phaller Exp $ */
+
+ 2000-08-18: Patrick Haller <phaller@gmx.net>
+    - NTDLL:    roughly synchronized with current WINE
+    - SHELL32:  roughly synchronized with current WINE
 
  2000-08-17: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: Only call O32_LoadLibrary if dwFlags == 0 and (LX binary 
