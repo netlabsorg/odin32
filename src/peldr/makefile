@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.20 2001-08-04 14:14:31 bird Exp $
+# $Id: makefile,v 1.21 2001-09-30 00:34:23 bird Exp $
 
 #
 # Odin32 API
@@ -21,13 +21,12 @@
 _all: all
 
 $(COMMONRULES:dep lib=):
-    $(MAKE_CMD) -f pe.mak $@
-    $(MAKE_CMD) -f pec.mak $@
+    @$(DOMAKES) "pe.mak pec.mak" $(MAKE_CMD) $@
 
 
 # don't have to make deps more than once.
 dep:
-    $(MAKE_CMD) -f pe.mak $@
+    @$(MAKE_CMD) -f pe.mak $@
 
 
 # dummy rule.
