@@ -1,4 +1,4 @@
-/* $Id: obj_shellview.h,v 1.5 1999-08-22 22:52:10 sandervl Exp $ */
+/* $Id: obj_shellview.h,v 1.6 1999-11-28 12:33:11 sandervl Exp $ */
 /************************************************************
  *    IShellView
  */
@@ -73,6 +73,8 @@ typedef struct IShellView IShellView, *LPSHELLVIEW;
 #define FCIDM_SHVIEWLAST	0x7fff
 #define FCIDM_BROWSERFIRST	0xA000
 /* undocumented toolbar items from stddlg's*/
+#define FCIDM_TB_UPFOLDER	0xA001
+#define FCIDM_TB_NEWFOLDER	0xA002
 #define FCIDM_TB_SMALLICON	0xA003
 #define FCIDM_TB_REPORTVIEW	0xA004
 
@@ -125,10 +127,11 @@ typedef enum
 ICOM_DEFINE(IShellView,IOleWindow)
 #undef ICOM_INTERFACE
 
-#ifdef ICOM_CINTERFACE
+/*** IUnknown methods ***/
 #define IShellView_QueryInterface(p,a,b)	ICOM_CALL2(QueryInterface,p,a,b)
 #define IShellView_AddRef(p)			ICOM_CALL(AddRef,p)
 #define IShellView_Release(p)			ICOM_CALL(Release,p)
+/*** IShellView methods ***/
 #define IShellView_GetWindow(p,a)		ICOM_CALL1(GetWindow,p,a)
 #define IShellView_ContextSensitiveHelp(p,a)	ICOM_CALL1(ContextSensitiveHelp,p,a)
 #define IShellView_TranslateAccelerator(p,a)	ICOM_CALL1(TranslateAccelerator,p,a)
@@ -142,7 +145,6 @@ ICOM_DEFINE(IShellView,IOleWindow)
 #define IShellView_SaveViewState(p)		ICOM_CALL(SaveViewState,p)
 #define IShellView_SelectItem(p,a,b)		ICOM_CALL2(SelectItem,p,a,b)
 #define IShellView_GetItemObject(p,a,b,c)	ICOM_CALL3(GetItemObject,p,a,b,c)
-#endif
 
 #ifdef __cplusplus
 } /* extern "C" */

@@ -1,10 +1,12 @@
-/* $Id: dlgs.h,v 1.2 1999-11-02 19:06:42 sandervl Exp $ */
+/* $Id: dlgs.h,v 1.3 1999-11-28 12:33:11 sandervl Exp $ */
 /******************************************************************************
 * dlgs.h -      Common dialog's dialog control ID numbers                     *
 ******************************************************************************/
 
 #ifndef __WINE_DLGS_H
 #define __WINE_DLGS_H
+
+#include "wine/obj_shellview.h"
 
 #define ctlFirst    0x0400
 #define ctlLast     0x04ff
@@ -171,47 +173,28 @@
 #define scr7        0x0496
 #define scr8        0x0497
 
+/*
+ *  Controls
+ */
+#define ctl1	    0x04A0
+
 /* These dialog resource ordinals really start at 0x0600, but the
  * RC Compiler can't handle hex for resource IDs, hence the decimal.
  */
-#define FILEOPENORD      1536
-#define MULTIFILEOPENORD 1537
-#define PRINTDLGORD      1538
-#define PRNSETUPDLGORD   1539
-#define FINDDLGORD       1540
-#define REPLACEDLGORD    1541
-#define FONTDLGORD       1542
-#define FORMATDLGORD31   1543
-#define FORMATDLGORD30   1544
-
-
-#define IDD_OPENDIALOG                  101
-#define IDD_SAVEDIALOG                  201
-#define IDS_ABOUTBOX                    101
-#define IDS_DOCUMENTFOLDERS             102
-#define IDS_PERSONAL                    103
-#define IDS_FAVORITES                   104
-#define IDS_PATH                        105
-#define IDS_DESKTOP                     106
-#define IDB_TOOLBAR                     107
-#define IDS_FONTS                       108
-#define IDS_MYCOMPUTER                  110
-#define IDS_SYSTEMFOLDERS               112
-#define IDS_LOCALHARDRIVES              113
-#define IDS_FILENOTFOUND                114
-#define IDS_VERIFYFILE                  115
-#define IDS_CREATEFILE                  116
-#define IDC_OPENREADONLY                410
-#define IDC_FILETYPESTATIC              441
-#define IDC_FILENAMESTATIC              442
-#define IDC_LOOKINSTATIC                443
-#define IDC_SHELLSTATIC                 461
-#define IDC_FILETYPE                    470
-#define IDC_LOOKIN                      471
-#define IDC_FILENAME                    480
-#define IDC_UPFOLDER                    1009
-#define IDC_NEWFOLDER                   1010
-#define IDC_LIST                        1011
-#define IDC_DETAILS                     1014
+#define FILEOPENORD		1536
+#define MULTIFILEOPENORD	1537
+#define PRINTDLGORD		1538
+#define PRNSETUPDLGORD		1539
+#define FINDDLGORD		1540
+#define REPLACEDLGORD		1541
+#define FONTDLGORD		1542
+#define FORMATDLGORD31		1543
+#define FORMATDLGORD30		1544
+#define PAGESETUPDLGORD		1546
+#define NEWFILEOPENORD		1547 
+#define PRINTDLGEXORD		1549
+#define PAGESETUPDLGORDMOTIF	1550
+#define COLORMGMTDLGORD		1551
+#define NEWFILEOPENV2ORD	1552
 
 #endif  /* #ifdef __WINE_DLGS_H */
