@@ -1,14 +1,8 @@
-; $Id: msvfw32.DEF,v 1.1 1999-09-04 09:08:44 sandervl Exp $
+; $Id: msvfw32.DEF,v 1.2 1999-09-18 15:57:30 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY MSVFW32 INITINSTANCE
 DATA MULTIPLE NONSHARED
-
-IMPORTS
-       _CloseDriver@12		= WINMM.CloseDriver
-       _OpenDriverA@12		= WINMM.OpenDriver
-       _SendDriverMessage@16	= WINMM.SendDriverMessage
-       _mmioStringToFOURCCA@8	= WINMM.mmioStringToFOURCCA
 
 EXPORTS
     VideoForWindowsVersion	= _VideoForWindowsVersion@0		@2

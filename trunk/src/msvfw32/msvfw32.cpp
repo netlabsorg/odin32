@@ -1,4 +1,4 @@
-/* $Id: msvfw32.cpp,v 1.1 1999-09-04 09:08:44 sandervl Exp $ */
+/* $Id: msvfw32.cpp,v 1.2 1999-09-18 15:57:30 sandervl Exp $ */
 /*
  * Copyright 1998 Marcus Meissner
  * Copyright 1999 Jens Wiessner
@@ -768,13 +768,3 @@ BOOL VFWAPIV MCIWndRegisterClass()
  */
 
 /* NO */
-
-
-INT WINAPI lstrncmpiA( LPCSTR str1, LPCSTR str2, INT n )
-{
-  //CB: implement!
-  return 0;
-}
-
-
-

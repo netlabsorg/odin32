@@ -1,4 +1,4 @@
-/* $Id: sh.cpp,v 1.7 1999-08-05 21:03:34 phaller Exp $ */
+/* $Id: sh.cpp,v 1.8 1999-09-18 15:57:52 sandervl Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -23,8 +23,6 @@
 #include <string.h>
 
 #include <misc.h>
-#include <nameid.h>
-#include <unicode.h>
 
 
 /*****************************************************************************

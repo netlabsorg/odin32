@@ -1,4 +1,4 @@
-/* $Id: drag.cpp,v 1.2 1999-06-10 16:56:08 phaller Exp $ */
+/* $Id: drag.cpp,v 1.3 1999-09-18 15:57:51 sandervl Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -23,7 +23,6 @@
 #include <string.h>
 
 #include <misc.h>
-#include <nameid.h>
 #include <unicode.h>
 
 
