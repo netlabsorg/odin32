@@ -8,10 +8,11 @@
 
 extern BOOL fCustomBuild;
 
-void InitDirectoriesCustom(char *szSystemDir, char *szWindowsDir);
+void WIN32API InitDirectoriesCustom(char *szSystemDir, char *szWindowsDir);
 
-void DisableOdinIni();
-void DisableOdinSysMenuItems();
+void WIN32API DisableOdinIni();
+
+void WIN32API DisableOdinSysMenuItems();
 
 
 typedef HANDLE (* WIN32API PFNDRVOPEN)(LPVOID lpDriverData, DWORD dwAccess, DWORD dwShare, DWORD dwFlags, PVOID *ppHandleData);
