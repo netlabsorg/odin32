@@ -1,4 +1,4 @@
-/* $Id: menu.cpp,v 1.4 1999-06-10 16:50:39 phaller Exp $ */
+/* $Id: menu.cpp,v 1.5 1999-07-10 15:58:52 sandervl Exp $ */
 
 /*
  * Win32 menu API functions for OS/2
@@ -185,14 +185,20 @@ BOOL rc;
 //******************************************************************************
 BOOL WIN32API AppendMenuW( HMENU arg1, UINT arg2, UINT arg3, LPCWSTR  arg4)
 {
- BOOL  rc;
- char *astring = UnicodeToAsciiString((LPWSTR)arg4);
+    BOOL  rc;
+    char *astring = NULL;
 
 #ifdef DEBUG
     WriteLog("USER32:  OS2AppendMenuW\n");
 #endif
+    if(arg2 & MF_STRING  && (int)arg4 >> 16 != 0)
+      astring = UnicodeToAsciiString((LPWSTR)arg4);
+    else
+      astring = (char *) arg4;
+
     rc = O32_AppendMenu(arg1, arg2, arg3, astring);
-    FreeAsciiString(astring);
+    if(arg2 & MF_STRING  && (int)arg4 >> 16 != 0)
+      FreeAsciiString(astring);
     return(rc);
 }
 //******************************************************************************
@@ -249,14 +255,20 @@ BOOL WIN32API ModifyMenuA( HMENU arg1, UINT arg2, UINT arg3, UINT arg4, LPCSTR  
 //******************************************************************************
 BOOL WIN32API ModifyMenuW( HMENU arg1, UINT arg2, UINT arg3, UINT arg4, LPCWSTR arg5)
 {
- BOOL  rc;
- char *astring = UnicodeToAsciiString((LPWSTR)arg5);
+    BOOL  rc;
+    char *astring = NULL;
 
 #ifdef DEBUG
     WriteLog("USER32: OS2ModifyMenuW %s\n", astring);
 #endif
+    if(arg3 & MF_STRING  && (int)arg5 >> 16 != 0)
+      astring = UnicodeToAsciiString((LPWSTR)arg5);
+    else
+      astring = (char *) arg5;
+
     rc = O32_ModifyMenu(arg1, arg2, arg3, arg4, astring);
-    FreeAsciiString(astring);
+    if(arg3 & MF_STRING  && (int)arg5 >> 16 != 0)
+      FreeAsciiString(astring);
     return(rc);
 }
 //******************************************************************************
@@ -308,16 +320,24 @@ BOOL WIN32API InsertMenuA( HMENU arg1, UINT arg2, UINT arg3, UINT arg4, LPCSTR  
 //******************************************************************************
 BOOL WIN32API InsertMenuW(HMENU arg1, UINT arg2, UINT arg3, UINT arg4, LPCWSTR arg5)
 {
- BOOL  rc;
- char *astring = UnicodeToAsciiString((LPWSTR)arg5);
+    BOOL  rc;
+    char *astring = NULL;
 
 #ifdef DEBUG
     WriteLog("USER32:  OS2InsertMenuW %s\n", astring);
 #endif
+    if(arg3 & MF_STRING  && (int)arg5 >> 16 != 0)
+      astring = UnicodeToAsciiString((LPWSTR)arg5);
+    else
+      astring = (char *) arg5;
+
     rc = O32_InsertMenu(arg1, arg2, arg3, arg4, astring);
-    FreeAsciiString(astring);
+    if(arg3 & MF_STRING  && (int)arg5 >> 16 != 0)
+      FreeAsciiString(astring);
     return(rc);
 }
+//******************************************************************************
+//******************************************************************************
 BOOL WIN32API SetMenuContextHelpId(HMENU hmenu, DWORD dwContextHelpId)
 {
 #ifdef DEBUG
