@@ -49,7 +49,7 @@ initialise.obj:	initialise.cpp
 clsid.obj:	clsid.cpp 
 guid.obj:	guid.cpp 
 stubs.obj:	stubs.cpp 
-initterm.obj:	initterm.c
+initterm.obj:	initterm.cpp
 
 
 clean:
