@@ -1,4 +1,4 @@
-/* $Id: heapstring.cpp,v 1.26 2000-02-16 14:23:58 sandervl Exp $ */
+/* $Id: heapstring.cpp,v 1.27 2000-06-12 12:20:05 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -1051,4 +1051,76 @@ WCHAR * WIN32API AsciiToUnicodeString(char *astring)
 #endif
 
 
+/*****************************************************************************
+ * Name      : GetNumberFormat
+ * Purpose   : format a given number string according to local settings
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Sun, 2000/06/12 12:46]
+ *****************************************************************************/
+
+
+ODINFUNCTION6(int,               GetNumberFormatA,
+              LCID,              Locale,
+              DWORD,             dwFlags,
+              LPCSTR,            lpValue,
+              CONST NUMBERFMTA *,lpFormat,
+              LPSTR,             lpNumberStr,
+              int,               cchNumber)
+{
+  dprintf(("GetNumberFormatA(%08x,%08x,%s,%08x,%s,%08x) not properly implemented.\n",
+           Locale,
+           dwFlags,
+           lpValue,
+           lpFormat,
+           lpNumberStr,
+           cchNumber));
+  
+  // @@@PH cheap ass emulation
+  lstrcpynA(lpNumberStr,
+            lpValue,
+            cchNumber);
+  
+  return lstrlenA(lpNumberStr);
+}
+
+
+/*****************************************************************************
+ * Name      : GetNumberFormat
+ * Purpose   : format a given number string according to local settings
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Sun, 2000/06/12 12:46]
+ *****************************************************************************/
+
+int WIN32API GetNumberFormatW(LCID     Locale,
+                                 DWORD    dwFlags,
+                                 LPCWSTR lpValue,
+                                 CONST NUMBERFMTW *lpFormat,
+                                 LPWSTR  lpNumberStr,
+                                 int      cchNumber)
+{
+  dprintf(("GetNumberFormatW(%08x,%08x,%s,%08x,%s,%08x) not properly implemented.\n",
+           Locale,
+           dwFlags,
+           lpValue,
+           lpFormat,
+           lpNumberStr,
+           cchNumber));
+  
+  // @@@PH cheap ass emulation
+  lstrcpynW(lpNumberStr,
+            lpValue,
+            cchNumber);
+  
+  return lstrlenW(lpNumberStr);
+}
 
