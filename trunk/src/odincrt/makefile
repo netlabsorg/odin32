@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.27 2002-04-29 13:19:31 bird Exp $
+# $Id: makefile,v 1.28 2002-04-29 14:45:43 bird Exp $
 
 #
 # Odin32 API
@@ -11,7 +11,6 @@
 # Tell the buildenvironment not to
 #
 NOTEXPDEF   = 1
-
 
 #
 # Compiler, tools, and interference rules.
@@ -39,14 +38,30 @@ DBG=p
 DBG=
 !endif
 
+# Sorry, this looks like hell now.
 !ifdef VAC3
-DEFFILE = odincrt$(DBG).def
+! ifdef WITH_KLIB
+DEFFILE_ORG = odincrt$(DBG).def
+DEFFILE     = $(OBJDIR)\odincrt$(DBG)klib.def
+! else
+DEFFILE     = odincrt$(DBG).def
+! endif
 !endif
 !ifdef VAC36
-DEFFILE = odin36$(DBG).def
+! ifdef WITH_KLIB
+DEFFILE_ORG = odin36$(DBG).def
+DEFFILE     = $(OBJDIR)\odin36$(DBG)klib.def
+! else
+DEFFILE     = odin36$(DBG).def
+! endif
 !endif
 !ifdef WAT
-DEFFILE = odinwat$(DBG).def
+! ifdef WITH_KLIB
+DEFFILE_ORG = odinwat$(DBG).def
+DEFFILE     = $(OBJDIR)\odinwat$(DBG)klib.def
+! else
+DEFFILE     = odinwat$(DBG).def
+! endif
 !endif
 !ifndef DEFFILE
 !error "not supported on this compiler yet."
@@ -104,4 +119,13 @@ TARGET = $(ODINCRT)
 # Includes the common rules.
 #
 !include $(ODIN32_POST_INC)
+
+
+
+!ifdef DEFFILE_ORG
+# Add kLib export to the def-file.
+$(DEFFILE): Makefile $(DEFFILE_ORG)
+    $(CP) $(DEFFILE_ORG) $@
+    $(ECHO)     kHeapDbgException           @1500 >> $@
+!endif
 
