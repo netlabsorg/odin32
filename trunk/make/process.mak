@@ -1,4 +1,4 @@
-# $Id: process.mak,v 1.38 2003-11-14 22:02:33 bird Exp $
+# $Id: process.mak,v 1.39 2004-02-02 22:26:57 bird Exp $
 #
 # Generic Buildsystem
 #
@@ -317,6 +317,85 @@ TARGET_PUB      = $(TARGET_PUB_DIR)\$(TARGET_PUB_NAME).$(TARGET_PUB_EXT)
 !if !defined(TARGET_PUB_DEB) && "$(TARGET_PUB_DIR_DEB)" != ""
 TARGET_PUB_DEB  = $(TARGET_PUB_DIR_DEB)\$(TARGET_PUB_NAME).$(TARGET_PUB_EXT)
 !endif
+
+# Target publish no.2
+
+!if defined(TARGET_PUB2_BASE) || defined(TARGET_PUB2_BASE_DEB) || defined(TARGET_PUB2_SUB) \
+ || defined(TARGET_PUB2_DIR) || defined(TARGET_PUB2_DIR_DEB) || defined(TARGET_PUB2_NAME) \
+ || defined(TARGET_PUB2_EXT) || defined(TARGET_PUB2)
+
+# Default public base directory. (publish)
+! ifndef TARGET_PUB2_BASE
+!  if "$(TARGET_MODE)" == "LIB" || "$(TARGET_MODE)" == "SYSLIB" || "$(TARGET_MODE)" == "IFSLIB"
+TARGET_PUB2_BASE = $(PATH_LIB)
+!  else
+TARGET_PUB2_BASE = $(PATH_PUB)
+!  endif
+! endif
+
+# Default public base directory for unstripped release version.
+! ifndef TARGET_PUB2_BASE_DEB
+!  if "$(BUILD_MODE)" == "RELEASE" && "$(TARGET_MODE:LIB=...)" == "$(TARGET_MODE)"
+!   if "$(TARGET_MODE)" == "EXE" || "$(TARGET_MODE)" == "DLL" || "$(TARGET_MODE)" == "SYS" || "$(TARGET_MODE)" == "IFS" || "$(TARGET_MODE)" == "VDD"
+TARGET_PUB2_BASE_DEB = $(PATH_PUB2_DEB)
+!   endif
+!  endif
+! endif
+
+# Default sub directory.
+! ifndef TARGET_PUB2_SUB
+!  if "$(TARGET_SUB)" ! = ""
+TARGET_PUB2_SUB  = $(TARGET_SUB)
+!  else
+!   if "$(TARGET_MODE)" == "EXE"
+TARGET_PUB2_SUB  = $(PATH_SUB_BIN)
+!   endif
+!   if "$(TARGET_MODE)" == "DLL"
+TARGET_PUB2_SUB  = $(PATH_SUB_DLL)
+!   endif
+!   if "$(TARGET_MODE)" == "LIB" || "$(TARGET_MODE)" == "SYSLIB" || "$(TARGET_MODE)" == "IFSLIB"
+TARGET_PUB2_SUB  = .
+!   endif
+!   if "$(TARGET_MODE)" == "SYS" || "$(TARGET_MODE)" == "IFS"
+TARGET_PUB2_SUB  = $(PATH_SUB_SYS)
+!   endif
+!   if "$(TARGET_MODE)" == "VDD"
+TARGET_PUB2_SUB  = $(PATH_SUB_VDD)
+!   endif
+!  endif
+! endif
+
+# Default public directory.
+! ifndef TARGET_PUB2_DIR
+TARGET_PUB2_DIR  = $(TARGET_PUB2_BASE)\$(TARGET_PUB2_SUB)
+! endif
+
+# Default unstripped public directory.
+! if ! defined(TARGET_PUB2_DIR_DEB) && "$(TARGET_PUB2_BASE_DEB)" != ""
+TARGET_PUB2_DIR_DEB  = $(TARGET_PUB2_BASE_DEB)\$(TARGET_PUB2_SUB)
+! endif
+
+# Default public name.
+! ifndef TARGET_PUB2_NAME
+TARGET_PUB2_NAME = $(TARGET_NAME)
+! endif
+
+# Default public ext.
+! ifndef TARGET_PUB2_EXT
+TARGET_PUB2_EXT  = $(TARGET_EXT)
+! endif
+
+# Default public full name.
+! ifndef TARGET_PUB2
+TARGET_PUB2      = $(TARGET_PUB2_DIR)\$(TARGET_PUB2_NAME).$(TARGET_PUB2_EXT)
+! endif
+
+# Default public full name of unstripped version.
+! if !defined(TARGET_PUB2_DEB) && "$(TARGET_PUB2_DIR_DEB)" != ""
+TARGET_PUB2_DEB  = $(TARGET_PUB2_DIR_DEB)\$(TARGET_PUB2_NAME).$(TARGET_PUB2_EXT)
+! endif
+
+!endif # pub2
 
 # Default public book dirs
 !ifndef TARGET_BOOK_PUB_BASE
@@ -1225,7 +1304,7 @@ publish: publish_target
 # This one is invoked when a target is 'needed' or early published.
 #
 publish_target:
-!if "$(_TARGET_EARLY_PUBLISH)" != "" || "$(TARGET_MODE:LIB=cute)" == "$(TARGET_MODE)"
+!if ( "$(_TARGET_EARLY_PUBLISH)" != "" || "$(TARGET_MODE:LIB=cute)" == "$(TARGET_MODE)" ) && "$(TARGET_PRIVATE)" == ""
 ! if "$(TARGET_MODE)" != "EMPTY" && "$(TARGET_MODE)" != "TESTCASE" && "$(TARGET_MODE)" != "DEPEND"
     @$(ECHO) Publishing $(CLRFIL)$(TARGET)$(CLRTXT) to directory $(CLRFIL)$(TARGET_PUB_DIR)$(CLRRST)
     @if not exist "$(TARGET)"           $(TOOL_ECHO) $(CLRERR)WARNING: $(CLRFIL)$(TARGET)$(CLRERR) doesn't exist. $(CLRRST)
@@ -1243,6 +1322,26 @@ publish_target:
     @if exist "$(TARGET_SYM)"           $(TOOL_COPY) "$(TARGET_SYM)"  "$(TARGET_PUB_DIR_DEB)"
 !   ifdef PUBLISH_MAP
     @if exist "$(TARGET_MAP)"           $(TOOL_COPY) "$(TARGET_MAP)"  "$(TARGET_PUB_DIR_DEB)"
+!   endif
+!  endif
+!  if "$(TARGET_PUB2)" != ""
+    @$(ECHO) Publishing $(CLRFIL)$(TARGET)$(CLRTXT) to directory $(CLRFIL)$(TARGET_PUB2_DIR)$(CLRRST)
+    @if not exist "$(TARGET)"           $(TOOL_ECHO) $(CLRERR)WARNING: $(CLRFIL)$(TARGET)$(CLRERR) doesn't exist. $(CLRRST)
+    @if not exist "$(TARGET_PUB2_DIR)"  $(TOOL_CREATEPATH) $(TARGET_PUB2_DIR)
+    @if exist "$(TARGET)"               $(TOOL_COPY) "$(TARGET)"      "$(TARGET_PUB2)"
+    @if exist "$(TARGET_SYM)"           $(TOOL_COPY) "$(TARGET_SYM)"  "$(TARGET_PUB2_DIR)"
+!   ifdef PUBLISH_MAP
+    @if exist "$(TARGET_MAP)"           $(TOOL_COPY) "$(TARGET_MAP)"  "$(TARGET_PUB2_DIR)"
+!   endif
+!   if "$(TARGET_PUB2_DEB)" != ""
+    @$(ECHO) Publishing unstripped $(CLRFIL)$(TARGET)$(CLRTXT) to directory $(CLRFIL)$(TARGET_PUB2_DIR_DEB)$(CLRRST)
+    @if not exist "$(_TARGET_DEB)"      $(TOOL_ECHO) $(CLRERR)WARNING: $(CLRFIL)$(_TARGET)$(CLRERR) doesn't exist. $(CLRRST)
+    @if not exist "$(TARGET_PUB2_DIR_DEB)" $(TOOL_CREATEPATH)  $(TARGET_PUB_DIR_DEB)
+    @if exist "$(_TARGET_DEB)"          $(TOOL_COPY) "$(_TARGET_DEB)" "$(TARGET_PUB2_DEB)"
+    @if exist "$(TARGET_SYM)"           $(TOOL_COPY) "$(TARGET_SYM)"  "$(TARGET_PUB2_DIR_DEB)"
+!    ifdef PUBLISH_MAP
+    @if exist "$(TARGET_MAP)"           $(TOOL_COPY) "$(TARGET_MAP)"  "$(TARGET_PUB2_DIR_DEB)"
+!    endif
 !   endif
 !  endif
 ! endif
