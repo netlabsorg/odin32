@@ -1,7 +1,8 @@
- /* $Id: ChangeLog,v 1.867 2000-04-06 20:38:41 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.868 2000-04-06 21:11:39 sandervl Exp $ */
 
  2000-04-06: Sander van Leeuwen <sandervl@xs4all.nl>
 	- WINMM: Fixed message callback once more (previous fix broke rp7)
+                 Fixed restart
 
  2000-04-08: Michal Necasek <mike@mendelu.cz>
         - WINMM: Moved phwo == NULL check below format query handling.
