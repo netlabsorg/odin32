@@ -1,4 +1,4 @@
-/* $Id: open32wbase.h,v 1.3 1999-09-05 08:55:13 dengert Exp $ */
+/* $Id: open32wbase.h,v 1.4 1999-09-05 16:06:21 dengert Exp $ */
 /*
  * Open32 Window fake Base Class for OS/2
  *
@@ -14,7 +14,7 @@
 
 extern "C" {
 void _System WinSetDAXData (HWND, PVOID);
-void _System DosBeep (ULONG, ULONG);
+ULONG _System DosBeep (ULONG, ULONG);
 }
 
 #define DosBeep(x,y)
