@@ -1,4 +1,4 @@
-/* $Id: iphlpapi.cpp,v 1.9 2002-07-26 17:18:29 sandervl Exp $ */
+/* $Id: iphlpapi.cpp,v 1.10 2002-09-24 11:47:14 sandervl Exp $ */
 /*
  *	IPHLPAPI library
  *
@@ -437,7 +437,6 @@ ODINFUNCTION2(DWORD,       GetNetworkParams,
   PFIXED_INFO fi = pFixedInfo; 
   DWORD memNeeded;
   PIP_ADDR_STRING dnslist = NULL, pdnslist = NULL;
-  PBYTE pTarget        = (PBYTE)pFixedInfo;
 
   dprintf(("GetNetworkParams pFixedInfo:%x pOutBufLen:%d",pFixedInfo,*pOutBufLen));
   res_init();
@@ -458,9 +457,8 @@ ODINFUNCTION2(DWORD,       GetNetworkParams,
   ODIN_gethostname(fi->HostName,128);
   strcpy(fi->DomainName,_res.defdname);
 
-  // For VPC DNS Servers are pretty much enough for now
+  // Fill in DNS Servers 
   fi->CurrentDnsServer = &fi->DnsServerList;   
-  pTarget += sizeof( FIXED_INFO );
   dnslist = &fi->DnsServerList;
    
   for (int i = 0; i<_res.nscount; i++)
@@ -470,8 +468,8 @@ ODINFUNCTION2(DWORD,       GetNetworkParams,
       strcpy(dnslist->IpAddress.String,inet_ntoa(sin->sin_addr));
       dprintf(("IPHLPAPI: GetNetworkParams Adding DNS Server %s",inet_ntoa(sin->sin_addr)));
       pdnslist = dnslist;
-      if ( pdnslist == &fi->DnsServerList) dnslist = (PIP_ADDR_STRING)(pTarget + sizeof(IP_ADDR_STRING));
-      else dnslist += sizeof(IP_ADDR_STRING);
+      if ( pdnslist == &fi->DnsServerList) dnslist = (PIP_ADDR_STRING)(fi + 1);
+      else dnslist += 1;
   }	
   fi->EnableDns = 1;
   return ERROR_SUCCESS;
