@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.cpp,v 1.60 2002-08-01 16:04:19 sandervl Exp $ */
+/* $Id: oslibmsg.cpp,v 1.61 2002-08-19 13:55:05 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -256,6 +256,12 @@ BOOL OSLibWinGetMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterMa
         teb->o.odin.os2msg.msg  = 0;
         teb->o.odin.os2msg.hwnd = 0;
     
+        if(!IsWindow(pMsg->hwnd)) {
+            //could be a queued char message for a window that was just destroyed
+            //when that's the case, we ignore it (MFC assertions are triggered by this)
+            goto continuegetmsg;
+        }
+
         // @@@PH verify this
         // if this is a keyup or keydown message, we've got to
         // call the keyboard hook here
@@ -405,6 +411,15 @@ BOOL OSLibWinPeekMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterM
             teb->o.odin.os2msg.hwnd = 0;
         }
         memcpy(pMsg, &teb->o.odin.msgWCHAR, sizeof(MSG));
+
+        if(!IsWindow(pMsg->hwnd)) {
+            //could be a queued char message for a window that was just destroyed
+            //when that's the case, we ignore it (MFC assertions are triggered by this)
+            teb->o.odin.fTranslated = FALSE;
+            teb->o.odin.os2msg.msg  = 0;
+            teb->o.odin.os2msg.hwnd = 0;
+            goto continuepeekmsg;
+        }
     
         // @@@PH verify this
         // if this is a keyup or keydown message, we've got to
