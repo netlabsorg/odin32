@@ -3547,6 +3547,13 @@ static BOOL LISTVIEW_DrawItem(LISTVIEW_INFO *infoPtr, HDC hdc, INT nItem, INT nS
     HIMAGELIST himl;
     LVITEMW lvItem;
 
+#ifdef __WIN32OS2__
+    DWORD dwBkColor;
+    DWORD dwTextColor;
+    INT   iBkMode = -1;
+    INT nMixMode;
+#endif
+
     TRACE("(hdc=%p, nItem=%d, nSubItem=%d, pos=%s)\n", hdc, nItem, nSubItem, debugpoint(&pos));
 
     /* get information needed for drawing the item */
@@ -3611,6 +3618,44 @@ static BOOL LISTVIEW_DrawItem(LISTVIEW_INFO *infoPtr, HDC hdc, INT nItem, INT nS
 
     /* Don't bother painting item being edited */
     if (infoPtr->hwndEdit && nItem == infoPtr->nEditLabelItem && nSubItem == 0) goto postpaint;
+
+#ifdef __WIN32OS2__
+    //This code never existed in Wine, was added by Patrick
+    if ((lvItem.state & LVIS_SELECTED) && (infoPtr->bFocus != FALSE))
+    {
+      /* set item colors */ 
+      dwBkColor = SetBkColor(hdc, GetSysColor(COLOR_HIGHLIGHT));
+      dwTextColor = SetTextColor(hdc, GetSysColor(COLOR_HIGHLIGHTTEXT));
+      /* set raster mode */
+      nMixMode = SetROP2(hdc, R2_XORPEN);
+    }
+    else if ((infoPtr->dwStyle & LVS_SHOWSELALWAYS) && 
+           (lvItem.state & LVIS_SELECTED) && (infoPtr->bFocus == FALSE))
+    {
+      dwBkColor = SetBkColor(hdc, GetSysColor(COLOR_3DFACE));
+      dwTextColor = SetTextColor(hdc, GetSysColor(COLOR_BTNTEXT));
+      /* set raster mode */
+      nMixMode = SetROP2(hdc, R2_COPYPEN);
+    }
+    else
+    {
+      /* set item colors */
+      if ( (infoPtr->clrTextBk == CLR_DEFAULT) || (infoPtr->clrTextBk == CLR_NONE) )
+      {
+        dwBkColor = GetBkColor(hdc);
+        iBkMode = SetBkMode(hdc, TRANSPARENT);
+      }
+      else
+      {
+        dwBkColor = SetBkColor(hdc, infoPtr->clrTextBk);
+        iBkMode = SetBkMode(hdc, OPAQUE);
+      }
+
+      dwTextColor = SetTextColor(hdc, infoPtr->clrText);
+      /* set raster mode */
+      nMixMode = SetROP2(hdc, R2_COPYPEN);
+    }
+#endif
 
     /* draw the selection background, if we're drawing the main item */
     if (nSubItem == 0)
@@ -8518,6 +8563,286 @@ static INT LISTVIEW_StyleChanged(LISTVIEW_INFO *infoPtr, WPARAM wStyleType,
     return 0;
 }
 
+#ifdef __WIN32OS2__
+#ifdef DEBUG
+void dprintfMsg(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+ char *msg = NULL;
+
+  switch (uMsg)
+  {
+  case LVM_APPROXIMATEVIEWRECT:
+      msg = "LVM_APPROXIMATEVIEWRECT";
+      break;
+  case LVM_ARRANGE:
+      msg = "LVM_ARRANGE";
+      break;
+  case LVM_CREATEDRAGIMAGE:
+      msg = "LVM_CREATEDRAGIMAGE";
+      break;
+  case LVM_DELETEALLITEMS:
+      msg = "LVM_DELETEALLITEMS";
+      break;
+  case LVM_DELETECOLUMN:
+      msg = "LVM_DELETECOLUMN";
+      break;
+  case LVM_DELETEITEM:
+      msg = "LVM_DELETEITEM";
+      break;
+  case LVM_EDITLABELW:
+      msg = "LVM_EDITLABELW";
+      break;
+  case LVM_EDITLABELA:
+      msg = "LVM_EDITLABELA";
+      break;
+  case LVM_ENSUREVISIBLE:
+      msg = "LVM_ENSUREVISIBLE";
+      break;
+  case LVM_FINDITEMA:
+      msg = "LVM_FINDITEMA";
+      break;
+  case LVM_GETBKCOLOR:
+      msg = "LVM_GETBKCOLOR";
+      break;
+  case LVM_GETBKIMAGEA:
+      msg = "LVM_GETBKIMAGEA";
+      break;
+  case LVM_GETBKIMAGEW:
+      msg = "LVM_GETBKIMAGEW";
+      break;
+  case LVM_GETCALLBACKMASK:
+      msg = "LVM_GETCALLBACKMASK";
+      break;
+  case LVM_GETCOLUMNA:
+      msg = "LVM_GETCOLUMNA";
+      break;
+  case LVM_GETCOLUMNW:
+      msg = "LVM_GETCOLUMNW";
+      break;
+  case LVM_GETCOLUMNORDERARRAY:
+      msg = "LVM_GETCOLUMNORDERARRAY";
+      break;
+  case LVM_GETCOLUMNWIDTH:
+      msg = "LVM_GETCOLUMNWIDTH";
+      break;
+  case LVM_GETCOUNTPERPAGE:
+      msg = "LVM_GETCOUNTPERPAGE";
+      break;
+  case LVM_GETEDITCONTROL:
+      msg = "LVM_GETEDITCONTROL";
+      break;
+  case LVM_GETEXTENDEDLISTVIEWSTYLE:
+      msg = "LVM_GETEXTENDEDLISTVIEWSTYLE";
+      break;
+  case LVM_GETHEADER:
+      msg = "LVM_GETHEADER";
+      break;
+  case LVM_GETHOTCURSOR:
+      msg = "LVM_GETHOTCURSOR";
+      break;
+  case LVM_GETHOTITEM:
+      msg = "LVM_GETHOTITEM";
+      break;
+  case LVM_GETHOVERTIME:
+      msg = "LVM_GETHOVERTIME";
+      break;
+  case LVM_GETIMAGELIST:
+      msg = "LVM_GETIMAGELIST";
+      break;
+  case LVM_GETISEARCHSTRINGA:
+      msg = "LVM_GETISEARCHSTRINGA";
+      break;
+  case LVM_GETISEARCHSTRINGW:
+      msg = "LVM_GETISEARCHSTRINGW";
+      break;
+  case LVM_GETITEMA:
+      msg = "LVM_GETITEMA";
+      break;
+  case LVM_GETITEMW:
+      msg = "LVM_GETITEMW";
+      break;
+  case LVM_GETITEMCOUNT:
+      msg = "LVM_GETITEMCOUNT";
+      break;
+  case LVM_GETITEMPOSITION:
+      msg = "LVM_GETITEMPOSITION";
+      break;
+  case LVM_GETITEMRECT:
+      msg = "LVM_GETITEMRECT";
+      break;
+  case LVM_GETITEMSPACING:
+      msg = "LVM_GETITEMSPACING";
+      break;
+  case LVM_GETITEMSTATE:
+      msg = "LVM_GETITEMSTATE";
+      break;
+  case LVM_GETITEMTEXTA:
+      msg = "LVM_GETITEMTEXTA";
+      break;
+  case LVM_GETITEMTEXTW:
+      msg = "LVM_GETITEMTEXTW";
+      break;
+  case LVM_GETNEXTITEM:
+      msg = "LVM_GETNEXTITEM";
+      break;
+  case LVM_GETNUMBEROFWORKAREAS:
+      msg = "LVM_GETNUMBEROFWORKAREAS";
+      break;
+  case LVM_GETORIGIN:
+      msg = "LVM_GETORIGIN";
+      break;
+  case LVM_GETSELECTEDCOUNT:
+      msg = "LVM_GETSELECTEDCOUNT";
+      break;
+  case LVM_GETSELECTIONMARK:
+      msg = "LVM_GETSELECTIONMARK";
+      break;
+  case LVM_GETSTRINGWIDTHA:
+      msg = "LVM_GETSTRINGWIDTHA";
+      break;
+  case LVM_GETSTRINGWIDTHW:
+      msg = "LVM_GETSTRINGWIDTHW";
+      break;
+  case LVM_GETSUBITEMRECT:
+      msg = "LVM_GETSUBITEMRECT";
+      break;
+  case LVM_GETTEXTBKCOLOR:
+      msg = "LVM_GETTEXTBKCOLOR";
+      break;
+  case LVM_GETTEXTCOLOR:
+      msg = "LVM_GETTEXTCOLOR";
+      break;
+  case LVM_GETTOOLTIPS:
+      msg = "LVM_GETTOOLTIPS";
+      break;
+  case LVM_GETTOPINDEX:
+      msg = "LVM_GETTOPINDEX";
+      break;
+  case LVM_GETVIEWRECT:
+      msg = "LVM_GETVIEWRECT";
+      break;
+  case LVM_GETWORKAREAS:
+      msg = "LVM_GETWORKAREAS";
+      break;
+  case LVM_HITTEST:
+      msg = "LVM_HITTEST";
+      break;
+  case LVM_INSERTCOLUMNA:
+      msg = "LVM_INSERTCOLUMNA";
+      break;
+  case LVM_INSERTCOLUMNW:
+      msg = "LVM_INSERTCOLUMNW";
+      break;
+  case LVM_INSERTITEMA:
+      msg = "LVM_INSERTITEMA";
+      break;
+  case LVM_INSERTITEMW:
+      msg = "LVM_INSERTITEMW";
+      break;
+  case LVM_REDRAWITEMS:
+      msg = "LVM_REDRAWITEMS";
+      break;
+  case LVM_SCROLL:
+      msg = "LVM_SCROLL";
+      break;
+  case LVM_SETBKCOLOR:
+      msg = "LVM_SETBKCOLOR";
+      break;
+  case LVM_SETBKIMAGEA:
+      msg = "LVM_SETBKIMAGEA";
+      break;
+  case LVM_SETBKIMAGEW:
+      msg = "LVM_SETBKIMAGEW";
+      break;
+  case LVM_SETCALLBACKMASK:
+      msg = "LVM_SETCALLBACKMASK";
+      break;
+  case LVM_SETCOLUMNA:
+      msg = "LVM_SETCOLUMNA";
+      break;
+  case LVM_SETCOLUMNW:
+      msg = "LVM_SETCOLUMNW";
+      break;
+  case LVM_SETCOLUMNORDERARRAY:
+      msg = "LVM_SETCOLUMNORDERARRAY";
+      break;
+  case LVM_SETCOLUMNWIDTH:
+      msg = "LVM_SETCOLUMNWIDTH";
+      break;
+  case LVM_SETEXTENDEDLISTVIEWSTYLE:
+      msg = "LVM_SETEXTENDEDLISTVIEWSTYLE";
+      break;
+  case LVM_SETHOTCURSOR:
+      msg = "LVM_SETHOTCURSOR";
+      break;
+  case LVM_SETHOTITEM:
+      msg = "LVM_SETHOTITEM";
+      break;
+  case LVM_SETHOVERTIME:
+      msg = "LVM_SETHOVERTIME";
+      break;
+  case LVM_SETICONSPACING:
+      msg = "LVM_SETICONSPACING";
+      break;
+  case LVM_SETIMAGELIST:
+      msg = "LVM_SETIMAGELIST";
+      break;
+  case LVM_SETITEMA:
+      msg = "LVM_SETITEMA";
+      break;
+  case LVM_SETITEMW:
+      msg = "LVM_SETITEMW";
+      break;
+  case LVM_SETITEMCOUNT:
+      msg = "LVM_SETITEMCOUNT";
+      break;
+  case LVM_SETITEMPOSITION:
+      msg = "LVM_SETITEMPOSITION";
+      break;
+  case LVM_SETITEMPOSITION32:
+      msg = "LVM_SETITEMPOSITION32";
+      break;
+  case LVM_SETITEMSTATE:
+      msg = "LVM_SETITEMSTATE";
+      break;
+  case LVM_SETITEMTEXTA:
+      msg = "LVM_SETITEMTEXTA";
+      break;
+  case LVM_SETITEMTEXTW:
+      msg = "LVM_SETITEMTEXTW";
+      break;
+  case LVM_SETSELECTIONMARK:
+      msg = "LVM_SETSELECTIONMARK";
+      break;
+  case LVM_SETTEXTBKCOLOR:
+      msg = "LVM_SETTEXTBKCOLOR";
+      break;
+  case LVM_SETTEXTCOLOR:
+      msg = "LVM_SETTEXTCOLOR";
+      break;
+  case LVM_SETTOOLTIPS:
+      msg = "LVM_SETTOOLTIPS";
+      break;
+  case LVM_SETWORKAREAS:
+      msg = "LVM_SETWORKAREAS";
+      break;
+  case LVM_SORTITEMS:
+      msg = "LVM_SORTITEMS";
+      break;
+  case LVM_SUBITEMHITTEST:
+      msg = "LVM_SUBITEMHITTEST";
+      break;
+  case LVM_UPDATE:
+      msg = "LVM_UPDATE";
+      break;
+  default:
+      return;
+  }
+  dprintf(("SysListView %x %s %x %x", hwnd, msg, wParam, lParam));
+}
+#endif
+#endif //__WIN32OS2__
+
 /***
  * DESCRIPTION:
  * Window procedure of the listview control.
@@ -8528,8 +8853,11 @@ LISTVIEW_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
   LISTVIEW_INFO *infoPtr = (LISTVIEW_INFO *)GetWindowLongW(hwnd, 0);
 
+#if defined(DEBUG) && defined(__WIN32OS2__)
+  dprintfMsg(hwnd, uMsg, wParam, lParam);
+#else
   TRACE("(uMsg=%x wParam=%x lParam=%lx)\n", uMsg, wParam, lParam);
-
+#endif
   if (!infoPtr && (uMsg != WM_CREATE))
     return DefWindowProcW(hwnd, uMsg, wParam, lParam);
 
