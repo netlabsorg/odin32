@@ -1,5 +1,5 @@
 ##############################################################################
-# $Id: makefile,v 1.3.4.1 2000-08-29 19:47:04 bird Exp $
+# $Id: makefile,v 1.3.4.2 2000-09-02 20:42:54 bird Exp $
 #
 # PD-Win32 API
 #
@@ -49,6 +49,8 @@ TARGET   = win32k.lib
 OBJS     =  $(WIN32KOBJ)\libInit.$(OBJEXT)         \
             $(WIN32KOBJ)\libTerm.$(OBJEXT)     \
             $(WIN32KOBJ)\libWin32kInstalled.$(OBJEXT) \
+            $(WIN32KOBJ)\libWin32kQueryOptionsStatus.$(OBJEXT) \
+            $(WIN32KOBJ)\libWin32kSetOptions.$(OBJEXT) \
             $(WIN32KOBJ)\libDosAllocMemEx.$(OBJEXT) \
             $(WIN32KOBJ)\libW32kQueryOTEs.$(OBJEXT) \
             $(WIN32KOBJ)\libGetCS.obj
