@@ -1,4 +1,4 @@
-# $Id: setup.tools.mk,v 1.12 2002-08-24 04:43:53 bird Exp $
+# $Id: setup.tools.mk,v 1.13 2002-08-24 22:32:12 bird Exp $
 
 
 #
@@ -64,6 +64,7 @@ TOOL_MAKE       = $(MAKE:.exe=).exe -nologo
 TOOL_MAPSYM     = $(PATH_TOOLS)\MapSym.cmd $(BUILD_ENV)
 TOOL_RM         = $(PATH_TOOLS)\rm.exe -fF
 TOOL_RMDIR      = rmdir
+TOOL_STRIP      = $(PATH_TOOLS)\lxlite.cmd
 TOOL_TYPE       = type
 
 
