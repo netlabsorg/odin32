@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.78 2000-04-16 07:07:01 bird Exp $ */
+/* $Id: wprocess.cpp,v 1.79 2000-04-16 10:42:13 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -11,12 +11,6 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
-
-
-
-/*******************************************************************************
-*   Header Files                                                               *
-*******************************************************************************/
 #include <odin.h>
 #include <odinwrap.h>
 #include <os2win.h>
@@ -54,9 +48,8 @@
 ODINDEBUGCHANNEL(KERNEL32-WPROCESS)
 
 
-/******************************************************************************
-*   Global Variables                                                          *
-******************************************************************************/
+//******************************************************************************
+//******************************************************************************
 BOOL      fFreeLibrary = FALSE;
 BOOL      fIsOS2Image = FALSE;  //TRUE  -> Odin32 OS/2 application (not converted!)
                             //FALSE -> otherwise
@@ -68,9 +61,6 @@ DWORD    *TIBFlatPtr    = 0;
 //list of thread database structures
 static THDB     *threadList = 0;
 static VMutex    threadListMutex;
-
-
-
 //******************************************************************************
 //******************************************************************************
 TEB *WIN32API GetThreadTEB()
@@ -364,8 +354,8 @@ USHORT WIN32API SetWin32TIB()
 //******************************************************************************
 VOID WIN32API ExitProcess(DWORD exitcode)
 {
-    dprintf(("KERNEL32: ExitProcess %d\n", exitcode));
-    dprintf(("KERNEL32: ExitProcess FS = %x\n", GetFS()));
+    dprintf(("KERNEL32:  ExitProcess %d\n", exitcode));
+    dprintf(("KERNEL32:  ExitProcess FS = %x\n", GetFS()));
 
     SetOS2ExceptionChain(-1);
 
@@ -424,27 +414,7 @@ BOOL WIN32API FreeLibrary(HINSTANCE hinstance)
     return(TRUE);
 }
 /******************************************************************************/
-//******************************************************************************
-HINSTANCE16 WIN32API LoadLibrary16(LPCTSTR lpszLibFile)
-{
-    dprintf(("ERROR: LoadLibrary16 %s, not implemented", lpszLibFile));
-    return 0;
-}
-//******************************************************************************
-//******************************************************************************
-VOID WIN32API FreeLibrary16(HINSTANCE16 hinstance)
-{
-    dprintf(("ERROR: FreeLibrary16 %x, not implemented", hinstance));
-}
-//******************************************************************************
-//******************************************************************************
-FARPROC WIN32API GetProcAddress16(HMODULE hModule, LPCSTR lpszProc)
-{
-    dprintf(("ERROR: GetProcAddress16 %x %x, not implemented", hModule, lpszProc));
-    return 0;
-}
-//******************************************************************************
-
+/******************************************************************************/
 /**
  * LoadLibraryA can be used to map a DLL module into the calling process's
  * addressspace. It returns a handle that can be used with GetProcAddress to
@@ -675,6 +645,7 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HANDLE hFile, DWORD dwFla
         dprintf(("KERNEL32: LoadLibraryExA(%s, 0x%x, 0x%x): dwFlags have invalid or unsupported flags\n",
                  lpszLibFile, hFile, dwFlags));
         SetLastError(ERROR_INVALID_PARAMETER);
+	return NULL;
     }
 
 
@@ -989,6 +960,26 @@ HINSTANCE WIN32API LoadLibraryExW(LPCWSTR lpszLibFile, HANDLE hFile, DWORD dwFla
 }
 //******************************************************************************
 //******************************************************************************
+HINSTANCE16 WIN32API LoadLibrary16(LPCTSTR lpszLibFile)
+{
+    dprintf(("ERROR: LoadLibrary16 %s, not implemented", lpszLibFile));
+    return 0;
+}
+//******************************************************************************
+//******************************************************************************
+VOID WIN32API FreeLibrary16(HINSTANCE16 hinstance)
+{
+    dprintf(("ERROR: FreeLibrary16 %x, not implemented", hinstance));
+}
+//******************************************************************************
+//******************************************************************************
+FARPROC WIN32API GetProcAddress16(HMODULE hModule, LPCSTR lpszProc)
+{
+    dprintf(("ERROR: GetProcAddress16 %x %x, not implemented", hModule, lpszProc));
+    return 0;
+}
+//******************************************************************************
+//******************************************************************************
 LPCSTR WIN32API GetCommandLineA()
 {
  LPTSTR cmdline = NULL;
@@ -999,8 +990,8 @@ LPCSTR WIN32API GetCommandLineA()
   if(cmdline == NULL) //not used for converted exes
     cmdline = O32_GetCommandLine();
 
-  dprintf(("KERNEL32: GetCommandLine %s\n", cmdline));
-  dprintf(("KERNEL32: FS = %x\n", GetFS()));
+  dprintf(("KERNEL32:  GetCommandLine %s\n", cmdline));
+  dprintf(("KERNEL32:  FS = %x\n", GetFS()));
   return(cmdline);
 }
 //******************************************************************************
@@ -1010,7 +1001,7 @@ LPCWSTR WIN32API GetCommandLineW(void)
  static WCHAR *UnicodeCmdLine = NULL;
          char *asciicmdline = NULL;
 
-    dprintf(("KERNEL32: FS = %x\n", GetFS()));
+    dprintf(("KERNEL32:  FS = %x\n", GetFS()));
 
     if(UnicodeCmdLine)
         return(UnicodeCmdLine); //already called before
@@ -1025,10 +1016,10 @@ LPCWSTR WIN32API GetCommandLineW(void)
     if(asciicmdline) {
         UnicodeCmdLine = (WCHAR *)malloc(strlen(asciicmdline)*2 + 2);
         AsciiToUnicode(asciicmdline, UnicodeCmdLine);
-        dprintf(("KERNEL32: OS2GetCommandLineW: %s\n", asciicmdline));
+        dprintf(("KERNEL32:  OS2GetCommandLineW: %s\n", asciicmdline));
         return(UnicodeCmdLine);
     }
-    dprintf(("KERNEL32: OS2GetCommandLineW: asciicmdline == NULL\n"));
+    dprintf(("KERNEL32:  OS2GetCommandLineW: asciicmdline == NULL\n"));
     return NULL;
 }
 //******************************************************************************
@@ -1069,7 +1060,7 @@ DWORD WIN32API GetModuleFileNameW(HMODULE hModule, LPWSTR lpFileName, DWORD nSiz
  char *asciifilename = (char *)malloc(nSize+1);
  DWORD rc;
 
-    dprintf(("KERNEL32: OSLibGetModuleFileNameW\n"));
+    dprintf(("KERNEL32:  OSLibGetModuleFileNameW\n"));
     rc = GetModuleFileNameA(hModule, asciifilename, nSize);
     if(rc)      AsciiToUnicode(asciifilename, lpFileName);
     free(asciifilename);
@@ -1120,7 +1111,7 @@ HANDLE WIN32API GetModuleHandleA(LPCTSTR lpszModule)
     }
   }
 
-  dprintf(("KERNEL32: GetModuleHandle %s returned %X\n", lpszModule, hMod));
+  dprintf(("KERNEL32:  GetModuleHandle %s returned %X\n", lpszModule, hMod));
   return(hMod);
 }
 //******************************************************************************
@@ -1132,7 +1123,7 @@ HMODULE WIN32API GetModuleHandleW(LPCWSTR arg1)
 
     astring = UnicodeToAsciiString((LPWSTR)arg1);
     rc = GetModuleHandleA(astring);
-    dprintf(("KERNEL32: OS2GetModuleHandleW %s returned %X\n", astring, rc));
+    dprintf(("KERNEL32:  OS2GetModuleHandleW %s returned %X\n", astring, rc));
     FreeAsciiString(astring);
     return(rc);
 }
@@ -1202,7 +1193,7 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
         cmdline = (char *)malloc(strlen(lpCommandLine) + 16);
         sprintf(cmdline, "PE.EXE %s", lpCommandLine);
     }
-    dprintf(("KERNEL32: CreateProcess %s\n", cmdline));
+    dprintf(("KERNEL32:  CreateProcess %s\n", cmdline));
     rc = O32_CreateProcess("PE.EXE", (LPCSTR)cmdline,lpProcessAttributes,
                          lpThreadAttributes, bInheritHandles, dwCreationFlags,
                          lpEnvironment, lpCurrentDirectory, lpStartupInfo,
@@ -1228,11 +1219,11 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
         free(cmdline);
 
     if(lpProcessInfo)
-      dprintf(("KERNEL32: CreateProcess returned %d hPro:%x hThr:%x pid:%x tid:%x\n",
+      dprintf(("KERNEL32:  CreateProcess returned %d hPro:%x hThr:%x pid:%x tid:%x\n",
                rc, lpProcessInfo->hProcess, lpProcessInfo->hThread,
                    lpProcessInfo->dwProcessId,lpProcessInfo->dwThreadId));
     else
-      dprintf(("KERNEL32: CreateProcess returned %d\n", rc));
+      dprintf(("KERNEL32:  CreateProcess returned %d\n", rc));
     return(rc);
 }
 //******************************************************************************
@@ -1295,7 +1286,11 @@ FARPROC WIN32API GetProcAddress(HMODULE hModule, LPCSTR lpszProc)
  FARPROC   proc;
  ULONG     ulAPIOrdinal;
 
-  winmod = Win32ImageBase::findModule(hModule);
+  if(hModule == 0 || hModule == -1 || (WinExe && hModule == WinExe->getInstanceHandle())) {
+    winmod = WinExe;
+  }
+  else  winmod = (Win32ImageBase *)Win32DllBase::findModule((HINSTANCE)hModule);
+
   if(winmod) {
         ulAPIOrdinal = (ULONG)lpszProc;
         if (ulAPIOrdinal <= 0x0000FFFF) {
@@ -1309,8 +1304,8 @@ FARPROC WIN32API GetProcAddress(HMODULE hModule, LPCSTR lpszProc)
   }
   proc = O32_GetProcAddress(hModule, lpszProc);
   if(HIWORD(lpszProc))
-    dprintf(("KERNEL32: GetProcAddress %s from %X returned %X\n", lpszProc, hModule, proc));
-  else  dprintf(("KERNEL32: GetProcAddress %x from %X returned %X\n", lpszProc, hModule, proc));
+    dprintf(("KERNEL32:  GetProcAddress %s from %X returned %X\n", lpszProc, hModule, proc));
+  else  dprintf(("KERNEL32:  GetProcAddress %x from %X returned %X\n", lpszProc, hModule, proc));
   return(proc);
 }
 //******************************************************************************
