@@ -2,12 +2,10 @@
 LIBRARY OLE32 INITINSTANCE
 DATA MULTIPLE NONSHARED
 
-
+; These are defined to prevent a forward reference to OLEAUT32...
 IMPORTS
-    _UnicodeToAscii@8       =  KERNEL32.UnicodeToAscii
-    _AsciiToUnicode@8       =  KERNEL32.AsciiToUnicode
-    _UnicodeToAsciiString@4 =  KERNEL32.UnicodeToAsciiString
-    _FreeAsciiString@4      =  KERNEL32.FreeAsciiString
+    _SysAllocString@4 		= OLEAUT32.SysAllocString 
+    _SysFreeString@4 		= OLEAUT32.SysFreeString 
 
 EXPORTS
     BindMoniker                = _BindMoniker@16             @1
