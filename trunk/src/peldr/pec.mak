@@ -1,4 +1,4 @@
-# $Id: pec.mak,v 1.3 2000-12-02 23:57:55 bird Exp $
+# $Id: pec.mak,v 1.4 2000-12-16 15:40:54 sandervl Exp $
 
 #
 # Odin32 API
@@ -9,6 +9,8 @@
 #
 # Tell that we're producing an executable
 #
+STACKSIZE = 0x100000
+VIO = 1
 EXETARGET = 1
 MAKEFILE = pec.mak
 
@@ -18,15 +20,6 @@ MAKEFILE = pec.mak
 #
 !include ../../makefile.inc
 
-
-#
-# Overrides.
-#
-!if "$(VAC3)" == "1" || "$(VAC36)" == "1"
-LD2FLAGS = $(LD2FLAGS) /PMTYPE:vio /STACK:0x100000 /NOBASE
-!else
-!error Compiler not supported yet
-!endif
 
 
 #
