@@ -1,10 +1,16 @@
-/* $Id: Fileio.cpp,v 1.35 2000-06-13 07:11:37 phaller Exp $ */
+/* $Id: Fileio.cpp,v 1.36 2000-07-04 08:41:12 sandervl Exp $ */
 
 /*
  * Win32 File IO API functions for OS/2
  *
  * Copyright 1998 Sander van Leeuwen
  * Copyright 1998 Patrick Haller
+ *
+ * Some parts copied from Wine (CopyFileExA/W)
+ *
+ * Copyright 1993 John Burton
+ * Copyright 1996 Alexandre Julliard
+ *
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -287,6 +293,105 @@ ODINFUNCTION3(BOOL, CopyFileW,
   FreeAsciiString(astring2);
   FreeAsciiString(astring1);
   return(rc);
+}
+/*****************************************************************************
+ * Name      : BOOL WIN32API CopyFileExA
+ * Purpose   : The CopyFileExA function copies an existing file to a new file.
+ *             This function preserves extended attributes, OLE structured
+ *             storage, NTFS alternate data streams, and file attributes.
+ *             Security attributes for the existing file are not copied to
+ *             the new file.
+ * Parameters: LPCSTR lpExistingFileName   pointer to name of an existing file
+ *             LPCSTR lpNewFileName        pointer to filename to copy to
+ *             LPPROGRESS_ROUTINE lpProgressRoutine  pointer to the callback function
+ *             LPVOID lpData               to be passed to the callback function
+ *             LPBOOL pbCancel     flag that can be used to cancel the operation
+ *             DWORD dwCopyFlags   flags that specify how the file is copied
+ * Variables :
+ * Result    : f the function succeeds, the return value is nonzero.
+ *             If the function fails, the return value is zero.
+ *             To get extended error information call GetLastError.
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Markus Montkowski [Thu, 1998/05/19 11:46]
+ *****************************************************************************/
+
+BOOL WIN32API CopyFileExA( LPCSTR             lpExistingFileName,
+                              LPCSTR             lpNewFileName,
+                              LPPROGRESS_ROUTINE lpProgressRoutine,
+                              LPVOID             lpData,
+                              LPBOOL             pbCancel,
+                              DWORD              dwCopyFlags)
+{
+
+  dprintf(("KERNEL32: CopyFileExA(%08x,%08x,%08x,%08x,%08x,%08x) not properly implemented\n",
+           lpExistingFileName,
+           lpNewFileName,
+           lpProgressRoutine,
+           lpData,
+           pbCancel,
+           dwCopyFlags
+          ));
+
+  BOOL failIfExists = FALSE;
+
+  /*
+   * Interpret the only flag that CopyFile can interpret.
+   */
+  if((dwCopyFlags & COPY_FILE_FAIL_IF_EXISTS) != 0)
+  {
+    	failIfExists = TRUE;
+  }
+
+  return CopyFileA(lpExistingFileName, lpNewFileName, failIfExists);
+}
+
+
+/*****************************************************************************
+ * Name      : BOOL WIN32API CopyFileExW
+ * Purpose   : The CopyFileExW function copies an existing file to a new file.
+ *             This function preserves extended attributes, OLE structured
+ *             storage, NTFS alternate data streams, and file attributes.
+ *             Security attributes for the existing file are not copied to
+ *             the new file.
+ * Parameters: LPCWSTR lpExistingFileName   pointer to name of an existing file
+ *             LPCWSTR lpNewFileName        pointer to filename to copy to
+ *             LPPROGRESS_ROUTINE lpProgressRoutine  pointer to the callback function
+ *             LPVOID lpData               to be passed to the callback function
+ *             LPBOOL pbCancel     flag that can be used to cancel the operation
+ *             DWORD dwCopyFlags   flags that specify how the file is copied
+ * Variables :
+ * Result    : f the function succeeds, the return value is nonzero.
+ *             If the function fails, the return value is zero.
+ *             To get extended error information call GetLastError.
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Markus Montkowski [Thu, 1998/05/19 11:46]
+ *****************************************************************************/
+
+BOOL WIN32API CopyFileExW( LPCWSTR            lpExistingFileName,
+                           LPCWSTR            lpNewFileName,
+                           LPPROGRESS_ROUTINE lpProgressRoutine,
+                           LPVOID             lpData,
+                           LPBOOL             pbCancel,
+                           DWORD              dwCopyFlags)
+{
+    LPSTR sourceA = HEAP_strdupWtoA( GetProcessHeap(), 0, lpExistingFileName );
+    LPSTR destA   = HEAP_strdupWtoA( GetProcessHeap(), 0, lpNewFileName );
+
+    BOOL ret = CopyFileExA(sourceA,
+                           destA,
+                           lpProgressRoutine,
+                           lpData,
+                           pbCancel,
+                           dwCopyFlags);
+
+    HeapFree( GetProcessHeap(), 0, sourceA );
+    HeapFree( GetProcessHeap(), 0, destA );
+
+    return ret;
 }
 //******************************************************************************
 //******************************************************************************
@@ -779,6 +884,15 @@ ODINFUNCTION5(BOOL, UnlockFileEx,
                         lpOverlapped));
 }
 //******************************************************************************
+//Behaviour in NT 4, SP6:
+//- converts long filename to 8.3 short filname (TODO: not yet done here!)
+//- fails on volume that doesn't support 8.3 filenames
+//- if lpszShortPath 0 or cchBuffer too small -> return required length
+//  (INCLUDING 0 terminator)
+//- if lpszLongPath == NULL -> ERROR_INVALID_PARAMETER (return 0)
+//- if lpszLongPath empty -> proceed as if nothing is wrong
+//- does NOT clear the last error if successful!
+//- if successful -> return length of string (excluding 0 terminator)
 //******************************************************************************
 ODINFUNCTION3(DWORD, GetShortPathNameA,
               LPCTSTR, lpszLongPath,
@@ -787,13 +901,21 @@ ODINFUNCTION3(DWORD, GetShortPathNameA,
 {
  int length;
 
-  dprintf(("KERNEL32:  GetShortPathNameA of %s, just copying it\n", lpszLongPath));
-  length = strlen(lpszLongPath) + 1;
-  if(length > cchBuffer) {
-        *lpszShortPath = 0;
-        return(length);
+  dprintf(("KERNEL32:  GetShortPathNameA of %s, just copying it", lpszLongPath));
+
+  if(!lpszLongPath) {
+      SetLastError(ERROR_INVALID_PARAMETER);
+      return 0;
   }
-  memcpy(lpszShortPath, lpszLongPath, length);
+
+  length = lstrlenA(lpszLongPath) + 1;
+  if(length > cchBuffer) {
+	if(lpszShortPath) {
+        	*lpszShortPath = 0;
+	}
+        return(length); //return length required (including 0 terminator)
+  }
+  lstrcpyA(lpszShortPath, lpszLongPath);
   return(length-1);
 }
 //******************************************************************************
@@ -805,15 +927,24 @@ ODINFUNCTION3(DWORD, GetShortPathNameW,
 {
  int length;
 
-  dprintf(("KERNEL32:  GetShortPathNameW; just copying it\n"));
-  length = UniStrlen((UniChar*)lpszLongPath) + 1;
-  if(length > cchBuffer) {
-        *lpszShortPath = 0;
-        return(length);
+  dprintf(("KERNEL32: GetShortPathNameW; just copying it"));
+  if(!lpszLongPath) {
+      SetLastError(ERROR_INVALID_PARAMETER);
+      return 0;
   }
-  memcpy(lpszShortPath, lpszLongPath, length*sizeof(USHORT));
+
+  length = lstrlenW(lpszLongPath) + 1;
+  if(length > cchBuffer) {
+	if(lpszShortPath) {
+        	*lpszShortPath = 0;
+	}
+        return(length); //return length required (including 0 terminator)
+  }
+  lstrcpyW(lpszShortPath, lpszLongPath);
   return(length-1);
 }
+//******************************************************************************
+//******************************************************************************
 ODINPROCEDURE0(SetFileApisToANSI)
 {
     dprintf(("SetFileApisToANSI() stub\n"));

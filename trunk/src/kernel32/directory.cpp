@@ -1,4 +1,4 @@
-/* $Id: directory.cpp,v 1.28 2000-06-30 08:39:20 sandervl Exp $ */
+/* $Id: directory.cpp,v 1.29 2000-07-04 08:41:13 sandervl Exp $ */
 
 /*
  * Win32 Directory functions for OS/2
@@ -276,6 +276,83 @@ ODINFUNCTION2(BOOL,CreateDirectoryW,LPCWSTR,             arg1,
   return(rc);
 }
 
+/*****************************************************************************
+ * Name      : BOOL WIN32API CreateDirectoryExA
+ * Purpose   : The CreateDirectoryExA function creates a new directory with a
+ *             specified path that retains the attributes of a specified
+ *             template directory. If the underlying file system supports
+ *             security on files and directories, the function applies a
+ *             specified security descriptor to the new directory.
+ *             The new directory retains the other attributes of the specified
+ *             template directory. Note that CreateDirectoryEx has a template
+ *             parameter, while CreateDirectory does not.
+ * Parameters: LPCSTR lpTemplateDirectory  pointer to path string of template
+ *                                         directory
+ *             LPCSTR lpNewDirectory      pointer to path string of directory
+ *                                         to create
+ *             LPSECURITY_ATTRIBUTES lpSecurityAttributes  pointer to security
+ *                                                         descriptor
+ *
+ * Variables :
+ * Result    : If the function succeeds, the return value is nonzero.
+ *             If the function fails, the return value is zero.
+ *             To get extended error information, call GetLastError.
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Markus Montkowski [Tha, 1998/05/21 17:46]
+ *****************************************************************************/
+
+BOOL WIN32API CreateDirectoryExA( LPCSTR lpTemplateDirectory,
+                                  LPCSTR lpNewDirectory,
+                                  LPSECURITY_ATTRIBUTES lpSecurityAttributes)
+{
+
+  dprintf(("KERNEL32:CreateDirectoryExA(%08x,%08x,%08x) not properly implemented\n",
+           lpTemplateDirectory,lpNewDirectory,lpSecurityAttributes
+          ));
+
+  return CreateDirectoryA(lpNewDirectory, lpSecurityAttributes);
+}
+
+/*****************************************************************************
+ * Name      : BOOL WIN32API CreateDirectoryExW
+ * Purpose   : The CreateDirectoryExW function creates a new directory with a
+ *             specified path that retains the attributes of a specified
+ *             template directory. If the underlying file system supports
+ *             security on files and directories, the function applies a
+ *             specified security descriptor to the new directory.
+ *             The new directory retains the other attributes of the specified
+ *             template directory. Note that CreateDirectoryEx has a template
+ *             parameter, while CreateDirectory does not.
+ * Parameters: LPCWSTR lpTemplateDirectory  pointer to path string of template
+ *                                          directory
+ *             LPCWSTR lpNewDirectory      pointer to path string of directory
+ *                                         to create
+ *             LPSECURITY_ATTRIBUTES lpSecurityAttributes  pointer to security
+ *                                                         descriptor
+ *
+ * Variables :
+ * Result    : If the function succeeds, the return value is nonzero.
+ *             If the function fails, the return value is zero.
+ *             To get extended error information, call GetLastError.
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Markus Montkowski [Tha, 1998/05/21 17:46]
+ *****************************************************************************/
+
+BOOL WIN32API CreateDirectoryExW( LPCWSTR lpTemplateDirectory,
+                                  LPCWSTR lpNewDirectory,
+                                  LPSECURITY_ATTRIBUTES lpSecurityAttributes)
+{
+
+  dprintf(("KERNEL32:CreateDirectoryExW(%08x,%08x,%08x) not properly implemented\n",
+           lpTemplateDirectory,lpNewDirectory,lpSecurityAttributes
+          ));
+
+  return CreateDirectoryW(lpNewDirectory, lpSecurityAttributes);
+}
 
 /*****************************************************************************
  * Name      : GetSystemDirectoryA
