@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2019 2002-03-14 13:33:57 bird Exp $ */
+/* $Id: changelog,v 1.2020 2002-03-18 09:31:51 sandervl Exp $ */
+
+ 2002-03-18: Sander van Leeuwen <sandervl@xs4all.nl>
+    - WGSS50:   o WGSS update from IBM
 
  2002-03-14: knut st. osmundsen <bird@anduin.net>
     - Fastdep:  o Some minor -E<somthing> issues (non Odin32 use).
