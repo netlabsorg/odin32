@@ -1,4 +1,4 @@
- /* $Id: changelog,v 1.1084 2000-08-24 09:36:02 sandervl Exp $ */
+ /* $Id: changelog,v 1.1085 2000-08-24 11:59:13 sandervl Exp $ */
 
  2000-08-24: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   Export wvsnprintfW
@@ -6,9 +6,13 @@
                 functions to ease resync in the future
                 Removed all AW exports; they belong in shell32
                 More functions exported (Wine additions)
+                Changed File and Product version to 5.00.2919.6304 (NT4, SP6 + IE 5.01)
     - SHELL32:  Merged Wine's shellpath.c
                 More exports (forwarders to shlwapi)
                 StrRetToStrNA fix
+                Changed File and Product version to 5.00.2919.6304 (NT4, SP6 + IE 5.01)
+    - SHFOLDER: Added (forwarder dll for SHGetFolderPathA/W for now)
+                Version based on NT 4 SP6 + IE 5.01 (5.00.2919.6304)
 
  2000-08-23: Michal Necasek <mike@mendelu.cz>
     - KERNEL32: (cpu.c) lpMinimumApplicationAddress should be 4 MB
