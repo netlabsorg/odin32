@@ -1,16 +1,30 @@
-/* $Id: shell.cpp,v 1.2 1999-10-09 11:17:01 sandervl Exp $ */
+/* $Id: shell.cpp,v 1.3 1999-10-19 10:23:27 phaller Exp $ */
+
 /*
- * 				Shell Library Functions
+ * Win32 SHELL32 for OS/2
+ *
+ * Copyright 1999 Patrick Haller (haller@zebra.fh-weingarten.de)
+ * Project Odin Software License can be found in LICENSE.TXT
+ *
+ *             Shell Library Functions
  *
  *  1998 Marcus Meissner
  */
+
+
+/*****************************************************************************
+ * Includes                                                                  *
+ *****************************************************************************/
+
+#include <odin.h>
+#include <odinwrap.h>
+#include <os2sel.h>
+
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 //#include <unistd.h>
 #include <ctype.h>
-
-#include <odin.h>
 
 #define ICOM_CINTERFACE 1
 #define CINTERFACE 1
@@ -37,8 +51,13 @@
 #include <heapstring.h>
 #include <misc.h>
 
-DECLARE_DEBUG_CHANNEL(exec)
-DECLARE_DEBUG_CHANNEL(shell)
+
+/*****************************************************************************
+ * Implementation                                                            *
+ *****************************************************************************/
+
+ODINDEBUGCHANNEL(SHELL32-SHELL)
+
 
 /* .ICO file ICONDIR definitions */
 
@@ -46,78 +65,79 @@ DECLARE_DEBUG_CHANNEL(shell)
 
 typedef struct
 {
-    BYTE        bWidth;          /* Width, in pixels, of the image	*/
-    BYTE        bHeight;         /* Height, in pixels, of the image	*/
+    BYTE        bWidth;          /* Width, in pixels, of the image  */
+    BYTE        bHeight;         /* Height, in pixels, of the image */
     BYTE        bColorCount;     /* Number of colors in image (0 if >=8bpp) */
-    BYTE        bReserved;       /* Reserved ( must be 0)		*/
-    WORD        wPlanes;         /* Color Planes			*/
-    WORD        wBitCount;       /* Bits per pixel			*/
-    DWORD       dwBytesInRes;    /* How many bytes in this resource?	*/
-    DWORD       dwImageOffset;   /* Where in the file is this image?	*/
+    BYTE        bReserved;       /* Reserved ( must be 0)     */
+    WORD        wPlanes;         /* Color Planes        */
+    WORD        wBitCount;       /* Bits per pixel         */
+    DWORD       dwBytesInRes;    /* How many bytes in this resource?   */
+    DWORD       dwImageOffset;   /* Where in the file is this image?   */
 } icoICONDIRENTRY, *LPicoICONDIRENTRY;
 
 typedef struct
 {
-    WORD            idReserved;   /* Reserved (must be 0)		*/
-    WORD            idType;       /* Resource Type (1 for icons)	*/
-    WORD            idCount;      /* How many images?			*/
+    WORD            idReserved;   /* Reserved (must be 0)     */
+    WORD            idType;       /* Resource Type (1 for icons) */
+    WORD            idCount;      /* How many images?         */
     icoICONDIRENTRY idEntries[1]; /* An entry for each image (idCount of 'em) */
 } icoICONDIR, *LPicoICONDIR;
 
 #include "poppack.h"
 
-static const char*	lpstrMsgWndCreated = "OTHERWINDOWCREATED";
-static const char*	lpstrMsgWndDestroyed = "OTHERWINDOWDESTROYED";
-static const char*	lpstrMsgShellActivate = "ACTIVATESHELLWINDOW";
+static const char* lpstrMsgWndCreated    = "OTHERWINDOWCREATED";
+static const char* lpstrMsgWndDestroyed  = "OTHERWINDOWDESTROYED";
+static const char* lpstrMsgShellActivate = "ACTIVATESHELLWINDOW";
 
-static HWND16	SHELL_hWnd = 0;
-static HHOOK	SHELL_hHook = 0;
-static UINT16	uMsgWndCreated = 0;
-static UINT16	uMsgWndDestroyed = 0;
-static UINT16	uMsgShellActivate = 0;
-HINSTANCE16	SHELL_hInstance = 0;
+static HWND16  SHELL_hWnd = 0;
+static HHOOK   SHELL_hHook = 0;
+static UINT16  uMsgWndCreated = 0;
+static UINT16  uMsgWndDestroyed = 0;
+static UINT16  uMsgShellActivate = 0;
+HINSTANCE16 SHELL_hInstance = 0;
 HINSTANCE SHELL_hInstance32;
 static int SHELL_Attach = 0;
 
 
 /*************************************************************************
- *				DragAcceptFiles32		[SHELL32.54]
+ *          DragAcceptFiles32               [SHELL32.54]
  */
-void WINAPI DragAcceptFiles(HWND hWnd, BOOL b)
+
+ODINPROCEDURE2(DragAcceptFiles, HWND, hWnd,
+                                BOOL, b)
 {
   LONG exstyle;
 
-
   if( !IsWindow(hWnd) )
-  	return;
+   return;
   exstyle = GetWindowLongA(hWnd,GWL_EXSTYLE);
   if (b)exstyle |= WS_EX_ACCEPTFILES;
-  else	exstyle &= ~WS_EX_ACCEPTFILES;
+  else   exstyle &= ~WS_EX_ACCEPTFILES;
   SetWindowLongA(hWnd,GWL_EXSTYLE,exstyle);
 }
 
 /*************************************************************************
- *				SHELL_DragQueryFile	[internal]
+ *          SHELL_DragQueryFile          [internal]
  *
  */
 static UINT SHELL_DragQueryFile(LPSTR lpDrop, LPWSTR lpwDrop, UINT lFile,
-				  LPSTR lpszFile, LPWSTR lpszwFile, UINT lLength)
+              LPSTR lpszFile, LPWSTR lpszwFile, UINT lLength)
 {
     UINT i;
 
     i = 0;
     if (lpDrop) {
     while (i++ < lFile) {
-	while (*lpDrop++); /* skip filename */
-	if (!*lpDrop)
-	  return (lFile == 0xFFFFFFFF) ? i : 0;
+   while (*lpDrop++); /* skip filename */
+   if (!*lpDrop)
+     return (lFile == 0xFFFFFFFF) ? i : 0;
       }
     }
     if (lpwDrop) {
       while (i++ < lFile) {
-	while (*lpwDrop++); /* skip filename */
-	if (!*lpwDrop)
-	  return (lFile == 0xFFFFFFFF) ? i : 0;
+   while (*lpwDrop++); /* skip filename */
+   if (!*lpwDrop)
+     return (lFile == 0xFFFFFFFF) ? i : 0;
       }
     }
 
@@ -139,10 +159,13 @@ static UINT SHELL_DragQueryFile(LPSTR lpDrop, LPWSTR lpwDrop, UINT lFile,
 }
 
 /*************************************************************************
- *				DragQueryFile32A	[SHELL32.81] [shell32.82]
+ *          DragQueryFile32A             [SHELL32.81] [shell32.82]
  */
-UINT WINAPI DragQueryFileA(HDROP hDrop, UINT lFile, LPSTR lpszFile,
-			      UINT lLength)
+
+ODINFUNCTION4(UINT, DragQueryFileA, HDROP, hDrop,
+                                    UINT,  lFile,
+                                    LPSTR, lpszFile,
+                                    UINT,  lLength)
 { /* hDrop is a global memory block allocated with GMEM_SHARE
      * with DROPFILESTRUCT as a header and filenames following
      * it, zero length filename is in the end */
@@ -150,8 +173,6 @@ UINT WINAPI DragQueryFileA(HDROP hDrop, UINT lFile, LPSTR lpszFile,
     LPDROPFILESTRUCT lpDropFileStruct;
     LPSTR lpCurrent;
     UINT i;
-
-    TRACE_(shell)("(%08x, %x, %p, %u)\n",	hDrop,lFile,lpszFile,lLength);
 
     lpDropFileStruct = (LPDROPFILESTRUCT) GlobalLock(hDrop);
     if(!lpDropFileStruct)
@@ -164,16 +185,16 @@ UINT WINAPI DragQueryFileA(HDROP hDrop, UINT lFile, LPSTR lpszFile,
 }
 
 /*************************************************************************
- *				DragQueryFile32W	[shell32.133]
+ *          DragQueryFile32W             [shell32.133]
  */
-UINT WINAPI DragQueryFileW(HDROP hDrop, UINT lFile, LPWSTR lpszwFile,
-			      UINT lLength)
+ODINFUNCTION4(UINT, DragQueryFileW, HDROP,  hDrop,
+                                    UINT,   lFile,
+                                    LPWSTR, lpszwFile,
+                                    UINT,   lLength)
 {
     LPDROPFILESTRUCT lpDropFileStruct;
     LPWSTR lpwCurrent;
     UINT i;
-
-    TRACE_(shell)("(%08x, %x, %p, %u)\n",	hDrop,lFile,lpszwFile,lLength);
 
     lpDropFileStruct = (LPDROPFILESTRUCT) GlobalLock(hDrop);
     if(!lpDropFileStruct)
@@ -201,17 +222,12 @@ UINT WINAPI DragQueryFileW(HDROP hDrop, UINT lFile, LPWSTR lpszwFile,
  * Author    : Patrick Haller [Tue, 1999/06/09 20:00]
  *****************************************************************************/
 
-UINT WIN32API DragQueryFileAorW(HDROP  hDrop,
-                                UINT   iFile,
-                                LPTSTR lpszFile,
-                                UINT   cch)
+ODINFUNCTION4(UINT,   DragQueryFileAorW,
+              HDROP,  hDrop,
+              UINT,   iFile,
+              LPTSTR, lpszFile,
+              UINT,   cch)
 {
-  dprintf(("SHELL32: DragQueryFileAorW(%08xh,%08xh,%s,%08xh).\n",
-           hDrop,
-           iFile,
-           lpszFile,
-           cch));
-
   // @@@PH maybe they want automatic determination here
   if (VERSION_OsIsUnicode())
     return DragQueryFileW(hDrop, iFile, (LPWSTR)lpszFile, cch);
@@ -221,22 +237,24 @@ UINT WIN32API DragQueryFileAorW(HDROP  hDrop,
 
 
 /*************************************************************************
- *				DragFinish32		[SHELL32.80]
+ *          DragFinish32                    [SHELL32.80]
  */
-void WINAPI DragFinish(HDROP h)
-{ TRACE_(shell)("\n");
-    GlobalFree((HGLOBAL)h);
+ODINPROCEDURE1(DragFinish, HDROP, h)
+{
+  GlobalFree((HGLOBAL)h);
 }
 
 
 /*************************************************************************
- *				DragQueryPoint32		[SHELL32.135]
+ *          DragQueryPoint32                [SHELL32.135]
  */
-BOOL WINAPI DragQueryPoint(HDROP hDrop, POINT *p)
+ODINFUNCTION2(BOOL,   DragQueryPoint,
+              HDROP,  hDrop,
+              POINT*, p)
 {
   LPDROPFILESTRUCT lpDropFileStruct;
   BOOL             bRet;
-  TRACE_(shell)("\n");
+
   lpDropFileStruct = (LPDROPFILESTRUCT) GlobalLock(hDrop);
 
   memcpy(p,&lpDropFileStruct->ptMousePos,sizeof(POINT));
@@ -247,7 +265,7 @@ BOOL WINAPI DragQueryPoint(HDROP hDrop, POINT *p)
 }
 
 /*************************************************************************
- *	SHELL_FindExecutable [Internal]
+ * SHELL_FindExecutable [Internal]
  *
  * Utility for code sharing between FindExecutable and ShellExecute
  */
@@ -266,37 +284,43 @@ HINSTANCE SHELL_FindExecutable( LPCSTR lpFile,
     int i;                  /* random counter */
     char xlpFile[256];      /* result of SearchPath */
 
-  TRACE_(shell)("%s\n", (lpFile != NULL?lpFile:"-") );
+    dprintf(("SHELL32:SHELL:SHELL_FindExecutable(%s,%s,%08xh)\n",
+             lpFile,
+             lpOperation,
+             lpResult));
 
     lpResult[0]='\0'; /* Start off with an empty return string */
 
     /* trap NULL parameters on entry */
     if (( lpFile == NULL ) || ( lpResult == NULL ) || ( lpOperation == NULL ))
-  { WARN_(exec)("(lpFile=%s,lpResult=%s,lpOperation=%s): NULL parameter\n",
-           lpFile, lpOperation, lpResult);
+  { dprintf(("SHELL32:SHELL:SHELL_FindExecutable(lpFile=%s,lpResult=%s,lpOperation=%s): NULL parameter\n",
+           lpFile, lpOperation, lpResult));
         return 2; /* File not found. Close enough, I guess. */
     }
 
     if (SearchPathA( NULL, lpFile,".exe",sizeof(xlpFile),xlpFile,NULL))
-  { TRACE_(shell)("SearchPath32A returned non-zero\n");
+  {  dprintf(("SHELL32:SHELL:SHELL_FindExecutable(SearchPath32A returned non-zero\n"));
         lpFile = xlpFile;
     }
 
     /* First thing we need is the file's extension */
     extension = strrchr( xlpFile, '.' ); /* Assume last "." is the one; */
-					/* File->Run in progman uses */
-					/* .\FILE.EXE :( */
-  TRACE_(shell)("xlpFile=%s,extension=%s\n", xlpFile, extension);
+               /* File->Run in progman uses */
+               /* .\FILE.EXE :( */
+    dprintf(("SHELL32:SHELL:SHELL_FindExecutable(xlpFile=%s,extension=%s)\n",
+             xlpFile, extension));
 
     if ((extension == NULL) || (extension == &xlpFile[strlen(xlpFile)]))
-  { WARN_(shell)("Returning 31 - No association\n");
+  { dprintf(("SHELL32:SHELL:SHELL_FindExecutable Returning 31 - No association\n"));
         return 31; /* no association */
     }
 
     /* Make local copy & lowercase it for reg & 'programs=' lookup */
     lstrcpynA( tmpext, extension, 5 );
     CharLowerA( tmpext );
-  TRACE_(shell)("%s file\n", tmpext);
+
+
+    dprintf(("SHELL32:SHELL:SHELL_FindExecutable(%s file)\n", tmpext));
 
     /* Three places to check: */
     /* 1. win.ini, [windows], programs (NB no leading '.') */
@@ -310,190 +334,198 @@ HINSTANCE SHELL_FindExecutable( LPCSTR lpFile,
      * section. Actually, if GetProfileString fails, we've probably
      * got a lot more to worry about than running a program... */
     if ( GetProfileStringA("windows", "programs", "exe pif bat com",
-						  buffer, sizeof(buffer)) > 0 )
+                    buffer, sizeof(buffer)) > 0 )
   { for (i=0;i<strlen(buffer); i++) buffer[i]=tolower(buffer[i]);
 
-		tok = strtok(buffer, " \t"); /* ? */
-		while( tok!= NULL)
-		  {
-			if (strcmp(tok, &tmpext[1])==0) /* have to skip the leading "." */
-			  {
-				strcpy(lpResult, xlpFile);
-				/* Need to perhaps check that the file has a path
-				 * attached */
-        TRACE_(shell)("found %s\n", lpResult);
-                                return 33;
+      tok = strtok(buffer, " \t"); /* ? */
+      while( tok!= NULL)
+        {
+         if (strcmp(tok, &tmpext[1])==0) /* have to skip the leading "." */
+           {
+            strcpy(lpResult, xlpFile);
+            /* Need to perhaps check that the file has a path
+             * attached */
+            dprintf(("SHELL32:SHELL:SHELL_FindExecutable found %s\n",
+                     lpResult));
+            return 33;
 
-		/* Greater than 32 to indicate success FIXME According to the
-		 * docs, I should be returning a handle for the
-		 * executable. Does this mean I'm supposed to open the
-		 * executable file or something? More RTFM, I guess... */
-			  }
-			tok=strtok(NULL, " \t");
-		  }
-	  }
+      /* Greater than 32 to indicate success FIXME According to the
+       * docs, I should be returning a handle for the
+       * executable. Does this mean I'm supposed to open the
+       * executable file or something? More RTFM, I guess... */
+           }
+         tok=strtok(NULL, " \t");
+        }
+     }
 
     /* Check registry */
     if (RegQueryValueA( HKEY_CLASSES_ROOT, tmpext, filetype,
                          &filetypelen ) == ERROR_SUCCESS )
     {
-	filetype[filetypelen]='\0';
-  TRACE_(shell)("File type: %s\n", filetype);
+   filetype[filetypelen]='\0';
+    dprintf(("SHELL32:SHELL:SHELL_FindExecutable(File type: %s)\n",
+             filetype));
 
-	/* Looking for ...buffer\shell\lpOperation\command */
-	strcat( filetype, "\\shell\\" );
-	strcat( filetype, lpOperation );
-	strcat( filetype, "\\command" );
-	
-	if (RegQueryValueA( HKEY_CLASSES_ROOT, filetype, command,
+   /* Looking for ...buffer\shell\lpOperation\command */
+   strcat( filetype, "\\shell\\" );
+   strcat( filetype, lpOperation );
+   strcat( filetype, "\\command" );
+
+   if (RegQueryValueA( HKEY_CLASSES_ROOT, filetype, command,
                              &commandlen ) == ERROR_SUCCESS )
-	{
-	    /* Is there a replace() function anywhere? */
-	    command[commandlen]='\0';
-	    strcpy( lpResult, command );
-	    tok=strstr( lpResult, "%1" );
-	    if (tok != NULL)
-	    {
-		tok[0]='\0'; /* truncate string at the percent */
-		strcat( lpResult, xlpFile ); /* what if no dir in xlpFile? */
-		tok=strstr( command, "%1" );
-		if ((tok!=NULL) && (strlen(tok)>2))
-		{
-		    strcat( lpResult, &tok[2] );
-		}
-	    }
-	    retval=33; /* FIXME see above */
-	}
+   {
+       /* Is there a replace() function anywhere? */
+       command[commandlen]='\0';
+       strcpy( lpResult, command );
+       tok=strstr( lpResult, "%1" );
+       if (tok != NULL)
+       {
+      tok[0]='\0'; /* truncate string at the percent */
+      strcat( lpResult, xlpFile ); /* what if no dir in xlpFile? */
+      tok=strstr( command, "%1" );
+      if ((tok!=NULL) && (strlen(tok)>2))
+      {
+          strcat( lpResult, &tok[2] );
+      }
+       }
+       retval=33; /* FIXME see above */
+   }
     }
     else /* Check win.ini */
     {
-	/* Toss the leading dot */
-	extension++;
-	if ( GetProfileStringA( "extensions", extension, "", command,
+   /* Toss the leading dot */
+   extension++;
+   if ( GetProfileStringA( "extensions", extension, "", command,
                                   sizeof(command)) > 0)
-	  {
-		if (strlen(command)!=0)
-		  {
-			strcpy( lpResult, command );
-			tok=strstr( lpResult, "^" ); /* should be ^.extension? */
-			if (tok != NULL)
-			  {
-				tok[0]='\0';
-				strcat( lpResult, xlpFile ); /* what if no dir in xlpFile? */
-				tok=strstr( command, "^" ); /* see above */
-				if ((tok != NULL) && (strlen(tok)>5))
-				  {
-					strcat( lpResult, &tok[5]);
-				  }
-			  }
-			retval=33; /* FIXME - see above */
-		  }
-	  }
-	}
+     {
+      if (strlen(command)!=0)
+        {
+         strcpy( lpResult, command );
+         tok=strstr( lpResult, "^" ); /* should be ^.extension? */
+         if (tok != NULL)
+           {
+            tok[0]='\0';
+            strcat( lpResult, xlpFile ); /* what if no dir in xlpFile? */
+            tok=strstr( command, "^" ); /* see above */
+            if ((tok != NULL) && (strlen(tok)>5))
+              {
+               strcat( lpResult, &tok[5]);
+              }
+           }
+         retval=33; /* FIXME - see above */
+        }
+     }
+   }
 
-    TRACE_(shell)("returning %s\n", lpResult);
+    dprintf(("SHELL32:SHELL:SHELL_FindExecutable (returning %s)\n", lpResult));
     return retval;
 }
 
 
 /*************************************************************************
- *				SHELL_GetResourceTable
+ *          SHELL_GetResourceTable
  */
 static DWORD SHELL_GetResourceTable(HFILE hFile,LPBYTE *retptr)
-{	IMAGE_DOS_HEADER	mz_header;
-	char			magic[4];
-	int			size;
+{  IMAGE_DOS_HEADER                      mz_header;
+   char        magic[4];
+   int         size;
 
-	TRACE_(shell)("\n");
+   dprintf(("SHELL32:Shell:SHELL_GetResourceTable(%08xh,%08xh)\n",
+            hFile,
+            retptr));
 
-	*retptr = NULL;
-	_llseek( hFile, 0, SEEK_SET );
-	if ((_lread(hFile,&mz_header,sizeof(mz_header)) != sizeof(mz_header)) || (mz_header.e_magic != IMAGE_DOS_SIGNATURE))
-	{ /* .ICO file ? */
+   *retptr = NULL;
+   _llseek( hFile, 0, SEEK_SET );
+   if ((_lread(hFile,&mz_header,sizeof(mz_header)) != sizeof(mz_header)) || (mz_header.e_magic != IMAGE_DOS_SIGNATURE))
+   { /* .ICO file ? */
           if (mz_header.e_cblp == 1)
-	  { /* ICONHEADER.idType, must be 1 */
-	    *retptr = (LPBYTE)-1;
-  	    return 1;
-	  }
-	  else
-	    return 0; /* failed */
-	}
-	_llseek( hFile, mz_header.e_lfanew, SEEK_SET );
+     { /* ICONHEADER.idType, must be 1 */
+       *retptr = (LPBYTE)-1;
+       return 1;
+     }
+     else
+       return 0; /* failed */
+   }
+   _llseek( hFile, mz_header.e_lfanew, SEEK_SET );
 
-	if (_lread( hFile, magic, sizeof(magic) ) != sizeof(magic))
-	  return 0;
+   if (_lread( hFile, magic, sizeof(magic) ) != sizeof(magic))
+     return 0;
 
-	_llseek( hFile, mz_header.e_lfanew, SEEK_SET);
+   _llseek( hFile, mz_header.e_lfanew, SEEK_SET);
 
-	if (*(DWORD*)magic  == IMAGE_NT_SIGNATURE)
-	  return IMAGE_NT_SIGNATURE;
+   if (*(DWORD*)magic  == IMAGE_NT_SIGNATURE)
+     return IMAGE_NT_SIGNATURE;
 
-	if (*(WORD*)magic == IMAGE_OS2_SIGNATURE)
-	{ IMAGE_OS2_HEADER	ne_header;
-	  LPBYTE		pTypeInfo = (LPBYTE)-1;
+   if (*(WORD*)magic == IMAGE_OS2_SIGNATURE)
+   { IMAGE_OS2_HEADER                    ne_header;
+     LPBYTE    pTypeInfo = (LPBYTE)-1;
 
-	  if (_lread(hFile,&ne_header,sizeof(ne_header))!=sizeof(ne_header))
-	    return 0;
+     if (_lread(hFile,&ne_header,sizeof(ne_header))!=sizeof(ne_header))
+       return 0;
 
-	  if (ne_header.ne_magic != IMAGE_OS2_SIGNATURE)
-	    return 0;
+     if (ne_header.ne_magic != IMAGE_OS2_SIGNATURE)
+       return 0;
 
-	  size = ne_header.rname_tab_offset - ne_header.resource_tab_offset;
+     size = ne_header.rname_tab_offset - ne_header.resource_tab_offset;
 
 //@@@PH no NE support
 #if 0
-	  if( size > sizeof(NE_TYPEINFO) )
-	  { pTypeInfo = (BYTE*)HeapAlloc( GetProcessHeap(), 0, size);
-	    if( pTypeInfo )
-	    { _llseek(hFile, mz_header.e_lfanew+ne_header.resource_tab_offset, SEEK_SET);
-	      if( _lread( hFile, (char*)pTypeInfo, size) != size )
-	      { HeapFree( GetProcessHeap(), 0, pTypeInfo);
-		pTypeInfo = NULL;
-	      }
-	    }
-	  }
+     if( size > sizeof(NE_TYPEINFO) )
+     { pTypeInfo = (BYTE*)HeapAlloc( GetProcessHeap(), 0, size);
+       if( pTypeInfo )
+       { _llseek(hFile, mz_header.e_lfanew+ne_header.resource_tab_offset, SEEK_SET);
+         if( _lread( hFile, (char*)pTypeInfo, size) != size )
+         { HeapFree( GetProcessHeap(), 0, pTypeInfo);
+      pTypeInfo = NULL;
+         }
+       }
+     }
 #endif
 
-	  *retptr = pTypeInfo;
-	  return IMAGE_OS2_SIGNATURE;
-	}
-  	return 0; /* failed */
+     *retptr = pTypeInfo;
+     return IMAGE_OS2_SIGNATURE;
+   }
+   return 0; /* failed */
 }
 
 
 /*************************************************************************
- *				ExtractAssociatedIcon	[SHELL.36]
+ *          ExtractAssociatedIcon        [SHELL.36]
  *
  * Return icon for given file (either from file itself or from associated
  * executable) and patch parameters if needed.
  */
-HICON WINAPI ExtractAssociatedIconA(HINSTANCE hInst, LPSTR lpIconPath, LPWORD lpiIcon)
-{	TRACE_(shell)("\n");
- 	HICON hIcon;
+ODINFUNCTION3(HICON,     ExtractAssociatedIconA,
+              HINSTANCE, hInst,
+              LPSTR,     lpIconPath,
+              LPWORD,    lpiIcon)
+{
+   HICON hIcon;
 
-	hIcon = ExtractIconA(hInst, lpIconPath, *lpiIcon);
+   hIcon = ExtractIconA(hInst, lpIconPath, *lpiIcon);
 
-	if( hIcon < 2 )
-	{ if( hIcon == 1 ) /* no icons found in given file */
-	  { char  tempPath[0x104];
-	    UINT16  uRet = FindExecutableA(lpIconPath,NULL,tempPath);
+   if( hIcon < 2 )
+   { if( hIcon == 1 ) /* no icons found in given file */
+     { char  tempPath[0x104];
+       UINT16  uRet = FindExecutableA(lpIconPath,NULL,tempPath);
 
-	    if( uRet > 32 && tempPath[0] )
-	    { strcpy(lpIconPath,tempPath);
-	      hIcon = ExtractIconA(hInst, lpIconPath, *lpiIcon);
-	      if( hIcon > 2 )
-	        return hIcon;
-	    }
-	    else hIcon = 0;
-	  }
+       if( uRet > 32 && tempPath[0] )
+       { strcpy(lpIconPath,tempPath);
+         hIcon = ExtractIconA(hInst, lpIconPath, *lpiIcon);
+         if( hIcon > 2 )
+           return hIcon;
+       }
+       else hIcon = 0;
+     }
 
-	  if( hIcon == 1 )
-	    *lpiIcon = 2;   /* MSDOS icon - we found .exe but no icons in it */
-	  else
-	    *lpiIcon = 6;   /* generic icon - found nothing */
+     if( hIcon == 1 )
+       *lpiIcon = 2;   /* MSDOS icon - we found .exe but no icons in it */
+     else
+       *lpiIcon = 6;   /* generic icon - found nothing */
 
-	  GetModuleFileNameA(hInst, lpIconPath, 0x80);
-	  hIcon = LoadIconA( hInst, (LPCSTR)*lpiIcon);
-	}
-	return hIcon;
+     GetModuleFileNameA(hInst, lpIconPath, 0x80);
+     hIcon = LoadIconA( hInst, (LPCSTR)*lpiIcon);
+   }
+   return hIcon;
 }
+
