@@ -1,10 +1,11 @@
-/* $Id: initterm.cpp,v 1.10 2000-08-11 10:56:27 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.11 2000-12-03 22:18:17 sandervl Exp $ */
 
 /*
  * WINMM DLL entry point
  *
  * Copyright 1998 Sander van Leeuwen (sandervl@xs4all.nl)
  * Copyright 1998 Peter Fitzsimmons
+ * Copyright 2000 Chris Wohlgemuth
  *
  *
  * Project Odin Software License can be found in LICENSE.TXT
@@ -41,10 +42,15 @@
 #define DBG_LOCALLOG	DBG_initterm
 #include "dbglocal.h"
 
+BOOL MULTIMEDIA_MciInit(void);
+BOOL	MULTIMEDIA_CreateIData(HINSTANCE hinstDLL);
+void MULTIMEDIA_DeleteIData(void);
+
 extern "C" {
 void IRTMidiShutdown();  // IRTMidi shutdown routine
 void CDECL _ctordtorInit( void );
 void CDECL _ctordtorTerm( void );
+
 
  //Win32 resource table (produced by wrc)
  extern DWORD _Resource_PEResTab;
@@ -55,9 +61,22 @@ static HMODULE dllHandle = 0;
 //******************************************************************************
 BOOL WINAPI LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
 {
-   switch (fdwReason)
-   {
-   case DLL_PROCESS_ATTACH:
+  static BOOL     		bInitDone = FALSE;
+  
+  switch (fdwReason)
+    {
+    case DLL_PROCESS_ATTACH:
+      if (!MULTIMEDIA_CreateIData(hinstDLL))
+        return FALSE;
+      
+      if (!bInitDone) { /* to be done only once */
+	    if (!MULTIMEDIA_MciInit() /*|| !MMDRV_Init() */ ) {
+          MULTIMEDIA_DeleteIData();
+          return FALSE;
+	    }
+        bInitDone = TRUE;	
+      }
+      
 	return TRUE;
 
    case DLL_THREAD_ATTACH:
@@ -65,6 +84,7 @@ BOOL WINAPI LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
 	return TRUE;
 
    case DLL_PROCESS_DETACH:
+     MULTIMEDIA_DeleteIData();
         auxOS2Close(); /* SvL: Close aux device if necessary */
    	IRTMidiShutdown;  /* JT: Shutdown RT Midi subsystem, if running. */
 	_ctordtorTerm();
@@ -100,9 +120,9 @@ unsigned long _System _DLL_InitTerm(unsigned long hModule, unsigned long
 
          CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
 
-	 dllHandle = RegisterLxDll(hModule, LibMain, (PVOID)&_Resource_PEResTab);
+         dllHandle = RegisterLxDll(hModule, LibMain, (PVOID)&_Resource_PEResTab);
          if(dllHandle == 0) 
-		return 0UL;
+           return 0UL;/* Error */
 
          break;
       case 1 :
@@ -122,3 +142,6 @@ unsigned long _System _DLL_InitTerm(unsigned long hModule, unsigned long
 }
 //******************************************************************************
 //******************************************************************************
+
+
+
