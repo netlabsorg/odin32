@@ -1,4 +1,10 @@
- /* $Id: ChangeLog,v 1.451 1999-11-14 21:07:18 davidr Exp $ */
+ /* $Id: ChangeLog,v 1.452 1999-11-14 22:25:15 hugh Exp $ */
+
+ 99-11-14  Markus Montkowski <mmontkowski@gmx.de>
+        - DDRAW:  Code cleanup and some fixes in handling blts in the virtuel buffers.
+                  Set IOPL =3 for all DXgames needed for RA (Red Alert).
+        - DSOUND: Implemented a fake soundcard so that the bufferpos does advance.
+                  Needed for RA. ToDO: Use better calulation for HiresTimers
 
  99-11-14: David Raison <djr@lemur.co.uk>
  	- OLEAUT32: Tidy up IPicture implentation - now handles fOwn.
