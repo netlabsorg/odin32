@@ -1,4 +1,4 @@
-/* $Id: console.cpp,v 1.15 1999-10-27 12:38:47 phaller Exp $ */
+/* $Id: console.cpp,v 1.16 1999-10-27 18:36:35 phaller Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -17,8 +17,8 @@
 #define DEBUG_LOCAL2
 #endif
 
-#undef DEBUG_LOCAL
-#undef DEBUG_LOCAL2
+//#undef DEBUG_LOCAL
+//#undef DEBUG_LOCAL2
 
 
 /*****************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: heapstring.cpp,v 1.15 1999-10-14 17:15:26 phaller Exp $ */
+/* $Id: heapstring.cpp,v 1.16 1999-10-27 18:36:36 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -569,7 +569,7 @@ int WIN32API lstrcpynWtoA(LPSTR  astring,
  *****************************************************************************/
 
 // asciilen: max length of unicode buffer (including end 0)
-
+// @@@PH 0 termination is NOT necessarily included !
 int WIN32API lstrcpynAtoW(LPWSTR unicode,
                           LPSTR  ascii,
                           int    asciilen)
@@ -582,9 +582,10 @@ int WIN32API lstrcpynAtoW(LPWSTR unicode,
   UniChar* out_buf;
   char*    in_buf;
 
-  dprintf(("KERNEL32: HeapString: lstrcpynAtoW(%s,%08xh)\n",
+  dprintf(("KERNEL32: HeapString: lstrcpynAtoW(%s,%08xh,%d)\n",
            ascii,
-           unicode));
+           unicode,
+           asciilen));
 
   //CB: no input, set at least terminator
   if (ascii == NULL)
@@ -598,14 +599,19 @@ int WIN32API lstrcpynAtoW(LPWSTR unicode,
 
   if (getUconvObject())
   {
-    if (asciilen == 1)
+    //@@@PH what's this?
+    if ((asciilen == 1) && (*ascii == '\0') )
     {
        unicode[0] = 0;
        return 0;
     }
 
     in_buf        = ascii;
-    in_bytes_left = asciilen-1; //buffer size in bytes
+
+    //@@@PH what's this?
+    //in_bytes_left = asciilen-1; //buffer size in bytes
+
+    in_bytes_left = asciilen; //buffer size in bytes
     out_buf = (UniChar*)unicode;
 
     uni_chars_left = in_bytes_left; //elements
@@ -615,24 +621,31 @@ int WIN32API lstrcpynAtoW(LPWSTR unicode,
                         &out_buf,        &uni_chars_left,
                         &num_subs );
 
-    unicode[asciilen-1-in_bytes_left] = 0;
+    //@@@PH what's this?
+    //unicode[asciilen-1-in_bytes_left] = 0;
 
     //if (rc != ULS_SUCCESS && in_bytes_left > 0) //CB: never the case during my tests
     //   dprintf(("KERNEL32: AsciiToUnicode failed, %d bytes left!\n",in_bytes_left));
-    return asciilen - 1;
+
+    //@@@PH what's this?
+    //return asciilen - 1;
+    return asciilen;
   }
   else
   { //poor man's conversion
 
-    for(i = 0;i < asciilen-1;i++)
+//    for(i = 0;i < asciilen-1;i++)
+    for(i = 0;i < asciilen;i++)
     {
       unicode[i] = ascii[i];
       if (ascii[i] == 0)
-        return i-1; //work done
+        //return i-1; //work done
+        return i; //work done
     }
 
-    unicode[asciilen-1] = 0;
-    return asciilen-1;
+//    unicode[asciilen-1] = 0;
+//    return asciilen-1;
+    return asciilen;
   }
 }
 
@@ -651,6 +664,7 @@ int WIN32API lstrcpynAtoW(LPWSTR unicode,
 
 LPSTR WIN32API lstrcpyWtoA(LPSTR ascii, LPWSTR unicode)
 {
+  //@@@PH huh? wuz dat?
   if (unicode == NULL)
   {
     if (unicode != NULL) unicode[0] = 0; //CB: set at least end

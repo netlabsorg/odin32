@@ -1,4 +1,4 @@
-/* $Id: conin.cpp,v 1.5 1999-08-24 23:37:07 phaller Exp $ */
+/* $Id: conin.cpp,v 1.6 1999-10-27 18:36:34 phaller Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -9,6 +9,7 @@
 
 #ifdef DEBUG
 #define DEBUG_LOCAL
+#define DEBUG_LOCAL2
 #endif
 
 
@@ -40,6 +41,7 @@
 #include "HMDevice.h"
 #include "Conin.H"
 #include "Console2.h"
+#include <heapstring.h>
 
 
 /***********************************
@@ -122,6 +124,7 @@ DWORD HMDeviceConsoleInClass::ReadFile(PHMHANDLEDATA pHMHandleData,
   APIRET rc;                                               /* API returncode */
   INPUT_RECORD InputRecord;               /* buffer for the event to be read */
   ULONG  ulPostCounter;                            /* semaphore post counter */
+  BOOL   fLoop = TRUE;      /* set to false if function may return to caller */
 
 #ifdef DEBUG_LOCAL
   WriteLog("KERNEL32/CONSOLE:HMDeviceConsoleInClass::ReadFile %s(%08x,%08x,%08x,%08x,%08x)\n",
@@ -137,7 +140,7 @@ DWORD HMDeviceConsoleInClass::ReadFile(PHMHANDLEDATA pHMHandleData,
   pszTarget = (PSZ)lpBuffer;
 
                                   /* block if no key events are in the queue */
-  for (;ulCounter==0;)                       /* until we got some characters */
+  for (;fLoop;)                       /* until we got some characters */
   {
     if (iConsoleInputQueryEvents() == 0)      /* if queue is currently empty */
     {
@@ -152,37 +155,96 @@ DWORD HMDeviceConsoleInClass::ReadFile(PHMHANDLEDATA pHMHandleData,
       rc = iConsoleInputEventPop(&InputRecord);      /* get event from queue */
       if (rc == NO_ERROR)         /* if we've got a valid event in the queue */
       {
-        if (InputRecord.EventType == KEY_EVENT)          /* check event type */
+        //@@@PH other events are discarded!
+        if ( (InputRecord.EventType == KEY_EVENT) &&     /* check event type */
+             (InputRecord.Event.KeyEvent.bKeyDown == TRUE) )
         {
+          // console in line input mode ?
+          if (pConsoleInput->dwConsoleMode & ENABLE_LINE_INPUT)
+          {
+            // continue until buffer full or CR entered
+            if (InputRecord.Event.KeyEvent.uChar.AsciiChar == 0x0d)
+              fLoop = FALSE;
+          }
+          else
+            fLoop = FALSE; // return on any single key in buffer :)
+
+          // record key stroke
+          if (pConsoleInput->dwConsoleMode & ENABLE_PROCESSED_INPUT)
+          {
+            // filter special characters first
+            switch (InputRecord.Event.KeyEvent.uChar.AsciiChar)
+            {
+              case 0x03: // ctrl-c is filtered!
+              case 0x0a: // LF
+              case 0x0d: // CR
+                // do NOT insert those keys into the resulting buffer
+                break;
+
+              case 0x08: // backspace
+                if (ulCounter > 0)
+                {
+                  //@@@PH erase character on screen!
+                  ulCounter--;
+                  pszTarget--;
                                                      /* local echo enabled ? */
-          if (pConsoleInput->dwConsoleMode & ENABLE_ECHO_INPUT)
-            HMWriteFile(pConsoleGlobals->hConsoleBuffer,
+                  if (pConsoleInput->dwConsoleMode & ENABLE_ECHO_INPUT)
+                    HMWriteFile(pConsoleGlobals->hConsoleBuffer,
+                        &InputRecord.Event.KeyEvent.uChar.AsciiChar,
+                        1,
+                        &ulPostCounter,                      /* dummy result */
+                        NULL);
+                }
+                break;
+
+              default:
+                // OK, for the rest ...
+                *pszTarget = InputRecord.Event.KeyEvent.uChar.AsciiChar;
+                dprintf(("KERNEL32:CONIN$: Debug: recorded key (%c - %02xh)\n",
+                         *pszTarget,
+                         *pszTarget));
+
+                pszTarget++;
+                ulCounter++;
+                                                     /* local echo enabled ? */
+                if (pConsoleInput->dwConsoleMode & ENABLE_ECHO_INPUT)
+                  HMWriteFile(pConsoleGlobals->hConsoleBuffer,
                         &InputRecord.Event.KeyEvent.uChar.AsciiChar,
                         1,
                         &ulPostCounter,                      /* dummy result */
                         NULL);
 
-          // console in line input mode ?
-          if ( (pConsoleInput->dwConsoleMode & ENABLE_LINE_INPUT) &&
-               (InputRecord.Event.KeyEvent.uChar.AsciiChar == 0x0d))
-            goto __readfile_exit;
 
-          // record key stroke
-          *pszTarget = InputRecord.Event.KeyEvent.uChar.AsciiChar;
-          pszTarget++;
-          ulCounter++;
+            }
+          }
+          else
+          {
+            *pszTarget = InputRecord.Event.KeyEvent.uChar.AsciiChar;
+            dprintf(("KERNEL32:CONIN$: Debug: recorded key (%c - %02xh)\n",
+                     *pszTarget,
+                     *pszTarget));
+
+            pszTarget++;
+            ulCounter++;
+
+                                                     /* local echo enabled ? */
+            if (pConsoleInput->dwConsoleMode & ENABLE_ECHO_INPUT)
+              HMWriteFile(pConsoleGlobals->hConsoleBuffer,
+                        &InputRecord.Event.KeyEvent.uChar.AsciiChar,
+                        1,
+                        &ulPostCounter,                      /* dummy result */
+                        NULL);
+          }
 
           // buffer filled?
           if (ulCounter >= nNumberOfBytesToRead)        /* at buffer's end ? */
-            goto __readfile_exit;
+            fLoop = FALSE;
         }
                                          /* Note: other events are discarded */
       }
     }
     while (rc == NO_ERROR);
   }
-
-__readfile_exit:
 
   *lpNumberOfBytesRead = ulCounter;                          /* write result */
 
@@ -641,6 +703,7 @@ DWORD HMDeviceConsoleInClass::ReadConsoleW(PHMHANDLEDATA pHMHandleData,
 {
   PCONSOLEBUFFER pConsoleBuffer = (PCONSOLEBUFFER)pHMHandleData->lpHandlerData;
   DWORD          dwResult;
+  LPSTR          lpstrAscii;
 
 #ifdef DEBUG_LOCAL2
   WriteLog("KERNEL32/CONSOLE: CONIN$::ReadConsoleW(%08x,%08x,%u,%08x,%08x).\n",
@@ -651,13 +714,22 @@ DWORD HMDeviceConsoleInClass::ReadConsoleW(PHMHANDLEDATA pHMHandleData,
            lpvReserved);
 #endif
 
+  // create ascii buffer
+  lpstrAscii = (LPSTR)HEAP_malloc(cchToRead);
+  if (lpstrAscii == NULL)
+     return ERROR_NOT_ENOUGH_MEMORY;
+
                                /* simply forward the request to that routine */
   dwResult = HMDeviceConsoleInClass::ReadFile(pHMHandleData,
-                                              lpvBuffer,
+                                              lpstrAscii,
                                               cchToRead,
                                               lpcchRead,
                                               NULL);
-  /* @@@PH AScii -> unicode translation */
+  /* Ascii -> unicode translation */
+  if (dwResult == TRUE)
+    lstrcpynAtoW((LPWSTR)lpvBuffer, lpstrAscii, *lpcchRead);
+
+  HEAP_free(lpstrAscii);
 
   return (dwResult);                                  /* deliver return code */
 }

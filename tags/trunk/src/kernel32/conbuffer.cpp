@@ -1,4 +1,4 @@
-/* $Id: conbuffer.cpp,v 1.4 1999-07-12 17:45:50 phaller Exp $ */
+/* $Id: conbuffer.cpp,v 1.5 1999-10-27 18:36:33 phaller Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -17,8 +17,8 @@
 #define DEBUG_LOCAL2
 #endif
 
-#undef DEBUG_LOCAL
-#undef DEBUG_LOCAL2
+//#undef DEBUG_LOCAL
+//#undef DEBUG_LOCAL2
 
 
 /*****************************************************************************
@@ -72,6 +72,7 @@
 #include "HMDevice.h"
 #include "ConBuffer.H"
 #include "Console2.h"
+#include <heapstring.h>
 
 
 /***********************************
@@ -288,8 +289,13 @@ DWORD HMDeviceConsoleBufferClass::WriteFile(PHMHANDLEDATA pHMHandleData,
           break;
 
         case 8: /* Backspace */
+          // not correct if deleting expanded tab character
           if (pConsoleBuffer->coordCursorPosition.X > 0)
             pConsoleBuffer->coordCursorPosition.X--;
+
+          //@@@PH overwrite old character
+          *(pConsoleBuffer->ppszLine[pConsoleBuffer->coordCursorPosition.Y] +
+            pConsoleBuffer->coordCursorPosition.X * 2) = 0x20;
           break;
 
         case 9: /* Tab */
@@ -318,6 +324,10 @@ DWORD HMDeviceConsoleBufferClass::WriteFile(PHMHANDLEDATA pHMHandleData,
           }
           break;
 
+        case 13: /* CARRIAGE RETURN */
+          pConsoleBuffer->coordCursorPosition.X = 0;
+          //@@@PH test break;
+
         case 10: /* LINEFEED */
           pConsoleBuffer->coordCursorPosition.Y++;
 
@@ -328,10 +338,6 @@ DWORD HMDeviceConsoleBufferClass::WriteFile(PHMHANDLEDATA pHMHandleData,
                                    1);
             pConsoleBuffer->coordCursorPosition.Y--;
           }
-          break;
-
-        case 13: /* CARRIAGE RETURN */
-          pConsoleBuffer->coordCursorPosition.X = 0;
           break;
 
         default:
@@ -2520,6 +2526,8 @@ DWORD HMDeviceConsoleBufferClass::WriteConsoleW(PHMHANDLEDATA pHMHandleData,
                                                 LPVOID        lpvReserved)
 {
   PCONSOLEBUFFER pConsoleBuffer = (PCONSOLEBUFFER)pHMHandleData->lpHandlerData;
+  DWORD          rc;
+  LPSTR          pszAscii;
 
 #ifdef DEBUG_LOCAL2
   WriteLog("KERNEL32/CONSOLE: CONBUFFER$::WriteConsoleW(%08x,%08x,%u,%08x,%08x).\n",
@@ -2530,14 +2538,22 @@ DWORD HMDeviceConsoleBufferClass::WriteConsoleW(PHMHANDLEDATA pHMHandleData,
            lpvReserved);
 #endif
 
-  /* @@@PH AScii -> unicode translation */
+  /* Ascii -> unicode translation */
+  pszAscii = (LPSTR)HEAP_malloc(cchToWrite);
+  if (pszAscii == NULL)
+     return ERROR_NOT_ENOUGH_MEMORY;
+
+  lstrcpynWtoA(pszAscii, (LPWSTR)lpvBuffer, cchToWrite);
 
   /* simply forward the request to that routine */
-  return (HMDeviceConsoleBufferClass::WriteFile(pHMHandleData,
-                                                lpvBuffer,
-                                                cchToWrite,
-                                                lpcchWritten,
-                                                NULL));
+  rc = HMDeviceConsoleBufferClass::WriteFile(pHMHandleData,
+                                             pszAscii,
+                                             cchToWrite,
+                                             lpcchWritten,
+                                             NULL);
+  // free memory again
+  HEAP_free(pszAscii);
+  return (rc);
 }
 
 
