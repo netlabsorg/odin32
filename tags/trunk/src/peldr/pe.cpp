@@ -1,4 +1,4 @@
-/* $Id: pe.cpp,v 1.1 1999-05-24 20:19:57 ktk Exp $ */
+/* $Id: pe.cpp,v 1.2 1999-06-02 16:00:38 cbratschi Exp $ */
 
 /*
  *
@@ -28,7 +28,7 @@
 #include "windll.h"
 
 char INFO_BANNER[]      = "Usage: PE winexe commandline";
-char szErrorTitle[]     = "Win32 for OS/2";
+char szErrorTitle[]     = "Odin";
 char szMemErrorMsg[]    = "Memory allocation failure";
 char szFileErrorMsg[]   = "File IO error";
 char szPEErrorMsg[]     = "Not a valid win32 exe. (perhaps 16 bits windows)";

@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.2 1999-05-31 22:08:15 phaller Exp $ */
+/* $Id: user32.cpp,v 1.3 1999-06-02 15:57:57 cbratschi Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -6,6 +6,7 @@
  * Copyright 1998 Sander van Leeuwen
  * Copyright 1998 Patrick Haller
  * Copyright 1998 Peter Fitzsimmons
+ * Copyright 1999 Christoph Bratschi
  *
  *
  * Project Odin Software License can be found in LICENSE.TXT
@@ -116,7 +117,7 @@ int __cdecl wsprintfW(LPWSTR lpOut, LPCWSTR lpFmt, ...)
            lpFmt));
 
   lpFmtA  = UnicodeToAsciiString((LPWSTR)lpFmt);
-  
+
   /* @@@PH 98/07/13 transform "%s" to "%ls" does the unicode magic */
   {
     PSZ     pszTemp;
@@ -227,11 +228,15 @@ VOID WIN32API PostQuitMessage( int arg1)
     O32_PostQuitMessage(arg1);
 }
 //******************************************************************************
+// Not implemented by Open32 (31-5-99 Christoph Bratschi)
 //******************************************************************************
 BOOL WIN32API IsDlgButtonChecked( HWND arg1, UINT  arg2)
 {
-    dprintf(("USER32:  IsDlgButtonChecked\n"));
-    return O32_IsDlgButtonChecked(arg1, arg2);
+#ifdef DEBUG
+    WriteLog("USER32:  IsDlgButtonChecked\n");
+#endif
+//    return O32_IsDlgButtonChecked(arg1, arg2);
+    return (BOOL)SendDlgItemMessageA(arg1,arg2,BM_GETCHECK,0,0);
 }
 //******************************************************************************
 //******************************************************************************
@@ -349,11 +354,15 @@ BOOL WIN32API CopyRect( PRECT arg1, const RECT * arg2)
     return O32_CopyRect(arg1, arg2);
 }
 //******************************************************************************
+// Not implemented by Open32 (5-31-99 Christoph Bratschi)
 //******************************************************************************
 BOOL WIN32API CheckDlgButton( HWND arg1, int arg2, UINT  arg3)
 {
-    dprintf(("USER32:  CheckDlgButton\n"));
-    return O32_CheckDlgButton(arg1, arg2, arg3);
+#ifdef DEBUG
+    WriteLog("USER32:  CheckDlgButton\n");
+#endif
+//    return O32_CheckDlgButton(arg1, arg2, arg3);
+    return (BOOL)SendDlgItemMessageA(arg1,arg2,BM_SETCHECK,arg3,0);
 }
 //******************************************************************************
 //******************************************************************************
@@ -555,6 +564,10 @@ HWND WIN32API CreateWindowExA(DWORD     dwExStyle,
   #define WS_SYNCPAINT               0x02000000L
 #endif
 
+#ifndef WS_CLIPSYBLINGS
+  #define WS_CLIPSYBLINGS            0x10000000L
+#endif
+
   dwStyle |= WS_SYNCPAINT;
 
   /* @@@PH 98/06/21 experimental fix for WinHlp32 */
@@ -594,7 +607,7 @@ HWND WIN32API CreateWindowExA(DWORD     dwExStyle,
     //Classname might be name of system class, in which case we don't
     //need to use our own callback
 //    if(Win32WindowClass::FindClass((LPSTR)arg2) != NULL) {
-     	window = new Win32WindowProc(arg11, arg2);
+        window = new Win32WindowProc(arg11, arg2);
 //    }
 
     hwnd = O32_CreateWindowEx(dwExStyle,
@@ -612,11 +625,11 @@ HWND WIN32API CreateWindowExA(DWORD     dwExStyle,
 
     //SvL: 16-11-'97: window can be already destroyed if hwnd == 0
     if(hwnd == 0 && window != 0 && Win32WindowProc::FindWindowProc(window)) {
-     	delete(window);
-     	window = 0;
+        delete(window);
+        window = 0;
     }
     if(window) {
-    	window->SetWindowHandle(hwnd);
+        window->SetWindowHandle(hwnd);
     }
     dprintf(("USER32:  ************CreateWindowExA %s (%d,%d,%d,%d), hwnd = %X\n", arg2, x, y, nWidth, nHeight, hwnd));
     return(hwnd);
@@ -792,7 +805,7 @@ UINT WIN32API SetTimer( HWND arg1, UINT arg2, UINT arg3, TIMERPROC  arg4)
 #ifdef DEBUG
     WriteLog("USER32: SetTimer INCORRECT CALLING CONVENTION FOR HANDLER!!!!!\n");
 #endif
-    //SvL: Write callback handler class for this one 
+    //SvL: Write callback handler class for this one
     return O32_SetTimer(arg1, arg2, arg3, (TIMERPROC_O32)arg4);
 }
 //******************************************************************************
@@ -1217,8 +1230,8 @@ LRESULT WIN32API CallWindowProcA(WNDPROC wndprcPrev,
 #endif
 
     if(Win32WindowSubProc::FindSubProc((WNDPROC_O32)wndprcPrev) != NULL) {
-      	 WNDPROC_O32 orgprc = (WNDPROC_O32)wndprcPrev; //is original Open32 system class callback (_System)
-      	 return orgprc(arg2, arg3, arg4, arg5);
+         WNDPROC_O32 orgprc = (WNDPROC_O32)wndprcPrev; //is original Open32 system class callback (_System)
+         return orgprc(arg2, arg3, arg4, arg5);
     }
     else return wndprcPrev(arg2, arg3, arg4, arg5);   //win32 callback (__stdcall)
 }
@@ -1262,13 +1275,21 @@ UINT WIN32API ArrangeIconicWindows( HWND arg1)
     return O32_ArrangeIconicWindows(arg1);
 }
 //******************************************************************************
+// Not implemented by Open32 (5-31-99 Christoph Bratschi)
+// Quick and dirty implementation
 //******************************************************************************
 BOOL WIN32API CheckRadioButton( HWND arg1, UINT arg2, UINT arg3, UINT  arg4)
 {
 #ifdef DEBUG
     WriteLog("USER32:  CheckRadioButton\n");
 #endif
-    return O32_CheckRadioButton(arg1, arg2, arg3, arg4);
+//    return O32_CheckRadioButton(arg1, arg2, arg3, arg4);
+    if (arg2 > arg3) return (FALSE);
+    for (UINT x=arg2;x <= arg3;x++)
+    {
+     SendDlgItemMessageA(arg1,x,BM_SETCHECK,(x == arg4) ? BST_CHECKED : BST_UNCHECKED,0);
+    }
+    return (TRUE);
 }
 //******************************************************************************
 //******************************************************************************
@@ -1374,7 +1395,7 @@ HICON WIN32API CreateIcon( HINSTANCE arg1, INT arg2, INT arg3, BYTE arg4, BYTE a
 //ASSERT dwVer == win31 (ok according to SDK docs)
 //******************************************************************************
 HICON WIN32API CreateIconFromResource(PBYTE presbits,  UINT dwResSize,
-		                      BOOL  fIcon,     DWORD dwVer)
+                                      BOOL  fIcon,     DWORD dwVer)
 {
  HICON hicon;
  DWORD OS2ResSize = 0;
@@ -1385,16 +1406,16 @@ HICON WIN32API CreateIconFromResource(PBYTE presbits,  UINT dwResSize,
     WriteLog("USER32:  CreateIconFromResource returned %X (%X)\n", hicon, GetLastError());
 #endif
     if(OS2Icon)
-    	FreeIcon(OS2Icon);
+        FreeIcon(OS2Icon);
 
     return(hicon);
 }
 //******************************************************************************
 //******************************************************************************
 HICON WIN32API CreateIconFromResourceEx(PBYTE presbits,  UINT dwResSize,
- 		                        BOOL  fIcon,     DWORD dwVer,
-                  			int   cxDesired, int cyDesired,
-                       			UINT  Flags)
+                                        BOOL  fIcon,     DWORD dwVer,
+                                        int   cxDesired, int cyDesired,
+                                        UINT  Flags)
 {
 #ifdef DEBUG
     WriteLog("USER32:  CreateIconFromResourceEx %X %d %d %X %d %d %X, not completely supported!\n", presbits, dwResSize, fIcon, dwVer, cxDesired, cyDesired, Flags);
@@ -1413,8 +1434,8 @@ HICON WIN32API CreateIconIndirect(LPICONINFO arg1)
 //******************************************************************************
 //******************************************************************************
 HWND WIN32API CreateMDIWindowA(LPCSTR arg1, LPCSTR arg2, DWORD arg3,
-		               int arg4, int arg5, int arg6, int arg7,
-                	       HWND arg8, HINSTANCE arg9, LPARAM  arg10)
+                               int arg4, int arg5, int arg6, int arg7,
+                               HWND arg8, HINSTANCE arg9, LPARAM  arg10)
 {
  HWND hwnd;
 
@@ -1425,8 +1446,8 @@ HWND WIN32API CreateMDIWindowA(LPCSTR arg1, LPCSTR arg2, DWORD arg3,
     hwnd = O32_CreateMDIWindow((LPSTR)arg1, (LPSTR)arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10);
     //SvL: 16-11-'97: window can be already destroyed if hwnd == 0
     if(hwnd == 0 && window != 0 && Win32WindowProc::FindWindowProc(window)) {
-     	delete(window);
-     	window = 0;
+        delete(window);
+        window = 0;
     }
 
 #ifdef DEBUG
@@ -1437,8 +1458,8 @@ HWND WIN32API CreateMDIWindowA(LPCSTR arg1, LPCSTR arg2, DWORD arg3,
 //******************************************************************************
 //******************************************************************************
 HWND WIN32API CreateMDIWindowW(LPCWSTR arg1, LPCWSTR arg2, DWORD arg3, int arg4,
-		               int arg5, int arg6, int arg7, HWND arg8, HINSTANCE arg9,
-                	       LPARAM arg10)
+                               int arg5, int arg6, int arg7, HWND arg8, HINSTANCE arg9,
+                               LPARAM arg10)
 {
  HWND hwnd;
  char *astring1 = NULL, *astring2 = NULL;
@@ -1459,11 +1480,11 @@ HWND WIN32API CreateMDIWindowW(LPCWSTR arg1, LPCWSTR arg2, DWORD arg3, int arg4,
     hwnd = O32_CreateMDIWindow(astring1, astring2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10);
     //SvL: 16-11-'97: window can be already destroyed if hwnd == 0
     if(hwnd == 0 && window != 0 && Win32WindowProc::FindWindowProc(window)) {
-     	delete(window);
-     	window = 0;
+        delete(window);
+        window = 0;
     }
     if(window) {
-    	window->SetWindowHandle(hwnd);
+        window->SetWindowHandle(hwnd);
     }
 
     if(astring1)    FreeAsciiString(astring1);
@@ -1504,7 +1525,7 @@ HWND WIN32API CreateWindowExW(DWORD     arg1,
 #ifdef DEBUG
     WriteLog("USER32:  CreateWindowExW: dwExStyle = %X\n", arg1);
     if((int)arg2 >> 16 != 0)
-     	 WriteLog("USER32:  CreateWindow: classname = %s\n", astring1);
+         WriteLog("USER32:  CreateWindow: classname = %s\n", astring1);
     else WriteLog("USER32:  CreateWindow: classname = %X\n", arg2);
     WriteLog("USER32:  CreateWindow: windowname= %s\n", astring2);
     WriteLog("USER32:  CreateWindow: dwStyle   = %X\n", dwStyle);
@@ -1532,7 +1553,7 @@ HWND WIN32API CreateWindowExW(DWORD     arg1,
                             arg12);
 
     if(astring1)
-    	FreeAsciiString(astring1);
+        FreeAsciiString(astring1);
 
     FreeAsciiString(astring2);
 
@@ -1842,7 +1863,7 @@ BOOL WIN32API EnumWindows(WNDENUMPROC lpfn, LPARAM lParam)
 #endif
   rc = O32_EnumWindows(callback->GetOS2Callback(), (LPARAM)callback);
   if(callback)
-    	delete callback;
+        delete callback;
   return(rc);
 }
 //******************************************************************************
@@ -2173,16 +2194,16 @@ HANDLE WIN32API GetPropW(HWND arg1, LPCWSTR arg2)
  char *astring;
 
     if((int)arg2 >> 16 != 0)
-      	 astring = UnicodeToAsciiString((LPWSTR)arg2);
+         astring = UnicodeToAsciiString((LPWSTR)arg2);
     else astring = (char *)arg2;
 #ifdef DEBUG
     if((int)arg2 >> 16 != 0)
-      	 WriteLog("USER32:  GetPropW %s\n", astring);
+         WriteLog("USER32:  GetPropW %s\n", astring);
     else WriteLog("USER32:  GetPropW %X\n", astring);
 #endif
     handle = GetPropA(arg1, (LPCSTR)astring);
     if((int)arg2 >> 16 != 0)
-      	FreeAsciiString(astring);
+        FreeAsciiString(astring);
 
     return(handle);
 }
@@ -2788,17 +2809,17 @@ BOOL WIN32API SetPropW(HWND arg1, LPCWSTR arg2, HANDLE arg3)
  char *astring;
 
     if((int)arg2 >> 16 != 0)
-     	 astring = UnicodeToAsciiString((LPWSTR)arg2);
+         astring = UnicodeToAsciiString((LPWSTR)arg2);
     else astring = (char *)arg2;
 
 #ifdef DEBUG
     if((int)arg2 >> 16 != 0)
-     	 WriteLog("USER32:  SetPropW %S\n", astring);
+         WriteLog("USER32:  SetPropW %S\n", astring);
     else WriteLog("USER32:  SetPropW %X\n", astring);
 #endif
     rc = O32_SetProp(arg1, astring, arg3);
     if((int)astring >> 16 != 0)
-    	FreeAsciiString(astring);
+        FreeAsciiString(astring);
     return(rc);
 }
 //******************************************************************************
@@ -2836,24 +2857,24 @@ LONG WIN32API SetWindowLongA(HWND hwnd, int nIndex, LONG  arg3)
 
     dprintf(("USER32:  SetWindowLongA %X %d %X\n", hwnd, nIndex, arg3));
     if(nIndex == GWL_WNDPROC || nIndex == DWL_DLGPROC) {
-       	Win32WindowProc *wndproc = Win32WindowProc::FindProc(hwnd);
-       	if(wndproc == NULL) {//created with system class and app wants to change the handler
-        	dprintf(("USER32:  SetWindowLong new WindowProc for system class\n"));
-        	wndproc = new Win32WindowProc((WNDPROC)arg3);
-        	wndproc->SetWindowHandle(hwnd);
-        	rc = O32_GetWindowLong(hwnd, nIndex);
-        	Win32WindowSubProc *subwndproc = new Win32WindowSubProc(hwnd, (WNDPROC_O32)rc);
-        	O32_SetWindowLong(hwnd, nIndex, (LONG)wndproc->GetOS2Callback());
-	        return((LONG)subwndproc->GetWin32Callback());
-       	}
-       	else {
-        	if(!(nIndex == DWL_DLGPROC && wndproc->IsWindow() == TRUE)) {
-            		rc = (LONG)wndproc->GetWin32Callback();
-            		dprintf(("USER32:  SetWindowLong change WindowProc %X to %X\n", rc, arg3));
-            		wndproc->SetWin32Callback((WNDPROC)arg3);
-            		return(rc);
-        	}
-        	//else window that accesses it's normal window data
+        Win32WindowProc *wndproc = Win32WindowProc::FindProc(hwnd);
+        if(wndproc == NULL) {//created with system class and app wants to change the handler
+                dprintf(("USER32:  SetWindowLong new WindowProc for system class\n"));
+                wndproc = new Win32WindowProc((WNDPROC)arg3);
+                wndproc->SetWindowHandle(hwnd);
+                rc = O32_GetWindowLong(hwnd, nIndex);
+                Win32WindowSubProc *subwndproc = new Win32WindowSubProc(hwnd, (WNDPROC_O32)rc);
+                O32_SetWindowLong(hwnd, nIndex, (LONG)wndproc->GetOS2Callback());
+                return((LONG)subwndproc->GetWin32Callback());
+        }
+        else {
+                if(!(nIndex == DWL_DLGPROC && wndproc->IsWindow() == TRUE)) {
+                        rc = (LONG)wndproc->GetWin32Callback();
+                        dprintf(("USER32:  SetWindowLong change WindowProc %X to %X\n", rc, arg3));
+                        wndproc->SetWin32Callback((WNDPROC)arg3);
+                        return(rc);
+                }
+                //else window that accesses it's normal window data
        }
     }
     return O32_SetWindowLong(hwnd, nIndex, arg3);
@@ -3243,17 +3264,17 @@ INT WIN32API SetScrollInfo(HWND hwnd, INT fnBar, const SCROLLINFO *lpsi, BOOL fR
     return(FALSE);
 
   if(lpsi->fMask & SIF_POS)
-    	SetScrollPos(hwnd, fnBar, lpsi->nPos, fRedraw);
+        SetScrollPos(hwnd, fnBar, lpsi->nPos, fRedraw);
   if(lpsi->fMask & SIF_RANGE)
-    	SetScrollRange(hwnd, fnBar, lpsi->nMin, lpsi->nMax, fRedraw);
+        SetScrollRange(hwnd, fnBar, lpsi->nMin, lpsi->nMax, fRedraw);
   if(lpsi->fMask & SIF_PAGE) {
 #ifdef DEBUG
-    	WriteLog("USER32:  GetScrollInfo, page info not implemented\n");
+        WriteLog("USER32:  GetScrollInfo, page info not implemented\n");
 #endif
   }
   if(lpsi->fMask & SIF_DISABLENOSCROLL) {
 #ifdef DEBUG
-    	WriteLog("USER32:  GetScrollInfo, disable scrollbar not yet implemented\n");
+        WriteLog("USER32:  GetScrollInfo, disable scrollbar not yet implemented\n");
 #endif
   }
   return(TRUE);
@@ -3277,7 +3298,7 @@ BOOL WIN32API GrayStringA(HDC hdc, HBRUSH hBrush, GRAYSTRINGPROC lpOutputFunc,
     return(FALSE);
   }
   if(lpOutputFunc) {
-    	return(lpOutputFunc(hdc, lpData, nCount));
+        return(lpOutputFunc(hdc, lpData, nCount));
   }
   curclr = SetTextColor(hdc, GetSysColor(COLOR_GRAYTEXT));
   rc = TextOutA(hdc, X, Y, (char *)lpData, nCount);
@@ -3825,7 +3846,7 @@ BOOL WIN32API OpenIcon(HWND hwnd)
   WriteLog("USER32:  OpenIcon\n");
 #endif
   if(!IsIconic(hwnd))
-    	return FALSE;
+        return FALSE;
   ShowWindow(hwnd, SW_SHOWNORMAL);
   return TRUE;
 }
@@ -3926,10 +3947,10 @@ LONG WIN32API ChangeDisplaySettingsA(LPDEVMODEA  lpDevMode, DWORD dwFlags)
 {
 #ifdef DEBUG
     if(lpDevMode) {
-    	WriteLog("USER32:  ChangeDisplaySettingsA FAKED %X\n", dwFlags);
-    	WriteLog("USER32:  ChangeDisplaySettingsA lpDevMode->dmBitsPerPel %d\n", lpDevMode->dmBitsPerPel);
-    	WriteLog("USER32:  ChangeDisplaySettingsA lpDevMode->dmPelsWidth  %d\n", lpDevMode->dmPelsWidth);
-    	WriteLog("USER32:  ChangeDisplaySettingsA lpDevMode->dmPelsHeight %d\n", lpDevMode->dmPelsHeight);
+        WriteLog("USER32:  ChangeDisplaySettingsA FAKED %X\n", dwFlags);
+        WriteLog("USER32:  ChangeDisplaySettingsA lpDevMode->dmBitsPerPel %d\n", lpDevMode->dmBitsPerPel);
+        WriteLog("USER32:  ChangeDisplaySettingsA lpDevMode->dmPelsWidth  %d\n", lpDevMode->dmPelsWidth);
+        WriteLog("USER32:  ChangeDisplaySettingsA lpDevMode->dmPelsHeight %d\n", lpDevMode->dmPelsHeight);
     }
 #endif
     return(DISP_CHANGE_SUCCESSFUL);
@@ -4344,7 +4365,7 @@ BOOL WIN32API DrawAnimatedRects(HWND hwnd,
  *****************************************************************************/
 
 BOOL WIN32API DrawCaption (HWND hwnd,
-			   HDC  hdc,
+                           HDC  hdc,
                            const RECT *lprc,
                            UINT wFlags)
 {
@@ -5143,7 +5164,7 @@ int WIN32API MessageBoxExW(HWND    hWnd,
                            UINT    uType,
                            WORD    wLanguageId)
 {
- 
+
   dprintf(("USER32:MessageBoxExW (%08xh,%x,%x,%u,%08w) not implemented.\n",
          hWnd,
          lpText,

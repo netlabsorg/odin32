@@ -1,4 +1,4 @@
-/* $Id: win32type.h,v 1.3 1999-05-31 22:08:08 phaller Exp $ */
+/* $Id: win32type.h,v 1.4 1999-06-02 16:00:38 cbratschi Exp $ */
 
 #ifndef __WIN32TYPE_H__
 #define __WIN32TYPE_H__
@@ -93,9 +93,9 @@
 #define HANDLE16 WORD
 #define HDRV16   WORD
 #define HINSTANCE16 WORD
-typedef double     LONGLONG;
+//typedef double     LONGLONG;
 typedef double     DWORDLONG;
-typedef LONGLONG  *PLONGLONG;
+//typedef LONGLONG  *PLONGLONG;
 typedef DWORDLONG *PDWORDLONG;
 #define BOOL	  int
 
