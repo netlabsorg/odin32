@@ -1,4 +1,4 @@
-/* $Id: symfile.cpp,v 1.1 2001-11-22 10:44:00 phaller Exp $ */
+/* $Id: symfile.cpp,v 1.2 2001-11-22 11:34:43 phaller Exp $ */
 /*
  * Project Odin Software License can be found in LICENSE.TXT
  * Execution Trace Profiler
@@ -16,8 +16,6 @@
    (SYM2IDA)
    => verify against kernel32\exceptionstack.cpp
    (KERNEL32.SYM is not interpreted correctly)
- - try to demangle C++ names
- - fix weird duplicate lookups of same symbol (i. e. SetBkColor)
  */
 
 
@@ -203,10 +201,11 @@ PSZ    LXSymbolFile::getFileName()
 }
 
 
-BOOL   LXSymbolFile::getSymbolName(ULONG objNr,
-                                   ULONG offset,
-                                   PSZ   pszNameBuffer,
-                                   ULONG ulNameBufferLength)
+BOOL   LXSymbolFile::getSymbolName(ULONG  objNr,
+                                   ULONG  offset,
+                                   PSZ    pszNameBuffer,
+                                   ULONG  ulNameBufferLength,
+                                   PULONG pulSymbolOffset)
 {
   PUCHAR    p = (PUCHAR)pSymbolRawData;
   ULONG     ulMapDefs;
@@ -263,7 +262,7 @@ BOOL   LXSymbolFile::getSymbolName(ULONG objNr,
               
               // find nearest symbol to the given offset
               if (iCurrent > 0)
-                if (iClosest < iCurrent)
+                if (iClosest > iCurrent)
                   pSymClosest = pSymDef32;
             }
             
@@ -277,6 +276,7 @@ BOOL   LXSymbolFile::getSymbolName(ULONG objNr,
               
               // terminate the string in any case
               pszNameBuffer[iLen] = 0;
+              *pulSymbolOffset = 0;
               
               // OK, found
               return TRUE;
@@ -292,7 +292,6 @@ BOOL   LXSymbolFile::getSymbolName(ULONG objNr,
         if (NULL != pSymClosest)
         {
           CHAR szBuf[128];
-          CHAR szBuf2[128];
           int  iLen;
           
           // proper symbol name found?
@@ -300,18 +299,18 @@ BOOL   LXSymbolFile::getSymbolName(ULONG objNr,
                (pSymClosest->cbSymName < 255) )
           {
             memcpy(szBuf, pSymClosest->achSymName, sizeof(szBuf));
-            szBuf[ sizeof(szBuf) ] = 0;
-            sprintf(szBuf2, "%s+%0xh", szBuf, offset - pSymClosest->wSymVal);
-            iLen = min(pSymClosest->cbSymName, ulNameBufferLength);
+            szBuf[ min(sizeof(szBuf), pSymClosest->cbSymName) ] = 0;
+            iLen = min(strlen(szBuf), ulNameBufferLength);
           }
           else
           {
-            sprintf(szBuf2, "%s:obj%d:%08xh", getName(), objNr, offset);
-            iLen = min(strlen(szBuf2), ulNameBufferLength);
+            sprintf(szBuf, "%s:obj%d:%08xh", getName(), objNr, offset);
+            iLen = min(strlen(szBuf), ulNameBufferLength);
           }
 
-          memcpy(pszNameBuffer, szBuf2, iLen);
+          memcpy(pszNameBuffer, szBuf, iLen);
           pszNameBuffer[iLen] = 0; // terminate the string in any case
+          *pulSymbolOffset = offset - pSymClosest->wSymVal;
           return TRUE;            // at least something usable has been found!
         }
         else
@@ -385,11 +384,12 @@ APIRET SymbolFilePool::searchModule(PSZ pszModule, PBYTE pBuffer, ULONG ulBuffer
 
 
   
-BOOL   SymbolFilePool::getSymbolName(PSZ   pszModule,
-                                     ULONG objNr,
-                                     ULONG offset,
-                                     PSZ   pszNameBuffer,
-                                     ULONG ulNameBufferLength)
+BOOL   SymbolFilePool::getSymbolName(PSZ    pszModule,
+                                     ULONG  objNr,
+                                     ULONG  offset,
+                                     PSZ    pszNameBuffer,
+                                     ULONG  ulNameBufferLength,
+                                     PULONG pulSymbolOffset)
 {
   LXSymbolFile* pSym = (LXSymbolFile*)pHashModules->getElement(pszModule);
   if (NULL == pSym)
@@ -420,7 +420,8 @@ BOOL   SymbolFilePool::getSymbolName(PSZ   pszModule,
     rc = pSym->getSymbolName(objNr,
                              offset,
                              pszNameBuffer,
-                             ulNameBufferLength);
+                             ulNameBufferLength,
+                             pulSymbolOffset);
     
     if (rc == TRUE)
     {
@@ -432,8 +433,20 @@ BOOL   SymbolFilePool::getSymbolName(PSZ   pszModule,
         strncpy(pszNameBuffer,
                 name->Text(),
                 ulNameBufferLength);
-      
         delete name;
+      }
+
+      // append symbol offsets
+      if (*pulSymbolOffset != 0)
+      {
+        CHAR szBuf[256];
+        sprintf(szBuf,
+                "%s+%xh",
+                pszNameBuffer,
+                *pulSymbolOffset);
+        strncpy(pszNameBuffer,
+                szBuf,
+                ulNameBufferLength);
       }
     }
   }

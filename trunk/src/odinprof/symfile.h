@@ -1,4 +1,4 @@
-/* $Id: symfile.h,v 1.1 2001-11-22 10:44:00 phaller Exp $ */
+/* $Id: symfile.h,v 1.2 2001-11-22 11:34:44 phaller Exp $ */
 /*
  * Project Odin Software License can be found in LICENSE.TXT
  * Execution Trace Profiler
@@ -134,10 +134,11 @@ class LXSymbolFile
     PSZ    getErrorMessage();
     PSZ    getFileName();
     PSZ    getName() { return pszName; }
-    BOOL   getSymbolName(ULONG objNr,
-                         ULONG offset,
-                         PSZ   pszNameBuffer,
-                         ULONG ulNameBufferLength);
+    BOOL   getSymbolName(ULONG  objNr,
+                         ULONG  offset,
+                         PSZ    pszNameBuffer,
+                         ULONG  ulNameBufferLength,
+                         PULONG pulSymbolOffset);
   
   protected:
     PSZ pszName;
@@ -156,11 +157,12 @@ class SymbolFilePool
     ~SymbolFilePool();
   
     APIRET searchModule(PSZ pszModule, PBYTE pBuffer, ULONG ulBufferLength);
-    BOOL   getSymbolName(PSZ   pszModule,
-                         ULONG objNr,
-                         ULONG offset,
-                         PSZ   pszNameBuffer,
-                         ULONG ulNameBufferLength);
+    BOOL   getSymbolName(PSZ    pszModule,
+                         ULONG  objNr,
+                         ULONG  offset,
+                         PSZ    pszNameBuffer,
+                         ULONG  ulNameBufferLength,
+                         PULONG pulSymbolOffset);
 
   protected:
     CHashtableLookup*  pHashModules;
