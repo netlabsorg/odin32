@@ -1,4 +1,4 @@
-/* $Id: heap.cpp,v 1.3 1999-05-31 23:13:12 phaller Exp $ */
+/* $Id: heap.cpp,v 1.4 1999-05-31 23:17:17 phaller Exp $ */
 
 /*
  *
@@ -95,6 +95,10 @@ BOOL WIN32API HeapDestroy(HANDLE hHeap)
 }
 //******************************************************************************
 //******************************************************************************
+/* PH: Though "HeapSize" is a reserved word for the linker, ILINK can be
+   tricked by placing the word HEAPSIZE in quotes. It then exports it properly
+   to the target DLL. 
+ */
 DWORD WIN32API HeapSize(HANDLE hHeap, DWORD arg2, PVOID  arg3)
 {
  OS2Heap *curheap = OS2Heap::find(hHeap);
