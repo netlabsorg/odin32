@@ -1,4 +1,4 @@
-/* $Id: dciman32.cpp,v 1.1 2000-10-23 11:24:38 sandervl Exp $ */
+/* $Id: dciman32.cpp,v 1.2 2001-05-29 20:25:27 sandervl Exp $ */
 /*
  * DCIMAN32 Stub code
  *
@@ -14,6 +14,7 @@
 #include <odinwrap.h>
 #include <misc.h>
 
+#include <dciman.h>
 
 //******************************************************************************
 //******************************************************************************
@@ -24,136 +25,141 @@ HDC WIN32API DCIOpenProvider()
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API DCICloseProvider(HDC hdc)
+void WIN32API DCICloseProvider(HDC hdc)
 {
     dprintf(("DCICloseProvide %x", hdc));
-    return DeleteDC(hdc);
+    DeleteDC(hdc);
 }
 //******************************************************************************
 //******************************************************************************
-DWORD WIN32API DCIEnum(DWORD arg1, DWORD arg2, DWORD arg3, DWORD arg4, DWORD arg5)
+int WINAPI DCIEnum(HDC hdc, LPRECT lprDst, LPRECT lprSrc, LPVOID lpFnCallback,
+                   LPVOID lpContext)
 {
-    dprintf(("DCIEnum %x %x %x %x %x NOT IMPLEMENTED", arg1, arg2, arg3, arg4, arg5));
-    return -4;
+    dprintf(("DCIEnum %x %x %x %x %x NOT IMPLEMENTED", hdc, lprDst, lprSrc, lpFnCallback, lpContext));
+    return DCI_FAIL_UNSUPPORTED;  //NT returns -4
 }
 //******************************************************************************
 //******************************************************************************
-DWORD WIN32API DCICreatePrimary(DWORD arg1, DWORD arg2)
+int WINAPI DCICreatePrimary(HDC hdc, LPDCISURFACEINFO *lplpSurface)
 {
-    dprintf(("DCICreatePrimary %x %x NOT IMPLEMENTED", arg1, arg2));
+    dprintf(("DCICreatePrimary %x %x NOT IMPLEMENTED", hdc, lplpSurface));
+    return DCI_FAIL_UNSUPPORTED;
+}
+//******************************************************************************
+//******************************************************************************
+int WINAPI DCICreateOffscreen(HDC hdc, DWORD dwCompression, DWORD dwRedMask,
+                              DWORD dwGreenMask, DWORD dwBlueMask, DWORD dwWidth, 
+                              DWORD dwHeight, DWORD dwDCICaps, DWORD dwBitCount, 
+                              LPDCIOFFSCREEN  *lplpSurface)
+{
+    dprintf(("DCICreateOffScreen %x %x %x %x %x %x %x %x %x %x NOT IMPLEMENTED", hdc, dwCompression, dwRedMask, dwGreenMask, dwBlueMask, dwWidth, dwHeight, dwDCICaps, dwBitCount, lplpSurface));
+    return DCI_FAIL_UNSUPPORTED;
+}
+//******************************************************************************
+//******************************************************************************
+int WINAPI DCICreateOverlay(HDC hdc, LPVOID lpOffscreenSurf, 
+                            LPDCIOVERLAY *lplpSurface)
+{
+    dprintf(("DCICreateOverlay %x %x %x NOT IMPLEMENTED", hdc, lpOffscreenSurf, lplpSurface));
+    return DCI_FAIL_UNSUPPORTED;
+}
+//******************************************************************************
+//******************************************************************************
+DCIRVAL WINAPI DCIBeginAccess(LPDCISURFACEINFO pdci, int x, int y, int dx, int dy)
+{
+    dprintf(("DCIBeginAccess %x %x %x %x %x NOT IMPLEMENTED", pdci, x, y, dx, dy));
+    return DCI_FAIL_UNSUPPORTED;
+}
+//******************************************************************************
+//******************************************************************************
+void WINAPI DCIEndAccess(LPDCISURFACEINFO pdci)
+{
+    dprintf(("DCIEndAccess %x NOT IMPLEMENTED", pdci));
+    return;
+}
+//******************************************************************************
+//******************************************************************************
+void WINAPI DCIDestroy(LPDCISURFACEINFO pdci)
+{
+    dprintf(("DCIDestroy %x NOT IMPLEMENTED", pdci));
+    return;
+}
+//******************************************************************************
+//******************************************************************************
+DCIRVAL WINAPI DCIDraw(LPDCIOFFSCREEN pdci)
+{
+    dprintf(("DCIDraw %x NOT IMPLEMENTED", pdci));
+    return DCI_FAIL_UNSUPPORTED;
+}
+//******************************************************************************
+//******************************************************************************
+DCIRVAL WINAPI DCISetClipList(LPDCIOFFSCREEN pdci, LPRGNDATA prd)
+{
+    dprintf(("DCISetClipList %x %x NOT IMPLEMENTED", pdci, prd));
+    return DCI_FAIL_UNSUPPORTED;
+}
+//******************************************************************************
+//******************************************************************************
+DCIRVAL WINAPI DCISetDestination(LPDCIOFFSCREEN pdci, LPRECT dst, LPRECT src)
+{
+    dprintf(("DCISetDestination %x %x %x NOT IMPLEMENTED", pdci, dst, src));
+    return DCI_FAIL_UNSUPPORTED;
+}
+//******************************************************************************
+//******************************************************************************
+DCIRVAL WINAPI DCISetSrcDestClip(LPDCIOFFSCREEN pdci, LPRECT srcrc, LPRECT destrc, LPRGNDATA prd )
+{
+    dprintf(("DCISetSrcDestClip %x %x %x %x NOT IMPLEMENTED", pdci, srcrc, destrc, prd));
+    return DCI_FAIL_UNSUPPORTED;
+}
+//******************************************************************************
+//******************************************************************************
+HWINWATCH WINAPI WinWatchOpen(HWND hwnd)
+{
+    dprintf(("WinWatchOpen %x NOT IMPLEMENTED", hwnd));
     return 0;
 }
 //******************************************************************************
 //******************************************************************************
-DWORD WIN32API DCICreateOffscreen(DWORD arg1, DWORD arg2, DWORD arg3, DWORD arg4, DWORD arg5,
-                                  DWORD arg6, DWORD arg7, DWORD arg8, DWORD arg9, DWORD arg10)
+void WINAPI WinWatchClose(HWINWATCH hWW)
 {
-    dprintf(("DCICreateOffScreen %x %x %x %x %x %x %x %x %x %x NOT IMPLEMENTED", arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10));
-    return -4;
+    dprintf(("WinWatchClose %x NOT IMPLEMENTED", hWW));
+    return;
 }
 //******************************************************************************
 //******************************************************************************
-DWORD WIN32API DCICreateOverlay(DWORD arg1, DWORD arg2, DWORD arg3)
+UINT WINAPI WinWatchGetClipList(HWINWATCH hWW, LPRECT prc, UINT size,  LPRGNDATA prd)
 {
-    dprintf(("DCICreateOverlay %x %x %x NOT IMPLEMENTED", arg1, arg2, arg3));
-    return -4;
-}
-//******************************************************************************
-//******************************************************************************
-DWORD WIN32API DCIBeginAccess(DWORD arg1, DWORD arg2, DWORD arg3, DWORD arg4, DWORD arg5)
-{
-    dprintf(("DCIBeginAccess %x %x %x %x %x NOT IMPLEMENTED", arg1, arg2, arg3, arg4, arg5));
+    dprintf(("WinWatchGetClipList %x %x %x %xNOT IMPLEMENTED", hWW, prc, size, prd));
     return 0;
 }
 //******************************************************************************
 //******************************************************************************
-DWORD WIN32API DCIEndAccess(DWORD arg1)
+BOOL WINAPI WinWatchDidStatusChange(HWINWATCH hWW)
 {
-    dprintf(("DCIEndAccess %x NOT IMPLEMENTED", arg1));
+    dprintf(("WinWatchDidStatusChange %x NOT IMPLEMENTED", hWW));
     return 0;
 }
 //******************************************************************************
 //******************************************************************************
-DWORD WIN32API DCIDestroy(DWORD arg1)
+BOOL WINAPI WinWatchNotify(HWINWATCH hWW, WINWATCHNOTIFYPROC NotifyCallback,
+                           LPARAM NotifyParam )
 {
-    dprintf(("DCIDestroy %x NOT IMPLEMENTED", arg1));
+    dprintf(("WinWatchNotify %x NOT IMPLEMENTED", hWW, NotifyCallback, NotifyParam));
     return 0;
 }
 //******************************************************************************
 //******************************************************************************
-DWORD WIN32API DCIDraw(DWORD arg1)
+DWORD WINAPI GetWindowRegionData(HWND hwnd, DWORD size, LPRGNDATA prd)
 {
-    dprintf(("DCIDraw %x NOT IMPLEMENTED", arg1));
-    return -4;
-}
-//******************************************************************************
-//******************************************************************************
-DWORD WIN32API DCISetClipList(DWORD arg1, DWORD arg2)
-{
-    dprintf(("DCISetClipList %x %x NOT IMPLEMENTED", arg1, arg2));
-    return -4;
-}
-//******************************************************************************
-//******************************************************************************
-DWORD WIN32API DCISetDestination(DWORD arg1, DWORD arg2, DWORD arg3)
-{
-    dprintf(("DCISetDestination %x %x %x NOT IMPLEMENTED", arg1, arg2, arg3));
-    return -4;
-}
-//******************************************************************************
-//******************************************************************************
-DWORD WIN32API DCISetSrcDestClip(DWORD arg1, DWORD arg2, DWORD arg3, DWORD arg4)
-{
-    dprintf(("DCISetSrcDestClip %x %x %x %x NOT IMPLEMENTED", arg1, arg2, arg3, arg4));
-    return -4;
-}
-//******************************************************************************
-//******************************************************************************
-DWORD WIN32API WinWatchOpen(DWORD arg1)
-{
-    dprintf(("WinWatchOpen %x NOT IMPLEMENTED", arg1));
+    dprintf(("GetWindowRegionData %x %x %x NOT IMPLEMENTED", hwnd, size, prd));
     return 0;
 }
 //******************************************************************************
 //******************************************************************************
-DWORD WIN32API WinWatchClose(DWORD arg1)
+DWORD WINAPI GetDCRegionData(HDC hdc, DWORD size, LPRGNDATA prd)
 {
-    dprintf(("WinWatchClose %x NOT IMPLEMENTED", arg1));
-    return 0;
-}
-//******************************************************************************
-//******************************************************************************
-DWORD WIN32API WinWatchGetClipList(DWORD arg1, DWORD arg2, DWORD arg3, DWORD arg4)
-{
-    dprintf(("WinWatchGetClipList %x %x %x %xNOT IMPLEMENTED", arg1, arg2, arg3, arg4));
-    return 0;
-}
-//******************************************************************************
-//******************************************************************************
-DWORD WIN32API WinWatchDidStatusChange(DWORD arg1)
-{
-    dprintf(("WinWatchDidStatusChange %x NOT IMPLEMENTED", arg1));
-    return 0;
-}
-//******************************************************************************
-//******************************************************************************
-DWORD WIN32API WinWatchNotify(DWORD arg1, DWORD arg2, DWORD arg3)
-{
-    dprintf(("WinWatchNotify %x NOT IMPLEMENTED", arg1));
-    return 0;
-}
-//******************************************************************************
-//******************************************************************************
-DWORD WIN32API GetWindowRegionData(DWORD arg1, DWORD arg2, DWORD arg3)
-{
-    dprintf(("GetWindowRegionData %x %x %x NOT IMPLEMENTED", arg1, arg2, arg3));
-    return 0;
-}
-//******************************************************************************
-//******************************************************************************
-DWORD WIN32API GetDCRegionData(DWORD arg1, DWORD arg2, DWORD arg3)
-{
-    dprintf(("GetDCRegionData %x %x %x NOT IMPLEMENTED", arg1, arg2, arg3));
+    dprintf(("GetDCRegionData %x %x %x NOT IMPLEMENTED", hdc, size, prd));
     return 0;
 }
 //******************************************************************************
