@@ -1,4 +1,4 @@
-/* $Id: OS2DDRAW.H,v 1.1 2000-04-07 18:21:04 mike Exp $ */
+/* $Id: OS2DDRAW.H,v 1.2 2001-03-09 22:48:48 mike Exp $ */
 
 /*
  * DX Draw base class definition
@@ -18,13 +18,15 @@
 #undef APIENTRY
 #define APIENTRY _System
 #include "divewrap.h"
-//#define DEBUG 1
 #define mmioFOURCC( ch0, ch1, ch2, ch3 )                         \
                   ( (DWORD)(BYTE)(ch0) | ( (DWORD)(BYTE)(ch1) << 8 ) |    \
                   ( (DWORD)(BYTE)(ch2) << 16 ) | ( (DWORD)(BYTE)(ch3) << 24 ) )
 #include <fourcc.h>
 #undef THIS
 #define THIS VOID*
+
+#define MAX_FOURCC_CODES        3
+
 class OS2IDirectDraw
 {
   public:
@@ -39,7 +41,13 @@ class OS2IDirectDraw
                                        // Height (236),  Bits (241)
                                        // ToDO :
                                        // debug into DirectDrawCreate and se what MS is doing !
-    IDirectDraw2Vtbl  Vtbl;
+    //Use for Direct3D interface (This != this)
+    IDirect3DVtbl    *lpVtbl3D;
+    IDirect3DVtbl    *lpVtbl3D2;
+    DWORD            *pdwUnknownData3D;
+
+    IDirectDrawVtbl  Vtbl;
+    IDirectDraw2Vtbl  Vtbl2;
     // MS did it again with direct/X 6 they changed the behavior of the directdraw component
     // So we now need 2 Virt. Tables one for the old and one for the new so we return the
     // right interface if one creates a DX6 directdraw object but wants a DX2,3,5 interface
@@ -80,11 +88,12 @@ class OS2IDirectDraw
     HWND    hwndClient;
     DWORD   dwCoopMode;
     int     screenwidth, screenheight, screenbpp;
-    int     oldwidth, oldheight, oldbpp, oldscanlines;
     BOOL    PrimaryExists;
+    BOOL    bScale;
+    int     oldwidth, oldheight, oldbpp, oldscanlines;
     BOOL    bPMILoaded;
     BOOL    bInFullScreen;
-    BOOL    bScale;
+
 
    // Linked list management
               OS2IDirectDraw* next;                   // Next OS2IDirectDraw
@@ -140,6 +149,9 @@ class OS2IDirectDraw
 
 };
 
+#define OFFSET_D3DVTABLE        (LONG)(&((OS2IDirectDraw *)NULL)->lpVtbl3D)
+#define DDraw3D_GetThisPtr(a)   (OS2IDirectDraw *)((ULONG)a-OFFSET_D3DVTABLE)
+
 //******************************************************************************
 HRESULT __stdcall DrawQueryInterface(THIS, REFIID riid, LPVOID  * ppvObj);
 ULONG   __stdcall DrawAddRef(THIS);
@@ -192,5 +204,8 @@ HRESULT __stdcall D3DCreateLight(THIS, LPDIRECT3DLIGHT*, IUnknown*);
 HRESULT __stdcall D3DCreateMaterial(THIS, LPDIRECT3DMATERIAL*, IUnknown*);
 HRESULT __stdcall D3DCreateViewport(THIS, LPDIRECT3DVIEWPORT*, IUnknown*);
 HRESULT __stdcall D3DFindDevice(THIS, LPD3DFINDDEVICESEARCH, LPD3DFINDDEVICERESULT);
+
+#define FOURCC_YUY2  mmioFOURCC( 'Y', 'U', 'Y', '2' )
+#define FOURCC_UYVY  mmioFOURCC( 'U', 'Y', 'V', 'Y' )
 
 #endif

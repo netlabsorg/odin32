@@ -1,4 +1,4 @@
-/* $Id: OS2SURFACE.CPP,v 1.27 2000-09-02 08:27:05 sandervl Exp $ */
+/* $Id: OS2SURFACE.CPP,v 1.28 2001-03-09 22:48:47 mike Exp $ */
 
 /*
  * DirectDraw Surface class implementaion
@@ -559,11 +559,8 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
                  pDBreal(NULL),pFBreal(NULL)
 
 {
-  ULONG rc;
-  DWORD i;
-  DIVE_CAPS dCaps;
+  DWORD rc;
   DDSURFACEDESC2 ComplexSurfaceDesc;
-  OS2IDirectDrawSurface *AttachedSurface;
   OS2IDirectDrawSurface *MipMapSurface;
 
   lpVtbl                     = &Vtbl2;
@@ -1401,7 +1398,7 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
 HRESULT OS2IDirectDrawSurface::DoColorFill(LPRECT lpDestRect,DWORD dwFillColor)
 {
 
-  int i, FillWidth, FillHeight, Top, Left;
+  int  FillWidth, FillHeight, Top, Left;
   DWORD *pPal24;
   WORD  *pPal16;
   dprintf(("DDRAW: ColorFill with %08X\n", dwFillColor));
@@ -1665,8 +1662,6 @@ INT CALLBACK ReleaseSurfaces(LPVOID lpItem, DWORD dwRes)
 
 OS2IDirectDrawSurface::~OS2IDirectDrawSurface()
 {
-  OS2IDirectDrawSurface  *AttachedSurface;
-
 
   if(DDSurfaceDesc.ddsCaps.dwCaps & DDSCAPS_PRIMARYSURFACE)
   {
@@ -1743,8 +1738,8 @@ OS2IDirectDrawSurface::~OS2IDirectDrawSurface()
   }
 
   lpDraw->Vtbl.Release(lpDraw);
-
 }
+
 //******************************************************************************
 //******************************************************************************
 inline  void OS2IDirectDrawSurface::SetFrontBuffer( OS2IDirectDrawSurface* NewFBuffer)
@@ -2124,11 +2119,7 @@ HRESULT WIN32API SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lpD
  OS2IDirectDrawSurface *dest = (OS2IDirectDrawSurface *)This;
  OS2IDirectDrawSurface *src  = (OS2IDirectDrawSurface *)lpDDSrcSurface;
 
- HRESULT                rc;
- ULONG                  ulColor, *pColor;
- RECTL                  cliprect;
-
- int                    x, y, i, j, BlitWidth, BlitHeight;
+ int                    x, i, BlitWidth, BlitHeight;
  PALETTEENTRY           SysPal[257];
  PLOGPALETTE            pLogPal = (PLOGPALETTE) SysPal;
  char                   *pBltPos, *pSrcPos;
@@ -2434,7 +2425,7 @@ HRESULT WIN32API SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lpD
   {
     dprintf(("DDRAW: Blitting with scaling\n Not supported.\n"));
 
-    return DDERR_NOSTRETCHHW;
+//    return DDERR_NOSTRETCHHW;
   }
 
   if( ( pIRectDest->width()  != pIRectSrc->width() ) ||
@@ -2677,7 +2668,6 @@ HRESULT WIN32API SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lpD
         if(dwFlags & DDBLT_DDFX)
         {
           DWORD dwFx;
-          DWORD dwSrcColor, dwDestColor;
 
           dwFlags &= ~DDBLT_DDFX; // remove the handled flag
 
@@ -3194,20 +3184,20 @@ HRESULT WIN32API SurfBltFast4( THIS This,
   OS2IDirectDrawSurface *src  = (OS2IDirectDrawSurface *)lpDDSrcSurface;
   RECTL SrcRect;
   char *pBltPos, *pSrcPos;
-  DWORD dwDestColor, dwSrcColor, BlitWidth, BlitHeight,x,y;
+  DWORD dwDestColor, dwSrcColor, BlitWidth, BlitHeight, x;
 
   dprintf(("DDRAW: SurfBltFast4 %08X at(%d/%d) onto %08X with flags %08X\n",src, dwX,dwY, dest, dwTrans));
 
-  if( (NULL==lpDDSrcSurface) ||
-      (dwX<0) || (dwY<0) ||
-      (dwX>dest->width) ||
-      (dwY>dest->height))
+  if( (NULL == lpDDSrcSurface) ||
+      ((LONG)dwX < 0) || ((LONG)dwY < 0) ||
+      (dwX > dest->width) ||
+      (dwY > dest->height))
   {
     dprintf(("DDRAW: Invalid Parameters %08X, %d %d", lpDDSrcSurface ,dest->width , dest->height));
     return DDERR_INVALIDPARAMS;
   }
 
-  if (NULL!=lpSrcRect)
+  if (NULL != lpSrcRect)
   {
     memcpy(&SrcRect,lpSrcRect,sizeof(RECTL) );
   }
@@ -3367,15 +3357,15 @@ HRESULT WIN32API SurfBltFast4( THIS This,
         switch(dest->dwBytesPPDive)
         {
           case 1:
-            if(CPUHasMMX())
-              while(BlitHeight--)
+            if (CPUHasMMX())
+              while (BlitHeight--)
               {
                 BlitColorKey8MMX((PBYTE)pBltPos,(PBYTE)pSrcPos,dwSrcColor,BlitWidth);
                 pBltPos += dest->dwPitchDB;
                 pSrcPos += src->dwPitchDB;
               }
             else
-              while(BlitHeight--)
+              while (BlitHeight--)
               {
                 BlitColorKey8((PBYTE)pBltPos,(PBYTE)pSrcPos,dwSrcColor,BlitWidth);
                 pBltPos += dest->dwPitchDB;
@@ -3384,7 +3374,7 @@ HRESULT WIN32API SurfBltFast4( THIS This,
             break;
           case 2:
 
-            if(CPUHasMMX())
+            if (CPUHasMMX())
               while(BlitHeight--)
               {
                 BlitColorKey16MMX((PBYTE)pBltPos,(PBYTE)pSrcPos,dwSrcColor,BlitWidth);
@@ -3432,7 +3422,7 @@ HRESULT WIN32API SurfBltFast4( THIS This,
     }
     else
     {
-      if(dwTrans & DDBLTFAST_DESTCOLORKEY)
+      if (dwTrans & DDBLTFAST_DESTCOLORKEY)
       {
         dprintf(("DDRAW: DestColorKey\n"));
 
@@ -3522,7 +3512,7 @@ HRESULT WIN32API SurfBltFast4( THIS This,
   // if(dest->lpVtbl == dest->Vtbl4)
   //   dest->Vtbl4->ChangeUniquenessValue(dest);
 
-  return(DD_OK);
+  return DD_OK;
 }
 //******************************************************************************
 //******************************************************************************
@@ -3800,7 +3790,6 @@ HRESULT WIN32API SurfFlip4(THIS This, LPDIRECTDRAWSURFACE4 lpDDSurf, DWORD dwFla
   OS2IDirectDrawSurface *FlipCursor;
   LPVOID Data;
   char *pcrFB,*pcFB,*pcrDB,*pcDB;
-  ULONG rc;
 
   dprintf(("DDRAW: SurfFlip4\n"));
 
@@ -3848,7 +3837,7 @@ HRESULT WIN32API SurfFlip4(THIS This, LPDIRECTDRAWSURFACE4 lpDDSurf, DWORD dwFla
     return(DDERR_SURFACEBUSY);
   }
 
-  if(-1 != me->diveBufNr)
+  if (-1 != me->diveBufNr)
   {
     //dprintf(("DDRAW: DIVE Flipchain DiveBuffer #%d",FlipSurface->diveBufNr));
 
@@ -3899,9 +3888,9 @@ HRESULT WIN32API SurfFlip4(THIS This, LPDIRECTDRAWSURFACE4 lpDDSurf, DWORD dwFla
     me->pDBreal                 = FlipSurface->pDBreal;
     me->pDiveBuffer             = FlipSurface->pDiveBuffer;
 
-    if(NULL==lpDDSurf)
+    if (NULL==lpDDSurf)
     {
-      while(NULL!=FlipSurface->BackBuffer)
+      while (NULL!=FlipSurface->BackBuffer)
       {
         FlipSurface->DDSurfaceDesc.lpSurface = FlipSurface->BackBuffer->DDSurfaceDesc.lpSurface;
         FlipSurface->pFBreal                 = FlipSurface->BackBuffer->pFBreal;
@@ -3918,8 +3907,9 @@ HRESULT WIN32API SurfFlip4(THIS This, LPDIRECTDRAWSURFACE4 lpDDSurf, DWORD dwFla
     FlipSurface->pDiveBuffer             = pcDB;
   }
 
-  return(DD_OK);
+  return DD_OK;
 }
+
 //******************************************************************************
 //******************************************************************************
 HRESULT WIN32API SurfGetAttachedSurface(THIS This, LPDDSCAPS lpDDCaps,
@@ -4170,13 +4160,13 @@ HRESULT WIN32API SurfGetDC(THIS This, HDC FAR *hdc)
     BitmapInfo.bmiHead.biWidth    = LockedSurfaceDesc.dwWidth;
     BitmapInfo.bmiHead.biHeight   = LockedSurfaceDesc.dwHeight;
     BitmapInfo.bmiHead.biPlanes   = 1;
-    BitmapInfo.bmiHead.biBitCount = LockedSurfaceDesc.ddpfPixelFormat.dwRGBBitCount;
+    BitmapInfo.bmiHead.biBitCount = (WORD)LockedSurfaceDesc.ddpfPixelFormat.dwRGBBitCount;
     memset(&bmihHdr, 0, sizeof(bmihHdr));
     bmihHdr.biSize     = sizeof(BITMAPINFOHEADER);
     bmihHdr.biWidth    = LockedSurfaceDesc.dwWidth;
     bmihHdr.biHeight   = LockedSurfaceDesc.dwHeight;
     bmihHdr.biPlanes   = 1;
-    bmihHdr.biBitCount = LockedSurfaceDesc.ddpfPixelFormat.dwRGBBitCount;
+    bmihHdr.biBitCount = (WORD)LockedSurfaceDesc.ddpfPixelFormat.dwRGBBitCount;
     #else
     bmpSurface.bmType       = 0;
     bmpSurface.bmWidth      = LockedSurfaceDesc.dwWidth;
@@ -4266,7 +4256,7 @@ HRESULT WIN32API SurfGetDC(THIS This, HDC FAR *hdc)
       BitmapInfo.bmiHead.biWidth    = LockedSurfaceDesc.dwWidth;
       BitmapInfo.bmiHead.biHeight   = LockedSurfaceDesc.dwHeight;
       BitmapInfo.bmiHead.biPlanes   = 1;
-      BitmapInfo.bmiHead.biBitCount = LockedSurfaceDesc.ddpfPixelFormat.dwRGBBitCount;
+      BitmapInfo.bmiHead.biBitCount = (WORD)LockedSurfaceDesc.ddpfPixelFormat.dwRGBBitCount;
 
       switch(LockedSurfaceDesc.ddpfPixelFormat.dwRGBBitCount)
       {
@@ -4503,10 +4493,7 @@ HRESULT WIN32API SurfLock4( THIS This,
   int i;
 
   BOOL Found;
-  ULONG  nrScanLines;
-  char *pBuffer;
   DDRectangle *pIRectCurrent,*pIRectNew;
-  static int times = 0;
   HRESULT rc;
 
   dprintf( ("SurfLock4 %08X %08X %08X %d %d\n",
@@ -4618,9 +4605,8 @@ HRESULT WIN32API SurfReleaseDC(THIS This, HDC hdc)
    BITMAPINFOHEADER  bmiHead;
    RGBQUAD           bmiCols[256];
  } BitmapInfo;
- BITMAP bmpData;
- char szError[256];
- int i,rc;
+// BITMAP bmpData;
+ int rc;
 
   dprintf(("DDRAW: SurfReleaseDC\n"));
 
@@ -5777,8 +5763,7 @@ void __cdecl TransSRCBlit8(LPDDSURFACEDESC2 pDestDesc, LPDDSURFACEDESC2 pSrcDesc
   DWORD dwTLineLen;      // # of DWORDS in each tBuffer line
   DWORD dwTLineStart;     // # DWORD in which the first transinfo is
   DWORD dwTDWStart;       // byte in which the firs transinfo is
-  DWORD dwTrans;          // current transparentvalue
-  DWORD BlitWidth;
+
   dwTLineLen = 1 + ((pSrcDesc->dwWidth + 31) & ~31);
   pdwTLine = (DWORD*)pAlpha + (dwTLineLen* lpSrcRect->top);
   dwTLineStart = 1+(lpSrcRect->left/32);

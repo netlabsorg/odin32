@@ -1,4 +1,4 @@
-/* $Id: ddraw.CPP,v 1.15 2000-08-31 21:03:14 sandervl Exp $ */
+/* $Id: ddraw.CPP,v 1.16 2001-03-09 22:48:47 mike Exp $ */
 
 /*
  * DXDraw DLL implementaion
@@ -15,7 +15,7 @@
 
 #include <memory.h>
 #include <stdio.h>
-#include <builtin.h>
+
 #define INITGUID
 #define ICOM_CINTERFACE 1
 #define CINTERFACE
@@ -27,6 +27,8 @@
 #define FAR
 
 #include <misc.h>
+
+extern "C" {
 
 //******************************************************************************
 //******************************************************************************
@@ -70,7 +72,7 @@ HRESULT WIN32API DirectDrawCreateEx(LPGUID lpGUID, LPVOID* lplpDD, REFIID iid, L
 }
 
 //******************************************************************************
-typedef BOOL (FAR PASCAL * LPDDENUMCALLBACKA)(GUID FAR *, LPSTR, LPSTR, LPVOID);
+//typedef BOOL (FAR PASCAL * LPDDENUMCALLBACKA)(GUID FAR *, LPSTR, LPSTR, LPVOID);
 //******************************************************************************
 HRESULT WIN32API OS2DirectDrawEnumerateA(LPDDENUMCALLBACKA lpCallback,
                LPVOID lpContext)
@@ -283,4 +285,4 @@ HRESULT WINAPI DllCanUnloadNow(void)
   dprintf(("DllCanUnloadNow(void) stub\n"));
   return S_FALSE;
 }//******************************************************************************
-
+}

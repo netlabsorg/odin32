@@ -1,4 +1,4 @@
-/* $Id: OS2PALETTE.CPP,v 1.12 1999-12-21 01:28:16 hugh Exp $ */
+/* $Id: OS2PALETTE.CPP,v 1.13 2001-03-09 22:48:46 mike Exp $ */
 
 /*
  * DX palette class implementation
@@ -90,9 +90,7 @@ OS2IDirectDrawPalette::~OS2IDirectDrawPalette()
 //******************************************************************************
 HRESULT __stdcall PalQueryInterface(THIS This, REFIID riid, LPVOID FAR * ppvObj)
 {
-  #ifdef DEBUG
-    dprintf(("DDRAW: OS2IDirectDrawPalette::PalQueryInterface\n"));
-  #endif
+  dprintf(("DDRAW: OS2IDirectDrawPalette::PalQueryInterface\n"));
 
   *ppvObj = NULL;
 
@@ -111,9 +109,7 @@ ULONG __stdcall PalAddRef(THIS This)
 {
   OS2IDirectDrawPalette *me = (OS2IDirectDrawPalette *)This;
 
-  #ifdef DEBUG
-    dprintf(("DDRAW: OS2IDirectDrawPalette::PalAddRef %d\n", me->Referenced+1));
-  #endif
+  dprintf(("DDRAW: OS2IDirectDrawPalette::PalAddRef %d\n", me->Referenced+1));
 
   return (++me->Referenced);
 }
@@ -170,11 +166,10 @@ HRESULT __stdcall PalGetEntries(THIS This, DWORD dwFlags,
 {
  OS2IDirectDrawPalette *me = (OS2IDirectDrawPalette *)This;
 
-  #ifdef DEBUG
-    dprintf(("DDRAW: OS2IDirectDrawPalette::PalGetEntries\n"));
-  #endif
+  dprintf(("DDRAW: OS2IDirectDrawPalette::PalGetEntries\n"));
 
-  if( (NULL== lpEntries) ||(0!=dwFlags) ||(dwBase<0) ||((dwBase + dwNumEntries)>me->dwSize) )
+  if ((NULL == lpEntries) || (0 != dwFlags) || (dwBase > 65536)
+      || ((dwBase + dwNumEntries) > me->dwSize))
     return(DDERR_INVALIDPARAMS);
 
   memcpy( (char *)lpEntries,
@@ -187,9 +182,7 @@ HRESULT __stdcall PalGetEntries(THIS This, DWORD dwFlags,
 //******************************************************************************
 HRESULT __stdcall PalInitialize(THIS, LPDIRECTDRAW, DWORD, LPPALETTEENTRY)
 {
-  #ifdef DEBUG
-    dprintf(("DDRAW: OS2IDirectDrawPalette::PalInitialize\n"));
-  #endif
+  dprintf(("DDRAW: OS2IDirectDrawPalette::PalInitialize\n"));
   return(DDERR_ALREADYINITIALIZED);
 }
 //******************************************************************************
@@ -201,10 +194,10 @@ HRESULT __stdcall PalSetEntries(THIS This, DWORD dwFlags,
 {
  OS2IDirectDrawPalette *me = (OS2IDirectDrawPalette *)This;
 
-  #ifdef DEBUG
-    dprintf(("DDRAW: OS2IDirectDrawPalette::PalSetEntries\n"));
-  #endif
-  if( (NULL== lpNewEntries) ||(0!=dwFlags) ||(dwBase<0) ||((dwBase + dwNumEntries)>me->dwSize) )
+  dprintf(("DDRAW: OS2IDirectDrawPalette::PalSetEntries\n"));
+
+  if ((NULL== lpNewEntries) || (0 != dwFlags) || (dwBase > 65536)
+      || ((dwBase + dwNumEntries) > me->dwSize))
     return(DDERR_INVALIDPARAMS);
 
   memcpy((char *)(me->os2pal + dwBase),
