@@ -1,11 +1,11 @@
-/* $Id: rmalloc.c,v 1.2 2000-01-23 03:20:53 bird Exp $
+/* $Id: rmalloc.c,v 1.3 2000-01-24 01:45:20 bird Exp $
  *
  * Resident Heap.
  *
  * Note: This heap does very little checking on input.
  *       Use with care! We're running at Ring-0!
  *
- * Copyright (c) 1999 knut st. osmundsen
+ * Copyright (c) 1999-2000 knut st. osmundsen
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -433,7 +433,7 @@ static PMEMBLOCK resFindUsedBlock(PHEAPANCHOR *ppha, void *pvUser, int fWithin)
  * @param     cbSizeInit  The initial size of the heap in bytes.
  * @param     cbSizeMax   Maximum heapsize in bytes.
  */
-int ResHeapInit(unsigned cbSizeInit, unsigned cbSizeMax)
+int resHeapInit(unsigned cbSizeInit, unsigned cbSizeMax)
 {
     unsigned cbSize = MAX(BLOCKSIZE, cbSizeInit);
 
