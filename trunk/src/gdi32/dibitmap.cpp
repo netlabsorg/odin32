@@ -1,4 +1,4 @@
-/* $Id: dibitmap.cpp,v 1.22 2001-06-11 15:57:15 sandervl Exp $ */
+/* $Id: dibitmap.cpp,v 1.23 2001-06-13 10:29:05 sandervl Exp $ */
 
 /*
  * GDI32 dib & bitmap code
@@ -212,7 +212,7 @@ HBITMAP WIN32API CreateDIBSection( HDC hdc, BITMAPINFO *pbmi, UINT iUsage,
             pbmi->bmiHeader.biWidth = iWidth;
             pbmi->bmiHeader.biHeight = iHeight;
 
-            if(fCreateDC) ReleaseDC(GetDesktopWindow(), hdc);
+            if(fCreateDC) DeleteDC(hdc);
             return(res);
         }
     }
