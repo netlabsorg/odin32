@@ -1,4 +1,9 @@
- /* $Id: ChangeLog,v 1.191 1999-09-09 21:04:36 phaller Exp $ */
+ /* $Id: ChangeLog,v 1.192 1999-09-12 00:34:58 bird Exp $ */
+
+ 99-09-12: knut st. osmundsen <knut.stange.osmundsen@pmsc.no>
+    - WIN32K: An untested version is checked in. The new skeleton is
+    partially tested. PE2LX is not updated and will probably not be updated
+    before pe2lx is rewritten.
 
  99-09-09: Daniela Engert <dani@ngrt.de>
 	- USER32\NEW: begin new DC/related code. BeginPaint/EndPaint done.
