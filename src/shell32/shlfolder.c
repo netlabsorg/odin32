@@ -869,9 +869,9 @@ static ODINFUNCTION4(HRESULT, IShellFolder_fnCompareIDs,
 	LPCITEMIDLIST  pidlTemp;
 	PIDLTYPE pt1, pt2;
 
-	TRACE("(%p)->(0x%08lx,pidl1=%p,pidl2=%p)\n",This,lParam,pidl1,pidl2);
-	pdump (pidl1);
-	pdump (pidl2);
+//	TRACE("(%p)->(0x%08lx,pidl1=%p,pidl2=%p)\n",This,lParam,pidl1,pidl2);
+//	pdump (pidl1);
+//	pdump (pidl2);
 	
 	if (!pidl1 && !pidl2)
 	{
