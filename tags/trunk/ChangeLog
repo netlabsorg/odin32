@@ -1,4 +1,12 @@
-/* $Id: ChangeLog,v 1.1569 2001-07-07 05:03:16 bird Exp $ */
+/* $Id: ChangeLog,v 1.1570 2001-07-07 10:45:54 achimha Exp $ */
+
+ 2001-07-07: Achim Hasenmueller <achimha@innotek.de>
+    - WS2_32:   o import WSAEventSelect from WSOCK32 (although a
+                  Winsock 2.0 API, it makes more sense to be implemented
+                  in the Winsock 1.1 stack)
+    - WSOCK32:  o enhanced WSAAsyncSelect processing to allow both
+                  window handle and event semaphore notification
+                o implemented WSAEventSelect
 
  2001-07-03: knut st. osmundsen <kosmunds@csc.com>:
     - URLMON:   o Stubbed HlinkSimpleNavigateToString and RegisterBindStatusCallback
