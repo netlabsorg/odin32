@@ -218,16 +218,4 @@ extern BOOL ICONTITLE_Init( void );
 extern void FOCUS_SwitchFocus( MESSAGEQUEUE *pMsgQ, HWND , HWND );
 
 
-/* Built-in class descriptor */
-struct builtin_class_descr
-{
-    LPCSTR  name;    /* class name */
-    UINT    style;   /* class style */
-    WNDPROC procA;   /* ASCII window procedure */
-    WNDPROC procW;   /* Unicode window procedure */
-    INT     extra;   /* window extra bytes */
-    LPCSTR  cursor;  /* cursor name */
-    HBRUSH  brush;   /* brush or system color */
-};
-
 #endif  /* __WINE_WIN_H */
