@@ -1,4 +1,4 @@
-/* $Id: glthread.c,v 1.1 2000-05-23 20:40:36 jeroen Exp $ */
+/* $Id: glthread.c,v 1.2 2000-09-22 20:49:20 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -62,6 +62,16 @@
  */
 #define INIT_MAGIC 0xff8adc98
 
+#ifdef __WIN32OS2__
+#include <odinwrap.h>
+inline void ** __threadstore()
+{
+  USHORT sel=RestoreOS2FS();
+  void **p=_threadstore();
+  SetFS(sel);
+  return p;
+}
+#endif
 
 
 /*
@@ -247,14 +257,14 @@ _glthread_SetTSD(_glthread_TSD *tsd, void *ptr)
 unsigned long
 _glthread_GetID(void)
 {
-   return (unsigned long) _threadstore();
+   return (unsigned long) __threadstore();
 }
 
 
 void
 _glthread_InitTSD(_glthread_TSD *tsd)
 {
-   tsd->key = (ULONG) (_threadstore());
+   tsd->key = (ULONG) (__threadstore());
    tsd->initMagic = INIT_MAGIC;
 }
 
@@ -265,7 +275,7 @@ _glthread_GetTSD(_glthread_TSD *tsd)
    if (tsd->initMagic != INIT_MAGIC) {
       _glthread_InitTSD(tsd);
    }
-   return _threadstore();
+   return __threadstore();
 }
 
 
@@ -278,7 +288,7 @@ _glthread_SetTSD(_glthread_TSD *tsd, void *ptr)
       _glthread_InitTSD(tsd);
    }
 
-   (*_threadstore())=(void *)ptr;
+   (*__threadstore())=(void *)ptr;
 }
 
 #endif                                 /* OS2_THREADS                    */

@@ -1,4 +1,4 @@
-/* $Id: sorter.cpp,v 1.1 2000-02-09 08:50:28 jeroen Exp $ */
+/* $Id: sorter.cpp,v 1.2 2000-09-22 20:49:20 jeroen Exp $ */
 /*
 ** License Applicability. Except to the extent portions of this file are
 ** made subject to an alternative license as permitted in the SGI Free
@@ -36,8 +36,8 @@
 /*
  * sorter.c++
  *
- * $Date: 2000-02-09 08:50:28 $ $Revision: 1.1 $
- * $Header: /home/ktk/tmp/odin/2007/netlabs.cvs/odin32/src/opengl/glu/nurbs/internals/sorter.cpp,v 1.1 2000-02-09 08:50:28 jeroen Exp $
+ * $Date: 2000-09-22 20:49:20 $ $Revision: 1.2 $
+ * $Header: /home/ktk/tmp/odin/2007/netlabs.cvs/odin32/src/opengl/glu/nurbs/internals/sorter.cpp,v 1.2 2000-09-22 20:49:20 jeroen Exp $
  */
 
 #include "glimports.h"
@@ -80,63 +80,70 @@ void
 Sorter::qs1( char *a,  char *l )
 {
     char *i, *j;
-    char	*lp, *hp;
-    int	c;
+    char        *lp, *hp;
+    int c;
     unsigned int n;
+    int redo=1;
 
-start:
+//start:
+while(redo)
+  {
+    redo=0;
+
     if((n=l-a) <= es)
-	    return;
+            return;
     n = es * (n / (2*es));
     hp = lp = a+n;
     i = a;
     j = l-es;
-    while(1) {
-	if(i < lp) {
-	    if((c = qscmp(i, lp)) == 0) {
-		qsexc(i, lp -= es);
-		continue;
-	    }
-	    if(c < 0) {
-		i += es;
-		continue;
-	    }
-	}
+    while(1)
+    {
+        if(i < lp) {
+            if((c = qscmp(i, lp)) == 0) {
+                qsexc(i, lp -= es);
+                continue;
+            }
+            if(c < 0) {
+                i += es;
+                continue;
+            }
+        }
 
 loop:
-	if(j > hp) {
-	    if((c = qscmp(hp, j)) == 0) {
-		qsexc(hp += es, j);
-		goto loop;
-	    }
-	    if(c > 0) {
-		if(i == lp) {
-		    qstexc(i, hp += es, j);
-		    i = lp += es;
-		    goto loop;
-		}
-		qsexc(i, j);
-		j -= es;
-		i += es;
-		continue;
-	    }
-	    j -= es;
-	    goto loop;
-	}
+        if(j > hp) {
+            if((c = qscmp(hp, j)) == 0) {
+                qsexc(hp += es, j);
+                goto loop;
+            }
+            if(c > 0) {
+                if(i == lp) {
+                    qstexc(i, hp += es, j);
+                    i = lp += es;
+                    goto loop;
+                }
+                qsexc(i, j);
+                j -= es;
+                i += es;
+                continue;
+            }
+            j -= es;
+            goto loop;
+        }
 
-	if(i == lp) {
-	    if(lp-a >= l-hp) {
-		qs1(hp+es, l);
-		l = lp;
-	    } else {
-		qs1(a, lp);
-		a = hp+es;
-	    }
-	    goto start;
-	}
+        if(i == lp) {
+            if(lp-a >= l-hp) {
+                qs1(hp+es, l);
+                l = lp;
+            } else {
+                qs1(a, lp);
+                a = hp+es;
+            }
+            /*goto start;*/ redo=1; break;
+        }
 
-	qstexc(j, lp -= es, i);
-	j = hp -= es;
+        qstexc(j, lp -= es, i);
+        j = hp -= es;
     }
+  }
 }
 
