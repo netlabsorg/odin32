@@ -1,4 +1,11 @@
- /* $Id: ChangeLog,v 1.786 2000-03-05 14:42:32 bird Exp $ */
+ /* $Id: ChangeLog,v 1.787 2000-03-06 22:39:31 sandervl Exp $ */
+
+ 2000-03-06: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32: Fixed bug in edit control
+		  If nyoff > nr lines in control -> bottom line in control 
+             	  window should show last line of control
+             	  Wine code shows last line at the top of the control
+             	  (Quake 3 startup edit control shows the problem)
 
  2000-03-04: knut st. osmundsen <knut.stange.osmundse@pmsc.no>
         - include\pdwin32.vac*: Added OS2RC and OS2RCFLAGS. This defines the
