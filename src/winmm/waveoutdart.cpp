@@ -1,4 +1,4 @@
-/* $Id: waveoutdart.cpp,v 1.11 2002-07-31 13:51:21 sandervl Exp $ */
+/* $Id: waveoutdart.cpp,v 1.12 2002-08-01 16:06:43 sandervl Exp $ */
 
 /*
  * Wave playback class (DART)
@@ -300,12 +300,14 @@ MMRESULT DartWaveOut::write(LPWAVEHDR pwh, UINT cbwh)
         else wavehdr = pwh;
 
         if(!fUnderrun && State != STATE_STOPPED) {//don't start playback if paused
+   	    //write new data to the DART buffers (if there's any room left)
+            if(State == STATE_PLAYING) {
+                writeBuffer();  //must be called before (re)starting playback
+            }
             wmutex.leave();
             return(MMSYSERR_NOERROR);
         }
-
         writeBuffer();  //must be called before (re)starting playback
-
         State     = STATE_PLAYING;
         fUnderrun = FALSE;
         wmutex.leave();
@@ -371,8 +373,9 @@ MMRESULT DartWaveOut::resume()
         wmutex.enter();
         State     = STATE_PLAYING;
         fUnderrun = FALSE;
-        wmutex.leave();
         curbuf = curPlayBuf;
+        writeBuffer();  //must be called before (re)starting playback
+        wmutex.leave();
 
         // MCI_MIXSETUP_PARMS->pMixWrite does alter FS: selector!
         USHORT selTIB = GetFS(); // save current FS selector
@@ -416,7 +419,7 @@ MMRESULT DartWaveOut::stop()
 /******************************************************************************/
 MMRESULT DartWaveOut::reset()
 {
-     MCI_GENERIC_PARMS Params;
+    MCI_GENERIC_PARMS Params;
     LPWAVEHDR tmpwavehdr;
 
     dprintf(("DartWaveOut::reset %s", (State == STATE_PLAYING) ? "playing" : "stopped"));
@@ -424,6 +427,10 @@ MMRESULT DartWaveOut::reset()
         return(MMSYSERR_HANDLEBUSY);
 
     memset(&Params, 0, sizeof(Params));
+
+    wmutex.enter();
+    State     = STATE_STOPPED;
+    wmutex.leave();
 
     // Stop the playback.
     mymciSendCommand(DeviceId, MCI_STOP, MCI_WAIT, (PVOID)&Params, 0);
@@ -443,7 +450,6 @@ MMRESULT DartWaveOut::reset()
         wmutex.enter();
     }
     wavehdr   = NULL;
-    State     = STATE_STOPPED;
     fUnderrun = FALSE;
 
     curPlayBuf = curFillBuf = curFillPos = curPlayPos = 0;
