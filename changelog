@@ -1,4 +1,12 @@
-/* $Id: changelog,v 1.1912 2001-12-16 11:32:32 sandervl Exp $ */
+/* $Id: changelog,v 1.1913 2001-12-17 16:22:42 sandervl Exp $ */
+
+ 2001-12-17: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o GetVolumeInformation changes: 
+                  - report JFS as NTFS
+                  - report UDF & CDFS as UDF & CDFS (no change)
+                  - report everthing else as FAT16
+                  (some applications make assumptions about maximium file size
+                   based on the volume name)
 
  2001-12-16: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Fixed memory DC leak in DrawIcon & DrawIconEx
