@@ -1,4 +1,4 @@
-/* $Id: pe2lx.cpp,v 1.18.4.6 2000-08-22 03:00:22 bird Exp $
+/* $Id: pe2lx.cpp,v 1.18.4.7 2000-08-24 01:36:26 bird Exp $
  *
  * Pe2Lx class implementation. Ring 0 and Ring 3
  *
@@ -1327,6 +1327,7 @@ ULONG  Pe2Lx::openPath(PCHAR pachModname, USHORT cchModname, ldrlv_t *pLdrLv, PU
 {
     #ifdef RING0
     #if 1
+    initOdin32Path();
     return ldrOpenPath(pachModname, cchModname, pLdrLv, pfl);
     #else
 
@@ -4695,7 +4696,7 @@ PCSZ Pe2Lx::queryOdin32ModuleName(PCSZ pszWin32ModuleName)
  */
 BOOL Pe2Lx::initOdin32Path()
 {
-    #if 0
+    #ifdef RING0
     APIRET rc;
     PMTE   pMTE;
 
@@ -4707,7 +4708,7 @@ BOOL Pe2Lx::initOdin32Path()
      * Try find it using ldrFindModule.
      */
     pMTE = NULL;
-    rc = ldrFindModule("KERNEL32", 8, CLASS_GLOBAL, &pMTE);
+    rc = ldrFindModule("KERNEL32", 8, CLASS_GLOBAL, (PPMTE)SSToDS(&pMTE));
     if (rc == NO_ERROR && pMTE != NULL && pMTE->mte_swapmte != NULL)
     {
         /*
@@ -4743,7 +4744,8 @@ BOOL Pe2Lx::initOdin32Path()
 
     ul = options.fNoLoader;
     options.fNoLoader = TRUE;
-    rc = ldrOpenPath("KERNEL32", 8, &lv, &ful);
+    lv.lv_class = CLASS_GLOBAL;
+    rc = ldrOpenPath("KERNEL32", 8, (ldrlv_t*)SSToDS(&lv), (PULONG)SSToDS(&ful));
     options.fNoLoader = ul;
     if (rc == NO_ERROR)
     {
@@ -4753,8 +4755,9 @@ BOOL Pe2Lx::initOdin32Path()
          *  the last opended filed, which in this case is kernel32.dll.)
          * We'll close the file handle first of course.
          */
+        rc = setOdin32Path(ldrpFileNameBuf);
         ldrClose(lv.lv_sfn);
-        return setOdin32Path(ldrpFileNameBuf);
+        return rc;
     }
 
     return rc == NO_ERROR;

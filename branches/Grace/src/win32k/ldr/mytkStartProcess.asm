@@ -1,4 +1,4 @@
-; $Id: mytkStartProcess.asm,v 1.1.2.3 2000-08-23 04:25:44 bird Exp $
+; $Id: mytkStartProcess.asm,v 1.1.2.4 2000-08-24 01:36:26 bird Exp $
 ;
 ; tkStartProcess overloader. Needed to clear the loader semaphore
 ; when a process is being started syncronously.
@@ -71,7 +71,7 @@ CODE32 SEGMENT
 ; @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
 ; @remark
 mytkStartProcess PROC NEAR
-    ASSUME CS:CODE32, DS:FLAT, ES:NOTHING, SS:NOTHING
+    ASSUME DS:FLAT, ES:NOTHING, SS:NOTHING
 
     ;
     ; Check if the loader semphore is take by us.
@@ -87,10 +87,10 @@ mytkStartProcess PROC NEAR
     add     eax, esp                    ; Added TKSSBase to the usage count pointer
     push    eax                         ; Push address of usage count pointer.
     push    pLdrSem                     ; Push pointer to loader semaphore ( = handle).
-    call    _KSEMQueryMutex@8
+    call    near ptr FLAT:_KSEMQueryMutex@8
     or      eax, eax                    ; Check return code. (1 = our / free; 0 = not our but take)
-    jz      mtksp_ret                   ; jmp if not taken by us (FALSE).
     pop     eax                         ; Pops usage count.
+    jz      mtksp_ret                   ; jmp if not taken by us (rc=FALSE).
     or      eax, eax                    ; Check usage count.
     jz      mtksp_ret                   ; jmp if 0 (=free).
     mov     ulLDRState, 0               ; Clears loaderstate. (LDRSTATE_UNKNOWN)
@@ -104,7 +104,7 @@ mtksp_ret:
     pop     edx
     pop     ecx
     pop     eax
-    jmp     _tkStartProcess
+    jmp     near ptr FLAT:_tkStartProcess
 mytkStartProcess ENDP
 
 CODE32 ENDS

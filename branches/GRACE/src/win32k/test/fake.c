@@ -1,4 +1,4 @@
-/* $Id: fake.c,v 1.1.4.3 2000-08-23 04:25:45 bird Exp $
+/* $Id: fake.c,v 1.1.4.4 2000-08-24 01:36:29 bird Exp $
  *
  * Fake stubs for the ldr and kernel functions we imports or overloads.
  *
@@ -857,7 +857,7 @@ BOOL KRNLCALL  fakeKSEMQueryMutex(HKSEMMTX hkmtx, PUSHORT pcusNest)
     }
     else
     {
-        fRc = (hkmtx->debug.ksem_Owner != usSlot);
+        fRc = (hkmtx->debug.ksem_Owner == usSlot);
         if (pcusNest)
             *pcusNest = hkmtx->debug.ksem_cusNest;
     }
@@ -1040,6 +1040,15 @@ ULONG _Optlink tkExecPgmWorker(ULONG execFlag, PSZ pArg, PSZ pEnv, PSZ pszFilena
     ldrrei_t    rei;
 
     printf("tkExecPgmWorker:                execFlag = %d, pArg = %p, pEnv = %p, pszFilename = %s\n", execFlag, pArg, pEnv, pszFilename);
+
+    /*
+     * Take loader semaphore.
+     */
+    rc = KSEMRequestMutex(&fakeLDRSem, KSEM_INDEFINITE_WAIT);
+    if (rc != NO_ERROR)
+    {
+        return rc;
+    }
 
     /*
      * Simulate loading.
@@ -1743,17 +1752,21 @@ ULONG LDRCALL   fakeldrMTEValidatePtrs(PSMTE psmte, ULONG ulMaxAddr, ULONG off)
 
 PMTE KRNLCALL fakeldrASMpMTEFromHandle(HMTE  hMTE)
 {
-    hMTE = hMTE;
+    PMTE pMte = (PMTE)hMTE;
+
+    pMte += 10; //just do something!
+
     return NULL;
 }
 
 ULONG LDRCALL   fakeldrFindModule(PCHAR pachFilename, USHORT cchFilename, USHORT usClass, PPMTE ppMTE)
 {
+    APIRET rc = NO_ERROR;
     usClass = usClass;
     cchFilename = cchFilename;
     pachFilename = pachFilename;
     *ppMTE = NULL;
-    return NO_ERROR;
+    return rc;
 }
 
 

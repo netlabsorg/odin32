@@ -1,4 +1,4 @@
-; $Id: fakea.asm,v 1.1.4.3 2000-08-23 04:25:46 bird Exp $
+; $Id: fakea.asm,v 1.1.4.4 2000-08-24 01:36:29 bird Exp $
 ;
 ; Fake assembly imports.
 ;
@@ -304,15 +304,6 @@ fake_tkStartProcess ENDP
 fakeg_tkExecPgm PROC NEAR
     push    ebp
     mov     ebp, esp
-
-    ;
-    ; Take loader semaphore.
-    ;
-    push    0ffffffffh
-    push    offset fakeLDRSem
-    call    _fakeKSEMRequestMutex@8
-    or      eax, eax
-    jnz     ftkep_ret2
 
     ;
     ; Call C worker
