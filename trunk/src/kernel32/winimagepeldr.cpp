@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.52 2000-08-11 10:56:19 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.53 2000-08-14 19:15:37 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -399,6 +399,7 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
   	}
   }
   dprintf((LOG, "*************************PE SECTIONS END **************************" ));
+
   imageSize += imageVirtBase - oh.ImageBase;
   dprintf((LOG, "Total size of Image %x", imageSize ));
   dprintf((LOG, "imageVirtBase       %x", imageVirtBase ));
@@ -430,18 +431,19 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
 
   if(loadType == REAL_LOAD)
   {
-   if(tlsDir != NULL) {
-    Section *sect = findSection(SECTION_TLS);
+   if(tlsDir = (IMAGE_TLS_DIRECTORY *)ImageDirectoryOffset(win32file, IMAGE_DIRECTORY_ENTRY_TLS)) 
+   {
+	Section *sect = findSectionByAddr(tlsDir->StartAddressOfRawData);
 
-	if(sect == NULL) {
-		dprintf((LOG, "Couldn't find TLS section!!" ));
-	    	goto failure;
-	}
 	dprintf((LOG, "TLS Directory" ));
 	dprintf((LOG, "TLS Address of Index     %x", tlsDir->AddressOfIndex ));
 	dprintf((LOG, "TLS Address of Callbacks %x", tlsDir->AddressOfCallBacks ));
 	dprintf((LOG, "TLS SizeOfZeroFill       %x", tlsDir->SizeOfZeroFill ));
 	dprintf((LOG, "TLS Characteristics      %x", tlsDir->Characteristics ));
+	if(sect == NULL) {
+		dprintf((LOG, "Couldn't find TLS section!!" ));
+	    	goto failure;
+	}
   	setTLSAddress((char *)sect->realvirtaddr);
   	setTLSInitSize(tlsDir->EndAddressOfRawData - tlsDir->StartAddressOfRawData);
   	setTLSTotalSize(tlsDir->EndAddressOfRawData - tlsDir->StartAddressOfRawData + tlsDir->SizeOfZeroFill);
@@ -462,6 +464,37 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
 		setTLSCallBackAddr((PIMAGE_TLS_CALLBACK *)(sect->realvirtaddr + ((ULONG)tlsDir->AddressOfCallBacks - sect->virtaddr)));
 	}
    }
+
+#ifdef DEBUG
+   dprintf((LOG, "Image directories: "));
+   for (i = 0; i < IMAGE_NUMBEROF_DIRECTORY_ENTRIES; i++)
+   {
+        char *pszName;
+
+	switch (i)
+        {
+                case IMAGE_DIRECTORY_ENTRY_EXPORT:      pszName = "Export Directory (IMAGE_DIRECTORY_ENTRY_EXPORT)"; break;
+                case IMAGE_DIRECTORY_ENTRY_IMPORT:      pszName = "Import Directory (IMAGE_DIRECTORY_ENTRY_IMPORT)"; break;
+                case IMAGE_DIRECTORY_ENTRY_RESOURCE:    pszName = "Resource Directory (IMAGE_DIRECTORY_ENTRY_RESOURCE)"; break;
+                case IMAGE_DIRECTORY_ENTRY_EXCEPTION:   pszName = "Exception Directory (IMAGE_DIRECTORY_ENTRY_EXCEPTION)"; break;
+                case IMAGE_DIRECTORY_ENTRY_SECURITY:    pszName = "Security Directory (IMAGE_DIRECTORY_ENTRY_SECURITY)"; break;
+                case IMAGE_DIRECTORY_ENTRY_BASERELOC:   pszName = "Base Relocation Table (IMAGE_DIRECTORY_ENTRY_BASERELOC)"; break;
+                case IMAGE_DIRECTORY_ENTRY_DEBUG:       pszName = "Debug Directory (IMAGE_DIRECTORY_ENTRY_DEBUG)"; break;
+                case IMAGE_DIRECTORY_ENTRY_COPYRIGHT:   pszName = "Description String (IMAGE_DIRECTORY_ENTRY_COPYRIGHT)"; break;
+                case IMAGE_DIRECTORY_ENTRY_GLOBALPTR:   pszName = "Machine Value (MIPS GP) (IMAGE_DIRECTORY_ENTRY_GLOBALPTR)"; break;
+                case IMAGE_DIRECTORY_ENTRY_TLS:         pszName = "TLS Directory (IMAGE_DIRECTORY_ENTRY_TLS)"; break;
+                case IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG: pszName = "Load Configuration Directory (IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG)"; break;
+                case IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT:pszName = "Bound Import Directory in headers (IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT)"; break;
+                case IMAGE_DIRECTORY_ENTRY_IAT:         pszName = "Import Address Table (IMAGE_DIRECTORY_ENTRY_IAT)"; break;
+                default:
+                    pszName = "unknown";
+        }
+	dprintf((LOG, "directory %s", pszName));
+	dprintf((LOG, "          Address    0x%08x", oh.DataDirectory[i].VirtualAddress));
+	dprintf((LOG, "          Size       0x%08x", oh.DataDirectory[i].Size));
+   }
+   dprintf((LOG, "\n\n"));
+#endif
 
    if(realBaseAddress != oh.ImageBase) {
 	pFixups     = (PIMAGE_BASE_RELOCATION)ImageDirectoryOffset(win32file, IMAGE_DIRECTORY_ENTRY_BASERELOC);
