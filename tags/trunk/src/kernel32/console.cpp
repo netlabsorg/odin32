@@ -1,4 +1,4 @@
-/* $Id: console.cpp,v 1.10 1999-07-12 17:45:51 phaller Exp $ */
+/* $Id: console.cpp,v 1.11 1999-08-06 12:14:10 phaller Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -53,6 +53,10 @@
  * Includes                                                                  *
  *****************************************************************************/
 
+#include <builtin.h>
+#include <stdlib.h>
+#include <string.h>
+
 #define  INCL_WIN
 #define  INCL_DOSMEMMGR
 #define  INCL_DOSSEMAPHORES
@@ -62,9 +66,6 @@
 #define  INCL_VIO
 #define  INCL_AVIO
 #include <os2wrap.h>         //Odin32 OS/2 api wrappers
-#include <builtin.h>
-#include <stdlib.h>
-#include <string.h>
 
 #include <win32type.h>
 #include <misc.h>

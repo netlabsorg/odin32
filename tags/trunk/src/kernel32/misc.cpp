@@ -1,4 +1,4 @@
-/* $Id: misc.cpp,v 1.4 1999-08-06 09:03:04 phaller Exp $ */
+/* $Id: misc.cpp,v 1.5 1999-08-06 12:14:12 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -245,7 +245,7 @@ static BOOL fLogging = TRUE;
 
 int SYSTEM EXPORT WriteLog(char *tekst, ...)
 {
-  USHORT  sel = RestoreOS2FS();
+//  USHORT  sel = RestoreOS2FS();
   va_list argptr;
 
   if(!init)
@@ -268,13 +268,13 @@ int SYSTEM EXPORT WriteLog(char *tekst, ...)
       fprintf(flog, "\n");
   }
 
-  SetFS(sel);
+//  SetFS(sel);
   return 1;
 }
 
 int SYSTEM EXPORT WriteLogError(char *tekst, ...)
 {
-  USHORT  sel = RestoreOS2FS();
+//  USHORT  sel = RestoreOS2FS();
   va_list argptr;
 
   va_start(argptr, tekst);
@@ -284,7 +284,7 @@ int SYSTEM EXPORT WriteLogError(char *tekst, ...)
   if(tekst[strlen(tekst)-1] != '\n')
     printf("\n");
 
-  SetFS(sel);
+//  SetFS(sel);
   return 1;
 }
 #endif
