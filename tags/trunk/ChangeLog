@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.557 1999-12-19 20:17:39 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.558 1999-12-19 22:05:14 sandervl Exp $ */
 
  99-12-19: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: fixed child positioning
@@ -11,6 +11,7 @@
 	- ADVAPI32/NTDLL: Forward sid apis to ntdll (need to check return
                           type of some Rtl SID apis (bool or status dword?))
                           Moved Service apis into separate sourcefile
+                          Implemented some service apis (not completely)
 	- KERNEL32: Fix for loading images (RSRC_LOAD)
                     Implemented FindResourceExA/W
                     CreateProcessW bugfix (string conversion)
