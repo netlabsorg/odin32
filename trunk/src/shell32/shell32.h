@@ -1,4 +1,4 @@
-/* $Id: shell32.h,v 1.4 1999-06-24 19:27:49 phaller Exp $ */
+/* $Id: shell32.h,v 1.5 1999-08-05 21:03:35 phaller Exp $ */
 
 #ifndef __shell32_H__
 #define __shell32_H__
@@ -70,6 +70,8 @@ typedef struct _browseinfoW
 typedef void *LPSHELLFOLDER;
 
 
+
+
 /****************************************************************************
 *  STRRET (temporary, move it away)
 */
@@ -92,6 +94,46 @@ typedef struct _STRRET
     WCHAR  cStrW[MAX_PATH];
   }u;
 } STRRET,*LPSTRRET;
+
+
+/**********************************************************************
+ * SHGetSettings ()
+ */
+typedef struct
+{  BOOL fShowAllObjects : 1;
+   BOOL fShowExtensions : 1;
+   BOOL fNoConfirmRecycle : 1;
+   BOOL fShowSysFiles : 1;
+
+   BOOL fShowCompColor : 1;
+   BOOL fDoubleClickInWebView : 1;
+   BOOL fDesktopHTML : 1;
+   BOOL fWin95Classic : 1;
+
+   BOOL fDontPrettyPath : 1;
+   BOOL fShowAttribCol : 1;
+   BOOL fMapNetDrvBtn : 1;
+   BOOL fShowInfoTip : 1;
+
+   BOOL fHideIcons : 1;
+   UINT fRestFlags : 3;
+} SHELLFLAGSTATE, * LPSHELLFLAGSTATE;
+
+void WIN32API SHGetSettings(LPSHELLFLAGSTATE lpsfs, DWORD dwMask, DWORD dwx);
+
+#define SSF_SHOWALLOBJECTS                  0x0001
+#define SSF_SHOWEXTENSIONS                  0x0002
+#define SSF_SHOWCOMPCOLOR                   0x0008
+#define SSF_SHOWSYSFILES                    0x0020
+#define SSF_DOUBLECLICKINWEBVIEW            0x0080
+#define SSF_SHOWATTRIBCOL                   0x0100
+#define SSF_DESKTOPHTML                     0x0200
+#define SSF_WIN95CLASSIC                    0x0400
+#define SSF_DONTPRETTYPATH                  0x0800
+#define SSF_SHOWINFOTIP                     0x2000
+#define SSF_MAPNETDRVBUTTON                 0x1000
+#define SSF_NOCONFIRMRECYCLE                0x8000
+#define SSF_HIDEICONS                       0x4000
 
 
 
