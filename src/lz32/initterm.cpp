@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.3 1999-08-16 16:55:32 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.4 1999-08-17 19:30:49 phaller Exp $ */
 
 /*
  * DLL entry point
@@ -33,11 +33,6 @@
 #include <odin.h>
 #include <misc.h>       /*PLF Wed  98-03-18 23:18:15*/
 
-extern "C" {
-void CDECL _ctordtorInit( void );
-void CDECL _ctordtorTerm( void );
-}
-
 /*-------------------------------------------------------------------*/
 /* A clean up routine registered with DosExitList must be used if    */
 /* runtime calls are required and the runtime is dynamically linked. */
@@ -55,10 +50,9 @@ static void APIENTRY cleanup(ULONG reason);
 /* linkage convention MUST be used because the operating system loader is   */
 /* calling this function.                                                   */
 /****************************************************************************/
-unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
-                                   ulFlag)
+unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule,
+                                   unsigned long ulFlag)
 {
-   size_t i;
    APIRET rc;
 
    /*-------------------------------------------------------------------------*/
@@ -69,7 +63,6 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
 
    switch (ulFlag) {
       case 0 :
-         _ctordtorInit();
 
          /*******************************************************************/
          /* A DosExitList routine must be used to clean up if runtime calls */
@@ -96,7 +89,6 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
 
 static void APIENTRY cleanup(ULONG ulReason)
 {
-   _ctordtorTerm();
    DosExitList(EXLST_EXIT, cleanup);
    return ;
 }
