@@ -1,4 +1,9 @@
-/* $Id: changelog,v 1.1371 2001-04-21 11:23:59 sandervl Exp $ */
+/* $Id: changelog,v 1.1372 2001-04-22 08:59:48 sandervl Exp $ */
+
+ 2001-04-22: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Removed wrong segment definitions introduced by yesterday's
+                  EXC_CallHandler rewrite.
+                  (fixes global data section)
 
  2001-04-21: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o DosWrite for stdout doesn't accept high addresses
