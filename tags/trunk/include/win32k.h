@@ -1,4 +1,4 @@
-/* $Id: win32k.h,v 1.9 2001-02-20 05:13:15 bird Exp $
+/* $Id: win32k.h,v 1.10 2001-02-21 07:41:24 bird Exp $
  *
  * Top level make file for the Win32k library.
  * Contains library and 32-bit IOCtl definition.
@@ -8,8 +8,10 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+/* NOINC */
 #ifndef _WIN32K_H_
 #define _WIN32K_H_
+/* INC */
 
 /*******************************************************************************
 *   Defined Constants And Macros                                               *
@@ -30,7 +32,8 @@
 #define K32_PROCESSREADWRITE    0x05
 #define K32_HANDLESYSTEMEVENT   0x06
 #define K32_QUERYSYSTEMMEMINFO  0x07
-#define K32_LASTIOCTLFUNCTION   K32_QUERYSYSTEMMEMINFO
+#define K32_QUERYCALLGATE       0x08
+#define K32_LASTIOCTLFUNCTION   K32_QUERYCALLGATE
 
 
 /*
@@ -78,7 +81,46 @@
 #define K32_SYSMEMINFO_VM                   0x04    /* Virtual memory stuff is all queried. */
 
 
+/* NOINC */
 #ifndef INCL_16                         /* We don't need this in 16-bit code. */
+/* INC */
+
+/*******************************************************************************
+*   Assembly Fixes                                                             *
+*******************************************************************************/
+/*ASM
+BOOL struc
+        dd ?
+BOOL ends
+
+PID struc
+        dd ?
+PID ends
+
+HMODULE struc
+        dd ?
+HMODULE ends
+
+HEV struc
+        dd ?
+HEV ends
+
+PVOID struc
+        dd ?
+PVOID ends
+
+PPVOID struc
+        dd ?
+PPVOID ends
+
+PUSHORT struc
+        dd ?
+PUSHORT ends
+
+CCHMAXPATH EQU 260
+
+*/  /* end of assembly */
+
 
 /*******************************************************************************
 *   Structures and Typedefs                                                    *
@@ -88,7 +130,7 @@
 /*
  * Object Table Entry buffer.
  */
-typedef struct _QueryOTE
+struct _QueryOTE
 {
     ULONG   ote_size;                   /* Object virtual size */
     ULONG   ote_base;                   /* Object base virtual address */
@@ -98,13 +140,17 @@ typedef struct _QueryOTE
   /*ULONG   ote_reserved;*/
     USHORT  ote_sel;                    /* Object Selector */
     USHORT  ote_hob;                    /* Object Handle */
-} QOTE, *PQOTE;
+};
+typedef struct _QueryOTE    QOTE;
+typedef QOTE     *          PQOTE;
+
 
 typedef struct _QueryOTEBuffer
 {
     ULONG   cOTEs;                      /* Number of entries in aOTE. */
     QOTE    aOTE[1];                    /* Array of OTEs. */
-} QOTEBUFFER, *PQOTEBUFFER;
+} QOTEBUFFER;
+typedef QOTEBUFFER *PQOTEBUFFER;
 
 
 /*
@@ -151,7 +197,8 @@ typedef struct _K32Options
     /** @cat Options affecting the heap. */
     ULONG       cbSwpHeapMax;           /* Maximum heapsize. */
     ULONG       cbResHeapMax;           /* Maxiumem residentheapsize. */
-} K32OPTIONS, *PK32OPTIONS;
+} K32OPTIONS;
+typedef K32OPTIONS  *PK32OPTIONS;
 
 
 /*
@@ -196,7 +243,8 @@ typedef struct _K32Status
     ULONG       cPe2LxModules;          /* Number of Pe2Lx modules currently loaded. */
     ULONG       cElf2LxModules;         /* Number of Elf2Lx modules currently loaded. */
     /*...*/
-} K32STATUS, *PK32STATUS;
+} K32STATUS;
+typedef K32STATUS * PK32STATUS;
 
 
 /*
@@ -254,78 +302,119 @@ typedef struct _k32SystemMemInfo
     ULONG       ulVMArenaHighSharedMin; /* VM: Current lowest address in the high shared arena - aurora/smp only. (ahvmhShr) */
     ULONG       ulVMArenaHighSharedMax; /* VM: Current highest address in the high shared arena - aurora/smp only. (ahvmhShr) */
 
-} K32SYSTEMMEMINFO, *PK32SYSTEMMEMINFO;
+} K32SYSTEMMEMINFO;
+typedef K32SYSTEMMEMINFO *  PK32SYSTEMMEMINFO;
 
 
 /*
  * K32 category parameter structs
- *
- * Note. The ULONG rc should allways be the first datamember!
+ * ---
+ * First member is allways a K32HDR struct called hdr.
+ * The rest of it should be exactly like the parameter list for the API call.
  */
-typedef struct _k32AllocMemEx
+struct _k32Header                       /* Common parameter header. */
 {
+    ULONG       cb;                     /* Size of the parameters struct. */
     ULONG       rc;                     /* Return code. */
+};
+typedef struct _k32Header   K32HDR;
+typedef K32HDR *            PK32HDR;
+
+
+struct _k32AllocMemEx
+{
+    K32HDR      hdr;                    /* Common parameter header */
     PPVOID      ppv;                    /* Pointer to pointer to the allocated memory block */
                                         /* On input it (*ppv) may hold the suggested  location of the block. */
     ULONG       cb;                     /* Blocksize (bytes) */
     ULONG       flFlags;                /* Flags (equal to DosAllocMem flags) */
     ULONG       ulCS;                   /* Call CS */
     ULONG       ulEIP;                  /* Call EIP */
-} K32ALLOCMEMEX, *PK32ALLOCMEMEX;
+};
+typedef struct _k32AllocMemEx   K32ALLOCMEMEX;
+typedef K32ALLOCMEMEX *         PK32ALLOCMEMEX;
 
-typedef struct _k32QueryOTEs
+
+struct _k32QueryOTEs
 {
-    ULONG       rc;                     /* Return code. */
+    K32HDR      hdr;                    /* Common parameter header */
     HMODULE     hMTE;                   /* Module handle. */
     PQOTEBUFFER pQOte;                  /* Pointer to output buffer. */
     ULONG       cbQOte;                 /* Size of the buffer pointed to by pQOte  */
-} K32QUERYOTES, *PK32QUERYOTES;
+};
+typedef struct _k32QueryOTEs    K32QUERYOTES;
+typedef K32QUERYOTES *          PK32QUERYOTES;
 
-typedef struct _k32QueryOptionsStatus
+
+struct _k32QueryOptionsStatus
 {
-    ULONG       rc;                     /* Return code. */
+    K32HDR      hdr;                    /* Common parameter header */
     PK32OPTIONS pOptions;               /* Pointer to option struct. (NULL allowed) */
     PK32STATUS  pStatus;                /* Pointer to status struct. (NULL allowed) */
-} K32QUERYOPTIONSSTATUS, *PK32QUERYOPTIONSSTATUS;
+};
+typedef struct _k32QueryOptionsStatus   K32QUERYOPTIONSSTATUS;
+typedef K32QUERYOPTIONSSTATUS *         PK32QUERYOPTIONSSTATUS;
 
-typedef struct _k32SetOptions
-{
-    ULONG        rc;                    /* Return code. */
-    PK32OPTIONS  pOptions;              /* Pointer to option struct. (NULL allowed) */
-} K32SETOPTIONS, *PK32SETOPTIONS;
 
-typedef struct _k32ProcessReadWrite
+struct _k32SetOptions
 {
-    ULONG       rc;                     /* Return code. */
+    K32HDR      hdr;                    /* Common parameter header */
+    PK32OPTIONS pOptions;               /* Pointer to option struct. (NULL allowed) */
+};
+typedef struct _k32SetOptions           K32SETOPTIONS;
+typedef K32SETOPTIONS *                 PK32SETOPTIONS;
+
+
+struct _k32ProcessReadWrite
+{
+    K32HDR      hdr;                    /* Common parameter header */
     PID         pid;                    /* Process ID of the process to access memory in. */
     ULONG       cb;                     /* Number of bytes to read or write. */
     PVOID       pvSource;               /* Pointer to source data. */
     PVOID       pvTarget;               /* Pointer to target area. */
     BOOL        fRead;                  /* TRUE:   pvSource is within pid while pvTarget is ours. */
                                         /* FALSE:  pvTarget is within pid while pvSource is ours. */
-} K32PROCESSREADWRITE, *PK32PROCESSREADWRITE;
+};
+typedef struct _k32ProcessReadWrite     K32PROCESSREADWRITE;
+typedef K32PROCESSREADWRITE *           PK32PROCESSREADWRITE;
 
-typedef struct _k32HandleSystemEvent
+
+struct _k32HandleSystemEvent
 {
-    ULONG       rc;                     /* Return code. */
+    K32HDR      hdr;                    /* Common parameter header */
     ULONG       ulEvent;                /* Event identifier. One of the K32_SYSEVENT_ defines. */
     HEV         hev;                    /* Handle of shared event semaphore which should be */
                                         /* posted when the the requested event occurs.      */
     BOOL        fHandle;                /* Action flag. */
                                         /* TRUE:  Take control of the event. */
                                         /* FALSE: Give control back to the OS of this event. (hev must match the current handle!) */
-} K32HANDLESYSTEMEVENT, *PK32HANDLESYSTEMEVENT;
+};
+typedef struct _k32HandleSystemEvent    K32HANDLESYSTEMEVENT;
+typedef K32HANDLESYSTEMEVENT *          PK32HANDLESYSTEMEVENT;
 
-typedef struct _k32QuerySystemMemInfo
+
+struct _k32QuerySystemMemInfo
 {
-    APIRET      rc;                     /* Return code. */
+    K32HDR      hdr;                    /* Common parameter header */
     PK32SYSTEMMEMINFO   pMemInfo;       /* Pointer to system memory info structure with cb set. */
                                         /* The other members will be filled on successful return. */
-} K32QUERYSYSTEMMEMINFO, *PK32QUERYSYSTEMMEMINFO;
+};
+typedef struct _k32QuerySystemMemInfo   K32QUERYSYSTEMMEMINFO;
+typedef K32QUERYSYSTEMMEMINFO *         PK32QUERYSYSTEMMEMINFO;
 
+
+struct _k32QueryCallGate
+{
+    K32HDR      hdr;                    /* Common parameter header */
+    PUSHORT     pusCGSelector;          /* Pointer to variable where the callgate selector */
+                                        /* is to be stored. */
+};
+typedef struct _k32QueryCallGate        K32QUERYCALLGATE;
+typedef struct _k32QueryCallGate *      PK32QUERYCALLGATE;
 
 #pragma pack()
 
+/* NOINC */
 #ifndef NO_WIN32K_LIB_FUNCTIONS
 /*******************************************************************************
 *   External Functions                                                         *
@@ -347,9 +436,10 @@ APIRET APIENTRY  W32kHandleSystemEvent(ULONG ulEvent, HEV hev, BOOL fHandle);
 /* Helper function */
 USHORT APIENTRY  libHelperGetCS(void);
 
-
 #endif
+/* INC */
 
+/* NOINC */
 #endif /* !defined(INCL_16) */
-
 #endif
+/* INC */
