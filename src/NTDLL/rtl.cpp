@@ -1,4 +1,4 @@
-/* $Id: rtl.cpp,v 1.13 2001-07-20 15:39:47 sandervl Exp $ */
+/* $Id: rtl.cpp,v 1.14 2002-02-21 22:52:42 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -28,7 +28,6 @@
 #include "winerror.h"
 #include "stackframe.h"
 #include "ntddk.h"
-#include "imagehlp.h"
 #include "winreg.h"
 #include "heapstring.h"
 
@@ -333,7 +332,7 @@ BOOLEAN WINAPI RtlFreeHeap(HANDLE Heap,
  *
  * FIXME: prototype guessed
  */
-BOOLEAN WINAPI RtlDestroyHeap(HANDLE Heap)
+HANDLE WINAPI RtlDestroyHeap( HANDLE Heap )
 {
   dprintf(("NTDLL: RtlDestroyHeap(%08xh)\n",
            Heap));
@@ -504,23 +503,11 @@ BOOLEAN WINAPI RtlGetNtProductType(LPDWORD type)
 }
 
 
-/******************************************************************************
- * RtlEnlargedIntegerMultiply [NTDLL.341]
- * Note: This even works, since gcc returns 64bit values in eax/edx just like
- * the caller expects. However... The relay code won't grok this I think.
- *
- * @@@PH: Parameters are unknown
- */
-/* longlong in VAC++ ? */
-
-extern INT WINAPI RtlEnlargedIntegerMultiply(INT factor1,
-                                             INT factor2);
-
 
 /******************************************************************************
  *  RtlFormatCurrentUserKeyPath             [NTDLL.371]
  */
-DWORD WINAPI RtlFormatCurrentUserKeyPath(PUNICODE_STRING pustrKeyPath)
+NTSTATUS WINAPI RtlFormatCurrentUserKeyPath(IN OUT PUNICODE_STRING pustrKeyPath)
 {
   dprintf(("NTDLL: RtlFormatCurrentUserKeyPath(%08xh) not correctly implemented.\n",
            pustrKeyPath));

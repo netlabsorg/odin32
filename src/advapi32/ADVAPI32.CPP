@@ -1,4 +1,4 @@
-/* $Id: ADVAPI32.CPP,v 1.19 2001-08-10 19:31:19 sandervl Exp $ */
+/* $Id: ADVAPI32.CPP,v 1.20 2002-02-21 22:51:58 sandervl Exp $ */
 
 /*
  * Win32 advanced API functions for OS/2
@@ -1004,46 +1004,6 @@ BOOL WIN32API LogonUserW(LPWSTR  lpszUsername,
 }
 
 
-/*****************************************************************************
- * Name      : LookupAccountNameA
- * Purpose   : The LookupAccountName function accepts the name of a system and
- *             an account as input. It retrieves a security identifier (SID)
- *             for the account and the name of the domain on which the account was found.
- * Parameters: LPCSTR       lpSystemName           address of string for system name
- *             LPCSTR       lpAccountName          address of string for account name
- *             PSID          Sid                    address of security identifier
- *             LPDWORD       cbSid                  address of size of security identifier
- *             LPTSTR        ReferencedDomainName   address of string for referenced domain
- *             LPDWORD       cbReferencedDomainName address of size of domain string
- *             PSID_NAME_USE peUse                  address of SID-type indicator
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
- *****************************************************************************/
-
-BOOL WIN32API LookupAccountNameA(LPCSTR       lpSystemName,
-                                    LPCSTR       lpAccountName,
-                                    PSID          Sid,
-                                    LPDWORD       cbSid,
-                                    LPTSTR        ReferencedDomainName,
-                                    LPDWORD       cbReferencedDomainName,
-                                    PSID_NAME_USE peUse)
-{
-  dprintf(("ADVAPI32: LookupAccountNameA(%s,%s,%08xh,%08xh,%s,%08xh,%08xh) not implemented.\n",
-           lpSystemName,
-           lpAccountName,
-           Sid,
-           cbSid,
-           ReferencedDomainName,
-           cbReferencedDomainName,
-           peUse));
-
-  return (FALSE); /* signal failure */
-}
-
 
 /*****************************************************************************
  * Name      : LookupAccountNameW
@@ -1679,33 +1639,6 @@ BOOL WIN32API SetAclInformation(PACL                  pAcl,
   return (FALSE); /* signal failure */
 }
 
-
-/*****************************************************************************
- * Name      : SetKernelObjectSecurity
- * Purpose   : The SetKernelObjectSecurity function sets the security of a kernel
- *             object. For example, this can be a process, thread, or event.
- * Parameters: HANDLE               hObject handle of object
- *             SECURITY_INFORMATION si      type of information to set
- *             PSECURITY_DESCRIPTOR psd     address of security descriptor
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
- *****************************************************************************/
-
-BOOL WIN32API SetKernelObjectSecurity(HANDLE               hObject,
-                                         SECURITY_INFORMATION si,
-                                         PSECURITY_DESCRIPTOR psd)
-{
-  dprintf(("ADVAPI32: SetKernelObjectSecurity(%08xh,%08xh,%08xh) not implemented.\n",
-           hObject,
-           si,
-           psd));
-
-  return (FALSE); /* signal failure */
-}
 
 
 /*****************************************************************************
