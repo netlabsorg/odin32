@@ -1,4 +1,11 @@
- /* $Id: ChangeLog,v 1.1022 2000-07-02 14:59:52 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.1023 2000-07-03 12:18:02 bird Exp $ */
+
+ 2000-07-03: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - KERNEL32: Added IsDebuggerPresent (debug.cpp). Returns FALSE, but by
+                SETing ODIN32.DEBUGGERPRESENT=1 it will return TRUE. (Some
+                application might issue calls to OutputDebugString if they
+                think they're being debugged.)
+                Moved OutputDebugString(A/W) to debug.cpp.
 
  2000-07-02: Sander van Leeuwen <sandervl@xs4all.nl>
     - RICHED32: Fixed bug when creating edit window (needs to be WS_CHILD)
