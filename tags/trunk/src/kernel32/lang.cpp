@@ -13,8 +13,14 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <odinwrap.h>
+#include <heapstring.h>
+#include <win\winreg.h>
 #include <winos2def.h>
 #include "unicode.h"
+
+ODINDEBUGCHANNEL(KERNEL32-LANG)
+
 
 //******************************************************************************
 //******************************************************************************
@@ -890,56 +896,90 @@ BOOL WIN32API SetLocaleInfoW(LCID    Locale,
 
 
 /*****************************************************************************
- * Name      : DWORD VerLanguageNameA
- * Purpose   : The VerLanguageNameA function converts the specified binary
- *             Microsoft language identifier into a text representation of the language.
- * Parameters: DWORD  idLang   Microsoft language identifier
- *             LPTSTR lpszLang address of buffer for language string
- *             DWORD  cbLang   size of buffer
+ * Name      :
+ * Purpose   :
+ * Parameters:
  * Variables :
- * Result    : size of target buffer
+ * Result    :
  * Remark    :
  * Status    : UNTESTED STUB
  *
- * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-DWORD WIN32API VerLanguageNameA(UINT  idLang,
-                                LPSTR lpszLang,
-                                UINT  cbLang)
+ODINFUNCTION3(DWORD,VerLanguageNameA,DWORD,  wLang,
+                                     LPSTR,  szLang,
+                                     DWORD,  nSize)
 {
-  dprintf(("KERNEL32: VerLanguageNameA(%08x,%08x,%08x) not implemented.\n",
-           idLang,
-           lpszLang,
-           cbLang));
+  char    buffer[80];
+  LPCSTR  name;
+  DWORD   result;
 
-  return (0);
+  /*
+   * First, check \System\CurrentControlSet\control\Nls\Locale\<langid>
+   * from the registry.
+   */
+
+#if 0
+PHS: disabled because if interlinkage with registry
+  sprintf( buffer,
+           "\\System\\CurrentControlSet\\control\\Nls\\Locale\\%08x",
+           wLang );
+
+  result = RegQueryValueA(HKEY_LOCAL_MACHINE,
+                          buffer,
+                          szLang,
+                          (LPLONG)&nSize );
+  if (result == ERROR_SUCCESS ||
+      result == ERROR_MORE_DATA)
+    return nSize;
+#endif
+
+  /*
+   * If that fails, use the internal table
+   * (actually, Windows stores the names in a string table resource ...)
+   */
+
+  lstrcpynA(szLang,
+            "Language-Neutral",
+            nSize);
+
+  return strlen(szLang);
 }
-
 
 /*****************************************************************************
- * Name      : DWORD VerLanguageNameW
- * Purpose   : The VerLanguageNameW function converts the specified binary
- *             Microsoft language identifier into a text representation of the language.
- * Parameters: DWORD  idLang   Microsoft language identifier
- *             LPTSTR lpszLang address of buffer for language string
- *             DWORD  cbLang   size of buffer
+ * Name      :
+ * Purpose   :
+ * Parameters:
  * Variables :
- * Result    : size of target buffer
+ * Result    :
  * Remark    :
  * Status    : UNTESTED STUB
  *
- * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-DWORD WIN32API VerLanguageNameW(UINT  idLang,
-                                LPWSTR lpszLang,
-                                UINT  cbLang)
+ODINFUNCTION3(DWORD,VerLanguageNameW,DWORD,  wLang,
+                                     LPWSTR, szLang,
+                                     DWORD,  nSize)
 {
-  dprintf(("KERNEL32: VerLanguageNameW(%08x,%08x,%08x) not implemented.\n",
-           idLang,
-           lpszLang,
-           cbLang));
+  LPSTR szLangA;
+  DWORD rc;
 
-  return (0);
+  if ( (szLang == NULL) ||
+       (nSize  == 0) )          // validate parameters
+     return 0;
+
+  szLangA = (LPSTR)HEAP_malloc(nSize + 1);
+  rc = VerLanguageNameA(wLang,
+                        szLangA,
+                        nSize);
+  if (rc == ERROR_SUCCESS || rc == ERROR_MORE_DATA)
+    AsciiToUnicodeN(szLangA,
+                    szLang,
+                    nSize);
+  HEAP_free(szLangA);
+  return rc;
 }
+
+

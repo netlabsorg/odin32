@@ -1,4 +1,4 @@
-/* $Id: winbase.h,v 1.2 1999-07-06 15:48:44 phaller Exp $ */
+/* $Id: winbase.h,v 1.3 1999-08-12 23:33:37 phaller Exp $ */
 
 #ifndef __WINE_WINBASE_H
 #define __WINE_WINBASE_H
@@ -1764,9 +1764,8 @@ UINT      WINAPI SetHandleCount(UINT);
 #define     SetSwapAreaSize(w) (w)
 DWORD       WINAPI SizeofResource(HMODULE,HRSRC);
 #define     UnlockSegment(handle) GlobalUnfix((HANDLE)(handle))
-DWORD       WINAPI VerLanguageNameA(UINT,LPSTR,UINT);
-DWORD       WINAPI VerLanguageNameW(UINT,LPWSTR,UINT);
-#define     VerLanguageName WINELIB_NAME_AW(VerLanguageName)
+DWORD       WINAPI VerLanguageNameA(DWORD,LPSTR,DWORD);
+DWORD       WINAPI VerLanguageNameW(DWORD,LPWSTR,DWORD);
 BOOL      WINAPI WritePrivateProfileSectionA(LPCSTR,LPCSTR,LPCSTR);
 BOOL      WINAPI WritePrivateProfileSectionW(LPCWSTR,LPCWSTR,LPCWSTR);
 #define     WritePrivateProfileSection WINELIB_NAME_AW(WritePrivateProfileSection)

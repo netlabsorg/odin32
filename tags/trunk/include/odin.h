@@ -1,4 +1,4 @@
-/* $Id: odin.h,v 1.4 1999-06-10 16:21:48 achimha Exp $ */
+/* $Id: odin.h,v 1.5 1999-08-12 23:33:36 phaller Exp $ */
 /*
  *
  * ODIN - Build Environment Definition
@@ -44,6 +44,7 @@
   #define CDECL     _cdecl
   #define EXPORT    _export
   #define WIN32API  __stdcall
+  #define WINAPI    __stdcall
   #define SYSTEM    __stdcall
   #define PASCAL    _Pascal
   #define UNALIGNED
@@ -54,6 +55,7 @@
   #define CDECL     _cdecl
   #define EXPORT    _export
   #define WIN32API  __stdcall
+  #define WINAPI    __stdcall
   #define SYSTEM    __stdcall
   #define PASCAL    _Pascal
   #define UNALIGNED
@@ -64,6 +66,7 @@
   #define CDECL     __cdecl
   #define EXPORT    _Export
   #define WIN32API  __stdcall
+  #define WINAPI    __stdcall
   #define SYSTEM    _System
   #define PASCAL    _Pascal
   #define UNALIGNED
@@ -75,12 +78,6 @@
 #endif
 #endif
 
-
-/* map WINE to ODIN */
-#ifdef WINAPI
-#  undef WINAPI
-#endif
-#define WINAPI WIN32API
 
 #include <builtin.h>
 

@@ -1,4 +1,4 @@
-/* $Id: version.cpp,v 1.4 1999-07-23 07:30:49 sandervl Exp $ */
+/* $Id: version.cpp,v 1.5 1999-08-12 23:33:37 phaller Exp $ */
 
 /*
  * Win32 Version resource APIs for OS/2
@@ -16,100 +16,32 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <odinwrap.h>
 #include <misc.h>
 #include <unicode.h>
-#include "version.h"
+#include <heapstring.h>
+#include <version.h>
+#include <lzexpand.h>
+#include <win\winreg.h>
 
-#include "lzexpand.h"
 
+ODINDEBUGCHANNEL(VERSION)
 
-/******************************************************************************/
-/******************************************************************************/
-BOOL WIN32API VERSION_GetFileVersionInfoA(LPTSTR lpszFile,
-                                          DWORD  dwHandle,
-                                          DWORD  cbBuf,
-                                          LPVOID lpvData)
-{
-   dprintf(("VERSION: GetFileVersionInfoA %s\n",
-            lpszFile));
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
 
-   return GetVersionStruct(lpszFile,
-                           (char *)lpvData,
-                           cbBuf);
-}
-/******************************************************************************/
-/******************************************************************************/
-BOOL WIN32API VERSION_GetFileVersionInfoW(LPWSTR lpszFile,
-                                          DWORD  dwHandle,
-                                          DWORD  cbBuf,
-                                          LPVOID lpvData)
-{
-  BOOL  rc;
-  char *astring = UnicodeToAsciiString(lpszFile);
-
-  dprintf(("VERSION: GetFileVersionInfoW (%s,%08xh,%08xh,%08xh)\n",
-           lpszFile,
-           dwHandle,
-           cbBuf,
-           lpvData));
-
-  rc = GetVersionStruct(astring, (char *)lpvData, cbBuf);
-  FreeAsciiString(astring);
-  return(rc);
-}
-/******************************************************************************/
-/******************************************************************************/
-DWORD WIN32API VERSION_GetFileVersionInfoSizeA(LPTSTR  lpszFile,
-                                               LPDWORD lpdwHandle)
-{
-  dprintf(("VERSION: GetFileVersionInfoSizeA(%s,%08xh)\n",
-           lpszFile,
-           lpdwHandle));
-
-  if(lpdwHandle)
-    lpdwHandle = 0;
-
-  return GetVersionSize(lpszFile);
-}
-/******************************************************************************/
-/******************************************************************************/
-DWORD WIN32API VERSION_GetFileVersionInfoSizeW(LPWSTR  lpszFile,
-                                               LPDWORD lpdwHandle)
-{
- char  *astring = UnicodeToAsciiString(lpszFile);
- DWORD rc;
-
- dprintf(("VERSION: GetFileVersionInfoSizeW(%08xh,%08xh)\n",
-          lpszFile,
-          lpdwHandle));
-
- if(lpdwHandle)
-   lpdwHandle = 0;
-
- rc = GetVersionSize(astring);
- FreeAsciiString(astring);
- return(rc);
-}
-/******************************************************************************/
-/******************************************************************************/
-INT WIN32API lstrncmpiW( LPCWSTR str1, LPCWSTR str2, INT n )
-{
-    INT res;
-
-    if (!n) return 0;
-    while ((--n > 0) && *str1)
-    {
-        if ((res = towupper(*str1) - towupper(*str2)) != 0) return res;
-        str1++;
-        str2++;
-    }
-    return towupper(*str1) - towupper(*str2);
-}
-/***********************************************************************
- *           VersionInfo16_FindChild             [internal]
- */
-VS_VERSION_INFO_STRUCT16 *VersionInfo16_FindChild( VS_VERSION_INFO_STRUCT16 *info, 
-                                            LPCSTR szKey, UINT cbKey )
+VS_VERSION_INFO_STRUCT16 *VersionInfo16_FindChild(VS_VERSION_INFO_STRUCT16 *info,
+                                                  LPCSTR                   szKey,
+                                                  UINT                     cbKey )
 {
     VS_VERSION_INFO_STRUCT16 *child = VersionInfo16_Children( info );
 
@@ -118,23 +50,36 @@ VS_VERSION_INFO_STRUCT16 *VersionInfo16_FindChild( VS_VERSION_INFO_STRUCT16 *inf
         if ( !strnicmp( child->szKey, szKey, cbKey ) )
             return child;
 
-	if (!(child->wLength)) return NULL;
+    if (!(child->wLength)) return NULL;
         child = VersionInfo16_Next( child );
     }
 
     return NULL;
 }
-/***********************************************************************
- *           VersionInfo32_FindChild             [internal]
- */
-VS_VERSION_INFO_STRUCT32 *VersionInfo32_FindChild( VS_VERSION_INFO_STRUCT32 *info, 
-                                            LPCWSTR szKey, UINT cbKey )
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+VS_VERSION_INFO_STRUCT32 *VersionInfo32_FindChild(VS_VERSION_INFO_STRUCT32 *info,
+                                                  LPCWSTR                  szKey,
+                                                  UINT                     cbKey )
 {
     VS_VERSION_INFO_STRUCT32 *child = VersionInfo32_Children( info );
 
     while ( (DWORD)child < (DWORD)info + info->wLength )
     {
-        if ( !lstrncmpiW( child->szKey, szKey, cbKey ) )
+//        if ( !lstrcmpniW( child->szKey, szKey, cbKey ) )
+        if ( !lstrcmpiW( child->szKey, szKey) )
             return child;
 
         child = VersionInfo32_Next( child );
@@ -142,119 +87,6 @@ VS_VERSION_INFO_STRUCT32 *VersionInfo32_FindChild( VS_VERSION_INFO_STRUCT32 *inf
 
     return NULL;
 }
-/******************************************************************************/
-/******************************************************************************
- *           VerQueryValue32W              [VERSION.13]
- */
-BOOL WIN32API VERSION_VerQueryValueW( LPVOID pBlock, LPCWSTR lpSubBlock,
-                                      LPVOID *lplpBuffer, UINT *puLen )
-{
-    VS_VERSION_INFO_STRUCT32 *info = (VS_VERSION_INFO_STRUCT32 *)pBlock;
-    if ( VersionInfoIs16( info ) )
-    {
-        dprintf(("VERSION: called on NE resource!\n"));
-        return FALSE;
-    }
-
-    dprintf(("VERSION: (%p,%s,%p,%p)\n",
-             pBlock, lpSubBlock, lplpBuffer, puLen ));
-
-    while ( *lpSubBlock )
-    {
-        /* Find next path component */
-        LPCWSTR lpNextSlash;
-        for ( lpNextSlash = lpSubBlock; *lpNextSlash; lpNextSlash++ )
-            if ( *lpNextSlash == '\\' )
-                break;
-
-        /* Skip empty components */
-        if ( lpNextSlash == lpSubBlock )
-        {
-            lpSubBlock++;
-            continue;
-        }
-
-        /* We have a non-empty component: search info for key */
-        info = VersionInfo32_FindChild( info, lpSubBlock, lpNextSlash-lpSubBlock );
-        if ( !info ) return FALSE;
-
-        /* Skip path component */
-        lpSubBlock = lpNextSlash;
-    }
-
-    /* Return value */
-    *lplpBuffer = VersionInfo32_Value( info );
-    *puLen = info->wValueLength;
-
-    return TRUE;
-}
-/******************************************************************************/
-/******************************************************************************/
-/***********************************************************************
- *           VerQueryValue32A              [VERSION.12]
- */
-BOOL WIN32API VERSION_VerQueryValueA( LPVOID pBlock, LPCSTR lpSubBlock,
-                                      LPVOID *lplpBuffer, UINT *puLen )
-{
-    VS_VERSION_INFO_STRUCT16 *info = (VS_VERSION_INFO_STRUCT16 *)pBlock;
-    if ( !VersionInfoIs16( info ) )
-    {
-        // this is a quick hack, not much tested 
-        WCHAR *ustring = (WCHAR *)malloc(strlen((char *)lpSubBlock)*2+1);
-        LPVOID ubuffer;
-        char *abuffer;
-        UINT len = *puLen * 2;
-        BOOL rc;
-
-        dprintf(("VERSION: called on PE unicode resource!\n" ));
-
-        AsciiToUnicode((char *)lpSubBlock, ustring);
-        rc = VERSION_VerQueryValueW( pBlock, (LPCWSTR)ustring, &ubuffer, &len);
-        if(lpSubBlock[0] == '\\' && lpSubBlock[1] == 0)
-          *lplpBuffer = ubuffer;
-        else
-        {
-          *lplpBuffer = malloc(len+1); // no free, memory leak
-          UnicodeToAsciiN((WCHAR *)ubuffer, (char *)*lplpBuffer, len);
-        }
-        *puLen = len;
-        free(ustring);
-        return rc;
-    }
-
-    dprintf(("VERSION: (%p,%s,%p,%p)\n",
-             pBlock, lpSubBlock, lplpBuffer, puLen ));
-
-    while ( *lpSubBlock )
-    {
-        /* Find next path component */
-        LPCSTR lpNextSlash;
-        for ( lpNextSlash = lpSubBlock; *lpNextSlash; lpNextSlash++ )
-            if ( *lpNextSlash == '\\' )
-                break;
-
-        /* Skip empty components */
-        if ( lpNextSlash == lpSubBlock )
-        {
-            lpSubBlock++;
-            continue;
-        }
-
-        /* We have a non-empty component: search info for key */
-        info = VersionInfo16_FindChild( info, lpSubBlock, lpNextSlash-lpSubBlock );
-        if ( !info ) return FALSE;
-
-        /* Skip path component */
-        lpSubBlock = lpNextSlash;
-    }
-
-    /* Return value */
-    *lplpBuffer = VersionInfo16_Value( info );
-    *puLen = info->wValueLength;
-
-    return TRUE;
-}
-/******************************************************************************/
 
 
 /******************************************************************************
@@ -395,6 +227,298 @@ static int  testFileExclusiveExistence(char const * path,
 }
 
 
+static LPBYTE _fetch_versioninfo(LPSTR fn,VS_FIXEDFILEINFO **vffi)
+{
+  DWORD   alloclen;
+  LPBYTE  buf;
+  DWORD   ret;
+
+  alloclen = 1000;
+  buf = (LPBYTE)malloc(alloclen);
+
+  while (1)
+  {
+    ret = GetFileVersionInfoA(fn,
+                              0,
+                              alloclen,
+                              buf);
+    if (!ret)
+    {
+      free(buf);
+      return 0;
+    }
+
+    if (alloclen<*(WORD*)buf)
+    {
+      free(buf);
+      alloclen = *(WORD*)buf;
+      buf = (LPBYTE)malloc(alloclen);
+    }
+    else
+    {
+      *vffi = (VS_FIXEDFILEINFO*)(buf+0x14);
+
+      if ((*vffi)->dwSignature == 0x004f0049) /* hack to detect unicode */
+        *vffi = (VS_FIXEDFILEINFO*)(buf+0x28);
+
+      if ((*vffi)->dwSignature != VS_FFI_SIGNATURE)
+        dprintf(("VERSION: _fetch_versioninfo: Bad VS_FIXEDFILEINFO signature 0x%08lx\n",
+                 (*vffi)->dwSignature));
+
+      return buf;
+   }
+  }
+}
+
+static DWORD _error2vif(DWORD error)
+{
+  switch (error)
+  {
+    case ERROR_ACCESS_DENIED:
+      return VIF_ACCESSVIOLATION;
+
+    case ERROR_SHARING_VIOLATION:
+      return VIF_SHARINGVIOLATION;
+
+    default:
+      return 0;
+  }
+}
+
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION4(BOOL,GetFileVersionInfoA,LPSTR, lpszFile,
+                                       DWORD, dwHandle,
+                                       DWORD, cbBuf,
+                                       LPVOID,lpvData)
+{
+  return GetVersionStruct((char *)lpszFile,
+                          (char *)lpvData,
+                          cbBuf);
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION4(BOOL,GetFileVersionInfoW,LPWSTR, lpszFile,
+                                       DWORD,  dwHandle,
+                                       DWORD,  cbBuf,
+                                       LPVOID, lpvData)
+{
+  BOOL rc;
+  char  *astring = UnicodeToAsciiString(lpszFile);
+
+  rc = GetVersionStruct(astring, (char *)lpvData, cbBuf);
+  FreeAsciiString(astring);
+  return(rc);
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION2(DWORD,GetFileVersionInfoSizeA,LPSTR,   lpszFile,
+                                            LPDWORD, lpdwHandle)
+{
+  if(lpdwHandle)
+    lpdwHandle = 0;
+
+  return GetVersionSize(lpszFile);
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION2(DWORD,GetFileVersionInfoSizeW,LPWSTR,  lpszFile,
+                                            LPDWORD, lpdwHandle)
+{
+  char  *astring = UnicodeToAsciiString((LPWSTR)lpszFile);
+  DWORD rc;
+
+
+  if(lpdwHandle)
+    lpdwHandle = 0;
+
+  rc = GetVersionSize(astring);
+  FreeAsciiString(astring);
+  return(rc);
+}
+
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION4(BOOL,VerQueryValueW, LPVOID,  pBlock,
+                                   LPWSTR,  lpSubBlock,
+                                   LPVOID*, lplpBuffer,
+                                   UINT*,   puLen)
+{
+    VS_VERSION_INFO_STRUCT32 *info = (VS_VERSION_INFO_STRUCT32 *)pBlock;
+    if ( VersionInfoIs16( info ) )
+    {
+        dprintf(("VERSION: called on NE resource!\n"));
+        return FALSE;
+    }
+
+    while ( *lpSubBlock )
+    {
+        /* Find next path component */
+        LPCWSTR lpNextSlash;
+        for ( lpNextSlash = lpSubBlock; *lpNextSlash; lpNextSlash++ )
+            if ( *lpNextSlash == '\\' )
+                break;
+
+        /* Skip empty components */
+        if ( lpNextSlash == lpSubBlock )
+        {
+            lpSubBlock++;
+            continue;
+        }
+
+        /* We have a non-empty component: search info for key */
+        info = VersionInfo32_FindChild( info, lpSubBlock, lpNextSlash-lpSubBlock );
+        if ( !info )
+          return FALSE;
+
+        /* Skip path component */
+        lpSubBlock = (LPWSTR)lpNextSlash;
+    }
+
+    /* Return value */
+    *lplpBuffer = VersionInfo32_Value( info );
+    *puLen = info->wValueLength;
+
+    return TRUE;
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION4(BOOL,VerQueryValueA,LPVOID,  pBlock,
+                                  LPSTR,   lpSubBlock,
+                                  LPVOID*, lplpBuffer,
+                                  UINT*,   puLen )
+{
+    VS_VERSION_INFO_STRUCT16 *info = (VS_VERSION_INFO_STRUCT16 *)pBlock;
+    if ( !VersionInfoIs16( info ) )
+    {
+        // this is a quick hack, not much tested
+        WCHAR *ustring = (WCHAR *)malloc(strlen((char *)lpSubBlock)*2+1);
+        LPVOID ubuffer;
+        char *abuffer;
+        UINT len = *puLen * 2;
+        BOOL rc;
+
+        dprintf(("VERSION: called on PE unicode resource!\n" ));
+
+        AsciiToUnicode((char *)lpSubBlock, ustring);
+        rc = VerQueryValueW( pBlock, (LPWSTR)ustring, &ubuffer, &len);
+        if(lpSubBlock[0] == '\\' && lpSubBlock[1] == 0)
+          *lplpBuffer = ubuffer;
+        else
+        {
+          *lplpBuffer = malloc(len+1); // no free, memory leak
+          UnicodeToAsciiN((WCHAR *)ubuffer, (char *)*lplpBuffer, len);
+        }
+        *puLen = len;
+        free(ustring);
+        return rc;
+    }
+
+    while ( *lpSubBlock )
+    {
+        /* Find next path component */
+        LPCSTR lpNextSlash;
+        for ( lpNextSlash = lpSubBlock; *lpNextSlash; lpNextSlash++ )
+            if ( *lpNextSlash == '\\' )
+                break;
+
+        /* Skip empty components */
+        if ( lpNextSlash == lpSubBlock )
+        {
+            lpSubBlock++;
+            continue;
+        }
+
+        /* We have a non-empty component: search info for key */
+        info = VersionInfo16_FindChild( info, lpSubBlock, lpNextSlash-lpSubBlock );
+        if ( !info ) return FALSE;
+
+        /* Skip path component */
+        lpSubBlock = (LPSTR)lpNextSlash;
+    }
+
+    /* Return value */
+    *lplpBuffer = VersionInfo16_Value( info );
+    *puLen = info->wValueLength;
+
+    return TRUE;
+}
+
+
+
+
 /*****************************************************************************
  *
  *   VerFindFile() [VER.8]
@@ -408,15 +532,14 @@ static int  testFileExclusiveExistence(char const * path,
  *
  ****************************************************************************/
 
-/* VerFindFile32A                                    [VERSION.5] */
-DWORD WIN32API VERSION_VerFindFileA(UINT flags,
-                                    LPCSTR lpszFilename,
-                                    LPCSTR lpszWinDir,
-                                    LPCSTR lpszAppDir,
-                                    LPSTR lpszCurDir,
-                                    UINT *lpuCurDirLen,
-                                    LPSTR lpszDestDir,
-                                    UINT *lpuDestDirLen )
+ODINFUNCTION8(DWORD,VerFindFileA,DWORD,  flags,
+                                 LPSTR,  lpszFilename,
+                                 LPSTR,  lpszWinDir,
+                                 LPSTR,  lpszAppDir,
+                                 LPSTR,  lpszCurDir,
+                                 PUINT,  lpuCurDirLen,
+                                 LPSTR,  lpszDestDir,
+                                 PUINT,  lpuDestDirLen )
 {
   DWORD  retval;
   char  curDir[256];
@@ -425,17 +548,6 @@ DWORD WIN32API VERSION_VerFindFileA(UINT flags,
   unsigned int  destDirSizeReq;
 
   retval = 0;
-
-  /* Print out debugging information */
-  dprintf(("VERSION: VerFindFileA(%08xh,%s,%s,%s,%08xh,%08xh,%08xh,%08xh)\n",
-           flags,
-           lpszFilename,
-           lpszWinDir,
-           lpszAppDir,
-           lpszCurDir,
-           lpuCurDirLen,
-           lpszDestDir,
-           lpuDestDirLen));
 
   ver_dstring("\tlpszFilename = ", lpszFilename, "");
   ver_dstring("\tlpszWinDir = ", lpszWinDir, "");
@@ -558,15 +670,27 @@ DWORD WIN32API VERSION_VerFindFileA(UINT flags,
   return retval;
 }
 
-/* VerFindFile32W                                    [VERSION.6] */
-DWORD WIN32API VERSION_VerFindFileW(UINT   flags,
-                                    LPWSTR filename,
-                                    LPWSTR windir,
-                                    LPWSTR appdir,
-                                    LPWSTR curdir,
-                                    UINT   *pcurdirlen,
-                                    LPWSTR destdir,
-                                    UINT   *pdestdirlen)
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION8(DWORD,VerFindFileW,DWORD,   flags,
+                                 LPWSTR,  lpszFilename,
+                                 LPWSTR,  lpszWinDir,
+                                 LPWSTR,  lpszAppDir,
+                                 LPWSTR,  lpszCurDir,
+                                 PUINT,   lpuCurDirLen,
+                                 LPWSTR,  lpszDestDir,
+                                 PUINT,   lpuDestDirLen )
 {
     UINT  curdirlen,
           destdirlen;
@@ -577,25 +701,25 @@ DWORD WIN32API VERSION_VerFindFileW(UINT   flags,
           wcd;
     DWORD ret;
 
-    wfn = UnicodeToAsciiString(filename );
-    wwd = UnicodeToAsciiString(windir );
-    wad = UnicodeToAsciiString(appdir );
-    wcd = (LPSTR)HeapAlloc( GetProcessHeap(), 0, *pcurdirlen );
-    wdd = (LPSTR)HeapAlloc( GetProcessHeap(), 0, *pdestdirlen );
+    wfn = UnicodeToAsciiString(lpszFilename );
+    wwd = UnicodeToAsciiString(lpszWinDir );
+    wad = UnicodeToAsciiString(lpszAppDir );
+    wcd = (LPSTR)HeapAlloc( GetProcessHeap(), 0, *lpuCurDirLen );
+    wdd = (LPSTR)HeapAlloc( GetProcessHeap(), 0, *lpuDestDirLen );
 
-    ret = VERSION_VerFindFileA(flags,
-                               wfn,
-                               wwd,
-                               wad,
-                               wcd,
-                               &curdirlen,
-                               wdd,
-                               &destdirlen);
+    ret = VerFindFileA(flags,
+                       wfn,
+                       wwd,
+                       wad,
+                       wcd,
+                       &curdirlen,
+                       wdd,
+                       &destdirlen);
 
-    AsciiToUnicodeN(wcd,curdir,*pcurdirlen);
-    AsciiToUnicodeN(wdd,destdir,*pdestdirlen);
-    *pcurdirlen = strlen(wcd);
-    *pdestdirlen = strlen(wdd);
+    AsciiToUnicodeN(wcd,lpszCurDir,*lpuCurDirLen);
+    AsciiToUnicodeN(wdd,lpszDestDir,*lpuDestDirLen);
+    *lpuCurDirLen = strlen(wcd);
+    *lpuDestDirLen = strlen(wdd);
 
     FreeAsciiString(wfn );
     FreeAsciiString(wwd );
@@ -605,76 +729,27 @@ DWORD WIN32API VERSION_VerFindFileW(UINT   flags,
     return ret;
 }
 
-static LPBYTE _fetch_versioninfo(LPSTR fn,VS_FIXEDFILEINFO **vffi)
-{
-  DWORD   alloclen;
-  LPBYTE  buf;
-  DWORD   ret;
 
-  alloclen = 1000;
-  buf = (LPBYTE)malloc(alloclen);
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
 
-  while (1)
-  {
-    ret = VERSION_GetFileVersionInfoA(fn,
-                                      0,
-                                      alloclen,
-                                      buf);
-    if (!ret)
-    {
-      free(buf);
-      return 0;
-    }
-
-    if (alloclen<*(WORD*)buf)
-    {
-      free(buf);
-      alloclen = *(WORD*)buf;
-      buf = (LPBYTE)malloc(alloclen);
-    }
-    else
-    {
-      *vffi = (VS_FIXEDFILEINFO*)(buf+0x14);
-
-      if ((*vffi)->dwSignature == 0x004f0049) /* hack to detect unicode */
-        *vffi = (VS_FIXEDFILEINFO*)(buf+0x28);
-
-      if ((*vffi)->dwSignature != VS_FFI_SIGNATURE)
-        dprintf(("VERSION: _fetch_versioninfo: Bad VS_FIXEDFILEINFO signature 0x%08lx\n",
-                 (*vffi)->dwSignature));
-
-      return buf;
-   }
-  }
-}
-
-static DWORD _error2vif(DWORD error)
-{
-  switch (error)
-  {
-    case ERROR_ACCESS_DENIED:
-      return VIF_ACCESSVIOLATION;
-
-    case ERROR_SHARING_VIOLATION:
-      return VIF_SHARINGVIOLATION;
-
-    default:
-      return 0;
-  }
-}
-
-
-/******************************************************************************
- * VerInstallFile32A [VERSION.7]
- */
-DWORD WIN32API VERSION_VerInstallFileA(UINT   flags,
-                                       LPCSTR srcfilename,
-                                       LPCSTR destfilename,
-                                       LPCSTR srcdir,
-                                       LPCSTR destdir,
-                                       LPCSTR curdir,
-                                       LPSTR  tmpfile,
-                                       UINT   *tmpfilelen )
+ODINFUNCTION8(DWORD,VerInstallFileA,DWORD,  flags,
+                                    LPSTR,  srcfilename,
+                                    LPSTR,  destfilename,
+                                    LPSTR,  srcdir,
+                                    LPSTR,  destdir,
+                                    LPSTR,  curdir,
+                                    LPSTR,  tmpfile,
+                                    PUINT,  tmpfilelen )
 {
     LPCSTR   pdest;
     char     destfn[260],
@@ -689,21 +764,7 @@ DWORD WIN32API VERSION_VerInstallFileA(UINT   flags,
     LPBYTE   buf1,buf2;
     OFSTRUCT ofs;
 
-    dprintf(("VERSION: VerInstallFileA(%x,%s,%s,%s,%s,%s,%p,%d)\n",
-             flags,
-             srcfilename,
-             destfilename,
-             srcdir,
-             destdir,
-             curdir,
-             tmpfile,
-             *tmpfilelen));
 
-#if 1
-  dprintf(("VERSION: VersInstallFileA not implemented\n"));
-
-  return 0;
-#else
     xret = 0;
 
     sprintf(srcfn,
@@ -867,19 +928,29 @@ DWORD WIN32API VERSION_VerInstallFileA(UINT   flags,
     }
     LZClose(hfsrc);
     return xret;
-#endif
 }
 
 
-/* VerInstallFile32W                              [VERSION.8] */
-DWORD WIN32API VERSION_VerInstallFileW(UINT   flags,
-                                       LPWSTR srcfilename,
-                                       LPWSTR destfilename,
-                                       LPWSTR srcdir,
-                                       LPWSTR destdir,
-                                       LPWSTR curdir,
-                                       LPWSTR tmpfile,
-                                       UINT   *tmpfilelen )
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION8(DWORD,VerInstallFileW,DWORD,   flags,
+                                    LPWSTR,  srcfilename,
+                                    LPWSTR,  destfilename,
+                                    LPWSTR,  srcdir,
+                                    LPWSTR,  destdir,
+                                    LPWSTR,  curdir,
+                                    LPWSTR,  tmpfile,
+                                    PUINT,   tmpfilelen )
 {
     LPSTR wsrcf,
           wsrcd,
@@ -896,14 +967,14 @@ DWORD WIN32API VERSION_VerInstallFileW(UINT   flags,
     wtmpf  = UnicodeToAsciiString(tmpfile );
     wcurd  = UnicodeToAsciiString(curdir );
 
-    ret = VERSION_VerInstallFileA(flags,
-                                  wsrcf,
-                                  wdestf,
-                                  wsrcd,
-                                  wdestd,
-                                  wcurd,
-                                  wtmpf,
-                                  tmpfilelen);
+    ret = VerInstallFileA(flags,
+                          wsrcf,
+                          wdestf,
+                          wsrcd,
+                          wdestd,
+                          wcurd,
+                          wtmpf,
+                          tmpfilelen);
     if (!ret)
       AsciiToUnicodeN(wtmpf,
                       tmpfile,
@@ -921,100 +992,5 @@ DWORD WIN32API VERSION_VerInstallFileW(UINT   flags,
     return ret;
 }
 
-
-/***********************************************************************
- *           VerLanguageName32A              [VERSION.9]
- */
-DWORD WIN32API VERSION_VerLanguageNameA(UINT  wLang,
-                                        LPSTR szLang,
-                                        UINT  nSize)
-{
-  char    buffer[80];
-  LPCSTR  name;
-  DWORD   result;
-
-  dprintf(("VERSION: VerLanguageNameA(%08xh,%08xh,%08xh) not implemented.\n",
-           wLang,
-           szLang,
-           nSize));
-
-#if 0
-  /*
-   * First, check \System\CurrentControlSet\control\Nls\Locale\<langid>
-   * from the registry.
-   */
-
-  sprintf( buffer,
-           "\\System\\CurrentControlSet\\control\\Nls\\Locale\\%08x",
-           wLang );
-
-  result = RegQueryValueA(HKEY_LOCAL_MACHINE,
-                          buffer,
-                          szLang,
-                          (LPDWORD)&nSize );
-  if (result == ERROR_SUCCESS ||
-      result == ERROR_MORE_DATA)
-    return nSize;
-
-  /*
-   * If that fails, use the internal table
-   * (actually, Windows stores the names in a string table resource ...)
-   */
-
-  name = WINE_GetLanguageName( wLang );
-  lstrcpynA( szLang, name, nSize );
-  return lstrlenA( name );
-#endif
-
-  return 0;
-}
-
-/***********************************************************************
- *           VerLanguageName32W              [VERSION.10]
- */
-DWORD WIN32API VERSION_VerLanguageNameW(UINT   wLang,
-                                        LPWSTR szLang,
-                                        UINT   nSize )
-{
-  char    buffer[80];
-  LPWSTR  keyname;
-  LPCSTR  name;
-  DWORD   result;
-
-  dprintf(("VERSION: VerLanguageNameW(%08xh,%08xh,%08xh) not implemented.\n",
-           wLang,
-           szLang,
-           nSize));
-
-#if 0
-  /*
-   * First, check \System\CurrentControlSet\control\Nls\Locale\<langid>
-   * from the registry.
-   */
-
-  sprintf( buffer,
-           "\\System\\CurrentControlSet\\control\\Nls\\Locale\\%08x",
-           wLang );
-
-  keyname = HEAP_strdupAtoW( GetProcessHeap(), 0, buffer );
-  result = RegQueryValueW( HKEY_LOCAL_MACHINE, keyname, szLang, (LPDWORD)&nSize );
-  HeapFree( GetProcessHeap(), 0, keyname );
-
-  if (result == ERROR_SUCCESS ||
-      result == ERROR_MORE_DATA)
-    return nSize;
-
-  /*
-   * If that fails, use the internal table
-   * (actually, Windows stores the names in a string table resource ...)
-   */
-
-  name = WINE_GetLanguageName( wLang );
-  lstrcpynAtoW( szLang, name, nSize );
-  return lstrlenA( name );
-#else
-  return 0;
-#endif
-}
 
 

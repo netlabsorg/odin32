@@ -1,30 +1,31 @@
-/* $Id: winver.h,v 1.1 1999-05-24 20:19:23 ktk Exp $ */
+/* $Id: winver.h,v 1.2 1999-08-12 23:33:37 phaller Exp $ */
 
 #ifndef __WINE_WINVER_H
 #define __WINE_WINVER_H
 
 #include "windef.h"
 
-DWORD       WINAPI VerFindFile16(UINT16,LPCSTR,LPCSTR,LPCSTR,LPSTR,UINT16*,LPSTR,UINT16*);
-DWORD       WINAPI VerFindFileA(UINT,LPCSTR,LPCSTR,LPCSTR,LPSTR,UINT*,LPSTR,UINT*);
-DWORD       WINAPI VerFindFileW(UINT,LPCWSTR,LPCWSTR,LPCWSTR,LPWSTR,UINT*,LPWSTR,UINT*);
-#define     VerFindFile WINELIB_NAME_AW(VerFindFile)
-DWORD       WINAPI VerInstallFile16(UINT16,LPCSTR,LPCSTR,LPCSTR,LPCSTR,LPCSTR,LPSTR,UINT16*);
-DWORD       WINAPI VerInstallFileA(UINT,LPCSTR,LPCSTR,LPCSTR,LPCSTR,LPCSTR,LPSTR,UINT*);
-DWORD       WINAPI VerInstallFileW(UINT,LPCWSTR,LPCWSTR,LPCWSTR,LPCWSTR,LPCWSTR,LPWSTR,UINT*);
-#define     VerInstallFile WINELIB_NAME_AW(VerInstallFile)
-DWORD       WINAPI VerLanguageName16(UINT16,LPSTR,UINT16);
-DWORD       WINAPI VerQueryValue16(SEGPTR,LPCSTR,SEGPTR*,UINT16*);
-DWORD       WINAPI VerQueryValueA(LPVOID,LPCSTR,LPVOID*,UINT*);
-DWORD       WINAPI VerQueryValueW(LPVOID,LPCWSTR,LPVOID*,UINT*);
-#define     VerQueryValue WINELIB_NAME_AW(VerQueryValue)
-DWORD       WINAPI GetFileVersionInfoSize16(LPCSTR,LPDWORD);
-DWORD       WINAPI GetFileVersionInfoSizeA(LPCSTR,LPDWORD);
-DWORD       WINAPI GetFileVersionInfoSizeW(LPCWSTR,LPDWORD);
-#define     GetFileVersionInfoSize WINELIB_NAME_AW(GetFileVersionInfoSize)
-DWORD       WINAPI GetFileVersionInfo16(LPCSTR,DWORD,DWORD,LPVOID);
-DWORD       WINAPI GetFileVersionInfoA(LPCSTR,DWORD,DWORD,LPVOID);
-DWORD       WINAPI GetFileVersionInfoW(LPCWSTR,DWORD,DWORD,LPVOID);
-#define     GetFileVersionInfo WINELIB_NAME_AW(GetFileVersionInfo)
+// enable C linkage to avoid parameter mangling
+#ifdef __cplusplus__
+extern "C" {
+#endif
+
+
+DWORD       WINAPI VerFindFileA(DWORD,LPSTR,LPSTR,LPSTR,LPSTR,PUINT,LPSTR,PUINT);
+DWORD       WINAPI VerFindFileW(DWORD,LPWSTR,LPWSTR,LPWSTR,LPWSTR,PUINT,LPWSTR,PUINT);
+DWORD       WINAPI VerInstallFileA(DWORD,LPSTR,LPSTR,LPSTR,LPSTR,LPSTR,LPSTR,PUINT);
+DWORD       WINAPI VerInstallFileW(DWPRD,LPWSTR,LPWSTR,LPWSTR,LPWSTR,LPWSTR,LPWSTR,PUINT);
+DWORD       WINAPI VerQueryValueA(LPVOID,LPSTR,LPVOID*,PUINT);
+DWORD       WINAPI VerQueryValueW(LPVOID,LPWSTR,LPVOID*,PUINT);
+DWORD       WINAPI GetFileVersionInfoSizeA(LPSTR,LPDWORD);
+DWORD       WINAPI GetFileVersionInfoSizeW(LPWSTR,LPDWORD);
+BOOL        WINAPI GetFileVersionInfoA(LPSTR,DWORD,DWORD,LPVOID);
+BOOL        WINAPI GetFileVersionInfoW(LPWSTR,DWORD,DWORD,LPVOID);
+
+// enable C linkage to avoid parameter mangling
+#ifdef __cplusplus__
+  }
+#endif
+
 
 #endif /* __WINE_WINVER_H */
