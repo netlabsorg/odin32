@@ -1,4 +1,4 @@
-/* $Id: winmouse.cpp,v 1.9 2000-05-03 18:35:56 sandervl Exp $ */
+/* $Id: winmouse.cpp,v 1.10 2000-05-05 18:23:07 sandervl Exp $ */
 /*
  * Mouse handler for DINPUT
  *
@@ -116,21 +116,25 @@ HWND WIN32API GetCapture(void)
 }
 //******************************************************************************
 //******************************************************************************
-HWND WIN32API SetCapture( HWND hwnd)
+HWND WIN32API SetCapture(HWND hwnd)
 {
  HWND hwndPrev = GetCapture();
+ BOOL rc;
 
     if(hwnd == 0) {
 	ReleaseCapture();
 	return hwndPrev;
     }
-    OSLibWinSetCapture(Win32Window::Win32ToOS2Handle(hwnd));
-    dprintf(("USER32: SetCapture %x (prev %x)", hwnd, hwndPrev));
+    if(hwndPrev != NULL) {
+	//SvL: WinSetCapture returns an error if mouse is already captured
+	ReleaseCapture();
+    }
+    rc = OSLibWinSetCapture(Win32Window::Win32ToOS2Handle(hwnd));
+    dprintf(("USER32: SetCapture %x (prev %x) returned %d", hwnd, hwndPrev, rc));
     if(hwndPrev) {
     	SendMessageA(hwndPrev, WM_CAPTURECHANGED, 0L, hwnd);
     }
     return hwndPrev;
-//    return 0;
 }
 //******************************************************************************
 //******************************************************************************
