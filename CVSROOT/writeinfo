@@ -22,10 +22,12 @@
 /src/olesvr32                              sandervl davidr
 /src/olecli32                              sandervl davidr
 /src/oledlg                                sandervl davidr
-/src/imm32                                 sandervl
-/src/imagehlp                              sandervl
+/src/imm32                                 sandervl jens
+/src/imagehlp                              sandervl jens
 /src/rasapi32                              sandervl jens
-/src/msacm32                               sandervl
+/src/msacm32                               sandervl jens
+/src/psapi                                 sandervl jens
+/src/msvfw32                               sandervl jens
 /src/odincrt                               sandervl phaller achimha hugh
 /src/OMFDUMP                               sandervl phaller achimha bird
 /src/pe2lx                                 sandervl bird achimha

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.15 1999-09-01 18:49:15 sandervl Exp $
+# $Id: makefile,v 1.16 1999-09-04 09:08:06 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -80,6 +80,10 @@ all:
         $(MAKE_CMD)
         cd ..\imm32
         $(MAKE_CMD)
+        cd ..\psapi
+        $(MAKE_CMD)
+        cd ..\msvfw32
+        $(MAKE_CMD)
         cd ..\msacm32
         $(MAKE_CMD)
         cd ..\imagehlp
@@ -147,4 +151,8 @@ clean:
         cd ..\NTDLL
         $(MAKE_CMD) clean
         cd ..\LZ32
+        $(MAKE_CMD) clean
+        cd ..\psapi
+        $(MAKE_CMD) clean
+        cd ..\msvfw32
         $(MAKE_CMD) clean
