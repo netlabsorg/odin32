@@ -1,4 +1,4 @@
-# $Id: mini.mak,v 1.1.2.4 2001-08-14 22:14:34 bird Exp $
+# $Id: mini.mak,v 1.1.2.5 2001-08-14 22:51:29 bird Exp $
 
 #
 # Odin32 API
@@ -74,7 +74,7 @@ TARGET  = mini
 !if 1
 $(OBJDIR)\$(TARGET).exe: $(OBJS)  $(DEFFILE) $(OBJDIR)\$(TARGET).lrf
     wlink system os2v2 file {$(OBJS)} name $(OBJDIR)\.exe \
-    import vprintf LIBCN.150 \
+    import printf LIBCN.150 \
 #    import DosPutMessage MSG.5   \
         option offset=0x0000 option alignment=1 option stack=4060
     mv $(OBJDIR)\.exe $@
