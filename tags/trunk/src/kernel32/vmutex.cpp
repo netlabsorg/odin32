@@ -1,14 +1,12 @@
-/* $Id: vmutex.cpp,v 1.4 1999-06-19 10:54:43 sandervl Exp $ */
+/* $Id: vmutex.cpp,v 1.5 1999-08-24 12:23:25 sandervl Exp $ */
 
-/*
- *
- * Project Odin Software License can be found in LICENSE.TXT
- *
- */
 /*
  * Mutex class
  *
  * Copyright 1998 Sander van Leeuwen (sandervl@xs4all.nl)
+ *
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
  *
  */
 #define  INCL_DOSSEMAPHORES
@@ -19,7 +17,7 @@
 
 /******************************************************************************/
 /******************************************************************************/
-_Export VMutex::VMutex() : waiting(0)
+VMutex::VMutex() : waiting(0)
 {
  APIRET rc;
 
@@ -31,7 +29,7 @@ _Export VMutex::VMutex() : waiting(0)
 }
 /******************************************************************************/
 /******************************************************************************/
-_Export VMutex::~VMutex()
+VMutex::~VMutex()
 {
  int i;
 
@@ -44,7 +42,7 @@ _Export VMutex::~VMutex()
 }
 /******************************************************************************/
 /******************************************************************************/
-void _Export VMutex::enter(ULONG timeout)
+void VMutex::enter(ULONG timeout)
 {
   if(sem_handle) {
     waiting++;
@@ -54,7 +52,7 @@ void _Export VMutex::enter(ULONG timeout)
 }
 /******************************************************************************/
 /******************************************************************************/
-void _Export VMutex::leave()
+void VMutex::leave()
 {
   DosReleaseMutexSem(sem_handle);
 }
