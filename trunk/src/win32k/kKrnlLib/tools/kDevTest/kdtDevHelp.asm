@@ -1,4 +1,4 @@
-; $Id: kdtDevHelp.asm,v 1.2 2002-10-01 05:02:16 bird Exp $
+; $Id: kdtDevHelp.asm,v 1.3 2002-10-14 15:17:05 bird Exp $
 ;
 ; Device Helper Implmenetation for Ring-3 testing.
 ;
@@ -626,6 +626,7 @@ CODE16 ENDS
 
 
 DATA16 SEGMENT
+
 ;; GetDosVar data
 ;
 ; The two YieldFlags
@@ -644,11 +645,14 @@ DATA32 ENDS
 
 DATA16 SEGMENT
     ASSUME ds:NOTHING, es:NOTHING, ss:NOTHING
+db "DosTables:"
 ;
 ; The two dostables.
 ;
+public DosTable
 DosTable                        db 17
   DosTable_fph_HardError        dd 0
+public DosTable_fph_HardError       
   DosTable_fph_UCase            dd 0
   DosTable_UnknownOrReserved1   dd 0
   DosTable_UnknownOrReserved2   dd 0
@@ -666,7 +670,9 @@ DosTable                        db 17
   DosTable_UnknownOrReserved6   dd 0
   DosTable_UnknownOrReserved7   dd 0
 
-DosTabel2                       db  19
+public DosTable2
+DosTable2                       db  19
+public DosTable2_fpErrMap24 
   DosTable2_fpErrMap24          dd 0
   DosTable2_fpErrMap24End       dd 0
   DosTable2_fpErr_Table_24      dd 0
@@ -677,17 +683,20 @@ DosTabel2                       db  19
   DosTable2_UnknownOrReserved1  dd 0
   DosTable2_UnknownOrReserved2  dd 0
   DosTable2_R0FlatCS            dw seg FLAT:CODE32
+public DosTable2_R0FlatCS   
                                 dw 0
   DosTable2_R0FlatDS            dw seg FLAT:DATA32
                                 dw 0
   DosTable2_pTKSSBase           dd offset FLAT:DATA32:TKSSBase
-  DosTable2_pintSwitchStack     dd 0
-  DosTable2_pprivatStack        dd 0
+public DosTable2_pintSwitchStack
+  DosTable2_pintSwitchStack     dd offset FLAT:CODE32:intSwitchStack
+  DosTable2_pprivatStack        dd offset FLAT:DATA32:pPrivateStack
   DosTable2_fpPhysDiskTablePtr  dd 0
   DosTable2_pforceEMHandler     dd 0
   DosTable2_pReserveVM          dd 0
   DosTable2_p_pgpPageDir        dd 0
   DosTable2_UnknownOrReserved3  dd 0
+
 DATA16 ENDS
 
 
@@ -895,6 +904,44 @@ kdtStackThunk32To16 PROC NEAR
     ret
 kdtStackThunk32To16 ENDP
 
+DATA32 segment
+  db "intSwitchStack-Data:"
+OS2Stack_ESP dd 0                       ; OS/2 kernel stack 48 ptr
+OS2Stack_SS dw 0
+pPrivateStackNew_ESP dd 0               ; private stack 48 ptr
+pPrivateStackNew_SS dw 0
+pPrivateStack dd 0                      ; private stack ESP (flat)
+DATA32 ends
+
+public intSwitchStack
+intSwitchStack proc near
+    or      eax, eax
+    jz      switch_back
+    
+switch_to:
+    mov     dx, ds
+    cmp     dx, seg FLAT:DATA32
+    jz      dsok
+    int 3
+dsok:
+    mov     pPrivateStackNew_SS, ds
+    mov     pPrivateStackNew_ESP, eax
+    pop     eax
+    push    OS2Stack_SS
+    push    OS2Stack_ESP
+    mov     OS2Stack_SS, ss
+    mov     OS2Stack_ESP, esp
+    lss     esp, fword ptr pPrivateStackNew_ESP
+    jmp     eax
+    
+switch_back:
+    pop     eax
+    mov     pPrivateStack, esp
+    lss     esp, fword ptr OS2Stack_ESP
+    pop     word ptr OS2Stack_SS
+    pop     dword ptr OS2Stack_ESP
+    jmp     eax
+intSwitchStack endp
 
 CODE32 ENDS
 

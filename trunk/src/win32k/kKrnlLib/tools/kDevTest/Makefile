@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.1 2002-09-30 23:53:52 bird Exp $
+# $Id: Makefile,v 1.2 2002-10-14 15:17:05 bird Exp $
 
 #
 # kKrnlLib.
@@ -13,6 +13,7 @@
 AS_INCLUDES     = -I$(PATH_DDKBASE)\inc
 CC_INCLUDES     = -I$(PATH_TOOLKIT)\h -I$(PATH_DDKBASE)\h
 ALL_DEFINES     =
+BUILD_ENV_FORCE = VAC308
 PATH_ROOT       = ..\..\..\..\..
 !include $(PATH_ROOT)\$(BUILD_SETUP_MAK)
 
