@@ -1,4 +1,10 @@
-/* $Id: changelog,v 1.1420 2001-05-17 18:33:19 sandervl Exp $ */
+/* $Id: changelog,v 1.1421 2001-05-18 07:20:51 sandervl Exp $ */
+
+ 2001-05-17: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o InvalidateRect & InvalidateRgn must call RedrawWindow
+                  with RDW_ALLCHILDREN flag. 
+                  (RealPlayer 8 install dialog doesn't have WS_CLIPCHILDREN
+                   style -> InvalidateRect overwrites child windows (buttons))
 
  2001-05-17: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Destroy menu windows when they are no longer used.
