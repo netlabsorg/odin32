@@ -1,7 +1,9 @@
- /* $Id: changelog,v 1.439 1999-11-12 11:38:35 sandervl Exp $ */
+ /* $Id: changelog,v 1.440 1999-11-12 14:59:00 sandervl Exp $ */
 
  99-11-12: Sander van Leeuwen <sandervl@xs4all.nl>
 	- GDI32: Changes + fixes in DIBSection bitblt (fixes Quake 2)
+ 	- KERNEL32: Added handlemanager class for device drivers
+                    Put devio.cpp in device driver class. (NOT TESTED)
 
  99-11-12: Edgar Buerkle <Edgar.Buerkle@gmx.net>
 	- KERNEL32: Wrote file io replacement apis (preliminary version)
