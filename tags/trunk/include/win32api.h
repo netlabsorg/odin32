@@ -154,4 +154,8 @@ HWND    WIN32API SetCapture(HWND);
 BOOL    WIN32API IsWindowEnabled(HWND);
 HWND    WIN32API SetActiveWindow( HWND hwnd);
 
+HMODULE WIN32API LoadLibraryA(LPCSTR);
+BOOL    WIN32API FreeLibrary(HMODULE);
+FARPROC WIN32API GetProcAddress(HMODULE,LPCSTR);
+
 #endif
