@@ -18,6 +18,22 @@ struct _UTINFO;
 /* Current Process pseudo-handle - Returned by GetCurrentProcess*/
 #define CURRENT_PROCESS_PSEUDOHANDLE ((HANDLE)0x7fffffff)
 
+
+#ifdef __WIN32OS2__
+/*
+ * This is GUESS WORK. I've not spend too much time
+ * figuring out how this really is. But this at least make some sense.
+ */
+/* The linked list node for one handler */
+typedef struct _ConCtrl
+{
+    void *              pfnHandler;     /* Pointer to the handler. (PHANDLER_ROUTINE) */
+    DWORD               cReference;     /* Number of installs of this handler. */
+    struct _ConCtrl *   pNext;          /* Pointer to the next in the chain. */
+} CONCTRL, *PCONCTRL;
+#endif
+
+
 /* Win32 process environment database */
 typedef struct
 {
@@ -31,7 +47,7 @@ typedef struct
     HANDLE           hStderr;          /* 1c Handle for standard error */
     DWORD            unknown2;         /* 20 Unknown */
     DWORD            inherit_console;  /* 24 Inherit console flag */
-    DWORD            break_type;       /* 28 Console events flag */
+    DWORD            break_type;       /* 28 Console events flag  (kso: pointer in NT4?) */
     void            *break_sem;        /* 2c SetConsoleCtrlHandler semaphore */
     void            *break_event;      /* 30 SetConsoleCtrlHandler event */
     void            *break_thread;     /* 34 SetConsoleCtrlHandler thread */
@@ -162,8 +178,8 @@ extern BOOL PROCESS_IsCurrent( HANDLE handle );
 extern PDB *PROCESS_Initial(void);
 extern PDB *PROCESS_IdToPDB( DWORD id );
 extern void PROCESS_CallUserSignalProc( UINT uCode, HMODULE hModule );
-extern PDB *PROCESS_Create( struct _NE_MODULE *pModule, 
-                            LPCSTR cmd_line, LPCSTR env, 
+extern PDB *PROCESS_Create( struct _NE_MODULE *pModule,
+                            LPCSTR cmd_line, LPCSTR env,
                             LPSECURITY_ATTRIBUTES psa, LPSECURITY_ATTRIBUTES tsa,
                             BOOL inherit, DWORD flags,
                             STARTUPINFOA *startup, PROCESS_INFORMATION *info );
