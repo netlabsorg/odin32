@@ -1,4 +1,4 @@
-/* $Id: winimagebase.h,v 1.6 1999-11-29 00:05:03 bird Exp $ */
+/* $Id: winimagebase.h,v 1.7 1999-11-29 20:42:20 sandervl Exp $ */
 
 /*
  * Win32 PE Image base class
@@ -69,6 +69,10 @@ virtual ULONG getResourceSizeA(LPCSTR lpszName, LPSTR lpszType, ULONG lang = LAN
         ULONG getResourceSizeW(LPCWSTR lpszName, LPWSTR lpszType, ULONG lang = LANG_GETFIRST);
 virtual BOOL  enumResourceNamesA(HMODULE hmod, LPCTSTR  lpszType, ENUMRESNAMEPROCA lpEnumFunc, LONG lParam);
 virtual BOOL  enumResourceNamesW(HMODULE hmod, LPCWSTR  lpszType, ENUMRESNAMEPROCW lpEnumFunc, LONG lParam);
+virtual BOOL  enumResourceTypesA(HMODULE hmod, ENUMRESTYPEPROCA lpEnumFunc, 
+                                 LONG lParam);
+virtual BOOL  enumResourceTypesW(HMODULE hmod, ENUMRESTYPEPROCW lpEnumFunc, 
+                                 LONG lParam);
 
 virtual ULONG getVersionSize();
 virtual BOOL  getVersionStruct(char *verstruct, ULONG bufLength);
