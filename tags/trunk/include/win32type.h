@@ -29,104 +29,63 @@
 
 #ifndef OS2DEF_INCLUDED
 // void
-#undef VOID
-#undef PVOID
 typedef void            VOID;
 typedef void*           PVOID;
 
 // 32 bit integers
-#undef LONG
-#undef PLONG
-#undef PCLONG
 typedef                long   LONG;
 typedef         signed long*  PLONG;
 typedef const   signed long*  PCLONG;
 
-#undef ULONG
-#undef PULONG
-#undef PCULONG
 typedef       unsigned long   ULONG;
 typedef       unsigned long*  PULONG;
 typedef const unsigned long*  PCULONG;
 
-#undef INT32
-#undef PINT32
-#undef PCINT32
 typedef       unsigned int    INT32;
 typedef       unsigned int *  PINT32;
 typedef const unsigned int *  PCINT32;
 
-#undef UINT32
-#undef PUINT32
-#undef PCUINT32
 typedef       unsigned int    UINT32;
 typedef       unsigned int *  PUINT32;
 typedef const unsigned int *  PCUINT32;
 
-#undef UINT
-#undef PUINT
-#undef PCUINT
 typedef       unsigned int    UINT;
 typedef       unsigned int *  PUINT;
 typedef const unsigned int *  PCUINT;
 
 
 // 16 bit integers
-#undef SHORT
-#undef PSHORT
-#undef PCSHORT
 typedef                short  SHORT;
 typedef         signed short* PSHORT;
 typedef const   signed short* PCSHORT;
 
-#undef USHORT
-#undef PUSHORT
-#undef PCUSHORT
 typedef       unsigned short  USHORT;
 typedef       unsigned short* PUSHORT;
 typedef const unsigned short* PCUSHORT;
 
-#undef UINT16
-#undef PUINT16
-#undef PCUINT16
 typedef       unsigned short  UINT16;
 typedef       unsigned short* PUINT16;
 typedef const unsigned short* PCUINT16;
 
 
 // 8 bit integers
-#undef UCHAR
-#undef PUCHAR
-#undef PCUCHAR
 typedef       unsigned char  UCHAR;
 typedef       unsigned char* PUCHAR;
 typedef const unsigned char* PCUCHAR;
 
-#undef UINT8
-#undef PUINT8
-#undef PCUINT8
 typedef       unsigned char   UINT8;
 typedef       unsigned char*  PUINT8;
 typedef const unsigned char*  PCUINT8;
 
-#undef INT8
-#undef PINT8
-#undef PCINT8
 typedef         signed char   INT8;
 typedef         signed char*  PINT8;
 typedef const   signed char*  PCINT8;
 
-#undef BYTE
-#undef PBYTE
-#undef PCBYTE
 typedef       unsigned char  BYTE;
 typedef       unsigned char* PBYTE;
 typedef const unsigned char* PCBYTE;
 
 // floats
-#undef FLOAT
-#undef PFLOAT
-#undef LPFLOAT
 typedef float FLOAT, *PFLOAT, *LPFLOAT;
 
 #endif
@@ -138,16 +97,10 @@ typedef float FLOAT, *PFLOAT, *LPFLOAT;
 
 #if !(defined(__WINE_WINDEF_H) || defined(OS2DEF_INCLUDED))
 
-#undef INT
-#undef PINT
-#undef PCINT
 typedef       unsigned int    INT;
 typedef       unsigned int *  PINT;
 typedef const unsigned int *  PCINT;
 
-#undef CHAR
-#undef PCHAR
-#undef PCCHAR
 typedef                char   CHAR;
 typedef         signed char*  PCHAR;
 typedef const   signed char*  PCCHAR;
@@ -161,101 +114,63 @@ typedef const   signed char*  PCCHAR;
 
 #ifndef __WINE_WINDEF_H
 // void
-#undef LPVOID
-#undef LPCVOID
 typedef void*           LPVOID;
 typedef const void*     LPCVOID;
 
 // 32 bit integers
-#undef LPLONG
-#undef LPCLONG
 typedef         signed long*  LPLONG;
 typedef const   signed long*  LPCLONG;
 
-#undef LPULONG
-#undef LPCULONG
 typedef       unsigned long*  LPULONG;
 typedef const unsigned long*  LPCULONG;
 
-#undef LPINT32
-#undef LPCINT32
 typedef       unsigned int *  LPINT32;
 typedef const unsigned int *  LPCINT32;
 
-#undef LPINT
-#undef LPCINT
 typedef       unsigned int *  LPINT;
 typedef const unsigned int *  LPCINT;
 
-#undef LPUINT32
-#undef LPCUINT32
 typedef       unsigned int *  LPUINT32;
 typedef const unsigned int *  LPCUINT32;
 
-#undef LPUINT
-#undef LPCUINT
 typedef       unsigned int *  LPUINT;
 typedef const unsigned int *  LPCUINT;
 
 
 // 16 bit integers
-#undef INT16
-#undef PINT16
-#undef PCINT16
 typedef       unsigned short  INT16;
 typedef       unsigned short* PINT16;
 typedef const unsigned short* PCINT16;
 
-#undef LPUINT16
-#undef LPCUINT16
 typedef       unsigned short* LPUINT16;
 typedef const unsigned short* LPCUINT16;
 
-#undef LPSHORT
-#undef LPCSHORT
 typedef         signed short* LPSHORT;
 typedef const   signed short* LPCSHORT;
 
-#undef LPUSHORT
-#undef LPCUSHORT
 typedef       unsigned short* LPUSHORT;
 typedef const unsigned short* LPCUSHORT;
 
-#undef LPINT16
-#undef LPCINT16
 typedef       unsigned short* LPINT16;
 typedef const unsigned short* LPCINT16;
 
 // 8 bit integers
-#undef LPCHAR
-#undef LPCCHAR
 typedef         signed char*  LPCHAR;
 typedef const   signed char*  LPCCHAR;
 
-#undef LPUCHAR
-#undef LPCUCHAR
 typedef       unsigned char* LPUCHAR;
 typedef const unsigned char* LPCUCHAR;
 
-#undef LPUINT8
-#undef LPCUINT8
 typedef       unsigned char*  LPUINT8;
 typedef const unsigned char*  LPCUINT8;
 
-#undef LPINT8
-#undef LPCINT8
 typedef         signed char*  LPINT8;
 typedef const   signed char*  LPCINT8;
 
-#undef LPBYTE
-#undef LPCBYTE
 typedef       unsigned char* LPBYTE;
 typedef const unsigned char* LPCBYTE;
 
 // floats
-#undef FLOAT
-#undef PFLOAT
-#undef LPFLOAT
 typedef float FLOAT, *PFLOAT, *LPFLOAT;
 
 // doubles
@@ -283,11 +198,6 @@ typedef unsigned long   BOOL;
 
 
 // 32 bit integer
-#undef DWORD
-#undef PDWORD
-#undef LPDWORD
-#undef PCDWORD
-#undef LPCDWORD
 typedef       unsigned long   DWORD;
 typedef       unsigned long*  PDWORD;
 typedef       unsigned long*  LPDWORD;
@@ -298,16 +208,11 @@ typedef DWORD LRESULT;
 
 
 // 16 bit integer
-#undef WORD
-#undef PWORD
-#undef LPWORD
-#undef PCWORD
-#undef LPCWORD
 typedef       unsigned short  WORD;
-typedef       unsigned short* PWORD;
-typedef       unsigned short* LPWORD;
-typedef const unsigned short* PCWORD;
-typedef const unsigned short* LPCWORD;
+typedef       WORD          * PWORD;
+typedef       WORD          * LPWORD;
+typedef const WORD          * PCWORD;
+typedef const WORD          * LPCWORD;
 
 
 
