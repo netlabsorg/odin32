@@ -1,9 +1,19 @@
- /* $Id: changelog,v 1.928 2000-05-05 11:34:14 sandervl Exp $ */
+ /* $Id: changelog,v 1.929 2000-05-05 18:23:29 sandervl Exp $ */
 
  2000-05-05: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32:   Fixed window property functions (ported from Wine)
                     The old ones used Open32 functions which no longer work
                     due to atom api changes a few months ago.
+                    If the mouse has already been captured, then it must
+                    be released before calling WinSetCapture ->
+                    fixes menus & dialog in MS Word 97
+	- OLE32:    Fixed BindCtxImpl_SetBindOptions/BindCtxImpl_GetBindOptions
+                    Need to check size of bind structure before copying (as done in Wine)
+                    -> fixes crash (stack corruption) in MS Word 97
+	- WSOCK32:  When changing the receive or send buffer (setsockopt) and
+                    it fails with WSAENOBUFS, decrease size until no error
+                    is returned (63kb buffer is not always accepted by the
+                    16 bits tcpip stack) (stops when buffer < 4096)
 
  2000-05-04: Achim Hasenmueller <achimha@innotek.de>
 	- USER32:   Applied fix to GetDCEx where the check to see if
