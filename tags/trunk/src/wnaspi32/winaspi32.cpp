@@ -1,3 +1,12 @@
+/*
+ * WNASPI routines
+ *
+ * Copyright 1999 Markus Montkowski
+ * Copyright 2000 Przemyslaw Dobrowolski
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
+ *
+ */
 #include <os2win.h>
 #include <stdlib.h>
 #include <sys/types.h>
@@ -5,7 +14,6 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <memory.h>
-// #include <unistd.h>
 
 #include "aspi.h"
 #include "wnaspi32.h"
@@ -151,9 +159,10 @@ ASPI_ExecScsiCmd( scsiObj *aspi,
           lpPRB,
           6* sizeof(BYTE) + sizeof(DWORD));
   aspi->SRBlock.flags |= SRB_Post;
-  aspi->SRBlock.u.cmd.sense_len = 32;                    // length of sense buffer
-  aspi->SRBlock.u.cmd.data_ptr  = NULL;                  // pointer to data buffer
-  aspi->SRBlock.u.cmd.link_ptr  = NULL;                  // pointer to next SRB
+  aspi->SRBlock.u.cmd.sense_len = lpPRB->SRB_SenseLen;;   // length of sense buffer
+  aspi->SRBlock.u.cmd.data_ptr  = NULL;                   // pointer to data buffer
+  aspi->SRBlock.u.cmd.link_ptr  = NULL;                   // pointer to next SRB
+  aspi->SRBlock.u.cmd.data_len  = lpPRB->SRB_BufLen;
   aspi->SRBlock.u.cmd.cdb_len   = lpPRB->SRB_CDBLen;     // SCSI command length
   memcpy( &aspi->SRBlock.u.cmd.cdb_st[0],
           &lpPRB->CDBByte[0],
@@ -354,39 +363,25 @@ DWORD __cdecl SendASPI32Command(LPSRB lpSRB)
         switch (lpSRB->common.SRB_Cmd)
         {
           case SC_HA_INQUIRY:
-            aspi->SRBlock.cmd=SRB_Inquiry;                      // host adapter inquiry
-            aspi->SRBlock.ha_num=lpSRB->inquiry.SRB_HaId;           // host adapter number
-            aspi->SRBlock.flags=0;                              // no flags set
-            rc = aspi->SendSRBlock();
-
-            if (!rc)
-            {
-              memcpy( lpSRB,
-                      &aspi->SRBlock,
-                      sizeof(SRB_HaInquiry) );
-              dwRC = aspi->SRBlock.status;
-            }
+            aspi->HA_inquiry(lpSRB->inquiry.SRB_HaId);
+            memset(lpSRB,0,sizeof(SRB_HaInquiry));
+            memcpy( lpSRB,
+                    &aspi->SRBlock,
+                    sizeof(SRB_HaInquiry)-4 ); 
+            // FIXME: I'dont know why in OS/2->ha_unique are filled with 0
+            // Hackmode ON ======
+            lpSRB->inquiry.HA_Unique[6]  = 0x01; // transfer only 64KB
+            lpSRB->inquiry.HA_Unique[3]  = 0x10; // 16 devices.
+            // HackMode OFF =====
+            dwRC = aspi->SRBlock.status;
             break;
 
           case SC_GET_DEV_TYPE:
-            memcpy( &aspi->SRBlock,
-                    lpSRB,
-                    sizeof(SRB_GDEVBlock));
-            aspi->SRBlock.flags = 0;
-
-            rc = aspi->SendSRBlock();
-
-            if (!rc)
-            {
-              memcpy( lpSRB,
-                      &aspi->SRBlock,
-                      sizeof(SRB_GDEVBlock) );
-
-              lpSRB->devtype.SRB_Rsvd1 = 0x00;
-              dwRC = aspi->SRBlock.status;
-            }
-
+            rc=aspi->getDeviceType(lpSRB->devtype.SRB_HaId,lpSRB->devtype.SRB_Target, lpSRB->devtype.SRB_Lun);
+            dwRC = lpSRB->devtype.SRB_Status = aspi->SRBlock.status;
+            lpSRB->devtype.SRB_DeviceType = aspi->SRBlock.u.dev.devtype;            
             break;
+
           case SC_EXEC_SCSI_CMD:
             dwRC = ASPI_ExecScsiCmd( aspi,
                                      &lpSRB->cmd);
@@ -397,41 +392,25 @@ DWORD __cdecl SendASPI32Command(LPSRB lpSRB)
             break;
 
           case SC_RESET_DEV:
-            memset( &aspi->SRBlock,
+            aspi->resetDevice(lpSRB->reset.SRB_HaId,lpSRB->reset.SRB_Target, lpSRB->reset.SRB_Lun);
+            lpSRB->reset.SRB_Status   = aspi->SRBlock.status;
+            lpSRB->reset.SRB_Flags    = aspi->SRBlock.flags;
+            lpSRB->reset.SRB_Hdr_Rsvd = 0;
+            memset( lpSRB->reset.SRB_Rsvd1,
                     0,
-                    sizeof(SRBOS2) );
-            aspi->SRBlock.cmd = lpSRB->reset.SRB_Cmd;       /* ASPI command code = SC_RESET_DEV */
-            aspi->SRBlock.status = lpSRB->reset.SRB_Status; /* ASPI command status byte */
-            aspi->SRBlock.ha_num = lpSRB->reset.SRB_HaId;   /* ASPI host adapter number */
-            aspi->SRBlock.flags =  SRB_Post;
-            aspi->SRBlock.u.res.target = lpSRB->reset.SRB_Target; /* Target's SCSI ID */
-            aspi->SRBlock.u.res.lun    = lpSRB->reset.SRB_Lun;    /* Target's LUN number */
+                    12 );
+            lpSRB->reset.SRB_HaStat   = aspi->SRBlock.u.res.ha_status;     /* Host Adapter Status */
+            lpSRB->reset.SRB_TargStat = aspi->SRBlock.u.res.target_status; /* Target Status */
+            lpSRB->reset.SRB_PostProc = NULL;                  /* Post routine */
+            lpSRB->reset.SRB_Rsvd2    = NULL;                  /* Reserved */
+            memset( lpSRB->reset.SRB_Rsvd3,
+                    0,
+                    32);            /* Reserved */
+             dwRC = aspi->SRBlock.status;
+             break;
 
-            rc = aspi->SendSRBlock();
-
-            if (!rc)
-            {
-              aspi->waitPost();
-              lpSRB->reset.SRB_Status   = aspi->SRBlock.status;
-              lpSRB->reset.SRB_Flags    = aspi->SRBlock.flags;
-              lpSRB->reset.SRB_Hdr_Rsvd = 0;
-              memset( lpSRB->reset.SRB_Rsvd1,
-                      0,
-                      12 );
-              lpSRB->reset.SRB_HaStat   = aspi->SRBlock.u.res.ha_status;     /* Host Adapter Status */
-              lpSRB->reset.SRB_TargStat = aspi->SRBlock.u.res.target_status; /* Target Status */
-              lpSRB->reset.SRB_PostProc = NULL;                  /* Post routine */
-              lpSRB->reset.SRB_Rsvd2    = NULL;                  /* Reserved */
-              memset( lpSRB->reset.SRB_Rsvd3,
-                      0,
-                      32);            /* Reserved */
-              dwRC = aspi->SRBlock.status;
-            }
-            break;
           } // end switch (lpSRB->common.SRB_Cmd)
 
-        aspi->close();
-        delete aspi;
       }
       else
       {
@@ -444,6 +423,8 @@ DWORD __cdecl SendASPI32Command(LPSRB lpSRB)
     {
       dwRC = SS_NO_ASPI;
     }
+    aspi->close();
+    delete aspi;
 
     return dwRC;
 }

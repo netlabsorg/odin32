@@ -324,14 +324,14 @@ ULONG scsiObj::HA_inquiry(UCHAR ha)
 //*  Preconditions: driver has to be opened                                 *
 //*                                                                         *
 //***************************************************************************
-ULONG scsiObj::getDeviceType(UCHAR id, UCHAR lun)
+ULONG scsiObj::getDeviceType(UCHAR ha_num, UCHAR id, UCHAR lun)
 {
   ULONG rc;                                     // return value
   unsigned long cbreturn;
   unsigned long cbParam;
 
   SRBlock.cmd=SRB_Device;                       // get device type
-  SRBlock.ha_num=0;                             // host adapter number
+  SRBlock.ha_num=ha_num;                        // host adapter number
   SRBlock.flags=0;                              // no flags set
   SRBlock.u.dev.target=id;                      // target id
   SRBlock.u.dev.lun=lun;                        // target LUN
@@ -359,7 +359,7 @@ ULONG scsiObj::getDeviceType(UCHAR id, UCHAR lun)
 //*  Preconditions: init() has to be called successfully before             *
 //*                                                                         *
 //***************************************************************************
-ULONG scsiObj::resetDevice(UCHAR id, UCHAR lun)
+ULONG scsiObj::resetDevice(UCHAR ha_num,UCHAR id, UCHAR lun)
 {
   ULONG rc;                                     // return value
   unsigned long cbreturn;
@@ -367,7 +367,7 @@ ULONG scsiObj::resetDevice(UCHAR id, UCHAR lun)
   BOOL  success;
 
   SRBlock.cmd=SRB_Reset;                        // reset device
-  SRBlock.ha_num=0;                             // host adapter number
+  SRBlock.ha_num=ha_num;                        // host adapter number
   SRBlock.flags=SRB_Post;                       // posting enabled
   SRBlock.u.res.target=id;                      // target id
   SRBlock.u.res.lun=lun;                        // target LUN
@@ -417,7 +417,8 @@ ULONG scsiObj::abort()
   if (SRBlock.status != SRB_Done) return 2;
   return 0;
 }
-
+//***************************************************************************
+//***************************************************************************
 ULONG scsiObj::getNumHosts()
 { int i,j=0;
   ULONG rc;
@@ -429,9 +430,7 @@ ULONG scsiObj::getNumHosts()
   }
   return j;
 }
-
 //***************************************************************************
-//*                                                                         *
 //***************************************************************************
 ULONG scsiObj::SendSRBlock(VOID)
 {
@@ -447,7 +446,8 @@ ULONG scsiObj::SendSRBlock(VOID)
                       sizeof(SRBOS2),
                       &ulReturn);
 }
-
+//***************************************************************************
+//***************************************************************************
 BOOL fGainDrvAccess( BOOL fWait,
                      ULONG *phSem)
 {
@@ -473,7 +473,8 @@ BOOL fGainDrvAccess( BOOL fWait,
 
   return TRUE;
 }
-
+//***************************************************************************
+//***************************************************************************
 BOOL fReleaseDrvAccess(ULONG hSem)
 {
   ULONG rc;
