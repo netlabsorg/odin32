@@ -1,4 +1,9 @@
- /* $Id: changelog,v 1.830 2000-03-22 20:12:07 sandervl Exp $ */
+ /* $Id: changelog,v 1.831 2000-03-23 17:12:24 cbratschi Exp $ */
+
+ 2000-03-23: Christoph Bratschi <cbratschi@datacomm.ch>
+	- COMDLG32: improved file dialog combobox
+	- COMCTL32: removed static WINMM linking
+		    several listview fixes
 
  2000-03-22: Sander van Leeuwen <sandervl@xs4all.nl>
 	- WSOCK32\NEW: Completely rewritten (removed dependancy on pmwsock)
