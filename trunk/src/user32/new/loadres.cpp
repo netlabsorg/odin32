@@ -1,4 +1,4 @@
-/* $Id: loadres.cpp,v 1.10 1999-08-22 16:46:58 dengert Exp $ */
+/* $Id: loadres.cpp,v 1.11 1999-08-25 12:30:08 sandervl Exp $ */
 
 /*
  * Win32 resource API functions for OS/2
@@ -234,7 +234,7 @@ HANDLE LoadBitmapA(HINSTANCE hinst, LPCSTR lpszName, int cxDesired, int cyDesire
     HBITMAP hbitmap = 0;
     HDC hdc;
     HRSRC hRsrc;
-    HGLOBAL handle;
+    HGLOBAL handle, hMapping = 0;
     char *ptr = NULL;
     BITMAPINFO *info, *fix_info=NULL;
     HGLOBAL hFix;
@@ -248,7 +248,7 @@ HANDLE LoadBitmapA(HINSTANCE hinst, LPCSTR lpszName, int cxDesired, int cyDesire
     }
     else
     {
-	if (!(ptr = (char *)VIRTUAL_MapFileA( lpszName ))) return 0;
+	if (!(hMapping = VIRTUAL_MapFileA( lpszName, (LPVOID *)&ptr ))) return 0;
 	info = (BITMAPINFO *)(ptr + sizeof(BITMAPFILEHEADER));
     }
 
@@ -285,7 +285,7 @@ HANDLE LoadBitmapA(HINSTANCE hinst, LPCSTR lpszName, int cxDesired, int cyDesire
       GlobalUnlock(hFix);
       GlobalFree(hFix);
     }
-    if (fuLoad & LR_LOADFROMFILE) UnmapViewOfFile( ptr );
+    if (fuLoad & LR_LOADFROMFILE) CloseHandle( hMapping );
     return hbitmap;
 }
 //******************************************************************************
