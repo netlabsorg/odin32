@@ -1,4 +1,4 @@
-/* $Id: winexebase.cpp,v 1.3 1999-11-24 19:31:23 sandervl Exp $ */
+/* $Id: winexebase.cpp,v 1.4 2000-01-06 20:07:10 sandervl Exp $ */
 
 /*
  * Win32 exe base class
@@ -47,7 +47,7 @@ BOOL IsExeStarted()
 Win32ExeBase::Win32ExeBase(HINSTANCE hInstance) 
                  : Win32ImageBase(hInstance),
                    fConsoleApp(FALSE),
-                   cmdline(NULL)
+                   cmdLineA(NULL), cmdLineW(NULL)
 {
   WinExe = this;
 }
@@ -57,6 +57,10 @@ Win32ExeBase::~Win32ExeBase()
 {
   Win32DllBase::deleteAll();
   WinExe = NULL;
+  if(cmdLineA)
+	free(cmdLineA);
+  if(cmdLineW)
+	free(cmdLineW);
 }
 //******************************************************************************
 //******************************************************************************
@@ -93,6 +97,17 @@ ULONG Win32ExeBase::start()
 BOOL Win32ExeBase::isDll()
 {
   return FALSE;
+}
+//******************************************************************************
+//******************************************************************************
+void Win32ExeBase::setCommandLine(char *cline)
+{
+ ULONG cmdlength = strlen(cline) + 1;
+
+  cmdLineA = (LPSTR)malloc(cmdlength);
+  strcpy(cmdLineA, cline);
+  cmdLineW = (LPWSTR)malloc(cmdlength*sizeof(WCHAR));
+  AsciiToUnicode(cmdLineA, cmdLineW);
 }
 //******************************************************************************
 //******************************************************************************
