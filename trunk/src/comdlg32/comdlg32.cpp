@@ -1,4 +1,4 @@
-/* $Id: comdlg32.cpp,v 1.12 1999-10-10 09:00:09 sandervl Exp $ */
+/* $Id: comdlg32.cpp,v 1.13 1999-10-18 11:59:04 sandervl Exp $ */
 
 /*
  * COMDLG32 implementation
@@ -26,6 +26,7 @@
 
 ODINDEBUGCHANNEL(COMDLG32)
 
+#if 0
 #define COMDLG32_CHECKHOOK(a,b,c)           \
   if(a->Flags & b)                          \
   {                                         \
@@ -47,8 +48,21 @@ ODINDEBUGCHANNEL(COMDLG32)
     a->d = (c)Win32WindowProc::GetOS2Callback();\
   } \
   a->hwndOwner = Win32ToOS2Handle(a->hwndOwner); 
+#else
+#define COMDLG32_CHECKHOOK(a,b,c)           \
+  if(a->Flags & b)                          \
+  {                                         \
+    a->lpfnHook = 0; \
+  } \
+  a->hwndOwner = Win32ToOS2Handle(a->hwndOwner); 
 
-
+#define COMDLG32_CHECKHOOK2(a,b,c,d)        \
+  if(a->Flags & b)                          \
+  {                                         \
+    a->d = 0; \
+  } \
+  a->hwndOwner = Win32ToOS2Handle(a->hwndOwner); 
+#endif
 /*****************************************************************************
  * Name      :
  * Purpose   :
