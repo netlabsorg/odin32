@@ -1,4 +1,4 @@
-/* $Id: hll.h,v 1.3 2000-03-26 21:56:37 bird Exp $
+/* $Id: hll.h,v 1.4 2000-03-27 12:36:17 bird Exp $
  *
  * HLL definitions.
  *
@@ -55,7 +55,6 @@ typedef struct _HLLHdr
     unsigned char   achSignature[4];    /* LX Debug Info Signature, 'NB04' */
     unsigned long   offDirectory;       /* Offset to the HLL Directory.
                                          * (Relative to start of this header.) */
-    unsigned long   ulReserved;         /* Unknown field. Seems to be 1. */
 } HLLHDR, *PHLLHDR;
 
 
@@ -79,7 +78,9 @@ typedef struct _HLLDirEntry
  */
 typedef struct _HLLDirectory
 {
-    unsigned long   ulReserved;         /* Unknown. */
+    unsigned short  cb;                 /* Size of this struct (minus aEntries)
+                                         * / offset of aEntries relative to start of this structure. */
+    unsigned short  cbEntry;            /* Size of the directory entries (HLLDIRENTRY). */
     unsigned long   cEntries;           /* Count of directory entires. */
     HLLDIRENTRY     aEntries[1];        /* Directory. */
 } HLLDIR, *PHLLDIR;
