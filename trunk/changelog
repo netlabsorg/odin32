@@ -1,4 +1,4 @@
- /* $Id: changelog,v 1.889 2000-04-15 14:19:31 cbratschi Exp $ */
+ /* $Id: changelog,v 1.890 2000-04-15 15:08:12 sandervl Exp $ */
 
  2000-04-15: Christoph Bratschi <cbratschi@datacomm.ch>
 	- COMCTL32: rewrote listview item handling: sort bug fix,
@@ -7,10 +7,15 @@
 
  2000-04-15: Sander van Leeuwen <sandervl@xs4all.nl>
 	- WSOCK32:  Async select fix (VPBuddy can connect again)
-	- KERNEL32: Remove ending backslash in FindFirstFileA (if present)
+	- KERNEL32: Remove terminating backslash in FindFirstFileA (if present)
                     (otherwise DosFindFirst fails)
                     Fixed flushing of file maps (wrong VirtualQuery parameter)
                     Path search fix for dlls
+	- ODINCRT:  Added checks for failing mallocs
+	- USER32:   Corrected return value of EnableWindow
+                    (return true if previous state was disabled, else false (sdk docs))
+                    Don't send mouse messages to disabled windows; reroute
+                    them to their parent windows (if any)
 
  2000-04-14: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Hardcoded system & windows dir
