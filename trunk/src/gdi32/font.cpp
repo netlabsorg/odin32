@@ -1,4 +1,4 @@
-/* $Id: font.cpp,v 1.29 2003-04-02 12:58:58 sandervl Exp $ */
+/* $Id: font.cpp,v 1.30 2003-07-16 15:47:37 sandervl Exp $ */
 
 /*
  * GDI32 font apis
@@ -432,9 +432,9 @@ int EXPENTRY_O32 EnumFontProcExW(LPENUMLOGFONTA lpLogFont, LPNEWTEXTMETRICA lpTe
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API EnumFontsA(HDC hdc, 
-                        LPCSTR arg2, 
-                        FONTENUMPROCA arg3, 
+int WIN32API EnumFontsA(HDC hdc,
+                        LPCSTR arg2,
+                        FONTENUMPROCA arg3,
                         LPARAM  arg4)
 {
   //@@@PH shouldn't this rather be O32_EnumFonts ?
@@ -442,7 +442,7 @@ int WIN32API EnumFontsA(HDC hdc,
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API EnumFontsW(HDC hdc, 
+int WIN32API EnumFontsW(HDC hdc,
                         LPCWSTR arg2,
                         FONTENUMPROCW arg3,
                         LPARAM  arg4)
@@ -498,10 +498,10 @@ int WIN32API EnumFontFamiliesW(HDC hdc,
 }
 //******************************************************************************
 //******************************************************************************
-INT WIN32API EnumFontFamiliesExA(HDC hdc, 
-                                 LPLOGFONTA arg2, 
-                                 FONTENUMPROCEXA arg3, 
-                                 LPARAM arg4, 
+INT WIN32API EnumFontFamiliesExA(HDC hdc,
+                                 LPLOGFONTA arg2,
+                                 FONTENUMPROCEXA arg3,
+                                 LPARAM arg4,
                                  DWORD dwFlags)
 {
   ENUMUSERDATA enumData;
@@ -519,10 +519,10 @@ INT WIN32API EnumFontFamiliesExA(HDC hdc,
 }
 //******************************************************************************
 //******************************************************************************
-INT WIN32API EnumFontFamiliesExW(HDC hdc, 
+INT WIN32API EnumFontFamiliesExW(HDC hdc,
                                  LPLOGFONTW arg2,
                                  FONTENUMPROCEXW arg3,
-                                 LPARAM arg4, 
+                                 LPARAM arg4,
                                  DWORD dwFlags)
 {
   ENUMUSERDATA enumData;
@@ -780,14 +780,32 @@ int WIN32API GetTextFaceA( HDC hdc, int arg2, LPSTR  arg3)
 //******************************************************************************
 int WIN32API GetTextFaceW( HDC hdc, int arg2, LPWSTR  arg3)
 {
- char *astring = (char *)malloc(arg2+1);
+ char *astring = NULL;
+ int   lenA = GetTextFaceA( hdc, 0, NULL );
  int   rc;
 
     dprintf(("GDI32: GetTextFaceW"));
-    *astring = 0;
-    rc = GetTextFaceA(hdc, arg2, astring);
-    AsciiToUnicode(astring, arg3);
+    astring = ( char * )malloc( lenA );
+    if( astring )
+        return 0;
+
+    rc = GetTextFaceA(hdc, lenA, astring);
+
+    if( rc )
+    {
+        if( arg3 )
+        {
+            AsciiToUnicodeN(astring, arg3, arg2);
+            rc = lstrlenW( arg3 );
+        }
+        else
+            rc = lstrlenAtoW( astring, -1 );
+
+        rc++; // including null-terminator
+    }
+
     free(astring);
+
     return rc;
 }
 //******************************************************************************
