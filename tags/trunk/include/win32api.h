@@ -144,6 +144,7 @@ BOOL    WIN32API PostThreadMessageA(DWORD, UINT, WPARAM, LPARAM);
 BOOL    WIN32API PostThreadMessageW(DWORD, UINT, WPARAM, LPARAM);
 
 DWORD   WIN32API GetWindowThreadProcessId(HWND,LPDWORD);
+int     WIN32API GetWindowTextA( HWND hwnd,  LPSTR lpsz, int cch);
 
 BOOL    WIN32API ResetEvent(HANDLE);
 BOOL    WIN32API SetEvent(HANDLE);
