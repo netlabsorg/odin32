@@ -1,4 +1,4 @@
-/* $Id: versionos2.h,v 1.22 2001-12-08 12:00:50 sandervl Exp $ */
+/* $Id: versionos2.h,v 1.23 2002-04-01 09:00:04 bird Exp $ */
 
 #ifndef __VERSIONOS2__H__
 #define __VERSIONOS2__H__
@@ -76,7 +76,9 @@ ULONG SYSTEM GetVersionSize(char *modname);
 #define WINVERSION_MAX          5
 
 //Override windows version reported by Odin
+#ifdef WIN32API
 void WIN32API OdinSetVersion(ULONG version);
+#endif
 
 #endif
 
