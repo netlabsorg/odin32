@@ -1,10 +1,14 @@
-/* $Id: windows.h,v 1.1 1999-05-24 20:19:21 ktk Exp $ */
+/* $Id: windows.h,v 1.2 1999-08-14 09:05:06 sandervl Exp $ */
 
 #ifndef __WINE_WINDOWS_H
 #define __WINE_WINDOWS_H
 
 #ifdef __cplusplus
 extern "C" {
+#endif
+
+#ifdef __WIN32OS2__
+#include <odin.h>
 #endif
 
 #include "winbase.h"
