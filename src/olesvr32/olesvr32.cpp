@@ -9,12 +9,11 @@
  */
 
 #include <os2win.h>
+#include <odinwrap.h>
 #include <ole.h>
 #include "olesvr32.h"
-#include "debugtools.h"
-#include <debugdefs.h>
 
-DEFAULT_DEBUG_CHANNEL(ole)
+ODINDEBUGCHANNEL(olesvr32)
 
 /******************************************************************************
  * OleRegisterServer	[OLESVR32.2]

@@ -1,4 +1,4 @@
-/* $Id: msvcrt.cpp,v 1.4 1999-10-28 15:25:35 sandervl Exp $ */
+/* $Id: msvcrt.cpp,v 1.5 1999-11-12 11:38:40 sandervl Exp $ */
 
 /*
  * The Visual C RunTime DLL
@@ -10,13 +10,11 @@
 
 
 #include <os2win.h>
+#include <odinwrap.h>
 #include <wchar.h>
 #include <except.h>
-#include "debugtools.h"
-#include <debugdefs.h>
 
-
-DEFAULT_DEBUG_CHANNEL(msvcrt)
+ODINDEBUGCHANNEL(msvcrt)
 
 int __app_type;
 int __usermatherr;
@@ -35,6 +33,160 @@ extern USHORT	_pctype_dll;
 extern CRTDLL_FILE _iob;
 
 
+/*********************************************************************
+ *                  ??3@YAXPAX@Z    (MSVCRT.1)
+ *	FIXME - Could not find anything about it
+ */
+INT CDECL MSVCRT_EXP1(DWORD ret)
+{
+  dprintf(("MSVCRT: MSVCRT_EXP1 not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  ??3@YAXPAX@Z    (MSVCRT.2)
+ *	FIXME - Could not find anything about it
+ */
+INT CDECL MSVCRT_EXP2(DWORD ret)
+{
+  dprintf(("MSVCRT: MSVCRT_EXP2 not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  ??3@YAXPAX@Z    (MSVCRT.3)
+ *	FIXME - Could not find anything about it
+ */
+INT CDECL MSVCRT_EXP3(DWORD ret)
+{
+  dprintf(("MSVCRT: MSVCRT_EXP3 not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  ??3@YAXPAX@Z    (MSVCRT.4)
+ *	FIXME - Could not find anything about it
+ */
+INT CDECL MSVCRT_EXP4(DWORD ret)
+{
+  dprintf(("MSVCRT: MSVCRT_EXP4 not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  ??3@YAXPAX@Z    (MSVCRT.5)
+ *	FIXME - Could not find anything about it
+ */
+INT CDECL MSVCRT_EXP5(DWORD ret)
+{
+  dprintf(("MSVCRT: MSVCRT_EXP5 not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  ??3@YAXPAX@Z    (MSVCRT.6)
+ *	FIXME - Could not find anything about it
+ */
+INT CDECL MSVCRT_EXP6(DWORD ret)
+{
+  dprintf(("MSVCRT: MSVCRT_EXP6 not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  ??3@YAXPAX@Z    (MSVCRT.7)
+ *	FIXME - Could not find anything about it
+ */
+INT CDECL MSVCRT_EXP7(DWORD ret)
+{
+  dprintf(("MSVCRT: MSVCRT_EXP7 not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  ??3@YAXPAX@Z    (MSVCRT.8)
+ *	FIXME - Could not find anything about it
+ */
+INT CDECL MSVCRT_EXP8(DWORD ret)
+{
+  dprintf(("MSVCRT: MSVCRT_EXP8 not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  ??3@YAXPAX@Z    (MSVCRT.9)
+ *	FIXME - Could not find anything about it
+ */
+INT CDECL MSVCRT_EXP9(DWORD ret)
+{
+  dprintf(("MSVCRT: MSVCRT_EXP9 not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  ??3@YAXPAX@Z    (MSVCRT.10)
+ *	FIXME - Could not find anything about it
+ */
+INT CDECL MSVCRT_EXP10(DWORD ret)
+{
+  dprintf(("MSVCRT: MSVCRT_EXP10 not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  ??3@YAXPAX@Z    (MSVCRT.11)
+ *	FIXME - Could not find anything about it
+ */
+INT CDECL MSVCRT_EXP11(DWORD ret)
+{
+  dprintf(("MSVCRT: MSVCRT_EXP11 not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  ??3@YAXPAX@Z    (MSVCRT.12)
+ *	FIXME - Could not find anything about it
+ */
+INT CDECL MSVCRT_EXP12(DWORD ret)
+{
+  dprintf(("MSVCRT: MSVCRT_EXP12 not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  ??3@YAXPAX@Z    (MSVCRT.13)
+ *	FIXME - Could not find anything about it
+ */
+INT CDECL MSVCRT_EXP13(DWORD ret)
+{
+  dprintf(("MSVCRT: MSVCRT_EXP13 not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
 
 
 /*********************************************************************
@@ -43,7 +195,7 @@ extern CRTDLL_FILE _iob;
  */
 INT CDECL MSVCRT_EXP14(DWORD ret)
 {
-  dprintf(("MSVCRT: ??1type_info@@UAE@XZ not implemented.\n"));
+  dprintf(("MSVCRT: MSVCRT_EXP14 not implemented.\n"));
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return FALSE;
 }
@@ -55,7 +207,7 @@ INT CDECL MSVCRT_EXP14(DWORD ret)
  */
 INT CDECL MSVCRT_EXP15(DWORD ret)
 {
-  dprintf(("MSVCRT: ??2@YAPAXI@Z not implemented.\n"));
+  dprintf(("MSVCRT: MSVCRT_EXP15 not implemented.\n"));
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return FALSE;
 }
@@ -67,7 +219,403 @@ INT CDECL MSVCRT_EXP15(DWORD ret)
  */
 INT CDECL MSVCRT_EXP16(DWORD ret)
 {
-  dprintf(("MSVCRT: ??3@YAXPAX@Z not implemented.\n"));
+  dprintf(("MSVCRT: MSVCRT_EXP16 not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  ??3@YAXPAX@Z    (MSVCRT.17)
+ *	FIXME - Could not find anything about it
+ */
+INT CDECL MSVCRT_EXP17(DWORD ret)
+{
+  dprintf(("MSVCRT: MSVCRT_EXP17 not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  ??3@YAXPAX@Z    (MSVCRT.18)
+ *	FIXME - Could not find anything about it
+ */
+INT CDECL MSVCRT_EXP18(DWORD ret)
+{
+  dprintf(("MSVCRT: MSVCRT_EXP18 not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  ??3@YAXPAX@Z    (MSVCRT.19)
+ *	FIXME - Could not find anything about it
+ */
+INT CDECL MSVCRT_EXP19(DWORD ret)
+{
+  dprintf(("MSVCRT: MSVCRT_EXP19 not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  ??3@YAXPAX@Z    (MSVCRT.20)
+ *	FIXME - Could not find anything about it
+ */
+INT CDECL MSVCRT_EXP20(DWORD ret)
+{
+  dprintf(("MSVCRT: MSVCRT_EXP20 not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  ??3@YAXPAX@Z    (MSVCRT.21)
+ *	FIXME - Could not find anything about it
+ */
+INT CDECL MSVCRT_EXP21(DWORD ret)
+{
+  dprintf(("MSVCRT: MSVCRT_EXP21 not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  ??3@YAXPAX@Z    (MSVCRT.22)
+ *	FIXME - Could not find anything about it
+ */
+INT CDECL MSVCRT_EXP22(DWORD ret)
+{
+  dprintf(("MSVCRT: MSVCRT_EXP22 not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  ??3@YAXPAX@Z    (MSVCRT.23)
+ *	FIXME - Could not find anything about it
+ */
+INT CDECL MSVCRT_EXP23(DWORD ret)
+{
+  dprintf(("MSVCRT: MSVCRT_EXP23 not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  ??3@YAXPAX@Z    (MSVCRT.24)
+ *	FIXME - Could not find anything about it
+ */
+INT CDECL MSVCRT_EXP24(DWORD ret)
+{
+  dprintf(("MSVCRT: MSVCRT_EXP24 not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  ??3@YAXPAX@Z    (MSVCRT.25)
+ *	FIXME - Could not find anything about it
+ */
+INT CDECL MSVCRT_EXP25(DWORD ret)
+{
+  dprintf(("MSVCRT: MSVCRT_EXP25 not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  ??3@YAXPAX@Z    (MSVCRT.26)
+ *	FIXME - Could not find anything about it
+ */
+INT CDECL MSVCRT_EXP26(DWORD ret)
+{
+  dprintf(("MSVCRT: MSVCRT_EXP26 not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  ??3@YAXPAX@Z    (MSVCRT.27)
+ *	FIXME - Could not find anything about it
+ */
+INT CDECL MSVCRT_EXP27(DWORD ret)
+{
+  dprintf(("MSVCRT: MSVCRT_EXP27 not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  ??3@YAXPAX@Z    (MSVCRT.28)
+ *	FIXME - Could not find anything about it
+ */
+INT CDECL MSVCRT_EXP28(DWORD ret)
+{
+  dprintf(("MSVCRT: MSVCRT_EXP28 not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  ??3@YAXPAX@Z    (MSVCRT.29)
+ *	FIXME - Could not find anything about it
+ */
+INT CDECL MSVCRT_EXP29(DWORD ret)
+{
+  dprintf(("MSVCRT: MSVCRT_EXP29 not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  ??3@YAXPAX@Z    (MSVCRT.30)
+ *	FIXME - Could not find anything about it
+ */
+INT CDECL MSVCRT_EXP30(DWORD ret)
+{
+  dprintf(("MSVCRT: MSVCRT_EXP30 not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  ??3@YAXPAX@Z    (MSVCRT.31)
+ *	FIXME - Could not find anything about it
+ */
+INT CDECL MSVCRT_EXP31(DWORD ret)
+{
+  dprintf(("MSVCRT: MSVCRT_EXP31 not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  ??3@YAXPAX@Z    (MSVCRT.32)
+ *	FIXME - Could not find anything about it
+ */
+INT CDECL MSVCRT_EXP32(DWORD ret)
+{
+  dprintf(("MSVCRT: MSVCRT_EXP32 not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  ??3@YAXPAX@Z    (MSVCRT.33)
+ *	FIXME - Could not find anything about it
+ */
+INT CDECL MSVCRT_EXP33(DWORD ret)
+{
+  dprintf(("MSVCRT: MSVCRT_EXP33 not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  ??3@YAXPAX@Z    (MSVCRT.34)
+ *	FIXME - Could not find anything about it
+ */
+INT CDECL MSVCRT_EXP34(DWORD ret)
+{
+  dprintf(("MSVCRT: MSVCRT_EXP34 not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  ??3@YAXPAX@Z    (MSVCRT.35)
+ *	FIXME - Could not find anything about it
+ */
+INT CDECL MSVCRT_EXP35(DWORD ret)
+{
+  dprintf(("MSVCRT: MSVCRT_EXP35 not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  ??3@YAXPAX@Z    (MSVCRT.36)
+ *	FIXME - Could not find anything about it
+ */
+INT CDECL MSVCRT_EXP36(DWORD ret)
+{
+  dprintf(("MSVCRT: MSVCRT_EXP36 not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  ??3@YAXPAX@Z    (MSVCRT.37)
+ *	FIXME - Could not find anything about it
+ */
+INT CDECL MSVCRT_EXP37(DWORD ret)
+{
+  dprintf(("MSVCRT: MSVCRT_EXP37 not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  ??3@YAXPAX@Z    (MSVCRT.38)
+ *	FIXME - Could not find anything about it
+ */
+INT CDECL MSVCRT_EXP38(DWORD ret)
+{
+  dprintf(("MSVCRT: MSVCRT_EXP38 not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  ??3@YAXPAX@Z    (MSVCRT.39)
+ *	FIXME - Could not find anything about it
+ */
+INT CDECL MSVCRT_EXP39(DWORD ret)
+{
+  dprintf(("MSVCRT: MSVCRT_EXP39 not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  ??3@YAXPAX@Z    (MSVCRT.40)
+ *	FIXME - Could not find anything about it
+ */
+INT CDECL MSVCRT_EXP40(DWORD ret)
+{
+  dprintf(("MSVCRT: MSVCRT_EXP40 not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  ??3@YAXPAX@Z    (MSVCRT.41)
+ *	FIXME - Could not find anything about it
+ */
+INT CDECL MSVCRT_EXP41(DWORD ret)
+{
+  dprintf(("MSVCRT: MSVCRT_EXP41 not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  ??3@YAXPAX@Z    (MSVCRT.42)
+ *	FIXME - Could not find anything about it
+ */
+INT CDECL MSVCRT_EXP42(DWORD ret)
+{
+  dprintf(("MSVCRT: MSVCRT_EXP42 not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  ??3@YAXPAX@Z    (MSVCRT.43)
+ *	FIXME - Could not find anything about it
+ */
+INT CDECL MSVCRT_EXP43(DWORD ret)
+{
+  dprintf(("MSVCRT: MSVCRT_EXP43 not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  ??3@YAXPAX@Z    (MSVCRT.44)
+ *	FIXME - Could not find anything about it
+ */
+INT CDECL MSVCRT_EXP44(DWORD ret)
+{
+  dprintf(("MSVCRT: MSVCRT_EXP44 not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  ??3@YAXPAX@Z    (MSVCRT.45)
+ *	FIXME - Could not find anything about it
+ */
+INT CDECL MSVCRT_EXP45(DWORD ret)
+{
+  dprintf(("MSVCRT: MSVCRT_EXP45 not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  ??3@YAXPAX@Z    (MSVCRT.46)
+ *	FIXME - Could not find anything about it
+ */
+INT CDECL MSVCRT_EXP46(DWORD ret)
+{
+  dprintf(("MSVCRT: MSVCRT_EXP46 not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  ??3@YAXPAX@Z    (MSVCRT.47)
+ *	FIXME - Could not find anything about it
+ */
+INT CDECL MSVCRT_EXP47(DWORD ret)
+{
+  dprintf(("MSVCRT: MSVCRT_EXP47 not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  ??3@YAXPAX@Z    (MSVCRT.48)
+ *	FIXME - Could not find anything about it
+ */
+INT CDECL MSVCRT_EXP48(DWORD ret)
+{
+  dprintf(("MSVCRT: MSVCRT_EXP48 not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  ??3@YAXPAX@Z    (MSVCRT.49)
+ *	FIXME - Could not find anything about it
+ */
+INT CDECL MSVCRT_EXP49(DWORD ret)
+{
+  dprintf(("MSVCRT: MSVCRT_EXP49 not implemented.\n"));
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return FALSE;
 }
