@@ -1,4 +1,4 @@
-; $Id: minihll.def,v 1.1.2.2 2001-08-15 01:50:13 bird Exp $
+; $Id: minihll.def,v 1.1.2.3 2001-08-16 15:57:02 bird Exp $
 NAME ''
 
 STUB    NONE
@@ -10,5 +10,6 @@ SEGMENTS
     'CODEDATA32'  CLASS 'CODE'    SHARED EXECUTEREAD
 
 IMPORTS
-    printf = LIBCN.1082
+    _printf_ansi = LIBCN.83
+    _printf_ansi_ = LIBCN.83
 
