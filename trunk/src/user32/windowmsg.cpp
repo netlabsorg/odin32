@@ -1,4 +1,4 @@
-/* $Id: windowmsg.cpp,v 1.6 1999-11-24 19:32:23 sandervl Exp $ */
+/* $Id: windowmsg.cpp,v 1.7 1999-11-27 00:10:22 sandervl Exp $ */
 /*
  * Win32 window message APIs for OS/2
  *
@@ -8,6 +8,8 @@
  *
  * Copyright 1993, 1994 Alexandre Julliard
  *
+ * TODO: GetQueueStatus: QS_HOTKEY (oslibmsg.cpp) & low word bits
+ * TODO: MsgWaitForMultipleObjects: timeout isn't handled correctly (can return too late)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -1015,4 +1017,80 @@ LRESULT WIN32API CallWindowProcW( WNDPROC func, HWND hwnd, UINT msg,
         return func( hwnd, msg, wParam, lParam );
     else
         return WINPROC_CallProc32WTo32A( func, hwnd, msg, wParam, lParam);
+}
+//******************************************************************************
+//TODO: QS_HOTKEY (oslibmsg.cpp) & low word bits
+//high word = messages currently in queue
+//low word  = messages that have been added to the queue and are still in the
+//            queue since the last call to GetQueueStatus
+//******************************************************************************
+DWORD WIN32API GetQueueStatus( UINT flags)
+{
+ DWORD queueStatus;
+
+    dprintf(("USER32:  GetQueueStatus"));
+    queueStatus = OSLibWinQueryQueueStatus();
+ 
+    queueStatus = MAKELONG(queueStatus, queueStatus);
+    return queueStatus & MAKELONG(flags, flags);
+}
+/*****************************************************************************
+ * Name      : BOOL WIN32API GetInputState
+ * Purpose   : The GetInputState function determines whether there are
+ *             mouse-button or keyboard messages in the calling thread's message queue.
+ * Parameters:
+ * Variables :
+ * Result    : If the queue contains one or more new mouse-button or keyboard
+ *               messages, the return value is TRUE.
+ *             If the function fails, the return value is FALSE.
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
+ *****************************************************************************/
+BOOL WIN32API GetInputState(VOID)
+{
+ DWORD queueStatus;
+
+  dprintf(("USER32:GetInputState()"));
+  queueStatus = OSLibWinQueryQueueStatus();
+
+  return (queueStatus & (QS_KEY | QS_MOUSEBUTTON)) ? TRUE : FALSE;
+}
+//******************************************************************************
+/* Synchronization Functions */
+//******************************************************************************
+DWORD MsgWaitForMultipleObjects(DWORD nCount, LPHANDLE pHandles, BOOL fWaitAll,
+                                DWORD dwMilliseconds, DWORD dwWakeMask)
+{
+ DWORD curtime, endtime;
+
+  dprintf(("MsgWaitForMultipleObjects %x %x %d %d %x", nCount, pHandles, fWaitAll, dwMilliseconds, dwWakeMask));
+  // @@@PH this is a temporary bugfix for WINFILE.EXE
+  if (nCount == 0)
+  {
+	if(dwMilliseconds == 0) {
+		if(GetQueueStatus(dwWakeMask) == 0) {
+			return WAIT_TIMEOUT;
+		}
+		return WAIT_OBJECT_0;
+	}
+        //SvL: Check time, wait for any message, check msg type and determine if
+        //     we have to return
+	//TODO: Timeout isn't handled correctly (can return too late)
+	curtime = GetCurrentTime();
+        endtime = curtime + dwMilliseconds;
+	while(curtime < endtime || dwMilliseconds == INFINITE) {
+    		if(OSLibWinWaitMessage() == FALSE) {
+			dprintf(("OSLibWinWaitMessage returned FALSE!"));
+			return -1;
+		}
+		if(GetQueueStatus(dwWakeMask) != 0) {
+			return WAIT_OBJECT_0;
+		}
+		curtime = GetCurrentTime();
+	}
+        return WAIT_TIMEOUT;
+  }
+  return O32_MsgWaitForMultipleObjects(nCount,pHandles,fWaitAll,dwMilliseconds,dwWakeMask);
 }
