@@ -1,4 +1,4 @@
-/* $Id: menu.h,v 1.3 1999-06-10 17:08:54 phaller Exp $ */
+/* $Id: menu.h,v 1.4 1999-07-06 08:50:11 sandervl Exp $ */
 
 /*
  * PE2LX menus
@@ -46,6 +46,6 @@ typedef struct {
 
 #pragma pack() /*PLF Sat  97-06-21 22:17:31*/
 
-void ShowMenu(int id, MenuHeader *menu, int size);
+void ShowMenu(int id, MenuHeader *menu, int size, int cp = 0);
 
 #endif
