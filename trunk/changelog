@@ -1,4 +1,20 @@
-/* $Id: changelog,v 1.1877 2001-12-02 12:40:45 sandervl Exp $ */
+/* $Id: changelog,v 1.1878 2001-12-03 12:14:47 sandervl Exp $ */
+
+ 2001-12-03: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Use DosSleep in Sleep (don't call WGSS)
+                o GetThreadPriority: return priority stored in TEB
+                o Rewrote SetThreadPriority; allow it to change priority
+                  classes too. WGSS only changes delta in SetThreadPriority
+                  and class in SetPriorityClass (but that one affects the whole 
+                  process, so it is rarely used by applications)
+                  THREAD_PRIORITY_IDLE          -> PRTYC_IDLETIME, 0 
+                  THREAD_PRIORITY_LOWEST        -> PRTYC_REGULAR, PRTYD_MINIMUM
+                  THREAD_PRIORITY_BELOW_NORMAL  -> PRTYC_REGULAR, -15
+                  THREAD_PRIORITY_NORMAL        -> PRTYC_REGULAR, 0
+                  THREAD_PRIORITY_ABOVE_NORMAL  -> PRTYC_REGULAR, 15
+                  THREAD_PRIORITY_HIGHEST       -> PRTYC_REGULAR, PRTYD_MAXIMUM
+                  THREAD_PRIORITY_TIME_CRITICAL -> PRTYC_TIMECRITICAL, 0
+                o SetPriorityClass; just return success for now
 
  2001-12-02: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Don't send WM_SIZE message to dialog before it receives
