@@ -1,4 +1,4 @@
-/* $Id: configure.cmd,v 1.21.2.5 2002-04-29 11:32:47 bird Exp $
+/* $Id: configure.cmd,v 1.21.2.6 2002-04-29 11:35:14 bird Exp $
  *
  * Configuration script.
  * Generates makefile.inc and an empty .depend file.
@@ -38,7 +38,6 @@
                 when (ch = '-') then
                 do
                     parse var sArg sParm'='sOpt
-                    say sParm
                     select
                         when (sParm = '-WITH-KLIB') then
                             fWithkLib = 1;
@@ -49,7 +48,7 @@
                 end
                 when (ch = '?' | ch = 'H' | substr(sArg, 1, 2) = '-H') then
                 do
-                    say 'Odin32 Configure.cmd. $Revision: 1.21.2.5 $.'
+                    say 'Odin32 Configure.cmd. $Revision: 1.21.2.6 $.'
                     say 'syntax: Configure.cmd [options]'
                     say '  -n           Noninteractive.'
                     say '  -w           Don''t build Win32k.'
@@ -142,6 +141,7 @@
      */
     if (fWithkLib) then
     do
+        say 'Configuring kLib...'
         sDir = directory();
         if (chdir('kKrnlLib')) then
         do
