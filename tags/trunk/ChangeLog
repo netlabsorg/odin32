@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.329 1999-10-16 14:51:05 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.330 1999-10-16 18:56:26 sandervl Exp $ */
 
  99-10-16: Yuri Dario <mc6530@mclink.it>
 	- USER32: Button bugfix (BUTTON_CheckAutoRadioButton)
@@ -15,8 +15,6 @@
                   message when creating a window. (can mess up our window
                   and client rectangle)
                   Erase background for buttons. (fixes groupbox redraw problems)
-                  Experimental change: Don't send WM_ERASEBKGND during PM
-                  WM_PAINT. OS/2 sends one before the WM_PAINT.
                   isFrameWindow bugfix + MDI creation & WM_NCCALCSIZE bugfix
 
  99-10-15: Sander van Leeuwen <sandervl@xs4all.nl>
