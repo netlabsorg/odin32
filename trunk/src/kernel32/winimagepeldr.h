@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.h,v 1.13 2001-06-01 08:22:34 sandervl Exp $ */
+/* $Id: winimagepeldr.h,v 1.14 2001-06-05 19:36:28 phaller Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -130,6 +130,7 @@ Win32DllBase *loadDll(char *pszCurModule);
 
         ULONG                 nrNameExports, nameExportSize;
         ULONG                 nrOrdExports;
+        ULONG                 nrOrdExportsRegistered;
         NameExport           *nameexports, *curnameexport;
         OrdExport            *ordexports, *curordexport;
 
