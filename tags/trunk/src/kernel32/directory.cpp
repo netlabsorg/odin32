@@ -1,9 +1,11 @@
-/* $Id: directory.cpp,v 1.16 2000-03-02 19:17:20 sandervl Exp $ */
+/* $Id: directory.cpp,v 1.17 2000-03-04 19:52:35 sandervl Exp $ */
 
 /*
  * Win32 Directory functions for OS/2
  *
  * Copyright 1998 Sander van Leeuwen
+ *
+ * NOTE: Directory creation has to be done in install program (odin\win) 
  *
  * Parts based on Wine code (991031) (files\directory.c)
  *

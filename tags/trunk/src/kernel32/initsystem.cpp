@@ -1,4 +1,4 @@
-/* $Id: initsystem.cpp,v 1.6 2000-03-03 11:15:57 sandervl Exp $ */
+/* $Id: initsystem.cpp,v 1.7 2000-03-04 19:52:36 sandervl Exp $ */
 /*
  * Odin system initialization (registry & directories)
  *
@@ -112,48 +112,48 @@ BOOL InitRegistry()
    }
 //   if(RegOpenKeyA(HKEY_CURRENT_USER, "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders", &hkey) != ERROR_SUCCESS) 
 //   {
-   	strcpy(shellpath, InternalGetSystemDirectoryA());
-   	strcat(shellpath, "\\WIN\\Favorites");
+   	strcpy(shellpath, InternalGetWindowsDirectoryA());
+   	strcat(shellpath, "\\Favorites");
    	CreateDirectoryA(shellpath, NULL);
    	RegSetValueExA(hkey,"Favorites",0,REG_SZ, (LPBYTE)shellpath, strlen(shellpath)+1);
-   	strcpy(shellpath, InternalGetSystemDirectoryA());
-   	strcat(shellpath, "\\WIN\\Programs\\Startup");
+   	strcpy(shellpath, InternalGetWindowsDirectoryA());
+   	strcat(shellpath, "\\Programs\\Startup");
    	CreateDirectoryA(shellpath, NULL);
    	RegSetValueExA(hkey,"Startup",0,REG_SZ, (LPBYTE)shellpath, strlen(shellpath)+1);
-   	strcpy(shellpath, InternalGetSystemDirectoryA());
-   	strcat(shellpath, "\\WIN\\Desktop");
+   	strcpy(shellpath, InternalGetWindowsDirectoryA());
+   	strcat(shellpath, "\\Desktop");
    	CreateDirectoryA(shellpath, NULL);
    	RegSetValueExA(hkey,"Desktop",0,REG_SZ, (LPBYTE)shellpath, strlen(shellpath)+1);
-   	strcpy(shellpath, InternalGetSystemDirectoryA());
-   	strcat(shellpath, "\\WIN\\Start Menu\\Programs");
+   	strcpy(shellpath, InternalGetWindowsDirectoryA());
+   	strcat(shellpath, "\\Start Menu\\Programs");
    	CreateDirectoryA(shellpath, NULL);
    	RegSetValueExA(hkey,"Programs",0,REG_SZ, (LPBYTE)shellpath, strlen(shellpath)+1);
-   	strcpy(shellpath, InternalGetSystemDirectoryA());
-   	strcat(shellpath, "\\WIN\\Fonts");
+   	strcpy(shellpath, InternalGetWindowsDirectoryA());
+   	strcat(shellpath, "\\Fonts");
    	CreateDirectoryA(shellpath, NULL);
    	RegSetValueExA(hkey,"Fonts",0,REG_SZ, (LPBYTE)shellpath, strlen(shellpath)+1);
-   	strcpy(shellpath, InternalGetSystemDirectoryA());
-   	strcat(shellpath, "\\WIN\\SendTo");
+   	strcpy(shellpath, InternalGetWindowsDirectoryA());
+   	strcat(shellpath, "\\SendTo");
    	CreateDirectoryA(shellpath, NULL);
    	RegSetValueExA(hkey,"SendTo",0,REG_SZ, (LPBYTE)shellpath, strlen(shellpath)+1);
-   	strcpy(shellpath, InternalGetSystemDirectoryA());
-   	strcat(shellpath, "\\WIN\\Start Menu");
+   	strcpy(shellpath, InternalGetWindowsDirectoryA());
+   	strcat(shellpath, "\\Start Menu");
    	CreateDirectoryA(shellpath, NULL);
    	RegSetValueExA(hkey,"Start Menu",0,REG_SZ, (LPBYTE)shellpath, strlen(shellpath)+1);
-   	strcpy(shellpath, InternalGetSystemDirectoryA());
-   	strcat(shellpath, "\\WIN\\ShellNew");
+   	strcpy(shellpath, InternalGetWindowsDirectoryA());
+   	strcat(shellpath, "\\ShellNew");
    	CreateDirectoryA(shellpath, NULL);
    	RegSetValueExA(hkey,"Templates",0,REG_SZ, (LPBYTE)shellpath, strlen(shellpath)+1);
-   	strcpy(shellpath, InternalGetSystemDirectoryA());
-   	strcat(shellpath, "\\WIN\\Recent");
+   	strcpy(shellpath, InternalGetWindowsDirectoryA());
+   	strcat(shellpath, "\\Recent");
    	CreateDirectoryA(shellpath, NULL);
    	RegSetValueExA(hkey,"Recent",0,REG_SZ, (LPBYTE)shellpath, strlen(shellpath)+1);
-   	strcpy(shellpath, InternalGetSystemDirectoryA());
-   	strcat(shellpath, "\\WIN\\NetHood");
+   	strcpy(shellpath, InternalGetWindowsDirectoryA());
+   	strcat(shellpath, "\\NetHood");
    	CreateDirectoryA(shellpath, NULL);
    	RegSetValueExA(hkey,"NetHood",0,REG_SZ, (LPBYTE)shellpath, strlen(shellpath)+1);
-   	strcpy(shellpath, InternalGetSystemDirectoryA());
-   	strcat(shellpath, "\\WIN\\My Documents");
+   	strcpy(shellpath, InternalGetWindowsDirectoryA());
+   	strcat(shellpath, "\\My Documents");
    	CreateDirectoryA(shellpath, NULL);
    	RegSetValueExA(hkey,"Personal",0,REG_SZ, (LPBYTE)shellpath, strlen(shellpath)+1);
 //   }
