@@ -1,4 +1,4 @@
-; $Id: d32Events.asm,v 1.1 2001-02-18 15:27:16 bird Exp $
+; $Id: d32Events.asm,v 1.2 2001-02-23 02:57:53 bird Exp $
 ;
 ; d32Events - Code for overriding system events.
 ;
@@ -25,9 +25,9 @@
 ;
     extrn   aSysEventsOverrides:dword
     extrn    _TKSSBase16:dword
-    extrn   dh_SendEvent:far
+    extrn   dh_SendEvent:near
     extrn   dh_SendEvent_sel:word
-    extrn   RASRST:far
+    extrn   RASRST:near
     extrn   _Device_Help:dword
 
 CODE16 segment
@@ -113,7 +113,7 @@ mydse_ret:
     push    DATA16                      ; 3
     pop     ds                          ; 3
     ASSUME  ds:DATA16                   ; 3
-    mov     ax, dh_SendEvent_sel        ; 3
+    mov     ax, cs:dh_SendEvent_sel     ; 3
     mov     ss:[bp+6], ax               ; 4
     pop     eax                         ; restore eax.
     pop     bp                          ; 5
@@ -136,7 +136,7 @@ mydse_OS_event:
     pop     ebx
     pop     ds
     pop     ax
-    jmp     far ptr DATA16:dh_SendEvent
+    jmp     dh_SendEvent
 mydh_SendEvent ENDP
 
 
@@ -161,11 +161,6 @@ myRASRST PROC FAR
 
 
     ;
-    ; TODO - add check if we're actually being called from kbdbase.sys!
-    ;
-
-
-    ;
     ; Check if we're going to override this dump request.
     ;
     push    seg FLAT:CODE32
@@ -177,6 +172,11 @@ myRASRST PROC FAR
 
     cmp     dword ptr aSysEventsOverrides[ebx], 0 ; check the hev if it's NULLHANDLE.
     jz      myRASRST_dump
+
+    ;
+    ; TODO - add check if we're actually being called from kbdbase.sys!
+    ;        If not called from kbdbase.sys we should do the dump.
+
 
     ;
     ; Post semaphore handle.
@@ -198,7 +198,7 @@ myRASRST_ret:
 myRASRST_dump:
     pop     ebx
     pop     ds
-    jmp     far ptr DATA16:RASRST
+    jmp     RASRST
 myRASRST ENDP
 
 

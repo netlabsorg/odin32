@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.66 2001-02-21 14:11:49 bird Exp $
+# $Id: Makefile,v 1.67 2001-02-23 02:57:50 bird Exp $
 
 #
 # Win32k makefile.
@@ -102,15 +102,15 @@ clean:
 dep:
     $(ODIN32_TOOLS)\fastdep @<<
         -o$$(WIN32KOBJ) $(CINCLUDES) -xldr\calltaba.asm -xtest\TstFakers.c
-        misc\*.c* ldr\*.c* dev32\*.c* pe2lx\*.c* k32\*.c* lib\*.c elf2lx\*.c* test\*.c*
+        misc\*.c* ldr\*.c* dev32\*.c* pe2lx\*.c* k32\*.c* elf2lx\*.c* test\*.c*
         -objobj_tst
-        misc\*.c* ldr\*.c* dev32\*.c* pe2lx\*.c* k32\*.c* lib\*.c elf2lx\*.c* test\*.c*
+        misc\*.c* ldr\*.c* dev32\*.c* pe2lx\*.c* k32\*.c* elf2lx\*.c* test\*.c*
         $(WIN32KINCLUDE)\*.h
 <<
     $(ODIN32_TOOLS)\fastdep @<<
         -a+ -o$$(WIN32KOBJ) -I$(WIN32KINCLUDE) -I$(DDKPATH)\inc
         -xldr\calltaba.asm -xtest\TstFakers.c
-        dev16\*.asm ldr\*.asm misc\*.asm dev32\*.asm pe2lx\*.asm k32\*.asm lib\*.asm elf2lx\*.asm test\*.asm
+        dev16\*.asm ldr\*.asm misc\*.asm dev32\*.asm pe2lx\*.asm k32\*.asm elf2lx\*.asm test\*.asm
         $(WIN32KINCLUDE)\*.inc
 <<
     $(ODIN32_TOOLS)\fastdep @<<

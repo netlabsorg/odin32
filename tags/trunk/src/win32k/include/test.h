@@ -1,4 +1,4 @@
-/* $Id: test.h,v 1.8 2001-02-20 05:04:24 bird Exp $
+/* $Id: test.h,v 1.9 2001-02-23 02:57:54 bird Exp $
  *
  * Definitions and declarations for test moduls.
  *
@@ -161,6 +161,8 @@ void _Optlink   faketkStartProcess(void);   /* Not callable! (fakea.asm) */
 void _Optlink   fakef_FuStrLenZ(void);      /* Not callable! (fakea.asm) */
 void _Optlink   fakef_FuStrLen(void);       /* Not callable! (fakea.asm) */
 void _Optlink   fakef_FuBuff(void);         /* Not callable! (fakea.asm) */
+void _Optlink   fakedh_SendEvent(void);     /* Not callable! (fakea.asm) */
+void _Optlink   fakeRASRST(void);           /* Not callable! (fakea.asm) */
 void _Optlink   fakeKMEnterKmodeSEF(void);  /* Not callable! (fakea.asm) */
 void _Optlink   fakeKMExitKmodeSEF8(void);  /* Not callable! (fakea.asm) */
 extern PTCB     fakepTCBCur;

@@ -1,4 +1,4 @@
-/* $Id: probkrnl.c,v 1.34 2001-02-20 05:05:45 bird Exp $
+/* $Id: probkrnl.c,v 1.35 2001-02-23 02:57:52 bird Exp $
  *
  * Description:   Autoprobes the os2krnl file and os2krnl[*].sym files.
  *                Another Hack!
@@ -108,8 +108,8 @@ IMPORTKRNLSYM DATA16_GLOBAL aImportTab[NBR_OF_KRNLIMPORTS] =
     {FALSE, -1, 21, "_ldrCheckInternalName","@4",  -1,  -1,  -1,  -1, EPT_PROC32},
     {FALSE, -1, 11, "g_tkExecPgm",          "",    -1,  -1,  -1,  -1, EPT_PROC32},
     {FALSE, -1, 15, "_tkStartProcess",      "",    -1,  -1,  -1,  -1, EPT_PROC32},
-/*    {FALSE, -1, 12, "dh_SendEvent",         "",    -1,  -1,  -1,  -1, EPT_PROC16},
-    {FALSE, -1,  6, "RASRST",               "",    -1,  -1,  -1,  -1, EPT_PROC16}, */
+    {FALSE, -1, 12, "dh_SendEvent",         "",    -1,  -1,  -1,  -1, EPT_PROC16},
+    {FALSE, -1,  6, "RASRST",               "",    -1,  -1,  -1,  -1, EPT_PROC16},
     {FALSE, -1, 12, "_LDRClearSem",         "@0",  -1,  -1,  -1,  -1, EPT_PROCIMPORT32},
     {FALSE, -1, 21, "_ldrASMpMTEFromHandle","@4",  -1,  -1,  -1,  -1, EPT_PROCIMPORT32},
     {FALSE, -1, 21, "_ldrValidateMteHandle","@4",  -1,  -1,  -1,  -1, EPT_PROCIMPORT32},

@@ -1,6 +1,6 @@
 [COMPILER]
 MACRO=odin32_setcurrentdir();\nodin32_maketagfile();\n
-FILTEREXPANSION=1 0 0 0 0 0 0 1 1 1 1 1 1 1
+FILTEREXPANSION=0 1 0 0 0 0 0 0 0 0 0 1 1 0
 compile=concur|capture|clear|:Compile:&Compile,nmake -f win32k.mak .\bin\debug\%n.obj
 make=concur|capture|clear|:Build:&Build,nmake
 rebuild=concur|capture|clear|:Rebuild:&Rebuild,nmake -a
@@ -203,5 +203,33 @@ utils\Win32kCC.h
 utils\Win32kCC.rc
 [ASSOCIATION]
 [STATE]
-BUFFER:
-
+SCREEN: 1600 1200 -250 255 1244 800 0 0 M 0 0 0 0 1247 855
+CWD: G:\odin32\tree\src\win32k
+BUFFER: BN="F:\VSLICK40\OS2\vrestore.slk"
+BI: MA=1 254 1  TABS=1 9  WWS=3 IWT=0 ST=0 IN=0 BW=0 US=0 RO=0 SE=0 SN=0 BIN=0 MN=Fundamental	HM=0 MF=1
+VIEW: LN=.0 CL=1 LE=0 CX=0 CY=1 WI=5 BI=24 HT=0 HN=0 HF=0 HC=4
+BUFFER: BN="G:\odin32\tree\src\win32k\dev32\d32Events.asm"
+BI: MA=1 74 1  TABS=1 5  WWS=1 IWT=0 ST=0 IN=1 BW=0 US=32000 RO=0 SE=1 SN=0 BIN=0 MN=Assembly	HM=0 MF=864
+VIEW: LN=.4055 CL=36 LE=0 CX=35 CY=21 WI=5 BI=17 HT=0 HN=0 HF=0 HC=4
+BUFFER: BN="G:\odin32\tree\src\win32k\win32k.mak"
+BI: MA=1 74 1  TABS=1 5  WWS=1 IWT=0 ST=0 IN=2 BW=0 US=32000 RO=0 SE=1 SN=0 BIN=0 MN=	HM=0 MF=512
+VIEW: LN=.3660 CL=5 LE=0 CX=4 CY=21 WI=5 BI=23 HT=0 HN=0 HF=0 HC=4
+WINDOW: 52 54 841 577 -1 -1 M  WF=0 WT=2 "System Monospaced,10,0,1"
+BUFFER: BN="G:\odin32\tree\src\win32k\dev32\d32Events.asm"
+VIEW: LN=.4055 CL=36 LE=0 CX=35 CY=21 WI=83 BI=17 HT=0 HN=0 HF=0 HC=4
+WINDOW: 0 0 841 577 -1 -1 M  WF=0 WT=1 "System Monospaced,10,0,1"
+BUFFER: BN="G:\odin32\tree\src\win32k\win32k.mak"
+VIEW: LN=.3659 CL=4 LE=0 CX=3 CY=21 WI=85 BI=23 HT=0 HN=0 HF=0 HC=4
+FILEHIST: 9
+G:\odin32\tree\src\win32k\dev32\d32CallGate.asm
+G:\odin32\tree\src\win32k\include\k32.h
+G:\odin32\tree\src\win32k\k32\k32HandleSystemEvent.cpp
+G:\odin32\tree\src\win32k\ldr\myldrGetFileName.asm
+G:\odin32\tree\src\win32k\ldr\myldrOpenPatha.asm
+G:\odin32\tree\src\win32k\ldr\mytkExecPgm.asm
+G:\odin32\tree\src\win32k\ldr\mytkStartProcess.asm
+G:\odin32\tree\src\win32k\ldr\calltaba.asm
+G:\odin32\tree\src\win32k\win32k.mak
+PRINTER: 2
+PRINTER: 2
+Printer1,
