@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.86 2001-02-03 18:52:02 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.87 2001-02-19 13:13:02 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -803,6 +803,12 @@ BOOL OSLibWinChangeTaskList(HANDLE hTaskList, HWND hwndFrame, char *title, BOOL 
 }
 //******************************************************************************
 //******************************************************************************
+BOOL OSLibWinLockWindowUpdate(HWND hwnd)
+{
+  return WinLockWindowUpdate(HWND_DESKTOP, (HWND)hwnd);
+}
+//******************************************************************************
+//******************************************************************************
 ULONG OSLibGetScreenHeight()
 {
   return ScreenHeight;
@@ -812,12 +818,6 @@ ULONG OSLibGetScreenHeight()
 ULONG OSLibGetScreenWidth()
 {
   return ScreenWidth;
-}
-//******************************************************************************
-//******************************************************************************
-BOOL OSLibWinLockWindowUpdate(HWND hwnd)
-{
-  return WinLockWindowUpdate(HWND_DESKTOP, (HWND)hwnd);
 }
 //******************************************************************************
 //******************************************************************************

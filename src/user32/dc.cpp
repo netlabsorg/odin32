@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.89 2001-02-19 10:15:49 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.90 2001-02-19 13:13:00 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -218,6 +218,45 @@ BOOL setPageXForm(Win32BaseWindow *wnd, pDCData pHps)
    double xScale =  pHps->viewportXExt / (double)pHps->windowExt.cx;
    double yScale =  pHps->viewportYExt / (double)pHps->windowExt.cy;
 
+#if 0
+   mlf.fxM11 = FLOAT_TO_FIXED(1.0);
+   mlf.fxM12 = 0;
+   mlf.lM13  = 0;
+   mlf.fxM21 = 0;
+   mlf.fxM22 = FLOAT_TO_FIXED(1.0);
+   mlf.lM23  = 0;
+   mlf.lM31  = pHps->viewportOrg.x - (LONG)(pHps->windowOrg.x * xScale);
+   mlf.lM32  = pHps->viewportOrg.y - (LONG)(pHps->windowOrg.y * yScale);
+   mlf.lM33  = 1;
+
+//testestest
+   if(wnd && wnd->getWindowWidth() && wnd->getWindowHeight()) {
+       RECTL recttmp, rectviewold;
+
+       rc = GpiQueryPageViewport(pHps->hps, &rectviewold);
+       if(rc == 0) {
+           dprintf(("WARNING: GpiQueryPageViewport returned FALSE!!"));
+       }
+       recttmp.xLeft   = 0;
+//       recttmp.xRight  = ((double)wnd->getWindowWidth() / xScale);
+       recttmp.xRight  = ((double)GetScreenWidth() / xScale);
+       recttmp.yBottom = 0;
+//       recttmp.yTop    = ((double)wnd->getWindowHeight() / yScale);
+       recttmp.yTop    = ((double)GetScreenHeight() / yScale);
+
+       if(recttmp.yTop != rectviewold.yTop || 
+          recttmp.xRight != rectviewold.xRight)
+       {
+           dprintf(("GpiSetPageViewport %x (%d,%d) %f %f", pHps->hps, recttmp.xRight, recttmp.yTop, xScale, yScale));
+           rc = GpiSetPageViewport(pHps->hps, &recttmp);
+           if(rc == 0) {
+              dprintf(("WARNING: GpiSetPageViewport returned FALSE!!"));
+           }
+       }
+   }
+//testestest
+
+#else
    mlf.fxM11 = FLOAT_TO_FIXED(xScale);
    mlf.fxM12 = 0;
    mlf.lM13  = 0;
@@ -227,6 +266,7 @@ BOOL setPageXForm(Win32BaseWindow *wnd, pDCData pHps)
    mlf.lM31  = pHps->viewportOrg.x - (LONG)(pHps->windowOrg.x * xScale);
    mlf.lM32  = pHps->viewportOrg.y - (LONG)(pHps->windowOrg.y * yScale);
    mlf.lM33  = 1;
+#endif
 
    pHps->isLeftLeft = mlf.fxM11 >= 0;
    pHps->isTopTop = mlf.fxM22 >= 0;
@@ -250,7 +290,9 @@ BOOL setPageXForm(Win32BaseWindow *wnd, pDCData pHps)
 //   if ((!pHps->isMetaPS) ||
 //      (pHps->pMetaFileObject && pHps->pMetaFileObject->isEnhanced()))
       rc = GpiSetDefaultViewMatrix(pHps->hps, 8, &mlf, TRANSFORM_REPLACE);
-
+   if(rc == 0) {
+      dprintf(("WARNING: GpiSetDefaultViewMatrix returned FALSE!!"));
+   }
 #ifdef INVERT
    if (bEnableYInversion)
       GpiEnableYInversion(pHps->hps, pHps->height + pHps->HPStoHDCInversionHeight);
@@ -399,7 +441,7 @@ void selectClientArea(Win32BaseWindow *window, pDCData pHps)
         //TODO: counter
         dprintf2(("WARNING: selectClientArea %x; already selected! origin (%d,%d) original origin (%d,%d)", window->getWindowHandle(), rcltemp.xLeft, rcltemp.yBottom, pHps->ptlOrigin.x, pHps->ptlOrigin.y));
         GetWindowRect(window->getWindowHandle(), &rectWindow);
-        mapWin32ToOS2Rect(OSLibGetScreenHeight(), &rectWindow, (PRECTLOS2)&rectWindowOS2);
+        mapWin32ToOS2Rect(GetScreenHeight(), &rectWindow, (PRECTLOS2)&rectWindowOS2);
         if(rectWindowOS2.xLeft + rcl.xLeft != rcltemp.xLeft ||
            rectWindowOS2.yBottom + rcl.yBottom != rcltemp.yBottom)
         {
@@ -437,7 +479,7 @@ void selectClientArea(Win32BaseWindow *window, pDCData pHps)
         rectWindow.left   += pClient->left;
         rectWindow.bottom  = rectWindow.top + pClient->bottom;
         rectWindow.top    += pClient->top;
-        mapWin32ToOS2Rect(OSLibGetScreenHeight(), &rectWindow, (PRECTLOS2)&rectWindowOS2);
+        mapWin32ToOS2Rect(GetScreenHeight(), &rectWindow, (PRECTLOS2)&rectWindowOS2);
 
         hrgnParentClip = GreCreateRectRegion(pHps->hps, &rectWindowOS2, 1);
         GreCombineRegion(pHps->hps, hrgnRect, hrgnParentClip, hrgnRect, CRGN_AND);
@@ -475,6 +517,9 @@ void selectClientArea(Win32BaseWindow *window, pDCData pHps)
    dprintf2(("def view limits (%d,%d)(%d,%d)", rectWindowOS2.xLeft, rectWindowOS2.yBottom, rectWindowOS2.xRight, rectWindowOS2.yTop));
    GpiQueryPageViewport(pHps->hps, &rectWindowOS2);
    dprintf2(("page viewport (%d,%d)(%d,%d)", rectWindowOS2.xLeft, rectWindowOS2.yBottom, rectWindowOS2.xRight, rectWindowOS2.yTop));
+
+   GpiQueryBoundaryData(pHps->hps, &rectWindowOS2);
+   dprintf2(("boundary data (%d,%d)(%d,%d)", rectWindowOS2.xLeft, rectWindowOS2.yBottom, rectWindowOS2.xRight, rectWindowOS2.yTop));
 
    GpiQueryGraphicsField(pHps->hps, &rectWindowOS2);
    dprintf2(("graphics field (%d,%d)(%d,%d)", rectWindowOS2.xLeft, rectWindowOS2.yBottom, rectWindowOS2.xRight, rectWindowOS2.yTop));
