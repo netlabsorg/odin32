@@ -1,4 +1,4 @@
-/* $Id: dibsect.h,v 1.20 2000-08-30 18:05:24 sandervl Exp $ */
+/* $Id: dibsect.h,v 1.21 2000-10-07 09:03:50 hugh Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -49,8 +49,8 @@ typedef struct
 } BITMAP_W, *LPBITMAP_W;
 
 typedef struct {
-	BITMAPINFOHEADER_W bmiHeader;
-	RGBQUAD	bmiColors[1];
+  BITMAPINFOHEADER_W bmiHeader;
+  RGBQUAD bmiColors[1];
 } BITMAPINFO_W;
 typedef BITMAPINFO *LPBITMAPINFO;
 
@@ -78,11 +78,12 @@ public:
               void  SelectDIBObject(HDC hdc);
               int   GetBitCount();
               int   GetHeight();
+              int   GetWidth();
               void  UnSelectDIBObject()      { this->hdc = 0;   };
 
-	      DWORD GetBitmapHandle()	     { return handle; };
+        DWORD GetBitmapHandle()      { return handle; };
               void  SetBitmapHandle(DWORD bmphandle) { handle = bmphandle; };
-	      DWORD GetRGBUsage()            { return iUsage; };
+        DWORD GetRGBUsage()            { return iUsage; };
 
               BOOL  BitBlt(HDC hdcDest, int nXdest, int nYDest,
                            int nDestWidth, int nDestHeight,
