@@ -1,4 +1,4 @@
-/* $Id: CmdQd.c,v 1.16 2002-05-24 01:57:58 bird Exp $
+/* $Id: CmdQd.c,v 1.17 2002-05-24 02:41:30 bird Exp $
  *
  * Command Queue Daemon / Client.
  *
@@ -118,7 +118,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdarg.h>
-#include <assert.h>
+//#include <assert.h>
 #include <direct.h>
 #include <signal.h>
 #include <process.h>
@@ -126,6 +126,23 @@
 #define INCL_BASE
 #include <os2.h>
 
+
+/*******************************************************************************
+*   Defined Constants And Macros                                               *
+*******************************************************************************/
+#undef assert
+//#define assert(expr) ((expr) ? (void)0, (void)0 \
+//                             : Error("assert: %s\n  CmdQd.c line %d  function %s\n",\
+//                                    #expr, __FUNCTION__, __LINE__), __interrupt(3))
+#ifdef DEBUG
+#define assert(expr)                                                           \
+    do { if (!(expr)) { Error("assert: %s\n  CmdQd.c line %d  function %s\n",  \
+                              #expr, __LINE__, __FUNCTION__);                  \
+                       __interrupt(3); }                                       \
+    } while (0)
+#else
+#define assert(expr) do { } while(0)
+#endif
 
 /*
  * Memory debugging.
@@ -333,6 +350,7 @@ HMTX        hmtxExec;                   /* Execute childs mutex sem. Required */
 
 PSZ         pszSharedMem = SHARED_MEM_NAME; /* Default shared memname */
                                         /* Could be overridden by env.var. CMDQD_MEM_NAME. */
+BOOL        fDaemon = FALSE;            /* Set if we're the daemon. */
 
 /*******************************************************************************
 *   Internal Functions                                                         *
@@ -557,6 +575,7 @@ int Init(const char *arg0, int cWorkers)
 int Daemon(int cWorkers)
 {
     int     rc;
+    fDaemon = TRUE;
 
     /*
      * Init Shared memory
@@ -1439,6 +1458,8 @@ void Worker(void * iWorkerId)
          */
         if (pJob)
         {
+            static BOOL  fStdClosed = FALSE;
+            static HFILE hStdOutSaved = -1;
             int         rc;
             char        szArg[4096];
             char        szObj[256];
@@ -1446,8 +1467,10 @@ void Worker(void * iWorkerId)
             PJOBOUTPUT  pJobOutputLast = NULL;
             RESULTCODES Res;
             PID         pid;
-            HPIPE       hPipeR = NULLHANDLE;
-            HPIPE       hPipeW = HF_STDOUT;
+            HPIPE       hPipeR = -1;
+            HPIPE       hPipeW = -1;
+            HFILE       hStdErr;
+            HFILE       hStdOut;
 
             //printf("debug-%d: start %s\n", iWorkerId, pJob->JobInfo.szCommand);
 
@@ -1466,6 +1489,23 @@ void Worker(void * iWorkerId)
                 return;
             }
 
+            if (!fStdClosed)
+            {   /* only do this once! */
+                DosDupHandle(HF_STDOUT, &hStdOutSaved);
+                DosSetFHState(hStdOutSaved, OPEN_FLAGS_NOINHERIT); /* child shall not see this handle! */
+                fclose(stdin);
+                DosClose(HF_STDIN);
+                fclose(stdout);
+                DosClose(HF_STDOUT);
+                fclose(stderr);
+                DosClose(HF_STDERR);
+                hStdOut = HF_STDOUT;
+                DosDupHandle(hStdOutSaved, &hStdOut);
+                hStdErr = HF_STDERR;
+                DosDupHandle(hStdOutSaved, &hStdErr);
+                fStdClosed = TRUE;
+            }
+
             rc = DosCreatePipe(&hPipeR, &hPipeW, sizeof(pJobOutput->szOutput) - 1);
             if (rc)
             {
@@ -1473,6 +1513,7 @@ void Worker(void * iWorkerId)
                 Error("Internal Error: Failed to create pipe! rc=%d\n", rc);
                 return;
             }
+            assert(hPipeW != HF_STDOUT && hPipeR != HF_STDERR);
 
             rc = DosSetDefaultDisk(  pJob->JobInfo.szCurrentDir[0] >= 'a'
                                    ? pJob->JobInfo.szCurrentDir[0] - 'a' + 1
@@ -1480,23 +1521,21 @@ void Worker(void * iWorkerId)
             rc += DosSetCurrentDir(pJob->JobInfo.szCurrentDir);
             if (!rc)
             {
-                static BOOL fStdClosed = FALSE;
-                HFILE   hStdErr = HF_STDERR;
+                hStdErr = HF_STDERR;
+                hStdOut = HF_STDOUT;
                 assert(   pJob->JobInfo.szzEnv[pJob->JobInfo.cchEnv-1] == '\0'
                        && pJob->JobInfo.szzEnv[pJob->JobInfo.cchEnv-2] == '\0');
-                if (!fStdClosed)
-                {   /* only do this once! */
-                    DosClose(HF_STDIN);
-                    DosClose(HF_STDOUT);
-                    DosClose(HF_STDERR);
-                    fStdClosed = TRUE;
-                }
+                DosDupHandle(hPipeW, &hStdOut);
                 DosDupHandle(hPipeW, &hStdErr);
-                DosSetFHState(hPipeR, OPEN_FLAGS_NOINHERIT);
+                DosClose(hPipeW);
+                DosSetFHState(hPipeR, OPEN_FLAGS_NOINHERIT); /* child shall not see this handle... */
                 rc = DosExecPgm(szObj, sizeof(szObj), EXEC_ASYNCRESULT,
                                 szArg, pJob->JobInfo.szzEnv, &Res, szArg);
-                DosClose(hPipeW);
-                DosClose(hStdErr);
+                /* Placeholders, prevents clashes... */
+                hStdOut = HF_STDOUT;
+                DosDupHandle(hStdOutSaved, &hStdOut);
+                hStdErr = HF_STDERR;
+                DosDupHandle(hStdOutSaved, &hStdErr);
                 DosReleaseMutexSem(hmtxExec);
 
 
@@ -2626,7 +2665,9 @@ void Error(const char *pszFormat, ...)
     va_list arg;
     /* won't workin in daemon mode... */
     va_start(arg, pszFormat);
-    if (vfprintf(stdout, pszFormat, arg) <= 0)
+    if (!fDaemon)
+        vfprintf(stdout, pszFormat, arg);
+    else
     {
         FILE *phFile = fopen(".\\cmdqd.log", "a+");
         if (phFile)
