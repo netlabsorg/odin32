@@ -1,4 +1,8 @@
- /* $Id: ChangeLog,v 1.282 1999-10-07 19:39:36 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.283 1999-10-07 23:22:04 sandervl Exp $ */
+
+ 99-10-08: Sander van Leeuwen <sandervl@xs4all.nl>
+ 	- USER32: Bugfix for SetWindowPos; take frame size into account
+                  Removed WM_MOVE notification class flag for Odin PM windows
 
  99-10-07: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: GetCaretPos() fix
