@@ -1,4 +1,4 @@
-/* $Id: socket.cpp,v 1.14 2003-02-22 10:05:41 sandervl Exp $ */
+/* $Id: socket.cpp,v 1.15 2003-02-24 10:03:58 sandervl Exp $ */
 /*
  * based on Windows Sockets 1.1 specs
  * (ftp.microsoft.com:/Advsys/winsock/spec11/WINSOCK.TXT)
@@ -185,6 +185,34 @@ INT WINAPI WSASend( SOCKET s, LPWSABUF lpBuffers, DWORD dwBufferCount,
                     LPWSAOVERLAPPED lpOverlapped,
                     LPWSAOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine )
 {
+    DWORD dwBytesSent, tmpret;
+    DWORD ret = NO_ERROR;
+
+    dprintf(("WSASend %d %x %d %x %x %x %x", s, lpBuffers, dwBufferCount, lpNumberOfBytesSent, dwFlags, lpOverlapped, lpCompletionRoutine));
+
+    if(lpBuffers == NULL) {
+        WSASetLastError(WSAEINVAL);
+        return SOCKET_ERROR;
+    }
+    if(lpNumberOfBytesSent == NULL) {
+        lpNumberOfBytesSent = &dwBytesSent;
+    }
+    if(!lpOverlapped && !lpCompletionRoutine) 
+    {
+        *lpNumberOfBytesSent = 0;
+
+        for(int i=0;i<dwBufferCount;i++) {
+            tmpret = send(s, lpBuffers[i].buf, lpBuffers[i].len,  dwFlags);
+            if(tmpret != SOCKET_ERROR) {
+                *lpNumberOfBytesSent += ret;
+            }
+            else {
+                ret = SOCKET_ERROR;
+                break;
+            }
+        }
+        return ret;
+    }
     return WSASendTo ( s, lpBuffers, dwBufferCount, lpNumberOfBytesSent, dwFlags,
                        NULL, 0, lpOverlapped, lpCompletionRoutine );
 }
@@ -204,10 +232,42 @@ INT WINAPI WSARecvFrom( SOCKET s, LPWSABUF lpBuffers, DWORD dwBufferCount,
  *		WSARecv			(WS2_32.67)
  */
 int WINAPI WSARecv (SOCKET s, LPWSABUF lpBuffers, DWORD dwBufferCount,
-		    LPDWORD NumberOfBytesReceived, LPDWORD lpFlags,
+		    LPDWORD lpNumberOfBytesReceived, LPDWORD lpFlags,
 		    LPWSAOVERLAPPED lpOverlapped,
 		    LPWSAOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine)
 {
-    return WSARecvFrom (s, lpBuffers, dwBufferCount, NumberOfBytesReceived, lpFlags,
+    DWORD dwBytesReceived, tmpret, flags;
+    DWORD ret = NO_ERROR;
+
+    dprintf(("WSARecv %d %x %d %x %x %x %x", s, lpBuffers, dwBufferCount, lpNumberOfBytesReceived, lpFlags, lpOverlapped, lpCompletionRoutine));
+    if(lpBuffers == NULL) {
+        WSASetLastError(WSAEINVAL);
+        return SOCKET_ERROR;
+    }
+    if(lpNumberOfBytesReceived == NULL) {
+        lpNumberOfBytesReceived = &dwBytesReceived;
+    }
+    if(lpFlags == NULL) {
+        lpFlags = &flags;
+        flags = 0;
+    }
+    if(!lpOverlapped && !lpCompletionRoutine) 
+    {
+        *lpNumberOfBytesReceived = 0;
+
+        for(int i=0;i<dwBufferCount;i++) {
+            tmpret = recv(s, lpBuffers[i].buf, lpBuffers[i].len,  *lpFlags);
+            if(tmpret != SOCKET_ERROR) {
+                *lpNumberOfBytesReceived += ret;
+            }
+            else {
+                ret = SOCKET_ERROR;
+                break;
+            }
+        }
+        *lpFlags = 0; //what to do with this?
+        return ret;
+    }
+    return WSARecvFrom (s, lpBuffers, dwBufferCount, lpNumberOfBytesReceived, lpFlags,
                         NULL, NULL, lpOverlapped, lpCompletionRoutine);
 }
