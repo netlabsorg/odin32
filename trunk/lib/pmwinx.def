@@ -738,6 +738,7 @@ _O32_GetExitCodeProcess @ 1005
 _O32_GetExitCodeThread @ 1006
 _O32_MapVirtualKey @ 1007
 _O32_GetAsyncKeyState @1012
+_O32_GetKeyboardState @1013
 _O32_WaitForInputIdle @1028
 _O32__CreateBitmapIndirect @ 5000
 _O32__CreateDialogIndirect @ 5001
@@ -754,6 +755,7 @@ _O32_WinTranslateDevicePoints @ 6003
 _O32_WinTranslateDeviceRects @ 6004
 _O32_WinTranslateGraphicsObjectHandle @ 6005
 _O32_WinTranslateMnemonicString @ 6006
+
 
 _HPSToHDC  @1022
 _DeleteHDC @1023
