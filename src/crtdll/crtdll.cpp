@@ -1,4 +1,4 @@
-/* $Id: crtdll.cpp,v 1.20 2000-01-08 12:07:45 sandervl Exp $ */
+/* $Id: crtdll.cpp,v 1.21 2000-01-08 14:24:04 sandervl Exp $ */
 
 /*
  * The C RunTime DLL
@@ -112,172 +112,6 @@ new_handler_type CDECL CRTDLL_set_new_handler(new_handler_type func)
     return old_handler;
 }
 
-
-/*********************************************************************
- *                  _CIacos    (CRTDLL.004)
- */
-double CDECL CRTDLL__CIacos(double x)
-{
-  dprintf2(("CRTDLL: _CIacos\n"));
-  dprintf2(("should be register function\n"));
-  return acos(x);
-}
-
-
-/*********************************************************************
- *                  _CIasin    (CRTDLL.005)
- */
-double CDECL CRTDLL__CIasin( double x )
-{
-  dprintf2(("CRTDLL: _CIasin\n"));
-  dprintf2(("should be register function\n"));
-  return asin(x);
-}
-
-
-/*********************************************************************
- *                  _CIatan    (CRTDLL.006)
- */
-double CDECL CRTDLL__CIatan( double x )
-{
-  dprintf2(("CRTDLL: _CIatan\n"));
-  dprintf2(("should be register function\n"));
-  return atan(x);
-}
-
-
-/*********************************************************************
- *                  _CIatan2    (CRTDLL.007)
- */
-double CDECL CRTDLL__CIatan2( double x, double y )
-{
-  dprintf2(("CRTDLL: _CIatan2\n"));
-  dprintf2(("should be register function\n"));
-  return atan2(x,y);
-}
-
-
-/*********************************************************************
- *                  _CIcos    (CRTDLL.008)
- */
-double CDECL CRTDLL__CIcos( double x )
-{
-  dprintf2(("CRTDLL: _CIcos\n"));
-  dprintf2(("should be register function\n"));
-  return cos(x);
-}
-
-
-/*********************************************************************
- *                  _CIcosh    (CRTDLL.009)
- */
-double CDECL CRTDLL__CIcosh( double x )
-{
-  dprintf2(("CRTDLL: _CIcosh\n"));
-  dprintf2(("should be register function\n"));
-  return cosh(x);
-}
-
-
-/*********************************************************************
- *                  _CIexp    (CRTDLL.010)
- */
-double CDECL CRTDLL__CIexp( double x )
-{
-  dprintf2(("CRTDLL: _CIexp\n"));
-  dprintf2(("should be register function\n"));
-  return exp(x);
-}
-
-
-/*********************************************************************
- *                  _CIfmod     (CRTDLL.011)
- */
-double CDECL CRTDLL__CIfmod( double x, double y )
-{
-  dprintf2(("CRTDLL: _CIfmod\n"));
-  dprintf2(("should be register function\n"));
-  return fmod(x,y);
-}
-
-
-/*********************************************************************
- *                  _CIlog    (CRTDLL.012)
- */
-double CDECL CRTDLL__CIlog( double x )
-{
-  dprintf2(("CRTDLL: _CIlog\n"));
-  dprintf2(("should be register function\n"));
-  return log(x);
-}
-
-
-/*********************************************************************
- *                  _CIlog10    (CRTDLL.013)
- */
-double CDECL CRTDLL__CIlog10( double x )
-{
-  dprintf2(("CRTDLL: _CIlog10\n"));
-  dprintf2(("should be register function\n"));
-  return log10(x);
-}
-
-
-/*********************************************************************
- *                  _CIsin     (CRTDLL.015)
- */
-double CDECL CRTDLL__CIsin( double x )
-{
-  dprintf2(("CRTDLL: _CIsin\n"));
-  dprintf2(("should be register function\n"));
-  return sin(x);
-}
-
-
-/*********************************************************************
- *                  _CIsinh    (CRTDLL.016)
- */
-double CDECL CRTDLL__CIsinh( double x )
-{
-  dprintf2(("CRTDLL: _CIsinh\n"));
-  dprintf2(("should be register function\n"));
-  return sinh(x);
-}
-
-
-/*********************************************************************
- *                  _CIsqrt    (CRTDLL.017)
- */
-double CDECL CRTDLL__CIsqrt( double x )
-{
-  dprintf2(("CRTDLL: _CIsqrt\n"));
-  dprintf2(("should be register function\n"));
-  return acos(x);
-}
-
-
-/*********************************************************************
- *                  _CItan    (CRTDLL.018)
- */
-double CDECL CRTDLL__CItan( double x )
-{
-  dprintf2(("CRTDLL: _CItan\n"));
-  dprintf2(("should be register function\n"));
-  return tan(x);
-}
-
-
-/*********************************************************************
- *                  _CItanh    (CRTDLL.019)
- */
-double CDECL CRTDLL__CItanh( double x )
-{
-  dprintf2(("CRTDLL: _CItanh\n"));
-  dprintf2(("should be register function\n"));
-  return tanh(x);
-}
-
-
 /*********************************************************************
  *                  _XcptFilter    (CRTDLL.21)
  */
@@ -286,7 +120,6 @@ INT CDECL CRTDLL__XcptFilter(DWORD ret, struct _EXCEPTION_POINTERS *  ExceptionI
   dprintf2(("CRTDLL: _XcptFilter\n"));
   return UnhandledExceptionFilter(ExceptionInfo);
 }
-
 
 /*********************************************************************
  *                  _GetMainArgs  (CRTDLL.22)
