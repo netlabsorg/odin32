@@ -1,4 +1,4 @@
-/* $Id: winexebase.cpp,v 1.19 2002-02-06 16:33:38 sandervl Exp $ */
+/* $Id: winexebase.cpp,v 1.20 2002-05-20 13:48:51 sandervl Exp $ */
 
 /*
  * Win32 exe base class
@@ -100,7 +100,11 @@ ULONG Win32ExeBase::start()
   if(getenv("WIN32_IOPL2")) {
    	io_init1();
   }
-  dprintf(("Start executable %X\n", WinExe));
+#ifdef DEBUG
+  TEB *teb = GetThreadTEB();
+  dprintf(("Start executable %x\n", WinExe));
+  dprintf(("Stack top 0x%x, stack end 0x%x", teb->stack_top, teb->stack_low));
+#endif
 
   fExeStarted  = TRUE;
 

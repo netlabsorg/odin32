@@ -1,4 +1,4 @@
-/* $Id: virtual.cpp,v 1.43 2002-02-09 12:45:14 sandervl Exp $ */
+/* $Id: virtual.cpp,v 1.44 2002-05-20 13:48:50 sandervl Exp $ */
 
 /*
  * Win32 virtual memory functions
@@ -591,82 +591,77 @@ DWORD WIN32API VirtualQuery(LPCVOID lpvAddress,
                             LPMEMORY_BASIC_INFORMATION pmbiBuffer,
                             DWORD   cbLength)
 {
-  ULONG  cbRangeSize,
-         dAttr;
-  DWORD  rc;
-  LPVOID lpBase;
+    ULONG  cbRangeSize, dAttr;
+    DWORD  rc;
+    LPVOID lpBase;
 
-  SetLastError(ERROR_SUCCESS);
+    SetLastError(ERROR_SUCCESS);
 
-  if(pmbiBuffer == NULL || cbLength != sizeof(MEMORY_BASIC_INFORMATION)) // check parameters
-  {
-    dprintf(("WARNING: invalid parameter"));
-    SetLastError(ERROR_INVALID_PARAMETER);
+    if(pmbiBuffer == NULL || cbLength != sizeof(MEMORY_BASIC_INFORMATION)) // check parameters
+    {
+        dprintf(("WARNING: invalid parameter"));
+        SetLastError(ERROR_INVALID_PARAMETER);
         return 0;                             // nothing to return
-  }
+    }
 
-  // determine exact page range
-  lpBase = (LPVOID)((ULONG)lpvAddress & 0xFFFFF000);
-  cbRangeSize = -1;
+    // determine exact page range
+    lpBase = (LPVOID)((ULONG)lpvAddress & 0xFFFFF000);
+    cbRangeSize = -1;
 
-  rc = OSLibDosQueryMem(lpBase,
-                        &cbRangeSize,
-                        &dAttr);
-  if(rc)
-  {
+    rc = OSLibDosQueryMem(lpBase, &cbRangeSize, &dAttr);
+    if(rc)
+    {
         dprintf(("VirtualQuery - OSLibDosQueryMem %x %x returned %d\n",
                   lpBase, cbLength, rc));
         SetLastError(ERROR_INVALID_PARAMETER);
         return 0;
-  }
+    }
 
-  memset(pmbiBuffer,
-         0,
-         sizeof(MEMORY_BASIC_INFORMATION));
+    memset(pmbiBuffer, 0, sizeof(MEMORY_BASIC_INFORMATION));
 
-  pmbiBuffer->BaseAddress = lpBase;
-  //round to next page boundary
-  pmbiBuffer->RegionSize  = (cbRangeSize + 0xFFF) & 0xFFFFF000;
+    pmbiBuffer->BaseAddress = lpBase;
+    //round to next page boundary
+    pmbiBuffer->RegionSize  = (cbRangeSize + 0xFFF) & 0xFFFFF000;
 
-  if(dAttr & PAG_READ && !(dAttr & PAG_WRITE))
-    pmbiBuffer->Protect |= PAGE_READONLY;
+    if(dAttr & PAG_READ && !(dAttr & PAG_WRITE))
+        pmbiBuffer->Protect |= PAGE_READONLY;
 
-  if(dAttr & PAG_WRITE)
-    pmbiBuffer->Protect |= PAGE_READWRITE;
+    if(dAttr & PAG_WRITE)
+        pmbiBuffer->Protect |= PAGE_READWRITE;
 
-  if((dAttr & (PAG_WRITE | PAG_EXECUTE)) == (PAG_WRITE | PAG_EXECUTE))
-    pmbiBuffer->Protect |= PAGE_EXECUTE_READWRITE;
-  else
-    if(dAttr & PAG_EXECUTE)
-      pmbiBuffer->Protect |= PAGE_EXECUTE_READ;
-
-  if(dAttr & PAG_GUARD)
-    pmbiBuffer->Protect |= PAGE_GUARD;
-
-  if(dAttr & PAG_FREE)
-    pmbiBuffer->State = MEM_FREE;
-  else
-    if(dAttr & PAG_COMMIT)
-      pmbiBuffer->State = MEM_COMMIT;
+    if((dAttr & (PAG_WRITE | PAG_EXECUTE)) == (PAG_WRITE | PAG_EXECUTE))
+        pmbiBuffer->Protect |= PAGE_EXECUTE_READWRITE;
     else
-      pmbiBuffer->State = MEM_RESERVE;
+    if(dAttr & PAG_EXECUTE)
+        pmbiBuffer->Protect |= PAGE_EXECUTE_READ;
 
-  //TODO: MEM_MAPPED & MEM_IMAGE (==SEC_IMAGE)
-  if(!(dAttr & PAG_SHARED))
+    if(dAttr & PAG_GUARD)
+        pmbiBuffer->Protect |= PAGE_GUARD;
+
+    if(dAttr & PAG_FREE)
+        pmbiBuffer->State = MEM_FREE;
+    else
+    if(dAttr & PAG_COMMIT)
+        pmbiBuffer->State = MEM_COMMIT;
+    else
+        pmbiBuffer->State = MEM_RESERVE;
+
+    //TODO: MEM_MAPPED & MEM_IMAGE (==SEC_IMAGE)
+    if(!(dAttr & PAG_SHARED))
         pmbiBuffer->Type = MEM_PRIVATE;
 
-  // Pages can be committed but not necessarily accessible!!
-  if (!(dAttr & (PAG_READ | PAG_WRITE | PAG_EXECUTE | PAG_GUARD)))
-    pmbiBuffer->Protect = PAGE_NOACCESS;
+    // Pages can be committed but not necessarily accessible!!
+    if (!(dAttr & (PAG_READ | PAG_WRITE | PAG_EXECUTE | PAG_GUARD)))
+        pmbiBuffer->Protect = PAGE_NOACCESS;
 
-  //TODO: This is not correct: AllocationProtect should contain the protection
-  //      flags used in the initial call to VirtualAlloc
-  pmbiBuffer->AllocationProtect = pmbiBuffer->Protect;
-  if(dAttr & PAG_BASE) {
+    //TODO: This is not correct: AllocationProtect should contain the protection
+    //      flags used in the initial call to VirtualAlloc
+    pmbiBuffer->AllocationProtect = pmbiBuffer->Protect;
+    if(dAttr & PAG_BASE) {
         pmbiBuffer->AllocationBase = lpBase;
-  }
-  else
-  {
+    }
+    else
+    {
         while(lpBase > 0)
         {
             rc = OSLibDosQueryMem(lpBase, &cbRangeSize, &dAttr);
@@ -680,25 +675,32 @@ DWORD WIN32API VirtualQuery(LPCVOID lpvAddress,
                 break;
             }
             lpBase = (LPVOID)((ULONG)lpBase - PAGE_SIZE);
+        }
     }
-  }
-  return sizeof(MEMORY_BASIC_INFORMATION);
+    dprintf(("Memory region alloc base          0x%08x", pmbiBuffer->AllocationBase));
+    dprintf(("Memory region alloc protect flags %x", pmbiBuffer->AllocationProtect));
+    dprintf(("Memory region base                0x%08x", pmbiBuffer->BaseAddress));
+    dprintf(("Memory region protect flags       %x", pmbiBuffer->Protect));
+    dprintf(("Memory region region size         0x%08x", pmbiBuffer->RegionSize));
+    dprintf(("Memory region state               0x%08x", pmbiBuffer->State));
+    dprintf(("Memory region type                0x%08x", pmbiBuffer->Type));
+    return sizeof(MEMORY_BASIC_INFORMATION);
 }
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API VirtualLock(LPVOID lpAddress, DWORD dwSize)
 {
-  dprintf(("VirtualLock at %d; %d bytes - stub (TRUE)\n", (int)lpAddress, dwSize));
-  SetLastError(ERROR_SUCCESS);
-  return TRUE;
+    dprintf(("VirtualLock at %d; %d bytes - stub (TRUE)\n", (int)lpAddress, dwSize));
+    SetLastError(ERROR_SUCCESS);
+    return TRUE;
 }
 
 //******************************************************************************
 BOOL WIN32API VirtualUnlock(LPVOID lpAddress, DWORD dwSize)
 {
-  dprintf(("VirtualUnlock at %d; %d bytes - stub (TRUE)\n", (int)lpAddress, dwSize));
-  SetLastError(ERROR_SUCCESS);
-  return TRUE;
+    dprintf(("VirtualUnlock at %d; %d bytes - stub (TRUE)\n", (int)lpAddress, dwSize));
+    SetLastError(ERROR_SUCCESS);
+    return TRUE;
 }
 
 /*****************************************************************************
