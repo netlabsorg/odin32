@@ -1,4 +1,4 @@
-# $Id: kernel32.mak,v 1.32 2002-06-26 07:14:18 sandervl Exp $
+# $Id: kernel32.mak,v 1.33 2002-07-13 15:58:20 sandervl Exp $
 
 #
 # Odin32 API
@@ -46,6 +46,7 @@ $(OBJDIR)\hmdevio.obj \
 $(OBJDIR)\profile.obj \
 $(OBJDIR)\thread.obj \
 $(OBJDIR)\virtual.obj \
+$(OBJDIR)\oslibmem.obj \
 $(OBJDIR)\thunk.obj \
 $(OBJDIR)\obsolete.obj \
 $(OBJDIR)\comm.obj \

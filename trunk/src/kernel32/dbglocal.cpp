@@ -1,4 +1,4 @@
-/* $Id: dbglocal.cpp,v 1.26 2002-06-26 07:14:17 sandervl Exp $ */
+/* $Id: dbglocal.cpp,v 1.27 2002-07-13 15:58:20 sandervl Exp $ */
 
 /*
  * debug logging functions for OS/2
@@ -139,7 +139,8 @@ static char  *DbgFileNames[DBG_MAXFILES] =
 "char",
 "osliblvm",
 "oslibtime",
-"conodin32"
+"conodin32",
+"oslibmem",
 };
 //******************************************************************************
 //******************************************************************************

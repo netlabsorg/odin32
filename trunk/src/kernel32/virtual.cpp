@@ -1,4 +1,4 @@
-/* $Id: virtual.cpp,v 1.45 2002-06-30 13:46:46 sandervl Exp $ */
+/* $Id: virtual.cpp,v 1.46 2002-07-13 15:58:21 sandervl Exp $ */
 
 /*
  * Win32 virtual memory functions
@@ -525,7 +525,7 @@ BOOL WIN32API VirtualProtect(LPVOID lpvAddress,
 
   if(pfdwOldProtect == NULL) {
         dprintf(("WARNING: pfdwOldProtect == NULL"));
-    SetLastError(ERROR_INVALID_PARAMETER);
+        SetLastError(ERROR_INVALID_PARAMETER);
         return(FALSE);
   }
 
