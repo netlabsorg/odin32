@@ -1,4 +1,4 @@
-/* $Id: winresmenu.h,v 1.1 1999-08-31 14:39:16 sandervl Exp $ */
+/* $Id: winresmenu.h,v 1.2 1999-08-31 17:15:53 sandervl Exp $ */
 
 /*
  * Win32 Menu resource class
@@ -22,7 +22,7 @@ public:
                    Win32MenuRes(Win32Image *module, HRSRC hRes, ULONG id, ULONG type);
                    Win32MenuRes(Win32Image *module, ULONG id, ULONG type,
 	                        ULONG size, char *resdata);
-		   Win32MenuRes(LPVOID menutemplate, BOOL isUnicode);
+		   Win32MenuRes(LPVOID menutemplate);
 
     virtual       ~Win32MenuRes();
 
