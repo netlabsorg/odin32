@@ -1,4 +1,4 @@
-/* $Id: blit.cpp,v 1.29 2001-05-29 09:45:20 sandervl Exp $ */
+/* $Id: blit.cpp,v 1.30 2001-06-02 07:24:38 sandervl Exp $ */
 
 /*
  * GDI32 blit code
@@ -375,6 +375,8 @@ static INT StretchDIBits_(HDC hdc, INT xDst, INT yDst, INT widthDst,
                            const BITMAPINFO *info, UINT wUsage, DWORD dwRop )
 {
  INT rc;
+ DWORD bitfields[3];
+ WORD *newbits = NULL;
 
     dprintf(("GDI32: StretchDIBits %x to (%d,%d) (%d,%d) from (%d,%d) (%d,%d), %x %x %x %x", hdc, xDst, yDst, widthDst, heightDst, xSrc, ySrc, widthSrc, heightSrc, bits, info, wUsage, dwRop));
 
@@ -430,9 +432,47 @@ static INT StretchDIBits_(HDC hdc, INT xDst, INT yDst, INT widthDst,
 
 	return rc;
     }
+
+    switch(info->bmiHeader.biBitCount) {
+    case 15:
+    case 16:
+        bitfields[0] = (info->bmiHeader.biCompression == BI_BITFIELDS) ? *(DWORD *)info->bmiColors : 0x7c00;
+        bitfields[1] = (info->bmiHeader.biCompression == BI_BITFIELDS) ?  *((DWORD *)info->bmiColors + 1) : 0x03e0;
+        bitfields[2] = (info->bmiHeader.biCompression == BI_BITFIELDS) ?  *((DWORD *)info->bmiColors + 2) : 0x001f;
+        break;
+    case 32:
+        bitfields[0] = (info->bmiHeader.biCompression == BI_BITFIELDS) ? *(DWORD *)info->bmiColors : 0xff0000;
+        bitfields[1] = (info->bmiHeader.biCompression == BI_BITFIELDS) ?  *((DWORD *)info->bmiColors + 1) : 0xff00;
+        bitfields[2] = (info->bmiHeader.biCompression == BI_BITFIELDS) ?  *((DWORD *)info->bmiColors + 2) : 0xff;
+        break;
+    default:
+        bitfields[0] = 0;
+        bitfields[1] = 0;
+        bitfields[2] = 0;
+        break;
+    }
+
+    if(bitfields[1] == 0x3E0) 
+    {//RGB 555?
+        dprintf(("RGB 555->565 conversion required %x %x %x", bitfields[0], bitfields[1], bitfields[2]));
+
+        int imgsize = CalcBitmapSize(info->bmiHeader.biBitCount,
+                                     info->bmiHeader.biWidth, info->bmiHeader.biHeight);
+
+        newbits = (WORD *)malloc(imgsize);
+        if(CPUFeatures & CPUID_MMX) {
+             RGB555to565MMX(newbits, (WORD *)bits, imgsize/sizeof(WORD));
+        }
+        else RGB555to565(newbits, (WORD *)bits, imgsize/sizeof(WORD));
+        bits = newbits;
+    }
+
     rc = O32_StretchDIBits(hdc, xDst, yDst, widthDst, heightDst, xSrc, ySrc,
                              widthSrc, heightSrc, (void *)bits,
                              (PBITMAPINFO)info, wUsage, dwRop);
+
+    if(newbits) free(newbits);
+
     //Open32 always returns height of bitmap (regardless of how many scanlines were copied)
     if(rc != heightSrc && rc != info->bmiHeader.biHeight) {
 	dprintf(("StretchDIBits failed with rc %x", rc));
