@@ -1,4 +1,4 @@
-/* $Id: treeview.c,v 1.8 1999-07-12 15:58:49 cbratschi Exp $ */
+/* $Id: treeview.c,v 1.9 1999-07-23 15:54:34 cbratschi Exp $ */
 /* Treeview control
  *
  * Copyright 1998 Eric Kohl <ekohl@abo.rhein-zeitung.de>
@@ -40,10 +40,6 @@
    -treehelper: stack corruption makes big window.
 
  */
-
-/* CB: todo
- - fix ffs();
-*/
 
 #include <string.h>
 #include "winbase.h"
@@ -1480,6 +1476,16 @@ LRESULT WINAPI TREEVIEW_SortChildrenCB(
   return FALSE;
 }
 
+int ffs(int mask)
+{
+        int bit;
+
+        if (mask == 0)
+                return(0);
+        for (bit = 1; !(mask & 1); bit++)
+                mask >>= 1;
+        return(bit);
+}
 
 /* the method used below isn't the most memory-friendly, but it avoids
    a lot of memory reallocations */
@@ -1539,9 +1545,8 @@ TREEVIEW_InsertItemA (HWND hwnd, WPARAM wParam, LPARAM lParam)
   } else {                                       /* check freelist */
         for (i=0; i<infoPtr->uNumPtrsAlloced>>5; i++) {
                 if (infoPtr->freeList[i]) {
-// WHAT IS FFS? NOT IN VAC++ C LIBRARY!!!
-//                      iItem=ffs (infoPtr->freeList[i])-1;
-//
+                        iItem=ffs (infoPtr->freeList[i])-1;
+
                         tv_clear_bit(iItem,&infoPtr->freeList[i]);
                         iItem+=i<<5;
                         break;
