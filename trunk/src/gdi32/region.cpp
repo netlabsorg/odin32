@@ -1,4 +1,4 @@
-/* $Id: region.cpp,v 1.6 2000-06-14 13:17:51 sandervl Exp $ */
+/* $Id: region.cpp,v 1.7 2000-06-14 14:26:59 sandervl Exp $ */
 
 /*
  * GDI32 region code
@@ -566,13 +566,19 @@ int WIN32API GetClipBox(HDC hdc, PRECT lpRect)
             //No conversion required as GpiQueryClipBox is affected by
             //the y-inversion of the window
             //NOTE: YINVERSION dependancy
-            lpRect->top    = rectl.yBottom;
-            lpRect->bottom = rectl.yTop;
+            if(rectl.yBottom > rectl.yTop) {
+                lpRect->top    = rectl.yTop;
+                lpRect->bottom = rectl.yBottom;
+            }
+            else {
+                lpRect->top    = rectl.yBottom;
+                lpRect->bottom = rectl.yTop;
+            }
 
             rc = (lComplexity == RGN_RECT) ? SIMPLEREGION_W : COMPLEXREGION_W;
         }
     }
-    dprintf(("GDI32: GetClipBox of %X returned %d\n", hdc, rc));
+    dprintf(("GDI32: GetClipBox of %X returned %d; (%d,%d)(%d,%d)", hdc, rc, lpRect->left, lpRect->top, lpRect->right, lpRect->bottom));
     return rc;
 }
 //******************************************************************************
