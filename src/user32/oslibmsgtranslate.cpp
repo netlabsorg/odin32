@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.39 2000-11-21 11:36:08 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.40 2000-12-29 18:39:58 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -22,7 +22,7 @@
 #include <misc.h>
 #include <winconst.h>
 #include "oslibmsg.h"
-#include "win32wnd.h"
+#include <winuser32.h>
 #include "win32wdesktop.h"
 #include "oslibutil.h"
 #include "timer.h"
@@ -264,7 +264,7 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
       HWND hwndActivate = (HWND)os2Msg->mp2;
       BOOL fMinimized = FALSE;
 
-        hwndActivate = Win32BaseWindow::OS2ToWin32Handle(hwndActivate);
+        hwndActivate = OS2ToWin32Handle(hwndActivate);
 	if(hwndActivate == 0) {
                 //another (non-win32) application's window
                 //set to desktop window handle
@@ -291,7 +291,7 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
                 //set to NULL (allowed according to win32 SDK) to avoid problems
                 hwndFocus = NULL;
         }
-        else    hwndFocus = Win32BaseWindow::OS2ToWin32Handle(hwndFocus);
+        else    hwndFocus = OS2ToWin32Handle(hwndFocus);
 
         if((ULONG)os2Msg->mp2 == TRUE) {
                 winMsg->message = WINWM_SETFOCUS;

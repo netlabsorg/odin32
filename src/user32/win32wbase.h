@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.101 2000-11-19 11:52:41 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.102 2000-12-29 18:40:00 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -295,9 +295,6 @@ Win32BaseWindow *FindWindowById(int id);
 	 HANDLE removeProp(LPCSTR str);
 	 INT    enumPropsExA(PROPENUMPROCEXA func, LPARAM lParam);
 	 INT    enumPropsExW(PROPENUMPROCEXW func, LPARAM lParam);
-
-    static HWND Win32ToOS2Handle(HWND hwnd);
-    static HWND OS2ToWin32Handle(HWND hwnd);
 
 static Win32BaseWindow *GetWindowFromHandle(HWND hwnd);
 static Win32BaseWindow *GetWindowFromOS2Handle(HWND hwnd);

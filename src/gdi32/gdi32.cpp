@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.63 2000-11-16 16:34:48 sandervl Exp $ */
+/* $Id: gdi32.cpp,v 1.64 2000-12-29 18:40:44 sandervl Exp $ */
 
 /*
  * GDI32 apis
@@ -14,7 +14,7 @@
 #include <stdarg.h>
 #include <string.h>
 #include <odinwrap.h>
-#include "misc.h"
+#include <misc.h>
 #include "callback.h"
 #include "unicode.h"
 #include "dibsect.h"
@@ -22,7 +22,7 @@
 #include "oslibgpi.h"
 #include "oslibgdi.h"
 #include <dcdata.h>
-#include <win32wnd.h>
+#include <winuser32.h>
 
 #define DBG_LOCALLOG    DBG_gdi32
 #include "dbglocal.h"

@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.80 2000-12-07 11:59:45 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.81 2000-12-29 18:39:58 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -24,6 +24,7 @@
 #include <string.h>
 #include <win32type.h>
 #include <win32api.h>
+#include <winuser32.h>
 #include <winconst.h>
 #include <misc.h>
 #include <win32wbase.h>
@@ -1767,7 +1768,7 @@ HWND WIN32API WindowFromDC(HDC hdc)
 
    dprintf2(("USER32:  WindowFromDC %x", hdc));
    if ( pHps )
-      return Win32BaseWindow::OS2ToWin32Handle(pHps->hwnd);
+      return OS2ToWin32Handle(pHps->hwnd);
    else
       return 0;
 }

@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.89 2000-11-16 16:35:43 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.90 2000-12-29 18:39:59 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -32,6 +32,7 @@
 
 #include <os2win.h>
 #include <misc.h>
+#include <winuser32.h>
 
 #include "user32.h"
 #include <winicon.h>
@@ -1397,7 +1398,7 @@ DWORD WIN32API OemKeyScan(WORD wOemChar)
 BOOL WIN32API RegisterHotKey(HWND hwnd, int idHotKey, UINT fuModifiers, UINT uVirtKey)
 {
   dprintf(("USER32:  RegisterHotKey, not implemented\n"));
-  hwnd = Win32Window::Win32ToOS2Handle(hwnd);
+  hwnd = Win32ToOS2Handle(hwnd);
   return(TRUE);
 }
 /*****************************************************************************
@@ -1475,7 +1476,7 @@ BOOL WIN32API UnloadKeyboardLayout (HKL hkl)
 BOOL WIN32API UnregisterHotKey(HWND hwnd, int idHotKey)
 {
   dprintf(("USER32:  UnregisterHotKey, not implemented\n"));
-  hwnd = Win32Window::Win32ToOS2Handle(hwnd);
+  hwnd = Win32ToOS2Handle(hwnd);
 
   return(TRUE);
 }

@@ -1,4 +1,4 @@
-/* $Id: dibsect.cpp,v 1.43 2000-11-23 19:23:01 sandervl Exp $ */
+/* $Id: dibsect.cpp,v 1.44 2000-12-29 18:40:43 sandervl Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -24,7 +24,6 @@
 #include <vmutex.h>
 #include <win32api.h>
 #include <winconst.h>
-#include <win32wnd.h>
 #include <cpuhlp.h>
 #include <dcdata.h>
 #include "oslibgpi.h"
