@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.77 2000-09-08 18:08:58 sandervl Exp $ */
+/* $Id: window.cpp,v 1.78 2000-10-08 18:45:36 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -906,14 +906,15 @@ BOOL WIN32API AdjustWindowRect(PRECT rect, DWORD style, BOOL menu)
     return AdjustWindowRectEx(rect, style, menu, 0);
 }
 //******************************************************************************
+//Calculate window rectangle based on given client rectangle, style, menu and extended style
 //******************************************************************************
 BOOL WIN32API AdjustWindowRectEx( PRECT rect, DWORD style, BOOL menu, DWORD exStyle)
 {
-    dprintf(("AdjustWindowRectEx %x %x %d (%d,%d)(%d,%d)\n", style, exStyle, menu, rect->left, rect->top, rect->right, rect->bottom));
-
     if(style == 0 && menu == FALSE && exStyle == 0) {
+        dprintf(("AdjustWindowRectEx %x %x %d (%d,%d)(%d,%d) -> no change required", style, exStyle, menu, rect->left, rect->top, rect->right, rect->bottom));
 	return TRUE;	//nothing needs to be changed (VERIFIED in NT 4)
     }
+    dprintf(("AdjustWindowRectEx %x %x %d (%d,%d)(%d,%d)\n", style, exStyle, menu, rect->left, rect->top, rect->right, rect->bottom));
     /* Correct the window style */
     if (!(style & (WS_POPUP | WS_CHILD)))  /* Overlapped window */
     	style |= WS_CAPTION;
@@ -1354,7 +1355,7 @@ BOOL WIN32API EndDeferWindowPos( HDWP hdwp)
     dprintf(("**EndDeferWindowPos for %d windows", pDWP->actualCount));
     for (i = 0, winpos = pDWP->winPos; i < pDWP->actualCount; i++, winpos++)
     {
-        dprintf(("**EndDeferWindowPos %x (%d,%d) (%d,%d) %x", winpos->hwnd, winpos->x, winpos->y, winpos->x, winpos->cy, winpos->flags));
+        dprintf(("**EndDeferWindowPos %x (%d,%d) (%d,%d) %x", winpos->hwnd, winpos->x, winpos->y, winpos->cx, winpos->cy, winpos->flags));
         if (!(res = SetWindowPos(winpos->hwnd, winpos->hwndInsertAfter,
                                  winpos->x, winpos->y, winpos->cx,
                                  winpos->cy, winpos->flags )))
