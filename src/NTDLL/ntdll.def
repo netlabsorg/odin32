@@ -1,4 +1,4 @@
-; $Id: ntdll.def,v 1.25 1999-11-30 20:41:39 sandervl Exp $
+; $Id: ntdll.def,v 1.26 1999-12-01 01:16:33 phaller Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is NT4.0's NTDLL.DLL
@@ -20,7 +20,7 @@ EXPORTS
     _alldiv                          = _OS2_alldiv
     _allmul                          = _OS2_allmul
 
-    RtlLargeIntegerToChar            = _RtlLargeIntegerToChar@12     @425
+    RtlLargeIntegerToChar            = _RtlLargeIntegerToChar@16     @425
 
 ; real functions
     NtAlertThread                 = _NtAlertThread@8                  @57
@@ -62,7 +62,7 @@ EXPORTS
     ZwQueryInformationFile        = _NtQueryInformationFile@20        @719
     NtSetInformationFile          = _NtSetInformationFile@20          @720
     ZwSetInformationFile          = _NtSetInformationFile@20          @721
-    NtQueryDirectoryFile          = _NtQueryDirectoryFile@44          @722 
+    NtQueryDirectoryFile          = _NtQueryDirectoryFile@44          @722
     ZwQueryDirectoryFile          = _NtQueryDirectoryFile@44          @723
     NtClose                       = _NtClose@4                        @65
     ZwClose                       = _NtClose@4 			      @724
@@ -89,7 +89,7 @@ EXPORTS
     NtDuplicateToken              = _NtDuplicateToken@24              @742
     ZwDuplicateToken              = _NtDuplicateToken@24              @743
     NtOpenProcessToken            = _NtOpenProcessToken@12            @744
-    ZwOpenProcessToken            = _NtOpenProcessToken@12            @745 
+    ZwOpenProcessToken            = _NtOpenProcessToken@12            @745
     NtOpenThreadToken             = _NtOpenThreadToken@16             @746
     ZwOpenThreadToken             = _NtOpenThreadToken@16             @747
     NtAdjustPrivilegesToken       = _NtAdjustPrivilegesToken@24       @748
