@@ -18,8 +18,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 #include "msvcrt.h"
-
+#include <ctype.h>
 #include "msvcrt/ctype.h"
+
 
 #include "wine/debug.h"
 
@@ -81,6 +82,7 @@ WORD** __p__pctype(void)
  */
 int _isctype(int c, int type)
 {
+  dprintf(("MSVCRT: _isctype %d %d",c, type));
   if (c >= -1 && c <= 255)
     return MSVCRT__pctype[c] & type;
 

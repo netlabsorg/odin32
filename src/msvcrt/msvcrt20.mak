@@ -1,4 +1,4 @@
-# $Id: msvcrt20.mak,v 1.7 2003-01-15 10:43:16 sandervl Exp $
+# $Id: msvcrt20.mak,v 1.8 2003-04-10 10:28:04 sandervl Exp $
 
 #
 # Odin32 API
@@ -32,18 +32,23 @@ OBJS = \
 $(OBJDIR)\mainmsvcrt20.obj \
 $(OBJDIR)\$(TARGET)rsrc.obj 
 
+LIBS = \
+$(ODIN32_LIB)\msvcrt.lib \
+$(ODIN32_LIB)\kernel32.lib \
+$(ODIN32_LIB)\ntdll.lib \
+$(ODIN32_LIB)\user32.lib \
+$(EMX)\lib\mt\c.lib \
+$(EMX)\lib\mt\c_dllso.lib \
+$(EMX)\lib\mt\sys.lib \
+$(EMX)\lib\os2.lib \
+
+
 #
 # Target name - name of the dll without extention and path.
 #
 TARGET = msvcrt20
 
 all: $(OBJDIR) $(OBJDIR)\$(TARGET).dll $(TARGET).lib
-
-$(OBJDIR)\$(TARGET).dll: $(OBJS) $(TARGET).def
-    $(LD) $(LDFLAGS) -Zso -Zsys $(OBJS) $(TARGET).def -L.\libs -lm\
-      -L$(OBJDIR) -liberty_s -lmsvcrt -o $(OBJDIR)\$(TARGET).dll
-    touch $(OBJDIR)\$(TARGET).map
-    @echo "Illegal Sym File for EMX" > $(OBJDIR)\$(TARGET).sym
 
 $(TARGET).lib: 
     implib $(OBJDIR)\$(TARGET).lib msvcrt20.def

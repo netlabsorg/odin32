@@ -22,7 +22,8 @@
 #include "msvcrt/conio.h"
 #include "msvcrt/stdlib.h"
 #include "mtdll.h"
-
+#include "winuser.h"
+#include <string.h>
 #include "wine/debug.h"
 
 WINE_DEFAULT_DEBUG_CHANNEL(msvcrt);
@@ -36,6 +37,9 @@ static int MSVCRT_atexit_table_size = 0;
 static int MSVCRT_atexit_registered = 0; /* Points to free slot */
 
 extern int MSVCRT_app_type;
+extern char *MSVCRT__pgmptr;
+
+static LPCSTR szMsgBoxTitle = "Wine C++ Runtime Library";
 
 /* INTERNAL: call atexit functions */
 void __MSVCRT__call_atexit(void)
@@ -91,8 +95,35 @@ _onexit_t __dllonexit(_onexit_t func, _onexit_t **start, _onexit_t **end)
  */
 void MSVCRT__exit(int exitcode)
 {
-  TRACE("(%d)\n", exitcode);
+  TRACE("MSVCRT: _exit (%d)\n", exitcode);
   ExitProcess(exitcode);
+}
+
+/* Print out an error message with an option to debug */
+static void DoMessageBox(LPCSTR lead, LPCSTR message)
+{
+  MSGBOXPARAMSA msgbox;
+  char text[2048];
+  INT ret;
+
+  _snprintf(text,sizeof(text),"%s\n\nProgram: %s\n%s\n\n"
+               "Press OK to exit the program, or Cancel to start the Wine debugger.\n ",
+               lead, MSVCRT__pgmptr, message);
+
+  msgbox.cbSize = sizeof(msgbox);
+  msgbox.hwndOwner = GetActiveWindow();
+  msgbox.hInstance = 0;
+  msgbox.lpszText = text;
+  msgbox.lpszCaption = szMsgBoxTitle;
+  msgbox.dwStyle = MB_OKCANCEL|MB_ICONERROR;
+  msgbox.lpszIcon = NULL;
+  msgbox.dwContextHelpId = 0;
+  msgbox.lpfnMsgBoxCallback = NULL;
+  msgbox.dwLanguageId = LANG_NEUTRAL;
+
+  ret = MessageBoxIndirectA(&msgbox);
+  if (ret == IDCANCEL)
+    DebugBreak();
 }
 
 /*********************************************************************
@@ -100,13 +131,16 @@ void MSVCRT__exit(int exitcode)
  */
 void MSVCRT__amsg_exit(int errnum)
 {
-  TRACE("(%d)\n", errnum);
+  TRACE("MSVCRT: _amsg_exit (%d)\n", errnum);
   /* FIXME: text for the error number. */
   if (MSVCRT_app_type == 2)
   {
-    /* FIXME: MsgBox */
+    char text[32];
+    sprintf(text, "Error: R60%d",errnum);
+    DoMessageBox("Runtime error!", text);
   }
-  _cprintf("\nruntime error R60%d\n",errnum);
+  else
+    MSVCRT__cprintf("\nruntime error R60%d\n",errnum);
   MSVCRT__exit(255);
 }
 
@@ -115,12 +149,13 @@ void MSVCRT__amsg_exit(int errnum)
  */
 void MSVCRT_abort(void)
 {
-  TRACE("(void)\n");
+  TRACE("MSVCRT: _abort");
   if (MSVCRT_app_type == 2)
   {
-    /* FIXME: MsgBox */
+    DoMessageBox("Runtime error!", "abnormal program termination");
   }
-  _cputs("\nabnormal program termination\n");
+  else
+    MSVCRT__cputs("\nabnormal program termination\n");
   MSVCRT__exit(3);
 }
 
@@ -129,13 +164,16 @@ void MSVCRT_abort(void)
  */
 void MSVCRT__assert(const char* str, const char* file, unsigned int line)
 {
-  TRACE("(%s,%s,%d)\n",str,file,line);
+  TRACE("MSVCRT: _assert (%s,%s,%d)\n",str,file,line);
   if (MSVCRT_app_type == 2)
   {
-    /* FIXME: MsgBox */
+    char text[2048];
+    _snprintf(text, sizeof(text), "File: %s\nLine: %d\n\nEpression: \"%s\"", file, line, str);
+    DoMessageBox("Assertion failed!", text);
   }
-  _cprintf("Assertion failed: %s, file %s, line %d\n\n",str,file, line);
-  MSVCRT_abort();
+  else
+    MSVCRT__cprintf("Assertion failed: %s, file %s, line %d\n\n",str, file, line);
+  MSVCRT__exit(3);
 }
 
 /*********************************************************************
@@ -143,7 +181,7 @@ void MSVCRT__assert(const char* str, const char* file, unsigned int line)
  */
 void MSVCRT__c_exit(void)
 {
-  TRACE("(void)\n");
+  TRACE("MSVCRT: _c_exit (void)\n");
   /* All cleanup is done on DLL detach; Return to caller */
 }
 
@@ -152,16 +190,16 @@ void MSVCRT__c_exit(void)
  */
 void MSVCRT__cexit(void)
 {
-  TRACE("(void)\n");
+  TRACE("MSVCRT: _cexit (void)\n");
   /* All cleanup is done on DLL detach; Return to caller */
 }
 
 /*********************************************************************
  *		_onexit (MSVCRT.@)
  */
-_onexit_t _onexit(_onexit_t func)
+_onexit_t MSVCRT__onexit(_onexit_t func)
 {
-  TRACE("(%p)\n",func);
+  TRACE("MSVCRT: _onexit (%p)\n",func);
 
   if (!func)
     return NULL;
@@ -195,7 +233,7 @@ _onexit_t _onexit(_onexit_t func)
  */
 void MSVCRT_exit(int exitcode)
 {
-  TRACE("(%d)\n",exitcode);
+  TRACE("MSVCRT: _exit (%d)\n",exitcode);
   LOCK_EXIT;
   __MSVCRT__call_atexit();
   UNLOCK_EXIT;
@@ -207,8 +245,8 @@ void MSVCRT_exit(int exitcode)
  */
 int MSVCRT_atexit(void (*func)(void))
 {
-  TRACE("(%p)\n", func);
-  return _onexit((_onexit_t)func) == (_onexit_t)func ? 0 : -1;
+  TRACE("MSVCRT: _atexit (%p)\n", func);
+  return MSVCRT__onexit((_onexit_t)func) == (_onexit_t)func ? 0 : -1;
 }
 
 
@@ -217,6 +255,6 @@ int MSVCRT_atexit(void (*func)(void))
  */
 void _purecall(void)
 {
-  TRACE("(void)\n");
+  TRACE("MSVCRT: _purecall (void)\n");
   MSVCRT__amsg_exit( 25 );
 }

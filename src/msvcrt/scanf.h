@@ -33,16 +33,16 @@
 #else /* WIDE_SCANF */
 #define _CHAR_ char
 #define _EOF_ MSVCRT_EOF
-#define _ISSPACE_(c) isspace(c)
-#define _ISDIGIT_(c) isdigit(c)
+#define _ISSPACE_(c) MSVCRT_isspace(c)
+#define _ISDIGIT_(c) MSVCRT_isdigit(c)
 #define _CONVERT_(c) c /*** FIXME ***/
 #define _CHAR2DIGIT_(c, base) char2digit((c), (base))
 #endif /* WIDE_SCANF */
 
 #ifdef CONSOLE
-#define _GETC_(file) _getch()
-#define _UNGETC_(nch, file) _ungetch(nch)
-#define _FUNCTION_ _cscanf(const _CHAR_ *format, ...)
+#define _GETC_(file) MSVCRT__getch()
+#define _UNGETC_(nch, file) MSVCRT__ungetch(nch)
+#define _FUNCTION_ MSVCRT__cscanf(const _CHAR_ *format, ...)
 #else
 #ifdef STRING
 #undef _EOF_
@@ -114,7 +114,7 @@ int _FUNCTION_ {
 	    int L_prefix = 0;
 	    int w_prefix = 0;
 	    int prefix_finished = 0;
-	    /* int I64_prefix = 0; */
+	    int I64_prefix = 0; 
             format++;
 	    /* look for leading asterisk, which means 'suppress assignment of
 	     * this field'. */
@@ -138,7 +138,7 @@ int _FUNCTION_ {
 		case 'I':
 		    if (*(format + 1) == '6' &&
 			*(format + 2) == '4') {
-			/* I64_prefix = 1; */
+			I64_prefix = 1; 
 			format += 2;
 			FIXME("I64 prefix currently not implemented in fscanf/fwscanf");
 		    }
@@ -221,7 +221,8 @@ int _FUNCTION_ {
                     if (!suppress) {
 #define _SET_NUMBER_(type) *va_arg(ap, type*) = negative ? -cur : cur
 			if (number_signed) {
-			    if (l_prefix) _SET_NUMBER_(long int);
+			    if (I64_prefix)  _SET_NUMBER_(long long);
+			    else if (l_prefix) _SET_NUMBER_(long int);
 			    else if (h_prefix) _SET_NUMBER_(short int);
 			    else _SET_NUMBER_(int);
 			} else {
@@ -229,7 +230,8 @@ int _FUNCTION_ {
 				WARN("Dropping sign in reading a negative number into an unsigned value");
 				negative = 0;
 			    }
-			    if (l_prefix) _SET_NUMBER_(unsigned long int);
+			    if (I64_prefix)  _SET_NUMBER_(long long);
+			    else if (l_prefix) _SET_NUMBER_(unsigned long int);
 			    else if (h_prefix)
 				_SET_NUMBER_(unsigned short int);
 			    else _SET_NUMBER_(unsigned int);

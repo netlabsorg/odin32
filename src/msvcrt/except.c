@@ -27,6 +27,8 @@
 
 #ifdef __WIN32OS2__
 #include <emxheader.h>
+#include <stdlib.h>
+#include <string.h>
 #include <winbase.h>
 #else
 #include "config.h"
@@ -39,6 +41,7 @@
 #include "thread.h"
 #include "msvcrt.h"
 
+#include "msvcrt/stdlib.h"
 #include "msvcrt/setjmp.h"
 #include "excpt.h"
 
@@ -143,7 +146,7 @@ void _local_unwind2(MSVCRT_EXCEPTION_FRAME* frame, int trylevel)
   MSVCRT_EXCEPTION_FRAME *curframe = frame;
   EXCEPTION_FRAME reg;
 
-  TRACE("(%p,%d,%d)\n",frame, frame->trylevel, trylevel);
+  TRACE("MSVCRT: _local_unwind2 (%p,%d,%d)\n",frame, frame->trylevel, trylevel);
 
   /* Register a handler in case of a nested exception */
   reg.Handler = (PEXCEPTION_HANDLER)MSVCRT_nested_handler;
@@ -194,7 +197,7 @@ int _except_handler3(PEXCEPTION_RECORD rec,
   EXCEPTION_POINTERS exceptPtrs;
   PSCOPETABLE pScopeTable;
 
-  TRACE("exception %lx flags=%lx at %p handler=%p %p %p semi-stub\n",
+  TRACE("MSVCRT: exception %lx flags=%lx at %p handler=%p %p %p semi-stub\n",
         rec->ExceptionCode, rec->ExceptionFlags, rec->ExceptionAddress,
         frame->handler, context, dispatcher);
 
@@ -289,7 +292,7 @@ void EXC_MSVCRT__setjmp(_JUMP_BUFFER *jmp, CONTEXT86* context)
 void _MSVCRT__setjmp(_JUMP_BUFFER *jmp, CONTEXT86* context)
 #endif
 {
-    TRACE("(%p)\n",jmp);
+    TRACE("MSVCRT: _setjmp (%p)\n",jmp);
     jmp->Ebp = context->Ebp;
     jmp->Ebx = context->Ebx;
     jmp->Edi = context->Edi;
@@ -315,7 +318,7 @@ void EXC_MSVCRT__setjmp3(_JUMP_BUFFER *jmp, int nb_args, CONTEXT86* context)
 void _MSVCRT__setjmp3(_JUMP_BUFFER *jmp, int nb_args, CONTEXT86* context)
 #endif
 {
-    TRACE("(%p,%d)\n",jmp,nb_args);
+    TRACE("MSVCRT: _setjmp3 (%p,%d)\n",jmp,nb_args);
     jmp->Ebp = context->Ebp;
     jmp->Ebx = context->Ebx;
     jmp->Edi = context->Edi;
@@ -358,7 +361,7 @@ void _MSVCRT_longjmp(_JUMP_BUFFER *jmp, int retval, CONTEXT86* context)
 {
     unsigned long cur_frame = 0;
 
-    TRACE("(%p,%d)\n", jmp, retval);
+    TRACE("MSVCRT: longjmp (%p,%d)\n", jmp, retval);
 
     cur_frame=(unsigned long)NtCurrentTeb()->except;
     TRACE("cur_frame=%lx\n",cur_frame);
@@ -403,11 +406,12 @@ void __stdcall _seh_longjmp_unwind(_JUMP_BUFFER *jmp)
 }
 #endif /* i386 */
 
+
 /*********************************************************************
  *		signal (MSVCRT.@)
  */
 void* MSVCRT_signal(int sig, MSVCRT_sig_handler_func func)
 {
-  FIXME("(%d %p):stub\n", sig, func);
-  return (void*)-1;
+  dprintf(("MSVCRT: signal(%d %p): NOT COMPLETE\n", sig, func));
+  return SIG_IGN_W;
 }

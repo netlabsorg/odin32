@@ -24,7 +24,7 @@
 #include "msvcrt.h"
 #include "msvcrt/stdlib.h"
 #include "msvcrt/string.h"
-
+#include <string.h>
 #include "wine/debug.h"
 
 WINE_DEFAULT_DEBUG_CHANNEL(msvcrt);
@@ -50,7 +50,7 @@ char* msvcrt_strndup(const char* buf, unsigned int size)
  *		_mbsdup (MSVCRT.@)
  *		_strdup (MSVCRT.@)
  */
-char* _strdup(const char* str)
+char* MSVCRT__strdup(const char* str)
 {
     char * ret = MSVCRT_malloc(strlen(str)+1);
     if (ret) strcpy( ret, str );
@@ -60,8 +60,9 @@ char* _strdup(const char* str)
 /*********************************************************************
  *		_strnset (MSVCRT.@)
  */
-char* _strnset(char* str, int value, unsigned int len)
+char* MSVCRT__strnset(char* str, int value, unsigned int len)
 {
+  dprintf(("MSVCRT: _strnset %s %d %d",str, value, len));
   if (len > 0 && str)
     while (*str && len--)
       *str++ = value;
@@ -71,10 +72,12 @@ char* _strnset(char* str, int value, unsigned int len)
 /*********************************************************************
  *		_strrev (MSVCRT.@)
  */
-char* _strrev(char* str)
+char* MSVCRT__strrev(char* str)
 {
   char * p1;
   char * p2;
+
+  dprintf(("MSVCRT: _strrev %s",str));
 
   if (str && *str)
     for (p1 = str, p2 = str + strlen(str) - 1; p2 > p1; ++p1, --p2)
@@ -90,9 +93,12 @@ char* _strrev(char* str)
 /*********************************************************************
  *		_strset (MSVCRT.@)
  */
-char* _strset(char* str, int value)
+char* MSVCRT__strset(char* str, int value)
 {
   char *ptr = str;
+
+  dprintf(("MSVCRT: _strset %s %d",str, value));
+
   while (*ptr)
     *ptr++ = value;
 
@@ -102,8 +108,10 @@ char* _strset(char* str, int value)
 /*********************************************************************
  *		_swab (MSVCRT.@)
  */
-void _swab(char* src, char* dst, int len)
+void MSVCRT__swab(char* src, char* dst, int len)
 {
+  dprintf(("MSVCRT: _swab %s %s %d",src, dst, len));
+
   if (len > 1)
   {
     len = (unsigned)len >> 1;
@@ -115,3 +123,10 @@ void _swab(char* src, char* dst, int len)
     }
   }
 }
+
+int MSVCRT_strncmp (const char* a,const char* b,MSVCRT(size_t) c)
+{
+  dprintf(("MSVCRT: strncmp %s,%s (%d)",a,b,c));
+  return strncmp(a,b,c);
+}
+

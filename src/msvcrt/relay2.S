@@ -80,3 +80,4 @@ ___wine_call_from_32_regs:
 	ret
 	.stabs "",100,0,0,.Letext
 .Letext:
+
