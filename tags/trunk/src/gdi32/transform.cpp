@@ -1,4 +1,4 @@
-/* $Id: transform.cpp,v 1.2 2000-12-29 18:40:44 sandervl Exp $ */
+/* $Id: transform.cpp,v 1.3 2001-05-15 10:34:02 sandervl Exp $ */
 
 /*
  * GDI32 coordinate & translformation code
@@ -306,6 +306,7 @@ int WIN32API SetMapMode(HDC hdc, int mode)
     }
 
     //todo: metafile recording!!!
+    dprintf(("SetMapMode %x %x", hdc, mode));
     return setMapMode(pHps, mode);
 }
 //******************************************************************************
