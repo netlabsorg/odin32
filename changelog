@@ -1,4 +1,12 @@
-/* $Id: changelog,v 1.1686 2001-09-19 15:38:23 sandervl Exp $ */
+/* $Id: changelog,v 1.1687 2001-09-20 12:56:39 sandervl Exp $ */
+
+ 2001-09-20: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o Activate window when it returns 0 for WM_MOUSEACTIVATE
+                  0 is not documented, but experiments in NT4 show that
+                  the window will get activated when it returns this.
+                  (fixes activation of FreeCell when clicking on the window)
+                o WM_NEXTMENU bugfix (from Wine)
+                  (fixes crash during menu navigation in MDI windows)
 
  2000-09-19: Oliver Braun <Oliver.Braun@hamburg.de>
     - USER32:   o PeekMessageW bugfix
