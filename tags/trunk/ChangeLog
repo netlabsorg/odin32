@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.851 2000-03-30 15:35:51 cbratschi Exp $ */
+ /* $Id: ChangeLog,v 1.852 2000-03-30 20:53:28 sandervl Exp $ */
 
  2000-03-30: Christoph Bratschi <cbratschi@datacomm.ch>
 	- KERNEL32:
@@ -8,6 +8,7 @@
  2000-03-30: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Also double thread stack in release build
                     (RealPlayer 7 runs out of stack sometimes)
+	- WSOCK32:  Fixed bugs in WSAStartup/Cleanup & select (fixes Gnutella)
 
  2000-03-29: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Throw exception when critical section times out
