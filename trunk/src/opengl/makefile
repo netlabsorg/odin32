@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.10 2000-02-25 00:46:08 sandervl Exp $
+# $Id: makefile,v 1.11 2000-02-25 00:57:10 sandervl Exp $
 #
 # PD-Win32 API
 #
@@ -37,13 +37,13 @@ DTARGET2 = glu32
 TARGET3  = glut\glut32
 DTARGET3 = glut32
 TARGET4  = glide
+DTARGET4 = glide2x
 
 OBJS1=  opengl32.obj initterm.obj resource.obj
 
 all: $(TARGET1).dll $(TARGET1).lib \
      $(TARGET2).dll $(TARGET2).lib \
-     $(TARGET3).dll $(TARGET3).lib \ 
-     $(TARGET4).dll $(TARGET4).lib
+     $(TARGET3).dll $(TARGET3).lib $(TARGET4)
 
 $(TARGET1).dll: $(OBJS1) $(TARGET1).def
     $(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS1) $(TARGET1).def \
@@ -88,20 +88,15 @@ $(TARGET3).lib:
     cd ..
 
 
-$(TARGET4).dll:
-    cd glu
-    $(MAKE_CMD)
-    cd ..
-
-$(TARGET4).lib:
+$(TARGET4):
     cd glide
-    $(MAKE_CMD) $(@F)
+    $(MAKE_CMD)
     cd ..
 
 lib: $(TARGET1).lib $(PDWIN32_LIB)\$(DTARGET1).lib \
      $(TARGET2).lib $(PDWIN32_LIB)\$(DTARGET2).lib \
      $(TARGET3).lib $(PDWIN32_LIB)\$(DTARGET3).lib \
-     $(TARGET4).lib $(PDWIN32_LIB)\$(TARGET4).lib
+     $(PDWIN32_LIB)\$(DTARGET4).lib
 
 $(PDWIN32_LIB)\$(DTARGET1).lib: $(TARGET1).lib
     $(CP) $** $@
@@ -112,8 +107,10 @@ $(PDWIN32_LIB)\$(DTARGET2).lib: $(TARGET2).lib
 $(PDWIN32_LIB)\$(DTARGET3).lib: $(TARGET3).lib
     $(CP) $** $@
 
-$(PDWIN32_LIB)\$(TARGET4).lib: $(TARGET4).lib
-    $(CP) $** $@
+$(PDWIN32_LIB)\$(DTARGET4).lib:
+    cd glide
+    $(MAKE_CMD) lib
+    cd ..
 
 dep:
     $(DEPEND) -I$(PDWIN32_INCLUDE);$(PDWIN32_INCLUDE)\win \
