@@ -1,4 +1,4 @@
-/* $Id: oslibwin.h,v 1.62 2001-11-30 13:53:50 sandervl Exp $ */
+/* $Id: oslibwin.h,v 1.63 2002-01-12 14:09:31 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -73,7 +73,6 @@ HWND OSLibWinQueryFocus(HWND hwndDeskTop);
 
 HWND OSLibWinWindowFromID(HWND hwndParent,ULONG id);
 BOOL OSLibWinSetFocus(HWND hwndDeskTop,HWND hwndNewFocus, BOOL activate);
-ULONG OSLibGetWindowHeight(HWND hwnd); //for point transformation
 
 extern ULONG ScreenHeight, ScreenWidth;
 inline ULONG OSLibQueryScreenHeight(void) { return (ScreenHeight); }
@@ -238,6 +237,10 @@ HWND  OSLibWinQueryActiveWindow();
 #define RELATIVE_TO_WINDOW 0
 #define RELATIVE_TO_SCREEN 1
 BOOL  OSLibWinQueryWindowRect(Win32BaseWindow *window, PRECT pRect, int RelativeTo = RELATIVE_TO_WINDOW);
+ULONG OSLibGetWindowHeight(HWND hwnd); //for point transformation
+
+BOOL  OSLibWinQueryWindowClientRect(HWND hwnd, PRECT pRect);
+
 BOOL  OSLibWinCalcFrameRect(HWND hwnd, RECT *pRect, BOOL fClient);
 BOOL  OSLibGetMinMaxInfo(HWND hwndFrame, MINMAXINFO *pMinMax);
 

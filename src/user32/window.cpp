@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.114 2002-01-12 09:55:52 sandervl Exp $ */
+/* $Id: window.cpp,v 1.115 2002-01-12 14:09:32 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -280,6 +280,22 @@ ODINFUNCTION2(HWND, CreateFakeWindowEx,
   
     RELEASE_WNDOBJ(window);
     return hwnd;
+}
+//******************************************************************************
+//******************************************************************************
+ODINFUNCTION1(BOOL, DestroyFakeWindow,
+              HWND, hwnd)
+{
+  Win32BaseWindow *window;
+
+    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
+    if(!window) {
+        dprintf(("DestroyFakeWindow, window %x not found", hwnd));
+        SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+        return 0;
+    }
+    delete window;
+    return TRUE;
 }
 //******************************************************************************
 //******************************************************************************
