@@ -1,4 +1,4 @@
-/* $Id: button.cpp,v 1.27 1999-12-28 17:04:22 cbratschi Exp $ */
+/* $Id: button.cpp,v 1.28 1999-12-30 18:32:57 cbratschi Exp $ */
 /* File: button.cpp -- Button type widgets
  *
  * Copyright (C) 1993 Johannes Ruscheinski
@@ -14,7 +14,6 @@
 
 #include <string.h>
 #include <stdlib.h>
-
 #include <os2win.h>
 #include "controls.h"
 #include "button.h"

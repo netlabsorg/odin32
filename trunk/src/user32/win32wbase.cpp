@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.128 1999-12-30 11:21:00 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.129 1999-12-30 18:32:59 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2874,13 +2874,30 @@ BOOL Win32BaseWindow::GetWindowRect(PRECT pRect)
 //******************************************************************************
 BOOL Win32BaseWindow::hasWindowName(LPSTR wndname, BOOL fUnicode)
 {
-    if(wndname == NULL)
-      return FALSE;
+    INT len = GetWindowTextLength();
+    BOOL res;
 
-    if(fUnicode) {
-            return (lstrcmpW(windowNameW, (LPWSTR)wndname) == 0);
+    if (wndname == NULL)
+      return (len == 0);
+
+    len++;
+    if (fUnicode)
+    {
+      WCHAR *text = (WCHAR*)malloc(len*sizeof(WCHAR));
+
+      GetWindowTextW(text,len);
+      res = (lstrcmpW(text,(LPWSTR)wndname) == 0);
+      free(text);
+    } else
+    {
+      CHAR *text = (CHAR*)malloc(len*sizeof(CHAR));
+
+      GetWindowTextA(text,len);
+      res = (strcmp(text,wndname) == 0);
+      free(text);
     }
-    else    return (strcmp(windowNameA, wndname) == 0);
+
+    return res;
 }
 //******************************************************************************
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: controls.h,v 1.1 1999-10-20 06:38:08 sandervl Exp $ */
+/* $Id: controls.h,v 1.2 1999-12-30 18:32:58 cbratschi Exp $ */
 /*
  * Win32 common controls
  *
@@ -18,17 +18,19 @@
 void CONTROLS_Register();
 void CONTROLS_Unregister();
 
-#define BUTTON_CONTROL  	0
-#define STATIC_CONTROL  	1
-#define SCROLLBAR_CONTROL	2
-#define LISTBOX_CONTROL		3
-#define COMBOLBOX_CONTROL	4
-#define COMBOBOX_CONTROL	5
-#define EDIT_CONTROL		6
-#define MDICLIENT_CONTROL	7
-#define DIALOG_CONTROL		8
-#define DESKTOP_CONTROL 	9
-#define MAX_CONTROLS 		10
+#define BUTTON_CONTROL          0
+#define STATIC_CONTROL          1
+#define SCROLLBAR_CONTROL       2
+#define LISTBOX_CONTROL         3
+#define COMBOLBOX_CONTROL       4
+#define COMBOBOX_CONTROL        5
+#define EDIT_CONTROL            6
+#define MDICLIENT_CONTROL       7
+#define DIALOG_CONTROL          8
+#define DESKTOP_CONTROL         9
+#define WINSWITCH_CONTROL       10
+#define ICONTITLE_CONTROL       11
+#define MAX_CONTROLS            12
 
 BOOL WIDGETS_IsControl(Win32BaseWindow *window, int control);
 

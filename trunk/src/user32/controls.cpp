@@ -1,4 +1,4 @@
-/* $Id: controls.cpp,v 1.5 1999-10-24 22:56:01 sandervl Exp $ */
+/* $Id: controls.cpp,v 1.6 1999-12-30 18:32:58 cbratschi Exp $ */
 /* File: controls.cpp -- Win32 common controls
  *
  * Copyright (c) 1999 Christoph Bratschi
@@ -16,6 +16,8 @@
 #include "win32wmdiclient.h"
 #include "win32dlg.h"
 #include "win32wdesktop.h"
+#include "winswitch.h"
+#include "icontitle.h"
 #include "controls.h"
 
 ATOM  controlAtoms[MAX_CONTROLS] = {0};
@@ -62,7 +64,15 @@ void CONTROLS_Register()
 
   dprintf(("Register DESKTOP class"));
   controlAtoms[DESKTOP_CONTROL] = DESKTOP_Register();
-  if (!controlAtoms[DESKTOP_CONTROL]) dprintf(("failed!!!")); 
+  if (!controlAtoms[DESKTOP_CONTROL]) dprintf(("failed!!!"));
+
+  dprintf(("Register WINSWITCH class"));
+  controlAtoms[WINSWITCH_CONTROL] = WINSWITCH_Register();
+  if (!controlAtoms[WINSWITCH_CONTROL]) dprintf(("failed!!!"));
+
+  dprintf(("Register ICONTITLE class"));
+  controlAtoms[ICONTITLE_CONTROL] = ICONTITLE_Register();
+  if (!controlAtoms[ICONTITLE_CONTROL]) dprintf(("failed!!!"));
 }
 
 void CONTROLS_Unregister()
@@ -96,13 +106,19 @@ void CONTROLS_Unregister()
 
   dprintf(("Unregister DESKTOP class"));
   if (!DESKTOP_Unregister()) dprintf(("failed!!!"));
+
+  dprintf(("Unregister WINSWITCH class"));
+  if (!WINSWITCH_Unregister()) dprintf(("failed!!!"));
+
+  dprintf(("Unregister ICONTITLE class"));
+  if (!ICONTITLE_Unregister()) dprintf(("failed!!!"));
 }
 
 
 BOOL WIDGETS_IsControl(Win32BaseWindow *window, int control)
 {
   if(control >= MAX_CONTROLS || window == NULL || window->getClass() == NULL)
-	return FALSE;
+        return FALSE;
 
   return controlAtoms[control] == window->getClass()->getAtom();
 }
