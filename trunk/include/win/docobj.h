@@ -1,4 +1,4 @@
-/* $Id: docobj.h,v 1.1 1999-05-24 20:19:11 ktk Exp $ */
+/* $Id: docobj.h,v 1.2 1999-09-09 21:04:37 phaller Exp $ */
 
 #ifndef __WINE_DOCOBJ_H
 #define __WINE_DOCOBJ_H
@@ -33,8 +33,9 @@ typedef struct _tagOLECMDTEXT
 	WCHAR rgwz[1];
 } OLECMDTEXT;
 
-typedef enum 
-{ 
+#ifndef __WINE_COMMDLG_H
+typedef enum
+{
 	PRINTFLAG_MAYBOTHERUSER = 1,
 	PRINTFLAG_PROMPTUSER  = 2,
 	PRINTFLAG_USERMAYCHANGEPRINTER  = 4,
@@ -43,6 +44,7 @@ typedef enum
 	PRINTFLAG_FORCEPROPERTIES = 32,
 	PRINTFLAG_PRINTTOFILE = 64
 } PRINTFLAG;
+#endif
 
 typedef struct tagPAGERANGE
 {
@@ -66,46 +68,46 @@ typedef enum
 	OLECMDTEXTF_STATUS  = 2
 } OLECMDTEXTF;
 
-typedef enum 
+typedef enum
 {
 	OLECMDEXECOPT_DODEFAULT = 0,
 	OLECMDEXECOPT_PROMPTUSER  = 1,
 	OLECMDEXECOPT_DONTPROMPTUSER  = 2,
 	OLECMDEXECOPT_SHOWHELP  = 3
 } OLECMDEXECOPT;
-															  
+															
 #define OLECMDERR_E_FIRST            (OLE_E_LAST+1)
 #define OLECMDERR_E_NOTSUPPORTED     (OLECMDERR_E_FIRST)
 #define OLECMDERR_E_DISABLED         (OLECMDERR_E_FIRST+1)
 #define OLECMDERR_E_NOHELP           (OLECMDERR_E_FIRST+2)
 #define OLECMDERR_E_CANCELED         (OLECMDERR_E_FIRST+3)
 #define OLECMDERR_E_UNKNOWNGROUP     (OLECMDERR_E_FIRST+4)
- 
+
 /*****************************************************************************
  * Predeclare the interfaces
  */
 DEFINE_GUID(IID_IOleDocument, 0xb722bcc5,0x4e68,0x101b,0xa2,0xbc,0x00,0xaa,0x00,0x40,0x47,0x70);
 typedef struct IOleDocument IOleDocument, *LPOLEDOCUMENT;
- 
+
 DEFINE_GUID(IID_IOleDocumentSite, 0xb722bcc7,0x4e68,0x101b,0xa2,0xbc,0x00,0xaa,0x00,0x40,0x47,0x70);
 typedef struct IOleDocumentSite IOleDocumentSite, *LPOLEDOCUMENTSITE;
- 
+
 DEFINE_GUID(IID_IOleDocumentView, 0xb722bcc6,0x4e68,0x101b,0xa2,0xbc,0x00,0xaa,0x00,0x40,0x47,0x70);
 typedef struct IOleDocumentView IOleDocumentView, *LPOLEDOCUMENTVIEW;
- 
+
 DEFINE_GUID(IID_IEnumOleDocumentViews, 0xb722bcc6,0x4e68,0x101b,0xa2,0xbc,0x00,0xaa,0x00,0x40,0x47,0x70);
 typedef struct IEnumOleDocumentViews IEnumOleDocumentViews, *LPENUMOLEDOCUMENTVIEWS;
- 
+
 DEFINE_GUID(IID_IOleCommandTarget, 0xb722bccb,0x4e68,0x101b,0xa2,0xbc,0x00,0xaa,0x00,0x40,0x47,0x70);
 typedef struct IOleCommandTarget IOleCommandTarget, *LPOLECOMMANDTARGET;
- 
+
 DEFINE_GUID(IID_IContinueCallback, 0xb722bcca,0x4e68,0x101b,0xa2,0xbc,0x00,0xaa,0x00,0x40,0x47,0x70);
 typedef struct IContinueCallback IContinueCallback, *LPCONTINUECALLBACK;
- 
+
 DEFINE_GUID(IID_IPrint, 0xb722bcc9,0x4e68,0x101b,0xa2,0xbc,0x00,0xaa,0x00,0x40,0x47,0x70);
 typedef struct IPrint IPrint, *LPPRINT;
- 
- 
+
+
 /*****************************************************************************
  * IOleDocument interface
  */
@@ -171,7 +173,7 @@ ICOM_DEFINE(IOleDocumentSite,IUnknown)
 	ICOM_METHOD1(HRESULT,CloseView, DWORD,dwReserved) \
 	ICOM_METHOD1(HRESULT,SaveViewState, LPSTREAM,pstm) \
 	ICOM_METHOD1(HRESULT,ApplyViewState,LPSTREAM,pstm) \
-	ICOM_METHOD2(HRESULT,Clone, IOleInPlaceSite*,pIPSiteNew, IOleDocumentView**,ppViewNew) 
+	ICOM_METHOD2(HRESULT,Clone, IOleInPlaceSite*,pIPSiteNew, IOleDocumentView**,ppViewNew)
 #define IOleDocumentView_IMETHODS \
 	IUnknown_IMETHODS \
 	IOleDocumentView_METHODS
@@ -208,7 +210,7 @@ ICOM_DEFINE(IOleDocumentView,IUnknown)
 	ICOM_METHOD3(HRESULT,Next, ULONG,cViews, IOleDocumentView**,rgpView, ULONG*,pcFetched) \
 	ICOM_METHOD1(HRESULT,Skip, ULONG,cViews) \
 	ICOM_METHOD (HRESULT,Reset) \
-	ICOM_METHOD1(HRESULT,Clone, IEnumOleDocumentViews**,ppEnum) 
+	ICOM_METHOD1(HRESULT,Clone, IEnumOleDocumentViews**,ppEnum)
 #define IEnumOleDocumentViews_IMETHODS \
 	IUnknown_IMETHODS \
 	IEnumOleDocumentViews_METHODS
@@ -227,7 +229,7 @@ ICOM_DEFINE(IEnumOleDocumentViews,IUnknown)
 #define IEnumOleDocumentViews_Clone(p,a)              ICOM_CALL1(Clone,p,a)
 #endif
 
-				  
+				
 /*****************************************************************************
  * IOleCommandTarget interface
  */
@@ -283,7 +285,7 @@ ICOM_DEFINE(IContinueCallback,IUnknown)
 #define IPrint_METHODS \
 	ICOM_METHOD1(HRESULT,SetInitialPageNum, LONG,nFirstPage) \
 	ICOM_METHOD2(HRESULT,GetPageInfo, LONG*,pnFirstPage, LONG*,pcPages) \
-	ICOM_METHOD8(HRESULT,Print, DWORD,grfFlags, DVTARGETDEVICE**,pptd, PAGESET**,ppPageSet, STGMEDIUM*,pstgmOptions, IContinueCallback*,pcallback, LONG,nFirstPage, LONG*,pcPagesPrinted, LONG*,pnLastPage) 
+	ICOM_METHOD8(HRESULT,Print, DWORD,grfFlags, DVTARGETDEVICE**,pptd, PAGESET**,ppPageSet, STGMEDIUM*,pstgmOptions, IContinueCallback*,pcallback, LONG,nFirstPage, LONG*,pcPagesPrinted, LONG*,pnLastPage)
 #define IPrint_IMETHODS \
 	IUnknown_IMETHODS \
 	IPrint_METHODS
