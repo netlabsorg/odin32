@@ -25,7 +25,22 @@
 
 #include "shlobj.h"
 #include "wine/undocshell.h"
-#ifndef __WIN32OS2__
+#ifdef __WIN32OS2__
+#define NO_DCDATA
+#include <winuser32.h>
+#include <winres.h>
+
+#undef WARN
+#undef TRACE
+#ifdef DEBUG
+#define TRACE WriteLog("SHELL32: %s", __FUNCTION__); WriteLog
+#define WARN WriteLog("WARNING: SHELL32: %s", __FUNCTION__); WriteLog
+#else
+#define TRACE 1 ? (void)0 : (void)((int (*)(char *, ...)) NULL)
+#define WARN 1 ? (void)0 : (void)((int (*)(char *, ...)) NULL)
+#endif
+
+#else
 #include "bitmaps/wine.xpm"
 #endif
 
@@ -234,7 +249,25 @@ static HRESULT WINAPI IPersistFile_fnLoad(IPersistFile* iface, LPCOLESTR pszFile
 }
 
 
-#ifndef __WIN32OS2__
+#ifdef __WIN32OS2__
+static BOOL SaveIconResAsOS2ICO(GRPICONDIR *pIconDir, HINSTANCE hInstance, const char *szXPMFileName)
+{
+    FILE *fXPMFile;
+    void *lpOS2Icon;
+    DWORD ressize;
+
+    if (!(fXPMFile = fopen(szXPMFileName, "w")))
+        return 0;
+
+    lpOS2Icon = ConvertIconGroup((void *)pIconDir, hInstance, &ressize);
+    if(lpOS2Icon) {
+        fwrite(lpOS2Icon, 1, ressize, fXPMFile);
+        free(lpOS2Icon);
+    }
+    fclose(fXPMFile);
+    return 1;
+}
+#else
 /* Icon extraction routines
  *
  * FIXME: should use PrivateExtractIcons and friends
@@ -329,6 +362,7 @@ static BOOL SaveIconResAsXPM(const BITMAPINFO *pIcon, const char *szXPMFileName)
     unlink( szXPMFileName );
     return 0;
 }
+#endif //__WIN32OS2__
 
 static BOOL CALLBACK EnumResNameProc(HANDLE hModule, const char *lpszType, char *lpszName, LONG lParam)
 {
@@ -382,6 +416,13 @@ static int ExtractFromEXEDLL(const char *szFileName, int nIndex, const char *szX
         goto error3;
     }
 
+#ifdef __WIN32OS2__
+    if(!SaveIconResAsOS2ICO(pIconDir, hModule, szXPMFileName))
+    {
+        TRACE("Failed saving icon as XPM, error %ld\n", GetLastError());
+        goto error3;
+    }
+#else
     for (i = 0; i < pIconDir->idCount; i++)
         if ((pIconDir->idEntries[i].bHeight * pIconDir->idEntries[i].bWidth) > nMax)
         {
@@ -412,7 +453,7 @@ static int ExtractFromEXEDLL(const char *szFileName, int nIndex, const char *szX
         TRACE("Failed saving icon as XPM, error %ld\n", GetLastError());
         goto error3;
     }
-
+#endif
     FreeResource(hResData);
     FreeLibrary(hModule);
 
@@ -435,9 +476,18 @@ static int ExtractFromICO(const char *szFileName, const char *szXPMFileName)
     int nIndex = 0;
     void *pIcon;
     int i;
+#ifdef __WIN32OS2__
+    int size;
+#endif
 
     if (!(fICOFile = fopen(szFileName, "r")))
         goto error1;
+
+#ifdef __WIN32OS2__
+     //TODO:
+    dprintf(("TODO: Icon file conversion not yet supported!!"));
+    goto error2;
+#else
 
     if (fread(&iconDir, sizeof (ICONDIR), 1, fICOFile) != 1)
         goto error2;
@@ -465,6 +515,7 @@ static int ExtractFromICO(const char *szFileName, const char *szXPMFileName)
     if(!SaveIconResAsXPM(pIcon, szXPMFileName))
         goto error4;
 
+#endif
     free(pIcon);
     free(pIconDirEntry);
     fclose(fICOFile);
@@ -481,6 +532,7 @@ static int ExtractFromICO(const char *szFileName, const char *szXPMFileName)
     return 0;
 }
 
+#ifndef __WIN32OS2__
 /* get the Unix file name for a given path, allocating the string */
 inline static char *get_unix_file_name( const char *dos )
 {
@@ -503,9 +555,18 @@ static BOOL create_default_icon( const char *filename )
     fclose( fXPM );
     return TRUE;
 }
+#endif //__WIN32OS2__
 
 /* extract an icon from an exe or icon file; helper for IPersistFile_fnSave */
-static char *extract_icon( const char *path, int index )
+#ifdef __WIN32OS2__
+static char *extract_icon( const char *path, char *filename, int index)
+{
+    if (ExtractFromEXEDLL( path, index, filename )) return filename;
+    if (ExtractFromICO( path, filename )) return filename;
+    return NULL;
+}
+#else
+static char *extract_icon( const char *path, int index)
 {
     char *filename = HEAP_strdupA( GetProcessHeap(), 0, tmpnam(NULL) );
     if (ExtractFromEXEDLL( path, index, filename )) return filename;
@@ -514,7 +575,7 @@ static char *extract_icon( const char *path, int index )
     HeapFree( GetProcessHeap(), 0, filename );
     return NULL;
 }
-#endif //__WIN32OS2__
+#endif
 
 static HRESULT WINAPI IPersistFile_fnSave(IPersistFile* iface, LPCOLESTR pszFileName, BOOL fRemember)
 {
@@ -528,6 +589,9 @@ static HRESULT WINAPI IPersistFile_fnSave(IPersistFile* iface, LPCOLESTR pszFile
     char *work_dir = NULL;
     BOOL bDesktop;
     HKEY hkey;
+#ifdef __WIN32OS2__
+    char *tmp;
+#endif
 
     _ICOM_THIS_From_IPersistFile(IShellLinkImpl, iface);
 
@@ -543,7 +607,72 @@ static HRESULT WINAPI IPersistFile_fnSave(IPersistFile* iface, LPCOLESTR pszFile
 
     /* check if ShellLinker configured */
 #ifdef __WIN32OS2__
-    return NOERROR;
+    dprintf(("IPersistFile_fnSave %ls", pszFileName));
+    filename = link_name = NULL;
+    bDesktop = 0;
+
+    if (!WideCharToMultiByte( CP_ACP, 0, pszFileName, -1, buffer, sizeof(buffer), NULL, NULL))
+        return ERROR_UNKNOWN;
+    GetFullPathNameA( buffer, sizeof(buff2), buff2, NULL );
+    filename = HEAP_strdupA( GetProcessHeap(), 0, buff2 );
+
+    if (SHGetSpecialFolderPathA( 0, buffer, CSIDL_STARTUP, FALSE ))
+    {
+        /* ignore startup for now */
+        if (!strncasecmp( filename, buffer, strlen(buffer) )) goto done;
+    }
+    if (SHGetSpecialFolderPathA( 0, buffer, CSIDL_DESKTOPDIRECTORY, FALSE ))
+    {
+        if (!strncasecmp( filename, buffer, strlen(buffer) ))
+        {
+            link_name = filename + strlen(buffer);
+            bDesktop = TRUE;
+            goto found;
+        }
+    }
+    if (SHGetSpecialFolderPathA( 0, buffer, CSIDL_STARTMENU, FALSE ))
+    {
+        if (!strncasecmp( filename, buffer, strlen(buffer) ))
+        {
+            link_name = filename + strlen(buffer);
+            bDesktop = FALSE;
+            goto found;
+        }
+    }
+    goto done;
+
+ found:
+
+    icon_name = HEAP_strdupA( GetProcessHeap(), 0, filename );
+    strupr(icon_name);
+    tmp = strstr(icon_name, ".LNK");
+    if(!tmp) {
+        dprintf(("ERROR: Unexpected name %s", icon_name));
+        goto done;
+    }
+    tmp[1] = 'I';
+    tmp[2] = 'C';
+    tmp[3] = 'O';
+    /* extract the icon */
+    if (!extract_icon( This->sIcoPath && strlen(This->sIcoPath) ? 
+                       This->sIcoPath : This->sPath,
+                       icon_name, This->iIcoNdx)) goto done;
+
+    if(OSLibWinCreateObject(This->sPath, This->sArgs, This->sWorkDir, filename,
+                            This->sDescription, icon_name,
+                            This->iIcoNdx, bDesktop) == FALSE) 
+    {
+        ret = E_ACCESSDENIED;
+    }
+   
+ done:
+    if(shell_link_app) HeapFree( GetProcessHeap(), 0, shell_link_app );
+    if(filename) HeapFree( GetProcessHeap(), 0, filename );
+    if(icon_name) HeapFree( GetProcessHeap(), 0, icon_name );
+    if(path_name) HeapFree( GetProcessHeap(), 0, path_name );
+    if(work_dir) HeapFree( GetProcessHeap(), 0, work_dir );
+    return ret;
+
 #else
     buffer[0] = 0;
     if (!RegOpenKeyExA( HKEY_LOCAL_MACHINE, "Software\\Wine\\Wine\\Config\\Wine",
