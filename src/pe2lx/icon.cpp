@@ -1,4 +1,4 @@
-/* $Id: icon.cpp,v 1.3 1999-06-10 17:08:53 phaller Exp $ */
+/* $Id: icon.cpp,v 1.4 1999-07-20 17:50:19 sandervl Exp $ */
 
 /*
  * PE2LX icons
@@ -34,7 +34,7 @@ OS2Icon::OS2Icon(int id, WINBITMAPINFOHEADER *bmpHdr, int size) :
                 id(0), next(NULL), iconhdr(NULL), iconsize(0), prevoffset(0)
 {
  RGBQUAD *rgb;
- RGB     *os2rgb;
+ RGB2    *os2rgb;
  int bwsize, i, colorsize, rgbsize;
  OS2Icon *icon = OS2Icon::icons;
 
@@ -90,40 +90,45 @@ OS2Icon::OS2Icon(int id, WINBITMAPINFOHEADER *bmpHdr, int size) :
   //bitmapfileheader for AndXor mask + 2 RGB structs + bitmapfileheader
   //for color bitmap + RGB structs for all the colors
   //SvL, 3-3-98: 2*bwsize
-  iconsize = 2*sizeof(BITMAPFILEHEADER) + 2*sizeof(RGB) +
+  iconsize = 2*sizeof(BITMAPFILEHEADER2) + 2*sizeof(RGB2) +
              rgbsize + 2*bwsize + bmpHdr->biSizeImage;
   //There are icons without an XOR mask, so check for it
   if(bmpHdr->biSizeImage == colorsize) {
         iconsize += bwsize;
   }
-  iconhdr  = (BITMAPFILEHEADER *)malloc(iconsize);
+  iconhdr  = (BITMAPFILEHEADER2 *)malloc(iconsize);
+  memset(iconhdr, 0, iconsize);
   iconhdr->usType        = BFT_COLORICON;
-  iconhdr->cbSize        = sizeof(BITMAPFILEHEADER);
+  iconhdr->cbSize        = sizeof(BITMAPFILEHEADER2);
   iconhdr->xHotspot      = 0;
   iconhdr->yHotspot      = 0;
-  iconhdr->offBits       = 2*sizeof(BITMAPFILEHEADER) +
-                           2*sizeof(RGB) + rgbsize;
-  iconhdr->bmp.cbFix     = sizeof(BITMAPINFOHEADER);
-  iconhdr->bmp.cx        = (USHORT)bmpHdr->biWidth;
-  iconhdr->bmp.cy        = (USHORT)bmpHdr->biHeight;
-  iconhdr->bmp.cPlanes   = 1;
-  iconhdr->bmp.cBitCount = 1;
-  os2rgb                 = (RGB *)(iconhdr+1);
-  memset(os2rgb, 0, sizeof(RGB));
-  memset(os2rgb+1, 0xff, sizeof(RGB));
-  iconhdr2               = (BITMAPFILEHEADER *)(os2rgb+2);
+  iconhdr->offBits       = 2*sizeof(BITMAPFILEHEADER2) +
+                           2*sizeof(RGB2) + rgbsize;
+  iconhdr->bmp2.cbFix    = sizeof(BITMAPINFOHEADER2);
+  iconhdr->bmp2.cx       = (USHORT)bmpHdr->biWidth;
+  iconhdr->bmp2.cy       = (USHORT)bmpHdr->biHeight;
+  iconhdr->bmp2.cPlanes  = 1;
+  iconhdr->bmp2.cBitCount= 1;
+  iconhdr->bmp2.ulCompression   = BCA_UNCOMP;
+  iconhdr->bmp2.ulColorEncoding = BCE_RGB;
+  os2rgb                 = (RGB2 *)(iconhdr+1);
+  memset(os2rgb, 0, sizeof(RGB2));
+  memset(os2rgb+1, 0xff, sizeof(RGB)); //not reserved byte
+  iconhdr2               = (BITMAPFILEHEADER2 *)(os2rgb+2);
   iconhdr2->usType       = BFT_COLORICON;
-  iconhdr2->cbSize       = sizeof(BITMAPFILEHEADER);
+  iconhdr2->cbSize       = sizeof(BITMAPFILEHEADER2);
   iconhdr2->xHotspot     = 0;
   iconhdr2->yHotspot     = 0;
-  iconhdr2->offBits      = 2*sizeof(BITMAPFILEHEADER) +
-                           2*sizeof(RGB) + rgbsize + 2*bwsize;
-  iconhdr2->bmp.cbFix    = sizeof(BITMAPINFOHEADER);
-  iconhdr2->bmp.cx       = (USHORT)bmpHdr->biWidth;
-  iconhdr2->bmp.cy       = (USHORT)(bmpHdr->biHeight/2);
-  iconhdr2->bmp.cPlanes  = bmpHdr->biPlanes;
-  iconhdr2->bmp.cBitCount= bmpHdr->biBitCount;
-  os2rgb                 = (RGB *)(iconhdr2+1);
+  iconhdr2->offBits      = 2*sizeof(BITMAPFILEHEADER2) +
+                           2*sizeof(RGB2) + rgbsize + 2*bwsize;
+  iconhdr2->bmp2.cbFix   = sizeof(BITMAPINFOHEADER2);
+  iconhdr2->bmp2.cx      = (USHORT)bmpHdr->biWidth;
+  iconhdr2->bmp2.cy      = (USHORT)(bmpHdr->biHeight/2);
+  iconhdr2->bmp2.cPlanes = bmpHdr->biPlanes;
+  iconhdr2->bmp2.cBitCount= bmpHdr->biBitCount;
+  iconhdr2->bmp2.ulCompression   = BCA_UNCOMP;
+  iconhdr2->bmp2.ulColorEncoding = BCE_RGB;
+  os2rgb                 = (RGB2 *)(iconhdr2+1);
   rgb                    = (RGBQUAD *)(bmpHdr+1);
   if(bmpHdr->biBitCount < 24) {
         for(i=0;i<(1<<bmpHdr->biBitCount);i++) {
@@ -172,7 +177,7 @@ int OS2Icon::QueryIconSize()
 }
 //******************************************************************************
 //******************************************************************************
-BITMAPFILEHEADER *OS2Icon::GetIconHeader()
+BITMAPFILEHEADER2 *OS2Icon::GetIconHeader()
 {
   return(iconhdr);
 }
