@@ -1,4 +1,4 @@
-/* $Id: mci.cpp,v 1.9 2003-07-16 15:47:23 sandervl Exp $ */
+/* $Id: mci.cpp,v 1.10 2004-01-20 18:09:42 sandervl Exp $ */
 
 /*
  * MCI functions
@@ -6,6 +6,9 @@
  * Copyright 1998 Joel Troster
  * Copyright 1998/1999 Eric Pouech
  * Copyright 2000 Chris Wohlgemuth
+ * 
+ * Contains portions of Wine (dlls\winmm\mci.c, winmm.c)
+ * Copyright 1998/1999 Eric Pouech 
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -45,7 +48,7 @@
 static DWORD  MCI_SendCommand(UINT mciId,
               UINT16 uMsg,
               DWORD dwParam1,
-              DWORD dwParam2);
+              DWORD dwParam2);                      
 
 static LPWINE_MCIDRIVER MCI_GetDriver(UINT16 wDevID) ;
 static UINT MCI_GetDriverFromString(LPCSTR lpstrName);
@@ -243,12 +246,298 @@ MCIERROR WINAPI mciSendCommandA(MCIDEVICEID mciId, UINT uMsg, DWORD dwParam1,
 }
 
 
-MCIERROR WINAPI mciSendCommandW(MCIDEVICEID mciId, UINT uMsg, DWORD dwParam1,
-                                DWORD dwParam2)
+/**************************************************************************
+ * 			MCI_MessageToString			[internal]
+ */
+const char* MCI_MessageToString(UINT16 wMsg)
 {
-  dprintf(("WINMM:mciSendCommandW - stub %X %X %X %X\n", mciId, uMsg, dwParam1, dwParam2));
-  return(MMSYSERR_NODRIVER);
+    static char buffer[100];
+
+#define CASE(s) case (s): return #s
+
+    switch (wMsg) {
+	CASE(MCI_BREAK);
+	CASE(MCI_CLOSE);
+	CASE(MCI_CLOSE_DRIVER);
+	CASE(MCI_COPY);
+	CASE(MCI_CUE);
+	CASE(MCI_CUT);
+	CASE(MCI_DELETE);
+	CASE(MCI_ESCAPE);
+	CASE(MCI_FREEZE);
+	CASE(MCI_PAUSE);
+	CASE(MCI_PLAY);
+	CASE(MCI_GETDEVCAPS);
+	CASE(MCI_INFO);
+	CASE(MCI_LOAD);
+	CASE(MCI_OPEN);
+	CASE(MCI_OPEN_DRIVER);
+	CASE(MCI_PASTE);
+	CASE(MCI_PUT);
+	CASE(MCI_REALIZE);
+	CASE(MCI_RECORD);
+	CASE(MCI_RESUME);
+	CASE(MCI_SAVE);
+	CASE(MCI_SEEK);
+	CASE(MCI_SET);
+	CASE(MCI_SPIN);
+	CASE(MCI_STATUS);
+	CASE(MCI_STEP);
+	CASE(MCI_STOP);
+	CASE(MCI_SYSINFO);
+	CASE(MCI_UNFREEZE);
+	CASE(MCI_UPDATE);
+	CASE(MCI_WHERE);
+	CASE(MCI_WINDOW);
+	/* constants for digital video */
+    /*
+	CASE(MCI_CAPTURE);
+	CASE(MCI_MONITOR);
+	CASE(MCI_RESERVE);
+	CASE(MCI_SETAUDIO);
+	CASE(MCI_SIGNAL);
+	CASE(MCI_SETVIDEO);
+	CASE(MCI_QUALITY);
+	CASE(MCI_LIST);
+	CASE(MCI_UNDO);
+	CASE(MCI_CONFIGURE);
+	CASE(MCI_RESTORE);
+    */
+#undef CASE
+    default:
+	sprintf(buffer, "MCI_<<%04X>>", wMsg);
+	return buffer;
+    }
 }
+
+inline static LPSTR strdupWtoA( LPCWSTR str )
+{
+    LPSTR ret;
+    INT len;
+
+    if (!str) return NULL;
+    len = WideCharToMultiByte( CP_ACP, 0, str, -1, NULL, 0, NULL, NULL );
+    ret = (LPSTR)HeapAlloc( GetProcessHeap(), 0, len );
+    if(ret) WideCharToMultiByte( CP_ACP, 0, str, -1, ret, len, NULL, NULL );
+    return ret;
+}
+
+static int MCI_MapMsgWtoA(UINT msg, DWORD dwParam1, DWORD *dwParam2)
+{
+    switch(msg)
+    {
+    case MCI_CLOSE:
+    case MCI_PLAY:
+    case MCI_SEEK:
+    case MCI_STOP:
+    case MCI_PAUSE:
+    case MCI_GETDEVCAPS:
+    case MCI_SPIN:
+    case MCI_SET:
+    case MCI_STEP:
+    case MCI_RECORD:
+    case MCI_BREAK:
+    case MCI_SOUND:
+    case MCI_STATUS:
+    case MCI_CUE:
+    case MCI_REALIZE:
+    case MCI_PUT:
+    case MCI_WHERE:
+    case MCI_FREEZE:
+    case MCI_UNFREEZE:
+    case MCI_CUT:
+    case MCI_COPY:
+    case MCI_PASTE:
+    case MCI_UPDATE:
+    case MCI_RESUME:
+    case MCI_DELETE:
+        return 0;
+
+    case MCI_OPEN:
+        {
+            MCI_OPEN_PARMSW *mci_openW = (MCI_OPEN_PARMSW *)*dwParam2;
+            MCI_OPEN_PARMSA *mci_openA;
+            DWORD *ptr;
+
+            ptr = (DWORD *)HeapAlloc(GetProcessHeap(), 0, sizeof(*mci_openA) + sizeof(DWORD));
+            if (!ptr) return -1;
+
+            *ptr++ = *dwParam2; /* save the previous pointer */
+            *dwParam2 = (DWORD)ptr;
+            mci_openA = (MCI_OPEN_PARMSA *)ptr;
+
+            if (dwParam1 & MCI_NOTIFY)
+                mci_openA->dwCallback = mci_openW->dwCallback;
+
+            if (dwParam1 & MCI_OPEN_TYPE)
+            {
+                if (dwParam1 & MCI_OPEN_TYPE_ID)
+                    mci_openA->lpstrDeviceType = (LPSTR)mci_openW->lpstrDeviceType;
+                else
+                    mci_openA->lpstrDeviceType = strdupWtoA(mci_openW->lpstrDeviceType);
+            }
+            if (dwParam1 & MCI_OPEN_ELEMENT)
+            {
+                if (dwParam1 & MCI_OPEN_ELEMENT_ID)
+                    mci_openA->lpstrElementName = (LPSTR)mci_openW->lpstrElementName;
+                else
+                    mci_openA->lpstrElementName = strdupWtoA(mci_openW->lpstrElementName);
+            }
+            if (dwParam1 & MCI_OPEN_ALIAS)
+                mci_openA->lpstrAlias = strdupWtoA(mci_openW->lpstrAlias);
+        }
+        return 1;
+
+    case MCI_WINDOW:
+        if (dwParam1 & MCI_ANIM_WINDOW_TEXT)
+        {
+            MCI_ANIM_WINDOW_PARMSW *mci_windowW = (MCI_ANIM_WINDOW_PARMSW *)*dwParam2;
+            MCI_ANIM_WINDOW_PARMSA *mci_windowA;
+
+            mci_windowA = (MCI_ANIM_WINDOW_PARMSA *)HeapAlloc(GetProcessHeap(), 0, sizeof(*mci_windowA));
+            if (!mci_windowA) return -1;
+
+            *dwParam2 = (DWORD)mci_windowA;
+
+            mci_windowA->lpstrText = strdupWtoA(mci_windowW->lpstrText);
+
+            if (dwParam1 & MCI_NOTIFY)
+                mci_windowA->dwCallback = mci_windowW->dwCallback;
+            if (dwParam1 & MCI_ANIM_WINDOW_HWND)
+                mci_windowA->hWnd = mci_windowW->hWnd;
+            if (dwParam1 & MCI_ANIM_WINDOW_STATE)
+                mci_windowA->nCmdShow = mci_windowW->nCmdShow;
+
+            return 1;
+        }
+        return 0;
+
+    case MCI_SYSINFO:
+        {
+            MCI_SYSINFO_PARMSW *mci_sysinfoW = (MCI_SYSINFO_PARMSW *)*dwParam2;
+            MCI_SYSINFO_PARMSA *mci_sysinfoA;
+            DWORD *ptr;
+
+            ptr = (DWORD *)HeapAlloc(GetProcessHeap(), 0, sizeof(*mci_sysinfoA) + sizeof(DWORD));
+            if (!ptr) return -1;
+
+            *ptr++ = *dwParam2; /* save the previous pointer */
+            *dwParam2 = (DWORD)ptr;
+            mci_sysinfoA = (MCI_SYSINFO_PARMSA *)ptr;
+
+            if (dwParam1 & MCI_NOTIFY)
+                mci_sysinfoA->dwCallback = mci_sysinfoW->dwCallback;
+
+            mci_sysinfoA->dwRetSize = mci_sysinfoW->dwRetSize; /* FIXME */
+            mci_sysinfoA->lpstrReturn = (CHAR *)HeapAlloc(GetProcessHeap(), 0, mci_sysinfoA->dwRetSize);
+
+            return 1;
+        }
+
+    case MCI_INFO:
+    case MCI_SAVE:
+    case MCI_LOAD:
+    case MCI_ESCAPE:
+    default:
+        FIXME("Message 0x%04x needs translation\n", msg);
+        return -1;
+    }
+    return 0;
+}
+
+static DWORD MCI_UnmapMsgWtoA(UINT msg, DWORD dwParam1, DWORD dwParam2,
+                              DWORD result)
+{
+    switch(msg)
+    {
+    case MCI_OPEN:
+        {
+            DWORD *ptr = (DWORD *)dwParam2 - 1;
+            MCI_OPEN_PARMSW *mci_openW = (MCI_OPEN_PARMSW *)*ptr;
+            MCI_OPEN_PARMSA *mci_openA = (MCI_OPEN_PARMSA *)(ptr + 1);
+
+            mci_openW->wDeviceID = mci_openA->wDeviceID;
+
+            if (dwParam1 & MCI_OPEN_TYPE)
+            {
+                if (!(dwParam1 & MCI_OPEN_TYPE_ID))
+                    HeapFree(GetProcessHeap(), 0, (LPVOID)mci_openA->lpstrDeviceType);
+            }
+            if (dwParam1 & MCI_OPEN_ELEMENT)
+            {
+                if (!(dwParam1 & MCI_OPEN_ELEMENT_ID))
+                    HeapFree(GetProcessHeap(), 0, (LPVOID)mci_openA->lpstrElementName);
+            }
+            if (dwParam1 & MCI_OPEN_ALIAS)
+                HeapFree(GetProcessHeap(), 0, (LPVOID)mci_openA->lpstrAlias);
+            HeapFree(GetProcessHeap(), 0, ptr);
+        }
+        break;
+
+    case MCI_WINDOW:
+        if (dwParam1 & MCI_ANIM_WINDOW_TEXT)
+        {
+            MCI_ANIM_WINDOW_PARMSA *mci_windowA = (MCI_ANIM_WINDOW_PARMSA *)dwParam2;
+
+            HeapFree(GetProcessHeap(), 0, (void *)mci_windowA->lpstrText);
+            HeapFree(GetProcessHeap(), 0, mci_windowA);
+        }
+        break;
+
+    case MCI_SYSINFO:
+        {
+            DWORD *ptr = (DWORD *)dwParam2 - 1;
+            MCI_SYSINFO_PARMSW *mci_sysinfoW = (MCI_SYSINFO_PARMSW *)*ptr;
+            MCI_SYSINFO_PARMSA *mci_sysinfoA = (MCI_SYSINFO_PARMSA *)(ptr + 1);
+
+            if (!result)
+            {
+                mci_sysinfoW->dwNumber = mci_sysinfoA->dwNumber;
+                mci_sysinfoW->wDeviceType = mci_sysinfoA->wDeviceType;
+                MultiByteToWideChar(CP_ACP, 0,
+                                    mci_sysinfoA->lpstrReturn, mci_sysinfoA->dwRetSize,
+                                    mci_sysinfoW->lpstrReturn, mci_sysinfoW->dwRetSize);
+            }
+
+            HeapFree(GetProcessHeap(), 0, mci_sysinfoA->lpstrReturn);
+            HeapFree(GetProcessHeap(), 0, ptr);
+        }
+        break;
+
+    default:
+        FIXME("Message 0x%04x needs unmapping\n", msg);
+        break;
+    }
+
+    return result;
+}
+
+
+/**************************************************************************
+ * 				mciSendCommandW			[WINMM.@]
+ *
+ * FIXME: we should do the things other way around, but since our
+ * MM subsystem is not unicode aware...
+ */
+DWORD WINAPI mciSendCommandW(MCIDEVICEID wDevID, UINT wMsg, DWORD dwParam1, DWORD dwParam2)
+{
+    DWORD ret;
+    int mapped;
+
+    dprintf(("(%08x, %s, %08lx, %08lx)\n", wDevID, MCI_MessageToString(wMsg), dwParam1, dwParam2));
+
+    mapped = MCI_MapMsgWtoA(wMsg, dwParam1, &dwParam2);
+    if (mapped == -1)
+    {
+        dprintf(("message %04x mapping failed\n", wMsg));
+        return MMSYSERR_NOMEM;
+    }
+    ret = mciSendCommandA(wDevID, wMsg, dwParam1, dwParam2);
+    if (mapped)
+        MCI_UnmapMsgWtoA(wMsg, dwParam1, dwParam2, ret);
+    return ret;
+}
+
 
 MCIERROR WINAPI mciSendStringA(LPCSTR lpstrCommand, LPSTR lpstrReturnString,
                                UINT uReturnLength, HWND hwndCallback)
@@ -769,12 +1058,19 @@ static  DWORD MCI_Open(DWORD dwParam, LPMCI_OPEN_PARMSA lpParms)
       if (!strDevTyp[0] &&
           MCI_GetDevTypeFromFileName(lpParms->lpstrElementName,
                                      strDevTyp, sizeof(strDevTyp))) {
-        if (GetDriveTypeA(lpParms->lpstrElementName) != DRIVE_CDROM) {
+        if (GetDriveTypeA(lpParms->lpstrElementName) == DRIVE_CDROM) {
+            /* FIXME: this will not work if several CDROM drives are installed on the machine */
+            strcpy(strDevTyp, "CDAUDIO");
+        }
+        else
+        if (GetFileAttributesA(lpParms->lpstrElementName) != INVALID_FILE_ATTRIBUTES) {
+            // TODO: Assuming wave file here 
+            strcpy(strDevTyp, "WAVEAUDIO");
+        }
+        else {
           dwRet = MCIERR_EXTENSION_NOT_FOUND;
           goto errCleanUp;
         }
-        /* FIXME: this will not work if several CDROM drives are installed on the machine */
-        strcpy(strDevTyp, "CDAUDIO");
       }
     }
 
@@ -1070,7 +1366,6 @@ BOOL MULTIMEDIA_MciInit(void)
       RegCloseKey(hkey);
       FIXME("Registry handling for mci drivers not changed for odin yet. Verbatim copy from WINE (line %d)",__LINE__);
     }
-#endif
     FIXME("No Registry querying for mci drivers yet! (line %d)",__LINE__);
     err=1;
     if (!err) {
@@ -1093,5 +1388,11 @@ BOOL MULTIMEDIA_MciInit(void)
       }
     }
     //RegCloseKey(hWineConf);
+#else
+    //Just used hardcoded names here
+    strcpy(MCI_lpInstallNames, "CDAUDIO=MCICDA");
+    strcpy(MCI_lpInstallNames+strlen(MCI_lpInstallNames)+1, "WAVEAUDIO=MCIWAVE");
+    MCI_InstalledCount = 2;
+#endif
     return TRUE;
 }
