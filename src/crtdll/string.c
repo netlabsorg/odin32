@@ -1,8 +1,8 @@
-/* $Id: string.c,v 1.1 2000-11-22 01:11:01 phaller Exp $ */
+/* $Id: string.c,v 1.2 2001-12-01 23:06:23 bird Exp $ */
 
 /*
  * The C RunTime DLL
- * 
+ *
  * Implements C run-time functionality as known from UNIX.
  *
  * Partialy based on Wine
@@ -18,7 +18,7 @@
 
 //#include <odin.h>
 //#include <os2win.h>
-//#include <ctype.h>
+#include <ctype.h>                      /* toupper proto */
 //#include <heapstring.h>
 #include <string.h>
 
@@ -128,7 +128,7 @@ char * CDECL CRTDLL__strtime( char *buf )
 LPSTR CDECL CRTDLL__strupr(LPSTR x)
 {
   LPSTR y=x;
-  
+
   dprintf2(("CRTDLL: _strupr(%s)\n",
            x));
 
@@ -341,7 +341,7 @@ LPSTR CDECL CRTDLL_strstr(const LPSTR str1,
 
   return (strstr(str1, str2));
 }
- 
+
 
 /*********************************************************************
  *                  strtod        (CRTDLL.475)
@@ -415,7 +415,7 @@ LPSTR __CRTDLL__strndup(LPSTR buf, INT size)
 /*********************************************************************
  *                  _strdec           (CRTDLL.282)
  *
- * Return the byte before str2 while it is >= to str1. 
+ * Return the byte before str2 while it is >= to str1.
  *
  * PARAMS
  *   str1 [in]  Terminating string
@@ -508,7 +508,7 @@ LPSTR CDECL CRTDLL__strrev (LPSTR str)
 {
   LPSTR p1;
   LPSTR p2;
- 
+
   if (str && *str)
     for (p1 = str, p2 = str + strlen(str) - 1; p2 > p1; ++p1, --p2)
     {
@@ -568,7 +568,7 @@ LPSTR CDECL CRTDLL__strspnp(LPSTR str1, LPSTR str2)
 void CDECL CRTDLL__swab(LPSTR src, LPSTR dst, INT len)
 {
   //_swab(s1, s2, i);
-  
+
   if (len > 1)
   {
     len = (unsigned)len >> 1;
