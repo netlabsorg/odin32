@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 1999-09-05 02:25:48 bird Exp $
+# $Id: makefile,v 1.2 1999-09-22 09:46:52 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -33,7 +33,7 @@ all: ImpDef.exe ..\bin\ImpDef.exe
 
 
 ImpDef.exe: ImpDef.obj ..\common\commonicc.lib
-   $(LD) $(LDFLAGS) $** cppom30.lib os2386.lib
+   $(LD) $(LDFLAGS) $** $(RTLLIB) os2386.lib
 
 ..\bin\ImpDef.exe: ImpDef.exe
    $(CP) $** $@

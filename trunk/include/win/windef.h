@@ -1,4 +1,4 @@
-/* $Id: windef.h,v 1.12 1999-09-18 15:55:45 sandervl Exp $ */
+/* $Id: windef.h,v 1.13 1999-09-22 09:46:19 sandervl Exp $ */
 
 /*
  * Basic types definitions
@@ -511,13 +511,7 @@ typedef LPCSTR LPCTSTR;
 
 #define __max(a,b) MAX(a,b)
 #define __min(a,b) MIN(a,b)
-#ifndef max
-#define max(a,b)   MAX(a,b)
-#endif
-
-#ifndef min
-#define min(a,b)   MIN(a,b)
-#endif
+#include <stdlib.h>
 
 #define _MAX_PATH  260
 #define MAX_PATH   260

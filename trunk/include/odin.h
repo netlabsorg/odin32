@@ -1,4 +1,4 @@
-/* $Id: odin.h,v 1.9 1999-09-08 19:34:51 sandervl Exp $ */
+/* $Id: odin.h,v 1.10 1999-09-22 09:46:18 sandervl Exp $ */
 /*
  * ODIN - Build Environment Definition
  *
@@ -76,6 +76,8 @@
   #define SYSTEM    _System
   #define PASCAL    _Pascal
   #define UNALIGNED
+  #define __inline__ inline
+
   #if (__IBMCPP__ == 300) || (__IBMC__ == 300)
   #define NONAMELESSUNION
   #endif

@@ -1,4 +1,4 @@
-/* $Id: shellapi.h,v 1.5 1999-09-02 18:54:58 phaller Exp $ */
+/* $Id: shellapi.h,v 1.6 1999-09-22 09:46:19 sandervl Exp $ */
 
 #ifndef _WINE_SHELLAPI_H
 #define _WINE_SHELLAPI_H
@@ -209,6 +209,8 @@ DWORD	WIN32API SHFileOperationW (LPSHFILEOPSTRUCTW lpFileOp);
 
 HINSTANCE	WINAPI ShellExecuteA(HWND,LPCSTR,LPCSTR,LPCSTR,LPCSTR,INT);
 HINSTANCE	WINAPI ShellExecuteW(HWND,LPCWSTR,LPCWSTR,LPCWSTR,LPCWSTR,INT);
+#define ShellExecute WINELIB_NAME_AW(ShellExecute)
+
 HINSTANCE16 WINAPI ShellExecute16( HWND16 hWnd, LPCSTR lpOperation,
                                    LPCSTR lpFile, LPCSTR lpParameters,
                                    LPCSTR lpDirectory, INT16 iShowCmd );
