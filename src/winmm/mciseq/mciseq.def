@@ -1,9 +1,0 @@
-; $Id: mciseq.def,v 1.2 2000-12-16 22:53:48 bird Exp $
-LIBRARY MCISEQ INITINSTANCE
-DESCRIPTION 'Odin32 System DLL - MciSeq'
-
-DATA MULTIPLE NONSHARED
-
-
-EXPORTS
-    DriverProc      = _MCIMIDI_DriverProc@20        @1

@@ -1,9 +1,0 @@
-; $Id: midimap.def,v 1.2 2000-12-16 22:53:48 bird Exp $
-LIBRARY MIDIMAP INITINSTANCE
-DESCRIPTION 'Odin32 System DLL - MidiMap'
-
-DATA MULTIPLE NONSHARED
-
-
-EXPORTS
-    DriverProc      = _MIDIMAP_DriverProc@20        @1

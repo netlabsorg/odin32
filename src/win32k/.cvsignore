@@ -1,8 +1,0 @@
-makefile.inc
-.depend
-*.sym
-*.sys
-*.vpj
-*.vtg
-*.v*
-win32knew.def

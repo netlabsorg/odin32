@@ -1,3 +1,0 @@
-; $Id: prog-cxx.def,v 1.1 2002-05-16 11:37:08 bird Exp $
-NAME prog-cxx WINDOWCOMPAT
-DESCRIPTION "Testcase for makeing simple C++ programs."
