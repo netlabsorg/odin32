@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.1713 2001-10-01 01:47:52 bird Exp $ */
+/* $Id: changelog,v 1.1714 2001-10-01 07:05:52 sandervl Exp $ */
 
  2001-09-30: Sander van Leeuwen <sandervl@xs4all.nl>
     - INCLUDE:  o Hook constants added to winconst.h
@@ -7,7 +7,7 @@
                   (only works if app uses clipping info for manual blitting;
                    IDirectSurface blitting methods need to be updated to
                    take clipping into account)
-    - USER32:   o Added export to registery visible region change callback
+    - USER32:   o Added export to register visible region change callback
 
  2001-09-30: knut st. osmundsen <kosmunds@csc.com>
     - Makefiles:
