@@ -1,4 +1,4 @@
-/* $Id: handlenames.cpp,v 1.4 2002-04-08 11:22:47 phaller Exp $ */
+/* $Id: handlenames.cpp,v 1.5 2002-04-29 17:05:29 sandervl Exp $ */
 
 /*
  * Win32 Handle Manager Object Namespace for OS/2
@@ -116,6 +116,8 @@ static HandleNames* pHandleNameMgr = &handleNameMgr;
 
 HandleNames::HandleNames(void)
 {
+  // Note: as handleNameMgr is a static object, the
+  // destructor will never be called, this memory is leaked.
   pSymbolicLinks = new CLinearList();
 }
 
@@ -332,8 +334,18 @@ BOOL HandleNames::removeSymbolicLink(PSZ pszSymbolicLink)
   if (NULL == pHandleName)
     rc = FALSE;
   else
+  {
     // 2 - remove the link
     pSymbolicLinks->removeObject(pHandleName);
+    
+    if (NULL != pHandleName->pszSymbolicLink )
+      free( pHandleName->pszSymbolicLink );
+    
+    if (NULL != pHandleName->pszTarget )
+      free( pHandleName->pszTarget );
+    
+    free( pHandleName );
+  }
   
   mtxHandleNameMgr.leave();
   

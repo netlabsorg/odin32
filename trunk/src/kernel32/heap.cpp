@@ -120,8 +120,16 @@ BOOL WIN32API HeapFree(HANDLE hHeap,
     return(FALSE);
 
   BOOL fResult = curheap->Free(dwFlags, lpMem);
+  
+  /* 2002-04-25 PH
+   * Apparently, Win2k does not do this. It does not touch last error,
+   * it does not even return FALSE but just anything != TRUE.
+   *
+   
   if (fResult == FALSE)
-    SetLastError(ERROR_INVALID_HANDLE); /// @@@PH possibly wrong return code!
+    SetLastError(ERROR_INVALID_HANDLE);
+  
+  */
   
   return fResult;
 }

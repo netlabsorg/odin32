@@ -1,4 +1,4 @@
-/* $Id: registry.cpp,v 1.13 2002-02-08 15:09:30 sandervl Exp $ */
+/* $Id: registry.cpp,v 1.14 2002-04-29 17:05:30 sandervl Exp $ */
 
 /*
  * Win32 registry API functions for OS/2
@@ -157,8 +157,10 @@ LONG WIN32API RegCreateKeyW(HKEY hKey, LPCWSTR lpszSubKey, PHKEY phkResult)
   rc = O32_RegCreateKey(ConvertKey(hKey),
                         astring,
                         phkResult);
-
-  FreeAsciiString(astring);
+  
+  if (NULL != astring)
+    FreeAsciiString(astring);
+  
   return(rc);
 }
 
@@ -236,9 +238,13 @@ LONG WIN32API RegCreateKeyExW(HKEY                  hKey,
                           lpSecurityAttributes,
                           phkResult,
                           lpdwDisposition);
-
-  FreeAsciiString(astring1);
-  FreeAsciiString(astring2);
+  
+  if (NULL != astring1)
+    FreeAsciiString(astring1);
+  
+  if (NULL != astring2)
+    FreeAsciiString(astring2);
+  
   return(rc);
 }
 
@@ -263,7 +269,10 @@ LONG WIN32API RegDeleteKeyW(HKEY hKey, LPWSTR lpszSubKey)
   dprintf(("RegDeleteKeyW %s", astring));
   rc = O32_RegDeleteKey(ConvertKey(hKey),
                         astring);
-  FreeAsciiString(astring);
+  
+  if (NULL != astring)
+    FreeAsciiString(astring);
+  
   return(rc);
 }
 
@@ -325,7 +334,10 @@ LONG WIN32API RegDeleteValueW(HKEY hKey, LPWSTR lpszValue)
 
   rc = O32_RegDeleteValue(ConvertKey(hKey),
                           astring);
-  FreeAsciiString(astring);
+  
+  if (NULL != astring)
+    FreeAsciiString(astring);
+  
   return(rc);
 }
 
@@ -617,8 +629,10 @@ LONG WIN32API RegOpenKeyW(HKEY hKey, LPCWSTR arg2, PHKEY arg3)
                       arg3);
   if(rc)
     *arg3 = 0;
-
-  FreeAsciiString(astring);
+  
+  if (NULL != astring)
+    FreeAsciiString(astring);
+  
   return(rc);
 }
 
@@ -682,8 +696,10 @@ LONG WIN32API RegOpenKeyExW(HKEY    arg1,
   //     return value and uses the whatever *arg5 contains)
   if(rc)
     *arg5 = 0;
-
-  FreeAsciiString(astring);
+  
+  if (NULL != astring)
+    FreeAsciiString(astring);
+  
   return(rc);
 }
 
@@ -840,7 +856,10 @@ LONG WIN32API RegQueryValueW(HKEY    hkey,
             free(astring2);
     }
   }
-  FreeAsciiString(astring1);
+  
+  if (NULL != astring1)
+    FreeAsciiString(astring1);
+  
   return(rc);
 }
 
@@ -929,10 +948,13 @@ LONG WIN32API RegQueryValueExW(HKEY   hkey,
           break;
       }
   }
-  FreeAsciiString(astring);
-  if(akeydata) {
+  
+  if (NULL != astring)
+    FreeAsciiString(astring);
+  
+  if(akeydata)
     free(akeydata);
-  }
+
   return(rc);
 }
 
@@ -1001,9 +1023,13 @@ LONG WIN32API RegSetValueW(HKEY   hkey,
   LONG  rc;
 
   rc = RegSetValueA(hkey, astring1, dwType, astring2, cbData);
-
-  FreeAsciiString(astring1);
-  FreeAsciiString(astring2);
+  
+  if (NULL != astring1)
+    FreeAsciiString(astring1);
+  
+  if (NULL != astring2)
+    FreeAsciiString(astring2);
+  
   return(rc);
 }
 
@@ -1090,10 +1116,13 @@ LONG WIN32API RegSetValueExW(HKEY  hkey,
         break;
   }
   rc = RegSetValueExA(hkey, astring, dwReserved, fdwType, lpbData, cbData);
+  
   if(akeydata)
     FreeAsciiString(akeydata);
-
-  FreeAsciiString(astring);
+  
+  if (NULL != astring)
+    FreeAsciiString(astring);
+  
   return(rc);
 }
 
