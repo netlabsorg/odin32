@@ -1,4 +1,4 @@
-/* $Id: mixer.cpp,v 1.22 2002-05-28 14:09:24 sandervl Exp $ */
+/* $Id: mixer.cpp,v 1.23 2002-05-29 15:13:05 sandervl Exp $ */
 
 /*
  * Mixer functions
@@ -716,13 +716,13 @@ MMRESULT WINAPI mixerGetLineControlsA(HMIXEROBJ hmxobj, LPMIXERLINECONTROLSA lpM
             return MIXERR_INVALLINE;
         }
         pLine = &pmixerLines[lpMlc->dwLineID]->line;
-        if(lpMlc->cControls != pLine->cControls || lpMlc->cbmxctrl < pLine->cControls*sizeof(MIXERCONTROLA)) {
+        if(lpMlc->cControls != pLine->cControls) {
             dprintf(("ERROR: invalid nr of controls %d or structure size %d (%d) (ptr %x)", lpMlc->cControls, lpMlc->cbmxctrl, pLine->cControls*sizeof(MIXERCONTROLA), lpMlc->pamxctrl));
             return MMSYSERR_INVALPARAM;
         }
         for(int i=0;i<lpMlc->cControls;i++) {
             pCtrl = lpMlc->pamxctrl+i;
-            memcpy(pCtrl, &pmixerLines[lpMlc->dwLineID]->Controls[i], sizeof(MIXERCONTROLA));
+            memcpy(pCtrl, &mixerControls[pmixerLines[lpMlc->dwLineID]->Controls[i]], sizeof(MIXERCONTROLA));
             dprintf(("found control %s (%s) control id %d", pCtrl->szName, pCtrl->szShortName, pCtrl->dwControlID));
         }
 	    break;
@@ -1153,6 +1153,7 @@ MMRESULT WINAPI mixerGetLineInfoW(HMIXEROBJ hmxobj, LPMIXERLINEW pmxl, DWORD fdw
     line.cbStruct              = sizeof(MIXERLINEA);
     line.cChannels             = pmxl->cChannels;
     line.cConnections          = pmxl->cConnections;
+    line.cControls             = pmxl->cControls;
     line.dwComponentType       = pmxl->dwComponentType;
     line.dwDestination         = pmxl->dwDestination;
     line.dwLineID              = pmxl->dwLineID;
@@ -1176,6 +1177,7 @@ MMRESULT WINAPI mixerGetLineInfoW(HMIXEROBJ hmxobj, LPMIXERLINEW pmxl, DWORD fdw
     pmxl->cbStruct              = sizeof(MIXERLINEA);
     pmxl->cChannels             = line.cChannels;
     pmxl->cConnections          = line.cConnections;
+    pmxl->cControls             = line.cControls;
     pmxl->dwComponentType       = line.dwComponentType;
     pmxl->dwDestination         = line.dwDestination;
     pmxl->dwLineID              = line.dwLineID;
@@ -1839,6 +1841,7 @@ static MIXERCONTROLA * mixerAddControl(DWORD dwControl, MIXLINE *pSrcLine)
  
     //add control to list of controls associated with source line
     pSrcLine->Controls[pSrcLine->cControls] = pctrl->dwControlID;
+    pSrcLine->line.cControls++;
     pSrcLine->cControls++;
 
     strncpy(pctrl->szShortName, szCtrlName[dwControl][0], sizeof(pctrl->szShortName));
