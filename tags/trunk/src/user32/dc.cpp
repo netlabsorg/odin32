@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.45 2000-02-08 22:28:03 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.46 2000-02-09 15:56:16 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -1595,6 +1595,9 @@ INT WIN32API ScrollWindowEx(HWND hwnd, int dx, int dy, const RECT *pScroll, cons
     if (hrgnUpdate)
        rc = setPMRgnIntoWinRgn (hrgn, hrgnUpdate, height);
 
+    //SvL: WinScrollWindow already invalidates the area; no need to do it again
+    //(call to invalidateRect was wrong; has to include erase flag)
+#if 0
     if ((scrollFlag & SW_INVALIDATE_W) &&
         ((lComplexity == RGN_RECT) || (lComplexity == RGN_COMPLEX)))
     {
@@ -1604,6 +1607,7 @@ INT WIN32API ScrollWindowEx(HWND hwnd, int dx, int dy, const RECT *pScroll, cons
           return (0);
        }
     }
+#endif
 
     switch (lComplexity)
     {
