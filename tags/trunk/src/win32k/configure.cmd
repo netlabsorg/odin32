@@ -1,4 +1,4 @@
-/* $Id: configure.cmd,v 1.1 1999-09-08 20:48:58 bird Exp $
+/* $Id: configure.cmd,v 1.2 1999-09-12 00:26:27 bird Exp $
  *
  * Configuration script.
  * Generates makefile.inc and an empty .depend file.
@@ -78,6 +78,8 @@
         say ''
         say 'You should now verify that the settings are correct by listing the file';
         say ''''sIncFile'''';
+        say ''
+        say 'Remember to do a ''nmake depend'' before making win32k.'
     end
     else do
         say 'oops, failed to open outputfile,' sIncFile;

@@ -1,4 +1,4 @@
-/* $Id: dialog.cpp,v 1.1 1999-09-06 02:20:04 bird Exp $ */
+/* $Id: dialog.cpp,v 1.2 1999-09-12 00:26:27 bird Exp $ */
 
 /*
  * PE2LX dialog conversion code
@@ -60,8 +60,8 @@
 static int  ConvertClassAndStyle(int winclass, int style, USHORT *os2class, BOOL *fIconBmp);
 static int  ConvertDlgStyle(int style);
 static int  ConvertDlgItemStyle(int style);
-static int  ConvertCaption(ULONG style, char *caption);
-static int  ConvertFont(char *font, PRESPARAMS *dlgpparam, int fsize);
+static BOOL ConvertCaption(ULONG style, char *caption);
+static BOOL ConvertFont(char *font, PRESPARAMS *dlgpparam, int fsize);
 
 #ifndef DIALOG_USER32
 BOOL ShowDialog(LXHeaderSuper &OS2Exe, int id, DialogBoxHeader *dhdr, int size, int cp)

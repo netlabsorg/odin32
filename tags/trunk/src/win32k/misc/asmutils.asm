@@ -1,4 +1,4 @@
-; $Id: asmutils.asm,v 1.1 1999-09-06 02:20:01 bird Exp $
+; $Id: asmutils.asm,v 1.2 1999-09-12 00:26:27 bird Exp $
 ;
 ; asmutils - assembly utility functions
 ;
@@ -200,10 +200,13 @@ _memmov@12 ENDP
 GetOS2KrnlMTE PROC NEAR
     push    es
 
-    mov     ax, 70h                     ;Read-only SAS selector.
+    mov     ax, SAS_selector            ;70h - Read-only SAS selector.
     mov     es, ax
-    mov     bx, es:[0].SAS_vm_data      ;SAS_vm_data (0ch)
-    mov     eax, es:[bx].SAS_vm_krnl_mte;SAS_vm_krnl_mte (0ch)
+    xor     ebx, ebx
+    assume  ebx: PTR SAS
+    mov     bx, [ebx].SAS_vm_data       ;SAS_vm_data (0ch)
+    assume  ebx: PTR SAS_vm_section
+    mov     eax,[ebx].SAS_vm_krnl_mte   ;SAS_vm_krnl_mte (0ch)
 
     pop     es
     ret
