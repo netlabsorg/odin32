@@ -1,4 +1,4 @@
-/* $Id: hmopen32.h,v 1.3 1999-08-25 14:27:06 sandervl Exp $ */
+/* $Id: hmopen32.h,v 1.4 1999-12-09 19:08:29 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -65,14 +65,14 @@ public:
   virtual DWORD  CloseHandle(PHMHANDLEDATA pHMHandleData);
 
                            /* this is a handler method for calls to ReadFile() */
-  virtual DWORD  ReadFile   (PHMHANDLEDATA pHMHandleData,
+  virtual BOOL   ReadFile   (PHMHANDLEDATA pHMHandleData,
                              LPCVOID       lpBuffer,
                              DWORD         nNumberOfBytesToRead,
                              LPDWORD       lpNumberOfBytesRead,
                              LPOVERLAPPED  lpOverlapped);
 
                         /* this is a handler method for calls to WriteFile() */
-  virtual DWORD  WriteFile  (PHMHANDLEDATA pHMHandleData,
+  virtual BOOL   WriteFile  (PHMHANDLEDATA pHMHandleData,
                              LPCVOID       lpBuffer,
                              DWORD         nNumberOfBytesToWrite,
                              LPDWORD       lpNumberOfBytesWritten,
