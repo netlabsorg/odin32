@@ -1,4 +1,4 @@
-/* $Id: button.cpp,v 1.37 2000-06-07 14:51:24 sandervl Exp $ */
+/* $Id: button.cpp,v 1.38 2000-11-22 13:44:49 sandervl Exp $ */
 /* File: button.cpp -- Button type widgets
  *
  * Copyright (C) 1993 Johannes Ruscheinski
@@ -20,6 +20,7 @@
 #include "button.h"
 #include <misc.h>
 #include "initterm.h"
+#include "syscolor.h"
 
 #define DBG_LOCALLOG    DBG_button
 #include "dbglocal.h"
@@ -950,16 +951,10 @@ static void CB_Paint(HWND hwnd,HDC hDC,WORD action)
 
     if (infoPtr->hFont) SelectObject( hDC, infoPtr->hFont );
 
-    /* Something is still not right, checkboxes (and edit controls)
-     * in wsping32 have white backgrounds instead of dark grey.
-     * BUTTON_SEND_CTLCOLOR() is even worse since it returns 0 in this
-     * particular case and the background is not painted at all.
+    /* GetControlBrush16 sends WM_CTLCOLORBTN, plus it returns default brush
+     * if parent didn't return valid one. So we kill two hares at once
      */
-    //SvL: 20/09/99: This works well for us. Now the background of
-    //               the dialog button strings in Solitaire is gray
-    SendMessageA(GetParent(hwnd),WM_CTLCOLORBTN,hDC,hwnd);
-
-    hBrush = GetSysColorBrush(COLOR_BTNFACE);
+    hBrush = GetControlBrush( hwnd, hDC, CTLCOLOR_BTN );
 
     /* In order to make things right, draw the rectangle background! */
     if ( !(infoPtr->state & BUTTON_HASFOCUS) && (action == ODA_DRAWENTIRE) )
@@ -1090,10 +1085,12 @@ static void GB_Paint(HWND hwnd,HDC hDC,WORD action)
     TEXTMETRICA tm;
     INT textLen;
     char* text;
+    HBRUSH hbr;
 
     if (action != ODA_DRAWENTIRE) return;
 
-    SendMessageA(GetParent(hwnd),WM_CTLCOLORBTN,hDC,hwnd);
+    /* GroupBox acts like static control, so it sends CTLCOLORSTATIC */
+    hbr = GetControlBrush( hwnd, hDC, CTLCOLOR_STATIC );
 
     GetClientRect(hwnd,&rc);
 
@@ -1116,10 +1113,13 @@ static void GB_Paint(HWND hwnd,HDC hDC,WORD action)
       if (infoPtr->hFont) SelectObject( hDC, infoPtr->hFont );
       rc.left += 10;
 
-      if (dwStyle & WS_DISABLED) DrawDisabledText(hDC,text,&rc,format); else
+      if (dwStyle & WS_DISABLED) {
+           DrawDisabledText(hDC,text,&rc,format); 
+      }
+      else
       {
-        SetTextColor(hDC,GetSysColor(COLOR_BTNTEXT));
-        DrawTextA(hDC,text,-1,&rc,format);
+           SetTextColor(hDC,GetSysColor(COLOR_BTNTEXT));
+           DrawTextA(hDC,text,-1,&rc,format);
       }
 
       free(text);
@@ -1142,15 +1142,15 @@ static void UB_Paint(HWND hwnd,HDC hDC,WORD action)
     GetClientRect(hwnd,&rc);
 
     if (infoPtr->hFont) SelectObject( hDC, infoPtr->hFont );
-    hBrush = GetSysColorBrush(COLOR_BTNFACE);
+    hBrush = GetControlBrush( hwnd, hDC, CTLCOLOR_BTN );
 
+    FillRect( hDC, &rc, hBrush );
     if ((action == ODA_FOCUS) ||
         ((action == ODA_DRAWENTIRE) && (infoPtr->state & BUTTON_HASFOCUS) && IsWindowEnabled(hwnd)))
     {
       DrawFocusRect( hDC, &rc );
       InflateRect(&rc,-1,-1);
     }
-    FillRect( hDC, &rc, hBrush );
 }
 
 

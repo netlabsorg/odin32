@@ -1,4 +1,4 @@
-/* $Id: syscolor.cpp,v 1.23 2000-10-17 17:11:07 sandervl Exp $ */
+/* $Id: syscolor.cpp,v 1.24 2000-11-22 13:44:50 sandervl Exp $ */
 
 /*
  * Win32 system color API functions for OS/2
@@ -26,6 +26,8 @@
 
 #define DBG_LOCALLOG    DBG_syscolor
 #include "dbglocal.h"
+
+#define CTLCOLOR_MAX   CTLCOLOR_STATIC
 
 //SvL: Open32 colors are much better than those in the table below
 #define NUM_OPEN32_SYSCOLORS 21
@@ -305,3 +307,21 @@ HBITMAP WIN32API GetPattern55AABitmap(void)
         hPattern55AABitmap = CreateBitmap( 8, 8, 1, 1, wPattern55AA );
     return hPattern55AABitmap;
 }
+//******************************************************************************
+//******************************************************************************
+HBRUSH WIN32API GetControlBrush(HWND hwnd, HDC hdc, DWORD ctlType)
+{
+ HBRUSH bkgBrush = 0;
+
+    if(ctlType <= CTLCOLOR_MAX)
+    {
+        bkgBrush = (HBRUSH)SendMessageA(GetParent(hwnd), WM_CTLCOLORMSGBOX + ctlType, 
+                                        (WPARAM)hdc, (LPARAM)hwnd );
+
+        if(GetObjectType(bkgBrush) != OBJ_BRUSH)
+             bkgBrush = DefWindowProcA(hwnd, WM_CTLCOLORMSGBOX + ctlType, hdc, ctlType);
+    }
+    return bkgBrush;
+}
+//******************************************************************************
+//******************************************************************************
