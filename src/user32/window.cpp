@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.64 2000-05-03 18:35:55 sandervl Exp $ */
+/* $Id: window.cpp,v 1.65 2000-05-05 11:32:38 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -6,7 +6,7 @@
  * Copyright 1999 Daniela Engert (dani@ngrt.de)
  * Copyright 2000 Christoph Bratschi (cbratschi@datacomm.ch)
  *
- * Parts based on Wine Windows code (windows\win.c)
+ * Parts based on Wine Windows code (windows\win.c, windows\property.c)
  *
  * Copyright 1993, 1994 Alexandre Julliard
  *
@@ -1473,6 +1473,129 @@ BOOL WIN32API SetWindowContextHelpId(HWND hwnd, DWORD dwContextHelpId)
     dprintf(("SetWindowContextHelpId %x %d", hwnd, dwContextHelpId));
     window->setWindowContextHelpId(dwContextHelpId);
     return(TRUE);
+}
+//******************************************************************************
+//******************************************************************************
+HANDLE WINAPI GetPropA( HWND hwnd, LPCSTR str )
+{
+  Win32BaseWindow *window;
+
+    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
+    if(!window) {
+        dprintf(("GetPropA, window %x not found", hwnd));
+        SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+        return 0;
+    }
+    return window->getProp(str);
+}
+//******************************************************************************
+//******************************************************************************
+HANDLE WINAPI GetPropW( HWND hwnd, LPCWSTR str )
+{
+    LPSTR strA;
+    HANDLE ret;
+
+    if (!HIWORD(str)) return GetPropA( hwnd, (LPCSTR)(UINT)LOWORD(str) );
+    strA = HEAP_strdupWtoA( GetProcessHeap(), 0, str );
+    ret = GetPropA( hwnd, strA );
+    HeapFree( GetProcessHeap(), 0, strA );
+    return ret;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WINAPI SetPropA( HWND hwnd, LPCSTR str, HANDLE handle )
+{
+  Win32BaseWindow *window;
+
+    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
+    if(!window) {
+        dprintf(("SetPropA, window %x not found", hwnd));
+        SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+        return FALSE;
+    }
+    return window->setProp(str, handle);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WINAPI SetPropW( HWND hwnd, LPCWSTR str, HANDLE handle )
+{
+    BOOL ret;
+    LPSTR strA;
+
+    if (!HIWORD(str))
+        return SetPropA( hwnd, (LPCSTR)(UINT)LOWORD(str), handle );
+    strA = HEAP_strdupWtoA( GetProcessHeap(), 0, str );
+    ret = SetPropA( hwnd, strA, handle );
+    HeapFree( GetProcessHeap(), 0, strA );
+    return ret;
+}
+//******************************************************************************
+//******************************************************************************
+HANDLE WINAPI RemovePropA( HWND hwnd, LPCSTR str )
+{
+  Win32BaseWindow *window;
+
+    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
+    if(!window) {
+        dprintf(("RemovePropA, window %x not found", hwnd));
+        SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+        return 0;
+    }
+    return window->removeProp(str);
+}
+//******************************************************************************
+//******************************************************************************
+HANDLE WINAPI RemovePropW( HWND hwnd, LPCWSTR str )
+{
+    LPSTR strA;
+    HANDLE ret;
+
+    if (!HIWORD(str))
+        return RemovePropA( hwnd, (LPCSTR)(UINT)LOWORD(str) );
+    strA = HEAP_strdupWtoA( GetProcessHeap(), 0, str );
+    ret = RemovePropA( hwnd, strA );
+    HeapFree( GetProcessHeap(), 0, strA );
+    return ret;
+}
+//******************************************************************************
+//******************************************************************************
+INT WINAPI EnumPropsA( HWND hwnd, PROPENUMPROCA func )
+{
+    return EnumPropsExA( hwnd, (PROPENUMPROCEXA)func, 0 );
+}
+//******************************************************************************
+//******************************************************************************
+INT WINAPI EnumPropsW( HWND hwnd, PROPENUMPROCW func )
+{
+    return EnumPropsExW( hwnd, (PROPENUMPROCEXW)func, 0 );
+}
+//******************************************************************************
+//******************************************************************************
+INT WINAPI EnumPropsExA(HWND hwnd, PROPENUMPROCEXA func, LPARAM lParam)
+{
+  Win32BaseWindow *window;
+
+    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
+    if(!window) {
+        dprintf(("EnumPropsExA, window %x not found", hwnd));
+        SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+        return -1;
+    }
+    return window->enumPropsExA(func, lParam);
+}
+//******************************************************************************
+//******************************************************************************
+INT WINAPI EnumPropsExW(HWND hwnd, PROPENUMPROCEXW func, LPARAM lParam)
+{
+  Win32BaseWindow *window;
+
+    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
+    if(!window) {
+        dprintf(("EnumPropsExA, window %x not found", hwnd));
+        SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+        return -1;
+    }
+    return window->enumPropsExW(func, lParam);
 }
 //******************************************************************************
 //******************************************************************************
