@@ -1,0 +1,85 @@
+LIBRARY AVIFIL32 INITINSTANCE TERMINSTANCE
+
+PROTMODE
+DATA MULTIPLE NONSHARED READWRITE LOADONCALL
+CODE LOADONCALL
+
+EXPORTS
+; AVIBuildFilter             = _AVIBuildFilter@?               @? ;0 not good
+; AVIBuildFilterA            = _AVIBuildFilterA@?              @1
+; AVIBuildFilterW            = _AVIBuildFilterW@?              @2
+; AVIClearClipboard          = _AVIClearClipboard@?            @3
+; AVIFileAddRef              = _AVIFileAddRef@?                @4
+; AVIFileCreateStream        = _AVIFileCreateStream@?          @5
+  AVIFileCreateStreamA       = _AVIFileCreateStreamA@12        @6
+; AVIFileCreateStreamW       = _AVIFileCreateStreamW@12        @7
+; AVIFileEndRecord           = _AVIFileEndRecord@?             @8
+  AVIFileExit                = _AVIFileExit@0                  @9
+; AVIFileGetStream           = _AVIFileGetStream@?             @10
+  AVIFileInfo                = _AVIFileInfo@12                 @11
+  AVIFileInfoA               = _AVIFileInfoA@12                @12
+  AVIFileInfoW               = _AVIFileInfoW@12                @13
+  AVIFileInit                = _AVIFileInit@0                  @14
+; AVIFileOpen                = _AVIFileOpen@?                  @15
+  AVIFileOpenA               = _AVIFileOpenA@16                @16
+; AVIFileOpenW               = _AVIFileOpenW@16                @17
+; AVIFileReadData            = _AVIFileReadData@?              @18
+  AVIFileRelease             = _AVIFileRelease@4               @19
+; AVIFIleWriteData           = _AVIFileWriteData@?             @20
+; AVIGetFromClipboard        = _AVIGetFromClipboard@?          @21
+  AVIMakeCompressedStream    = _AVIMakeCompressedStream@16     @22
+; AVIMakeFileFromStreams     = _AVIMakeFileFromStreams@?       @23
+; AVIMakeStreamFromClipboard = _AVIMakeStreamFromClipboard@?   @24
+; AVIPutFileOnClipboard      = _AVIPutFileOnClipboard@?        @25
+; AVISave                    = _AVISave@?                      @26
+; AVISaveA                   = _AVISaveA@?                     @27
+; AVISaveOptions             = _AVISaveOptions@?               @28
+; AVISaveOptionsFree         = _AVISaveOptionsFree@?           @29
+; AVISaveV                   = _AVISaveV@?                     @30
+; AVISaveVA                  = _AVISaveVA@?                    @31
+; AVISaveVW                  = _AVISaveVW@?                    @32
+; AVISaveW                   = _AVISaveW@?                     @33
+; AVIStreamAddRef            = _AVIStreamAddRef@?              @34
+; AVIStreamBeginStreaming    = _AVIBeginStreaming@?            @35
+; AVIStreamCreate            = _AVIStreamCreate@?              @36
+; AVIStreamEndStreaming      = _AVIStreamEndStreaming@?        @37
+; AVIStreamFindSample        = _AVIStreamFindSample@?          @38
+  AVIStreamGetFrame          = _AVIStreamGetFrame@8            @39
+  AVIStreamGetFrameClose     = _AVIStreamGetFrameClose@4       @40
+  AVIStreamGetFrameOpen      = _AVIStreamGetFrameOpen@8        @41
+  AVIStreamInfo              = _AVIStreamInfoA@12              @42
+  AVIStreamInfoA             = _AVIStreamInfoA@12              @43
+  AVIStreamInfoW             = _AVIStreamInfoW@12              @44
+  AVIStreamLength            = _AVIStreamLength@4              @45
+; AVIStreamOpenFromFile      = _AVIStreamOpenFromFile@?        @46
+; AVIStreamOpenFromFileA     = _AVIStreamOpenFromFileA@?       @47
+; AVIStreamOpenFromFileW     = _AVIStreamOpenFromFileW@?       @48
+  AVIStreamRead              = _AVIStreamRead@28               @49
+  AVIStreamReadData          = _AVIStreamReadData@16           @50
+  AVIStreamReadFormat        = _AVIStreamReadFormat@16         @51
+  AVIStreamRelease           = _AVIStreamRelease@4             @52
+; AVIStreamSampleToTime      = _AVIStreamSampleToTime@?        @53
+  AVIStreamSetFormat         = _AVIStreamSetFormat@16          @54
+  AVIStreamStart             = _AVIStreamStart@4               @55
+; AVIStreamTimeToSample      = _AVIStreamTimeToSample@?        @56
+  AVIStreamWrite             = _AVIStreamWrite@32              @57
+  AVIStreamWriteData         = _AVIStreamWriteData@16          @58
+; CLSID_AVISimpleUnMarshal   = _CLSID_AVISimpleUnMarshal@?     @59
+; CreateEditableStream       = _CreateEditableStream@?         @60
+; DllCanUnloadNow            = _DllCanUnloadNow@?              @61
+; DllGetClassObject          = _DllGetClassObject@?            @62
+; EditStreamClone            = _EditStreamClone@?              @63
+; EditStreamCopy             = _EditStreamCopy@?               @64
+; EditStreamCut              = _EditStreamCut@?                @65
+; EditStreamPaste            = _EditStreamPaste@?              @66
+; EditStreamSetInfo          = _EditStreamSetInfo@?            @67
+; EditStreamSetInfoA         = _EditStreamSetInfoA@?           @68
+; EditStreamSetInfoW         = _EditStreamSetInfoW@?           @69
+; EditStreamSetName          = _EditStreamSetName@?            @70
+; EditStreamSetNameA         = _EditStreamSetNameA@?           @71
+; EditStreamSetNameW         = _EditStreamSetNameW@?           @72
+; IID_IAVIEditStream         = _IID_IAVIEditStream@?           @73
+; IID_IAVIFile               = _IID_IAVIFile@?                 @74
+; IID_IAVIStream             = _IID_IAVIStream@?               @75
+; IID_IGetFrame              = _IID_IGetFrame@?                @76
+
