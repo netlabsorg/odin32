@@ -1,4 +1,4 @@
-/* $Id: win32wmdichild.cpp,v 1.2 1999-09-29 09:16:32 sandervl Exp $ */
+/* $Id: win32wmdichild.cpp,v 1.3 1999-10-07 09:28:02 sandervl Exp $ */
 /*
  * Win32 MDI Child Window Class for OS/2
  *
@@ -325,9 +325,14 @@ HWND Win32MDIChildWindow::createChild(Win32MDIClientWindow *client, LPMDICREATES
         style |= (WS_VISIBLE | WS_OVERLAPPEDWINDOW);
     }
 
-    hwnd = ::CreateWindowA(cs->szClass, cs->szTitle, style,
-                         cs->x, cs->y, cs->cx, cs->cy, client->getWindowHandle(),
-                         (HMENU)wIDmenu, cs->hOwner, cs );
+    if(!client->IsUnicode())
+    	hwnd = ::CreateWindowA(cs->szClass, cs->szTitle, style,
+                               cs->x, cs->y, cs->cx, cs->cy, client->getWindowHandle(),
+                               (HMENU)wIDmenu, cs->hOwner, cs );
+    else
+        hwnd = ::CreateWindowW((LPWSTR)cs->szClass, (LPWSTR)cs->szTitle, style,
+                               cs->x, cs->y, cs->cx, cs->cy, client->getWindowHandle(),
+                               (HMENU)wIDmenu, cs->hOwner, cs );
 
     /* MDI windows are WS_CHILD so they won't be activated by CreateWindow */
     newchild = (Win32MDIChildWindow *)GetWindowFromHandle(hwnd);

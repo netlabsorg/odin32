@@ -1,4 +1,4 @@
-/* $Id: scroll.cpp,v 1.4 1999-09-29 08:27:15 sandervl Exp $ */
+/* $Id: scroll.cpp,v 1.5 1999-10-07 09:28:01 sandervl Exp $ */
 /*
  * Scrollbar control
  *
@@ -1553,10 +1553,14 @@ BOOL WINAPI ShowScrollBar(
      BOOL rc;
 
         if(nBar == SB_HORZ || nBar == SB_BOTH)
-            rc = OSLibWinShowScrollBar(window->getOS2FrameWindowHandle(), OSLIB_HSCROLL, fShow);
+            rc = OSLibWinShowScrollBar(window->getOS2FrameWindowHandle(), 
+                                       window->getHorzScrollHandle(), 
+                                       OSLIB_HSCROLL, fShow);
 
         if(nBar == SB_VERT || ( rc == TRUE && nBar == SB_BOTH))
-            rc = OSLibWinShowScrollBar(window->getOS2FrameWindowHandle(), OSLIB_VSCROLL, fShow);
+            rc = OSLibWinShowScrollBar(window->getOS2FrameWindowHandle(),
+                                       window->getVertScrollHandle(), 
+                                       OSLIB_VSCROLL, fShow);
 
         return rc;
     }
