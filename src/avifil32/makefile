@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 1999-09-15 23:26:05 sandervl Exp $
+# $Id: makefile,v 1.4 1999-11-03 23:28:04 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -9,7 +9,7 @@
 PDWIN32_INCLUDE = ..\..\include
 PDWIN32_LIB = ..\..\lib
 PDWIN32_BIN = ..\..\bin
-
+PDWIN32_TOOLS = ..\..\tools\bin
 
 !include $(PDWIN32_INCLUDE)/pdwin32.mk
 
@@ -33,10 +33,12 @@ $(TARGET).dll: $(OBJS) $(TARGET).def
         $(CP) $@ $(PDWIN32_BIN)
 
 
-$(TARGET).lib: $(TARGET).dll
-        $(IMPLIB) $(IMPLIBFLAGS) $@ $(TARGET).dll
+$(TARGET).lib: $(TARGET)exp.def
+        $(IMPLIB) $(IMPLIBFLAGS) $@ $**
         $(CP) $@ $(PDWIN32_LIB)
 
+$(TARGET)exp.def: $(TARGET).def
+        $(IMPDEF) $** $@
 
 initterm.obj: initterm.cpp
 avifile.obj:  avifile.cpp

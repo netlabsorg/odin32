@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.17 1999-10-24 22:49:45 sandervl Exp $
+# $Id: makefile,v 1.18 1999-11-03 23:28:04 sandervl Exp $
 #
 # PD-Win32 API
 #
@@ -30,8 +30,8 @@ OBJS =  comctl32.obj initterm.obj progress.obj comctl32undoc.obj imagelist.obj \
 
 all: $(TARGET).dll $(TARGET).lib
 
-resource.asm: rsrc.rc 
-    $(RC) $(RCFLAGS) -o resource.asm rsrc.rc 
+resource.asm: rsrc.rc
+    $(RC) $(RCFLAGS) -o resource.asm rsrc.rc
 
 resource.obj: resource.asm
 
@@ -46,8 +46,11 @@ $(TARGET).dll: $(OBJS) $(TARGET).def
 
 
 $(TARGET).lib: $(TARGET)exp.def
-	$(IMPLIB) $(IMPLIBFLAGS) $@ $(TARGET)exp.def
+        $(IMPLIB) $(IMPLIBFLAGS) $@ $(TARGET)exp.def
         $(CP) $@ $(PDWIN32_LIB)
+
+$(TARGET)exp.def: $(TARGET).def
+        $(IMPDEF) $** $@
 
 comctl32.obj: comctl32.c
 initterm.obj: initterm.cpp

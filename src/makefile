@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.30 1999-11-02 20:54:12 phaller Exp $
+# $Id: makefile,v 1.31 1999-11-03 23:28:03 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -6,9 +6,10 @@
 #       Top of the src tree makefile
 #
 #
-#       Usage: nmake ( all | clean )
+#       Usage: nmake ( all | libs | clean )
 #
 #            all: Build the entire src tree.
+#            lib: Builds the libraries.
 #            clean: Bring src tree back to a "virgin" state.
 #
 #
@@ -23,8 +24,21 @@ MAKE_CMD = nmake -nologo
 MAKE_CMD = $(MAKE_CMD) NODEBUGINFO=1
 !endif
 
+LIBS = advapi32\advapi32.lib  avifil32\avifil32.lib  capi2032\capi2032.lib    \
+       comctl32\comctl32.lib  comdlg32\comdlg32.lib  crtdll\crtdll.lib        \
+       ddraw\ddraw.lib        dplay\dplay.lib        dsound\dsound.lib        \
+       gdi32\gdi32.lib        imagehlp\imagehlp.lib  imm32\imm32.lib          \
+       kernel32\kernel32.lib  lz32\lz32.lib          mpr\mpr.lib              \
+       msacm32\msacm32.lib    msvfw32\msvfw32.lib    ntdll\ntdll.lib          \
+       odincrt\odincrt.lib    ole32\ole32.lib        oleaut32\oleaut32.lib    \
+       olecli32\olecli32.lib  oledlg\oledlg.lib      olesvr32\olesvr32.lib    \
+       psapi\psapi.lib        rasapi32\rasapi32.lib  shell32\shell32.lib      \
+       shlwapi\shlwapi.lib    tapi32\tapi32.lib      user32\user32.lib        \
+       version\version.lib    winmm\winmm.lib        winspool\winspool.lib    \
+       wnaspi32\wnaspi32.lib  wnetap32\wnetap32.lib  wsock32\wsock32.lib
 
-all:
+
+all: libs
         cd odincrt
         $(MAKE_CMD)
         cd ..\kernel32
@@ -104,10 +118,20 @@ all:
         cd ..\dsound
         $(MAKE_CMD)
 
+
+
+libs: $(LIBS)
+
+$(LIBS): $(@D)\$(@B).def
+        cd $(@D)
+        $(MAKE_CMD) $(@F)
+        cd ..
+
+
 clean:
         cd odincrt
         $(MAKE_CMD) clean
-	cd ..\peldr
+        cd ..\peldr
         $(MAKE_CMD) clean
         cd ..\win32k\pe2lx
         $(MAKE_CMD) clean

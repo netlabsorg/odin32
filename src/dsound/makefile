@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.9 1999-10-26 17:53:43 sandervl Exp $
+# $Id: makefile,v 1.10 1999-11-03 23:28:04 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -33,25 +33,25 @@ $(TARGET).dll: $(OBJS) $(TARGET).def
         $(CP) $@ $(PDWIN32_BIN)
 
 
-$(TARGET).lib: $(TARGET).dll
-        $(IMPLIB) $(IMPLIBFLAGS) $@ $(TARGET).dll
+$(TARGET).lib: $(TARGET).def
+        $(IMPLIB) $(IMPLIBFLAGS) $@ $**
         $(CP) $@ $(PDWIN32_LIB)
 
 
 
 dsound.obj: dsound.cpp \
     $(PDWIN32_INCLUDE)/misc.h \
-    os2dsound.h 
+    os2dsound.h
 
 os2dsound.obj: os2dsound.cpp \
     $(PDWIN32_INCLUDE)/misc.h \
     os2sndbuffer.h \
-    os2dsound.h 
+    os2dsound.h
 
 os2sndbuffer.obj: os2sndbuffer.cpp \
     $(PDWIN32_INCLUDE)/misc.h \
     os2sndbuffer.h \
-    os2dsound.h 
+    os2dsound.h
 
 misc.obj: misc.cpp \
           $(PDWIN32_INCLUDE)\misc.h initterm.h
