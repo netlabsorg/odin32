@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.329 2002-07-30 18:20:42 achimha Exp $ */
+/* $Id: win32wbase.cpp,v 1.330 2002-07-30 18:48:26 achimha Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2762,6 +2762,11 @@ HWND Win32BaseWindow::SetParent(HWND hwndNewParent)
         setParent(newparent);
         getParent()->addChild(this);
         fParentChange = TRUE;
+        // in case we haven't finished creating the window whose parent we're
+        // setting here, the OS/2 HWND might not exist yet and we call the PM
+        // API with a NULLHANDLE  - no problem
+        // when we create the OS/2 window lateron, we will create it with the
+        // right parent anyway.
         OSLibWinSetParent(getOS2FrameWindowHandle(), getParent()->getOS2WindowHandle());
         if(!(getStyle() & WS_CHILD))
         {
