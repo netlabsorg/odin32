@@ -1,0 +1,516 @@
+<HTML>
+<HEAD>
+<TITLE>OpenC++ Reference Manual</TITLE>
+</HEAD>
+<BODY>
+
+<H1>Representation of Program Text</H1>
+
+<P>
+Program text is accessible at the meta level in the form of parse tree.
+The parse tree is represented by a <CODE><B>Ptree</B></CODE> metaobject.
+It is implemented as a nested
+linked-list of lexical tokens --- the S expressions in the Lisp terminology.
+For example, this piece of code:</P>
+
+
+<PRE><CODE>int a = b + c * 2;
+</CODE></PRE>
+
+<P>
+is parsed into:</P>
+
+
+<PRE><CODE>[[static] [int] [[a = [b + [c * 2]]]] ;]
+</CODE></PRE>
+
+<P>
+Here, <CODE><B>[]</B></CODE> denotes a linked list.
+Note that operators such as <CODE><B>=</B></CODE> and <CODE><B>+</B></CODE> make sublists.
+The sublists and their elements (that is, lexical tokens such as <CODE><B>a</B></CODE> and <CODE><B>=</B></CODE>) are also represented by <CODE><B>Ptree</B></CODE> metaobjects.</P>
+
+<HR>
+<UL>
+<LI><A HREF="#S1">Basic Operations</A>
+<LI><A HREF="#S2">Construction</A>
+<LI><A HREF="#S3">Pattern Matching</A>
+<LI><A HREF="#S4">Reifying Program Text</A>
+<LI><A HREF="#S5">Support Classes</A>
+  <UL>
+  <LI>PtreeIter</A>
+  <LI>PtreeArray</A>
+  </UL>
+</UL>
+
+<HR>
+
+<H2><IMG SRC="red-pin.gif"> Public Members</H2>
+
+<UL><CODE><NOBR>
+<IMG SRC="red.gif" ALT=" o "><A HREF="#mem10">Append</A>(Ptree* lst1, Ptree* lst2)<BR>
+<IMG SRC="red.gif" ALT=" o "><A HREF="#mem8">Cons</A>(Ptree* a, Ptree* b)<BR>
+<IMG SRC="red.gif" ALT=" o "><A HREF="#mem11">CopyList</A>(Ptree* lst)<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem18">Display</A>()<BR>
+<IMG SRC="red.gif" ALT=" o "><A HREF="#mem13">Eq</A>(Ptree* lst, char x)<BR>
+<IMG SRC="red.gif" ALT=" o "><A HREF="#mem14">Eq</A>(Ptree* lst, char* x)<BR>
+<IMG SRC="red.gif" ALT=" o "><A HREF="#mem15">Eq</A>(Ptree* lst, Ptree* x)<BR>
+<IMG SRC="red.gif" ALT=" o "><A HREF="#mem16">Equal</A>(Ptree* x, Ptree* y)<BR>
+<IMG SRC="red.gif" ALT=" o "><A HREF="#mem0">First</A>(Ptree* lst)<BR>
+<IMG SRC="red.gif" ALT=" o "><A HREF="#mem23">GenSym</A>()<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem17">IsLeaf</A>()<BR>
+<IMG SRC="red.gif" ALT=" o "><A HREF="#mem5">Last</A>(Ptree* lst)<BR>
+<IMG SRC="red.gif" ALT=" o "><A HREF="#mem7">Length</A>(Ptree* lst)<BR>
+<IMG SRC="red.gif" ALT=" o "><A HREF="#mem9">List</A>(Ptree* e1, Ptree* e2, ...)<BR>
+<IMG SRC="red.gif" ALT=" o "><A HREF="#mem6">ListTail</A>(Ptree* lst, int k)<BR>
+<IMG SRC="red.gif" ALT=" o "><A HREF="#mem22">Make</A>(char* format, [Ptree* sublist, ...])<BR>
+<IMG SRC="red.gif" ALT=" o "><A HREF="#mem25">Match</A>(Ptree* list, char* pattern,
+            [Ptree** sublist, ...])<BR>
+<IMG SRC="red.gif" ALT=" o "><A HREF="#mem4">Nth</A>(Ptree* lst, int n)<BR>
+<IMG SRC="red.gif" ALT=" o "><A HREF="#mem26">Reify</A>(unsigned int& value)<BR>
+<IMG SRC="red.gif" ALT=" o "><A HREF="#mem27">Reify</A>(char*& string)<BR>
+<IMG SRC="red.gif" ALT=" o "><A HREF="#mem12">ReplaceAll</A>(Ptree* lst, Ptree* orig, Ptree* subst)<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem21">operator <<</A>(ostream& s, Ptree* p)<BR>
+<IMG SRC="red.gif" ALT=" o "><A HREF="#mem1">Rest</A>(Ptree* lst)<BR>
+<IMG SRC="red.gif" ALT=" o "><A HREF="#mem2">Second</A>(Ptree* lst)<BR>
+<IMG SRC="red.gif" ALT=" o "><A HREF="#mem3">Third</A>(Ptree* lst)<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem19">ToString</A>()<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem20">Write</A>(ostream& out)<BR>
+<IMG SRC="red.gif" ALT=" o "><A HREF="#mem24">qMake</A>(char* text)<BR>
+</NOBR></CODE></UL>
+<HR>
+
+<H2><IMG SRC="red-pin.gif"> <A NAME="S1">Basic Operations</A></H2>
+
+<P>
+To manipulate linked lists, the MOP provides many <CODE><B>static</B></CODE> member
+functions on <CODE><B>Ptree</B></CODE>, which are familiar to Lisp programmers:</P>
+
+<UL>
+<A NAME="mem0">
+</A><PRE>
+<IMG SRC="red.gif" ALT=" o "> <B>static Ptree* First(Ptree* lst)</B>
+</PRE>
+<P>
+This returns the first element of <CODE><B>lst</B></CODE>.</P>
+<A NAME="mem1">
+</A><PRE>
+<IMG SRC="red.gif" ALT=" o "> <B>static Ptree* Rest(Ptree* lst)</B>
+</PRE>
+<P>
+This returns the rest of <CODE><B>lst</B></CODE> except the first element, that is, the <I>cdr</I> field of <CODE><B>lst</B></CODE>.</P>
+<A NAME="mem2">
+</A><PRE>
+<IMG SRC="red.gif" ALT=" o "> <B>static Ptree* Second(Ptree* lst)</B>
+</PRE>
+<P>
+This returns the second element of <I>lst</I>.</P>
+<A NAME="mem3">
+</A><PRE>
+<IMG SRC="red.gif" ALT=" o "> <B>static Ptree* Third(Ptree* lst)</B>
+</PRE>
+<P>
+This returns the third element of <I>lst</I>.</P>
+<A NAME="mem4">
+</A><PRE>
+<IMG SRC="red.gif" ALT=" o "> <B>static Ptree* Nth(Ptree* lst, int n)</B>
+</PRE>
+<P>
+This returns the <CODE><B>n</B></CODE>-th element of <CODE><B>lst</B></CODE>.  <CODE><B>Nth(lst, 0)</B></CODE> is equivalent to <CODE><B>First(lst)</B></CODE>.</P>
+<A NAME="mem5">
+</A><PRE>
+<IMG SRC="red.gif" ALT=" o "> <B>static Ptree* Last(Ptree* lst)</B>
+</PRE>
+<P>
+This returns the last cons cell, which
+is a list containing only the last element of <CODE><B>lst</B></CODE>.</P>
+<A NAME="mem6">
+</A><PRE>
+<IMG SRC="red.gif" ALT=" o "> <B>static Ptree* ListTail(Ptree* lst, int k)</B>
+</PRE>
+<P>
+This returns a sublist of  <CODE><B>lst</B></CODE> obtained by omitting the first <CODE><B>k</B></CODE> elements.  <CODE><B>ListTail(lst, 1)</B></CODE> is equivalent to  <CODE><B>Rest(lst)</B></CODE> .</P>
+<A NAME="mem7">
+</A><PRE>
+<IMG SRC="red.gif" ALT=" o "> <B>static int Length(Ptree* lst)</B>
+</PRE>
+<P>
+This returns the number of the elements	of <CODE><B>lst</B></CODE>.
+If <CODE><B>lst</B></CODE> is not a list, then this returns a negative number.</P>
+<A NAME="mem8">
+</A><PRE>
+<IMG SRC="red.gif" ALT=" o "> <B>static Ptree* Cons(Ptree* a, Ptree* b)</B>
+</PRE>
+<P>
+This returns a cons cell whose <I>car</I> field is <CODE><B>a</B></CODE> and whose <I>cdr</I> is <CODE><B>b</B></CODE>.</P>
+<A NAME="mem9">
+</A><PRE>
+<IMG SRC="red.gif" ALT=" o "> <B>static Ptree* List(Ptree* e1, Ptree* e2, ...)</B>
+</PRE>
+<P>
+This returns a list whose elements are <CODE><B>e1</B></CODE>, <CODE><B>e2</B></CODE>, ... <CODE><B>List()</B></CODE> returns
+a null list <CODE><B>nil</B></CODE>.</P>
+<A NAME="mem10">
+</A><PRE>
+<IMG SRC="red.gif" ALT=" o "> <B>static Ptree* Append(Ptree* lst1, Ptree* lst2)</B>
+</PRE>
+<P>
+This concatenates <CODE><B>lst1</B></CODE> and <CODE><B>lst2</B></CODE>.  It returns the resulting list.</P>
+<A NAME="mem11">
+</A><PRE>
+<IMG SRC="red.gif" ALT=" o "> <B>static Ptree* CopyList(Ptree* lst)</B>
+</PRE>
+<P>
+This returns a new list whose elements
+are the same as  <CODE><B>lst</B></CODE> 's.</P>
+<A NAME="mem12">
+</A><PRE>
+<IMG SRC="red.gif" ALT=" o "> <B>static Ptree* ReplaceAll(Ptree* lst, Ptree* orig, Ptree* subst)</B>
+</PRE>
+<P>
+This returns
+a list in which all occurrences of  <CODE><B>orig</B></CODE> in <CODE><B>lst</B></CODE> are
+replaced with <CODE><B>subst</B></CODE>.  This is not a destructive operation.</P>
+<A NAME="mem13">
+</A><A NAME="mem14">
+</A><A NAME="mem15">
+</A><PRE>
+<IMG SRC="red.gif" ALT=" o "> <B>static bool Eq(Ptree* lst, char x)</B>
+<IMG SRC="red.gif" ALT=" o "> <B>static bool Eq(Ptree* lst, char* x)</B>
+<IMG SRC="red.gif" ALT=" o "> <B>static bool Eq(Ptree* lst, Ptree* x)</B>
+</PRE>
+<P>
+This returns  <CODE><B>true</B></CODE> if <CODE><B>lst</B></CODE> and <CODE><B>x</B></CODE> are equal.  If <CODE><B>x</B></CODE> is <CODE><B>Ptree*</B></CODE>, this
+determines the equivalence by comparing the pointers.</P>
+<A NAME="mem16">
+</A><PRE>
+<IMG SRC="red.gif" ALT=" o "> <B>static bool Equal(Ptree* x, Ptree* y)</B>
+</PRE>
+<P>
+This recursively compares <CODE><B>x</B></CODE> and <CODE><B>y</B></CODE> and
+returns <CODE><B>true</B></CODE> if they are equivalent.</P>
+</UL>
+<P>
+Furthermore, the following member functions are
+available on <CODE><B>Ptree</B></CODE> metaobjects:</P>
+
+<UL>
+<A NAME="mem17">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>bool IsLeaf()</B></PRE>
+<P>
+This returns <CODE><B>true</B></CODE> if the metaobject indicates
+a lexical token.</P>
+<A NAME="mem18">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>void Display()</B></PRE>
+<P>
+This prints the metaobject on the console for
+debugging.  Sublists are surrounded by <CODE><B>[</B></CODE> and <CODE><B>]</B></CODE>.</P>
+<A NAME="mem19">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>char* ToString()</B></PRE>
+<P>
+This converts the parse tree into a character string and
+returns it.</P>
+<A NAME="mem20">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>int Write(ostream& out)</B></PRE>
+<P>
+This writes the metaobject to the file
+	specified by <CODE><B>out</B></CODE>.  Unlike  <CODE><B>Display()</B></CODE> ,
+sublists are not surrounded by <CODE><B>[</B></CODE> and <CODE><B>]</B></CODE>.  This member
+function returns the number of written lines.</P>
+<A NAME="mem21">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>ostream& operator <<(ostream& s, Ptree* p)</B></PRE>
+<P>
+The operator <CODE><B><<</B></CODE> can be used to write a <CODE><B>Ptree</B></CODE> object
+to an output stream.  It is equivalent to <CODE><B>Write()</B></CODE> in terms of the result.</P>
+</UL>
+<P>
+The parse tree is basically a long list of the lexical tokens
+that appear in the program
+although some of them are grouped into sublists.
+The order of the elements of that list is the same as the order
+in which the lexical tokens appear.
+But if some fields such as
+the type field are omitted in the program,
+then <CODE><B>nil</B></CODE> is inserted at those places.
+For example, if the return type of a function declaration
+is omitted as follows:</P>
+
+
+<PRE><CODE>main(int argc, char** argv){ }
+</CODE></PRE>
+
+<P>
+then <CODE><B>nil</B></CODE> list is inserted at the head of the list:</P>
+
+
+<PRE><CODE>[nil nil [main ( [[[int] [argc]] , [[char] [* * argv]]] )] [{
+    nil
+}]
+</CODE></PRE>
+
+<P>
+Since the function body is also omitted, <CODE><B>nil</B></CODE> list is inserted between <CODE><B>{</B></CODE> and <CODE><B>}</B></CODE>.</P>
+
+
+<H2><IMG SRC="red-pin.gif"> <A NAME="S2">Construction</A></H2>
+
+<P>
+Programmers can make <CODE><B>Ptree</B></CODE> metaobjects.  Because the MOP
+provides a conservative garbage collector, they don't need to care about
+deallocation of the metaobjects.
+The next <CODE><B>static</B></CODE> member functions on <CODE><B>Ptree</B></CODE> are used to
+make a <CODE><B>Ptree</B></CODE> metaobjects.</P>
+
+<UL>
+<A NAME="mem22">
+</A><PRE>
+<IMG SRC="red.gif" ALT=" o "> <B>static Ptree* Make(char* format, [Ptree* sublist, ...])</B>
+</PRE>
+<P>
+This makes a <CODE><B>Ptree</B></CODE> metaobject according to the <CODE><B>format</B></CODE>. The  <CODE><B>format</B></CODE> is a null-terminated
+string.  All occurrences of <CODE><B>%c</B></CODE> (character), <CODE><B>%d</B></CODE> (integer), <CODE><B>%s</B></CODE> (character string), and <CODE><B>%p</B></CODE> (<CODE><B>Ptree</B></CODE>) in the <CODE><B>format</B></CODE> are replaced with the values following the <CODE><B>format</B></CODE>.   <CODE><B>%%</B></CODE>  in the <CODE><B>format</B></CODE> is replaced with <CODE><B>%</B></CODE>.</P>
+<A NAME="mem23">
+</A><PRE>
+<IMG SRC="red.gif" ALT=" o "> <B>static Ptree* GenSym()</B>
+</PRE>
+<P>
+This generates a unique symbol name (aka identifier) and
+returns it. The returned symbol name is used as the name of a temporary
+variable, for example.</P>
+</UL>
+<P>
+The <CODE><B>Ptree</B></CODE> metaobject returned by <CODE><B>Make()</B></CODE> is not a real
+parse tree.(At least, for the time being.)It is just a
+unparsed chunk of characters.  Although programmers can use <CODE><B>Ptree</B></CODE> metaobjects generated by <CODE><B>Make()</B></CODE> as they use
+other <CODE><B>Ptree</B></CODE> metaobjects, the structure of those metaobjects
+does not reflect the code they represent.</P>
+
+<P>
+Using <CODE><B>Make()</B></CODE>, programmers can easily generate any piece
+of code to substitute for part of the original source code.
+For example, suppose <CODE><B>array_name</B></CODE> is <CODE><B>xpos</B></CODE> and <CODE><B>offset</B></CODE> is <CODE><B>3</B></CODE>.  The following function call:</P>
+
+
+<PRE><CODE>Ptree::Make("%p[%d]", array_name, offset)
+</CODE></PRE>
+
+<P>
+makes a <CODE><B>Ptree</B></CODE> metaobject that represents:</P>
+
+
+<PRE><CODE>xpos[3]
+</CODE></PRE>
+
+<P>
+ <CODE><B>%p</B></CODE> simply expand a given <CODE><B>Ptree</B></CODE> metaobject
+as a character string.  Thus programmers may write something like:</P>
+
+
+<PRE><CODE>Ptree::Make("char* GetName(){ return \"%p\"; }",
+            array_name);
+</CODE></PRE>
+
+<P>
+Note that a double quote <CODE><B>"</B></CODE> must be escaped by a backslash <CODE><B>\</B></CODE> in a C++ string. <CODE><B>\"%p\"</B></CODE> makes a string literal.
+The function call above generates the code below:</P>
+
+
+<PRE><CODE>char* GetName(){ return "xpos"; }
+</CODE></PRE>
+
+<P>
+Although <CODE><B>Make()</B></CODE> follows the old <CODE><B>printf()</B></CODE> style, programmers can also use a more convenient style
+similar to Lisp's backquote notation.  For example,</P>
+
+
+<PRE><CODE>Ptree::Make("%p[%d]", array_name, offset)
+</CODE></PRE>
+
+<P>
+The expression above can be rewritten using <CODE><B>qMake()</B></CODE> as follows:</P>
+
+
+<PRE><CODE>Ptree::qMake("`array_name`[`offset`]")
+</CODE></PRE>
+
+<P>
+Note that the ``backqouted'' C++ expressions <CODE><B>array_name</B></CODE> and <CODE><B>offset</B></CODE> are directly embedded in the C++ string.  Their
+occurrence are replaced with the value of the expression.  This
+replacement cannot be implemented in regular C++.  It is implemented
+by the metaclass for <CODE><B>Ptree</B></CODE>.</P>
+
+<UL>
+<A NAME="mem24">
+</A><PRE>
+<IMG SRC="red.gif" ALT=" o "> <B>static Ptree* qMake(char* text)</B>
+</PRE>
+<P>
+This makes a <CODE><B>Ptree</B></CODE> metaobject that represents the <CODE><B>text</B></CODE>.
+Any C++ expression surrounded by backquotes <CODE><B>`</B></CODE> can appear in <CODE><B>text</B></CODE>.  Its occurrence is replaced with the value denoted by
+the expression. The type of the expression must be <CODE><B>Ptree*</B></CODE>, <CODE><B>int</B></CODE>, or <CODE><B>char*</B></CODE>.</P>
+</UL>
+<P>
+Except the difference in the notation, <CODE><B>qMake()</B></CODE> is equivalent to <CODE><B>Make()</B></CODE>.  Programmers can choose
+either one they prefer at any place.</P>
+
+
+<H2><IMG SRC="red-pin.gif"> <A NAME="S3">Pattern Matching</A></H2>
+
+<P>
+The MOP provides a <CODE><B>static</B></CODE> member function
+on <CODE><B>Ptree</B></CODE> metaobjects for pattern matching.</P>
+
+<UL>
+<A NAME="mem25">
+</A><PRE>
+<IMG SRC="red.gif" ALT=" o "> <B>static BOOL Match(Ptree* list, char* pattern,
+            [Ptree** sublist, ...])</B>
+</PRE>
+<P>
+This compares the <CODE><B>pattern</B></CODE> and <CODE><B>list</B></CODE>.
+If they match, this function returns <CODE><B>true</B></CODE> and binds the <CODE><B>sublist</B></CODE>s
+to appropriate sublists of the <CODE><B>list</B></CODE>, as specified by the <CODE><B>pattern</B></CODE>.  Note that the type of <CODE><B>sublist</B></CODE> is pointer to <CODE><B>Ptree*</B></CODE>.</P>
+</UL>
+<P>
+For example, the function <CODE><B>Match()</B></CODE> is used as follows:</P>
+
+
+<PRE><CODE>if(Ptree::Match(expr, "[%? + %?]", &lexpr, &rexpr))
+    cout << "this is an addition.";
+else if(Ptree::Match(expr, "[%? - %?]", &lexpr, &rexpr))
+    cout << "this is a subtraction.";
+else
+    cout << "unknown";
+</CODE></PRE>
+
+<P>
+The pattern <CODE><B>[%? + %?]</B></CODE> matches a linked list that
+consists of three elements if the second one is <CODE><B>+</B></CODE>.
+If an expression <CODE><B>expr</B></CODE> matches the pattern, <CODE><B>lexpr</B></CODE> gets bound to the first element of <CODE><B>expr</B></CODE> and <CODE><B>rexpr</B></CODE> gets bound to the third element.</P>
+
+<P>
+The <CODE><B>pattern</B></CODE> is a null-terminated string.  Since <CODE><B>Match()</B></CODE> does not understand the C++ grammar, lexical tokens appearing in
+the pattern must be separated by a white space.  For example,
+a pattern <CODE><B>a+b</B></CODE> is regarded as a single token.
+The pattern is constructed by these rules:</P>
+
+<OL>
+<LI> A word (characters terminated by a white space) is a pattern that
+	matches a lexical token.
+
+<LI> <CODE><B>%[</B></CODE>, <CODE><B>%]</B></CODE>, and <CODE><B>%%</B></CODE> are patterns that match <CODE><B>[</B></CODE>, <CODE><B>]</B></CODE>, and <CODE><B>%</B></CODE>.
+
+<LI>  <CODE><B>[]</B></CODE> is a pattern that matches a null list (<CODE><B>nil</B></CODE>).
+
+<LI> <CODE><B>[</B></CODE><I>pat1</I> <I>pat2</I> ... <CODE><B>]</B></CODE> is a pattern
+that matches a list of <I>pat1</I>, <I>pat2</I>, ...
+
+<LI>  <CODE><B>%*</B></CODE> is a pattern that matches any token or list.
+
+<LI>  <CODE><B>%?</B></CODE> is a pattern that matches any token or list.  The matched
+token or list is bound to <CODE><B>sublist</B></CODE>.
+
+<LI>  <CODE><B>%_</B></CODE> is a pattern that matches the rest of the list
+(the  <CODE><B>cdr</B></CODE> part).
+
+<LI>  <CODE><B>%r</B></CODE> is a pattern that matches the rest of the list.
+The matched list is bound to <CODE><B>sublist</B></CODE>.
+
+</OL>
+
+<H2><IMG SRC="red-pin.gif"> <A NAME="S4">Reifying Program Text</A></H2>
+
+<P>
+If a <CODE><B>Ptree</B></CODE> metaobject represents a literal such as an integer
+constant and a string literal, we can obtain the value denoted by
+the literal.</P>
+
+<UL>
+<A NAME="mem26">
+</A><PRE>
+<IMG SRC="red.gif" ALT=" o "> <B>static BOOL Reify(unsigned int& value)</B>
+</PRE>
+<P>
+This returns <CODE><B>true</B></CODE> if the metaobject represents an
+integer constant.  The denoted value is stored in <CODE><B>value</B></CODE>.  Note
+that the denoted value
+is always a positive number because a negative number such as <CODE><B>-4</B></CODE> generates two distinct tokens such as <CODE><B>-</B></CODE> and <CODE><B>4</B></CODE>.</P>
+<A NAME="mem27">
+</A><PRE>
+<IMG SRC="red.gif" ALT=" o "> <B>static BOOL Reify(char*& string)</B>
+</PRE>
+<P>
+This returns <CODE><B>true</B></CODE> if the metaobject represents a
+string literal.  A string literal is a sequence of character surrounded by
+double quotes <CODE><B>"</B></CODE>.
+The denoted null-terminated string is stored in <CODE><B>string</B></CODE>.
+It does not include the double quotes at the
+both ends.  Also, the escape sequences are not expanded.</P>
+</UL>
+<P>
+Note: the character string returned by <CODE><B>Reify()</B></CODE> is
+allocated in the heap area.  However, because the MOP provides a
+conservative garbage collector, programmers do not need to deallocate
+the string by themselves.</P>
+
+
+<H2><IMG SRC="red-pin.gif"> <A NAME="S5">Support Classes</A></H2>
+
+<P>
+The MOP provides two support classes <CODE><B>PtreeIter</B></CODE> and <CODE><B>PtreeArray</B></CODE> to help programmers to deal
+with <CODE><B>Ptree</B></CODE> objects.  <CODE><B>PtreeIter</B></CODE> is useful to perform iteration on a list of <CODE><B>Ptree</B></CODE> objects.
+Suppose that <CODE><B>expr</B></CODE> is a list:</P>
+
+
+<PRE><CODE>PtreeIter next(expr);
+Ptree* p;
+while((p = next()) != nil){
+    // compute on p
+}
+</CODE></PRE>
+
+<P>
+Each element of <CODE><B>expr</B></CODE> is bound to <CODE><B>p</B></CODE> one at a time.
+The operator <CODE><B>()</B></CODE> on <CODE><B>PtreeIter</B></CODE> objects returns the next
+element.  Programmers may call <CODE><B>Pop()</B></CODE> instead of the operator <CODE><B>()</B></CODE>.  Since the two functions are equivalent, the program above
+can be rewritten to be:</P>
+
+
+<PRE><CODE>PtreeIter next(expr);
+Ptree* p;
+while((p = next.Pop()) != nil){
+    // compute on p
+}
+</CODE></PRE>
+
+<P>
+If the reader prefers the <CODE><B>for</B></CODE>-loop style,
+she may also say:</P>
+
+
+<PRE><CODE>for(PtreeIter i = expr; !i.Empty(); i++){
+    // compute on *i
+}
+</CODE></PRE>
+
+<P>
+Although this interface is slightly slower, it distinguishes
+the end of the list and a <CODE><B>nil</B></CODE> element.  If <CODE><B>expr</B></CODE> includes <CODE><B>nil</B></CODE>, <CODE><B>Pop()</B></CODE> cannot correctly detect the end of the list.</P>
+
+<P>
+Another support class is <CODE><B>PtreeArray</B></CODE> for dealing with
+an unbounded array of <CODE><B>Ptree</B></CODE> objects.  It is used as follows (suppose that <CODE><B>expr</B></CODE> is a <CODE><B>Ptree</B></CODE> object):</P>
+
+
+<PRE><CODE>PtreeArray a;            // allocate an array
+a.Append(expr);          // append expr to the end of the array
+Ptree* p = a[0];         // get the first element
+Ptree* p2 = a.Ref(0);    // same as a[0]
+int n = a.Number();      // get the number of elements
+Ptree* lst = a.All();    // get a list of all the elements
+a.Clear();               // make the array empty
+</CODE></PRE>
+
+<HR>
+[<A HREF="index.html">First</A> | <A HREF="mop.html">Prev</A> | <A HREF="env.html">Next</A>]
+</BODY>
+</HTML>

@@ -1,0 +1,61 @@
+<HTML>
+<HEAD>
+<TITLE>OpenC++ Reference Manual</TITLE>
+</HEAD>
+<BODY>
+
+<H1>Metaobject Protocol (MOP)</H1>
+
+<P>
+At the meta level, the (base-level) programs are represented by objects
+of a few predefined classes (and their subclasses that programmers
+define).  These objects are called <I>metaobjects</I> because
+they are <I>meta</I> representation of the programs.  Source-to-source
+translation from OpenC++ to C++ is implemented by manipulating those
+metaobjects.</P>
+
+<P>
+The following several sections show details of such metaobjects.
+They reflect
+various aspects of programs that are not accessible in C++.
+Although most of metaobjects provide means of introspection,
+some metaobjects represent a behavioral aspect of the program
+and enables to control source-to-source translation of the program.
+Here is the list of metaobjects:</P>
+
+<UL>
+<LI><A HREF="ptree.html"> <CODE><B>Ptree</B></CODE> </A>metaobjects:
+<P>
+They represent a parse tree of the program.  The parse tree
+is implemented as a nested-linked list.</P>
+<LI><A HREF="env.html"> <CODE><B>Environment</B></CODE> </A>metaobjects:
+<P>
+They represent bindings between names and types.  Since this
+MOP is a compile-time MOP, the runtime values bound to names
+are not available at the meta level.</P>
+<LI><A HREF="typeinfo.html"> <CODE><B>TypeInfo</B></CODE> </A>metaobjects:
+<P>
+They represent types that appear in the program.  The types
+include derived types such as pointer types and reference types
+as well as built-in types and class types.</P>
+<LI><A HREF="class.html"> <CODE><B>Class</B></CODE> </A>metaobjects:
+<P>
+As well as they represent class definitions,
+they control source-to-source translation of the program.
+Programmers may define subclasses of <CODE><B>Class</B></CODE> in order to tailor the translation.</P>
+<LI><A HREF="member.html"> <CODE><B>Member</B></CODE> </A>metaobjects:
+<P>
+They represent class members.  They inform whether the member is
+a constructor, an inline function, a data member, a public member,
+or so forth.</P>
+</UL>
+<P>
+Distinguishing <CODE><B>TypeInfo</B></CODE> metaobjects and <CODE><B>Class</B></CODE> metaobjects
+might look like wrong design.  But this distinction is needed to handle
+derived types.  <CODE><B>TypeInfo</B></CODE> metaobjects were introduced to deal with
+derived types and fundamental types by using the same kind of metaobjects.</P>
+
+<HR>
+[<A HREF="index.html">First</A> | <A HREF="base.html">Prev</A> | <A HREF="ptree.html">Next</A>]
+</BODY>
+</HTML>

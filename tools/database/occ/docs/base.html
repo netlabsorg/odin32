@@ -1,0 +1,185 @@
+<HTML>
+<HEAD>
+<TITLE>OpenC++ Reference Manual</TITLE>
+</HEAD>
+<BODY>
+
+<H1>Base-Level Language (OpenC++)</H1>
+
+<P>
+This section addresses the language specification of OpenC++.
+OpenC++ is identical to C++ except two extensions.
+To connect a base-level program and a meta-level program, OpenC++
+introduces a new kind of declaration into C++.  Also, new extended syntax
+is available in OpenC++ if the syntax is defined by the meta-level program.</P>
+
+
+<H2><IMG SRC="red-pin.gif"> <A NAME="metaclass">Base-level Connection to the MOP</A></H2>
+
+<P>
+OpenC++ provides a new syntax for metaclass declaration.  This
+declaration form is the only connection between the base level
+and the meta level.  Although the default metaclass is <CODE><B>Class</B></CODE>,
+programmers can change it by using this declaration form:</P>
+
+<UL>
+<LI> <CODE><B>metaclass</B></CODE>  <I>metaclass-name</I>  <CODE><B> </B></CODE> [  <I>class-name</I>  [  <CODE><B>(</B></CODE>  <I>meta-arguments</I>  <CODE><B>)</B></CODE>  ] ] <CODE><B>;</B></CODE>  
+<P>
+This declares the metaclass for a class.  It must appear
+before the class is defined.  If the class name is not specified, this
+declaration means nothing except that the metaclass is loaded
+into the compiler. <I>meta-arguments</I> is a sequence of
+identifiers, type names,
+literals, and C++ expressions surrounded by <CODE><B>()</B></CODE>.  The
+elements must be separated by commas.  The identifiers appearing in <I>meta-arguments</I>  do not have to be declared in advance.  What
+should be placed at  <I>meta-arguments</I> is <A HREF="class.html#S2">specified by the metaclass</A>.</P>
+<P>
+The code shown below is an example of metaclass declaration:</P>
+
+<PRE><CODE>metaclass PersistentClass Point;
+class Point {
+public:
+    int x, y;
+};
+</CODE></PRE>
+
+<P>
+The metaclass for <CODE><B>Point</B></CODE> is <CODE><B>PersistentClass</B></CODE>.
+This syntax was chosen so that it looks like a variable declaration such
+as:</P>
+
+<PRE><CODE>class Point p0;
+</CODE></PRE>
+
+<P>
+The former declaration defines a class metaobject <CODE><B>Point</B></CODE> as
+an instance of metaclass <CODE><B>PersistentClass</B></CODE>, and the latter defines
+an object <CODE><B>p0</B></CODE> as an instance of class <CODE><B>Point</B></CODE>.</P>
+</UL>
+
+<H2><IMG SRC="red-pin.gif"> <A NAME="SyntaxExtend">Syntax Extensions</A></H2>
+
+<P>
+The extended syntax described here is effective if programmers define
+it by the MOP.  By default, it causes a syntax error.   To make it available,
+the programmers must register a new keyword, which is used in one of the
+following forms:</P>
+
+<UL>
+<LI><A HREF="class.html#RegMod"> <B>Modifier</B> </A><BR>
+ <I>keyword</I> [  <CODE><B>(</B></CODE>  <I>function-arguments</I>  <CODE><B>)</B></CODE>  ]
+<P>
+A keyword can be registered to lead a modifier.  It may
+appear in front of <A HREF="class.html#RegMc">class declarations</A>, the <CODE><B>new</B></CODE> operator, or
+function arguments.  For example, these statements are valid:</P>
+
+<PRE><CODE>distribute class Dictionary { ... };
+Point* p = remote(athos) new Point;
+void append(ref int i, int j);
+</CODE></PRE>
+
+<P>
+Here, <CODE><B>distribute</B></CODE>, <CODE><B>remote</B></CODE>, and <CODE><B>ref</B></CODE> are registered keywords.</P>
+<P>
+Also, a modifier can be placed <A HREF="class.html#RegMmod">in front of a member declaration.</A>  For example,</P>
+
+<PRE><CODE>class Point {
+public:
+    sync int x, y;
+};
+</CODE></PRE>
+
+<P>
+The keyword <CODE><B>sync</B></CODE> is a modifier.</P>
+<LI><A HREF="class.html#RegAcc"> <B>Access Specifier</B> </A><BR>
+ <I>keyword</I> [  <CODE><B>(</B></CODE>  <I>function-arguments</I>  <CODE><B>)</B></CODE>  ] <CODE><B>:</B></CODE> 
+<P>
+Programmers may define a keyword as a member-access specifier.  It
+appears at the same place that the built-in access specifier such as <CODE><B>public</B></CODE> can appears.  For example, if <CODE><B>after</B></CODE> is a
+user-defined keyword, then programmers may write:</P>
+
+<PRE><CODE>class Window {
+public:
+    void Move();
+after:
+    void Move() { ... }     // after method
+}
+</CODE></PRE>
+
+<LI><A HREF="class.html#RegWhile"> <B>While-style Statement</B> </A><BR>
+ <I>pointer</I>  <CODE><B>-></B></CODE>  <I>keyword</I>  <CODE><B>(</B></CODE>  <I>expression</I>  <CODE><B>){</B></CODE>  <I>statements</I>  <CODE><B>}</B></CODE> <BR>
+ <I>object</I>  <CODE><B>.</B></CODE>  <I>keyword</I>  <CODE><B>(</B></CODE>  <I>expression</I>  <CODE><B>){</B></CODE>  <I>statements</I>  <CODE><B>}</B></CODE> <BR>
+ <I>class-name</I> <CODE><B>::</B></CODE> <I>keyword</I>  <CODE><B>(</B></CODE>  <I>expression</I>  <CODE><B>){</B></CODE>  <I>statements</I>  <CODE><B>}</B></CODE> 
+<P>
+A user-defined keyword may lead something like the <CODE><B>while</B></CODE> 
+statement.  In the grammar, that is not a statement but an expression.
+It can appear at any place where C++ expressions appear.  <I>expression</I> is any C++ expression.  It may be empty or separated by
+commas like function-call arguments.
+Here is an example of the while-style statement:</P>
+
+<PRE><CODE>Matrix m2;
+m2.forall(e){
+    e = 0;
+}
+</CODE></PRE>
+
+<P>
+A user-defined keyword can also lead other styles of statements.</P>
+<LI><A HREF="class.html#RegFor"> <B>For-style Statement</B> </A><BR>
+ <I>pointer</I>  <CODE><B>-></B></CODE>  <I>keyword</I>  <CODE><B>(</B></CODE>  <I>expr</I>  <CODE><B>;</B></CODE>  <I>expr</I>  <CODE><B>;</B></CODE>  <I>expr</I>  <CODE><B>){</B></CODE>  <I>statements</I>  <CODE><B>}</B></CODE> <BR>
+ <I>object</I>  <CODE><B>.</B></CODE>  <I>keyword</I>  <CODE><B>(</B></CODE>  <I>expr</I>  <CODE><B>;</B></CODE>  <I>expr</I>  <CODE><B>;</B></CODE>  <I>expr</I>  <CODE><B>){</B></CODE>  <I>statements</I>  <CODE><B>}</B></CODE> <BR>
+ <I>class-name</I> <CODE><B>::</B></CODE> <I>keyword</I>  <CODE><B>(</B></CODE>  <I>expr</I>  <CODE><B>;</B></CODE>  <I>expr</I>  <CODE><B>;</B></CODE>  <I>expr</I>  <CODE><B>){</B></CODE>  <I>statements</I>  <CODE><B>}</B></CODE> 
+<P>
+The for-style statement takes three expressions like the <CODE><B>for</B></CODE> 
+statement.  Except that, it is the same as the while-style statement.</P>
+<LI><A NAME="ClsrSt"></A><A HREF="class.html#RegClo"> <B>Closure Statement</B> </A><BR>
+ <I>pointer</I>  <CODE><B>-></B></CODE>  <I>keyword</I>  <CODE><B>(</B></CODE>  <I>arg-declaration-list</I>  <CODE><B>){</B></CODE>  <I>statements</I>  <CODE><B>}</B></CODE> <BR>
+ <I>object</I>  <CODE><B>.</B></CODE>  <I>keyword</I>  <CODE><B>(</B></CODE>  <I>arg-declaration-list</I>  <CODE><B>){</B></CODE>  <I>statements</I>  <CODE><B>}</B></CODE> <BR>
+ <I>class-name</I> <CODE><B>::</B></CODE> <I>keyword</I>  <CODE><B>(</B></CODE>  <I>arg-declaration-list</I>  <CODE><B>){</B></CODE>  <I>statements</I>  <CODE><B>}</B></CODE> 
+<P>
+The closure statement takes an argument declaration list instead of
+an expression.  That is the only difference from the while-style statement.
+For example, programmers may write something like this:</P>
+
+<PRE><CODE>ButtonWidget b;
+b.press(int x, int y){
+    printf("pressed at (%d, %d)\n", x, y);
+}
+</CODE></PRE>
+
+<P>
+This might be translated into this:</P>
+
+<PRE><CODE>void callback(int x, int y){
+    printf("pressed at (%d, %d)\n", x, y);
+}
+    :
+ButtonWidget b;
+b.press(callback);    // register a callback function
+</CODE></PRE>
+
+</UL>
+
+<H2><IMG SRC="red-pin.gif"> Loosened Grammar</H2>
+
+<P>
+Besides extended syntax,
+OpenC++'s grammar is somewhat loosened as compared with C++'s grammar.
+For example, the next code is semantically wrong in C++:</P>
+
+
+<PRE><CODE>Point p = { 1, 3, 5 };
+</CODE></PRE>
+
+<P>
+The C++ compiler will report that <CODE><B>p</B></CODE> cannot be initialized by
+<CODE><B>{ 1, 3, 5 }</B></CODE>.  Such an aggregate can be used only to
+initialize an array.
+The OpenC++ compiler simply accepts such a semantically-wrong code.
+It ignores semantical correctness expecting that the code will be
+translated into valid C++ code.</P>
+
+<HR>
+[<A HREF="index.html">First</A> | <A HREF="overview.html">Prev</A> | <A HREF="mop.html">Next</A>]
+</BODY>
+</HTML>

@@ -1,0 +1,196 @@
+<HTML>
+<HEAD>
+<TITLE>OpenC++ Reference Manual (Appendix)</TITLE>
+</HEAD>
+<BODY>
+
+<h1>Class Metaobjects</h1>
+
+<p><br>
+
+<h2><img src="html/red-pin.gif" alt=" o ">Public Members (cont.)</h2>
+
+<ul>
+<img src="html/green.gif" alt=" o "><code>
+<b>Ptree* Comments()</b></code>
+<p>This returns a list of comments preceding the class declaration.
+If no comments are given, this function returns <code>nil</code>.
+The compiler recognizes a comment string as a single token.
+The comment string includes <code>"//"</code> or <code>"/* */"</code>.
+The returned value is a list of
+<code>Ptree</code> objects each of which represents a single
+comment string (token).
+<p>
+<b>Note:</b> To use this function, run the compiler with the
+<code><b>-C</b></code> option.
+</ul>
+
+<p><br>
+
+<hr>
+
+<h1>Member Metaobjects</h1>
+
+<p><br>
+
+<h2><img src="html/red-pin.gif" alt=" o ">Public Members (cont.)</h2>
+
+<ul>
+<img src="html/green.gif" alt=" o "><code>
+<b>Ptree* Comments()</b></code>
+<p>This returns a list of comments preceding the member declaration.
+If no comments are given, this function returns <code>nil</code>.
+The compiler recognizes a comment string as a single token.
+The comment string includes <code>"//"</code> or <code>"/* */"</code>.
+The returned value is a list of
+<code>Ptree</code> objects each of which represents a single
+comment string (token).
+<p>
+<b>Note:</b> To use this function, run the compiler with the
+<code><b>-C</b></code> option.
+</ul>
+
+<p><br>
+
+<hr>
+
+<h1>TemplateClass Metaobjects</h1>
+
+<p>
+<code><b>TemplateClass</b></code> metaobjects represent template classes.
+It is a subclass of <code><b>Class</b></code>.
+
+<p>
+The metaclass for any template class must be <code><b>TemplateClass</b></code>
+or its subclass.
+
+<p><br>
+
+<h2><img src="html/red-pin.gif" alt=" o ">Public Members</h2>
+
+<ul>
+<img src="html/green.gif" alt=" o ">
+<code><b>Ptree* TemplateDefinition()</b></code>
+<p>
+This returns the whole definition of the template.
+
+<p><img src="html/green.gif" alt=" o "><code>
+<b>Ptree* TemplateArguments()</b></code>
+<p>
+This returns template arguments.
+
+<p><img src="html/yellow.gif" alt=" o "><code>
+<b>Ptree* TranslateInstantiation(Environment* env, Ptree* spec)</b></code>
+<p>
+This translates a template instantiation.  An example of template
+instantiation is:
+<ul><pre>
+template class Foo&lt;int&gt;;
+</pre></ul>
+<p>Here, <code>Foo</code> is a template class.
+<p>
+<i>--- Defualt implementation by Template</i><br>
+This returns <code><b>spec</b></code>.
+
+</ul>
+
+<hr>
+
+<h1>C functions</h1>
+
+<p><code><b>Class</b></code> metaobjects can be used for translating
+C functions.
+
+<p>If the compiler encounters a C function declaration, it
+calls <code><b>TranslateMemberFunction()</b></code>
+on the <code><b>Class</b></code> metaobject for C functions.
+The <code><b>Member</b></code> metaobject representing the C
+function is passed to that member function as an argument.
+All C functions are handled by a single <code><b>Class</b></code>
+metaobject.
+
+<p>To translate C functions, first define the class for the metaobject
+handling C functions.  Then, call this member function:
+
+<ul>
+<img src="html/red.gif" alt=" o "><code>
+<b>static void Class::SetMetaclassForFunctions(char* name)</b></code>
+<p>
+This registers the <code><b>name</b></code> of
+the metaclass for C functions.  The compiler creates an instance of
+this metaclass for handling C functions.  The metaclass must be a
+subclass of <code><b>Class</b></code>.
+
+</ul>
+
+<p>This member function must be called just after the compiler has
+started.  For more information about when it should be called, see the
+description of <code><b>Class::ChangeDefaultMetaclass()</b></code>.
+
+<p><br>
+
+<hr>
+
+<h1>Representation of Types</h1>
+
+<p><code><b>TypeInfo</b></code> metaobjects represent types.
+
+<p><br>
+
+<h2><img src="html/red-pin.gif" alt=" o ">Public Members (cont.)</h2>
+
+<ul>
+<img src="html/green.gif" alt=" o "><code>
+<b>bool NthTemplateArgument(int nth, TypeInfo& t)</b></code>
+<p>If the type is <code><b>TemplateType</b></code>, this returns
+the <code><b>n-th</b></code> (&gt= 0) template argument
+in <code><b>t</b></code>.
+If the type is not <code><b>TemplateType</b></code> or
+the <code><b>n-th</b></code> template argument does not exist,
+this function returns <code><b>false</b></code>.
+</ul>
+
+<p>The example program shown below prints the name and
+all the arguments of the given template type.
+Suppose that a variable <code><b>tinfo</b></code> is
+a <code><b>TypeInfo</b></code> metaobject representing
+a template type:
+
+<pre>
+TypeInfo t;
+tinfo.FullTypeName()->Display();
+int i = 0;
+while (tinfo.NthTemplateArgument(i++, t))
+    t.FullTypeName()->Display();
+</pre>
+
+<p><br>
+
+<hr>
+
+<h1>Representation of Environments</h1>
+
+<p><code><b>Environment</b></code> metaobjects represent bindings
+between names and types.
+
+<p><br>
+
+<h2><img src="html/red-pin.gif" alt=" o ">Public Members (cont.)</h2>
+
+<ul>
+<img src="html/green.gif" alt=" o "><code>
+<b>Ptree* GetLineNumber(Ptree* expr, int& number)</b></code>
+<p>Returns the file name including the source text represented by
+<code><b>expr</b></code>.
+The line number of that text is stored in <code><b>number</b></code>.
+</ul>
+
+<p><br>
+
+<hr>
+
+<p>Shigeru Chiba<br>
+<i>Copyright &#169; 2000 Shigeru Chiba.  All rights reserved.</i>
+
+</BODY>
+</HTML>

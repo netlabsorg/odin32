@@ -1,0 +1,269 @@
+<HTML>
+<HEAD>
+<TITLE>OpenC++ Compiler</TITLE>
+</HEAD>
+
+<BODY>
+
+<H1>Command Reference</H1>
+
+<H2>NAME</H2>
+
+<UL>
+<P><B><TT>occ</TT></B> --- the Open C++ compiler</P>
+</UL>
+
+<H2>SYNOPSIS</H2>
+
+<UL>
+<PRE>
+<TT>occ [-l] [-s] [-V] [-v] [-m[<I>file_name</I>]] [-c] [-E] [-n] [-p] [-P]
+    [-I<I>include_directory</I>] [-D<I>name</I>[=<I>def</I>]] [-M<I>option</I>[=<I>value</I>]]
+    [-S<I>metaclass</I>] [-d<I>option</I>] [--regular-c++]
+    [-- <I>C++ compiler options</I> [<I>.o and .a files</I>]] <I>source_file</I></TT>
+</PRE>
+</UL>
+
+<H2>DESCRIPTION</H2>
+
+<UL>
+
+<P>
+<B>occ</B> compiles an OpenC++ program into an object file.
+It first invokes the C++ preprocessor with the predefined macro
+<B>__opencxx</B> and generates a <B>.occ</B> file,
+then translates it into a <B>.ii</B> file according to the meta-level program.
+The <B>.ii</B> file is compiled by the back-end C++ compiler, and finally
+an <B>a.out</B> file is produced.  If <B>occ</B> is run with the <B>-c</B>
+option, it generates a <B>.o</B> file but suppresses linking.</P>
+
+<P>
+For example, to compile a base-level program <B>sample.cc</B> with
+the meta-level program <B>MyClass.mc</B>, the user should do as follows:</P>
+
+<CODE>
+% occ -m MyClass.mc
+</CODE>
+
+<P>
+First, <B>MyClass.mc</B> should be compiled into shared libraries
+<B>MyClass.so</B> and <B>MyClass-init.so</B>.
+The produced shared libraries must be under the directory specified
+by <B>LD_LIBRARY_PATH</B>.
+Then, the user can compile the base-level program:</P>
+
+<CODE>
+% occ -- -o sample sample.cc
+</CODE>
+
+<P>
+If <B>sample.cc</B> requires a metaclass <B>MyClass</B>, <B>occ</B>
+dynamically loads and links <B>MyClass.so</B> and <B>MyClass-init.so</B>.
+Then <B>sample.cc</B> is compiled according to
+the metaclass <B>MyClass</B> and an executable file <B>sample</B> is
+produced.</P>
+
+<P>
+The separate compilation of meta-level programs is also supported.
+Suppose that <B>MyClass</B> is implemented by <B>foo.mc</B> and
+<B>bar.mc</B>.  The user should compile them as follows:</P>
+
+<CODE>
+% occ -c -m foo.mc<BR>
+% occ -c -m bar.mc
+</CODE>
+
+<P>
+This produces <B>foo.o</B>, <B>bar.o</B>, and <B>MyClass-init.so</B>.
+Although the second invocation of <B>occ</B> overrides
+<B>MyClass-init.so</B> produced by the first invocation,
+this is not a problem.  To get the shared library,
+<B>foo.o</B> and <B>bar.o</B> have to be
+linked by hand into <B>MyClass.so</B> by:</P>
+
+<CODE>
+% occ -mMyClass foo.o bar.o
+</CODE>
+
+<P>For the reason of efficiency, the user can statically link the
+meta-level program with the OpenC++ compiler.  To do this, the user
+must not specify the <B>-m</B> option:</P>
+
+<CODE>
+% occ -- -o myocc opencxx.a MyClass.mc
+</CODE>
+
+<P>
+First, <B>MyClass.mc</B> should be compiled and linked to the OpenC++
+compiler.  The command shown above produces the OpenC++ compiler that
+<B>MyClass.mc</B> is embedded in.  <B>opencxx.a</B> is the archive of
+the original OpenC++ compiler.  (Note: The Solaris and Linux users have
+to add the <B>-ldl</B> option after <B>opencxx.a</B>.)</P>
+
+<P>
+Then, the produced compiler <B>myocc</B> is used to compile
+the base-level program:</P>
+
+<CODE>
+% myocc -- -o sample sample.cc
+</CODE>
+
+<P>
+This compiles <B>sample.cc</B> and produces an executable file <B>sample</B>.
+</P>
+</UL>
+
+<H2>OPTIONS</H2>
+
+<UL>
+<DL>
+
+<DT><TT>-D</TT>
+<DD>Define a macro <I><B>name</B></I> as <I><B>def</B></I>.
+
+<DT><TT>-E</TT>
+<DD>Don't run the back-end C++ compiler.  Stop after
+generating a <B>.ii</B> file.
+
+<DT><TT>-I</TT>
+<DD>Add a <I><B>directory</B></I> to the search path of
+the <TT>#include</TT> directive.
+
+<DT><TT>-M</TT>
+<DD>Specify an <I><B>option</B></I> with <I><B>value</B></I>.  It is
+passed to metaobjects.
+
+<DT><TT>-P</TT>
+<DD>Run the preprocessor again after translation (Unix only).
+
+<DT><TT><A NAME="SOpt">-S</TT>
+<DD>Load <I><B>metaclass</B></I> at the beginning.  It enables to load
+a metaclass and invoke <TT>Initialize()</TT> without the
+<TT>metaclass</TT> declaration.  It is usedful to call
+<TT><A HREF="class.html#ChDefMeta">ChangeDefaultMetaclass()</A></TT>
+on <TT>Class</TT>.
+
+<DT><TT>-V</TT>
+<DD>Show the version number.
+
+<DT><TT>-c</TT>
+<DD>Suppress linking and produce a <B>.o</B> file.
+
+<DT><TT>-d</TT>
+<DD>Pass <I><B>option</B></I> to the preprocessor.  For example,
+<TT><B>-d/MDd</B></TT> directs the compiler to pass <TT><B>/MDd</B></TT> to
+the preprocessor.
+
+<DT><TT>-l</TT>
+<DD>Print the list of statically loaded metaclasses.
+
+<DT><TT>-m</TT>
+<DD>Produce a shared library (a <B>.so</B> file.)  This is used to compile a metaclass.
+If <I><B>file_name</B></I> is specified, the name of the shared library is
+<B><I>file_name</I>.so</B>.  If the <TT><B>-c</B></TT> option is specified together,
+<B>occ</B> produces a <B>.so</B> file, which should be linked by the user to be
+a shared library.
+
+<DT><TT>-n</TT>
+<DD>Suppress invoking the preprocessor.
+
+<DT><TT>-p</TT>
+<DD>Stop after the parsing stage.  No translation is done.
+
+<DT><TT>-s</TT>
+<DD>Print the whole parse tree of the given source program.
+	Don't perform translation or compilation.  If no source file is
+	given, <B>occ</B> reads from the standard input.
+
+<DT><TT>-v</TT>
+<DD>Specify the verbose mode.
+
+<DT><TT>--regular-c++</TT>
+<DD>Inhibit the extended syntax.  This enables the keyword <B>metaclass</B>
+to be used as a variable name.
+This option is useful when parsing legacy code being not
+intended to translation.  When this option is used,
+the symbol <B>__opencxx</B> is not defined.
+
+<DT><TT>--</TT>
+<DD>The following options are interpreted as options for
+the back-end C++ compiler. For example, if you type
+
+<DD>
+<P>
+<CODE>
+% occ -I.. -- -g foo.c
+</CODE>
+</P>
+
+<DD>Then the <TT><B>-g</B></TT> option is passed to the C++ compiler.
+Note that these options are not passed to the C++ preprocessor.
+The <TT><B>-D</B></TT> and <TT><B>-I</B></TT> options need to
+be placed before <TT><B>--</B></TT>.
+
+</DL>
+</UL>
+
+
+<H2>FILES</H2>
+
+<UL>
+<DL>
+
+<DT><TT>file<B>.{cc,C,c,cpp,cxx,mc}</B></TT>
+<DD>source file.
+
+<DT><TT>file<B>.occ</B></TT>
+<DD>output file after C++ preprocessing.
+
+<DT><TT>file<B>.ii</B></TT>
+<DD>output file after translation.
+
+<DT><TT>file<B>.o</B></TT>
+<DD>object file.
+
+<DT><TT>file<B>.so</B></TT>
+<DD>shared library dynamically loaded by <B>occ</B>.
+
+<DT><TT><B>opencxx.a</B></TT>
+<DD>library to link with meta-level program.
+
+</DL>
+</UL>
+
+<H2>NOTES</H2>
+
+<UL>
+
+<LI>While the C++ processor is running, the macro <B>__opencxx</B>
+is predefined.
+
+<LI>The programs compiled by <B>occ</B> do not need any runtime libraries
+or a garbage collector unless the meta-level program requires them at the
+base level.
+
+</UL>
+
+<H2>COPYRIGHT</H2>
+
+<UL>
+<P>
+Copyright &#169; 1997-99 Shigeru Chiba.  All Rights Reserved.<BR>
+Copyright &#169; 1995, 1996 Xerox Corporation.  All Rights Reserved.
+</P>
+</UL>
+
+<H2>AUTHOR</H2>
+
+<UL>
+<P>
+Shigeru Chiba, University of Tsukuba, Japan.<BR>
+<ADDRESS>Email: chiba@is.tsukuba.ac.jp</ADDRESS>
+</P>
+</UL>
+
+<HR>
+[<A HREF="index.html">First</A> | <A HREF="member.html">Prev</A>]
+
+</BODY>
+</HTML>
