@@ -1,4 +1,4 @@
-/* $Id: configure.cmd,v 1.14 2000-12-12 19:09:48 bird Exp $
+/* $Id: configure.cmd,v 1.15 2000-12-15 15:04:05 bird Exp $
  *
  * Configuration script.
  * Generates makefile.inc and an empty .depend file.
@@ -163,9 +163,9 @@ SearchPaths: procedure expose fInteractive;
     do i = 2 to arg() by 2
         sEnv  = arg(i-1);
         sFile = arg(i);
-        say i':' sEnv '-' sFile;
+        /* say i':' sEnv '-' sFile; */
         sPath = SysSearchPath(sEnv, sFile);
-        say 'SysSearchPath('sEnv',' sFile') ->' sPath;
+        /* say 'SysSearchPath('sEnv',' sFile') ->' sPath; */
         if (sPath <> '') then
            leave;
     end
