@@ -1,4 +1,4 @@
-/* $Id: shellguid.cpp,v 1.1 1999-10-09 11:13:24 sandervl Exp $ */
+/* $Id: shellguid.cpp,v 1.2 2000-08-18 02:01:21 phaller Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -42,6 +42,7 @@
 #include <wine/obj_commdlgbrowser.h>
 #include <wine/obj_extracticon.h>
 #include <wine/obj_shellextinit.h>
+#include "shellfolder.h"
 #include <docobj.h>
 
 /*

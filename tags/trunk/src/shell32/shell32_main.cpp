@@ -1,4 +1,4 @@
-/* $Id: shell32_main.cpp,v 1.11 2000-05-18 14:16:03 sandervl Exp $ */
+/* $Id: shell32_main.cpp,v 1.12 2000-08-18 02:01:19 phaller Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -48,6 +48,7 @@
 #include "shlguid.h"
 #include "wine/undocshell.h"
 #include "shpolicy.h"
+#include "shlwapi.h"
 
 #include <heapstring.h>
 #include <misc.h>
@@ -147,7 +148,7 @@ ODINFUNCTION5(DWORD, SHGetFileInfoA, LPCSTR,       path,
    int iIndex;
    DWORD ret = TRUE, dwAttributes = 0;
    IShellFolder * psfParent = NULL;
-   IExtractIcon * pei = NULL;
+   IExtractIconA * pei = NULL;
    LPITEMIDLIST   pidlLast = NULL, pidl = NULL;
    HRESULT hr = S_OK;
 
@@ -159,7 +160,12 @@ ODINFUNCTION5(DWORD, SHGetFileInfoA, LPCSTR,       path,
 #endif
    if ((flags & SHGFI_USEFILEATTRIBUTES) && (flags & (SHGFI_ATTRIBUTES|SHGFI_EXETYPE|SHGFI_PIDL)))
      return FALSE;
-
+  
+   /* windows initializes this values regardless of the flags */
+   psfi->szDisplayName[0] = '\0';
+   psfi->szTypeName[0] = '\0';
+   psfi->iIcon = 0;
+  
    /* translate the path into a pidl only when SHGFI_USEFILEATTRIBUTES in not specified
       the pidl functions fail on not existing file names */
    if (flags & SHGFI_PIDL)
@@ -235,7 +241,7 @@ ODINFUNCTION5(DWORD, SHGetFileInfoA, LPCSTR,       path,
 
      if (SUCCEEDED(hr))
      {
-       hr = IExtractIconA_GetIconLocation(pei, 0, szLoaction, MAX_PATH, &iIndex, &uFlags);
+       hr = IExtractIconA_GetIconLocation(pei, (flags & SHGFI_OPENICON) ? GIL_OPENICON : 0, szLoaction, MAX_PATH, &iIndex, &uFlags);
        /* fixme what to do with the index? */
 
        if(uFlags != GIL_NOTFILENAME)
@@ -277,14 +283,15 @@ ODINFUNCTION5(DWORD, SHGetFileInfoA, LPCSTR,       path,
      }
      else
      {
-       if (!(PidlToSicIndex(psfParent, pidlLast, (flags && SHGFI_LARGEICON), (PUINT)&(psfi->iIcon))))
+       if (!(PidlToSicIndex(psfParent, pidlLast, (flags && SHGFI_LARGEICON), 
+                            (flags & SHGFI_OPENICON) ? GIL_OPENICON : 0, (PUINT)&(psfi->iIcon))))
        {
          ret = FALSE;
        }
      }
      if (ret)
      {
-       ret = (DWORD) ((flags && SHGFI_LARGEICON) ? ShellBigIconList : ShellSmallIconList);
+       ret = (DWORD) ((flags & SHGFI_LARGEICON) ? ShellBigIconList : ShellSmallIconList);
      }
    }
 
@@ -511,15 +518,17 @@ ODINFUNCTION4(DWORD, SHHelpShortcuts_RunDLL, DWORD, dwArg1,
  * Create an instance of specified object class from within the shell process
  */
 
-ODINFUNCTION1(DWORD, SHLoadInProc, DWORD, dwArg1)
+ODINFUNCTION1(DWORD, SHLoadInProc, REFCLSID, rclsid)
 {
-  CLSID *id;
-
   dprintf(("SHELL32: SHLoadInProc\n"));
-
-  CLSIDFromString((LPCOLESTR) dwArg1, id);
-  if (S_OK==SHCoCreateInstance( (LPSTR) dwArg1, id, NULL, &IID_IUnknown, NULL) )
-        return NOERROR;
+  
+  IUnknown *pUnk = NULL;
+  CoCreateInstance(rclsid, NULL, CLSCTX_INPROC_SERVER, &IID_IUnknown, (LPVOID*)pUnk);
+  if (pUnk)
+  {
+    IUnknown_Release(pUnk);
+    return NOERROR;
+  }
   return DISP_E_MEMBERNOTFOUND;
 }
 
@@ -948,19 +957,14 @@ LPVOID   (WINAPI *pDPA_DeletePtr) (const HDPA hdpa, INT i);
 HICON (WINAPI *pLookupIconIdFromDirectoryEx)(LPBYTE dir, BOOL bIcon, INT width, INT height, UINT cFlag);
 HICON (WINAPI *pCreateIconFromResourceEx)(LPBYTE bits,UINT cbSize, BOOL bIcon, DWORD dwVersion, INT width, INT height,UINT cFlag);
 
-/* ole2 */
-HRESULT (WINAPI* pOleInitialize)(LPVOID reserved);
-void (WINAPI* pOleUninitialize)(void);
-HRESULT (WINAPI* pDoDragDrop)(IDataObject* pDataObject, IDropSource * pDropSource, DWORD dwOKEffect, DWORD *pdwEffect);
-HRESULT (WINAPI* pRegisterDragDrop)(HWND hwnd, IDropTarget* pDropTarget);
-HRESULT (WINAPI* pRevokeDragDrop)(HWND hwnd);
 
 static HINSTANCE  hComctl32;
 static HINSTANCE  hOle32;
 static INT     shell32_RefCount = 0;
 
-INT      shell32_ObjCount = 0;
+LONG        shell32_ObjCount = 0;
 HINSTANCE   shell32_hInstance = 0;
+HMODULE     huser32 = 0;
 HIMAGELIST  ShellSmallIconList = 0;
 HIMAGELIST  ShellBigIconList = 0;
 

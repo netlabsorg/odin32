@@ -1,4 +1,4 @@
-/* $Id: sh.cpp,v 1.10 1999-10-19 10:23:26 phaller Exp $ */
+/* $Id: sh.cpp,v 1.11 2000-08-18 02:01:18 phaller Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -317,27 +317,6 @@ ODINFUNCTION0(DWORD, SHUpdateRecycleBinIcon)
   dprintf(("SHELL32: SHUpdateRecycleBinIcon() not implemented.\n"));
 
   return(0);
-}
-
-
-/*****************************************************************************
- * Name      : HRESULT SHRegDeleteKeyW
- * Purpose   :
- * Parameters:
- * Variables :
- * Result    :
- * Remark    : SHELL32.512
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Tue, 1999/06/09 20:02]
- *****************************************************************************/
-
-ODINFUNCTION2(HRESULT, SHRegDeleteKeyW,
-              HKEY,    hkey,
-              LPWSTR,  lpszKey)
-{
-  return RegDeleteKeyW(hkey,
-                       lpszKey);
 }
 
 

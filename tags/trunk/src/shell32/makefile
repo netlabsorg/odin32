@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.26 2000-07-19 19:05:22 sandervl Exp $
+# $Id: makefile,v 1.27 2000-08-18 02:01:16 phaller Exp $
 
 #
 # Odin32 API
@@ -26,9 +26,12 @@ CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
 OBJS =  \
 $(OBJDIR)\initterm.obj \
 $(OBJDIR)\brsfolder.obj \
+$(OBJDIR)\changenotify.obj \
 $(OBJDIR)\classes.obj \
+$(OBJDIR)\clipboard.obj \
 $(OBJDIR)\contmenu.obj \
 $(OBJDIR)\dataobject.obj \
+$(OBJDIR)\dialogs.obj \
 $(OBJDIR)\enumidlist.obj \
 $(OBJDIR)\folders.obj \
 $(OBJDIR)\iconcache.obj \
@@ -41,12 +44,16 @@ $(OBJDIR)\shelllink.obj \
 $(OBJDIR)\shlmenu.obj \
 $(OBJDIR)\shellpath.obj \
 $(OBJDIR)\shellole.obj \
+$(OBJDIR)\shellreg.obj \
+$(OBJDIR)\shellstring.obj \
 $(OBJDIR)\shellstub.obj \
 $(OBJDIR)\shellord.obj \
-$(OBJDIR)\shv_bg_cmenu.obj \
+$(OBJDIR)\shlfileop.obj \
 $(OBJDIR)\shlfolder.obj \
 $(OBJDIR)\shlview.obj \
 $(OBJDIR)\shell.obj \
+$(OBJDIR)\shv_bg_cmenu.obj \
+$(OBJDIR)\shv_item_cmenu.obj \
 $(OBJDIR)\unknown.obj \
 $(OBJDIR)\misc.obj \
 $(OBJDIR)\she.obj \

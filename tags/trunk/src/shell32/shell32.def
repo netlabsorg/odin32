@@ -1,4 +1,4 @@
-; $Id: shell32.def,v 1.26 2000-05-19 12:09:25 sandervl Exp $
+; $Id: shell32.def,v 1.27 2000-08-18 02:01:19 phaller Exp $
 
 ;Created by BLAST for IBM's compiler
 ;based on Windows 95
@@ -96,7 +96,7 @@ EXPORTS
     OpenRegStream                     = _OpenRegStream@16                     @85
     SHRegisterDragDrop                = _SHRegisterDragDrop@8                 @86
     SHRevokeDragDrop                  = _SHRevokeDragDrop@4                   @87
-    SHDoDragDrop                      = _SHDoDragDrop@24                      @88
+    SHDoDragDrop                      = _SHDoDragDrop@20                      @88
     SHCloneSpecialIDList              = _SHCloneSpecialIDList@12              @89
     SHFindFiles                       = _SHFindFiles@8                        @90
     SHFindComputer                    = _SHFindComputer@8                     @91
@@ -348,6 +348,7 @@ EXPORTS
     SHRegDeleteKeyW                   = _SHRegDeleteKeyW@8                    @512
     SHRegDeleteKeyA                   = _SHRegDeleteKeyA@8                    @513 ;?
     SHAllocShared                     = _SHAllocShared@12                     @520
+    SHInitRestricted                  = _SHInitRestricted@8
     SHLockShared                      = _SHLockShared@8                       @521
     SHUnlockShared                    = _SHUnlockShared@4                     @522
     SHFreeShared                      = _SHFreeShared@8                       @523
