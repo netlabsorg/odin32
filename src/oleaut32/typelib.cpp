@@ -1,4 +1,4 @@
-/* $Id: typelib.cpp,v 1.10 2000-01-09 14:12:19 davidr Exp $ */
+/* $Id: typelib.cpp,v 1.11 2000-01-26 11:26:05 sandervl Exp $ */
 /* 
  * ITypelib interface
  * 
@@ -40,13 +40,11 @@ void OpenPrivateLogFileTypelib()
 
     sprintf(logname, "tlib_%d.log", loadNr);
     _privateLogFile = fopen(logname, "w");
-#if 0
     if(_privateLogFile == NULL)
     {
 	sprintf(logname, "%stlib_%d.log", oleaut32Path, loadNr);
 	_privateLogFile = fopen(logname, "w");
     }
-#endif
     dprintfGlobal(("TLIB LOGFILE : %s", logname));
 }
 
