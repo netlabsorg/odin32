@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.86 2001-02-18 14:18:38 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.87 2001-02-18 17:03:47 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -375,6 +375,8 @@ void selectClientArea(Win32BaseWindow *window, pDCData pHps)
    LONG  rc;
    PRECT pClient = window->getClientRectPtr();
    PRECT pWindow = window->getWindowRect();
+   RECT  rectWindow;
+   RECTL rectWindowOS2;
 
    if(pClient->left == 0 && pClient->top == 0 &&
       window->getClientHeight() == window->getWindowHeight() &&
@@ -396,8 +398,6 @@ void selectClientArea(Win32BaseWindow *window, pDCData pHps)
    {
         //TODO: counter
         dprintf2(("WARNING: selectClientArea %x; already selected! origin (%d,%d) original origin (%d,%d)", window->getWindowHandle(), rcltemp.xLeft, rcltemp.yBottom, pHps->ptlOrigin.x, pHps->ptlOrigin.y));
-        RECT rectWindow;
-        RECTL rectWindowOS2;
         GetWindowRect(window->getWindowHandle(), &rectWindow);
         mapWin32ToOS2Rect(OSLibGetScreenHeight(), &rectWindow, (PRECTLOS2)&rectWindowOS2);
         if(rectWindowOS2.xLeft + rcl.xLeft != rcltemp.xLeft ||
@@ -420,13 +420,30 @@ void selectClientArea(Win32BaseWindow *window, pDCData pHps)
         pHps->ptlOrigin.x = rcltemp.xLeft;
         pHps->ptlOrigin.y = rcltemp.yBottom;
    }
-
    dprintf2(("selectClientArea %x: (%d,%d) -> (%d,%d)", window->getWindowHandle(), rcltemp.xLeft, rcltemp.yBottom, rcl.xLeft, rcl.yBottom));
 
    if(pHps->hrgnVis == 0)
         pHps->hrgnVis = GreCreateRectRegion(pHps->hps, &rcl, 1);
 
    hrgnRect = GreCreateRectRegion(pHps->hps, &rcl, 1);
+#if 0
+   if(window->getParent()) 
+   {
+     HRGN hrgnParentClip;
+
+        pClient = window->getParent()->getClientRectPtr();
+        GetWindowRect(window->getParent()->getWindowHandle(), &rectWindow);
+        rectWindow.right   = rectWindow.left + pClient->right;
+        rectWindow.left   += pClient->left;
+        rectWindow.bottom  = rectWindow.top + pClient->bottom;
+        rectWindow.top    += pClient->top;
+        mapWin32ToOS2Rect(OSLibGetScreenHeight(), &rectWindow, (PRECTLOS2)&rectWindowOS2);
+
+        hrgnParentClip = GreCreateRectRegion(pHps->hps, &rectWindowOS2, 1);
+        GreCombineRegion(pHps->hps, hrgnRect, hrgnParentClip, hrgnRect, CRGN_AND);
+        GreDestroyRegion(pHps->hps, hrgnParentClip);
+   }
+#endif
 
    // Query the visible region
    GreCopyClipRegion(pHps->hps, pHps->hrgnVis, 0, COPYCRGN_VISRGN);
@@ -450,6 +467,23 @@ void selectClientArea(Win32BaseWindow *window, pDCData pHps)
 
    // Destroy the region now we have finished with it.
    GreDestroyRegion(pHps->hps, hrgnRect);
+
+//testestest
+   GpiQueryViewingLimits(pHps->hps, &rectWindowOS2);
+   dprintf(("view limits (%d,%d)(%d,%d)", rectWindowOS2.xLeft, rectWindowOS2.yBottom, rectWindowOS2.xRight, rectWindowOS2.yTop));
+   GpiQueryDefViewingLimits(pHps->hps, &rectWindowOS2);
+   dprintf(("def view limits (%d,%d)(%d,%d)", rectWindowOS2.xLeft, rectWindowOS2.yBottom, rectWindowOS2.xRight, rectWindowOS2.yTop));
+   GpiQueryPageViewport(pHps->hps, &rectWindowOS2);
+   dprintf(("page viewport (%d,%d)(%d,%d)", rectWindowOS2.xLeft, rectWindowOS2.yBottom, rectWindowOS2.xRight, rectWindowOS2.yTop));
+
+   GpiQueryGraphicsField(pHps->hps, &rectWindowOS2);
+   dprintf(("graphics field (%d,%d)(%d,%d)", rectWindowOS2.xLeft, rectWindowOS2.yBottom, rectWindowOS2.xRight, rectWindowOS2.yTop));
+
+   SIZEL size;
+   GpiQueryPickApertureSize(pHps->hps, &size);
+   dprintf(("page viewport (%d,%d)", size.cx, size.cy));
+//testestest
+
 }
 //******************************************************************************
 //******************************************************************************
@@ -1702,7 +1736,7 @@ INT WIN32API ScrollWindowEx(HWND hwnd, int dx, int dy, const RECT *pScroll, cons
                     return 0;
                 }
                 rectChild = *child->getWindowRect();
-                if(pRectUpdate || IntersectRect(&rectChild, &rectChild, &rc))
+                if(!pRectUpdate || IntersectRect(&rectChild, &rectChild, &rc))
                 {
                      dprintf(("ScrollWindowEx: Scroll child window %x", hwndChild));
 		     SetWindowPos(hwndChild, 0, rectChild.left + dx,
@@ -1739,7 +1773,12 @@ INT WIN32API ScrollWindowEx(HWND hwnd, int dx, int dy, const RECT *pScroll, cons
     if ((scrollFlag & SW_INVALIDATE_W) &&
         ((lComplexity == RGN_RECT) || (lComplexity == RGN_COMPLEX)))
     {
-       rc = InvalidateRect (hwnd, &winRectUpdate, (scrollFlag & SW_ERASE_W) ? 1 : 0);
+       rc = RedrawWindow (hwnd, &winRectUpdate, NULLHANDLE,
+                          RDW_ALLCHILDREN_W | RDW_INVALIDATE_W |
+                          ((scrollFlag & SW_ERASE_W) ? RDW_ERASE_W : 0) |
+                          RDW_UPDATENOW_W);
+
+//       rc = InvalidateRect (hwnd, &winRectUpdate, (scrollFlag & SW_ERASE_W) ? 1 : 0);
        if (rc == FALSE)
        {
           return (0);
