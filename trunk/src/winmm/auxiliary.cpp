@@ -1,4 +1,4 @@
-/* $Id: auxiliary.cpp,v 1.1 1999-10-05 19:23:59 phaller Exp $ */
+/* $Id: auxiliary.cpp,v 1.2 2000-01-03 10:29:02 sandervl Exp $ */
 
 /*
  * Auxilary multimedia apis
@@ -17,6 +17,7 @@
 
 #include <os2win.h>
 #include <mmsystem.h>
+#include <mmddk.h>
 #include <odinwrap.h>
 #include <string.h>
 
