@@ -1,4 +1,4 @@
-/* $Id: uniconv.h,v 1.6 2000-04-28 15:15:18 achimha Exp $ */
+/* $Id: uniconv.h,v 1.7 2000-10-03 17:26:04 sandervl Exp $ */
 /*
  * OS/2 Unicode API definitions
  *
@@ -472,4 +472,907 @@ int CALLCONV UniMapCpToUcsCp( unsigned long ulCodePage, UniChar *ucsCodePage, si
 #ifdef __cplusplus
 }
 #endif
+
+#ifdef __cplusplus
+
+//Wrappers for unicode api
+#include <os2sel.h>
+
+inline int _UniCreateLocaleObject(int a, const void *b, LocaleObject *c)
+{
+ int yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = UniCreateLocaleObject(a, b, c);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  UniCreateLocaleObject
+#define UniCreateLocaleObject _UniCreateLocaleObject
+
+inline int _UniQueryLocaleObject(const LocaleObject a, int b, int c, void **d)
+{
+ int yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = UniQueryLocaleObject(a, b, c, d);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  UniQueryLocaleObject
+#define UniQueryLocaleObject _UniQueryLocaleObject
+
+inline int _UniFreeLocaleObject(LocaleObject a)
+{
+ int yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = UniFreeLocaleObject(a);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  UniFreeLocaleObject
+#define UniFreeLocaleObject _UniFreeLocaleObject
+
+inline int _UniFreeMem(void *a)
+{
+ int yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = UniFreeMem(a);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  UniFreeMem
+#define UniFreeMem _UniFreeMem
+
+inline int _UniLocaleStrToToken(int a, const void *b, LocaleToken *c)
+{
+ int yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = UniLocaleStrToToken(a, b, c);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  UniLocaleStrToToken
+#define UniLocaleStrToToken _UniLocaleStrToToken
+
+inline int _UniLocaleTokenToStr(const LocaleToken a, int b, void **c)
+{
+ int yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = UniLocaleTokenToStr(a, b, c);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  UniLocaleTokenToStr
+#define UniLocaleTokenToStr _UniLocaleTokenToStr
+
+inline int _UniQueryLocaleInfo(const LocaleObject a, UniLconv **b)
+{
+ int yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = UniQueryLocaleInfo(a, b);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  UniQueryLocaleInfo
+#define UniQueryLocaleInfo _UniQueryLocaleInfo
+
+inline int _UniFreeLocaleInfo(struct UniLconv *a)
+{
+ int yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = UniFreeLocaleInfo(a);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  UniFreeLocaleInfo
+#define UniFreeLocaleInfo _UniFreeLocaleInfo
+
+inline int _UniQueryLocaleItem(const LocaleObject a, LocaleItem b, UniChar **c)
+{
+ int yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = UniQueryLocaleItem(a, b, c);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  UniQueryLocaleItem
+#define UniQueryLocaleItem _UniQueryLocaleItem
+
+inline size_t _UniStrftime(const LocaleObject a, UniChar *b, size_t c, const UniChar *d, const struct tm *e)
+{
+ size_t yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = UniStrftime(a, b, c, d, e);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  UniStrftime
+#define UniStrftime _UniStrftime
+
+inline UniChar *_UniStrptime(const LocaleObject a, const UniChar *b, const UniChar *c, struct tm *d)
+{
+ UniChar * yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = UniStrptime(a, b, c, d);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  UniStrptime
+#define UniStrptime _UniStrptime
+
+inline UniChar *_UniStrcat(UniChar *a, const UniChar *b)
+{
+ UniChar * yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = UniStrcat(a, b);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  UniStrcat
+#define UniStrcat _UniStrcat
+
+inline UniChar *_UniStrchr(const UniChar *a, UniChar b)
+{
+ UniChar * yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = UniStrchr(a, b);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  UniStrchr
+#define UniStrchr _UniStrchr
+
+inline int _UniStrcmp(const UniChar *a, const UniChar *b)
+{
+ int yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = UniStrcmp(a, b);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  UniStrcmp
+#define UniStrcmp _UniStrcmp
+
+inline UniChar *_UniStrcpy(UniChar *a, const UniChar *b)
+{
+ UniChar * yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = UniStrcpy(a, b);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  UniStrcpy
+#define UniStrcpy _UniStrcpy
+
+inline size_t _UniStrcspn(const UniChar *a, const UniChar *b)
+{
+ size_t yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = UniStrcspn(a, b);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  UniStrcspn
+#define UniStrcspn _UniStrcspn
+
+inline size_t _UniStrlen(const UniChar *a)
+{
+ size_t yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = UniStrlen(a);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  UniStrlen
+#define UniStrlen _UniStrlen
+
+inline UniChar *_UniStrncat(UniChar *a, const UniChar *b, size_t c)
+{
+ UniChar * yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = UniStrncat(a, b, c);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  UniStrncat
+#define UniStrncat _UniStrncat
+
+inline int _UniStrncmp(const UniChar *a, const UniChar *b, size_t c)
+{
+ int yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = UniStrncmp(a, b, c);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  UniStrncmp
+#define UniStrncmp _UniStrncmp
+
+inline UniChar *_UniStrncpy(UniChar *a, const UniChar *b, size_t c)
+{
+ UniChar * yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = UniStrncpy(a, b, c);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  UniStrncpy
+#define UniStrncpy _UniStrncpy
+
+inline UniChar *_UniStrpbrk(const UniChar *a, const UniChar *b)
+{
+ UniChar * yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = UniStrpbrk(a, b);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  UniStrpbrk
+#define UniStrpbrk _UniStrpbrk
+
+inline UniChar *_UniStrrchr(const UniChar *a, UniChar b)
+{
+ UniChar * yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = UniStrrchr(a, b);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  UniStrrchr
+#define UniStrrchr _UniStrrchr
+
+inline size_t _UniStrspn(const UniChar *a, const UniChar *b)
+{
+ size_t yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = UniStrspn(a, b);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  UniStrspn
+#define UniStrspn _UniStrspn
+
+inline UniChar *_UniStrstr(const UniChar *a, const UniChar *b)
+{
+ UniChar * yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = UniStrstr(a, b);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  UniStrstr
+#define UniStrstr _UniStrstr
+
+inline UniChar *_UniStrtok(UniChar *a, const UniChar *b)
+{
+ UniChar * yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = UniStrtok(a, b);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  UniStrtok
+#define UniStrtok _UniStrtok
+
+inline int _UniCreateAttrObject(const LocaleObject a, const UniChar *b, AttrObject *c)
+{
+ int yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = UniCreateAttrObject(a, b, c);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  UniCreateAttrObject
+#define UniCreateAttrObject _UniCreateAttrObject
+
+inline int _UniQueryCharAttr(AttrObject a, UniChar b)
+{
+ int yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = UniQueryCharAttr(a, b);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  UniQueryCharAttr
+#define UniQueryCharAttr _UniQueryCharAttr
+
+inline int _UniScanForAttr(AttrObject a, const UniChar *b, size_t c, ulsBool d, size_t *e)
+{
+ int yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = UniScanForAttr(a, b, c, d, e);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  UniScanForAttr
+#define UniScanForAttr _UniScanForAttr
+
+inline int _UniFreeAttrObject(AttrObject a)
+{
+ int yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = UniFreeAttrObject(a);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  UniFreeAttrObject
+#define UniFreeAttrObject _UniFreeAttrObject
+
+inline int _UniQueryAlnum(const LocaleObject a, UniChar b)
+{
+ int yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = UniQueryAlnum(a, b);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  UniQueryAlnum
+#define UniQueryAlnum _UniQueryAlnum
+
+inline int _UniQueryAlpha(const LocaleObject a, UniChar b)
+{
+ int yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = UniQueryAlpha(a, b);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  UniQueryAlpha
+#define UniQueryAlpha _UniQueryAlpha
+
+inline int _UniQueryBlank(const LocaleObject a, UniChar b)
+{
+ int yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = UniQueryBlank(a, b);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  UniQueryBlank
+#define UniQueryBlank _UniQueryBlank
+
+inline int _UniQueryCntrl(const LocaleObject a, UniChar b)
+{
+ int yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = UniQueryCntrl(a, b);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  UniQueryCntrl
+#define UniQueryCntrl _UniQueryCntrl
+
+inline int _UniQueryDigit(const LocaleObject a, UniChar b)
+{
+ int yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = UniQueryDigit(a, b);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  UniQueryDigit
+#define UniQueryDigit _UniQueryDigit
+
+inline int _UniQueryGraph(const LocaleObject a, UniChar b)
+{
+ int yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = UniQueryGraph(a, b);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  UniQueryGraph
+#define UniQueryGraph _UniQueryGraph
+
+inline int _UniQueryLower(const LocaleObject a, UniChar b)
+{
+ int yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = UniQueryLower(a, b);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  UniQueryLower
+#define UniQueryLower _UniQueryLower
+
+inline int _UniQueryPrint(const LocaleObject a, UniChar b)
+{
+ int yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = UniQueryPrint(a, b);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  UniQueryPrint
+#define UniQueryPrint _UniQueryPrint
+
+inline int _UniQueryPunct(const LocaleObject a, UniChar b)
+{
+ int yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = UniQueryPunct(a, b);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  UniQueryPunct
+#define UniQueryPunct _UniQueryPunct
+
+inline int _UniQuerySpace(const LocaleObject a, UniChar b)
+{
+ int yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = UniQuerySpace(a, b);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  UniQuerySpace
+#define UniQuerySpace _UniQuerySpace
+
+inline int _UniQueryUpper(const LocaleObject a, UniChar b)
+{
+ int yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = UniQueryUpper(a, b);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  UniQueryUpper
+#define UniQueryUpper _UniQueryUpper
+
+inline int _UniQueryXdigit(const LocaleObject a, UniChar b)
+{
+ int yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = UniQueryXdigit(a, b);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  UniQueryXdigit
+#define UniQueryXdigit _UniQueryXdigit
+
+inline int _UniCreateTransformObject(const LocaleObject a, const UniChar *b, XformObject *c)
+{
+ int yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = UniCreateTransformObject(a, b, c);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  UniCreateTransformObject
+#define UniCreateTransformObject _UniCreateTransformObject
+
+inline int _UniTransformStr(XformObject a, const UniChar *b, int *c, UniChar *d, int *e)
+{
+ int yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = UniTransformStr(a, b, c, d, e);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  UniTransformStr
+#define UniTransformStr _UniTransformStr
+
+inline int _UniFreeTransformObject(XformObject a)
+{
+ int yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = UniFreeTransformObject(a);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  UniFreeTransformObject
+#define UniFreeTransformObject _UniFreeTransformObject
+
+inline UniChar _UniTransLower(const LocaleObject a, UniChar b)
+{
+ UniChar yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = UniTransLower(a, b);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  UniTransLower
+#define UniTransLower _UniTransLower
+
+inline UniChar _UniTransUpper(const LocaleObject a, UniChar b)
+{
+ UniChar yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = UniTransUpper(a, b);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  UniTransUpper
+#define UniTransUpper _UniTransUpper
+
+inline int _UniStrtod(const LocaleObject a, const UniChar *b, UniChar **c, double *d)
+{
+ int yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = UniStrtod(a, b, c, d);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  UniStrtod
+#define UniStrtod _UniStrtod
+
+inline int _UniStrtol(const LocaleObject a, const UniChar *b, UniChar **c, int d, long *e)
+{
+ int yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = UniStrtol(a, b, c, d, e);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  UniStrtol
+#define UniStrtol _UniStrtol
+
+inline int _UniStrtoul(const LocaleObject a, const UniChar *b, UniChar **c, int d, unsigned long *e)
+{
+ int yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = UniStrtoul(a, b, c, d, e);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  UniStrtoul
+#define UniStrtoul _UniStrtoul
+
+inline int _UniStrcoll(const LocaleObject a, const UniChar *b, const UniChar *c)
+{
+ int yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = UniStrcoll(a, b, c);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  UniStrcoll
+#define UniStrcoll _UniStrcoll
+
+inline size_t _UniStrxfrm(const LocaleObject a, UniChar *b, const UniChar *c, size_t d)
+{
+ size_t yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = UniStrxfrm(a, b, c, d);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  UniStrxfrm
+#define UniStrxfrm _UniStrxfrm
+
+inline int _UniStrcmpi(const LocaleObject a, const UniChar *b, const UniChar *c)
+{
+ int yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = UniStrcmpi(a, b, c);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  UniStrcmpi
+#define UniStrcmpi _UniStrcmpi
+
+inline int _UniStrncmpi(const LocaleObject a, const UniChar *b, const UniChar *c, const size_t d)
+{
+ int yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = UniStrncmpi(a, b, c, d);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  UniStrncmpi
+#define UniStrncmpi _UniStrncmpi
+
+inline UniChar _UniToupper(UniChar a)
+{
+ UniChar yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = UniToupper(a);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  UniToupper
+#define UniToupper _UniToupper
+
+inline UniChar _UniTolower(UniChar a)
+{
+ UniChar yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = UniTolower(a);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  UniTolower
+#define UniTolower _UniTolower
+
+inline UniChar *_UniStrupr(UniChar *a)
+{
+ UniChar * yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = UniStrupr(a);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  UniStrupr
+#define UniStrupr _UniStrupr
+
+inline UniChar *_UniStrlwr(UniChar *a)
+{
+ UniChar * yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = UniStrlwr(a);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  UniStrlwr
+#define UniStrlwr _UniStrlwr
+
+inline int _UniMapCtryToLocale(long a, UniChar *b, size_t c)
+{
+ int yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = UniMapCtryToLocale(a, b, c);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  UniMapCtryToLocale
+#define UniMapCtryToLocale _UniMapCtryToLocale
+
+inline int _UniCreateUconvObject(UniChar *a, UconvObject *b)
+{
+ int yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = UniCreateUconvObject(a, b);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  UniCreateUconvObject
+#define UniCreateUconvObject _UniCreateUconvObject
+
+inline int _UniQueryUconvObject(UconvObject a, uconv_attribute_t *b, size_t c, char d[256], char e[256], udcrange_t f[32])
+{
+ int yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = UniQueryUconvObject(a, b, c, d, e, f);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  UniQueryUconvObject
+#define UniQueryUconvObject _UniQueryUconvObject
+
+inline int _UniSetUconvObject(UconvObject a, uconv_attribute_t *b)
+{
+ int yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = UniSetUconvObject(a, b);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  UniSetUconvObject
+#define UniSetUconvObject _UniSetUconvObject
+
+inline int _UniUconvToUcs(UconvObject a, void **b, size_t *c, UniChar **d, size_t *e, size_t *f)
+{
+ int yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = UniUconvToUcs(a, b, c, d, e, f);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  UniUconvToUcs
+#define UniUconvToUcs _UniUconvToUcs
+
+inline int _UniUconvFromUcs(UconvObject a, UniChar **b, size_t *c, void **d, size_t *e, size_t *f)
+{
+ int yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = UniUconvFromUcs(a, b, c, d, e, f);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  UniUconvFromUcs
+#define UniUconvFromUcs _UniUconvFromUcs
+
+inline int _UniFreeUconvObject(UconvObject a)
+{
+ int yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = UniFreeUconvObject(a);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  UniFreeUconvObject
+#define UniFreeUconvObject _UniFreeUconvObject
+#endif //__cplusplus
+
 #endif
