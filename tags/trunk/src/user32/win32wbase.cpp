@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.280 2001-09-15 09:16:08 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.281 2001-09-15 15:23:12 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -3244,6 +3244,11 @@ HWND Win32BaseWindow::SetActiveWindow()
  HWND hwndActive;
 
     dprintf(("SetActiveWindow %x", getWindowHandle()));
+    if(getStyle() & (WS_DISABLED | WS_CHILD)) {
+        dprintf(("WARNING: Window is a child or disabled"));
+        return 0;
+    }
+
     if(GetActiveWindow() == getWindowHandle()) {
         dprintf(("Window already active"));
         return getWindowHandle();
