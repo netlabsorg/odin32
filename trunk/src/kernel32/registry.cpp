@@ -1,4 +1,4 @@
-/* $Id: registry.cpp,v 1.4 2000-10-02 22:17:33 sandervl Exp $ */
+/* $Id: registry.cpp,v 1.5 2000-10-18 17:09:33 sandervl Exp $ */
 
 /*
  * Win32 registry API functions for OS/2
@@ -643,11 +643,11 @@ ODINFUNCTION5(LONG,RegOpenKeyExW,HKEY,   arg1,
   char *astring = UnicodeToAsciiString((LPWSTR)arg2);
   LONG  rc;
 
-  rc = O32_RegOpenKeyEx(ConvertKey(arg1),
-                        astring,
-                        arg3,
-                        arg4,
-                        arg5);
+  rc = CALL_ODINFUNC(RegOpenKeyExA)(ConvertKey(arg1),
+                                    astring,
+                                    arg3,
+                                    arg4,
+                                    arg5);
   //SvL: This fixes crashes in pmwinx.dll. (if an app doesn't check the
   //     return value and uses the whatever *arg5 contains)
   if(rc)
@@ -799,10 +799,10 @@ ODINFUNCTION4(LONG,RegQueryValueW,HKEY,   hkey,
   char *astring2;
   LONG  rc;
 
-  rc = O32_RegQueryValue(ConvertKey(hkey),
-                         astring1,
-                         (char *)lpszValue,
-                         pcbValue);
+  rc = CALL_ODINFUNC(RegQueryValueA)(ConvertKey(hkey),
+                                     astring1,
+                                     (char *)lpszValue,
+                                     pcbValue);
   if(rc == ERROR_SUCCESS)
   {
 	if(pcbValue) {
@@ -836,8 +836,8 @@ ODINFUNCTION6(LONG,RegQueryValueExA,HKEY,   arg1,
                                     LPBYTE, arg5,
                                     LPDWORD,arg6)
 {
-  dprintf(("ADVAPI32:Registry key=%s\n",
-           arg2));
+  dprintf(("ADVAPI32:Registry key=%s", arg2));
+
   return O32_RegQueryValueEx(ConvertKey(arg1),
                              arg2,
                              arg3,
@@ -869,12 +869,12 @@ ODINFUNCTION6(LONG,RegQueryValueExW,HKEY,   arg1,
   char *astring = UnicodeToAsciiString(arg2);
   LONG  rc;
 
-  rc = O32_RegQueryValueEx(ConvertKey(arg1),
-                           astring,
-                           arg3,
-                           arg4,
-                           arg5,
-                           arg6);
+  rc = CALL_ODINFUNC(RegQueryValueExA)(ConvertKey(arg1),
+                                       astring,
+                                       arg3,
+                                       arg4,
+                                       arg5,
+                                       arg6);
   FreeAsciiString(astring);
   return(rc);
 }

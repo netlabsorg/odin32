@@ -1,4 +1,4 @@
-/* $Id: process.cpp,v 1.6 2000-03-10 16:12:00 sandervl Exp $ */
+/* $Id: process.cpp,v 1.7 2000-10-18 17:09:33 sandervl Exp $ */
 
 /*
  * Win32 process functions for OS/2
@@ -68,12 +68,12 @@ HANDLE WIN32API OpenProcess(DWORD arg1, BOOL arg2, DWORD arg3)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API GetExitCodeProcess(HANDLE arg1, LPDWORD  arg2)
+BOOL WIN32API GetExitCodeProcess(HANDLE hProcess, LPDWORD  arg2)
 {
  BOOL rc;
 
-    rc = O32_GetExitCodeProcess(arg1, arg2);
-    dprintf(("KERNEL32:  GetExitCodeProcess returned %d (%x)", rc, (arg2) ? *arg2 : 0));
+    rc = O32_GetExitCodeProcess(hProcess, arg2);
+    dprintf(("KERNEL32:  GetExitCodeProcess %x returned %d (%x)", hProcess, rc, (arg2) ? *arg2 : 0));
     return rc;
 }
 //******************************************************************************

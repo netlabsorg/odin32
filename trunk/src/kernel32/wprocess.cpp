@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.104 2000-10-16 11:05:15 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.105 2000-10-18 17:09:34 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -791,8 +791,8 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HANDLE hFile, DWORD dwFla
      *      Endif
      *  Endif
      */
-    //only call Open32 if dwFlags == 0 and (LX binary or win32k process)
-    if(dwFlags == 0 && (!fPeLoader || fPE != ERROR_SUCCESS))
+    //only call Open32 if LX binary or win32k process
+    if(!fPeLoader || fPE != ERROR_SUCCESS)
     {
         hDll = O32_LoadLibrary(szModname);
         if (hDll)
@@ -805,12 +805,12 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HANDLE hFile, DWORD dwFla
                 {
                         ((Win32LxDll *)pModule)->setDllHandleOS2(hDll);
                         if(fPeLoader)
-            {
+                        {
                             if(pModule->AddRef() == -1) {//-1 -> load failed (attachProcess)
-                    dprintf(("Dll %s refused to be loaded; aborting", szModname));
-                    delete pModule;
-                    return 0;
-                }
+                                dprintf(("Dll %s refused to be loaded; aborting", szModname));
+                                delete pModule;
+                                return 0;
+                            }
                         }
                 }
                 pModule->incDynamicLib();
@@ -923,7 +923,7 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HANDLE hFile, DWORD dwFla
                          lpszLibFile, hFile, dwFlags));
                 SetLastError(ERROR_DLL_INIT_FAILED);
                 delete peldrDll;
-        return NULL;
+                return NULL;
             }
         }
         else
@@ -932,7 +932,7 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HANDLE hFile, DWORD dwFla
                      lpszLibFile, hFile, dwFlags, peldrDll->getError()));
             SetLastError(ERROR_INVALID_EXE_SIGNATURE);
             delete peldrDll;
-        return NULL;
+            return NULL;
         }
     }
     else
@@ -940,7 +940,7 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HANDLE hFile, DWORD dwFla
         dprintf(("KERNEL32: LoadLibraryExA(%s, 0x%x, 0x%x) library wasn't found (%s) or isn't loadable; err %x",
                  lpszLibFile, hFile, dwFlags, szModname, fPE));
         SetLastError(fPE);
-    return NULL;
+        return NULL;
     }
 
     return hDll;

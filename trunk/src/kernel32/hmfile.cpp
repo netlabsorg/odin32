@@ -1,4 +1,4 @@
-/* $Id: hmfile.cpp,v 1.22 2000-10-10 17:14:03 sandervl Exp $ */
+/* $Id: hmfile.cpp,v 1.23 2000-10-18 17:09:32 sandervl Exp $ */
 
 /*
  * File IO win32 apis
@@ -595,11 +595,6 @@ BOOL HMDeviceFileClass::WriteFile(PHMHANDLEDATA pHMHandleData,
                             nNumberOfBytesToWrite,
                             lpNumberOfBytesWritten);
 //  }
-
-//testestest!!!!
-    dprintf(("%s", lpRealBuf));
-//testestest!!!!
-
 
   dprintf(("KERNEL32: HMDeviceFileClass::WriteFile returned %08xh\n",
            bRC));
