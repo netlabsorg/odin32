@@ -1,4 +1,4 @@
-/* $Id: hmopen32.cpp,v 1.8 1999-07-06 15:48:47 phaller Exp $ */
+/* $Id: hmopen32.cpp,v 1.9 1999-08-25 14:27:06 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -67,6 +67,43 @@ DWORD  HMDeviceOpen32Class::_DeviceRequest (PHMHANDLEDATA pHMHandleData,
   return(ERROR_INVALID_FUNCTION);
 }
 
+
+/*****************************************************************************
+ * Name      : HMDeviceHandler::DuplicateHandle
+ * Purpose   : dummy version
+ * Parameters: 
+ *             various parameters as required
+ * Variables :
+ * Result    :
+ * Remark    : the standard behaviour is to return an error code for non-
+ *             existant request codes
+ * Status    :
+ *
+ * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
+ *****************************************************************************/
+BOOL HMDeviceOpen32Class::DuplicateHandle(PHMHANDLEDATA pHMHandleData, HANDLE  srcprocess,
+                               PHMHANDLEDATA pHMSrcHandle,
+                               HANDLE  destprocess,
+                               PHANDLE desthandle,
+                       	       DWORD   fdwAccess,
+                       	       BOOL    fInherit,
+                               DWORD   fdwOptions)
+{
+ BOOL rc;
+
+  dprintf(("KERNEL32:HandleManager::Open32::DuplicateHandle %s(%08x,%08x,%08x,%08x,%08x)\n",
+           lpHMDeviceName,
+           pHMHandleData,
+           srcprocess, pHMSrcHandle->hHMHandle, destprocess, desthandle));
+
+  rc = O32_DuplicateHandle(srcprocess, pHMSrcHandle->hHMHandle, destprocess, desthandle, fdwAccess, fInherit, fdwOptions);
+
+  if(rc == TRUE) {
+     	pHMHandleData->hHMHandle = *desthandle;
+     	return (NO_ERROR);
+  }
+  else  return(O32_GetLastError());
+}
 
 /*****************************************************************************
  * Name      : DWORD HMDeviceOpen32Class::CreateFile

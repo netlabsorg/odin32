@@ -1,4 +1,4 @@
-/* $Id: exceptions.cpp,v 1.12 1999-08-25 10:28:40 sandervl Exp $ */
+/* $Id: exceptions.cpp,v 1.13 1999-08-25 14:27:05 sandervl Exp $ */
 
 /*
  * Win32 Device IOCTL API functions for OS/2
@@ -900,7 +900,7 @@ ULONG APIENTRY OS2ExceptionHandler(PEXCEPTIONREPORTRECORD       pERepRec,
 	if(pERepRec->ExceptionInfo[1] == 0 && pERepRec->ExceptionInfo[1] == XCPT_DATA_UNKNOWN) {
 		goto continueFail;
 	}
-       	map = Win32MemMap::findMap(pERepRec->ExceptionInfo[0]);
+       	map = Win32MemMap::findMap(pERepRec->ExceptionInfo[1]);
 	if(map == NULL) {
 		goto continueFail;
 	}

@@ -1,4 +1,4 @@
-/* $Id: virtual.cpp,v 1.6 1999-08-25 12:30:48 sandervl Exp $ */
+/* $Id: virtual.cpp,v 1.7 1999-08-25 14:27:07 sandervl Exp $ */
 
 /*
  * Win32 virtual memory functions
@@ -198,7 +198,7 @@ BOOL WINAPI UnmapViewOfFile(LPVOID addr /* [in] Address where mapped view begins
  */
 HANDLE WINAPI VIRTUAL_MapFileW( LPCWSTR name , LPVOID *lpMapping)
 {
-    HANDLE hFile, hMapping = 0;
+    HANDLE hFile, hMapping = -1;
 
     hFile = CreateFileW( name, GENERIC_READ, FILE_SHARE_READ, NULL, 
                            OPEN_EXISTING, FILE_FLAG_RANDOM_ACCESS, 0);
@@ -206,7 +206,7 @@ HANDLE WINAPI VIRTUAL_MapFileW( LPCWSTR name , LPVOID *lpMapping)
     {
         hMapping = CreateFileMappingA( hFile, NULL, PAGE_READONLY, 0, 0, NULL );
         CloseHandle( hFile );
-        if (hMapping)
+        if (hMapping != INVALID_HANDLE_VALUE)
         {
             *lpMapping = MapViewOfFile( hMapping, FILE_MAP_READ, 0, 0, 0 );
         }
@@ -223,7 +223,7 @@ HANDLE WINAPI VIRTUAL_MapFileW( LPCWSTR name , LPVOID *lpMapping)
  */
 HANDLE WINAPI VIRTUAL_MapFileA( LPCSTR name , LPVOID *lpMapping)
 {
-    HANDLE hFile, hMapping = 0;
+    HANDLE hFile, hMapping = -1;
 
     hFile = CreateFileA(name, GENERIC_READ, FILE_SHARE_READ, NULL, 
                         OPEN_EXISTING, FILE_FLAG_RANDOM_ACCESS, 0);
@@ -231,7 +231,7 @@ HANDLE WINAPI VIRTUAL_MapFileA( LPCSTR name , LPVOID *lpMapping)
     {
         hMapping = CreateFileMappingA( hFile, NULL, PAGE_READONLY, 0, 0, NULL );
         CloseHandle( hFile );
-        if (hMapping)
+        if (hMapping != INVALID_HANDLE_VALUE)
         {
             *lpMapping = MapViewOfFile( hMapping, FILE_MAP_READ, 0, 0, 0 );
         }

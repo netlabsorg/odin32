@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.32 1999-08-25 12:30:48 sandervl Exp $
+# $Id: makefile,v 1.33 1999-08-25 14:27:07 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -257,6 +257,7 @@ handlemanager.OBJ: \
         .\hmopen32.h \
         .\hmsemaphore.h \
         .\hmmmap.h \
+        $(PDWIN32_INCLUDE)\winconst.h \
         $(PDWIN32_INCLUDE)\handlemanager.h
 
 hmdevice.OBJ: \
