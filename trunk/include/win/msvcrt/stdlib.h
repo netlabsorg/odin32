@@ -85,7 +85,11 @@ extern WCHAR***              __p___wargv(void);
 extern char***               __p__environ(void);
 extern WCHAR***              __p__wenviron(void);
 extern int*                  __p___mb_cur_max(void);
+#ifndef __WIN32OS2__
 extern unsigned long*        __doserrno(void);
+#else
+extern unsigned long*        MSVCRT_doserrno(void);
+#endif
 extern unsigned int*         __p__fmode(void);
 /* FIXME: We need functions to access these:
  * int _sys_nerr;
@@ -128,26 +132,26 @@ long double _atold(const char*);
 void        _beep(unsigned int,unsigned int);
 char*       _ecvt(double,int,int*,int*);
 char*       _fcvt(double,int,int*,int*);
-char*       _fullpath(char*,const char*,MSVCRT(size_t));
+char*       MSVCRT(_fullpath)(char*,const char*,MSVCRT(size_t));
 char*       _gcvt(double,int,char*);
 char*       _i64toa(__int64,char*,int);
 char*       _itoa(int,char*,int);
 char*       _ltoa(long,char*,int);
-unsigned long _lrotl(unsigned long,int);
-unsigned long _lrotr(unsigned long,int);
+unsigned long MSVCRT(_lrotl)(unsigned long,int);
+unsigned long MSVCRT(_lrotr)(unsigned long,int);
 void        _makepath(char*,const char*,const char*,const char*,const char*);
 MSVCRT(size_t) _mbstrlen(const char*);
-_onexit_t   _onexit(_onexit_t);
+_onexit_t   MSVCRT_onexit(_onexit_t);
 int         _putenv(const char*);
 unsigned int _rotl(unsigned int,int);
 unsigned int _rotr(unsigned int,int);
-void        _searchenv(const char*,const char*,char*);
+void        MSVCRT(_searchenv)(const char*,const char*,char*);
 int         _set_error_mode(int);
 void        _seterrormode(int);
-void        _sleep(unsigned long);
+void        MSVCRT(_sleep)(unsigned long);
 void        _splitpath(const char*,char*,char*,char*,char*);
 long double _strtold(const char*,char**);
-void        _swab(char*,char*,int);
+void        MSVCRT(_swab)(char*,char*,int);
 char*       _ui64toa(unsigned __int64,char*,int);
 char*       _ultoa(unsigned long,char*,int);
 

@@ -28,19 +28,19 @@ typedef unsigned int MSVCRT(size_t);
 extern "C" {
 #endif
 
-void*       _memccpy(void*,const void*,int,MSVCRT(size_t));
-int         _memicmp(const void*,const void*,MSVCRT(size_t));
-int         _strcmpi(const char*,const char*);
-char*       _strdup(const char*);
-char*       _strerror(const char*);
-int         _stricmp(const char*,const char*);
-int         _stricoll(const char*,const char*);
-char*       _strlwr(char*);
-int         _strnicmp(const char*,const char*,MSVCRT(size_t));
-char*       _strnset(char*,int,MSVCRT(size_t));
-char*       _strrev(char*);
-char*       _strset(char*,int);
-char*       _strupr(char*);
+void*       MSVCRT(_memccpy)(void*,const void*,int,MSVCRT(size_t));
+int         MSVCRT(_memicmp)(const void*,const void*,MSVCRT(size_t));
+int         MSVCRT(_strcmpi)(const char*,const char*);
+char*       MSVCRT(_strdup)(const char*);
+char*       MSVCRT(_strerror)(const char*);
+int         MSVCRT(_stricmp)(const char*,const char*);
+int         MSVCRT(_stricoll)(const char*,const char*);
+char*       MSVCRT(_strlwr)(char*);
+int         MSVCRT(_strnicmp)(const char*,const char*,MSVCRT(size_t));
+char*       MSVCRT(_strnset)(char*,int,MSVCRT(size_t));
+char*       MSVCRT(_strrev)(char*);
+char*       MSVCRT(_strset)(char*,int);
+char*       MSVCRT(_strupr)(char*);
 
 void*       MSVCRT(memchr)(const void*,int,MSVCRT(size_t));
 int         MSVCRT(memcmp)(const void*,const void*,MSVCRT(size_t));
@@ -53,7 +53,7 @@ int         MSVCRT(strcmp)(const char*,const char*);
 int         MSVCRT(strcoll)(const char*,const char*);
 char*       MSVCRT(strcpy)(char*,const char*);
 MSVCRT(size_t) MSVCRT(strcspn)(const char*,const char*);
-char*       MSVCRT(strerror)(int);
+char*       MSVCRTstrerror(int);
 MSVCRT(size_t) MSVCRT(strlen)(const char*);
 char*       MSVCRT(strncat)(char*,const char*,MSVCRT(size_t));
 int         MSVCRT(strncmp)(const char*,const char*,MSVCRT(size_t));
