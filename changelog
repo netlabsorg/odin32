@@ -1,4 +1,9 @@
-/* $Id: changelog,v 1.2315 2002-09-18 10:59:41 sandervl Exp $ */
+/* $Id: changelog,v 1.2316 2002-09-19 09:37:20 sandervl Exp $ */
+
+ 2002-09-19: Platon Fomichev <platon@innotek   >
+    - USER32:   o Put window on top of owner if owner is not in the foreground;
+                  HWND_TOP forces the owner to the top as well
+                  (window creation)
 
  2002-09-18: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o Added code to print leaked heap memory
