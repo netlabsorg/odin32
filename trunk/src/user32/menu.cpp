@@ -1,4 +1,4 @@
-/* $Id: menu.cpp,v 1.24 2000-10-22 16:18:59 sandervl Exp $*/
+/* $Id: menu.cpp,v 1.25 2000-10-22 19:53:23 sandervl Exp $*/
 /*
  * Menu functions
  *
@@ -98,7 +98,25 @@ typedef struct
 } MTRACKER;
 
 #define MENU_MAGIC   0x554d  /* 'MU' */
-#define IS_A_MENU(pmenu) ((pmenu) && !IsWindow((HWND)pmenu) && (pmenu)->wMagic == MENU_MAGIC)
+
+#ifdef __WIN32OS2__
+//******************************************************************************
+//Used by our menu code (we don't want any logging)
+//******************************************************************************
+BOOL IsWindowInternal(HWND hwnd)
+{
+  Win32BaseWindow *window;
+
+    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
+    if(!window) {
+        return FALSE;
+    }
+    return window->IsWindow();
+}
+#define IS_A_MENU(pmenu) ((pmenu) && !IsWindowInternal((HWND)pmenu) && (pmenu)->wMagic == MENU_MAGIC)
+#else
+#define IS_A_MENU(pmenu) ((pmenu) && (pmenu)->wMagic == MENU_MAGIC)
+#endif
 
 #define ITEM_PREV               -1
 #define ITEM_NEXT                1
