@@ -1,4 +1,4 @@
-/* $Id: configure.cmd,v 1.24 2002-04-29 11:57:59 bird Exp $
+/* $Id: configure.cmd,v 1.25 2002-08-20 05:49:51 bird Exp $
  *
  * Configuration script.
  * Generates makefile.inc and an empty .depend file.
@@ -200,14 +200,18 @@
         sDir = directory();
         if (chdir('kKrnlLib')) then
         do
-            if (fInteractive) then
+            '@mkdir kLib 2> nul > nul'
+            if (chdir('kLib')) then
             do
-                say 'Log in to the kLib cvs repository? (Y/N)';
-                pull sAnswer
-                if (substr(sAnswer, 1, 1) = 'Y') then
-                    'cvs -d:pserver:readonly@www.netlabs.org:/netlabs.cvs/ktaskmanager login'
+                if (fInteractive) then
+                do
+                    say 'Log in to the kLib cvs repository? (Y/N)';
+                    pull sAnswer
+                    if (substr(sAnswer, 1, 1) = 'Y') then
+                        'cvs -d:pserver:readonly@www.netlabs.org:/netlabs.cvs/ktaskmanager login'
+                end
+                'cvs -d:pserver:readonly@www.netlabs.org:/netlabs.cvs/ktaskmanager co kLibSrc kLibInclude'
             end
-            'cvs -d:pserver:readonly@www.netlabs.org:/netlabs.cvs/ktaskmanager co kLibSrc kLibInclude'
         end
         call directory sDir;
     end
