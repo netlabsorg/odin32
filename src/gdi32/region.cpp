@@ -1,4 +1,4 @@
-/* $Id: region.cpp,v 1.22 2001-09-30 22:22:53 sandervl Exp $ */
+/* $Id: region.cpp,v 1.23 2001-10-10 22:20:22 phaller Exp $ */
 
 /*
  * GDI32 region code
@@ -12,6 +12,11 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+
+// Note: profiling currently not supported for this file
+#undef PROFILE
+#include <odinwrap.h>
+
 #define  INCL_GPI
 #define  INCL_WIN
 #include <os2wrap.h> //need odin wrappers
@@ -23,7 +28,6 @@
 #include <stdarg.h>
 #include <string.h>
 #include <misc.h>
-#include <odinwrap.h>
 #include <objhandle.h>
 #include <dcdata.h>
 #include <winuser32.h>
@@ -31,6 +35,10 @@
 
 #define DBG_LOCALLOG    DBG_region
 #include "dbglocal.h"
+
+
+ODINDEBUGCHANNEL(GDI32-REGION)
+
 
 typedef enum
 {
