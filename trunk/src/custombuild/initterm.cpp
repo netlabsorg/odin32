@@ -70,6 +70,7 @@ ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
    size_t i;
    APIRET rc;
    ULONG  version[2];
+   static BOOL fInit = FALSE, fExit = FALSE;
 
    /*-------------------------------------------------------------------------*/
    /* If ulFlag is zero then the DLL is being loaded so initialization should */
@@ -79,6 +80,7 @@ ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
 
    switch (ulFlag) {
       case 0 :
+      {
          /*******************************************************************/
          /* The C run-time environment initialization function must be      */
          /* called before any calls to C run-time functions that are not    */
@@ -104,7 +106,11 @@ ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
          if(rc)
                 return 0UL;
 
-         CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
+         char szErrName[CCHMAXPATH];
+         rc = DosLoadModule(szErrName, sizeof(szErrName), "XXODIN32.DLL", &hModule);
+         if(rc != 0) {
+             return 0;
+         }
 
          if(RegCreateKeyA(HKEY_LOCAL_MACHINE,"Software\\XXOdin32\\REGROOT_HKEY_ClassesRoot",&hKeyClassesRoot)!=ERROR_SUCCESS_W) {
              return 0;
@@ -174,7 +180,10 @@ ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
 
          SetCustomBuildName(NULL);
          break;
+      }
+
       case 1 :
+      {
          inittermComdlg32(hModule, ulFlag);
          inittermShell32(hModule, ulFlag);
          inittermComctl32(hModule, ulFlag);
@@ -185,6 +194,7 @@ ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
          inittermUser32(hModule, ulFlag);
          inittermKernel32(hModule, ulFlag);
          break;
+      }
 
       default  :
          return 0UL;
@@ -214,9 +224,9 @@ ULONG APIENTRY InitializeKernel32()
 {
     HMODULE hModule;
 
-    DosQueryModuleHandle("OPWGSS50", &hModule);
+    DosQueryModuleHandle("WGSS50", &hModule);
     O32__DLL_InitTerm(hModule, 0);
-    DosQueryModuleHandle("OPODIN32", &hModule);
+    DosQueryModuleHandle("XXODIN32", &hModule);
     return inittermKernel32(hModule, 0);
 }
 //******************************************************************************
