@@ -1,4 +1,4 @@
-/* $Id: asyncapi.cpp,v 1.8 2000-05-18 22:54:20 sandervl Exp $ */
+/* $Id: asyncapi.cpp,v 1.9 2001-04-28 16:15:18 sandervl Exp $ */
 
 /*
  *
@@ -436,6 +436,7 @@ asyncloopstart:
       	//block if no events are pending
       	if(lEventsPending == 0)
       	{
+		dprintf2(("WSAsyncSelectThreadProc: waiting for new events"));
 		//wait for events to be enabled
 		pThreadParm->u.asyncselect.asyncSem->wait();
 		//reset event semaphore
@@ -459,14 +460,14 @@ asyncloopstart:
 		sockets[noexcept] = s;
 	}
 
-////        dprintf(("WSAsyncSelectThreadProc %x rds=%d, wrs=%d, oos =%d, pending = %x", pThreadParm->u.asyncselect.s, noread, nowrite, noexcept, lEventsPending));
+        dprintf2(("WSAsyncSelectThreadProc %x rds=%d, wrs=%d, oos =%d, pending = %x", pThreadParm->u.asyncselect.s, noread, nowrite, noexcept, lEventsPending));
 
 	pThreadParm->fWaitSelect = TRUE;
 	ret = select((int *)sockets, nr(noread), nr(nowrite), nr(noexcept), -1);
 	pThreadParm->fWaitSelect = FALSE;
 	if(ret == SOCKET_ERROR) {
 		int selecterr = sock_errno();
-////        	dprintf(("WSAsyncSelectThreadProc %x rds=%d, wrs=%d, oos =%d, pending = %x select returned %x", pThreadParm->u.asyncselect.s, noread, nowrite, noexcept, lEventsPending, selecterr));
+        	dprintf2(("WSAsyncSelectThreadProc %x rds=%d, wrs=%d, oos =%d, pending = %x select returned %x", pThreadParm->u.asyncselect.s, noread, nowrite, noexcept, lEventsPending, selecterr));
 		if(selecterr && selecterr < SOCBASEERR) {
 			selecterr += SOCBASEERR;
 		}
@@ -560,7 +561,7 @@ asyncloopstart:
 				AsyncNotifyEvent(pThreadParm, FD_ACCEPT, NO_ERROR);
 			}
 		}
-		if((lEventsPending & FD_READ) && bytesread > 0) {
+		if((lEventsPending & FD_READ) && bytesread >= 0) {
 			AsyncNotifyEvent(pThreadParm, FD_READ, NO_ERROR);
 		}
 #if 0

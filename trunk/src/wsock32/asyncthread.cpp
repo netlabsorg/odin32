@@ -1,4 +1,4 @@
-/* $Id: asyncthread.cpp,v 1.6 2000-05-18 22:54:21 sandervl Exp $ */
+/* $Id: asyncthread.cpp,v 1.7 2001-04-28 16:15:18 sandervl Exp $ */
 
 /*
  * Async thread help functions
@@ -29,7 +29,7 @@ static void AddToQueue(PASYNCTHREADPARM pThreadParm);
 
 //******************************************************************************
 //******************************************************************************
-static void APIENTRY AsyncThread(ULONG arg)
+static void _Optlink AsyncThread(void *arg)
 {
  PASYNCTHREADPARM pThreadParm = (PASYNCTHREADPARM)arg;
 
@@ -47,8 +47,7 @@ static void APIENTRY AsyncThread(ULONG arg)
 //******************************************************************************
 ULONG QueueAsyncJob(ASYNCTHREADPROC asyncproc, PASYNCTHREADPARM pThreadParm, BOOL fSetBlocking)
 {
- APIRET rc;
- TID    tid;
+ TID tid;
 
    pThreadParm->asyncProc         = asyncproc;
    pThreadParm->fActive           = TRUE;
@@ -61,10 +60,9 @@ ULONG QueueAsyncJob(ASYNCTHREADPROC asyncproc, PASYNCTHREADPARM pThreadParm, BOO
 
    if(fSetBlocking) WSASetBlocking(TRUE);
 
-   rc = DosCreateThread(&tid, AsyncThread, (ULONG)pThreadParm, CREATE_READY, 16384);
-   if(rc)
-   {
-   	dprintf(("QueueAsyncJob: DosCreateThread failed with error %x", rc));
+   tid = _beginthread(AsyncThread, NULL, 16384, (PVOID)pThreadParm);
+   if (tid == -1) {
+   	dprintf(("QueueAsyncJob: _beginthread failed"));
    	if(fSetBlocking) WSASetBlocking(FALSE);
 	RemoveFromQueue(pThreadParm);
    	WSASetLastError(WSAEFAULT);
@@ -165,6 +163,31 @@ int WIN32API WSACancelBlockingCall()
    asyncThreadMutex.leave();
 #endif
    return SOCKET_ERROR;
+}
+//******************************************************************************
+//dump queue
+//******************************************************************************
+void DumpQueue(void)
+{
+ HANDLE hThread = GetCurrentThread();
+ PASYNCTHREADPARM pThreadInfo;
+
+   dprintf(("DumpQueue"));
+
+   asyncThreadMutex.enter();
+   pThreadInfo = threadList;
+
+   while(pThreadInfo) {
+	dprintf(( "SOCKET %08xh thread#%d events %xh pending %xh, select %d", 
+		pThreadInfo->u.asyncselect.s,
+		pThreadInfo->hAsyncTaskHandle,
+		pThreadInfo->u.asyncselect.lEvents,
+		pThreadInfo->u.asyncselect.lEventsPending,
+		pThreadInfo->fWaitSelect));
+	pThreadInfo = pThreadInfo->next;
+   }
+   asyncThreadMutex.leave();
+   dprintf(("DumpQueue done"));
 }
 //******************************************************************************
 //Assumes caller owns async thread mutex!
