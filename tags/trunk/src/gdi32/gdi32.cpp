@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.74 2001-07-14 15:31:41 sandervl Exp $ */
+/* $Id: gdi32.cpp,v 1.75 2001-08-02 14:49:31 sandervl Exp $ */
 
 /*
  * GDI32 apis
@@ -340,6 +340,10 @@ HDC WIN32API CreateDCA(LPCSTR lpszDriver, LPCSTR lpszDevice, LPCSTR lpszOutput, 
     }
 
     hdc = O32_CreateDC(lpszDriver, lpszDevice, lpszOutput, lpInitData);
+    if(hdc) {
+        OSLibGpiSetCp(hdc, GetDisplayCodepage());
+    }
+
     dprintf(("GDI32: CreateDCA %s %s %s %x returned %x", lpszDriver, lpszDevice, lpszOutput, lpInitData, hdc));
     return hdc;
 }
