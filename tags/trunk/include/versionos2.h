@@ -1,4 +1,4 @@
-/* $Id: versionos2.h,v 1.21 2001-08-16 21:34:41 sandervl Exp $ */
+/* $Id: versionos2.h,v 1.22 2001-12-08 12:00:50 sandervl Exp $ */
 
 #ifndef __VERSIONOS2__H__
 #define __VERSIONOS2__H__
@@ -61,15 +61,22 @@ ULONG SYSTEM GetVersionSize(char *modname);
 
 //profile key in odin.ini for windows version
 #define PROFILE_WINVERSION_SECTION  "WinVersion"
-#define PROFILE_WINVERSION_KEY          "Version"
+#define PROFILE_WINVERSION_KEY      "Version"
 #define PROFILE_WINVERSION_WIN98    "Win98"
+#define PROFILE_WINVERSION_WINME    "WinME"
 #define PROFILE_WINVERSION_NT40     "NT40"
 #define PROFILE_WINVERSION_WIN2000  "Win2000"
+#define PROFILE_WINVERSION_WINXP    "WinXP"
 
 #define WINVERSION_WIN98        0
-#define WINVERSION_NT40         1   //default
-#define WINVERSION_WIN2000      2
-#define WINVERSION_MAX          3
+#define WINVERSION_WINME        1
+#define WINVERSION_NT40         2   //default
+#define WINVERSION_WIN2000      3
+#define WINVERSION_WINXP        4
+#define WINVERSION_MAX          5
+
+//Override windows version reported by Odin
+void WIN32API OdinSetVersion(ULONG version);
 
 #endif
 
