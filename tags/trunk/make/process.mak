@@ -1,4 +1,4 @@
-# $Id: process.mak,v 1.8 2002-04-29 11:46:29 bird Exp $
+# $Id: process.mak,v 1.9 2002-04-29 12:04:37 bird Exp $
 
 #
 # Unix-like tools for OS/2
@@ -495,7 +495,7 @@ $(PREMAKEFILES_LIB):
 !endif
 
 !if "$(TARGET_MODE)" == "LIB" || "$(TARGET_MODE)" == "SYSLIB" || "$(TARGET_MODE)" == "IFSLIB"
-lib: $(SUBDIRS_LIB) $(TARGET_ILIB) $(TARGET_PUBNAME)
+lib: $(SUBDIRS_LIB) $(TARGET_ILIB) $(TARGET) $(TARGET_PUBNAME)
 !else
 lib: $(SUBDIRS_LIB) $(TARGET_ILIB)
 !endif
