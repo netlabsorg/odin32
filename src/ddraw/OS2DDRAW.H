@@ -1,4 +1,4 @@
-/* $Id: OS2DDRAW.H,v 1.10 2000-03-03 19:21:26 hugh Exp $ */
+/* $Id: OS2DDRAW.H,v 1.11 2000-06-14 20:21:11 hugh Exp $ */
 
 /*
  * DX Draw base class definition
@@ -18,7 +18,6 @@
 #undef APIENTRY
 #define APIENTRY _System
 #include "divewrap.h"
-#define DEBUG 1
 #define mmioFOURCC( ch0, ch1, ch2, ch3 )                         \
                   ( (DWORD)(BYTE)(ch0) | ( (DWORD)(BYTE)(ch1) << 8 ) |    \
                   ( (DWORD)(BYTE)(ch2) << 16 ) | ( (DWORD)(BYTE)(ch3) << 24 ) )
