@@ -1,4 +1,4 @@
-/* $Id: header.c,v 1.14 1999-10-05 16:54:24 cbratschi Exp $ */
+/* $Id: header.c,v 1.15 1999-10-06 15:41:10 cbratschi Exp $ */
 /*
  *  Header control
  *
@@ -9,9 +9,9 @@
  *  TODO:
  *   - Order list support.
  *   - Control specific cursors (over dividers).
- *   - Hottrack support (partially).
  *   - Custom draw support (including Notifications).
  *   - Drag and Drop support (including Notifications).
+ *   - HDS_FILTERBAR
  *
  *
  * Status: Development in progress, a lot to do :)
@@ -26,14 +26,13 @@
 #include "comctl32.h"
 
 
-#define __HDM_LAYOUT_HACK__
-
-
 #define VERT_BORDER     4
 #define DIVIDER_WIDTH  10
 #define MIN_ITEMWIDTH  0
 #define ITEM_FRAMESIZE 2
 #define TEXT_MARGIN    3
+#define TIMER_ID       1
+#define TIMER_MS       200
 
 #define HEADER_GetInfoPtr(hwnd) ((HEADER_INFO *)GetWindowLongA(hwnd,0))
 
@@ -367,11 +366,33 @@ HEADER_DrawItem (HWND hwnd, HDC hdc, INT iItem, BOOL bHotTrack,BOOL bEraseTextBk
     return phdi->rect.right;
 }
 
+static void
+HEADER_DrawTrackLine (HWND hwnd, HDC hdc, INT x)
+{
+    RECT rect;
+    HPEN hOldPen;
+    INT  oldRop;
+
+    GetClientRect (hwnd, &rect);
+
+    rect.left = x;
+    rect.right = x+1;
+    InvertRect(hdc,&rect);
+/* //CB: Odin bug!!! This code doesn't work:
+    hOldPen = SelectObject (hdc, GetStockObject (BLACK_PEN));
+    oldRop = SetROP2 (hdc, R2_XORPEN);
+    MoveToEx (hdc, x, rect.top, NULL);
+    LineTo (hdc, x, rect.bottom);
+    SetROP2 (hdc, oldRop);
+    SelectObject (hdc, hOldPen);
+*/
+}
 
 static void
 HEADER_Draw(HWND hwnd,HDC hdc)
 {
     HEADER_INFO *infoPtr = HEADER_GetInfoPtr (hwnd);
+    DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
     HFONT hFont, hOldFont;
     RECT rect;
     HBRUSH hbrBk;
@@ -401,13 +422,15 @@ HEADER_Draw(HWND hwnd,HDC hdc)
     if (x != -1 && (x <= rect.right) && (infoPtr->uNumItem > 0))
     {
         rect.left = x;
-        if (GetWindowLongA (hwnd, GWL_STYLE) & HDS_BUTTONS)
+        if (dwStyle & HDS_BUTTONS)
             DrawEdge (hdc, &rect, EDGE_RAISED, BF_TOP|BF_LEFT|BF_BOTTOM|BF_SOFT);
         else
             DrawEdge (hdc, &rect, EDGE_ETCHED, BF_BOTTOM);
     }
 
     SelectObject (hdc, hOldFont);
+
+    if (infoPtr->bCaptured && infoPtr->bTracking && !(dwStyle & HDS_FULLDRAG)) HEADER_DrawTrackLine(hwnd,hdc,infoPtr->xOldTrack);
 }
 
 
@@ -466,29 +489,6 @@ HEADER_SetItemBounds(HWND hwnd,INT start)
     x = phdi->rect.right;
   }
 }
-
-
-static void
-HEADER_ForceItemBounds (HWND hwnd, INT cy)
-{
-    HEADER_INFO *infoPtr = HEADER_GetInfoPtr (hwnd);
-    HEADER_ITEM *phdi;
-    int i, x;
-
-    if (infoPtr->uNumItem == 0)
-        return;
-
-    x = 0;
-    for (i = 0; i < infoPtr->uNumItem; i++) {
-        phdi = &infoPtr->items[i];
-        phdi->rect.top = 0;
-        phdi->rect.bottom = cy;
-        phdi->rect.left = x;
-        phdi->rect.right = phdi->rect.left + phdi->cxy;
-        x = phdi->rect.right;
-    }
-}
-
 
 static void
 HEADER_InternalHitTest (HWND hwnd, LPPOINT lpPt, UINT *pFlags, INT *pItem)
@@ -626,29 +626,6 @@ HEADER_InternalHitTest (HWND hwnd, LPPOINT lpPt, UINT *pFlags, INT *pItem)
     return;
 }
 
-
-static void
-HEADER_DrawTrackLine (HWND hwnd, HDC hdc, INT x)
-{
-    RECT rect;
-    HPEN hOldPen;
-    INT  oldRop;
-
-    GetClientRect (hwnd, &rect);
-
-    rect.left = x;
-    rect.right = x+1;
-    InvertRect(hdc,&rect);
-/* //CB: Odin bug!!! This code doesn't work:
-    hOldPen = SelectObject (hdc, GetStockObject (BLACK_PEN));
-    oldRop = SetROP2 (hdc, R2_XORPEN);
-    MoveToEx (hdc, x, rect.top, NULL);
-    LineTo (hdc, x, rect.bottom);
-    SetROP2 (hdc, oldRop);
-    SelectObject (hdc, hOldPen);
-*/
-}
-
 static BOOL
 HEADER_SendSimpleNotify (HWND hwnd, UINT code)
 {
@@ -662,51 +639,225 @@ HEADER_SendSimpleNotify (HWND hwnd, UINT code)
                                    (WPARAM)nmhdr.idFrom, (LPARAM)&nmhdr);
 }
 
-
 static BOOL
-HEADER_SendHeaderNotify (HWND hwnd, UINT code, INT iItem)
+HEADER_SendHeaderNotifyA(HWND hwnd,UINT code,INT iItem,INT iButton)
 {
-    HEADER_INFO *infoPtr = HEADER_GetInfoPtr (hwnd);
+    HEADER_INFO *infoPtr = HEADER_GetInfoPtr(hwnd);
     NMHEADERA nmhdr;
     HDITEMA nmitem;
+    char* text;
+    BOOL res;
+
+    if (infoPtr->items[iItem].pszText)
+    {
+      INT len = lstrlenW(infoPtr->items[iItem].pszText);
+
+      if (len > 0)
+      {
+        text = COMCTL32_Alloc(len+1);
+        lstrcpyWtoA(text,infoPtr->items[iItem].pszText);
+      } else text = NULL;
+    } else text = NULL;
 
     nmhdr.hdr.hwndFrom = hwnd;
-    nmhdr.hdr.idFrom   = GetWindowLongA (hwnd, GWL_ID);
+    nmhdr.hdr.idFrom   = GetWindowLongA(hwnd,GWL_ID);
     nmhdr.hdr.code = code;
-    nmhdr.iItem = iItem;
+    nmhdr.iItem   = iItem;
     nmhdr.iButton = 0;
-    nmhdr.pitem = &nmitem;
-    nmitem.mask = 0;
-    nmitem.cxy = infoPtr->items[iItem].cxy;
-    nmitem.hbm = infoPtr->items[iItem].hbm;
-    nmitem.pszText = NULL;
-    nmitem.cchTextMax = 0;
-/*    nmitem.pszText = infoPtr->items[iItem].pszText; */
-/*    nmitem.cchTextMax = infoPtr->items[iItem].cchTextMax; */
-    nmitem.fmt = infoPtr->items[iItem].fmt;
-    nmitem.lParam = infoPtr->items[iItem].lParam;
-    nmitem.iOrder = infoPtr->items[iItem].iOrder;
-    nmitem.iImage = infoPtr->items[iItem].iImage;
+    nmhdr.pitem   = &nmitem;
 
-    return (BOOL)SendMessageA (GetParent (hwnd), WM_NOTIFY,
-                               (WPARAM)nmhdr.hdr.idFrom, (LPARAM)&nmhdr);
+    nmitem.mask       = 0;
+    nmitem.cxy        = infoPtr->items[iItem].cxy;
+    nmitem.hbm        = infoPtr->items[iItem].hbm;
+    nmitem.pszText    = text;
+    nmitem.cchTextMax = infoPtr->items[iItem].cchTextMax;
+    nmitem.fmt        = infoPtr->items[iItem].fmt;
+    nmitem.lParam     = infoPtr->items[iItem].lParam;
+    nmitem.iImage     = infoPtr->items[iItem].iImage;
+    nmitem.iOrder     = infoPtr->items[iItem].iOrder;
+    nmitem.type       = infoPtr->items[iItem].type;
+    nmitem.pvFilter   = infoPtr->items[iItem].pvFilter;
+
+    res = (BOOL)SendMessageA(GetParent(hwnd),WM_NOTIFY,(WPARAM)nmhdr.hdr.idFrom,(LPARAM)&nmhdr);
+
+    if (text) COMCTL32_Free(text);
+
+    return res;
 }
 
+static BOOL
+HEADER_SendHeaderNotifyW(HWND hwnd,UINT code,INT iItem,INT iButton)
+{
+    HEADER_INFO *infoPtr = HEADER_GetInfoPtr(hwnd);
+    NMHEADERW nmhdr;
+    HDITEMW nmitem;
+
+    nmhdr.hdr.hwndFrom = hwnd;
+    nmhdr.hdr.idFrom   = GetWindowLongW(hwnd,GWL_ID);
+    nmhdr.hdr.code = code;
+    nmhdr.iItem   = iItem;
+    nmhdr.iButton = 0;
+    nmhdr.pitem   = &nmitem;
+
+    nmitem.mask       = 0;
+    nmitem.cxy        = infoPtr->items[iItem].cxy;
+    nmitem.hbm        = infoPtr->items[iItem].hbm;
+    nmitem.pszText    = infoPtr->items[iItem].pszText;
+    nmitem.cchTextMax = infoPtr->items[iItem].cchTextMax;
+    nmitem.fmt        = infoPtr->items[iItem].fmt;
+    nmitem.lParam     = infoPtr->items[iItem].lParam;
+    nmitem.iImage     = infoPtr->items[iItem].iImage;
+    nmitem.iOrder     = infoPtr->items[iItem].iOrder;
+    nmitem.type       = infoPtr->items[iItem].type;
+    nmitem.pvFilter   = infoPtr->items[iItem].pvFilter;
+
+    return (BOOL)SendMessageW(GetParent(hwnd),WM_NOTIFY,(WPARAM)nmhdr.hdr.idFrom,(LPARAM)&nmhdr);
+}
 
 static BOOL
-HEADER_SendClickNotify (HWND hwnd, UINT code, INT iItem)
+HEADER_SendItemChanging(HWND hwnd,INT iItem)
+{
+  if (IsWindowUnicode(GetParent(hwnd)))
+    return HEADER_SendHeaderNotifyA(hwnd,HDN_ITEMCHANGINGA,iItem,0);
+  else
+    return HEADER_SendHeaderNotifyW(hwnd,HDN_ITEMCHANGINGW,iItem,0);
+}
+
+static BOOL
+HEADER_SendItemChanged(HWND hwnd,INT iItem)
+{
+  if (IsWindowUnicode(GetParent(hwnd)))
+    return HEADER_SendHeaderNotifyA(hwnd,HDN_ITEMCHANGEDA,iItem,0);
+  else
+    return HEADER_SendHeaderNotifyW(hwnd,HDN_ITEMCHANGEDW,iItem,0);
+}
+
+static BOOL
+HEADER_SendItemDblClick(HWND hwnd,INT iItem,INT iButton)
+{
+  if (IsWindowUnicode(GetParent(hwnd)))
+    return HEADER_SendHeaderNotifyA(hwnd,HDN_ITEMDBLCLICKA,iItem,iButton);
+  else
+    return HEADER_SendHeaderNotifyW(hwnd,HDN_ITEMDBLCLICKW,iItem,iButton);
+}
+
+static BOOL
+HEADER_SendDividerDblClick(HWND hwnd,INT iItem,INT iButton)
+{
+  if (IsWindowUnicode(GetParent(hwnd)))
+    return HEADER_SendHeaderNotifyA(hwnd,HDN_DIVIDERDBLCLICKA,iItem,iButton);
+  else
+    return HEADER_SendHeaderNotifyW(hwnd,HDN_DIVIDERDBLCLICKW,iItem,iButton);
+}
+
+static BOOL
+HEADER_SendBeginTrack(HWND hwnd,INT iItem,INT iButton)
+{
+  if (IsWindowUnicode(GetParent(hwnd)))
+    return HEADER_SendHeaderNotifyA(hwnd,HDN_BEGINTRACKA,iItem,iButton);
+  else
+    return HEADER_SendHeaderNotifyW(hwnd,HDN_BEGINTRACKW,iItem,iButton);
+}
+
+static BOOL
+HEADER_SendEndTrack(HWND hwnd,INT iItem,INT iButton)
+{
+  if (IsWindowUnicode(GetParent(hwnd)))
+    return HEADER_SendHeaderNotifyA(hwnd,HDN_ENDTRACKA,iItem,iButton);
+  else
+    return HEADER_SendHeaderNotifyW(hwnd,HDN_ENDTRACKW,iItem,iButton);
+}
+
+static BOOL
+HEADER_SendTrack(HWND hwnd,INT iItem)
+{
+  if (IsWindowUnicode(GetParent(hwnd)))
+    return HEADER_SendHeaderNotifyA(hwnd,HDN_TRACKA,iItem,0);
+  else
+    return HEADER_SendHeaderNotifyW(hwnd,HDN_TRACKW,iItem,0);
+}
+
+static BOOL
+HEADER_SendClickNotifyA(HWND hwnd,UINT code,INT iItem,INT iButton)
 {
     NMHEADERA nmhdr;
 
     nmhdr.hdr.hwndFrom = hwnd;
-    nmhdr.hdr.idFrom   = GetWindowLongA (hwnd, GWL_ID);
-    nmhdr.hdr.code = code;
-    nmhdr.iItem = iItem;
-    nmhdr.iButton = 0;
-    nmhdr.pitem = NULL;
+    nmhdr.hdr.idFrom   = GetWindowLongA(hwnd,GWL_ID);
+    nmhdr.hdr.code     = code;
+    nmhdr.iItem        = iItem;
+    nmhdr.iButton      = iButton;
+    nmhdr.pitem        = NULL;
 
-    return (BOOL)SendMessageA (GetParent (hwnd), WM_NOTIFY,
-                               (WPARAM)nmhdr.hdr.idFrom, (LPARAM)&nmhdr);
+    return (BOOL)SendMessageA(GetParent(hwnd),WM_NOTIFY,(WPARAM)nmhdr.hdr.idFrom,(LPARAM)&nmhdr);
+}
+
+static BOOL
+HEADER_SendClickNotifyW(HWND hwnd,UINT code,INT iItem,INT iButton)
+{
+    NMHEADERW nmhdr;
+
+    nmhdr.hdr.hwndFrom = hwnd;
+    nmhdr.hdr.idFrom   = GetWindowLongW(hwnd,GWL_ID);
+    nmhdr.hdr.code     = code;
+    nmhdr.iItem        = iItem;
+    nmhdr.iButton      = iButton;
+    nmhdr.pitem        = NULL;
+
+    return (BOOL)SendMessageW(GetParent(hwnd),WM_NOTIFY,(WPARAM)nmhdr.hdr.idFrom,(LPARAM)&nmhdr);
+}
+
+static BOOL
+HEADER_SendItemClick(HWND hwnd,INT iItem,INT iButton)
+{
+  if (IsWindowUnicode(GetParent(hwnd)))
+    return HEADER_SendClickNotifyA(hwnd,HDN_ITEMCLICKA,iItem,iButton);
+  else
+    return HEADER_SendClickNotifyW(hwnd,HDN_ITEMCLICKW,iItem,iButton);
+}
+
+static BOOL
+HEADER_SendDragNotify(HWND hwnd,UINT code,INT iItem,INT iButton)
+{
+    NMHEADERA nmhdr;
+
+    nmhdr.hdr.hwndFrom = hwnd;
+    nmhdr.hdr.idFrom   = GetWindowLongA(hwnd,GWL_ID);
+    nmhdr.hdr.code     = code;
+    nmhdr.iItem        = iItem;
+    nmhdr.iButton      = iButton;
+    nmhdr.pitem        = NULL;
+
+    return (BOOL)SendMessageA(GetParent(hwnd),WM_NOTIFY,(WPARAM)nmhdr.hdr.idFrom,(LPARAM)&nmhdr);
+}
+
+static BOOL
+HEADER_SendFilterBtnClick(HWND hwnd,INT iItem,RECT iRect)
+{
+    NMHDFILTERBTNCLICK nmhdr;
+
+    nmhdr.hdr.hwndFrom = hwnd;
+    nmhdr.hdr.idFrom   = GetWindowLongA(hwnd,GWL_ID);
+    nmhdr.hdr.code = HDN_FILTERBTNCLICK;
+    nmhdr.iItem    = iItem;
+    nmhdr.rc       = iRect;
+
+    return (BOOL)SendMessageA(GetParent(hwnd),WM_NOTIFY,(WPARAM)nmhdr.hdr.idFrom,(LPARAM)&nmhdr);
+}
+
+static BOOL
+HEADER_SendFilterChange(HWND hwnd,INT iItem)
+{
+    NMHEADERA nmhdr;
+
+    nmhdr.hdr.hwndFrom = hwnd;
+    nmhdr.hdr.idFrom   = GetWindowLongA(hwnd,GWL_ID);
+    nmhdr.hdr.code     = HDN_FILTERCHANGE;
+    nmhdr.iItem        = iItem;
+    nmhdr.iButton      = 0;
+    nmhdr.pitem        = NULL;
+
+    return (BOOL)SendMessageA(GetParent(hwnd),WM_NOTIFY,(WPARAM)nmhdr.hdr.idFrom,(LPARAM)&nmhdr);
 }
 
 static LRESULT
@@ -742,7 +893,7 @@ HEADER_SetFilterChangeTimeout(HWND hwnd,WPARAM wParam,LPARAM lParam)
 }
 
 static LRESULT
-HEADER_CreateDragImage (HWND hwnd, WPARAM wParam)
+HEADER_CreateDragImage(HWND hwnd,WPARAM wParam,LPARAM lParam)
 {
   HEADER_INFO *infoPtr = HEADER_GetInfoPtr(hwnd);
   INT iItem = (INT)wParam;
@@ -1201,6 +1352,8 @@ HEADER_Layout (HWND hwnd, WPARAM wParam, LPARAM lParam)
     HEADER_INFO *infoPtr = HEADER_GetInfoPtr (hwnd);
     LPHDLAYOUT lpLayout = (LPHDLAYOUT)lParam;
 
+    if (!lpLayout) return FALSE;
+
     lpLayout->pwpos->hwnd = hwnd;
     lpLayout->pwpos->hwndInsertAfter = 0;
     lpLayout->pwpos->x = lpLayout->prc->left;
@@ -1215,14 +1368,6 @@ HEADER_Layout (HWND hwnd, WPARAM wParam, LPARAM lParam)
 //    TRACE (header, "Layout x=%d y=%d cx=%d cy=%d\n",
 //           lpLayout->pwpos->x, lpLayout->pwpos->y,
 //           lpLayout->pwpos->cx, lpLayout->pwpos->cy);
-
-    HEADER_ForceItemBounds (hwnd, lpLayout->pwpos->cy);
-
-    /* hack */
-#ifdef __HDM_LAYOUT_HACK__
-    MoveWindow (lpLayout->pwpos->hwnd, lpLayout->pwpos->x, lpLayout->pwpos->y,
-                  lpLayout->pwpos->cx, lpLayout->pwpos->cy, TRUE);
-#endif
 
     return TRUE;
 }
@@ -1257,8 +1402,7 @@ HEADER_SetItemA (HWND hwnd, WPARAM wParam, LPARAM lParam)
     if (phdi->mask == 0) return TRUE;
 
 //    TRACE (header, "[nItem=%d]\n", nItem);
-
-    if (HEADER_SendHeaderNotify(hwnd,HDN_ITEMCHANGINGA,nItem)) return FALSE;
+    if (HEADER_SendItemChanging(hwnd,nItem)) return FALSE;
 
     lpItem = (HEADER_ITEM*)&infoPtr->items[nItem];
 
@@ -1306,7 +1450,7 @@ HEADER_SetItemA (HWND hwnd, WPARAM wParam, LPARAM lParam)
       }
     }
 
-    HEADER_SendHeaderNotify(hwnd,HDN_ITEMCHANGEDA,nItem);
+    HEADER_SendItemChanged(hwnd,nItem);
 
     HEADER_SetItemBounds(hwnd,0);
     HEADER_Refresh(hwnd);
@@ -1330,7 +1474,7 @@ HEADER_SetItemW (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
 //    TRACE (header, "[nItem=%d]\n", nItem);
 
-    if (HEADER_SendHeaderNotify(hwnd,HDN_ITEMCHANGINGW,nItem)) return FALSE;
+    if (HEADER_SendItemChanging(hwnd,nItem)) return FALSE;
 
     lpItem = (HEADER_ITEM*)&infoPtr->items[nItem];
 
@@ -1378,7 +1522,7 @@ HEADER_SetItemW (HWND hwnd, WPARAM wParam, LPARAM lParam)
       }
     }
 
-    HEADER_SendHeaderNotify(hwnd,HDN_ITEMCHANGEDW,nItem);
+    HEADER_SendItemChanged(hwnd,nItem);
 
     HEADER_SetItemBounds(hwnd,0);
     HEADER_Refresh(hwnd);
@@ -1415,13 +1559,17 @@ HEADER_Create (HWND hwnd, WPARAM wParam, LPARAM lParam)
     infoPtr->hcurArrow = LoadCursorA (0, IDC_ARROWA);
     infoPtr->hcurDivider = LoadCursorA (0, IDC_SIZEWEA);
     infoPtr->hcurDivopen = LoadCursorA (0, IDC_SIZENSA);
+    infoPtr->bCaptured = FALSE;
     infoPtr->bPressed  = FALSE;
     infoPtr->bTracking = FALSE;
+    infoPtr->bDragDrop = FALSE;
+    infoPtr->bTimer    = FALSE;
     infoPtr->iMoveItem = 0;
-    infoPtr->himl = 0;
-    infoPtr->iHotItem = -1;
+    infoPtr->himl      = 0;
+    infoPtr->dragImage = 0;
+    infoPtr->iHotItem  = -1;
     infoPtr->xBmpMargin = 3*GetSystemMetrics(SM_CXEDGE);
-    infoPtr->bUnicode = IsWindowUnicode (hwnd);
+    infoPtr->bUnicode = IsWindowUnicode(hwnd);
 
     hdc = GetDC (0);
     hOldFont = SelectObject (hdc, GetStockObject (SYSTEM_FONT));
@@ -1491,9 +1639,9 @@ HEADER_LButtonDblClk (HWND hwnd, WPARAM wParam, LPARAM lParam)
     HEADER_InternalHitTest (hwnd, &pt, &flags, &nItem);
 
     if ((GetWindowLongA (hwnd, GWL_STYLE) & HDS_BUTTONS) && (flags == HHT_ONHEADER))
-        HEADER_SendHeaderNotify (hwnd, HDN_ITEMDBLCLICKA, nItem);
+        HEADER_SendItemDblClick(hwnd,nItem,0);
     else if ((flags == HHT_ONDIVIDER) || (flags == HHT_ONDIVOPEN))
-        HEADER_SendHeaderNotify (hwnd, HDN_DIVIDERDBLCLICKA, nItem);
+        HEADER_SendDividerDblClick(hwnd,nItem,0);
 
     return 0;
 }
@@ -1509,8 +1657,8 @@ HEADER_LButtonDown (HWND hwnd, WPARAM wParam, LPARAM lParam)
     INT   nItem;
     HDC   hdc;
 
-    pt.x = (INT)LOWORD(lParam);
-    pt.y = (INT)HIWORD(lParam);
+    pt.x = (SHORT)LOWORD(lParam);
+    pt.y = (SHORT)HIWORD(lParam);
     HEADER_InternalHitTest (hwnd, &pt, &flags, &nItem);
 
     if ((dwStyle & HDS_BUTTONS) && (flags == HHT_ONHEADER))
@@ -1528,10 +1676,9 @@ HEADER_LButtonDown (HWND hwnd, WPARAM wParam, LPARAM lParam)
         ReleaseDC (hwnd, hdc);
 
 //      TRACE (header, "Pressed item %d!\n", nItem);
-    }
-    else if ((flags == HHT_ONDIVIDER) || (flags == HHT_ONDIVOPEN))
+    } else if ((flags == HHT_ONDIVIDER) || (flags == HHT_ONDIVOPEN))
     {
-        if (!(HEADER_SendHeaderNotify (hwnd, HDN_BEGINTRACKA, nItem)))
+        if (!(HEADER_SendBeginTrack(hwnd,nItem,0)))
         {
             SetCapture (hwnd);
             infoPtr->bCaptured  = TRUE;
@@ -1567,37 +1714,36 @@ HEADER_LButtonUp (HWND hwnd, WPARAM wParam, LPARAM lParam)
     INT   nItem, nWidth;
     HDC   hdc;
 
-    pt.x = (INT)LOWORD(lParam);
-    pt.y = (INT)HIWORD(lParam);
+    pt.x = (SHORT)LOWORD(lParam);
+    pt.y = (SHORT)HIWORD(lParam);
     HEADER_InternalHitTest (hwnd, &pt, &flags, &nItem);
 
     if (infoPtr->bPressed)
     {
-        if ((nItem == infoPtr->iMoveItem) && (flags == HHT_ONHEADER))
+        if (PtInRect(&infoPtr->items[infoPtr->iMoveItem].rect,pt))
         {
             infoPtr->items[infoPtr->iMoveItem].bDown = FALSE;
-            hdc = GetDC (hwnd);
-            HEADER_RefreshItem (hwnd, hdc, infoPtr->iMoveItem);
-            ReleaseDC (hwnd, hdc);
+            hdc = GetDC(hwnd);
+            HEADER_RefreshItem(hwnd,hdc,infoPtr->iMoveItem);
+            ReleaseDC(hwnd,hdc);
 
-            HEADER_SendClickNotify (hwnd, HDN_ITEMCLICKA, infoPtr->iMoveItem);
+            HEADER_SendItemClick(hwnd,infoPtr->iMoveItem,0);
         }
 //      TRACE (header, "Released item %d!\n", infoPtr->iMoveItem);
         infoPtr->bPressed = FALSE;
-    }
-    else if (infoPtr->bTracking)
+    } else if (infoPtr->bTracking)
     {
 //      TRACE (header, "End tracking item %d!\n", infoPtr->iMoveItem);
         infoPtr->bTracking = FALSE;
 
-        HEADER_SendHeaderNotify (hwnd, HDN_ENDTRACKA, infoPtr->iMoveItem);
+        HEADER_SendEndTrack(hwnd,infoPtr->iMoveItem,0);
 
         if (!(dwStyle & HDS_FULLDRAG))
         {
             hdc = GetDC (hwnd);
             HEADER_DrawTrackLine (hwnd, hdc, infoPtr->xOldTrack);
             ReleaseDC (hwnd, hdc);
-            if (HEADER_SendHeaderNotify (hwnd, HDN_ITEMCHANGINGA, infoPtr->iMoveItem))
+            if (HEADER_SendItemChanging(hwnd,infoPtr->iMoveItem))
                 infoPtr->items[infoPtr->iMoveItem].cxy = infoPtr->nOldWidth;
             else
             {
@@ -1607,7 +1753,7 @@ HEADER_LButtonUp (HWND hwnd, WPARAM wParam, LPARAM lParam)
                 if (infoPtr->nOldWidth != nWidth)
                 {
                   infoPtr->items[infoPtr->iMoveItem].cxy = nWidth;
-                  HEADER_SendHeaderNotify (hwnd, HDN_ITEMCHANGEDA, infoPtr->iMoveItem);
+                  HEADER_SendItemChanged(hwnd,infoPtr->iMoveItem);
 
                   HEADER_SetItemBounds (hwnd,infoPtr->iMoveItem);
 
@@ -1617,10 +1763,11 @@ HEADER_LButtonUp (HWND hwnd, WPARAM wParam, LPARAM lParam)
         }
     }
 
-    if (infoPtr->bCaptured) {
-        infoPtr->bCaptured = FALSE;
-        ReleaseCapture ();
-        HEADER_SendSimpleNotify (hwnd, NM_RELEASEDCAPTURE);
+    if (infoPtr->bCaptured)
+    {
+      infoPtr->bCaptured = FALSE;
+      ReleaseCapture();
+      HEADER_SendSimpleNotify(hwnd,NM_RELEASEDCAPTURE);
     }
 
     return 0;
@@ -1641,81 +1788,135 @@ HEADER_MouseMove (HWND hwnd, WPARAM wParam, LPARAM lParam)
     pt.y = (SHORT)HIWORD(lParam);
     HEADER_InternalHitTest (hwnd, &pt, &flags, &nItem);
 
-    if ((dwStyle & HDS_BUTTONS) && (dwStyle & HDS_HOTTRACK) &&!infoPtr->bCaptured)
+    if (dwStyle & HDS_BUTTONS && dwStyle & HDS_HOTTRACK) //CB: check with no buttons
     {
         INT newItem;
 
-        if (flags & (HHT_ONHEADER | HHT_ONDIVIDER | HHT_ONDIVOPEN))
-            newItem = nItem;
+        if (infoPtr->bCaptured && infoPtr->bPressed && PtInRect(&infoPtr->items[infoPtr->iMoveItem].rect,pt))
+          newItem = infoPtr->iMoveItem;
         else
-            newItem = -1;
+        {
+          if (flags & (HHT_ONHEADER | HHT_ONDIVIDER | HHT_ONDIVOPEN))
+              newItem = nItem;
+          else
+              newItem = -1;
+        }
         if (newItem != infoPtr->iHotItem)
         {
-          INT oldItem = infoPtr->iHotItem;
-
           infoPtr->iHotItem = newItem;
           HEADER_Refresh(hwnd);
+        }
+        if (!infoPtr->bTimer && infoPtr->iHotItem != -1)
+        {
+          infoPtr->bTimer = TRUE;
+          SetTimer(hwnd,TIMER_ID,TIMER_MS,NULL);
+        } else if (infoPtr->bTimer && infoPtr->iHotItem == -1)
+        {
+          KillTimer(hwnd,TIMER_ID);
+          infoPtr->bTimer = FALSE;
         }
     }
 
     if (infoPtr->bCaptured)
     {
-        if (infoPtr->bPressed)
+      if (infoPtr->bPressed)
+      {
+        if (dwStyle & HDS_DRAGDROP && (infoPtr->bDragDrop || !HEADER_SendDragNotify(hwnd,HDN_BEGINDRAG,infoPtr->iMoveItem,0)))
         {
-            BOOL newDown;
-
-            if ((nItem == infoPtr->iMoveItem) && (flags == HHT_ONHEADER))
-                newDown = TRUE;
-            else
-                newDown = FALSE;
-
-            if (newDown != infoPtr->items[infoPtr->iMoveItem].bDown)
-            {
-              infoPtr->items[infoPtr->iMoveItem].bDown = newDown;
-              hdc = GetDC (hwnd);
-              HEADER_RefreshItem (hwnd, hdc, infoPtr->iMoveItem);
-              ReleaseDC (hwnd, hdc);
-            }
-//          TRACE (header, "Moving pressed item %d!\n", infoPtr->iMoveItem);
-        } else if (infoPtr->bTracking)
+          if (!infoPtr->bDragDrop)
+          {
+            infoPtr->bDragDrop = TRUE;
+            infoPtr->dragImage = (HIMAGELIST)HEADER_CreateDragImage(hwnd,0,0);
+          }
+          //CB:todo
+        } else
         {
-          if (dwStyle & HDS_FULLDRAG)
-          {
-            if (HEADER_SendHeaderNotify (hwnd, HDN_ITEMCHANGINGA, infoPtr->iMoveItem))
-              infoPtr->items[infoPtr->iMoveItem].cxy = infoPtr->nOldWidth;
-            else
-            {
-              nWidth = pt.x - infoPtr->items[infoPtr->iMoveItem].rect.left + infoPtr->xTrackOffset;
-              if (nWidth < MIN_ITEMWIDTH) nWidth = MIN_ITEMWIDTH;
-              infoPtr->items[infoPtr->iMoveItem].cxy = nWidth;
-              HEADER_SendHeaderNotify(hwnd,HDN_ITEMCHANGEDA,infoPtr->iMoveItem);
-            }
-            HEADER_SetItemBounds (hwnd,infoPtr->iMoveItem);
-            HEADER_Refresh(hwnd);
-          } else
-          {
-            INT lastPos = infoPtr->xOldTrack;
+          BOOL newDown;
 
+          if (PtInRect(&infoPtr->items[infoPtr->iMoveItem].rect,pt))
+            newDown = TRUE;
+          else
+            newDown = FALSE;
+
+          if (newDown != infoPtr->items[infoPtr->iMoveItem].bDown)
+          {
+            infoPtr->items[infoPtr->iMoveItem].bDown = newDown;
             hdc = GetDC (hwnd);
-            infoPtr->xOldTrack = pt.x + infoPtr->xTrackOffset;
-            if (infoPtr->xOldTrack < infoPtr->items[infoPtr->iMoveItem].rect.left+MIN_ITEMWIDTH)
-              infoPtr->xOldTrack = infoPtr->items[infoPtr->iMoveItem].rect.left+MIN_ITEMWIDTH;
-            infoPtr->items[infoPtr->iMoveItem].cxy =
-              infoPtr->xOldTrack-infoPtr->items[infoPtr->iMoveItem].rect.left;
-            if (lastPos != infoPtr->xOldTrack)
-            {
-              HEADER_DrawTrackLine(hwnd,hdc,lastPos);
-              HEADER_DrawTrackLine(hwnd,hdc,infoPtr->xOldTrack);
-            }
+            HEADER_RefreshItem (hwnd, hdc, infoPtr->iMoveItem);
             ReleaseDC (hwnd, hdc);
           }
-
-          HEADER_SendHeaderNotify (hwnd, HDN_TRACKA, infoPtr->iMoveItem);
-//          TRACE (header, "Tracking item %d!\n", infoPtr->iMoveItem);
         }
+//          TRACE (header, "Moving pressed item %d!\n", infoPtr->iMoveItem);
+      } else if (infoPtr->bTracking)
+      {
+        if (dwStyle & HDS_FULLDRAG)
+        {
+          if (HEADER_SendItemChanging(hwnd,infoPtr->iMoveItem))
+            infoPtr->items[infoPtr->iMoveItem].cxy = infoPtr->nOldWidth;
+          else
+          {
+            nWidth = pt.x - infoPtr->items[infoPtr->iMoveItem].rect.left + infoPtr->xTrackOffset;
+            if (nWidth < MIN_ITEMWIDTH) nWidth = MIN_ITEMWIDTH;
+            infoPtr->items[infoPtr->iMoveItem].cxy = nWidth;
+            HEADER_SendItemChanged(hwnd,infoPtr->iMoveItem);
+          }
+          HEADER_SetItemBounds (hwnd,infoPtr->iMoveItem);
+          HEADER_Refresh(hwnd);
+        } else
+        {
+          INT lastPos = infoPtr->xOldTrack;
+
+          hdc = GetDC (hwnd);
+          infoPtr->xOldTrack = pt.x + infoPtr->xTrackOffset;
+          if (infoPtr->xOldTrack < infoPtr->items[infoPtr->iMoveItem].rect.left+MIN_ITEMWIDTH)
+            infoPtr->xOldTrack = infoPtr->items[infoPtr->iMoveItem].rect.left+MIN_ITEMWIDTH;
+          infoPtr->items[infoPtr->iMoveItem].cxy =
+            infoPtr->xOldTrack-infoPtr->items[infoPtr->iMoveItem].rect.left;
+          if (lastPos != infoPtr->xOldTrack)
+          {
+            HEADER_DrawTrackLine(hwnd,hdc,lastPos);
+            HEADER_DrawTrackLine(hwnd,hdc,infoPtr->xOldTrack);
+          }
+          ReleaseDC (hwnd, hdc);
+        }
+
+        HEADER_SendTrack(hwnd,infoPtr->iMoveItem);
+//          TRACE (header, "Tracking item %d!\n", infoPtr->iMoveItem);
+      }
     }
 
     return 0;
+}
+
+static LRESULT
+HEADER_Size(HWND hwnd,WPARAM wParam,LPARAM lParam)
+{
+  HEADER_SetItemBounds(hwnd,0);
+
+  return DefWindowProcA(hwnd,WM_SIZE,wParam,lParam);
+}
+
+static LRESULT
+HEADER_Timer(HWND hwnd,WPARAM wParam,LPARAM lParam)
+{
+  POINT point;
+  RECT rect;
+
+  GetCursorPos(&point);
+  ScreenToClient(hwnd,&point);
+  GetClientRect(hwnd,&rect);
+  if (!PtInRect(&rect,point))
+  {
+    HEADER_INFO *infoPtr = HEADER_GetInfoPtr(hwnd);
+
+    infoPtr->iHotItem = -1;
+    infoPtr->bTimer = FALSE;
+    HEADER_Refresh(hwnd);
+
+    KillTimer(hwnd,TIMER_ID);
+  }
+
+  return 0;
 }
 
 static LRESULT
@@ -1729,7 +1930,7 @@ HEADER_KeyDown(HWND hwnd,WPARAM wParam,LPARAM lParam)
   {
     infoPtr->bTracking = FALSE;
 
-    HEADER_SendHeaderNotify(hwnd,HDN_ENDTRACKA,infoPtr->iMoveItem);
+    HEADER_SendEndTrack(hwnd,infoPtr->iMoveItem,0);
     hdc = GetDC(hwnd);
     HEADER_DrawTrackLine(hwnd,hdc,infoPtr->xOldTrack);
     ReleaseDC(hwnd,hdc);
@@ -1747,6 +1948,31 @@ HEADER_KeyDown(HWND hwnd,WPARAM wParam,LPARAM lParam)
   }
 
   return DefWindowProcA(WM_KEYDOWN,hwnd,wParam,lParam);
+}
+
+static LRESULT
+HEADER_CaptureChanged(HWND hwnd,WPARAM wParam,LPARAM lParam)
+{
+  HEADER_INFO *infoPtr = HEADER_GetInfoPtr(hwnd);
+  DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
+  HDC hdc;
+
+  if (infoPtr->bCaptured && infoPtr->bTracking)
+  {
+    infoPtr->bTracking = FALSE;
+
+    HEADER_SendEndTrack(hwnd,infoPtr->iMoveItem,0);
+    hdc = GetDC(hwnd);
+    HEADER_DrawTrackLine(hwnd,hdc,infoPtr->xOldTrack);
+    ReleaseDC(hwnd,hdc);
+    if (dwStyle & HDS_FULLDRAG)
+    {
+      infoPtr->items[infoPtr->iMoveItem].cxy = infoPtr->nOldWidth;
+      HEADER_Refresh(hwnd);
+    }
+  }
+
+  return 0;
 }
 
 static LRESULT
@@ -1827,10 +2053,7 @@ HEADER_SetFont (HWND hwnd, WPARAM wParam, LPARAM lParam)
     SelectObject (hdc, hOldFont);
     ReleaseDC (0, hdc);
 
-    if (lParam) {
-        HEADER_ForceItemBounds (hwnd, infoPtr->nHeight);
-        HEADER_Refresh(hwnd);
-    }
+    if (lParam) HEADER_Refresh(hwnd);
 
     return 0;
 }
@@ -1845,7 +2068,7 @@ HEADER_WindowProc (HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             return HEADER_ClearFilter(hwnd,wParam,lParam);
 
         case HDM_CREATEDRAGIMAGE:
-            return HEADER_CreateDragImage (hwnd, wParam);
+            return HEADER_CreateDragImage (hwnd,wParam,lParam);
 
         case HDM_DELETEITEM:
             return HEADER_DeleteItem (hwnd, wParam);
@@ -1916,6 +2139,9 @@ HEADER_WindowProc (HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         case HDM_SETUNICODEFORMAT:
             return HEADER_SetUnicodeFormat (hwnd, wParam);
 
+        case WM_CAPTURECHANGED:
+            return HEADER_CaptureChanged(hwnd,wParam,lParam);
+
         case WM_CREATE:
             return HEADER_Create (hwnd, wParam, lParam);
 
@@ -1959,6 +2185,12 @@ HEADER_WindowProc (HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
         case WM_SETFONT:
             return HEADER_SetFont (hwnd, wParam, lParam);
+
+        case WM_SIZE:
+            return HEADER_Size(hwnd,wParam,lParam);
+
+        case WM_TIMER:
+            return HEADER_Timer(hwnd,wParam,lParam);
 
         default:
 //            if (msg >= WM_USER)

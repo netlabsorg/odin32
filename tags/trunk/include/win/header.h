@@ -1,4 +1,4 @@
-/* $Id: header.h,v 1.4 1999-10-05 17:34:18 cbratschi Exp $ */
+/* $Id: header.h,v 1.5 1999-10-06 15:40:19 cbratschi Exp $ */
 
 /*
  * Header window definitions
@@ -41,6 +41,8 @@ typedef struct
     BOOL      bPressed; /* Is a header item pressed (down)? */
     BOOL      bTracking;        /* Is in tracking mode? */
     BOOL      bTrackOpen;
+    BOOL      bDragDrop;
+    BOOL      bTimer;
     BOOL      bUnicode;       /* Unicode flag */
     INT       iMoveItem;        /* index of tracked item. (Tracking mode) */
     INT       xTrackOffset;     /* distance between the right side of the tracked item and the cursor */
@@ -50,8 +52,9 @@ typedef struct
     INT       xBmpMargin;
 
     HIMAGELIST  himl;           /* handle to a image list (may be 0) */
+    HIMAGELIST  dragImage;
     HEADER_ITEM *items;         /* pointer to array of HEADER_ITEM's */
-    LPINT     pOrder;         /* pointer to order array */
+    LPINT       pOrder;         /* pointer to order array */
 } HEADER_INFO;
 
 
