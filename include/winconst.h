@@ -1,4 +1,4 @@
-/* $Id: winconst.h,v 1.34 2000-06-01 11:26:15 sandervl Exp $ */
+/* $Id: winconst.h,v 1.35 2000-06-14 13:19:44 sandervl Exp $ */
 
 /*
  * Win32 constants
@@ -1415,3 +1415,10 @@
 #define FILE_BEGIN_W              0
 #define FILE_CURRENT_W            1
 #define FILE_END_W                2
+
+/* Graphics Modes */
+#define GM_COMPATIBLE_W     1
+#define GM_ADVANCED_W       2
+#define GM_LAST_W           2
+
+#define	RDH_RECTANGLES_W  1

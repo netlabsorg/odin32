@@ -1,4 +1,4 @@
-/* $Id: win32type.h,v 1.39 2000-06-01 11:26:14 sandervl Exp $ */
+/* $Id: win32type.h,v 1.40 2000-06-14 13:19:44 sandervl Exp $ */
 
 /*
  * Win32 type definitions for OS/2
@@ -328,6 +328,7 @@ typedef unsigned short  WCHAR;
 #define PHANDLE HANDLE *
 #define HINSTANCE ULONG
 #define HGLOBAL DWORD
+#define HGDIOBJ DWORD
 #define ATOM    DWORD
 #define HRSRC   DWORD
 #define HICON   DWORD
@@ -570,6 +571,19 @@ typedef struct tagRECT
 typedef const RECT *LPCRECT;
 #endif
 
+
+typedef struct _RGNDATAHEADER {
+    DWORD	dwSize;
+    DWORD	iType;
+    DWORD	nCount;
+    DWORD	nRgnSize;
+    RECT	rcBound;
+} RGNDATAHEADER,*LPRGNDATAHEADER;
+
+typedef struct _RGNDATA {
+    RGNDATAHEADER	rdh;
+    char		Buffer[1];
+} RGNDATA,*PRGNDATA,*LPRGNDATA;
 
 /* WM_WINDOWPOSCHANGING/CHANGED struct */
 typedef struct tagWINDOWPOS
