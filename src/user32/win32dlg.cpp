@@ -1,4 +1,4 @@
-/* $Id: win32dlg.cpp,v 1.69 2001-06-13 17:28:06 sandervl Exp $ */
+/* $Id: win32dlg.cpp,v 1.70 2001-06-15 14:07:22 sandervl Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -645,7 +645,9 @@ WORD *Win32Dialog::getControl(const WORD *p, DLG_CONTROL_INFO *info, BOOL dialog
     if (GET_WORD(p) == 0xffff)  /* Is it an integer id? */
     {
         info->windowName = (LPCSTR)(UINT)GET_WORD(p + 1);
-        p = (WORD *)((char *)p+3);
+        //Wine add 3 (bytes) here. But that causes problems with certain
+        //InstallShield installers.
+        p += 2;
     }
     else
     {
