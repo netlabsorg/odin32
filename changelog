@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.799 2000-03-11 17:27:13 bird Exp $ */
+ /* $Id: changelog,v 1.800 2000-03-11 20:06:28 sandervl Exp $ */
+
+ 2000-03-11: Przemyslaw Dobrowolski <dobrawka@asua.org.pl>
+	- OPENGL\GLIDE: Fix for Voodoo 1 glide (missing io ports)
 
  2000-03-11: knut st. osmundsen <knut.stange.osmundse@pmsc.no>
         - OPENGL\GLUT: Fix for gettimeofday. This is defined conflicting in
