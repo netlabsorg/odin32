@@ -1,4 +1,4 @@
-/* $Id: heap.cpp,v 1.20 2000-04-30 16:31:47 sandervl Exp $ */
+/* $Id: heap.cpp,v 1.21 2000-09-08 04:28:46 phaller Exp $ */
 
 /*
  * Win32 heap API functions for OS/2
@@ -179,7 +179,9 @@ ODINFUNCTIONNODBG0(HANDLE, GetProcessHeap)
 }
 //******************************************************************************
 //******************************************************************************
-HLOCAL WIN32API LocalAlloc(UINT fuFlags, DWORD cbBytes)
+ODINFUNCTIONNODBG2(HLOCAL, LocalAlloc,
+                   UINT,   fuFlags,
+                   DWORD,  cbBytes)
 {
  HLOCAL lmem;
  DWORD  dwFlags = 0;
@@ -216,16 +218,17 @@ UINT WIN32API LocalFlags(HLOCAL hMem)
 }
 //******************************************************************************
 //******************************************************************************
-HLOCAL WIN32API LocalFree(HLOCAL hMem)
+ODINFUNCTIONNODBG1(HLOCAL, LocalFree,
+                   HLOCAL, hMem)
 {
-  dprintf(("KERNEL32: LocalFree %X\n", hMem));
-
-  if(OS2ProcessHeap->GetLockCnt((LPVOID)hMem) != 0) {
-      	dprintf(("LocalFree, lock count != 0\n"));
-      	return(hMem);   //TODO: SetLastError
+  if(OS2ProcessHeap->GetLockCnt((LPVOID)hMem) != 0)
+  {
+    dprintf(("LocalFree, lock count != 0\n"));
+    return(hMem);   //TODO: SetLastError
   }
-  if(OS2ProcessHeap->Free(0, (LPVOID)hMem) == FALSE) {
-      	return(hMem);   //TODO: SetLastError
+  if(OS2ProcessHeap->Free(0, (LPVOID)hMem) == FALSE) 
+  {
+    return(hMem);   //TODO: SetLastError
   }
   return NULL; //success
 }
@@ -248,12 +251,13 @@ BOOL WIN32API LocalUnlock(HLOCAL hMem)
 //******************************************************************************
 //TODO: cbBytes==0 && fuFlags & LMEM_MOVEABLE not handled!!
 //******************************************************************************
-HLOCAL WIN32API LocalReAlloc(HLOCAL hMem, DWORD cbBytes, UINT fuFlags)
+ODINFUNCTIONNODBG3(HLOCAL, LocalReAlloc,
+                   HLOCAL, hMem,
+                   DWORD,  cbBytes,
+                   UINT,   fuFlags)
 {
   HLOCAL hLocalNew;
   LPVOID lpMem;
-
-  dprintf(("KERNEL32: LocalReAlloc %X %d %X\n", hMem, cbBytes, fuFlags));
 
   //SvL: 8-8-'98: Notepad bugfix (assumes address is identical when new size < old size)
   if(OS2ProcessHeap->Size(0, (LPVOID)hMem) > cbBytes)
