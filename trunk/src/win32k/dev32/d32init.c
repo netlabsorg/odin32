@@ -1,4 +1,4 @@
-/* $Id: d32init.c,v 1.42 2002-06-21 00:56:05 bird Exp $
+/* $Id: d32init.c,v 1.43 2002-12-06 02:57:49 bird Exp $
  *
  * d32init.c - 32-bits init routines.
  *
@@ -21,8 +21,8 @@
 #define IMPORT32_ENTRY      0x08
 #define VARIMPORT_ENTRY     0x10
 
-#if  0
-    #define kprintf2(a) kprintf
+#if 0
+    #define kprintf2(a) kprintf(a)
 #else
     #define kprintf2(a) (void)0
 #endif
@@ -761,7 +761,7 @@ int interpretFunctionProlog32(char *pach, BOOL fOverload)
      * Something else must be wrong, but this is where we crash.
      * TODO: make a real fix for this!
      */
-    if (pach >= 0xffff0000 || pach <= 0x10000)
+    if ((unsigned)pach >= 0xffff0000 || (unsigned)pach <= 0x10000)
     {
         kprintf(("interpretFunctionProlog32: Bad address! pach=0x%08x\n", pach));
         return 0;
