@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.27 1999-10-30 09:19:47 sandervl Exp $ */
+/* $Id: window.cpp,v 1.28 1999-10-30 10:55:16 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -180,6 +180,10 @@ HWND WIN32API CreateWindowExW(DWORD exStyle, LPCWSTR className,
           return 0;
         }
     }
+    if(HIWORD(className)) {
+         dprintf(("CreateWindowExW: class %s parent %x (%d,%d) (%d,%d), %x %x", className, parent, x, y, width, height, style, exStyle));
+    }
+    else dprintf(("CreateWindowExW: class %d parent %x (%d,%d) (%d,%d), %x %x", className, parent, x, y, width, height, style, exStyle));
 
     /* Create the window */
     cs.lpCreateParams = data;
