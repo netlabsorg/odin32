@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2000-02-09 23:50:51 bird Exp $
+# $Id: makefile,v 1.4 2000-05-13 15:40:34 bird Exp $
 
 #
 # PD-Win32 API
@@ -35,11 +35,6 @@ all:    commonicc.lib commongcc.a commongcc.lib
 needed: commonicc.lib
 
 
-dep:
-    $(DEPEND) -I$(PDWIN32_INCLUDE);$(PDWIN32_INCLUDE)\win \
-    *.h *.asm *.inc $(PDWIN32_INCLUDE)\*.h *.c *.cpp -objo *.c *.cpp -objgobj *.c *.cpp
-
-
 commonicc.lib: dummy
     -@echo $@
     @$(MAKE_CMD) -f makefile.icc
@@ -52,6 +47,7 @@ commongcc.lib: dummy
     -@echo $@
     @$(MAKE_CMD) OMF=1 -f makefile.gcc
 
+
 #a simple hack to make nmake process the target.
 dummy:
      -@echo ...
@@ -63,4 +59,7 @@ clean:
     @$(MAKE_CMD) OMF=1 -f makefile.gcc clean
 
 
+dep:
+    $(DEPEND) -I$(PDWIN32_INCLUDE);$(PDWIN32_INCLUDE)\win \
+        *.h *.asm *.inc $(PDWIN32_INCLUDE)\*.h *.c *.cpp -objo *.c *.cpp -objgobj *.c *.cpp
 
