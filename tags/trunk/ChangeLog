@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.1125 2000-09-15 13:22:38 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.1126 2000-09-15 20:02:40 davidr Exp $ */
+
+ 2000-09-14: David Raison <djr@lemur.co.uk>
+    - OLE32: Updates from Wine
 
  2000-09-14: Sander van Leeuwen <sandervl@xs4all.nl>
     - WNASPI32: Open and initialize aspirout during dll load; doing this
