@@ -1,0 +1,353 @@
+
+ DSOUND
+
+ Start         Length     Name                   Class
+ 0001:00000000 000002FD4H CODE32                 CODE 32-bit
+	at offset 00000000 0037AH bytes from E:\work\odin32\src\dsound\dsound.obj (DSOUND.cpp)
+	at offset 00000380 00552H bytes from E:\work\odin32\src\dsound\os2dsound.obj (OS2DSOUND.cpp)
+	at offset 000008e0 000E9H bytes from E:\work\odin32\src\dsound\initterm.obj (initterm.cpp)
+	at offset 000009d0 00B68H bytes from E:\work\odin32\src\dsound\os2sndbuffer.obj (OS2SNDBUFFER.cpp)
+	at offset 00001540 008C7H bytes from E:\work\odin32\src\dsound\os2primbuff.obj (OS2PrimBuff.cpp)
+	at offset 00001e10 0070BH bytes from E:\work\odin32\src\dsound\dart.obj (dart.cpp)
+	at offset 00002520 002E4H bytes from E:\work\odin32\src\dsound\os2notify.obj (OS2NOTIFY.cpp)
+	at offset 00002810 006AFH bytes from E:\work\odin32\src\dsound\dsmixer.obj (dsmixer.cpp)
+	at offset 00002ec0 00111H bytes from D:\IBMCPP\LIB\cppom30o.lib (D:\SwordCSD\crt\ctordtor.c)
+
+ 0001:00002FE0 000000010H EH_CODE                CODE 32-bit
+	at offset 00000000 0000EH bytes from E:\work\odin32\src\dsound\os2primbuff.obj (OS2PrimBuff.cpp)
+
+ 0002:00000000 0000010DCH CONST32_RO             CONST 32-bit
+	at offset 00000000 003E4H bytes from E:\work\odin32\src\dsound\dsound.obj (DSOUND.cpp)
+	at offset 000003e4 00290H bytes from E:\work\odin32\src\dsound\os2dsound.obj (OS2DSOUND.cpp)
+	at offset 00000674 002A8H bytes from E:\work\odin32\src\dsound\os2sndbuffer.obj (OS2SNDBUFFER.cpp)
+	at offset 0000091c 00290H bytes from E:\work\odin32\src\dsound\os2primbuff.obj (OS2PrimBuff.cpp)
+	at offset 00000bac 0000EH bytes from E:\work\odin32\src\dsound\dart.obj (dart.cpp)
+	at offset 00000bbc 00290H bytes from E:\work\odin32\src\dsound\os2notify.obj (OS2NOTIFY.cpp)
+	at offset 00000e4c 00290H bytes from E:\work\odin32\src\dsound\dsmixer.obj (dsmixer.cpp)
+
+ 0003:00000000 0000000BCH EH_DATA                CONST 32-bit
+	at offset 00000000 0001CH bytes from E:\work\odin32\src\dsound\dsound.obj (DSOUND.cpp)
+	at offset 0000001c 00030H bytes from E:\work\odin32\src\dsound\os2dsound.obj (OS2DSOUND.cpp)
+	at offset 0000004c 00038H bytes from E:\work\odin32\src\dsound\os2sndbuffer.obj (OS2SNDBUFFER.cpp)
+	at offset 00000084 00038H bytes from E:\work\odin32\src\dsound\os2primbuff.obj (OS2PrimBuff.cpp)
+
+ 0003:000000BC 000000000H _VFT                   CONST 32-bit
+
+ 0004:00000000 0000004C8H DATA32                 DATA 32-bit
+	at offset 00000000 0001CH bytes from E:\work\odin32\src\dsound\dsound.obj (DSOUND.cpp)
+	at offset 0000001c 00104H bytes from E:\work\odin32\src\dsound\initterm.obj (initterm.cpp)
+	at offset 00000120 00014H bytes from E:\work\odin32\src\dsound\os2sndbuffer.obj (OS2SNDBUFFER.cpp)
+	at offset 00000134 0038CH bytes from E:\work\odin32\src\dsound\resource.obj (resource.asm)
+	at offset 000004c0 00004H bytes from D:\IBMCPP\LIB\cppom30o.lib (D:\SwordCSD\crt\ctordtor.c)
+	at offset 000004c4 00004H bytes from D:\IBMCPP\LIB\cppom30o.lib (D:\SwordCSD\crt\dllstub.asm)
+
+ 0004:000004C8 000000000H CTOR_DTOR1             DATA 32-bit
+
+ 0004:000004C8 000000000H CTOR_DTOR2             DATA 32-bit
+
+ 0004:000004C8 000000000H CTOR_DTOR3             DATA 32-bit
+
+ 0004:000004C8 000000000H EDC1                   EDC_CLASS 32-bit
+
+ 0004:000004C8 000000000H EDC2                   EDC_CLASS 32-bit
+
+ 0004:000004C8 000000000H EDC3                   EDC_CLASS 32-bit
+
+ 0004:000004C8 000004A5CH BSS32                  BSS 32-bit
+	at offset 00000000 00004H bytes from E:\work\odin32\src\dsound\dsound.obj (DSOUND.cpp)
+	at offset 00000004 00004H bytes from E:\work\odin32\src\dsound\os2dsound.obj (OS2DSOUND.cpp)
+	at offset 00000008 00008H bytes from E:\work\odin32\src\dsound\os2sndbuffer.obj (OS2SNDBUFFER.cpp)
+	at offset 00000010 0026CH bytes from E:\work\odin32\src\dsound\dart.obj (dart.cpp)
+	at offset 0000027c 047E0H bytes from E:\work\odin32\src\dsound\dsmixer.obj (dsmixer.cpp)
+
+ 0004:00004F24 000000004H c_common               BSS 32-bit
+
+
+ Origin   Group
+ 0000:0   FLAT
+ 0004:0   DGROUP
+
+ Address       Export                  Alias
+
+ 0001:00000200 DirectSoundCaptureCreate  _OS2DirectSoundCreate@12
+ 0001:000001A0 DirectSoundCaptureEnumerateA  _OS2DirectSoundEnumerateA@8
+ 0001:0000017A DirectSoundCaptureEnumerateW  _OS2DirectSoundEnumerateW@8
+ 0001:00000200 DirectSoundCreate       _OS2DirectSoundCreate@12
+ 0001:000001A0 DirectSoundEnumerateA   _OS2DirectSoundEnumerateA@8
+ 0001:0000017A DirectSoundEnumerateW   _OS2DirectSoundEnumerateW@8
+ 0001:00000000 DllCanUnloadNow         _DllCanUnloadNow@0
+ 0001:00000034 DllGetClassObject       _DllGetClassObject@12
+
+  Address         Publics by Name
+
+ 0000:00000000  Imp  atoi                 (ODINCRT.249)
+ 0004:00000724       BufferParms
+ 0001:0000256A       CheckPos__21OS2IDirectSoundNotifyFUlT1
+ 0001:00002540       CheckStop__21OS2IDirectSoundNotifyFv
+ 0000:00000000  Imp  CheckVersionFromHMOD (KERNEL32.1223)
+ 0001:00002230       Dart_Close_Device__FUsPvN22
+ 0001:00001E10       Dart_GetPosition__FUsPl
+ 0001:000022A0       Dart_Open_Device__FPUsPPvN32
+ 0001:00001EC8       Dart_Play__FUsPvT2l
+ 0001:00001FA0       Dart_SetFormat__FPUsPvN22lN25
+ 0001:00001F60       Dart_Stop__FUs
+ 0001:00001130       DestroyAllBuffers__21OS2IDirectSoundBufferFv
+ 0000:00000000  Imp  DosQueryModuleName   (DOSCALLS.320)
+ 0004:000004C8       DS
+ 0004:000004D0       dsbroot__21OS2IDirectSoundBuffer
+ 0004:0000001C       dsoundPath
+ 0004:000004CC       fDSExists__15OS2IDirectSound
+ 0000:00000000  Imp  free                 (ODINCRT.219)
+ 0000:00000000  Imp  getenv               (ODINCRT.427)
+ 0000:00000000  Imp  malloc               (ODINCRT.351)
+ 0000:00000000  Imp  mciSendCommand       (mdm.1)
+ 0004:00000744       mixbuf
+ 0004:000004EC       MixBuffers
+ 0001:00002E9A       MixCallback__FUl
+ 0001:00002CB8       MixFunc__FP21OS2IDirectSoundBufferT1Ul
+ 0001:00002810       MixOneBuffer__FP21OS2IDirectSoundBufferiT2
+ 0004:000006EC       MixSetupParms
+ 0001:00001E30       OS2_Dart_Update
+ 0000:00000000  Imp  pow                  (ODINCRT.236)
+ 0004:000004D4       primary__21OS2IDirectSoundBuffer
+ 0000:00000000  Imp  RestoreOS2FS         (KERNEL32.1230)
+ 0000:00000000  Imp  SetFS                (KERNEL32.1227)
+ 0004:000004E8       usDeviceID
+ 0004:00000120       wfxDefaultPrimaryBuf
+ 0001:00000000       _DllCanUnloadNow@0
+ 0004:000004C4       _dllentry
+ 0001:00000034       _DllGetClassObject@12
+ 0001:00000922       _DLL_InitTerm
+ 0004:000004C8       _edata
+ 0004:00004F28       _end
+ 0000:00000000  Imp  _Exception_CPP       (ODINCRT.917)
+ 0000:00000000  Imp  _fltused             (ODINCRT.701)
+ 0001:000008E0       _LibMain@12
+ 0001:0000002C       _OS2DirectSoundCaptureCreate@12
+ 0001:000001E0       _OS2DirectSoundCaptureEnumerateA@8
+ 0001:000001C0       _OS2DirectSoundCaptureEnumerateW@8
+ 0001:00000200       _OS2DirectSoundCreate@12
+ 0001:000001A0       _OS2DirectSoundEnumerateA@8
+ 0001:0000017A       _OS2DirectSoundEnumerateW@8
+ 0000:00000000  Imp  _PGLOBAL_PTR         (ODINCRT.77)
+ 0001:00001640       _PrimBufAddRef@4
+ 0001:000015F8       _PrimBufGetCaps@8
+ 0001:000019D4       _PrimBufGetCurrentPosition@12
+ 0001:00001958       _PrimBufGetFormat@16
+ 0001:000015E0       _PrimBufGetFrequency@8
+ 0001:000015E8       _PrimBufGetPan@8
+ 0001:000015A0       _PrimBufGetStatus@8
+ 0001:000015F0       _PrimBufGetVolume@8
+ 0001:00001580       _PrimBufInitialize@12
+ 0001:000017E0       _PrimBufLock@32
+ 0001:00001764       _PrimBufPlay@16
+ 0001:00001B00       _PrimBufQueryInterface@12
+ 0001:00001A96       _PrimBufRelease@4
+ 0001:00001540       _PrimBufRestore@4
+ 0001:00001578       _PrimBufSetCurrentPosition@8
+ 0001:000016C0       _PrimBufSetFormat@8
+ 0001:00001560       _PrimBufSetFrequency@8
+ 0001:00001568       _PrimBufSetPan@8
+ 0001:00001570       _PrimBufSetVolume@8
+ 0001:00001670       _PrimBufStop@4
+ 0001:00001550       _PrimBufUnlock@20
+ 0000:00000000  Imp  _RegisterLxDll@12    (KERNEL32.1238)
+ 0004:00000134       _Resource_PEResTab
+ 0004:000004B0       _Resource_ResourceDescriptor
+ 0004:0000017C       _Resource_ResourceDirectory
+ 0000:00000000  Imp  _SetEvent@4          (KERNEL32.644)
+ 0001:00000500       _SoundAddRef@4
+ 0001:00000D40       _SoundBufAddRef@4
+ 0001:00000CE8       _SoundBufGetCaps@8
+ 0001:00000CAC       _SoundBufGetCurrentPosition@12
+ 0001:00000EF0       _SoundBufGetFormat@16
+ 0001:00000C20       _SoundBufGetFrequency@8
+ 0001:00000C4C       _SoundBufGetPan@8
+ 0001:00000BC0       _SoundBufGetStatus@8
+ 0001:00000C80       _SoundBufGetVolume@8
+ 0001:00000BA0       _SoundBufInitialize@12
+ 0001:00000ABE       _SoundBufLock@32
+ 0001:00000A70       _SoundBufPlay@16
+ 0001:00000FBE       _SoundBufQueryInterface@12
+ 0001:00000F6C       _SoundBufRelease@4
+ 0001:000009D0       _SoundBufRestore@4
+ 0001:00000A40       _SoundBufSetCurrentPosition@8
+ 0001:00000A38       _SoundBufSetFormat@8
+ 0001:00000A04       _SoundBufSetFrequency@8
+ 0001:00000DA2       _SoundBufSetPan@8
+ 0001:00000E70       _SoundBufSetVolume@8
+ 0001:00000D60       _SoundBufStop@4
+ 0001:000009E4       _SoundBufUnlock@20
+ 0001:000004F0       _SoundCompact@4
+ 0001:00000592       _SoundCreateSoundBuffer@16
+ 0001:0000041A       _SoundDuplicateSoundBuffer@12
+ 0001:00000422       _SoundGetCaps@8
+ 0001:000003C0       _SoundGetSpeakerConfig@8
+ 0001:00000380       _SoundInitialize@8
+ 0001:00002520       _SoundNotifyAddRef@4
+ 0001:000026E8       _SoundNotifyQueryInterface@12
+ 0001:00002696       _SoundNotifyRelease@4
+ 0001:000025FE       _SoundNotifySetNotificationPositions@12
+ 0001:000007D0       _SoundQueryInterface@12
+ 0001:0000077E       _SoundRelease@4
+ 0001:000003F0       _SoundSetCooperativeLevel@12
+ 0001:00000390       _SoundSetSpeakerConfig@8
+ 0000:00000000  Imp  _sprintfieee         (ODINCRT.87)
+ 0000:00000000  Imp  _UnregisterLxDll@4   (KERNEL32.1239)
+ 0000:00000000  Imp  _VirtualAlloc@16     (KERNEL32.711)
+ 0000:00000000  Imp  _VirtualFree@12      (KERNEL32.712)
+ 0000:00000000  Imp  _WINE_StringFromCLSID@8 (OLE32OS2.1000)
+ 0004:000004C0       __ctdtused
+ 0004:00004F24       __ctordtorCurrent
+ 0004:000004C8       __ctordtorEnd
+ 0001:00002EF8       __ctordtorInit
+ 0004:000004C8       __ctordtorStart
+ 0001:00002EC0       __ctordtorTerm
+ 0001:00001C64       __ct__11OS2PrimBuffFP15OS2IDirectSoundPC13_DSBUFFERDESC
+ 0001:0000050E       __ct__15OS2IDirectSoundFPC5_GUID
+ 0001:00001258       __ct__21OS2IDirectSoundBufferFP15OS2IDirectSoundPC13_DSBUFFERDESC
+ 0001:000027B4       __ct__21OS2IDirectSoundNotifyFP21OS2IDirectSoundBuffer
+ 0000:00000000  Imp  __dl__FPv            (ODINCRT.839)
+ 0001:00001B90       __dt__11OS2PrimBuffFv
+ 0001:000008A2       __dt__15OS2IDirectSoundFv
+ 0001:00001190       __dt__21OS2IDirectSoundBufferFv
+ 0001:00002770       __dt__21OS2IDirectSoundNotifyFv
+ 0000:00000000  Imp  __nw__FUi            (ODINCRT.850)
+
+  Address         Publics by Value
+
+ 0000:00000000  Imp  _sprintfieee         (ODINCRT.87)
+ 0000:00000000  Imp  _RegisterLxDll@12    (KERNEL32.1238)
+ 0000:00000000  Imp  getenv               (ODINCRT.427)
+ 0000:00000000  Imp  malloc               (ODINCRT.351)
+ 0000:00000000  Imp  SetFS                (KERNEL32.1227)
+ 0000:00000000  Imp  _WINE_StringFromCLSID@8 (OLE32OS2.1000)
+ 0000:00000000  Imp  mciSendCommand       (mdm.1)
+ 0000:00000000  Imp  _VirtualFree@12      (KERNEL32.712)
+ 0000:00000000  Imp  _Exception_CPP       (ODINCRT.917)
+ 0000:00000000  Imp  atoi                 (ODINCRT.249)
+ 0000:00000000  Imp  pow                  (ODINCRT.236)
+ 0000:00000000  Imp  free                 (ODINCRT.219)
+ 0000:00000000  Imp  _VirtualAlloc@16     (KERNEL32.711)
+ 0000:00000000  Imp  _fltused             (ODINCRT.701)
+ 0000:00000000  Imp  DosQueryModuleName   (DOSCALLS.320)
+ 0000:00000000  Imp  __dl__FPv            (ODINCRT.839)
+ 0000:00000000  Imp  __nw__FUi            (ODINCRT.850)
+ 0000:00000000  Imp  RestoreOS2FS         (KERNEL32.1230)
+ 0000:00000000  Imp  CheckVersionFromHMOD (KERNEL32.1223)
+ 0000:00000000  Imp  _SetEvent@4          (KERNEL32.644)
+ 0000:00000000  Imp  _UnregisterLxDll@4   (KERNEL32.1239)
+ 0000:00000000  Imp  _PGLOBAL_PTR         (ODINCRT.77)
+ 0001:00000000       _DllCanUnloadNow@0
+ 0001:0000002C       _OS2DirectSoundCaptureCreate@12
+ 0001:00000034       _DllGetClassObject@12
+ 0001:0000017A       _OS2DirectSoundEnumerateW@8
+ 0001:000001A0       _OS2DirectSoundEnumerateA@8
+ 0001:000001C0       _OS2DirectSoundCaptureEnumerateW@8
+ 0001:000001E0       _OS2DirectSoundCaptureEnumerateA@8
+ 0001:00000200       _OS2DirectSoundCreate@12
+ 0001:00000380       _SoundInitialize@8
+ 0001:00000390       _SoundSetSpeakerConfig@8
+ 0001:000003C0       _SoundGetSpeakerConfig@8
+ 0001:000003F0       _SoundSetCooperativeLevel@12
+ 0001:0000041A       _SoundDuplicateSoundBuffer@12
+ 0001:00000422       _SoundGetCaps@8
+ 0001:000004F0       _SoundCompact@4
+ 0001:00000500       _SoundAddRef@4
+ 0001:0000050E       __ct__15OS2IDirectSoundFPC5_GUID
+ 0001:00000592       _SoundCreateSoundBuffer@16
+ 0001:0000077E       _SoundRelease@4
+ 0001:000007D0       _SoundQueryInterface@12
+ 0001:000008A2       __dt__15OS2IDirectSoundFv
+ 0001:000008E0       _LibMain@12
+ 0001:00000922       _DLL_InitTerm
+ 0001:000009D0       _SoundBufRestore@4
+ 0001:000009E4       _SoundBufUnlock@20
+ 0001:00000A04       _SoundBufSetFrequency@8
+ 0001:00000A38       _SoundBufSetFormat@8
+ 0001:00000A40       _SoundBufSetCurrentPosition@8
+ 0001:00000A70       _SoundBufPlay@16
+ 0001:00000ABE       _SoundBufLock@32
+ 0001:00000BA0       _SoundBufInitialize@12
+ 0001:00000BC0       _SoundBufGetStatus@8
+ 0001:00000C20       _SoundBufGetFrequency@8
+ 0001:00000C4C       _SoundBufGetPan@8
+ 0001:00000C80       _SoundBufGetVolume@8
+ 0001:00000CAC       _SoundBufGetCurrentPosition@12
+ 0001:00000CE8       _SoundBufGetCaps@8
+ 0001:00000D40       _SoundBufAddRef@4
+ 0001:00000D60       _SoundBufStop@4
+ 0001:00000DA2       _SoundBufSetPan@8
+ 0001:00000E70       _SoundBufSetVolume@8
+ 0001:00000EF0       _SoundBufGetFormat@16
+ 0001:00000F6C       _SoundBufRelease@4
+ 0001:00000FBE       _SoundBufQueryInterface@12
+ 0001:00001130       DestroyAllBuffers__21OS2IDirectSoundBufferFv
+ 0001:00001190       __dt__21OS2IDirectSoundBufferFv
+ 0001:00001258       __ct__21OS2IDirectSoundBufferFP15OS2IDirectSoundPC13_DSBUFFERDESC
+ 0001:00001540       _PrimBufRestore@4
+ 0001:00001550       _PrimBufUnlock@20
+ 0001:00001560       _PrimBufSetFrequency@8
+ 0001:00001568       _PrimBufSetPan@8
+ 0001:00001570       _PrimBufSetVolume@8
+ 0001:00001578       _PrimBufSetCurrentPosition@8
+ 0001:00001580       _PrimBufInitialize@12
+ 0001:000015A0       _PrimBufGetStatus@8
+ 0001:000015E0       _PrimBufGetFrequency@8
+ 0001:000015E8       _PrimBufGetPan@8
+ 0001:000015F0       _PrimBufGetVolume@8
+ 0001:000015F8       _PrimBufGetCaps@8
+ 0001:00001640       _PrimBufAddRef@4
+ 0001:00001670       _PrimBufStop@4
+ 0001:000016C0       _PrimBufSetFormat@8
+ 0001:00001764       _PrimBufPlay@16
+ 0001:000017E0       _PrimBufLock@32
+ 0001:00001958       _PrimBufGetFormat@16
+ 0001:000019D4       _PrimBufGetCurrentPosition@12
+ 0001:00001A96       _PrimBufRelease@4
+ 0001:00001B00       _PrimBufQueryInterface@12
+ 0001:00001B90       __dt__11OS2PrimBuffFv
+ 0001:00001C64       __ct__11OS2PrimBuffFP15OS2IDirectSoundPC13_DSBUFFERDESC
+ 0001:00001E10       Dart_GetPosition__FUsPl
+ 0001:00001E30       OS2_Dart_Update
+ 0001:00001EC8       Dart_Play__FUsPvT2l
+ 0001:00001F60       Dart_Stop__FUs
+ 0001:00001FA0       Dart_SetFormat__FPUsPvN22lN25
+ 0001:00002230       Dart_Close_Device__FUsPvN22
+ 0001:000022A0       Dart_Open_Device__FPUsPPvN32
+ 0001:00002520       _SoundNotifyAddRef@4
+ 0001:00002540       CheckStop__21OS2IDirectSoundNotifyFv
+ 0001:0000256A       CheckPos__21OS2IDirectSoundNotifyFUlT1
+ 0001:000025FE       _SoundNotifySetNotificationPositions@12
+ 0001:00002696       _SoundNotifyRelease@4
+ 0001:000026E8       _SoundNotifyQueryInterface@12
+ 0001:00002770       __dt__21OS2IDirectSoundNotifyFv
+ 0001:000027B4       __ct__21OS2IDirectSoundNotifyFP21OS2IDirectSoundBuffer
+ 0001:00002810       MixOneBuffer__FP21OS2IDirectSoundBufferiT2
+ 0001:00002CB8       MixFunc__FP21OS2IDirectSoundBufferT1Ul
+ 0001:00002E9A       MixCallback__FUl
+ 0001:00002EC0       __ctordtorTerm
+ 0001:00002EF8       __ctordtorInit
+ 0004:0000001C       dsoundPath
+ 0004:00000120       wfxDefaultPrimaryBuf
+ 0004:00000134       _Resource_PEResTab
+ 0004:0000017C       _Resource_ResourceDirectory
+ 0004:000004B0       _Resource_ResourceDescriptor
+ 0004:000004C0       __ctdtused
+ 0004:000004C4       _dllentry
+ 0004:000004C8       _edata
+ 0004:000004C8       DS
+ 0004:000004C8       __ctordtorStart
+ 0004:000004C8       __ctordtorEnd
+ 0004:000004CC       fDSExists__15OS2IDirectSound
+ 0004:000004D0       dsbroot__21OS2IDirectSoundBuffer
+ 0004:000004D4       primary__21OS2IDirectSoundBuffer
+ 0004:000004E8       usDeviceID
+ 0004:000004EC       MixBuffers
+ 0004:000006EC       MixSetupParms
+ 0004:00000724       BufferParms
+ 0004:00000744       mixbuf
+ 0004:00004F24       __ctordtorCurrent
+ 0004:00004F28       _end
+
+Program entry point at 0001:00000922
