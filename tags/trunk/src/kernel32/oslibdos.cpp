@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.103 2002-06-06 15:10:06 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.104 2002-06-08 11:40:15 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -2977,9 +2977,9 @@ BOOL OSLibDosCreatePipe(PHANDLE phfRead,
 }
 //******************************************************************************
 //******************************************************************************
-DWORD OSLibDosDevIOCtl( DWORD hFile, DWORD dwCat, DWORD dwFunc,
-                        PVOID pParm, DWORD dwParmMaxLen, DWORD *pdwParmLen,
-                        PVOID pData, DWORD dwDataMaxLen, DWORD *pdwDataLen)
+DWORD SYSTEM OSLibDosDevIOCtl( DWORD hFile, DWORD dwCat, DWORD dwFunc,
+                               PVOID pParm, DWORD dwParmMaxLen, DWORD *pdwParmLen,
+                               PVOID pData, DWORD dwDataMaxLen, DWORD *pdwDataLen)
 {
   APIRET rc;
   PVOID pTiledParm    = pParm;
