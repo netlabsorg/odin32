@@ -1,4 +1,4 @@
-/* $Id: conbuffer.cpp,v 1.6 1999-10-27 19:47:38 phaller Exp $ */
+/* $Id: conbuffer.cpp,v 1.7 1999-11-03 21:10:30 phaller Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -326,7 +326,7 @@ DWORD HMDeviceConsoleBufferClass::WriteFile(PHMHANDLEDATA pHMHandleData,
 
         case 13: /* CARRIAGE RETURN */
           pConsoleBuffer->coordCursorPosition.X = 0;
-          //@@@PH test break;
+          break;
 
         case 10: /* LINEFEED */
           pConsoleBuffer->coordCursorPosition.Y++;
