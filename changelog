@@ -1,10 +1,12 @@
-/* $Id: changelog,v 1.1667 2001-08-31 19:46:45 phaller Exp $ */
+/* $Id: changelog,v 1.1668 2001-08-31 19:56:17 phaller Exp $ */
 
  2001-08-31: Patrick Haller <patrick.haller@innotek.de>
     - KERNEL32: o Fix in MoveFileExW, MoveFileExA prevents stack corruption
                   in MS ACMSETUP
     - USER32:   o Fix in UnregisterClass for never reaching the destructor
                   of Win32class. ACMSETUP now working.
+                o graceful error handling if PostMessage fails due to
+                  shared heap shortage
 
  2001-08-30: Patrick Haller <patrick.haller@innotek.de>
     - SHLWAPI:  o Improvements on ordinal functions
