@@ -1,4 +1,4 @@
-/* $Id: console.cpp,v 1.31 2002-12-27 13:31:40 sandervl Exp $ */
+/* $Id: console.cpp,v 1.32 2002-12-27 13:42:08 sandervl Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -804,8 +804,8 @@ MRESULT EXPENTRY iConsoleWindowProc(HWND   hwnd,
                        FORMAT_CGA,
                        0);                       /* template hvps, must be 0 */
       if (rc != NO_ERROR)                                    /* check errors */
-        WriteLog("KERNEL32/CONSOLE:VioCreatePS=%u\n",
-                 rc);
+        dprintf(("KERNEL32/CONSOLE:VioCreatePS=%u\n",
+                 rc));
 
  /* PH 1998/02/12 this seems to be an OS/2 PM bug:
     when doing a WinOpenWindowDC here, PM hangs. Seems it never gets back into
@@ -818,8 +818,8 @@ MRESULT EXPENTRY iConsoleWindowProc(HWND   hwnd,
       rc = VioAssociate(ConsoleGlobals.hdcConsole,
                         ConsoleGlobals.hvpsConsole);
       if (rc != NO_ERROR)                                    /* check errors */
-        WriteLog("KERNEL32/CONSOLE:VioAssociate=%u\n",
-                 rc);
+        dprintf(("KERNEL32/CONSOLE:VioAssociate=%u\n",
+                 rc));
 
       iConsoleFontQuery();                       /* query current cell sizes */
 
@@ -1364,10 +1364,8 @@ APIRET iConsoleInputEventPush(PINPUT_RECORD pInputRecord)
   PINPUT_RECORD pirFree;                           /* pointer to free record */
   APIRET        rc;                                        /* API-returncode */
 
-#ifdef DEBUG_LOCAL2
-  dprintf(("KERNEL32/CONSOLE:ConsoleInputEventPush(%08x).\n",
+  dprintf2(("KERNEL32/CONSOLE:ConsoleInputEventPush(%08x).\n",
            pInputRecord));
-#endif
 
   iConsoleInputQueueLock();
                                                            /* get free event */
@@ -1417,10 +1415,8 @@ APIRET iConsoleInputEventPop(PINPUT_RECORD pInputRecord)
   PINPUT_RECORD pirEvent;                         /* pointer to event record */
   APIRET        rc;                                        /* API-returncode */
 
-#ifdef DEBUG_LOCAL2
-  dprintf(("KERNEL32/CONSOLE:ConsoleInputEventPop(%08x).\n",
+  dprintf2(("KERNEL32/CONSOLE:ConsoleInputEventPop(%08x).\n",
            pInputRecord));
-#endif
 
   if (ConsoleInput.ulEvents == 0)                         /* empty console ? */
     return (ERROR_QUE_EMPTY);                            /* queue is empty ! */
@@ -1630,11 +1626,9 @@ APIRET iConsoleInputEventPushKey(MPARAM mp1,
   USHORT       usVk       = ((ULONG)mp2 & 0xffff0000) >> 16;
   UCHAR        ucChar     = usCh & 0x00ff;
 
-#ifdef DEBUG_LOCAL2
-  dprintf(("KERNEL32/CONSOLE:ConsoleInputEventPushKey(%08x,%08x).\n",
+  dprintf2(("KERNEL32/CONSOLE:ConsoleInputEventPushKey(%08x,%08x).\n",
            mp1,
            mp2));
-#endif
 
 
   InputRecord.EventType = KEY_EVENT;                 /* fill event structure */
@@ -1754,7 +1748,7 @@ APIRET iConsoleInputEventPushMouse(ULONG  ulMessage,
   if ( !(ConsoleInput.dwConsoleMode & ENABLE_MOUSE_INPUT))
     return (NO_ERROR);                                 /* return immediately */
 
-  dprintf(("KERNEL32/CONSOLE:ConsoleInputEventPushMouse(%08x,%08x,%08x).\n",
+  dprintf2(("KERNEL32/CONSOLE:ConsoleInputEventPushMouse(%08x,%08x,%08x).\n",
            ulMessage,
            mp1,
            mp2));
@@ -1866,7 +1860,7 @@ APIRET iConsoleInputEventPushWindow(COORD coordWindowSize)
   if ( !(ConsoleInput.dwConsoleMode & ENABLE_WINDOW_INPUT))
     return (NO_ERROR);                                 /* return immediately */
 
-  dprintf(("KERNEL32/CONSOLE:ConsoleInputEventPushWindow(x = %u, y = %u).\n",
+  dprintf2(("KERNEL32/CONSOLE:ConsoleInputEventPushWindow(x = %u, y = %u).\n",
            coordWindowSize.X,
            coordWindowSize.Y));
 
@@ -1901,7 +1895,7 @@ APIRET iConsoleInputEventPushMenu(DWORD dwCommandId)
   if ( !(ConsoleInput.dwConsoleMode & ENABLE_WINDOW_INPUT))
     return (NO_ERROR);                                 /* return immediately */
 
-  dprintf(("KERNEL32/CONSOLE:ConsoleInputEventPushMenu(%08x).\n",
+  dprintf2(("KERNEL32/CONSOLE:ConsoleInputEventPushMenu(%08x).\n",
            dwCommandId));
 
   InputRecord.EventType = MENU_EVENT;                /* fill event structure */
@@ -1935,7 +1929,7 @@ APIRET iConsoleInputEventPushFocus(BOOL bSetFocus)
   if ( !(ConsoleInput.dwConsoleMode & ENABLE_WINDOW_INPUT))
     return (NO_ERROR);                                 /* return immediately */
 
-  dprintf(("KERNEL32/CONSOLE:ConsoleInputEventPushFocus(%08x).\n",
+  dprintf2(("KERNEL32/CONSOLE:ConsoleInputEventPushFocus(%08x).\n",
            bSetFocus));
 
   InputRecord.EventType = FOCUS_EVENT;               /* fill event structure */
@@ -2053,10 +2047,8 @@ void iConsoleCursorShow (PCONSOLEBUFFER pConsoleBuffer,
   static BOOL fState;                                /* current cursor state */
   RECTL rclWindow;                                    /* current window size */
 
-#ifdef DEBUG_LOCAL2
-  dprintf(("KERNEL32:Console:ConsoleCursorShow(%u)\n",
+  dprintf2(("KERNEL32:Console:ConsoleCursorShow(%u)\n",
            ulCursorMode));
-#endif
 
   if (pConsoleBuffer->CursorInfo.bVisible == FALSE)/* cursor is switched off */
     return;                                            /* return immediately */
@@ -2327,9 +2319,7 @@ BOOL WIN32API AllocConsole(VOID)
 {
   APIRET rc;                                               /* API returncode */
 
-#ifdef DEBUG_LOCAL2
-  WriteLog("KERNEL32/CONSOLE: OS2AllocConsole() called.\n");
-#endif
+  dprintf(("KERNEL32/CONSOLE: OS2AllocConsole() called"));
 
   rc = iConsoleInit(flVioConsole);               /* initialize subsystem if required */
   if (rc != NO_ERROR)                            /* check for errors */
@@ -2371,15 +2361,6 @@ HANDLE WIN32API CreateConsoleScreenBuffer(DWORD  dwDesiredAccess,
 {
   HANDLE hResult;
 
-#ifdef DEBUG_LOCAL2
-  WriteLog("KERNEL32/CONSOLE:OS2CreateConsoleScreenBuffer(%08x,%08x,%08x,%08x,%08x).\n",
-           dwDesiredAccess,
-           dwShareMode,
-           lpSecurityAttributes,
-           dwFlags,
-           lpScreenBufferData);
-#endif
-
   hResult = HMCreateFile("CONBUFFER$",         /* create a new buffer handle */
                          dwDesiredAccess,
                          dwShareMode,
@@ -2412,15 +2393,6 @@ BOOL WIN32API FillConsoleOutputAttribute(HANDLE  hConsoleOutput,
 {
   BOOL fResult;
 
-#ifdef DEBUG_LOCAL2
-  WriteLog("KERNEL32/CONSOLE: OS2FillConsoleOutputAttribute(%08x,%04x,%08x,%08x,%08x).\n",
-           hConsoleOutput,
-           wAttribute,
-           nLength,
-           dwWriteCoord,
-           lpNumberOfAttrsWritten);
-#endif
-
   fResult = (BOOL)HMDeviceRequest(hConsoleOutput,
                                   DRQ_FILLCONSOLEOUTPUTATTRIBUTE,
                                   (ULONG)wAttribute,
@@ -2451,15 +2423,6 @@ BOOL WIN32API FillConsoleOutputCharacterA(HANDLE  hConsoleOutput,
                                              LPDWORD lpNumberOfCharsWritten )
 {
   BOOL fResult;
-
-#ifdef DEBUG_LOCAL2
-  WriteLog("KERNEL32/CONSOLE: OS2FillConsoleOutputCharacterA(%08x,%c,%08x,%08x,%08x).\n",
-           hConsoleOutput,
-           cCharacter,
-           nLength,
-           dwWriteCoord,
-           lpNumberOfCharsWritten);
-#endif
 
   fResult = (BOOL)HMDeviceRequest(hConsoleOutput,
                                   DRQ_FILLCONSOLEOUTPUTCHARACTERA,
@@ -2492,15 +2455,6 @@ BOOL WIN32API FillConsoleOutputCharacterW(HANDLE  hConsoleOutput,
 {
   BOOL fResult;
 
-#ifdef DEBUG_LOCAL2
-  WriteLog("KERNEL32/CONSOLE: OS2FillConsoleOutputCharacterW(%08x,%c,%08x,%08x,%08x) .\n",
-           hConsoleOutput,
-           cCharacter,
-           nLength,
-           dwWriteCoord,
-           lpNumberOfCharsWritten);
-#endif
-
   fResult = (BOOL)HMDeviceRequest(hConsoleOutput,
                                   DRQ_FILLCONSOLEOUTPUTCHARACTERW,
                                   (ULONG)cCharacter,
@@ -2527,11 +2481,6 @@ BOOL WIN32API FillConsoleOutputCharacterW(HANDLE  hConsoleOutput,
 BOOL WIN32API FlushConsoleInputBuffer( HANDLE hConsoleInput )
 {
   BOOL fResult;
-
-#ifdef DEBUG_LOCAL2
-  WriteLog("KERNEL32/CONSOLE: OS2FlushConsoleInputBuffer(%08x).\n",
-           hConsoleInput);
-#endif
 
   fResult = (BOOL)HMDeviceRequest(hConsoleInput,
                                   DRQ_FLUSHCONSOLEINPUTBUFFER,
@@ -2563,10 +2512,6 @@ BOOL WIN32API FreeConsole( VOID )
 {
   APIRET rc;                                               /* API returncode */
 
-#ifdef DEBUG_LOCAL2
-  WriteLog("KERNEL32/CONSOLE: OS2FreeConsole() called.\n");
-#endif
-
   rc = iConsoleTerminate();               /* terminate subsystem if required */
   if (rc != NO_ERROR)                                    /* check for errors */
   {
@@ -2594,9 +2539,7 @@ BOOL WIN32API FreeConsole( VOID )
 
 UINT WIN32API GetConsoleCP(VOID)
 {
-#ifdef DEBUG_LOCAL2
-  WriteLog("KERNEL32/CONSOLE: OS2GetConsoleCP not implemented.\n");
-#endif
+  dprintf(("KERNEL32/CONSOLE: GetConsoleCP not implemented"));
 
   return 1;
 }
@@ -2618,12 +2561,6 @@ BOOL WIN32API GetConsoleCursorInfo(HANDLE               hConsoleOutput,
                                       PCONSOLE_CURSOR_INFO lpConsoleCursorInfo)
 {
   BOOL fResult;
-
-#ifdef DEBUG_LOCAL2
-  WriteLog("KERNEL32/CONSOLE: OS2GetConsoleCursorInfo(%08x,%08x).\n",
-           hConsoleOutput,
-           lpConsoleCursorInfo);
-#endif
 
   fResult = (BOOL)HMDeviceRequest(hConsoleOutput,
                                   DRQ_GETCONSOLECURSORINFO,
@@ -2653,12 +2590,6 @@ BOOL WIN32API GetConsoleMode(HANDLE  hConsole,
 {
   BOOL fResult;
 
-#ifdef DEBUG_LOCAL2
-  WriteLog("KERNEL32/CONSOLE: OS2GetConsoleMode(%08x,%08x).\n",
-           hConsole,
-           lpMode);
-#endif
-
   fResult = (BOOL)HMDeviceRequest(hConsole,
                                   DRQ_GETCONSOLEMODE,
                                   (ULONG) lpMode,
@@ -2684,9 +2615,7 @@ BOOL WIN32API GetConsoleMode(HANDLE  hConsole,
 
 UINT WIN32API GetConsoleOutputCP(VOID)
 {
-#ifdef DEBUG_LOCAL2
-  WriteLog("KERNEL32/CONSOLE: OS2GetConsoleOutputCP not implemented.\n");
-#endif
+  dprintf(("KERNEL32/CONSOLE: GetConsoleOutputCP not implemented"));
 
   return 1;
 }
@@ -2708,12 +2637,6 @@ BOOL WIN32API GetConsoleScreenBufferInfo(HANDLE                      hConsoleOut
                                          PCONSOLE_SCREEN_BUFFER_INFO lpConsoleScreenBufferInfo)
 {
   BOOL fResult;
-
-#ifdef DEBUG_LOCAL2
-  WriteLog("KERNEL32/CONSOLE: OS2GetConsoleScreenBufferInfo(%08x,%08x).\n",
-           hConsoleOutput,
-           lpConsoleScreenBufferInfo);
-#endif
 
   fResult = (BOOL)HMDeviceRequest(hConsoleOutput,
                                   DRQ_GETCONSOLESCREENBUFFERINFO,
@@ -2743,12 +2666,6 @@ DWORD WIN32API GetConsoleTitleA(LPTSTR lpConsoleTitle,
                                 DWORD  nSize)
 {
   ULONG ulLength;                                          /* length of text */
-
-#ifdef DEBUG_LOCAL2
-  WriteLog("KERNEL32/CONSOLE: OS2GetConsoleTitleA(%08x,%08x).\n",
-           lpConsoleTitle,
-           nSize);
-#endif
 
   if (ConsoleGlobals.pszWindowTitle == NULL)    /* is there a window title ? */
     return 0;                                           /* abort immediately */
@@ -2782,12 +2699,6 @@ DWORD WIN32API GetConsoleTitleW(LPWSTR lpConsoleTitle,
 {
   ULONG ulLength;                                          /* length of text */
 
-#ifdef DEBUG_LOCAL2
-  WriteLog("KERNEL32/CONSOLE: GetConsoleTitleW(%08x,%08x)",
-           lpConsoleTitle,
-           nSize);
-#endif
-
   if (ConsoleGlobals.pszWindowTitle == NULL)    /* is there a window title ? */
     return 0;                                           /* abort immediately */
 
@@ -2818,11 +2729,6 @@ COORD WIN32API GetLargestConsoleWindowSize(HANDLE hConsoleOutput)
   DWORD dwResult;
   COORD coordResult;
 
-#ifdef DEBUG_LOCAL2
-  WriteLog("KERNEL32/CONSOLE: OS2GetLargestConsoleWindowSize(%08x).\n",
-           hConsoleOutput);
-#endif
-
   dwResult = HMDeviceRequest(hConsoleOutput,
                              DRQ_GETLARGESTCONSOLEWINDOWSIZE,
                              0,
@@ -2852,12 +2758,6 @@ BOOL WIN32API GetNumberOfConsoleInputEvents(HANDLE  hConsoleInput,
 {
   BOOL fResult;
 
-#ifdef DEBUG_LOCAL2
-  WriteLog("KERNEL32/CONSOLE: OS2GetNumberOfConsoleInputEvents(%08x,%08x).\n",
-           hConsoleInput,
-           lpNumberOfEvents);
-#endif
-
   fResult = (BOOL)HMDeviceRequest(hConsoleInput,
                                   DRQ_GETNUMBEROFCONSOLEINPUTEVENTS,
                                   (ULONG)lpNumberOfEvents,
@@ -2884,11 +2784,6 @@ BOOL WIN32API GetNumberOfConsoleInputEvents(HANDLE  hConsoleInput,
 BOOL WIN32API GetNumberOfConsoleMouseButtons(LPDWORD lpcNumberOfMouseButtons)
 {
   LONG lMouseButtons;
-
-#ifdef DEBUG_LOCAL2
-  WriteLog("KERNEL32/CONSOLE: OS2GetNumberOfConsoleMouseButtons(%08x).\n",
-           lpcNumberOfMouseButtons);
-#endif
 
   lMouseButtons = WinQuerySysValue(HWND_DESKTOP,        /* query PM for that */
                                    SV_CMOUSEBUTTONS);
@@ -2917,14 +2812,6 @@ BOOL WIN32API PeekConsoleInputW(HANDLE        hConsoleInput,
                                    LPDWORD       lpcRead)
 {
   BOOL fResult;
-
-#ifdef DEBUG_LOCAL2
-  WriteLog("KERNEL32/CONSOLE: OS2PeekConsoleInputW(%08x,%08x,%08x,%08x).\n",
-           hConsoleInput,
-           pirBuffer,
-           cInRecords,
-           lpcRead);
-#endif
 
   fResult = (BOOL)HMDeviceRequest(hConsoleInput,
                                   DRQ_PEEKCONSOLEINPUTW,
@@ -2955,14 +2842,6 @@ BOOL WIN32API PeekConsoleInputA(HANDLE        hConsoleInput,
                                 LPDWORD       lpcRead)
 {
   BOOL fResult;
-
-#ifdef DEBUG_LOCAL2
-  WriteLog("KERNEL32/CONSOLE: OS2PeekConsoleInputA(%08x,%08x,%08x,%08x).\n",
-           hConsoleInput,
-           pirBuffer,
-           cInRecords,
-           lpcRead);
-#endif
 
   fResult = (BOOL)HMDeviceRequest(hConsoleInput,
                                   DRQ_PEEKCONSOLEINPUTA,
@@ -2995,15 +2874,6 @@ BOOL WIN32API ReadConsoleA(HANDLE  hConsoleInput,
 {
   BOOL fResult;
 
-#ifdef DEBUG_LOCAL2
-  WriteLog("KERNEL32/CONSOLE: OS2ReadConsoleA(%08x,%08x,%08x,%08x,%08x).\n",
-           hConsoleInput,
-           lpvBuffer,
-           cchToRead,
-           lpcchRead,
-           lpvReserved);
-#endif
-
   fResult = (BOOL)HMDeviceRequest(hConsoleInput,
                                   DRQ_READCONSOLEA,
                                   (ULONG)lpvBuffer,
@@ -3035,15 +2905,6 @@ BOOL WIN32API ReadConsoleW(HANDLE  hConsoleInput,
 {
   BOOL fResult;
 
-#ifdef DEBUG_LOCAL2
-  WriteLog("KERNEL32/CONSOLE: OS2ReadConsoleW(%08x,%08x,%08x,%08x,%08x).\n",
-           hConsoleInput,
-           lpvBuffer,
-           cchToRead,
-           lpcchRead,
-           lpvReserved);
-#endif
-
   fResult = (BOOL)HMDeviceRequest(hConsoleInput,
                                   DRQ_READCONSOLEW,
                                   (ULONG)lpvBuffer,
@@ -3074,14 +2935,6 @@ BOOL WIN32API ReadConsoleInputA(HANDLE        hConsoleInput,
 {
   BOOL fResult;
 
-#ifdef DEBUG_LOCAL2
-  WriteLog("KERNEL32/CONSOLE: OS2ReadConsoleInputA(%08x,%08x,%08x,%08x).\n",
-           hConsoleInput,
-           pirBuffer,
-           cInRecords,
-           lpcRead);
-#endif
-
   fResult = (BOOL)HMDeviceRequest(hConsoleInput,
                                   DRQ_READCONSOLEINPUTA,
                                   (ULONG)pirBuffer,
@@ -3111,14 +2964,6 @@ BOOL WIN32API ReadConsoleInputW(HANDLE        hConsoleInput,
                                 LPDWORD       lpcRead)
 {
   BOOL fResult;
-
-#ifdef DEBUG_LOCAL2
-  WriteLog("KERNEL32/CONSOLE: OS2ReadConsoleInputW(%08x,%08x,%08x,%08x).\n",
-           hConsoleInput,
-           pirBuffer,
-           cInRecords,
-           lpcRead);
-#endif
 
   fResult = (BOOL)HMDeviceRequest(hConsoleInput,
                                   DRQ_READCONSOLEINPUTW,
@@ -3151,15 +2996,6 @@ BOOL WIN32API ReadConsoleOutputA(HANDLE      hConsoleOutput,
 {
   BOOL fResult;
 
-#ifdef DEBUG_LOCAL2
-  WriteLog("KERNEL32/CONSOLE: OS2ReadConsoleOutputA(%08x,%08x,%08x,%08x,%08x).\n",
-           hConsoleOutput,
-           pchiDestBuffer,
-           coordDestBufferSize,
-           coordDestBufferCoord,
-           psrctSourceRect);
-#endif
-
   fResult = (BOOL)HMDeviceRequest(hConsoleOutput,
                                   DRQ_READCONSOLEOUTPUTA,
                                   (ULONG)pchiDestBuffer,
@@ -3190,15 +3026,6 @@ BOOL WIN32API ReadConsoleOutputW(HANDLE      hConsoleOutput,
                                  PSMALL_RECT psrctSourceRect)
 {
   BOOL fResult;
-
-#ifdef DEBUG_LOCAL2
-  WriteLog("KERNEL32/CONSOLE: OS2ReadConsoleOutputW(%08x,%08x,%08x,%08x,%08x).\n",
-           hConsoleOutput,
-           pchiDestBuffer,
-           coordDestBufferSize,
-           coordDestBufferCoord,
-           psrctSourceRect);
-#endif
 
   fResult = (BOOL)HMDeviceRequest(hConsoleOutput,
                                   DRQ_READCONSOLEOUTPUTW,
@@ -3231,15 +3058,6 @@ BOOL WIN32API ReadConsoleOutputAttribute(HANDLE  hConsoleOutput,
 {
   BOOL fResult;
 
-#ifdef DEBUG_LOCAL2
-  WriteLog("KERNEL32/CONSOLE: OS2ReadConsoleOutputAttribute(%08x,%08x,%08x,%08x,%08x).\n",
-           hConsoleOutput,
-           lpwAttribute,
-           cReadCells,
-           coordReadCoord,
-           lpcNumberRead);
-#endif
-
   fResult = (BOOL)HMDeviceRequest(hConsoleOutput,
                                   DRQ_READCONSOLEOUTPUTATTRIBUTE,
                                   (ULONG)lpwAttribute,
@@ -3270,15 +3088,6 @@ BOOL WIN32API ReadConsoleOutputCharacterA(HANDLE  hConsoleOutput,
                                           LPDWORD lpcNumberRead)
 {
   BOOL fResult;
-
-#ifdef DEBUG_LOCAL2
-  WriteLog("KERNEL32/CONSOLE: OS2ReadConsoleOutputCharacterA(%08x,%08x,%08x,%08x,%08x).\n",
-           hConsoleOutput,
-           lpReadBuffer,
-           cchRead,
-           coordReadCoord,
-           lpcNumberRead);
-#endif
 
   fResult = (BOOL)HMDeviceRequest(hConsoleOutput,
                                   DRQ_READCONSOLEOUTPUTCHARACTERA,
@@ -3311,15 +3120,6 @@ BOOL WIN32API ReadConsoleOutputCharacterW(HANDLE  hConsoleOutput,
 {
   BOOL fResult;
 
-#ifdef DEBUG_LOCAL2
-  WriteLog("KERNEL32/CONSOLE: OS2ReadConsoleOutputCharacterW(%08x,%08x,%08x,%08x,%08x).\n",
-           hConsoleOutput,
-           lpReadBuffer,
-           cchRead,
-           coordReadCoord,
-           lpcNumberRead);
-#endif
-
   fResult = (BOOL)HMDeviceRequest(hConsoleOutput,
                                   DRQ_READCONSOLEOUTPUTCHARACTERW,
                                   (ULONG)lpReadBuffer,
@@ -3350,15 +3150,6 @@ BOOL WIN32API ScrollConsoleScreenBufferA(HANDLE      hConsoleOutput,
                                          PCHAR_INFO  pchiFill)
 {
   BOOL fResult;
-
-#ifdef DEBUG_LOCAL2
-  WriteLog("KERNEL32/CONSOLE: OS2ScrollConsoleScreenBufferA(%08x,%08x,%08x,%08x,%08x).\n",
-           hConsoleOutput,
-           psrctSourceRect,
-           psrctClipRect,
-           coordDestOrigin,
-           pchiFill);
-#endif
 
   fResult = (BOOL)HMDeviceRequest(hConsoleOutput,
                                   DRQ_SCROLLCONSOLESCREENBUFFERA,
@@ -3391,15 +3182,6 @@ BOOL WIN32API ScrollConsoleScreenBufferW(HANDLE      hConsoleOutput,
 {
   BOOL fResult;
 
-#ifdef DEBUG_LOCAL2
-  WriteLog("KERNEL32/CONSOLE: OS2ScrollConsoleScreenBufferW(%08x,%08x,%08x,%08x,%08x).\n",
-           hConsoleOutput,
-           psrctSourceRect,
-           psrctClipRect,
-           coordDestOrigin,
-           pchiFill);
-#endif
-
   fResult = (BOOL)HMDeviceRequest(hConsoleOutput,
                                   DRQ_SCROLLCONSOLESCREENBUFFERW,
                                   (ULONG)psrctSourceRect,
@@ -3426,11 +3208,6 @@ BOOL WIN32API SetConsoleActiveScreenBuffer(HANDLE hConsoleOutput)
 {
   BOOL fResult;
 
-#ifdef DEBUG_LOCAL2
-  WriteLog("KERNEL32/CONSOLE: OS2SetConsoleActiveScreenBuffer(%08x).\n",
-           hConsoleOutput);
-#endif
-
   fResult = (BOOL)HMDeviceRequest(hConsoleOutput,
                                   DRQ_SETCONSOLEACTIVESCREENBUFFER,
                                   0,
@@ -3456,10 +3233,8 @@ BOOL WIN32API SetConsoleActiveScreenBuffer(HANDLE hConsoleOutput)
 
 BOOL WIN32API SetConsoleCP(UINT IDCodePage)
 {
-#ifdef DEBUG_LOCAL2
-  WriteLog("KERNEL32/CONSOLE: OS2SetConsoleCP(%08x) not implemented.\n",
-           IDCodePage);
-#endif
+  dprintf(("KERNEL32/CONSOLE: SetConsoleCP(%08x) not implemented.\n",
+           IDCodePage));
 
   return TRUE;
 }
@@ -3481,12 +3256,6 @@ BOOL WIN32API SetConsoleCursorInfo(HANDLE               hConsoleOutput,
                                       PCONSOLE_CURSOR_INFO lpConsoleCursorInfo)
 {
   BOOL fResult;
-
-#ifdef DEBUG_LOCAL2
-  WriteLog("KERNEL32/CONSOLE: OS2SetConsoleCursorInfo(%08x,%08x).\n",
-           hConsoleOutput,
-           lpConsoleCursorInfo);
-#endif
 
   fResult = (BOOL)HMDeviceRequest(hConsoleOutput,
                                   DRQ_SETCONSOLECURSORINFO,
@@ -3517,12 +3286,6 @@ BOOL WIN32API SetConsoleCursorPosition(HANDLE hConsoleOutput,
 {
   BOOL fResult;
 
-#ifdef DEBUG_LOCAL2
-  WriteLog("KERNEL32/CONSOLE: OS2SetConsoleCursorPosition(%08x,%08x).\n",
-           hConsoleOutput,
-           coordCursor);
-#endif
-
   fResult = (BOOL)HMDeviceRequest(hConsoleOutput,
                                   DRQ_SETCONSOLECURSORPOSITION,
                                   COORD2ULONG(coordCursor),
@@ -3551,12 +3314,6 @@ BOOL WIN32API SetConsoleMode(HANDLE hConsole,
 {
  BOOL fResult;
 
-#ifdef DEBUG_LOCAL2
-  WriteLog("KERNEL32/CONSOLE: OS2SetConsoleMode(%08x,%08x).\n",
-           hConsole,
-           fdwMode);
-#endif
-
   fResult = (BOOL)HMDeviceRequest(hConsole,
                                   DRQ_SETCONSOLEMODE,
                                   (ULONG)fdwMode,
@@ -3582,10 +3339,8 @@ BOOL WIN32API SetConsoleMode(HANDLE hConsole,
 
 BOOL WIN32API SetConsoleOutputCP(UINT IDCodePage)
 {
-#ifdef DEBUG_LOCAL2
-  WriteLog("KERNEL32/CONSOLE: OS2SetConsoleOutputCP(%08x) not implemented.\n",
-           IDCodePage);
-#endif
+  dprintf(("KERNEL32/CONSOLE: OS2SetConsoleOutputCP(%08x) not implemented.\n",
+           IDCodePage));
 
   return TRUE;
 }
@@ -3607,12 +3362,6 @@ BOOL WIN32API SetConsoleScreenBufferSize(HANDLE hConsoleOutput,
                                             COORD  coordSize)
 {
   BOOL fResult;
-
-#ifdef DEBUG_LOCAL2
-  WriteLog("KERNEL32/CONSOLE: OS2SetConsoleScreenBufferSize(%08x,%08x).\n",
-           hConsoleOutput,
-           coordSize);
-#endif
 
   fResult = (BOOL)HMDeviceRequest(hConsoleOutput,
                                   DRQ_SETCONSOLESCREENBUFFERSIZE,
@@ -3642,12 +3391,6 @@ BOOL WIN32API SetConsoleTextAttribute(HANDLE hConsoleOutput,
 {
   BOOL fResult;
 
-#ifdef DEBUG_LOCAL2
-  WriteLog("KERNEL32/CONSOLE: OS2SetConsoleTextAttribute(%08x,%04x).\n",
-           hConsoleOutput,
-           wAttr);
-#endif
-
   fResult = (BOOL)HMDeviceRequest(hConsoleOutput,
                                   DRQ_SETCONSOLETEXTATTRIBUTE,
                                   (ULONG)wAttr,
@@ -3673,11 +3416,6 @@ BOOL WIN32API SetConsoleTextAttribute(HANDLE hConsoleOutput,
 
 BOOL WIN32API SetConsoleTitleA(LPTSTR lpszTitle)
 {
-#ifdef DEBUG_LOCAL2
-  WriteLog("KERNEL32/CONSOLE: OS2SetConsoleTitleA(%s).\n",
-           lpszTitle);
-#endif
-
   if (ConsoleGlobals.pszWindowTitle != NULL)           /* previously set name */
     free (ConsoleGlobals.pszWindowTitle);                     /* then free it */
 
@@ -3704,11 +3442,6 @@ BOOL WIN32API SetConsoleTitleA(LPTSTR lpszTitle)
 
 BOOL WIN32API SetConsoleTitleW(LPWSTR lpszTitle)
 {
-#ifdef DEBUG_LOCAL2
-  WriteLog("KERNEL32/CONSOLE: OS2SetConsoleTitleW(%s) not implemented.\n",
-           lpszTitle);
-#endif
-
   if (lpszTitle == NULL)                                 /* check parameters */
     return FALSE;
 
@@ -3749,13 +3482,6 @@ BOOL WIN32API SetConsoleWindowInfo(HANDLE      hConsoleOutput,
 {
   BOOL fResult;
 
-#ifdef DEBUG_LOCAL2
-  WriteLog("KERNEL32/CONSOLE: OS2SetConsoleWindowInfo(%08x,%08x,%08x).\n",
-           hConsoleOutput,
-           fAbsolute,
-           psrctWindowRect);
-#endif
-
   fResult = (BOOL)HMDeviceRequest(hConsoleOutput,
                                   DRQ_SETCONSOLEWINDOWINFO,
                                   (ULONG)fAbsolute,
@@ -3786,15 +3512,6 @@ BOOL WIN32API WriteConsoleA(HANDLE      hConsoleOutput,
                             LPVOID      lpvReserved)
 {
   BOOL fResult;
-
-#ifdef DEBUG_LOCAL2
-  WriteLog("KERNEL32/CONSOLE: OS2WriteConsoleA(%08x,%08x,%08x,%08x,%08x).\n",
-           hConsoleOutput,
-           lpvBuffer,
-           cchToWrite,
-           lpcchWritten,
-           lpvReserved);
-#endif
 
   fResult = (BOOL)HMDeviceRequest(hConsoleOutput,
                                   DRQ_WRITECONSOLEA,
@@ -3827,15 +3544,6 @@ BOOL WIN32API WriteConsoleW(HANDLE      hConsoleOutput,
 {
   BOOL fResult;
 
-#ifdef DEBUG_LOCAL2
-  WriteLog("KERNEL32/CONSOLE: OS2WriteConsoleW(%08x,%08x,%08x,%08x,%08x).\n",
-           hConsoleOutput,
-           lpvBuffer,
-           cchToWrite,
-           lpcchWritten,
-           lpvReserved);
-#endif
-
   fResult = (BOOL)HMDeviceRequest(hConsoleOutput,
                                   DRQ_WRITECONSOLEW,
                                   (ULONG)lpvBuffer,
@@ -3866,14 +3574,6 @@ BOOL WIN32API WriteConsoleInputA(HANDLE        hConsoleInput,
 {
   BOOL fResult;
 
-#ifdef DEBUG_LOCAL2
-  WriteLog("KERNEL32/CONSOLE: OS2WriteConsoleInputA(%08x,%08x,%08x,%08x).\n",
-           hConsoleInput,
-           pirBuffer,
-           cInRecords,
-           lpcWritten);
-#endif
-
   fResult = (BOOL)HMDeviceRequest(hConsoleInput,
                                   DRQ_WRITECONSOLEINPUTA,
                                   (ULONG)pirBuffer,
@@ -3903,14 +3603,6 @@ BOOL WIN32API WriteConsoleInputW(HANDLE        hConsoleInput,
                                  LPDWORD       lpcWritten)
 {
   BOOL fResult;
-
-#ifdef DEBUG_LOCAL2
-  WriteLog("KERNEL32/CONSOLE: OS2WriteConsoleInputW(%08x,%08x,%08x,%08x).\n",
-           hConsoleInput,
-           pirBuffer,
-           cInRecords,
-           lpcWritten);
-#endif
 
   fResult = (BOOL)HMDeviceRequest(hConsoleInput,
                                   DRQ_WRITECONSOLEINPUTW,
@@ -3943,15 +3635,6 @@ BOOL WIN32API WriteConsoleOutputA(HANDLE      hConsoleOutput,
 {
   BOOL fResult;
 
-#ifdef DEBUG_LOCAL2
-  WriteLog("KERNEL32/CONSOLE: OS2WriteConsoleOutputA(%08x,%08x,%08x,%08x,%08x).\n",
-           hConsoleOutput,
-           pchiSrcBuffer,
-           coordSrcBufferSize,
-           coordSrcBufferCoord,
-           psrctDestRect);
-#endif
-
   fResult = (BOOL)HMDeviceRequest(hConsoleOutput,
                                   DRQ_WRITECONSOLEOUTPUTA,
                                   (ULONG)pchiSrcBuffer,
@@ -3983,15 +3666,6 @@ BOOL WIN32API WriteConsoleOutputW(HANDLE      hConsoleOutput,
 {
   BOOL fResult;
 
-#ifdef DEBUG_LOCAL2
-  WriteLog("KERNEL32/CONSOLE: OS2WriteConsoleOutputW(%08x,%08x,%08x,%08x,%08x).\n",
-           hConsoleOutput,
-           pchiSrcBuffer,
-           coordSrcBufferSize,
-           coordSrcBufferCoord,
-           psrctDestRect);
-#endif
-
   fResult = (BOOL)HMDeviceRequest(hConsoleOutput,
                                   DRQ_WRITECONSOLEOUTPUTW,
                                   (ULONG)pchiSrcBuffer,
@@ -4021,15 +3695,6 @@ BOOL WIN32API WriteConsoleOutputAttribute(HANDLE  hConsoleOutput,
                                           LPDWORD lpcNumberWritten)
 {
   BOOL fResult;
-
-#ifdef DEBUG_LOCAL2
-  WriteLog("KERNEL32/CONSOLE: OS2WriteConsoleOutputAttribute(%08x,%08x,%08x,%08x,%08x).\n",
-           hConsoleOutput,
-           lpwAttribute,
-           cWriteCells,
-           coordWriteCoord,
-           lpcNumberWritten);
-#endif
 
   fResult = (BOOL)HMDeviceRequest(hConsoleOutput,
                                   DRQ_WRITECONSOLEOUTPUTATTRIBUTE,
@@ -4062,15 +3727,6 @@ BOOL WIN32API WriteConsoleOutputCharacterA(HANDLE  hConsoleOutput,
 {
   BOOL fResult;
 
-#ifdef DEBUG_LOCAL2
-  WriteLog("KERNEL32/CONSOLE: OS2WriteConsoleOutputCharacterA(%08x,%08x,%08x,%08x,%08x).\n",
-           hConsoleOutput,
-           lpWriteBuffer,
-           cchWrite,
-           coordWriteCoord,
-           lpcWritten);
-#endif
-
   fResult = (BOOL)HMDeviceRequest(hConsoleOutput,
                                   DRQ_WRITECONSOLEOUTPUTCHARACTERA,
                                   (ULONG)lpWriteBuffer,
@@ -4101,15 +3757,6 @@ BOOL WIN32API WriteConsoleOutputCharacterW(HANDLE  hConsoleOutput,
                                            LPDWORD lpcWritten)
 {
   BOOL fResult;
-
-#ifdef DEBUG_LOCAL2
-  WriteLog("KERNEL32/CONSOLE: OS2WriteConsoleOutputCharacterW(%08x,%08x,%08x,%08x,%08x).\n",
-           hConsoleOutput,
-           lpWriteBuffer,
-           cchWrite,
-           coordWriteCoord,
-           lpcWritten);
-#endif
 
   fResult = (BOOL)HMDeviceRequest(hConsoleOutput,
                                   DRQ_WRITECONSOLEOUTPUTCHARACTERW,
