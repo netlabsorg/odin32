@@ -1,4 +1,4 @@
-/* $Id: libconv.c,v 1.1 2001-09-02 04:35:58 bird Exp $
+/* $Id: libconv.c,v 1.2 2001-10-19 00:07:30 bird Exp $
  *
  * Very simple OMF/LIB dumper.
  *
@@ -7,6 +7,58 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+
+/*******************************************************************************
+*   Defined Constants And Macros                                               *
+*******************************************************************************/
+/**
+ * Upcases a char.
+ */
+#define upcase(ch) ((ch) >= 'a' && (ch) <= 'z' ?  (char)((ch) - ('a' - 'A')) : (ch))
+
+
+/**
+ * Access macro for reading index value.
+ * @return  index value. 0 - 32768.
+ * @param   pch     Pointer to the first byte of the index.
+ */
+#define INDEX_VALUE(pch)    ( *(char*)(pch) & 0x80 \
+                                ? (*(char *)(pch) & 0x7f) * 0x100 + *((char*)(pch)+1) \
+                                : *((char*)(pch)) )
+
+/**
+ * Access macro for determin the size of an index.
+ * @return  index size in bytes. 1 or 2.
+ * @param   pch     Pointer to the first byte of the index.
+ */
+#define INDEX_SIZE(pch)     ( *(char*)(pch) & 0x80 ? 2 : 1 )
+
+
+/**
+ * Get a byte at a given offset.
+ * @return  byte at given offset.
+ * @param   pch     Pointer to address relativ to.
+ * @param   off     Byte offset from pch.
+ */
+#define OMF_BYTE(pch, off)  ( *((char*)(pch) + (int)(off)) )
+
+
+/**
+ * Get a word (unsigned short) at a given offset.
+ * @return  word (unsigned short) at given offset.
+ * @param   pch     Pointer to address relativ to.
+ * @param   off     Byte offset from pch.
+ */
+#define OMF_WORD(pch, off)  ( *(unsigned short*)((char*)(pch) + (int)(off)) )
+
+
+/**
+ * Get a dword (unsigned long) at a given offset.
+ * @return  dword (unsigned long) at given offset.
+ * @param   pch     Pointer to address relativ to.
+ * @param   off     Byte offset from pch.
+ */
+#define OMF_DWORD(pch, off)  ( *(unsigned long*)((char*)(pch) + (int)(off)) )
 
 
 /*@Header***********************************************************************
@@ -19,7 +71,7 @@
 
 #include "include\omf.h"
 
-int fCodeToCode16 = 0;
+int fUpcase = 0;
 int fRemoveExtra = 0;
 
 /*@IntFunc**********************************************************************
@@ -35,7 +87,7 @@ int main(int argc, char **argv)
     int rc = 0;
     int argi = 1;
 
-    if (argc == 4)
+    if (argc >= 4)
     {
         argi = 2;
         fRemoveExtra = 1;
@@ -60,7 +112,7 @@ int processFile(const char *pszFilename, const char *pszFilenameOut)
 
     psz = strrchr(pszFilename, '\\');
     if (psz)
-        fCodeToCode16 = stricmp(psz, "\\dhcalls.lib") == 0;
+        fUpcase = stricmp(psz, "\\dhcalls.lib") == 0;
 
     phFile = fopen(pszFilename, "rb");
     phNew = fopen(pszFilenameOut, "wb");
@@ -185,6 +237,24 @@ void *processRecord(void *pvRecord, void *pvBase, FILE *phNew, unsigned short *a
         {
             cbRecord = *((unsigned short*)((int)pvRecord+1)) + 3;
             *((char*)pvRecord + cbRecord - 1) = 0;
+            if (fUpcase)
+            {
+                char *pch = (char*)pvRecord;
+                char *pch1, *pch2, *pchEnd;
+                pch1 = pch + 3 + INDEX_SIZE(pch + 3);
+                pch2 = pch1 + INDEX_SIZE(pch1);
+                if (!*pch1)
+                    pch2 += 2;
+
+                for (pchEnd = pch + pch[1]; pch2 + 1 < pchEnd; )
+                {
+                    int i;
+                    for (i = 1; i <= *pch2; i++)
+                        pch2[i] = upcase(pch2[i]);
+                    pch2 += *pch2 + 1 + (pch[0] & 0x1 ? 4 : 2);
+                    pch2 += INDEX_SIZE(pch2);
+                }
+            }
             break;
         }
 
