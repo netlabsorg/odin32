@@ -37,7 +37,7 @@
 
 extern "C" {
  //Win32 resource table (produced by wrc)
- extern DWORD _Resource_PEResTab;
+ extern DWORD comdlg32_PEResTab;
 
  BOOL WINAPI COMDLG32_DllEntryPoint(HINSTANCE hInstance, DWORD Reason, LPVOID Reserved);
 }
@@ -82,7 +82,7 @@ ULONG APIENTRY inittermComdlg32(ULONG hModule, ULONG ulFlag)
 
    switch (ulFlag) {
       case 0 :
-	 dllHandle = RegisterLxDll(hModule, LibMainComdlg32, (PVOID)&_Resource_PEResTab,
+	 dllHandle = RegisterLxDll(hModule, LibMainComdlg32, (PVOID)&comdlg32_PEResTab,
                                    COMDLG32_MAJORIMAGE_VERSION, COMDLG32_MINORIMAGE_VERSION,
                                    IMAGE_SUBSYSTEM_WINDOWS_GUI);
          if(dllHandle == 0) 

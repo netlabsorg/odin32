@@ -1,4 +1,4 @@
-/* $Id: windlllx.cpp,v 1.20 2001-06-15 09:42:48 bird Exp $ */
+/* $Id: windlllx.cpp,v 1.21 2001-07-29 19:00:32 sandervl Exp $ */
 
 /*
  * Win32 LX Dll class (compiled in OS/2 using Odin32 api)
@@ -39,6 +39,14 @@
 #define DBG_LOCALLOG    DBG_windlllx
 #include "dbglocal.h"
 
+char *lpszCustomDllName = NULL;
+
+//******************************************************************************
+//******************************************************************************
+void WIN32API SetCustomBuildName(char *lpszName) 
+{
+    lpszCustomDllName = lpszName;
+}
 //******************************************************************************
 //Create LX Dll object and send process attach message
 //System dlls set EntryPoint to 0
@@ -64,32 +72,33 @@ DWORD WIN32API RegisterLxDll(HINSTANCE hInstance, WIN32DLLENTRY EntryPoint,
  Win32DllBase *windlldep;
  char          szFileName[CCHMAXPATH], szErrName[CCHMAXPATH];
 
-   if(OSLibGetDllName(hInstance, szFileName, sizeof(szFileName)) == FALSE) {
-    dprintf(("ERROR: RegisterLxDll: OSLibGetDllName %x failed!!", hInstance));
-    return 0;
+   if(!lpszCustomDllName) {
+       if(OSLibGetDllName(hInstance, szFileName, sizeof(szFileName)) == FALSE) {
+           dprintf(("ERROR: RegisterLxDll: OSLibGetDllName %x failed!!", hInstance));
+           return 0;
+       }
+       dprintf(("RegisterLxDll %x %s", hInstance, szFileName));
+       //Make sure DosLoadModule is called at least once for a dll (to make sure
+       //OS/2 doesn't unload the dll when it's still needed)
+       rc = DosLoadModule(szErrName, sizeof(szErrName), szFileName, &hInstance);
+       if(rc != 0) {
+           dprintf(("ERROR: RegisterLxDll: DosLoadModule %s failed (rc=%d)!!", szFileName, rc));
+           return 0;
+       }
    }
-   dprintf(("RegisterLxDll %x %s", hInstance, szFileName));
-   //Make sure DosLoadModule is called at least once for a dll (to make sure
-   //OS/2 doesn't unload the dll when it's still needed)
-   rc = DosLoadModule(szErrName, sizeof(szErrName), szFileName, &hInstance);
-   if(rc != 0) {
-    dprintf(("ERROR: RegisterLxDll: DosLoadModule %s failed (rc=%d)!!", szFileName, rc));
-    return 0;
-   }
-
    windll = new Win32LxDll(hInstance, EntryPoint, pResData, MajorImageVersion,
                            MinorImageVersion, Subsystem);
    if(windll == NULL) {
-    dprintf(("RegisterLxDll: windll == NULL!!!"));
-    return 0;
+       dprintf(("RegisterLxDll: windll == NULL!!!"));
+       return 0;
    }
    if(!fPeLoader) {
-    windll->AddRef();
+       windll->AddRef();
 
-    if(windll->attachProcess() == 0)
-        return 0;
+       if(windll->attachProcess() == 0)
+           return 0;
 
-    return windll->getInstanceHandle();
+       return windll->getInstanceHandle();
    }
    IMAGE_DOS_HEADER doshdr;
    struct e32_exe   lxhdr;
@@ -104,30 +113,31 @@ DWORD WIN32API RegisterLxDll(HINSTANCE hInstance, WIN32DLLENTRY EntryPoint,
    //(no need to save FS here as we'll return to OS/2 immediately)
    rc = DosQueryHeaderInfo(hInstance, 0, &doshdr, sizeof(IMAGE_DOS_HEADER), QHINF_READFILE);
    if(rc) {
-    goto hdrerror;
+       goto hdrerror;
    }
    rc = DosQueryHeaderInfo(hInstance, doshdr.e_lfanew, &lxhdr, sizeof(e32_exe), QHINF_READFILE);
    if(rc) {
-    goto hdrerror;
+       goto hdrerror;
    }
    offset = doshdr.e_lfanew + lxhdr.e32_impmod;
    for(i=0;i<lxhdr.e32_impmodcnt;i++) {
-    rc = DosQueryHeaderInfo(hInstance, offset, &modsize, 1, QHINF_READFILE);
-    if(rc) {
-        goto hdrerror;
-    }
-    rc = DosQueryHeaderInfo(hInstance, offset+1, &modulename, min(modsize, sizeof(modulename)), QHINF_READFILE);
-    if(rc) {
-        goto hdrerror;
-    }
-    modulename[modsize] = 0;
-    windlldep = Win32DllBase::findModule(modulename, TRUE);
-    if(windlldep && strcmp(windlldep->getModuleName(), windll->getModuleName())) {
-        dprintf(("RegisterLxDll: Add dependency %s -> %s", windll->getModuleName(), modulename));
-        windll->addDependency(windlldep);
-    }
-        else    dprintf(("HARMLESS WARNING: Can't find dll %s referenced by %s", modulename, windll->getModuleName()));
-    offset += modsize + 1;
+       rc = DosQueryHeaderInfo(hInstance, offset, &modsize, 1, QHINF_READFILE);
+       if(rc) {
+           goto hdrerror;
+       }
+       rc = DosQueryHeaderInfo(hInstance, offset+1, &modulename, min(modsize, sizeof(modulename)), QHINF_READFILE);
+       if(rc) {
+           goto hdrerror;
+       }
+       modulename[modsize] = 0;
+       windlldep = Win32DllBase::findModule(modulename, TRUE);
+       if(windlldep && strcmp(windlldep->getModuleName(), windll->getModuleName())) {
+            dprintf(("RegisterLxDll: Add dependency %s -> %s", windll->getModuleName(), modulename));
+            windll->addDependency(windlldep);
+       }
+       else dprintf(("HARMLESS WARNING: Can't find dll %s referenced by %s", modulename, windll->getModuleName()));
+
+       offset += modsize + 1;
    }
    return windll->getInstanceHandle();
 

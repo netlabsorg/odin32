@@ -1,10 +1,11 @@
-# $Id: makefile,v 1.34 2001-07-20 15:37:22 sandervl Exp $
+# $Id: makefile,v 1.35 2001-07-29 19:01:06 sandervl Exp $
 
 #
 # Odin32 API
 #
 #       shell32.dll makefile
 #
+WRC_PREFIX_RESOURCE=1
 
 
 #

@@ -1,11 +1,11 @@
-# $Id: makefile,v 1.28 2001-07-20 15:36:49 sandervl Exp $
+# $Id: makefile,v 1.29 2001-07-29 19:00:13 sandervl Exp $
 
 #
 # Odin32 API
 #
 #       comdlg32.dll makefile
 #
-
+WRC_PREFIX_RESOURCE=1
 
 #
 # Compiler, tools, and interference rules.

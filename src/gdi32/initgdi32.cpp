@@ -40,7 +40,7 @@
 
 extern "C" {
  //Win32 resource table (produced by wrc)
- extern DWORD _Resource_PEResTab;
+ extern DWORD gdi32_PEResTab;
 }
 static HMODULE dllHandle = 0;
 //******************************************************************************
@@ -89,7 +89,7 @@ ULONG inittermGdi32(ULONG hModule, ULONG ulFlag)
 	 if(InitRegionSpace() == FALSE) {
 		return 0UL;
          }
-	 dllHandle = RegisterLxDll(hModule, OdinLibMain, (PVOID)&_Resource_PEResTab,
+	 dllHandle = RegisterLxDll(hModule, OdinLibMain, (PVOID)&gdi32_PEResTab,
                                    GDI32_MAJORIMAGE_VERSION, GDI32_MINORIMAGE_VERSION,
                                    IMAGE_SUBSYSTEM_NATIVE);
          if(dllHandle == 0) 
