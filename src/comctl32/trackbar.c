@@ -1,4 +1,4 @@
-/* $Id: trackbar.c,v 1.16 1999-08-22 13:20:26 cbratschi Exp $ */
+/* $Id: trackbar.c,v 1.17 1999-09-12 16:52:46 cbratschi Exp $ */
 /*
  * Trackbar control
  *
@@ -487,7 +487,6 @@ static VOID TRACKBAR_DrawThumb(TRACKBAR_INFO *infoPtr,HDC hdc,DWORD dwStyle)
 {
     if (!(dwStyle & TBS_NOTHUMB))
     {
-
       HBRUSH hbr,hbrOld;
       RECT thumb = infoPtr->rcThumb;
 
@@ -501,7 +500,6 @@ static VOID TRACKBAR_DrawThumb(TRACKBAR_INFO *infoPtr,HDC hdc,DWORD dwStyle)
         FillRect(hdc,&thumb,hbr);
       } else
       {
-
         POINT points[6];
         RECT triangle;  /* for correct shadows of thumb */
 
@@ -731,8 +729,8 @@ static VOID TRACKBAR_Draw(HWND hwnd,HDC hdc)
 
     if (infoPtr->flags & TB_THUMBCHANGED)
     {
-      TRACKBAR_CalcThumb(hwnd,infoPtr);
       if (infoPtr->flags & TB_THUMBSIZECHANGED) TRACKBAR_CalcChannel(hwnd,infoPtr);
+      TRACKBAR_CalcThumb(hwnd,infoPtr);
     }
     if (infoPtr->flags & TB_SELECTIONCHANGED) TRACKBAR_CalcSelection(hwnd,infoPtr);
     infoPtr->flags &= ~ (TB_THUMBCHANGED | TB_SELECTIONCHANGED | TB_DRAGPOSVALID);
@@ -1527,14 +1525,14 @@ TRACKBAR_SetSelStart (HWND hwnd, WPARAM wParam, LPARAM lParam)
 static LRESULT
 TRACKBAR_SetThumbLength (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
-    TRACKBAR_INFO *infoPtr = TRACKBAR_GetInfoPtr (hwnd);
+    TRACKBAR_INFO *infoPtr = TRACKBAR_GetInfoPtr(hwnd);
 
     if (infoPtr->uThumbLen == (UINT)wParam) return 0;
 
-    if (!(GetWindowLongA (hwnd, GWL_STYLE) & TBS_FIXEDLENGTH)) return 0;
+    if (GetWindowLongA(hwnd,GWL_STYLE) & TBS_FIXEDLENGTH) return 0;
 
-    infoPtr->uThumbLen = (UINT)wParam;
-    infoPtr->flags |= TB_THUMBSIZECHANGED;
+    infoPtr->uThumbLen = MAX((UINT)wParam,THUMB_MINLEN);
+    infoPtr->flags |= TB_THUMBSIZECHANGED | TB_THUMBCHANGED;
 
     TRACKBAR_Refresh(hwnd);
 
