@@ -1,4 +1,9 @@
-/* $Id: ChangeLog,v 1.1198 2000-12-30 13:26:33 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1199 2000-12-31 12:28:01 sandervl Exp $ */
+
+ 2000-12-31: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Implemented ReadFile/WriteFile for COM devices (UNTESTED)
+    - ODINCRT:  o Don't export anything by name (we import everything by ordinal
+                  and it saves 15k)
 
  2000-12-30: Sander van Leeuwen <sandervl@xs4all.nl>
     - INSTALL:  o Don't include odin.ini anymore. 
@@ -11,7 +16,7 @@
 
  2000-12-29: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Export OS2ToWin32Handle & Win32ToOS2Handle with stdcall
-                  convention. (not mangled)
+                  calling convention. (not mangled)
     - GDI32:    o Changes for above exports
 
  2000-12-27: Jeroen van den Horn <J.vandenHorn@chello.nl>
