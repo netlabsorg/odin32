@@ -1,4 +1,4 @@
-# $Id: odin32.tools.mk,v 1.5 2001-07-29 23:28:11 bird Exp $
+# $Id: odin32.tools.mk,v 1.6 2001-08-16 04:13:21 bird Exp $
 
 #
 # Odin32 API
@@ -47,6 +47,7 @@ CREATEPATH  = $(ODIN32_TOOLS)\CreatePath.cmd
 EXECEXCL    = $(ODIN32_TOOLS)\ExecExcl.cmd
 BLDLEVELINF = $(ODIN32_TOOLS)\BldLevelInf.cmd
 LXLITE      = $(ODIN32_TOOLS)\lxlite.exe
+CMDQD       = $(ODIN32_TOOLS)\cmdqd.exe
 DEPEND      = $(ODIN32_TOOLS)\fastdep.exe -o$$(OBJDIR) -cy+
 !ifdef MAKEFLAGS
 !if "$(MAKEVER)" != "5.0"
@@ -57,6 +58,14 @@ DEPEND      = $(ODIN32_TOOLS)\fastdep.exe -o$$(OBJDIR) -cy+ -F+
 !if "$(MAKEFLAGS:a=z)" != "$(MAKEFLAGS)"
 DEPEND      = $(ODIN32_TOOLS)\fastdep.exe -o$$(OBJDIR) -cy+ -F+
 !endif
+!endif
+!endif
+
+!ifdef MULTIJOBS
+!ifndef WAT
+CMDQD_SUB   = $(CMDQD) submit
+CMDQD_WAIT  = $(CMDQD) wait
+CMDQD_INIT  = $(CMDQD) kill & $(CMDQD) init $(MULTIJOBS)
 !endif
 !endif
 
