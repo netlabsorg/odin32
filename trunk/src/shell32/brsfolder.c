@@ -1,4 +1,4 @@
-/* $Id: brsfolder.c,v 1.7 2002-02-14 12:10:07 sandervl Exp $ */
+/* $Id: brsfolder.c,v 1.8 2002-06-06 06:55:55 sandervl Exp $ */
 
 /*
  * Win32 compatibility SHELL32 BRSFOLDER for OS/2
@@ -72,6 +72,10 @@ static void InitializeTreeView(HWND hwndParent, LPCITEMIDLIST root)
 	if (SUCCEEDED(hr) && hwndTreeView)
 	{ TreeView_DeleteAllItems(hwndTreeView);
        	  FillTreeView(lpsf, NULL, TVI_ROOT);
+#ifdef __WIN32OS2__
+          //@@PF Windows always expands root here. Period.
+          TreeView_Expand(hwndTreeView,TreeView_GetRoot(hwndTreeView),TVE_EXPAND); 
+#endif
 	}
 	
 	if (SUCCEEDED(hr))
@@ -224,7 +228,12 @@ static LRESULT MsgNotify(HWND hWnd,  UINT CtlID, LPNMHDR lpnmh)
 	          if (SUCCEEDED(IShellFolder_BindToObject(lptvid->lpsfParent, lptvid->lpi,0,(REFIID)&IID_IShellFolder,(LPVOID *)&lpsf2)))
 	          { FillTreeView( lpsf2, lptvid->lpifq, pnmtv->itemNew.hItem );
 	          }
+#ifndef __WIN32OS2__
+		  //@PF This is absolutely wrong from all points. First tree we have is
+                  //already sorted the way it should. Second we should supply a sort procedure
+                  //if needed because otherwise we get sort by name!
 	          TreeView_SortChildren(hwndTreeView, pnmtv->itemNew.hItem, FALSE);
+#endif
 		}
 	        break;
 	      case TVN_SELCHANGEDA:
