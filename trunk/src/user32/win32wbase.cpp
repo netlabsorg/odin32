@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.274 2001-07-04 17:46:04 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.275 2001-07-05 10:45:25 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -929,7 +929,7 @@ ULONG Win32BaseWindow::MsgPosChanged(LPARAM lp)
 {
     //SvL: Notes crashes when switching views (calls DestroyWindow -> PM sends
     //     a WM_WINDOWPOSCHANGED msg -> crash)
-    if(CanReceiveSizeMsgs() || fDestroyWindowCalled)
+    if(!CanReceiveSizeMsgs() || fDestroyWindowCalled)
         return 1;
 
     return SendInternalMessageA(WM_WINDOWPOSCHANGED, 0, lp);
@@ -2868,8 +2868,11 @@ HWND Win32BaseWindow::GetTopWindow()
         topwindow = GetWindowFromOS2FrameHandle(hwndTop);
         //Note: GetTopWindow can't return a window that hasn't processed
         //      WM_NCCREATE yet (verified in NT4, SP6)
-        if(topwindow && topwindow->state >= STATE_POST_WMNCCREATE) {
-            hwndTop = topwindow->getWindowHandle();
+        if(topwindow) {
+            if(topwindow->state >= STATE_POST_WMNCCREATE) {
+                 hwndTop = topwindow->getWindowHandle();
+            }
+            else hwndTop = topwindow->GetWindow(GW_HWNDNEXT);
             RELEASE_WNDOBJ(topwindow);
             return hwndTop;
         }
@@ -2880,8 +2883,11 @@ HWND Win32BaseWindow::GetTopWindow()
         topwindow = GetWindowFromOS2FrameHandle(hwndTop);
         //Note: GetTopWindow can't return a window that hasn't processed
         //      WM_NCCREATE yet (verified in NT4, SP6)
-        if(topwindow && topwindow->state >= STATE_POST_WMNCCREATE) {
-            hwndTop = topwindow->getWindowHandle();
+        if(topwindow) {
+            if(topwindow->state >= STATE_POST_WMNCCREATE) {
+                 hwndTop = topwindow->getWindowHandle();
+            }
+            else hwndTop = topwindow->GetWindow(GW_HWNDNEXT);
             RELEASE_WNDOBJ(topwindow);
             return hwndTop;
         }
