@@ -6,6 +6,8 @@
  */
 #include <string.h>
 #include <ctype.h>
+#include <wctype.h>
+#define HAVE_WCTYPE_H
 #include <odin.h>
 
 #define ICOM_CINTERFACE 1

@@ -22,6 +22,11 @@
 #endif /* defined(__cplusplus) */
 
 
+/**
+ * WINE portability macro
+ **/
+
+#define VERSION_OsIsUnicode() FALSE
 
 /*******************************************
 *  global SHELL32.DLL variables
