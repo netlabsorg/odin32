@@ -1,11 +1,17 @@
-/* $Id: changelog,v 1.1808 2001-10-29 10:02:32 achimha Exp $ */
+/* $Id: changelog,v 1.1809 2001-10-29 13:35:45 sandervl Exp $ */
+
+ 2001-10-29: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Always IOCTL_DISK/DSK_GETLOCKSTATUS for IOCTL_STORAGE_CHECK_VERIFY
+                  (handle doesn't need to be valid for this ioctl)
+    - USER32:   o Send WM_DEVICECHANGE when a CD is inserted or removed
+                  (poll CD every 100ms)
 
  2001-10-29: Achim Hasenmueller <achimha@innotek.de>
     - BUILD:    o strip EAs from binary before executing LXLITE on it to
                   prevent errors in LXLITE if the file is on a LAN Server
                   JFS volume
 
- 2001-10-26: knut st. osmundsen <kosmunds@csc.com>
+ 2001-10-29: knut st. osmundsen <kosmunds@csc.com>
     - NTDLL:    o _ultow and RtlIntegerToUnicodeString.
 
  2001-10-28: Sander van Leeuwen <sandervl@xs4all.nl>
