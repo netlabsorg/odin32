@@ -1,8 +1,9 @@
- /* $Id: changelog,v 1.708 2000-02-08 12:45:16 bird Exp $ */
+ /* $Id: changelog,v 1.709 2000-02-08 14:55:04 bird Exp $ */
 
  2000-02-08: Knut Stange Osmundsen <knut.stange.osmundsen>
-	- Win32k: Temporarily disabled imported kernelfunctions which
-	          broke Win32k at WE4eB. (The imports are currently unused.)
+	- Win32k: Temporarily disabled some unused imported kernelfunctions.
+	          Corrected a problem with overloading _ldrEnum32bitRelRecs;
+	          it failed on WS4eB. (Message 'DosDevIOCtl failed')
 
  2000-02-07: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Don't use shell positioning for child windows (breaks Notes)
