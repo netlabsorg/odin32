@@ -1,3 +1,5 @@
+/* $Id: winimagepeldr.cpp,v 1.80 2001-06-01 08:10:48 sandervl Exp $ */
+
 /*
  * Win32 PE loader Image base class
  *
@@ -51,7 +53,6 @@
 #include "oslibdos.h"
 #include "mmap.h"
 #include <wprocess.h>
-
 
 //Define COMMIT_ALL to let the pe loader commit all sections of the image
 //This is very useful during debugging as you'll get lots of exceptions
@@ -108,10 +109,8 @@ Win32PeLdrImage::Win32PeLdrImage(char *pszFileName, BOOL isExe) :
     Win32ImageBase(-1),
     nrsections(0), imageSize(0), dwFlags(0), section(NULL),
     imageVirtBase(-1), realBaseAddress(0), imageVirtEnd(0),
-    nrNameExports(0), nrOrdExports(0),
-    nameexports(NULL), ordexports(NULL),
-    curnameexport(NULL), curordexport(NULL),
-    memmap(NULL), pFixups(NULL), dwFixupSize(0)
+    nrNameExports(0), nrOrdExports(0), nameexports(NULL), ordexports(NULL),
+    memmap(NULL), pFixups(NULL), dwFixupSize(0), curnameexport(NULL), curordexport(NULL)
 {
  HFILE  dllfile;
 
@@ -217,7 +216,7 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
     imageSize = oh.SizeOfImage;
     //Allocate memory to hold the entire image
     if(allocSections(reservedMem) == FALSE) {
-        dprintf((LOG, "Failed to allocate image memory for %s at %x, rc %d", szFileName, oh.ImageBase, errorState));
+        dprintf((LOG, "Failed to allocate image memory for %s at %x, rc %d", szFileName, oh.ImageBase, errorState));;
         goto failure;
     }
 
@@ -650,7 +649,6 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
             goto failure;
         }
     }
-
     return(TRUE);
 
 failure:
@@ -666,30 +664,7 @@ failure:
     return FALSE;
 }
 //******************************************************************************
-//  commitPage:
-//      commits image page(s) when an access violation exception is received
-//      (usually called from exception.cpp; also from other methods in this file)
-//
-//  Parameters:
-//      virtAddress     - address of exception (rounded down to page boundary)
-//      fWriteAccess    - type of access violation (read or write)
-//      fPageCmd        - SINGLE_PAGE       -> commit single page
-//                        SECTION_PAGES     -> commit default nr of pages
-//                        COMPLETE_SECTION  -> commit entire section
-//
-//  Remarks:
-//      DosEnterCritSec/DosExitCritSec is used to make sure the other threads in
-//      the application can't touch the pages before they are loaded from disk and
-//      fixups are applied.
-//
-//  TODO:
-//      SECTION_PAGES:  - don't load pages starting at access violation address, but
-//                        a region surrounding it (e.g. -32k -> + 32k)
-//                        this will prevent many pagefaults when the app uses
-//                        pages with a lower addr.
-//
 //******************************************************************************
-
 #define DOSREAD_IDEAL_SIZE 61440
 static inline APIRET _Optlink fastDosRead(HFILE hFile,
                                           PVOID pAddress,
@@ -724,7 +699,30 @@ static inline APIRET _Optlink fastDosRead(HFILE hFile,
     return NO_ERROR;
 }
 
-
+//******************************************************************************
+//  commitPage:
+//      commits image page(s) when an access violation exception is received
+//      (usually called from exception.cpp; also from other methods in this file)
+//
+//  Parameters:
+//      virtAddress     - address of exception (rounded down to page boundary)
+//      fWriteAccess    - type of access violation (read or write)
+//      fPageCmd        - SINGLE_PAGE       -> commit single page
+//                        SECTION_PAGES     -> commit default nr of pages
+//                        COMPLETE_SECTION  -> commit entire section
+//
+//  Remarks:
+//      DosEnterCritSec/DosExitCritSec is used to make sure the other threads in
+//      the application can't touch the pages before they are loaded from disk and
+//      fixups are applied.
+//
+//  TODO:
+//      SECTION_PAGES:  - don't load pages starting at access violation address, but
+//                        a region surrounding it (e.g. -32k -> + 32k)
+//                        this will prevent many pagefaults when the app uses
+//                        pages with a lower addr.
+//
+//******************************************************************************
 BOOL Win32PeLdrImage::commitPage(ULONG virtAddress, BOOL fWriteAccess, int fPageCmd)
 {
  Section *section;
@@ -820,11 +818,14 @@ BOOL Win32PeLdrImage::commitPage(ULONG virtAddress, BOOL fWriteAccess, int fPage
             dprintf((LOG, "Win32PeLdrImage::commitPage: DosSetFilePtr failed for 0x%x!", fileoffset));
             goto fail;
         }
-
+#if 1
         // 2001-05-31 PH
         // ensure DosRead() does not have to read more
         // than 65535 bytes, otherwise split into two requests!
         rc = fastDosRead(hFile, (PVOID)virtAddress, size, &ulRead);
+#else
+        rc = DosRead(hFile, (PVOID)virtAddress, size, &ulRead);
+#endif
         if(rc) {
             DosExitCritSec();
             dprintf((LOG, "Win32PeLdrImage::commitPage: DosRead failed for 0x%x %x %x %x (rc=%d)!", virtAddress, size, ulRead, fileoffset, rc));
@@ -1318,217 +1319,174 @@ void Win32PeLdrImage::StoreImportByName(Win32ImageBase *WinImage, char *impname,
 //******************************************************************************
 BOOL Win32PeLdrImage::processExports(char *win32file)
 {
-  IMAGE_SECTION_HEADER    sh;
-  PIMAGE_EXPORT_DIRECTORY ped;
-  ULONG *ptrNames, *ptrAddress;
-  USHORT *ptrOrd;
-  BOOL fForwarder;
-  int i;
+ IMAGE_SECTION_HEADER    sh;
+ PIMAGE_EXPORT_DIRECTORY ped;
+ ULONG *ptrNames, *ptrAddress;
+ USHORT *ptrOrd;
+ BOOL fForwarder;
+ int i;
 
   /* get section header and pointer to data directory for .edata section */
   if((ped = (PIMAGE_EXPORT_DIRECTORY)ImageDirectoryOffset
-      (win32file, IMAGE_DIRECTORY_ENTRY_EXPORT)) != NULL &&
-     GetSectionHdrByImageDir(win32file, IMAGE_DIRECTORY_ENTRY_EXPORT, &sh) ) 
-  {
+     (win32file, IMAGE_DIRECTORY_ENTRY_EXPORT)) != NULL &&
+     GetSectionHdrByImageDir(win32file, IMAGE_DIRECTORY_ENTRY_EXPORT, &sh) ) {
 
-    dprintf((LOG, "Exported Functions: " ));
+        dprintf((LOG, "Exported Functions: " ));
     ptrOrd     = (USHORT *)((ULONG)ped->AddressOfNameOrdinals +
                             (ULONG)win32file);
     ptrNames   = (ULONG *)((ULONG)ped->AddressOfNames +
-                           (ULONG)win32file);
+                            (ULONG)win32file);
     ptrAddress = (ULONG *)((ULONG)ped->AddressOfFunctions +
-                           (ULONG)win32file);
+                            (ULONG)win32file);
     nrOrdExports  = ped->NumberOfFunctions;
     nrNameExports = ped->NumberOfNames;
-    
+
     int   ord, RVAExport;
     char *name;
     for(i=0;i<ped->NumberOfNames;i++)
     {
-      fForwarder = FALSE;
-      ord        = ptrOrd[i] + ped->Base;
-      name       = (char *)((ULONG)ptrNames[i] + (ULONG)win32file);
-      RVAExport  = ptrAddress[ptrOrd[i]];
+    fForwarder = FALSE;
+        ord        = ptrOrd[i] + ped->Base;
+        name       = (char *)((ULONG)ptrNames[i] + (ULONG)win32file);
+        RVAExport  = ptrAddress[ptrOrd[i]];
 
-      /* forwarder? ulRVA within export directory. */
-      if(RVAExport > oh.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress &&
-         RVAExport < oh.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress
-         + oh.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].Size)
-      {
-        fForwarder = AddForwarder(oh.ImageBase + RVAExport, name, ord);
-      }
-      
-      if(!fForwarder) 
-      {
-        //points to code (virtual address relative to oh.ImageBase
-        AddNameExport(oh.ImageBase + RVAExport, name, ord);
-        dprintf((LOG, "address 0x%x %s @%d (0x%08x)", RVAExport, name, ord, realBaseAddress + RVAExport));
-      }
+        /* forwarder? ulRVA within export directory. */
+        if(RVAExport > oh.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress &&
+           RVAExport < oh.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress
+                       + oh.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].Size)
+        {
+            fForwarder = AddForwarder(oh.ImageBase + RVAExport, name, ord);
+        }
+    if(!fForwarder) {
+            //points to code (virtual address relative to oh.ImageBase
+            AddNameExport(oh.ImageBase + RVAExport, name, ord);
+            dprintf((LOG, "address 0x%x %s @%d (0x%08x)", RVAExport, name, ord, realBaseAddress + RVAExport));
+        }
     }
-    
     for(i=0;i<max(ped->NumberOfNames,ped->NumberOfFunctions);i++)
     {
-      fForwarder = FALSE;
-      ord = ped->Base + i;  //Correct??
-      RVAExport = ptrAddress[i];
-      /* forwarder? ulRVA within export directory. */
-      if(RVAExport > oh.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress &&
-         RVAExport < oh.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress
-         + oh.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].Size)
-      {
-        fForwarder = AddForwarder(oh.ImageBase + RVAExport, NULL, ord);
-      }
-      
-      if(!fForwarder && RVAExport) 
-      {
-        //points to code (virtual address relative to oh.ImageBase
-        dprintf((LOG, "ord %d at 0x%08x (0x%08x)", ord, RVAExport, realBaseAddress + RVAExport));
-        AddOrdExport(oh.ImageBase + RVAExport, ord);
-      }
+    fForwarder = FALSE;
+        ord = ped->Base + i;  //Correct??
+        RVAExport = ptrAddress[i];
+        /* forwarder? ulRVA within export directory. */
+        if(RVAExport > oh.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress &&
+           RVAExport < oh.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress
+                       + oh.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].Size)
+        {
+            fForwarder = AddForwarder(oh.ImageBase + RVAExport, NULL, ord);
+        }
+    if(!fForwarder && RVAExport) {
+            //points to code (virtual address relative to oh.ImageBase
+            dprintf((LOG, "ord %d at 0x%08x (0x%08x)", ord, RVAExport, realBaseAddress + RVAExport));
+            AddOrdExport(oh.ImageBase + RVAExport, ord);
+        }
     }
   }
-
   return(TRUE);
 }
 //******************************************************************************
 //******************************************************************************
 void Win32PeLdrImage::AddNameExport(ULONG virtaddr, char *apiname, ULONG ordinal, BOOL fAbsoluteAddress)
 {
-  ULONG nsize;
-  int iApiNameLength = strlen(apiname);
+ ULONG nsize;
 
-  if(nameexports == NULL) 
-  {
-    nameExportSize= 4096;
-    nameexports   = (NameExport *)malloc(nameExportSize);
-    curnameexport = nameexports;
-  }
-  
-  nsize = (ULONG)curnameexport - (ULONG)nameexports;
-  if(nsize + sizeof(NameExport) + iApiNameLength > nameExportSize)
-  {
-    nameExportSize += 4096;
-    char *tmp = (char *)nameexports;
-    nameexports = (NameExport *)malloc(nameExportSize);
-    memcpy(nameexports, tmp, nsize);
-    curnameexport = (NameExport *)((ULONG)nameexports + nsize);
-    free(tmp);
-  }
-  
-  if(fAbsoluteAddress) //forwarders use absolute address
-    curnameexport->virtaddr = virtaddr;
-  else
-    curnameexport->virtaddr = realBaseAddress + (virtaddr - oh.ImageBase);
-  
-  curnameexport->ordinal  = ordinal;
-  *(ULONG *)curnameexport->name = 0;
-  strcpy(curnameexport->name, apiname);
-
-  curnameexport->nlength = iApiNameLength + 1;
-  if(curnameexport->nlength < sizeof(curnameexport->name))
-    curnameexport->nlength = sizeof(curnameexport->name);
-
-  curnameexport = (NameExport *)((ULONG)curnameexport->name + curnameexport->nlength);
-}
-//******************************************************************************
-//******************************************************************************
-void Win32PeLdrImage::AddOrdExport(ULONG virtaddr, 
-                                   ULONG ordinal, 
-                                   BOOL fAbsoluteAddress)
-{
-  if(ordexports == NULL) 
-  {
-    ordexports   = (OrdExport *)malloc(nrOrdExports * sizeof(OrdExport));
-    curordexport = ordexports;
-  }
-  
-  if(fAbsoluteAddress) //forwarders use absolute address
-    curordexport->virtaddr = virtaddr;
-  else 
-    curordexport->virtaddr = realBaseAddress + (virtaddr - oh.ImageBase);
-
-  curordexport->ordinal  = ordinal;
-  curordexport++;
-}
-//******************************************************************************
-//******************************************************************************
-BOOL Win32PeLdrImage::AddForwarder(ULONG virtaddr, 
-                                   char *apiname, 
-                                   ULONG ordinal)
-{
-  char         *forward = (char *)(realBaseAddress + (virtaddr - oh.ImageBase));
-  char         *forwarddll, *forwardapi, *forwardapi0;
-  Win32DllBase *WinDll;
-  DWORD         exportaddr;
-  int           forwardord;
-  int           iForwardApiLength; /* save strlen result */
-    
-// 2001-06-01 PH
-// we do exactly know which character we replace: the "." is zeroed
-// so we can cheaply restore the name at the end of the method.
-//  forwarddll = strdup(forward);
-//  if(forwarddll == NULL)
-//  {
-//    return FALSE;
-//  }
-  forwarddll = forward;
-    
-  forwardapi = strchr(forwarddll, '.');
-  if(forwardapi == NULL) 
-  {
-    goto fail;
-  }
-  *forwardapi0 = 0;
-  forwardapi=forwardapi0++;
-  iForwardApiLength = strlen(forwardapi);
-  
-  if(strlen(forwarddll) == 0 || iForwardApiLength == 0) 
-  {
-    goto fail;
-  }
-  
-  WinDll = Win32DllBase::findModule(forwarddll);
-  if(WinDll == NULL) 
-  {
-    WinDll = loadDll(forwarddll);
-    if(WinDll == NULL) 
-    {
-      dprintf((LOG, "ERROR: couldn't find forwarder %s.%s", forwarddll, forwardapi));
-      goto fail;
+    if(nameexports == NULL) {
+        nameExportSize= 4096;
+        nameexports   = (NameExport *)malloc(nameExportSize);
+        curnameexport = nameexports;
     }
-  }
-  
-  //check if name or ordinal forwarder
-  if(*forwardapi >= '0' && *forwardapi <= '9') 
-  {
-    forwardord = atoi(forwardapi);
-  }
-  else
+    nsize = (ULONG)curnameexport - (ULONG)nameexports;
+    if(nsize + sizeof(NameExport) + strlen(apiname) > nameExportSize) {
+        nameExportSize += 4096;
+        char *tmp = (char *)nameexports;
+        nameexports = (NameExport *)malloc(nameExportSize);
+        memcpy(nameexports, tmp, nsize);
+        curnameexport = (NameExport *)((ULONG)nameexports + nsize);
+        free(tmp);
+    }
+    if(fAbsoluteAddress) {//forwarders use absolute address
+        curnameexport->virtaddr = virtaddr;
+    }
+    else curnameexport->virtaddr = realBaseAddress + (virtaddr - oh.ImageBase);
+    curnameexport->ordinal  = ordinal;
+    *(ULONG *)curnameexport->name = 0;
+    strcpy(curnameexport->name, apiname);
+
+    curnameexport->nlength = strlen(apiname) + 1;
+    if(curnameexport->nlength < sizeof(curnameexport->name))
+        curnameexport->nlength = sizeof(curnameexport->name);
+
+    curnameexport = (NameExport *)((ULONG)curnameexport->name + curnameexport->nlength);
+}
+//******************************************************************************
+//******************************************************************************
+void Win32PeLdrImage::AddOrdExport(ULONG virtaddr, ULONG ordinal, BOOL fAbsoluteAddress)
+{
+    if(ordexports == NULL) {
+        ordexports   = (OrdExport *)malloc(nrOrdExports * sizeof(OrdExport));
+        curordexport = ordexports;
+    }
+    if(fAbsoluteAddress) {//forwarders use absolute address
+        curordexport->virtaddr = virtaddr;
+    }
+    else curordexport->virtaddr = realBaseAddress + (virtaddr - oh.ImageBase);
+
+    curordexport->ordinal  = ordinal;
+    curordexport++;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL Win32PeLdrImage::AddForwarder(ULONG virtaddr, char *apiname, ULONG ordinal)
+{
+ char         *forward = (char *)(realBaseAddress + (virtaddr - oh.ImageBase));
+ char         *forwarddll, *forwardapi;
+ Win32DllBase *WinDll;
+ DWORD         exportaddr;
+ int           forwardord;
+
+    forwarddll = strdup(forward);
+    if(forwarddll == NULL) {
+        return FALSE;
+    }
+    forwardapi = strchr(forwarddll, '.');
+    if(forwardapi == NULL) {
+        goto fail;
+    }
+    *forwardapi++ = 0;
+    if(strlen(forwarddll) == 0 || strlen(forwardapi) == 0) {
+        goto fail;
+    }
+    WinDll = Win32DllBase::findModule(forwarddll);
+    if(WinDll == NULL) {
+        WinDll = loadDll(forwarddll);
+        if(WinDll == NULL) {
+            dprintf((LOG, "ERROR: couldn't find forwarder %s.%s", forwarddll, forwardapi));
+            goto fail;
+        }
+    }
+    //check if name or ordinal forwarder
     forwardord = 0;
-  
-  if(forwardord != 0 || (iForwardApiLength == 1 && *forwardapi == '0')) 
-    exportaddr = WinDll->getApi(forwardord);
-  else  
-    exportaddr = WinDll->getApi(forwardapi);
+    if(*forwardapi >= '0' && *forwardapi <= '9') {
+        forwardord = atoi(forwardapi);
+    }
+    if(forwardord != 0 || (strlen(forwardapi) == 1 && *forwardapi == '0')) {
+        exportaddr = WinDll->getApi(forwardord);
+    }
+    else  exportaddr = WinDll->getApi(forwardapi);
 
-  if(apiname) 
-  {
-    dprintf((LOG, "address 0x%x %s @%d (0x%08x) forwarder %s.%s", virtaddr - oh.ImageBase, apiname, ordinal, virtaddr, forwarddll, forwardapi));
-    AddNameExport(exportaddr, apiname, ordinal, TRUE);
-  }
-  else 
-  {
-    dprintf((LOG, "address 0x%x @%d (0x%08x) forwarder %s.%s", virtaddr - oh.ImageBase, ordinal, virtaddr, forwarddll, forwardapi));
-    AddOrdExport(exportaddr, ordinal, TRUE);
-  }
+    if(apiname) {
+        dprintf((LOG, "address 0x%x %s @%d (0x%08x) forwarder %s.%s", virtaddr - oh.ImageBase, apiname, ordinal, virtaddr, forwarddll, forwardapi));
+        AddNameExport(exportaddr, apiname, ordinal, TRUE);
+    }
+    else {
+        dprintf((LOG, "address 0x%x @%d (0x%08x) forwarder %s.%s", virtaddr - oh.ImageBase, ordinal, virtaddr, forwarddll, forwardapi));
+         AddOrdExport(exportaddr, ordinal, TRUE);
+    }
+    free(forwarddll);
+    return TRUE;
 
-//  free(forwarddll);
-  *forwardapi0 = '.';
-  return TRUE;
-
-  fail:
-//  free(forwarddll);
-  *forwardapi0 = '.';
+fail:
+  free(forwarddll);
   return FALSE;
 }
 //******************************************************************************
@@ -1621,7 +1579,6 @@ Win32DllBase *Win32PeLdrImage::loadDll(char *pszCurModule)
     dprintf((LOG, "**********************************************************************" ));
     dprintf((LOG, "**********************  Finished Loading Module %s ", modname ));
     dprintf((LOG, "**********************************************************************" ));
-
 
     return WinDll;
 }
@@ -1858,7 +1815,6 @@ BOOL Win32PeLdrImage::processImports(char *win32file)
   }//for (i = 0; i < cModules; i++)
 
   free(pszModules);
-
   return TRUE;
 }
 //******************************************************************************
@@ -1897,7 +1853,7 @@ ULONG Win32PeLdrImage::getApi(char *name)
   char        tmp[4];
   NameExport *curexport;
   ULONG       ulAPIOrdinal;                      /* api requested by ordinal */
-  
+
     apilen = strlen(name) + 1;
     if(apilen < 4)
     {
@@ -1914,10 +1870,8 @@ ULONG Win32PeLdrImage::getApi(char *name)
         if(apilen == curexport->nlength &&
            *(ULONG *)curexport->name == *(ULONG *)apiname)
         {
-          if(strcmp(curexport->name, apiname) == 0)
-          {
-            return(curexport->virtaddr);
-          }
+            if(strcmp(curexport->name, apiname) == 0)
+                return(curexport->virtaddr);
         }
         curexport = (NameExport *)((ULONG)curexport->name + curexport->nlength);
     }
@@ -1927,28 +1881,65 @@ ULONG Win32PeLdrImage::getApi(char *name)
 //******************************************************************************
 ULONG Win32PeLdrImage::getApi(int ordinal)
 {
-  ULONG       apiaddr, i;
-  OrdExport  *curexport;
-  NameExport *nexport;
+ ULONG       apiaddr, i;
+ OrdExport  *curexport;
+ NameExport *nexport;
 
-  curexport = ordexports;
-  for(i=0;i<nrOrdExports;i++)
-  {
-    if(curexport->ordinal == ordinal)
-      return(curexport->virtaddr);
-    curexport++;
-  }
-  
-  //Name exports also contain an ordinal, so check this
-  nexport = nameexports;
-  for(i=0;i<nrNameExports;i++) 
-  {
-    if(nexport->ordinal == ordinal)
-      return(nexport->virtaddr);
+    curexport = ordexports;
 
-    nexport = (NameExport *)((ULONG)nexport->name + nexport->nlength);
-  }
-  return(0);
+    i = 0;    
+    if(nrOrdExports > 1000) {
+        for(i=0;i<nrOrdExports;i+=1000) {
+            if(curexport[i].ordinal == ordinal)
+                return(curexport[i].virtaddr);
+            else
+            if(ordinal < curexport[i].ordinal) {
+                if(i) i -= 1000;
+                break;
+            }
+        }
+        if(i >= nrOrdExports) i -= 1000;
+    }
+
+    if(nrOrdExports > 100) {
+        for(i;i<nrOrdExports;i+=100) {
+            if(curexport[i].ordinal == ordinal)
+                return(curexport[i].virtaddr);
+            else
+            if(ordinal < curexport[i].ordinal) {
+                if(i) i -= 100;
+                break;
+            }
+        }
+        if(i >= nrOrdExports) i -= 100;
+    }
+
+    if(nrOrdExports > 10) {
+        for(i;i<nrOrdExports;i+=10) {
+            if(curexport[i].ordinal == ordinal)
+                return(curexport[i].virtaddr);
+            else
+            if(ordinal < curexport[i].ordinal) {
+                if(i) i -= 10;
+                break;
+            }
+        }
+        if(i >= nrOrdExports) i -= 10;
+    }
+    for(i;i<nrOrdExports;i++) {
+        if(curexport[i].ordinal == ordinal)
+            return(curexport[i].virtaddr);
+    }
+
+    //Name exports also contain an ordinal, so check this
+    nexport = nameexports;
+    for(i=0;i<nrNameExports;i++) {
+        if(nexport->ordinal == ordinal)
+            return(nexport->virtaddr);
+
+        nexport = (NameExport *)((ULONG)nexport->name + nexport->nlength);
+    }
+    return(0);
 }
 //******************************************************************************
 //Returns required OS version for this image
