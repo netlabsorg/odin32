@@ -1,9 +1,9 @@
-# $Id: win32k.mak,v 1.8 2001-02-23 02:57:51 bird Exp $
+# $Id: win32k.mak,v 1.9 2001-03-11 16:46:08 bird Exp $
 
 #
 # Win32k.sys makefile.
 #
-# Copyright 1998-2000 knut st. osmundsen
+# Copyright 1998-2001 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
 #
 # Project Odin Software License can be found in LICENSE.TXT
 #

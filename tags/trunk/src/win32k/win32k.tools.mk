@@ -1,9 +1,9 @@
-# $Id: win32k.tools.mk,v 1.7 2001-02-21 07:54:06 bird Exp $
+# $Id: win32k.tools.mk,v 1.8 2001-03-11 16:46:39 bird Exp $
 
 #
 # Win32k common tools makefile.
 #
-# Copyright 1998-2000 knut st. osmundsen
+# Copyright 1998-2001 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
 #
 # Project Odin Software License can be found in LICENSE.TXT
 #
