@@ -1,4 +1,4 @@
-/* $Id: systray.cpp,v 1.3 2000-06-03 07:18:54 sandervl Exp $ */
+/* $Id: systray.cpp,v 1.4 2000-06-07 21:47:36 sandervl Exp $ */
 /*
  *      Systray
  *
@@ -197,6 +197,11 @@ BOOL SYSTRAY_Create(SystrayData *ptrayItem)
   rect.right  = SMALL_ICON_SIZE+2*TBORDER;
   rect.bottom = SMALL_ICON_SIZE+2*TBORDER;
 
+#if 1
+  //SvL: Disabled system tray for now
+  //     Integrate with OS/2 WPS (WarpCenter tray?)
+  return FALSE;
+#else
   /* Create tray window for icon. */
   ptrayItem->hWnd = CreateWindowExA( WS_EX_TRAYWINDOW,
                                 SYSTRAY_CLASS, "Odin-Systray",
@@ -209,6 +214,7 @@ BOOL SYSTRAY_Create(SystrayData *ptrayItem)
     ERR( "CreateWindow(OdinSystray) failed\n" );
     return FALSE;
   }
+#endif
 
   /* Create tooltip for icon. */
   ptrayItem->hWndToolTip = CreateWindowA( TOOLTIPS_CLASSA,NULL,TTS_ALWAYSTIP,
