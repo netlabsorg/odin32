@@ -1,4 +1,4 @@
-/* $Id: menu.cpp,v 1.40 2001-11-21 11:51:37 sandervl Exp $*/
+/* $Id: menu.cpp,v 1.41 2001-11-24 13:55:13 sandervl Exp $*/
 /*
  * Menu functions
  *
@@ -4127,10 +4127,14 @@ HMENU WINAPI GetMenu( HWND hWnd )
         return 0;
     }
     retvalue = (HMENU)GetWindowLongA( hWnd, GWL_ID );
+#ifdef __WIN32OS2__
     if(MENU_GetMenu(retvalue) != NULL) {
         return retvalue;
     }
     return 0;
+#else
+    return retvalue;
+#endif
 }
 
 /**********************************************************************
@@ -4334,7 +4338,7 @@ BOOL WINAPI IsMenu(HMENU hmenu)
 {
     LPPOPUPMENU menu = MENU_GetMenu(hmenu);
 
-    dprintf(("USER32: IsMenu"));
+    dprintf(("USER32: IsMenu %x", hmenu));
 
     return IS_A_MENU(menu);
 }
