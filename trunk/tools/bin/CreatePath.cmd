@@ -1,4 +1,4 @@
-/* $Id: CreatePath.cmd,v 1.3 2001-01-26 21:33:13 phaller Exp $
+/* $Id: CreatePath.cmd,v 1.4 2002-05-16 11:50:22 bird Exp $
  *
  * Createpath.cmd <pathname>
  *
@@ -10,7 +10,7 @@ if RxFuncQuery('SysMkDir')=1 THEN
     call RxFuncAdd 'SysMkDir', 'RexxUtil', 'SysMkDir'
 
     parse arg sArgs
-    return createpath(sArgs);
+    return createpath(strip(sArgs));
 
 createpath: procedure
     parse arg sDir
@@ -26,5 +26,6 @@ createpath: procedure
      * Create this directory.
      */
     rc = SysMkDir(sDir);
+    /*say 'dir:' sDir '- rc='rc;*/
 
     return 0;
