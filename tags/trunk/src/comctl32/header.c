@@ -1,4 +1,4 @@
-/* $Id: header.c,v 1.13 1999-10-05 16:05:16 cbratschi Exp $ */
+/* $Id: header.c,v 1.14 1999-10-05 16:54:24 cbratschi Exp $ */
 /*
  *  Header control
  *
@@ -219,7 +219,7 @@ HEADER_DrawItemText(HDC hdc,HEADER_INFO* infoPtr,HEADER_ITEM* phdi,RECT* r,WCHAR
     if (!(phdi->fmt & HDF_BITMAP_ON_RIGHT)) r->right -= TEXT_MARGIN;
     if (r->left >= r->right) return;
 
-    SetTextColor (hdc,GetSysColor(bHotTrack ? COLOR_HIGHLIGHT:COLOR_BTNTEXT)); //CB: not right color: COLOR_HOTLIGHT? (blue in Win95)
+    SetTextColor (hdc,GetSysColor(bHotTrack ? COLOR_HOTLIGHT:COLOR_BTNTEXT));
     if (bEraseTextBkgnd)
     {
       HBRUSH hbrBk = GetSysColorBrush(COLOR_3DFACE);
@@ -1694,14 +1694,19 @@ HEADER_MouseMove (HWND hwnd, WPARAM wParam, LPARAM lParam)
             HEADER_Refresh(hwnd);
           } else
           {
+            INT lastPos = infoPtr->xOldTrack;
+
             hdc = GetDC (hwnd);
-            HEADER_DrawTrackLine (hwnd, hdc, infoPtr->xOldTrack);
             infoPtr->xOldTrack = pt.x + infoPtr->xTrackOffset;
             if (infoPtr->xOldTrack < infoPtr->items[infoPtr->iMoveItem].rect.left+MIN_ITEMWIDTH)
               infoPtr->xOldTrack = infoPtr->items[infoPtr->iMoveItem].rect.left+MIN_ITEMWIDTH;
             infoPtr->items[infoPtr->iMoveItem].cxy =
               infoPtr->xOldTrack-infoPtr->items[infoPtr->iMoveItem].rect.left;
-            HEADER_DrawTrackLine (hwnd, hdc, infoPtr->xOldTrack);
+            if (lastPos != infoPtr->xOldTrack)
+            {
+              HEADER_DrawTrackLine(hwnd,hdc,lastPos);
+              HEADER_DrawTrackLine(hwnd,hdc,infoPtr->xOldTrack);
+            }
             ReleaseDC (hwnd, hdc);
           }
 
