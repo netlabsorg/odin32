@@ -1,4 +1,9 @@
- /* $Id: ChangeLog,v 1.828 2000-03-21 21:23:37 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.829 2000-03-22 18:47:30 sandervl Exp $ */
+
+ 2000-03-22: Sander van Leeuwen <sandervl@xs4all.nl>
+	- WSOCK32: Completely rewritten (removed dependancy on pmwsock)
+                   Untested and unfinished (WSAAsyncSelect)
+                   -> not ready for usage (committed for purpose of backup)
 
  2000-03-21: Sander van Leeuwen <sandervl@xs4all.nl>
 	- GDI32: Added RGB 555 to 565 conversion in dibsection blit.
