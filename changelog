@@ -1,4 +1,11 @@
- /* $Id: changelog,v 1.954 2000-05-20 14:56:15 sandervl Exp $ */
+ /* $Id: changelog,v 1.955 2000-05-22 17:17:30 cbratschi Exp $ */
+
+ 2000-05-21: Christoph Bratschi <cbratschi@datacomm.ch>
+    - USER32: merged controls with Corel WINE 20000513
+	      fixed titlebar double click -> restore/maximize
+	      show window text changes (why was this disabled?)
+    - COMCTL32: merged with Corel WINE 20000513
+		added APIs used by IE5 (credit: Patrick Haller)
 
  2000-05-20: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   BroadcastMessageA/W bugfix

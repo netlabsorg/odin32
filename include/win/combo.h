@@ -1,4 +1,4 @@
-/* $Id: combo.h,v 1.4 2000-02-14 17:27:54 cbratschi Exp $ */
+/* $Id: combo.h,v 1.5 2000-05-22 17:18:48 cbratschi Exp $ */
 
 /*
  * Combo box definitions
@@ -62,8 +62,7 @@ typedef struct
 #define CB_HASSTRINGS( lphc ) ((lphc)->dwStyle & CBS_HASSTRINGS)
 #define CB_HWND( lphc )       ((lphc)->hwndself)
 
-BOOL    COMBO_FlipListbox( LPHEADCOMBO, BOOL );
-HWND    COMBO_GetLBWindow( HWND );
+BOOL 	COMBO_FlipListbox( LPHEADCOMBO, BOOL, BOOL );
 LRESULT COMBO_Directory( LPHEADCOMBO, UINT, LPSTR, BOOL );
 
 BOOL LISTBOX_Register();

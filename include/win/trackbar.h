@@ -1,4 +1,4 @@
-/* $Id: trackbar.h,v 1.5 2000-03-18 16:10:57 cbratschi Exp $ */
+/* $Id: trackbar.h,v 1.6 2000-05-22 17:18:57 cbratschi Exp $ */
 
 /*
  * Trackbar class extra info
@@ -13,6 +13,9 @@
 typedef struct tagTRACKBAR_INFO
 {
     COMCTL32_HEADER header;
+
+    HWND  hwnd;
+    DWORD dwStyle;
 
     INT  nRangeMin;
     INT  nRangeMax;
@@ -29,6 +32,9 @@ typedef struct tagTRACKBAR_INFO
     HWND hwndBuddyRB;
     INT  fLocation;
     COLORREF clrBk;
+    COLORREF clrHighlightedThumb;
+    HBRUSH   hbrThumb;
+
 
     INT  flags;
     BOOL bFocus;
