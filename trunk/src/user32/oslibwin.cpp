@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.123 2002-08-21 12:32:40 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.124 2002-08-21 15:40:28 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -15,6 +15,7 @@
 #define  INCL_WINSWITCHLIST
 #include <os2wrap.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 
 #include <misc.h>
@@ -276,28 +277,6 @@ BOOL OSLibWinAlarm(HWND hwndDeskTop,ULONG flStyle)
 HWND OSLibWinQueryFocus(HWND hwndDeskTop)
 {
     return WinQueryFocus(hwndDeskTop);
-}
-//******************************************************************************
-//******************************************************************************
-HWND OSLibWinControlWindow(HWND hwndWindow, INT controlID, HWND controlHWND)
-{
- HWND hwnd = NULL, hwndParent = NULL; 
-
- if (controlHWND)
- {
-   WinSetParent(controlHWND, hwndWindow, TRUE);
-   return NULL; // this is done to minimize assignments
- }
- else
- {
-   hwnd = WinWindowFromID(hwndWindow, controlID);
-   if (hwnd)
-   {
-    WinSetParent(hwnd, HWND_OBJECT, TRUE);
-    return hwnd;   
-   }
- }
- return NULL;
 }
 //******************************************************************************
 //******************************************************************************
@@ -1037,19 +1016,28 @@ void OSLibSetWindowStyle(HWND hwndFrame, HWND hwndClient, ULONG dwStyle, ULONG d
     }
     if(fOS2Look) {
         ULONG OSFrameStyle = 0;
-        if((dwStyle & WS_CAPTION_W) == WS_CAPTION_W) {
+        if((dwStyle & WS_CAPTION_W) == WS_CAPTION_W)
+        {
             if(WinWindowFromID(hwndFrame, FID_TITLEBAR) == 0) {
                 OSFrameStyle = FCF_TITLEBAR;
             }
+            
             if((dwStyle & WS_SYSMENU_W) && !(dwExStyle & WS_EX_TOOLWINDOW_W))
             {
                 if(WinWindowFromID(hwndFrame, FID_SYSMENU) == 0) {
                     OSFrameStyle |= FCF_SYSMENU;
                 }
             }
+
             if((dwStyle & WS_MINIMIZEBOX_W) || (dwStyle & WS_MAXIMIZEBOX_W)) {
-                if(WinWindowFromID(hwndFrame, FID_MINMAX) == 0) {
-                    OSFrameStyle |= FCF_MINMAX;
+                if(dwStyle & WS_MINIMIZEBOX_W) 
+                    if(WinWindowFromID(hwndFrame, FID_MINMAX) == 0) {
+                         OSFrameStyle |= FCF_MINBUTTON;
+                }
+
+                if(dwStyle & WS_MAXIMIZEBOX_W) 
+                    if(WinWindowFromID(hwndFrame, FID_MINMAX) == 0) {
+                         OSFrameStyle |= FCF_MAXBUTTON;
                 }
             }
             else
@@ -1058,14 +1046,30 @@ void OSLibSetWindowStyle(HWND hwndFrame, HWND hwndClient, ULONG dwStyle, ULONG d
                     OSFrameStyle |= FCF_CLOSEBUTTON;
                 }
             }
-        }
-        if(OSFrameStyle) {
+       }
+       // no caption, delete all controls if they exist
+       else 
+       {
+          if (WinWindowFromID(hwndFrame, FID_TITLEBAR)) 
+              WinDestroyWindow(WinWindowFromID(hwndFrame, FID_TITLEBAR));
+          if (WinWindowFromID(hwndFrame, FID_SYSMENU)) 
+              WinDestroyWindow(WinWindowFromID(hwndFrame, FID_SYSMENU));
+          if (WinWindowFromID(hwndFrame, FID_MINMAX)) 
+              WinDestroyWindow(WinWindowFromID(hwndFrame, FID_MINMAX));
+       }
+       
+       if(OSFrameStyle) {
             FRAMECDATA FCData = {sizeof (FRAMECDATA), 0, 0, 0};
-
+            char buffer[255];
             FCData.flCreateFlags = OSFrameStyle;
-            WinCreateFrameControls(hwndFrame, &FCData, NULL);
-        }
-    }
+
+            GetWindowTextA(OS2ToWin32Handle(hwndClient), buffer, sizeof(buffer));
+            WinCreateFrameControls(hwndFrame, &FCData, buffer );
+
+            if (WinQueryActiveWindow(HWND_DESKTOP) == hwndFrame)
+              WinSendMsg(WinWindowFromID(hwndFrame, FID_TITLEBAR), TBM_SETHILITE, (MPARAM)1, 0);
+       }
+   } // os2look
 }
 //******************************************************************************
 //******************************************************************************
@@ -1113,8 +1117,7 @@ HANDLE OSLibWinAddToTaskList(HWND hwndFrame, char *title, BOOL fVisible)
     swctrl.fbJump        = SWL_JUMPABLE;
     swctrl.bProgType     = PROG_PM;
     if(title) {
-//        strncpy(swctrl.szSwtitle, title, MAXNAMEL+4);
-        CharToOemBuffA( title, swctrl.szSwtitle, MAXNAMEL+4 );
+        CharToOemBuffA( title, swctrl.szSwtitle, min(strlen(title),MAXNAMEL+4) );
         swctrl.szSwtitle[MAXNAMEL+4-1] = 0;
     }
     else {
@@ -1139,8 +1142,7 @@ BOOL OSLibWinChangeTaskList(HANDLE hTaskList, HWND hwndFrame, char *title, BOOL 
     swctrl.fbJump        = SWL_JUMPABLE;
     swctrl.bProgType     = PROG_PM;
     if(title) {
-//        strncpy(swctrl.szSwtitle, title, MAXNAMEL+4);
-        CharToOemBuffA( title, swctrl.szSwtitle, MAXNAMEL+4 );
+        CharToOemBuffA( title, swctrl.szSwtitle, min(strlen(title),MAXNAMEL+4) );
         swctrl.szSwtitle[MAXNAMEL+4-1] = 0;
     }
     else {
