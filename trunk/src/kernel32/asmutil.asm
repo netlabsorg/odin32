@@ -1,4 +1,4 @@
-; $Id: asmutil.asm,v 1.1 2002-05-10 14:55:10 sandervl Exp $
+; $Id: asmutil.asm,v 1.2 2002-05-15 10:57:44 sandervl Exp $
 
 ;/*
 ; * Project Odin Software License can be found in LICENSE.TXT
@@ -18,8 +18,6 @@ BSS32	segment dword use32 public 'BSS'
 BSS32	ends
 DGROUP	group BSS32, DATA32
 	assume	cs:FLAT, ds:FLAT, ss:FLAT, es:FLAT
-
-DATA32	segment dword use32 public 'DATA'
 
 CODE32          SEGMENT DWORD PUBLIC USE32 'CODE'
 
