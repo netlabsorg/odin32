@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.14 1999-12-07 20:26:08 achimha Exp $
+# $Id: makefile,v 1.15 1999-12-07 20:29:15 achimha Exp $
 
 #
 # PD-Win32 API
@@ -6,10 +6,10 @@
 #	wsock32.dll makefile
 #
 
-PDWIN32_INCLUDE = ..\..\..\include
-PDWIN32_LIB = ..\..\..\lib
-PDWIN32_BIN = ..\..\..\bin
-PDWIN32_TOOLS = ..\..\..\tools\bin
+PDWIN32_INCLUDE = ..\..\include
+PDWIN32_LIB = ..\..\lib
+PDWIN32_BIN = ..\..\bin
+PDWIN32_TOOLS = ..\..\tools\bin
 
 !include $(PDWIN32_INCLUDE)/pdwin32.mk
 
