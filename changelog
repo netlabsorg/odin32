@@ -1,4 +1,4 @@
- /* $Id: changelog,v 1.122 1999-08-22 22:16:26 sandervl Exp $ */
+ /* $Id: changelog,v 1.123 1999-08-22 22:58:13 sandervl Exp $ */
 
  99-08-22: Sander van Leeuwen <sandervl@xs4all.nl>
 	- OLE32: Changes for updated WINE headers
@@ -17,6 +17,7 @@
                       (but might not be completely correct)
 	- INCLUDE\WIN: Added custcntl.h & fixed GetObject definition
 	- INCLUDE\WIN, WIN\WINE: Added several files, updated OLE headers
+	- NTDLL: Some changes to make it compile again
 
  99-08-21: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32\NEW: Fixed window class bug. Freecell menu now properly

@@ -1,4 +1,4 @@
-/* $Id: winexe.h,v 1.3 1999-08-16 13:55:27 sandervl Exp $ */
+/* $Id: winexe.h,v 1.4 1999-08-22 22:56:48 sandervl Exp $ */
 
 /*
  *
@@ -32,9 +32,6 @@ public:
 	void  setCommandLine(char *cline)      { cmdline = cline; };
 	char *getCommandLine()                 { return cmdline;  };
 
-	void  setOS2InstanceHandle(ULONG handle) { OS2InstanceHandle = handle; };
-	ULONG getOS2InstanceHandle()             { return OS2InstanceHandle; };
-
 	BOOL  isConsoleApp()                   { return fConsoleApp; };
 
 virtual ULONG start();
@@ -42,8 +39,6 @@ virtual ULONG start();
 protected:
 	char *cmdline;
 	BOOL  fConsoleApp;
-
-	ULONG OS2InstanceHandle;
 
 private:
 };
