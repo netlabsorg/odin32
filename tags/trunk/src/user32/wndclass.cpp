@@ -1,4 +1,4 @@
-/* $Id: wndclass.cpp,v 1.13 1999-06-26 18:25:08 sandervl Exp $ */
+/* $Id: wndclass.cpp,v 1.14 1999-06-27 16:49:52 sandervl Exp $ */
 
 /*
  * Win32 Window Class Managment Code for OS/2
@@ -26,17 +26,11 @@
 #include <spy.h>
 #include <wprocess.h>
 #include "hooks.h"
+#include "wndmsg.h"
 
 //default window handlers that are registered by RegisterClass are called
 //in this callback handler
 LRESULT EXPENTRY_O32 OS2ToWinCallback(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam);
-//default window handlers that are queried by GetClassInfo/GetClassLong is really
-//this callback handler
-LRESULT WIN32API WinToOS2Callback(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam);
-
-#ifdef DEBUG
-char *GetMsgText(int Msg);
-#endif
 
 DWORD MapOEMToRealKey(DWORD wParam, DWORD lParam);
 
@@ -67,95 +61,42 @@ Win32WindowClass *StaticClass = 0;
 //******************************************************************************
 LRESULT WIN32API ButtonCallback(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
- DWORD   dwStyle, dwExStyle;
- LRESULT rc;
-
-  //Restore our FS selector
-  SetWin32TIB();
-
-  PostSpyMessage(hwnd, Msg, wParam, lParam);
-  switch(Msg)
-  {
-	case WM_LBUTTONDOWN:
-		rc = ButtonHandler(hwnd, Msg, wParam, lParam);
-		//Restore our FS selector
-  		SetWin32TIB();
-
-		NotifyParent(hwnd, Msg, wParam, lParam);
-		dwStyle   = GetWindowLongA(hwnd, GWL_STYLE);
-		dwExStyle = GetWindowLongA(hwnd, GWL_EXSTYLE);
-
-		if(dwStyle & WS_CHILD && !(dwExStyle & WS_EX_NOPARENTNOTIFY) )
-		{
-			HWND hwndParent = GetParent(hwnd);
-
-			//TODO: Mouse shouldn't be captured
-			Win32WindowProc *parentwnd = Win32WindowProc::FindProc(hwndParent);
-			if(parentwnd) {
-				//TODO: HTCLIENT isn't always accurate
-				parentwnd->SendMessageA(hwndParent, WM_SETCURSOR, hwnd, HTCLIENT | (WM_LBUTTONDOWN << 16));
-			}
-		}	
-		return rc;
-
-	case WM_CREATE:
-	case WM_MBUTTONDOWN:
-	case WM_RBUTTONDOWN:
-		rc = ButtonHandler(hwnd, Msg, wParam, lParam);
-		//Restore our FS selector
-  		SetWin32TIB();
-		NotifyParent(hwnd, Msg, wParam, lParam);
-		RestoreOS2TIB();
-		return rc;
-
-	case WM_DESTROY:
-		NotifyParent(hwnd, Msg, wParam, lParam);
-		break;
-  }
-  rc = ButtonHandler(hwnd, Msg, wParam, lParam);
-  RestoreOS2TIB();
-  return rc;
+  return ButtonHandler(hwnd, Msg, wParam, lParam);
 }
 //******************************************************************************
 //******************************************************************************
 LRESULT WIN32API ListboxCallback(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
-  PostSpyMessage(hwnd, Msg, wParam, lParam);
   return ListboxHandler(hwnd, Msg, wParam, lParam);
 }
 //******************************************************************************
 //******************************************************************************
 LRESULT WIN32API ComboboxCallback(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
-  PostSpyMessage(hwnd, Msg, wParam, lParam);
   return ComboboxHandler(hwnd, Msg, wParam, lParam);
 }
 //******************************************************************************
 //******************************************************************************
 LRESULT WIN32API MdiClientCallback(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
-  PostSpyMessage(hwnd, Msg, wParam, lParam);
   return MdiClientHandler(hwnd, Msg, wParam, lParam);
 }
 //******************************************************************************
 //******************************************************************************
 LRESULT WIN32API EditCallback(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
-  PostSpyMessage(hwnd, Msg, wParam, lParam);
   return EditHandler(hwnd, Msg, wParam, lParam);
 }
 //******************************************************************************
 //******************************************************************************
 LRESULT WIN32API ScrollbarCallback(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
-  PostSpyMessage(hwnd, Msg, wParam, lParam);
   return ScrollbarHandler(hwnd, Msg, wParam, lParam);
 }
 //******************************************************************************
 //******************************************************************************
 LRESULT WIN32API StaticCallback(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
-  PostSpyMessage(hwnd, Msg, wParam, lParam);
   return StaticHandler(hwnd, Msg, wParam, lParam);
 }
 //******************************************************************************
@@ -174,7 +115,7 @@ void RegisterSystemClasses(ULONG hModule)
 	if(hwndButton == 0) {
 		dprintf(("RegisterSystemClasses failed!!"));
 	}
-	O32_SetClassLong(hwndButton, GCL_WNDPROC, (LONG)ButtonCallback);
+	O32_SetClassLong(hwndButton, GCL_WNDPROC, (LONG)Win32WindowClass::GetOS2ClassCallback());
    }
    if(O32_GetClassInfo(NULL, "LISTBOX", &wndclass)) {
 	dprintf(("Create LISTBOX System class"));
@@ -184,7 +125,7 @@ void RegisterSystemClasses(ULONG hModule)
 	if(hwndListbox == 0) {
 		dprintf(("RegisterSystemClasses failed!!"));
 	}
-	O32_SetClassLong(hwndListbox, GCL_WNDPROC, (LONG)ListboxCallback);
+	O32_SetClassLong(hwndListbox, GCL_WNDPROC, (LONG)Win32WindowClass::GetOS2ClassCallback());
    }
    if(O32_GetClassInfo(NULL, "COMBOBOX", &wndclass)) {
 	dprintf(("Create COMBOBOX System class"));
@@ -194,7 +135,7 @@ void RegisterSystemClasses(ULONG hModule)
 	if(hwndCombobox == 0) {
 		dprintf(("RegisterSystemClasses failed!!"));
 	}
-	O32_SetClassLong(hwndCombobox, GCL_WNDPROC, (LONG)ComboboxCallback);
+	O32_SetClassLong(hwndCombobox, GCL_WNDPROC, (LONG)Win32WindowClass::GetOS2ClassCallback());
    }
    if(O32_GetClassInfo(NULL, "EDIT", &wndclass)) {
 	dprintf(("Create EDIT System class"));
@@ -204,7 +145,7 @@ void RegisterSystemClasses(ULONG hModule)
 	if(hwndEdit == 0) {
 		dprintf(("RegisterSystemClasses failed!!"));
 	}
-	O32_SetClassLong(hwndEdit, GCL_WNDPROC, (LONG)EditCallback);
+	O32_SetClassLong(hwndEdit, GCL_WNDPROC, (LONG)Win32WindowClass::GetOS2ClassCallback());
    }
    //TODO: This doens't work yet!! (need to create a normal window as parent)
    if(O32_GetClassInfo(NULL, "MDICLIENT", &wndclass)) {
@@ -215,7 +156,7 @@ void RegisterSystemClasses(ULONG hModule)
 	if(hwndMdiClient == 0) {
 		dprintf(("RegisterSystemClasses failed!!"));
 	}
-	O32_SetClassLong(hwndMdiClient, GCL_WNDPROC, (LONG)MdiClientCallback);
+	O32_SetClassLong(hwndMdiClient, GCL_WNDPROC, (LONG)Win32WindowClass::GetOS2ClassCallback());
    }
    if(O32_GetClassInfo(NULL, "SCROLLBAR", &wndclass)) {
 	dprintf(("Create SCROLLBAR System class"));
@@ -225,7 +166,7 @@ void RegisterSystemClasses(ULONG hModule)
 	if(hwndScrollbar == 0) {
 		dprintf(("RegisterSystemClasses failed!!"));
 	}
-	O32_SetClassLong(hwndScrollbar, GCL_WNDPROC, (LONG)ScrollbarCallback);
+	O32_SetClassLong(hwndScrollbar, GCL_WNDPROC, (LONG)Win32WindowClass::GetOS2ClassCallback());
    }
    if(O32_GetClassInfo(NULL, "STATIC", &wndclass)) {
 	dprintf(("Create STATIC System class"));
@@ -235,7 +176,7 @@ void RegisterSystemClasses(ULONG hModule)
 	if(hwndStatic == 0) {
 		dprintf(("RegisterSystemClasses failed!!"));
 	}
-	O32_SetClassLong(hwndStatic, GCL_WNDPROC, (LONG)StaticCallback);
+	O32_SetClassLong(hwndStatic, GCL_WNDPROC, (LONG)Win32WindowClass::GetOS2ClassCallback());
    }
 //TODO: More standard classes in win95/NT4?
 }
@@ -610,7 +551,8 @@ LONG WIN32API GetClassLongA(HWND hwnd, int nIndex)
 
     dprintf(("USER32: OS2GetClassLongA\n"));
     rc = O32_GetClassLong(hwnd, nIndex);
-    if(nIndex == GCL_WNDPROC) {
+    if(nIndex == GCL_WNDPROC) 
+    {
       char                  szClass[128];
       Win32WindowClass     *wclass;
 
@@ -920,19 +862,6 @@ LRESULT EXPENTRY_O32 OS2ToWinCallback(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM
   }
   dprintf(("OS2ToWinCallback: couldn't find class procedure of window %X\n", hwnd));
   RestoreOS2TIB();
-  return(0);
-}
-//******************************************************************************
-//******************************************************************************
-LRESULT WIN32API WinToOS2Callback(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
-{
- WNDPROC_O32 os2callback;
-
-  os2callback = (WNDPROC_O32)GetClassLongA(hwnd, GCL_WNDPROC);
-  if(os2callback) {
-	return os2callback(hwnd, Msg, wParam, lParam);
-  }  
-  dprintf(("OS2ToWinCallback: window procedure == NULL!!\n"));
   return(0);
 }
 //******************************************************************************
