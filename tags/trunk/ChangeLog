@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.138 1999-08-25 15:47:23 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.139 1999-08-25 22:39:12 sandervl Exp $ */
+
+ 99-08-25: Jens Wiessner <wiessnej@rfi.de>
+	- OLESVR32: Created stub dll
 
  99-08-25: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Use memory mapped files for PE loader
