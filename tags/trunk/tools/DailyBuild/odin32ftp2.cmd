@@ -1,4 +1,4 @@
-/* $Id: odin32ftp2.cmd,v 1.9 2001-01-20 18:00:43 bird Exp $
+/* $Id: odin32ftp2.cmd,v 1.10 2001-02-23 14:41:51 bird Exp $
  *
  * Uploads the relase and debug builds to the FTP sites.
  *
@@ -67,10 +67,10 @@ do i = 1 to 5 /* (Retries 5 times) */
 
     if (sLoc = '' | sLoc = 'netlabs') then
     do
-        /*                 (                    sDeleteFile1,                     sDeleteFile2,             sLockFile,             sSite); */
-        rc = deletefunction(             '/daily/'sDeleteDbg,      '/odinftp/daily/'sDeleteRel,      'netlabs-delete', 'ftp.netlabs.org');
-/*      rc = deletefunction('/odinftp/daily/'sDeleteGlideDbg, '/odinftp/daily/'sDeleteGlideRel,'netlabs-delete-glide', 'ftp.netlabs.org'); */
-        rc = deletefunction(          '/daily/'sDeleteDbgWPI,   '/odinftp/daily/'sDeleteRelWPI,  'netlabs-delete-wpi', 'ftp.netlabs.org');
+        /*                 (                    sDeleteFile1,             sDeleteFile2,             sLockFile,             sSite); */
+        rc = deletefunction(             '/daily/'sDeleteDbg,      '/daily/'sDeleteRel,      'netlabs-delete', 'ftp.netlabs.org');
+/*      rc = deletefunction('/odinftp/daily/'sDeleteGlideDbg, '/daily/'sDeleteGlideRel,'netlabs-delete-glide', 'ftp.netlabs.org'); */
+        rc = deletefunction(          '/daily/'sDeleteDbgWPI,   '/daily/'sDeleteRelWPI,  'netlabs-delete-wpi', 'ftp.netlabs.org');
         if 1 then
         do
         /*              (sFile,      sFileRemote,              sLockFile,             sSite); */
