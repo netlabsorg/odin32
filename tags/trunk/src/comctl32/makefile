@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 1999-06-12 18:19:14 achimha Exp $
+# $Id: makefile,v 1.6 1999-06-25 14:08:27 achimha Exp $
 #
 # PD-Win32 API 
 #
@@ -33,6 +33,8 @@ $(TARGET).dll: $(OBJS) $(TARGET).def
               $(PDWIN32_LIB)/kernel32.lib \
               $(PDWIN32_LIB)/gdi32.lib \
               $(PDWIN32_LIB)/user32.lib
+              rc -r rsrc.rc rsrc.res
+              rc rsrc.res comctl32.dll
         $(CP) $@ $(PDWIN32_BIN)
 
 
