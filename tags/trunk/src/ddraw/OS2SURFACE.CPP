@@ -15,6 +15,7 @@
 #define FAR
 #include <misc.h>
 #include "asmutil.h"
+#include "bltFunc.h"
 #include <winerror.h>
 #include <os2win.h>
 #ifndef __WATCOMC__
@@ -519,7 +520,8 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
                  hbmImage(NULL),
                  pFrameBuffer(NULL),Updated(FALSE),
                  fOverlayValid(FALSE),
-                 BackBuffer(NULL),FrontBuffer(NULL)
+                 BackBuffer(NULL),FrontBuffer(NULL),
+                 pDBreal(NULL),pFBreal(NULL)
 
 {
   ULONG rc;
@@ -721,6 +723,97 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
     return;
   }
 
+  switch(lpDraw->GetScreenBpp())
+  {
+    case 8:
+      switch(lpDraw->dCaps.ulDepth)
+      {
+        case 8:
+          BltSolid = &BltSolid8to8;
+          break;
+        case 16:
+          BltSolid = &BltSolid8to16;
+          break;
+        case 24:
+          BltSolid = &BltSolid8to24;
+          break;
+        case 32:
+          BltSolid = &BltSolid8to32;
+          break;
+        default:
+          dprintf(("DDRAW: Unsupported System ColorDeapth %d",lpDraw->dCaps.ulDepth));
+          BltSolid = NULL;
+          break;
+      }
+      break;
+    case16:
+      switch(lpDraw->dCaps.ulDepth)
+      {
+        case 8:
+          BltSolid = &BltSolid16to8;
+          break;
+        case 16:
+          BltSolid = &BltSolid16to16;
+          break;
+        case 24:
+          BltSolid = &BltSolid16to24;
+          break;
+        case 32:
+          BltSolid = &BltSolid16to32;
+          break;
+        default:
+          dprintf(("DDRAW: Unsupported System ColorDeapth %d",lpDraw->dCaps.ulDepth));
+          BltSolid = NULL;
+          break;
+      }
+      break;
+    case24:
+      switch(lpDraw->dCaps.ulDepth)
+      {
+        case 8:
+          BltSolid = &BltSolid24to8;
+          break;
+        case 16:
+          BltSolid = &BltSolid24to16;
+          break;
+        case 24:
+          BltSolid = &BltSolid24to24;
+          break;
+        case 32:
+          BltSolid = &BltSolid24to32;
+          break;
+        default:
+          dprintf(("DDRAW: Unsupported System ColorDeapth %d",lpDraw->dCaps.ulDepth));
+          BltSolid = NULL;
+          break;
+      }
+      break;
+    case32:
+      switch(lpDraw->dCaps.ulDepth)
+      {
+        case 8:
+          BltSolid = &BltSolid32to8;
+          break;
+        case 16:
+          BltSolid = &BltSolid32to16;
+          break;
+        case 24:
+          BltSolid = &BltSolid32to24;
+          break;
+        case 32:
+          BltSolid = &BltSolid32to32;
+          break;
+        default:
+          dprintf(("DDRAW: Unsupported System ColorDeapth %d",lpDraw->dCaps.ulDepth));
+          BltSolid = NULL;
+          break;
+      }
+      break;
+    default:
+      dprintf(("DDRAW: Unsupported DX ColorDeapth %d",lpDraw->GetScreenBpp()));
+      BltSolid = NULL;
+      break;
+  }
   if( lpDDSurfaceDesc->dwFlags & DDSD_CAPS )
   {
     // First check if we want to create a primary surface while the ddraw object already has one
@@ -1158,12 +1251,14 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
           {
             dprintf(("DDRAW:  Alloc CCBuf "));
             dwPitchDB = (lpDDSurfaceDesc->dwWidth * (lpDraw->dCaps.ulDepth/8) +7) & ~7;
+
             if(Mainchain)
             {
               dprintf(("DDRAW: with DIVE\n"));
               // This surface is part of flipchain with the primary surface use dive to assoc memory
-              pDiveBuffer = (char*)malloc( lpDDSurfaceDesc->dwHeight *
-                                           dwPitchDB);
+              pDBreal = (char*)malloc( lpDDSurfaceDesc->dwHeight *
+                                           dwPitchDB+24);
+              pDiveBuffer = (char*)(((int)pDBreal + 7) & ~7); // align to QWORD
               diveBufNr = 0;
               rc = DiveAllocImageBuffer( hDive,
                                          &diveBufNr,
@@ -1182,8 +1277,9 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
                         dwPitchDB));
               // No so we must create the Divebuffer to do the colortranslation
               // and blit to the real framebuffer on Unlock to do color conversion
-              pDiveBuffer = (char*)malloc( lpDDSurfaceDesc->dwHeight *
-                                           dwPitchDB);
+              pDBreal = (char*)malloc( lpDDSurfaceDesc->dwHeight *
+                                       dwPitchDB + 24);
+              pDiveBuffer = (char*)(((int)pDBreal + 7) & ~7); // align to QWORD
             }
             dprintf(( " @ %08X\n", pDiveBuffer));
           }
@@ -1244,7 +1340,9 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
           #ifdef DEBUG
             dprintf(("DDRAW: Mipmpa # = %d\n",lpDDSurfaceDesc->dwMipMapCount));
           #endif
-          memcpy(&ComplexSurfaceDesc,lpDDSurfaceDesc,sizeof(DDSURFACEDESC2));
+          memcpy( &ComplexSurfaceDesc,
+                  lpDDSurfaceDesc,
+                  sizeof(DDSURFACEDESC2));
           ComplexSurfaceDesc.dwMipMapCount = 0;
 
           for(int i =0; i < lpDDSurfaceDesc->dwMipMapCount; i++)
@@ -1439,150 +1537,86 @@ HRESULT OS2IDirectDrawSurface::ColorFill(LPRECT lpDestRect,DWORD dwFillColor)
     #endif
   }
 
-  return(DD_OK);
-
-#if 0 // rest of old code for resuse/move to a function to get closest syscolor
-      // for colorconversion modes color fills
-  else
+  if(pDiveBuffer!=pFrameBuffer)
   {
-    // Yeah! Color conversion needed ;)
-    #ifdef DEBUG
-       dprintf(("DDRAW: Color converion ! Urks, may not work \n"));
-    #endif
+    dprintf(("DDRAW: CC-Mode Fill FrameBuffer\n"));
 
-    switch(dest->lpDraw->dCaps.ulDepth)
+    if(NULL!=lpDestRect)
     {
-      case 8:  // 256 Mode bad thing as programm wants to run in a higher mode might look ugly
-        GetSystemPaletteEntries(GetDC(HWND_DESKTOP),0,255,&SysPal[1]);
-        pLogPal->palVersion = 0;
-        pLogPal->palNumEntries = 256;
+      FillWidth  = lpDestRect->right - lpDestRect->left;
+      FillHeight = lpDestRect->bottom - lpDestRect->top -1;
+      pLine = pFrameBuffer +
+              (lpDestRect->top*dwPitchFB) +
+              (lpDestRect->left*lpDraw->GetScreenBpp());
+    }
+    else
+    {
+      FillWidth  = width;
+      FillHeight = height -1;
+      pLine = pFrameBuffer;
+    }
 
-        hPal = CreatePalette(pLogPal);
-        if(hPal!=NULL)
+    // Colorconversion mode we must also fill the other buffer
+    switch(lpDraw->GetScreenBpp())
+    {
+      case 8:
+        dprintf(("DDRAW: 8 Bit\n"));
+        dwColor = (dwFillColor<<24) + (dwFillColor<<16) +
+                  (dwFillColor<<8)  + (dwFillColor);
+        dprintf(("DDRAW: Fill with 0x%08X\n",dwColor));
+        for(i=0,pColor = (DWORD*)pLine;i<(FillWidth/4);i++)
+          pColor[i] = dwColor;
+        if(FillWidth % 4)
         {
-          if(dest->DDSurfaceDesc.ddpfPixelFormat.dwRGBBitCount==16)
-          {
-            ulColor = ((lpDDBltFx->dwFillColor & 0x0000001F) <<3) +
-                      ((lpDDBltFx->dwFillColor & 0x000007E0) <<5) +
-                      ((lpDDBltFx->dwFillColor & 0x0000F800) <<8);
-          }
-          else
-            ulColor = lpDDBltFx->dwFillColor;
-
-          ulColor = GetNearestPaletteIndex(hPal,ulColor);
-          ulColor = (ulColor & 0x000000FF) + ((ulColor & 0x000000FF) << 8) +
-                    ((ulColor & 0x000000FF) << 16) + ((ulColor & 0x000000FF) << 24);
+           pFillPos = (char*) (&pColor[i-1]);
+          for(i=0;i<FillWidth % 4;i++)
+             pFillPos[i] = (UCHAR) dwColor;
         }
-        else
-        {
-          #ifdef DEBUG
-            dprintf(("DDRAW: Error creating Palette default to 0"));
-          #endif
-          ulColor = 0;
-        }
-        for(i=0,(char*)pColor = ScanLine;i<(FillWidth/4)+1;i++)
-           *(pColor+i) = ulColor;
         break;
       case 16:
-        if(dest->DDSurfaceDesc.ddpfPixelFormat.dwRGBBitCount==8)
+        dprintf(("DDRAW: 16 Bit\n"));
+        dwColor = (dwFillColor<<16) + (dwFillColor);
+        dprintf(("DDRAW: Fill with 0x%08X\n",dwColor));
+        for(i=0,pColor = (DWORD*)pLine;i<(FillWidth/2);i++)
+          pColor[i] = dwColor;
+        if(FillWidth % 2)
         {
-          if(lpDDBltFx->dwFillColor > 255)
-            return DDERR_INVALIDPARAMS;
-
-          if(dest->lpPalette!=NULL)
-            dest->lpPalette->lpVtbl->GetEntries(dest->lpPalette,0,0,256,(LPPALETTEENTRY)&SysPal);
-          else
-            GetSystemPaletteEntries(GetDC(HWND_DESKTOP),0,255,(PPALETTEENTRY)&SysPal);
-
-          SysPal[lpDDBltFx->dwFillColor].peBlue  >>3;
-          SysPal[lpDDBltFx->dwFillColor].peGreen >>2;
-          SysPal[lpDDBltFx->dwFillColor].peRed   >>3;
-          ulColor = ULONG(SysPal[lpDDBltFx->dwFillColor].peRed) << 11 +
-                    ULONG(SysPal[lpDDBltFx->dwFillColor].peGreen) << 5 +
-                    ULONG(SysPal[lpDDBltFx->dwFillColor].peBlue);
+           pFillPos = (char*)(&pColor[i-1]);
+          *((USHORT*)pFillPos) = (USHORT)dwColor;
         }
-        else
-        {
-          ulColor = (lpDDBltFx->dwFillColor & 0x000000FF)>>3 +
-                    (((lpDDBltFx->dwFillColor & 0x0000FF00)>>5) & 0x000007E0) +
-                    (((lpDDBltFx->dwFillColor & 0x00FF0000)>>8) & 0x0000F800);
-        }
-        ulColor += ulColor << 16;
-        for(i=0,(char*)pColor = ScanLine;i<(FillWidth/2)+1;i++)
-          *(pColor+i) = ulColor;
         break;
       case 24:
-        if(dest->DDSurfaceDesc.ddpfPixelFormat.dwRGBBitCount==8)
+        dprintf(("DDRAW: 24 Bit\n"));
+        dwColor = (dwFillColor<<8);
+        for(i=0 ; i<FillWidth ; i++)
         {
-          if(lpDDBltFx->dwFillColor > 255)
-            return DDERR_INVALIDPARAMS;
-
-          if(dest->lpPalette!=NULL)
-            dest->lpPalette->lpVtbl->GetEntries(dest->lpPalette,0,0,256,(LPPALETTEENTRY)&SysPal);
-          else
-            GetSystemPaletteEntries(GetDC(HWND_DESKTOP),0,255,(PPALETTEENTRY)&SysPal);
-
-          ulColor = ULONG(SysPal[lpDDBltFx->dwFillColor].peRed) <<24 +
-                    ULONG(SysPal[lpDDBltFx->dwFillColor].peGreen) <<16 +
-                    ULONG(SysPal[lpDDBltFx->dwFillColor].peBlue) <<8;
-        }
-        else
-        {
-          if(dest->DDSurfaceDesc.ddpfPixelFormat.dwRGBBitCount==16)
-          {
-            ulColor = ((lpDDBltFx->dwFillColor & 0x0000001F) <<11) +
-                       ((lpDDBltFx->dwFillColor & 0x000007E0) <<13) +
-                       ((lpDDBltFx->dwFillColor & 0x0000F800) <<18);
-          }
-          else
-            ulColor = lpDDBltFx->dwFillColor << 8 ;
-        }
-
-        for(i=0;i<FillWidth;i++)
-        {
-          char* pColor = (char*)Scanline+(i*3);
-          *pColor = ulColor;
+           char* pColor = (char*)pLine+(i*3);
+          *pColor = dwColor;
         }
         break;
       case 32:
-        if(dest->DDSurfaceDesc.ddpfPixelFormat.dwRGBBitCount==8)
-        {
-          if(lpDDBltFx->dwFillColor > 255)
-            return DDERR_INVALIDPARAMS;
+        dprintf(("DDRAW: 32 Bit\n"));
+        dwColor = dwFillColor;
+        for(i=0,pColor = (DWORD*)pLine;i<FillWidth;i++)
+          pColor[i] = dwColor;
+    }
 
-          if(dest->lpPalette!=NULL)
-            dest->lpPalette->lpVtbl->GetEntries(dest->lpPalette,0,0,256,(LPPALETTEENTRY)&SysPal);
-          else
-            GetSystemPaletteEntries(GetDC(HWND_DESKTOP),0,255,(PPALETTEENTRY)&SysPal);
+    pFillPos = pLine + dwPitchFB;
+    FillWidth = FillWidth*lpDraw->GetScreenBpp();
+    for( y=0;y<FillHeight;y++,pFillPos+=dwPitchFB)
+    {
+      #ifdef USE_ASM
+        // ToDo get the loop into an asm function as well to speed up filling
+        // maybe remove the creation of the first fill line in an all asm
+        // function and use MMX regs to set 8 bytes
+        MemFlip(pFillPos,pLine,FillWidth);
+      #else
+        memcpy(pFillPos,pLine,FillWidth);
+      #endif
+    }
+  }
 
-          ulColor = ULONG(SysPal[lpDDBltFx->dwFillColor].peRed) <<16 +
-                    ULONG(SysPal[lpDDBltFx->dwFillColor].peGreen) <<8 +
-                    ULONG(SysPal[lpDDBltFx->dwFillColor].peBlue);
-        }
-        else
-        {
-          if(dest->DDSurfaceDesc.ddpfPixelFormat.dwRGBBitCount==16)
-          {
-            ulColor = ((lpDDBltFx->dwFillColor & 0x0000001F) <<3) +
-                      ((lpDDBltFx->dwFillColor & 0x000007E0) <<5) +
-                      ((lpDDBltFx->dwFillColor & 0x0000F800) <<8);
-          }
-          else
-            ulColor = lpDDBltFx->dwFillColor & 0x00FFFFFF;
-        }
-
-        for(i=0,(char*)pColor = ScanLine;i<(FillWidth/4);i++)
-          *(pColor+i) = ulColor;
-        break;
-      default:
-        #ifdef DEBUG
-          dprintf(("DDRAW: Unexpected Bitdepth\n"));
-        #endif
-        return DDERR_GENERIC;
-    } // end switch (dest->lpDraw->dCaps.ulDepth)
-  }// end of Scanline setup
-#endif
-
+  return(DD_OK);
 }
 //******************************************************************************
 //******************************************************************************
@@ -1812,6 +1846,7 @@ OS2IDirectDrawSurface::~OS2IDirectDrawSurface()
     lpDraw->SetPrimarySurface(FALSE);
     if(lpPalette)
       lpPalette->RestorePhysPalette();
+
   }
   else
   {
@@ -1820,22 +1855,22 @@ OS2IDirectDrawSurface::~OS2IDirectDrawSurface()
       if(fLocked)
         DiveEndImageBufferAccess(hDive, diveBufNr);
       DiveFreeImageBuffer(hDive, diveBufNr);
-    }
-    else
-    {
-      // Memory Surfaces
-      if (!Updated)  // check for user handled buffer
-        free(DDSurfaceDesc.lpSurface);
-    }
 
+    }
 
     fLocked = FALSE;
     diveBufNr = -1;
   }
+  // Free Buffers if they have been allocated
+  // DIVE Buffer
 
-  // Free the translation buffer
-  if(pFrameBuffer != pDiveBuffer)
-    free(pDiveBuffer);
+  if(NULL!=pDBreal)
+    free(pDBreal);
+
+  // FrameBuffer
+
+  if(NULL!=pFBreal)
+    free(pFBreal);
 
   // Clear the list of locked rectangles
   if (DPA_GetPtrCount(DPA_LockedRects)>0)
@@ -2645,6 +2680,15 @@ HRESULT __stdcall SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lp
                  (LPRECT)&SrcRect,
                  dest->dwBytesPPDive,
                  dest->dwPitchDB);
+      // MoveRects in framebuufer if we use colorconversion
+      if(dest->pFrameBuffer != dest->pDiveBuffer)
+      {
+        MoveRects( dest->pFrameBuffer,
+                   (LPRECT)&DestRect,
+                   (LPRECT)&SrcRect,
+                   dest->lpDraw->GetScreenBpp()>>3,
+                   dest->dwPitchFB);
+      }
 
       // End of Special Type 1 blitting on the screen
     }
@@ -2669,69 +2713,37 @@ HRESULT __stdcall SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lp
       // Everything else we do yourselfs
       // Type 2 Sysmem to Primarysurface ca also be handled by this
 
-      pBltPos = (char*) dest->pDiveBuffer + (DestRect.top * dest->dwPitchDB) +
-                (DestRect.left * dest->dwBytesPPDive);
-
-      pSrcPos = (char*) src->pDiveBuffer + (SrcRect.top * src->dwPitchDB) +
-                (SrcRect.left * src->dwBytesPPDive);
-
-      BlitHeight = pIRectDest->height();
-      BlitWidth = pIRectDest->width();
-
       if(!dwFlags)
       {
         dprintf(("DDRAW: Solid Blit\n"));
 
-        BlitWidth *= dest->dwBytesPPDive;
+        dest->BltSolid( dest->pDiveBuffer,
+                        dest->pFrameBuffer,
+                        DestRect.top,
+                        DestRect.left,
+                        dest->dwPitchDB,
+                        dest->dwPitchFB,
+                        src->pDiveBuffer,
+                        src->pFrameBuffer,
+                        SrcRect.top,
+                        SrcRect.left,
+                        pIRectDest->width(),
+                        pIRectDest->height(),
+                        src->dwPitchDB,
+                        src->dwPitchFB
+                        );
 
-        #ifdef USE_ASM
-        BltRec(pBltPos, pSrcPos, BlitWidth, BlitHeight,
-               dest->dwPitchDB,
-               src->dwPitchDB);
-        #else
-        // Solid Blit
-        while(1)
-        {
-          memcpy(pBltPos,pSrcPos,BlitWidth);
-          pBltPos += dest->dwPitchDB;
-          pSrcPos += src->dwPitchDB;
-          if(! (--BlitHeight))
-            break;
-        }
-        #endif
-
-        if(dest->pFrameBuffer != dest->pDiveBuffer)
-        {
-          // Copy Framebuffer also ...
-          pBltPos = (char*) dest->pFrameBuffer + (DestRect.top * dest->dwPitchFB) +
-                    (DestRect.left * dest->lpDraw->GetScreenBpp());
-
-          pSrcPos = (char*) src->pFrameBuffer + (SrcRect.top * src->dwPitchFB) +
-                    (SrcRect.left * dest->lpDraw->GetScreenBpp());
-
-          BlitHeight = pIRectDest->height();
-          BlitWidth  = pIRectDest->width();
-          BlitWidth *= dest->lpDraw->GetScreenBpp();
-
-          #ifdef USE_ASM
-          BltRec(pBltPos, pSrcPos, BlitWidth, BlitHeight,
-                 dest->dwPitchDB,
-                 src->dwPitchDB);
-          #else
-          // Solid Blit
-          while(1)
-          {
-            memcpy(pBltPos,pSrcPos,BlitWidth);
-            pBltPos += dest->dwPitchFB;
-            pSrcPos += src->dwPitchFB;
-            if(! (--BlitHeight))
-              break;
-          }
-          #endif
-        }
       }
       else
       {
+        pBltPos = (char*) dest->pDiveBuffer + (DestRect.top * dest->dwPitchDB) +
+                  (DestRect.left * dest->dwBytesPPDive);
+
+        pSrcPos = (char*) src->pDiveBuffer + (SrcRect.top * src->dwPitchDB) +
+                  (SrcRect.left * src->dwBytesPPDive);
+
+        BlitHeight = pIRectDest->height();
+        BlitWidth = pIRectDest->width();
         // Transparent Blit
         if( (dwFlags &DDBLT_KEYSRC) || (dwFlags & DDBLT_KEYSRCOVERRIDE) )
         {
@@ -2774,23 +2786,21 @@ HRESULT __stdcall SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lp
         // Check for transparent blit
         if(!dwFlags)
         {
-          BlitWidth *= dest->dwBytesPPDive;
-
-          #ifdef USE_ASM
-          BltRec(pBltPos, pSrcPos, BlitWidth, BlitHeight,
-                 dest->dwPitchDB,
-                 src->dwPitchDB);
-          #else
-          // Solid Blit
-          while(1)
-          {
-            memcpy(pBltPos,pSrcPos,BlitWidth);
-            pBltPos += dest->dwPitchDB;
-            pSrcPos += src->dwPitchDB;
-            if(! (--BlitHeight))
-              break;
-          }
-          #endif
+          dest->BltSolid( dest->pDiveBuffer,
+                          dest->pFrameBuffer,
+                          DestRect.top,
+                          DestRect.left,
+                          dest->dwPitchDB,
+                          dest->dwPitchFB,
+                          src->pDiveBuffer,
+                          src->pFrameBuffer,
+                          SrcRect.top,
+                          SrcRect.left,
+                          pIRectDest->width(),
+                          pIRectDest->height(),
+                          src->dwPitchDB,
+                          src->dwPitchFB
+                          );
         }
         else
         {
@@ -2830,41 +2840,47 @@ HRESULT __stdcall SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lp
                    dest->dwBytesPPDive,
                    dest->dwPitchDB);
 
+        // MoveRects in framebuufer if we use colorconversion
+        if(dest->pFrameBuffer != dest->pDiveBuffer)
+        {
+          MoveRects( dest->pFrameBuffer,
+                     (LPRECT)&DestRect,
+                     (LPRECT)&SrcRect,
+                     dest->lpDraw->GetScreenBpp()>>3,
+                     dest->dwPitchFB);
+        }
         return DD_OK;
       }
-
-      pBltPos = (char*) dest->pDiveBuffer + (DestRect.top * dest->dwPitchDB) +
-                (DestRect.left * dest->dwBytesPPDive);
-
-      pSrcPos = (char*) src->pDiveBuffer + (SrcRect.top * src->dwPitchDB) +
-                (SrcRect.left * src->dwBytesPPDive);
-
-      BlitHeight = pIRectDest->height();
-      BlitWidth = pIRectDest->width();
 
       // Check for transparent blit
       if(!dwFlags)
       {
-        BlitWidth *= dest->dwBytesPPDive;
-
-        #ifdef USE_ASM
-        BltRec(pBltPos, pSrcPos, BlitWidth, BlitHeight,
-               dest->dwPitchDB,
-               src->dwPitchDB);
-        #else
-        // Solid Blit
-        while(1)
-        {
-          memcpy(pBltPos,pSrcPos,BlitWidth);
-          pBltPos += dest->dwPitchDB;
-          pSrcPos += src->dwPitchDB;
-          if(! (--BlitHeight))
-            break;
-        }
-        #endif
+        dest->BltSolid( dest->pDiveBuffer,
+                        dest->pFrameBuffer,
+                        DestRect.top,
+                        DestRect.left,
+                        dest->dwPitchDB,
+                        dest->dwPitchFB,
+                        src->pDiveBuffer,
+                        src->pFrameBuffer,
+                        SrcRect.top,
+                        SrcRect.left,
+                        pIRectDest->width(),
+                        pIRectDest->height(),
+                        src->dwPitchDB,
+                        src->dwPitchFB
+                        );
       }
       else
       {
+        pBltPos = (char*) dest->pDiveBuffer + (DestRect.top * dest->dwPitchDB) +
+                  (DestRect.left * dest->dwBytesPPDive);
+
+        pSrcPos = (char*) src->pDiveBuffer + (SrcRect.top * src->dwPitchDB) +
+                  (SrcRect.left * src->dwBytesPPDive);
+
+        BlitHeight = pIRectDest->height();
+        BlitWidth = pIRectDest->width();
         DWORD dwPitch = dest->dwPitchDB;
 
         if(dwFlags &DDBLT_ROTATIONANGLE)
@@ -5468,11 +5484,27 @@ HRESULT __stdcall SurfSetSurfaceDesc(THIS This, LPDDSURFACEDESC lpSurfDesc, DWOR
     me->Updated = TRUE;
     // free our allocated Memory
     if(me->DDSurfaceDesc.dwFlags & DDSD_LPSURFACE)
-      free(me->DDSurfaceDesc.lpSurface);
+    {
+      if(me->pFBreal)
+        free(me->pFBreal);
+      if(me->pDBreal)
+        free(me->pFBreal);
+    }
   }
   // me->lpVtbl->ChangeUniquenessValue(me);
-  memcpy((char *)&(me->DDSurfaceDesc), (char *)lpSurfDesc, sizeof(DDSURFACEDESC));
+  memcpy( (char*)&(me->DDSurfaceDesc),
+          (char*)lpSurfDesc,
+          sizeof(DDSURFACEDESC));
 
+  me->dwPitchFB = me->DDSurfaceDesc.lPitch;
+
+  if( me->lpDraw->dCaps.ulDepth != me->lpDraw->GetScreenBpp() )
+  {
+    // create CC buffer ....
+    me->dwPitchDB = (me->DDSurfaceDesc.dwWidth * me->dwBytesPPDive +7) & ~7;
+    me->pDBreal = (char*)malloc( me->DDSurfaceDesc.dwHeight * me->dwPitchDB + 24);
+    me->pDiveBuffer = (char*)(((int)me->pDBreal + 7) & ~7); // align to QWORD
+  }
   return DD_OK;
 }
 //******************************************************************************
@@ -5498,11 +5530,28 @@ HRESULT __stdcall SurfSetSurfaceDesc4(THIS This, LPDDSURFACEDESC2 lpSurfDesc, DW
   {
     me->Updated = TRUE;
     // free our allocated Memory
+    // free our allocated Memory
     if(me->DDSurfaceDesc.dwFlags & DDSD_LPSURFACE)
-      free(me->DDSurfaceDesc.lpSurface);
+    {
+      if(me->pFBreal)
+        free(me->pFBreal);
+      if(me->pDBreal)
+        free(me->pFBreal);
+    }
   }
   // me->lpVtbl->ChangeUniquenessValue(me);
-  memcpy((char *)&(me->DDSurfaceDesc), (char *)lpSurfDesc, sizeof(DDSURFACEDESC2));
+  memcpy( (char *)&(me->DDSurfaceDesc),
+          (char*)lpSurfDesc,
+          sizeof(DDSURFACEDESC2));
+  me->dwPitchFB = me->DDSurfaceDesc.lPitch;
+
+  if( me->lpDraw->dCaps.ulDepth != me->lpDraw->GetScreenBpp() )
+  {
+    // create CC buffer ....
+    me->dwPitchDB = (me->DDSurfaceDesc.dwWidth * me->dwBytesPPDive +7) & ~7;
+    me->pDBreal = (char*)malloc( me->DDSurfaceDesc.dwHeight * me->dwPitchDB + 24);
+    me->pDiveBuffer = (char*)(((int)me->pDBreal + 7) & ~7); // align to QWORD
+  }
 
   return DD_OK;
 }
@@ -5860,6 +5909,8 @@ HRESULT __stdcall SurfChangeUniquenessValue(THIS This)
 
   return (DD_OK);
 }
+
+
 
 //******************************************************************************
 //
