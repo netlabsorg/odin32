@@ -1,9 +1,9 @@
-/* $Id: myldrOpenPath.cpp,v 1.3 2000-09-22 09:22:40 bird Exp $
+/* $Id: myldrOpenPath.cpp,v 1.4 2000-12-11 06:30:59 bird Exp $
  *
  * myldrOpenPath - ldrOpenPath used to open executables we'll override
  * this to altern the search path for DLLs.
  *
- * Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -36,7 +36,7 @@
 #include "ldrCalls.h"
 #include "ldr.h"
 #include "ModuleBase.h"
-
+#include "options.h"
 
 
 /**
@@ -90,7 +90,7 @@ ULONG LDRCALL myldrOpenPath(       /* retd  0x14 */
     )
 {
 
-    APIRET rc;
+    APIRET  rc;
 
     #ifdef DEBUG
     /* !paranoia!
@@ -121,6 +121,20 @@ ULONG LDRCALL myldrOpenPath(       /* retd  0x14 */
         setLdrStateLoadingDLL();
     else
         setLdrStateLoadingUnsupported();
+
+
+    /*
+     * Check if we're to apply the extention fix in myldrOpen.
+     * The required conditions are:
+     *      1. Global class. (ie. DLL)
+     *      2. Name must include a dot.
+     *      3. The extention must not be .DLL.
+     */
+    fldrOpenExtentionFix =      isDllFixesEnabled()
+                            &&  plv->lv_class == CLASS_GLOBAL
+                            &&  memchr(pachFilename, '.', cchFilename)
+                            &&  (   cchFilename < 4
+                                 || memcmp(pachFilename + cchFilename - 4, ".DLL", 4));
 
     /*
      * Overload the behaviour of ldrOpenPath?
@@ -187,6 +201,11 @@ ULONG LDRCALL myldrOpenPath(       /* retd  0x14 */
      * Change Loader State - Clear the type part of the loading bits.
      */
     setLdrStateClearLoadingType();
+
+    /*
+     * Clear the extention fix flag.
+     */
+    fldrOpenExtentionFix = FALSE;
 
     return rc;
 }
