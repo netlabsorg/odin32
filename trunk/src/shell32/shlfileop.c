@@ -18,6 +18,39 @@
 
 DEFAULT_DEBUG_CHANNEL(shell);
 
+
+#ifdef __WIN32OS2__
+BOOL SHELL_ConfirmDialog (int nKindOfDialog, LPCSTR szDir)
+{
+	char szCaption[255], szText[255], szBuffer[MAX_PATH + 256];
+        UINT caption_resource_id, text_resource_id;
+
+	switch(nKindOfDialog) {
+
+	case ASK_DELETE_FILE:
+		caption_resource_id	= IDS_DELETEITEM_CAPTION;
+		text_resource_id	= IDS_DELETEITEM_TEXT;
+		break;
+	case ASK_DELETE_FOLDER:
+		caption_resource_id	= IDS_DELETEFOLDER_CAPTION;
+		text_resource_id	= IDS_DELETEITEM_TEXT;
+		break;
+	case ASK_DELETE_MULTIPLE_ITEM:
+		caption_resource_id	= IDS_DELETEITEM_CAPTION;
+		text_resource_id	= IDS_DELETEMULTIPLE_TEXT;
+		break;
+	case ASK_OVERWRITE_FILE:
+		caption_resource_id	= IDS_OVERWRITEFILE_CAPTION;
+		text_resource_id	= IDS_OVERWRITEFILE_TEXT;
+		break;
+	default:
+		FIXME(__FUNCTION__" Unhandled nKindOfDialog %d stub\n", nKindOfDialog);
+		return FALSE;
+	}
+
+	LoadStringA(shell32_hInstance, caption_resource_id, szCaption, sizeof(szCaption));
+	LoadStringA(shell32_hInstance, text_resource_id, szText, sizeof(szText));
+#else
 BOOL SHELL_WarnItemDelete (int nKindOfDialog, LPCSTR szDir)
 {
 	char szCaption[255], szText[255], szBuffer[MAX_PATH + 256];
@@ -50,7 +83,7 @@ BOOL SHELL_WarnItemDelete (int nKindOfDialog, LPCSTR szDir)
 	  LoadStringA(shell32_hInstance, IDS_DELETEITEM_CAPTION, 
 		szCaption, sizeof(szCaption));
 	}          
-
+#endif
 	FormatMessageA(FORMAT_MESSAGE_FROM_STRING|FORMAT_MESSAGE_ARGUMENT_ARRAY,
 	    szText, 0, 0, szBuffer, sizeof(szBuffer), (va_list*)&szDir);
 
@@ -151,6 +184,53 @@ BOOL WINAPI Win32DeleteFile(LPSTR fName)
 	return TRUE;
 }
 
+#ifdef __WIN32OS2__
+/************************************************************************
+ *	Creation from dir for SHFileOperation (FO_COPY)
+ *
+ */ 
+
+LPSTR DirForFileOperationA (LPSTR pTo, DWORD *dwAttr, LPSHFILEOPSTRUCTA lpFileOp, BOOL toSingle)
+{
+
+	LPSTR pTempTo = NULL;
+	long lenTo;
+	BOOL withFileName = FALSE;
+	if(pTo[0]) {
+		lenTo = strlen(pTo);
+		pTempTo = HeapAlloc(GetProcessHeap(), 0, lenTo + MAX_PATH);
+
+	}
+        *dwAttr = -1;
+	if (pTempTo) {
+		strcpy(pTempTo,pTo);
+		PathRemoveBackslashA(pTempTo);
+                *dwAttr = GetFileAttributesA(pTempTo);
+                if (*(dwAttr) == -1 || !(*(dwAttr) & FILE_ATTRIBUTE_DIRECTORY)) {
+                        withFileName = ((lenTo == strlen(pTempTo)) || !toSingle);
+			if (withFileName) {
+// Target must not be an directory
+				PathRemoveFileSpecA(pTempTo);
+				*(dwAttr) = GetFileAttributesA(pTempTo);
+                        }
+                }
+                if ((*(dwAttr) == -1) || 
+                  ( !(*(dwAttr) & FILE_ATTRIBUTE_DIRECTORY) || (!withFileName && !toSingle) )) {
+// !toSingle == !(&pTo[strlen(pTo)+1]=="\0") redundant ?
+                        if (!withFileName && !toSingle) {
+				FIXME(__FUNCTION__" FO_COPY tagetdir and FOF_MULTIDESTFILES not implemented ? ,stub\n");
+                        };
+// never Create directory at this time
+                                HeapFree(GetProcessHeap(), 0, pTempTo);
+                                pTempTo = NULL;
+//                      }
+                }
+        }
+        if (!pTempTo) lpFileOp->fAnyOperationsAborted=TRUE;
+        return pTempTo;
+}
+#endif
+
 /*************************************************************************
  * SHFileOperationA				[SHELL32.243]
  *
@@ -161,11 +241,149 @@ DWORD WINAPI SHFileOperationA (LPSHFILEOPSTRUCTA lpFileOp)
 {
 	LPSTR pFrom = (LPSTR)lpFileOp->pFrom;
 	LPSTR pTo = (LPSTR)lpFileOp->pTo;
+#ifdef __WIN32OS2__
+	DWORD ToAttr;
+	DWORD FromAttr;
+	LPSTR pToFile;
+	LPSTR pTempTo = NULL;
+	LPSTR pTempFrom;
+
+	FILEOP_FLAGS OFl = ((FILEOP_FLAGS)lpFileOp->fFlags & 0x7ff);
+	BOOL Multi = (lpFileOp->fFlags & FOF_MULTIDESTFILES);
+	BOOL withFileName = FALSE;
+	BOOL not_overwrite;
+	BOOL copyOk;
+	long lenTo;
+/* default no error
+*/
+	lpFileOp->fAnyOperationsAborted=FALSE;
+#else
 	LPSTR pTempTo;
+#endif
 	
 	switch(lpFileOp->wFunc) {
 	case FO_COPY:
 		TRACE("File Copy:\n");
+#ifdef __WIN32OS2__
+/* 
+ * FOF_MULTIDESTFILES, FOF_NOCONFIRMATION				are	implemented
+ * FOF_CONFIRMMOUSE, FOF_SILENT, FOF_NOCONFIRMMKDIR, FOF_SIMPLEPROGRESS are not implemented and ignored
+ * if any other flag set, an error occurs
+ */  
+		OFl = (OFl & (-1 - (FOF_MULTIDESTFILES)));
+		OFl = (OFl ^ (FOF_SILENT | FOF_NOCONFIRMATION | FOF_SIMPLEPROGRESS | FOF_NOCONFIRMMKDIR));
+		if (OFl) {
+			if (OFl & (-1 - (FOF_CONFIRMMOUSE | FOF_SILENT | FOF_NOCONFIRMATION | FOF_SIMPLEPROGRESS | FOF_NOCONFIRMMKDIR))) {
+				FIXME(__FUNCTION__" FO_COPY with this fFlags not implemented:%2x ,stub\n",lpFileOp->fFlags);
+				lpFileOp->fAnyOperationsAborted=TRUE;
+			} else {
+// not FOF_SILENT, not FOF_SIMPLEPROGRESS, not FOF_NOCONFIRMMKDIR
+				FIXME(__FUNCTION__" FO_COPY with this fFlags not full implemented:%2x ,stub\n",lpFileOp->fFlags);
+			} /* endif */              
+		} /* endif */
+
+		not_overwrite = (!(lpFileOp->fFlags & FOF_NOCONFIRMATION));
+		while(!Multi && !lpFileOp->fAnyOperationsAborted) {
+// single targetdir
+			pTempTo = DirForFileOperationA(pTo, &ToAttr, lpFileOp, TRUE);
+
+			if (!pTempTo) break;
+
+                        lenTo = strlen(pTempTo);
+                        withFileName = (((lenTo + 1) <  strlen(pTo)) || (PathIsRootA(pTo) && lenTo < strlen(pTo)));
+			PathAddBackslashA(pTempTo);
+			break;
+		}
+		if (!lpFileOp->fAnyOperationsAborted) {
+			TRACE("File Copy:\n");
+#ifdef __WIN32OS2__
+		  while(pFrom[0]) {
+#endif
+				if(!pTo[0]) break;
+
+				TRACE("   From='%s' To='%s'\n", pFrom, pTo);
+
+				if (Multi) {
+// multi target, each one for one source. ? last
+					pTempTo = DirForFileOperationA(pTo, &ToAttr, lpFileOp, FALSE);
+                                        if (pTempTo) {
+
+                                                lenTo = strlen(pTempTo);
+                                                withFileName = (((lenTo + 1) <  strlen(pTo)) || (PathIsRootA(pTo) && lenTo < strlen(pTo)));
+						PathAddBackslashA(pTempTo);
+					}
+				}
+				if (pTempTo) {
+					lenTo = strlen(pTempTo);
+					pToFile = &pTempTo[lenTo];
+// target name in target or from source
+                                        if (withFileName) {
+                                           if ((pFrom[strlen(pFrom)+1]=='\0') ||
+                                               (Multi && !(pTo[strlen(pTo)+1]=='\0'))) {
+                                                pTempFrom = pTo;
+                                           } else {
+// more then one source for one targetfile
+                                                lpFileOp->fAnyOperationsAborted=TRUE;
+                                                break;
+                                           } /* endif */
+                                        } else {
+                                                pTempFrom = pFrom;
+                                        } /* endif */
+// isolate target filename
+					strcpy(pToFile,pTempFrom);
+					PathRemoveFileSpecA(pToFile);
+					PathAddBackslashA(pToFile);
+					lenTo = strlen(pToFile);
+
+					strcpy(pToFile,&pTempFrom[lenTo]);
+                                        FromAttr = GetFileAttributesA(pFrom);
+                                        if (FromAttr & FILE_ATTRIBUTE_DIRECTORY) {
+                                           if (!(FromAttr == -1)) {
+                				FIXME(__FUNCTION__" FO_COPY only with sourcedir not implemented ,stub\n");
+                                           };
+                                           lpFileOp->fAnyOperationsAborted=TRUE;
+                                           break;
+                                        }
+                                        ToAttr = GetFileAttributesA(pTempTo);
+                                        if (!(ToAttr == -1) && (ToAttr & FILE_ATTRIBUTE_DIRECTORY)) {
+                                           lpFileOp->fAnyOperationsAborted=TRUE;
+                                           break;
+                                        }
+// first try to copy
+					copyOk = CopyFileA(pFrom, pTempTo, not_overwrite);
+
+					if (!copyOk && not_overwrite) {
+						if (SHELL_ConfirmDialog (ASK_OVERWRITE_FILE, pTempTo))
+// second try to copy after confirm
+							copyOk = CopyFileA(pFrom, pTempTo, FALSE);
+					} /* endif */
+					if (!copyOk) lpFileOp->fAnyOperationsAborted=TRUE;
+// fix for mor then one source for one target 
+					pToFile[0] = '\0';
+
+                                        if (!withFileName && Multi && (pTo[strlen(pTo)+1]=='\0')) {
+// Win Bug ?
+                                                Multi = FALSE;
+                                        } /* endif */
+					if (Multi) HeapFree(GetProcessHeap(), 0, pTempTo);
+				}				
+
+				pFrom += strlen(pFrom) + 1;
+                                
+                        	if (Multi) pTo += strlen(pTo) + 1;
+
+			}
+		} /* endif */
+		if (!Multi && pTempTo) HeapFree(GetProcessHeap(), 0, pTempTo);
+
+		if (lpFileOp->fAnyOperationsAborted==TRUE) {
+			TRACE(__FUNCTION__" Setting AnyOpsAborted=TRUE\n");
+			return 0x75l;
+		} else {
+		      TRACE(__FUNCTION__" Setting AnyOpsAborted=FALSE\n");
+                } /* endif */
+		return 0;
+#else
 		while(1) {
 			if(!pFrom[0]) break;
 			if(!pTo[0]) break;
@@ -188,6 +406,7 @@ DWORD WINAPI SHFileOperationA (LPSHFILEOPSTRUCTA lpFileOp)
 		TRACE("Setting AnyOpsAborted=FALSE\n");
 		lpFileOp->fAnyOperationsAborted=FALSE;
 		return 0;
+#endif
 
 	case FO_DELETE:
 		TRACE("File Delete:\n");
