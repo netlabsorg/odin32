@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.84 2000-02-16 14:25:41 sandervl Exp $
+# $Id: makefile,v 1.85 2000-03-03 11:15:58 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -47,7 +47,7 @@ pefile.OBJ winimgres.OBJ wintls.obj async.OBJ fileio.obj hmtoken.obj kernelrsrc.
 atom.obj disk.obj directory.obj cvtbitmap.obj hmmmap.obj winfakepeldr.obj \
 cvtaccel.obj cvticon.obj cvticongrp.obj oslibexcept.obj cpu.obj process.obj \
 cvtcursor.obj cvtcursorgrp.obj stubs.obj interlock.obj toolhelp.obj codepage.obj \
-debug.obj oslibdebug.obj dbglocal.obj
+debug.obj oslibdebug.obj dbglocal.obj registry.obj
 
 
 TARGET = kernel32
