@@ -1,4 +1,4 @@
-/* $Id: Dialog.h,v 1.1 2001-02-02 08:41:31 bird Exp $
+/* $Id: Dialog.h,v 1.2 2001-02-11 23:41:46 bird Exp $
  *
  * Dialog IDs.
  *
@@ -105,6 +105,6 @@
 
 #define GR_LDRFIX                   1250
 #define CB_LDRFIX_DLLFIXES          1251
-
-
+#define CB_LDRFIX_EXEFIXES          1252
+#define CB_LDRFIX_FORCEPRELOAD      1253
 

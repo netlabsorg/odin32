@@ -1,8 +1,8 @@
-/* $Id: myldrOpen.cpp,v 1.14 2001-02-10 11:11:46 bird Exp $
+/* $Id: myldrOpen.cpp,v 1.15 2001-02-11 23:43:51 bird Exp $
  *
  * myldrOpen - ldrOpen.
  *
- * Copyright (c) 1998-2000 knut st. osmundsen
+ * Copyright (c) 1998-2001 knut st. osmundsen <knut.stange.osmundsen@mynd.no>
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -762,8 +762,13 @@ ULONG LDRCALL myldrOpen(PSFN phFile, PSZ pszFilename, PULONG pfl)
 
 ret:
     /** @sketch
+     *  If successful and force preload enabled and media flag pointer valid Then
+     *      Set removable media.
      *  Return rc.
      */
+    if (rc == NO_ERROR && isForcePreloadEnabled() && pfl)
+        *pfl &= ~0x1000UL; /* 0x1000 is the fixed media flag. */
+
     return rc;
 }
 
