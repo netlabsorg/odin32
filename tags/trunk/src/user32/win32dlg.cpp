@@ -1,4 +1,4 @@
-/* $Id: win32dlg.cpp,v 1.80 2002-12-18 14:04:24 sandervl Exp $ */
+/* $Id: win32dlg.cpp,v 1.81 2003-04-24 13:59:14 sandervl Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -26,6 +26,7 @@
 #include "hook.h"
 #include <math.h>
 #include <unicode.h>
+#include "user32api.h"
 
 #define DBG_LOCALLOG    DBG_win32dlg
 #include "dbglocal.h"
@@ -33,6 +34,7 @@
 #define DEFAULT_DLGFONT "9.WarpSans"
 
 #define GET_SHORT(ptr)     (*(SHORT *)(ptr))
+
 
 //******************************************************************************
 //******************************************************************************
@@ -1136,8 +1138,21 @@ BOOL Win32Dialog::endDialog(int retval)
 
     /* Windows sets the focus to the dialog itself in EndDialog */
 
+#ifdef __WIN32OS2__
+    if (::IsChild(hwnd, GetFocus()))
+    {
+       ::SetFocus( hwnd );
+       //SvL: Enable the owner if the focus is on one of its children.
+       //     If we don't, then PM will switch focus to another app since
+       //     we hide the window below (hidden windows cannot have focus)
+       HWND owner = ::GetWindow( hwnd, GW_OWNER);
+       if(owner)
+           ::EnableWindow(owner, TRUE);
+    }
+#else
     if (::IsChild(hwnd, GetFocus()))
        ::SetFocus( hwnd );
+#endif
 
     /* Don't have to send a ShowWindow(SW_HIDE), just do
        SetWindowPos with SWP_HIDEWINDOW as done in Windows */
