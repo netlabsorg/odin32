@@ -1,4 +1,4 @@
-/* $Id: controls.h,v 1.4 2000-01-18 20:08:09 sandervl Exp $ */
+/* $Id: controls.h,v 1.5 2001-04-26 17:02:28 sandervl Exp $ */
 /*
  * Win32 common controls
  *
@@ -9,7 +9,9 @@
 #ifndef __CONTROLS_H
 #define __CONTROLS_H
 
+#ifdef __cplusplus
 #include "win32wbase.h"
+#endif
 
 #define GetInfoPtr(hwnd) (GetWindowLongA(hwnd,0))
 #define SetInfoPtr(hwnd,data) \
@@ -33,7 +35,13 @@ void CONTROLS_Unregister();
 #define POPUPMENU_CONTROL       12
 #define MAX_CONTROLS            13
 
+#ifdef __cplusplus
 BOOL CONTROLS_IsControl(Win32BaseWindow *window, int control);
+#endif
 
+/* combo box */
+
+#define ID_CB_LISTBOX           1000
+#define ID_CB_EDIT              1001
 
 #endif // __CONTROLS_H
