@@ -1,4 +1,4 @@
-/* $Id: shresdef.h,v 1.7 2000-08-30 13:51:09 sandervl Exp $ */
+/* $Id: shresdef.h,v 1.8 2001-04-19 08:32:19 sandervl Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -40,8 +40,10 @@
 
 #define IDS_CREATEFOLDER_DENIED 30
 #define IDS_CREATEFOLDER_CAPTION 31
-#define IDS_DELETEFOLDER_TEXT   32
+#define IDS_DELETEITEM_CAPTION	32
 #define IDS_DELETEFOLDER_CAPTION 33
+#define IDS_DELETEITEM_TEXT	34
+#define IDS_DELETEMULTIPLE_TEXT	35
 
 #define IDS_SHV_INVALID_FILENAME_TITLE 28
 #define IDS_SHV_INVALID_FILENAME       29

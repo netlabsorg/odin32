@@ -1,4 +1,4 @@
-/* $Id: shres.orc,v 1.10 2000-11-28 11:00:47 sandervl Exp $ */
+/* $Id: shres.orc,v 1.11 2001-04-19 08:32:18 sandervl Exp $ */
 /*
  * Top level resource file for Common Dialogs
  *
@@ -137,8 +137,10 @@ STRINGTABLE DISCARDABLE
 {
 	IDS_CREATEFOLDER_DENIED "Can not create new Folder: Permission denied."
 	IDS_CREATEFOLDER_CAPTION "Error during creating a new folder"
-	IDS_DELETEFOLDER_TEXT "Are you sure you want to delete %1 and all it's subfolders?"
-	IDS_DELETEFOLDER_CAPTION "Confirm file delete"
+	IDS_DELETEITEM_CAPTION "Confirm file delete"
+	IDS_DELETEFOLDER_CAPTION "Confirm folder delete"
+	IDS_DELETEITEM_TEXT "Are you sure you want to delete '%1'?"
+	IDS_DELETEMULTIPLE_TEXT "Are you sure you want to delete these %1 items?"
 }
 
 shv_accel ACCELERATORS
