@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.64 1999-11-29 00:04:05 bird Exp $
+# $Id: makefile,v 1.65 1999-11-30 14:15:54 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -42,7 +42,7 @@ winimagepe2lx.obj winimagepeldr.obj windllpe2lx.obj windlllx.obj windllpeldr.obj
 winexepe2lx.obj winexelx.obj winexepeldr.obj WINRES.OBJ critsection.obj \
 pefile.OBJ winimgres.OBJ wintls.obj async.OBJ fileio.obj \
 atom.obj disk.obj directory.obj cvtbitmap.obj hmmmap.obj winfakepeldr.obj \
-cvtaccel.obj cvticon.obj cvticongrp.obj oslibexcept.obj cpu.obj \
+cvtaccel.obj cvticon.obj cvticongrp.obj oslibexcept.obj cpu.obj process.obj \
 cvtcursor.obj cvtcursorgrp.obj stubs.obj interlock.obj toolhelp.obj
 
 
@@ -92,6 +92,10 @@ kernel32.OBJ: kernel32.cpp \
     exceptutil.h \
     $(PDWIN32_INCLUDE)\unicode.h \
     $(PDWIN32_INCLUDE)\heap.h \
+    $(PDWIN32_INCLUDE)\wprocess.h
+
+process.obj: process.cpp \
+    $(PDWIN32_INCLUDE)\misc.h \
     $(PDWIN32_INCLUDE)\wprocess.h
 
 kobjects.obj: kobjects.cpp

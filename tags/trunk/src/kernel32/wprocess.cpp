@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.51 1999-11-26 00:05:20 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.52 1999-11-30 14:15:56 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -145,6 +145,17 @@ TEB *InitializeTIB(BOOL fMainThread)
         //todo: initialize TLS array if required
         //TLS in executable always TLS index 0?
    	ProcessTIBSel = tibsel;
+    	ProcessPDB.exit_code       = 0x103; /* STILL_ACTIVE */
+    	ProcessPDB.threads         = 1;
+    	ProcessPDB.running_threads = 1;
+    	ProcessPDB.ring0_threads   = 1;
+    	ProcessPDB.system_heap     = GetProcessHeap();
+    	ProcessPDB.parent          = 0;
+    	ProcessPDB.group           = &ProcessPDB;
+    	ProcessPDB.priority        = 8;  /* Normal */
+    	ProcessPDB.heap            = ProcessPDB.system_heap;  /* will be changed later on */
+    	ProcessPDB.next            = NULL;
+    	ProcessPDB.winver          = 0xffff; /* to be determined */
    }
    dprintf(("InitializeTIB setup TEB with selector %x", tibsel));
    dprintf(("InitializeTIB: FS(%x):[0] = %x", GetFS(), QueryExceptionChain()));
@@ -821,27 +832,6 @@ ULONG SYSTEM GetVersionSize(char *lpszModName)
   return winimage->getVersionSize();
 }
 //******************************************************************************
-//******************************************************************************
-
-
-/***********************************************************************
- *           RegisterServiceProcess             (KERNEL, KERNEL32)
- *
- * A service process calls this function to ensure that it continues to run
- * even after a user logged off.
- */
-DWORD WIN32API RegisterServiceProcess(DWORD dwProcessId,
-                                      DWORD dwType)
-{
-  dprintf(("KERNEL32: RegisterServiceProcess(%08xh,%08xh) not implemented.\n",
-           dwProcessId,
-           dwType));
-
-  /* I don't think that Wine needs to do anything in that function */
-  return 1; /* success */
-}
-
-//******************************************************************************
 //TODO:What does this do exactly??
 //******************************************************************************
 ODINFUNCTION1(BOOL,DisableThreadLibraryCalls,HMODULE,hModule)
@@ -864,4 +854,5 @@ ODINFUNCTION1(BOOL,DisableThreadLibraryCalls,HMODULE,hModule)
     return FALSE;
   }
 }
-
+//******************************************************************************
+//******************************************************************************

@@ -1,9 +1,9 @@
-/* $Id: KERNEL32.CPP,v 1.34 1999-11-24 19:31:22 sandervl Exp $ */
+/* $Id: KERNEL32.CPP,v 1.35 1999-11-30 14:15:53 sandervl Exp $ */
 
 /*
  * Win32 compatibility file functions for OS/2
  *
- * Copyright 1998 Sander van Leeuven
+ * Copyright 1998 Sander van Leeuwen
  * Copyright 1998 Patrick Haller
  * Copyright 1998 Peter Fitzsimmons
  * Copyright 1998 Knut St. Osmundsen
@@ -374,36 +374,6 @@ DWORD WIN32API GetEnvironmentVariableW(LPCWSTR lpName, LPWSTR lpBuffer,
     free(asciibuffer);
     return(rc);
 }
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API GetExitCodeProcess(HANDLE arg1, LPDWORD  arg2)
-{
-    dprintf(("KERNEL32:  GetExitCodeProcess\n"));
-    return O32_GetExitCodeProcess(arg1, arg2);
-}
-//******************************************************************************
-//******************************************************************************
-HANDLE WIN32API GetCurrentProcess(void)
-{
-    dprintf2(("KERNEL32:  GetCurrentProcess\n"));
-    return O32_GetCurrentProcess();
-}
-//******************************************************************************
-//******************************************************************************
-DWORD WIN32API GetCurrentProcessId(void)
-{
-    dprintf2(("KERNEL32:  GetCurrentProcessId\n"));
-    return O32_GetCurrentProcessId();
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API TerminateProcess( HANDLE arg1, DWORD arg2)
-{
-    dprintf(("KERNEL32:  TerminateProcess\n"));
-    return O32_TerminateProcess(arg1, arg2);
-}
-//******************************************************************************
-//******************************************************************************
 VOID WIN32API Sleep(DWORD arg1)
 {
     dprintf2(("KERNEL32:  Sleep %d\n", arg1));
@@ -539,13 +509,6 @@ int WIN32API MulDiv(int arg1, int arg2, int  arg3)
 	return 0;
 
     return O32_MulDiv(arg1, arg2, arg3);
-}
-//******************************************************************************
-//******************************************************************************
-HANDLE WIN32API OpenProcess(DWORD arg1, BOOL arg2, DWORD arg3)
-{
-    dprintf(("KERNEL32:  OS2OpenProcess\n"));
-    return O32_OpenProcess(arg1, arg2, arg3);
 }
 //******************************************************************************
 //******************************************************************************
@@ -733,14 +696,6 @@ BOOL WIN32API GetVersionExW(OSVERSIONINFOW *lpVersionInformation)
    return(TRUE);
 }
 //******************************************************************************
-//Should retrieve this from the exe...
-//******************************************************************************
-DWORD WIN32API GetProcessVersion(DWORD Processid)
-{
-  dprintf(("KERNEL32:  OS2GetProcessVersion not correctly implemented!!\n"));
-  return(WIN32OS2_VERSION);
-}
-//******************************************************************************
 //******************************************************************************
 LONG WIN32API GetVersion()
 {
@@ -771,32 +726,7 @@ VOID WIN32API OutputDebugStringA(LPCSTR lpszOutputString)
   return;
 }
 //******************************************************************************
-//Obsolete
 //******************************************************************************
-DWORD WIN32API GetProcessHeaps(DWORD NumberOfHeaps, PHANDLE ProcessHeaps)
-{
-  dprintf(("KERNEL32:  GetProcessHeaps, Not implemented\n"));
-  return(0);
-}
-//******************************************************************************
-//WINE
-//******************************************************************************
-BOOL WIN32API GetProcessAffinityMask(HANDLE  hProcess,
-                                        LPDWORD lpProcessAffinityMask,
-                                        LPDWORD lpSystemAffinityMask)
-{
-        /* It is definitely important for a process to know on what processor
-           it is running :-) */
-        if(lpProcessAffinityMask)
-                *lpProcessAffinityMask=1;
-        if(lpSystemAffinityMask)
-                *lpSystemAffinityMask=1;
-        return TRUE;
-}
-//******************************************************************************
-//******************************************************************************
-
-
 BOOL WIN32API FlushInstructionCache(     /*PLF Mon  98-02-09 23:56:49 : STUB STUB STUB STUB STUB */
     HANDLE hProcess,    /* process with cache to flush  */
     LPCVOID lpvBase,    /* address of region to flush   */

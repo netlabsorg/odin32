@@ -1,4 +1,4 @@
-; $Id: kernel32.def,v 1.52 1999-11-23 19:31:34 sandervl Exp $
+; $Id: kernel32.def,v 1.53 1999-11-30 14:15:53 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is Windows95 KERNEL32
@@ -463,10 +463,11 @@ EXPORTS
      GetPrivateProfileStructW   = _GetPrivateProfileStructW@20 @371
      GetProcAddress             = _GetProcAddress@8           @372
      GetProcessAffinityMask     = _GetProcessAffinityMask@12  @373
+     GetProcessDword            = _GetProcessDword@8          @885
 ;    GetProcessFlags            = _GetProcessFlags@??         @374      ;W95
      GetProcessHeap             = _GetProcessHeap@0           @375
      GetProcessHeaps            = _GetProcessHeaps@8          @376
-;    GetProcessPriorityBoost    = _GetProcessPriorityBoost@??           ;NT
+;     GetProcessPriorityBoost    = _GetProcessPriorityBoost@??           ;NT
      GetProcessShutdownParameters  = _GetProcessShutdownParameters@8 @377
      GetProcessTimes            = _GetProcessTimes@20         @378
      GetProcessVersion          = _GetProcessVersion@4        @379
@@ -793,8 +794,9 @@ EXPORTS
     SetMailslotInfo            = _SetMailslotInfo@8          @658
     SetNamedPipeHandleState    = _SetNamedPipeHandleState@16 @659
     SetPriorityClass           = _SetPriorityClass@8         @660
-;   SetProcessAffinityMask     = _SetProcessAffinityMask@??             ;NT
-;   SetProcessPriorityBoost    = _SetPriorityBoost@??                   ;NT
+    SetProcessAffinityMask     = _SetProcessAffinityMask@8   @862
+    SetProcessDword            = _SetProcessDword@12         @884
+    SetProcessPriorityBoost    = _SetProcessPriorityBoost@8  @863
     SetProcessShutdownParameters  = _SetProcessShutdownParameters@8 @661
     SetProcessWorkingSetSize   = _SetProcessWorkingSetSize@12 @662
     SetStdHandle               = _SetStdHandle@8              @663
