@@ -1,4 +1,4 @@
-/* $Id: win32class.cpp,v 1.6 1999-08-21 12:53:28 sandervl Exp $ */
+/* $Id: win32class.cpp,v 1.7 1999-08-24 09:20:30 sandervl Exp $ */
 /*
  * Win32 Window Class Managment Code for OS/2
  *
@@ -119,19 +119,26 @@ Win32WndClass::~Win32WndClass()
 //******************************************************************************
 Win32WndClass *Win32WndClass::FindClass(HINSTANCE hInstance, LPSTR id)
 {
+  enterMutex(OBJTYPE_CLASS);
+
   Win32WndClass *wndclass = (Win32WndClass *)wndclasses;
 
-  if(wndclass == NULL)  return(NULL);
+  if(wndclass == NULL) {
+	leaveMutex(OBJTYPE_CLASS);
+	return(NULL);
+  }
 
   if(HIWORD(id) != 0) {
 //CB: read comment below!
         if(stricmp(wndclass->classNameA, id) == 0 && wndclass->hInstance == hInstance) {
+		leaveMutex(OBJTYPE_CLASS);
                 return(wndclass);
         }
         else {
                 wndclass = (Win32WndClass *)wndclass->GetNext();
                 while(wndclass != NULL) {
                         if(stricmp(wndclass->classNameA, id) == 0 && wndclass->hInstance == hInstance) {
+				leaveMutex(OBJTYPE_CLASS);
                                 return(wndclass);
                         }
                         wndclass = (Win32WndClass *)wndclass->GetNext();
@@ -142,18 +149,21 @@ Win32WndClass *Win32WndClass::FindClass(HINSTANCE hInstance, LPSTR id)
 //CB: without HInstance check, test program finds class
 //CB: need more code to compare instance; convert 0 to exe module handle
         if(wndclass->classAtom == (DWORD)id /*&& wndclass->hInstance == hInstance*/) {
+		leaveMutex(OBJTYPE_CLASS);
                 return(wndclass);
         }
         else {
                 wndclass = (Win32WndClass *)wndclass->GetNext();
                 while(wndclass != NULL) {
                         if(wndclass->classAtom == (DWORD)id/* && wndclass->hInstance == hInstance*/) {
-                                return(wndclass);
+				leaveMutex(OBJTYPE_CLASS);
+	        	        return(wndclass);
                         }
                         wndclass = (Win32WndClass *)wndclass->GetNext();
                 }
         }
   }
+  leaveMutex(OBJTYPE_CLASS);
   dprintf(("Class %X (inst %X) not found!", id, hInstance));
   return(NULL);
 }

@@ -1,4 +1,4 @@
-/* $Id: gen_object.cpp,v 1.2 1999-07-15 12:01:31 sandervl Exp $ */
+/* $Id: gen_object.cpp,v 1.3 1999-08-24 09:20:30 sandervl Exp $ */
 /*
  * Generic Object Class for OS/2
  *
@@ -12,33 +12,19 @@
 #include <win32type.h>
 #include <gen_object.h>
 #include <misc.h>
+#include <vmutex.h>
 
-HMTX genMutexSem = 0;
+VMutex genMutex[OBJTYPE_MAX];
 
 //******************************************************************************
 //******************************************************************************
 GenericObject::GenericObject(GenericObject **head, DWORD objType)
 {
- APIRET rc;
-
   this->objType = objType;
   this->head    = head;
   this->next    = NULL;
 
-  if(genMutexSem == 0) {
-	rc = DosCreateMutexSem(NULL, &genMutexSem, 0, FALSE);
-	if(rc) {
-		dprintf(("GenericObject ctor: DosCreateMutexSem returned %d", rc));
-		DebugInt3();
-		exit(1);
-	}
-  }
-  //insert in linked list
-  rc = DosRequestMutexSem(genMutexSem, SEM_INDEFINITE_WAIT);
-  if(rc) {
-	dprintf(("GenericObject ctor: DosRequestMutexSem returned %d", rc));
-	DebugInt3();
-  }
+  genMutex[objType].enter();
   if(*head == NULL) {
 	*head = this;	
   }
@@ -50,20 +36,14 @@ GenericObject::GenericObject(GenericObject **head, DWORD objType)
 	}
 	cur->next = this;
   }
-  DosReleaseMutexSem(genMutexSem);
+  genMutex[objType].leave();
 }
 //******************************************************************************
 //******************************************************************************
 GenericObject::~GenericObject()
 {
- APIRET rc;
-
   //remove from linked list
-  rc = DosRequestMutexSem(genMutexSem, SEM_INDEFINITE_WAIT);
-  if(rc) {
-	dprintf(("GenericObject dtor: DosRequestMutexSem returned %d", rc));
-	DebugInt3();
-  }
+  genMutex[objType].enter();
   if(*head == this) {
 	*head = next;	
   }
@@ -79,7 +59,31 @@ GenericObject::~GenericObject()
 	}
 	cur->next = next;
   }
-  DosReleaseMutexSem(genMutexSem);
+  genMutex[objType].leave();
+}
+//******************************************************************************
+//******************************************************************************
+void GenericObject::enterMutex()
+{
+  genMutex[objType].enter();
+}
+//******************************************************************************
+//******************************************************************************
+void GenericObject::leaveMutex()
+{
+  genMutex[objType].leave();
+}
+//******************************************************************************
+//******************************************************************************
+void GenericObject::enterMutex(DWORD objType)
+{
+  genMutex[objType].enter();
+}
+//******************************************************************************
+//******************************************************************************
+void GenericObject::leaveMutex(DWORD objType)
+{
+  genMutex[objType].leave();
 }
 //******************************************************************************
 //******************************************************************************
