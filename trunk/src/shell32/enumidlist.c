@@ -1,4 +1,4 @@
-/* $Id: enumidlist.c,v 1.1 2000-08-30 13:52:51 sandervl Exp $ */
+/* $Id: enumidlist.c,v 1.2 2001-10-11 02:42:27 phaller Exp $ */
 /*
  *	IEnumIDList
  *
@@ -23,6 +23,17 @@
 #include "shell32_main.h"
 
 DEFAULT_DEBUG_CHANNEL(shell)
+
+/****************************************************************************
+ * local prototypes
+ ****************************************************************************/
+
+LPITEMIDLIST _Optlink ODIN_ILClone      (LPCITEMIDLIST pidl);
+
+void         _Optlink ODIN_SHFree   (LPVOID x);
+LPVOID       _Optlink ODIN_SHAlloc  (DWORD len);
+
+
 
 typedef struct tagENUMLIST
 {
@@ -59,7 +70,7 @@ static BOOL AddToEnumList(
 	LPENUMLIST  pNew;
 
 	TRACE("(%p)->(pidl=%p)\n",This,pidl);
-	pNew = (LPENUMLIST)SHAlloc(sizeof(ENUMLIST));
+	pNew = (LPENUMLIST)ODIN_SHAlloc(sizeof(ENUMLIST));
 	if(pNew)
 	{
 	  /*set the next pointer */
@@ -105,7 +116,7 @@ static BOOL AddToEnumList2(
         LPENUMLIST  pNew;
 
         TRACE("(%p)->(pidl=%p)\n",This,pidl);
-        pNew = (LPENUMLIST)SHAlloc(sizeof(ENUMLIST));
+        pNew = (LPENUMLIST)ODIN_SHAlloc(sizeof(ENUMLIST));
         if(pNew)
         {
           /*set the next pointer */
@@ -459,8 +470,8 @@ static BOOL DeleteList(
 	while(This->mpFirst)
 	{ pDelete = This->mpFirst;
 	  This->mpFirst = pDelete->pNext;
-	  SHFree(pDelete->pidl);
-	  SHFree(pDelete);
+	  ODIN_SHFree(pDelete->pidl);
+	  ODIN_SHFree(pDelete);
 	}
 	This->mpFirst = This->mpLast = This->mpCurrent = NULL;
 	return TRUE;
@@ -621,7 +632,7 @@ static HRESULT WINAPI IEnumIDList_fnNext(
 	  { hr =  S_FALSE;
 	    break;
 	  }
-	  temp = ILClone(This->mpCurrent->pidl);
+	  temp = ODIN_ILClone(This->mpCurrent->pidl);
 	  rgelt[i] = temp;
 	  This->mpCurrent = This->mpCurrent->pNext;
 	}
