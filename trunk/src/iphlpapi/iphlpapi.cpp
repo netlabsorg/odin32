@@ -1,4 +1,4 @@
-/* $Id: iphlpapi.cpp,v 1.14 2003-05-05 15:11:42 sandervl Exp $ */
+/* $Id: iphlpapi.cpp,v 1.15 2003-05-05 15:26:03 sandervl Exp $ */
 /*
  *	IPHLPAPI library
  *
@@ -245,7 +245,8 @@ static void i_initializeAdapterInformation(void)
 //    pmibTable->table[currentInterface].dwOutQLen
 
     pmibTable->table[currentInterface].dwDescrLen = strlen(ifmibget.iftable[i].ifDescr);
-    strncpy((char *)pmibTable->table[currentInterface].bDescr, ifmibget.iftable[i].ifDescr, sizeof(pmibTable->table[currentInterface].bDescr));
+    strncpy((char *)pmibTable->table[currentInterface].bDescr, iShortName, strlen(iShortName));
+//    strncpy((char *)pmibTable->table[currentInterface].bDescr, ifmibget.iftable[i].ifDescr, sizeof(pmibTable->table[currentInterface].bDescr));
 
 
     pmipaddrTable->table[currentInterface].dwAddr = ifInfo->IPAddress;
