@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.43 1999-07-06 08:49:28 sandervl Exp $ */
+ /* $Id: changelog,v 1.44 1999-07-06 15:55:03 phaller Exp $ */
+ 99-07-06: Patrick Haller <phaller@gmx.net>
+	- KERNEL32: major enhancement of handlemanager
+
  99-07-06: Edgar Buerkle <100566.557@compuserve.com>
 	- PE2LX: Finished support for codepages
 
