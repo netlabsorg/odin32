@@ -1,5 +1,11 @@
- /* $Id: ChangeLog,v 1.1041 2000-07-21 18:31:42 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.1042 2000-07-22 09:34:27 sandervl Exp $ */
 
+ 2000-07-21: Sander van Leeuwen <sandervl@xs4all.nl>
+    - DOC\ReportingBugs.txt
+                Added file that tells users how to report bugs
+    - TOOLS\install: 
+                Added ReportingBugs.txt to WarpIN script
+   
  2000-07-21: Sander van Leeuwen <sandervl@xs4all.nl>
     - SHLWAPI:  SHGetSpecialFolderPathA: StartMenu changed in 'Start Menu'
                 (now identical to Windows 98/NT)
