@@ -1,4 +1,4 @@
-/* $Id: krnlInit.c,v 1.3 2002-12-16 02:24:29 bird Exp $
+/* $Id: krnlInit.c,v 1.4 2002-12-19 01:49:08 bird Exp $
  *
  * Init the OS2 Kernel facilities; identify it, find symbols, import table.
  *
@@ -24,7 +24,7 @@
  */
 
 #ifndef NOFILEID
-static const char szFileId[] = "$Id: krnlInit.c,v 1.3 2002-12-16 02:24:29 bird Exp $";
+static const char szFileId[] = "$Id: krnlInit.c,v 1.4 2002-12-19 01:49:08 bird Exp $";
 #endif
 
 
@@ -40,13 +40,11 @@ static const char szFileId[] = "$Id: krnlInit.c,v 1.3 2002-12-16 02:24:29 bird E
 /*******************************************************************************
 *   Header Files                                                               *
 *******************************************************************************/
-#include <kLib/format/LXexe.h>
 #include <kLib/kTypes.h>
 #include <kLib/kDevHlp.h>
+#include <kLib/format/LXexe.h>
 
-#define INCL_DOSERRORS
-#define INCL_NOPMAPI
-#include <os2.h>
+#include <os2def.h>
 #include <string.h>
 
 #define INCL_OS2KRNL_ALL
@@ -58,10 +56,8 @@ static const char szFileId[] = "$Id: krnlInit.c,v 1.3 2002-12-16 02:24:29 bird E
 #define INCL_KKL_LOG
 #include "kKrnlLib.h"
 
-#include "dev1632.h"
-#include "dev32.h"
-#include "ProbKrnl.h"
-#include "ProbKrnlErrors.h"
+#include "devErrors.h"
+#include "krnlImportTable.h"
 #include "krnlPrivate.h"
 
 #ifdef R3TST
@@ -79,7 +75,7 @@ KSEMMTX     kmtxImports;
 PMTE        pKrnlMTE = NULL;            /* Initiated by krnlGetKernelInfo */
 PSMTE       pKrnlSMTE = NULL;           /* Initiated by krnlGetKernelInfo */
 POTE        pKrnlOTE = NULL;            /* Initiated by krnlGetKernelInfo */
-ULONG       cKernelObjects = 0;         /* Initiated by krnlGetKernelInfo */
+int         cKernelObjects = 0;         /* Initiated by krnlGetKernelInfo */
 
 extern char callTab[1];
 
@@ -89,7 +85,6 @@ extern char callTab[1];
 *******************************************************************************/
 int         krnlGetKernelInfo(void);
 int         krnlLookupKernel(void);
-int         krnlVerifyImportTab(void);
 
 int         krnlInitImports(void);
 int         krnlInitExports(void);
@@ -167,7 +162,7 @@ int krnlGetKernelInfo(void)
 
     /* Find the kernel OTE table */
 #ifndef R3TST
-    pKrnlMTE = GetOS2KrnlMTE();
+    pKrnlMTE = krnlGetOS2KrnlMTE();
 #else
     pKrnlMTE = GetOS2KrnlMTETst();
 #endif
@@ -176,7 +171,7 @@ int krnlGetKernelInfo(void)
         pKrnlSMTE = pKrnlMTE->mte_swapmte;
         if (pKrnlSMTE != NULL)
         {
-            if (pKrnlSMTE->smte_objcnt <= MAXKRNLOBJECTS)
+            if (pKrnlSMTE->smte_objcnt <= 42)
             {
                 pKrnlOTE = pKrnlSMTE->smte_objtab;
                 if (pKrnlOTE != NULL)
@@ -319,7 +314,7 @@ int krnlGetKernelInfo(void)
     else
         rc = ERROR_D32_GETOS2KRNL_FAILED;
 
-    if (rc != NO_ERROR)
+    if (!rc)
         kprintf(("krnlGetKernelInfo: failed. rc = %d\n", rc));
 
     KLOGEXIT(rc);
@@ -493,12 +488,12 @@ int krnlVerifyImportTab(void)
                  */
                 if (EPT32BitEntry(aImportTab[i]))
                 {
-                    cb = interpretFunctionProlog32((char*)aImportTab[i].ulAddress);
+                    cb = krnlInterpretProlog32((char*)aImportTab[i].ulAddress);
                     cbmax = OVERLOAD32_ENTRY - 5; /* 5 = Size of the jump instruction */
                 }
                 else
                 {
-                    cb = interpretFunctionProlog16((char*)aImportTab[i].ulAddress);
+                    cb = krnlInterpretProlog16((char*)aImportTab[i].ulAddress);
                     cbmax = OVERLOAD16_ENTRY - 5; /* 5 = Size of the jump instruction */
                 }
 
@@ -529,28 +524,9 @@ int krnlVerifyImportTab(void)
         }
     }
 
-    KLOGEXIT(NO_ERROR);
-    return NO_ERROR;
+    KLOGEXIT(0);
+    return 0;
 }
-
-
-
-
-
-
-/**
- * Initiates the exported functions and MTE.
- * @returns 0 on success.
- *          -1 on failure.
- */
-int krnlInit2(void)
-{
-    KLOGENTRY0("int");
-    int rc = krnlInitExports();
-    KLOGEXIT(rc);
-    return rc;
-}
-
 
 
 /**
@@ -623,7 +599,7 @@ int krnlInitImports(void)
                 pchCTEntry += 4;
             case EPT_PROC32:
             {
-                cb = interpretFunctionProlog32((char*)aImportTab[i].ulAddress);
+                cb = krnlInterpretProlog32((char*)aImportTab[i].ulAddress);
                 aImportTab[i].cbProlog = (char)cb;
                 if (   cb >= 5                      /* 5(1st): size of jump instruction in the function prolog which jumps to my overloading function */
                     && cb + 5 <= OVERLOAD32_ENTRY   /* 5(2nd): size of jump instruction which jumps back to the original function after executing the prolog copied to the callTab entry for this function. */
@@ -675,7 +651,7 @@ int krnlInitImports(void)
             case EPT_PROC16:
             case EPT_PROCH16:
             {
-                cb = interpretFunctionProlog16((char*)aImportTab[i].ulAddress);
+                cb = krnlInterpretProlog16((char*)aImportTab[i].ulAddress);
                 aImportTab[i].cbProlog = (char)cb;
                 if (   cb >= 5                          /* 5:      size of a 16:16 jump which jumps to my overloading function */
                     && cb + 5 + 4 < OVERLOAD16_ENTRY    /* cb+5+4: size of a 16:16 jump which is added to the call tab and the far ptr. and far address at end */
@@ -766,15 +742,15 @@ int krnlInitImports(void)
      * Now switch the 16-bit calltab segment to a CODE segment.
      */
     #ifndef R3TST
-    if (MakeCalltab16CodeSegment())
+    if (krnlMakeCalltab16CodeSegment())
     {
-        kprintf(("MakeCalltab16CodeSegment failed\n"));
+        kprintf(("krnlMakeCalltab16CodeSegment failed\n"));
         INT3();
     }
     #endif
 
-    KLOGEXIT(NO_ERROR);
-    return NO_ERROR;
+    KLOGEXIT(0);
+    return 0;
 }
 
 
@@ -840,6 +816,20 @@ VOID R3TstFixImportTab(VOID)
     KLOGEXITVOID();
 }
 #endif
+
+
+/**
+ * Initiates the exported functions and MTE.
+ * @returns 0 on success.
+ *          -1 on failure.
+ */
+int krnlInit2(void)
+{
+    KLOGENTRY0("int");
+    int rc = krnlInitExports();
+    KLOGEXIT(rc);
+    return rc;
+}
 
 
 /**

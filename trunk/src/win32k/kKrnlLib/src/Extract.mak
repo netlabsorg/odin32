@@ -1,4 +1,4 @@
-# $Id: Extract.mak,v 1.11 2002-12-16 02:24:27 bird Exp $
+# $Id: Extract.mak,v 1.12 2002-12-19 01:49:07 bird Exp $
 
 #
 # kKrnlLib/krnl makefile.
@@ -26,13 +26,15 @@ TARGET_PUB_DIR  = $(PATH_TOOLS)
 MAKEFILE        = $(TARGET_NAME).mak
 
 TARGET_OBJS =\
+$(PATH_TARGET)\Extract.$(EXT_OBJ)\
 $(PATH_TARGET)\Extract32.$(EXT_OBJ)\
 $(PATH_TARGET)\krnlPrologs.$(EXT_OBJ)\
 $(PATH_TARGET)\krnlImportTable.$(EXT_OBJ)\
+$(PATH_TARGET)\krnlLoadKernelSymFile.$(EXT_OBJ)\
 
 TARGET_LIBS =\
 $(LIB_OS)\
-$(LIB_C_NRE)\
+$(LIB_C_OBJ)\
 
 #
 # Rules config

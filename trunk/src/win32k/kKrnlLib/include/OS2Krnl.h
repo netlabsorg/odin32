@@ -1,4 +1,4 @@
-/* $Id: OS2Krnl.h,v 1.4 2002-12-16 02:25:06 bird Exp $
+/* $Id: OS2Krnl.h,v 1.5 2002-12-19 01:49:06 bird Exp $
  *
  * OS/2 kernel structures, typedefs and macros.
  * Top-level include file.
@@ -29,9 +29,15 @@
 
 
 
+/*******************************************************************************
+*   Header Files                                                               *
+*******************************************************************************/
 /*
  * "OS2KDefs.h"
  */
+/* NOASM */
+#include <os2def.h>
+/* ASM */
 #if !defined(OS2_INCLUDED)
     /* when used with h2inc.exe */
     #define UCHAR   unsigned char
@@ -41,6 +47,10 @@
     #define PCHAR   char *
 #endif
 
+
+/*******************************************************************************
+*   Defined Constants And Macros                                               *
+*******************************************************************************/
 /* undefine everything defined below to quite compiler */
 #undef  PAGESIZE
 #undef  PAGESUB1

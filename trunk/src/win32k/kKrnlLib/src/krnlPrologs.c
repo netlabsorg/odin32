@@ -1,4 +1,4 @@
-/* $Id: krnlPrologs.c,v 1.2 2002-12-16 02:24:29 bird Exp $
+/* $Id: krnlPrologs.c,v 1.3 2002-12-19 01:49:09 bird Exp $
  *
  * krnlPrologs - Kernel Prolog Recognizer.
  *
@@ -24,7 +24,7 @@
  */
 
 #ifndef NOFILEID
-static const char szFileId[] = "$Id: krnlPrologs.c,v 1.2 2002-12-16 02:24:29 bird Exp $";
+static const char szFileId[] = "$Id: krnlPrologs.c,v 1.3 2002-12-19 01:49:09 bird Exp $";
 #endif
 
 
@@ -117,7 +117,7 @@ int ModR_M_16bit(char bModRM)
  *            On error it returns 0.
  * @param     pach       Pointer to prolog.
  */
-int interpretFunctionProlog32(char *pach)
+int krnlInterpretProlog32(char *pach)
 {
     KLOGENTRY1("int","char * pach", pach);
     int cb = -3;
@@ -439,7 +439,7 @@ int interpretFunctionProlog32(char *pach)
  *            On error it returns 0.
  * @param     pach       Pointer to prolog.
  */
-int interpretFunctionProlog16(char *pach)
+int krnlInterpretProlog16(char *pach)
 {
     KLOGENTRY1("int","char * pach", pach);
     int cb = -7;
