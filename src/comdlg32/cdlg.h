@@ -1,4 +1,4 @@
-/* $Id: cdlg.h,v 1.2 1999-11-02 20:37:42 sandervl Exp $ */
+/* $Id: cdlg.h,v 1.3 1999-11-28 12:32:27 sandervl Exp $ */
 /*
  *  Common Dialog Boxes interface (32 bit)
  *
@@ -8,7 +8,10 @@
 #ifndef _WINE_DLL_CDLG_H
 #define _WINE_DLL_CDLG_H
 
+#include "dlgs.h"
+
 extern HINSTANCE	COMDLG32_hInstance;
+#define COMMDLG_hInstance32 COMDLG32_hInstance
 
 /*---------------- 32-bit ----------------*/
 
