@@ -1,4 +1,4 @@
-/* $Id: dcrgn.cpp,v 1.7 2001-09-30 22:24:41 sandervl Exp $ */
+/* $Id: dcrgn.cpp,v 1.8 2003-03-22 20:27:11 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -64,6 +64,9 @@ BOOL WIN32API GetUpdateRect(HWND hwnd, LPRECT pRect, BOOL erase)
 
     dprintf(("GetUpdateRect %x %x %d", hwnd, pRect, erase));
 
+    //check if the application previously didn't handle a WM_PAINT msg properly
+    wnd->checkForDirtyUpdateRegion();
+
     BOOL updateRegionExists = WinQueryUpdateRect(wnd->getOS2WindowHandle(), pRect ? &rectl : NULL);
     if (!pRect) {
         dprintf(("GetUpdateRect returned %d", updateRegionExists));
@@ -117,6 +120,9 @@ int WIN32API GetUpdateRgn(HWND hwnd, HRGN hrgn, BOOL erase)
         if(wnd) RELEASE_WNDOBJ(wnd);
         return ERROR_W;
     }
+    //check if the application previously didn't handle a WM_PAINT msg properly
+    wnd->checkForDirtyUpdateRegion();
+
     lComplexity = WinQueryUpdateRegion(wnd->getOS2WindowHandle(), hrgn);
     if(lComplexity == RGN_ERROR) {
         dprintf(("WARNING: GetUpdateRgn %x %x %d; RGN_ERROR", hwnd, hrgn, erase));
