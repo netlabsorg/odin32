@@ -1,4 +1,4 @@
-/* $Id: winconst.h,v 1.36 2000-08-16 08:03:57 sandervl Exp $ */
+/* $Id: winconst.h,v 1.37 2000-11-05 18:47:11 sandervl Exp $ */
 
 /*
  * Win32 constants
@@ -1432,3 +1432,19 @@
 #define SUBLANG_NEUTRAL                  0x00    /* language neutral */
 #define SUBLANG_DEFAULT                  0x01    /* user default */
 #define SUBLANG_SYS_DEFAULT              0x02    /* system default */
+
+
+/* Flags for ModifyWorldTransform */
+#define MWT_IDENTITY_W      1
+#define MWT_LEFTMULTIPLY_W  2
+#define MWT_RIGHTMULTIPLY_W 3
+
+  /* Map modes */
+#define MM_TEXT_W		  1
+#define MM_LOMETRIC_W	  2
+#define MM_HIMETRIC_W	  3
+#define MM_LOENGLISH_W	  4
+#define MM_HIENGLISH_W	  5
+#define MM_TWIPS_W	  6
+#define MM_ISOTROPIC_W	  7
+#define MM_ANISOTROPIC_W  8
