@@ -1,11 +1,16 @@
-/* $Id: changelog,v 1.2607 2003-07-28 11:22:29 sandervl Exp $ */
+/* $Id: changelog,v 1.2608 2003-07-28 11:22:54 sandervl Exp $ */
 
- 2003-07-03: knut st. osmundsen <bird-odin-spam@anduin   >
+ 2003-07-28: Platon Fomichev <stauff@innotek   >
+    - WMC:      o Port of Wine Windows Message Compiler
+    - KERNEL32: o Fixed loading of unicode messages and added loading of 
+                  internal ones.
+
+ 2003-07-28: knut st. osmundsen <bird-odin-spam@anduin   >
     - USER32:   o Updates
     - OLEPRO32: o Updates
     - ODINCRT:  o Use fast method to query pid & tid in critical sections
 
- 2003-07-02: Sander van Leeuwen <sandervl@innotek   >
+ 2003-07-28: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o Updates
     - WINMM:    o Updates
     - OLE32:    o Updates
