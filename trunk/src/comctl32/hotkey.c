@@ -1,4 +1,4 @@
-/* $Id: hotkey.c,v 1.10 1999-09-25 15:10:27 cbratschi Exp $ */
+/* $Id: hotkey.c,v 1.11 1999-09-25 15:24:12 cbratschi Exp $ */
 /*
  * Hotkey control
  *
@@ -20,11 +20,7 @@
 static VOID
 HOTKEY_Refresh(HWND hwnd)
 {
-  RECT rect;
-
-  GetClientRect(hwnd,&rect);
-  InflateRect(&rect,-1,-2); //CB: x only -1 -> bug!
-  InvalidateRect(hwnd,&rect,FALSE);
+  InvalidateRect(hwnd,NULL,FALSE);
 }
 
 
@@ -332,7 +328,7 @@ HOTKEY_Draw(HWND hwnd,HDC hdc)
   if(infoPtr->hFont) oldFont = SelectObject(hdc,infoPtr->hFont);
   SetBkMode(hdc,TRANSPARENT);
   CopyRect(&newRect,&rect);
-  DrawTextA(hdc,text,strlen(text),&newRect,DT_LEFT | DT_BOTTOM | DT_SINGLELINE);
+  DrawTextA(hdc,text,strlen(text),&newRect,DT_LEFT | DT_BOTTOM | DT_SINGLELINE | DT_NOCLIP);
   DrawTextA(hdc,text,strlen(text),&newRect,DT_LEFT | DT_BOTTOM | DT_SINGLELINE | DT_CALCRECT);
   if (infoPtr->hFont) SelectObject(hdc,oldFont);
   infoPtr->cursorPos.x = (newRect.right >= rect.right)? 0:newRect.right;
