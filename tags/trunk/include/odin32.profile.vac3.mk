@@ -1,9 +1,9 @@
-# $Id: odin32.profile.vac3.mk,v 1.5 2001-11-21 19:45:46 phaller Exp $
+# $Id: odin32.profile.vac3.mk,v 1.6 2001-11-22 10:46:08 phaller Exp $
 
 #
 # Odin32 API
 #
-#       DEBUG makefile for the VAC3 compiler environment.
+#       PROFILE makefile for the VAC3 compiler environment.
 #
 
 
@@ -15,7 +15,8 @@ RTLLIB   = cppom30.lib
 RTLLIB_O = cppom30o.lib
 RTLLIB_NRE = cppon30.lib
 DLLENTRY = $(ODIN32_LIB)\dllentry.obj
-ODINCRT  = odincrtd
+DEMANGLLIB = demangl.lib
+ODINCRT  = odincrtp
 
 
 #
