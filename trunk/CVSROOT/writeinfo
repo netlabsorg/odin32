@@ -45,7 +45,7 @@
 /src/comdlg32/backup                       sandervl achimha cbratschi
 /src/comdlg32/backups                      sandervl achimha cbratschi
 /src/ddraw/backup                          sandervl hugh achimha
-/src/dsound/backup                         sandervl hugh achimha
+/src/dsound/backup                         sandervl hugh achimha phaller
 /src/gdi32/backup                          sandervl phaller achimha bird
 /src/gdi32/backups                         sandervl phaller achimha bird
 /src/kernel32/backup                       sandervl phaller achimha bird
