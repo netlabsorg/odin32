@@ -1,4 +1,4 @@
-# $Id: setup.os2debwat11-16.mk,v 1.19 2002-09-20 04:10:04 bird Exp $
+# $Id: setup.os2debwat11-16.mk,v 1.20 2003-11-14 22:02:36 bird Exp $
 
 # ---OS2, DEBUG, WAT11-------------------------
 ENV_NAME="OS/2, Debug, Watcom C/C++ v11.0c 16-bit"
@@ -39,16 +39,16 @@ CXX=wpp.exe
 CC_FLAGS=-bt=os2 -dOS2 -d__16BIT__ -dDEBUG -zq -fr=nul -bm -ze -w4 -zld -d2 -hc $(_CC_OPTIONAL) $(CC_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CC_INCLUDES:-I=-i=) $(ALL_INCLUDES:-I=-i=) -i=$(PATH_INCLUDES) -i=$(WATCOM)\h
 CC_FLAGS_EXE=$(CC_FLAGS) -zc
 CC_FLAGS_DLL=$(CC_FLAGS) -zc -bd
-CC_FLAGS_SYS=$(CC_FLAGS) -s -zff -zgf -zu
+CC_FLAGS_SYS=$(CC_FLAGS) -s -zff -zgf -zu -dRING0
 CC_FLAGS_VDD=$(CC_FLAGS_SYS)
-CC_FLAGS_IFS=$(CC_FLAGS) -s -zff -zgf -zu -bd
+CC_FLAGS_IFS=$(CC_FLAGS) -s -zff -zgf -zu -bd -dRING0
 
 CXX_FLAGS=-bt=os2 -dOS2 -d__16BIT__ -dDEBUG -zq -fr=nul -bm -ze -w4 -zld -d2 -hc $(_CXX_OPTIONAL)  $(CXX_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CXX_INCLUDES:-I=-i=) $(ALL_INCLUDES:-I=-i=) -i=$(PATH_INCLUDES) -i=$(WATCOM)\h
 CXX_FLAGS_EXE=$(CXX_FLAGS) -zc
 CXX_FLAGS_DLL=$(CXX_FLAGS) -zc -bd
-CXX_FLAGS_SYS=$(CXX_FLAGS) -s -zff -zgf -zu
+CXX_FLAGS_SYS=$(CXX_FLAGS) -s -zff -zgf -zu -dRING0
 CXX_FLAGS_VDD=$(CXX_FLAGS_SYS)
-CXX_FLAGS_IFS=$(CXX_FLAGS) -s -zff -zgf -zdp -zu -bd
+CXX_FLAGS_IFS=$(CXX_FLAGS) -s -zff -zgf -zdp -zu -bd -dRING0
 
 !if "$(CC_AS_CXX)" != ""
 ! if "$(CXX_AS_CC)" != ""
