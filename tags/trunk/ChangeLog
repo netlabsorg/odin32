@@ -1,23 +1,29 @@
- /* $Id: ChangeLog,v 1.933 2000-05-10 19:49:16 cbratschi Exp $ */
+ /* $Id: ChangeLog,v 1.934 2000-05-12 18:07:04 sandervl Exp $ */
+
+ 2000-05-12: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   
+                Fixed bug in HOOK_RemoveHook (wrong call for enter semaphore method)
+                SetSysColors bugfix (called itself for some reason)
+                Fixed wrong dispatch of messages under certain conditions
+    - COMDLG32: 
+                Fixed initial directory for GetOpen/SaveFileNameW
+                If initial dir string == "" -> use current dir (not only
+                when ptr equals NULL)
 
  2000-05-10: Christoph Bratschi <cbratschi@datacomm.ch>
-	- COMCTL32: fixed treeview item height bug
-		    (reported by Markus Montkowski)
+    - COMCTL32: Fixed treeview item height bug (reported by Markus Montkowski)
 
  2000-05-10: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:
                 Fix for SetForegroundWindow (SWP_NOZORDER flag removed)
                 GetForegroundWindow now uses WinQueryActiveWindow instead
                 of Open32's GetForegroundWindow
-    - KERNEL32:
-                Extra logging for atom functions, fixed GlobalGetAtomNameW
+    - KERNEL32: Extra logging for atom functions, fixed GlobalGetAtomNameW
     - COMDLG32:
                 Added missing ascii to unicode conversions in GetFileDialog95W
                 (file name (returned), initial dir & file dialog title)
-    - RICHED32:
-                Added (Wine port)
-    - TOOLS\INSTALL: 
-                Added ChangeLog to installation script
+    - RICHED32: Added (Wine port)
+    - TOOLS\INSTALL: Added ChangeLog to installation script
 
  2000-05-09: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32:
@@ -46,12 +52,11 @@
                 Fixed bugs in SYSTRAY_SetTip/SYSTRAY_ModifyTip; string
                 copy operations used wrong size -> heap corruption
     - DINPUT:   Check window handle if app acquired mouse input in
-                    cooperative mode
+                cooperative mode
     - TOOLS\INSTALL: Fixed wrong glide dll for voodoo 2 install package
 
  2000-05-06: Sander van Leeuwen <sandervl@xs4all.nl>
-    - GDI32:
-                Added stretch blit mode support to dibsection blits
+    - GDI32:    Added stretch blit mode support to dibsection blits
 
  2000-05-05: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:
@@ -119,17 +124,17 @@
                 more logging.
 
  2000-05-02: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
-        - makefile and tools/makefile:
+    - makefile and tools/makefile:
                 tools/install is not a "needed tool" required for
                 to do the rest of the build; and it'is dependent on
                 kernel32.lib which haven't been made at the time
                 the needed_tools are being made. So, the making of
                 tools/install is the last thing we do in the makeprocess.
-        - WSOCK32, WINMM:
+    - WSOCK32, WINMM:
                 ODINWRAP changes below broke WSOCK32 and WINMM.
                 I've created some highly temporary fix for it this problem.
                 Could someone please make a permanent fix?
-        - tools/bin/wrc.exe and tools/wrc:
+    - tools/bin/wrc.exe and tools/wrc:
                 Important notice: __WIN32OS2__ is not defined when making wrc!
                 This was the reason why ':' was used as include separator.
                 This is corrected now. ';' is now the include separator.
