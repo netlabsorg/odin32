@@ -1,10 +1,13 @@
-/* $Id: wprocess.cpp,v 1.35 1999-10-04 22:25:01 phaller Exp $ */
+/* $Id: wprocess.cpp,v 1.36 1999-10-09 13:33:25 sandervl Exp $ */
 
 /*
  * Win32 process functions
  *
  * Copyright 1998 Sander van Leeuwen (sandervl@xs4all.nl)
  *
+ *
+ * NOTE: Even though Odin32 OS/2 apps don't switch FS selectors,
+ *       we still allocate a TEB to store misc information. 
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -41,7 +44,8 @@ ODINDEBUGCHANNEL(KERNEL32-WPROCESS)
 //******************************************************************************
 //******************************************************************************
 BOOL      fFreeLibrary = FALSE;
-
+BOOL      fIsOS2Image = FALSE;	//TRUE  -> Odin32 OS/2 application (not converted!)
+                         	//FALSE -> otherwise
 //Process database
 PDB       ProcessPDB = {0};
 USHORT    ProcessTIBSel = 0;
@@ -178,6 +182,12 @@ void WIN32API RestoreOS2TIB()
  TEB   *winteb;
  THDB  *thdb;
 
+   //If we're running an Odin32 OS/2 application (not converted!), then we
+   //we don't switch FS selectors
+   if(fIsOS2Image) {
+	return;
+   }
+
    winteb = (TEB *)*TIBFlatPtr;
    if(winteb) {
    	thdb = (THDB *)(winteb+1);
@@ -194,6 +204,12 @@ USHORT WIN32API SetWin32TIB()
  SHORT  win32tibsel;
  TEB   *winteb;
  THDB  *thdb;
+
+   //If we're running an Odin32 OS/2 application (not converted!), then we
+   //we don't switch FS selectors
+   if(fIsOS2Image) {
+	return;
+   }
 
    winteb = (TEB *)*TIBFlatPtr;
    if(winteb) {
@@ -656,7 +672,7 @@ BOOL SYSTEM GetVersionStruct(char *modname, char *verstruct, ULONG bufLength)
  Win32ImageBase *winimage;
 
   dprintf(("GetVersionStruct"));
-  if(WinExe && !strcmp(WinExe->getFullPath(), modname)) {
+  if(WinExe && !stricmp(WinExe->getFullPath(), modname)) {
     	winimage = (Win32ImageBase *)WinExe;
   }
   else {
@@ -676,7 +692,7 @@ ULONG SYSTEM GetVersionSize(char *modname)
 
   dprintf(("GetVersionSize of %s\n", modname));
 
-  if(WinExe && !strcmp(WinExe->getFullPath(), modname)) {
+  if(WinExe && !stricmp(WinExe->getFullPath(), modname)) {
     	winimage = (Win32ImageBase *)WinExe;
   }
   else {
