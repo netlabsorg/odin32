@@ -1,4 +1,4 @@
-/* $Id: profile.cpp,v 1.25 2000-10-01 21:16:04 phaller Exp $ */
+/* $Id: profile.cpp,v 1.26 2000-10-02 13:38:57 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -46,11 +46,6 @@ ODINDEBUGCHANNEL(PROFILE)
 #endif
 
 #define SystemHeap               GetProcessHeap()
-
-#ifndef strcasecmp
-#define strcasecmp               stricmp
-#endif
-
 #define DOSFS_GetFullName(a,b,c) strcpy(c,a)
 #define CharLowerA(a)            (a)
 
