@@ -1,4 +1,4 @@
-/* $Id: win32type.h,v 1.31 2000-01-02 22:52:49 sandervl Exp $ */
+/* $Id: win32type.h,v 1.32 2000-01-05 19:35:52 sandervl Exp $ */
 
 /*
  * Win32 type definitions for OS/2
@@ -758,6 +758,150 @@ typedef struct _DEBUG_EVENT {
         RIP_INFO                  RipInfo;
     } u;
 } DEBUG_EVENT, *LPDEBUG_EVENT;
+
+#ifndef __WINE_WINNT_H
+
+#pragma pack(1)
+#define ANYSIZE_ARRAY 1
+
+#ifndef SID_IDENTIFIER_AUTHORITY_DEFINED
+#define SID_IDENTIFIER_AUTHORITY_DEFINED
+typedef struct {
+    BYTE Value[6];
+} SID_IDENTIFIER_AUTHORITY,*PSID_IDENTIFIER_AUTHORITY,*LPSID_IDENTIFIER_AUTHORITY;
+#endif /* !defined(SID_IDENTIFIER_AUTHORITY_DEFINED) */
+
+#ifndef SID_DEFINED
+#define SID_DEFINED
+typedef struct _SID {
+    BYTE Revision;
+    BYTE SubAuthorityCount;
+    SID_IDENTIFIER_AUTHORITY IdentifierAuthority;
+    DWORD SubAuthority[1];
+} SID,*PSID;
+#endif /* !defined(SID_DEFINED) */
+
+/* 
+ * ACL 
+ */
+
+typedef struct _ACL {
+    BYTE AclRevision;
+    BYTE Sbz1;
+    WORD AclSize;
+    WORD AceCount;
+    WORD Sbz2;
+} ACL, *PACL;
+
+/* 
+ * SID_AND_ATTRIBUTES
+ */
+
+typedef struct _SID_AND_ATTRIBUTES {
+  PSID  Sid; 
+  DWORD Attributes; 
+} SID_AND_ATTRIBUTES ; 
+ 
+/*
+ * TOKEN_USER
+ */
+
+typedef struct _TOKEN_USER {
+  SID_AND_ATTRIBUTES User; 
+} TOKEN_USER; 
+
+/*
+ * TOKEN_GROUPS
+ */
+
+typedef struct _TOKEN_GROUPS  {
+  DWORD GroupCount; 
+  SID_AND_ATTRIBUTES Groups[ANYSIZE_ARRAY]; 
+} TOKEN_GROUPS; 
+
+typedef LARGE_INTEGER LUID,*PLUID;
+
+typedef struct _LUID_AND_ATTRIBUTES {
+  LUID   Luid; 
+  DWORD  Attributes; 
+} LUID_AND_ATTRIBUTES; 
+
+/*
+ * PRIVILEGE_SET
+ */
+
+typedef struct _PRIVILEGE_SET {
+    DWORD PrivilegeCount;
+    DWORD Control;
+    LUID_AND_ATTRIBUTES Privilege[ANYSIZE_ARRAY];
+} PRIVILEGE_SET, *PPRIVILEGE_SET;
+
+/*
+ * TOKEN_PRIVILEGES
+ */
+
+typedef struct _TOKEN_PRIVILEGES {
+  DWORD PrivilegeCount; 
+  LUID_AND_ATTRIBUTES Privileges[ANYSIZE_ARRAY]; 
+} TOKEN_PRIVILEGES, *PTOKEN_PRIVILEGES; 
+
+/*
+ * TOKEN_OWNER
+ */
+
+typedef struct _TOKEN_OWNER {
+  PSID Owner; 
+} TOKEN_OWNER; 
+
+/*
+ * TOKEN_PRIMARY_GROUP
+ */
+
+typedef struct _TOKEN_PRIMARY_GROUP {
+  PSID PrimaryGroup; 
+} TOKEN_PRIMARY_GROUP; 
+
+
+/*
+ * TOKEN_DEFAULT_DACL
+ */
+
+typedef struct _TOKEN_DEFAULT_DACL { 
+  PACL DefaultDacl; 
+} TOKEN_DEFAULT_DACL; 
+
+/*
+ * TOKEN_SOURCEL
+ */
+
+typedef struct _TOKEN_SOURCE {
+  char Sourcename[8]; 
+  LUID SourceIdentifier; 
+} TOKEN_SOURCE; 
+
+/*
+ * TOKEN_TYPE
+ */
+
+typedef enum tagTOKEN_TYPE {
+  TokenPrimary = 1, 
+  TokenImpersonation 
+} TOKEN_TYPE; 
+
+/*
+ * SECURITY_IMPERSONATION_LEVEL
+ */
+
+typedef enum _SECURITY_IMPERSONATION_LEVEL {
+  SecurityAnonymous, 
+  SecurityIdentification, 
+  SecurityImpersonation, 
+  SecurityDelegation 
+} SECURITY_IMPERSONATION_LEVEL, *PSECURITY_IMPERSONATION_LEVEL; 
+
+#pragma pack()
+
+#endif //__WINE_WINNT_H
 
 #pragma pack()
 
