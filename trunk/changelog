@@ -1,4 +1,8 @@
- /* $Id: changelog,v 1.707 2000-02-08 10:30:33 sandervl Exp $ */
+ /* $Id: changelog,v 1.708 2000-02-08 12:45:16 bird Exp $ */
+
+ 2000-02-08: Knut Stange Osmundsen <knut.stange.osmundsen>
+	- Win32k: Temporarily disabled imported kernelfunctions which
+	          broke Win32k at WE4eB. (The imports are currently unused.)
 
  2000-02-07: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Don't use shell positioning for child windows (breaks Notes)
@@ -42,9 +46,9 @@
 	- OPENGL: Removed OS2wgl apis (they had the wrong calling convention
                   -> causes crashes in gdi32 when compiled with optimizations on)
 
- 2000-02-04: Markus Montkowski <mmontkowski@gmx.de> 
+ 2000-02-04: Markus Montkowski <mmontkowski@gmx.de>
         - DDRAW:  Many minor/major bugfixes at numerous places
-        - DSOUND: Fixed GetCurrentBufferPos in the virtual player 
+        - DSOUND: Fixed GetCurrentBufferPos in the virtual player
 
  2000-02-04: Sander van Leeuwen <sandervl@xs4all.nl>
 	- ALL: Added version resource (if not already present)
@@ -91,7 +95,7 @@
 		 now (correct in 24 bps mode; upside down and wrong colors
 		 in 16 bps mode)
 
- 2000-02-01: Knut Stange Osmundse <knut.stange.osmundsen>
+ 2000-02-01: Knut Stange Osmundsen <knut.stange.osmundsen>
 	- Pe2Lx: Makefile should be working again.
 	- KERNEL32: RegisterPe2LxDll - no detach is done for Pe2Lx/Win32k DLLs.
 		    This is a temporary fix.
