@@ -1,4 +1,4 @@
-/* $Id: oslibmem.cpp,v 1.4 2002-07-16 08:16:47 sandervl Exp $ */
+/* $Id: oslibmem.cpp,v 1.5 2002-09-24 15:15:27 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -211,7 +211,8 @@ DWORD OSLibDosFreeMem(LPVOID lpMemAddr)
     ULONG  ulAttr, ulSize, ulAddr;
     APIRET rc;
 
-    ulAddr  = (DWORD)lpMemAddr & ~0xFFF;
+    ulAddr = (DWORD)lpMemAddr & ~0xFFF;
+    ulSize = 0x1000;
 
     //Find base within previous 64kb (alignment can add filler pages)
     for(int i=0;i<16;i++) {
