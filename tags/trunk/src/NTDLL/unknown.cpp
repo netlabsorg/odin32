@@ -1,4 +1,4 @@
-/* $Id: unknown.cpp,v 1.4 1999-08-18 21:45:14 phaller Exp $ */
+/* $Id: unknown.cpp,v 1.5 1999-08-18 22:08:34 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -385,5 +385,30 @@ void CDECL OS2_alloca_probe(DWORD x1)
            x1));
 
     //ESP_reg(context) -= EAX_reg(context);
+}
+
+
+/*****************************************************************************
+ * Name      : RtlConvertSidToUnicodeString
+ * Purpose   : unknown
+ * Parameters: unknown, probably wrong
+ * Variables :
+ * Result    :
+ * Remark    : NTDLL.?
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1999/06/01 09:00]
+ *****************************************************************************/
+
+DWORD WIN32API RtlConvertSidToUnicodeString(DWORD x1,
+                                            DWORD x2,
+                                            DWORD x3)
+{
+  dprintf(("NTDLL: RtlConvertSidToUnicodeString(%08xh,%08xh,%08xh) not implemented.\n",
+           x1,
+           x2,
+           x3));
+
+  return 0;
 }
 
