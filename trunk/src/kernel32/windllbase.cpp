@@ -1,4 +1,4 @@
-/* $Id: windllbase.cpp,v 1.34 2004-01-15 10:39:06 sandervl Exp $ */
+/* $Id: windllbase.cpp,v 1.35 2004-01-30 22:17:00 bird Exp $ */
 
 /*
  * Win32 Dll base class
@@ -212,7 +212,9 @@ ULONG Win32DllBase::AddRef()
 {
  Win32DllBase *dll;
 
+#ifdef DEBUG
     dprintf(("Win32DllBase::AddRef %s->%s %d", parentname, getModuleName(), referenced+1));
+#endif
     ++referenced;
 #ifdef DEBUG
     if(referenced == 1) {

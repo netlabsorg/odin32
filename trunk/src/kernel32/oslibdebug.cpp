@@ -1,4 +1,4 @@
-/* $Id: oslibdebug.cpp,v 1.7 2002-05-28 09:53:34 sandervl Exp $ */
+/* $Id: oslibdebug.cpp,v 1.8 2004-01-30 22:17:00 bird Exp $ */
 
 /*
  * OS/2 debug apis
@@ -92,7 +92,7 @@ VOID _Optlink DebugThread(VOID *argpid)
   HQUEUE WinQueueHandle   = 0;
   HEV    hevSem           = 0,
          hevQSem          = 0,
-         hevWinQSem	  = 0;	 
+         hevWinQSem	  = 0;	
   uDB_t  DbgBuf           = {0};
   int    rc, rc2;
   char   path[CCHMAXPATH];
@@ -236,9 +236,9 @@ DosDebug_GO:
         // DosWriteQueue(QueueHandle, 0, sizeof(DEBUG_EVENT), lpde, 0);
         // break;
         if (DbgBuf.Value == 0 && DbgBuf.Buffer == XCPT_BREAKPOINT)
-        { 
+        {
           dprintf(("Breakpoint encountered"));
-          // This may be win32 event exception as well as common int3 
+          // This may be win32 event exception as well as common int3
           Priority = 0;
           ulElemCode = 0;
           rc2 = DosPeekQueue(WinQueueHandle,&Request, &ulDataLen, (PPVOID)&lpde, &ulElemCode,DCWW_NOWAIT, &Priority, hevWinQSem);
@@ -251,13 +251,15 @@ DosDebug_GO:
              dprintf(("DebugThread - DosReadQueue failed!"));
              //Forward it to receiver
              lpde2 = (LPDEBUG_EVENT) malloc(sizeof(DEBUG_EVENT));
-             OSLibDebugReadMemory ( lpde, lpde2,sizeof(DEBUG_EVENT),NULL);  
+             OSLibDebugReadMemory ( lpde, lpde2,sizeof(DEBUG_EVENT),NULL);
+             #ifdef DEBUG
              dprintf(("DebugThread Win32 Event %s",GetDebugMsgText(lpde2->dwDebugEventCode)));
+             #endif
              DosWriteQueue(QueueHandle, 0, sizeof(DEBUG_EVENT), lpde2, 0);
              //Stay stopped
           }
           dprintf(("DebugThread - waiting for continue signal"));
-          DosWaitEventSem(hevSem, SEM_INDEFINITE_WAIT);          
+          DosWaitEventSem(hevSem, SEM_INDEFINITE_WAIT);
           DosResetEventSem(hevSem,&ulNumCalled);
           DbgBuf.Cmd = DBG_C_ReadReg;
           rc = DosDebug(&DbgBuf);
@@ -271,7 +273,7 @@ DosDebug_GO:
           DbgBuf.Cmd = DBG_C_Continue;
           DbgBuf.Value = XCPT_CONTINUE_EXECUTION;
           goto DebugApi;
-       } 
+       }
        DbgBuf.Cmd = DBG_C_Continue;
        DbgBuf.Value = XCPT_CONTINUE_SEARCH;
        goto DebugApi;
@@ -591,7 +593,7 @@ VOID OSLibDebugReadMemory(LPCVOID lpBaseAddress,LPVOID lpBuffer, DWORD cbRead, L
   uDB_t  DbgBuf        = {0};
   USHORT sel = RestoreOS2FS();
   APIRET rc;
-  dprintf(("OSLibDebugReadMemory - reading from pid %d",superpid));	   
+  dprintf(("OSLibDebugReadMemory - reading from pid %d",superpid));	
   DbgBuf.Pid = superpid;
   DbgBuf.Cmd = DBG_C_ReadMemBuf;
   DbgBuf.Addr  = (ULONG)lpBaseAddress;
@@ -624,7 +626,7 @@ BOOL OSLibAddWin32Event(LPDEBUG_EVENT lpde)
   char   tmp[12];
   PID    pidOwner;
 
-  dprintf(("OSLibAddWin32Event"));	   
+  dprintf(("OSLibAddWin32Event"));	
   // open main debug semaphore
   strcat(SemName, itoa(getpid(),tmp, 10));
   rc = DosOpenEventSem(SemName, &hevSem);
@@ -661,13 +663,13 @@ BOOL OSLibAddWin32Event(LPDEBUG_EVENT lpde)
     goto fail;
   }
   _interrupt(3);
-  free(lpde_copy);  
+  free(lpde_copy);
   DosCloseEventSem(hevSem);
   DosCloseQueue(WinQueueHandle);
   SetFS(sel);
   return TRUE;
 fail:
-  if (lpde_copy) free(lpde_copy);  
+  if (lpde_copy) free(lpde_copy);
   DosCloseEventSem(hevSem);
   DosCloseQueue(WinQueueHandle);
   SetFS(sel);
