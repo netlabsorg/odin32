@@ -1,4 +1,4 @@
-/* $Id: windowclass.cpp,v 1.4 1999-11-01 19:11:46 sandervl Exp $ */
+/* $Id: windowclass.cpp,v 1.5 1999-11-14 13:07:03 sandervl Exp $ */
 /*
  * Win32 Window Class Code for OS/2
  *
@@ -265,14 +265,17 @@ BOOL WIN32API GetClassInfoExW(HINSTANCE     hInstance,
 int WIN32API GetClassNameA(HWND hwnd, LPSTR lpszClassName, int cchClassName)
 {
  Win32BaseWindow *wnd;
+ int rc;
 
-    dprintf(("USER32: GetClassNameA\n"));
     wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!wnd) {
         dprintf(("GetClassNameA wnd == NULL"));
         return(0);
     }
-    return (wnd->getClass())->getClassName(lpszClassName, cchClassName);
+    *lpszClassName = 0;
+    rc = (wnd->getClass())->getClassName(lpszClassName, cchClassName);
+    dprintf(("USER32: GetClassNameA %x %s (%d)", hwnd, lpszClassName, rc));
+    return rc;
 }
 //******************************************************************************
 //******************************************************************************
