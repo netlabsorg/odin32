@@ -1,4 +1,4 @@
-/* $Id: crtdllrsrc.orc,v 1.1 2000-03-06 23:38:31 bird Exp $ */
+/* $Id: crtdllrsrc.orc,v 1.2 2003-01-10 13:14:56 sandervl Exp $ */
 
 #include "winuser.h"
 #include "odinrsrc.h"
