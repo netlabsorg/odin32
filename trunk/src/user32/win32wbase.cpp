@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.156 2000-02-06 22:00:24 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.157 2000-02-07 14:30:18 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -530,7 +530,7 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
                                  dwOSWinStyle,(char *)windowNameA,
                                  (owner) ? owner->getOS2WindowHandle() : OSLIB_HWND_DESKTOP,
                                  (hwndLinkAfter == HWND_BOTTOM) ? TRUE : FALSE,
-                                 &OS2HwndFrame, 0, fTaskList, 0, windowClass->getStyle() & CS_SAVEBITS);
+                                 &OS2HwndFrame, 0, fTaskList, 0, windowClass->getStyle());
   if(OS2Hwnd == 0) {
         dprintf(("Window creation failed!!"));
         SetLastError(ERROR_OUTOFMEMORY); //TODO: Better error
@@ -1337,6 +1337,7 @@ ULONG Win32BaseWindow::MsgNCPaint()
         (rect.bottom >= client.top) && (rect.bottom < client.bottom))
       return 0;
 
+    dprintf(("MsgNCPaint (%d,%d)(%d,%d)", rect.left, rect.top, rect.right, rect.bottom));
     hrgn = CreateRectRgnIndirect(&rect);
     if (!hrgn) return 0;
     rc = SendInternalMessageA(WM_NCPAINT,hrgn,0);
