@@ -1,4 +1,4 @@
-/* $Id: hmopen32.cpp,v 1.15 1999-12-09 19:08:28 sandervl Exp $ */
+/* $Id: hmopen32.cpp,v 1.16 2000-02-12 10:43:50 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -709,8 +709,10 @@ DWORD HMDeviceOpen32Class::OpenFile (LPCSTR        lpFileName,
     lpFileName+=4;
 
   // filling OFSTRUCT
+  memset(pOFStruct, 0, sizeof(OFSTRUCT));
   pOFStruct->cBytes = sizeof(OFSTRUCT);
   pOFStruct->nErrCode = 0;
+  strncpy((char *)pOFStruct->szPathName, lpFileName, OFS_MAXPATHNAME - 1);
 
   hFile = O32_OpenFile(lpFileName,
                        pOFStruct,
