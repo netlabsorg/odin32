@@ -1,4 +1,4 @@
-/* $Id: odininst.cpp,v 1.8 2001-07-28 18:48:10 sandervl Exp $ */
+/* $Id: odininst.cpp,v 1.9 2001-08-11 09:34:11 sandervl Exp $ */
 /*
  * Odin WarpIn installation app
  *
@@ -171,6 +171,110 @@ BOOL InitSystemAndRegistry()
 
     RegCloseKey(hkey);
     //todo: productid, registered org/owner, sourcepath,
+
+//#
+//# Entries for OLE32 (COM/OLE base)
+//#
+//
+//# OLE32's built-in marshaler, handles standard interfaces such as IClassFactory.
+//# (PSFactoryBuffer = Proxy/Stub factory)
+//[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\CLSID\{00000320-0000-0000-C000-000000000046}]
+//@="PSFactoryBuffer"
+//
+//[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\CLSID\{00000320-0000-0000-C000-000000000046}\InProcServer32]
+//@="ole32.dll"
+//"ThreadingModel"="Both"
+   #define PSFACTORYBUFFER "PSFactoryBuffer"
+   if(RegCreateKey(HKEY_LOCAL_MACHINE,"SOFTWARE\\Classes\\CLSID\\{00000320-0000-0000-C000-000000000046}",&hkey)!=ERROR_SUCCESS) {
+    goto initreg_error;
+   }
+   RegSetValueEx(hkey, "", 0, REG_SZ, (LPBYTE)PSFACTORYBUFFER, sizeof(PSFACTORYBUFFER));
+   RegCloseKey(hkey);
+   if(RegCreateKey(HKEY_LOCAL_MACHINE,"SOFTWARE\\Classes\\CLSID\\{00000320-0000-0000-C000-000000000046}\\InProcServer32",&hkey)!=ERROR_SUCCESS) {
+    goto initreg_error;
+   }
+   RegSetValueEx(hkey, "", 0, REG_SZ, (LPBYTE)CLASS_OLE32DLL, sizeof(CLASS_OLE32DLL));
+   RegSetValueEx(hkey, COM_THREADMODEL, 0, REG_SZ, (LPBYTE)THREAD_BOTH, sizeof(THREAD_BOTH));
+   RegCloseKey(hkey);
+
+//# IUnknown, the superclass for everything COM/OLE.
+//[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Interface\{00000000-0000-0000-C000-000000000046}]
+//@="IUnknown"
+//
+//[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Interface\{00000000-0000-0000-C000-000000000046}\BaseInterface]
+//@=""
+//
+//[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Interface\{00000000-0000-0000-C000-000000000046}\NumMethods]
+//@="3"
+   #define IUNKNOWN "IUnknown"
+   if(RegCreateKey(HKEY_LOCAL_MACHINE,"SOFTWARE\\Classes\\CLSID\\{00000000-0000-0000-C000-000000000046}",&hkey)!=ERROR_SUCCESS) {
+    goto initreg_error;
+   }
+   RegSetValueEx(hkey, "", 0, REG_SZ, (LPBYTE)IUNKNOWN, sizeof(IUNKNOWN));
+   RegCloseKey(hkey);
+   if(RegCreateKey(HKEY_LOCAL_MACHINE,"SOFTWARE\\Classes\\CLSID\\{00000000-0000-0000-C000-000000000046}\\BaseInterface",&hkey)!=ERROR_SUCCESS) {
+    goto initreg_error;
+   }
+   RegSetValueEx(hkey, "", 0, REG_SZ, (LPBYTE)"", 1);
+   RegCloseKey(hkey);
+   if(RegCreateKey(HKEY_LOCAL_MACHINE,"SOFTWARE\\Classes\\CLSID\\{00000000-0000-0000-C000-000000000046}\\NumMethods",&hkey)!=ERROR_SUCCESS) {
+    goto initreg_error;
+   }
+   RegSetValueEx(hkey, "", 0, REG_SZ, (LPBYTE)"3", 2);
+   RegCloseKey(hkey);
+
+//# IClassFactory, standard interface for creating instances of classes.
+//[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Interface\{00000001-0000-0000-C000-000000000046}]
+//@="IClassFactory"
+//
+//[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Interface\{00000001-0000-0000-C000-000000000046}\NumMethods]
+//@="5"
+//
+//[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Interface\{00000001-0000-0000-C000-000000000046}\ProxyStubClsid32]
+//@="{00000320-0000-0000-C000-000000000046}"
+   #define ICLASSFACTORY "IClassFactory"
+   if(RegCreateKey(HKEY_LOCAL_MACHINE,"SOFTWARE\\Classes\\CLSID\\{00000001-0000-0000-C000-000000000046}",&hkey)!=ERROR_SUCCESS) {
+    goto initreg_error;
+   }
+   RegSetValueEx(hkey, "", 0, REG_SZ, (LPBYTE)ICLASSFACTORY, sizeof(ICLASSFACTORY));
+   RegCloseKey(hkey);
+   if(RegCreateKey(HKEY_LOCAL_MACHINE,"SOFTWARE\\Classes\\CLSID\\{00000001-0000-0000-C000-000000000046}\\NumMethods",&hkey)!=ERROR_SUCCESS) {
+    goto initreg_error;
+   }
+   RegSetValueEx(hkey, "", 0, REG_SZ, (LPBYTE)"5", 2);
+   RegCloseKey(hkey);
+   #define PSFACTORY_GUID "{00000320-0000-0000-C000-000000000046}"
+   if(RegCreateKey(HKEY_LOCAL_MACHINE,"SOFTWARE\\Classes\\CLSID\\{00000001-0000-0000-C000-000000000046}\\ProxyStubClsid32",&hkey)!=ERROR_SUCCESS) {
+    goto initreg_error;
+   }
+   RegSetValueEx(hkey, "", 0, REG_SZ, (LPBYTE)PSFACTORY_GUID, sizeof(PSFACTORY_GUID));
+   RegCloseKey(hkey);
+
+//#
+//# Entries for OLEAUT32 (OLE Automation)
+//#
+//
+//# The Universal Marshaler, also known as the Type Library Marshaler.
+//# (PSOAInterface = Proxy/Stub OLE Automation interface)
+//[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\CLSID\{00020424-0000-0000-C000-000000000046}]
+//@="PSOAInterface"
+//
+//[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\CLSID\{00020424-0000-0000-C000-000000000046}\InProcServer32]
+//@="oleaut32.dll"
+//"ThreadingModel"="Both"
+   #define PSOAINTERFACE "PSOAInterface"
+   if(RegCreateKey(HKEY_LOCAL_MACHINE,"SOFTWARE\\Classes\\CLSID\\{00020424-0000-0000-C000-000000000046}",&hkey)!=ERROR_SUCCESS) {
+    goto initreg_error;
+   }
+   RegSetValueEx(hkey, "", 0, REG_SZ, (LPBYTE)PSOAINTERFACE, sizeof(PSOAINTERFACE));
+   RegCloseKey(hkey);
+   if(RegCreateKey(HKEY_LOCAL_MACHINE,"SOFTWARE\\Classes\\CLSID\\{00020424-0000-0000-C000-000000000046}\\InProcServer32",&hkey)!=ERROR_SUCCESS) {
+    goto initreg_error;
+   }
+   RegSetValueEx(hkey, "", 0, REG_SZ, (LPBYTE)CLASS_OLEAUT32DLL, sizeof(CLASS_OLEAUT32DLL));
+   RegSetValueEx(hkey, COM_THREADMODEL, 0, REG_SZ, (LPBYTE)THREAD_BOTH, sizeof(THREAD_BOTH));
+   RegCloseKey(hkey);
+
 
    //Shell32 & IE related keys
    //[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\CLSID\{00021400-0000-0000-C000-000000000046}]
