@@ -1,4 +1,4 @@
-; $Id: exceptutil.asm,v 1.20 2002-11-28 19:49:02 sandervl Exp $
+; $Id: exceptutil.asm,v 1.21 2002-11-29 09:30:55 sandervl Exp $
 
 ;/*
 ; * Project Odin Software License can be found in LICENSE.TXT
@@ -173,7 +173,6 @@ _CallEntryPoint proc near
         push	ebp
         mov	ebp, esp
 
-IFDEF DEBUG
 ;We're asking for problems if our stack start near a 64kb boundary
 ;Some OS/2 thunking procedures can choke on misaligned stack addresses
         mov     eax, esp
@@ -184,7 +183,6 @@ IFDEF DEBUG
         add     eax, 1000h
         sub     esp, eax
 @goodstack:
-ENDIF
 
         mov     eax, esp
         sub     eax, 16
