@@ -1,4 +1,4 @@
-; $Id: USER32.DEF,v 1.59 2001-06-18 09:00:50 sandervl Exp $
+; $Id: USER32.DEF,v 1.60 2001-07-03 13:23:31 sandervl Exp $
 
 LIBRARY USER32 INITINSTANCE TERMINSTANCE
 DESCRIPTION 'Odin32 System Dll - User32'
@@ -21,6 +21,7 @@ IMPORTS
     _GpiQueryYInversion         = PMGPI.726
     _WinQueryPointerClipRect    = PMMERGE.5433
     _WinSetPointerClipRect      = PMMERGE.5434
+    WinTranslateChar2           = PMMERGE.5473
     DspInitSystemDriverName     = PMGPI.656
 
 ;;;; Present in WGSS50
@@ -665,7 +666,7 @@ EXPORTS
     _OS2ToWin32Handle@4                                          @2012 NONAME
 
     _MOUSE_Enable@4                                              @2007 NONAME
-    _KeyTranslatePMToWin@4                                       @2008 NONAME
+;;    _KeyTranslatePMToWin@4                                       @2008 NONAME
     _KeyTranslatePMToWinBuf@12                                   @2009 NONAME
 
     _wvsnprintfA@16                                              @2010 NONAME
