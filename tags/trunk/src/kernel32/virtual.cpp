@@ -1,4 +1,4 @@
-/* $Id: virtual.cpp,v 1.54 2003-03-06 10:44:34 sandervl Exp $ */
+/* $Id: virtual.cpp,v 1.55 2003-04-02 11:03:32 sandervl Exp $ */
 
 /*
  * Win32 virtual memory functions
@@ -46,7 +46,7 @@ ODINDEBUGCHANNEL(KERNEL32-VIRTUAL)
  *  NULL: Failure
  */
 HANDLE WINAPI CreateFileMappingA(
-                HFILE hFile,   /* [in] Handle of file to map */
+                HANDLE hFile,   /* [in] Handle of file to map */
                 SECURITY_ATTRIBUTES *sa, /* [in] Optional security attributes*/
                 DWORD protect,   /* [in] Protection for mapping object */
                 DWORD size_high, /* [in] High-order 32 bits of object size */
@@ -66,7 +66,7 @@ HANDLE WINAPI CreateFileMappingA(
  *             CreateFileMapping32W   (KERNEL32.47)
  * See CreateFileMapping32A
  */
-HANDLE WINAPI CreateFileMappingW( HFILE hFile, LPSECURITY_ATTRIBUTES attr,
+HANDLE WINAPI CreateFileMappingW( HANDLE hFile, LPSECURITY_ATTRIBUTES attr,
                                       DWORD protect, DWORD size_high,
                                       DWORD size_low, LPCWSTR name )
 {
