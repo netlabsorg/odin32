@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.1043 2000-07-22 12:51:33 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.1044 2000-07-22 12:53:42 sandervl Exp $ */
 
  2000-07-22: Sander van Leeuwen <sandervl@xs4all.nl>
     - DOC\ReportingBugs.txt
@@ -7,6 +7,8 @@
                 Added ReportingBugs.txt to WarpIN script
     - USER32:   Fixed BeginPaint; set clip region to update region; not update
                 rectangle -> fixes invisible buttons in winzip install
+    - KERNEL32: Include message in log entry if FS != 0x150b (doesn't always
+                means FS is trashed though)
    
  2000-07-21: Sander van Leeuwen <sandervl@xs4all.nl>
     - SHLWAPI:  SHGetSpecialFolderPathA: StartMenu changed in 'Start Menu'
