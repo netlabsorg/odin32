@@ -53,15 +53,15 @@ BOOL WINAPI LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
    switch (fdwReason)
    {
    case DLL_PROCESS_ATTACH:
-	return TRUE;
+        return TRUE;
 
    case DLL_THREAD_ATTACH:
    case DLL_THREAD_DETACH:
-	return TRUE;
+        return TRUE;
 
    case DLL_PROCESS_DETACH:
-	ctordtorTerm();
-	return TRUE;
+        ctordtorTerm();
+        return TRUE;
    }
    return FALSE;
 }
@@ -90,14 +90,14 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
       {
          ctordtorInit();
 
-   	 DosQueryModuleName(hModule, CCHMAXPATH, ddrawPath);
+         DosQueryModuleName(hModule, CCHMAXPATH, ddrawPath);
          char *endofpath = strrchr(ddrawPath, '\\');
          if(endofpath) *(endofpath+1) = 0;
 
          CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
 
-	 if(RegisterLxDll(hModule, LibMain, (PVOID)&_Resource_PEResTab) == FALSE) 
-		return 0UL;
+         if(RegisterLxDll(hModule, LibMain, (PVOID)&_Resource_PEResTab) == FALSE)
+                return 0UL;
 
          rc = DosExitList(EXITLIST_NONCOREDLL|EXLST_ADD, cleanup);
          if(rc) return 0UL;
@@ -107,7 +107,7 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
       }
       case 1 :
          // TODO: We must restore display, only when display was changed.
-	 UnregisterLxDll(hModule);
+         UnregisterLxDll(hModule);
          break;
       default  :
          return 0UL;
@@ -125,7 +125,7 @@ static void APIENTRY cleanup(ULONG ulReason)
 {
    dprintf(("ddraw exit\n"));
    RestorePM();
-   _ctordtorTerm();
+   ctordtorTerm();
    dprintf(("ddraw exit done\n"));
 
    DosExitList(EXLST_EXIT, cleanup);

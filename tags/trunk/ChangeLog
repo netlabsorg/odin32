@@ -1,4 +1,8 @@
-/* $Id: ChangeLog,v 1.1297 2001-03-07 23:09:43 bird Exp $ */
+/* $Id: ChangeLog,v 1.1298 2001-03-09 22:48:45 mike Exp $ */
+
+ 2000-03-09: Michal Necasek <michalnec@volny.cz>
+    - DDRAW:    o Watcomized (not complete) and cleaned up a bit.
+                  Also synced DDRAW\NEW with the main directory.
 
  2001-03-07: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - Win32k:   o Fixed trap in k32QuerySystemMemInfo when
@@ -7,8 +11,6 @@
  2000-03-06: Michal Necasek <michalnec@volny.cz>
     - include   o More changes and fixes for Watcom
 
- 2000-03-06: Michal Necasek <michalnec@volny.cz>
-    - DSOUND:   o Cleaned up for building with Watcom
 
  2001-03-02: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - Win32k:   o Fixed some 16-bit compiler problems.

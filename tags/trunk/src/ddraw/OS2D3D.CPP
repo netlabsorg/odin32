@@ -1,4 +1,4 @@
-/* $Id: OS2D3D.CPP,v 1.10 2000-08-31 17:57:09 sandervl Exp $ */
+/* $Id: OS2D3D.CPP,v 1.11 2001-03-09 22:48:46 mike Exp $ */
 
 /*
  * DX clipper class routines
@@ -22,7 +22,6 @@
 #define FAR
 #include <misc.h>
 #include <winerror.h>
-#include <builtin.h>
 #undef THIS
 #define THIS VOID*
 
@@ -33,7 +32,7 @@ HRESULT __stdcall D3DQueryInterface(THIS This, REFIID riid, LPVOID FAR * ppvObj)
   dprintf(("DDRAW: D3DQueryInterface\n"));
   *ppvObj = NULL;
 
-  if(IID_IDirect3D != (GUID &)&riid)
+  if (!IsEqualGUID(riid, IID_IDirect3D))
     return E_NOINTERFACE;
 
   *ppvObj = This;
