@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.233 2001-02-09 18:30:25 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.234 2001-02-10 10:31:31 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -551,7 +551,6 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndOS2)
             windowNameW[wndNameLength] = 0;
         }
     }
-
 
 //SvL: This completely messes up MS Word 97 (no button bar, no menu)
 #if 0
@@ -1888,6 +1887,7 @@ LRESULT Win32BaseWindow::SendMessageW(ULONG Msg, WPARAM wParam, LPARAM lParam)
 LRESULT Win32BaseWindow::SendInternalMessageA(ULONG Msg, WPARAM wParam, LPARAM lParam)
 {
  LRESULT rc;
+ HWND    hwnd = getWindowHandle();
  BOOL    fInternalMsgBackup = fInternalMsg;
 
   //if the destination window was created by this process & thread, call window proc directly
@@ -1939,6 +1939,13 @@ LRESULT Win32BaseWindow::SendInternalMessageA(ULONG Msg, WPARAM wParam, LPARAM l
                 rc = CallWindowProcA(win32wndproc, getWindowHandle(), Msg, wParam, lParam);
                 break;
   }
+  if(!::IsWindow(hwnd)) {
+        //window might have been destroyed by now. (this pointer invalid)
+        //we must return immediately
+        //(MS Visual C++ install heap corruption)
+        //TODO: could happen in several places here!!!!
+        return rc;
+  }
   fInternalMsg = fInternalMsgBackup;
   return rc;
 }
@@ -1948,6 +1955,7 @@ LRESULT Win32BaseWindow::SendInternalMessageA(ULONG Msg, WPARAM wParam, LPARAM l
 LRESULT Win32BaseWindow::SendInternalMessageW(ULONG Msg, WPARAM wParam, LPARAM lParam)
 {
  LRESULT rc;
+ HWND    hwnd = getWindowHandle();
  BOOL    fInternalMsgBackup = fInternalMsg;
 
   //if the destination window was created by this process & thread, call window proc directly
@@ -1986,6 +1994,13 @@ LRESULT Win32BaseWindow::SendInternalMessageW(ULONG Msg, WPARAM wParam, LPARAM l
         default:
                 rc = CallWindowProcW(win32wndproc, getWindowHandle(), Msg, wParam, lParam);
                 break;
+  }
+  if(!::IsWindow(hwnd)) {
+        //window might have been destroyed by now. (this pointer invalid)
+        //we must return immediately
+        //(MS Visual C++ install heap corruption)
+        //TODO: could happen in several places here!!!!
+        return rc;
   }
   fInternalMsg = fInternalMsgBackup;
   return rc;

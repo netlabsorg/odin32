@@ -1,4 +1,4 @@
-/* $Id: win32class.cpp,v 1.20 2001-02-02 19:04:02 sandervl Exp $ */
+/* $Id: win32class.cpp,v 1.21 2001-02-10 10:31:31 sandervl Exp $ */
 /*
  * Win32 Window Class Managment Code for OS/2
  *
@@ -362,6 +362,7 @@ void Win32WndClass::setMenuName(LPSTR newMenuName)
                 strcpy((char *)menuNameA, newMenuName);
                 AsciiToUnicode(menuNameA, menuNameW);
         }
+
   }
   else {//id
         menuNameA = (PCHAR)newMenuName;
@@ -481,7 +482,7 @@ ULONG Win32WndClass::setClassLongA(int index, LONG lNewVal, BOOL fUnicode)
                         userClassLong[index] = lNewVal;
                         break;
                 }
-                SetLastError(ERROR_INVALID_PARAMETER);
+                SetLastError(ERROR_INVALID_INDEX);  //verified in NT4, SP6
   		if(classNameA) {
         	      dprintf2(("WARNING: Win32WndClass::setClassLongA %s: %d %x -> wrong INDEX", classNameA, index, lNewVal));
   		}
