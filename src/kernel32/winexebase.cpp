@@ -1,4 +1,4 @@
-/* $Id: winexebase.cpp,v 1.2 1999-11-09 19:22:32 sandervl Exp $ */
+/* $Id: winexebase.cpp,v 1.3 1999-11-24 19:31:23 sandervl Exp $ */
 
 /*
  * Win32 exe base class
@@ -81,7 +81,7 @@ ULONG Win32ExeBase::start()
   tlsAlloc();
   tlsAttachThread();	//setup TLS (main thread)
 
-  rc = ((WIN32EXEENTRY)entryPoint)();
+  rc = ((WIN32EXEENTRY)entryPoint)(NULL);
   RestoreOS2TIB();
 
   OS2UnsetExceptionHandler((void *)&exceptFrame);

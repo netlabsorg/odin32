@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.60 1999-11-23 19:31:35 sandervl Exp $
+# $Id: makefile,v 1.61 1999-11-24 19:31:23 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -106,7 +106,7 @@ profile.obj: profile.cpp \
 
 directory.obj: directory.cpp \
     $(PDWIN32_INCLUDE)\unicode.h \
-    initterm.h directory.h oslibdos.h
+    initterm.h directory.h oslibdos.h profile.h
 
 disk.obj: disk.cpp \
     $(PDWIN32_INCLUDE)\unicode.h

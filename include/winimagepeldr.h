@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.h,v 1.5 1999-11-22 20:36:53 sandervl Exp $ */
+/* $Id: winimagepeldr.h,v 1.6 1999-11-24 19:33:34 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -73,7 +73,7 @@ class Win32MemMap;
 class Win32PeLdrImage : public virtual Win32ImageBase
 {
 public:
-         Win32PeLdrImage(char *szFileName, int loadtype = REAL_LOAD);
+         Win32PeLdrImage(char *szFileName, BOOL isExe, int loadtype = REAL_LOAD);
 virtual ~Win32PeLdrImage();
 
         //reservedMem is address of memory reserved in peldr.dll (allocated before

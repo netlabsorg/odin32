@@ -1,4 +1,4 @@
-/* $Id: winexebase.h,v 1.1 1999-09-15 23:29:37 sandervl Exp $ */
+/* $Id: winexebase.h,v 1.2 1999-11-24 19:33:34 sandervl Exp $ */
 
 /*
  * Win32 PE Exe base class
@@ -14,7 +14,7 @@
 
 #include <winimagebase.h>
 
-typedef ULONG (* WIN32API WIN32EXEENTRY)();
+typedef ULONG (* WIN32API WIN32EXEENTRY)(LPVOID);
 
 //Base executable class
 class Win32ExeBase : public virtual Win32ImageBase
