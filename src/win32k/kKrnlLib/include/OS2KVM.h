@@ -1,4 +1,4 @@
-/* $Id: OS2KVM.h,v 1.2 2001-09-26 03:52:37 bird Exp $
+/* $Id: OS2KVM.h,v 1.3 2001-09-27 03:04:12 bird Exp $
  *
  * OS/2 kernel VM functions.
  *
@@ -221,6 +221,24 @@ typedef struct vmah_s
 /*******************************************************************************
 *   Global Variables                                                           *
 *******************************************************************************/
+/*
+ * Mapping from _stdcall variable names nonmangled names.
+ */
+#ifndef KKRNLLIB
+    #if defined(__IBMC__) || defined(__IBMCPP__)
+        #pragma map(VirtualAddressLimit, "_VirtualAddressLimit")
+        #pragma map(ahvmSys, "_ahvmSys")
+        #pragma map(ahvmShr, "_ahvmShr")
+        #pragma map(ahvmhShr, "_ahvmhShr")
+    #else
+        #pragma VirtualAddressLimit     _VirtualAddressLimit
+        #pragma ahvmSys                 _ahvmSys
+        #pragma ahvmShr                 _ahvmShr
+        #pragma ahvmhShr                _ahvmhShr
+    #endif
+#endif
+
+
 /**
  * Virtual Address Limit - this pointer might be NULL!
  */
