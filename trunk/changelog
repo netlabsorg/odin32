@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2322 2002-09-26 16:02:33 sandervl Exp $ */
+/* $Id: changelog,v 1.2323 2002-09-27 13:42:15 sandervl Exp $ */
+
+ 2002-09-27: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o GetFileSize must fail for drives
 
  2002-09-26: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o OS/2 Physical partition names have base 1 (0 for win32)
