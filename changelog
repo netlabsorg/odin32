@@ -1,8 +1,9 @@
- /* $Id: changelog,v 1.903 2000-04-19 20:24:16 bird Exp $ */
+ /* $Id: changelog,v 1.904 2000-04-19 22:19:36 bird Exp $ */
 
  2000-04-19: knut st. osmundsen <knut.stange.osmundsen@pmsc.no>
         - KERNEL32: Added fix for bug in FP13 DosQuerySysInfo.
                 Win32k/Pe2Lx loaded files didn't work.
+                Corrected TLS handling for Borland.
 
  2000-04-19: Sander van Leeuwen <sandervl@xs4all.nl>
 	- TOOLS\WRC: Resync with latest Wine wrc + added code to produce
