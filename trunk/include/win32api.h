@@ -149,5 +149,6 @@ HWND    WIN32API WindowFromPoint(POINT);
 INT     WIN32API MapWindowPoints(HWND,HWND,LPPOINT,UINT);
 HWND    WIN32API GetCapture(void);
 HWND    WIN32API SetCapture(HWND);
+BOOL    WIN32API IsWindowEnabled(HWND);
 
 #endif

@@ -1,4 +1,12 @@
-/* $Id: changelog,v 1.1378 2001-04-24 20:36:56 sandervl Exp $ */
+/* $Id: changelog,v 1.1379 2001-04-25 20:52:18 sandervl Exp $ */
+
+ 2001-04-25: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o Check visibility of parents in IsWindowVisible
+                o Call ShowWindow(SW_MINIMIZE) in CloseWindow (for non-child windows)
+                  Don't use PM directly to minimize it.
+
+ 2001-04-25: Shingo Tsuda <sofiya@din.or.jp>
+    - GDI32:    o DBCS fix for looking up font name in font rename profile section
 
  2001-04-24: Sander van Leeuwen <sandervl@xs4all.nl>
     - COMDLG32, DPLAYX, OLE32, OLEAUT32:
@@ -116,7 +124,7 @@
                 o Added option to Configure.cmd, -w, which omittes building
                   of Win32k.sys.
 
- 2001-04-12: Sofiya (sofiya@din.or.jp)
+ 2001-04-12: Shingo Tsuda <sofiya@din.or.jp>
     - USER32:   o Fixes for DBCS strings
 
  2001-04-10: Sander van Leeuwen <sandervl@xs4all.nl>
@@ -126,7 +134,7 @@
  2001-04-06: Sander van Leeuwen <sandervl@xs4all.nl>
     - WINMM:    o Clean up DirectAudio thread properly.
 
- 2001-04-05: Sofiya (sofiya@din.or.jp)
+ 2001-04-05: Shingo Tsuda <sofiya@din.or.jp>
     - KERNEL32: o WideCharToMultiByte/MultiByteToWideChar changes
                   - srclen <= -1 -> calculate length (docs say only for -1)
                   - source and destination pointer can't be the same (as docs also claim)
