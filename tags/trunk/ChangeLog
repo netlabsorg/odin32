@@ -1,4 +1,8 @@
-/* $Id: ChangeLog,v 1.1664 2001-08-28 18:58:27 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1665 2001-08-29 10:39:28 phaller Exp $ */
+
+ 2001-08-29: Patrick Haller <patrick.haller@innotek.de>
+    - USER32:   o BUTTON.CPP: don't draw invisible buttons
+                  (fixes MS ACMSETUP w/ OWNERDRAW pushbuttons)
 
  2001-08-28: Sander van Leeuwen <sandervl@xs4all.nl>
     - GDI32:    o CreateDIBitmap: reverse bitmap for negative height
