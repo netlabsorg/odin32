@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.45 1999-10-15 13:52:54 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.46 1999-10-16 10:28:31 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -257,6 +257,19 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
         SetLastError(ERROR_INVALID_PARAMETER);
         return 0;
   }
+#ifdef DEBUG
+  if(HIWORD(cs->lpszClass))
+  {
+        char *astring;
+
+        if(isUnicode) astring = UnicodeToAsciiString((LPWSTR)cs->lpszClass);
+        else          astring = (char *)cs->lpszClass;
+
+        dprintf(("Window class %s", astring));
+        if(isUnicode) FreeAsciiString(astring);
+  }
+  else  dprintf(("Window class %x", cs->lpszClass));
+#endif
 
   /* Fix the lpszClass field: from existing programs, it seems ok to call a CreateWindowXXX
    * with an atom as the class name, put some programs expect to have a *REAL* string in
@@ -518,6 +531,8 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndFrame, HWND hwndClient)
 //  if(!isFrameWindow())
 //        OS2HwndFrame = hwndClient;
 
+  fNoSizeMsg = TRUE;
+
   if(OSLibWinSetWindowULong(OS2Hwnd, OFFSET_WIN32WNDPTR, (ULONG)this) == FALSE) {
         dprintf(("WM_CREATE: WinSetWindowULong %X failed!!", OS2Hwnd));
         SetLastError(ERROR_OUTOFMEMORY); //TODO: Better error
@@ -572,6 +587,10 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndFrame, HWND hwndClient)
   fakeWinBase.pWindowClass = windowClass;
 //  SetFakeOpen32();
 
+  //Set icon from class
+  if(windowClass->getIcon())
+        SetIcon(windowClass->getIcon());
+
   /* Set the window menu */
   if ((dwStyle & (WS_CAPTION | WS_CHILD)) == WS_CAPTION )
   {
@@ -589,10 +608,6 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndFrame, HWND hwndClient)
         setWindowId((DWORD)cs->hMenu);
   }
 
-  //Set icon from class
-  if(windowClass->getIcon())
-        SetIcon(windowClass->getIcon());
-
   //Subclass frame
 //  if(isFrameWindow() && (HAS_3DFRAME(dwExStyle) ||
 //     (!HAS_DLGFRAME(dwStyle, dwExStyle) && (dwStyle & (WS_DLGFRAME|WS_BORDER|WS_THICKFRAME)) == WS_BORDER)))
@@ -607,7 +622,6 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndFrame, HWND hwndClient)
    */
   maxPos.x = rectWindow.left; maxPos.y = rectWindow.top;
 
-  fNoSizeMsg = TRUE;
   if(getParent()) {
         SetWindowPos(getParent()->getWindowHandle(), rectClient.left, rectClient.top,
                      rectClient.right-rectClient.left,

@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.30 1999-10-15 13:52:54 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.31 1999-10-16 10:28:31 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -256,6 +256,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         dprintf(("OS2: WM_ADJUSTWINDOWPOS %x %x (%d,%d) (%d,%d)", hwnd, pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
 
         if ((pswp->fl & (SWP_SIZE | SWP_MOVE | SWP_ZORDER)) == 0) break;
+	if (!win32wnd->CanReceiveSizeMsgs())	break;
 
         WinQueryWindowPos(hwnd, &swpOld);
 
@@ -295,6 +296,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         dprintf(("OS2: WM_WINDOWPOSCHANGED %x %x (%d,%d) (%d,%d)", hwnd, pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
 
         if ((pswp->fl & (SWP_SIZE | SWP_MOVE | SWP_ZORDER)) == 0) break;
+	if (!win32wnd->CanReceiveSizeMsgs())	break;
 
         if(pswp->fl & (SWP_MOVE | SWP_SIZE)) {
             if (win32wnd->isChild()) {
@@ -393,16 +395,6 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 
     goto RunDefWndProc;
 //        break;
-    }
-
-    case WM_ERASEBACKGROUND:
-    {
-	dprintf(("OS2: WM_ERASEBACKGROUND %x", win32wnd->getWindowHandle()));
-        if (!win32wnd->isSupressErase()) {
-            BOOL erased = sendEraseBkgnd (win32wnd);
-            win32wnd->setEraseBkgnd (!erased, !erased);
-        }
-        break;
     }
 
     case WM_MOVE:
@@ -850,9 +842,20 @@ VirtualKeyFound:
         goto RunDefWndProc;
     }
 
+    case WM_ERASEBACKGROUND:
+    {
+	dprintf(("OS2: WM_ERASEBACKGROUND %x", win32wnd->getWindowHandle()));
+        if (!win32wnd->isSupressErase()) {
+            BOOL erased = sendEraseBkgnd (win32wnd);
+            win32wnd->setEraseBkgnd (!erased, !erased);
+        }
+        break;
+    }
+
     case WM_PAINT:
         dprintf(("OS2: WM_PAINT %x", hwnd));
 
+#if 0
         if (WinQueryUpdateRect (hwnd, NULL)) {
             if (!win32wnd->isSupressErase()) {
                 BOOL erased = sendEraseBkgnd (win32wnd);
@@ -860,7 +863,7 @@ VirtualKeyFound:
             }
         }
         win32wnd->setSupressErase (FALSE);
-
+#endif
         if(win32wnd->MsgPaint(0, 0)) {
                 goto RunDefWndProc;
         }

@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.23 1999-10-15 13:52:55 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.24 1999-10-16 10:28:31 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -162,6 +162,7 @@ Win32BaseWindow *GetTopParent();
          BOOL   IsWindow()                    { return TRUE; };
          BOOL   IsDialog()                    { return fIsDialog; };
 
+	 BOOL   CanReceiveSizeMsgs()          { return !fNoSizeMsg; };
 	 BOOL   IsWindowDestroyed()           { return fIsDestroyed; };
          BOOL   IsWindowEnabled();
          BOOL   IsWindowVisible();

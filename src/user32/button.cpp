@@ -1,4 +1,4 @@
-/* $Id: button.cpp,v 1.9 1999-10-12 18:14:53 sandervl Exp $ */
+/* $Id: button.cpp,v 1.10 1999-10-16 10:28:30 sandervl Exp $ */
 /* File: button.cpp -- Button type widgets
  *
  * Copyright (C) 1993 Johannes Ruscheinski
@@ -162,7 +162,13 @@ static LRESULT BUTTON_Destroy(HWND hwnd,WPARAM wParam,LPARAM lParam)
 
 static LRESULT BUTTON_EraseBkgnd(HWND hwnd,WPARAM wParam,LPARAM lParam)
 {
-  return 1;
+  //SvL: Erase background for groupboxes as the paint function only draws
+  //     a box
+  DWORD style = GetWindowLongA(hwnd,GWL_STYLE) & 0x0f;
+//  if(style == BS_GROUPBOX) {
+  	return DefWindowProcA(hwnd, WM_ERASEBKGND, wParam, lParam);
+//  }
+//  return 1;
 }
 
 static LRESULT BUTTON_Paint(HWND hwnd,WPARAM wParam,LPARAM lParam)
@@ -1064,7 +1070,8 @@ BOOL BUTTON_Register()
     wndClass.cbClsExtra    = 0;
     wndClass.cbWndExtra    = sizeof(BUTTONINFO);
     wndClass.hCursor       = LoadCursorA(0,IDC_ARROWA);
-    wndClass.hbrBackground = (HBRUSH)0;
+//    wndClass.hbrBackground = (HBRUSH)0;
+    wndClass.hbrBackground = GetSysColorBrush(COLOR_BTNFACE);
     wndClass.lpszClassName = BUTTONCLASSNAME;
 
     return RegisterClassA(&wndClass);
