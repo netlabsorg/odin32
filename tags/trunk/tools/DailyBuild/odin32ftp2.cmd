@@ -1,4 +1,4 @@
-/* $Id: odin32ftp2.cmd,v 1.10 2001-02-23 14:41:51 bird Exp $
+/* $Id: odin32ftp2.cmd,v 1.11 2001-03-24 19:22:02 bird Exp $
  *
  * Uploads the relase and debug builds to the FTP sites.
  *
@@ -14,84 +14,67 @@ rc = FtpLoadFuncs();
 
 parse arg sLoc
 
-do i = 1 to 5 /* (Retries 5 times) */
-    sFile           = 'odin32bin-'|| DATE(S);
-    sDelete         = 'odin32bin-'|| DateSub(DATE('S'), 7);
-    sFileDbg        = sFile   || '-debug.zip';
-    sFileGlideDbg   = sFile   || '-glide-debug.zip';
-    sFileDbgWPI     = sFile   || '-debug.wpi';
-    sDeleteDbg      = sDelete || '-debug.zip';
-    sDeleteGlideDbg = sDelete || '-glide-debug.zip';
-    sDeleteDbgWPI   = sDelete || '-debug.wpi';
-    sFileRel        = sFile   || '-release.zip';
-    sFileGlideRel   = sFile   || '-glide-release.zip';
-    sFileRelWPI     = sFile   || '-release.wpi';
-    sDeleteRel      = sDelete || '-release.zip';
-    sDeleteGlideRel = sDelete || '-glide-release.zip';
-    sDeleteRelWPI   = sDelete || '-release.wpi';
-    sChangeLog      = 'ChangeLog';
+/*
+ * Determin files to upload and files to delete.
+ */
+if (DATE('B')//7 = 4) then              /* Thursdays only! */
+do  /* weekly .wpi build */
+    asUploads.0 = 3;
+    asUploads.1 = 'ChangeLog';
+    asUploads.2 = 'odin32bin-'DATE('S')'-release.wpi';
+    asUploads.3 = 'odin32bin-'DATE('S')'-debug.wpi';
+end
+else
+do  /* daily .zip build */
+    asUploads.0 = 3;
+    asUploads.1 = 'ChangeLog';
+    asUploads.2 = 'odin32bin-'DATE('S')'-release.zip';
+    asUploads.3 = 'odin32bin-'DATE('S')'-debug.zip';
+end
 
+asDelete.0 = 25;
+do i = 1 to 12
+    j = i * 2;
+    asDelete.j = 'odin32bin-'DateSub(Date('S'), 31+i)'-release.zip';
+    j = j + 1;
+    asDelete.j = 'odin32bin-'DateSub(Date('S'), 31+i)'-debug.zip';
+end
+
+
+/*
+ * Execution loop.
+ */
+do i = 1 to 5 /* (Retries 5 times) */
     /*
-     * Cleanup the daily directory at source forge.
+     * Put files to SourceForge.
      */
     rc = cleanSF();
+    do j = 1 to asUploads.0
+        rc = putSF(asUploads.j, 'SF-'||asUploads.j);
+    end
 
     /*
-     * Put file to SourceForge.
-     */
-    rc = putSF(sFileDbg,        'SF-debug');
-    rc = putSF(sFileGlideDbg,   'SF-glide-debug');
-    rc = putSF(sFileDbgWPI,     'SF-debug-wpi');
-    rc = putSF(sFileRel,        'SF-release');
-    rc = putSF(sFileGlideRel,   'SF-glide-release');
-    rc = putSF(sFileRelWPI,     'SF-release-wpi');
-    rc = putSF(sChangeLog,      'SF-ChangeLog');
-
-    /*
-     * Forwards files from source forge to os2.ftp.org
+     * Forwards files from sourceforge(t) to os2.ftp.org
      */
     if (sLoc = '' | sLoc = 'os2') then
     do
-        rc = deletefunction(     '/daily/'sDeleteDbg,      '/daily/'sDeleteRel,       'os2-delete', 'www.os2.org');
-/*      rc = deletefunction('/daily/'sDeleteGlideDbg, '/daily/'sDeleteGlideRel, 'os2-delete-glide', 'www.os2.org'); */
-        rc = deletefunction(  '/daily/'sDeleteDbgWPI,   '/daily/'sDeleteRelWPI,   'os2-delete-wpi', 'www.os2.org');
-        rc = forwardSF(sFileDbg,              'os2-debug', '/daily', 'www.os2.org');
-/*      rc = forwardSF(sFileGlideDbg,   'os2-glide-debug', '/daily', 'www.os2.org'); */
-        rc = forwardSF(sFileRel,            'os2-release', '/daily', 'www.os2.org');
-/*      rc = forwardSF(sFileGlideRel, 'os2-glide-release', '/daily', 'www.os2.org'); */
-        rc = forwardSF(sFileDbgWPI,       'os2-debug-wpi', '/daily', 'www.os2.org');
-        rc = forwardSF(sFileRelWPI,     'os2-release-wpi', '/daily', 'www.os2.org');
-        rc = forwardSF(sChangeLog,        'os2-ChangeLog', '/daily', 'www.os2.org');
-
+        rc = cleanFtp('os2-delete', '/daily', 'www.os2.org');
+        do j = 1 to asUploads.0
+            rc = forwardSF(asUploads.j, 'os2-'||asUploads.j, '/daily', 'www.os2.org');
+        end
     end
 
+    /*
+     * Upload files to netlabs.
+     */
     if (sLoc = '' | sLoc = 'netlabs') then
     do
-        /*                 (                    sDeleteFile1,             sDeleteFile2,             sLockFile,             sSite); */
-        rc = deletefunction(             '/daily/'sDeleteDbg,      '/daily/'sDeleteRel,      'netlabs-delete', 'ftp.netlabs.org');
-/*      rc = deletefunction('/odinftp/daily/'sDeleteGlideDbg, '/daily/'sDeleteGlideRel,'netlabs-delete-glide', 'ftp.netlabs.org'); */
-        rc = deletefunction(          '/daily/'sDeleteDbgWPI,   '/daily/'sDeleteRelWPI,  'netlabs-delete-wpi', 'ftp.netlabs.org');
-        if 1 then
-        do
-        /*              (sFile,      sFileRemote,              sLockFile,             sSite); */
-        rc = putfunction(sFileDbg,      '/daily',        'netlabs-debug', 'ftp.netlabs.org');
-/*      rc = putfunction(sFileGlideDbg, '/daily',  'netlabs-glide-debug', 'ftp.netlabs.org'); */
-        rc = putfunction(sFileRel,      '/daily',      'netlabs-release', 'ftp.netlabs.org');
-/*      rc = putfunction(sFileGlideRel, '/daily','netlabs-glide-release', 'ftp.netlabs.org'); */
-        rc = putfunction(sFileDbgWPI,   '/daily',    'netlabs-debug-wpi', 'ftp.netlabs.org');
-        rc = putfunction(sFileRelWPI,   '/daily',  'netlabs-release-wpi', 'ftp.netlabs.org');
-        rc = putfunction('ChangeLog',   '/daily',    'netlabs-ChangeLog', 'ftp.netlabs.org');
-        end
-        else
-        do
-        /*            (sFile,                  sLockFile,  sRemoteDir,             sSite); */
-        rc = forwardSF(sFileDbg,         'netlabs-debug',    '/daily', 'ftp.netlabs.org');
-/*      rc = forwardSF(sFileGlideDbg,    'netlabs-debug',    '/daily', 'ftp.netlabs.org'); */
-        rc = forwardSF(sFileRel,       'netlabs-release',    '/daily', 'ftp.netlabs.org');
-/*      rc = forwardSF(sFileGlideRel,  'netlabs-release',    '/daily', 'ftp.netlabs.org'); */
-        rc = forwardSF(sFileDbgWPI,      'netlabs-debug',    '/daily', 'ftp.netlabs.org');
-        rc = forwardSF(sFileRelWPI,    'netlabs-release',    '/daily', 'ftp.netlabs.org');
-        rc = forwardSF('ChangeLog',  'netlabs-ChangeLog',    '/daily', 'ftp.netlabs.org');
+        rc = cleanFtp('netlabs-delete', '/daily', 'ftp.netlabs.org');
+        do j = 1 to asUploads.0
+            if (1) then
+                rc = putFtp(asUploads.j, 'netlabs-'||asUploads.j, '/daily', 'ftp.netlabs.org');
+            else
+                rc = forwardSF(asUploads.j, 'netlabs-'||asUploads.j, '/daily', 'ftp.netlabs.org');
         end
     end
 end
@@ -181,8 +164,8 @@ forwardSF: procedure
 /*
  * Puts a file to a ftp site using ncftpput from ncftp v3.0 beta.
  */
-putfunction: procedure
-    parse arg sFile, sRemoteDir, sLockFile, sSite
+putFtp: procedure
+    parse arg sFile, sLockFile, sRemoteDir, sSite
 
     /* check for done-lock */
     if stream(sLockFile,'c','query exists') = '' then
@@ -197,17 +180,6 @@ putfunction: procedure
             return -1;
         end
         parse var sPasswdString sUser':'sPasswd;
-
-        /* debug logging */
-        if 0 then
-        do
-            say sFile
-            say sRemoteDir;
-            say sLockFile
-            say sSite
-            say sUser
-            say sPasswd
-        end
 
         /* do the put */
         say 'ncftpput -u' sUser '-p' sPasswd '-z' sSite sRemoteDir sFile;
@@ -225,9 +197,9 @@ putfunction: procedure
             asErrors.6 = 'Directory change failed - timed out.';
             asErrors.7 = 'Malformed URL.';
             if (rc < asErrors.0) then
-                say 'NCFTPPut failed with rc='rc'-' asErrors.rc;
+                say 'ncftpput failed with rc='rc'-' asErrors.rc;
             else
-                say 'NCFTPPut failed with rc='rc;
+                say 'ncftpput failed with rc='rc;
         end
     end
     else
@@ -237,20 +209,14 @@ putfunction: procedure
 
 
 /*
- * Delete two files on a given ftp site.
+ * Delete the files in asDelete on a given ftp site.
  */
-deletefunction: procedure
-    parse arg sDeleteFile1, sDeleteFile2, sLockFile, sSite
+cleanFtp: procedure expose asDelete.;
+    parse arg sLockFile, sRemoteDir, sSite
 
-    /*
-     * On fridays we don't perform any deletetions.
-     */
-    if (DATE('B')//7 = 5) then
-        return 0;
-
-    if stream(sLockFile,'c','query exists') = '' then
+    if (stream(sLockFile,'c','query exists') = '') then
     do
-        say '--- deleting old files('sDeleteFile1','sDeleteFile2') at 'sSite' ---'
+        say '--- deleting old files at 'sSite' ---'
 
         /* get password */
         sPasswdString = GetPassword(sSite);
@@ -261,51 +227,32 @@ deletefunction: procedure
         end
         parse var sPasswdString sUser':'sPasswd;
 
-        /* debug logging */
-        if 0 then
-        do
-            say sDeleteFile1
-            say sDeleteFile2
-            say sLockFile
-            say sSite
-            say sUser
-            say sPasswd
-        end
-
         /* start ftp'ing */
         rc = FtpSetUser(sSite, sUser, sPasswd);
-        if rc = 1 then
+        if (rc = 1) then
         do
-            rc1 = FtpDelete(sDeleteFile1)
-            if (rc1 <> 0 & FTPERRNO = 'FTPCOMMAND') then /* happens when the file don't exists... too. */
-                rc1 = 0;
-            if (rc1 <> 0) then
-            do
-                rc = rc1;
-                call failure rc, 'FtpDelete failed -' sSite , FTPERRNO;
+            cErrors = 0;
+            do i = 1 to asDelete.0
+                rc = FtpDelete(sRemoteDir||'/'||asDelete.i)
+                if (rc <> 0 & FTPERRNO = 'FTPCOMMAND') then /* happens when the file don't exists... too. */
+                    rc = 0;
+                if (rc <> 0) then
+                do
+                    call failure rc, 'FtpDelete failed - 'sRemoteDir||'/'||asDelete.i' -' sSite , FTPERRNO;
+                    cErrors = cErrors + 1;
+                end
             end
 
-            rc2 = FtpDelete(sDeleteFile2)
-            if (rc2 <> 0 & FTPERRNO = 'FTPCOMMAND') then /* happens when the file don't exists... too. */
-                rc2 = 0;
-            if (rc1 <> 0) then
-            do
-                rc = rc2;
-                call failure rc, 'FtpDelete failed -' sSite , FTPERRNO;
-            end
-            if (rc1 = 0 & rc2 = 0) then
-            do
+            if (cErrors = 0) then
                 'echo ok >' sLockFile;
-                rc = 0;
-            end
             else
-                say 'delete failed with rc1='rc1 'and rc2='rc2;
-            rc1 = FtpLogoff();
+                say 'delete failed with 'cErrors' times.';
+            call FtpLogoff;
         end
         else
         do
             call failure rc, 'Logon failed -' sSite, FTPERRNO;
-            if rc = 0 then rc = -1;
+            if (rc = 0) then rc = -1;
         end
     end
     else
