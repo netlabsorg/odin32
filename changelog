@@ -1,4 +1,15 @@
-/* $Id: changelog,v 1.1697 2001-09-26 15:29:17 phaller Exp $ */
+/* $Id: changelog,v 1.1698 2001-09-27 01:54:06 bird Exp $ */
+
+ 2001-09-11: knut st. osmundsen <kosmunds@csc.com>
+    - Win32k:   o Create development branch 'splittup' which in the
+                  splittup of win32k is being implemented.
+                o BTW. I think I've found the jfs/fat32 + win32k problem.
+                  I left some dirty readonly heap pages behind...
+                  That is corrected in the splittup.
+    - Some Makefiles:
+                o Corrected the file header to state correct dllname.
+                  Ye][ow, which is doing some documentation stuff on the Odin32,
+                  pointed this out this for me.
 
  2001-09-26: Patrick Haller <patrick.haller@innotek.de>
     - ODINWRAP: o fixed FNEPILOGUE position
@@ -20,7 +31,7 @@
  2001-09-23: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o MDI bugfix: set active child to 0 when last one is destroyed
                   (fixes crash when closing mdi window in odinapp)
-    - GDI32:    o DIB Section sync bugfix; GpiQueryBitmapBits fails 
+    - GDI32:    o DIB Section sync bugfix; GpiQueryBitmapBits fails
                   when cbImage is too small (compressed images only)
                   This used to work. Maybe related to new SDD version.
                   (CoolEdit 2000 hits breakpoint in debug build)
