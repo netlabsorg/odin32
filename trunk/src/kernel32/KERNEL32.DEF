@@ -1,4 +1,4 @@
-; $Id: KERNEL32.DEF,v 1.95 2000-12-16 23:24:35 bird Exp $
+; $Id: KERNEL32.DEF,v 1.96 2001-01-02 18:16:40 sandervl Exp $
 
 ;Basis is Windows95 KERNEL32
 LIBRARY KERNEL32 INITINSTANCE TERMINSTANCE
@@ -124,8 +124,8 @@ EXPORTS
 ;  Ordinal0096 = _OS2Ordinal0096@??           @96
 ;  Ordinal0097 = _OS2Ordinal0097@??           @97
 ;  Ordinal0098 = _OS2Ordinal0098@??           @98
-   KERNEL32_99 = _KERNEL32_99@4               @99
-;  Ordinal0100 = _OS2Ordinal0100@??           @100
+   KERNEL32_99 = _KERNEL32_99@4               @99	NONAME
+   KERNEL32_100 = _KERNEL32_100@12            @100     	NONAME
 ;  Ordinal0101 = _OS2Ordinal0101@??           @101
 
 
@@ -965,53 +965,53 @@ EXPORTS
 ; (Must be placed below ordinal 1200!)
 ; ----------------------------------------------------------------------------
 ;registry apis imported by advapi32
-    RegCloseKey                 = _RegCloseKey@4                @1100
-    RegConnectRegistryA         = _RegConnectRegistryA@12       @1101
-    RegConnectRegistryW         = _RegConnectRegistryW@12       @1102
-    RegCreateKeyA               = _RegCreateKeyA@12             @1103
-    RegCreateKeyExA             = _RegCreateKeyExA@36           @1104
-    RegCreateKeyExW             = _RegCreateKeyExW@36           @1105
-    RegCreateKeyW               = _RegCreateKeyW@12             @1106
-    RegDeleteKeyA               = _RegDeleteKeyA@8              @1107
-    RegDeleteKeyW               = _RegDeleteKeyW@8              @1108
-    RegDeleteValueA             = _RegDeleteValueA@8            @1109
-    RegDeleteValueW             = _RegDeleteValueW@8            @1110
-    RegEnumKeyA                 = _RegEnumKeyA@16               @1111
-    RegEnumKeyExA               = _RegEnumKeyExA@32             @1112
-    RegEnumKeyExW               = _RegEnumKeyExW@32             @1113
-    RegEnumKeyW                 = _RegEnumKeyW@16               @1114
-    RegEnumValueA               = _RegEnumValueA@32             @1115
-    RegEnumValueW               = _RegEnumValueW@32             @1116
-    RegFlushKey                 = _RegFlushKey@4                @1117
-    RegGetKeySecurity           = _RegGetKeySecurity@16         @1118
-    RegLoadKeyA                 = _RegLoadKeyA@12               @1119
-    RegLoadKeyW                 = _RegLoadKeyW@12               @1120
-    RegNotifyChangeKeyValue     = _RegNotifyChangeKeyValue@20   @1121
-    RegOpenKeyA                 = _RegOpenKeyA@12               @1122
-    RegOpenKeyExA               = _RegOpenKeyExA@20             @1123
-    RegOpenKeyExW               = _RegOpenKeyExW@20             @1124
-    RegOpenKeyW                 = _RegOpenKeyW@12               @1125
-    RegQueryInfoKeyA            = _RegQueryInfoKeyA@48          @1126
-    RegQueryInfoKeyW            = _RegQueryInfoKeyW@48          @1127
-    RegQueryMultipleValuesA     = _RegQueryMultipleValuesA@20   @1128
-    RegQueryMultipleValuesW     = _RegQueryMultipleValuesW@20   @1129
-    RegQueryValueA              = _RegQueryValueA@16            @1130
-    RegQueryValueExA            = _RegQueryValueExA@24          @1131
-    RegQueryValueExW            = _RegQueryValueExW@24          @1132
-    RegQueryValueW              = _RegQueryValueW@16            @1133
-    RegReplaceKeyA              = _RegReplaceKeyA@16            @1134
-    RegReplaceKeyW              = _RegReplaceKeyW@16            @1135
-    RegRestoreKeyA              = _RegRestoreKeyA@12            @1136
-    RegRestoreKeyW              = _RegRestoreKeyW@12            @1137
-    RegSaveKeyA                 = _RegSaveKeyA@12               @1138
-    RegSaveKeyW                 = _RegSaveKeyW@12               @1139
-    RegSetKeySecurity           = _RegSetKeySecurity@12         @1140
-    RegSetValueA                = _RegSetValueA@20              @1141
-    RegSetValueExA              = _RegSetValueExA@24            @1142
-    RegSetValueExW              = _RegSetValueExW@24            @1143
-    RegSetValueW                = _RegSetValueW@20              @1144
-    RegUnLoadKeyA               = _RegUnLoadKeyA@8              @1145
-    RegUnLoadKeyW               = _RegUnLoadKeyW@8              @1146
+    RegCloseKey                 = _RegCloseKey@4                @1100 NONAME
+    RegConnectRegistryA         = _RegConnectRegistryA@12       @1101 NONAME
+    RegConnectRegistryW         = _RegConnectRegistryW@12       @1102 NONAME
+    RegCreateKeyA               = _RegCreateKeyA@12             @1103 NONAME
+    RegCreateKeyExA             = _RegCreateKeyExA@36           @1104 NONAME
+    RegCreateKeyExW             = _RegCreateKeyExW@36           @1105 NONAME
+    RegCreateKeyW               = _RegCreateKeyW@12             @1106 NONAME
+    RegDeleteKeyA               = _RegDeleteKeyA@8              @1107 NONAME
+    RegDeleteKeyW               = _RegDeleteKeyW@8              @1108 NONAME
+    RegDeleteValueA             = _RegDeleteValueA@8            @1109 NONAME
+    RegDeleteValueW             = _RegDeleteValueW@8            @1110 NONAME
+    RegEnumKeyA                 = _RegEnumKeyA@16               @1111 NONAME
+    RegEnumKeyExA               = _RegEnumKeyExA@32             @1112 NONAME
+    RegEnumKeyExW               = _RegEnumKeyExW@32             @1113 NONAME
+    RegEnumKeyW                 = _RegEnumKeyW@16               @1114 NONAME
+    RegEnumValueA               = _RegEnumValueA@32             @1115 NONAME
+    RegEnumValueW               = _RegEnumValueW@32             @1116 NONAME
+    RegFlushKey                 = _RegFlushKey@4                @1117 NONAME
+    RegGetKeySecurity           = _RegGetKeySecurity@16         @1118 NONAME
+    RegLoadKeyA                 = _RegLoadKeyA@12               @1119 NONAME
+    RegLoadKeyW                 = _RegLoadKeyW@12               @1120 NONAME
+    RegNotifyChangeKeyValue     = _RegNotifyChangeKeyValue@20   @1121 NONAME
+    RegOpenKeyA                 = _RegOpenKeyA@12               @1122 NONAME
+    RegOpenKeyExA               = _RegOpenKeyExA@20             @1123 NONAME
+    RegOpenKeyExW               = _RegOpenKeyExW@20             @1124 NONAME
+    RegOpenKeyW                 = _RegOpenKeyW@12               @1125 NONAME
+    RegQueryInfoKeyA            = _RegQueryInfoKeyA@48          @1126 NONAME
+    RegQueryInfoKeyW            = _RegQueryInfoKeyW@48          @1127 NONAME
+    RegQueryMultipleValuesA     = _RegQueryMultipleValuesA@20   @1128 NONAME
+    RegQueryMultipleValuesW     = _RegQueryMultipleValuesW@20   @1129 NONAME
+    RegQueryValueA              = _RegQueryValueA@16            @1130 NONAME
+    RegQueryValueExA            = _RegQueryValueExA@24          @1131 NONAME
+    RegQueryValueExW            = _RegQueryValueExW@24          @1132 NONAME
+    RegQueryValueW              = _RegQueryValueW@16            @1133 NONAME
+    RegReplaceKeyA              = _RegReplaceKeyA@16            @1134 NONAME
+    RegReplaceKeyW              = _RegReplaceKeyW@16            @1135 NONAME
+    RegRestoreKeyA              = _RegRestoreKeyA@12            @1136 NONAME
+    RegRestoreKeyW              = _RegRestoreKeyW@12            @1137 NONAME
+    RegSaveKeyA                 = _RegSaveKeyA@12               @1138 NONAME
+    RegSaveKeyW                 = _RegSaveKeyW@12               @1139 NONAME
+    RegSetKeySecurity           = _RegSetKeySecurity@12         @1140 NONAME
+    RegSetValueA                = _RegSetValueA@20              @1141 NONAME
+    RegSetValueExA              = _RegSetValueExA@24            @1142 NONAME
+    RegSetValueExW              = _RegSetValueExW@24            @1143 NONAME
+    RegSetValueW                = _RegSetValueW@20              @1144 NONAME
+    RegUnLoadKeyA               = _RegUnLoadKeyA@8              @1145 NONAME
+    RegUnLoadKeyW               = _RegUnLoadKeyW@8              @1146 NONAME
 
 
 
@@ -1020,13 +1020,13 @@ EXPORTS
 ;   (These starts at ordinal 1200, API have ordinal less than 1200.)
 ; ----------------------------------------------------------------------------
 
-    DebugErrorBox                 = DebugErrorBox                 @1201
-    WriteLog                                                      @1202
-    WriteLogError                                                 @1214
-    WriteLogNoEOL                                                 @1218
-    WritePrivateLog                                               @1208
-    DecreaseLogCount                                              @1273
-    IncreaseLogCount                                              @1274
+    DebugErrorBox                 = DebugErrorBox                 @1201 NONAME
+    WriteLog                                                      @1202 NONAME
+    WriteLogError                                                 @1214 NONAME
+    WriteLogNoEOL                                                 @1218 NONAME
+    WritePrivateLog                                               @1208 NONAME
+    DecreaseLogCount                                              @1273 NONAME
+    IncreaseLogCount                                              @1274 NONAME
 
 ;Used by tibfix page in exe (change ordinal in pe2lx.cpp too!!)
     _RegisterPe2LxExe@12                                          @1203
@@ -1039,117 +1039,117 @@ EXPORTS
     _UnregisterLxDll@4                                            @1239
 
 ;VMutex
-   enter__6VMutexFUlPUl                                           @1204
-   leave__6VMutexFPUl                                             @1205
-   __ct__6VMutexFiPUl                                             @1206
-   __dt__6VMutexFv                                                @1207
+   enter__6VMutexFUlPUl                                           @1204 NONAME
+   leave__6VMutexFPUl                                             @1205 NONAME
+   __ct__6VMutexFiPUl                                             @1206 NONAME
+   __dt__6VMutexFv                                                @1207 NONAME
 
 ;Unicode
-   UnicodeToAsciiString  = _UnicodeToAsciiString@4                 @1210
-   UnicodeToAscii        = _UnicodeToAscii@8                       @1211
-   FreeAsciiString       = _FreeAsciiString@4                      @1212
-   AsciiToUnicode        = _AsciiToUnicode@8                       @1213
-   UnicodeToAsciiN       = _UnicodeToAsciiN@12                     @1215
-   AsciiToUnicodeN       = _AsciiToUnicodeN@12                     @1216
-   UnicodeToAsciiStringN = _UnicodeToAsciiStringN@8                @1217
+   UnicodeToAsciiString  = _UnicodeToAsciiString@4                 @1210 NONAME
+   UnicodeToAscii        = _UnicodeToAscii@8                       @1211 NONAME
+   FreeAsciiString       = _FreeAsciiString@4                      @1212 NONAME
+   AsciiToUnicode        = _AsciiToUnicode@8                       @1213 NONAME
+   UnicodeToAsciiN       = _UnicodeToAsciiN@12                     @1215 NONAME
+   AsciiToUnicodeN       = _AsciiToUnicodeN@12                     @1216 NONAME
+   UnicodeToAsciiStringN = _UnicodeToAsciiStringN@8                @1217 NONAME
 
 ;Get version resource
-   GetVersionStruct     = GetVersionStruct                        @1221
-   GetVersionSize       = GetVersionSize                          @1222
+   GetVersionStruct     = GetVersionStruct                        @1221 NONAME
+   GetVersionSize       = GetVersionSize                          @1222 NONAME
 
 ;version functions
-   CheckVersionFromHMOD = CheckVersionFromHMOD                    @1223
-   CheckVersion         = CheckVersion                            @1224
+   CheckVersionFromHMOD = CheckVersionFromHMOD                    @1223 NONAME
+   CheckVersion         = CheckVersion                            @1224 NONAME
 
-   Win32QueryModuleName = Win32QueryModuleName                    @1225
+   Win32QueryModuleName = Win32QueryModuleName                    @1225 NONAME
 
-   GetFS               = GetFS                                    @1226
-   SetFS               = SetFS                                    @1227
+   GetFS               = GetFS                                    @1226 NONAME
+   SetFS               = SetFS                                    @1227 NONAME
 
-   RestoreOS2TIB        = _RestoreOS2TIB@0                        @1228
-   SetWin32TIB          = _SetWin32TIB@0                          @1229
-   RestoreOS2FS         = RestoreOS2FS                            @1230
+   RestoreOS2TIB        = _RestoreOS2TIB@0                        @1228 NONAME
+   SetWin32TIB          = _SetWin32TIB@0                          @1229 NONAME
+   RestoreOS2FS         = RestoreOS2FS                            @1230 NONAME
 
    ;SvL: HandleManager functions
 
 ;   HMHandleTranslateToWin__FUlPUl                                  @1234
 
-   HMHandleAllocate__FPUlUl                                       @1231
-   HMHandleFree__FUl                                              @1232
-   HMHandleTranslateToOS2__FUlPUl                                 @1233
-   HMMsgWaitForMultipleObjects__FUlPUlN31                         @1260
-   HMOpenThreadToken__FUlN21PUl                                   @1261
-   HMOpenProcessToken__FUlN21PUl                                  @1262
-   HMHandleGetUserData__FUl                                       @1263
+   HMHandleAllocate__FPUlUl                                       @1231 NONAME
+   HMHandleFree__FUl                                              @1232 NONAME
+   HMHandleTranslateToOS2__FUlPUl                                 @1233 NONAME
+   HMMsgWaitForMultipleObjects__FUlPUlN31                         @1260 NONAME
+   HMOpenThreadToken__FUlN21PUl                                   @1261 NONAME
+   HMOpenProcessToken__FUlN21PUl                                  @1262 NONAME
+   HMHandleGetUserData__FUl                                       @1263 NONAME
 
-   _GetThreadTEB@0                                                @1234
-   _GetTEBFromThreadId@4                                          @1255
-   _GetTEBFromThreadHandle@4                                      @1256
+   _GetThreadTEB@0                                                @1234 NONAME
+   _GetTEBFromThreadId@4                                          @1255 NONAME
+   _GetTEBFromThreadHandle@4                                      @1256 NONAME
 
 ; HEAP Management (heap.cpp, heapstring.cpp)
-    HEAP_xalloc                = _HEAP_xalloc@12                  @1240
-    HEAP_xrealloc              = _HEAP_xrealloc@16                @1241
-    HEAP_malloc                = _HEAP_malloc@4                   @1242
-    HEAP_realloc               = _HEAP_realloc@8                  @1243
-    HEAP_size                  = _HEAP_size@4                     @1292
-    HEAP_free                  = _HEAP_free@4                     @1244
-    HEAP_strdupWtoA            = _HEAP_strdupWtoA@12              @1245
-    HEAP_strdupAtoW            = _HEAP_strdupAtoW@12              @1246
-    HEAP_strdupA               = _HEAP_strdupA@12                 @1247
-    HEAP_strdupW               = _HEAP_strdupW@12                 @1248
-    WideCharToLocal            = _WideCharToLocal@12              @1249
-    LocalToWideChar            = _LocalToWideChar@12              @1250
+    HEAP_xalloc                = _HEAP_xalloc@12                  @1240 NONAME
+    HEAP_xrealloc              = _HEAP_xrealloc@16                @1241 NONAME
+    HEAP_malloc                = _HEAP_malloc@4                   @1242 NONAME
+    HEAP_realloc               = _HEAP_realloc@8                  @1243 NONAME
+    HEAP_size                  = _HEAP_size@4                     @1292 NONAME
+    HEAP_free                  = _HEAP_free@4                     @1244 NONAME
+    HEAP_strdupWtoA            = _HEAP_strdupWtoA@12              @1245 NONAME
+    HEAP_strdupAtoW            = _HEAP_strdupAtoW@12              @1246 NONAME
+    HEAP_strdupA               = _HEAP_strdupA@12                 @1247 NONAME
+    HEAP_strdupW               = _HEAP_strdupW@12                 @1248 NONAME
+    WideCharToLocal            = _WideCharToLocal@12              @1249 NONAME
+    LocalToWideChar            = _LocalToWideChar@12              @1250 NONAME
 
-    _VIRTUAL_MapFileA@12              @1251
-    _VIRTUAL_MapFileW@12              @1252
+    _VIRTUAL_MapFileA@12                                          @1251 NONAME
+    _VIRTUAL_MapFileW@12                                          @1252 NONAME
 
-    OS2SetExceptionHandler                                        @1253
-    OS2UnsetExceptionHandler                                      @1254
+    OS2SetExceptionHandler                                        @1253 NONAME
+    OS2UnsetExceptionHandler                                      @1254 NONAME
 
 ; -------------------
 ; Odin ini management
 ; -------------------
 
-    _PROFILE_GetOdinIniString@20     @1264
-    _PROFILE_SetOdinIniString@12     @1265
-    _PROFILE_GetOdinIniInt@12        @1266
-    _PROFILE_SetOdinIniInt@12        @1267
-    _PROFILE_GetOdinIniBool@12       @1268
-    _PROFILE_SetOdinIniBool@12       @1269
-    _PROFILE_SaveOdinIni@0           @1270
+    _PROFILE_GetOdinIniString@20                                  @1264 NONAME
+    _PROFILE_SetOdinIniString@12                                  @1265 NONAME
+    _PROFILE_GetOdinIniInt@12                                     @1266 NONAME
+    _PROFILE_SetOdinIniInt@12                                     @1267 NONAME
+    _PROFILE_GetOdinIniBool@12                                    @1268 NONAME
+    _PROFILE_SetOdinIniBool@12                                    @1269 NONAME
+    _PROFILE_SaveOdinIni@0                                        @1270 NONAME
 
 ;shared memory allocation
-    _smalloc__FUi                                                 @1271
+    _smalloc__FUi                                                 @1271 NONAME
 
 ;code memory allocation
-    _cmalloc__FUi                                                 @1272
+    _cmalloc__FUi                                                 @1272 NONAME
 
 ;VSemaphore
-   wait__10VSemaphoreFUlPUl                                       @1280
-   post__10VSemaphoreFPUl                                         @1281
-   reset__10VSemaphoreFPUl                                        @1282
-   __ct__10VSemaphoreFiPUl                                        @1283
-   __dt__10VSemaphoreFv                                           @1284
+   wait__10VSemaphoreFUlPUl                                       @1280 NONAME
+   post__10VSemaphoreFPUl                                         @1281 NONAME
+   reset__10VSemaphoreFPUl                                        @1282 NONAME
+   __ct__10VSemaphoreFiPUl                                        @1283 NONAME
+   __dt__10VSemaphoreFv                                           @1284 NONAME
 
 ;fast file API's
-    FindFirstFileMultiA        = _FindFirstFileMultiA@12          @1290
-    FindNextFileMultiA         = _FindNextFileMultiA@12           @1291
+    FindFirstFileMultiA        = _FindFirstFileMultiA@12          @1290 NONAME
+    FindNextFileMultiA         = _FindNextFileMultiA@12           @1291 NONAME
 
 
 ;Export for MSACM32
-    _wsnprintfA                                                   @2000
+    _wsnprintfA                                                   @2000 NONAME
 
-    IsExeStarted__Fv                                              @2001
-    CheckCurFS                                                    @2002
-    _SupportsCPUID                                                @2003
-    _GetCPUFeatures                                               @2004
-    CPUFeatures                                                   @2005
-    InitSystemAndRegistry__Fv                                     @2006
-    _ConvertResourceToOS2@12                                      @2007
-    _ConvertCursorToOS2@4                                         @2008
-    _FreeOS2Resource@4                                            @2009
+    IsExeStarted__Fv                                              @2001 NONAME
+    CheckCurFS                                                    @2002 NONAME
+    _SupportsCPUID                                                @2003 NONAME
+    _GetCPUFeatures                                               @2004 NONAME
+    CPUFeatures                                                   @2005 NONAME
+    InitSystemAndRegistry__Fv                                     @2006 NONAME
+    _ConvertResourceToOS2@12                                      @2007 NONAME
+    _ConvertCursorToOS2@4                                         @2008 NONAME
+    _FreeOS2Resource@4                                            @2009 NONAME
 
-    GetDisplayCodepage__Fv                                        @3000
-    GetWindowsCodepage__Fv                                        @3001
+    GetDisplayCodepage__Fv                                        @3000 NONAME
+    GetWindowsCodepage__Fv                                        @3001 NONAME
 
 
