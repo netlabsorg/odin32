@@ -1,4 +1,4 @@
-# $Id: odin32.tools.emx.mk,v 1.8 2003-02-28 10:28:11 sandervl Exp $
+# $Id: odin32.tools.emx.mk,v 1.9 2003-07-09 12:57:33 bird Exp $
 
 #
 # Odin32 API
@@ -103,7 +103,7 @@ _DST = $(OBJDIR)\$(@F)
     $(AS) $(ASFLAGS) -Fdo:$(OBJDIR) $(OBJDIR)\$(@B).orc_asm
 
 .rc{$(OBJDIR)}.res:
-    $(CMDQD_SUB) $(OS2RC) $(OS2RCFLAGS) $(CINCLUDES:-I=-i ) $(_SRC) $@
+    $(OS2RC) $(OS2RCFLAGS) $(CINCLUDES:-I=-i ) $(_SRC) $@
 
 .S{$(OBJDIR)}.obj:
 !ifdef USERAPP
