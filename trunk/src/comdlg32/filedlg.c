@@ -153,6 +153,10 @@ static BOOL FileDlg_Init(void)
 	    ERR("Error loading icons !\n");
 	    return FALSE;
 	}
+#ifdef __WIN32OS2__
+	fldrHeight = 16;
+	fldrWidth = 16;
+#else
 	fldrInfo = (CURSORICONINFO *) GlobalLock16( hFolder2 );
 	if (!fldrInfo)
 	{	
@@ -162,6 +166,7 @@ static BOOL FileDlg_Init(void)
 	fldrHeight = fldrInfo -> nHeight;
 	fldrWidth = fldrInfo -> nWidth;
 	GlobalUnlock16( hFolder2 );
+#endif
 	initialized = TRUE;
     }
     return TRUE;
