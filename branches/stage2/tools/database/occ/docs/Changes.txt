@@ -1,0 +1,48 @@
+** version 2.5.11
+
+- Namespaces have been supported.
+
+
+** version 2.5.10
+
+- A bug was fixed so that OpenC++ can process the Microsoft iostream
+  header file.
+
+
+** version 2.5.9
+
+- ref-appendix.html was added to the distribution package.
+
+- TypeInfo::MakePtree() and FullTypeName() were modified
+  to work with templates.
+
+- TypeInfo::NthTemplateArgument() was added.
+
+- classwalk.cc was modified so that Class::TranslateMemberFunction()
+  is invoked on TemplateClass metaobjects.
+
+- TemplateClass::TranslateInstantiation() was added.
+
+- Class::SetMetaclassForFunctions() was added.
+
+- Class::Comments() wad added.
+
+- Environment::GetLineNumber() was added.
+
+
+** version 2.5.8
+
+The bugs listed below were fixed.
+
+- Template types cannot be used as a template parameter.
+  For example,
+	template <class S, template<class T> class C = list> class D { .. };
+  caused a syntax error.
+
+- Program::ReadLineDirective() does not work correctly.
+
+- The lexical analyzer does not recognize __restrict.
+
+- asm () is not supported.
+
+- Class::AppendMember() does not work with a template class.

@@ -1,0 +1,4 @@
+; $Id: occ.def,v 1.1.2.1 2001-09-20 03:12:11 bird Exp $
+NAME occ
+DESCRIPTION "Documentation generator for C and C++. Based on OpenC++; Copyright (C) 1997-2001 Shigeru Chiba, Tokyo Institute of Technology. Documentation generator (C) 1999-2001 Knut st. osmundsen."
+

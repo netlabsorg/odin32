@@ -1,0 +1,231 @@
+<HTML>
+<HEAD>
+<TITLE>OpenC++ Reference Manual</TITLE>
+</HEAD>
+<BODY>
+
+<H1>Representation of Types</H1>
+
+<P>
+ <CODE><B>TypeInfo</B></CODE> metaobjects represent types.  Because C++ deals with
+derived types such as pointer types and array types, <CODE><B>Class</B></CODE> metaobjects are not used for primary representation of types.  <CODE><B>TypeInfo</B></CODE> metaobjects do not treat <CODE><B>typedef</B></CODE>ed
+types as independent types.  They are treated just as aliases of
+the original types.</P>
+
+<HR>
+
+<H2><IMG SRC="red-pin.gif"> Public Members</H2>
+
+<UL><CODE><NOBR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem14">ClassMetaobject</A>()<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem15">Dereference</A>(TypeInfo& t)<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem16">Dereference</A>()<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem1">FullTypeName</A>()<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem8">IsArray</A>()<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem4">IsBuiltInType</A>()<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem13">IsClass</A>(Class*& metaobject)<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem2">IsConst</A>()<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem22">IsEllipsis</A>()<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem11">IsEnum</A>()<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem12">IsEnum</A>(Ptree*& spec)<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem7">IsFunction</A>()<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem19">IsNoReturnType</A>()<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem9">IsPointerToMember</A>()<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem5">IsPointerType</A>()<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem6">IsReferenceType</A>()<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem10">IsTemplateClass</A>()<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem3">IsVolatile</A>()<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem23">MakePtree</A>(Ptree* varname = nil)<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem21">NthArgument</A>(int nth, TypeInfo& t)<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem20">NumOfArguments</A>()<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem17">Reference</A>(TypeInfo& t)<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem18">Reference</A>()<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem0">WhatIs</A>()<BR>
+</NOBR></CODE></UL>
+<HR>
+<P>
+The followings are member functions on <CODE><B>TypeInfo</B></CODE> metaobjects:</P>
+
+<UL>
+<A NAME="mem0">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>TypeInfoId WhatIs()</B></PRE>
+<P>
+This returns an <CODE><B>enum</B></CODE> constant that corresponds to the kind of
+the type: <CODE><B>BuiltInType</B></CODE>, <CODE><B>ClassType</B></CODE> (including <CODE><B>class</B></CODE>, <CODE><B>struct</B></CODE>, and <CODE><B>union</B></CODE>), <CODE><B>EnumType</B></CODE>, <CODE><B>TemplateType</B></CODE>, <CODE><B>PointerType</B></CODE>, <CODE><B>ReferenceType</B></CODE>, <CODE><B>PointerToMemberType</B></CODE>,  <CODE><B>ArrayType</B></CODE>, <CODE><B>FunctionType</B></CODE>, <CODE><B>TemplateType</B></CODE>,
+or <CODE><B>UndefType</B></CODE> (the type is unknown).</P>
+<A NAME="mem1">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>Ptree* FullTypeName()</B></PRE>
+<P>
+This returns the full name of the type if the type is a built-in type,
+a class type, an <CODE><B>enum</B></CODE> type, or a template class type.  Otherwise,
+this returns <CODE><B>nil</B></CODE>.
+For example, if the type is a nested class <CODE><B>Y</B></CODE> defined within
+a class  <CODE><B>X</B></CODE> , this returns <CODE><B>X::Y</B></CODE>.</P>
+<A NAME="mem2">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>bool IsConst()</B></PRE>
+<P>
+This returns <CODE><B>true</B></CODE> if the type is const.</P>
+<A NAME="mem3">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>bool IsVolatile()</B></PRE>
+<P>
+This returns <CODE><B>true</B></CODE> if the type is volatile.</P>
+<A NAME="mem4">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>uint IsBuiltInType()</B></PRE>
+<P>
+This returns a bit field that represents what the built-in type is.
+If the type is not a built-in type, it simply returns <CODE><B>0</B></CODE> (<CODE><B>false</B></CODE>).
+To test the bit field, these masks are available: <CODE><B>CharType</B></CODE>, <CODE><B>IntType</B></CODE>, <CODE><B>ShortType</B></CODE>, <CODE><B>LongType</B></CODE>, <CODE><B>SignedType</B></CODE>, <CODE><B>UnsignedType</B></CODE>, <CODE><B>FloatType</B></CODE>, <CODE><B>DoubleType</B></CODE>, <CODE><B>LongDoubleType</B></CODE>,  <CODE><B>BooleanType</B></CODE>, and  <CODE><B>VoidType</B></CODE> .
+For example, <CODE><B>IsBuiltInType() & LongType</B></CODE> is <CODE><B>true</B></CODE> if
+the type is <CODE><B>long</B></CODE>, <CODE><B>unsigned long</B></CODE>, or <CODE><B>signed long</B></CODE>.</P>
+<A NAME="mem5">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>bool IsPointerType()</B></PRE>
+<P>
+This returns <CODE><B>true</B></CODE> if the type is a pointer type.</P>
+<A NAME="mem6">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>bool IsReferenceType()</B></PRE>
+<P>
+This returns <CODE><B>true</B></CODE> if the type is a reference type.</P>
+<A NAME="mem7">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>bool IsFunction()</B></PRE>
+<P>
+This returns <CODE><B>true</B></CODE> if the type is a function type.
+To obtain the type of the returned value, examine the <A HREF="#Deref">dereferenced</A> type of the function type.</P>
+<A NAME="mem8">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>bool IsArray()</B></PRE>
+<P>
+This returns <CODE><B>true</B></CODE> if the type is an array type.
+To obtain the type of the array components, examine the <A HREF="#Deref">dereferenced</A> type of the array type.</P>
+<A NAME="mem9">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>bool IsPointerToMember()</B></PRE>
+<P>
+This returns <CODE><B>true</B></CODE> if the type is a pointer to member.</P>
+<A NAME="mem10">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>bool IsTemplateClass()</B></PRE>
+<P>
+This returns <CODE><B>true</B></CODE> if the type is a class template.</P>
+<A NAME="mem11">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>bool IsEnum()</B></PRE>
+<P>
+This returns <CODE><B>true</B></CODE> if the type is an enum type.</P>
+<A NAME="mem12">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>bool IsEnum(Ptree*& spec)</B></PRE>
+<P>
+This returns <CODE><B>true</B></CODE> if the type is an enum type.
+The <CODE><B>Ptree</B></CODE> metaobject representing the <CODE><B>enum</B></CODE> declaration
+is stored in <CODE><B>spec</B></CODE>.</P>
+<A NAME="mem13">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>bool IsClass(Class*& metaobject)</B></PRE>
+<P>
+This returns <CODE><B>true</B></CODE> if the type is a class type.
+The <CODE><B>Class</B></CODE> metaobject representing the class type is stored
+in <CODE><B>metaobject</B></CODE>.</P>
+<A NAME="mem14">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>Class* ClassMetaobject()</B></PRE>
+<P>
+This returns a <CODE><B>Class</B></CODE> metaobject that represent the type.
+If the type is not a <CODE><B>class</B></CODE> type, it simply returns <CODE><B>nil</B></CODE>.</P>
+</UL>
+<P>
+The <CODE><B>TypeInfo</B></CODE> metaobjects also provide methods for computing
+the dereferenced type.  For example, those methods are used to get the type
+of the value that a pointer points to.  Suppose that the type of the pointer
+is <CODE><B>int*</B></CODE>.  If the dereferenced type of that pointer type is
+computed, then <CODE><B>int</B></CODE> is obtained.</P>
+
+<UL>
+<A NAME="mem15">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>void <A NAME="Deref">Dereference</A>(TypeInfo& t)</B></PRE>
+<P>
+This returns the dereferenced type in  <CODE><B>t</B></CODE> .
+If dereferencing is not possible, the <CODE><B>Undef</B></CODE> type is returned
+in  <CODE><B>t</B></CODE> .</P>
+<A NAME="mem16">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>void Dereference()</B></PRE>
+<P>
+This is identical to <CODE><B>Dereference(TypeInfo&)</B></CODE> except that
+the <CODE><B>TypeInfo</B></CODE> metaobject itself is changed to represent
+the dereferenced type.</P>
+<A NAME="mem17">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>void Reference(TypeInfo& t)</B></PRE>
+<P>
+This returns the referenced type in  <CODE><B>t</B></CODE> .
+For example, if the type is <CODE><B>int*</B></CODE>, then the referenced type is <CODE><B>int**</B></CODE>.</P>
+<A NAME="mem18">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>void Reference()</B></PRE>
+<P>
+This is identical to <CODE><B>Reference(TypeInfo&)</B></CODE> except that
+the <CODE><B>TypeInfo</B></CODE> metaobject itself is changed to represent
+the referenced type.</P>
+</UL>
+<P>
+The dereferenced type of a function type is the type of the
+return value.  For example, if the function type is <CODE><B>void f(char)</B></CODE>,
+then the dereferenced type is  <CODE><B>void</B></CODE> .  If no return type is
+specified (e.g. constructors), the dereferenced type of the function type
+is ``no return type.''</P>
+
+<UL>
+<A NAME="mem19">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>bool IsNoReturnType()</B></PRE>
+<P>
+This returns <CODE><B>true</B></CODE> if the return type of the function
+is not specified.</P>
+</UL>
+<P>
+The <CODE><B>TypeInfo</B></CODE> metaobjects also provide a method to obtain
+the types of function arguments.</P>
+
+<UL>
+<A NAME="mem20">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>int NumOfArguments()</B></PRE>
+<P>
+This returns the number of the arguments.  If the type is not
+a function type, then it returns -1.</P>
+<A NAME="mem21">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>bool NthArgument(int nth, TypeInfo& t)</B></PRE>
+<P>
+If the type is  <CODE><B>FunctionType</B></CODE> ,
+this returns the type of the <CODE><B>nth</B></CODE> (&gt= 0) argument
+in <CODE><B>t</B></CODE>.
+If the type is not <CODE><B>FunctionType</B></CODE> or the <CODE><B>nth</B></CODE> argument
+does not exist, this function returns <CODE><B>false</B></CODE>.
+If the <CODE><B>nth</B></CODE> argument is <CODE><B>...</B></CODE> (ellipses), then the returned
+type is an ellipsis type (see below.)</P>
+<A NAME="mem22">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>bool IsEllipsis()</B></PRE>
+<P>
+This returns <CODE><B>true</B></CODE> if the type is an ellipsis type.</P>
+</UL>
+<P>
+Finally, we show a convenient method for constructing
+a <CODE><B>Ptree</B></CODE> metaobject that represents the declaration of
+a variable of the type.</P>
+
+<UL>
+<A NAME="mem23">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>Ptree* MakePtree(Ptree* varname = nil)</B></PRE>
+<P>
+This makes a <CODE><B>Ptree</B></CODE> metaobject that represents the
+declaration (or a function) of a variable of the type.
+For example, if the type is pointer to integer, this returns <CODE><B>[int *</B></CODE>  <I>varname</I> <CODE><B>]</B></CODE>.  <CODE><B>varname</B></CODE> may be  <CODE><B>nil</B></CODE> .</P>
+</UL>
+<P>
+If the type is a function type, <CODE><B>MakePtree()</B></CODE> returns
+a function prototype matching that type.  The argument names in the
+prototype is omitted.  To construct a function prototype including
+argument names, programmers need to write as follows.  Suppose
+that <CODE><B>ftype</B></CODE> is the type of the function, <CODE><B>atype</B></CODE> is the
+type of the argument, the function name is <CODE><B>Set</B></CODE>,
+and the argument name is <CODE><B>width</B></CODE>:</P>
+
+
+<PRE><CODE>Ptree* arg = atype.MakePtree(Ptree::Make("width"));
+Ptree* func = Ptree::qMake("Set(`arg`)");
+ftype.Dereference();
+Ptree* proto = ftype.MakePtree(func);    // function prototype
+</CODE></PRE>
+
+<HR>
+[<A HREF="index.html">First</A> | <A HREF="env.html">Prev</A> | <A HREF="class.html">Next</A>]
+</BODY>
+</HTML>

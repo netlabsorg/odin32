@@ -1,0 +1,1362 @@
+<HTML>
+<HEAD>
+<TITLE>OpenC++ Reference Manual</TITLE>
+</HEAD>
+<BODY>
+
+<H1>Class Metaobjects</H1>
+
+<P>
+Class metaobjects are the most significant metaobjects of the MOP.
+Although other metaobjects only represent a structural aspect of the
+program, the class metaobjects not only represent such a structural aspect
+but also allow programmers to define a subclass
+and alter the behavior of the program.</P>
+
+<P>
+The default class for the class metaobjects is <CODE><B>Class</B></CODE>,
+which provides member functions for accessing the class definition.
+To alter a behavioral aspect of the class, the programmer define
+a subclass of <CODE><B>Class</B></CODE> that overrides <CODE><B>virtual</B></CODE> functions
+controlling source-to-source translation involved with the class.</P>
+
+<HR>
+<UL>
+<LI><A HREF="#S1">Selecting a Metaclass</A>
+<LI><A HREF="#S2">Constructor</A>
+<LI><A HREF="#S3">Introspection</A>
+<LI><A HREF="#S4">Translation</A>
+  <UL>
+  <LI><A HREF="#S4.1">Class Definition</A>
+  <LI><A HREF="#S4.2">Expressions</A>
+  </UL>
+<LI><A HREF="#S5">Registering Keywords</A>
+<LI><A HREF="#S6">Initialization and Finalization</A>
+<LI><A HREF="#S7">Inserting Statements</A>
+<LI><A HREF="#S8">Command Line Options</A>
+<LI><A HREF="#S9">Error Message</A>
+<LI><A HREF="#S10">Metaclass for Class</A>
+</UL>
+
+<HR>
+
+<H2><IMG SRC="red-pin.gif"> Public Members</H2>
+
+<UL><CODE><NOBR>
+<IMG SRC="red.gif" ALT=" o "><A HREF="#mem72">AllClasses</A>()<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem77">AppendAfterStatement</A>(Environment* e, Ptree* s)<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem6">AppendAfterToplevel</A>(Environment* e, Class* c)<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem35">AppendAfterToplevel</A>(Environment* e, Member& m)<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem79">AppendAfterToplevel</A>(Environment* e, Ptree* s)<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem26">AppendBaseClass</A>(Class* c, int specifier = Public,
+            bool is_virtual = false)<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem27">AppendBaseClass</A>(Ptree* class_name, int specifier = Public,
+            bool is_virtual = false)<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem28">AppendBaseClass</A>(char* class_name, int specifier = Public,
+            bool is_virtual = false)<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem31">AppendMember</A>(Member& added_member,
+            int specifier = Public)<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem32">AppendMember</A>(Ptree* text)<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem8">BaseClasses</A>()<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem24">ChangeBaseClasses</A>(Ptree* base_classes)<BR>
+<IMG SRC="red.gif" ALT=" o "><A HREF="#mem0">ChangeDefaultMetaclass</A>(char* name)<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem29">ChangeMember</A>(Member& changed_member)<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem23">ChangeName</A>(Ptree* new_name)<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem1">Class</A>()<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem3">Class</A>(Environment* e, char* name)<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem4">Class</A>(Environment* e, Ptree* name)<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem10">Definition</A>()<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem85">ErrorMessage</A>(Environment* env, char* message,
+            Ptree* code, Ptree* where)<BR>
+<IMG SRC="red.gif" ALT=" o "><A HREF="#mem71">FinalizeClass</A>()<BR>
+<IMG SRC="yellow.gif" ALT=" o "><A HREF="#mem70">FinalizeInstance</A>()<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem74">ImmediateSubclasses</A>(ClassArray& result)<BR>
+<IMG SRC="red.gif" ALT=" o "><A HREF="#mem69">Initialize</A>()<BR>
+<IMG SRC="yellow.gif" ALT=" o "><A HREF="#mem2">InitializeInstance</A>(Ptree* definition, Ptree* meta_arg)<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem76">InsertBeforeStatement</A>(Environment* e, Ptree* s)<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem5">InsertBeforeToplevel</A>(Environment* e, Class* c)<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem34">InsertBeforeToplevel</A>(Environment* e, Member& m)<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem78">InsertBeforeToplevel</A>(Environment* e, Ptree* s)<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem80">InsertDeclaration</A>(Environment* e, Ptree* d)<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem81">InsertDeclaration</A>(Environment* e, Ptree* d,
+            Ptree* key, void* client_data)<BR>
+<IMG SRC="red.gif" ALT=" o "><A HREF="#mem75">InstancesOf</A>(char* metaclas_name,
+            ClassArray& result)<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem15">IsImmediateSubclassOf</A>(Ptree* class_name)<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem14">IsSubclassOf</A>(Ptree* class_name)<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem82">LookupClientData</A>(Environment* e, Ptree* key)<BR>
+<IMG SRC="red.gif" ALT=" o "><A HREF="#mem83">LookupCmdLineOption</A>(char* option_name)<BR>
+<IMG SRC="red.gif" ALT=" o "><A HREF="#mem84">LookupCmdLineOption</A>(char* key, char*& value)<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem17">LookupMember</A>(Ptree* name, Member& m, int i = 0)<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem18">LookupMember</A>(Ptree* name)<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem19">LookupMember</A>(char* name, Member& m, int i = 0)<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem20">LookupMember</A>(char* name)<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem9">Members</A>()<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem11">MetaclassName</A>()<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem7">Name</A>()<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem12">NthBaseClass</A>(int n)<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem13">NthBaseClassName</A>(int n)<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem16">NthMember</A>(int n, Member& m)<BR>
+<IMG SRC="red.gif" ALT=" o "><A HREF="#mem68">RegisterMetaclass</A>(char* keyword, char* metaclass)<BR>
+<IMG SRC="red.gif" ALT=" o "><A HREF="#mem64">RegisterNewAccessSpecifier</A>(char* keyword)<BR>
+<IMG SRC="red.gif" ALT=" o "><A HREF="#mem67">RegisterNewClosureStatement</A>(char* keyword)<BR>
+<IMG SRC="red.gif" ALT=" o "><A HREF="#mem66">RegisterNewForStatement</A>(char* keyword)<BR>
+<IMG SRC="red.gif" ALT=" o "><A HREF="#mem63">RegisterNewMemberModifier</A>(char* keyword)<BR>
+<IMG SRC="red.gif" ALT=" o "><A HREF="#mem62">RegisterNewModifier</A>(char* keyword)<BR>
+<IMG SRC="red.gif" ALT=" o "><A HREF="#mem65">RegisterNewWhileStatement</A>(char* keyword)<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem25">RemoveBaseClasses</A>()<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem22">RemoveClass</A>()<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem30">RemoveMember</A>(Member& removed_member)<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem73">Subclasses</A>(ClassArray& result)<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem60">TranslateArguments</A>(Environment* env, Ptree* args)<BR>
+<IMG SRC="yellow.gif" ALT=" o "><A HREF="#mem37">TranslateAssign</A>(Environment* env, Ptree* object,
+            Ptree* assign_op, Ptree* expr)<BR>
+<IMG SRC="yellow.gif" ALT=" o "><A HREF="#mem38">TranslateBinary</A>(Environment* env, Ptree* lexpr,
+            Ptree* binary_op, Ptree* rexpr)<BR>
+<IMG SRC="yellow.gif" ALT=" o "><A HREF="#mem21">TranslateClass</A>(Environment* env)<BR>
+<IMG SRC="yellow.gif" ALT=" o "><A HREF="#mem44">TranslateDelete</A>(Environment* env, Ptree* delete_op,
+            Ptree* object)<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem58">TranslateExpression</A>(Environment* env, Ptree* expr)<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem59">TranslateExpression</A>(Environment* env,
+            Ptree* expr, TypeInfo& t)<BR>
+<IMG SRC="yellow.gif" ALT=" o "><A HREF="#mem42">TranslateFunctionCall</A>(Environment* env,
+            Ptree* object, Ptree* args)<BR>
+<IMG SRC="yellow.gif" ALT=" o "><A HREF="#mem36">TranslateInitializer</A>(Environment* env, Ptree* var_name,
+            Ptree* expr)<BR>
+<IMG SRC="yellow.gif" ALT=" o "><A HREF="#mem49">TranslateMemberCall</A>(Environment* env, Ptree* object,
+            Ptree* op, Ptree* member, Ptree* arglist)<BR>
+<IMG SRC="yellow.gif" ALT=" o "><A HREF="#mem50">TranslateMemberCall</A>(Environment* env, Ptree* member,
+            Ptree* arglist)<BR>
+<IMG SRC="yellow.gif" ALT=" o "><A HREF="#mem33">TranslateMemberFunction</A>(Environment* env, Member& m)<BR>
+<IMG SRC="yellow.gif" ALT=" o "><A HREF="#mem45">TranslateMemberRead</A>(Environment* env, Ptree* object,
+            Ptree* op, Ptree* member)<BR>
+<IMG SRC="yellow.gif" ALT=" o "><A HREF="#mem46">TranslateMemberRead</A>(Environment* env, Ptree* member)<BR>
+<IMG SRC="yellow.gif" ALT=" o "><A HREF="#mem47">TranslateMemberWrite</A>(Environment* env, Ptree* object,
+            Ptree* op, Ptree* member, Ptree* assign_op, Ptree* expr)<BR>
+<IMG SRC="yellow.gif" ALT=" o "><A HREF="#mem48">TranslateMemberWrite</A>(Environment* env, Ptree* member,
+            Ptree* assign_op, Ptree* expr)<BR>
+<IMG SRC="yellow.gif" ALT=" o "><A HREF="#mem43">TranslateNew</A>(Environment* env, Ptree* header,
+            Ptree* new_op, Ptree* placement,
+            Ptree* type_name, Ptree* arglist)<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem61">TranslateNewType</A>(Environment* env, Ptree* type_name)<BR>
+<IMG SRC="yellow.gif" ALT=" o "><A HREF="#mem55">TranslatePointer</A>(Environment* env, Ptree* variable_name)<BR>
+<IMG SRC="yellow.gif" ALT=" o "><A HREF="#mem41">TranslatePostfix</A>(Environment* env, Ptree* object,
+            Ptree* post_op)<BR>
+<IMG SRC="yellow.gif" ALT=" o "><A HREF="#mem53">TranslatePostfixOnMember</A>(Environment* env, Ptree* object,
+            Ptree* op, Ptree* member,
+            Ptree* postfix_op)<BR>
+<IMG SRC="yellow.gif" ALT=" o "><A HREF="#mem54">TranslatePostfixOnMember</A>(Environment* env, Ptree* member,
+            Ptree* postfix_op)<BR>
+<IMG SRC="yellow.gif" ALT=" o "><A HREF="#mem57">TranslateStaticUserStatement</A>(Environment* env,
+            Ptree* keyword, Ptree* rest)<BR>
+<IMG SRC="yellow.gif" ALT=" o "><A HREF="#mem40">TranslateSubscript</A>(Environment* env, Ptree* object,
+            Ptree* index)<BR>
+<IMG SRC="yellow.gif" ALT=" o "><A HREF="#mem39">TranslateUnary</A>(Environment* env, Ptree* unary_op,
+            Ptree* object)<BR>
+<IMG SRC="yellow.gif" ALT=" o "><A HREF="#mem51">TranslateUnaryOnMember</A>(Environment* env, Ptree* unary_op,
+            Ptree* object, Ptree* op,
+            Ptree* member)<BR>
+<IMG SRC="yellow.gif" ALT=" o "><A HREF="#mem52">TranslateUnaryOnMember</A>(Environment* env, Ptree* unary_op,
+            Ptree* member)<BR>
+<IMG SRC="yellow.gif" ALT=" o "><A HREF="#mem56">TranslateUserStatement</A>(Environment* env, Ptree* object,
+            Ptree* op, Ptree* keyword, Ptree* rest)<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem86">WarningMessage</A>(Environment* env, char* message,
+            Ptree* name, Ptree* where)<BR>
+</NOBR></CODE></UL>
+<HR>
+
+<H2><IMG SRC="red-pin.gif"> <A NAME="S1">Selecting a Metaclass</A></H2>
+
+<P>
+In general, the class of a metaobject is selected
+by the <A HREF="base.html#metaclass"><CODE><B>metaclass</B></CODE></A> declaration
+at the base level.  For example:</P>
+
+
+<PRE><CODE>metaclass PersistentClass Point;
+</CODE></PRE>
+
+<P>
+declares that the metaclass for <CODE><B>Point</B></CODE> is <CODE><B>PersistentClass</B></CODE>.
+This means that the compiler instantiates <CODE><B>PersistentClass</B></CODE> and
+makes the instantiated object be the class metaobject representing <CODE><B>Point</B></CODE>.  Since  <CODE><B>PersistentClass</B></CODE> is a regular C++ class
+but its instance is a class (metaobject), <CODE><B>PersistentClass</B></CODE> is
+called ``metaclass''.  This might look weird, but regard a class metaobject
+as being identical to the class.</P>
+
+<P>
+Programmers may specify a metaclass in a way other than
+the <CODE><B>metaclass</B></CODE> declaration.  The exact algorithm to select
+a metaclass is as described below:</P>
+
+<OL>
+<LI> The metaclass specified by the <CODE><B>metaclass</B></CODE> declaration.
+
+<LI> The metaclass specified by the keyword attached
+	to the class declaration if exists.
+
+<LI> Or else, the metaclass for the base classes.  If they are different,
+	an error is caused.
+
+<LI> Otherwise, the default metaclass <CODE><B>Class</B></CODE> is selected.
+
+</OL>
+<P>
+Programmers may specify a metaclass
+by a <A HREF="base.html#SyntaxExtend">user-defined keyword.</A> For example,</P>
+
+
+<PRE><CODE>distribute class Dictionary { ... };
+</CODE></PRE>
+
+<P>
+This means that the metaclass associated with the user-defined
+keyword <CODE><B>distribute</B></CODE> is selected
+for <CODE><B>Dictionary</B></CODE>.
+If there is also a metaclass declaration for <CODE><B>Dictionary</B></CODE>, then
+an error occurs.</P>
+
+<P>
+Although the default metaclass is <CODE><B>Class</B></CODE>,
+programmers can change it to another metaclass:</P>
+
+<UL>
+<A NAME="mem0">
+</A><PRE>
+<IMG SRC="red.gif" ALT=" o "> <B>static void <A NAME="ChDefMeta">ChangeDefaultMetaclass</A>(char* name)</B>
+</PRE>
+<P>
+This changes the default metaclass to <CODE><B>name</B></CODE>.
+It should be called by <CODE><B><A HREF="#Init">Initialize()</A></B></CODE> defined
+for a metaclass loaded by the <CODE><B><A HREF="man.html#SOpt">-S</A></B></CODE> option
+at the beginning.  Otherwise, that metaclass should be explicitly
+loaded by the <CODE><B>metaclass</B></CODE> declaration, after which the new
+default metaclass is effective.</P>
+</UL>
+
+<H2><IMG SRC="red-pin.gif"> <A NAME="S2">Constructor</A></H2>
+
+<P>
+Class metaobjects may receive a meta argument
+when they are initialized.  The meta argument is specified by
+programmers, for example, as follows:</P>
+
+
+<PRE><CODE>metaclass PersistentClass Point("db", 5001);
+</CODE></PRE>
+
+<P>
+The <CODE><B>Ptree</B></CODE> metaobject <CODE><B>["db" , 5001]</B></CODE> is
+a meta argument to the class metaobject for <CODE><B>Point</B></CODE>.
+Also, the programmers may specify a meta argument in this syntax:</P>
+
+
+<PRE><CODE>distribute("db", 5001) class Dictionary { ... };
+</CODE></PRE>
+
+<P>
+The user-defined keyword <CODE><B>distribute</B></CODE> can lead a meta
+argument.  The class metaobject for <CODE><B>Dictionary</B></CODE> receives the
+same meta argument that the class metaobject for <CODE><B>Point</B></CODE> 
+receives in the example above.</P>
+
+<P>
+The member function <CODE><B>InitializeInstance()</B></CODE> on <CODE><B>Class</B></CODE> (and its subclasses) is responsible to
+deal with the meta argument.  By default, the meta argument
+is simply ignored:</P>
+
+<UL>
+<A NAME="mem1">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B> Class()</B></PRE>
+<P>
+This constructor performs nothing.  The initialization is performed
+by  <CODE><B>InitializeInstance()</B></CODE> invoked just after the constructor.
+For this reason, the member functions supplied by <CODE><B>Class</B></CODE> are
+not executable in the constructors of the subclasses of <CODE><B>Class</B></CODE>.</P>
+<P>
+Note: only the OpenC++ compiler can call this constructor.
+The user programs should not call it.</P>
+
+<A NAME="mem2">
+</A><PRE><IMG SRC="yellow.gif" ALT=" o "><B>void InitializeInstance(Ptree* definition, Ptree* meta_arg)</B></PRE>
+<P>
+This is automatically invoked just after the constructor is invoked.
+It initializes the data members of the class metaobject and
+processes the meta arguments. <CODE><B>definition</B></CODE> is a <CODE><B>Ptree</B></CODE> metaobject representing
+the class declaration.  If a meta argument is not given, <CODE><B>meta_arg</B></CODE> is <CODE><B>nil</B></CODE>.  This member function is not <I>overridable</I>; <CODE><B>InitializeInstance()</B></CODE> of the subclasses of <CODE><B>Class</B></CODE> must call
+the base-class'es  <CODE><B>InitializeInstance()</B></CODE>  at
+the <I>beginning</I>.</P>
+<P>
+Note: This has been separeted from the constructor.  Otherwise,
+the constructor of <CODE><B>Class</B></CODE> would take two arguments and
+thus all the metaclasses have to
+have a constructor just for passing the arguments to the
+constructor of <CODE><B>Class</B></CODE>.</P>
+
+<P>
+Note: only the OpenC++ compiler can call this member function.
+The user programs should not call it.</P>
+
+</UL>
+<P>
+Another constructor is provided for the programmers
+to produce a new class.
+This is an example of the use of this constructor:</P>
+
+
+<PRE><CODE>void MyClass::TranslateClass(Environment* e)
+{
+    Member m;
+    Class* c = new Class(e, "Bike");
+    LookupMember("move", m);
+    c->AppendMember(m);
+    AppendAfterToplevel(e, c);
+}
+</CODE></PRE>
+
+<P>
+A new class named <CODE><B>Bike</B></CODE> is created,
+a member named <CODE><B>move</B></CODE> is retrieved from the class represented
+by this class metaobject, and the retrieved member is copied to that new class.
+The created class <CODE><B>Bike</B></CODE> is then inserted in the source code
+after the declaration of the class represented by this class metaobject.</P>
+
+<UL>
+<A NAME="mem3">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B> Class(Environment* e, char* name)</B></PRE>
+<P>
+This constructor creates a class with the given <CODE><B>name</B></CODE>.
+The created class has no member.  If this constructor
+is invoked, <CODE><B>InitializeInstance()</B></CODE> is not called.  No subclass
+of  <CODE><B>Class</B></CODE> can inherit or invoke this constructor.</P>
+<A NAME="mem4">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B> Class(Environment* e, Ptree* name)</B></PRE>
+<P>
+This constructor creates a class with the given <CODE><B>name</B></CODE>.
+The created class has no member.  If this constructor
+is invoked, <CODE><B>InitializeInstance()</B></CODE> is not called.  No subclass
+of  <CODE><B>Class</B></CODE> can inherit or invoke this constructor.</P>
+<A NAME="mem5">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>void InsertBeforeToplevel(Environment* e, Class* c)</B></PRE>
+<P>
+This inserts the class specified by the metaobject <CODE><B>c</B></CODE> just
+before the toplevel declaration.</P>
+<A NAME="mem6">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>void AppendAfterToplevel(Environment* e, Class* c)</B></PRE>
+<P>
+This appends the class specified by the metaobject <CODE><B>c</B></CODE> just
+before the toplevel declaration.</P>
+</UL>
+
+<H2><IMG SRC="red-pin.gif"> <A NAME="S3">Introspection</A></H2>
+
+<P>
+Since a class metaobject is the meta representation of a class,
+programmers can access details of the class definition
+through the class metaobject.  The followings are member functions
+on class metaobjects.  The subclasses of <CODE><B>Class</B></CODE> cannot override
+them.</P>
+
+<UL>
+<A NAME="mem7">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>Ptree* Name()</B></PRE>
+<P>
+This returns the name of the class.</P>
+<A NAME="mem8">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>Ptree* BaseClasses()</B></PRE>
+<P>
+This returns the base classes of the class.
+For example, if the class declaration is:</P>
+
+<PRE><CODE>class C : public A, private B { ... };
+</CODE></PRE>
+
+<P>
+Then, <CODE><B>BaseClasses()</B></CODE> returns a <CODE><B>Ptree</B></CODE> metaobject:</P>
+
+
+<PRE><CODE>[: [public A] , [private B]]
+</CODE></PRE>
+
+<A NAME="mem9">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>Ptree* Members()</B></PRE>
+<P>
+This returns the body of the class declaration.  It is a list
+	of member declarations.  It does not include <CODE><B>{</B></CODE> and <CODE><B>}</B></CODE>.</P>
+<A NAME="mem10">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>Ptree* Definition()</B></PRE>
+<P>
+This returns the <CODE><B>Ptree</B></CODE> metaobject representing
+the whole class declaration.</P>
+<A NAME="mem11">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>char* MetaclassName()</B></PRE>
+<P>
+This returns the name of the metaclass.</P>
+<A NAME="mem12">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>Class* NthBaseClass(int n)</B></PRE>
+<P>
+This returns the <CODE><B>n</B></CODE>-th (&gt= 0) base class. </P>
+<A NAME="mem13">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>Ptree* NthBaseClassName(int n)</B></PRE>
+<P>
+This returns the name of the <CODE><B>n</B></CODE>-th (&gt= 0)
+base class. </P>
+<A NAME="mem14">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>bool IsSubclassOf(Ptree* class_name)</B></PRE>
+<P>
+This returns <CODE><B>true</B></CODE> if the class is a subclass of <CODE><B>class_name</B></CODE>.</P>
+<A NAME="mem15">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>bool IsImmediateSubclassOf(Ptree* class_name)</B></PRE>
+<P>
+This returns <CODE><B>true</B></CODE> if the class is an immediate
+subclass of <CODE><B>class_name</B></CODE>.</P>
+<A NAME="mem16">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>bool NthMember(int n, Member& m)</B></PRE>
+<P>
+This returns <CODE><B>true</B></CODE> if the <CODE><B>n</B></CODE>-th (&gt= 0)
+member, including data members and member functions, exists.  The <A HREF="member.html">member metaobject</A> representing the <CODE><B>n</B></CODE>-th member is
+returned in <CODE><B>m</B></CODE>.  If the class is a subclass, the member is
+an inherited one from the base class.</P>
+<A NAME="mem17">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>bool LookupMember(Ptree* name, Member& m, int i = 0)</B></PRE>
+<P>
+This returns <CODE><B>true</B></CODE> if the member named <CODE><B>name</B></CODE> exists.
+The <A HREF="member.html">member metaobject</A> representing that member is
+returned at <CODE><B>m</B></CODE>.
+The member may be an inherited one.
+If there are more than one members named <CODE><B>name</B></CODE>,
+the <CODE><B>i</B></CODE>-th (&gt= 0) member is returned.</P>
+<A NAME="mem18">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>bool LookupMember(Ptree* name)</B></PRE>
+<P>
+This returns <CODE><B>true</B></CODE> if the member named <CODE><B>name</B></CODE> exists.
+The member may be an inherited one.</P>
+<A NAME="mem19">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>bool LookupMember(char* name, Member& m, int i = 0)</B></PRE>
+<P>
+This returns <CODE><B>true</B></CODE> if the member named <CODE><B>name</B></CODE> exists.
+The <A HREF="member.html">member metaobject</A> representing that member is
+returned at <CODE><B>m</B></CODE>.
+The member may be an inherited one.
+If there are more than one members named <CODE><B>name</B></CODE>,
+the <CODE><B>i</B></CODE>-th (&gt= 0) member is returned.</P>
+<A NAME="mem20">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>bool LookupMember(char* name)</B></PRE>
+<P>
+This returns <CODE><B>true</B></CODE> if the member named <CODE><B>name</B></CODE> exists.
+The member may be an inherited one.</P>
+</UL>
+
+<H2><IMG SRC="red-pin.gif"> <A NAME="S4">Translation</A></H2>
+
+<P>
+Class metaobjects control source-to-source translation of the
+program.  Expressions involving a class are translated from OpenC++ to
+C++ by a member function on the class metaobject.(In the
+current version, the translated code is not recursively translated
+again.  So the metaobjects have to translate code from OpenC++ to C++
+rather than from OpenC++ to (less-extended) OpenC++.  This limitation
+will be fixed in future.) Programmers may define a subclass
+of <CODE><B>Class</B></CODE> to override such a member function to tailor
+the translation.</P>
+
+<P>
+The effective class metaobject that is actually responsible for the
+translation is the <I>static</I> type of the object involved by the
+expression.  For example, suppose:</P>
+
+
+<PRE><CODE>class Point { public: int x, y; };
+class ColoredPoint : public Point { public: int color; };
+        :
+Point* p = new ColoredPoint;
+</CODE></PRE>
+
+<P>
+Then, an expression for data member read, <CODE><B>p->x</B></CODE>,
+is translated by the class metaobject for <CODE><B>Point</B></CODE> because the variable <CODE><B>p</B></CODE> is a pointer to not <CODE><B>ColoredPoint</B></CODE> but <CODE><B>Point</B></CODE>.  Although this might seem wrong design,
+we believe that it is a reasonable way since only static type analysis
+is available at compile time.</P>
+
+
+<H3><IMG SRC="yellow-pin.gif"> <A NAME="S4.1">Class Definition</A></H3>
+
+<P>
+The class definition is translated by <CODE><B>TranslateClass()</B></CODE>.
+For example, if a member function <CODE><B>f()</B></CODE> is renamed <CODE><B>g()</B></CODE>,
+the member function <CODE><B>TranslateClass()</B></CODE> should be overridden to be
+this:</P>
+
+
+<PRE><CODE>void MyClass::TranslateClass(Environment* e)
+{
+    Member m;
+    LookupMember("f", m);
+    m.SetName(Ptree::Make("g"));
+    ChangeMember(m);
+}
+</CODE></PRE>
+
+<P>
+First, the <A HREF="member.html">member metaobject</A> for <CODE><B>f()</B></CODE> is
+obtained and the new
+name <CODE><B>g()</B></CODE> is given to that member metaobject.  Then, this change
+is reflected on the class by <CODE><B>ChangeMember()</B></CODE>.
+The class <CODE><B>Class</B></CODE> provides several member functions, such as <CODE><B>ChangeMember()</B></CODE>, for translating a class definition.
+Programmers can override <CODE><B>TranslateClass()</B></CODE> to call these functions and implement the translation
+they want.</P>
+
+<UL>
+<A NAME="mem21">
+</A><PRE><IMG SRC="yellow.gif" ALT=" o "><B>void TranslateClass(Environment* env)</B></PRE>
+<P>
+This may call the member functions shown below and translate
+the declaration of the class.</P>
+<P>
+<I>--- Default implementation by Class</I><BR>
+This performs nothing.
+
+<A NAME="mem22">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>void RemoveClass()</B></PRE>
+<P>
+This removes the whole declaration of the class from the source
+code.</P>
+<A NAME="mem23">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>void ChangeName(Ptree* new_name)</B></PRE>
+<P>
+This changes the name of the class.  Note that this member
+function only substitutes <CODE><B>new_name</B></CODE> for the identifier following
+the <CODE><B>class</B></CODE> keyword in the declaration.  The constructors or
+any other occurence of the class name are not changed.</P>
+<A NAME="mem24">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>void ChangeBaseClasses(Ptree* base_classes)</B></PRE>
+<P>
+This replaces the base-classes field of the class declaration
+with the given <CODE><B>base_class</B></CODE>.</P>
+<A NAME="mem25">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>void RemoveBaseClasses()</B></PRE>
+<P>
+This removes the base classes from the class declaration.  The
+class does not inherit other classes after the translation.</P>
+<A NAME="mem26">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>void AppendBaseClass(Class* c, int specifier = Public,
+            bool is_virtual = false)</B></PRE>
+<P>
+This appends a given class <CODE><B>c</B></CODE> to the list of the base classes.  <CODE><B>specifier</B></CODE> is either <CODE><B>Class::Public</B></CODE>, <CODE><B>Class::Protected</B></CODE>, or <CODE><B>Class::Private</B></CODE>.  If <CODE><B>is_virtual</B></CODE> is <CODE><B>true</B></CODE>,
+then the appended base class is <CODE><B>virtual</B></CODE>.</P>
+<A NAME="mem27">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>void AppendBaseClass(Ptree* class_name, int specifier = Public,
+            bool is_virtual = false)</B></PRE>
+<P>
+This appends a given class named <CODE><B>class_name</B></CODE> to the list
+of the base classes.  <CODE><B>specifier</B></CODE> is either <CODE><B>Class::Public</B></CODE>, <CODE><B>Class::Protected</B></CODE>, or <CODE><B>Class::Private</B></CODE>.  If <CODE><B>is_virtual</B></CODE> is <CODE><B>true</B></CODE>,
+then the appended base class is <CODE><B>virtual</B></CODE>.</P>
+<A NAME="mem28">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>void AppendBaseClass(char* class_name, int specifier = Public,
+            bool is_virtual = false)</B></PRE>
+<P>
+This appends a given class named <CODE><B>class_name</B></CODE> to the list
+of the base classes.  <CODE><B>specifier</B></CODE> is either <CODE><B>Class::Public</B></CODE>, <CODE><B>Class::Protected</B></CODE>, or <CODE><B>Class::Private</B></CODE>.  If <CODE><B>is_virtual</B></CODE> is <CODE><B>true</B></CODE>,
+then the appended base class is <CODE><B>virtual</B></CODE>.</P>
+<A NAME="mem29">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>void <A NAME="ChMem">ChangeMember</A>(Member& changed_member)</B></PRE>
+<P>
+This alter a member according to <CODE><B>changed_member</B></CODE>.
+The <A HREF="member.html">member metaobject</A>  <CODE><B>changed_member</B></CODE> must be the object returned by <CODE><B>LookupMember()</B></CODE>.
+Note that the change of the member metaobject is not reflected until this
+member function is called.</P>
+<A NAME="mem30">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>void RemoveMember(Member& removed_member)</B></PRE>
+<P>
+This removes the member specified by <CODE><B>removed_member</B></CODE>.
+The <A HREF="member.html">member metaobject</A>  <CODE><B>removed_member</B></CODE> must be the object returned by <CODE><B>LookupMember()</B></CODE>.</P>
+<A NAME="mem31">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>void <A NAME="ApndMem">AppendMember</A>(Member& added_member,
+            int specifier = Public)</B></PRE>
+<P>
+This appends a new member to the class.   <CODE><B>specifier</B></CODE> is either <CODE><B>Class::Public</B></CODE>, <CODE><B>Class::Protected</B></CODE>, or <CODE><B>Class::Private</B></CODE>.  This member function is used to append
+a member similar to an existing one.  For example,  <CODE><B>added_member</B></CODE> may
+be the object returned by<CODE><B>LookupMember()</B></CODE>and called <CODE><B>SetName()</B></CODE> on
+to change the member name.</P>
+<A NAME="mem32">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>void AppendMember(Ptree* text)</B></PRE>
+<P>
+This inserts <CODE><B>text</B></CODE> after the member declarations in the
+original class declaration.  <CODE><B>text</B></CODE> can be not only a member declaration
+but also a nested class declaration, an access specifier, and any kind of
+program text.</P>
+</UL>
+<P>
+The implementation of member functions is translated by  <CODE><B>TranslateMemberFunction()</B></CODE>.
+For example,</P>
+
+
+<PRE><CODE>void Point::Move(int rx, int ry)
+{
+    x += rx;
+    y += ry;
+}
+</CODE></PRE>
+
+<P>
+To translate this function implementation, the compiler calls  <CODE><B>TranslateMemberFunction()</B></CODE> on the class metaobject for <CODE><B>Point</B></CODE>.
+The arguments are <A HREF="env.html">an environment</A> and <A HREF="member.html">a member metaobject</A> for <CODE><B>Move()</B></CODE>.  If this member metaobject is changed
+by member functions such as <CODE><B>SetName()</B></CODE>, the change is reflected on the
+program.  Unlike class declarations, no explicit function call for the reflection
+is not needed.  For example,</P>
+
+
+<PRE><CODE>void MyClass::TranslateMemberFunction(Environment* env, Member& m)
+{
+    m.SetFunctionBody(Ptree::Make("{}"));
+}
+</CODE></PRE>
+
+<P>
+This customizes the member function so that it has an empty body.</P>
+
+<UL>
+<A NAME="mem33">
+</A><PRE><IMG SRC="yellow.gif" ALT=" o "><B>void <A NAME="TransMF">TranslateMemberFunction</A>(Environment* env, Member& m)</B></PRE>
+<P>
+This translates the implementation of a member function specified by <CODE><B>m</B></CODE>.
+The compiler does not call this function if the member function is inlined in the class
+declaration.  For example,</P>
+
+<PRE><CODE>class Point {
+public:
+    void Reset() { x = y = 0; }
+    void Move(int, int);
+    int x, y;
+};
+inline void Point::Move(int rx, int ry) { ... }
+</CODE></PRE>
+
+<P>
+ <CODE><B>TranslateMemberFunction()</B></CODE> is called only for <CODE><B>Move()</B></CODE>.
+The implementation of <CODE><B>Reset()</B></CODE> can be translated by <CODE><B>TranslateClass()</B></CODE>.
+Note that, even if the implementation of <CODE><B>Move()</B></CODE> is translated
+by <CODE><B>TranslateMemberFunction()</B></CODE>, the member declaration of <CODE><B>Move()</B></CODE> in the
+class declaration is not translated.  It needs to be explicitly translated
+in <CODE><B>TranslateClass()</B></CODE>.</P>
+
+<P>
+<I>--- Default implementation by Class</I><BR>
+This performs nothing.
+
+<A NAME="mem34">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>void InsertBeforeToplevel(Environment* e, Member& m)</B></PRE>
+<P>
+This inserts the member function specified by <CODE><B>m</B></CODE> just
+before the toplevel declaration.  It should be used to insert the
+implementation of a member function derived from the argument <CODE><B>m</B></CODE> of <CODE><B>TranslateMemberFunction()</B></CODE>.  Note that <CODE><B>AppendMember()</B></CODE> only appends a member declaration in the class declaration.</P>
+<A NAME="mem35">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>void AppendAfterToplevel(Environment* e, Member& m)</B></PRE>
+<P>
+This appends the member function specified by <CODE><B>m</B></CODE> just
+before the toplevel declaration.  It should be used to append the
+implementation of a member function derived from the argument <CODE><B>m</B></CODE> of <CODE><B>TranslateMemberFunction()</B></CODE>.  Note that <CODE><B>AppendMember()</B></CODE> only appends a member declaration in the class declaration.</P>
+</UL>
+
+<H3><IMG SRC="yellow-pin.gif"> <A NAME="S4.2">Expressions</A></H3>
+
+<P>
+Class metaobjects also control the translation of expressions.
+An expressions, such as member calls, are translated by one of the
+following <CODE><B>virtual</B></CODE> functions on the class metaobject involved
+with the expression.  For example, if the expression is a member call
+on a <CODE><B>Point</B></CODE> object, it is translated by the class metaobject
+for the <CODE><B>Point</B></CODE> class.</P>
+
+<UL>
+<A NAME="mem36">
+</A><PRE><IMG SRC="yellow.gif" ALT=" o "><B>Ptree* TranslateInitializer(Environment* env, Ptree* var_name,
+            Ptree* expr)</B></PRE>
+<P>
+This translates a variable initializer <CODE><B>expr</B></CODE>, which
+would be <CODE><B>[=</B></CODE> <I>expression</I><CODE><B>]</B></CODE> or <CODE><B>[( [</B></CODE><I>expression</I><CODE><B>] )]</B></CODE>.
+The two forms correspond to C++'s two different notations
+for initialization.  For example:</P>
+
+<PRE><CODE>complex p(2.3, 4.0);
+complex q = 0.0;
+</CODE></PRE>
+
+<P>
+The initializers are <CODE><B>[( [2.3 , 4.0] )]</B></CODE> and <CODE><B>[= 0.0]</B></CODE>, respectively.</P>
+
+<P>
+The argument <CODE><B>var_name</B></CODE> indicates the name of the variable
+initialized by <CODE><B>expr</B></CODE>.</P>
+
+<P>
+<I>--- Default implementation by Class</I><BR>
+This translates <CODE><B>expr</B></CODE> by calling <CODE><B>TranslateExpression()</B></CODE> on the second element of <CODE><B>expr</B></CODE>.
+
+<A NAME="mem37">
+</A><PRE><IMG SRC="yellow.gif" ALT=" o "><B>Ptree* TranslateAssign(Environment* env, Ptree* object,
+            Ptree* assign_op, Ptree* expr)</B></PRE>
+<P>
+This translates an assignment expression such as <CODE><B>=</B></CODE> and <CODE><B>+=</B></CODE>.  <CODE><B>object</B></CODE> is an instance of the class, which
+the value of <CODE><B>expr</B></CODE> is assigned to.  <CODE><B>assign_op</B></CODE> is
+an assignment operator.  <CODE><B>object</B></CODE> and <CODE><B>expr</B></CODE> have not
+been translated yet.</P>
+<P>
+<I>--- Default implementation by Class</I><BR>
+This calls <CODE><B>TranslateExpression()</B></CODE> on <CODE><B>object</B></CODE> and <CODE><B>expr</B></CODE> and returns the translated expression.
+
+<A NAME="mem38">
+</A><PRE><IMG SRC="yellow.gif" ALT=" o "><B>Ptree* TranslateBinary(Environment* env, Ptree* lexpr,
+            Ptree* binary_op, Ptree* rexpr)</B></PRE>
+<P>
+This translates a binary expression.  <CODE><B>binary_op</B></CODE> is
+the operator such as <CODE><B>*</B></CODE>, <CODE><B>+</B></CODE>, <CODE><B><<</B></CODE>, <CODE><B>==</B></CODE>, <CODE><B>|</B></CODE>, <CODE><B>&&</B></CODE>, and <CODE><B>,</B></CODE> (comma). <CODE><B>lexpr</B></CODE> and <CODE><B>rexpr</B></CODE> are the left-side expression
+and the right-side expression.  They have not been translated
+yet.  The class metaobject that this function is called on is
+for the type of <CODE><B>rexpr</B></CODE>.</P>
+<P>
+<I>--- Default implementation by Class</I><BR>
+This calls <CODE><B>TranslateExpression()</B></CODE> on <CODE><B>lexpr</B></CODE> and <CODE><B>rexpr</B></CODE> and returns the translated expression.
+
+<A NAME="mem39">
+</A><PRE><IMG SRC="yellow.gif" ALT=" o "><B>Ptree* TranslateUnary(Environment* env, Ptree* unary_op,
+            Ptree* object)</B></PRE>
+<P>
+This translates a unary expression.  <CODE><B>unary_op</B></CODE> is
+the operator, which are either <CODE><B>*</B></CODE>, <CODE><B>&</B></CODE>, <CODE><B>+</B></CODE>, <CODE><B>-</B></CODE>, <CODE><B>!</B></CODE>, <CODE><B>~</B></CODE>, <CODE><B>++</B></CODE>, or <CODE><B>--</B></CODE>.  <CODE><B>sizeof</B></CODE> is not included.  <CODE><B>object</B></CODE> is an instance
+of the class, which the operator is applied to.  <CODE><B>object</B></CODE> has not been translated yet.</P>
+<P>
+<I>--- Default implementation by Class</I><BR>
+This calls <CODE><B>TranslateExpression()</B></CODE> on <CODE><B>object</B></CODE> and returns the translated expression.
+
+<A NAME="mem40">
+</A><PRE><IMG SRC="yellow.gif" ALT=" o "><B>Ptree* TranslateSubscript(Environment* env, Ptree* object,
+            Ptree* index)</B></PRE>
+<P>
+This translates a subscript expression (array access).  <CODE><B>object</B></CODE> is an instance of the class, which the operator <CODE><B>[]</B></CODE> denoted by <CODE><B>index</B></CODE> is applied to.  <CODE><B>index</B></CODE> is a list <CODE><B>[\[</B></CODE>  <I>expression</I>  <CODE><B>\]]</B></CODE> .  <CODE><B>object</B></CODE> and <CODE><B>expr</B></CODE> have not been translated yet.</P>
+<P>
+<I>--- Default implementation by Class</I><BR>
+This calls <CODE><B>TranslateExpression()</B></CODE> on <CODE><B>object</B></CODE> and <CODE><B>index</B></CODE> and returns the translated expression.
+
+<A NAME="mem41">
+</A><PRE><IMG SRC="yellow.gif" ALT=" o "><B>Ptree* TranslatePostfix(Environment* env, Ptree* object,
+            Ptree* post_op)</B></PRE>
+<P>
+This translates a postfix increment or decrement expression
+(<CODE><B>++</B></CODE> or <CODE><B>--</B></CODE>).  <CODE><B>object</B></CODE> is an instance of the
+class, which the operator <CODE><B>post_op</B></CODE> is applied to.  <CODE><B>object</B></CODE> has not been translated yet.</P>
+<P>
+<I>--- Default implementation by Class</I><BR>
+This calls <CODE><B>TranslateExpression()</B></CODE> on <CODE><B>object</B></CODE> and returns the translated expression.
+
+<A NAME="mem42">
+</A><PRE><IMG SRC="yellow.gif" ALT=" o "><B>Ptree* TranslateFunctionCall(Environment* env,
+            Ptree* object, Ptree* args)</B></PRE>
+<P>
+This translates a function call expression on <CODE><B>object</B></CODE>.
+Note that it is not for translating a member function call.
+It is invoked to translate an application of
+the call operator <CODE><B>()</B></CODE>.  <CODE><B>object</B></CODE> is an instance of the
+class.  <CODE><B>object</B></CODE> and <CODE><B>args</B></CODE> have not been translated yet.
+For example:</P>
+
+<PRE><CODE>class Iterator { ... };
+    :
+Iterator next;
+while(p = next())
+    record(p);
+</CODE></PRE>
+
+<P>
+ <CODE><B>TranslateFunctionCall()</B></CODE> is called on the class metaobject
+for  <CODE><B>Iterator</B></CODE> to translate <CODE><B>next()</B></CODE>.
+In this case, <CODE><B>object</B></CODE> indicates <CODE><B>next</B></CODE>.</P>
+
+<P>
+<I>--- Default implementation by Class</I><BR>
+This calls <CODE><B>TranslateExpression()</B></CODE> on <CODE><B>object</B></CODE> and <CODE><B>TranslateArguments()</B></CODE> on <CODE><B>args</B></CODE> ,
+and returns the translated expression.
+
+<A NAME="mem43">
+</A><PRE><IMG SRC="yellow.gif" ALT=" o "><B>Ptree* <A NAME="TransNew">TranslateNew</A>(Environment* env, Ptree* header,
+            Ptree* new_op, Ptree* placement,
+            Ptree* type_name, Ptree* arglist)</B></PRE>
+<P>
+This translates a <CODE><B>new</B></CODE> expression.  <CODE><B>header</B></CODE> is
+a user-defined keyword (type modifier), <CODE><B>::</B></CODE> (if
+the expression is <CODE><B>::new</B></CODE>), or <CODE><B>nil</B></CODE>.  <CODE><B>new_op</B></CODE> is the new operator.  <CODE><B>type_name</B></CODE> may include an array size surrounded by <CODE><B>[]</B></CODE>.  <CODE><B>arglist</B></CODE> is arguments to the constructor.  It includes
+parentheses <CODE><B>()</B></CODE> . <CODE><B>placement</B></CODE>, <CODE><B>type_name</B></CODE>,
+and <CODE><B>arglist</B></CODE> have not been translated yet.</P>
+<P>
+<I>--- Default implementation by Class</I><BR>
+This calls <CODE><B>TranslateArguments()</B></CODE> on <CODE><B>placement</B></CODE> and <CODE><B>arglist</B></CODE>,
+and <CODE><B>TranslateNewType()</B></CODE> on <CODE><B>type_name</B></CODE>.
+Then it returns the translated expression.
+
+<A NAME="mem44">
+</A><PRE><IMG SRC="yellow.gif" ALT=" o "><B>Ptree* TranslateDelete(Environment* env, Ptree* delete_op,
+            Ptree* object)</B></PRE>
+<P>
+This translates a delete expression on the <CODE><B>object</B></CODE>. <CODE><B>delete_op</B></CODE> is the delete operator.  Note that this function is
+not called on <CODE><B>::delete</B></CODE> or <CODE><B>delete []</B></CODE> expressions.</P>
+<P>
+<I>--- Default implementation by Class</I><BR>
+This calls <CODE><B>TranslateExpression()</B></CODE> on the <CODE><B>object</B></CODE> and returns the translated expression.
+
+<A NAME="mem45">
+</A><PRE><IMG SRC="yellow.gif" ALT=" o "><B>Ptree* TranslateMemberRead(Environment* env, Ptree* object,
+            Ptree* op, Ptree* member)</B></PRE>
+<P>
+This translates a member read expression on the <CODE><B>object</B></CODE>.
+The operator <CODE><B>op</B></CODE> is <CODE><B>.</B></CODE> (dot) or <CODE><B>-></B></CODE>.  <CODE><B>member</B></CODE> specifies the member name. <CODE><B>object</B></CODE> has not been translated yet.</P>
+<P>
+<I>--- Default implementation by Class</I><BR>
+This calls <CODE><B>TranslateExpression()</B></CODE> on the <CODE><B>object</B></CODE> and returns the translated expression.
+
+<A NAME="mem46">
+</A><PRE><IMG SRC="yellow.gif" ALT=" o "><B>Ptree* TranslateMemberRead(Environment* env, Ptree* member)</B></PRE>
+<P>
+This translates a member read expression on the <CODE><B>this</B></CODE> object.  That is, it is invoked if the object is not explicitly
+specified.</P>
+<P>
+<I>--- Default implementation by Class</I><BR>
+This returns <CODE><B>member</B></CODE>.
+
+<A NAME="mem47">
+</A><PRE><IMG SRC="yellow.gif" ALT=" o "><B>Ptree* TranslateMemberWrite(Environment* env, Ptree* object,
+            Ptree* op, Ptree* member, Ptree* assign_op, Ptree* expr)</B></PRE>
+<P>
+This translates a member write expression on the  <CODE><B>object</B></CODE> .
+The operator <CODE><B>op</B></CODE> is <CODE><B>.</B></CODE> (dot) or <CODE><B>-></B></CODE>.  <CODE><B>member</B></CODE> specifies the member name.  <CODE><B>assign_op</B></CODE> is an assign operator such as <CODE><B>=</B></CODE> and <CODE><B>+=</B></CODE>.  <CODE><B>expr</B></CODE> specifies the right-hand expression of the assign operator. <CODE><B>object</B></CODE> and <CODE><B>expr</B></CODE> have not been translated yet.</P>
+<P>
+<I>--- Default implementation by Class</I><BR>
+This calls <CODE><B>TranslateExpression()</B></CODE> on <CODE><B>object</B></CODE> and <CODE><B>expr</B></CODE> and returns the translated expression.
+
+<A NAME="mem48">
+</A><PRE><IMG SRC="yellow.gif" ALT=" o "><B>Ptree* TranslateMemberWrite(Environment* env, Ptree* member,
+            Ptree* assign_op, Ptree* expr)</B></PRE>
+<P>
+This translates a member write expression on the <CODE><B>this</B></CODE> object.   That is, it is invoked if the object is not explicitly
+specified. <CODE><B>member</B></CODE> specifies the member name.  <CODE><B>assign_op</B></CODE> is an assign operator such as <CODE><B>=</B></CODE> and <CODE><B>+=</B></CODE> .  <CODE><B>expr</B></CODE> specifies the right-hand expression of the assign operator.  <CODE><B>expr</B></CODE> has not been translated yet.</P>
+<P>
+<I>--- Default implementation by Class</I><BR>
+This calls <CODE><B>TranslateExpression()</B></CODE> on <CODE><B>expr</B></CODE> and returns the translated expression.
+
+<A NAME="mem49">
+</A><PRE><IMG SRC="yellow.gif" ALT=" o "><B>Ptree* TranslateMemberCall(Environment* env, Ptree* object,
+            Ptree* op, Ptree* member, Ptree* arglist)</B></PRE>
+<P>
+This translates a member function call on the <CODE><B>object</B></CODE>.
+The operator <CODE><B>op</B></CODE> is <CODE><B>.</B></CODE> (dot) or  <CODE><B>-></B></CODE> .  <CODE><B>member</B></CODE> specifies the member name.  <CODE><B>arglist</B></CODE> is arguments to the function.  It includes
+parentheses  <CODE><B>()</B></CODE> .  <CODE><B>object</B></CODE> and <CODE><B>arglist</B></CODE> have not been translated yet.</P>
+<P>
+<I>--- Default implementation by Class</I><BR>
+This calls <CODE><B>TranslateExpression()</B></CODE> on  <CODE><B>object</B></CODE> , and <CODE><B>TranslateArguments()</B></CODE> on  <CODE><B>arglist</B></CODE> .
+Then it returns the translated expression.
+
+<A NAME="mem50">
+</A><PRE><IMG SRC="yellow.gif" ALT=" o "><B>Ptree* TranslateMemberCall(Environment* env, Ptree* member,
+            Ptree* arglist)</B></PRE>
+<P>
+This translates a member function call on the <CODE><B>this</B></CODE> object.
+That is, it is invoked if the object is not explicitly specified. <CODE><B>member</B></CODE> specifies the member name.  <CODE><B>arglist</B></CODE> is arguments to the function.  It includes
+parentheses  <CODE><B>()</B></CODE> .  <CODE><B>arglist</B></CODE> has not been translated yet.</P>
+<P>
+<I>--- Default implementation by Class</I><BR>
+This calls <CODE><B>TranslateArguments()</B></CODE> on <CODE><B>arglist</B></CODE> and returns the translated expression.
+
+<A NAME="mem51">
+</A><PRE><IMG SRC="yellow.gif" ALT=" o "><B>Ptree* TranslateUnaryOnMember(Environment* env, Ptree* unary_op,
+            Ptree* object, Ptree* op,
+            Ptree* member)</B></PRE>
+<P>
+This translates a unary operator applied to a member.
+For example, if an expression is <CODE><B>++p->i</B></CODE>, this member function
+is called on the <CODE><B>p</B></CODE>'s class.  The argument <CODE><B>unary_op</B></CODE> is <CODE><B>++</B></CODE>, <CODE><B>object</B></CODE> is <CODE><B>p</B></CODE>, <CODE><B>op</B></CODE> is <CODE><B>-></B></CODE>, and <CODE><B>member</B></CODE> is <CODE><B>i</B></CODE>.</P>
+<P>
+<I>--- Default implementation by Class</I><BR>
+This calls <CODE><B>TranslateExpression()</B></CODE> on  <CODE><B>object</B></CODE> and returns the translated expression.
+
+<A NAME="mem52">
+</A><PRE><IMG SRC="yellow.gif" ALT=" o "><B>Ptree* TranslateUnaryOnMember(Environment* env, Ptree* unary_op,
+            Ptree* member)</B></PRE>
+<P>
+This translates a unary operator applied to a member.
+For example, if an expression is <CODE><B>--i</B></CODE>and <CODE><B>i</B></CODE> is a member,
+this member function
+is called on the the class for <CODE><B>this</B></CODE> object.
+The argument <CODE><B>unary_op</B></CODE> is <CODE><B>--</B></CODE> and <CODE><B>member</B></CODE> is <CODE><B>i</B></CODE>.</P>
+<P>
+<I>--- Default implementation by Class</I><BR>
+This returns the given expression as is.
+
+<A NAME="mem53">
+</A><PRE><IMG SRC="yellow.gif" ALT=" o "><B>Ptree* TranslatePostfixOnMember(Environment* env, Ptree* object,
+            Ptree* op, Ptree* member,
+            Ptree* postfix_op)</B></PRE>
+<P>
+This translates a postfix operator applied to a member.
+For example, if an expression is <CODE><B>p->i++</B></CODE>, this member function
+is called on the <CODE><B>p</B></CODE>'s class.  The argument <CODE><B>object</B></CODE> is <CODE><B>p</B></CODE>, <CODE><B>op</B></CODE> is <CODE><B>-></B></CODE>, <CODE><B>member</B></CODE> is <CODE><B>i</B></CODE>, and <CODE><B>postfix_op</B></CODE> is <CODE><B>++</B></CODE>.</P>
+<P>
+<I>--- Default implementation by Class</I><BR>
+This calls <CODE><B>TranslateExpression()</B></CODE> on  <CODE><B>object</B></CODE> and returns the translated expression.
+
+<A NAME="mem54">
+</A><PRE><IMG SRC="yellow.gif" ALT=" o "><B>Ptree* TranslatePostfixOnMember(Environment* env, Ptree* member,
+            Ptree* postfix_op)</B></PRE>
+<P>
+This translates a postfix operator applied to a member.
+For example, if an expression is <CODE><B>i++</B></CODE>and <CODE><B>i</B></CODE> is a member,
+this member function
+is called on the the class for <CODE><B>this</B></CODE> object.
+The argument <CODE><B>member</B></CODE> is <CODE><B>i</B></CODE> and <CODE><B>postfix_op</B></CODE> is <CODE><B>++</B></CODE>.</P>
+<P>
+<I>--- Default implementation by Class</I><BR>
+This returns the given expression as is.
+
+<A NAME="mem55">
+</A><PRE><IMG SRC="yellow.gif" ALT=" o "><B>Ptree* TranslatePointer(Environment* env, Ptree* variable_name)</B></PRE>
+<P>
+This translates occurrences of the pointer variables, such as <CODE><B>this</B></CODE>, indicating instances of this class.  It translates those
+variables even if they are the left values of assignment expressions.
+Note that this function is also called on the target expression of
+the <CODE><B>-></B></CODE> operator from
+within (the default) <CODE><B>TranslateMemberCall()</B></CODE> etc.</P>
+<P>
+<I>--- Default implementation by Class</I><BR>
+This returns <CODE><B>variable_name</B></CODE> as is.
+
+<A NAME="mem56">
+</A><PRE><IMG SRC="yellow.gif" ALT=" o "><B>Ptree* <A NAME="UserSt">TranslateUserStatement</A>(Environment* env, Ptree* object,
+            Ptree* op, Ptree* keyword, Ptree* rest)</B></PRE>
+<P>
+This translates a <A HREF="base.html#SyntaxExtend">user-defined statement</A>,
+which is a while-style,
+for-style, or closure statement.  The first three elements
+of the statement are specified by <CODE><B>object</B></CODE>, <CODE><B>op</B></CODE>,
+and <CODE><B>keyword</B></CODE>.  The rest of the statement, the <CODE><B>()</B></CODE> part
+and the <CODE><B>{}</B></CODE> part, is specified by <CODE><B>rest</B></CODE>.  For example:</P>
+
+<PRE><CODE>matrix.forall(e) { e = 0.0; }
+</CODE></PRE>
+
+<P>
+If <CODE><B>forall</B></CODE> is a user-defined keyword for the while-style
+statement,  <CODE><B>object</B></CODE> is <CODE><B>matrix</B></CODE>,  <CODE><B>op</B></CODE> is <CODE><B>.</B></CODE> (dot),  <CODE><B>keyword</B></CODE> is <CODE><B>forall</B></CODE>,
+and <CODE><B>rest</B></CODE> is  <CODE><B>[( e ) [{ [[e = 0.0] ;] }]]</B></CODE>.</P>
+
+<P>
+To recursively translate the <CODE><B>{}</B></CODE> part,  <CODE><B>TranslateExpression()</B></CODE> should be called on the last element of <CODE><B>rest</B></CODE>, that is, <CODE><B>rest->Last()->First()</B></CODE>.  If the statement is <A HREF="base.html#ClsrSt">a closure statement</A>,
+the declared arguments are recorded in
+the given environment <CODE><B>env</B></CODE>.  Since the scope represented
+by <CODE><B>env</B></CODE> is only within the statement, those declared arguments are
+removed from <CODE><B>env</B></CODE> after this function is completed.</P>
+
+<P>
+<I>--- Default implementation by Class</I><BR>
+This causes an error and returns <CODE><B>nil</B></CODE>.
+
+<A NAME="mem57">
+</A><PRE><IMG SRC="yellow.gif" ALT=" o "><B>Ptree* <A NAME="StaticUser">TranslateStaticUserStatement</A>(Environment* env,
+            Ptree* keyword, Ptree* rest)</B></PRE>
+<P>
+This translates a <A HREF="base.html#SyntaxExtend">user-defined statement</A> beginning with
+a class name such as:</P>
+
+<PRE><CODE>Lambda::closure(int i) { return i + 1; }
+</CODE></PRE>
+
+<P>
+Here, <CODE><B>closure</B></CODE> is a user-defined keyword.
+The meaning of the arguments to this function is the same as that of <CODE><B>TranslateUserStatement()</B></CODE>.</P>
+
+<P>
+To recursively translate the <CODE><B>{}</B></CODE> part,  <CODE><B>TranslateExpression()</B></CODE> should be called on the last
+element of <CODE><B>rest</B></CODE>, that is, <CODE><B>rest->Last()->First()</B></CODE>.
+If the statement is <A HREF="base.html#ClsrSt">a closure statement</A> like the example above,
+the declared arguments such as <CODE><B>i</B></CODE> are recorded in
+the given environment <CODE><B>env</B></CODE>.  Since the scope represented
+by <CODE><B>env</B></CODE> is only within the statement, those declared arguments are
+removed from <CODE><B>env</B></CODE> after this function is completed.</P>
+
+<P>
+This member function
+is named after that the syntax is similar
+to one for <CODE><B>static</B></CODE> member function calls.</P>
+
+<P>
+<I>--- Default implementation by Class</I><BR>
+This causes an error and returns <CODE><B>nil</B></CODE>.
+
+</UL>
+<P>
+The MOP does not allow programmers to customize array access or
+pointer operations.  Suppose that <CODE><B>p</B></CODE> is a pointer to a class <CODE><B>A</B></CODE>.  Then the class metaobject for <CODE><B>A</B></CODE> cannot translate
+expressions such as <CODE><B>*p</B></CODE> or <CODE><B>p[3]</B></CODE>.
+This design decision is based on C++'s one.  For example,
+C++'s operator overloading on <CODE><B>[]</B></CODE> does not change the meaning
+of array access.  It changes the meaning of the operator <CODE><B>[]</B></CODE> applied to not an array of objects but an object.</P>
+
+<P>
+If the MOP allows programmers to customize array access and pointer
+operations, they could implement an inconsistent extension.
+For example, they want to translate an expression <CODE><B>p[2]</B></CODE> into <CODE><B>p->get(2)</B></CODE>, where <CODE><B>p</B></CODE> is a pointer to a class <CODE><B>X</B></CODE>.
+Then, what should this expression <CODE><B>*(p + 2)</B></CODE> be translated into?
+Should the MOP regard it as an array access or a pointer dereference?
+Because C++ provides strong pointer arithmetic,
+designing an interface to consistently customize array access and
+pointer operations is difficult.</P>
+
+<P>
+The class <CODE><B>Class</B></CODE> also provides functions for translating
+expressions and actual arguments.  These functions are not overridden
+but rather called by other functions shown above:</P>
+
+<UL>
+<A NAME="mem58">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>Ptree* TranslateExpression(Environment* env, Ptree* expr)</B></PRE>
+<P>
+This translates an expression.</P>
+<A NAME="mem59">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>Ptree* TranslateExpression(Environment* env,
+            Ptree* expr, TypeInfo& t)</B></PRE>
+<P>
+This translates an expression and stores its type in <CODE><B>t</B></CODE>.</P>
+<A NAME="mem60">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>Ptree* TranslateArguments(Environment* env, Ptree* args)</B></PRE>
+<P>
+This translates an actual-argument list.</P>
+<A NAME="mem61">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>Ptree* TranslateNewType(Environment* env, Ptree* type_name)</B></PRE>
+<P>
+This translates the type name included
+in a <CODE><B>new</B></CODE> expression.  If the created object is an array,
+it calls <CODE><B>TranslateExpression()</B></CODE> on the expression specifying
+the array size.
+This is called by <A HREF="#TransNew"><CODE><B>TranslateNew()</B></CODE></A>.</P>
+</UL>
+
+<H2><IMG SRC="red-pin.gif"> <A NAME="S5">Registering Keywords</A></H2>
+
+<P>
+To make <A HREF="base.html#SyntaxExtend">user-defined keywords</A> available at the base level,
+programmers must register the keywords by the <CODE><B>static</B></CODE> member functions on <CODE><B>Class</B></CODE> shown below.
+Those member functions should be called
+by <CODE><B><A HREF="#Init">Initialize()</A></B></CODE>.</P>
+
+<UL>
+<A NAME="mem62">
+</A><PRE>
+<IMG SRC="red.gif" ALT=" o "> <B>static void <A NAME="RegMod">RegisterNewModifier</A>(char* keyword)</B>
+</PRE>
+<P>
+This registers <CODE><B>keyword</B></CODE> as a new modifier.  If this
+appears in front of the new operator, the translation is performed by <A HREF="#TransNew"><CODE><B>TranslateNew()</B></CODE></A>.  If it appears in front of
+a function argument, then it is automatically eliminated after the
+translation.  Its existence can be inspected by <A HREF="member.html#GetUsrArgMod"><CODE><B>GetUserArgumentModifiers()</B></CODE></A> on
+the member metaobject.</P>
+<A NAME="mem63">
+</A><PRE>
+<IMG SRC="red.gif" ALT=" o "> <B>static void <A NAME="RegMmod">RegisterNewMemberModifier</A>(char* keyword)</B>
+</PRE>
+<P>
+This registers <CODE><B>keyword</B></CODE> as a new member modifier.
+It is automatically eliminated after the translation.  Its existence
+can be inspected by  <A HREF="member.html#GetUsrMemMod"><CODE><B>GetUserMemberModifier()</B></CODE></A> on
+the member metaobject.</P>
+<A NAME="mem64">
+</A><PRE>
+<IMG SRC="red.gif" ALT=" o "> <B>static void <A NAME="RegAcc">RegisterNewAccessSpecifier</A>(char* keyword)</B>
+</PRE>
+<P>
+This registers <CODE><B>keyword</B></CODE> as a new access specifier.
+It is automatically eliminated after the translation.  Its existence
+can be inspected by  <A HREF="member.html#GetUsrAccSpec"><CODE><B>GetUserAccessSpecifier()</B></CODE></A> on
+the member metaobject.</P>
+<A NAME="mem65">
+</A><PRE>
+<IMG SRC="red.gif" ALT=" o "> <B>static void <A NAME="RegWhile">RegisterNewWhileStatement</A>(char* keyword)</B>
+</PRE>
+<P>
+This registers <CODE><B>keyword</B></CODE> as a new <CODE><B>while</B></CODE>-style statement.</P>
+<A NAME="mem66">
+</A><PRE>
+<IMG SRC="red.gif" ALT=" o "> <B>static void <A NAME="RegFor">RegisterNewForStatement</A>(char* keyword)</B>
+</PRE>
+<P>
+This registers <CODE><B>keyword</B></CODE> as a
+new <CODE><B>for</B></CODE>-style statement.</P>
+<A NAME="mem67">
+</A><PRE>
+<IMG SRC="red.gif" ALT=" o "> <B>static void <A NAME="RegClo">RegisterNewClosureStatement</A>(char* keyword)</B>
+</PRE>
+<P>
+This registers <CODE><B>keyword</B></CODE> as a new closure-style
+statement.</P>
+<A NAME="mem68">
+</A><PRE>
+<IMG SRC="red.gif" ALT=" o "> <B>static void <A NAME="RegMc">RegisterMetaclass</A>(char* keyword, char* metaclass)</B>
+</PRE>
+<P>
+This registers <CODE><B>keyword</B></CODE> as a new modifier
+and associates it with <CODE><B>metaclass</B></CODE>.
+If this keyword appears in front of a class declaration,
+then <CODE><B>metaclass</B></CODE> is <A HREF="#S1">selected for the declared class.</A></P>
+</UL>
+<P>
+The translation of the registered keyword for the while-,
+the for-, or the closure-style statement is the responsibility
+of the class metaobject.  It is processed by <A HREF="#UserSt"><CODE><B>TranslateUserStatement()</B></CODE></A> and <A HREF="#StaticUser"><CODE><B>TranslateStaticUserStatement()</B></CODE></A>.</P>
+
+
+<H2><IMG SRC="red-pin.gif"> <A NAME="S6">Initialization and Finalization</A></H2>
+
+<P>
+The MOP provides functions to initialize and finalize class
+metaobjects:</P>
+
+<UL>
+<A NAME="mem69">
+</A><PRE>
+<IMG SRC="red.gif" ALT=" o "> <B>static bool <A NAME="Init">Initialize</A>()</B>
+</PRE>
+<P>
+This is a class initializer; it is invoked only
+once on each metaclass (not on each class metaobject) right after
+the compiler starts (if it is statically linked) or
+the metaclass is dynamically loaded.
+It returns <CODE><B>true</B></CODE> if the initialization succeeds.
+The subclasses of <CODE><B>Class</B></CODE> may define their own <CODE><B>Initialize()</B></CODE> but they must not call their base
+classes' <CODE><B>Initialize()</B></CODE>.</P>
+<P>
+<I>--- Default implementation by Class</I><BR>
+This does nothing except returning <CODE><B>true</B></CODE>.
+
+<A NAME="mem70">
+</A><PRE><IMG SRC="yellow.gif" ALT=" o "><B>Ptree* FinalizeInstance()</B></PRE>
+<P>
+This is invoked on each class metaobject after all the
+translation is finished.  The returned <CODE><B>Ptree</B></CODE> object is inserted at
+the end of the translated source file.  This member function is not <I>overridable</I>; <CODE><B>FinalizeInstance()</B></CODE> of the subclasses of <CODE><B>Class</B></CODE> must call
+the base-class'es  <CODE><B>FinalizeInstance()</B></CODE> .</P>
+<P>
+<I>--- Default implementation by Class</I><BR>
+This does nothing except returning <CODE><B>nil</B></CODE>.
+
+<A NAME="mem71">
+</A><PRE>
+<IMG SRC="red.gif" ALT=" o "> <B>static Ptree* FinalizeClass()</B>
+</PRE>
+<P>
+This is invoked on each metaclass after all the
+translation is finished if it exists.  The returned <CODE><B>Ptree</B></CODE> object
+is inserted at the end of the translated source file.
+The subclasses of <CODE><B>Class</B></CODE> may define their own <CODE><B>FinalizeClass()</B></CODE> but they must not call their base
+classes' <CODE><B>FinalizeClass()</B></CODE>.</P>
+<P>
+<I>--- Default implementation by Class</I><BR>
+This returns <CODE><B>nil</B></CODE>.
+
+<A NAME="mem72">
+</A><PRE>
+<IMG SRC="red.gif" ALT=" o "> <B>static ClassArray& AllClasses()</B>
+</PRE>
+<P>
+This is available only within <CODE><B>FinalizeInstance()</B></CODE>.
+It returns an array of all the classes appearing in the base-level program.
+The returned array <CODE><B>a</B></CODE> is used as follows:</P>
+
+<PRE><CODE>int n = a.Number();      // get the number of elements
+Class* c = a[0];         // get the first element
+Class* c2 = a.Ref(0);    // same as a[0]
+</CODE></PRE>
+
+<A NAME="mem73">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>int Subclasses(ClassArray& result)</B></PRE>
+<P>
+This is available only within <CODE><B>FinalizeInstance()</B></CODE>.
+It returns the number of all the subclasses of the class.
+Those subclasses are also stored in <CODE><B>result</B></CODE>.</P>
+<A NAME="mem74">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>int ImmediateSubclasses(ClassArray& result)</B></PRE>
+<P>
+This is available only within <CODE><B>FinalizeInstance()</B></CODE>.
+It returns the number of all the immediate subclasses of the class.
+Those subclasses are also stored in <CODE><B>result</B></CODE>.
+The immediate subclass means only a child class but not a grand child.</P>
+<A NAME="mem75">
+</A><PRE>
+<IMG SRC="red.gif" ALT=" o "> <B>static int InstancesOf(char* metaclas_name,
+            ClassArray& result)</B>
+</PRE>
+<P>
+This is available only within <CODE><B>FinalizeInstance()</B></CODE>.
+It returns the number of all the classes that are instances of
+the metaclass specified by <CODE><B>metaclass_name</B></CODE>.  Also those classes
+are stored in <CODE><B>result</B></CODE>.</P>
+</UL>
+
+<H2><IMG SRC="red-pin.gif"> <A NAME="S7">Inserting Statements</A></H2>
+
+<P>
+Class metaobjects can not only replace expressions but also
+insert statements into the translated source code:</P>
+
+<UL>
+<A NAME="mem76">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>void InsertBeforeStatement(Environment* e, Ptree* s)</B></PRE>
+<P>
+This inserts the statement <CODE><B>s</B></CODE> just before the statement
+currently translated.</P>
+<A NAME="mem77">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>void AppendAfterStatement(Environment* e, Ptree* s)</B></PRE>
+<P>
+This appends the statement <CODE><B>s</B></CODE> just after the statement
+currently translated.</P>
+<A NAME="mem78">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>void InsertBeforeToplevel(Environment* e, Ptree* s)</B></PRE>
+<P>
+This inserts the statement <CODE><B>s</B></CODE> just before the toplevel
+declaration, such as function definitions, that are currently translated.</P>
+<A NAME="mem79">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>void AppendAfterToplevel(Environment* e, Ptree* s)</B></PRE>
+<P>
+This appends the statement <CODE><B>s</B></CODE> just after the toplevel
+declaration, such as function definitions, that are currently translated.</P>
+<A NAME="mem80">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>bool InsertDeclaration(Environment* e, Ptree* d)</B></PRE>
+<P>
+This inserts the declaration statement <CODE><B>d</B></CODE> at the
+beginning of the function body.  For example,</P>
+
+<PRE><CODE>1: void Point::Move(int new_x, int new_y)
+2: {
+3:     x = new_x; y = new_y;
+4: }
+</CODE></PRE>
+
+<P>
+The declaration statement <CODE><B>d</B></CODE> is inserted between the
+2nd line and the 3rd line.</P>
+
+<P>
+This function returns <CODE><B>true</B></CODE> if the insertion succeeds.</P>
+
+<A NAME="mem81">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>bool InsertDeclaration(Environment* e, Ptree* d,
+            Ptree* key, void* client_data)</B></PRE>
+<P>
+This inserts the declaration statement <CODE><B>d</B></CODE> at the
+beginning of the function body, and also records <CODE><B>client_data</B></CODE> with <CODE><B>key</B></CODE>.  The recorded client data last while the
+function body is translated.
+This function returns <CODE><B>true</B></CODE> if no client data is recorded with <CODE><B>key</B></CODE> and the insertion succeeds.</P>
+<A NAME="mem82">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>void* LookupClientData(Environment* e, Ptree* key)</B></PRE>
+<P>
+This returns the client data associated with <CODE><B>key</B></CODE>.  If the client data is not recorded, this function
+returns <CODE><B>nil</B></CODE>.</P>
+</UL>
+
+<H2><IMG SRC="red-pin.gif"> <A NAME="S8">Command Line Options</A></H2>
+
+<P>
+Class metaobjects can receive <A HREF="man.html">command line options</A>.  For example,
+if the user specify the <CODE><B>-M</B></CODE> option:</P>
+
+
+<PRE><CODE>% occ -Mclient -Mmode=tcp sample.cc
+</CODE></PRE>
+
+<P>
+Then the class metaobjects can receive the command line
+options <CODE><B>client</B></CODE> and <CODE><B>mode</B></CODE> (the value is <CODE><B>tcp</B></CODE>) by the following functions:</P>
+
+<UL>
+<A NAME="mem83">
+</A><PRE>
+<IMG SRC="red.gif" ALT=" o "> <B>static bool LookupCmdLineOption(char* option_name)</B>
+</PRE>
+<P>
+This returns <CODE><B>true</B></CODE> if the option specified
+by <CODE><B>option_name</B></CODE> is given from the command line.</P>
+<A NAME="mem84">
+</A><PRE>
+<IMG SRC="red.gif" ALT=" o "> <B>static bool LookupCmdLineOption(char* key, char*& value)</B>
+</PRE>
+<P>
+This returns <CODE><B>true</B></CODE> if the option specified
+by <CODE><B>option_name</B></CODE> is given from the command line.  The value of
+the option is stored in <CODE><B>value</B></CODE>.  If the option value is not
+given, <CODE><B>value</B></CODE> is <CODE><B>nil</B></CODE>.</P>
+</UL>
+
+<H2><IMG SRC="red-pin.gif"> <A NAME="S9">Error Message</A></H2>
+
+<P>
+The following functions reports an error that occurs during
+the source-to-source translation.</P>
+
+<UL>
+<A NAME="mem85">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>void ErrorMessage(Environment* env, char* message,
+            Ptree* code, Ptree* where)</B></PRE>
+<P>
+This prints an error message.
+For example, <CODE><B>message</B></CODE> is <CODE><B>"wrong type:"</B></CODE> and <CODE><B>code</B></CODE> is a <CODE><B>Ptree</B></CODE> metaobject
+representing <CODE><B>Point</B></CODE>, then the printed messages is something
+like this:</P>
+
+<PRE><CODE>sample.cc:25: wrong type: Point
+</CODE></PRE>
+
+<P>
+The file name and the line number point to the location of the
+code specified by <CODE><B>where</B></CODE>.  If <CODE><B>where</B></CODE> is <CODE><B>nil</B></CODE>,
+no file name or line number are not printed.</P>
+
+<P>
+The first argument <CODE><B>env</B></CODE> can be omitted.  In this case, the printed
+line number may be wrong.</P>
+
+<A NAME="mem86">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>void WarningMessage(Environment* env, char* message,
+            Ptree* name, Ptree* where)</B></PRE>
+<P>
+This prints a warning message.  The meaning of the arguments
+are the same as <CODE><B>ErrorMessage()</B></CODE>.  The first argument <CODE><B>env</B></CODE> can
+be omitted.</P>
+</UL>
+
+
+
+<H2><IMG SRC="red-pin.gif"> <A NAME="S10">Metaclass for Class</A></H2>
+
+<P>
+Since OpenC++ is a self-reflective language,
+the meta-level programs are also in OpenC++.
+They must be compiled by the OpenC++ compiler.
+Because of this self-reflection, metaclasses also have their metaclasses.
+The metaclass for <CODE><B>Class</B></CODE> and its subclasses must
+be <CODE><B>Metaclass</B></CODE>.
+However, programmers do not have to explicitly declare the metaclass for
+their metaclasses because
+the subclasses of <CODE><B>Class</B></CODE> inherit the metaclass
+from <CODE><B>Class</B></CODE>.</P>
+
+<P>
+ <CODE><B>Metaclass</B></CODE> makes it easy to define a subclass
+of <CODE><B>Class</B></CODE>.
+It automatically inserts the definition of <CODE><B>MetaclassName()</B></CODE> of that subclass and also generates house-keeping code internally used by
+the compiler.</P>
+
+<P>
+Since <CODE><B>Metaclass</B></CODE> is a subclass of <CODE><B>Class</B></CODE>,
+its metaclass is <CODE><B>Metaclass</B></CODE> itself. </P>
+
+<P><IMG SRC="instance-of.gif"
+ALT="the instance-of relationship"></P>
+<HR>
+[<A HREF="index.html">First</A> | <A HREF="typeinfo.html">Prev</A> | <A HREF="member.html">Next</A>]
+</BODY>
+</HTML>

@@ -1,0 +1,173 @@
+OpenC++ version 2.5.11
+
+Copyright (c) 1997-2001 Shigeru Chiba.  All Rights Reserved.
+Copyright (c) 1995, 1996 Xerox Corporation. All Rights Reserved.
+
+THIS MATERIAL IS PROVIDED AS IS, WITH ABSOLUTELY NO WARRANTY EXPRESSED
+OR IMPLIED.  ANY USE IS AT YOUR OWN RISK.
+
+This is a distribution package of OpenC++ version 2.5.
+
+
+** Compilation
+
+To compile the OpenC++ compiler, move to src/{Unix,Win32} and run make
+with the makefile for your target, for example:
+
+  % make -f Makefile.Linux
+
+We made sure that the OpenC++ compiler can be compiled with gcc on
+Solaris, Linux, FreeBSD, OpenBSD, and SunOS (some sample programs do
+not run on SunOS.)
+
+Since the OpenC++ compiler uses Boehm's conservative garbage collector
+(Note: the object code produced by OpenC++ does not use it,) the
+library gc.a needs to be installed on your target in advance.  For
+your convenience, this package includes the 4.14 distribution of that
+garbage collector and you should move to src/gc/ and run "make c++"
+(Don't forget "c++"!) there before running make under src/{Unix,Win32}.
+For more details, see src/gc/README.
+
+
+** Tips
+
+- If you have a trouble to run the OpenC++ compiler, first make sure of
+  LD_LIBRARY_PATH.  It has to include the current directory.
+
+- Some g++ installations uses GNU ld, but this configuration may break
+  dlopen().  ld supplied by the operating system should be used.
+
+- If the operating system is Solaris 2.x, you may need -DSOLARIS_THREADS 
+  to build the garbage collector.  If this option is specified, you also
+  need to edit src/Unix/Makefile.Solaris so that CXXFLAGS includes
+  that option and LIB includes -lthread.
+
+- If your operating system is Solaris 2.6, you should insert:
+
+	typedef unsigned long uint32_t;
+
+  before the line:
+
+	#include <sys/procfs.h>
+
+  in src/gc/os_dep.c.
+
+- If the platform is Win32, Visual C++'s BIN directory has to be
+  in the search path.
+
+- If you have a trouble of the garbage collector, try the latest version
+  available from http://www.hpl.hp.com/personal/Hans_Boehm/gc.
+  Otherwise, the following step-by-step instruction may help you build
+  gc.a.
+
+  Step1: cd src/gc
+  Step2: Change os_dep.c and Makefile if necessary
+  Step3: make test
+	 You should see SUCCEEDED.
+  Step4: make clean c++
+	 You should see "The test appears to have succeeded."
+  Step5: cd ../{Unix,Win32}
+  Step6: make
+  Step7: cd ../gc; make clean
+	 You don't need gc.a any more.
+
+  Note: if your platform is Irix, you have to specify ABI_FLAG (= n32).
+
+
+** Files
+
+reference.pdf		Reference Manual (PDF)
+
+html/			Reference Manual (HTML)
+
+ref-appendix.html	Appendix of the Reference Manual (HTML)
+
+src/			Compiler source
+src/Unix/Makefile.*	Makefiles for several Unix platforms
+src/Win32/Makefile.*	Makefiles for OpenC++ and Boehm's GC
+
+src/gc			Boehm's GC 4.14 source
+sample/			Sample programs
+sample/Makefile		Makefile using a dynamic loader
+sample/Makefile.static	Makefile to build sample programs without
+			a dynamic loader.  All metaclasses are
+			compiled and statically linked to the OpenC++
+			compiler.
+sample/Makefile.Win	Makefile for Win32.  Make sure that occ.exe,
+			occ.lib, gc.lib, and gc.dll are under sample/.
+
+
+** Bug reports etc.
+
+Bug reports:
+chiba@acm.org
+or chiba@is.titech.ac.jp
+
+Web page of OpenC++:
+http://www.is.titech.ac.jp/~chiba
+
+Web page of Boehm's GC:
+http://www.hpl.hp.com/personal/Hans_Boehm/gc/
+
+
+** Acknowledgments
+
+OpenC++ version 2 was originally developed as part of Chiba's
+PhD work under the supervision of Gregor Kiczales at Xerox
+PARC.  For this reason, the copyright of the original soruce code
+is held by Xerox although they kindly allow me to freely distribute
+the source code (See the copyright notice for more details.)
+
+For the derivative work from the Xerox version, I'd like to thank
+Blake McBride <blake@edge.net>, Eric Totel <totel@laas.fr>, Toru
+Takimoto <takimoto@is.s.u-tokyo.ac.jp>, Jean Louis
+<jlfc@club-internet.fr> for Win32 support, Marc-Olivier Killijian
+<killijia@laas.fr>, Uttam M. Narsu <narsu@hks.com>, Victor Zhukov
+<vic@paragraph.com>, Renaud Pawlak <pawlak@ecoledoc.lip6.fr>,
+Mangesh Kasbekar <kasbekar@cse.psu.edu>, Chuck Blake <cblake@lcs.mit.edu>,
+Winfried Joachim Szukalski <szukw000@mail.Uni-Mainz.de>,
+Pat Rogers <progers@classwide.com>, Andrew Filonov <aef@cliph.keytown.com>,
+Jean-Paul Rigault <jpr@essi.fr>, Juan Carlos Arevalo Baeza
+<jcab@roningames.com>, Colin McCormack <colin@field.medicine.adelaide.edu.au>,
+Borice Arcier <arcier@essi.fr>, Paul Stodghill <stodghil@cs.cornell.edu>,
+Mark Murray <mark@xnar.com>, Bas van der Linden <linden@win.tue.nl>,
+and all other contributors.
+
+
+*** Copyright Notice
+
+  Copyright (C) 1997-2001 Shigeru Chiba, Tokyo Institute of Technology.
+
+  Permission to use, copy, distribute and modify this software and   
+  its documentation for any purpose is hereby granted without fee,        
+  provided that the above copyright notice appear in all copies and that 
+  both that copyright notice and this permission notice appear in 
+  supporting documentation.
+
+  Shigeru Chiba makes no representations about the suitability of this 
+  software for any purpose.  It is provided "as is" without express or
+  implied warranty.
+
+  Copyright (c) 1995, 1996 Xerox Corporation.
+  All Rights Reserved.
+
+  Use and copying of this software and preparation of derivative works
+  based upon this software are permitted. Any copy of this software or
+  of any derivative work must include the above copyright notice of
+  Xerox Corporation, this paragraph and the one after it.  Any
+  distribution of this software or derivative works must comply with all
+  applicable United States export control laws.
+
+  This software is made available AS IS, and XEROX CORPORATION DISCLAIMS
+  ALL WARRANTIES, EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION THE
+  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+  PURPOSE, AND NOTWITHSTANDING ANY OTHER PROVISION CONTAINED HEREIN, ANY
+  LIABILITY FOR DAMAGES RESULTING FROM THE SOFTWARE OR ITS USE IS
+  EXPRESSLY DISCLAIMED, WHETHER ARISING IN CONTRACT, TORT (INCLUDING
+  NEGLIGENCE) OR STRICT LIABILITY, EVEN IF XEROX CORPORATION IS ADVISED
+  OF THE POSSIBILITY OF SUCH DAMAGES.
+
+----
+Shigeru CHIBA			E-mail: chiba@acm.org
+Department of Mathematical and Computing Sciences
+Tokyo Institute of Technology

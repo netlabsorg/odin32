@@ -1,0 +1,317 @@
+<HTML>
+<HEAD>
+<TITLE>OpenC++ Reference Manual</TITLE>
+</HEAD>
+<BODY>
+
+<H1>Member Metaobjects</H1>
+
+<P>
+Member metaobjects provide the ability of introspection and
+source-code translation of
+the members.  They can be obtained by calling <CODE><B>NthMember()</B></CODE> or <CODE><B>LookupMember()</B></CODE> on a class metaobject.  The following
+is the list of the member functions provided by the member metaobjects.</P>
+
+<HR>
+
+<H2><IMG SRC="red-pin.gif"> Public Members</H2>
+
+<UL><CODE><NOBR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem2">ArgumentList</A>()<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem3">Arguments</A>()<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem5">FunctionBody</A>()<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem20">GetUserAccessSpecifier</A>()<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem22">GetUserArgumentModifiers</A>(PtreeArray& modifiers)<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem21">GetUserMemberModifier</A>()<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem9">IsConstructor</A>()<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem10">IsDestructor</A>()<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem11">IsFunction</A>()<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem17">IsInline</A>()<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem16">IsMutable</A>()<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem14">IsPrivate</A>()<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem13">IsProtected</A>()<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem12">IsPublic</A>()<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem19">IsPureVirtual</A>()<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem15">IsStatic</A>()<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem18">IsVirtual</A>()<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem0">Member</A>(Member&)<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem4">MemberInitializers</A>()<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem1">Name</A>()<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem29">NewArgumentList</A>()<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem31">NewFunctionBody</A>()<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem30">NewMemberInitializers</A>()<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem28">NewName</A>()<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem6">Nth</A>()<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem25">SetArgumentList</A>(Ptree* arglist)<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem27">SetFunctionBody</A>(Ptree* body)<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem26">SetMemberInitializers</A>(Ptree* init)<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem23">SetName</A>(Ptree* name)<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem24">SetQualifiedName</A>(Ptree* name)<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem7">Signature</A>(TypeInfo& t)<BR>
+<IMG SRC="green.gif" ALT=" o "><A HREF="#mem8">Supplier</A>()<BR>
+</NOBR></CODE></UL>
+<HR>
+
+<H2><IMG SRC="red-pin.gif"> <A NAME="S1">Introspection</A></H2>
+
+<P>
+First, we show the member functions for introspection.</P>
+
+<UL>
+<A NAME="mem0">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B> Member(Member&)</B></PRE>
+<P>
+This is a constructor to make a copy of a member metaobject.</P>
+<A NAME="mem1">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>Ptree* Name()</B></PRE>
+<P>
+This returns the member name.</P>
+<A NAME="mem2">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>Ptree* ArgumentList()</B></PRE>
+<P>
+This returns the formal argument list of the member.
+For example, if the member is <CODE><B>int f(int, char*)</B></CODE>,
+then this function returns  <CODE><B>[[[int] [nil]] , [[char] [*]]]</B></CODE>.
+If the member is a data member, this function returns <CODE><B>nil</B></CODE>.</P>
+<A NAME="mem3">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>Ptree* Arguments()</B></PRE>
+<P>
+This returns the argument list of the member.
+Unlike <CODE><B>ArgumentList()</B></CODE>, the returned list does not include
+the types.  It is a list of the argument names.  If the member is <CODE><B>int f(int p, char* q)</B></CODE>, then this function returns <CODE><B>[p , q]</B></CODE>.  Even if the argument name is not given in the argument
+list, it is automatically filled by this function.  In this case,
+the formal argument list of the member is also changed to include that
+argument name.
+If the member is a data member, this function returns <CODE><B>nil</B></CODE>.</P>
+<A NAME="mem4">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>Ptree* MemberInitializers()</B></PRE>
+<P>
+This returns the member initializers if the member is a constructor.
+Otherwise, it returns <CODE><B>nil</B></CODE>.  For example, if the member is:</P>
+
+<PRE><CODE>X::X() : p(3), q(1) {
+... }
+</CODE></PRE>
+
+<P>
+Then this function returns <CODE><B>[: [p ( [3] )] , [q ( [1] )]]</B></CODE>.</P>
+
+<A NAME="mem5">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>Ptree* FunctionBody()</B></PRE>
+<P>
+This returns the function body if the member is a function.  The
+returned text includes braces <CODE><B>{}</B></CODE>.</P>
+<A NAME="mem6">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>int Nth()</B></PRE>
+<P>
+If the member is the  <CODE><B>i</B></CODE> -th member, this returns <CODE><B>i</B></CODE>.  Otherwise, if the member is not declared,
+it returns -1.</P>
+<A NAME="mem7">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>void Signature(TypeInfo& t)</B></PRE>
+<P>
+This returns the type of the member in <CODE><B>t</B></CODE>.  If the
+member is a member function, the returned type is the function type.</P>
+<A NAME="mem8">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>Class* Supplier()</B></PRE>
+<P>
+This returns the class supplying this member.  If the member is
+inherited from the base class, then the returned class is that base class.</P>
+<A NAME="mem9">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>bool IsConstructor()</B></PRE>
+<P>
+This returns <CODE><B>true</B></CODE> if the member is a constructor.</P>
+<A NAME="mem10">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>bool IsDestructor()</B></PRE>
+<P>
+This returns <CODE><B>true</B></CODE> if the member is a destructor.</P>
+<A NAME="mem11">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>bool IsFunction()</B></PRE>
+<P>
+This returns <CODE><B>true</B></CODE> if the member is a member function.</P>
+<A NAME="mem12">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>bool IsPublic()</B></PRE>
+<P>
+This returns <CODE><B>true</B></CODE> if the member is a <CODE><B>public</B></CODE> member.</P>
+<A NAME="mem13">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>bool IsProtected()</B></PRE>
+<P>
+This returns <CODE><B>true</B></CODE> if the member is a <CODE><B>protected</B></CODE> member.</P>
+<A NAME="mem14">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>bool IsPrivate()</B></PRE>
+<P>
+This returns <CODE><B>true</B></CODE> if the member is a <CODE><B>private</B></CODE> member.</P>
+<A NAME="mem15">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>bool IsStatic()</B></PRE>
+<P>
+This returns <CODE><B>true</B></CODE> if the member is a <CODE><B>static</B></CODE> member.</P>
+<A NAME="mem16">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>bool IsMutable()</B></PRE>
+<P>
+This returns <CODE><B>true</B></CODE> if the member is a <CODE><B>mutable</B></CODE> member.</P>
+<A NAME="mem17">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>bool IsInline()</B></PRE>
+<P>
+This returns <CODE><B>true</B></CODE> if the member is a <CODE><B>inline</B></CODE> member function.</P>
+<A NAME="mem18">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>bool IsVirtual()</B></PRE>
+<P>
+This returns <CODE><B>true</B></CODE> if the member is a <CODE><B>virtual</B></CODE> member function.</P>
+<A NAME="mem19">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>bool IsPureVirtual()</B></PRE>
+<P>
+This returns <CODE><B>true</B></CODE> if the member is a pure <CODE><B>virtual</B></CODE> member function.</P>
+</UL>
+<P>
+OpenC++ allows syntax extensions for access specifiers and
+argument lists.  The following members are used for dealing with
+such syntax extensions.</P>
+
+<UL>
+<A NAME="mem20">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>Ptree* <A NAME="GetUsrAccSpec">GetUserAccessSpecifier</A>()</B></PRE>
+<P>
+This returns an user-defined access specifier for the member.
+For example, suppose that <CODE><B>sync</B></CODE> is a user-defined keyword:</P>
+
+<PRE><CODE>class Window {
+public:
+    void Move();
+sync:
+    void Resize();
+};
+</CODE></PRE>
+
+<P>
+Then <CODE><B>GetUserAccessSpecifier()</B></CODE> called on <CODE><B>Resize()</B></CODE> returns <CODE><B>[sync :]</B></CODE>.  The user-defined
+access specifier is effective until another access specifier
+appears.  For example:</P>
+
+
+<PRE><CODE>class X {
+public:
+    void f1();     // public
+sync:
+    void f2();     // public, sync
+private:
+    void g1();     // private
+sync:
+    void g2();     // private, sync
+};
+</CODE></PRE>
+
+<P>
+The user-defined access specifiers are automatically eliminated.
+The programmer does not have to be concerned about it.</P>
+
+<A NAME="mem21">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>Ptree* <A NAME="GetUsrMemMod">GetUserMemberModifier</A>()</B></PRE>
+<P>
+This returns <A HREF="base.html#SyntaxExtend">the member modifier</A> for the member.
+If no member modifier is specified, this returns <CODE><B>nil</B></CODE>.
+The member modifier is automatically eliminated.
+The programmer does not have to be concerned about it.</P>
+<A NAME="mem22">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>bool <A NAME="GetUsrArgMod">GetUserArgumentModifiers</A>(PtreeArray& modifiers)</B></PRE>
+<P>
+This computes user-defined type modifiers
+attached to the argument types.  If successful, it returns <CODE><B>true</B></CODE> and stores the result in <CODE><B>modifiers</B></CODE>.  The result is
+a <CODE><B>PtreeArray</B></CODE> of user-defined type modifiers.  The <CODE><B>i</B></CODE>-the element is one for the <CODE><B>i</B></CODE>-th argument.  If no modifier
+is specified, the element is <CODE><B>nil</B></CODE>.  For example, if <CODE><B>ref</B></CODE> is a user-defined type modifier,</P>
+
+<PRE><CODE>class C {
+public:
+    void f(ref int p1, int p2);
+};
+</CODE></PRE>
+
+<P>
+Then <CODE><B>GetUserArgumentModifiers()</B></CODE> called on <CODE><B>f</B></CODE> returns
+an array <CODE><B>{ [ref], nil }</B></CODE>.</P>
+
+<P>
+All the user-defined type modifiers are automatically eliminated.
+The programmer does not have to be concerned about it.</P>
+
+</UL>
+
+<H2><IMG SRC="red-pin.gif"> <A NAME="S2">Translation</A></H2>
+
+<P>
+The member metaobjects also provide functions for customizing the
+member.  The changes are not actually reflected on the source-code translation
+until <CODE><B><A HREF="class.html#ChMem">ChangeMember()</A></B></CODE> or <CODE><B><A HREF="class.html#ApndMem">AppendMember()</A></B></CODE> is called on
+the class metaobject.</P>
+
+<UL>
+<A NAME="mem23">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>void SetName(Ptree* name)</B></PRE>
+<P>
+This changes the member name to <CODE><B>name</B></CODE>.</P>
+<A NAME="mem24">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>void SetQualifiedName(Ptree* name)</B></PRE>
+<P>
+This changes the member name to <CODE><B>name</B></CODE>.
+Unlike <CODE><B>SetName()</B></CODE>, this function substitutes <CODE><B>name</B></CODE> for
+the member name including the qualified class name.  It is
+useful in <A HREF="class.html#TransMF"><CODE><B>Class::TranslateMemberFunction()</B></CODE></A>.
+For example, if the member is:</P>
+
+<PRE><CODE>void Rect::Enlarge(int rx, int ry) { ... }
+</CODE></PRE>
+
+<P>
+Then,  <CODE><B>SetQualifiedName(Ptree::Make("Point::Move"))</B></CODE> changes
+this member to:</P>
+
+
+<PRE><CODE>void Point::Move(int rx, int ry) { ... }
+</CODE></PRE>
+
+<A NAME="mem25">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>void SetArgumentList(Ptree* arglist)</B></PRE>
+<P>
+This changes the formal argument list of the member function
+to <CODE><B>arglist</B></CODE>.</P>
+<A NAME="mem26">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>void SetMemberInitializers(Ptree* init)</B></PRE>
+<P>
+This changes the member initializers of the constructor
+to <CODE><B>init</B></CODE>.</P>
+<A NAME="mem27">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>void SetFunctionBody(Ptree* body)</B></PRE>
+<P>
+This changes the function body of the member to <CODE><B>body</B></CODE>.</P>
+</UL>
+<P>
+The member functions for introspection such as <CODE><B>Name()</B></CODE> does
+not reflect the customization in the results.
+For example, <CODE><B>Name()</B></CODE> returns the original member name
+even if <CODE><B>SetName()</B></CODE> specifies a new name.  To get the new value
+specified by the above functions such as <CODE><B>SetName()</B></CODE>,
+the following functions are used:</P>
+
+<UL>
+<A NAME="mem28">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>void NewName()</B></PRE>
+<P>
+This returns the new member name substituted for the original one.</P>
+<A NAME="mem29">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>void NewArgumentList()</B></PRE>
+<P>
+This returns the new argument list
+substituted for the original one.</P>
+<A NAME="mem30">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>void NewMemberInitializers()</B></PRE>
+<P>
+This returns the new member initializers
+substituted for the original one.</P>
+<A NAME="mem31">
+</A><PRE><IMG SRC="green.gif" ALT=" o "><B>void NewFunctionBody()</B></PRE>
+<P>
+This returns the new function body
+substituted for the original one.</P>
+</UL>
+<HR>
+[<A HREF="index.html">First</A> | <A HREF="class.html">Prev</A> | <A HREF="man.html">Next</A>]
+</BODY>
+</HTML>
