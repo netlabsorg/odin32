@@ -1,4 +1,4 @@
-/* $Id: winmenu.cpp,v 1.14 1999-11-05 12:54:11 sandervl Exp $ */
+/* $Id: winmenu.cpp,v 1.15 1999-11-08 13:44:17 sandervl Exp $ */
 
 /*
  * Win32 menu API functions for OS/2
@@ -440,13 +440,13 @@ ODINFUNCTION5(int,   GetMenuStringW,
   int   rc;
 
     rc = ODIN_GetMenuStringA(hMenu, idItem, astring, cchMax, fuFlags);
-    free(astring);
     if(rc)
     {
-            dprintf(("USER32: OS2GetMenuStringW %s\n", astring));
-                     AsciiToUnicode(astring, lpsz);
+            dprintf(("USER32: GetMenuStringW %s\n", astring));
+            AsciiToUnicode(astring, lpsz);
     }
     else    lpsz[0] = 0;
+    free(astring);
 
     return(rc);
 }

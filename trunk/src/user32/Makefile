@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.41 1999-11-04 19:00:59 sandervl Exp $
+# $Id: Makefile,v 1.42 1999-11-08 13:44:13 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -24,8 +24,8 @@ RCFLAGS = -s -I. -I$(CPPMAIN)\include -I$(PDWIN32_INCLUDE) -I$(PDWIN32_INCLUDE)\
 TARGET = user32
 
 OBJS =  user32.obj loadres.obj \
-        dde.obj win32wndhandle.obj wsprintf.obj \
-        icon.obj hook.obj hooks.obj winmenu.obj \
+        dde.obj win32wndhandle.obj wsprintf.obj winmouse.obj \
+        icon.obj hook.obj hooks.obj winmenu.obj winkeyboard.obj \
         defwndproc.obj syscolor.obj char.obj initterm.obj \
         uitools.obj unknown.obj spy.obj wndmsg.obj \
         pmwindow.obj pmframe.obj win32class.obj win32wnd.obj win32dlg.obj \
@@ -82,7 +82,7 @@ resource.asm: user32.rc
 resource.obj: resource.asm
 
 user32.obj: user32.cpp $(PDWIN32_INCLUDE)\wndproc.h \
-            $(PDWIN32_INCLUDE)\winicon.h syscolor.h
+            $(PDWIN32_INCLUDE)\winicon.h syscolor.h pmwindow.h
 dummy.obj: dummy.cpp
 char.obj: char.cpp user32.h
 loadres.obj: loadres.cpp user32.h dib.h
@@ -124,7 +124,7 @@ win32wndhandle.obj: win32wndhandle.cpp win32wndhandle.h
 pmwindow.obj:   pmwindow.cpp win32class.h win32wbase.h win32dlg.h pmwindow.h win32wndchild.h $(PDWIN32_INCLUDE)\wprocess.h oslibgdi.h oslibwin.h dc.h
 pmframe.obj: pmframe.cpp win32class.h win32wbase.h pmframe.h win32wndchild.h
 win32class.obj: win32class.cpp win32class.h win32wbase.h win32dlg.h gen_object.h $(PDWIN32_INCLUDE)\heapshared.h oslibwin.h win32wndchild.h
-win32wbase.obj:   win32wbase.cpp win32class.h win32wbase.h win32dlg.h gen_object.h $(PDWIN32_INCLUDE)\heapshared.h oslibwin.h win32wndchild.h  $(PDWIN32_INCLUDE)\winres.h oslibres.h win32wndhandle.h oslibdos.h dc.h pmframe.h win32wdesktop.h controls.h
+win32wbase.obj:   win32wbase.cpp win32class.h win32wbase.h win32dlg.h gen_object.h $(PDWIN32_INCLUDE)\heapshared.h oslibwin.h win32wndchild.h  $(PDWIN32_INCLUDE)\winres.h oslibres.h win32wndhandle.h oslibdos.h dc.h pmframe.h win32wdesktop.h controls.h winmouse.h
 win32wbasepos.obj: win32wbasepos.cpp win32class.h win32wbase.h win32dlg.h gen_object.h $(PDWIN32_INCLUDE)\heapshared.h oslibwin.h win32wndchild.h  $(PDWIN32_INCLUDE)\winres.h oslibres.h win32wndhandle.h oslibdos.h dc.h pmframe.h win32wdesktop.h
 win32wnd.obj:   win32wnd.cpp win32class.h win32wbase.h win32wnd.h win32dlg.h gen_object.h $(PDWIN32_INCLUDE)\heapshared.h oslibwin.h win32wndchild.h  $(PDWIN32_INCLUDE)\winres.h oslibres.h win32wndhandle.h oslibdos.h oslibmenu.h
 win32dlg.obj:   win32dlg.cpp win32class.h win32wbase.h win32dlg.h gen_object.h $(PDWIN32_INCLUDE)\heapshared.h oslibwin.h win32wndchild.h oslibmsg.h controls.h
@@ -147,6 +147,9 @@ caret.obj:      caret.cpp win32wbase.h caret.h dcdata.h
 clipboard.obj:  clipboard.cpp
 dib.obj:        dib.cpp dib.h
 wsprintf.obj:   wsprintf.cpp
+
+winmouse.obj:   winmouse.cpp winmouse.h oslibmsg.h pmwindow.h win32wbase.h
+winkeyboard.obj: winkeyboard.cpp $(PDWIN32_INCLUDE)\winkeyboard.h
 
 clean:
         $(RM) *.obj *.lib *.dll *.map *.pch *.res

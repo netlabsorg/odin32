@@ -1,4 +1,4 @@
-/* $Id: windowmsg.cpp,v 1.3 1999-10-30 13:21:56 sandervl Exp $ */
+/* $Id: windowmsg.cpp,v 1.4 1999-11-08 13:44:17 sandervl Exp $ */
 /*
  * Win32 window message APIs for OS/2
  *
@@ -206,22 +206,17 @@ BOOL WIN32API ReplyMessage( LRESULT arg1)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API PostThreadMessageA( DWORD arg1, UINT arg2, WPARAM arg3, LPARAM  arg4)
+BOOL WIN32API PostThreadMessageA( DWORD threadid, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  PostThreadMessageA\n");
-#endif
-    return O32_PostThreadMessage(arg1, arg2, arg3, arg4);
+    dprintf(("USER32:  PostThreadMessageA\n"));
+    return O32_PostThreadMessage(threadid, WIN32APP_USERMSGBASE+msg, wParam, lParam);
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API PostThreadMessageW( DWORD arg1, UINT arg2, WPARAM arg3, LPARAM  arg4)
+BOOL WIN32API PostThreadMessageW( DWORD threadid, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  PostThreadMessageW\n");
-#endif
-    // NOTE: This will not work as is (needs UNICODE support)
-    return O32_PostThreadMessage(arg1, arg2, arg3, arg4);
+    dprintf(("USER32:  PostThreadMessageW\n"));
+    return O32_PostThreadMessage(threadid, WIN32APP_USERMSGBASE+msg, wParam, lParam);
 }
 //******************************************************************************
 //SvL: 24-6-'97 - Added
