@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.61 1999-12-19 19:54:32 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.62 1999-12-30 11:19:54 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -446,6 +446,26 @@ static HINSTANCE iLoadLibraryA(LPCTSTR lpszLibFile, DWORD dwFlags)
         return peldrDll->getInstanceHandle();
   }
   else  return(0);
+}
+//******************************************************************************
+//******************************************************************************
+HINSTANCE16 WIN32API LoadLibrary16(LPCTSTR lpszLibFile)
+{
+	dprintf(("ERROR: LoadLibrary16 %s, not implemented", lpszLibFile));
+	return 0;
+}
+//******************************************************************************
+//******************************************************************************
+VOID WIN32API FreeLibrary16(HINSTANCE16 hinstance)
+{
+	dprintf(("ERROR: FreeLibrary16 %x, not implemented", hinstance));
+}
+//******************************************************************************
+//******************************************************************************
+FARPROC WIN32API GetProcAddress16(HMODULE hModule, LPCSTR lpszProc)
+{
+	dprintf(("ERROR: GetProcAddress16 %x %x, not implemented", hModule, lpszProc));
+	return 0;
 }
 //******************************************************************************
 //******************************************************************************
