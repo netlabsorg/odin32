@@ -1,8 +1,14 @@
- /* $Id: ChangeLog,v 1.119 1999-08-22 08:33:37 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.120 1999-08-22 11:12:29 sandervl Exp $ */
 
  99-08-22: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Moved CloseLogFile call to after DestroyTIB (fixes crashes
                     as WriteLog was still called in DestroyTIB & WriteOutProfiles)
+	- KERNEL32: Added exception handling code for each thread, entrypoint &
+                    TLS callbach handler.
+                    OS2ExceptionHandler (in exceptions.cpp) is registered as the
+                    main exception handler.
+                    NOTE: Still needs to call original win32 exception handler
+                          from OS2ExceptionHandler.
 	- USER32/NEW: Changed WM_ERASEBKGND handling. Fixes FreeCell background.
                       (but might not be completely correct)
 	

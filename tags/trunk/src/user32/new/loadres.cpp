@@ -1,4 +1,4 @@
-/* $Id: loadres.cpp,v 1.8 1999-08-21 19:10:59 sandervl Exp $ */
+/* $Id: loadres.cpp,v 1.9 1999-08-22 11:10:34 sandervl Exp $ */
 
 /*
  * Win32 resource API functions for OS/2
@@ -226,6 +226,7 @@ BOOL IsSystemBitmap(ULONG *id)
    }
 }
 //******************************************************************************
+//NOTE: LR_CREATEDIBSECTION flag doesn't work (crash in GDI32)!
 //******************************************************************************
 HANDLE LoadBitmapA(HINSTANCE hinst, LPCSTR lpszName, int cxDesired, int cyDesired, 
                    UINT fuLoad)
