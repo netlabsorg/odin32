@@ -1,4 +1,4 @@
-/* $Id: kLog.h,v 1.3 2001-10-19 00:04:45 bird Exp $
+/* $Id: kLog.h,v 1.4 2001-10-19 01:48:36 bird Exp $
  *
  * kLog - Generic Logging and Trace Routines.
  *
@@ -19,6 +19,7 @@ extern "C" {
 /*
  * Standard log types.
  */
+#define KLOG_TYPE_LOGINIT    0          /* Log Initiated. */
 #define KLOG_TYPE_INITMOD    1          /* Log Module Init. */
 #define KLOG_TYPE_TERMMOD    2          /* Log Module Termination. */
 #define KLOG_TYPE_START      3          /* Start sequence and function entry. */
@@ -167,13 +168,14 @@ typedef struct kLogModuleData
     int                     cFiles;     /* Number of files in paFiles. */
     PKLOGFILEINFO           paFiles;    /* Array of per file settings. */
 
+    unsigned short          fCurrent;
+    const unsigned short    fDefault;
+
     /* Module Data Used by Log System - Do NOT touch! */
     AVLULNODECORE           avlnodecore;/* AVL Tree node with module handle as key. */
     PAVLSTRNODECORE         pavlTypedefs;/*Tree of typedef into entries. */
     PAVLSTRNODECORE         pavlFiles;  /* Tree of file into entries. */
     unsigned long           ulLastSeq;  /* Last sequence number. */
-    unsigned short          fCurrent;
-    const unsigned short    fDefault;
 
 } KLOGMODDATA, *PKLOGMODDATA;
 #endif /* #ifdef _kAVL_h_ */
