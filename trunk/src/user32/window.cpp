@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.70 2000-06-08 18:10:12 sandervl Exp $ */
+/* $Id: window.cpp,v 1.71 2000-06-28 18:11:19 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -1177,20 +1177,24 @@ BOOL WIN32API ClientToScreen (HWND hwnd, PPOINT pt)
     return TRUE;
 }
 //******************************************************************************
+//Note: count 0 is a legal parameter (verified in NT4)
 //******************************************************************************
 HDWP WIN32API BeginDeferWindowPos(int count)
 {
     HDWP handle;
     DWP *pDWP;
 
-    if (count <= 0)
+    if (count < 0)
     {
         dprintf(("USER32: BeginDeferWindowPos invalid param %d", count));
         SetLastError(ERROR_INVALID_PARAMETER);
         return 0;
     }
     dprintf(("USER32: BeginDeferWindowPos %d", count));
-    handle = (HDWP)HeapAlloc(GetProcessHeap(), 0, sizeof(DWP) + (count-1)*sizeof(WINDOWPOS) );
+    if(count == 0)
+        count = 8;  // change to any non-zero value
+
+    handle = (HDWP)HeapAlloc(GetProcessHeap(), 0, sizeof(DWP) + (count-1)*sizeof(WINDOWPOS));
     if (!handle)
         return 0;
 
@@ -1204,6 +1208,9 @@ HDWP WIN32API BeginDeferWindowPos(int count)
 }
 /***********************************************************************
  *           DeferWindowPos   (USER32.128)
+ * 
+ * TODO: SvL: Does this need to be thread safe?
+ *
  */
 HDWP WIN32API DeferWindowPos( HDWP hdwp, HWND hwnd, HWND hwndAfter,
                               INT x, INT y, INT cx, INT cy,
@@ -1281,6 +1288,8 @@ HDWP WIN32API DeferWindowPos( HDWP hdwp, HWND hwnd, HWND hwndAfter,
     }
     if (pDWP->actualCount >= pDWP->suggestedCount)
     {
+        //DWP structure already contains WINDOWPOS, allocated with (count-1)
+        //in BeginDeferWindowPos; pDWP->suggestedCount alloc increases it by one
         newhdwp = (HDWP)HeapReAlloc(GetProcessHeap(), 0, (LPVOID)hdwp,
                                     sizeof(DWP) + pDWP->suggestedCount*sizeof(WINDOWPOS));
         if (!newhdwp)
