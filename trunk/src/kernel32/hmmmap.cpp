@@ -1,4 +1,4 @@
-/* $Id: hmmmap.cpp,v 1.22 2003-02-18 18:58:47 sandervl Exp $ */
+/* $Id: hmmmap.cpp,v 1.23 2003-03-27 14:19:23 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -57,7 +57,7 @@ DWORD HMDeviceMemMapClass::CreateFileMapping(PHMHANDLEDATA         pHMHandleData
                 		   	     DWORD size_low,  /* [in] Low-order 32 bits of object size */
                 		   	     LPCSTR name)     /* [in] Name of file-mapping object */
 {
- Win32MemMap *map;
+  Win32MemMap *map;
 
   if((hFile == -1 && size_low == 0) || size_high ||
      protect & ~(PAGE_READONLY|PAGE_READWRITE|PAGE_WRITECOPY|SEC_COMMIT|SEC_IMAGE|SEC_RESERVE|SEC_NOCACHE) ||
@@ -69,6 +69,20 @@ DWORD HMDeviceMemMapClass::CreateFileMapping(PHMHANDLEDATA         pHMHandleData
 	dprintf(("CreateFileMappingA: invalid parameter (combination)!"));
         dprintf(("Parameters: %x %x %x %x %s", hFile, protect, size_high, size_low, name));
 	return ERROR_INVALID_PARAMETER;
+  }
+
+  //It's not allowed to map a file of length 0 according to MSDN. This time
+  //the docs are correct. (verified in NT4 SP6)
+  //TODO: also need to verify access rights of the file handle (write maps need
+  //      write access obviously)
+  if(hFile != -1) {
+      DWORD dwFileSizeLow = 0, dwFileSizeHigh = 0;
+
+      dwFileSizeLow = ::GetFileSize(hFile, &dwFileSizeHigh);
+      if(dwFileSizeHigh == 0 && dwFileSizeLow == 0) {
+          dprintf(("CreateFileMappingA: not allowed to map a file with length 0!!"));
+          return ERROR_FILE_INVALID;
+      }
   }
 
   map = Win32MemMap::findMap((LPSTR)name);
@@ -104,37 +118,37 @@ DWORD HMDeviceMemMapClass::CreateFileMapping(PHMHANDLEDATA         pHMHandleData
         //release it here
         return ERROR_ALREADY_EXISTS;
   }
-#if 0  
+
   //We reuse the original memory map object if another one is created for
   //the same file handle
   //TODO: different file handles can exist for the same file (DuplicateHandle)
   map = Win32MemMap::findMapByFile(hFile);
   if(map) {
-        dprintf(("CreateFileMappingA: duplicating map with file %x!", hFile));
+     Win32MemMapDup *dupmap;
 
-        //if map already exists, we must create a new handle to the existing
-        //map object
-        pHMHandleData->dwUserData = (ULONG)map;
-        pHMHandleData->dwInternalType = HMTYPE_MEMMAP;
+     dprintf(("CreateFileMappingA: duplicating map with file %x!", hFile));
 
-        //findMap already incremented the reference count, so we simply don't
-        //release it here
-        return ERROR_SUCCESS;
+     dupmap = new Win32MemMapDup(map, hFile, size_low, protect, (LPSTR)name);
+
+     if(dupmap == NULL) {
+         dprintf(("CreateFileMappingA: can't create Win32MemMap object!"));
+         return ERROR_OUTOFMEMORY;
+     }
+     map->Release(); //findMapByFile increases the refcount, so decrease it here
+     map = dupmap;
   }
-#endif
   else {
-	map = new Win32MemMap(hFile, size_low, protect, (LPSTR)name);
+     map = new Win32MemMap(hFile, size_low, protect, (LPSTR)name);
 
-  	if(map == NULL) {
-		dprintf(("CreateFileMappingA: can't create Win32MemMap object!"));
-		return ERROR_OUTOFMEMORY;
-  	}
-
-        if(map->Init(size_low) == FALSE) {
-		dprintf(("CreateFileMappingA: init failed!"));
-		delete map;
-		return ERROR_GEN_FAILURE;
-	}
+     if(map == NULL) {
+         dprintf(("CreateFileMappingA: can't create Win32MemMap object!"));
+         return ERROR_OUTOFMEMORY;
+     }
+  }
+  if(map->Init(size_low) == FALSE) {
+      dprintf(("CreateFileMappingA: init failed!"));
+      delete map;
+      return ERROR_GEN_FAILURE;
   }
   pHMHandleData->dwUserData = (ULONG)map;
   pHMHandleData->dwInternalType = HMTYPE_MEMMAP;
