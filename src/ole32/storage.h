@@ -1,4 +1,4 @@
-/* $Id: storage.h,v 1.1 1999-09-24 21:49:45 davidr Exp $ */
+/* $Id: storage.h,v 1.2 2000-03-19 15:35:15 davidr Exp $ */
 /*
  * Compound Storage (32 bit version)
  *
@@ -88,7 +88,6 @@ static const ULONG PROPERTY_NULL             = 0xFFFFFFFF;
  */
 static const BYTE STORAGE_magic[8]    ={0xd0,0xcf,0x11,0xe0,0xa1,0xb1,0x1a,0xe1};
 static const BYTE STORAGE_oldmagic[8] ={0xd0,0xcf,0x11,0xe0,0x0e,0x11,0xfc,0x0d};
-static const BYTE STORAGE_notmagic[8]={0x0e,0x11,0xfc,0x0d,0xd0,0xcf,0x11,0xe0};
 
 /*
  * Forward declarations of all the structures used by the storage
@@ -137,7 +136,6 @@ struct StgProperty
  */
 typedef struct BigBlockFile BigBlockFile,*LPBIGBLOCKFILE;
 typedef struct MappedPage   MappedPage,*LPMAPPEDPAGE;
-typedef struct BigBlock     BigBlock,*LPBIGBLOCK;
 
 struct BigBlockFile
 {
@@ -147,11 +145,12 @@ struct BigBlockFile
   HANDLE hfile;
   HANDLE hfilemap;
   DWORD flProtect;
-  MappedPage *maplisthead;
+  MappedPage *maplist;
+  MappedPage *victimhead, *victimtail;
+  ULONG num_victim_pages;
   ILockBytes *pLkbyt;
   HGLOBAL hbytearray;
   LPVOID pbytearray;
-  BigBlock *headblock;
 };
 
 /*
@@ -181,8 +180,8 @@ ULARGE_INTEGER BIGBLOCKFILE_GetSize(LPBIGBLOCKFILE This);
  */
 struct StorageBaseImpl
 {
-  ICOM_VTABLE(IStorage)*  lpvtbl;   /* Needs to be the first item in the stuct
-				       * since we want to cast this in a Storage32 pointer */
+  ICOM_VFIELD(IStorage);   /* Needs to be the first item in the stuct
+			    * since we want to cast this in a Storage32 pointer */
 
   /*
    * Reference count of this object
@@ -275,7 +274,7 @@ HRESULT WINAPI StorageBaseImpl_SetClass(
  */
 struct StorageImpl
 {
-  ICOM_VTABLE(IStorage) *lpvtbl;   /* Needs to be the first item in the stuct
+  ICOM_VFIELD(IStorage);   /* Needs to be the first item in the stuct
 				      * since we want to cast this in a Storage32 pointer */
 
   /*
@@ -322,6 +321,13 @@ struct StorageImpl
    * Pointer to the big block file abstraction
    */
   BigBlockFile* bigBlockFile; 
+
+  /*****************************************************************************************/
+  /* warning: this is a temp fix for bugs related to save file to mounted network drive    */
+  /* TBD: these lines should be removed when we will get the final fix                     */
+  /*****************************************************************************************/
+  WCHAR* srcDestFiles[2];
+  /*****************************************************************************************/
 };
 
 /*
@@ -377,11 +383,12 @@ void StorageImpl_Destroy(
 	    StorageImpl* This);
 
 HRESULT StorageImpl_Construct(
-	    StorageImpl* This,
-	    HANDLE       hFile,
-      ILockBytes*  pLkbyt,
-	    DWORD        openFlags,
-      BOOL         fileBased);
+            StorageImpl* This,
+            HANDLE       hFile,
+            ILockBytes*  pLkbyt,
+            DWORD        openFlags,
+            BOOL         fileBased,
+            BOOL         fileCreate);
 
 BOOL StorageImpl_ReadBigBlock(
             StorageImpl* This,
@@ -464,8 +471,8 @@ void Storage32Impl_SetExtDepotBlock(StorageImpl* This,
  */
 struct StorageInternalImpl
 {
-  ICOM_VTABLE(IStorage) *lpvtbl;	/* Needs to be the first item in the stuct
-					 * since we want to cast this in a Storage32 pointer */
+  ICOM_VFIELD(IStorage);	/* Needs to be the first item in the stuct
+				 * since we want to cast this in a Storage32 pointer */
 
   /*
    * Declare the member of the Storage32BaseImpl class to allow
@@ -508,7 +515,7 @@ HRESULT WINAPI StorageInternalImpl_Revert(
  */
 struct IEnumSTATSTGImpl
 {
-  ICOM_VTABLE(IEnumSTATSTG) *lpvtbl;    /* Needs to be the first item in the stuct
+  ICOM_VFIELD(IEnumSTATSTG);    /* Needs to be the first item in the stuct
 					 * since we want to cast this in a IEnumSTATSTG pointer */
   
   ULONG		 ref;		        /* Reference count */
@@ -593,7 +600,7 @@ INT IEnumSTATSTGImpl_FindParentProperty(
  */
 struct StgStreamImpl
 {
-  ICOM_VTABLE(IStream) *lpvtbl;  /* Needs to be the first item in the stuct
+  ICOM_VFIELD(IStream);  /* Needs to be the first item in the stuct
 				    * since we want to cast this in a IStream pointer */
   
   /*
@@ -605,6 +612,11 @@ struct StgStreamImpl
    * Storage that is the parent(owner) of the stream
    */
   StorageBaseImpl* parentStorage;
+
+  /*
+   * Access mode of this stream.
+   */
+  DWORD grfMode;
 
   /*
    * Index of the property that owns (points to) this stream.
@@ -636,7 +648,8 @@ struct StgStreamImpl
  */
 StgStreamImpl* StgStreamImpl_Construct(
 		StorageBaseImpl* parentStorage,
-		ULONG              ownerProperty);
+    DWORD            grfMode,
+    ULONG            ownerProperty);
 
 void StgStreamImpl_Destroy(
                 StgStreamImpl* This);
@@ -722,6 +735,8 @@ void StorageUtl_ReadWord(void* buffer, ULONG offset, WORD* value);
 void StorageUtl_WriteWord(void* buffer, ULONG offset, WORD value);
 void StorageUtl_ReadDWord(void* buffer, ULONG offset, DWORD* value);
 void StorageUtl_WriteDWord(void* buffer, ULONG offset, DWORD value);
+void StorageUtl_ReadDWords(void *buffer, ULONG offset, DWORD *values,
+			   ULONG len);
 void StorageUtl_ReadGUID(void* buffer, ULONG offset, GUID* value);
 void StorageUtl_WriteGUID(void* buffer, ULONG offset, GUID* value);
 void StorageUtl_CopyPropertyToSTATSTG(STATSTG*     destination,
@@ -743,6 +758,7 @@ struct BlockChainStream
   ULONG        lastBlockNoInSequenceIndex;
   ULONG        tailIndex;
   ULONG        numBlocks;
+  BOOL         lazyInitComplete;
 };
 
 /*

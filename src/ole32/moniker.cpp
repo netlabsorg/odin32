@@ -1,4 +1,4 @@
-/* $Id: moniker.cpp,v 1.4 2000-02-12 11:51:03 davidr Exp $ */
+/* $Id: moniker.cpp,v 1.5 2000-03-19 15:33:06 davidr Exp $ */
 /* 
  * 
  * Project Odin Software License can be found in LICENSE.TXT
@@ -278,7 +278,6 @@ HRESULT WIN32API RunningObjectTableImpl_Register
     IMoniker_AddRef(pmkObjectName);
     
     return res;
-    return S_OK;
 }
 
 // ----------------------------------------------------------------------

@@ -1,4 +1,4 @@
-/* $Id: stg_stream.cpp,v 1.1 1999-09-24 21:49:44 davidr Exp $ */
+/* $Id: stg_stream.cpp,v 1.2 2000-03-19 15:33:07 davidr Exp $ */
 /* 
  * Compound Storage (32 bit version)
  * Stream implementation
@@ -64,6 +64,7 @@ static ICOM_VTABLE(IStream) StgStreamImpl_Vtbl =
  */
 StgStreamImpl* StgStreamImpl_Construct(
 		StorageBaseImpl* parentStorage,
+		DWORD            grfMode,
 		ULONG              ownerProperty)
 {
   StgStreamImpl* newStream;
@@ -75,7 +76,7 @@ StgStreamImpl* StgStreamImpl_Construct(
     /*
      * Set-up the virtual function table and reference count.
      */
-    newStream->lpvtbl = &StgStreamImpl_Vtbl;
+    ICOM_VTBL(newStream) = &StgStreamImpl_Vtbl;
     newStream->ref    = 0;
     
     /*
@@ -85,6 +86,7 @@ StgStreamImpl* StgStreamImpl_Construct(
     newStream->parentStorage = parentStorage;
     IStorage_AddRef((IStorage*)newStream->parentStorage);
     
+    newStream->grfMode = grfMode;    
     newStream->ownerProperty = ownerProperty;
     
     /*
@@ -430,6 +432,12 @@ HRESULT WINAPI StgStreamImpl_Write(
    */
   *pcbWritten = 0;
 
+  /*
+   * Do we have permission to write to this stream?
+   */
+  if (!(This->grfMode & (STGM_WRITE | STGM_READWRITE)))
+    return STG_E_ACCESSDENIED;
+
   if (cb == 0)
   {
     return S_OK;
@@ -532,29 +540,56 @@ HRESULT WINAPI StgStreamImpl_Seek(
       return STG_E_INVALIDFUNCTION;
   }
 
+#if SIZEOF_LONG_LONG >= 8
+  plibNewPosition->QuadPart += dlibMove.QuadPart;
+#else
   /*
-   * We don't support files with offsets of 64 bits.
+   * do some multiword arithmetic:
+   *    treat HighPart as a signed value
+   *    treat LowPart as unsigned
+   *  NOTE: this stuff is two's complement specific!
    */
-  assert(dlibMove.HighPart == 0);
-
+  if (dlibMove.HighPart < 0) { /* dlibMove is < 0 */
+      /* calculate the absolute value of dlibMove ... */
+      dlibMove.HighPart = -dlibMove.HighPart;
+      dlibMove.LowPart ^= -1;
+      /* ... and subtract with carry */
+      if (dlibMove.LowPart > plibNewPosition->LowPart) {
+	  /* carry needed, This accounts for any underflows at [1]*/
+	  plibNewPosition->HighPart -= 1; 
+      }
+      plibNewPosition->LowPart -= dlibMove.LowPart; /* [1] */
+      plibNewPosition->HighPart -= dlibMove.HighPart; 
+  } else {
+      /* add directly */
+      int initialLowPart = plibNewPosition->LowPart;
+      plibNewPosition->LowPart += dlibMove.LowPart;
+      if((plibNewPosition->LowPart < initialLowPart) ||
+	 (plibNewPosition->LowPart < dlibMove.LowPart)) {
+	  /* LowPart has rolled over => add the carry digit to HighPart */
+	  plibNewPosition->HighPart++;
+      }
+      plibNewPosition->HighPart += dlibMove.HighPart; 
+  }
   /*
-   * Check if we end-up before the beginning of the file. That should trigger an
-   * error.
+   * Check if we end-up before the beginning of the file. That should 
+   * trigger an error.
    */
-  if ( (dlibMove.LowPart<0) && (plibNewPosition->LowPart < (ULONG)(-dlibMove.LowPart)) )
-  {
-    /*
-     * I don't know what error to send there.
-     */
-    return E_FAIL;
+  if (plibNewPosition->HighPart < 0) {
+      return STG_E_INVALIDPOINTER;
   }
 
+    /*
+   * We currently don't support files with offsets of >32 bits.  
+   * Note that we have checked for a negative offset already
+     */
+  assert(plibNewPosition->HighPart <= 0);
+
+#endif
+
   /*
-   * Move the actual file pointer
-   * If the file pointer ends-up after the end of the stream, the next Write operation will
-   * make the file larger. This is how it is documented.
+   * tell the caller what we calculated
    */
-  plibNewPosition->LowPart += dlibMove.LowPart;
   This->currentPosition = *plibNewPosition;
  
   return S_OK;
@@ -586,6 +621,12 @@ HRESULT WINAPI StgStreamImpl_SetSize(
   if (libNewSize.HighPart != 0)
     return STG_E_INVALIDFUNCTION;
   
+  /*
+   * Do we have permission?
+   */
+  if (!(This->grfMode & (STGM_WRITE | STGM_READWRITE)))
+    return STG_E_ACCESSDENIED;
+
   if (This->streamSize.LowPart == libNewSize.LowPart)
     return S_OK;
 
@@ -827,6 +868,8 @@ HRESULT WINAPI StgStreamImpl_Stat(
 				     &curProperty, 
 				     grfStatFlag);
     
+    pstatstg->grfMode = This->grfMode;
+
     return S_OK;
   }
   

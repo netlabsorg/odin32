@@ -1,4 +1,4 @@
-/* $Id: storage.cpp,v 1.1 1999-09-24 21:49:44 davidr Exp $ */
+/* $Id: storage.cpp,v 1.2 2000-03-19 15:33:08 davidr Exp $ */
 /* 
  * Compound Storage functions.
  * 
@@ -25,18 +25,102 @@
 
 #include "storage.h"
 
+#include "winnls.h"
+#include "winreg.h"
+#include "wine/wingdi16.h"
+
 DEFAULT_DEBUG_CHANNEL(storage)
 
 #define FILE_BEGIN 0
 
+
+/* Used for OleConvertIStorageToOLESTREAM and OleConvertOLESTREAMToIStorage */
+#define OLESTREAM_ID 0x501
+#define OLESTREAM_MAX_STR_LEN 255
+
+#define OLECONVERT_NUM_OLE10STREAMS 2
+
+#define OLECONVERT_LINK_TYPE              1L
+#define OLECONVERT_EMBEDDED_TYPE          2L
+#define OLECONVERT_PRESENTATION_DATA_TYPE 5L
+
 static const char rootPropertyName[] = "Root Entry";
+
+
+/* OLESTREAM memory structure to use for Get and Put Routines */
+/* Used for OleConvertIStorageToOLESTREAM and OleConvertOLESTREAMToIStorage */
+typedef struct 
+{
+    DWORD dwOleID;
+    DWORD dwObjectTypeID;
+    DWORD dwOleTypeNameLength;
+    CHAR  strOleTypeName[OLESTREAM_MAX_STR_LEN];
+    DWORD dwLinkFileNameLength;
+    BYTE *strLinkFileName;
+    DWORD dwLinkExtraInfoLength;
+    BYTE *pLinkExtraInfo;
+    DWORD dwMetaFileWidth;
+    DWORD dwMetaFileHeight;
+    DWORD dwDataLength;
+    BYTE *pData;
+}OLECONVERT_OLESTREAM_DATA;
+
+/* CompObj Stream structure */
+/* Used for OleConvertIStorageToOLESTREAM and OleConvertOLESTREAMToIStorage */
+typedef struct
+{
+    BYTE byUnknown1[12];
+    CLSID clsid;
+    DWORD dwCLSIDNameLength;
+    CHAR strCLSIDName[OLESTREAM_MAX_STR_LEN];
+    DWORD dwOleTypeNameLength;
+    CHAR strOleTypeName[OLESTREAM_MAX_STR_LEN];
+    DWORD dwProgIDNameLength;
+    CHAR strProgIDName[OLESTREAM_MAX_STR_LEN];
+    BYTE byUnknown2[16];
+}OLECONVERT_ISTORAGE_COMPOBJ;
+
+
+/* Ole Presention Stream structure */
+/* Used for OleConvertIStorageToOLESTREAM and OleConvertOLESTREAMToIStorage */
+typedef struct
+{
+    BYTE byUnknown1[28];
+    DWORD dwExtentX;
+    DWORD dwExtentY;
+    DWORD dwSize;  
+    BYTE *pData;
+}OLECONVERT_ISTORAGE_OLEPRES;
+
+
+/* Ole Stream Structure */
+/* Used for OleConvertIStorageToOLESTREAM and OleConvertOLESTREAMToIStorage */
+typedef struct
+{
+    DWORD dwOLEHEADER_ID;
+    DWORD dwUnknown1;
+    DWORD dwUnknown2;
+    DWORD dwUnknown3;
+    DWORD dwUnknown4; /*Only used when using a Moniker is present in the /001Ole Stream*/
+    DWORD dwUnknown5; /*Only used when using a Moniker is present in the /001Ole stream*/
+    DWORD dwObjectCLSIDOffset;
+    CLSID clsidMonikerTypeID;
+    /*Save info for clsidMonikerTypeID (eg. FileMoniker, ItemMoniker, or CompositeMoniker) */
+    DWORD dwUnknown6;
+    CLSID clsidObject;
+    BYTE dwUnknown7[32];
+}OLECONVERT_ISTORAGE_OLE;
+
+
+
 
 /***********************************************************************
  * Forward declaration of internal functions used by the method DestroyElement
  */
 static HRESULT deleteStorageProperty(
   StorageImpl *parentStorage,
-  OLECHAR     *propertyToDeleteName);
+  ULONG        foundPropertyIndexToDelete,
+  StgProperty  propertyToDelete);
 
 static HRESULT deleteStreamProperty(
   StorageImpl *parentStorage,
@@ -336,7 +420,7 @@ HRESULT WINAPI StorageBaseImpl_OpenStream(
   if ( (foundPropertyIndex!=PROPERTY_NULL) && 
        (currentProperty.propertyType==PROPTYPE_STREAM) )
   {
-    newStream = StgStreamImpl_Construct(This, foundPropertyIndex);
+    newStream = StgStreamImpl_Construct(This, grfMode, foundPropertyIndex);
     
     if (newStream!=0)
     {
@@ -686,6 +770,10 @@ HRESULT WINAPI StorageBaseImpl_RenameElement(
      * This means that we need to tweek the StgProperty if it is a stream or a
      * non empty storage.
      */
+    StorageImpl_ReadProperty(This->ancestorStorage,
+                             foundPropertyIndex,
+                             &currentProperty);
+
     currentProperty.dirProperty  = PROPERTY_NULL;
     currentProperty.propertyType = PROPTYPE_STORAGE;
     StorageImpl_WriteProperty(
@@ -844,7 +932,7 @@ HRESULT WINAPI StorageBaseImpl_CreateStream(
   /* 
    * Open the stream to return it.
    */
-  newStream = StgStreamImpl_Construct(This, newPropertyIndex);
+  newStream = StgStreamImpl_Construct(This, grfMode, newPropertyIndex);
 
   if (newStream != 0)
   {
@@ -1592,7 +1680,8 @@ HRESULT WINAPI StorageImpl_DestroyElement(
   {
     hr = deleteStorageProperty(
            This, 
-           propertyToDelete.name);
+           foundPropertyIndexToDelete,
+           propertyToDelete);
   } 
   else if ( propertyToDelete.propertyType == PROPTYPE_STREAM )
   {
@@ -1628,7 +1717,8 @@ HRESULT WINAPI StorageImpl_DestroyElement(
  */
 static HRESULT deleteStorageProperty(
   StorageImpl *parentStorage,
-  OLECHAR     *propertyToDeleteName)
+  ULONG        indexOfPropertyToDelete,
+  StgProperty  propertyToDelete)
 {
   IEnumSTATSTG *elements     = 0;
   IStorage   *childStorage = 0;
@@ -1641,7 +1731,7 @@ static HRESULT deleteStorageProperty(
    */
   hr = StorageBaseImpl_OpenStorage(
         (IStorage*)parentStorage,
-        propertyToDeleteName,
+        propertyToDelete.name,
         0,
         STGM_SHARE_EXCLUSIVE,
         0,
@@ -1681,6 +1771,15 @@ static HRESULT deleteStorageProperty(
 
   } while ((hr == S_OK) && (destroyHr == S_OK));
 
+  /*
+   * Invalidate the property by zeroing it's name member.
+   */
+  propertyToDelete.sizeOfNameString = 0;
+
+  StorageImpl_WriteProperty(parentStorage->ancestorStorage,
+                            indexOfPropertyToDelete,
+                            &propertyToDelete);
+
   IStorage_Release(childStorage);
   IEnumSTATSTG_Release(elements);
     
@@ -1710,7 +1809,7 @@ static HRESULT deleteStreamProperty(
          (IStorage*)parentStorage,
          (OLECHAR*)propertyToDelete.name,
          NULL,
-         STGM_SHARE_EXCLUSIVE,
+         STGM_WRITE | STGM_SHARE_EXCLUSIVE,
          0,
          &pis);
     
@@ -2026,7 +2125,8 @@ HRESULT StorageImpl_Construct(
   HANDLE       hFile,
   ILockBytes*  pLkbyt,
   DWORD        openFlags,
-  BOOL         fileBased)
+  BOOL         fileBased,
+  BOOL         fileCreate)
 {
   HRESULT     hr = S_OK;
   StgProperty currentProperty;
@@ -2041,7 +2141,7 @@ HRESULT StorageImpl_Construct(
   /*
    * Initialize the virtual fgunction table.
    */
-  This->lpvtbl       = &Storage32Impl_Vtbl;
+  ICOM_VTBL(This)    = &Storage32Impl_Vtbl;
   This->v_destructor = &StorageImpl_Destroy;
   
   /*
@@ -2069,7 +2169,7 @@ HRESULT StorageImpl_Construct(
   if (This->bigBlockFile == 0)
     return E_FAIL;
  
-  if (openFlags & STGM_CREATE)
+  if (fileCreate)
   {
     ULARGE_INTEGER size;
     BYTE* bigBlockBuffer;
@@ -2092,7 +2192,6 @@ HRESULT StorageImpl_Construct(
     This->smallBlockSizeBits    = DEF_SMALL_BLOCK_SIZE_BITS;
     This->extBigBlockDepotStart = BLOCK_END_OF_CHAIN;
     This->extBigBlockDepotCount = 0;
-
     StorageImpl_SaveFileHeader(This);
 
     /*
@@ -2150,7 +2249,7 @@ HRESULT StorageImpl_Construct(
   /*
    * Write the root property 
    */
-  if (openFlags & STGM_CREATE)
+  if (fileCreate)
   {
     StgProperty rootProp;
     /*
@@ -2596,13 +2695,8 @@ ULONG StorageImpl_GetNextBlockInChain(
 
     if (depotBuffer!=0)
     {
-      int index;
-
-      for (index = 0; index < NUM_BLOCKS_PER_DEPOT_BLOCK; index++)
-      {
-        StorageUtl_ReadDWord(depotBuffer, index*sizeof(ULONG), &nextBlockIndex);
-        This->blockDepotCached[index] = nextBlockIndex;
-      }
+      StorageUtl_ReadDWords(depotBuffer, 0, This->blockDepotCached,
+			    NUM_BLOCKS_PER_DEPOT_BLOCK);
 
       StorageImpl_ReleaseBigBlock(This, depotBuffer);
     }
@@ -3034,11 +3128,6 @@ BOOL StorageImpl_WriteProperty(
 
   memcpy(currentProperty + OFFSET_PS_PROPERTYTYPE, &buffer->propertyType, 1);
 
-  /* 
-   * Reassign the size in case of mistake....
-   */
-  buffer->sizeOfNameString = (lstrlenW(buffer->name)+1) * sizeof(WCHAR);
-
   StorageUtl_WriteWord(
     currentProperty,  
       OFFSET_PS_NAMELENGTH,   
@@ -3287,7 +3376,7 @@ StorageInternalImpl* StorageInternalImpl_Construct(
     /*
      * Initialize the virtual function table.
      */
-    newStorage->lpvtbl       = &Storage32InternalImpl_Vtbl;
+    ICOM_VTBL(newStorage)    = &Storage32InternalImpl_Vtbl;
     newStorage->v_destructor = &StorageInternalImpl_Destroy;
 
     /*
@@ -3358,7 +3447,7 @@ IEnumSTATSTGImpl* IEnumSTATSTGImpl_Construct(
     /*
      * Set-up the virtual function table and reference count.
      */
-    newEnumeration->lpvtbl = &IEnumSTATSTGImpl_Vtbl;
+    ICOM_VTBL(newEnumeration) = &IEnumSTATSTGImpl_Vtbl;
     newEnumeration->ref    = 0;
     
     /*
@@ -3876,6 +3965,12 @@ void StorageUtl_ReadDWord(void* buffer, ULONG offset, DWORD* value)
   memcpy(value, (BYTE*)buffer+offset, sizeof(DWORD));
 }
 
+void StorageUtl_ReadDWords(void *buffer, ULONG offset, DWORD *values,
+			   ULONG len)
+{
+  memcpy(values, (BYTE*)buffer+offset, sizeof(DWORD)*len);
+}
+
 void StorageUtl_WriteDWord(void* buffer, ULONG offset, DWORD value)
 {
   memcpy((BYTE*)buffer+offset, &value, sizeof(DWORD));
@@ -3956,7 +4051,6 @@ BlockChainStream* BlockChainStream_Construct(
   ULONG          propertyIndex)
 {
   BlockChainStream* newStream;
-  ULONG blockIndex;
 
   newStream = (BlockChainStream *)HeapAlloc(GetProcessHeap(), 0, sizeof(BlockChainStream));
 
@@ -3964,22 +4058,46 @@ BlockChainStream* BlockChainStream_Construct(
   newStream->headOfStreamPlaceHolder = headOfStreamPlaceHolder;
   newStream->ownerPropertyIndex      = propertyIndex;
   newStream->lastBlockNoInSequence   = 0xFFFFFFFF;
+  newStream->lazyInitComplete        = FALSE;
   newStream->tailIndex               = BLOCK_END_OF_CHAIN;
   newStream->numBlocks               = 0;
 
-  blockIndex = BlockChainStream_GetHeadOfChain(newStream);
-
-  while (blockIndex != BLOCK_END_OF_CHAIN)
-  {
-    newStream->numBlocks++;
-    newStream->tailIndex = blockIndex;
-
-    blockIndex = StorageImpl_GetNextBlockInChain(
-                   parentStorage,
-                   blockIndex);
-  }
-
   return newStream;
+}
+
+static void BlockChainStream_LazyInit(BlockChainStream *This)
+{
+    ULONG numBlocks = 0;
+    ULONG tailIndex = BLOCK_END_OF_CHAIN;
+    StorageImpl *parentStorage = This->parentStorage;
+
+    ULONG blockIndex = BlockChainStream_GetHeadOfChain(This);
+
+    while (blockIndex != BLOCK_END_OF_CHAIN)
+    {
+	numBlocks++;
+	tailIndex = blockIndex;
+
+	blockIndex = StorageImpl_GetNextBlockInChain(parentStorage,
+						     blockIndex);
+    }
+
+    This->numBlocks = numBlocks;
+    This->tailIndex = tailIndex;
+}
+
+static inline ULONG BlockChainStream_TailIndex(BlockChainStream *This)
+{
+    if (!This->lazyInitComplete)
+	BlockChainStream_LazyInit(This);
+    return This->tailIndex;
+}
+
+static inline ULONG BlockChainStream_NumBlocks(BlockChainStream *This)
+{
+    if (!This->lazyInitComplete)
+	BlockChainStream_LazyInit(This);
+    return This->numBlocks;
 }
 
 void BlockChainStream_Destroy(BlockChainStream* This)
@@ -4350,24 +4468,8 @@ BOOL BlockChainStream_Enlarge(BlockChainStream* This,
   /*
    * Go to the current end of chain
    */
-  if (This->tailIndex == BLOCK_END_OF_CHAIN)
-  {
-    currentBlock = blockIndex;
-
-    while (blockIndex != BLOCK_END_OF_CHAIN)
-    {
-      This->numBlocks++;
-      currentBlock = blockIndex;
-
-      blockIndex =
-        StorageImpl_GetNextBlockInChain(This->parentStorage, currentBlock);
-    }
-
-    This->tailIndex = currentBlock;
-  }
-
-  currentBlock = This->tailIndex;
-  oldNumBlocks = This->numBlocks;
+  currentBlock = BlockChainStream_TailIndex(This);
+  oldNumBlocks = BlockChainStream_NumBlocks(This);
 
   /*
    * Add new blocks to the chain
@@ -5204,6 +5306,7 @@ HRESULT WINAPI StgCreateDocfile(
   DWORD          creationMode;
   DWORD          fileAttributes;
   WCHAR          tempFileName[MAX_PATH];
+  BOOL           switchRemoteToLocalFile = TRUE;
 
   TRACE("(%s, %lx, %ld, %p)\n", 
 	debugstr_w(pwcsName), grfMode, 
@@ -5228,6 +5331,8 @@ HRESULT WINAPI StgCreateDocfile(
   {
     WCHAR tempPath[MAX_PATH];
     WCHAR prefix[] = { 'S', 'T', 'O', 0 };
+
+    switchRemoteToLocalFile = FALSE;
 
     memset(tempPath, 0, sizeof(tempPath));
     memset(tempFileName, 0, sizeof(tempFileName));
@@ -5287,6 +5392,7 @@ HRESULT WINAPI StgCreateDocfile(
          hFile,
          NULL,
          grfMode,
+         TRUE,
          TRUE);
  
   if (FAILED(hr))
@@ -5351,17 +5457,43 @@ HRESULT WINAPI StgOpenStorage(
   *ppstgOpen = 0;
   
   hFile = CreateFileW( pwcsName, 
-                        accessMode,
-                        shareMode,
-            NULL,
-            OPEN_EXISTING,
-            FILE_ATTRIBUTE_NORMAL | FILE_FLAG_RANDOM_ACCESS,
-            0);
+                       accessMode,
+                       shareMode,
+                       NULL,
+                       OPEN_EXISTING,
+                       FILE_ATTRIBUTE_NORMAL | FILE_FLAG_RANDOM_ACCESS,
+                       0);
   
   
   if (hFile==INVALID_HANDLE_VALUE)
   {
-    return E_FAIL;
+    HRESULT hr = E_FAIL;
+    DWORD last_error = GetLastError();
+
+    switch (last_error)
+    {
+      case ERROR_FILE_NOT_FOUND:
+        hr = STG_E_FILENOTFOUND;
+        break;
+
+      case ERROR_PATH_NOT_FOUND:
+        hr = STG_E_PATHNOTFOUND;
+        break;
+
+      case ERROR_ACCESS_DENIED:
+      case ERROR_WRITE_PROTECT:
+        hr = STG_E_ACCESSDENIED;
+        break;
+
+      case ERROR_SHARING_VIOLATION:
+        hr = STG_E_SHAREVIOLATION;
+        break;
+
+      default:
+        hr = E_FAIL;
+    }
+
+    return hr;
   }
 
   /*
@@ -5377,7 +5509,8 @@ HRESULT WINAPI StgOpenStorage(
          hFile,
          NULL,
          grfMode,
-         TRUE);
+         TRUE,
+         FALSE);
   
   if (FAILED(hr))
   {
@@ -5427,7 +5560,8 @@ HRESULT WINAPI StgCreateDocfileOnILockBytes(
          0,
          plkbyt,
          grfMode,
-         FALSE);
+         FALSE,
+         TRUE);
 
   if (FAILED(hr))
   {
@@ -5490,6 +5624,7 @@ HRESULT WINAPI StgOpenStorageOnILockBytes(
          0,
          plkbyt,
          grfMode,
+         FALSE,
          FALSE);
 
   if (FAILED(hr))
@@ -5581,12 +5716,19 @@ HRESULT  WINAPI OleLoadFromStream(IStream *pStm,REFIID iidInterface,void** ppvOb
     CLSID clsid;
     HRESULT res;
 
+/* For this function to work.  All registry keys related to Interface must be in            */
+/* Installed in the wine registry (eg. Search for IFileMoniker in the windows registry,     */
+/* copy the missing CLSID keys (and all contents) to wine registry). Implement              */
+/* the OLE32_DllGetClassObject (a big switch for all interface in OLE32.dll to allocate the */
+/* actual interface )                                                                       */
     FIXME("(),stub!\n");
 
     res=ReadClassStm(pStm,&clsid);
 
     if (SUCCEEDED(res)){
-        
+        /* For this to work properly iidInterface should be IUnknown, need to Query */
+        /* for IPersitStream, if successful, query for iidInterface */
+
         res=CoCreateInstance(&clsid,NULL,CLSCTX_INPROC_SERVER,iidInterface,ppvObj);
 
         if (SUCCEEDED(res))
@@ -5618,9 +5760,10 @@ HRESULT  WINAPI OleSaveToStream(IPersistStream *pPStm,IStream *pStm)
 
         if (SUCCEEDED(res))
 
-            res=IPersistStream_Save(pPStm,pStm,FALSE);
+            res=IPersistStream_Save(pPStm,pStm,TRUE);
     }
 
+    TRACE("Finished Save\n");
     return res;
 }
 
@@ -5807,12 +5950,1557 @@ static DWORD GetCreationModeFromSTGM(DWORD stgm)
   return CREATE_NEW;
 }
 
+BOOL OLECONVERT_IsStorageLink(LPSTORAGE pStorage)
+{
+    STATSTG stat;
 
+    IStorage_Stat(pStorage, &stat, STATFLAG_NONAME);
+    
+    return IsEqualCLSID(&IID_StdOleLink, &stat.clsid);
+}
+
+/*************************************************************************
+ * OLECONVERT_LoadOLE10 [Internal] 
+ *
+ * Loads the OLE10 STREAM to memory 
+ *
+ * PARAMS
+ *     pOleStream   [I] The OLESTREAM
+ *     pData        [I] Data Structure for the OLESTREAM Data
+ *
+ * RETURNS
+ *     Success:  S_OK
+ *     Failure:  CONVERT10_E_OLESTREAM_GET for invalid Get
+ *               CONVERT10_E_OLESTREAM_FMT if the OLEID is invalide
+ *
+ * NOTES
+ *     This function is used by OleConvertOLESTREAMToIStorage only.
+ *     
+ *     Memory allocated for pData must be freed by the caller
+ */
+HRESULT OLECONVERT_LoadOLE10(LPOLESTREAM pOleStream, OLECONVERT_OLESTREAM_DATA *pData)
+{
+    DWORD dwSize;
+    pData->pData = NULL;
+    pData->pLinkExtraInfo = NULL;
+    pData->strLinkFileName = NULL;
+
+    /* Get the OleID */
+    dwSize = pOleStream->lpstbl->Get(pOleStream, (LPSTR)&(pData->dwOleID), sizeof(pData->dwOleID));
+    if(dwSize != sizeof(pData->dwOleID))
+    {
+         return CONVERT10_E_OLESTREAM_GET;
+    }
+    else if(pData->dwOleID != OLESTREAM_ID)
+    {
+        return CONVERT10_E_OLESTREAM_FMT;
+    }
+
+    /* Get the TypeID...more info needed for this field */
+    dwSize = pOleStream->lpstbl->Get(pOleStream, (LPSTR)&(pData->dwObjectTypeID), sizeof(pData->dwObjectTypeID));
+
+    if(dwSize != sizeof(pData->dwObjectTypeID))
+    {
+        return CONVERT10_E_OLESTREAM_GET;
+    }
+    if(pData->dwObjectTypeID != 0)
+    {
+        if(pData->dwObjectTypeID != OLECONVERT_LINK_TYPE 
+            && pData->dwObjectTypeID != OLECONVERT_EMBEDDED_TYPE
+            && pData->dwObjectTypeID != OLECONVERT_PRESENTATION_DATA_TYPE)
+        {
+            FIXME("Unknown ObjectTypeID: %lx\n", pData->dwObjectTypeID);
+        }
+
+        /* Get the lenght of the OleTypeName */
+        dwSize = pOleStream->lpstbl->Get(pOleStream, (LPSTR) &(pData->dwOleTypeNameLength), sizeof(pData->dwOleTypeNameLength));
+        if(dwSize != sizeof(pData->dwOleTypeNameLength))
+        {
+            return CONVERT10_E_OLESTREAM_GET;
+        }
+        if(pData->dwOleTypeNameLength > 0)
+        {
+            /* Get the OleTypeName */
+            dwSize = pOleStream->lpstbl->Get(pOleStream, (LPSTR)pData->strOleTypeName, pData->dwOleTypeNameLength);
+            if(dwSize != pData->dwOleTypeNameLength)
+            {
+                return CONVERT10_E_OLESTREAM_GET;
+            }
+        }
+        if(pData->dwObjectTypeID == OLECONVERT_LINK_TYPE)
+        {
+            dwSize = pOleStream->lpstbl->Get(pOleStream, (LPSTR) &(pData->dwLinkFileNameLength), sizeof(pData->dwLinkFileNameLength));
+            if(dwSize != sizeof(pData->dwLinkFileNameLength))
+            {
+                return CONVERT10_E_OLESTREAM_GET;
+            }
+
+            if(pData->dwLinkFileNameLength > 0)
+            {
+                pData->strLinkFileName = (BYTE *)malloc(pData->dwLinkFileNameLength);
+                if(pData->strLinkFileName == NULL)
+                {
+                    return E_OUTOFMEMORY;
+                }
+                dwSize = pOleStream->lpstbl->Get(pOleStream, (LPSTR) pData->strLinkFileName, pData->dwLinkFileNameLength);
+                if(dwSize != pData->dwLinkFileNameLength)
+                {
+                    return CONVERT10_E_OLESTREAM_GET;
+                }
+            }
+            dwSize = pOleStream->lpstbl->Get(pOleStream, (LPSTR) &(pData->dwLinkExtraInfoLength), sizeof(pData->dwLinkExtraInfoLength));
+            if(dwSize != sizeof(pData->dwLinkExtraInfoLength))
+            {
+                return CONVERT10_E_OLESTREAM_GET;
+            }
+          
+            if(pData->dwLinkExtraInfoLength > 0)
+            {
+                pData->pLinkExtraInfo = (BYTE *)malloc(pData->dwLinkExtraInfoLength);
+                if(pData->pLinkExtraInfo == NULL)
+                {
+                    return E_OUTOFMEMORY;
+                }
+                dwSize = pOleStream->lpstbl->Get(pOleStream, (LPSTR) pData->pLinkExtraInfo, pData->dwLinkExtraInfoLength);
+                if(dwSize != pData->dwLinkExtraInfoLength)
+                {
+                    return CONVERT10_E_OLESTREAM_GET;
+                }
+            }
+        }
+
+        /* Get the Width of the Metafile */
+        dwSize = pOleStream->lpstbl->Get(pOleStream, (LPSTR)&(pData->dwMetaFileWidth), sizeof(pData->dwMetaFileWidth));
+        if(dwSize != sizeof(pData->dwMetaFileWidth))
+        {
+            return CONVERT10_E_OLESTREAM_GET;
+        }
+
+        /* Get the Height of the Metafile */
+        dwSize = pOleStream->lpstbl->Get(pOleStream, (LPSTR)&(pData->dwMetaFileHeight), sizeof(pData->dwMetaFileHeight));
+        if(dwSize != sizeof(pData->dwMetaFileHeight))
+        {
+            return CONVERT10_E_OLESTREAM_GET;
+        }
+
+        /* Get the Length of the Data */
+        dwSize = pOleStream->lpstbl->Get(pOleStream, (LPSTR)&(pData->dwDataLength), sizeof(pData->dwDataLength));
+        if(dwSize != sizeof(pData->dwDataLength))
+        {
+            return CONVERT10_E_OLESTREAM_GET;
+        }
+        if(pData->dwDataLength > 0)
+        {
+            pData->pData = (BYTE *)malloc(pData->dwDataLength);
+            if(pData->pData == NULL)
+            {
+                return E_OUTOFMEMORY;
+            }
+            /* Get Data (ex. IStorage, Metafile, or BMP) */
+            dwSize = pOleStream->lpstbl->Get(pOleStream, (LPSTR)pData->pData, pData->dwDataLength);
+            if(dwSize != pData->dwDataLength)
+            {
+                return CONVERT10_E_OLESTREAM_GET;
+            }
+        }
+    }
+    return S_OK;
+}
+
+
+/*************************************************************************
+ * OLECONVERT_SaveOLE10 [Internal] 
+ *
+ * Saves the OLE10 STREAM From memory 
+ *
+ * PARAMS
+ *     pData        [I] Data Structure for the OLESTREAM Data
+ *     pOleStream   [I] The OLESTREAM to save
+ *
+ * RETURNS
+ *     Success:  S_OK
+ *     Failure:  CONVERT10_E_OLESTREAM_PUT for invalid Put
+ *
+ * NOTES
+ *     This function is used by OleConvertIStorageToOLESTREAM only.
+ *     
+ */
+HRESULT OLECONVERT_SaveOLE10(OLECONVERT_OLESTREAM_DATA *pData, LPOLESTREAM pOleStream)
+{
+    DWORD dwSize;
+    HRESULT hRes = S_OK;
+
+
+   /* Set the OleID */
+    dwSize = pOleStream->lpstbl->Put(pOleStream, (LPSTR)&(pData->dwOleID), sizeof(pData->dwOleID));
+    if(dwSize != sizeof(pData->dwOleID))
+    {
+        return CONVERT10_E_OLESTREAM_PUT;
+    }
+
+    /* Set the TypeID */
+    dwSize = pOleStream->lpstbl->Put(pOleStream, (LPSTR)&(pData->dwObjectTypeID), sizeof(pData->dwObjectTypeID));
+    if(dwSize != sizeof(pData->dwObjectTypeID))
+    {
+        return CONVERT10_E_OLESTREAM_PUT;
+    }
+
+    if(pData->dwOleID == OLESTREAM_ID && pData->dwObjectTypeID != 0 && hRes == S_OK)
+    {
+        /* Set the Length of the OleTypeName */
+        dwSize = pOleStream->lpstbl->Put(pOleStream, (LPSTR)&(pData->dwOleTypeNameLength), sizeof(pData->dwOleTypeNameLength));
+        if(dwSize != sizeof(pData->dwOleTypeNameLength))
+        {
+            return CONVERT10_E_OLESTREAM_PUT;
+        }
+
+        if(pData->dwOleTypeNameLength > 0)
+        {
+            /* Set the OleTypeName */
+            dwSize = pOleStream->lpstbl->Put(pOleStream, (LPSTR)  pData->strOleTypeName, pData->dwOleTypeNameLength);
+            if(dwSize != pData->dwOleTypeNameLength)
+            {
+                return CONVERT10_E_OLESTREAM_PUT;
+            }
+        }
+
+        if(pData->dwObjectTypeID == OLECONVERT_LINK_TYPE)
+        {
+            dwSize = pOleStream->lpstbl->Put(pOleStream, (LPSTR) &(pData->dwLinkFileNameLength), sizeof(pData->dwLinkFileNameLength));
+            if(dwSize != sizeof(pData->dwLinkFileNameLength))
+            {
+                return CONVERT10_E_OLESTREAM_GET;
+            }
+
+            if(pData->dwLinkFileNameLength > 0)
+            {
+                dwSize = pOleStream->lpstbl->Put(pOleStream, (LPSTR) pData->strLinkFileName, pData->dwLinkFileNameLength);
+                if(dwSize != pData->dwLinkFileNameLength)
+                {
+                    return CONVERT10_E_OLESTREAM_GET;
+                }
+            }
+
+            dwSize = pOleStream->lpstbl->Put(pOleStream, (LPSTR) &(pData->dwLinkExtraInfoLength), sizeof(pData->dwLinkExtraInfoLength));
+            if(dwSize != sizeof(pData->dwLinkExtraInfoLength))
+            {
+                return CONVERT10_E_OLESTREAM_GET;
+            }
+          
+            if(pData->dwLinkExtraInfoLength > 0)
+            {
+                dwSize = pOleStream->lpstbl->Put(pOleStream, (LPSTR) pData->pLinkExtraInfo, pData->dwLinkExtraInfoLength);
+                if(dwSize != pData->dwLinkExtraInfoLength)
+                {
+                    return CONVERT10_E_OLESTREAM_GET;
+                }
+            }
+        }
+
+        /* Set the width of the Metafile */
+        dwSize = pOleStream->lpstbl->Put(pOleStream, (LPSTR)&(pData->dwMetaFileWidth), sizeof(pData->dwMetaFileWidth));
+        if(dwSize != sizeof(pData->dwMetaFileWidth))
+        {
+            return CONVERT10_E_OLESTREAM_PUT;
+        }
+
+        /* Set the height of the Metafile */
+        dwSize = pOleStream->lpstbl->Put(pOleStream, (LPSTR)&(pData->dwMetaFileHeight), sizeof(pData->dwMetaFileHeight));
+        if(dwSize != sizeof(pData->dwMetaFileHeight))
+        {
+            return CONVERT10_E_OLESTREAM_PUT;
+        }
+
+        /* Set the lenght of the Data */
+        dwSize = pOleStream->lpstbl->Put(pOleStream, (LPSTR)&(pData->dwDataLength), sizeof(pData->dwDataLength));
+        if(dwSize != sizeof(pData->dwDataLength))
+        {
+            return CONVERT10_E_OLESTREAM_PUT;
+        }
+
+        if(pData->dwDataLength > 0)
+        {
+            /* Set the Data (eg. IStorage, Metafile, Bitmap) */
+            dwSize = pOleStream->lpstbl->Put(pOleStream, (LPSTR)  pData->pData, pData->dwDataLength);
+            if(dwSize != pData->dwDataLength)
+            {
+                return CONVERT10_E_OLESTREAM_PUT;
+            }
+        }
+    }
+    return S_OK;
+}
+
+/*************************************************************************
+ * OLECONVERT_GetOLE20FromOLE10[Internal] 
+ *
+ * This function copies OLE10 Data (the IStorage in the OLESTREAM) to disk,
+ * opens it, and copies the content to the dest IStorage for 
+ * OleConvertOLESTREAMToIStorage
+ * 
+ *
+ * PARAMS
+ *     pDestStorage  [I] The IStorage to copy the data to
+ *     pBuffer       [I] Buffer that contains the IStorage from the OLESTREAM
+ *     nBufferLength [I] The size of the buffer
+ *
+ * RETURNS
+ *     Nothing
+ *
+ * NOTES
+ *     
+ *     
+ */
+void OLECONVERT_GetOLE20FromOLE10(LPSTORAGE pDestStorage, BYTE *pBuffer, DWORD nBufferLength)
+{
+    HRESULT hRes;
+    HANDLE hFile;
+    IStorage *pTempStorage;
+    DWORD dwNumOfBytesWritten;
+    WCHAR wstrTempDir[MAX_PATH], wstrTempFile[MAX_PATH];
+    WCHAR wstrPrefix[] = {'s', 'i', 's', 0};
+
+    /* Create a temp File */
+    GetTempPathW(MAX_PATH, wstrTempDir);
+    GetTempFileNameW(wstrTempDir, wstrPrefix, 0, wstrTempFile);
+    hFile = CreateFileW(wstrTempFile, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+
+    if(hFile != INVALID_HANDLE_VALUE)
+    {
+        /* Write IStorage Data to File */
+        WriteFile(hFile, pBuffer, nBufferLength, &dwNumOfBytesWritten, NULL);
+        CloseHandle(hFile);
+
+        /* Open and copy temp storage to the Dest Storage */
+        hRes = StgOpenStorage(wstrTempFile, NULL, STGM_READ, NULL, 0, &pTempStorage);
+        if(hRes == S_OK)
+        {
+            hRes = StorageImpl_CopyTo(pTempStorage, NULL,NULL,NULL, pDestStorage);
+            StorageBaseImpl_Release(pTempStorage);
+        }
+        DeleteFileW(wstrTempFile);
+    }
+}
+
+
+/*************************************************************************
+ * OLECONVERT_WriteOLE20ToBuffer [Internal] 
+ *
+ * Saves the OLE10 STREAM From memory 
+ *
+ * PARAMS
+ *     pStorage  [I] The Src IStorage to copy
+ *     pData     [I] The Dest Memory to write to.
+ *
+ * RETURNS
+ *     The size in bytes allocated for pData
+ *
+ * NOTES
+ *     Memory allocated for pData must be freed by the caller
+ *
+ *     Used by OleConvertIStorageToOLESTREAM only.
+ *     
+ */
+DWORD OLECONVERT_WriteOLE20ToBuffer(LPSTORAGE pStorage, BYTE **pData)
+{
+    HANDLE hFile;
+    HRESULT hRes;
+    DWORD nDataLength = 0;
+    IStorage *pTempStorage;
+    WCHAR wstrTempDir[MAX_PATH], wstrTempFile[MAX_PATH];
+    WCHAR wstrPrefix[] = {'s', 'i', 's', 0};
+
+    *pData = NULL;
+    
+    /* Create temp Storage */
+    GetTempPathW(MAX_PATH, wstrTempDir);
+    GetTempFileNameW(wstrTempDir, wstrPrefix, 0, wstrTempFile);
+    hRes = StgCreateDocfile(wstrTempFile, STGM_CREATE | STGM_READWRITE | STGM_SHARE_EXCLUSIVE, NULL, &pTempStorage);
+
+    if(hRes == S_OK)
+    {
+        /* Copy Src Storage to the Temp Storage */
+        StorageImpl_CopyTo(pStorage, NULL,NULL,NULL, pTempStorage);
+        StorageBaseImpl_Release(pTempStorage);
+
+        /* Open Temp Storage as a file and copy to memory */
+        hFile = CreateFileW(wstrTempFile, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+        if(hFile != INVALID_HANDLE_VALUE)
+        {
+            nDataLength = GetFileSize(hFile, NULL);
+            *pData = (BYTE *) malloc(nDataLength);
+            ReadFile(hFile, *pData, nDataLength, &nDataLength, 0);
+            CloseHandle(hFile);
+        }
+        DeleteFileW(wstrTempFile);
+    }
+    return nDataLength;
+}
+
+/*************************************************************************
+ * OLECONVERT_CreateEmbeddedOleStream [Internal] 
+ *
+ * Creates the "\001OLE" stream in the IStorage if neccessary.
+ *
+ * PARAMS
+ *     pStorage     [I] Dest storage to create the stream in
+ *
+ * RETURNS
+ *     Nothing
+ *
+ * NOTES
+ *     This function is used by OleConvertOLESTREAMToIStorage only.
+ *
+ *     This stream is still unknown, MS Word seems to have extra data
+ *     but since the data is stored in the OLESTREAM there should be
+ *     no need to recreate the stream.  If the stream is manually 
+ *     deleted it will create it with this default data.
+ *     
+ */
+void OLECONVERT_CreateEmbeddedOleStream(LPSTORAGE pStorage)
+{
+    HRESULT hRes;
+    IStream *pStream;
+    WCHAR wstrStreamName[] = {1,'O', 'l', 'e', 0};
+    BYTE pOleStreamHeader [] = 
+    {
+        0x01, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+        0x00, 0x00, 0x00, 0x00 
+    };
+    
+    /* Create stream if not present */
+    hRes = IStorage_CreateStream(pStorage, wstrStreamName, 
+        STGM_WRITE  | STGM_SHARE_EXCLUSIVE, 0, 0, &pStream );
+
+    if(hRes == S_OK)
+    {
+        /* Write default Data */
+        hRes = IStream_Write(pStream, pOleStreamHeader, sizeof(pOleStreamHeader), NULL);
+        IStream_Release(pStream);
+    }
+}
+
+/*************************************************************************
+ * OLECONVERT_CreateLinkOleStream [Internal] 
+ *
+ * Creates the "\001OLE" stream in the IStorage if neccessary.
+ *
+ * PARAMS
+ *     pStorage     [I] Dest storage to create the stream in
+ *
+ * RETURNS
+ *     Nothing
+ *
+ * NOTES
+ *     This function is used by OleConvertOLESTREAMToIStorage only.
+ *
+ *     This stream is still unknown, MS Word seems to have extra data
+ *     but since the data is stored in the OLESTREAM there should be
+ *     no need to recreate the stream.  If the stream is manually 
+ *     deleted it will create it with this default data.
+ *     
+ */
+HRESULT OLECONVERT_CreateLinkOleStream(LPSTORAGE pStorage, LPCSTR strProgID, LPCSTR strFileName, BYTE *pItemData, DWORD dwItemDataLength)
+{
+    HRESULT hRes;
+    IStream *pStream;
+    WCHAR wstrStreamName[] = {1,'O', 'l', 'e', 0};
+    OLECONVERT_ISTORAGE_OLE OleStreamHeader;
+    LPMONIKER pFileMoniker=NULL;
+    LPMONIKER pItemMoniker=NULL;
+    LPMONIKER pCompMoniker=NULL;
+    LPMONIKER pDestMoniker=NULL;
+
+
+    BYTE pUnknown7 [] = 
+    {
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+        0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 
+    };
+
+    OleStreamHeader.dwOLEHEADER_ID = 0x02000001;
+    OleStreamHeader.dwUnknown1 = 0x01;
+    OleStreamHeader.dwUnknown2 = 0x01;
+    OleStreamHeader.dwUnknown3 = 0x00;
+    OleStreamHeader.dwUnknown4 = 0x00;
+    OleStreamHeader.dwUnknown5 = 0x00;
+    OleStreamHeader.dwUnknown6 = 0xFFFF;
+    hRes = CLSIDFromProgID16(strProgID, &(OleStreamHeader.clsidObject));
+    memcpy(OleStreamHeader.dwUnknown7, pUnknown7, sizeof(pUnknown7));
+
+    if(hRes != S_OK)
+    {
+        return REGDB_E_CLASSNOTREG;
+    }
+
+    if(strFileName != NULL)
+    {
+        WCHAR wstrFileName[MAX_PATH];
+        MultiByteToWideChar(CP_ACP, 0, strFileName, -1, wstrFileName, MAX_PATH); 
+        hRes = CreateFileMoniker(wstrFileName, &pFileMoniker);
+    }
+    if(pItemData != NULL)
+    {
+
+        WCHAR wstrDelim[] = {'!', 0};
+        WCHAR *wstrItem;
+
+        wstrItem = (LPWSTR) malloc(dwItemDataLength * sizeof(WCHAR));
+
+        MultiByteToWideChar(CP_ACP, 0, (LPCSTR)pItemData, -1, wstrItem, dwItemDataLength); 
+        hRes = CreateItemMoniker(wstrDelim, wstrItem, &pItemMoniker);
+
+        free(wstrItem);
+    }
+
+    if(pItemMoniker != NULL && pFileMoniker != NULL)
+    {
+        hRes = CreateGenericComposite(pFileMoniker, pItemMoniker, &pCompMoniker);
+    }
+
+    if(hRes == S_OK)
+    {
+
+        if(pCompMoniker != NULL)
+        {
+            pDestMoniker = pCompMoniker;
+        }
+        else if(pFileMoniker != NULL)
+        {
+            pDestMoniker = pFileMoniker;
+        }
+        else if(pItemMoniker != NULL)
+        {
+            pDestMoniker = pItemMoniker;
+        }
+
+
+        if(pDestMoniker != NULL)
+        {
+            ULARGE_INTEGER liFileMonikerSize;
+            IMoniker_GetClassID(pDestMoniker, &(OleStreamHeader.clsidMonikerTypeID));
+            IMoniker_GetSizeMax(pDestMoniker, &liFileMonikerSize);
+            OleStreamHeader.dwObjectCLSIDOffset = liFileMonikerSize.LowPart + sizeof(OleStreamHeader.dwUnknown6) + sizeof(OleStreamHeader.clsidMonikerTypeID);
+        }
+        
+
+        /* Create stream  (shouldn't be present)*/
+        hRes = IStorage_CreateStream(pStorage, wstrStreamName, 
+            STGM_CREATE | STGM_WRITE  | STGM_SHARE_EXCLUSIVE, 0, 0, &pStream );
+
+        if(hRes == S_OK)
+        {
+            /* Write default Data */
+            IStream_Write(pStream, &(OleStreamHeader.dwOLEHEADER_ID), sizeof(OleStreamHeader.dwOLEHEADER_ID), NULL);
+            IStream_Write(pStream, &(OleStreamHeader.dwUnknown1), sizeof(OleStreamHeader.dwUnknown1), NULL);
+            IStream_Write(pStream, &(OleStreamHeader.dwUnknown2), sizeof(OleStreamHeader.dwUnknown2), NULL);
+            IStream_Write(pStream, &(OleStreamHeader.dwUnknown3), sizeof(OleStreamHeader.dwUnknown3), NULL);
+            IStream_Write(pStream, &(OleStreamHeader.dwUnknown4), sizeof(OleStreamHeader.dwUnknown4), NULL);
+            IStream_Write(pStream, &(OleStreamHeader.dwUnknown5), sizeof(OleStreamHeader.dwUnknown5), NULL);
+            IStream_Write(pStream, &(OleStreamHeader.dwObjectCLSIDOffset), sizeof(OleStreamHeader.dwObjectCLSIDOffset), NULL);
+            /* Should call OleSaveToStream */
+            WriteClassStm(pStream, &(OleStreamHeader.clsidMonikerTypeID));
+            if(pDestMoniker != NULL)
+            {
+                IMoniker_Save(pDestMoniker, pStream, FALSE);
+            }
+            IStream_Write(pStream, &(OleStreamHeader.dwUnknown6), sizeof(OleStreamHeader.dwUnknown6), NULL);
+            WriteClassStm(pStream, &(OleStreamHeader.clsidObject));
+            IStream_Write(pStream, OleStreamHeader.dwUnknown7, sizeof(OleStreamHeader.dwUnknown7), NULL);
+            IStream_Release(pStream);
+        }
+    }
+    if(pFileMoniker != NULL)
+    {
+        IMoniker_Release(pFileMoniker);
+    }
+    if(pItemMoniker != NULL)
+    {
+        IMoniker_Release(pItemMoniker);
+    }
+    if(pCompMoniker != NULL)
+    {
+        IMoniker_Release(pCompMoniker);
+    }
+    return S_OK;
+}
+
+/*************************************************************************
+ * OLECONVERT_CreateCompObjStream [Internal] 
+ *
+ * Creates a "\001CompObj" is the destination IStorage if necessary.
+ *
+ * PARAMS
+ *     pStorage       [I] The dest IStorage to create the CompObj Stream 
+ *                        if necessary.
+ *     strOleTypeName [I] The ProgID
+ *
+ * RETURNS
+ *     Success:  S_OK
+ *     Failure:  REGDB_E_CLASSNOTREG if cannot reconstruct the stream
+ *
+ * NOTES
+ *     This function is used by OleConvertOLESTREAMToIStorage only.
+ *
+ *     The stream data is stored in the OLESTREAM and there should be
+ *     no need to recreate the stream.  If the stream is manually 
+ *     deleted it will attempt to create it by querying the registry.
+ *
+ *     
+ */
+HRESULT OLECONVERT_CreateCompObjStream(LPSTORAGE pStorage, LPCSTR strOleTypeName)
+{
+    IStream *pStream;
+    HRESULT hStorageRes, hRes = S_OK;
+    OLECONVERT_ISTORAGE_COMPOBJ IStorageCompObj;
+    WCHAR wstrStreamName[] = {1,'C', 'o', 'm', 'p', 'O', 'b', 'j', 0};
+
+    BYTE pCompObjUnknown1[] = {0x01, 0x00, 0xFE, 0xFF, 0x03, 0x0A, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF};
+    BYTE pCompObjUnknown2[] = {0xF4, 0x39, 0xB2, 0x71};
+
+    /* Initialize the CompObj structure */
+    memset(&IStorageCompObj, 0, sizeof(IStorageCompObj));
+    memcpy(&(IStorageCompObj.byUnknown1), pCompObjUnknown1, sizeof(pCompObjUnknown1));
+    memcpy(&(IStorageCompObj.byUnknown2), pCompObjUnknown2, sizeof(pCompObjUnknown2));
+
+
+    /*  Create a CompObj stream if it doesn't exist */
+    hStorageRes = IStorage_CreateStream(pStorage, wstrStreamName, 
+        STGM_WRITE  | STGM_SHARE_EXCLUSIVE, 0, 0, &pStream );
+    if(hStorageRes == S_OK)
+    {
+        /* copy the OleTypeName to the compobj struct */
+        IStorageCompObj.dwOleTypeNameLength = strlen(strOleTypeName)+1;
+        strcpy(IStorageCompObj.strOleTypeName, strOleTypeName);
+
+        /* copy the OleTypeName to the compobj struct */
+        /* Note: in the test made, these where Identical      */
+        IStorageCompObj.dwProgIDNameLength = strlen(strOleTypeName)+1;
+        strcpy(IStorageCompObj.strProgIDName, strOleTypeName);
+
+        /* Get the CLSID */
+        hRes = CLSIDFromProgID16(IStorageCompObj.strProgIDName, &(IStorageCompObj.clsid));
+
+        if(hRes != S_OK)
+        {
+            hRes = REGDB_E_CLASSNOTREG;
+        }
+        else
+        {
+            HKEY hKey;
+            LONG hErr;
+            /* Get the CLSID Default Name from the Registry */
+            hErr = RegOpenKeyA(HKEY_CLASSES_ROOT, IStorageCompObj.strProgIDName, &hKey); 
+            if(hErr == ERROR_SUCCESS)
+            {
+                char strTemp[OLESTREAM_MAX_STR_LEN];
+                IStorageCompObj.dwCLSIDNameLength = OLESTREAM_MAX_STR_LEN;
+                hErr = RegQueryValueA(hKey, NULL, strTemp, (LPLONG)&(IStorageCompObj.dwCLSIDNameLength));
+                if(hErr == ERROR_SUCCESS)
+                {
+                    strcpy(IStorageCompObj.strCLSIDName, strTemp);
+                }
+                RegCloseKey(hKey);
+            }
+            if(hErr != ERROR_SUCCESS)
+            {
+                hRes = REGDB_E_CLASSNOTREG;
+            }
+        }
+
+        if(hRes == S_OK )
+        {
+            /* Write CompObj Structure to stream */
+            hRes = IStream_Write(pStream, IStorageCompObj.byUnknown1, sizeof(IStorageCompObj.byUnknown1), NULL);
+            WriteClassStm(pStream,&(IStorageCompObj.clsid));
+            hRes = IStream_Write(pStream, &(IStorageCompObj.dwCLSIDNameLength), sizeof(IStorageCompObj.dwCLSIDNameLength), NULL);
+            if(IStorageCompObj.dwCLSIDNameLength > 0)
+            {
+                hRes = IStream_Write(pStream, IStorageCompObj.strCLSIDName, IStorageCompObj.dwCLSIDNameLength, NULL);
+            }
+            hRes = IStream_Write(pStream, &(IStorageCompObj.dwOleTypeNameLength) , sizeof(IStorageCompObj.dwOleTypeNameLength), NULL);
+            if(IStorageCompObj.dwOleTypeNameLength > 0)
+            {
+                hRes = IStream_Write(pStream, IStorageCompObj.strOleTypeName , IStorageCompObj.dwOleTypeNameLength, NULL);
+            }
+            hRes = IStream_Write(pStream, &(IStorageCompObj.dwProgIDNameLength) , sizeof(IStorageCompObj.dwProgIDNameLength), NULL);
+            if(IStorageCompObj.dwProgIDNameLength > 0)
+            {
+                hRes = IStream_Write(pStream, IStorageCompObj.strProgIDName , IStorageCompObj.dwProgIDNameLength, NULL);
+            }
+            hRes = IStream_Write(pStream, IStorageCompObj.byUnknown2 , sizeof(IStorageCompObj.byUnknown2), NULL);
+        }
+        IStream_Release(pStream);
+    }
+    return hRes;
+}
+
+
+/*************************************************************************
+ * OLECONVERT_CreateOlePresStream[Internal] 
+ *
+ * Creates the "\002OlePres000" Stream with the Metafile data
+ *
+ * PARAMS
+ *     pStorage     [I] The dest IStorage to create \002OLEPres000 stream in.
+ *     dwExtentX    [I] Width of the Metafile
+ *     dwExtentY    [I] Height of the Metafile 
+ *     pData        [I] Metafile data
+ *     dwDataLength [I] Size of the Metafile data
+ *
+ * RETURNS
+ *     Success:  S_OK
+ *     Failure:  CONVERT10_E_OLESTREAM_PUT for invalid Put
+ *
+ * NOTES
+ *     This function is used by OleConvertOLESTREAMToIStorage only.
+ *     
+ */
+void OLECONVERT_CreateOlePresStream(LPSTORAGE pStorage, DWORD dwObjectType, DWORD dwExtentX, DWORD dwExtentY , BYTE *pData, DWORD dwDataLength)
+{
+    HRESULT hRes;
+    IStream *pStream;
+    WCHAR wstrStreamName[] = {2, 'O', 'l', 'e', 'P', 'r', 'e', 's', '0', '0', '0', 0};
+    BYTE pOlePresStreamEmbeddedHeader [] = 
+    {
+        0xFF, 0xFF, 0xFF, 0xFF, 0x03, 0x00, 0x00, 0x00, 
+        0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 
+        0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00
+    };
+
+    BYTE pOlePresStreamLinkHeader [] = 
+    {
+        0xFF, 0xFF, 0xFF, 0xFF, 0x03, 0x00, 0x00, 0x00, 
+        0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 
+        0xFF, 0xFF, 0xFF, 0xFF, 0x02, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00
+    };
+
+    BYTE pOlePresStreamHeaderEmpty [] = 
+    {
+        0x00, 0x00, 0x00, 0x00, 
+        0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 
+        0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00
+    };
+     
+    /* Create the OlePres000 Stream */
+    hRes = IStorage_CreateStream(pStorage, wstrStreamName, 
+        STGM_CREATE | STGM_WRITE  | STGM_SHARE_EXCLUSIVE, 0, 0, &pStream );
+
+    if(hRes == S_OK)
+    {
+        DWORD nHeaderSize;
+        OLECONVERT_ISTORAGE_OLEPRES OlePres;
+
+        memset(&OlePres, 0, sizeof(OlePres));
+        /* Do we have any metafile data to save */
+        if(dwDataLength > 0)
+        {
+            if(dwObjectType == OLECONVERT_LINK_TYPE)
+            {
+                memcpy(OlePres.byUnknown1, pOlePresStreamLinkHeader, sizeof(pOlePresStreamLinkHeader));
+                nHeaderSize = sizeof(pOlePresStreamLinkHeader);
+            }
+            else
+            {
+                memcpy(OlePres.byUnknown1, pOlePresStreamEmbeddedHeader, sizeof(pOlePresStreamEmbeddedHeader));
+                nHeaderSize = sizeof(pOlePresStreamEmbeddedHeader);
+            }
+        }
+        else
+        {
+            memcpy(OlePres.byUnknown1, pOlePresStreamHeaderEmpty, sizeof(pOlePresStreamHeaderEmpty));
+            nHeaderSize = sizeof(pOlePresStreamHeaderEmpty);
+        }
+        /* Set width and height of the metafile */
+        OlePres.dwExtentX = dwExtentX;
+        OlePres.dwExtentY = -dwExtentY;
+
+        /* Set Data and Length */
+        if(dwDataLength > sizeof(METAFILEPICT16))
+        {
+            OlePres.dwSize = dwDataLength - sizeof(METAFILEPICT16);
+            OlePres.pData = &(pData[8]);
+        }
+        /* Save OlePres000 Data to Stream */
+        hRes = IStream_Write(pStream, OlePres.byUnknown1, nHeaderSize, NULL);
+        hRes = IStream_Write(pStream, &(OlePres.dwExtentX), sizeof(OlePres.dwExtentX), NULL);
+        hRes = IStream_Write(pStream, &(OlePres.dwExtentY), sizeof(OlePres.dwExtentY), NULL);
+        hRes = IStream_Write(pStream, &(OlePres.dwSize), sizeof(OlePres.dwSize), NULL);
+        if(OlePres.dwSize > 0)
+        {
+            hRes = IStream_Write(pStream, OlePres.pData, OlePres.dwSize, NULL);
+        }
+        IStream_Release(pStream);
+    }
+}
+
+/*************************************************************************
+ * OLECONVERT_CreateOle10NativeStream [Internal] 
+ *
+ * Creates the "\001Ole10Native" Stream (should contain a BMP)
+ *
+ * PARAMS
+ *     pStorage     [I] Dest storage to create the stream in
+ *     pData        [I] Ole10 Native Data (ex. bmp)
+ *     dwDataLength [I] Size of the Ole10 Native Data
+ *
+ * RETURNS
+ *     Nothing
+ *
+ * NOTES
+ *     This function is used by OleConvertOLESTREAMToIStorage only.
+ *
+ *     Might need to verify the data and return appropriate error message
+ *     
+ */
+void OLECONVERT_CreateOle10NativeStream(LPSTORAGE pStorage, BYTE *pData, DWORD dwDataLength)
+{
+    HRESULT hRes;
+    IStream *pStream;
+    WCHAR wstrStreamName[] = {1, 'O', 'l', 'e', '1', '0', 'N', 'a', 't', 'i', 'v', 'e', 0};
+    
+    /* Create the Ole10Native Stream */
+    hRes = IStorage_CreateStream(pStorage, wstrStreamName, 
+        STGM_CREATE | STGM_WRITE  | STGM_SHARE_EXCLUSIVE, 0, 0, &pStream );
+
+    if(hRes == S_OK)
+    {
+        /* Write info to stream */
+        hRes = IStream_Write(pStream, &dwDataLength, sizeof(dwDataLength), NULL);
+        hRes = IStream_Write(pStream, pData, dwDataLength, NULL);
+        IStream_Release(pStream);
+    }
+
+}
+
+/*************************************************************************
+ * OLECONVERT_GetProgIDFromStorage [Internal] 
+ *
+ * Finds the ProgID (or OleTypeID) from the IStorage
+ *
+ * PARAMS
+ *     pStorage        [I] The Src IStorage to get the ProgID
+ *     strProgID       [I] the ProgID string to get
+ *     dwSize          [I] the size of the string
+ *
+ * RETURNS
+ *     Success:  S_OK
+ *     Failure:  REGDB_E_CLASSNOTREG if cannot reconstruct the stream
+ *
+ * NOTES
+ *     This function is used by OleConvertIStorageToOLESTREAM only.
+ *
+ *     
+ */
+HRESULT OLECONVERT_GetProgIDFromStorage(LPSTORAGE pStorage, char *strProgID, DWORD *dwSize)
+{
+    HRESULT hRes;
+    IStream *pStream;
+    LARGE_INTEGER iSeekPos;
+
+    strProgID[0] = NULL;
+    
+    if(strProgID == NULL || dwSize == NULL)
+    {
+        return E_INVALIDARG;
+    }
+
+    if(OLECONVERT_IsStorageLink(pStorage))
+    {
+        LPOLESTR wstrProgID;
+        WCHAR wstrStreamName[] = {1,'O', 'l', 'e', 0};
+
+        /* Open the CompObj Stream */
+        hRes = IStorage_OpenStream(pStorage, wstrStreamName, NULL,  
+            STGM_READ  | STGM_SHARE_EXCLUSIVE, 0, &pStream );
+        if(hRes == S_OK)
+        {
+            OLECONVERT_ISTORAGE_OLE OleStreamHeader;
+
+            /* Get the CLSID Offset */
+            iSeekPos.LowPart = sizeof(OleStreamHeader.dwOLEHEADER_ID) + sizeof(OleStreamHeader.dwUnknown1)
+                                + sizeof(OleStreamHeader.dwUnknown2) + sizeof(OleStreamHeader.dwUnknown3) 
+                                + sizeof(OleStreamHeader.dwUnknown4) + sizeof(OleStreamHeader.dwUnknown5);
+            iSeekPos.HighPart = 0;
+            hRes = IStream_Seek(pStream, iSeekPos, STREAM_SEEK_SET, NULL);
+            if(hRes == S_OK)
+            {
+                hRes = IStream_Read(pStream, &OleStreamHeader.dwObjectCLSIDOffset, sizeof(OleStreamHeader.dwObjectCLSIDOffset), NULL);
+            }
+            if(hRes == S_OK)
+            {
+                iSeekPos.LowPart = OleStreamHeader.dwObjectCLSIDOffset;
+                hRes = IStream_Seek(pStream, iSeekPos, STREAM_SEEK_CUR, NULL);
+            }
+            /* Read the CLSID */
+            hRes = ReadClassStm(pStream, &OleStreamHeader.clsidObject);
+            if(hRes == S_OK)
+            {
+                hRes = ProgIDFromCLSID(&(OleStreamHeader.clsidObject), &wstrProgID);
+                if(hRes == S_OK)
+                {
+                    *dwSize = WideCharToMultiByte(CP_ACP, 0, wstrProgID, -1, strProgID, *dwSize, NULL, FALSE);
+                }
+            }
+            IStream_Release(pStream);
+        }
+    }
+    else
+    {
+        
+        STATSTG stat;
+        OLECONVERT_ISTORAGE_COMPOBJ CompObj;
+        WCHAR wstrStreamName[] = {1,'C', 'o', 'm', 'p', 'O', 'b', 'j', 0};
+        /* Open the CompObj Stream */
+        hRes = IStorage_OpenStream(pStorage, wstrStreamName, NULL,  
+            STGM_READ  | STGM_SHARE_EXCLUSIVE, 0, &pStream );
+
+        if(hRes == S_OK)
+        {
+
+            /*Get the OleType from the CompObj Stream */
+            iSeekPos.LowPart = sizeof(CompObj.byUnknown1) + sizeof(CompObj.clsid);
+            iSeekPos.HighPart = 0;
+
+            hRes = IStream_Seek(pStream, iSeekPos, STREAM_SEEK_SET, NULL);
+            if(hRes == S_OK)
+            {
+                hRes = IStream_Read(pStream, &CompObj.dwCLSIDNameLength, sizeof(CompObj.dwCLSIDNameLength), NULL);
+            }
+
+            if(hRes == S_OK)
+            {
+                iSeekPos.LowPart = CompObj.dwCLSIDNameLength;
+                hRes = IStream_Seek(pStream, iSeekPos, STREAM_SEEK_CUR , NULL);
+            }
+            if(hRes == S_OK)
+            {
+                hRes = IStream_Read(pStream, &CompObj.dwOleTypeNameLength, sizeof(CompObj.dwOleTypeNameLength), NULL);
+            }
+            if(hRes == S_OK)
+            {
+                iSeekPos.LowPart = CompObj.dwOleTypeNameLength;
+                hRes = IStream_Seek(pStream, iSeekPos, STREAM_SEEK_CUR , NULL);
+            }
+
+            if(hRes == S_OK)
+            {
+                hRes = IStream_Read(pStream, dwSize, sizeof(*dwSize), NULL);
+                if(*dwSize > 0)
+                {
+                    if(hRes == S_OK)
+                    {
+                        hRes = IStream_Read(pStream, strProgID, *dwSize, NULL);
+                    }
+                }
+            }
+            IStream_Release(pStream);
+        }
+
+        /* If the CompObject is not present, or there was an error reading the CompObject */
+        /* Get the CLSID from the storage stat */
+        if(hRes != S_OK)
+        {
+            LPOLESTR wstrProgID;
+
+            /* Get the OleType from the registry */
+            IStorage_Stat(pStorage, &stat, STATFLAG_NONAME);
+            hRes = ProgIDFromCLSID(&(stat.clsid), &wstrProgID);
+            if(hRes == S_OK)
+            {
+                *dwSize = WideCharToMultiByte(CP_ACP, 0, wstrProgID, -1, strProgID, *dwSize, NULL, FALSE);
+            }
+        }
+    }
+    if(strProgID[0] == NULL)
+    {
+        *dwSize = 0;
+    }
+    return hRes;
+}
+
+/*************************************************************************
+ * OLECONVERT_GetOle20PresData[Internal] 
+ *
+ * Converts IStorage "/002OlePres000" stream to a OLE10 Stream
+ *
+ * PARAMS
+ *     pStorage         [I] Src IStroage
+ *     pOleStreamData   [I] Dest OleStream Mem Struct
+ *
+ * RETURNS
+ *     Nothing
+ *
+ * NOTES
+ *     This function is used by OleConvertIStorageToOLESTREAM only.
+ *     
+ *     Memory allocated for pData must be freed by the caller
+ */
+void OLECONVERT_GetOle20PresData(LPSTORAGE pStorage, OLECONVERT_OLESTREAM_DATA *pOleStreamData)
+{
+    HRESULT hRes;
+    IStream *pStream;
+    OLECONVERT_ISTORAGE_OLEPRES olePress;
+    WCHAR wstrStreamName[] = {2, 'O', 'l', 'e', 'P', 'r', 'e', 's', '0', '0', '0', 0};
+
+ 
+
+    /* Open OlePress000 stream */
+    hRes = IStorage_OpenStream(pStorage, wstrStreamName, NULL,  
+        STGM_READ  | STGM_SHARE_EXCLUSIVE, 0, &pStream );
+    if(hRes == S_OK)
+    {
+        LARGE_INTEGER iSeekPos;
+        METAFILEPICT16 MetaFilePict;
+        char strMetafilePictName[] = "METAFILEPICT";
+
+        /* Set the TypeID for a Metafile */
+        pOleStreamData[1].dwObjectTypeID = OLECONVERT_PRESENTATION_DATA_TYPE;
+
+        /* Set the OleTypeName to Metafile */
+        pOleStreamData[1].dwOleTypeNameLength = strlen(strMetafilePictName) +1;
+        strcpy(pOleStreamData[1].strOleTypeName, strMetafilePictName);
+
+        iSeekPos.HighPart = 0;
+        iSeekPos.LowPart = sizeof(olePress.byUnknown1);
+
+        /* Get Presentation Data */
+        IStream_Seek(pStream, iSeekPos, STREAM_SEEK_SET, NULL);
+        IStream_Read(pStream, &(olePress.dwExtentX), sizeof(olePress.dwExtentX), NULL);
+        IStream_Read(pStream, &(olePress.dwExtentY), sizeof(olePress.dwExtentY), NULL);
+        IStream_Read(pStream, &(olePress.dwSize), sizeof(olePress.dwSize), NULL);
+
+        /*Set width and Height */
+        pOleStreamData[1].dwMetaFileWidth = olePress.dwExtentX;
+        pOleStreamData[1].dwMetaFileHeight = -olePress.dwExtentY;
+        if(olePress.dwSize > 0)
+        {
+            /* Set Length */
+            pOleStreamData[1].dwDataLength  = olePress.dwSize + sizeof(METAFILEPICT16);
+
+            /* Set MetaFilePict struct */
+            MetaFilePict.mm = 8;
+            MetaFilePict.xExt = olePress.dwExtentX;
+            MetaFilePict.yExt = olePress.dwExtentY;
+            MetaFilePict.hMF = 0;
+
+            /* Get Metafile Data */
+            pOleStreamData[1].pData = (BYTE *) malloc(pOleStreamData[1].dwDataLength);
+            memcpy(pOleStreamData[1].pData, &MetaFilePict, sizeof(MetaFilePict));
+            IStream_Read(pStream, &(pOleStreamData[1].pData[sizeof(MetaFilePict)]), pOleStreamData[1].dwDataLength-sizeof(METAFILEPICT16), NULL);
+        }
+        IStream_Release(pStream);
+    }
+}
+
+LPMONIKER OLECONVERT_LoadMonikers(CLSID *pclsid, IStream *pStream )
+{
+
+    LPMONIKER pDestMoniker=NULL;
+    HRESULT hRes;
+    if(IsEqualCLSID(&CLSID_FileMoniker, pclsid))
+    {
+        WCHAR temp=0;
+        hRes = CreateFileMoniker(&temp, &pDestMoniker);
+        IMoniker_Load(pDestMoniker, pStream);
+    }
+    else if(IsEqualCLSID(&CLSID_ItemMoniker, pclsid))
+    {
+        WCHAR temp1=0;
+        WCHAR temp2=0;
+        hRes = CreateItemMoniker(&temp1, &temp2, &pDestMoniker);
+        IMoniker_Load(pDestMoniker, pStream);
+    }
+    else if(IsEqualCLSID(&CLSID_CompositeMoniker, pclsid))
+    {
+        /* Problem with Saving CompositeMoniker */
+        /* TODO: Rechange remove code, create an empty CompositeMoniker */
+        WCHAR temp1=0;
+        WCHAR temp2=0;
+        LPMONIKER pItemMoniker, pFileMoniker;
+        hRes = CreateItemMoniker(&temp1, &temp2, &pItemMoniker);
+        hRes = CreateFileMoniker(&temp1, &pFileMoniker);
+        hRes = CreateGenericComposite(pFileMoniker, pItemMoniker, &pDestMoniker);
+        IMoniker_Load(pDestMoniker, pStream);
+    }
+    else
+    {
+        FIXME("Unsupported moniker in IStorage, /001Ole stream\n");
+    }
+    return pDestMoniker;
+}
+
+HRESULT OLECONVERT_GetMonikerFromStorage(LPSTORAGE pStorage, 
+    BYTE **pLinkFileName, DWORD* dwLinkFileNameLength, 
+    BYTE **pLinkExtraInfo,  DWORD* dwLinkExtraInfoLength)
+{
+    HRESULT hRes;
+    IStream *pStream;
+    WCHAR wstrStreamName[] = {1,'O', 'l', 'e', 0};
+    OLECONVERT_ISTORAGE_OLE OleStreamHeader;
+    LPMONIKER pDestMoniker=NULL;
+
+    *pLinkFileName = NULL;
+    *pLinkExtraInfo = NULL;
+    *dwLinkFileNameLength = 0;
+    *dwLinkExtraInfoLength = 0;
+
+    hRes = IStorage_OpenStream(pStorage, wstrStreamName, NULL,  
+        STGM_READ  | STGM_SHARE_EXCLUSIVE, 0, &pStream );
+
+    if(hRes == S_OK)
+    {   
+        /* Write default Data */
+        IStream_Read(pStream, &(OleStreamHeader.dwOLEHEADER_ID), sizeof(OleStreamHeader.dwOLEHEADER_ID), NULL);
+        IStream_Read(pStream, &(OleStreamHeader.dwUnknown1), sizeof(OleStreamHeader.dwUnknown1), NULL);
+        IStream_Read(pStream, &(OleStreamHeader.dwUnknown2), sizeof(OleStreamHeader.dwUnknown2), NULL);
+        IStream_Read(pStream, &(OleStreamHeader.dwUnknown3), sizeof(OleStreamHeader.dwUnknown3), NULL);
+        IStream_Read(pStream, &(OleStreamHeader.dwUnknown4), sizeof(OleStreamHeader.dwUnknown4), NULL);
+        IStream_Read(pStream, &(OleStreamHeader.dwUnknown5), sizeof(OleStreamHeader.dwUnknown5), NULL);
+        IStream_Read(pStream, &(OleStreamHeader.dwObjectCLSIDOffset), sizeof(OleStreamHeader.dwObjectCLSIDOffset), NULL);
+
+        /* Should call OleLoadFromStream, but implementeation incomplete */
+        ReadClassStm(pStream, &(OleStreamHeader.clsidMonikerTypeID));
+        /* Load the moniker */
+        pDestMoniker = OLECONVERT_LoadMonikers(&(OleStreamHeader.clsidMonikerTypeID), pStream);
+
+        /* Retreive the neccesary data */
+        if(IsEqualCLSID(&CLSID_FileMoniker, &(OleStreamHeader.clsidMonikerTypeID)))
+        {
+            
+            LPOLESTR ppszDisplayName;
+            IMoniker_GetDisplayName(pDestMoniker, NULL, NULL, &ppszDisplayName);
+            *dwLinkFileNameLength = WideCharToMultiByte(CP_ACP, 0, ppszDisplayName, -1, 
+                                        NULL, 0, NULL, FALSE);
+            *pLinkFileName = (BYTE *) malloc(*dwLinkFileNameLength);
+            WideCharToMultiByte(CP_ACP, 0, ppszDisplayName, -1, 
+                (LPSTR)*pLinkFileName, *dwLinkFileNameLength, NULL, FALSE);
+            CoTaskMemFree(ppszDisplayName);
+        }
+        else if(IsEqualCLSID(&CLSID_ItemMoniker, &(OleStreamHeader.clsidMonikerTypeID)))
+        {
+            LPOLESTR ppszDisplayName;
+            IMoniker_GetDisplayName(pDestMoniker, NULL, NULL, &ppszDisplayName);
+            *dwLinkExtraInfoLength = WideCharToMultiByte(CP_ACP, 0, ppszDisplayName, -1, 
+                                        NULL, 0, NULL, FALSE);
+            *pLinkExtraInfo = (BYTE *) malloc(*dwLinkExtraInfoLength);
+            WideCharToMultiByte(CP_ACP, 0, ppszDisplayName, -1, 
+                (LPSTR)*pLinkExtraInfo, *dwLinkExtraInfoLength, NULL, FALSE);
+            CoTaskMemFree(ppszDisplayName);
+            
+        }
+        else if(IsEqualCLSID(&CLSID_CompositeMoniker, &(OleStreamHeader.clsidMonikerTypeID)))
+        {
+            LPOLESTR ppszDisplayName;
+            IMoniker *pmk;
+            IEnumMoniker *enumMk;
+
+            IMoniker_Enum(pDestMoniker,TRUE,&enumMk);
+            IEnumMoniker_Next(enumMk,1,&pmk,NULL);
+            
+
+            IMoniker_GetDisplayName(pDestMoniker, NULL, NULL, &ppszDisplayName);
+            *dwLinkFileNameLength = WideCharToMultiByte(CP_ACP, 0, ppszDisplayName, -1, 
+                                        NULL, 0, NULL, FALSE);
+            *pLinkFileName = (BYTE *) malloc(*dwLinkFileNameLength);
+            WideCharToMultiByte(CP_ACP, 0, ppszDisplayName, -1, 
+                (LPSTR)*pLinkFileName, *dwLinkFileNameLength, NULL, FALSE);
+            CoTaskMemFree(ppszDisplayName);
+            IMoniker_Release(pmk);
+
+            IEnumMoniker_Next(enumMk,1,&pmk,NULL);
+
+            IMoniker_GetDisplayName(pDestMoniker, NULL, NULL, &ppszDisplayName);
+            *dwLinkExtraInfoLength = WideCharToMultiByte(CP_ACP, 0, ppszDisplayName, -1, 
+                                        NULL, 0, NULL, FALSE);
+            *pLinkExtraInfo = (BYTE *) malloc(*dwLinkExtraInfoLength);
+            WideCharToMultiByte(CP_ACP, 0, ppszDisplayName, -1, 
+                (LPSTR)*pLinkExtraInfo, *dwLinkExtraInfoLength, NULL, FALSE);
+            CoTaskMemFree(ppszDisplayName);
+            IMoniker_Release(pmk);
+            IEnumMoniker_Release(enumMk);
+        }
+        IStream_Read(pStream, &(OleStreamHeader.dwUnknown6), sizeof(OleStreamHeader.dwUnknown6), NULL);
+
+        ReadClassStm(pStream, &(OleStreamHeader.clsidObject));
+        IStream_Read(pStream, OleStreamHeader.dwUnknown7, sizeof(OleStreamHeader.dwUnknown7), NULL);
+        IStream_Release(pStream);
+    }
+    if(pDestMoniker != NULL)
+    {
+        IMoniker_Release(pDestMoniker);
+    }
+    return S_OK;
+
+
+}
+/*************************************************************************
+ * OLECONVERT_SetEmbeddedOle10OLESTREAMData [Internal] 
+ *
+ * Converts IStorage "/001Ole10Native" stream to a OLE10 Stream
+ *
+ * PARAMS
+ *     pStorage     [I] Src IStroage
+ *     pOleStream   [I] Dest OleStream Mem Struct
+ *
+ * RETURNS
+ *     Nothing
+ *
+ * NOTES
+ *     This function is used by OleConvertIStorageToOLESTREAM only.
+ *
+ *     Memory allocated for pData must be freed by the caller
+ *      
+ *     
+ */
+HRESULT OLECONVERT_SetEmbeddedOle10OLESTREAMData(LPSTORAGE pStorage, OLECONVERT_OLESTREAM_DATA *pOleStreamData)
+{
+
+    HRESULT hRes;
+    IStream *pStream;
+    WCHAR wstrStreamName[] = {1, 'O', 'l', 'e', '1', '0', 'N', 'a', 't', 'i', 'v', 'e', 0};
+
+    /* Initialize Default data for OLESTREAM */
+    memset(pOleStreamData,0, sizeof(OLECONVERT_OLESTREAM_DATA) * OLECONVERT_NUM_OLE10STREAMS);
+    /* Get the ProgID */
+    pOleStreamData[0].dwOleTypeNameLength = OLESTREAM_MAX_STR_LEN;
+    hRes = OLECONVERT_GetProgIDFromStorage(pStorage, pOleStreamData[0].strOleTypeName, &(pOleStreamData[0].dwOleTypeNameLength));
+
+    if(hRes != S_OK)
+    {
+        /* Cannot find the CLSID in the registry. Abort! */
+        return hRes;
+    }
+
+    pOleStreamData[0].dwOleID = OLESTREAM_ID;
+    pOleStreamData[0].dwObjectTypeID = OLECONVERT_EMBEDDED_TYPE;
+
+    /* Open Ole10Native Stream */
+    hRes = IStorage_OpenStream(pStorage, wstrStreamName, NULL,  
+        STGM_READ  | STGM_SHARE_EXCLUSIVE, 0, &pStream );
+    if(hRes == S_OK)
+    {
+
+        /* Read Size and Data */
+        IStream_Read(pStream, &(pOleStreamData->dwDataLength), sizeof(pOleStreamData->dwDataLength), NULL);
+        if(pOleStreamData->dwDataLength > 0)
+        {
+            pOleStreamData->pData = (BYTE *) malloc(pOleStreamData->dwDataLength);
+            IStream_Read(pStream, pOleStreamData->pData, pOleStreamData->dwDataLength, NULL);
+        }
+        IStream_Release(pStream);
+    }
+
+    if(hRes == S_OK)
+    {
+        /* Stream doens't exist for all cases: no stream for pbrush but package does! */
+        /* Cannot check for return value because the stream might not exist (normal behavior)*/
+        pOleStreamData[1].dwOleID = OLESTREAM_ID;
+        OLECONVERT_GetOle20PresData(pStorage, pOleStreamData);
+    }
+
+    return hRes;
+
+}
+
+HRESULT OLECONVERT_SetEmbeddedOle20OLESTREAMData(LPSTORAGE pStorage, OLECONVERT_OLESTREAM_DATA *pOleStreamData)
+{
+
+    HRESULT hRes=S_OK;
+   /* Initialize Default data for OLESTREAM */
+    memset(pOleStreamData,0, sizeof(OLECONVERT_OLESTREAM_DATA) * OLECONVERT_NUM_OLE10STREAMS);
+
+    /* Get the ProgID */
+    pOleStreamData[0].dwOleTypeNameLength = OLESTREAM_MAX_STR_LEN;
+    hRes = OLECONVERT_GetProgIDFromStorage(pStorage, pOleStreamData[0].strOleTypeName, &(pOleStreamData[0].dwOleTypeNameLength));
+
+    if(hRes != S_OK)
+    {
+        /* Cannot find the CLSID in the registry. Abort! */
+        return hRes;
+    }
+
+    pOleStreamData[0].dwOleID = OLESTREAM_ID;
+    pOleStreamData[0].dwObjectTypeID = OLECONVERT_EMBEDDED_TYPE;
+    pOleStreamData[0].dwDataLength = OLECONVERT_WriteOLE20ToBuffer(pStorage, 
+                                        &(pOleStreamData[0].pData));
+    pOleStreamData[1].dwOleID = OLESTREAM_ID;
+    OLECONVERT_GetOle20PresData(pStorage, pOleStreamData);
+
+    return hRes;
+}
+
+
+HRESULT OLECONVERT_SetLinkOLESTREAMData(LPSTORAGE pStorage, OLECONVERT_OLESTREAM_DATA *pOleStreamData)
+{
+
+    HRESULT hRes = S_OK;
+   /* Initialize Default data for OLESTREAM */
+    memset(pOleStreamData,0, sizeof(OLECONVERT_OLESTREAM_DATA) * OLECONVERT_NUM_OLE10STREAMS);
+
+    /* Get the ProgID */
+    pOleStreamData[0].dwOleTypeNameLength = OLESTREAM_MAX_STR_LEN;
+    hRes = OLECONVERT_GetProgIDFromStorage(pStorage, pOleStreamData[0].strOleTypeName, &(pOleStreamData[0].dwOleTypeNameLength));
+
+    if(hRes != S_OK)
+    {
+        /* Cannot find the CLSID in the registry. Abort! */
+        return hRes;
+    }
+    pOleStreamData[0].dwOleID = OLESTREAM_ID;
+    pOleStreamData[0].dwObjectTypeID = OLECONVERT_LINK_TYPE;
+    /* TODO: Write the Link data */
+    OLECONVERT_GetMonikerFromStorage(pStorage, 
+        &(pOleStreamData[0].strLinkFileName), &(pOleStreamData[0].dwLinkFileNameLength), 
+        &(pOleStreamData[0].pLinkExtraInfo),  &(pOleStreamData[0].dwLinkExtraInfoLength));
+
+/*    pOleStreamData[0].dwDataLength = OLECONVERT_WriteOLE20ToBuffer(pStorage, &(pOleStreamData[0].pData)); */
+    pOleStreamData[1].dwOleID = OLESTREAM_ID;
+    OLECONVERT_GetOle20PresData(pStorage, pOleStreamData);
+    return hRes;
+}
+
+
+HRESULT OLECONVERT_CreateEmbeddedIStorage(LPSTORAGE pStorage, OLECONVERT_OLESTREAM_DATA *pOleStreamData)
+{
+    HRESULT hRes = S_OK;
+    BOOL bCreateOle10Native = TRUE;
+    if(pOleStreamData[0].dwDataLength > sizeof(STORAGE_magic))
+    {
+        /* Do we have the IStorage Data in the OLESTREAM */
+        if(memcmp(pOleStreamData[0].pData, STORAGE_magic, sizeof(STORAGE_magic)) ==0)
+        {
+            OLECONVERT_GetOLE20FromOLE10(pStorage, pOleStreamData[0].pData, pOleStreamData[0].dwDataLength);
+            
+            OLECONVERT_CreateOlePresStream(pStorage, OLECONVERT_EMBEDDED_TYPE,
+                pOleStreamData[1].dwMetaFileWidth, pOleStreamData[1].dwMetaFileHeight, 
+                pOleStreamData[1].pData, pOleStreamData[1].dwDataLength);
+            bCreateOle10Native = FALSE;
+        }
+    }
+
+    if(bCreateOle10Native)
+    {
+        /* It must be an original OLE 1.0 source */
+        OLECONVERT_CreateOle10NativeStream(pStorage, pOleStreamData[0].pData, pOleStreamData[0].dwDataLength);
+
+        if(pOleStreamData[1].dwObjectTypeID == OLECONVERT_PRESENTATION_DATA_TYPE)
+        {
+            OLECONVERT_CreateOlePresStream(pStorage, OLECONVERT_EMBEDDED_TYPE, 
+                pOleStreamData[1].dwMetaFileWidth, pOleStreamData[1].dwMetaFileHeight, 
+                pOleStreamData[1].pData, pOleStreamData[1].dwDataLength);
+        }
+    }
+
+    /*Create the Ole Stream if necessary */
+    OLECONVERT_CreateEmbeddedOleStream(pStorage);
+    /* Create CompObj Stream if necessary */
+    hRes = OLECONVERT_CreateCompObjStream(pStorage, pOleStreamData[0].strOleTypeName);
+    if(hRes == S_OK)
+    {
+        CLSID clsid;
+        
+        CLSIDFromProgID16(pOleStreamData[0].strOleTypeName, &clsid);
+        IStorage_SetClass(pStorage, &clsid);
+    }
+    return hRes;
+}
+
+HRESULT OLECONVERT_CreateLinkIStorage(LPSTORAGE pStorage, OLECONVERT_OLESTREAM_DATA *pOleStreamData)
+{
+    HRESULT hRes;
+    hRes = OLECONVERT_CreateLinkOleStream(pStorage, 
+        pOleStreamData[0].strOleTypeName, (LPCSTR)pOleStreamData[0].strLinkFileName, 
+        pOleStreamData[0].pLinkExtraInfo, pOleStreamData[0].dwLinkExtraInfoLength);
+    if(hRes == S_OK)
+    {
+        OLECONVERT_CreateOlePresStream(pStorage, OLECONVERT_LINK_TYPE,
+            pOleStreamData[1].dwMetaFileWidth, pOleStreamData[1].dwMetaFileHeight, 
+            pOleStreamData[1].pData, pOleStreamData[1].dwDataLength);
+    }
+    if(hRes == S_OK)
+    {
+        IStorage_SetClass(pStorage, &IID_StdOleLink);
+    }
+    return hRes;
+}
+
+
+
+/*************************************************************************
+ * OleConvertOLESTREAMToIStorage [OLE32.87] 
+ *
+ * Read info on MSDN
+ *
+ * TODO
+ *      DVTARGETDEVICE paramenter is not handled
+ *      Still unsure of some mem fields for OLE 10 Stream
+ *      Still some unknowns for the IStorage: "\002OlePres000", "\001CompObj",
+ *      and "\001OLE" streams
+ *     
+ */
+HRESULT WINAPI OleConvertOLESTREAMToIStorage (
+    LPOLESTREAM pOleStream, 
+    LPSTORAGE pstg, 
+    const DVTARGETDEVICE* ptd)
+{
+    int i;
+    HRESULT hRes=S_OK;
+    OLECONVERT_OLESTREAM_DATA pOleStreamData[OLECONVERT_NUM_OLE10STREAMS];
+
+    memset(pOleStreamData, 0, sizeof(pOleStreamData));
+
+    if(ptd != NULL)
+    {
+        FIXME("DVTARGETDEVICE is not NULL, unhandled parameter\n");
+    }
+
+    if(pstg == NULL || pOleStream == NULL)
+    {
+        hRes = E_INVALIDARG;
+    }
+
+    if(hRes == S_OK)
+    {
+        /* Load the OLESTREAM to Memory */
+        hRes = OLECONVERT_LoadOLE10(pOleStream, &pOleStreamData[0]);
+    }
+
+    if(hRes == S_OK)
+    {
+        /* Load the OLESTREAM to Memory (part 2)*/
+        hRes = OLECONVERT_LoadOLE10(pOleStream, &pOleStreamData[1]);
+    }
+
+    if(hRes == S_OK)
+    {
+        /* Is olestream an embedded object */
+        if(pOleStreamData[0].dwObjectTypeID != OLECONVERT_LINK_TYPE)
+        {
+            hRes = OLECONVERT_CreateEmbeddedIStorage(pstg, pOleStreamData);
+        }
+        else
+        {
+            hRes = OLECONVERT_CreateLinkIStorage(pstg, pOleStreamData);
+        }
+    }
+    /* Free allocated memory */
+    for(i=0; i < OLECONVERT_NUM_OLE10STREAMS; i++)
+    {
+        if(pOleStreamData[i].pData != NULL)
+        {
+            free(pOleStreamData[i].pData);
+        }
+
+        if(pOleStreamData[i].pLinkExtraInfo != NULL)
+        {
+            free(pOleStreamData[i].pLinkExtraInfo);
+        }
+        if(pOleStreamData[i].strLinkFileName != NULL)
+        {
+            free(pOleStreamData[i].strLinkFileName);
+        }
+    }
+    return hRes;
+}
+
+/*************************************************************************
+ * OleConvertIStorageToOLESTREAM [OLE32.85]
+ *
+ * Read info on MSDN
+ *
+ * Read info on MSDN
+ *
+ * TODO
+ *      Still unsure of some mem fields for OLE 10 Stream
+ *      Still some unknowns for the IStorage: "\002OlePres000", "\001CompObj",
+ *      and "\001OLE" streams.
+ *     
+ */
+HRESULT WINAPI OleConvertIStorageToOLESTREAM (
+    LPSTORAGE pstg, 
+    LPOLESTREAM pOleStream)
+{
+    int i;
+    HRESULT hRes = S_OK;
+    IStream *pStream;
+    OLECONVERT_OLESTREAM_DATA pOleStreamData[OLECONVERT_NUM_OLE10STREAMS];
+    WCHAR wstrStreamName[] = {1, 'O', 'l', 'e', '1', '0', 'N', 'a', 't', 'i', 'v', 'e', 0};
+
+
+    memset(pOleStreamData, 0, sizeof(pOleStreamData));
+
+    if(pstg == NULL || pOleStream == NULL)
+    {
+        hRes = E_INVALIDARG;
+    }
+    if(hRes == S_OK)
+    {
+        if(!OLECONVERT_IsStorageLink(pstg))
+        {
+            /*Was it originaly Ole10 */
+            hRes = IStorage_OpenStream(pstg, wstrStreamName, 0, STGM_READ | STGM_SHARE_EXCLUSIVE, 0, &pStream);    
+            if(hRes == S_OK)
+            {
+                IStream_Release(pStream);
+                /*Get Presentation Data for Ole10Native */
+                hRes = OLECONVERT_SetEmbeddedOle10OLESTREAMData(pstg, pOleStreamData);
+            }
+            else
+            {
+                /*Get Presentation Data (OLE20)*/
+                hRes = OLECONVERT_SetEmbeddedOle20OLESTREAMData(pstg, pOleStreamData);
+            }
+        }
+        else
+        {
+            hRes = OLECONVERT_SetLinkOLESTREAMData(pstg, pOleStreamData);
+        }
+
+        if(hRes == S_OK)
+        {
+            /* Save OLESTREAM */
+            hRes = OLECONVERT_SaveOLE10(&(pOleStreamData[0]), pOleStream);
+            if(hRes == S_OK)
+            {
+                hRes = OLECONVERT_SaveOLE10(&(pOleStreamData[1]), pOleStream);
+            }
+        }
+    }
+
+    /* Free allocated memory */
+    for(i=0; i < OLECONVERT_NUM_OLE10STREAMS; i++)
+    {
+        if(pOleStreamData[i].pData != NULL)
+        {
+            free(pOleStreamData[i].pData);
+        }
+
+        if(pOleStreamData[i].pLinkExtraInfo != NULL)
+        {
+            free(pOleStreamData[i].pLinkExtraInfo);
+        }
+
+        if(pOleStreamData[i].strLinkFileName != NULL)
+        {
+            free(pOleStreamData[i].strLinkFileName);
+        }
+    }
+
+    return hRes;
+}
 
 /******************************************************************************
  * StgIsStorageFile16 [STORAGE.5]
  */
 HRESULT WINAPI StgIsStorageFile16(LPCOLESTR16 fn) {
+static const BYTE STORAGE_notmagic[8]={0x0e,0x11,0xfc,0x0d,0xd0,0xcf,0x11,0xe0};
         HFILE           hf;
         OFSTRUCT        ofs;
         BYTE            magic[24];

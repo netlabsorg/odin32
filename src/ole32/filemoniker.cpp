@@ -1,4 +1,4 @@
-/* $Id: filemoniker.cpp,v 1.1 1999-09-24 21:49:43 davidr Exp $ */
+/* $Id: filemoniker.cpp,v 1.2 2000-03-19 15:33:06 davidr Exp $ */
 /* 
  *  FileMonikers functions.
  * 
@@ -14,6 +14,7 @@
 #include "heapstring.h"
 #include "debugtools.h"
 #include "filemoniker.h"
+#include "winnls.h"
 
 DEFAULT_DEBUG_CHANNEL(ole)
 
@@ -211,12 +212,14 @@ HRESULT WINAPI FileMonikerImpl_IsDirty(IMoniker* iface)
 HRESULT WINAPI FileMonikerImpl_Load(IMoniker* iface,IStream* pStm)
 {
     HRESULT res;
-    CHAR* filePathA;
-    WCHAR* filePathW;
+    CHAR* filePathA=NULL;
+    WCHAR* filePathW=NULL;
     ULONG bread;
     WORD  wbuffer;
-    DWORD dwbuffer,length,i,doubleLenHex,doubleLenDec;
-
+    DWORD i;
+    DWORD dwAnsiLength, dwUnicodeLength;
+    DWORD dwOffsetToEndUnicodeStr; 
+    WCHAR tempUnicodePath[MAX_PATH];
     ICOM_THIS(FileMonikerImpl,iface);
 
     TRACE("(%p,%p)\n",iface,pStm);
@@ -229,22 +232,34 @@ HRESULT WINAPI FileMonikerImpl_Load(IMoniker* iface,IStream* pStm)
         return E_FAIL;
     
     /* read filePath string length (plus one) */
-    res=IStream_Read(pStm,&length,sizeof(DWORD),&bread);
+    res=IStream_Read(pStm,&dwAnsiLength,sizeof(DWORD),&bread);
     if (bread != sizeof(DWORD))
         return E_FAIL;
 
-    /* read filePath string */
-    filePathA=(CHAR*)HeapAlloc(GetProcessHeap(),0,length);
-    res=IStream_Read(pStm,filePathA,length,&bread);
-    if (bread != length)
-        return E_FAIL;
+    if(dwAnsiLength > 0)
+    {
+        /* read filePath string */
+        filePathA=(CHAR *)HeapAlloc(GetProcessHeap(),0,dwAnsiLength);
+        res=IStream_Read(pStm,filePathA,dwAnsiLength,&bread);
+        if (bread != dwAnsiLength)
+            return E_FAIL;
+    }
+    tempUnicodePath[0] = 0;
+    if(filePathA != NULL)
+    {
+        MultiByteToWideChar(CP_ACP, 0, filePathA, -1, tempUnicodePath, MAX_PATH);
+    }
+    FileMonikerImpl_CheckFileFormat(This, tempUnicodePath);
 
-    /* read the first constant */
-    IStream_Read(pStm,&dwbuffer,sizeof(DWORD),&bread);
-    if (bread != sizeof(DWORD) || dwbuffer != 0xDEADFFFF)
+    IStream_Read(pStm, &(This->wNetworkDomainLenght), sizeof(WORD), &bread);
+    if(bread != sizeof(WORD))
+    {
         return E_FAIL;
-	
-    length--;
+    }
+    /* read the first constant */
+    IStream_Read(pStm,&wbuffer,sizeof(WORD),&bread);
+    if (bread != sizeof(WORD) || wbuffer != 0xDEAD)
+        return E_FAIL;
 	
     for(i=0;i<10;i++){
         res=IStream_Read(pStm,&wbuffer,sizeof(WORD),&bread);
@@ -252,40 +267,48 @@ HRESULT WINAPI FileMonikerImpl_Load(IMoniker* iface,IStream* pStm)
             return E_FAIL;
     }
     
-    if (length>8)
-        length=0;
-	
-    doubleLenHex=doubleLenDec=2*length;
-    if (length > 5)
-        doubleLenDec+=6;
-
-    res=IStream_Read(pStm,&dwbuffer,sizeof(DWORD),&bread);
-    if (bread!=sizeof(DWORD) || dwbuffer!=doubleLenDec)
+    res=IStream_Read(pStm,&dwOffsetToEndUnicodeStr,sizeof(DWORD),&bread);
+    if (bread != sizeof(DWORD))
         return E_FAIL;
+    if(dwOffsetToEndUnicodeStr != 0)
+    {
+        res=IStream_Read(pStm,&dwUnicodeLength,sizeof(DWORD),&bread);
+        if (bread!=sizeof(DWORD))
+            return E_FAIL;
 
-    if (length==0)
-        return res;
-	
-    res=IStream_Read(pStm,&dwbuffer,sizeof(DWORD),&bread);
-    if (bread!=sizeof(DWORD) || dwbuffer!=doubleLenHex)
-        return E_FAIL;
 
-    res=IStream_Read(pStm,&wbuffer,sizeof(WORD),&bread);
-    if (bread!=sizeof(WORD) || wbuffer!=0x3)
-        return E_FAIL;
+        res=IStream_Read(pStm,&wbuffer,sizeof(WORD),&bread);
+        if (bread!=sizeof(WORD) || wbuffer!=0x3)
+            return E_FAIL;
 
-    filePathW=(WCHAR*)HeapAlloc(GetProcessHeap(),0,(length+1)*sizeof(WCHAR));
-    filePathW[length]=0;
-    res=IStream_Read(pStm,filePathW,doubleLenHex,&bread);
-    if (bread!=doubleLenHex)
-        return E_FAIL;
+        if(dwUnicodeLength > 0)
+        {
+            filePathW=(WCHAR *)HeapAlloc(GetProcessHeap(),0,dwUnicodeLength + sizeof(WCHAR));
+            res=IStream_Read(pStm, filePathW, dwUnicodeLength,&bread);
+            filePathW[dwAnsiLength-1]=0;
+            if (bread!=dwUnicodeLength)
+                return E_FAIL;
+        }
+    }
+    else
+    {
+        if(filePathA != NULL)
+        {
+            filePathW=(WCHAR *)HeapAlloc(GetProcessHeap(),0,dwAnsiLength*sizeof(WCHAR));
+            MultiByteToWideChar(CP_ACP, 0, filePathA, -1, filePathW, dwAnsiLength); 
+            filePathW[dwAnsiLength-1]=0;
+        }
+    }
 
     if (This->filePathName!=NULL)
         HeapFree(GetProcessHeap(),0,This->filePathName);
 
     This->filePathName=filePathW;
 
-    HeapFree(GetProcessHeap(),0,filePathA);
+    if(filePathA != NULL)
+    {
+        HeapFree(GetProcessHeap(),0,filePathA);
+    }
     
     return res;
 }
@@ -312,64 +335,85 @@ HRESULT WINAPI FileMonikerImpl_Save(IMoniker* iface,
 
     HRESULT res;
     LPOLESTR filePathW=This->filePathName;
-    CHAR*     filePathA;
-    DWORD  len=1+lstrlenW(filePathW);
+    CHAR*     filePathA=NULL;
+    DWORD  len=0;
 
-    DWORD  constant1 = 0xDEADFFFF; /* these constants are detected after analysing the data structure writen by */
+    WORD  constant1 = 0xDEAD; /* these constants are detected after analysing the data structure writen by */
     WORD   constant2 = 0x3;        /* FileMoniker_Save function in a windows program system */
+    WORD wUnicodeLen=0xFFFF;  
+    DWORD dwOffsetToEndUnicodeStr=0; 
 
     WORD   zero=0;
     DWORD doubleLenHex;
-    DWORD doubleLenDec;
     int i=0;
+    WCHAR temp = 0;
+
 
     TRACE("(%p,%p,%d)\n",iface,pStm,fClearDirty);
 
     if (pStm==NULL)
         return E_POINTER;
+    if(filePathW == NULL)
+    {
+        return S_FALSE;  /* TODO: Check what windows returns */
+    }
+
+    doubleLenHex=lstrlenW(filePathW) * sizeof(WCHAR); /* Doesn't include the "\0" */
+    len = lstrlenW(filePathW)+1;
+    filePathA=(CHAR *)HeapAlloc(GetProcessHeap(), 0,len);
+    lstrcpyWtoA(filePathA,filePathW);
+    
+    if(!This->bIsLongFileName && len > 1)
+    {
+        
+        dwOffsetToEndUnicodeStr = sizeof(DWORD) + sizeof(WORD) + doubleLenHex;
+    }
 
     /* write a DWORD seted to 0 : constant */
+    /* TODO: Not Sure, but I believe that this is a constant for  char types */
+    /* eg. 0000 for Ansi, 0003 for Unicode, will need to verify this  */
     res=IStream_Write(pStm,&zero,sizeof(WORD),NULL);
 
     /* write length of filePath string ( "\0" included )*/
     res=IStream_Write(pStm,&len,sizeof(DWORD),NULL);
 
     /* write filePath string type A */
-    filePathA=(CHAR *)HeapAlloc(GetProcessHeap(),0,len);
-    lstrcpyWtoA(filePathA,filePathW);
     res=IStream_Write(pStm,filePathA,len,NULL);
-    HeapFree(GetProcessHeap(),0,filePathA);
 
-    /* write a DWORD seted to 0xDEADFFFF: constant */
-    res=IStream_Write(pStm,&constant1,sizeof(DWORD),NULL);
+    /*When the file path is a network path, it fills this value with */
+    /*Lenght in of the domain/share drive name */
+    res=IStream_Write(pStm, &(This->wNetworkDomainLenght), sizeof(wUnicodeLen), NULL);
+    /* write a WORD seted to 0xDEAD: constant */
+    res=IStream_Write(pStm,&constant1,sizeof(constant1),NULL);
 	
     len--;
-    /* write 10 times a DWORD seted to 0 : constants */
+    /* write 10 times a WORD seted to 0 : constants */
     for(i=0;i<10;i++)
         res=IStream_Write(pStm,&zero,sizeof(WORD),NULL);
-	
-    if (len>8)
-        len=0;
-	
-    doubleLenHex=doubleLenDec=2*len;
-    if (len > 5)
-        doubleLenDec+=6;
 
-    /* write double-length of the path string ( "\0" included )*/
-    res=IStream_Write(pStm,&doubleLenDec,sizeof(DWORD),NULL);
-
-    if (len==0)
-        return res;
-
-    /* write double-length (hexa representation) of the path string ( "\0" included ) */
-    res=IStream_Write(pStm,&doubleLenHex,sizeof(DWORD),NULL);
-
-    /* write a WORD seted to 0x3: constant */
-    res=IStream_Write(pStm,&constant2,sizeof(WORD),NULL);
-
-    /* write path unicode string */
-    res=IStream_Write(pStm,filePathW,doubleLenHex,NULL);
-
+    /* when a file path is a file or network path that doesn't fallow the dos 8.3 format  */
+    /* it creates the unicode data.  This value is offset */
+    /* where the Unicode string ends.  If the file is a long dos filename (or network containing a long filename)*/
+    /* it doesn't create it's unicode counterpart */    
+    res=IStream_Write(pStm, &dwOffsetToEndUnicodeStr, sizeof(DWORD), NULL);
+    if(dwOffsetToEndUnicodeStr != 0)
+    {
+        /* write double-length (hexa representation) of the path string*/
+        res=IStream_Write(pStm, &doubleLenHex, sizeof(DWORD),NULL);
+        /* write a WORD seted to 0x3: constant */
+        /* TODO: (same as above) Not Sure, but I believe that this is a constant for  char types */
+        /* eg. 0000 for Ansi, 0003 for Unicode, will need to verify this  */
+        res=IStream_Write(pStm, &constant2, sizeof(WORD),NULL);
+        /* write path unicode string */
+        if(doubleLenHex > 0)
+        {
+            res=IStream_Write(pStm, filePathW, doubleLenHex,NULL);
+        }
+    }
+    if(filePathA != NULL)
+    {
+        HeapFree(GetProcessHeap(),0,filePathA);
+    }
     return res;
 }
 
@@ -385,7 +429,7 @@ HRESULT WINAPI FileMonikerImpl_GetSizeMax(IMoniker* iface,
 
     TRACE("(%p,%p)\n",iface,pcbSize);
 
-    if (pcbSize!=NULL)
+    if (pcbSize==NULL)
         return E_POINTER;
 
     /* for more details see FileMonikerImpl_Save coments */
@@ -397,12 +441,13 @@ HRESULT WINAPI FileMonikerImpl_GetSizeMax(IMoniker* iface,
                10*sizeof(WORD)+         /* 10 zero WORD */
                sizeof(DWORD);           /* size of the unicode filePath: "\0" not included */
 
-    if (len==0 || len > 8)
-        return S_OK;
-    
-    sizeMAx += sizeof(DWORD)+           /* size of the unicode filePath: "\0" not included */
-               sizeof(WORD)+            /* constant : 0x3 */
-               len*sizeof(WCHAR);       /* unicde filePath string */
+    if(!This->bIsLongFileName)
+    {
+        
+        sizeMAx += sizeof(DWORD)+           /* size of the unicode filePath: "\0" not included */
+                   sizeof(WORD)+            /* constant : 0x3 */
+                   len*sizeof(WCHAR);       /* unicde filePath string */
+    }
     
     pcbSize->LowPart=sizeMAx;
     pcbSize->HighPart=0;
@@ -410,6 +455,67 @@ HRESULT WINAPI FileMonikerImpl_GetSizeMax(IMoniker* iface,
     return S_OK;
 }
 
+void WINAPI FileMonikerImpl_CheckFileFormat(FileMonikerImpl* This, LPCOLESTR lpszPathName)
+{
+    int len;
+    WCHAR tempShortPath[MAX_PATH];
+
+    This->bIsNetworkPath = FALSE;
+    This->bIsLongFileName = FALSE;
+    This->wNetworkDomainLenght = 0xFFFF;
+
+    /* TODO: Not handling invalid filesname  and invalid UNC Filenames */
+    /* Filenames that doesn't conform to dos 8.3, are handled diffently when saving and loading */
+    /* Same applies to network path, but only after the \\Domain\Share path */
+
+    if(lpszPathName == NULL)
+    {
+        return;
+    }
+    len = lstrlenW(lpszPathName);
+    if(len == 0)
+    {
+        return;
+    }
+
+    if( len >= 2)
+    {
+        /* Is this a network path */
+        if(lpszPathName[0] == '\\' && lpszPathName[1] == '\\')
+        {
+            int i=2; /* Skip the \\ */
+            int j=0;
+            This->bIsNetworkPath = TRUE;
+            /* Skip Domain name \ share drive name */
+            for(j =0; j < 2; j++)
+            {
+                for(; i < len && lpszPathName[i] != '\\'; i++)
+                {
+                }
+                i++;
+            }
+            This->wNetworkDomainLenght = i-1;
+            if( i < len)
+            {
+                /* Check to see if the file fallows the dos file format (8.3)*/
+                GetShortPathNameW(&(lpszPathName[i]), tempShortPath, MAX_PATH);
+                if(lstrcmpiW(&(lpszPathName[i]), tempShortPath) != 0)
+                {
+                    This->bIsLongFileName = TRUE;
+                }
+            }
+        }
+        
+        else
+        {
+            GetShortPathNameW(lpszPathName, tempShortPath, MAX_PATH);
+            if(lstrcmpiW(lpszPathName, tempShortPath) != 0)
+            {
+                This->bIsLongFileName = TRUE;
+            }
+        }
+    }
+}
 /******************************************************************************
  *         FileMoniker_Construct (local function)
  *******************************************************************************/
@@ -474,6 +580,7 @@ HRESULT WINAPI FileMonikerImpl_Construct(FileMonikerImpl* This, LPCOLESTR lpszPa
             lstrcatW(This->filePathName,bkSlash);
     }
 
+    FileMonikerImpl_CheckFileFormat(This, This->filePathName);
     for(i=0; tabStr[i]!=NULL;i++)
         CoTaskMemFree(tabStr[i]);
     CoTaskMemFree(tabStr);
@@ -1047,7 +1154,7 @@ HRESULT WINAPI FileMonikerImpl_CommonPrefixWith(IMoniker* iface,IMoniker* pmkOth
 int WINAPI FileMonikerImpl_DecomposePath(LPOLESTR str, LPOLESTR** stringTable)
 {
     WCHAR bSlash[] = {'\\',0};
-    WCHAR word[100];
+    WCHAR word[MAX_PATH];
     int i=0,j,tabIndex=0;
     LPOLESTR *strgtable ;
 

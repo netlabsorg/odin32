@@ -1,4 +1,4 @@
-/* $Id: stubs.cpp,v 1.10 1999-12-03 11:57:20 sandervl Exp $ */
+/* $Id: stubs.cpp,v 1.11 2000-03-19 15:33:09 davidr Exp $ */
 /* 
  * Win32 COM/OLE stubs for OS/2
  * 
@@ -322,13 +322,6 @@ HRESULT WIN32API MonikerRelativePathTo(LPMONIKER pmkSrc, LPMONIKER pmkDest,
 }
 //*******************************************************************************
 //*******************************************************************************
-HRESULT WIN32API OleConvertIStorageToOLESTREAM(IStorage *pStg, LPOLESTREAM lpolestream)
-{
-    dprintf(("OLE32: OleConvertIStorageToOLESTREAM - stub"));
-    return E_INVALIDARG;
-}
-//*******************************************************************************
-//*******************************************************************************
 HRESULT WIN32API OleConvertIStorageToOLESTREAMEx(LPSTORAGE	pStg,
 						 CLIPFORMAT	ctFormat,
 						 LONG		lWidth,
@@ -338,15 +331,6 @@ HRESULT WIN32API OleConvertIStorageToOLESTREAMEx(LPSTORAGE	pStg,
 						 LPOLESTREAM	lpolestream)
 {
     dprintf(("OLE32: OleConvertIStorageToOLESTREAMEx - stub"));
-    return(E_INVALIDARG);
-}
-//*******************************************************************************
-//*******************************************************************************
-HRESULT WIN32API OleConvertOLESTREAMToIStorage(LPOLESTREAM lpolestream,
-                                                  IStorage *pstg,
-                                                  const DVTARGETDEVICE *ptd)
-{
-    dprintf(("OLE32: OleConvertOLESTREAMToIStorage - stub"));
     return(E_INVALIDARG);
 }
 //*******************************************************************************
