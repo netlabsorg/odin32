@@ -1,4 +1,4 @@
-/* $Id: stubs.cpp,v 1.17 2002-02-15 17:18:52 sandervl Exp $ */
+/* $Id: stubs.cpp,v 1.18 2002-02-15 19:15:39 sandervl Exp $ */
 /* 
  * Win32 COM/OLE stubs for OS/2
  * 
@@ -20,13 +20,6 @@ HRESULT WIN32API DllDebugObjectRPCHook()
 {
     dprintf(("OLE32: DllDebugObjectRPCHook, UNKNOWN API - stub"));
     return 0;
-}
-//*******************************************************************************
-//*******************************************************************************
-HRESULT WIN32API DllGetClassObject(REFCLSID rclsid, REFIID riid, LPVOID *ppv)
-{
-    dprintf(("OLE32: DllGetClassObject - stub"));
-    return E_OUTOFMEMORY;
 }
 //*******************************************************************************
 //*******************************************************************************
