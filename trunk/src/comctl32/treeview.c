@@ -1,4 +1,4 @@
-/* $Id: treeview.c,v 1.7 1999-06-30 15:52:19 cbratschi Exp $ */
+/* $Id: treeview.c,v 1.8 1999-07-12 15:58:49 cbratschi Exp $ */
 /* Treeview control
  *
  * Copyright 1998 Eric Kohl <ekohl@abo.rhein-zeitung.de>
@@ -41,6 +41,9 @@
 
  */
 
+/* CB: todo
+ - fix ffs();
+*/
 
 #include <string.h>
 #include "winbase.h"
@@ -1267,6 +1270,7 @@ TREEVIEW_GetCount (HWND hwnd, WPARAM wParam, LPARAM lParam)
 /***************************************************************************
  * This method does the chaining of the insertion of a treeview item
  * before an item.
+ * If parent is NULL, we're inserting at the root of the list.
  */
 static void TREEVIEW_InsertBefore(
     TREEVIEW_INFO *infoPtr,
@@ -1304,15 +1308,19 @@ static void TREEVIEW_InsertBefore(
     if ( upSibling != NULL )
       upSibling->sibling = newItem->hItem;
     else
+    if (parent)
       /* this item is the first child of this parent, adjust parent pointers */
       parent->firstChild = newItem->hItem;
+    else infoPtr->TopRootItem = newItem->hItem;
   }
   else /* Insert as first child of this parent */
+  if (parent)
     parent->firstChild = newItem->hItem;
 }
 
 /***************************************************************************
  * This method does the chaining of the insertion of a treeview item
+ * If parent is NULL, we're inserting at the root of the list.
  * after an item.
  */
 static void TREEVIEW_InsertAfter(
@@ -1356,6 +1364,7 @@ static void TREEVIEW_InsertAfter(
     */
   }
   else /* Insert as first child of this parent */
+  if (parent)
     parent->firstChild = newItem->hItem;
 }
 
@@ -1389,6 +1398,13 @@ LRESULT WINAPI TREEVIEW_SortChildrenCB(
 
   /* Obtain the TVSORTBC struct */
   infoPtr->pCallBackSort = (LPTVSORTCB)lParam;
+
+  /* Check for a valid handle to the parent item */
+  if (!TREEVIEW_ValidItem(infoPtr, infoPtr->pCallBackSort->hParent))
+  {
+//    ERR ("invalid item hParent=%d\n", (INT)infoPtr->pCallBackSort->hParent);
+    return FALSE;
+  }
 
   /* Obtain the parent node to sort */
   sortMe = &infoPtr->items[ (INT)infoPtr->pCallBackSort->hParent ];
@@ -1626,11 +1642,15 @@ TREEVIEW_InsertItemA (HWND hwnd, WPARAM wParam, LPARAM lParam)
         break;
       else
       {
-        TREEVIEW_ITEM *aChild        =
-          &infoPtr->items[(INT)parentItem->firstChild];
+        TREEVIEW_ITEM *aChild;
 
         TREEVIEW_ITEM *previousChild = NULL;
         BOOL bItemInserted           = FALSE;
+
+        if (parentItem)
+          aChild = &infoPtr->items[(INT)parentItem->firstChild];
+        else
+          aChild = &infoPtr->items[(INT)infoPtr->TopRootItem];
 
         /* Iterate the parent children to see where we fit in */
         while ( aChild != NULL )
