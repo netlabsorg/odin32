@@ -1,4 +1,4 @@
-/* $Id: dlgconvert.cpp,v 1.7 1999-07-04 19:02:38 sandervl Exp $ */
+/* $Id: dlgconvert.cpp,v 1.8 1999-08-18 17:17:04 sandervl Exp $ */
 
 /*
  * Win32 runtime dialog conversion functions for OS/2
@@ -188,7 +188,7 @@ DLGTEMPLATE *ConvertWin32DlgTemplate(DLGTEMPLATE *windlg)
       dlgitem->offClassName = (USHORT)((int)dlgcurdata - (int)dlgt);
       strcpy((char *)dlgcurdata, szClass);
       //Open32 wants class name in upper case!
-      UpCase((char *)dlgcurdata);
+      strupr((char *)dlgcurdata);
       dlgcurdata           += dlgitem->cchClassName + 1;   //include terminating 0 (just to be sure)
 //TODO: SvL: Can they also be system classes?
 //    dlgitem->flStyle      = dhdr->lStyle;
@@ -239,7 +239,7 @@ DLGTEMPLATE *ConvertWin32DlgTemplate(DLGTEMPLATE *windlg)
    dlgpparam->cb = 0;
    dlgpparam->aparam[0].id = PP_FONTNAMESIZE;
    dlgpparam->aparam[0].cb = 0;
-   UpCase(font);
+   strupr(font);
    if(ConvertFont(font, dlgpparam, fhdr->wPointSize) == TRUE) {
       dlgpparam->cb           = sizeof(PARAM) + dlgpparam->aparam[0].cb - 1;
       dlgpparam->aparam[0].cb = strlen(dlgpparam->aparam[0].ab) + 1;
@@ -312,7 +312,7 @@ DLGTEMPLATE *ConvertWin32DlgTemplate(DLGTEMPLATE *windlg)
       dlgitem->offClassName = (USHORT)((int)dlgcurdata - (int)dlgt);
       strcpy((char *)dlgcurdata, szClass);
       //Open32 wants class name in upper case!
-      UpCase((char *)dlgcurdata);
+      strupr((char *)dlgcurdata);
       dlgcurdata           += dlgitem->cchClassName + 1;   //include terminating 0 (just to be sure)
 //TODO: SvL: Can they also be system classes?
 //    dlgitem->flStyle      = ctrldata->lStyle;
@@ -487,7 +487,7 @@ DLGTEMPLATE *ConvertWin32DlgTemplateEx(WINDLGTEMPLATEEX *dhdr)
       dlgitem->offClassName = (USHORT)((int)dlgcurdata - (int)dlgt);
       strcpy((char *)dlgcurdata, szClass);
       //Open32 wants class name in upper case!
-      UpCase((char *)dlgcurdata);
+      strupr((char *)dlgcurdata);
       dlgcurdata           += dlgitem->cchClassName + 1;   //include terminating 0 (just to be sure)
 //TODO: SvL: Can they also be system classes?
 //    dlgitem->flStyle      = dhdr->lStyle;
@@ -539,7 +539,7 @@ DLGTEMPLATE *ConvertWin32DlgTemplateEx(WINDLGTEMPLATEEX *dhdr)
    dlgpparam->cb = 0;
    dlgpparam->aparam[0].id = PP_FONTNAMESIZE;
    dlgpparam->aparam[0].cb = 0;
-   UpCase(font);
+   strupr(font);
    if(ConvertFont(font, dlgpparam, fhdr->wPointSize) == TRUE) {
       dlgpparam->cb           = sizeof(PARAM) + dlgpparam->aparam[0].cb - 1;
       dlgpparam->aparam[0].cb = strlen(dlgpparam->aparam[0].ab) + 1;
@@ -611,7 +611,7 @@ DLGTEMPLATE *ConvertWin32DlgTemplateEx(WINDLGTEMPLATEEX *dhdr)
       dlgitem->offClassName = (USHORT)((int)dlgcurdata - (int)dlgt);
       strcpy((char *)dlgcurdata, szClass);
       //Open32 wants class name in upper case!
-      UpCase((char *)dlgcurdata);
+      strupr((char *)dlgcurdata);
       dlgcurdata           += dlgitem->cchClassName + 1;   //include terminating 0 (just to be sure)
 //TODO: SvL: Can they also be system classes?
 //    dlgitem->flStyle      = ctrldata->lStyle;
