@@ -63,7 +63,7 @@ extern DWORD _Resource_PEResTab;
 }
 #endif
 
-#endif
+#endif  /* IBM CPP Compiler */
 
 #ifdef __cplusplus
 extern "C" {
@@ -82,6 +82,7 @@ ULONG APIENTRY inittermOle32(ULONG hModule, ULONG ulFlag);
 ULONG APIENTRY inittermComdlg32(ULONG hModule, ULONG ulFlag);
 ULONG APIENTRY inittermComctl32(ULONG hModule, ULONG ulFlag);
 ULONG APIENTRY inittermGdi32(ULONG hModule, ULONG ulFlag);
+ULONG APIENTRY inittermNTDLL(ULONG hModule, ULONG ulFlag);
 ULONG APIENTRY inittermWsock32(ULONG hModule, ULONG ulFlag);
 ULONG APIENTRY inittermWininet(ULONG hModule, ULONG ulFlag);
 ULONG APIENTRY inittermRpcrt4(ULONG hModule, ULONG ulFlag);
@@ -95,6 +96,7 @@ ULONG APIENTRY inittermDSound(ULONG hModule, ULONG ulFlag);
 ULONG APIENTRY inittermWinSpool(ULONG hModule, ULONG ulFlag);
 ULONG APIENTRY inittermDDraw(ULONG hModule, ULONG ulFlag);
 ULONG APIENTRY inittermNTDLL(ULONG hModule, ULONG ulFlag);
+ULONG APIENTRY inittermMSVCRT(ULONG hModule, ULONG ulFlag);
 
 ULONG APIENTRY InitializeKernel32();
 
