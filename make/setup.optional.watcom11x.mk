@@ -1,4 +1,4 @@
-# $Id: setup.optional.watcom11x.mk,v 1.6 2002-08-29 10:01:41 bird Exp $
+# $Id: setup.optional.watcom11x.mk,v 1.7 2002-08-29 12:06:17 bird Exp $
 
 #
 #  Helper file for all the optional stuff which is common for
@@ -33,12 +33,10 @@ _CC_O_SIZE  =
 _CC_O_TIME  =
 _CC_O_DISABLE =
 _CC_O_X     =
-!if "$(BUILD_MODE)" == "RELEASE"
-! ifdef ENV_16BIT
+!ifdef ENV_16BIT
 _CC_O_CPU   = -5
 !else
 _CC_O_CPU   = -5r
-!endif
 !endif
 
 !ifdef ALL_SEG_TEXT
@@ -214,12 +212,10 @@ _CXX_O_TIME  =
 _CXX_O_DISABLE =
 _CXX_O_X     =
 _CXX_O_CPU   =
-!if "$(BUILD_MODE)" == "RELEASE"
-! ifdef ENV_16BIT
+!ifdef ENV_16BIT
 _CXX_O_CPU   = -5
 !else
 _CXX_O_CPU   = -5r
-!endif
 !endif
 
 !ifdef ALL_SEG_TEXT
