@@ -1,8 +1,9 @@
-/* $Id: ChangeLog,v 1.2720 2004-04-06 11:50:47 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2721 2004-04-06 14:20:41 sandervl Exp $ */
 
  2004-04-06: Sander van Leeuwen <sandervl@innotek   >
     - WINMM:    o Automatically disable audio support when any Crystal driver
                   is detected
+    - KERNEL32: o Changed check for number of memory map views
 
  2004-04-02: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o ReadFile/WriteFile: wrong page calculation for memory maps
