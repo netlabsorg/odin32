@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.71 2000-06-07 14:51:23 sandervl Exp $
+# $Id: Makefile,v 1.72 2000-06-08 18:10:08 sandervl Exp $
 
 #
 # Odin32 API
@@ -78,6 +78,7 @@ $(OBJDIR)\win32wbasepos.obj \
 $(OBJDIR)\win32wbaseprop.obj \
 $(OBJDIR)\oslibres.obj \
 $(OBJDIR)\dc.obj \
+$(OBJDIR)\dcrgn.obj \
 $(OBJDIR)\timer.obj \
 $(OBJDIR)\dbglocal.obj \
 $(OBJDIR)\caret.obj \
