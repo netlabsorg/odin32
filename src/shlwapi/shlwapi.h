@@ -1,4 +1,4 @@
-/* $Id: shlwapi.h,v 1.1 2000-05-15 02:43:17 phaller Exp $ */
+/* $Id: shlwapi.h,v 1.2 2000-06-12 08:09:44 phaller Exp $ */
 
 /*
  * Win32 Lightweight SHELL32 for OS/2
@@ -26,11 +26,16 @@
 #endif /* defined(__cplusplus) */
 
     
+/*****************************************************************************
+ * Prototypes                                                                *
+ *****************************************************************************/
+    
+LPSTR WIN32API StrStrIA(LPCSTR lpFirst, LPCSTR lpSrch);
+    
 
 #ifdef __cplusplus
   }
 #endif /* defined(__cplusplus) */
-
 
 
 #endif
