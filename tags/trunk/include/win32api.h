@@ -147,5 +147,7 @@ BOOL    WIN32API TerminateThread(HANDLE hThread, DWORD dwExitCode);
 
 HWND    WIN32API WindowFromPoint(POINT);
 INT     WIN32API MapWindowPoints(HWND,HWND,LPPOINT,UINT);
+HWND    WIN32API GetCapture(void);
+HWND    WIN32API SetCapture(HWND);
 
 #endif

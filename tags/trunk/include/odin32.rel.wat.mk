@@ -1,4 +1,4 @@
-# $Id: odin32.rel.wat.mk,v 1.4 2001-03-06 21:44:39 mike Exp $
+# $Id: odin32.rel.wat.mk,v 1.5 2001-04-02 09:54:45 sandervl Exp $
 
 #
 # Odin32 API
@@ -49,7 +49,7 @@ OS2RC  = rc
 ASFLAGS          = -Mb -Sc -Sv:ALP
 IMPLIBFLAGS      = /nologo
 ILIBFLAGS        = /quiet /nologo
-RCFLAGS          = -s -I. -I$(%WATCOM)\include
+RCFLAGS          = -s -I. -I$(%WATCOM)\include -D__WIN32OS2__
 OS2RCFLAGS       = -r -n
 OS2RCLFLAGS      = -x2 -n
 
