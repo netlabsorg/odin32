@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.23 2001-04-27 17:39:49 sandervl Exp $
+# $Id: makefile,v 1.24 2002-09-14 08:31:25 sandervl Exp $
 
 #
 # Odin32 API
@@ -20,6 +20,7 @@ OBJS = \
 $(OBJDIR)\dsound.obj \
 $(OBJDIR)\os2dsound.obj \
 $(OBJDIR)\initterm.obj \
+$(OBJDIR)\initdsound.obj \
 $(OBJDIR)\os2sndbuffer.obj \
 $(OBJDIR)\os2primbuff.obj \
 $(OBJDIR)\os2notify.obj \
