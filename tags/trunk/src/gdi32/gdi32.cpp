@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.67 2001-03-27 20:47:53 sandervl Exp $ */
+/* $Id: gdi32.cpp,v 1.68 2001-04-27 17:37:23 sandervl Exp $ */
 
 /*
  * GDI32 apis
@@ -222,17 +222,20 @@ int WIN32API SetBkMode( HDC hdc, int mode)
 }
 //******************************************************************************
 //******************************************************************************
-COLORREF WIN32API GetPixel( HDC arg1, int arg2, int  arg3)
+COLORREF WIN32API GetPixel( HDC hdc, int x, int y)
 {
-////    dprintf(("GDI32: GetPixel\n"));
-    return O32_GetPixel(arg1, arg2, arg3);
+ COLORREF color;
+
+    color = O32_GetPixel(hdc, x, y);
+    dprintf2(("GDI32: GetPixel %x (%d,%d) -> %x", hdc, x, y, color));
+    return color;
 }
 //******************************************************************************
 //******************************************************************************
-COLORREF WIN32API SetPixel( HDC arg1, int arg2, int arg3, COLORREF  arg4)
+COLORREF WIN32API SetPixel( HDC hdc, int x, int y, COLORREF color)
 {
-////    dprintf(("GDI32: SetPixel\n"));
-    return O32_SetPixel(arg1, arg2, arg3, arg4);
+    dprintf2(("GDI32: SetPixel %x (%d,%d) %x", hdc, x, y, color));
+    return O32_SetPixel(hdc, x, y, color);
 }
 //******************************************************************************
 //Faster version of SetPixel (since it doesn't need to return the original color)
@@ -785,7 +788,7 @@ BOOL WIN32API GetCharWidth32A( HDC hdc, UINT iFirstChar, UINT iLastChar, PINT pW
 //******************************************************************************
 BOOL WIN32API GetCharWidth32W(HDC hdc, UINT iFirstChar, UINT iLastChar, PINT pWidthArray)
 {
-    dprintf(("GDI32: GetCharWidth32W, not properly implemented"));
+    dprintf(("GDI32: GetCharWidth32W might not work properly %x %x %x %x", hdc, iFirstChar, iLastChar, pWidthArray));
     return O32_GetCharWidth(hdc, iFirstChar, iLastChar, pWidthArray);
 }
 //******************************************************************************
