@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.12 2000-02-03 23:05:49 sandervl Exp $
+# $Id: makefile,v 1.13 2000-02-05 01:54:33 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -17,10 +17,6 @@ PDWIN32_TOOLS = ..\..\tools\bin
 
 CFLAGS = $(CFLAGS) -I$(PDWIN32_INCLUDE)
 CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
-
-RC = $(PDWIN32_TOOLS)\wrc
-RCFLAGS = -s -I. -I$(CPPMAIN)\include -I$(PDWIN32_INCLUDE) -I$(PDWIN32_INCLUDE)\win
-
 
 TARGET = comdlg32
 
