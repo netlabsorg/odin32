@@ -96,7 +96,7 @@ DEBUGWRAP4(GetTapeStatus);
 //DEBUGWRAP8(InterlockedExchangeAdd);
 //DEBUGWRAP4(InterlockedIncrement);
 
-DEBUGWRAP12(MulDiv);
+DEBUGWRAP_LVL2_12(MulDiv);
 DEBUGWRAP16(PostQueuedCompletionStatus);
 DEBUGWRAP12(PrepareTape);
 DEBUGWRAP12(QueryDosDeviceA);
