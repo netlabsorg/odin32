@@ -1,0 +1,12 @@
+; $Id: ws2_32.def,v 1.1 2001-05-07 08:23:50 phaller Exp $
+
+;Created by BLAST for IBM's compiler
+LIBRARY WS2_32 INITINSTANCE
+
+DESCRIPTION 'Odin32 System DLL - WS2_32'
+
+DATA MULTIPLE NONSHARED
+
+IMPORTS
+
+EXPORTS
