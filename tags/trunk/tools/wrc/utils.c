@@ -357,54 +357,95 @@ static const struct lang2cp lang2cps[] =
     { LANG_AFRIKAANS,      SUBLANG_NEUTRAL,              1252 },
     { LANG_ALBANIAN,       SUBLANG_NEUTRAL,              1250 },
     { LANG_ARABIC,         SUBLANG_NEUTRAL,              1256 },
+    { LANG_ARMENIAN,       SUBLANG_NEUTRAL,              0    },
+    { LANG_AZERI,          SUBLANG_NEUTRAL,              1254 },
+    { LANG_AZERI,          SUBLANG_AZERI_CYRILLIC,       1251 },
     { LANG_BASQUE,         SUBLANG_NEUTRAL,              1252 },
+    { LANG_BELARUSIAN,     SUBLANG_NEUTRAL,              1251 },
+#ifdef LANG_BRETON
     { LANG_BRETON,         SUBLANG_NEUTRAL,              1252 },
+#endif /* LANG_BRETON */
     { LANG_BULGARIAN,      SUBLANG_NEUTRAL,              1251 },
-    { LANG_BYELORUSSIAN,   SUBLANG_NEUTRAL,              1251 },
+    { LANG_BELARUSIAN,     SUBLANG_NEUTRAL,              1251 }, /* ?? */
     { LANG_CATALAN,        SUBLANG_NEUTRAL,              1252 },
     { LANG_CHINESE,        SUBLANG_NEUTRAL,              936  },
+    { LANG_CHINESE,        SUBLANG_CHINESE_SINGAPORE,    936  },
+    { LANG_CHINESE,        SUBLANG_CHINESE_SIMPLIFIED,   936  },
+#ifdef LANG_CORNISH
     { LANG_CORNISH,        SUBLANG_NEUTRAL,              1252 },
+#endif /* LANG_CORNISH */
+    { LANG_CROATIAN,       SUBLANG_NEUTRAL,              1250 },
     { LANG_CZECH,          SUBLANG_NEUTRAL,              1250 },
     { LANG_DANISH,         SUBLANG_NEUTRAL,              1252 },
+    { LANG_DIVEHI,         SUBLANG_NEUTRAL,              0    },
     { LANG_DUTCH,          SUBLANG_NEUTRAL,              1252 },
     { LANG_ENGLISH,        SUBLANG_NEUTRAL,              1252 },
+#ifdef LANG_ESPERANTO
     { LANG_ESPERANTO,      SUBLANG_NEUTRAL,              1252 },
+#endif /* LANG_ESPERANTO */
     { LANG_ESTONIAN,       SUBLANG_NEUTRAL,              1257 },
     { LANG_FAEROESE,       SUBLANG_NEUTRAL,              1252 },
+    { LANG_FARSI,          SUBLANG_NEUTRAL,              1256 },
     { LANG_FINNISH,        SUBLANG_NEUTRAL,              1252 },
     { LANG_FRENCH,         SUBLANG_NEUTRAL,              1252 },
+#ifdef LANG_GAELIC
     { LANG_GAELIC,         SUBLANG_NEUTRAL,              1252 },
+#endif /* LANG_GAELIC */
+    { LANG_GALICIAN,       SUBLANG_NEUTRAL,              1252 },
+    { LANG_GEORGIAN,       SUBLANG_NEUTRAL,              0    },
     { LANG_GERMAN,         SUBLANG_NEUTRAL,              1252 },
     { LANG_GREEK,          SUBLANG_NEUTRAL,              1253 },
+    { LANG_GUJARATI,       SUBLANG_NEUTRAL,              0    },
     { LANG_HEBREW,         SUBLANG_NEUTRAL,              1255 },
+    { LANG_HINDI,          SUBLANG_NEUTRAL,              0    },
     { LANG_HUNGARIAN,      SUBLANG_NEUTRAL,              1250 },
     { LANG_ICELANDIC,      SUBLANG_NEUTRAL,              1252 },
     { LANG_INDONESIAN,     SUBLANG_NEUTRAL,              1252 },
     { LANG_ITALIAN,        SUBLANG_NEUTRAL,              1252 },
     { LANG_JAPANESE,       SUBLANG_NEUTRAL,              932  },
+    { LANG_KANNADA,        SUBLANG_NEUTRAL,              0    },
+    { LANG_KAZAK,          SUBLANG_NEUTRAL,              1251 },
+    { LANG_KONKANI,        SUBLANG_NEUTRAL,              0    },
     { LANG_KOREAN,         SUBLANG_NEUTRAL,              949  },
+    { LANG_KYRGYZ,         SUBLANG_NEUTRAL,              1251 },
     { LANG_LATVIAN,        SUBLANG_NEUTRAL,              1257 },
     { LANG_LITHUANIAN,     SUBLANG_NEUTRAL,              1257 },
     { LANG_MACEDONIAN,     SUBLANG_NEUTRAL,              1251 },
     { LANG_MALAY,          SUBLANG_NEUTRAL,              1252 },
+    { LANG_MARATHI,        SUBLANG_NEUTRAL,              0    },
+    { LANG_MONGOLIAN,      SUBLANG_NEUTRAL,              1251 },
     { LANG_NEUTRAL,        SUBLANG_NEUTRAL,              1252 },
     { LANG_NORWEGIAN,      SUBLANG_NEUTRAL,              1252 },
     { LANG_POLISH,         SUBLANG_NEUTRAL,              1250 },
     { LANG_PORTUGUESE,     SUBLANG_NEUTRAL,              1252 },
+    { LANG_PUNJABI,        SUBLANG_NEUTRAL,              0    },
     { LANG_ROMANIAN,       SUBLANG_NEUTRAL,              1250 },
     { LANG_RUSSIAN,        SUBLANG_NEUTRAL,              1251 },
-    { LANG_SERBO_CROATIAN, SUBLANG_NEUTRAL,              1250 },
-    { LANG_SERBO_CROATIAN, SUBLANG_SERBIAN,              1251 },
+    { LANG_SANSKRIT,       SUBLANG_NEUTRAL,              0    },
+    { LANG_SERBIAN,        SUBLANG_NEUTRAL,              1250 },
+    { LANG_SERBIAN,        SUBLANG_SERBIAN_CYRILLIC,     1251 },
     { LANG_SLOVAK,         SUBLANG_NEUTRAL,              1250 },
     { LANG_SLOVENIAN,      SUBLANG_NEUTRAL,              1250 },
     { LANG_SPANISH,        SUBLANG_NEUTRAL,              1252 },
+    { LANG_SWAHILI,        SUBLANG_NEUTRAL,              1252 },
     { LANG_SWEDISH,        SUBLANG_NEUTRAL,              1252 },
+    { LANG_SYRIAC,         SUBLANG_NEUTRAL,              0    },
+    { LANG_TAMIL,          SUBLANG_NEUTRAL,              0    },
+    { LANG_TATAR,          SUBLANG_NEUTRAL,              1251 },
+    { LANG_TELUGU,         SUBLANG_NEUTRAL,              0    },
     { LANG_THAI,           SUBLANG_NEUTRAL,              874  },
     { LANG_TURKISH,        SUBLANG_NEUTRAL,              1254 },
     { LANG_UKRAINIAN,      SUBLANG_NEUTRAL,              1251 },
-    { LANG_VIETNAMESE,     SUBLANG_NEUTRAL,              1258 },
-    { LANG_WALON,          SUBLANG_NEUTRAL,              1252 },
-    { LANG_WELSH,          SUBLANG_NEUTRAL,              1252 }
+    { LANG_URDU,           SUBLANG_NEUTRAL,              1256 },
+    { LANG_UZBEK,          SUBLANG_NEUTRAL,              1254 },
+    { LANG_UZBEK,          SUBLANG_UZBEK_CYRILLIC,       1251 },
+    { LANG_VIETNAMESE,     SUBLANG_NEUTRAL,              1258 }
+#ifdef LANG_WALON
+    , { LANG_WALON,          SUBLANG_NEUTRAL,              1252 }
+#endif /* LANG_WALON */
+#ifdef LANG_WELSH
+    , { LANG_WELSH,          SUBLANG_NEUTRAL,              1252 }
+#endif /* LANG_WELSH */
 };
 
 void set_language( unsigned short lang, unsigned short sublang )
