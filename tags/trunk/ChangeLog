@@ -1,4 +1,9 @@
- /* $Id: ChangeLog,v 1.957 2000-05-23 18:48:12 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.958 2000-05-24 01:55:48 phaller Exp $ */
+
+ 2000-05-24: Patrick Haller <phaller@gmx.net>
+    - WINMM:    finally fixed callback type of timeSetEvent() timers
+    - KERNEL32: changed (experimentally) behaviour of MapViewOfFileEx:
+                  lpBaseAddress is ignored (VAJ3 loads)
 
  2000-05-23: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: Rewrote GetVolumeInformationA/W
