@@ -1,4 +1,4 @@
-/* $Id: blit.cpp,v 1.2 2000-02-02 23:45:06 sandervl Exp $ */
+/* $Id: blit.cpp,v 1.3 2000-02-03 10:23:24 dengert Exp $ */
 
 /*
  * GDI32 blit code
@@ -37,12 +37,12 @@ BOOL WIN32API StretchBlt(HDC hdcDest, int nXOriginDest, int nYOriginDest,
     DIBSection *dsect = DIBSection::findHDC(hdcSrc);
     if(dsect)
     {
-      	dprintf((" Do stretched DIB Blt\n"));
-      	rc  = dsect->BitBlt( hdcDest,
+        dprintf((" Do stretched DIB Blt\n"));
+        rc  = dsect->BitBlt( hdcDest,
                              nXOriginDest, nYOriginDest, nWidthDest, nHeightDest,
                              nXOriginSrc, nYOriginSrc, nWidthSrc, nHeightSrc,
                              dwRop);
-	return rc;
+        return rc;
     }
   }
   return O32_StretchBlt(hdcDest, nXOriginDest, nYOriginDest, nWidthDest, nHeightDest, hdcSrc, nXOriginSrc, nYOriginSrc, nWidthSrc, nHeightSrc, dwRop);
@@ -57,20 +57,20 @@ BOOL WIN32API BitBlt(HDC hdcDest, int arg2, int arg3, int arg4, int arg5, HDC hd
         DIBSection *dsect = DIBSection::findHDC(hdcSrc);
         if(dsect) {
                 rc = dsect->BitBlt(hdcDest, arg2, arg3, arg4, arg5, arg7, arg8, arg4, arg5, arg9);
-		if(rc) {
-			BITMAPINFO bmpinfo = {0};
-        		DIBSection *dest = DIBSection::findHDC(hdcDest);
-			if(dest) {
-				dprintf(("Sync dest DIB section"));
-				bmpinfo.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-				GetDIBits(hdcDest, dest->GetBitmapHandle(), 0, 300, 0, &bmpinfo, dest->GetRGBUsage());
-				dprintf(("height        %d", bmpinfo.bmiHeader.biHeight));
-				dprintf(("width         %d", bmpinfo.bmiHeader.biWidth));
-				dprintf(("biBitCount    %d", bmpinfo.bmiHeader.biBitCount));
-				GetDIBits(hdcDest, dest->GetBitmapHandle(), 0, 300, dest->GetDIBObject(), &bmpinfo, dest->GetRGBUsage());
-			}
-		}
-		return rc;
+                if(rc) {
+                        BITMAPINFO bmpinfo = {0};
+                        DIBSection *dest = DIBSection::findHDC(hdcDest);
+                        if(dest) {
+                                dprintf(("Sync dest DIB section"));
+                                bmpinfo.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+                                GetDIBits(hdcDest, dest->GetBitmapHandle(), 0, 300, 0, &bmpinfo, dest->GetRGBUsage());
+                                dprintf(("height        %d", bmpinfo.bmiHeader.biHeight));
+                                dprintf(("width         %d", bmpinfo.bmiHeader.biWidth));
+                                dprintf(("biBitCount    %d", bmpinfo.bmiHeader.biBitCount));
+                                GetDIBits(hdcDest, dest->GetBitmapHandle(), 0, 300, dest->GetDIBObject(), &bmpinfo, dest->GetRGBUsage());
+                        }
+                }
+                return rc;
         }
     }
     dprintf(("GDI32: BitBlt to hdc %X from (%d,%d) to (%d,%d), (%d,%d) rop %X\n", hdcDest, arg7, arg8, arg2, arg3, arg4, arg5, arg9));
@@ -78,9 +78,9 @@ BOOL WIN32API BitBlt(HDC hdcDest, int arg2, int arg3, int arg4, int arg5, HDC hd
 }
 //******************************************************************************
 //******************************************************************************
-INT WIN32API SetDIBitsToDevice(HDC hdc, INT xDest, INT yDest, DWORD cx, 
-                               DWORD cy, INT xSrc, INT ySrc, 
-                               UINT startscan, UINT lines, LPCVOID bits, 
+INT WIN32API SetDIBitsToDevice(HDC hdc, INT xDest, INT yDest, DWORD cx,
+                               DWORD cy, INT xSrc, INT ySrc,
+                               UINT startscan, UINT lines, LPCVOID bits,
                                const BITMAPINFO *info, UINT coloruse)
 {
     INT result, imgsize, palsize, height, width;
@@ -90,14 +90,14 @@ INT WIN32API SetDIBitsToDevice(HDC hdc, INT xDest, INT yDest, DWORD cx,
 
     SetLastError(0);
     if(info == NULL) {
-	goto invalid_parameter;
+        goto invalid_parameter;
     }
     height = info->bmiHeader.biHeight;
     width  = info->bmiHeader.biWidth;
 
     if (height < 0) height = -height;
     if (!lines || (startscan >= height)) {
-	goto invalid_parameter;
+        goto invalid_parameter;
     }
     if (startscan + lines > height) lines = height - startscan;
 
@@ -129,31 +129,22 @@ INT WIN32API SetDIBitsToDevice(HDC hdc, INT xDest, INT yDest, DWORD cx,
 
     //SvL: Ignore BI_BITFIELDS type (SetDIBitsToDevice fails otherwise)
     if(info->bmiHeader.biCompression == BI_BITFIELDS) {
-	DWORD *bitfields = (DWORD *)info->bmiColors;
+        DWORD *bitfields = (DWORD *)info->bmiColors;
 
-	dprintf(("BI_BITFIELDS compression %x %x %x", *bitfields, *(bitfields+1), *(bitfields+2))); 
-    	((BITMAPINFO *)info)->bmiHeader.biCompression = 0;
-	compression = BI_BITFIELDS;
-	if(*(bitfields+1) == 0x3E0) {//RGB 555?
-	  WORD *dstbits, *srcbits;
-	  WORD  pixel;
+        dprintf(("BI_BITFIELDS compression %x %x %x", *bitfields, *(bitfields+1), *(bitfields+2)));
+        ((BITMAPINFO *)info)->bmiHeader.biCompression = 0;
+        compression = BI_BITFIELDS;
+        if(*(bitfields+1) == 0x3E0) {//RGB 555?
+            extern void _Optlink RGB555to565 (WORD *dest, WORD *src, ULONG num);
 
-		newbits = dstbits = (WORD *)malloc(imgsize);
-		srcbits = (WORD *)bits;
-		for(int i=0;i<imgsize/sizeof(WORD);i++) {
-			pixel     = *dstbits = *srcbits++;
-			*dstbits &= 0x1F;
-			pixel    &= 0x7FE0;
-			pixel   <<= 1;
-			*dstbits  = *dstbits | pixel;
-			dstbits++;
-		}
-		bits = newbits;
-	}
+                newbits = (WORD *)malloc(imgsize);
+                RGB555to565 (newbits, (WORD *)bits, imgsize/sizeof(WORD));
+                bits = newbits;
+        }
     }
 
     if(info->bmiHeader.biHeight < 0)
-	((BITMAPINFO *)info)->bmiHeader.biHeight = -info->bmiHeader.biHeight;
+        ((BITMAPINFO *)info)->bmiHeader.biHeight = -info->bmiHeader.biHeight;
 
     result = O32_SetDIBitsToDevice(hdc, xDest, yDest, cx, cy, xSrc, ySrc, startscan, lines, (PVOID) bits, (PBITMAPINFO)info, coloruse);
     //SvL: Wrong Open32 return value
@@ -164,8 +155,8 @@ INT WIN32API SetDIBitsToDevice(HDC hdc, INT xDest, INT yDest, DWORD cx,
     dprintf(("GDI32: SetDIBitsToDevice %d %d %d %d %x %d", info->bmiHeader.biWidth, info->bmiHeader.biHeight, info->bmiHeader.biPlanes, info->bmiHeader.biBitCount, info->bmiHeader.biCompression, info->bmiHeader.biSizeImage));
 
     if(compression == BI_BITFIELDS) {
-    	((BITMAPINFO *)info)->bmiHeader.biCompression = BI_BITFIELDS;
-	if(newbits) free(newbits);
+        ((BITMAPINFO *)info)->bmiHeader.biCompression = BI_BITFIELDS;
+        if(newbits) free(newbits);
     }
     return result;
 
