@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.2023 2002-03-18 13:19:22 sandervl Exp $ */
+/* $Id: changelog,v 1.2024 2002-03-18 15:27:21 sandervl Exp $ */
 
  2002-03-18: Sander van Leeuwen <sandervl@xs4all.nl>
     - WGSS50:   o WGSS update from IBM
@@ -9,6 +9,9 @@
  2002-03-16: Platon Fomichev <platon@innotek.de>
     - COMCTL32: o Ownerdrawn listview control items have no margin
     - USER32:   o DIB_BitmapInfoSize fix for 24 bpp bitmaps
+                o CloseWindow change; call ShowWindow(SW_MINIMIZE)
+                o GetWindowPlacement fix; always return internally stored
+                  rcNormalPosition
     - WNASPI32: o Added DisableASPI function
 
  2002-03-14: knut st. osmundsen <bird@anduin.net>
