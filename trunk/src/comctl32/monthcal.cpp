@@ -1,4 +1,4 @@
-/* $Id: */
+/* $Id: monthcal.cpp,v 1.4 2000-07-18 16:17:29 bird Exp $ */
 /* Month calendar control
  *
  * Copyright 1998, 1999 Eric Kohl (ekohl@abo.rhein-zeitung.de)
