@@ -1,4 +1,4 @@
-/* $Id: HandleManager.h,v 1.23 2000-09-04 02:31:42 bird Exp $ */
+/* $Id: HandleManager.h,v 1.24 2000-09-20 21:32:56 hugh Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -33,41 +33,6 @@
 
 #ifdef _OS2WIN_H
 #include <winos2def.h>
-#endif
-
-#ifndef __WINE_WINDEF_H
-
-typedef struct tagDCB
-{
-    DWORD DCBlength;
-    DWORD BaudRate;
-    unsigned fBinary               :1;
-    unsigned fParity               :1;
-    unsigned fOutxCtsFlow          :1;
-    unsigned fOutxDsrFlow          :1;
-    unsigned fDtrControl           :2;
-    unsigned fDsrSensitivity       :1;
-    unsigned fTXContinueOnXoff     :1;
-    unsigned fOutX                 :1;
-    unsigned fInX                  :1;
-    unsigned fErrorChar            :1;
-    unsigned fNull                 :1;
-    unsigned fRtsControl           :2;
-    unsigned fAbortOnError         :1;
-    unsigned fDummy2               :17;
-    WORD wReserved;
-    WORD XonLim;
-    WORD XoffLim;
-    BYTE ByteSize;
-    BYTE Parity;
-    BYTE StopBits;
-    char XonChar;
-    char XoffChar;
-    char ErrorChar;
-    char EofChar;
-    char EvtChar;
-} DCB, *LPDCB;
-
 #endif
 
 
@@ -288,11 +253,11 @@ DWORD  HMWaitForMultipleObjectsEx   (DWORD                      cObjects,
                                      DWORD                      dwTimeout,
                                      BOOL                       fAlertable);
 
-DWORD  HMMsgWaitForMultipleObjects  (DWORD 			nCount,
-                                     HANDLE 		       *pHandles,
-                                     BOOL 			fWaitAll,
-                                     DWORD 			dwMilliseconds,
-                                     DWORD 			dwWakeMask);
+DWORD  HMMsgWaitForMultipleObjects  (DWORD      nCount,
+                                     HANDLE            *pHandles,
+                                     BOOL       fWaitAll,
+                                     DWORD      dwMilliseconds,
+                                     DWORD      dwWakeMask);
 
 BOOL HMDeviceIoControl              (HANDLE hDevice,
                                      DWORD dwIoControlCode,
@@ -350,7 +315,7 @@ LPVOID HMMapViewOfFileEx            (HANDLE                     hFileMappingObje
                                      DWORD                      dwFileOffsetHigh,
                                      DWORD                      dwFileOffsetLow,
                                      DWORD                      dwNumberOfBytesToMap,
-			             LPVOID                     lpBaseAddress);
+                   LPVOID                     lpBaseAddress);
 
 BOOL HMDuplicateHandle(HANDLE  srcprocess,
                        HANDLE  srchandle,
@@ -361,11 +326,11 @@ BOOL HMDuplicateHandle(HANDLE  srcprocess,
                        DWORD   fdwOptions,
                        DWORD   fdwOdinOptions = 0);
 
-#define DUPLICATE_SHARE_DENYNONE	1
-#define DUPLICATE_SHARE_READ		2
-#define DUPLICATE_ACCESS_READ   	4
-#define DUPLICATE_ACCESS_WRITE  	8
-#define DUPLICATE_ACCESS_READWRITE  	(DUPLICATE_ACCESS_WRITE|DUPLICATE_ACCESS_READ)
+#define DUPLICATE_SHARE_DENYNONE  1
+#define DUPLICATE_SHARE_READ    2
+#define DUPLICATE_ACCESS_READ     4
+#define DUPLICATE_ACCESS_WRITE    8
+#define DUPLICATE_ACCESS_READWRITE    (DUPLICATE_ACCESS_WRITE|DUPLICATE_ACCESS_READ)
 
 //SvL: Used internally by memory mapped class
 #define HMDuplicateHandleOdin HMDuplicateHandle
@@ -380,9 +345,70 @@ DWORD HMOpenProcessToken(HANDLE  ProcessHandle,
                          DWORD   dwUserData,
                          HANDLE *TokenHandle);
 
-BOOL HMSetupComm(HANDLE hFile, DWORD dwInQueue, DWORD dwOutQueue);
+BOOL HMCommSetupComm(HANDLE hFile, DWORD dwInQueue, DWORD dwOutQueue);
 
-BOOL HMGetCommState(INT hCommDev, LPDCB lpdcb);
+BOOL HMCommGetCommState(HANDLE hCommDev, LPDCB lpdcb);
+BOOL HMCommWaitCommEvent( HANDLE hCommDev,
+                          LPDWORD lpfdwEvtMask,
+                          LPOVERLAPPED lpo);
+
+BOOL HMCommGetCommProperties( HANDLE hCommDev,
+                              LPCOMMPROP lpcmmp);
+
+BOOL HMCommGetCommMask( HANDLE hCommDev,
+                        LPDWORD lpfdwEvtMask);
+
+BOOL HMCommSetCommMask( HANDLE hCommDev,
+                        DWORD fdwEvtMask);
+
+BOOL HMCommPurgeComm( HANDLE hCommDev,
+                      DWORD fdwAction);
+
+BOOL HMCommClearCommError( HANDLE hCommDev,
+                           LPDWORD lpdwErrors,
+                           LPCOMSTAT lpcst);
+
+BOOL HMCommSetCommState( HANDLE hCommDev,
+                         LPDCB lpdcb);
+
+BOOL HMCommGetCommModemStatus( HANDLE hFile,
+                               LPDWORD lpModemStat );
+
+BOOL HMCommGetCommTimeouts( HANDLE hCommDev,
+                            LPCOMMTIMEOUTS lpctmo);
+
+BOOL HMCommSetCommTimeouts( HANDLE hCommDev,
+                            LPCOMMTIMEOUTS lpctmo);
+
+BOOL HMCommTransmitCommChar( HANDLE hFile,
+                             CHAR cChar );
+
+BOOL HMCommSetCommConfig( HANDLE hCommDev,
+                          LPCOMMCONFIG lpCC,
+                          DWORD dwSize );
+
+BOOL HMCommSetCommBreak( HANDLE hFile );
+
+BOOL HMCommGetCommConfig( HANDLE hCommDev,
+                          LPCOMMCONFIG lpCC,
+                          LPDWORD lpdwSize );
+
+BOOL HMCommEscapeCommFunction( HANDLE hFile,
+                               UINT dwFunc );
+
+BOOL HMCommSetupComm( HANDLE hFile,
+                      DWORD dwInQueue,
+                      DWORD dwOutQueue);
+
+BOOL HMCommClearCommBreak(HANDLE hFile);
+
+BOOL HMCommSetDefaultCommConfig( HANDLE hCOM,
+                                 LPCOMMCONFIG lpCC,
+                                 DWORD dwSize);
+
+BOOL HMCommGetDefaultCommConfig( HANDLE hCOM,
+                                 LPCOMMCONFIG lpCC,
+                                 LPDWORD lpdwSize);
 
 HANDLE HMCreateThread(LPSECURITY_ATTRIBUTES  lpsa,
                       DWORD                  cbStack,

@@ -1,4 +1,4 @@
-/* $Id: hmcomm.h,v 1.4 1999-11-27 12:48:26 achimha Exp $ */
+/* $Id: hmcomm.h,v 1.5 2000-09-20 21:32:54 hugh Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -11,6 +11,11 @@
 
 #ifndef _HM_COMM_H_
 #define _HM_COMM_H_
+typedef struct
+{
+  DWORD dwBaudRate;
+  DWORD dwBaudFlag;
+}BAUDTABLEENTRY;
 
 class HMDeviceCommClass : public HMDeviceHandler
 {
@@ -28,8 +33,65 @@ class HMDeviceCommClass : public HMDeviceHandler
   virtual DWORD  CloseHandle(PHMHANDLEDATA pHMHandleData);
 
   /* this is the handler method for SetComm() */
-  virtual BOOL SetupComm(PHMHANDLEDATA pHMHandleData, DWORD dwInQueue, DWORD dwOutQueue);
+  virtual BOOL WaitCommEvent( PHMHANDLEDATA pHMHandleData,
+                              LPDWORD lpfdwEvtMask,
+                              LPOVERLAPPED lpo);
 
+  virtual BOOL GetCommProperties( PHMHANDLEDATA pHMHandleData,
+                                  LPCOMMPROP lpcmmp);
+  virtual BOOL GetCommMask( PHMHANDLEDATA pHMHandleData,
+                            LPDWORD lpfdwEvtMask);
+  virtual BOOL SetCommMask( PHMHANDLEDATA pHMHandleData,
+                            DWORD fdwEvtMask);
+  virtual BOOL PurgeComm( PHMHANDLEDATA pHMHandleData,
+                          DWORD fdwAction);
+  virtual BOOL ClearCommError( PHMHANDLEDATA pHMHandleData,
+                               LPDWORD lpdwErrors,
+                               LPCOMSTAT lpcst);
+  virtual BOOL SetCommState( PHMHANDLEDATA pHMHandleData,
+                             LPDCB lpdcb) ;
+  virtual BOOL GetCommState( PHMHANDLEDATA pHMHandleData,
+                             LPDCB lpdcb);
+  virtual BOOL GetCommModemStatus( PHMHANDLEDATA pHMHandleData,
+                                   LPDWORD lpModemStat );
+  virtual BOOL GetCommTimeouts( PHMHANDLEDATA pHMHandleData,
+                                LPCOMMTIMEOUTS lpctmo);
+  virtual BOOL SetCommTimeouts( PHMHANDLEDATA pHMHandleData,
+                                LPCOMMTIMEOUTS lpctmo);
+  virtual BOOL TransmitCommChar( PHMHANDLEDATA pHMHandleData,
+                                 CHAR cChar );
+  virtual BOOL SetCommConfig( PHMHANDLEDATA pHMHandleData,
+                              LPCOMMCONFIG lpCC,
+                              DWORD dwSize );
+  virtual BOOL SetCommBreak( PHMHANDLEDATA pHMHandleData );
+  virtual BOOL GetCommConfig( PHMHANDLEDATA pHMHandleData,
+                              LPCOMMCONFIG lpCC,
+                              LPDWORD lpdwSize );
+  virtual BOOL EscapeCommFunction( PHMHANDLEDATA pHMHandleData,
+                                   UINT dwFunc );
+  virtual BOOL SetupComm( PHMHANDLEDATA pHMHandleData,
+                          DWORD dwInQueue,
+                          DWORD dwOutQueue);
+  virtual BOOL ClearCommBreak( PHMHANDLEDATA pHMHandleData);
+  virtual BOOL SetDefaultCommConfig( PHMHANDLEDATA pHMHandleData,
+                                     LPCOMMCONFIG lpCC,
+                                     DWORD dwSize);
+  virtual BOOL GetDefaultCommConfig( PHMHANDLEDATA pHMHandleData,
+                                     LPCOMMCONFIG lpCC,
+                                     LPDWORD lpdwSize);
+  private:
+  APIRET SetLine( PHMHANDLEDATA pHMHandleData,
+                  UCHAR ucSize,UCHAR Parity, UCHAR Stop);
+  APIRET SetOS2DCB( PHMHANDLEDATA pHMHandleData,
+                    BOOL fOutxCtsFlow, BOOL fOutxDsrFlow,
+                    UCHAR ucDtrControl,  BOOL fDsrSensitivity,
+                    BOOL fTXContinueOnXoff, BOOL fOutX,
+                    BOOL fInX, BOOL fErrorChar,
+                    BOOL fNull, UCHAR ucRtsControl,
+                    BOOL fAbortOnError, BYTE XonChar,
+                    BYTE XoffChar,BYTE ErrorChar);
+  APIRET SetBaud( PHMHANDLEDATA pHMHandleData,
+                  DWORD dwNewBaud);
 };
 
 

@@ -1,4 +1,4 @@
-/* $Id: hmopen32.cpp,v 1.25 2000-08-04 21:12:08 sandervl Exp $ */
+/* $Id: hmopen32.cpp,v 1.26 2000-09-20 21:32:52 hugh Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -11,7 +11,7 @@
  *****************************************************************************
  */
 
-//#define DEBUG_LOCAL
+#define DEBUG_LOCAL
 
 #ifdef DEBUG_LOCAL
 #  define dprintfl(a) dprintf(a)
@@ -30,7 +30,7 @@ inline void ignore_dprintf(...){}
 #include "HMOpen32.h"
 #include "mmap.h"
 
-#define DBG_LOCALLOG	DBG_hmopen32
+#define DBG_LOCALLOG  DBG_hmopen32
 #include "dbglocal.h"
 
 /*****************************************************************************
@@ -100,7 +100,7 @@ DWORD HMDeviceOpen32Class::CloseHandle(PHMHANDLEDATA pHMHandleData)
 /*****************************************************************************
  * Name      : HMDeviceHandler::DuplicateHandle
  * Purpose   : dummy version
- * Parameters: 
+ * Parameters:
  *             various parameters as required
  * Variables :
  * Result    :
@@ -114,8 +114,8 @@ BOOL HMDeviceOpen32Class::DuplicateHandle(PHMHANDLEDATA pHMHandleData, HANDLE  s
                                PHMHANDLEDATA pHMSrcHandle,
                                HANDLE  destprocess,
                                PHANDLE desthandle,
-                       	       DWORD   fdwAccess,
-                       	       BOOL    fInherit,
+                               DWORD   fdwAccess,
+                               BOOL    fInherit,
                                DWORD   fdwOptions,
                                DWORD   fdwOdinOptions)
 {
@@ -129,8 +129,8 @@ BOOL HMDeviceOpen32Class::DuplicateHandle(PHMHANDLEDATA pHMHandleData, HANDLE  s
   rc = O32_DuplicateHandle(srcprocess, pHMSrcHandle->hHMHandle, destprocess, desthandle, fdwAccess, fInherit, fdwOptions);
 
   if(rc == TRUE) {
-     	pHMHandleData->hHMHandle = *desthandle;
-     	return TRUE;
+      pHMHandleData->hHMHandle = *desthandle;
+      return TRUE;
   }
   else  return FALSE;
 }
@@ -204,15 +204,15 @@ DWORD HMDeviceOpen32Class::WaitForSingleObject(PHMHANDLEDATA pHMHandleData,
   dprintfl(("KERNEL32: HandleManager::Open32::WaitForSingleObject(%08xh,%08h)\n",
             pHMHandleData->hHMHandle,
             dwTimeout));
- 
+
   if(dwTimeout) {
-  	starttime = O32_GetCurrentTime();
+    starttime = O32_GetCurrentTime();
   }
   rc =  (O32_WaitForSingleObject(pHMHandleData->hHMHandle,
                                  dwTimeout));
   if(dwTimeout) {
-  	endtime = O32_GetCurrentTime();
-  	dprintf(("KERNEL32: HandleManager::WaitForSingleObject %x delta = %x (rc=%x)", pHMHandleData->hHMHandle, endtime - starttime, rc));
+    endtime = O32_GetCurrentTime();
+    dprintf(("KERNEL32: HandleManager::WaitForSingleObject %x delta = %x (rc=%x)", pHMHandleData->hHMHandle, endtime - starttime, rc));
   }
   else dprintf(("KERNEL32: HandleManager::WaitForSingleObject %x rc=%x", pHMHandleData->hHMHandle, rc));
   return rc;
