@@ -1,4 +1,4 @@
-/* $Id: winproc.cpp,v 1.7 2001-06-09 14:50:26 sandervl Exp $ */
+/* $Id: winproc.cpp,v 1.8 2003-10-02 10:36:00 sandervl Exp $ */
 /*
  * Window procedure callbacks
  *
@@ -307,9 +307,9 @@ LRESULT WINAPI CallWindowProcA(
     else  dprintf2(("CallWindowProcA %x %x %x %x %x (unknown proc)", func, hwnd, msg, wParam, lParam));
    
     if(!IsWindow(hwnd)) {
-        dprintf(("CallWindowProcA, window %x not found", hwnd));
-        // return func( hwnd, msg, wParam, lParam );
-        return 0;
+        dprintf2(("CallWindowProcA, window %x not found", hwnd));
+        //not fatal. WM_TIMER doesn't need a valid window handle
+        //Wine doesn't fail here either
     }
 
     if (!proc) return func(hwnd, msg, wParam, lParam );
@@ -341,9 +341,9 @@ LRESULT WINAPI CallWindowProcW( WNDPROC func, HWND hwnd, UINT msg,
     else  dprintf2(("CallWindowProcW %x %x %x %x %x (unknown proc)", func, hwnd, msg, wParam, lParam));
 
     if(!IsWindow(hwnd)) {
-        dprintf(("CallWindowProcW, window %x not found", hwnd));
-        // return func( hwnd, msg, wParam, lParam );
-        return 0;
+        dprintf2(("CallWindowProcW, window %x not found", hwnd));
+        //not fatal. WM_TIMER doesn't need a valid window handle
+        //Wine doesn't fail here either
     }
 
     if (!proc) return func( hwnd, msg, wParam, lParam );
