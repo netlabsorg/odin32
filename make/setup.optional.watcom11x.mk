@@ -1,4 +1,4 @@
-# $Id: setup.optional.watcom11x.mk,v 1.2 2002-04-30 19:48:59 bird Exp $
+# $Id: setup.optional.watcom11x.mk,v 1.3 2002-05-01 04:00:18 bird Exp $
 
 #
 #  Helper file for all the optional stuff which is common for
@@ -6,6 +6,10 @@
 #  Concidering the size of this, it really make sense putting it here.
 #
 
+#
+# This is not optional (but I'm getting lazy)
+#
+TOOL_DEFCONV    = $(PATH_TOOLS)\kDef2Wat.exe $(BUILD_PLATFORM)
 
 #
 # C Compiler flags.

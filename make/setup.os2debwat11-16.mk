@@ -1,4 +1,4 @@
-# $Id: setup.os2debwat11-16.mk,v 1.1 2002-04-30 19:44:31 bird Exp $
+# $Id: setup.os2debwat11-16.mk,v 1.2 2002-05-01 04:00:18 bird Exp $
 
 # ---OS2, DEBUG, WAT11-------------------------
 ENV_NAME="OS/2, Debug, Watcom C/C++ v11.0c 16-bit"
@@ -65,23 +65,23 @@ CXX_PC_2_STDOUT=-pc
 
 IMPLIB_FLAGS=/NOI /Nologo
 
-LINK_FLAGS=format os2 lx pmcompatible option quiet, stack=$(TARGET_STACKSIZE)
+LINK_FLAGS=Sort global Debug codeview Option quiet, dosseg, eliminate, manglednames, caseexact
 LINK_FLAGS_EXE=$(LINK_FLAGS)
 LINK_FLAGS_DLL=$(LINK_FLAGS)
-LINK_FLAGS_SYS=format os2 physdevice option int, dosseg, map, eliminate, mang, tog sort global d codeview
-LINK_FLAGS_VDD=format os2 virtdevice option int, dosseg, map, eliminate, mang, tog sort global d codeview
-LINK_FLAGS_IFS=$(LINK_FLAGS_DLL)
+LINK_FLAGS_SYS=$(LINK_FLAGS) Option oneautodata, internalrelocs, togglerelocs
+LINK_FLAGS_VDD=$(LINK_FLAGS_SYS)
+LINK_FLAGS_IFS=$(LINK_FLAGS_SYS)
 LINK_CMD_EXE=$(LINK) $(LINK_FLAGS_EXE) @$(TARGET_LNK)
 LINK_CMD_DLL=$(LINK) $(LINK_FLAGS_DLL) @$(TARGET_LNK)
 LINK_CMD_SYS=$(LINK) $(LINK_FLAGS_SYS) @$(TARGET_LNK)
 LINK_CMD_VDD=$(LINK) $(LINK_FLAGS_VDD) @$(TARGET_LNK)
 LINK_CMD_IFS=$(LINK) $(LINK_FLAGS_IFS) @$(TARGET_LNK)
-LINK_LNK1=file $(TARGET_OBJS: =^
-file )
-LINK_LNK2=libpath $(WATCOM)\lib286;$(WATCOM)\lib286\os2;
+LINK_LNK1=file       $(TARGET_OBJS: =^
+file       )
+LINK_LNK2=libpath    $(WATCOM)\lib386\os2;$(WATCOM)\lib386;
 LINK_LNK3=option map=$(TARGET_MAP)
-LINK_LNK4=library $(TARGET_LIBS: =^, )
-LINK_LNK5=name $(PATH_TARGET)\$(TARGET_NAME).$(TARGET_EXT)
+LINK_LNK4=library    $(TARGET_LIBS: =^, )
+LINK_LNK5=name       $(PATH_TARGET)\$(TARGET_NAME).$(TARGET_EXT)
 
 RC_FLAGS=-r -n -i $(PATH_INCLUDES:;= -i ) $(RC_DEFINES) $(RC_INCLUDES)
 RL_FLAGS=-x2 -n

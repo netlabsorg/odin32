@@ -1,4 +1,4 @@
-# $Id: process.mak,v 1.11 2002-04-30 19:50:40 bird Exp $
+# $Id: process.mak,v 1.12 2002-05-01 04:00:17 bird Exp $
 
 #
 # Unix-like tools for OS/2
@@ -712,6 +712,7 @@ $(TARGET): $(TARGET_OBJS) $(TARGET_RES) $(TARGET_DEF_LINK) $(TARGET_LNK) $(TARGE
 # Linker parameter file.
 #
 $(TARGET_LNK): $(MAKE_INCLUDE_PROCESS) $(MAKE_INCLUDE_SETUP) $(PATH_MAKE)\setup.mak $(MAKEFILE)
+!ifndef TOOL_DEFCONV
     @$(ECHO) Creating Linker Input File $(CLRRST)<<$@
 $(LINK_LNK1)
 $(LINK_LNK2)
@@ -719,6 +720,23 @@ $(LINK_LNK3)
 $(LINK_LNK4)
 $(LINK_LNK5)
 <<KEEP
+!else
+    @$(ECHO) Creating Linker Input File $(CLRRST) $@
+    @$(TOOL_RM) $@
+! ifdef BUILD_VERBOSE
+    @ \
+! endif
+    $(TOOL_DEFCONV) $(TARGET_DEF_LINK) $@ <<$(TARGET_LNK)2
+#
+# LINK_LNK[1-5]:
+#
+$(LINK_LNK1)
+$(LINK_LNK2)
+$(LINK_LNK3)
+$(LINK_LNK4)
+$(LINK_LNK5)
+<<keep
+!endif
 !ifdef BUILD_VERBOSE
     @type $@
 !endif
