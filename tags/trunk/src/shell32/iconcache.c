@@ -1,4 +1,4 @@
-/* $Id: iconcache.c,v 1.9 2003-11-17 19:29:40 sandervl Exp $ */
+/* $Id: iconcache.c,v 1.10 2003-12-01 11:46:11 sandervl Exp $ */
 /*
  *	shell icon cache (SIC)
  *
@@ -963,6 +963,10 @@ void SIC_Destroy(void)
 	  for (i=0; i < pDPA_GetPtrCount(sic_hdpa); ++i)
 	  {
 	    lpsice = pDPA_GetPtr(sic_hdpa, i);
+#ifdef __WIN32OS2__
+            // 2003-11-23 DT see also SIC_IconAppend, memory leak in WINE
+            HeapFree(GetProcessHeap(),0,lpsice->sSourceFile);
+#endif          
 	    SHFree(lpsice);
 	  }
 	  pDPA_Destroy(sic_hdpa);
