@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.25 1999-08-29 20:05:07 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.26 1999-08-30 11:59:53 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -19,7 +19,7 @@
 #include <winconst.h>
 #include <wprocess.h>
 #include <misc.h>
-#include <win32wnd.h>
+#include <win32wbase.h>
 #include <win32dlg.h>
 #include "pmwindow.h"
 #include "oslibwin.h"
@@ -77,7 +77,7 @@ BOOL InitPM()
      (PFNWP)Win32WindowProc,            /* Address of window procedure  */
      CS_SIZEREDRAW | CS_HITTEST,
      NROF_WIN32WNDBYTES)) {
-        dprintf(("WinRegisterClass Win32Window failed"));
+        dprintf(("WinRegisterClass Win32BaseWindow failed"));
         return(FALSE);
    }
 
@@ -95,21 +95,21 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 {
  POSTMSG_PACKET *postmsg;
  OSLIBPOINT      point, ClientPoint;
- Win32Window    *win32wnd;
+ Win32BaseWindow    *win32wnd;
  APIRET          rc;
 
   //Restore our FS selector
   SetWin32TIB();
 
-  win32wnd = Win32Window::GetWindowFromOS2Handle(hwnd);
+  win32wnd = Win32BaseWindow::GetWindowFromOS2Handle(hwnd);
 
   if(msg != WM_CREATE && win32wnd == NULL) {
         dprintf(("Invalid win32wnd pointer for window %x!!", hwnd));
         goto RunDefWndProc;
   }
   if(msg > WIN32APP_USERMSGBASE) {
-	//win32 app user message
-	dprintf(("PMWINDOW: Message %x (%x,%x) posted to window %x", (ULONG)msg-WIN32APP_USERMSGBASE, mp1, mp2, hwnd));
+    //win32 app user message
+    dprintf(("PMWINDOW: Message %x (%x,%x) posted to window %x", (ULONG)msg-WIN32APP_USERMSGBASE, mp1, mp2, hwnd));
         win32wnd->SendMessageA((ULONG)msg-WIN32APP_USERMSGBASE, (ULONG)mp1, (ULONG)mp2);
   }
   switch( msg )
@@ -181,7 +181,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         wp.hwnd = win32wnd->getWindowHandle();
         if ((pswp->fl & SWP_ZORDER) && (pswp->hwndInsertBehind > HWND_BOTTOM))
         {
-           Win32Window *wndAfter = Win32Window::GetWindowFromOS2Handle(pswp->hwndInsertBehind);
+           Win32BaseWindow *wndAfter = Win32BaseWindow::GetWindowFromOS2Handle(pswp->hwndInsertBehind);
            if(wndAfter) wp.hwndInsertAfter = wndAfter->getWindowHandle();
         }
         win32wnd->MsgPosChanging((LPARAM)&wp);
@@ -216,7 +216,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         wp.hwnd = win32wnd->getWindowHandle();
         if ((pswp->fl & SWP_ZORDER) && (pswp->hwndInsertBehind > HWND_BOTTOM))
         {
-           Win32Window *wndAfter = Win32Window::GetWindowFromOS2Handle(pswp->hwndInsertBehind);
+           Win32BaseWindow *wndAfter = Win32BaseWindow::GetWindowFromOS2Handle(pswp->hwndInsertBehind);
            wp.hwndInsertAfter = wndAfter->getWindowHandle();
         }
         classStyle = win32wnd->getClass()->getStyle();
@@ -433,10 +433,10 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 
     case WM_MOUSEMOVE:
     {
-	//Only send this message when the mouse isn't captured
+    //Only send this message when the mouse isn't captured
         if(WinQueryCapture(HWND_DESKTOP) != NULLHANDLE) {
                 goto RunDefWndProc;
-	}
+    }
         ULONG keystate = 0;
         if(WinGetKeyState(HWND_DESKTOP, VK_BUTTON1))
             keystate |= WMMOVE_LBUTTON;
@@ -592,12 +592,12 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         break;
 
     case WM_HITTEST:
-	// Only send this message if the window is enabled
-        if (WinIsWindowEnabled(hwnd)) 
-	{
-	        if(win32wnd->MsgHitTest((*(POINTS *)&mp1).x, MapOS2ToWin32Y(OSLIB_HWND_DESKTOP, hwnd, (*(POINTS *)&mp1).y))) {
-        	        goto RunDefWndProc;
-		}
+    // Only send this message if the window is enabled
+        if (WinIsWindowEnabled(hwnd))
+    {
+            if(win32wnd->MsgHitTest((*(POINTS *)&mp1).x, MapOS2ToWin32Y(OSLIB_HWND_DESKTOP, hwnd, (*(POINTS *)&mp1).y))) {
+                    goto RunDefWndProc;
+        }
         }
         else    goto RunDefWndProc;
         break;

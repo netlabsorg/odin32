@@ -1,4 +1,4 @@
-/* $Id: defwndproc.cpp,v 1.5 1999-08-29 20:05:07 sandervl Exp $ */
+/* $Id: defwndproc.cpp,v 1.6 1999-08-30 11:59:53 sandervl Exp $ */
 
 /*
  * Win32 default window API functions for OS/2
@@ -13,6 +13,7 @@
  */
 #include "user32.h"
 #include "syscolor.h"
+#include "win32wbase.h"
 #include "win32wnd.h"
 
 #ifdef DEBUG
@@ -23,9 +24,9 @@ char *GetMsgText(int Msg);
 //******************************************************************************
 LRESULT WIN32API DefWindowProcA(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
-  Win32Window *window;
+  Win32BaseWindow *window;
 
-    window = Win32Window::GetWindowFromHandle(hwnd);
+    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("DefWindowProcA, window %x not found", hwnd));
         return 0;
@@ -36,9 +37,9 @@ LRESULT WIN32API DefWindowProcA(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lPara
 //******************************************************************************
 LRESULT WIN32API DefWindowProcW(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
-  Win32Window *window;
+  Win32BaseWindow *window;
 
-    window = Win32Window::GetWindowFromHandle(hwnd);
+    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("DefWindowProcW, window %x not found", hwnd));
         return 0;
@@ -117,32 +118,30 @@ LRESULT WIN32API DefDlgProcW(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
     }
 }
 //******************************************************************************
-//TODO: Should be handled differently than the normal wnd proc
 //******************************************************************************
-LRESULT WIN32API DefFrameProcA(HWND hwndFrame, HWND hwndClient, UINT Msg, WPARAM wParam, LPARAM lParam)
+LRESULT WIN32API DefFrameProcA(HWND hwndFrame, HWND hwndMDIClient, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
   Win32Window *window;
 
-    window = Win32Window::GetWindowFromHandle(hwndFrame);
+    window = (Win32Window *)Win32BaseWindow::GetWindowFromHandle(hwndFrame);
     if(!window) {
         dprintf(("DefFrameProcA, window %x not found", hwndFrame));
         return 0;
     }
-    return window->DefWindowProcA(Msg, wParam, lParam);
+    return window->DefFrameProcA(hwndMDIClient, Msg, wParam, lParam);
 }
 //******************************************************************************
-//TODO: Should be handled differently than the normal wnd proc
 //******************************************************************************
-LRESULT WIN32API DefFrameProcW(HWND hwndFrame, HWND hwndClient, UINT Msg, WPARAM wParam, LPARAM lParam)
+LRESULT WIN32API DefFrameProcW(HWND hwndFrame, HWND hwndMDIClient, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
   Win32Window *window;
 
-    window = Win32Window::GetWindowFromHandle(hwndFrame);
+    window = (Win32Window *)Win32BaseWindow::GetWindowFromHandle(hwndFrame);
     if(!window) {
         dprintf(("DefFrameProcW, window %x not found", hwndFrame));
         return 0;
     }
-    return window->DefWindowProcW(Msg, wParam, lParam);
+    return window->DefFrameProcW(hwndMDIClient, Msg, wParam, lParam);
 }
 //******************************************************************************
 //******************************************************************************

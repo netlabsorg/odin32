@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.18 1999-08-29 20:05:08 sandervl Exp $ */
+/* $Id: window.cpp,v 1.19 1999-08-30 11:59:54 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -17,7 +17,7 @@
 
 #include <os2win.h>
 #include <misc.h>
-#include <win32wnd.h>
+#include <win32wbase.h>
 #include <oslibwin.h>
 #include <oslibgdi.h>
 #include "user32.h"
@@ -32,7 +32,7 @@ HWND WIN32API CreateWindowExA(DWORD exStyle, LPCSTR className,
                               HWND parent, HMENU menu,
                               HINSTANCE instance, LPVOID data )
 {
-  Win32Window *window;
+  Win32BaseWindow *window;
   ATOM classAtom;
   CREATESTRUCTA cs;
 
@@ -65,15 +65,15 @@ HWND WIN32API CreateWindowExA(DWORD exStyle, LPCSTR className,
     cs.lpszClass      = className;
     cs.dwExStyle      = exStyle;
     dprintf(("CreateWindowExA: (%d,%d) (%d,%d), %x %x", x, y, width, height, style, exStyle));
-    window = new Win32Window( &cs, classAtom, FALSE );
+    window = new Win32BaseWindow( &cs, classAtom, FALSE );
     if(window == NULL)
     {
-        dprintf(("Win32Window creation failed!!"));
+        dprintf(("Win32BaseWindow creation failed!!"));
         return 0;
     }
     if(GetLastError() != 0)
     {
-        dprintf(("Win32Window error found!!"));
+        dprintf(("Win32BaseWindow error found!!"));
         delete window;
         return 0;
     }
@@ -87,7 +87,7 @@ HWND WIN32API CreateWindowExW(DWORD exStyle, LPCWSTR className,
                               HWND parent, HMENU menu,
                               HINSTANCE instance, LPVOID data )
 {
-  Win32Window *window;
+  Win32BaseWindow *window;
   ATOM classAtom;
   CREATESTRUCTA cs;
 
@@ -119,15 +119,15 @@ HWND WIN32API CreateWindowExW(DWORD exStyle, LPCWSTR className,
     cs.lpszName       = (LPSTR)windowName;
     cs.lpszClass      = (LPSTR)className;
     cs.dwExStyle      = exStyle;
-    window = new Win32Window( &cs, classAtom, TRUE );
+    window = new Win32BaseWindow( &cs, classAtom, TRUE );
     if(window == NULL)
     {
-        dprintf(("Win32Window creation failed!!"));
+        dprintf(("Win32BaseWindow creation failed!!"));
         return 0;
     }
     if(GetLastError() != 0)
     {
-        dprintf(("Win32Window error found!!"));
+        dprintf(("Win32BaseWindow error found!!"));
         delete window;
         return 0;
     }
@@ -135,16 +135,16 @@ HWND WIN32API CreateWindowExW(DWORD exStyle, LPCWSTR className,
 }
 //******************************************************************************
 //******************************************************************************
-HWND WIN32API CreateMDIWindowA(LPCSTR lpszClassName, LPCSTR lpszWindowName, 
-                               DWORD dwStyle, int x, int y, int nWidth, 
+HWND WIN32API CreateMDIWindowA(LPCSTR lpszClassName, LPCSTR lpszWindowName,
+                               DWORD dwStyle, int x, int y, int nWidth,
                                int nHeight, HWND hwndParent,
                                HINSTANCE hInstance, LPARAM lParam )
 {
  HWND hwnd;
  MDICREATESTRUCTA cs;
- Win32Window *window;
+ Win32BaseWindow *window;
 
-    window = Win32Window::GetWindowFromHandle(hwndParent);
+    window = Win32BaseWindow::GetWindowFromHandle(hwndParent);
     if(!window) {
         dprintf(("CreateMDIWindowA, window %x not found", hwndParent));
         return 0;
@@ -165,16 +165,16 @@ HWND WIN32API CreateMDIWindowA(LPCSTR lpszClassName, LPCSTR lpszWindowName,
 }
 //******************************************************************************
 //******************************************************************************
-HWND WIN32API CreateMDIWindowW(LPCWSTR lpszClassName, LPCWSTR lpszWindowName, 
-                               DWORD dwStyle, int x, int y, int nWidth, 
+HWND WIN32API CreateMDIWindowW(LPCWSTR lpszClassName, LPCWSTR lpszWindowName,
+                               DWORD dwStyle, int x, int y, int nWidth,
                                int nHeight, HWND hwndParent,
                                HINSTANCE hInstance, LPARAM lParam )
 {
  HWND hwnd;
  MDICREATESTRUCTW cs;
- Win32Window *window;
+ Win32BaseWindow *window;
 
-    window = Win32Window::GetWindowFromHandle(hwndParent);
+    window = Win32BaseWindow::GetWindowFromHandle(hwndParent);
     if(!window) {
         dprintf(("CreateMDIWindowW, window %x not found", hwndParent));
         return 0;
@@ -197,9 +197,9 @@ HWND WIN32API CreateMDIWindowW(LPCWSTR lpszClassName, LPCWSTR lpszWindowName,
 //******************************************************************************
 BOOL WIN32API DestroyWindow(HWND hwnd)
 {
-  Win32Window *window;
+  Win32BaseWindow *window;
 
-    window = Win32Window::GetWindowFromHandle(hwnd);
+    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("DestroyWindow, window %x not found", hwnd));
         return 0;
@@ -211,9 +211,9 @@ BOOL WIN32API DestroyWindow(HWND hwnd)
 //******************************************************************************
 HWND WIN32API SetActiveWindow( HWND hwnd)
 {
-  Win32Window *window;
+  Win32BaseWindow *window;
 
-    window = Win32Window::GetWindowFromHandle(hwnd);
+    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("SetActiveWindow, window %x not found", hwnd));
         return 0;
@@ -225,9 +225,9 @@ HWND WIN32API SetActiveWindow( HWND hwnd)
 //******************************************************************************
 HWND WIN32API GetParent( HWND hwnd)
 {
-  Win32Window *window;
+  Win32BaseWindow *window;
 
-    window = Win32Window::GetWindowFromHandle(hwnd);
+    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("GetParent, window %x not found", hwnd));
         return 0;
@@ -239,9 +239,9 @@ HWND WIN32API GetParent( HWND hwnd)
 //******************************************************************************
 HWND WIN32API SetParent( HWND hwndChild, HWND hwndNewParent)
 {
-  Win32Window *window;
+  Win32BaseWindow *window;
 
-    window = Win32Window::GetWindowFromHandle(hwndChild);
+    window = Win32BaseWindow::GetWindowFromHandle(hwndChild);
     if(!window) {
         dprintf(("SetParent, window %x not found", hwndChild));
         return 0;
@@ -253,9 +253,9 @@ HWND WIN32API SetParent( HWND hwndChild, HWND hwndNewParent)
 //******************************************************************************
 BOOL WIN32API IsChild( HWND hwndParent, HWND hwnd)
 {
-  Win32Window *window;
+  Win32BaseWindow *window;
 
-    window = Win32Window::GetWindowFromHandle(hwnd);
+    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("IsChild, window %x not found", hwnd));
         return 0;
@@ -267,9 +267,9 @@ BOOL WIN32API IsChild( HWND hwndParent, HWND hwnd)
 //******************************************************************************
 HWND WIN32API GetTopWindow( HWND hwnd)
 {
-  Win32Window *window;
+  Win32BaseWindow *window;
 
-    window = Win32Window::GetWindowFromHandle(hwnd);
+    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("GetTopWindow, window %x not found", hwnd));
         return 0;
@@ -281,9 +281,9 @@ HWND WIN32API GetTopWindow( HWND hwnd)
 //******************************************************************************
 BOOL WIN32API UpdateWindow(HWND hwnd)
 {
-  Win32Window *window;
+  Win32BaseWindow *window;
 
-    window = Win32Window::GetWindowFromHandle(hwnd);
+    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("UpdateWindow, window %x not found", hwnd));
         return 0;
@@ -295,9 +295,9 @@ BOOL WIN32API UpdateWindow(HWND hwnd)
 //******************************************************************************
 BOOL WIN32API IsIconic( HWND hwnd)
 {
-  Win32Window *window;
+  Win32BaseWindow *window;
 
-    window = Win32Window::GetWindowFromHandle(hwnd);
+    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("IsIconic, window %x not found", hwnd));
         return 0;
@@ -309,9 +309,9 @@ BOOL WIN32API IsIconic( HWND hwnd)
 //******************************************************************************
 HWND WIN32API GetWindow(HWND hwnd, UINT uCmd)
 {
-  Win32Window *window;
+  Win32BaseWindow *window;
 
-    window = Win32Window::GetWindowFromHandle(hwnd);
+    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("GetWindow, window %x not found", hwnd));
         return 0;
@@ -323,9 +323,9 @@ HWND WIN32API GetWindow(HWND hwnd, UINT uCmd)
 //******************************************************************************
 BOOL WIN32API EnableWindow( HWND hwnd, BOOL fEnable)
 {
-  Win32Window *window;
+  Win32BaseWindow *window;
 
-    window = Win32Window::GetWindowFromHandle(hwnd);
+    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("EnableWindow, window %x not found", hwnd));
         return 0;
@@ -343,15 +343,15 @@ BOOL WIN32API BringWindowToTop(HWND hwnd)
 //******************************************************************************
 HWND WIN32API GetActiveWindow()
 {
-  return Win32Window::GetActiveWindow();
+  return Win32BaseWindow::GetActiveWindow();
 }
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API ShowWindow(HWND hwnd, int nCmdShow)
 {
-  Win32Window *window;
+  Win32BaseWindow *window;
 
-    window = Win32Window::GetWindowFromHandle(hwnd);
+    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("ShowWindow, window %x not found", hwnd));
         return 0;
@@ -363,9 +363,9 @@ BOOL WIN32API ShowWindow(HWND hwnd, int nCmdShow)
 //******************************************************************************
 BOOL WIN32API SetWindowPos(HWND hwnd, HWND hwndInsertAfter, int x, int y, int cx, int cy, UINT fuFlags)
 {
-  Win32Window *window;
+  Win32BaseWindow *window;
 
-    window = Win32Window::GetWindowFromHandle(hwnd);
+    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("SetWindowPos, window %x not found", hwnd));
         return 0;
@@ -393,9 +393,9 @@ BOOL WIN32API GetWindowPlacement( HWND arg1, LPWINDOWPLACEMENT arg2)
 //******************************************************************************
 BOOL WIN32API IsWindow( HWND hwnd)
 {
-  Win32Window *window;
+  Win32BaseWindow *window;
 
-    window = Win32Window::GetWindowFromHandle(hwnd);
+    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("IsWindow, window %x not found", hwnd));
         return FALSE;
@@ -407,9 +407,9 @@ BOOL WIN32API IsWindow( HWND hwnd)
 //******************************************************************************
 BOOL WIN32API IsWindowEnabled( HWND hwnd)
 {
-  Win32Window *window;
+  Win32BaseWindow *window;
 
-    window = Win32Window::GetWindowFromHandle(hwnd);
+    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("IsWindowEnabled, window %x not found", hwnd));
         return 0;
@@ -421,9 +421,9 @@ BOOL WIN32API IsWindowEnabled( HWND hwnd)
 //******************************************************************************
 BOOL WIN32API IsWindowVisible( HWND hwnd)
 {
-  Win32Window *window;
+  Win32BaseWindow *window;
 
-    window = Win32Window::GetWindowFromHandle(hwnd);
+    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("IsWindowVisible, window %x not found", hwnd));
         return 0;
@@ -440,7 +440,7 @@ HWND WIN32API SetFocus( HWND hwnd)
     dprintf(("USER32:  SetFocus\n"));
 
     lastFocus = GetFocus();
-    hwnd = Win32Window::Win32ToOS2Handle(hwnd);
+    hwnd = Win32BaseWindow::Win32ToOS2Handle(hwnd);
     return (OSLibWinSetFocus(OSLIB_HWND_DESKTOP,hwnd)) ? lastFocus:0;
 }
 //******************************************************************************
@@ -451,7 +451,7 @@ HWND WIN32API GetFocus(void)
 //    dprintf(("USER32:  GetFocus\n"));
 
     hwnd = OSLibWinQueryFocus(OSLIB_HWND_DESKTOP);
-    return Win32Window::OS2ToWin32Handle(hwnd);
+    return Win32BaseWindow::OS2ToWin32Handle(hwnd);
 }
 //******************************************************************************
 //******************************************************************************
@@ -514,9 +514,9 @@ BOOL WIN32API RedrawWindow( HWND arg1, const RECT * arg2, HRGN arg3, UINT arg4)
 //******************************************************************************
 BOOL WIN32API GetWindowRect( HWND hwnd, PRECT pRect)
 {
-   Win32Window *window;
+   Win32BaseWindow *window;
 
-    window = Win32Window::GetWindowFromHandle(hwnd);
+    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("GetWindowRect, window %x not found", hwnd));
         return 0;
@@ -528,9 +528,9 @@ BOOL WIN32API GetWindowRect( HWND hwnd, PRECT pRect)
 //******************************************************************************
 int WIN32API GetWindowTextLengthA( HWND hwnd)
 {
-   Win32Window *window;
+   Win32BaseWindow *window;
 
-    window = Win32Window::GetWindowFromHandle(hwnd);
+    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("GetWindowTextLength, window %x not found", hwnd));
         return 0;
@@ -542,9 +542,9 @@ int WIN32API GetWindowTextLengthA( HWND hwnd)
 //******************************************************************************
 int WIN32API GetWindowTextA( HWND hwnd, LPSTR lpsz, int cch)
 {
-   Win32Window *window;
+   Win32BaseWindow *window;
 
-    window = Win32Window::GetWindowFromHandle(hwnd);
+    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("GetWindowTextA, window %x not found", hwnd));
         return 0;
@@ -581,9 +581,9 @@ int WIN32API GetWindowTextW(HWND hwnd, LPWSTR lpsz, int cch)
 //******************************************************************************
 BOOL WIN32API SetWindowTextA(HWND hwnd, LPCSTR lpsz)
 {
-   Win32Window *window;
+   Win32BaseWindow *window;
 
-    window = Win32Window::GetWindowFromHandle(hwnd);
+    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("SetWindowTextA, window %x not found", hwnd));
         return 0;
@@ -632,7 +632,7 @@ BOOL WIN32API GetClientRect( HWND hwnd, PRECT pRect)
 {
  BOOL rc;
 
-    hwnd = Win32Window::Win32ToOS2Handle(hwnd);
+    hwnd = Win32BaseWindow::Win32ToOS2Handle(hwnd);
     rc = OSLibWinQueryWindowRect(hwnd, pRect);
     dprintf(("USER32:  GetClientRect of %X returned (%d,%d) (%d,%d)\n", hwnd, pRect->left, pRect->top, pRect->right, pRect->bottom));
     return rc;
@@ -667,30 +667,30 @@ HWND WIN32API GetDesktopWindow(void)
 HWND WIN32API FindWindowA(LPCSTR lpszClass, LPCSTR lpszWindow)
 {
     if(!lpszClass) {
-	SetLastError(ERROR_INVALID_PARAMETER);
-	return 0;
+    SetLastError(ERROR_INVALID_PARAMETER);
+    return 0;
     }
     if(HIWORD(lpszClass)) {
-    	 dprintf(("USER32:  FindWindow %s %s\n", lpszClass, lpszWindow));
+         dprintf(("USER32:  FindWindow %s %s\n", lpszClass, lpszWindow));
     }
     else dprintf(("USER32:  FindWindow %x %s\n", lpszClass, lpszWindow));
 
-    return Win32Window::FindWindowEx(OSLIB_HWND_DESKTOP, 0, (LPSTR)lpszClass, (LPSTR)lpszWindow);
+    return Win32BaseWindow::FindWindowEx(OSLIB_HWND_DESKTOP, 0, (LPSTR)lpszClass, (LPSTR)lpszWindow);
 }
 //******************************************************************************
 //******************************************************************************
 HWND WIN32API FindWindowExA(HWND hwndParent, HWND hwndChildAfter, LPCSTR lpszClass, LPCSTR lpszWindow)
 {
     if(!lpszClass) {
-	SetLastError(ERROR_INVALID_PARAMETER);
-	return 0;
+    SetLastError(ERROR_INVALID_PARAMETER);
+    return 0;
     }
     if(HIWORD(lpszClass)) {
-    	 dprintf(("USER32:  FindWindowExA (%x,%x) %s %s\n", hwndParent, hwndChildAfter, lpszClass, lpszWindow));
+         dprintf(("USER32:  FindWindowExA (%x,%x) %s %s\n", hwndParent, hwndChildAfter, lpszClass, lpszWindow));
     }
     else dprintf(("USER32:  FindWindowExA (%x,%x)%x %s\n", hwndParent, hwndChildAfter, lpszClass, lpszWindow));
 
-    return Win32Window::FindWindowEx(hwndParent, hwndChildAfter, (LPSTR)lpszClass, (LPSTR)lpszWindow);
+    return Win32BaseWindow::FindWindowEx(hwndParent, hwndChildAfter, (LPSTR)lpszClass, (LPSTR)lpszWindow);
 }
 /*****************************************************************************
  * Name      : HWND WIN32API FindWindowExW
@@ -719,19 +719,19 @@ HWND WIN32API FindWindowExW(HWND    hwndParent,
                                LPCWSTR lpszWindow)
 {
     if(!lpszClass) {
-	SetLastError(ERROR_INVALID_PARAMETER);
-	return 0;
+    SetLastError(ERROR_INVALID_PARAMETER);
+    return 0;
     }
     dprintf(("USER32:  FindWindowExW (%x,%x) %x %s\n", hwndParent, hwndChildAfter, lpszClass, lpszWindow));
 
-    return Win32Window::FindWindowEx(hwndParent, hwndChildAfter, (LPSTR)lpszClass, (LPSTR)lpszWindow);
+    return Win32BaseWindow::FindWindowEx(hwndParent, hwndChildAfter, (LPSTR)lpszClass, (LPSTR)lpszWindow);
 }
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API FlashWindow(HWND hwnd, BOOL fFlash)
 {
     dprintf(("FlashWindow %x %d\n", hwnd, fFlash));
-    return OSLibWinFlashWindow(Win32Window::Win32ToOS2Handle(hwnd), fFlash);
+    return OSLibWinFlashWindow(Win32BaseWindow::Win32ToOS2Handle(hwnd), fFlash);
 }
 //******************************************************************************
 //******************************************************************************
@@ -794,9 +794,9 @@ HWND WIN32API ChildWindowFromPointEx(HWND arg1, POINT arg2, UINT uFlags)
 //******************************************************************************
 BOOL WIN32API CloseWindow(HWND hwnd)
 {
-   Win32Window *window;
+   Win32BaseWindow *window;
 
-    window = Win32Window::GetWindowFromHandle(hwnd);
+    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("CloseWindow, window %x not found", hwnd));
         return 0;
@@ -814,7 +814,7 @@ HWND WIN32API WindowFromPoint( POINT point)
     dprintf(("WindowFromPoint (%d,%d)\n", point.x, point.y));
     hwnd = OSLibWinWindowFromPoint(OSLIB_HWND_DESKTOP, (PVOID)&point);
     if(hwnd) {
-        return Win32Window::OS2ToWin32Handle(hwnd);
+        return Win32BaseWindow::OS2ToWin32Handle(hwnd);
     }
     return 0;
 }
@@ -822,9 +822,9 @@ HWND WIN32API WindowFromPoint( POINT point)
 //******************************************************************************
 BOOL WIN32API IsWindowUnicode(HWND hwnd)
 {
-   Win32Window *window;
+   Win32BaseWindow *window;
 
-    window = Win32Window::GetWindowFromHandle(hwnd);
+    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("IsWindowUnicode, window %x not found", hwnd));
         return 0;
@@ -906,7 +906,7 @@ BOOL WIN32API GetUpdateRect( HWND hwnd, PRECT lpRect, BOOL  bErase)
     dprintf(("GetUpdateRect %x %d\n", hwnd, bErase));
     if (!lpRect) return FALSE;
 
-    return OSLibWinQueryUpdateRect(Win32Window::Win32ToOS2Handle(hwnd), lpRect);
+    return OSLibWinQueryUpdateRect(Win32BaseWindow::Win32ToOS2Handle(hwnd), lpRect);
 }
 //******************************************************************************
 //******************************************************************************
@@ -919,11 +919,11 @@ BOOL WIN32API InvalidateRect(HWND hWnd, const RECT *lpRect, BOOL bErase)
 #endif
 
     //CB: bErase no quite the same
-    hWnd = Win32Window::Win32ToOS2Handle(hWnd);
+    hWnd = Win32BaseWindow::Win32ToOS2Handle(hWnd);
     if (lpRect)
     {
-      	 return OSLibWinInvalidateRect(hWnd, (PRECT)lpRect, bErase);
-    } 
+         return OSLibWinInvalidateRect(hWnd, (PRECT)lpRect, bErase);
+    }
     else return OSLibWinInvalidateRect(hWnd,NULL,bErase);
 }
 //******************************************************************************
