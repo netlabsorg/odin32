@@ -9841,4 +9841,17 @@ inline DWORD O32_WaitForInputIdle(HANDLE hProcess, DWORD dwTimeOut)
     return yyrc;
 }
 
+HBITMAP OPEN32API _O32_CreateBitmapFromPMHandle(HBITMAP hPMBitmap);
+
+inline HBITMAP O32_CreateBitmapFromPMHandle(HBITMAP hPMBitmap)
+{
+ HBITMAP yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = _O32_CreateBitmapFromPMHandle(hPMBitmap);
+    SetFS(sel);
+
+    return yyrc;
+}
+
 #endif    /* ifdef _OS2WIN_H */
