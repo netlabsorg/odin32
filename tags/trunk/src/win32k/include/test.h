@@ -1,4 +1,4 @@
-/* $Id: test.h,v 1.6 2000-12-16 23:04:51 bird Exp $
+/* $Id: test.h,v 1.7 2001-02-11 15:12:38 bird Exp $
  *
  * Definitions and declarations for test moduls.
  *
@@ -152,6 +152,10 @@ ULONG KRNLCALL  fakeTKSuFuBuff(PVOID pvUsr, PVOID pv, ULONG cb, ULONG fl);
 ULONG KRNLCALL  fakeTKPidToPTDA(PID pid, PPPTDA ppPTDA);
 PMTE LDRCALL    fakeldrValidateMteHandle(HMTE hMTE);
 PSZ  SECCALL    fakeSecPathFromSFN(SFN hFile);
+ULONG KRNLCALL  fakePGPhysAvail(void);
+ULONG KRNLCALL  fakePGPhysPresent(void);
+VOID  KRNLCALL  fakevmRecalcShrBound(ULONG flFlags, PULONG pulSentinelAddress);
+
 void _Optlink   fakeg_tkExecPgm(void);    /* Not callable! (fakea.asm) */
 void _Optlink   faketkStartProcess(void); /* Not callable! (fakea.asm) */
 void _Optlink   fakef_FuStrLenZ(void);    /* Not callable! (fakea.asm) */
@@ -174,8 +178,29 @@ extern PMTE     fakespecific_l;
 extern PMTE     fakeprogram_h;
 extern PMTE     fakeprogram_l;
 
+extern ULONG fakeSMcDFInuse;
+extern ULONG fakesmFileSize;
+extern ULONG fakeSMswapping;
+extern ULONG fakesmcBrokenDF;
+extern ULONG fakepgPhysPages;
+extern ULONG fakeSMcInMemFile;
+extern ULONG fakeSMCFGMinFree;
+extern ULONG fakesmcGrowFails;
+extern ULONG fakePGSwapEnabled;
+extern ULONG fakepgcPageFaults;
+extern ULONG fakeSMCFGSwapSize;
+extern ULONG fakepgResidentPages;
+extern ULONG fakepgSwappablePages;
+extern ULONG fakepgDiscardableInmem;
+extern ULONG fakepgDiscardablePages;
+extern ULONG fakeSMMinFree;
+extern ULONG fakepgcPageFaultsActive;
+extern ULONG fakepgPhysMax;
+extern ULONG fakeVirtualAddressLimit;
 
-
+extern VMAH  fakeahvmShr;
+extern VMAH  fakeahvmSys;
+extern VMAH  fakeahvmhShr;
 
 #endif /* INCL_NO_FAKE */
 
