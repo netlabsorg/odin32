@@ -1,4 +1,4 @@
-/* $Id: hmdisk.cpp,v 1.24 2001-10-29 13:36:32 sandervl Exp $ */
+/* $Id: hmdisk.cpp,v 1.25 2001-10-29 16:29:33 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -895,7 +895,7 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
         //TODO: this doesn't work for floppies for some reason...
         rc = OSLibDosDevIOCtl(-1, 0x08, 0x66, &parm, sizeof(parm), &parsize,
                               &status, sizeof(status), &datasize);
-        if(rc != NO_ERROR || datasize == 0) {
+        if(rc != NO_ERROR) {
             dprintf(("OSLibDosDevIOCtl failed with rc %d datasize %d", rc, datasize));
             return FALSE;
         }
@@ -1124,7 +1124,7 @@ BOOL HMDeviceDiskClass::ReadFile(PHMHANDLEDATA pHMHandleData,
   DWORD        offset, bytesread;
   BOOL         bRC;
 
-  dprintf2(("KERNEL32: HMDeviceDiskClass::ReadFile %s(%08x,%08x,%08x,%08x,%08x) - stub?\n",
+  dprintf2(("KERNEL32: HMDeviceDiskClass::ReadFile %s(%08x,%08x,%08x,%08x,%08x)",
            lpHMDeviceName,
            pHMHandleData,
            lpBuffer,
@@ -1177,6 +1177,7 @@ BOOL HMDeviceDiskClass::ReadFile(PHMHANDLEDATA pHMHandleData,
       dprintf(("KERNEL32: HMDeviceDiskClass::ReadFile returned %08xh %x", bRC, GetLastError()));
       dprintf(("%x -> %d", lpBuffer, IsBadWritePtr((LPVOID)lpBuffer, nNumberOfBytesToRead)));
   }
+  else dprintf2(("KERNEL32: HMDeviceDiskClass::ReadFile read %x bytes", *lpNumberOfBytesRead));
 
   return bRC;
 }
