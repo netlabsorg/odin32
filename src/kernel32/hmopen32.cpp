@@ -1,4 +1,4 @@
-/* $Id: hmopen32.cpp,v 1.3 1999-06-17 21:52:01 phaller Exp $ */
+/* $Id: hmopen32.cpp,v 1.4 1999-06-29 08:45:04 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -533,6 +533,10 @@ DWORD HMDeviceOpen32Class::OpenFile (LPCSTR        lpFileName,
                        arg3);
   if (hFile != INVALID_HANDLE_ERROR)
      pHMHandleData->hWinHandle = hFile;
+
+  //@@@PH: Edgar Buerkle suspects wrong return value here, should be 0 in case of success
+  dprintf(("KERNEL32: HandleManager::Open32::OpenFile returns %08xh\n",
+           hFile));
 
   return(hFile);
 }
