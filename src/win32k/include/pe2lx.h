@@ -1,4 +1,4 @@
-/* $Id: pe2lx.h,v 1.9.4.1 2000-07-16 22:43:32 bird Exp $
+/* $Id: pe2lx.h,v 1.9.4.2 2000-08-20 08:08:45 bird Exp $
  *
  * Pe2Lx class declarations. Ring 0 and Ring 3
  *
@@ -74,6 +74,8 @@ public:
     /** @cat public query methods */
     BOOL    isExe();
     BOOL    isDll();
+    static HMTE getKernel32SFN()        {   return sfnKernel32;   }
+    static VOID setKernel32SFN(SFN sfn) {   sfnKernel32 = sfn;   }
 
     /** @cat public Helper methods */
     ULONG  querySizeOfLxFile();
@@ -202,6 +204,7 @@ private:
     } paSecChars2Flags[];
 
     static const char *     pszOdin32Path;  /* Odin32 base path. */
+    static SFN              sfnKernel32;    /* Odin32 Kernel32 filehandle. */
 };
 
 

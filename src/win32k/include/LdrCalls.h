@@ -1,4 +1,4 @@
-/* $Id: LdrCalls.h,v 1.3.4.3 2000-08-19 14:37:09 bird Exp $
+/* $Id: LdrCalls.h,v 1.3.4.4 2000-08-20 08:08:45 bird Exp $
  *
  * Prototypes for the loader overrided function.
  *
@@ -164,11 +164,23 @@ extern ULONG LDRCALL ldrOpenPath(   /* retd  0x10 */
 ULONG LDRCALL myldrOpenPath(PCHAR pachFilename, USHORT cchFilename, ldrlv_t *plv, PULONG pful);
 
 
+/**
+ * Finds a module if it's loaded.
+ * @returns     NO_ERROR on success.
+ *              OS/2 errorcode on error.
+ * @param       pachFilename    Pointer to module filename.
+ * @param       cchFilename     Length of modulefilename.
+ * @param       usClass         Module class. (CLASS_*)
+ * @param       ppMTE           Pointer to pMTE found.
+ * @sketch
+ */
+ULONG LDRCALL ldrFindModule(PCHAR pachFilename, USHORT cchFilename, USHORT usClass, PPMTE ppMTE);
+
 
 /**
  * LDRClearSem - Clears the loader semaphore.
  * (It does some garbage collection on release.)
- * @returns   NO_ERROR on sucess.
+ * @returns   NO_ERROR on success.
  *            OS/2 error on failure. (ERROR_INTERRUPT?)
  */
 extern ULONG LDRCALL LDRClearSem(void);
