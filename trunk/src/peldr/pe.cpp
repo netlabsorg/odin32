@@ -1,4 +1,4 @@
-/* $Id: pe.cpp,v 1.35 2002-12-20 11:38:55 sandervl Exp $ */
+/* $Id: pe.cpp,v 1.36 2002-12-28 13:40:10 sandervl Exp $ */
 
 /*
  * PELDR main exe loader code
@@ -43,6 +43,7 @@ char szPEErrorMsg[]     = "Not a valid win32 exe. (perhaps 16 bits windows)";
 char szCPUErrorMsg[]    = "%s doesn't run on x86 machines";
 char szExeErrorMsg[]    = "%s isn't an executable";
 char szInteralErrorMsg[]= "Internal Error while loading %s";
+char szInteralErrorMsg1[]= "Internal Error";
 char szNoKernel32Msg[]  = "Can't load/find kernel32.dll (rc=%d, module %s)";
 char szDosInfoBlocks[]  = "DosInfoBlocks failed!";
 char szErrorExports[]   = "Unable to process exports of %s";
@@ -97,6 +98,29 @@ int main(int argc, char *argv[])
  char  *cmdline, *win32cmdline, *peoptions, *newcmdline;
  BOOL   fQuote = FALSE, fVioConsole, fIsNEExe, fEndOfCmdLine = FALSE;
  int    nrTries = 1;
+
+  if(DosGetInfoBlocks(&ptib, &ppib) == 0) 
+  {
+      char *pszTemp;
+
+      fullpath[0] = 0;
+      DosQueryModuleName(ppib->pib_hmte, sizeof(fullpath), fullpath);
+
+      strupr(fullpath);
+#ifdef COMMAND_LINE_VERSION
+      pszTemp = strstr(fullpath, "PEC.EXE");
+#else
+      pszTemp = strstr(fullpath, "PE.EXE");
+#endif
+      if(pszTemp == NULL) {
+          pszErrorMsg = szInteralErrorMsg1;
+          goto failerror;
+      }
+      pszTemp--; //to go trailing backslash
+      *pszTemp = 0;
+      strcat(fullpath, ";%BeginLIBPATH%");
+      DosSetExtLIBPATH(fullpath, BEGIN_LIBPATH);
+  }
 
   if(argc >= 2) {
 	if(DosGetInfoBlocks(&ptib, &ppib) == 0) {
