@@ -1,4 +1,4 @@
-/* $Id: ChangeLog,v 1.1762 2001-10-17 14:31:10 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1763 2001-10-17 18:27:59 phaller Exp $ */
 
  2001-10-17: knut stange osmundsen <kosmunds@csc.com>
     - common:   o Corrected bug in kFile buffering which caused impdef to
@@ -8,6 +8,7 @@
     - SHELL32:  o WINE resync 20011017
     - KERNEL32: o minor heap optimization
     - USER32:   o minor handle mgmt optimizations
+    - CRTDLL32: o RegisterLxDll() in initterm was missing (WINPROJ)
 
  2001-10-17: Sander van Leeuwen <sandervl@xs4all.nl>
     - DDRAW:    o Fixes for DDBLT_COLORFILL
