@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.4 1999-07-17 11:52:23 sandervl Exp $ */
+/* $Id: window.cpp,v 1.5 1999-07-18 10:39:52 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -474,22 +474,59 @@ BOOL WIN32API RedrawWindow( HWND arg1, const RECT * arg2, HRGN arg3, UINT arg4)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API GetWindowRect( HWND arg1, PRECT  arg2)
+BOOL WIN32API GetWindowRect( HWND hwnd, PRECT pRect)
 {
- BOOL rc;
+   Win32Window *window;
 
-    rc = O32_GetWindowRect(arg1, arg2);
-    dprintf(("USER32:  GetWindowRect %X returned %d\n", arg1, rc));
-    return(rc);
+    window = Win32Window::GetWindowFromHandle(hwnd);
+    if(!window) {
+	dprintf(("GetWindowRect, window %x not found", hwnd));
+	return 0;
+    }
+    dprintf(("GetWindowRect %x", hwnd));
+    return window->GetWindowRect(pRect);
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API SetWindowTextA(HWND arg1, LPCSTR  arg2)
+int WIN32API GetWindowTextLengthA( HWND hwnd)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  SetWindowText %s\n", arg2);
-#endif
-    return O32_SetWindowText(arg1, arg2);
+   Win32Window *window;
+
+    window = Win32Window::GetWindowFromHandle(hwnd);
+    if(!window) {
+	dprintf(("GetWindowTextLength, window %x not found", hwnd));
+	return 0;
+    }
+    dprintf(("GetWindowTextLength %x", hwnd));
+    return window->GetWindowTextLengthA();
+}
+//******************************************************************************
+//******************************************************************************
+int WIN32API GetWindowTextA( HWND hwnd, LPSTR lpsz, int cch)
+{
+   Win32Window *window;
+
+    window = Win32Window::GetWindowFromHandle(hwnd);
+    if(!window) {
+	dprintf(("GetWindowTextA, window %x not found", hwnd));
+	return 0;
+    }
+    dprintf(("GetWindowTextA %x", hwnd));
+    return window->GetWindowTextA(lpsz, cch);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API SetWindowTextA(HWND hwnd, LPCSTR lpsz)
+{
+   Win32Window *window;
+
+    window = Win32Window::GetWindowFromHandle(hwnd);
+    if(!window) {
+	dprintf(("SetWindowTextA, window %x not found", hwnd));
+	return 0;
+    }
+    dprintf(("SetWindowTextA %x %s", hwnd, lpsz));
+    return window->SetWindowTextA(lpsz);
 }
 //******************************************************************************
 //******************************************************************************

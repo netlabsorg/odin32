@@ -1,4 +1,4 @@
-/* $Id: win32wnd.h,v 1.7 1999-07-17 18:30:52 sandervl Exp $ */
+/* $Id: win32wnd.h,v 1.8 1999-07-18 10:39:52 sandervl Exp $ */
 /*
  * Win32 Window Code for OS/2
  *
@@ -65,6 +65,7 @@ virtual  ULONG  MsgCreate(HWND hwndOS2, ULONG initParam);
 	 ULONG  MsgButton(ULONG msg, ULONG x, ULONG y);
 	 ULONG  MsgPaint(ULONG tmp1, ULONG tmp2);
 	 ULONG  MsgEraseBackGround(ULONG hps);
+	 ULONG  MsgSetText(LPSTR lpsz, LONG cch);
 
 virtual	 LONG   SetWindowLongA(int index, ULONG value);
 virtual	 ULONG  GetWindowLongA(int index);
@@ -104,6 +105,11 @@ virtual	 WORD   GetWindowWord(int index);
 	 BOOL   IsWindowEnabled();
 	 BOOL   IsWindowVisible();
 
+	 BOOL   GetWindowRect(PRECT pRect);
+	 int    GetWindowTextLengthA();
+	 int    GetWindowTextA(LPSTR lpsz, int cch);
+ 	 BOOL   SetWindowTextA(LPCSTR lpsz);
+
        LRESULT  SendMessageA(ULONG msg, WPARAM wParam, LPARAM lParam);
        LRESULT  SendMessageW(ULONG msg, WPARAM wParam, LPARAM lParam);
        BOOL     PostMessageA(ULONG msg, WPARAM wParam, LPARAM lParam);
@@ -118,6 +124,8 @@ Win32WndClass  *getClass()  { return windowClass; };
 static Win32Window *GetWindowFromHandle(HWND hwnd);
 
 protected:
+       LRESULT  SendInternalMessageA(ULONG msg, WPARAM wParam, LPARAM lParam);
+       LRESULT  SendInternalMessageW(ULONG msg, WPARAM wParam, LPARAM lParam);
 	void    Init();
 
 	HWND	OS2Hwnd;
@@ -172,11 +180,11 @@ private:
                              RECT *oldClientRect, WINDOWPOS *winpos,
                              RECT *newClientRect );
 
-     LRESULT  sendMessage(ULONG msg, WPARAM wParam, LPARAM lParam)
+     LRESULT  SendInternalMessage(ULONG msg, WPARAM wParam, LPARAM lParam)
      {
 	if(isUnicode)
-		return SendMessageW(msg, wParam, lParam);
-	else	return SendMessageA(msg, wParam, lParam);
+		return SendInternalMessageW(msg, wParam, lParam);
+	else	return SendInternalMessageA(msg, wParam, lParam);
      }
 #endif
 };
