@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2000-03-04 19:10:17 jeroen Exp $
+# $Id: makefile,v 1.5 2000-03-04 19:30:05 bird Exp $
 #
 # PD-Win32
 #
@@ -12,14 +12,10 @@ PDWIN32_TOOLS = ..\..\..\tools\bin
 
 !include $(PDWIN32_INCLUDE)/pdwin32.mk
 
-!ifdef DEBUG
-L=/CO
-!endif
+MESADEFS = -DNO_PARALLEL -DNO_STEREO -DGL_MESA_window_pos -DTHREADS -DDIVE \
+           -DUSE_X86_ASM -DUSE_MMX_ASM -DUSE_3DNOW_ASM_NOT
 
-MESADEFS=-DNO_PARALLEL -DNO_STEREO -DGL_MESA_window_pos -DTHREADS -DDIVE \
-         -DUSE_X86_ASM -DUSE_MMX_ASM -DUSE_3DNOW_ASM_NOT
-
-CFLAGS = -I. -IGL $(CFLAGS_WIN32APP) -I$(PDWIN32_INCLUDE) -I..\glut $(MESADEFS) /Tdp /Wcnd-
+CFLAGS   = -I. -IGL $(CFLAGS_WIN32APP)   -I$(PDWIN32_INCLUDE) -I..\glut $(MESADEFS) /Tdp /Wcnd-
 CXXFLAGS = -I. -IGL $(CXXFLAGS_WIN32APP) -I$(PDWIN32_INCLUDE) -I..\glut $(MESADEFS) /Tdp /Wcnd-
 
 TARGET = OPENGL32
@@ -115,7 +111,7 @@ resource.asm: $(TARGET).rc
     $(RC) $(RCFLAGS) -o resource.asm $(TARGET).rc
 
 $(TARGET).DLL: $(OBJS) $(TARGET).lrf $(TARGET).def
-    -ILINK /FREE /NOE $(L) @$(TARGET).lrf
+    -$(LD2) /FREE $(LD2FLAGS) @$(TARGET).lrf
     $(CP) $@ $(PDWIN32_BIN)
 
 $(TARGET).lrf: makefile
@@ -133,11 +129,12 @@ $(TARGET).def
 <<keep
 
 $(TARGET).lib: $(TARGET)exp.def
-        $(IMPLIB) $(IMPLIBFLAGS) $@ $(TARGET)exp.def
-        $(CP) $@ $(PDWIN32_LIB)
+    $(IMPLIB) $(IMPLIBFLAGS) $@ $(TARGET)exp.def
+    $(CP) $@ $(PDWIN32_LIB)
 
 $(TARGET)exp.def: $(TARGET).def
-        $(IMPDEF) $** $@
+    $(IMPDEF) $** $@
+
 
 dep:
     $(DEPEND) -I$(PDWIN32_INCLUDE);$(PDWIN32_INCLUDE)\win -IGL \
@@ -148,12 +145,6 @@ dep:
 !endif
 
 clean:
-        $(RM) *.obj
-        $(RM) *.dll
-        $(RM) *.lib
-        $(RM) *.lrf
-        $(RM) resource.asm
-        $(RM) $(TARGET)exp.def
-        $(RM) $(PDWIN32_BIN)\$(TARGET).dll
-        $(RM) $(PDWIN32_LIB)\$(TARGET).lib
+    $(RM) *.obj *.dll *.lib *.lrf resource.asm  $(TARGET)exp.def \
+        $(PDWIN32_BIN)\$(TARGET).dll $(PDWIN32_LIB)\$(TARGET).lib
 
