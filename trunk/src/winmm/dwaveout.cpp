@@ -1,4 +1,4 @@
-/* $Id: dwaveout.cpp,v 1.19 2000-04-05 18:39:23 sandervl Exp $ */
+/* $Id: dwaveout.cpp,v 1.20 2000-04-06 12:04:29 sandervl Exp $ */
 
 /*
  * Wave playback class
@@ -375,7 +375,7 @@ MMRESULT DartWaveOut::write(LPWAVEHDR pwh, UINT cbwh)
         for(i=0;i<PREFILLBUF_DART;i++) {
             memset(MixBuffer[i].pBuffer, 0, MixBuffer[i].ulBufferLength);
         }
-        dprintf(("Dart opened, bufsize = %d\n", MixBuffer[i].ulBufferLength));
+        dprintf(("Dart opened, bufsize = %d\n", MixBuffer[0].ulBufferLength));
 
         wavehdr     = pwh;
         curhdr      = pwh;
@@ -476,17 +476,18 @@ MMRESULT DartWaveOut::reset()
 
   wmutex->enter(VMUTEX_WAIT_FOREVER);
   while(wavehdr) {
-    wavehdr->dwFlags |= WHDR_DONE;
-    wmutex->leave();
-    if(mthdCallback) {
-        callback((ULONG)this, WOM_DONE, dwInstance, (ULONG)wavehdr, 0);
-    }
-    else {
-        if(hwndCallback)
-            PostMessageA(hwndCallback, WOM_DONE, (ULONG)wavehdr, 0);
-    }
-    wmutex->enter(VMUTEX_WAIT_FOREVER);
-    wavehdr = wavehdr->lpNext;
+    	wavehdr->dwFlags |= WHDR_DONE;
+    	wmutex->leave();
+    	if(mthdCallback) {
+        	callback((ULONG)this, WOM_DONE, dwInstance, (ULONG)wavehdr, 0);
+    	}
+    	else 
+        if(hwndCallback) {
+		dprintf(("Callback (msg) for buffer %x", wavehdr));
+	        PostMessageA(hwndCallback, WOM_DONE, (WPARAM)this, (ULONG)wavehdr);
+	}
+    	wmutex->enter(VMUTEX_WAIT_FOREVER);
+    	wavehdr = wavehdr->lpNext;
   }
   wavehdr = NULL;
   State = STATE_STOPPED;
@@ -648,8 +649,10 @@ void DartWaveOut::handler(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer, ULONG ulFlags
             callback((ULONG)this, WOM_DONE, dwInstance, (ULONG)whdr, 0);
         }
         else
-            if(hwndCallback)
-            	PostMessageA(hwndCallback, WOM_DONE, (ULONG)whdr, 0);
+        if(hwndCallback) {
+		dprintf(("Callback (msg) for buffer %x", whdr));
+	        PostMessageA(hwndCallback, WOM_DONE, (WPARAM)this, (ULONG)whdr);
+	}
 
         wmutex->enter(VMUTEX_WAIT_FOREVER);
     }
