@@ -1,4 +1,4 @@
-/* $Id: stages.c,v 1.1 2000-02-29 00:50:10 sandervl Exp $ */
+/* $Id: stages.c,v 1.2 2000-03-01 18:49:35 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -35,6 +35,7 @@
 #endif
 #include "bbox.h"
 #include "clip.h"
+#include "types.h"
 #include "context.h"
 #include "cva.h"
 #include "fog.h"
@@ -43,7 +44,6 @@
 #include "pipeline.h"
 #include "shade.h"
 #include "stages.h"
-#include "types.h"
 #include "translate.h"
 #include "vbcull.h"
 #include "vbindirect.h"

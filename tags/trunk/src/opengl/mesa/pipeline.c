@@ -1,4 +1,4 @@
-/* $Id: pipeline.c,v 1.1 2000-02-29 00:50:07 sandervl Exp $ */
+/* $Id: pipeline.c,v 1.2 2000-03-01 18:49:33 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -35,6 +35,7 @@
 #endif
 #include "bbox.h"
 #include "clip.h"
+#include "types.h"
 #include "context.h"
 #include "cva.h"
 #include "pipeline.h"
@@ -47,7 +48,6 @@
 #include "mmath.h"
 #include "shade.h"
 #include "stages.h"
-#include "types.h"
 #include "translate.h"
 #include "xform.h"
 

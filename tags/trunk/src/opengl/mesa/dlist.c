@@ -1,4 +1,4 @@
-/* $Id: dlist.c,v 1.1 2000-02-29 00:50:02 sandervl Exp $ */
+/* $Id: dlist.c,v 1.2 2000-03-01 18:49:26 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -47,6 +47,7 @@
 #include "blend.h"
 #include "clip.h"
 #include "colortab.h"
+#include "types.h"
 #include "context.h"
 #include "copypix.h"
 #include "depth.h"
@@ -80,7 +81,6 @@
 #include "texobj.h"
 #include "teximage.h"
 #include "texstate.h"
-#include "types.h"
 #include "varray.h"
 #include "vb.h"
 #include "vbfill.h"

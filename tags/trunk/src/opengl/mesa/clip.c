@@ -1,4 +1,4 @@
-/* $Id: clip.c,v 1.1 2000-02-29 00:49:59 sandervl Exp $ */
+/* $Id: clip.c,v 1.2 2000-03-01 18:49:24 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -39,11 +39,11 @@
 #include "GL/xf86glx.h"
 #endif
 #include "clip.h"
+#include "types.h"
 #include "context.h"
 #include "macros.h"
 #include "matrix.h"
 #include "mmath.h"
-#include "types.h"
 #include "vb.h"
 #include "xform.h"
 #endif

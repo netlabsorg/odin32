@@ -1,4 +1,4 @@
-/* $Id: hash.c,v 1.1 2000-02-29 00:50:04 sandervl Exp $ */
+/* $Id: hash.c,v 1.2 2000-03-01 18:49:29 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -84,9 +84,9 @@ void DeleteHashTable(struct HashTable *table)
    for (i=0;i<TABLE_SIZE;i++) {
       struct HashEntry *entry = table->Table[i];
       while (entry) {
-	 struct HashEntry *next = entry->Next;
-	 FREE(entry);
-	 entry = next;
+         struct HashEntry *next = entry->Next;
+         FREE(entry);
+         entry = next;
       }
    }
    FREE(table);
@@ -105,14 +105,14 @@ void *HashLookup(const struct HashTable *table, GLuint key)
    GLuint pos;
    const struct HashEntry *entry;
 
-   assert(table);
+/* assert(table);
    assert(key);
-
+*/
    pos = key & (TABLE_SIZE-1);
    entry = table->Table[pos];
    while (entry) {
       if (entry->Key == key) {
-	 return entry->Data;
+         return entry->Data;
       }
       entry = entry->Next;
    }
@@ -145,8 +145,8 @@ void HashInsert(struct HashTable *table, GLuint key, void *data)
    while (entry) {
       if (entry->Key == key) {
          /* replace entry's data */
-	 entry->Data = data;
-	 return;
+         entry->Data = data;
+         return;
       }
       entry = entry->Next;
    }
@@ -187,7 +187,7 @@ void HashRemove(struct HashTable *table, GLuint key)
             table->Table[pos] = entry->Next;
          }
          FREE(entry);
-	 return;
+         return;
       }
       prev = entry;
       entry = entry->Next;
@@ -224,8 +224,8 @@ void HashPrint(const struct HashTable *table)
    for (i=0;i<TABLE_SIZE;i++) {
       const struct HashEntry *entry = table->Table[i];
       while (entry) {
-	 printf("%u %p\n", entry->Key, entry->Data);
-	 entry = entry->Next;
+         printf("%u %p\n", entry->Key, entry->Data);
+         entry = entry->Next;
       }
    }
 }
@@ -251,18 +251,18 @@ GLuint HashFindFreeKeyBlock(const struct HashTable *table, GLuint numKeys)
       GLuint freeStart = 0;
       GLuint key;
       for (key=0; key!=maxKey; key++) {
-	 if (HashLookup(table, key)) {
-	    /* darn, this key is already in use */
-	    freeCount = 0;
-	    freeStart = key+1;
-	 }
-	 else {
-	    /* this key not in use, check if we've found enough */
-	    freeCount++;
-	    if (freeCount == numKeys) {
-	       return freeStart;
-	    }
-	 }
+         if (HashLookup(table, key)) {
+            /* darn, this key is already in use */
+            freeCount = 0;
+            freeStart = key+1;
+         }
+         else {
+            /* this key not in use, check if we've found enough */
+            freeCount++;
+            if (freeCount == numKeys) {
+               return freeStart;
+            }
+         }
       }
       /* cannot allocate a block of numKeys consecutive keys */
       return 0;

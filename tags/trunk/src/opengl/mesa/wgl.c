@@ -1,4 +1,4 @@
-/* $Id: wgl.c,v 1.1 2000-02-29 00:50:15 sandervl Exp $ */
+/* $Id: wgl.c,v 1.2 2000-03-01 18:49:40 jeroen Exp $ */
 
 /*
 * This library is free software; you can redistribute it and/or
@@ -37,9 +37,10 @@ extern "C" {
 #include <stdio.h>
 #include <tchar.h>
 #include "gl.h"
+#include "types.h"
+#include "context.h"
 #include "wmesadef.h"
 #include "wmesa.h"
-#include "types.h"
 
 #define MAX_MESA_ATTRS  20
 
@@ -483,7 +484,7 @@ GLAPI int GLWINAPI wglGetPixelFormat(HDC hdc)
     return(curPFD);
 }
 
-GLAPI BOOL GLWINAPI wglSetPixelFormat(HDC hdc,int iPixelFormat,
+GLAPI BOOL GLWINAPI wglSetPixelFormat(HDC hdc, int iPixelFormat,
                                 PIXELFORMATDESCRIPTOR *ppfd)
 {
     int         qt_valid_pix;
@@ -511,4 +512,4 @@ GLAPI BOOL GLWINAPI wglSwapBuffers(HDC hdc)
    return(TRUE);
 }
 
-#endif /* WIN32 or __WIN32OS2__ */
+#endif                                 /* WIN32 or __WIN32OS2__            */

@@ -1,4 +1,4 @@
-/* $Id: glmisc.c,v 1.1 2000-02-29 00:50:04 sandervl Exp $ */
+/* $Id: glmisc.c,v 1.2 2000-03-01 18:49:29 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -55,6 +55,7 @@
 void gl_ClearIndex( GLcontext *ctx, GLfloat c )
 {
    ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx, "glClearIndex");
+
    ctx->Color.ClearIndex = (GLuint) c;
    if (!ctx->Visual->RGBAflag) {
       /* it's OK to call glClearIndex in RGBA mode but it should be a NOP */
@@ -82,9 +83,6 @@ void gl_ClearColor( GLcontext *ctx, GLclampf red, GLclampf green,
       (*ctx->Driver.ClearColor)( ctx, r, g, b, a );
    }
 }
-
-
-
 
 /*
  * Clear the color buffer when glColorMask or glIndexMask is in effect.
@@ -125,7 +123,7 @@ static void clear_color_buffer_with_masking( GLcontext *ctx )
          }
          gl_mask_rgba_span( ctx, width, x, y, rgba );
          (*ctx->Driver.WriteRGBASpan)( ctx, width, x, y,
-				       (const GLubyte (*)[4])rgba, NULL );
+                                       (const GLubyte (*)[4])rgba, NULL );
       }
    }
    else {
@@ -152,7 +150,6 @@ static void clear_color_buffer_with_masking( GLcontext *ctx )
  */
 static void clear_color_buffers( GLcontext *ctx )
 {
-
    if (ctx->RasterMask & MULTI_DRAW_BIT) {
       GLuint bufferBit;
 
@@ -199,7 +196,7 @@ static void clear_color_buffers( GLcontext *ctx )
    }
    else {
       /* normal case:  clear exactly one color buffer */
-
+#ifndef DIVE
       if (ctx->Color.SWmasking) {
          clear_color_buffer_with_masking( ctx );
       }
@@ -212,6 +209,7 @@ static void clear_color_buffers( GLcontext *ctx )
                                       !ctx->Scissor.Enabled,
                                       x, y, width, height );
       }
+#endif
    }
 }
 
@@ -280,23 +278,21 @@ void gl_Finish( GLcontext *ctx )
 {
    /* Don't compile into display list */
    ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx, "glFinish");
+
    if (ctx->Driver.Finish) {
       (*ctx->Driver.Finish)( ctx );
    }
 }
 
-
-
 void gl_Flush( GLcontext *ctx )
 {
    /* Don't compile into display list */
    ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx, "glFlush");
+
    if (ctx->Driver.Flush) {
       (*ctx->Driver.Flush)( ctx );
    }
 }
-
-
 
 GLboolean gl_Hint( GLcontext *ctx, GLenum target, GLenum mode )
 {
@@ -336,13 +332,13 @@ GLboolean gl_Hint( GLcontext *ctx, GLenum target, GLenum mode )
       break;
    case GL_ALWAYS_FAST_HINT_PGI:
       if (mode) {
-	 ctx->Hint.AllowDrawWin = GL_TRUE;
-	 ctx->Hint.AllowDrawSpn = GL_FALSE;
-	 ctx->Hint.AllowDrawMem = GL_FALSE;
+         ctx->Hint.AllowDrawWin = GL_TRUE;
+         ctx->Hint.AllowDrawSpn = GL_FALSE;
+         ctx->Hint.AllowDrawMem = GL_FALSE;
       } else {
-	 ctx->Hint.AllowDrawWin = GL_TRUE;
-	 ctx->Hint.AllowDrawSpn = GL_TRUE;
-	 ctx->Hint.AllowDrawMem = GL_TRUE;
+         ctx->Hint.AllowDrawWin = GL_TRUE;
+         ctx->Hint.AllowDrawSpn = GL_TRUE;
+         ctx->Hint.AllowDrawMem = GL_TRUE;
       }
       break;
    case GL_ALWAYS_SOFT_HINT_PGI:
@@ -385,8 +381,6 @@ GLboolean gl_Hint( GLcontext *ctx, GLenum target, GLenum mode )
 
    return GL_TRUE;
 }
-
-
 
 void gl_DrawBuffer( GLcontext *ctx, GLenum mode )
 {
@@ -536,8 +530,6 @@ void gl_DrawBuffer( GLcontext *ctx, GLenum mode )
    ctx->Color.DrawBuffer = mode;
    ctx->NewState |= NEW_RASTER_OPS;
 }
-
-
 
 void gl_ReadBuffer( GLcontext *ctx, GLenum mode )
 {

@@ -1,4 +1,4 @@
-/* $Id: xform.h,v 1.1 2000-02-29 00:48:44 sandervl Exp $ */
+/* $Id: xform.h,v 1.2 2000-03-01 18:49:41 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -103,22 +103,22 @@ extern void gl_init_transformation( void );
  * into a straight-forward matrix transformation, with asm acceleration
  * automatically available.
  */
-typedef GLvector4f *(*clip_func)( GLvector4f *vClip,
-				  GLvector4f *vProj,
-				  GLubyte clipMask[],
-				  GLubyte *orMask,
-				  GLubyte *andMask );
+typedef GLvector4f *(* __cdecl clip_func)( GLvector4f *vClip,
+                                  GLvector4f *vProj,
+                                  GLubyte clipMask[],
+                                  GLubyte *orMask,
+                                  GLubyte *andMask );
 
 
 typedef void (*dotprod_func)( GLvector4f *out_vec,
-			      GLuint elt,
-			      const GLvector4f *coord_vec,
-			      const GLfloat plane[4],
-			      const GLubyte mask[]);
+                              GLuint elt,
+                              const GLvector4f *coord_vec,
+                              const GLfloat plane[4],
+                              const GLubyte mask[]);
 
 typedef void (*vec_copy_func)( GLvector4f *to,
-			       const GLvector4f *from,
-			       const GLubyte mask[]);
+                               const GLvector4f *from,
+                               const GLubyte mask[]);
 
 
 
@@ -128,18 +128,18 @@ typedef void (*vec_copy_func)( GLvector4f *to,
  *     when the mask byte is zero.  This is always present as a
  *     parameter, to allow a unified interface.
  */
-typedef void (*transform_func)( GLvector4f *to_vec,
-				const GLmatrix *mat,
-				const GLvector4f *from_vec,
-				const GLubyte *clipmask,
-				const GLubyte flag );
+typedef void (* __cdecl transform_func)( GLvector4f *to_vec,
+                                const GLmatrix *mat,
+                                const GLvector4f *from_vec,
+                                const GLubyte *clipmask,
+                                const GLubyte flag );
 
 
 extern GLvector4f *gl_project_points( GLvector4f *to,
-			       const GLvector4f *from );
+                               const GLvector4f *from );
 
 extern void gl_transform_bounds3( GLubyte *orMask, GLubyte *andMask,
-			   const GLmatrix *mat,
+                           const GLmatrix *mat,
 			   CONST GLfloat src[][3] );
 
 extern void gl_transform_bounds2( GLubyte *orMask, GLubyte *andMask,
