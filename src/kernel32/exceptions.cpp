@@ -1,4 +1,4 @@
-/* $Id: exceptions.cpp,v 1.64 2002-07-05 17:59:30 sandervl Exp $ */
+/* $Id: exceptions.cpp,v 1.65 2002-07-26 10:47:33 sandervl Exp $ */
 
 /*
  * Win32 Exception functions for OS/2
@@ -681,6 +681,17 @@ void KillWin32Process(void)
 }
 //*****************************************************************************
 //*****************************************************************************
+void KillWin32Thread(void)
+{
+//    ExitThread(666);
+    //Restore original OS/2 TIB selector
+    RestoreOS2FS();
+
+    SetExceptionChain((ULONG)-1);
+    DosExit(EXIT_THREAD, 666);
+}
+//*****************************************************************************
+//*****************************************************************************
 static void sprintfException(PEXCEPTIONREPORTRECORD       pERepRec,
                              PEXCEPTIONREGISTRATIONRECORD pERegRec,
                              PCONTEXTRECORD               pCtxRec,
@@ -1282,19 +1293,38 @@ CrashAndBurn:
 
 #ifdef DEBUG
         dprintfException(pERepRec, pERegRec, pCtxRec, p);
-        if(pCtxRec->ContextFlags & CONTEXT_CONTROL) {
+        if(!fExitProcess && (pCtxRec->ContextFlags & CONTEXT_CONTROL)) {
                 dbgPrintStack(pERepRec, pERegRec, pCtxRec, p);
         }
 #endif
 
         if(!fIsOS2Image && !fExitProcess)  //Only for real win32 apps
         {
-                if(OSLibDispatchException(pERepRec, pERegRec, pCtxRec, p) == TRUE)
-                {
-                        goto continueexecution;
-                }
+            if(OSLibDispatchException(pERepRec, pERegRec, pCtxRec, p) == TRUE)
+            {
+                goto continueexecution;
+            }
         }
-        else    goto continuesearch; //pass on to OS/2 RTL or app exception handler
+        else {
+            if(fExitProcess) {
+                PPIB   pPIB;
+                PTIB   pTIB;
+                APIRET rc;
+
+                rc = DosGetInfoBlocks (&pTIB, &pPIB);
+                if(rc == NO_ERROR && pTIB->tib_ptib2->tib2_ultid != 1)
+                {
+                    dprintf(("KERNEL32: OS2ExceptionHandler: Continue and kill thread"));
+
+                    pCtxRec->ctx_RegEip = (ULONG)KillWin32Thread;
+                    pCtxRec->ctx_RegEsp = pCtxRec->ctx_RegEsp + 0x10;
+                    pCtxRec->ctx_RegEax = pERepRec->ExceptionNum;
+                    pCtxRec->ctx_RegEbx = pCtxRec->ctx_RegEip;
+                    goto continueexecution;
+                }
+            }
+            goto continuesearch; //pass on to OS/2 RTL or app exception handler
+        }
 
         //Log fatal exception here
         logException();
