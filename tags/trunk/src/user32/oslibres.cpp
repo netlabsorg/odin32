@@ -1,4 +1,4 @@
-/* $Id: oslibres.cpp,v 1.37 2003-03-03 16:36:26 sandervl Exp $ */
+/* $Id: oslibres.cpp,v 1.38 2004-02-27 19:51:56 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -387,7 +387,7 @@ HANDLE OSLibWinCreatePointer(CURSORICONINFO *pInfo, char *pAndBits, BITMAP_W *pA
 
     hps = WinGetScreenPS(HWND_DESKTOP);
 
-    if(pXorBits)
+    if(pXorBits && pXorBmp->bmBitsPixel > 1)
     {//color bitmap present
         RGBQUAD *rgb;
         RGB2    *os2rgb;
@@ -397,12 +397,11 @@ HANDLE OSLibWinCreatePointer(CURSORICONINFO *pInfo, char *pAndBits, BITMAP_W *pA
         else rgbsize = 0;
 
         colorsize = sizeof(BITMAPINFO2) + (pXorBmp->bmHeight * pXorBmp->bmWidthBytes) + rgbsize;
-        pBmpColor = (BITMAPINFO2 *)malloc(colorsize);
+        pBmpColor = (BITMAPINFO2 *)calloc(colorsize, 1);
         if(pBmpColor == NULL) {
             DebugInt3();
             return 0;
         }
-        memset(pBmpColor, 0, colorsize);
         pBmpColor->cbFix            = sizeof(BITMAPINFOHEADER2);
         pBmpColor->cx               = (USHORT)pXorBmp->bmWidth;
         pBmpColor->cy               = (USHORT)pXorBmp->bmHeight;
@@ -414,15 +413,6 @@ HANDLE OSLibWinCreatePointer(CURSORICONINFO *pInfo, char *pAndBits, BITMAP_W *pA
         os2rgb                      = &pBmpColor->argbColor[0];
         rgb                         = (RGBQUAD *)(pXorBits);
 
-#if 0
-        if(pXorBmp->bmBitsPixel == 1) {
-            os2rgb->bRed = os2rgb->bBlue = os2rgb->bGreen = 0;
-            os2rgb++;
-            os2rgb->bRed = os2rgb->bBlue = os2rgb->bGreen = 0xff;
-            os2rgb++;
-        }
-        else
-#endif
         if(pXorBmp->bmBitsPixel <= 8) {
             for(i=0;i<(1<<pXorBmp->bmBitsPixel);i++) {
                     os2rgb->bRed   = rgb->rgbRed;
@@ -433,17 +423,6 @@ HANDLE OSLibWinCreatePointer(CURSORICONINFO *pInfo, char *pAndBits, BITMAP_W *pA
             }
     	}
 
-        if(pXorBmp->bmBitsPixel == 1) {
-                //copy Xor bits (must reverse scanlines because origin is top left instead of bottom left)
-                src  = (char *)rgb;
-                dest = ((char *)os2rgb) + (pXorBmp->bmHeight - 1) * pXorBmp->bmWidthBytes;
-                for(i=0;i<pXorBmp->bmHeight;i++) {
-                    memcpy(dest, src, pXorBmp->bmWidthBytes);
-                    dest -= pXorBmp->bmWidthBytes;
-                    src  += pXorBmp->bmWidthBytes;
-                }
-        }
-        else
         if(pXorBmp->bmBitsPixel == 16) {
                 ConvertRGB555to565(os2rgb, rgb, pXorBmp->bmHeight * pXorBmp->bmWidthBytes);
         }
@@ -479,12 +458,11 @@ HANDLE OSLibWinCreatePointer(CURSORICONINFO *pInfo, char *pAndBits, BITMAP_W *pA
     //      Looks like it's reading 3 bytes too much... Hopefully that's due to the
     //      &pBmpMask->argbColor[2] which it assumes is 16 colors long. But no proofs.
     masksize = sizeof(BITMAPINFO2) + (pAndBmp->bmHeight * 2 * pAndBmp->bmWidthBytes) + (16+2)*sizeof(RGB2);
-    pBmpMask = (BITMAPINFO2 *)malloc(masksize);
+    pBmpMask = (BITMAPINFO2 *)calloc(masksize, 1);
     if(pBmpMask == NULL) {
         DebugInt3();
         return 0;
     }
-    memset(pBmpMask, 0, masksize);
     pBmpMask->cbFix             = sizeof(BITMAPINFOHEADER2);
     pBmpMask->cx                = (USHORT)pAndBmp->bmWidth;
     pBmpMask->cy                = (USHORT)pAndBmp->bmHeight*2;
@@ -492,13 +470,31 @@ HANDLE OSLibWinCreatePointer(CURSORICONINFO *pInfo, char *pAndBits, BITMAP_W *pA
     pBmpMask->cBitCount         = 1;
     pBmpMask->ulCompression     = BCA_UNCOMP;
     pBmpMask->ulColorEncoding   = BCE_RGB;
-    memset(&pBmpMask->argbColor[0], 0, sizeof(RGB2));
+    memset(&pBmpMask->argbColor[0], 0x00, sizeof(RGB));    //not the reserved byte
     memset(&pBmpMask->argbColor[1], 0xff, sizeof(RGB)); //not the reserved byte
-    if(pOS2XorBits) {
-         dest = ((char *)&pBmpMask->argbColor[2]);
-         memcpy(dest, pOS2XorBits, pAndBmp->bmWidthBytes*pAndBmp->bmHeight);
-         free(pOS2XorBits);
-         pOS2XorBits = NULL;
+
+    // The mono XOR bitmap must be first in the pointer bitmap
+    if(pOS2XorBits || pXorBmp->bmBitsPixel == 1) 
+    {
+        if(pXorBmp->bmBitsPixel == 1) 
+        {
+            pOS2XorBits = (char *)calloc(pXorBmp->bmHeight, pXorBmp->bmWidthBytes);
+
+            //copy Xor bits (must reverse scanlines because origin is top left instead of bottom left)
+            src  = (char *)pXorBits;
+            dest = ((char *)pOS2XorBits) + (pXorBmp->bmHeight - 1) * pXorBmp->bmWidthBytes;
+            for(i=0;i<pXorBmp->bmHeight;i++) {
+                memcpy(dest, src, pXorBmp->bmWidthBytes);
+                dest -= pXorBmp->bmWidthBytes;
+                src  += pXorBmp->bmWidthBytes;
+            }
+        }
+        //else converted bitmap (created by colorToMonoBitmap)
+
+        dest = ((char *)&pBmpMask->argbColor[2]);
+        memcpy(dest, pOS2XorBits, pAndBmp->bmWidthBytes*pAndBmp->bmHeight);
+        free(pOS2XorBits);
+        pOS2XorBits = NULL;
     }
     // else Xor bits are already 0
 
