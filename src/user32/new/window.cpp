@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.30 2000-01-11 17:34:44 cbratschi Exp $ */
+/* $Id: window.cpp,v 1.31 2000-01-13 13:54:55 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -327,7 +327,6 @@ HWND WIN32API SetActiveWindow( HWND hwnd)
         SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
-    dprintf(("SetActiveWindow %x", hwnd));
     return window->SetActiveWindow();
 }
 //******************************************************************************

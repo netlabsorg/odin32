@@ -1,4 +1,4 @@
-/* $Id: win32wbasenonclient.cpp,v 1.3 2000-01-11 18:32:07 cbratschi Exp $ */
+/* $Id: win32wbasenonclient.cpp,v 1.4 2000-01-13 13:54:54 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (non-client methods)
  *
@@ -585,7 +585,8 @@ VOID Win32BaseWindow::DrawFrame(HDC hdc,RECT *rect,BOOL dlgFrame,BOOL active)
   {
     width = GetSystemMetrics(SM_CXDLGFRAME) - GetSystemMetrics(SM_CXEDGE);
     height = GetSystemMetrics(SM_CYDLGFRAME) - GetSystemMetrics(SM_CYEDGE);
-  } else
+  }
+  else
   {
     width = GetSystemMetrics(SM_CXFRAME) - GetSystemMetrics(SM_CXEDGE);
     height = GetSystemMetrics(SM_CYFRAME) - GetSystemMetrics(SM_CYEDGE);
@@ -594,11 +595,12 @@ VOID Win32BaseWindow::DrawFrame(HDC hdc,RECT *rect,BOOL dlgFrame,BOOL active)
   oldBrush = SelectObject(hdc,GetSysColorBrush(active ? COLOR_ACTIVEBORDER:COLOR_INACTIVEBORDER));
 
   /* Draw frame */
-
-  PatBlt(hdc,rect->left,rect->top,rect->right-rect->left,height,PATCOPY);
-  PatBlt(hdc,rect->left,rect->top,width,rect->bottom-rect->top,PATCOPY);
-  PatBlt(hdc,rect->left,rect->bottom-1,rect->right-rect->left,-height,PATCOPY);
-  PatBlt(hdc,rect->right-1,rect->top,-width,rect->bottom-rect->top,PATCOPY);
+  PatBlt(hdc,rect->left,   rect->top,      rect->right-rect->left, height,PATCOPY);
+  PatBlt(hdc,rect->left,   rect->top,      width,                  rect->bottom-rect->top,PATCOPY);
+  PatBlt(hdc,rect->left,   rect->bottom, rect->right-rect->left,-height,PATCOPY);
+  //SvL: Was PatBlt(hdc,rect->left,   rect->bottom-1, rect->right-rect->left,-height,PATCOPY);
+  PatBlt(hdc,rect->right,  rect->top,     -width,                  rect->bottom-rect->top,PATCOPY);
+  //SvL: Was PatBlt(hdc,rect->right-1,  rect->top,     -width,                  rect->bottom-rect->top,PATCOPY);
   SelectObject(hdc,oldBrush);
 
   InflateRect(rect,-width,-height);
@@ -1143,8 +1145,8 @@ LONG Win32BaseWindow::HandleSysCommand(WPARAM wParam,POINT *pt32)
     }
 
     case SC_MOVE:
-      FrameTrackFrame(this,TFOS_MOVE);
-      break;
+        FrameTrackFrame(this,TFOS_MOVE);
+        break;
 
     case SC_MINIMIZE:
         ShowWindow(SW_MINIMIZE);

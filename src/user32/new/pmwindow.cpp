@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.39 2000-01-12 22:07:28 cbratschi Exp $ */
+/* $Id: pmwindow.cpp,v 1.40 2000-01-13 13:54:52 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -258,21 +258,11 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 
     case WM_ACTIVATE:
     {
-      HWND hwndActivate = (HWND)mp2;
-      BOOL fMinimized = FALSE;
+        dprintf(("OS2: WM_ACTIVATE %x %x", hwnd, mp2));
 
-        dprintf(("OS2: WM_ACTIVATE %x %x", hwnd, hwndActivate));
-        if(WinQueryWindowULong(hwndActivate, OFFSET_WIN32PM_MAGIC) != WIN32PM_MAGIC) {
-                //another (non-win32) application's window
-                //set to NULL (allowed according to win32 SDK) to avoid problems
-                hwndActivate = NULL;
-        }
-        if(WinQueryWindowULong(hwnd, QWL_STYLE) & WS_MINIMIZED)
-        {
-           fMinimized = TRUE;
-        }
+        if(win32wnd->IsWindowCreated())
+          win32wnd->MsgActivate((LOWORD(pWinMsg->wParam) == WA_ACTIVE_W) ? 1 : 0, HIWORD(pWinMsg->wParam), pWinMsg->lParam, (HWND)mp2);
 
-        win32wnd->MsgActivate(SHORT1FROMMP(mp1), fMinimized, Win32BaseWindow::OS2ToWin32Handle(hwndActivate));
         break;
     }
 

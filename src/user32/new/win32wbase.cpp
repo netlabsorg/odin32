@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.37 2000-01-12 17:37:29 cbratschi Exp $ */
+/* $Id: win32wbase.cpp,v 1.38 2000-01-13 13:54:53 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -833,28 +833,30 @@ ULONG Win32BaseWindow::MsgHitTest(ULONG x, ULONG y)
 }
 //******************************************************************************
 //******************************************************************************
-ULONG Win32BaseWindow::MsgActivate(BOOL fActivate, BOOL fMinimized, HWND hwnd)
+ULONG Win32BaseWindow::MsgActivate(BOOL fActivate, BOOL fMinimized, HWND hwnd, HWND hwndOS2Win)
 {
- ULONG rc, curprocid, procidhwnd = -1, threadidhwnd = 0;
+ ULONG rc, procidhwnd = -1, threadidhwnd = 0;
 
 
     //According to SDK docs, if app returns FALSE & window is being deactivated,
     //default processing is cancelled
     //TODO: According to Wine we should proceed anyway if window is sysmodal
+#if 0
     if(SendInternalMessageA(WM_NCACTIVATE, fActivate, 0) == FALSE && !fActivate)
     {
         return 0;
     }
+#endif
     rc = SendInternalMessageA(WM_ACTIVATE, MAKELONG((fActivate) ? WA_ACTIVE : WA_INACTIVE, fMinimized), hwnd);
 
-    curprocid  = GetCurrentProcessId();
-    if(hwnd) {
-            threadidhwnd = GetWindowThreadProcessId(hwnd, &procidhwnd);
+    if(hwndOS2Win) {
+            threadidhwnd = O32_GetWindowThreadProcessId(hwndOS2Win, &procidhwnd);
     }
 
-    if(curprocid != procidhwnd && fActivate) {
-        SendInternalMessageA(WM_ACTIVATEAPP, 1, threadidhwnd);
+    if(fActivate) {
+            SendInternalMessageA(WM_ACTIVATEAPP, 1, dwThreadId);    //activate; specify window thread id
     }
+    else    SendInternalMessageA(WM_ACTIVATEAPP, 0, threadidhwnd);  //deactivate; specify thread id of other process
     return rc;
 }
 //******************************************************************************
@@ -1050,23 +1052,33 @@ ULONG Win32BaseWindow::MsgNCPaint()
   else return 0;
 }
 //******************************************************************************
+//Called when either the frame's size or position has changed (lpWndPos != NULL)
+//or when the frame layout has changed (i.e. scrollbars added/removed) (lpWndPos == NULL)
 //******************************************************************************
-ULONG  Win32BaseWindow::MsgFormatFrame()
+ULONG Win32BaseWindow::MsgFormatFrame(WINDOWPOS *lpWndPos)
 {
-  RECT window = rectWindow,client = rectClient,rect;
+  RECT oldWindowRect = rectWindow, client = rectClient, newWindowRect;
   WINDOWPOS wndPos;
 
-  wndPos.hwnd = Win32Hwnd;
-  wndPos.hwndInsertAfter = 0;
-  rect = rectWindow;
-  if (getParent()) mapWin32Rect(OSLIB_HWND_DESKTOP,getParent()->getOS2WindowHandle(),&rect);
-  wndPos.x = rect.left;
-  wndPos.y = rect.top;
-  wndPos.cx = rect.right-rect.left;
-  wndPos.cy = rect.bottom-rect.top;
-  wndPos.flags = 0; //dummy
+  if(lpWndPos) {
+    //set new window rectangle
+    setWindowRect(lpWndPos->x, lpWndPos->y, lpWndPos->x + lpWndPos->cx, lpWndPos->y + lpWndPos->cy);
+    newWindowRect = rectWindow;
+  }
+  else {
+    wndPos.hwnd  = Win32Hwnd;
+    wndPos.hwndInsertAfter = 0;
+    newWindowRect= rectWindow;
+    if (getParent()) mapWin32Rect(OSLIB_HWND_DESKTOP,getParent()->getOS2WindowHandle(),&newWindowRect);
+    wndPos.x     = newWindowRect.left;
+    wndPos.y     = newWindowRect.top;
+    wndPos.cx    = newWindowRect.right - newWindowRect.left;
+    wndPos.cy    = newWindowRect.bottom - newWindowRect.top;
+    wndPos.flags = SWP_FRAMECHANGED;
+    lpWndPos = &wndPos;
+  }
 
-  return SendNCCalcSize(TRUE,&window,&window,&client,&wndPos,&rectClient);
+  return SendNCCalcSize(TRUE, &oldWindowRect, &newWindowRect, &client, &wndPos, &rectClient);
 }
 //******************************************************************************
 //******************************************************************************
@@ -2536,14 +2548,15 @@ HWND Win32BaseWindow::SetActiveWindow()
  Win32BaseWindow  *win32wnd;
  ULONG         magic;
 
-  hwndActive = OSLibWinSetActiveWindow(OS2HwndFrame);
-  win32wnd = (Win32BaseWindow *)OSLibWinGetWindowULong(hwndActive, OFFSET_WIN32WNDPTR);
-  magic    = OSLibWinGetWindowULong(hwndActive, OFFSET_WIN32PM_MAGIC);
-  if(CheckMagicDword(magic) && win32wnd)
-  {
+    dprintf(("SetActiveWindow %x", getWindowHandle()));
+    hwndActive = OSLibWinSetActiveWindow(OS2HwndFrame);
+    win32wnd = (Win32BaseWindow *)OSLibWinGetWindowULong(hwndActive, OFFSET_WIN32WNDPTR);
+    magic    = OSLibWinGetWindowULong(hwndActive, OFFSET_WIN32PM_MAGIC);
+    if(CheckMagicDword(magic) && win32wnd)
+    {
         return win32wnd->getWindowHandle();
-  }
-  return 0;
+    }
+    return windowDesktop->getWindowHandle(); //pretend the desktop was active
 }
 //******************************************************************************
 //WM_ENABLE is sent to hwnd, but not to it's children (as it should be)
