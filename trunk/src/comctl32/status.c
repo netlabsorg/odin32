@@ -1050,8 +1050,16 @@ STATUSBAR_WMSize (STATUSWINDOWINFO *infoPtr, WORD flags)
 	WARN("flags MUST be SIZE_RESTORED\n");
 	return FALSE;
     }
+#ifdef __WIN32OS2__
+    if (GetWindowLongW(infoPtr->Self, GWL_STYLE) & CCS_NORESIZE) {
+        //@@PF At least do invalidate to erase garbage
+        InvalidateRect(infoPtr->Self,NULL,TRUE);
+        return FALSE;
+    }
+#else
     if (GetWindowLongW(infoPtr->Self, GWL_STYLE) & CCS_NORESIZE) return FALSE;
-    
+#endif
+
     /* width and height don't apply */
     GetClientRect (GetParent(infoPtr->Self), &parent_rect);
     width = parent_rect.right - parent_rect.left;
