@@ -1,4 +1,4 @@
-/* $Id: windlllx.cpp,v 1.27 2003-02-20 09:47:01 sandervl Exp $ */
+/* $Id: windlllx.cpp,v 1.28 2003-10-28 10:42:40 sandervl Exp $ */
 
 /*
  * Win32 LX Dll class (compiled in OS/2 using Odin32 api)
@@ -56,12 +56,10 @@ PFNLXDLLUNLOAD pfnLxDllUnLoadCallback = NULL;
 
 //******************************************************************************
 //******************************************************************************
-void WIN32API SetCustomBuildName(char *lpszName, DWORD ordinalbase,
-                                 char *lpszExportPrefix)
+void WIN32API SetCustomBuildName(char *lpszName, PIMAGE_FILE_HEADER  pfh)
+
 {
     lpszCustomDllName      = lpszName;
-    dwOrdinalBase          = ordinalbase;
-    lpszCustomExportPrefix = lpszExportPrefix;
 }
 //******************************************************************************
 //Create LX Dll object and send process attach message
