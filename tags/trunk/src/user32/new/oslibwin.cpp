@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.10 1999-07-18 10:39:51 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.11 1999-07-18 13:57:47 cbratschi Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -45,23 +45,23 @@ HWND OSLibWinCreateWindow(HWND hwndParent, ULONG dwWinStyle, ULONG dwFrameStyle,
   dprintf(("WinCreateWindow %x %x %x %s", hwndParent, dwWinStyle, dwFrameStyle, pszName));
 
   if(pszName && *pszName == 0) {
-	pszName = NULL;
+        pszName = NULL;
   }
   if(hwndParent == 0) {
         hwndParent = HWND_DESKTOP;
   }
   if(dwFrameStyle) {
         dwWinStyle &= ~WS_CLIPCHILDREN; //invalid style according to docs
-	if(pszName)
-		dwFrameStyle |= FCF_TITLEBAR;
+        if(pszName)
+                dwFrameStyle |= FCF_TITLEBAR;
 
         *hwndFrame = WinCreateStdWindow(hwndParent, dwWinStyle,
                                        &dwFrameStyle, WIN32_STDCLASS,
                                        "", 0, 0, 0, &hwndClient);
         if(*hwndFrame) {
-		if(pszName) {
-			WinSetWindowText(*hwndFrame, pszName);
-		}
+                if(pszName) {
+                        WinSetWindowText(*hwndFrame, pszName);
+                }
                 return hwndClient;
         }
         dprintf(("OSLibWinCreateWindow: WinCreateStdWindow failed (%x)", WinGetLastError(GetThreadHAB())));
@@ -160,6 +160,60 @@ APIRET OSLibDosBeep(ULONG freg,ULONG dur)
 }
 //******************************************************************************
 //******************************************************************************
+HWND OSLibWinQueryFocus(HWND hwndDeskTop)
+{
+  return WinQueryFocus(hwndDeskTop);
+}
+//******************************************************************************
+//******************************************************************************
+HWND OSLibWinWindowFromID(HWND hwndParent,ULONG id)
+{
+  return WinWindowFromID(hwndParent,id);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibWinSetFocus(HWND hwndDeskTop,HWND hwndNewFocus)
+{
+  return WinSetFocus(hwndDeskTop,hwndNewFocus);
+}
+//******************************************************************************
+//******************************************************************************
+ULONG OSLibGetWindowHeight(HWND hwnd)
+{
+  RECTL rect;
+
+  return (WinQueryWindowRect(hwnd,&rect)) ? rect.yTop-rect.yBottom:0;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibWinInvalidateRect(HWND hwnd,POSRECTL pwrc,BOOL fIncludeChildren)
+{
+  return WinInvalidateRect(hwnd,(PRECTL)pwrc,fIncludeChildren);
+}
+//******************************************************************************
+//******************************************************************************
+LONG OSLibWinQuerySysValue(HWND hwndDeskTop,LONG iSysValue)
+{
+  return WinQuerySysValue(hwndDeskTop,iSysValue);
+}
+//******************************************************************************
+//******************************************************************************
+ULONG OSLibWinQueryDlgItemText(HWND hwndDlg,ULONG idItem,LONG cchBufferMax,char* pchBuffer)
+{
+  return WinQueryDlgItemText(hwndDlg,idItem,cchBufferMax,pchBuffer);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibWinSetDlgItemText(HWND hwndDlg,ULONG idItem,char* pszText)
+{
+  return WinSetDlgItemText(hwndDlg,idItem,pszText);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibWinQueryPointerPos(HWND hwndDeskTop,PPOINT pptlPoint)
+{
+  return WinQueryPointerPos(hwndDeskTop,(PPOINTL)pptlPoint);
+}
 //******************************************************************************
 //******************************************************************************
 HWND OSLibWinQueryWindow(HWND hwnd, ULONG lCode)
@@ -172,7 +226,7 @@ BOOL OSLibWinSetWindowPos(HWND hwnd, HWND hwndInsertBehind, LONG x, LONG y, LONG
                           LONG cy, ULONG fl)
 {
   if(fl & SWP_MOVE) {
-	y = MapOS2ToWin32Y(hwnd, cy, y);
+        y = MapOS2ToWin32Y(hwnd, cy, y);
   }
   dprintf(("WinSetWindowPos %x %x %d %d %d %d %x", hwnd, hwndInsertBehind, x, y, cx, cy, fl));
   return WinSetWindowPos(hwnd, hwndInsertBehind, x, y, cx, cy, fl);
@@ -184,13 +238,13 @@ BOOL OSLibWinShowWindow(HWND hwnd, ULONG fl)
  BOOL rc;
 
   if(fl & SWP_SHOW) {
-	 rc = WinShowWindow(hwnd, TRUE);
+         rc = WinShowWindow(hwnd, TRUE);
   }
   if(rc == 0)
-	dprintf(("WinShowWindow %x failed %x", hwnd, WinGetLastError(GetThreadHAB())));
+        dprintf(("WinShowWindow %x failed %x", hwnd, WinGetLastError(GetThreadHAB())));
   rc = WinSetWindowPos(hwnd, HWND_TOP, 0, 0, 0, 0, fl);
   if(rc == 0)
-	dprintf(("WinShowWindow %x failed %x", hwnd, WinGetLastError(GetThreadHAB())));
+        dprintf(("WinShowWindow %x failed %x", hwnd, WinGetLastError(GetThreadHAB())));
   return rc;
 }
 //******************************************************************************
@@ -201,16 +255,10 @@ BOOL OSLibWinDestroyWindow(HWND hwnd)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL OSLibWinQueryUpdateRect(HWND hwnd, PRECT pRect)
+BOOL OSLibWinQueryUpdateRect(HWND hwnd, POSRECTL pRect)
 {
- BOOL rc;
- RECTLOS2 rectl;
-
-  rc = WinQueryUpdateRect(hwnd, (PRECTL)&rectl);
-  if(rc) {
-	MapOS2ToWin32Rectl(hwnd, &rectl, pRect);
-  }
-  return rc;
+  return WinQueryUpdateRect(hwnd, (PRECTL)pRect);
+  //CB: caller must convert rect
 }
 //******************************************************************************
 //******************************************************************************
