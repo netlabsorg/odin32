@@ -1,4 +1,4 @@
-/* $Id: env.c,v 1.5 2001-02-10 11:11:47 bird Exp $
+/* $Id: env.c,v 1.6 2001-07-08 03:13:16 bird Exp $
  *
  * Environment access functions
  *
@@ -28,6 +28,12 @@
 #include <string.h>
 #include "macros.h"
 #include "env.h"
+
+/*******************************************************************************
+*   Internal Functions                                                         *
+*******************************************************************************/
+const char *GetEnv1(BOOL fExecChild);
+const char *GetEnv2(BOOL fExecChild);
 
 
 /**
@@ -115,8 +121,22 @@ const char *GetEnv(BOOL fExecChild)
      *  my own GetEnv. So, currently I'll write the code for both 1) and
      *  2), testing will show which one of them are the better.
      */
-
     #if 1
+    return GetEnv1(fExecChild);
+    #else
+    const char *pszEnv = GetEnv2(fExecChild);
+    if (pszEnv == NULL)
+        pszEnv = GetEnv1(fExecChild);
+    return pszEnv;
+    #endif
+}
+
+
+/**
+ * Method 1.
+ */
+const char *GetEnv1(BOOL fExecChild)
+{
     PPTDA   pPTDACur;                   /* Pointer to the current (system context) PTDA */
     PPTDA   pPTDA;                      /* PTDA in question. */
     USHORT  hobEnviron;                 /* Object handle of the environ block */
@@ -161,11 +181,14 @@ const char *GetEnv(BOOL fExecChild)
     }
 
     return NULL;
+}
 
 
-    #else
-
-
+/**
+ * Method 2.
+ */
+const char *GetEnv2(BOOL fExecChild)
+{
     struct InfoSegLDT * pLIS;           /* Pointer to local infosegment. */
     PVOID               pv;             /* Address to return. */
 
@@ -193,6 +216,22 @@ const char *GetEnv(BOOL fExecChild)
     {
         kprintf(("GetEnv: VirtToLin2 failed to thunk %04x:0000 to linar address\n", pLIS->LIS_AX));
     }
+
     return (const char *)pv;
+}
+
+
+
+
+/**
+ * Relase environment block retrieved by GetEnv.
+ * @param   pszEnv  Pointer to environment block.
+ */
+void RelaseEnv(const char *pszEnv)
+{
+    #if 0
+    pszEnv = pszEnv; /* nothing to do! */
+    #else
+    pszEnv = pszEnv; /* nothing to do yet! */
     #endif
 }
