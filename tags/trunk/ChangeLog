@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.265 1999-10-04 09:55:47 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.266 1999-10-04 12:47:09 phaller Exp $ */
+
+ 99-10-04: Patrick Haller <phaller@gmx.net>
+	- SHELL32\NEW: Compilation fix (indirectly included win32type.h)
 
  99-10-04: Edgar Buerkle <Edgar.Buerkle@gmx.net>
 	- USER32: Fixes for window style update, mouse button messages,
