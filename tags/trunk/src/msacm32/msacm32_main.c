@@ -1,4 +1,3 @@
-/* $Id: msacm32.cpp,v 1.6 2000-08-02 15:49:32 bird Exp $ */
 /* -*- tab-width: 8; c-basic-offset: 4 -*- */
 
 /*
@@ -8,7 +7,6 @@
  *		  1999	Eric Pouech
  */
 
-#include <os2win.h>
 #include "winbase.h"
 #include "winerror.h"
 #include "windef.h"
@@ -16,36 +14,31 @@
 #include "msacm.h"
 #include "msacmdrv.h"
 #include "wineacm.h"
-#include "winversion.h"
 
-DEFAULT_DEBUG_CHANNEL(msacm)
-
+DEFAULT_DEBUG_CHANNEL(msacm);
+	
 /**********************************************************************/
-
-static DWORD MSACM_dwProcessesAttached = 0;
+	
+HINSTANCE	MSACM_hInstance32 = 0;
 
 /***********************************************************************
- *           MSACM_LibMain32 (MSACM32.init)
+ *           MSACM_LibMain (MSACM32.init) 
  */
 BOOL WINAPI MSACM32_LibMain(HINSTANCE hInstDLL, DWORD fdwReason, LPVOID lpvReserved)
 {
-    dprintf(("0x%x 0x%lx %p\n", hInstDLL, fdwReason, lpvReserved));
+    TRACE("0x%x 0x%lx %p\n", hInstDLL, fdwReason, lpvReserved);
 
     switch (fdwReason) {
     case DLL_PROCESS_ATTACH:
-	if (MSACM_dwProcessesAttached == 0) {
-	    MSACM_hHeap = HeapCreate(0, 0x10000, 0);
-	    MSACM_RegisterAllDrivers();
-	}
-	MSACM_dwProcessesAttached++;
+        MSACM_hHeap = HeapCreate(0, 0x10000, 0);
+        MSACM_hInstance32 = hInstDLL;
+        MSACM_RegisterAllDrivers();
 	break;
     case DLL_PROCESS_DETACH:
-	MSACM_dwProcessesAttached--;
-	if (MSACM_dwProcessesAttached == 0) {
-	    MSACM_UnregisterAllDrivers();
-	    HeapDestroy(MSACM_hHeap);
-	    MSACM_hHeap = (HANDLE) NULL;
-	}
+        MSACM_UnregisterAllDrivers();
+        HeapDestroy(MSACM_hHeap);
+        MSACM_hHeap = (HANDLE) NULL;
+        MSACM_hInstance32 = (HINSTANCE)NULL;
 	break;
     case DLL_THREAD_ATTACH:
 	break;
@@ -64,18 +57,21 @@ BOOL WINAPI MSACM32_LibMain(HINSTANCE hInstDLL, DWORD fdwReason, LPVOID lpvReser
  */
 
 /***********************************************************************
- *           acmGetVersion32 (MSACM32.34)
+ *           acmGetVersion (MSACM32.34)
  */
 DWORD WINAPI acmGetVersion(void)
 {
-    switch (GetVersion()) {
-    default:
-	dprintf(("Current OS not supported\n"));
-    case WIN95:
-	return 0x04000000; /* 4.0.0 */
-    case NT40:
+    OSVERSIONINFOA version;
+    GetVersionExA( &version );
+    switch(version.dwPlatformId)
+    {
+    case VER_PLATFORM_WIN32_NT:
 	return 0x04000565; /* 4.0.1381 */
-    }
+    default:
+        FIXME("%ld not supported",version.dwPlatformId);
+    case VER_PLATFORM_WIN32_WINDOWS:
+	return 0x04000000; /* 4.0.0 */
+  }
 }
 
 /***********************************************************************
@@ -87,15 +83,16 @@ DWORD WINAPI acmGetVersion(void)
 /***********************************************************************
  *           acmMetrics (MSACM32.36)
  */
-MMRESULT WINAPI acmMetrics(HACMOBJ hao, UINT uMetric, LPVOID  pMetric)
+MMRESULT WINAPI acmMetrics(HACMOBJ hao, UINT uMetric, LPVOID pMetric)
 {
-    PWINE_ACMOBJ 	pao = MSACM_GetObj(hao);
+    PWINE_ACMOBJ 	pao = MSACM_GetObj(hao, WINE_ACMOBJ_DONTCARE);
     BOOL 		bLocal = TRUE;
     PWINE_ACMDRIVERID	padid;
     DWORD		val = 0;
+    MMRESULT		mmr = MMSYSERR_NOERROR;
 
-    dprintf(("(0x%08x, %d, %p): stub\n", hao, uMetric, pMetric));
-
+    TRACE("(0x%08x, %d, %p);\n", hao, uMetric, pMetric);
+    
     switch (uMetric) {
     case ACM_METRIC_COUNT_DRIVERS:
 	bLocal = FALSE;
@@ -107,7 +104,7 @@ MMRESULT WINAPI acmMetrics(HACMOBJ hao, UINT uMetric, LPVOID  pMetric)
 	    if (padid->bEnabled /* && (local(padid) || !bLocal) */)
 		val++;
 	*(LPDWORD)pMetric = val;
-	return 0;
+	break;
 
     case ACM_METRIC_COUNT_CODECS:
 	if (!pao)
@@ -120,7 +117,7 @@ MMRESULT WINAPI acmMetrics(HACMOBJ hao, UINT uMetric, LPVOID  pMetric)
 	    if (padid->bEnabled /* && (local(padid) || !bLocal) */)
 		val++;
 	*(LPDWORD)pMetric = val;
-	return 0;
+	break;
 
     case ACM_METRIC_COUNT_CONVERTERS:
 	bLocal = FALSE;
@@ -131,7 +128,7 @@ MMRESULT WINAPI acmMetrics(HACMOBJ hao, UINT uMetric, LPVOID  pMetric)
 	    if (padid->bEnabled /* && (local(padid) || !bLocal) */)
 		val++;
 	*(LPDWORD)pMetric = val;
-	return 0;
+	break;
 
     case ACM_METRIC_COUNT_FILTERS:
 	bLocal = FALSE;
@@ -142,29 +139,54 @@ MMRESULT WINAPI acmMetrics(HACMOBJ hao, UINT uMetric, LPVOID  pMetric)
 	    if (padid->bEnabled /* && (local(padid) || !bLocal) */)
 		val++;
 	*(LPDWORD)pMetric = val;
-	return 0;
+	break;
 
     case ACM_METRIC_COUNT_DISABLED:
 	bLocal = FALSE;
 	/* fall thru */
     case ACM_METRIC_COUNT_LOCAL_DISABLED:
 	if (!pao)
-	    return MMSYSERR_INVALHANDLE;
+	    return MMSYSERR_INVALHANDLE;  
 	for (padid = MSACM_pFirstACMDriverID; padid; padid = padid->pNextACMDriverID)
 	    if (!padid->bEnabled /* && (local(padid) || !bLocal) */)
 		val++;
 	*(LPDWORD)pMetric = val;
-	return 0;
+	break;
+    
+    case ACM_METRIC_MAX_SIZE_FORMAT:
+	{
+	    ACMFORMATTAGDETAILSW	aftd;
+
+	    aftd.cbStruct = sizeof(aftd);
+	    aftd.dwFormatTag = WAVE_FORMAT_UNKNOWN;
+
+	    if (hao == (HACMOBJ)NULL) {
+		mmr = acmFormatTagDetailsW((HACMDRIVER)NULL, &aftd, ACM_FORMATTAGDETAILSF_LARGESTSIZE);
+	    } else if (MSACM_GetObj(hao, WINE_ACMOBJ_DRIVER)) {
+		mmr = acmFormatTagDetailsW((HACMDRIVER)hao, &aftd, ACM_FORMATTAGDETAILSF_LARGESTSIZE);
+	    } else if (MSACM_GetObj(hao, WINE_ACMOBJ_DRIVERID)) {
+		HACMDRIVER	had;
+		
+		if (acmDriverOpen(&had, (HACMDRIVERID)hao, 0) == 0) {
+		    mmr = acmFormatTagDetailsW((HACMDRIVER)hao, &aftd, ACM_FORMATTAGDETAILSF_LARGESTSIZE);
+		    acmDriverClose(had, 0);
+		}
+	    } else {
+		mmr = MMSYSERR_INVALHANDLE;
+	    }
+	    if (mmr == MMSYSERR_NOERROR) *(LPDWORD)pMetric = aftd.cbFormatSize;
+	}
+        break;
 
     case ACM_METRIC_COUNT_HARDWARE:
     case ACM_METRIC_HARDWARE_WAVE_INPUT:
     case ACM_METRIC_HARDWARE_WAVE_OUTPUT:
-    case ACM_METRIC_MAX_SIZE_FORMAT:
     case ACM_METRIC_MAX_SIZE_FILTER:
     case ACM_METRIC_DRIVER_SUPPORT:
     case ACM_METRIC_DRIVER_PRIORITY:
     default:
-	return MMSYSERR_NOTSUPPORTED;
+	FIXME("(0x%08x, %d, %p): stub\n", hao, uMetric, pMetric);
+	mmr = MMSYSERR_NOTSUPPORTED;
     }
-    return MMSYSERR_NOERROR;
+    return mmr;
 }
