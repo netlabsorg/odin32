@@ -1,4 +1,4 @@
-/* $Id: tab.cpp,v 1.2 2000-03-18 16:17:30 cbratschi Exp $ */
+/* $Id: tab.cpp,v 1.3 2000-04-12 16:38:59 cbratschi Exp $ */
 /*
  * Tab control
  *
@@ -565,7 +565,7 @@ static LRESULT TAB_OnHScroll(
 }
 
 /******************************************************************************
- * TAB_SetupScroling
+ * TAB_SetupScrolling
  *
  * This method will check the current scrolling state and make sure the
  * scrolling control is displayed (or not).
@@ -1860,10 +1860,8 @@ TAB_Destroy (HWND hwnd, WPARAM wParam, LPARAM lParam)
 static LRESULT WINAPI
 TAB_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-//if (uMsg == WM_CREATE) MessageBoxA(hwnd,"wm_create!",NULL,MB_OK);//CB:bug!!!
-//CB: WM_CREATE never send!!!
-    switch (uMsg)
-    {
+  switch (uMsg)
+  {
     case TCM_GETIMAGELIST:
       return TAB_GetImageList (hwnd, wParam, lParam);
 
@@ -2025,14 +2023,13 @@ TAB_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 //      ERR (tab, "unknown msg %04x wp=%08x lp=%08lx\n",
 //           uMsg, wParam, lParam);
       return defComCtl32ProcA (hwnd, uMsg, wParam, lParam);
-    }
+  }
 
-    return 0;
+  return 0;
 }
 
 
-VOID
-TAB_Register (VOID)
+VOID TAB_Register(VOID)
 {
   WNDCLASSA wndClass;
 
@@ -2049,8 +2046,7 @@ TAB_Register (VOID)
 }
 
 
-VOID
-TAB_Unregister (VOID)
+VOID TAB_Unregister(VOID)
 {
   UnregisterClassA (WC_TABCONTROLA, (HINSTANCE)NULL);
 }

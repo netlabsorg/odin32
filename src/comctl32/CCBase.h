@@ -1,4 +1,4 @@
-/* $Id: CCBase.h,v 1.7 2000-03-30 15:39:09 cbratschi Exp $ */
+/* $Id: CCBase.h,v 1.8 2000-04-12 16:38:58 cbratschi Exp $ */
 /*
  * COMCTL32 Base Functions and Macros for all Controls
  *
@@ -45,6 +45,13 @@ VOID destroyToolTip(HWND hwndToolTip);
 
 VOID drawStubControl(HWND hwnd,HDC hdc);
 
-INT lstrcmpAtoW(CHAR* textA,WCHAR* textW);
+INT lstrcmpAtoW(CHAR *textA,WCHAR *textW);
+INT lstrcmpAW(WCHAR *textA,BOOL textaunicode,WCHAR *textB,BOOL textbunicode);
+
+CHAR*  lstrstrA(CHAR *text,CHAR *subtext);
+WCHAR* lstrstrW(WCHAR *text,WCHAR *subtext);
+CHAR*  lstrstrAtoW(CHAR *text,WCHAR *subtext);
+WCHAR* lstrstrWtoA(WCHAR *text,CHAR *subtext);
+WCHAR* lstrstrAW(WCHAR *text,BOOL textunicode,WCHAR *subtext,BOOL subtextunicode);
 
 #endif
