@@ -1,4 +1,4 @@
-# $Id: odin32.post.emx.mk,v 1.3 2000-12-03 01:07:01 bird Exp $
+# $Id: odin32.post.emx.mk,v 1.4 2000-12-03 01:23:00 bird Exp $
 
 #
 # Odin32 API
@@ -354,11 +354,11 @@ $(OBJDIR)\$(TARGET).sym: $(OBJDIR)\$(TARGET).map
 #
 !ifndef LIBTARGET
 !ifndef NOTEXPDEF
-$(OBJDIR)\$(ORGTARGET).lib: $(OBJDIR)\$(ORGTARGET)exp.def
-    $(IMPLIB) $(IMPLIBFLAGS) $@ $**
+$(OBJDIR)\$(ORGTARGET).lib: $(OBJDIR) $(OBJDIR)\$(ORGTARGET)exp.def
+    $(IMPLIB) $(IMPLIBFLAGS) $@ $(OBJDIR)\$(ORGTARGET)exp.def
 !else
-$(OBJDIR)\$(TARGET).lib: $(DEFFILE)
-    $(IMPLIB) $(IMPLIBFLAGS) $@ $**
+$(OBJDIR)\$(TARGET).lib: $(OBJDIR) $(DEFFILE)
+    $(IMPLIB) $(IMPLIBFLAGS) $@ $(DEFFILE)
 !endif
 !endif
 
