@@ -1,3 +1,4 @@
+/* $Id: obj_storage.h,v 1.5 1999-08-22 22:52:11 sandervl Exp $ */
 /*
  * Defines the COM interfaces and APIs related to structured data storage.
  */

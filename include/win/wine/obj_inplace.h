@@ -1,3 +1,4 @@
+/* $Id: obj_inplace.h,v 1.5 1999-08-22 22:52:08 sandervl Exp $ */
 /*
  * Defines the COM interfaces and APIs related to structured data storage.
  * 
