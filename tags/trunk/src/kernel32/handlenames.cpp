@@ -169,13 +169,19 @@ PHANDLENAME HandleNames::findSymbolicLink(PSZ pszSymbolicLink,
     
     if (fCaseInsensitive)
     {
-      if (strnicmp(pHandleName->pszSymbolicLink, pszSymbolicLink, iLen) == 0)
-        return pHandleName;
+      // Note: pszSymbolicLink must either terminate at [iLen] or
+      // have a delimiter.
+      if ( (pszSymbolicLink[iLen] == '\\') ||
+           (pszSymbolicLink[iLen] == 0) )
+        if (strnicmp(pHandleName->pszSymbolicLink, pszSymbolicLink, iLen) == 0)
+          return pHandleName;
     }
     else
     {
-      if (strncmp(pHandleName->pszSymbolicLink, pszSymbolicLink, iLen) == 0)
-        return pHandleName;
+      if ( (pszSymbolicLink[iLen] == '\\') ||
+           (pszSymbolicLink[iLen] == 0) )
+        if (strncmp(pHandleName->pszSymbolicLink, pszSymbolicLink, iLen) == 0)
+          return pHandleName;
     }
     
     

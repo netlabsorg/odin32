@@ -1,4 +1,4 @@
-/* $Id: hmfile.cpp,v 1.30 2001-11-26 14:54:01 sandervl Exp $ */
+/* $Id: hmfile.cpp,v 1.31 2001-11-28 23:33:36 phaller Exp $ */
 
 /*
  * File IO win32 apis
@@ -48,7 +48,7 @@ inline void ignore_dprintf(...){}
  *             PHMHANDLEDATA pHMHandleDataTemplate data of the template handle
  * Variables :
  * Result    :
- * Remark    : TODO: \\.\PHYSICALDRIVEx opens physical drive x
+ * Remark    : 
  * Status    : NO_ERROR - API succeeded
  *             other    - what is to be set in SetLastError
  *
@@ -71,18 +71,9 @@ DWORD HMDeviceFileClass::CreateFile (HANDLE        hHandle,
            pHMHandleData,
            lpSecurityAttributes,
            pHMHandleDataTemplate));
-
-  if(strncmp(lpFileName,       // "support" for local unc names
-             "\\\\.\\",
-             4) == 0)
-  {
-        lpFileName+=4;
-  }
-  else {
-        ParsePath(lpFileName, filepath, sizeof(filepath));
-        lpFileName = filepath;
-  }
-
+  
+  ParsePath(lpFileName, filepath, sizeof(filepath));
+  lpFileName = filepath;
 
   // create from template
   if (pHMHandleDataTemplate != NULL)
@@ -179,12 +170,6 @@ DWORD HMDeviceFileClass::OpenFile (HANDLE        hHandle,
         return HFILE_ERROR;
     }
 
-    if(strcmp(lpFileName,       // "support" for local unc names
-             "\\\\.\\") == 0)
-    {
-        lpFileName+=4;
-    }
-    else
     if(!strchr(lpFileName, ':') && !strchr(lpFileName, '\\'))
     {
         //filename only; search for file in following order

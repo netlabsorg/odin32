@@ -1,4 +1,4 @@
-/* $Id: hmcomm.cpp,v 1.17 2001-11-28 15:35:15 sandervl Exp $ */
+/* $Id: hmcomm.cpp,v 1.18 2001-11-28 23:33:35 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -18,6 +18,7 @@
 #include <os2win.h>
 #include <string.h>
 #include <handlemanager.h>
+#include "handlenames.h"
 #include <heapstring.h>
 #include "hmdevice.h"
 #include "hmcomm.h"
@@ -90,6 +91,20 @@ HMDeviceCommClass::HMDeviceCommClass(LPCSTR lpDeviceName) : HMDeviceHandler(lpDe
   pData = CreateDevData();
   if(pData!= NULL)
     HMDeviceRegisterEx("COM1", this, pData);
+  
+  // add symbolic links to the "real name" of the device
+  {
+    // @@@PH what's the long device name: SerialPortx ?
+    // HandleNamesAddSymbolicLink("\\Device\\ParallelPort3", "COM3");
+    
+    PSZ pszCOM = strdup("\\\\.\\COMx");
+    for (char ch = '1'; ch <= '9'; ch++)
+    {
+      pszCOM[7] = ch;
+      HandleNamesAddSymbolicLink(pszCOM, pszCOM+4);
+    }
+    free(pszCOM);
+  }
 }
 
 /*****************************************************************************
@@ -108,14 +123,7 @@ HMDeviceCommClass::HMDeviceCommClass(LPCSTR lpDeviceName) : HMDeviceHandler(lpDe
 BOOL HMDeviceCommClass::FindDevice(LPCSTR lpClassDevName, LPCSTR lpDeviceName, int namelength)
 {
     dprintf2(("HMDeviceCommClass::FindDevice %s %s", lpClassDevName, lpDeviceName));
-
-    if(namelength > 5) {
-        if(namelength != 9 || lstrncmpA(lpDeviceName, "\\\\.\\", 4) != 0) {
-            return FALSE;  //can't be com name
-        }
-        lpDeviceName += 4; //skip prefix
-    }
-
+  
     //first 3 letters 'COM'?
     if(lstrncmpiA(lpDeviceName, lpClassDevName, 3) != 0) {
         return FALSE;
@@ -206,7 +214,7 @@ DWORD HMDeviceCommClass::CreateFile(HANDLE hComm,
     if(rc)
     {
       delete pHMHandleData->lpHandlerData;
-      return rc;
+      return error2WinError(rc);
     }
     rc = SetBaud(pHMHandleData,9600);
     dprintf(("Init Baud to 9600 rc = %d",rc));
