@@ -1,4 +1,4 @@
-/* $Id: win32wndchild.h,v 1.2 1999-08-28 14:09:30 sandervl Exp $ */
+/* $Id: win32wndchild.h,v 1.3 1999-08-31 10:36:23 sandervl Exp $ */
 /*
  * Win32 Child/Parent window class for OS/2
  *
@@ -36,9 +36,9 @@ protected:
 	BOOL   AddChild(ChildWindow *child);
 	BOOL   RemoveChild(ChildWindow *child);
 
-ChildWindow   *GetFirstChild()                  { return children; };
-ChildWindow   *GetNextChild()   		{ return nextchild; };
-        void   SetNextChild(ChildWindow *child)	{ nextchild = child; };
+ChildWindow   *getFirstChild()                  { return children; };
+ChildWindow   *getNextChild()   		{ return nextchild; };
+        void   setNextChild(ChildWindow *child)	{ nextchild = child; };
 
 	BOOL   DestroyChildren();
 

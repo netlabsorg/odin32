@@ -1,4 +1,4 @@
-/* $Id: win32wndchild.cpp,v 1.2 1999-08-28 14:09:30 sandervl Exp $ */
+/* $Id: win32wndchild.cpp,v 1.3 1999-08-31 10:36:23 sandervl Exp $ */
 /*
  * Win32 Child/Parent window class for OS/2
  *
@@ -47,12 +47,12 @@ BOOL ChildWindow::AddChild(ChildWindow *child)
    	children = child;
    }
    else {
-	while(curchild->GetNextChild()) {
-		curchild = curchild->GetNextChild();
+	while(curchild->getNextChild()) {
+		curchild = curchild->getNextChild();
 	}
-	curchild->SetNextChild(this);
+	curchild->setNextChild(this);
    }
-   child->SetNextChild(NULL);
+   child->setNextChild(NULL);
 
    mutex.leave();
    return TRUE;
@@ -67,7 +67,7 @@ BOOL ChildWindow::RemoveChild(ChildWindow *child)
    mutex.enter();
 
    if(curchild == child) {
-	children = child->GetNextChild();	
+	children = child->getNextChild();	
    }
    else {
 	if(curchild == NULL) {
@@ -76,8 +76,8 @@ BOOL ChildWindow::RemoveChild(ChildWindow *child)
 		mutex.leave();
 		return FALSE;
 	}
-	while(curchild->GetNextChild() != child) {
-		curchild = curchild->GetNextChild();
+	while(curchild->getNextChild() != child) {
+		curchild = curchild->getNextChild();
 		if(curchild == NULL) {
 			dprintf(("ChildWindow::RemoveChild, curchild == NULL"));
 			DebugInt3();
@@ -85,7 +85,7 @@ BOOL ChildWindow::RemoveChild(ChildWindow *child)
 			return FALSE;
 		}	
 	}
-	curchild->SetNextChild(child->GetNextChild());
+	curchild->setNextChild(child->getNextChild());
    }
    mutex.leave();
    return TRUE;
