@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.9 2000-12-02 23:39:00 bird Exp $
+# $Id: makefile,v 1.10 2001-12-06 10:13:59 sandervl Exp $
 
 #
 # Odin32 API
@@ -19,7 +19,6 @@
 OBJS = \
 $(OBJDIR)\dinput.obj \
 $(OBJDIR)\oslibinput.obj \
-$(OBJDIR)\dinputguid.obj \
 $(OBJDIR)\dinputrsrc.obj \
 $(DLLENTRY)
 
@@ -33,8 +32,8 @@ $(ODIN32_LIB)/$(ODINCRT).lib \
 OS2386.LIB \
 $(RTLLIB_O) \
 $(ODIN32_LIB)/user32.lib \
-$(ODIN32_LIB)/ole32.lib
-
+$(ODIN32_LIB)/ole32.lib \
+$(ODIN32_LIB)/guidlib.lib
 
 #
 # Target name - name of the dll without extention and path.
