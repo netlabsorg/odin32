@@ -1,26 +1,9 @@
-; $Id: ntdll.def,v 1.23 1999-11-10 14:14:51 sandervl Exp $
+; $Id: ntdll.def,v 1.24 1999-11-30 19:42:09 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is NT4.0's NTDLL.DLL
 LIBRARY NTDLL INITINSTANCE TERMINSTANCE
 DATA MULTIPLE NONSHARED
-
-IMPORTS
-    fwd_RtlUnwind                    =  KERNEL32.RtlUnwind
-    fwd_memmove                      =  KERNEL32.memmove
-    fwd_RtlFillMemory                =  KERNEL32.RtlFillMemory
-    fwd_RtlMoveMemory                =  KERNEL32.RtlMoveMemory
-    fwd_RtlZeroMemory                =  KERNEL32.RtlZeroMemory
-    fwd_RtlInitializeCriticalSection =  KERNEL32.InitializeCriticalSection
-    fwd_RtlLeaveCriticalSection      =  KERNEL32.LeaveCriticalSection
-    fwd_RtlEnterCriticalSection      =  KERNEL32.EnterCriticalSection
-    fwd_RtlDeleteCriticalSection     =  KERNEL32.DeleteCriticalSection
-
-    _lstrncmpW@12                    =  KERNEL32.lstrncmpW
-    _lstrncmpiA@12                   =  KERNEL32.lstrncmpiA
-    _lstrncmpiW@12                   =  KERNEL32.lstrncmpiW
-    HEAP_strdupW                     =  KERNEL32.HEAP_strdupW
-    HEAP_strdupWtoA                  =  KERNEL32.HEAP_strdupWtoA
 
 EXPORTS
 
@@ -28,14 +11,10 @@ EXPORTS
 ; Forwarder Functions
 ; -------------------
 
-    RtlUnwind                    =  fwd_RtlUnwind
-    RtlFillMemory                =  fwd_RtlFillMemory
-    RtlMoveMemory                =  fwd_RtlMoveMemory
-    RtlZeroMemory                =  fwd_RtlZeroMemory
-    RtlInitializeCriticalSection =  fwd_RtlInitializeCriticalSection
-    RtlLeaveCriticalSection      =  fwd_RtlLeaveCriticalSection
-    RtlEnterCriticalSection      =  fwd_RtlEnterCriticalSection
-    RtlDeleteCriticalSection     =  fwd_RtlDeleteCriticalSection
+    RtlFillMemory              = _RtlFillMemory@12           @588
+    RtlMoveMemory              = _RtlMoveMemory@12           @589
+    RtlUnwind                  = RtlUnwindAsm                   @590
+    RtlZeroMemory              = _RtlZeroMemory@8            @591
 
 ; unknown
     _alldiv                          = _OS2_alldiv
@@ -45,152 +24,152 @@ EXPORTS
 
 ; real functions
     NtAlertThread                 = _NtAlertThread@8                  @57
-    ZwAlertThread                 = _NtAlertThread@8
+    ZwAlertThread                 = _NtAlertThread@8                  @700
     NtAllocateUuids               = _NtAllocateUuids@16               @59
-    ZwAllocateUuids               = _NtAllocateUuids@16
+    ZwAllocateUuids               = _NtAllocateUuids@16		      @701
     NtTestAlert                   = _NtTestAlert@8                    @232
-    ZwTestAlert                   = _NtTestAlert@8
+    ZwTestAlert                   = _NtTestAlert@8		      @702
     NtWriteRequestData            = _NtWriteRequestData@20            @246
-    ZwWriteRequestData            = _NtWriteRequestData@20
+    ZwWriteRequestData            = _NtWriteRequestData@20	      @703
     NtImpersonateClientOfPort     = _NtImpersonateClientOfPort@16     @112
-    ZwImpersonateClientOfPort     = _NtImpersonateClientOfPort@16
+    ZwImpersonateClientOfPort     = _NtImpersonateClientOfPort@16     @704
     NtQuerySystemTime             = _NtQuerySystemTime@4              @169
-    ZwQuerySystemTime             = _NtQuerySystemTime@4
+    ZwQuerySystemTime             = _NtQuerySystemTime@4              @705
     NtReadRequestData             = _NtReadRequestData@20             @178
-    ZwReadRequestData             = _NtReadRequestData@20
+    ZwReadRequestData             = _NtReadRequestData@20             @706
 
     NtReplyPort                   = _NtReplyPort@16                   @187
-    ZwReplyPort                   = _NtReplyPort@16
+    ZwReplyPort                   = _NtReplyPort@16                   @707
     NtReplyWaitReplyPort          = _NtReplyWaitReplyPort@16          @189
-    ZwReplyWaitReplyPort          = _NtReplyWaitReplyPort@16
+    ZwReplyWaitReplyPort          = _NtReplyWaitReplyPort@16          @708
     NtRequestPort                 = _NtRequestPort@16                 @190
-    ZwRequestPort                 = _NtRequestPort@16
+    ZwRequestPort                 = _NtRequestPort@16                 @709
 
 
     NtOpenFile                    = _NtOpenFile@24                    @127
-    ZwOpenFile                    = _NtOpenFile@24
+    ZwOpenFile                    = _NtOpenFile@24                    @710
     NtCreateFile                  = _NtCreateFile@44                  @73
-    ZwCreateFile                  = _NtCreateFile@44
-    NtReadFile                    = _NtReadFile@36
-    ZwReadFile                    = _NtReadFile@36
+    ZwCreateFile                  = _NtCreateFile@44                  @711
+    NtReadFile                    = _NtReadFile@36                    @712
+    ZwReadFile                    = _NtReadFile@36                    @713
     NtDeviceIoControlFile         = _NtDeviceIoControlFile@40         @94
-    ZwDeviceIoControlFile         = _NtDeviceIoControlFile@40
+    ZwDeviceIoControlFile         = _NtDeviceIoControlFile@40         @714
     NtFsControlFile               = _NtFsControlFile@40               @108
-    ZwFsControlFile               = _NtFsControlFile@40
-    NtSetVolumeInformationFile    = _NtSetVolumeInformationFile@16
-    ZwSetVolumeInformationFile    = _NtSetVolumeInformationFile@16
-    NtQueryInformationFile        = _NtQueryInformationFile@20
-    ZwQueryInformationFile        = _NtQueryInformationFile@20
-    NtSetInformationFile          = _NtSetInformationFile@20
-    ZwSetInformationFile          = _NtSetInformationFile@20
-    NtQueryDirectoryFile          = _NtQueryDirectoryFile@44
-    ZwQueryDirectoryFile          = _NtQueryDirectoryFile@44
+    ZwFsControlFile               = _NtFsControlFile@40               @715
+    NtSetVolumeInformationFile    = _NtSetVolumeInformationFile@16    @716
+    ZwSetVolumeInformationFile    = _NtSetVolumeInformationFile@16    @717
+    NtQueryInformationFile        = _NtQueryInformationFile@20        @718
+    ZwQueryInformationFile        = _NtQueryInformationFile@20        @719
+    NtSetInformationFile          = _NtSetInformationFile@20          @720
+    ZwSetInformationFile          = _NtSetInformationFile@20          @721
+    NtQueryDirectoryFile          = _NtQueryDirectoryFile@44          @722 
+    ZwQueryDirectoryFile          = _NtQueryDirectoryFile@44          @723
     NtClose                       = _NtClose@4                        @65
-    ZwClose                       = _NtClose@4
+    ZwClose                       = _NtClose@4 			      @724
     NtCreateTimer                 = _NtCreateTimer@16                 @87
-    ZwCreateTimer                 = _NtCreateTimer@16
+    ZwCreateTimer                 = _NtCreateTimer@16                 @725
     NtSetTimer                    = _NtSetTimer@28                    @221
-    ZwSetTimer                    = _NtSetTimer@28
-    NtQueryTimerResolution        = _NtQueryTimerResolution@12
-    ZwQueryTimerResolution        = _NtQueryTimerResolution@12
-    NtTerminateProcess            = _NtTerminateProcess@8
-    ZwTerminateProcess            = _NtTerminateProcess@8
-    NtQueryInformationProcess     = _NtQueryInformationProcess@20
-    ZwQueryInformationProcess     = _NtQueryInformationProcess@20
+    ZwSetTimer                    = _NtSetTimer@28                    @726
+    NtQueryTimerResolution        = _NtQueryTimerResolution@12        @727
+    ZwQueryTimerResolution        = _NtQueryTimerResolution@12        @728
+    NtTerminateProcess            = _NtTerminateProcess@8             @729
+    ZwTerminateProcess            = _NtTerminateProcess@8             @730
+    NtQueryInformationProcess     = _NtQueryInformationProcess@20     @731
+    ZwQueryInformationProcess     = _NtQueryInformationProcess@20     @732
     NtSetInformationProcess       = _NtSetInformationProcess@16       @207
-    ZwSetInformationProcess       = _NtSetInformationProcess@16
-    NtResumeThread                = _NtResumeThread@8
-    ZwResumeThread                = _NtResumeThread@8
-    NtTerminateThread             = _NtTerminateThread@8
-    ZwTerminateThread             = _NtTerminateThread@8
-    NtQueryInformationThread      = _NtQueryInformationThread@20
-    ZwQueryInformationThread      = _NtQueryInformationThread@20
-    NtSetInformationThread        = _NtSetInformationThread@16
-    ZwSetInformationThread        = _NtSetInformationThread@16
-    NtDuplicateToken              = _NtDuplicateToken@24
-    ZwDuplicateToken              = _NtDuplicateToken@24
-    NtOpenProcessToken            = _NtOpenProcessToken@12
-    ZwOpenProcessToken            = _NtOpenProcessToken@12
-    NtOpenThreadToken             = _NtOpenThreadToken@16
-    ZwOpenThreadToken             = _NtOpenThreadToken@16
-    NtAdjustPrivilegesToken       = _NtAdjustPrivilegesToken@24
-    ZwAdjustPrivilegesToken       = _NtAdjustPrivilegesToken@24
+    ZwSetInformationProcess       = _NtSetInformationProcess@16       @733
+    NtResumeThread                = _NtResumeThread@8                 @734
+    ZwResumeThread                = _NtResumeThread@8                 @735
+    NtTerminateThread             = _NtTerminateThread@8              @736
+    ZwTerminateThread             = _NtTerminateThread@8              @737
+    NtQueryInformationThread      = _NtQueryInformationThread@20      @738
+    ZwQueryInformationThread      = _NtQueryInformationThread@20      @739
+    NtSetInformationThread        = _NtSetInformationThread@16        @740
+    ZwSetInformationThread        = _NtSetInformationThread@16        @741
+    NtDuplicateToken              = _NtDuplicateToken@24              @742
+    ZwDuplicateToken              = _NtDuplicateToken@24              @743
+    NtOpenProcessToken            = _NtOpenProcessToken@12            @744
+    ZwOpenProcessToken            = _NtOpenProcessToken@12            @745 
+    NtOpenThreadToken             = _NtOpenThreadToken@16             @746
+    ZwOpenThreadToken             = _NtOpenThreadToken@16             @747
+    NtAdjustPrivilegesToken       = _NtAdjustPrivilegesToken@24       @748
+    ZwAdjustPrivilegesToken       = _NtAdjustPrivilegesToken@24       @749
     NtQueryInformationToken       = _NtQueryInformationToken@20       @156
-    ZwQueryInformationToken       = _NtQueryInformationToken@20
-    NtCreateSection               = _NtCreateSection@28
-    ZwCreateSection               = _NtCreateSection@28
-    NtOpenSection                 = _NtOpenSection@12
-    ZwOpenSection                 = _NtOpenSection@12
-    NtQuerySection                = _NtQuerySection@20
-    ZwQuerySection                = _NtQuerySection@20
-    NtMapViewOfSection            = _NtMapViewOfSection@40
-    ZwMapViewOfSection            = _NtMapViewOfSection@40
-    NtCreatePort                  = _NtCreatePort@20
-    ZwCreatePort                  = _NtCreatePort@20
-    NtConnectPort                 = _NtConnectPort@32
-    ZwConnectPort                 = _NtConnectPort@32
-    NtListenPort                  = _NtListenPort@8
-    ZwListenPort                  = _NtListenPort@8
-    NtAcceptConnectPort           = _NtAcceptConnectPort@24
-    ZwAcceptConnectPort           = _NtAcceptConnectPort@24
-    NtCompleteConnectPort         = _NtCompleteConnectPort@4
-    ZwCompleteConnectPort         = _NtCompleteConnectPort@4
-    NtRegisterThreadTerminatePort = _NtRegisterThreadTerminatePort@4
-    ZwRegisterThreadTerminatePort = _NtRegisterThreadTerminatePort@4
-    NtRequestWaitReplyPort        = _NtRequestWaitReplyPort@12
-    ZwRequestWaitReplyPort        = _NtRequestWaitReplyPort@12
-    NtReplyWaitReceivePort        = _NtReplyWaitReceivePort@16
-    ZwReplyWaitReceivePort        = _NtReplyWaitReceivePort@16
-    NtSetIntervalProfile          = _NtSetIntervalProfile@8
-    ZwSetIntervalProfile          = _NtSetIntervalProfile@8
-    NtQueryPerformanceCounter     = _NtQueryPerformanceCounter@8
-    ZwQueryPerformanceCounter     = _NtQueryPerformanceCounter@8
-    NtCreateMailslotFile          = _NtCreateMailslotFile@32
-    ZwCreateMailslotFile          = _NtCreateMailslotFile@32
+    ZwQueryInformationToken       = _NtQueryInformationToken@20       @750
+    NtCreateSection               = _NtCreateSection@28               @751
+    ZwCreateSection               = _NtCreateSection@28               @752
+    NtOpenSection                 = _NtOpenSection@12                 @753
+    ZwOpenSection                 = _NtOpenSection@12                 @754
+    NtQuerySection                = _NtQuerySection@20                @755
+    ZwQuerySection                = _NtQuerySection@20                @756
+    NtMapViewOfSection            = _NtMapViewOfSection@40            @757
+    ZwMapViewOfSection            = _NtMapViewOfSection@40            @758
+    NtCreatePort                  = _NtCreatePort@20                  @759
+    ZwCreatePort                  = _NtCreatePort@20                  @760
+    NtConnectPort                 = _NtConnectPort@32                 @761
+    ZwConnectPort                 = _NtConnectPort@32                 @762
+    NtListenPort                  = _NtListenPort@8                   @763
+    ZwListenPort                  = _NtListenPort@8                   @764
+    NtAcceptConnectPort           = _NtAcceptConnectPort@24           @765
+    ZwAcceptConnectPort           = _NtAcceptConnectPort@24           @766
+    NtCompleteConnectPort         = _NtCompleteConnectPort@4          @767
+    ZwCompleteConnectPort         = _NtCompleteConnectPort@4          @768
+    NtRegisterThreadTerminatePort = _NtRegisterThreadTerminatePort@4  @769
+    ZwRegisterThreadTerminatePort = _NtRegisterThreadTerminatePort@4  @770
+    NtRequestWaitReplyPort        = _NtRequestWaitReplyPort@12        @771
+    ZwRequestWaitReplyPort        = _NtRequestWaitReplyPort@12        @772
+    NtReplyWaitReceivePort        = _NtReplyWaitReceivePort@16        @773
+    ZwReplyWaitReceivePort        = _NtReplyWaitReceivePort@16        @774
+    NtSetIntervalProfile          = _NtSetIntervalProfile@8           @775
+    ZwSetIntervalProfile          = _NtSetIntervalProfile@8           @776
+    NtQueryPerformanceCounter     = _NtQueryPerformanceCounter@8      @777
+    ZwQueryPerformanceCounter     = _NtQueryPerformanceCounter@8      @778
+    NtCreateMailslotFile          = _NtCreateMailslotFile@32          @779
+    ZwCreateMailslotFile          = _NtCreateMailslotFile@32          @780
     NtQuerySystemInformation      = _NtQuerySystemInformation@16      @95
-    ZwQuerySystemInformation      = _NtQuerySystemInformation@16
-    NtCreatePagingFile            = _NtCreatePagingFile@16
-    ZwCreatePagingFile            = _NtCreatePagingFile@16
-    NtDisplayString               = _NtDisplayString@4
-    ZwDisplayString               = _NtDisplayString@4
+    ZwQuerySystemInformation      = _NtQuerySystemInformation@16      @781
+    NtCreatePagingFile            = _NtCreatePagingFile@16            @782
+    ZwCreatePagingFile            = _NtCreatePagingFile@16            @783
+    NtDisplayString               = _NtDisplayString@4                @784
+    ZwDisplayString               = _NtDisplayString@4                @785
 
-    NtCreateSemaphore             = _NtCreateSemaphore@20
-    ZwCreateSemaphore             = _NtCreateSemaphore@20
-    NtOpenSemaphore               = _NtOpenSemaphore@12
-    ZwOpenSemaphore               = _NtOpenSemaphore@12
-    NtQuerySemaphore              = _NtQuerySemaphore@20
-    ZwQuerySemaphore              = _NtQuerySemaphore@20
-    NtReleaseSemaphore            = _NtReleaseSemaphore@12
-    ZwReleaseSemaphore            = _NtReleaseSemaphore@12
-    NtCreateEvent                 = _NtCreateEvent@20
-    ZwCreateEvent                 = _NtCreateEvent@20
-    NtOpenEvent                   = _NtOpenEvent@12
-    ZwOpenEvent                   = _NtOpenEvent@12
-    NtSetEvent                    = _NtSetEvent@8
-    ZwSetEvent                    = _NtSetEvent@8
+    NtCreateSemaphore             = _NtCreateSemaphore@20             @786
+    ZwCreateSemaphore             = _NtCreateSemaphore@20             @787
+    NtOpenSemaphore               = _NtOpenSemaphore@12               @788
+    ZwOpenSemaphore               = _NtOpenSemaphore@12               @789
+    NtQuerySemaphore              = _NtQuerySemaphore@20              @790
+    ZwQuerySemaphore              = _NtQuerySemaphore@20              @791
+    NtReleaseSemaphore            = _NtReleaseSemaphore@12            @792
+    ZwReleaseSemaphore            = _NtReleaseSemaphore@12            @793
+    NtCreateEvent                 = _NtCreateEvent@20                 @794
+    ZwCreateEvent                 = _NtCreateEvent@20                 @795
+    NtOpenEvent                   = _NtOpenEvent@12                   @796
+    ZwOpenEvent                   = _NtOpenEvent@12                   @797
+    NtSetEvent                    = _NtSetEvent@8                     @798
+    ZwSetEvent                    = _NtSetEvent@8                     @799
     NtResetEvent                  = _NtResetEvent@4                   @192
-    ZwResetEvent                  = _NtResetEvent@4
+    ZwResetEvent                  = _NtResetEvent@4                   @800
 
     NtQueryObject                 = _NtQueryObject@20                 @161
-    ZwQueryObject                 = _NtQueryObject@20
-    NtQuerySecurityObject         = _NtQuerySecurityObject@20
-    ZwQuerySecurityObject         = _NtQuerySecurityObject@20
-    NtDuplicateObject             = _NtDuplicateObject@28
-    ZwDuplicateObject             = _NtDuplicateObject@28
-    NtWaitForSingleObject         = _NtWaitForSingleObject@12
-    ZwWaitForSingleObject         = _NtWaitForSingleObject@12
+    ZwQueryObject                 = _NtQueryObject@20                 @801
+    NtQuerySecurityObject         = _NtQuerySecurityObject@20         @802
+    ZwQuerySecurityObject         = _NtQuerySecurityObject@20         @803
+    NtDuplicateObject             = _NtDuplicateObject@28             @804
+    ZwDuplicateObject             = _NtDuplicateObject@28             @805
+    NtWaitForSingleObject         = _NtWaitForSingleObject@12         @806
+    ZwWaitForSingleObject         = _NtWaitForSingleObject@12         @807
     NtOpenDirectoryObject         = _NtOpenDirectoryObject@12         @124
-    ZwOpenDirectoryObject         = _NtOpenDirectoryObject@12
-    NtCreateDirectoryObject       = _NtCreateDirectoryObject@12
-    ZwCreateDirectoryObject       = _NtCreateDirectoryObject@12
+    ZwOpenDirectoryObject         = _NtOpenDirectoryObject@12         @808
+    NtCreateDirectoryObject       = _NtCreateDirectoryObject@12       @809
+    ZwCreateDirectoryObject       = _NtCreateDirectoryObject@12       @810
     NtQueryDirectoryObject        = _NtQueryDirectoryObject@28        @149
-    ZwQueryDirectoryObject        = _NtQueryDirectoryObject@28
-    NtOpenSymbolicLinkObject      = _NtQuerySymbolicLinkObject@12
-    ZwOpenSymbolicLinkObject      = _NtQuerySymbolicLinkObject@12
-    NtCreateSymbolicLinkObject    = _NtCreateSymbolicLinkObject@16
-    ZwCreateSymbolicLinkObject    = _NtCreateSymbolicLinkObject@16
-    NtQuerySymbolicLinkObject     = _NtQuerySymbolicLinkObject@12
-    ZwQuerySymbolicLinkObject     = _NtQuerySymbolicLinkObject@12
+    ZwQueryDirectoryObject        = _NtQueryDirectoryObject@28        @811
+    NtOpenSymbolicLinkObject      = _NtQuerySymbolicLinkObject@12     @812
+    ZwOpenSymbolicLinkObject      = _NtQuerySymbolicLinkObject@12     @813
+    NtCreateSymbolicLinkObject    = _NtCreateSymbolicLinkObject@16    @814
+    ZwCreateSymbolicLinkObject    = _NtCreateSymbolicLinkObject@16    @815
+    NtQuerySymbolicLinkObject     = _NtQuerySymbolicLinkObject@12     @816
+    ZwQuerySymbolicLinkObject     = _NtQuerySymbolicLinkObject@12     @817
 
     NtCreateKey                   = _NtCreateKey@28
     ZwCreateKey                   = _NtCreateKey@28
@@ -240,22 +219,22 @@ EXPORTS
     RtlSubAuthorityCountSid       = _RtlSubAuthorityCountSid@4        @496
     RtlCopySid                    = _RtlCopySid@12                    @302
     RtlCreateSecurityDescriptor   = _RtlCreateSecurityDescriptor@8    @313
-    RtlValidSecurityDescriptor    = _RtlValidSecurityDescriptor@4
-    RtlLengthSecurityDescriptor   = _RtlLengthSecurityDescriptor@4
-    RtlGetDaclSecurityDescriptor  = _RtlGetDaclSecurityDescriptor@16
+    RtlValidSecurityDescriptor    = _RtlValidSecurityDescriptor@4     @600
+    RtlLengthSecurityDescriptor   = _RtlLengthSecurityDescriptor@4    @601
+    RtlGetDaclSecurityDescriptor  = _RtlGetDaclSecurityDescriptor@16  @602
     RtlSetDaclSecurityDescriptor  = _RtlSetDaclSecurityDescriptor@16  @483
-    RtlGetSaclSecurityDescriptor  = _RtlGetSaclSecurityDescriptor@16
-    RtlSetSaclSecurityDescriptor  = _RtlSetSaclSecurityDescriptor@16
+    RtlGetSaclSecurityDescriptor  = _RtlGetSaclSecurityDescriptor@16  @603
+    RtlSetSaclSecurityDescriptor  = _RtlSetSaclSecurityDescriptor@16  @604
     RtlGetOwnerSecurityDescriptor = _RtlGetOwnerSecurityDescriptor@12 @488
     RtlSetOwnerSecurityDescriptor = _RtlSetOwnerSecurityDescriptor@12 @487
     RtlSetGroupSecurityDescriptor = _RtlSetGroupSecurityDescriptor@12 @485
-    RtlGetGroupSecurityDescriptor = _RtlGetGroupSecurityDescriptor@12
+    RtlGetGroupSecurityDescriptor = _RtlGetGroupSecurityDescriptor@12 @605
     RtlCreateAcl                  = _RtlCreateAcl@12                  @306
     RtlFirstFreeAce               = _RtlFirstFreeAce@8                @370
     RtlAddAce                     = _RtlAddAce@20                     @260
-    RtlAddAccessAllowedAce        = _RtlAddAccessAllowedAce@16
-    RtlGetAce                     = _RtlGetAce@12
-    RtlAdjustPrivilege            = _RtlAdjustPrivilege@16
+    RtlAddAccessAllowedAce        = _RtlAddAccessAllowedAce@16        @606
+    RtlGetAce                     = _RtlGetAce@12                     @607
+    RtlAdjustPrivilege            = _RtlAdjustPrivilege@16            @608
 
     RtlAnsiStringToUnicodeString  = _RtlAnsiStringToUnicodeString@12  @269
     RtlOemStringToUnicodeString   = _RtlOemStringToUnicodeString@12   @447
@@ -372,7 +351,7 @@ EXPORTS
 ; -----------------
 ; Note: CDECL does not decorate the function names with parameter bytes!
 
-    _CIpow                       = _NTDLL__CIpow                     @749
+    _CIpow                       = _NTDLL__CIpow                     @349
     _ftol                        = _NTDLL__ftol                      @864
     _ltoa                        = _NTDLL__ltoa                      @866
     _memicmp                     = _NTDLL__memicmp                   @868
@@ -413,7 +392,7 @@ EXPORTS
     memchr                        = _NTDLL_memchr                    @903
     memcmp                        = _NTDLL_memcmp                    @904
     memcpy                        = _NTDLL_memcpy                    @905
-    memmove                       = fwd_memmove                              @906
+    memmove                       = _OS2memmove                              @906
     memset                        = _NTDLL_memset                    @907
     pow                           = _NTDLL_pow                       @908
     qsort                         = _NTDLL_qsort                     @909
