@@ -1,4 +1,4 @@
-# $Id: setup.os2prfemx.mk,v 1.2 2002-05-16 11:37:03 bird Exp $
+# $Id: setup.os2prfemx.mk,v 1.3 2002-06-19 02:20:01 bird Exp $
 
 # ---OS2, PROFILE, EMX----------------------------
 ENV_NAME="OS/2, Profile, EMX/GCC Compiler"
@@ -60,6 +60,7 @@ CC_FLAGS_IFS=$(CC_FLAGS_SYS:  = ) -Zdll
 CC_OBJ_OUT=-o$(SPACE:_= )
 #CC_LST_OUT=-S -o$(SPACE:_= )
 CC_PC_2_STDOUT=-C -E
+CC_AS_2_FILE=-S -o$(SPACE:_= )
 
 
 CXX_FLAGS=-c -DDEBUG -DOS2 -D__32BIT__ -DMODEL=FLAT -Zomf -Wall -Wstrict-prototypes -Wno-trigraphs \
@@ -73,6 +74,7 @@ CXX_FLAGS_IFS=$(CXX_FLAGS_SYS:  = ) -Zdll
 CXX_OBJ_OUT=-o$(SPACE:_= )
 #CXX_LST_OUT=-S -o$(SPACE:_= )
 CXX_PC_2_STDOUT=-C -E
+CXX_AS_2_FILE=-S -o$(SPACE:_= )
 
 !if "$(CC_AS_CXX)" != ""
 ! if "$(CXX_AS_CC)" != ""
