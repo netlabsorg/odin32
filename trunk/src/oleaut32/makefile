@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.26 2001-06-07 12:47:54 sandervl Exp $
+# $Id: makefile,v 1.27 2001-06-07 12:48:18 sandervl Exp $
 
 #
 # Odin32 API
@@ -11,13 +11,6 @@
 # Compiler, tools, and interference rules.
 #
 !include ../../makefile.inc
-
-#
-# Overrides.
-#
-!if "$(CCENV)" == "VAC36"
-CDEFINES    = $(CDEFINES) -DNONAMELESSSTRUCT -DNONAMELESSUNION
-!endif
 
 #
 # Object files. Prefix with OBJDIR and one space before the '\'.
