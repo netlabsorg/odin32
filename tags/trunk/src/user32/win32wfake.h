@@ -1,4 +1,4 @@
-/* $Id: win32wfake.h,v 1.1 2003-03-20 13:20:46 sandervl Exp $ */
+/* $Id: win32wfake.h,v 1.2 2003-03-27 10:42:42 sandervl Exp $ */
 /*
  * Win32 Fake Window Class for OS/2
  *
@@ -22,6 +22,8 @@ virtual ~Win32FakeWindow();
 
 virtual  BOOL   SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, int cy, UINT fuFlags, BOOL fShowWindow = FALSE);
 virtual  PRECT  getWindowRect();
+
+virtual  BOOL   isFakeWindow();
 
 protected:
 private:
