@@ -51,3 +51,4 @@
 /src/winspool/backup                       *
 /src/wnetap32/backup                       *
 /src/wsock32/backup                        *
+/src/comctl32                              *
