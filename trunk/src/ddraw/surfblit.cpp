@@ -1,4 +1,4 @@
-/* $Id: surfblit.cpp,v 1.1 2002-12-29 14:11:03 sandervl Exp $ */
+/* $Id: surfblit.cpp,v 1.2 2002-12-30 14:05:44 sandervl Exp $ */
 
 /*
  * DirectDraw Surface class implementaion
