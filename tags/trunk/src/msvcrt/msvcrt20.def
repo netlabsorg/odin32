@@ -1,4 +1,4 @@
-; $Id: msvcrt20.def,v 1.1 1999-11-30 19:44:05 sandervl Exp $
+; $Id: msvcrt20.def,v 1.2 1999-12-20 10:12:43 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY MSVCRT20 INITINSTANCE TERMINSTANCE
@@ -598,7 +598,7 @@ EXPORTS
 ;   _atoldbl							@527
     _beep			= CRTDLL__beep			@528
     _beginthread		= CRTDLL__beginthread		@529
-;   _beginthreadex						@530
+    _beginthreadex		= _MSVCRT__beginthreadex	@530
     _c_exit			= CRTDLL__c_exit		@531
     _cabs			= CRTDLL__cabs			@532
     _cexit			= CRTDLL__cexit			@533
@@ -626,7 +626,7 @@ EXPORTS
     _dup2			= CRTDLL__dup2			@555
     _ecvt			= CRTDLL__ecvt			@556
     _endthread			= CRTDLL__endthread		@557
-;   _endthreadex						@558
+    _endthreadex		= _MSVCRT__endthreadex		@558
     _environ			= MSVCRT__environ    		@559
     _eof			= CRTDLL__eof			@560
     _errno			= CRTDLL__errno			@561
@@ -747,7 +747,7 @@ EXPORTS
     _ltoa			= NTDLL__ltoa			@674
     _ltow			= _MSVCRT__ltow			@675
     _makepath			= CRTDLL__makepath		@676
-;    _matherr							@677
+    _matherr			= _MSVCRT__matherr		@677
     _mbbtombc			= CRTDLL__mbbtombc		@678
     _mbbtype			= CRTDLL__mbbtype		@679
     _mbccpy			= CRTDLL__mbccpy		@680
@@ -842,7 +842,7 @@ EXPORTS
     _seterrormode		= CRTDLL__seterrormode		@767
     _setjmp			= CRTDLL__setjmp		@768
     _setjmp3			= CRTDLL__setjmp		@769 ; Not correct
-;   _setmbcp							@770
+    _setmbcp			= _MSVCRT__setmbcp		@770
     _setmode							@771
     _setsystime			= CRTDLL__setsystime		@772
     _sleep			= CRTDLL__sleep			@773
