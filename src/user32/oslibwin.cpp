@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.49 1999-11-26 17:06:08 cbratschi Exp $ */
+/* $Id: oslibwin.cpp,v 1.50 1999-12-05 16:37:57 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -53,7 +53,7 @@ BOOL OSLibWinSetOwner(HWND hwnd, HWND hwndOwner)
 //******************************************************************************
 HWND OSLibWinCreateWindow(HWND hwndParent, ULONG dwWinStyle, ULONG dwFrameStyle,
                           char *pszName, HWND Owner, ULONG fHWND_BOTTOM, HWND *hwndFrame,
-                          ULONG id)
+                          ULONG id, BOOL fTaskList)
 {
  HWND  hwndClient;
 
@@ -80,7 +80,8 @@ HWND OSLibWinCreateWindow(HWND hwndParent, ULONG dwWinStyle, ULONG dwFrameStyle,
   dwClientStyle = dwWinStyle & ~(WS_TABSTOP | WS_GROUP | WS_CLIPSIBLINGS);
 
   dwFrameStyle |= FCF_NOBYTEALIGN;
-  if (hwndParent == HWND_DESKTOP && dwFrameStyle & FCF_TITLEBAR) {
+  if(fTaskList)
+  {
     dwFrameStyle |= FCF_TASKLIST | FCF_NOMOVEWITHOWNER;
   }
 
@@ -1052,11 +1053,16 @@ void OSLibTranslateScrollCmdAndMsg(ULONG *msg, ULONG *scrollcmd)
 }
 //******************************************************************************
 //******************************************************************************
-void OSLibSetWindowStyle(HWND hwnd, ULONG dwStyle)
+void OSLibSetWindowStyle(HWND hwnd, ULONG dwStyle, BOOL fTaskList)
 {
   ULONG OSWinStyle, OSFrameStyle, borderWidth, borderHeight,dwExStyle;
 
   OSLibWinConvertStyle(dwStyle, &dwExStyle, &OSWinStyle, &OSFrameStyle, &borderWidth, &borderHeight);
+
+  if(fTaskList)
+  {
+    OSFrameStyle |= FCF_TASKLIST | FCF_NOMOVEWITHOWNER;
+  }
 
 //  OSWinStyle = OSWinStyle & ~(WS_TABSTOP | WS_GROUP | WS_CLIPCHILDREN | WS_CLIPSIBLINGS);
   OSWinStyle = OSWinStyle & ~(WS_TABSTOP | WS_GROUP | WS_CLIPCHILDREN);
