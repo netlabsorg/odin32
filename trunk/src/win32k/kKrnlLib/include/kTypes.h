@@ -1,4 +1,4 @@
-/* $Id: kTypes.h,v 1.2 2001-09-27 03:05:22 bird Exp $
+/* $Id: kTypes.h,v 1.3 2001-10-14 22:51:58 bird Exp $
  *
  * Common typedefinitions for kLib.
  *
@@ -13,12 +13,21 @@
 *   Common stuff                                                               *
 *******************************************************************************/
 #ifndef TRUE
-#   define TRUE 1
+#   define TRUE         1
 #endif
 
 #ifndef FALSE
-#   define FALSE 0
+#   define FALSE        0
 #endif
+
+#ifndef PAGESIZE
+#   define PAGESIZE     0x1000
+#endif
+
+#ifndef PAGESHIFT
+#   define PAGESHIFT    12
+#endif
+
 
 /**
  * Maximum value a or b.
@@ -45,18 +54,23 @@
  * Aligns something, a, up to nearest alignment boundrary-
  * Note: Aligment must be a 2**n number.
  */
-#define KALIGNUP(alignment, a)      (((a) + (alignment - 1)) & ~(alignment - 1))
+#define KALIGNUP(alignment, a)      (((KSIZE)(a) + ((KSIZE)(alignment) - 1)) & ~((KSIZE)(alignment) - 1))
 
 /**
  * Aligns something, a, down to nearest alignment boundrary-
  * Note: Aligment must be a 2**n number.
  */
-#define KALIGNDOWN(alignment, a)    ((a) & ~(alignment - 1))
+#define KALIGNDOWN(alignment, a)    ((KSIZE)(a) & ~((KSIZE)(alignment) - 1))
 
 /**
  * Offset of struct member.
  */
-#define KOFFSETOF(type, member)     ((KSIZE)&((type *)0)->member)
+#define KOFFSETOF(type, member)     ((KSIZE) &((type *)0)->member )
+
+/**
+ * Size of a struct member.
+ */
+#define KSIZEOF(type, member)       (((KSIZE) sizeof(((type *)0)->member) )
 
 /**
  * Determins the number of entires declared in an array.
