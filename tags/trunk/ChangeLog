@@ -1,4 +1,9 @@
- /* $Id: ChangeLog,v 1.958 2000-05-24 01:55:48 phaller Exp $ */
+ /* $Id: ChangeLog,v 1.959 2000-05-24 19:26:28 sandervl Exp $ */
+
+ 2000-05-24: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: Fixed some memory map bugs (memory sdk sample works again)
+    - USER32:   Experimental generation of own WM_HITTEST messages (disabled now)
+                Don't activate active MDI child.
 
  2000-05-24: Patrick Haller <phaller@gmx.net>
     - WINMM:    finally fixed callback type of timeSetEvent() timers
