@@ -987,8 +987,9 @@ static INT LISTVIEW_GetItemWidth(HWND hwnd)
     }
 #ifdef __WIN32OS2__
     //SvL: An item can never be bigger than the client area
-    GetClientRect(hwnd, &rect);
-    nItemWidth = MIN(rect.left - rect.right, nItemWidth);
+    if(GetClientRect(hwnd, &rect)) {
+        nItemWidth = MIN(rect.right - rect.left, nItemWidth);
+    }
 #endif
   }
   else
