@@ -2731,7 +2731,7 @@ static INT MENU_TrackMenu( HMENU hmenu, UINT wFlags, INT x, INT y,
     MTRACKER mt;
     BOOL enterIdleSent = FALSE;
 #ifdef __WIN32OS2__
-    BOOL bSysMenu = FALSE;
+    BOOL bSysMenu = FALSE, bFirstMouseMove = TRUE;
 #endif
 
     mt.trackFlags = 0;
@@ -2921,7 +2921,15 @@ buttondown:
                        mouse moves. In Win31 winelook, the mouse button has to be held down */
 
 #ifdef __WIN32OS2__
-                    if ( !fOS2Look ||
+                    //PF Win32 eats first mousemove to prevent auto-select of item
+                    //on TrackMenuPopup pressed button - verified in Win2k
+                    if (bFirstMouseMove) 
+                    { 
+                        bFirstMouseMove = FALSE; 
+                        break;
+                    }
+
+                    if (!fOS2Look ||
 #else
                     if ( (TWEAK_WineLook > WIN31_LOOK) ||
 #endif
