@@ -1,4 +1,9 @@
- /* $Id: ChangeLog,v 1.17 1999-06-22 20:00:03 achimha Exp $ */
+ /* $Id: ChangeLog,v 1.18 1999-06-23 20:11:40 achimha Exp $ */
+ 99-23-06: Achim Hasenmueller
+        - ported latest WINE fixes and additions for comctl32. Changes
+          involve better undoc. DSA APIs, right colors for the tab control,
+          many improvements for the listview...
+
  99-21-06: Achim Hasenmueller
         - ported latest WINE DrawEdge code and moved everything to the
           new file src/user32/uitools.cpp
