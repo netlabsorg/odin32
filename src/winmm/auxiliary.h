@@ -1,4 +1,4 @@
-/* $Id: aux.h,v 1.3 1999-06-10 16:24:33 phaller Exp $ */
+/* $Id: auxiliary.h,v 1.1 1999-10-05 19:23:59 phaller Exp $ */
 
 /*
  * Auxilary multimedia apis

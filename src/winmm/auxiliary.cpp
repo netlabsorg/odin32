@@ -1,4 +1,4 @@
-/* $Id: aux.cpp,v 1.4 1999-08-19 18:46:04 phaller Exp $ */
+/* $Id: auxiliary.cpp,v 1.1 1999-10-05 19:23:59 phaller Exp $ */
 
 /*
  * Auxilary multimedia apis
@@ -24,7 +24,7 @@
 #include <unicode.h>
 
 #include "winmm.h"
-#include "aux.h"
+#include "auxiliary.h"
 
 ODINDEBUGCHANNEL(WINMM-AUX)
 
