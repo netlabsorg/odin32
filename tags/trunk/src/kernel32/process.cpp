@@ -1,4 +1,4 @@
-/* $Id: process.cpp,v 1.4 1999-12-01 19:46:49 sandervl Exp $ */
+/* $Id: process.cpp,v 1.5 2000-02-16 14:23:11 sandervl Exp $ */
 
 /*
  * Win32 process functions for OS/2
@@ -29,6 +29,9 @@
 #include <win\task.h>
 #include <winimagebase.h>
 #include "oslibdos.h"
+
+#define DBG_LOCALLOG	DBG_process
+#include "dbglocal.h"
 
 #define SHUTDOWN_NORETRY 1
 
@@ -67,8 +70,11 @@ HANDLE WIN32API OpenProcess(DWORD arg1, BOOL arg2, DWORD arg3)
 //******************************************************************************
 BOOL WIN32API GetExitCodeProcess(HANDLE arg1, LPDWORD  arg2)
 {
-    dprintf(("KERNEL32:  GetExitCodeProcess\n"));
-    return O32_GetExitCodeProcess(arg1, arg2);
+ BOOL rc;
+
+    rc = O32_GetExitCodeProcess(arg1, arg2);
+    dprintf(("KERNEL32:  GetExitCodeProcess returned %d (%x)", rc, (arg2) ? *arg2 : 0));
+    return rc;
 }
 //******************************************************************************
 //******************************************************************************

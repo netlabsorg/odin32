@@ -1,4 +1,4 @@
-/* $Id: hmtoken.cpp,v 1.2 2000-01-05 19:39:56 sandervl Exp $ */
+/* $Id: hmtoken.cpp,v 1.3 2000-02-16 14:24:00 sandervl Exp $ */
 
 /*
  * Win32 process/thread token handle manager class
@@ -33,6 +33,8 @@
 #include "HMToken.h"
 #include <wprocess.h>
 
+#define DBG_LOCALLOG	DBG_hmtoken
+#include "dbglocal.h"
 
 /*****************************************************************************
  * Name      : DWORD HMDeviceHandler::OpenThreadToken

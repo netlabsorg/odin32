@@ -1,4 +1,4 @@
-/* $Id: winexepe2lx.cpp,v 1.3 1999-10-17 01:49:09 bird Exp $ */
+/* $Id: winexepe2lx.cpp,v 1.4 2000-02-16 14:22:11 sandervl Exp $ */
 
 /*
  * Win32 PE2LX Exe class
@@ -31,6 +31,9 @@
 #include "oslibmisc.h"      // OSLibGetDllName
 #include "conwin.h"         // Windows Header for console only
 #include "console.h"
+
+#define DBG_LOCALLOG	DBG_winexepe2lx
+#include "dbglocal.h"
 
 
 /**

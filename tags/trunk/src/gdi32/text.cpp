@@ -1,4 +1,4 @@
-/* $Id: text.cpp,v 1.7 2000-01-29 14:22:13 sandervl Exp $ */
+/* $Id: text.cpp,v 1.8 2000-02-16 14:18:12 sandervl Exp $ */
 
 /*
  * GDI32 text apis
@@ -17,6 +17,9 @@
 #include <string.h>
 #include <float.h>
 #include "oslibgpi.h"
+
+#define DBG_LOCALLOG	DBG_text
+#include "dbglocal.h"
 
 #define ELLIPSIS    "..."
 #define ELLIPSISLEN 3

@@ -1,4 +1,4 @@
-/* $Id: conin.cpp,v 1.7 1999-12-09 19:08:25 sandervl Exp $ */
+/* $Id: conin.cpp,v 1.8 2000-02-16 14:25:31 sandervl Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -43,6 +43,8 @@
 #include "Console2.h"
 #include <heapstring.h>
 
+#define DBG_LOCALLOG	DBG_conin
+#include "dbglocal.h"
 
 /***********************************
  * Open32 support for SetLastError *

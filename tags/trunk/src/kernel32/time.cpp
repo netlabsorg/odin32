@@ -1,4 +1,4 @@
-/* $Id: time.cpp,v 1.6 1999-11-05 17:42:12 achimha Exp $ */
+/* $Id: time.cpp,v 1.7 2000-02-16 14:23:12 sandervl Exp $ */
 
 /*
  * Win32 time/date API functions
@@ -20,6 +20,9 @@
 #include <string.h>
 #include <stdio.h>
 #include "unicode.h"
+
+#define DBG_LOCALLOG	DBG_time
+#include "dbglocal.h"
 
 #define lstrcpynAtoW(unicode,ascii,asciilen) AsciiToUnicodeN(ascii,unicode,asciilen);
 

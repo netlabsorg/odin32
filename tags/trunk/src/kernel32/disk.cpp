@@ -1,4 +1,4 @@
-/* $Id: disk.cpp,v 1.8 2000-01-08 04:48:10 phaller Exp $ */
+/* $Id: disk.cpp,v 1.9 2000-02-16 14:25:39 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -19,6 +19,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include "unicode.h"
+
+#define DBG_LOCALLOG	DBG_disk
+#include "dbglocal.h"
 
 
 ODINDEBUGCHANNEL(KERNEL32-DISK)

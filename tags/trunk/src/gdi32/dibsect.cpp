@@ -1,4 +1,4 @@
-/* $Id: dibsect.cpp,v 1.17 2000-02-10 00:36:10 sandervl Exp $ */
+/* $Id: dibsect.cpp,v 1.18 2000-02-16 14:18:09 sandervl Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -25,6 +25,9 @@
 #include <winconst.h>
 #include <win32wnd.h>
 #include "oslibgpi.h"
+
+#define DBG_LOCALLOG	DBG_dibsect
+#include "dbglocal.h"
 
 //Win32 apis used:
 HWND WIN32API WindowFromDC(HDC hdc);
@@ -236,7 +239,7 @@ int DIBSection::SetDIBits(HDC hdc, HBITMAP hbitmap, UINT startscan, UINT
 
    if(bmpsize & 3)
    {
-     bmpsize = (bmpsize + 3) & ~3;
+     	bmpsize = (bmpsize + 3) & ~3;
    }
 
    bmpBits    = (char *)realloc(bmpBits, bmpsize*pbmi->biHeight);
@@ -249,6 +252,8 @@ int DIBSection::SetDIBits(HDC hdc, HBITMAP hbitmap, UINT startscan, UINT
    pOS2bmp->cBitCount     = pbmi->biBitCount;
    pOS2bmp->ulCompression = pbmi->biCompression;
    pOS2bmp->cbImage       = pbmi->biSizeImage;
+
+   dprintf(("DIBSection::SetDIBits (%d,%d), %d %d", pbmi->biWidth, pbmi->biHeight, pbmi->biBitCount, pbmi->biCompression));
 
    if(palsize)
      memcpy(pOS2bmp->argbColor, (char *)pbmi + 1 , palsize);

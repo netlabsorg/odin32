@@ -15,6 +15,9 @@
 #include "profile.h"
 #include "codepage.h"
 
+#define DBG_LOCALLOG	DBG_codepage
+#include "dbglocal.h"
+
 static UconvObject DisplayUconv = NULL;
 static UconvObject WindowsUconv = NULL;
 

@@ -1,4 +1,4 @@
-/* $Id: initsystem.cpp,v 1.3 1999-12-28 22:08:57 sandervl Exp $ */
+/* $Id: initsystem.cpp,v 1.4 2000-02-16 14:25:40 sandervl Exp $ */
 /*
  * Odin system initialization (registry & directories)
  *
@@ -19,6 +19,9 @@
 #include "initsystem.h"
 #include "directory.h"
 #include <versionos2.h>
+
+#define DBG_LOCALLOG	DBG_initsystem
+#include "dbglocal.h"
 
 static HINSTANCE hInstance = 0;
 

@@ -1,4 +1,4 @@
-/* $Id: hmopen32.cpp,v 1.16 2000-02-12 10:43:50 sandervl Exp $ */
+/* $Id: hmopen32.cpp,v 1.17 2000-02-16 14:24:00 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -29,6 +29,9 @@ inline void ignore_dprintf(...){}
 #include "HandleManager.h"
 #include "HMOpen32.h"
 #include "mmap.h"
+
+#define DBG_LOCALLOG	DBG_hmopen32
+#include "dbglocal.h"
 
 /*****************************************************************************
  * Defines                                                                   *

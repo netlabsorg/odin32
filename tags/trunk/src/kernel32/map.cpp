@@ -1,4 +1,4 @@
-/* $Id: map.cpp,v 1.3 1999-06-19 10:54:41 sandervl Exp $ */
+/* $Id: map.cpp,v 1.4 2000-02-16 14:25:42 sandervl Exp $ */
 
 /* Copyright (C) 1995 by Holger Veit (Holger.Veit@gmd.de)
  * Use at your own risk! No Warranty! The author is not responsible for
@@ -13,6 +13,9 @@
 
 #include "map.h"
 #include "mapos2.h"
+
+#define DBG_LOCALLOG	DBG_map
+#include "dbglocal.h"
 
 int mpioctl(HFILE fd, int func,struct map_ioctl* data)
 {

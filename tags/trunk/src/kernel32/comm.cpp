@@ -1,4 +1,4 @@
-/* $Id: comm.cpp,v 1.3 1999-11-27 12:48:25 achimha Exp $ */
+/* $Id: comm.cpp,v 1.4 2000-02-16 14:25:30 sandervl Exp $ */
 
 /*
  * PE2LX dialog conversion code
@@ -16,6 +16,8 @@
 #include "unicode.h"
 #include "handlemanager.h"
 
+#define DBG_LOCALLOG	DBG_comm
+#include "dbglocal.h"
 
 //------------------------------------------------------------------------------
 

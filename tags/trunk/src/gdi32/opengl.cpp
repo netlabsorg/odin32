@@ -1,4 +1,4 @@
-/* $Id: opengl.cpp,v 1.7 2000-02-05 15:55:54 sandervl Exp $ */
+/* $Id: opengl.cpp,v 1.8 2000-02-16 14:18:11 sandervl Exp $ */
 
 /*
  * GDI32 OpenGl stubs
@@ -20,6 +20,9 @@
 #include <odinwrap.h>
 #include "misc.h"
 #include "unicode.h"
+
+#define DBG_LOCALLOG	DBG_opengl
+#include "dbglocal.h"
 
 
 ODINDEBUGCHANNEL(GDI32-OPENGL)

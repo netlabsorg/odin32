@@ -1,4 +1,4 @@
-/* $Id: cpu.cpp,v 1.5 2000-02-03 18:56:39 sandervl Exp $ */
+/* $Id: cpu.cpp,v 1.6 2000-02-16 14:25:36 sandervl Exp $ */
 /*
  * Odin win32 CPU apis
  *
@@ -21,6 +21,9 @@
 #include "debugtools.h"
 #include <cpuhlp.h>
 #include "initsystem.h"
+
+#define DBG_LOCALLOG	DBG_cpu
+#include "dbglocal.h"
 
 DEFAULT_DEBUG_CHANNEL(CPU)
 

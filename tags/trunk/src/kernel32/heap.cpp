@@ -1,4 +1,4 @@
-/* $Id: heap.cpp,v 1.18 2000-01-29 10:42:38 sandervl Exp $ */
+/* $Id: heap.cpp,v 1.19 2000-02-16 14:23:57 sandervl Exp $ */
 
 /*
  * Win32 heap API functions for OS/2
@@ -17,6 +17,9 @@
 #include "os2heap.h"
 #include <heap.h>
 #include <odinwrap.h>
+
+#define DBG_LOCALLOG	DBG_heap
+#include "dbglocal.h"
 
 static HANDLE processheap = NULL;
 OS2Heap *OS2ProcessHeap = NULL;

@@ -1,4 +1,4 @@
-/* $Id: debug.cpp,v 1.1 1999-12-31 10:47:11 sandervl Exp $ */
+/* $Id: debug.cpp,v 1.2 2000-02-16 14:25:38 sandervl Exp $ */
 
 /*
  * Win32 debug Subsystem for OS/2
@@ -15,6 +15,9 @@
 #include <os2win.h>
 #include <misc.h>
 #include "oslibdebug.h"
+
+#define DBG_LOCALLOG	DBG_debug
+#include "dbglocal.h"
 
 /*****************************************************************************
  * Name      : BOOL WaitForDebugEvent

@@ -1,4 +1,4 @@
-/* $Id: winimagepe2lx.cpp,v 1.7 1999-11-29 00:04:06 bird Exp $ */
+/* $Id: winimagepe2lx.cpp,v 1.8 2000-02-16 14:22:12 sandervl Exp $ */
 
 /*
  * Win32 PE2LX Image base class
@@ -34,6 +34,8 @@
 #include <winimagebase.h>
 #include <winimagepe2lx.h>
 
+#define DBG_LOCALLOG	DBG_winimagepe2lx
+#include "dbglocal.h"
 
 /*******************************************************************************
 *   Structures and Typedefs                                                    *
