@@ -1,4 +1,4 @@
-/* $Id: winimage.h,v 1.3 1999-07-07 08:11:09 sandervl Exp $ */
+/* $Id: winimage.h,v 1.4 1999-08-09 22:46:46 phaller Exp $ */
 
 /*
  *
@@ -88,10 +88,12 @@ protected:
 public:
         void checkObject()
         {
+        #ifdef DEBUG
                 if(magic != MAGIC_WINIMAGE) {
                         eprintf(("Corrupt this pointer %X %X!!", this, magic));
                         DebugInt3();
                 }
+        #endif
         };
 #endif
 
@@ -130,8 +132,8 @@ static  BOOL  isPEImage(char *szFileName);
         void  setTLSInitSize(ULONG dwTlsSize)		{ tlsInitSize = dwTlsSize; };
         void  setTLSTotalSize(ULONG dwTlsSize)		{ tlsTotalSize = dwTlsSize; };
         void  setTLSCallBackAddr(PIMAGE_TLS_CALLBACK *dwTlsCallBackAddr)	
-	{ 
-	   tlsCallBackAddr = dwTlsCallBackAddr; 
+	{
+	   tlsCallBackAddr = dwTlsCallBackAddr;
 	};
 
 	void  tlsAttachThread();	//setup TLS structures for new thread
@@ -199,7 +201,7 @@ protected:
   	ULONG 			tlsInitSize;		//size of initialized TLS memory block
   	ULONG 			tlsTotalSize;		//size of TLS memory block
   	PIMAGE_TLS_CALLBACK    *tlsCallBackAddr;	//ptr to TLS callback array
-	ULONG                   tlsIndex;		//module TLS index 
+	ULONG                   tlsIndex;		//module TLS index
 
 private:
 
