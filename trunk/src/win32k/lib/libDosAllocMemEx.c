@@ -1,4 +1,4 @@
-/* $Id: libDosAllocMemEx.c,v 1.6 2001-02-19 05:42:57 bird Exp $
+/* $Id: libDosAllocMemEx.c,v 1.7 2001-02-20 04:57:28 bird Exp $
  *
  * DosAllocMemEx - Extened Edition of DosAllocMem.
  *                 Allows you to suggest an address of the memory.
@@ -43,7 +43,8 @@ APIRET APIENTRY  DosAllocMemEx(PPVOID ppv, ULONG cb, ULONG flag)
         K32ALLOCMEMEX Param;
         ULONG         cbParam = sizeof(Param);
         ULONG         cbData = 0UL;
-        Param.pv = *ppv;
+
+        Param.ppv = ppv;
         Param.cb = cb;
         Param.flFlags = flag;
         Param.rc = 0;
@@ -57,7 +58,6 @@ APIRET APIENTRY  DosAllocMemEx(PPVOID ppv, ULONG cb, ULONG flag)
                          "", 1, &cbData);
         if (rc == NO_ERROR)
         {
-            *ppv = Param.pv;
             rc = Param.rc;
         }
     }
