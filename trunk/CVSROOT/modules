@@ -24,9 +24,9 @@
 # character to interpose another module into the current module.  This
 # can be useful for creating a module that consists of many directories
 # spread out over the entire source repository.
-DailyBuild          -a &DailyBuild_scripts &DailyBuild_bin
-DailyBuild_scripts  -d scripts tools/DailyBuild
-DailyBuild_bin      -d scripts/bin tools/bin
+DailyBuild          &DailyBuild_scripts &DailyBuild_bin
+DailyBuild_scripts  -l -d scripts tools/DailyBuild
+DailyBuild_bin      -l -d scripts/bin tools/bin
 win32k              src/win32k
 kKrnlLib            src/win32k/kKrnlLib
 include             include
