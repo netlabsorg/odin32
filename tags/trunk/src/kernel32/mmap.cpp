@@ -1,4 +1,4 @@
-/* $Id: mmap.cpp,v 1.21 1999-11-08 20:53:24 sandervl Exp $ */
+/* $Id: mmap.cpp,v 1.22 1999-11-10 14:16:01 sandervl Exp $ */
 
 /*
  * Win32 Memory mapped file & view classes
@@ -144,7 +144,7 @@ Win32MemMap::~Win32MemMap()
 //If the write flag is set, this means commitPage had to enable this due to a pagefault
 //(all pages are readonly until the app tries to write to it)
 //******************************************************************************
-BOOL Win32MemMap::commitPage(ULONG offset, BOOL fWriteAccess)
+BOOL Win32MemMap::commitPage(ULONG offset, BOOL fWriteAccess, int nrpages)
 {
  MEMORY_BASIC_INFORMATION memInfo;
  LPVOID lpPageFaultAddr = (LPVOID)((ULONG)pMapping + offset);
@@ -157,8 +157,8 @@ BOOL Win32MemMap::commitPage(ULONG offset, BOOL fWriteAccess)
 
   dprintf(("Win32MemMap::commitPage %x (faultaddr %x)", pageAddr, lpPageFaultAddr));
   if(hMemFile != -1) {
-	if(VirtualQuery((LPSTR)pageAddr, &memInfo, NRPAGES_TOCOMMIT*PAGE_SIZE) == 0) {
-		dprintf(("Win32MemMap::commitPage: VirtualQuery (%x,%x) failed for %x", pageAddr, NRPAGES_TOCOMMIT*PAGE_SIZE));
+	if(VirtualQuery((LPSTR)pageAddr, &memInfo, nrpages*PAGE_SIZE) == 0) {
+		dprintf(("Win32MemMap::commitPage: VirtualQuery (%x,%x) failed for %x", pageAddr, nrpages*PAGE_SIZE));
 		goto fail;
 	}
 	//Only changes the state of the pages with the same attribute flags
@@ -206,8 +206,8 @@ BOOL Win32MemMap::commitPage(ULONG offset, BOOL fWriteAccess)
 	}
   }
   else {
-	if(VirtualQuery((LPSTR)pageAddr, &memInfo, NRPAGES_TOCOMMIT*PAGE_SIZE) == 0) {
-		dprintf(("Win32MemMap::commitPage: VirtualQuery (%x,%x) failed for %x", pageAddr, NRPAGES_TOCOMMIT*PAGE_SIZE));
+	if(VirtualQuery((LPSTR)pageAddr, &memInfo, nrpages*PAGE_SIZE) == 0) {
+		dprintf(("Win32MemMap::commitPage: VirtualQuery (%x,%x) failed for %x", pageAddr, nrpages*PAGE_SIZE));
 		goto fail;
 	}
   	if(VirtualAlloc((LPVOID)pageAddr, memInfo.RegionSize, MEM_COMMIT, newProt) == FALSE) {

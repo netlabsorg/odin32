@@ -1,4 +1,4 @@
-/* $Id: virtual.cpp,v 1.21 1999-10-24 22:51:22 sandervl Exp $ */
+/* $Id: virtual.cpp,v 1.22 1999-11-10 14:16:01 sandervl Exp $ */
 
 /*
  * Win32 virtual memory functions
@@ -30,6 +30,7 @@
 
 ODINDEBUGCHANNEL(KERNEL32-VIRTUAL)
 
+#define PAGE_SHIFT 12
 
 /***********************************************************************
  *             CreateFileMapping32A   (KERNEL32.46)
@@ -304,6 +305,23 @@ ODINFUNCTION4(LPVOID, VirtualAlloc, LPVOID, lpvAddress,
   {
     dprintf(("VirtualAlloc: Unknown protection flags, default to read/write"));
     flag |= PAG_READ | PAG_WRITE;
+  }
+
+  if(lpvAddress) 
+  {
+   Win32MemMap *map;
+   ULONG offset, nrpages;
+
+	nrpages = cbSize >> PAGE_SHIFT;
+	if(cbSize & 0xFFF)
+		nrpages++;
+
+  	map = Win32MemMapView::findMapByView((ULONG)lpvAddress, &offset, fdwProtect);
+  	if(map) {
+		//TODO: We don't allow protection flag changes for mmaped files now
+		map->commitPage(offset, FALSE, nrpages);
+		return lpvAddress;
+  	}
   }
 
   // commit memory
