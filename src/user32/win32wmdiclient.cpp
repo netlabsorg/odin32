@@ -1,4 +1,4 @@
-/* $Id: win32wmdiclient.cpp,v 1.29 2000-06-07 14:51:33 sandervl Exp $ */
+/* $Id: win32wmdiclient.cpp,v 1.30 2000-10-09 17:26:54 sandervl Exp $ */
 /*
  * Win32 MDI Client Window Class for OS/2
  *
@@ -1256,7 +1256,7 @@ BOOL MDICLIENT_Register()
     wndClass.cbClsExtra    = 0;
     wndClass.cbWndExtra    = 0;
     wndClass.hCursor       = 0;
-    wndClass.hbrBackground = (HBRUSH)LTGRAY_BRUSH;
+    wndClass.hbrBackground = (HBRUSH)GetStockObject(GRAY_BRUSH);
     wndClass.lpszClassName = MDICLIENTCLASSNAMEA;
 
     return RegisterClassA(&wndClass);

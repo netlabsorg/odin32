@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.104 2000-10-04 19:35:31 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.105 2000-10-09 17:26:50 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -838,6 +838,7 @@ PosChangedEnd:
 
    	rc = WinQueryUpdateRect(hwnd, &rectl);
         dprintf(("OS2: WM_PAINT %x (%d,%d) (%d,%d) rc=%d", win32wnd->getWindowHandle(), rectl.xLeft, rectl.yBottom, rectl.xRight, rectl.yTop, rc));
+
         if(rc && win32wnd->IsWindowCreated() && (rectl.xLeft != rectl.xRight &&
            rectl.yBottom != rectl.yTop)) 
 	{
@@ -1008,7 +1009,7 @@ VOID FrameTrackFrame(Win32BaseWindow *win32wnd,DWORD flags)
 {
   TRACKINFO track;
   RECTL     rcl;
-  PRECT     pWindowRect;
+  PRECT     pWindowRect, pClientRect;
   HWND      hwndTracking;
   HPS       hpsTrack;
   LONG      parentHeight, parentWidth;
@@ -1035,17 +1036,9 @@ VOID FrameTrackFrame(Win32BaseWindow *win32wnd,DWORD flags)
 	hpsTrack     = NULL;
    }
 
-   rcl.xLeft   = pWindowRect->left;
-   rcl.yTop    = OSLibQueryScreenHeight() - pWindowRect->top;
-   rcl.xRight  = pWindowRect->right;
-   rcl.yBottom = OSLibQueryScreenHeight() - pWindowRect->bottom;
-   if(hwndTracking != HWND_DESKTOP) {
-   	WinMapWindowPoints(win32wnd->getOS2WindowHandle(), HWND_DESKTOP, (PPOINTL)&rcl, 2);
-   }
-   WinCopyRect(hab, &track.rclTrack, &rcl);   /* starting point */
- 
-   WinSetRect(hab, &track.rclBoundary, 0, 0, parentWidth, parentHeight); /* bounding rectangle */
- 
+   mapWin32ToOS2Rect(parentHeight, pWindowRect, (PRECTLOS2)&track.rclTrack);
+   WinQueryWindowRect(hwndTracking, &track.rclBoundary);
+
    track.ptlMinTrackSize.x = 10;
    track.ptlMinTrackSize.y = 10;  /* set smallest allowed size of rectangle */
    track.ptlMaxTrackSize.x = parentWidth;
@@ -1055,7 +1048,7 @@ VOID FrameTrackFrame(Win32BaseWindow *win32wnd,DWORD flags)
  
    track.fs = flags;
  
-   if(WinTrackRect(HWND_DESKTOP, NULL, &track) )
+   if(WinTrackRect(hwndTracking, NULL, &track) )
    {
    	if(hpsTrack)	WinReleasePS(hpsTrack);
 
