@@ -1,4 +1,4 @@
-/* $Id: button.cpp,v 1.39 2001-05-03 18:13:10 sandervl Exp $ */
+/* $Id: button.cpp,v 1.40 2001-06-14 12:56:51 sandervl Exp $ */
 /* File: button.cpp -- Button type widgets
  *
  * Copyright (C) 1993 Johannes Ruscheinski
@@ -551,8 +551,15 @@ static LRESULT BUTTON_SetCheck(HWND hwnd,WPARAM wParam,LPARAM lParam)
   DWORD style = dwStyle & 0x0f;
 
   if (wParam > maxCheckState[style]) wParam = maxCheckState[style];
+#ifndef __WIN32OS2__
+  //Must clear WS_TABSTOP of control that is already disabled or else 
+  //multiple control can have this style ((auto)radiobutton) and 
+  //GetNextDlgTabItem will return the wrong one
+  //Happens in Opera preferences dialog (multimedia) where all autoradio
+  //buttons have the WS_TABSTOP style.
   if ((infoPtr->state & 3) != wParam)
   {
+#endif
     if ((style == BS_RADIOBUTTON) || (style == BS_AUTORADIOBUTTON))
     {
       DWORD oldStyle = dwStyle;
@@ -564,6 +571,10 @@ static LRESULT BUTTON_SetCheck(HWND hwnd,WPARAM wParam,LPARAM lParam)
 
       if (oldStyle != dwStyle) SetWindowLongA(hwnd,GWL_STYLE,dwStyle);
     }
+#ifdef __WIN32OS2__
+    if ((infoPtr->state & 3) != wParam)
+    {
+#endif
     infoPtr->state = (infoPtr->state & ~3) | wParam;
     PAINT_BUTTON(hwnd,style,ODA_SELECT);
   }
