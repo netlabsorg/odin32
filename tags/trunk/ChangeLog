@@ -1,4 +1,10 @@
-/* $Id: ChangeLog,v 1.1351 2001-04-05 09:31:52 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1352 2001-04-05 19:05:37 sandervl Exp $ */
+
+ 2001-04-05: Sofiya (sofiya@din.or.jp)
+    - KERNEL32: o WideCharToMultiByte/MultiByteToWideChar changes
+                  - srclen <= -1 -> calculate length (docs say only for -1)
+                  - source and destination pointer can't be the same (as docs also claim)
+                  (verified in Windows ME & Windows NT4, SP6)
 
  2001-04-05: Sander van Leeuwen <sandervl@xs4all.nl>   
     - USER32:   o Rewrote ShowCursor
