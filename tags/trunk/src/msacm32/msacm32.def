@@ -1,15 +1,8 @@
-; $Id: msacm32.def,v 1.1 1999-09-01 18:50:33 sandervl Exp $
+; $Id: msacm32.def,v 1.2 1999-09-18 15:57:10 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY MSACM32 INITINSTANCE TERMINSTANCE
 DATA MULTIPLE NONSHARED
-
-IMPORTS
-       _CloseDriver@12		= WINMM.CloseDriver
-       _OpenDriverA@12		= WINMM.OpenDriver
-       _DefDriverProc@20	= WINMM.DefDriverProc
-       _SendDriverMessage@16	= WINMM.SendDriverMessage
-
 
 EXPORTS
     acmDriverAddA		= _acmDriverAddA@20		@1

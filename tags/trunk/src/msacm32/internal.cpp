@@ -1,4 +1,4 @@
-/* $Id: internal.cpp,v 1.1 1999-09-01 18:50:32 sandervl Exp $ */
+/* $Id: internal.cpp,v 1.2 1999-09-18 15:57:10 sandervl Exp $ */
 /*
  *      MSACM32 library
  *
@@ -206,9 +206,4 @@ HDRVR MSACM_OpenDriverProc(DRIVERPROC pfnDriverProc)
 #endif
 }
 
-INT WINAPI lstrncmpiA( LPCSTR str1, LPCSTR str2, INT n )
-{
-  //CB: implement!
-  return 0;
-}
 

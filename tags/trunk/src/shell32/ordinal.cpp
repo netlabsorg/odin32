@@ -1,4 +1,4 @@
-/* $Id: ordinal.cpp,v 1.3 1999-06-24 19:27:49 phaller Exp $ */
+/* $Id: ordinal.cpp,v 1.4 1999-09-18 15:57:51 sandervl Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -26,7 +26,6 @@
 #include <wcstr.h>
 
 #include <misc.h>
-#include <nameid.h>
 #include <unicode.h>
 #include <winnls.h>
 
