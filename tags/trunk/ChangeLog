@@ -1,8 +1,10 @@
-/* $Id: ChangeLog,v 1.1557 2001-07-03 13:26:00 bird Exp $ */
+/* $Id: ChangeLog,v 1.1558 2001-07-03 22:05:13 bird Exp $ */
 
  2001-07-03: knut st. osmundsen <kosmunds@csc.com>
     - KERNEL32: o Improoved the Unhandled exception message by
                   trying to provide modulename and some kind of obj/offset.
+    - FastDep:  o (synced with OS2Tools) Make better use of data in evt.
+                   existing .depend file so that only changed files are processed.
 
  2001-07-03: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Executable load fix
