@@ -1,4 +1,4 @@
-/* $Id: treeview.cpp,v 1.17 2000-08-13 17:12:40 cbratschi Exp $ */
+/* $Id: treeview.cpp,v 1.18 2000-08-15 17:04:39 cbratschi Exp $ */
 /* Treeview control
  *
  * Copyright 1998 Eric Kohl <ekohl@abo.rhein-zeitung.de>
@@ -1285,9 +1285,9 @@ TREEVIEW_DeleteItem(TREEVIEW_INFO *infoPtr, WPARAM wParam, LPARAM lParam)
 
     if (lParam == (LPARAM)TVI_ROOT)
     {
-	parent = infoPtr->root;
+        parent = infoPtr->root;
         newSelection = NULL;
-	visible = TRUE;
+        visible = TRUE;
         TREEVIEW_RemoveTree(infoPtr);
     }
     else
@@ -1298,7 +1298,7 @@ TREEVIEW_DeleteItem(TREEVIEW_INFO *infoPtr, WPARAM wParam, LPARAM lParam)
             return FALSE;
 
         //TRACE("%p (%s)\n", wineItem, TREEVIEW_ItemName(wineItem));
-	parent = wineItem->parent;
+        parent = wineItem->parent;
 
         if (ISVISIBLE(wineItem))
         {
@@ -1316,17 +1316,17 @@ TREEVIEW_DeleteItem(TREEVIEW_INFO *infoPtr, WPARAM wParam, LPARAM lParam)
                 newSelection = wineItem->parent;
         }
 
-	if (infoPtr->firstVisible == wineItem)
-	{
-	    if (wineItem->nextSibling)
-	       newFirstVisible = wineItem->nextSibling;
-	    else if (wineItem->prevSibling)
-	       newFirstVisible = wineItem->prevSibling;
-	    else if (wineItem->parent != infoPtr->root)
-	       newFirstVisible = wineItem->parent;
-	}
-	else
-	    newFirstVisible = infoPtr->firstVisible;
+        if (infoPtr->firstVisible == wineItem)
+        {
+            if (wineItem->nextSibling)
+               newFirstVisible = wineItem->nextSibling;
+            else if (wineItem->prevSibling)
+               newFirstVisible = wineItem->prevSibling;
+            else if (wineItem->parent != infoPtr->root)
+               newFirstVisible = wineItem->parent;
+        }
+        else
+            newFirstVisible = infoPtr->firstVisible;
 
         TREEVIEW_RemoveItem(infoPtr, wineItem);
     }
@@ -1344,10 +1344,10 @@ TREEVIEW_DeleteItem(TREEVIEW_INFO *infoPtr, WPARAM wParam, LPARAM lParam)
      * hotItem ??? - used for comparision only.
      */
     if (!TREEVIEW_ValidItem(infoPtr, infoPtr->insertMarkItem))
-	infoPtr->insertMarkItem = 0;
+        infoPtr->insertMarkItem = 0;
 
     if (!TREEVIEW_ValidItem(infoPtr, infoPtr->dropItem))
-	infoPtr->dropItem = 0;
+        infoPtr->dropItem = 0;
 
     if (!TREEVIEW_ValidItem(infoPtr, newFirstVisible))
         newFirstVisible = infoPtr->root->firstChild;
@@ -1804,7 +1804,7 @@ TREEVIEW_SetItem(TREEVIEW_INFO *infoPtr, WPARAM wParam, LPARAM lParam,BOOL unico
 
     if (changed & (TVIF_INTEGRAL | TVIF_CHILDREN))
       TREEVIEW_QueueRefresh(infoPtr);
-    else
+    else if (changed)
       TREEVIEW_RefreshItem(infoPtr,wineItem,changed);
 
     return TRUE;
@@ -2015,16 +2015,16 @@ TREEVIEW_DrawItemLines(TREEVIEW_INFO *infoPtr, HDC hdc, TREEVIEW_ITEM *item)
             /* plussize = ceil(rectsize * 3/4) */
             LONG plussize = (rectsize + 1) * 3 / 4;
 
-	    HPEN hNewPen  = CreatePen(PS_SOLID, 0, infoPtr->clrLine);
-	    HPEN hOldPen  = SelectObject(hdc, hNewPen);
-	    HBRUSH hbr    = CreateSolidBrush(infoPtr->clrBk);
-	    HBRUSH hbrOld = SelectObject(hdc, hbr);
+            HPEN hNewPen  = CreatePen(PS_SOLID, 0, infoPtr->clrLine);
+            HPEN hOldPen  = SelectObject(hdc, hNewPen);
+            HBRUSH hbr    = CreateSolidBrush(infoPtr->clrBk);
+            HBRUSH hbrOld = SelectObject(hdc, hbr);
 
             Rectangle(hdc, centerx - rectsize, centery - rectsize,
                       centerx + rectsize + 1, centery + rectsize + 1);
 
-	    SelectObject(hdc, hbrOld);
-	    DeleteObject(hbr);
+            SelectObject(hdc, hbrOld);
+            DeleteObject(hbr);
 
             SelectObject(hdc, hOldPen);
             DeleteObject(hNewPen);
