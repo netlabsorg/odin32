@@ -324,7 +324,19 @@ static void draw_moving_frame( HDC hdc, RECT *rect, BOOL thickframe, DWORD hitte
         }
         SelectObject( hdc, hbrush );
     }
-    else DrawFocusRect( hdc, rect );
+    else {
+        static RECT oldRect = {0};
+
+        if(fRedraw && EqualRect(&oldRect, rect)) {
+            return;
+        }
+
+        if(fRedraw) {
+            DrawFocusRect( hdc, &oldRect );
+        }
+        DrawFocusRect( hdc, rect );
+        oldRect = *rect;
+    }
 }
 
 
