@@ -1,4 +1,4 @@
-# $Id: pdwin32.tools,v 1.9 2000-03-06 23:42:12 bird Exp $
+# $Id: pdwin32.tools,v 1.10 2000-03-09 19:38:51 bird Exp $
 # ODIN / win32os2 Project
 #
 # makefile for the build system tools and standard rules
@@ -15,14 +15,15 @@ RM          = rm -f
 CP          = copy
 MKDIR       = mkdir
 ECHO        = echo
+EXISTS      = $(PDWIN32_TOOLS)\Exists.cmd
+DOWITHDIRS  = $(PDWIN32_TOOLS)\dowithdirs.cmd
 IMPDEF      = $(PDWIN32_TOOLS)\impdef.exe
 DEPEND      = $(PDWIN32_TOOLS)\fastdep.exe -o$$(OBJDIR)
-#SvL: Remove this when everything has been converted to the new build rules
+
+#Svl: Remove this when everything has been converted to the new build rules
 !ifdef OLDBUILD
 DEPEND      = $(PDWIN32_TOOLS)\fastdep.exe
 !endif
-
-DOWITHDIRS  = $(PDWIN32_TOOLS)\dowithdirs.cmd
 MAKE_CMD    = nmake /nologo
 !ifdef DEBUG
 MAKE_CMD    = $(MAKE_CMD) DEBUG=1
