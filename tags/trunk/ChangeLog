@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.547 1999-12-18 16:30:41 cbratschi Exp $ */
+ /* $Id: ChangeLog,v 1.548 1999-12-18 17:21:18 sandervl Exp $ */
+
+ 99-12-18: Edgar Buerkle <Edgar.Buerkle@gmx.net>
+	- KERNEL32: Partially implemented GetThreadContext, Read/WriteProcessMemory
 
  99-12-18: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: added MDI menu window switching
