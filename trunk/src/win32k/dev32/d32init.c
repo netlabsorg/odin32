@@ -1,4 +1,4 @@
-/* $Id: d32init.c,v 1.30 2001-01-20 23:53:27 bird Exp $
+/* $Id: d32init.c,v 1.31 2001-02-02 08:27:16 bird Exp $
  *
  * d32init.c - 32-bits init routines.
  *
@@ -63,6 +63,7 @@
 *******************************************************************************/
 #ifdef DEBUG
 static char * apszPE[] = {"FLAGS_PE_NOT", "FLAGS_PE_PE2LX", "FLAGS_PE_PE", "FLAGS_PE_MIXED", "!invalid!"};
+static char * apszPEOneObject[] = {"FLAGS_PEOO_DISABLED", "FLAGS_PEOO_ENABLED", "FLAGS_PEOO_FORCED", "!invalid!"};
 static char * apszInfoLevel[] = {"INFOLEVEL_QUIET", "INFOLEVEL_ERROR", "INFOLEVEL_WARNING", "INFOLEVEL_INFO", "INFOLEVEL_INFOALL", "!invalid!"};
 #endif
 PMTE    pKrnlMTE = NULL;
@@ -133,6 +134,15 @@ USHORT _loadds _Far32 _Pascal R0Init32(RP32INIT *pRpInit)
         cch = strlen(pszTmp);
         switch (*pszTmp)
         {
+            case '1':   /* All-In-One-Object fix - temporary...- -1<-|+|*> */
+                if (pszTmp[1] == '-')
+                    options.fPEOneObject = FLAGS_PEOO_DISABLED;
+                else if (pszTmp[1] == '+')
+                    options.fPEOneObject = FLAGS_PEOO_ENABLED;
+                else
+                    options.fPEOneObject = FLAGS_PEOO_FORCED;
+                break;
+
             case 'c':
             case 'C': /* -C[1|2|3|4] or -Com:[1|2|3|4]  -  com-port no, def:-C2 */
                 pszTmp2 = strpbrk(pszTmp, ":=/- ");
@@ -354,6 +364,7 @@ USHORT _loadds _Far32 _Pascal R0Init32(RP32INIT *pRpInit)
         kprintf(("\n"));
 
     kprintf(("\tfPE=%d (%s)\n",     options.fPE, apszPE[MIN(options.fPE, 5)]));
+    kprintf(("\tfPEOneObject=%d (%s)\n",     options.fPEOneObject, apszPEOneObject[MIN(options.fPEOneObject, 3)]));
     kprintf(("\tulInfoLevel=%d (%s)\n", options.ulInfoLevel, apszInfoLevel[MIN(options.ulInfoLevel, 5)]));
     kprintf(("\tfElf=%d\n",         options.fElf));
     kprintf(("\tfUNIXScript=%d\n",  options.fUNIXScript));
