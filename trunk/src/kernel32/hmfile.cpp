@@ -1,4 +1,4 @@
-/* $Id: hmfile.cpp,v 1.24 2000-11-23 19:23:50 sandervl Exp $ */
+/* $Id: hmfile.cpp,v 1.25 2000-11-23 19:39:51 sandervl Exp $ */
 
 /*
  * File IO win32 apis
@@ -62,6 +62,7 @@ DWORD HMDeviceFileClass::CreateFile (LPCSTR        lpFileName,
 {
   HFILE hFile;
   HFILE hTemplate;
+  char  filepath[260];
 
   dprintfl(("KERNEL32: HMDeviceFileClass::CreateFile %s(%s,%08x,%08x,%08x)\n",
            lpHMDeviceName,
@@ -79,6 +80,10 @@ DWORD HMDeviceFileClass::CreateFile (LPCSTR        lpFileName,
             lpFileName+=3;
         else
             lpFileName+=4;
+  }
+  else {
+        ParsePath(lpFileName, filepath, sizeof(filepath));
+        lpFileName = filepath;
   }
 
 
