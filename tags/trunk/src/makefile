@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.16 1999-09-04 09:08:06 sandervl Exp $
+# $Id: makefile,v 1.17 1999-09-07 20:42:24 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -26,9 +26,7 @@ all:
         $(MAKE_CMD)
         cd ..\gdi32
         $(MAKE_CMD)
-        cd ..\user32
-        $(MAKE_CMD)
-        cd new
+        cd ..\user32\new
         $(MAKE_CMD)
         cd ..
         cd ..\advapi32
@@ -64,7 +62,6 @@ all:
         cd ..\peldr
         $(MAKE_CMD)
         cd ..\pe2lx
-#        wmake -f makefile.wat
         $(MAKE_CMD)
         cd ..\ddraw
         $(MAKE_CMD)
@@ -83,6 +80,8 @@ all:
         cd ..\psapi
         $(MAKE_CMD)
         cd ..\msvfw32
+        $(MAKE_CMD)
+        cd ..\crtdll
         $(MAKE_CMD)
         cd ..\msacm32
         $(MAKE_CMD)
@@ -145,6 +144,8 @@ clean:
         cd ..\winmm
         $(MAKE_CMD) clean
         cd ..\winspool
+        $(MAKE_CMD) clean
+        cd ..\crtdll
         $(MAKE_CMD) clean
         cd ..\shell32
         $(MAKE_CMD) clean
