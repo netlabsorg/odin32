@@ -1,4 +1,4 @@
-/* $Id: dsmixer.cpp,v 1.3 2000-08-02 15:48:27 bird Exp $ */
+/* $Id: dsmixer.cpp,v 1.4 2001-03-06 20:11:17 mike Exp $ */
 /*
  * DirectSound Software Mixer
  *
@@ -160,7 +160,7 @@ void MixFunc (OS2IDirectSoundBuffer *firstBuf, OS2IDirectSoundBuffer *outBuf,
    outnch = outBuf->lpfxFormat->nChannels;
    tomix = cbMix * 8 / outbits / outnch;
 
-   memset(&mixbuf, 0, tomix * 2 * sizeof(mixbuf[0]));
+   memset(&mixbuf[0], 0, tomix * 2 * sizeof(mixbuf[0]));
 
    while (inBuf != NULL) {
       if (inBuf->fPlaying) {
@@ -176,7 +176,7 @@ void MixFunc (OS2IDirectSoundBuffer *firstBuf, OS2IDirectSoundBuffer *outBuf,
       for (i = 0; i < tomix * outnch; i++) {
          if (mixbuf[i] <= -32768) data16b[outpos] = -32768;
          else if (mixbuf[i] >= 32767) data16b[outpos] = 32767;
-         else data16b[outpos] = mixbuf[i];
+         else data16b[outpos] = (signed short)mixbuf[i];
          outpos++;
          if (outpos >= outlen) outpos = 0;
       }
@@ -185,7 +185,7 @@ void MixFunc (OS2IDirectSoundBuffer *firstBuf, OS2IDirectSoundBuffer *outBuf,
       for (i = 0; i < tomix * outnch; i++) {
          if (mixbuf[i] <= -32768) data8b[outpos] = 0;
          else if (mixbuf[i] >= 32767) data8b[outpos] = 255;
-         else data8b[outpos] = mixbuf[i] / 256 + 128;
+         else data8b[outpos] = (signed short)mixbuf[i] / 256 + 128;
          outpos++;
          if (outpos >= outlen) outpos = 0;
       }

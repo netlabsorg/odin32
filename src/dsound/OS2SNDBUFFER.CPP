@@ -1,4 +1,4 @@
-/* $Id: OS2SNDBUFFER.CPP,v 1.8 2000-05-18 20:37:09 mike Exp $ */
+/* $Id: OS2SNDBUFFER.CPP,v 1.9 2001-03-06 20:11:16 mike Exp $ */
 
 /*
  * DirectSound SoundBuffer class
@@ -76,7 +76,7 @@ OS2IDirectSoundBuffer::OS2IDirectSoundBuffer(OS2IDirectSound *DSound, const DSBU
 
    // get the primary buffer from the DSound instance.
    primary = DSound->primary;
- 
+
    // We can still to the below logic just in case!!  Should not be required thow!
    // If the primary SoundBuffer doesn't exist by now, we have to create it!
    if (primary == NULL) {
@@ -327,7 +327,7 @@ HRESULT __stdcall SoundBufGetFormat(THIS_ LPWAVEFORMATEX lpwfxFormat,
    if (me == NULL || lpwfxFormat == NULL || ddwSizeAllocated == 0) {
       return DSERR_INVALIDPARAM;
    }
-   copysize = min(ddwSizeAllocated, (me->lpfxFormat->cbSize + sizeof(WAVEFORMATEX)));
+   copysize = MIN(ddwSizeAllocated, (me->lpfxFormat->cbSize + sizeof(WAVEFORMATEX)));
    memcpy(lpwfxFormat, me->lpfxFormat, copysize);
 
    if (lpdwSizeWritten) {
@@ -456,8 +456,6 @@ HRESULT __stdcall SoundBufLock(THIS_ DWORD dwWriteCursor, DWORD dwWriteBytes,
 HRESULT __stdcall SoundBufPlay(THIS_ DWORD dwRes1, DWORD dwRes2, DWORD dwFlags)
 {
    OS2IDirectSoundBuffer *me = (OS2IDirectSoundBuffer *)This;
-
-   ULONG ulBytesToPlay;
 
    dprintf(("DSOUND-OS2IDirectSoundBuffer::SoundBufPlay (buf=%X)", me));
    if (me == NULL) {

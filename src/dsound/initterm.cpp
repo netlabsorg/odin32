@@ -45,20 +45,22 @@ static HMODULE dllHandle = 0;
 
 //******************************************************************************
 //******************************************************************************
-BOOL WINAPI LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
+BOOL WINAPI OdinLibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
 {
    switch (fdwReason)
    {
    case DLL_PROCESS_ATTACH:
-	return TRUE;
+        return TRUE;
 
    case DLL_THREAD_ATTACH:
    case DLL_THREAD_DETACH:
-	return TRUE;
+        return TRUE;
 
    case DLL_PROCESS_DETACH:
-	ctordtorTerm();
-	return TRUE;
+#ifdef __IBMCPP__
+        ctordtorTerm();
+#endif
+        return TRUE;
    }
    return FALSE;
 }
@@ -70,11 +72,12 @@ BOOL WINAPI LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
 /* linkage convention MUST be used because the operating system loader is   */
 /* calling this function.                                                   */
 /****************************************************************************/
-unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
-                                   ulFlag)
+#ifdef __IBMCPP__
+unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long ulFlag)
+#else
+unsigned long APIENTRY LibMain(unsigned long hModule, unsigned long ulFlag)
+#endif
 {
-   size_t i;
-   APIRET rc;
 
    /*-------------------------------------------------------------------------*/
    /* If ulFlag is zero then the DLL is being loaded so initialization should */
@@ -85,23 +88,24 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
    switch (ulFlag) {
       case 0 :
       {
-   	 DosQueryModuleName(hModule, CCHMAXPATH, dsoundPath);
+         DosQueryModuleName(hModule, CCHMAXPATH, dsoundPath);
          char *endofpath = strrchr(dsoundPath, '\\');
          if(endofpath) *(endofpath+1) = 0;
+#ifdef __IBMCPP__
          ctordtorInit();
-
+#endif
          CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
 
-	 dllHandle = RegisterLxDll(hModule, LibMain, (PVOID)&_Resource_PEResTab);
-         if(dllHandle == 0) 
-		return 0UL;
+         dllHandle = RegisterLxDll(hModule, OdinLibMain, (PVOID)&_Resource_PEResTab);
+         if(dllHandle == 0)
+                return 0UL;
 
          break;
       }
 
       case 1 :
          if(dllHandle) {
-	 	UnregisterLxDll(dllHandle);
+                UnregisterLxDll(dllHandle);
          }
          break;
       default  :
