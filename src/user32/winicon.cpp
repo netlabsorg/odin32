@@ -1,4 +1,4 @@
-/* $Id: winicon.cpp,v 1.29 2001-08-26 14:23:35 sandervl Exp $ */
+/* $Id: winicon.cpp,v 1.30 2001-10-14 20:15:15 sandervl Exp $ */
 /*
  * Win32 Icon Code for OS/2
  *
@@ -226,7 +226,7 @@ HICON WINAPI CreateIconIndirect(ICONINFO *iconinfo)
         }
 
 #ifdef __WIN32OS2__
-        info->hColorBmp = OSLibWinCreatePointer(info, (char*)(info + 1), (LPBITMAP_W)&bmpAnd, (char*)(info + 1) + sizeAnd, (LPBITMAP_W)&bmpXor, FALSE);
+        info->hColorBmp = OSLibWinCreatePointer(info, (char*)(info + 1), (LPBITMAP_W)&bmpAnd, (char*)(info + 1) + sizeAnd, (LPBITMAP_W)&bmpXor, iconinfo->fIcon);
 #endif
         GlobalUnlock(hObj);
 
@@ -1198,7 +1198,8 @@ static HGLOBAL CURSORICON_CreateFromResource( HINSTANCE hInstance, DWORD dwResGr
         else {
             GetBitmapBits( hXorBits, sizeXor, (char *)(info + 1) + sizeAnd);
         }
-        info->hColorBmp = OSLibWinCreatePointer(info, (char *)(info + 1), (LPBITMAP_W)&bmpAnd, (char *)(info + 1) + sizeAnd, (LPBITMAP_W)&bmpXor, bIcon == FALSE);
+        info->hColorBmp = OSLibWinCreatePointer(info, (char*)(info + 1), (LPBITMAP_W)&bmpAnd, (char*)(info + 1) + sizeAnd, (LPBITMAP_W)&bmpXor, bIcon == FALSE);
+
         dprintf(("Create cursor/icon %x with OS/2 pointer handle %x", hObj, info->hColorBmp));
         GlobalUnlock( hObj );
     }
