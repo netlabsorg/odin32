@@ -1,4 +1,8 @@
- /* $Id: ChangeLog,v 1.48 1999-07-14 08:39:22 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.49 1999-07-14 21:08:19 cbratschi Exp $ */
+ 99-07-14: Christoph Bratschi <cbratschi@datacomm.ch>
+        - USER32/NEW: several bugs fixed, compiles now
+                      CreateWindow doesn't work yet
+
  99-07-13: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32/NEW: *VERY* preliminary/alpha code for Open32 replacement in user32
                       Compiles, but not tested at all.
