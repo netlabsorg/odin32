@@ -1,4 +1,4 @@
-; $Id: ws2_32.def,v 1.13 2002-08-16 15:30:41 sandervl Exp $
+; $Id: ws2_32.def,v 1.14 2003-02-22 10:05:41 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY WS2_32 INITINSTANCE
@@ -117,14 +117,14 @@ EXPORTS
 ; WSANtohl                                         @64
 ; WSANtohs                                         @65
 ; WSAProviderConfigChange                          @66
-; WSARecv                                          @67
+  WSARecv            = _WSARecv@28                 @67
 ; WSARecvDisconnect                                @68
-; WSARecvFrom                                      @69
+  WSARecvFrom        = _WSARecvFrom@36             @69
 ; WSARemoveServiceClass                            @70
   WSAResetEvent      = _ResetEvent@4               @71
-; WSASend                                          @72
+  WSASend            = _WSASend@28                 @72     
   WSASendDisconnect  = _WSASendDisconnect@8        @73
-; WSASendTo                                        @74
+  WSASendTo          = _WSASendTo@36               @74
   WSASetEvent        = _WSASetEvent@4              @75
 ; WSASetServiceA                                   @76
 ; WSASetServiceW                                   @77
