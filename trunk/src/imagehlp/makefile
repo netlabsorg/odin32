@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2000-01-26 23:19:56 sandervl Exp $
+# $Id: makefile,v 1.6 2000-02-05 02:00:05 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -21,14 +21,14 @@ CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
 
 TARGET = imagehlp
 
-OBJS =  imagehlp.obj internal.obj initterm.obj
+OBJS =  imagehlp.obj internal.obj initterm.obj resource.obj
 
 all: $(TARGET).dll $(TARGET).lib
 
 
 $(TARGET).dll: $(OBJS) $(TARGET).def
 	$(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) $(TARGET).def \
-              $(PDWIN32_LIB)/pmwinx.lib $(PDWIN32_LIB)/kernel32.lib \
+              $(PDWIN32_LIB)/kernel32.lib \
               $(PDWIN32_LIB)/odincrt.lib OS2386.LIB $(RTLLIB_O)
 	$(CP) $@ $(PDWIN32_BIN)
 
@@ -40,6 +40,10 @@ $(TARGET).lib: $(TARGET)exp.def
 $(TARGET)exp.def: $(TARGET).def
         $(IMPDEF) $** $@
 
+resource.asm: $(TARGET).rc
+    $(RC) $(RCFLAGS) -o resource.asm $(TARGET).rc
+
+resource.obj: resource.asm
 
 initterm.obj: initterm.cpp
 imagehlp.obj: imagehlp.cpp

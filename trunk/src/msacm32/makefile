@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 2000-01-26 23:19:57 sandervl Exp $
+# $Id: makefile,v 1.7 2000-02-05 02:02:34 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -22,7 +22,7 @@ CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
 TARGET = msacm32
 
 OBJS =  msacm32.obj filter.obj format.obj internal.obj \
-	stream.obj driver.obj  initterm.obj
+	stream.obj driver.obj  initterm.obj resource.obj
 
 all: $(TARGET).dll $(TARGET).lib
 
@@ -43,6 +43,10 @@ $(TARGET).lib: $(TARGET)exp.def
 $(TARGET)exp.def: $(TARGET).def
         $(IMPDEF) $** $@
 
+resource.asm: $(TARGET).rc
+    $(RC) $(RCFLAGS) -o resource.asm $(TARGET).rc
+
+resource.obj: resource.asm
 
 msacm32.obj: msacm32.cpp
 driver.obj: driver.cpp

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2000-01-26 23:19:57 sandervl Exp $
+# $Id: makefile,v 1.6 2000-02-05 02:07:39 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -21,14 +21,14 @@ CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
 
 TARGET = olecli32
 
-OBJS =  olecli32.obj initterm.obj
+OBJS =  olecli32.obj resource.obj $(PDWIN32_LIB)/dllentry.obj
 
 all: $(TARGET).dll $(TARGET).lib
 
 
 $(TARGET).dll: $(OBJS) $(TARGET).def
 	$(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) $(TARGET).def \
-              $(PDWIN32_LIB)/pmwinx.lib $(PDWIN32_LIB)/kernel32.lib \
+              $(PDWIN32_LIB)/kernel32.lib \
               $(PDWIN32_LIB)/odincrt.lib OS2386.LIB $(RTLLIB_O)
 	$(CP) $@ $(PDWIN32_BIN)
 
@@ -40,8 +40,11 @@ $(TARGET).lib: $(TARGET)exp.def
 $(TARGET)exp.def: $(TARGET).def
         $(IMPDEF) $** $@
 
+resource.asm: $(TARGET).rc
+    $(RC) $(RCFLAGS) -o resource.asm $(TARGET).rc
 
-initterm.obj: initterm.cpp
+resource.obj: resource.asm
+
 olecli32.obj: olecli32.cpp
 
 clean:

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2000-01-15 22:02:48 sandervl Exp $
+# $Id: makefile,v 1.3 2000-02-05 02:16:22 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -20,7 +20,7 @@ CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
 
 TARGET = mcianim
 
-OBJS =  mcianim.obj initterm.obj
+OBJS =  mcianim.obj $(PDWIN32_LIB)/dllentry.obj
 
 all: $(TARGET).dll $(TARGET).lib
 
@@ -37,7 +37,6 @@ $(TARGET).lib: $(TARGET).def
 	$(CP) $@ $(PDWIN32_LIB)
 
 
-initterm.obj: initterm.cpp
 mcianim.obj: mcianim.cpp
 
 clean:

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2000-01-18 20:24:02 sandervl Exp $
+# $Id: makefile,v 1.3 2000-02-05 02:16:26 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -20,7 +20,7 @@ CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
 
 TARGET = msacm32
 
-OBJS =  msacm32.obj initterm.obj
+OBJS =  msacm32.obj  $(PDWIN32_LIB)/dllentry.obj
 
 all: $(TARGET).drv $(TARGET).lib
 
@@ -37,11 +37,10 @@ $(TARGET).lib: $(TARGET).def
 	$(CP) $@ $(PDWIN32_LIB)
 
 
-initterm.obj: initterm.cpp
 msacm32.obj: msacm32.cpp
 
 clean:
-	$(RM) *.obj *.lib *.drv *~ *.map *.pch
+	$(RM) *.obj *.lib *.drv *.map *.pch
 	$(RM) $(PDWIN32_BIN)\$(TARGET).drv
 	$(RM) $(PDWIN32_LIB)\$(TARGET).lib
 

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2000-01-15 22:02:49 sandervl Exp $
+# $Id: makefile,v 1.3 2000-02-05 02:16:24 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -20,7 +20,7 @@ CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
 
 TARGET = mciseq
 
-OBJS =  mciseq.obj initterm.obj
+OBJS =  mciseq.obj  $(PDWIN32_LIB)/dllentry.obj
 
 all: $(TARGET).dll $(TARGET).lib
 
@@ -37,7 +37,6 @@ $(TARGET).lib: $(TARGET).def
 	$(CP) $@ $(PDWIN32_LIB)
 
 
-initterm.obj: initterm.cpp
 mciseq.obj: mciseq.cpp
 
 clean:

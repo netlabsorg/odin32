@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7 2000-01-06 20:05:46 sandervl Exp $
+# $Id: makefile,v 1.8 2000-02-05 02:01:38 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -21,7 +21,7 @@ IMPLIBFLAGS = $(IMPLIBFLAGS)
 
 TARGET = lz32
 
-OBJS =  lz32.obj initterm.obj
+OBJS =  lz32.obj resource.obj $(PDWIN32_LIB)/dllentry.obj
 
 all: $(TARGET).dll $(TARGET).lib
 
@@ -44,8 +44,12 @@ $(TARGET).lib: $(TARGET)exp.def
 	$(CP) $@ $(PDWIN32_LIB)
 
 
+resource.asm: $(TARGET).rc
+    $(RC) $(RCFLAGS) -o resource.asm $(TARGET).rc
+
+resource.obj: resource.asm
+
 lz32.obj: lz32.cpp lz32.h $(PDWIN32_INCLUDE)\win\debugtools.h
-initterm.obj: initterm.cpp
 
 clean:
         $(RM) *exp.def *.obj *.lib *.dll *.map *.pch

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.12 1999-10-22 18:09:16 sandervl Exp $
+# $Id: makefile,v 1.13 2000-02-05 02:16:21 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -24,7 +24,7 @@ TARGET = winmm
 OBJS =  os2timer.obj waveout.obj dwaveout.obj time.obj \
         wavein.obj auxiliary.obj auxos2.obj mixer.obj \
         midi.obj irtmidi.obj midistrm.obj initterm.obj mci.obj joy.obj \
-        mmio.obj driver.obj playsound.obj joyos2.obj
+        mmio.obj driver.obj playsound.obj joyos2.obj resource.obj
 
 
 all: $(TARGET).dll $(TARGET).lib
@@ -47,6 +47,11 @@ $(TARGET).LIB: $(TARGET)exp.def
 $(TARGET)exp.def: $(TARGET).def
         $(IMPDEF) $** $@
 
+
+resource.asm: $(TARGET).rc
+    $(RC) $(RCFLAGS) -o resource.asm $(TARGET).rc
+
+resource.obj: resource.asm
 
 driver.obj:     driver.cpp
 os2timer.obj:   os2timer.cpp os2timer.h time.h

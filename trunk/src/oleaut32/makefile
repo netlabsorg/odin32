@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.13 2000-01-26 23:48:29 sandervl Exp $
+# $Id: makefile,v 1.14 2000-02-05 02:07:04 sandervl Exp $
 #
 # PD-Win32 API 
 #
@@ -40,7 +40,7 @@ OBJS =  oleaut32.obj guid.obj \
 	itypelib.obj \
 	itypeinfo.obj \
 	hash.obj \
-	safearray.obj stubs.obj
+	safearray.obj stubs.obj resource.obj
 
 all: $(TARGET).dll $(ORGTARGET).lib
 
@@ -64,10 +64,15 @@ $(ORGTARGET).lib: $(ORGTARGET)exp.def
 $(ORGTARGET)exp.def: $(ORGTARGET).def
         $(IMPDEF) $** $@
 
+resource.asm: $(ORGTARGET).rc
+    $(RC) $(RCFLAGS) -o resource.asm $(ORGTARGET).rc
+
+resource.obj: resource.asm
+
 hash.obj:		hash.cpp oList.h
 oList.obj:		oList.cpp oList.h
 oleaut32.obj:		oleaut32.cpp oleaut32.h
-initterm.obj:		initterm.cpp
+initterm.obj:		initterm.cpp $(PDWIN32_INCLUDE)\exitlist.h
 ole2disp.obj:   	ole2disp.cpp oleaut32.h
 variant.obj:    	variant.cpp parsedt.h
 typelib.obj:		typelib.cpp oleaut32.h oList.h itypelib.h
