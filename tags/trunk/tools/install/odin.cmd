@@ -1,4 +1,4 @@
-/* $Id: odin.cmd,v 1.22 2000-12-24 14:36:54 sandervl Exp $
+/* $Id: odin.cmd,v 1.23 2000-12-30 10:18:36 sandervl Exp $
  *
  * Odin32 API WarpIn installation script generator.
  *
@@ -344,14 +344,14 @@ call SysFileDelete sInstallArchive
  */
 sWICCmd '1 -c'||sMainDir 'ChangeLog LICENSE.TXT';
 if (rc <> 0) then return rc;
-sWICCmd '1 -c'||sDocDir 'ChangeLog-1999 ChangeLog-2000 Readme.txt ReportingBugs.txt Logging.txt';
+sWICCmd '1 -c'||sDocDir 'ChangeLog-1999 ChangeLog-2000 Readme.txt ReportingBugs.txt Logging.txt Odin.ini.txt';
 if (rc <> 0) then return rc;
 
 /*
  * Packet 2
  */
 say sWICCmd '2 -c'||sBinDir' *.ini 2 -c'||sDllDir '*.dll pe.exe pec.exe odininst.exe regsvr32.exe win32k.sys win32k.ddp Win32kCC.exe kRx.exe';
-sWICCmd '2 -c'||sBinDir' odin.ini';
+/* sWICCmd '2 -c'||sBinDir' odin.ini'; */
 if (rc <> 0) then return rc;
 sWICCmd '2 -c'||sDllDir 'pe.exe *.dll pec.exe odininst.exe regsvr32.exe win32k.sys win32k.ddp Win32kCC.exe kRx.exe';
 if (rc <> 0) then return rc;
