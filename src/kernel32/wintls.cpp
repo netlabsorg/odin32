@@ -1,9 +1,10 @@
-/* $Id: wintls.cpp,v 1.10 2000-05-27 11:30:36 sandervl Exp $ */
+/* $Id: wintls.cpp,v 1.11 2000-08-09 18:59:03 sandervl Exp $ */
 /*
  * Win32 TLS API functions
  *
- * Copyright 1998 Sander van Leeuwen (sandervl@xs4all.nl)
+ * Copyright 1998-2000 Sander van Leeuwen (sandervl@xs4all.nl)
  *
+ * TODO: correct errors set for Tls* apis? (verify in NT)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -53,10 +54,9 @@ void Win32ImageBase::tlsDelete()	//Free TLS index for this module
 //******************************************************************************
 void Win32ImageBase::tlsAttachThread()	//setup TLS structures for new thread
 {
- EXCEPTION_FRAME exceptFrame;
+ EXCEPTION_FRAME      exceptFrame;
  PIMAGE_TLS_CALLBACK *pCallback;
- TEB   *winteb;
- char  *tibmem;
+ LPVOID               tibmem;
 
    if(!tlsAddress) 
 	return;
@@ -74,7 +74,7 @@ void Win32ImageBase::tlsAttachThread()	//setup TLS structures for new thread
    dprintf(("tlsIndexAddr     %x", tlsIndexAddr));
    dprintf(("tlsCallbackAddr  %x", tlsCallBackAddr));
    dprintf(("*tlsCallbackAddr %x", (tlsCallBackAddr) ? *tlsCallBackAddr : 0));
-   tibmem = (char *)VirtualAlloc(0, tlsTotalSize, MEM_RESERVE|MEM_COMMIT, PAGE_READWRITE);
+   tibmem = VirtualAlloc(0, tlsTotalSize, MEM_RESERVE|MEM_COMMIT, PAGE_READWRITE);
    if(tibmem == NULL) {
 	dprintf(("tlsAttachThread: tibmem == NULL!!!!"));
 	DebugInt3();
@@ -83,8 +83,7 @@ void Win32ImageBase::tlsAttachThread()	//setup TLS structures for new thread
    memset(tibmem, 0, tlsTotalSize);
    memcpy(tibmem, tlsAddress, tlsInitSize);
 
-   winteb = (TEB *)*TIBFlatPtr;
-   winteb->tls_ptr[tlsIndex] = tibmem;
+   TlsSetValue(tlsIndex, tibmem);
    *tlsIndexAddr = tlsIndex;
 
    if(tlsCallBackAddr && (ULONG)*tlsCallBackAddr != 0) {
@@ -104,9 +103,9 @@ void Win32ImageBase::tlsAttachThread()	//setup TLS structures for new thread
 //******************************************************************************
 void Win32ImageBase::tlsDetachThread()	//destroy TLS structures
 {
- EXCEPTION_FRAME exceptFrame;
+ EXCEPTION_FRAME      exceptFrame;
  PIMAGE_TLS_CALLBACK *pCallback;
- TEB   *winteb;
+ LPVOID tlsmem;
 
    if(!tlsAddress) 
 	return;
@@ -124,9 +123,14 @@ void Win32ImageBase::tlsDetachThread()	//destroy TLS structures
 		*pCallback++;
 	}
    }
-   winteb = (TEB *)*TIBFlatPtr;
-   VirtualFree(winteb->tls_ptr[tlsIndex], tlsTotalSize, MEM_RELEASE);
-   winteb->tls_ptr[tlsIndex] = 0;
+   tlsmem = TlsGetValue(tlsIndex);
+   if(tlsmem) {
+   	VirtualFree(tlsmem, tlsTotalSize, MEM_RELEASE);
+   }
+   else {
+	dprintf(("ERROR: tlsDetachThread: tlsmem == NULL!!!"));
+   }
+   TlsFree(tlsIndex);
 }
 //******************************************************************************
 //******************************************************************************
@@ -135,9 +139,40 @@ void Win32ImageBase::tlsDetachThread()	//destroy TLS structures
 //******************************************************************************
 DWORD WIN32API TlsAlloc()
 {
- DWORD index;
+ DWORD index = -1;
 
+#if 1
+ THDB *thdb;
+ PDB  *pdb;
+ DWORD mask, tibidx;
+ int   i;
+
+  thdb = GetThreadTHDB();
+  pdb  = PROCESS_Current();
+
+  EnterCriticalSection(&pdb->crit_section);
+  tibidx = 0;
+  if(pdb->tls_bits[0] == 0xFFFFFFFF) {
+  	if(pdb->tls_bits[1] == 0xFFFFFFFF) {
+  		LeaveCriticalSection(&pdb->crit_section);
+  		SetLastError(ERROR_NO_MORE_ITEMS);  //TODO: correct error?
+		return -1;
+	}
+	tibidx = 1;
+  }
+  for(i=0;i<32;i++) {
+	mask = (1 << i);
+	if((pdb->tls_bits[tibidx] & mask) == 0) {
+		pdb->tls_bits[tibidx] |= mask;
+		index = (tibidx*32) + i;
+		break;
+	}
+  }
+  LeaveCriticalSection(&pdb->crit_section);
+  thdb->tls_array[index] = 0;
+#else
   index = O32_TlsAlloc();
+#endif
   dprintf(("KERNEL32: TlsAlloc returned %d", index));
   return index;
 }
@@ -146,7 +181,40 @@ DWORD WIN32API TlsAlloc()
 BOOL WIN32API TlsFree(DWORD index)
 {
   dprintf(("KERNEL32: TlsFree %d", index));
+#if 1
+ THDB  *thdb;
+ PDB   *pdb;
+ int    tlsidx;
+ DWORD  mask;
+
+  if(index >= TLS_MINIMUM_AVAILABLE)
+  {
+        SetLastError(ERROR_INVALID_PARAMETER);
+        return NULL;
+  }
+
+  thdb = GetThreadTHDB();
+  pdb  = PROCESS_Current();
+
+  EnterCriticalSection(&pdb->crit_section);
+  tlsidx = 0;
+  if(index > 32) {
+	tlsidx++;
+  }
+  mask = (1 << index);
+  if(pdb->tls_bits[tlsidx] & mask) {
+        LeaveCriticalSection(&pdb->crit_section);
+	pdb->tls_bits[tlsidx] &= ~mask;
+        thdb->tls_array[index] = 0;
+        SetLastError(ERROR_SUCCESS);
+	return TRUE;
+  }
+  LeaveCriticalSection(&pdb->crit_section);
+  SetLastError(ERROR_INVALID_PARAMETER); //TODO: correct error? (does NT even change the last error?)
+  return FALSE;
+#else
   return(O32_TlsFree(index));
+#endif
 }
 //******************************************************************************
 //******************************************************************************
@@ -154,16 +222,44 @@ LPVOID WIN32API TlsGetValue(DWORD index)
 {
  LPVOID rc;
 
+  if(index >= TLS_MINIMUM_AVAILABLE)
+  {
+        SetLastError(ERROR_INVALID_PARAMETER);
+        return NULL;
+  }
+  SetLastError(ERROR_SUCCESS);
+
+#if 1
+ THDB  *thdb;
+
+  thdb = GetThreadTHDB();
+  rc = thdb->tls_array[index];
+#else
   rc = O32_TlsGetValue(index);
-  dprintf2(("KERNEL32:  TlsGetValue %d returned %X\n", index, rc));
+#endif
+  dprintf2(("KERNEL32: TlsGetValue %d returned %X\n", index, rc));
   return(rc);
 }
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API TlsSetValue(DWORD index, LPVOID val)
 {
-  dprintf2(("KERNEL32:  TlsSetValue\n"));
+  dprintf2(("KERNEL32: TlsSetValue %d %x", index, val));
+  if(index >= TLS_MINIMUM_AVAILABLE)
+  {
+        SetLastError(ERROR_INVALID_PARAMETER);
+        return FALSE;
+  }
+  SetLastError(ERROR_SUCCESS);
+#if 1
+  THDB *thdb;
+
+  thdb = GetThreadTHDB();
+  thdb->tls_array[index] = val;
+  return TRUE;
+#else
   return(O32_TlsSetValue(index, val));
+#endif
 }
 //******************************************************************************
 //******************************************************************************
