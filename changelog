@@ -1,7 +1,11 @@
- /* $Id: changelog,v 1.581 1999-12-28 13:03:51 sandervl Exp $ */
+ /* $Id: changelog,v 1.582 1999-12-28 19:17:33 sandervl Exp $ */
 
  99-12-28: Sander van Leeuwen <sandervl@xs4all.nl>
 	- WININET: Created stub dll
+	- KERNEL32: Create Software\Microsoft\Windows NT\CurrentVersion registry key + necessary values
+                    Put all version information in include\versionos2.h
+                    Faked GetSystemPowerStatus (always returns online status
+                    for desktop system)
 
  99-12-28: Jens Wiessner <wiessnej@rfi.de>
 	- avifil32, comdlg32, crtdll, ddraw, dinput, dplay, dplayx, imagehlp,
