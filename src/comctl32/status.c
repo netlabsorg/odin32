@@ -1,4 +1,4 @@
-/* $Id: status.c,v 1.10 1999-08-14 16:13:12 cbratschi Exp $ */
+/* $Id: status.c,v 1.11 1999-09-26 11:01:10 achimha Exp $ */
 /*
  * Interface code to StatusWindow widget/control
  *
@@ -7,6 +7,8 @@
  * Copyright 1999 Achim Hasenmueller
  * Copyright 1999 Christoph Bratschi
  */
+
+/* WINE 990923 level */
 
 #include "winbase.h"
 #include "commctrl.h"
@@ -837,9 +839,9 @@ STATUSBAR_WMCreate (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
     LPCREATESTRUCTA lpCreate = (LPCREATESTRUCTA)lParam;
     NONCLIENTMETRICSA nclm;
-    RECT        rect;
-    int         width, len;
-    HDC hdc;
+    RECT	rect;
+    int	        width, len;
+    HDC	hdc;
     STATUSWINDOWINFO *self;
 
     self = (STATUSWINDOWINFO*)COMCTL32_Alloc (sizeof(STATUSWINDOWINFO));
@@ -872,59 +874,58 @@ STATUSBAR_WMCreate (HWND hwnd, WPARAM wParam, LPARAM lParam)
     self->parts[0].hIcon = 0;
 
     if (IsWindowUnicode (hwnd)) {
-        self->bUnicode = TRUE;
-        len = lstrlenW ((LPCWSTR)lpCreate->lpszName);
-        if (len) {
-            self->parts[0].text = COMCTL32_Alloc ((len + 1)*sizeof(WCHAR));
-            lstrcpyW (self->parts[0].text, (LPCWSTR)lpCreate->lpszName);
-        }
+	self->bUnicode = TRUE;
+	if (lpCreate->lpszName &&
+	    (len = lstrlenW ((LPCWSTR)lpCreate->lpszName))) {
+	    self->parts[0].text = COMCTL32_Alloc ((len + 1)*sizeof(WCHAR));
+	    lstrcpyW (self->parts[0].text, (LPCWSTR)lpCreate->lpszName);
+	}
     }
     else {
-        len = lstrlenA ((LPCSTR)lpCreate->lpszName);
-        if (len) {
-            self->parts[0].text = COMCTL32_Alloc ((len + 1)*sizeof(WCHAR));
-            lstrcpyAtoW (self->parts[0].text, (char*)lpCreate->lpszName);
-        }
+	if (lpCreate->lpszName &&
+	    (len = lstrlenA ((LPCSTR)lpCreate->lpszName))) {
+	    self->parts[0].text = COMCTL32_Alloc ((len + 1)*sizeof(WCHAR));
+	    lstrcpyAtoW (self->parts[0].text, (LPCSTR)lpCreate->lpszName);
+	}
     }
 
-    hdc = GetDC(hwnd);
-    if (hdc) {
-        TEXTMETRICA tm;
-        HFONT hOldFont;
+    if ((hdc = GetDC (0))) {
+	TEXTMETRICA tm;
+	HFONT hOldFont;
 
-        hOldFont = SelectObject (hdc,self->hDefaultFont);
-        GetTextMetricsA(hdc, &tm);
-        self->textHeight = tm.tmHeight;
-        SelectObject (hdc, hOldFont);
-        ReleaseDC(hwnd, hdc);
+	hOldFont = SelectObject (hdc,self->hDefaultFont);
+	GetTextMetricsA(hdc, &tm);
+	self->textHeight = tm.tmHeight;
+	SelectObject (hdc, hOldFont);
+	ReleaseDC(0, hdc);
     }
 
     if (GetWindowLongA (hwnd, GWL_STYLE) & SBT_TOOLTIPS) {
-        self->hwndToolTip =
-            CreateWindowExA (0, TOOLTIPS_CLASSA, NULL, 0,
-                               CW_USEDEFAULT, CW_USEDEFAULT,
-                               CW_USEDEFAULT, CW_USEDEFAULT,
-                             hwnd, 0,
-                             GetWindowLongA (hwnd, GWL_HINSTANCE), NULL);
+	self->hwndToolTip =
+	    CreateWindowExA (0, TOOLTIPS_CLASSA, NULL, 0,
+			       CW_USEDEFAULT, CW_USEDEFAULT,
+			       CW_USEDEFAULT, CW_USEDEFAULT,
+			     hwnd, 0,
+			     GetWindowLongA (hwnd, GWL_HINSTANCE), NULL);
 
-        if (self->hwndToolTip) {
-            NMTOOLTIPSCREATED nmttc;
+	if (self->hwndToolTip) {
+	    NMTOOLTIPSCREATED nmttc;
 
-            nmttc.hdr.hwndFrom = hwnd;
-            nmttc.hdr.idFrom = GetWindowLongA (hwnd, GWL_ID);
-            nmttc.hdr.code = NM_TOOLTIPSCREATED;
-            nmttc.hwndToolTips = self->hwndToolTip;
+	    nmttc.hdr.hwndFrom = hwnd;
+	    nmttc.hdr.idFrom = GetWindowLongA (hwnd, GWL_ID);
+	    nmttc.hdr.code = NM_TOOLTIPSCREATED;
+	    nmttc.hwndToolTips = self->hwndToolTip;
 
-            SendMessageA (GetParent (hwnd), WM_NOTIFY,
-                            (WPARAM)nmttc.hdr.idFrom, (LPARAM)&nmttc);
-        }
+	    SendMessageA (GetParent (hwnd), WM_NOTIFY,
+			    (WPARAM)nmttc.hdr.idFrom, (LPARAM)&nmttc);
+	}
     }
 
     GetClientRect (GetParent (hwnd), &rect);
     width = rect.right - rect.left;
-    self->height = self->textHeight+2*VERT_BORDER+2*VERT_SPACE;
+    self->height = self->textHeight + 4 + VERT_BORDER;
     MoveWindow (hwnd, lpCreate->x, lpCreate->y-1,
-                  width, self->height, FALSE);
+		  width, self->height, FALSE);
     STATUSBAR_SetPartBounds (hwnd);
 
     return 0;

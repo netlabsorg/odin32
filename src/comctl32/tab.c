@@ -1,4 +1,4 @@
-/* $Id: tab.c,v 1.12 1999-08-28 09:25:56 achimha Exp $ */
+/* $Id: tab.c,v 1.13 1999-09-26 11:01:11 achimha Exp $ */
 /*
  * Tab control
  *
@@ -14,7 +14,7 @@
  *  Unicode support
  */
 
-/* WINE 990815 level */
+/* WINE 990823 level */
 
 #include <string.h>
 
@@ -129,7 +129,7 @@ TAB_SetCurFocus (HWND hwnd,WPARAM wParam)
   TAB_INFO *infoPtr = TAB_GetInfoPtr(hwnd);
   INT iItem=(INT) wParam;
 
-  if ((iItem < 0) || (iItem > infoPtr->uNumItem)) return 0;
+  if ((iItem < 0) || (iItem >= infoPtr->uNumItem)) return 0;
 
   infoPtr->uFocus=iItem;
   if (GetWindowLongA(hwnd, GWL_STYLE) & TCS_BUTTONS) {
@@ -1300,6 +1300,7 @@ static LRESULT TAB_InsertItemA (HWND hwnd, WPARAM wParam, LPARAM lParam)
   if (infoPtr->uNumItem == 0) {
     infoPtr->items = COMCTL32_Alloc (sizeof (TAB_ITEM));
     infoPtr->uNumItem++;
+    infoPtr->iSelected = 0;
   }
   else {
     TAB_ITEM *oldItems = infoPtr->items;
@@ -1319,6 +1320,9 @@ static LRESULT TAB_InsertItemA (HWND hwnd, WPARAM wParam, LPARAM lParam)
               (infoPtr->uNumItem - iItem - 1) * sizeof(TAB_ITEM));
 
     }
+
+    if (iItem <= infoPtr->iSelected)
+      infoPtr->iSelected++;
 
     COMCTL32_Free (oldItems);
   }
@@ -1529,7 +1533,7 @@ TAB_GetItemA (HWND hwnd, WPARAM wParam, LPARAM lParam)
   iItem=(INT) wParam;
   tabItem=(LPTCITEMA) lParam;
 //  TRACE (tab,"\n");
-  if ((iItem<0) || (iItem>infoPtr->uNumItem)) return FALSE;
+  if ((iItem<0) || (iItem>=infoPtr->uNumItem)) return FALSE;
 
   wineItem=& infoPtr->items[iItem];
 
@@ -1615,6 +1619,9 @@ TAB_DeleteItem (HWND hwnd, WPARAM wParam, LPARAM lParam)
     if (iItem < infoPtr->iSelected)
       infoPtr->iSelected--;
 
+    if (infoPtr->uNumItem == 0)
+      infoPtr->iSelected = -1;
+
     /*
      * Reposition and repaint tabs.
      */
@@ -1633,7 +1640,8 @@ TAB_DeleteAllItems (HWND hwnd, WPARAM wParam, LPARAM lParam)
    TAB_INFO *infoPtr = TAB_GetInfoPtr(hwnd);
 
   COMCTL32_Free (infoPtr->items);
-  infoPtr->uNumItem=0;
+  infoPtr->uNumItem = 0;
+  infoPtr->iSelected = -1;
 
   return TRUE;
 }
@@ -1746,7 +1754,7 @@ TAB_Create (HWND hwnd, WPARAM wParam, LPARAM lParam)
   infoPtr->hFont           = 0;
   infoPtr->items           = 0;
   infoPtr->hcurArrow       = LoadCursorA (0, IDC_ARROWA);
-  infoPtr->iSelected       = 0;
+  infoPtr->iSelected       = -1;
   infoPtr->uFocus          = 0;
   infoPtr->hwndToolTip     = 0;
   infoPtr->DoRedraw        = TRUE;

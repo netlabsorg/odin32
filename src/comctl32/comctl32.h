@@ -1,4 +1,4 @@
-/* $Id: comctl32.h,v 1.7 1999-08-14 16:13:10 cbratschi Exp $ */
+/* $Id: comctl32.h,v 1.8 1999-09-26 11:01:08 achimha Exp $ */
 /*
  * Win32 common controls implementation
  *
@@ -10,6 +10,8 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+
+/* Status: WINE 990923 */
 
 #ifndef _H_COMCTL32
 #define _H_COMCTL32
@@ -54,6 +56,10 @@ extern HMODULE COMCTL32_hModule;
 
 #define IDC_TABCONTROL   12320
 #define IDC_APPLY_BUTTON 12321
+#define IDC_BACK_BUTTON  12323
+#define IDC_NEXT_BUTTON  12324
+#define IDC_FINISH_BUTTON 12325
+#define IDC_SUNKEN_LINE   12326
 
 /* Toolbar customization dialog */
 #define IDD_TBCUSTOMIZE     200
