@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.97 2002-07-16 08:16:48 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.98 2002-07-17 21:09:20 achimha Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -579,6 +579,8 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
 #endif
 
 #ifdef COMMIT_ALL
+        // this is a workaround until we have full page fault handling. We
+        // just commit all pages here, i.e. do the DosReads
         for (i=0; i<nSections; i++) {
             commitPage((ULONG)section[i].realvirtaddr, FALSE, COMPLETE_SECTION);
         }
@@ -594,6 +596,8 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
             }
         }
 #endif
+        // here we are going to parse the export table and build a list
+        // in memory of what this module exports
         if(processExports((char *)win32file) == FALSE) {
             dprintf((LOG, "Failed to process exported apis" ));
             goto failure;
@@ -607,7 +611,7 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
     }
 #endif
 
-    //SvL: Use pointer to image header as module handle now. Some apps needs this
+    // a HINSTANCE in Windows is actually a pointer to the PE header!
     hinstance = (HINSTANCE)realBaseAddress;
 
     //SvL: Set instance handle in process database structure
@@ -622,9 +626,12 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
         ulRVAResourceSection = oh.DataDirectory[IMAGE_DIRECTORY_ENTRY_RESOURCE].VirtualAddress;
     }
 
-    //Allocate TLS index for this module
-    //Must do this before dlls are loaded for this module. Some apps assume
-    //they get TLS index 0 for their main executable
+    // Allocate TLS index for this module
+    // Must do this before dlls are loaded for this module. Some apps assume
+    // they get TLS index 0 for their main executable
+    // AH TODO: is this really safe here? We call processExports before and
+    // the module might export forwarders so additional DLLs are loaded which
+    // in turn might allocate TLS in the initterm routine!
     {
       USHORT sel = SetWin32TIB(TIB_SWITCH_FORCE_WIN32);
       tlsAlloc();
@@ -634,6 +641,8 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
 
     if(!(dwFlags & (FLAG_PELDR_LOADASDATAFILE | FLAG_PELDR_SKIPIMPORTS)))
     {
+        // this will process all import statements and resolve them. I.e.
+        // additional DLLs will be loaded automatically.
         if(processImports((char *)win32file) == FALSE) {
             dprintf((LOG, "Failed to process imports!" ));
             goto failure;
@@ -727,7 +736,9 @@ static inline APIRET _Optlink fastDosRead(HFILE hFile,
 BOOL Win32PeLdrImage::commitPage(ULONG virtAddress, BOOL fWriteAccess, int fPageCmd)
 {
  Section *section;
- ULONG    offset, size, sectionsize, protflags, fileoffset, range, attr;
+ ULONG fileoffset; // this will be the offset in the file we have to read at
+                   // it will be calculated from the virtual address
+ ULONG    offset, size, sectionsize, protflags, range, attr;
  ULONG    ulNewPos, ulRead, orgVirtAddress = virtAddress;
  APIRET   rc;
 
@@ -736,23 +747,30 @@ BOOL Win32PeLdrImage::commitPage(ULONG virtAddress, BOOL fWriteAccess, int fPage
         return FALSE;
     }
 
-    //Round down to nearest page boundary
+    // round down to nearest page boundary
     virtAddress = virtAddress & ~0xFFF;
 
+    // check if this address corresponds to any PE section
     section = findSectionByOS2Addr(virtAddress);
     if(section == NULL) {
+        // maybe the section does not start at a page boundary?
         section = findSectionByOS2Addr(orgVirtAddress);
         if(section) {
             virtAddress = orgVirtAddress;
         }
     }
+    // if we still haven't found the section, it's a special case
     if(section == NULL) {
         size        = 4096;
         sectionsize = 4096;
         //Header page must be readonly (same as in NT)
         protflags   = PAG_READ;
+
+        // check if there is a previous section
         section = findPreviousSectionByOS2Addr(virtAddress);
-        if(section == NULL) {//access to header
+
+        // no, so it must be the PE header
+        if(section == NULL) {
             offset     = 0;
             fileoffset = virtAddress - realBaseAddress;
         }
@@ -766,13 +784,15 @@ BOOL Win32PeLdrImage::commitPage(ULONG virtAddress, BOOL fWriteAccess, int fPage
         offset      = virtAddress - section->realvirtaddr;
         sectionsize = section->virtualsize - offset;
 
+        // check if this is unitialized data (i.e. not present in the PE file
+        // and set to 0 by the PE loader
         if(offset > section->rawsize || section->type == SECTION_UNINITDATA) {
-            //unintialized data (set to 0)
+            // AH TODO shouldn't be abusing these variables here...
             size = 0;
             fileoffset = -1;
         }
         else {
-            size = section->rawsize-offset;
+            size = section->rawsize - offset;
             fileoffset = section->rawoffset + offset;
         }
         if(fWriteAccess & !(section->pageflags & PAG_WRITE)) {
@@ -780,7 +800,8 @@ BOOL Win32PeLdrImage::commitPage(ULONG virtAddress, BOOL fWriteAccess, int fPage
             return FALSE;
         }
     }
-    if(fPageCmd == COMPLETE_SECTION && (section && section->type == SECTION_DEBUG)) {//ignore
+    // we completely ignore debug sections!
+    if(fPageCmd == COMPLETE_SECTION && (section && section->type == SECTION_DEBUG)) {
         return TRUE;
     }
     //Check range of pages with the same attributes starting at virtAddress
@@ -810,12 +831,16 @@ BOOL Win32PeLdrImage::commitPage(ULONG virtAddress, BOOL fWriteAccess, int fPage
     size = min(size, range);
     sectionsize = min(sectionsize, range);
 
+    // make sure this is not address space that has no backing PE file data
+    // (i.e. uninitialized data)
+    // AH TODO: don't abuse these variables!
     if(size && fileoffset != -1) {
         rc = DosEnterCritSec();
         if(rc) {
             dprintf((LOG, "DosEnterCritSec failed with rc %d", rc));
             goto fail;
         }
+        // we need write permissions for now to do the actual loading
         rc = DosSetMem((PVOID)virtAddress, sectionsize, PAG_READ|PAG_WRITE|PAG_COMMIT);
         if(rc) {
             DosExitCritSec();
@@ -848,6 +873,7 @@ BOOL Win32PeLdrImage::commitPage(ULONG virtAddress, BOOL fWriteAccess, int fPage
         }
         setFixups(virtAddress, sectionsize);
 
+        // set the protection flags to what the section requests
         rc = DosSetMem((PVOID)virtAddress, sectionsize, protflags);
         DosExitCritSec();
         if(rc) {
@@ -856,12 +882,15 @@ BOOL Win32PeLdrImage::commitPage(ULONG virtAddress, BOOL fWriteAccess, int fPage
         }
     }
     else {
+        // unitialized data section, padded with 0 (done by OS/2)
+
         rc = DosEnterCritSec();
         if(rc) {
             dprintf((LOG, "DosEnterCritSec failed with rc %d", rc));
             goto fail;
         }
 
+        // get temporary write permission
         rc = DosSetMem((PVOID)virtAddress, sectionsize, PAG_READ|PAG_WRITE|PAG_COMMIT);
         if(rc) {
             DosExitCritSec();
@@ -870,6 +899,7 @@ BOOL Win32PeLdrImage::commitPage(ULONG virtAddress, BOOL fWriteAccess, int fPage
         }
         setFixups(virtAddress, sectionsize);
 
+        // set the protection flags to what the section requests
         rc = DosSetMem((PVOID)virtAddress, sectionsize, protflags);
         DosExitCritSec();
         if(rc) {
@@ -924,6 +954,7 @@ BOOL Win32PeLdrImage::allocSections(ULONG reservedMem)
     if(fh.Characteristics & IMAGE_FILE_RELOCS_STRIPPED && !(dwFlags & FLAG_PELDR_LOADASDATAFILE)) {
         return allocFixedMem(reservedMem);
     }
+    // AH TODO: aren't we wasting 64kb address space here if things go bad?
     rc = OSLibDosAllocMem((PPVOID)&baseAddress, imageSize, PAG_READ | PAG_WRITE);
     if(rc) {
         dprintf((LOG, "Win32PeLdrImage::allocSections, DosAllocMem returned %d", rc));
@@ -1097,38 +1128,47 @@ BOOL Win32PeLdrImage::setMemFlags()
   return(TRUE);
 }
 //******************************************************************************
+// setFixups:
+//   this is the main fixup processing function. It uses the virtual image base
+//   address (oh.ImageBase) and replaces all fixups by the relative virtual address
+//   plus the image base address
 //******************************************************************************
 BOOL Win32PeLdrImage::setFixups(ULONG virtAddress, ULONG size)
 {
- int   i, j;
+ int i;
  char *page;
  ULONG count, newpage;
  Section *section;
  PIMAGE_BASE_RELOCATION prel = pFixups;
 
+  // is fixup processing required?
   if(realBaseAddress == oh.ImageBase || fh.Characteristics & IMAGE_FILE_RELOCS_STRIPPED) {
         return(TRUE);
   }
 
+  // convert the virtual address to a relative virtual address
   virtAddress -= realBaseAddress;
-  //round size to next page boundary
-  size  = (size-1) & ~0xFFF;
+
+  // round size to next page boundary
+  size  = (size - 1) & ~0xFFF;
   size += PAGE_SIZE;
 
+  // do we have relocation records (aka fixups)?
   if(prel) {
-        j = 1;
-        while(((ULONG)prel < (ULONG)pFixups+dwFixupSize) &&
+        // move to the first relocation record
+        while(((ULONG)prel < (ULONG)pFixups + dwFixupSize) &&
               prel->VirtualAddress && prel->VirtualAddress < virtAddress)
         {
             prel = (PIMAGE_BASE_RELOCATION)((char*)prel + prel->SizeOfBlock);
         }
-        while(((ULONG)prel < (ULONG)pFixups+dwFixupSize) &&
+        // go through all relocation records
+        while(((ULONG)prel < (ULONG)pFixups + dwFixupSize) &&
                prel->VirtualAddress && prel->VirtualAddress < virtAddress + size)
         {
             page = (char *)((char *)prel + (ULONG)prel->VirtualAddress);
-            count  = (prel->SizeOfBlock - 8)/2;
-            j++;
-            for(i=0;i<count;i++) {
+            // determine how many fixups we have to process
+            count = (prel->SizeOfBlock - 8) / 2;
+            for(i = 0; i < count; i++) {
                 int type   = prel->TypeOffset[i] >> 12;
                 int offset = prel->TypeOffset[i] & 0xFFF;
                 int fixupsize = 0;
@@ -1143,24 +1183,26 @@ BOOL Win32PeLdrImage::setFixups(ULONG virtAddress, ULONG size)
                     fixupsize = 2;
                     break;
                 }
-                //If the fixup crosses the final page boundary,
-                //then we have to load another page
+                // if the fixup crosses the final page boundary,
+                // then we have to load another page
                 if(prel->VirtualAddress + offset + fixupsize > virtAddress + size)
                 {
                     newpage  = realBaseAddress + prel->VirtualAddress + offset + fixupsize;
                     newpage &= ~0xFFF;
 
+                    // find the corresponding section so that we know lateron
+                    // what permission bits we have to assign to the new page
                     section  = findSectionByOS2Addr(newpage);
                     if(section == NULL) {
-                        //should never happen
-                        dprintf((LOG, "::setFixups -> section == NULL!!"));
+                        // should never happen
+                        dprintf((LOG, "setFixups -> section == NULL!!"));
                         return FALSE;
                     }
-                    //SvL: Read page from disk
+                    // explicitly read page from disk
                     commitPage(newpage, FALSE, SINGLE_PAGE);
 
                     //SvL: Enable write access (TODO: may need to prevent other threads from being active)
-                    DosSetMem((PVOID)newpage, PAGE_SIZE, PAG_READ|PAG_WRITE);
+                    DosSetMem((PVOID)newpage, PAGE_SIZE, PAG_READ | PAG_WRITE);
                 }
 
                 switch(type)
@@ -1181,12 +1223,14 @@ BOOL Win32PeLdrImage::setFixups(ULONG virtAddress, ULONG size)
                 default:
                         break;
                 }
+                // did we have to load another page?
                 if(prel->VirtualAddress + offset + fixupsize > virtAddress + size)
                 {
                     //SvL: Restore original page protection flags (TODO: may need to prevent other threads from being active)
                     DosSetMem((PVOID)newpage, PAGE_SIZE, section->pageflags);
                 }
             }
+            // move to the next relocation record
             prel = (PIMAGE_BASE_RELOCATION)((char*)prel + prel->SizeOfBlock);
         }//while
   }
@@ -1200,22 +1244,34 @@ BOOL Win32PeLdrImage::setFixups(ULONG virtAddress, ULONG size)
 //******************************************************************************
 BOOL Win32PeLdrImage::setFixups(PIMAGE_BASE_RELOCATION prel)
 {
- int   i, j;
+ int   i;
+ #if DEBUG
+ int j;
+ #endif
  char *page;
  ULONG count;
 
+  // if there are no fixups, we have nothing to do...
   if(fh.Characteristics & IMAGE_FILE_RELOCS_STRIPPED) {
         return(TRUE);
   }
 
   if(prel) {
+        #if DEBUG
         j = 1;
+        #endif
+        // loop through all relocation records
         while(prel->VirtualAddress) {
             page = (char *)((char *)prel + (ULONG)prel->VirtualAddress);
-            count  = (prel->SizeOfBlock - 8)/2;
-            dprintf((LOG, "Page %d Address %x Count %d", j, prel->VirtualAddress, count ));
+            // determine how many fixups we have to process
+            count  = (prel->SizeOfBlock - 8) / 2;
+
+            dprintf((LOG, "Page %d Address %x Count %d", j, prel->VirtualAddress, count));
+            #if DEBUG
             j++;
-            for(i=0;i<count;i++) {
+            #endif
+
+            for(i = 0; i < count; i++) {
                 int type   = prel->TypeOffset[i] >> 12;
                 int offset = prel->TypeOffset[i] & 0xFFF;
                 switch(type) {
@@ -1239,6 +1295,7 @@ BOOL Win32PeLdrImage::setFixups(PIMAGE_BASE_RELOCATION prel)
                     break;
                 }
             }
+            // advance to the next relocation record
             prel = (PIMAGE_BASE_RELOCATION)((char*)prel + prel->SizeOfBlock);
         }//while
   }
@@ -1258,7 +1315,7 @@ void Win32PeLdrImage::AddOff32Fixup(ULONG fixupaddr)
 
     fixup   = (ULONG *)(fixupaddr + realBaseAddress);
     orgaddr = *fixup;
-//  dprintf((LOG, "AddOff32Fixup 0x%x org 0x%x -> new 0x%x", fixup, orgaddr, realBaseAddress + (*fixup - oh.ImageBase)));
+////  dprintf((LOG, "AddOff32Fixup 0x%x org 0x%x -> new 0x%x", fixup, orgaddr, realBaseAddress + (*fixup - oh.ImageBase)));
     *fixup  = realBaseAddress + (*fixup - oh.ImageBase);
 }
 //******************************************************************************
@@ -1561,17 +1618,23 @@ Win32DllBase *Win32PeLdrImage::loadDll(char *pszCurModule)
             return NULL;
     }
 
+    // if it's not a PE image, we let OS/2 load it (LX image)
     if(isPEImage(modname, NULL, NULL) != ERROR_SUCCESS_W)
-    {//LX image, so let OS/2 do all the work for us
+    {
         APIRET rc;
         char   szModuleFailure[CCHMAXPATH] = "";
         ULONG  hInstanceNewDll;
         Win32LxDll *lxdll;
 
+        // check if we have the .DLL extension or have to add it first
         char *dot = strchr(modname, '.');
         if(dot == NULL) {
             strcat(modname, DLL_EXTENSION);
         }
+        // here we load the module. This will also execute the initterm
+        // function in the DLL. We expect the LX DLL to callback RegisterLxDll
+        // to register with Odin. This also means we cannot load "standard"
+        // LX DLLs with this method - they have to be Odin aware
         rc = DosLoadModule(szModuleFailure, sizeof(szModuleFailure), modname, (HMODULE *)&hInstanceNewDll);
         if(rc) {
             dprintf((LOG, "DosLoadModule returned %X for %s", rc, szModuleFailure));
@@ -1579,13 +1642,17 @@ Win32DllBase *Win32PeLdrImage::loadDll(char *pszCurModule)
             errorState = rc;
             return NULL;
         }
+        // due to the callback requirement, we can expect to have a structure
+        // for it by now. Otherwise it didn't work out
         lxdll = Win32LxDll::findModuleByOS2Handle(hInstanceNewDll);
         if(lxdll == NULL) {//shouldn't happen!
             dprintf((LOG, "Just loaded the dll, but can't find it anywhere?!!?"));
+            // AH TODO: shouldn't we do a DosFreeModule here?
             errorState = ERROR_INTERNAL;
             return NULL;
         }
         lxdll->setDllHandleOS2(hInstanceNewDll);
+        // AddRef for a LX DLL is special - it does not increase the reference counter
         if(lxdll->AddRef() == -1) {//-1 -> load failed (attachProcess)
             dprintf((LOG, "Dll %s refused to be loaded; aborting", modname));
             delete lxdll;
@@ -1596,7 +1663,7 @@ Win32DllBase *Win32PeLdrImage::loadDll(char *pszCurModule)
     }
     else {
          Win32PeLdrDll *pedll;
-
+            // create an object for that DLL
             pedll = new Win32PeLdrDll(modname, this);
             if(pedll == NULL) {
                 dprintf((LOG, "pedll: Error allocating memory" ));
@@ -1607,6 +1674,7 @@ Win32DllBase *Win32PeLdrImage::loadDll(char *pszCurModule)
             dprintf((LOG, "**********************************************************************" ));
             dprintf((LOG, "**********************     Loading Module        *********************" ));
             dprintf((LOG, "**********************************************************************" ));
+            // do the actual loading including all imports - so this is a point of recursion
             if(pedll->init(0) == FALSE) {
                 dprintf((LOG, "Internal WinDll error ", pedll->getError() ));
                 delete pedll;
@@ -1615,8 +1683,10 @@ Win32DllBase *Win32PeLdrImage::loadDll(char *pszCurModule)
 #ifdef DEBUG
             pedll->AddRef(getModuleName());
 #else
+            // increase the reference count
             pedll->AddRef();
 #endif
+            // send the attach process message to the DLL, i.e. call the handler
             if(pedll->attachProcess() == FALSE) {
                 dprintf((LOG, "attachProcess failed!" ));
                 delete pedll;
@@ -2051,6 +2121,8 @@ ULONG WIN32API MissingApiName(char *parentimage, char *dllname, char *functionna
    return MissingApi(message);
 }
 //******************************************************************************
+// we link this function to all imports we couldn't resolve in our DLLs so the
+// user gets a stupid error message dialog
 //******************************************************************************
 ULONG WIN32API MissingApi(char *message)
 {
