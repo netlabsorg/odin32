@@ -1,4 +1,4 @@
-/* $Id: stubs.cpp,v 1.14 2000-09-17 10:31:06 davidr Exp $ */
+/* $Id: stubs.cpp,v 1.15 2000-10-02 17:34:15 sandervl Exp $ */
 /* 
  * Win32 COM/OLE stubs for OS/2
  * 
@@ -664,4 +664,34 @@ HRESULT WIN32API CoRegisterSurrogate(LPSURROGATE pSurrogate)	// NT4 SP2, Win95b+
     dprintf(("OLE32: CoRegisterSurrogate - Stub"));
     return(S_OK);
 }
-
+//*******************************************************************************
+//*******************************************************************************
+HRESULT WIN32API CoGetInstanceFromFile(
+    COSERVERINFO *              pServerInfo,
+    CLSID       *               pClsid,
+    IUnknown    *               punkOuter, // only relevant locally
+    DWORD                       dwClsCtx,
+    DWORD                       grfMode,
+    OLECHAR *                   pwszName,
+    DWORD                       dwCount,
+    MULTI_QI        *           pResults )
+{
+    dprintf(("ERROR: OLE32: CoGetInstanceFromFile, UNKNOWN API - stub"));
+    return(E_OUTOFMEMORY);
+}
+//*******************************************************************************
+//*******************************************************************************
+HRESULT WIN32API CoGetInstanceFromIStorage(
+    COSERVERINFO *              pServerInfo,
+    CLSID       *               pClsid,
+    IUnknown    *               punkOuter, // only relevant locally
+    DWORD                       dwClsCtx,
+    struct IStorage *           pstg,
+    DWORD                       dwCount,
+    MULTI_QI        *           pResults )
+{
+    dprintf(("ERROR: OLE32: CoGetInstanceFromIStorage, UNKNOWN API - stub"));
+    return(E_OUTOFMEMORY);
+}
+//*******************************************************************************
+//*******************************************************************************
