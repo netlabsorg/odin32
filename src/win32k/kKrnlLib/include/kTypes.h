@@ -1,4 +1,4 @@
-/* $Id: kTypes.h,v 1.1 2001-09-14 01:50:18 bird Exp $
+/* $Id: kTypes.h,v 1.2 2001-09-27 03:05:22 bird Exp $
  *
  * Common typedefinitions for kLib.
  *
@@ -100,7 +100,7 @@
     /**
      * SSToDS converts stack address to data addresses.
      */
-    #ifndef KKRNLLIB_PRIVATE
+    #ifdef KKRNLLIB
         extern unsigned long *pulTKSSBase32;
         #define SSToDS(p) ((void*)((unsigned long)(p) + *pulTKSSBase32))
     #else
