@@ -1,4 +1,4 @@
-; $Id: wgss50.def,v 1.1 2001-01-09 19:13:38 bird Exp $
+; $Id: wgss50.def,v 1.2 2001-01-18 18:10:42 sandervl Exp $
 LIBRARY WGSS50  INITINSTANCE  TERMINSTANCE
 
 EXPORTS
@@ -176,7 +176,6 @@ EXPORTS
    _O32_SetCursorPos @ 606
    _O32_SetDIBColorTable @ 607
    _O32_SetDIBits @ 608
-   _O32_SetDIBitsToDevice @ 609
    _O32_SetMapperFlags @ 627
    _O32_SetMetaFileBitsEx @ 630
    _O32_SetMiterLimit @ 631
