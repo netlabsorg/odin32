@@ -346,7 +346,7 @@ long Dart_Play(USHORT usDeviceID, void *vpMixSetup, void *vpMixBuffer, long play
       USHORT  sel = RestoreOS2FS();
       /* Note: the call to pmixWrite trashes the FS selector, we have to save */
       /* and then restore FS!!! Otherwise exception handling will be broken.  */
-      MixSetupParms.pmixWrite(MixSetupParms.ulMixHandle, MixBuffers, NUM_DART_BUFFS);
+      MixSetupParms.pmixWrite(MixSetupParms.ulMixHandle, MixBuffers, 2);
       SetFS(sel);
    }
 
