@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.158 2000-02-07 20:32:42 cbratschi Exp $ */
+/* $Id: win32wbase.cpp,v 1.159 2000-02-08 10:30:03 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -355,6 +355,8 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
             SetLastError(ERROR_INVALID_WINDOW_HANDLE);
             return FALSE;
         }
+        //SvL: Shell positioning shouldn't be done for child windows! (breaks Notes)
+        fXDefault = fCXDefault = FALSE;
   }
   else
   {
