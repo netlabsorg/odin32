@@ -1,4 +1,4 @@
- /* $Id: changelog,v 1.645 2000-01-14 13:18:41 sandervl Exp $ */
+ /* $Id: changelog,v 1.646 2000-01-14 14:46:45 sandervl Exp $ */
 
  2000-01-14: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32\NEW: Fixed min/max bug for mdi child windows
@@ -6,7 +6,9 @@
                       FrameUpdateClient if client rectangle wasn't changed)
                       Fixed bugs in MsgFormatFrame & SendNCCalcSize
                       Fixed WM_WINDOWPOSCHANGED translation for frame window (not done yet)
-                      (Winamp works now; still some problems with winhlp32)
+                      (Winamp works now)
+                      Removed code that's no longer used (subclassed OS/2 frame
+                      controls & OS/2 scrollbar functions etc)
 
  2000-01-13: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32\NEW: WM_ACTIVATEAPP should be sent when another process' window
