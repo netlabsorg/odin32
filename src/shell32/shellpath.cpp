@@ -1,4 +1,4 @@
-/* $Id: shellpath.cpp,v 1.5 1999-12-28 23:16:33 sandervl Exp $ */
+/* $Id: shellpath.cpp,v 1.6 2000-03-22 16:55:51 cbratschi Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -816,7 +816,7 @@ ODINFUNCTION1(HRESULT, PathGetDriveNumberA,
  */
 ODINFUNCTION1(HRESULT, PathGetDriveNumberW,
               LPWSTR, u)
-{  
+{
    return 0;
 }
 
@@ -1206,35 +1206,35 @@ ODINFUNCTION4(BOOL, SHGetSpecialFolderPathAW,
  */
 LPSTR WINAPI PathRemoveBackslashA(LPSTR lpPath)
 {
-	LPSTR temp = lpPath;
-	LPSTR prev = lpPath;
-	
-	while (*temp)
-	{
-		prev = temp++;
-	}
-	if ( *prev == (CHAR)'\\')
-	{
-		*prev = (CHAR)'\0';
-	}
+        LPSTR temp = lpPath;
+        LPSTR prev = lpPath;
 
-	return prev;
+        while (*temp)
+        {
+                prev = temp++;
+        }
+        if ( *prev == (CHAR)'\\')
+        {
+                *prev = (CHAR)'\0';
+        }
+
+        return prev;
 }
 
 LPWSTR WINAPI PathRemoveBackslashW(LPWSTR lpPath)
 {
-	LPWSTR temp = lpPath;
-	LPWSTR prev = lpPath;
-	
-	while (*temp)
-	{
-		prev = temp++;
-	}
-	if ( *prev == (WCHAR)'\\')
-	{
-		*prev = (WCHAR)'\0';
-	}
+        LPWSTR temp = lpPath;
+        LPWSTR prev = lpPath;
 
-	return prev;
+        while (*temp)
+        {
+                prev = temp++;
+        }
+        if ( *prev == (WCHAR)'\\')
+        {
+                *prev = (WCHAR)'\0';
+        }
+
+        return prev;
 }
 

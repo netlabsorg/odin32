@@ -94,6 +94,7 @@ typedef struct
 
 #define RF_REFRESH      1
 #define RF_UPDATESCROLL 2
+#define RF_NOREDRAW     4
 
 extern VOID LISTVIEW_Register (VOID);
 extern VOID LISTVIEW_Unregister (VOID);
