@@ -1,4 +1,4 @@
-/* $Id: fastdep.c,v 1.17 2000-03-21 13:16:18 bird Exp $
+/* $Id: fastdep.c,v 1.18 2000-03-22 13:16:24 bird Exp $
  *
  * Fast dependents. (Fast = Quick and Dirty!)
  *
@@ -300,6 +300,7 @@ int main(int argc, char **argv)
     int         argi = 1;
     int         i;
     char *      psz;
+    char *      psz2;
     const char *pszDepFile = pszDefaultDepFile;
     char        achBuffer[4096];
 
@@ -432,29 +433,75 @@ int main(int argc, char **argv)
                     }
                     /* path or path list */
                     if (strlen(argv[argi]) > 2)
-                        strcat(szExclude, &argv[argi][2]);
+                        psz = &argv[argi][2];
                     else
                     {
-                        strcat(szExclude, argv[argi+1]);
+                        psz = argv[argi+1];
                         argi++;
                     }
-                    strlwr(szExclude);
-                    if (szExclude[strlen(szExclude)-1] != ';')
-                        strcat(szExclude, ";");
+                    /* check if enviroment variable */
+                    if (*psz == '%')
+                    {
+                        psz2 = strdup(psz+1);
+                        if (psz2 != NULL && *psz2 != '\0')
+                        {
+                            if (psz2[strlen(psz2)-1] == '%')
+                                psz2[strlen(psz2)-1] = '\0';
+                            psz = getenv(psz2);
+                            free(psz2);
+                            if (psz == NULL)
+                                break;
+                        }
+                        else
+                        {
+                            fprintf(stderr, "error: -E% is not an valid argument!\n");
+                            return -1;
+                        }
+                    }
+                    if (psz != NULL)
+                    {
+                        strcat(szExclude, psz);
+                        strlwr(szExclude);
+                        if (szExclude[strlen(szExclude)-1] != ';')
+                            strcat(szExclude, ";");
+                    }
                     break;
 
                 case 'I': /* optional include path. This has precedence over the INCLUDE environment variable. */
                 case 'i':
                     if (strlen(argv[argi]) > 2)
-                        strcat(szInclude, &argv[argi][2]);
+                        psz = &argv[argi][2];
                     else
                     {
-                        strcat(szInclude, argv[argi+1]);
+                        psz = argv[argi+1];
                         argi++;
                     }
-                    strlwr(szInclude);
-                    if (szInclude[strlen(szInclude)-1] != ';')
-                        strcat(szInclude, ";");
+                    /* check if enviroment variable */
+                    if (*psz == '%')
+                    {
+                        psz2 = strdup(psz+1);
+                        if (psz2 != NULL && *psz2 != '\0')
+                        {
+                            if (psz2[strlen(psz2)-1] == '%')
+                                psz2[strlen(psz2)-1] = '\0';
+                            psz = getenv(psz2);
+                            free(psz2);
+                            if (psz == NULL)
+                                break;
+                        }
+                        else
+                        {
+                            fprintf(stderr, "error: -I% is not an valid argument!\n");
+                            return -1;
+                        }
+                    }
+                    if (psz != NULL)
+                    {
+                        strcat(szInclude, psz);
+                        strlwr(szInclude);
+                        if (szInclude[strlen(szInclude)-1] != ';')
+                            strcat(szInclude, ";");
+                    }
                     break;
 
                 case 'n': /* no object path , -N<[+]|-> */
