@@ -1,4 +1,4 @@
-/* $Id: initsystem.cpp,v 1.2 1999-12-28 19:16:34 sandervl Exp $ */
+/* $Id: initsystem.cpp,v 1.3 1999-12-28 22:08:57 sandervl Exp $ */
 /*
  * Odin system initialization (registry & directories)
  *
@@ -91,7 +91,7 @@ BOOL InitRegistry()
    sprintf(digbuf, "%d.%d", ODINNT_MAJOR_VERSION, ODINNT_MINOR_VERSION);
    ADVAPI32_RegSetValueExA(hkey,"CurrentVersion",0,REG_SZ, (LPBYTE)digbuf, strlen(digbuf)+1);
 
-   val = GetCurrentTime(); //TODO: Correct format?
+   val = (DWORD)time(NULL); //todo: Correct format???
    ADVAPI32_RegSetValueExA(hkey,"InstallDate",0,REG_DWORD, (LPBYTE)&val, sizeof(DWORD));
    
    ADVAPI32_RegCloseKey(hkey);
