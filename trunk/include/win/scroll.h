@@ -1,4 +1,4 @@
-/* $Id: scroll.h,v 1.5 1999-10-17 12:18:50 cbratschi Exp $ */
+/* $Id: scroll.h,v 1.6 2000-01-09 14:13:12 cbratschi Exp $ */
 
 /*
  * Scroll-bar class extra info
@@ -22,7 +22,8 @@ typedef struct
     UINT  flags;    /* EnableScrollBar flags */
 } SCROLLBAR_INFO;
 
-VOID SCROLL_SubclassScrollBars(HWND hwndHorz,HWND hwndVert);
+VOID SCROLL_DrawScrollBar(HWND hwnd,HDC hdc,INT nBar,BOOL arrows,BOOL interior);
+LRESULT SCROLL_HandleScrollEvent(HWND hwnd,WPARAM wParam,LPARAM lParam,INT nBar,UINT msg);
 
 extern LRESULT WINAPI ScrollBarWndProc( HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam );
 extern LRESULT WINAPI HorzScrollBarWndProc(HWND hwnd,UINT message,WPARAM wParam,LPARAM lParam );
