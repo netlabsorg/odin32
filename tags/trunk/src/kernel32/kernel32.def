@@ -1,4 +1,4 @@
-; $Id: kernel32.def,v 1.51 1999-11-10 23:25:50 phaller Exp $
+; $Id: kernel32.def,v 1.52 1999-11-23 19:31:34 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is Windows95 KERNEL32
@@ -940,6 +940,8 @@ EXPORTS
     lstrcpyWtoA                = _lstrcpyWtoA@8              @784
     lstrncmpA                  = _lstrncmpA@12               @785
     lstrncmpW                  = _lstrncmpW@12               @786
+
+    IsProcessorFeaturePresent  = _IsProcessorFeaturePresent@4 @880
 
     GetFileAttributesExA       = _GetFileAttributesExA@12    @874
     GetFileAttributesExW       = _GetFileAttributesExW@12    @875

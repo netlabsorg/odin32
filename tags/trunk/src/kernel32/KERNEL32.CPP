@@ -1,4 +1,4 @@
-/* $Id: KERNEL32.CPP,v 1.32 1999-11-19 14:32:55 achimha Exp $ */
+/* $Id: KERNEL32.CPP,v 1.33 1999-11-23 19:31:34 sandervl Exp $ */
 
 /*
  * Win32 compatibility file functions for OS/2
@@ -620,27 +620,6 @@ UINT WIN32API CompareStringW(LCID lcid, DWORD fdwStyle, LPCWSTR lpString1,
   FreeAsciiString(string2);
 
   return(fEqual);
-}
-//******************************************************************************
-//******************************************************************************
-//TODO: Query processor info to complete this api
-//******************************************************************************
-VOID WIN32API GetSystemInfo(LPSYSTEM_INFO lpSystemInfo)
-{
-  dprintf(("KERNEL32:  GetSystemInfo, not completely accurate\n"));
-  lpSystemInfo->u.x.wProcessorArchitecture  = PROCESSOR_ARCHITECTURE_INTEL;
-  lpSystemInfo->u.x.wReserved               = 0;
-  lpSystemInfo->dwPageSize                  = 4096;
-  // as of NT 4.0 SP3
-  lpSystemInfo->lpMinimumApplicationAddress = (LPVOID)0x00010000;
-  //TODO: detect Aurora and increase
-  lpSystemInfo->lpMaximumApplicationAddress = (LPVOID)(512*1024*1024);
-  lpSystemInfo->dwActiveProcessorMask       = 1;
-  lpSystemInfo->dwNumberOfProcessors        = 1; //assuming non-SMP OS/2
-  lpSystemInfo->dwProcessorType             = PROCESSOR_INTEL_PENTIUM;
-  lpSystemInfo->dwAllocationGranularity     = 64*1024;
-  lpSystemInfo->wProcessorLevel             = 5;  //Pentium
-  lpSystemInfo->wProcessorRevision          = 0x201;   //Model 2 stepping 1 (obviously not correct)
 }
 //******************************************************************************
 //Borrowed from Wine
