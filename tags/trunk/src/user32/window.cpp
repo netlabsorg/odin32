@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.119 2002-02-12 13:10:14 sandervl Exp $ */
+/* $Id: window.cpp,v 1.120 2002-02-12 18:07:21 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -1101,7 +1101,7 @@ static void WINPOS_GetWinOffset( Win32BaseWindow *wndFrom, Win32BaseWindow *wndT
     /* Translate source window origin to screen coords */
     if(wndFrom != windowDesktop)
     {
-    window = wndFrom;
+        window = wndFrom;
         while(window)
         {
             offset->x += window->getClientRectPtr()->left + window->getWindowRect()->left;
@@ -1113,7 +1113,7 @@ static void WINPOS_GetWinOffset( Win32BaseWindow *wndFrom, Win32BaseWindow *wndT
     /* Translate origin to destination window coords */
     if(wndTo != windowDesktop)
     {
-    window = wndTo;
+        window = wndTo;
         while(window)
         {
             offset->x -= window->getClientRectPtr()->left + window->getWindowRect()->left;
@@ -1207,9 +1207,9 @@ BOOL WIN32API ScreenToClient(HWND hwnd,  LPPOINT pt)
 //******************************************************************************
 HWND WIN32API GetDesktopWindow(void)
 {
-    HWND DesktopWindow = windowDesktop->getWindowHandle();
-    dprintf2(("USER32: GetDesktopWindow, returned %x\n", DesktopWindow));
-    return DesktopWindow;
+    HWND hDesktopWindow = windowDesktop->getWindowHandle();
+    dprintf2(("USER32: GetDesktopWindow, returned %x\n", hDesktopWindow));
+    return hDesktopWindow;
 }
 //******************************************************************************
 //******************************************************************************
