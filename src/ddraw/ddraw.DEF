@@ -1,0 +1,11 @@
+LIBRARY DDRAW INITINSTANCE TERMINSTANCE
+PROTMODE
+DATA MULTIPLE NONSHARED READWRITE LOADONCALL
+CODE LOADONCALL
+EXPORTS 
+ DDHAL32_VidMemFree	= _DDHAL32_VidMemFree@4	     @10
+ DDHAL32_VidMemAlloc    = _DDHAL32_VidMemAlloc@4     @11
+ DirectDrawCreate       = _OS2DirectDrawCreate@12       @12
+ DirectDrawEnumerateA   = _OS2DirectDrawEnumerateA@8    @13
+IMPORTS
+ DiveSetTransparentBlitMode = DIVE.18

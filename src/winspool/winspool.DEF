@@ -1,0 +1,128 @@
+;Created by BLAST for IBM's compiler
+LIBRARY WINSPOOL INITINSTANCE
+DATA MULTIPLE NONSHARED
+
+EXPORTS
+;001 stub ADVANCEDSETUPDIALOG
+  AbortPrinter  			= _AbortPrinter@4   				@2 ;stubonly
+  AddFormA				= _AddFormA@12      				@3 ;stubonly
+  AddFormW				= _AddFormW@12      				@4 ;stubonly
+  AddJobA				= _AddJobA@20	    			@5 ;stubonly
+  AddJobW				= _AddJobW@20       				@6 ;stubonly
+  AddMonitorA				= _AddMonitorA@12   				@7 ;stubonly
+  AddMonitorW				= _AddMonitorA@12   				@8 ;stubonly
+  AddPortA				= _AddPortA@12      				@9 ;stubonly
+;011 stub AddPortExA
+;011 stub AddPortExW
+  AddPortW				= _AddPortW@12      				@12 ;stubonly
+  AddPrintProcessorA 			= _AddPrintProcessorA@16 			@13 ;stubonly
+  AddPrintProcessorW 			= _AddPrintProcessorW@16			@14 ;stubonly
+  AddPrintProvidorA 		 	= _AddPrintProvidorA@12			@15 ;stubonly
+  AddPrintProvidorW  			= _AddPrintProvidorW@12			@16 ;stubonly
+  AddPrinterA				= _AddPrinterA@12				@17 ;stubonly
+  AddPrinterConnectionA 		= _AddPrinterConnectionA@4			@18 ;stubonly
+  AddPrinterConnectionW 		= _AddPrinterConnectionW@4			@19 ;stubonly
+  AddPrinterDriverA 			= _AddPrinterDriverA@12			@20 ;stubonly
+  AddPrinterDriverW			= _AddPrinterDriverW@12			@21 ;stubonly
+  AddPrinterW				= _AddPrinterW@12				@22 ;stubonly
+  AdvancedDocumentPropertiesA 		= _AdvancedDocumentPropertiesA@20 		@23 ;stubonly
+  AdvancedDocumentPropertiesW 		= _AdvancedDocumentPropertiesA@20		@24 ;stubonly		
+;025 stub AdvancedSetupDialog 
+  ClosePrinter				= _ClosePrinter@4				@26 ;stubonly
+  ConfigurePortA 			= _ConfigurePortA@12				@27 ;stubonly
+  ConfigurePortW 			= _ConfigurePortW@12				@28 ;stubonly
+  ConnectToPrinterDlg 			= _ConnectToPrinterDlg@8			@29 ;stubonly
+;030 stub CreatePrinterIC
+;031 stub DEVICECAPABILITIES
+;032 stub DEVICEMODE
+  DeleteFormA 				= _DeleteFormA@8				@33 ;stubonly
+  DeleteFormW				= _DeleteFormW@8				@34 ;stubonly
+  DeleteMonitorA 			= _DeleteMonitorA@12				@35 ;stubonly
+  DeleteMonitorW 			= _DeleteMonitorW@12				@36 ;stubonly
+  DeletePortA 				= _DeletePortA@12				@37 ;stubonly
+  DeletePortW				= _DeletePortW@12				@38 ;stubonly
+  DeletePrintProcessorA			= _DeletePrintProcessorA@12			@39 ;stubonly
+  DeletePrintProcessorW			= _DeletePrintProcessorW@12			@40 ;stubonly
+  DeletePrintProvidorA  		= _DeletePrintProvidorA@12			@41 ;stubonly
+  DeletePrintProvidorW			= _DeletePrintProvidorW@12			@42 ;stubonly
+  DeletePrinter				= _DeletePrinter@4				@43 ;stubonly
+  DeletePrinterConnectionA 		= _DeletePrinterConnectionA@4 		@44 ;stubonly
+  DeletePrinterConnectionW 		= _DeletePrinterConnectionW@4		@45 ;stubonly
+  DeletePrinterDriverA			= _DeletePrinterDriverA@12			@46 ;stubonly
+  DeletePrinterDriverW 			= _DeletePrinterDriverW@12			@47 ;stubonly
+;048 stub DeletePrinterIC
+;049 stub DevQueryPrint
+;050 stub DeviceCapabilities
+  DeviceCapabilitiesA 			= _DeviceCapabilitiesA@20			@51 ;stubonly
+  DeviceCapabilitiesW 			= _DeviceCapabilitiesW@20			@52 ;stubonly
+;053 stub DeviceMode
+;054 stub DocumentEvent
+ DocumentPropertiesA  			= _DocumentPropertiesA@24			@55 ;stubonly
+;056 stub DocumentPropertiesW
+;057 stub EXTDEVICEMODE
+  EndDocPrinter 			= _EndDocPrinter@4				@58 ;stubonly
+  EndPagePrinter			= _EndPagePrinter@4				@59 ;stubonly
+  EnumFormsA				= _EnumFormsA@24				@60 ;stubonly
+  EnumFormsW				= _EnumFormsW@24				@61 ;stubonly
+  EnumJobsA				= _EnumJobsA@32				@62 ;stubonly
+  EnumJobsW				= _EnumJobsW@32				@63 ;stubonly
+  EnumMonitorsA				= _EnumMonitorsA@24				@64 ;stubonly
+  EnumMonitorsW				= _EnumMonitorsW@24				@65 ;stubonly
+  EnumPortsA				= _EnumPortsA@24				@66 ;stubonly
+  EnumPortsW				= _EnumPortsW@24				@67 ;stubonly
+  EnumPrintProcessorDatatypesA		= _EnumPrintProcessorDatatypesA@28		@68 ;stubonly
+  EnumPrintProcessorDatatypesW		= _EnumPrintProcessorDatatypesW@28		@69 ;stubonly
+  EnumPrintProcessorsA			= _EnumPrintProcessorsA@28			@70 ;stubonly
+  EnumPrintProcessorsW			= _EnumPrintProcessorsW@28			@71 ;stubonly
+  EnumPrinterDriversA			= _EnumPrinterDriversA@28			@72 ;stubonly
+  EnumPrinterDriversW			= _EnumPrinterDriversA@28			@73 ;stubonly
+  EnumPrintersA        			= _EnumPrintersA@28    		 	@74
+  EnumPrintersW 			= _EnumPrintersW@28				@75 ;stubonly
+;076 stub ExtDeviceMode
+  FindClosePrinterChangeNotification 	= _FindClosePrinterChangeNotification@4	@77 ;stubonly
+  FindFirstPrinterChangeNotification 	= _FindFirstPrinterChangeNotification@16	@78 ;stubonly
+  FindNextPrinterChangeNotification  	= _FindNextPrinterChangeNotification@16	@79 ;stubonly
+  FreePrinterNotifyInfo			= _FreePrinterNotifyInfo@4			@80 ;stubonly
+  GetFormA				= _GetFormA@24				@81 ;stubonly
+  GetFormW				= _GetFormW@24				@82 ;stubonly
+  GetJobA				= _GetJobA@24				@83 ;stubonly
+  GetJobW				= _GetJobW@24				@84 ;stubonly
+  GetPrintProcessorDirectoryA		= _GetPrintProcessorDirectoryA@24		@85 ;stubonly
+  GetPrintProcessorDirectoryW		= _GetPrintProcessorDirectoryW@24		@86 ;stubonly
+  GetPrinterA				= _GetPrinterA@20				@87 ;stubonly
+  GetPrinterDataA			= _GetPrinterDataA@24			@88 ;stubonly
+  GetPrinterDataW			= _GetPrinterDataW@24			@89 ;stubonly
+  GetPrinterDriverA			= _GetPrinterDriverA@24			@90 ;stubonly
+  GetPrinterDriverDirectoryA		= _GetPrinterDriverDirectoryA@24		@91 ;stubonly
+  GetPrinterDriverDirectoryW		= _GetPrinterDriverDirectoryW@24		@92 ;stubonly
+  GetPrinterDriverW			= _GetPrinterDriverW@24			@93 ;stubonly
+  GetPrinterW				= _GetPrinterW@20				@94 ;stubonly
+;095 stub InitializeDll
+ OpenPrinterA	= _OpenPrinterA@12		@96
+  OpenPrinterW				= _OpenPrinterW@12 				@97 ;stubonly
+;098 stub PlayGdiScriptOnPrinterIC
+  PrinterMessageBoxA			= _PrinterMessageBoxA@24			@99  ;stubonly
+  PrinterMessageBoxW			= _PrinterMessageBoxW@24			@100 ;stubonly
+  PrinterProperties			= _PrinterProperties@8			@101 ;stubonly
+  ReadPrinter				= _ReadPrinter@16				@102 ;stubonly
+  ResetPrinterA				= _ResetPrinterA@8				@103 ;stubonly
+  ResetPrinterW				= _ResetPrinterW@8				@104 ;stubonly
+  ScheduleJob				= _ScheduleJob@8				@105 ;stubonly
+;106 stub  SetAllocFailCount	
+  SetFormA				= _SetFormA@16				@107 ;stubonly
+  SetFormW				= _SetFormW@16				@108 ;stubonly
+  SetJobA				= _SetJobA@20				@109 ;stubonly
+  SetJobW				= _SetJobA@20				@110 ;stubonly
+  SetPrinterA				= _SetPrinterA@16				@111 ;stubonly
+  SetPrinterDataA			= _SetPrinterDataA@20			@112 ;stubonly
+  SetPrinterDataW			= _SetPrinterDataW@20			@113 ;stubonly
+  SetPrinterW				= _SetPrinterW@16				@114 ;stubonly
+;115 stub SpoolerDevQueryPrintW
+;116 stub SpoolerInit
+;117 stub StartDocDlgA
+;118 stub StartDocDlgW
+  StartDocPrinterA			= _StartDocPrinterA@12			@119 ;stubonly
+  StartDocPrinterW			= _StartDocPrinterW@12			@120 ;stubonly
+  StartPagePrinter			= _StartPagePrinter@4			@121 ;stubonly
+;122 stub WaitForPrinterChange
+  WritePrinter				= _WritePrinter@16				@123 ;stubonly

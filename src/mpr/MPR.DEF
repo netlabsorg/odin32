@@ -1,0 +1,83 @@
+;Created by BLAST for IBMs compiler
+;Basis is  5.05.97  12.00  59152 MPR.DLL (NT4SP3)
+
+LIBRARY MPR INITINSTANCE
+DATA MULTIPLE NONSHARED
+EXPORTS
+
+; MultinetGetConnectionPerformanceA@1  = _OS2MultinetGetConnectionPerformanceA@?? @1
+; MultinetGetConnectionPerformanceW@2  = _OS2MultinetGetConnectionPerformanceW@?? @2
+; MultinetGetErrorTextA@3              = _OS2MultinetGetErrorTextA@??             @3
+; MultinetGetErrorTextW@4              = _OS2MultinetGetErrorTextW@??             @4
+; RestoreConnectionA0@5                = _OS2RestoreConnectionA0@??               @5
+  WNetAddConnection2A                  = _OS2WNetAddConnection2A@16               @6
+  WNetAddConnection2W                  = _OS2WNetAddConnection2W@16               @7
+  WNetAddConnection3A                  = _OS2WNetAddConnection3A@20               @8
+  WNetAddConnection3W                  = _OS2WNetAddConnection3W@20               @9
+  WNetAddConnectionA                   = _OS2WNetAddConnectionA@12                @10
+  WNetAddConnectionW                   = _OS2WNetAddConnectionW@12                @11
+  WNetCancelConnection2A               = _OS2WNetCancelConnection2A@12            @12
+  WNetCancelConnection2W               = _OS2WNetCancelConnection2W@12            @13
+  WNetCancelConnectionA                = _OS2WNetCancelConnectionA@8              @14
+  WNetCancelConnectionW                = _OS2WNetCancelConnectionW@8              @15
+; WNetClearConnections                 = _OS2WNetClearConnections@??              @16
+  WNetCloseEnum                        = _OS2WNetCloseEnum@4                      @17
+; WNetConnectionDialog1A               = _OS2WNetConnectionDialog1A@??            @18
+; WNetConnectionDialog1W               = _OS2WNetConnectionDialog1W@??            @19
+; WNetConnectionDialog2                = _OS2WNetConnectionDialog2@??             @20
+  WNetConnectionDialog                 = _OS2WNetConnectionDialog@8               @21
+; WNetDirectoryNotifyA                 = _OS2WNetDirectoryNotifyA@??              @22
+; WNetDirectoryNotifyW                 = _OS2WNetDirectoryNotifyW@??              @23
+; WNetDisconnectDialog1A               = _OS2WNetDisconnectDialog1A@??            @24
+; WNetDisconnectDialog1W               = _OS2WNetDisconnectDialog1W@??            @25
+; WNetDisconnectDialog2                = _OS2WNetDisconnectDialog2@??             @26
+  WNetDisconnectDialog                 = _OS2WNetDisconnectDialog@8               @27
+  WNetEnumResourceA                    = _OS2WNetEnumResourceA@16                 @28
+  WNetEnumResourceW                    = _OS2WNetEnumResourceW@16                 @29
+; WNetFMXEditPerm                      = _OS2WNetFMXEditPerm@??                   @30
+; WNetFMXGetPermCaps                   = _OS2WNetFMXGetPermCaps@??                @31
+; WNetFMXGetPermHelp                   = _OS2WNetFMXGetPermHelp@??                @32
+; WNetFormatNetworkNameA               = _OS2WNetGetNetworkNameA@??               @33
+; WNetFormatNetworkNameW               = _OS2WNetGetNetworkNameW@??               @34
+; WNetGetConnection2A                  = _OS2WNetGetConnection2A@??               @35
+; WNetGetConnection2W                  = _OS2WNetGetConnection2W@??               @36
+; WNetGetConnection3A                  = _OS2WNetGetConnection3A@??               @37
+; WNetGetConnection3W                  = _OS2WNetGetConnection3W@??               @38
+  WNetGetConnectionA                   = _OS2WNetGetConnectionA@12                @39
+  WNetGetConnectionW                   = _OS2WNetGetConnectionW@12                @40
+; WNetGetDirectoryTypeA                = _OS2WNetGetDirectoryTypeA@??             @41
+; WNetGetDirectoryTypeW                = _OS2WNetGetDirectoryTypeW@??             @42
+; WNetGetHomeDirectoryW                = _OS2WNetGetHomeDirectoryW@??             @43
+  WNetGetLastErrorA                    = _OS2WNetGetLastErrorA@20                 @44
+  WNetGetLastErrorW                    = _OS2WNetGetLastErrorW@20                 @45
+; WNetGetNetworkInformationA           = _OS2WNetGetNetworkInformationA@??        @46
+; WNetGetNetworkInformationW           = _OS2WNetGetNetworkInformationW@??        @47
+; WNetGetPropertyTextA                 = _OS2WNetGetPropertyTextA@??              @48
+; WNetGetPropertyTextW                 = _OS2WNetGetPropertyTextW@??              @49
+; WNetGetProviderNameA                 = _OS2WNetGetProviderNameA@??              @50
+; WNetGetProviderNameW                 = _OS2WNetGetProviderNameW@??              @51
+; WNetGetProviderTypeA                 = _OS2WNetGetProviderTypeA@??              @52
+; WNetGetProviderTypeW                 = _OS2WNetGetProviderTypeW@??              @53
+  WNetGetResourceInformationA          = _OS2WNetGetResourceInformationA@16       @54
+  WNetGetResourceInformationW          = _OS2WNetGetResourceInformationW@16       @55
+  WNetGetResourceParentA               = _OS2WNetGetResourceParentA@12            @56
+  WNetGetResourceParentW               = _OS2WNetGetResourceParentW@12            @57
+; WNetGetSearchDialog                  = _OS2WNetGetSearchDialog@??               @58
+  WNetGetUniversalNameA                = _OS2WNetGetUniversalNameA@16             @59
+  WNetGetUniversalNameW                = _OS2WNetGetUniversalNameW@16             @60
+  WNetGetUserA                         = _OS2WNetGetUserA@12                      @61
+  WNetGetUserW                         = _OS2WNetGetUserW@12                      @62
+; WNetLogonNotify                      = _OS2WNetLogonNotify@??                   @63
+  WNetOpenEnumA                        = _OS2WNetOpenEnumA@20                     @64
+  WNetOpenEnumW                        = _OS2WNetOpenEnumW@20                     @65
+; WNetPasswordChangeNotify             = _OS2WNetPasswordChangeNotify@??          @66
+; WNetPropertyDialogA                  = _OS2WNetPropertyDialogA@??               @67
+; WNetPropertyDialogW                  = _OS2WNetPropertyDialogW@??               @68
+; WNetRestoreConnectionW               = _OS2WNetRestoreConnection@??             @69
+; WNetSetConnectionA                   = _OS2WNetSetConnectionA@??                @70
+; WNetSetConnectionW                   = _OS2WNetSetConnectionW@??                @71
+  WNetSetLastErrorA                    = _OS2WNetSetLastErrorA@12                 @72
+  WNetSetLastErrorW                    = _OS2WNetSetLastErrorW@12                 @73
+; WNetSupportGlobalEnum                = _OS2WNetSupportGlobalEnum@??             @74
+; WNetUseConnectionA                   = _OS2WNetUseConnectionA@??                @75
+; WNetUseConnectionW                   = _OS2WnetUseConnectionW@??                @76
