@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.45 2000-09-25 18:58:53 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.46 2000-09-25 19:00:27 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -1971,7 +1971,7 @@ BOOL OSLibGetDiskFreeSpace(LPSTR lpRootPathName, LPDWORD lpSectorsPerCluster,
         *lpBytesPerSector        = fsAlloc.cbSector;
         *lpNumberOfFreeClusters  = fsAlloc.cUnitAvail;
         *lpTotalNumberOfClusters = fsAlloc.cUnit;
-  SetLastError(ERROR_SUCCESS_W);
+        SetLastError(ERROR_SUCCESS_W);
         return TRUE;
    }
    SetLastError(error2WinError(rc));
@@ -2013,12 +2013,11 @@ DWORD OSLibDosDevIOCtl( DWORD hFile, DWORD dwCat, DWORD dwFunc,
                         PVOID pData, DWORD dwDataMaxLen, DWORD *pdwDataLen)
 {
   APIRET rc;
-  USHORT sel = RestoreOS2FS();
 
   rc = DosDevIOCtl( (HFILE)hFile, dwCat, dwFunc,
                      pParm, dwParmMaxLen, pdwParmLen,
                      pData, dwDataMaxLen, pdwDataLen);
-  SetFS(sel);
+
   SetLastError(error2WinError(rc,ERROR_INVALID_HANDLE));
   return (DWORD)rc;
 }
