@@ -1,4 +1,4 @@
-; $Id: ntdll.def,v 1.4 1999-06-10 17:06:45 phaller Exp $
+; $Id: ntdll.def,v 1.5 1999-06-22 15:38:02 phaller Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is NT4.0's NTDLL.DLL
@@ -176,6 +176,8 @@ EXPORTS
     ZwQueryKey                    = _NtQueryKey@20
     NtQueryMultipleValueKey       = _NtQueryMultipleValueKey@24
     ZwQueryMultipleValueKey       = _NtQueryMultipleValueKey@24
+    NtQueryValueKey               = _NtQueryValueKey@24
+    ZwQueryValueKey               = _NtQueryValueKey@24
     NtReplaceKey                  = _NtReplaceKey@12
     ZwReplaceKey                  = _NtReplaceKey@12
     NtRestoreKey                  = _NtRestoreKey@12
