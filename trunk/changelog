@@ -1,4 +1,9 @@
-/* $Id: changelog,v 1.2544 2003-04-08 12:31:30 sandervl Exp $ */
+/* $Id: changelog,v 1.2545 2003-04-08 12:43:15 sandervl Exp $ */
+
+ 2002-04-08: knut st. osmundsen <Knut.Osmundsen@innotek   >
+    - COMDLG32: o Corrected default printer init. It was crashing with big
+                  printer setups and not handling multiple drivers per device
+                  correctly.
 
  2002-04-08: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o Menu control: do not paint default menu item strings in bold
