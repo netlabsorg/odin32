@@ -1,4 +1,4 @@
-/* $Id: winres.cpp,v 1.10 1999-08-20 11:52:44 sandervl Exp $ */
+/* $Id: winres.cpp,v 1.11 1999-08-20 15:03:31 sandervl Exp $ */
 
 /*
  * Win32 resource class
@@ -132,7 +132,7 @@ Win32Resource::Win32Resource(Win32Image *module, HRSRC hRes, ULONG id, ULONG typ
   }
   OS2ResHandle = 0;
 
-  rc = DosQueryResourceSize(module->hinstance, type, id, &ressize);
+  rc = DosQueryResourceSize(module->hinstance, orgos2type, id, &ressize);
   if(rc) {
     dprintf(("Win32Resource ctor: DosQueryResourceSize %x %d %d returned %X\n", module->hinstance, type, id, rc));
     ressize = 0;
@@ -247,8 +247,9 @@ PVOID Win32Resource::lockResource()
             dprintf(("Can't find original string!!!\n"));
             return(NULL);
         }
-        winresdata = (char *)malloc(ressize);
+        winresdata = malloc(ressize+sizeof(WCHAR));
         memcpy(winresdata, resdata, ressize);
+	*(USHORT *)(&((char *)winresdata)[ressize]) = 0;
         DosFreeResource(resdata);
         return((PVOID)((ULONG)winresdata+2));   //skip length word
 
