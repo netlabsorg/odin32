@@ -558,7 +558,9 @@ static DWORD CDAUDIO_mciStatus(UINT wDevID, DWORD dwFlags, LPMCI_STATUS_PARMS lp
 	    if (dwFlags & MCI_TRACK) {
 		if (lpParms->dwTrack > wmcda->wcda.nTracks || lpParms->dwTrack == 0)
 		    return MCIERR_OUTOFRANGE;
+#ifndef __WIN32OS2__
                 if(wmcda->wcda.nCurTrack)
+#endif
                     lpParms->dwReturn = wmcda->wcda.lpdwTrackPos[lpParms->dwTrack - 1];
 		//TRACE("get MCI_TRACK #%lu, track position: %lu !\n", lpParms->dwTrack, lpParms->dwReturn);
             }
