@@ -1,4 +1,4 @@
-/* $Id: options.h,v 1.2 2002-04-01 12:45:14 bird Exp $
+/* $Id: options.h,v 1.3 2002-04-01 13:51:16 bird Exp $
  *
  * Options.
  *
@@ -16,46 +16,6 @@
 /*******************************************************************************
 *   Defined Constants And Macros                                               *
 *******************************************************************************/
-/* fKernel */
-#define KF_UNI              0x0000
-#define KF_SMP              0x0001
-#define KF_W4               0x0002
-#define KF_REV_MASK         0x0FF0
-#define KF_REV_SHIFT        4
-#define KF_REV_0            0x0000
-#define KF_REV_A            0x0010
-#define KF_REV_B            0x0020
-#define KF_REV_C            0x0030
-#define KF_REV_D            0x0040
-#define KF_REV_E            0x0050
-#define KF_REV_F            0x0060
-#define KF_REV_G            0x0070
-#define KF_REV_H            0x0080
-#define KF_REV_I            0x0090
-#define KF_REV_J            0x00a0
-#define KF_REV_K            0x00b0
-#define KF_REV_L            0x00c0
-#define KF_REV_M            0x00d0
-#define KF_REV_N            0x00e0
-#define KF_REV_O            0x00f0
-#define KF_REV_P            0x0100
-#define KF_REV_Q            0x0110
-#define KF_REV_R            0x0120
-#define KF_REV_S            0x0130
-#define KF_REV_T            0x0140
-#define KF_REV_U            0x0150
-#define KF_REV_V            0x0160
-#define KF_REV_W            0x0170
-#define KF_REV_X            0x0180
-#define KF_REV_Y            0x0190
-#define KF_REV_Z            0x01a0
-#define KF_REV_ECS          0x0900
-#define KF_DEBUG            0x1000
-#define KF_HAS_DEBUGTYPE    0x2000
-#define KF_ALLSTRICT        0x3000
-#define KF_HALFSTRICT       0x7000
-
-
 /* default heapsizes */
 #define CB_SWP_INIT         ((unsigned long)1024*512)      /* 512KB */
 #define CB_SWP_MAX          ((unsigned long)1024*1024*16)  /*  16MB  */
@@ -80,11 +40,6 @@
             CB_SWP_MAX,             /* cbSwpHeapMax  */     \
             CB_RES_INIT,            /* cbResHeapInit */     \
             CB_RES_MAX}             /* cbResHeapMax  */
-
-#define isSMPKernel()               (fKernel & KF_SMP)
-#define isUNIKernel()               (!(fKernel & KF_SMP))
-
-#define isHighMemorySupported()     (ulKernelBuild >= 14000 || isSMPKernel())
 
 /* INC */
 
@@ -115,16 +70,12 @@ struct kKLOptions
 *******************************************************************************/
 /* NOINC */
 extern struct kKLOptions DATA16_GLOBAL options;  /* defined in d16Globl.c */
-extern ULONG  DATA16_GLOBAL fKernel;
-extern ULONG  DATA16_GLOBAL ulKernelBuild;
 extern USHORT DATA16_GLOBAL usVerMajor;
 extern USHORT DATA16_GLOBAL usVerMinor;
 
 #ifdef RING0
 #if defined(__IBMC__) || defined(__IBMCPP__)
     #pragma map(options,        "_options")
-    #pragma map(fKernel,        "_fKernel")
-    #pragma map(ulKernelBuild,  "_ulKernelBuild")
     #pragma map(usVerMajor,     "_usVerMajor")
     #pragma map(usVerMinor,     "_usVerMinor")
 #endif
