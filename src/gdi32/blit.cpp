@@ -1,4 +1,4 @@
-/* $Id: blit.cpp,v 1.18 2000-09-13 21:00:22 sandervl Exp $ */
+/* $Id: blit.cpp,v 1.19 2000-10-01 21:21:15 phaller Exp $ */
 
 /*
  * GDI32 blit code
@@ -54,19 +54,39 @@ BOOL WIN32API StretchBlt(HDC hdcDest, int nXOriginDest, int nYOriginDest,
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API BitBlt(HDC hdcDest, int arg2, int arg3, int arg4, int arg5, HDC hdcSrc, int arg7, int arg8, DWORD  arg9)
+BOOL WIN32API BitBlt(HDC hdcDest, 
+                     int nXDest, 
+                     int nYDest,
+                     int nWidth,
+                     int nHeight,
+                     HDC hdcSrc, 
+                     int nXSrc,
+                     int nYSrc,
+                     DWORD  dwRop)
 {
- BOOL rc;
+  BOOL rc;
 
-    SetLastError(ERROR_SUCCESS);
-    if(DIBSection::getSection() != NULL) {
-        DIBSection *dsect = DIBSection::findHDC(hdcSrc);
-        if(dsect) {
-                return dsect->BitBlt(hdcDest, arg2, arg3, arg4, arg5, arg7, arg8, arg4, arg5, arg9);
-        }
+  SetLastError(ERROR_SUCCESS);
+  if(DIBSection::getSection() != NULL) 
+  {
+    DIBSection *dsect = DIBSection::findHDC(hdcSrc);
+    if(dsect) 
+    {
+      return dsect->BitBlt(hdcDest,
+                           nXDest,
+                           nYDest,
+                           nWidth,
+                           nHeight,
+                           nXSrc,
+                           nYSrc,
+                           nWidth,
+                           nHeight,
+                           dwRop);
     }
-    dprintf(("GDI32: BitBlt to hdc %X from (%d,%d) to (%d,%d), (%d,%d) rop %X\n", hdcDest, arg7, arg8, arg2, arg3, arg4, arg5, arg9));
-    return O32_BitBlt(hdcDest, arg2, arg3, arg4, arg5, hdcSrc, arg7, arg8, arg9);
+  }
+  dprintf(("GDI32: BitBlt to hdc %X from (%d,%d) to (%d,%d), (%d,%d) rop %X\n", 
+           hdcDest, nXSrc, nYSrc, nXDest, nYDest, nWidth, nHeight, dwRop));
+  return O32_BitBlt(hdcDest, nXDest, nYDest, nWidth, nHeight, hdcSrc, nXSrc, nYSrc, dwRop);
 }
 //******************************************************************************
 //******************************************************************************
