@@ -1,4 +1,4 @@
-/* $Id: thread.cpp,v 1.41 2002-01-13 21:42:43 sandervl Exp $ */
+/* $Id: thread.cpp,v 1.42 2002-02-07 11:19:13 sandervl Exp $ */
 
 /*
  * Win32 Thread API functions
@@ -278,7 +278,7 @@ DWORD OPEN32API Win32ThreadProc(LPVOID lpData)
 {
  EXCEPTION_FRAME exceptFrame;
  Win32Thread     *me = (Win32Thread *)lpData;
- ULONG            winthread = (ULONG)me->pCallback;
+ ULONG            threadCallback = (ULONG)me->pCallback;
  LPVOID           userdata  = me->lpUserData;
  HANDLE           hThread   = me->hThread;
  DWORD            rc;
@@ -294,7 +294,7 @@ DWORD OPEN32API Win32ThreadProc(LPVOID lpData)
   }
   winteb->flags = me->dwFlags;
 
-  winteb->entry_point = (void *)winthread;
+  winteb->entry_point = (void *)threadCallback;
   winteb->entry_arg   = (void *)userdata;
   winteb->o.odin.hThread = hThread;
 
@@ -307,7 +307,16 @@ DWORD OPEN32API Win32ThreadProc(LPVOID lpData)
   OS2SetExceptionHandler((void *)&exceptFrame);
   winteb->o.odin.exceptFrame = (ULONG)&exceptFrame;
 
-  SetWin32TIB();
+  //Determine if thread callback is inside a PE dll; if true, then force
+  //switch to win32 TIB (FS selector)
+  //(necessary for Opera when loading win32 plugins that create threads)
+  Win32DllBase *dll;
+  dll = Win32DllBase::findModuleByAddr(threadCallback);
+  if(dll && dll->isPEImage()) {
+       dprintf(("Win32ThreadProc: Force win32 TIB switch"));
+       SetWin32TIB(TIB_SWITCH_FORCE_WIN32);
+  }
+  else SetWin32TIB(TIB_SWITCH_DEFAULT); //executable type determines whether or not FS is changed
 
   DWORD dwProcessAffinityMask, dwSystemAffinityMask;
 
@@ -322,7 +331,7 @@ DWORD OPEN32API Win32ThreadProc(LPVOID lpData)
 
   //Set FPU control word to 0x27F (same as in NT)
   CONTROL87(0x27F, 0xFFF);
-  rc = AsmCallThreadHandler(winthread, userdata);
+  rc = AsmCallThreadHandler(threadCallback, userdata);
 
   if(fExitProcess) {
       OSLibDosExitThread(rc);
@@ -333,7 +342,7 @@ DWORD OPEN32API Win32ThreadProc(LPVOID lpData)
       Win32DllBase::detachThreadFromAllDlls();  //send DLL_THREAD_DETACH message to all dlls
       Win32DllBase::tlsDetachThreadFromAllDlls(); //destroy TLS structures of all dlls
       if(WinExe) WinExe->tlsDetachThread();		  //destroy TLS structure of main exe
-      DestroyTIB();
+      DestroyTIB();  //destroys TIB and restores FS
       OS2UnsetExceptionHandler((void *)&exceptFrame);
   }
 
