@@ -66,6 +66,8 @@
 *.pdf -k 'b'
 *.ps -k 'b'
 *.hlp -k 'b'
+*.inf -k 'b'
+*.fw4 -k 'b'
 
 
 # video and audio files
