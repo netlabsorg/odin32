@@ -1,4 +1,4 @@
-/* $Id: heapstring.cpp,v 1.28 2000-06-18 12:55:17 phaller Exp $ */
+/* $Id: heapstring.cpp,v 1.29 2000-07-06 21:18:42 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -1426,8 +1426,8 @@ ODINFUNCTION6(INT,               GetNumberFormatA,
         retVal = strlen(sDestination) + 1;
     else           
     {
-        strncpy (lpNumberStr, sDestination, cchNumber-1);
-        *(lpNumberStr+cchNumber-1) = '\0';   /* ensure we got a NULL at the end */
+        strncpy (lpNumberStr, sDestination, cchNumber);
+        lpNumberStr[cchNumber-1] = '\0';   /* ensure we got a NULL at the end */
         retVal = strlen(lpNumberStr);
     }
           

@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.82 2000-06-08 18:08:58 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.83 2000-07-06 21:18:45 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -192,9 +192,10 @@ TEB *InitializeTIB(BOOL fMainThread)
     thdb->pWsockData      = NULL;
     thdb->threadId        = GetCurrentThreadId();
     if(fMainThread) {
-        thdb->hThread    = hThreadMain;
+        thdb->hThread     = hThreadMain;
     }
     else thdb->hThread    = GetCurrentThread();
+    thdb->lcid            = GetUserDefaultLCID();
 
     threadListMutex.enter();
     THDB *thdblast        = threadList;
@@ -1084,6 +1085,7 @@ DWORD WIN32API GetModuleFileNameA(HMODULE hinstModule, LPTSTR lpszPath, DWORD cc
         //SvL: 13-9-98: +1
         rc = min(strlen(fpath)+1, cchPath);
         strncpy(lpszPath, fpath, rc);
+	lpszPath[rc-1] = 0;
   }
   else  rc = O32_GetModuleFileName(hinstModule, lpszPath, cchPath);
 

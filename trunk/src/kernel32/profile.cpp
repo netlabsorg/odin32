@@ -1,4 +1,4 @@
-/* $Id: profile.cpp,v 1.22 2000-02-16 14:23:12 sandervl Exp $ */
+/* $Id: profile.cpp,v 1.23 2000-07-06 21:18:44 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -964,7 +964,8 @@ ODINFUNCTION0(int,PROFILE_LoadOdinIni)
     {
       PROFILE_OdinProfile = PROFILE_Load( f );
       fclose( f );
-      strncpy(PROFILE_OdinIniUsed,p,MAX_PATHNAME_LEN-1);
+      strncpy(PROFILE_OdinIniUsed,p,MAX_PATHNAME_LEN);
+      PROFILE_OdinIniUsed[MAX_PATHNAME_LEN-1] = 0;
     } 
     else
     {

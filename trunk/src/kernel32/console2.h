@@ -1,4 +1,4 @@
-/* $Id: console2.h,v 1.7 1999-07-12 17:20:04 phaller Exp $ */
+/* $Id: console2.h,v 1.8 2000-07-06 21:18:41 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -521,8 +521,8 @@ BOOL   WIN32API GetConsoleScreenBufferInfo    (HANDLE                      hCons
 DWORD  WIN32API GetConsoleTitleA              (LPTSTR        lpConsoleTitle,
                                                   DWORD         nSize);
 
-DWORD  WIN32API GetConsoleTitleW              (LPTSTR        lpConsoleTitle,
-                                                  DWORD         nSize);
+DWORD  WIN32API GetConsoleTitleW              (LPWSTR        lpConsoleTitle,
+                                               DWORD         nSize);
 
 COORD  WIN32API GetLargestConsoleWindowSize   (HANDLE        hConsoleOutput);
 

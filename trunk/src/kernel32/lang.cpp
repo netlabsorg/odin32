@@ -1,10 +1,11 @@
-/* $Id: lang.cpp,v 1.23 2000-06-23 19:02:37 sandervl Exp $ */
+/* $Id: lang.cpp,v 1.24 2000-07-06 21:18:43 sandervl Exp $ */
 /*
  * Win32 language API functions for OS/2
  *
  * Copyright 1998 Sander van Leeuwen
  * Copyright 1998 Patrick Haller
  * Copyright 1999 Przemyslaw Dobrowolski
+ *
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -20,6 +21,7 @@
 #include <winos2def.h>
 #include "unicode.h"
 #include "oslibmisc.h"
+#include <wprocess.h>
 
 #define DBG_LOCALLOG	DBG_lang
 #include "dbglocal.h"
@@ -879,44 +881,61 @@ ODINFUNCTION4(int, GetLocaleInfoA, LCID, lcid, LCTYPE, LCType, LPSTR, buf,
 //******************************************************************************
 BOOL WIN32API IsValidLocale(LCID Locale, DWORD dwFlags)
 {
-  dprintf(("KERNEL32:  OS2IsValidLocale, always returns TRUE\n"));
+  dprintf(("KERNEL32: IsValidLocale, always returns TRUE\n"));
   return(TRUE);
 }
 //******************************************************************************
 //******************************************************************************
 LCID WIN32API GetThreadLocale()
 {
-  dprintf(("KERNEL32:  OS2GetThreadLocale always return US English!\n"));
-  return(0x409);        //US English
+ THDB *thdb = GetThreadTHDB();
+
+  if(thdb == NULL) {
+  	dprintf(("KERNEL32: ERROR: GetThreadLocale thdb == NULL!"));
+	return FALSE;
+  }
+  dprintf(("KERNEL32: GetThreadLocale returned %x", thdb->lcid));
+  return(thdb->lcid);
 }
 //******************************************************************************
 //******************************************************************************
-//******************************************************************************
-BOOL WIN32API SetThreadLocale( LCID locale )
+BOOL WIN32API SetThreadLocale(LCID locale)
 {
-  dprintf(("KERNEL32:  OS2SetThreadLocale not implemented!\n"));
+ THDB *thdb = GetThreadTHDB();
+ 
+  if(thdb == NULL) {
+  	dprintf(("KERNEL32: ERROR SetThreadLocale thdb == NULL!"));
+	return FALSE;
+  }
+  dprintf(("KERNEL32: SetThreadLocale %x", locale));
+  thdb->lcid = locale;
   return(TRUE);
 }
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API EnumSystemLocalesA(LOCALE_ENUMPROCA lpLocaleEnumProc,
-                                    DWORD dwFlags)
+                                 DWORD dwFlags)
 {
+ char buffer[32];
+
   dprintf(("EnumSystemLocalesA %X %X\n", lpLocaleEnumProc, dwFlags));
   if(lpLocaleEnumProc == NULL || ((dwFlags & LCID_INSTALLED) && (dwFlags & LCID_SUPPORTED))) {
         dprintf(("Invalid parameter\n"));
         SetLastError(ERROR_INVALID_PARAMETER);
         return(FALSE);
   }
-  lpLocaleEnumProc("OS/2 US English");
+
+  sprintf(buffer, "%08lx", GetUserDefaultLCID());
+  lpLocaleEnumProc(buffer);
   return(TRUE);
 }
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API EnumSystemLocalesW(LOCALE_ENUMPROCW lpLocaleEnumProc,
-                                    DWORD            dwFlags)
+                                 DWORD            dwFlags)
 {
- WCHAR locStr[32];
+ WCHAR bufferW[32];
+ char  bufferA[32];
 
   dprintf(("EnumSystemLocalesW %X %X\n", lpLocaleEnumProc, dwFlags));
   if(lpLocaleEnumProc == NULL || ((dwFlags & LCID_INSTALLED) && (dwFlags & LCID_SUPPORTED))) {
@@ -924,8 +943,10 @@ BOOL WIN32API EnumSystemLocalesW(LOCALE_ENUMPROCW lpLocaleEnumProc,
         SetLastError(ERROR_INVALID_PARAMETER);
         return(FALSE);
   }
-  AsciiToUnicode("OS/2 US English", locStr);
-  lpLocaleEnumProc(locStr);
+  sprintf(bufferA, "%08lx", GetUserDefaultLCID());
+  lstrcpyAtoW(bufferW, bufferA);
+
+  lpLocaleEnumProc(bufferW);
   return(TRUE);
 }
 //******************************************************************************

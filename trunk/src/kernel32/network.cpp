@@ -1,4 +1,4 @@
-/* $Id: network.cpp,v 1.9 2000-02-16 14:27:08 sandervl Exp $ */
+/* $Id: network.cpp,v 1.10 2000-07-06 21:18:43 sandervl Exp $ */
 /*
  * Win32 Network apis
  *
@@ -39,7 +39,7 @@ BOOL WIN32API GetComputerNameA(LPSTR lpBuffer, LPDWORD nSize)
 
     if (lpBuffer)
     {
-        strncpy(lpBuffer, szHostname, *nSize - 1);      // Copy back name.
+        strncpy(lpBuffer, szHostname, *nSize);  // Copy back name.
         lpBuffer[*nSize - 1] = 0;               // Ensure terminated.
     }
 

@@ -1,4 +1,4 @@
-/* $Id: KERNEL32.CPP,v 1.48 2000-07-03 12:12:37 bird Exp $ */
+/* $Id: KERNEL32.CPP,v 1.49 2000-07-06 21:18:38 sandervl Exp $ */
 
 /*
  * Win32 compatibility file functions for OS/2
@@ -896,11 +896,12 @@ int WIN32API LCMapStringW(
     int      cchDest)
 {
     // quick hack!  this code is not done!
+    dprintf(("LCMapStringW: NOT IMPLEMENTED!"));
     if(cchSrc == -1)
         cchSrc = strlen((const char *)lpSrcStr);
     if(!cchDest)
         return cchSrc;
-    strncpy((char *)lpDestStr, (const char *)lpSrcStr, max(cchSrc, cchDest));
+    lstrcpynW(lpDestStr, lpSrcStr, max(cchSrc, cchDest));
     return max(cchSrc, cchDest);
 }
 //******************************************************************************
