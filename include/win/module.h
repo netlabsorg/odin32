@@ -1,4 +1,4 @@
-/* $Id: module.h,v 1.3 1999-09-02 17:39:35 phaller Exp $ */
+/* $Id: module.h,v 1.4 1999-11-02 21:50:40 achimha Exp $ */
 
 /*
  * Module definitions
@@ -162,7 +162,6 @@ typedef struct _wine_modref
 #define WINE_MODREF_MARKER                0x80000000
 
 
-#ifndef __WIN32OS2__
 /* Resource types */
 typedef struct resource_typeinfo_s NE_TYPEINFO;
 typedef struct resource_nameinfo_s NE_NAMEINFO;
@@ -176,6 +175,8 @@ typedef struct resource_nameinfo_s NE_NAMEINFO;
 #define NE_MODULE_NAME(pModule) \
     (((OFSTRUCT *)((char*)(pModule) + (pModule)->fileinfo))->szPathName)
 #endif
+
+#ifndef __WIN32OS2__
 
 /* module.c */
 extern FARPROC MODULE_GetProcAddress( HMODULE hModule, LPCSTR function, BOOL snoop );

@@ -7,6 +7,10 @@
 #ifndef __WINE_LISTVIEW_H
 #define __WINE_LISTVIEW_H
 
+#include "commctrl.h"
+#include "windef.h"
+#include "wingdi.h"
+
 typedef struct tagLISTVIEW_SUBITEM
 {
     LPSTR pszText;
@@ -56,7 +60,9 @@ typedef struct tagLISTVIEW_INFO
     HDPA hdpaItems;
     PFNLVCOMPARE pfnCompare;
     LPARAM lParamSort;
-
+    HWND hwndEdit;
+    LISTVIEW_ITEM *lpeditItem;
+    
 } LISTVIEW_INFO;
 
 
