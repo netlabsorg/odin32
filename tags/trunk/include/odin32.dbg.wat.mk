@@ -1,4 +1,4 @@
-# $Id: odin32.dbg.wat.mk,v 1.2 2000-12-16 23:41:35 bird Exp $
+# $Id: odin32.dbg.wat.mk,v 1.3 2000-12-17 19:54:55 bird Exp $
 
 #
 # Odin32 API
@@ -117,6 +117,15 @@ LDFLAGS_ODINCRT  = option maxe=125, quiet, symfile  LIBPath $(%WATCOM)\lib386\os
 !ifndef NODEBUGINFO
 LDFLAGS          += debug all
 LDFLAGS_ODINCRT  += debug all
+!endif
+
+!ifndef STACKSIZE
+STACKSIZE = 0x50000
+!endif
+
+!ifdef EXETARGET
+LDFLAGS          += option stack=$(STACKSIZE)
+LDFLAGS_ODINCRT  += option stack=$(STACKSIZE)
 !endif
 
 LD2FLAGS         = $(LDFLAGS)
