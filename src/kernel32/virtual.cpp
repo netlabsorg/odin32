@@ -1,4 +1,4 @@
-/* $Id: virtual.cpp,v 1.24 1999-11-30 14:15:55 sandervl Exp $ */
+/* $Id: virtual.cpp,v 1.25 1999-12-06 21:31:43 sandervl Exp $ */
 
 /*
  * Win32 virtual memory functions
@@ -310,13 +310,22 @@ ODINFUNCTION4(LPVOID, VirtualAlloc, LPVOID, lpvAddress,
   if(lpvAddress) 
   {
    Win32MemMap *map;
-   ULONG offset, nrpages;
+   ULONG offset, nrpages, accessflags = 0;
 
 	nrpages = cbSize >> PAGE_SHIFT;
 	if(cbSize & 0xFFF)
 		nrpages++;
 
-  	map = Win32MemMapView::findMapByView((ULONG)lpvAddress, &offset, fdwProtect);
+	if(flag & PAG_READ) {
+		accessflags |= MEMMAP_ACCESS_READ;
+	}
+	if(flag & PAG_WRITE) {
+		accessflags |= MEMMAP_ACCESS_WRITE;
+	}
+	if(flag & PAG_EXECUTE) {
+		accessflags |= MEMMAP_ACCESS_EXECUTE;
+	}
+  	map = Win32MemMapView::findMapByView((ULONG)lpvAddress, &offset, accessflags);
   	if(map) {
 		//TODO: We don't allow protection flag changes for mmaped files now
 		map->commitPage(offset, FALSE, nrpages);
