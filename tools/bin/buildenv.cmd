@@ -1,4 +1,4 @@
-/* $Id: buildenv.cmd,v 1.19 2002-08-29 03:15:49 bird Exp $
+/* $Id: buildenv.cmd,v 1.20 2002-08-29 11:49:59 bird Exp $
  *
  * This is the master tools environment script. It contains environment
  * configurations for many development tools. Each tool can be installed
@@ -26,7 +26,7 @@
     /*
      * Version
      */
-    sVersion = '1.0.3 [2002-08-28]';
+    sVersion = '1.0.4 [2002-08-29]';
 
     /*
      * Create argument array with lowercase arguments.
@@ -1223,6 +1223,8 @@ EnvAddEnd2: procedure
     /* Get original variable value */
     sOrgEnvVar = EnvGet(sEnvVar);
 
+    if (sOrgEnvVar <> '') then
+    do
     /* Remove previously sToAdd if exists. (Changing sOrgEnvVar). */
     i = pos(translate(sToAdd), translate(sOrgEnvVar));
     if (i > 0) then
@@ -1231,6 +1233,7 @@ EnvAddEnd2: procedure
     /* checks that sOrgEnvVar ends with a separator. Adds one if not. */
     if (substr(sOrgEnvVar, length(sOrgEnvVar), 1) <> sSeparator) then
         sOrgEnvVar = sOrgEnvVar || sSeparator;
+    end
 
     /* set environment */
     if (fRM) then return EnvSet(0, sEnvVar, sOrgEnvVar);
