@@ -1,4 +1,4 @@
-; $Id: devfirst.asm,v 1.6 2000-09-02 21:07:58 bird Exp $
+; $Id: devfirst.asm,v 1.7 2001-02-21 07:44:15 bird Exp $
 ;
 ; DevFirst - entrypoint and segment definitions
 ;
@@ -40,6 +40,8 @@
     public _CallWin32kIOCtl
     public _SSToDS_16a
     public GetOS2KrnlMTE
+    public x86DisableWriteProtect
+    public x86RestoreWriteProtect
 
 
 ;
@@ -218,6 +220,56 @@ GetOS2KrnlMTE PROC NEAR
     pop     es
     ret
 GetOS2KrnlMTE ENDP
+
+
+;;
+; Disables the ring-0 write protection.
+; It's used to help us write to readonly code segments and objects.
+; @cproto   extern ULONG    _Optlink x86DisableWriteProtect(void);
+; @return   Previous write protection flag setting.
+; @uses     eax, edx
+; @status   completely implemented.
+; @author   knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+; @remark   Used by importTabInit.
+x86DisableWriteProtect proc near
+    cli
+    mov     edx, cr0                    ; Get current cr0
+    test    edx, 000010000h             ; Test for the WriteProtect flag (bit 16)
+    setnz   al
+    movzx   eax, al                     ; Old flag setting in eax (return value)
+    and     edx, 0fffeffffh             ; Clear the 16th (WP) bit.
+    mov     cr0, edx                    ;
+    sti
+    ret                                 ; return eax holds previous WP value.
+x86DisableWriteProtect endp
+
+
+;;
+; Restore the WP flag of CR0 to it's previous state.
+; The call is intent only to be called with the result from x86DisableWriteProtect,
+; and will hence only enable the WP flag.
+; @cproto   extern ULONG    _Optlink x86RestoreWriteProtect(ULONG flWP);
+; @return   Previous write protection flag setting.
+; @param    eax - flWP  Boolean value. (1 = WP was set, 0 WP was clear)
+; @uses     eax
+; @status   completely implemented.
+; @author   knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+; @remark   Used by importTabInit.
+x86RestoreWriteProtect proc near
+    test    eax, eax                    ; Check if the flag was previously clear
+    jnz     x86RWP_set                  ; If set Then Set it back.
+    jmp     x86RWP_end                  ; If clear Then nothing to do.
+x86RWP_set:
+    cli
+    mov     eax, cr0                    ; Get current cr0.
+    or      eax, 000010000h             ; The the 16-bit (WP) bit.
+    mov     cr0, eax                    ; Update cr0.
+    sti
+
+x86RWP_end:
+    ret
+x86RestoreWriteProtect endp
+
 
 CODE32 ends
 
