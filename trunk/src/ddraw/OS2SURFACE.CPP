@@ -1,4 +1,4 @@
-/* $Id: OS2SURFACE.CPP,v 1.36 2001-10-07 08:25:30 sandervl Exp $ */
+/* $Id: OS2SURFACE.CPP,v 1.37 2001-10-10 14:40:45 sandervl Exp $ */
 
 /*
  * DirectDraw Surface class implementaion
@@ -305,7 +305,15 @@ BOOL fPalInit=FALSE;
 
 #define CBM_CREATEDIB   0x02L   /* create DIB bitmap */
 
+//#define PERFTEST
+#ifdef PERFTEST
+LARGE_INTEGER liStart;
+LARGE_INTEGER liEnd;
+ULONG average = 0;
+#endif
+
 #ifdef DEBUG
+
 // ******************************************************************************
 // *    internal helper functions from WINE
 // *
@@ -1731,6 +1739,10 @@ INT CALLBACK ReleaseSurfaces(LPVOID lpItem, DWORD dwRes)
 OS2IDirectDrawSurface::~OS2IDirectDrawSurface()
 {
 
+#ifdef PERFTEST
+  WriteLog("Average blitting time: %x clock ticks");
+#endif
+
   if(DDSurfaceDesc.ddsCaps.dwCaps & DDSCAPS_PRIMARYSURFACE)
   {
     lpDraw->SetPrimarySurface(FALSE);
@@ -2457,6 +2469,9 @@ HRESULT WIN32API SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lpD
               }
           }
 dodiveblit:
+#ifdef PERFTEST
+          QueryPerformanceCounter(&liStart);
+#endif
           if(fChanged || memcmp(&sBlt, &dest->sBlt, sizeof(sBlt)-sizeof(PRECTL)-sizeof(ULONG)))
           {
               dprintf(("Setting up blitter: src  (%d,%d)(%d,%d)", sBlt.ulSrcPosX, sBlt.ulSrcPosY, sBlt.ulSrcWidth, sBlt.ulSrcHeight));
@@ -2476,6 +2491,15 @@ dodiveblit:
               dprintf(("DiveBlitImage returned %d", rc));
               return(DD_OK);
           }
+#ifdef PERFTEST
+          QueryPerformanceCounter(&liEnd);
+          if(liEnd.HighPart == liStart.HighPart) {
+              if(average == 0) {
+                    average = (liEnd.LowPart - liStart.LowPart);
+              }
+              else  average = (average + (liEnd.LowPart - liStart.LowPart))/2;
+          }
+#endif
           return DD_OK;
       }
   }
@@ -2497,6 +2521,9 @@ dodiveblit:
               RECT newdest, newsrc;
               LPRECT lpClipRect = (LPRECT)&lpRgnData->Buffer;
 
+#ifdef PERFTEST
+              QueryPerformanceCounter(&liStart);
+#endif
               for(i=0;i<lpRgnData->rdh.nCount;i++) 
               {
                   if(IntersectRect(&newdest, &DestRect, &lpClipRect[i]) == TRUE) 
@@ -2517,6 +2544,16 @@ dodiveblit:
 //                      SurfUnlock(dest, surfdesc.lpSurface);
                   }
               }
+#ifdef PERFTEST
+              if(liEnd.HighPart == liStart.HighPart) {
+                  QueryPerformanceCounter(&liEnd);
+                  if(average == 0) {
+                        average = (liEnd.LowPart - liStart.LowPart);
+                  }
+                  else  average = (average + (liEnd.LowPart - liStart.LowPart))/2;
+              }
+#endif
+
               return ret;
           }
       }
@@ -4815,6 +4852,7 @@ HRESULT WIN32API SurfLock4( THIS This,
                    DPA_GetPtrCount(me->DPA_LockedRects),
                    pIRectNew);
 
+#if 0
     if(me->diveBufNr == DIVE_BUFFER_SCREEN) 
     {
         OS2RECTL rectOS2;
@@ -4829,6 +4867,7 @@ HRESULT WIN32API SurfLock4( THIS This,
             dprintf(("ERROR: DiveAcquireFrameBuffer failed with %d", ret));
         }
     }
+#endif
     me->fLocked = TRUE;
   }
 
@@ -5252,6 +5291,7 @@ HRESULT WIN32API SurfUnlock(THIS This, LPVOID lpSurfaceData)
       dprintf( ("No ColorConversion Needed"));
 
 
+#if 0
     if(me->diveBufNr == DIVE_BUFFER_SCREEN) 
     {
         OS2RECTL rectOS2;
@@ -5266,6 +5306,7 @@ HRESULT WIN32API SurfUnlock(THIS This, LPVOID lpSurfaceData)
             dprintf(("ERROR: DiveDeacquireFrameBuffer failed with %d", ret));
         }
     }
+#endif
 
     // delete tne DDRectobject of the found rectangle
     delete pIRectEnum;
