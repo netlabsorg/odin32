@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.97 2001-04-27 17:36:38 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.98 2001-05-19 11:16:01 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -2536,3 +2536,11 @@ DWORD WIN32API SetWinEventHook(DWORD arg1, DWORD arg2, DWORD arg3, DWORD arg4, D
 
   return 0;
 }
+
+DWORD WIN32API GetGUIThreadInfo(DWORD arg1, DWORD arg2)
+{
+  dprintf(("USER32: GetGUIThreadInfo %x %x - empty stub!!", arg1, arg2));
+
+  return 0;
+}
+

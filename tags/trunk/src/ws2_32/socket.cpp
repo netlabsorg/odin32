@@ -26,9 +26,15 @@
 WSAEVENT WINAPI WSACreateEvent(void)
 {
     /* Create a manual-reset event, with initial state: unsignealed */
-    TRACE("\n");
+    TRACE("WSACreateEvent");
     
     return CreateEventA(NULL, TRUE, FALSE, NULL);    
+}
+
+BOOL WINAPI WSASetEvent(WSAEVENT hEvent)
+{
+    TRACE("WSASetEvent");
+    return SetEvent(hEvent);
 }
 
 /***********************************************************************
@@ -37,7 +43,7 @@ WSAEVENT WINAPI WSACreateEvent(void)
  */
 BOOL WINAPI WSACloseEvent(WSAEVENT event)
 {
-    TRACE ("event=0x%x\n", event);
+    TRACE ("WSACloseEvent event=0x%x\n", event);
 
     return CloseHandle(event);
 }
@@ -79,3 +85,24 @@ SOCKET WINAPI WSASocketW(int af, int type, int protocol,
 
    return ( socket (af, type, protocol) );
 }
+
+/***********************************************************************
+ *		WSAEnumNetworkEvents
+ */
+int WINAPI WSAEnumNetworkEvents(SOCKET s, WSAEVENT hEvent, LPWSANETWORKEVENTS lpEvent)
+{
+    dprintf(("WSAEnumNetworkEvents %x %x %x NOT IMPLEMENTED", s, hEvent, lpEvent));
+    SetLastError(WSAEINVAL);
+    return SOCKET_ERROR;
+}
+
+/***********************************************************************
+ *		WSAEventSelect
+ */
+int WINAPI WSAEventSelect(SOCKET s, WSAEVENT hEvent, LONG lEvent)
+{
+    TRACE("WSAEventSelect %08x, hEvent %08x, event %08x\n", s, hEvent, (unsigned)lEvent );
+    SetLastError(WSAEINVAL);
+    return SOCKET_ERROR;
+}
+
