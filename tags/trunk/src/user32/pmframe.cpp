@@ -1,4 +1,4 @@
-/* $Id: pmframe.cpp,v 1.1 1999-10-08 16:13:08 cbratschi Exp $ */
+/* $Id: pmframe.cpp,v 1.2 1999-10-08 16:19:34 cbratschi Exp $ */
 /*
  * Win32 Frame Managment Code for OS/2
  *
@@ -75,5 +75,5 @@ PVOID FrameSubclassFrameWindow(Win32BaseWindow *win32wnd)
 
 VOID FrameSetBorderSize(Win32BaseWindow *win32wnd)
 {
-  //WinSendMsg(win32wnd->getOS2FrameWindowHandle(),WM_SETBORDERSIZE,(MPARAM)win32wnd->getBorderWidth(),(MPARAM)win32wnd->getBorderHeight());
+  WinSendMsg(win32wnd->getOS2FrameWindowHandle(),WM_SETBORDERSIZE,(MPARAM)win32wnd->getBorderWidth(),(MPARAM)win32wnd->getBorderHeight());
 }
