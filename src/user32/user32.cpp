@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.44 1999-10-18 10:54:04 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.45 1999-10-20 13:48:07 phaller Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -769,13 +769,39 @@ BOOL WIN32API SwapMouseButton( BOOL fSwap)
 
 /* Error Functions */
 
-BOOL WIN32API ExitWindowsEx( UINT uFlags, DWORD  dwReserved)
+/*****************************************************************************
+ * Name      : ExitWindowsEx
+ * Purpose   : Shutdown System
+ * Parameters: UINT  uFlags
+ *             DWORD dwReserved
+ * Variables :
+ * Result    : TRUE / FALSE
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Tue, 1999/10/20 21:24]
+ *****************************************************************************/
+
+ODINFUNCTION2(BOOL, ExitWindowsEx, UINT,  uFlags,
+                                   DWORD, dwReserved)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  ExitWindowsEx\n");
-#endif
-    return O32_ExitWindowsEx(uFlags,dwReserved);
+  int rc = MessageBoxA(HWND_DESKTOP,
+                       "Are you sure you want to shutdown the system?",
+                       "Shutdown ...",
+                       MB_YESNOCANCEL | MB_ICONQUESTION);
+  switch (rc)
+  {
+    case IDCANCEL: return (FALSE);
+    case IDYES:    break;
+    case IDNO:
+      dprintf(("no shutdown!\n"));
+      return TRUE;
+  }
+
+  return O32_ExitWindowsEx(uFlags,dwReserved);
 }
+
+
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API MessageBeep( UINT uType)
