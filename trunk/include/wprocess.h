@@ -23,8 +23,15 @@ typedef ULONG PDB;
 #define MAKE_THREADID(processid, threadid) 	((processid << 16) | threadid)
 #define ODIN_TO_OS2_THREADID(threadid)          (threadid & 0xFFFF)
 
-TEB *  WIN32API InitializeTIB(BOOL fMainThread = FALSE);
-void   WIN32API DestroyTIB();
+TEB   *WIN32API CreateTEB(HANDLE hThread, DWORD dwThreadId);
+TEB   *WIN32API InitializeMainThread();
+
+//******************************************************************************
+// Set up the TEB structure of the CURRENT (!) thread
+//******************************************************************************
+BOOL   WIN32API InitializeThread(TEB *teb, BOOL fMainThread = FALSE);
+
+void   WIN32API DestroyTEB(TEB *teb);
 ULONG  WIN32API GetProcessTIBSel();
 
 #define TIB_SWITCH_DEFAULT	0  //executable type determines whether or not FS is changed
