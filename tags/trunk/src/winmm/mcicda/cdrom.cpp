@@ -215,7 +215,7 @@ int 	CDAUDIO_GetNumberOfTracks(WINE_CDAUDIO* wcda)
             return -1;
         case 0:
             SetLastError(ERROR_WRONG_DISK);  
-            return -1;
+            return 1;
         default:
             break;
         }
@@ -232,6 +232,7 @@ BOOL 	CDAUDIO_GetTracksInfo(WINE_CDAUDIO* wcda)
     int		i, length;
     ULONG		start, last_start = 0;
     int		total_length = 0;
+    BOOL        flAudioTrack;
 
     if(!wcda->hfOS2Handle) {
         CDAUDIO_Open(wcda);/* Get new handle */
@@ -281,7 +282,7 @@ BOOL 	CDAUDIO_GetTracksInfo(WINE_CDAUDIO* wcda)
     memset(wcda->lpbTrackFlags, 0, (wcda->nTracks + 1) * sizeof(BYTE));
     
     for (i = 0; i <= wcda->nTracks; i++) {
-        if((start=os2CDQueryTrackStartSector(wcda->hfOS2Handle,i))==0)
+        if((start=os2CDQueryTrackStartSector(wcda->hfOS2Handle,i,&flAudioTrack))==0)
             {
                 WARN("error reading start sector for track %d\n", i+1);
                 /* Freeing the already allocated mem */
@@ -312,7 +313,10 @@ BOOL 	CDAUDIO_GetTracksInfo(WINE_CDAUDIO* wcda)
 	    TRACE("track #%u start=%u len=%u\n", i, start, length);
 	}
         //if(wcda->ulCDROMStatus & )
-        wcda->lpbTrackFlags[i] = 0; 
+        if (!flAudioTrack)
+          wcda->lpbTrackFlags[i] = CDROM_DATA_TRACK; 
+        else
+          wcda->lpbTrackFlags[i] = 0;
 	//TRACE("track #%u flags=%02x\n", i + 1, wcda->lpbTrackFlags[i]);
     }/* for */
     
@@ -320,10 +324,6 @@ BOOL 	CDAUDIO_GetTracksInfo(WINE_CDAUDIO* wcda)
     TRACE("total_len=%u Leaving CDAUDIO_GetTracksInfo...\n", total_length);
     
     return TRUE;
-    
-    dprintf(("MCICDA-CDROM: CDAUDIO_GetTracksInfo not implemented.\n"));
-    SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-    return FALSE;
 }
 
 

@@ -97,7 +97,7 @@ ULONG os2CDClose(ULONG hfOS2Handle);
 int os2GetNumTracks(HFILE hfOS2Handle,ULONG *ulLeadOut);
 BOOL os2GetCDStatus(HFILE hfOS2Handle, ULONG  *ulStatus);
 BOOL os2GetCDAudioStatus(HFILE hfOS2Handle, USHORT  *usStatus);
-ULONG  os2CDQueryTrackStartSector( HFILE hfDrive, ULONG numTrack);
+ULONG  os2CDQueryTrackStartSector( HFILE hfDrive, ULONG numTrack, BOOL *flAudio);
 BOOL os2CDEject(HFILE hfDrive);
 BOOL os2CDCloseTray(HFILE hfDrive);
 BOOL os2CDStop(HFILE hfDrive);
