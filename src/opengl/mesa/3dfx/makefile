@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.14 2001-10-01 01:40:57 bird Exp $
+# $Id: makefile,v 1.15 2001-12-19 00:41:46 bird Exp $
 
 #
 # Odin32 API
@@ -50,15 +50,15 @@ CFLAGS      = $(CXXFLAGS)
 
 
 #
-# Interference rule for sources in the parent directory.
-#   This is BAD! Try make library in parent directory? Problem with different objects.
+# Inference rule for sources in the parent directory.
+#   This is BAD! Try make library in parent directory? Problem with different objects. :-(
 #
 !if "$(VAC3)" == "1" || "$(VAC36)" == "1" || ("$(WAT)" == "1" && defined(NMAKE))
 {..}.c{$(OBJDIR)}.obj:
-    $(CC) $(CFLAGS) $(CINCLUDES) $(CDEFINES) -Fo$(OBJDIR)\$(@B).obj $<
+    $(CMDQD_SUB) $(CC) $(CFLAGS) $(CINCLUDES) $(CDEFINES) -Fo$(OBJDIR)\$(@B).obj $<
 
 {..}.asm{$(OBJDIR)}.obj:
-    $(AS) $(ASFLAGS) -Fdo:$(OBJDIR) $<
+    $(CMDQD_SUB) $(AS) $(ASFLAGS) -Fdo:$(OBJDIR) $<
 !else
 !error "Compiler not supported yet!"
 !endif
