@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.86 1999-11-21 09:43:18 achimha Exp $ */
+/* $Id: win32wbase.cpp,v 1.87 1999-11-21 17:07:51 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1214,10 +1214,7 @@ ULONG Win32BaseWindow::MsgEraseBackGround(HDC hdc)
 //******************************************************************************
 ULONG Win32BaseWindow::MsgSetText(LPSTR lpsz, LONG cch)
 {
-    if(isUnicode) {
-            return SendInternalMessageW(WM_SETTEXT, 0, (LPARAM)lpsz);
-    }
-    else    return SendInternalMessageA(WM_SETTEXT, 0, (LPARAM)lpsz);
+    return SendInternalMessageA(WM_SETTEXT, 0, (LPARAM)lpsz);
 }
 //******************************************************************************
 //TODO: in- or excluding terminating 0?
@@ -1230,12 +1227,7 @@ ULONG Win32BaseWindow::MsgGetTextLength()
 //******************************************************************************
 char *Win32BaseWindow::MsgGetText()
 {
-    if(isUnicode) {
-        SendInternalMessageW(WM_GETTEXT, wndNameLength, (LPARAM)windowNameW);
-    }
-    else {
-        SendInternalMessageA(WM_GETTEXT, wndNameLength, (LPARAM)windowNameA);
-    }
+    SendInternalMessageA(WM_GETTEXT, wndNameLength, (LPARAM)windowNameA);
     return windowNameA;
 }
 //******************************************************************************
@@ -1505,15 +1497,37 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
     case WM_GETTEXTLENGTH:
         return wndNameLength;
 
-    case WM_GETTEXT:   //TODO: SS_ICON controls
+    case WM_GETTEXT:
+        if (!lParam) return 0;
         strncpy((LPSTR)lParam, windowNameA, wParam);
         return min(wndNameLength, wParam);
 
     case WM_SETTEXT:
-        if(!fInternalMsg) {
-                return SetWindowTextA((LPSTR)lParam);
+    {
+        LPCSTR lpsz = (LPCSTR)lParam;
+
+        if(windowNameA) free(windowNameA);
+        if(windowNameW) free(windowNameW);
+
+        if (lParam)
+        {
+          windowNameA = (LPSTR)_smalloc(strlen(lpsz)+1);
+          strcpy(windowNameA, lpsz);
+          windowNameW = (LPWSTR)_smalloc((strlen(lpsz)+1)*sizeof(WCHAR));
+          lstrcpyAtoW(windowNameW, windowNameA);
+          wndNameLength = strlen(windowNameA)+1; //including 0 terminator
+        } else
+        {
+          windowNameA = NULL;
+          windowNameW = NULL;
+          wndNameLength = 1;
         }
-        else    return 0;
+
+        if(OS2HwndFrame && dwStyle & WS_CAPTION)
+          return OSLibWinSetWindowText(OS2HwndFrame,(LPSTR)windowNameA);
+
+        return TRUE;
+    }
 
     case WM_SETREDRAW:
         if(wParam)
@@ -1732,29 +1746,36 @@ LRESULT Win32BaseWindow::DefWindowProcW(UINT Msg, WPARAM wParam, LPARAM lParam)
     case WM_GETTEXTLENGTH:
         return wndNameLength;
 
-    case WM_GETTEXT:   //TODO: SS_ICON controls
-    {
-            LRESULT result;
-            char *str = (char *) malloc(wParam + 1);
-            result = DefWindowProcA(Msg, wParam, (LPARAM)str );
-            lstrcpynAtoW( (LPWSTR)lParam, str, wParam );
-            free(str);
-            return result;
-    }
+    case WM_GETTEXT:
+        if (!lParam) return 0;
+        lstrcpynW((LPWSTR)lParam,windowNameW,wParam);
+        return min(wndNameLength,wParam);
 
     case WM_SETTEXT:
     {
-        if(!fInternalMsg)
+        LPWSTR lpsz = (LPWSTR)lParam;
+
+        if(windowNameA) free(windowNameA);
+        if(windowNameW) free(windowNameW);
+
+        if (lParam)
         {
-           LRESULT result;
-           char *aText = (char *) malloc((lstrlenW((LPWSTR)lParam)+1)*sizeof(WCHAR));
-           *aText = 0;
-           lstrcpyWtoA(aText, (LPWSTR) lParam);
-           result = SetWindowTextA(aText);
-           free(aText);
-           return result;
+          windowNameA = (LPSTR)_smalloc(lstrlenW(lpsz)+1);
+          lstrcpyWtoA(windowNameA,lpsz);
+          windowNameW = (LPWSTR)_smalloc((lstrlenW(lpsz)+1)*sizeof(WCHAR));
+          lstrcpyW(windowNameW,lpsz);
+          wndNameLength = strlen(windowNameA)+1; //including 0 terminator
+        } else
+        {
+          windowNameA = NULL;
+          windowNameW = NULL;
+          wndNameLength = 1;
         }
-        else    return 0;
+
+        if(OS2HwndFrame && dwStyle & WS_CAPTION)
+          return OSLibWinSetWindowText(OS2HwndFrame,(LPSTR)windowNameA);
+
+        return TRUE;
     }
 
     default:
@@ -1915,6 +1936,7 @@ LRESULT Win32BaseWindow::SendInternalMessageA(ULONG Msg, WPARAM wParam, LPARAM l
                 win32wndproc(getWindowHandle(), WM_NCDESTROY, 0, 0);
                 rc = win32wndproc(getWindowHandle(), WM_DESTROY, 0, 0);
                 break;
+
         default:
                 rc = CallWindowProcA(win32wndproc, getWindowHandle(), Msg, wParam, lParam);
                 break;
@@ -2624,81 +2646,54 @@ BOOL Win32BaseWindow::hasWindowName(LPSTR wndname, BOOL fUnicode)
 //******************************************************************************
 int Win32BaseWindow::GetWindowTextLength()
 {
-    return wndNameLength;
+    return SendInternalMessageA(WM_GETTEXTLENGTH,0,0);
 }
 //******************************************************************************
 //******************************************************************************
 int Win32BaseWindow::GetWindowTextA(LPSTR lpsz, int cch)
 {
-    if(windowNameA == NULL) {
-        *lpsz = 0;
-        return 0;
-    }
-    strncpy(lpsz, windowNameA, cch);
-    return wndNameLength;
+    return SendInternalMessageA(WM_GETTEXT,(WPARAM)cch,(LPARAM)lpsz);
 }
 //******************************************************************************
 //******************************************************************************
 int Win32BaseWindow::GetWindowTextW(LPWSTR lpsz, int cch)
 {
-    if(windowNameW == NULL) {
-        *lpsz = 0;
-        return 0;
-    }
-    lstrcpynW((LPWSTR)lpsz, windowNameW, cch);
-    return wndNameLength;
+    return SendInternalMessageW(WM_GETTEXT,(WPARAM)cch,(LPARAM)lpsz);
 }
 //******************************************************************************
 //******************************************************************************
 BOOL Win32BaseWindow::SetWindowTextA(LPSTR lpsz)
 {
-    if(lpsz == NULL)
-        return FALSE;
-
-    if(windowNameA) free(windowNameA);
-    if(windowNameW) free(windowNameW);
-
-    windowNameA = (LPSTR)_smalloc(strlen(lpsz)+1);
-    strcpy(windowNameA, lpsz);
-    windowNameW = (LPWSTR)_smalloc((strlen(lpsz)+1)*sizeof(WCHAR));
-    lstrcpyAtoW(windowNameW, windowNameA);
-    wndNameLength = strlen(windowNameA)+1; //including 0 terminator
-
-    // Edit and static text controls also need a WM_SETTEXT message
-    if (getWindowClass()->hasClassName("EDIT", FALSE) ||
-        getWindowClass()->hasClassName("STATIC", FALSE))
-      SendInternalMessageA(WM_SETTEXT, 0, (LPARAM)windowNameA);
-
-    if(OS2HwndFrame)
-        return OSLibWinSetWindowText(OS2HwndFrame, (LPSTR)windowNameA);
-
-    return TRUE;
+    return SendInternalMessageA(WM_SETTEXT,0,(LPARAM)lpsz);
 }
 //******************************************************************************
 //******************************************************************************
 BOOL Win32BaseWindow::SetWindowTextW(LPWSTR lpsz)
 {
-    if(lpsz == NULL)
-        return FALSE;
+    return SendInternalMessageW(WM_SETTEXT,0,(LPARAM)lpsz);
+}
+//******************************************************************************
+//******************************************************************************
+VOID Win32BaseWindow::updateWindowStyle(DWORD oldExStyle,DWORD oldStyle)
+{
+  if(IsWindowDestroyed()) return;
 
-    if(windowNameA) free(windowNameA);
-    if(windowNameW) free(windowNameW);
+/*
+  if (isChild())
+  {
+    DWORD dwOSWinStyle,dwOSFrameStyle,newBorderWidth,newBorderHeight;
 
-    windowNameW = (LPWSTR)_smalloc((lstrlenW((LPWSTR)lpsz)+1)*sizeof(WCHAR));
-    lstrcpyW(windowNameW, (LPWSTR)lpsz);
-    windowNameA = (LPSTR)_smalloc(lstrlenW((LPWSTR)lpsz)+1);
-    lstrcpyWtoA(windowNameA, windowNameW);
-    wndNameLength = strlen(windowNameA)+1; //including 0 terminator
+    OSLibWinConvertStyle(dwStyle,&dwExStyle,&dwOSWinStyle,&dwOSFrameStyle,&newBorderWidth,&newBorderHeight);
+    if (newBorderWidth != borderWidth || newBorderHeight != borderHeight)
+    {
+      borderWidth = newBorderWidth;
+      borderHeight = newBorderHeight;
+      FrameSetBorderSize(this,TRUE);
+    }
+  }
+*/
 
-    // Edit and static text controls also need a WM_SETTEXT message
-    if (getWindowClass()->hasClassName("EDIT", FALSE) ||
-        getWindowClass()->hasClassName("STATIC", FALSE))
-      SendInternalMessageA(WM_SETTEXT, 0, (LPARAM)windowNameA);
-
-    if(OS2HwndFrame)
-        return OSLibWinSetWindowText(OS2HwndFrame, (LPSTR)windowNameA);
-
-    return TRUE;
+  if (dwStyle != oldStyle) OSLibSetWindowStyle(OS2HwndFrame,dwStyle);
 }
 //******************************************************************************
 //******************************************************************************
@@ -2720,6 +2715,7 @@ LONG Win32BaseWindow::SetWindowLongA(int index, ULONG value)
                 dprintf(("SetWindowLong GWL_EXSTYLE %x old %x new style %x", getWindowHandle(), dwExStyle, value));
                 SendMessageA(WM_STYLECHANGING,GWL_EXSTYLE,(LPARAM)&ss);
                 setExStyle(ss.styleNew);
+                updateWindowStyle(ss.styleOld,dwStyle);
                 SendMessageA(WM_STYLECHANGED,GWL_EXSTYLE,(LPARAM)&ss);
                 return ss.styleOld;
         }
@@ -2735,8 +2731,7 @@ LONG Win32BaseWindow::SetWindowLongA(int index, ULONG value)
                 dprintf(("SetWindowLong GWL_STYLE %x old %x new style %x", getWindowHandle(), dwStyle, value));
                 SendMessageA(WM_STYLECHANGING,GWL_STYLE,(LPARAM)&ss);
                 setStyle(ss.styleNew);
-                if(!IsWindowDestroyed())
-                    OSLibSetWindowStyle(OS2HwndFrame, ss.styleNew);
+                updateWindowStyle(dwExStyle,ss.styleOld);
                 SendMessageA(WM_STYLECHANGED,GWL_STYLE,(LPARAM)&ss);
                 return ss.styleOld;
         }

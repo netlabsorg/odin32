@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.45 1999-11-14 16:35:54 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.46 1999-11-21 17:07:50 cbratschi Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -438,7 +438,7 @@ BOOL OSLibWinEnableWindow(HWND hwnd, BOOL fEnable)
   rc = WinEnableWindow(hwnd, fEnable);
   hwndClient = WinWindowFromID(hwnd, FID_CLIENT);
   if(hwndClient) {
-	WinEnableWindow(hwndClient, fEnable);
+        WinEnableWindow(hwndClient, fEnable);
   }
   return rc;
 }
@@ -1056,8 +1056,6 @@ void OSLibSetWindowStyle(HWND hwnd, ULONG dwStyle)
   WinSetWindowULong(hwnd, QWL_STYLE,
                     (WinQueryWindowULong(hwnd, QWL_STYLE) & ~0xffff0000) |
                     OSWinStyle);
-
-  //CB: bug: it doesn't work with child windows!
 
   if(OSFrameStyle & FCF_TITLEBAR)
   {

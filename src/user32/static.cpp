@@ -1,4 +1,4 @@
-/* $Id: static.cpp,v 1.10 1999-11-21 14:37:17 achimha Exp $ */
+/* $Id: static.cpp,v 1.11 1999-11-21 17:07:51 cbratschi Exp $ */
 /*
  * Static control
  *
@@ -13,6 +13,7 @@
  */
 
 #include <stdlib.h>
+#include <string.h>
 #include <os2win.h>
 #include "controls.h"
 #include "static.h"
@@ -320,7 +321,30 @@ LRESULT STATIC_SetText(HWND hwnd,WPARAM wParam,LPARAM lParam)
   InvalidateRect(hwnd,NULL,FALSE);
   UpdateWindow(hwnd);
 
-  return 0;
+  return TRUE;
+}
+
+LRESULT STATIC_GetText(HWND hwnd,WPARAM wParam,LPARAM lParam)
+{
+  DWORD style = GetWindowLongA(hwnd,GWL_STYLE) & SS_TYPEMASK;
+
+  if (style == SS_ICON)
+  {
+    STATICINFO* infoPtr = (STATICINFO*)GetInfoPtr(hwnd);
+
+    if (wParam < 4 || !lParam) return 0;
+    memcpy((VOID*)lParam,&infoPtr->hIcon,4);
+
+    return 4;
+  } else return DefWindowProcA(hwnd,WM_GETTEXT,wParam,lParam);
+}
+
+LRESULT STATIC_GetTextLength(HWND hwnd,WPARAM wParam,LPARAM lParam)
+{
+  DWORD style = GetWindowLongA(hwnd,GWL_STYLE) & SS_TYPEMASK;
+
+  if (style == SS_ICON) return 4;
+  else return DefWindowProcA(hwnd,WM_GETTEXTLENGTH,wParam,lParam);
 }
 
 LRESULT STATIC_SetFont(HWND hwnd,WPARAM wParam,LPARAM lParam)
@@ -478,6 +502,12 @@ LRESULT WINAPI StaticWndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 
     case WM_SETTEXT:
       return STATIC_SetText(hwnd,wParam,lParam);
+
+    case WM_GETTEXT:
+      return STATIC_GetText(hwnd,wParam,lParam);
+
+    case WM_GETTEXTLENGTH:
+      return STATIC_GetTextLength(hwnd,wParam,lParam);
 
     case WM_SETFONT:
       return STATIC_SetFont(hwnd,wParam,lParam);
@@ -721,12 +751,12 @@ static void STATIC_PaintEtchedfn( HWND hwnd, HDC hdc )
     GetClientRect( hwnd, &rc );
     switch (dwStyle & SS_TYPEMASK)
     {
-	case SS_ETCHEDHORZ:
-	    DrawEdge(hdc,&rc,EDGE_ETCHED,BF_TOP|BF_BOTTOM);
-	    break;
-	case SS_ETCHEDVERT:
-	    DrawEdge(hdc,&rc,EDGE_ETCHED,BF_LEFT|BF_RIGHT);
-	    break;
+        case SS_ETCHEDHORZ:
+            DrawEdge(hdc,&rc,EDGE_ETCHED,BF_TOP|BF_BOTTOM);
+            break;
+        case SS_ETCHEDVERT:
+            DrawEdge(hdc,&rc,EDGE_ETCHED,BF_LEFT|BF_RIGHT);
+            break;
         case SS_ETCHEDFRAME:
             DrawEdge (hdc, &rc, EDGE_ETCHED, BF_RECT);
             break;

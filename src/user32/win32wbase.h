@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.43 1999-11-11 13:17:32 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.44 1999-11-21 17:07:52 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -93,6 +93,8 @@ virtual  ULONG  MsgActivate(BOOL fActivate, BOOL fMinimized, HWND hwnd);
          char  *MsgGetText();
          ULONG  MsgContextMenu(ULONG x,ULONG y);
 
+         VOID   updateWindowStyle(DWORD oldExStyle,DWORD oldStyle);
+
 virtual  LONG   SetWindowLongA(int index, ULONG value);
 virtual  ULONG  GetWindowLongA(int index);
 virtual  WORD   SetWindowWord(int index, WORD value);
@@ -107,7 +109,7 @@ virtual  WORD   GetWindowWord(int index);
          HWND   getOS2FrameWindowHandle()       { return OS2HwndFrame; };
  Win32WndClass *getWindowClass()                { return windowClass; };
 
- 	 DWORD  getWindowContextHelpId()        { return contextHelpId; };
+         DWORD  getWindowContextHelpId()        { return contextHelpId; };
          void   setWindowContextHelpId(DWORD id){ contextHelpId = id; };
 
          BOOL   isFrameWindow();
@@ -270,7 +272,7 @@ protected:
 
          HWND   hwndLinkAfter;
         DWORD   flags;
-	DWORD   contextHelpId;
+        DWORD   contextHelpId;
         LONG    lastHitTestVal;         //Last value returned by WM_NCHITTEST handler
 
         BOOL    isIcon;
