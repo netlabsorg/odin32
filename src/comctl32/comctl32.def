@@ -1,4 +1,4 @@
-; $Id: comctl32.def,v 1.23 2001-07-20 15:35:30 sandervl Exp $
+; $Id: comctl32.def,v 1.24 2001-07-21 09:07:16 sandervl Exp $
 LIBRARY COMCTL32 INITINSTANCE
 DESCRIPTION 'Odin32 System DLL - ComCtl32 - Common Controls Library'
 DATA MULTIPLE NONSHARED
@@ -124,7 +124,6 @@ EXPORTS
   DSA_InsertItem      = _DSA_InsertItem@12         @325
   DSA_DeleteItem      = _DSA_DeleteItem@8          @326
   DSA_DeleteAllItems  = _DSA_DeleteAllItems@4      @327
-
   DPA_Create          = _DPA_Create@4              @328
   DPA_Destroy         = _DPA_Destroy@4             @329
   DPA_Grow            = _DPA_Grow@8                @330
@@ -143,12 +142,35 @@ EXPORTS
   SendNotifyEx        = _COMCTL32_SendNotifyEx@20  @342
 
   StrChrA             = _COMCTL32_StrChrA@8        @350
+  StrRChrA            = _COMCTL32_StrRChrA@12      @351
+  StrCmpNA            = _COMCTL32_StrCmpNA@12      @352
+  StrCmpNIA           = _COMCTL32_StrCmpNIA@12     @353
+  StrStrA             = _COMCTL32_StrStrA@8        @354
   StrStrIA            = _COMCTL32_StrStrIA@8       @355
+  StrCSpnA            = _COMCTL32_StrCSpnA@8       @356
+  StrChrW             = _COMCTL32_StrChrW@8        @358
   StrToIntA           = _COMCTL32_StrToIntA@4      @357
-
-  COMCTL32_StrCmpNIW  = _COMCTL32_StrCmpNIW@12     @361
+  StrRChrW            = _COMCTL32_StrRChrW@12      @359
+  StrCmpNW            = _COMCTL32_StrCmpNW@12      @360
+  StrCmpNIW           = _COMCTL32_StrCmpNIW@12     @361
+  StrStrW             = _COMCTL32_StrStrW@8        @362
+;StrStrIW @363
+  StrSpnW             = _COMCTL32_StrSpnW@8        @364
+  StrToIntW           = _COMCTL32_StrToIntW@4      @365
+;366 stub StrChrIA
+;367 stub StrChrIW
+;368 stub StrRChrIA
+;369 stub StrRChrIW
+;372 stub StrRStrIA
+;373 stub StrRStrIW
+;374 stub StrCSpnIA
+;375 stub StrCSpnIW
+;376 stub IntlStrEqWorkerA@16
+;377 stub IntlStrEqWorkerW@16
 
   SmoothScrollWindow  = _SmoothScrollWindow@4      @382
+;383 stub DoReaderMode@4
+;384 stub SetPathWordBreakProc@8
 
   DPA_EnumCallback    = _DPA_EnumCallback@12       @385
   DPA_DestroyCallback = _DPA_DestroyCallback@12    @386
@@ -157,19 +179,14 @@ EXPORTS
                         _COMCTL32_389@8            @389 NONAME
                         _COMCTL32_390@16           @390 NONAME
 
-  StrCSpnA            = _COMCTL32_StrCSpnA@8       @356
-  StrChrW             = _COMCTL32_StrChrW@8        @358
-  StrCmpNA            = _COMCTL32_StrCmpNA@12      @352
-  StrCmpNIA           = _COMCTL32_StrCmpNIA@12     @353
-  StrCmpNW            = _COMCTL32_StrCmpNW@12      @360
-  StrRChrA            = _COMCTL32_StrRChrA@12      @351
-  StrRChrW            = _COMCTL32_StrRChrW@12      @359
-  StrStrA             = _COMCTL32_StrStrA@8        @354
-  StrStrW             = _COMCTL32_StrStrW@8        @362
-  StrSpnW             = _COMCTL32_StrSpnW@8        @364
+;400 stub CreateMRUListW@4
+;401 stub AddMRUStringW@8
+;402 stub FindMRUStringW@12
+;403 stub EnumMRUListW@16
+;404 stub CreateMRUListLazyW@16
 
-                        _comctl32_410@16           @410 NONAME
-                        _comctl32_411@12           @411 NONAME
-                        _comctl32_412@12           @412 NONAME
-                        _comctl32_413@16           @413 NONAME
+                        _COMCTL32_410@16           @410 NONAME
+                        _COMCTL32_411@12           @411 NONAME
+                        _COMCTL32_412@12           @412 NONAME
+                        _COMCTL32_413@16           @413 NONAME
                         _COMCTL32_415@20           @415 NONAME
