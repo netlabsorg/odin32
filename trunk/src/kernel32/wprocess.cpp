@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.185 2003-03-03 16:38:20 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.186 2003-04-02 11:03:33 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -854,7 +854,7 @@ BOOL WIN32API ODIN_SetLxDllLoadCallback(PFNLXDLLLOAD pfn)
  *            knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
  * @remark    Forwards to LoadLibraryExA.
  */
-HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HANDLE hFile, DWORD dwFlags)
+HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HFILE hFile, DWORD dwFlags)
 {
     HINSTANCE       hDll;
     Win32DllBase *  pModule;
@@ -1264,7 +1264,7 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HANDLE hFile, DWORD dwFla
  *            knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
  * @remark    Forwards to LoadLibraryExA.
  */
-HINSTANCE WIN32API LoadLibraryExW(LPCWSTR lpszLibFile, HANDLE hFile, DWORD dwFlags)
+HINSTANCE WIN32API LoadLibraryExW(LPCWSTR lpszLibFile, HFILE hFile, DWORD dwFlags)
 {
     char *      pszAsciiLibFile;
     HINSTANCE   hDll;

@@ -1,4 +1,4 @@
-/* $Id: mmapdup.cpp,v 1.1 2003-03-27 14:13:11 sandervl Exp $ */
+/* $Id: mmapdup.cpp,v 1.2 2003-04-02 11:03:32 sandervl Exp $ */
 
 /*
  * Win32 Memory mapped file & view classes
@@ -47,7 +47,7 @@
 // associated with an existing memory map)
 //
 //******************************************************************************
-Win32MemMapDup::Win32MemMapDup(Win32MemMap *parent, HFILE hFile, ULONG size, 
+Win32MemMapDup::Win32MemMapDup(Win32MemMap *parent, HANDLE hFile, ULONG size, 
                                ULONG fdwProtect, LPSTR lpszName) :
           Win32MemMap(hFile, size, fdwProtect, lpszName)
 {
@@ -220,12 +220,16 @@ fail:
 //******************************************************************************
 BOOL Win32MemMapDup::commitPage(ULONG ulFaultAddr, ULONG offset, BOOL fWriteAccess, int nrpages)
 {
+    if(mProtFlags & PAGE_WRITECOPY) 
+    {//this is a COW map, call commitGuardPage
+        return commitGuardPage(ulFaultAddr, offset, fWriteAccess);
+    }
     return parent->commitPage(ulFaultAddr, offset, fWriteAccess, nrpages);
 }
 //******************************************************************************
 // Win32MemMapDup::commitGuardPage
 //
-// Handle a guard page exception
+// Handle a guard page exception for a copy-on-write view
 //
 // Parameters:
 //

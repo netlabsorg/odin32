@@ -1,4 +1,4 @@
-/* $Id: winimagelx.cpp,v 1.19 2002-11-18 14:03:56 sandervl Exp $ */
+/* $Id: winimagelx.cpp,v 1.20 2003-04-02 11:03:33 sandervl Exp $ */
 
 /*
  * Win32 LX Image base class
@@ -201,7 +201,7 @@ LPVOID Win32LxImage::buildHeader(DWORD MajorImageVersion, DWORD MinorImageVersio
     poh->MinorImageVersion           = MinorImageVersion;
     poh->MajorSubsystemVersion       = ODINNT_MAJOR_VERSION;
     poh->MinorSubsystemVersion       = ODINNT_MINOR_VERSION;
-    poh->Reserved1                   = 0;
+    poh->Win32VersionValue           = 0;
     poh->SizeOfImage                 = 0;
     poh->SizeOfHeaders               = 1024;
     poh->CheckSum                    = 0;

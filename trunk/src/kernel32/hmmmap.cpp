@@ -1,4 +1,4 @@
-/* $Id: hmmmap.cpp,v 1.23 2003-03-27 14:19:23 sandervl Exp $ */
+/* $Id: hmmmap.cpp,v 1.24 2003-04-02 11:03:31 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -50,7 +50,7 @@
 //******************************************************************************
 //******************************************************************************
 DWORD HMDeviceMemMapClass::CreateFileMapping(PHMHANDLEDATA         pHMHandleData,
-			 		     HFILE hFile,
+			 		     HANDLE hFile,
                 	 		     SECURITY_ATTRIBUTES *sa, /* [in] Optional security attributes*/
                 	 		     DWORD protect,   /* [in] Protection for mapping object */
                 		   	     DWORD size_high, /* [in] High-order 32 bits of object size */
