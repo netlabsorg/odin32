@@ -1,4 +1,4 @@
-/* $Id: ADVAPI32.CPP,v 1.14 2000-10-03 05:38:08 bird Exp $ */
+/* $Id: ADVAPI32.CPP,v 1.15 2000-10-03 05:52:30 bird Exp $ */
 
 /*
  * Win32 advanced API functions for OS/2
@@ -47,6 +47,7 @@ ODINDEBUGCHANNEL(ADVAPI32-ADVAPI32)
 /*
  * Watcom C/C++ messed things up...
  */
+#ifdef __WATCOM__
 extern "C"
 {
 BOOL WIN32API SetTokenInformation(HANDLE                  hToken,
@@ -310,7 +311,7 @@ BOOL WIN32API    SetPrivateObjectSecurity(SECURITY_INFORMATION  si,
                                           PGENERIC_MAPPING      pgm,
                                           HANDLE                hClientToken);
 }
-
+#endif //__WATCOM__
 
 /*****************************************************************************
  * Name      : SetTokenInformation
