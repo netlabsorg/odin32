@@ -1,4 +1,4 @@
-/* $Id: msvfw32.cpp,v 1.2 1999-09-18 15:57:30 sandervl Exp $ */
+/* $Id: msvfw32.cpp,v 1.3 1999-09-23 09:38:05 sandervl Exp $ */
 /*
  * Copyright 1998 Marcus Meissner
  * Copyright 1999 Jens Wiessner
@@ -11,6 +11,7 @@
 #define ICOM_CINTERFACE 1
 #define strcasecmp               strcmp 
 
+#include <os2win.h>
 #include "winerror.h"
 #include "heap.h"
 #include "resource.h"
@@ -28,7 +29,7 @@
 #include <debugstr.h>
 
 
-// DEFAULT_DEBUG_CHANNEL(msvideo)
+DEFAULT_DEBUG_CHANNEL(msvideo)
 
 
 /****************************************************************************
@@ -38,10 +39,11 @@
  */
 DWORD WINAPI VideoForWindowsVersion(void)
 {
+#ifdef DEBUG
+    dprintf(("MSVFW32: VideoForWindowsVersion\n"));
+#endif
 	return 0x040003B6; /* 4.950 */
 }
-
-/* system.ini: [drivers] */
 
 
 /****************************************************************************
@@ -56,6 +58,9 @@ BOOL VFWAPI DrawDibBegin(HANDLE /*HDRAWDIB*/ hdd,
                                     INT      dySrc,
                                     UINT     wFlags)
 {
+#ifdef DEBUG
+    dprintf(("MSVFW32: DrawDibBegin not implemented\n"));
+#endif
 	return TRUE;
 }
 
@@ -66,6 +71,9 @@ BOOL VFWAPI DrawDibBegin(HANDLE /*HDRAWDIB*/ hdd,
 
 BOOL VFWAPI DrawDibChangePalette(HANDLE /*HDRAWDIB*/ hdd, int iStart, int iLen, LPPALETTEENTRY lppe)
 {
+#ifdef DEBUG
+    dprintf(("MSVFW32: DrawDibChangePalette not implemented\n"));
+#endif
 	return TRUE;
 }
 
@@ -75,6 +83,9 @@ BOOL VFWAPI DrawDibChangePalette(HANDLE /*HDRAWDIB*/ hdd, int iStart, int iLen, 
  */
 BOOL WINAPI DrawDibClose( HANDLE /*HDRAWDIB*/ hDib )
 {
+#ifdef DEBUG
+    dprintf(("MSVFW32: DrawDibClose not implemented\n"));
+#endif
        return TRUE;
 }
 
@@ -96,9 +107,11 @@ BOOL VFWAPI DrawDibDraw(HANDLE /*HDRAWDIB*/ hdd,
                                    int      dySrc,
                                    UINT     wFlags)
 {
+#ifdef DEBUG
+    dprintf(("MSVFW32: DrawDibDraw not implemented\n"));
+#endif
        return TRUE;
 }
-
 
 
 /****************************************************************************
@@ -106,6 +119,9 @@ BOOL VFWAPI DrawDibDraw(HANDLE /*HDRAWDIB*/ hdd,
  */
 BOOL VFWAPI DrawDibEnd(HANDLE /*HDRAWDIB*/ hdd)
 {
+#ifdef DEBUG
+    dprintf(("MSVFW32: DrawDibEnd not implemented\n"));
+#endif
        return TRUE;
 }
 
@@ -115,6 +131,9 @@ BOOL VFWAPI DrawDibEnd(HANDLE /*HDRAWDIB*/ hdd)
  */
 LPVOID VFWAPI DrawDibGetBuffer(HANDLE /*HDRAWDIB*/ hdd, LPBITMAPINFOHEADER lpbi, DWORD dwSize, DWORD dwFlags)
 {
+#ifdef DEBUG
+    dprintf(("MSVFW32: DrawDibGetBuffer not implemented\n"));
+#endif
        return 0;
 }
 
@@ -124,6 +143,9 @@ LPVOID VFWAPI DrawDibGetBuffer(HANDLE /*HDRAWDIB*/ hdd, LPBITMAPINFOHEADER lpbi,
  */
 HPALETTE VFWAPI DrawDibGetPalette(HANDLE /*HDRAWDIB*/ hdd)
 {
+#ifdef DEBUG
+    dprintf(("MSVFW32: DrawDibGetPalette not implemented\n"));
+#endif
        return TRUE;
 }
 
@@ -133,6 +155,9 @@ HPALETTE VFWAPI DrawDibGetPalette(HANDLE /*HDRAWDIB*/ hdd)
  */
 HANDLE /* HDRAWDIB */ WINAPI DrawDibOpen( void ) 
 {
+#ifdef DEBUG
+    dprintf(("MSVFW32: DrawDibOpen not implemented\n"));
+#endif
 	return 0xdead;
 }
 
@@ -142,9 +167,11 @@ HANDLE /* HDRAWDIB */ WINAPI DrawDibOpen( void )
  */
 DWORD VFWAPI DrawDibProfileDisplay(LPBITMAPINFOHEADER lpbi)
 {
+#ifdef DEBUG
+    dprintf(("MSVFW32: DrawDibProfileDisplay not implemented\n"));
+#endif
        return TRUE;
 }
-
 
 
 /****************************************************************************
@@ -152,6 +179,9 @@ DWORD VFWAPI DrawDibProfileDisplay(LPBITMAPINFOHEADER lpbi)
  */
 UINT VFWAPI DrawDibRealize(HANDLE /*HDRAWDIB*/ hdd, HDC hdc, BOOL fBackground)
 {
+#ifdef DEBUG
+    dprintf(("MSVFW32: DrawDibRealize not implemented\n"));
+#endif
 	return 0;
 }
 
@@ -161,6 +191,9 @@ UINT VFWAPI DrawDibRealize(HANDLE /*HDRAWDIB*/ hdd, HDC hdc, BOOL fBackground)
  */
 BOOL VFWAPI DrawDibSetPalette(HANDLE /*HDRAWDIB*/ hdd, HPALETTE hpal) 
 {
+#ifdef DEBUG
+    dprintf(("MSVFW32: DrawDibSetPalette not implemented\n"));
+#endif
 	return TRUE;
 }
 
@@ -170,6 +203,9 @@ BOOL VFWAPI DrawDibSetPalette(HANDLE /*HDRAWDIB*/ hdd, HPALETTE hpal)
  */
 BOOL VFWAPI DrawDibStart(HANDLE /*HDRAWDIB*/ hdd, DWORD rate)
 {
+#ifdef DEBUG
+    dprintf(("MSVFW32: DrawDibStart not implemented\n"));
+#endif
 	return TRUE;
 }
 
@@ -179,9 +215,11 @@ BOOL VFWAPI DrawDibStart(HANDLE /*HDRAWDIB*/ hdd, DWORD rate)
  */
 BOOL VFWAPI DrawDibStop(HANDLE /*HDRAWDIB*/ hdd)
 {
+#ifdef DEBUG
+    dprintf(("MSVFW32: DrawDibStop not implemented\n"));
+#endif
 	return TRUE;
 }
-
 
 
 /****************************************************************************
@@ -189,9 +227,11 @@ BOOL VFWAPI DrawDibStop(HANDLE /*HDRAWDIB*/ hdd)
  */
 BOOL VFWAPI DrawDibTime(HANDLE /*HDRAWDIB*/ hdd, LPDRAWDIBTIME lpddtime)
 {
+#ifdef DEBUG
+    dprintf(("MSVFW32: DrawDibTime not implemented\n"));
+#endif
 	return TRUE;
 }
-
 
 
 /****************************************************************************
@@ -206,6 +246,9 @@ BOOL VFWAPI DrawDibTime(HANDLE /*HDRAWDIB*/ hdd, LPDRAWDIBTIME lpddtime)
  */
 BOOL VFWAPI GetOpenFileNamePreviewA(LPOPENFILENAMEA lpofn)
 {
+#ifdef DEBUG
+    dprintf(("MSVFW32: GetOpenFileNamePreviewA not implemented\n"));
+#endif
 	return TRUE;
 }
 
@@ -215,6 +258,9 @@ BOOL VFWAPI GetOpenFileNamePreviewA(LPOPENFILENAMEA lpofn)
  */
 BOOL VFWAPI GetOpenFileNamePreviewW(LPOPENFILENAMEW lpofn)
 {
+#ifdef DEBUG
+    dprintf(("MSVFW32: GetOpenFileNamePreviewW not implemented\n"));
+#endif
 	return TRUE;
 }
 
@@ -224,6 +270,9 @@ BOOL VFWAPI GetOpenFileNamePreviewW(LPOPENFILENAMEW lpofn)
  */
 BOOL VFWAPI GetSaveFileNamePreviewA(LPOPENFILENAMEA lpofn)
 {
+#ifdef DEBUG
+    dprintf(("MSVFW32: GetSaveFileNamePreviewA not implemented\n"));
+#endif
 	return TRUE;
 }
 
@@ -233,6 +282,9 @@ BOOL VFWAPI GetSaveFileNamePreviewA(LPOPENFILENAMEA lpofn)
  */
 BOOL VFWAPI GetSaveFileNamePreviewW(LPOPENFILENAMEW lpofn)
 {
+#ifdef DEBUG
+    dprintf(("MSVFW32: GetSaveFileNamePreviewW not implemented\n"));
+#endif
 	return TRUE;
 }
 
@@ -242,6 +294,9 @@ BOOL VFWAPI GetSaveFileNamePreviewW(LPOPENFILENAMEW lpofn)
  */
 LRESULT WINAPI ICClose(HIC hic) 
 {
+#ifdef DEBUG
+    dprintf(("MSVFW32: ICClose\n"));
+#endif
 	WINE_HIC	*whic = (WINE_HIC*)hic;
 	/* FIXME: correct? */
 	CloseDriver(whic->hdrv,0,0);
@@ -259,6 +314,9 @@ DWORD VFWAPIV ICCompress(
 	LPDWORD lpdwFlags,LONG lFrameNum,DWORD dwFrameSize,DWORD dwQuality,
 	LPBITMAPINFOHEADER lpbiPrev,LPVOID lpPrev) 
 {
+#ifdef DEBUG
+    dprintf(("MSVFW32: ICCompress\n"));
+#endif
 	ICCOMPRESS	iccmp;
 
 	iccmp.dwFlags		= dwFlags;
@@ -290,6 +348,9 @@ BOOL VFWAPI ICCompressorChoose(
         PCOMPVARS   pc,                 // data about the compressor/dlg
         LPSTR       lpszTitle)          // dialog title (optional)
 {
+#ifdef DEBUG
+    dprintf(("MSVFW32: ICCompressorChoose not implemented\n"));
+#endif
 	return TRUE;
 }
 
@@ -299,6 +360,9 @@ BOOL VFWAPI ICCompressorChoose(
  */
 void VFWAPI ICCompressorFree(PCOMPVARS pc)
 {
+#ifdef DEBUG
+    dprintf(("MSVFW32: ICCompressorFree not implemented\n"));
+#endif
 	return;
 }
 
@@ -309,6 +373,9 @@ void VFWAPI ICCompressorFree(PCOMPVARS pc)
 DWORD VFWAPIV ICDecompress(HIC hic,DWORD dwFlags,LPBITMAPINFOHEADER lpbiFormat,
 		LPVOID lpData,LPBITMAPINFOHEADER  lpbi,LPVOID lpBits) 
 {
+#ifdef DEBUG
+    dprintf(("MSVFW32: ICDecompress\n"));
+#endif
 	ICDECOMPRESS	icd;
 
 	icd.dwFlags	= dwFlags;
@@ -328,6 +395,9 @@ DWORD VFWAPIV ICDecompress(HIC hic,DWORD dwFlags,LPBITMAPINFOHEADER lpbiFormat,
 DWORD VFWAPIV ICDraw(HIC hic,DWORD dwFlags,LPVOID lpFormat,LPVOID lpData,
 	DWORD cbData, LONG lTime) 
 {
+#ifdef DEBUG
+    dprintf(("MSVFW32: ICDraw\n"));
+#endif
 	ICDRAW	icd;
 
 	icd.dwFlags = dwFlags;
@@ -360,6 +430,9 @@ DWORD	VFWAPIV	ICDrawBegin(
         DWORD			dwRate,	/* frames/second = (dwRate/dwScale) */
         DWORD			dwScale) 
 {
+#ifdef DEBUG
+    dprintf(("MSVFW32: ICDrawBegin\n"));
+#endif
 	ICDRAWBEGIN	icdb;
 
 	icdb.dwFlags = dwFlags;
@@ -387,6 +460,9 @@ DWORD	VFWAPIV	ICDrawBegin(
 HIC VFWAPI ICGetDisplayFormat(HIC hic,LPBITMAPINFOHEADER lpbiIn,
 	LPBITMAPINFOHEADER lpbiOut, INT depth,INT dx,INT dy) 
 {
+#ifdef DEBUG
+    dprintf(("MSVFW32: ICGetDisplayFormat\n"));
+#endif
 	HIC	tmphic = hic; 
 	LRESULT	lres;
 
@@ -431,6 +507,9 @@ errout:
  */
 LRESULT WINAPI ICGetInfo(HIC hic,ICINFO *picinfo,DWORD cb) 
 {
+#ifdef DEBUG
+    dprintf(("MSVFW32: ICGetInfo\n"));
+#endif
 	LRESULT		ret;
 
 	ret = ICSendMessage(hic,ICM_GETINFO,(DWORD)picinfo,cb);
@@ -450,6 +529,9 @@ HANDLE VFWAPI ICImageCompress(
         LONG                lQuality,   // quality to use
         LONG                plSize)     // compress to this size (0=whatever)
 {	
+#ifdef DEBUG
+    dprintf(("MSVFW32: ICImageCompress not implemented\n"));
+#endif
 	return 0;
 }
 
@@ -464,6 +546,9 @@ HANDLE VFWAPI ICImageDecompress(
         LPVOID              lpBits,     // data to decompress
         LPBITMAPINFO        lpbiOut)    // decompress to this (NULL ==> default)
 {	
+#ifdef DEBUG
+    dprintf(("MSVFW32: ICImageDecompress not implemented\n"));
+#endif
 	return 0;
 }
 
@@ -475,6 +560,9 @@ HANDLE VFWAPI ICImageDecompress(
  */
 BOOL WINAPI ICInfo(DWORD fccType,DWORD fccHandler,ICINFO *lpicinfo)
 {
+#ifdef DEBUG
+    dprintf(("MSVFW32: ICInfo\n"));
+#endif
 
 	char	type[5],buf[2000];
 
@@ -504,6 +592,9 @@ BOOL WINAPI ICInfo(DWORD fccType,DWORD fccHandler,ICINFO *lpicinfo)
  */
 BOOL    VFWAPI ICInstall(DWORD fccType, DWORD fccHandler, LPARAM lParam, LPSTR szDesc, UINT wFlags)
 {	
+#ifdef DEBUG
+    dprintf(("MSVFW32: ICInstall not implemented\n"));
+#endif
 	return TRUE;
 }
 
@@ -514,6 +605,9 @@ BOOL    VFWAPI ICInstall(DWORD fccType, DWORD fccHandler, LPARAM lParam, LPSTR s
 HIC  VFWAPI ICLocate(DWORD fccType, DWORD fccHandler, LPBITMAPINFOHEADER lpbiIn,
 	LPBITMAPINFOHEADER lpbiOut, WORD wMode) 
 {
+#ifdef DEBUG
+    dprintf(("MSVFW32: ICLocate\n"));
+#endif
 	char	type[5],handler[5];
 	HIC	hic;
 	DWORD	querymsg;
@@ -558,6 +652,9 @@ HIC  VFWAPI ICLocate(DWORD fccType, DWORD fccHandler, LPBITMAPINFOHEADER lpbiIn,
  */
 HIC WINAPI ICOpen(DWORD fccType,DWORD fccHandler,UINT wMode) 
 {
+#ifdef DEBUG
+    dprintf(("MSVFW32: ICOpen\n"));
+#endif
 	char		type[5],handler[5],codecname[20];
 	ICOPEN		icopen;
 	HDRVR		hdrv;
@@ -599,6 +696,9 @@ HIC WINAPI ICOpen(DWORD fccType,DWORD fccHandler,UINT wMode)
 HIC VFWAPI ICOpenFunction(DWORD fccType, DWORD fccHandler, UINT wMode,
 FARPROC lpfnHandler) 
 {
+#ifdef DEBUG
+    dprintf(("MSVFW32: ICOpenFunction\n"));
+#endif
 	char		type[5],handler[5];
 	HIC		hic;
 	WINE_HIC	*whic;
@@ -619,6 +719,9 @@ FARPROC lpfnHandler)
  */
 BOOL    VFWAPI ICRemove(DWORD fccType, DWORD fccHandler, UINT wFlags)
 {	
+#ifdef DEBUG
+    dprintf(("MSVFW32: ICRemove not implemented\n"));
+#endif
 	return TRUE;
 }
 
@@ -629,6 +732,9 @@ BOOL    VFWAPI ICRemove(DWORD fccType, DWORD fccHandler, UINT wFlags)
 LRESULT VFWAPI ICSendMessage(HIC hic,UINT msg,DWORD lParam1,DWORD lParam2) 
 
 {
+#ifdef DEBUG
+    dprintf(("MSVFW32: ICSendMessage\n"));
+#endif
 	LRESULT		ret;
 	WINE_HIC	*whic = (WINE_HIC*)hic;
 	INT		tvfw;
@@ -701,6 +807,9 @@ LPVOID VFWAPI ICSeqCompressFrame(
     BOOL 		    *pfKey,	// did it end up being a key frame?
     LONG		    *plSize) 	// size to compress to/of returned image
 {
+#ifdef DEBUG
+    dprintf(("MSVFW32: ICSeqCompressFrame not implemented\n"));
+#endif
 	return 0;
 }
 
@@ -710,9 +819,11 @@ LPVOID VFWAPI ICSeqCompressFrame(
  */
 BOOL VFWAPI ICSeqCompressFrameStart(PCOMPVARS pc, LPBITMAPINFO lpbiIn)
 {
+#ifdef DEBUG
+    dprintf(("MSVFW32: ICSeqCompressFrameEnd not implemented\n"));
+#endif
 	return TRUE;
 }
-
 
 
 /**************************************************************************
@@ -720,6 +831,9 @@ BOOL VFWAPI ICSeqCompressFrameStart(PCOMPVARS pc, LPBITMAPINFO lpbiIn)
  */
 void VFWAPI ICSeqCompressFrameEnd(PCOMPVARS pc)
 {
+#ifdef DEBUG
+    dprintf(("MSVFW32: ICSeqCompressFrameStart not implemented\n"));
+#endif
 	return;
 }
 
@@ -730,6 +844,9 @@ void VFWAPI ICSeqCompressFrameEnd(PCOMPVARS pc)
 HWND VFWAPIV MCIWndCreate (HWND hwndParent, HINSTANCE hInstance,
                       DWORD dwStyle,LPVOID szFile)
 {	
+#ifdef DEBUG
+    dprintf(("MSVFW32: MCIWndCreate not implemented\n"));
+#endif
 	return 0;
 }
 
@@ -740,6 +857,9 @@ HWND VFWAPIV MCIWndCreate (HWND hwndParent, HINSTANCE hInstance,
 HWND VFWAPIV MCIWndCreateA(HWND hwndParent, HINSTANCE hInstance,
                       DWORD dwStyle,LPCSTR szFile)
 {	
+#ifdef DEBUG
+    dprintf(("MSVFW32: MCIWndCreateA not implemented\n"));
+#endif
 	return 0;
 }
 
@@ -750,6 +870,9 @@ HWND VFWAPIV MCIWndCreateA(HWND hwndParent, HINSTANCE hInstance,
 HWND VFWAPIV MCIWndCreateW(HWND hwndParent, HINSTANCE hInstance,
                       DWORD dwStyle,LPCWSTR szFile)
 {	
+#ifdef DEBUG
+    dprintf(("MSVFW32: MCIWndCreateW not implemented\n"));
+#endif
 	return 0;
 }
 
@@ -759,6 +882,9 @@ HWND VFWAPIV MCIWndCreateW(HWND hwndParent, HINSTANCE hInstance,
  */
 BOOL VFWAPIV MCIWndRegisterClass()
 {
+#ifdef DEBUG
+    dprintf(("MSVFW32: MCIWndRegisterClass not implemented\n"));
+#endif
 	return TRUE;
 }
 
