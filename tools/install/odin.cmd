@@ -244,8 +244,8 @@ call directory doc
 call directory ".."
 
 call directory dlldir;
-rem "wic.exe "curdir"\"installarchive" -a 2 *.dll pe.exe odininst.exe regsvr32.exe *.ini win32k.sys win32k.ddp";
-"wic.exe "curdir"\"installarchive" -a 2 *.dll pe.exe odininst.exe regsvr32.exe odin.ini";
+"wic.exe "curdir"\"installarchive" -a 2 *.dll pe.exe odininst.exe regsvr32.exe *.ini win32k.sys win32k.ddp";
+rem "wic.exe "curdir"\"installarchive" -a 2 *.dll pe.exe odininst.exe regsvr32.exe odin.ini";
 
 call directory "Glide"
 "wic.exe "curdir"\"installarchive" -a 3 *.dll";

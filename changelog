@@ -1,4 +1,4 @@
- /* $Id: changelog,v 1.1047 2000-08-01 23:17:04 sandervl Exp $ */
+ /* $Id: changelog,v 1.1048 2000-08-01 23:17:28 sandervl Exp $ */
 
  2000-08-01: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: Create x:\Program Files & x:\Program Files\Common Files
@@ -7,7 +7,9 @@
                 "ProgramFilesDir"="x:\Program Files"
                 "CommonFilesDir"="x:\Program Files\Common Files"
                 "SharedDir"="x:\Odin"
-     - DOC\ToDo.txt:
+    - COMCTL32: Fixed property page bugfix (wrong position) (by merging
+                latest PROPSHEET_ShowPage from Wine)
+    - DOC\ToDo.txt:
                 Added:
                 KERNEL32: Build fake PE headers for odin dlls (dll handle must be pointer to header)
                           (some applications use the handles as pointers)
