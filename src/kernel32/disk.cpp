@@ -1,4 +1,4 @@
-/* $Id: disk.cpp,v 1.30 2002-01-07 14:44:03 sandervl Exp $ */
+/* $Id: disk.cpp,v 1.31 2002-01-08 18:20:45 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -53,14 +53,13 @@ BOOL WIN32API SetVolumeLabelW(LPCWSTR lpRootPathName, LPCWSTR lpVolumeName)
 }
 
 //******************************************************************************
-//SvL: 24-6-'97 - Added
 //******************************************************************************
 ODINFUNCTION5(BOOL, GetDiskFreeSpaceA,
-              LPCSTR, arg1,
-              PDWORD, arg2,
-              PDWORD, arg3,
-              PDWORD, arg4,
-              PDWORD, arg5)
+              LPCSTR, lpszRootPathName,
+              PDWORD, lpSectorsPerCluster,
+              PDWORD, lpBytesPerSector,
+              PDWORD, lpFreeClusters,
+              PDWORD, lpClusters)
 {
   BOOL rc;
   DWORD dwSectorsPerCluster;    // address of sectors per cluster ter
@@ -68,21 +67,18 @@ ODINFUNCTION5(BOOL, GetDiskFreeSpaceA,
   DWORD dwNumberOfFreeClusters; // address of number of free clusters
   DWORD dwTotalNumberOfClusters;    // address of total number of clusters
 
-  dprintf(("KERNEL32:  GetDiskFreeSpaceA %s, 0x%08X, 0x%08X, 0x%08X, 0x%08X,\n",
-             arg1!=NULL?arg1:"NULL", arg2,arg3,arg4,arg5));
-
-  rc = OSLibGetDiskFreeSpace((LPSTR)arg1, &dwSectorsPerCluster, &dwBytesPerSector,
+  rc = OSLibGetDiskFreeSpace((LPSTR)lpszRootPathName, &dwSectorsPerCluster, &dwBytesPerSector,
                              &dwNumberOfFreeClusters, &dwTotalNumberOfClusters);
   if(rc)
   {
-    if (arg2!=NULL)
-      *arg2 = dwSectorsPerCluster;
-    if (arg3!=NULL)
-      *arg3 = dwBytesPerSector;
-    if (arg4!=NULL)
-      *arg4 = dwNumberOfFreeClusters;
-    if (arg5!=NULL)
-      *arg5 = dwTotalNumberOfClusters;
+    if (lpSectorsPerCluster!=NULL)
+      *lpSectorsPerCluster = dwSectorsPerCluster;
+    if (lpBytesPerSector!=NULL)
+      *lpBytesPerSector = dwBytesPerSector;
+    if (lpFreeClusters!=NULL)
+      *lpFreeClusters = dwNumberOfFreeClusters;
+    if (lpClusters!=NULL)
+      *lpClusters = dwTotalNumberOfClusters;
 
     /* CW: Windows Media Player setup complains about wrong clustersize when odin is installed on
        a TVFS drive. This fakes the clustersizes to 32. The following
@@ -91,35 +87,35 @@ ODINFUNCTION5(BOOL, GetDiskFreeSpaceA,
        [DRIVESPACE]
        TVFSTOHPFS = 1
        */
-    if(arg2!=NULL) {
-      if(*arg2==1024 && PROFILE_GetOdinIniBool("DRIVESPACE","CLUSTERTO32",0)) {/* TVFS returns 1024 sectors per cluster */
+    if(lpSectorsPerCluster!=NULL) 
+    {
+      if(*lpSectorsPerCluster==1024 && PROFILE_GetOdinIniBool("DRIVESPACE","CLUSTERTO32",0)) 
+      {/* TVFS returns 1024 sectors per cluster */
         dprintf(("KERNEL32:  GetDiskFreeSpaceA, TVFS-Drive detected. Faking clustersize to 32.\n"));
-        *arg2=32;
-        if (arg4!=NULL)
-          *arg4 = dwNumberOfFreeClusters<<0x5;
-        if (arg5!=NULL)
-          *arg5 = dwTotalNumberOfClusters<<0x5;
+        *lpSectorsPerCluster=32;
+        if (lpFreeClusters!=NULL)
+          *lpFreeClusters = dwNumberOfFreeClusters<<0x5;
+        if (lpClusters!=NULL)
+          *lpClusters = dwTotalNumberOfClusters<<0x5;
       }
     }
-
   }
-
   return rc;
 }
 //******************************************************************************
 //******************************************************************************
 ODINFUNCTION5(BOOL, GetDiskFreeSpaceW,
-              LPCWSTR, arg1,
-              PDWORD, arg2,
-              PDWORD, arg3,
-              PDWORD, arg4,
-              PDWORD, arg5)
+              LPCWSTR, lpszRootPathName,
+              PDWORD, lpSectorsPerCluster,
+              PDWORD, lpBytesPerSector,
+              PDWORD, lpFreeClusters,
+              PDWORD, lpClusters)
 {
   BOOL  rc;
   char *astring;
 
-  astring = UnicodeToAsciiString((LPWSTR)arg1);
-  rc = CALL_ODINFUNC(GetDiskFreeSpaceA)(astring, arg2, arg3, arg4, arg5);
+  astring = UnicodeToAsciiString((LPWSTR)lpszRootPathName);
+  rc = CALL_ODINFUNC(GetDiskFreeSpaceA)(astring, lpSectorsPerCluster, lpBytesPerSector, lpFreeClusters, lpClusters);
   FreeAsciiString(astring);
   return(rc);
 }
@@ -253,7 +249,7 @@ UINT WIN32API GetDriveTypeW(LPCWSTR lpszDrive)
         return DRIVE_CANNOTDETERMINE;   //NT 4, SP6 returns this (VERIFIED)
     }
     astring = UnicodeToAsciiString((LPWSTR)lpszDrive);
-    dprintf(("KERNEL32:  OS2GetDriveTypeW %s", astring));
+    dprintf(("KERNEL32: GetDriveTypeW %s", astring));
     rc = GetDriveTypeA(astring);
     FreeAsciiString(astring);
     return(rc);
