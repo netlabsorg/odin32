@@ -1,4 +1,4 @@
-; $Id: WINMM.DEF,v 1.3 2000-12-24 14:58:21 sandervl Exp $
+; $Id: WINMM.DEF,v 1.4 2001-04-02 09:49:08 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY WINMM INITINSTANCE
@@ -12,21 +12,20 @@ EXPORTS
      CloseDriver                = _CloseDriver@12          @5
      DefDriverProc              = _DefDriverProc@20        @6
      DriverCallback             = _DriverCallback@28       @7
-;    DrvClose                   = _DrvClose@??                @8
-;    DrvDefDriverProc           = _DrvDefDriverProc@??        @9
-     DrvGetModuleHandle         = _DrvGetModuleHandle@4    @10
-;    DrvOpen                    = _DrvOpen@??                 @11
-;    DrvOpenA                   = _DrvOpenA@??                @12
-     DrvSendMessage             = _DrvSendMessage@16       @13
-;    GetDriverFlags             = _GetDriverFlags@??          @14
+     DrvClose                   = _CloseDriver@12          @8
+     DrvDefDriverProc           = _DefDriverProc@20        @9
+     DrvGetModuleHandle         = _GetDriverModuleHandle@4 @10
+     DrvOpen                    = _OpenDriverA@12          @11
+     DrvOpenA                   = _OpenDriverA@12          @12
+     DrvSendMessage             = _SendDriverMessage@16    @13
+     GetDriverFlags             = _GetDriverFlags@4        @14
      GetDriverModuleHandle      = _GetDriverModuleHandle@4 @15
-     OpenDriver                 = _OpenDriver@12           @16
+     OpenDriver                 = _OpenDriverA@12          @16
      OpenDriverA                = _OpenDriverA@12          @17
      PlaySound                  = _PlaySoundA@12           @18
      PlaySoundW                 = _PlaySoundW@12           @19
      SendDriverMessage          = _SendDriverMessage@16    @20
 
-;    SendDriverMessage          = _SendDriverMessage@??      @20
 ; AUX
     auxGetDevCapsA             = _auxGetDevCapsA@12          @21
     auxGetDevCapsW             = _auxGetDevCapsW@12          @22
