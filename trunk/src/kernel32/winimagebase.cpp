@@ -1,4 +1,4 @@
-/* $Id: winimagebase.cpp,v 1.14 2000-04-15 21:08:36 bird Exp $ */
+/* $Id: winimagebase.cpp,v 1.15 2000-04-16 04:19:57 bird Exp $ */
 
 /*
  * Win32 PE Image base class
@@ -131,7 +131,8 @@ ULONG Win32ImageBase::getVersion()
   dprintf(("Win32ImageBase::getVersion: NOT IMPLEMENTED!"));
   return 0x40000; //NT 4
 }
-//******************************************************************************
+
+
 /**
  * Finds a executable module (or really any file) using the DLL search order.
  * The search order used is:
@@ -160,16 +161,24 @@ ULONG Win32ImageBase::getVersion()
  *                          If it don't contains an '.', ".DLL" is appended to
  *                          the name.
  * @param     pszFullname   Pointer to output buffer, this will hold the
- *                          filename upon return.
+ *                          a fully qualified, uppercased, filename upon
+ *                          successful return.
  * @param     cchFullname   Size of the buffer pointer to by pszFullname.
  *                          (A length of at least CCHMAXPATH is recommended.)
+ * @parm      pszAltPath    Pointer to alternate first path. If this is NULL
+ *                          (which is it by default) the executable path
+ *                          is used. If this is specified, this path is used
+ *                          instead. This is intented used to implement the
+ *                          LoadLibraryEx flag LOAD_WITH_ALTERED_SEARCH_PATH.
  *
  * @status    Completely implemented.
  * @author    Sander van Leeuwen (sandervl@xs4all.nl)
  *            knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
  * @remark
  */
-BOOL Win32ImageBase::findDll(const char *pszFileName, char *pszFullName, int cchFullName)
+BOOL Win32ImageBase::findDll(const char *pszFileName,
+                             char *pszFullName, int cchFullName,
+                             const char *pszAltPath /*=NULL*/)
 {
     BOOL            fRet = FALSE;       /* Return value. (Pessimistic attitude! Init it to FALSE...) */
     char *          psz;                /* General string pointer. */
@@ -248,17 +257,24 @@ BOOL Win32ImageBase::findDll(const char *pszFileName, char *pszFullName, int cch
         switch (iPath)
         {
             case FINDDLL_EXECUTABLEDIR:
-                //ASSUMES: getFullPath allways returns a fully qualified path, ie. with at least one backslash.
-                //         and that all slashes are backslashes!
-                pszPath = strcpy(plv->szPath, WinExe->getFullPath());
-                psz = strrchr(plv->szPath, '\\');
-                dassert(psz, ("KERNEL32:Win32ImageBase::findDll(%s, 0x%08x, %d): "
-                        "WinExe->getFullPath returned a path not fully qualified: %s",
-                        pszFileName, pszFullName, cchFullName, pszPath));
-                if (psz)
-                    *psz = '\0';
+                if (!pszAltPath)
+                {
+                    /* ASSUMES: getFullPath allways returns a fully qualified
+                     *      path, ie. with at least one backslash. and that all
+                     *      slashes are backslashes!
+                     */
+                    pszPath = strcpy(plv->szPath, WinExe->getFullPath());
+                    psz = strrchr(plv->szPath, '\\');
+                    dassert(psz, ("KERNEL32:Win32ImageBase::findDll(%s, 0x%08x, %d): "
+                            "WinExe->getFullPath returned a path not fully qualified: %s",
+                            pszFileName, pszFullName, cchFullName, pszPath));
+                    if (psz)
+                        *psz = '\0';
+                    else
+                        continue;
+                }
                 else
-                    continue;
+                    pszPath = pszAltPath;
                 break;
 
             case FINDDLL_CURRENTDIR:
@@ -327,6 +343,7 @@ BOOL Win32ImageBase::findDll(const char *pszFileName, char *pszFullName, int cch
                 goto end;
         }
 
+
         /** @sketch
          * pszPath is now set to the pathlist to be searched.
          * So we'll loop thru all the paths in the list.
@@ -375,10 +392,11 @@ BOOL Win32ImageBase::findDll(const char *pszFileName, char *pszFullName, int cch
              *  Use DosFindFirst to check if the file exists.
              *  IF the file exists THEN
              *      Query Fullpath using OS/2 API.
-             *      IF unsuccessfull THEN return relative name.
+             *      IF unsuccessful THEN return relative name.
              *          Check that the fullname buffer is large enough.
              *          Copy the filename found to the fullname buffer.
              *      ENDIF
+             *      IF successful THEN uppercase the fullname buffer.
              *      goto end
              *  ENDIF
              */
@@ -413,6 +431,7 @@ BOOL Win32ImageBase::findDll(const char *pszFileName, char *pszFullName, int cch
                                 pszFileName, pszFullName, cchFullName, cch, cchFileName, cchFullName, plv->sz));
                     }
                 }
+                if (fRet) strupr(pszFullName);
                 goto end;
             }
 
@@ -428,6 +447,8 @@ end:
     free(plv);
     return fRet;
 }
+
+
 //******************************************************************************
 //******************************************************************************
 BOOL Win32ImageBase::isPEImage(char *szFileName)
