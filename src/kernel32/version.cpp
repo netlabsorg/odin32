@@ -1,4 +1,4 @@
-/* $Id: version.cpp,v 1.5 2001-12-08 12:01:28 sandervl Exp $ */
+/* $Id: version.cpp,v 1.6 2001-12-08 14:48:54 sandervl Exp $ */
 
 /*
  * Win32 compatibility file functions for OS/2
@@ -41,9 +41,9 @@
 
 typedef struct
 {
-    LONG           getVersion16;
-    LONG           getVersion;
-    OSVERSIONINFOA getVersionEx;
+    LONG             getVersion16;
+    LONG             getVersion;
+    OSVERSIONINFOEXA getVersionEx;
 } VERSION_DATA;
 
 static VERSION_DATA VersionData[WINVERSION_MAX] =
@@ -54,7 +54,8 @@ static VERSION_DATA VersionData[WINVERSION_MAX] =
 	0xC0000A04,
 	{
 	    sizeof(OSVERSIONINFOA), 4, 10, 0x40A07CE,
-	    VER_PLATFORM_WIN32_WINDOWS, "Win98"
+	    VER_PLATFORM_WIN32_WINDOWS, "Win98",
+            0, 0, 0, 0
 	}
     },
     // Windows ME
@@ -63,7 +64,8 @@ static VERSION_DATA VersionData[WINVERSION_MAX] =
         0xC0005A04,
         {
             sizeof(OSVERSIONINFOA), 4, 90, 0x45A0BB8,
-            VER_PLATFORM_WIN32_WINDOWS, " "
+            VER_PLATFORM_WIN32_WINDOWS, " ",
+            0, 0, 0, 0
         }
     },
     // Windows NT 4.0 (SP6)
@@ -72,7 +74,8 @@ static VERSION_DATA VersionData[WINVERSION_MAX] =
         ODINNT_VERSION,
         {
             sizeof(OSVERSIONINFOA), ODINNT_MAJOR_VERSION, ODINNT_MINOR_VERSION, 
-            ODINNT_BUILD_NR, VER_PLATFORM_WIN32_NT, ODINNT_CSDVERSION
+            ODINNT_BUILD_NR, VER_PLATFORM_WIN32_NT, ODINNT_CSDVERSION,
+            6, 0, 0, 0
         }
     },
     // Windows 2000 (SP2)
@@ -81,7 +84,8 @@ static VERSION_DATA VersionData[WINVERSION_MAX] =
         0x08930005,
         {
             sizeof(OSVERSIONINFOA), 5, 0, 0x893,
-            VER_PLATFORM_WIN32_NT, "Service Pack 2"
+            VER_PLATFORM_WIN32_NT, "Service Pack 2",
+            2, 0, 0, 0
         }
     },
     // Windows XP
@@ -90,7 +94,8 @@ static VERSION_DATA VersionData[WINVERSION_MAX] =
         0x0A280105,
         {
             sizeof(OSVERSIONINFOA), 5, 1, 0xA28,
-            VER_PLATFORM_WIN32_NT, ""
+            VER_PLATFORM_WIN32_NT, "",
+            0, 0, 0, 0
         }
     }
 };
@@ -154,7 +159,7 @@ BOOL WIN32API GetVersionExA(OSVERSIONINFOA *lpVersionInformation)
 	SetLastError(ERROR_INVALID_PARAMETER);
         return(FALSE);
    }
-   if(lpVersionInformation->dwOSVersionInfoSize != sizeof(OSVERSIONINFOA))
+   if(lpVersionInformation->dwOSVersionInfoSize < sizeof(OSVERSIONINFOA))
    {
 	dprintf(("ERROR: buffer too small (%d != %d)", lpVersionInformation->dwOSVersionInfoSize, sizeof(OSVERSIONINFOA)));
 	SetLastError(ERROR_INSUFFICIENT_BUFFER);
@@ -170,6 +175,15 @@ BOOL WIN32API GetVersionExA(OSVERSIONINFOA *lpVersionInformation)
    lpVersionInformation->dwPlatformId   = VersionData[winversion].getVersionEx.dwPlatformId;
    strcpy(lpVersionInformation->szCSDVersion, VersionData[winversion].getVersionEx.szCSDVersion );
 
+   if(lpVersionInformation->dwOSVersionInfoSize == sizeof(OSVERSIONINFOEXA)) 
+   {//Windows 2000 (and up) extension
+       LPOSVERSIONINFOEXA lpVersionExInformation = (LPOSVERSIONINFOEXA)lpVersionInformation;
+
+       lpVersionExInformation->wServicePackMajor = VersionData[winversion].getVersionEx.wServicePackMajor;
+       lpVersionExInformation->wServicePackMinor = VersionData[winversion].getVersionEx.wServicePackMinor;
+       lpVersionExInformation->wReserved[0]      = VersionData[winversion].getVersionEx.wReserved[0];
+       lpVersionExInformation->wReserved[1]      = VersionData[winversion].getVersionEx.wReserved[1];
+   }
    SetLastError(ERROR_SUCCESS);
    return(TRUE);
 }
@@ -185,7 +199,7 @@ BOOL WIN32API GetVersionExW(OSVERSIONINFOW *lpVersionInformation)
 	SetLastError(ERROR_INVALID_PARAMETER);
         return(FALSE);
    }
-   if(lpVersionInformation->dwOSVersionInfoSize != sizeof(OSVERSIONINFOW))
+   if(lpVersionInformation->dwOSVersionInfoSize < sizeof(OSVERSIONINFOW))
    {
 	dprintf(("ERROR: buffer too small"));
 	SetLastError(ERROR_INSUFFICIENT_BUFFER);
@@ -200,6 +214,16 @@ BOOL WIN32API GetVersionExW(OSVERSIONINFOW *lpVersionInformation)
    lpVersionInformation->dwBuildNumber  = VersionData[winversion].getVersionEx.dwBuildNumber;
    lpVersionInformation->dwPlatformId   = VersionData[winversion].getVersionEx.dwPlatformId;
    lstrcpyAtoW(lpVersionInformation->szCSDVersion, VersionData[winversion].getVersionEx.szCSDVersion);
+
+   if(lpVersionInformation->dwOSVersionInfoSize == sizeof(OSVERSIONINFOEXW)) 
+   {//Windows 2000 (and up) extension
+       LPOSVERSIONINFOEXW lpVersionExInformation = (LPOSVERSIONINFOEXW)lpVersionInformation;
+
+       lpVersionExInformation->wServicePackMajor = VersionData[winversion].getVersionEx.wServicePackMajor;
+       lpVersionExInformation->wServicePackMinor = VersionData[winversion].getVersionEx.wServicePackMinor;
+       lpVersionExInformation->wReserved[0]      = VersionData[winversion].getVersionEx.wReserved[0];
+       lpVersionExInformation->wReserved[1]      = VersionData[winversion].getVersionEx.wReserved[1];
+   }
    SetLastError(ERROR_SUCCESS);
    return(TRUE);
 }
