@@ -1,4 +1,4 @@
-/* $Id: reg.cpp,v 1.4 2000-08-02 20:18:23 bird Exp $ */
+/* $Id: reg_odin.cpp,v 1.1 2000-08-24 09:32:43 sandervl Exp $ */
 
 /*
  * Win32 URL-handling APIs for OS/2
@@ -22,7 +22,6 @@
 #include <ctype.h>
 #include <wctype.h>
 #define HAVE_WCTYPE_H
-#include <odin.h>
 
 #include "debugtools.h"
 #include "winnls.h"
@@ -32,7 +31,7 @@
 #include <heapstring.h>
 #include <misc.h>
 #include <win\winerror.h>
-#include "shlwapi.h"
+#include "shlwapi_odin.h"
 
 
 ODINDEBUGCHANNEL(SHLWAPI-REG)
@@ -110,61 +109,8 @@ ODINFUNCTION5(DWORD,  SHRegCreateUSKeyW,
    FIXME: move to a more appropriate file( when one exists )
 */
 
- /* SHGetValue: Gets a value from the registry */
-
-ODINFUNCTION6(DWORD,SHGetValueA,HKEY,     hkey,
-                                LPCSTR,   pSubKey,
-                                LPCSTR,   pValue,
-                                LPDWORD,  pwType,
-                                LPVOID,   pvData,
-                                LPDWORD,  pbData)
-{
-    dprintf(("(%p),stub!\n", pSubKey));
-
-        return ERROR_SUCCESS;  /* return success */
-}
-
-ODINFUNCTION6(DWORD,SHGetValueW,HKEY,     hkey,
-                                LPCWSTR,  pSubKey,
-                                LPCWSTR,  pValue,
-                                LPDWORD,  pwType,
-                                LPVOID,   pvData,
-                                LPDWORD,  pbData)
-{
-    dprintf(("(%p),stub!\n", pSubKey));
-
-        return ERROR_SUCCESS;  /* return success */
-}
 
 /* gets a user-specific registry value. */
-
-ODINFUNCTION8(LONG,SHRegGetUSValueA,LPCSTR,   pSubKey,
-                                    LPCSTR,   pValue,
-                                    LPDWORD,  pwType,
-                                    LPVOID,   pvData,
-                                    LPDWORD,  pbData,
-                                    BOOL,     fIgnoreHKCU,
-                                    LPVOID,   pDefaultData,
-                                    DWORD,    wDefaultDataSize)
-{
-    FIXME("(%p),stub!\n", pSubKey);
-
-        return ERROR_SUCCESS;  /* return success */
-}
-
-ODINFUNCTION8(LONG,SHRegGetUSValueW,LPCWSTR, pSubKey,
-                                    LPCWSTR, pValue,
-                                    LPDWORD, pwType,
-                                    LPVOID,  pvData,
-                                    LPDWORD, pbData,
-                                    BOOL,    flagIgnoreHKCU,
-                                    LPVOID,  pDefaultData,
-                                    DWORD,   wDefaultDataSize)
-{
-    dprintf(("(%p),stub!\n", pSubKey));
-
-        return ERROR_SUCCESS;  /* return success */
-}
 
 
 /*****************************************************************************
