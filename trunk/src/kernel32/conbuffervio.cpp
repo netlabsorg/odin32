@@ -1,4 +1,4 @@
-/* $Id: conbuffervio.cpp,v 1.3 2001-01-23 11:59:45 sandervl Exp $ */
+/* $Id: conbuffervio.cpp,v 1.4 2001-10-01 01:45:18 bird Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -68,6 +68,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <malloc.h>
 
 #include "conwin.h"          // Windows Header for console only
 #include "HandleManager.h"
