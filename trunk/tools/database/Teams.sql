@@ -1,6 +1,10 @@
--- $Id: Teams.sql,v 1.2 2000-07-18 22:18:56 bird Exp $
+-- $Id: Teams.sql,v 1.3 2000-07-18 22:21:28 bird Exp $
 --
 -- Team data.
+--
+-- IMPORTANT! Before you load this file, you'll have to import dlls and apis.
+-- This is done by issuing a 'nmake apiimport' from /src. (Database utils
+-- will have to be compiled first of course.)
 --
 
 
