@@ -1,4 +1,4 @@
-/* $Id: kKLasmutils.h,v 1.2 2001-10-14 22:51:07 bird Exp $
+/* $Id: kKLasmutils.h,v 1.3 2001-10-16 02:21:05 bird Exp $
  *
  * Assembly utilities.
  *
@@ -28,6 +28,7 @@ extern unsigned long _Optlink   AtomicInc(unsigned long *pul);
 extern unsigned long _Optlink   AtomicIncWrap(unsigned long *pul, unsigned long ulMax);
 extern unsigned long _Optlink   AtomicDec(unsigned long *pul);
 extern unsigned long _Optlink   AtomicSet(unsigned long *pul, unsigned long ul);
+extern unsigned long _Optlink   AtomicSetEqual(unsigned long *pul, unsigned long ulSet, unsigned long ulCurrent);
 
 #if 0
     //extern void _System Int3(void);
