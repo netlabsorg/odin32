@@ -1,4 +1,4 @@
-/* $Id: disk.cpp,v 1.12 2000-05-23 18:45:12 sandervl Exp $ */
+/* $Id: disk.cpp,v 1.13 2000-05-28 11:41:44 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -249,12 +249,13 @@ ODINFUNCTION8(BOOL,    GetVolumeInformationA,
    if(lpFileSystemNameBuffer || lpMaximumComponentLength) {
 	if(!lpFileSystemNameBuffer) {
 		lpFileSystemNameBuffer = tmpstring;
+		nFileSystemNameSize    = sizeof(tmpstring);
 	}
 	rc = OSLibDosQueryVolumeFS(drive, lpFileSystemNameBuffer, nFileSystemNameSize);
    }
    if(lpMaximumComponentLength) {
 	if(!strcmp(lpFileSystemNameBuffer, "FAT")) {
-		*lpMaximumComponentLength = 11;
+		*lpMaximumComponentLength = 12;
 	}
 	else	*lpMaximumComponentLength = 255; //TODO: Always correct? (CDFS?)
    }
