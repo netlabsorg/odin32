@@ -1,4 +1,4 @@
-/* $Id: oslibmenu.cpp,v 1.4 1999-10-30 09:19:44 sandervl Exp $ */
+/* $Id: oslibmenu.cpp,v 1.5 1999-11-14 12:00:01 sandervl Exp $ */
 /*
  * Window Menu wrapper functions for OS/2
  *
@@ -76,6 +76,30 @@ HMENU OSLibWinCreateEmptyPopupMenu()
 {
    return WinCreateWindow(HWND_OBJECT, WC_MENU, NULL, WS_CLIPSIBLINGS | WS_SAVEBITS,
                           0, 0, 0, 0, HWND_OBJECT, HWND_TOP, 0, NULL, NULL);
+}
+//******************************************************************************
+//Returns menu item rectange in screen coordinates
+//******************************************************************************
+BOOL OSLibGetMenuItemRect(HWND hMenu, int index, LPRECT pRect)
+{
+  RECTL rectl;
+  BOOL  rc;
+  ULONG id;
+
+   //First get id from menu index
+   id = (ULONG)WinSendMsg(hMenu, MM_ITEMIDFROMPOSITION, MPARAM(index), 0);
+
+   rc = (BOOL)WinSendMsg(hMenu, MM_QUERYITEMRECT, MPARAM(id), (MPARAM)&rectl);
+   if(rc == FALSE) {
+	dprintf(("OSLibGetMenuItemRect %x %d %d failed!", hMenu, index, id));
+	return FALSE;
+   }
+   WinMapWindowPoints(hMenu, HWND_DESKTOP, (PPOINTL)&rectl, 2);
+   pRect->left  = rectl.xLeft;
+   pRect->right = rectl.xRight;
+   pRect->top   = OSLibQueryScreenHeight() - rectl.yTop;
+   pRect->bottom= OSLibQueryScreenHeight() - rectl.yBottom;
+   return TRUE;
 }
 //******************************************************************************
 //******************************************************************************
