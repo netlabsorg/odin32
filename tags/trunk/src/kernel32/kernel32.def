@@ -1,4 +1,4 @@
-; $Id: kernel32.def,v 1.161 2004-01-11 12:12:32 sandervl Exp $
+; $Id: kernel32.def,v 1.162 2004-01-12 09:55:24 sandervl Exp $
 
 ;Basis is Windows95 KERNEL32
 LIBRARY KERNEL32 INITINSTANCE TERMINSTANCE
@@ -1223,6 +1223,8 @@ EXPORTS
 
 ; override TIB switching
     _ODIN_SetTIBSwitch@4                                          @2102 NONAME
+
+    _hookInit@4                                                   @2104 NONAME
 
     GetDisplayCodepage                                            @3000 NONAME
     GetWindowsCodepage                                            @3001 NONAME
