@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.cpp,v 1.12 1999-11-24 20:11:36 sandervl Exp $ */
+/* $Id: oslibmsg.cpp,v 1.13 1999-11-27 00:10:20 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -244,6 +244,32 @@ ULONG OSLibWinQueryMsgTime()
 BOOL OSLibWinWaitMessage()
 {
   return WinWaitMsg(GetThreadHAB(), 0, 0);
+}
+//******************************************************************************
+//TODO: QS_HOTKEY
+//******************************************************************************
+ULONG OSLibWinQueryQueueStatus()
+{
+ ULONG statusOS2, statusWin32;
+
+   statusOS2 = WinQueryQueueStatus(HWND_DESKTOP);
+
+   if(statusOS2 & QS_KEY)
+	statusWin32 |= QS_KEY_W;
+   if(statusOS2 & QS_MOUSEBUTTON)    
+	statusWin32 |= QS_MOUSEBUTTON_W;
+   if(statusOS2 & QS_MOUSEMOVE)
+	statusWin32 |= QS_MOUSEMOVE_W;
+   if(statusOS2 & QS_TIMER)    
+	statusWin32 |= QS_TIMER_W;
+   if(statusOS2 & QS_PAINT)    
+	statusWin32 |= QS_PAINT_W;
+   if(statusOS2 & QS_POSTMSG)    
+	statusWin32 |= QS_POSTMESSAGE_W;
+   if(statusOS2 & QS_SENDMSG)    
+	statusWin32 |= QS_SENDMESSAGE_W;
+
+   return statusWin32;
 }
 //******************************************************************************
 //******************************************************************************
