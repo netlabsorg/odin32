@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.27 1999-10-14 18:27:58 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.28 1999-10-14 19:31:31 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -297,20 +297,24 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
             if (win32wnd->isChild())
                 hParent = win32wnd->getParent()->getOS2WindowHandle();
             else
-                hFrame = win32wnd->getOS2FrameWindowHandle();
+                hFrame = WinQueryWindow(hwnd, QW_PARENT);
         }
         OSLibMapSWPtoWINDOWPOS(pswp, &wp, pswpo, hParent, hFrame);
 
 	SWP swpFrame;
-        WinQueryWindowPos(win32wnd->getOS2FrameWindowHandle(), &swpFrame);
+        WinQueryWindowPos(WinQueryWindow(hwnd, QW_PARENT), &swpFrame);
         dprintf(("WINDOWPOSCHANGE %x %x %x (%d,%d) (%d,%d)", win32wnd->getWindowHandle(), win32wnd->getOS2FrameWindowHandle(),
                          swpFrame.fl,swpFrame.x, swpFrame.y, swpFrame.cx, swpFrame.cy));
 	POINTL point;
+
 	point.x = swpFrame.x;
 	point.y = swpFrame.y;
-	WinMapWindowPoints(win32wnd->getOS2FrameWindowHandle(), HWND_DESKTOP,
-                           &point, 1);
-
+	if(win32wnd->getParent() != NULL)
+	{
+		WinMapWindowPoints(WinQueryWindow(hwnd, QW_PARENT), HWND_DESKTOP,
+                	           &point, 1);
+	}
+	point.y = OSLibQueryScreenHeight() - point.y - swpFrame.cy;
         win32wnd->setWindowRect(point.x, point.y, point.x+swpFrame.cx, point.y+swpFrame.cy);
         win32wnd->setClientRect(pswpo->x, pswpo->y, pswpo->x + pswpo->cx, pswpo->y + pswpo->cy);
 

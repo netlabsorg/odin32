@@ -1,4 +1,4 @@
-/* $Id: loadres.cpp,v 1.8 1999-10-08 19:34:25 dengert Exp $ */
+/* $Id: loadres.cpp,v 1.9 1999-10-14 19:31:29 sandervl Exp $ */
 
 /*
  * Win32 resource API functions for OS/2
@@ -437,6 +437,41 @@ HANDLE WIN32API LoadImageW(HINSTANCE hinst, LPCWSTR lpszName, UINT uType,
   dprintf(("LoadImageW returned %d\n", (int)hRet));
 
   return(hRet);
+}
+/******************************************************************************
+ * CopyImage32 [USER32.61]  Creates new image and copies attributes to it
+ *
+ * PARAMS
+ *    hnd      [I] Handle to image to copy
+ *    type     [I] Type of image to copy
+ *    desiredx [I] Desired width of new image
+ *    desiredy [I] Desired height of new image
+ *    flags    [I] Copy flags
+ *
+ * RETURNS
+ *    Success: Handle to newly created image
+ *    Failure: NULL
+ *
+ * FIXME: implementation still lacks nearly all features, see LR_*
+ * defines in windows.h
+ *
+ */
+HICON WINAPI CopyImage( HANDLE hnd, UINT type, INT desiredx,
+                             INT desiredy, UINT flags )
+{
+    dprintf(("CopyImage %x %d (%d,%d) %x", hnd, type, desiredx, desiredy, flags));
+    switch (type)
+    {
+//	case IMAGE_BITMAP:
+//		return BITMAP_CopyBitmap(hnd);
+	case IMAGE_ICON:
+		return CopyIcon(hnd);
+	case IMAGE_CURSOR:
+		return CopyCursor(hnd);
+	default:
+		dprintf(("CopyImage: Unsupported type"));
+    }
+    return 0;
 }
 //******************************************************************************
 //******************************************************************************
