@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2083 2002-05-16 16:41:42 sandervl Exp $ */
+/* $Id: changelog,v 1.2084 2002-05-17 10:11:47 sandervl Exp $ */
+
+ 2002-05-17: Sander van Leeuwen <sandervl@xs4all.nl>
+    - OLEAUT32: o Resync with latest Wine
 
  2002-05-16: knut st. osmundsen <bird@anduin.net>
     - MAKE:     o Merged in latest changes.
