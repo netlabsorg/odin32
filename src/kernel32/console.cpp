@@ -1,4 +1,4 @@
-/* $Id: console.cpp,v 1.8 1999-07-06 15:48:45 phaller Exp $ */
+/* $Id: console.cpp,v 1.9 1999-07-12 17:20:03 phaller Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -183,6 +183,43 @@ static ICONSOLEINPUT   ConsoleInput;
 
 
 /*****************************************************************************
+ * Name      : iConsoleInputQueueLock
+ * Purpose   : lock the input queue to ensure correct event sequence
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Tue, 1998/02/10 01:55]
+ *****************************************************************************/
+
+void static iConsoleInputQueueLock()
+{
+  DosRequestMutexSem(ConsoleInput.hmtxInputQueue,
+                     SEM_INDEFINITE_WAIT);
+}
+
+
+/*****************************************************************************
+ * Name      : iConsoleInputQueueUnlock
+ * Purpose   : unlock the input queue
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Tue, 1998/02/10 01:55]
+ *****************************************************************************/
+
+void static iConsoleInputQueueUnlock()
+{
+  DosReleaseMutexSem(ConsoleInput.hmtxInputQueue);
+}
+
+
+/*****************************************************************************
  * Name      :
  * Purpose   :
  * Parameters:
@@ -224,6 +261,17 @@ APIRET iConsoleInit(void)               /* creation of the console subsystem */
     return (rc);                                    /* raise error condition */
   }
 
+
+  rc = DosCreateMutexSem(NULL,
+                         &ConsoleInput.hmtxInputQueue,
+                         0L,
+                         FALSE);
+  if (rc != NO_ERROR)                                       /* other error ? */
+  {
+    DosCloseEventSem(ConsoleGlobals.hevConsole);    /* close other semaphore */
+    DosCloseEventSem(ConsoleInput.hevInputQueue);   /* close other semaphore */
+    return (rc);                                    /* raise error condition */
+  }
 
   /***************************************************************************
    * Create pseudo-devices and initialize ConsoleGlobals                     *
@@ -331,7 +379,7 @@ APIRET iConsoleDevicesRegister(void)
   ConsoleGlobals.Options.coordDefaultPosition.X  = 0;
   ConsoleGlobals.Options.coordDefaultPosition.Y  = 0;
   ConsoleGlobals.Options.coordDefaultSize.X      = 80;
-  ConsoleGlobals.Options.coordDefaultSize.Y      = 35;
+  ConsoleGlobals.Options.coordDefaultSize.Y      = 25;
   ConsoleGlobals.coordWindowSize.X               = ConsoleGlobals.Options.coordDefaultSize.X;
   ConsoleGlobals.coordWindowSize.Y               = ConsoleGlobals.Options.coordDefaultSize.Y;
   ConsoleGlobals.coordWindowPos.X                = 0;
@@ -495,6 +543,11 @@ APIRET iConsoleDevicesRegister(void)
 APIRET iConsoleTerminate(VOID)
 {
   APIRET rc;
+
+  DosCloseEventSem(ConsoleGlobals.hevConsole);      /* close other semaphore */
+  DosCloseEventSem(ConsoleInput.hevInputQueue);     /* close other semaphore */
+  DosCloseMutexSem(ConsoleInput.hmtxInputQueue);          /* close semaphore */
+
 
   WinPostMsg (ConsoleGlobals.hwndFrame,         /* force thread to terminate */
               WM_CLOSE,
@@ -1307,15 +1360,16 @@ APIRET iConsoleInputEventPush(PINPUT_RECORD pInputRecord)
   dprintf(("KERNEL32/CONSOLE:ConsoleInputEventPush(%08x).\n",
            pInputRecord));
 #endif
+
+  iConsoleInputQueueLock();
                                                            /* get free event */
   pirFree = &ConsoleInput.arrInputRecord[ConsoleInput.ulIndexFree];
   if (pirFree->EventType != 0x0000)
+  {
+    iConsoleInputQueueUnlock();
     return (ERROR_QUE_NO_MEMORY);                         /* queue is full ! */
-
+  }
                                                        /* put event in queue */
-  memcpy(pirFree,                                               /* copy data */
-         pInputRecord,
-         sizeof (INPUT_RECORD) );
 
   ConsoleInput.ulIndexFree++;                        /* update index counter */
   if (ConsoleInput.ulIndexFree >= CONSOLE_INPUTQUEUESIZE)
@@ -1323,6 +1377,11 @@ APIRET iConsoleInputEventPush(PINPUT_RECORD pInputRecord)
 
   ConsoleInput.ulEvents++;                   /* increate queue event counter */
 
+  iConsoleInputQueueUnlock();
+
+  memcpy(pirFree,                                               /* copy data */
+         pInputRecord,
+         sizeof (INPUT_RECORD) );
                                                   /* unblock reading threads */
   rc = DosPostEventSem(ConsoleInput.hevInputQueue);
   return (rc);                                                         /* OK */
@@ -1354,10 +1413,21 @@ APIRET iConsoleInputEventPop(PINPUT_RECORD pInputRecord)
   if (ConsoleInput.ulEvents == 0)                         /* empty console ? */
     return (ERROR_QUE_EMPTY);                            /* queue is empty ! */
 
+  iConsoleInputQueueLock();
                                                           /* get first event */
   pirEvent = &ConsoleInput.arrInputRecord[ConsoleInput.ulIndexEvent];
   if (pirEvent->EventType == 0x0000)
+  {
+    iConsoleInputQueueUnlock();
     return (ERROR_QUE_EMPTY);                            /* queue is empty ! */
+  }
+
+  if (ConsoleInput.ulEvents >= 0)       /* decrease number of console events */
+    ConsoleInput.ulEvents--;
+
+  ConsoleInput.ulIndexEvent++;                       /* update index counter */
+  if (ConsoleInput.ulIndexEvent >= CONSOLE_INPUTQUEUESIZE)
+    ConsoleInput.ulIndexEvent = 0;
 
                                                        /* put event in queue */
   memcpy(pInputRecord,                                          /* copy data */
@@ -1366,12 +1436,7 @@ APIRET iConsoleInputEventPop(PINPUT_RECORD pInputRecord)
 
   pirEvent->EventType = 0x0000;                 /* mark event as read = free */
 
-  if (ConsoleInput.ulEvents >= 0)       /* decrease number of console events */
-    ConsoleInput.ulEvents--;
-
-  ConsoleInput.ulIndexEvent++;                       /* update index counter */
-  if (ConsoleInput.ulIndexEvent >= CONSOLE_INPUTQUEUESIZE)
-    ConsoleInput.ulIndexEvent = 0;
+  iConsoleInputQueueUnlock();
 
   return (NO_ERROR);                                                   /* OK */
 }
