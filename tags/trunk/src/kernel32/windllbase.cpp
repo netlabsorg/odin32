@@ -1,4 +1,4 @@
-/* $Id: windllbase.cpp,v 1.3 1999-11-09 14:19:47 sandervl Exp $ */
+/* $Id: windllbase.cpp,v 1.4 1999-11-09 19:22:32 sandervl Exp $ */
 
 /*
  * Win32 Dll base class
@@ -101,12 +101,23 @@ BOOL Win32DllBase::attachProcess()
 {
  WINEXCEPTION_FRAME exceptFrame;
  USHORT sel;
- BOOL rc;
+ THDB *thdb;
+ BOOL rc, fSetExceptionHandler;
 
   if(fAttachedToProcess)
 	return TRUE;
 
   fAttachedToProcess = TRUE;
+
+  thdb = GetThreadTHDB();
+  fSetExceptionHandler = (!thdb || thdb->teb_sel != GetFS());
+
+  //Note: The Win32 exception structure references by FS:[0] is the same
+  //      in OS/2
+  if(fSetExceptionHandler) {
+  	OS2SetExceptionHandler((void *)&exceptFrame);
+  	sel = SetWin32TIB();
+  }
 
   //Allocate TLS index for this module
   tlsAlloc();
@@ -114,21 +125,23 @@ BOOL Win32DllBase::attachProcess()
 
   if(fSkipEntryCalls || dllEntryPoint == NULL) {
         dprintf(("attachProcess not required for dll %s", szModule));
+  	if(fSetExceptionHandler) {
+  		SetFS(sel);
+		OS2UnsetExceptionHandler((void *)&exceptFrame);
+	}
 	return(TRUE);
   }
 
   dprintf(("attachProcess to dll %s", szModule));
 
-  //Note: The Win32 exception structure references by FS:[0] is the same
-  //      in OS/2
-  OS2SetExceptionHandler((void *)&exceptFrame);
-
-  sel = SetWin32TIB();
   rc = dllEntryPoint(hinstance, DLL_PROCESS_ATTACH, 0);
-  SetFS(sel);
 
-  OS2UnsetExceptionHandler((void *)&exceptFrame);
+  dprintf(("attachProcess to dll %s DONE", szModule));
 
+  if(fSetExceptionHandler) {
+  	SetFS(sel);
+  	OS2UnsetExceptionHandler((void *)&exceptFrame);
+  }
   return rc;
 }
 //******************************************************************************
@@ -173,13 +186,11 @@ BOOL Win32DllBase::attachThread()
 	return(TRUE);
 
   dprintf(("attachThread to dll %s", szModule));
-  //Note: The Win32 exception structure references by FS:[0] is the same
-  //      in OS/2
-  OS2SetExceptionHandler((void *)&exceptFrame);
 
   rc = dllEntryPoint(hinstance, DLL_THREAD_ATTACH, 0);
 
-  OS2UnsetExceptionHandler((void *)&exceptFrame);
+  dprintf(("attachThread to dll %s DONE", szModule));
+
   return rc;
 }
 //******************************************************************************
@@ -194,13 +205,7 @@ BOOL Win32DllBase::detachThread()
 
   dprintf(("attachThread from dll %s", szModule));
 
-  //Note: The Win32 exception structure references by FS:[0] is the same
-  //      in OS/2
-  OS2SetExceptionHandler((void *)&exceptFrame);
-
   rc =  dllEntryPoint(hinstance, DLL_THREAD_DETACH, 0);
-
-  OS2UnsetExceptionHandler((void *)&exceptFrame);
   return rc;
 }
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: KERNEL32.CPP,v 1.28 1999-11-08 20:53:24 sandervl Exp $ */
+/* $Id: KERNEL32.CPP,v 1.29 1999-11-09 19:22:31 sandervl Exp $ */
 
 /*
  * Win32 compatibility file functions for OS/2
@@ -160,7 +160,7 @@ DWORD WIN32API GetLastError()
 //******************************************************************************
 VOID WIN32API SetLastError( DWORD arg1)
 {
-//    dprintf(("KERNEL32:  SetLastError to %d\n", arg1));
+    dprintf2(("KERNEL32:  SetLastError to %d\n", arg1));
     O32_SetLastError(arg1);
 }
 //******************************************************************************
@@ -385,14 +385,14 @@ BOOL WIN32API GetExitCodeProcess(HANDLE arg1, LPDWORD  arg2)
 //******************************************************************************
 HANDLE WIN32API GetCurrentProcess(void)
 {
-////    dprintf(("KERNEL32:  GetCurrentProcess\n"));
+    dprintf2(("KERNEL32:  GetCurrentProcess\n"));
     return O32_GetCurrentProcess();
 }
 //******************************************************************************
 //******************************************************************************
 DWORD WIN32API GetCurrentProcessId(void)
 {
-//    dprintf(("KERNEL32:  GetCurrentProcessId\n"));
+    dprintf2(("KERNEL32:  GetCurrentProcessId\n"));
     return O32_GetCurrentProcessId();
 }
 //******************************************************************************
@@ -406,7 +406,7 @@ BOOL WIN32API TerminateProcess( HANDLE arg1, DWORD arg2)
 //******************************************************************************
 VOID WIN32API Sleep(DWORD arg1)
 {
-//    dprintf(("KERNEL32:  Sleep %d\n", arg1));
+    dprintf2(("KERNEL32:  Sleep %d\n", arg1));
     O32_Sleep(arg1);
 }
 //******************************************************************************
@@ -598,7 +598,7 @@ UINT WIN32API CompareStringA(LCID lcid, DWORD fdwStyle, LPCSTR lpString1,
       else
          fEqual = 3;
    }
-//   dprintf(("KERNEL32:  OS2CompareStringA '%s' - '%s' returned %d\n", lpString1, lpString2, fEqual));
+   dprintf2(("KERNEL32:  OS2CompareStringA '%s' - '%s' returned %d\n", lpString1, lpString2, fEqual));
    return(fEqual);
 }
 
@@ -613,7 +613,7 @@ UINT WIN32API CompareStringW(LCID lcid, DWORD fdwStyle, LPCWSTR lpString1,
  char *string1 = UnicodeToAsciiString((LPWSTR)lpString1);
  char *string2 = UnicodeToAsciiString((LPWSTR)lpString2);
 
-//  dprintf(("KERNEL32:  OS2CompareStringW '%s' - '%s'\n", string1, string2));
+  dprintf2(("KERNEL32:  OS2CompareStringW '%s' - '%s'\n", string1, string2));
 
   fEqual = CompareStringA(lcid, fdwStyle, string1, cch1, string2, cch2);
   FreeAsciiString(string1);
@@ -911,12 +911,10 @@ VOID WIN32API RtlMoveMemory(LPVOID  dst,
                             LPCVOID src,
                             UINT  len )
 {
-#ifdef DEBUG_LOCAL
-  dprintf(("KERNEL32: RtlMoveMemory(%08x,%08x,%08x)\n",
+  dprintf2(("KERNEL32: RtlMoveMemory(%08x,%08x,%08x)\n",
            dst,
            src,
            len));
-#endif
 
   memmove(dst,
           src,
@@ -930,11 +928,9 @@ VOID WIN32API RtlMoveMemory(LPVOID  dst,
 VOID WIN32API RtlZeroMemory(LPVOID ptr,
                             UINT len)
 {
-#ifdef DEBUG_LOCAL
-  dprintf(("KERNEL32: RtlZeroMemory(%08x,%08x)\n",
+  dprintf2(("KERNEL32: RtlZeroMemory(%08x,%08x)\n",
            ptr,
            len));
-#endif
 
   memset(ptr,
          0,
