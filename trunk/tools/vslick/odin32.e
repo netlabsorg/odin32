@@ -1,4 +1,4 @@
-/* $Id: odin32.e,v 1.5 2000-07-21 14:56:24 bird Exp $
+/* $Id: odin32.e,v 1.6 2000-10-02 04:08:49 bird Exp $
  *
  * Visual SlickEdit Documentation Macros.
  *
@@ -48,9 +48,9 @@ def  'C-S-T' = odin32_maketagfile
 #include 'slick.sh'
 
 /* Remeber to change these! */
-_str sOdin32UserInitials = "kso";
-_str sOdin32UserName     = "knut st. osmundsen";
-_str sOdin32UserEmail    = "knut.stange.osmundsen@pmsc.no";
+static _str sOdin32UserInitials = "kso";
+static _str sOdin32UserName     = "knut st. osmundsen";
+static _str sOdin32UserEmail    = "knut.stange.osmundsen@mynd.no";
 
 
 
@@ -201,16 +201,16 @@ void odin32_funcbox()
     {
         _insert_text(";;\n");
         _insert_text("; \n");
-        _insert_text("; @cproto    \n");
-        _insert_text("; @returns   \n");
-        _insert_text("; @param     \n");
-        _insert_text("; @uses      \n");
-        _insert_text("; @equiv     \n");
-        _insert_text("; @time      \n");
-        _insert_text("; @sketch    \n");
-        _insert_text("; @status    \n");
-        _insert_text("; @author    "sOdin32UserName" (" sOdin32UserEmail ")\n");
-        _insert_text("; @remark    \n");
+        _insert_text("; @cproto   \n");
+        _insert_text("; @returns  \n");
+        _insert_text("; @param    \n");
+        _insert_text("; @uses     \n");
+        _insert_text("; @equiv    \n");
+        _insert_text("; @time     \n");
+        _insert_text("; @sketch   \n");
+        _insert_text("; @status   \n");
+        _insert_text("; @author   "sOdin32UserName" (" sOdin32UserEmail ")\n");
+        _insert_text("; @remark   \n");
         up(11);
         p_col = 3;
     }
@@ -218,19 +218,18 @@ void odin32_funcbox()
     {
         _insert_text("/**\n");
         _insert_text(" * \n");
-        _insert_text(" * @returns   \n");
-        _insert_text(" * @param     \n");
-        _insert_text(" * @equiv     \n");
-        _insert_text(" * @time      \n");
-        _insert_text(" * @sketch    \n");
-        _insert_text(" * @status    \n");
-        _insert_text(" * @author    "sOdin32UserName" (" sOdin32UserEmail ")\n");
-        _insert_text(" * @remark    \n");
+        _insert_text(" * @returns \n");
+        _insert_text(" * @param   \n");
+        _insert_text(" * @equiv   \n");
+        _insert_text(" * @time    \n");
+        _insert_text(" * @sketch  \n");
+        _insert_text(" * @status  \n");
+        _insert_text(" * @author  "sOdin32UserName" (" sOdin32UserEmail ")\n");
+        _insert_text(" * @remark  \n");
         _insert_text(" */\n");
         up(10);
         p_col = 4;
     }
-
 }
 
 
@@ -303,7 +302,7 @@ void odin32_modulebox()
     _begin_line();
     if (file_eq(p_extension, 'asm'))
     {
-        _insert_text("; $Id: odin32.e,v 1.5 2000-07-21 14:56:24 bird Exp $\n");
+        _insert_text("; $Id: odin32.e,v 1.6 2000-10-02 04:08:49 bird Exp $\n");
         _insert_text("; \n");
         _insert_text("; \n");
         _insert_text("; \n");
@@ -316,7 +315,7 @@ void odin32_modulebox()
     }
     else
     {
-        _insert_text("/* $Id: odin32.e,v 1.5 2000-07-21 14:56:24 bird Exp $\n");
+        _insert_text("/* $Id: odin32.e,v 1.6 2000-10-02 04:08:49 bird Exp $\n");
         _insert_text(" * \n");
         _insert_text(" * \n");
         _insert_text(" * \n");
@@ -333,12 +332,18 @@ void odin32_modulebox()
 
 _command void odin32_maketagfile()
 {
+    /* We'll */
     if (file_match('-p 'maybe_quote_filename(strip_filename(_project_name,'e'):+TAG_FILE_EXT),1)=="")
         _project_update_files_retag(true,false,false,true);
+    else
+        _project_update_files_retag(false,false,false,false);
 }
 
 _command void odin32_setcurrentdir()
 {
-    _ini_get_value(_project_name,"COMPILER","WORKINGDIR", workingdir);
-    cd(workingdir);
+    //_ini_get_value(_project_name,"COMPILER","WORKINGDIR", workingdir);
+    //cd(workingdir);
+    /* Go the the directory containing the project filename */
+    cd(strip_filename(_project_name, 'NE'));
 }
+
