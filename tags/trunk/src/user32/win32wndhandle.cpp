@@ -1,4 +1,4 @@
-/* $Id: win32wndhandle.cpp,v 1.13 2002-06-09 19:54:28 sandervl Exp $ */
+/* $Id: win32wndhandle.cpp,v 1.14 2002-06-13 14:02:50 sandervl Exp $ */
 /*
  * Win32 Handle Management Code for OS/2
  *
@@ -18,6 +18,7 @@
 #include <os2win.h>
 #include <vmutex.h>
 #include "win32wndhandle.h"
+#include <custombuild.h>
 
 #define DBG_LOCALLOG	DBG_win32wndhandle
 #include "dbglocal.h"
@@ -31,12 +32,20 @@ CRITICAL_SECTION_OS2 globalwhandlecritsect = {0};
 ULONG                lastIndex = 0;
 #pragma data_seg()
 
+static char *pszWndHandleSemName = NULL;
+
+//******************************************************************************
+//******************************************************************************
+void WIN32API SetCustomWndHandleSemName(LPSTR pszSemName) 
+{
+    pszWndHandleSemName = pszSemName;
+}
 //******************************************************************************
 //******************************************************************************
 void InitializeWindowHandles()
 {
     if(globalwhandlecritsect.hmtxLock == 0) {
-         DosInitializeCriticalSection(&globalwhandlecritsect, WINHANDLE_CRITSECTION_NAME);
+         DosInitializeCriticalSection(&globalwhandlecritsect, (pszWndHandleSemName) ? pszWndHandleSemName : WINHANDLE_CRITSECTION_NAME);
     }
     else {
          dprintf(("InitializeWindowHandles -> access shared critical section"));

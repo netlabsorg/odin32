@@ -85,6 +85,10 @@ void WIN32API SetCustomPMHookDll(LPSTR pszKbdDllName);
 //Turn off wave audio in winmm
 void WIN32API DisableWaveAudio();
 
+//Override shared semaphore name used to synchronize global window handle 
+//array access (to avoid name clash with Odin)
+void WIN32API SetCustomWndHandleSemName(LPSTR pszSemName);
+
 //Turn off ASPI
 void WIN32API DisableASPI();
 
