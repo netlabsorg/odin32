@@ -1,9 +1,9 @@
-# $Id: makefile,v 1.7 1999-06-25 15:49:02 achimha Exp $
+# $Id: makefile,v 1.8 1999-07-07 17:08:42 cbratschi Exp $
 #
-# PD-Win32 API 
+# PD-Win32 API
 #
-#	comctl32.dll makefile
-# 
+#       comctl32.dll makefile
+#
 
 PDWIN32_INCLUDE = ..\..\include
 PDWIN32_LIB = ..\..\lib
@@ -28,8 +28,8 @@ OBJS =  comctl32.obj initterm.obj progress.obj comctl32undoc.obj imagelist.obj \
 all: $(TARGET).dll $(TARGET).lib
 
 
-$(TARGET).dll: $(OBJS) $(TARGET).def 
-	$(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) $(TARGET).def \
+$(TARGET).dll: $(OBJS) $(TARGET).def
+        $(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) $(TARGET).def \
               $(PDWIN32_LIB)/kernel32.lib \
               $(PDWIN32_LIB)/gdi32.lib \
               $(PDWIN32_LIB)/user32.lib
@@ -39,8 +39,8 @@ $(TARGET).dll: $(OBJS) $(TARGET).def
 
 
 $(TARGET).lib: $(TARGET).dll
-	$(IMPLIB) $(IMPLIBFLAGS) $@ $(TARGET).dll
-	$(CP) $@ $(PDWIN32_LIB)
+        $(IMPLIB) $(IMPLIBFLAGS) $@ $(TARGET).dll
+        $(CP) $@ $(PDWIN32_LIB)
 
 comctl32.obj: comctl32.c
 initterm.obj: initterm.cpp
@@ -71,7 +71,7 @@ listview.obj: listview.c
 draglist.obj: draglist.c
 
 clean:
-	$(RM) *.obj *.lib *.dll *~ *.map *.pch	
-	$(RM) $(PDWIN32_BIN)\$(TARGET).dll
-	$(RM) $(PDWIN32_LIB)\$(TARGET).lib
+        $(RM) *.obj *.lib *.dll *~ *.map *.pch
+        $(RM) $(PDWIN32_BIN)\$(TARGET).dll
+        $(RM) $(PDWIN32_LIB)\$(TARGET).lib
 

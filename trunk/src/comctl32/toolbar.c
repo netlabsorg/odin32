@@ -1,4 +1,4 @@
-/* $Id: toolbar.c,v 1.9 1999-07-04 21:06:00 cbratschi Exp $ */
+/* $Id: toolbar.c,v 1.10 1999-07-07 17:08:42 cbratschi Exp $ */
 /*
  * Toolbar control
  *
@@ -15,7 +15,8 @@
  *   - Tooltip support (almost complete).
  *   - Internal COMMCTL32 bitmaps.
  *   - Fix TOOLBAR_SetButtonInfo32A.
- *   - Customize dialog (under construction).
+ *   - Customize dialog (CB: under construction).
+ *   - Drag & drop of buttons
  *
  * Testing:
  *   - Run tests using Waite Group Windows95 API Bible Volume 2.
@@ -719,6 +720,427 @@ TOOLBAR_RelayEvent (HWND hwndTip, HWND hwndMsg, UINT uMsg,
     SendMessageA(hwndTip,TTM_RELAYEVENT,0,(LPARAM)&msg);
 }
 
+static void TBCUSTOMIZE_GetToolNameA(TOOLBAR_INFO* infoPtr,TBUTTON_INFO* btnPtr,INT pos)
+{
+  if (btnPtr->iString > -1 && btnPtr->iString < infoPtr->nNumStrings)
+  {
+    if (!btnPtr->pszName) btnPtr->pszName = COMCTL32_Alloc(MAXTOOLNAME*sizeof(WCHAR));
+    lstrcpynW(btnPtr->pszName,infoPtr->strings[btnPtr->iString],MAXTOOLNAME*sizeof(WCHAR));
+
+    return;
+  }
+
+  if (btnPtr->fsStyle & TBSTYLE_SEP)
+  {
+    if (!btnPtr->pszName) btnPtr->pszName = COMCTL32_Alloc(MAXTOOLNAME*sizeof(WCHAR));
+    lstrcpyAtoW(btnPtr->pszName,"Separator");
+  } else
+  {
+    TBNOTIFYA tbNotify;
+
+    tbNotify.hdr.hwndFrom = infoPtr->hwndToolbar;
+    tbNotify.hdr.idFrom   = GetWindowLongA(infoPtr->hwndToolbar,GWL_ID);
+    tbNotify.hdr.code     = TBN_GETBUTTONINFOA;
+    tbNotify.iItem    = pos;
+    tbNotify.tbButton = (TBBUTTON*)btnPtr;
+    tbNotify.cchText  = MAXTOOLNAME;
+    tbNotify.pszText  = COMCTL32_Alloc(MAXTOOLNAME);
+    tbNotify.pszText[0] = 0;
+
+    if (!SendMessageA(infoPtr->hwndNotify,WM_NOTIFY,(WPARAM)tbNotify.hdr.idFrom,(LPARAM)&tbNotify))
+    { //CB: failed, try other methods
+      if (infoPtr->hwndToolTip)
+      { //try to get tool tip text
+        TTTOOLINFOA ti;
+
+        ZeroMemory (&ti,sizeof(ti));
+        ti.cbSize   = sizeof(ti);
+        ti.hwnd     = infoPtr->hwndToolbar;
+        ti.uId      = btnPtr->idCommand;
+        ti.hinst    = 0;
+        ti.lpszText = COMCTL32_Alloc(INFOTIPSIZE);
+        ti.lpszText[0] = 0;
+
+        SendMessageA(infoPtr->hwndToolTip,TTM_GETTEXTA,0,(LPARAM)&ti);
+        if (ti.lpszText[0] != 0) lstrcpynA(tbNotify.pszText,ti.lpszText,MAXTOOLNAME);
+        else strcpy(tbNotify.pszText,"Button");
+
+        COMCTL32_Free(ti.lpszText);
+
+      } else strcpy(tbNotify.pszText,"Button");
+    }
+
+    if (!btnPtr->pszName) btnPtr->pszName = COMCTL32_Alloc(MAXTOOLNAME*sizeof(WCHAR));
+    lstrcpyAtoW(btnPtr->pszName,tbNotify.pszText);
+    COMCTL32_Free(tbNotify.pszText);
+  }
+}
+
+static void TBCUSTOMIZE_GetToolNameW(TOOLBAR_INFO* infoPtr,TBUTTON_INFO* btnPtr,INT pos)
+{
+  if (btnPtr->iString > -1 && btnPtr->iString < infoPtr->nNumStrings)
+  {
+    if (!btnPtr->pszName) btnPtr->pszName = COMCTL32_Alloc(MAXTOOLNAME*sizeof(WCHAR));
+    lstrcpynW(btnPtr->pszName,infoPtr->strings[btnPtr->iString],MAXTOOLNAME*sizeof(WCHAR));
+
+    return;
+  }
+
+  if (btnPtr->fsStyle & TBSTYLE_SEP)
+  {
+    if (!btnPtr->pszName) btnPtr->pszName = COMCTL32_Alloc(MAXTOOLNAME*sizeof(WCHAR));
+    lstrcpyAtoW(btnPtr->pszName,"Separator");
+  } else
+  {
+    TBNOTIFYW tbNotify;
+
+    if (!btnPtr->pszName) btnPtr->pszName = COMCTL32_Alloc(MAXTOOLNAME*sizeof(WCHAR));
+    btnPtr->pszName[0] = 0;
+
+    tbNotify.hdr.hwndFrom = infoPtr->hwndToolbar;
+    tbNotify.hdr.idFrom   = GetWindowLongA(infoPtr->hwndToolbar,GWL_ID);
+    tbNotify.hdr.code     = TBN_GETBUTTONINFOW;
+    tbNotify.iItem    = pos;
+    tbNotify.tbButton = (TBBUTTON*)btnPtr;
+    tbNotify.cchText  = MAXTOOLNAME;
+    tbNotify.pszText  = btnPtr->pszName;
+
+    if (!SendMessageW(infoPtr->hwndNotify,WM_NOTIFY,(WPARAM)tbNotify.hdr.idFrom,(LPARAM)&tbNotify))
+    { //CB: failed, try other methods
+      if (infoPtr->hwndToolTip)
+      { //try to get tool tip text
+        TTTOOLINFOW ti;
+
+        ZeroMemory (&ti,sizeof(ti));
+        ti.cbSize   = sizeof(ti);
+        ti.hwnd     = infoPtr->hwndToolbar;
+        ti.uId      = btnPtr->idCommand;
+        ti.hinst    = 0;
+        ti.lpszText = COMCTL32_Alloc(INFOTIPSIZE*sizeof(WCHAR));
+        ti.lpszText[0] = 0;
+
+        SendMessageA(infoPtr->hwndToolTip,TTM_GETTEXTW,0,(LPARAM)&ti);
+        if (ti.lpszText[0] != 0) lstrcpynW(btnPtr->pszName,ti.lpszText,MAXTOOLNAME);
+        else lstrcpyAtoW(btnPtr->pszName,"Button");
+
+        COMCTL32_Free(ti.lpszText);
+
+      } else lstrcpyAtoW(btnPtr->pszName,"Button");
+    }
+  }
+}
+
+static BOOL TBCUSTOMIZE_InitDialog(HWND hwnd,WPARAM wParam,LPARAM lParam)
+{
+  TOOLBAR_INFO* infoPtr;
+
+  infoPtr = (TOOLBAR_INFO*)lParam;
+  SetWindowLongA (hwnd, DWL_USER, (DWORD)infoPtr);
+
+  if (infoPtr)
+  {
+    TBUTTON_INFO* btnPtr;
+    INT i;
+    INT leftCount = 0;
+    INT rightCount = 0;
+    INT nItem;
+
+    infoPtr->hDsa = DSA_Create(sizeof(TBUTTON_INFO),5);
+
+    /* insert 'virtual' separator button into 'available buttons' list */
+    SendDlgItemMessageA(hwnd,IDC_AVAILBTN_LBOX,LB_ADDSTRING,0,(LPARAM)"Separator");
+
+    /* copy all buttons and append them to the right listbox */
+    btnPtr = infoPtr->buttons;
+    for (i = 0; i < infoPtr->nNumButtons; i++, btnPtr++)
+    {
+      DSA_InsertItem (infoPtr->hDsa, i, btnPtr);
+
+      if (IsWindowUnicode(infoPtr->hwndNotify))
+      {
+        TBNOTIFYW tbNotify;
+
+        tbNotify.hdr.hwndFrom = infoPtr->hwndToolbar;
+        tbNotify.hdr.idFrom   = GetWindowLongA(infoPtr->hwndToolbar,GWL_ID);
+        tbNotify.iItem    = i;
+        tbNotify.tbButton = (TBBUTTON*)btnPtr;
+        tbNotify.cchText  = 0;
+        tbNotify.pszText  = NULL;
+
+        // send TBN_QUERYINSERT notification
+
+        tbNotify.hdr.code     = TBN_QUERYINSERT;
+
+        if (!SendMessageW(infoPtr->hwndNotify,WM_NOTIFY,(WPARAM)tbNotify.hdr.idFrom,(LPARAM)&tbNotify)) continue;
+
+        // send TBN_QUERYDELETE notification
+
+        tbNotify.hdr.code     = TBN_QUERYDELETE;
+
+        btnPtr->bDelete = (BOOL)SendMessageW(infoPtr->hwndNotify,WM_NOTIFY,(WPARAM)tbNotify.hdr.idFrom,(LPARAM)&tbNotify);
+
+        //get tool name
+
+        TBCUSTOMIZE_GetToolNameW(infoPtr,btnPtr,i);
+
+      } else
+      {
+        TBNOTIFYA tbNotify;
+
+        tbNotify.hdr.hwndFrom = infoPtr->hwndToolbar;
+        tbNotify.hdr.idFrom   = GetWindowLongA(infoPtr->hwndToolbar,GWL_ID);
+        tbNotify.iItem    = i;
+        tbNotify.tbButton = (TBBUTTON*)btnPtr;
+        tbNotify.cchText  = 0;
+        tbNotify.pszText  = NULL;
+
+        // send TBN_QUERYINSERT notification
+
+        tbNotify.hdr.code     = TBN_QUERYINSERT;
+
+        if (!SendMessageA(infoPtr->hwndNotify,WM_NOTIFY,(WPARAM)tbNotify.hdr.idFrom,(LPARAM)&tbNotify)) continue;
+
+        // send TBN_QUERYDELETE notification
+
+        tbNotify.hdr.code     = TBN_QUERYDELETE;
+
+        btnPtr->bDelete = (BOOL)SendMessageA(infoPtr->hwndNotify,WM_NOTIFY,(WPARAM)tbNotify.hdr.idFrom,(LPARAM)&tbNotify);
+
+        //get tool name
+
+        TBCUSTOMIZE_GetToolNameA(infoPtr,btnPtr,i);
+      }
+
+      if (btnPtr->fsState & TBSTATE_HIDDEN)
+      {
+        nItem = SendDlgItemMessageA(hwnd,IDC_AVAILBTN_LBOX,LB_ADDSTRING,0,(LPARAM)"");
+        SendDlgItemMessageA(hwnd,IDC_AVAILBTN_LBOX,LB_SETITEMDATA,nItem,(LPARAM)btnPtr);
+        leftCount++;
+      } else
+      {
+        nItem = SendDlgItemMessageA(hwnd,IDC_TOOLBARBTN_LBOX,LB_ADDSTRING,0,(LPARAM)"");
+        SendDlgItemMessageA(hwnd,IDC_TOOLBARBTN_LBOX,LB_SETITEMDATA,nItem,(LPARAM)btnPtr);
+        rightCount++;
+      }
+    }
+
+    if (leftCount == 0 && rightCount == 0)
+    {
+      EndDialog(hwnd,FALSE);
+
+      return TRUE;
+    }
+  }
+
+  return TRUE;
+}
+
+static BOOL TBCUSTOMIZE_Close(HWND hwnd,WPARAM wParam,LPARAM lParam)
+{
+  EndDialog(hwnd,FALSE);
+
+  return TRUE;
+}
+
+static VOID TBCUSTOMIZE_Reset(HWND hwnd)
+{
+  //CB: todo
+  //Send TBN_RESET
+}
+
+static VOID TBCUSTOMIZE_AddTool(HWND hwnd)
+{
+  //CB: todo
+}
+
+static VOID TBCUSTOMIZE_RemoveTool(HWND hwnd)
+{
+  //CB: todo
+}
+
+static VOID TBCUSTOMIZE_Help(HWND hwnd)
+{
+ TOOLBAR_INFO* infoPtr = (TOOLBAR_INFO*)GetWindowLongA(hwnd,DWL_USER);
+ NMHDR nmhdr;
+
+ //Send TBN_CUSTHELP
+ nmhdr.hwndFrom = infoPtr->hwndToolbar;
+ nmhdr.idFrom   = GetWindowLongA(infoPtr->hwndToolbar,GWL_ID);
+ nmhdr.code     = TBN_CUSTHELP;
+
+ SendMessageA(infoPtr->hwndNotify,WM_NOTIFY,(WPARAM)nmhdr.idFrom,(LPARAM)&nmhdr);
+}
+
+static VOID TBCUSTOMIZE_MoveToolUp(HWND hwnd)
+{
+  //CB: todo
+}
+
+static VOID TBCUSTOMIZE_MoveToolDown(HWND hwnd)
+{
+  //CB: todo
+}
+
+static BOOL TBCUSTOMIZE_Command(HWND hwnd,WPARAM wParam,LPARAM lParam)
+{
+  switch(LOWORD(wParam))
+  {
+    case IDCANCEL:
+      EndDialog(hwnd,FALSE);
+      break;
+    case IDC_RESET_BTN:
+      TBCUSTOMIZE_Reset(hwnd);
+      break;
+    case IDOK: //== add tool
+      TBCUSTOMIZE_AddTool(hwnd);
+      break;
+    case IDC_REMOVE_BTN:
+      TBCUSTOMIZE_RemoveTool(hwnd);
+      break;
+    case IDC_HELP_BTN:
+      TBCUSTOMIZE_Help(hwnd);
+      break;
+    case IDC_MOVEUP_BTN:
+      TBCUSTOMIZE_MoveToolUp(hwnd);
+      break;
+    case IDC_MOVEDN_BTN:
+      TBCUSTOMIZE_MoveToolDown(hwnd);
+      break;
+  }
+
+  return TRUE;
+}
+
+static BOOL TBCUSTOMIZE_Destroy(HWND hwnd,WPARAM wParam,LPARAM lParam)
+{
+  TOOLBAR_INFO* infoPtr = (TOOLBAR_INFO*)GetWindowLongA(hwnd,DWL_USER);
+  INT x;
+
+  for (x = 0;x < infoPtr->nNumButtons;x++)
+  {
+    COMCTL32_Free(infoPtr->buttons[x].pszName);
+    infoPtr->buttons[x].pszName = NULL;
+  }
+
+  if (infoPtr->hDsa) DSA_Destroy(infoPtr->hDsa);
+
+  return TRUE;
+}
+
+static BOOL TBCUSTOMIZE_DrawItem(HWND hwnd,WPARAM wParam,LPARAM lParam)
+{
+  if (wParam == IDC_AVAILBTN_LBOX || wParam == IDC_TOOLBARBTN_LBOX)
+  {
+    TOOLBAR_INFO* infoPtr = (TOOLBAR_INFO*)GetWindowLongA(hwnd,DWL_USER);
+    LPDRAWITEMSTRUCT lpdis = (LPDRAWITEMSTRUCT)lParam;
+    RECT rcButton;
+    RECT rcText;
+    HPEN hOldPen;
+    HBRUSH hOldBrush;
+    COLORREF oldText = 0;
+    COLORREF oldBk = 0;
+    TBUTTON_INFO* btnPtr;
+    DWORD dwStyle = GetWindowLongA(infoPtr->hwndToolbar,GWL_STYLE);
+
+    btnPtr = (TBUTTON_INFO*)SendDlgItemMessageA(hwnd,wParam,LB_GETITEMDATA,lpdis->itemID,0);
+
+//              FIXME(toolbar, "action: %x itemState: %x\n",
+//                    lpdis->itemAction, lpdis->itemState);
+
+     if (btnPtr != NULL && !btnPtr->bDelete)
+    {
+      if (lpdis->itemState & ODS_FOCUS) oldBk = SetBkColor(lpdis->hDC,GetSysColor(COLOR_HIGHLIGHT));
+      oldText = SetTextColor(lpdis->hDC,GetSysColor(COLOR_GRAYTEXT));
+    } else if (lpdis->itemState & ODS_FOCUS)
+    {
+      oldBk = SetBkColor (lpdis->hDC, GetSysColor(COLOR_HIGHLIGHT));
+      oldText = SetTextColor (lpdis->hDC, GetSysColor(COLOR_HIGHLIGHTTEXT));
+    }
+
+
+    hOldPen = SelectObject (lpdis->hDC, GetSysColorPen ((lpdis->itemState & ODS_SELECTED)?COLOR_HIGHLIGHT:COLOR_WINDOW));
+    hOldBrush = SelectObject (lpdis->hDC, GetSysColorBrush ((lpdis->itemState & ODS_FOCUS)?COLOR_HIGHLIGHT:COLOR_WINDOW));
+
+    /* fill background rectangle */
+    Rectangle (lpdis->hDC,lpdis->rcItem.left,lpdis->rcItem.top,lpdis->rcItem.right,lpdis->rcItem.bottom);
+
+    /* calculate button and text rectangles */
+    CopyRect (&rcButton, &lpdis->rcItem);
+    InflateRect (&rcButton, -1, -1);
+    CopyRect (&rcText, &rcButton);
+    rcButton.right = rcButton.left + infoPtr->nBitmapWidth + 6;
+    rcText.left = rcButton.right + 2;
+
+    /* draw focus rectangle */
+    if (lpdis->itemState & ODS_FOCUS) DrawFocusRect (lpdis->hDC, &lpdis->rcItem);
+
+    /* draw button */
+    DrawEdge(lpdis->hDC,&rcButton,EDGE_RAISED,BF_RECT|BF_MIDDLE|BF_SOFT|BF_ADJUST);
+
+    if (btnPtr && !btnPtr->fsStyle & TBSTYLE_SEP)
+    {
+      if (dwStyle & TBSTYLE_FLAT)
+      {
+        if(infoPtr->himlDef != NULL)
+            ImageList_Draw(infoPtr->himlDef,btnPtr->iBitmap,lpdis->hDC,
+                           rcButton.left+2,rcButton.top+2,ILD_NORMAL);
+        else
+            ImageList_Draw(infoPtr->himlStd,btnPtr->iBitmap,lpdis->hDC,
+                           rcButton.left+2,rcButton.top+2,ILD_NORMAL);
+      } else
+      {
+        /* normal state */
+        ImageList_Draw(infoPtr->himlStd,btnPtr->iBitmap,lpdis->hDC,
+                       rcButton.left+1,rcButton.top+1,ILD_NORMAL);
+      }
+    } else
+    { //draw separator
+
+    }
+
+    /* draw text */
+    if (btnPtr == NULL)
+    { //new separator
+      DrawTextA(lpdis->hDC,"Separator",-1,&rcText,DT_LEFT | DT_VCENTER | DT_SINGLELINE);
+    } else if (btnPtr->pszName != NULL)
+    {
+      DrawTextW(lpdis->hDC,btnPtr->pszName,-1,&rcText,DT_LEFT | DT_VCENTER | DT_SINGLELINE);
+    }
+
+    if (lpdis->itemState & ODS_FOCUS)
+    {
+      SetBkColor (lpdis->hDC, oldBk);
+      SetTextColor (lpdis->hDC, oldText);
+    }
+
+    SelectObject (lpdis->hDC, hOldBrush);
+    SelectObject (lpdis->hDC, hOldPen);
+
+    return TRUE;
+  }
+
+  return FALSE;
+}
+
+static BOOL TBCUSTOMIZE_MeasureItem(HWND hwnd,WPARAM wParam,LPARAM lParam)
+{
+  if (wParam == IDC_AVAILBTN_LBOX || wParam == IDC_TOOLBARBTN_LBOX)
+  {
+    TOOLBAR_INFO* infoPtr = (TOOLBAR_INFO*)GetWindowLongA(hwnd,DWL_USER);
+    MEASUREITEMSTRUCT *lpmis = (MEASUREITEMSTRUCT*)lParam;
+
+    infoPtr = (TOOLBAR_INFO *)GetWindowLongA(hwnd,DWL_USER);
+
+    if (infoPtr)
+      lpmis->itemHeight = infoPtr->nBitmapHeight+8;
+    else
+      lpmis->itemHeight = 16+8; /* default height */
+
+    return TRUE;
+  }
+
+  return FALSE;
+}
 
 /***********************************************************************
  * TOOLBAR_CustomizeDialogProc
@@ -728,139 +1150,26 @@ BOOL WINAPI
 TOOLBAR_CustomizeDialogProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     TOOLBAR_INFO *infoPtr;
-    static HDSA hDsa = NULL;
 
     switch (uMsg)
     {
         case WM_INITDIALOG:
-            infoPtr = (TOOLBAR_INFO *)lParam;
-            SetWindowLongA (hwnd, DWL_USER, (DWORD)infoPtr);
-
-            hDsa = DSA_Create (sizeof(TBUTTON_INFO), 5);
-
-            if (infoPtr)
-            {
-                TBUTTON_INFO *btnPtr;
-                INT i;
-
-                /* insert 'virtual' separator button into 'available buttons' list */
-                SendDlgItemMessageA (hwnd, IDC_AVAILBTN_LBOX, LB_ADDSTRING, 0, (LPARAM)"");
-
-                /* copy all buttons and append them to the right listbox */
-                btnPtr = infoPtr->buttons;
-                for (i = 0; i < infoPtr->nNumButtons; i++, btnPtr++)
-                {
-                    DSA_InsertItem (hDsa, i, btnPtr);
-
-                    if (btnPtr->fsState & TBSTATE_HIDDEN)
-                    {
-                        SendDlgItemMessageA (hwnd, IDC_AVAILBTN_LBOX, LB_ADDSTRING, 0, (LPARAM)"");
-                    }
-                    else
-                    {
-                        SendDlgItemMessageA (hwnd, IDC_TOOLBARBTN_LBOX, LB_ADDSTRING, 0, (LPARAM)"");
-                    }
-                }
-
-                /* append 'virtual' sepatator button to the 'toolbar buttons' list */
-                /* TODO */
-            }
-            return TRUE;
+            return TBCUSTOMIZE_InitDialog(hwnd,wParam,lParam);
 
         case WM_CLOSE:
-            EndDialog(hwnd, FALSE);
-            return TRUE;
+            return TBCUSTOMIZE_Close(hwnd,wParam,lParam);
 
         case WM_COMMAND:
-            switch (LOWORD(wParam))
-            {
-                case IDCANCEL:
-                    EndDialog(hwnd, FALSE);
-                    break;
-            }
-            return TRUE;
+            return TBCUSTOMIZE_Command(hwnd,wParam,lParam);
 
         case WM_DESTROY:
-            if (hDsa)
-                DSA_Destroy (hDsa);
-            return TRUE;
+            return TBCUSTOMIZE_Destroy(hwnd,wParam,lParam);
 
         case WM_DRAWITEM:
-            if (wParam == IDC_AVAILBTN_LBOX || wParam == IDC_TOOLBARBTN_LBOX)
-            {
-                LPDRAWITEMSTRUCT lpdis = (LPDRAWITEMSTRUCT)lParam;
-                RECT rcButton;
-                RECT rcText;
-                HPEN hOldPen;
-                HBRUSH hOldBrush;
-                COLORREF oldText = 0;
-                COLORREF oldBk = 0;
-
-//              FIXME(toolbar, "action: %x itemState: %x\n",
-//                    lpdis->itemAction, lpdis->itemState);
-
-                infoPtr = (TOOLBAR_INFO *)GetWindowLongA(hwnd,DWL_USER);
-
-                if (lpdis->itemState & ODS_FOCUS)
-                {
-                    oldBk = SetBkColor (lpdis->hDC, GetSysColor(COLOR_HIGHLIGHT));
-                    oldText = SetTextColor (lpdis->hDC, GetSysColor(COLOR_HIGHLIGHTTEXT));
-                }
-
-                hOldPen = SelectObject (lpdis->hDC, GetSysColorPen ((lpdis->itemState & ODS_SELECTED)?COLOR_HIGHLIGHT:COLOR_WINDOW));
-                hOldBrush = SelectObject (lpdis->hDC, GetSysColorBrush ((lpdis->itemState & ODS_FOCUS)?COLOR_HIGHLIGHT:COLOR_WINDOW));
-
-                /* fill background rectangle */
-                Rectangle (lpdis->hDC, lpdis->rcItem.left, lpdis->rcItem.top,
-                           lpdis->rcItem.right, lpdis->rcItem.bottom);
-
-                /* calculate button and text rectangles */
-                CopyRect (&rcButton, &lpdis->rcItem);
-                InflateRect (&rcButton, -1, -1);
-                CopyRect (&rcText, &rcButton);
-                rcButton.right = rcButton.left + infoPtr->nBitmapWidth + 6;
-                rcText.left = rcButton.right + 2;
-
-                /* draw focus rectangle */
-                if (lpdis->itemState & ODS_FOCUS)
-                    DrawFocusRect (lpdis->hDC, &lpdis->rcItem);
-
-                /* draw button */
-                DrawEdge (lpdis->hDC, &rcButton, EDGE_RAISED, BF_RECT|BF_MIDDLE|BF_SOFT);
-
-                /* draw text */
-                if (wParam == IDC_AVAILBTN_LBOX && lpdis->itemID == 0)
-                    DrawTextA (lpdis->hDC, "Separator", -1, &rcText,
-                               DT_LEFT | DT_VCENTER | DT_SINGLELINE);
-
-                if (lpdis->itemState & ODS_FOCUS)
-                {
-                    SetBkColor (lpdis->hDC, oldBk);
-                    SetTextColor (lpdis->hDC, oldText);
-                }
-
-                SelectObject (lpdis->hDC, hOldBrush);
-                SelectObject (lpdis->hDC, hOldPen);
-
-                return TRUE;
-            }
-            return FALSE;
+            return TBCUSTOMIZE_DrawItem(hwnd,wParam,lParam);
 
         case WM_MEASUREITEM:
-            if (wParam == IDC_AVAILBTN_LBOX || wParam == IDC_TOOLBARBTN_LBOX)
-            {
-                MEASUREITEMSTRUCT *lpmis = (MEASUREITEMSTRUCT*)lParam;
-
-                infoPtr = (TOOLBAR_INFO *)GetWindowLongA(hwnd,DWL_USER);
-
-                if (infoPtr)
-                    lpmis->itemHeight = infoPtr->nBitmapHeight + 8;
-                else
-                    lpmis->itemHeight = 16 + 8; /* default height */
-
-                return TRUE;
-            }
-            return FALSE;
+            return TBCUSTOMIZE_MeasureItem(hwnd,wParam,lParam);
 
         default:
             return FALSE;
@@ -962,19 +1271,18 @@ TOOLBAR_AddButtonsA (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
     nAddButtons = (UINT)wParam;
     nOldButtons = infoPtr->nNumButtons;
-    nNewButtons = nOldButtons + nAddButtons;
+    nNewButtons = nOldButtons+nAddButtons;
 
-    if (infoPtr->nNumButtons == 0) {
-        infoPtr->buttons =
-            COMCTL32_Alloc (sizeof(TBUTTON_INFO) * nNewButtons);
-    }
-    else {
-        TBUTTON_INFO *oldButtons = infoPtr->buttons;
-        infoPtr->buttons =
-            COMCTL32_Alloc (sizeof(TBUTTON_INFO) * nNewButtons);
-        memcpy (&infoPtr->buttons[0], &oldButtons[0],
-                nOldButtons * sizeof(TBUTTON_INFO));
-        COMCTL32_Free (oldButtons);
+    if (infoPtr->nNumButtons == 0)
+    {
+      infoPtr->buttons = COMCTL32_Alloc(sizeof(TBUTTON_INFO)*nNewButtons);
+    } else
+    {
+      TBUTTON_INFO* oldButtons = infoPtr->buttons;
+
+      infoPtr->buttons = COMCTL32_Alloc(sizeof(TBUTTON_INFO)*nNewButtons);
+      memcpy(&infoPtr->buttons[0], &oldButtons[0],nOldButtons * sizeof(TBUTTON_INFO));
+      COMCTL32_Free(oldButtons);
     }
 
     infoPtr->nNumButtons = nNewButtons;
@@ -982,7 +1290,8 @@ TOOLBAR_AddButtonsA (HWND hwnd, WPARAM wParam, LPARAM lParam)
     /* insert new button data */
     for (nCount = 0; nCount < nAddButtons; nCount++)
     {
-        TBUTTON_INFO *btnPtr = &infoPtr->buttons[nOldButtons+nCount];
+        TBUTTON_INFO* btnPtr = &infoPtr->buttons[nOldButtons+nCount];
+
         btnPtr->iBitmap   = lpTbb[nCount].iBitmap;
         btnPtr->idCommand = lpTbb[nCount].idCommand;
         btnPtr->fsState   = lpTbb[nCount].fsState;
@@ -990,6 +1299,8 @@ TOOLBAR_AddButtonsA (HWND hwnd, WPARAM wParam, LPARAM lParam)
         btnPtr->dwData    = lpTbb[nCount].dwData;
         btnPtr->iString   = lpTbb[nCount].iString;
         btnPtr->bHot      = FALSE;
+        btnPtr->bDelete   = FALSE; //only used in customize
+        btnPtr->pszName   = NULL;
 
         if ((infoPtr->hwndToolTip) && !(btnPtr->fsStyle & TBSTYLE_SEP))
         {
@@ -1323,11 +1634,10 @@ TOOLBAR_Customize (HWND hwnd)
 
     /* send TBN_BEGINADJUST notification */
     nmhdr.hwndFrom = hwnd;
-    nmhdr.idFrom   = GetWindowLongA (hwnd, GWL_ID);
+    nmhdr.idFrom   = GetWindowLongA(hwnd,GWL_ID);
     nmhdr.code     = TBN_BEGINADJUST;
 
-    SendMessageA (infoPtr->hwndNotify, WM_NOTIFY,
-                  (WPARAM)nmhdr.idFrom, (LPARAM)&nmhdr);
+    SendMessageA (infoPtr->hwndNotify,WM_NOTIFY,(WPARAM)nmhdr.idFrom,(LPARAM)&nmhdr);
 
     //load OS/2 dialog
 
@@ -1338,7 +1648,7 @@ TOOLBAR_Customize (HWND hwnd)
                          (DLGPROC)TOOLBAR_CustomizeDialogProc,
                          (LPARAM)infoPtr);
 
-    if (ret == (INT)-1) return FALSE;
+    if (ret == (INT)-1) ret = 0;
 
 /* //original WINE code
     if (!(hRes = FindResourceA (COMCTL32_hModule,
@@ -1359,8 +1669,7 @@ TOOLBAR_Customize (HWND hwnd)
     /* send TBN_ENDADJUST notification */
     nmhdr.code = TBN_ENDADJUST;
 
-    SendMessageA (infoPtr->hwndNotify, WM_NOTIFY,
-                  (WPARAM)nmhdr.idFrom, (LPARAM)&nmhdr);
+    SendMessageA(infoPtr->hwndNotify,WM_NOTIFY,(WPARAM)nmhdr.idFrom,(LPARAM)&nmhdr);
 
     return ret;
 }
@@ -1387,13 +1696,16 @@ TOOLBAR_DeleteButton (HWND hwnd, WPARAM wParam, LPARAM lParam)
         SendMessageA (infoPtr->hwndToolTip, TTM_DELTOOLA, 0, (LPARAM)&ti);
     }
 
-    if (infoPtr->nNumButtons == 1) {
+    COMCTL32_Free(infoPtr->buttons[nIndex].pszName);
+
+    if (infoPtr->nNumButtons == 1)
+    {
 //      TRACE (toolbar, " simple delete!\n");
         COMCTL32_Free (infoPtr->buttons);
         infoPtr->buttons = NULL;
         infoPtr->nNumButtons = 0;
-    }
-    else {
+    } else
+    {
         TBUTTON_INFO *oldButtons = infoPtr->buttons;
 //        TRACE(toolbar, "complex delete! [nIndex=%d]\n", nIndex);
 
@@ -2620,6 +2932,9 @@ TOOLBAR_Create (HWND hwnd, WPARAM wParam, LPARAM lParam)
     infoPtr->bTransparent = (dwStyle & TBSTYLE_FLAT);
     infoPtr->dwDTFlags = DT_CENTER;
 
+    infoPtr->hDsa        = NULL;
+    infoPtr->hwndToolbar = hwnd;
+
     SystemParametersInfoA (SPI_GETICONTITLELOGFONT, 0, &logFont, 0);
     infoPtr->hFont = CreateFontIndirectA (&logFont);
 
@@ -2661,7 +2976,12 @@ TOOLBAR_Destroy (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
     /* delete button data */
     if (infoPtr->buttons)
-        COMCTL32_Free (infoPtr->buttons);
+    {
+      INT x;
+
+      for (x = 0;x < infoPtr->nNumButtons;x++) COMCTL32_Free(infoPtr->buttons[x].pszName);
+      COMCTL32_Free(infoPtr->buttons);
+    }
 
     /* delete strings */
     if (infoPtr->strings) {
