@@ -1,4 +1,4 @@
-/* $Id: db.cpp,v 1.11 2000-02-18 12:42:06 bird Exp $ *
+/* $Id: db.cpp,v 1.12 2000-07-18 07:15:59 bird Exp $ *
  *
  * DB - contains all database routines.
  *
@@ -350,6 +350,124 @@ BOOL _System dbInsertUpdateFunction(unsigned short usDll,
 }
 
 
+
+/**
+ * Inserts or updates (existing) file information.
+ * @returns     Success indicator (TRUE / FALSE).
+ * @param       usDll           Dll reference code.
+ * @param       pszFilename     Filename.
+ * @param       pszDescription  Pointer to file description.
+ * @param       pszLastDateTime Date and time for last change (ISO).
+ * @param       lLastAuthor     Author number. (-1 if not found.)
+ * @param       pszRevision     Pointer to revision string.
+ * @sketch
+ * @remark
+ */
+BOOL            _System dbInsertUpdateFile(unsigned short usDll,
+                                           const char *pszFilename,
+                                           const char *pszDescription,
+                                           const char *pszLastDateTime,
+                                           signed long lLastAuthor,
+                                           const char *pszRevision)
+{
+    int  rc;
+    long lFile = -1;
+    char szQuery[0x10000];
+    MYSQL_RES *pres;
+
+    /* parameter assertions */
+    assert(usDll != 0);
+    assert(pszFilename != NULL);
+    assert(*pszFilename != '\0');
+
+    /* try find file */
+    sprintf(&szQuery[0], "SELECT refcode, name FROM file WHERE dll = %d AND name = '%s'", usDll, pszFilename);
+    rc = mysql_query(pmysql, &szQuery[0]);
+    pres = mysql_store_result(pmysql);
+    if (rc >= 0 && pres != NULL && mysql_num_rows(pres) != 0)
+    {   /* update file (file is found) */
+        MYSQL_ROW parow;
+        if (mysql_num_rows(pres) > 1)
+        {
+            fprintf(stderr, "internal database integrity error(%s): More files by the same name in the same dll. "
+                    "usDll = %d, pszFilename = %s\n", __FUNCTION__, usDll, pszFilename);
+            return FALSE;
+        }
+
+        parow = mysql_fetch_row(pres);
+        if (parow != NULL)
+            lFile = getvalue(0, parow);
+        mysql_free_result(pres);
+
+        if (strcmp(parow[1], pszFilename) != 0) /* case might have changed... */
+        {
+            sprintf(&szQuery[0], "UPDATE file SET name = '%s' WHERE refcode = %ld",
+                    pszFilename, lFile);
+            rc = mysql_query(pmysql, &szQuery[0]);
+        }
+
+        if (rc >= 0)
+        {
+            if (pszDescription != NULL && pszDescription != '\0')
+            {
+                szQuery[0] = '\0';
+                sqlstrcat(&szQuery[0], "UPDATE file SET description = ", pszDescription, NULL);
+                sprintf(&szQuery[strlen(szQuery)], " WHERE refcode = %ld", lFile);
+            }
+            else
+                sprintf(&szQuery[0], "UPDATE file SET description = NULL WHERE refcode = %ld",
+                        lFile);
+            rc = mysql_query(pmysql, &szQuery[0]);
+        }
+
+        if (rc >= 0 && pszLastDateTime != NULL && *pszLastDateTime != '\0')
+        {
+            sprintf(&szQuery[0], "UPDATE file SET lastdatetime = '%s' WHERE refcode = %ld",
+                    pszLastDateTime, lFile);
+            rc = mysql_query(pmysql, &szQuery[0]);
+        }
+
+        if (rc >= 0)
+        {
+            sprintf(&szQuery[0], "UPDATE file SET lastauthor = %ld WHERE refcode = %ld",
+                    lLastAuthor, lFile);
+            rc = mysql_query(pmysql, &szQuery[0]);
+        }
+
+        if (rc >= 0 && pszRevision != NULL && *pszRevision != '\0')
+        {
+            sprintf(&szQuery[0], "UPDATE file SET revision = '%s' WHERE refcode = %ld",
+                    pszRevision, lFile);
+            rc = mysql_query(pmysql, &szQuery[0]);
+        }
+
+    }
+    else
+    {   /* insert */
+        sprintf(&szQuery[0], "INSERT INTO file(dll, name, description, lastauthor, lastdatetime, revision) VALUES(%d, '%s', %ld, ",
+                usDll, pszFilename, lLastAuthor);
+        if (pszDescription != NULL && *pszDescription != '\0')
+            sqlstrcat(&szQuery[0], NULL, pszDescription);
+        else
+            strcat(&szQuery[0], "NULL");
+
+        if (pszLastDateTime != NULL && *pszLastDateTime != '\0')
+            sqlstrcat(&szQuery[0], ", ", pszLastDateTime);
+        else
+            strcat(&szQuery[0], ", '1975-03-13 14:00:00'"); /* dummy */
+
+        if (pszRevision != NULL && *pszRevision != '\0')
+            sqlstrcat(&szQuery[0], ", ", pszRevision, ")");
+        else
+            strcat(&szQuery[0], ", '')");
+
+        rc = mysql_query(pmysql, &szQuery[0]);
+    }
+
+    return rc >= 0;
+}
+
+
 /**
  * Get a long value.
  * @returns   Number value of pRow[iField]. -1 on error.
@@ -398,9 +516,10 @@ int     mysql_query6(MYSQL *mysql, const char *q)
 /**
  * Find occurences of a function, given by internal name.
  * @returns   success indicator, TRUE / FALSE.
- * @param     pszFunctionName
- * @param     pFnFindBuf
- * @param     lDll
+ * @param     pszFunctionName   Pointer to a function name string. (input)
+ * @param     pFnFindBuf        Pointer to a find buffer. (output)
+ * @param     lDll              Dll refcode (optional). If given the search is limited to
+ *                              the given dll and aliasing functions is updated (slow!).
  * @sketch    1) Get functions for this dll(if given).
  *            2) Get functions which aliases the functions found in (1).
  *            3) Get new aliases by intname
@@ -419,10 +538,10 @@ BOOL _System dbFindFunction(const char *pszFunctionName, PFNFINDBUF pFnFindBuf, 
      * 1) Get functions for this dll(if given).
      */
     if (lDll < 0)
-        sprintf(&szQuery[0], "SELECT refcode, dll, aliasfn, name FROM function WHERE intname = '%s'",
+        sprintf(&szQuery[0], "SELECT refcode, dll, aliasfn, file, name FROM function WHERE intname = '%s'",
                 pszFunctionName);
     else
-        sprintf(&szQuery[0], "SELECT refcode, dll, aliasfn, name FROM function "
+        sprintf(&szQuery[0], "SELECT refcode, dll, aliasfn, file, name FROM function "
                 "WHERE intname = '%s' AND dll = %ld",
                 pszFunctionName, lDll);
 
@@ -440,7 +559,8 @@ BOOL _System dbFindFunction(const char *pszFunctionName, PFNFINDBUF pFnFindBuf, 
                 pFnFindBuf->alRefCode[pFnFindBuf->cFns] = atol(row[0]);
                 pFnFindBuf->alDllRefCode[pFnFindBuf->cFns] = atol(row[1]);
                 pFnFindBuf->alAliasFn[pFnFindBuf->cFns] = atol(row[2]);
-                strcpy(szFnName[pFnFindBuf->cFns], row[3]);
+                pFnFindBuf->alFileRefCode[pFnFindBuf->cFns] = atol(row[3]);
+                strcpy(szFnName[pFnFindBuf->cFns], row[4]);
 
                 /* next */
                 pFnFindBuf->cFns++;
@@ -456,7 +576,7 @@ BOOL _System dbFindFunction(const char *pszFunctionName, PFNFINDBUF pFnFindBuf, 
                  * 2) Get functions which aliases the functions found in (1).
                  */
                 cFnsThisDll = (int)pFnFindBuf->cFns;
-                strcpy(&szQuery[0], "SELECT refcode, dll, aliasfn, name FROM function WHERE aliasfn IN (");
+                strcpy(&szQuery[0], "SELECT refcode, dll, aliasfn, file, name FROM function WHERE aliasfn IN (");
                 for (i = 0; i < cFnsThisDll; i++)
                 {
                     if (i > 0)  strcat(&szQuery[0], " OR ");
@@ -475,7 +595,8 @@ BOOL _System dbFindFunction(const char *pszFunctionName, PFNFINDBUF pFnFindBuf, 
                             pFnFindBuf->alRefCode[pFnFindBuf->cFns] = atol(row[0]);
                             pFnFindBuf->alDllRefCode[pFnFindBuf->cFns] = atol(row[1]);
                             pFnFindBuf->alAliasFn[pFnFindBuf->cFns] = atol(row[2]);
-                            strcpy(szFnName[pFnFindBuf->cFns], row[3]);
+                            pFnFindBuf->alFileRefCode[pFnFindBuf->cFns] = atol(row[3]);
+                            strcpy(szFnName[pFnFindBuf->cFns], row[4]);
 
                             /* next */
                             pFnFindBuf->cFns++;
@@ -486,7 +607,7 @@ BOOL _System dbFindFunction(const char *pszFunctionName, PFNFINDBUF pFnFindBuf, 
                          * 3) Get new aliases by intname
                          */
                         cFnsAliasesAndThisDll = (int)pFnFindBuf->cFns;
-                        sprintf(&szQuery[0], "SELECT refcode, dll, aliasfn FROM function "
+                        sprintf(&szQuery[0], "SELECT refcode, dll, aliasfn, file FROM function "
                                              "WHERE aliasfn = (-1) AND dll <> %ld AND (intname = '%s'",
                                 lDll, pszFunctionName);
                         for (i = 0; i < cFnsAliasesAndThisDll; i++)
@@ -507,6 +628,7 @@ BOOL _System dbFindFunction(const char *pszFunctionName, PFNFINDBUF pFnFindBuf, 
                                         pFnFindBuf->alAliasFn[pFnFindBuf->cFns] = atol(row[2]);
                                     else
                                         pFnFindBuf->alAliasFn[pFnFindBuf->cFns] = ALIAS_NULL;
+                                    pFnFindBuf->alFileRefCode[pFnFindBuf->cFns] = atol(row[3]);
 
                                     /* next */
                                     pFnFindBuf->cFns++;
@@ -517,7 +639,7 @@ BOOL _System dbFindFunction(const char *pszFunctionName, PFNFINDBUF pFnFindBuf, 
                                 /*
                                  * 4) Get new aliases by name
                                  */
-                                sprintf(&szQuery[0], "SELECT refcode, dll, aliasfn FROM function "
+                                sprintf(&szQuery[0], "SELECT refcode, dll, aliasfn, file FROM function "
                                                      "WHERE aliasfn = (-1) AND dll <> %ld AND (name = '%s'",
                                         lDll, pszFunctionName);
                                 for (i = 0; i < cFnsAliasesAndThisDll; i++)
@@ -538,6 +660,7 @@ BOOL _System dbFindFunction(const char *pszFunctionName, PFNFINDBUF pFnFindBuf, 
                                                 pFnFindBuf->alAliasFn[pFnFindBuf->cFns] = atol(row[2]);
                                             else
                                                 pFnFindBuf->alAliasFn[pFnFindBuf->cFns] = ALIAS_NULL;
+                                            pFnFindBuf->alFileRefCode[pFnFindBuf->cFns] = atol(row[3]);
 
                                             /* next */
                                             pFnFindBuf->cFns++;
@@ -564,9 +687,9 @@ BOOL _System dbFindFunction(const char *pszFunctionName, PFNFINDBUF pFnFindBuf, 
                                             /*
                                              * 6) Update all functions from (3) and (4) to alias the first function from 1.
                                              */
-                                            sprintf(&szQuery[0], "UPDATE function SET aliasfn = (%ld) "
+                                            sprintf(&szQuery[0], "UPDATE function SET aliasfn = (%ld), file = (%ld) "
                                                                  "WHERE aliasfn = (-1) AND refcode IN (",
-                                                    pFnFindBuf->alRefCode[0]);
+                                                    pFnFindBuf->alRefCode[0], pFnFindBuf->alFileRefCode[0]);
                                             for (i = cFnsAliasesAndThisDll; i < pFnFindBuf->cFns; i++)
                                             {
                                                 sprintf(&szQuery[strlen(&szQuery[0])],
@@ -588,6 +711,41 @@ BOOL _System dbFindFunction(const char *pszFunctionName, PFNFINDBUF pFnFindBuf, 
     }
 
     return rc >= 0;
+}
+
+
+/**
+ * Finds the refcode for a file (if it exists).
+ * @returns     File 'refcode'.
+ *              -1 on error or not found.
+ * @param       lDll            Refcode of the dll which this file belongs to.
+ * @param       pszFilename     The filename to search for.
+ */
+signed long     _System dbFindFile(signed long lDll, const char *pszFilename)
+{
+    char        szQuery[256];
+    MYSQL_RES * pres;
+    signed long lRefCode = -1;
+
+    assert(lDll >= 0);
+    assert(pszFilename != NULL);
+    assert(*pszFilename != '\0');
+
+    sprintf(&szQuery[0], "SELECT refcode FROM file WHERE dll = %ld AND name = '%s'",
+            lDll, pszFilename);
+    if (mysql_query(pmysql, &szQuery[0]) >= 0)
+    {
+        pres = mysql_store_result(pmysql);
+        if (pres != NULL)
+        {
+            MYSQL_ROW parow = mysql_fetch_row(pres);
+            if (parow != NULL)
+                lRefCode = getvalue(0, parow);
+            mysql_free_result(pres);
+        }
+    }
+
+    return lRefCode;
 }
 
 
@@ -994,6 +1152,91 @@ unsigned long _System dbUpdateFunction(PFNDESC pFnDesc, signed long lDll, char *
 
 
 /**
+ * Removes all the existing design notes in the specified file.
+ * @returns     Success indicator.
+ * @param       lFile       File refcode of the file to remove all design notes for.
+ * @sketch
+ * @status
+ * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @remark
+ */
+BOOL            _System dbRemoveDesignNotes(signed long lFile)
+{
+    char        szQuery[80];
+
+    assert(lFile >= 0);
+    sprintf(&szQuery[0], "DELETE FROM designnote WHERE file = %ld", lFile);
+    return mysql_query(pmysql, &szQuery[0]) >= 0;
+}
+
+
+/**
+ * Adds a design note.
+ * @returns     Success indicator.
+ * @param       lDll            Dll refcode.
+ * @param       lFile           File refcode.
+ * @param       pszTitle        Design note title.
+ * @param       pszText         Design note text.
+ * @param       lSeqNbr         Sequence number (in dll). If 0 the use next available number.
+ * @param       lSeqNbrFile     Sequence number in file.
+ */
+BOOL            _System dbAddDesignNote(signed long lDll,
+                                        signed long lFile,
+                                        const char *pszTitle,
+                                        const char *pszText,
+                                        signed long lSeqNbr,
+                                        signed long lSeqNbrFile)
+{
+    char        szQuery[0x10200];
+    MYSQL_RES * pres;
+
+
+    assert(lDll >= 0 && lFile >= 0);
+    assert(lSeqNbrFile >= 0);
+
+    /*
+     * If no lSqlNbr the make one.
+     */
+    if (lSeqNbr == 0)
+    {
+        sprintf(&szQuery[0], "SELECT MAX(lSeqNbr) + 1 FROM designnote WHERE dll = %ld'", lDll);
+        if (mysql_query(pmysql, &szQuery[0]) >= 0)
+        {
+            pres = mysql_store_result(pmysql);
+            if (pres != NULL)
+            {
+                MYSQL_ROW parow = mysql_fetch_row(pres);
+                if (parow != NULL)
+                    lSeqNbr = getvalue(0, parow);
+                else
+                    lSeqNbr = 1;
+                mysql_free_result(pres);
+            }
+            else
+                return FALSE;
+        }
+        else
+            return FALSE;
+    }
+
+    /*
+     * Create update query.
+     */
+    sprintf(&szQuery[0], "INSERT INTO designnote(dll, file, seqnbrfile, seqnbr, title, note) "
+                         "VALUES (%ld, %ld, %ld, %ld, ",
+            lDll, lFile, lSeqNbrFile, lSeqNbr);
+    if (pszTitle != NULL && *pszTitle != '\0')
+        sqlstrcat(&szQuery[0], NULL, pszTitle);
+    else
+        strcat(&szQuery[0], "NULL");
+    sqlstrcat(&szQuery[0], ", ", pszText == NULL ? "" : pszText, ")");
+
+    return mysql_query(pmysql, &szQuery[0]) >= 0;
+}
+
+
+
+/**
  * Updates the history tables.
  * @returns   Number of signals/errors.
  * @param     pszError  Pointer to buffer which will hold the error messages.
@@ -1108,7 +1351,7 @@ unsigned long   _System dbCheckIntegrity(char *pszError)
     mysql_refresh(pmysql, REFRESH_TABLES);
 
     /* foreign keys in function table */
-    strcpy(pszQuery, "SELECT refcode, dll, state, apigroup FROM function");
+    strcpy(pszQuery, "SELECT refcode, dll, state, apigroup, file FROM function");
     rc = mysql_query(pmysql, pszQuery);
     if (rc >= 0)
     {
@@ -1118,22 +1361,51 @@ unsigned long   _System dbCheckIntegrity(char *pszError)
             while ((row1 = mysql_fetch_row(pres1)) != NULL)
             {
                 /* check dll */
-                sprintf(pszQuery, "SELECT name FROM dll WHERE refcode = %s", row1[1]);
+                sprintf(pszQuery, "SELECT refcode FROM dll WHERE refcode = %s", row1[1]);
                 rc = mysql_query(pmysql, pszQuery);
                 CheckFKError("function/dll", "Foreign key 'dll' not found in the dll table");
 
                 /* check state */
-                sprintf(pszQuery, "SELECT name FROM state WHERE refcode = %s", row1[2]);
+                sprintf(pszQuery, "SELECT refcode FROM state WHERE refcode = %s", row1[2]);
                 rc = mysql_query(pmysql, pszQuery);
                 CheckFKError("function/state", "Foreign key 'state' not found in the state table");
 
                 /* check apigroup */
                 if (row1[3] != NULL)
                 {
-                    sprintf(pszQuery, "SELECT name FROM apigroup WHERE refcode = %s", row1[3]);
+                    sprintf(pszQuery, "SELECT refcode FROM apigroup WHERE refcode = %s", row1[3]);
                     rc = mysql_query(pmysql, pszQuery);
                     CheckFKError("function/state", "Foreign key 'state' not found in the state table");
                 }
+
+                /* check file */
+                if (atoi(row1[4]) >= 0)
+                {
+                    sprintf(pszQuery, "SELECT refcode FROM file WHERE refcode = %s", row1[4]);
+                    rc = mysql_query(pmysql, pszQuery);
+                    CheckFKError("function/file", "Foreign key 'file' not found in the file table");
+                }
+            }
+            mysql_free_result(pres1);
+        }
+    }
+    else
+        ulRc += logDbError(pszError, pszQuery);
+
+    /* foreign keys in file */
+    strcpy(pszQuery, "SELECT refcode, dll FROM file");
+    rc = mysql_query(pmysql, pszQuery);
+    if (rc >= 0)
+    {
+        pres1 = mysql_store_result(pmysql);
+        if (pres1 != NULL)
+        {
+            while ((row1 = mysql_fetch_row(pres1)) != NULL)
+            {
+                /* check dll */
+                sprintf(pszQuery, "SELECT refcode FROM dll WHERE refcode = %s", row1[1]);
+                rc = mysql_query(pmysql, pszQuery);
+                CheckFKError("apigroup/dll", "Foreign key 'dll' not found in the dll table");
             }
             mysql_free_result(pres1);
         }
@@ -1154,7 +1426,7 @@ unsigned long   _System dbCheckIntegrity(char *pszError)
                 /* check dll */
                 sprintf(pszQuery, "SELECT refcode FROM dll WHERE refcode = %s", row1[1]);
                 rc = mysql_query(pmysql, pszQuery);
-                CheckFKError("apigroup/dll", "Foreign key 'dll' not found in the dll table");
+                CheckFKError("file/dll", "Foreign key 'dll' not found in the dll table");
             }
             mysql_free_result(pres1);
         }
@@ -1645,7 +1917,7 @@ signed long _System dbGetNumberOfUpdatedFunction(signed long lDll)
 
 
 /**
- *
+ * Appends a set of strings to a query. The main string (pszStr) is enclosed in "'"s.
  * @returns   Pointer to end of the string.
  * @param     pszQuery   Outputbuffer
  * @param     pszBefore  Text before string, might be NULL.
@@ -1676,8 +1948,36 @@ static char *sqlstrcat(char *pszQuery, const char *pszBefore, const char *pszStr
     while ((ch = *pszStr++) != '\0')
     {
         if (ch == '\'')
+        {
             *pszQuery++ = '\\';
-        *pszQuery++ = ch;
+            *pszQuery++ = '\'';
+        }
+        else if (ch == '\n')
+        {
+            #if 0
+            *pszQuery++ = '\\';
+            *pszQuery++ = 'n';
+            #else
+            *pszQuery++ = '<';
+            *pszQuery++ = 'B';
+            *pszQuery++ = 'R';
+            *pszQuery++ = '>';
+            #endif
+        }
+        else if (ch == '\r')
+        {
+            #if 0
+            *pszQuery++ = '\\';
+            *pszQuery++ = 'r';
+            #else
+            *pszQuery++ = '<';
+            *pszQuery++ = 'B';
+            *pszQuery++ = 'R';
+            *pszQuery++ = '>';
+            #endif
+        }
+        else
+            *pszQuery++ = ch;
     }
     *pszQuery++ = '\'';
 

@@ -1,4 +1,4 @@
-/* $Id: StateUpd.cpp,v 1.22 2000-03-14 16:33:20 bird Exp $
+/* $Id: StateUpd.cpp,v 1.23 2000-07-18 07:15:58 bird Exp $
  *
  * StateUpd - Scans source files for API functions and imports data on them.
  *
@@ -46,6 +46,8 @@ static void openLogs(void);
 static void closeLogs(void);
 static unsigned long processDir(const char *pszDirOrFile, POPTIONS pOptions);
 static unsigned long processFile(const char *pszFilename, POPTIONS pOptions);
+static unsigned long processModuleHeader(char **papszLines, int i, int &iRet, const char *pszFilename, POPTIONS pOptions);
+static unsigned long processDesignNote(char **papszLines, int i, int &iRet, const char *pszFilename, POPTIONS pOptions);
 static unsigned long processAPI(char **papszLines, int i, int &iRet, const char *pszFilename, POPTIONS pOptions);
 static unsigned long analyseFnHdr(PFNDESC pFnDesc, char **papszLines, int i, const char *pszFilename, POPTIONS pOptions);
 static unsigned long analyseFnDcl(PFNDESC pFnDesc, char **papszLines, int i, int &iRet, const char *pszFilename, POPTIONS pOptions);
@@ -53,6 +55,7 @@ static unsigned long analyseFnDcl2(PFNDESC pFnDesc, char **papszLines, int i, in
 static char *SDSCopyTextUntilNextTag(char *pszTarget, BOOL fHTML, int iStart, int iEnd, char **papszLines, const char *pszStart = NULL);
 static char *CommonCopyTextUntilNextTag(char *pszTarget, BOOL fHTML, int iStart, int iEnd, char **papszLines, const char *pszStart = NULL);
 static BOOL  isFunction(char **papszLines, int i, POPTIONS pOptions);
+static BOOL  isDesignNote(char **papszLines, int i, POPTIONS pOptions);
 static long _System dbNotUpdatedCallBack(const char *pszValue, const char *pszFieldName, void *pvUser);
 static char *skipInsignificantChars(char **papszLines, int &i, char *psz);
 static char *readFileIntoMemory(const char *pszFilename);
@@ -62,8 +65,10 @@ static char *findStartOfWord(const char *psz, const char *pszStart);
 inline char *trim(char *psz);
 inline char *trimR(char *psz);
 inline char *skip(const char *psz);
-static void  copy(char *psz, int jFrom, int iFrom, int jTo, int iTo, char **papszLines);
 static void  copy(char *psz, char *pszFrom, int iFrom, char *pszTo, int iTo, char **papszLines);
+static void  copy(char *psz, int jFrom, int iFrom, int jTo, int iTo, char **papszLines);
+static void  copyComment(char *psz, char *pszFrom, int iFrom, char **papszLines, BOOL fStrip);
+static void  copyComment(char *psz, int jFrom, int iFrom, char **papszLines, BOOL fStrip);
 static char *stristr(const char *pszStr, const char *pszSubStr);
 static char *skipBackwards(const char *pszStopAt, const char *pszFrom, int &iLine, char **papszLines);
 static int   findStrLine(const char *psz, int iStart, int iEnd, char **papszLines);
@@ -91,7 +96,7 @@ int main(int argc, char **argv)
     ULONG          ul0, ul1, ul2;
 
     DosError(0x3);
-    DosSetPriority(PRTYS_PROCESSTREE, PRTYC_REGULAR, 1, 0);
+    /*DosSetPriority(PRTYS_PROCESSTREE, PRTYC_REGULAR, 1, 0);*/
 
     /* get dll name from directory */
     ul1 = ul2 = 0;
@@ -263,40 +268,48 @@ int main(int argc, char **argv)
             /* find dll */
             options.lDllRefcode = dbGetDll(options.pszDLLName);
             fprintf(phLog, "DLL: refcode=%d, name=%s\n", options.lDllRefcode, options.pszDLLName);
-
-            /* processing */
-            if (argv[argi] == NULL || *argv[argi] == '\0')
-                ulRc = processDir(".", &options);
-            else
-                while (argv[argi] != NULL)
-                {
-                    ulRc += processDir(argv[argi], &options);
-                    argi++;
-                }
-
-            /* create new history rows */
-            pszErrorDesc = (char*)malloc(1048768); assert(pszErrorDesc != NULL);
-            *pszErrorDesc = '\0';
-            ulRc2 = dbCreateHistory(pszErrorDesc);
-            if (ulRc2 != 0)
+            if (options.lDllRefcode >= 0)
             {
-                fprintf(phSignal, "-,-: errors which occurred while creating history:\n\t%s\n", pszErrorDesc);
-                ulRc += ulRc2 << 16;
-            }
-            free(pszErrorDesc);
+                /* processing */
+                if (argv[argi] == NULL || *argv[argi] == '\0')
+                    ulRc = processDir(".", &options);
+                else
+                    while (argv[argi] != NULL)
+                    {
+                        ulRc += processDir(argv[argi], &options);
+                        argi++;
+                    }
 
-            /* check db integrity */
-            if (options.fIntegrityAfter)
-            {
+                /* create new history rows */
                 pszErrorDesc = (char*)malloc(1048768); assert(pszErrorDesc != NULL);
                 *pszErrorDesc = '\0';
-                ulRc2 = dbCheckIntegrity(pszErrorDesc);
+                ulRc2 = dbCreateHistory(pszErrorDesc);
                 if (ulRc2 != 0)
                 {
-                    fprintf(phSignal, "-,-: integrity errors:\n\t%s\n", pszErrorDesc);
+                    fprintf(phSignal, "-,-: errors which occurred while creating history:\n\t%s\n", pszErrorDesc);
                     ulRc += ulRc2 << 16;
                 }
                 free(pszErrorDesc);
+
+                /* check db integrity */
+                if (options.fIntegrityAfter)
+                {
+                    pszErrorDesc = (char*)malloc(1048768); assert(pszErrorDesc != NULL);
+                    *pszErrorDesc = '\0';
+                    ulRc2 = dbCheckIntegrity(pszErrorDesc);
+                    if (ulRc2 != 0)
+                    {
+                        fprintf(phSignal, "-,-: integrity errors:\n\t%s\n", pszErrorDesc);
+                        ulRc += ulRc2 << 16;
+                    }
+                    free(pszErrorDesc);
+                }
+            }
+            else
+            {   /* failed to find dll - concidered nearly fatal. */
+                fprintf(phSignal, "-,-: failed to find dll (%s)!\n\t%s\n",
+                        options.pszDLLName ? options.pszDLLName : "<NULL>");
+                ulRc++;
             }
         }
 
@@ -360,7 +373,7 @@ static void syntax()
            "    -s            Scan subdirectories.          default: disabled\n"
            "    -Old          Use old API style.            default: disabled\n"
            "    -OS2          Ignore 'OS2'-prefix on APIs.  default: disabled\n"
-           "    -Dll:<dllname> Name of the dll.             default: dirname\n"
+           "    -Dll:<dllname> Name of the dll.             default: currentdirname\n"
            "    -h:<hostname> Database server hostname.     default: localhost\n"
            "    -u:<username> Username on the server.       default: root\n"
            "    -p:<password> Password.                     default: <empty>\n"
@@ -540,8 +553,10 @@ static unsigned long processDir(const char *pszDirOrFile, POPTIONS pOptions)
  * @sketch     1. read file into memory.
  *             2. create line array.
  *            (3. simple preprocessing - TODO)
- *             4. scan thru the line array, looking for APIs.
- *                4b. when API is found, process it.
+ *             4. process module header.
+ *             5. scan thru the line array, looking for APIs and designnotes.
+ *                5b. when API is found, process it.
+ *                5c. when designnote found, process it.
  */
 static unsigned long processFile(const char *pszFilename, POPTIONS pOptions)
 {
@@ -560,22 +575,47 @@ static unsigned long processFile(const char *pszFilename, POPTIONS pOptions)
         papszLines = createLineArray(pszFile);
         if (papszLines != NULL)
         {
+            unsigned long ulRc;
             int i = 0;
 
             /* 3. - TODO */
 
-            /* 4.*/
-            while (papszLines[i] != NULL)
+            /* 4. */
+            ulRc = processModuleHeader(papszLines, i, i, pszFilename, pOptions);
+            cSignals += ulRc >> 16;
+            if (ulRc & 0x0000ffff)
             {
-                if (isFunction(papszLines, i, pOptions))
+                /* 4b.
+                 * Remove Design notes.
+                 */
+                pOptions->lSeqFile = 0;
+                if (!dbRemoveDesignNotes(pOptions->lFileRefcode))
                 {
-                    unsigned long ulRc;
-                    ulRc = processAPI(papszLines, i, i, pszFilename, pOptions);
-                    cAPIs += 0x0000ffff & ulRc;
-                    cSignals += ulRc >> 16;
+                    fprintf(phSignal, "%s: failed to remove design notes. %s\n",
+                            pszFilename, dbGetLastErrorDesc());
+                    cSignals++;
                 }
-                else
-                    i++;
+
+
+                /* 5.*/
+                while (papszLines[i] != NULL)
+                {
+                    if (isFunction(papszLines, i, pOptions))
+                    {
+                        ulRc = processAPI(papszLines, i, i, pszFilename, pOptions);
+                        cAPIs += 0x0000ffff & ulRc;
+                        cSignals += ulRc >> 16;
+                    }
+                    else
+                    {
+                        if (isDesignNote(papszLines, i, pOptions))
+                        {
+                            ulRc = processDesignNote(papszLines, i, i, pszFilename, pOptions);
+                            cSignals += ulRc >> 16;
+                        }
+                        i++;
+                    }
+                }
             }
 
             free(papszLines);
@@ -597,6 +637,228 @@ static unsigned long processFile(const char *pszFilename, POPTIONS pOptions)
 
     return (unsigned long)((cSignals << 16) | cAPIs);
 }
+
+
+/**
+ * Processes an module header and other file information.
+ * @returns     high word = number of signals.
+ *              low  word = Success indicator (TRUE / FALSE).
+ * @param       papszLines      Array of lines in the file.
+ * @param       i               Index into papszLines.
+ * @param       iRet            Index into papszLines. Where to resume search.
+ * @param       pszFilename     Filename.
+ * @param       pOptions        Pointer to options. lFileRefcode is set on successful return.
+ * @sketch      Extract module information if any....
+ */
+static unsigned long processModuleHeader(char **papszLines, int i, int &iRet, const char *pszFilename, POPTIONS pOptions)
+{
+    char    szDescription[10240];       /* File description buffer. */
+    char    szId[128];                  /* CVS Id keyword buffer. */
+    char *  psz, *psz2;
+    const char *    pszDBFilename;
+    char *          pszLastDateTime;
+    char *          pszRevision;
+    char *          pszAuthor;
+    signed long     lLastAuthor;
+
+    /*
+     * Find the DB filename (skip path!)
+     */
+    pszDBFilename = strrchr(pszFilename, '\\');
+    psz = strrchr(pszFilename, '/');
+    if (psz > pszDBFilename)
+        pszDBFilename = psz;
+    psz = strrchr(pszFilename, ':');
+    if (psz > pszDBFilename)
+        pszDBFilename = psz;
+    if (pszDBFilename == NULL)
+        pszDBFilename = pszFilename;
+    else
+        pszDBFilename++;
+
+    /*
+     * The module header is either on single comment or two comments.
+     * The first line should be a "$Id" CVS keyword. (by convention).
+     * Then the module description follows. So, we'll try find the $Id
+     * keyword first.
+     */
+    iRet = i;
+    while (i < iRet + 10 && (psz = strstr(papszLines[i], "$Id"": ")) == NULL)
+        i++;
+    if (psz != NULL)
+    {   /* found $Id: */
+        psz2 = strchr(psz+3, '$');
+        strncpy(&szId[0], psz, psz2 - psz);
+        szId[psz2 - psz] = '\0';
+        iRet = i;
+
+        /* parse it! */
+        psz = strstr(szId+4, ",v ");
+        if (psz == NULL)
+        {
+            fprintf(phSignal, "%s, module header: $Id keyword is incorrect (or the parsing code is broken).\n", pszFilename);
+            return 0x00010000;
+        }
+        pszRevision = trim(psz + 3);
+        psz = strchr(pszRevision, ' ');
+        *psz++ = '\0';
+        trimR(pszRevision);
+
+        pszLastDateTime = trim(psz);
+        psz = strchr(strchr(pszLastDateTime, ' ') + 1, ' ');
+        *psz++ = '\0';
+        pszLastDateTime[4] = pszLastDateTime[7] = '-';
+        trimR(pszLastDateTime);
+
+        pszAuthor = trim(psz);
+        psz = strchr(pszAuthor, ' ');
+        *psz = '\0';
+        lLastAuthor = dbFindAuthor(pszAuthor, NULL);
+
+        /*
+         * Is there more stuff here, in this comment?
+         * Skip to end of the current comment and copy the contents to szDescription.
+         * if szDescription suddenly contains nothing.
+         */
+        psz = &szDescription[0];
+        copyComment(psz, psz2+1, i, papszLines, TRUE);
+        while (*psz == '\n' && *psz == ' ')
+            psz++;
+        if (*psz == '\0')
+        {   /*
+             * No description in the first comment. (The one with $Id.)
+             * Is there a comment following the first one?
+             */
+            while (papszLines[i] != NULL && strstr(papszLines[i++], "*/") == NULL)
+                i = i;
+            while (papszLines[i] != NULL)
+            {
+                psz2 = papszLines[i];
+                while (*psz2 == ' ')
+                    psz2++;
+                if (*psz2 != '\0')
+                    break;
+                i++;
+            }
+            if (psz2 != NULL && strncmp(psz2, "/*", 2) == 0)
+            {
+                psz = &szDescription[0];
+                copyComment(psz, psz2+1, i, papszLines, TRUE);
+                while (*psz == '\n' && *psz == ' ')
+                    psz++;
+                if (psz == '\0')
+                    szDescription[0] = '\0';
+
+                /* Skip to line after comment end. */
+                while (papszLines[i] != NULL && strstr(papszLines[i++], "*/") == NULL)
+                    i = i;
+            }
+        }
+        else
+        {
+            /* Skip to line after comment end. */
+            while (papszLines[i] != NULL && strstr(papszLines[i++], "*/") == NULL)
+                i = i;
+        }
+        iRet = i;
+
+        /*
+         * Information is collected.
+         * Insert or update the database.
+         */
+        if (dbInsertUpdateFile((unsigned short)pOptions->lDllRefcode, pszDBFilename,
+                               &szDescription[0], pszLastDateTime, lLastAuthor, pszRevision))
+        {
+            /*
+             * Get file refcode.
+             */
+            pOptions->lFileRefcode = dbFindFile(pOptions->lDllRefcode, pszDBFilename);
+            if (pOptions->lFileRefcode <= 0)
+            {
+                fprintf(phSignal, "%s, module header: failed to find file in DB. %s\n",
+                        pszDBFilename, dbGetLastErrorDesc());
+                return 0x00010000;
+            }
+        }
+        else
+        {
+            fprintf(phSignal, "%s, module header: failed to insert/update file. %s\n",
+                    pszDBFilename, dbGetLastErrorDesc());
+            return 0x00010000;
+        }
+    }
+    else
+    {
+        fprintf(phSignal, "%s, module header: $Id keyword is missing.\n", pszFilename);
+        return 0x00010000;
+    }
+
+    return TRUE;
+}
+
+
+/**
+ * Processes an API function.
+ * @returns   high word = number of signals
+ *            low  word = Success indicator (TRUE/FALSE).
+ * @param     papszLines   Array of lines in the file.
+ * @param     i            Index into papszLines.
+ * @param     iRet         Index into papszLines. Where to resume search.
+ * @param     pszFilename  Filename used in the signal log.
+ * @param     pOptions  Pointer to options.
+ */
+static unsigned long processDesignNote(char **papszLines, int i, int &iRet, const char *pszFilename, POPTIONS pOptions)
+{
+    unsigned long   ulRc;
+    char            szBuffer[0x10000];
+    char *          psz;
+
+    /*
+     *  Find and parse the @designnote tag/keyword.
+     *      syntax:     @designnote [seqnbr] <title>
+     *                  <text>
+     *
+     */
+    psz = stristr(papszLines[i], "@designnote ");
+    if (psz != NULL)
+    {
+        signed long     lSeqNbr;
+
+        psz = findEndOfWord(psz+1)+1;
+        lSeqNbr = atol(psz);
+        if (lSeqNbr != 0)
+            psz = findEndOfWord(psz);
+        psz = trim(psz);
+        if (psz != NULL && strstr(psz, "*/") != NULL)
+        {
+            szBuffer[0] = '\0';
+            *strstr(psz, "*/") = '\0';
+        }
+        else
+            copyComment(&szBuffer[0], 0, i+1, papszLines, TRUE);
+
+        /* Update database */
+        if (!dbAddDesignNote(pOptions->lDllRefcode, pOptions->lFileRefcode, psz, &szBuffer[0], lSeqNbr, pOptions->lSeqFile++))
+        {
+            ulRc = 0x00010000;
+            fprintf(phSignal, "%s(%d): Failed to add designnote. %s\n", dbGetLastErrorDesc());
+        }
+
+        /* Skip to line after comment end. */
+        while (papszLines[i] != NULL && strstr(papszLines[i++], "*/") == NULL)
+            i = i;
+        iRet = i;
+    }
+    else
+    {
+        fprintf(phSignal, "%s(%d): internal error @designnote \n", pszFilename, i);
+        ulRc = 0x00010000;
+    }
+
+    return ulRc;
+}
+
+
 
 
 /**
@@ -1807,6 +2069,36 @@ static BOOL isFunction(char **papszLines, int i, POPTIONS pOptions)
 }
 
 
+/**
+ * Checks if there may be a design note starting at the current line.
+ * @returns   TRUE if design note found, else FALSE.
+ * @param     papszLines   Array of lines in the file.
+ * @param     i            Index into papszLines.
+ * @param     pOptions     Pointer to options.
+ */
+static BOOL isDesignNote(char **papszLines, int i, POPTIONS pOptions)
+{
+    char *psz = papszLines[i];
+
+    if (psz == NULL)
+        return FALSE;
+
+    // look for /**@designnote "
+    while (*psz == ' ')
+        psz++;
+    if (strncmp(psz, "/**", 3) == 0)
+    {
+        psz++;
+        while (*psz == '*' || *psz == ' ')
+            psz++;
+        return strnicmp(psz, "@designnote ", 12) == 0;
+    }
+    pOptions = pOptions;
+    return FALSE;
+}
+
+
+
 
 /**
  * Callback function for the dbGetNotUpdatedFunction routine.
@@ -2234,6 +2526,95 @@ static void copy(char *psz, int jFrom, int iFrom, int jTo, int iTo, char **papsz
     *psz = '\0';
 }
 #endif
+
+
+/* copyComment: Wrapper for the other copyComment function.
+ *
+ */
+static void copyComment(char *psz, char *pszFrom, int iFrom, char **papszLines, BOOL fStrip)
+{
+    copyComment(psz, pszFrom - papszLines[iFrom], iFrom, papszLines, fStrip);
+}
+
+
+
+
+/**
+ * Copies a set of lines to a buffer (psz) stopping at the first end comment.
+ * (If a start comment occurs it is concidered an error.)
+ * Stars begining lines are removed.
+ * @param       psz         Target buffer.
+ * @param       jFrom       Starting position, index into line iFrom.
+ * @param       iFrom       Starting position, index into papszLines.
+ * @param       papszLines  Array of lines.
+ * @param       fStrip      Strip blank lines at start and end + LICENCE notice (at end).
+ * @status      completely implemented.
+ * @author      knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ */
+static void copyComment(char *psz, int jFrom, int iFrom, char **papszLines, BOOL fStrip)
+{
+    char *  pszStartBuffer = psz;       /* Start of the target buffer. */
+    char *  pszStart = psz;             /* Start of current line. */
+    int     fFirst = TRUE;              /* True while we're still processing the start of the line. */
+    int     i, j;                       /* Indexes into papszLines. */
+
+    i = iFrom;
+    j = jFrom;
+    while (papszLines[i] != NULL && !(papszLines[i][j] == '*' && papszLines[i][j+1] == '/'))
+    {
+        if (papszLines[i][j] != '\0')
+        {
+            /* Skip or copy the char ? */
+            if (fFirst && papszLines[i][j] == ' ')
+                j++;
+            else if (fFirst && papszLines[i][j] == '*')
+                j += papszLines[i][j+1] == ' ' ? (fFirst = FALSE) + 2 : 1; /* bad habbit...*/
+            else
+            {   /* Copy it */
+                *psz++ = papszLines[i][j++];
+                fFirst = FALSE;
+            }
+        }
+        else
+        {   /* End of line:
+             *  Check if empty line. If so truncate it.
+             *  Add new line char if not empty first line...
+             */
+            j = 0; /* use this as an index from line start on the copied line. */
+            while (pszStart + j < psz && pszStart[j] == ' ')
+                j++;
+            if (pszStart + j == psz)
+                psz = pszStart;
+            if (psz > pszStartBuffer || !fStrip)
+                *psz++ = '\n';
+
+            /* next */
+            i++;
+            j = 0;
+            fFirst = TRUE;
+            pszStart = psz;
+        }
+    }
+    *psz = '\0';
+
+    /*
+     * Strip end + license.
+     */
+    if (fStrip)
+    {
+        while (psz >= pszStartBuffer && (*psz == ' ' || *psz == '\n' || *psz == '\0'))
+            *psz-- = '\0';
+
+        if (psz - 20 > pszStartBuffer && strstr(psz - 20, "LICENSE.TXT") != NULL)
+        {
+            while (psz >= pszStartBuffer && *psz != '\n')
+                *psz-- = '\0';
+        }
+
+        while (psz >= pszStartBuffer && (*psz == ' ' || *psz == '\n' || *psz == '\0'))
+            *psz-- = '\0';
+    }
+}
 
 
 /**
