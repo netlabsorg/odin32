@@ -1,4 +1,4 @@
-; $Id: kernel32dbg.def,v 1.21 2002-12-13 16:46:44 sandervl Exp $
+; $Id: kernel32dbg.def,v 1.22 2002-12-20 11:39:41 sandervl Exp $
 
 ;Basis is Windows95 KERNEL32
 LIBRARY KERNEL32 INITINSTANCE TERMINSTANCE
@@ -1076,7 +1076,7 @@ EXPORTS
     _RegisterPe2LxExe@12                                          @1203
     _RegisterPe2LxDll@12                                          @1209
 
-    _CreateWin32PeLdrExe@28                                       @1236
+    _CreateWin32PeLdrExe@36                                       @1236
 
     _RegisterLxExe@8                                              @1237
     _RegisterLxDll@24                                             @1238

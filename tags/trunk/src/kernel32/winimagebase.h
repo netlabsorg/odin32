@@ -1,4 +1,4 @@
-/* $Id: winimagebase.h,v 1.21 2002-02-06 16:33:39 sandervl Exp $ */
+/* $Id: winimagebase.h,v 1.22 2002-12-20 11:39:41 sandervl Exp $ */
 
 /*
  * Win32 PE Image base class
@@ -15,6 +15,7 @@
 
 #include <peexe.h>
 #include "queue.h"
+#include <odinpe.h>
 #ifdef OS2_INCLUDED
 #include <winconst.h>
 #else
@@ -28,15 +29,6 @@
 #endif
 
 #define ID_GETFIRST             0xF0000000
-
-#ifndef ENUMRESNAMEPROC
-    typedef BOOL (* CALLBACK ENUMRESTYPEPROCA)(HMODULE,LPSTR,LONG);
-    typedef BOOL (* CALLBACK ENUMRESTYPEPROCW)(HMODULE,LPWSTR,LONG);
-    typedef BOOL (* CALLBACK ENUMRESNAMEPROCA)(HMODULE,LPCSTR,LPSTR,LONG);
-    typedef BOOL (* CALLBACK ENUMRESNAMEPROCW)(HMODULE,LPCWSTR,LPWSTR,LONG);
-    typedef BOOL (* CALLBACK ENUMRESLANGPROCA)(HMODULE,LPCSTR,LPCSTR,WORD,LONG);
-    typedef BOOL (* CALLBACK ENUMRESLANGPROCW)(HMODULE,LPCWSTR,LPCWSTR,WORD,LONG);
-#endif
 
 class Win32Resource;
 class Win32DllBase;
