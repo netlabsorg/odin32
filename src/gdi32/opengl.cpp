@@ -1,4 +1,4 @@
-/* $Id: opengl.cpp,v 1.6 2000-01-26 23:48:03 sandervl Exp $ */
+/* $Id: opengl.cpp,v 1.7 2000-02-05 15:55:54 sandervl Exp $ */
 
 /*
  * GDI32 OpenGl stubs
@@ -64,37 +64,37 @@ static BOOL internalOpenGLEnable(void)
 {
   if(hOpenGL == NULL)
   {
-     hOpenGL = O32_LoadLibrary("OPENGL32.DLL");
+     hOpenGL = LoadLibraryA("OPENGL32.DLL");
      if(hOpenGL == NULL)
        return(FALSE);
   }
 
   if(glChoosePixelFormat == NULL) {
-        glChoosePixelFormat = (CHOOSEPIXELFMT)O32_GetProcAddress(hOpenGL, "OS2wglChoosePixelFormat");
+        glChoosePixelFormat = (CHOOSEPIXELFMT)GetProcAddress(hOpenGL, "wglChoosePixelFormat");
         if(glChoosePixelFormat == NULL)
                 return(0);
   }
 
   if(glSetPixelFormat == NULL) {
-        glSetPixelFormat = (SETPIXELFMT)O32_GetProcAddress(hOpenGL, "OS2wglSetPixelFormat");
+        glSetPixelFormat = (SETPIXELFMT)GetProcAddress(hOpenGL, "wglSetPixelFormat");
         if(glSetPixelFormat == NULL)
                 return(FALSE);
   }
 
   if(glSwapBuffers == NULL) {
-        glSwapBuffers = (SWAPBUFFERS)O32_GetProcAddress(hOpenGL, "OS2wglSwapBuffers");
+        glSwapBuffers = (SWAPBUFFERS)GetProcAddress(hOpenGL, "wglSwapBuffers");
         if(glSwapBuffers == NULL)
                 return(FALSE);
   }
 
   if(glDescribePixelFormat == NULL) {
-        glDescribePixelFormat = (DESCRIBEPIXELFMT)O32_GetProcAddress(hOpenGL, "OS2wglDescribePixelFormat");
+        glDescribePixelFormat = (DESCRIBEPIXELFMT)GetProcAddress(hOpenGL, "wglDescribePixelFormat");
         if(glDescribePixelFormat == NULL)
                 return(FALSE);
   }
 
   if(glGetPixelFormat == NULL) {
-        glGetPixelFormat = (GETPIXELFMT)O32_GetProcAddress(hOpenGL, "OS2wglGetPixelFormat");
+        glGetPixelFormat = (GETPIXELFMT)GetProcAddress(hOpenGL, "wglGetPixelFormat");
         if(glGetPixelFormat == NULL)
                 return(FALSE);
   }
