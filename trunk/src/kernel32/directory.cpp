@@ -1,4 +1,4 @@
-/* $Id: directory.cpp,v 1.6 1999-10-20 08:09:04 sandervl Exp $ */
+/* $Id: directory.cpp,v 1.7 1999-10-23 12:34:46 sandervl Exp $ */
 
 /*
  * Win32 Directory functions for OS/2
@@ -22,7 +22,7 @@
 #include <unicode.h>
 #include <heapstring.h>
 #include <options.h>
-
+#include "initterm.h"
 
 ODINDEBUGCHANNEL(KERNEL32-DIRECTORY)
 
@@ -181,15 +181,19 @@ ODINFUNCTION2(UINT,GetSystemDirectoryA,LPSTR,lpBuffer,
               lpstrEnv,
               uSize);
     return (lstrlenA(lpBuffer));                /* return number of copies bytes */
-  } else
+  } 
+  else
   {
     int len;
 
     len = PROFILE_GetOdinIniString(ODINDIRECTORIES,"SYSTEM","",lpBuffer,uSize);
-    if (len > 2) return len;
-    else
-                               /* if no override by environment is available */
-      return O32_GetSystemDirectory(lpBuffer,uSize);
+    if (len > 2) {
+	return len;
+    }
+    else {//SvL: Use path of kernel32.dll instead of calling Open32 api (which returns \OS2\SYSTEM)
+	lstrcpynA(lpBuffer, kernel32Path, uSize);
+	return lstrlenA(lpBuffer);
+    }
   }
 }
 

@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.15 1999-10-20 08:09:04 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.16 1999-10-23 12:34:46 sandervl Exp $ */
 
 /*
  * KERNEL32 DLL entry point
@@ -38,6 +38,7 @@
 #include "initterm.h"
 #include <win32type.h>
 #include <odinlx.h>
+#include "oslibmisc.h"
 
 /*-------------------------------------------------------------------*/
 /* A clean up routine registered with DosExitList must be used if    */
@@ -62,6 +63,7 @@ int globLoadNr = 0;
 /* flag to optimize DosAllocMem to use all the memory on SMP machines */
 ULONG flAllocMem = 0;
 int   loadNr = 0;
+char  kernel32Path[CCHMAXPATH] = "";
 
 /****************************************************************************/
 /* _DLL_InitTerm is the function that gets called by the operating system   */
@@ -87,8 +89,12 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
     switch (ulFlag)
     {
         case 0 :
+	{
             loadNr = globLoadNr++;
 
+	    strcpy(kernel32Path, OSLibGetDllName(hModule));
+	    char *endofpath = strrchr(kernel32Path, '\\');
+	    *(endofpath+1) = 0;
             dprintf(("kernel32 init\n"));
             _ctordtorInit();
 
@@ -119,6 +125,7 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
             HMInitialize();             /* store standard handles within HandleManager */
             PROFILE_LoadOdinIni();
             break;
+	}
         case 1 :
             UnregisterLxDll(hModule);
             break;
