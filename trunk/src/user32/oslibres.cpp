@@ -1,4 +1,4 @@
-/* $Id: oslibres.cpp,v 1.2 1999-09-21 08:24:04 sandervl Exp $ */
+/* $Id: oslibres.cpp,v 1.3 1999-09-24 22:45:26 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -138,6 +138,7 @@ HANDLE OSLibWinCreatePointer(PVOID cursorbitmap)
 {
  POINTERINFO pointerInfo = {0};
  HBITMAP     hbmColor;
+ BITMAPARRAYFILEHEADER2 *bafh = (BITMAPARRAYFILEHEADER2 *)cursorbitmap;
  BITMAPFILEHEADER2 *bfh = (BITMAPFILEHEADER2 *)cursorbitmap;
  HPS         hps;
  HANDLE      hPointer;
@@ -146,10 +147,17 @@ HANDLE OSLibWinCreatePointer(PVOID cursorbitmap)
     	dprintf(("OSLibWinCreatePointer cursorbitmap == NULL!!"));
     	return 0;
     }
+    if(bafh->usType == BFT_BITMAPARRAY && bafh->cbSize == sizeof(BITMAPARRAYFILEHEADER2)) {
+    	bfh  = &bafh->bfh2;
+    }
+    else {//single icon
+    	bfh  = (BITMAPFILEHEADER2 *)cursorbitmap;
+	bafh = (BITMAPARRAYFILEHEADER2 *)bfh; //for calculation bitmap offset
+    }
     //skip xor/and mask
     hps = WinGetScreenPS(HWND_DESKTOP);
     hbmColor = GpiCreateBitmap(hps, &bfh->bmp2, CBM_INIT,
-                           (char *)bfh + bfh->offBits,
+                               (char *)bafh + bfh->offBits,
                                (BITMAPINFO2 *)&bfh->bmp2);
     if(hbmColor == GPI_ERROR) {
         dprintf(("OSLibWinCreatePointer: GpiCreateBitmap failed!"));
