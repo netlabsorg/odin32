@@ -1,4 +1,4 @@
-/* $Id: wsock32.cpp,v 1.12 1999-11-10 16:36:15 phaller Exp $ */
+/* $Id: wsock32.cpp,v 1.13 1999-11-10 16:39:46 phaller Exp $ */
 
 /*
  *
@@ -11,6 +11,12 @@
  * @(#) wsock32.c       1.0.0   1998/08/25 VV initial release
  *                      1.0.1   1999/04/27 VV cleanup and implement select.
  *
+ */
+
+/* Remark:
+ * PH 1999/11/10 memory leak as WSOCKTHREADDATA is NOT yet
+ *               freed when thread dies!
+ * PH 1999/11/10 asyncSelect() still left to proper implementation
  */
 
 

@@ -1,4 +1,4 @@
-/* $Id: wsock32.h,v 1.6 1999-10-25 23:17:19 phaller Exp $ */
+/* $Id: wsock32.h,v 1.7 1999-11-10 16:36:16 phaller Exp $ */
 
 /* WSOCK32.H--definitions & conversions for Odin's wsock32.dll.
  * Unused/unneeded Microsoft declarations removed.
@@ -541,8 +541,6 @@ struct Wprotoent  * WIN32API OS2getprotobyname(const char  * name);
 /* Microsoft Windows Extension function prototypes */
 int    WIN32API  OS2WSAStartup(WORD wVersionRequired, LPWSADATA lpWSAData);
 int    WIN32API  OS2WSACleanup(void);
-void   WIN32API  OS2WSASetLastError(int iError);
-int    WIN32API  OS2WSAGetLastError(void);
 BOOL   WIN32API  OS2WSAIsBlocking(void);
 int    WIN32API  OS2WSAUnhookBlockingHook(void);
 PROC   WIN32API  OS2WSASetBlockingHook(PROC lpBlockFunc);
