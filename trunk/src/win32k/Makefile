@@ -1,5 +1,5 @@
 ################################################################################
-# $Id: Makefile,v 1.39 2000-03-09 20:54:04 bird Exp $
+# $Id: Makefile,v 1.40 2000-03-17 19:14:42 bird Exp $
 #
 # Win32k makefile.
 #
@@ -404,7 +404,7 @@ clean:
 ################################################################################
 dep:
     $(PDWIN32_TOOLS)\fastdep -o$$(WIN32KOBJ) $(CINCLUDES) misc\*.c* ldr\*.c* \
-        dev32\*.c* dev16\*.c* pe2lx\*.c* k32\*.c* lib\*.c elf2lx\*.c* \
+        dev32\*.c* pe2lx\*.c* k32\*.c* lib\*.c elf2lx\*.c* \
         $(WIN32KINCLUDE)\*.h
     $(PDWIN32_TOOLS)\fastdep -a+ -o$$(WIN32KOBJ) $(CINCLUDES16) dev16\*.c*
     $(PDWIN32_TOOLS)\fastdep -a+ -o$$(WIN32KOBJ) -I$(WIN32KINCLUDE) \
