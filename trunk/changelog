@@ -1,4 +1,4 @@
- /* $Id: changelog,v 1.583 1999-12-28 22:15:23 sandervl Exp $ */
+ /* $Id: changelog,v 1.584 1999-12-28 23:15:30 sandervl Exp $ */
 
  99-12-28: Vit Timchishin <tvv@sbs.kiev.ua>
 	- USER32: Listbox fix; Commented out 'if (index == oldsel) return LB_OKAY;'
@@ -12,6 +12,9 @@
                     Put all version information in include\versionos2.h
                     Faked GetSystemPowerStatus (always returns online status
                     for desktop system)
+	- SHELL32: Implemented PathBuildRootW, PathRemoveBackslashW, PathFileExistsW,
+                   StrChrA & StrRChrW
+	- SHLWAPI: Created more forwarders to shell32 apis
 
  99-12-28: Jens Wiessner <wiessnej@rfi.de>
 	- avifil32, comdlg32, crtdll, ddraw, dinput, dplay, dplayx, imagehlp,
