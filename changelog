@@ -1,4 +1,9 @@
-/* $Id: changelog,v 1.2709 2004-03-17 16:59:27 sandervl Exp $ */
+/* $Id: changelog,v 1.2710 2004-03-18 11:14:28 sandervl Exp $ */
+
+ 2004-02-17: knut st. osmundsen <bird-changelog@innotek    >
+    - KERNEL32: o Fixed HEAP_strdupW.
+    - USER32:   o GpiCreateBitmap() sometimes read too much data, allocate more to
+                  prevent hitting the electric fence.
 
  2004-03-17: Sander van Leeuwen <sandervl@innotek   >
     - COMCTL32: o Merged latest Wine rebar and status controls
