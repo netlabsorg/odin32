@@ -1,4 +1,4 @@
-# $Id: pec.mak,v 1.2 2000-11-19 20:55:25 sandervl Exp $
+# $Id: pec.mak,v 1.3 2000-12-02 23:57:55 bird Exp $
 
 #
 # Odin32 API
@@ -10,12 +10,13 @@
 # Tell that we're producing an executable
 #
 EXETARGET = 1
+MAKEFILE = pec.mak
 
 
 #
 # Compiler, tools, and interference rules.
 #
-!include ../../include/pdwin32.mk
+!include ../../makefile.inc
 
 
 #
@@ -39,7 +40,7 @@ $(OBJDIR)\pec.obj
 # Libraries. One space before the '\'.
 #
 LIBS = \
-$(PDWIN32_LIB)/$(ODINCRT).lib \
+$(ODIN32_LIB)/$(ODINCRT).lib \
 $(RTLLIB_O) \
 os2386.lib
 
@@ -53,7 +54,7 @@ TARGET  = pec
 #
 # Includes the common rules.
 #
-!include $(PDWIN32_INCLUDE)/pdwin32.post
+!include $(ODIN32_POST_INC)
 
 
 #

@@ -1,18 +1,11 @@
-# $Id: makefile,v 1.11 2000-11-19 08:58:16 bird Exp $
+# $Id: makefile,v 1.12 2000-12-02 23:58:37 bird Exp $
+
 #
 # Odin32 API
 #
 #       Mesa/3dxf Makefile - opengl.dll.
 #
 
-
-#
-# Directory macros.
-#
-PDWIN32_INCLUDE = ..\..\..\..\include
-PDWIN32_LIB     = ..\..\..\..\lib
-PDWIN32_BIN     = ..\..\..\..\$(OBJDIR)\Glide
-PDWIN32_TOOLS   = ..\..\..\..\tools\bin
 
 
 #
@@ -24,12 +17,13 @@ NO_MAIN_BIN_COPY = 1
 #
 # Compiler, tools, and interference rules.
 #
-!include $(PDWIN32_INCLUDE)/pdwin32.mk
+!include ../../../../makefile.inc
 
 
 #
 # Overrides.
 #
+ODIN32_BIN  = $(ODIN32_BIN__)\Glide
 CINCLUDES   = -I.. -I..\GL $(CINCLUDES) -I..\..\glut -I..\..\glide\cvg\glide \
               -I..\..\glide\swlibs\fxmisc -I..\..\glide\cvg\incsrc
 CDEFINES    = $(CDEFINES_WIN32APP) \
@@ -37,8 +31,9 @@ CDEFINES    = $(CDEFINES_WIN32APP) \
               -DUSE_X86_ASM -DUSE_MMX_ASM -DUSE_3DNOW_ASM_NOT \
               -DFX -DFX_V2 -DFX_SILENT -DBUILD_GL32 -DFAST_MATH
 
+!if "$(VAC3)" == "1" || "$(VAC36)" == "1"
 CFLAGS      = $(CFLAGS) /Wcnd- /Tdp
-!ifdef WAT
+!else
 !error "Compiler not supported yet!"
 !endif
 
@@ -47,11 +42,15 @@ CFLAGS      = $(CFLAGS) /Wcnd- /Tdp
 # Interference rule for sources in the parent directory.
 #   This is BAD! Try make library in parent directory? Problem with different objects.
 #
+!ifndef WAT
 {..}.c{$(OBJDIR)}.obj:
     $(CC) $(CFLAGS) $(CINCLUDES) $(CDEFINES) -c -Fo$(OBJDIR)\$(@B).obj $<
 
 {..}.asm{$(OBJDIR)}.obj:
     $(AS) $(ASFLAGS) -Fdo:$(OBJDIR) $<
+!else
+!error "Compiler not supported yet!"
+!endif
 
 
 #
@@ -162,11 +161,11 @@ $(OBJDIR)\mem.obj
 # Libraries. One space before the '\'.
 #
 LIBS = \
-$(PDWIN32_LIB)/$(ODINCRT).lib \
-$(PDWIN32_LIB)\kernel32.lib \
-$(PDWIN32_LIB)\gdi32.lib \
-$(PDWIN32_LIB)\user32.lib \
-$(PDWIN32_LIB)\glide2x.lib \
+$(ODIN32_LIB)/$(ODINCRT).lib \
+$(ODIN32_LIB)/kernel32.lib \
+$(ODIN32_LIB)/gdi32.lib \
+$(ODIN32_LIB)/user32.lib \
+$(ODIN32_LIB)/glide2x.lib \
 $(RTLLIB_O) \
 os2386.lib
 
@@ -180,7 +179,7 @@ TARGET = opengl32
 #
 # Includes the common rules.
 #
-!include $(PDWIN32_INCLUDE)/pdwin32.post
+!include $(ODIN32_POST_INC)
 
 
 #

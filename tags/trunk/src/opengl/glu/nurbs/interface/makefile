@@ -1,18 +1,10 @@
-# $Id: makefile,v 1.7 2000-11-19 08:58:13 bird Exp $
+# $Id: makefile,v 1.8 2000-12-02 23:59:44 bird Exp $
+
 #
-# PD-Win32 API
+# Odin32 API
 #
 #       glu/nurbs/interface makefile
 #
-
-
-#
-# Directory macros.
-#
-PDWIN32_INCLUDE = ..\..\..\..\..\include
-PDWIN32_LIB     = ..\..\..\..\..\lib
-PDWIN32_BIN     = ..\..\..\..\..\$(OBJDIR)
-PDWIN32_TOOLS   = ..\..\..\..\..\tools\bin
 
 
 #
@@ -25,7 +17,7 @@ ADDITIONAL_DEP = mydep
 #
 # Compiler, tools, and interference rules.
 #
-!include $(PDWIN32_INCLUDE)/pdwin32.mk
+!include ../../../../../makefile.inc
 
 
 #
@@ -60,7 +52,7 @@ TARGET  = interface
 #
 # Includes the common rules.
 #
-!include $(PDWIN32_INCLUDE)/pdwin32.post
+!include $(ODIN32_POST_INC)
 
 
 #
