@@ -1,4 +1,4 @@
-/* $Id: shellord.c,v 1.1 2000-08-30 13:52:56 sandervl Exp $ */
+/* $Id: shellord.c,v 1.2 2000-11-06 10:20:56 sandervl Exp $ */
 /*
  * The parameters of many functions changes between different OS versions
  * (NT uses Unicode strings, 95 uses ASCII strings)
@@ -108,7 +108,15 @@ BOOL WINAPI GetFileNameFromBrowse(
 }
 
 /*************************************************************************
- * SHGetSettings				[SHELL32.68]
+ * SHGetSetSettings				[SHELL32.68]
+ */
+VOID WINAPI SHGetSetSettings(DWORD x, DWORD y, DWORD z)
+{
+	FIXME("0x%08lx 0x%08lx 0x%08lx\n", x, y, z);
+}
+
+/*************************************************************************
+ * SHGetSettings				[SHELL32.@]
  * 
  * NOTES
  *  the registry path are for win98 (tested)

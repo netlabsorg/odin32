@@ -1,4 +1,4 @@
-; $Id: shell32.def,v 1.32 2000-11-02 09:52:18 sandervl Exp $
+; $Id: shell32.def,v 1.33 2000-11-06 10:20:55 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 ;based on Windows 95
@@ -74,7 +74,7 @@ EXPORTS
     InvalidateDriveType               = _InvalidateDriveType@4                @65
     IsNetDrive                        = _IsNetDrive@4                         @66
     Shell_MergeMenus                  = _Shell_MergeMenus@24                  @67
-    SHGetSettings                     = _SHGetSettings@12                     @68
+    SHGetSetSettings                  = _SHGetSetSettings@12                  @68
 ;   SHGetNetResource                  = _SHGetNetResource@?                   @69
     SHCreateDefClassObject            = _SHCreateDefClassObject@20            @70
     Shell_GetImageList                = _Shell_GetImageList@8                 @71
@@ -375,6 +375,8 @@ EXPORTS
 ;  _WIN32_IE >= 0x0400
 ;
     SHGetSpecialFolderPathA           = _SHGetSpecialFolderPathA@16           @690
+
+    SHGetSettings                     = _SHGetSettings@12                     @691
 
 ;
 ; version 5.00 (Win2K)
