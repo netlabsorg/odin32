@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.h,v 1.11 2001-05-30 08:23:21 sandervl Exp $ */
+/* $Id: winimagepeldr.h,v 1.12 2001-06-01 01:21:12 phaller Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -13,6 +13,7 @@
 #define __WINIMAGEPELDR_H__
 
 #include <winimagebase.h>
+
 
 #define SINGLE_PAGE 		0  //commit single page
 #define COMPLETE_SECTION 	1  //commit entire section
@@ -54,20 +55,25 @@ typedef struct {
   ULONG  flags;         //psh[i].Characteristics
 } Section;
 
-typedef struct {
+
+typedef struct 
+{
   ULONG  virtaddr;
   ULONG  ordinal;
   ULONG  nlength;
   char   name[4];
 } NameExport;
 
-typedef struct {
+typedef struct 
+{
   ULONG  virtaddr;
   ULONG  ordinal;
 } OrdExport;
 
+
 class Win32DllBase;
 class Win32MemMap;
+
 
 class Win32PeLdrImage : public virtual Win32ImageBase
 {
@@ -130,6 +136,7 @@ Win32DllBase *loadDll(char *pszCurModule);
 
         ULONG                 nrNameExports, nameExportSize;
         ULONG                 nrOrdExports;
+
         NameExport           *nameexports, *curnameexport;
         OrdExport            *ordexports, *curordexport;
 
