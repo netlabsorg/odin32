@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.49 1999-07-14 21:08:19 cbratschi Exp $ */
+ /* $Id: ChangeLog,v 1.50 1999-07-15 08:19:02 sandervl Exp $ */
+ 99-07-15: Sander van Leeuwen <sandervl@xs4all.nl>
+        - USER32/NEW: Unicode & window handle translation bugfixes
+
  99-07-14: Christoph Bratschi <cbratschi@datacomm.ch>
         - USER32/NEW: several bugs fixed, compiles now
                       CreateWindow doesn't work yet

@@ -1,4 +1,4 @@
-/* $Id: windowclass.cpp,v 1.2 1999-07-14 21:05:59 cbratschi Exp $ */
+/* $Id: windowclass.cpp,v 1.3 1999-07-15 08:18:11 sandervl Exp $ */
 /*
  * Win32 Window Class Code for OS/2
  *
@@ -18,6 +18,7 @@
 #include <misc.h>
 #include <win32class.h>
 #include <win32wnd.h>
+#include <handlemanager.h>
 
 //******************************************************************************
 //******************************************************************************
@@ -62,55 +63,66 @@ ATOM WIN32API RegisterClassExA(CONST WNDCLASSEXA *lpWndClass)
    return(wclass->getAtom());
 }
 //******************************************************************************
-//CB: update to unicode!
 //******************************************************************************
 WORD WIN32API RegisterClassW(CONST WNDCLASSW *lpwc)
 {
  ATOM rc;
  WNDCLASSEXA wclass;
+ Win32WndClass *winclass;
 
     dprintf(("RegisterClassW\n"));
     //CB: size new in ex structure
     wclass.cbSize = sizeof(wclass);
     memcpy(&wclass.style, lpwc, sizeof(WNDCLASSA));
-    if(wclass.lpszMenuName && ((ULONG)wclass.lpszMenuName >> 16 != 0)) {
+    if(wclass.lpszMenuName && (HIWORD(wclass.lpszMenuName) != 0)) {
         wclass.lpszMenuName = UnicodeToAsciiString((LPWSTR)lpwc->lpszMenuName);
     }
-    if(wclass.lpszClassName && ((ULONG)wclass.lpszClassName >> 16 != 0)) {
+    if(wclass.lpszClassName && (HIWORD(wclass.lpszClassName) != 0)) {
         wclass.lpszClassName = UnicodeToAsciiString((LPWSTR)lpwc->lpszClassName);
     }
-    rc = RegisterClassA((CONST WNDCLASSA *)&wclass);
+    winclass = new Win32WndClass((WNDCLASSEXA *)&wclass, TRUE);
+    if(winclass == NULL) {
+        dprintf(("RegisterClassW wclass == NULL!"));
+        return(0);
+    }
+    rc = winclass->getAtom();
 
-    if(lpwc->lpszMenuName && ((ULONG)lpwc->lpszMenuName >> 16 != 0)) {
+    if(lpwc->lpszMenuName && (HIWORD(lpwc->lpszMenuName) != 0)) {
         FreeAsciiString((char *)wclass.lpszMenuName);
     }
-    if(lpwc->lpszClassName && ((ULONG)lpwc->lpszClassName >> 16 != 0)) {
+    if(lpwc->lpszClassName && (HIWORD(lpwc->lpszClassName) !=0)) {
         FreeAsciiString((char *)wclass.lpszClassName);
     }
     return(rc);
 }
 //******************************************************************************
-//CB: update to unicode!
 //******************************************************************************
 ATOM WIN32API RegisterClassExW(CONST WNDCLASSEXW *lpwc)
 {
  ATOM rc;
  WNDCLASSEXA wclass;
+ Win32WndClass *winclass;
 
     dprintf(("RegisterClassExW\n"));
     memcpy(&wclass, lpwc, sizeof(WNDCLASSEXA));
-    if(wclass.lpszMenuName && ((ULONG)wclass.lpszMenuName >> 16 != 0)) {
+    if(wclass.lpszMenuName && (HIWORD(wclass.lpszMenuName) != 0)) {
         wclass.lpszMenuName = UnicodeToAsciiString((LPWSTR)lpwc->lpszMenuName);
     }
-    if(wclass.lpszClassName && ((ULONG)wclass.lpszClassName >> 16 != 0)) {
+    if(wclass.lpszClassName && (HIWORD(wclass.lpszClassName) != 0)) {
         wclass.lpszClassName = UnicodeToAsciiString((LPWSTR)lpwc->lpszClassName);
     }
-    rc = RegisterClassExA((CONST WNDCLASSEXA *)&wclass);
 
-    if(lpwc->lpszMenuName && ((ULONG)lpwc->lpszMenuName >> 16 != 0)) {
+    winclass = new Win32WndClass((WNDCLASSEXA *)&wclass, TRUE);
+    if(winclass == NULL) {
+        dprintf(("RegisterClassExW wclass == NULL!"));
+        return(0);
+    }
+    rc = winclass->getAtom();
+
+    if(lpwc->lpszMenuName && (HIWORD(lpwc->lpszMenuName) != 0)) {
         FreeAsciiString((char *)wclass.lpszMenuName);
     }
-    if(lpwc->lpszClassName && ((ULONG)lpwc->lpszClassName >> 16 != 0)) {
+    if(lpwc->lpszClassName && (HIWORD(lpwc->lpszClassName) != 0)) {
         FreeAsciiString((char *)wclass.lpszClassName);
     }
     return(rc);
@@ -126,21 +138,21 @@ BOOL WIN32API UnregisterClassA(LPCSTR lpszClassName, HINSTANCE hinst)
    return(TRUE);
 }
 //******************************************************************************
-//CB:update to unicode!
 //******************************************************************************
 BOOL WIN32API UnregisterClassW(LPCWSTR lpszClassName, HINSTANCE hinst)
 {
  char *astring = NULL;
 
   dprintf(("USER32:  UnregisterClassW\n"));
-  if((ULONG)lpszClassName >> 16 != 0) {
+  if(HIWORD(lpszClassName) != 0) {
         astring = UnicodeToAsciiString((LPWSTR)lpszClassName);
   }
   else  astring = (char *)lpszClassName;
 
   Win32WndClass::UnregisterClassA(hinst, (LPSTR)astring);
-  if((ULONG)astring >> 16 != 0)
+  if(HIWORD(astring) != 0)
         FreeAsciiString((char *)astring);
+
   //Spintest returns FALSE in dll termination, so pretend it succeeded
   return(TRUE);
 }
@@ -163,7 +175,6 @@ BOOL WIN32API GetClassInfoA(HINSTANCE hInstance, LPCSTR lpszClass, WNDCLASSA *lp
   return(FALSE);
 }
 //******************************************************************************
-//CB: update to unicode!
 //******************************************************************************
 BOOL WIN32API GetClassInfoW(HINSTANCE  hinst, LPCWSTR lpszClass, WNDCLASSW *lpwc)
 {
@@ -174,17 +185,18 @@ BOOL WIN32API GetClassInfoW(HINSTANCE  hinst, LPCWSTR lpszClass, WNDCLASSW *lpwc
 
   dprintf(("USER32:  GetClassInfoW\n"));
 
-  if((ULONG)lpszClass >> 16 != 0) {
+  if(HIWORD(lpszClass) != 0) {
         astring = UnicodeToAsciiString((LPWSTR)lpszClass);
   }
   else  astring = (char *)lpszClass;
 
   wndclass = Win32WndClass::FindClass(hinst, astring);
-  if((ULONG)astring >> 16 != 0)
+  if(HIWORD(astring) != 0)
         FreeAsciiString((char *)astring);
+
   if(wndclass) {
         wndclass->getClassInfo(&wc);
-        memcpy(lpwc, &wc, sizeof(WNDCLASSW));
+        memcpy(lpwc, &wc.style, sizeof(WNDCLASSW));
         return(TRUE);
   }
   return(FALSE);
@@ -249,14 +261,15 @@ BOOL WIN32API GetClassInfoExW(HINSTANCE     hInstance,
 
   dprintf(("USER32: GetClassInfoExW\n"));
 
-  if((ULONG)lpszClass >> 16 != 0) {
+  if(HIWORD(lpszClass) != 0) {
         astring = UnicodeToAsciiString((LPWSTR)lpszClass);
   }
   else  astring = (char *)lpszClass;
 
   wndclass = Win32WndClass::FindClass(hInstance, astring);
-  if((ULONG)astring >> 16 != 0)
+  if(HIWORD(astring) != 0)
         FreeAsciiString((char *)astring);
+
   if(wndclass) {
         wndclass->getClassInfo(lpwcx);
         return(TRUE);
@@ -270,8 +283,7 @@ int WIN32API GetClassNameA(HWND hwnd, LPSTR lpszClassName, int cchClassName)
  Win32Window *wnd;
 
     dprintf(("USER32: GetClassNameA\n"));
-    wnd = WIN2OS2HWND(hwnd);
-    if(wnd == NULL) {
+    if(HMHandleTranslateToOS2(hwnd, (PULONG)&wnd) != NO_ERROR) {
         dprintf(("GetClassNameA wnd == NULL"));
         return(0);
     }
@@ -284,8 +296,7 @@ int WIN32API GetClassNameW(HWND hwnd, LPWSTR lpszClassName, int cchClassName)
  Win32Window *wnd;
 
     dprintf(("USER32: GetClassNameW\n"));
-    wnd = WIN2OS2HWND(hwnd);
-    if(wnd == NULL) {
+    if(HMHandleTranslateToOS2(hwnd, (PULONG)&wnd) != NO_ERROR) {
         dprintf(("GetClassNameA wnd == NULL"));
         return(0);
     }
@@ -298,8 +309,7 @@ LONG WIN32API SetClassLongA(HWND hwnd, int nIndex, LONG lNewVal)
  Win32Window *wnd;
 
     dprintf(("USER32: SetClassLongA\n"));
-    wnd = WIN2OS2HWND(hwnd);
-    if(wnd == NULL) {
+    if(HMHandleTranslateToOS2(hwnd, (PULONG)&wnd) != NO_ERROR) {
         dprintf(("SetClassLongA wnd == NULL"));
         return(0);
     }
@@ -312,8 +322,7 @@ LONG WIN32API SetClassLongW(HWND hwnd, int nIndex, LONG lNewVal)
  Win32Window *wnd;
 
     dprintf(("USER32: SetClassLongW\n"));
-    wnd = WIN2OS2HWND(hwnd);
-    if(wnd == NULL) {
+    if(HMHandleTranslateToOS2(hwnd, (PULONG)&wnd) != NO_ERROR) {
         dprintf(("SetClassLongW wnd == NULL"));
         return(0);
     }
@@ -326,8 +335,7 @@ WORD WIN32API SetClassWord(HWND hwnd, int nIndex, WORD  wNewVal)
  Win32Window *wnd;
 
     dprintf(("USER32: SetClassWordA\n"));
-    wnd = WIN2OS2HWND(hwnd);
-    if(wnd == NULL) {
+    if(HMHandleTranslateToOS2(hwnd, (PULONG)&wnd) != NO_ERROR) {
         dprintf(("SetClassWordA wnd == NULL"));
         return(0);
     }
@@ -340,8 +348,7 @@ WORD WIN32API GetClassWord(HWND hwnd, int nIndex)
  Win32Window *wnd;
 
     dprintf(("USER32: GetClassWordA\n"));
-    wnd = WIN2OS2HWND(hwnd);
-    if(wnd == NULL) {
+    if(HMHandleTranslateToOS2(hwnd, (PULONG)&wnd) != NO_ERROR) {
         dprintf(("GetClassWordA wnd == NULL"));
         return(0);
     }
@@ -354,8 +361,7 @@ LONG WIN32API GetClassLongA(HWND hwnd, int nIndex)
  Win32Window *wnd;
 
     dprintf(("USER32: GetClassLongA\n"));
-    wnd = WIN2OS2HWND(hwnd);
-    if(wnd == NULL) {
+    if(HMHandleTranslateToOS2(hwnd, (PULONG)&wnd) != NO_ERROR) {
         dprintf(("GetClassLongA wnd == NULL"));
         return(0);
     }
@@ -368,8 +374,7 @@ LONG WIN32API GetClassLongW(HWND hwnd, int nIndex)
  Win32Window *wnd;
 
     dprintf(("USER32: GetClassLongW\n"));
-    wnd = WIN2OS2HWND(hwnd);
-    if(wnd == NULL) {
+    if(HMHandleTranslateToOS2(hwnd, (PULONG)&wnd) != NO_ERROR) {
         dprintf(("GetClassLongW wnd == NULL"));
         return(0);
     }
