@@ -1,4 +1,4 @@
-/* $Id: icon.cpp,v 1.11 2001-08-08 10:07:18 sandervl Exp $ */
+/* $Id: icon.cpp,v 1.12 2001-08-08 12:06:29 sandervl Exp $ */
 
 /*
  * Win32 icon conversion functions for OS/2
@@ -36,126 +36,6 @@
 #define DIB_PAL_COLORS_W   1
 #define CBM_INIT_W         4
 
-#if 0
-//******************************************************************************
-//******************************************************************************
-PBYTE ConvertWin32Icon(PBYTE presbits, DWORD dwResSize, DWORD *OS2ResSize)
-{
- WINBITMAPINFOHEADER *bmpHdr = (WINBITMAPINFOHEADER *)presbits;
- BITMAPFILEHEADER    *iconhdr;  
- BITMAPFILEHEADER    *iconhdr2;
- RGBQUAD *rgb;
- RGB     *os2rgb;
- int bwsize, i, colorsize, rgbsize, iconsize;
-
-  bwsize   = (bmpHdr->biWidth*(bmpHdr->biHeight/2))/8;
-  colorsize = bmpHdr->biWidth*(bmpHdr->biHeight/2);
-  if(bmpHdr->biBitCount < 24)	
-	rgbsize = (1<<bmpHdr->biBitCount)*sizeof(RGB);
-  else  rgbsize = 0;
-
-  switch(bmpHdr->biBitCount) {
-	case 1:
-		colorsize /= 8;
-		break;
-	case 4:
-		colorsize /= 2;
-		break;
-	case 8:
-		break;
-	case 16:
-		colorsize *= 2;
-		break;
-	case 24:
-		colorsize *= 3;
-		break;
-	case 32:
-		colorsize *= 4;
-		break;
-  }
-  if(bmpHdr->biSizeImage == 0 && bmpHdr->biCompression == 0) {
-	bmpHdr->biSizeImage = bwsize + colorsize;
-  }
-#if 0
-  cout << "Icon size    : " << bmpHdr->biSizeImage << endl;
-  cout << "Icon Width   : " << bmpHdr->biWidth << endl;
-//height for both the XOR and AND bitmap (color & BW)
-  cout << "Height       : " << bmpHdr->biHeight << endl;
-  cout << "Icon Bitcount: " << bmpHdr->biBitCount << endl;
-  cout << "Icon Compress: " << bmpHdr->biCompression << endl;
-#endif
-
-  //bitmapfileheader for AndXor mask + 2 RGB structs + bitmapfileheader
-  //for color bitmap + RGB structs for all the colors
-  //SvL, 15-3-98: 2*bwsize 
-  iconsize = 2*sizeof(BITMAPFILEHEADER) + 2*sizeof(RGB) + 
-             rgbsize + 2*bwsize + bmpHdr->biSizeImage;
-  //There are icons without an XOR mask, so check for it
-  if(bmpHdr->biSizeImage == colorsize) {
-	iconsize += bwsize;
-  }
-  iconhdr  = (BITMAPFILEHEADER *)malloc(iconsize);
-  iconhdr->usType    	 = BFT_COLORICON;
-  iconhdr->cbSize	 = sizeof(BITMAPFILEHEADER);
-  iconhdr->xHotspot	 = 0;
-  iconhdr->yHotspot	 = 0;
-  iconhdr->offBits 	 = 2*sizeof(BITMAPFILEHEADER) + 
-		           2*sizeof(RGB) + rgbsize;
-  iconhdr->bmp.cbFix	 = sizeof(BITMAPINFOHEADER);
-  iconhdr->bmp.cx	 = (USHORT)bmpHdr->biWidth;
-  iconhdr->bmp.cy	 = (USHORT)bmpHdr->biHeight;
-  iconhdr->bmp.cPlanes   = 1;
-  iconhdr->bmp.cBitCount = 1;
-  os2rgb                 = (RGB *)(iconhdr+1);
-  memset(os2rgb, 0, sizeof(RGB));
-  memset(os2rgb+1, 0xff, sizeof(RGB));
-  iconhdr2               = (BITMAPFILEHEADER *)(os2rgb+2);
-  iconhdr2->usType    	 = BFT_COLORICON;
-  iconhdr2->cbSize	 = sizeof(BITMAPFILEHEADER);
-  iconhdr2->xHotspot	 = 0;
-  iconhdr2->yHotspot	 = 0;
-  iconhdr2->offBits 	 = 2*sizeof(BITMAPFILEHEADER) + 
-		           2*sizeof(RGB) + rgbsize + 2*bwsize;
-  iconhdr2->bmp.cbFix	 = sizeof(BITMAPINFOHEADER);
-  iconhdr2->bmp.cx	 = (USHORT)bmpHdr->biWidth;
-  iconhdr2->bmp.cy	 = (USHORT)(bmpHdr->biHeight/2);
-  iconhdr2->bmp.cPlanes  = bmpHdr->biPlanes;
-  iconhdr2->bmp.cBitCount= bmpHdr->biBitCount; 
-  os2rgb                 = (RGB *)(iconhdr2+1);
-  rgb 			 = (RGBQUAD *)(bmpHdr+1);
-  if(bmpHdr->biBitCount < 24) {
-	for(i=0;i<(1<<bmpHdr->biBitCount);i++) {
-		os2rgb->bRed   = rgb->red;
-		os2rgb->bBlue  = rgb->blue;
-	 	os2rgb->bGreen = rgb->green;
-		os2rgb++;
-		rgb++;
-	}
-  }
-  //write 2*mono pixels + color pixels
-  //There are icons without an XOR mask, so check for it
-  if(bmpHdr->biSizeImage == colorsize) {
-	memset((char *)os2rgb, 0, bwsize);
-	memset((char *)os2rgb+bwsize, 0, bwsize);
-	memcpy((char *)os2rgb+2*bwsize, (char *)rgb, colorsize);
-  }
-  else {
-	memcpy((char *)os2rgb, (char *)rgb+colorsize, bwsize);
-	memcpy((char *)os2rgb+bwsize, (char *)rgb+colorsize, bwsize);
-	memcpy((char *)os2rgb+2*bwsize, (char *)rgb, colorsize);
-  }
-  *OS2ResSize = iconsize;
-  return((PBYTE)iconhdr);
-}
-//******************************************************************************
-//******************************************************************************
-void FreeIcon(void *os2icon)
-{
-  free(os2icon);
-}
-//******************************************************************************
-//******************************************************************************
-#endif
 
 //******************************************************************************
 //******************************************************************************
@@ -166,7 +46,6 @@ ULONG QueryConvertedIconSize(WINBITMAPINFOHEADER *bmpHdr, int size)
   bwsize    = DIB_GetDIBImageBytes(bmpHdr->biWidth, (bmpHdr->biHeight/2), 1);
   colorsize = DIB_GetDIBImageBytes(bmpHdr->biWidth, (bmpHdr->biHeight/2), bmpHdr->biBitCount);
 
-  //SvL: 28-09-'98: only for <= 8
   if(bmpHdr->biBitCount <= 8)
         rgbsize = (1<<bmpHdr->biBitCount)*sizeof(RGB2);
   else  rgbsize = 0;
@@ -183,7 +62,7 @@ ULONG QueryConvertedIconSize(WINBITMAPINFOHEADER *bmpHdr, int size)
   //for color bitmap + RGB structs for all the colors
   //SvL, 3-3-98: 2*bwsize
   iconsize = 2*sizeof(BITMAPFILEHEADER2) + 2*sizeof(RGB2) +
-             rgbsize + 2*bwsize + bmpHdr->biSizeImage;
+             rgbsize + 2*bwsize + colorsize;
 
   return iconsize;
 }
@@ -225,7 +104,7 @@ void *ConvertIcon(WINBITMAPINFOHEADER *bmpHdr, int size, int *os2size, int offse
   //for color bitmap + RGB structs for all the colors
   //SvL, 3-3-98: 2*bwsize
   iconsize = 2*sizeof(BITMAPFILEHEADER2) + 2*sizeof(RGB2) +
-             rgbsize + 2*bwsize + bmpHdr->biSizeImage;
+             rgbsize + 2*bwsize + colorsize;
 
   iconhdr  = (BITMAPFILEHEADER2 *)malloc(iconsize);
   memset(iconhdr, 0, iconsize);
@@ -240,6 +119,9 @@ void *ConvertIcon(WINBITMAPINFOHEADER *bmpHdr, int size, int *os2size, int offse
   iconhdr->bmp2.cy       = (USHORT)bmpHdr->biHeight;
   iconhdr->bmp2.cPlanes  = 1;
   iconhdr->bmp2.cBitCount= 1;
+  iconhdr->bmp2.cbImage  = 2*bwsize;
+  iconhdr->bmp2.cclrUsed = 2;
+  iconhdr->bmp2.cclrImportant = 2;
   iconhdr->bmp2.ulCompression   = BCA_UNCOMP;
   iconhdr->bmp2.ulColorEncoding = BCE_RGB;
   os2rgb                 = (RGB2 *)(iconhdr+1);
@@ -257,6 +139,9 @@ void *ConvertIcon(WINBITMAPINFOHEADER *bmpHdr, int size, int *os2size, int offse
   iconhdr2->bmp2.cy      = (USHORT)(bmpHdr->biHeight/2);
   iconhdr2->bmp2.cPlanes = bmpHdr->biPlanes;
   iconhdr2->bmp2.cBitCount= bmpHdr->biBitCount;
+  iconhdr2->bmp2.cbImage  = colorsize;
+  iconhdr2->bmp2.cclrUsed = bmpHdr->biClrUsed;
+  iconhdr2->bmp2.cclrImportant = bmpHdr->biClrImportant;
   iconhdr2->bmp2.ulCompression   = BCA_UNCOMP;
   iconhdr2->bmp2.ulColorEncoding = BCE_RGB;
   os2rgb                 = (RGB2 *)(iconhdr2+1);
@@ -327,7 +212,7 @@ void * WIN32API ConvertIconGroup(void *hdr, HINSTANCE hInstance, DWORD *ressize)
                                             SizeofResource(hInstance, hRes));
         rdir++;
   }
-  groupsize = groupsize+ihdr->wCount*sizeof(BITMAPARRAYFILEHEADER2);
+  groupsize = groupsize+ihdr->wCount*(sizeof(BITMAPARRAYFILEHEADER2) - sizeof(BITMAPFILEHEADER2));
   bafh    = (BITMAPARRAYFILEHEADER2 *)malloc(groupsize);
   memset(bafh, 0, groupsize);
   orgbafh = bafh;
