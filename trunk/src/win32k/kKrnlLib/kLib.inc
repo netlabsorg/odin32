@@ -1,4 +1,4 @@
-# $Id: kLib.inc,v 1.1 2002-03-31 19:30:40 bird Exp $
+# $Id: kLib.inc,v 1.2 2002-04-07 22:40:16 bird Exp $
 
 #
 # kLib.mk - configuration overloader for kLib in kLibKrnl.sys.
@@ -23,7 +23,7 @@ ALL_DEFINES     = -DKKRNLLIB
 KLIB_POSTFIX    = R0
 TARGET_MODE     = SYSLIB
 PATH_ROOT       = $(PATH_WIN32K)\..\..
-!include $(PATH_ROOT)\tools\make\setup.mak
+!include $(PATH_ROOT)\make\setup.mak
 
 
 

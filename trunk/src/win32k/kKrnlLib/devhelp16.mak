@@ -1,4 +1,4 @@
-# $Id: devhelp16.mak,v 1.1 2002-03-10 05:22:32 bird Exp $
+# $Id: devhelp16.mak,v 1.2 2002-04-07 22:40:15 bird Exp $
 
 #
 # devhelp (16-bit)
@@ -11,7 +11,7 @@
 # Setup.
 #
 PATH_ROOT = ..\..\..
-!include $(PATH_ROOT)\tools\make\setup.mak
+!include $(PATH_ROOT)\make\setup.mak
 !include ..\makefile.inc
 
 

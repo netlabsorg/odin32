@@ -1,4 +1,4 @@
-# $Id: first.mak,v 1.2 2002-03-31 19:01:16 bird Exp $
+# $Id: first.mak,v 1.3 2002-04-07 22:39:44 bird Exp $
 
 #
 # kKrnlLib/dev32 makefile.
@@ -9,7 +9,7 @@
 # Load the build setup.
 #
 PATH_ROOT = ..\..\..\..
-!include $(PATH_ROOT)\tools\make\setup.mak
+!include $(PATH_ROOT)\make\setup.mak
 
 
 #

@@ -1,4 +1,4 @@
-# $Id: win32k.mak,v 1.13.2.4 2002-04-01 12:42:15 bird Exp $
+# $Id: win32k.mak,v 1.13.2.5 2002-04-07 22:40:36 bird Exp $
 
 #
 # win32k.sys
@@ -11,7 +11,7 @@
 # Setup.
 #
 PATH_ROOT = ..\..
-!include $(PATH_ROOT)\tools\make\setup.mak
+!include $(PATH_ROOT)\make\setup.mak
 
 
 #

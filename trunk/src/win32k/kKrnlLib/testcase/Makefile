@@ -1,8 +1,10 @@
-# $Id: Makefile,v 1.1 2002-03-31 19:30:41 bird Exp $
+# $Id: Makefile,v 1.2 2002-04-07 22:37:23 bird Exp $
 
 #
 # kKrnlLib/testcase makefile.
 #
+# Test makefile is setup to automatically execute all testcases
+# for the kKrnlLib.sys driver.
 #
 
 #
@@ -10,34 +12,18 @@
 #
 !include ..\..\Makefile.inc
 PATH_ROOT = ..\..\..\..
-!include $(PATH_ROOT)\tools\make\setup.mak
+!include $(PATH_ROOT)\make\setup.mak
 
 
 #
-# Config.
+# Macros
 #
-TARGET_MODE  = SYSLIB
-TARGET_NAME  = kKrnlLib_testcase
-ALL_INCLUDES = -I../include
-AS_INCLUDES  = -I$(PATH_DDKBASE)\inc
-ALL_DEFINES  = -DKKRNLLIB -DR3TST
+KKRNLLIBR3TST = $(PATH_OBJ)\kKrnlLibR3Tst.exe\kKrnlLibR3Tst.exe
 
+testcase: \
+    Kernel-Identifications \
 
-#
-# Targets.
-#
-TARGET_OBJS =\
-$(PATH_TARGET)\tstDH.$(EXT_OBJ)\
-$(PATH_TARGET)\tstDos.$(EXT_OBJ)\
-$(PATH_TARGET)\tstDosA.$(EXT_OBJ)\
-$(PATH_TARGET)\tstFake.$(EXT_OBJ)\
-$(PATH_TARGET)\tstFakeA.$(EXT_OBJ)\
-$(PATH_TARGET)\tstInit.$(EXT_OBJ)\
-$(PATH_TARGET)\tstkKrnlLib.$(EXT_OBJ)\
-
-
-#
-# Load the build process rules.
-#
-!include $(MAKE_INCLUDE_PROCESS)
-
+Kernel-Identifications:
+    @$(ECHO) $(CLRFIL)kKrnlLib.sys $(CLRTXT)- Testcase 1: Massive kernel idenfication test.$(CLRRST)
+    if exist h:\kernels\syms\14040R4.sym ..\tools\TestKernels.cmd $(KKRNLLIBR3TST) h:\kernels\syms
+    @$(ECHO) $(CLRFIL)kKrnlLib.sys $(CLRTXT)- Testcase 1: Completed.$(CLRRST)

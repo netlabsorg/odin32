@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.25 2002-03-31 19:40:12 bird Exp $
+# $Id: Makefile,v 1.26 2002-04-07 22:40:15 bird Exp $
 
 #
 # kKrnlLib main file.
@@ -11,7 +11,7 @@
 # Setup.
 #
 PATH_ROOT = ..\..\..
-!include $(PATH_ROOT)\tools\make\setup.mak
+!include $(PATH_ROOT)\make\setup.mak
 
 
 #
@@ -21,6 +21,8 @@ TARGET_MODE = EMPTY
 TARGET_NAME = kKrnlLib_empty
 SUBDIRS     = tools include
 PREMAKEFILES= kKrnlLib.mak kKrnlLibR3Tst.mak
+BUILD_NO_TESTCASE = 1
+
 
 
 #
@@ -34,4 +36,11 @@ needed:
 #    @$(TOOL_DOMAKES) "" $(TOOL_MAKE) build
 
 
+#
+# Our own minimal testcase rule
+#
+testcase:
+!if [$(TOOL_EXISTS) testcase] == 0
+    @$(TOOL_DODIRS) "testcase" $(TOOL_MAKE) $@
+!endif
 

@@ -1,4 +1,4 @@
-# $Id: newdbg.mak,v 1.2 2002-03-31 19:01:17 bird Exp $
+# $Id: newdbg.mak,v 1.3 2002-04-07 22:39:45 bird Exp $
 
 #
 # newdbg - separate make file for the debug new.
@@ -15,7 +15,7 @@
 ALL_INCLUDES= -I../include
 ALL_DEFINES = -DKKRNLLIB
 PATH_ROOT   = ..\..\..\..
-!include $(PATH_ROOT)\tools\make\setup.mak
+!include $(PATH_ROOT)\make\setup.mak
 !if "$(BUILD_ENV)" == "VAC308" || "$(BUILD_ENV)" == "VAC365"
 CXX_FLAGS_SYS = $(CXX_FLAGS_SYS) -Tm+
 !endif

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.14.2.2 2002-04-01 13:04:08 bird Exp $
+# $Id: makefile,v 1.14.2.3 2002-04-07 22:40:36 bird Exp $
 
 #
 # Odin32 API
@@ -11,7 +11,7 @@
 # Load the build setup.
 #
 PATH_ROOT = ..\..\..
-!include $(PATH_ROOT)\tools\make\setup.mak
+!include $(PATH_ROOT)\make\setup.mak
 
 
 #

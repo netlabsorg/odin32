@@ -1,4 +1,4 @@
-# $Id: dev16.mak,v 1.1.2.2 2002-04-01 12:50:00 bird Exp $
+# $Id: dev16.mak,v 1.1.2.3 2002-04-07 22:40:37 bird Exp $
 
 #
 # kKrnlLib/dev16
@@ -13,7 +13,7 @@
 !endif
 BUILD_ENV  = MSCV6
 PATH_ROOT  = ..\..\..
-!include $(PATH_ROOT)\tools\make\setup.mak
+!include $(PATH_ROOT)\make\setup.mak
 !include ..\makefile.inc
 
 

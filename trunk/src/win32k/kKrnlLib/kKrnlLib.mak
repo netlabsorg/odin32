@@ -1,4 +1,4 @@
-# $Id: kKrnlLib.mak,v 1.3 2002-04-01 12:43:10 bird Exp $
+# $Id: kKrnlLib.mak,v 1.4 2002-04-07 22:40:16 bird Exp $
 
 #
 # kKrnlLib.
@@ -11,7 +11,7 @@
 # Setup.
 #
 PATH_ROOT = ..\..\..
-!include $(PATH_ROOT)\tools\make\setup.mak
+!include $(PATH_ROOT)\make\setup.mak
 
 
 #

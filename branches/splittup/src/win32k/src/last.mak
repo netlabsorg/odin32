@@ -1,4 +1,4 @@
-# $Id: last.mak,v 1.1.2.1 2002-04-01 09:06:55 bird Exp $
+# $Id: last.mak,v 1.1.2.2 2002-04-07 22:40:38 bird Exp $
 
 #
 # Win32k/dev32 makefile.
@@ -9,7 +9,7 @@
 # Load the build setup.
 #
 PATH_ROOT = ..\..\..
-!include $(PATH_ROOT)\tools\make\setup.mak
+!include $(PATH_ROOT)\make\setup.mak
 
 
 #
