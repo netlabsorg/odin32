@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.9 1999-08-16 16:55:32 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.10 1999-08-17 16:35:09 phaller Exp $ */
 
 /*
  * KERNEL32 DLL entry point
@@ -27,13 +27,14 @@
 #define  INCL_DOSMODULEMGR
 #define  INCL_DOSMISC
 #define  INCL_DOSPROCESS
-#include <os2wrap.h>	//Odin32 OS/2 api wrappers
+#include <os2wrap.h>    //Odin32 OS/2 api wrappers
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <misc.h>
 #include <wprocess.h>
 #include "handlemanager.h"
+#include "profile.h"
 
 /*-------------------------------------------------------------------*/
 /* A clean up routine registered with DosExitList must be used if    */
@@ -105,10 +106,10 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
                    flAllocMem = PAG_ANY;      // high memory support. Let's use it!
             else   flAllocMem = 0;        // no high memory support
 
-	    InitializeTIB(TRUE);
-	    //SvL: Do it here instead of during the exe object creation
-	    //(std handles can be used in win32 dll initialization routines
-	    HMInitialize();             /* store standard handles within HandleManager */
+            InitializeTIB(TRUE);
+            //SvL: Do it here instead of during the exe object creation
+            //(std handles can be used in win32 dll initialization routines
+            HMInitialize();             /* store standard handles within HandleManager */
             break;
         case 1 :
             break;
@@ -126,6 +127,7 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
 static void APIENTRY cleanup(ULONG ulReason)
 {
     dprintf(("kernel32 exit %d\n", ulReason));
+    WriteOutProfiles();
     _ctordtorTerm();
     DestroyTIB();
     DosExitList(EXLST_EXIT, cleanup);

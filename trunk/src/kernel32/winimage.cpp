@@ -1,4 +1,4 @@
-/* $Id: winimage.cpp,v 1.7 1999-08-11 22:27:56 phaller Exp $ */
+/* $Id: winimage.cpp,v 1.8 1999-08-17 16:35:10 phaller Exp $ */
 
 /*
  * Win32 PE Image class
@@ -23,8 +23,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-
-#include <odincrt.h>
 
 //#include <iostream.h>
 //#include <fstream.h>
@@ -145,7 +143,7 @@ Win32Image::~Win32Image()
   while(winres)
   {
     res    = winres->next;
-    ODIN_delete(winres);
+    delete winres;
     winres = res;
   }
   if(realBaseAddress)
@@ -982,9 +980,7 @@ BOOL Win32Image::processImports(char *win32file)
     WinDll = Win32Dll::findModule(pszCurModule);
     if(WinDll == NULL)
      {  //not found, so load it
-        ODIN_FS_BEGIN
         WinDll = new Win32Dll(pszCurModule);
-        ODIN_FS_END
 
         if(WinDll == NULL) {
             fout << "WinDll: Error allocating memory" << endl;
