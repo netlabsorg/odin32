@@ -1,4 +1,4 @@
-/* $Id: options.h,v 1.1 2002-03-31 19:32:54 bird Exp $
+/* $Id: options.h,v 1.2 2002-04-01 12:45:14 bird Exp $
  *
  * Options.
  *
@@ -76,19 +76,15 @@
             {FALSE,                 /* fQuiet        */     \
             OUTPUT_COM2,            /* usCom         */     \
             TRUE,                   /* fLogging      */     \
-            KF_UNI,                 /* fKernel       */     \
-            ~0UL,                   /* ulBuild       */     \
-            (unsigned short)~0,     /* usVerMajor    */     \
-            (unsigned short)~0,     /* usVerMinor    */     \
             CB_SWP_INIT,            /* cbSwpHeapInit */     \
             CB_SWP_MAX,             /* cbSwpHeapMax  */     \
             CB_RES_INIT,            /* cbResHeapInit */     \
             CB_RES_MAX}             /* cbResHeapMax  */
 
-#define isSMPKernel()               (options.fKernel & KF_SMP)
-#define isUNIKernel()               (!(options.fKernel & KF_SMP))
+#define isSMPKernel()               (fKernel & KF_SMP)
+#define isUNIKernel()               (!(fKernel & KF_SMP))
 
-#define isHighMemorySupported()     (options.ulBuild >= 14000 || isSMPKernel())
+#define isHighMemorySupported()     (ulKernelBuild >= 14000 || isSMPKernel())
 
 /* INC */
 
@@ -106,12 +102,6 @@ struct kKLOptions
     USHORT      usCom;                  /* Output port no. */
     USHORT      fLogging;               /* Logging. */
 
-    /** @cat kernel selection */
-    ULONG       fKernel;                /* Smp or uni kernel. */
-    ULONG       ulBuild;                /* Kernel build. */
-    USHORT      usVerMajor;             /* OS/2 major ver - 20 */
-    USHORT      usVerMinor;             /* OS/2 minor ver - 30,40 */
-
     /** @cat Options affecting the heap. */
     ULONG       cbSwpHeapInit;          /* Initial heapsize. */
     ULONG       cbSwpHeapMax;           /* Maximum heapsize. */
@@ -124,12 +114,22 @@ struct kKLOptions
 *   Global Variables                                                           *
 *******************************************************************************/
 /* NOINC */
-extern struct kKLOptions DATA16_GLOBAL options;  /* defined in d16globals.c */
+extern struct kKLOptions DATA16_GLOBAL options;  /* defined in d16Globl.c */
+extern ULONG  DATA16_GLOBAL fKernel;
+extern ULONG  DATA16_GLOBAL ulKernelBuild;
+extern USHORT DATA16_GLOBAL usVerMajor;
+extern USHORT DATA16_GLOBAL usVerMinor;
+
 #ifdef RING0
 #if defined(__IBMC__) || defined(__IBMCPP__)
-    #pragma map(options, "_options")
+    #pragma map(options,        "_options")
+    #pragma map(fKernel,        "_fKernel")
+    #pragma map(ulKernelBuild,  "_ulKernelBuild")
+    #pragma map(usVerMajor,     "_usVerMajor")
+    #pragma map(usVerMinor,     "_usVerMinor")
 #endif
 #endif
+
 /* INC */
 
 /* NOINC */

@@ -1,4 +1,4 @@
-/* $Id: tstkKrnlLib.c,v 1.1 2002-03-30 17:05:47 bird Exp $
+/* $Id: tstkKrnlLib.c,v 1.2 2002-04-01 12:44:11 bird Exp $
  *
  * kKrnlLib test module.
  *
@@ -260,7 +260,7 @@ void    initRPInit(RP32INIT *pRpInit, char *pszInitArgs);
 int     tests(int iTest, int argc, char **argv);
 int     TestCase1(int argc, char **argv);
 int     TestCase2(void);
-int     CompareOptions(struct kKLOptions *pOpt);
+int     CompareOptions(struct kKLOptions *pOpt, ULONG fExpKernel, ULONG ulExpKernelBuild, USHORT usExpVerMajor, USHORT usExpVerMinor);
 int     TestCaseExeLoad2(void);
 int     WritekKrnlLibDll(void);
 
@@ -640,25 +640,21 @@ int TestCase1(int argc, char **argv)
         if ((rpinit.rph.Status & (STDON | STERR)) == STDON)
         {
             struct kKLOptions opt = DEFAULT_OPTION_ASSIGMENTS;
-            opt.fKernel = 0;
-            if (argv[6][0] == 'S')  opt.fKernel |= KF_SMP;
-            if (argv[6][0] == '4')  opt.fKernel |= KF_W4;
-            if (argv[6][0] == 'U')  opt.fKernel |= KF_UNI;
-            if (argv[7][0] == 'A')  opt.fKernel |= KF_ALLSTRICT;
-            if (argv[7][0] == 'H')  opt.fKernel |= KF_HALFSTRICT;
+            ULONG   fExpKernel = 0;
+            if (argv[6][0] == 'S')  fExpKernel |= KF_SMP;
+            if (argv[6][0] == '4')  fExpKernel |= KF_W4;
+            if (argv[6][0] == 'U')  fExpKernel |= KF_UNI;
+            if (argv[7][0] == 'A')  fExpKernel |= KF_ALLSTRICT;
+            if (argv[7][0] == 'H')  fExpKernel |= KF_HALFSTRICT;
 
             if (argc >= 9 && argv[8][1] == '\0')
                 switch (argv[8][0])
                 {
                     case '\0': break;
                     default:
-                    opt.fKernel |= (argv[8][0] - (argv[8][0] >= 'a' ? 'a'-1 : 'A'-1)) << KF_REV_SHIFT;
+                    fExpKernel |= (argv[8][0] - (argv[8][0] >= 'a' ? 'a'-1 : 'A'-1)) << KF_REV_SHIFT;
                 }
-            opt.ulBuild = atoi(argv[5]);
-            opt.usVerMajor = (USHORT)atoi(argv[3]);
-            opt.usVerMinor = (USHORT)atoi(argv[4]);
-
-            rc = CompareOptions(SSToDS(&opt));
+            rc = CompareOptions(SSToDS(&opt), fExpKernel, atoi(argv[5]), (USHORT)atoi(argv[3]), (USHORT)atoi(argv[4]));
         }
         else
             printf("!failed!\n");
@@ -711,7 +707,7 @@ int TestCase2(void)
             opt.fLogging        = TRUE;
             opt.usCom           = OUTPUT_COM1;
 
-            rc = CompareOptions(SSToDS(&opt));
+            rc = CompareOptions(SSToDS(&opt), -1, -1, (USHORT)-1, (USHORT)-1);
             if (rc == NO_ERROR)
             {
                 rc = WritekKrnlLibDll();
@@ -851,11 +847,16 @@ int WritekKrnlLibDll(void)
  * Compares the options with the option struct passed in.
  * @returns 0 on success.
  *          number of mismatches on error.
- * @param   pOpt
+ * @param   pOpt                Expected option struct.
+ * @param   fExpKernel          Expected stuff.
+ * @param   ulExpKernelBuild    Expected stuff.
+ * @param   usExpVerMajor       Expected stuff.
+ * @param   usExpVerMinor       Expected stuff.
  * @status  completely implemented.
  * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  */
-int CompareOptions(struct kKLOptions *pOpt)
+int CompareOptions(struct kKLOptions *pOpt, ULONG fExpKernel, ULONG ulExpKernelBuild,
+                   USHORT usExpVerMajor, USHORT usExpVerMinor)
 {
     int rc = 0;
     /*
@@ -867,16 +868,16 @@ int CompareOptions(struct kKLOptions *pOpt)
         printf("usCom = %d - should be %d\n", options.usCom, pOpt->usCom, rc++);
     if (options.fLogging != pOpt->fLogging)
         printf("fLogging = %d - should be %d\n", options.fLogging, pOpt->fLogging, rc++);
-    if (pOpt->ulBuild != ~0UL)
+    if (ulExpKernelBuild != ~0UL)
     {
-        if (options.fKernel != pOpt->fKernel)
-            printf("fKernel = %x - should be %x\n", options.fKernel, pOpt->fKernel, rc++);
-        if (options.ulBuild != pOpt->ulBuild)
-            printf("ulBuild = %d - should be %d\n", options.ulBuild, pOpt->ulBuild, rc++);
-        if (options.usVerMajor != pOpt->usVerMajor)
-            printf("usVerMajor = %d - should be %d\n", options.usVerMajor, pOpt->usVerMajor, rc++);
-        if (options.usVerMinor != pOpt->usVerMinor)
-            printf("usVerMinor = %d - should be %d\n", options.usVerMinor, pOpt->usVerMinor, rc++);
+        if (fKernel != fExpKernel)
+            printf("fKernel = %x - should be %x\n", fKernel, fExpKernel, rc++);
+        if (ulKernelBuild != ulExpKernelBuild)
+            printf("ulBuild = %d - should be %d\n", ulKernelBuild, ulExpKernelBuild, rc++);
+        if (usVerMajor != usExpVerMajor)
+            printf("usVerMajor = %d - should be %d\n", usVerMajor, usExpVerMajor, rc++);
+        if (usVerMinor != usExpVerMinor)
+            printf("usVerMinor = %d - should be %d\n", usVerMinor, usExpVerMinor, rc++);
     }
     if (options.cbSwpHeapInit != pOpt->cbSwpHeapInit)
         printf("cbSwpHeapInit = %d - should be %d\n", options.cbSwpHeapInit, pOpt->cbSwpHeapInit, rc++);
