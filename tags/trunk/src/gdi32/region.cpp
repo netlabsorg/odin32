@@ -1,4 +1,4 @@
-/* $Id: region.cpp,v 1.31 2002-12-04 10:24:02 sandervl Exp $ */
+/* $Id: region.cpp,v 1.32 2003-06-03 13:48:13 sandervl Exp $ */
 
 /*
  * GDI32 region code
@@ -387,7 +387,6 @@ BOOL WIN32API setWinDeviceRegionFromPMDeviceRegion(HRGN winHrgn, HRGN pmHrgn, pD
    return success;
 }
 //******************************************************************************
-int WIN32API GetRgnBox( HRGN hrgn, PRECT pRect);
 //******************************************************************************
 int WIN32API SelectClipRgn(HDC hdc, HRGN hrgn)
 {
