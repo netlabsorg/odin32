@@ -1,4 +1,4 @@
-/* $Id: hook.h,v 1.4 2001-09-28 14:06:39 phaller Exp $ */
+/* $Id: hook.h,v 1.5 2001-10-09 05:18:39 phaller Exp $ */
 
 /*
  * Windows hook definitions
@@ -29,6 +29,6 @@ extern void HOOK_ResetQueueHooks( HQUEUE hQueue );
 extern HOOKPROC HOOK_GetProc( HHOOK hook );
 
 extern BOOL ProcessKbdHook(LPMSG msg, BOOL remove );
-extern BOOL ProcessKbdHookLL(LPMSG msg, BOOL remove );
+extern BOOL ProcessKbdHookLL(LPMSG msg, BOOL flagRemove, BOOL flagInjected );
 
 #endif  /* __WINE_HOOK_H */
