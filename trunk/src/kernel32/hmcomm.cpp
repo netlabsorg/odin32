@@ -1,4 +1,4 @@
-/* $Id: hmcomm.cpp,v 1.34 2001-12-10 14:04:24 sandervl Exp $ */
+/* $Id: hmcomm.cpp,v 1.35 2002-06-11 12:51:43 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -296,7 +296,7 @@ DWORD CommReadIOHandler(LPASYNCIOREQUEST lpRequest, DWORD *lpdwResult, DWORD *lp
 {
     PHMHANDLEDATA pHMHandleData;
     BOOL          ret;
-    ULONG         ulBytesRead;
+    ULONG         ulBytesRead, len;
 
     pHMHandleData = HMQueryHandleData(lpRequest->hHandle);
     if(pHMHandleData == NULL) {
@@ -316,8 +316,7 @@ DWORD CommReadIOHandler(LPASYNCIOREQUEST lpRequest, DWORD *lpdwResult, DWORD *lp
     dprintf(("ASYNC_GETINQUECOUNT -> qInfo.cch %d (queue size %d) rc %d", qInfo.cch, qInfo.cb, rc));
 #endif
 
-    ret = OSLibDosRead(pHMHandleData->hHMHandle, (LPVOID)lpRequest->lpBuffer, lpRequest->nNumberOfBytes,
-                       &ulBytesRead);
+    ret = OSLibDosRead(pHMHandleData->hHMHandle, (LPVOID)lpRequest->lpBuffer, lpRequest->nNumberOfBytes, &ulBytesRead);
 
     *lpdwResult = (ret) ? ulBytesRead : 0;
     dprintf2(("KERNEL32: CommReadIOHandler %d bytes read", *lpdwResult));
@@ -326,12 +325,12 @@ DWORD CommReadIOHandler(LPASYNCIOREQUEST lpRequest, DWORD *lpdwResult, DWORD *lp
         dprintf(("!ERROR!: CommReadIOHandler failed with rc %d", GetLastError()));
     }
     else {
-        //testestestest
+#ifdef DEBUG
         dprintf2(("%d Bytes read:", ulBytesRead));
-        for(int i=0;i<ulBytesRead;i++) {
+        for(int i=0;i<min(ulBytesRead, 16);i++) {
             dprintf2(("%x %c", ((char *)lpRequest->lpBuffer)[i], ((char *)lpRequest->lpBuffer)[i]));
         }
-        //testestestset
+#endif
     }
     return GetLastError();
 }
@@ -351,12 +350,12 @@ DWORD CommWriteIOHandler(LPASYNCIOREQUEST lpRequest, DWORD *lpdwResult, DWORD *l
         return ERROR_INVALID_HANDLE;
     }
 
-    //testestestest
+#ifdef DEBUG
     dprintf2(("Bytes to write:"));
-    for(int i=0;i<lpRequest->nNumberOfBytes;i++) {
+    for(int i=0;i<min(lpRequest->nNumberOfBytes, 16);i++) {
         dprintf2(("%x %c", ((char *)lpRequest->lpBuffer)[i], ((char *)lpRequest->lpBuffer)[i]));
     }
-    //testestestset
+#endif
 
     ret = OSLibDosWrite(pHMHandleData->hHMHandle, (LPVOID)lpRequest->lpBuffer, lpRequest->nNumberOfBytes,
                         &ulBytesWritten);
@@ -592,14 +591,14 @@ BOOL HMDeviceCommClass::ReadFile(PHMHANDLEDATA pHMHandleData,
     if(ret == FALSE) {
         dprintf(("!ERROR!: ReadFile failed with rc %d", GetLastError()));
     }
+#ifdef DEBUG
     else {
-        //testestestest
         dprintf2(("%d Bytes read:", ulBytesRead));
-        for(int i=0;i<ulBytesRead;i++) {
+        for(int i=0;i<min(ulBytesRead, 16);i++) {
             dprintf2(("%x %c", ((char *)lpBuffer)[i], ((char *)lpBuffer)[i]));
         }
-        //testestestset
     }
+#endif
     return ret;
 }
 /*****************************************************************************
