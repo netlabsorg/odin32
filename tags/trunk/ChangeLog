@@ -1,4 +1,10 @@
- /* $Id: ChangeLog,v 1.528 1999-12-09 19:11:55 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.529 1999-12-10 14:07:03 sandervl Exp $ */
+
+ 99-12-10: Sander van Leeuwen <sandervl@xs4all.nl>
+	- KERNEL32: Fix for CreateFileMapping; return old handle if
+                    trying to open existing mapping
+                    commitPage: Commit page by page, not entire range (could
+                    leave holes if VirtualQueryMem range != nrpages)
 
  99-12-09: Christoph Bratschi <cbratschi@datacomm.ch>
 	- GDI32: fixed TextOut and ExtTextOut bugs
