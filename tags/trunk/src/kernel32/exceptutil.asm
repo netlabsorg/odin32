@@ -1,4 +1,4 @@
-; $Id: exceptutil.asm,v 1.16 2001-04-22 09:00:19 sandervl Exp $
+; $Id: exceptutil.asm,v 1.17 2001-06-27 19:09:35 sandervl Exp $
 
 ;/*
 ; * Project Odin Software License can be found in LICENSE.TXT
@@ -265,6 +265,27 @@ _AsmCallThreadHandler proc near
         pop     ebp
         ret
 _AsmCallThreadHandler endp
+
+        PUBLIC _CallEntryPoint
+_CallEntryPoint proc near
+        push	ebp
+        mov	ebp, esp
+
+        mov     eax, esp
+        sub     eax, 16
+        and     eax, 0FFFFFFF0h
+        add     eax, 4
+        mov     esp, eax
+
+        push    dword ptr [ebp+12]
+        mov     eax, dword ptr [ebp+8]
+        call    eax
+
+        mov     esp, ebp
+        pop     ebp
+        ret
+_CallEntryPoint endp
+
 
 ; 281 static DWORD EXC_CallHandler( WINEXCEPTION_RECORD *record, WINEXCEPTION_FRAME *frame,
         EXTRN WriteLog:PROC
