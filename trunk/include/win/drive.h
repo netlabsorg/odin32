@@ -28,10 +28,34 @@ typedef enum
 #define DRIVE_CASE_SENSITIVE  0x0004  /* Drive fs is case sensitive */
 #define DRIVE_CASE_PRESERVING 0x0008  /* Drive fs is case preserving */
 
-#define DRIVE_SetCurrentDrive(a)    _chdrive(a)
-#define DRIVE_GetCurrentDrive()     _getdrive()
-#define DRIVE_Chdir(a,b)             chdir(b)
-#define DRIVE_GetDosCwd(a, b)       _getdcwd(b, a, sizeof(a))
+inline int DRIVE_SetCurrentDrive(char drive)
+{
+   int ret;
+   USHORT sel = GetFS();
+   ret = _chdrive(drive);
+   SetFS(sel);
+   return ret;
+}
+
+inline int DRIVE_GetCurrentDrive()     
+{
+   int ret;
+   USHORT sel = GetFS();
+   ret = _getdrive();
+   SetFS(sel);
+   return ret;
+}
+
+#define DRIVE_Chdir(a,b)             SetCurrentDirectoryA(b)
+
+inline char *DRIVE_GetDosCwd (char *buffer, int drive)
+{
+   char * ret;
+   USHORT sel = GetFS();
+   ret = _getdcwd(drive, buffer, sizeof(int));
+   SetFS(sel);
+   return ret;
+}
 
 #if 0
 extern int DRIVE_Init(void);
