@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.117 2002-06-28 19:45:00 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.118 2003-03-22 20:27:10 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -678,6 +678,9 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
 //    bIcon = (IsIconic(hwnd) && GetClassLongA(hWnd, GCL_HICON_W));
     bIcon = IsIconic(hwnd);
 
+    //check if the application previously didn't handle a WM_PAINT msg properly
+    wnd->checkForDirtyUpdateRegion();
+
     HWND hwndClient = (bIcon) ? wnd->getOS2FrameWindowHandle() : wnd->getOS2WindowHandle();
 
     if(hwnd != HWND_DESKTOP && !bIcon && wnd->isOwnDC())
@@ -1207,6 +1210,9 @@ BOOL WIN32API RedrawWindow(HWND hwnd, const RECT* pRect, HRGN hrgn, DWORD redraw
         else hwnd = wnd->getOS2WindowHandle();
     }
 
+    //check if the application previously didn't handle a WM_PAINT msg properly
+    wnd->checkForDirtyUpdateRegion();
+
     BOOL  IncludeChildren = (redraw & RDW_ALLCHILDREN_W) ? TRUE : FALSE;
     BOOL  success = TRUE;
     HPS   hpsTemp = NULLHANDLE;
@@ -1381,6 +1387,9 @@ BOOL WIN32API UpdateWindow (HWND hwnd)
         SetLastError(ERROR_INVALID_WINDOW_HANDLE_W);
         return FALSE;
     }
+
+    //check if the application previously didn't handle a WM_PAINT msg properly
+    wnd->checkForDirtyUpdateRegion();
 
 #ifdef DEBUG
     if(WinQueryUpdateRect(wnd->getOS2WindowHandle(), &rectl))

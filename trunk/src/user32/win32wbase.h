@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.149 2003-03-20 13:20:46 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.150 2003-03-22 20:27:12 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -229,6 +229,10 @@ virtual  PRECT  getWindowRect();
          HRGN   GetClipRegion()                   { return hClipRegion; };
          void   SetClipRegion(HRGN hRegion)       { hClipRegion = hRegion; };
 
+         void   saveAndValidateUpdateRegion();
+         void   checkForDirtyUpdateRegion();   
+         BOOL   hasDirtUpdateRegion()             { return fDirtyUpdateRegion; };
+
          BOOL   ShowWindow(ULONG nCmdShow);
 virtual  BOOL   SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, int cy, UINT fuFlags, BOOL fShowWindow = FALSE);
          BOOL   SetWindowPlacement(WINDOWPLACEMENT *winpos);
@@ -415,11 +419,13 @@ protected:
                  fMinMaxChange:1,        //set when switching between min/max/restored state
                  fVisibleRegionChanged:1, //set when visible region has changed -> erase background must be sent during next BeginPaint
                  fEraseBkgndFlag:1,
-                 fIsDragDropActive:1;
+                 fIsDragDropActive:1,
+                 fDirtyUpdateRegion:1;
 
         ULONG   state;
         HRGN    hWindowRegion;
         HRGN    hClipRegion;
+        HRGN    hUpdateRegion;
 
         DWORD   dwThreadId;             //id of thread that created this window
         DWORD   dwProcessId;            //id of process that created this window
