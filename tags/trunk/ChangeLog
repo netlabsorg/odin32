@@ -1,4 +1,9 @@
-/* $Id: ChangeLog,v 1.1432 2001-05-20 08:18:51 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1433 2001-05-20 08:50:26 sandervl Exp $ */
+
+ 2001-05-20: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o Paint menu item first before destroying it
+                  (prevents menu control from painting selected item on
+                   desktop)
 
  2001-05-20: Dietrich Teickner <Dietrich_Teickner@t-online.de>
     - KERNEL32: o LOCALE_IFIRSTDAYOFWEEK fixes (Get/SetLocaleInfo)
