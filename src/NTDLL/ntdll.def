@@ -1,4 +1,4 @@
-; $Id: ntdll.def,v 1.40 2001-07-21 08:47:27 sandervl Exp $
+; $Id: ntdll.def,v 1.41 2001-10-29 02:26:38 bird Exp $
 
 ;
 ; Based on NT 4.0 SP6: NTDLL.DLL
@@ -465,8 +465,8 @@ EXPORTS
     RtlInitializeResource         = _RtlInitializeResource@4            @449
     RtlInitializeSid              = _RtlInitializeSid@12                @450
 ;   RtlInsertElementGenericTable                    @451
-    RtlIntegerToChar              = _RtlIntegerToChar@16        @452
-;   RtlIntegerToUnicodeString                       @453
+    RtlIntegerToChar              = _RtlIntegerToChar@16                @452
+    RtlIntegerToUnicodeString     = _RtlIntegerToUnicodeString@12       @453
 ;   RtlIsDosDeviceName_U                        @454
 ;   RtlIsGenericTableEmpty                      @455
 ;   RtlIsNameLegalDOS8Dot3                      @456
@@ -985,7 +985,7 @@ EXPORTS
     _tolower                = _CRTDLL__tolower              @965
     _toupper                = _CRTDLL__toupper              @966
     _ultoa                        = _CRTDLL__ultoa                      @967
-;    _ultow                        = _MSVCRT__ultow                         @968
+    _ultow                        = _CRTDLL__ultow                      @968
     _vsnprintf                    = _CRTDLL__vsnprintf                  @969
     _wcsicmp                      = _NTDLL__wcsicmp                     @970
     _wcslwr                       = _NTDLL__wcslwr                      @971
