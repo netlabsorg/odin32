@@ -1,8 +1,11 @@
-/* $Id: ChangeLog,v 1.2622 2003-08-22 13:15:48 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2623 2003-09-07 03:56:22 bird Exp $ */
+
+ 2003-09-07: knut st. osmundsen <bird-odinspam@anduin    >
+    - LIBWRAP:  o Do all .asm's in with on ALP.
 
  2003-08-22: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o Ignore messages sent or posted to the desktop window
-                o Post/SendMessage: use shared or local memory depending 
+                o Post/SendMessage: use shared or local memory depending
                   on the target window.
 
  2003-08-20: Sander van Leeuwen <sandervl@innotek   >
@@ -25,9 +28,9 @@
                   default window procedures
 
  2003-08-06: Sander van Leeuwen <sandervl@innotek   >
-    - USER32:   o Cleaned up GetMessage/PeekMessage. 
+    - USER32:   o Cleaned up GetMessage/PeekMessage.
                 o Removed DispatchMessage change for WM_CHAR; must return
-                  the proper format in Get/PeekMessageA/W. 
+                  the proper format in Get/PeekMessageA/W.
                   (assuming the GetMessageW/DispatchMessageA combination is
                    not allowed)
 
@@ -43,15 +46,15 @@
  2003-07-31: KO Myung-Hun <komh@chollian    >
     - USER32:   o fixed GetMenuStringA() to truncate DBCS string correctly.
                 o fixed GetMenuItemInfo_common() to truncate DBCS string correctly.
-                o fixed WM_GETTEXT of Win32BaseWindow::DefWindowProcA() and 
+                o fixed WM_GETTEXT of Win32BaseWindow::DefWindowProcA() and
                    Win32BaseWindow::DefWindowProcW() to ensure null-terminator.
                 o fixed Win32BaseWindow::GetWindowTextA() and Win32BaseWindow::GetWindowTextW()
                   to ensure null-terminator.
                 o fixed memory allocation for windowNameW. When open 'Open common dialog box'
                   memory block of windowNameW is overwritten.
                 o fixed MessageBoxIndirectW() to support unicode correctly.
-                o fixed OSLibWinDispatchMsg() to distinguish ascii message from 
-                  unicode message in case of the message being sent directly 
+                o fixed OSLibWinDispatchMsg() to distinguish ascii message from
+                  unicode message in case of the message being sent directly
                 o fixed OS2ToWinMsgTranslate() to process DBCS input.
                 o fixed Win32BaseWindow::MsgChar() to distinguish ascii from unicode message.
                 o fixed Win32BaseWindow::MsgCreate(), Win32BaseWindow::DefWindowProcA(),
@@ -68,14 +71,14 @@
                 o improved WINPROC_CallProc32ATo32W() and WINPROC_CallProc32WTo32A() to process WM_CHAR
                   and WM_GETTEXTLENGTH, LB-GETTEXTLEN, CB_GETLBTEXTLEN.
                 o fixed edit control to process WM_CHAR including splitted DBCS chars.
-                o fixed listbox control to process WM_CHAR including splitted DBCS chars.    
+                o fixed listbox control to process WM_CHAR including splitted DBCS chars.
 
  2002-07-31: Dmitry Froloff <froloff@os2   >
     - USER32:   o Convert WM_CHAR characters to UTF-16 for unicode windows
 
  2003-07-28: Platon Fomichev <stauff@innotek   >
     - WMC:      o Port of Wine Windows Message Compiler
-    - KERNEL32: o Fixed loading of unicode messages and added loading of 
+    - KERNEL32: o Fixed loading of unicode messages and added loading of
                   internal ones. (message file from Rewind)
 
  2003-07-28: knut st. osmundsen <bird-odin-spam@anduin   >
@@ -97,7 +100,7 @@
  2003-07-16: KO Myung-Hun <komh@chollian    >
     - SHELL32:  o DragQueryFileW; allocate more for unicode conversion (DBCS)
     - WINMM:    o Fixed mciGetErrorStringW() to prevent buffer overflow.
-                o Fixed midiInGetErrorText() and midiOutGetErrorText() 
+                o Fixed midiInGetErrorText() and midiOutGetErrorText()
                   to prevent buffer overflow.
                 o Fixed waveInGetErrorTextW() to prevent buffer overflow.
                 o Fixed waveOutGetErrorTextW() to prevent buffer overflow.
@@ -105,7 +108,7 @@
                 o Fixed calcDimensions(). The width is one point - other point + 1
                   (code currently not active)
     - KERNEL32: o Added functions to query length after ascii or unicode conversion
-                o Changed the destination length parameter name of lstrcpynWtoA() 
+                o Changed the destination length parameter name of lstrcpynWtoA()
                   and lstrcpynAtoW().
 
  2002-07-16: Yuri Dario <mc6530@mclink   >
@@ -116,7 +119,7 @@
     - GDI32:    o Fix for partial blits in StretchDIBits
 
  2003-07-14: KO Myung-Hun <komh@chollian    >
-    - GDI32:    o Fixed InternalTextOutW() and GetTextExtentPointW() to support 
+    - GDI32:    o Fixed InternalTextOutW() and GetTextExtentPointW() to support
                   unicode correctly. (DBCS)
     - COMCTL32: o Fixed PROPSHEET_CollectSheetInfoA() and PROPSHEET_SetTitleA()
                   to convert ascii to unicode correctly. (DBCS)
