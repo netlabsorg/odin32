@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.21 2000-12-02 23:40:50 bird Exp $
+# $Id: makefile,v 1.22 2000-12-24 14:39:54 sandervl Exp $
 
 #
 # Odin32 API
@@ -25,18 +25,21 @@ $(OBJDIR)\olefont.obj \
 $(OBJDIR)\variant.obj \
 $(OBJDIR)\ole2disp.obj \
 $(OBJDIR)\parsedt.obj \
-$(OBJDIR)\iPicture.obj \
-$(OBJDIR)\iPictureNone.obj \
-$(OBJDIR)\iPictureBmp.obj \
-$(OBJDIR)\iPictureMeta.obj \
-$(OBJDIR)\iPictureIcon.obj \
-$(OBJDIR)\iPictureEmf.obj \
+$(OBJDIR)\olepicture.obj \
+#$(OBJDIR)\iPicture.obj \
+#$(OBJDIR)\iPictureNone.obj \
+#$(OBJDIR)\iPictureBmp.obj \
+#$(OBJDIR)\iPictureMeta.obj \
+#$(OBJDIR)\iPictureIcon.obj \
+#$(OBJDIR)\iPictureEmf.obj \
 $(OBJDIR)\typelib.obj \
-$(OBJDIR)\itypelib.obj \
-$(OBJDIR)\itypecomp.obj \
-$(OBJDIR)\itypeinfo.obj \
+#$(OBJDIR)\itypelib.obj \
+#$(OBJDIR)\itypecomp.obj \
+#$(OBJDIR)\itypeinfo.obj \
 $(OBJDIR)\hash.obj \
 $(OBJDIR)\safearray.obj \
+$(OBJDIR)\connpt.obj \
+$(OBJDIR)\dispatch.obj \
 $(OBJDIR)\stubs.obj \
 $(OBJDIR)\oleaut32rsrc.obj
 

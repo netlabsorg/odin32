@@ -1,4 +1,4 @@
-/* $Id: stubs.cpp,v 1.7 2000-11-21 12:16:22 sandervl Exp $ */
+/* $Id: stubs.cpp,v 1.8 2000-12-24 14:39:56 sandervl Exp $ */
 /* 
  * Win32 COM/OLE stubs for OS/2
  * 
@@ -50,70 +50,6 @@ INT WIN32API VariantTimeToDosDateTime(DOUBLE vtime, USHORT * pwDosDate, USHORT *
 {
     dprintf(("OLEAUT32: VariantTimeToDosDateTime - stub"));
     return 0;
-}
-
-//*****************************************************************************
-//*****************************************************************************
-HRESULT WIN32API DispGetParam
-   (DISPPARAMS *	pdispparams,
-    UINT		position,
-    VARTYPE		vtTarg,
-    VARIANT *		pvarResult,
-    UINT *		puArgErr)
-{
-    dprintf(("OLEAUT32: DispGetParam - stub"));
-    return S_OK;
-}
-
-//*****************************************************************************
-//*****************************************************************************
-HRESULT WIN32API DispGetIDsOfNames
-   (ITypeInfo *		ptinfo,
-    OLECHAR **		rgszNames,
-    UINT		cNames,
-    DISPID *		rgdispid)
-{
-    dprintf(("OLEAUT32: DispGetIDsOfNames - stub"));
-    return S_OK;
-}
-
-//*****************************************************************************
-//*****************************************************************************
-HRESULT WIN32API DispInvoke
-   (void *		_this,
-    ITypeInfo *		ptinfo,
-    DISPID		dispidMember,
-    WORD		wFlags,
-    DISPPARAMS *	pparams,
-    VARIANT *		pvarResult,
-    EXCEPINFO *		pexcepinfo,
-    UINT *		puArgErr)
-{
-    dprintf(("OLEAUT32: DispInvoke - stub"));
-    return S_OK;
-}
-
-//*****************************************************************************
-//*****************************************************************************
-HRESULT WIN32API CreateDispTypeInfo
-   (INTERFACEDATA *	pidata,
-    LCID		lcid,
-    ITypeInfo **	pptinfo)
-{
-    dprintf(("OLEAUT32: CreateDispTypeInfo - stub"));
-    return E_OUTOFMEMORY;
-}
-
-//*****************************************************************************
-//*****************************************************************************
-HRESULT WIN32API CreateStdDispatch
-   (IUnknown *		punkOuter,
-    void *		pvThis,
-    ITypeInfo *		ptinfo,
-    IUnknown **		ppunkStdDisp)
-{
-    dprintf(("OLEAUT32: CreateStdDispatch - stub"));
-    return S_OK;
 }
 
 //*****************************************************************************
@@ -265,28 +201,11 @@ HRESULT WIN32API VarUI1FromDisp(IDispatch * pdispIn, LCID lcid, BYTE * pbOut)
 
 //*****************************************************************************
 //*****************************************************************************
-HRESULT WIN32API DispCallFunc
-   (void *		pvInstance,
-   ULONG		oVft,
-   UINT			cc,
-   VARTYPE		vtReturn,
-   UINT 		cActuals,
-   VARTYPE *		prgvt,
-   VARIANTARG **	prgpvarg,
-   VARIANT *		pvargResult)
+HRESULT WINAPI DispCallFunc(void* pvInstance, ULONG oVft, CALLCONV_OLE2 cc,
+            VARTYPE vtReturn, UINT  cActuals, VARTYPE* prgvt,
+            VARIANTARG** prgpvarg, VARIANT* pvargResult)
 {
     dprintf(("OLEAUT32: DispCallFunc - stub"));
-    return S_OK;
-}
-
-//*****************************************************************************
-//*****************************************************************************
-HRESULT WIN32API CreateTypeLib
-   (SYSKIND		syskind,
-    const OLECHAR *	szFile,
-    ICreateTypeLib **	ppctlib)
-{
-    dprintf(("OLEAUT32: CreateTypeLib - stub"));
     return S_OK;
 }
 
