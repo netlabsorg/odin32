@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2000-02-09 23:40:51 bird Exp $
+# $Id: makefile,v 1.3 2000-02-29 13:56:49 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -14,7 +14,7 @@ PDWIN32_TOOLS = ..\..\..\..\..\tools\bin
 
 !include $(PDWIN32_INCLUDE)/pdwin32.mk
 
-CINCLUDE=-I..\internals -I..\nurbtess -I..\..\..\mesa -I..\..\include -I$(PDWIN32_INCLUDE)
+CINCLUDE=-I..\internals -I..\nurbtess -I..\..\..\mesa\GL -I..\..\include -I$(PDWIN32_INCLUDE)
 CDEFS=-DSTANDALONE -DLIBRARYBUILD -DNDEBUG
 
 CFLAGS = $(CFLAGS) $(CINCLUDE) $(CDEFS)
@@ -36,7 +36,7 @@ all: $(OBJS)
 
 dep:
     $(DEPEND) $(CINCLUDE) *.c *.cpp *.h *.asm *.inc  \
-        ..\nurbtess\*.h ..\..\..\mesa\*.h ..\..\include\*.h
+        ..\nurbtess\*.h ..\..\..\mesa\GL\*.h ..\..\include\*.h
 
 !ifndef NODEP
 !include .depend

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.9 2000-02-10 01:19:17 bird Exp $
+# $Id: makefile,v 1.10 2000-02-29 13:56:48 sandervl Exp $
 
 #
 # PD-Win32
@@ -25,8 +25,8 @@ L=/DE
 MAKE_CMD = nmake -nologo
 !endif
 
-CFLAGS = $(CFLAGS) -I$(PDWIN32_INCLUDE)
-CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
+CFLAGS = $(CFLAGS) -I$(PDWIN32_INCLUDE) -I..\mesa\GL
+CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE) -I..\mesa\GL
 
 TARGET = GLU32
 
@@ -353,7 +353,7 @@ resource.asm: $(TARGET).rc
 
 
 dep:
-    $(DEPEND) -I$(PDWIN32_INCLUDE);$(PDWIN32_INCLUDE)\win \
+    $(DEPEND) -I$(PDWIN32_INCLUDE);$(PDWIN32_INCLUDE)\win -I..\mesa\GL \
     *.c *.cpp *.h *.asm *.inc $(PDWIN32_INCLUDE)\*.h
     cd util
     $(MAKE_CMD) NODEP=1 dep

@@ -1,4 +1,4 @@
-/* $Id: gl.h,v 1.1 2000-02-29 00:43:31 sandervl Exp $ */
+/* $Id: gl.h,v 1.2 2000-02-29 13:56:52 sandervl Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -1042,7 +1042,7 @@ typedef enum {
  */
 
 }
-#ifdef CENTERLINE_CLPP
+#if defined(CENTERLINE_CLPP) || defined(__cplusplus)
   /* CenterLine C++ workaround: */
   gl_enum;
   typedef int GLenum;
