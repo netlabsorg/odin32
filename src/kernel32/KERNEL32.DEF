@@ -1,4 +1,4 @@
-; $Id: KERNEL32.DEF,v 1.136 2002-05-16 12:15:59 sandervl Exp $
+; $Id: KERNEL32.DEF,v 1.137 2002-05-17 10:14:07 sandervl Exp $
 
 ;Basis is Windows95 KERNEL32
 LIBRARY KERNEL32 INITINSTANCE TERMINSTANCE
@@ -658,7 +658,7 @@ EXPORTS
 ;   MapHModuleLS               = _MapHModuleLS@??            @520       ;W95
 ;   MapHModuleSL               = _MapHModuleSL@??            @521       ;W95
     MapLS                      = _MapLS@4                    @522       ;W95
-;   MapSL                      = _MapSL@4                    @523       ;W95
+    MapSL                      = _MapSL@4                    @523       ;W95
     MapSLFix                   = _MapSLFix@4                 @524       ;W95
     MapViewOfFile              = _MapViewOfFile@20           @525
     MapViewOfFileEx            = _MapViewOfFileEx@24         @526
