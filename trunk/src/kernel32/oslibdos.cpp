@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.95 2002-02-11 13:46:36 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.96 2002-02-15 19:14:52 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -1727,8 +1727,19 @@ DWORD OSLibDosCreateNamedPipe(LPCTSTR lpName,
                OPEN_SHARE_DENYNONE, NULL);
 
   if(rc == NO_ERROR) {
-      dprintf(("Opening of existing named pipe succeeded"));
-      return hPipe;
+#if 0
+      //TODO:
+      if(dwOpenMode & FILE_FLAG_FIRST_PIPE_INSTANCE_W) {
+          DosClose(hPipe);
+          SetLastError(ERROR_ALREADY_EXISTS_W);
+          return -1;
+      }
+      else {
+#endif
+          dprintf(("Opening of existing named pipe succeeded"));
+          SetLastError(ERROR_SUCCESS_W);
+          return hPipe;
+//      }
   }
 
   rc=DosCreateNPipe(lpOS2Name,
@@ -1745,6 +1756,7 @@ DWORD OSLibDosCreateNamedPipe(LPCTSTR lpName,
     SetLastError(error2WinError(rc,ERROR_INVALID_PARAMETER_W));
     return -1; // INVALID_HANDLE_VALUE
   }
+  SetLastError(ERROR_SUCCESS_W);
   return hPipe;
 }
 //******************************************************************************
@@ -1768,6 +1780,7 @@ BOOL OSLibSetNamedPipeState(DWORD hNamedPipe, DWORD dwPipeMode)
     SetLastError(error2WinError(rc, ERROR_INVALID_PARAMETER_W));
     return FALSE;
   }
+  SetLastError(ERROR_SUCCESS_W);
   return TRUE;
 }
 //******************************************************************************
@@ -1858,6 +1871,7 @@ DWORD OSLibDosOpenPipe(LPCTSTR lpName,
 
   if(rc == NO_ERROR) {
       dprintf(("Opening of existing named pipe succeeded"));
+      SetLastError(ERROR_SUCCESS_W);
       return hPipe;
   }
 
@@ -1875,9 +1889,11 @@ BOOL OSLibDosConnectNamedPipe(DWORD hNamedPipe, LPOVERLAPPED lpOverlapped)
   rc=DosConnectNPipe(hNamedPipe);
   dprintf(("DosConnectNPipe rc=%d",rc));
 
-  if (!rc) return (TRUE);
+  if(rc == NO_ERROR) {
+      SetLastError(ERROR_SUCCESS_W);
+      return (TRUE);
+  }
   SetLastError(error2WinError(rc,ERROR_PIPE_NOT_CONNECTED_W));
-
   return (FALSE);
 }
 
@@ -1913,9 +1929,11 @@ BOOL OSLibDosCallNamedPipe( LPCTSTR lpNamedPipeName,
                   nTimeOut );
 
 
-  if (!rc) return (TRUE);
+  if(rc == NO_ERROR) {
+      SetLastError(ERROR_SUCCESS_W);
+      return (TRUE);
+  }
   SetLastError(error2WinError(rc,ERROR_PIPE_NOT_CONNECTED_W));
-
   return (FALSE);
 }
 
@@ -1939,9 +1957,11 @@ BOOL OSLibDosTransactNamedPipe( DWORD  hNamedPipe,
                       lpBytesRead);
 
   dprintf(("DosTransactNPipe returned rc=%d");)
-  if (!rc) return (TRUE);
+  if(rc == NO_ERROR) {
+      SetLastError(ERROR_SUCCESS_W);
+      return (TRUE);
+  }
   SetLastError(error2WinError(rc,ERROR_PIPE_NOT_CONNECTED_W));
-
   return (FALSE);
 }
 
@@ -1966,10 +1986,10 @@ BOOL OSLibDosPeekNamedPipe(DWORD   hPipe,
   {
     *lpcbAvail   = availData.cbpipe;
     *lpcbMessage = availData.cbmessage;
+    SetLastError(ERROR_SUCCESS_W);
     return (TRUE);
   }
   SetLastError(error2WinError(rc,ERROR_PIPE_NOT_CONNECTED_W));
-
   return (FALSE);
 }
 //******************************************************************************
@@ -1982,9 +2002,11 @@ BOOL OSLibDosDisconnectNamedPipe(DWORD hPipe)
 
   dprintf(("DosDisConnectNPipe returned rc=%d",rc));
 
-  if (!rc) return TRUE;
+  if(rc == NO_ERROR) {
+      SetLastError(ERROR_SUCCESS_W);
+      return (TRUE);
+  }
   SetLastError(error2WinError(rc,ERROR_PIPE_NOT_CONNECTED_W));
-
   return (FALSE);
 }
 //******************************************************************************
@@ -2009,7 +2031,10 @@ BOOL OSLibDosWaitNamedPipe(LPCSTR lpszNamedPipeName,
 
   dprintf(("DosWaitNPipe returned rc=%d",rc));
 
-  if (!rc) return TRUE;
+  if(rc == NO_ERROR) {
+      SetLastError(ERROR_SUCCESS_W);
+      return (TRUE);
+  }
   SetLastError(error2WinError(rc,ERROR_PIPE_NOT_CONNECTED_W));
 
   return (FALSE);
