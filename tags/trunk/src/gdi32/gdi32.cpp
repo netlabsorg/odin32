@@ -1,7 +1,7 @@
-/* $Id: gdi32.cpp,v 1.10 1999-10-11 20:55:49 sandervl Exp $ */
+/* $Id: gdi32.cpp,v 1.11 1999-10-20 22:36:53 sandervl Exp $ */
 
 /*
- * GDI32 DIB sections
+ * GDI32 apis
  *
  * Copyright 1998 Sander van Leeuwen (sandervl@xs4all.nl)
  * Copyright 1998 Patrick Haller
@@ -406,18 +406,6 @@ BOOL WIN32API SetPixelV(HDC arg1, int arg2, int arg3, COLORREF  arg4)
 }
 //******************************************************************************
 //******************************************************************************
-HFONT WIN32API CreateFontA(int arg1, int arg2, int arg3, int arg4, int arg5,
-                               DWORD arg6, DWORD arg7, DWORD arg8, DWORD arg9,
-                               DWORD arg10, DWORD arg11, DWORD arg12, DWORD arg13, LPCSTR arg14)
-{
- HFONT hfont;
-
-    hfont = O32_CreateFont(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14);
-    dprintf(("GDI32: CreateFontA '%s' returned %D\n", arg14, hfont));
-    return(hfont);
-}
-//******************************************************************************
-//******************************************************************************
 BOOL WIN32API GetDCOrgEx(HDC arg1, PPOINT arg2)
 {
     dprintf(("GDI32: GetDCOrgEx\n"));
@@ -443,22 +431,6 @@ BOOL WIN32API AbortPath( HDC arg1)
 {
     dprintf(("GDI32: OS2AbortPath"));
     return O32_AbortPath(arg1);
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API AddFontResourceA( LPCSTR arg1)
-{
-    dprintf(("GDI32: OS2AddFontResourceA"));
-    return O32_AddFontResource(arg1);
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API AddFontResourceW( LPCWSTR arg1)
-{
-    dprintf(("GDI32: OS2AddFontResourceW STUB"));
-    // NOTE: This will not work as is (needs UNICODE support)
-//    return O32_AddFontResource(arg1);
-    return 0;
 }
 //******************************************************************************
 //******************************************************************************
@@ -655,75 +627,6 @@ HENHMETAFILE WIN32API CreateEnhMetaFileW( HDC arg1, LPCWSTR arg2, const RECT * a
 }
 //******************************************************************************
 //******************************************************************************
-HFONT WIN32API CreateFontIndirectA(const LOGFONTA *lplf)
-{
- HFONT rc;
-
-    dprintf(("GDI32: CreateFontIndirectA\n"));
-    dprintf(("GDI32: lfHeight        = %d\n", lplf->lfHeight));
-    dprintf(("GDI32: lfWidth          = %d\n", lplf->lfWidth));
-    dprintf(("GDI32: lfEscapement    = %d\n", lplf->lfEscapement));
-    dprintf(("GDI32: lfOrientation   = %d\n", lplf->lfOrientation));
-    dprintf(("GDI32: lfWeight        = %d\n", lplf->lfWeight));
-    dprintf(("GDI32: lfItalic        = %d\n", lplf->lfItalic));
-    dprintf(("GDI32: lfUnderline     = %d\n", lplf->lfUnderline));
-    dprintf(("GDI32: lfStrikeOut     = %d\n", lplf->lfStrikeOut));
-    dprintf(("GDI32: lfCharSet       = %X\n", lplf->lfCharSet));
-    dprintf(("GDI32: lfOutPrecision  = %X\n", lplf->lfOutPrecision));
-    dprintf(("GDI32: lfClipPrecision = %X\n", lplf->lfClipPrecision));
-    dprintf(("GDI32: lfQuality       = %X\n", lplf->lfQuality));
-    dprintf(("GDI32: lfPitchAndFamily= %X\n", lplf->lfPitchAndFamily));
-    dprintf(("GDI32: lfFaceName      = %s\n", lplf->lfFaceName));
-    rc = O32_CreateFontIndirect(lplf);
-    dprintf(("GDI32: OS2CreateFontIndirectA returned %X\n", rc));
-    return(rc);
-}
-//******************************************************************************
-//******************************************************************************
-HFONT WIN32API CreateFontIndirectW(const LOGFONTW *lplf)
-{
- LOGFONTA afont;
- HFONT    hfont;
-
-    memcpy(&afont, lplf, ((int)&afont.lfFaceName - (int)&afont));
-    UnicodeToAscii((WCHAR *)lplf->lfFaceName, afont.lfFaceName);
-
-    hfont = O32_CreateFontIndirect(&afont);
-    dprintf(("GDI32: CreateFontIndirectW\n"));
-    dprintf(("GDI32: lfHeight        = %d\n", lplf->lfHeight));
-    dprintf(("GDI32: lfWidth          = %d\n", lplf->lfWidth));
-    dprintf(("GDI32: lfHeight        = %d\n", afont.lfHeight));
-    dprintf(("GDI32: lfWidth          = %d\n", afont.lfWidth));
-    dprintf(("GDI32: lfEscapement    = %d\n", afont.lfEscapement));
-    dprintf(("GDI32: lfOrientation   = %d\n", afont.lfOrientation));
-    dprintf(("GDI32: lfWeight        = %d\n", afont.lfWeight));
-    dprintf(("GDI32: lfItalic        = %d\n", afont.lfItalic));
-    dprintf(("GDI32: lfUnderline     = %d\n", afont.lfUnderline));
-    dprintf(("GDI32: lfStrikeOut     = %d\n", afont.lfStrikeOut));
-    dprintf(("GDI32: lfCharSet       = %X\n", afont.lfCharSet));
-    dprintf(("GDI32: lfOutPrecision  = %X\n", afont.lfOutPrecision));
-    dprintf(("GDI32: lfClipPrecision = %X\n", afont.lfClipPrecision));
-    dprintf(("GDI32: lfQuality       = %X\n", afont.lfQuality));
-    dprintf(("GDI32: lfPitchAndFamily= %X\n", afont.lfPitchAndFamily));
-    dprintf(("GDI32: lfFaceName      = %s\n", afont.lfFaceName));
-    dprintf(("GDI32: CreateFontIndirectW %s returned %X\n", afont.lfFaceName, hfont));
-
-    return(hfont);
-}
-//******************************************************************************
-//******************************************************************************
-HFONT WIN32API CreateFontW(int arg1, int arg2, int arg3, int arg4, int arg5,
-                              DWORD arg6, DWORD arg7, DWORD arg8, DWORD arg9,
-                              DWORD arg10, DWORD arg11, DWORD arg12, DWORD arg13, LPCWSTR arg14)
-{
- char *astring = UnicodeToAsciiString((LPWSTR)arg14);
- HFONT rc;
-
-   dprintf(("GDI32: OS2CreateFontW\n"));
-   rc = O32_CreateFont(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, astring);
-   FreeAsciiString(astring);
-   return(rc);
-}
 //******************************************************************************
 //******************************************************************************
 HBRUSH WIN32API CreateHatchBrush( int arg1, COLORREF  arg2)
@@ -853,32 +756,6 @@ BOOL WIN32API EnumEnhMetaFile( HDC arg1, HENHMETAFILE arg2, ENHMFENUMPROC arg3, 
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API EnumFontFamiliesA(HDC          arg1,
-                                  LPCSTR       arg2,
-                                  FONTENUMPROCA arg3,
-                                  LPARAM       arg4)
-{
-    dprintf(("GDI32: OS2EnumFontFamiliesA DOESN'T WORK!"));
-//    return O32_EnumFontFamilies(arg1, arg2, arg3, arg4);
-    return 0;
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API EnumFontFamiliesW(HDC          arg1,
-                               LPCWSTR       arg2,
-                               FONTENUMPROCW arg3,
-                               LPARAM       arg4)
-{
-  dprintf(("GDI32: OS2EnumFontFamiliesW not implemented\n"));
-
-  // NOTE: This will not work as is (needs UNICODE support)
-
-  /* @@@PH 98/06/07 EnumFontFamilies will crash upon return from a
-                    wide-character FONTENUMPROC. */
-  return(0);
-}
-//******************************************************************************
-//******************************************************************************
 BOOL WIN32API LineTo( HDC arg1, int arg2, int  arg3)
 {
     dprintf(("GDI32: OS2LineTo"));
@@ -917,24 +794,6 @@ int WIN32API SetROP2( HDC arg1, int  arg2)
 }
 //******************************************************************************
 //TODO: Callback
-//******************************************************************************
-int WIN32API EnumFontsA( HDC arg1, LPCSTR arg2, FONTENUMPROCA arg3, LPARAM  arg4)
-{
-    dprintf(("GDI32: OS2EnumFontsA"));
-//    return O32_EnumFonts(arg1, arg2, arg3, arg4);
-    return 1;
-}
-//******************************************************************************
-//TODO: Callback
-//******************************************************************************
-int WIN32API EnumFontsW( HDC arg1, LPCWSTR arg2, FONTENUMPROCW arg3, LPARAM  arg4)
-{
-    dprintf(("GDI32: OS2EnumFontsW - stub (1)"));
-    // NOTE: This will not work as is (needs UNICODE support)
-//    return O32_EnumFonts(arg1, arg2, arg3, arg4);
-    return 1;
-}
-//******************************************************************************
 //******************************************************************************
 BOOL WIN32API EnumMetaFile( HDC arg1, HMETAFILE arg2, MFENUMPROC arg3, LPARAM  arg4)
 {
@@ -1771,25 +1630,6 @@ BOOL WIN32API RectVisible( HDC arg1, const RECT * arg2)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API RemoveFontResourceA( LPCSTR arg1)
-{
-    dprintf(("GDI32: OS2RemoveFontResourceA %s\n", arg1));
-    return O32_RemoveFontResource(arg1);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API RemoveFontResourceW(LPCWSTR arg1)
-{
- char *astring = UnicodeToAsciiString((LPWSTR)arg1);
- BOOL  rc;
-
-    dprintf(("GDI32: OS2RemoveFontResourceW\n"));
-    rc = O32_RemoveFontResource(astring);
-    FreeAsciiString(astring);
-    return(rc);
-}
-//******************************************************************************
-//******************************************************************************
 HDC WIN32API ResetDCA( HDC arg1, const DEVMODEA *  arg2)
 {
     dprintf(("GDI32: OS2ResetDCA\n"));
@@ -2229,21 +2069,6 @@ UINT WIN32API SetDIBColorTable(HDC hdc, UINT uStartIndex, UINT cEntries,
 }
 //******************************************************************************
 //******************************************************************************
-INT WIN32API EnumFontFamiliesExA( HDC arg1, LPLOGFONTA arg2, FONTENUMPROCEXA arg3, LPARAM  arg4, DWORD dwFlags)
-{
-    dprintf(("GDI32: OS2EnumFontFamiliesExA, not implemented\n"));
-    return 0;
-}
-//******************************************************************************
-//******************************************************************************
-INT WIN32API EnumFontFamiliesExW( HDC arg1, LPLOGFONTW arg2, FONTENUMPROCEXW arg3, LPARAM  arg4, DWORD dwFlags)
-{
-    dprintf(("GDI32: OS2EnumFontFamiliesW, not implemented\n"));
-    // NOTE: This will not work as is (needs UNICODE support)
-    return 0;
-}
-//******************************************************************************
-//******************************************************************************
 HPALETTE WIN32API CreateHalftonePalette(HDC hdc)
 {
     dprintf(("GDI32: OS2CreateHalftonePalette, not implemented\n"));
@@ -2362,17 +2187,9 @@ DWORD WIN32API GetGlyphOutlineW(HDC hdc, UINT uChar, UINT uFormat, LPGLYPHMETRIC
 //******************************************************************************
 
 //******************************************************************************
-DWORD WIN32API GetFontData(HDC hdc, DWORD dwTable, DWORD dwOffset, LPVOID lpvBuffer,
-                              DWORD dbData)
-{
-  dprintf(("GDI32: GetFontData, not implemented (GDI_ERROR)\n"));
-  return(GDI_ERROR);
-}
-//******************************************************************************
-//******************************************************************************
 int WIN32API DescribePixelFormat(HDC, int, UINT, LPPIXELFORMATDESCRIPTOR)
 {
-  dprintf(("GDI32: GetFontData, not implemented (GDI_ERROR)\n"));
+  dprintf(("GDI32: DescribePixelFormat, not implemented (GDI_ERROR)\n"));
   return(GDI_ERROR);
 }
 //******************************************************************************
@@ -2713,66 +2530,6 @@ HBRUSH WIN32API CreateDIBPatternBrush(HGLOBAL hglbDIBPacked,
 }
 
 
-/*****************************************************************************
- * Name      : BOOL CreateScalableFontResourceA
- * Purpose   : The CreateScalableFontResourceA function creates a font resource
- *             file for a scalable font.
- * Parameters: DWORD   fdwHidden       flag for read-only embedded font
- *             LPCSTR lpszFontRes     address of filename for font resource
- *             LPCSTR lpszFontFile    address of filename for scalable font
- *             LPCSTR lpszCurrentPath address of path to font file
- * Variables :
- * Result    : TRUE / FALSE
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
- *****************************************************************************/
-
-BOOL WIN32API CreateScalableFontResourceA(DWORD   fdwHidden,
-                                             LPCSTR lpszFontRes,
-                                             LPCSTR lpszFontFile,
-                                             LPCSTR lpszCurrentPath)
-{
-  dprintf(("GDI32: CreateScalableFontResourceA(%08xh,%08xh,%08xh,%08xh) not implemented.\n",
-           fdwHidden,
-           lpszFontRes,
-           lpszFontFile,
-           lpszCurrentPath));
-
-  return (FALSE);
-}
-
-
-/*****************************************************************************
- * Name      : BOOL CreateScalableFontResourceW
- * Purpose   : The CreateScalableFontResourceW function creates a font resource
- *             file for a scalable font.
- * Parameters: DWORD   fdwHidden       flag for read-only embedded font
- *             LPCSTR lpszFontRes     address of filename for font resource
- *             LPCSTR lpszFontFile    address of filename for scalable font
- *             LPCSTR lpszCurrentPath address of path to font file
- * Variables :
- * Result    : TRUE / FALSE
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
- *****************************************************************************/
-
-BOOL WIN32API CreateScalableFontResourceW(DWORD   fdwHidden,
-                                             LPCWSTR lpszFontRes,
-                                             LPCWSTR lpszFontFile,
-                                             LPCWSTR lpszCurrentPath)
-{
-  dprintf(("GDI32: CreateScalableFontResourceW(%08xh,%08xh,%08xh,%08xh) not implemented.\n",
-           fdwHidden,
-           lpszFontRes,
-           lpszFontFile,
-           lpszCurrentPath));
-
-  return (FALSE);
-}
 
 
 /*****************************************************************************
@@ -3016,28 +2773,6 @@ DWORD WIN32API GetDeviceGammaRamp(HDC    hdc,
 }
 
 
-/*****************************************************************************
- * Name      : DWORD GetFontLanguageInfo
- * Purpose   : The GetFontLanguageInfo function returns information about the
- *             currently selected font for the specified display context.
- *             Applications typically use this information and the
- *             GetCharacterPlacement function to prepare a character string for display.
- * Parameters: HDC     hdc        handle to device context
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
- *****************************************************************************/
-
-DWORD WIN32API GetFontLanguageInfo(HDC hdc)
-{
-  dprintf(("GDI32: GetFontLanguageInfo(%08xh) not implemented.\n",
-           hdc));
-
-  return (0);
-}
 
 
 /*****************************************************************************
