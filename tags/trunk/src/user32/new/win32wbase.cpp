@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.39 2000-01-13 20:11:37 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.40 2000-01-14 13:16:58 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1081,14 +1081,15 @@ ULONG Win32BaseWindow::MsgFormatFrame(WINDOWPOS *lpWndPos)
 {
   RECT oldWindowRect = rectWindow, client = rectClient, newWindowRect;
   WINDOWPOS wndPos;
+  ULONG rc;
 
   if(lpWndPos) {
     //set new window rectangle
     setWindowRect(lpWndPos->x, lpWndPos->y, lpWndPos->x + lpWndPos->cx, lpWndPos->y + lpWndPos->cy);
-    newWindowRect = rectWindow;
+    newWindowRect= rectWindow;
   }
   else {
-    wndPos.hwnd  = Win32Hwnd;
+    wndPos.hwnd  = getWindowHandle();
     wndPos.hwndInsertAfter = 0;
     newWindowRect= rectWindow;
     if (getParent()) mapWin32Rect(OSLIB_HWND_DESKTOP,getParent()->getOS2WindowHandle(),&newWindowRect);
@@ -1097,10 +1098,13 @@ ULONG Win32BaseWindow::MsgFormatFrame(WINDOWPOS *lpWndPos)
     wndPos.cx    = newWindowRect.right - newWindowRect.left;
     wndPos.cy    = newWindowRect.bottom - newWindowRect.top;
     wndPos.flags = SWP_FRAMECHANGED;
-    lpWndPos = &wndPos;
+    lpWndPos     = &wndPos;
   }
 
-  return SendNCCalcSize(TRUE, &oldWindowRect, &newWindowRect, &client, &wndPos, &rectClient);
+  rc = SendNCCalcSize(TRUE, &newWindowRect,  &oldWindowRect, &client, lpWndPos, &rectClient);
+
+  dprintf(("MsgFormatFrame: old client rect (%d,%d)(%d,%d), new client (%d,%d)(%d,%d)", client.left, client.top, client.right, client.bottom, rectClient.left, rectClient.top, rectClient.right, rectClient.bottom));
+  return rc;
 }
 //******************************************************************************
 //******************************************************************************
