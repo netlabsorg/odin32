@@ -1,7 +1,8 @@
-/* $Id: ChangeLog,v 1.2633 2003-10-16 10:31:13 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2634 2003-10-16 12:22:57 sandervl Exp $ */
 
  2003-10-16: Sander van Leeuwen <sandervl@innotek   >
     - SHELL32:  o CommandLineToArgvW bugfix from Wine
+    - ADVAPI32: o Check for valid SID pointer in LengthSid
 
  2003-10-13: Platon Fomichev <stauff@innotek   >
     - COMDLG32: o We should set/clear PD_PRINTTOFILE flag when we click on
