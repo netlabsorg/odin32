@@ -1,4 +1,4 @@
-/* $Id: disk.cpp,v 1.25 2001-09-07 10:51:38 phaller Exp $ */
+/* $Id: disk.cpp,v 1.26 2001-12-17 16:23:19 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -309,19 +309,35 @@ ODINFUNCTION8(BOOL,    GetVolumeInformationA,
             nFileSystemNameSize    = sizeof(tmpstring);
         }
         rc = OSLibDosQueryVolumeFS(drive, lpFileSystemNameBuffer, nFileSystemNameSize);
-        if(lpFileSystemNameBuffer) {
+        if(lpFileSystemNameBuffer) 
+        {
             dprintf2(("File system name: %s", lpFileSystemNameBuffer));
+            if(!strcmp(lpFileSystemNameBuffer, "JFS")) 
+            {
+                strcpy(lpFileSystemNameBuffer, "NTFS");
+            }
+            else
+            if(!strcmp(lpFileSystemNameBuffer, "CDFS") ||
+               !strcmp(lpFileSystemNameBuffer, "UDF")) 
+            {
+                //do nothing
+            }
+            else 
+            {//pretend everything else is FAT16 (HPFS and FAT have the same file size limit)
+                strcpy(lpFileSystemNameBuffer, "FAT16");
+            }
+            dprintf2(("Final file system name: %s", lpFileSystemNameBuffer));
         }
     }
     if(lpMaximumComponentLength) {
-        if(!strcmp(lpFileSystemNameBuffer, "FAT")) {
+        if(!strcmp(lpFileSystemNameBuffer, "FAT16")) {
             *lpMaximumComponentLength = 12;
         }
         else    *lpMaximumComponentLength = 255; //TODO: Always correct? (CDFS?)
     }
     if(lpFileSystemFlags)
     {
-        if(strcmp(lpFileSystemNameBuffer, "FAT")) {
+        if(strcmp(lpFileSystemNameBuffer, "FAT16")) {
             *lpFileSystemFlags = FS_CASE_IS_PRESERVED;
         }
         else
@@ -406,10 +422,10 @@ DWORD WIN32API GetLogicalDrives(void)
 }
 //******************************************************************************
 //******************************************************************************
-UINT WIN32API GetLogicalDriveStringsA(UINT arg1, LPSTR  arg2)
+UINT WIN32API GetLogicalDriveStringsA(UINT cchBuffer, LPSTR lpszBuffer)
 {
-    dprintf(("KERNEL32:  OS2GetLogicalDriveStringsA\n"));
-    return O32_GetLogicalDriveStrings(arg1, arg2);
+    dprintf(("KERNEL32: GetLogicalDriveStringsA", cchBuffer, lpszBuffer));
+    return O32_GetLogicalDriveStrings(cchBuffer, lpszBuffer);
 }
 //******************************************************************************
 //******************************************************************************
