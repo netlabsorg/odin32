@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.34 2000-01-10 23:29:13 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.35 2000-01-11 13:52:18 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -53,6 +53,8 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2);
 //******************************************************************************
 BOOL InitPM()
 {
+  CLASSINFO FrameClassInfo;
+
   hab = WinInitialize(0);
   dprintf(("Winitialize returned %x", hab));
   hmq = WinCreateMsgQueue(hab, 0);
@@ -104,7 +106,6 @@ BOOL InitPM()
         dprintf(("WinRegisterClass Win32BaseWindow failed"));
         return(FALSE);
    }
-/* //CB: perhaps reuse it for own frame
    if (!WinQueryClassInfo (hab, WC_FRAME, &FrameClassInfo)) {
      dprintf (("WinQueryClassInfo WC_FRAME failed"));
      return (FALSE);
@@ -118,7 +119,7 @@ BOOL InitPM()
      dprintf (("WinRegisterClass Win32InnerFrame failed"));
      return (FALSE);
    }
-*/
+
    WinQueryWindowRect(HWND_DESKTOP, &desktopRectl);
    ScreenWidth  = desktopRectl.xRight;
    ScreenHeight = desktopRectl.yTop;

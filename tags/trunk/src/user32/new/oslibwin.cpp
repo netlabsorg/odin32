@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.34 2000-01-11 13:06:25 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.35 2000-01-11 13:52:18 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -88,7 +88,7 @@ HWND OSLibWinCreateWindow(HWND hwndParent,ULONG dwWinStyle,
   FCData.flCreateFlags = dwFrameStyle;
 
   *hwndFrame = WinCreateWindow (hwndParent,
-                                WC_FRAME,
+                                TopLevel ? WC_FRAME : WIN32_INNERFRAME,
                                 pszName, dwWinStyle, 0, 0, 0, 0,
                                 hwndParent, HWND_TOP,
                                 id, &FCData, NULL);
