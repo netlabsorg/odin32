@@ -1,4 +1,4 @@
-/* $Id: windef.h,v 1.11 1999-09-08 19:35:37 sandervl Exp $ */
+/* $Id: windef.h,v 1.12 1999-09-18 15:55:45 sandervl Exp $ */
 
 /*
  * Basic types definitions
@@ -240,11 +240,13 @@ typedef ULONG          *PULONG;
 typedef LONG           *PLONG;
 typedef DWORD          *PDWORD;
 /* common win32 types */
-typedef CHAR           *LPSTR;
+#ifdef __WINE__
 typedef CHAR           *LPTSTR;
+typedef const CHAR     *LPCTSTR;
+#endif
+typedef CHAR           *LPSTR;
 typedef CHAR           *PSTR;
 typedef const CHAR     *LPCSTR;
-typedef const CHAR     *LPCTSTR;
 typedef const CHAR     *PCSTR;
 typedef WCHAR          *LPWSTR;
 typedef WCHAR          *PWSTR;
