@@ -1,4 +1,4 @@
-/* $Id: pe.cpp,v 1.15 2000-04-13 18:54:41 sandervl Exp $ */
+/* $Id: pe.cpp,v 1.16 2000-04-14 22:56:11 sandervl Exp $ */
 
 /*
  * PELDR main exe loader code
@@ -37,6 +37,7 @@ char szCPUErrorMsg[]    = "Executable doesn't run on x86 machines";
 char szExeErrorMsg[]    = "File isn't an executable";
 char szInteralErrorMsg[]= "Internal Error";
 char szNoKernel32Msg[]  = "Can't load/find kernel32.dll (rc=%d)";
+char szDosInfoBlocks[]  = "DosInfoBlocks failed!";
 
 char fullpath[CCHMAXPATH];
 
@@ -61,7 +62,7 @@ KRNL32EXCEPTPROC       Krnl32SetExceptionHandler = 0;
 KRNL32EXCEPTPROC       Krnl32UnsetExceptionHandler = 0;
 
 //should be the same as in ..\kernel32\winexepeldr.h
-typedef BOOL (* WIN32API WIN32CTOR)(char *, ULONG);
+typedef BOOL (* WIN32API WIN32CTOR)(char *, char *, ULONG);
 
 WIN32CTOR              CreateWin32Exe       = 0;
 
@@ -76,12 +77,54 @@ int main(int argc, char *argv[])
  HAB    hab = 0;                             /* PM anchor block handle       */
  HMQ    hmq = 0;                             /* Message queue handle         */
  char   exeName[CCHMAXPATH];
+ char   fullpath[CCHMAXPATH];
  APIRET  rc;
  HMODULE hmodPMWin = 0, hmodKernel32 = 0;
+ PTIB   ptib;
+ PPIB   ppib;
+ char  *cmdline, *win32cmdline;
 
   if(argc >= 2) {
-	strcpy(exeName, argv[1]);
-	strupr(exeName);
+	if(DosGetInfoBlocks(&ptib, &ppib) == 0) {
+		cmdline = ppib->pib_pchcmd;
+		cmdline += strlen(cmdline)+1; 	//skip pe.exe
+		while(*cmdline == ' ')	cmdline++; //skip leading space
+		if(*cmdline == '"')     cmdline++;
+		win32cmdline = cmdline;
+
+		strncpy(exeName, cmdline, sizeof(exeName)-1);
+		exeName[sizeof(exeName)-1] = 0;
+		strupr(exeName);
+                cmdline = strstr(exeName, ".EXE");
+		if(cmdline) {
+			cmdline[4] = 0;
+			win32cmdline += ((ULONG)cmdline - (ULONG)exeName) + 4;
+		}
+		else {
+			cmdline = exeName;
+			while(*cmdline && *cmdline != ' ')	cmdline++; //skip exe name
+			*cmdline = 0;
+			win32cmdline += ((ULONG)cmdline - (ULONG)exeName);
+			if(strstr(exeName, ".") == NULL) {
+				strcat(exeName, ".EXE");
+			}
+ 		}
+		while(*win32cmdline == ' ') win32cmdline++; //skip spaces
+
+		cmdline = exeName + strlen(exeName) - 1;
+		while(*cmdline == ' ') cmdline--;
+		cmdline[1] = 0;
+		if(DosQueryPathInfo(exeName, FIL_QUERYFULLNAME, (PVOID)fullpath, sizeof(fullpath)) == 0) {
+			strcpy(exeName, fullpath);
+		}
+	}
+	else {//should never happen!
+		DebugInt3();
+  		rc = DosLoadModule(exeName, sizeof(exeName), "PMWIN.DLL", &hmodPMWin);
+  		rc = DosQueryProcAddr(hmodPMWin, ORD_WIN32MESSAGEBOX, NULL, (PFN *)&MyWinMessageBox);
+		MyWinMessageBox(HWND_DESKTOP, NULL, szDosInfoBlocks, szErrorTitle, 0, MB_OK | MB_ERROR | MB_MOVEABLE);
+		goto fail;
+	}
 	AllocateExeMem(exeName);
   }
 
@@ -108,11 +151,9 @@ int main(int argc, char *argv[])
 	MyWinMessageBox(HWND_DESKTOP, NULL, exeName, szErrorTitle, 0, MB_OK | MB_ERROR | MB_MOVEABLE);
         goto fail;
   }
-  rc = DosQueryProcAddr(hmodKernel32, 0, "_CreateWin32PeLdrExe@8", (PFN *)&CreateWin32Exe);
+  rc = DosQueryProcAddr(hmodKernel32, 0, "_CreateWin32PeLdrExe@12", (PFN *)&CreateWin32Exe);
 
-  strcpy(exeName, argv[1]);
-  strupr(exeName);
-  if(CreateWin32Exe(exeName, reservedMemory) == FALSE) {
+  if(CreateWin32Exe(exeName, win32cmdline, reservedMemory) == FALSE) {
         goto fail;
   }
 
@@ -153,14 +194,7 @@ void AllocateExeMem(char *filename)
  ULONG  ulSysinfo, flAllocMem = 0;
 
   strcpy(szFileName, filename);
-  tmp = szFileName;
-  while(*tmp != ' ' && *tmp != 0)
-	tmp++;
-  *tmp = 0;
 
-  if(!strchr(szFileName, '.')) {
-	strcat(szFileName,".EXE");
-  }
   rc = DosOpen(szFileName, &dllfile, &action, 0, FILE_READONLY, OPEN_ACTION_OPEN_IF_EXISTS|OPEN_ACTION_FAIL_IF_NEW, OPEN_SHARE_DENYNONE|OPEN_ACCESS_READONLY, NULL);
   if(rc != 0) {
 	if(!strstr(szFileName, ".EXE")) {
