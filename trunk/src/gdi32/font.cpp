@@ -1,4 +1,4 @@
-/* $Id: font.cpp,v 1.6 1999-11-11 19:09:34 sandervl Exp $ */
+/* $Id: font.cpp,v 1.7 1999-12-04 13:53:12 hugh Exp $ */
 
 /*
  * GDI32 font apis
@@ -36,9 +36,9 @@ ODINDEBUGCHANNEL(GDI32-FONT)
 
 
 typedef struct {
-	DWORD userProc;
-	DWORD userData;
-	DWORD dwFlags;
+  DWORD userProc;
+  DWORD userData;
+  DWORD dwFlags;
 } ENUMUSERDATA;
 
 /*
@@ -71,7 +71,7 @@ static CHARSETINFO FONT_tci[MAXTCIINDEX] = {
   { GB2312_CHARSET, 936, FS(18)},
   { HANGEUL_CHARSET, 949, FS(19)},
   { CHINESEBIG5_CHARSET, 950, FS(20)},
-  { JOHAB_CHARSET, 1361, FS(21)}, 
+  { JOHAB_CHARSET, 1361, FS(21)},
   /* reserved for alternate ANSI and OEM */
   { DEFAULT_CHARSET, 0, FS(0)},
   { DEFAULT_CHARSET, 0, FS(0)},
@@ -265,7 +265,7 @@ int  EXPENTRY_O32 EnumFontProcA(LPENUMLOGFONTA lpLogFont, LPNEWTEXTMETRICA
                                    lpTextM, DWORD arg3, LPARAM arg4)
 {
  ENUMUSERDATA *lpEnumData = (ENUMUSERDATA *)arg4;
- FONTENUMPROCA proc = (FONTENUMPROCA)lpEnumData->userProc; 
+ FONTENUMPROCA proc = (FONTENUMPROCA)lpEnumData->userProc;
 
   return proc(lpLogFont, lpTextM, arg3, lpEnumData->userData);
 }
@@ -275,7 +275,7 @@ int  EXPENTRY_O32 EnumFontProcW(LPENUMLOGFONTA lpLogFont, LPNEWTEXTMETRICA lpTex
                                    DWORD arg3, LPARAM arg4)
 {
  ENUMUSERDATA *lpEnumData = (ENUMUSERDATA *)arg4;
- FONTENUMPROCW proc = (FONTENUMPROCW)lpEnumData->userProc; 
+ FONTENUMPROCW proc = (FONTENUMPROCW)lpEnumData->userProc;
  ENUMLOGFONTW LogFont;
  NEWTEXTMETRICW textM;
  int rc;
@@ -320,7 +320,7 @@ int  EXPENTRY_O32 EnumFontProcExA(LPENUMLOGFONTA lpLogFont, LPNEWTEXTMETRICA
                                      lpTextM, DWORD arg3, LPARAM arg4)
 {
  ENUMUSERDATA *lpEnumData = (ENUMUSERDATA *)arg4;
- FONTENUMPROCEXA proc = (FONTENUMPROCEXA)lpEnumData->userProc; 
+ FONTENUMPROCEXA proc = (FONTENUMPROCEXA)lpEnumData->userProc;
  ENUMLOGFONTEXA logFont;
  NEWTEXTMETRICEXA textM;
 
@@ -339,7 +339,7 @@ int EXPENTRY_O32 EnumFontProcExW(LPENUMLOGFONTA lpLogFont, LPNEWTEXTMETRICA lpTe
                                     DWORD arg3, LPARAM arg4)
 {
  ENUMUSERDATA *lpEnumData = (ENUMUSERDATA *)arg4;
- FONTENUMPROCEXW proc = (FONTENUMPROCEXW)lpEnumData->userProc; 
+ FONTENUMPROCEXW proc = (FONTENUMPROCEXW)lpEnumData->userProc;
  ENUMLOGFONTEXW LogFont;
  NEWTEXTMETRICEXW textM;
  int rc;
@@ -597,7 +597,7 @@ DWORD WIN32API GetFontLanguageInfo(HDC hdc)
  *
  * Fills a CHARSETINFO structure for a character set, code page, or
  * font. This allows making the correspondance between different labelings
- * (character set, Windows, ANSI, and OEM codepages, and Unicode ranges) 
+ * (character set, Windows, ANSI, and OEM codepages, and Unicode ranges)
  * of the same encoding.
  *
  * Only one codepage will be set in lpCs->fs. If TCI_SRCFONTSIG is used,
@@ -612,14 +612,14 @@ BOOL WIN32API TranslateCharsetInfo(
        if flags == TCI_SRCFONTSIG: pointer to fsCsb of a FONTSIGNATURE
        if flags == TCI_SRCCHARSET: a character set value
        if flags == TCI_SRCCODEPAGE: a code page value
-		 */
+     */
   LPCHARSETINFO lpCs, /* structure to receive charset information */
   DWORD flags /* determines interpretation of lpSrc */
 ) {
     int index = 0;
     switch (flags) {
     case TCI_SRCFONTSIG:
-	while (!(*lpSrc>>index & 0x0001) && index<MAXTCIINDEX) index++;
+  while (!(*lpSrc>>index & 0x0001) && index<MAXTCIINDEX) index++;
       break;
     case TCI_SRCCODEPAGE:
       while ((UINT) (lpSrc) != FONT_tci[index].ciACP && index < MAXTCIINDEX) index++;
