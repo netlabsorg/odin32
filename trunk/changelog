@@ -1,10 +1,11 @@
- /* $Id: changelog,v 1.658 2000-01-18 20:48:18 sandervl Exp $ */
+ /* $Id: changelog,v 1.659 2000-01-18 22:28:47 sandervl Exp $ */
 
  2000-01-18: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Removed 'old' user32 and replaced it with the new one
                   Call default window proc when DefMDIChildProcA/W is called
                   for a non-MDI window.
 	- KERNEL32: Increased shared heap reserve size to 512 kb
+	- SHELL32:  Display Odin logo in Shell about dialog box
 
  2000-01-18: Jens Wiessner <wiessnej@rfi.de>
 	- WINMM\WAVEMAP
