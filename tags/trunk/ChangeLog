@@ -1,12 +1,18 @@
-/* $Id: ChangeLog,v 1.1214 2001-01-09 20:54:11 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1215 2001-01-10 19:22:14 bird Exp $ */
+
+ 2001-01-10: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - tools\install:
+                o Corrected packing of wpss50.dll.
+                o Added .sym files to release distributions. (optional package)
+
+    - tools\dailybuild:
+                o Removed uploading of glide-stuff.
 
  2001-01-09: Sander van Leeuwen <sandervl@xs4all.nl>
-    - INCLUDE\dcdata:
-      GDI32:
-      USER32:   o Updates for WGSS50.
+    - INCLUDE\dcdata, GDI32, USER32:
+                o Updates for WGSS50.
 
-    - LIB\WGSS50.lib
-    - BIN\WGSS50.dll
+    - LIB\WGSS50.lib, BIN\WGSS50.dll:
                 o Binary distribution of WGSS50 added
 
  2001-01-09: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
