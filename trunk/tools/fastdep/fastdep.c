@@ -1,8 +1,8 @@
-/* $Id: fastdep.c,v 1.25 2001-03-02 11:23:24 phaller Exp $
+/* $Id: fastdep.c,v 1.26 2001-03-14 20:17:52 bird Exp $
  *
  * Fast dependents. (Fast = Quick and Dirty!)
  *
- * Copyright (c) 1999-2000 knut st. osmundsen
+ * Copyright (c) 1999-2001 knut st. osmundsen
  *
  * PH 2001-03-01 added optional support for a super-dependency
  *
@@ -16,11 +16,28 @@
 #define INCL_DOSERRORS
 #define INCL_FILEMGR
 
+/*
+ * Size of the \n charater (forget '\r').
+ * If you're compiling this under a UNICODE system this may perhaps change,
+ * but I doubd that fastdep will work at all under a UNICODE system. ;-)
+ */                        
+#if defined(UNICODE) && !defined(__WIN32OS2__)
+#define CBNEWLINE     (2)
+#else
+#define CBNEWLINE     (1)
+#endif
+
+
 
 /*******************************************************************************
 *   Header Files                                                               *
 *******************************************************************************/
+#if defined(OS2FAKE)
+#include "os2fake.h"
+#else
 #include <os2.h>
+#endif
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -725,6 +742,7 @@ int main(int argc, char **argv)
             ULONG           cFiles = ~0UL;
             int             i;
 
+
             /*
              * If append option is specified we'll have to read the existing dep file
              * before starting adding new dependencies.
@@ -816,7 +834,7 @@ int main(int argc, char **argv)
 static void syntax(void)
 {
     printf(
-        "FastDep v0.31\n"
+        "FastDep v0.32\n"
         "Dependency scanner. Creates a makefile readable depend file.\n"
         " - was quick and dirty, now it's just quick -\n"
         "\n"
@@ -849,13 +867,15 @@ static void syntax(void)
         "   -obr<[+]|->     -obr+: Object rule.\n"
         "                   -obr-: No object rule, rule for source filename is generated.\n"
         "   -obj[ ]<objext> Object extention.           Default: obj\n"
-        "   -s <name>       Insert super-dependency on top of tree, Default: alltargets:\n"
+        "   -s[ ][name]     Insert super-dependency on top of tree.\n"
+        "                   If not specified name defaults to 'alltargets'.\n"
+        "                   Default: disabled\n"
         "   -r[ ]<rsrcext>  Resource binary extention.  Default: res\n"
         "   -x[ ]<f1[;f2]>  Files to exclude. Only exact filenames.\n"
         "   <files>         Files to scan. Wildchars are allowed.\n"
         "\n"
         "Options and files could be mixed.\n"
-        " copyright (c) 1999-2000 knut st. osmundsen (knut.stange.osmundsen@pmsc.no)\n",
+        " copyright (c) 1999-2001 knut st. osmundsen (knut.stange.osmundsen@mynd.no)\n",
         pszDefaultDepFile
         );
 }
@@ -2576,10 +2596,6 @@ static BOOL  depWriteFile(const char *pszFilename, POPTIONS options)
         int         iBuffer = 0;
         int         cch;
 
-        /* PH Note: might not be CRLF on other platforms */
-        int iCRLF = strlen("\n");
-
-
         /* @@@PH 2001-03-01
          * If option is selected to generate a parent
          * "super" dependency, enter this scope.
@@ -2611,7 +2627,7 @@ static BOOL  depWriteFile(const char *pszFilename, POPTIONS options)
             }
 
             /* Add two new lines. Flush buffer first if necessary. */
-            if (iBuffer + iCRLF + iCRLF >= sizeof(szBuffer))
+            if (iBuffer + CBNEWLINE*2 >= sizeof(szBuffer))
             {
                 fwrite(szBuffer, iBuffer, 1, phFile);
                 iBuffer = 0;
@@ -2619,7 +2635,7 @@ static BOOL  depWriteFile(const char *pszFilename, POPTIONS options)
 
             /* add 2 linefeeds */
             strcpy(szBuffer + iBuffer, "\n\n");
-            iBuffer += iCRLF + iCRLF;
+            iBuffer += CBNEWLINE*2;
         }
 
 
@@ -2658,7 +2674,7 @@ static BOOL  depWriteFile(const char *pszFilename, POPTIONS options)
             }
 
             /* Add two new lines. Flush buffer first if necessary. */
-            if (iBuffer + iCRLF + iCRLF >= sizeof(szBuffer))
+            if (iBuffer + CBNEWLINE*2 >= sizeof(szBuffer))
             {
                 fwrite(szBuffer, iBuffer, 1, phFile);
                 iBuffer = 0;
@@ -2666,7 +2682,7 @@ static BOOL  depWriteFile(const char *pszFilename, POPTIONS options)
 
             /* add 2 linefeeds */
             strcpy(szBuffer + iBuffer, "\n\n");
-            iBuffer += iCRLF + iCRLF;
+            iBuffer += CBNEWLINE*2;
 
             /* next rule */
             pdep = (PDEPRULE)(void*)AVLGetNextNode(&EnumData);
@@ -2878,13 +2894,18 @@ static BOOL depCheckCyclic(PDEPRULE pdepRule, const char *pszDep)
 }
 
 
+
+
 /*
  * Testing purpose.
  */
+#if !defined(OS2FAKE)
 #include <os2.h>
+#endif
 #ifdef OLEMANN
 #include "olemann.h"
 #endif
+
 
 
 
