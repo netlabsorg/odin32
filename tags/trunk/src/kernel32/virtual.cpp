@@ -1,4 +1,4 @@
-/* $Id: virtual.cpp,v 1.9 1999-08-26 15:05:14 sandervl Exp $ */
+/* $Id: virtual.cpp,v 1.10 1999-08-26 17:56:26 sandervl Exp $ */
 
 /*
  * Win32 virtual memory functions
@@ -432,7 +432,11 @@ BOOL WIN32API VirtualProtect(LPVOID lpvAddress, DWORD cbSize, DWORD fdwNewProtec
         dprintf(("pageFlags == 0\n"));
         return(TRUE);   //nothing to do
   }
-  npages = ((int)lpvAddress + cbSize >> 12) - ((int)lpvAddress >> 12) + 1;
+  ULONG offset = ((ULONG)lpvAddress & 0xFFF);
+  npages = (cbSize >> 12);
+  if(cbSize & 0xFFF + offset) {
+	npages++;
+  }
 
   lpvAddress = (LPVOID)((int)lpvAddress & ~0xFFF);
   cbSize     = npages*4096;
