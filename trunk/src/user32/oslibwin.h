@@ -1,4 +1,4 @@
-/* $Id: oslibwin.h,v 1.6 1999-09-29 08:27:15 sandervl Exp $ */
+/* $Id: oslibwin.h,v 1.7 1999-10-02 04:09:13 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -39,6 +39,7 @@ HWND  OSLibWinCreateWindow(HWND hwndParent, ULONG dwWinStyle, ULONG dwFrameStyle
                            char *pszName, HWND Owner, ULONG fHWND_BOTTOM, HWND *hwndFrame);
 
 BOOL  OSLibWinConvertStyle(ULONG dwStyle, ULONG dwExStyle, ULONG *OSWinStyle, ULONG *OSFrameStyle);
+void  OSLibSetWindowStyle(HWND hwnd, ULONG dwStyle);
 
 BOOL  OSLibWinSetWindowULong(HWND hwnd, ULONG offset, ULONG value);
 ULONG OSLibWinGetWindowULong(HWND hwnd, ULONG offset);
@@ -251,7 +252,6 @@ BOOL  OSLibWinSetScrollRange(HWND hwndParent, int scrollBar, int minpos,
                              int maxpos, int fRedraw);
 BOOL  OSLibWinSetScrollPageSize(HWND hwndParent, int scrollBar, int pagesize, 
                                 int totalsize, int fRedraw);
-void  OSLibWinChangeScrollStyle(HWND hwndParent, int scrollBar, int Reserved);
 
 void  OSLibTranslateScrollCmdAndMsg(ULONG *msg, ULONG *scrollcmd);
 
