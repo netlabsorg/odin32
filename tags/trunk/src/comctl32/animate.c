@@ -732,9 +732,6 @@ static LRESULT ANIMATE_OpenA(HWND hWnd, WPARAM wParam, LPARAM lParam)
     if (!hInstance)
        hInstance = GetWindowLongA(hWnd, GWL_HINSTANCE);
 
-    if (HIWORD(lParam)) {
-    TRACE("(\"%s\");\n", (LPSTR)lParam);
-
 #ifdef __WIN32OS2__
     if (HIWORD(lParam)) {
         //TRACE("(\"%s\");\n", (LPSTR)lParam);
@@ -755,23 +752,26 @@ static LRESULT ANIMATE_OpenA(HWND hWnd, WPARAM wParam, LPARAM lParam)
         }
     }
 #else
-    if (!ANIMATE_LoadResA(infoPtr, hInstance, (LPSTR)lParam)) {
-        TRACE("No AVI resource found!\n");
-        if (!ANIMATE_LoadFileA(infoPtr, (LPSTR)lParam)) {
-        WARN("No AVI file found!\n");
-        return FALSE;
-        }
-    }
-    } else {
-    TRACE("(%u);\n", (WORD)LOWORD(lParam));
+    if (HIWORD(lParam)) {
+	TRACE("(\"%s\");\n", (LPSTR)lParam);
 
-    if (!ANIMATE_LoadResA(infoPtr, hInstance,
-                  MAKEINTRESOURCEA((INT)lParam))) {
-        WARN("No AVI resource found!\n");
-        return FALSE;
+	if (!ANIMATE_LoadResA(infoPtr, hInstance, (LPSTR)lParam)) {
+	    TRACE("No AVI resource found!\n");
+	    if (!ANIMATE_LoadFileA(infoPtr, (LPSTR)lParam)) {
+		WARN("No AVI file found!\n");
+		return FALSE;
+	    }
+	}
+    } else {
+	TRACE("(%u);\n", (WORD)LOWORD(lParam));
+
+	if (!ANIMATE_LoadResA(infoPtr, hInstance,
+			      MAKEINTRESOURCEA((INT)lParam))) {
+	    WARN("No AVI resource found!\n");
+	    return FALSE;
+	}
     }
 #endif
-    }
 
     if (!ANIMATE_GetAviInfo(infoPtr)) {
     WARN("Can't get AVI information\n");
