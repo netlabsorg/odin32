@@ -1,4 +1,4 @@
-/* $Id: menu.cpp,v 1.25 2000-10-22 19:53:23 sandervl Exp $*/
+/* $Id: menu.cpp,v 1.26 2000-11-01 20:51:37 sandervl Exp $*/
 /*
  * Menu functions
  *
@@ -1866,20 +1866,18 @@ static MENUITEM *MENU_InsertItem( HMENU hMenu, UINT pos, UINT flags )
 
     /* Find where to insert new item */
 
-    if ((pos==(UINT)-1) || ((flags & MF_BYPOSITION) && (pos == menu->nItems)))
-    {
-        /* Special case: append to menu */
-        /* Some programs specify the menu length to do that */
-        pos = menu->nItems;
-    } else
-    {
-        if (!MENU_FindItem( &hMenu, &pos, flags ))
-        {
-            //FIXME("item %x not found\n", pos );
-            return NULL;
+    /* Find where to insert new item */
+
+    if (flags & MF_BYPOSITION) {
+        if (pos > menu->nItems) 
+            pos = menu->nItems;
+    } else {
+        if (!MENU_FindItem( &hMenu, &pos, flags )) 
+            pos = menu->nItems;
+        else {
+            if (!(menu = MENU_GetMenu( hMenu )))
+                return NULL;
         }
-        if (!(menu = MENU_GetMenu(hMenu)))
-            return NULL;
     }
 
     /* Create new items array */
