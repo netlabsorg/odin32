@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7 1999-11-04 18:50:50 sandervl Exp $
+# $Id: makefile,v 1.8 1999-11-05 14:27:09 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -10,8 +10,7 @@
 #
 #            debug: Change to a debug build.
 #            debugsmp: Start nmake process in background that processes all
-#                      dlls in reverse (linking fails, but first nmake will 
-#                      correct this)
+#                      dlls in reverse
 #            nodebuginfo: Change to a debug build without debug info in binaries
 #            nodebuginfosmp: Change to an SMP debug build without debug info in binaries
 #            release: Change to a release build.
