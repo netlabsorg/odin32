@@ -1,5 +1,5 @@
 <?php
-/* $Id: Odin32Changelog.php,v 1.1 2000-10-26 18:41:00 bird Exp $
+/* $Id: Odin32Changelog.php,v 1.2 2003-04-15 00:39:28 bird Exp $
  *
  * Change log parser/conveter.
  *
@@ -11,7 +11,7 @@
 
 echo "<TABLE border=0 CELLSPACING=0 CELLPADDING=0 COLS=3 WIDTH=\"750\">\n".
      "<TR><td>\n";
-$aChangeLog = ChangeLog_Read(file("d:/odin32/tree20001026/changelog"));
+$aChangeLog = ChangeLog_Read(file("y:/bldodin/scripts/StateD/ChangeLog"));
 //ChangeLog_Dump($aChangeLog);
 ChangeLog_MakeTable($aChangeLog);
 
@@ -60,6 +60,8 @@ function ChangeLog_Read($aFile)
                                          * ie. an ISO date. */
     $fPre   = 0;                        /* We're parsing preformatted text.
                                          * Add newlines! */
+    $iModule = -1;
+    $iChange = -1;
 
     reset($aFile);
     while (list($sKey, $sLine) = each($aFile))
@@ -67,7 +69,7 @@ function ChangeLog_Read($aFile)
         $sTrimmed = trim($sLine);
 
         /* ISO date on this line? */
-        if ($sTrimmed[10] == ':' && isISODate(substr($sTrimmed, 0, 10)) )
+        if (strlen($sTrimmed) > 10 && $sTrimmed[10] == ':' && isISODate(substr($sTrimmed, 0, 10)) )
         {
             $fFirst = 0;
             /* example line:
@@ -78,7 +80,7 @@ function ChangeLog_Read($aFile)
             $iRight = strrpos($sTrimmed, ">");
             if ($iLeft >= $iRight)
             {
-                echo "<!-- $iLeft >= $iRight; line $sKey -->";
+                //echo "<!-- $iLeft >= $iRight; line $sKey -->";
                 $fFirst = 1; // skips this entry.
                 continue;
             }
@@ -110,7 +112,8 @@ function ChangeLog_Read($aFile)
              */
 
             /* Look for new module */
-            if ($sTrimmed[0] == '-'
+            if (    strlen($sTrimmed) > 0
+                &&  $sTrimmed[0] == '-'
                 &&  ($iColon = strpos($sTrimmed, ":")) > 1
                 &&  strlen($sModule = trim(substr($sTrimmed, 1, $iColon - 1))) > 0
                 &&  strlen($sModule) < 42
@@ -131,8 +134,10 @@ function ChangeLog_Read($aFile)
             }
 
             /* Look for start of new point */
-            if (   $sTrimmed[0] == "ú"
-                || ($sTrimmed[0] == "o" && $sTrimmed[1] == " ")
+            if (    strlen($sTrimmed) > 0
+                && (    $sTrimmed[0] == "ú"
+                    || ($sTrimmed[0] == "o" && $sTrimmed[1] == " ")
+                    )
                 )
             {
                 if ($iChange > 0 ||
@@ -160,7 +165,7 @@ function ChangeLog_Read($aFile)
                 $iPre = ($iPre ? $iPre : -1);
                 $iEndPre = strpos($sTrimmed, "</pre");
                 $iEndPre = ($iEndPre ? $iEndPre : -1);
-                echo "<!--$iPre,$iEndPre-->\n";
+                //echo "<!--$iPre,$iEndPre-->\n";
 
                 if ($fPre && $iEndPre > $iPre)
                     $fPre = false;
