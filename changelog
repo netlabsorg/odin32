@@ -1,6 +1,8 @@
-/* $Id: changelog,v 1.1943 2002-01-08 18:23:03 sandervl Exp $ */
+/* $Id: changelog,v 1.1944 2002-01-08 22:34:29 sandervl Exp $ */
 
  2002-01-07: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Fixes for DosQueryAffinity & DosSetAffinity on non-SMP
+                  systems (set default/ignore)
     - USER32:   o Fixed restoring of windows after minimizing/maximizing
                 o Allocate more memory for 40x40 icon generation
                 o Fixed SetClipboardData for CF_UNICODETEXT (translate to
