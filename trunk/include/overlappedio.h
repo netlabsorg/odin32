@@ -1,4 +1,4 @@
-/* $Id: overlappedio.h,v 1.2 2002-06-11 12:52:03 sandervl Exp $ */
+/* $Id: overlappedio.h,v 1.3 2002-07-05 17:56:33 sandervl Exp $ */
 
 /*
  * Win32 overlapped IO class
@@ -75,6 +75,9 @@ public:
                          BOOL fFullDuplex = ASYNC_TYPE_HALFDUPLEX);
     ~OverlappedIOHandler();
 
+     DWORD  AddRef();
+     DWORD  Release(BOOL fSignalExit = FALSE);
+
      BOOL   WriteFile(HANDLE        hHandle,
                       LPCVOID       lpBuffer,
                       DWORD         nNumberOfBytesToWrite,
@@ -134,6 +137,8 @@ private:
 
      DWORD                dwAsyncType;
      BOOL                 fFullDuplex;
+     LONG                 refCount;
+
      //[ASYNC_INDEX_READ]  list of pending read (+ write if half-duplex mode) operations
      //[ASYNC_INDEX_WRITE] list of pending write (full-duplex mode) operations
      //[ASYNC_INDEX_POLL]  list of pending poll operations
