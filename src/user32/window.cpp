@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.121 2002-02-26 11:12:26 sandervl Exp $ */
+/* $Id: window.cpp,v 1.122 2002-02-27 15:23:38 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -1633,8 +1633,10 @@ HWND WIN32API WindowFromPoint( POINT point)
                     dprintf(("WindowFromPoint (%d,%d) %x->%x\n", point.x, point.y, hwndOS2, hwnd));
                     return hwnd;
                 }
-                hwnd = GetWindow(hwnd, GW_HWNDNEXT);
 #if 0
+//TODO: breaks a lot of things
+                hwnd = GetWindow(hwnd, GW_HWNDNEXT);
+#else
                 //try siblings
                 HWND hwndSibling;
                 HWND hwndParent = GetParent(hwnd);
