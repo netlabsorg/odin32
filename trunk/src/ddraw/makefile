@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.30 2002-12-04 10:35:01 sandervl Exp $
+# $Id: makefile,v 1.31 2002-12-20 10:38:25 sandervl Exp $
 
 #
 # Odin32 API
@@ -23,7 +23,7 @@ $(OBJDIR)\ddraw2d.obj \
 $(OBJDIR)\clipper.obj \
 $(OBJDIR)\oslibgpi.obj \
 $(OBJDIR)\ddraw3d.obj \
-$(OBJDIR)\iccio1.obj \
+##$(OBJDIR)\iccio1.obj \
 $(OBJDIR)\asmutil.obj \
 $(OBJDIR)\surface.obj \
 $(OBJDIR)\surfacehlp.obj \

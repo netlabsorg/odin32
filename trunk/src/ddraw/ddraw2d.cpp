@@ -1,4 +1,4 @@
-/* $Id: ddraw2d.cpp,v 1.3 2002-12-04 16:45:06 sandervl Exp $ */
+/* $Id: ddraw2d.cpp,v 1.4 2002-12-20 10:38:25 sandervl Exp $ */
 
 /*
  * DX Draw base class implementation
@@ -32,7 +32,6 @@
 #include <winuser.h>
 #include <winerror.h>
 #include <options.h>
-#include "cio2.h"
 #include "os2util.h"
 #include "os2fsdd.h"
 // include with the videomodes we support
@@ -265,6 +264,7 @@ OS2IDirectDraw::OS2IDirectDraw(GUID *lpGUID) :
   // Check to see if FS DDraw is enabled in ODIN.INI
   if (!fNoFSDD && PROFILE_GetOdinIniBool(ODINDDRAW_SECTION, "Fullscreen", FALSE)) 
   {
+#if 0
       rc = InitIO();
 
       if(rc)  // try to get IOPL for the thread
@@ -275,6 +275,7 @@ OS2IDirectDraw::OS2IDirectDraw(GUID *lpGUID) :
       {
           dprintf(("DDRAW: IOPL 3!"));
       }
+#endif
 
       rc = LoadPMIService();
       dprintf(("DDRAW: LoadPMIService() rc=0x%08X",rc));
@@ -1904,7 +1905,6 @@ HRESULT WIN32API DrawSetCooperativeLevel(THIS This, HWND hwndClient, DWORD dwFla
     return(DD_OK);
 }
 //******************************************************************************
-//Backwards compatibility, what's that??
 //******************************************************************************
 HRESULT WIN32API DrawSetDisplayMode2(THIS This, DWORD dwWidth, DWORD dwHeight,
                                      DWORD dwBPP, DWORD dwRefreshRate,

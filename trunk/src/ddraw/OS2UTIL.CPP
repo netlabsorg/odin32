@@ -1,4 +1,4 @@
-/* $Id: OS2UTIL.CPP,v 1.14 2002-12-04 15:21:40 sandervl Exp $ */
+/* $Id: OS2UTIL.CPP,v 1.15 2002-12-20 10:38:25 sandervl Exp $ */
 
 /*
  * OS/2 Utility functions
@@ -72,6 +72,7 @@ void InverseDC(HDC hdc, LONG lHeight)
 //******************************************************************************
 int InitIO()
 {
+#if 0
   WORD  gdt;
   HRESULT rc;
   HFILE  device;
@@ -100,6 +101,7 @@ int InitIO()
   io_init2(gdt);
 
   SetFS(sel);
+#endif
   return 0;
 }
 //******************************************************************************
