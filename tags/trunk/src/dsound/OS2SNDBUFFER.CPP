@@ -1,4 +1,4 @@
-/* $Id: OS2SNDBUFFER.CPP,v 1.3 1999-06-10 17:09:30 phaller Exp $ */
+/* $Id: OS2SNDBUFFER.CPP,v 1.4 1999-10-23 23:00:49 sandervl Exp $ */
 
 /*
  * DirectSound SoundBuffer class
@@ -10,35 +10,19 @@
  */
 
 
-/*@Const************************************************************************
-*   Defined Constants                                                          *
-*******************************************************************************/
-#define INCL_DOSMEMMGR
-#define INCL_DIRECTSOUNDBUFFER_GUID
-#define WIN32SDK_NOPOSTWRAPPER
-
 /*@Header***********************************************************************
 *   Header Files                                                               *
 *******************************************************************************/
-#include <os2.h>
+#include <os2win.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "no.h"     /* NO* defines for windows.h */
-#include <w_windows.h>
+#define INITGUID
 #include <dsound.h>
-#include <Win32SDKPostWrapper.h>
 
 #include "os2dsound.h"
 #include "os2sndbuffer.h"
 #include "misc.h"
-
-
-/* KSO Apr 19 1999: Set correct interface.           *
- * (INTERFACE is used in the THIS and THIS_ macros)  */
-#undef INTERFACE
-#define INTERFACE IDirectSoundBuffer
-
 
 
 //******************************************************************************
@@ -46,8 +30,6 @@
 OS2IDirectSoundBuffer::OS2IDirectSoundBuffer(const DSBUFFERDESC *lpDSBufferDesc) //KSO Apr 13 1999: const, SDK changes
         : Referenced(0), lastError(DS_OK)
 {
- APIRET rc;
-
   lpVtbl = &Vtbl;
   Vtbl.AddRef               = SoundBufAddRef;
   Vtbl.Release              = SoundBufRelease;
@@ -89,9 +71,9 @@ OS2IDirectSoundBuffer::OS2IDirectSoundBuffer(const DSBUFFERDESC *lpDSBufferDesc)
     lpfxFormat = (WAVEFORMATEX *)malloc(bufferdesc.lpwfxFormat->cbSize + sizeof(WAVEFORMATEX));
     memcpy(lpfxFormat, bufferdesc.lpwfxFormat, bufferdesc.lpwfxFormat->cbSize + sizeof(WAVEFORMATEX));
 
-    rc = DosAllocMem((PPVOID)&lpBuffer, bufferdesc.dwBufferBytes, PAG_READ|PAG_WRITE|PAG_COMMIT);
-    if(rc) {
-        dprintf(("DosAllocMem returned %d", rc));
+    lpBuffer = (LPSTR)VirtualAlloc(0, bufferdesc.dwBufferBytes, MEM_COMMIT, PAGE_READWRITE);
+    if(lpBuffer == NULL) {
+        dprintf(("VirtualAlloc failed"));
         lpBuffer  = NULL;
         lastError = DSERR_OUTOFMEMORY;
         return;
@@ -105,14 +87,14 @@ OS2IDirectSoundBuffer::OS2IDirectSoundBuffer(const DSBUFFERDESC *lpDSBufferDesc)
 OS2IDirectSoundBuffer::~OS2IDirectSoundBuffer()
 {
   if(lpBuffer)
-    DosFreeMem(lpBuffer);
+    VirtualFree(lpBuffer, 0, MEM_RELEASE);
   if(lpfxFormat)
     free(lpfxFormat);
 
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT WIN32API SoundBufQueryInterface(THIS, REFIID riid, LPVOID FAR * ppvObj)
+HRESULT WIN32API SoundBufQueryInterface(THIS, REFIID riid, LPVOID * ppvObj)
 {
   dprintf(("OS2IDirectSoundBuffer::QueryInterface\n"));
   if(This == NULL) {
@@ -261,11 +243,7 @@ HRESULT __stdcall SoundBufGetStatus(THIS_ LPDWORD lpdwStatus)
 }
 //******************************************************************************
 //******************************************************************************
-#if 0 //KSO Apr 19 1999: some parameter incompabilities between newer and older SDKs.
 HRESULT __stdcall SoundBufInitialize(THIS_ LPDIRECTSOUND, LPDSBUFFERDESC )
-#else
-HRESULT __stdcall SoundBufInitialize(THIS_ LPDIRECTSOUND, LPCDSBUFFERDESC )
-#endif
 {
  OS2IDirectSoundBuffer *me = (OS2IDirectSoundBuffer *)This;
 
@@ -277,17 +255,10 @@ HRESULT __stdcall SoundBufInitialize(THIS_ LPDIRECTSOUND, LPCDSBUFFERDESC )
 }
 //******************************************************************************
 //******************************************************************************
-#if 0 //KSO Apr 19 1999: some parameter incompabilities between newer and older SDKs.
 HRESULT __stdcall SoundBufLock(THIS_ DWORD dwWriteCursor, DWORD dwWriteBytes,
                    LPVOID lplpvAudioPtr1, LPDWORD lpdwAudioBytes1,
                    LPVOID lplpvAudioPtr2, LPDWORD lpdwAudioBytes2,
                    DWORD dwFlags)
-#else
-HRESULT __stdcall SoundBufLock(THIS_ DWORD dwWriteCursor, DWORD dwWriteBytes,
-                   LPVOID *lplpvAudioPtr1, LPDWORD lpdwAudioBytes1,
-                   LPVOID *lplpvAudioPtr2, LPDWORD lpdwAudioBytes2,
-                   DWORD dwFlags)
-#endif
 {
  OS2IDirectSoundBuffer *me = (OS2IDirectSoundBuffer *)This;
 
@@ -351,11 +322,7 @@ HRESULT __stdcall SoundBufSetCurrentPosition(THIS_ DWORD dwNewPosition)
 }
 //******************************************************************************
 //******************************************************************************
-#if 0 //KSO Apr 19 1999: some parameter incompabilities between newer and older SDKs.
 HRESULT __stdcall SoundBufSetFormat(THIS_ LPWAVEFORMATEX )
-#else
-HRESULT __stdcall SoundBufSetFormat(THIS_ LPCWAVEFORMATEX )
-#endif
 {
  OS2IDirectSoundBuffer *me = (OS2IDirectSoundBuffer *)This;
 

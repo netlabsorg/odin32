@@ -1,4 +1,4 @@
-/* $Id: OS2SNDBUFFER.H,v 1.3 1999-06-10 17:09:30 phaller Exp $ */
+/* $Id: OS2SNDBUFFER.H,v 1.4 1999-10-23 23:00:50 sandervl Exp $ */
 
 /*
  * DirectSound SoundBuffer class
@@ -11,9 +11,13 @@
 #ifndef __OS2SNDBUFFER_H__
 #define __OS2SNDBUFFER_H__
 
-//KSO Apr 19 1999: Seems to be necessary to define these now.
-#undef  INTERFACE
-#define INTERFACE   IDirectSoundBuffer
+#include <mmsystem.h>
+
+#undef THIS
+#define THIS VOID*This
+
+#undef THIS_
+#define THIS_ VOID*This,
 
 class OS2IDirectSoundBuffer
 {
@@ -47,7 +51,7 @@ class OS2IDirectSoundBuffer
               OS2IDirectSoundBuffer* next;                   // Next OS2IDirectSound
     static    OS2IDirectSoundBuffer* dsound;                 // List of OS2IDirectSound
 
-    friend    HRESULT __stdcall SoundBufQueryInterface(THIS, REFIID riid, LPVOID FAR * ppvObj);
+    friend    HRESULT __stdcall SoundBufQueryInterface(THIS, REFIID riid, LPVOID * ppvObj);
     friend    ULONG   __stdcall SoundBufAddRef(THIS);
     friend    ULONG   __stdcall SoundBufRelease(THIS);
     friend    HRESULT __stdcall SoundBufGetCaps(THIS_ LPDSBCAPS );
@@ -57,20 +61,11 @@ class OS2IDirectSoundBuffer
     friend    HRESULT __stdcall SoundBufGetPan(THIS_ LPLONG ) ;
     friend    HRESULT __stdcall SoundBufGetFrequency(THIS_ LPDWORD ) ;
     friend    HRESULT __stdcall SoundBufGetStatus(THIS_ LPDWORD ) ;
-    #if 0 //KSO Apr 19 1999: some parameter incompabilities between newer and older SDKs.
-       friend HRESULT __stdcall SoundBufInitialize(THIS_ LPDIRECTSOUND, LPDSBUFFERDESC ) ;
-       friend HRESULT __stdcall SoundBufLock(THIS_ DWORD,DWORD,LPVOID,LPDWORD,LPVOID,LPDWORD,DWORD ) ;
-    #else
-       friend HRESULT __stdcall SoundBufInitialize(THIS_ LPDIRECTSOUND, LPCDSBUFFERDESC ) ;
-       friend HRESULT __stdcall SoundBufLock(THIS_ DWORD,DWORD,LPVOID*,LPDWORD,LPVOID*,LPDWORD,DWORD ) ;
-    #endif
+    friend    HRESULT __stdcall SoundBufInitialize(THIS_ LPDIRECTSOUND, LPDSBUFFERDESC ) ;
+    friend    HRESULT __stdcall SoundBufLock(THIS_ DWORD,DWORD,LPVOID,LPDWORD,LPVOID,LPDWORD,DWORD ) ;
     friend    HRESULT __stdcall SoundBufPlay(THIS_ DWORD,DWORD,DWORD ) ;
     friend    HRESULT __stdcall SoundBufSetCurrentPosition(THIS_ DWORD ) ;
-    #if 0 //KSO Apr 19 1999: some parameter incompabilities between newer and older SDKs.
-       friend HRESULT __stdcall SoundBufSetFormat(THIS_ LPWAVEFORMATEX ) ;
-    #else
-       friend HRESULT __stdcall SoundBufSetFormat(THIS_ LPCWAVEFORMATEX ) ;
-    #endif
+    friend    HRESULT __stdcall SoundBufSetFormat(THIS_ LPWAVEFORMATEX ) ;
     friend    HRESULT __stdcall SoundBufSetVolume(THIS_ LONG ) ;
     friend    HRESULT __stdcall SoundBufSetPan(THIS_ LONG ) ;
     friend    HRESULT __stdcall SoundBufSetFrequency(THIS_ DWORD ) ;
@@ -80,7 +75,7 @@ class OS2IDirectSoundBuffer
 };
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall SoundBufQueryInterface(THIS, REFIID riid, LPVOID FAR * ppvObj);
+HRESULT __stdcall SoundBufQueryInterface(THIS, REFIID riid, LPVOID * ppvObj);
 ULONG   __stdcall SoundBufAddRef(THIS);
 ULONG   __stdcall SoundBufRelease(THIS);
 HRESULT __stdcall SoundBufGetCaps(THIS_ LPDSBCAPS );
@@ -90,20 +85,11 @@ HRESULT __stdcall SoundBufGetVolume(THIS_ LPLONG ) ;
 HRESULT __stdcall SoundBufGetPan(THIS_ LPLONG ) ;
 HRESULT __stdcall SoundBufGetFrequency(THIS_ LPDWORD ) ;
 HRESULT __stdcall SoundBufGetStatus(THIS_ LPDWORD ) ;
-#if 0 //KSO Apr 19 1999: some parameter incompabilities between newer and older SDKs.
-    HRESULT __stdcall SoundBufInitialize(THIS_ LPDIRECTSOUND, LPDSBUFFERDESC ) ;
-    HRESULT __stdcall SoundBufLock(THIS_ DWORD,DWORD,LPVOID,LPDWORD,LPVOID,LPDWORD,DWORD ) ;
-#else
-    HRESULT __stdcall SoundBufInitialize(THIS_ LPDIRECTSOUND, LPCDSBUFFERDESC ) ;
-    HRESULT __stdcall SoundBufLock(THIS_ DWORD,DWORD,LPVOID*,LPDWORD,LPVOID*,LPDWORD,DWORD ) ;
-#endif
+HRESULT __stdcall SoundBufInitialize(THIS_ LPDIRECTSOUND, LPDSBUFFERDESC ) ;
+HRESULT __stdcall SoundBufLock(THIS_ DWORD,DWORD,LPVOID,LPDWORD,LPVOID,LPDWORD,DWORD ) ;
 HRESULT __stdcall SoundBufPlay(THIS_ DWORD,DWORD,DWORD ) ;
 HRESULT __stdcall SoundBufSetCurrentPosition(THIS_ DWORD ) ;
-#if 0 //KSO Apr 19 1999: some parameter incompabilities between newer and older SDKs.
-    HRESULT __stdcall SoundBufSetFormat(THIS_ LPWAVEFORMATEX ) ;
-#else
-    HRESULT __stdcall SoundBufSetFormat(THIS_ LPCWAVEFORMATEX ) ;
-#endif
+HRESULT __stdcall SoundBufSetFormat(THIS_ LPWAVEFORMATEX ) ;
 HRESULT __stdcall SoundBufSetVolume(THIS_ LONG ) ;
 HRESULT __stdcall SoundBufSetPan(THIS_ LONG ) ;
 HRESULT __stdcall SoundBufSetFrequency(THIS_ DWORD ) ;

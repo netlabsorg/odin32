@@ -1,21 +1,8 @@
-/* $Id: misc.c,v 1.3 1999-06-10 17:09:30 phaller Exp $ */
-
-/*
- * Logging procedures
- *
- * Copyright 1998 Sander van Leeuwen (sandervl@xs4all.nl)
- * Copyright 1998 Joel Troster
- * Copyright 1998 Peter FitzSimmons
- *
- *
- * Project Odin Software License can be found in LICENSE.TXT
- *
- */
 #define INCL_BASE
 #define INCL_WIN
 #define INCL_WINERRORS
 #define INCL_DOSFILEMGR
-#include <os2.h>
+#include <os2wrap.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -37,19 +24,20 @@
 #include <stddef.h>                /* .. */
 #include <time.h>                  /* .. */
 
-extern ULONG flAllocMem;        /*Tue 03.03.1998: knut */
+extern ULONG flAllocMem;  /*Tue 03.03.1998: knut */
 
 /* ----- Local defines ----- */
 #define PRINTFIDSIZE sizeof(PRINTFID)
 #define PRINTFMAXBUF PRINTFIDSIZE+PRINTFLINELEN
 
 /* ----- Per-thread output buffer and current indices into line ---- */
-struct perthread {
+struct perthread
+{
   LONG   lineindex;                /* where next char */
   LONG   tidemark;                 /* rightmost char */
   int    bell;                     /* TRUE if line has bell */
   UCHAR  line[PRINTFMAXBUF];       /* accumulator */
-  };
+};
 
 /* ----- Local static variables ----- */
 static ULONG  ourpid=0;            /* our process ID */
@@ -65,7 +53,7 @@ static int printf_(struct perthread *);
 /* arguments.                                                        */
 /* ----------------------------------------------------------------- */
 int SYSTEM EXPORT WriteLog(char *f, ...)
-  {
+{
   TIB    *ptib;                    /* process/thread id structures */
   PIB    *ppib;                    /* .. */
   TID    ourtid;                   /* thread ID */
@@ -73,10 +61,14 @@ int SYSTEM EXPORT WriteLog(char *f, ...)
   int    rc;                       /* returncode */
   ULONG  urc;                      /* returncode */
 
-  urc=DosOpenQueue(&servepid, &qhandle, PRINTFQNAME);  /* Open the Q */
+  urc=DosOpenQueue( &servepid,
+                    &qhandle,
+                    PRINTFQNAME);  /* Open the Q */
   /* Non-0 RC means Q does not exist or cannot be opened */
-  if (urc==343) return 0;          /* queue does not exist, so quit */
-  if (urc!=0)   return -1;         /* report any other error */
+  if (urc==343)
+    return 0;          /* queue does not exist, so quit */
+  if (urc!=0)
+    return -1;         /* report any other error */
 
   /* First determine our thread ID (and hence get access to the      */
   /* correct per-thread data.  If the per-thread data has not been   */
@@ -87,17 +79,21 @@ int SYSTEM EXPORT WriteLog(char *f, ...)
   if (ourtid>PRINTFTHREADS)        /* too many threads .. */
     return 0;                      /* .. so quit, quietly */
   tp=tps[ourtid];                  /* copy to local pointer */
-  if (tp==NULL) {                  /* uninitialized (NULL=0) */
+  if (tp==NULL)
+  {
+    /* uninitialized (NULL=0) */
     /* allocate a per-thread structure */
     tp=(struct perthread *)malloc(sizeof(struct perthread));
-    if (tp==NULL) return -1;       /* out of memory -- return error */
+    if (tp==NULL)
+      return -1;       /* out of memory -- return error */
     tps[ourtid]=tp;                /* save for future calls */
     strcpy(tp->line,PRINTFID);     /* initialize: line.. */
     tp->lineindex=PRINTFIDSIZE-1;  /* ..where next char */
     tp->tidemark =PRINTFIDSIZE-2;  /* ..rightmost char */
     tp->bell=FALSE;                /* ..if line has bell */
-    if (ourpid==0) ourpid=ppib->pib_ulpid;   /* save PID for all to use */
-    }
+    if (ourpid==0)
+      ourpid=ppib->pib_ulpid;   /* save PID for all to use */
+  }
 
   { /* Block for declarations -- only needed if queue exists, etc. */
     LONG  count;                   /* count of characters formatted */
@@ -110,22 +106,26 @@ int SYSTEM EXPORT WriteLog(char *f, ...)
     count=vsprintf(buffer, f, argptr);
     va_end(argptr);                /* done with variable arguments */
 
-    if (count<0) return count-1000;/* bad start */
+    if (count<0)
+      return count-1000;/* bad start */
 
-    if (count>PRINTFMAXLEN) {
+    if (count>PRINTFMAXLEN)
+    {
       /* Disaster -- we are probably "dead", but just in case we */
       /* are not, carry on with truncated data. */
       count=PRINTFMAXLEN;
-      }
+    }
     buffer[count]='\0';            /* ensure terminated */
     /* OK, ready to go with the data now in BUFFER                    */
     /* We copy from the formatted string to the output (line) buffer, */
     /* taking note of certain control characters and sending a line   */
     /* the queue whenever we see a LF control, or when the line       */
     /* fills (causing a forced break).                                */
-    for (i=0; ; i++) {
+    for (i=0; ; i++)
+    {
       ch=buffer[i]; if (!ch) break;
-      switch(ch) {
+      switch(ch)
+      {
         case '\r':                 /* carriage return */
           tp->lineindex=PRINTFIDSIZE-1; /* back to start of line */
           break;
@@ -137,13 +137,16 @@ int SYSTEM EXPORT WriteLog(char *f, ...)
         case '\t':                 /* tab */
           newind=tp->lineindex-PRINTFIDSIZE+1;   /* offset into data */
           newind=tp->lineindex+5-newind%5;    /* new index requested */
-          if (newind>=PRINTFMAXBUF) newind=PRINTFMAXBUF;    /* clamp */
-          for (; tp->lineindex<newind; tp->lineindex++) {
-            if (tp->lineindex>tp->tidemark) {  /* beyond current end */
+          if (newind>=PRINTFMAXBUF)
+            newind=PRINTFMAXBUF;    /* clamp */
+          for (; tp->lineindex<newind; tp->lineindex++)
+          {
+            if (tp->lineindex>tp->tidemark)
+            {  /* beyond current end */
               tp->line[tp->lineindex]=' ';              /* add space */
               tp->tidemark=tp->lineindex;
-              }
             }
+          }
           break;
         case '\v':                 /* vertical tab */
           /* ignore it */
@@ -160,20 +163,22 @@ int SYSTEM EXPORT WriteLog(char *f, ...)
             tp->tidemark=tp->lineindex;
           tp->lineindex++;                 /* step for next */
         } /* switch */
-      if (tp->lineindex>=PRINTFMAXBUF) {
+      if (tp->lineindex>=PRINTFMAXBUF)
+      {
         rc=printf_(tp);            /* print a line */
-        if (rc!=0) return rc;      /* error */
-        }
+        if (rc!=0)
+          return rc;      /* error */
+      }
 
-      } /* copy loop */
+    } /* copy loop */
     return count;                  /* all formatted data processed */
-    } /* block */
-  } /* printf */
+  } /* block */
+} /* printf */
 
 /* ----- printf_(tp) -- Local subroutine to send a line ------------ */
 /* A line has been completed (or overflowed): write it to the queue. */
 int printf_(struct perthread *tp)  /* pointer to per-thread data */
-  {
+{
   ULONG   urc;                     /* unsigned returncode */
   PSZ     pszTo, pszFrom;          /* character pointers */
   PVOID   addr;                    /* address of output data */
@@ -184,38 +189,48 @@ int printf_(struct perthread *tp)  /* pointer to per-thread data */
   size=tp->tidemark+2;             /* total length of data */
 
   /* Get some shared memory that can be given away */
-  urc=DosAllocSharedMem(&addr, NULL, (unsigned)size,
-    OBJ_GIVEABLE|PAG_WRITE|PAG_COMMIT|flAllocMem);
+  urc=DosAllocSharedMem( &addr,
+                         NULL,
+                         (unsigned)size,
+                         OBJ_GIVEABLE|PAG_WRITE|PAG_COMMIT|flAllocMem);
                                    /*knut: added flAllocMem */
 
-  if (urc!=0) return -2;           /* error */
+  if (urc!=0)
+    return -2;                     /* error */
 
   pszTo=addr;                      /* copy for clarity */
   pszFrom=&(tp->line[0]);          /* pointer to source */
   strcpy(pszTo,pszFrom);           /* copy the string to shared memory */
 
-  if (ourpid!=servepid) {          /* (no giveaway needed if to self) */
+  if (ourpid!=servepid)
+  {          /* (no giveaway needed if to self) */
     urc=DosGiveSharedMem(addr, servepid, PAG_READ); /* give access */
-    if (urc!=0) return -3;}        /* error */
+    if (urc!=0)
+      return -3; /* error */
+  }
 
   /* Write the selector, size, and timestamp to the queue */
   if (tp->bell) size=-size;        /* BELL passed by negation */
   time(&timenow);                  /* optional - else use 0 */
-  urc=DosWriteQueue(qhandle,       /* handle */
-         (unsigned)timenow,        /* 'request' (timestamp) */
-         (unsigned)size,           /* 'length'  (length/bell) */
-                   addr,           /* 'address' (address) */
-                   0);             /* priority (FIFO if enabled) */
-  if (urc!=0) return -4;           /* error */
-  if (ourpid!=servepid) {          /* if given away.. */
+  urc=DosWriteQueue( qhandle,           /* handle */
+                     (unsigned)timenow, /* 'request' (timestamp) */
+                     (unsigned)size,    /* 'length'  (length/bell) */
+                               addr,    /* 'address' (address) */
+                               0);       /* priority (FIFO if enabled) */
+  if (urc!=0)
+    return -4;           /* error */
+  if (ourpid!=servepid)
+  {          /* if given away.. */
     urc=DosFreeMem(addr);          /* .. *we* are done with it */
-    if (urc!=0) return -5;}        /* error */
+    if (urc!=0)
+      return -5; /* error */
+  }
   /* Reset the line buffer and indices */
   tp->lineindex=PRINTFIDSIZE-1;    /* where next char */
   tp->tidemark =PRINTFIDSIZE-2;    /* rightmost char */
   tp->bell     =FALSE;             /* true if line has bell */
   return 0;                        /* success! */
-  } /* printf_ */
+} /* printf_ */
 #else
 
 
@@ -225,19 +240,22 @@ static BOOL init = FALSE;
 
 int SYSTEM EXPORT WriteLog(char *tekst, ...)
 {
-    va_list argptr;
-    if(!init){
-        init = TRUE;
-        if(!getenv("NOWIN32LOG"))
-            flog = fopen("directx.log", "w");
-    }
+  va_list argptr;
+  if(!init)
+  {
+    init = TRUE;
+    if(!getenv("NODSOUNDLOG"))
+      flog = fopen("DSOUND.log", "w");
+  }
 
-    if(flog){
-        va_start(argptr, tekst);
-        vfprintf(flog, tekst, argptr);
-        va_end(argptr);
-    }
-    return 1;
+  if(flog)
+  {
+     va_start(argptr, tekst);
+     vfprintf(flog, tekst, argptr);
+     va_end(argptr);
+     fflush(flog);
+  }
+  return 1;
 }
 #else   /*PLF Mon  97-09-08 20:04:26*/
 /******************************************************************************/
@@ -246,43 +264,44 @@ static BOOL fLog = TRUE;
 /******************************************************************************/
 int SYSTEM EXPORT WriteLog(char *tekst, ...)
 {
-ULONG Action, Wrote;
-HFILE log;
-APIRET rc;
-char message[4096];
-va_list argptr;
-ULONG openFlags = OPEN_ACTION_CREATE_IF_NEW;
+  ULONG Action, Wrote;
+  HFILE log;
+  APIRET rc;
+  char message[4096];
+  va_list argptr;
+  ULONG openFlags = OPEN_ACTION_CREATE_IF_NEW;
 
- if(fLog == FALSE)
-        return(FALSE);
+  if(fLog == FALSE)
+    return(FALSE);
 
- if(!init) {
-        init       = TRUE;
-        openFlags |= OPEN_ACTION_REPLACE_IF_EXISTS;
-        if(getenv("NOWIN32LOG"))
-            fLog = FALSE;
- }
- else   openFlags |= OPEN_ACTION_OPEN_IF_EXISTS;
+  if(!init)
+  {
+    init = TRUE;
+    openFlags |= OPEN_ACTION_REPLACE_IF_EXISTS;
+    if(getenv("NOWIN32LOG"))
+      fLog = FALSE;
+  }
+  else
+    openFlags |= OPEN_ACTION_OPEN_IF_EXISTS;
 
- rc = DosOpen(
-              "directx.log",
-              &log,           /* file handle returned */
-              &Action,
-              0L,
-              FILE_NORMAL,
-              openFlags,
-              OPEN_ACCESS_READWRITE | OPEN_SHARE_DENYWRITE,
-              (PEAOP2)NULL);
+  rc = DosOpen( "win32os2.log",
+                &log,           /* file handle returned */
+                &Action,
+                0L,
+                FILE_NORMAL,
+                openFlags,
+                OPEN_ACCESS_READWRITE | OPEN_SHARE_DENYWRITE,
+                (PEAOP2)NULL);
 
- rc = DosSetFilePtr(log, 0, FILE_END, &Wrote);
- va_start(argptr, tekst);
- vsprintf(message, tekst, argptr);
- va_end(argptr);
+   rc = DosSetFilePtr(log, 0, FILE_END, &Wrote);
+   va_start(argptr, tekst);
+   vsprintf(message, tekst, argptr);
+   va_end(argptr);
 
- rc = DosWrite(log, message, strlen(message), &Wrote);
+   rc = DosWrite(log, message, strlen(message), &Wrote);
 
- DosClose(log);   /*PLF Mon  97-09-08 20:01:43*/
- return(TRUE);
+   DosClose(log);   /*PLF Mon  97-09-08 20:01:43*/
+   return(TRUE);
 }
 #endif  /*PLF Mon  97-09-08 20:04:23*/
 /******************************************************************************/

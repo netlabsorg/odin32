@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7 1999-10-23 12:35:14 sandervl Exp $
+# $Id: makefile,v 1.8 1999-10-23 23:00:50 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -20,8 +20,8 @@ CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
 
 TARGET = dsound
 
-#OBJS =  dsound.obj os2dsound.obj initterm.obj misc.obj os2sndbuffer.obj
-OBJS =  dsound.obj initterm.obj
+OBJS =  dsound.obj os2dsound.obj initterm.obj misc.obj os2sndbuffer.obj
+#OBJS =  dsound.obj initterm.obj
 
 all: $(TARGET).dll $(TARGET).lib
 
@@ -53,14 +53,14 @@ os2sndbuffer.obj: os2sndbuffer.cpp \
     os2sndbuffer.h \
     os2dsound.h 
 
-misc.obj: misc.c \
+misc.obj: misc.cpp \
           $(PDWIN32_INCLUDE)\misc.h
 
 initterm.obj: initterm.cpp
 
 
 clean:
-        $(RM) *.obj *.lib *.dll *~ *.map *.pch
+        $(RM) *.obj *.lib *.dll *.map *.pch
         $(RM) $(PDWIN32_BIN)\$(TARGET).dll
         $(RM) $(PDWIN32_LIB)\$(TARGET).lib
 
