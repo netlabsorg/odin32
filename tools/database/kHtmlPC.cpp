@@ -1,4 +1,4 @@
-/* $Id: kHtmlPC.cpp,v 1.2 2000-02-12 17:55:03 bird Exp $ */
+/* $Id: kHtmlPC.cpp,v 1.3 2000-02-18 12:42:07 bird Exp $ */
 /*
  * kHtmlPC - Special-purpose HTML/SQL preprocessor.
  *
@@ -111,12 +111,12 @@ extern "C" void      handler(int sig);
 static void          syntax(void);
 static void          openLog(void);
 static void          closeLog(void);
-static unsigned long processFile(const char *pszFilename/*, const POPTIONS pOptions*/);
+static unsigned long processFile(const char *pszFilenamem, const POPTIONS pOptions);
 static unsigned long tagEndkSql(TAG_PARAMETER_LIST);
 static unsigned long tagkSql(TAG_PARAMETER_LIST);
-static unsigned long tagkTemplate(TAG_PARAMETER_LIST, FILE * &phFile);
+static unsigned long tagkTemplate(TAG_PARAMETER_LIST, FILE * &phFile, const POPTIONS pOptions);
 static unsigned long tagkInclude(TAG_PARAMETER_LIST);
-static unsigned long tagkGraph(TAG_PARAMETER_LIST);
+static unsigned long tagkGraph(TAG_PARAMETER_LIST, const POPTIONS pOptions);
 static unsigned long tagkDefine(TAG_PARAMETER_LIST);
 static unsigned long tagkUndef(TAG_PARAMETER_LIST);
 static unsigned long tagkIf(TAG_PARAMETER_LIST);
@@ -154,6 +154,9 @@ int main(int argc, char **argv)
     char           *pszDatabase = "Odin32";
     char           *pszUser     = "root";
     char           *pszPasswd   = "";
+    char            szPathName[CCHMAXPATH];
+    OPTIONS         options = {"."};
+
 
     /* signal handler */
     if (SIG_ERR == signal(SIGBREAK, handler)
@@ -166,6 +169,7 @@ int main(int argc, char **argv)
     /**************************************************************************
     * parse arguments.
     * options:  -h or -?     help
+    *           -b:<basepath> Basepath for output files.
     *           -d:<dbname>   Database name
     *           -p:<passwd>   Password
     *           -u:<user>     Userid
@@ -180,12 +184,35 @@ int main(int argc, char **argv)
         {
             switch (argv[argi][1])
             {
+                case 'b':
+                case 'B':
+                    printf("%s\n", argv[argi]);
+                    if (argv[argi][2] == ':')
+                    {
+                        if (_fullpath(&szPathName[0], &argv[argi][3], sizeof(szPathName)) != NULL)
+                            options.pszBaseDir = &szPathName[0];
+                        else
+                        {
+                            fprintf(stderr, "error: basepath '%s' don't exists\n", &argv[argi][3]);
+                            fFatal = TRUE;
+                        }
+                    }
+                    else
+                    {
+                        fprintf(stderr, "error: option '-b:' requires a directory name.\n");
+                        fFatal = TRUE;
+                    }
+                    break;
+
                 case 'd':
                 case 'D':
                     if (argv[argi][2] == ':')
                         pszDatabase = &argv[argi][3];
                     else
-                        fprintf(stderr, "warning: option '-d:' requires database name.\n");
+                    {
+                        fprintf(stderr, "error: option '-d:' requires database name.\n");
+                        fFatal = TRUE;
+                    }
                     break;
 
                 case 'h':
@@ -204,7 +231,10 @@ int main(int argc, char **argv)
                     if (argv[argi][2] == ':')
                         pszPasswd = &argv[argi][3];
                     else
-                        fprintf(stderr, "warning: option '-p:' requires password.\n");
+                    {
+                        fprintf(stderr, "error: option '-p:' requires password.\n");
+                        fFatal = TRUE;
+                    }
                     break;
 
                 case 'u':
@@ -212,7 +242,10 @@ int main(int argc, char **argv)
                     if (argv[argi][2] == ':')
                         pszUser = &argv[argi][3];
                     else
+                    {
                         fprintf(stderr, "error: option '-u:' requires userid.\n");
+                        fFatal = TRUE;
+                    }
                     break;
 
                     /*
@@ -232,7 +265,7 @@ int main(int argc, char **argv)
                 openLog();
             if (dbConnect(pszHost, pszUser, pszPasswd, pszDatabase))
             {
-                ulRc += processFile(argv[argi]/*, &options*/);
+                ulRc += processFile(argv[argi], &options);
                 dbDisconnect();
             }
             else
@@ -329,7 +362,7 @@ static void closeLog(void)
  * @param     pOption      Pointer to the option struct.
  * @remark    Big function!
  */
-static unsigned long processFile(const char *pszFilename/*, const POPTIONS pOptions*/)
+static unsigned long processFile(const char *pszFilename, const POPTIONS pOptions)
 {
     unsigned long                      ulRc = 0;
     unsigned long                      ulRc2;
@@ -453,11 +486,11 @@ static unsigned long processFile(const char *pszFilename/*, const POPTIONS pOpti
                         else if (tag.isTag("!/kSql"))                   /* !/kSql       */
                             ulRc2 = tagEndkSql(TAG_PARAMETERS);
                         else if (tag.isTag("!kTemplate"))               /* !kTemplate   */
-                            ulRc2 = tagkTemplate(TAG_PARAMETERS, phFile);
+                            ulRc2 = tagkTemplate(TAG_PARAMETERS, phFile, pOptions);
                         else if (tag.isTag("!kInclude"))                /* !kInclude    */
                             ulRc2 = tagkInclude(TAG_PARAMETERS);
                         else if (tag.isTag("!kGraph"))                  /* !kGraph      */
-                            ulRc2 = tagkGraph(TAG_PARAMETERS);
+                            ulRc2 = tagkGraph(TAG_PARAMETERS, pOptions);
                         else if (tag.isTag("!kDefine"))                 /* !kDefine     */
                             ulRc2 = tagkDefine(TAG_PARAMETERS);
                         else if (tag.isTag("!kUndef"))                  /* !kUndef      */
@@ -713,11 +746,12 @@ static unsigned long tagEndkSql(TAG_PARAMETER_LIST)
  * Tag function - kTemplate.
  * @returns   low  word: number of errors
  *            high word: number of warnings
- * @param     phFile  Reference to current output file.
+ * @param     phFile    Reference to current output file.
+ * @param     pOptions  Pointer to the options struct.
  * @remark    See TAG_PARAMETER_LIST for parameters.
  *            Use TAG_PARAMETERS when calling this function.
  */
-static unsigned long tagkTemplate(TAG_PARAMETER_LIST, FILE * &phFile)
+static unsigned long tagkTemplate(TAG_PARAMETER_LIST, FILE * &phFile, const POPTIONS pOptions)
 {
     unsigned long    ulRc = 0;
     const char      *pszFilename;
@@ -733,17 +767,27 @@ static unsigned long tagkTemplate(TAG_PARAMETER_LIST, FILE * &phFile)
     pszFilename = tag.queryParameter("filename");
     if (pszFilename != NULL)
     {
+        char  szFullFileName[CCHMAXPATH];
         if (phFile != NULL)
             fclose(phFile);
-
-        phFile = fopen(pszFilename, "wb");
-        if (phFile != NULL)
-            fprintf(phLog, "%s(%ld) : info: new output file, '%s'.\n",
-                    pCurFile->getFilename(), pCurFile->getLineNumber()+1, pszFilename);
+        if (strlen(pszFilename) + strlen(pOptions->pszBaseDir) + 1 + 1 < sizeof(szFullFileName))
+        {
+            sprintf(&szFullFileName[0], "%s\\%s", pOptions->pszBaseDir, pszFilename);
+            phFile = fopen(&szFullFileName[0], "wb");
+            if (phFile != NULL)
+                fprintf(phLog, "%s(%ld) : info: new output file, '%s'.\n",
+                        pCurFile->getFilename(), pCurFile->getLineNumber()+1, &szFullFileName[0]);
+            else
+            {
+                fprintf(phLog, "%s(%ld) : error: kTemplate - error opening output file '%s'.\n",
+                        pCurFile->getFilename(), pCurFile->getLineNumber()+1, &szFullFileName[0]);
+                ulRc += 0x00000001;
+            }
+        }
         else
         {
-            fprintf(phLog, "%s(%ld) : error: kTemplate - error opening output file '%s'.\n",
-                    pCurFile->getFilename(), pCurFile->getLineNumber()+1, pszFilename);
+            fprintf(phLog, "%s(%ld) : error: kTemplate - filename and base dir is too long! '%s\\%s'.\n",
+                    pCurFile->getFilename(), pCurFile->getLineNumber()+1, pOptions->pszBaseDir, pszFilename);
             ulRc += 0x00000001;
         }
     }
@@ -798,7 +842,7 @@ static unsigned long tagkInclude(TAG_PARAMETER_LIST)
  * @remark    See TAG_PARAMETER_LIST for parameters.
  *            Use TAG_PARAMETERS when calling this function.
  */
-static unsigned long tagkGraph(TAG_PARAMETER_LIST)
+static unsigned long tagkGraph(TAG_PARAMETER_LIST, const POPTIONS pOptions)
 {
     unsigned long ulRc = 0;
     /**
@@ -813,7 +857,7 @@ static unsigned long tagkGraph(TAG_PARAMETER_LIST)
     */
     try
     {
-        kGraph graph(tag);
+        kGraph graph(tag, pOptions->pszBaseDir);
         graph.showWarnings(phLog, pCurFile);
         graph.save();
     }
@@ -2241,10 +2285,11 @@ void kGraphDataSet::setLegend(const char *pszLegend)
 
 /**
  * Analyses the tag and executes SQL statements.
- * @param     tag  Tag.
+ * @param     tag         Tag.
+ * @param     pszBaseDir  Base output directory.
  * @remark    Throws kError::enmErrors
  */
-void  kGraph::analyseTag(const kTag &tag) throw(kError::enmErrors)
+void  kGraph::analyseTag(const kTag &tag, const char *pszBaseDir) throw(kError::enmErrors)
 {
     int cArgs,    i;
     const char    *pszName;
@@ -2296,7 +2341,9 @@ void  kGraph::analyseTag(const kTag &tag) throw(kError::enmErrors)
         else if (stricmp(pszName, "filename") == 0)
         {
             if (pszValue == NULL || strlen(pszValue) == 0) throw(kError::error_filename_param_is_missing_value);
-            pszFilename = dupeString(pszValue);
+            pszFilename = new char[strlen(pszValue) + 2 + strlen(pszBaseDir)];
+            if (pszFilename == NULL) throw(kError::error_filename_param_is_missing_value);
+            sprintf(pszFilename, "%s\\%s", pszBaseDir, pszValue);
         }
         else if (stricmp(pszName, "title") == 0)
         {
@@ -3124,7 +3171,7 @@ void kGraph::setColors(void)
  * Constructor.
  * @remark    Throws kError::enmError on error.
  */
-kGraph::kGraph(const kTag &tag) throw(kError::enmErrors)
+kGraph::kGraph(const kTag &tag, const char *pszBaseDir) throw(kError::enmErrors)
     : pGraph(NULL), enmTypeCd(unknown), enmSubTypeCd(normal),
     pszFilename(NULL), pszTitle(NULL), pszTitleX(NULL),
     pszTitleY(NULL), pszBackground(NULL), fLegend(FALSE),
@@ -3136,7 +3183,7 @@ kGraph::kGraph(const kTag &tag) throw(kError::enmErrors)
 {
     try
     {
-        analyseTag(tag);
+        analyseTag(tag, pszBaseDir);
         createBaseGraph();
         if (fLegend)
             drawLegend();
@@ -3162,6 +3209,7 @@ kGraph::~kGraph(void)
 
 /**
  * Saves the graph to the filename specified in the tag.
+ * 2
  * @returns   Errorcode.
  */
 kError::enmErrors kGraph::save(void)
