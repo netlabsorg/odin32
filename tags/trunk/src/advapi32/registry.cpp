@@ -1,4 +1,4 @@
-/* $Id: registry.cpp,v 1.2 1999-08-13 00:06:19 phaller Exp $ */
+/* $Id: registry.cpp,v 1.3 1999-09-02 19:39:08 phaller Exp $ */
 
 /*
  * Win32 registry API functions for OS/2
@@ -803,12 +803,12 @@ ODINFUNCTION4(DWORD,RegQueryValueW,HKEY,   hkey,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION6(DWORD,RegQueryValueExA,HKEY,   arg1,
-                                     LPSTR,  arg2,
-                                     LPDWORD,arg3,
-                                     LPDWORD,arg4,
-                                     LPBYTE, arg5,
-                                     LPDWORD,arg6)
+ODINFUNCTION6(LONG,RegQueryValueExA,HKEY,   arg1,
+                                    LPSTR,  arg2,
+                                    LPDWORD,arg3,
+                                    LPDWORD,arg4,
+                                    LPBYTE, arg5,
+                                    LPDWORD,arg6)
 {
   return _O32_RegQueryValueEx(ConvertKey(arg1),
                              arg2,
@@ -831,12 +831,12 @@ ODINFUNCTION6(DWORD,RegQueryValueExA,HKEY,   arg1,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION6(DWORD,RegQueryValueExW,HKEY,   arg1,
-                                     LPWSTR, arg2,
-                                     LPDWORD,arg3,
-                                     LPDWORD,arg4,
-                                     LPBYTE, arg5,
-                                     LPDWORD,arg6)
+ODINFUNCTION6(LONG,RegQueryValueExW,HKEY,   arg1,
+                                    LPWSTR, arg2,
+                                    LPDWORD,arg3,
+                                    LPDWORD,arg4,
+                                    LPBYTE, arg5,
+                                    LPDWORD,arg6)
 {
   char *astring = UnicodeToAsciiString(arg2);
   LONG  rc;
