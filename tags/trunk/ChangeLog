@@ -1,4 +1,16 @@
- /* $Id: ChangeLog,v 1.368 1999-10-25 23:46:12 phaller Exp $ */
+ /* $Id: ChangeLog,v 1.369 1999-10-26 11:19:16 sandervl Exp $ */
+
+ 99-10-26: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32: Fixed bugs in menu apis (Append/InsertMenuA/W)
+                  Fixed InsertMenuItemA/W.
+                  Finished up Patrick's work -> regedit menus now correct
+                  In winmenu call only ODIN_* menu apis; decreases amount of
+                  logging and increases speed.
+
+	- KERNEL32: Removed menu resource + non-used resource methods
+
+ 99-10-26: Patrick Haller <phaller@gmx.net>
+	- USER32: Ported Wine menu(ex) parser and integrated it into menu code
 
  99-10-25: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Removed SetFocus call in Edit control (WM_LBUTTONDOWN)
