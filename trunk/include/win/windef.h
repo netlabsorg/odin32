@@ -1,4 +1,4 @@
-/* $Id: windef.h,v 1.21 2000-02-29 00:55:09 sandervl Exp $ */
+/* $Id: windef.h,v 1.22 2000-04-02 14:51:42 sandervl Exp $ */
 
 /*
  * Basic types definitions
@@ -663,6 +663,50 @@ typedef struct tagDEC
       ULONGLONG Lo64;
     } d;
 } DECIMAL;
+
+#ifndef NONAMELESSSTRUCT
+# if defined(__WINE__) || !defined(_FORCENAMELESSSTRUCT)
+#  define NONAMELESSSTRUCT
+# endif
+#endif /* !defined(NONAMELESSSTRUCT) */
+
+#ifndef NONAMELESSUNION
+# if defined(__WINE__) || !defined(_FORCENAMELESSUNION) || !defined(__cplusplus)
+#  define NONAMELESSUNION
+# endif
+#endif /* !defined(NONAMELESSUNION) */
+
+#ifndef NONAMELESSSTRUCT
+#define DUMMYSTRUCTNAME
+#define DUMMYSTRUCTNAME1
+#define DUMMYSTRUCTNAME2
+#define DUMMYSTRUCTNAME3
+#define DUMMYSTRUCTNAME4
+#define DUMMYSTRUCTNAME5
+#else /* !defined(NONAMELESSSTRUCT) */
+#define DUMMYSTRUCTNAME   s
+#define DUMMYSTRUCTNAME1  s1
+#define DUMMYSTRUCTNAME2  s2
+#define DUMMYSTRUCTNAME3  s3
+#define DUMMYSTRUCTNAME4  s4
+#define DUMMYSTRUCTNAME5  s5
+#endif /* !defined(NONAMELESSSTRUCT) */
+
+#ifndef NONAMELESSUNION
+#define DUMMYUNIONNAME
+#define DUMMYUNIONNAME1
+#define DUMMYUNIONNAME2
+#define DUMMYUNIONNAME3
+#define DUMMYUNIONNAME4
+#define DUMMYUNIONNAME5
+#else /* !defined(NONAMELESSUNION) */
+#define DUMMYUNIONNAME   u
+#define DUMMYUNIONNAME1  u1
+#define DUMMYUNIONNAME2  u2
+#define DUMMYUNIONNAME3  u3
+#define DUMMYUNIONNAME4  u4
+#define DUMMYUNIONNAME5  u5
+#endif /* !defined(NONAMELESSUNION) */
 
 #ifdef __cplusplus
 }
