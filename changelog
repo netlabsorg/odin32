@@ -1,4 +1,9 @@
- /* $Id: changelog,v 1.1103 2000-09-04 02:33:54 bird Exp $ */
+ /* $Id: changelog,v 1.1104 2000-09-04 17:52:38 bird Exp $ */
+
+ 2000-09-04: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - Win32k:   Improved error reporting.
+                Corrected fatal bug in the QueryOptionsStatus IOCtl,
+                had forgotten three SSToDS()...
 
  2000-09-04: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - doc/readme.txt: Updated Win32k sections.
