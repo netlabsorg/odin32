@@ -1,4 +1,4 @@
-/* $Id: cpu.cpp,v 1.7 2000-03-03 11:15:57 sandervl Exp $ */
+/* $Id: cpu.cpp,v 1.8 2000-04-29 18:26:57 sandervl Exp $ */
 /*
  * Odin win32 CPU apis
  *
@@ -26,8 +26,9 @@
 
 DEFAULT_DEBUG_CHANNEL(CPU)
 
-static BYTE PF[64] = {0,};
-static nrCPUs = 1;
+static BYTE PF[64]          = {0,};
+static nrCPUs               = 1;
+static SYSTEM_INFO cachedsi = {0};
 
 //******************************************************************************
 //******************************************************************************
@@ -59,12 +60,11 @@ void InitSystemInfo(int nrcpus)
  */
 VOID WINAPI GetSystemInfo(LPSYSTEM_INFO si)	/* [out] system information */
 {
- static int cache = 0;
- static SYSTEM_INFO cachedsi;
- HKEY	xhkey=0,hkey;
+ HKEY   xhkey=0,hkey;
  HKEY   fpukey=0, xhfpukey;
- char buf[20];
- DWORD features, signature;
+ char   buf[20];
+ DWORD  features, signature;
+ static int cache = 0;
 
 	if(!si) {
 		dprintf(("GetSystemInfo -> si == NULL!!"));

@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.40 2000-04-14 22:35:27 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.41 2000-04-29 18:26:59 sandervl Exp $ */
 
 /*
  * KERNEL32 DLL entry point
@@ -47,9 +47,10 @@
 #include "hmdevio.h"
 #include <windllbase.h>
 #include "winexepe2lx.h"
-#include "initsystem.h"
 #include <exitlist.h>
 #include "oslibdos.h"
+#include <cpuhlp.h>
+
 #define DBG_LOCALLOG	DBG_initterm
 #include "dbglocal.h"
 
@@ -169,7 +170,7 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
             if (rc != 0) 
 		ulSysinfo = 1;
 
-            InitSystemEnvironment(ulSysinfo);
+            InitSystemInfo(ulSysinfo);
             break;
 	}
         case 1 :
