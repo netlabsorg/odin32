@@ -1,4 +1,4 @@
-/* $Id: windlg.cpp,v 1.11 1999-11-05 17:50:30 achimha Exp $ */
+/* $Id: windlg.cpp,v 1.12 1999-11-25 19:22:04 sandervl Exp $ */
 /*
  * Win32 dialog apis for OS/2
  *
@@ -129,6 +129,7 @@ INT  WIN32API DialogBoxIndirectParamA(HINSTANCE hInst,
         dialog = (Win32Dialog *)Win32BaseWindow::GetWindowFromHandle(hwnd);
         if(!dialog || !dialog->IsDialog()) {
             dprintf(("DialogBoxIndirectParamA, dialog %x not found", hwnd));
+    	    SetLastError(ERROR_INVALID_WINDOW_HANDLE);
             return 0;
         }
         return dialog->doDialogBox();
@@ -150,6 +151,7 @@ INT  WIN32API DialogBoxIndirectParamW(HINSTANCE hInst, LPCDLGTEMPLATEW dlgtempla
         dialog = (Win32Dialog *)Win32BaseWindow::GetWindowFromHandle(hwnd);
         if(!dialog || !dialog->IsDialog()) {
             dprintf(("DialogBoxIndirectParamW, dialog %x not found", hwnd));
+    	    SetLastError(ERROR_INVALID_WINDOW_HANDLE);
             return 0;
         }
         return dialog->doDialogBox();
@@ -170,6 +172,7 @@ int WIN32API DialogBoxParamA(HINSTANCE hInst, LPCSTR lpszTemplate, HWND hwndOwne
         dialog = (Win32Dialog *)Win32BaseWindow::GetWindowFromHandle(hwnd);
         if(!dialog || !dialog->IsDialog()) {
             dprintf(("DialogBoxParamA, dialog %x not found", hwnd));
+    	    SetLastError(ERROR_INVALID_WINDOW_HANDLE);
             return 0;
         }
         return dialog->doDialogBox();
@@ -190,6 +193,7 @@ int WIN32API DialogBoxParamW(HINSTANCE hInst, LPCWSTR lpszTemplate, HWND hwndOwn
         dialog = (Win32Dialog *)Win32BaseWindow::GetWindowFromHandle(hwnd);
         if(!dialog || !dialog->IsDialog()) {
             dprintf(("DialogBoxParamW, dialog %x not found", hwnd));
+    	    SetLastError(ERROR_INVALID_WINDOW_HANDLE);
             return 0;
         }
         return dialog->doDialogBox();
@@ -254,6 +258,7 @@ HWND WIN32API GetDlgItem(HWND hwnd, int id)
         return dlgcontrol->getWindowHandle();
     }
     dprintf(("USER32: GetDlgItem %x %d NOT FOUND!\n", hwnd, id));
+    SetLastError(ERROR_INVALID_PARAMETER);
     return 0;
 }
 //******************************************************************************

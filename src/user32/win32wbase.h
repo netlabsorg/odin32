@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.45 1999-11-24 19:32:23 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.46 1999-11-25 19:22:03 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -206,6 +206,7 @@ Win32BaseWindow *getOwner()                   { return owner; };
 
        LRESULT  SendMessageA(ULONG msg, WPARAM wParam, LPARAM lParam);
        LRESULT  SendMessageW(ULONG msg, WPARAM wParam, LPARAM lParam);
+       LRESULT  SendMessageToProcess(UINT msg, WPARAM wParam, LPARAM lParam, BOOL fUnicode);
        BOOL     PostMessageA(ULONG msg, WPARAM wParam, LPARAM lParam);
        BOOL     PostMessageW(ULONG msg, WPARAM wParam, LPARAM lParam);
        void     PostMessage(POSTMSG_PACKET *packet);
