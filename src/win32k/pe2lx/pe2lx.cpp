@@ -1,4 +1,4 @@
-/* $Id: pe2lx.cpp,v 1.22 2000-12-11 06:53:55 bird Exp $
+/* $Id: pe2lx.cpp,v 1.23 2000-12-18 14:19:24 bird Exp $
  *
  * Pe2Lx class implementation. Ring 0 and Ring 3
  *
@@ -416,14 +416,14 @@ ULONG Pe2Lx::init(PCSZ pszFilename)
         return rc;
 
     /* 5.Validate PE header  (Magics, Machine, subsystem, characteristics,...) - fail if not valid. */
-    dumpNtHeaders(pNtHdrs);
     if (pNtHdrs->Signature != IMAGE_NT_SIGNATURE)
     {
         printErr(("Invalid PE signature, '%c%c%c%c'\n",
-                 ((PCHAR)pNtHdrs->Signature)[0], ((PCHAR)pNtHdrs->Signature)[1],
-                 ((PCHAR)pNtHdrs->Signature)[2], ((PCHAR)pNtHdrs->Signature)[3]));
+                 ((PCHAR)&pNtHdrs->Signature)[0], ((PCHAR)&pNtHdrs->Signature)[1],
+                 ((PCHAR)&pNtHdrs->Signature)[2], ((PCHAR)&pNtHdrs->Signature)[3]));
         return ERROR_INVALID_EXE_SIGNATURE;
     }
+    dumpNtHeaders(pNtHdrs);
     if (pNtHdrs->FileHeader.Machine != IMAGE_FILE_MACHINE_I386)
     {
         printErr(("Invalid Machine! %#4x\n", pNtHdrs->FileHeader.Machine));
