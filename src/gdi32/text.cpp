@@ -1,4 +1,4 @@
-/* $Id: text.cpp,v 1.19 2001-04-27 19:30:54 sandervl Exp $ */
+/* $Id: text.cpp,v 1.20 2001-05-19 13:50:19 sandervl Exp $ */
 
 /*
  * GDI32 text apis
@@ -896,9 +896,26 @@ BOOL WIN32API GetTextExtentPointA(HDC hdc, LPCTSTR lpsz, int cbString,
       SetLastError(ERROR_SUCCESS);
       return TRUE;
    }
-   if(cbString > 512) {
-      dprintf(("ERROR: Oh, oh, string too long!!"));
-      DebugInt3();
+   if(cbString > 512) 
+   {
+      DWORD cbStringNew;
+      SIZE  newSize;
+
+      dprintf(("WARNING: string longer than 512 chars; splitting up"));
+      lpsSize->cx = 0;
+      lpsSize->cy = 0;
+      while(cbString) {
+         cbStringNew = min(500, cbString);
+         rc = GetTextExtentPointA(hdc, lpsz, cbStringNew, &newSize);
+         if(rc == FALSE) {
+             return FALSE;
+         }
+         lpsSize->cx += newSize.cx;
+         lpsSize->cy  = max(newSize.cy, lpsSize->cy);
+         lpsz     += cbStringNew;
+         cbString -= cbStringNew;
+      }
+      return TRUE;
    }
 
    rc = OSLibGpiQueryTextBox(pHps, cbString, lpsz, TXTBOXOS_COUNT, pts);
