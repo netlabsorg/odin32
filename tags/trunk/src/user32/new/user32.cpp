@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.11 1999-07-25 15:51:56 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.12 1999-07-25 17:47:25 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -448,10 +448,6 @@ int WIN32API ShowCursor( BOOL arg1)
 //******************************************************************************
 BOOL WIN32API SetRect( PRECT lprc, int nLeft, int nTop, int nRight, int  nBottom)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  SetRect\n");
-#endif
-
     if (!lprc) return FALSE;
     lprc->left   = nLeft;
     lprc->top    = nTop;
@@ -599,15 +595,6 @@ DWORD WIN32API MsgWaitForMultipleObjects( DWORD arg1, LPHANDLE arg2, BOOL arg3, 
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API ChangeClipboardChain( HWND arg1, HWND  arg2)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  ChangeClipboardChain\n");
-#endif
-    return O32_ChangeClipboardChain(arg1, arg2);
-}
-//******************************************************************************
-//******************************************************************************
 BOOL WIN32API CheckRadioButton( HWND arg1, UINT arg2, UINT arg3, UINT  arg4)
 {
 #ifdef DEBUG
@@ -620,33 +607,6 @@ BOOL WIN32API CheckRadioButton( HWND arg1, UINT arg2, UINT arg3, UINT  arg4)
      SendDlgItemMessageA(arg1,x,BM_SETCHECK,(x == arg4) ? BST_CHECKED : BST_UNCHECKED,0);
     }
     return (TRUE);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API CloseClipboard(void)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  CloseClipboard\n");
-#endif
-    return O32_CloseClipboard();
-}
-//******************************************************************************
-//******************************************************************************
-HICON WIN32API CopyIcon( HICON arg1)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  CopyIcon\n");
-#endif
-    return O32_CopyIcon(arg1);
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API CountClipboardFormats(void)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  CountClipboardFormats\n");
-#endif
-    return O32_CountClipboardFormats();
 }
 //******************************************************************************
 //******************************************************************************
@@ -668,55 +628,6 @@ HCURSOR WIN32API CreateCursor( HINSTANCE arg1, int arg2, int arg3, int arg4, int
 }
 //******************************************************************************
 //******************************************************************************
-HICON WIN32API CreateIcon( HINSTANCE arg1, INT arg2, INT arg3, BYTE arg4, BYTE arg5, LPCVOID arg6, LPCVOID arg7)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  CreateIcon\n");
-#endif
-    return O32_CreateIcon(arg1, arg2, arg3, arg4, arg5, (const BYTE *)arg6, (const BYTE *)arg7);
-}
-//******************************************************************************
-//ASSERT dwVer == win31 (ok according to SDK docs)
-//******************************************************************************
-HICON WIN32API CreateIconFromResource(PBYTE presbits,  UINT dwResSize,
-                                      BOOL  fIcon,     DWORD dwVer)
-{
- HICON hicon;
- DWORD OS2ResSize = 0;
- PBYTE OS2Icon    = ConvertWin32Icon(presbits, dwResSize, &OS2ResSize);
-
-    hicon = O32_CreateIconFromResource(OS2Icon, OS2ResSize, fIcon, dwVer);
-#ifdef DEBUG
-    WriteLog("USER32:  CreateIconFromResource returned %X (%X)\n", hicon, GetLastError());
-#endif
-    if(OS2Icon)
-        FreeIcon(OS2Icon);
-
-    return(hicon);
-}
-//******************************************************************************
-//******************************************************************************
-HICON WIN32API CreateIconFromResourceEx(PBYTE presbits,  UINT dwResSize,
-                                        BOOL  fIcon,     DWORD dwVer,
-                                        int   cxDesired, int cyDesired,
-                                        UINT  Flags)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  CreateIconFromResourceEx %X %d %d %X %d %d %X, not completely supported!\n", presbits, dwResSize, fIcon, dwVer, cxDesired, cyDesired, Flags);
-#endif
-    return CreateIconFromResource(presbits, dwResSize, fIcon, dwVer);
-}
-//******************************************************************************
-//******************************************************************************
-HICON WIN32API CreateIconIndirect(LPICONINFO arg1)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  CreateIconIndirect\n");
-#endif
-    return O32_CreateIconIndirect(arg1);
-}
-//******************************************************************************
-//******************************************************************************
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API DestroyCaret(void)
@@ -734,24 +645,6 @@ BOOL WIN32API DestroyCursor( HCURSOR arg1)
     WriteLog("USER32:  DestroyCursor\n");
 #endif
     return O32_DestroyCursor(arg1);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API DestroyIcon( HICON arg1)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  DestroyIcon\n");
-#endif
-    return O32_DestroyIcon(arg1);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API EmptyClipboard(void)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  EmptyClipboard\n");
-#endif
-    return O32_EmptyClipboard();
 }
 //******************************************************************************
 //******************************************************************************
@@ -776,15 +669,6 @@ BOOL WIN32API EnumChildWindows(HWND hwnd, WNDENUMPROC lpfn, LPARAM lParam)
   if(callback)
     delete callback;
   return(rc);
-}
-//******************************************************************************
-//******************************************************************************
-UINT WIN32API EnumClipboardFormats(UINT arg1)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  EnumClipboardFormats\n");
-#endif
-    return O32_EnumClipboardFormats(arg1);
 }
 //******************************************************************************
 //******************************************************************************
@@ -900,56 +784,6 @@ BOOL WIN32API GetClipCursor( PRECT arg1)
 }
 //******************************************************************************
 //******************************************************************************
-HANDLE WIN32API GetClipboardData( UINT arg1)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  GetClipboardData\n");
-#endif
-    return O32_GetClipboardData(arg1);
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API GetClipboardFormatNameA( UINT arg1, LPSTR arg2, int  arg3)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  GetClipboardFormatNameA %s\n", arg2);
-#endif
-    return O32_GetClipboardFormatName(arg1, arg2, arg3);
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API GetClipboardFormatNameW(UINT arg1, LPWSTR arg2, int arg3)
-{
- int   rc;
- char *astring = UnicodeToAsciiString(arg2);
-
-#ifdef DEBUG
-    WriteLog("USER32:  GetClipboardFormatNameW %s\n", astring);
-#endif
-    rc = O32_GetClipboardFormatName(arg1, astring, arg3);
-    FreeAsciiString(astring);
-    return(rc);
-}
-//******************************************************************************
-//******************************************************************************
-HWND WIN32API GetClipboardOwner(void)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  GetClipboardOwner\n");
-#endif
-    return O32_GetClipboardOwner();
-}
-//******************************************************************************
-//******************************************************************************
-HWND WIN32API GetClipboardViewer(void)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  GetClipboardViewer\n");
-#endif
-    return O32_GetClipboardViewer();
-}
-//******************************************************************************
-//******************************************************************************
 UINT WIN32API GetDoubleClickTime(void)
 {
 #ifdef DEBUG
@@ -965,15 +799,6 @@ HWND WIN32API GetForegroundWindow(void)
     WriteLog("USER32:  GetForegroundWindow\n");
 #endif
     return O32_GetForegroundWindow();
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API GetIconInfo( HICON arg1, LPICONINFO  arg2)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  GetIconInfo\n");
-#endif
-    return O32_GetIconInfo(arg1, arg2);
 }
 //******************************************************************************
 //******************************************************************************
@@ -1015,24 +840,6 @@ HWND WIN32API GetLastActivePopup( HWND arg1)
 }
 //******************************************************************************
 //******************************************************************************
-//******************************************************************************
-//******************************************************************************
-HWND WIN32API GetOpenClipboardWindow(void)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  GetOpenClipboardWindow\n");
-#endif
-    return O32_GetOpenClipboardWindow();
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API GetPriorityClipboardFormat( PUINT arg1, int  arg2)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  GetPriorityClipboardFormat\n");
-#endif
-    return O32_GetPriorityClipboardFormat(arg1, arg2);
-}
 //******************************************************************************
 //******************************************************************************
 DWORD WIN32API GetQueueStatus( UINT arg1)
@@ -1125,15 +932,6 @@ BOOL WIN32API InvertRect( HDC arg1, const RECT * arg2)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API IsClipboardFormatAvailable( UINT arg1)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  IsClipboardFormatAvailable\n");
-#endif
-    return O32_IsClipboardFormatAvailable(arg1);
-}
-//******************************************************************************
-//******************************************************************************
 BOOL WIN32API IsRectEmpty( const RECT * arg1)
 {
 #ifdef DEBUG
@@ -1180,47 +978,12 @@ int WIN32API MapWindowPoints( HWND arg1, HWND arg2, LPPOINT arg3, UINT arg4)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API OpenClipboard( HWND arg1)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  OpenClipboard\n");
-#endif
-    return O32_OpenClipboard(arg1);
-}
-//******************************************************************************
-//******************************************************************************
 BOOL WIN32API PtInRect( const RECT * arg1, POINT  arg2)
 {
 #ifdef DEBUG1
     WriteLog("USER32:  PtInRect\n");
 #endif
     return O32_PtInRect(arg1, arg2);
-}
-//******************************************************************************
-//******************************************************************************
-UINT WIN32API RegisterClipboardFormatA( LPCSTR arg1)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  RegisterClipboardFormatA\n");
-#endif
-    return O32_RegisterClipboardFormat(arg1);
-}
-//******************************************************************************
-//******************************************************************************
-UINT WIN32API RegisterClipboardFormatW(LPCWSTR arg1)
-{
- UINT  rc;
- char *astring = UnicodeToAsciiString((LPWSTR)arg1);
-
-#ifdef DEBUG
-    WriteLog("USER32:  RegisterClipboardFormatW %s\n", astring);
-#endif
-    rc = O32_RegisterClipboardFormat(astring);
-    FreeAsciiString(astring);
-#ifdef DEBUG
-    WriteLog("USER32:  RegisterClipboardFormatW returned %d\n", rc);
-#endif
-    return(rc);
 }
 //******************************************************************************
 //******************************************************************************
@@ -1255,20 +1018,6 @@ BOOL WIN32API SetCaretPos( int arg1, int  arg2)
 {
     dprintf(("USER32:  SetCaretPos\n"));
     return O32_SetCaretPos(arg1, arg2);
-}
-//******************************************************************************
-//******************************************************************************
-HANDLE WIN32API SetClipboardData( UINT arg1, HANDLE  arg2)
-{
-    dprintf(("USER32:  SetClipboardData\n"));
-    return O32_SetClipboardData(arg1, arg2);
-}
-//******************************************************************************
-//******************************************************************************
-HWND WIN32API SetClipboardViewer( HWND arg1)
-{
-    dprintf(("USER32:  SetClipboardViewer\n"));
-    return O32_SetClipboardViewer(arg1);
 }
 //******************************************************************************
 //******************************************************************************
