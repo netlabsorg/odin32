@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2001-12-19 01:27:25 bird Exp $
+# $Id: makefile,v 1.5 2001-12-30 21:26:07 bird Exp $
 
 #
 # Odin32 API
@@ -85,7 +85,7 @@ needed: all
 #
 clean2:
 !ifndef MULTIJOBS
-    if exist $(ODIN32_TOOLS)\cmdqd.exe do $(ODIN32_TOOLS)\cmdqd kill
+    if exist $(ODIN32_TOOLS)\cmdqd.exe $(ODIN32_TOOLS)\cmdqd kill
     $(RM) $(ODIN32_BIN)\$(TARGET).$(TARGET_EXTENSION) $(ODIN32_BIN)\$(TARGET).sym
 !else
     @echo Info: Not removing $(ODIN32_TOOLS)\cmdqd.exe because MULTIJOBS is defined.
