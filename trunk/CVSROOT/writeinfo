@@ -69,29 +69,6 @@
 /tools/omfdumper                           bird sandervl
 /tools/wrc                                 sandervl bird
 /tools                                     sandervl phaller bird
-/src/advapi32/backup                       sandervl phaller achimha bird
-/src/advapi32/backups                      sandervl phaller achimha bird
-/src/comdlg32/backup                       sandervl achimha 
-/src/comdlg32/backups                      sandervl achimha 
-/src/ddraw/backup                          sandervl hugh achimha
-/src/dsound/backup                         sandervl hugh achimha phaller
-/src/gdi32/backup                          sandervl phaller achimha bird
-/src/gdi32/backups                         sandervl phaller achimha bird
-/src/kernel32/backup                       sandervl phaller achimha bird
-/src/kernel32/backups                      sandervl phaller achimha bird
-/src/mpr/backup                            sandervl phaller achimha bird
-/src/NTDLL/backup                          sandervl achimha
-/src/ole32/backup                          sandervl achimha
-/src/pe2lx/backup                          sandervl achimha
-/src/shell32/backup                        sandervl phaller achimha bird
-/src/tapi32/backup                         sandervl phaller achimha bird
-/src/user32/backup                         sandervl phaller achimha bird
-/src/user32/backups                        sandervl phaller achimha bird
-/src/version/backup                        sandervl phaller achimha
-/src/winmm/backup                          sandervl phaller achimha bird
-/src/winspool/backup                       sandervl phaller achimha bird
-/src/wnetap32/backup                       sandervl phaller achimha bird
-/src/wsock32/backup                        sandervl phaller achimha bird
 /src/comctl32                              sandervl achimha phaller
 /src/opengl                                sandervl 
 /src/opengl/glut                           sandervl 
