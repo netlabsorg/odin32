@@ -1,4 +1,4 @@
-/* $Id: windowclass.cpp,v 1.22 2001-07-13 14:31:39 sandervl Exp $ */
+/* $Id: windowclass.cpp,v 1.23 2001-08-31 13:37:39 phaller Exp $ */
 /*
  * Win32 Window Class Code for OS/2
  *
@@ -24,6 +24,14 @@
 #define DBG_LOCALLOG    DBG_windowclass
 #include "dbglocal.h"
 
+
+#include <odin.h>
+#include <odinwrap.h>
+#include <os2sel.h>
+
+ODINDEBUGCHANNEL(USER32-CLASS)
+
+
 //******************************************************************************
 //******************************************************************************
 void RegisterSystemClasses(ULONG hModule)
@@ -41,7 +49,9 @@ void UnregisterSystemClasses()
 //******************************************************************************
 //Note: RegisterClassA does NOT change the last error if successful! (verified in NT 4, SP6)
 //******************************************************************************
-ATOM WIN32API RegisterClassA(CONST WNDCLASSA *lpWndClass)
+
+ODINFUNCTION1(ATOM,              RegisterClassA,
+              CONST WNDCLASSA *, lpWndClass)
 {
  WNDCLASSEXA wc;
  Win32WndClass *wclass;
@@ -84,7 +94,8 @@ ATOM WIN32API RegisterClassA(CONST WNDCLASSA *lpWndClass)
 //******************************************************************************
 //Note: RegisterClassA does NOT change the last error if successful! (verified in NT 4, SP6)
 //******************************************************************************
-ATOM WIN32API RegisterClassExA(CONST WNDCLASSEXA *lpWndClass)
+ODINFUNCTION1(ATOM,                RegisterClassExA,
+              CONST WNDCLASSEXA *, lpWndClass)
 {
  Win32WndClass *wclass;
 
@@ -113,7 +124,8 @@ ATOM WIN32API RegisterClassExA(CONST WNDCLASSEXA *lpWndClass)
 //******************************************************************************
 //Note: RegisterClassA does NOT change the last error if successful! (verified in NT 4, SP6)
 //******************************************************************************
-WORD WIN32API RegisterClassW(CONST WNDCLASSW *lpwc)
+ODINFUNCTION1(ATOM,              RegisterClassW,
+              CONST WNDCLASSW *, lpwc)
 {
  ATOM rc;
  WNDCLASSEXA wc;
@@ -156,7 +168,8 @@ WORD WIN32API RegisterClassW(CONST WNDCLASSW *lpwc)
 //******************************************************************************
 //Note: RegisterClassA does NOT change the last error if successful! (verified in NT 4, SP6)
 //******************************************************************************
-ATOM WIN32API RegisterClassExW(CONST WNDCLASSEXW *lpwc)
+ODINFUNCTION1(ATOM,                RegisterClassExW,
+              CONST WNDCLASSEXW *, lpwc)
 {
  ATOM rc;
  WNDCLASSEXA wc;
@@ -189,7 +202,9 @@ ATOM WIN32API RegisterClassExW(CONST WNDCLASSEXW *lpwc)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API UnregisterClassA(LPCSTR lpszClassName, HINSTANCE hinst)
+ODINFUNCTION2(BOOL,      UnregisterClassA,
+              LPCSTR,    lpszClassName,
+              HINSTANCE, hinst)
 {
  BOOL ret;
 
@@ -198,7 +213,9 @@ BOOL WIN32API UnregisterClassA(LPCSTR lpszClassName, HINSTANCE hinst)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API UnregisterClassW(LPCWSTR lpszClassName, HINSTANCE hinst)
+ODINFUNCTION2(BOOL,      UnregisterClassW,
+              LPCWSTR,   lpszClassName,
+              HINSTANCE, hinst)
 {
  char *astring = NULL;
  BOOL  ret;
@@ -217,7 +234,10 @@ BOOL WIN32API UnregisterClassW(LPCWSTR lpszClassName, HINSTANCE hinst)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API GetClassInfoA(HINSTANCE hInstance, LPCSTR lpszClass, WNDCLASSA *lpwc)
+ODINFUNCTION3(BOOL,        GetClassInfoA,
+              HINSTANCE,   hInstance,
+              LPCSTR,      lpszClass,
+              WNDCLASSA *, lpwc)
 {
  WNDCLASSEXA    wc;
  BOOL           rc;
@@ -241,7 +261,10 @@ BOOL WIN32API GetClassInfoA(HINSTANCE hInstance, LPCSTR lpszClass, WNDCLASSA *lp
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API GetClassInfoW(HINSTANCE  hinst, LPCWSTR lpszClass, WNDCLASSW *lpwc)
+ODINFUNCTION3(BOOL,        GetClassInfoW,
+              HINSTANCE,   hinst,
+              LPCWSTR,     lpszClass,
+              WNDCLASSW *, lpwc)
 {
  WNDCLASSEXW    wc;
  BOOL           rc;
@@ -284,9 +307,10 @@ BOOL WIN32API GetClassInfoW(HINSTANCE  hinst, LPCWSTR lpszClass, WNDCLASSW *lpwc
  *             To get extended error information, call GetLastError.
  * Remark    : PH: does not obtain handle of the small icon
  *****************************************************************************/
-BOOL WIN32API GetClassInfoExA(HINSTANCE     hInstance,
-                              LPCTSTR       lpszClass,
-                              LPWNDCLASSEXA lpwcx)
+ODINFUNCTION3(BOOL,          GetClassInfoExA,
+              HINSTANCE,     hInstance,
+              LPCTSTR,       lpszClass,
+              LPWNDCLASSEXA, lpwcx)
 {
  BOOL           rc;
  Win32WndClass *wndclass;
@@ -309,6 +333,8 @@ BOOL WIN32API GetClassInfoExA(HINSTANCE     hInstance,
   SetLastError(ERROR_CLASS_DOES_NOT_EXIST);
   return(FALSE);
 }
+
+
 /*****************************************************************************
  * Name      : BOOL WIN32API GetClassInfoExW
  * Purpose   : The GetClassInfoEx function retrieves information about a window
@@ -325,9 +351,11 @@ BOOL WIN32API GetClassInfoExA(HINSTANCE     hInstance,
  * Remark    : does not obtain handle of the small icon
  *
  *****************************************************************************/
-BOOL WIN32API GetClassInfoExW(HINSTANCE     hInstance,
-                                 LPCWSTR       lpszClass,
-                                 LPWNDCLASSEXW lpwcx)
+
+ODINFUNCTION3(BOOL,          GetClassInfoExW,
+              HINSTANCE,     hInstance,
+              LPCWSTR,       lpszClass,
+              LPWNDCLASSEXW, lpwcx)
 {
  BOOL           rc;
  Win32WndClass *wndclass;
@@ -361,7 +389,10 @@ BOOL WIN32API GetClassInfoExW(HINSTANCE     hInstance,
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API GetClassNameA(HWND hwnd, LPSTR lpszClassName, int cchClassName)
+ODINFUNCTION3(int,   GetClassNameA,
+              HWND,  hwnd,
+              LPSTR, lpszClassName,
+              int,   cchClassName)
 {
  Win32BaseWindow *wnd;
  int rc;
@@ -379,7 +410,10 @@ int WIN32API GetClassNameA(HWND hwnd, LPSTR lpszClassName, int cchClassName)
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API GetClassNameW(HWND hwnd, LPWSTR lpszClassName, int cchClassName)
+ODINFUNCTION3(int,    GetClassNameW,
+              HWND,   hwnd,
+              LPWSTR, lpszClassName,
+              int,    cchClassName)
 {
  Win32BaseWindow *wnd;
  int              ret;
@@ -396,7 +430,10 @@ int WIN32API GetClassNameW(HWND hwnd, LPWSTR lpszClassName, int cchClassName)
 }
 //******************************************************************************
 //******************************************************************************
-LONG WIN32API SetClassLongA(HWND hwnd, int nIndex, LONG lNewVal)
+ODINFUNCTION3(LONG, SetClassLongA,
+			  HWND, hwnd, 
+			  int,  nIndex, 
+			  LONG, lNewVal)
 {
  Win32BaseWindow *wnd;
  LONG             ret;
@@ -412,7 +449,10 @@ LONG WIN32API SetClassLongA(HWND hwnd, int nIndex, LONG lNewVal)
 }
 //******************************************************************************
 //******************************************************************************
-LONG WIN32API SetClassLongW(HWND hwnd, int nIndex, LONG lNewVal)
+ODINFUNCTION3(LONG,   SetClassLongW,
+              HWND,   hwnd,
+              int,    nIndex,
+              LONG,   lNewVal)
 {
  Win32BaseWindow *wnd;
  LONG             ret;
@@ -428,7 +468,10 @@ LONG WIN32API SetClassLongW(HWND hwnd, int nIndex, LONG lNewVal)
 }
 //******************************************************************************
 //******************************************************************************
-WORD WIN32API SetClassWord(HWND hwnd, int nIndex, WORD  wNewVal)
+ODINFUNCTION3(WORD,  SetClassWord,
+              HWND,  hwnd,
+              int,   nIndex,
+              WORD,  wNewVal)
 {
  Win32BaseWindow *wnd;
  LONG             ret;
@@ -445,7 +488,9 @@ WORD WIN32API SetClassWord(HWND hwnd, int nIndex, WORD  wNewVal)
 }
 //******************************************************************************
 //******************************************************************************
-WORD WIN32API GetClassWord(HWND hwnd, int nIndex)
+ODINFUNCTION2(WORD, GetClassWord,
+              HWND, hwnd,
+              int,  nIndex)
 {
  Win32BaseWindow *wnd;
  WORD             ret;
@@ -462,7 +507,9 @@ WORD WIN32API GetClassWord(HWND hwnd, int nIndex)
 }
 //******************************************************************************
 //******************************************************************************
-LONG WIN32API GetClassLongA(HWND hwnd, int nIndex)
+ODINFUNCTION2(LONG, GetClassLongA,
+              HWND, hwnd,
+              int,  nIndex)
 {
  Win32BaseWindow *wnd;
  LONG ret;
@@ -479,7 +526,9 @@ LONG WIN32API GetClassLongA(HWND hwnd, int nIndex)
 }
 //******************************************************************************
 //******************************************************************************
-LONG WIN32API GetClassLongW(HWND hwnd, int nIndex)
+ODINFUNCTION2(LONG, GetClassLongW,
+              HWND, hwnd,
+              int,  nIndex)
 {
  Win32BaseWindow *wnd;
  LONG ret;
