@@ -1,4 +1,4 @@
-/* $Id: wndproc.cpp,v 1.9 1999-06-26 13:21:11 sandervl Exp $ */
+/* $Id: wndproc.cpp,v 1.10 1999-06-26 14:09:45 sandervl Exp $ */
 
 /*
  * Win32 window procedure class for OS/2
@@ -288,19 +288,28 @@ LRESULT EXPENTRY_O32 WndCallback(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lPar
  Win32WindowProc *curwnd;
  LRESULT rc;
 
+  if(Msg == WM_MOUSEACTIVATE) 
+  {
+	//Open32 sends an OS/2 window message for a button click
+	if(HIWORD(lParam) == 0x71)  //WM_BUTTONCLICKFIRST
+	{
+		lParam = (WM_LBUTTONDOWN << 16) | LOWORD(lParam);
+	}
+  }
+
+  if(PostSpyMessage(hwnd, Msg, wParam, lParam) == FALSE)
+       	dprintf(("Message %s for %X %x %x\n", GetMsgText(Msg), hwnd, wParam, lParam));
+
   if(HkCBT::OS2HkCBTProc(hwnd, Msg, wParam, lParam) == TRUE) {//hook swallowed msg
         return(0);
   }
-  
+ 
   curwnd = Win32WindowProc::FindProc(hwnd);
   if(!curwnd) {
 	curwnd = Win32WindowProc::FindProc(0, GetCurrentThreadId());
 	if(curwnd)	curwnd->SetWindowHandle(hwnd);
   }
   if(curwnd != NULL) {
-	if(PostSpyMessage(hwnd, Msg, wParam, lParam) == FALSE)
-        	dprintf(("Message %s for %X %x %x\n", GetMsgText(Msg), hwnd, wParam, lParam));
-	
 	switch(Msg) 
 	{
 	case WM_KEYDOWN:
@@ -340,14 +349,8 @@ LRESULT EXPENTRY_O32 WndCallback(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lPar
                  	ReleaseDC(hwnd, hdc);
         	}
 		break;
-	case WM_MOUSEACTIVATE:
-		//Open32 sends an OS/2 window message for a button click
-		if(HIWORD(lParam) == 0x71)  //WM_BUTTONCLICKFIRST
-		{
-			lParam = (WM_LBUTTONDOWN << 16) | LOWORD(lParam);
-		}
-		break;
 	}
+
         rc = curwnd->pCallback(hwnd, Msg, wParam, lParam);
         if(Msg == WM_NCDESTROY) {
                 dprintf(("WM_NCDESTROY received for window/dialog %X\n", curwnd->hwnd));
