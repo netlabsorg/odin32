@@ -1,4 +1,4 @@
-/* $Id: odin32ftp2.cmd,v 1.19 2002-06-26 22:11:28 bird Exp $
+/* $Id: odin32ftp2.cmd,v 1.20 2003-02-18 01:01:01 bird Exp $
  *
  * Uploads the relase and debug builds to the FTP sites.
  *
@@ -66,6 +66,7 @@ do i = 1 to 5 /* (Retries 5 times) */
     /*
      * Forwards files from sourceforge(t) to os2.ftp.org
      */
+    /*
     if (sLoc = '' | sLoc = 'os2') then
     do
         rc = cleanFtp('os2-delete', '/daily', 'www.os2.org');
@@ -75,6 +76,7 @@ do i = 1 to 5 /* (Retries 5 times) */
             /*rc = forwardSF(asUploads.j, 'os2-'||asUploads.j, '/'||sDirectory, 'www.os2.org');*/
         end
     end
+    */
 
     /*
      * Upload files to netlabs.
