@@ -1,4 +1,4 @@
-/* $Id: sec.cpp,v 1.9 2002-02-21 22:52:43 sandervl Exp $ */
+/* $Id: sec.cpp,v 1.10 2002-05-08 14:08:55 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -732,8 +732,8 @@ NTSTATUS WINAPI RtlAddAce(PACL acl,
 /******************************************************************************
  *  RtlAddAccessAllowedAce                  [NTDLL]
  */
-NTSTATUS WINAPI RtlAddAccessAllowedAce(IN OUT PACL pAcl, IN DWORD dwAceRevision, 
-                                       IN DWORD AccessMask, IN PSID pSid)
+BOOL WINAPI RtlAddAccessAllowedAce(IN OUT PACL pAcl, IN DWORD dwAceRevision, 
+                                   IN DWORD AccessMask, IN PSID pSid)
 {
   dprintf(("NTDLL: RtlAddAccessAllowedAce(%08xh,%08xh,%08xh,%08xh) not implemented.\n",
            pAcl,
@@ -741,7 +741,7 @@ NTSTATUS WINAPI RtlAddAccessAllowedAce(IN OUT PACL pAcl, IN DWORD dwAceRevision,
            AccessMask,
            pSid));
 
-  return 0;
+  return TRUE;
 }
 
 
