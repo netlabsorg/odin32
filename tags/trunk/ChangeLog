@@ -1,9 +1,13 @@
-/* $Id: ChangeLog,v 1.1522 2001-06-16 11:36:05 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1523 2001-06-16 16:13:10 sandervl Exp $ */
 
  2001-06-16: Sander van Leeuwen <sandervl@xs4all.nl>
     - DDRAW:    o Save & Restore FS when calling io_init2
+                o Partly implemented DrawEnumDisplayModes4
     - WINMM:    o Resume failed (during waveOutWrite) after underrun
                   (fixes audio error message in Atari Emulator)
+    - KERNEL32: o Implemented IOCTL_DISK_GET_DRIVE_GEOMETRY & IOCTL_DISK_GET_MEDIA_TYPES
+                o Allow direct sector reading from disk + changing read position
+                  with SetFilePointer
 
  2001-06-15: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Removed yesterday's getControl dialog change. 
