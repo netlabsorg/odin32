@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.24 1999-08-28 19:32:46 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.25 1999-08-29 20:05:07 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -433,6 +433,10 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 
     case WM_MOUSEMOVE:
     {
+	//Only send this message when the mouse isn't captured
+        if(WinQueryCapture(HWND_DESKTOP) != NULLHANDLE) {
+                goto RunDefWndProc;
+	}
         ULONG keystate = 0;
         if(WinGetKeyState(HWND_DESKTOP, VK_BUTTON1))
             keystate |= WMMOVE_LBUTTON;
@@ -588,9 +592,14 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         break;
 
     case WM_HITTEST:
-        if(win32wnd->MsgHitTest((*(POINTS *)&mp1).x, MapOS2ToWin32Y(OSLIB_HWND_DESKTOP, hwnd, (*(POINTS *)&mp1).y))) {
-                goto RunDefWndProc;
+	// Only send this message if the window is enabled
+        if (WinIsWindowEnabled(hwnd)) 
+	{
+	        if(win32wnd->MsgHitTest((*(POINTS *)&mp1).x, MapOS2ToWin32Y(OSLIB_HWND_DESKTOP, hwnd, (*(POINTS *)&mp1).y))) {
+        	        goto RunDefWndProc;
+		}
         }
+        else    goto RunDefWndProc;
         break;
 
     case WM_SYSCOLORCHANGE:
