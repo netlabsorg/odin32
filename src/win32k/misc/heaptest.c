@@ -1,4 +1,4 @@
-/* $Id: heaptest.c,v 1.4 2000-01-24 03:05:13 bird Exp $
+/* $Id: heaptest.c,v 1.5 2000-01-24 18:18:59 bird Exp $
  *
  * Test of resident and swappable heaps.
  *
@@ -12,10 +12,9 @@
 /******************************************************************************
 *   Defined Constants
 *******************************************************************************/
-#define NUMBER_OF_POINTERS      1024
-#define RANDOMTEST_ITERATIONS   65536*2
-#define Int3()          __interrupt(3)
-
+#define NUMBER_OF_POINTERS      16384
+#define RANDOMTEST_ITERATIONS   65536
+#define EXTRA_HEAPCHECK
 
 /*******************************************************************************
 *   Internal Functions
@@ -24,10 +23,10 @@
 #include "rmalloc.h"
 #include "smalloc.h"
 #include "macros.h"
+#include "asmutils.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <memory.h>
-#include <builtin.h>
 
 
 
@@ -42,11 +41,11 @@ int main(int argc, char *argv)
     unsigned      crfree;
     unsigned      crealloc;
     int           i;
-    int           fResTests = 0;
-    int           fResSimple = 0;
-    int           fResRandom = 0;
+    int           fResTests = 1;
+    int           fResSimple = 1;
+    int           fResRandom = 1;
     int           fSwpTests = 1;
-    int           fSwpSimple = 0;
+    int           fSwpSimple = 1;
     int           fSwpRandom = 1;
     enum   {malloc,realloc, free, unknown} enmLast = unknown;
 
@@ -97,7 +96,7 @@ int main(int argc, char *argv)
                     if (acb[i] > 1000)
                         break;
                 }
-                memset(apv[i], 0xA, MIN(acb[i],16));
+                memset(apv[i], 0xA, acb[i]);
                 cb += acb[i];
             }
 
@@ -112,6 +111,7 @@ int main(int argc, char *argv)
                 int cb = _res_msize(apv[i]);
                 if (cb != ((acb[i] + 3) & ~3) && (cb < ((acb[i] + 3) & ~3) || cb > 52 + ((acb[i] + 3) & ~3)) )
                     printf("size of avp[%d] (%d) != acb[%d] (%d)\n", i, cb, i, acb[i]);
+                memset(apv[i], 0xF, acb[i]);
                 rfree(apv[i]);
                 enmLast = free;
             }
@@ -178,7 +178,7 @@ int main(int argc, char *argv)
                                 continue;
                             break;
                         }
-                        memset(apv[j], 0xA, MIN(acb[j],16));
+                        memset(apv[j], 0xA, acb[j]);
                         cAllocations++;
                         cb += acb[j];
                         crmalloc++;
@@ -235,9 +235,11 @@ int main(int argc, char *argv)
                             }
                             apv[j] = pv;
                             acb[j] = cb;
+                            memset(apv[j], 0xB, acb[j]);
                         }
                         else
                         {   /* free */
+                            memset(apv[j], 0xF, acb[j]);
                             rfree(apv[j]);
                             enmLast = free;
                             apv[j] = NULL;
@@ -246,7 +248,9 @@ int main(int argc, char *argv)
                         }
                     }
                 }
+                #ifdef EXTRA_HEAPCHECK
                 _res_heap_check();
+                #endif
                 if (RANDOMTEST_ITERATIONS/2 == i)
                     _res_dump_subheaps();
                 if ((i % 2048) == 0)
@@ -276,11 +280,13 @@ int main(int argc, char *argv)
  */
     if (fSwpTests)
     {
+        printf("\nSwappable heap tests\nSwappable heap tests\n");
         if (fSwpSimple)
         {
             /*
              * Simple allocation test.
              */
+            printf("\nSimple swappable heap tests\nSimple swappable heap tests\n");
             for (i = 0; i < NUMBER_OF_POINTERS; i++)
             {
                 do
@@ -298,7 +304,7 @@ int main(int argc, char *argv)
                     if (acb[i] > 1000)
                         break;
                 }
-                memset(apv[i], 0xA, MIN(acb[i],16));
+                memset(apv[i], 0xA, acb[i]);
                 cb += acb[i];
             }
 
@@ -313,6 +319,7 @@ int main(int argc, char *argv)
                 int cb = _swp_msize(apv[i]);
                 if (cb != ((acb[i] + 3) & ~3) && (cb < ((acb[i] + 3) & ~3) || cb > 52 + ((acb[i] + 3) & ~3)) )
                     printf("size of avp[%d] (%d) != acb[%d] (%d)\n", i, cb, i, acb[i]);
+                memset(apv[i], 0xF, acb[i]);
                 sfree(apv[i]);
                 enmLast = free;
             }
@@ -339,7 +346,9 @@ int main(int argc, char *argv)
              * Test 2 - random allocation and freeing of memory.
              */
             printf("\n"
-                   "Random allocation and freeing test:\n");
+                   "Random allocation and freeing test (swappable)\n"
+                   "Random allocation and freeing test (swappable)\n"
+                   );
             for (i = 0; i < NUMBER_OF_POINTERS; i++)
                 apv[i] = NULL, acb[i] = 0;
             cAllocations = 0;
@@ -379,7 +388,7 @@ int main(int argc, char *argv)
                                 continue;
                             break;
                         }
-                        memset(apv[j], 0xA, MIN(acb[j],16));
+                        memset(apv[j], 0xA, acb[j]);
                         cAllocations++;
                         cb += acb[j];
                         crmalloc++;
@@ -436,9 +445,11 @@ int main(int argc, char *argv)
                             }
                             apv[j] = pv;
                             acb[j] = cb;
+                            memset(apv[j], 0xB, acb[j]);
                         }
                         else
                         {   /* free */
+                            memset(apv[j], 0xF, acb[j]);
                             sfree(apv[j]);
                             enmLast = free;
                             apv[j] = NULL;
@@ -447,9 +458,14 @@ int main(int argc, char *argv)
                         }
                     }
                 }
+                #ifdef EXTRA_HEAPCHECK
                 _swp_heap_check();
+                #endif
                 if (RANDOMTEST_ITERATIONS/2 == i)
+                {
                     _swp_dump_subheaps();
+                    _res_dump_subheaps();
+                }
                 if ((i % 2048) == 0)
                     printf("i=%d cAllocations=%d\n", i, cAllocations);
             }
@@ -458,6 +474,8 @@ int main(int argc, char *argv)
 
             printf("_swp_dump_subheaps:\n");
             _swp_dump_subheaps();
+            printf("_res_dump_subheaps:\n");
+            _res_dump_subheaps();
 
             printf("_swp_memfree - before heapmin: %d\n", _swp_memfree());
             _swp_heapmin();
@@ -465,6 +483,8 @@ int main(int argc, char *argv)
 
             printf("_swp_dump_subheaps:\n");
             _swp_dump_subheaps();
+            printf("_res_dump_subheaps:\n");
+            _res_dump_subheaps();
         } /* fSwpRandom */
     }
 

@@ -1,4 +1,4 @@
-/* $Id: rmalloc_avl.c,v 1.4 2000-01-24 03:05:14 bird Exp $
+/* $Id: rmalloc_avl.c,v 1.5 2000-01-24 18:19:00 bird Exp $
  *
  * Resident Heap - AVL.
  *
@@ -15,9 +15,11 @@
 /*******************************************************************************
 *   Defined Constants And Macros                                               *
 *******************************************************************************/
+#pragma info(notrd)
 #ifdef DEBUG
     #define DEBUG_ALLOC
-    #define ALLWAYS_HEAPCHECK
+    #undef ALLWAYS_HEAPCHECK
+    #undef SOMETIMES_HEAPCHECK
 #endif
 
 #define HEAPANCHOR_SIGNATURE    0xBEEFFEEB
@@ -40,24 +42,20 @@
     #define INCL_DOSMEMMGR
 #endif
 
-
 /******************************************************************************
 *  Headerfiles
 ******************************************************************************/
 #include <os2.h>
 #ifdef RING0
     #include "dev32hlp.h"
-    #include "asmutils.h"
-#else
-    #include <builtin.h>
-    #define Int3() __interrupt(3)
 #endif
+#include "asmutils.h"
 #include "log.h"
 #include "rmalloc.h"
-#include <memory.h>
 #include "dev32.h"
 #include "avl.h"
 #include "macros.h"
+#include <memory.h>
 
 
 /*******************************************************************************
@@ -138,8 +136,10 @@ static void         resInsertFree(PHEAPANCHOR pha, PMEMBLOCK pmb);
 static PMEMBLOCK    resGetFreeMemblock(PHEAPANCHOR *ppha, unsigned cbUserSize);
 static PMEMBLOCK    resFindUsedBlock(PHEAPANCHOR *ppha, void *pvUser);
 static PMEMBLOCK    resFindWithinUsedBlock(PHEAPANCHOR *ppha, void *pvUser);
+#ifdef DEBUG_ALLOC
 static int          resCheckAVLTree(PMEMBLOCK pmb);
 static int          resCheckAVLTreeFree(PAVLNODECORE pNode);
+#endif
 static unsigned     _res_dump_subheaps_callback(PMEMBLOCK pmb, PSUBHEAPS_CALLBACK_PARAM pCb);
 static unsigned     _res_dump_allocated_callback(PMEMBLOCK pmb, PALLOCATED_CALLBACK_PARAM pParam);
 
@@ -251,7 +251,6 @@ static void resInsertFree(PHEAPANCHOR pha, PMEMBLOCK pmb)
     PMEMBLOCKFREE   pmbfRight;
     PMEMBLOCKFREE   pmbfRightParent;
     PMEMBLOCKFREE   pmbfLeft;
-    PMEMBLOCKFREE   pmbfTmp;
 
     pha->cbFree += pmb->cbSize;
 
@@ -591,7 +590,7 @@ int resHeapInit(unsigned cbSizeInit, unsigned cbSizeMax)
     #endif
     resInsertFree(phaFirst, pmb);
 
-    #ifdef ALLWAYS_HEAPCHECK
+    #if defined(ALLWAYS_HEAPCHECK) || defined(SOMETIMES_HEAPCHECK)
         if (!_res_heap_check())
         {   /* error! */
             kprintf(("resHeapInit: _res_heap_check failed!\n"));
@@ -601,8 +600,8 @@ int resHeapInit(unsigned cbSizeInit, unsigned cbSizeMax)
             return -2;
         }
     #endif
-    #ifdef RING3
-        fInited = TRUE;
+    #ifndef RING0
+        fResInited = TRUE;
     #endif
     return 0;
 }
@@ -617,7 +616,7 @@ int resHeapInit(unsigned cbSizeInit, unsigned cbSizeMax)
  */
 void * rmalloc(unsigned cbSize)
 {
-    #ifdef ALLWAYS_HEAPCHECK
+    #if defined(ALLWAYS_HEAPCHECK) || defined(SOMETIMES_HEAPCHECK)
     if (!_res_heap_check())
     {
         kprintf(("rmalloc: _res_heap_check failed!\n"));
@@ -654,7 +653,7 @@ void *rrealloc(void *pv, unsigned cbNew)
     PMEMBLOCK pmb;
     PHEAPANCHOR pha;
 
-    #ifdef ALLWAYS_HEAPCHECK
+    #if defined(ALLWAYS_HEAPCHECK) || defined(SOMETIMES_HEAPCHECK)
     if (!_res_heap_check())
     {
         kprintf(("rrealloc: _res_heap_check failed!\n"));
@@ -777,12 +776,12 @@ void *rrealloc(void *pv, unsigned cbNew)
  */
 void rfree(void *pv)
 {
-    #ifdef ALLWAYS_HEAPCHECK
-        if (!_res_heap_check())
-        {
-            kprintf(("rfree: _res_heap_check failed!\n"));
-            return;
-        }
+    #if defined(ALLWAYS_HEAPCHECK) || defined(SOMETIMES_HEAPCHECK)
+    if (!_res_heap_check())
+    {
+        kprintf(("rfree: _res_heap_check failed!\n"));
+        return;
+    }
     #endif
 
     if (pv != NULL)
@@ -824,8 +823,8 @@ unsigned _res_msize(void *pv)
     PMEMBLOCK   pmb;
 
     #ifdef ALLWAYS_HEAPCHECK
-        if (!_res_heap_check())
-            kprintf(("_res_msize: _res_heap_check failed!\n"));
+    if (!_res_heap_check())
+        kprintf(("_res_msize: _res_heap_check failed!\n"));
     #endif
 
     pmb = resFindUsedBlock(SSToDS(&pha), pv);
@@ -840,12 +839,11 @@ unsigned _res_msize(void *pv)
  */
 int _res_validptr(void *pv)
 {
-    PHEAPANCHOR pha;
     PMEMBLOCK   pmb;
 
     #ifdef ALLWAYS_HEAPCHECK
-        if (!_res_heap_check())
-            kprintf(("_res_validptr: _res_heap_check failed!\n"));
+    if (!_res_heap_check())
+        kprintf(("_res_validptr: _res_heap_check failed!\n"));
     #endif
 
     pmb = resFindWithinUsedBlock(NULL, pv);
@@ -861,12 +859,11 @@ int _res_validptr(void *pv)
  */
 int _res_validptr2(void *pv, unsigned cbSize)
 {
-    PHEAPANCHOR pha;
     PMEMBLOCK   pmb;
 
     #ifdef ALLWAYS_HEAPCHECK
-        if (!_res_heap_check())
-            kprintf(("_res_validptr: _res_heap_check failed!\n"));
+    if (!_res_heap_check())
+        kprintf(("_res_validptr: _res_heap_check failed!\n"));
     #endif
 
     pmb = resFindWithinUsedBlock(NULL, pv);
@@ -888,8 +885,8 @@ unsigned _res_memfree(void)
     unsigned    cb;
 
     #ifdef ALLWAYS_HEAPCHECK
-        if (!_res_heap_check())
-            kprintf(("_res_memfree: _res_heap_check failed!\n"));
+    if (!_res_heap_check())
+        kprintf(("_res_memfree: _res_heap_check failed!\n"));
     #endif
 
     for (cb = 0; pha != NULL; pha = pha->pNext)
@@ -916,10 +913,12 @@ int _res_heap_check(void)
     {
         AVLENUMDATA FreeEnumData;
         AVLENUMDATA UsedEnumData;
-        PMEMBLOCK pmbFree = (PMEMBLOCK)AVLBeginEnumTree((PPAVLNODECORE)&pha->pmbFree, &FreeEnumData, TRUE);
-        PMEMBLOCK pmbFreeNext = (PMEMBLOCK)AVLGetNextNode(&FreeEnumData);
-        PMEMBLOCK pmbUsed = (PMEMBLOCK)AVLBeginEnumTree((PPAVLNODECORE)&pha->pmbUsed, &UsedEnumData, TRUE);
-        PMEMBLOCK pmbUsedNext = (PMEMBLOCK)AVLGetNextNode(&UsedEnumData);
+        PMEMBLOCK pmbFree = (PMEMBLOCK)AVLBeginEnumTree((PPAVLNODECORE)&pha->pmbFree,
+                                                        SSToDS(&FreeEnumData), TRUE);
+        PMEMBLOCK pmbFreeNext = (PMEMBLOCK)AVLGetNextNode(SSToDS(&FreeEnumData));
+        PMEMBLOCK pmbUsed = (PMEMBLOCK)AVLBeginEnumTree((PPAVLNODECORE)&pha->pmbUsed,
+                                                        SSToDS(&UsedEnumData), TRUE);
+        PMEMBLOCK pmbUsedNext = (PMEMBLOCK)AVLGetNextNode(SSToDS(&UsedEnumData));
         PMEMBLOCK pmbLast = NULL;
         unsigned  cbFree = 0;
         unsigned  cbUsed = 0;
@@ -1030,7 +1029,7 @@ int _res_heap_check(void)
                 }
                 pmbLast = pmbUsed;
                 pmbUsed = pmbUsedNext;
-                pmbUsedNext = (PMEMBLOCK)AVLGetNextNode(&UsedEnumData);
+                pmbUsedNext = (PMEMBLOCK)AVLGetNextNode(SSToDS(&UsedEnumData));
             }
             else
             {
@@ -1070,7 +1069,7 @@ int _res_heap_check(void)
                 }
                 pmbLast = pmbFree;
                 pmbFree = pmbFreeNext;
-                pmbFreeNext = (PMEMBLOCK)AVLGetNextNode(&FreeEnumData);
+                pmbFreeNext = (PMEMBLOCK)AVLGetNextNode(SSToDS(&FreeEnumData));
             }
         }
 
@@ -1132,6 +1131,7 @@ int _res_heap_check(void)
 }
 
 
+#ifdef DEBUG_ALLOC
 /**
  * Check the integrity of the a Free/Used AVL tree where Key == node pointer.
  */
@@ -1142,6 +1142,12 @@ static int resCheckAVLTree(PMEMBLOCK pmb)
     if (pmb->core.Key != (AVLKEY)pmb)
     {
         kprintf(("resCheckAVLTree: Invalid Key!\n"));
+        Int3();
+        return -1;
+    }
+    if (pmb->core.Key % ALIGNMENT != 0)
+    {
+        kprintf(("resCheckAVLTree: Data is not correctly aligned, uData=0x%08x\n", pmb->core.Key));
         Int3();
         return -1;
     }
@@ -1222,6 +1228,7 @@ static int resCheckAVLTreeFree(PAVLNODECORE pNode)
         return -1;
     return 0;
 }
+#endif
 
 
 /**
@@ -1288,14 +1295,13 @@ void _res_dump_subheaps(void)
     pha = phaFirst;
     while (pha != NULL)
     {
-        PMEMBLOCK pmb;
-        SUBHEAPS_CALLBACK_PARAM FreeParam = {0};
-        SUBHEAPS_CALLBACK_PARAM UsedParam = {0};
+        SUBHEAPS_CALLBACK_PARAM FreeParam = {0, 0};
+        SUBHEAPS_CALLBACK_PARAM UsedParam = {0, 0};
 
         AVLDoWithAll((PPAVLNODECORE)&pha->pmbUsed, 1,
-                     (PAVLCALLBACK)_res_dump_subheaps_callback, &UsedParam);
+                     (PAVLCALLBACK)_res_dump_subheaps_callback, SSToDS(&UsedParam));
         AVLDoWithAll((PPAVLNODECORE)&pha->pmbFree, 1,
-                     (PAVLCALLBACK)_res_dump_subheaps_callback, &FreeParam);
+                     (PAVLCALLBACK)_res_dump_subheaps_callback, SSToDS(&FreeParam));
 
         kprintf(("HeapAnchor %2d addr=0x%08x cbSize=%6d cbFree=%6d cbUsed=%6d cUsed=%4d cFree=%d\n",
                  i, pha, pha->cbSize, pha->cbFree, pha->cbUsed, UsedParam.c, FreeParam.c));
@@ -1337,7 +1343,7 @@ static unsigned _res_dump_subheaps_callback(PMEMBLOCK pmb, PSUBHEAPS_CALLBACK_PA
 void _res_dump_allocated(unsigned cb)
 {
     PHEAPANCHOR pha;
-    ALLOCATED_CALLBACK_PARAM Param = {0};
+    ALLOCATED_CALLBACK_PARAM Param = {cb, 0, 0};
 
     kprintf(("----------------------------\n"
              "- Dumping allocated blocks -\n"
@@ -1348,7 +1354,7 @@ void _res_dump_allocated(unsigned cb)
     {
         /* iterate thru tree using callback */
         AVLDoWithAll((PPAVLNODECORE)&pha->pmbUsed, TRUE,
-                     (PAVLCALLBACK)_res_dump_allocated_callback, &Param);
+                     (PAVLCALLBACK)_res_dump_allocated_callback, SSToDS(&Param));
 
         /* next */
         pha = pha->pNext;

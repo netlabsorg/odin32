@@ -1,4 +1,4 @@
-/* $Id: smalloc_avl.c,v 1.2 2000-01-24 03:05:14 bird Exp $
+/* $Id: smalloc_avl.c,v 1.3 2000-01-24 18:19:00 bird Exp $
  *
  * Swappable Heap - AVL.
  *
@@ -15,10 +15,11 @@
 /*******************************************************************************
 *   Defined Constants And Macros                                               *
 *******************************************************************************/
+#pragma info(notrd)
 #ifdef DEBUG
     #define DEBUG_ALLOC
-    #define ALLWAYS_HEAPCHECK
-    #define SOMETIMES_HEAPCHECK
+    #undef ALLWAYS_HEAPCHECK
+    #undef SOMETIMES_HEAPCHECK
 #endif
 
 #define SIGNATURE_END           0xBEDAADEB
@@ -59,18 +60,15 @@
 #include <os2.h>
 #ifdef RING0
     #include "dev32hlp.h"
-    #include "asmutils.h"
-#else
-    #include <builtin.h>
-    #define Int3() __interrupt(3)
 #endif
+#include "asmutils.h"
 #include "log.h"
 #include "smalloc.h"
 #include "rmalloc.h"
-#include <memory.h>
 #include "dev32.h"
 #include "avl.h"
 #include "macros.h"
+#include <memory.h>
 
 
 /*******************************************************************************
@@ -161,8 +159,10 @@ static void         swpInsertFree(PHEAPANCHOR pha, PMEMBLOCK pmb);
 static PMEMBLOCK    swpGetFreeMemblock(PHEAPANCHOR *ppha, unsigned cbUserSize);
 static PMEMBLOCK    swpFindUsedBlock(PHEAPANCHOR *ppha, void *pvUser);
 static PMEMBLOCK    swpFindWithinUsedBlock(PHEAPANCHOR *ppha, void *pvUser);
+#ifdef DEBUG_ALLOC
 static int          swpCheckAVLTree(PMEMBLOCK pmb);
 static int          swpCheckAVLTreeFree(PAVLNODECORE pNode);
+#endif
 static unsigned     _swp_dump_subheaps_callback(PMEMBLOCK pmb, PSUBHEAPS_CALLBACK_PARAM pCb);
 static unsigned     _swp_dump_allocated_callback(PMEMBLOCK pmb, PALLOCATED_CALLBACK_PARAM pParam);
 
@@ -184,7 +184,6 @@ _Inline PMEMBLOCK swpAllocateMemblock(void)
     #else
 
     unsigned long *pul;
-    unsigned long  ul;
     int            i = 0;
     PMEMBLOCKCHUNK pmcLast = NULL;
     PMEMBLOCKCHUNK pmc = pmcFirst;
@@ -221,7 +220,7 @@ _Inline PMEMBLOCK swpAllocateMemblock(void)
         pul++, i += 8*4;
     while (pmc->achBitmap[i/8] & (0x1 << (i%8)))
         i++;
-    pmc->achBitmap[i/8] |=  0x1 << (i%8);
+    pmc->achBitmap[i/8] |=  (0x1 << (i%8));
     return &pmc->amb[i];
     #endif
 }
@@ -250,15 +249,15 @@ _Inline void swpReleaseMemblock(PMEMBLOCK pmb)
         if ((pmc->achBitmap[i / 8] & (1 << (i % 8))) == 0)
         {
             kprintf(("swpReleaseMemblock: the memblock requested to be freed are allread free!\n"));
-            pmc->cFree++;
+            pmc->cFree--;
         }
         #endif
-        pmc->cFree--;
-        pmc->achBitmap[i / 8] &= pmc->achBitmap[i / 8] & ~(0x1 << i % 8);
-        #endif
+        pmc->cFree++;
+        pmc->achBitmap[i / 8] &= pmc->achBitmap[i / 8] & ~(0x1 << (i % 8));
     }
     else
         kprintf(("swpReleaseMemblock: hmm pmb is not found within any pmc.\n"));
+    #endif
 }
 
 
@@ -367,7 +366,6 @@ static void swpInsertFree(PHEAPANCHOR pha, PMEMBLOCK pmb)
     PMEMBLOCK   pmbRight;
     PMEMBLOCK   pmbRightParent;
     PMEMBLOCK   pmbLeft;
-    PMEMBLOCK   pmbTmp;
 
     pha->cbFree += pmb->u2.cbSize;
 
@@ -752,8 +750,8 @@ int swpHeapInit(unsigned cbSizeInit, unsigned cbSizeMax)
                         return -2;
                     }
                 #endif
-                #ifdef RING3
-                    fInited = TRUE;
+                #ifndef RING0
+                    fSwpInited = TRUE;
                 #endif
 
                 return 0;
@@ -919,7 +917,7 @@ void *srealloc(void *pv, unsigned cbNew)
                 pvRet = smalloc(cbNew);
                 if (pvRet != NULL)
                 {
-                    memcpy(pvRet, pv, pmb->u2.cbSize);
+                    memcpy(pvRet, pv, pmb->u2.cbSize-CB_SIGNATURES);
                     sfree(pv);
                 }
             }
@@ -1004,7 +1002,6 @@ unsigned _swp_msize(void *pv)
  */
 int _swp_validptr(void *pv)
 {
-    PHEAPANCHOR pha;
     PMEMBLOCK   pmb;
 
     #ifdef ALLWAYS_HEAPCHECK
@@ -1028,7 +1025,6 @@ int _swp_validptr(void *pv)
  */
 int _swp_validptr2(void *pv, unsigned cbSize)
 {
-    PHEAPANCHOR pha;
     PMEMBLOCK   pmb;
 
     #ifdef ALLWAYS_HEAPCHECK
@@ -1089,10 +1085,12 @@ int _swp_heap_check(void)
     {
         AVLENUMDATA FreeEnumData;
         AVLENUMDATA UsedEnumData;
-        PMEMBLOCK pmbFree = (PMEMBLOCK)AVLBeginEnumTree(&pha->pcoreFree, &FreeEnumData, TRUE);
-        PMEMBLOCK pmbFreeNext = (PMEMBLOCK)AVLGetNextNode(&FreeEnumData);
-        PMEMBLOCK pmbUsed = (PMEMBLOCK)AVLBeginEnumTree(&pha->pcoreUsed, &UsedEnumData, TRUE);
-        PMEMBLOCK pmbUsedNext = (PMEMBLOCK)AVLGetNextNode(&UsedEnumData);
+        PMEMBLOCK pmbFree = (PMEMBLOCK)AVLBeginEnumTree(&pha->pcoreFree,
+                                                        (PAVLENUMDATA)SSToDS(&FreeEnumData), TRUE);
+        PMEMBLOCK pmbFreeNext = (PMEMBLOCK)AVLGetNextNode((PAVLENUMDATA)SSToDS(&FreeEnumData));
+        PMEMBLOCK pmbUsed = (PMEMBLOCK)AVLBeginEnumTree(&pha->pcoreUsed,
+                                                        (PAVLENUMDATA)SSToDS(&UsedEnumData), TRUE);
+        PMEMBLOCK pmbUsedNext = (PMEMBLOCK)AVLGetNextNode((PAVLENUMDATA)SSToDS(&UsedEnumData));
         PMEMBLOCK pmbLast = NULL;
         unsigned  cbFree = 0;
         unsigned  cbUsed = 0;
@@ -1203,7 +1201,7 @@ int _swp_heap_check(void)
                 }
                 pmbLast = pmbUsed;
                 pmbUsed = pmbUsedNext;
-                pmbUsedNext = (PMEMBLOCK)AVLGetNextNode(&UsedEnumData);
+                pmbUsedNext = (PMEMBLOCK)AVLGetNextNode((PAVLENUMDATA)SSToDS(&UsedEnumData));
             }
             else
             {
@@ -1243,7 +1241,7 @@ int _swp_heap_check(void)
                 }
                 pmbLast = pmbFree;
                 pmbFree = pmbFreeNext;
-                pmbFreeNext = (PMEMBLOCK)AVLGetNextNode(&FreeEnumData);
+                pmbFreeNext = (PMEMBLOCK)AVLGetNextNode((PAVLENUMDATA)SSToDS(&FreeEnumData));
             }
         }
 
@@ -1304,7 +1302,7 @@ int _swp_heap_check(void)
     return TRUE;
 }
 
-
+#ifdef DEBUG_ALLOC
 /**
  * Check the integrity of the a Free/Used AVL tree where Key == node pointer.
  */
@@ -1315,6 +1313,12 @@ static int swpCheckAVLTree(PMEMBLOCK pmb)
     if (pmb->u1.core.Key < 0x10000)
     {
         kprintf(("swpCheckAVLTree: Invalid Key!\n"));
+        Int3();
+        return -1;
+    }
+    if (pmb->u1.uData % ALIGNMENT != 0)
+    {
+        kprintf(("swpCheckAVLTree: Data is not correctly aligned, uData=0x%08x\n", pmb->u1.uData));
         Int3();
         return -1;
     }
@@ -1398,6 +1402,7 @@ static int swpCheckAVLTreeFree(PAVLNODECORE pNode)
         return -1;
     return 0;
 }
+#endif
 
 
 /**
@@ -1405,6 +1410,8 @@ static int swpCheckAVLTreeFree(PAVLNODECORE pNode)
  */
 void _swp_heapmin(void)
 {
+    PMEMBLOCKCHUNK pmcLast;
+    PMEMBLOCKCHUNK pmc;
     PHEAPANCHOR pha = phaLast;
 
     while (pha != NULL && pha != phaFirst)
@@ -1437,6 +1444,30 @@ void _swp_heapmin(void)
         else
             pha = pha->pPrev;
     }
+
+    pmcLast = NULL;
+    pmc = pmcFirst;
+    while (pmc != NULL)
+    {
+        #ifdef DEBUG_ALLOC
+        if (pmc->cFree > MEMBLOCKS_PER_CHUNK)
+        {
+            kprintf(("_swp_heapmin: internal heap error - pmc->cFree(%d) > MEMBLOCKS_PER_CHUNK(%d)\n",
+                     pmc->cFree, MEMBLOCKS_PER_CHUNK));
+        }
+        #endif
+        if (pmc->cFree == MEMBLOCKS_PER_CHUNK && pmcLast != NULL)
+        {
+            pmcLast->pNext = pmc->pNext;
+            rfree(pmc);
+            pmc = pmcLast->pNext;
+        }
+        else
+        {
+            pmcLast = pmc;
+            pmc = pmc->pNext;
+        }
+    }
 }
 
 
@@ -1465,14 +1496,13 @@ void _swp_dump_subheaps(void)
     pha = phaFirst;
     while (pha != NULL)
     {
-        PMEMBLOCK pmb;
-        SUBHEAPS_CALLBACK_PARAM FreeParam = {0};
-        SUBHEAPS_CALLBACK_PARAM UsedParam = {0};
+        SUBHEAPS_CALLBACK_PARAM FreeParam = {0, 0};
+        SUBHEAPS_CALLBACK_PARAM UsedParam = {0, 0};
 
         AVLDoWithAll(&pha->pcoreUsed, 1,
-                     (PAVLCALLBACK)_swp_dump_subheaps_callback, &UsedParam);
+                     (PAVLCALLBACK)_swp_dump_subheaps_callback, SSToDS(&UsedParam));
         AVLDoWithAll(&pha->pcoreFree, 1,
-                     (PAVLCALLBACK)_swp_dump_subheaps_callback, &FreeParam);
+                     (PAVLCALLBACK)_swp_dump_subheaps_callback, SSToDS(&FreeParam));
 
         kprintf(("HeapAnchor %2d addr=0x%08x cbSize=%6d cbFree=%6d cbUsed=%6d cUsed=%4d cFree=%d\n",
                  i, pha, pha->cbSize, pha->cbFree, pha->cbUsed, UsedParam.c, FreeParam.c));
@@ -1514,7 +1544,7 @@ static unsigned _swp_dump_subheaps_callback(PMEMBLOCK pmb, PSUBHEAPS_CALLBACK_PA
 void _swp_dump_allocated(unsigned cb)
 {
     PHEAPANCHOR pha;
-    ALLOCATED_CALLBACK_PARAM Param = {0};
+    ALLOCATED_CALLBACK_PARAM Param = {cb, 0, 0};
 
     kprintf(("----------------------------\n"
              "- Dumping allocated blocks -\n"
@@ -1525,7 +1555,7 @@ void _swp_dump_allocated(unsigned cb)
     {
         /* iterate thru tree using callback */
         AVLDoWithAll((PPAVLNODECORE)&pha->pcoreUsed, TRUE,
-                     (PAVLCALLBACK)_swp_dump_allocated_callback, &Param);
+                     (PAVLCALLBACK)_swp_dump_allocated_callback, SSToDS(&Param));
 
         /* next */
         pha = pha->pNext;

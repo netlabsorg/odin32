@@ -1,4 +1,4 @@
-/* $Id: malloc.h,v 1.5 1999-11-10 01:45:32 bird Exp $
+/* $Id: malloc.h,v 1.6 2000-01-24 18:18:59 bird Exp $
  *
  * Heap.
  *
@@ -27,26 +27,20 @@ extern "C" {
 /*******************************************************************************
 *   Exported Functions and Variables                                           *
 *******************************************************************************/
-int      heapInit(unsigned);
-void *   malloc(unsigned);
-void *   realloc(void *, unsigned);
-void     free(void *);
-unsigned _memfree(void);
-unsigned _msize(void *);
-int      _validptr(void *);
-int      _validptr2(void *, unsigned);
-int      _heap_check(void);
-
-extern unsigned  _uHeapMinPtr;/* heap pointers are greater or equal to this.*/
-extern unsigned  _uHeapMaxPtr;/* heap pointers are less than this. */
+int         heapInit(unsigned, unsigned, unsigned, unsigned);
+void *      malloc(unsigned);
+void *      realloc(void *, unsigned);
+void        free(void *);
+unsigned    _memfree(void);
+unsigned    _msize(void *);
+int         _validptr(void *);
+int         _validptr2(void *, unsigned);
+int         _heap_check(void);
 
 
 /*******************************************************************************
 *   Defined Constants And Macros                                               *
 *******************************************************************************/
-#define MINPTR _uHeapMinPtr
-#define MAXPTR _uHeapMaxPtr
-
 /* HeapPointer assert - old ones... */
 #define ltasserthp(a)         if (!_validptr((void*)(a))){ _ltasserthp((void*)(a), #a,__FILE__,__LINE__); return FALSE;}
 #define ltasserthp2(a,b)      if (!_validptr((void*)(a))){ _ltasserthp((void*)(a), #a,__FILE__,__LINE__); b; return FALSE;}
