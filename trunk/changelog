@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.2072 2002-05-13 12:11:25 sandervl Exp $ */
+/* $Id: changelog,v 1.2073 2002-05-14 09:06:22 sandervl Exp $ */
+
+ 2002-05-14: Platon Fomichev <platon@innotek.de>
+    - USER32:   o Don't send WM_WINDOWPOSCHANGING message when PM sends
+                  SWP_FOCUS(DE)ACTIVATE message.
 
  2002-05-10: Platon Fomichev <platon@innotek.de>
     - KERNEL32: o Parallel port updates (use resource manager to query
