@@ -1,4 +1,4 @@
-/* $Id: win32wmdichild.cpp,v 1.1 1999-09-15 23:19:01 sandervl Exp $ */
+/* $Id: win32wmdichild.cpp,v 1.2 1999-09-29 09:16:32 sandervl Exp $ */
 /*
  * Win32 MDI Child Window Class for OS/2
  *
@@ -51,6 +51,34 @@ Win32MDIChildWindow::Win32MDIChildWindow(CREATESTRUCTA *lpCreateStructA, ATOM cl
 //******************************************************************************
 Win32MDIChildWindow::~Win32MDIChildWindow()
 {
+}
+//******************************************************************************
+//******************************************************************************
+ULONG Win32MDIChildWindow::MsgActivate(BOOL fActivate, BOOL fMinimized, HWND hwnd)
+{
+ ULONG rc, curprocid, procidhwnd = -1, threadidhwnd = 0;
+
+    //According to SDK docs, if app returns FALSE & window is being deactivated,
+    //default processing is cancelled
+    //TODO: According to Wine we should proceed anyway if window is sysmodal
+    if(SendInternalMessageA(WM_NCACTIVATE, fActivate, 0) == FALSE && !fActivate)
+    {
+        return 0;
+    }
+    if(fActivate)
+    {
+         rc = SendInternalMessageA(WM_CHILDACTIVATE, MAKELONG((fActivate) ? WA_ACTIVE : WA_INACTIVE, fMinimized), hwnd);
+         curprocid  = GetCurrentProcessId();
+         if(hwnd) {
+                threadidhwnd = GetWindowThreadProcessId(hwnd, &procidhwnd);
+         }
+
+         if(curprocid != procidhwnd && fActivate) {
+            SendInternalMessageA(WM_ACTIVATEAPP, 1, threadidhwnd);
+         }
+         return rc;
+    }
+    else return 1;
 }
 //******************************************************************************
 //******************************************************************************
