@@ -9,15 +9,14 @@
 #define __WRC_WRC_H
 
 #ifndef __WRC_WRCTYPES_H
-#include "odin.h"
 #include "wrctypes.h"
-#include "ver.h"
 #endif
 
+//ifdef __WIN32OS2__
 #define strcasecmp stricmp
 
-#define WRC_VERSION	"1.0.14"
-#define WRC_RELEASEDATE	"(08-Aug-1999)"
+#define WRC_VERSION	"1.0.18"
+#define WRC_RELEASEDATE	"(28-Dec-1999)"
 #define WRC_FULLVERSION WRC_VERSION " " WRC_RELEASEDATE
 
 /* Only used in heavy debugging sessions */

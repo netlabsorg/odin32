@@ -39,6 +39,7 @@ typedef union{
 	toolbar_item_t	*tlbarItems;
 	dlginit_t       *dginit;
 	style_pair_t	*styles;
+	style_t		*style;
 } YYSTYPE;
 #define	tIF	258
 #define	tIFDEF	259
