@@ -1,4 +1,4 @@
-/* $Id: npipe.cpp,v 1.4 2000-01-02 22:51:58 sandervl Exp $ */
+/* $Id: npipe.cpp,v 1.5 2000-01-03 21:36:10 sandervl Exp $ */
 /*
  * Win32 Named pipes API 
  *
@@ -21,11 +21,14 @@ ODINDEBUGCHANNEL(KERNEL32-NPIPE)
 
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API PeekNamedPipe(HANDLE hPipe, LPVOID lpvBuffer, DWORD cbBuffer,
-                            LPDWORD lpcbRead, LPDWORD lpcbAvail, LPDWORD lpcbMessage)
+ODINFUNCTION6(BOOL,PeekNamedPipe,HANDLE ,hPipe, 
+                                 LPVOID ,lpvBuffer, 
+                                 DWORD  ,cbBuffer,
+                                 LPDWORD,lpcbRead, 
+                                 LPDWORD,lpcbAvail, 
+                                 LPDWORD,lpcbMessage)
 {
-  dprintf(("PeekNamedPipe Not Implemented! - yet\n"));
-  return(FALSE);
+  return(OSLibDosPeekNamedPipe(hPipe,lpvBuffer,cbBuffer,lpcbRead,lpcbAvail,lpcbMessage));
 }
 //******************************************************************************
 //LPSECURITY_ATTRIBUTES lpsa;   /* address of security attributes   */
@@ -37,10 +40,6 @@ BOOL WIN32API CreatePipe(PHANDLE phRead, PHANDLE phWrite, LPSECURITY_ATTRIBUTES 
 }
 //******************************************************************************
 //******************************************************************************
-//HANDLE WIN32API 
-//                    DWORD nMaxInstances, DWORD nOutBufferSize,
-//                    DWORD nInBufferSize, DWORD nDefaultTimeOut,
-//                    void *lpSecurityAttributes)
 ODINFUNCTION8(HANDLE,CreateNamedPipeA,LPCTSTR,lpName, DWORD,dwOpenMode, DWORD,dwPipeMode,
                                      DWORD, nMaxInstances, DWORD, nOutBufferSize,
                                      DWORD, nInBufferSize, DWORD, nDefaultTimeOut,
@@ -105,7 +104,7 @@ ODINFUNCTION8(HANDLE,CreateNamedPipeW,LPCWSTR,lpName, DWORD,dwOpenMode, DWORD,dw
  * Remark    :
  * Status    : NOT FULLY TESTED
  *
- * Author    : Przemyslaw Dobrowolski [Thu, 2000/01/02 12:48]
+ * Author    : Przemyslaw Dobrowolski [Sun, 2000/01/02 12:48]
  *****************************************************************************/
 
 ODINFUNCTION2(BOOL,ConnectNamedPipe,HANDLE,hNamedPipe, LPOVERLAPPED,lpOverlapped)
@@ -142,27 +141,30 @@ ODINFUNCTION2(BOOL,ConnectNamedPipe,HANDLE,hNamedPipe, LPOVERLAPPED,lpOverlapped
  *             to the pipe before returning.
  *
  *             CallNamedPipe fails if the pipe is a byte-type pipe.
- * Status    : UNTESTED STUB
+ * Status    : NOT FULLY TESTED
  *
- * Author    : Markus Montkowski [Thu, 1998/05/19 11:46]
+ * Author    : Przemyslaw Dobrowolski [Mon, 2000/01/03 13:32]
  *****************************************************************************/
 
-BOOL WIN32API CallNamedPipeA( LPCSTR lpNamedPipeName,
-                                  LPVOID lpInBuffer, DWORD nInBufferSize,
-                                  LPVOID lpOutBuffer, DWORD nOutBufferSize,
-                                  LPDWORD lpBytesRead, DWORD nTimeOut)
+ODINFUNCTION7(BOOL,CallNamedPipeA,LPCSTR , lpNamedPipeName,
+                                  LPVOID , lpInBuffer, 
+                                  DWORD  , nInBufferSize,
+                                  LPVOID , lpOutBuffer, 
+                                  DWORD  , nOutBufferSize,
+                                  LPDWORD, lpBytesRead, 
+                                  DWORD  , nTimeOut)
 {
-
-  dprintf(("KERNEL32:  CallNamedPipeA(%08x,%08x,%08x,%08x,%08x,%08x) not implemented\n",
-           lpNamedPipeName, lpInBuffer, nInBufferSize,
-           lpOutBuffer, nOutBufferSize, lpBytesRead,  nTimeOut
-          ));
-
-  return (FALSE);
+  return(OSLibDosCallNamedPipe(lpNamedPipeName,
+                           lpInBuffer,
+                           nInBufferSize,
+                           lpOutBuffer,
+                           nOutBufferSize,
+                           lpBytesRead,
+                           nTimeOut ));
 }
 
 /*****************************************************************************
- * Name      : BOOL WIN32AOI CallNamedPipeA
+ * Name      : BOOL WIN32AOI CallNamedPipeW
  * Purpose   : The CallNamedPipe function connects to a message-type pipe
  *             (and waits if an instance of the pipe is not available),
  *             writes to and reads from the pipe, and then closes the pipe.
@@ -190,23 +192,34 @@ BOOL WIN32API CallNamedPipeA( LPCSTR lpNamedPipeName,
  *             to the pipe before returning.
  *
  *             CallNamedPipe fails if the pipe is a byte-type pipe.
- * Status    : UNTESTED STUB
+ * Status    : NOT FULLY TESTED
  *
- * Author    : Markus Montkowski [Thu, 1998/05/19 11:46]
+ * Author    : Przemyslaw Dobrowolski [Mon, 2000/01/03 13:33]
  *****************************************************************************/
-
-BOOL WIN32API CallNamedPipeW( LPCWSTR lpNamedPipeName,
-                                  LPVOID lpInBuffer, DWORD nInBufferSize,
-                                  LPVOID lpOutBuffer, DWORD nOutBufferSize,
-                                  LPDWORD lpBytesRead, DWORD nTimeOut)
+ODINFUNCTION7(BOOL,CallNamedPipeW,LPCWSTR , lpNamedPipeName,
+                                  LPVOID , lpInBuffer, 
+                                  DWORD  , nInBufferSize,
+                                  LPVOID , lpOutBuffer, 
+                                  DWORD  , nOutBufferSize,
+                                  LPDWORD, lpBytesRead, 
+                                  DWORD  , nTimeOut)
 {
+  char *asciiname;
+  BOOL rc;
 
-  dprintf(("KERNEL32:  CallNamedPipeA(%08x,%08x,%08x,%08x,%08x,%08x) not implemented\n",
-           lpNamedPipeName, lpInBuffer, nInBufferSize,
-           lpOutBuffer, nOutBufferSize, lpBytesRead,  nTimeOut
-          ));
+  asciiname  = UnicodeToAsciiString((LPWSTR)lpNamedPipeName);
 
-  return (FALSE);
+  rc=OSLibDosCallNamedPipe(asciiname,
+                           lpInBuffer,
+                           nInBufferSize,
+                           lpOutBuffer,
+                           nOutBufferSize,
+                           lpBytesRead,
+                           nTimeOut );
+
+  FreeAsciiString(asciiname);
+
+  return(rc);
 }
 /*****************************************************************************
  * Name      : BOOL WIN32API DisconnectNamedPipe
@@ -217,19 +230,14 @@ BOOL WIN32API CallNamedPipeW( LPCWSTR lpNamedPipeName,
  * Result    : If the function succeeds, the return value is nonzero.
  *             If the function fails, the return value is zero
  * Remark    :
- * Status    : UNTESTED STUB
+ * Status    : NOT FULLY TESTED
  *
- * Author    : Markus Montkowski [Tha, 1998/05/21 17:46]
+ * Author    : Przemyslaw Dobrowolski [Mon, 2000/01/03 13:34]
  *****************************************************************************/
 
-BOOL WIN32API DisconnectNamedPipe(HANDLE hNamedPipe)
+ODINFUNCTION1(BOOL,DisconnectNamedPipe,HANDLE,hNamedPipe)
 {
-
-  dprintf(("KERNEL32: DisconnectNamedPipe(%08x) not implemented\n",
-           hNamedPipe
-          ));
-
-  return (FALSE);
+  return (OSLibDosDisconnectNamedPipe(hNamedPipe));
 }
 
 /*****************************************************************************
@@ -260,7 +268,7 @@ BOOL WIN32API GetNamedPipeHandleStateA(HANDLE  hNamedPipe,
                                           LPTSTR  lpUserName,
                                           DWORD   nMaxUserNameSize)
 {
-  dprintf(("KERNEL32: GetNamedPipeHandleStateA(%08xh,%08xh,%08xh,%08xh,%08xh,%08xh,%08xh) not implemented\n",
+  dprintf(("KERNEL32: GetNamedPipeHandleStateA(%08xh,%08xh,%08xh,%08xh,%08xh,%08xh,%08xh) not implemented (yet)\n",
            hNamedPipe,
            lpState,
            lpCurInstances,
@@ -366,9 +374,9 @@ BOOL WIN32API GetNamedPipeInfo(HANDLE  hNamedPipe,
  *****************************************************************************/
 
 BOOL WIN32API SetNamedPipeHandleState(HANDLE  hNamedPipe,
-                                         LPDWORD lpdwMode,
-                                         LPDWORD lpcbMaxCollect,
-                                         LPDWORD lpdwCollectDataTimeout)
+                                      LPDWORD lpdwMode,
+                                      LPDWORD lpcbMaxCollect,
+                                      LPDWORD lpdwCollectDataTimeout)
 {
   dprintf(("KERNEL32: SetNamedPipeHandleState(%08xh,%08xh,%08xh,%08xh) not implemented.\n",
            hNamedPipe,
@@ -394,29 +402,27 @@ BOOL WIN32API SetNamedPipeHandleState(HANDLE  hNamedPipe,
  * Variables :
  * Result    : TRUE / FALSE
  * Remark    :
- * Status    : UNTESTED STUB
+ * Status    : NOT FULLY TESTED (YET!)
  *
- * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
+ * Author    : Przemysˆaw Dobrowolski [Mon, 2000/01/03 08:48]
  *****************************************************************************/
 
-DWORD WIN32API TransactNamedPipe(HANDLE       hNamedPipe,
-                                    LPVOID       lpvWriteBuf,
-                                    DWORD        cbWriteBuf,
-                                    LPVOID       lpvReadBuf,
-                                    DWORD        cbReadBuf,
-                                    LPDWORD      lpcbRead,
-                                    LPOVERLAPPED lpo)
+ODINFUNCTION7(DWORD,TransactNamedPipe,HANDLE,hNamedPipe,
+                                      LPVOID,lpvWriteBuf,
+                                      DWORD,cbWriteBuf,
+                                      LPVOID,lpvReadBuf,
+                                      DWORD,cbReadBuf,
+                                      LPDWORD,lpcbRead,
+                                      LPOVERLAPPED,lpo)
 {
-  dprintf(("KERNEL32: TransactNamedPipe(%08x,%08x,%08x,%08x,%08x,%08x,%08x) not implemented.\n",
-           hNamedPipe,
-           lpvWriteBuf,
-           cbWriteBuf,
-           lpvReadBuf,
-           cbReadBuf,
-           lpcbRead,
-           lpo));
+  return(OSLibDosTransactNamedPipe( hNamedPipe,
+                                    lpvWriteBuf,
+                                    cbWriteBuf,
+                                    lpvReadBuf,
+                                    cbReadBuf,
+                                    lpcbRead,
+                                    lpo));
 
-  return (FALSE);
 }
 
 /*****************************************************************************
@@ -430,19 +436,14 @@ DWORD WIN32API TransactNamedPipe(HANDLE       hNamedPipe,
  * Variables :
  * Result    : TRUE / FALSE
  * Remark    :
- * Status    : UNTESTED STUB
+ * Status    : UNTESTED (YET)
  *
- * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
+ * Author    : Przemyslaw Dobrowolski [Mon, 2000/01/03 13:52]
  *****************************************************************************/
 
-BOOL WIN32API WaitNamedPipeA(LPCTSTR lpszNamedPipeName,
-                                DWORD   dwTimeout)
+ODINFUNCTION2(BOOL,WaitNamedPipeA,LPCSTR,lpszNamedPipeName, DWORD, dwTimeout)
 {
-  dprintf(("KERNEL32: WaitNamedPipeA(%s, %u) not implemented.\n",
-           lpszNamedPipeName,
-           dwTimeout));
-
-  return (FALSE);
+  return(OSLibDosWaitNamedPipe(lpszNamedPipeName, dwTimeout));
 }
 
 
@@ -457,17 +458,21 @@ BOOL WIN32API WaitNamedPipeA(LPCTSTR lpszNamedPipeName,
  * Variables :
  * Result    : TRUE / FALSE
  * Remark    :
- * Status    : UNTESTED STUB
+ * Status    : UNTESTED (YET)
  *
- * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
+ * Author    : Przemyslaw Dobrowolski [Mon, 2000/01/03 13:44]
  *****************************************************************************/
 
-BOOL WIN32API WaitNamedPipeW(LPCWSTR lpszNamedPipeName,
-                                DWORD   dwTimeout)
+ODINFUNCTION2(BOOL,WaitNamedPipeW,LPCWSTR,lpszNamedPipeName, DWORD, dwTimeout)
 {
-  dprintf(("KERNEL32: WaitNamedPipeW(%s, %u) not implemented.\n",
-           lpszNamedPipeName,
-           dwTimeout));
+  char  *asciiname;
+  DWORD rc;
 
-  return (FALSE);
+  asciiname  = UnicodeToAsciiString((LPWSTR)lpszNamedPipeName);
+
+  rc=OSLibDosWaitNamedPipe(asciiname, dwTimeout);
+
+  FreeAsciiString(asciiname);
+
+  return(rc);
 }

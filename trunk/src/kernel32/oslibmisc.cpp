@@ -1,4 +1,4 @@
-/* $Id: oslibmisc.cpp,v 1.4 1999-10-28 18:23:34 sandervl Exp $ */
+/* $Id: oslibmisc.cpp,v 1.5 2000-01-03 21:36:11 sandervl Exp $ */
 
 /*
  * Misc OS/2 util. procedures
@@ -11,6 +11,7 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+#define INCL_WIN
 #define INCL_BASE
 #define INCL_DOSPROCESS
 #define INCL_DOSSEL
@@ -289,6 +290,21 @@ char *OSLibStripPath(char *path)
     return (++pszFilename);              /* return pointer to next character */
   
   return (path);                                     /* default return value */
+}
+//******************************************************************************
+//******************************************************************************
+ULONG OSLibWinInitialize()
+{
+  return (ULONG)WinInitialize(0);
+}
+//******************************************************************************
+//******************************************************************************
+ULONG OSLibWinQueryMsgQueue(ULONG hab)
+{
+//  ULONG hmq;
+
+//  hmq = WinQueryWindowULong(HWND_DESKTOP, QWL_HMQ);
+  return (ULONG)WinCreateMsgQueue((HAB)hab, 0);
 }
 //******************************************************************************
 //******************************************************************************

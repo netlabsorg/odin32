@@ -1,4 +1,4 @@
-/* $Id: oslibmisc.h,v 1.1 1999-08-26 12:56:02 sandervl Exp $ */
+/* $Id: oslibmisc.h,v 1.2 2000-01-03 21:36:11 sandervl Exp $ */
 /*
  * Misc util. procedures
  *
@@ -44,5 +44,8 @@ ULONG OSLibGetTIB(int tiboff);
 ULONG OSLibGetPIB(int piboff);
 
 ULONG OSLibAllocThreadLocalMemory(int nrdwords);
+
+ULONG OSLibWinInitialize();
+ULONG OSLibWinQueryMsgQueue(ULONG hab);
 
 #endif
