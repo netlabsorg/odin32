@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.33 2000-01-26 23:48:02 sandervl Exp $ */
+/* $Id: gdi32.cpp,v 1.34 2000-01-28 22:24:57 sandervl Exp $ */
 
 /*
  * GDI32 apis
@@ -19,6 +19,7 @@
 #include "dibsect.h"
 #include <codepage.h>
 #include "oslibgpi.h"
+#include "oslibgdi.h"
 
 static ULONG QueryPaletteSize(BITMAPINFOHEADER *pBHdr)
 {
@@ -688,10 +689,13 @@ HBRUSH WIN32API CreateBrushIndirect( const LOGBRUSH * arg1)
 }
 //******************************************************************************
 //******************************************************************************
-HDC WIN32API CreateDCA( LPCSTR arg1, LPCSTR arg2, LPCSTR arg3, const DEVMODEA * arg4)
+HDC WIN32API CreateDCA(LPCSTR lpszDriver, LPCSTR lpszDevice, LPCSTR lpszOutput, const DEVMODEA *lpInitData)
 {
-    dprintf(("GDI32: CreateDCA"));
-    return O32_CreateDC(arg1, arg2, arg3, arg4);
+ HDC hdc;
+
+    hdc = O32_CreateDC(lpszDriver, lpszDevice, lpszOutput, lpInitData);
+    dprintf(("GDI32: CreateDCA %s %s %s %x returned %x", lpszDriver, lpszDevice, lpszOutput, lpInitData, hdc));
+    return hdc;
 }
 //******************************************************************************
 //******************************************************************************
@@ -1028,10 +1032,10 @@ BOOL WIN32API Rectangle( HDC arg1, int arg2, int arg3, int arg4, int  arg5)
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API SetROP2( HDC arg1, int  arg2)
+int WIN32API SetROP2( HDC hdc, int rop2)
 {
-    dprintf(("GDI32: SetROP2"));
-    return O32_SetROP2(arg1, arg2);
+    dprintf(("GDI32: SetROP2 %x %x", hdc, rop2));
+    return O32_SetROP2(hdc, rop2);
 }
 //******************************************************************************
 //TODO: Callback
@@ -1255,10 +1259,15 @@ BOOL WIN32API GetCurrentPositionEx( HDC arg1, PPOINT  arg2)
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API GetDIBits( HDC arg1, HBITMAP arg2, UINT arg3, UINT arg4, void * arg5, PBITMAPINFO arg6, UINT  arg7)
+int WIN32API GetDIBits(HDC hdc, HBITMAP hBitmap, UINT uStartScan, UINT cScanLines, 
+                       void *lpvBits, PBITMAPINFO lpbi, UINT uUsage)
 {
-    dprintf(("GDI32: GetDIBits"));
-    return O32_GetDIBits(arg1, arg2, arg3, arg4, arg5, arg6, arg7);
+ int rc;
+
+    rc = O32_GetDIBits(hdc, hBitmap, uStartScan, cScanLines, lpvBits, lpbi, uUsage);
+    dprintf(("GDI32: GetDIBits %x %x %d %d %x %x %d returned %d", hdc, hBitmap, uStartScan, cScanLines, lpvBits, lpbi, uUsage, rc));
+    //SvL: Wrong Open32 return value
+    return (rc == TRUE) ? cScanLines : 0;
 }
 //******************************************************************************
 //******************************************************************************
@@ -1942,13 +1951,37 @@ int WIN32API SetDIBits( HDC arg1, HBITMAP arg2, UINT arg3, UINT arg4, const VOID
 }
 //******************************************************************************
 //******************************************************************************
-INT WIN32API SetDIBitsToDevice(HDC hdc, INT xDest, INT yDest, DWORD cx, DWORD cy, INT xSrc, INT ySrc, UINT startscan, UINT lines, LPCVOID bits, const BITMAPINFO *info, UINT coloruse)
+INT WIN32API SetDIBitsToDevice(HDC hdc, INT xDest, INT yDest, DWORD cx, 
+                               DWORD cy, INT xSrc, INT ySrc, 
+                               UINT startscan, UINT lines, LPCVOID bits, 
+                               const BITMAPINFO *info, UINT coloruse)
 {
-    INT result, imgsize, palsize;
+    INT result, imgsize, palsize, height, width;
     char *ptr;
 
-    dprintf(("GDI32: SetDIBitsToDevice hdc:%X xDest:%d yDest:%d, cx:%d, cy:%d, xSrc:%d, ySrc:%d, startscan:%d, lines:%d, bits:%X, info%X, coloruse:%d",
-                 hdc, xDest, yDest, cx, cy, xSrc, ySrc, startscan, lines, (LPVOID) bits, (PBITMAPINFO)info, coloruse));
+    SetLastError(0);
+    if(info == NULL) {
+	goto invalid_parameter;
+    }
+    height = info->bmiHeader.biHeight;
+    width  = info->bmiHeader.biWidth;
+
+    if (height < 0) height = -height;
+    if (!lines || (startscan >= height)) {
+	goto invalid_parameter;
+    }
+    if (startscan + lines > height) lines = height - startscan;
+
+    if (ySrc < startscan) ySrc = startscan;
+    else if (ySrc >= startscan + lines) goto invalid_parameter;
+
+    if (xSrc >= width) goto invalid_parameter;
+
+    if (ySrc + cy >= startscan + lines) cy = startscan + lines - ySrc;
+
+    if (xSrc + cx >= width) cx = width - xSrc;
+
+    if (!cx || !cy) goto invalid_parameter;
 
     // EB: ->>> Crazy. Nobody seen this Open32 bug ?
     // Dont't like dirty pointers, but Open32 needs a bit help.
@@ -1965,8 +1998,22 @@ INT WIN32API SetDIBitsToDevice(HDC hdc, INT xDest, INT yDest, DWORD cx, DWORD cy
     }
     // EB: <<<-
 
-    result = O32_SetDIBitsToDevice(hdc, xDest, yDest, cx, cy, xSrc, ySrc, startscan, lines, (PVOID) bits, (PBITMAPINFO)info, coloruse);
+//    if(xDest == 0 && yDest == 0 && xSrc == 0 && ySrc == 0 && cx == width && cy == height) {
+//	result = OSLibSetDIBitsToDevice(hdc, xDest, yDest, cx, cy, xSrc, ySrc, startscan, lines, (PVOID) bits, (WINBITMAPINFOHEADER*)info, coloruse);
+//    }
+//    else {
+    	result = O32_SetDIBitsToDevice(hdc, xDest, yDest, cx, cy, xSrc, ySrc, startscan, lines, (PVOID) bits, (PBITMAPINFO)info, coloruse);
+	//SvL: Wrong Open32 return value
+	result = (result == TRUE) ? lines : 0;
+//    }
+
+    dprintf(("GDI32: SetDIBitsToDevice hdc:%X xDest:%d yDest:%d, cx:%d, cy:%d, xSrc:%d, ySrc:%d, startscan:%d, lines:%d, bits:%X, info%X, coloruse:%d returned %d",
+                 hdc, xDest, yDest, cx, cy, xSrc, ySrc, startscan, lines, (LPVOID) bits, (PBITMAPINFO)info, coloruse, result));
     return result;
+
+invalid_parameter:
+    SetLastError(ERROR_INVALID_PARAMETER);
+    return 0;
 }
 //******************************************************************************
 //******************************************************************************
