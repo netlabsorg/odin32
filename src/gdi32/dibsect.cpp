@@ -1,4 +1,4 @@
-/* $Id: dibsect.cpp,v 1.47 2001-03-21 12:31:36 sandervl Exp $ */
+/* $Id: dibsect.cpp,v 1.48 2001-03-27 20:47:52 sandervl Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -38,7 +38,8 @@ static VMutex dibMutex;
 //******************************************************************************
 //******************************************************************************
 DIBSection::DIBSection(BITMAPINFOHEADER_W *pbmi, char *pColors, DWORD iUsage, DWORD hSection, DWORD dwOffset, DWORD handle, int fFlip)
-                : bmpBits(NULL), pOS2bmp(NULL), next(NULL), bmpBitsDblBuffer(NULL)
+                : bmpBits(NULL), pOS2bmp(NULL), next(NULL), bmpBitsDblBuffer(NULL),
+                  hdc(0), hwndParent(0)
 {
  int  palsize=0;
 
@@ -722,7 +723,7 @@ void DIBSection::SelectDIBObject(HDC hdc)
 }
 //******************************************************************************
 //******************************************************************************
-DIBSection *DIBSection::find(DWORD handle)
+DIBSection *DIBSection::findObj(HANDLE handle)
 {
  DIBSection *dsect = section;
 
@@ -758,9 +759,9 @@ DIBSection *DIBSection::findHDC(HDC hdc)
 }
 //******************************************************************************
 //******************************************************************************
-void DIBSection::deleteSection(DWORD handle)
+void DIBSection::deleteSection(HANDLE handle)
 {
- DIBSection *dsect = find(handle);
+ DIBSection *dsect = findObj(handle);
 
   if(dsect)
         delete dsect;
