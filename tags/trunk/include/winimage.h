@@ -1,4 +1,4 @@
-/* $Id: winimage.h,v 1.4 1999-08-09 22:46:46 phaller Exp $ */
+/* $Id: winimage.h,v 1.5 1999-08-18 12:24:53 sandervl Exp $ */
 
 /*
  *
@@ -26,6 +26,12 @@ extern char *ResTypes[MAX_RES];
 #define MAGIC_WINIMAGE          0x11223344
 #endif
 
+
+//SvL: Amount of memory the peldr dll reserves for win32 exes without fixups
+//(most of them need to be loaded at 4 MB; except MS Office apps of course)
+#define PELDR_RESERVEDMEMSIZE	16*1024*1024
+
+
 #pragma pack(1)
 typedef struct {
   int    id;
@@ -44,6 +50,7 @@ typedef struct {
 #define SECTION_RELOC           64
 #define SECTION_EXPORT          128
 #define SECTION_DEBUG           256
+#define SECTION_TLS             512
 
 #define PAGE_SIZE               4096
 
@@ -106,7 +113,10 @@ virtual ~Win32Image();
         //called to reset object to native OS/2 or converted win32 dll
         void OS2ImageInit(HINSTANCE hinstance, int NameTableId, int Win32TableId);
 
-virtual BOOL  init();
+        //reservedMem is address of memory reserved in peldr.dll (allocated before
+        //any dlls are loaded, so that exes without fixups can be loaded at a low
+        //address)
+virtual BOOL  init(ULONG reservedMem);
 
         ULONG getError()              { return errorState; };
         HINSTANCE getInstanceHandle() { return hinstance; };
@@ -147,8 +157,10 @@ protected:
         void StoreImportByName(Win32Dll *WinDll, char *impname, ULONG impaddr);
 
         void  addSection(ULONG type, char *rawdata, ULONG rawsize, ULONG virtaddress, ULONG virtsize);
-        BOOL  allocSections();
-        BOOL  allocFixedMem();
+        BOOL  allocSections(ULONG reservedMem);
+        BOOL  allocFixedMem(ULONG reservedMem);
+     Section *findSection(ULONG type);
+     Section *findSectionByAddr(ULONG addr);
 
         BOOL  storeSections();
         BOOL  setMemFlags();

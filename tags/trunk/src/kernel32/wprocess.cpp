@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.20 1999-08-17 17:04:52 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.21 1999-08-18 12:24:17 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -394,7 +394,7 @@ static HINSTANCE iLoadLibraryA(LPCTSTR lpszLibFile)
     if(module == NULL)
         return(0);
 
-    module->init();
+    module->init(0);
     if(module->getError() != NO_ERROR) {
         dprintf(("LoadLibary %s failed (::init)\n", lpszLibFile));
         delete(module);
@@ -466,7 +466,7 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HANDLE hFile, DWORD dwFla
     if(module == NULL)
         return(0);
 
-    module->init();
+    module->init(0);
     if(module->getError() != NO_ERROR) {
         dprintf(("LoadLibary %s failed (::init)\n", lpszLibFile));
         delete(module);

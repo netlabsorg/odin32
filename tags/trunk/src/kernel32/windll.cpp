@@ -1,4 +1,4 @@
-/* $Id: windll.cpp,v 1.8 1999-07-07 08:42:48 sandervl Exp $ */
+/* $Id: windll.cpp,v 1.9 1999-08-18 12:24:16 sandervl Exp $ */
 
 /*
  * Win32 DLL class
@@ -153,7 +153,7 @@ ULONG Win32Dll::Release()
 }
 //******************************************************************************
 //******************************************************************************
-BOOL Win32Dll::init()
+BOOL Win32Dll::init(ULONG reservedMem)
 {
  char  *syspath;
  FILE  *dllfile;
@@ -176,7 +176,7 @@ BOOL Win32Dll::init()
 	}
 	else	fclose(dllfile);
 	if(isPEImage(szFileName) == TRUE) {
-		fRet = Win32Image::init();
+		fRet = Win32Image::init(0);
 		dllEntryPoint = (WIN32DLLENTRY)entryPoint;
 		return fRet;
 	}
