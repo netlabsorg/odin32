@@ -1,4 +1,4 @@
-/* $Id: atom.cpp,v 1.5 1999-10-14 01:47:39 bird Exp $ */
+/* $Id: atom.cpp,v 1.6 1999-11-05 09:16:57 sandervl Exp $ */
 
 /*
  * Win32 ATOM api functions
@@ -137,7 +137,10 @@ ATOM WIN32API GlobalAddAtomW(LPCWSTR arg1)
 //******************************************************************************
 ATOM WIN32API GlobalFindAtomA( LPCSTR arg1)
 {
-    dprintf(("KERNEL32:  OS2GlobalFindAtomA\n"));
+    if (arg1 < (LPCSTR)0x10000)
+      dprintf(("KERNEL32:  GlobalFindAtomA %#4x\n", arg1));
+    else
+      dprintf(("KERNEL32:  GlobalFindAtomA %s\n", arg1));
     return O32_GlobalFindAtom(arg1);
 }
 //******************************************************************************
