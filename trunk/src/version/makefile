@@ -1,10 +1,15 @@
-# $Id: makefile,v 1.20 2003-01-15 10:42:50 sandervl Exp $
+# $Id: makefile,v 1.21 2003-10-24 14:47:25 sandervl Exp $
 
 #
 # Odin32 API
 #
 #       version.dll makefile
 #
+
+!if "$(DEBUG)" == "1"
+DEFFILE    = versiondbg.def
+ORGDEFFILE = version.def
+!endif
 
 
 #
@@ -17,9 +22,12 @@
 # Object files. Prefix with OBJDIR and one space before the '\'.
 #
 OBJS = \
-$(OBJDIR)\version.obj \
 $(OBJDIR)\install.obj \
 $(OBJDIR)\info.obj \
+$(OBJDIR)\resource.obj \
+!ifdef DEBUG
+$(OBJDIR)\dbgwrap.obj \
+!endif
 $(OBJDIR)\versionrsrc.obj \
 $(DLLENTRY)
 

@@ -1,26 +1,42 @@
-/* $Id: info.c,v 1.4 2003-01-15 10:42:34 sandervl Exp $ */
-/* 
- * Implementation of VERSION.DLL - Version Info access (Wine 991212)
- * 
+/*
+ * Implementation of VERSION.DLL - Version Info access
+ *
  * Copyright 1996,1997 Marcus Meissner
  * Copyright 1997 David Cuthbert
  * Copyright 1999 Ulrich Weigand
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * TODO
+ *   o Verify VerQueryValue()
  */
 
+#include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
 
+#include "windef.h"
+#include "winbase.h"
 #include "winreg.h"
 #include "winver.h"
-#include "wine/winestring.h"
+#include "wine/winuser16.h"
+#include "wine/unicode.h"
 #include "winerror.h"
-#include "heap.h"
-#include "crtdll.h"
-#include "debugtools.h"
-#include <misc.h>
-#include <unicode.h>
+#include "wine/debug.h"
 
-DEFAULT_DEBUG_CHANNEL(ver)
+WINE_DEFAULT_DEBUG_CHANNEL(ver);
 
 
 /******************************************************************************
@@ -31,6 +47,7 @@ DEFAULT_DEBUG_CHANNEL(ver)
  *      Added this function to clean up the code.
  *
  *****************************************************************************/
+#ifdef DEBUG
 static void print_vffi_debug(VS_FIXEDFILEINFO *vffi)
 {
 	TRACE(" structversion=%u.%u, fileversion=%u.%u.%u.%u, productversion=%u.%u.%u.%u, flagmask=0x%lx, flags=%s%s%s%s%s%s\n",
@@ -49,28 +66,28 @@ static void print_vffi_debug(VS_FIXEDFILEINFO *vffi)
 		    );
 
         TRACE("(");
-	DPRINTF(" OS=0x%x.0x%x ",
+	TRACE(" OS=0x%x.0x%x ",
 		HIWORD(vffi->dwFileOS),
 		LOWORD(vffi->dwFileOS)
 	);
 	switch (vffi->dwFileOS&0xFFFF0000) {
-	case VOS_DOS:DPRINTF("DOS,");break;
-	case VOS_OS216:DPRINTF("OS/2-16,");break;
-	case VOS_OS232:DPRINTF("OS/2-32,");break;
-	case VOS_NT:DPRINTF("NT,");break;
+	case VOS_DOS:TRACE("DOS,");break;
+	case VOS_OS216:TRACE("OS/2-16,");break;
+	case VOS_OS232:TRACE("OS/2-32,");break;
+	case VOS_NT:TRACE("NT,");break;
 	case VOS_UNKNOWN:
 	default:
-		DPRINTF("UNKNOWN(0x%lx),",vffi->dwFileOS&0xFFFF0000);break;
+		TRACE("UNKNOWN(0x%lx),",vffi->dwFileOS&0xFFFF0000);break;
 	}
 	switch (LOWORD(vffi->dwFileOS)) {
-	case VOS__BASE:DPRINTF("BASE");break;
-	case VOS__WINDOWS16:DPRINTF("WIN16");break;
-	case VOS__WINDOWS32:DPRINTF("WIN32");break;
-	case VOS__PM16:DPRINTF("PM16");break;
-	case VOS__PM32:DPRINTF("PM32");break;
-	default:DPRINTF("UNKNOWN(0x%x)",LOWORD(vffi->dwFileOS));break;
+	case VOS__BASE:TRACE("BASE");break;
+	case VOS__WINDOWS16:TRACE("WIN16");break;
+	case VOS__WINDOWS32:TRACE("WIN32");break;
+	case VOS__PM16:TRACE("PM16");break;
+	case VOS__PM32:TRACE("PM32");break;
+	default:TRACE("UNKNOWN(0x%x)",LOWORD(vffi->dwFileOS));break;
 	}
-	DPRINTF(")\n");
+	TRACE(")\n");
 
 	switch (vffi->dwFileType) {
 	default:
@@ -84,40 +101,40 @@ static void print_vffi_debug(VS_FIXEDFILEINFO *vffi)
 		switch(vffi->dwFileSubtype) {
 		default:
 		case VFT2_UNKNOWN:
-			DPRINTF("UNKNOWN(0x%lx)",vffi->dwFileSubtype);
+			TRACE("UNKNOWN(0x%lx)",vffi->dwFileSubtype);
 			break;
 		case VFT2_DRV_PRINTER:
-			DPRINTF("PRINTER");
+			TRACE("PRINTER");
 			break;
 		case VFT2_DRV_KEYBOARD:
-			DPRINTF("KEYBOARD");
+			TRACE("KEYBOARD");
 			break;
 		case VFT2_DRV_LANGUAGE:
-			DPRINTF("LANGUAGE");
+			TRACE("LANGUAGE");
 			break;
 		case VFT2_DRV_DISPLAY:
-			DPRINTF("DISPLAY");
+			TRACE("DISPLAY");
 			break;
 		case VFT2_DRV_MOUSE:
-			DPRINTF("MOUSE");
+			TRACE("MOUSE");
 			break;
 		case VFT2_DRV_NETWORK:
-			DPRINTF("NETWORK");
+			TRACE("NETWORK");
 			break;
 		case VFT2_DRV_SYSTEM:
-			DPRINTF("SYSTEM");
+			TRACE("SYSTEM");
 			break;
 		case VFT2_DRV_INSTALLABLE:
-			DPRINTF("INSTALLABLE");
+			TRACE("INSTALLABLE");
 			break;
 		case VFT2_DRV_SOUND:
-			DPRINTF("SOUND");
+			TRACE("SOUND");
 			break;
 		case VFT2_DRV_COMM:
-			DPRINTF("COMM");
+			TRACE("COMM");
 			break;
 		case VFT2_DRV_INPUTMETHOD:
-			DPRINTF("INPUTMETHOD");
+			TRACE("INPUTMETHOD");
 			break;
 		}
 		break;
@@ -125,21 +142,23 @@ static void print_vffi_debug(VS_FIXEDFILEINFO *vffi)
                 TRACE("filetype=FONT.");
 		switch (vffi->dwFileSubtype) {
 		default:
-			DPRINTF("UNKNOWN(0x%lx)",vffi->dwFileSubtype);
+			TRACE("UNKNOWN(0x%lx)",vffi->dwFileSubtype);
 			break;
-		case VFT2_FONT_RASTER:DPRINTF("RASTER");break;
-		case VFT2_FONT_VECTOR:DPRINTF("VECTOR");break;
-		case VFT2_FONT_TRUETYPE:DPRINTF("TRUETYPE");break;
+		case VFT2_FONT_RASTER:TRACE("RASTER");break;
+		case VFT2_FONT_VECTOR:TRACE("VECTOR");break;
+		case VFT2_FONT_TRUETYPE:TRACE("TRUETYPE");break;
 		}
 		break;
 	case VFT_VXD:TRACE("filetype=VXD");break;
 	case VFT_STATIC_LIB:TRACE("filetype=STATIC_LIB");break;
 	}
-        DPRINTF("\n");
+        TRACE("\n");
 	TRACE("  filedata=0x%lx.0x%lx\n",
 		    vffi->dwFileDateMS,vffi->dwFileDateLS);
 }
-
+#else
+#define print_vffi_debug(a)
+#endif
 
 /***********************************************************************
  * Version Info Structure
@@ -175,12 +194,13 @@ typedef struct
 #define VersionInfoIs16( ver ) \
     ( ((VS_VERSION_INFO_STRUCT16 *)ver)->szKey[0] >= ' ' )
 
-#define DWORD_ALIGN( ptr ) ((LPBYTE)( (((DWORD)(ptr)) + 3) & ~3 ))
+#define DWORD_ALIGN( base, ptr ) \
+    ( (LPBYTE)(base) + ((((LPBYTE)(ptr) - (LPBYTE)(base)) + 3) & ~3) )
 
 #define VersionInfo16_Value( ver )  \
-    DWORD_ALIGN( (ver)->szKey + lstrlenA((ver)->szKey) + 1 )
+    DWORD_ALIGN( (ver), (ver)->szKey + strlen((ver)->szKey) + 1 )
 #define VersionInfo32_Value( ver )  \
-    DWORD_ALIGN( (ver)->szKey + lstrlenW((ver)->szKey) + 1 )
+    DWORD_ALIGN( (ver), (ver)->szKey + strlenW((ver)->szKey) + 1 )
 
 #define VersionInfo16_Children( ver )  \
     (VS_VERSION_INFO_STRUCT16 *)( VersionInfo16_Value( ver ) + \
@@ -195,11 +215,10 @@ typedef struct
 #define VersionInfo32_Next( ver ) \
     (VS_VERSION_INFO_STRUCT32 *)( (LPBYTE)ver + (((ver)->wLength + 3) & ~3) )
 
-#ifndef __WIN32OS2__
 /***********************************************************************
  *           ConvertVersionInfo32To16        [internal]
  */
-void ConvertVersionInfo32To16( VS_VERSION_INFO_STRUCT32 *info32, 
+void ConvertVersionInfo32To16( VS_VERSION_INFO_STRUCT32 *info32,
                                VS_VERSION_INFO_STRUCT16 *info16 )
 {
     /* Copy data onto local stack to prevent overwrites */
@@ -210,29 +229,30 @@ void ConvertVersionInfo32To16( VS_VERSION_INFO_STRUCT32 *info32,
     VS_VERSION_INFO_STRUCT32 *child32 = VersionInfo32_Children( info32 );
     VS_VERSION_INFO_STRUCT16 *child16;
 
-    TRACE("Converting %p to %p\n", info32, info16 );
-    TRACE("wLength %d, wValueLength %d, bText %d, value %p, child %p\n",
-                wLength, wValueLength, bText, lpValue, child32 );
+    dprintf(("Converting %p to %p\n", info32, info16 ));
+    dprintf(("wLength %d, wValueLength %d, bText %d, value %p, child %p\n",
+                wLength, wValueLength, bText, lpValue, child32 ));
 
     /* Convert key */
-    lstrcpyWtoA( info16->szKey, info32->szKey );
+    WideCharToMultiByte( CP_ACP, 0, info32->szKey, -1, info16->szKey, 0x7fffffff, NULL, NULL );
 
-    TRACE("Copied key from %p to %p: %s\n", info32->szKey, info16->szKey,
-                debugstr_a(info16->szKey) );
+    dprintf(("Copied key from %p to %p: %s\n", info32->szKey, info16->szKey,
+                debugstr_a(info16->szKey) ));
 
     /* Convert value */
     if ( wValueLength == 0 )
     {
         info16->wValueLength = 0;
-        TRACE("No value present\n" );
+        dprintf(("No value present\n" ));
     }
     else if ( bText )
     {
-        info16->wValueLength = lstrlenW( (LPCWSTR)lpValue ) + 1;
-        lstrcpyWtoA( VersionInfo16_Value( info16 ), (LPCWSTR)lpValue );
+        info16->wValueLength = WideCharToMultiByte( CP_ACP, 0, (LPCWSTR)lpValue, -1, NULL, 0, NULL, NULL );
+        WideCharToMultiByte( CP_ACP, 0, (LPCWSTR)lpValue, -1,
+                             VersionInfo16_Value( info16 ), info16->wValueLength, NULL, NULL );
 
-        TRACE("Copied value from %p to %p: %s\n", lpValue, 
-                    VersionInfo16_Value( info16 ), 
+        dprintf(("Copied value from %p to %p: %s\n", lpValue,
+                    VersionInfo16_Value( info16 )),
                     debugstr_a(VersionInfo16_Value( info16 )) );
     }
     else
@@ -240,13 +260,13 @@ void ConvertVersionInfo32To16( VS_VERSION_INFO_STRUCT32 *info32,
         info16->wValueLength = wValueLength;
         memmove( VersionInfo16_Value( info16 ), lpValue, wValueLength );
 
-        TRACE("Copied value from %p to %p: %d bytes\n", lpValue, 
-                     VersionInfo16_Value( info16 ), wValueLength );
+        dprintf(("Copied value from %p to %p: %d bytes\n", lpValue,
+                     VersionInfo16_Value( info16 ), wValueLength ));
     }
 
     /* Convert children */
     child16 = VersionInfo16_Children( info16 );
-    while ( (DWORD)child32 < (DWORD)info32 + wLength )
+    while ( (DWORD)child32 < (DWORD)info32 + wLength && child32->wLength != 0 )
     {
         VS_VERSION_INFO_STRUCT32 *nextChild = VersionInfo32_Next( child32 );
 
@@ -259,13 +279,167 @@ void ConvertVersionInfo32To16( VS_VERSION_INFO_STRUCT32 *info32,
     /* Fixup length */
     info16->wLength = (DWORD)child16 - (DWORD)info16;
 
-    TRACE("Finished, length is %d (%p - %p)\n", 
-                info16->wLength, info16, child16 );
+    dprintf(("Finished, length is %d (%p - %p)\n",
+                info16->wLength, info16, child16 ));
 }
 
+/***********************************************************************
+ *           VERSION_GetFileVersionInfo_PE             [internal]
+ *
+ *    NOTE: returns size of the PE VERSION resource or 0xFFFFFFFF
+ *    in the case if file exists, but VERSION_INFO not found.
+ *    FIXME: handle is not used.
+ */
+static DWORD VERSION_GetFileVersionInfo_PE( LPCSTR filename, LPDWORD handle,
+                                    DWORD datasize, LPVOID data )
+{
+    VS_FIXEDFILEINFO *vffi;
+    DWORD len;
+    BYTE *buf;
+    HMODULE hModule;
+    HRSRC hRsrc;
+    HGLOBAL hMem;
+
+    dprintf(("(%s,%p)\n", debugstr_a(filename), handle ));
+
+    hModule = GetModuleHandleA(filename);
+    if(!hModule)
+	hModule = LoadLibraryExA(filename, 0, LOAD_LIBRARY_AS_DATAFILE);
+    else
+	hModule = LoadLibraryExA(filename, 0, 0);
+    if(!hModule)
+    {
+	WARN("Could not load %s\n", debugstr_a(filename));
+	return 0;
+    }
+    hRsrc = FindResourceW(hModule,
+			  MAKEINTRESOURCEW(VS_VERSION_INFO),
+			  MAKEINTRESOURCEW(VS_FILE_INFO));
+    if(!hRsrc)
+    {
+	WARN("Could not find VS_VERSION_INFO in %s\n", debugstr_a(filename));
+	FreeLibrary(hModule);
+	return 0xFFFFFFFF;
+    }
+    len = SizeofResource(hModule, hRsrc);
+    hMem = LoadResource(hModule, hRsrc);
+    if(!hMem)
+    {
+	WARN("Could not load VS_VERSION_INFO from %s\n", debugstr_a(filename));
+	FreeLibrary(hModule);
+	return 0xFFFFFFFF;
+    }
+    buf = LockResource(hMem);
+
+    vffi = (VS_FIXEDFILEINFO *)VersionInfo32_Value( (VS_VERSION_INFO_STRUCT32 *)buf );
+
+    if ( vffi->dwSignature != VS_FFI_SIGNATURE )
+    {
+        WARN("vffi->dwSignature is 0x%08lx, but not 0x%08lx!\n",
+                   vffi->dwSignature, VS_FFI_SIGNATURE );
+	len = 0xFFFFFFFF;
+	goto END;
+    }
+#ifdef DEBUG
+    if ( TRACE_ON(ver) )
+        print_vffi_debug( vffi );
+#endif
+    if(data)
+    {
+	if(datasize < len)
+	    len = datasize; /* truncate data */
+	if(len)
+	    memcpy(data, buf, len);
+	else
+	    len = 0xFFFFFFFF;
+    }
+END:
+    FreeResource(hMem);
+    FreeLibrary(hModule);
+
+    return len;
+}
+
+#ifndef __WIN32OS2__
+/***********************************************************************
+ *           VERSION_GetFileVersionInfo_16             [internal]
+ *
+ *    NOTE: returns size of the 16-bit VERSION resource or 0xFFFFFFFF
+ *    in the case if file exists, but VERSION_INFO not found.
+ *    FIXME: handle is not used.
+ */
+static DWORD VERSION_GetFileVersionInfo_16( LPCSTR filename, LPDWORD handle,
+                                    DWORD datasize, LPVOID data )
+{
+    VS_FIXEDFILEINFO *vffi;
+    DWORD len;
+    BYTE *buf;
+    HMODULE16 hModule;
+    HRSRC16 hRsrc;
+    HGLOBAL16 hMem;
+
+    TRACE("(%s,%p)\n", debugstr_a(filename), handle );
+
+    hModule = LoadLibrary16(filename);
+    if(hModule < 32)
+    {
+	WARN("Could not load %s\n", debugstr_a(filename));
+	return 0;
+    }
+    hRsrc = FindResource16(hModule,
+			  MAKEINTRESOURCEA(VS_VERSION_INFO),
+			  MAKEINTRESOURCEA(VS_FILE_INFO));
+    if(!hRsrc)
+    {
+	WARN("Could not find VS_VERSION_INFO in %s\n", debugstr_a(filename));
+	FreeLibrary16(hModule);
+	return 0xFFFFFFFF;
+    }
+    len = SizeofResource16(hModule, hRsrc);
+    hMem = LoadResource16(hModule, hRsrc);
+    if(!hMem)
+    {
+	WARN("Could not load VS_VERSION_INFO from %s\n", debugstr_a(filename));
+	FreeLibrary16(hModule);
+	return 0xFFFFFFFF;
+    }
+    buf = LockResource16(hMem);
+
+    if(!VersionInfoIs16(buf))
+	goto END;
+
+    vffi = (VS_FIXEDFILEINFO *)VersionInfo16_Value( (VS_VERSION_INFO_STRUCT16 *)buf );
+
+    if ( vffi->dwSignature != VS_FFI_SIGNATURE )
+    {
+        WARN("vffi->dwSignature is 0x%08lx, but not 0x%08lx!\n",
+                   vffi->dwSignature, VS_FFI_SIGNATURE );
+	len = 0xFFFFFFFF;
+	goto END;
+    }
+
+    if ( TRACE_ON(ver) )
+        print_vffi_debug( vffi );
+
+    if(data)
+    {
+	if(datasize < len)
+	    len = datasize; /* truncate data */
+	if(len)
+	    memcpy(data, buf, len);
+	else
+	    len = 0xFFFFFFFF;
+    }
+END:
+    FreeResource16(hMem);
+    FreeLibrary16(hModule);
+
+    return len;
+}
+#endif
 
 /***********************************************************************
- *           GetFileVersionInfoSize32A         [VERSION.2]
+ *           GetFileVersionInfoSizeA         [VERSION.@]
  */
 DWORD WINAPI GetFileVersionInfoSizeA( LPCSTR filename, LPDWORD handle )
 {
@@ -273,22 +447,40 @@ DWORD WINAPI GetFileVersionInfoSizeA( LPCSTR filename, LPDWORD handle )
     DWORD len, ret, offset;
     BYTE buf[144];
 
-    TRACE("(%s,%p)\n", debugstr_a(filename), handle );
+    dprintf(("(%s,%p)\n", debugstr_a(filename), handle ));
 
-    len = GetFileResourceSize( filename,
+    len = VERSION_GetFileVersionInfo_PE(filename, handle, 0, NULL);
+    /* 0xFFFFFFFF means: file exists, but VERSION_INFO not found */
+    if(len == 0xFFFFFFFF)
+    {
+        SetLastError(ERROR_RESOURCE_DATA_NOT_FOUND);
+        return 0;
+    }
+    if(len) return len;
+#ifndef __WIN32OS2__
+    len = VERSION_GetFileVersionInfo_16(filename, handle, 0, NULL);
+    /* 0xFFFFFFFF means: file exists, but VERSION_INFO not found */
+    if(len == 0xFFFFFFFF)
+    {
+        SetLastError(ERROR_RESOURCE_DATA_NOT_FOUND);
+        return 0;
+    }
+    if(len) return len;
+#endif
+    len = GetFileResourceSize16( filename,
                                  MAKEINTRESOURCEA(VS_FILE_INFO),
                                  MAKEINTRESOURCEA(VS_VERSION_INFO),
                                  &offset );
     if (!len) return 0;
 
-    ret = GetFileResource( filename,
+    ret = GetFileResource16( filename,
                              MAKEINTRESOURCEA(VS_FILE_INFO),
                              MAKEINTRESOURCEA(VS_VERSION_INFO),
                              offset, sizeof( buf ), buf );
     if (!ret) return 0;
 
     if ( handle ) *handle = offset;
-    
+
     if ( VersionInfoIs16( buf ) )
         vffi = (VS_FIXEDFILEINFO *)VersionInfo16_Value( (VS_VERSION_INFO_STRUCT16 *)buf );
     else
@@ -296,51 +488,70 @@ DWORD WINAPI GetFileVersionInfoSizeA( LPCSTR filename, LPDWORD handle )
 
     if ( vffi->dwSignature != VS_FFI_SIGNATURE )
     {
-        WARN("vffi->dwSignature is 0x%08lx, but not 0x%08lx!\n",
-                   vffi->dwSignature, VS_FFI_SIGNATURE );
+        dprintf(("vffi->dwSignature is 0x%08lx, but not 0x%08lx!\n",
+                   vffi->dwSignature, VS_FFI_SIGNATURE ));
         return 0;
     }
 
     if ( ((VS_VERSION_INFO_STRUCT16 *)buf)->wLength < len )
         len = ((VS_VERSION_INFO_STRUCT16 *)buf)->wLength;
 
+#ifdef DEBUG
     if ( TRACE_ON(ver) )
         print_vffi_debug( vffi );
+#endif
 
     return len;
 }
 
 /***********************************************************************
- *           GetFileVersionInfoSize32W         [VERSION.3]
+ *           GetFileVersionInfoSizeW         [VERSION.@]
  */
 DWORD WINAPI GetFileVersionInfoSizeW( LPCWSTR filename, LPDWORD handle )
 {
-    LPSTR fn = HEAP_strdupWtoA( GetProcessHeap(), 0, filename );
-    DWORD ret = GetFileVersionInfoSizeA( fn, handle );
+    DWORD ret, len = WideCharToMultiByte( CP_ACP, 0, filename, -1, NULL, 0, NULL, NULL );
+    LPSTR fn = HeapAlloc( GetProcessHeap(), 0, len );
+    WideCharToMultiByte( CP_ACP, 0, filename, -1, fn, len, NULL, NULL );
+    ret = GetFileVersionInfoSizeA( fn, handle );
     HeapFree( GetProcessHeap(), 0, fn );
     return ret;
 }
 
 /***********************************************************************
- *           GetFileVersionInfo32A             [VERSION.1]
+ *           GetFileVersionInfoA             [VERSION.@]
  */
-DWORD WINAPI GetFileVersionInfoA( LPCSTR filename, DWORD handle,
+BOOL WINAPI GetFileVersionInfoA( LPCSTR filename, DWORD handle,
                                     DWORD datasize, LPVOID data )
 {
-    TRACE("(%s,%ld,size=%ld,data=%p)\n",
-                debugstr_a(filename), handle, datasize, data );
+    DWORD len;
 
-    if ( !GetFileResource( filename, MAKEINTRESOURCEA(VS_FILE_INFO),
+    dprintf(("(%s,%ld,size=%ld,data=%p)\n",
+                debugstr_a(filename), handle, datasize, data ));
+
+    len = VERSION_GetFileVersionInfo_PE(filename, &handle, datasize, data);
+    /* 0xFFFFFFFF means: file exists, but VERSION_INFO not found */
+    if(len == 0xFFFFFFFF) return FALSE;
+    if(len)
+	goto DO_CONVERT;
+#ifndef __WIN32OS2__
+    len = VERSION_GetFileVersionInfo_16(filename, &handle, datasize, data);
+    /* 0xFFFFFFFF means: file exists, but VERSION_INFO not found */
+    if(len == 0xFFFFFFFF) return FALSE;
+    if(len)
+	goto DO_CONVERT;
+#endif
+
+    if ( !GetFileResource16( filename, MAKEINTRESOURCEA(VS_FILE_INFO),
                                        MAKEINTRESOURCEA(VS_VERSION_INFO),
                                        handle, datasize, data ) )
         return FALSE;
-
+DO_CONVERT:
     if (    datasize >= sizeof(VS_VERSION_INFO_STRUCT16)
-         && datasize >= ((VS_VERSION_INFO_STRUCT16 *)data)->wLength  
+         && datasize >= ((VS_VERSION_INFO_STRUCT16 *)data)->wLength
          && !VersionInfoIs16( data ) )
     {
         /* convert resource from PE format to NE format */
-        ConvertVersionInfo32To16( (VS_VERSION_INFO_STRUCT32 *)data, 
+        ConvertVersionInfo32To16( (VS_VERSION_INFO_STRUCT32 *)data,
                                   (VS_VERSION_INFO_STRUCT16 *)data );
     }
 
@@ -348,46 +559,55 @@ DWORD WINAPI GetFileVersionInfoA( LPCSTR filename, DWORD handle,
 }
 
 /***********************************************************************
- *           GetFileVersionInfo32W             [VERSION.4]
+ *           GetFileVersionInfoW             [VERSION.@]
  */
-DWORD WINAPI GetFileVersionInfoW( LPCWSTR filename, DWORD handle,
+BOOL WINAPI GetFileVersionInfoW( LPCWSTR filename, DWORD handle,
                                     DWORD datasize, LPVOID data )
 {
-    LPSTR fn = HEAP_strdupWtoA( GetProcessHeap(), 0, filename );
+    DWORD len = WideCharToMultiByte( CP_ACP, 0, filename, -1, NULL, 0, NULL, NULL );
+    LPSTR fn = HeapAlloc( GetProcessHeap(), 0, len );
     DWORD retv = TRUE;
 
-    TRACE("(%s,%ld,size=%ld,data=%p)\n",
-                debugstr_a(fn), handle, datasize, data );
+    WideCharToMultiByte( CP_ACP, 0, filename, -1, fn, len, NULL, NULL );
 
-    if ( !GetFileResource( fn, MAKEINTRESOURCEA(VS_FILE_INFO),
+    dprintf(("(%s,%ld,size=%ld,data=%p)\n",
+                debugstr_w(filename), handle, datasize, data ));
+
+    if(VERSION_GetFileVersionInfo_PE(fn, &handle, datasize, data))
+	goto END;
+#ifndef __WIN32OS2__
+    if(VERSION_GetFileVersionInfo_16(fn, &handle, datasize, data))
+	goto END;
+#endif
+    if ( !GetFileResource16( fn, MAKEINTRESOURCEA(VS_FILE_INFO),
                                  MAKEINTRESOURCEA(VS_VERSION_INFO),
                                  handle, datasize, data ) )
         retv = FALSE;
 
     else if (    datasize >= sizeof(VS_VERSION_INFO_STRUCT16)
-              && datasize >= ((VS_VERSION_INFO_STRUCT16 *)data)->wLength 
+              && datasize >= ((VS_VERSION_INFO_STRUCT16 *)data)->wLength
               && VersionInfoIs16( data ) )
     {
-        ERR("Cannot access NE resource in %s\n", debugstr_a(fn) );
+        dprintf(("Cannot access NE resource in %s\n", debugstr_a(fn) ));
         retv =  FALSE;
     }
-
+END:
     HeapFree( GetProcessHeap(), 0, fn );
     return retv;
 }
-#endif //!__WIN32OS2__
+
 
 /***********************************************************************
  *           VersionInfo16_FindChild             [internal]
  */
-VS_VERSION_INFO_STRUCT16 *VersionInfo16_FindChild( VS_VERSION_INFO_STRUCT16 *info, 
+static VS_VERSION_INFO_STRUCT16 *VersionInfo16_FindChild( VS_VERSION_INFO_STRUCT16 *info,
                                             LPCSTR szKey, UINT cbKey )
 {
     VS_VERSION_INFO_STRUCT16 *child = VersionInfo16_Children( info );
 
     while ( (DWORD)child < (DWORD)info + info->wLength )
     {
-        if ( !lstrncmpiA( child->szKey, szKey, cbKey ) )
+        if ( !strncasecmp( child->szKey, szKey, cbKey ) )
             return child;
 
 	if (!(child->wLength)) return NULL;
@@ -400,18 +620,14 @@ VS_VERSION_INFO_STRUCT16 *VersionInfo16_FindChild( VS_VERSION_INFO_STRUCT16 *inf
 /***********************************************************************
  *           VersionInfo32_FindChild             [internal]
  */
-VS_VERSION_INFO_STRUCT32 *VersionInfo32_FindChild( VS_VERSION_INFO_STRUCT32 *info, 
+static VS_VERSION_INFO_STRUCT32 *VersionInfo32_FindChild( VS_VERSION_INFO_STRUCT32 *info,
                                             LPCWSTR szKey, UINT cbKey )
 {
     VS_VERSION_INFO_STRUCT32 *child = VersionInfo32_Children( info );
 
     while ( (DWORD)child < (DWORD)info + info->wLength )
     {
-#ifdef __WIN32OS2__
-        if ( !lstrncmpiW( child->szKey, szKey, cbKey ) )
-#else
-        if ( !CRTDLL_wcsnicmp( child->szKey, szKey, cbKey ) )
-#endif
+        if ( !strncmpiW( child->szKey, szKey, cbKey ) )
             return child;
 
         child = VersionInfo32_Next( child );
@@ -421,72 +637,7 @@ VS_VERSION_INFO_STRUCT32 *VersionInfo32_FindChild( VS_VERSION_INFO_STRUCT32 *inf
 }
 
 /***********************************************************************
- *           VerQueryValue32W              [VERSION.13]
- */
-DWORD VerQueryValue32W( LPVOID pBlock, LPCWSTR lpSubBlock,
-                        LPVOID *lplpBuffer, UINT *puLen, BOOL *bText)
-{
-    VS_VERSION_INFO_STRUCT32 *info = (VS_VERSION_INFO_STRUCT32 *)pBlock;
-    if ( VersionInfoIs16( info ) )
-    {
-        ERR("called on NE resource!\n" );
-        return FALSE;
-    }
-
-#if defined(__WIN32OS2__)
-    dprintf(("VerQueryValueW %x %x %x %x", pBlock, lpSubBlock, lplpBuffer, puLen));
-#else
-    TRACE("(%p,%s,%p,%p)\n",
-                pBlock, debugstr_w(lpSubBlock), lplpBuffer, puLen );
-#endif
-
-    while ( *lpSubBlock )
-    {
-        /* Find next path component */
-        LPCWSTR lpNextSlash;
-        for ( lpNextSlash = lpSubBlock; *lpNextSlash; lpNextSlash++ )
-            if ( *lpNextSlash == '\\' )
-                break;
-
-        /* Skip empty components */
-        if ( lpNextSlash == lpSubBlock )
-        {
-            lpSubBlock++;
-            continue;
-        }
-
-        /* We have a non-empty component: search info for key */
-        info = VersionInfo32_FindChild( info, lpSubBlock, lpNextSlash-lpSubBlock );
-        if ( !info ) return FALSE;
-
-        /* Skip path component */
-        lpSubBlock = lpNextSlash;
-    }
-
-    /* Return value */
-    *lplpBuffer = VersionInfo32_Value( info );
-    *puLen = info->wValueLength;
-    *bText = info->bText;
-
-#if defined(__WIN32OS2__)
-    dprintf(("VerQueryValueW successful"));
-#endif
-    return TRUE;
-}
-
-
-#if defined(__WIN32OS2__)
-DWORD VerQueryValueW( LPVOID pBlock, LPCWSTR lpSubBlock,
-                      LPVOID *lplpBuffer, UINT *puLen)
-{
- BOOL bText;
-
-    return VerQueryValue32W(pBlock, lpSubBlock, lplpBuffer, puLen, &bText);
-}
-#endif
-
-/***********************************************************************
- *           VerQueryValue32A              [VERSION.12]
+ *           VerQueryValueA              [VERSION.@]
  */
 DWORD WINAPI VerQueryValueA( LPVOID pBlock, LPCSTR lpSubBlock,
                                LPVOID *lplpBuffer, UINT *puLen )
@@ -494,41 +645,23 @@ DWORD WINAPI VerQueryValueA( LPVOID pBlock, LPCSTR lpSubBlock,
     VS_VERSION_INFO_STRUCT16 *info = (VS_VERSION_INFO_STRUCT16 *)pBlock;
     if ( !VersionInfoIs16( info ) )
     {
-#ifdef __WIN32OS2__
-        // this is a quick hack, not much tested
-        WCHAR *ustring = (WCHAR *)malloc(strlen((char *)lpSubBlock)*2+2);
-        LPVOID ubuffer;
-        char *abuffer;
-        UINT len = *puLen * 2;
-        BOOL rc, bText;
+        INT len;
+        LPWSTR wide_str;
+        DWORD give;
 
-        dprintf(("VERSION: called on PE unicode resource!\n" ));
+        /* <lawson_whitney@juno.com> Feb 2001 */
+        /* AOL 5.0 does this, expecting to get this: */
+        len = MultiByteToWideChar(CP_ACP, 0, lpSubBlock, -1, NULL, 0);
+        wide_str = HeapAlloc(GetProcessHeap(), 0, len * sizeof(WCHAR));
+        MultiByteToWideChar(CP_ACP, 0, lpSubBlock, -1, wide_str, len);
 
-        AsciiToUnicode((char *)lpSubBlock, ustring);
-        rc = VerQueryValue32W( pBlock, (LPWSTR)ustring, &ubuffer, &len, &bText);
-	if(rc == 0) {
-	        free(ustring);
-		return 0;
-	}
-        if(!bText) {
-          *lplpBuffer = ubuffer;
-        }
-        else
-        {
-          *lplpBuffer = malloc(len+1); // FIXME: no free, memory leak!!
-          UnicodeToAsciiN((WCHAR *)ubuffer, (char *)*lplpBuffer, len);
-        }
-        *puLen = len;
-        free(ustring);
-        return rc;
-#else
-        ERR("called on PE resource!\n" );
-        return FALSE;
-#endif //__WIN32OS2__
+        give = VerQueryValueW(pBlock, wide_str, lplpBuffer, puLen);
+        HeapFree(GetProcessHeap(), 0, wide_str);
+        return give;
     }
 
-    TRACE("(%p,%s,%p,%p)\n",
-                pBlock, debugstr_a(lpSubBlock), lplpBuffer, puLen );
+    dprintf(("(%p,%s,%p,%p)\n",
+                pBlock, debugstr_a(lpSubBlock), lplpBuffer, puLen ));
 
     while ( *lpSubBlock )
     {
@@ -555,6 +688,52 @@ DWORD WINAPI VerQueryValueA( LPVOID pBlock, LPCSTR lpSubBlock,
 
     /* Return value */
     *lplpBuffer = VersionInfo16_Value( info );
+    *puLen = info->wValueLength;
+
+    return TRUE;
+}
+
+/***********************************************************************
+ *           VerQueryValueW              [VERSION.@]
+ */
+DWORD WINAPI VerQueryValueW( LPVOID pBlock, LPCWSTR lpSubBlock,
+                               LPVOID *lplpBuffer, UINT *puLen )
+{
+    VS_VERSION_INFO_STRUCT32 *info = (VS_VERSION_INFO_STRUCT32 *)pBlock;
+    if ( VersionInfoIs16( info ) )
+    {
+        dprintf(("called on NE resource!\n" ));
+        return FALSE;
+    }
+
+    dprintf(("(%p,%s,%p,%p)\n",
+                pBlock, debugstr_w(lpSubBlock), lplpBuffer, puLen ));
+
+    while ( *lpSubBlock )
+    {
+        /* Find next path component */
+        LPCWSTR lpNextSlash;
+        for ( lpNextSlash = lpSubBlock; *lpNextSlash; lpNextSlash++ )
+            if ( *lpNextSlash == '\\' )
+                break;
+
+        /* Skip empty components */
+        if ( lpNextSlash == lpSubBlock )
+        {
+            lpSubBlock++;
+            continue;
+        }
+
+        /* We have a non-empty component: search info for key */
+        info = VersionInfo32_FindChild( info, lpSubBlock, lpNextSlash-lpSubBlock );
+        if ( !info ) return FALSE;
+
+        /* Skip path component */
+        lpSubBlock = lpNextSlash;
+    }
+
+    /* Return value */
+    *lplpBuffer = VersionInfo32_Value( info );
     *puLen = info->wValueLength;
 
     return TRUE;
