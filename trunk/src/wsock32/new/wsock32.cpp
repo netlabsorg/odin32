@@ -1,4 +1,4 @@
-/* $Id: wsock32.cpp,v 1.1 1999-11-22 08:18:04 phaller Exp $ */
+/* $Id: wsock32.cpp,v 1.2 1999-11-25 23:02:30 phaller Exp $ */
 
 /*
  *
@@ -14,6 +14,20 @@
  * 1999/11/21 experimental rewrite using IBM's PMWSock only
  *            -> some structural differences remain! (hostent)
  *            -> this cannot work yet!
+ *
+ * identical structures:
+ * - sockaddr_in
+ * - WSADATA
+ * - sockaddr
+ * - fd_set
+ * - timeval
+ *
+ * incompatible structures:
+ * - hostent
+ * - netent
+ * - servent
+ * - protent
+ * - linger
  */
 
 
@@ -26,6 +40,8 @@
 #include <odinwrap.h>
 #include <os2sel.h>
 #include <misc.h>
+#include <wprocess.h>
+#include <heapstring.h>
 
 #include <wsock32.h>
 
@@ -40,7 +56,6 @@ ODINDEBUGCHANNEL(WSOCK32-WSOCK32)
 #define ERROR_SUCCESS 0
 
 
-#if 0
 static WSOCKTHREADDATA wstdFallthru; // for emergency only
 
 
@@ -82,6 +97,7 @@ PWSOCKTHREADDATA iQueryWsockThreadData(void)
 }
 
 
+#if 0
 /*****************************************************************************
  * Name      :
  * Purpose   :
@@ -91,7 +107,7 @@ PWSOCKTHREADDATA iQueryWsockThreadData(void)
  * Remark    :
  * Status    : UNTESTED STUB
  *
- * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
  *****************************************************************************/
 
 #define CASEERR2(a) case SOC##a: case a: return WSA##a;
@@ -163,6 +179,18 @@ int iTranslateSockErrToWSock(int iError)
 
 
 
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
+
 
 ODINPROCEDURE1(OS2WSASetLastError,
                int,iError)
@@ -171,13 +199,35 @@ ODINPROCEDURE1(OS2WSASetLastError,
 }
 
 
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
+
 ODINFUNCTION0(int,OS2WSAGetLastError)
 {
   return WSAGetLastError();
 }
 
 
-
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
 
 ODINFUNCTION2(int,OS2__WSAFDIsSet,SOCKET, s,
                                   fd_set*,fds)
@@ -186,24 +236,58 @@ ODINFUNCTION2(int,OS2__WSAFDIsSet,SOCKET, s,
 }
 
 
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
+
 ODINFUNCTION3(SOCKET,OS2accept, SOCKET,           s,
-                                struct Wsockaddr *,addr,
+                                struct sockaddr *,addr,
                                 int *,            addrlen)
 {
-  //@@@PH translate Wsockaddr to sockaddr
   return(accept(s,addr,addrlen));
 }
 
 
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
+
 ODINFUNCTION3(int,OS2bind,
               SOCKET ,s,
-              const struct Wsockaddr *,addr,
+              const struct sockaddr *,addr,
               int, namelen)
 {
-  //@@@PH translate Wsockaddr to sockaddr
   return(bind(s,addr,namelen));
 }
 
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
 
 ODINFUNCTION1(int,OS2closesocket,SOCKET, s)
 {
@@ -211,15 +295,38 @@ ODINFUNCTION1(int,OS2closesocket,SOCKET, s)
 }
 
 
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
+
 ODINFUNCTION3(int,OS2connect,
               SOCKET, s,
-              const struct Wsockaddr *,name,
+              const struct sockaddr *,name,
               int, namelen)
 {
-  //@@@PH translate Wsockaddr to sockaddr
   return(connect(s,name,namelen));
 }
 
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
 
 ODINFUNCTION3(int,OS2ioctlsocket,
               SOCKET,s,
@@ -230,25 +337,59 @@ ODINFUNCTION3(int,OS2ioctlsocket,
 }
 
 
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
+
 ODINFUNCTION3(int,OS2getpeername,
               SOCKET, s,
-              struct Wsockaddr *,name,
+              struct sockaddr *,name,
               int *, namelen)
 {
-  //@@@PH translate Wsockaddr to sockaddr
   return(getpeername(s,name,namelen));
 }
 
 
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
+
 ODINFUNCTION3(int,OS2getsockname,
               SOCKET,s,
-              struct Wsockaddr *,name,
+              struct sockaddr *,name,
               int *, namelen)
 {
-  //@@@PH translate Wsockaddr to sockaddr
   return(getsockname(s,name,namelen));
 }
 
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
 
 ODINFUNCTION5(int,OS2getsockopt,
               SOCKET, s,
@@ -265,6 +406,18 @@ ODINFUNCTION5(int,OS2getsockopt,
 }
 
 
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
+
 ODINFUNCTION1(u_long,OS2htonl,
               u_long,hostlong)
 {
@@ -272,12 +425,36 @@ ODINFUNCTION1(u_long,OS2htonl,
 }
 
 
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
+
 ODINFUNCTION1(u_short,OS2htons,
               u_short,hostshort)
 {
   return(htons(hostshort));
 }
 
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
 
 ODINFUNCTION1(unsigned long,OS2inet_addr,
               const char *, cp)
@@ -289,12 +466,36 @@ ODINFUNCTION1(unsigned long,OS2inet_addr,
 }
 
 
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
+
 ODINFUNCTION1(char *,OS2inet_ntoa,
               struct in_addr, in)
 {
   return(inet_ntoa(in));
 }
 
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
 
 ODINFUNCTION2(int,OS2listen,
               SOCKET, s,
@@ -304,6 +505,18 @@ ODINFUNCTION2(int,OS2listen,
 }
 
 
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
+
 ODINFUNCTION1(u_long,OS2ntohl,
               u_long,netlong)
 {
@@ -311,12 +524,36 @@ ODINFUNCTION1(u_long,OS2ntohl,
 }
 
 
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
+
 ODINFUNCTION1(u_short,OS2ntohs,
               u_short,netshort)
 {
   return(ntohs(netshort));
 }
 
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
 
 ODINFUNCTION4(int,OS2recv,
               SOCKET,s,
@@ -331,6 +568,18 @@ ODINFUNCTION4(int,OS2recv,
 }
 
 
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
+
 ODINFUNCTION6(int,OS2recvfrom,
               SOCKET,s,
               char *,buf,
@@ -339,14 +588,27 @@ ODINFUNCTION6(int,OS2recvfrom,
               struct sockaddr *,from,
               int *,fromlen)
 {
+  
   return(recvfrom(s,
-                  buf,
-                  len,
-                  flags,
-                  from,
-                  fromlen));
+                buf,
+                len,
+                flags,
+                from,
+                fromlen));
 }
 
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
 
 ODINFUNCTION5(int,OS2select,
               int,nfds,
@@ -363,6 +625,18 @@ ODINFUNCTION5(int,OS2select,
 }
 
 
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
+
 ODINFUNCTION4(int,OS2send,
               SOCKET,s,
               const char *,buf,
@@ -376,6 +650,18 @@ ODINFUNCTION4(int,OS2send,
 }
 
 
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
+
 ODINFUNCTION6(int,OS2sendto,
               SOCKET,s,
               const char *,buf,
@@ -385,13 +671,25 @@ ODINFUNCTION6(int,OS2sendto,
               int,tolen)
 {
   return(sendto(s,
-                buf,
-                len,
-                flags,
-                to,
-                tolen));
+              buf,
+              len,
+              flags,
+              to,
+              tolen));
 }
 
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
 
 ODINFUNCTION5(int,OS2setsockopt,
               SOCKET,s,
@@ -426,6 +724,18 @@ ODINFUNCTION5(int,OS2setsockopt,
 }
 
 
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
+
 ODINFUNCTION2(int,OS2shutdown,
               SOCKET,s,
               int,how)
@@ -434,6 +744,18 @@ ODINFUNCTION2(int,OS2shutdown,
                   how));
 }
 
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
 
 ODINFUNCTION3(SOCKET,OS2socket,
               int,af,
@@ -447,67 +769,269 @@ ODINFUNCTION3(SOCKET,OS2socket,
 
 
 /* Database function prototypes */
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
+
 ODINFUNCTION3(struct Whostent *,OS2gethostbyaddr,
               const char *,addr,
               int,len,
               int,type)
 {
-  return(gethostbyaddr(addr,
-                       len,
-                       type));
+  WHOSTENT         *yy;
+  struct hostent   *xx;
+  PWSOCKTHREADDATA pwstd;
+
+  xx = gethostbyaddr((char *)addr,len,type);
+  //PH: we assume PMWSOCK sets WSASetLastError correctly!
+  
+  if(xx == NULL)
+     return (WHOSTENT *)NULL;
+
+  // access current thread wsock data block
+  pwstd = iQueryWsockThreadData();
+
+  pwstd->whsnt.h_name      = xx->h_name;
+  pwstd->whsnt.h_aliases   = xx->h_aliases;
+  pwstd->whsnt.h_addrtype  = (short)xx->h_addrtype;
+  pwstd->whsnt.h_length    = (short)xx->h_length;
+  pwstd->whsnt.h_addr_list = xx->h_addr_list;
+
+  return &pwstd->whsnt;
 }
 
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
 
 ODINFUNCTION1(struct Whostent *,OS2gethostbyname,
               const char *,name)
 {
-  return(gethostbyname(name));
+  WHOSTENT         *yy;
+  struct hostent   *xx;
+  PWSOCKTHREADDATA pwstd;
+
+
+  xx = gethostbyname((char *)name);
+  //PH: we assume PMWSOCK sets WSASetLastError correctly!
+  
+  if(xx == NULL)
+    return (WHOSTENT *)NULL;
+
+  // access current thread wsock data block
+  pwstd = iQueryWsockThreadData();
+
+  pwstd->whsnt.h_name      = xx->h_name;
+  pwstd->whsnt.h_aliases   = xx->h_aliases;
+  pwstd->whsnt.h_addrtype  = (short)xx->h_addrtype;
+  pwstd->whsnt.h_length    = (short)xx->h_length;
+  pwstd->whsnt.h_addr_list = xx->h_addr_list;
+
+  return &pwstd->whsnt;
 }
 
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
 
 ODINFUNCTION2(int,OS2gethostname,
               char *,name,
               int,namelen)
 {
-  return(gethostname(name,
+   //PH: we assume PMWSOCK sets WSASetLastError correctly!
+   return(gethostname(name,
                      namelen));
 }
 
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
 
 ODINFUNCTION2(struct Wservent *,OS2getservbyport,
               int,port,
               const char *, proto)
 {
-  return(getservbyport(port,
-                       proto));
+  struct servent   *xx;
+  PWSOCKTHREADDATA pwstd;
+
+  //PH: we assume PMWSOCK sets WSASetLastError correctly!
+  xx = getservbyport(port,(char *)proto);
+
+  if(xx == NULL)
+    return (WSERVENT *)NULL;
+
+  // access current thread wsock data block
+  pwstd = iQueryWsockThreadData();
+
+  pwstd->wsvnt.s_name    = xx->s_name;
+  pwstd->wsvnt.s_aliases = xx->s_aliases;
+  pwstd->wsvnt.s_port    = (short)xx->s_port;
+  pwstd->wsvnt.s_proto   = xx->s_proto;
+
+  return &pwstd->wsvnt;
 }
 
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
 
 ODINFUNCTION2(struct Wservent *,OS2getservbyname,
               const char *,name,
               const char *,proto)
 {
-  return(getservbyname(name,
-                       proto));
+  WSERVENT         *yy;
+  struct servent   *xx;
+  PWSOCKTHREADDATA pwstd;
+
+
+  //PH: we assume PMWSOCK sets WSASetLastError correctly!
+  xx = getservbyname((char *)name,(char *)proto);
+
+  if(xx == NULL)
+    return (WSERVENT *)NULL;
+
+  // access current thread wsock data block
+  pwstd = iQueryWsockThreadData();
+
+  pwstd->wsvnt.s_name    = xx->s_name;
+  pwstd->wsvnt.s_aliases = xx->s_aliases;
+  pwstd->wsvnt.s_port    = (short)xx->s_port;
+  pwstd->wsvnt.s_proto   = xx->s_proto;
+
+  return &pwstd->wsvnt;
 }
 
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
 
 ODINFUNCTION1(struct Wprotoent *,OS2getprotobynumber,
               int,proto)
 {
-  return(getprotobynumber(proto));
+  struct protoent  *xx;
+  PWSOCKTHREADDATA pwstd;
+
+  //PH: we assume PMWSOCK sets WSASetLastError correctly!
+  xx = getprotobynumber(proto);
+
+  if(xx == NULL)
+    return (WPROTOENT *)NULL;
+
+  // access current thread wsock data block
+  pwstd = iQueryWsockThreadData();
+
+  pwstd->wptnt.p_name    = xx->p_name;
+  pwstd->wptnt.p_aliases = xx->p_aliases;
+  pwstd->wptnt.p_proto   = (short)xx->p_proto;
+
+  return &pwstd->wptnt;
 }
 
 
-ODINFUNCTION1(struct protoent *,OS2getprotobyname,
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION1(struct Wprotoent *,OS2getprotobyname,
               const char *,name)
 {
-  return(getprotobyname(name));
+  struct protoent  *xx;
+  PWSOCKTHREADDATA pwstd;
+
+  //PH: we assume PMWSOCK sets WSASetLastError correctly!
+  xx = getprotobyname((char *)name);
+
+  if(xx == NULL)
+    return (WPROTOENT *)NULL;
+
+  // access current thread wsock data block
+  pwstd = iQueryWsockThreadData();
+
+  pwstd->wptnt.p_name    = xx->p_name;
+  pwstd->wptnt.p_aliases = xx->p_aliases;
+  pwstd->wptnt.p_proto   = (short)xx->p_proto;
+
+  return &pwstd->wptnt;
 }
 
 
 
 /* Microsoft Windows Extension function prototypes */
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
+
 ODINFUNCTION2(int,OS2WSAStartup,
               USHORT,wVersionRequired,
               LPWSADATA,lpWSAData)
@@ -517,11 +1041,35 @@ ODINFUNCTION2(int,OS2WSAStartup,
 }
 
 
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
+
 ODINFUNCTION0(int,OS2WSACleanup)
 {
   return(WSACleanup());
 }
 
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
 
 ODINFUNCTION0(BOOL,OS2WSAIsBlocking)
 {
@@ -529,11 +1077,35 @@ ODINFUNCTION0(BOOL,OS2WSAIsBlocking)
 }
 
 
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
+
 ODINFUNCTION0(int,OS2WSAUnhookBlockingHook)
 {
   return WSAUnhookBlockingHook();
 }
 
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
 
 ODINFUNCTION1(PFN,OS2WSASetBlockingHook,
               PFN,lpBlockFunc)
@@ -542,11 +1114,35 @@ ODINFUNCTION1(PFN,OS2WSASetBlockingHook,
 }
 
 
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
+
 ODINFUNCTION0(int,OS2WSACancelBlockingCall)
 {
   return(WSACancelBlockingCall());
 }
 
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
 
 ODINFUNCTION6(LHANDLE,OS2WSAAsyncGetServByName,
               HWND,hWnd,
@@ -565,6 +1161,18 @@ ODINFUNCTION6(LHANDLE,OS2WSAAsyncGetServByName,
 }
 
 
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
+
 ODINFUNCTION6(LHANDLE,OS2WSAAsyncGetServByPort,
               HWND,hWnd,
               u_int,wMsg,
@@ -582,6 +1190,18 @@ ODINFUNCTION6(LHANDLE,OS2WSAAsyncGetServByPort,
 }
 
 
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
+
 ODINFUNCTION5(LHANDLE,OS2WSAAsyncGetProtoByName,
               HWND,hWnd,
               u_int,wMsg,
@@ -596,6 +1216,18 @@ ODINFUNCTION5(LHANDLE,OS2WSAAsyncGetProtoByName,
                                 buflen));
 }
 
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
 
 ODINFUNCTION5(LHANDLE,OS2WSAAsyncGetProtoByNumber,
               HWND,hWnd,
@@ -612,6 +1244,18 @@ ODINFUNCTION5(LHANDLE,OS2WSAAsyncGetProtoByNumber,
 }
 
 
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
+
 ODINFUNCTION5(LHANDLE,OS2WSAAsyncGetHostByName,
               HWND,hWnd,
               u_int,wMsg,
@@ -626,6 +1270,18 @@ ODINFUNCTION5(LHANDLE,OS2WSAAsyncGetHostByName,
                                buflen));
 }
 
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
 
 ODINFUNCTION7(LHANDLE,OS2WSAAsyncGetHostByAddr,
               HWND,hWnd,
@@ -646,12 +1302,36 @@ ODINFUNCTION7(LHANDLE,OS2WSAAsyncGetHostByAddr,
 }
 
 
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
+
 ODINFUNCTION1(int,OS2WSACancelAsyncRequest,
               LHANDLE,hAsyncTaskHandle)
 {
   return(WSACancelAsyncRequest(hAsyncTaskHandle));
 }
 
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
 
 ODINFUNCTION4(int,OS2WSAAsyncSelect,
               SOCKET,s,
