@@ -1,3 +1,4 @@
+/* $Id: glutint.h,v 1.2 2000-02-09 08:46:19 jeroen Exp $ */
 #ifndef __glutint_h__
 #define __glutint_h__
 

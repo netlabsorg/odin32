@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.1 2000-02-01 19:42:07 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.2 2000-02-09 08:46:20 jeroen Exp $ */
 
 /*
  * DLL entry point
@@ -40,6 +40,8 @@ void CDECL _ctordtorInit( void );
 void CDECL _ctordtorTerm( void );
 }
 
+BOOL WINAPI Glut32LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID ImpLoad);
+
 /*-------------------------------------------------------------------*/
 /* A clean up routine registered with DosExitList must be used if    */
 /* runtime calls are required and the runtime is dynamically linked. */
@@ -47,7 +49,6 @@ void CDECL _ctordtorTerm( void );
 /* library DLL is terminated.                                        */
 /*-------------------------------------------------------------------*/
 static void APIENTRY cleanup(ULONG reason);
-
 
 /****************************************************************************/
 /* _DLL_InitTerm is the function that gets called by the operating system   */
@@ -80,10 +81,10 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
          /* are required and the runtime is dynamically linked.             */
          /*******************************************************************/
 
-         if(RegisterLxDll(hModule, 0, 0) == FALSE)
+         if(RegisterLxDll(hModule, Glut32LibMain, 0) == FALSE)
                 return 0UL;
 
-         rc = DosExitList(0x0000F000|EXLST_ADD, cleanup);
+         rc = DosExitList(0x000F0000|EXLST_ADD, cleanup);
          if(rc)
                 return 0UL;
          break;

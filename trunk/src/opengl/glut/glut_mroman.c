@@ -1,4 +1,4 @@
-
+/* $Id: glut_mroman.c,v 1.2 2000-02-09 08:46:15 jeroen Exp $ */
 /* GENERATED FILE -- DO NOT MODIFY */
 
 #include "glutstroke.h"

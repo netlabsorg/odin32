@@ -1,3 +1,4 @@
+/* $Id: glut.h,v 1.2 2000-02-09 08:46:07 jeroen Exp $ */
 #ifndef __glut_h__
 #define __glut_h__
 

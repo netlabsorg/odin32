@@ -1,3 +1,4 @@
+/* $Id: glutbitmap.h,v 1.2 2000-02-09 08:46:19 jeroen Exp $ */
 #ifndef __glutbitmap_h__
 #define __glutbitmap_h__
 

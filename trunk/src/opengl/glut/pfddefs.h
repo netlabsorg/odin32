@@ -1,3 +1,4 @@
+/* $Id: pfddefs.h,v 1.2 2000-02-09 08:46:21 jeroen Exp $ */
 #define PFD_TYPE_RGBA       0
 #define PFD_TYPE_COLORINDEX 1
 

@@ -1,4 +1,4 @@
-
+/* $Id: glut_swidth.c,v 1.2 2000-02-09 08:46:17 jeroen Exp $ */
 /* Copyright (c) Mark J. Kilgard, 1995. */
 
 /* This program is freely distributable without licensing fees

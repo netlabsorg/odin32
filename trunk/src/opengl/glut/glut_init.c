@@ -1,4 +1,4 @@
-
+/* $Id: glut_init.c,v 1.2 2000-02-09 08:46:13 jeroen Exp $ */
 /* Copyright (c) Mark J. Kilgard, 1994, 1997. */
 
 /* This program is freely distributable without licensing fees
@@ -58,7 +58,7 @@ static Bool synchronize = False;
 
 #if defined(_WIN32) || defined(__WIN32OS2__)
 
-#ifdef __BORLANDC__
+#if defined(__BORLANDC__) || defined(__WIN32OS2__)
 #include <float.h>  /* For masking floating point exceptions. */
 #endif
 
@@ -78,7 +78,7 @@ __glutOpenWin32Connection(char* display)
   if(classname)
     return;
 
-#ifdef __BORLANDC__
+#if defined(__BORLANDC__) || defined(__WIN32OS2__)
   /* Under certain conditions (e.g. while rendering solid surfaces with
      lighting enabled) Microsoft OpenGL libraries cause some illegal
      operations like floating point overflow or division by zero. The

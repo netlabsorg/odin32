@@ -1,4 +1,4 @@
-
+/* $Id: glut_tr10.c,v 1.2 2000-02-09 08:46:18 jeroen Exp $ */
 /* GENERATED FILE -- DO NOT MODIFY */
 
 #define glutBitmapTimesRoman10 XXX

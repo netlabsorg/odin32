@@ -1,4 +1,4 @@
-
+/* $Id: win32_menu.c,v 1.2 2000-02-09 08:46:22 jeroen Exp $ */
 /* Copyright (c) Mark J. Kilgard, 1994, 1997, 1998. */
 /* Copyright (c) Nate Robins, 1997. */
 

@@ -1,4 +1,4 @@
-
+/* $Id: glut_ext.c,v 1.2 2000-02-09 08:46:11 jeroen Exp $ */
 /* Copyright (c) Mark J. Kilgard, 1994, 1997. */
 
 /* This program is freely distributable without licensing fees
@@ -11,7 +11,7 @@
 #include "glutint.h"
 
 /* CENTRY */
-int APIENTRY 
+int APIENTRY
 glutExtensionSupported(const char *extension)
 {
   static const GLubyte *extensions = NULL;

@@ -1,3 +1,4 @@
+/* $Id: glutstroke.h,v 1.2 2000-02-09 08:46:20 jeroen Exp $ */
 #ifndef __glutstroke_h__
 #define __glutstroke_h__
 

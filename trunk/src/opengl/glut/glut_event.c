@@ -1,4 +1,4 @@
-
+/* $Id: glut_event.c,v 1.2 2000-02-09 08:46:09 jeroen Exp $ */
 /* Copyright (c) Mark J. Kilgard, 1994, 1995, 1996, 1997, 1998. */
 
 /* This program is freely distributable without licensing fees
@@ -332,7 +332,7 @@ processEventsAndTimeouts(void)
       exit(0);
     TranslateMessage(&event);             /* translate virtual-key messages*/
 #if defined(__WIN32OS2__)
-    DispatchMessageA(&event);                        /* call the window proc*/
+    DispatchMessageA(&event);                       /* call the window proc*/
 #else
     DispatchMessage(&event);                        /* call the window proc*/
 #endif
@@ -1032,7 +1032,6 @@ processWindowWorkList(GLUTwindow * window)
       __glutUpdateInputDeviceMaskFunc(window);
     }
     /* Be sure to configure window BEFORE map window is done. */
-
     if (workMask & GLUT_CONFIGURE_WORK) {
 #if defined(_WIN32) || defined(__WIN32OS2__)
       RECT changes;
@@ -1082,7 +1081,7 @@ processWindowWorkList(GLUTwindow * window)
 
       /* Do the repositioning, moving, and push/pop. */
       SetWindowPos(window->win,
-        window->desiredStack == Above ? HWND_TOP : HWND_NOTOPMOST,
+        window->desiredStack == (Above ? HWND_TOP : HWND_NOTOPMOST),
         changes.left, changes.top,
         changes.right - changes.left, changes.bottom - changes.top,
         flags);
@@ -1097,7 +1096,7 @@ processWindowWorkList(GLUTwindow * window)
         window->desiredX = point.x;
         window->desiredY = point.y;
       }
-#else /* !_WIN32 */
+#else                                  /* !_WIN32                          */
       XWindowChanges changes;
 
       changes.x = window->desiredX;
@@ -1113,7 +1112,7 @@ processWindowWorkList(GLUTwindow * window)
             MotifWmHints hints;
 
             hints.flags = MWM_HINTS_DECORATIONS;
-            hints.decorations = 0;  /* Absolutely no
+            hints.decorations = 0;                         /* Absolutely no*/
                                        decorations. */
             XChangeProperty(__glutDisplay, window->win,
               __glutMotifHints, __glutMotifHints, 32,
@@ -1204,8 +1203,28 @@ processWindowWorkList(GLUTwindow * window)
          for a window, a reshape callback must be generated. */
 
       __glutSetWindow(window);
+
       window->reshape(window->width, window->height);
       window->forceReshape = False;
+
+#ifdef __WIN32OS2__
+      /* JvdH - 03/02/2000 */
+      /* FIXME: This is a rather stupid hack... */
+      /* The client area appears transparent... */
+      /* By twice swapping the ZORDER the client area is repainted... */
+      /* I'd like a better fix, but for now this seems to work */
+      SetWindowPos(window->win,
+                   HWND_BOTTOM,
+                   0,0,
+                   0,0,
+                   SWP_NOMOVE | SWP_NOSIZE);
+
+      SetWindowPos(window->win,
+                   HWND_TOP,
+                   0,0,
+                   0,0,
+                   SWP_NOMOVE | SWP_NOSIZE);
+#endif
 
       /* Setting the redisplay bit on the first reshape is
          necessary to make the "Mesa glXSwapBuffers to repair
@@ -1215,6 +1234,8 @@ processWindowWorkList(GLUTwindow * window)
          happens to the window. */
       workMask |= GLUT_REDISPLAY_WORK;
     }
+
+
     /* The code below is more involved than otherwise necessary
        because it is paranoid about the overlay or entire window
        being removed or destroyed in the course of the callbacks.
@@ -1301,7 +1322,6 @@ processWindowWorkList(GLUTwindow * window)
   }
   /* Combine workMask with window->workMask to determine what
      finish and debug work there is. */
-
 
   workMask |= window->workMask;
 

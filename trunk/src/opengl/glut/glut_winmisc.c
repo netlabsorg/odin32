@@ -1,4 +1,4 @@
-
+/* $Id: glut_winmisc.c,v 1.2 2000-02-09 08:46:19 jeroen Exp $ */
 /* Copyright (c) Mark J. Kilgard, 1994.  */
 
 /* This program is freely distributable without licensing fees

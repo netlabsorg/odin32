@@ -1,3 +1,4 @@
+# $Id: Makefile,v 1.2 2000-02-09 08:46:06 jeroen Exp $
 #
 # PD-Win32 API
 #
@@ -14,13 +15,11 @@ PDWIN32_TOOLS = ..\..\..\tools\bin
 
 
 !ifdef DEBUG
-MAKE_CMD=nmake DEBUG=1
-!else
-MAKE_CMD=nmake
+L=/CO
 !endif
 
-CFLAGS = -Tdp $(CFLAGS) -I$(PDWIN32_INCLUDE)
-CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
+CFLAGS = -Tdp -I..\mesa -I..\glu $(CFLAGS) -I$(PDWIN32_INCLUDE)
+CXXFLAGS = -Tdp -I..\mesa -I..\glu $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
 
 TARGET=GLUT32
 
@@ -35,12 +34,12 @@ OBJS = glut_8x13.obj glut_9x15.obj glut_bitmap.obj glut_bwidth.obj glut_cindex.o
        glut_swap.obj glut_swidth.obj glut_tablet.obj glut_teapot.obj glut_tr10.obj \
        glut_tr24.obj glut_util.obj glut_vidresize.obj glut_warp.obj glut_win.obj \
        glut_winmisc.obj win32_glx.obj win32_menu.obj win32_util.obj win32_winproc.obj \
-       win32_x11.obj initterm.obj
+       win32_x11.obj initterm.obj glut_term.obj
 
 all     : $(TARGET).DLL
 
 $(TARGET).DLL: $(OBJS) $(TARGET).def $(TARGET).lrf
-        ILINK /FREE /NOE @$(TARGET).lrf
+        ILINK /FREE /NOE $(L) @$(TARGET).lrf
         $(CP) $@ $(PDWIN32_BIN)
 
 $(TARGET).lib: $(TARGET)exp.def
@@ -104,7 +103,7 @@ $(TARGET).lrf: makefile
 $(OBJS)
 /OUT:$(TARGET).DLL /DLL
 $(PDWIN32_LIB)\ODINCRT.LIB
-CPPOM30O.LIB
+$(RTLLIB_O)
 $(PDWIN32_LIB)\WINMM.LIB
 $(PDWIN32_LIB)\KERNEL32.LIB
 $(PDWIN32_LIB)\PMWINX.LIB

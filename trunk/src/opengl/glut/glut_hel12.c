@@ -1,4 +1,4 @@
-
+/* $Id: glut_hel12.c,v 1.2 2000-02-09 08:46:12 jeroen Exp $ */
 /* GENERATED FILE -- DO NOT MODIFY */
 
 #define glutBitmapHelvetica12 XXX
