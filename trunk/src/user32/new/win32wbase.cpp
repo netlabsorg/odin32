@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.40 2000-01-14 13:16:58 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.41 2000-01-14 14:45:17 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -70,38 +70,6 @@ Win32BaseWindow::Win32BaseWindow(DWORD objType) : GenericObject(&windows, objTyp
 }
 //******************************************************************************
 //******************************************************************************
-Win32BaseWindow::Win32BaseWindow(HWND os2Handle,VOID* win32WndProc) : GenericObject(&windows,OBJTYPE_WINDOW)
-{
-  Init();
-  OS2Hwnd = OS2HwndFrame = os2Handle;
-  dwStyle = WS_VISIBLE;
-  setWindowProc((WNDPROC)win32WndProc);
-  fIsSubclassedOS2Wnd = TRUE;
-  fFirstShow = FALSE;
-  fCreated = TRUE;
-
-  SetLastError(0);
-
-  //CB: replace by a secure method
-
-  if(OSLibWinSetWindowULong(OS2Hwnd, OFFSET_WIN32WNDPTR, (ULONG)this) == FALSE) {
-        dprintf(("WM_CREATE: WinSetWindowULong %X failed!!", OS2Hwnd));
-        SetLastError(ERROR_OUTOFMEMORY); //TODO: Better error
-        return;
-  }
-  if(OSLibWinSetWindowULong(OS2Hwnd, OFFSET_WIN32PM_MAGIC, WIN32PM_MAGIC) == FALSE) {
-        dprintf(("WM_CREATE: WinSetWindowULong2 %X failed!!", OS2Hwnd));
-        SetLastError(ERROR_OUTOFMEMORY); //TODO: Better error
-        return;
-  }
-
-  OSLibWinQueryWindowRect(OS2Hwnd,&rectClient,RELATIVE_TO_WINDOW);
-  OSLibWinQueryWindowRect(OS2Hwnd,&rectWindow,RELATIVE_TO_SCREEN);
-
-  setOldWndProc(SubclassWithDefHandler(OS2Hwnd));
-}
-//******************************************************************************
-//******************************************************************************
 Win32BaseWindow::Win32BaseWindow(CREATESTRUCTA *lpCreateStructA, ATOM classAtom, BOOL isUnicode)
                         : GenericObject(&windows, OBJTYPE_WINDOW), ChildWindow()
 {
@@ -114,7 +82,6 @@ Win32BaseWindow::Win32BaseWindow(CREATESTRUCTA *lpCreateStructA, ATOM classAtom,
 void Win32BaseWindow::Init()
 {
   isUnicode        = FALSE;
-  fIsSubclassedOS2Wnd = FALSE;
   fFirstShow       = TRUE;
   fIsDialog        = FALSE;
   fIsModalDialogOwner = FALSE;
@@ -749,8 +716,6 @@ ULONG Win32BaseWindow::MsgDestroy()
  Win32BaseWindow *child;
  HWND hwnd = getWindowHandle();
 
-    if (isSubclassedOS2Wnd) OSLibWinSubclassWindow(OS2Hwnd,pOldWndProc);
-
     fIsDestroyed = TRUE;
 
     if(fDestroyWindowCalled == FALSE)
@@ -970,14 +935,7 @@ ULONG Win32BaseWindow::MsgButton(MSG *msg)
      HWND hwndTop;
 
         /* Activate the window if needed */
-        if(isSubclassedOS2Wnd()) {
-                Win32BaseWindow *parentwnd = GetWindowFromOS2FrameHandle(OSLibWinQueryWindow(OS2Hwnd, QWOS_PARENT));
-                if(parentwnd) {
-                        hwndTop = (parentwnd->GetTopParent()) ? parentwnd->GetTopParent()->getWindowHandle() : 0;
-                }
-                else    hwndTop = 0;
-        }
-        else    hwndTop = (GetTopParent()) ? GetTopParent()->getWindowHandle() : 0;
+        hwndTop = (GetTopParent()) ? GetTopParent()->getWindowHandle() : 0;
 
         HWND hwndActive = GetActiveWindow();
         if (hwndTop && (getWindowHandle() != hwndActive))
@@ -1092,13 +1050,19 @@ ULONG Win32BaseWindow::MsgFormatFrame(WINDOWPOS *lpWndPos)
     wndPos.hwnd  = getWindowHandle();
     wndPos.hwndInsertAfter = 0;
     newWindowRect= rectWindow;
-    if (getParent()) mapWin32Rect(OSLIB_HWND_DESKTOP,getParent()->getOS2WindowHandle(),&newWindowRect);
+    if (getParent()) {
+        mapWin32Rect(OSLIB_HWND_DESKTOP,getParent()->getOS2WindowHandle(),&newWindowRect);
+    }
     wndPos.x     = newWindowRect.left;
     wndPos.y     = newWindowRect.top;
     wndPos.cx    = newWindowRect.right - newWindowRect.left;
     wndPos.cy    = newWindowRect.bottom - newWindowRect.top;
     wndPos.flags = SWP_FRAMECHANGED;
     lpWndPos     = &wndPos;
+
+    if (getParent()) {
+        newWindowRect= rectWindow; //reset; was modified
+    }
   }
 
   rc = SendNCCalcSize(TRUE, &newWindowRect,  &oldWindowRect, &client, lpWndPos, &rectClient);
@@ -2738,8 +2702,7 @@ VOID Win32BaseWindow::updateWindowStyle(DWORD oldExStyle,DWORD oldStyle)
 
   if ((dwStyle & 0xFFFF0000) != (oldStyle & 0xFFFF0000))
   {
-    //CB: update
-    //OSLibSetWindowStyle(OS2HwndFrame, dwStyle, fTaskList);
+        FrameUpdateClient(this);
   }
 }
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.41 2000-01-14 13:16:57 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.42 2000-01-14 14:45:16 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -458,69 +458,3 @@ RunDefWndProc:
 } /* End of Win32WindowProc */
 //******************************************************************************
 //******************************************************************************
-MRESULT EXPENTRY Win32SubclassWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
-{
-  Win32BaseWindow* win32wnd;
-
-  //Restore our FS selector
-  SetWin32TIB();
-
-  win32wnd = Win32BaseWindow::GetWindowFromOS2Handle(hwnd);
-
-  if (!win32wnd)
-  {
-    dprintf(("Invalid win32wnd pointer for subclassed window %x!!", hwnd));
-    goto RunDefWndProc;
-  }
-
-  switch (msg)
-  {
-    case WM_WINDOWPOSCHANGED:
-      {
-        PSWP      pswp  = (PSWP)mp1;
-        SWP       swpOld = *(pswp + 1);
-        WINDOWPOS wp;
-        HWND      hParent = NULLHANDLE, hFrame = NULLHANDLE;
-
-        dprintf(("OS2Subclass: WM_WINDOWPOSCHANGED %x %x (%d,%d) (%d,%d)", hwnd, pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
-        if ((pswp->fl & (SWP_SIZE | SWP_MOVE | SWP_ZORDER)) == 0) break;
-
-        hParent = hFrame = WinQueryWindow(hwnd, QW_PARENT);
-
-        OSLibMapSWPtoWINDOWPOS(pswp,&wp, &swpOld,hParent,hFrame);
-
-        win32wnd->setWindowRect(swpOld.x, swpOld.y, swpOld.x + swpOld.cx, swpOld.y + swpOld.cy);
-        //win32wnd->setClientRect(swpOld.x, swpOld.y, swpOld.x + swpOld.cx, swpOld.y + swpOld.cy);
-        wp.x = swpOld.x;
-        wp.y = swpOld.y;
-        wp.cx = swpOld.cx;
-        wp.cy = swpOld.cy;
-
-        wp.hwnd = win32wnd->getWindowHandle();
-
-        win32wnd->MsgPosChanged((LPARAM)&wp);
-
-        goto RunOldWndProc;
-      }
-
-    default:
-      goto RunDefHandler;
-  }
-
-RunDefWndProc:
-  RestoreOS2TIB();
-  return WinDefWindowProc(hwnd,msg,mp1,mp2);
-
-RunOldWndProc:
-  RestoreOS2TIB();
-  return ((PFNWP)win32wnd->getOldWndProc())(hwnd,msg,mp1,mp2);
-
-RunDefHandler:
-  RestoreOS2TIB();
-  return Win32WindowProc(hwnd,msg,mp1,mp2);
-}
-
-PVOID SubclassWithDefHandler(HWND hwnd)
-{
-  return WinSubclassWindow(hwnd,Win32SubclassWindowProc);
-}

@@ -1,4 +1,4 @@
-/* $Id: oslibwin.h,v 1.29 2000-01-11 13:06:26 sandervl Exp $ */
+/* $Id: oslibwin.h,v 1.30 2000-01-14 14:45:16 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -258,18 +258,7 @@ BOOL  OSLibWinMapWindowPoints (HWND hwndFrom, HWND hwndTo, OSLIBPOINT *pptl, ULO
 
 HWND  OSLibWinObjectWindowFromID(HWND hwndOwner, ULONG ID);
 
-#define OSLIB_HSCROLL   0
-#define OSLIB_VSCROLL   1
-BOOL  OSLibWinEnableScrollBar(HWND hwndParent, int scrollBar, BOOL fEnable);
 HWND  OSLibWinQueryObjectWindow(VOID);
-ULONG OSLibWinGetScrollPos(HWND hwndParent, HWND hwndScroll);
-ULONG OSLibWinSetScrollPos(HWND hwndParent, HWND hwndScroll, int pos, int fRedraw);
-BOOL  OSLibWinSetScrollRange(HWND hwndParent, HWND hwndScroll, int minpos,
-                             int maxpos, int fRedraw);
-BOOL  OSLibWinSetScrollPageSize(HWND hwndParent, HWND hwndScroll, int pagesize,
-                                int totalsize, int fRedraw);
-
-void  OSLibTranslateScrollCmdAndMsg(ULONG *msg, ULONG *scrollcmd);
 
 PVOID OSLibWinSubclassWindow(HWND hwnd,PVOID newWndProc);
 
