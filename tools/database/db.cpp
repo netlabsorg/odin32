@@ -1,4 +1,4 @@
-/* $Id: db.cpp,v 1.8 2000-02-12 23:54:29 bird Exp $ *
+/* $Id: db.cpp,v 1.9 2000-02-14 13:49:13 bird Exp $ *
  *
  * DB - contains all database routines.
  *
@@ -363,7 +363,7 @@ static long getvalue(int iField, MYSQL_ROW papszRow)
 }
 
 
-#if 1
+#if 0
 /*
  * Stubs used while optimizing sqls.
  */
@@ -377,10 +377,8 @@ int     mysql_query4(MYSQL *mysql, const char *q)
 {   return mysql_query(mysql, q); }
 int     mysql_query5(MYSQL *mysql, const char *q)
 {   return mysql_query(mysql, q); }
-MYSQL_RES *  mysql_store_result1(MYSQL *mysql)
-{   return mysql_store_result(mysql); }
-MYSQL_RES *  mysql_store_result5(MYSQL *mysql)
-{   return mysql_store_result(mysql); }
+int     mysql_query6(MYSQL *mysql, const char *q)
+{   return mysql_query(mysql, q); }
 
 #else
 
@@ -389,8 +387,7 @@ MYSQL_RES *  mysql_store_result5(MYSQL *mysql)
 #define mysql_query3            mysql_query
 #define mysql_query4            mysql_query
 #define mysql_query5            mysql_query
-#define mysql_store_result1     mysql_store_result
-#define mysql_store_result5     mysql_store_result
+#define mysql_query6            mysql_query
 
 #endif
 
@@ -402,6 +399,12 @@ MYSQL_RES *  mysql_store_result5(MYSQL *mysql)
  * @param     pszFunctionName
  * @param     pFnFindBuf
  * @param     lDll
+ * @sketch    1) Get functions for this dll(if given).
+ *            2) Get functions which aliases the functions found in (1).
+ *            3) Get new aliases by intname
+ *            4) Get new aliases by name
+ *            5) Update all functions from (1) to have aliasfn -2 (DONTMIND)
+ *            6) Update all functions from (3) and (4) to alias the first function from 1.
  */
 BOOL _System dbFindFunction(const char *pszFunctionName, PFNFINDBUF pFnFindBuf, signed long lDll)
 {
@@ -410,26 +413,32 @@ BOOL _System dbFindFunction(const char *pszFunctionName, PFNFINDBUF pFnFindBuf, 
     int          rc;
     char         szQuery[256];
 
+    /*
+     * 1) Get functions for this dll(if given).
+     */
     if (lDll < 0)
-        sprintf(&szQuery[0], "SELECT refcode, dll, aliasfn FROM function WHERE intname = '%s'",
+        sprintf(&szQuery[0], "SELECT refcode, dll, aliasfn, name FROM function WHERE intname = '%s'",
                 pszFunctionName);
     else
-        sprintf(&szQuery[0], "SELECT refcode, dll, aliasfn FROM function "
+        sprintf(&szQuery[0], "SELECT refcode, dll, aliasfn, name FROM function "
                 "WHERE intname = '%s' AND dll = %ld",
                 pszFunctionName, lDll);
 
     rc = mysql_query1(pmysql, &szQuery[0]);
     if (rc >= 0)
     {
-        pres = mysql_store_result1(pmysql);
+        pres = mysql_store_result(pmysql);
         if (pres != NULL)
         {
+            char szFnName[NBR_FUNCTIONS][80];
+
             pFnFindBuf->cFns = 0;
             while ((row = mysql_fetch_row(pres)) != NULL)
             {
                 pFnFindBuf->alRefCode[pFnFindBuf->cFns] = atol(row[0]);
                 pFnFindBuf->alDllRefCode[pFnFindBuf->cFns] = atol(row[1]);
                 pFnFindBuf->alAliasFn[pFnFindBuf->cFns] = atol(row[2]);
+                strcpy(szFnName[pFnFindBuf->cFns], row[3]);
 
                 /* next */
                 pFnFindBuf->cFns++;
@@ -439,79 +448,20 @@ BOOL _System dbFindFunction(const char *pszFunctionName, PFNFINDBUF pFnFindBuf, 
             /* alias check and fix */
             if (lDll >= 0 && pFnFindBuf->cFns != 0)
             {
-                #if 0
-                int i;
-                /* Make the selected function to DONT TOUCH */
-                sprintf(&szQuery[0], "UPDATE function SET aliasfn = (-2) "
-                                     "WHERE (",
-                        lDll, pszFunctionName);
-                for (i = 0; i < pFnFindBuf->cFns; i++)
+                int cFnsThisDll, cFnsAliasesAndThisDll, i;
+
+                /*
+                 * 2) Get functions which aliases the functions found in (1).
+                 */
+                cFnsThisDll = (int)pFnFindBuf->cFns;
+                strcpy(&szQuery[0], "SELECT refcode, dll, aliasfn, name FROM function WHERE aliasfn IN (");
+                for (i = 0; i < cFnsThisDll; i++)
                 {
-                    if (i != 0) strcat(&szQuery[0], " OR");
-                    sprintf(&szQuery[strlen(szQuery)], " refcode = %ld", pFnFindBuf->alRefCode[i]);
+                    if (i > 0)  strcat(&szQuery[0], " OR ");
+                    sprintf(&szQuery[strlen(szQuery)], "(%ld)", pFnFindBuf->alRefCode[i]);
                 }
-                strcat(&szQuery[0], ") AND aliasfn <> (-2)");
+                strcat(&szQuery[0], ")");
 
-                rc = mysql_query2(pmysql, &szQuery[0]);
-                if (rc >= 0)
-                {
-                    /* Update all with equal internal... which is not in this Dll */
-                    sprintf(&szQuery[0], "UPDATE function SET aliasfn = (%ld) "
-                                         "WHERE aliasfn = (-1) AND dll <> %ld AND intname = '%s'",
-                            pFnFindBuf->alRefCode[0], lDll, pszFunctionName, pszFunctionName);
-                    rc = mysql_query3(pmysql, &szQuery[0]);
-                    if (rc >= 0)
-                    {
-                        /* Update all with equal external name... which is not in this Dll */
-                        sprintf(&szQuery[0], "UPDATE function SET aliasfn = (%ld) "
-                                             "WHERE aliasfn = (-1) AND dll <> %ld AND name = '%s'",
-                                pFnFindBuf->alRefCode[0], lDll, pszFunctionName, pszFunctionName);
-
-                        rc = mysql_query4(pmysql, &szQuery[0]);
-                        if (rc >= 0)
-                        {
-                            /* get the functions aliases to the functions we have allready found. */
-                            sprintf(&szQuery[0], "SELECT refcode, dll, aliasfn FROM function WHERE dll = %ld AND aliasfn IN (", lDll);
-                            for (i = 0; i < pFnFindBuf->cFns; i++)
-                            {
-                                if (i != 0) strcat(&szQuery[0], ", ");
-                                sprintf(&szQuery[strlen(szQuery)], "%ld", pFnFindBuf->alRefCode[i]);
-                            }
-                            strcat(&szQuery[strlen(szQuery)], ")");
-
-                            DosSleep(0);
-                            rc = mysql_query5(pmysql, &szQuery[0]);
-                            if (rc >= 0)
-                            {
-                                pres = mysql_store_result5(pmysql);
-                                if (pres != NULL)
-                                {
-                                    while ((row = mysql_fetch_row(pres)) != NULL)
-                                    {
-                                        pFnFindBuf->alRefCode[pFnFindBuf->cFns] = atol(row[0]);
-                                        pFnFindBuf->alDllRefCode[pFnFindBuf->cFns] = atol(row[1]);
-                                        if (row[2] != NULL)
-                                            pFnFindBuf->alAliasFn[pFnFindBuf->cFns] = atol(row[2]);
-                                        else
-                                            pFnFindBuf->alAliasFn[pFnFindBuf->cFns] = ALIAS_NULL;
-
-                                        /* next */
-                                        pFnFindBuf->cFns++;
-                                    }
-                                    mysql_free_result(pres);
-                                }
-                            }
-                        }
-                    }
-                }
-                #else
-                int i;
-                int cFnsThisDll = (int)pFnFindBuf->cFns;
-
-                /* get the functions aliases to the functions we have allready found. */
-                sprintf(&szQuery[0], "SELECT refcode, dll, aliasfn FROM function "
-                                     "WHERE aliasfn = (-1) AND dll <> %ld AND intname = '%s'",
-                        lDll, pszFunctionName);
                 rc = mysql_query2(pmysql, &szQuery[0]);
                 if (rc >= 0)
                 {
@@ -522,21 +472,25 @@ BOOL _System dbFindFunction(const char *pszFunctionName, PFNFINDBUF pFnFindBuf, 
                         {
                             pFnFindBuf->alRefCode[pFnFindBuf->cFns] = atol(row[0]);
                             pFnFindBuf->alDllRefCode[pFnFindBuf->cFns] = atol(row[1]);
-                            if (row[2] != NULL)
-                                pFnFindBuf->alAliasFn[pFnFindBuf->cFns] = atol(row[2]);
-                            else
-                                pFnFindBuf->alAliasFn[pFnFindBuf->cFns] = ALIAS_NULL;
+                            pFnFindBuf->alAliasFn[pFnFindBuf->cFns] = atol(row[2]);
+                            strcpy(szFnName[pFnFindBuf->cFns], row[3]);
 
                             /* next */
                             pFnFindBuf->cFns++;
                         }
                         mysql_free_result(pres);
 
-
-                        /* get the functions aliases to the functions we have allready found. */
+                        /*
+                         * 3) Get new aliases by intname
+                         */
+                        cFnsAliasesAndThisDll = (int)pFnFindBuf->cFns;
                         sprintf(&szQuery[0], "SELECT refcode, dll, aliasfn FROM function "
-                                             "WHERE aliasfn = (-1) AND dll <> %ld AND name = '%s'",
+                                             "WHERE aliasfn = (-1) AND dll <> %ld AND (intname = '%s'",
                                 lDll, pszFunctionName);
+                        for (i = 0; i < cFnsAliasesAndThisDll; i++)
+                            sprintf(&szQuery[strlen(&szQuery[0])], " OR intname = '%s'", szFnName[i]);
+                        strcat(&szQuery[0], ")");
+
                         rc = mysql_query3(pmysql, &szQuery[0]);
                         if (rc >= 0)
                         {
@@ -557,43 +511,73 @@ BOOL _System dbFindFunction(const char *pszFunctionName, PFNFINDBUF pFnFindBuf, 
                                 }
                                 mysql_free_result(pres);
 
-                                /* do updates! */
-                                /* Make the selected function to DONT TOUCH */
-                                sprintf(&szQuery[0], "UPDATE function SET aliasfn = (-2) "
-                                                     "WHERE (",
+
+                                /*
+                                 * 4) Get new aliases by name
+                                 */
+                                sprintf(&szQuery[0], "SELECT refcode, dll, aliasfn FROM function "
+                                                     "WHERE aliasfn = (-1) AND dll <> %ld AND (name = '%s'",
                                         lDll, pszFunctionName);
-                                for (i = 0; i < cFnsThisDll; i++)
-                                {
-                                    if (i != 0) strcat(&szQuery[0], " OR");
-                                    sprintf(&szQuery[strlen(szQuery)], " refcode = %ld", pFnFindBuf->alRefCode[i]);
-                                }
-                                strcat(&szQuery[0], ") AND aliasfn <> (-2)");
+                                for (i = 0; i < cFnsAliasesAndThisDll; i++)
+                                    sprintf(&szQuery[strlen(&szQuery[0])], " OR name = '%s'", szFnName[i]);
+                                strcat(&szQuery[0], ")");
 
                                 rc = mysql_query4(pmysql, &szQuery[0]);
                                 if (rc >= 0)
                                 {
-                                    /* Update all with equal internal... which is not in this Dll */
-                                    sprintf(&szQuery[0], "UPDATE function SET aliasfn = (%ld) "
-                                                         "WHERE aliasfn = (-1) AND dll <> %ld AND intname = '%s'",
-                                            pFnFindBuf->alRefCode[0], lDll, pszFunctionName, pszFunctionName);
-                                    rc = mysql_query5(pmysql, &szQuery[0]);
-                                    if (rc >= 0)
+                                    pres = mysql_store_result(pmysql);
+                                    if (pres != NULL)
                                     {
-                                        /* Update all with equal external name... which is not in this Dll */
-                                        sprintf(&szQuery[0], "UPDATE function SET aliasfn = (%ld) "
-                                                             "WHERE aliasfn = (-1) AND dll <> %ld AND name = '%s'",
-                                                pFnFindBuf->alRefCode[0], lDll, pszFunctionName, pszFunctionName);
+                                        while ((row = mysql_fetch_row(pres)) != NULL)
+                                        {
+                                            pFnFindBuf->alRefCode[pFnFindBuf->cFns] = atol(row[0]);
+                                            pFnFindBuf->alDllRefCode[pFnFindBuf->cFns] = atol(row[1]);
+                                            if (row[2] != NULL)
+                                                pFnFindBuf->alAliasFn[pFnFindBuf->cFns] = atol(row[2]);
+                                            else
+                                                pFnFindBuf->alAliasFn[pFnFindBuf->cFns] = ALIAS_NULL;
 
-                                        rc = mysql_query4(pmysql, &szQuery[0]);
+                                            /* next */
+                                            pFnFindBuf->cFns++;
+                                        }
+                                        mysql_free_result(pres);
+
+                                        /*
+                                         * 5) Update all functions from (1) to have aliasfn -2 (DONTMIND)
+                                         */
+                                        sprintf(&szQuery[0], "UPDATE function SET aliasfn = (-2) "
+                                                             "WHERE (",
+                                                lDll, pszFunctionName);
+                                        for (i = 0; i < cFnsThisDll; i++)
+                                        {
+                                            if (i != 0) strcat(&szQuery[0], " OR");
+                                            sprintf(&szQuery[strlen(szQuery)], " refcode = %ld", pFnFindBuf->alRefCode[i]);
+                                        }
+                                        strcat(&szQuery[0], ") AND aliasfn <> (-2)");
+
+                                        rc = mysql_query5(pmysql, &szQuery[0]);
+                                        if (rc >= 0 && cFnsAliasesAndThisDll < pFnFindBuf->cFns)
+                                        {
+                                            /*
+                                             * 6) Update all functions from (3) and (4) to alias the first function from 1.
+                                             */
+                                            sprintf(&szQuery[0], "UPDATE function SET aliasfn = (%ld) "
+                                                                 "WHERE aliasfn = (-1) AND refcode IN (",
+                                                    pFnFindBuf->alRefCode[0]);
+                                            for (i = cFnsAliasesAndThisDll; i < pFnFindBuf->cFns; i++)
+                                                sprintf(&szQuery[strlen(&szQuery[0])],
+                                                        i > 0 ? ", %ld" : "%ld", pFnFindBuf->alRefCode[i]);
+                                            strcat(&szQuery[0], ")");
+                                            rc = mysql_query6(pmysql, &szQuery[0]);
+                                        } /* query 5 */
                                     }
-                                }
+                                } /* query 4 */
                             }
-                        }
+                        } /* query 3 */
                     }
-                }
-                #endif
+                } /* query 2 */
             }
-        }
+        } /* query 1 */
         else
             rc = -1;
     }
@@ -671,6 +655,36 @@ signed long _System dbGetFunctionState(signed long lRefCode)
     return lState;
 }
 
+#if 1
+/*
+ * Stubs used while optimizing sqls.
+ */
+int     mysql_queryu1(MYSQL *mysql, const char *q)
+{   return mysql_query(mysql, q); }
+int     mysql_queryu2(MYSQL *mysql, const char *q)
+{   return mysql_query(mysql, q); }
+int     mysql_queryu3(MYSQL *mysql, const char *q)
+{   return mysql_query(mysql, q); }
+int     mysql_queryu4(MYSQL *mysql, const char *q)
+{   return mysql_query(mysql, q); }
+int     mysql_queryu5(MYSQL *mysql, const char *q)
+{   return mysql_query(mysql, q); }
+int     mysql_queryu6(MYSQL *mysql, const char *q)
+{   return mysql_query(mysql, q); }
+int     mysql_queryu7(MYSQL *mysql, const char *q)
+{   return mysql_query(mysql, q); }
+int     mysql_queryu8(MYSQL *mysql, const char *q)
+{   return mysql_query(mysql, q); }
+#else
+#define mysql_queryu1 mysql_query
+#define mysql_queryu2 mysql_query
+#define mysql_queryu3 mysql_query
+#define mysql_queryu4 mysql_query
+#define mysql_queryu5 mysql_query
+#define mysql_queryu6 mysql_query
+#define mysql_queryu7 mysql_query
+#define mysql_queryu8 mysql_query
+#endif
 
 /**
  * Updates function information.
@@ -682,22 +696,29 @@ signed long _System dbGetFunctionState(signed long lRefCode)
  */
 unsigned long _System dbUpdateFunction(PFNDESC pFnDesc, signed long lDll, char *pszError)
 {
-    char  szQuery[256];
-    char *pszQuery = &szQuery[0];
-    long  lCurrentState;
-    int   i,k,rc;
-    unsigned long ulRc = 0;
+    MYSQL_RES *     pres;
+    MYSQL_ROW       row;
+    char            szQuery[512];
+    char *          pszQuery = &szQuery[0];
+    long            lCurrentState;
+    int             i,k,rc;
+    unsigned long   ulRc = 0;
 
     for (k = 0; k < pFnDesc->cRefCodes; k++)
     {
         BOOL    f = FALSE;
 
-        /* set updated flag */
+        /*
+         * Set updated flag
+         */
         sprintf(pszQuery, "UPDATE function SET updated = updated + 1 WHERE refcode = %ld",
                 pFnDesc->alRefCode[k]);
-        rc = mysql_query(pmysql, &szQuery[0]);
+        rc = mysql_queryu1(pmysql, &szQuery[0]);
 
-        /* get current status */
+
+        /*
+         * Get current status
+         */
         lCurrentState = dbGetFunctionState(pFnDesc->alRefCode[k]);
         if (lCurrentState == -1)
         {
@@ -705,7 +726,10 @@ unsigned long _System dbUpdateFunction(PFNDESC pFnDesc, signed long lDll, char *
             return 1;
         }
 
-        /* update function table first */
+
+        /*
+         * Update function table first
+         */
         strcpy(pszQuery, "UPDATE function SET ");
         pszQuery += strlen(pszQuery);
         if (pFnDesc->lStatus != 99 || lCurrentState == 0)
@@ -726,7 +750,7 @@ unsigned long _System dbUpdateFunction(PFNDESC pFnDesc, signed long lDll, char *
         if (f)
         {
             sprintf(pszQuery + strlen(pszQuery), "WHERE refcode = %ld", pFnDesc->alRefCode[k]);
-            rc = mysql_query(pmysql, &szQuery[0]);
+            rc = mysql_queryu2(pmysql, &szQuery[0]);
             if (rc < 0)
             {
                 sprintf(pszError, "Updating functiontable failed with error: %s - (sql=%s) ",
@@ -736,50 +760,113 @@ unsigned long _System dbUpdateFunction(PFNDESC pFnDesc, signed long lDll, char *
             }
         }
 
-        /* parameters */
-        pszQuery = &szQuery[0];
-        sprintf(pszQuery, "DELETE FROM parameter WHERE function = %ld", pFnDesc->alRefCode[k]);
-        rc = mysql_query(pmysql, &szQuery[0]);
-        if (rc < 0)
-        {
-            if (*pszError == ' ')
-                strcpy(pszError++, "\n\t");
-            sprintf(pszError, "Deleting old parameters failed with error: %s - (sql=%s) ",
-                    dbGetLastErrorDesc(), &szQuery[0]);
-            pszError += strlen(pszError) - 1;
-            ulRc++;
-        }
 
-        for (i = 0; i < pFnDesc->cParams; i++)
+        /*
+         * Parameters
+         */
+        pszQuery = &szQuery[0];
+        sprintf(pszQuery, "SELECT count(*) FROM parameter WHERE function = %ld", pFnDesc->alRefCode[k]);
+        rc = mysql_queryu3(pmysql, pszQuery);
+        if (rc >= 0)
         {
-            sprintf(pszQuery, "INSERT INTO parameter(function, sequencenbr, type, name) "
-                    "VALUES (%ld, %d, '%s', '%s')",
-                    pFnDesc->alRefCode[k], i,
-                    pFnDesc->apszParamType[i] != NULL ? pFnDesc->apszParamType[i] : "",
-                    pFnDesc->apszParamName[i] != NULL ? pFnDesc->apszParamName[i] : ""
-                    );
-            rc = mysql_query(pmysql, pszQuery);
-            if (rc < 0)
+            pres = mysql_store_result(pmysql);
+            if (pres != NULL)
+                row = mysql_fetch_row(pres);
+            if (pres != NULL && row != NULL && mysql_num_rows(pres) == 1)
+            {
+                if (atol(row[0]) == pFnDesc->cParams)
+                {   /* update parameters */
+                    for (i = 0; i < pFnDesc->cParams; i++)
+                    {
+                        sprintf(pszQuery, "UPDATE parameter SET type = '%s', name = '%s' "
+                                "WHERE function = (%ld) AND sequencenbr == (%ld)",
+                                pFnDesc->apszParamType[i] != NULL ? pFnDesc->apszParamType[i] : "",
+                                pFnDesc->apszParamName[i] != NULL ? pFnDesc->apszParamName[i] : "",
+                                pFnDesc->alRefCode[k], i
+                                );
+                        rc = mysql_queryu4(pmysql, pszQuery);
+                        if (rc < 0)
+                        {
+                            if (*pszError == ' ')
+                                strcpy(pszError++, "\n\t");
+                            sprintf(pszError, "Updateing parameter %i failed with error: %s - (sql=%s) ",
+                                    i, dbGetLastErrorDesc(), pszQuery);
+                            pszError += strlen(pszError) - 1;
+                            ulRc++;
+                        }
+                    }
+                }
+                else
+                {
+                    if (atol(row[0]) != 0)
+                    {   /* delete old parameters */
+                        sprintf(pszQuery, "DELETE FROM parameter WHERE function = %ld", pFnDesc->alRefCode[k]);
+                        rc = mysql_queryu5(pmysql, pszQuery);
+                        if (rc < 0)
+                        {
+                            if (*pszError == ' ')
+                                strcpy(pszError++, "\n\t");
+                            sprintf(pszError, "Deleting old parameters failed with error: %s - (sql=%s) ",
+                                    dbGetLastErrorDesc(), pszQuery);
+                            pszError += strlen(pszError) - 1;
+                            ulRc++;
+                        }
+                    }
+
+                    /* insert parameters */
+                    for (i = 0; i < pFnDesc->cParams; i++)
+                    {
+                        sprintf(pszQuery, "INSERT INTO parameter(function, sequencenbr, type, name) "
+                                "VALUES (%ld, %d, '%s', '%s')",
+                                pFnDesc->alRefCode[k], i,
+                                pFnDesc->apszParamType[i] != NULL ? pFnDesc->apszParamType[i] : "",
+                                pFnDesc->apszParamName[i] != NULL ? pFnDesc->apszParamName[i] : ""
+                                );
+                        rc = mysql_queryu6(pmysql, pszQuery);
+                        if (rc < 0)
+                        {
+                            if (*pszError == ' ')
+                                strcpy(pszError++, "\n\t");
+                            sprintf(pszError, "Inserting parameter %i failed with error: %s - (sql=%s) ",
+                                    i, dbGetLastErrorDesc(), pszQuery);
+                            pszError += strlen(pszError) - 1;
+                            ulRc++;
+                        }
+                    }
+                }
+            }
+            else
             {
                 if (*pszError == ' ')
                     strcpy(pszError++, "\n\t");
-                sprintf(pszError, "Inserting parameter %i failed with error: %s - (sql=%s) ",
-                        i, dbGetLastErrorDesc(), &szQuery[0]);
+                sprintf(pszError, "failed to store result or to fetch a row , error: %s - (sql=%s) ",
+                        dbGetLastErrorDesc(), pszQuery);
                 pszError += strlen(pszError) - 1;
                 ulRc++;
             }
         }
+        else
+        {
+            if (*pszError == ' ')
+                strcpy(pszError++, "\n\t");
+            sprintf(pszError, "Failed querying number of parameters, error: %s - (sql=%s) ",
+                    dbGetLastErrorDesc(), pszQuery);
+            pszError += strlen(pszError) - 1;
+            ulRc++;
+        }
 
-        /* authors */
-        pszQuery = &szQuery[0];
+
+        /*
+         * Authors
+         */
         sprintf(pszQuery, "DELETE FROM fnauthor WHERE function = %ld", pFnDesc->alRefCode[k]);
-        rc = mysql_query(pmysql, &szQuery[0]);
+        rc = mysql_queryu7(pmysql, pszQuery);
         if (rc < 0)
         {
             if (*pszError == ' ')
                 strcpy(pszError++, "\n\t");
             sprintf(pszError, "Deleting old authors failed with error: %s - (sql=%s) ",
-                    dbGetLastErrorDesc(), &szQuery[0]);
+                    dbGetLastErrorDesc(), pszQuery);
             pszError += strlen(pszError) - 1;
             ulRc++;
         }
@@ -791,13 +878,13 @@ unsigned long _System dbUpdateFunction(PFNDESC pFnDesc, signed long lDll, char *
             sprintf(pszQuery, "INSERT INTO fnauthor(author, function) "
                     "VALUES (%ld, %ld)",
                     pFnDesc->alAuthorRefCode[i], pFnDesc->alRefCode[k]);
-            rc = mysql_query(pmysql, pszQuery);
+            rc = mysql_queryu8(pmysql, pszQuery);
             if (rc < 0)
             {
                 if (*pszError == ' ')
                     strcpy(pszError++, "\n\t");
                 sprintf(pszError, "Inserting parameter %i failed with error: %s - (sql=%s) ",
-                        i, dbGetLastErrorDesc(), &szQuery[0]);
+                        i, dbGetLastErrorDesc(), pszQuery);
                 pszError += strlen(pszError) - 1;
                 ulRc++;
             }

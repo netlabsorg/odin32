@@ -1,4 +1,4 @@
--- $Id: CreateTables.sql,v 1.4 2000-02-12 23:54:29 bird Exp $
+-- $Id: CreateTables.sql,v 1.5 2000-02-14 13:49:12 bird Exp $
 --
 -- Create all tables.
 --
@@ -29,8 +29,8 @@ CREATE TABLE function (
     refcode  INTEGER  NOT NULL AUTO_INCREMENT PRIMARY KEY,
     dll      TINYINT  NOT NULL,
     aliasfn  INTEGER  NOT NULL DEFAULT -1,
-    name     VARCHAR(64) NOT NULL,
-    intname  VARCHAR(64) NOT NULL,
+    name     VARCHAR(74) NOT NULL,
+    intname  VARCHAR(74) NOT NULL,
     state    TINYINT  NOT NULL DEFAULT 0,
     ordinal  INTEGER  NOT NULL,
     apigroup SMALLINT,
