@@ -1,4 +1,4 @@
-/* $Id: winconst.h,v 1.5 1999-08-29 14:57:28 sandervl Exp $ */
+/* $Id: winconst.h,v 1.6 1999-09-10 18:56:35 dengert Exp $ */
 
 /*
  * Win32 constants
@@ -153,7 +153,14 @@
 
 
 /* Argument 1 passed to the DllEntryProc. */
-#define	DLL_PROCESS_DETACH	0	/* detach process (unload library) */
-#define	DLL_PROCESS_ATTACH	1	/* attach process (load library) */
-#define	DLL_THREAD_ATTACH	2	/* attach new thread */
-#define	DLL_THREAD_DETACH	3	/* detach thread */
+#define DLL_PROCESS_DETACH      0       /* detach process (unload library) */
+#define DLL_PROCESS_ATTACH      1       /* attach process (load library) */
+#define DLL_THREAD_ATTACH       2       /* attach new thread */
+#define DLL_THREAD_DETACH       3       /* detach thread */
+
+/* Regions */
+#define ERROR_W           0
+#define NULLREGION_W      1
+#define SIMPLEREGION_W    2
+#define COMPLEXREGION_W   3
+
