@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.1426 2001-05-19 11:12:26 sandervl Exp $ */
+/* $Id: changelog,v 1.1427 2001-05-19 13:15:46 sandervl Exp $ */
 
  2001-05-19: Sander van Leeuwen <sandervl@xs4all.nl>
     - WS2_32:   o Added more exports
@@ -8,6 +8,13 @@
     - SHLWAPI:  o Export SHSetValueW
                 o Ordinal export 342 is InterlockedCompareExchange implementation
                   Takes 3 parameters, not 4. (Wine bug)
+                o Ordinal export 151 takes 3 parameters, not zero.
+                o Implemented SHLWAPI_151 (case sensitive string compare 
+                  with length; ascii version of SHLWAPI_152)
+                o Implemented SHLWAPI_153 (case insensitive string compare 
+                  with length (ascii))
+                o Added SHLWAPI_154 (case insensitive string compare with 
+                  length (unicode))
     - USER32:   o Added TrackMouseEvent, GetGUIThreadInfo & SendInput stubs
     - ADVAPI32: o Added undocumented SystemFunctionXXX functions (stubs)
                 o Set lasterror in EnumServicesStatusA/W stubs
