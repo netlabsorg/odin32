@@ -267,6 +267,8 @@ BOOL HMDeviceIoControl              (HANDLE hDevice,
                                      LPDWORD lpBytesReturned,
                                      LPOVERLAPPED lpOverlapped);
 
+BOOL   HMCancelIo                   (HANDLE hDevice);
+
 BOOL   HMFlushFileBuffers           (HANDLE                     hObject);
 
 BOOL   HMGetOverlappedResult        (HANDLE                     hObject,
