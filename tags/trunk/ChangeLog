@@ -1,4 +1,11 @@
- /* $Id: ChangeLog,v 1.19 1999-06-23 22:55:41 phaller Exp $ */
+ /* $Id: ChangeLog,v 1.20 1999-06-24 08:45:38 sandervl Exp $ */
+
+ 99-24-06: Edgar Buerkle
+	- KERNEL32: Implemented GetLocaleInfoA/W
+
+ 99-24-06: Sander van Leeuwen
+	- include\winos2def.h: Changed OS/2 apis to use wrappers (FS save/restore)
+	  and added DosQueryCtryInfo
 
  99-06-23: Patrick Haller
         - Fixed date format in changlog .g.
