@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.1699 2001-09-27 01:56:18 bird Exp $ */
+/* $Id: changelog,v 1.1700 2001-09-27 13:14:53 phaller Exp $ */
+
+ 2001-09-27: Patrick Haller <patrick.haller@innotek.de>
+    - USER32:   o partial implementation of SendInput()
 
  2001-09-26: knut st. osmundsen <kosmunds@csc.com>
     - Win32k:   o Create development branch 'splittup' which in the
