@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.cpp,v 1.56 2002-06-15 17:17:17 sandervl Exp $ */
+/* $Id: oslibmsg.cpp,v 1.57 2002-06-15 17:38:23 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -433,7 +433,9 @@ continuepeekmsg:
         //to do so, we will translate each win32 message in the filter range and call WinPeekMsg
         ULONG ulPMFilter;
 
-        for(int i=0;i<uMsgFilterMax-uMsgFilterMin;i++) {
+        for(int i=0;i<uMsgFilterMax-uMsgFilterMin+1;i++) {
+            rc = 0;
+
             ulPMFilter = TranslateWinMsg(uMsgFilterMin+i, TRUE, TRUE);
             if(ulPMFilter) {
                 do {
@@ -465,7 +467,6 @@ continuepeekmsg:
         }
         while (eaten && rc);
     }
-
     if(rc == FALSE) {
         return FALSE;
     }
