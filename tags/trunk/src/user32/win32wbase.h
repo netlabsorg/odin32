@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.41 1999-11-03 22:04:24 cbratschi Exp $ */
+/* $Id: win32wbase.h,v 1.42 1999-11-10 17:11:31 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -187,9 +187,12 @@ Win32WndClass  *getClass()  { return windowClass; };
 Win32BaseWindow *getOwner()                   { return owner; };
 
  SCROLLBAR_INFO *getScrollInfo(int nBar);
-       HWND      getVertScrollHandle()        { return hwndVertScroll; };
-       HWND      getHorzScrollHandle()        { return hwndHorzScroll; };
+       HWND      getVertScrollHandle()               { return hwndVertScroll; };
+       VOID      setVertScrollHandle(HWND newHandle) { hwndVertScroll = newHandle; }
+       HWND      getHorzScrollHandle()               { return hwndHorzScroll; };
+       VOID      setHorzScrollHandle(HWND newHandle) { hwndHorzScroll = newHandle; }
        VOID      subclassScrollBars(BOOL subHorz,BOOL subVert);
+       BOOL      showScrollBars(BOOL changeHorz,BOOL changeVert,BOOL fShow);
 
        LRESULT  SendMessageA(ULONG msg, WPARAM wParam, LPARAM lParam);
        LRESULT  SendMessageW(ULONG msg, WPARAM wParam, LPARAM lParam);
