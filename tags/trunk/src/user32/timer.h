@@ -1,4 +1,4 @@
-/* $Id: timer.h,v 1.5 2000-01-18 20:08:14 sandervl Exp $ */
+/* $Id: timer.h,v 1.6 2003-05-16 10:59:28 sandervl Exp $ */
 /*
  * public timer functions
  *
@@ -13,9 +13,10 @@
 #define __TIMER_H__
 
 #ifndef INCL_TIMERWIN32
-extern BOOL TIMER_GetTimerInfo(HWND PMhwnd,ULONG PMid,PBOOL sys,PULONG id);
+extern BOOL TIMER_GetTimerInfo(HWND PMhwnd,ULONG PMid,PBOOL sys,PULONG id, PULONG proc);
 extern BOOL TIMER_HandleTimer (PQMSG pMsg);
 #endif
+extern BOOL TIMER_IsTimerValid( HWND hwnd, UINT id, ULONG proc );
 extern VOID TIMER_KillTimerFromWindow(HWND hwnd);
 
 #endif //__TIMER_H__
