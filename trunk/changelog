@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2687 2004-02-24 11:47:52 sandervl Exp $ */
+/* $Id: changelog,v 1.2688 2004-02-27 14:37:31 sandervl Exp $ */
+
+ 2004-02-27: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o Re-assert DC transformation and y-inversion after SetWindowPos
 
  2003-02-24: Dietrich Teickner <Dietrich_Teickner@t-online   >
     - KERNEL32: o CreateProcess fix
