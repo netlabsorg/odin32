@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.31 2002-05-16 12:16:46 sandervl Exp $
+# $Id: makefile,v 1.32 2002-06-15 11:16:52 sandervl Exp $
 
 #
 # Odin32 API
@@ -35,7 +35,7 @@ $(OBJDIR)\large_int.obj \
 $(OBJDIR)\regfunc.obj \
 $(OBJDIR)\error.obj \
 $(OBJDIR)\loader.obj \
-$(OBJDIR)\heap.obj \
+##$(OBJDIR)\heap.obj \
 $(OBJDIR)\misc.obj \
 $(OBJDIR)\string.obj \
 $(OBJDIR)\ntdllrsrc.obj
