@@ -1,4 +1,4 @@
-/* $Id: mixeros2.cpp,v 1.9 2002-07-12 08:12:30 sandervl Exp $ */
+/* $Id: mixeros2.cpp,v 1.10 2002-07-12 09:21:27 sandervl Exp $ */
 
 /*
  * OS/2 Mixer multimedia
@@ -54,6 +54,9 @@ BOOL OSLibMixerOpen()
         dprintf(("Unable to open PDD %s", szPDDName));
         return FALSE;
     }
+    //Touch array to force OS/2 to make it valid; some braindead audio drivers
+    //(Crystal) do not check pointers.
+    mixerApiMap[0] = 0;
     if(mixerapiIOCTL90(hPDDMix, GETAPIMAP, mixerApiMap, sizeof(mixerApiMap)) == FALSE) {
         dprintf(("GETAPIMAP failed!!"));
         DosClose(hPDDMix);
