@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.351 2003-01-04 12:21:44 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.352 2003-01-06 15:38:17 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2639,6 +2639,11 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx,
         //Restore position always changes when the window position is changed
         dprintf(("Save new restore position (%d,%d)(%d,%d)", rectWindow.left, rectWindow.top, rectWindow.right, rectWindow.bottom));
         windowpos.rcNormalPosition = rectWindow;
+    }
+    //MSDN says the entire client area will be invalidated when SWP_NOCOPYBITS
+    //is specified (fixes repaint issues when window is made smaller)
+    if((fuFlags & (SWP_NOCOPYBITS|SWP_NOREDRAW)) == SWP_NOCOPYBITS) {
+        InvalidateRect(getWindowHandle(), NULL, TRUE);
     }
     return (rc);
 }
