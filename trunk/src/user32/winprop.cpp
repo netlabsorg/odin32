@@ -1,4 +1,4 @@
-/* $Id: winprop.cpp,v 1.7 2000-02-16 14:28:28 sandervl Exp $ */
+/* $Id: winprop.cpp,v 1.8 2000-03-23 23:06:54 sandervl Exp $ */
 /*
  * Win32 Property apis for OS/2
  *
@@ -16,15 +16,11 @@
 #define DBG_LOCALLOG	DBG_winprop
 #include "dbglocal.h"
 
-#undef DEBUG
-
 //******************************************************************************
 //******************************************************************************
 int WIN32API EnumPropsA(HWND hwnd, PROPENUMPROCA arg2)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  EnumPropsA DOES NOT WORK\n");
-#endif
+    dprintf(("USER32:  EnumPropsA DOES NOT WORK\n"));
     //calling convention problems
     return 0;
 //    return O32_EnumProps(hwnd, (PROPENUMPROC_O32)arg2);
@@ -33,9 +29,7 @@ int WIN32API EnumPropsA(HWND hwnd, PROPENUMPROCA arg2)
 //******************************************************************************
 int WIN32API EnumPropsExA( HWND hwnd, PROPENUMPROCEXA arg2, LPARAM  arg3)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  EnumPropsExA DOES NOT WORK\n");
-#endif
+    dprintf(("USER32:  EnumPropsExA DOES NOT WORK\n"));
     //calling convention problems
     return 0;
 //    return O32_EnumPropsEx(hwnd, arg2, (PROPENUMPROCEX_O32)arg3);
@@ -44,9 +38,7 @@ int WIN32API EnumPropsExA( HWND hwnd, PROPENUMPROCEXA arg2, LPARAM  arg3)
 //******************************************************************************
 int WIN32API EnumPropsExW( HWND hwnd, PROPENUMPROCEXW arg2, LPARAM  arg3)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  EnumPropsExW DOES NOT WORK\n");
-#endif
+    dprintf(("USER32:  EnumPropsExW DOES NOT WORK\n"));
     // NOTE: This will not work as is (needs UNICODE support)
     //calling convention problems
     return 0;
@@ -56,9 +48,7 @@ int WIN32API EnumPropsExW( HWND hwnd, PROPENUMPROCEXW arg2, LPARAM  arg3)
 //******************************************************************************
 int WIN32API EnumPropsW( HWND hwnd, PROPENUMPROCW  arg2)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  EnumPropsW DOES NOT WORK\n");
-#endif
+    dprintf(("USER32:  EnumPropsW DOES NOT WORK\n"));
     // NOTE: This will not work as is (needs UNICODE support)
     //calling convention problems
     return 0;
@@ -78,11 +68,9 @@ HANDLE WIN32API GetPropA(HWND hwnd, LPCSTR arg2)
         return 0;
     }
     rc = O32_GetProp(window->getOS2WindowHandle(), arg2);
-#ifdef DEBUG
     if(HIWORD(arg2) != 0)
-         dprintf(("USER32: GetPropA %s returned %x\n", arg2, rc));
-    else dprintf(("USER32: GetPropA %X returned %x\n", arg2, rc));
-#endif
+         dprintf2(("USER32: GetPropA %s returned %x\n", arg2, rc));
+    else dprintf2(("USER32: GetPropA %X returned %x\n", arg2, rc));
     return rc;
 }
 //******************************************************************************
@@ -114,11 +102,9 @@ HANDLE WIN32API RemovePropA( HWND hwnd, LPCSTR  arg2)
         SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
-#ifdef DEBUG
     if(HIWORD(arg2) != 0)
-         dprintf(("USER32: RemovePropA %s\n", arg2));
-    else dprintf(("USER32: RemovePropA %X\n", arg2));
-#endif
+         dprintf2(("USER32: RemovePropA %s\n", arg2));
+    else dprintf2(("USER32: RemovePropA %X\n", arg2));
     return O32_RemoveProp(window->getOS2WindowHandle(), arg2);
 }
 //******************************************************************************
@@ -150,11 +136,9 @@ BOOL WIN32API SetPropA( HWND hwnd, LPCSTR arg2, HANDLE  arg3)
         SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
-#ifdef DEBUG
     if(HIWORD(arg2) != 0)
-         dprintf(("USER32: SetPropA %s to %x\n", arg2, arg3));
-    else dprintf(("USER32: SetPropA %X to %x\n", arg2, arg3));
-#endif
+         dprintf2(("USER32: SetPropA %s to %x\n", arg2, arg3));
+    else dprintf2(("USER32: SetPropA %X to %x\n", arg2, arg3));
     return O32_SetProp(window->getOS2WindowHandle(), arg2, arg3);
 }
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: windowmsg.cpp,v 1.19 2000-02-16 14:28:26 sandervl Exp $ */
+/* $Id: windowmsg.cpp,v 1.20 2000-03-23 23:06:53 sandervl Exp $ */
 /*
  * Win32 window message APIs for OS/2
  *
@@ -244,9 +244,7 @@ UINT WIN32API RegisterWindowMessageA(LPCSTR arg1)
  UINT rc;
 
     rc = O32_RegisterWindowMessage(arg1);
-#ifdef DEBUG
-    WriteLog("USER32:  RegisterWindowMessageA %s returned %X\n", arg1, rc);
-#endif
+    dprintf(("USER32:  RegisterWindowMessageA %s returned %X\n", arg1, rc));
     return(rc);
 }
 //******************************************************************************
@@ -256,9 +254,7 @@ UINT WIN32API RegisterWindowMessageW( LPCWSTR arg1)
  char *astring = UnicodeToAsciiString((LPWSTR)arg1);
  UINT  rc;
 
-#ifdef DEBUG
-    WriteLog("USER32:  RegisterWindowMessageW\n");
-#endif
+    dprintf(("USER32:  RegisterWindowMessageW\n"));
     rc = O32_RegisterWindowMessage(astring);
     FreeAsciiString(astring);
     return rc;
@@ -268,9 +264,7 @@ UINT WIN32API RegisterWindowMessageW( LPCWSTR arg1)
 //******************************************************************************
 BOOL WIN32API SetMessageQueue(int cMessagesMax)
 {
-#ifdef DEBUG
-  WriteLog("USER32:  SetMessageQueue\n");
-#endif
+  dprintf(("USER32:  SetMessageQueue\n"));
   return(TRUE);
 }
 //******************************************************************************
@@ -279,9 +273,7 @@ LRESULT WIN32API SendMessageTimeoutA(HWND hwnd, UINT Msg, WPARAM wParam,
                     LPARAM lParam, UINT fuFlags, UINT uTimeOut,
                     LPDWORD lpdwResult)
 {
-#ifdef DEBUG
-  WriteLog("USER32:  SendMessageTimeoutA, partially implemented\n");
-#endif
+  dprintf(("USER32:  SendMessageTimeoutA, partially implemented\n"));
   //ignore fuFlags & wTimeOut
   *lpdwResult = SendMessageA(hwnd, Msg, wParam, lParam);
   return(TRUE);
@@ -292,36 +284,28 @@ LRESULT WIN32API SendMessageTimeoutW(HWND hwnd, UINT Msg, WPARAM wParam,
                     LPARAM lParam, UINT fuFlags, UINT uTimeOut,
                     LPDWORD lpdwResult)
 {
-#ifdef DEBUG
-  WriteLog("USER32:  SendMessageTimeoutW, partially implemented\n");
-#endif
+  dprintf(("USER32:  SendMessageTimeoutW, partially implemented\n"));
   return(SendMessageTimeoutA(hwnd, Msg, wParam, lParam, fuFlags, uTimeOut, lpdwResult));
 }
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API SendNotifyMessageA(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
-#ifdef DEBUG
-  WriteLog("USER32:  SendNotifyMessageA, not completely implemented\n");
-#endif
+  dprintf(("USER32:  SendNotifyMessageA, not completely implemented\n"));
   return(SendMessageA(hwnd, Msg, wParam, lParam));
 }
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API SendNotifyMessageW(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
-#ifdef DEBUG
-  WriteLog("USER32:  SendNotifyMessageW, not completely implemented\n");
-#endif
+  dprintf(("USER32:  SendNotifyMessageW, not completely implemented\n"));
   return(SendMessageA(hwnd, Msg, wParam, lParam));
 }
 //******************************************************************************
 //******************************************************************************
 LPARAM WIN32API SetMessageExtraInfo(LPARAM lParam)
 {
-#ifdef DEBUG
-  WriteLog("USER32:  SetMessageExtraInfo\n");
-#endif
+  dprintf(("USER32:  SetMessageExtraInfo\n"));
   return SetThreadMessageExtraInfo(lParam);
 }
 /*****************************************************************************

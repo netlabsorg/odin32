@@ -1,4 +1,4 @@
-/* $Id: display.cpp,v 1.5 2000-02-16 14:34:16 sandervl Exp $ */
+/* $Id: display.cpp,v 1.6 2000-03-23 23:06:51 sandervl Exp $ */
 /*
  * Display/Monitor Win32 apis
  *
@@ -346,14 +346,12 @@ LONG WIN32API ChangeDisplaySettingsA(LPDEVMODEA  lpDevMode, DWORD dwFlags)
     {
         return(DISP_CHANGE_SUCCESSFUL);
     }
-#ifdef DEBUG
     if(lpDevMode) {
-        WriteLog("USER32:  ChangeDisplaySettingsA FAKED %X\n", dwFlags);
-        WriteLog("USER32:  ChangeDisplaySettingsA lpDevMode->dmBitsPerPel %d\n", lpDevMode->dmBitsPerPel);
-        WriteLog("USER32:  ChangeDisplaySettingsA lpDevMode->dmPelsWidth  %d\n", lpDevMode->dmPelsWidth);
-        WriteLog("USER32:  ChangeDisplaySettingsA lpDevMode->dmPelsHeight %d\n", lpDevMode->dmPelsHeight);
+        dprintf(("USER32:  ChangeDisplaySettingsA FAKED %X\n", dwFlags));
+        dprintf(("USER32:  ChangeDisplaySettingsA lpDevMode->dmBitsPerPel %d\n", lpDevMode->dmBitsPerPel));
+        dprintf(("USER32:  ChangeDisplaySettingsA lpDevMode->dmPelsWidth  %d\n", lpDevMode->dmPelsWidth));
+        dprintf(("USER32:  ChangeDisplaySettingsA lpDevMode->dmPelsHeight %d\n", lpDevMode->dmPelsHeight));
     }
-#endif
     return(DISP_CHANGE_SUCCESSFUL);
 }
 /*****************************************************************************
@@ -395,14 +393,12 @@ LONG WIN32API ChangeDisplaySettingsExA(LPCSTR devname, LPDEVMODEA lpDevMode,
     {
         return(DISP_CHANGE_SUCCESSFUL);
     }
-#ifdef DEBUG
     if(lpDevMode) {
-        WriteLog("USER32:  ChangeDisplaySettingsExA FAKED %X\n", dwFlags);
-        WriteLog("USER32:  ChangeDisplaySettingsExA lpDevMode->dmBitsPerPel %d\n", lpDevMode->dmBitsPerPel);
-        WriteLog("USER32:  ChangeDisplaySettingsExA lpDevMode->dmPelsWidth  %d\n", lpDevMode->dmPelsWidth);
-        WriteLog("USER32:  ChangeDisplaySettingsExA lpDevMode->dmPelsHeight %d\n", lpDevMode->dmPelsHeight);
+        dprintf(("USER32:  ChangeDisplaySettingsExA FAKED %X\n", dwFlags));
+        dprintf(("USER32:  ChangeDisplaySettingsExA lpDevMode->dmBitsPerPel %d\n", lpDevMode->dmBitsPerPel));
+        dprintf(("USER32:  ChangeDisplaySettingsExA lpDevMode->dmPelsWidth  %d\n", lpDevMode->dmPelsWidth));
+        dprintf(("USER32:  ChangeDisplaySettingsExA lpDevMode->dmPelsHeight %d\n", lpDevMode->dmPelsHeight));
     }
-#endif
     return(DISP_CHANGE_SUCCESSFUL);
 }
 //******************************************************************************
