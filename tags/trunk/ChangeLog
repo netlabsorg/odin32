@@ -1,4 +1,7 @@
-/* $Id: ChangeLog,v 1.2629 2003-10-06 09:50:30 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2630 2003-10-06 10:00:07 sandervl Exp $ */
+
+ 2003-10-06: Platon Fomichev <stauff@innotek   >
+    - USER32:   o Wrong class names (case) for Static, Scroller, Button.
 
  2003-10-06: KO Myung-Hun <komh@chollian    >
     - USER32:   o Fixed heap corruption when changing windows text (DBCS)
