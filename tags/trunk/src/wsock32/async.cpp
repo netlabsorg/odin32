@@ -1,4 +1,4 @@
-/* $Id: async.cpp,v 1.11 1999-11-04 00:58:03 phaller Exp $ */
+/* $Id: async.cpp,v 1.12 1999-11-04 01:13:41 phaller Exp $ */
 
 /*
  *
@@ -1002,7 +1002,7 @@ void WSAAsyncWorker::asyncSelect(PASYNCREQUEST pRequest)
   //@@@PH how to implement other events?
 
   // finally do the select!
-#ifndef BSDSELECT
+#ifdef BSDSELECT
   irc = os2_select(&sockWin,
                    (ulEvent & FD_READ)  ? 1 : 0,
                    (ulEvent & FD_WRITE) ? 1 : 0,
@@ -1054,6 +1054,21 @@ void WSAAsyncWorker::asyncSelect(PASYNCREQUEST pRequest)
       usResult = 0;
 
       // readiness for reading bytes ?
+/*
+      if (FD_ISSET(sockWin, pfds_read))      usResult |= FD_READ;
+      if (FD_ISSET(sockWin, pfds_write))     usResult |= FD_WRITE;
+      if (FD_ISSET(sockWin, pfds_exception)) usResult |= FD_OOB;
+*/
+
+/*
+#define FD_READ    0x01
+#define FD_WRITE   0x02
+#define FD_OOB     0x04
+#define FD_ACCEPT  0x08
+#define FD_CONNECT 0x10
+#define FD_CLOSE   0x20
+*/
+
       irc = ioctl(sockWin, FIONREAD, (char *)&iUnknown, sizeof(iUnknown));
       if ( (irc == 0) && (iUnknown > 0))
          usResult |= FD_READ | FD_CONNECT;
@@ -1443,6 +1458,7 @@ ODINFUNCTION0(BOOL, WSAIsBlocking)
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 // the real function calls
+
 ODINFUNCTION4(HANDLE, WSAAsyncSelect,SOCKET,       s,
                                      HWND,         hwnd,
                                      unsigned int, wMsg,
