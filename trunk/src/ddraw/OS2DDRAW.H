@@ -1,4 +1,4 @@
-/* $Id: OS2DDRAW.H,v 1.15 2001-10-05 12:33:09 sandervl Exp $ */
+/* $Id: OS2DDRAW.H,v 1.16 2002-06-08 13:12:33 sandervl Exp $ */
 
 /*
  * DX Draw base class definition
@@ -24,6 +24,10 @@
 #include <fourcc.h>
 #undef THIS
 #define THIS VOID*
+
+//testestest
+//#define SUPPORT_ALL_DIVE_FOURCCS
+//testestest
 
 #define MAX_FOURCC_CODES        4
 
@@ -74,6 +78,7 @@ class OS2IDirectDraw
     inline  int           GetScreenHeight() { return screenheight; }
     inline  int           GetScreenBpp()    { return screenbpp;}
     FOURCC        GetScreenFourCC();
+    BOOL          IsFourCCSupported(FOURCC fourcc);
     // We should be able to use any mode with less or same bits and same or
     // smaller size to be able to report all supported mode in the enum
     // functions we need the physical screen size. Other information is later
