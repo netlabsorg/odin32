@@ -1,4 +1,4 @@
-/* $Id: palette.cpp,v 1.7 2000-08-30 18:05:25 sandervl Exp $ */
+/* $Id: palette.cpp,v 1.8 2001-05-25 10:05:29 sandervl Exp $ */
 
 /*
  * GDI32 palette apis
@@ -80,25 +80,19 @@ HPALETTE WIN32API CreatePalette( const LOGPALETTE * arg1)
 //******************************************************************************
 HPALETTE WIN32API SelectPalette(HDC hdc, HPALETTE hPalette, BOOL bForceBackground)
 {
+  HPALETTE hPal;
+
   dprintf(("GDI32: SelectPalette (0x%08X, 0x%08X, 0x%08X)", hdc, hPalette, bForceBackground));
+  hPal = O32_SelectPalette(hdc, hPalette, bForceBackground);
   if(DIBSection::getSection() != NULL)
   {
     DIBSection *dsect = DIBSection::findHDC(hdc);
     if(dsect)
     {
-      int nrcolors;
-      PALETTEENTRY Pal[256];
-      char PalSize = dsect->GetBitCount();
-      dprintf(("       - Set Palette Values in DIBSection\n"));
-      if(PalSize<=8)
-      {
-        nrcolors = GetPaletteEntries( hPalette, 0, 1<<PalSize, (LPPALETTEENTRY)&Pal);
-        dsect->SetDIBColorTable(0, nrcolors, (RGBQUAD*)&Pal);
-      }
-
+        dsect->sync(hdc, 0, dsect->GetHeight());
     }
   }
-  return O32_SelectPalette(hdc, hPalette, bForceBackground);
+  return hPal;
 }
 //******************************************************************************
 //******************************************************************************
