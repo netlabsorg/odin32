@@ -1,4 +1,4 @@
-/* $Id: version.cpp,v 1.5 1999-08-12 23:33:37 phaller Exp $ */
+/* $Id: version.cpp,v 1.6 1999-10-02 04:09:55 sandervl Exp $ */
 
 /*
  * Win32 Version resource APIs for OS/2
@@ -464,7 +464,7 @@ ODINFUNCTION4(BOOL,VerQueryValueA,LPVOID,  pBlock,
     if ( !VersionInfoIs16( info ) )
     {
         // this is a quick hack, not much tested
-        WCHAR *ustring = (WCHAR *)malloc(strlen((char *)lpSubBlock)*2+1);
+        WCHAR *ustring = (WCHAR *)malloc(strlen((char *)lpSubBlock)*2+2);
         LPVOID ubuffer;
         char *abuffer;
         UINT len = *puLen * 2;
