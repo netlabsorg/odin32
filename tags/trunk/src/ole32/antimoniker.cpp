@@ -1,19 +1,21 @@
-/* $Id: antimoniker.cpp,v 1.2 1999-09-24 21:49:42 davidr Exp $ */
+/* $Id: antimoniker.cpp,v 1.3 2000-09-14 14:57:00 davidr Exp $ */
 /* 
  * AntiMonikers functions.
  * 
- * 20/9/99
- * 
- * Copyright 1999 David J. Raison
+ * Copyright 1999, 2000 David J. Raison
  * 
  * Direct port of Wine Implementation
  *   Copyright 1999  Noomen Hamza
+ *
+ * Updates.
+ *   14/09/2000 Updated from CorelWine
+ * 
  */
 
 #include "ole32.h"
 #include "debugtools.h"
 
-DEFAULT_DEBUG_CHANNEL(ole)
+DEFAULT_DEBUG_CHANNEL(moniker)
 
 /* AntiMoniker data structure */
 typedef struct AntiMonikerImpl
@@ -195,7 +197,7 @@ ULONG WINAPI AntiMonikerImpl_Release(IMoniker* iface)
  ******************************************************************************/
 HRESULT WINAPI AntiMonikerImpl_GetClassID(IMoniker* iface,CLSID *pClassID)
 {
-    TRACE("(%p,%p),stub!\n",iface,pClassID);
+    TRACE("(iface:%p ClassID:%p [CLSID_AntiMoniker])\n",iface,pClassID);
 
     if (pClassID==NULL)
         return E_POINTER;
@@ -251,6 +253,20 @@ HRESULT WINAPI AntiMonikerImpl_Save(IMoniker* iface,IStream* pStm,BOOL fClearDir
 }
 
 /******************************************************************************
+ *        AntiMonikerImpl_GetSizeToSave
+ ******************************************************************************/
+HRESULT AntiMonikerImpl_GetSizeToSave(IMoniker* iface,ULARGE_INTEGER* pcbSize)
+{
+    if (pcbSize==NULL)
+        return E_POINTER;
+
+    pcbSize->LowPart =  sizeof(DWORD);
+    pcbSize->HighPart = 0;
+
+    return S_OK;
+}
+
+/******************************************************************************
  *        AntiMoniker_GetSizeMax
  ******************************************************************************/
 HRESULT WINAPI AntiMonikerImpl_GetSizeMax(IMoniker* iface,
@@ -258,19 +274,17 @@ HRESULT WINAPI AntiMonikerImpl_GetSizeMax(IMoniker* iface,
 {
     TRACE("(%p,%p)\n",iface,pcbSize);
 
-    if (pcbSize!=NULL)
+    if (pcbSize == NULL)
         return E_POINTER;
 
-    /* for more details see AntiMonikerImpl_Save coments */
-    
-    /* Normaly the sizemax must be the  size of DWORD ! but I tested this function it ususlly return 16 bytes */
-    /* more than the number of bytes used by AntiMoniker::Save function */
-    pcbSize->LowPart =  sizeof(DWORD)+16;
-
-    pcbSize->HighPart=0;
+    /* GetSizeMax = SizeToSave + 16 */
+    AntiMonikerImpl_GetSizeToSave(iface,pcbSize);
+    pcbSize->LowPart += 16;	//FIXME - 64bit math
+//    pcbSize->HighPart = 0;
 
     return S_OK;
 }
+
 
 /******************************************************************************
  *         AntiMoniker_Construct (local function)
@@ -433,7 +447,7 @@ HRESULT WINAPI AntiMonikerImpl_IsRunning(IMoniker* iface,
     res=IBindCtx_GetRunningObjectTable(pbc,&rot);
 
     if (FAILED(res))
-    return res;
+	return res;
 
     res = IRunningObjectTable_IsRunning(rot,iface);
 
