@@ -1,4 +1,4 @@
-/* $Id: db.cpp,v 1.9 2000-02-14 13:49:13 bird Exp $ *
+/* $Id: db.cpp,v 1.10 2000-02-14 17:18:31 bird Exp $ *
  *
  * DB - contains all database routines.
  *
@@ -411,7 +411,7 @@ BOOL _System dbFindFunction(const char *pszFunctionName, PFNFINDBUF pFnFindBuf, 
     MYSQL_RES   *pres;
     MYSQL_ROW    row;
     int          rc;
-    char         szQuery[256];
+    char         szQuery[1024];
 
     /*
      * 1) Get functions for this dll(if given).
@@ -448,7 +448,7 @@ BOOL _System dbFindFunction(const char *pszFunctionName, PFNFINDBUF pFnFindBuf, 
             /* alias check and fix */
             if (lDll >= 0 && pFnFindBuf->cFns != 0)
             {
-                int cFnsThisDll, cFnsAliasesAndThisDll, i;
+                int cFnsThisDll, cFnsAliasesAndThisDll, i, f;
 
                 /*
                  * 2) Get functions which aliases the functions found in (1).
@@ -546,16 +546,17 @@ BOOL _System dbFindFunction(const char *pszFunctionName, PFNFINDBUF pFnFindBuf, 
                                          * 5) Update all functions from (1) to have aliasfn -2 (DONTMIND)
                                          */
                                         sprintf(&szQuery[0], "UPDATE function SET aliasfn = (-2) "
-                                                             "WHERE (",
+                                                             "WHERE refcode IN (",
                                                 lDll, pszFunctionName);
-                                        for (i = 0; i < cFnsThisDll; i++)
-                                        {
-                                            if (i != 0) strcat(&szQuery[0], " OR");
-                                            sprintf(&szQuery[strlen(szQuery)], " refcode = %ld", pFnFindBuf->alRefCode[i]);
-                                        }
+                                        for (f = 0, i = 0; i < cFnsThisDll; i++)
+                                            if (pFnFindBuf->alAliasFn[i] != ALIAS_DONTMIND)
+                                                sprintf(&szQuery[strlen(&szQuery[0])],
+                                                        f++ != 0 ? ", %ld" : "%ld", pFnFindBuf->alRefCode[i]);
                                         strcat(&szQuery[0], ") AND aliasfn <> (-2)");
-
-                                        rc = mysql_query5(pmysql, &szQuery[0]);
+                                        if (f > 0)
+                                            rc = mysql_query5(pmysql, &szQuery[0]);
+                                        else
+                                            rc = 0;
                                         if (rc >= 0 && cFnsAliasesAndThisDll < pFnFindBuf->cFns)
                                         {
                                             /*
@@ -565,8 +566,10 @@ BOOL _System dbFindFunction(const char *pszFunctionName, PFNFINDBUF pFnFindBuf, 
                                                                  "WHERE aliasfn = (-1) AND refcode IN (",
                                                     pFnFindBuf->alRefCode[0]);
                                             for (i = cFnsAliasesAndThisDll; i < pFnFindBuf->cFns; i++)
+                                            {
                                                 sprintf(&szQuery[strlen(&szQuery[0])],
-                                                        i > 0 ? ", %ld" : "%ld", pFnFindBuf->alRefCode[i]);
+                                                        i > cFnsAliasesAndThisDll ? ", %ld" : "%ld", pFnFindBuf->alRefCode[i]);
+                                            }
                                             strcat(&szQuery[0], ")");
                                             rc = mysql_query6(pmysql, &szQuery[0]);
                                         } /* query 5 */
@@ -779,7 +782,7 @@ unsigned long _System dbUpdateFunction(PFNDESC pFnDesc, signed long lDll, char *
                     for (i = 0; i < pFnDesc->cParams; i++)
                     {
                         sprintf(pszQuery, "UPDATE parameter SET type = '%s', name = '%s' "
-                                "WHERE function = (%ld) AND sequencenbr == (%ld)",
+                                "WHERE function = (%ld) AND sequencenbr = (%ld)",
                                 pFnDesc->apszParamType[i] != NULL ? pFnDesc->apszParamType[i] : "",
                                 pFnDesc->apszParamName[i] != NULL ? pFnDesc->apszParamName[i] : "",
                                 pFnDesc->alRefCode[k], i
