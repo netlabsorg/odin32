@@ -1,4 +1,9 @@
-/* $Id: changelog,v 1.2213 2002-07-11 18:16:41 achimha Exp $ */
+/* $Id: changelog,v 1.2214 2002-07-12 08:58:50 sandervl Exp $ */
+
+ 2002-07-12: Sander van Leeuwen <sandervl@innotek.de> 
+    - WINMM:    o Changed init order; do not check for MMPM2 presence if
+                  wave audio was already disabled
+                o Minor cleanup for mixer code
 
  2002-07-11: Platon Fomichev <platon@innotek.de>
     - COMCTL32: o Listview: clear background for area without items (ownerdrawn)
