@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.1169 2000-10-04 15:16:05 bird Exp $ */
+ /* $Id: ChangeLog,v 1.1170 2000-10-04 19:39:12 sandervl Exp $ */
+
+ 2000-10-04: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: Added forwarder support for PE loader (required for msvcrt40.dll)
 
  2000-10-04: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - tools\ImpDef: Corrected wrong DESCRIPTION statement.
@@ -18,6 +21,7 @@
                 dlls (pe loader). Didn't fail properly before.
                 Check if executable exists in CreateProcessA; fixes VMWare
                 installation
+                InitCommandLine fix (forgot to copy cmd line)
     - USER32:   Fix for EDIT_WM_Char (couldn't type in numbers anymore)
                 EnumDisplaySettingsA accepts negative indices
     - ADVAPI32: Cleanup
