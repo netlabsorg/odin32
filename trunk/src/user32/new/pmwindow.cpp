@@ -1,8 +1,9 @@
-/* $Id: pmwindow.cpp,v 1.17 1999-07-26 09:01:34 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.18 1999-08-16 15:55:28 dengert Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
  * Copyright 1998-1999 Sander van Leeuwen (sandervl@xs4all.nl)
+ * Copyright 1999      Daniela Engert (dani@ngrt.de)
  *
  *
  * Project Odin Software License can be found in LICENSE.TXT
@@ -87,7 +88,7 @@ BOOL InitPM()
 MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 {
  POSTMSG_PACKET *postmsg;
- OSLIBPOINT      point;
+ OSLIBPOINT      point, ClientPoint;
  Win32Window    *win32wnd;
  APIRET          rc;
 
@@ -285,8 +286,10 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         dprintf(("OS2: WM_BUTTON1DOWN %x", hwnd));
         point.x = (*(POINTS *)&mp1).x;
         point.y = (*(POINTS *)&mp1).y;
+        ClientPoint.x = point.x;
+        ClientPoint.y = MapOS2ToWin32Y(hwnd, 1, point.y);
         MapOS2ToWin32Point(OSLIB_HWND_DESKTOP, hwnd, &point);
-        if(win32wnd->MsgButton(BUTTON_LEFTDOWN, point.x, point.y)) {
+        if(win32wnd->MsgButton(BUTTON_LEFTDOWN, point.x, point.y, ClientPoint.x, ClientPoint.y)) {
                 goto RunDefWndProc;
         }
         break;
@@ -295,64 +298,80 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         dprintf(("OS2: WM_BUTTON1UP %x", hwnd));
         point.x = (*(POINTS *)&mp1).x;
         point.y = (*(POINTS *)&mp1).y;
+        ClientPoint.x = point.x;
+        ClientPoint.y = MapOS2ToWin32Y(hwnd, 1, point.y);
         MapOS2ToWin32Point(OSLIB_HWND_DESKTOP, hwnd, &point);
-        if(win32wnd->MsgButton(BUTTON_LEFTUP, point.x, point.y)) {
+        if(win32wnd->MsgButton(BUTTON_LEFTUP, point.x, point.y, ClientPoint.x, ClientPoint.y)) {
                 goto RunDefWndProc;
         }
         break;
     case WM_BUTTON1DBLCLK:
         point.x = (*(POINTS *)&mp1).x;
         point.y = (*(POINTS *)&mp1).y;
+        ClientPoint.x = point.x;
+        ClientPoint.y = MapOS2ToWin32Y(hwnd, 1, point.y);
         MapOS2ToWin32Point(OSLIB_HWND_DESKTOP, hwnd, &point);
-        if(win32wnd->MsgButton(BUTTON_LEFTDBLCLICK, point.x, point.y)) {
+        if(win32wnd->MsgButton(BUTTON_LEFTDBLCLICK, point.x, point.y, ClientPoint.x, ClientPoint.y)) {
                 goto RunDefWndProc;
         }
         break;
     case WM_BUTTON2DOWN:
         point.x = (*(POINTS *)&mp1).x;
         point.y = (*(POINTS *)&mp1).y;
+        ClientPoint.x = point.x;
+        ClientPoint.y = MapOS2ToWin32Y(hwnd, 1, point.y);
         MapOS2ToWin32Point(OSLIB_HWND_DESKTOP, hwnd, &point);
-        if(win32wnd->MsgButton(BUTTON_RIGHTDOWN, point.x, point.y)) {
+        if(win32wnd->MsgButton(BUTTON_RIGHTDOWN, point.x, point.y, ClientPoint.x, ClientPoint.y)) {
                 goto RunDefWndProc;
         }
         break;
     case WM_BUTTON2UP:
         point.x = (*(POINTS *)&mp1).x;
         point.y = (*(POINTS *)&mp1).y;
+        ClientPoint.x = point.x;
+        ClientPoint.y = MapOS2ToWin32Y(hwnd, 1, point.y);
         MapOS2ToWin32Point(OSLIB_HWND_DESKTOP, hwnd, &point);
-        if(win32wnd->MsgButton(BUTTON_RIGHTUP, point.x, point.y)) {
+        if(win32wnd->MsgButton(BUTTON_RIGHTUP, point.x, point.y, ClientPoint.x, ClientPoint.y)) {
                 goto RunDefWndProc;
         }
         break;
     case WM_BUTTON2DBLCLK:
         point.x = (*(POINTS *)&mp1).x;
         point.y = (*(POINTS *)&mp1).y;
+        ClientPoint.x = point.x;
+        ClientPoint.y = MapOS2ToWin32Y(hwnd, 1, point.y);
         MapOS2ToWin32Point(OSLIB_HWND_DESKTOP, hwnd, &point);
-        if(win32wnd->MsgButton(BUTTON_RIGHTDBLCLICK, point.x, point.y)) {
+        if(win32wnd->MsgButton(BUTTON_RIGHTDBLCLICK, point.x, point.y, ClientPoint.x, ClientPoint.y)) {
                 goto RunDefWndProc;
         }
         break;
     case WM_BUTTON3DOWN:
         point.x = (*(POINTS *)&mp1).x;
         point.y = (*(POINTS *)&mp1).y;
+        ClientPoint.x = point.x;
+        ClientPoint.y = MapOS2ToWin32Y(hwnd, 1, point.y);
         MapOS2ToWin32Point(OSLIB_HWND_DESKTOP, hwnd, &point);
-        if(win32wnd->MsgButton(BUTTON_MIDDLEDOWN, point.x, point.y)) {
+        if(win32wnd->MsgButton(BUTTON_MIDDLEDOWN, point.x, point.y, ClientPoint.x, ClientPoint.y)) {
                 goto RunDefWndProc;
         }
         break;
     case WM_BUTTON3UP:
         point.x = (*(POINTS *)&mp1).x;
         point.y = (*(POINTS *)&mp1).y;
+        ClientPoint.x = point.x;
+        ClientPoint.y = MapOS2ToWin32Y(hwnd, 1, point.y);
         MapOS2ToWin32Point(OSLIB_HWND_DESKTOP, hwnd, &point);
-        if(win32wnd->MsgButton(BUTTON_MIDDLEUP, point.x, point.y)) {
+        if(win32wnd->MsgButton(BUTTON_MIDDLEUP, point.x, point.y, ClientPoint.x, ClientPoint.y)) {
                 goto RunDefWndProc;
         }
         break;
     case WM_BUTTON3DBLCLK:
         point.x = (*(POINTS *)&mp1).x;
         point.y = (*(POINTS *)&mp1).y;
+        ClientPoint.x = point.x;
+        ClientPoint.y = MapOS2ToWin32Y(hwnd, 1, point.y);
         MapOS2ToWin32Point(OSLIB_HWND_DESKTOP, hwnd, &point);
-        if(win32wnd->MsgButton(BUTTON_MIDDLEDBLCLICK, point.x, point.y)) {
+        if(win32wnd->MsgButton(BUTTON_MIDDLEDBLCLICK, point.x, point.y, ClientPoint.x, ClientPoint.y)) {
                 goto RunDefWndProc;
         }
         break;
