@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.255 1999-09-28 18:14:56 dengert Exp $ */
+ /* $Id: changelog,v 1.256 1999-09-28 18:31:24 dengert Exp $ */
+
+ 99-09-28: Daniela Engert <dani@ngrt.de>
+	- USER32: CreateCaret fixed
 
  99-09-28: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: Mouse input functions: SetCapture() fixed
