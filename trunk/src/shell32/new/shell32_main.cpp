@@ -639,7 +639,7 @@ INT WINAPI ShellAboutA( HWND hWnd, LPCSTR szApp, LPCSTR szOtherStuff,
     info.szApp        = szApp;
     info.szOtherStuff = szOtherStuff;
     info.hIcon        = hIcon;
-    if (!hIcon) info.hIcon = LoadIcon16( 0, MAKEINTRESOURCE16(OIC_WINEICON) );
+    if (!hIcon) info.hIcon = LoadIconA( 0, (LPCSTR)OIC_WINEICON );
     return DialogBoxIndirectParamA( GetWindowLongA( hWnd, GWL_HINSTANCE ),
                                     (DLGTEMPLATE*)dlgTemplate , hWnd, AboutDlgProc, (LPARAM)&info );
 }
@@ -665,7 +665,7 @@ INT WINAPI ShellAboutW( HWND hWnd, LPCWSTR szApp, LPCWSTR szOtherStuff,
     info.szApp        = HEAP_strdupWtoA( GetProcessHeap(), 0, szApp );
     info.szOtherStuff = HEAP_strdupWtoA( GetProcessHeap(), 0, szOtherStuff );
     info.hIcon        = hIcon;
-    if (!hIcon) info.hIcon = LoadIcon16( 0, MAKEINTRESOURCE16(OIC_WINEICON) );
+    if (!hIcon) info.hIcon = LoadIconA( 0, (LPCSTR)OIC_WINEICON );
     ret = DialogBoxIndirectParamA( GetWindowLongA( hWnd, GWL_HINSTANCE ),
                                    (DLGTEMPLATE*)dlgTemplate, hWnd, AboutDlgProc, (LPARAM)&info );
     HeapFree( GetProcessHeap(), 0, (LPSTR)info.szApp );
