@@ -1,4 +1,4 @@
-/* $Id: ole2nls.cpp,v 1.14 2001-09-05 12:57:59 bird Exp $
+/* $Id: ole2nls.cpp,v 1.15 2001-11-14 12:30:40 phaller Exp $
  *
  *  National Language Support library
  *
@@ -441,6 +441,10 @@ static INT NLS_LoadStringExW(HMODULE hModule, LANGID lang_id, UINT res_id, LPWST
     WCHAR *p;
     int string_num;
     int i;
+
+    /* Replace SUBLANG_NEUTRAL by SUBLANG_DEFAULT */
+    if(SUBLANGID(lang_id) == SUBLANG_NEUTRAL)
+        lang_id = MAKELANGID(PRIMARYLANGID(lang_id), SUBLANG_DEFAULT);
 
     hrsrc = FindResourceExW(hModule, RT_STRINGW, (LPCWSTR)((res_id >> 4) + 1), lang_id);
 
@@ -2017,6 +2021,7 @@ INT WINAPI LCMapStringA(
   /* FIXME: as long as we don't support Katakana nor Hiragana
    * characters, we can support NORM_IGNOREKANATYPE
    */
+#ifdef DEBUG
   if (mapflags & ~LCMAPSTRINGA_SUPPORTED_FLAGS)
   {
     FIXME("(0x%04lx,0x%08lx,%p,%d,%p,%d): "
@@ -2030,6 +2035,7 @@ INT WINAPI LCMapStringA(
       mapflags & ~LCMAPSTRINGA_SUPPORTED_FLAGS
      );
   }
+#endif
 
   if ( !(mapflags & LCMAP_SORTKEY) )
   {

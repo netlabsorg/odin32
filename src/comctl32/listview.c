@@ -6762,13 +6762,24 @@ static LRESULT LISTVIEW_InsertColumnW(HWND hwnd, INT nColumn,
     if (lpColumn->pszText == LPSTR_TEXTCALLBACKW)
       lvca.pszText = LPSTR_TEXTCALLBACKA;
     else
+#ifdef __WIN32OS2__
+    {
+      LPSTR pszText;
+      STACK_strdupWtoA(lpColumn->pszText, pszText)
+      lvca.pszText = pszText;
+    }
+#else
       lvca.pszText = HEAP_strdupWtoA(GetProcessHeap(),0,lpColumn->pszText);
+#endif
   }
   lres = LISTVIEW_InsertColumnA(hwnd,nColumn,&lvca);
+
+#ifndef __WIN32OS2__
   if (lpColumn->mask & LVCF_TEXT) {
     if (lpColumn->pszText != LPSTR_TEXTCALLBACKW)
       HeapFree(GetProcessHeap(),0,lvca.pszText);
   }
+#endif
   return lres;
 }
 
@@ -6945,13 +6956,23 @@ static LRESULT LISTVIEW_InsertItemW(HWND hwnd, LPLVITEMW lpLVItem) {
     if (lpLVItem->pszText == LPSTR_TEXTCALLBACKW)
       lvia.pszText = LPSTR_TEXTCALLBACKA;
     else
+#ifdef __WIN32OS2__
+    {
+      LPSTR pszText;
+      STACK_strdupWtoA(lpLVItem->pszText, pszText)
+      lvia.pszText = pszText;
+    }
+#else
       lvia.pszText = HEAP_strdupWtoA(GetProcessHeap(),0,lpLVItem->pszText);
+#endif
   }
   lres = LISTVIEW_InsertItemA(hwnd, &lvia);
+#ifndef __WIN32OS2__
   if (lvia.mask & LVIF_TEXT) {
     if (lpLVItem->pszText != LPSTR_TEXTCALLBACKW)
       HeapFree(GetProcessHeap(),0,lvia.pszText);
   }
+#endif
   return lres;
 }
 

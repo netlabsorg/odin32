@@ -1,4 +1,4 @@
-/* $Id: virtual.cpp,v 1.40 2001-10-09 20:25:20 sandervl Exp $ */
+/* $Id: virtual.cpp,v 1.41 2001-11-14 12:30:46 phaller Exp $ */
 
 /*
  * Win32 virtual memory functions
@@ -68,11 +68,20 @@ HANDLE WINAPI CreateFileMappingW( HFILE hFile, LPSECURITY_ATTRIBUTES attr,
                                       DWORD protect, DWORD size_high,
                                       DWORD size_low, LPCWSTR name )
 {
-    LPSTR nameA = HEAP_strdupWtoA( GetProcessHeap(), 0, name );
+#ifdef __WIN32OS2__
+  LPSTR nameA;
+  STACK_strdupWtoA(name, nameA)
+#else
+  LPSTR nameA = HEAP_strdupWtoA( GetProcessHeap(), 0, name );
+#endif
+  
     HANDLE ret = CreateFileMappingA( hFile, attr, protect,
-                                         size_high, size_low, nameA );
-    HeapFree( GetProcessHeap(), 0, nameA );
-    return ret;
+                                    size_high, size_low, nameA );
+  
+#ifndef __WIN32OS2__
+  HeapFree( GetProcessHeap(), 0, nameA );
+#endif
+  return ret;
 }
 
 
@@ -100,10 +109,19 @@ HANDLE WINAPI OpenFileMappingA(
  */
 HANDLE WINAPI OpenFileMappingW( DWORD access, BOOL inherit, LPCWSTR name)
 {
+#ifdef __WIN32OS2__
+  LPSTR nameA;
+  STACK_strdupWtoA(name, nameA)
+#else
     LPSTR nameA = HEAP_strdupWtoA( GetProcessHeap(), 0, name );
-    HANDLE ret = OpenFileMappingA( access, inherit, nameA );
-    HeapFree( GetProcessHeap(), 0, nameA );
-    return ret;
+#endif
+  
+  HANDLE ret = OpenFileMappingA( access, inherit, nameA );
+  
+#ifndef __WIN32OS2__
+  HeapFree( GetProcessHeap(), 0, nameA );
+#endif
+  return ret;
 }
 
 

@@ -1,4 +1,4 @@
-/* $Id: Fileio.cpp,v 1.53 2001-08-31 19:53:11 phaller Exp $ */
+/* $Id: Fileio.cpp,v 1.54 2001-11-14 12:30:35 phaller Exp $ */
 
 /*
  * Win32 File IO API functions for OS/2
@@ -530,20 +530,29 @@ BOOL WIN32API CopyFileExW( LPCWSTR            lpExistingFileName,
                            LPBOOL             pbCancel,
                            DWORD              dwCopyFlags)
 {
-    LPSTR sourceA = HEAP_strdupWtoA( GetProcessHeap(), 0, lpExistingFileName );
-    LPSTR destA   = HEAP_strdupWtoA( GetProcessHeap(), 0, lpNewFileName );
-
-    BOOL ret = CopyFileExA(sourceA,
-                           destA,
-                           lpProgressRoutine,
-                           lpData,
-                           pbCancel,
-                           dwCopyFlags);
-
-    HeapFree( GetProcessHeap(), 0, sourceA );
-    HeapFree( GetProcessHeap(), 0, destA );
-
-    return ret;
+#ifdef __WIN32OS2__
+  LPSTR sourceA;
+  LPSTR destA;
+  STACK_strdupWtoA(lpExistingFileName, sourceA)
+  STACK_strdupWtoA(lpNewFileName, destA)
+#else
+  LPSTR sourceA = HEAP_strdupWtoA( GetProcessHeap(), 0, lpExistingFileName );
+  LPSTR destA   = HEAP_strdupWtoA( GetProcessHeap(), 0, lpNewFileName );
+#endif
+  
+  BOOL ret = CopyFileExA(sourceA,
+                         destA,
+                         lpProgressRoutine,
+                         lpData,
+                         pbCancel,
+                         dwCopyFlags);
+  
+#ifndef __WIN32OS2__
+  HeapFree( GetProcessHeap(), 0, sourceA );
+  HeapFree( GetProcessHeap(), 0, destA );
+#endif
+  
+  return ret;
 }
 //******************************************************************************
 //******************************************************************************
@@ -1382,9 +1391,18 @@ ODINFUNCTION3(BOOL, GetFileAttributesExW,
               GET_FILEEX_INFO_LEVELS, fInfoLevelId,
               LPVOID, lpFileInformation)
 {
+#ifdef __WIN32OS2__
+  LPSTR nameA;
+  STACK_strdupWtoA(lpFileName, nameA)
+#else
   LPSTR nameA = HEAP_strdupWtoA( GetProcessHeap(), 0, lpFileName );
+#endif
+  
   BOOL res = GetFileAttributesExA( nameA, fInfoLevelId, lpFileInformation);
+  
+#ifndef __WIN32OS2__
   HeapFree( GetProcessHeap(), 0, nameA );
+#endif
   return res;
 }
 
