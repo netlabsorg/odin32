@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.2209 2002-07-06 09:57:07 sandervl Exp $ */
+/* $Id: changelog,v 1.2210 2002-07-08 10:21:08 sandervl Exp $ */
+
+ 2002-07-08: Sander van Leeuwen <sandervl@innotek.de> 
+    - USER32:   o Changed SetFocus fix; only disallow focus change for minimized
+                  and disabled windows.
 
  2002-07-06: Sander van Leeuwen <sandervl@innotek.de> 
     - KERNEL32: o Com overlapped IO changes for reference counts
