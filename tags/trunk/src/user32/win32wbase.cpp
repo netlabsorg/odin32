@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.238 2001-02-20 15:40:22 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.239 2001-02-20 17:22:05 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -924,10 +924,12 @@ ULONG Win32BaseWindow::MsgActivate(BOOL fActivate, BOOL fMinimized, HWND hwnd, H
         dprintf(("WARNING: WM_NCACTIVATE return code = FALSE -> cancel processing"));
         return 0;
     }
-    /* child windows get WM_CHILDACTIVATE message */
+    /* child windows get a WM_CHILDACTIVATE message */
     if((getStyle() & (WS_CHILD | WS_POPUP)) == WS_CHILD )
     {
-        SendInternalMessageA(WM_CHILDACTIVATE, 0, 0L);
+        if(fActivate) {//WM_CHILDACTIVE is for activation only
+            SendInternalMessageA(WM_CHILDACTIVATE, 0, 0L);
+        }
         return 0;
     }
 
@@ -2428,12 +2430,12 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
         return 0;
     }
 
-//testestest
+    //Restore window origin of parent window with CS_OWNDC style
+    //(fixes paint offset problems in Opera windows)
     if(getParent() && getParent()->isOwnDC()) {
         dprintfOrigin(getParent()->getOwnDC());
         selectClientArea(getParent(), getParent()->getOwnDC());
     }
-//testestest
 
     if((fuFlags & SWP_FRAMECHANGED) && (fuFlags & (SWP_NOMOVE | SWP_NOSIZE) == (SWP_NOMOVE | SWP_NOSIZE)))
     {
@@ -3113,6 +3115,21 @@ HWND Win32BaseWindow::SetActiveWindow()
 //    }
     hwndActive = GetActiveWindow();
     return (hwndActive) ? hwndActive : windowDesktop->getWindowHandle(); //pretend the desktop was active
+}
+//******************************************************************************
+//Used to change active status of an mdi window
+//******************************************************************************
+BOOL Win32BaseWindow::DeactivateChildWindow()
+{
+    /* child windows get a WM_CHILDACTIVATE message */
+    if((getStyle() & (WS_CHILD | WS_POPUP)) == WS_CHILD )
+    {
+        ULONG flags = OSLibWinGetWindowULong(getOS2WindowHandle(), OFFSET_WIN32FLAGS);
+        OSLibWinSetWindowULong(getOS2WindowHandle(), OFFSET_WIN32FLAGS, (flags & ~WINDOWFLAG_ACTIVE));
+        return TRUE;
+    }
+    DebugInt3();    //should not be called for non-child window
+    return FALSE;
 }
 //******************************************************************************
 //WM_ENABLE is sent to hwnd, but not to it's children (as it should be)
