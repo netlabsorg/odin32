@@ -1,4 +1,4 @@
-/* $Id: winimagebase.h,v 1.19 2001-06-10 22:32:17 sandervl Exp $ */
+/* $Id: winimagebase.h,v 1.20 2001-10-09 20:25:20 sandervl Exp $ */
 
 /*
  * Win32 PE Image base class
@@ -173,17 +173,5 @@ private:
     friend class Win32Resource;
     friend ULONG SYSTEM GetVersionSize(char *modname);
 };
-
-//SvL: This structure is placed at the end of the first page of the image (header
-//     page), so we can determine the Win32Image pointer from a HINSTANCE variable
-//     (which is actually the address of the win32 module)
-typedef struct
-{
-  ULONG           magic1;
-  Win32ImageBase *image;
-  ULONG           magic2;
-} WINIMAGE_LOOKUP;
-
-#define WINIMAGE_LOOKUPADDR(a)  (WINIMAGE_LOOKUP *)((ULONG)a + PAGE_SIZE - sizeof(WINIMAGE_LOOKUP))
 
 #endif //__WINIMAGEBASE_H__

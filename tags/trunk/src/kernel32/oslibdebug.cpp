@@ -1,4 +1,4 @@
-/* $Id: oslibdebug.cpp,v 1.5 2000-11-20 09:52:37 sandervl Exp $ */
+/* $Id: oslibdebug.cpp,v 1.6 2001-10-09 20:25:20 sandervl Exp $ */
 
 /*
  * OS/2 debug apis
@@ -172,7 +172,7 @@ VOID _Optlink DebugThread(VOID *argpid)
         lpde->dwThreadId = 0;
         lpde->u.LoadDll.hFile = 0;
         // TODO: make a pe fakeheader in our DLL's (kernel32,...)
-        lpde->u.LoadDll.lpBaseOfDll = WINIMAGE_LOOKUPADDR(winmod);
+        lpde->u.LoadDll.lpBaseOfDll = (PVOID)winmod->getInstanceHandle();
         lpde->u.LoadDll.dwDebugInfoFileOffset = 0;
         lpde->u.LoadDll.nDebugInfoSize = 0;
         lpde->u.LoadDll.lpImageName = path;
@@ -280,7 +280,7 @@ VOID _Optlink DebugThread(VOID *argpid)
         lpde->dwDebugEventCode = UNLOAD_DLL_DEBUG_EVENT_W;
         lpde->dwProcessId = *pid;
         lpde->dwThreadId = 0;
-        lpde->u.UnloadDll.lpBaseOfDll = WINIMAGE_LOOKUPADDR(winmod);
+        lpde->u.UnloadDll.lpBaseOfDll = (PVOID)winmod->getInstanceHandle();
         DosWriteQueue(QueueHandle, 0, sizeof(DEBUG_EVENT), lpde, 0);
         break;
 
@@ -413,7 +413,7 @@ BOOL OSLibAddModuleDebugEvent(char *name, BOOL fLoad)
     lpde->dwProcessId = getpid(); // debuggee pid
     lpde->dwThreadId = 0;
     lpde->u.LoadDll.hFile = 0;
-    lpde->u.LoadDll.lpBaseOfDll = WINIMAGE_LOOKUPADDR(winmod);
+    lpde->u.LoadDll.lpBaseOfDll = (PVOID)winmod->getInstanceHandle();
     lpde->u.LoadDll.dwDebugInfoFileOffset = 0;
     lpde->u.LoadDll.nDebugInfoSize = 0;
     lpde->u.LoadDll.lpImageName = name;
@@ -426,7 +426,7 @@ BOOL OSLibAddModuleDebugEvent(char *name, BOOL fLoad)
     lpde->dwDebugEventCode = UNLOAD_DLL_DEBUG_EVENT_W;
     lpde->dwProcessId = getpid(); // debuggee pid
     lpde->dwThreadId = 0;
-    lpde->u.UnloadDll.lpBaseOfDll = WINIMAGE_LOOKUPADDR(winmod);
+    lpde->u.UnloadDll.lpBaseOfDll = (PVOID)winmod->getInstanceHandle();
     DosWriteQueue(QueueHandle, 0, sizeof(DEBUG_EVENT), lpde, 0);
   }
   SetFS(sel);
