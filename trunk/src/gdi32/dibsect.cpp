@@ -1,4 +1,4 @@
-/* $Id: dibsect.cpp,v 1.50 2001-05-10 17:03:18 sandervl Exp $ */
+/* $Id: dibsect.cpp,v 1.51 2001-05-25 10:05:29 sandervl Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -388,6 +388,7 @@ int DIBSection::SetDIBColorTable(int startIdx, int cEntries, RGBQUAD *rgb)
 {
  int i;
 
+  dprintf(("SetDIBColorTable %d %d %x", startIdx, cEntries, rgb));
   if(startIdx + cEntries > (1 << pOS2bmp->cBitCount))
   {
     dprintf(("DIBSection::SetDIBColorTable, invalid nr of entries %d %d\n", startIdx, cEntries));
@@ -712,6 +713,7 @@ void DIBSection::sync(HDC hdc, DWORD nYdest, DWORD nDestHeight, BOOL orgYInversi
         }
 #endif
   }
+  memcpy(pOS2bmp, tmphdr, os2bmphdrsize);
 
 #if 0
   if(dibinfo.dsBitfields[1] == 0x3E0) {//RGB 555?

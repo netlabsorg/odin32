@@ -1,4 +1,4 @@
-/* $Id: dibitmap.cpp,v 1.15 2001-03-27 20:47:52 sandervl Exp $ */
+/* $Id: dibitmap.cpp,v 1.16 2001-05-25 10:05:28 sandervl Exp $ */
 
 /*
  * GDI32 dib & bitmap code
@@ -300,17 +300,10 @@ int WIN32API GetDIBits(HDC hdc, HBITMAP hBitmap, UINT uStartScan, UINT cScanLine
 int WIN32API SetDIBits(HDC hdc, HBITMAP hBitmap, UINT startscan, UINT numlines, const VOID *pBits,
                        const BITMAPINFO *pBitmapInfo, UINT usage)
 {
+    int ret;
+
     dprintf(("GDI32: SetDIBits %x %x %x %x %x %x %x", hdc, hBitmap, startscan, numlines, pBits, pBitmapInfo, usage));
 
-    if(DIBSection::getSection() != NULL)
-    {
-        DIBSection *dsect;
-
-        dsect = DIBSection::findObj(hBitmap);
-        if(dsect) {
-           return dsect->SetDIBits(hdc, hBitmap, startscan, numlines, pBits, (BITMAPINFOHEADER_W *)&pBitmapInfo->bmiHeader, usage);
-        }
-    }
     //SvL: Open32's SetDIBits really messes things up for 1 bpp bitmaps, must use SetBitmapBits
     if(pBitmapInfo->bmiHeader.biBitCount == 1 && startscan == 0 && numlines == pBitmapInfo->bmiHeader.biHeight)
     {//WARNING: hack alert!
@@ -343,7 +336,20 @@ int WIN32API SetDIBits(HDC hdc, HBITMAP hBitmap, UINT startscan, UINT numlines, 
         dprintf(("ERROR: SetDIBits does NOT work well for 1 bpp bitmaps!!!!!"));
     }
 #endif
-    return O32_SetDIBits(hdc, hBitmap, startscan, numlines, pBits, pBitmapInfo, usage);
+    ret = O32_SetDIBits(hdc, hBitmap, startscan, numlines, pBits, pBitmapInfo, usage);
+    if(DIBSection::getSection() != NULL)
+    {
+        DIBSection *dsect;
+
+        dsect = DIBSection::findObj(hBitmap);
+        if(dsect) {
+             HBITMAP hBmpOld = SelectObject(hdc, hBitmap);
+             dsect->sync(hdc, 0, dsect->GetHeight());
+             SelectObject(hdc, hBmpOld);
+        }
+    }
+
+    return ret;
 }
 //******************************************************************************
 //******************************************************************************
