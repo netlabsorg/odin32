@@ -1,4 +1,4 @@
-/* $Id: options.h,v 1.4 2000-04-29 18:25:03 sandervl Exp $ */
+/* $Id: options.h,v 1.5 2000-10-02 21:23:05 phaller Exp $ */
 
 /*
  * Command-line options.
@@ -84,18 +84,25 @@ struct options
 extern struct options Options;
 
 /* Odin profile functions */
-
+/* Odin profile name in KERNEL32.DLL directory */
+#define ODINININAME "ODIN.INI"
 #define ODINCOLORS        "COLORS"
 #define ODINDIRECTORIES   "DEVDIRECTORIES"
 #define ODINCUSTOMIZATION "CUSTOMIZATION"
 
-int WINAPI PROFILE_GetOdinIniString(LPCSTR section,LPCSTR key_name,LPCSTR def,LPCSTR buffer,int len);
+int WINAPI PROFILE_GetOdinIniString(LPCSTR section,LPCSTR key_name,LPCSTR def,LPSTR buffer,UINT len);
 int WINAPI PROFILE_SetOdinIniString(LPCSTR section,LPCSTR key_name,LPCSTR value);
 int WINAPI PROFILE_GetOdinIniInt(LPCSTR section,LPCSTR key_name,int def);
 int WINAPI PROFILE_SetOdinIniInt(LPCSTR section,LPCSTR key_name,int value);
 int WINAPI PROFILE_GetOdinIniBool(LPCSTR section,LPCSTR key_name,int def);
 int WINAPI PROFILE_SetOdinIniBool(LPCSTR section,LPCSTR key_name,int value);
 int WINAPI PROFILE_SaveOdinIni(void);
+int WINAPI PROFILE_LoadOdinIni(void);
+void WINAPI WriteOutProfiles(void);
+
+//INT WINAPI GetPrivateProfileStringA(LPCSTR section, LPCSTR entry,
+//                                          LPCSTR def_val, LPSTR buffer,
+//                                          UINT len, LPCSTR filename);
 
 /* Version functions */
 extern void VERSION_ParseWinVersion( const char *arg );
