@@ -1,4 +1,10 @@
- /* $Id: changelog,v 1.1123 2000-09-13 20:59:32 sandervl Exp $ */
+ /* $Id: changelog,v 1.1124 2000-09-14 19:09:41 sandervl Exp $ */
+
+ 2000-09-13: Sander van Leeuwen <sandervl@xs4all.nl>
+    - WNASPI32: Fixed uninitialized variables in aspirout class 
+                Fixed memory leaks (aspi object not deleted when something goes wrong)
+    - KERNEL32: Implemented IOCTL_SCSI_GET_ADDRESS (not perfect; only works
+                for cdrom/dvd drives and only the first one)
 
  2000-09-12: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: InitCommandLine corrupted the heap
