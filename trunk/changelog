@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2598 2003-07-09 13:03:24 bird Exp $ */
+/* $Id: changelog,v 1.2599 2003-07-11 15:37:50 sandervl Exp $ */
+
+ 2003-07-11: Dietrich Teickner <Dietrich_Teickner@t-online   >
+    - SHELL32:  o Shell folder updates
 
  2003-07-09: knut st. osmundsen <bird-odinspam@anduin    >
     - MAKEFILES:o Invoke RC directly and not thru the CMDQD.
