@@ -1,4 +1,4 @@
-/* $Id: pmframe.cpp,v 1.51 2000-04-15 15:11:13 sandervl Exp $ */
+/* $Id: pmframe.cpp,v 1.52 2000-04-29 18:28:38 sandervl Exp $ */
 /*
  * Win32 Frame Managment Code for OS/2
  *
@@ -437,6 +437,10 @@ PosChangedEnd:
         RestoreOS2TIB();
         return (MRESULT)FALSE;
     }
+
+    case WM_SHOW:
+      	dprintf(("PMFRAME: WM_SHOW"));
+        break;
 
     case WM_ERASEBACKGROUND:
         break;

@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.180 2000-04-18 11:13:00 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.181 2000-04-29 18:28:39 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -541,11 +541,14 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndFrame, HWND hwndClient)
         return FALSE;
   }
 
+//SvL: This completely messes up MS Word 97 (no button bar, no menu)
+#if 0
   //adjust CW_USEDEFAULT position
   if (fXDefault | fCXDefault)
   {
     RECT rect;
 
+    //SvL: Returns invalid rectangle (not the expected shell default size)
     OSLibWinQueryWindowRect(OS2HwndFrame,&rect,RELATIVE_TO_SCREEN);
     if (getParent()) mapWin32Rect(OSLIB_HWND_DESKTOP,getParent()->getOS2WindowHandle(),&rect);
     if (fXDefault)
@@ -563,27 +566,7 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndFrame, HWND hwndClient)
       cs->cy = rect.bottom-rect.top;
     }
   }
-
-  /* Send the WM_GETMINMAXINFO message and fix the size if needed */
-  if ((cs->style & WS_THICKFRAME) || !(cs->style & (WS_POPUP | WS_CHILD)))
-  {
-        GetMinMaxInfo(&maxSize, &maxPos, &minTrack, &maxTrack);
-        if (maxSize.x < cs->cx) cs->cx = maxSize.x;
-        if (maxSize.y < cs->cy) cs->cy = maxSize.y;
-        if (cs->cx < minTrack.x) cs->cx = minTrack.x;
-        if (cs->cy < minTrack.y) cs->cy = minTrack.y;
-  }
-
-  if(cs->style & WS_CHILD)
-  {
-        if(cs->cx < 0) cs->cx = 0;
-        if(cs->cy < 0) cs->cy = 0;
-  }
-  else
-  {
-        if (cs->cx <= 0) cs->cx = 1;
-        if (cs->cy <= 0) cs->cy = 1;
-  }
+#endif
 
   OSLibWinSetOwner(OS2Hwnd, OS2HwndFrame);
 
@@ -636,6 +619,27 @@ if (!cs->hMenu) cs->hMenu = LoadMenuA(windowClass->getInstance(),"MYAPP");
 
   // Subclass frame
   pOldFrameProc = FrameSubclassFrameWindow(this);
+
+  /* Send the WM_GETMINMAXINFO message and fix the size if needed */
+  if ((cs->style & WS_THICKFRAME) || !(cs->style & (WS_POPUP | WS_CHILD)))
+  {
+        GetMinMaxInfo(&maxSize, &maxPos, &minTrack, &maxTrack);
+        if (maxSize.x < cs->cx) cs->cx = maxSize.x;
+        if (maxSize.y < cs->cy) cs->cy = maxSize.y;
+        if (cs->cx < minTrack.x) cs->cx = minTrack.x;
+        if (cs->cy < minTrack.y) cs->cy = minTrack.y;
+  }
+
+  if(cs->style & WS_CHILD)
+  {
+        if(cs->cx < 0) cs->cx = 0;
+        if(cs->cy < 0) cs->cy = 0;
+  }
+  else
+  {
+        if (cs->cx <= 0) cs->cx = 1;
+        if (cs->cy <= 0) cs->cy = 1;
+  }
 
   //preset rects
   rectWindow.left = cs->x;
@@ -1607,24 +1611,25 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
 
     case WM_SYSCHAR:
     {
-            int iMenuSysKey = 0;
-            if (wParam == VK_RETURN && (getStyle() & WS_MINIMIZE))
+        int iMenuSysKey = 0;
+        if (wParam == VK_RETURN && (getStyle() & WS_MINIMIZE))
         {
                 PostMessageA(getWindowHandle(), WM_SYSCOMMAND,
                          (WPARAM)SC_RESTORE, 0L );
                 break;
         }
-            if ((HIWORD(lParam) & KEYDATA_ALT) && wParam)
+        if((HIWORD(lParam) & KEYDATA_ALT) && wParam)
         {
-                if (wParam == VK_TAB || wParam == VK_ESCAPE) break;
-                if (wParam == VK_SPACE && (getStyle() & WS_CHILD))
-                getParent()->SendMessageA(Msg, wParam, lParam );
-                else
-                SendMessageA(WM_SYSCOMMAND, (WPARAM)SC_KEYMENU, (LPARAM)(DWORD)wParam );
+                if (wParam == VK_TAB || wParam == VK_ESCAPE) 
+			break;
+                if (wParam == VK_SPACE && (getStyle() & WS_CHILD)) {
+                	getParent()->SendMessageA(Msg, wParam, lParam );
+		}
+                else    SendMessageA(WM_SYSCOMMAND, (WPARAM)SC_KEYMENU, (LPARAM)(DWORD)wParam );
         }
-            else /* check for Ctrl-Esc */
-            if (wParam != VK_ESCAPE) MessageBeep(0);
-            break;
+        else /* check for Ctrl-Esc */
+        	if (wParam != VK_ESCAPE) MessageBeep(0);
+            		break;
     }
 
     case WM_SETHOTKEY:
@@ -2079,6 +2084,8 @@ BOOL Win32BaseWindow::ShowWindow(ULONG nCmdShow)
     else    setStyle(getStyle() & ~WS_VISIBLE);
 
     BOOL rc = OSLibWinShowWindow(OS2HwndFrame, showstate);
+
+    SendInternalMessageA(WM_SHOWWINDOW, (showstate & SWPOS_SHOW) ? 1 : 0, 0);
 
     return rc;
 }
