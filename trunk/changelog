@@ -1,4 +1,11 @@
-/* $Id: changelog,v 1.2010 2002-02-28 19:27:20 sandervl Exp $ */
+/* $Id: changelog,v 1.2011 2002-03-04 10:46:28 sandervl Exp $ */
+
+ 2002-03-04: Yuri Dario <mc6530@mclink.it>
+    - KERNEL32: o Update for Italian NLS info
+                o Fall back to English NLS info if time format not found
+
+ 2002-03-04: Platon Fomichev <platon@innotek.de>
+    - USER32:   o Fix for window restore from minimized state
 
  2002-02-28: Platon Fomichev <platon@innotek.de>
     - KERNEL32: o Implemented IOCTL_DISK_IS_WRITABLE ioctl & fixes writing
