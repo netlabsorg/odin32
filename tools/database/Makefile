@@ -1,131 +1,83 @@
-# $Id: Makefile,v 1.4 2000-02-09 23:50:31 bird Exp $
+# $Id: Makefile,v 1.5 2000-02-10 22:45:19 bird Exp $
 
 #
-# Common makefile for database utils - EMX/GCC version
+# Common makefile for database utils. ICC edition
 #
 
-# common include directory
+# include common definitions
 PDWIN32_INCLUDE = ..\..\include
-PDWIN32_TOOLS = ..\bin
-!include $(PDWIN32_INCLUDE)\pdwin32.tools
+PDWIN32_TOOLS   = ..\bin
+!include ..\..\include\pdwin32.mk
 
-!ifndef OMF
-OMF=0
-!endif
-
-#
-# gcc defines
-#
-CC  =gcc
-CXX =gcc
-LD  =gcc
-
-!if $(OMF) == 0
-O      = o
-A      = a
-AR     = ar
-CFZOMF =
+# Addjust common definitions
+CINCLUDES= -I$(PDWIN32_INCLUDE) -I$(PDWIN32_INCLUDE)\win -Igd -Imysql -I..\common
+!ifdef DEBUG
+CFLAGS   = $(CFLAGS)   -Ge+ -Tx+ $(CINCLUDES)      -DNO_CLIENT_LONG_LONG -Wall+ppt-ppc-inl-cnv-gnr-vft-
+CXXFLAGS = $(CXXFLAGS) -Ge+ -Gx- -Tx+ $(CINCLUDES) -DNO_CLIENT_LONG_LONG -Wall+ppt-ppc-inl-cnv-gnr-vft-
+LDFLAGS  = $(LDFLAGS)  -Ge+ -Fe$@ /B"/MAP:full" $(RTLLIB) os2386.lib
 !else
-O      = obj
-A      = lib
-AR     = emxomfar
-CFZOMF = -Zomf
+CFLAGS   = $(CFLAGS)   -Ge+ -Tx+ $(CINCLUDES)      -DNO_CLIENT_LONG_LONG -Wall+ppt-ppc-inl-cnv-gnr-vft-
+CXXFLAGS = $(CXXFLAGS) -Ge+ -Gx- -Tx+ $(CINCLUDES) -DNO_CLIENT_LONG_LONG -Wall+ppt-ppc-inl-cnv-gnr-vft-
+LDFLAGS  = $(LDFLAGS)  -Ge+ -Fe$@ /B"/MAP:full" $(RTLLIB) os2386.lib
 !endif
-
-CDEFINES  = -D__WIN32OS2__ -D__WINE__ -DNOTDLL
-CINCLUDES = -I$(PDWIN32_INCLUDE)\Win -I$(PDWIN32_INCLUDE) -Imysql -Igd -I..\common
-# Note: Add -fhandle-exceptions if old gcc version.
-!ifndef DEBUG
-CFLAGS        = $(CFLAGS) -Zmap -Zmt -mprobe -Wall -s -O
-!else
-CFLAGS        = $(CFZOMF) -Zmap -Zmt -mprobe -Wall -g
-!endif
-CXXFLAGS  = $(CFLAGS)
-LIBS      = -L. -ldb -lmysql\libmysqlclient -lsocket -lstdcpp
-LINK      = $(LD) $(CFLAGS) -o $@
-
-
-#
-# interference rules (the .c.obj/.cpp.obj rules are intended for Visual Slick only)
-#
-.c.o:
-    $(CC) -c $(CFLAGS) $(CDEFINES) $(CINCLUDES) $<
-
-.cpp.o:
-    $(CXX) -c $(CXXFLAGS) $(CDEFINES) $(CINCLUDES) $<
-
-.c.obj:
-    $(CC) -c $(CFLAGS) $(CDEFINES) $(CINCLUDES) $<
-
-.cpp.obj:
-    $(CXX) -c $(CXXFLAGS) $(CDEFINES) $(CINCLUDES) $<
-
 
 
 #
 # All roule
 #
-all: db.$(A) APIImport.exe StateUpd.exe kHTMLPC.exe \
-    ..\bin\APIImport.exe ..\bin\StateUpd.exe ..\bin\kHTMLPC.exe
-
-
-
-#
-# Database library
-#
-db.$(A): db.$(O)
-    -$(RM) $@
-    $(AR) cr $@ $**
+all: APIImport.exe StateUpd.exe kHTMLPC.exe   \
+     ..\bin\APIImport.exe ..\bin\StateUpd.exe \
+     ..\bin\kHTMLPC.exe
 
 
 
 #
 # APIImport
 #
-APIImport.exe: APIImport.$(O) db.$(A) ..\common\commongcc.$(A)
-    $(LINK) APIImport.$(O) -l..\common\commongcc $(LIBS)
+APIImport.exe: APIImport.obj db.obj ..\common\commonicc.lib mysql\libmysqlclient.lib
+   $(LD) $(LDFLAGS) $**
 
 ..\bin\APIImport.exe: APIImport.exe
-    $(CP) $** $@
+   $(CP) $** $@
 
-..\common\commongcc.$(A):
-    @cd ..\common
-    @nmake /nologo commongcc.$(A)
-    @cd ..\database
+..\common\commonicc.lib:
+    cd ..\common
+    nmake /nologo commonicc.lib
+    cd ..\database
+
 
 
 #
 # StateUpd
 #
-StateUpd.exe: StateUpd.$(O) db.$(A)
-    $(LINK) StateUpd.$(O)  $(LIBS)
+StateUpd.exe: StateUpd.obj db.obj mysql\libmysqlclient.lib
+   $(LD) $(LDFLAGS) $**
 
 ..\bin\StateUpd.exe: StateUpd.exe
-    $(CP) $** $@
+   $(CP) $** $@
 
 
 
 #
 # kHTMLPC - HTML/Sql PreCompiler.
 #
-kHTMLPC.exe: kHTMLPC.$(O) gd/gdgcc.$(A) db.$(A)
-    $(LINK) kHTMLPC.$(O) -lgd/gdgcc  $(LIBS)
+kHTMLPC.exe: kHTMLPC.obj db.obj gd/gdicc.lib mysql\libmysqlclient.lib
+   $(LD) $(LDFLAGS) $**
+
 
 ..\bin\kHTMLPC.exe: kHTMLPC.exe
-    $(CP) $** $@
+   $(CP) $** $@
+
+gd\gdicc.lib: force
+   @cd gd
+   @nmake /nologo gdicc.lib
+   @cd ..
 
 
-gd/gdgcc.$(A): force
-    @cd gd
-    @nmake /nologo gdgcc.$(A)
-    @cd ..
 
 
-
-#
 # kHTHMLPC - interference roules for preprocessing of kSqlHtml files.
-#
-.SUFFIXES: .html .ksqlhtml .$(O)
+.SUFFIXES: .html .ksqlhtml .obj
 .kSqlHtml.html:
     kHTMLPC $<
 .kSqlHtml.obj: # Visual SlickEdit thinks everything complies to .obj files...
@@ -137,20 +89,20 @@ gd/gdgcc.$(A): force
 # Odin32 - Creates the database. This will do a drop of any database named "Odin32"!
 #
 Odin32: CreateTables.sql States.sql Authors.sql
-    -mysqladmin refresh
-    -mysqladmin DROP Odin32
-    mysql < CreateTables.sql
-    mysql < States.sql
-    mysql < Authors.sql
-    -mysqladmin refresh
+   -mysqladmin refresh
+   mysqladmin DROP Odin32
+   mysql < CreateTables.sql
+   mysql < States.sql
+   mysql < Authors.sql
+   -mysqladmin refresh
 
 Authors: Authors.sql
-    mysql < Authors.sql
-    -mysqladmin refresh
+   mysql < Authors.sql
+   -mysqladmin refresh
 
 States: States.sql
-    mysql < States.sql
-    -mysqladmin refresh
+   mysql < States.sql
+   -mysqladmin refresh
 
 
 
@@ -169,15 +121,21 @@ dep:
 !endif
 
 
-
 #
 # clean
 #
 clean:
-   @$(RM) *.obj *.lib *.o *.a *.dll *.exe *.pch *.log *.map
+   -@$(RM) *.obj
+   -@$(RM) *.lib
+   -@$(RM) *.o
+   -@$(RM) *.a
+   -@$(RM) *.dll
+   -@$(RM) *.exe
+   -@$(RM) *.pch
+   -@$(RM) *.log
+   -@$(RM) *.map
    @cd gd
    @nmake /nologo clean
-   @cd ..
 
 force:
     @$(ECHO) ...
