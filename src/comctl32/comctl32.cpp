@@ -1,4 +1,4 @@
-/* $Id: comctl32.cpp,v 1.2 2000-04-16 18:26:57 cbratschi Exp $ */
+/* $Id: comctl32.cpp,v 1.3 2000-04-16 18:52:38 cbratschi Exp $ */
 /*
  * Win32 common controls implementation
  *
@@ -131,7 +131,6 @@ void CDECL UnregisterCOMCTL32WindowClasses(void)
  *     lpwIDs:
  *     (will be written ...)
  */
-
 VOID WINAPI
 MenuHelp (UINT uMsg, WPARAM wParam, LPARAM lParam, HMENU hMainMenu,
           HINSTANCE hInst, HWND hwndStatus, LPUINT lpwIDs)

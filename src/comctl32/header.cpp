@@ -1,4 +1,4 @@
-/* $Id: header.cpp,v 1.7 2000-04-16 18:26:57 cbratschi Exp $ */
+/* $Id: header.cpp,v 1.8 2000-04-16 18:52:39 cbratschi Exp $ */
 /*
  *  Header control
  *
@@ -1618,7 +1618,7 @@ HEADER_LButtonDblClk (HWND hwnd, WPARAM wParam, LPARAM lParam)
 static LRESULT
 HEADER_LButtonDown (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
-    HEADER_INFO *infoPtr = HEADER_GetInfoPtr (hwnd);
+    HEADER_INFO *infoPtr = HEADER_GetInfoPtr(hwnd);
     DWORD dwStyle = GetWindowLongA (hwnd, GWL_STYLE);
     POINT pt;
     UINT  flags;
