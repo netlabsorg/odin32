@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.67 2000-02-05 19:45:16 cbratschi Exp $ */
+/* $Id: oslibwin.cpp,v 1.68 2000-02-07 14:30:18 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -50,11 +50,12 @@ BOOL OSLibWinSetOwner(HWND hwnd, HWND hwndOwner)
 //******************************************************************************
 HWND OSLibWinCreateWindow(HWND hwndParent,ULONG dwWinStyle,
                           char *pszName, HWND Owner, ULONG fHWND_BOTTOM, HWND *hwndFrame,
-                          ULONG id, BOOL fTaskList,BOOL fShellPosition,BOOL saveBits)
+                          ULONG id, BOOL fTaskList,BOOL fShellPosition,
+                          int classStyle)
 {
  HWND  hwndClient;
 
-  dprintf(("WinCreateWindow %x %s", hwndParent, pszName));
+  dprintf(("WinCreateWindow %x %s %x task %d shell %d classstyle %x", hwndParent, pszName, id, fTaskList, fShellPosition, classStyle));
 
   if(pszName && *pszName == 0) {
         pszName = NULL;
@@ -72,8 +73,10 @@ HWND OSLibWinCreateWindow(HWND hwndParent,ULONG dwWinStyle,
 
   FRAMECDATA FCData = {sizeof (FRAMECDATA), 0, 0, 0};
 
+  if(classStyle & CS_SAVEBITS_W) dwWinStyle |= WS_SAVEBITS;
+  if(classStyle & CS_PARENTDC_W) dwWinStyle |= WS_PARENTCLIP;
+
   dwClientStyle = dwWinStyle & ~(WS_TABSTOP | WS_GROUP | WS_CLIPSIBLINGS);
-  if (saveBits) dwWinStyle |= WS_SAVEBITS;
 
   dwFrameStyle |= FCF_NOBYTEALIGN;
   if(fTaskList)
@@ -92,7 +95,7 @@ HWND OSLibWinCreateWindow(HWND hwndParent,ULONG dwWinStyle,
                                 id, &FCData, NULL);
 
   if (*hwndFrame) {
-    hwndClient = WinCreateWindow (*hwndFrame,saveBits ? WIN32_STDCLASS2:WIN32_STDCLASS,
+    hwndClient = WinCreateWindow (*hwndFrame, (classStyle & CS_SAVEBITS_W) ? WIN32_STDCLASS2:WIN32_STDCLASS,
                                   NULL, dwClientStyle, 0, 0, 0, 0,
                                   *hwndFrame, HWND_TOP, FID_CLIENT, NULL, NULL);
     return hwndClient;
