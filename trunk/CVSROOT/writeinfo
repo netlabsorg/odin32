@@ -34,7 +34,7 @@
 /src/psapi                                 sandervl jens
 /src/msvfw32                               sandervl jens
 /src/crtdll                                sandervl jens
-/src/msvcrt                                sandervl jens
+/src/msvcrt                                sandervl jens phaller
 /src/odincrt                               sandervl phaller achimha hugh
 /src/odinwps                               sandervl phaller achimha ktk umoeller
 /src/OMFDUMP                               sandervl phaller achimha bird
