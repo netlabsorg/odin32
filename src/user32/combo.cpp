@@ -1,4 +1,4 @@
-/* $Id: combo.cpp,v 1.33 2001-02-17 20:16:31 sandervl Exp $ */
+/* $Id: combo.cpp,v 1.34 2002-04-24 08:56:16 sandervl Exp $ */
 /*
  * Combo controls
  *
@@ -1271,6 +1271,23 @@ BOOL COMBO_FlipListbox( LPHEADCOMBO lphc, BOOL ok, BOOL bRedrawButton )
    CBDropDown( lphc );
    return TRUE;
 }
+
+#ifdef __WIN32OS2__
+/***********************************************************************
+ *           COMBO_RollupListbox
+ *
+ * @@PF Odin specific function. 
+ */
+BOOL COMBO_RollupListbox( LPHEADCOMBO lphc)
+{
+   if(lphc->wState & CBF_DROPPED)
+   {
+       CBRollUp( lphc, FALSE, FALSE);
+       return TRUE;
+   }
+   return FALSE;
+}
+#endif
 
 /***********************************************************************
  *           CBRepaintButton
