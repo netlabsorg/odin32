@@ -1,4 +1,4 @@
-/* $Id: controls.cpp,v 1.3 1999-09-23 10:33:59 sandervl Exp $ */
+/* $Id: controls.cpp,v 1.4 1999-10-19 19:26:07 sandervl Exp $ */
 /* File: controls.cpp -- Win32 common controls
  *
  * Copyright (c) 1999 Christoph Bratschi
@@ -9,7 +9,6 @@
 #include <string.h>
 #include "misc.h"
 
-#include "controls.h"
 #include "button.h"
 #include "static.h"
 #include "scroll.h"
@@ -17,6 +16,9 @@
 #include "win32wmdiclient.h"
 #include "win32dlg.h"
 #include "win32wdesktop.h"
+#include "controls.h"
+
+ATOM controlAtoms[MAX_CONTROLS] = {0};
 
 /* registration */
 
@@ -45,34 +47,44 @@ void CONTROLS_Register()
   //END to be removed code
 
   dprintf(("Register BUTTON class"));
-  if (!BUTTON_Register()) dprintf(("failed!!!"));
+  controlAtoms[BUTTON_CONTROL] = BUTTON_Register();
+  if (!controlAtoms[BUTTON_CONTROL]) dprintf(("failed!!!"));
 
   dprintf(("Register STATIC class"));
-  if (!STATIC_Register()) dprintf(("failed!!!"));
+  controlAtoms[STATIC_CONTROL] = STATIC_Register();
+  if (!controlAtoms[STATIC_CONTROL]) dprintf(("failed!!!"));
 
   dprintf(("Register SCROLLBAR class"));
-  if (!SCROLLBAR_Register()) dprintf(("failed!!!"));
+  controlAtoms[SCROLLBAR_CONTROL] = SCROLLBAR_Register();
+  if (!controlAtoms[SCROLLBAR_CONTROL]) dprintf(("failed!!!"));
 
   dprintf(("Register LISTBOX class"));
-  if (!LISTBOX_Register()) dprintf(("failed!!!"));
+  controlAtoms[LISTBOX_CONTROL] = LISTBOX_Register();
+  if (!controlAtoms[LISTBOX_CONTROL]) dprintf(("failed!!!"));
 
   dprintf(("Register COMBOLBOX class"));
-  if (!COMBOLBOX_Register()) dprintf(("failed!!!"));
+  controlAtoms[COMBOLBOX_CONTROL] = COMBOLBOX_Register();
+  if (!controlAtoms[COMBOLBOX_CONTROL]) dprintf(("failed!!!"));
 
   dprintf(("Register COMBOBOX class"));
-  if (!COMBOBOX_Register()) dprintf(("failed!!!"));
+  controlAtoms[COMBOBOX_CONTROL] = COMBOBOX_Register();
+  if (!controlAtoms[COMBOBOX_CONTROL]) dprintf(("failed!!!"));
 
   dprintf(("Register EDIT class"));
-  if (!EDIT_Register()) dprintf(("failed!!!"));
+  controlAtoms[EDIT_CONTROL] = EDIT_Register();
+  if (!controlAtoms[EDIT_CONTROL]) dprintf(("failed!!!"));
 
   dprintf(("Register MDICLIENT class"));
-  if (!MDICLIENT_Register()) dprintf(("failed!!!"));
+  controlAtoms[MDICLIENT_CONTROL] = MDICLIENT_Register();
+  if (!controlAtoms[MDICLIENT_CONTROL]) dprintf(("failed!!!"));
 
   dprintf(("Register DIALOG class"));
-  if (!DIALOG_Register()) dprintf(("failed!!!"));
+  controlAtoms[DIALOG_CONTROL] = DIALOG_Register();
+  if (!controlAtoms[DIALOG_CONTROL]) dprintf(("failed!!!"));
 
   dprintf(("Register DESKTOP class"));
-  if (!DESKTOP_Register()) dprintf(("failed!!!")); 
+  controlAtoms[DESKTOP_CONTROL] = DESKTOP_Register();
+  if (!controlAtoms[DESKTOP_CONTROL]) dprintf(("failed!!!")); 
 }
 
 void CONTROLS_Unregister()
@@ -108,4 +120,12 @@ void CONTROLS_Unregister()
   if (!DESKTOP_Unregister()) dprintf(("failed!!!"));
 }
 
+
+BOOL WIDGETS_IsControl(Win32BaseWindow *window, int control)
+{
+  if(control >= MAX_CONTROLS || window == NULL || window->getClass() == NULL)
+	return FALSE;
+
+  return controlAtoms[control] == window->getClass()->getAtom();
+}
 
