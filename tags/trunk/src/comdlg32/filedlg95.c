@@ -479,7 +479,15 @@ BOOL  WINAPI GetFileDialog95W(LPOPENFILENAMEW ofn,UINT iDlgType)
   AllocInArgWtoA(ofn->lpstrInitialDir, lpstrInitialDir);
   AllocInArgWtoA(ofn->lpstrTitle, lpstrTitle);
   AllocInArgWtoA(ofn->lpstrDefExt, lpstrDefExt);
-  AllocInArgWtoA(ofn->lpTemplateName, lpTemplateName);
+#ifdef __WIN32OS2__
+  if(HIWORD(ofn->lpTemplateName)) {
+#endif
+       AllocInArgWtoA(ofn->lpTemplateName, lpTemplateName);
+#ifdef __WIN32OS2__
+  }
+  else lpTemplateName = ofn->lpTemplateName;
+#endif
+
   dwFlags = ofn->Flags;
   hInstance = ofn->hInstance;
 
@@ -530,7 +538,10 @@ BOOL  WINAPI GetFileDialog95W(LPOPENFILENAMEW ofn,UINT iDlgType)
   FreeInArg(ofn->lpstrInitialDir, lpstrInitialDir);
   FreeInArg(ofn->lpstrTitle, lpstrTitle);
   FreeInArg(ofn->lpstrDefExt, lpstrDefExt);
-  FreeInArg(ofn->lpTemplateName, lpTemplateName);
+#ifdef __WIN32OS2__
+  if(HIWORD(lpTemplateName))
+#endif
+      FreeInArg(ofn->lpTemplateName, lpTemplateName);
 
   MemFree((LPVOID)(fodInfos));
   return ret;
