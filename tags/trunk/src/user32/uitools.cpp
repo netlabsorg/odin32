@@ -1,10 +1,11 @@
-/* $Id: uitools.cpp,v 1.2 1999-06-23 16:36:56 achimha Exp $ */
+/* $Id: uitools.cpp,v 1.3 1999-06-26 15:29:11 achimha Exp $ */
 /*
  * User Interface Functions
  *
  * Copyright 1997 Dimitrie O. Paun
  * Copyright 1997 Bertho A. Stultiens
  * Copyright 1999 Achim Hasenmueller
+ * Copyright 1999 Christoph Bratschi
  */
 
 #include "winuser.h"
@@ -99,8 +100,8 @@ static const char LTRBInnerFlat[] = {
  *
  * See also comments with UITOOLS_DrawRectEdge()
  */
-static BOOL UITOOLS95_DrawDiagEdge(HDC hdc, LPRECT rc, 
-				     UINT uType, UINT uFlags)
+static BOOL UITOOLS95_DrawDiagEdge(HDC hdc, LPRECT rc,
+                                     UINT uType, UINT uFlags)
 {
     POINT Points[4];
     char InnerI, OuterI;
@@ -118,11 +119,13 @@ static BOOL UITOOLS95_DrawDiagEdge(HDC hdc, LPRECT rc,
     int add = (LTRBInnerMono[uType & (BDR_INNER|BDR_OUTER)] != -1 ? 1 : 0)
             + (LTRBOuterMono[uType & (BDR_INNER|BDR_OUTER)] != -1 ? 1 : 0);
 
+    if (IsRectEmpty(rc)) return retval; //nothing to do
+
     /* Init some vars */
     OuterPen = InnerPen = (HPEN)GetStockObject(NULL_PEN);
     SavePen = (HPEN)SelectObject(hdc, InnerPen);
     spx = spy = epx = epy = 0; /* Satisfy the compiler... */
-    
+
     /* Determine the colors of the edges */
     if(uFlags & BF_MONO)
     {
@@ -183,6 +186,8 @@ static BOOL UITOOLS95_DrawDiagEdge(HDC hdc, LPRECT rc,
         spx = epx + SmallDiam;
         epy = rc->bottom;
         spy = epy - SmallDiam;
+        epx++;
+        epy--;
         break;
 
     case BF_TOPLEFT:
@@ -192,6 +197,8 @@ static BOOL UITOOLS95_DrawDiagEdge(HDC hdc, LPRECT rc,
         spx = epx + SmallDiam;
         epy = rc->top-1;
         spy = epy + SmallDiam;
+        epx++;
+        epy++;
         break;
 
     case BF_TOP:
@@ -209,6 +216,8 @@ static BOOL UITOOLS95_DrawDiagEdge(HDC hdc, LPRECT rc,
         epx = spx + SmallDiam;
         spy = rc->bottom-1;
         epy = spy - SmallDiam;
+        epx--;
+        epy++;
         break;
     }
 
@@ -311,10 +320,10 @@ static BOOL UITOOLS95_DrawDiagEdge(HDC hdc, LPRECT rc,
     {
         HBRUSH hbsave;
         HBRUSH hb = GetSysColorBrush(uFlags & BF_MONO ? COLOR_WINDOW
-					 :COLOR_BTNFACE);
+                                         :COLOR_BTNFACE);
         HPEN hpsave;
         HPEN hp = GetSysColorPen(uFlags & BF_MONO ? COLOR_WINDOW
-				     : COLOR_BTNFACE);
+                                     : COLOR_BTNFACE);
         hbsave = (HBRUSH)SelectObject(hdc, hb);
         hpsave = (HPEN)SelectObject(hdc, hp);
         Polygon(hdc, Points, 4);
@@ -344,6 +353,11 @@ static BOOL UITOOLS95_DrawDiagEdge(HDC hdc, LPRECT rc,
  * Same as DrawEdge invoked without BF_DIAGONAL
  *
  * 23-Nov-1997: Changed by Bertho Stultiens
+ * 25-June-1999: Changed by Christoph Bratschi
+ *
+ * Attention: only draw in the rect's range!
+ *   left to right-1
+ *   top to bottom-1
  *
  * Well, I started testing this and found out that there are a few things
  * that weren't quite as win95. The following rewrite should reproduce
@@ -412,8 +426,8 @@ static BOOL UITOOLS95_DrawDiagEdge(HDC hdc, LPRECT rc,
  */
 
 
-static BOOL UITOOLS95_DrawRectEdge(HDC hdc, LPRECT rc, 
-				     UINT uType, UINT uFlags)
+static BOOL UITOOLS95_DrawRectEdge(HDC hdc, LPRECT rc,
+                                     UINT uType, UINT uFlags)
 {
     char LTInnerI, LTOuterI;
     char RBInnerI, RBOuterI;
@@ -429,7 +443,9 @@ static BOOL UITOOLS95_DrawRectEdge(HDC hdc, LPRECT rc,
     BOOL retval = !(   ((uType & BDR_INNER) == BDR_INNER
                        || (uType & BDR_OUTER) == BDR_OUTER)
                       && !(uFlags & (BF_FLAT|BF_MONO)) );
-        
+
+    if  (IsRectEmpty(rc)) return retval; //nothing to do
+
     /* Init some vars */
     LTInnerPen = LTOuterPen = RBInnerPen = RBOuterPen = (HPEN)GetStockObject(NULL_PEN);
     SavePen = (HPEN)SelectObject(hdc, LTInnerPen);
@@ -472,8 +488,8 @@ static BOOL UITOOLS95_DrawRectEdge(HDC hdc, LPRECT rc,
 
     if((uFlags & BF_MIDDLE) && retval)
     {
-        FillRect(hdc, &InnerRect, GetSysColorBrush(uFlags & BF_MONO ? 
-					    COLOR_WINDOW : COLOR_BTNFACE));
+        FillRect(hdc, &InnerRect, GetSysColorBrush(uFlags & BF_MONO ?
+                                            COLOR_WINDOW : COLOR_BTNFACE));
     }
 
     MoveToEx(hdc, 0, 0, &SavePoint);
@@ -483,23 +499,24 @@ static BOOL UITOOLS95_DrawRectEdge(HDC hdc, LPRECT rc,
     if(uFlags & BF_TOP)
     {
         MoveToEx(hdc, InnerRect.left, InnerRect.top, NULL);
-        LineTo(hdc, InnerRect.right, InnerRect.top);
+        LineTo(hdc, InnerRect.right-1, InnerRect.top);
     }
     if(uFlags & BF_LEFT)
     {
         MoveToEx(hdc, InnerRect.left, InnerRect.top, NULL);
-        LineTo(hdc, InnerRect.left, InnerRect.bottom);
+        LineTo(hdc, InnerRect.left, InnerRect.bottom-1);
     }
+
     SelectObject(hdc, RBOuterPen);
     if(uFlags & BF_BOTTOM)
     {
         MoveToEx(hdc, InnerRect.right-1, InnerRect.bottom-1, NULL);
-        LineTo(hdc, InnerRect.left-1, InnerRect.bottom-1);
+        LineTo(hdc, InnerRect.left, InnerRect.bottom-1);
     }
     if(uFlags & BF_RIGHT)
     {
         MoveToEx(hdc, InnerRect.right-1, InnerRect.bottom-1, NULL);
-        LineTo(hdc, InnerRect.right-1, InnerRect.top-1);
+        LineTo(hdc, InnerRect.right-1, InnerRect.top);
     }
 
     /* Draw the inner edge */
@@ -507,23 +524,23 @@ static BOOL UITOOLS95_DrawRectEdge(HDC hdc, LPRECT rc,
     if(uFlags & BF_TOP)
     {
         MoveToEx(hdc, InnerRect.left+LTpenplus, InnerRect.top+1, NULL);
-        LineTo(hdc, InnerRect.right-RTpenplus, InnerRect.top+1);
+        LineTo(hdc, InnerRect.right-RTpenplus-1, InnerRect.top+1);
     }
     if(uFlags & BF_LEFT)
     {
         MoveToEx(hdc, InnerRect.left+1, InnerRect.top+LTpenplus, NULL);
-        LineTo(hdc, InnerRect.left+1, InnerRect.bottom-LBpenplus);
+        LineTo(hdc, InnerRect.left+1, InnerRect.bottom-LBpenplus-1);
     }
     SelectObject(hdc, RBInnerPen);
     if(uFlags & BF_BOTTOM)
     {
         MoveToEx(hdc, InnerRect.right-1-RBpenplus, InnerRect.bottom-2, NULL);
-        LineTo(hdc, InnerRect.left-1+LBpenplus, InnerRect.bottom-2);
+        LineTo(hdc, InnerRect.left+LBpenplus, InnerRect.bottom-2);
     }
     if(uFlags & BF_RIGHT)
     {
         MoveToEx(hdc, InnerRect.right-2, InnerRect.bottom-1-RBpenplus, NULL);
-        LineTo(hdc, InnerRect.right-2, InnerRect.top-1+RTpenplus);
+        LineTo(hdc, InnerRect.right-2, InnerRect.top+RTpenplus);
     }
 
     /* Adjust rectangle if asked */
@@ -550,14 +567,14 @@ static BOOL UITOOLS95_DrawRectEdge(HDC hdc, LPRECT rc,
 BOOL WIN32API DrawEdge(HDC hdc, LPRECT rc, UINT edge, UINT flags)
 {
 
-    if(flags & BF_DIAGONAL)
+    if (flags & BF_DIAGONAL)
       return UITOOLS95_DrawDiagEdge(hdc, rc, edge, flags);
     else
       return UITOOLS95_DrawRectEdge(hdc, rc, edge, flags);
 }
 
 /************************************************************************
- *	UITOOLS_MakeSquareRect
+ *      UITOOLS_MakeSquareRect
  *
  * Utility to create a square rectangle and returning the width
  */
@@ -586,7 +603,7 @@ static int UITOOLS_MakeSquareRect(LPRECT src, LPRECT dst)
 
 
 /************************************************************************
- *	UITOOLS_DFC_ButtonPush
+ *      UITOOLS_DFC_ButtonPush
  *
  * Draw a push button coming from DrawFrameControl()
  *
@@ -656,7 +673,7 @@ static BOOL UITOOLS95_DFC_ButtonPush(HDC dc, LPRECT r, UINT uFlags)
 
 
 /************************************************************************
- *	UITOOLS_DFC_ButtonChcek
+ *      UITOOLS_DFC_ButtonChcek
  *
  * Draw a check/3state button coming from DrawFrameControl()
  *
@@ -766,7 +783,7 @@ static BOOL UITOOLS95_DFC_ButtonCheck(HDC dc, LPRECT r, UINT uFlags)
 
 
 /************************************************************************
- *	UITOOLS_DFC_ButtonRadio
+ *      UITOOLS_DFC_ButtonRadio
  *
  * Draw a radio/radioimage/radiomask button coming from DrawFrameControl()
  *
@@ -1339,7 +1356,7 @@ BOOL WIN32API DrawFrameControl(HDC hdc, LPRECT rc, UINT uType,
     /* Win95 doesn't support drawing in other mapping modes */
     if(GetMapMode(hdc) != MM_TEXT)
         return FALSE;
-        
+
     switch(uType)
     {
     case DFC_BUTTON:
@@ -1352,7 +1369,7 @@ BOOL WIN32API DrawFrameControl(HDC hdc, LPRECT rc, UINT uType,
       return UITOOLS95_DrawFrameScroll(hdc, rc, uState);
 //    default:
 //      WARN("(%x,%p,%d,%x), bad type!\n",
-//	   hdc,rc,uType,uState );
+//         hdc,rc,uType,uState );
     }
     return FALSE;
 }
