@@ -1,8 +1,10 @@
+# $Id: makefile,v 1.3 1999-06-10 16:29:00 phaller Exp $
+
 #
-# PD-Win32 API 
+# PD-Win32 API
 #
 #	version.dll makefile
-# 
+#
 
 PDWIN32_INCLUDE = ..\..\include
 PDWIN32_LIB = ..\..\lib
@@ -23,7 +25,7 @@ OBJS =  version.obj initterm.obj
 all: $(TARGET).dll $(TARGET).lib
 
 
-$(TARGET).dll: $(OBJS) $(TARGET).def 
+$(TARGET).dll: $(OBJS) $(TARGET).def
 	$(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) $(TARGET).def \
               $(PDWIN32_LIB)/pmwinx.lib $(PDWIN32_LIB)/kernel32.lib \
               $(PDWIN32_LIB)/user32.lib

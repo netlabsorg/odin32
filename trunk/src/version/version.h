@@ -1,5 +1,7 @@
+/* $Id: version.h,v 1.2 1999-06-10 16:29:00 phaller Exp $ */
+
 /* Definitions for the VERsion infolibrary (VER.DLL)
- * 
+ *
  * Copyright 1996 Marcus Meissner
  */
 

@@ -1,3 +1,5 @@
+/* $Id: os2timer.cpp,v 1.3 1999-06-10 16:24:34 phaller Exp $ */
+
 /*
  * OS/2 Timer class
  *

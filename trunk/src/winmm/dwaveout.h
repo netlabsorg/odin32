@@ -1,11 +1,9 @@
+/* $Id: dwaveout.h,v 1.3 1999-06-10 16:24:33 phaller Exp $ */
+
 /*
  * Wave playback class
- *
  * Copyright 1998 Sander van Leeuwen (sandervl@xs4all.nl)
- *
- *
  * Project Odin Software License can be found in LICENSE.TXT
- *
  */
 #ifndef __DWAVEOUT_H__
 #define __DWAVEOUT_H__

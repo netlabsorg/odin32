@@ -1,3 +1,5 @@
+/* $Id: winmm.cpp,v 1.3 1999-06-10 16:24:35 phaller Exp $ */
+
 /*
  * Timer MM apis
  *
