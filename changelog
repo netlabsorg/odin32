@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.1921 2001-12-22 12:35:56 sandervl Exp $ */
+/* $Id: changelog,v 1.1922 2001-12-23 09:40:41 sandervl Exp $ */
+
+ 2001-12-23: Sander van Leeuwen <sandervl@xs4all.nl>
+    - WINMM:    o DisableWaveAudio function added to disable wave audio (custom build)
 
  2001-12-22: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Print more information when a missing api is called
