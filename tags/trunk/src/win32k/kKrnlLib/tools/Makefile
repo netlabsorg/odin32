@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.2 2002-04-07 22:40:16 bird Exp $
+# $Id: Makefile,v 1.3 2002-08-22 02:09:43 bird Exp $
 
 #
 # Makefile for all tools.
@@ -6,37 +6,23 @@
 # Copyright (c) 2002 knut st. osmundsen (bird@anduin.net)
 #
 
-
 #
-# Setup.
+# Setup config
 #
 PATH_ROOT = ..\..\..\..
-!include $(PATH_ROOT)\make\setup.mak
-
-
-#
-# Config.
-#
-TARGET_NAME = clfix
-ALL_INCLUDES= -I../include/kLib -I../include
-PATH_BIN    = $(PATH_TOOLS)
-
+!include $(PATH_ROOT)\$(BUILD_SETUP_MAK)
 
 #
-# Object files.
+# Target config
 #
-TARGET_NAME  = clfix
-PREMAKEFILES = ignore.mak libconv.mak
-
+TARGET_NAME     = clfix
+TARGET_PUBNAME  = $(PATH_TOOLS)\$(TARGET_NAME).$(TARGET_EXT)
+TARGET_NEEDED   = 1
+ALL_INCLUDES    = -I../include
+POSTMAKEFILES   = ignore.mak libconv.mak
 
 #
-# Process
+# Rules config
 #
 !include $(MAKE_INCLUDE_PROCESS)
-
-
-#
-# needed rulez
-#
-needed: build install
 
