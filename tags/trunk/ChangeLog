@@ -1,11 +1,14 @@
- /* $Id: ChangeLog,v 1.796 2000-03-10 16:16:56 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.797 2000-03-11 09:09:55 jeroen Exp $ */
+
+ 2000-03-11: Jeroen van den Horn <J.vandenHorn@fibre.a2000.nl>
+        - OPENGL: Fixed error preventing build to complete
 
  2000-03-09: Sander van Leeuwen <sandervl@xs4all.nl>
         - KERNEL32: Set initial max nr of file handles to 256 during kernel32 init
-	            Create DDRAW & DSOUND registry keys in InitRegistry
+                    Create DDRAW & DSOUND registry keys in InitRegistry
                     (NOTE: Must be done in install program!)
                     Added some win95 stubs
-	- GDI32:    Added 16 bits device apis stubs
+        - GDI32:    Added 16 bits device apis stubs
 
  2000-03-10: Michal Necasek <mike@mendelu.cz>
         - dsound\new: Changed DART buffer size calcualation, hopefully
