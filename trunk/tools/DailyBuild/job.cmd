@@ -1,4 +1,4 @@
-/* $Id: job.cmd,v 1.6 2001-02-19 17:15:31 bird Exp $
+/* $Id: job.cmd,v 1.7 2001-06-27 08:34:43 bird Exp $
  *
  * Main job for building OS/2.
  *
@@ -61,7 +61,7 @@
     if (rc <> 0) then call failure rc, 'd: failed.';
     'cd d:\odin';
     if (rc <> 0) then call failure rc, 'cd d:\odin failed.';
-    'unzip -o ' || sTree || '\*debug.zip';
+    'unzip -o ' || sTree || '\odin*debug.zip';
     if (rc <> 0) then call failure rc, 'unzip failed.';
     'd:'
     if (rc <> 0) then call failure rc, 'd: failed.';
