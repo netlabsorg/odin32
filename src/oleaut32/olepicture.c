@@ -40,17 +40,27 @@
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif
+#include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
+
+/* Must be before wine includes, the header has things conflicting with
+ * WINE headers.
+ */
+#ifdef HAVE_GIF_LIB_H
+# include <gif_lib.h>
+#endif
+
+#define NONAMELESSUNION
+#define NONAMELESSSTRUCT
 #include "winerror.h"
+#include "windef.h"
 #include "winbase.h"
 #include "wingdi.h"
 #include "winuser.h"
 #include "ole2.h"
 #include "olectl.h"
 #include "oleauto.h"
-#include "wine/obj_picture.h"
-#include "wine/obj_connection.h"
 #include "connpt.h"
 #include "wine/debug.h"
 
@@ -62,6 +72,7 @@
 #define XMD_H
 #define UINT8 JPEG_UINT8
 #define UINT16 JPEG_UINT16
+#undef FAR
 #ifdef HAVE_JPEGLIB_H
 # include <jpeglib.h>
 #endif
@@ -217,6 +228,11 @@ static OLEPictureImpl* OLEPictureImpl_Construct(LPPICTDESC pictDesc, BOOL fOwn)
 	TRACE("metafile handle %p\n", pictDesc->u.wmf.hmeta);
 	newObject->himetricWidth = pictDesc->u.wmf.xExt;
 	newObject->himetricHeight = pictDesc->u.wmf.yExt;
+	break;
+
+      case PICTYPE_NONE:
+	/* not sure what to do here */
+	newObject->himetricWidth = newObject->himetricHeight = 0;
 	break;
 
       case PICTYPE_ICON:
@@ -498,7 +514,7 @@ static HRESULT WINAPI OLEPictureImpl_Render(IPicture *iface, HDC hdc,
   TRACE("(%p)->(%p, (%ld,%ld), (%ld,%ld) <- (%ld,%ld), (%ld,%ld), %p)\n",
 	This, hdc, x, y, cx, cy, xSrc, ySrc, cxSrc, cySrc, prcWBounds);
   if(prcWBounds)
-    TRACE("prcWBounds (%d,%d) - (%d,%d)\n", prcWBounds->left, prcWBounds->top,
+    TRACE("prcWBounds (%ld,%ld) - (%ld,%ld)\n", prcWBounds->left, prcWBounds->top,
 	  prcWBounds->right, prcWBounds->bottom);
 
   /*
@@ -795,7 +811,9 @@ static boolean _jpeg_fill_input_buffer(j_decompress_ptr cinfo) {
 }
 
 static void _jpeg_skip_input_data(j_decompress_ptr cinfo,long num_bytes) {
-    ERR("(%ld), should not get here.\n",num_bytes);
+    TRACE("Skipping %ld bytes...\n", num_bytes);
+    cinfo->src->next_input_byte += num_bytes;
+    cinfo->src->bytes_in_buffer -= num_bytes;
 }
 
 static boolean _jpeg_resync_to_restart(j_decompress_ptr cinfo, int desired) {
@@ -804,6 +822,26 @@ static boolean _jpeg_resync_to_restart(j_decompress_ptr cinfo, int desired) {
 }
 static void _jpeg_term_source(j_decompress_ptr cinfo) { }
 #endif /* HAVE_LIBJPEG */
+
+#ifdef HAVE_LIBGIF
+struct gifdata {
+    unsigned char *data;
+    unsigned int curoff;
+    unsigned int len;
+};
+
+static int _gif_inputfunc(GifFileType *gif, GifByteType *data, int len) {
+    struct gifdata *gd = (struct gifdata*)gif->UserData;
+
+    if (len+gd->curoff > gd->len) {
+        FIXME("Trying to read %d bytes, but only %d available.\n",len, gd->len-gd->curoff);
+        len = gd->len - gd->curoff;
+    }
+    memcpy(data, gd->data+gd->curoff, len);
+    gd->curoff += len;
+    return len;
+}
+#endif
 
 /************************************************************************
  * OLEPictureImpl_IPersistStream_Load (IUnknown)
@@ -821,41 +859,157 @@ static HRESULT WINAPI OLEPictureImpl_Load(IPersistStream* iface,IStream*pStm) {
   BYTE 		*xbuf;
   DWORD		header[2];
   WORD		magic;
+  STATSTG       statstg;
   ICOM_THIS_From_IPersistStream(OLEPictureImpl, iface);
-
+  
   TRACE("(%p,%p)\n",This,pStm);
 
+  /* Sometimes we have a header, sometimes we don't. Apply some guesses to find
+   * out whether we do.
+   */
+  hr=IStream_Stat(pStm,&statstg,STATFLAG_NONAME);
+  if (hr)
+    FIXME("Stat failed with hres %lx\n",hr);
   hr=IStream_Read(pStm,header,8,&xread);
   if (hr || xread!=8) {
       FIXME("Failure while reading picture header (hr is %lx, nread is %ld).\n",hr,xread);
       return hr;
   }
-  xread = 0;
-  xbuf = This->data = HeapAlloc(GetProcessHeap(),HEAP_ZERO_MEMORY,header[1]);
-  This->datalen = header[1];
-  while (xread < header[1]) {
-    ULONG nread;
-    hr = IStream_Read(pStm,xbuf+xread,header[1]-xread,&nread);
-    xread+=nread;
-    if (hr || !nread)
-      break;
+  if (header[1] > statstg.cbSize.QuadPart) {/* Incorrect header, assume none. */
+    xread = 8;
+#ifdef __WIN32OS2__
+    // PF Can't understand problem here.. Using QuadPart causes all sorts of corruptions.
+    // Anyway we use only LowPart currently.
+    xbuf = This->data = HeapAlloc(GetProcessHeap(),HEAP_ZERO_MEMORY,statstg.cbSize.s.LowPart);
+#else
+    xbuf = This->data = HeapAlloc(GetProcessHeap(),HEAP_ZERO_MEMORY,statstg.cbSize.QuadPart);
+#endif
+    memcpy(xbuf,&header,8);
+#ifdef __WIN32OS2__
+    This->datalen = statstg.cbSize.s.LowPart;
+#else
+    This->datalen = statstg.cbSize.QuadPart;
+#endif
+    while (xread < This->datalen) {
+      ULONG nread;
+      hr = IStream_Read(pStm,xbuf+xread,This->datalen-xread,&nread);
+      xread+=nread;
+      if (hr || !nread)
+	break;
+    }
+    if (xread != This->datalen)
+      FIXME("Could only read %ld of %d bytes in no-header case?\n",xread,This->datalen);
+  } else {
+    xread = 0;
+    xbuf = This->data = HeapAlloc(GetProcessHeap(),HEAP_ZERO_MEMORY,header[1]);
+    This->datalen = header[1];
+    while (xread < header[1]) {
+      ULONG nread;
+      hr = IStream_Read(pStm,xbuf+xread,header[1]-xread,&nread);
+      xread+=nread;
+      if (hr || !nread)
+	break;
+    }
+    if (xread != header[1])
+      FIXME("Could only read %ld of %ld bytes?\n",xread,header[1]);
   }
-  if (xread != header[1])
-    FIXME("Could only read %ld of %ld bytes?\n",xread,header[1]);
-
   magic = xbuf[0] + (xbuf[1]<<8);
   switch (magic) {
+  case 0x4947: { /* GIF */
+#ifdef HAVE_LIBGIF
+    struct gifdata 	gd;
+    GifFileType 	*gif;
+    BITMAPINFO		*bmi;
+    HDC			hdcref;
+    LPBYTE              bytes;
+    int                 i,j,ret;
+    GifImageDesc        *gid;
+    SavedImage          *si;
+    ColorMapObject      *cm;
+    
+    gd.data   = xbuf;
+    gd.curoff = 0;
+    gd.len    = xread;
+    gif = DGifOpen((void*)&gd, _gif_inputfunc);
+    ret = DGifSlurp(gif);
+    if (ret == GIF_ERROR) {
+      FIXME("Failed reading GIF using libgif.\n");
+      return E_FAIL;
+    }
+    TRACE("screen height %d, width %d\n", gif->SWidth, gif->SHeight);
+    TRACE("color res %d, backgcolor %d\n", gif->SColorResolution, gif->SBackGroundColor);
+    TRACE("imgcnt %d\n", gif->ImageCount);
+    if (gif->ImageCount<1) {
+      FIXME("GIF stream does not have images inside?\n");
+      return E_FAIL;
+    }
+    TRACE("curimage: %d x %d, on %dx%d, interlace %d\n",
+      gif->Image.Width, gif->Image.Height,
+      gif->Image.Left, gif->Image.Top,
+      gif->Image.Interlace
+    );
+    /* */
+    bmi  = HeapAlloc(GetProcessHeap(),0,sizeof(BITMAPINFOHEADER)+(1<<gif->SColorResolution)*sizeof(RGBQUAD));
+    bytes= HeapAlloc(GetProcessHeap(),0,gif->SWidth*gif->SHeight);
+    si   = gif->SavedImages+0;
+    gid  = &(si->ImageDesc);
+    cm   = gid->ColorMap;
+    if (!cm) cm = gif->SColorMap;
+    for (i=0;i<(1<<gif->SColorResolution);i++) {
+      bmi->bmiColors[i].rgbRed = cm->Colors[i].Red;
+      bmi->bmiColors[i].rgbGreen = cm->Colors[i].Green;
+      bmi->bmiColors[i].rgbBlue = cm->Colors[i].Blue;
+    }
+    /* Map to in picture coordinates */
+    for (i=0;i<gid->Height;i++)
+      for (j=0;j<gid->Width;j++)
+        bytes[(gid->Top+i)*gif->SWidth+gid->Left+j]=si->RasterBits[i*gid->Width+j];
+    bmi->bmiHeader.biSize		= sizeof(BITMAPINFOHEADER);
+    bmi->bmiHeader.biWidth		= gif->SWidth;
+    bmi->bmiHeader.biHeight		= gif->SHeight;
+    bmi->bmiHeader.biPlanes		= 1;
+    bmi->bmiHeader.biBitCount		= 8;
+    bmi->bmiHeader.biCompression	= BI_RGB;
+    bmi->bmiHeader.biSizeImage		= gif->SWidth*gif->SHeight;
+    bmi->bmiHeader.biXPelsPerMeter	= 0;
+    bmi->bmiHeader.biYPelsPerMeter	= 0;
+    bmi->bmiHeader.biClrUsed		= 1 << gif->SColorResolution;
+    bmi->bmiHeader.biClrImportant	= 0;
+
+    hdcref = GetDC(0);
+    This->desc.u.bmp.hbitmap=CreateDIBitmap(
+	    hdcref,
+	    &bmi->bmiHeader,
+	    CBM_INIT,
+	    bytes,
+	    bmi,
+	    DIB_PAL_COLORS
+    );
+    DeleteDC(hdcref);
+    This->desc.picType = PICTYPE_BITMAP;
+    OLEPictureImpl_SetBitmap(This);
+    DGifCloseFile(gif);
+    HeapFree(GetProcessHeap(),0,bytes);
+    return S_OK;
+#else
+    FIXME("Trying to load GIF, but no support for libgif/libungif compiled in.\n");
+    return E_FAIL;
+#endif
+    break;
+  }
   case 0xd8ff: { /* JPEG */
 #ifdef HAVE_LIBJPEG
     struct jpeg_decompress_struct	jd;
     struct jpeg_error_mgr		jerr;
     int					ret;
     JDIMENSION				x;
-    JSAMPROW				samprow;
+    JSAMPROW				samprow,oldsamprow;
     BITMAPINFOHEADER			bmi;
     LPBYTE				bits;
     HDC					hdcref;
     struct jpeg_source_mgr		xjsm;
+    LPBYTE                              oldbits;
+    int i;
 
     /* This is basically so we can use in-memory data for jpeg decompression.
      * We need to have all the functions.
@@ -872,25 +1026,41 @@ static HRESULT WINAPI OLEPictureImpl_Load(IPersistStream* iface,IStream*pStm) {
     jpeg_create_decompress(&jd);
     jd.src = &xjsm;
     ret=jpeg_read_header(&jd,TRUE);
+    jd.out_color_space = JCS_RGB;
     jpeg_start_decompress(&jd);
     if (ret != JPEG_HEADER_OK) {
 	ERR("Jpeg image in stream has bad format, read header returned %d.\n",ret);
 	HeapFree(GetProcessHeap(),0,xbuf);
 	return E_FAIL;
     }
-    bits = HeapAlloc(GetProcessHeap(),HEAP_ZERO_MEMORY,(jd.output_height+1)*jd.output_width*jd.output_components);
+
+    bits = HeapAlloc(GetProcessHeap(),HEAP_ZERO_MEMORY,
+                     (jd.output_height+1) * ((jd.output_width*jd.output_components + 3) & ~3) );
     samprow=HeapAlloc(GetProcessHeap(),HEAP_ZERO_MEMORY,jd.output_width*jd.output_components);
+
+    oldbits = bits;
+    oldsamprow = samprow;
     while ( jd.output_scanline<jd.output_height ) {
       x = jpeg_read_scanlines(&jd,&samprow,1);
       if (x != 1) {
 	FIXME("failed to read current scanline?\n");
 	break;
       }
-      memcpy( bits+jd.output_scanline*jd.output_width*jd.output_components,
-	      samprow,
-      	      jd.output_width*jd.output_components
-      );
+      /* We have to convert from RGB to BGR, see MSDN/ BITMAPINFOHEADER */
+      for(i=0;i<jd.output_width;i++,samprow+=jd.output_components) {
+	*(bits++) = *(samprow+2);
+	*(bits++) = *(samprow+1);
+	*(bits++) = *(samprow);
+      }
+#ifdef __WIN32OS2__
+      bits = (LPBYTE)((unsigned long)(bits + 3) & ~3);
+#else
+      bits = (LPBYTE)(((UINT_PTR)bits + 3) & ~3);
+#endif
+      samprow = oldsamprow;
     }
+    bits = oldbits;
+
     bmi.biSize		= sizeof(bmi);
     bmi.biWidth		=  jd.output_width;
     bmi.biHeight	= -jd.output_height;
@@ -997,14 +1167,25 @@ static HRESULT WINAPI OLEPictureImpl_Load(IPersistStream* iface,IStream*pStm) {
     } else {
 	This->desc.picType = PICTYPE_ICON;
 	This->desc.u.icon.hicon = hicon;
+	This->himetricWidth = cifd->idEntries[i].bWidth;
+	This->himetricHeight = cifd->idEntries[i].bHeight;
 	hr = S_OK;
     }
     break;
   }
   default:
-    FIXME("Unknown magic %04x\n",magic);
+  {
+    int i;
+    FIXME("Unknown magic %04x, %ld read bytes:\n",magic,xread);
     hr=E_FAIL;
+    for (i=0;i<xread+8;i++) {
+	if (i<8) MESSAGE("%02x ",((unsigned char*)&header)[i]);
+	else MESSAGE("%02x ",xbuf[i-8]);
+        if (i % 10 == 9) MESSAGE("\n");
+    }
+    MESSAGE("\n");
     break;
+  }
   }
 
   /* FIXME: this notify is not really documented */
@@ -1308,3 +1489,63 @@ HRESULT WINAPI OleLoadPictureEx( LPSTREAM lpstream, LONG lSize, BOOL fRunmode,
   IPicture_Release(newpic);
   return hr;
 }
+
+/*******************************************************************************
+ * StdPic ClassFactory
+ */
+typedef struct
+{
+    /* IUnknown fields */
+    ICOM_VFIELD(IClassFactory);
+    DWORD                       ref;
+} IClassFactoryImpl;
+
+static HRESULT WINAPI
+SPCF_QueryInterface(LPCLASSFACTORY iface,REFIID riid,LPVOID *ppobj) {
+	ICOM_THIS(IClassFactoryImpl,iface);
+
+	FIXME("(%p)->(%s,%p),stub!\n",This,debugstr_guid(riid),ppobj);
+	return E_NOINTERFACE;
+}
+
+static ULONG WINAPI
+SPCF_AddRef(LPCLASSFACTORY iface) {
+	ICOM_THIS(IClassFactoryImpl,iface);
+	return ++(This->ref);
+}
+
+static ULONG WINAPI SPCF_Release(LPCLASSFACTORY iface) {
+	ICOM_THIS(IClassFactoryImpl,iface);
+	/* static class, won't be  freed */
+	return --(This->ref);
+}
+
+static HRESULT WINAPI SPCF_CreateInstance(
+	LPCLASSFACTORY iface,LPUNKNOWN pOuter,REFIID riid,LPVOID *ppobj
+) {
+	PICTDESC	pd;
+
+	FIXME("(%p,%p,%s,%p), creating stdpic with PICTYPE_NONE.\n",iface,pOuter,debugstr_guid(riid),ppobj);
+	pd.cbSizeofstruct = sizeof(pd);
+	pd.picType = PICTYPE_NONE;
+	return OleCreatePictureIndirect(&pd,riid,TRUE,ppobj);
+
+}
+
+static HRESULT WINAPI SPCF_LockServer(LPCLASSFACTORY iface,BOOL dolock) {
+	ICOM_THIS(IClassFactoryImpl,iface);
+	FIXME("(%p)->(%d),stub!\n",This,dolock);
+	return S_OK;
+}
+
+static ICOM_VTABLE(IClassFactory) SPCF_Vtbl = {
+	ICOM_MSVTABLE_COMPAT_DummyRTTIVALUE
+	SPCF_QueryInterface,
+	SPCF_AddRef,
+	SPCF_Release,
+	SPCF_CreateInstance,
+	SPCF_LockServer
+};
+static IClassFactoryImpl STDPIC_CF = {&SPCF_Vtbl, 1 };
+
+void _get_STDPIC_CF(LPVOID *ppv) { *ppv = (LPVOID)&STDPIC_CF; }
