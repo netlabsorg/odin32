@@ -1,4 +1,4 @@
-/* $Id: vprntf16.c,v 1.6 2001-04-16 23:05:31 bird Exp $
+/* $Id: vprntf16.c,v 1.7 2002-06-18 21:28:00 bird Exp $
  *
  * vprintf and printf - 16-bit.
  *
@@ -118,7 +118,7 @@ static char * numtostr(long lValue, unsigned int uiBase,
     int             cchValue;
     unsigned long   ul;
     int             i;
-    int             j;
+    /*int             j; -TODO / FIXME */
 
 #ifdef DEBUG
     if (uiBase < 2 || uiBase > 16)
