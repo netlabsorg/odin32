@@ -1,4 +1,4 @@
-/* $Id: blit.cpp,v 1.7 2000-04-02 10:12:53 sandervl Exp $ */
+/* $Id: blit.cpp,v 1.8 2000-04-02 12:24:39 sandervl Exp $ */
 
 /*
  * GDI32 blit code
@@ -37,6 +37,7 @@ BOOL WIN32API StretchBlt(HDC hdcDest, int nXOriginDest, int nYOriginDest,
            hdcDest, nXOriginDest, nYOriginDest, nWidthDest, nHeightDest));
   dprintf(("GDI32: StretchBlt Src : %x (%d, %d) size (%d, %d)\n",
            hdcSrc, nXOriginSrc, nYOriginSrc, nWidthSrc, nHeightSrc));
+  SetLastError(0);
   if(DIBSection::getSection() != NULL)
   {
     DIBSection *dsect = DIBSection::findHDC(hdcSrc);
@@ -58,24 +59,11 @@ BOOL WIN32API BitBlt(HDC hdcDest, int arg2, int arg3, int arg4, int arg5, HDC hd
 {
  BOOL rc;
 
+    SetLastError(0);
     if(DIBSection::getSection() != NULL) {
         DIBSection *dsect = DIBSection::findHDC(hdcSrc);
         if(dsect) {
-                rc = dsect->BitBlt(hdcDest, arg2, arg3, arg4, arg5, arg7, arg8, arg4, arg5, arg9);
-                if(rc) {
-                        BITMAPINFO bmpinfo = {0};
-                        DIBSection *dest = DIBSection::findHDC(hdcDest);
-                        if(dest) {
-                                dprintf(("Sync dest DIB section"));
-                                bmpinfo.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-                                GetDIBits(hdcDest, dest->GetBitmapHandle(), 0, 0, 0, &bmpinfo, dest->GetRGBUsage());
-                                dprintf(("height        %d", bmpinfo.bmiHeader.biHeight));
-                                dprintf(("width         %d", bmpinfo.bmiHeader.biWidth));
-                                dprintf(("biBitCount    %d", bmpinfo.bmiHeader.biBitCount));
-                                GetDIBits(hdcDest, dest->GetBitmapHandle(), 0, bmpinfo.bmiHeader.biHeight, dest->GetDIBObject(), &bmpinfo, dest->GetRGBUsage());
-                        }
-                }
-                return rc;
+                return dsect->BitBlt(hdcDest, arg2, arg3, arg4, arg5, arg7, arg8, arg4, arg5, arg9);
         }
     }
     dprintf(("GDI32: BitBlt to hdc %X from (%d,%d) to (%d,%d), (%d,%d) rop %X\n", hdcDest, arg7, arg8, arg2, arg3, arg4, arg5, arg9));

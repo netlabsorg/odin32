@@ -1,4 +1,4 @@
-/* $Id: dibsect.h,v 1.14 2000-03-25 12:19:08 sandervl Exp $ */
+/* $Id: dibsect.h,v 1.15 2000-04-02 12:24:40 sandervl Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -84,7 +84,7 @@ public:
 
                int  SetDIBColorTable(int startIdx, int cEntries, RGBQUAD *rgb);
 
-         int  SetDIBits(HDC hdc, HBITMAP hbitmap, UINT startscan, UINT
+               int  SetDIBits(HDC hdc, HBITMAP hbitmap, UINT startscan, UINT
                               lines, const VOID *bits, BITMAPINFOHEADER_W *pbmi,
                               UINT coloruse);
 
@@ -103,7 +103,7 @@ private:
           HDC   hdc;
           char *bmpBits, *bmpBitsRGB565;
           BOOL  fFlip;
-          int   bmpsize;
+          int   bmpsize, os2bmphdrsize;
     DIBSECTION  dibinfo;
 
     BITMAPINFO2 *pOS2bmp;

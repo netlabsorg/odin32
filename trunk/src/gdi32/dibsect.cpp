@@ -1,4 +1,4 @@
-/* $Id: dibsect.cpp,v 1.24 2000-04-01 15:05:30 sandervl Exp $ */
+/* $Id: dibsect.cpp,v 1.25 2000-04-02 12:24:40 sandervl Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -39,26 +39,24 @@ static VMutex dibMutex;
 DIBSection::DIBSection(BITMAPINFOHEADER_W *pbmi, char *pColors, DWORD iUsage, DWORD hSection, DWORD dwOffset, DWORD handle, int fFlip)
                 : bmpBits(NULL), pOS2bmp(NULL), next(NULL), bmpBitsRGB565(NULL)
 {
-  int  os2bmpsize;
-
   bmpsize = pbmi->biWidth;
   /* @@@PH 98/06/07 -- high-color bitmaps don't have palette */
 
   this->fFlip = fFlip;
-  os2bmpsize = sizeof(BITMAPINFO2);
+  os2bmphdrsize = sizeof(BITMAPINFO2);
 
   switch(pbmi->biBitCount)
   {
         case 1:
                 bmpsize = ((bmpsize + 31) & ~31) / 8;
-                os2bmpsize += ((1 << pbmi->biBitCount)-1)*sizeof(RGB2);
+                os2bmphdrsize += ((1 << pbmi->biBitCount)-1)*sizeof(RGB2);
                 break;
         case 4:
                 bmpsize = ((bmpsize + 7) & ~7) / 2;
-                os2bmpsize += ((1 << pbmi->biBitCount)-1)*sizeof(RGB2);
+                os2bmphdrsize += ((1 << pbmi->biBitCount)-1)*sizeof(RGB2);
                 break;
         case 8:
-                os2bmpsize += ((1 << pbmi->biBitCount)-1)*sizeof(RGB2);
+                os2bmphdrsize += ((1 << pbmi->biBitCount)-1)*sizeof(RGB2);
         	bmpsize = (bmpsize + 3) & ~3;
                 break;
         case 16:
@@ -91,11 +89,11 @@ DIBSection::DIBSection(BITMAPINFOHEADER_W *pbmi, char *pColors, DWORD iUsage, DW
    }
    memset(bmpBits, 0, bmpsize*pbmi->biHeight);
 
-   pOS2bmp = (BITMAPINFO2 *)malloc(os2bmpsize);
+   pOS2bmp = (BITMAPINFO2 *)malloc(os2bmphdrsize);
 
    memset(pOS2bmp, /* set header + palette entries to zero */
           0,
-          os2bmpsize);
+          os2bmphdrsize);
 
    pOS2bmp->cbFix         = sizeof(BITMAPINFO2) - sizeof(RGB2);
    pOS2bmp->cx            = pbmi->biWidth;
@@ -237,27 +235,26 @@ int DIBSection::SetDIBits(HDC hdc, HBITMAP hbitmap, UINT startscan, UINT
                           UINT coloruse)
 {
   lines = (int)lines >= 0 ? (int)lines : (int)-lines;
-  int  os2bmpsize;
   int  palsize=0;
 
   bmpsize = pbmi->biWidth;
-  os2bmpsize = sizeof(BITMAPINFO2);
+  os2bmphdrsize = sizeof(BITMAPINFO2);
 
   switch(pbmi->biBitCount)
   {
     case 1:
       bmpsize = ((bmpsize + 31) & ~31) / 8;
       palsize = ((1 << pbmi->biBitCount))*sizeof(RGB2);
-      os2bmpsize += palsize;
+      os2bmphdrsize += palsize;
       break;
     case 4:
       bmpsize = ((bmpsize + 7) & ~7) / 2;
       palsize = ((1 << pbmi->biBitCount))*sizeof(RGB2);
-      os2bmpsize += palsize;
+      os2bmphdrsize += palsize;
       break;
     case 8:
       palsize = ((1 << pbmi->biBitCount))*sizeof(RGB2);
-      os2bmpsize += palsize;
+      os2bmphdrsize += palsize;
       bmpsize = (bmpsize + 3) & ~3;
       break;
     case 16:
@@ -284,7 +281,7 @@ int DIBSection::SetDIBits(HDC hdc, HBITMAP hbitmap, UINT startscan, UINT
 	memcpy(bmpBits, oldbits, min(oldsize, bmpsize*pbmi->biHeight));
 	DosFreeMem(oldbits);
    }
-   pOS2bmp    = (BITMAPINFO2 *)realloc(pOS2bmp, os2bmpsize);
+   pOS2bmp    = (BITMAPINFO2 *)realloc(pOS2bmp, os2bmphdrsize);
    pOS2bmp->cbFix         = sizeof(BITMAPINFO2) - sizeof(RGB2);
    pOS2bmp->cx            = pbmi->biWidth;
    pOS2bmp->cy            = pbmi->biHeight;
@@ -385,6 +382,7 @@ BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nDestWidth,
  POINTL point[4];
  LONG   rc;
  PVOID  bitmapBits = NULL;
+ int    oldyinversion = 0;
 
   HWND hwndDest = WindowFromDC(hdcDest);
   hwndDest = Win32ToOS2Handle(hwndDest);
@@ -411,33 +409,32 @@ BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nDestWidth,
   point[2].y = pOS2bmp->cy - nYsrc - nSrcHeight;
   if(nXsrc + nSrcWidth > pOS2bmp->cx)
   {
-    point[3].x = pOS2bmp->cx;
+    	point[3].x = pOS2bmp->cx;
+	nSrcWidth  = pOS2bmp->cx - nXsrc;
   }
-  else
-    point[3].x = nXsrc + nSrcWidth;
+  else  point[3].x = nXsrc + nSrcWidth;
 
   if(nYsrc + nSrcHeight > pOS2bmp->cy)
   {
-    point[3].y = pOS2bmp->cy;
+    	point[3].y = pOS2bmp->cy;
+	nSrcHeight = pOS2bmp->cy - nYsrc;
   }
-  else
-    point[3].y = pOS2bmp->cy - nYsrc;
+  else  point[3].y = pOS2bmp->cy - nYsrc;
 
-
-#if 1
+  oldyinversion = GpiQueryYInversion(hps);
   if(fFlip & FLIP_VERT)
   {
-    GpiEnableYInversion(hps, nDestHeight);
+    	GpiEnableYInversion(hps, nDestHeight-1);
   }
+  else	GpiEnableYInversion(hps, 0);
 
   if(fFlip & FLIP_HOR)
   {
-    ULONG x;
-    x = point[0].x;
-    point[0].x = point[1].x;
-    point[1].x = x;
+    	ULONG x;
+    	x = point[0].x;
+    	point[0].x = point[1].x;
+    	point[1].x = x;
   }
-#endif
 
   //SvL: Optimize this.. (don't convert entire bitmap if only a part will be blitted to the dc)
   if(dibinfo.dsBitfields[1] == 0x3E0) {//RGB 555?
@@ -454,12 +451,33 @@ BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nDestWidth,
   }
   else	rc = GpiDrawBits(hps, bmpBits, pOS2bmp, 4, &point[0], ROP_SRCCOPY, BBO_OR);
 
+  if(rc == GPI_OK) {
+   	DIBSection *destdib = DIBSection::findHDC(hdcDest);
+        if(destdib) {
+		dprintf(("Sync destination dibsection %x (%x) (%d)", destdib->handle, hdcDest, oldyinversion));
+
+		//todo: rgb 565 to 555 conversion if bpp == 16
+		BITMAPINFO2 *tmphdr = (BITMAPINFO2 *)malloc(destdib->os2bmphdrsize);
+		memcpy(tmphdr, destdib->pOS2bmp, destdib->os2bmphdrsize);
+		rc = GpiQueryBitmapBits(hps, nYdest, nDestHeight, destdib->GetDIBObject(),
+                                        tmphdr);
+		free(tmphdr);
+		if(rc != nDestHeight) {
+			DebugInt3();
+		}
+        }
+	//restore old y inversion height
+	GpiEnableYInversion(hps, oldyinversion);
+  	if(hwndDest != 0)
+  	{
+    		WinReleasePS(hps);
+  	}
+    	return(TRUE);
+  }
+  GpiEnableYInversion(hps, oldyinversion);
   if(hwndDest != 0)
   {
-    WinReleasePS(hps);
-  }
-  if(rc == GPI_OK) {
-    	return(TRUE);
+    	WinReleasePS(hps);
   }
   dprintf(("DIBSection::BitBlt %X (%d,%d) (%d,%d) to (%d,%d) (%d,%d) returned %d\n", hps, point[0].x, point[0].y, point[1].x, point[1].y, point[2].x, point[2].y, point[3].x, point[3].y, rc));
   dprintf(("WinGetLastError returned %X\n", WinGetLastError(WinQueryAnchorBlock(hwndDest)) & 0xFFFF));
