@@ -25,13 +25,62 @@
 #include "winbase.h"
 #include "commctrl.h"
 #include "ccbase.h"
-#include "tooltips.h"
 #include "comctl32.h"
 
 #define ID_TIMERSHOW   1    /* show delay timer */
 #define ID_TIMERPOP    2    /* auto pop timer */
 #define ID_TIMERLEAVE  3    /* tool leave timer */
 
+
+typedef struct tagTT_SUBCLASS_INFO
+{
+    WNDPROC wpOrigProc;
+    HWND    hwndToolTip;
+    UINT    uRefCount;
+} TT_SUBCLASS_INFO, *LPTT_SUBCLASS_INFO;
+
+
+typedef struct tagTTTOOL_INFO
+{
+    UINT      uFlags;
+    HWND      hwnd;
+    UINT      uId;
+    RECT      rect;
+    HINSTANCE hinst;
+    LPWSTR    lpszText;
+    LPARAM    lParam;
+} TTTOOL_INFO;
+
+
+typedef struct tagTOOLTIPS_INFO
+{
+    COMCTL32_HEADER header;
+
+    WCHAR    szTipText[INFOTIPSIZE];
+    BOOL     bActive;
+    BOOL     bTrackActive;
+    UINT     uNumTools;
+    COLORREF clrBk;
+    COLORREF clrText;
+#ifdef __WIN32OS2__
+    HFONT    hDefaultFont;
+#endif
+    HFONT    hFont;
+    INT      xTrackPos;
+    INT      yTrackPos;
+    INT      nMaxTipWidth;
+    INT      nTool;
+    INT      nOldTool;
+    INT      nCurrentTool;
+    INT      nTrackTool;
+    INT      nAutomaticTime;
+    INT      nReshowTime;
+    INT      nAutoPopTime;
+    INT      nInitialTime;
+    RECT     rcMargin;
+
+    TTTOOL_INFO *tools;
+} TOOLTIPS_INFO;
 
 extern LPSTR COMCTL32_aSubclass; /* global subclassing atom */
 
@@ -2001,7 +2050,12 @@ TOOLTIPS_Create (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
     nclm.cbSize = sizeof(NONCLIENTMETRICSA);
     SystemParametersInfoA(SPI_GETNONCLIENTMETRICS,0,&nclm,0);
+
+#ifdef __WIN32OS2__
+    infoPtr->hFont = infoPtr-> hDefaultFont = CreateFontIndirectA(&nclm.lfStatusFont);
+#else
     infoPtr->hFont = CreateFontIndirectA(&nclm.lfStatusFont);
+#endif
 
     infoPtr->nMaxTipWidth = -1;
     infoPtr->nTool = -1;
@@ -2078,7 +2132,12 @@ TOOLTIPS_Destroy (HWND hwnd, WPARAM wParam, LPARAM lParam)
     }
 
     /* delete font */
+#ifdef __WIN32OS2__
+    //NEVER delete the font object received by WM_SETFONT!
+    DeleteObject (infoPtr->hDefaultFont);
+#else
     DeleteObject (infoPtr->hFont);
+#endif
 
     /* free tool tips info data */
     doneControl(hwnd);
@@ -2285,11 +2344,19 @@ TOOLTIPS_WinIniChange (HWND hwnd, WPARAM wParam, LPARAM lParam)
     infoPtr->clrBk   = GetSysColor (COLOR_INFOBK);
     infoPtr->clrText = GetSysColor (COLOR_INFOTEXT);
 
+#ifdef __WIN32OS2__
+    //NEVER delete the font object received by WM_SETFONT!
+    DeleteObject (infoPtr->hDefaultFont);
+#else
     DeleteObject (infoPtr->hFont);
+#endif
     nclm.cbSize = sizeof(NONCLIENTMETRICSA);
     SystemParametersInfoA (SPI_GETNONCLIENTMETRICS, 0, &nclm, 0);
+#ifdef __WIN32OS2__
+    infoPtr->hFont = infoPtr->hDefaultFont = CreateFontIndirectA (&nclm.lfStatusFont);
+#else
     infoPtr->hFont = CreateFontIndirectA (&nclm.lfStatusFont);
-
+#endif
     return 0;
 }
 
