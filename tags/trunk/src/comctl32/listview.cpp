@@ -1,4 +1,4 @@
-/*$Id: listview.cpp,v 1.16 2000-04-17 17:04:12 cbratschi Exp $*/
+/*$Id: listview.cpp,v 1.17 2000-04-18 16:02:37 cbratschi Exp $*/
 /*
  * Listview control
  *
@@ -181,7 +181,7 @@ static VOID LISTVIEW_RefreshItems(HWND hwnd,INT nFirst,INT nLast)
     if (nFirst > nBottom) return;
     if (nLast > nBottom) nLast = nBottom;
 
-    Header_GetItemRect(infoPtr->hwndHeader,0,&rcHeader);
+    HEADER_GetItemRect(infoPtr->hwndHeader,(WPARAM)0,(LPARAM)&rcHeader);
     rcHeader.left += REPORT_MARGINX;
     rcHeader.right = max(rcHeader.left,rcHeader.right-REPORT_MARGINX);
 
@@ -373,11 +373,11 @@ static VOID LISTVIEW_UpdateScroll(HWND hwnd)
     INT nCountPerRow = LISTVIEW_GetCountPerRow(hwnd);
     INT nNumOfItems = GETITEMCOUNT(infoPtr);
 
-    infoPtr->maxScroll.x = nNumOfItems / nCountPerColumn;
+    infoPtr->maxScroll.x = nNumOfItems/nCountPerColumn;
     if (nNumOfItems % nCountPerColumn)
       infoPtr->maxScroll.x++;
 
-    infoPtr->lefttop.x = LISTVIEW_GetTopIndex(hwnd) / nCountPerColumn;
+    infoPtr->lefttop.x = LISTVIEW_GetTopIndex(hwnd)/nCountPerColumn;
     infoPtr->scrollPage.x = nCountPerRow;
     infoPtr->scrollStep.x = infoPtr->nItemWidth;
 
@@ -667,10 +667,10 @@ static INT LISTVIEW_GetItemWidth(HWND hwnd)
   else if (infoPtr->uView == LVS_REPORT)
   {
     /* calculate width of header */
-    nHeaderItemCount = Header_GetItemCount(infoPtr->hwndHeader);
+    nHeaderItemCount = HEADER_GetItemCount(infoPtr->hwndHeader);
     for (i = 0; i < nHeaderItemCount; i++)
     {
-      if (Header_GetItemRect(infoPtr->hwndHeader, i, &rcHeaderItem))
+      if (HEADER_GetItemRect(infoPtr->hwndHeader,(WPARAM)i,(LPARAM)&rcHeaderItem))
       {
         nItemWidth += (rcHeaderItem.right - rcHeaderItem.left);
       }
@@ -748,10 +748,10 @@ static INT LISTVIEW_CalculateWidth(HWND hwnd, INT nItem)
   else if (infoPtr->uView == LVS_REPORT)
   {
     /* calculate width of header */
-    nHeaderItemCount = Header_GetItemCount(infoPtr->hwndHeader);
+    nHeaderItemCount = HEADER_GetItemCount(infoPtr->hwndHeader);
     for (i = 0; i < nHeaderItemCount; i++)
     {
-      if (Header_GetItemRect(infoPtr->hwndHeader, i, &rcHeaderItem) != 0)
+      if (HEADER_GetItemRect(infoPtr->hwndHeader,(WPARAM)i,(LPARAM)&rcHeaderItem) != 0)
       {
         nItemWidth += (rcHeaderItem.right - rcHeaderItem.left);
       }
@@ -1133,7 +1133,7 @@ static LRESULT LISTVIEW_MouseSelection(HWND hwnd, POINT pt)
     INT nCountPerColumn = LISTVIEW_GetCountPerColumn(hwnd);
 
     nItem = nTop+(pt.y/infoPtr->nItemHeight)+
-            ((INT)(pt.x-infoPtr->lefttop.x*infoPtr->scrollStep.x)/infoPtr->nItemWidth)*nCountPerColumn;
+            ((INT)(pt.x/infoPtr->nItemWidth))*nCountPerColumn;
     if (nItem >= GETITEMCOUNT(infoPtr)) return -1;
 
     if (LISTVIEW_GetItemRect(hwnd,nItem,&rcItem,LVIR_SELECTBOUNDS) && PtInRect(&rcItem,pt))
@@ -1894,7 +1894,7 @@ static VOID LISTVIEW_DrawReport(HWND hwnd,HDC hdc,RECT *updateRect)
 {
   LISTVIEW_INFO *infoPtr = (LISTVIEW_INFO *)LISTVIEW_GetInfoPtr(hwnd);
   INT nDrawPosY = infoPtr->rcList.top;
-  INT nColumnCount = Header_GetItemCount(infoPtr->hwndHeader);
+  INT nColumnCount = HEADER_GetItemCount(infoPtr->hwndHeader);
   RECT rcItem,*rcHeader;
   INT  j,nItem,nLast,xOffset = infoPtr->lefttop.x*infoPtr->scrollStep.x;
 
@@ -1919,7 +1919,7 @@ static VOID LISTVIEW_DrawReport(HWND hwnd,HDC hdc,RECT *updateRect)
   rcHeader = (LPRECT)COMCTL32_Alloc(nColumnCount*sizeof(RECT));
   for (j = 0;j < nColumnCount;j++)
   {
-    Header_GetItemRect(infoPtr->hwndHeader,j,&rcHeader[j]);
+    HEADER_GetItemRect(infoPtr->hwndHeader,(WPARAM)j,(LPARAM)&rcHeader[j]);
     rcHeader[j].left += REPORT_MARGINX;
     rcHeader[j].right = max(rcHeader[j].left,rcHeader[j].right-REPORT_MARGINX);
 
@@ -2498,7 +2498,7 @@ static LRESULT LISTVIEW_DeleteColumn(HWND hwnd, INT nColumn)
   LISTVIEW_INFO *infoPtr = (LISTVIEW_INFO *)LISTVIEW_GetInfoPtr(hwnd);
   BOOL bResult = FALSE;
 
-  if (Header_DeleteItem(infoPtr->hwndHeader, nColumn))
+  if (HEADER_DeleteItem(infoPtr->hwndHeader, nColumn))
   {
     bResult = LISTVIEW_RemoveColumn(infoPtr->hdpaItems, nColumn);
 
@@ -3312,10 +3312,7 @@ static LRESULT LISTVIEW_GetColumn(HWND hwnd,INT nItem,LPLVCOLUMNW lpColumn,BOOL 
       hdi.mask |= HDI_ORDER;
     }
 
-    if (unicode)
-      bResult = Header_GetItemW(infoPtr->hwndHeader,nItem,&hdi);
-    else
-      bResult = Header_GetItemA(infoPtr->hwndHeader,nItem,(HDITEMW*)&hdi);
+    bResult = HEADER_GetItem(infoPtr->hwndHeader,(WPARAM)nItem,(LPARAM)&hdi,unicode);
     if (bResult)
     {
       if (lpColumn->mask & LVCF_FMT)
@@ -3365,7 +3362,7 @@ static LRESULT LISTVIEW_GetColumnOrderArray(HWND hwnd, INT iCount, LPINT lpiArra
 {
   LISTVIEW_INFO *infoPtr = (LISTVIEW_INFO *)LISTVIEW_GetInfoPtr(hwnd);
 
-  return Header_GetOrderArray(infoPtr->hwndHeader,iCount,lpiArray);
+  return HEADER_GetOrderArray(infoPtr->hwndHeader,(WPARAM)iCount,(LPARAM)lpiArray);
 }
 
 /***
@@ -3394,7 +3391,7 @@ static LRESULT LISTVIEW_GetColumnWidth(HWND hwnd, INT nColumn)
     /* get column width from header */
     ZeroMemory(&hdi,sizeof(HDITEMW));
     hdi.mask = HDI_WIDTH;
-    if (Header_GetItemW(infoPtr->hwndHeader, nColumn, &hdi))
+    if (HEADER_GetItem(infoPtr->hwndHeader,(WPARAM)nColumn,(LPARAM)&hdi,TRUE))
     {
       return hdi.cxy;
     }
@@ -3567,6 +3564,20 @@ static LRESULT LISTVIEW_GetItem(HWND hwnd,LPLVITEMW lpLVItem,BOOL unicode,BOOL i
       if (lpItem)
       {
         LISTVIEW_ITEMDATA *lpItemData = LISTVIEW_GetItemData(lpItem->hdpaSubItems,lpLVItem->iSubItem);
+
+        //add subitem if not present
+        if (!lpItemData && (lpLVItem->iSubItem > 0) && (lpLVItem->iSubItem < HEADER_GetItemCount(infoPtr->hwndHeader)))
+        {
+          INT nPosition;
+
+          lpItemData = (LISTVIEW_ITEMDATA*)COMCTL32_Alloc(sizeof(LISTVIEW_ITEMDATA));
+          ZeroMemory(lpItemData,sizeof(LISTVIEW_ITEMDATA));
+          lpItemData->pszText = LPSTR_TEXTCALLBACKW;
+          lpItemData->iImage = I_IMAGECALLBACK;
+          lpItemData->iSubItem = lpLVItem->iSubItem;
+          nPosition = LISTVIEW_FindInsertPosition(lpItem->hdpaSubItems,lpItemData->iSubItem);
+          DPA_InsertPtr(lpItem->hdpaSubItems,nPosition,lpItemData);
+        }
 
         if (lpItemData)
         {
@@ -3863,7 +3874,7 @@ static BOOL LISTVIEW_GetSubItemPosition(HWND hwnd,INT nItem,INT nSubItem,LPPOINT
   LISTVIEW_INFO *infoPtr = (LISTVIEW_INFO*)LISTVIEW_GetInfoPtr(hwnd);
   RECT rect;
 
-  if (Header_GetItemRect(infoPtr->hwndHeader,nSubItem,&rect))
+  if (HEADER_GetItemRect(infoPtr->hwndHeader,(WPARAM)nSubItem,(LPARAM)&rect))
   {
     lpptPosition->x = rect.left+REPORT_MARGINX;
     lpptPosition->y = ((nItem-LISTVIEW_GetTopIndex(hwnd))*infoPtr->nItemHeight)+infoPtr->rcList.top;
@@ -4217,7 +4228,7 @@ static LRESULT LISTVIEW_GetSubItemRect(HWND hwnd,INT nItem,LPRECT lprc)
   if (!lprc || (infoPtr->uView != LVS_REPORT) || (nItem < 0) || (nItem >= GETITEMCOUNT(infoPtr))) return FALSE;
 
   nSubItem = lprc->top;
-  if ((nSubItem < 0) || (nSubItem >= Header_GetItemCount(infoPtr->hwndHeader))) return FALSE;
+  if ((nSubItem < 0) || (nSubItem >= HEADER_GetItemCount(infoPtr->hwndHeader))) return FALSE;
   if (!LISTVIEW_GetSubItemPosition(hwnd,nItem,nSubItem,&ptItem)) return FALSE;
 
   code = lprc->left;
@@ -4748,7 +4759,7 @@ static BOOL LISTVIEW_InternalHitTestItem(HWND hwnd,LISTVIEW_INFO *infoPtr,INT nI
 
   if (checkSubItems && (infoPtr->uView == LVS_REPORT))
   {
-    INT nColumnCount = Header_GetItemCount(infoPtr->hwndHeader);
+    INT nColumnCount = HEADER_GetItemCount(infoPtr->hwndHeader);
     INT xDiff = -infoPtr->lefttop.x*infoPtr->scrollStep.x;
 
     rcItem.top = infoPtr->rcList.top+(nItem-LISTVIEW_GetTopIndex(hwnd))*infoPtr->nItemHeight;
@@ -4757,7 +4768,7 @@ static BOOL LISTVIEW_InternalHitTestItem(HWND hwnd,LISTVIEW_INFO *infoPtr,INT nI
     {
       RECT rcColumn;
 
-      Header_GetItemRect(infoPtr->hwndHeader,x,&rcColumn);
+      HEADER_GetItemRect(infoPtr->hwndHeader,(WPARAM)x,(LPARAM)&rcColumn);
       rcItem.left = xDiff+REPORT_MARGINX+rcColumn.left;
       rcItem.right = xDiff+rcColumn.right-REPORT_MARGINX;
       if (PtInRect(&rcItem,lpHitTestInfo->pt))
@@ -4851,7 +4862,7 @@ static INT LISTVIEW_HitTestItem(HWND hwnd, LPLVHITTESTINFO lpHitTestInfo)
     INT nCountPerColumn = LISTVIEW_GetCountPerColumn(hwnd);
 
     nItem = nTop+(lpHitTestInfo->pt.y/infoPtr->nItemHeight)+
-            ((INT)(lpHitTestInfo->pt.x-infoPtr->lefttop.x*infoPtr->scrollStep.x)/infoPtr->nItemWidth)*nCountPerColumn;
+            ((INT)(lpHitTestInfo->pt.x/infoPtr->nItemWidth))*nCountPerColumn;
     if (nItem >= GETITEMCOUNT(infoPtr)) return -1;
 
     if (LISTVIEW_InternalHitTestItem(hwnd,infoPtr,nItem,lpHitTestInfo,FALSE))
@@ -5040,10 +5051,7 @@ static LRESULT LISTVIEW_InsertColumn(HWND hwnd,INT nColumn,LPLVCOLUMNW lpColumn,
     }
 
     /* insert item in header control */
-    if (unicode)
-      nNewColumn = Header_InsertItemW(infoPtr->hwndHeader,nColumn,&hdi);
-    else
-      nNewColumn = Header_InsertItemA(infoPtr->hwndHeader,nColumn,&hdi);
+    nNewColumn = HEADER_InsertItem(infoPtr->hwndHeader,(WPARAM)nColumn,(LPARAM)&hdi,unicode);
 
     /* Need to reset the item width when inserting a new column */
     infoPtr->nItemWidth = LISTVIEW_GetItemWidth(hwnd);
@@ -5395,7 +5403,7 @@ static LRESULT LISTVIEW_SetColumn(HWND hwnd,INT nColumn,LPLVCOLUMNW lpColumn,BOO
   HDITEMW hdi, hdiget;
 
   if ((lpColumn != NULL) && (nColumn >= 0) &&
-      (nColumn < Header_GetItemCount(infoPtr->hwndHeader)))
+      (nColumn < HEADER_GetItemCount(infoPtr->hwndHeader)))
   {
     /* initialize memory */
     ZeroMemory(&hdi, sizeof(HDITEMA));
@@ -5407,7 +5415,7 @@ static LRESULT LISTVIEW_SetColumn(HWND hwnd,INT nColumn,LPLVCOLUMNW lpColumn,BOO
 
       /* get current format first */
       hdiget.mask = HDI_FORMAT;
-      if (Header_GetItemW(infoPtr->hwndHeader, nColumn, &hdiget))
+      if (HEADER_GetItem(infoPtr->hwndHeader,(WPARAM)nColumn,(LPARAM)&hdiget,TRUE))
               /* preserve HDF_STRING if present */
               hdi.fmt = hdiget.fmt & HDF_STRING;
 
@@ -5476,10 +5484,7 @@ static LRESULT LISTVIEW_SetColumn(HWND hwnd,INT nColumn,LPLVCOLUMNW lpColumn,BOO
     }
 
     /* set header item attributes */
-    if (unicode)
-      bResult = Header_SetItemW(infoPtr->hwndHeader,nColumn,&hdi);
-    else
-      bResult = Header_SetItemA(infoPtr->hwndHeader,nColumn,(HDITEMA*)&hdi);
+    bResult = HEADER_SetItem(infoPtr->hwndHeader,(WPARAM)nColumn,(LPARAM)&hdi,unicode);
   }
 
   return bResult;
@@ -5505,12 +5510,12 @@ static LRESULT LISTVIEW_SetColumnOrderArray(HWND hwnd,INT iCount,LPINT lpiArray)
   INT nHeaderItemCount;
   BOOL rc,changed = FALSE;
 
-  nHeaderItemCount = Header_GetItemCount(infoPtr->hwndHeader);
+  nHeaderItemCount = HEADER_GetItemCount(infoPtr->hwndHeader);
   if (iCount != nHeaderItemCount) return FALSE;
 
   oldArray = (LPINT)COMCTL32_Alloc(nHeaderItemCount*sizeof(INT));
-  Header_GetOrderArray(infoPtr->hwndHeader,nHeaderItemCount,oldArray);
-  rc = Header_SetOrderArray(infoPtr->hwndHeader,iCount,lpiArray);
+  HEADER_GetOrderArray(infoPtr->hwndHeader,(WPARAM)nHeaderItemCount,(LPARAM)oldArray);
+  rc = HEADER_SetOrderArray(infoPtr->hwndHeader,(WPARAM)iCount,(LPARAM)lpiArray);
   if (rc)
   {
     INT x,y;
@@ -5544,6 +5549,7 @@ static LRESULT LISTVIEW_SetColumnOrderArray(HWND hwnd,INT iCount,LPINT lpiArray)
 
           lpItemData = LISTVIEW_GetItemData(lpItem->hdpaSubItems,diffList[y]);
           if (!lpItemData) continue;
+          lpItemData->iSubItem = y;
           DPA_InsertPtr(newDPA,newDPA->nItemCount,lpItemData);
         }
         DPA_Destroy(lpItem->hdpaSubItems);
@@ -5612,7 +5618,7 @@ static LRESULT LISTVIEW_SetColumnWidth(HWND hwnd, INT iCol, INT cx)
     hdi.cxy = cx;
 
     // call header to update the column change
-    lret = Header_SetItemW(infoPtr->hwndHeader, (WPARAM)iCol, (LPARAM)&hdi);
+    lret = HEADER_SetItem(infoPtr->hwndHeader,(WPARAM)iCol,(LPARAM)&hdi,TRUE);
 
     infoPtr->nItemWidth = LISTVIEW_GetItemWidth(hwnd);
 
@@ -5880,7 +5886,7 @@ static LRESULT LISTVIEW_SetItem(HWND hwnd,LPLVITEMW lpLVItem,BOOL unicode)
         } else
         {
           /* set subitem only if column is present */
-          if (Header_GetItemCount(infoPtr->hwndHeader) > lpLVItem->iSubItem)
+          if (HEADER_GetItemCount(infoPtr->hwndHeader) > lpLVItem->iSubItem)
           {
             lpItemData = (LISTVIEW_ITEMDATA*)COMCTL32_Alloc(sizeof(LISTVIEW_ITEMDATA));
             if (lpItemData)
@@ -6963,8 +6969,6 @@ static LRESULT LISTVIEW_LButtonDblClk(HWND hwnd, WORD wKey, WORD wPosX,
 {
   LVHITTESTINFO htInfo;
 
-//  TRACE("(hwnd=%x,key=%hu,X=%hu,Y=%hu)\n", hwnd, wKey, wPosX, wPosY);
-
   /* send NM_DBLCLK notification */
   sendNotify(hwnd,NM_DBLCLK);
 
@@ -7541,7 +7545,7 @@ static VOID LISTVIEW_UpdateSize(HWND hwnd)
 
       hl.prc = &rcList;
       hl.pwpos = &wp;
-      Header_Layout(infoPtr->hwndHeader, &hl);
+      HEADER_Layout(infoPtr->hwndHeader,(WPARAM)0,(LPARAM)&hl);
       SetWindowPos(infoPtr->hwndHeader,hwnd,wp.x,wp.y,wp.cx,wp.cy,wp.flags);
       infoPtr->rcList.top = max(wp.cy,0);
     }
@@ -7609,7 +7613,7 @@ static INT LISTVIEW_StyleChanged(HWND hwnd, WPARAM wStyleType,
 
       hl.prc = &rcList;
       hl.pwpos = &wp;
-      Header_Layout(infoPtr->hwndHeader, &hl);
+      HEADER_Layout(infoPtr->hwndHeader,(WPARAM)0,(LPARAM)&hl);
       SetWindowPos(infoPtr->hwndHeader, hwnd, wp.x, wp.y, wp.cx, wp.cy,
                    wp.flags);
       if (!(LVS_NOCOLUMNHEADER & lpss->styleNew))
