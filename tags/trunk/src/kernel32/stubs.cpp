@@ -1,4 +1,4 @@
-/* $Id: stubs.cpp,v 1.12 1999-12-09 11:00:40 sandervl Exp $ */
+/* $Id: stubs.cpp,v 1.13 1999-12-18 16:19:19 sandervl Exp $ */
 
 /*
  * Win32 KERNEL32 Subsystem for OS/2
@@ -1859,7 +1859,11 @@ int WIN32API GetCurrencyFormatA(LCID              Locale,
            lpFormat,
            lpCurrencyStr,
            cchCurrency));
-
+ 
+  if(lpValue && lpCurrencyStr) {
+	lstrcpyA(lpCurrencyStr, lpValue);
+	return lstrlenA(lpCurrencyStr);
+  }
   return (0);
 }
 
@@ -1896,6 +1900,11 @@ int WIN32API GetCurrencyFormatW(LCID              Locale,
            lpFormat,
            lpCurrencyStr,
            cchCurrency));
+
+  if(lpValue && lpCurrencyStr) {
+	lstrcpyW(lpCurrencyStr, lpValue);
+	return lstrlenW(lpCurrencyStr);
+  }
 
   return (0);
 }
