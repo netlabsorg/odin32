@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.33 1999-11-08 13:48:19 sandervl Exp $
+# $Id: makefile,v 1.34 1999-11-08 15:42:49 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -83,7 +83,7 @@ all: libs
         $(MAKE_CMD)
         cd ..\..\ddraw
         $(MAKE_CMD)
-        cd ..\..\dinput
+        cd ..\dinput
         $(MAKE_CMD)
         cd ..\ole32
         $(MAKE_CMD)
@@ -205,7 +205,7 @@ clean:
         $(MAKE_CMD) clean
         cd ..\dplay
         $(MAKE_CMD) clean
-        cd ..\..\dinput
+        cd ..\dinput
         $(MAKE_CMD)
         cd ..\wnaspi32
         $(MAKE_CMD) clean
