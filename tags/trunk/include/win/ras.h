@@ -269,7 +269,6 @@ RASPROJECTION
 
 #define LPRASPROJECTION RASPROJECTION*
 
-
 /* Describes the result of a RAS AMB (Authentication Message Block)
 ** projection.  This protocol is used with NT 3.1 and OS/2 1.3 downlevel
 ** RAS servers.
@@ -914,6 +913,8 @@ RASAUTODIALENTRYW
 #define RASADP_ConnectionQueryTimeout           4
 
 
+
+
 /* External RAS API function prototypes.
 */
 DWORD APIENTRY RasDialA( LPRASDIALEXTENSIONS, LPSTR, LPRASDIALPARAMSA, DWORD,
@@ -1131,5 +1132,42 @@ DWORD APIENTRY RasSetAutodialParamW( DWORD, LPVOID, DWORD );
 #endif
 
 #include <poppack.h>
+
+/* typedefs
+*/
+
+typedef struct  {
+  DWORD dwSize;
+  RASPROJECTION RasProjection;
+// FIXME  union ProjInfo;
+} PROJECTION_INFO, *LPPROJECTION_INFO;
+
+typedef struct {
+ DWORD dwSize;
+ DWORD dwResult;
+ UINT idMsg;
+ BOOL fUnload;
+ HANDLE hThread;
+} COMPLETE_INFO, *LPCOMPLETE_INFO;
+
+typedef struct {
+  DWORD dwSize;
+  char szUserName[UNLEN+1];
+  char szPassword[PWLEN+1];
+  char szDomainName[DNLEN+1];
+  BOOL fUseCallbacks;
+} USER_PROFILE, *LPUSER_PROFILE;
+
+typedef struct {
+  DWORD dwSize;
+  HANDLE hDevicePort;
+  DWORD dwLinkSpeed;
+} DEVICE_PORT_INFO, *LPDEVICE_PORT_INFO;
+
+typedef struct {
+  DWORD dwSize;
+// FIXME  SESSSTARTPROC lpfnStart;
+// FIXME  SESSSTARTSTOP lpfnStop;
+} RNA_FUNCS, *LPRNA_FUNCS; 
 
 #endif // __WINE_RAS_H
