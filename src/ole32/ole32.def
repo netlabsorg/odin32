@@ -1,5 +1,3 @@
-; $Id: ole32.def,v 1.3 1999-06-10 17:05:55 phaller Exp $
-
 ;Created by BLAST for IBM's compiler
 LIBRARY OLE32 INITINSTANCE
 DATA MULTIPLE NONSHARED
@@ -37,6 +35,7 @@ EXPORTS
     CoGetStandardMarshal       = _CoGetStandardMarshal@24    @23
     CoGetState                 = _CoGetState@0               @24
     CoGetTreatAsClass          = _CoGetTreatAsClass@8        @25
+    CoInitializeEx             = _CoInitializeEx@8
     CoInitialize               = _CoInitialize@4             @26
     CoInitializeWOW            = _CoInitializeWOW@0          @27
     CoIsHandlerConnected       = _CoIsHandlerConnected@4     @28
@@ -87,7 +86,7 @@ EXPORTS
     GetRunningObjectTable      = _GetRunningObjectTable@8    @73
     IIDFromString              = _IIDFromString@8            @74
     IsAccelerator              = _IsAccelerator@16           @75
-;    IsEqualGUID                = _IsEqualGUID@8              @76
+    IsEqualGUID                = _CONCRETE_IsEqualGUID@8              @76
     IsValidIid                 = _IsValidIid@4               @77
     IsValidInterface           = _IsValidInterface@4         @78
     IsValidPtrIn               = _IsValidPtrIn@4             @79
@@ -174,3 +173,7 @@ EXPORTS
     WriteFmtUserTypeStg        = _WriteFmtUserTypeStg@12     @160
     WriteOleStg                = _WriteOleStg@0              @161
     WriteStringStream          = _WriteStringStream@0        @162
+    CoImpersonateClient        = _CoImpersonateClient@0
+    CoInitializeSecurity       = _CoInitializeSecurity@36
+    CoRegisterSurrogate        = _CoRegisterSurrogate@4
+
