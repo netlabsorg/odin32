@@ -1,4 +1,4 @@
-/* $Id: windlg.cpp,v 1.7 1999-10-17 20:18:46 sandervl Exp $ */
+/* $Id: windlg.cpp,v 1.8 1999-10-30 10:55:16 sandervl Exp $ */
 /*
  * Win32 dialog apis for OS/2
  *
@@ -195,6 +195,22 @@ int WIN32API DialogBoxParamW(HINSTANCE hInst, LPCWSTR lpszTemplate, HWND hwndOwn
         return dialog->doDialogBox();
     }
     return -1;
+}
+/***********************************************************************
+ *           MapDialogRect32   (USER32.382)
+ */
+BOOL WIN32API MapDialogRect(HWND hwndDlg, LPRECT rect)
+{
+  Win32Dialog *dialog;
+
+    dialog = (Win32Dialog *)Win32BaseWindow::GetWindowFromHandle(hwndDlg);
+    if(!dialog || !dialog->IsDialog()) {
+        dprintf(("MapDialogRect, window %x not found", hwndDlg));
+        SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+        return 0;
+    }
+    dprintf(("USER32: MapDialogRect\n"));
+    return dialog->MapDialogRect(rect);
 }
 //******************************************************************************
 //******************************************************************************

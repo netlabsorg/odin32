@@ -1,4 +1,4 @@
-/* $Id: win32dlg.cpp,v 1.22 1999-10-30 09:19:45 sandervl Exp $ */
+/* $Id: win32dlg.cpp,v 1.23 1999-10-30 10:55:15 sandervl Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -235,6 +235,16 @@ ULONG Win32Dialog::MsgCreate(HWND hwndFrame, HWND hwndClient)
     }
     dprintf(("********* DIALOG CREATION FAILED! ************"));
     return FALSE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL Win32Dialog::MapDialogRect(LPRECT rect)
+{
+    rect->left   = (rect->left * xUnit) / 4;
+    rect->right  = (rect->right * xUnit) / 4;
+    rect->top    = (rect->top * yUnit) / 8;
+    rect->bottom = (rect->bottom * yUnit) / 8;
+    return TRUE;
 }
 /***********************************************************************
  *           DIALOG_DoDialogBox
