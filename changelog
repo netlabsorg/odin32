@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.680 2000-01-31 22:32:03 sandervl Exp $ */
+ /* $Id: changelog,v 1.681 2000-01-31 22:51:28 phaller Exp $ */
+
+ 2000-02-01: Patrick Haller <phaller@gmx.net>
+        - SHELL32: Added PathSkipRootAW
 
  2000-02-01: Jens Wiessner <wiessnej@rfi.de>
 	- NTDLL: Updated .def file (similar to NT 4 SP6) + bugfix for impdef

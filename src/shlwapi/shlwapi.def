@@ -1,4 +1,4 @@
-; $Id: shlwapi.def,v 1.6 1999-12-30 00:24:30 phaller Exp $
+; $Id: shlwapi.def,v 1.7 2000-01-31 22:50:51 phaller Exp $
 
 LIBRARY SHLWAPI INITINSTANCE TERMINSTANCE
 DATA MULTIPLE NONSHARED
@@ -461,6 +461,9 @@ EXPORTS
 
     PathSetDlgItemPathA  = _PathSetDlgItemPathA@12              @255
     PathSetDlgItemPathW  = _PathSetDlgItemPathW@12              @256
+    PathSkipRootA        = _PathSkipRootA@4                     @257
+    PathSkipRootW        = _PathSkipRootW@4                     @258
+
     PathUnquoteSpacesA   = _PathUnquoteSpacesA@4                @265
     PathUnquoteSpacesW   = _PathUnquoteSpacesW@4                @266
 
