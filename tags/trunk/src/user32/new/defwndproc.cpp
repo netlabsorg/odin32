@@ -1,10 +1,12 @@
-/* $Id: defwndproc.cpp,v 1.4 1999-07-25 15:51:55 sandervl Exp $ */
+/* $Id: defwndproc.cpp,v 1.5 1999-08-29 20:05:07 sandervl Exp $ */
 
 /*
  * Win32 default window API functions for OS/2
  *
  * Copyright 1998 Sander van Leeuwen
  *
+ *
+ * TODO: Incomplete default window handlers + incorrect handler (defframe)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -115,75 +117,32 @@ LRESULT WIN32API DefDlgProcW(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
     }
 }
 //******************************************************************************
+//TODO: Should be handled differently than the normal wnd proc
 //******************************************************************************
 LRESULT WIN32API DefFrameProcA(HWND hwndFrame, HWND hwndClient, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
-#ifdef DEBUG
-////    WriteLog("*DFP*");
-#endif
-    switch(Msg) {
-        case WM_SETREDRAW: //Open32 does not set the visible flag
-                if(wParam)
-                  SetWindowLongA (hwndClient, GWL_STYLE, GetWindowLongA (hwndClient, GWL_STYLE) | WS_VISIBLE);
-                else
-                  SetWindowLongA (hwndClient, GWL_STYLE, GetWindowLongA (hwndClient, GWL_STYLE) & ~WS_VISIBLE);
-                return O32_DefFrameProc(hwndFrame, hwndClient, Msg, wParam, lParam);
-        case WM_NCCREATE://SvL: YAOFM (yet another open32 feature missing)
-                return(TRUE);
-        case WM_CTLCOLORMSGBOX:
-        case WM_CTLCOLOREDIT:
-        case WM_CTLCOLORLISTBOX:
-        case WM_CTLCOLORBTN:
-        case WM_CTLCOLORDLG:
-        case WM_CTLCOLORSTATIC:
-        case WM_CTLCOLORSCROLLBAR:
-                SetBkColor((HDC)wParam, GetSysColor(COLOR_WINDOW));
-                SetTextColor((HDC)wParam, GetSysColor(COLOR_WINDOWTEXT));
-                return GetSysColorBrush(COLOR_BTNFACE);
+  Win32Window *window;
 
-    case WM_PARENTNOTIFY: //Open32 doesn't like receiving those!!
-        dprintf(("DefWndProc: WM_PARENTNOTIFY for %x", hwndFrame));
+    window = Win32Window::GetWindowFromHandle(hwndFrame);
+    if(!window) {
+        dprintf(("DefFrameProcA, window %x not found", hwndFrame));
         return 0;
-
-        default:
-                return O32_DefFrameProc(hwndFrame, hwndClient, Msg, wParam, lParam);
     }
+    return window->DefWindowProcA(Msg, wParam, lParam);
 }
 //******************************************************************************
-//NOTE: Unicode msg translation!
+//TODO: Should be handled differently than the normal wnd proc
 //******************************************************************************
 LRESULT WIN32API DefFrameProcW(HWND hwndFrame, HWND hwndClient, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
-#ifdef DEBUG
-////    WriteLog("*DFPW*");
-#endif
-    switch(Msg) {
-        case WM_SETREDRAW: //Open32 does not set the visible flag
-                if(wParam)
-                  SetWindowLongA (hwndClient, GWL_STYLE, GetWindowLongA (hwndClient, GWL_STYLE) | WS_VISIBLE);
-                else
-                  SetWindowLongA (hwndClient, GWL_STYLE, GetWindowLongA (hwndClient, GWL_STYLE) & ~WS_VISIBLE);
-                return O32_DefFrameProc(hwndFrame, hwndClient, Msg, wParam, lParam);
-        case WM_NCCREATE://SvL: YAOFM (yet another open32 feature missing)
-                return(TRUE);
-        case WM_CTLCOLORMSGBOX:
-        case WM_CTLCOLOREDIT:
-        case WM_CTLCOLORLISTBOX:
-        case WM_CTLCOLORBTN:
-        case WM_CTLCOLORDLG:
-        case WM_CTLCOLORSTATIC:
-        case WM_CTLCOLORSCROLLBAR:
-                SetBkColor((HDC)wParam, GetSysColor(COLOR_WINDOW));
-                SetTextColor((HDC)wParam, GetSysColor(COLOR_WINDOWTEXT));
-                return GetSysColorBrush(COLOR_BTNFACE);
+  Win32Window *window;
 
-    case WM_PARENTNOTIFY: //Open32 doesn't like receiving those!!
-        dprintf(("DefWndProc: WM_PARENTNOTIFY for %x", hwndFrame));
+    window = Win32Window::GetWindowFromHandle(hwndFrame);
+    if(!window) {
+        dprintf(("DefFrameProcW, window %x not found", hwndFrame));
         return 0;
-
-        default:
-                return O32_DefFrameProc(hwndFrame, hwndClient, Msg, wParam, lParam);
     }
+    return window->DefWindowProcW(Msg, wParam, lParam);
 }
 //******************************************************************************
 //******************************************************************************

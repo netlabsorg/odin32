@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.cpp,v 1.2 1999-07-20 07:42:35 sandervl Exp $ */
+/* $Id: oslibmsg.cpp,v 1.3 1999-08-29 20:05:07 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -61,7 +61,7 @@ ULONG TranslateWinMsg(ULONG msg)
 //******************************************************************************
 void OSLibWinPostQuitMessage(ULONG nExitCode)
 {
-  WinPostQueueMsg(GetThreadMessageQueue(), WM_QUIT, (MPARAM)nExitCode, 0);
+  WinPostQueueMsg(NULLHANDLE, WM_QUIT, (MPARAM)nExitCode, 0);
 }
 //******************************************************************************
 //******************************************************************************

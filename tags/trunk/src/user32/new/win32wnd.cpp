@@ -1,4 +1,4 @@
-/* $Id: win32wnd.cpp,v 1.34 1999-08-28 19:32:47 sandervl Exp $ */
+/* $Id: win32wnd.cpp,v 1.35 1999-08-29 20:05:07 sandervl Exp $ */
 /*
  * Win32 Window Code for OS/2
  *
@@ -879,20 +879,20 @@ ULONG Win32Window::MsgChar(ULONG cmd, ULONG repeatcnt, ULONG scancode, ULONG vke
 ULONG Win32Window::MsgSetFocus(HWND hwnd)
 {
     if(hwnd == 0) {
-        //other app lost focus
-        SendInternalMessageA(WM_ACTIVATEAPP, TRUE, 0); //TODO: Need thread id from hwnd app
+            //other app lost focus
+            SendInternalMessageA(WM_ACTIVATEAPP, TRUE, 0); //TODO: Need thread id from hwnd app
     }
-    return SendInternalMessageA(WM_SETFOCUS, hwnd, 0);
+    return  SendInternalMessageA(WM_SETFOCUS, hwnd, 0);
 }
 //******************************************************************************
 //******************************************************************************
 ULONG Win32Window::MsgKillFocus(HWND hwnd)
 {
     if(hwnd == 0) {
-        //other app lost focus
-        SendInternalMessageA(WM_ACTIVATEAPP, FALSE, 0); //TODO: Need thread id from hwnd app
+            //other app lost focus
+            SendInternalMessageA(WM_ACTIVATEAPP, FALSE, 0); //TODO: Need thread id from hwnd app
     }
-    return SendInternalMessageA(WM_KILLFOCUS, hwnd, 0);
+    return  SendInternalMessageA(WM_KILLFOCUS, hwnd, 0);
 }
 //******************************************************************************
 //******************************************************************************
@@ -948,14 +948,20 @@ ULONG Win32Window::MsgButton(ULONG msg, ULONG ncx, ULONG ncy, ULONG clx, ULONG c
             return 1;
         }
     }
-    SendInternalMessageA(win32ncmsg, lastHitTestVal, MAKELONG(ncx, ncy)); //TODO:
-    return SendInternalMessageA(win32msg, 0, MAKELONG(clx, cly));
+    SendInternalMessageA(WM_SETCURSOR, Win32Hwnd, MAKELONG(lastHitTestVal, win32ncmsg));
+
+    //WM_NC*BUTTON* is posted when the cursor is in a non-client area of the window
+    if(lastHitTestVal != HTCLIENT) {
+            SendInternalMessageA(win32ncmsg, lastHitTestVal, MAKELONG(ncx, ncy)); //TODO:
+    }
+    return  SendInternalMessageA(win32msg, 0, MAKELONG(clx, cly));
 }
 //******************************************************************************
 //******************************************************************************
 ULONG Win32Window::MsgMouseMove(ULONG keystate, ULONG x, ULONG y)
 {
  ULONG winstate = 0;
+ ULONG setcursormsg = WM_MOUSEMOVE;
 
     if(keystate & WMMOVE_LBUTTON)
         winstate |= MK_LBUTTON;
@@ -968,7 +974,17 @@ ULONG Win32Window::MsgMouseMove(ULONG keystate, ULONG x, ULONG y)
     if(keystate & WMMOVE_CTRL)
         winstate |= MK_CONTROL;
 
-    return SendInternalMessageA(WM_MOUSEMOVE, keystate, MAKELONG(x, y));
+    if(lastHitTestVal != HTCLIENT) {
+        setcursormsg = WM_NCMOUSEMOVE;
+    }
+    //TODO: hiword should be 0 if window enters menu mode (SDK docs)
+    SendInternalMessageA(WM_SETCURSOR, Win32Hwnd, MAKELONG(lastHitTestVal, setcursormsg));
+
+    //WM_NCMOUSEMOVE is posted when the cursor moves into a non-client area of the window
+    if(lastHitTestVal != HTCLIENT) {
+            SendInternalMessageA(WM_NCMOUSEMOVE, lastHitTestVal, MAKELONG(x, y));
+    }
+    return  SendInternalMessageA(WM_MOUSEMOVE, keystate, MAKELONG(x, y));
 }
 //******************************************************************************
 //******************************************************************************
@@ -1146,8 +1162,8 @@ LRESULT Win32Window::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
     case WM_NCMBUTTONDBLCLK:
         return 0;           //TODO: Send WM_SYSCOMMAND if required
 
-    case WM_NCHITTEST: //TODO:
-        return 0;
+    case WM_NCHITTEST: //TODO: Calculate position of
+        return HTCLIENT;
 
     default:
         return 1;
