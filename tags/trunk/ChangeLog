@@ -1,4 +1,8 @@
- /* $Id: ChangeLog,v 1.470 1999-11-23 20:47:26 davidr Exp $ */
+ /* $Id: ChangeLog,v 1.471 1999-11-24 18:20:13 cbratschi Exp $ */
+
+ 99-11-24: Christoph Bratschi <cbratschi@datacomm.ch>
+	- USER32: added missing button styles and messages
+		  several bug fixes
 
  99-11-23: David Raison <djr@lemur.co.uk>
  	- OLE32: Fixed buffer size error in StringFromGUID2.
