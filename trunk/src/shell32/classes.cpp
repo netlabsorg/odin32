@@ -1,4 +1,4 @@
-/* $Id: classes.cpp,v 1.2 1999-11-02 18:50:15 phaller Exp $ */
+/* $Id: classes.cpp,v 1.3 2000-03-26 16:34:39 cbratschi Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -7,6 +7,7 @@
  * Copyright 1999 Patrick Haller (haller@zebra.fh-weingarten.de)
  * Project Odin Software License can be found in LICENSE.TXT
  *
+ * Corel WINE 20000324 level
  */
 
 /*
@@ -192,7 +193,7 @@ BOOL HCR_GetClassName (REFIID riid, LPSTR szDest, DWORD len)
             LoadStringA(shell32_hInstance, IDS_DESKTOP, szDest, buflen);
             ret = TRUE;
           }
-          else if (IsEqualIID(riid, &IID_MyComputer))
+          else if (IsEqualIID(riid, &CLSID_MyComputer))
           {
             LoadStringA(shell32_hInstance, IDS_MYCOMPUTER, szDest, buflen);
             ret = TRUE;
@@ -208,6 +209,9 @@ BOOL HCR_GetClassName (REFIID riid, LPSTR szDest, DWORD len)
 *       HCR_GetFolderAttributes [internal]
 *
 * gets the folder attributes of a class
+*
+* FIXME
+*	verify the defaultvalue for *szDest
 */
 BOOL HCR_GetFolderAttributes (REFIID riid, LPDWORD szDest)
 {
@@ -223,6 +227,9 @@ BOOL HCR_GetFolderAttributes (REFIID riid, LPDWORD szDest)
         strcpy(xriid,"CLSID\\");
         WINE_StringFromCLSID(riid,&xriid[strlen(xriid)]);
         TRACE("%s\n",xriid );
+
+	if (!szDest) return FALSE;
+	*szDest = SFGAO_FOLDER|SFGAO_FILESYSTEM;
 
         strcat (xriid, "\\ShellFolder");
 

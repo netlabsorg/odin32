@@ -1,4 +1,4 @@
-/* $Id: contmenu.cpp,v 1.1 1999-10-09 11:13:18 sandervl Exp $ */
+/* $Id: contmenu.cpp,v 1.2 2000-03-26 16:34:39 cbratschi Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -6,6 +6,7 @@
  * Copyright 1999 Patrick Haller (haller@zebra.fh-weingarten.de)
  * Project Odin Software License can be found in LICENSE.TXT
  *
+ * Corel WINE 20000324 level
  */
 
 /*
@@ -39,6 +40,7 @@
 #include "wine/undocshell.h"
 
 #include "shell32_main.h"
+#include "shresdef.h"
 
 #include <heapstring.h>
 #include <misc.h>
@@ -88,7 +90,6 @@ typedef struct
         LPITEMIDLIST    *aPidls;        /* array of child pidls */
         BOOL            bAllValues;
 } IContextMenuImpl;
-
 
 //static struct ICOM_VTABLE(IContextMenu) cmvt;
 
@@ -369,13 +370,15 @@ static HRESULT WINAPI IContextMenu_fnQueryContextMenu(
         { if(!This->bAllValues)
           { /* folder menu */
             fExplore = uFlags & CMF_EXPLORE;
+            /* patch, the MFS_GRAYED items are not implemented yet */
             if(fExplore)
-            { _InsertMenuItem(hmenu, indexMenu++, TRUE, idCmdFirst+IDM_EXPLORE, MFT_STRING, "&Explore", MFS_ENABLED|MFS_DEFAULT);
+            {
+              _InsertMenuItem(hmenu, indexMenu++, TRUE, idCmdFirst+IDM_EXPLORE, MFT_STRING, "&Explore", MFS_GRAYED|MFS_DEFAULT);
               _InsertMenuItem(hmenu, indexMenu++, TRUE, idCmdFirst+IDM_OPEN, MFT_STRING, "&Open", MFS_ENABLED);
             }
             else
             { _InsertMenuItem(hmenu, indexMenu++, TRUE, idCmdFirst+IDM_OPEN, MFT_STRING, "&Open", MFS_ENABLED|MFS_DEFAULT);
-              _InsertMenuItem(hmenu, indexMenu++, TRUE, idCmdFirst+IDM_EXPLORE, MFT_STRING, "&Explore", MFS_ENABLED);
+              _InsertMenuItem(hmenu, indexMenu++, TRUE, idCmdFirst+IDM_EXPLORE, MFT_STRING, "&Explore", MFS_GRAYED);
             }
 
             if(uFlags & CMF_CANRENAME)
@@ -407,6 +410,8 @@ static HRESULT WINAPI IContextMenu_fnInvokeCommand(
         LPITEMIDLIST    pidlFQ;
         SHELLEXECUTEINFOA       sei;
         int   i;
+        int   iItem;
+        int   hwndListView = GetDlgItem(lpcmi->hwnd,ID_LISTVIEW);
 
   dprintf(("SHELL32:contmenu:IContextMenu_fnInvokeCommand(%08xh,%08xh,%08xh,%08xh)\n",
            This,
@@ -449,8 +454,8 @@ static HRESULT WINAPI IContextMenu_fnInvokeCommand(
             break;
 
           case IDM_RENAME:
-            MessageBeep(MB_OK);
-            /*handle rename for the view here*/
+            iItem = ListView_GetNextItem(hwndListView,0, LVNI_FOCUSED);
+            ListView_EditLabelA(hwndListView, iItem);
             break;
         }
         return NOERROR;

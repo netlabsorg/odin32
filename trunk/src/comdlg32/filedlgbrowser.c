@@ -1,6 +1,11 @@
+/* $Id: filedlgbrowser.c,v 1.3 2000-03-26 16:31:42 cbratschi Exp $ */
 /*
  *  Implementation of IShellBrowser for the File Open common dialog
  *
+ * Copyright 2000 Christoph Bratschi (cbratschi@datacomm.ch)
+ * Project Odin Software License can be found in LICENSE.TXT
+ *
+ *  Corel WINE 20000324 level
  */
 
 #ifdef __WIN32OS2__
@@ -40,6 +45,7 @@ DEFAULT_DEBUG_CHANNEL(commdlg)
 */
 static ICOM_VTABLE(IShellBrowser) IShellBrowserImpl_Vtbl =
 {
+        ICOM_MSVTABLE_COMPAT_DummyRTTIVALUE
         /* IUnknown */
         IShellBrowserImpl_QueryInterface,
         IShellBrowserImpl_AddRef,
@@ -65,6 +71,7 @@ static ICOM_VTABLE(IShellBrowser) IShellBrowserImpl_Vtbl =
 
 static ICOM_VTABLE(ICommDlgBrowser) IShellBrowserImpl_ICommDlgBrowser_Vtbl =
 {
+        ICOM_MSVTABLE_COMPAT_DummyRTTIVALUE
         /* IUnknown */
         IShellBrowserImpl_ICommDlgBrowser_QueryInterface,
         IShellBrowserImpl_ICommDlgBrowser_AddRef,
@@ -326,6 +333,15 @@ HRESULT WINAPI IShellBrowserImpl_BrowseObject(IShellBrowser *iface,
         COMDLG32_SHFree(pidlTmp);
         return NOERROR;
     }
+#ifdef SHELL_NO_DESKTOP
+
+    if(pidlTmp->mkid.cb == 0x00)
+    {
+        IShellFolder_Release(psfTmp);
+                COMDLG32_SHFree(pidlTmp);
+        return NOERROR;
+    }
+#endif
 
     /* Release the current fodInfos->Shell.FOIShellFolder and update its value */
     IShellFolder_Release(fodInfos->Shell.FOIShellFolder);
@@ -338,6 +354,12 @@ HRESULT WINAPI IShellBrowserImpl_BrowseObject(IShellBrowser *iface,
                                                       (LPVOID *)&psvTmp)))
     {
         HWND hwndView;
+        HWND hDlgWnd;
+        BOOL bViewHasFocus;
+
+        /* Check if listview has focus */
+        bViewHasFocus = IsChild(fodInfos->ShellInfos.hwndView,GetFocus());
+
         /* Get the foldersettings from the old view */
         if(fodInfos->Shell.FOIShellView)
         {
@@ -381,6 +403,15 @@ HRESULT WINAPI IShellBrowserImpl_BrowseObject(IShellBrowser *iface,
             fodInfos->Shell.FOIShellView = psvTmp;
 
             fodInfos->ShellInfos.hwndView = hwndView;
+
+            /* changes the tab order of the ListView to reflect the window's File Dialog */
+            hDlgWnd = GetDlgItem(GetParent(hwndView), IDC_LOOKIN);
+            SetWindowPos(hwndView, hDlgWnd, 0,0,0,0, SWP_NOMOVE | SWP_NOSIZE);
+
+            /* Since we destroyed the old view if it had focus set focus
+               to the newly created view */
+            if (bViewHasFocus)
+                SetFocus(fodInfos->ShellInfos.hwndView);
 
             return NOERROR;
         }
@@ -661,7 +692,7 @@ HRESULT WINAPI IShellBrowserImpl_ICommDlgBrowser_OnDefaultCommand(ICommDlgBrowse
         /* Tell the dialog that the user selected a file */
         else
         {
-            hRes = FILEDLG95_OnOpen(This->hwndOwner);
+            hRes = PostMessageA(This->hwndOwner, WM_COMMAND, IDOK, 0L);
         }
 
         /* Free memory used by pidl */
@@ -688,6 +719,11 @@ HRESULT WINAPI IShellBrowserImpl_ICommDlgBrowser_OnStateChange(ICommDlgBrowser *
     switch (uChange)
     {
         case CDBOSC_SETFOCUS:
+             /* FIXME: Reset the default button.
+                This should be taken care of by defdlg. If control
+                other than button receives focus the default button
+                should be restored. */
+             SendMessageA(This->hwndOwner, DM_SETDEFID, IDOK, 0);
             break;
         case CDBOSC_KILLFOCUS:
             {
@@ -753,42 +789,109 @@ HRESULT WINAPI IShellBrowserImpl_ICommDlgBrowser_IncludeObject(ICommDlgBrowser *
 */
 HRESULT IShellBrowserImpl_ICommDlgBrowser_OnSelChange(ICommDlgBrowser *iface, IShellView *ppshv)
 {
-    LPITEMIDLIST pidl;
+    ULONG             uAttr;
     FileOpenDlgInfos *fodInfos;
+    UINT              nFiles = 0;                  /* Intial to zero */
+    UINT              nCurrLength;
+    UINT              nFileToOpen;
+    UINT              nAllLength = 2;              /* Include intial '"' and final NULL */
+    UINT              nSize = MAX_PATH;
+    UINT              nFileSelected = 0;
+    LPITEMIDLIST      pidlSelection;
+    LPSTR             lpstrTemp = NULL;
+    LPSTR             lpstrAllFile = NULL;
+    char              lpstrCurrFile[MAX_PATH];
+
     _ICOM_THIS_FromICommDlgBrowser(IShellBrowserImpl,iface);
 
     fodInfos = (FileOpenDlgInfos *) GetPropA(This->hwndOwner,FileOpenDlgInfosStr);
     TRACE("(%p)\n", This);
 
-    pidl = GetSelectedPidl(ppshv);
-    if (pidl)
+    /* Locate memory and Get selected item counter */
+    if((lpstrAllFile = (LPSTR)SHAlloc(nSize * sizeof(char))) != NULL)
     {
-        HRESULT hRes = E_FAIL;
-        char lpstrFileName[MAX_PATH];
-        ULONG  ulAttr = SFGAO_FOLDER | SFGAO_HASSUBFOLDER;
+        ZeroMemory(lpstrAllFile, nSize * sizeof(char));
+        *lpstrAllFile =  '\"';
+        lpstrTemp = lpstrAllFile + 1;
+        nFileSelected = GetNumSelected(fodInfos->Shell.FOIShellView);     /* Get all selected counter */
+    }
 
-        IShellFolder_GetAttributesOf(fodInfos->Shell.FOIShellFolder, 1, &pidl, &ulAttr);
-        if (!ulAttr)
+    /* Count all selected files we have */
+    for(nFileToOpen = 0; nFileToOpen < nFileSelected; nFileToOpen++)
+    {   /* get the file selected */
+        pidlSelection = NULL;
+        uAttr = SFGAO_FOLDER | SFGAO_HASSUBFOLDER;
+        ZeroMemory(lpstrCurrFile, MAX_PATH * sizeof(char));
+        EnumSelectedPidls(fodInfos->Shell.FOIShellView, nFileToOpen, &pidlSelection);
+
+        /* get the file name and attrib of the selected files*/
+        GetName(fodInfos->Shell.FOIShellFolder, pidlSelection, SHGDN_NORMAL, lpstrCurrFile);
+        IShellFolder_GetAttributesOf(fodInfos->Shell.FOIShellFolder, 1, &pidlSelection, &uAttr);
+        COMDLG32_SHFree((LPVOID) pidlSelection);
+
+        if(!uAttr)
+        {   /* Get the new file name */
+            nCurrLength = lstrlenA(lpstrCurrFile);
+            if(nAllLength + nCurrLength + 3 > nSize)
+            {   /* increase the memory and transfer string to new location */
+                nSize += MAX_PATH;
+                if((lpstrTemp = (LPSTR)SHAlloc(nSize * sizeof(char))) != NULL)
+                {   /* Transfer old file names */
+                    ZeroMemory(lpstrTemp, nSize * sizeof(char));
+                    lstrcpyA(lpstrTemp, lpstrAllFile);
+                    SHFree(lpstrAllFile);
+                    lpstrAllFile = lpstrTemp;
+                    lpstrTemp = lpstrAllFile + nAllLength - 1;
+                }
+                else
+                {   /* if failure, stop the loop to get filename */
+                    nFileSelected = 0;
+                }
+            }
+
+            if(lpstrTemp != NULL)
+            {   /* Add the new file name */
+                nFiles++;
+                lstrcpyA(lpstrTemp, lpstrCurrFile);
+                *(lpstrTemp + nCurrLength) = '\"';
+                *(lpstrTemp + nCurrLength + 1) = ' ';
+                *(lpstrTemp + nCurrLength + 2) = '\"';
+                nAllLength += nCurrLength + 3;
+                lpstrTemp = lpstrAllFile + nAllLength - 1;
+            }
+        }
+    }
+
+    if(lpstrAllFile)
+    {
+        if(nFiles > 1)
         {
-            if(SUCCEEDED(hRes = GetName(fodInfos->Shell.FOIShellFolder,pidl,SHGDN_NORMAL,lpstrFileName)))
-                SetWindowTextA(fodInfos->DlgInfos.hwndFileName,lpstrFileName);
-            if(fodInfos->DlgInfos.dwDlgProp & FODPROP_SAVEDLG)
-                    SetDlgItemTextA(fodInfos->ShellInfos.hwndOwner,IDOK,"&Save");
+            *(lpstrTemp - 2) = '\0';
+            SetWindowTextA(fodInfos->DlgInfos.hwndFileName, lpstrAllFile);
         }
         else
-            SetDlgItemTextA(fodInfos->ShellInfos.hwndOwner,IDOK,"&Open");
+        {
+            *(lpstrTemp - 3) = '\0';
+            SetWindowTextA(fodInfos->DlgInfos.hwndFileName, lpstrAllFile + 1);
+        }
 
         fodInfos->DlgInfos.dwDlgProp |= FODPROP_USEVIEW;
-
-        COMDLG32_SHFree((LPVOID)pidl);
         SendCustomDlgNotificationMessage(This->hwndOwner, CDN_SELCHANGE);
-        return hRes;
+        SHFree( lpstrAllFile );
     }
+    else
+    {
+        SetWindowTextA(fodInfos->DlgInfos.hwndFileName, "");
+    }
+
     if(fodInfos->DlgInfos.dwDlgProp & FODPROP_SAVEDLG)
-        SetDlgItemTextA(fodInfos->ShellInfos.hwndOwner,IDOK,"&Save");
+        SetDlgItemTextA(fodInfos->ShellInfos.hwndOwner, IDOK, "&Save");
+    else
+        SetDlgItemTextA(fodInfos->ShellInfos.hwndOwner, IDOK, "&Open");
 
     fodInfos->DlgInfos.dwDlgProp &= ~FODPROP_USEVIEW;
-    return E_FAIL;
+
+    return nFileSelected ? S_OK : E_FAIL;
 }
 
 /***********************************************************************
@@ -840,7 +943,108 @@ LPITEMIDLIST GetSelectedPidl(IShellView *ppshv)
     return NULL;
 }
 
+/***********************************************************************
+ *          EnumSelectedPidls
+ *
+ * Return the pidl(s) of the selected item(s) in the view.
+ *
+*/
+BOOL EnumSelectedPidls( IShellView *ppshv,  /*[in]*/
+                        UINT nPidlIndex,  /*[in]*/
+                        LPITEMIDLIST *pidlSelected /*[out]*/ )
+{
 
+    IDataObject *doSelected;
+    BOOL retVal = TRUE;
+
+    /* Get an IDataObject from the view */
+    if(SUCCEEDED(IShellView_GetItemObject(ppshv,
+                                          SVGIO_SELECTION,
+                                          &IID_IDataObject,
+                                          (LPVOID *)&doSelected)))
+    {
+        STGMEDIUM medium;
+        FORMATETC formatetc;
+
+        /* Set the FORMATETC structure*/
+        SETDefFormatEtc(formatetc,
+                        RegisterClipboardFormatA(CFSTR_SHELLIDLIST),
+                        TYMED_HGLOBAL);
+
+        /* Get the pidls from IDataObject */
+        if(SUCCEEDED(IDataObject_GetData(doSelected,&formatetc,&medium)))
+        {
+            LPIDA cida = GlobalLock(medium.u.hGlobal);
+            if(nPidlIndex < cida->cidl)
+            {
+                *pidlSelected = COMDLG32_PIDL_ILClone((LPITEMIDLIST)(&((LPBYTE)cida)[cida->aoffset[nPidlIndex + 1]]));
+            }
+            else
+            {
+                retVal = FALSE;
+            }
+
+            if(medium.pUnkForRelease)
+            {
+                IUnknown_Release(medium.pUnkForRelease);
+            }
+            else
+            {
+                GlobalUnlock(medium.u.hGlobal);
+                GlobalFree(medium.u.hGlobal);
+            }
+        }
+        IDataObject_Release(doSelected);
+        return retVal;
+    }
+    return FALSE;
+}
+
+/***********************************************************************
+ *          GetNumSelected
+ *
+ * Return the number of selected items in the view.
+ *
+*/
+UINT GetNumSelected( IShellView *ppshv )
+{
+    IDataObject *doSelected;
+    UINT retVal = 0;
+
+       /* Get an IDataObject from the view */
+    if(SUCCEEDED(IShellView_GetItemObject(ppshv,
+                                          SVGIO_SELECTION,
+                                          &IID_IDataObject,
+                                          (LPVOID *)&doSelected)))
+    {
+        STGMEDIUM medium;
+        FORMATETC formatetc;
+
+        /* Set the FORMATETC structure*/
+        SETDefFormatEtc(formatetc,
+                        RegisterClipboardFormatA(CFSTR_SHELLIDLIST),
+                        TYMED_HGLOBAL);
+
+        /* Get the pidls from IDataObject */
+        if(SUCCEEDED(IDataObject_GetData(doSelected,&formatetc,&medium)))
+        {
+            LPIDA cida = GlobalLock(medium.u.hGlobal);
+            retVal = cida->cidl;
+
+            if(medium.pUnkForRelease)
+                IUnknown_Release(medium.pUnkForRelease);
+            else
+            {
+                GlobalUnlock(medium.u.hGlobal);
+                GlobalFree(medium.u.hGlobal);
+            }
+        }
+        IDataObject_Release(doSelected);
+        return retVal;
+    }
+
+    return 0;
+}
 
 
 

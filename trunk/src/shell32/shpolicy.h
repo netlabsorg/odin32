@@ -1,8 +1,10 @@
-/* 
+/*
  *  shpolicy.h - contains defs of policy data for SHRestricted
- * 
+ *
  *  Created 1999 by Ian Schmidt, <ischmidt@cfl.rr.com>
  *  Up to date as of SHELL32 v4.72 (Win98, Win95 with MSIE 5)
+ *
+ * Corel WINE 20000324 level
  */
 
 #ifndef __WINE_SHPOLICY_H

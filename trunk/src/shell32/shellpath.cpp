@@ -1,4 +1,4 @@
-/* $Id: shellpath.cpp,v 1.6 2000-03-22 16:55:51 cbratschi Exp $ */
+/* $Id: shellpath.cpp,v 1.7 2000-03-26 16:34:52 cbratschi Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -11,6 +11,7 @@
  *
  * Many of this functions are in SHLWAPI.DLL also
  *
+ * Corel WINE 20000324 level (without CRTDLL_* calls)
  */
 
 
@@ -46,6 +47,8 @@
 
 ODINDEBUGCHANNEL(SHELL32-SHELLPATH)
 
+/* Supported protocols for PathIsURL */
+LPSTR SupportedProtocol[] = {"http","https","ftp","gopher","file","mailto",""};
 
 /*************************************************************************
  * PathIsRoot [SHELL32.29]
@@ -55,8 +58,8 @@ ODINFUNCTION1(BOOL, PathIsRootA,
 {  TRACE("%s\n",x);
    if (*(x+1)==':' && *(x+2)=='\\')         /* "X:\" */
      return 1;
-   if (*x=='\\')                         /* "\" */
-     return 0;
+   if (*x=='\\' || *x=='/')                         /* "\" */
+     return 1;
    if (x[0]=='\\' && x[1]=='\\')            /* UNC "\\<xx>\" */
    { int foundbackslash = 0;
      x=x+2;
@@ -74,8 +77,8 @@ ODINFUNCTION1(BOOL, PathIsRootW,
 {  TRACE("%s\n",debugstr_w(x));
    if (*(x+1)==':' && *(x+2)=='\\')         /* "X:\" */
      return 1;
-   if (*x == (WCHAR) '\\')                  /* "\" */
-     return 0;
+   if (*x == (WCHAR) '\\' || *x == (WCHAR) '/')                  /* "\" */
+     return 1;
    if (x[0]==(WCHAR)'\\' && x[1]==(WCHAR)'\\') /* UNC "\\<xx>\" */
    { int foundbackslash = 0;
      x=x+2;
@@ -816,7 +819,7 @@ ODINFUNCTION1(HRESULT, PathGetDriveNumberA,
  */
 ODINFUNCTION1(HRESULT, PathGetDriveNumberW,
               LPWSTR, u)
-{
+{  FIXME("%s stub\n",debugstr_a(u));
    return 0;
 }
 
@@ -964,6 +967,7 @@ ODINFUNCTION4(HRESULT, PathProcessCommandA,
 {
    FIXME("%p(%s) %p 0x%04lx 0x%04lx stub\n",
    lpCommand, lpCommand, v, w,x );
+   lstrcpyA(v,lpCommand);
    return 0;
 }
 
@@ -1084,7 +1088,7 @@ ODINFUNCTION4(BOOL, SHGetSpecialFolderPathA,
      case CSIDL_PROGRAMS:
        hRootKey = HKEY_CURRENT_USER;
        strcpy(szValueName, "Programs");
-       strcpy(szDefaultPath, "StatrMenu\\Programs");
+       strcpy(szDefaultPath, "StartMenu\\Programs");
        break;
 
      case CSIDL_COMMON_PROGRAMS:
@@ -1236,5 +1240,108 @@ LPWSTR WINAPI PathRemoveBackslashW(LPWSTR lpPath)
         }
 
         return prev;
+}
+
+/*
+   shlwapi functions that have found their way in because most of
+   shlwapi is unimplemented and doesn't have a home.
+
+   FIXME: move to a more appropriate file( when one exists )
+*/
+
+ /* SHGetValue: Gets a value from the registry */
+
+
+BOOL WINAPI PathIsURLA(LPCSTR lpstrPath)
+{
+  LPSTR lpstrRes;
+  char lpstrFileType[10] = "";
+  int iSize;
+  int i = 0;
+  /* sanity check */
+  if(!lpstrPath)
+    return FALSE;
+
+  /* get protocol        */
+  /* protocol://location */
+  if(!(lpstrRes = strchr(lpstrPath,':')))
+  {
+    return FALSE;
+  }
+  iSize = lpstrRes - lpstrPath;
+  if(iSize > sizeof(lpstrFileType))
+    return FALSE;
+
+  strncpy(lpstrFileType,lpstrPath,iSize);
+
+  while(strlen(SupportedProtocol[i]))
+  {
+    if(!stricmp(lpstrFileType,SupportedProtocol[i++]))
+      return TRUE;
+  }
+
+  return FALSE;
+}
+
+DWORD WINAPI SHGetValueA(
+    HKEY     hkey,
+    LPCSTR   pSubKey,
+    LPCSTR   pValue,
+    LPDWORD  pwType,
+    LPVOID   pvData,
+    LPDWORD  pbData
+    )
+{
+    FIXME("(%p),stub!\n", pSubKey);
+
+	return ERROR_SUCCESS;  /* return success */
+}
+
+DWORD WINAPI SHGetValueW(
+    HKEY     hkey,
+    LPCWSTR  pSubKey,
+    LPCWSTR  pValue,
+    LPDWORD  pwType,
+    LPVOID   pvData,
+    LPDWORD  pbData
+    )
+{
+    FIXME("(%p),stub!\n", pSubKey);
+
+	return ERROR_SUCCESS;  /* return success */
+}
+
+/* gets a user-specific registry value. */
+
+LONG WINAPI SHRegGetUSValueA(
+    LPCSTR   pSubKey,
+    LPCSTR   pValue,
+    LPDWORD  pwType,
+    LPVOID   pvData,
+    LPDWORD  pbData,
+    BOOL     fIgnoreHKCU,
+    LPVOID   pDefaultData,
+    DWORD    wDefaultDataSize
+    )
+{
+    FIXME("(%p),stub!\n", pSubKey);
+
+	return ERROR_SUCCESS;  /* return success */
+}
+
+LONG WINAPI SHRegGetUSValueW(
+    LPCWSTR  pSubKey,
+    LPCWSTR  pValue,
+    LPDWORD  pwType,
+    LPVOID   pvData,
+    LPDWORD  pbData,
+    BOOL     flagIgnoreHKCU,
+    LPVOID   pDefaultData,
+    DWORD    wDefaultDataSize
+    )
+{
+    FIXME("(%p),stub!\n", pSubKey);
+
+	return ERROR_SUCCESS;  /* return success */
 }
 

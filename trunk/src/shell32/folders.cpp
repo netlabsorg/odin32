@@ -1,4 +1,4 @@
-/* $Id: folders.cpp,v 1.1 1999-10-09 11:13:19 sandervl Exp $ */
+/* $Id: folders.cpp,v 1.2 2000-03-26 16:34:41 cbratschi Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -6,11 +6,12 @@
  * Copyright 1999 Patrick Haller (haller@zebra.fh-weingarten.de)
  * Project Odin Software License can be found in LICENSE.TXT
  *
+ * Corel WINE 20000324 level
  */
 
 /*
- *	Copyright 1997	Marcus Meissner
- *	Copyright 1998	Juergen Schmied
+ *      Copyright 1997  Marcus Meissner
+ *      Copyright 1998  Juergen Schmied
  *
  */
 
@@ -48,10 +49,10 @@ ODINDEBUGCHANNEL(SHELL32-FOLDERS)
 */
 
 typedef struct
-{	ICOM_VTABLE(IExtractIconA)*	lpvtbl;
-	DWORD	ref;
-	ICOM_VTABLE(IPersistFile)*	lpvtblPersistFile;
-	LPITEMIDLIST	pidl;
+{       ICOM_VTABLE(IExtractIconA)*     lpvtbl;
+        DWORD   ref;
+        ICOM_VTABLE(IPersistFile)*      lpvtblPersistFile;
+        LPITEMIDLIST    pidl;
 } IExtractIconAImpl;
 
 //static struct ICOM_VTABLE(IExtractIconA) eivt;
@@ -65,34 +66,34 @@ typedef struct
  */
 static HRESULT WINAPI IExtractIconA_fnQueryInterface( IExtractIconA * iface, REFIID riid, LPVOID *ppvObj)
 {
-	ICOM_THIS(IExtractIconAImpl,iface);
+        ICOM_THIS(IExtractIconAImpl,iface);
 
-	char	xriid[50];
-	 WINE_StringFromCLSID((LPCLSID)riid,xriid);
-	 dprintf(("SHELL32:folders IExtractIconA_fnQueryInterface(%p)->(\n\tIID:\t%s,%p)\n",
+        char    xriid[50];
+         WINE_StringFromCLSID((LPCLSID)riid,xriid);
+         dprintf(("SHELL32:folders IExtractIconA_fnQueryInterface(%p)->(\n\tIID:\t%s,%p)\n",
            This,
            xriid,
            ppvObj));
 
-	*ppvObj = NULL;
+        *ppvObj = NULL;
 
-	if(IsEqualIID(riid, &IID_IUnknown))		/*IUnknown*/
-	{ *ppvObj = This;
-	}
-	else if(IsEqualIID(riid, &IID_IPersistFile))	/*IExtractIcon*/
-	{    *ppvObj = (IPersistFile*)&(This->lpvtblPersistFile);
-	}
-	else if(IsEqualIID(riid, &IID_IExtractIconA))	/*IExtractIcon*/
-	{    *ppvObj = (IExtractIconA*)This;
-	}
+        if(IsEqualIID(riid, &IID_IUnknown))             /*IUnknown*/
+        { *ppvObj = This;
+        }
+        else if(IsEqualIID(riid, &IID_IPersistFile))    /*IExtractIcon*/
+        {    *ppvObj = (IPersistFile*)&(This->lpvtblPersistFile);
+        }
+        else if(IsEqualIID(riid, &IID_IExtractIconA))   /*IExtractIcon*/
+        {    *ppvObj = (IExtractIconA*)This;
+        }
 
-	if(*ppvObj)
-	{ IExtractIconA_AddRef((IExtractIconA*) *ppvObj);  	
-	  dprintf(("SHELL32:folders IExtractIconA_fnQueryInterface-- Interface: (%p)->(%p)\n",ppvObj,*ppvObj));
-	  return S_OK;
-	}
-	dprintf(("SHELL32:folders IExtractIconA_fnQueryInterface-- Interface: E_NOINTERFACE\n"));
-	return E_NOINTERFACE;
+        if(*ppvObj)
+        { IExtractIconA_AddRef((IExtractIconA*) *ppvObj);
+          dprintf(("SHELL32:folders IExtractIconA_fnQueryInterface-- Interface: (%p)->(%p)\n",ppvObj,*ppvObj));
+          return S_OK;
+        }
+        dprintf(("SHELL32:folders IExtractIconA_fnQueryInterface-- Interface: E_NOINTERFACE\n"));
+        return E_NOINTERFACE;
 }
 
 /**************************************************************************
@@ -100,36 +101,36 @@ static HRESULT WINAPI IExtractIconA_fnQueryInterface( IExtractIconA * iface, REF
 */
 static ULONG WINAPI IExtractIconA_fnAddRef(IExtractIconA * iface)
 {
-	ICOM_THIS(IExtractIconAImpl,iface);
+        ICOM_THIS(IExtractIconAImpl,iface);
 
-	dprintf(("SHELL32:folders IExtractIconA_fnAddRef(%p)->(count=%lu)\n",
+        dprintf(("SHELL32:folders IExtractIconA_fnAddRef(%p)->(count=%lu)\n",
           This,
           This->ref));
 
-	shell32_ObjCount++;
+        shell32_ObjCount++;
 
-	return ++(This->ref);
+        return ++(This->ref);
 }
 /**************************************************************************
 *  IExtractIconA_Release
 */
 static ULONG WINAPI IExtractIconA_fnRelease(IExtractIconA * iface)
 {
-	ICOM_THIS(IExtractIconAImpl,iface);
+        ICOM_THIS(IExtractIconAImpl,iface);
 
-	dprintf(("SHELL32:folders IExtractIconA_fnRelease(%p)->()\n",
+        dprintf(("SHELL32:folders IExtractIconA_fnRelease(%p)->()\n",
           This));
 
-	shell32_ObjCount--;
+        shell32_ObjCount--;
 
-	if (!--(This->ref))
-	{ dprintf(("SHELL32:folders  IExtractIconA_fnRelease destroying IExtractIcon(%p)\n",
+        if (!--(This->ref))
+        { dprintf(("SHELL32:folders  IExtractIconA_fnRelease destroying IExtractIcon(%p)\n",
             This));
-	  SHFree(This->pidl);
-	  HeapFree(GetProcessHeap(),0,This);
-	  return 0;
-	}
-	return This->ref;
+          SHFree(This->pidl);
+          HeapFree(GetProcessHeap(),0,This);
+          return 0;
+        }
+        return This->ref;
 }
 /**************************************************************************
 *  IExtractIconA_GetIconLocation
@@ -137,21 +138,21 @@ static ULONG WINAPI IExtractIconA_fnRelease(IExtractIconA * iface)
 * mapping filetype to icon
 */
 static HRESULT WINAPI IExtractIconA_fnGetIconLocation(
-	IExtractIconA * iface,
-	UINT uFlags,
-	LPSTR szIconFile,
-	UINT cchMax,
-	int * piIndex,
-	UINT * pwFlags)
+        IExtractIconA * iface,
+        UINT uFlags,
+        LPSTR szIconFile,
+        UINT cchMax,
+        int * piIndex,
+        UINT * pwFlags)
 {
-	ICOM_THIS(IExtractIconAImpl,iface);
+        ICOM_THIS(IExtractIconAImpl,iface);
 
-	char	sTemp[MAX_PATH];
-	DWORD	dwNr;
-	GUID const * riid;
-	LPITEMIDLIST	pSimplePidl = ILFindLastID(This->pidl);
-			
-	dprintf(("SHELL32:folders IExtractIconA_fnGetIconLocation(%p) (flags=%u %p %u %p %p)\n",
+        char    sTemp[MAX_PATH];
+        DWORD   dwNr;
+        GUID const * riid;
+        LPITEMIDLIST    pSimplePidl = ILFindLastID(This->pidl);
+
+        dprintf(("SHELL32:folders IExtractIconA_fnGetIconLocation(%p) (flags=%u %p %u %p %p)\n",
           This,
           uFlags,
           szIconFile,
@@ -159,94 +160,94 @@ static HRESULT WINAPI IExtractIconA_fnGetIconLocation(
           piIndex,
           pwFlags));
 
-	if (pwFlags)
-	  *pwFlags = 0;
+        if (pwFlags)
+          *pwFlags = 0;
 
-	if (_ILIsDesktop(pSimplePidl))
-	{
-	  lstrcpynA(szIconFile, "shell32.dll", cchMax);
-	  *piIndex = 34;
-	}
+        if (_ILIsDesktop(pSimplePidl))
+        {
+          lstrcpynA(szIconFile, "shell32.dll", cchMax);
+          *piIndex = 34;
+        }
 
-	/* my computer and other shell extensions */
-	else if ( (riid = _ILGetGUIDPointer(pSimplePidl)) )
-	{
-	  char xriid[50];
-	  strcpy(xriid,"CLSID\\");
-	  WINE_StringFromCLSID((LPCLSID)riid,&xriid[strlen(xriid)]);
+        /* my computer and other shell extensions */
+        else if (riid = _ILGetGUIDPointer(pSimplePidl))
+        {
+          char xriid[50];
+          strcpy(xriid,"CLSID\\");
+          WINE_StringFromCLSID((LPCLSID)riid,&xriid[strlen(xriid)]);
 
-	  if (HCR_GetDefaultIcon(xriid, sTemp, MAX_PATH, &dwNr))
-	  {
-	    lstrcpynA(szIconFile, sTemp, cchMax);
-	    *piIndex = dwNr;
-	  }
-	  else
-	  {
-	    lstrcpynA(szIconFile, "shell32.dll", cchMax);
-	    *piIndex = 15;
-	  }
-	}
+          if (HCR_GetDefaultIcon(xriid, sTemp, MAX_PATH, &dwNr))
+          {
+            lstrcpynA(szIconFile, sTemp, cchMax);
+            *piIndex = dwNr;
+          }
+          else
+          {
+            lstrcpynA(szIconFile, "shell32.dll", cchMax);
+            *piIndex = 15;
+          }
 
-	else if (_ILIsDrive (pSimplePidl))
-	{
-	  if (HCR_GetDefaultIcon("Drive", sTemp, MAX_PATH, &dwNr))
-	  {
-	    lstrcpynA(szIconFile, sTemp, cchMax);
-	    *piIndex = dwNr;
-	  }
-	  else
-	  {
-	    lstrcpynA(szIconFile, "shell32.dll", cchMax);
-	    *piIndex = 8;
-	  }
-	}
-	else if (_ILIsFolder (pSimplePidl))
-	{
-	  if (HCR_GetDefaultIcon("Folder", sTemp, MAX_PATH, &dwNr))
-	  {
-	    lstrcpynA(szIconFile, sTemp, cchMax);
-	    *piIndex = dwNr;
-	  }
-	  else
-	  {
-	    lstrcpynA(szIconFile, "shell32.dll", cchMax);
-	    *piIndex = 3;
-	  }
-	}
-	else	/* object is file */
-	{
-	  if (_ILGetExtension (pSimplePidl, sTemp, MAX_PATH)
-	      && HCR_MapTypeToValue(sTemp, sTemp, MAX_PATH, TRUE)
-	      && HCR_GetDefaultIcon(sTemp, sTemp, MAX_PATH, &dwNr))
-	  {
-	    if (!strcmp("%1",sTemp))		/* icon is in the file */
-	    {
-	      SHGetPathFromIDListA(This->pidl, sTemp);
-	      dwNr = 0;
-	    }
-	    lstrcpynA(szIconFile, sTemp, cchMax);
-	    *piIndex = dwNr;
-	  }
-	  else					/* default icon */
-	  {
-	    lstrcpynA(szIconFile, "shell32.dll", cchMax);
-	    *piIndex = 0;
-	  }
-	}
+        }
+        else if (_ILIsDrive (pSimplePidl))
+        {
+          if (HCR_GetDefaultIcon("Drive", sTemp, MAX_PATH, &dwNr))
+          {
+            lstrcpynA(szIconFile, sTemp, cchMax);
+            *piIndex = dwNr;
+          }
+          else
+          {
+            lstrcpynA(szIconFile, "shell32.dll", cchMax);
+            *piIndex = 8;
+          }
+        }
+        else if (_ILIsFolder (pSimplePidl))
+        {
+          if (HCR_GetDefaultIcon("Folder", sTemp, MAX_PATH, &dwNr))
+          {
+            lstrcpynA(szIconFile, sTemp, cchMax);
+            *piIndex = dwNr;
+          }
+          else
+          {
+            lstrcpynA(szIconFile, "shell32.dll", cchMax);
+            *piIndex = 3;
+          }
+        }
+        else    /* object is file */
+        {
+          if (_ILGetExtension (pSimplePidl, sTemp, MAX_PATH)
+              && HCR_MapTypeToValue(sTemp, sTemp, MAX_PATH, TRUE)
+              && HCR_GetDefaultIcon(sTemp, sTemp, MAX_PATH, &dwNr))
+          {
+            if (!strcmp("%1",sTemp))            /* icon is in the file */
+            {
+              SHGetPathFromIDListA(This->pidl, sTemp);
+              dwNr = 0;
+            }
+            lstrcpynA(szIconFile, sTemp, cchMax);
+            *piIndex = dwNr;
+          }
+          else                                  /* default icon */
+          {
+            lstrcpynA(szIconFile, "shell32.dll", cchMax);
+            *piIndex = 0;
+          }
+        }
 
-	dprintf(("SHELL32:folders IExtractIconA_fnGetIconLocation -- %s %x\n",
+        dprintf(("SHELL32:folders IExtractIconA_fnGetIconLocation -- %s %x\n",
           szIconFile,
           *piIndex));
-	return NOERROR;
+        return NOERROR;
 }
 /**************************************************************************
 *  IExtractIconA_Extract
 */
 static HRESULT WINAPI IExtractIconA_fnExtract(IExtractIconA * iface, LPCSTR pszFile, UINT nIconIndex, HICON *phiconLarge, HICON *phiconSmall, UINT nIconSize)
 {
-	ICOM_THIS(IExtractIconAImpl,iface);
+        ICOM_THIS(IExtractIconAImpl,iface);
 
-	dprintf(("SHELL32:folders IExtractIconA_fnExtract (%p) (file=%p index=%u %p %p size=%u) semi-stub\n",
+        dprintf(("SHELL32:folders IExtractIconA_fnExtract (%p) (file=%p index=%u %p %p size=%u) semi-stub\n",
           This,
           pszFile,
           nIconIndex,
@@ -254,23 +255,23 @@ static HRESULT WINAPI IExtractIconA_fnExtract(IExtractIconA * iface, LPCSTR pszF
           phiconSmall,
           nIconSize));
 
-	if (phiconLarge)
-	  *phiconLarge = pImageList_GetIcon(ShellBigIconList, nIconIndex, ILD_TRANSPARENT);
+        if (phiconLarge)
+          *phiconLarge = pImageList_GetIcon(ShellBigIconList, nIconIndex, ILD_TRANSPARENT);
 
-	if (phiconSmall)
-	  *phiconSmall = pImageList_GetIcon(ShellSmallIconList, nIconIndex, ILD_TRANSPARENT);
+        if (phiconSmall)
+          *phiconSmall = pImageList_GetIcon(ShellSmallIconList, nIconIndex, ILD_TRANSPARENT);
 
-	return S_OK;
+        return S_OK;
 }
 
 static struct ICOM_VTABLE(IExtractIconA) eivt =
-{	
-	ICOM_MSVTABLE_COMPAT_DummyRTTIVALUE
-	IExtractIconA_fnQueryInterface,
-	IExtractIconA_fnAddRef,
-	IExtractIconA_fnRelease,
-	IExtractIconA_fnGetIconLocation,
-	IExtractIconA_fnExtract
+{
+        ICOM_MSVTABLE_COMPAT_DummyRTTIVALUE
+        IExtractIconA_fnQueryInterface,
+        IExtractIconA_fnAddRef,
+        IExtractIconA_fnRelease,
+        IExtractIconA_fnGetIconLocation,
+        IExtractIconA_fnExtract
 };
 
 
@@ -278,52 +279,52 @@ static struct ICOM_VTABLE(IExtractIconA) eivt =
  * IEIPersistFile_QueryInterface (IUnknown)
  */
 static HRESULT WINAPI IEIPersistFile_fnQueryInterface(
-	IPersistFile	*iface,
-	REFIID		iid,
-	LPVOID		*ppvObj)
+        IPersistFile    *iface,
+        REFIID          iid,
+        LPVOID          *ppvObj)
 {
-	_ICOM_THIS_From_IPersistFile(IExtractIconA, iface);
+        _ICOM_THIS_From_IPersistFile(IExtractIconA, iface);
 
-	return IShellFolder_QueryInterface((IExtractIconA*)This, iid, ppvObj);
+        return IShellFolder_QueryInterface((IExtractIconA*)This, iid, ppvObj);
 }
 
 /************************************************************************
  * IEIPersistFile_AddRef (IUnknown)
  */
 static ULONG WINAPI IEIPersistFile_fnAddRef(
-	IPersistFile	*iface)
+        IPersistFile    *iface)
 {
-	_ICOM_THIS_From_IPersistFile(IExtractIconA, iface);
+        _ICOM_THIS_From_IPersistFile(IExtractIconA, iface);
 
-	return IExtractIconA_AddRef((IExtractIconA*)This);
+        return IExtractIconA_AddRef((IExtractIconA*)This);
 }
 
 /************************************************************************
  * IEIPersistFile_Release (IUnknown)
  */
 static ULONG WINAPI IEIPersistFile_fnRelease(
-	IPersistFile	*iface)
+        IPersistFile    *iface)
 {
-	_ICOM_THIS_From_IPersistFile(IExtractIconA, iface);
+        _ICOM_THIS_From_IPersistFile(IExtractIconA, iface);
 
-	return IExtractIconA_Release((IExtractIconA*)This);
+        return IExtractIconA_Release((IExtractIconA*)This);
 }
 
 /************************************************************************
  * IEIPersistFile_GetClassID (IPersist)
  */
 static HRESULT WINAPI IEIPersistFile_fnGetClassID(
-	IPersistFile	*iface,
-	LPCLSID		lpClassId)
+        IPersistFile    *iface,
+        LPCLSID         lpClassId)
 {
-	CLSID StdFolderID = { 0x00000000, 0x0000, 0x0000, {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00} };
+        CLSID StdFolderID = { 0x00000000, 0x0000, 0x0000, {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00} };
 
-	if (lpClassId==NULL)
-	  return E_POINTER;
+        if (lpClassId==NULL)
+          return E_POINTER;
 
-	memcpy(lpClassId, &StdFolderID, sizeof(StdFolderID));
+        memcpy(lpClassId, &StdFolderID, sizeof(StdFolderID));
 
-	return S_OK;
+        return S_OK;
 }
 
 /************************************************************************
@@ -341,9 +342,9 @@ static HRESULT WINAPI IEIPersistFile_fnIsDirty(IPersistFile* iface)
  */
 static HRESULT WINAPI IEIPersistFile_fnLoad(IPersistFile* iface, LPCOLESTR pszFileName, DWORD dwMode)
 {
-	_ICOM_THIS_From_IPersistFile(IExtractIconA, iface);
-	FIXME("%p\n", This);
-	return E_NOTIMPL;
+        _ICOM_THIS_From_IPersistFile(IExtractIconA, iface);
+        FIXME("%p\n", This);
+        return E_NOTIMPL;
 
 }
 
@@ -379,16 +380,16 @@ static HRESULT WINAPI IEIPersistFile_fnGetCurFile(IPersistFile* iface, LPOLESTR*
 
 static struct ICOM_VTABLE(IPersistFile) pfvt =
 {
-	ICOM_MSVTABLE_COMPAT_DummyRTTIVALUE
-	IEIPersistFile_fnQueryInterface,
-	IEIPersistFile_fnAddRef,
-	IEIPersistFile_fnRelease,
-	IEIPersistFile_fnGetClassID,
-	IEIPersistFile_fnIsDirty,       /* IEIPersistFile_fnIsDirty */
-	IEIPersistFile_fnLoad,
-	IEIPersistFile_fnSave,          /* IEIPersistFile_fnSave */
-	IEIPersistFile_fnSaveCompleted, /* IEIPersistFile_fnSaveCompleted */
-	IEIPersistFile_fnGetCurFile     /* IEIPersistFile_fnGetCurFile */
+        ICOM_MSVTABLE_COMPAT_DummyRTTIVALUE
+        IEIPersistFile_fnQueryInterface,
+        IEIPersistFile_fnAddRef,
+        IEIPersistFile_fnRelease,
+        IEIPersistFile_fnGetClassID,
+        IEIPersistFile_fnIsDirty,       /* IEIPersistFile_fnIsDirty */
+        IEIPersistFile_fnLoad,
+        IEIPersistFile_fnSave,          /* IEIPersistFile_fnSave */
+        IEIPersistFile_fnSaveCompleted, /* IEIPersistFile_fnSaveCompleted */
+        IEIPersistFile_fnGetCurFile     /* IEIPersistFile_fnGetCurFile */
 };
 
 /**************************************************************************
@@ -396,20 +397,20 @@ static struct ICOM_VTABLE(IPersistFile) pfvt =
 */
 IExtractIconA* IExtractIconA_Constructor(LPCITEMIDLIST pidl)
 {
-	IExtractIconAImpl* ei;
+        IExtractIconAImpl* ei;
 
-	ei=(IExtractIconAImpl*)HeapAlloc(GetProcessHeap(),0,sizeof(IExtractIconAImpl));
-	ei->ref=1;
-	ei->lpvtbl = &eivt;
-	ei->lpvtblPersistFile = &pfvt;
-	ei->pidl=ILClone(pidl);
+        ei=(IExtractIconAImpl*)HeapAlloc(GetProcessHeap(),0,sizeof(IExtractIconAImpl));
+        ei->ref=1;
+        ei->lpvtbl = &eivt;
+        ei->lpvtblPersistFile = &pfvt;
+        ei->pidl=ILClone(pidl);
 
-	pdump(pidl);
+        pdump(pidl);
 
-	dprintf(("SHELL32:folders IExtractIconA_Constructor(%p)\n",
+        dprintf(("SHELL32:folders IExtractIconA_Constructor(%p)\n",
           ei));
-	shell32_ObjCount++;
-	return (IExtractIconA *)ei;
+        shell32_ObjCount++;
+        return (IExtractIconA *)ei;
 }
 
 

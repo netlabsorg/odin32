@@ -1,25 +1,34 @@
-/* $Id: shlview.cpp,v 1.8 2000-03-24 17:17:28 cbratschi Exp $ */
+/* $Id: shlview.cpp,v 1.9 2000-03-26 16:34:54 cbratschi Exp $ */
 /*
  * ShellView
  *
+ * Copyright 2000 Christoph Bratschi (cbratschi@datacomm.ch)
+ *
  * Copyright 1998,1999                   <juergen.schmied@metronet.de>
  *
- *  FIXME: when the ShellView_WndProc gets a WM_NCDESTROY should we do a
- *  Release() ???
+ * This is the view visualizing the data provied by the shellfolder.
+ * No direct access to data from pidls should be done from here.
  *
- *  FIXME: There is still a design problem in this implementation.
- * This implementation is more or less ok for file system folders
- * but there are many more kinds of folders.
- * The shellview is not supposed to know much about the colums
- * appearing in the view. To fix this it should use the IShellFolder2
- * interface when possible to get the informations dynamically
- * this will take a lot of work to implement and wont likely not
- * be done in near future
- * Please considder this when code new features. Mail me if you
- * are in doubt how to do things. (jsch 25/10/99)
+ * FIXME: There is not jet a official interface defined to manipulate
+ * the objects shown in the view (rename, move...). This should be
+ * implemented as additional interface to IShellFolder.
  *
- * FIXME: Set the buttons in the filedialog according to the view state
-
+ * FIXME: The order by part of the background context menu should be
+ * buily according to the columns shown.
+ *
+ * FIXME: Load/Save the view state from/into the stream provied by
+ * the ShellBrowser
+ *
+ * FIXME: CheckToolbar: handle the "new folder" and "folder up" button
+ *
+ * FIXME: ShellView_FillList: consider sort orders
+ *
+ * FIXME: implement the drag and drop in the old (msg-based) way
+ *
+ * FIXME: when the ShellView_WndProc gets a WM_NCDESTROY should we do a
+ * Release() ???
+ *
+ * Corel WINE 20000324 level
  */
 
 #include <stdlib.h>
@@ -82,28 +91,29 @@ typedef struct
 } IShellViewImpl;
 
 extern struct ICOM_VTABLE(IShellView) svvt;
+
 extern struct ICOM_VTABLE(IOleCommandTarget) ctvt;
 #define _IOleCommandTarget_Offset ((int)(&(((IShellViewImpl*)0)->lpvtblOleCommandTarget)))
-#define _ICOM_THIS_From_IOleCommandTarget(myClass, name) myClass* This = (myClass*)(((char*)name)-_IOleCommandTarget_Offset);
+#define _ICOM_THIS_From_IOleCommandTarget(class, name) class* This = (class*)(((char*)name)-_IOleCommandTarget_Offset);
 
 extern struct ICOM_VTABLE(IDropTarget) dtvt;
 #define _IDropTarget_Offset ((int)(&(((IShellViewImpl*)0)->lpvtblDropTarget)))
-#define _ICOM_THIS_From_IDropTarget(myClass, name) myClass* This = (myClass*)(((char*)name)-_IDropTarget_Offset);
+#define _ICOM_THIS_From_IDropTarget(class, name) class* This = (class*)(((char*)name)-_IDropTarget_Offset);
 
 extern struct ICOM_VTABLE(IDropSource) dsvt;
 #define _IDropSource_Offset ((int)(&(((IShellViewImpl*)0)->lpvtblDropSource)))
-#define _ICOM_THIS_From_IDropSource(myClass, name) myClass* This = (myClass*)(((char*)name)-_IDropSource_Offset);
+#define _ICOM_THIS_From_IDropSource(class, name) class* This = (class*)(((char*)name)-_IDropSource_Offset);
 
 extern struct ICOM_VTABLE(IViewObject) vovt;
 #define _IViewObject_Offset ((int)(&(((IShellViewImpl*)0)->lpvtblViewObject)))
-#define _ICOM_THIS_From_IViewObject(myClass, name) myClass* This = (myClass*)(((char*)name)-_IViewObject_Offset);
+#define _ICOM_THIS_From_IViewObject(class, name) class* This = (class*)(((char*)name)-_IViewObject_Offset);
 
 /* ListView Header ID's */
-#define LISTVIEW_COLUMN_NAME 0
-#define LISTVIEW_COLUMN_SIZE 1
-#define LISTVIEW_COLUMN_TYPE 2
-#define LISTVIEW_COLUMN_TIME 3
-#define LISTVIEW_COLUMN_ATTRIB 4
+#define FILEDIALOG_COLUMN_NAME 0
+#define FILEDIALOG_COLUMN_SIZE 1
+#define FILEDIALOG_COLUMN_TYPE 2
+#define FILEDIALOG_COLUMN_TIME 3
+#define FILEDIALOG_COLUMN_ATTRIB 4
 //CB: todo: drive view!
 
 /*menu items */
@@ -214,12 +224,12 @@ static HRESULT OnStateChange(IShellViewImpl * This, UINT uFlags)
    }
    return ret;
 }
+
 /**********************************************************
+ *      set the toolbar of the filedialog buttons
  *
- * ##### helperfunctions for initializing the view #####
- */
-/**********************************************************
- * set the toolbar buttons
+ * - activates the buttons from the shellbrowser according to
+ *   the view state
  */
 static void CheckToolbar(IShellViewImpl * This)
 {
@@ -241,6 +251,11 @@ static void CheckToolbar(IShellViewImpl * This)
 }
 
 /**********************************************************
+ *
+ * ##### helperfunctions for initializing the view #####
+ */
+
+/**********************************************************
  * change the style of the listview control
  */
 static void SetStyle(IShellViewImpl * This, DWORD dwAdd, DWORD dwRemove)
@@ -256,6 +271,7 @@ static void SetStyle(IShellViewImpl * This, DWORD dwAdd, DWORD dwRemove)
 /**********************************************************
 * ShellView_CreateList()
 *
+* - creates the list view window
 */
 static BOOL ShellView_CreateList (IShellViewImpl * This)
 {  DWORD dwStyle;
@@ -274,9 +290,13 @@ static BOOL ShellView_CreateList (IShellViewImpl * This)
      default:     dwStyle |= LVS_LIST;      break;
    }
 
-   if (This->FolderSettings.fFlags && FWF_AUTOARRANGE)  dwStyle |= LVS_AUTOARRANGE;
+   if (This->FolderSettings.fFlags & FWF_AUTOARRANGE)  dwStyle |= LVS_AUTOARRANGE;
    /*if (This->FolderSettings.fFlags && FWF_DESKTOP); used from explorer*/
-   if (This->FolderSettings.fFlags && FWF_SINGLESEL) dwStyle |= LVS_SINGLESEL;
+   if (This->FolderSettings.fFlags & FWF_SINGLESEL) dwStyle |= LVS_SINGLESEL;
+
+   This->ListViewSortInfo.bIsAscending = TRUE;
+   This->ListViewSortInfo.nHeaderID = -1;
+   This->ListViewSortInfo.nLastHeaderID = -1;
 
    This->hWndList=CreateWindowExA( WS_EX_CLIENTEDGE,
                WC_LISTVIEWA,
@@ -291,20 +311,21 @@ static BOOL ShellView_CreateList (IShellViewImpl * This)
    if(!This->hWndList)
      return FALSE;
 
-        This->ListViewSortInfo.bIsAscending = TRUE;
-        This->ListViewSortInfo.nHeaderID = -1;
-        This->ListViewSortInfo.nLastHeaderID = -1;
-
    /*  UpdateShellSettings(); */
+
+   /* Bring window to the Top
+      if there is any user defined template then we cannot
+      see this list control
+   */
+   BringWindowToTop(This->hWnd);
+   BringWindowToTop(This->hWndList);
+
    return TRUE;
 }
 /**********************************************************
 * ShellView_InitList()
 *
-* NOTES
-*  FIXME: the headers should depend on the kind of shellfolder
-*  thats creating the shellview. this hack implements only the
-*  correct headers for a filesystem folder (jsch 25/10/99)
+* - adds all needed columns to the shellview
 */
 static BOOL ShellView_InitList(IShellViewImpl * This)
 {
@@ -408,21 +429,21 @@ static INT CALLBACK ShellView_ListViewCompareItems(LPVOID lParam1, LPVOID lParam
     {
         /* Sort by Time: Folders or Files can be sorted */
 
-        if(pSortInfo->nHeaderID == LISTVIEW_COLUMN_TIME)
+        if(pSortInfo->nHeaderID == FILEDIALOG_COLUMN_TIME)
         {
             _ILGetFileDateTime(pItemIdList1, &fd1);
             _ILGetFileDateTime(pItemIdList2, &fd2);
             nDiff = CompareFileTime(&fd2, &fd1);
         }
         /* Sort by Attribute: Folder or Files can be sorted */
-        else if(pSortInfo->nHeaderID == LISTVIEW_COLUMN_ATTRIB)
+        else if(pSortInfo->nHeaderID == FILEDIALOG_COLUMN_ATTRIB)
         {
-            _ILGetAttributeStr(pItemIdList1, strName1, MAX_PATH);
-            _ILGetAttributeStr(pItemIdList2, strName2, MAX_PATH);
+            _ILGetFileAttributes(pItemIdList1, strName1, MAX_PATH);
+            _ILGetFileAttributes(pItemIdList2, strName2, MAX_PATH);
             nDiff = strcmp(strName1, strName2);
         }
         /* Sort by FileName: Folder or Files can be sorted */
-        else if(pSortInfo->nHeaderID == LISTVIEW_COLUMN_NAME || bIsBothFolder)
+        else if(pSortInfo->nHeaderID == FILEDIALOG_COLUMN_NAME || bIsBothFolder)
         {
             /* Sort by Text */
             _ILSimpleGetText(pItemIdList1, strName1, MAX_PATH);
@@ -430,12 +451,12 @@ static INT CALLBACK ShellView_ListViewCompareItems(LPVOID lParam1, LPVOID lParam
             nDiff = strcmp(strName1, strName2);
         }
         /* Sort by File Size, Only valid for Files */
-        else if(pSortInfo->nHeaderID == LISTVIEW_COLUMN_SIZE)
+        else if(pSortInfo->nHeaderID == FILEDIALOG_COLUMN_SIZE)
         {
             nDiff = (INT)(_ILGetFileSize(pItemIdList1, NULL, 0) - _ILGetFileSize(pItemIdList2, NULL, 0));
         }
         /* Sort by File Type, Only valid for Files */
-        else if(pSortInfo->nHeaderID == LISTVIEW_COLUMN_TYPE)
+        else if(pSortInfo->nHeaderID == FILEDIALOG_COLUMN_TYPE)
         {
             /* Sort by Type */
             _ILGetFileType(pItemIdList1, strName1, MAX_PATH);
@@ -464,8 +485,9 @@ static INT CALLBACK ShellView_ListViewCompareItems(LPVOID lParam1, LPVOID lParam
 /**********************************************************
 * ShellView_FillList()
 *
-* NOTES
-*  internal
+* - gets the objectlist from the shellfolder
+* - sorts the list
+* - fills the list into the view
 */
 
 static HRESULT ShellView_FillList(IShellViewImpl * This)
@@ -539,8 +561,6 @@ static HRESULT ShellView_FillList(IShellViewImpl * This)
 
    /*turn the listview's redrawing back on and force it to draw*/
    SendMessageA(This->hWndList, WM_SETREDRAW, TRUE, 0);
-   InvalidateRect(This->hWndList, NULL, TRUE);
-   UpdateWindow(This->hWndList);
 
    IEnumIDList_Release(pEnumIDList); /* destroy the list*/
    pDPA_Destroy(hdpa);
@@ -776,7 +796,7 @@ static void ShellView_DoContextMenu(IShellViewImpl * This, WORD x, WORD y, BOOL 
           TRACE("-- explore -- invoke command\n");
           ZeroMemory(&cmi, sizeof(cmi));
           cmi.cbSize = sizeof(cmi);
-          cmi.hwnd = This->hWndParent;
+          cmi.hwnd = This->hWnd;
           cmi.lpVerb = (LPCSTR)MAKEINTRESOURCEA(uCommand);
           IContextMenu_InvokeCommand(pContextMenu, &cmi);
         }
@@ -1016,10 +1036,102 @@ static LRESULT ShellView_OnCommand(IShellViewImpl * This,DWORD dwCmdID, DWORD dw
        ListView_SortItems(This->hWndList, ShellView_ListViewCompareItems, (LPARAM) (&(This->ListViewSortInfo)));
        break;
 
+     case ID_NEWFOLDER:
+       PostMessageA (GetParent (This->hWnd), WM_COMMAND, ID_NEWFOLDER, 0L);
+       break;
+
+
      default:
        TRACE("-- COMMAND 0x%04lx unhandled\n", dwCmdID);
    }
    return 0;
+}
+
+/*************************************************************************
+ * ShellView_OnEndLabelEdit [Internal]
+ *
+ * Message handling for LVN_ENDLABELEDIT.  This function will rename a
+ * file and rename the pidl to match it's new name.
+ *
+ * PARAMS
+ *     This        [I] ShellView structure
+ *     lpdi        [I] Listview Display info struct
+ *
+ * RETURNS
+ *     TRUE if the listview should keep the edit text otherwise FALSE
+ *
+ * NOTES
+ *     This funciton will pop a message box if an error occures
+ */
+static LRESULT ShellView_OnEndLabelEdit(IShellViewImpl *This, NMLVDISPINFOA *lpdi)
+{
+    char strOldPath[MAX_PATH];
+    char strNewPath[MAX_PATH];
+    char strMsgTitle[256];
+    char strMsgText[256];
+
+    LPSTR strDestName;
+    BOOL bRet = FALSE;
+    LPITEMIDLIST pidl = (LPITEMIDLIST)lpdi->item.lParam;
+    DWORD type;
+    STRRET   str;
+
+    if(lpdi->item.pszText != NULL && lpdi->item.cchTextMax > 0)
+    {
+        strDestName = lpdi->item.pszText;
+
+        /* Check for valid Destnation Name */
+        if(strpbrk(strDestName,"/\\:*?\"<>|") != NULL)
+        {
+            LoadStringA(shell32_hInstance, IDS_SHV_INVALID_FILENAME_TITLE, strMsgTitle, sizeof(strMsgTitle));
+            LoadStringA(shell32_hInstance, IDS_SHV_INVALID_FILENAME, strMsgText, sizeof(strMsgText));
+            MessageBoxA(This->hWnd,strMsgText, strMsgTitle, MB_OK | MB_ICONHAND);
+            return FALSE;
+        }
+
+        if(SUCCEEDED(IShellFolder_GetDisplayNameOf(This->pSFParent,pidl, SHGDN_NORMAL | SHGDN_FORPARSING, &str)))
+        {
+            char *pLastSlash;
+            StrRetToStrNA(strOldPath, MAX_PATH, &str, pidl);
+
+
+            /* Set the complete path of the new filename */
+            strcpy(strNewPath, strOldPath);
+            pLastSlash = strrchr(strNewPath, '\\');
+            if(pLastSlash != NULL)
+            {
+              pLastSlash[1] = 0;
+            }
+            strcat(strNewPath, strDestName);
+
+            /* Are the string the same */
+            if(strcmp(strNewPath, strOldPath) != 0)
+            {
+                if(MoveFileA(strOldPath, strNewPath) != 0)
+                {
+                    /* Update the pidl with the new filename */
+                    type   = _ILGetDataPointer(pidl)->type;
+                    LPSTR pStr = _ILGetTextPointer(type,_ILGetDataPointer(pidl));
+                    strcpy(pStr, strDestName);
+
+                    /* Remove the current selection from the listview */
+                    ListView_SetItemState(This->hWndList,lpdi->item.iItem,0,LVIS_SELECTED);
+                    bRet = TRUE;
+                }
+                else
+                {
+                    /* Cannot move file, so display a message */
+                    char pBuffer[256+MAX_PATH];
+                    LoadStringA(shell32_hInstance, IDS_SHV_INVALID_MOVE_TITLE, strMsgTitle, sizeof(strMsgTitle));
+                    LoadStringA(shell32_hInstance, IDS_SHV_INVALID_MOVE, strMsgText, sizeof(strMsgText));
+                    sprintf(pBuffer, strMsgText, strDestName);
+                    MessageBoxA(This->hWnd,pBuffer,strMsgTitle, MB_OK | MB_ICONHAND);
+                }
+            }
+        }
+
+    }
+    return bRet;
 }
 
 /**********************************************************
@@ -1105,8 +1217,11 @@ static LRESULT ShellView_OnNotify(IShellViewImpl * This, UINT CtlID, LPNMHDR lpn
        break;
 
      case LVN_ITEMCHANGED:
-       TRACE("-- LVN_ITEMCHANGED %p\n",This);
-       OnStateChange(This, CDBOSC_SELCHANGE);  /* the browser will get the IDataObject now */
+       if (ListView_GetNextItem(This->hWndList, -1, LVNI_FOCUSED) == lpnmlv->iItem)
+       {
+         TRACE("-- LVN_ITEMCHANGED %p\n",This);
+         OnStateChange(This, CDBOSC_SELCHANGE);  /* the browser will get the IDataObject now */
+       }
        break;
 
      case LVN_BEGINDRAG:
@@ -1142,9 +1257,12 @@ static LRESULT ShellView_OnNotify(IShellViewImpl * This, UINT CtlID, LPNMHDR lpn
        break;
 
      case LVN_BEGINLABELEDITA:
+       return FALSE;
+
      case LVN_ENDLABELEDITA:
-        FIXME("labeledit\n");
-        break;
+       {
+         return ShellView_OnEndLabelEdit(This,lpdi);
+       }
 
      default:
 //     TRACE("-- %p WM_COMMAND %s unhandled\n", This, SPY_GetMsgName(lpnmh->code));
@@ -1328,9 +1446,9 @@ static HRESULT WINAPI IShellView_fnContextSensitiveHelp(IShellView * iface,BOOL 
 */
 static HRESULT WINAPI IShellView_fnTranslateAccelerator(IShellView * iface,LPMSG lpmsg)
 {
+#if 0
    ICOM_THIS(IShellViewImpl, iface);
 
-#if 0
    FIXME("(%p)->(%p: hwnd=%x msg=%x lp=%lx wp=%x) stub\n",This,lpmsg, lpmsg->hwnd, lpmsg->message, lpmsg->lParam, lpmsg->wParam);
 #endif
 
@@ -1530,12 +1648,96 @@ static HRESULT WINAPI IShellView_fnSaveViewState(IShellView * iface)
    return S_OK;
 }
 
+/*************************************************************************
+ * IShellView_fnSelectItem
+ *
+ * Changes the selection state of one or more items within the shell
+ * view window.
+ *
+ * PARAMS
+ *     iFace       [I] The IShellView structure
+ *     pidlItem    [I] Address of the ITEMIDLIST structure
+ *     uFlags      [I] Flag specifying what type of selection to apply.
+ *
+ * RETURNS
+ *  Returns NOERROR if successful otherwise S_FALSE
+ *
+ * NOTES
+ *   CB: can't use ListView_SetItemState return value: MS's macro doesn't return a value
+ */
 static HRESULT WINAPI IShellView_fnSelectItem(IShellView * iface, LPCITEMIDLIST pidlItem, UINT uFlags)
-{  ICOM_THIS(IShellViewImpl, iface);
+{       ICOM_THIS(IShellViewImpl, iface);
 
-   FIXME("(%p)->(pidl=%p, 0x%08x) stub\n",This, pidlItem, uFlags);
+    LVITEMA lvItem;
+    int iItem=-1;
+    BOOL bIsFound = FALSE;
+    HRESULT hResult = NOERROR;
 
-   return E_NOTIMPL;
+    /* Find the Listview item index */
+    ZeroMemory(&lvItem, sizeof(lvItem));
+    lvItem.mask = LVIF_PARAM;
+    lvItem.iItem = 0;
+    while(ListView_GetItemA(This->hWndList, &lvItem) && !bIsFound)
+    {
+        if(ILIsEqual((LPCITEMIDLIST)lvItem.lParam, pidlItem))
+        {
+            iItem = lvItem.iItem;
+            bIsFound = TRUE;
+        }
+        lvItem.iItem++;
+    }
+
+    if(!bIsFound)
+    {
+        return S_FALSE;
+    }
+
+    /* Perform flag operations */
+    if(SVSI_DESELECT & uFlags)
+    {
+        ListView_SetItemState(This->hWndList,iItem,0,LVIS_SELECTED);
+    }
+
+    if(SVSI_DESELECTOTHERS & uFlags)
+    {
+        int iOtherItems=-1;
+        iOtherItems = ListView_GetNextItem(This->hWndList, iOtherItems, LVNI_ALL);
+        while(iOtherItems != -1)
+        {
+            if(iOtherItems != iItem)
+            {
+                ListView_SetItemState(This->hWndList,iOtherItems,0,LVIS_SELECTED);
+            }
+            iOtherItems = ListView_GetNextItem(This->hWndList, iOtherItems, LVNI_ALL);
+        }
+    }
+
+    if(SVSI_ENSUREVISIBLE & uFlags)
+    {
+        if(ListView_EnsureVisible(This->hWndList, iItem, FALSE) != TRUE)
+        {
+            hResult = S_FALSE;
+        }
+    }
+
+    if(SVSI_FOCUSED  & uFlags)
+    {
+        ListView_SetItemState(This->hWndList,iItem,LVIS_FOCUSED,LVIS_FOCUSED);
+    }
+
+    if(SVSI_SELECT & uFlags)
+    {
+        ListView_SetItemState(This->hWndList,iItem,LVIS_FOCUSED,LVIS_FOCUSED);
+    }
+
+    if(SVSI_EDIT & uFlags)
+    {
+        if(ListView_EditLabelA(This->hWndList, iItem) != 0)
+        {
+            hResult = S_FALSE;
+        }
+    }
+    return NOERROR;
 }
 
 static HRESULT WINAPI IShellView_fnGetItemObject(IShellView * iface, UINT uItem, REFIID riid, LPVOID *ppvOut)

@@ -1,5 +1,8 @@
+/* $Id: cdlg_xx.orc,v 1.2 2000-03-26 16:31:40 cbratschi Exp $*/
 /*
  * Language neutral resources for Common Dialogs
+ *
+ * Corel WINE 20000324 level
  */
 
 #include "winver.h"
@@ -7,33 +10,33 @@
 LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
 
 1 VERSIONINFO
-FILEVERSION	4, 0, 0, 950	/* Maybe 4.1.0.980 for win98?? */
-PRODUCTVERSION	4, 0, 0, 950	/* id. */
-FILEFLAGSMASK	VS_FFI_FILEFLAGSMASK
-FILEOS		VOS_DOS_WINDOWS16
-FILETYPE	VFT_DLL
+FILEVERSION     4, 0, 0, 950    /* Maybe 4.1.0.980 for win98?? */
+PRODUCTVERSION  4, 0, 0, 950    /* id. */
+FILEFLAGSMASK   VS_FFI_FILEFLAGSMASK
+FILEOS          VOS_DOS_WINDOWS16
+FILETYPE        VFT_DLL
 {
-	BLOCK "StringFileInfo"
-	{
-		BLOCK "040604B0"
-		{
-			VALUE "CompanyName", "Wine Developer Team\000"
-			VALUE "FileDescription", "Common Dialog Boxes\000"
-			VALUE "FileVersion", "4.00\000"
-			VALUE "InternalName", "COMDLG32\000"
-			VALUE "LegalCopyright", "Copyright \251 B. A. Stultiens 1998,1999\000"
-			VALUE "OriginalFilename", "COMDLG32.DLL\000"
-			VALUE "ProductName", "Wine\000"
-			VALUE "ProductVersion", "4.00\000"
-		}
-	}
+        BLOCK "StringFileInfo"
+        {
+                BLOCK "040604B0"
+                {
+                        VALUE "CompanyName", "Odin Developer Team\000"
+                        VALUE "FileDescription", "Common Dialog Boxes\000"
+                        VALUE "FileVersion", "4.00\000"
+                        VALUE "InternalName", "COMDLG32\000"
+                        VALUE "LegalCopyright", "Copyright \251 B. A. Stultiens 1998,1999\000"
+                        VALUE "OriginalFilename", "COMDLG32.DLL\000"
+                        VALUE "ProductName", "Odin\000"
+                        VALUE "ProductVersion", "4.00\000"
+                }
+        }
 
-	/* Do we need this? It isn't a translation, but we have all languages at once... */
+        /* Do we need this? It isn't a translation, but we have all languages at once... */
 /*
-	BLOCK "VarFileInfo"
-	{
-		VALUE "Translation", 1030, 1200
-	}
+        BLOCK "VarFileInfo"
+        {
+                VALUE "Translation", 1030, 1200
+        }
 */
 }
 
@@ -179,7 +182,7 @@ PD32_COLLATE ICON DISCARDABLE LOADONCALL
 
 
 /* BINRES pd32_nocollate.ico */
-PD32_NOCOLLATE ICON 
+PD32_NOCOLLATE ICON
 {
  '00 00 01 00 02 00 20 20 10 00 00 00 00 00 E8 02'
  '00 00 26 00 00 00 4C 18 10 00 00 00 00 00 48 05'
@@ -316,3 +319,144 @@ PD32_NOCOLLATE ICON
  'FF FF F0 FF FF FC 3F FF FF FF FF E7 FF FF F9 FF'
  'FF FE 7F F0 00 00'
 }
+
+/******************
+ * Bitmap
+ */
+
+IDB_TOOLBAR 	BITMAP DISCARDABLE
+{'
+42 4d 36 08 00 00 00 00 00 00 36 04 00 00 28 00
+00 00 40 00 00 00 10 00 00 00 01 00 08 00 00 00
+00 00 00 04 00 00 00 00 00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00 00 00 00 00 80 00 00 80
+00 00 00 80 80 00 80 00 00 00 80 00 80 00 80 80
+00 00 c0 c0 c0 00 c0 dc c0 00 f0 ca a6 00 04 04
+04 00 08 08 08 00 0c 0c 0c 00 11 11 11 00 16 16
+16 00 1c 1c 1c 00 22 22 22 00 29 29 29 00 55 55
+55 00 4d 4d 4d 00 42 42 42 00 39 39 39 00 80 7c
+ff 00 50 50 ff 00 93 00 d6 00 ff ec cc 00 c6 d6
+ef 00 d6 e7 e7 00 90 a9 ad 00 00 00 33 00 00 00
+66 00 00 00 99 00 00 00 cc 00 00 33 00 00 00 33
+33 00 00 33 66 00 00 33 99 00 00 33 cc 00 00 33
+ff 00 00 66 00 00 00 66 33 00 00 66 66 00 00 66
+99 00 00 66 cc 00 00 66 ff 00 00 99 00 00 00 99
+33 00 00 99 66 00 00 99 99 00 00 99 cc 00 00 99
+ff 00 00 cc 00 00 00 cc 33 00 00 cc 66 00 00 cc
+99 00 00 cc cc 00 00 cc ff 00 00 ff 66 00 00 ff
+99 00 00 ff cc 00 33 00 00 00 33 00 33 00 33 00
+66 00 33 00 99 00 33 00 cc 00 33 00 ff 00 33 33
+00 00 33 33 33 00 33 33 66 00 33 33 99 00 33 33
+cc 00 33 33 ff 00 33 66 00 00 33 66 33 00 33 66
+66 00 33 66 99 00 33 66 cc 00 33 66 ff 00 33 99
+00 00 33 99 33 00 33 99 66 00 33 99 99 00 33 99
+cc 00 33 99 ff 00 33 cc 00 00 33 cc 33 00 33 cc
+66 00 33 cc 99 00 33 cc cc 00 33 cc ff 00 33 ff
+33 00 33 ff 66 00 33 ff 99 00 33 ff cc 00 33 ff
+ff 00 66 00 00 00 66 00 33 00 66 00 66 00 66 00
+99 00 66 00 cc 00 66 00 ff 00 66 33 00 00 66 33
+33 00 66 33 66 00 66 33 99 00 66 33 cc 00 66 33
+ff 00 66 66 00 00 66 66 33 00 66 66 66 00 66 66
+99 00 66 66 cc 00 66 99 00 00 66 99 33 00 66 99
+66 00 66 99 99 00 66 99 cc 00 66 99 ff 00 66 cc
+00 00 66 cc 33 00 66 cc 99 00 66 cc cc 00 66 cc
+ff 00 66 ff 00 00 66 ff 33 00 66 ff 99 00 66 ff
+cc 00 cc 00 ff 00 ff 00 cc 00 99 99 00 00 99 33
+99 00 99 00 99 00 99 00 cc 00 99 00 00 00 99 33
+33 00 99 00 66 00 99 33 cc 00 99 00 ff 00 99 66
+00 00 99 66 33 00 99 33 66 00 99 66 99 00 99 66
+cc 00 99 33 ff 00 99 99 33 00 99 99 66 00 99 99
+99 00 99 99 cc 00 99 99 ff 00 99 cc 00 00 99 cc
+33 00 66 cc 66 00 99 cc 99 00 99 cc cc 00 99 cc
+ff 00 99 ff 00 00 99 ff 33 00 99 cc 66 00 99 ff
+99 00 99 ff cc 00 99 ff ff 00 cc 00 00 00 99 00
+33 00 cc 00 66 00 cc 00 99 00 cc 00 cc 00 99 33
+00 00 cc 33 33 00 cc 33 66 00 cc 33 99 00 cc 33
+cc 00 cc 33 ff 00 cc 66 00 00 cc 66 33 00 99 66
+66 00 cc 66 99 00 cc 66 cc 00 99 66 ff 00 cc 99
+00 00 cc 99 33 00 cc 99 66 00 cc 99 99 00 cc 99
+cc 00 cc 99 ff 00 cc cc 00 00 cc cc 33 00 cc cc
+66 00 cc cc 99 00 cc cc cc 00 cc cc ff 00 cc ff
+00 00 cc ff 33 00 99 ff 66 00 cc ff 99 00 cc ff
+cc 00 cc ff ff 00 cc 00 33 00 ff 00 66 00 ff 00
+99 00 cc 33 00 00 ff 33 33 00 ff 33 66 00 ff 33
+99 00 ff 33 cc 00 ff 33 ff 00 ff 66 00 00 ff 66
+33 00 cc 66 66 00 ff 66 99 00 ff 66 cc 00 cc 66
+ff 00 ff 99 00 00 ff 99 33 00 ff 99 66 00 ff 99
+99 00 ff 99 cc 00 ff 99 ff 00 ff cc 00 00 ff cc
+33 00 ff cc 66 00 ff cc 99 00 ff cc cc 00 ff cc
+ff 00 ff ff 33 00 cc ff 66 00 ff ff 99 00 ff ff
+cc 00 66 66 ff 00 66 ff 66 00 66 ff ff 00 ff 66
+66 00 ff 66 ff 00 ff ff 66 00 21 00 a5 00 5f 5f
+5f 00 77 77 77 00 86 86 86 00 96 96 96 00 cb cb
+cb 00 b2 b2 b2 00 d7 d7 d7 00 dd dd dd 00 e3 e3
+e3 00 ea ea ea 00 f1 f1 f1 00 f8 f8 f8 00 f0 fb
+ff 00 a4 a0 a0 00 80 80 80 00 00 00 ff 00 00 ff
+00 00 00 ff ff 00 ff 00 00 00 ff 00 ff 00 ff ff
+00 00 ff ff ff 00 fa fa fa fa fa fa fa fa fa fa
+fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+fa fa fa fa fa fa fa fa 92 92 92 92 92 92 92 92
+92 92 92 92 92 fa fa fa 6d 6d 6d 6d 6d 6d 6d 6d
+6d 6d 6d 6d 6d fa fa fa 00 00 00 fa fa fa fa fa
+fa fa fa fa fa fa fa 00 00 fa fa fa fa fa fa fa
+fa fa fa fa fa fa fa 00 00 00 00 00 00 00 00 00
+00 00 00 00 92 fa fa 00 00 00 00 00 00 00 00 00
+00 00 00 00 6d fa fa fa ff ff 00 fa 00 00 00 00
+00 00 fa fa fa fa fa ff 00 fa 00 00 00 00 fa 00
+00 fa 00 00 00 fa fa 00 ff dd dd dd dd d6 d6 d6
+d6 d6 d6 00 92 fa fa 00 ff dd dd dd dd d6 d6 d6
+d6 d6 d6 00 6d fa fa fa ff ff 00 fa 00 00 00 00
+00 00 fa fa fa fa fa ff 00 fa fa fa fa fa fa fa
+fa fa fa fa fa fa fa 00 ff dd dd dd dd dd dd d6
+d6 d6 d6 00 92 fa fa 00 ff dd dd dd dd dd dd d6
+d6 d6 d6 00 6d fa fa fa ff ff 00 fa fa fa fa fa
+fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+fa fa fa fa fa fa fa 00 ff dd dd dd dd dd dd dd
+d6 d6 d6 00 92 fa fa 00 ff dd dd dd dd dd dd dd
+d6 d6 d6 00 6d fa fa fa fa fa fa fa fa fa fa fa
+fa fa fa fa fa fa fa 00 00 fa fa fa fa fa fa fa
+fa fa fa fa fa fa fa 00 ff dd dd dd dd 1f 1f 1f
+d6 d6 d6 00 92 fa fa 00 ff dd dd dd dd dd dd dd
+d6 fb d6 00 6d fa fa fa 00 00 00 fa fa fa fa fa
+fa fa fa fa fa fa fa ff 00 fa 00 00 00 00 fa 00
+00 fa 00 00 00 fa fa 00 ff dd dd dd dd dd dd dd
+1f d6 d6 00 92 fa fa 00 ff dd dd dd dd dd dd dd
+d6 fb d6 00 6d fa fa fa ff ff 00 fa 00 00 00 00
+00 00 fa fa fa fa fa ff 00 fa fa fa fa fa fa fa
+fa fa fa fa fa fa fa 00 ff dd dd dd dd dd dd dd
+dd 1f d6 00 92 fa fa 00 ff dd dd dd dd dd fb dd
+dd fb d6 92 fb fa fa fa ff ff 00 fa 00 00 00 00
+00 00 fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+fa fa fa fa fa fa fa 00 ff ff ff ff ff ff ff ff
+ff 1f c3 00 fa fa fa 00 ff ff ff ff ff ff ff fb
+ff fb c3 fb fa fa fa fa ff ff 00 fa fa fa fa fa
+fa fa fa fa fa fa fa 00 00 fa fa fa fa fa fa fa
+fa fa fa fa fa fa fa 00 d6 d6 d6 d6 d6 d6 d6 00
+00 1f 00 00 fa fa fa 00 d6 d6 d6 d6 d6 d6 d6 92
+fb fb fb 92 92 fa fa fa fa fa fa fa fa fa fa fa
+fa fa fa fa fa fa fa ff 00 fa 00 00 00 00 fa 00
+00 fa 00 00 00 fa fa fa 00 d6 d6 d6 d6 d6 00 fa
+fa 1f fa fa fa fa fa fa 00 d6 d6 d6 d6 fb fb fb
+fb fb fb fb fb fb fa fa 00 00 00 fa fa fa fa fa
+fa fa fa fa fa fa fa ff 00 fa fa fa fa fa fa fa
+fa fa fa fa fa fa fa fa fa 00 00 00 00 00 fa fa
+fa 1f fa fa fa fa fa fa fa 00 00 00 00 00 fa 92
+fb fb fb 92 fa fa fa fa ff ff 00 fa 00 00 00 00
+00 00 fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa 1f
+1f 1f 1f 1f fa fa fa fa fa fa fa fa fa fa ff fb
+fa fb fa fb 92 fa fa fa ff ff 00 fa 00 00 00 00
+00 00 fa fa fa fa 92 92 92 92 92 92 92 92 92 92
+92 92 92 92 92 92 fa fa fa fa fa fa fa fa fa fa
+1f 1f 1f fa fa fa fa fa fa fa fa fa fa fa fb fa
+fa fb fa fa fb fa fa fa ff ff 00 fa fa fa fa fa
+fa fa fa fa fa fa 92 ff ff 92 ff ff ff ff 92 ff
+ff 92 ff ff ff 92 fa fa fa fa fa fa fa fa fa fa
+fa 1f fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+fa fb fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+fa fa fa fa fa fa 92 92 92 92 92 92 92 92 92 92
+92 92 92 92 92 92
+'}
+

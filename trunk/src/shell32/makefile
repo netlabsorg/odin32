@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.22 2000-03-06 23:38:57 bird Exp $
+# $Id: makefile,v 1.23 2000-03-26 16:34:41 cbratschi Exp $
 
 #
 # Odin32 API
@@ -51,6 +51,7 @@ $(OBJDIR)\misc.obj \
 $(OBJDIR)\she.obj \
 $(OBJDIR)\sh.obj \
 $(OBJDIR)\shpolicy.obj \
+$(OBJDIR)\systray.obj \
 $(OBJDIR)\shres.obj
 
 

@@ -1,4 +1,4 @@
-/* $Id: memorystream.cpp,v 1.3 1999-10-22 12:18:46 phaller Exp $ */
+/* $Id: memorystream.cpp,v 1.4 2000-03-26 16:34:42 cbratschi Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -14,6 +14,8 @@
  * needs to be able to load lnk's from a IStream
  * interface so it was obvious to capsule the file
  * access in a IStream to.
+ *
+ * Corel WINE 20000324 level
  */
 
 

@@ -1,4 +1,4 @@
-/* $Id: shellole.cpp,v 1.3 1999-10-19 10:23:27 phaller Exp $ */
+/* $Id: shellole.cpp,v 1.4 2000-03-26 16:34:51 cbratschi Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -11,6 +11,7 @@
  * Copyright 1997 Marcus Meissner
  * Copyright 1998 Juergen Schmied  <juergen.schmied@metronet.de>
  *
+ * Corel WINE 20000324 level
  */
 
 
@@ -55,6 +56,13 @@ ODINDEBUGCHANNEL(SHELL32-SHELLOLE)
 
 
 DWORD WINAPI SHCLSIDFromStringA (LPSTR clsid, CLSID *id);
+extern IShellFolder * IShellFolder_Constructor(
+	IShellFolder * psf,
+	LPITEMIDLIST pidl);
+extern HRESULT IFSFolder_Constructor(
+	IUnknown * pUnkOuter,
+	REFIID riid,
+	LPVOID * ppv);
 
 /*************************************************************************
  * SHCoCreateInstance [SHELL32.102]
@@ -69,7 +77,7 @@ ODINFUNCTION5(LRESULT, SHCoCreateInstance, LPSTR,     aclsid,
                                            REFIID,    refiid,
                                            LPVOID*,   ppv)
 {
-   char  xclsid[48], xiid[48], xuout[48];
+   char  xclsid[48], xiid[48];
    DWORD hres;
    IID   iid;
    CLSID * myclsid = (CLSID*)clsid;
@@ -85,23 +93,29 @@ ODINFUNCTION5(LRESULT, SHCoCreateInstance, LPSTR,     aclsid,
 
    WINE_StringFromCLSID(myclsid,xclsid);
    WINE_StringFromCLSID(refiid,xiid);
-   if (unknownouter)
-      WINE_StringFromCLSID((const CLSID*)unknownouter,xuout);
 
-   dprintf(("SHELL32:SHCoCreateInstance (%p,CLSID:%s UOUT:%s IID:%s,%p)\n",
+   dprintf(("SHELL32:SHCoCreateInstance (%p,CLSID:%s unk:%s IID:%s,%p)\n",
             aclsid,
             xclsid,
-            unknownouter?xuout:"nil",xiid,ppv));
+            unknownouter,xiid,ppv));
 
-   hres = CoCreateInstance(myclsid, NULL, CLSCTX_INPROC_SERVER, refiid, ppv);
+   if IsEqualCLSID(myclsid, &CLSID_ShellFSFolder)
+   {
+     hres = IFSFolder_Constructor(unknownouter, refiid, ppv);
+   }
+   else
+   {
+     hres = CoCreateInstance(myclsid, unknownouter, CLSCTX_INPROC_SERVER, refiid, ppv);
+   }
 
    if(hres!=S_OK)
    {
-     dprintf(("SHELL32:SHCoCreateInstance failed (0x%08lx) to create CLSID:%s IID:%s\n",
+     dprintf(("SHELL32: SHCoCreateInstance failed (0x%08lx) to create CLSID:%s IID:%s\n",
               hres,
               xclsid,
               xiid));
-     dprintf(("SHELL32:SHCoCreateInstance you might need to import the winedefault.reg\n"));
+     dprintf(("SHELL32: SHCoCreateInstance: class not found in registry\n"));
+     dprintf(("SHELL32: SHCoCreateInstance you might need to import the winedefault.reg\n"));
    }
 
    return hres;
@@ -127,11 +141,6 @@ ODINFUNCTION3(HRESULT, SHELL32_DllGetClassObject, REFCLSID, rclsid,
 
    *ppv = NULL;
 
-   if(IsEqualCLSID(rclsid, &CLSID_PaperBin))
-   {
-     dprintf(("SHELL32:SHELL32_DllGetClassObject paper bin not implemented\n"));
-     return CLASS_E_CLASSNOTAVAILABLE;
-   }
    if(IsEqualCLSID(rclsid, &CLSID_ShellDesktop)||
       IsEqualCLSID(rclsid, &CLSID_ShellLink))
    {

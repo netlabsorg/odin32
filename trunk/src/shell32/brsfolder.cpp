@@ -1,4 +1,4 @@
-/* $Id: brsfolder.cpp,v 1.3 2000-03-21 17:33:21 cbratschi Exp $ */
+/* $Id: brsfolder.cpp,v 1.4 2000-03-26 16:34:38 cbratschi Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -7,6 +7,7 @@
  * Copyright 1999 Patrick Haller (haller@zebra.fh-weingarten.de)
  * Project Odin Software License can be found in LICENSE.TXT
  *
+ * Corel WINE 20000324 level
  */
 
 
@@ -54,6 +55,8 @@
 
 ODINDEBUGCHANNEL(shell32-brsfolder)
 
+#define		BRS_SPACE    40
+#define		BRS_MARGIN    6
 #define         IDD_TREEVIEW 99
 
 static HWND             hwndTreeView;
@@ -281,6 +284,45 @@ static LRESULT MsgNotify(HWND hWnd,  UINT CtlID, LPNMHDR lpnmh)
         return 0;
 }
 
+/*************************************************************************
+ *     ResizeControls (temporary solution and will be removed
+ *                    if a horizontal scroll bar added to a tree control)
+ */
+
+void ResizeConrols(HWND hWnd, int Cx, int Cy)
+{
+	POINT pt;
+	HWND  hBtn;
+	RECT  rcCtl;
+
+	// Move the treeView control
+	if(hwndTreeView)
+	{
+		GetWindowRect(hwndTreeView, &rcCtl);
+		pt.y = rcCtl.top;
+		pt.x = rcCtl.left;
+		ScreenToClient(hWnd, &pt);
+		MoveWindow(hwndTreeView, pt.x, pt.y, Cx - pt.x - BRS_MARGIN, Cy - BRS_SPACE, TRUE);
+	}
+	
+	// Move the OK button
+	hBtn = GetDlgItem(hWnd, IDOK);
+	if(hBtn)
+	{
+		GetWindowRect(hBtn, &rcCtl);
+		pt.y = Cy - (BRS_MARGIN + (rcCtl.bottom - rcCtl.top));
+		pt.x = Cx - 2 * (2 * BRS_MARGIN + (rcCtl.right - rcCtl.left));
+		MoveWindow(hBtn, pt.x, pt.y, rcCtl.right - rcCtl.left, rcCtl.bottom - rcCtl.top, TRUE);
+	}
+
+	// MOve the cancel button
+	hBtn = GetDlgItem(hWnd, IDCANCEL);
+	if(hBtn)
+	{
+		pt.x = Cx - (2 * BRS_MARGIN + (rcCtl.right - rcCtl.left));
+		MoveWindow(hBtn, pt.x, pt.y, rcCtl.right - rcCtl.left, rcCtl.bottom - rcCtl.top, TRUE);
+	}
+}
 
 /*************************************************************************
  *             BrsFolderDlgProc32  (not an exported API function)
@@ -304,7 +346,17 @@ ODINFUNCTION4(BOOL, BrsFolderDlgProc, HWND,   hWnd,
               FIXME("root is desktop\n");
 
             InitializeTreeView ( hWnd);
+	    {
+	      RECT rcDlg;
+
+	      GetClientRect(hWnd, &rcDlg);
+	      ResizeConrols(hWnd, rcDlg.right, rcDlg.bottom);
+	    }
             return 1;
+
+	  case WM_SIZE:
+	    ResizeConrols(hWnd, LOWORD(lParam), HIWORD(lParam));
+	    break;
 
           case WM_NOTIFY:
             MsgNotify( hWnd, (UINT)wParam, (LPNMHDR)lParam);

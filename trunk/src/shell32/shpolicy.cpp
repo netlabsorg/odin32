@@ -1,4 +1,4 @@
-/* $Id: shpolicy.cpp,v 1.1 1999-11-02 19:17:16 phaller Exp $ */
+/* $Id: shpolicy.cpp,v 1.2 2000-03-26 16:34:55 cbratschi Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -18,6 +18,8 @@
  * this file...
  *
  * Up to date as of SHELL32 v4.72 (Win98, Win95 with MSIE 5)
+ *
+ * Corel WINE 20000324 level
  */
 
 
