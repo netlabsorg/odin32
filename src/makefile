@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.29 1999-10-28 19:54:06 achimha Exp $
+# $Id: makefile,v 1.30 1999-11-02 20:54:12 phaller Exp $
 
 #
 # PD-Win32 API
@@ -99,6 +99,8 @@ all:
         $(MAKE_CMD)
         cd ..\wnaspi32
         $(MAKE_CMD)
+        cd ..\shlwapi
+        $(MAKE_CMD)
         cd ..\dsound
         $(MAKE_CMD)
 
@@ -178,4 +180,6 @@ clean:
         cd ..\dplay
         $(MAKE_CMD) clean
         cd ..\wnaspi32
+        $(MAKE_CMD) clean
+        cd ..\shlwapi
         $(MAKE_CMD) clean
