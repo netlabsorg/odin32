@@ -1,4 +1,4 @@
-; $Id: user32dbg.def,v 1.4 2002-03-08 11:09:15 sandervl Exp $
+; $Id: user32dbg.def,v 1.5 2002-04-30 14:54:06 sandervl Exp $
 
 LIBRARY USER32 INITINSTANCE TERMINSTANCE
 DESCRIPTION 'Odin32 System Dll - User32'
@@ -676,15 +676,12 @@ EXPORTS
     _Win32ToOS2Handle@4                                          @2006 NONAME
     _OS2ToWin32Handle@4                                          @2012 NONAME
 
-    _MOUSE_Enable@4                                              @2007 NONAME
 ;;    _KeyTranslatePMToWin@4                                       @2008 NONAME
     _KeyTranslatePMToWinBuf@12                                   @2009 NONAME
 
     _wvsnprintfA@16                                              @2010 NONAME
 ;Export for MSACM32
     _wsnprintfA                                                  @2100 NONAME
-
-    _KEYBOARD_Enable@4                                           @2011 NONAME
 
     ;SvL: Used by GDI32
     OSLibGetScreenHeight__Fv                                     @2013 NONAME

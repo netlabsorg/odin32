@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.84 2002-03-28 11:25:59 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.85 2002-04-30 14:54:06 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -36,6 +36,7 @@
 #include <pmscan.h>
 #include <winscan.h>
 #include <winkeyboard.h>
+#include "hook.h"
 
 #define DBG_LOCALLOG    DBG_oslibmsgtranslate
 #include "dbglocal.h"
@@ -340,12 +341,6 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
             winMsg->lParam  = MAKELONG(ClientPoint.x, ClientPoint.y); //client coordinates
         }
         EnableLogging();
-        if((fMsgRemoved == MSG_REMOVE) && ISMOUSE_CAPTURED())
-        {
-            if(DInputMouseHandler(win32wnd->getWindowHandle(), winMsg->message, winMsg->pt.x, winMsg->pt.y)) {
-                goto dummymessage; //dinput swallowed message
-            }
-        }
 
         if(fWasDisabled) {
             if(win32wnd) {
@@ -384,6 +379,21 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
         }
         EnableLogging();
 
+        if(fMsgRemoved == MSG_REMOVE)
+        {
+            MSLLHOOKSTRUCT hook;
+
+            hook.pt.x        = os2Msg->ptl.x & 0xFFFF;
+            hook.pt.y        = mapScreenY(os2Msg->ptl.y);
+            hook.mouseData   = 0;  //todo: XBUTTON1/2 (XP feature) or wheel data
+            hook.flags       = 0;  //todo: injected (LLMHF_INJECTED)
+            hook.time        = winMsg->time;
+            hook.dwExtraInfo = 0;
+
+            if(HOOK_CallHooksW( WH_MOUSE_LL, HC_ACTION, winMsg->message, (LPARAM)&hook)) {
+                goto dummymessage; //hook swallowed message
+            }
+        }
         break;
     }
 
@@ -452,26 +462,34 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
             winMsg->lParam  = MAKELONG(ClientPoint.x, ClientPoint.y); //client coordinates
         }
         EnableLogging();
-        if((fMsgRemoved == MSG_REMOVE) && ISMOUSE_CAPTURED())
-        {
-            if(DInputMouseHandler(win32wnd->getWindowHandle(), winMsg->message, winMsg->pt.x, winMsg->pt.y)) {
-                goto dummymessage; //dinput swallowed message
+        if(fWasDisabled) {
+            if(win32wnd) {
+                winMsg->hwnd = win32wnd->getWindowHandle();
+            }
+            else {
+                goto dummymessage; //don't send mouse messages to disabled windows
             }
         }
-        if(fWasDisabled) {
-                if(win32wnd) {
-                    winMsg->hwnd = win32wnd->getWindowHandle();
-                }
-                else {
-                    goto dummymessage; //don't send mouse messages to disabled windows
-                }
+        if(fMsgRemoved == MSG_REMOVE)
+        {
+            MSLLHOOKSTRUCT hook;
+
+            hook.pt.x        = os2Msg->ptl.x & 0xFFFF;
+            hook.pt.y        = mapScreenY(os2Msg->ptl.y);
+            hook.mouseData   = 0;
+            hook.flags       = 0;  //todo: injected (LLMHF_INJECTED)
+            hook.time        = winMsg->time;
+            hook.dwExtraInfo = 0;
+
+            if(HOOK_CallHooksW( WH_MOUSE_LL, HC_ACTION, winMsg->message, (LPARAM)&hook)) {
+                goto dummymessage; //hook swallowed message
+            }
         }
-        //OS/2 Window coordinates -> Win32 Window coordinates
         break;
     }
 
     case WM_CONTROL:
-      goto dummymessage;
+        goto dummymessage;
 
     case WM_COMMAND:
         if(SHORT1FROMMP(os2Msg->mp2) == CMDSRC_MENU) {
@@ -739,13 +757,6 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
             // if the current window has keyboard focus
             winMsg->lParam |= WIN_KEY_ALTHELD;
           }
-        }
-
-        if (ISKDB_CAPTURED())
-        {
-            if (DInputKeyBoardHandler(winMsg)) {
-                goto dummymessage; //dinput swallowed message
-            }
         }
 
 #ifdef ALTGR_HACK
