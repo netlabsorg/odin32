@@ -70,7 +70,7 @@ all: $(PDWIN32_LIB)\pmwinx.lib $(TARGET).dll $(TARGET).LIB
 
 
 $(TARGET).dll: $(OBJS) $(TARGET).def
-        $(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) $(TARGET).def $(PDWIN32_LIB)\PMWINX.LIB LIBULS.LIB LIBCONV.LIB
+        $(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) $(TARGET).def $(PDWIN32_LIB)\PMWINX.LIB $(PDWIN32_LIB)\LIBULS.LIB $(PDWIN32_LIB)\LIBCONV.LIB
         rc -r console.rc console.res
         rc console.res $@
         $(CP) $@ $(PDWIN32_BIN)
