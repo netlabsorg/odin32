@@ -1,4 +1,4 @@
-/* $Id: heapstring.h,v 1.5 1999-09-18 15:55:45 sandervl Exp $ */
+/* $Id: heapstring.h,v 1.6 1999-10-04 20:51:52 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -22,6 +22,8 @@ int    WIN32API lstrcmpW       (LPCWSTR arg1, LPCWSTR arg2);
 int    WIN32API lstrncmpA      (LPCSTR arg1, LPCSTR  arg2, int i);
 int    WIN32API lstrncmpW      (LPCWSTR arg1, LPCWSTR arg2, int i);
 int    WIN32API lstrncmpiA     (LPCSTR arg1, LPCSTR  arg2, int i);
+int    WIN32API lstrncmpiW     (LPCWSTR arg1, LPCWSTR arg2, int i);
+#define lstrcmpniW lstrncmpiW
 LPSTR  WIN32API lstrcpyA       (LPSTR arg1, LPCSTR  arg2);
 LPWSTR WIN32API lstrcpyW       (LPWSTR dest, LPCWSTR src);
 LPSTR  WIN32API lstrcpynA      (LPSTR arg1, LPCSTR  arg2, int arg3);
