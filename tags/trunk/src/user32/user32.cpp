@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.81 2000-05-09 18:56:57 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.82 2000-05-28 19:50:54 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -1327,6 +1327,14 @@ HKL WIN32API LoadKeyboardLayoutW(LPCWSTR pwszKLID,
 UINT WIN32API MapVirtualKeyA( UINT uCode, UINT  uMapType)
 {
     dprintf(("USER32:  MapVirtualKeyA\n"));
+    /* A quick fix for Commandos, very incomplete */
+    switch (uMapType) {
+    case 2:
+      if (uCode >= VK_A && uCode <= VK_Z) {
+         return 'A' + uCode - VK_A;
+      }
+      break;
+    }
     return O32_MapVirtualKey(uCode,uMapType);
 }
 //******************************************************************************
