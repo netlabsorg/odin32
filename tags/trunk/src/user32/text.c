@@ -21,6 +21,10 @@
 #define CACHE_GetPattern55AABrush GetPattern55AABrush
 
 #define MapSL(a)	a
+
+#define DBG_LOCALLOG    DBG_text
+#include "dbglocal.h"
+
 #endif
 
 DEFAULT_DEBUG_CHANNEL(text);
