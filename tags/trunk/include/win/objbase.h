@@ -1,4 +1,4 @@
-/* $Id: objbase.h,v 1.2 1999-09-21 18:48:06 davidr Exp $ */
+/* $Id: objbase.h,v 1.3 2002-02-15 17:16:25 sandervl Exp $ */
 
 #ifndef __WINE_OBJBASE_H
 #define __WINE_OBJBASE_H
@@ -23,7 +23,7 @@
 
 #include "wine/obj_dragdrop.h"
 
-HRESULT WINAPI GetClassFile(LPOLESTR filePathName,CLSID *pclsid);
+HRESULT WINAPI GetClassFile(LPCOLESTR filePathName,CLSID *pclsid);
 
 
 /*    These macros are msdev's way of defining COM objects. They are provided 
