@@ -1,4 +1,4 @@
-/* $Id: log.h,v 1.5 2000-09-02 21:08:02 bird Exp $
+/* $Id: log.h,v 1.6 2001-07-08 03:01:09 bird Exp $
  *
  * log - C-style logging - kprintf.
  * Dual mode, RING0 and RING3.
@@ -42,7 +42,11 @@ extern "C" {
         /* 32-bit */
         #include <stdarg.h>
         #include "vprintf.h"
-        #define kprintf(a)          printf a
+        #ifdef __cplusplus
+            #define kprintf(a)      ::printf a
+        #else
+            #define kprintf(a)      printf a
+        #endif
     #endif
 #else
     #define kprintf(a)              ((void)0)
