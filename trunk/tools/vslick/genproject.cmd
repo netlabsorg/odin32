@@ -1,4 +1,4 @@
-/* $Id: genproject.cmd,v 1.2 2000-04-21 22:39:32 bird Exp $
+/* $Id: genproject.cmd,v 1.3 2000-05-19 21:22:49 bird Exp $
  *
  * This script generates a Visual Slick project of the source and include
  * files found in the directory tree starting at the current directory.
@@ -86,7 +86,7 @@
     /* open target file */
     if (stream(sProjFile, 'c', 'open write' ) <> '') then do
         call lineout sProjFile, '[COMPILER]'
-        call lineout sProjFile, 'MACRO=odin32_maketagfile();\n'
+        call lineout sProjFile, 'MACRO=odin32_maketagfile();\n odin32_setcurrentdir();\n'
         call lineout sProjFile, 'FILTEREXPANSION=1 1 0 0 1'
         call lineout sProjFile, 'compile=concur|capture|clear|:Compile:&Compile,nmake %n.obj'
         call lineout sProjFile, 'make=concur|capture|clear|:Build:&Build,nmake'
