@@ -1,4 +1,4 @@
-# $Id: process.mak,v 1.3 2002-04-13 04:39:59 bird Exp $
+# $Id: process.mak,v 1.4 2002-04-15 23:14:17 bird Exp $
 
 #
 # Unix-like tools for OS/2
@@ -464,7 +464,7 @@ install:
 # The testcase rule - Execute testcases when present.
 #   Testcases are either a testcase.mak file or a testcase subdirectory.
 # -----------------------------------------------------------------------------
-!ifndef BUILD_NO_TESTCASE
+!ifndef BUILD_OWN_TESTCASE_RULE
 testcase: install
 !if [$(TOOL_EXISTS) testcase] == 0
     @$(TOOL_DODIRS) "testcase" $(TOOL_MAKE) $@

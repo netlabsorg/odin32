@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.26 2002-04-07 22:40:15 bird Exp $
+# $Id: Makefile,v 1.27 2002-04-15 23:13:26 bird Exp $
 
 #
 # kKrnlLib main file.
@@ -21,7 +21,7 @@ TARGET_MODE = EMPTY
 TARGET_NAME = kKrnlLib_empty
 SUBDIRS     = tools include
 PREMAKEFILES= kKrnlLib.mak kKrnlLibR3Tst.mak
-BUILD_NO_TESTCASE = 1
+BUILD_OWN_TESTCASE_RULE = 1
 
 
 
