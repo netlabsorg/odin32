@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.934 2000-05-12 18:07:04 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.935 2000-05-12 19:13:58 sandervl Exp $ */
 
  2000-05-12: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   
@@ -9,6 +9,10 @@
                 Fixed initial directory for GetOpen/SaveFileNameW
                 If initial dir string == "" -> use current dir (not only
                 when ptr equals NULL)
+    - GDI32:    
+                Do manual image flip in dib section blit (fixes wrong position
+                of Palm Emulator bitmap)
+                Might also fix reversed video in RealPlayer 7 (Warp 4 FP13/WSeB FP1)
 
  2000-05-10: Christoph Bratschi <cbratschi@datacomm.ch>
     - COMCTL32: Fixed treeview item height bug (reported by Markus Montkowski)
