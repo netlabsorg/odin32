@@ -28,9 +28,9 @@ typedef struct
     DWORD                  ref;
 } IUnknownImpl;
 
-static ULONG WINAPI IUnknown_fnAddRef(LPUNKNOWN iface);
-static ULONG WINAPI IUnknown_fnRelease(LPUNKNOWN iface);
-static HRESULT WINAPI IUnknown_fnQueryInterface(LPUNKNOWN iface, REFIID refiid, LPVOID * obj);
+static ULONG WIN32API IUnknown_fnAddRef(LPUNKNOWN iface);
+static ULONG WIN32API IUnknown_fnRelease(LPUNKNOWN iface);
+static HRESULT WIN32API IUnknown_fnQueryInterface(LPUNKNOWN iface, REFIID refiid, LPVOID * obj);
 
 static ICOM_VTABLE(IUnknown) uvt = 
 {
@@ -46,7 +46,7 @@ static ICOM_VTABLE(IUnknown) uvt =
 // ----------------------------------------------------------------------
 // IUnknown_fnAddRef
 // ----------------------------------------------------------------------
-static ULONG WINAPI IUnknown_fnAddRef(LPUNKNOWN iface)
+static ULONG WIN32API IUnknown_fnAddRef(LPUNKNOWN iface)
 { 
     ICOM_THIS(IUnknownImpl, iface);
 
@@ -58,7 +58,7 @@ static ULONG WINAPI IUnknown_fnAddRef(LPUNKNOWN iface)
 // ----------------------------------------------------------------------
 // IUnknown_fnRelease
 // ----------------------------------------------------------------------
-static ULONG WINAPI IUnknown_fnRelease(LPUNKNOWN iface)
+static ULONG WIN32API IUnknown_fnRelease(LPUNKNOWN iface)
 {
     ICOM_THIS(IUnknownImpl, iface);
 
@@ -75,7 +75,7 @@ static ULONG WINAPI IUnknown_fnRelease(LPUNKNOWN iface)
 // ----------------------------------------------------------------------
 // Initialize
 // ----------------------------------------------------------------------
-static HRESULT WINAPI IUnknown_fnQueryInterface(LPUNKNOWN iface, REFIID refiid, LPVOID *obj)
+static HRESULT WIN32API IUnknown_fnQueryInterface(LPUNKNOWN iface, REFIID refiid, LPVOID *obj)
 {
     ICOM_THIS(IUnknownImpl, iface);
 

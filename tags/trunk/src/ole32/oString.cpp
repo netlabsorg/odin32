@@ -95,7 +95,7 @@ oStringA::oStringA( void) : oStringBase(sizeof(char))
 }
 
 // Initialise to a specified length...
-oStringA::oStringA(int defLen)   : oStringBase(sizeof(char))
+oStringA::oStringA(int defLen, int fill)   : oStringBase(sizeof(char))
 {
     getBuf( defLen + 1);
 }
@@ -135,6 +135,30 @@ oStringA::oStringA( REFCLSID pClsId)  : oStringBase(sizeof(char))
 
     // Assign string...
     operator=(pClsId);
+}
+
+oStringA::oStringA(const ULONG val)  : oStringBase(sizeof(char))
+{
+    getBuf( 30);	// Incl. terminator...
+    m_strLen = sprintf(m_strBuf, "%lu", val);
+}
+
+oStringA::oStringA(const LONG val)  : oStringBase(sizeof(char))
+{
+    getBuf( 30);	// Incl. terminator...
+    m_strLen = sprintf(m_strBuf, "%ld", val);
+}
+
+oStringA::oStringA(const USHORT val)  : oStringBase(sizeof(char))
+{
+    getBuf( 30);	// Incl. terminator...
+    m_strLen = sprintf(m_strBuf, "%u", val);
+}
+
+oStringA::oStringA(const SHORT val)  : oStringBase(sizeof(char))
+{
+    getBuf( 30);	// Incl. terminator...
+    m_strLen = sprintf(m_strBuf, "%d", val);
 }
 
 // Return pointer to string...
@@ -192,18 +216,9 @@ oStringA oStringA::operator =  (REFCLSID rClsId)
 
     // Setup new string...
     getBuf( 50);
-    m_strLen  = sprintf(m_strBuf, "{%08X-%04X-%04X-%02X%02X-%02X%02X%02X%02X%02X%02X}",
-	    rClsId->Data1,
-	    rClsId->Data2,
-	    rClsId->Data3,
-	    rClsId->Data4[0],
-	    rClsId->Data4[1],
-	    rClsId->Data4[2],
-	    rClsId->Data4[3],
-	    rClsId->Data4[4],
-	    rClsId->Data4[5],
-	    rClsId->Data4[6],
-	    rClsId->Data4[7]);
+    WINE_StringFromCLSID(rClsId, m_strBuf);
+    m_strLen  = strlen(m_strBuf);
+
     return *this;
 }
 
@@ -211,7 +226,7 @@ oStringA oStringA::operator =  (REFCLSID rClsId)
 oStringA oStringA::operator +  (const oStringA & string)
 {
     // two terminators to account for...
-    oStringA	product(m_strLen + string.m_strLen - 1);
+    oStringA	product(m_strLen + string.m_strLen - 1, 1);
 
     memcpy(product.m_strBuf, m_strBuf, m_strLen);
     strcpy(product.m_strBuf + m_strLen - 1, string.m_strBuf);
@@ -225,7 +240,7 @@ oStringA oStringA::operator +  (LPCSTR pAscii)
 {
     long	strLen = m_strLen + strlen(pAscii);
 
-    oStringA	product(strLen);
+    oStringA	product(strLen, 1);
 
     memcpy(product.m_strBuf, m_strBuf, m_strLen);
     strcpy(product.m_strBuf + m_strLen - 1, pAscii);
@@ -239,7 +254,7 @@ oStringA oStringA::operator +  (LPCWSTR pUnicode)
 {
     long	strLen = m_strLen + lstrlenW(pUnicode);
 
-    oStringA	product(strLen);
+    oStringA	product(strLen, 1);
 
     memcpy(product.m_strBuf, m_strBuf, m_strLen);
     UnicodeToAscii((LPWSTR)pUnicode, product.m_strBuf + m_strLen - 1);
@@ -296,7 +311,7 @@ oStringW::oStringW( void) : oStringBase(sizeof(WCHAR))
 }
 
 // Initialise to a specified length...
-oStringW::oStringW(int defLen) : oStringBase(sizeof(WCHAR))
+oStringW::oStringW(int defLen, int fill) : oStringBase(sizeof(WCHAR))
 {
     getBuf( defLen + 1);
 }
@@ -418,18 +433,8 @@ oStringW oStringW::operator =  (REFCLSID rClsId)
 
     // Setup new string...
     getBuf( 50);
-    m_strLen  = sprintf(tmp, "{%08X-%04X-%04X-%02X%02X-%02X%02X%02X%02X%02X%02X}",
-	    rClsId->Data1,
-	    rClsId->Data2,
-	    rClsId->Data3,
-	    rClsId->Data4[0],
-	    rClsId->Data4[1],
-	    rClsId->Data4[2],
-	    rClsId->Data4[3],
-	    rClsId->Data4[4],
-	    rClsId->Data4[5],
-	    rClsId->Data4[6],
-	    rClsId->Data4[7]);
+    WINE_StringFromCLSID(rClsId, tmp);
+    m_strLen  = strlen(tmp);
     AsciiToUnicode(tmp, (LPWSTR)m_strBuf);
     return *this;
 }
@@ -438,7 +443,7 @@ oStringW oStringW::operator =  (REFCLSID rClsId)
 oStringW oStringW::operator +  (const oStringW & string)
 {
     // two terminators to account for...
-    oStringW	product(m_strLen + string.m_strLen - 1);
+    oStringW	product(m_strLen + string.m_strLen - 1, 1);
 
     lstrcpyW((LPWSTR)product.m_strBuf, (LPWSTR)m_strBuf);
     lstrcpyW((LPWSTR)product.m_strBuf + m_strLen - 1, (LPWSTR)string.m_strBuf);
@@ -452,7 +457,7 @@ oStringW oStringW::operator +  (LPCSTR pAscii)
 {
     long	strLen = m_strLen + strlen(pAscii);
 
-    oStringW	product(strLen);
+    oStringW	product(strLen, 1);
 
     lstrcpyW((LPWSTR)product.m_strBuf, (LPWSTR)m_strBuf);
     AsciiToUnicode((char *)pAscii, (LPWSTR)product.m_strBuf + m_strLen - 1);
@@ -466,7 +471,7 @@ oStringW oStringW::operator +  (LPCWSTR pUnicode)
 {
     long	strLen = m_strLen + lstrlenW(pUnicode);
 
-    oStringW	product(strLen);
+    oStringW	product(strLen, 1);
 
     lstrcpyW((LPWSTR)product.m_strBuf, (LPWSTR)m_strBuf);
     lstrcpyW((LPWSTR)product.m_strBuf + m_strLen - 1, (LPWSTR)pUnicode);
@@ -480,7 +485,7 @@ oStringW oStringW::operator +  (const wchar_t * pUnicode)
 {
     long	strLen = m_strLen + lstrlenW((LPWSTR)pUnicode);
 
-    oStringW	product(strLen);
+    oStringW	product(strLen, 1);
 
     lstrcpyW((LPWSTR)product.m_strBuf, (LPWSTR)m_strBuf);
     lstrcpyW((LPWSTR)product.m_strBuf + m_strLen - 1, (LPWSTR)pUnicode);

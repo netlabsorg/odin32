@@ -33,6 +33,7 @@
 #include <os2win.h>
 #include <ole2ver.h>
 #include <ole.h>
+#include <ole2.h>
 #include <winreg.h>
 
 #include "wine/obj_base.h"
