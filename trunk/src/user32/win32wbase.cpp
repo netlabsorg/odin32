@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.311 2002-01-12 14:09:31 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.312 2002-01-20 15:26:21 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -146,7 +146,7 @@ Win32BaseWindow::Win32BaseWindow(HWND hwndOS2, ATOM classAtom)
     //We pretend this window has no parent and won't change size
     //(dangerous assumption!!)
     OSLibWinQueryWindowClientRect(OS2Hwnd, &rectClient);
-    rectWindow = rectClient;
+    OSLibQueryWindowRectAbsolute (OS2Hwnd, &rectWindow);
 
     fFakeWindow = TRUE;
 }
