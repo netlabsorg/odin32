@@ -1,4 +1,4 @@
-/* $Id: windef.h,v 1.15 1999-10-11 20:15:48 sandervl Exp $ */
+/* $Id: windef.h,v 1.16 1999-11-30 19:38:23 sandervl Exp $ */
 
 /*
  * Basic types definitions
@@ -62,6 +62,7 @@ extern "C" {
 
 /* Calling conventions definitions */
 
+#ifndef __WIN32OS2__
 #ifdef __i386__
 # if defined(__GNUC__) && (__GNUC__ == 2) && (__GNUC_MINOR__ >= 7)
 #  define __stdcall __attribute__((__stdcall__))
@@ -71,12 +72,11 @@ extern "C" {
 #  error You need gcc >= 2.7 to build Wine on a 386
 # endif  /* __GNUC__ */
 #else  /* __i386__ */
-#ifndef __WIN32OS2__
 # define __stdcall
 # define __cdecl
 # define __RESTORE_ES
-#endif
 #endif  /* __i386__ */
+#endif
 
 
 /* define needed macros as required */
@@ -182,8 +182,8 @@ typedef double          DATE;
 typedef long            LONG_PTR;
 typedef unsigned long   ULONG_PTR;
 typedef double          DOUBLE;
-typedef double          LONGLONG_W;
-typedef double          ULONGLONG_W;
+typedef double          LONGLONG;
+typedef double          ULONGLONG;
 
 /* FIXME: Wine does not compile with strict on, therefore strict
  * handles are presently only usable on machines where sizeof(UINT) ==
@@ -657,7 +657,7 @@ typedef struct tagDEC
           ULONG Lo32;
           ULONG Mid32;
       } c;
-      ULONGLONG_W Lo64;
+      ULONGLONG Lo64;
     } d;
 } DECIMAL;
 
