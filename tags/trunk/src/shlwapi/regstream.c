@@ -1,9 +1,23 @@
 /*
  *	SHRegOpenStream
+ *
+ * Copyright 1999 Juergen Schmied
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
-#ifdef __WIN32OS2__
-#define SHLWAPI_STREAM
-#endif
+
 #include <string.h>
 
 #include "winerror.h"
@@ -11,11 +25,11 @@
 #include "winreg.h"
 #include "shlobj.h"
 
-#include "debugtools.h"
+#include "wine/debug.h"
 
-DEFAULT_DEBUG_CHANNEL(shell);
+WINE_DEFAULT_DEBUG_CHANNEL(shell);
 
-typedef struct 
+typedef struct
 {	ICOM_VFIELD(IStream);
 	DWORD		ref;
 	HKEY		hKey;
@@ -33,7 +47,7 @@ static IStream *IStream_ConstructorA(HKEY hKey, LPCSTR pszSubKey, LPCSTR pszValu
 {
 	ISHRegStream*	rstr;
 	DWORD		dwType;
-	
+
 	rstr = (ISHRegStream*)HeapAlloc(GetProcessHeap(),HEAP_ZERO_MEMORY,sizeof(ISHRegStream));
 
 	ICOM_VTBL(rstr)=&rstvt;
@@ -42,7 +56,7 @@ static IStream *IStream_ConstructorA(HKEY hKey, LPCSTR pszSubKey, LPCSTR pszValu
 	if (!(RegOpenKeyExA (hKey, pszSubKey, 0, KEY_READ, &(rstr->hKey))))
 	{
 	  if (!(RegQueryValueExA(rstr->hKey, pszValue,0,0,0,&(rstr->dwLength))))
-	  { 
+	  {
 	    /* read the binary data into the buffer */
 	    if((rstr->pbBuffer = HeapAlloc(GetProcessHeap(),0,rstr->dwLength)))
 	    {
@@ -70,7 +84,7 @@ static IStream *IStream_ConstructorW(HKEY hKey, LPCWSTR pszSubKey, LPCWSTR pszVa
 {
 	ISHRegStream*	rstr;
 	DWORD		dwType;
-	
+
 	rstr = (ISHRegStream*)HeapAlloc(GetProcessHeap(),HEAP_ZERO_MEMORY,sizeof(ISHRegStream));
 
 	ICOM_VTBL(rstr)=&rstvt;
@@ -79,7 +93,7 @@ static IStream *IStream_ConstructorW(HKEY hKey, LPCWSTR pszSubKey, LPCWSTR pszVa
 	if (!(RegOpenKeyExW (hKey, pszSubKey, 0, KEY_READ, &(rstr->hKey))))
 	{
 	  if (!(RegQueryValueExW(rstr->hKey, pszValue,0,0,0,&(rstr->dwLength))))
-	  { 
+	  {
 	    /* read the binary data into the buffer */
 	    if((rstr->pbBuffer = HeapAlloc(GetProcessHeap(),0,rstr->dwLength)))
 	    {
@@ -112,15 +126,15 @@ static HRESULT WINAPI IStream_fnQueryInterface(IStream *iface, REFIID riid, LPVO
 	*ppvObj = NULL;
 
 	if(IsEqualIID(riid, &IID_IUnknown))	/*IUnknown*/
-	{ *ppvObj = This; 
+	{ *ppvObj = This;
 	}
 	else if(IsEqualIID(riid, &IID_IStream))	/*IStream*/
 	{ *ppvObj = This;
-	}   
+	}
 
 	if(*ppvObj)
-	{ 
-	  IStream_AddRef((IStream*)*ppvObj);      
+	{
+	  IStream_AddRef((IStream*)*ppvObj);
 	  TRACE("-- Interface: (%p)->(%p)\n",ppvObj,*ppvObj);
 	  return S_OK;
 	}
@@ -149,7 +163,7 @@ static ULONG WINAPI IStream_fnRelease(IStream *iface)
 
 	TRACE("(%p)->()\n",This);
 
-	if (!--(This->ref)) 
+	if (!--(This->ref))
 	{ TRACE(" destroying SHReg IStream (%p)\n",This);
 
 	  if (This->pbBuffer)
@@ -169,21 +183,21 @@ static HRESULT WINAPI IStream_fnRead (IStream * iface, void* pv, ULONG cb, ULONG
 	ICOM_THIS(ISHRegStream, iface);
 
 	DWORD dwBytesToRead, dwBytesLeft;
-	
+
 	TRACE("(%p)->(%p,0x%08lx,%p)\n",This, pv, cb, pcbRead);
-	
+
 	if ( !pv )
 	  return STG_E_INVALIDPOINTER;
-	  
+
 	dwBytesLeft = This->dwLength - This->dwPos;
 
 	if ( 0 >= dwBytesLeft )						/* end of buffer */
 	  return S_FALSE;
-	
+
 	dwBytesToRead = ( cb > dwBytesLeft) ? dwBytesLeft : cb;
 
 	memmove ( pv, (This->pbBuffer) + (This->dwPos), dwBytesToRead);
-	
+
 	This->dwPos += dwBytesToRead;					/* adjust pointer */
 
 	if (pcbRead)
@@ -272,8 +286,8 @@ static HRESULT WINAPI IStream_fnClone (IStream * iface, IStream** ppstm)
 	return E_NOTIMPL;
 }
 
-static struct ICOM_VTABLE(IStream) rstvt = 
-{	
+static struct ICOM_VTABLE(IStream) rstvt =
+{
 	ICOM_MSVTABLE_COMPAT_DummyRTTIVALUE
 	IStream_fnQueryInterface,
 	IStream_fnAddRef,
@@ -289,7 +303,7 @@ static struct ICOM_VTABLE(IStream) rstvt =
 	IStream_fnUnlockRegion,
 	IStream_fnStat,
 	IStream_fnClone
-	
+
 };
 
 /*************************************************************************

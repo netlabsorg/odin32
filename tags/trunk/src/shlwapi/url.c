@@ -2,12 +2,21 @@
  * Url functions
  *
  * Copyright 2000 Huw D M Davies for CodeWeavers.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
-#ifdef __WIN32OS2__
-#include <ctype.h>
-#include <stdarg.h>
-#include <winuser.h>
-#endif
 
 #include <string.h>
 #include <stdlib.h>
@@ -20,11 +29,10 @@
 #include "winreg.h"
 #define NO_SHLWAPI_STREAM
 #include "shlwapi.h"
-#include "debugtools.h"
+#include "wine/debug.h"
 #include "ordinal.h"
 
-
-DEFAULT_DEBUG_CHANNEL(shell);
+WINE_DEFAULT_DEBUG_CHANNEL(shell);
 
 typedef struct {
     LPCWSTR pScheme;      /* [out] start of scheme                     */
@@ -190,7 +198,7 @@ HRESULT WINAPI UrlCanonicalizeA(LPCSTR pszUrl, LPSTR pszCanonicalized,
 	  debugstr_a(pszUrl), pszCanonicalized,
 	  pcchCanonicalized, dwFlags);
 
-    base = (LPWSTR) HeapAlloc(GetProcessHeap(), 0, 
+    base = (LPWSTR) HeapAlloc(GetProcessHeap(), 0,
 			      (2*INTERNET_MAX_URL_LENGTH) * sizeof(WCHAR));
     canonical = base + INTERNET_MAX_URL_LENGTH;
 
@@ -209,7 +217,7 @@ HRESULT WINAPI UrlCanonicalizeA(LPCSTR pszUrl, LPSTR pszCanonicalized,
 	HeapFree(GetProcessHeap(), 0, base);
 	return E_POINTER;
     }
-    WideCharToMultiByte(0, 0, canonical, len+1, pszCanonicalized, 
+    WideCharToMultiByte(0, 0, canonical, len+1, pszCanonicalized,
 			*pcchCanonicalized, 0, 0);
     *pcchCanonicalized = len2;
     HeapFree(GetProcessHeap(), 0, base);
@@ -220,7 +228,7 @@ HRESULT WINAPI UrlCanonicalizeA(LPCSTR pszUrl, LPSTR pszCanonicalized,
  *        UrlCanonicalizeW     [SHLWAPI.@]
  *
  *
- * MSDN is wrong (at 10/30/01 - go figure). This should support the 
+ * MSDN is wrong (at 10/30/01 - go figure). This should support the
  * following flags:                                      GLA
  *    URL_DONT_ESCAPE_EXTRA_INFO    0x02000000
  *    URL_ESCAPE_SPACES_ONLY        0x04000000
@@ -230,7 +238,7 @@ HRESULT WINAPI UrlCanonicalizeA(LPCSTR pszUrl, LPSTR pszCanonicalized,
  *    URL_DONT_SIMPLIFY             0x08000000
  *    URL_ESCAPE_SEGMENT_ONLY       0x00002000
  */
-HRESULT WINAPI UrlCanonicalizeW(LPCWSTR pszUrl, LPWSTR pszCanonicalized, 
+HRESULT WINAPI UrlCanonicalizeW(LPCWSTR pszUrl, LPWSTR pszCanonicalized,
 				LPDWORD pcchCanonicalized, DWORD dwFlags)
 {
     HRESULT hr = S_OK;
@@ -356,7 +364,7 @@ HRESULT WINAPI UrlCanonicalizeW(LPCWSTR pszUrl, LPWSTR pszCanonicalized,
     if(dwFlags & URL_UNESCAPE)
         UrlUnescapeW(lpszUrlCpy, NULL, NULL, URL_UNESCAPE_INPLACE);
 
-    if((EscapeFlags = dwFlags & (URL_ESCAPE_UNSAFE | 
+    if((EscapeFlags = dwFlags & (URL_ESCAPE_UNSAFE |
                                  URL_ESCAPE_SPACES_ONLY |
                                  URL_ESCAPE_PERCENT |
                                  URL_DONT_ESCAPE_EXTRA_INFO |
@@ -376,7 +384,7 @@ HRESULT WINAPI UrlCanonicalizeW(LPCWSTR pszUrl, LPWSTR pszCanonicalized,
     }
 
     HeapFree(GetProcessHeap(), 0, lpszUrlCpy);
-  
+
     if (hr == S_OK)
 	TRACE("result %s\n", debugstr_w(pszCanonicalized));
 
@@ -399,7 +407,7 @@ HRESULT WINAPI UrlCombineA(LPCSTR pszBase, LPCSTR pszRelative,
 	  debugstr_a(pszBase),debugstr_a(pszRelative),
 	  *pcchCombined,dwFlags);
 
-    base = (LPWSTR) HeapAlloc(GetProcessHeap(), 0, 
+    base = (LPWSTR) HeapAlloc(GetProcessHeap(), 0,
 			      (3*INTERNET_MAX_URL_LENGTH) * sizeof(WCHAR));
     relative = base + INTERNET_MAX_URL_LENGTH;
     combined = relative + INTERNET_MAX_URL_LENGTH;
@@ -500,7 +508,7 @@ HRESULT WINAPI UrlCombineW(LPCWSTR pszBase, LPCWSTR pszRelative,
 	 *    .ap2      points to location (starting with '//')
 	 *    .sizep2   length of location (above) and rest less the last
 	 *              leaf (if any)
-	 *    sizeloc   length of location (above) up to but not including 
+	 *    sizeloc   length of location (above) up to but not including
 	 *              the last '/'
 	 */
 
@@ -540,7 +548,7 @@ HRESULT WINAPI UrlCombineW(LPCWSTR pszBase, LPCWSTR pszRelative,
 	}
 
 	/* handle cases where pszRelative has scheme */
-	if ((base.sizep1 == relative.sizep1) && 
+	if ((base.sizep1 == relative.sizep1) &&
 	    (strncmpW(base.ap1, relative.ap1, base.sizep1) == 0)) {
 
 	    /* since the schemes are the same */
@@ -582,7 +590,7 @@ HRESULT WINAPI UrlCombineW(LPCWSTR pszBase, LPCWSTR pszRelative,
 	    *pcchCombined = len;
 	    ret = E_POINTER;
 	    break;
-	} 
+	}
 	strcatW(preliminary, mrelative);
 	break;
 
@@ -595,7 +603,7 @@ HRESULT WINAPI UrlCombineW(LPCWSTR pszBase, LPCWSTR pszRelative,
 	    *pcchCombined = len;
 	    ret = E_POINTER;
 	    break;
-	} 
+	}
 	strcpyW(preliminary, mrelative);
 	if (!(dwFlags & URL_PLUGGABLE_PROTOCOL) &&
 	    URL_JustLocation(relative.ap2))
@@ -611,7 +619,7 @@ HRESULT WINAPI UrlCombineW(LPCWSTR pszBase, LPCWSTR pszRelative,
 	    *pcchCombined = len;
 	    ret = E_POINTER;
 	    break;
-	} 
+	}
 	strncpyW(preliminary, base.ap1, base.sizep1 + 1);
 	work = preliminary + base.sizep1 + 1;
 	strcpyW(work, relative.ap2);
@@ -630,7 +638,7 @@ HRESULT WINAPI UrlCombineW(LPCWSTR pszBase, LPCWSTR pszRelative,
 	    *pcchCombined = len;
 	    ret = E_POINTER;
 	    break;
-	} 
+	}
 	strncpyW(preliminary, base.ap1, base.sizep1+1+sizeloc);
 	work = preliminary + base.sizep1 + 1 + sizeloc;
 	if (dwFlags & URL_PLUGGABLE_PROTOCOL)
@@ -639,7 +647,7 @@ HRESULT WINAPI UrlCombineW(LPCWSTR pszBase, LPCWSTR pszRelative,
 	break;
 
     case 5:  /*
-	      * Return the pszBase without its document (if any) and 
+	      * Return the pszBase without its document (if any) and
 	      * append pszRelative after its scheme.
 	      */
 	len = base.sizep1 + 1 + base.sizep2 + relative.sizep2;
@@ -647,7 +655,7 @@ HRESULT WINAPI UrlCombineW(LPCWSTR pszBase, LPCWSTR pszRelative,
 	    *pcchCombined = len;
 	    ret = E_POINTER;
 	    break;
-	} 
+	}
 	strncpyW(preliminary, base.ap1, base.sizep1+1+base.sizep2);
 	work = preliminary + base.sizep1+1+base.sizep2 - 1;
 	if (*work++ != L'/')
@@ -662,7 +670,7 @@ HRESULT WINAPI UrlCombineW(LPCWSTR pszBase, LPCWSTR pszRelative,
 
     if (ret == S_OK) {
 	/*
-	 * Now that the combining is done, process the escape options if 
+	 * Now that the combining is done, process the escape options if
 	 * necessary, otherwise just copy the string.
 	 */
 	myflags = dwFlags & (URL_ESCAPE_PERCENT |
@@ -779,7 +787,7 @@ HRESULT WINAPI UrlEscapeA(
     }
     *pcchEscaped = needed;
     return ret;
-}	
+}
 
 /*************************************************************************
  *      UrlEscapeW	[SHLWAPI.@]
@@ -876,7 +884,7 @@ HRESULT WINAPI UrlEscapeW(
  *      UrlUnescapeA	[SHLWAPI.@]
  *
  * Converts escape sequences back to ordinary characters.
- * 
+ *
  * If URL_ESCAPE_INPLACE is set in dwFlags then pszUnescaped and
  * pcchUnescaped are ignored and the converted string is returned in
  * pszUrl, otherwise the string is returned in pszUnescaped.
@@ -941,7 +949,7 @@ HRESULT WINAPI UrlUnescapeA(
         *pcchUnescaped = needed;
 
     if (ret == S_OK) {
-	TRACE("result %s\n", (dwFlags & URL_UNESCAPE_INPLACE) ? 
+	TRACE("result %s\n", (dwFlags & URL_UNESCAPE_INPLACE) ?
 	      debugstr_a(pszUrl) : debugstr_a(pszUnescaped));
     }
 
@@ -1005,7 +1013,7 @@ HRESULT WINAPI UrlUnescapeW(
         *pcchUnescaped = needed;
 
     if (ret == S_OK) {
-	TRACE("result %s\n", (dwFlags & URL_UNESCAPE_INPLACE) ? 
+	TRACE("result %s\n", (dwFlags & URL_UNESCAPE_INPLACE) ?
 	      debugstr_w(pszUrl) : debugstr_w(pszUnescaped));
     }
 
@@ -1016,15 +1024,15 @@ HRESULT WINAPI UrlUnescapeW(
  *      UrlGetLocationA 	[SHLWAPI.@]
  *
  * Bugs/Features:
- *  MSDN (as of 2001-11-01) says that: 
- *         "The location is the segment of the URL starting with a ? 
- *          or # character." 
+ *  MSDN (as of 2001-11-01) says that:
+ *         "The location is the segment of the URL starting with a ?
+ *          or # character."
  *     Neither V4 nor V5 of shlwapi.dll implement the '?' and always return
  *     a NULL.
  *  MSDN further states that:
- *         "If a file URL has a query string, ther returned string 
+ *         "If a file URL has a query string, ther returned string
  *          the query string."
- *     In all test cases if the scheme starts with "fi" then a NULL is 
+ *     In all test cases if the scheme starts with "fi" then a NULL is
  *     returned. V5 gives the following results:
  *       NULL     file://aa/b/cd#hohoh
  *       #hohoh   http://aa/b/cd#hohoh
@@ -1178,7 +1186,7 @@ HRESULT WINAPI UrlApplySchemeA(LPCSTR pszIn, LPSTR pszOut, LPDWORD pcchOut, DWOR
     TRACE("(in %s, out size %ld, flags %08lx) using W version\n",
 	  debugstr_a(pszIn), *pcchOut, dwFlags);
 
-    in = (LPWSTR) HeapAlloc(GetProcessHeap(), 0, 
+    in = (LPWSTR) HeapAlloc(GetProcessHeap(), 0,
 			      (2*INTERNET_MAX_URL_LENGTH) * sizeof(WCHAR));
     out = in + INTERNET_MAX_URL_LENGTH;
 
@@ -1292,7 +1300,7 @@ HRESULT WINAPI UrlApplySchemeW(LPCWSTR pszIn, LPWSTR pszOut, LPDWORD pcchOut, DW
 	  debugstr_w(pszIn), *pcchOut, dwFlags);
 
     if (dwFlags & URL_APPLY_GUESSFILE) {
-	FIXME("(%s %p %p(%ld) 0x%08lx): stub URL_APPLY_GUESSFILE not implemented\n", 
+	FIXME("(%s %p %p(%ld) 0x%08lx): stub URL_APPLY_GUESSFILE not implemented\n",
 	      debugstr_w(pszIn), pszOut, pcchOut, *pcchOut, dwFlags);
 	strcpyW(pszOut, pszIn);
 	*pcchOut = strlenW(pszOut);
@@ -1305,7 +1313,7 @@ HRESULT WINAPI UrlApplySchemeW(LPCWSTR pszIn, LPWSTR pszOut, LPDWORD pcchOut, DW
     if (res1) {
 	/* no scheme in input, need to see if we need to guess */
 	if (dwFlags & URL_APPLY_GUESSSCHEME) {
-	    if ((ret = URL_GuessScheme(pszIn, pszOut, pcchOut)) != -1) 
+	    if ((ret = URL_GuessScheme(pszIn, pszOut, pcchOut)) != -1)
 		return ret;
 	}
     }
@@ -1324,7 +1332,7 @@ HRESULT WINAPI UrlApplySchemeW(LPCWSTR pszIn, LPWSTR pszOut, LPDWORD pcchOut, DW
 	}
     }
 
-    /* If we are here, then either invalid scheme, 
+    /* If we are here, then either invalid scheme,
      * or no scheme and can't/failed guess.
      */
     if ( ( ((res1 == 0) && (dwFlags & URL_APPLY_FORCEAPPLY)) ||
@@ -1494,7 +1502,7 @@ LPCWSTR  URL_ScanID(LPCWSTR start, LPDWORD size, WINE_URL_SCAN_TYPE type)
 		start++;
 		(*size)++;
 	    } else if (*start == L'%') {
-		if (isxdigitW(*(start+1)) && 
+		if (isxdigitW(*(start+1)) &&
 		    isxdigitW(*(start+2))) {
 		    start += 3;
 		    *size += 3;
@@ -1552,7 +1560,7 @@ LONG URL_ParseUrl(LPCWSTR pszUrl, WINE_PARSE_URL *pl)
     work++;
     if ((*work != L'/') || (*(work+1) != L'/')) goto __ERROR;
 #else
-    if (!*work || (*work != L':')) goto ERROR1;
+    if (!*work || (*work != L':')) goto ERROR;
     work++;
     if ((*work != L'/') || (*(work+1) != L'/')) goto ERROR;
 #endif
@@ -1582,7 +1590,7 @@ LONG URL_ParseUrl(LPCWSTR pszUrl, WINE_PARSE_URL *pl)
 #ifdef __WIN32OS2__
     } else goto __ERROR;
 #else
-    } else goto ERROR1;
+    } else goto ERROR;
 #endif
     /* now start parsing hostname or hostnumber */
     work++;
@@ -1619,13 +1627,13 @@ LONG URL_ParseUrl(LPCWSTR pszUrl, WINE_PARSE_URL *pl)
 /*************************************************************************
  *      UrlGetPartA  	[SHLWAPI.@]
  */
-HRESULT WINAPI UrlGetPartA(LPCSTR pszIn, LPSTR pszOut, LPDWORD pcchOut, 
+HRESULT WINAPI UrlGetPartA(LPCSTR pszIn, LPSTR pszOut, LPDWORD pcchOut,
 			   DWORD dwPart, DWORD dwFlags)
 {
     LPWSTR in, out;
     DWORD ret, len, len2;
 
-    in = (LPWSTR) HeapAlloc(GetProcessHeap(), 0, 
+    in = (LPWSTR) HeapAlloc(GetProcessHeap(), 0,
 			      (2*INTERNET_MAX_URL_LENGTH) * sizeof(WCHAR));
     out = in + INTERNET_MAX_URL_LENGTH;
 
@@ -1654,7 +1662,7 @@ HRESULT WINAPI UrlGetPartA(LPCSTR pszIn, LPSTR pszOut, LPDWORD pcchOut,
 /*************************************************************************
  *      UrlGetPartW  	[SHLWAPI.@]
  */
-HRESULT WINAPI UrlGetPartW(LPCWSTR pszIn, LPWSTR pszOut, LPDWORD pcchOut, 
+HRESULT WINAPI UrlGetPartW(LPCWSTR pszIn, LPWSTR pszOut, LPDWORD pcchOut,
 			   DWORD dwPart, DWORD dwFlags)
 {
     WINE_PARSE_URL pl;

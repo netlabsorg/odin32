@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.26 2002-02-13 16:15:07 sandervl Exp $
+# $Id: makefile,v 1.27 2002-06-07 08:02:17 sandervl Exp $
 
 #
 # Odin32 API
@@ -30,12 +30,12 @@ $(OBJDIR)\url_odin.obj \
 $(OBJDIR)\reg_odin.obj \
 $(OBJDIR)\reg.obj \
 $(OBJDIR)\regstream.obj \
-$(OBJDIR)\pathcpp.obj \
 $(OBJDIR)\path.obj \
 $(OBJDIR)\string_odin.obj \
 $(OBJDIR)\string.obj \
 $(OBJDIR)\ordinal.obj \
 $(OBJDIR)\ordinal_odin.obj \
+$(OBJDIR)\wsprintf.obj \
 !if "$(DEBUG)" == "1"
 $(OBJDIR)\dbgwrap.obj \
 !endif
@@ -48,6 +48,7 @@ $(DLLENTRY)
 #
 LIBS = \
 $(ODIN32_LIB)/kernel32.lib \
+$(ODIN32_LIB)/advapi32.lib \
 $(ODIN32_LIB)/ntdll.lib \
 $(ODIN32_LIB)/user32.lib \
 $(ODIN32_LIB)/gdi32.lib \
