@@ -1,4 +1,4 @@
-/* $Id: comdlg32.cpp,v 1.22 2000-02-03 23:29:06 sandervl Exp $ */
+/* $Id: comdlg32.cpp,v 1.23 2000-03-22 16:55:00 cbratschi Exp $ */
 
 /*
  * COMDLG32 implementation
@@ -24,6 +24,8 @@
 #include <win32wnd.h>
 
 ODINDEBUGCHANNEL(COMDLG32-COMDLG32)
+
+BOOL useWinFileDlg = FALSE;
 
 #if 0
 #define COMDLG32_CHECKHOOK(a,b,c)           \
@@ -168,7 +170,7 @@ static DWORD iFileDlg_CleanFilterArray( LPSTR lpstrFilters)
 ODINFUNCTION1(BOOL, GetSaveFileNameA,
               LPOPENFILENAMEA, lpofn)
 {
-  if(lpofn->Flags & (OFN_ENABLETEMPLATE|OFN_ENABLETEMPLATEHANDLE)) {
+  if(useWinFileDlg || (lpofn->Flags & (OFN_ENABLETEMPLATE|OFN_ENABLETEMPLATEHANDLE))) {
    return GetFileDialog95A(lpofn, SAVE_DIALOG);
   }
 
@@ -203,7 +205,7 @@ ODINFUNCTION1(BOOL, GetSaveFileNameW,
   char*           szCustFilter;
   BOOL            bResult;
 
-  if(lpofn->Flags & (OFN_ENABLETEMPLATE|OFN_ENABLETEMPLATEHANDLE)) {
+  if(useWinFileDlg || (lpofn->Flags & (OFN_ENABLETEMPLATE|OFN_ENABLETEMPLATEHANDLE))) {
    return GetFileDialog95W(lpofn, SAVE_DIALOG);
   }
 
@@ -322,7 +324,7 @@ ODINFUNCTION1(BOOL, GetOpenFileNameA,
   BOOL rc;
 
   CheckCurFS();
-  if(lpofn->Flags & (OFN_ENABLETEMPLATE|OFN_ENABLETEMPLATEHANDLE))
+  if(useWinFileDlg || (lpofn->Flags & (OFN_ENABLETEMPLATE|OFN_ENABLETEMPLATEHANDLE)))
   {
     return GetFileDialog95A(lpofn, OPEN_DIALOG);
   }
@@ -358,7 +360,7 @@ ODINFUNCTION1(BOOL, GetOpenFileNameW,
   char*           szCustFilter;
   BOOL            bResult;
 
-  if(lpofn->Flags & (OFN_ENABLETEMPLATE|OFN_ENABLETEMPLATEHANDLE)) {
+  if(useWinFileDlg || (lpofn->Flags & (OFN_ENABLETEMPLATE|OFN_ENABLETEMPLATEHANDLE))) {
    return GetFileDialog95W(lpofn, OPEN_DIALOG);
   }
 
