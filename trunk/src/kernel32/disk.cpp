@@ -1,9 +1,9 @@
-/* $Id: disk.cpp,v 1.36 2002-05-10 14:55:10 sandervl Exp $ */
+/* $Id: disk.cpp,v 1.37 2002-05-14 09:28:19 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
  *
- * Copyright 1998 Sander van Leeuwen
+ * Copyright 1998-2002 Sander van Leeuwen
  *
  *
  * Project Odin Software License can be found in LICENSE.TXT
@@ -45,8 +45,8 @@ BOOL WIN32API SetVolumeLabelA( LPCSTR arg1, LPCSTR  arg2)
 //******************************************************************************
 BOOL WIN32API SetVolumeLabelW(LPCWSTR lpRootPathName, LPCWSTR lpVolumeName)
 {
-  char *asciiroot, *asciivolname;
-  BOOL  rc;
+    char *asciiroot, *asciivolname;
+    BOOL  rc;
 
     dprintf(("KERNEL32:  OS2SetVolumeLabelW\n"));
     asciiroot    = UnicodeToAsciiString((LPWSTR)lpRootPathName);
@@ -63,24 +63,24 @@ BOOL WIN32API GetDiskFreeSpaceA(LPCSTR lpszRootPathName, PDWORD lpSectorsPerClus
                                 PDWORD lpBytesPerSector, PDWORD lpFreeClusters,
                                 PDWORD lpClusters)
 {
-  BOOL rc;
-  DWORD dwSectorsPerCluster;    // address of sectors per cluster ter
-  DWORD dwBytesPerSector;   // address of bytes per sector
-  DWORD dwNumberOfFreeClusters; // address of number of free clusters
-  DWORD dwTotalNumberOfClusters;    // address of total number of clusters
+    BOOL rc;
+    DWORD dwSectorsPerCluster;    // address of sectors per cluster ter
+    DWORD dwBytesPerSector;   // address of bytes per sector
+    DWORD dwNumberOfFreeClusters; // address of number of free clusters
+    DWORD dwTotalNumberOfClusters;    // address of total number of clusters
 
-  rc = OSLibGetDiskFreeSpace((LPSTR)lpszRootPathName, &dwSectorsPerCluster, &dwBytesPerSector,
-                             &dwNumberOfFreeClusters, &dwTotalNumberOfClusters);
-  if(rc)
-  {
-    if (lpSectorsPerCluster!=NULL)
-      *lpSectorsPerCluster = dwSectorsPerCluster;
-    if (lpBytesPerSector!=NULL)
-      *lpBytesPerSector = dwBytesPerSector;
-    if (lpFreeClusters!=NULL)
-      *lpFreeClusters = dwNumberOfFreeClusters;
-    if (lpClusters!=NULL)
-      *lpClusters = dwTotalNumberOfClusters;
+    rc = OSLibGetDiskFreeSpace((LPSTR)lpszRootPathName, &dwSectorsPerCluster, &dwBytesPerSector,
+                                &dwNumberOfFreeClusters, &dwTotalNumberOfClusters);
+    if(rc)
+    {
+        if (lpSectorsPerCluster!=NULL)
+            *lpSectorsPerCluster = dwSectorsPerCluster;
+        if (lpBytesPerSector!=NULL)
+            *lpBytesPerSector = dwBytesPerSector;
+        if (lpFreeClusters!=NULL)
+            *lpFreeClusters = dwNumberOfFreeClusters;
+        if (lpClusters!=NULL)
+            *lpClusters = dwTotalNumberOfClusters;
 
     /* CW: Windows Media Player setup complains about wrong clustersize when odin is installed on
        a TVFS drive. This fakes the clustersizes to 32. The following
@@ -89,20 +89,20 @@ BOOL WIN32API GetDiskFreeSpaceA(LPCSTR lpszRootPathName, PDWORD lpSectorsPerClus
        [DRIVESPACE]
        TVFSTOHPFS = 1
        */
-    if(lpSectorsPerCluster!=NULL) 
-    {
-      if(*lpSectorsPerCluster==1024 && PROFILE_GetOdinIniBool("DRIVESPACE","CLUSTERTO32",0)) 
-      {/* TVFS returns 1024 sectors per cluster */
-        dprintf(("KERNEL32:  GetDiskFreeSpaceA, TVFS-Drive detected. Faking clustersize to 32.\n"));
-        *lpSectorsPerCluster=32;
-        if (lpFreeClusters!=NULL)
-          *lpFreeClusters = dwNumberOfFreeClusters<<0x5;
-        if (lpClusters!=NULL)
-          *lpClusters = dwTotalNumberOfClusters<<0x5;
-      }
+        if(lpSectorsPerCluster!=NULL) 
+        {
+            if(*lpSectorsPerCluster==1024 && PROFILE_GetOdinIniBool("DRIVESPACE","CLUSTERTO32",0)) 
+            {/* TVFS returns 1024 sectors per cluster */
+                dprintf(("KERNEL32:  GetDiskFreeSpaceA, TVFS-Drive detected. Faking clustersize to 32.\n"));
+                *lpSectorsPerCluster=32;
+                if (lpFreeClusters!=NULL)
+                    *lpFreeClusters = dwNumberOfFreeClusters<<0x5;
+                if (lpClusters!=NULL)
+                    *lpClusters = dwTotalNumberOfClusters<<0x5;
+            }
+        }
     }
-  }
-  return rc;
+    return rc;
 }
 //******************************************************************************
 //******************************************************************************
@@ -112,13 +112,13 @@ BOOL WIN32API GetDiskFreeSpaceW(LPCWSTR lpszRootPathName,
                                 PDWORD  lpFreeClusters,
                                 PDWORD  lpClusters)
 {
-  BOOL  rc;
-  char *astring;
+    BOOL  rc;
+    char *astring;
 
-  astring = UnicodeToAsciiString((LPWSTR)lpszRootPathName);
-  rc = GetDiskFreeSpaceA(astring, lpSectorsPerCluster, lpBytesPerSector, lpFreeClusters, lpClusters);
-  FreeAsciiString(astring);
-  return(rc);
+    astring = UnicodeToAsciiString((LPWSTR)lpszRootPathName);
+    rc = GetDiskFreeSpaceA(astring, lpSectorsPerCluster, lpBytesPerSector, lpFreeClusters, lpClusters);
+    FreeAsciiString(astring);
+    return(rc);
 }
 
 
@@ -201,8 +201,8 @@ BOOL WIN32API GetDiskFreeSpaceExW(LPCWSTR         lpDirectoryName,
                                   PULARGE_INTEGER lpTotalNumberOfBytes,
                                   PULARGE_INTEGER lpTotalNumberOfFreeBytes )
 {
- BOOL  rc;
- char *astring;
+    BOOL  rc;
+    char *astring;
 
     dprintf(("KERNEL32:  OS2GetDiskFreeSpaceExW\n"));
     astring = UnicodeToAsciiString((LPWSTR)lpDirectoryName);
@@ -215,8 +215,8 @@ BOOL WIN32API GetDiskFreeSpaceExW(LPCWSTR         lpDirectoryName,
 //******************************************************************************
 UINT WIN32API GetDriveTypeA(LPCSTR lpszDrive)
 {
-   UINT rc;
-   ULONG driveIndex;
+    UINT rc;
+    ULONG driveIndex;
 
     if(lpszDrive == 0) {
         driveIndex = OSLibDosQueryCurrentDisk() - 1;
@@ -258,8 +258,8 @@ UINT WIN32API GetDriveTypeA(LPCSTR lpszDrive)
 //******************************************************************************
 UINT WIN32API GetDriveTypeW(LPCWSTR lpszDrive)
 {
- UINT  rc;
- char *astring;
+    UINT  rc;
+    char *astring;
 
     if(lpszDrive == (LPCWSTR)-1) {
         return DRIVE_CANNOTDETERMINE;   //NT 4, SP6 returns this (VERIFIED)
@@ -269,6 +269,13 @@ UINT WIN32API GetDriveTypeW(LPCWSTR lpszDrive)
     rc = GetDriveTypeA(astring);
     FreeAsciiString(astring);
     return(rc);
+}
+//******************************************************************************
+static int fForce2GBFileSize = FALSE;
+//******************************************************************************
+void WIN32API CustForce2GBFileSize()
+{
+    fForce2GBFileSize = TRUE;
 }
 //******************************************************************************
 //******************************************************************************
@@ -368,6 +375,13 @@ proceed:
             {//pretend everything else is FAT16 (HPFS and FAT have the same file size limit)
                 strcpy(lpFileSystemNameBuffer, "FAT16");
             }
+            if(fForce2GBFileSize) {
+                if(strcmp(lpFileSystemNameBuffer, "CDFS") &&
+                   strcmp(lpFileSystemNameBuffer, "UDF")) 
+                {//everything is FAT -> 2 GB file size limit
+                    strcpy(lpFileSystemNameBuffer, "FAT16");
+                }
+            }
             dprintf2(("Final file system name: %s", lpFileSystemNameBuffer));
         }
     }
@@ -413,46 +427,39 @@ BOOL WIN32API GetVolumeInformationW(LPCWSTR lpRootPathName,
                                     LPWSTR  lpFileSystemNameBuffer,
                                     DWORD   nFileSystemNameSize)
 {
-  char *asciiroot,
-       *asciivol,
-       *asciifs;
-  BOOL  rc;
+    char *asciiroot,
+         *asciivol,
+         *asciifs;
+    BOOL  rc;
 
-  // transform into ascii
-  asciivol  = (char *)malloc(nVolumeNameSize+1);
-  asciifs   = (char *)malloc(nFileSystemNameSize+1);
+    // transform into ascii
+    asciivol  = (char *)malloc(nVolumeNameSize+1);
+    asciifs   = (char *)malloc(nFileSystemNameSize+1);
 
-  // clear ascii buffers
-  memset (asciivol, 0, (nVolumeNameSize + 1));
-  memset (asciifs,  0, (nFileSystemNameSize + 1));
+    // clear ascii buffers
+    memset (asciivol, 0, (nVolumeNameSize + 1));
+    memset (asciifs,  0, (nFileSystemNameSize + 1));
 
-  if (lpRootPathName != NULL) // NULL is valid!
-    asciiroot = UnicodeToAsciiString((LPWSTR)lpRootPathName);
-  else
-    asciiroot = NULL;
+    if (lpRootPathName != NULL) // NULL is valid!
+        asciiroot = UnicodeToAsciiString((LPWSTR)lpRootPathName);
+    else
+        asciiroot = NULL;
 
-  rc = GetVolumeInformationA(asciiroot,
-                             asciivol,
-                             nVolumeNameSize,
-                             lpVolumeSerialNumber,
-                             lpMaximumComponentLength,
-                             lpFileSystemFlags,
-                             asciifs,
-                             nFileSystemNameSize);
+    rc = GetVolumeInformationA(asciiroot, asciivol, nVolumeNameSize, lpVolumeSerialNumber,
+                               lpMaximumComponentLength, lpFileSystemFlags, asciifs, nFileSystemNameSize);
 
     if (lpVolumeNameBuffer != NULL)  /* @@@PH 98/06/07 */
-      AsciiToUnicodeN(asciivol, lpVolumeNameBuffer, nVolumeNameSize);
+        AsciiToUnicodeN(asciivol, lpVolumeNameBuffer, nVolumeNameSize);
 
     if (lpFileSystemNameBuffer != NULL)  /* @@@PH 98/06/07 */
-      AsciiToUnicodeN(asciifs, lpFileSystemNameBuffer, nFileSystemNameSize);
+        AsciiToUnicodeN(asciifs, lpFileSystemNameBuffer, nFileSystemNameSize);
 
+    if (asciiroot != NULL)
+        FreeAsciiString(asciiroot);
 
-  if (asciiroot != NULL)
-    FreeAsciiString(asciiroot);
-
-  free(asciifs);
-  free(asciivol);
-  return(rc);
+    free(asciifs);
+    free(asciivol);
+    return(rc);
 }
 //******************************************************************************
 //******************************************************************************
@@ -472,8 +479,8 @@ UINT WIN32API GetLogicalDriveStringsA(UINT cchBuffer, LPSTR lpszBuffer)
 //******************************************************************************
 UINT WIN32API GetLogicalDriveStringsW(UINT nBufferLength, LPWSTR lpBuffer)
 {
-  char *asciibuffer = (char *)malloc(nBufferLength+1);
-  DWORD rc;
+    char *asciibuffer = (char *)malloc(nBufferLength+1);
+    DWORD rc;
 
     dprintf(("KERNEL32:  OS2GetLogicalDriveStringsW\n"));
 
@@ -561,6 +568,11 @@ BOOL WIN32API FindNextVolumeA(HANDLE hFindVolume, LPTSTR lpszVolumeName,
     char     szdrive[3];
     DWORD    DeviceType;
     char     szVolume[256];
+
+    //tetsetsetetsetsetset
+    SetLastError(ERROR_NO_MORE_FILES);
+    return FALSE;
+    //tetsetsetetsetsetset
 
     if(!VERSION_IS_WIN2000_OR_HIGHER()) {
         SetLastError(ERROR_NOT_SUPPORTED);
