@@ -1,4 +1,4 @@
-/* $Id: hmstd.cpp,v 1.9 2002-06-26 07:13:00 sandervl Exp $ */
+/* $Id: hmstd.cpp,v 1.10 2002-06-27 12:35:56 sandervl Exp $ */
 
 /*
  * Handle Manager class for standard in, out & error handles
@@ -154,12 +154,12 @@ BOOL HMDeviceStandardClass::WriteFile(PHMHANDLEDATA pHMHandleData,
         //kso - Jun 23 2002 2:54am:
         //Yeah, cause PM programs doesn't have working STD* handles unless you redirect them!
         //So, we should rather check if valid handle than !console.
-        dprintf(("%s (GUI): %*s", pHMHandleData->dwUserData == STD_ERROR_HANDLE ? "STDERR" : "STDOUT",
+        dprintf(("%s (GUI): %.*s", pHMHandleData->dwUserData == STD_ERROR_HANDLE ? "STDERR" : "STDOUT",
                  nNumberOfBytesToWrite, lpLowMemBuffer));
         return TRUE;
     }
 
-    dprintf(("%s: %*s", pHMHandleData->dwUserData == STD_ERROR_HANDLE ? "STDERR" : "STDOUT",
+    dprintf(("%s: %.*s", pHMHandleData->dwUserData == STD_ERROR_HANDLE ? "STDERR" : "STDOUT",
              nNumberOfBytesToWrite, lpLowMemBuffer));
     if (!O32_WriteFile(pHMHandleData->hHMHandle, lpLowMemBuffer, nNumberOfBytesToWrite,
                        lpNumberOfBytesWritten, lpOverlapped))
