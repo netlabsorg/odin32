@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.32 1999-09-18 12:07:35 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.33 1999-09-25 17:55:21 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -74,11 +74,13 @@ TEB *InitializeTIB(BOOL fMainThread)
   USHORT tibsel;
 
    //Allocate one dword to store the flat address of our TEB
-   TIBFlatPtr = (DWORD *)OSLibAllocThreadLocalMemory(1);
-   if(TIBFlatPtr == 0) {
-   	dprintf(("InitializeTIB: local thread memory alloc failed!!"));
-   	DebugInt3();
-   	return NULL;
+   if(fMainThread) {
+   	TIBFlatPtr = (DWORD *)OSLibAllocThreadLocalMemory(1);
+   	if(TIBFlatPtr == 0) {
+   		dprintf(("InitializeTIB: local thread memory alloc failed!!"));
+	   	DebugInt3();
+	   	return NULL;
+	}
    }
    if(OSLibAllocSel(PAGE_SIZE, &tibsel) == FALSE)
    {
@@ -187,6 +189,20 @@ USHORT WIN32API SetWin32TIB()
 
    winteb = (TEB *)*TIBFlatPtr;
    if(winteb) {
+   	thdb = (THDB *)(winteb+1);
+   	win32tibsel = thdb->teb_sel;
+
+   	//Restore our win32 FS selector
+      	return SetReturnFS(win32tibsel);
+   }
+   else {
+	//we didn't create this thread, so allocate a selector now
+	//NOTE: Possible memory leak (i.e. DART threads in WINMM)
+	winteb = InitializeTIB();
+	if(winteb == NULL) {
+		DebugInt3();
+		return GetFS();
+	}
    	thdb = (THDB *)(winteb+1);
    	win32tibsel = thdb->teb_sel;
 
