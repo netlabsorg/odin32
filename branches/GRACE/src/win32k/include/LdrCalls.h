@@ -1,4 +1,4 @@
-/* $Id: LdrCalls.h,v 1.3.4.5 2000-08-21 22:59:38 bird Exp $
+/* $Id: LdrCalls.h,v 1.3.4.6 2000-08-22 03:00:19 bird Exp $
  *
  * Prototypes for the loader overrided function.
  *
@@ -191,14 +191,14 @@ extern ULONG LDRCALL LDRClearSem(void);
  * @returns   NO_ERROR if succesfully.
  *            OS2 errorcode on failure. (ERROR_INTERRUPT?)
  */
-#define LDRRequestSem()   KSEMRequestMutex((HKMTX)pLdrSem, (ULONG)-1)
+#define LDRRequestSem()   KSEMRequestMutex(pLdrSem, (ULONG)-1)
 
 
 /*
  * Pointer to the loader semaphore.
  */
 #ifdef _OS2KSEM_h_
-extern HKMTX *  pLdrSem;
+extern PKSEMMTX    pLdrSem;
 #endif
 
 

@@ -1,4 +1,4 @@
-/* $Id: pe2lx.h,v 1.9.4.3 2000-08-21 22:59:38 bird Exp $
+/* $Id: pe2lx.h,v 1.9.4.4 2000-08-22 03:00:19 bird Exp $
  *
  * Pe2Lx class declarations. Ring 0 and Ring 3
  *
@@ -74,7 +74,7 @@ public:
     /** @cat public query methods */
     BOOL    isExe();
     BOOL    isDll();
-    static HMTE getKernel32SFN()        {   return sfnKernel32;   }
+    static SFN  getKernel32SFN()        {   return sfnKernel32;   }
     static VOID setKernel32SFN(SFN sfn) {   sfnKernel32 = sfn;    }
     static VOID invalidateOdin32Path();
     static LONG getLoadedModuleCount()  {   return cLoadedModules;}

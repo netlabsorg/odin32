@@ -1,5 +1,5 @@
 ################################################################################
-# $Id: Makefile,v 1.43.4.4 2000-08-15 06:15:55 bird Exp $
+# $Id: Makefile,v 1.43.4.5 2000-08-22 03:00:16 bird Exp $
 #
 # Win32k makefile.
 #
@@ -342,7 +342,8 @@ OBJS  =\
     $(WIN32KOBJ)\d32ElfIOCtl.obj \
     $(WIN32KOBJ)\d32Win32kIOCtl.obj \
     $(WIN32KOBJ)\k32AllocMemEx.obj \
-    $(WIN32KOBJ)\mytkExecPgm.obj
+    $(WIN32KOBJ)\mytkExecPgm.obj\
+    $(WIN32KOBJ)\mytkStartProcess.obj
 
 
 OBJSINIT =\

@@ -1,4 +1,4 @@
-/* $Id: myldrOpen.cpp,v 1.10.4.4 2000-08-19 14:37:15 bird Exp $
+/* $Id: myldrOpen.cpp,v 1.10.4.5 2000-08-22 03:00:21 bird Exp $
  *
  * myldrOpen - ldrOpen.
  *
@@ -115,7 +115,7 @@ ULONG LDRCALL myldrOpen(PSFN phFile, PSZ pszFilename, PULONG pfl)
         if (u1.pach == NULL)
         {
             kprintf(("myldrOpen-%d: rmalloc(640) failed\n", cNesting));
-            goto semcleanup;
+            goto ret;
         }
 
 
@@ -639,20 +639,7 @@ ULONG LDRCALL myldrOpen(PSFN phFile, PSZ pszFilename, PULONG pfl)
         kprintf(("myldrOpen-%d: cNesting = %d, which is too deep!\n", cNesting, cNesting));
     #endif
 
-semcleanup:
-    /*
-     * We have to clean the smaphore which was taken by mytkExecPgm here
-     * because we might not return before the new child is finsished
-     * executing.
-     * It is not risk in releasing the semphore here since it's taken
-     * three times now. First by tkExecPgm then by LDROpenExe.
-     */
-    if (isLdrStateExecPgm() && fLdrSemTaken)
-    {
-        KSEMReleaseMutex((HKMTX)pLdrSem);
-        fLdrSemTaken = 0;
-    }
-
+ret:
     /** @sketch
      *  Return rc.
      */

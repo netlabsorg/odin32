@@ -1,4 +1,4 @@
-; $Id: mytkExecPgm.asm,v 1.10.4.4 2000-08-21 22:59:40 bird Exp $
+; $Id: mytkExecPgm.asm,v 1.10.4.5 2000-08-22 03:00:21 bird Exp $
 ;
 ; mytkExecPgm - tkExecPgm overload
 ;
@@ -53,13 +53,13 @@ CCHMAXPATH      EQU CCHFILENAME - 1     ; Max path length
     ; 32-bit memcpy. (see OS2KTK.h)
     extrn _TKFuBuff@16:PROC
 
-
     ;
     ; LDR semaphore
     ;
-    extrn  pLDRSem:DWORD
-    extrn  _KSEMRequestMutex@8:PROC
-    extrn  _LDRClearSem@0:PROC
+    extrn pLdrSem:DWORD
+    extrn _LDRClearSem@0:PROC
+    extrn _KSEMRequestMutex@8:PROC
+    extrn _KSEMQueryMutex@8:PROC
 
     ;
     ; Loader State
@@ -76,6 +76,10 @@ CCHMAXPATH      EQU CCHFILENAME - 1     ; Max path length
     ;
     extrn D32Hlp_VirtToLin:PROC
 
+    ;
+    ; TKSSBase (32-bit)
+    ;
+    extrn pulTKSSBase32:DWORD
 
 ;
 ;   Exported symbols
@@ -83,7 +87,6 @@ CCHMAXPATH      EQU CCHFILENAME - 1     ; Max path length
     public mytkExecPgm
     public tkExecPgmCopyEnv
 
-    public fLdrSemTaken
     public fTkExecPgm
     public achTkExecPgmFilename
     public achTkExecPgmArguments
@@ -100,8 +103,6 @@ CCHMAXPATH      EQU CCHFILENAME - 1     ; Max path length
 ; This data is only valid at isLdrStateExecPgm time
 ; (and you'll have to be behind the loader semaphore of course!)
 DATA16 SEGMENT
-fLdrSemTaken            db 0            ; 0 - Loader Semaphore not taken
-                                        ; 1 - Loader semaphore is taken and will be freed at exit.
 fTkExecPgm              db 0            ; 0 - achTkExecPgmFilename and achTkExecPgmArguments is INVALID
                                         ; 1 - achTkExecPgmFilename and achTkExecPgmArguments is VALID.
 achTkExecPgmFilename    db CCHFILENAME dup (0)  ; The filename  passed in to tkExecPgm if (fTkExec is TRUE)
@@ -220,16 +221,15 @@ tkepgm1:
     mov     es, ax
     ASSUME  DS:FLAT, ES:FLAT
 
-    mov     eax, pLDRSem                ; Load pointer to pLDRSem
-    or      eax, eax                    ; Check NULL pointer.
-    je      tkepgm_backout              ; BACKOUT on NULL pointer. (paranoia)
+    mov     eax, pLdrSem                ; Get pointer to the loader semaphore.
+    or      eax, eax                    ; Check if null. (paranoia)
+    jz      tkepgm_backout              ; Fail if null.
 
     push    0ffffffffh                  ; Wait indefinitely.
-    push    eax                         ; LDRSem handle.
+    push    eax                         ; Push LdrSem address (which is the handle).
     call    near ptr FLAT:_KSEMRequestMutex@8
     or      eax, eax                    ; Check if failed.
     jnz     tkepgm_backout              ; Backout on failure.
-    mov     fLdrSemTaken, 1             ; Marks that the loader semaphore is taken
 
 
     ;
@@ -327,16 +327,25 @@ tkepgm_callbehind:
 
 
     ;
-    ; Clear loader semaphore.
+    ; Clear loader semaphore?
     ; and clear loader state, current exe module and tkExecPgm global data flag.
     ;
-    cmp     fLdrSemTaken, 0             ; is the semaphore still taken?
-    je      tkepgm_callbehindret        ; jmp if not taken.
+    push    0                           ; Usage count variable.
+    mov     eax, pulTKSSBase32          ; Get TKSSBase
+    mov     eax, [eax]
+    add     eax, esp                    ; Added TKSSBase to the usage count pointer
+    push    eax                         ; Push address of usage count pointer.
+    push    pLdrSem                     ; Push pointer to loader semaphore ( = handle).
+    call    _KSEMQueryMutex@8
+    or      eax, eax                    ; Check return code. (1 = our / free; 0 = not our but take)
+    je      tkepgm_callbehindret        ; jmp if not taken by us (FALSE).
+    pop     eax                         ; Pops usage count.
+    or      eax, eax                    ; Check usage count.
+    jz      tkepgm_callbehindret        ; jmp if 0 (=free).
     mov     ulLDRState, 0               ; Clears loaderstate. (LDRSTATE_UNKNOWN)
     mov     pExeModule, 0               ; Sets the exemodule pointer to NULL.
     mov     fTkExecPgm, 0               ; Marks global data invalid.
     call    near ptr FLAT:_LDRClearSem@0
-    mov     fLdrSemTaken, 0             ; Loader semaphore is not taken any longer!
 
     ;
     ; Restore ds and es (probably unecessary but...) and Return
