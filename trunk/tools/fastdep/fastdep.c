@@ -1,4 +1,4 @@
-/* $Id: fastdep.c,v 1.18 2000-03-22 13:16:24 bird Exp $
+/* $Id: fastdep.c,v 1.19 2000-03-24 01:50:36 bird Exp $
  *
  * Fast dependents. (Fast = Quick and Dirty!)
  *
@@ -100,8 +100,8 @@ typedef struct _Options
 /*
  * Language specific analysis functions type.
  */
-typedef int ( _FNLANG)  (const char *pszFilename, void *pvFile,
-                         BOOL fHeader, POPTIONS pOptions);
+typedef int ( _FNLANG)  (const char *pszFilename, const char *pszNormFilename,
+                         void *pvFile, BOOL fHeader, POPTIONS pOptions);
 typedef _FNLANG    *PFNLANG;
 
 
@@ -144,10 +144,10 @@ typedef struct _DepRule
 static void syntax(void);
 static int makeDependent(const char *pszFilename, POPTIONS pOptions);
 
-int langC_CPP(const char *pszFilename, void *pvFile, BOOL fHeader, POPTIONS pOptions);
-int langAsm(const char *pszFilename, void *pvFile, BOOL fHeader, POPTIONS pOptions);
-int langRC(const char *pszFilename, void *pvFile, BOOL fHeader, POPTIONS pOptions);
-int langCOBOL(const char *pszFilename, void *pvFile, BOOL fHeader, POPTIONS pOptions);
+int langC_CPP(const char *pszFilename, const char *pszNormFilename, void *pvFile, BOOL fHeader, POPTIONS pOptions);
+int langAsm(const char *pszFilename, const char *pszNormFilename, void *pvFile, BOOL fHeader, POPTIONS pOptions);
+int langRC(const char *pszFilename, const char *pszNormFilename, void *pvFile, BOOL fHeader, POPTIONS pOptions);
+int langCOBOL(const char *pszFilename, const char *pszNormFilename, void *pvFile, BOOL fHeader, POPTIONS pOptions);
 
 
 /* string operations */
@@ -680,6 +680,7 @@ int main(int argc, char **argv)
                         szSource[0]  = '\0';
                     strcat(szSource, pfindbuf3->achName);
                     strlwr(szSource);
+                    fileNormalize(szSource);
 
                     /*
                      * Analyse the file.
@@ -798,7 +799,11 @@ static int makeDependent(const char *pszFilename, POPTIONS pOptions)
 
         /* Found? */
         if (pCfg->papszExts != NULL)
-            rc = (*pCfg->pfn)(pszFilename, pvFile, fHeader, pOptions);
+        {
+            char szNormFile[CCHMAXPATH];
+            fileNormalize2(pszFilename, szNormFile);
+            rc = (*pCfg->pfn)(pszFilename, &szNormFile[0],  pvFile, fHeader, pOptions);
+        }
         else
         {
             if (*fileName(pszFilename, szExt) != '.') /* these are 'hidden' files, like .cvsignore, let's ignore them. */
@@ -820,13 +825,14 @@ static int makeDependent(const char *pszFilename, POPTIONS pOptions)
  * and written to file later.
  * @returns   0 on success.
  *            !0 on error.
- * @param     pszFilename  Pointer to source filename. Correct case is assumed!
- * @param     pvFile       Pointer to file textbuffer.
- * @param     pOptions     Pointer to options struct.
+ * @param     pszFilename      Pointer to source filename. Correct case is assumed!
+ * @param     pszNormFilename  Pointer to normalized source filename.
+ * @param     pvFile           Pointer to file textbuffer.
+ * @param     pOptions         Pointer to options struct.
  * @status    completely implemented.
  * @author    knut st. osmundsen
  */
-int langC_CPP(const char *pszFilename, void *pvFile, BOOL fHeader, POPTIONS pOptions)
+int langC_CPP(const char *pszFilename, const char *pszNormFilename, void *pvFile, BOOL fHeader, POPTIONS pOptions)
 {
     void *  pvRule;                     /* Handle to the current rule. */
     char    szBuffer[4096];             /* Max line length is 4096... should not be a problem. */
@@ -864,13 +870,13 @@ int langC_CPP(const char *pszFilename, void *pvFile, BOOL fHeader, POPTIONS pOpt
 
         if (pOptions->fSrcWhenObj && pvRule)
             depAddDepend(pvRule,
-                         pOptions->fExcludeAll || pathlistFindFile2(pOptions->pszExclude, pszFilename, pOptions) ?
-                            fileName(pszFilename, szBuffer) : fileNormalize2(pszFilename, szBuffer),
+                         pOptions->fExcludeAll || pathlistFindFile2(pOptions->pszExclude, pszNormFilename, pOptions) ?
+                            fileName(pszFilename, szBuffer) : pszNormFilename,
                          pOptions->fCheckCyclic);
     }
     else
-        pvRule = depAddRule(pOptions->fExcludeAll || pathlistFindFile2(pOptions->pszExclude, pszFilename, pOptions) ?
-                            fileName(pszFilename, szBuffer) : fileNormalize2(pszFilename, szBuffer), NULL, NULL);
+        pvRule = depAddRule(pOptions->fExcludeAll || pathlistFindFile2(pOptions->pszExclude, pszNormFilename, pOptions) ?
+                            fileName(pszFilename, szBuffer) : pszNormFilename, NULL, NULL);
 
     /* duplicate rule? */
     if (pvRule == NULL)
@@ -1099,13 +1105,14 @@ int langC_CPP(const char *pszFilename, void *pvFile, BOOL fHeader, POPTIONS pOpt
  * and written to file later.
  * @returns   0 on success.
  *            !0 on error.
- * @param     pszFilename  Pointer to source filename. Correct case is assumed!
- * @param     pvFile       Pointer to file textbuffer.
- * @param     pOptions     Pointer to options struct.
+ * @param     pszFilename      Pointer to source filename. Correct case is assumed!
+ * @param     pszNormFilename  Pointer to normalized source filename.
+ * @param     pvFile           Pointer to file textbuffer.
+ * @param     pOptions         Pointer to options struct.
  * @status    completely implemented.
  * @author    knut st. osmundsen
  */
-int langAsm(const char *pszFilename, void *pvFile, BOOL fHeader, POPTIONS pOptions)
+int langAsm(const char *pszFilename, const char *pszNormFilename, void *pvFile, BOOL fHeader, POPTIONS pOptions)
 {
     void *  pvRule;                     /* Handle to the current rule. */
     char    szBuffer[4096];             /* Temporary buffer (max line lenght size...) */
@@ -1129,13 +1136,13 @@ int langAsm(const char *pszFilename, void *pvFile, BOOL fHeader, POPTIONS pOptio
 
         if (pOptions->fSrcWhenObj && pvRule)
             depAddDepend(pvRule,
-                         pOptions->fExcludeAll || pathlistFindFile2(pOptions->pszExclude, pszFilename, pOptions) ?
-                            fileName(pszFilename, szBuffer) : fileNormalize2(pszFilename, szBuffer),
+                         pOptions->fExcludeAll || pathlistFindFile2(pOptions->pszExclude, pszNormFilename, pOptions) ?
+                            fileName(pszFilename, szBuffer) : pszNormFilename,
                          pOptions->fCheckCyclic);
     }
     else
-        pvRule = depAddRule(pOptions->fExcludeAll || pathlistFindFile2(pOptions->pszExclude, pszFilename, pOptions) ?
-                            fileName(pszFilename, szBuffer) : fileNormalize2(pszFilename, szBuffer), NULL, NULL);
+        pvRule = depAddRule(pOptions->fExcludeAll || pathlistFindFile2(pOptions->pszExclude, pszNormFilename, pOptions) ?
+                            fileName(pszFilename, szBuffer) : pszNormFilename, NULL, NULL);
 
     /* duplicate rule? */
     if (pvRule == NULL)
@@ -1217,13 +1224,14 @@ int langAsm(const char *pszFilename, void *pvFile, BOOL fHeader, POPTIONS pOptio
  * and written to file later.
  * @returns   0 on success.
  *            !0 on error.
- * @param     pszFilename  Pointer to source filename. Correct case is assumed!
- * @param     pvFile       Pointer to file textbuffer.
- * @param     pOptions     Pointer to options struct.
+ * @param     pszFilename      Pointer to source filename. Correct case is assumed!
+ * @param     pszNormFilename  Pointer to normalized source filename.
+ * @param     pvFile           Pointer to file textbuffer.
+ * @param     pOptions         Pointer to options struct.
  * @status    completely implemented.
  * @author    knut st. osmundsen
  */
-int langRC(const char *pszFilename, void *pvFile, BOOL fHeader, POPTIONS pOptions)
+int langRC(const char *pszFilename, const char *pszNormFilename, void *pvFile, BOOL fHeader, POPTIONS pOptions)
 {
     void *  pvRule;                     /* Handle to the current rule. */
     char    szBuffer[4096];             /* Temporary buffer (max line lenght size...) */
@@ -1247,13 +1255,13 @@ int langRC(const char *pszFilename, void *pvFile, BOOL fHeader, POPTIONS pOption
 
         if (pOptions->fSrcWhenObj && pvRule)
             depAddDepend(pvRule,
-                         pOptions->fExcludeAll || pathlistFindFile2(pOptions->pszExclude, pszFilename, pOptions) ?
+                         pOptions->fExcludeAll || pathlistFindFile2(pOptions->pszExclude, pszNormFilename, pOptions) ?
                             fileName(pszFilename, szBuffer) : fileNormalize2(pszFilename, szBuffer),
                          pOptions->fCheckCyclic);
     }
     else
-        pvRule = depAddRule(pOptions->fExcludeAll || pathlistFindFile2(pOptions->pszExclude, pszFilename, pOptions) ?
-                            fileName(pszFilename, szBuffer) : fileNormalize2(pszFilename, szBuffer), NULL, NULL);
+        pvRule = depAddRule(pOptions->fExcludeAll || pathlistFindFile2(pOptions->pszExclude, pszNormFilename, pOptions) ?
+                            fileName(pszFilename, szBuffer) : pszNormFilename, NULL, NULL);
 
     /* duplicate rule? */
     if (pvRule == NULL)
@@ -1361,13 +1369,14 @@ int langRC(const char *pszFilename, void *pvFile, BOOL fHeader, POPTIONS pOption
  * and written to file later.
  * @returns   0 on success.
  *            !0 on error.
- * @param     pszFilename  Pointer to source filename. Correct case is assumed!
- * @param     pvFile       Pointer to file textbuffer.
- * @param     pOptions     Pointer to options struct.
+ * @param     pszFilename      Pointer to source filename. Correct case is assumed!
+ * @param     pszNormFilename  Pointer to normalized source filename.
+ * @param     pvFile           Pointer to file textbuffer.
+ * @param     pOptions         Pointer to options struct.
  * @status    completely implemented.
  * @author    knut st. osmundsen
  */
-int langCOBOL(const char *pszFilename, void *pvFile, BOOL fHeader, POPTIONS pOptions)
+int langCOBOL(const char *pszFilename, const char *pszNormFilename, void *pvFile, BOOL fHeader, POPTIONS pOptions)
 {
     void *  pvRule;                     /* Handle to the current rule. */
     char    szBuffer[4096];             /* Temporary buffer (max line lenght size...) */
@@ -1391,13 +1400,13 @@ int langCOBOL(const char *pszFilename, void *pvFile, BOOL fHeader, POPTIONS pOpt
 
         if (pOptions->fSrcWhenObj && pvRule)
             depAddDepend(pvRule,
-                         pOptions->fExcludeAll || pathlistFindFile2(pOptions->pszExclude, pszFilename, pOptions) ?
+                         pOptions->fExcludeAll || pathlistFindFile2(pOptions->pszExclude, pszNormFilename, pOptions) ?
                             fileName(pszFilename, szBuffer) : fileNormalize2(pszFilename, szBuffer),
                          pOptions->fCheckCyclic);
     }
     else
-        pvRule = depAddRule(pOptions->fExcludeAll || pathlistFindFile2(pOptions->pszExclude, pszFilename, pOptions) ?
-                            fileName(pszFilename, szBuffer) : fileNormalize2(pszFilename, szBuffer), NULL, NULL);
+        pvRule = depAddRule(pOptions->fExcludeAll || pathlistFindFile2(pOptions->pszExclude, pszNormFilename, pOptions) ?
+                            fileName(pszFilename, szBuffer) : pszNormFilename, NULL, NULL);
 
     /* duplicate rule? */
     if (pvRule == NULL)
@@ -2040,7 +2049,7 @@ static char *pathlistFindFile(const char *pszPathList, const char *pszFilename, 
  * @returns   TRUE: if exists.
  *            FALSE: don't exist.
  * @param     pszPathList  Path list to search for filename.
- * @parma     pszFilename  Filename to find.
+ * @parma     pszFilename  Filename to find. The filename should be normalized!
  * @param     pOptions     Pointer to options struct.
  * @status    completely implemented.
  * @author    knut st. osmundsen
@@ -2062,7 +2071,6 @@ static BOOL pathlistFindFile2(const char *pszPathList, const char *pszFilename, 
     /*
      * Normalize the filename and get it's path.
      */
-    fileNormalize2(pszFilename, szBuffer);
     filePath(pszFilename, pszPathToFind);
 
 
