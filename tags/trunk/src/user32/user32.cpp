@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.5 1999-06-08 18:59:07 phaller Exp $ */
+/* $Id: user32.cpp,v 1.6 1999-06-09 20:53:30 phaller Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -2043,17 +2043,54 @@ UINT WIN32API GetDlgItemInt( HWND arg1, int arg2, PBOOL arg3, BOOL  arg4)
 #endif
     return O32_GetDlgItemInt(arg1, arg2, arg3, arg4);
 }
-//******************************************************************************
-//******************************************************************************
-UINT WIN32API GetDlgItemTextW( HWND arg1, int arg2, LPWSTR arg3, UINT  arg4)
+
+
+/*****************************************************************************
+ * Name      : UINT WIN32API GetDlgItemTextW
+ * Purpose   : Determine the text of a window control
+ * Parameters: HWND   arg1
+ *             int    arg2
+ *             LPWSTR arg3
+ *             UINT   arg4
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED UNKNOWN STUB
+ *
+ * Author    : Patrick Haller [Wed, 1998/06/16 11:55]
+ *****************************************************************************/
+
+UINT WIN32API GetDlgItemTextW(HWND   arg1,
+                              int    arg2,
+                              LPWSTR arg3,
+                              UINT   arg4)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  GetDlgItemTextW NOT WORKING\n");
-#endif
-    // NOTE: This will not work as is (needs UNICODE support)
-    return 0;
-//    return O32_GetDlgItemText(arg1, arg2, arg3, arg4);
+  LPSTR lpBuffer;                   /* temporary buffer for the ascii result */
+  UINT  uiResult;                   /* return value of the ascii variant     */
+
+  dprintf(("USER32: GetDlgItemTextW(%08xh,%08xh,%08xh,%08xh)\n",
+           arg1,
+           arg2,
+           arg3,
+           arg4));
+
+
+  lpBuffer = (LPSTR)malloc(arg4);              /* allocate temporary buffer */
+  uiResult = GetDlgItemTextA(arg1,             /* call ascii variant        */
+                             arg2,
+                             lpBuffer,
+                             arg4);
+
+  AsciiToUnicodeN(lpBuffer,                /* now convert result to unicode */
+                  arg3,
+                  arg4);
+
+  free(lpBuffer);                              /* free the temporary buffer */
+
+  return (uiResult);                                       /* OK, that's it */
 }
+
+
 //******************************************************************************
 //******************************************************************************
 UINT WIN32API GetDoubleClickTime(void)
