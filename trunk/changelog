@@ -1,4 +1,10 @@
-/* $Id: changelog,v 1.1247 2001-02-10 10:35:50 sandervl Exp $ */
+/* $Id: changelog,v 1.1248 2001-02-11 10:35:49 sandervl Exp $ */
+
+ 2001-02-11: Sander van Leeuwen <sandervl@xs4all.nl>
+    - ODINCRT:  o Completed runtime dll for VAC 3.6.5
+    - WINMM, GLU, CRTDLL, KERNEL32:
+                o Compile fixes for VAC 3.6.5
+    - RASAPI32: o Can't use LXLITE as it crashes on this binary
 
  2001-02-10: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Check if window has been destroyed before accessing
@@ -9,7 +15,6 @@
                         Also a potential problem in user32 classes (InfoPtr).
                 o Set last error to ERROR_INVALID_INDEX for invalid class word
                   index.
-
 
  2001-02-09: Sander van Leeuwen <sandervl@xs4all.nl>
     - COMCTL32: o Register controls in LibMain, not in DLL_InitTerm
