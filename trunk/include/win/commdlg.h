@@ -1,4 +1,4 @@
-/* $Id: commdlg.h,v 1.4 2000-02-03 13:26:22 sandervl Exp $ */
+/* $Id: commdlg.h,v 1.5 2000-02-09 13:40:23 sandervl Exp $ */
 /* 
  * COMMDLG - Common Wine Dialog ... :-)
  */
@@ -590,6 +590,12 @@ DECL_WINELIB_TYPE_AW(LPPAGESETUPDLG)
 #define PSD_ENABLEPAGESETUPTEMPLATEHANDLE 0x00020000
 #define PSD_ENABLEPAGEPAINTHOOK           0x00040000
 #define PSD_DISABLEPAGEPAINTING           0x00080000
+
+#define CommDlg_OpenSave_GetSpecA(_hdlg, _psz, _cbmax) \
+        (int)SNDMSG(_hdlg, CDM_GETSPEC, (WPARAM)_cbmax, (LPARAM)(LPSTR)_psz)
+#define CommDlg_OpenSave_GetSpecW(_hdlg, _psz, _cbmax) \
+        (int)SNDMSG(_hdlg, CDM_GETSPEC, (WPARAM)_cbmax, (LPARAM)(LPWSTR)_psz)
+#define     CommDlg_OpenSave_GetSpec WINELIB_NAME_AW(CommDlg_OpenSave_GetSpec)
 
 BOOL16  WINAPI ChooseColor16(LPCHOOSECOLOR16 lpChCol);
 BOOL  WINAPI ChooseColorA(LPCHOOSECOLORA lpChCol);

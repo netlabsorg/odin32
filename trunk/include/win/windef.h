@@ -1,4 +1,4 @@
-/* $Id: windef.h,v 1.19 2000-01-26 23:17:49 sandervl Exp $ */
+/* $Id: windef.h,v 1.20 2000-02-09 13:40:23 sandervl Exp $ */
 
 /*
  * Basic types definitions
@@ -113,7 +113,7 @@ extern "C" {
 #endif
 
 #ifndef __export
-  #define __export    __stdcall
+  #define __export    
 #endif
 
 #ifndef CDECL

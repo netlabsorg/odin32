@@ -1,4 +1,4 @@
-/* $Id: winuser.h,v 1.31 2000-01-26 23:47:20 sandervl Exp $ */
+/* $Id: winuser.h,v 1.32 2000-02-09 13:40:23 sandervl Exp $ */
 
 #ifndef __INCLUDE_WINUSER_H
 #define __INCLUDE_WINUSER_H
@@ -3674,6 +3674,8 @@ BOOL      WINAPI UnhookWindowsHookEx(HHOOK);
 BOOL      WINAPI UnionRect(LPRECT,const RECT*,const RECT*);
 BOOL      WINAPI UnregisterClassA(LPCSTR,HINSTANCE);
 BOOL      WINAPI UnregisterClassW(LPCWSTR,HINSTANCE);
+#define     UnregisterClass WINELIB_NAME_AW(UnregisterClass)
+
 BOOL        WINAPI UpdateWindow(HWND);
 BOOL        WINAPI ValidateRect(HWND,const RECT*);
 BOOL        WINAPI ValidateRgn(HWND,HRGN);
