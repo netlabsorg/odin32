@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.110 2001-02-17 21:48:23 bird Exp $
+# $Id: makefile,v 1.111 2001-03-22 18:16:41 sandervl Exp $
 
 #
 # Odin32 API
@@ -6,12 +6,10 @@
 #       kernel32.dll makefile
 #
 
-
 #
 # Compiler, tools, and interference rules.
 #
 !include ../../makefile.inc
-
 
 #
 # Object files. Prefix with OBJDIR and one space before the '\'.
@@ -119,6 +117,7 @@ $(OBJDIR)\version.obj \
 !ifdef DEBUG
 $(OBJDIR)\exceptstackdump.obj \
 !endif
+$(OBJDIR)\module.obj \
 $(OBJDIR)\kernelrsrc.obj
 
 

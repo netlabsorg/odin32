@@ -1,4 +1,4 @@
-/* $Id: thread.cpp,v 1.27 2001-02-11 10:34:45 sandervl Exp $ */
+/* $Id: thread.cpp,v 1.28 2001-03-22 18:16:41 sandervl Exp $ */
 
 /*
  * Win32 Thread API functions
@@ -97,7 +97,7 @@ DWORD OPEN32API Win32ThreadProc(LPVOID lpData)
 {
  EXCEPTION_FRAME exceptFrame;
  Win32Thread     *me = (Win32Thread *)lpData;
- WIN32THREADPROC  winthread = me->pCallback;
+ ULONG            winthread = (ULONG)me->pCallback;
  LPVOID           userdata  = me->lpUserData;
  HANDLE           hThread   = me->hThread;
  DWORD            rc;
@@ -133,7 +133,7 @@ DWORD OPEN32API Win32ThreadProc(LPVOID lpData)
 
   //Set default FPU control word (no exceptions); same as in NT
   CONTROL87(0x27F, 0xFFF);
-  rc = winthread(userdata);
+  rc = AsmCallThreadHandler(winthread, userdata);
 
   HMSetThreadTerminated(GetCurrentThread());
   winteb->o.odin.exceptFrame = 0;

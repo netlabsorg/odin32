@@ -1,4 +1,4 @@
-/* $Id: KERNEL32.CPP,v 1.59 2001-03-13 18:45:32 sandervl Exp $ */
+/* $Id: KERNEL32.CPP,v 1.60 2001-03-22 18:16:40 sandervl Exp $ */
 
 /*
  * Win32 compatibility file functions for OS/2
@@ -237,27 +237,6 @@ VOID WIN32API GlobalMemoryStatus(MEMORYSTATUS *arg1)
     dprintf(("dwTotalVirtual  %X\n", arg1->dwTotalVirtual));
     dprintf(("dwAvailVirtual  %X\n", arg1->dwAvailVirtual));
 }
-VOID WIN32API Sleep(DWORD arg1)
-{
-    dprintf2(("KERNEL32:  Sleep %d\n", arg1));
-    O32_Sleep(arg1);
-}
-//******************************************************************************
-//******************************************************************************
-DWORD WIN32API GetPriorityClass(HANDLE arg1)
-{
-    dprintf(("KERNEL32:  GetPriorityClass\n"));
-    return O32_GetPriorityClass(arg1);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API SetPriorityClass(HANDLE arg1, DWORD  arg2)
-{
-    dprintf(("KERNEL32:  SetPriorityClass\n"));
-    return O32_SetPriorityClass(arg1, arg2);
-}
-//******************************************************************************
-//******************************************************************************
 BOOL WIN32API Beep( DWORD arg1, DWORD  arg2)
 {
     dprintf(("KERNEL32:  OS2Beep\n"));
@@ -367,36 +346,6 @@ ODINPROCEDURE1(GetStartupInfoW,LPSTARTUPINFOW,lpStartupInfo)
   lpStartupInfo->lpDesktop   = lpDesktop;
   lpStartupInfo->lpTitle     = lpTitle;
   return;
-}
-//******************************************************************************
-//TODO: Not complete or correct, but sufficient for now
-//******************************************************************************
-BOOL WIN32API GetBinaryTypeA(LPCTSTR lpApplicationName, LPDWORD lpBinaryType)
-{
-  dprintf(("KERNEL32:  OS2GetBinaryTypeA %s\n", lpApplicationName));
-  if(strstr(lpApplicationName, ".EXE") ||   strstr(lpApplicationName, ".exe"))
-        *lpBinaryType = SCS_32BIT_BINARY;
-  else
-  if(strstr(lpApplicationName, ".COM") ||   strstr(lpApplicationName, ".com"))
-        *lpBinaryType = SCS_DOS_BINARY;
-  else
-  if(strstr(lpApplicationName, ".PIF") ||   strstr(lpApplicationName, ".pif"))
-        *lpBinaryType = SCS_PIF_BINARY;
-  else  return(FALSE);
-  return(TRUE);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API GetBinaryTypeW(LPCWSTR lpApplicationName, LPDWORD lpBinaryType)
-{
- BOOL rc;
- char  *astring;
-
-    dprintf(("KERNEL32:  OS2GetBinaryTypeW\n"));
-    astring = UnicodeToAsciiString((LPWSTR)lpApplicationName);
-    rc = GetBinaryTypeA(astring, lpBinaryType);
-    FreeAsciiString(astring);
-    return(rc);
 }
 //******************************************************************************
 //******************************************************************************

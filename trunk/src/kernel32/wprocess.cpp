@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.115 2001-03-19 19:27:14 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.116 2001-03-22 18:16:41 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -1754,6 +1754,27 @@ HINSTANCE WIN32API WinExec(LPCSTR lpCmdLine, UINT nCmdShow)
         dprintf(("WinExec: WaitForInputIdle %x returned %x", procinfo.hProcess, rc));
     }
     return procinfo.hProcess; //correct?
+}
+//******************************************************************************
+//******************************************************************************
+VOID WIN32API Sleep(DWORD arg1)
+{
+    dprintf2(("KERNEL32:  Sleep %d\n", arg1));
+    O32_Sleep(arg1);
+}
+//******************************************************************************
+//******************************************************************************
+DWORD WIN32API GetPriorityClass(HANDLE hProcess)
+{
+    dprintf(("KERNEL32: GetPriorityClass %x", hProcess));
+    return O32_GetPriorityClass(hProcess);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API SetPriorityClass(HANDLE hProcess, DWORD dwPriority)
+{
+    dprintf(("KERNEL32: SetPriorityClass %x %x", hProcess, dwPriority));
+    return O32_SetPriorityClass(hProcess, dwPriority);
 }
 /**********************************************************************
  * LoadModule    (KERNEL32.499)
