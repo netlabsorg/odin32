@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.1263 2001-02-17 19:25:43 sandervl Exp $ */
+/* $Id: changelog,v 1.1264 2001-02-17 20:17:09 sandervl Exp $ */
 
  2000-02-17: Yuri Dario <mc6530@mclink.it>
     - INCLUDE:  o Header changes for compiling Opera
@@ -22,7 +22,9 @@
                 o ScrollWindow(Ex) bugfixes
                   Must scroll child windows manually
                   (fixes scrolling of Opera html MDI windows)
-
+                o Combobox fix from Wine (CBCalcPlacement)
+                  (fixes combobox controls in Opera html MDI windows)
+                  (TODO: sync rest with latest Wine control code)
 
  2001-02-15: Sander van Leeuwen <sandervl@xs4all.nl>
     - COMDLG32: o Ignore OFN_FILEMUSTEXIST flag in GetSaveFileNameA/W
