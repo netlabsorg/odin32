@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.73 1999-12-27 21:20:48 sandervl Exp $
+# $Id: makefile,v 1.74 1999-12-28 19:16:34 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -92,6 +92,7 @@ kernel32.OBJ: kernel32.cpp \
     exceptutil.h \
     $(PDWIN32_INCLUDE)\unicode.h \
     $(PDWIN32_INCLUDE)\heap.h \
+    $(PDWIN32_INCLUDE)\versionos2.h \
     $(PDWIN32_INCLUDE)\wprocess.h
 
 process.obj: process.cpp \
@@ -151,7 +152,8 @@ os2heap.OBJ: \
     initterm.h
 
 initterm.OBJ: .\initterm.cpp initterm.h  $(PDWIN32_INCLUDE)\heapshared.h  mmap.h directory.h hmdevio.h initsystem.h $(PDWIN32_INCLUDE)\heapcode.h
-initsystem.obj: initsystem.cpp cpuhlp.h initsystem.h $(PDWIN32_INCLUDE)\misc.h directory.h
+initsystem.obj: initsystem.cpp cpuhlp.h initsystem.h $(PDWIN32_INCLUDE)\misc.h directory.h $(PDWIN32_INCLUDE)\versionos2.h
+
 
 thunk.OBJ: \
     .\thunk.cpp \

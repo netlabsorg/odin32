@@ -1,4 +1,4 @@
-/* $Id: stubs.cpp,v 1.15 1999-12-19 19:54:31 sandervl Exp $ */
+/* $Id: stubs.cpp,v 1.16 1999-12-28 19:16:35 sandervl Exp $ */
 
 /*
  * Win32 KERNEL32 Subsystem for OS/2
@@ -2060,29 +2060,6 @@ BOOL WIN32API GetQueuedCompletionStatus(HANDLE       CompletionPort,
   return (FALSE);
 }
 
-
-/*****************************************************************************
- * Name      : BOOL GetSystemPowerStatus
- * Purpose   : The GetSystemPowerStatus function retrieves the power status of
- *             the system. The status indicates whether the system is running
- *             on AC or DC power, whether the battery is currently charging,
- *             and how much battery life currently remains.
- * Parameters: LPSYSTEM_POWER_STATUS lpSystemPowerStatus
- * Variables :
- * Result    : TRUE / FALSE
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
- *****************************************************************************/
-
-BOOL WIN32API GetSystemPowerStatus(LPSYSTEM_POWER_STATUS lpSystemPowerStatus)
-{
-  dprintf(("Kernel32: GetSystemPowerStatus(%08xh) not implemented.\n",
-           lpSystemPowerStatus));
-
-  return (FALSE);
-}
 
 
 /*****************************************************************************

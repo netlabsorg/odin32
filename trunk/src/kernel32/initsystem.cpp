@@ -1,4 +1,4 @@
-/* $Id: initsystem.cpp,v 1.1 1999-12-09 11:59:28 sandervl Exp $ */
+/* $Id: initsystem.cpp,v 1.2 1999-12-28 19:16:34 sandervl Exp $ */
 /*
  * Odin system initialization (registry & directories)
  *
@@ -18,6 +18,7 @@
 #include "cpuhlp.h"
 #include "initsystem.h"
 #include "directory.h"
+#include <versionos2.h>
 
 static HINSTANCE hInstance = 0;
 
@@ -55,6 +56,7 @@ BOOL InitRegistry()
  HKEY hkey;
  char *buf;
  DWORD val;
+ char  digbuf[16];
 
    if(ADVAPI32_RegCreateKeyA(HKEY_LOCAL_MACHINE,"SYSTEM\\CurrentControlSet\\Control\\Windows",&hkey)!=ERROR_SUCCESS) {
       	dprintf(("InitRegistry: Unable to register system information\n"));
@@ -68,11 +70,32 @@ BOOL InitRegistry()
    ADVAPI32_RegSetValueExA(hkey,"ErrorMode",0,REG_DWORD, (LPBYTE)&val, sizeof(DWORD));
    val = 0;
    ADVAPI32_RegSetValueExA(hkey,"NoInteractiveServices",0,REG_DWORD, (LPBYTE)&val, sizeof(DWORD));
-   val = 0x300;
+   val = ODINNT_BUILD_NR;
    ADVAPI32_RegSetValueExA(hkey,"CSDVersion",0,REG_DWORD, (LPBYTE)&val, sizeof(DWORD));
    ADVAPI32_RegSetValueExA(hkey,"ShutdownTime",0,REG_DWORD, (LPBYTE)ShutdownTime, sizeof(ShutdownTime));
    ADVAPI32_RegCloseKey(hkey);
- 
+
+   if(ADVAPI32_RegCreateKeyA(HKEY_LOCAL_MACHINE,"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion",&hkey)!=ERROR_SUCCESS) {
+      	dprintf(("InitRegistry: Unable to register system information (2)"));
+	return FALSE;
+   }
+   buf = InternalGetSystemDirectoryA();
+   ADVAPI32_RegSetValueExA(hkey,"SystemRoot",0,REG_SZ, (LPBYTE)buf, strlen(buf)+1);
+   ADVAPI32_RegSetValueExA(hkey,"PathName",0,REG_SZ, (LPBYTE)buf, strlen(buf)+1);
+   sprintf(digbuf, "%d", ODINNT_BUILD_NR);
+   ADVAPI32_RegSetValueExA(hkey,"CurrentBuildNumber",0,REG_SZ, (LPBYTE)digbuf, strlen(digbuf)+1);
+   ADVAPI32_RegSetValueExA(hkey,"CurrentType",0,REG_SZ, (LPBYTE)ODINNT_OSTYPE_UNI, sizeof(ODINNT_OSTYPE_UNI));
+   ADVAPI32_RegSetValueExA(hkey,"CSDVersion",0,REG_SZ, (LPBYTE)ODINNT_CSDVERSION, sizeof(ODINNT_CSDVERSION));
+   ADVAPI32_RegSetValueExA(hkey,"SoftwareType",0,REG_SZ, (LPBYTE)ODINNT_SOFTWARE_TYPE, sizeof(ODINNT_SOFTWARE_TYPE));
+
+   sprintf(digbuf, "%d.%d", ODINNT_MAJOR_VERSION, ODINNT_MINOR_VERSION);
+   ADVAPI32_RegSetValueExA(hkey,"CurrentVersion",0,REG_SZ, (LPBYTE)digbuf, strlen(digbuf)+1);
+
+   val = GetCurrentTime(); //TODO: Correct format?
+   ADVAPI32_RegSetValueExA(hkey,"InstallDate",0,REG_DWORD, (LPBYTE)&val, sizeof(DWORD));
+   
+   ADVAPI32_RegCloseKey(hkey);
+   //todo: productid, registered org/owner, sourcepath,    
    return TRUE;
 }
 //******************************************************************************
