@@ -1,4 +1,4 @@
-/* $Id: winmenu.cpp,v 1.18 1999-12-16 00:11:49 sandervl Exp $ */
+/* $Id: winmenu.cpp,v 1.19 1999-12-18 14:31:15 sandervl Exp $ */
 
 /*
  * Win32 menu API functions for OS/2
@@ -724,7 +724,7 @@ ODINFUNCTION5(BOOL, InsertMenuA,
               LPCSTR, str)
 {
     if(IS_STRING_ITEM(flags) && HIWORD(str)) {
-    	 dprintf(("USER32: InsertMenuA %x %d %x %d %s", hMenu, pos, flags, id, str));
+         dprintf(("USER32: InsertMenuA %x %d %x %d %s", hMenu, pos, flags, id, str));
     }
     else dprintf(("USER32: InsertMenuA %x %d %x %d %x", hMenu, pos, flags, id, str));
 
@@ -1071,7 +1071,7 @@ ODINFUNCTION4(BOOL, GetMenuItemInfoW,
  *             If the function fails, the return value is FALSE. To get
  *             extended error information, use the GetLastError function.
  * Remark    :
- * Status    : 
+ * Status    :
  *
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
@@ -1105,6 +1105,9 @@ ODINFUNCTION4(BOOL, InsertMenuItemA,
               BOOL, fByPosition,
               const MENUITEMINFOA*, lpmii)
 {
+ DWORD dwType;
+ BOOL rc;
+
     dprintf(("USER32:InsertMenuItemA (%08xh,%08xh,%u,%08x) not correctly implemented.\n",
          hMenu,
          uItem,
@@ -1112,9 +1115,21 @@ ODINFUNCTION4(BOOL, InsertMenuItemA,
          lpmii));
 
     if(fByPosition) {
-            return ODIN_InsertMenuA(hMenu, uItem, lpmii->fType | MF_BYPOSITION, (lpmii->fType & MF_POPUP) ? lpmii->hSubMenu : lpmii->wID, lpmii->dwTypeData);
+            dwType = lpmii->fType | MF_BYPOSITION;
     }
-    else    return ODIN_InsertMenuA(hMenu, uItem, lpmii->fType | MF_BYCOMMAND, (lpmii->fType & MF_POPUP) ? lpmii->hSubMenu : lpmii->wID, lpmii->dwTypeData);
+    else    dwType = lpmii->fType | MF_BYCOMMAND;
+
+    if(lpmii->fMask & MIIM_SUBMENU && lpmii->hSubMenu) {
+        rc &= ODIN_InsertMenuA(hMenu, uItem, dwType | MF_POPUP, lpmii->hSubMenu, lpmii->dwTypeData);
+    }
+    else
+    if(lpmii->fMask & MIIM_ID) {
+        rc = ODIN_InsertMenuA(hMenu, uItem, dwType, lpmii->wID, lpmii->dwTypeData);
+    }
+    if(lpmii->fMask & MIIM_STATE) {
+    //TODO
+    }
+    return rc;
 }
 
 
