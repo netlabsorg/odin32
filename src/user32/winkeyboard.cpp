@@ -1,4 +1,4 @@
-/* $Id: winkeyboard.cpp,v 1.7 2000-10-18 20:17:00 sandervl Exp $ */
+/* $Id: winkeyboard.cpp,v 1.8 2001-02-19 21:43:18 sandervl Exp $ */
 /*
  * Win32 <-> PM key translation
  *
@@ -292,6 +292,13 @@ void WIN32API KeyTranslatePMToWinBuf(BYTE *pmkey, BYTE *winkey, int nrkeys)
    for(int i=0;i<nrkeys;i++) {
     	winkey[i] = abPMScanToWinVKey[pmkey[i]];
    }
+}
+//******************************************************************************
+//******************************************************************************
+int WIN32API GetKeyboardType( int nTypeFlag)
+{
+    dprintf(("USER32:  GetKeyboardType\n"));
+    return O32_GetKeyboardType(nTypeFlag);
 }
 //******************************************************************************
 //******************************************************************************
