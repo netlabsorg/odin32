@@ -1,4 +1,4 @@
-/* $Id: winkeyboard.cpp,v 1.22 2001-10-25 13:16:57 phaller Exp $ */
+/* $Id: winkeyboard.cpp,v 1.23 2001-10-26 10:03:34 phaller Exp $ */
 /*
  * Win32 <-> PM key translation
  *
@@ -104,7 +104,7 @@ BYTE abPMScanToWinVKey[256][2] =
 /* 0x33 PMSCAN_COMMA        */ , VK_COMMA                   ,FALSE
 /* 0x34 PMSCAN_PERIOD       */ , VK_PERIOD                  ,FALSE
 /* 0x35 PMSCAN_SLASH        */ , VK_SLASH                   ,FALSE
-/* 0x36 PMSCAN_SHIFTRIGHT   */ , VK_RSHIFT                  ,FALSE
+/* 0x36 PMSCAN_SHIFTRIGHT   */ , VK_RSHIFT                  ,TRUE
 /* 0x37 PMSCAN_PADASTERISK  */ , VK_MULTIPLY                ,FALSE
 /* 0x38 PMSCAN_ALTLEFT      */ , VK_LMENU                   ,FALSE
 /* 0x39 PMSCAN_SPACE        */ , VK_SPACE                   ,FALSE
@@ -639,7 +639,7 @@ BYTE abPMScanToWinScan[256][2] =
 /* 0x33 PMSCAN_COMMA        */ , WINSCAN_COMMA              ,FALSE
 /* 0x34 PMSCAN_PERIOD       */ , WINSCAN_PERIOD             ,FALSE
 /* 0x35 PMSCAN_SLASH        */ , WINSCAN_SLASH              ,FALSE
-/* 0x36 PMSCAN_SHIFTRIGHT   */ , WINSCAN_SHIFTRIGHT         ,FALSE
+/* 0x36 PMSCAN_SHIFTRIGHT   */ , WINSCAN_SHIFTRIGHT         ,TRUE
 /* 0x37 PMSCAN_PADASTERISK  */ , WINSCAN_PADASTERISK        ,FALSE
 /* 0x38 PMSCAN_ALTLEFT      */ , WINSCAN_ALTLEFT            ,FALSE
 /* 0x39 PMSCAN_SPACE        */ , WINSCAN_SPACE              ,FALSE
@@ -896,6 +896,24 @@ BYTE KeyTranslateWinVKeyToPMScan(BYTE bWinVKey, BOOL fExtended)
   
   // almost a match or no match at all.
   return bAlmost; 
+}
+//******************************************************************************
+//******************************************************************************
+void KeyTranslatePMScanToWinVKey(BYTE bPMScan, 
+                                 BOOL bNumLock,
+                                 PBYTE pbWinVKey,
+                                 WORD* pwWinScan,
+                                 PBOOL pfExtended)
+{
+  // @@@PH numlock is currently ignored
+  if (pbWinVKey)
+    *pbWinVKey = abPMScanToWinVKey[bPMScan][0];
+  
+  if (pfExtended)
+    *pfExtended = abPMScanToWinVKey[bPMScan][1];
+  
+  if (pwWinScan)
+    *pwWinScan = abPMScanToWinScan[bPMScan][0];
 }
 //******************************************************************************
 //******************************************************************************

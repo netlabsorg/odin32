@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.69 2001-10-26 09:10:12 phaller Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.70 2001-10-26 10:03:34 phaller Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -35,10 +35,13 @@
 #include <pmkbdhk.h>
 #include <pmscan.h>
 #include <winscan.h>
+#include <winkeyboard.h>
 
 #define DBG_LOCALLOG    DBG_oslibmsgtranslate
 #include "dbglocal.h"
 
+
+#if REDUNDANT_AND_BUGGY_DEFINITION
 // Formerly used method of translation based on OS/2 VKEY value didn't work
 // right. We need to take a look at the scan code we get from PM and derive
 // the Win32 VKEY and scancode from that because sometimes even the scancode
@@ -88,7 +91,7 @@ USHORT pmscan2winkey [][2] = {
     0xBA, 0x27,     // 0x27 ;
     0xDE, 0x28,     // 0x28 '
     0xC0, 0x29,     // 0x29 `
-    0x10, 0x2A,     // 0x2A LShift
+    VK_LSHIFT_W, 0x2A,     // 0x2A LShift
     0xDC, 0x2B,     // 0x2B Bkslsh
     0x5A, 0x2C,     // 0x2C z
     0x58, 0x2D,     // 0x2D x
@@ -100,7 +103,7 @@ USHORT pmscan2winkey [][2] = {
     0xBC, 0x33,     // 0x33 ,
     0xBE, 0x34,     // 0x34 .
     0xBF, 0x35,     // 0x35 /
-    0x10, 0x36,     // 0x36 RShift
+    VK_RSHIFT_W, 0x36,     // 0x36 RShift
     0x6A, 0x37,     // 0x37 * Pad
 //  0x12, 0x38,     // 0x38 LAlt
     VK_LMENU_W, 0x38,     // 0x38 LAlt
@@ -160,6 +163,7 @@ USHORT pmscan2winkey [][2] = {
     0x5B, 0x15B,    // 0x6E LWin (PM scan 0x7E)
     0x5C, 0x15C     // 0x6F RMenu? (PM scan 0x7F)
 };
+#endif
 
 static BOOL fGenerateDoubleClick = FALSE;
 static MSG  doubleClickMsg = {0};
@@ -729,13 +733,29 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
 
 VirtualKeyFound:
 //        dprintf (("VIRTUALKEYFOUND:(%x)", virtualKey));
-
+      
+        // @@@PH: what's this supposed to be?
         // Adjust PM scancodes for Win* keys
         if (scanCode >= 0x70)
-            scanCode -= 0x10;
-        winMsg->wParam  = pmscan2winkey[scanCode][0];
+          scanCode -= 0x10;
+      
+      // winMsg->wParam  = pmscan2winkey[scanCode][0];
+      // wWinScan  = pmscan2winkey[scanCode][1];
+      {
+        BOOL  fWinExtended;
+        BYTE  bWinVKey;
+        WORD  wWinScan;
+        
+        // Note: Numlock-state currently ignored, see below
+        KeyTranslatePMScanToWinVKey(scanCode,
+                                    FALSE, 
+                                    &bWinVKey,
+                                    &wWinScan,
+                                    &fWinExtended);
+        winMsg->wParam = bWinVKey;
         winMsg->lParam  = repeatCount & 0x0FFFF;                 // bit 0-15, repeatcount
-        winMsg->lParam |= (pmscan2winkey[scanCode][1] & 0x1FF) << 16;  // bit 16-23, scancode + bit 15 extended
+        winMsg->lParam |= (wWinScan & 0x1FF) << 16;  // bit 16-23, scancode + bit 15 extended
+      }
 
         // Adjust VKEY value for pad digits if NumLock is on
         if ((scanCode >= 0x47) && (scanCode <= 0x53) &&

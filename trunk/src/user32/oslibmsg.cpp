@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.cpp,v 1.47 2001-10-26 09:10:12 phaller Exp $ */
+/* $Id: oslibmsg.cpp,v 1.48 2001-10-26 10:03:34 phaller Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -247,9 +247,18 @@ BOOL i_OSLibWinGetMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilter
         // @@@PH verify this
         // if this is a keyup or keydown message, we've got to
         // call the keyboard hook here
-        if(pMsg->message <= WINWM_KEYLAST && pMsg->message >= WINWM_KEYDOWN)
+        // send keyboard messages to the registered hooks
+        switch (pMsg->message)
         {
-          ProcessKbdHook(pMsg, TRUE);
+          case WINWM_KEYDOWN:
+          case WINWM_KEYUP:
+          case WINWM_SYSKEYDOWN:
+          case WINWM_SYSKEYUP:
+            // only supposed to be called upon WM_KEYDOWN
+            // and WM_KEYUP according to docs.
+            if(ProcessKbdHook(pMsg, TRUE))
+              goto continuegetmsg;
+            break;
         }
     
         return (pMsg->message != WINWM_QUIT);
@@ -299,13 +308,19 @@ continuegetmsg:
   memcpy(&teb->o.odin.winmsg, pMsg, sizeof(MSG));
   
   // send keyboard messages to the registered hooks
-  if(pMsg->message <= WINWM_KEYLAST && pMsg->message >= WINWM_KEYDOWN)
+  switch (pMsg->message)
   {
-    // only supposed to be called upon WM_KEYDOWN
-    // and WM_KEYUP according to docs.
-    if(ProcessKbdHook(pMsg, TRUE))
-      goto continuegetmsg;
+    case WINWM_KEYDOWN:
+    case WINWM_KEYUP:
+    case WINWM_SYSKEYDOWN:
+    case WINWM_SYSKEYUP:
+      // only supposed to be called upon WM_KEYDOWN
+      // and WM_KEYUP according to docs.
+      if(ProcessKbdHook(pMsg, TRUE))
+        goto continuegetmsg;
+      break;
   }
+  
   return rc;
 }
 BOOL OSLibWinGetMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterMax,
@@ -373,10 +388,20 @@ BOOL i_OSLibWinPeekMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilte
         // @@@PH verify this
         // if this is a keyup or keydown message, we've got to
         // call the keyboard hook here
-        if(pMsg->message <= WINWM_KEYLAST && pMsg->message >= WINWM_KEYDOWN)
+        // send keyboard messages to the registered hooks
+        switch (pMsg->message)
         {
-          ProcessKbdHook(pMsg, fRemove);
+          case WINWM_KEYDOWN:
+          case WINWM_KEYUP:
+          case WINWM_SYSKEYDOWN:
+          case WINWM_SYSKEYUP:
+            // only supposed to be called upon WM_KEYDOWN
+            // and WM_KEYUP according to docs.
+            if(ProcessKbdHook(pMsg, fRemove))
+              goto continuepeekmsg;
+            break;
         }
+    
         return TRUE;
   }
 
@@ -418,12 +443,17 @@ continuepeekmsg:
   }
 
   // send keyboard messages to the registered hooks
-  if(pMsg->message <= WINWM_KEYLAST && pMsg->message >= WINWM_KEYDOWN)
+  switch (pMsg->message)
   {
-    // only supposed to be called upon WM_KEYDOWN
-    // and WM_KEYUP according to docs.
-    if(ProcessKbdHook(pMsg, fRemove))
-      goto continuepeekmsg;
+    case WINWM_KEYDOWN:
+    case WINWM_KEYUP:
+    case WINWM_SYSKEYDOWN:
+    case WINWM_SYSKEYUP:
+      // only supposed to be called upon WM_KEYDOWN
+      // and WM_KEYUP according to docs.
+      if(ProcessKbdHook(pMsg, fRemove))
+        goto continuepeekmsg;
+      break;
   }
 
   return rc;
