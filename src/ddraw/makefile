@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.31 2002-12-20 10:38:25 sandervl Exp $
+# $Id: makefile,v 1.32 2002-12-29 14:11:01 sandervl Exp $
 
 #
 # Odin32 API
@@ -26,6 +26,8 @@ $(OBJDIR)\ddraw3d.obj \
 ##$(OBJDIR)\iccio1.obj \
 $(OBJDIR)\asmutil.obj \
 $(OBJDIR)\surface.obj \
+$(OBJDIR)\surfblit.obj \
+$(OBJDIR)\surfoverlay.obj \
 $(OBJDIR)\surfacehlp.obj \
 $(OBJDIR)\wndproc.obj \
 $(OBJDIR)\palette.obj \

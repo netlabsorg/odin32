@@ -1,4 +1,4 @@
-/* $Id: ddraw3d.cpp,v 1.1 2002-12-04 10:35:00 sandervl Exp $ */
+/* $Id: ddraw3d.cpp,v 1.2 2002-12-29 14:11:01 sandervl Exp $ */
 
 /*
  * DX clipper class routines
@@ -30,7 +30,7 @@
 
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall D3DQueryInterface(THIS This, REFIID riid, LPVOID FAR * ppvObj)
+HRESULT WIN32API D3DQueryInterface(THIS This, REFIID riid, LPVOID FAR * ppvObj)
 {
   dprintf(("DDRAW: D3DQueryInterface\n"));
   *ppvObj = NULL;
@@ -45,7 +45,7 @@ HRESULT __stdcall D3DQueryInterface(THIS This, REFIID riid, LPVOID FAR * ppvObj)
 }
 //******************************************************************************
 //******************************************************************************
-ULONG __stdcall D3DAddRef(THIS This)
+ULONG WIN32API D3DAddRef(THIS This)
 {
  OS2IDirectDraw *me = DDraw3D_GetThisPtr(This);
 
@@ -54,7 +54,7 @@ ULONG __stdcall D3DAddRef(THIS This)
 }
 //******************************************************************************
 //******************************************************************************
-ULONG __stdcall D3DRelease(THIS This)
+ULONG WIN32API D3DRelease(THIS This)
 {
  OS2IDirectDraw *me = DDraw3D_GetThisPtr(This);
 
@@ -76,7 +76,7 @@ ULONG __stdcall D3DRelease(THIS This)
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall D3DInitialize(THIS This, REFIID)
+HRESULT WIN32API D3DInitialize(THIS This, REFIID)
 {
  OS2IDirectDraw *me = DDraw3D_GetThisPtr(This);
 
@@ -85,7 +85,7 @@ HRESULT __stdcall D3DInitialize(THIS This, REFIID)
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall D3DEnumDevices(THIS This, LPD3DENUMDEVICESCALLBACK, LPVOID)
+HRESULT WIN32API D3DEnumDevices(THIS This, LPD3DENUMDEVICESCALLBACK, LPVOID)
 {
  OS2IDirectDraw *me = DDraw3D_GetThisPtr(This);
 
@@ -94,7 +94,7 @@ HRESULT __stdcall D3DEnumDevices(THIS This, LPD3DENUMDEVICESCALLBACK, LPVOID)
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall D3DCreateLight(THIS This, LPDIRECT3DLIGHT*, IUnknown*)
+HRESULT WIN32API D3DCreateLight(THIS This, LPDIRECT3DLIGHT*, IUnknown*)
 {
  OS2IDirectDraw *me = DDraw3D_GetThisPtr(This);
 
@@ -103,7 +103,7 @@ HRESULT __stdcall D3DCreateLight(THIS This, LPDIRECT3DLIGHT*, IUnknown*)
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall D3DCreateMaterial(THIS This, LPDIRECT3DMATERIAL*, IUnknown*)
+HRESULT WIN32API D3DCreateMaterial(THIS This, LPDIRECT3DMATERIAL*, IUnknown*)
 {
  OS2IDirectDraw *me = DDraw3D_GetThisPtr(This);
 
@@ -112,7 +112,7 @@ HRESULT __stdcall D3DCreateMaterial(THIS This, LPDIRECT3DMATERIAL*, IUnknown*)
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall D3DCreateViewport(THIS This, LPDIRECT3DVIEWPORT*, IUnknown*)
+HRESULT WIN32API D3DCreateViewport(THIS This, LPDIRECT3DVIEWPORT*, IUnknown*)
 {
  OS2IDirectDraw *me = DDraw3D_GetThisPtr(This);
 
@@ -121,7 +121,7 @@ HRESULT __stdcall D3DCreateViewport(THIS This, LPDIRECT3DVIEWPORT*, IUnknown*)
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall D3DFindDevice(THIS This, LPD3DFINDDEVICESEARCH, LPD3DFINDDEVICERESULT)
+HRESULT WIN32API D3DFindDevice(THIS This, LPD3DFINDDEVICESEARCH, LPD3DFINDDEVICERESULT)
 {
  OS2IDirectDraw *me = DDraw3D_GetThisPtr(This);
 

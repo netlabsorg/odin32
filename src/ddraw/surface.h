@@ -1,4 +1,4 @@
-/* $Id: surface.h,v 1.1 2002-12-04 10:35:02 sandervl Exp $ */
+/* $Id: surface.h,v 1.2 2002-12-29 14:11:02 sandervl Exp $ */
 
 /*
  * Direct/X Surface class
@@ -54,9 +54,9 @@ class OS2IDirectDrawSurface
  public:
   //this one has to go first!
   IDirectDrawSurface2Vtbl *lpVtbl;
-  IDirectDrawSurface2Vtbl *lpVtbl2;         // 2nd Vtable pointer An other MS assumtion see below
+  IDirectDrawSurface2Vtbl *lpVtbl2;         // 2nd Vtable pointer An other MS assumption see below
 //  IDirectDrawSurface4Vtbl *lpVtbl;
-//  IDirectDrawSurface4Vtbl *lpVtbl2;         // 2nd Vtable pointer An other MS assumtion see below
+//  IDirectDrawSurface4Vtbl *lpVtbl2;         // 2nd Vtable pointer An other MS assumption see below
   DWORD                    dwUnknownData;   // Pointer to unknown data set to DEADDEAD to indicate that we can't handle this
   IDirectDrawSurface2Vtbl  Vtbl2;
   IDirectDrawSurface3Vtbl  Vtbl3;

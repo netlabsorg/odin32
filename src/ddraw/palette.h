@@ -1,4 +1,4 @@
-/* $Id: palette.h,v 1.1 2002-12-04 10:35:01 sandervl Exp $ */
+/* $Id: palette.h,v 1.2 2002-12-29 14:11:02 sandervl Exp $ */
 
 /*
  * DX palette class definition
@@ -61,23 +61,23 @@ class OS2IDirectDrawPalette
   DWORD          dwCaps;
   DWORD          dwSize;
   BOOL           fAttachedToPrimary;
-  friend    HRESULT __stdcall PalQueryInterface(THIS, REFIID riid, LPVOID FAR * ppvObj);
-  friend    ULONG   __stdcall PalAddRef(THIS);
-  friend    ULONG   __stdcall PalRelease(THIS);
-  friend    HRESULT __stdcall PalGetCaps(THIS, LPDWORD);
-  friend    HRESULT __stdcall PalGetEntries(THIS, DWORD,DWORD,DWORD,LPPALETTEENTRY);
-  friend    HRESULT __stdcall PalInitialize(THIS, LPDIRECTDRAW, DWORD, LPPALETTEENTRY);
-  friend    HRESULT __stdcall PalSetEntries(THIS, DWORD,DWORD,DWORD,LPPALETTEENTRY);
+  friend    HRESULT WIN32API PalQueryInterface(THIS, REFIID riid, LPVOID FAR * ppvObj);
+  friend    ULONG   WIN32API PalAddRef(THIS);
+  friend    ULONG   WIN32API PalRelease(THIS);
+  friend    HRESULT WIN32API PalGetCaps(THIS, LPDWORD);
+  friend    HRESULT WIN32API PalGetEntries(THIS, DWORD,DWORD,DWORD,LPPALETTEENTRY);
+  friend    HRESULT WIN32API PalInitialize(THIS, LPDIRECTDRAW, DWORD, LPPALETTEENTRY);
+  friend    HRESULT WIN32API PalSetEntries(THIS, DWORD,DWORD,DWORD,LPPALETTEENTRY);
 };
 
 
-HRESULT __stdcall PalQueryInterface(THIS, REFIID riid, LPVOID FAR * ppvObj);
-ULONG   __stdcall PalAddRef(THIS);
-ULONG   __stdcall PalRelease(THIS);
-HRESULT __stdcall PalGetCaps(THIS, LPDWORD);
-HRESULT __stdcall PalGetEntries(THIS, DWORD,DWORD,DWORD,LPPALETTEENTRY);
-HRESULT __stdcall PalInitialize(THIS, LPDIRECTDRAW, DWORD, LPPALETTEENTRY);
-HRESULT __stdcall PalSetEntries(THIS, DWORD,DWORD,DWORD,LPPALETTEENTRY);
+HRESULT WIN32API PalQueryInterface(THIS, REFIID riid, LPVOID FAR * ppvObj);
+ULONG   WIN32API PalAddRef(THIS);
+ULONG   WIN32API PalRelease(THIS);
+HRESULT WIN32API PalGetCaps(THIS, LPDWORD);
+HRESULT WIN32API PalGetEntries(THIS, DWORD,DWORD,DWORD,LPPALETTEENTRY);
+HRESULT WIN32API PalInitialize(THIS, LPDIRECTDRAW, DWORD, LPPALETTEENTRY);
+HRESULT WIN32API PalSetEntries(THIS, DWORD,DWORD,DWORD,LPPALETTEENTRY);
 
 
 #endif
