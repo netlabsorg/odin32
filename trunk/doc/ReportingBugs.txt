@@ -1,4 +1,4 @@
-/* $Id: ReportingBugs.txt,v 1.7 2001-04-23 17:06:35 sandervl Exp $ */
+/* $Id: ReportingBugs.txt,v 1.8 2001-05-20 08:23:11 sandervl Exp $ */
 
 Reporting Odin bugs
 -------------------
@@ -7,8 +7,8 @@ To make our job easier when dealing with reports of failures to run
 certain apps, there's a standard form to report bug. (see below)
 
 Some remarks:
-        - unless the debug version of Odin works ok, always try the debug build 
-          with the application
+        - always try the debug build with the application unless only
+          only the release build shows the problem.
         - make sure you have installed Odin properly (WarpIN)
         - pe.exe is the recommended way to run windows applications; remove
           win32k from your config.sys (note that WarpIN does *not* install win32k)
@@ -17,7 +17,7 @@ Some remarks:
         - always send these bug reports to the odinusers mailinglist; not directly 
           to the developers.
           (so others can respond if the problem is old or already fixed)
-          (odinusers@egroups.com; go to www.egroups.com to subscribe)
+          (odinusers@yahoogroups.com; go to www.yahoogroups.com to subscribe)
 
 Sometimes the small part of the logfile isn't enough for us to determine 
 where the problem lies.
@@ -49,7 +49,7 @@ but improper behaviour isn't.
 In the system menu (top left button of a window), there's a menu item called
 'Put mark in debug log'. Selecting this item puts the line 'Mark requested 
 by user' in the log. 
-This can be useful i.e. if a window is resized improperly after you click
+This can be useful e.g. if a window is resized improperly after you click
 on a button. To make it easy for us to locate the right log lines, you
 should select the 'Put mark in debug log' menu item and then click on the
 button that causes the problem.
@@ -60,10 +60,11 @@ Odin build: 		date & debug/release
 Installed Odin:		manually/WarpIN
 Method of launching
 win32 apps:            	win32k/pe.exe
-                        (if pe.exe is used, win32k must not be loaded at all!)
+                        (if pe.exe is used, win32k must not be loaded at all)
 OS/2 version:		OS/2 Warp 4 or OS/2 Warp Server for e-Business 
                         (Warp 3 not officially supported)
 Fixpack level:		
+Display driver + ver.:  (eg. sdd/gradd/matrox etc)
 
 xf86sup.sys loaded:     yes/no
 
