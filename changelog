@@ -1,7 +1,8 @@
-/* $Id: changelog,v 1.1641 2001-08-08 12:05:45 sandervl Exp $ */
+/* $Id: changelog,v 1.1642 2001-08-08 15:25:13 sandervl Exp $ */
 
  2001-08-08: Sander van Leeuwen <sandervl@xs4all.nl>
     - SHELL32:  o Fix for shell link with single icon instead of icon group
+                o Shell icon save fix (again fopen without binary mode)
     - USER32:   o Icon conversion moved here + fixed
     - KERNEL32: o Removed icon conversion
     - INSTALL:  o Add program object for Registry Editor to Odin folder
