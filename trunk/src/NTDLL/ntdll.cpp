@@ -1,4 +1,4 @@
-/* $Id: ntdll.cpp,v 1.3 1999-11-09 09:30:20 phaller Exp $ */
+/* $Id: ntdll.cpp,v 1.4 1999-12-18 20:01:14 sandervl Exp $ */
 
 /*
  *
@@ -49,6 +49,8 @@
 
 #define NTSTATUS DWORD
 
+//SvL: per process heap for NTDLL
+HANDLE NTDLL_hHeap = 0;
 
 /*****************************************************************************
  * Name      : DbgPrint
@@ -76,3 +78,27 @@ void __cdecl DbgPrint(LPCSTR lpcstrFormat,LPVOID args)
 
   //@@@PH raise debug exception if running in debugger
 }
+
+
+BOOL WINAPI NTDLL_LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
+{
+    dprintf(("NTDLL_LibMain: 0x%x 0x%lx %p\n", hinstDLL, fdwReason, lpvReserved));
+
+    switch (fdwReason) {
+    case DLL_PROCESS_ATTACH:
+        NTDLL_hHeap = HeapCreate(0, 0x10000, 0);
+	break;
+    case DLL_PROCESS_DETACH:
+        HeapDestroy(NTDLL_hHeap);
+        NTDLL_hHeap = 0;
+	break;
+    case DLL_THREAD_ATTACH:
+	break;
+    case DLL_THREAD_DETACH:
+	break;
+    default:
+	break;
+    }
+    return TRUE;
+}
+

@@ -1,4 +1,4 @@
-/* $Id: ntdll.h,v 1.7 1999-08-22 22:45:52 sandervl Exp $ */
+/* $Id: ntdll.h,v 1.8 1999-12-18 20:01:14 sandervl Exp $ */
 
 /*
    this file defines interfaces mainly exposed to device drivers and
@@ -44,6 +44,10 @@ extern "C" {
 #endif
 
 
+//SvL: Internal heap allocation definitions for NTDLL
+extern HANDLE NTDLL_hHeap;
+#define Heap_Alloc(a)	HeapAlloc(NTDLL_hHeap, HEAP_ZERO_MEMORY, a)
+#define Heap_Free(a)	HeapFree(NTDLL_hHeap, 0, (PVOID)a)
 
 typedef struct _IO_STATUS_BLOCK
 {  union
@@ -366,21 +370,20 @@ NTSTATUS WINAPI NtQueryInformationToken(
  * sid functions
  */
 
-BOOLEAN WINAPI RtlAllocateAndInitializeSid (
-   PSID_IDENTIFIER_AUTHORITY pIdentifierAuthority,
-   DWORD nSubAuthorityCount,
-   DWORD x3,
-   DWORD x4,
-   DWORD x5,
-   DWORD x6,
-   DWORD x7,
-   DWORD x8,
-   DWORD x9,
-   DWORD x10,
-   PSID pSid);
-
-DWORD WINAPI RtlEqualSid(DWORD x1,DWORD x2);
-DWORD WINAPI RtlFreeSid(DWORD x1);
+BOOLEAN WINAPI RtlAllocateAndInitializeSid ( PSID_IDENTIFIER_AUTHORITY pIdentifierAuthority,
+					     BYTE nSubAuthorityCount,
+					     DWORD nSubAuthority0,
+					     DWORD nSubAuthority1,
+					     DWORD nSubAuthority2,
+					     DWORD nSubAuthority3,
+					     DWORD nSubAuthority4,
+					     DWORD nSubAuthority5,
+					     DWORD nSubAuthority6,
+					     DWORD nSubAuthority7,
+					     PSID *pSid);
+	
+BOOL WINAPI RtlEqualSid(PSID pSid1, PSID pSid2);
+VOID* WINAPI RtlFreeSid(PSID pSid);
 DWORD WINAPI RtlLengthRequiredSid(DWORD nrofsubauths);
 DWORD WINAPI RtlLengthSid(PSID sid);
 DWORD WINAPI RtlInitializeSid(PSID PSID,PSID_IDENTIFIER_AUTHORITY PSIDauth, DWORD c);

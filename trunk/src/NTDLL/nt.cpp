@@ -1,4 +1,4 @@
-/* $Id: nt.cpp,v 1.2 1999-06-10 17:06:45 phaller Exp $ */
+/* $Id: nt.cpp,v 1.3 1999-12-18 20:01:13 sandervl Exp $ */
 
 
 /*
@@ -330,21 +330,68 @@ NTSTATUS WINAPI NtQueryInformationToken(HANDLE  Token,
   switch (TokenInformationClass)
   {
     case TokenGroups:                    /* 2 */
-      *ReturnLength = sizeof (TOKEN_GROUPS);
-#if 0
+      	*ReturnLength = sizeof (TOKEN_GROUPS);
+	if(TokenInformationLength < sizeof (TOKEN_GROUPS)) {
+		return STATUS_BUFFER_TOO_SMALL;
+	}
+	memset(TokenInformation, 0, sizeof(TOKEN_GROUPS));
+	break;
     case TokenUser:                     /* 1 */
+      	*ReturnLength = sizeof (TOKEN_USER);
+	if(TokenInformationLength < sizeof (TOKEN_USER)) {
+		return STATUS_BUFFER_TOO_SMALL;
+	}
+	memset(TokenInformation, 0, sizeof(TOKEN_USER));
+	break;
     case TokenPrivileges:
+      	*ReturnLength = sizeof (TOKEN_PRIVILEGES);
+	if(TokenInformationLength < sizeof (TOKEN_PRIVILEGES)) {
+		return STATUS_BUFFER_TOO_SMALL;
+	}
+	memset(TokenInformation, 0, sizeof(TOKEN_PRIVILEGES));
+	break;
     case TokenOwner:
+      	*ReturnLength = sizeof (TOKEN_OWNER);
+	if(TokenInformationLength < sizeof (TOKEN_OWNER)) {
+		return STATUS_BUFFER_TOO_SMALL;
+	}
+	memset(TokenInformation, 0, sizeof(TOKEN_OWNER));
+	break;
     case TokenPrimaryGroup:
+      	*ReturnLength = sizeof (TOKEN_PRIMARY_GROUP);
+	if(TokenInformationLength < sizeof (TOKEN_PRIMARY_GROUP)) {
+		return STATUS_BUFFER_TOO_SMALL;
+	}
+	memset(TokenInformation, 0, sizeof(TOKEN_PRIMARY_GROUP));
+	break;
     case TokenDefaultDacl:
+      	*ReturnLength = sizeof (TOKEN_DEFAULT_DACL);
+	if(TokenInformationLength < sizeof (TOKEN_DEFAULT_DACL)) {
+		return STATUS_BUFFER_TOO_SMALL;
+	}
+	memset(TokenInformation, 0, sizeof(TOKEN_DEFAULT_DACL));
+	break;
     case TokenSource:
+      	*ReturnLength = sizeof (TOKEN_SOURCE);
+	if(TokenInformationLength < sizeof (TOKEN_SOURCE)) {
+		return STATUS_BUFFER_TOO_SMALL;
+	}
+	memset(TokenInformation, 0, sizeof(TOKEN_SOURCE));
+	break;
     case TokenType:
+      	*ReturnLength = sizeof (TOKEN_TYPE);
+	if(TokenInformationLength < sizeof (TOKEN_TYPE)) {
+		return STATUS_BUFFER_TOO_SMALL;
+	}
+	memset(TokenInformation, 0, sizeof(TOKEN_TYPE));
+	break;
+#if 0
     case TokenImpersonationLevel:
     case TokenStatistics:
 #endif /* 0 */
   }
 
-  return 0;
+  return STATUS_SUCCESS;
 }
 
 
