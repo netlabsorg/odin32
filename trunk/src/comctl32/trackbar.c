@@ -1,4 +1,4 @@
-/* $Id: trackbar.c,v 1.19 1999-10-01 15:53:32 cbratschi Exp $ */
+/* $Id: trackbar.c,v 1.20 1999-10-05 16:05:17 cbratschi Exp $ */
 /*
  * Trackbar control
  *
@@ -697,7 +697,7 @@ static VOID TRACKBAR_Draw(HWND hwnd,HDC hdc)
     TRACKBAR_INFO *infoPtr = TRACKBAR_GetInfoPtr (hwnd);
     DWORD dwStyle = GetWindowLongA(hwnd, GWL_STYLE);
     RECT rcClient,rcChannel,rcSelection;
-    HBRUSH hBrush = CreateSolidBrush(infoPtr->clrBk);
+    HBRUSH hBrush;
     int i;
     NMCUSTOMDRAW cdraw;
     LRESULT cdctlres,cdres;
