@@ -1,4 +1,11 @@
-/* $Id: changelog,v 1.2565 2003-04-29 10:27:57 sandervl Exp $ */
+/* $Id: changelog,v 1.2566 2003-04-30 11:03:08 sandervl Exp $ */
+
+ 2003-04-30: Dietrich Teickner <Dietrich_Teickner@t-online   >
+    - SHLWAPI:  o Fixed PathIsUrlA/W
+    - KERNEL32: o Changed dll renaming to include extension if it's not .dll
+    - ODIN.INI: o Update for kernel32 change
+                  (IMPORTANT: must update your odin.ini with this one or
+                              delete the current file)
 
  2003-04-27: Platon Fomichev <stauff@innotek   >
     - USER32:   o Correctly finish PM restore procedure from minimized state.
