@@ -1,3 +1,5 @@
+; $Id: advapi32exp.def,v 1.2 1999-06-10 14:23:33 phaller Exp $
+
 ;Created by BLAST for IBM's compiler
 LIBRARY ADVAPI32 INITINSTANCE
 DATA MULTIPLE NONSHARED

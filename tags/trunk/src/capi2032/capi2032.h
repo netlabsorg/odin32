@@ -1,3 +1,5 @@
+/* $Id: capi2032.h,v 1.3 1999-06-10 14:27:04 phaller Exp $ */
+
 /*
  * CAPI2032 implementation
  *
