@@ -1,4 +1,4 @@
-/* $Id: iphlpapi.cpp,v 1.13 2003-05-05 15:10:56 sandervl Exp $ */
+/* $Id: iphlpapi.cpp,v 1.14 2003-05-05 15:11:42 sandervl Exp $ */
 /*
  *	IPHLPAPI library
  *
@@ -567,7 +567,7 @@ DWORD WIN32API GetIpAddrTable(PMIB_IPADDRTABLE pIpAddrTable, PULONG pdwSize,
 
 
     buflen = sizeof(MIB_IPADDRTABLE) - sizeof(MIB_IPADDRROW);
-    buflen+= pmibTable->dwNumEntries*sizeof(MIB_IPADDRROW);
+    buflen+= pmipaddrTable->dwNumEntries*sizeof(MIB_IPADDRROW);
 
     if(buflen > *pdwSize) {
         *pdwSize = buflen;
