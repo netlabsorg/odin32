@@ -1,4 +1,3 @@
-/* $Id: shpolicy.c,v 1.3 2001-09-05 13:47:00 bird Exp $ */
 /*
  * shpolicy.c - Data for shell/system policies.
  *
@@ -8,9 +7,9 @@
  * Editor which came with the Win95 Migration Guide, although
  * there doesn't appear to be an updated Win98 version that
  * would handle the many new policies introduced since then.
- * You could easily write one with the information in
+ * You could easily write one with the information in 
  * this file...
- *
+ * 
  * Up to date as of SHELL32 v4.72 (Win98, Win95 with MSIE 5)
  */
 
@@ -108,7 +107,7 @@ static char strNoRun[] = {"NoRun"};
 
 /* policy data array */
 
-POLICYDATA sh32_policy_table[] =
+POLICYDATA sh32_policy_table[] = 
 {
   {
     0x1,
@@ -455,69 +454,69 @@ POLICYDATA sh32_policy_table[] =
 };
 
 /*************************************************************************
- * SHRestricted             [SHELL32.100]
+ * SHRestricted				[SHELL32.100]
  *
- * walks through policy table, queries <app> key, <type> value, returns
+ * walks through policy table, queries <app> key, <type> value, returns 
  * queried (DWORD) value, and caches it between called to SHInitRestricted
  * to prevent unnecessary registry access.
  *
  * NOTES
  *     exported by ordinal
  *
- * REFERENCES:
+ * REFERENCES: 
  *     MS System Policy Editor
  *     98Lite 2.0 (which uses many of these policy keys) http://www.98lite.net/
  *     "The Windows 95 Registry", by John Woram, 1996 MIS: Press
  */
 DWORD WINAPI SHRestricted (DWORD pol) {
         char regstr[256];
-    HKEY    xhkey;
-    DWORD   retval, polidx, i, datsize = 4;
+	HKEY	xhkey;
+	DWORD   retval, polidx, i, datsize = 4;
 
-    TRACE("(%08lx)\n",pol);
+	TRACE("(%08lx)\n",pol);
 
-    polidx = -1;
+	polidx = -1;
 
-    /* scan to see if we know this policy ID */
-    for (i = 0; i < SHELL_MAX_POLICIES; i++)
-    {
-         if (pol == sh32_policy_table[i].polflags)
-         {
-             polidx = i;
-         break;
-         }
-    }
+	/* scan to see if we know this policy ID */
+	for (i = 0; i < SHELL_MAX_POLICIES; i++)
+	{
+	     if (pol == sh32_policy_table[i].polflags)
+	     {
+	         polidx = i;
+		 break;
+	     }
+	}
 
-    if (polidx == -1)
-    {
-        /* we don't know this policy, return 0 */
-        TRACE("unknown policy: (%08lx)\n", pol);
-        return 0;
-    }
+	if (polidx == -1)
+	{
+	    /* we don't know this policy, return 0 */
+	    TRACE("unknown policy: (%08lx)\n", pol);
+		return 0;
+	}
 
-    /* we have a known policy */
-        strcpy(regstr, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\");
-    strcat(regstr, sh32_policy_table[polidx].appstr);
+	/* we have a known policy */
+      	strcpy(regstr, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\");
+	strcat(regstr, sh32_policy_table[polidx].appstr);
 
-    /* first check if this policy has been cached, return it if so */
-    if (sh32_policy_table[polidx].cache != SHELL_NO_POLICY)
-    {
-        return sh32_policy_table[polidx].cache;
-    }
+	/* first check if this policy has been cached, return it if so */
+	if (sh32_policy_table[polidx].cache != SHELL_NO_POLICY)
+	{
+	    return sh32_policy_table[polidx].cache;
+	}
 
-    /* return 0 and don't set the cache if any registry errors occur */
-    retval = 0;
-    if (RegOpenKeyA(HKEY_CURRENT_USER, regstr, &xhkey) == ERROR_SUCCESS)
-    {
-        if (RegQueryValueExA(xhkey, sh32_policy_table[polidx].keystr, NULL, NULL, (LPBYTE)&retval, &datsize) == ERROR_SUCCESS)
-        {
-            sh32_policy_table[polidx].cache = retval;
-        }
+	/* return 0 and don't set the cache if any registry errors occur */
+	retval = 0;
+	if (RegOpenKeyA(HKEY_CURRENT_USER, regstr, &xhkey) == ERROR_SUCCESS)
+	{
+	    if (RegQueryValueExA(xhkey, sh32_policy_table[polidx].keystr, NULL, NULL, (LPBYTE)&retval, &datsize) == ERROR_SUCCESS)
+	    {
+	        sh32_policy_table[polidx].cache = retval;
+	    }
 
-    RegCloseKey(xhkey);
+	RegCloseKey(xhkey);
 }
 
-    return retval;
+	return retval;
 }
 
 /*************************************************************************
@@ -558,11 +557,11 @@ BOOL WINAPI SHInitRestricted(LPSTR inpRegKey, LPSTR parm2)
      if (inpRegKey != (LPSTR)NULL)
      {
          if (lstrcmpiA(inpRegKey, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies"))
-     {
-         /* doesn't match, fail */
-         return 0;
-     }
-     }
+	 {
+	     /* doesn't match, fail */
+	     return 0;
+	 }
+     }                               
 
      /* check passed, init all policy cache entries with SHELL_NO_POLICY */
      for (i = 0; i < SHELL_MAX_POLICIES; i++)

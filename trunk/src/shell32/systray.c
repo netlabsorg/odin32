@@ -1,8 +1,7 @@
-/* $Id: systray.c,v 1.3 2001-09-05 13:47:01 bird Exp $ */
 /*
- *  Systray
+ *	Systray
  *
- *  Copyright 1999 Kai Morich   <kai.morich@bigfoot.de>
+ *	Copyright 1999 Kai Morich	<kai.morich@bigfoot.de>
  *
  *  Manage the systray window. That it actually appears in the docking
  *  area of KDE or GNOME is delegated to windows/x11drv/wnd.c,
@@ -66,16 +65,16 @@ static LRESULT CALLBACK SYSTRAY_WndProc(HWND hWnd, UINT message, WPARAM wParam, 
 
     while (ptrayItem) {
       if (ptrayItem->hWnd==hWnd) {
-    if (ptrayItem->notifyIcon.hIcon) {
-      hdc = BeginPaint(hWnd, &ps);
-      GetClientRect(hWnd, &rc);
-      if (!DrawIconEx(hdc, rc.left+ICON_BORDER, rc.top+ICON_BORDER, ptrayItem->notifyIcon.hIcon,
-              ICON_SIZE, ICON_SIZE, 0, 0, DI_DEFAULTSIZE|DI_NORMAL)) {
-        ERR("Paint(SystrayWindow 0x%08x) failed -> removing SystrayItem %p\n", hWnd, ptrayItem);
-        SYSTRAY_Delete(&ptrayItem->notifyIcon);
-      }
-    }
-    break;
+	if (ptrayItem->notifyIcon.hIcon) {
+	  hdc = BeginPaint(hWnd, &ps);
+	  GetClientRect(hWnd, &rc);
+	  if (!DrawIconEx(hdc, rc.left+ICON_BORDER, rc.top+ICON_BORDER, ptrayItem->notifyIcon.hIcon,
+			  ICON_SIZE, ICON_SIZE, 0, 0, DI_DEFAULTSIZE|DI_NORMAL)) {
+	    ERR("Paint(SystrayWindow 0x%08x) failed -> removing SystrayItem %p\n", hWnd, ptrayItem);
+	    SYSTRAY_Delete(&ptrayItem->notifyIcon);
+	  }
+	}
+	break;
       }
       ptrayItem = ptrayItem->nextTrayItem;
     }
@@ -119,14 +118,14 @@ static LRESULT CALLBACK SYSTRAY_WndProc(HWND hWnd, UINT message, WPARAM wParam, 
 
     while (ptrayItem) {
       if (ptrayItem->hWnd == hWnd) {
-    if (ptrayItem->notifyIcon.hWnd && ptrayItem->notifyIcon.uCallbackMessage) {
+	if (ptrayItem->notifyIcon.hWnd && ptrayItem->notifyIcon.uCallbackMessage) {
           if (!PostMessageA(ptrayItem->notifyIcon.hWnd, ptrayItem->notifyIcon.uCallbackMessage,
                             (WPARAM)ptrayItem->notifyIcon.uID, (LPARAM)message)) {
-          ERR("PostMessage(SystrayWindow 0x%08x) failed -> removing SystrayItem %p\n", hWnd, ptrayItem);
-          SYSTRAY_Delete(&ptrayItem->notifyIcon);
+	      ERR("PostMessage(SystrayWindow 0x%08x) failed -> removing SystrayItem %p\n", hWnd, ptrayItem);
+	      SYSTRAY_Delete(&ptrayItem->notifyIcon);
+	    }
         }
-        }
-    break;
+	break;
       }
       ptrayItem = ptrayItem->nextTrayItem;
     }
@@ -219,7 +218,7 @@ BOOL SYSTRAY_ItemInit(SystrayItem *ptrayItem)
 static void SYSTRAY_ItemTerm(SystrayItem *ptrayItem)
 {
   if(ptrayItem->notifyIcon.hIcon)
-     DestroyIcon(ptrayItem->notifyIcon.hIcon);
+     DestroyIcon(ptrayItem->notifyIcon.hIcon);   
   if(ptrayItem->hWndToolTip)
       DestroyWindow(ptrayItem->hWndToolTip);
   if(ptrayItem->hWnd)
@@ -345,7 +344,7 @@ BOOL SYSTRAY_Init(void)
 }
 
 /*************************************************************************
- * Shell_NotifyIconA            [SHELL32.297][SHELL32.296]
+ * Shell_NotifyIconA			[SHELL32.297][SHELL32.296]
  */
 BOOL WINAPI Shell_NotifyIconA(DWORD dwMessage, PNOTIFYICONDATAA pnid )
 {
@@ -367,19 +366,19 @@ BOOL WINAPI Shell_NotifyIconA(DWORD dwMessage, PNOTIFYICONDATAA pnid )
 }
 
 /*************************************************************************
- * Shell_NotifyIconW            [SHELL32.298]
+ * Shell_NotifyIconW			[SHELL32.298]
  */
 BOOL WINAPI Shell_NotifyIconW (DWORD dwMessage, PNOTIFYICONDATAW pnid )
 {
-    BOOL ret;
+	BOOL ret;
 
-    PNOTIFYICONDATAA p = HeapAlloc(GetProcessHeap(),0,sizeof(NOTIFYICONDATAA));
-    memcpy(p, pnid, sizeof(NOTIFYICONDATAA));
+	PNOTIFYICONDATAA p = HeapAlloc(GetProcessHeap(),0,sizeof(NOTIFYICONDATAA));
+	memcpy(p, pnid, sizeof(NOTIFYICONDATAA));
         WideCharToMultiByte( CP_ACP, 0, pnid->szTip, -1, p->szTip, sizeof(p->szTip), NULL, NULL );
         p->szTip[sizeof(p->szTip)-1] = 0;
 
-    ret = Shell_NotifyIconA(dwMessage, p );
+	ret = Shell_NotifyIconA(dwMessage, p );
 
-    HeapFree(GetProcessHeap(),0,p);
-    return ret;
+	HeapFree(GetProcessHeap(),0,p);
+	return ret;
 }

@@ -1,4 +1,4 @@
-/* $Id: shell32_main.h,v 1.9 2001-04-28 13:33:45 sandervl Exp $ */
+/* $Id: shell32_main.h,v 1.10 2001-09-15 09:26:23 sandervl Exp $ */
 /*
  * 	internal Shell32 Library definitions
  */
@@ -19,6 +19,17 @@
 #include "wine/obj_oleview.h"
 #ifdef __WIN32OS2__
 #include <heapstring.h>
+
+#undef FIXME
+#undef TRACE
+#ifdef DEBUG
+#define TRACE WriteLog("SHELL32: %s", __FUNCTION__); WriteLog
+#define FIXME WriteLog("SHELL32: FIXME %s", __FUNCTION__); WriteLog
+#else
+#define TRACE 1 ? (void)0 : (void)((int (*)(char *, ...)) NULL)
+#define FIXME 1 ? (void)0 : (void)((int (*)(char *, ...)) NULL)
+#endif
+
 #endif
 /*******************************************
 *  global SHELL32.DLL variables
