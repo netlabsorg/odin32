@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.96 2001-05-11 20:40:40 sandervl Exp $ */
+/* $Id: window.cpp,v 1.97 2001-05-12 08:25:57 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -732,7 +732,7 @@ HWND WIN32API SetFocus(HWND hwnd)
         return 0;
     }
 
-    hwnd_O    = window->getOS2FrameWindowHandle();
+    hwnd_O = window->getOS2WindowHandle();
     if(teb->o.odin.hwndFocus) {
          lastFocus = teb->o.odin.hwndFocus;
     }
