@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2001-08-16 04:06:16 bird Exp $
+# $Id: makefile,v 1.2 2001-08-16 04:27:45 bird Exp $
 
 #
 # Odin32 API
@@ -23,6 +23,7 @@ EXETARGET = 1
 VIO = 1
 STATIC_CRT = 1
 NO_MAIN_BIN_COPY = 1
+NO_MULTIJOBS = 1
 
 
 #
