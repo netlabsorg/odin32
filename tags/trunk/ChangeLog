@@ -1,4 +1,21 @@
-/* $Id: ChangeLog,v 1.1382 2001-04-26 19:24:26 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1383 2001-04-27 17:34:19 sandervl Exp $ */
+
+ 2001-04-27: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o Call WH_GETMESSAGE hook handler from GetMessage and PeekMessage
+                  (if message present)
+                o Added (not 100% correct) filtering for nonclient mouse messages
+                  (fixes nonclient messages for MS Word 97 (frame & menu mouse actions))
+                o Recalculate HDC height of windows with CS_OWNDC style if 
+                  window is resized.
+                  (fixes 28 pixel shift up in MS Word MDI window; Word calls 
+                   GetDCEx once and does custom WM_PAINT handling (never calls 
+                   Begin/EndPaint))
+    - KERNEL32: o HeapReAlloc: return old pointer if new size is smaller or
+                               equal to old size.
+    - INCLUDE\win\unicode: 
+                o strcpyW bugfix (didn't terminate string -> heap corruption)
+    - DSOUND:   o Preliminary code added for DirectAudio interface. 
+                  (not finished & not activated)
 
  2001-04-26: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Implemented FreeLibraryAndExitThread
