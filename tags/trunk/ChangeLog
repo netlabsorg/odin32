@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.734 2000-02-16 17:19:56 cbratschi Exp $ */
+ /* $Id: ChangeLog,v 1.735 2000-02-16 19:52:27 sandervl Exp $ */
 
  2000-02-16: Christoph Bratschi <cbratschi@datacomm.ch>
 	- COMCTL32: treeview: switched to unicode, fixed many bugs
@@ -7,6 +7,8 @@
 	- KERNEL32/USER32/GDI32: Added new logging feature which allows users
                                  to disable or enable logging for separate source
                                  files. (see Logging.txt for details)
+	- GDI32: SetDIBitsToDevice fix for RealPlayer 7 (store the right bitmap
+                 size in the BITMAPINFO structure before calling Open32)
 
  2000-02-15: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: SetWindowPos bugfix (returned before hiding or showing windows)
