@@ -1,4 +1,4 @@
-/* $Id: listbox.cpp,v 1.5 1999-10-14 09:22:39 sandervl Exp $ */
+/* $Id: listbox.cpp,v 1.6 1999-10-14 18:27:55 sandervl Exp $ */
 /*
  * Listbox controls
  *
@@ -320,9 +320,12 @@ static void LISTBOX_UpdatePage( HWND hwnd, LB_DESCR *descr )
  */
 static void LISTBOX_UpdateSize( HWND hwnd, LB_DESCR *descr )
 {
-    RECT rect;
+    RECT rect, rectWindow;
 
+    GetWindowRect( hwnd, &rectWindow );
+    OffsetRect(&rectWindow, -rectWindow.left, -rectWindow.top);
     GetClientRect( hwnd, &rect );
+
     descr->width  = rect.right - rect.left;
     descr->height = rect.bottom - rect.top;
     if (!(descr->style & LBS_NOINTEGRALHEIGHT) && !IS_OWNERDRAW(descr))
@@ -334,8 +337,8 @@ static void LISTBOX_UpdateSize( HWND hwnd, LB_DESCR *descr )
                     hwnd, descr->height,
                     descr->height - descr->height%descr->item_height));
             SetWindowPos( hwnd, 0, 0, 0,
-                            descr->width,
-                            descr->height -
+                            rectWindow.right - rectWindow.left,
+                            rectWindow.bottom - rectWindow.top -
                                 (descr->height % descr->item_height),
                             SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOMOVE );
             return;

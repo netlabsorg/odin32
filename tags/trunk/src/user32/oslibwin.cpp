@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.27 1999-10-14 09:22:40 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.28 1999-10-14 18:27:57 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -42,8 +42,15 @@ BOOL OSLibWinSetParent(HWND hwnd, HWND hwndParent, ULONG fRedraw)
 }
 //******************************************************************************
 //******************************************************************************
+BOOL OSLibWinSetOwner(HWND hwnd, HWND hwndOwner)
+{
+  return WinSetOwner(hwnd, hwndOwner);
+}
+//******************************************************************************
+//******************************************************************************
 HWND OSLibWinCreateWindow(HWND hwndParent, ULONG dwWinStyle, ULONG dwFrameStyle,
-                          char *pszName, HWND Owner, ULONG fHWND_BOTTOM, HWND *hwndFrame)
+                          char *pszName, HWND Owner, ULONG fHWND_BOTTOM, HWND *hwndFrame,
+                          ULONG id)
 {
  HWND  hwndClient;
 
@@ -72,7 +79,7 @@ HWND OSLibWinCreateWindow(HWND hwndParent, ULONG dwWinStyle, ULONG dwFrameStyle,
 
         *hwndFrame = WinCreateStdWindow(hwndParent, dwWinStyle,
                                        &dwFrameStyle, WIN32_STDCLASS,
-                                       "", dwClientStyle, 0, 0, &hwndClient);
+                                       "", dwClientStyle, 0, id, &hwndClient);
         if(*hwndFrame) {
                 if(pszName) {
                         WinSetWindowText(*hwndFrame, pszName);
@@ -319,7 +326,7 @@ BOOL OSLibWinSetMultWindowPos(PSWP pswp, ULONG num)
 //******************************************************************************
 BOOL OSLibWinShowWindow(HWND hwnd, ULONG fl)
 {
- BOOL rc;
+ BOOL rc = 1;
 
   if(fl & SWP_SHOW) {
          rc = WinShowWindow(hwnd, TRUE);

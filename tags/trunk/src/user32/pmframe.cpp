@@ -1,4 +1,4 @@
-/* $Id: pmframe.cpp,v 1.4 1999-10-11 16:04:51 cbratschi Exp $ */
+/* $Id: pmframe.cpp,v 1.5 1999-10-14 18:27:58 sandervl Exp $ */
 /*
  * Win32 Frame Managment Code for OS/2
  *
@@ -176,6 +176,35 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
 
   switch(msg)
   {
+    case WM_ADJUSTWINDOWPOS:
+    {
+      PSWP     pswp = (PSWP)mp1;
+      Win32BaseWindow *wndchild;
+
+      wndchild = Win32BaseWindow::GetWindowFromOS2FrameHandle(pswp->hwnd);
+      if(wndchild && wndchild->isChild()) {
+      	dprintf(("PMFRAME: WM_ADJUSTWINDOWPOS %x %x %x (%d,%d) (%d,%d)", hwnd, pswp->hwnd, pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
+      	RestoreOS2TIB();
+      	return (MRESULT)0;
+      }
+      goto RunDefFrameProc;
+    }
+#if 0
+    case WM_WINDOWPOSCHANGED:
+    {
+      PSWP      pswp  = (PSWP)mp1;
+      dprintf(("PMFRAME: WM_WINDOWPOSCHANGED %x %x %x (%d,%d) (%d,%d)", hwnd, pswp->hwnd, pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
+      goto RunDefFrameProc;
+    }
+
+    case WM_FORMATFRAME:
+    {
+      PSWP      pswp  = (PSWP)mp1;
+      dprintf(("PMFRAME: WM_FORMATFRAME %x %x %x (%d,%d) (%d,%d)", hwnd, pswp->hwnd, pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
+      goto RunDefFrameProc;
+    }
+#endif
+
     case WM_DESTROY:
       #ifdef PMFRAMELOG
        dprintf(("PMFRAME: WM_DESTROY"));

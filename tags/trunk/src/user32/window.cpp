@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.14 1999-10-12 14:47:24 sandervl Exp $ */
+/* $Id: window.cpp,v 1.15 1999-10-14 18:27:59 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -616,7 +616,8 @@ BOOL WIN32API RedrawWindow( HWND arg1, const RECT * arg2, HRGN arg3, UINT arg4)
 //******************************************************************************
 BOOL WIN32API GetWindowRect( HWND hwnd, PRECT pRect)
 {
-   Win32BaseWindow *window;
+  Win32BaseWindow *window;
+  BOOL rc;
 
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
@@ -624,8 +625,9 @@ BOOL WIN32API GetWindowRect( HWND hwnd, PRECT pRect)
 	SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
-    dprintf(("GetWindowRect %x", hwnd));
-    return window->GetWindowRect(pRect);
+    rc = window->GetWindowRect(pRect);
+    dprintf(("GetWindowRect %x (%d,%d) (%d,%d)", hwnd, pRect->left, pRect->top, pRect->right, pRect->bottom));
+    return rc;
 }
 //******************************************************************************
 //******************************************************************************
