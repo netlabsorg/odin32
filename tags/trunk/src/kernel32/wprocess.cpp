@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.89 2000-08-18 18:16:34 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.90 2000-09-09 08:59:55 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -52,7 +52,9 @@ ODINDEBUGCHANNEL(KERNEL32-WPROCESS)
 //******************************************************************************
 //******************************************************************************
 BOOL      fIsOS2Image = FALSE;  //TRUE  -> Odin32 OS/2 application (not converted!)
-                            //FALSE -> otherwise
+                                //FALSE -> otherwise
+BOOL      fExitProcess = FALSE;
+
 //Process database
 PDB       ProcessPDB = {0};
 USHORT    ProcessTIBSel = 0;
@@ -399,6 +401,8 @@ VOID WIN32API ExitProcess(DWORD exitcode)
 {
     dprintf(("KERNEL32:  ExitProcess %d\n", exitcode));
     dprintf(("KERNEL32:  ExitProcess FS = %x\n", GetFS()));
+
+    fExitProcess = TRUE;
 
     SetOS2ExceptionChain(-1);
 

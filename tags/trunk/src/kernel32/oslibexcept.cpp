@@ -1,4 +1,4 @@
-/* $Id: oslibexcept.cpp,v 1.3 2000-09-08 18:07:50 sandervl Exp $ */
+/* $Id: oslibexcept.cpp,v 1.4 2000-09-09 08:59:55 sandervl Exp $ */
 /*
  * Exception handler util. procedures
  *
@@ -181,6 +181,7 @@ BOOL APIENTRY OSLibDispatchException(PEXCEPTIONREPORTRECORD pReportRec,
   case XCPT_GUARD_PAGE_VIOLATION:
   case XCPT_UNABLE_TO_GROW_STACK:
   case XCPT_IN_PAGE_ERROR:
+  default:
 	SetFS(oldsel);	//restore FS
         return FALSE; //let's not dispatch those for now
   }

@@ -1,4 +1,4 @@
-/* $Id: exceptions.cpp,v 1.43 2000-09-08 18:07:49 sandervl Exp $ */
+/* $Id: exceptions.cpp,v 1.44 2000-09-09 08:59:54 sandervl Exp $ */
 
 /* WARNING: Compiling this module with ICC with optimizations turned on   */
 /* currently breaks this module. To get correct code, it is not necessary */
@@ -1075,7 +1075,7 @@ ULONG APIENTRY OS2ExceptionHandler(PEXCEPTIONREPORTRECORD       pERepRec,
   case XCPT_FLOAT_UNDERFLOW:
         dprintfException(pERepRec, pERegRec, pCtxRec, p);
         dprintf(("KERNEL32: OS2ExceptionHandler: FPU exception\n"));
-        if(fIsOS2Image == FALSE)  //Only for real win32 apps
+        if(!fIsOS2Image && !fExitProcess)  //Only for real win32 apps
         {
                 if(OSLibDispatchException(pERepRec, pERegRec, pCtxRec, p) == FALSE)
                 {
@@ -1180,7 +1180,7 @@ CrashAndBurn:
                 dbgPrintStack(pERepRec, pERegRec, pCtxRec, p);
         }
 #endif
-        if(fIsOS2Image == FALSE)  //Only for real win32 apps
+        if(!fIsOS2Image && !fExitProcess)  //Only for real win32 apps
         {
                 if(OSLibDispatchException(pERepRec, pERegRec, pCtxRec, p) == TRUE)
                 {
