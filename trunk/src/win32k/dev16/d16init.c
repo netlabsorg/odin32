@@ -1,4 +1,4 @@
-/* $Id: d16init.c,v 1.2 1999-10-27 02:02:53 bird Exp $
+/* $Id: d16init.c,v 1.3 1999-10-31 23:57:00 bird Exp $
  *
  * d16init - init routines for both drivers.
  *
@@ -93,6 +93,7 @@ USHORT _near dev1Init(PRPINITIN pRpIn, PRPINITOUT pRpOut)
                     npszErrMsg = "Ring-0 initiation failed\n\r";
                 else
                 {
+                    /* FIXME quiet test! */
                     register NPSZ npsz = "Win32k.sys succesfully initiated!\n\r";
                     DosPutMessage(1, strlen(npsz)+1, npsz);
                     pRpOut->Status = data.Status;

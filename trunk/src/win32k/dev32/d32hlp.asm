@@ -1,4 +1,4 @@
-; $Id: d32hlp.asm,v 1.2 1999-10-27 02:02:54 bird Exp $
+; $Id: d32hlp.asm,v 1.3 1999-10-31 23:57:02 bird Exp $
 ;
 ; d32hlp - 32-bit Device Driver Helper Function.
 ;
@@ -38,7 +38,7 @@ extrn _Device_Help:dword
 ;CODE32 segment
 CODE32 segment dword public 'CODE' use32
     assume cs:CODE32, ds:flat, ss:nothing, es:nothing
-
+    .386p
 
 ;PVOID  D32HLPCALL D32Hlp_VirtToLin(ULONG  ulPtr16); /* eax */
 D32Hlp_VirtToLin proc near
@@ -100,10 +100,7 @@ D32Hlp_VirtToLin3 endp
 ;                                   ULONG ulVarMember); /* edx */
 D32Hlp_GetDOSVar proc near
     push    bx
-
-    mov     cx, ax
-    mov     al, dl
-
+    mov     ecx, edx
     mov     dl, DevHlp_GetDOSVar
     jmp     far ptr CODE16:Thunk16_GetDOSVar
 Thunk32_GetDOSVar::
@@ -115,7 +112,7 @@ Thunk32_GetDOSVar::
     jmp Finished
 
 Error:
-    mov     ax, 87
+    xor     eax, eax
 
 Finished:
     pop     bx

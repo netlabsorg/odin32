@@ -1,4 +1,4 @@
-/* $Id: ldr.cpp,v 1.4 1999-10-29 17:02:34 bird Exp $
+/* $Id: ldr.cpp,v 1.5 1999-10-31 23:57:05 bird Exp $
  *
  * ldr.cpp - Loader helpers.
  *
@@ -247,11 +247,8 @@ ULONG ldrInit(void)
     pSFNRoot = NULL;
     pMTERoot = NULL;
 
-    /* set pe2lx according to quite/verbose */
-    if (options.fQuiet)
-        Pe2Lx::ulInfoLevel = Pe2Lx::Quiet;
-    else
-        Pe2Lx::ulInfoLevel = Pe2Lx::Info;
+    /* Pe2Lx logging. */
+    Pe2Lx::ulInfoLevel = options.ulInfoLevel;
 
     return rc;
 }

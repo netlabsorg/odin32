@@ -1,4 +1,4 @@
-/* $Id: pe2lx.cpp,v 1.5 1999-10-27 02:03:01 bird Exp $
+/* $Id: pe2lx.cpp,v 1.6 1999-10-31 23:57:09 bird Exp $
  *
  * Pe2Lx class implementation. Ring 0 and Ring 3
  *
@@ -125,6 +125,7 @@
 #endif
 #include "pe2lx.h"                          /* Pe2Lx class definitions, ++. */
 #include <versionos2.h>                     /* Pe2Lx version. */
+#include "yield.h"                          /* Yield CPU. */
 
 
 /*******************************************************************************
@@ -649,6 +650,7 @@ ULONG Pe2Lx::init(PCSZ pszFilename)
         printErr(("Failed to make exports rc=%d\n", rc));
         return rc;
     }
+    Yield();
 
     /* 14.Convert base relocations (fixups). Remember to add the fixup for RegisterPe2LxDll/Exe. */
     rc = makeFixups();
@@ -657,6 +659,7 @@ ULONG Pe2Lx::init(PCSZ pszFilename)
         printErr(("Failed to make fixups rc=%d\n", rc));
         return rc;
     }
+    Yield();
 
     /* 15.Make object table. */
     rc = makeObjectTable();
@@ -673,6 +676,7 @@ ULONG Pe2Lx::init(PCSZ pszFilename)
         printErr(("Failed to make object table rc=%d\n", rc));
         return rc;
     }
+    Yield();
 
     /* 17.Completing the LX header. */
     LXHdr.e32_mpages = getCountOfPages();
@@ -731,6 +735,8 @@ ULONG Pe2Lx::init(PCSZ pszFilename)
 
     /* 20.Dump virtual LX-file */
     dumpVirtualLxFile();
+
+    Yield();
 
     return NO_ERROR;
 }
@@ -2156,6 +2162,7 @@ ULONG Pe2Lx::makeFixups()
         }
         else /* page++ */
             ulRVAPage += PAGESIZE;
+        Yield();
     } /* The Loop! */
 
 
@@ -2321,6 +2328,7 @@ ULONG Pe2Lx::makeExports()
             } /* for loop - export --> entry */
             if (rc != NO_ERROR)
                 printErr(("export --> entry loop failed! ul = %d rc = %d\n", ul, rc));
+            Yield();
 
             /* Convert function names to resident names. */
             if (rc == NO_ERROR && ExpDir.NumberOfNames > 0UL)
@@ -2348,6 +2356,7 @@ ULONG Pe2Lx::makeExports()
                             break;
                         rc = addResName(usOrdinal, psz, ~0UL);
                         free(psz);
+                        Yield();
                     }
                     if (rc != NO_ERROR)
                         printErr(("FnNames --> ResNames loop failed! ul = %d rc = %d\n", ul, rc));
