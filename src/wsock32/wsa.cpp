@@ -1,4 +1,4 @@
-/* $Id: wsa.cpp,v 1.9 2002-03-18 10:03:49 sandervl Exp $ */
+/* $Id: wsa.cpp,v 1.10 2003-01-06 13:05:40 sandervl Exp $ */
 
 /*
  *
@@ -93,6 +93,7 @@ ODINFUNCTION0(int,WSACleanup)
 
         WSACancelAllAsyncRequests();
         winsockcleanupsockets();
+        WSAWaitForAllAsyncRequests();
 
 	fWSAInitialized = FALSE;
 	WINSOCK_DeleteIData();
