@@ -1,4 +1,4 @@
-/* $Id: wingdi32.h,v 1.3 2001-03-27 20:46:34 sandervl Exp $ */
+/* $Id: wingdi32.h,v 1.4 2001-08-02 14:49:03 sandervl Exp $ */
 
 /*
  * Internal functions exported by gdi32
@@ -11,5 +11,6 @@
 
 BOOL WIN32API setWinDeviceRegionFromPMDeviceRegion(HRGN winHrgn, HRGN pmHrgn, pDCData pHpsPmHrgn, HWND hwndPmHrgn);
 VOID WIN32API UnselectGDIObjects(HDC hdc);
+BOOL OSLibGpiSetCp(HDC hdc, ULONG codepage);
 
 #endif //__WINGDI32_H__
