@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.17 2001-10-24 03:52:37 bird Exp $
+# $Id: Makefile,v 1.18 2001-11-09 07:37:33 bird Exp $
 
 #
 # kKrnlLib.sys makefile.
@@ -174,7 +174,7 @@ TSTOBJS =\
     $(WIN32KOBJ)\d32hlp.obj \
     $(WIN32KOBJ)\d32globals.obj \
     $(WIN32KOBJ)\d16globl.obj \
-    $(WIN32KOBJ)\Log.obj \
+    $(WIN32KOBJ)\Log.obj_tst. \
     $(WIN32KOBJ)\calltaba.obj \
     $(WIN32KOBJ)\krnlInit.obj_tst. \
     $(WIN32KOBJ)\krnlLockedWrite.obj \
