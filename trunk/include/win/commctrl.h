@@ -1,4 +1,4 @@
-/* $Id: commctrl.h,v 1.11 1999-08-28 09:25:55 achimha Exp $ */
+/* $Id: commctrl.h,v 1.12 1999-09-02 10:10:10 phaller Exp $ */
 /*
  * Common controls definitions
  */
@@ -14,7 +14,8 @@
 
 /* c++ likes nameless unions whereas c doesnt */
 /* (used in property sheet structures)        */
-#ifdef __cplusplus
+
+#if defined(__cplusplus) && !defined(NONAMELESSUNION)
 #define DUMMYUNIONNAME
 #define DUMMYUNIONNAME1
 #define DUMMYUNIONNAME2

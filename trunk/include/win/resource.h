@@ -1,4 +1,4 @@
-/* $Id: resource.h,v 1.1 1999-05-24 20:19:18 ktk Exp $ */
+/* $Id: resource.h,v 1.2 1999-09-02 10:08:38 phaller Exp $ */
 
 /*
  * Resource definitions
@@ -35,7 +35,7 @@ typedef enum
 {
     SYSRES_MENU_SYSMENU,
     SYSRES_MENU_EDITMENU,
-    SYSRES_DIALOG_MSGBOX,
+    SYSRES_DIALOG_MSGBOX
 } SYSTEM_RESOURCE;
 
 extern void LIBRES_RegisterResources(const wrc_resource32_t * const * Res);
