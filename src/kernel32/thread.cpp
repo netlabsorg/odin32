@@ -1,4 +1,4 @@
-/* $Id: thread.cpp,v 1.31 2001-06-27 19:09:35 sandervl Exp $ */
+/* $Id: thread.cpp,v 1.32 2001-09-26 15:29:39 phaller Exp $ */
 
 /*
  * Win32 Thread API functions
@@ -57,6 +57,49 @@ HANDLE WIN32API GetCurrentThread()
     }
     return teb->o.odin.hThread;
 }
+
+// these two debugging functions allow access to a
+// calldepth counter inside the TEB block of each thread
+ULONG WIN32API dbg_GetThreadCallDepth()
+{
+#ifdef DEBUG
+  TEB *teb;
+
+  teb = GetThreadTEB();
+  if(teb == NULL)
+    return 0;
+  else
+    return teb->o.odin.dbgCallDepth;
+#else
+  return 0;
+#endif
+}
+
+
+void WIN32API dbg_IncThreadCallDepth()
+{
+#ifdef DEBUG
+  TEB *teb;
+
+  teb = GetThreadTEB();
+  if(teb != NULL)
+    teb->o.odin.dbgCallDepth++;
+#endif
+}
+
+
+void WIN32API dbg_DecThreadCallDepth()
+{
+#ifdef DEBUG
+  TEB *teb;
+
+  teb = GetThreadTEB();
+  if(teb != NULL)
+    --(teb->o.odin.dbgCallDepth);
+#endif
+}
+
+
 //******************************************************************************
 //******************************************************************************
 VOID WIN32API ExitThread(DWORD exitcode)

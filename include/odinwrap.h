@@ -1,4 +1,4 @@
-/* $Id: odinwrap.h,v 1.35 2001-09-02 10:42:16 phaller Exp $
+/* $Id: odinwrap.h,v 1.36 2001-09-26 15:28:32 phaller Exp $
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -57,7 +57,10 @@
 #include <odin.h>
 
 // ---------------------------------------------------------------------------
-extern unsigned long int WIN32API GetCurrentThreadId(); //kernel32
+extern unsigned long int WIN32API GetCurrentThreadId();     // kernel32
+extern unsigned long int WIN32API dbg_GetThreadCallDepth(); // kernel32
+extern void              WIN32API dbg_IncThreadCallDepth(); // kernel32
+extern void              WIN32API dbg_DecThreadCallDepth(); // kernel32
 
 // ---------------------------------------------------------------------------
 //SvL: Only check the heap very frequently when there are problems
@@ -99,12 +102,14 @@ extern unsigned long int WIN32API GetCurrentThreadId(); //kernel32
 
 #define FNPROLOGUE(a)   \
   USHORT sel = GetFS(); \
+  dbg_IncThreadCallDepth(); \
   ODIN_HEAPCHECK();     \
   PROFILE_START(a)
 
 #define FNEPILOGUE(a)   \
   PROFILE_STOP(a)       \
   ODIN_HEAPCHECK();     \
+  dbg_DecThreadCallDepth(); \
   if (sel != GetFS()) { \
     SetFS(sel); \
     dprintf(("WARNING: FS: for thread %08xh corrupted by "a, GetCurrentThreadId())); \
@@ -142,9 +147,9 @@ extern unsigned long int WIN32API GetCurrentThreadId(); //kernel32
              pszOdinDebugChannel));           \
     FNPROLOGUE(#cName)                       \
     ODIN_##cName();                           \
+    FNEPILOGUE(#cName)                        \
     dprintf(("%s: void "#cName"() leave\n",   \
              pszOdinDebugChannel));           \
-    FNEPILOGUE(#cName)                        \
   }                                           \
                                               \
   void ODIN_INTERNAL ODIN_##cName (void)
@@ -160,10 +165,10 @@ extern unsigned long int WIN32API GetCurrentThreadId(); //kernel32
              a1));                            \
     FNPROLOGUE(#cName)                       \
     cRet   rc  = ODIN_##cName(a1);            \
+    FNEPILOGUE(#cName)                        \
     dprintf(("%s: "#cRet" "#cName"() leave = %08xh\n", \
              pszOdinDebugChannel,             \
              rc));                            \
-    FNEPILOGUE(#cName)                        \
     return rc;                                \
   }                                           \
                                               \
@@ -178,9 +183,9 @@ extern unsigned long int WIN32API GetCurrentThreadId(); //kernel32
              a1));                            \
     FNPROLOGUE(#cName)                       \
     ODIN_##cName(a1);                         \
+    FNEPILOGUE(#cName)                        \
     dprintf(("%s: void "#cName"() leave\n",   \
              pszOdinDebugChannel));           \
-    FNEPILOGUE(#cName)                        \
   }                                           \
                                               \
   void ODIN_INTERNAL ODIN_##cName (t1 a1)
@@ -196,10 +201,10 @@ extern unsigned long int WIN32API GetCurrentThreadId(); //kernel32
              a1,a2));                          \
     FNPROLOGUE(#cName)                        \
     cRet   rc  = ODIN_##cName(a1,a2);          \
+    FNEPILOGUE(#cName)                         \
     dprintf(("%s: "#cRet" "#cName"() leave = %08xh\n", \
              pszOdinDebugChannel,              \
              rc));                             \
-    FNEPILOGUE(#cName)                         \
     return rc;                                 \
   }                                            \
                                                \
@@ -214,9 +219,9 @@ extern unsigned long int WIN32API GetCurrentThreadId(); //kernel32
              a1,a2));                         \
     FNPROLOGUE(#cName)                       \
     ODIN_##cName(a1,a2);                      \
+    FNEPILOGUE(#cName)                        \
     dprintf(("%s: void "#cName"() leave\n",   \
              pszOdinDebugChannel));           \
-    FNEPILOGUE(#cName)                        \
   }                                           \
                                               \
   void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2)
@@ -232,10 +237,10 @@ extern unsigned long int WIN32API GetCurrentThreadId(); //kernel32
              a1,a2,a3));                      \
     FNPROLOGUE(#cName)                       \
     cRet   rc  = ODIN_##cName(a1,a2,a3);      \
+    FNEPILOGUE(#cName)            \
     dprintf(("%s: "#cRet" "#cName"() leave = %08xh\n", \
              pszOdinDebugChannel,             \
              rc));                            \
-    FNEPILOGUE(#cName)            \
     return rc;                    \
   }                               \
                                   \
@@ -250,9 +255,9 @@ extern unsigned long int WIN32API GetCurrentThreadId(); //kernel32
              a1,a2,a3));                      \
     FNPROLOGUE(#cName)                       \
     ODIN_##cName(a1,a2,a3);              \
+    FNEPILOGUE(#cName)            \
     dprintf(("%s: void "#cName"() leave\n",   \
              pszOdinDebugChannel));           \
-    FNEPILOGUE(#cName)            \
   }                               \
                                   \
   void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3)
@@ -268,10 +273,10 @@ extern unsigned long int WIN32API GetCurrentThreadId(); //kernel32
              a1,a2,a3,a4));                   \
     FNPROLOGUE(#cName)                       \
     cRet   rc  = ODIN_##cName(a1,a2,a3,a4); \
+    FNEPILOGUE(#cName)            \
     dprintf(("%s: "#cRet" "#cName"() leave = %08xh\n", \
              pszOdinDebugChannel,             \
              rc));                            \
-    FNEPILOGUE(#cName)            \
     return rc;                    \
   }                               \
                                   \
@@ -286,9 +291,9 @@ extern unsigned long int WIN32API GetCurrentThreadId(); //kernel32
              a1,a2,a3,a4));                    \
     FNPROLOGUE(#cName)                       \
     ODIN_##cName(a1,a2,a3,a4); \
+    FNEPILOGUE(#cName)       \
     dprintf(("%s: void "#cName"() leave\n",   \
              pszOdinDebugChannel));           \
-  FNEPILOGUE(#cName)       \
   }                               \
                                   \
   void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4)
@@ -305,10 +310,10 @@ extern unsigned long int WIN32API GetCurrentThreadId(); //kernel32
              a1,a2,a3,a4,a5));                \
     FNPROLOGUE(#cName)                       \
     cRet   rc  = ODIN_##cName(a1,a2,a3,a4,a5); \
+    FNEPILOGUE(#cName)            \
     dprintf(("%s: "#cRet" "#cName"() leave = %08xh\n", \
              pszOdinDebugChannel,             \
              rc));                            \
-    FNEPILOGUE(#cName)            \
     return rc;                    \
   }                               \
                                   \
@@ -324,9 +329,9 @@ extern unsigned long int WIN32API GetCurrentThreadId(); //kernel32
              a1,a2,a3,a4,a5));                \
     FNPROLOGUE(#cName)                       \
     ODIN_##cName(a1,a2,a3,a4,a5); \
+    FNEPILOGUE(#cName)       \
     dprintf(("%s: void "#cName"() leave\n",   \
              pszOdinDebugChannel));           \
-    FNEPILOGUE(#cName)       \
   }                               \
                                   \
   void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5)
@@ -343,10 +348,10 @@ extern unsigned long int WIN32API GetCurrentThreadId(); //kernel32
              a1,a2,a3,a4,a5,a6));             \
     FNPROLOGUE(#cName)                       \
     cRet   rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6); \
+    FNEPILOGUE(#cName)            \
     dprintf(("%s: "#cRet" "#cName"() leave = %08xh\n", \
              pszOdinDebugChannel,             \
              rc));                            \
-    FNEPILOGUE(#cName)            \
     return rc;                    \
   }                               \
                                   \
@@ -362,9 +367,9 @@ extern unsigned long int WIN32API GetCurrentThreadId(); //kernel32
              a1,a2,a3,a4,a5,a6));             \
     FNPROLOGUE(#cName)                       \
     ODIN_##cName(a1,a2,a3,a4,a5,a6); \
+    FNEPILOGUE(#cName)       \
     dprintf(("%s: void "#cName"() leave\n",    \
              pszOdinDebugChannel));           \
-    FNEPILOGUE(#cName)       \
   }                               \
                                   \
   void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6)
@@ -381,10 +386,10 @@ extern unsigned long int WIN32API GetCurrentThreadId(); //kernel32
              a1,a2,a3,a4,a5,a6,a7));          \
     FNPROLOGUE(#cName)                       \
     cRet   rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6,a7); \
+    FNEPILOGUE(#cName)            \
     dprintf(("%s: "#cRet" "#cName"() leave = %08xh\n", \
              pszOdinDebugChannel,             \
              rc));                            \
-    FNEPILOGUE(#cName)            \
     return rc;                    \
   }                               \
                                   \
@@ -400,9 +405,9 @@ extern unsigned long int WIN32API GetCurrentThreadId(); //kernel32
              a1,a2,a3,a4,a5,a6,a7));          \
     FNPROLOGUE(#cName)                       \
     ODIN_##cName(a1,a2,a3,a4,a5,a6,a7); \
+    FNEPILOGUE(#cName)       \
     dprintf(("%s: void "#cName"() leave\n",    \
              pszOdinDebugChannel));           \
-    FNEPILOGUE(#cName)       \
   }                               \
                                   \
   void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7)
@@ -420,10 +425,10 @@ extern unsigned long int WIN32API GetCurrentThreadId(); //kernel32
              a1,a2,a3,a4,a5,a6,a7,a8));       \
     FNPROLOGUE(#cName)                       \
     cRet   rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8); \
+    FNEPILOGUE(#cName)            \
     dprintf(("%s: "#cRet" "#cName"() leave = %08xh\n", \
              pszOdinDebugChannel,             \
              rc));                            \
-    FNEPILOGUE(#cName)            \
     return rc;                    \
   }                               \
                                   \
@@ -440,9 +445,9 @@ extern unsigned long int WIN32API GetCurrentThreadId(); //kernel32
              a1,a2,a3,a4,a5,a6,a7,a8));       \
     FNPROLOGUE(#cName)                       \
     ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8); \
+    FNEPILOGUE(#cName)       \
     dprintf(("%s: void "#cName"() leave\n",    \
              pszOdinDebugChannel));           \
-    FNEPILOGUE(#cName)       \
   }                               \
                                   \
   void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8)
@@ -460,10 +465,10 @@ extern unsigned long int WIN32API GetCurrentThreadId(); //kernel32
              a1,a2,a3,a4,a5,a6,a7,a8,a9));    \
     FNPROLOGUE(#cName)                       \
     cRet   rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9); \
+    FNEPILOGUE(#cName)            \
     dprintf(("%s: "#cRet" "#cName"() leave = %08xh\n", \
              pszOdinDebugChannel,             \
              rc));                            \
-    FNEPILOGUE(#cName)            \
     return rc;                    \
   }                               \
                                   \
@@ -480,9 +485,9 @@ extern unsigned long int WIN32API GetCurrentThreadId(); //kernel32
              a1,a2,a3,a4,a5,a6,a7,a8,a9));    \
     FNPROLOGUE(#cName)                       \
     ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9); \
+    FNEPILOGUE(#cName)       \
     dprintf(("%s: void "#cName"() leave\n",    \
              pszOdinDebugChannel));           \
-    FNEPILOGUE(#cName)       \
   }                               \
                                   \
   void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9)
@@ -500,10 +505,10 @@ extern unsigned long int WIN32API GetCurrentThreadId(); //kernel32
              a1,a2,a3,a4,a5,a6,a7,a8,a9,a10));\
     FNPROLOGUE(#cName)                       \
     cRet   rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10); \
+    FNEPILOGUE(#cName)            \
     dprintf(("%s: "#cRet" "#cName"() leave = %08xh\n", \
              pszOdinDebugChannel,             \
              rc));                            \
-    FNEPILOGUE(#cName)            \
     return rc;                    \
   }                               \
                                   \
@@ -520,9 +525,9 @@ extern unsigned long int WIN32API GetCurrentThreadId(); //kernel32
              a1,a2,a3));                      \
     FNPROLOGUE(#cName)                       \
     ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10); \
+    FNEPILOGUE(#cName)       \
     dprintf(("%s: void "#cName"() leave\n",    \
              pszOdinDebugChannel));           \
-    FNEPILOGUE(#cName)       \
   }                               \
                                   \
   void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10)
@@ -540,10 +545,10 @@ extern unsigned long int WIN32API GetCurrentThreadId(); //kernel32
              a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11)); \
     FNPROLOGUE(#cName)                       \
     cRet   rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11); \
+    FNEPILOGUE(#cName)            \
     dprintf(("%s: "#cRet" "#cName"() leave = %08xh\n", \
              pszOdinDebugChannel,             \
              rc));                            \
-    FNEPILOGUE(#cName)            \
     return rc;                    \
   }                               \
                                   \
@@ -560,9 +565,9 @@ extern unsigned long int WIN32API GetCurrentThreadId(); //kernel32
              a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11)); \
     FNPROLOGUE(#cName)                       \
     ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11); \
+    FNEPILOGUE(#cName)       \
     dprintf(("%s: void "#cName"() leave\n",    \
              pszOdinDebugChannel));           \
-    FNEPILOGUE(#cName)       \
   }                               \
                                   \
   void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11)
@@ -581,10 +586,10 @@ extern unsigned long int WIN32API GetCurrentThreadId(); //kernel32
              a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12)); \
     FNPROLOGUE(#cName)                       \
     cRet   rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12); \
+    FNEPILOGUE(#cName)            \
     dprintf(("%s: "#cRet" "#cName"() leave = %08xh\n", \
              pszOdinDebugChannel,             \
              rc));                            \
-    FNEPILOGUE(#cName)            \
     return rc;                    \
   }                               \
                                   \
@@ -602,9 +607,9 @@ extern unsigned long int WIN32API GetCurrentThreadId(); //kernel32
              a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12));  \
     FNPROLOGUE(#cName)                       \
     ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12); \
+    FNEPILOGUE(#cName)       \
     dprintf(("%s: void "#cName"() leave\n",    \
              pszOdinDebugChannel));           \
-    FNEPILOGUE(#cName)       \
   }                               \
                                   \
   void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12)
@@ -623,10 +628,10 @@ extern unsigned long int WIN32API GetCurrentThreadId(); //kernel32
              a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13)); \
     FNPROLOGUE(#cName)                       \
     cRet   rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13); \
+    FNEPILOGUE(#cName)            \
     dprintf(("%s: "#cRet" "#cName"() leave = %08xh\n", \
              pszOdinDebugChannel,             \
              rc));                            \
-    FNEPILOGUE(#cName)            \
     return rc;                    \
   }                               \
                                   \
@@ -644,9 +649,9 @@ extern unsigned long int WIN32API GetCurrentThreadId(); //kernel32
              a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13));  \
     FNPROLOGUE(#cName)                       \
     ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13); \
+    FNEPILOGUE(#cName)       \
     dprintf(("%s: void "#cName"() leave\n",    \
              pszOdinDebugChannel));           \
-    FNEPILOGUE(#cName)       \
   }                               \
                                   \
   void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12,t13 a13)
@@ -665,10 +670,10 @@ extern unsigned long int WIN32API GetCurrentThreadId(); //kernel32
              a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14)); \
     FNPROLOGUE(#cName)                       \
     cRet   rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14); \
+    FNEPILOGUE(#cName)            \
     dprintf(("%s: "#cRet" "#cName"() leave = %08xh\n", \
              pszOdinDebugChannel,             \
              rc));                            \
-    FNEPILOGUE(#cName)            \
     return rc;                    \
   }                               \
                                   \
@@ -686,9 +691,9 @@ extern unsigned long int WIN32API GetCurrentThreadId(); //kernel32
              a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14));  \
     FNPROLOGUE(#cName)                       \
     ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14); \
+    FNEPILOGUE(#cName)       \
     dprintf(("%s: void "#cName"() leave\n",    \
              pszOdinDebugChannel));           \
-    FNEPILOGUE(#cName)       \
   }                               \
                                   \
   void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12,t13 a13,t14 a14)
