@@ -1,7 +1,8 @@
-/* $Id: changelog,v 1.2008 2002-02-27 15:22:00 sandervl Exp $ */
+/* $Id: changelog,v 1.2009 2002-02-27 15:22:44 sandervl Exp $ */
 
  2002-02-27: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Removed WindowFromPoint change; has bad effect on many things
+    - KERNEL32: o Removable disk access fix
 
  2002-02-26: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Rewrote GetWindowThreadProcessId (no longer uses WGSS)
