@@ -1,4 +1,4 @@
-/* $Id: pe2lx.cpp,v 1.31 2001-07-10 16:39:18 bird Exp $
+/* $Id: pe2lx.cpp,v 1.32 2001-08-08 17:24:45 bird Exp $
  *
  * Pe2Lx class implementation. Ring 0 and Ring 3
  *
@@ -1874,7 +1874,7 @@ ULONG  Pe2Lx::openPath2(PCHAR pachFilename, ULONG cchFilename, ldrlv_t *pLdrLv, 
                 case ERROR_UNEXP_NET_ERR:           case ERROR_BAD_REM_ADAP:            case ERROR_NETNAME_DELETED:         case ERROR_BAD_DEV_TYPE:
                 case ERROR_NETWORK_ACCESS_DENIED:   case ERROR_BAD_NET_NAME:            case ERROR_TOO_MANY_SESS:           case ERROR_REQ_NOT_ACCEP:
                 case ERROR_INVALID_PASSWORD:        case ERROR_OPEN_FAILED:             case ERROR_INVALID_NAME:            case ERROR_FILENAME_EXCED_RANGE:
-                case ERROR_VC_DISCONNECTED:
+                case ERROR_VC_DISCONNECTED:         case ERROR_DRIVE_LOCKED:
                     rc = ERROR_FILE_NOT_FOUND;
                     pszPath = pszNext;
                     break;
