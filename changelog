@@ -1,4 +1,32 @@
-/* $Id: changelog,v 1.1218 2001-01-12 14:51:30 bird Exp $ */
+/* $Id: changelog,v 1.1219 2001-01-14 17:11:52 sandervl Exp $ */
+
+ 2001-01-13: Sander van Leeuwen <sandervl@xs4all.nl>
+    - COMDLG32: o Get current directory if initial dir == NULL (win31 style
+                  file dialog). 
+                o Fix for filter. (default to NULL; not " /0/0")
+                o Scale icons to 16x16 (win31 style file dialog) -> system
+                  default (32x32) is too big. (TODO: Our user32 icons are too
+                  big)
+                o Drive list not initialized correctly. (GetDriveTypeA return
+                  value interpreted wrong)
+                  -> use GetLogicalDrives instead to avoid accessing floppy
+                     drives (which GetDriveType does)
+    - USER32:   o Replaced some icons with those found in SHELL32:
+                  - open & closed folder
+                  - floppy, harddisk & network drive
+                o Fixed bug in NotifyFormatFrame method (fixes problems
+                  with combobox)
+                o ComboLBox bugfix (extra vertical scrollbar)
+                o LISTBOX_Directory bugfix (must check for FILE_ATTRIBUTE_NORMAL)
+                  (removes files from directory listing in common file dialog)
+    - KERNEL32: o Fix for executable names with spaces in path
+                o Workaround for applications that block the PM input queue
+                  while waiting for a child process to terminate.
+                  (WaitSingleObject now calls MsgWaitMultipleObjects and
+                   processes messages while waiting for the process to die)
+                  (Napster install now doesn't block PM anymore (forcing a reboot))
+                o Add class keys for SHDOCVW during install
+    - SHDOCVW:  o Added (Wine 20010112 port)
 
  2001-01-12: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - tools\install, tools\dailybuild:
