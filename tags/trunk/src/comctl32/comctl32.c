@@ -35,7 +35,7 @@ HANDLE COMCTL32_hHeap = (HANDLE)NULL;
 HMODULE COMCTL32_hModule = 0;
 LPSTR    COMCTL32_aSubclass = (LPSTR)NULL;
 
-void RegisterCOMCTL32WindowClasses(unsigned long hinstDLL)
+void CDECL RegisterCOMCTL32WindowClasses(unsigned long hinstDLL)
 {
   /* create private heap */
   COMCTL32_hHeap = HeapCreate(0, 0x10000, 0);
@@ -66,7 +66,7 @@ void RegisterCOMCTL32WindowClasses(unsigned long hinstDLL)
   TREEVIEW_Register();
 } 
 
-void UnregisterCOMCTL32WindowClasses(void)
+void CDECL UnregisterCOMCTL32WindowClasses(void)
 {
   /* unregister controls */
   PROGRESS_Unregister();
