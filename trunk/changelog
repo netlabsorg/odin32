@@ -1,4 +1,9 @@
-/* $Id: changelog,v 1.1536 2001-06-22 20:27:11 hugh Exp $ */
+/* $Id: changelog,v 1.1537 2001-06-23 07:23:12 achimha Exp $ */
+
+ 2001-06-23: Achim Hasenmueller <achimha@innotek.de>
+    - USER32:   o added OS/2 INI file access library (oslibprf)
+                o changed SystemParametersInfoA to no longer use Open32
+
  2001-06-22: Markus Montkowski <mmontkowski@gmx.de>
     - TWAIN_32: o Updated initterm.cpp to use OS/2 and not Win32 APIs when loading
                   the OS/2 twain DLL. needed because of kernel32 change 2001-06-12
