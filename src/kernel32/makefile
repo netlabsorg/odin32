@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.108 2000-12-03 00:33:26 bird Exp $
+# $Id: makefile,v 1.109 2001-01-23 18:31:26 sandervl Exp $
 
 #
 # Odin32 API
@@ -67,6 +67,7 @@ $(OBJDIR)\hmfile.obj \
 $(OBJDIR)\hmmutex.obj \
 $(OBJDIR)\hmcomm.obj \
 $(OBJDIR)\hmsemaphore.obj \
+$(OBJDIR)\hmstd.obj \
 $(OBJDIR)\wprocess.obj \
 $(OBJDIR)\conprop.obj \
 $(OBJDIR)\conprop2.obj \

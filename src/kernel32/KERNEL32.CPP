@@ -1,4 +1,4 @@
-/* $Id: KERNEL32.CPP,v 1.57 2000-10-26 17:21:38 sandervl Exp $ */
+/* $Id: KERNEL32.CPP,v 1.58 2001-01-23 18:31:25 sandervl Exp $ */
 
 /*
  * Win32 compatibility file functions for OS/2
@@ -277,7 +277,7 @@ VOID WIN32API FatalAppExitW(UINT arg1, LPCWSTR arg2)
 {
  char *astring;
 
-    dprintf(("KERNEL32:  OS2FatalAppExitW\n"));
+    dprintf(("KERNEL32: OS2FatalAppExitW %x", arg1));
     astring = UnicodeToAsciiString((LPWSTR)arg2);
     O32_FatalAppExit(arg1, astring);
     //probably won't return, but who cares..
@@ -287,7 +287,7 @@ VOID WIN32API FatalAppExitW(UINT arg1, LPCWSTR arg2)
 //******************************************************************************
 VOID WIN32API FatalExit( UINT arg1)
 {
-    dprintf(("KERNEL32:  OS2FatalExit\n"));
+    dprintf(("KERNEL32: FatalExit %x", arg1));
     O32_FatalExit(arg1);
 }
 //******************************************************************************
@@ -301,14 +301,14 @@ BOOL WIN32API IsBadHugeReadPtr( const void * arg1, UINT  arg2)
 //******************************************************************************
 BOOL WIN32API IsBadHugeWritePtr( PVOID arg1, UINT  arg2)
 {
-    dprintf(("KERNEL32:  OS2IsBadHugeWritePtr\n"));
+    dprintf(("KERNEL32: IsBadHugeWritePtr\n"));
     return O32_IsBadHugeWritePtr(arg1, arg2);
 }
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API IsDBCSLeadByte(BYTE arg1)
 {
-    dprintf2(("KERNEL32:  OS2IsDBCSLeadByte\n"));
+    dprintf2(("KERNEL32:  IsDBCSLeadByte %x", arg1));
     return O32_IsDBCSLeadByte(arg1);
 }
 //******************************************************************************
