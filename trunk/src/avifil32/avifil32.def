@@ -1,4 +1,4 @@
-; $Id: avifil32.def,v 1.4 2000-12-16 22:53:17 bird Exp $
+; $Id: avifil32.def,v 1.5 2001-07-21 17:38:48 sandervl Exp $
 
 ;
 ; Based on NT 4.0 SP6: AVIFIL32.DLL
@@ -26,10 +26,10 @@ EXPORTS
 ; AVIFileAddRef              = _AVIFileAddRef@?                @5
 ; AVIFileCreateStream        = _AVIFileCreateStream@?          @6
   AVIFileCreateStreamA       = _AVIFileCreateStreamA@12        @7
-; AVIFileCreateStreamW       = _AVIFileCreateStreamW@12        @8
+  AVIFileCreateStreamW       = _AVIFileCreateStreamW@12        @8
 ; AVIFileEndRecord           = _AVIFileEndRecord@?             @9
   AVIFileExit                = _AVIFileExit@0                  @10
-; AVIFileGetStream           = _AVIFileGetStream@?             @11
+  AVIFileGetStream           = _AVIFileGetStream@16            @11
   AVIFileInfo                = _AVIFileInfoA@12                @12
   AVIFileInfoA               = _AVIFileInfoA@12                @13
   AVIFileInfoW               = _AVIFileInfoW@12                @14
@@ -72,10 +72,10 @@ EXPORTS
   AVIStreamReadData          = _AVIStreamReadData@16           @51
   AVIStreamReadFormat        = _AVIStreamReadFormat@16         @52
   AVIStreamRelease           = _AVIStreamRelease@4             @53
-; AVIStreamSampleToTime      = _AVIStreamSampleToTime@?        @54
+  AVIStreamSampleToTime      = _AVIStreamSampleToTime@8        @54
   AVIStreamSetFormat         = _AVIStreamSetFormat@16          @55
   AVIStreamStart             = _AVIStreamStart@4               @56
-; AVIStreamTimeToSample      = _AVIStreamTimeToSample@?        @57
+  AVIStreamTimeToSample      = _AVIStreamTimeToSample@8        @57
   AVIStreamWrite             = _AVIStreamWrite@32              @58
   AVIStreamWriteData         = _AVIStreamWriteData@16          @59
 ; CLSID_AVISimpleUnMarshal   = _CLSID_AVISimpleUnMarshal@?     @60
