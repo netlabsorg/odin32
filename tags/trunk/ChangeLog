@@ -1,4 +1,9 @@
-/* $Id: ChangeLog,v 1.1470 2001-06-02 07:32:07 achimha Exp $ */
+/* $Id: ChangeLog,v 1.1471 2001-06-02 08:33:06 sandervl Exp $ */
+
+ 2001-06-02: Sander van Leeuwen <sandervl@xs4all.nl>
+    - WINMM:    o Default waveout volume can be controlled by a key in odin.ini:
+                  [WINMM]
+                  DefVolume=50[0-100] Default waveout volume (default = 100)
 
  2001-06-01: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Send WM_HELP if F1 pressed & no menu active
