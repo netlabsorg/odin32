@@ -1,4 +1,4 @@
-; $Id: shell32.def,v 1.22 1999-12-28 23:27:41 sandervl Exp $
+; $Id: shell32.def,v 1.23 1999-12-30 00:21:34 phaller Exp $
 
 ;Created by BLAST for IBM's compiler
 ;based on Windows 95
@@ -314,8 +314,8 @@ EXPORTS
 ;   Shl1632_ThunkData32               = _Shl1632_ThunkData32@?                @299
 ;   Shl3216_ThunkData32               = _Shl3216_ThunkData32@?                @300
     StrChrA                           = _StrChrA@8                            @301
-;   StrChrIA                          = _StrChrIA@?                           @302
-;   StrChrIW                          = _StrChrIW@?                           @303
+    StrChrIA                          = _StrChrIA@8                           @302
+    StrChrIW                          = _StrChrIW@8                           @303
     StrChrW                           = _StrChrW@8                            @304
 ;   StrCmpNA                          = _StrCmpNA@?                           @305
     StrCmpNIA                         = _StrCmpNIA@12                         @306
@@ -338,8 +338,8 @@ EXPORTS
 ;   StrRStrIW                         = _StrRStrIW@?                          @323
 ;   StrRStrW                          = _StrRStrW@?                           @324
 ;   StrStrA                           = _StrStrA@?                            @325
-;   StrStrIA                          = _StrStrIA@?                           @326
-;   StrStrIW                          = _StrStrIW@?                           @327
+    StrStrIA                          = _StrStrIA@8                           @326
+    StrStrIW                          = _StrStrIW@8                           @327
 ;   StrStrW                           = _StrStrW@?                            @328
 ;   WOWShellExecute                   = _WOWShellExecute@?                    @329
     SHRegCloseKey                     = _SHRegCloseKey@4                      @505
