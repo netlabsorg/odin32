@@ -1,4 +1,4 @@
-/* $Id: region.cpp,v 1.2 2000-02-16 14:18:12 sandervl Exp $ */
+/* $Id: region.cpp,v 1.3 2000-03-29 17:15:35 sandervl Exp $ */
 
 /*
  * GDI32 region code
@@ -90,8 +90,11 @@ BOOL WIN32API EqualRgn( HRGN arg1, HRGN  arg2)
 //******************************************************************************
 HRGN WIN32API ExtCreateRegion( const XFORM * arg1, DWORD arg2, const RGNDATA *  arg3)
 {
-    dprintf(("GDI32: ExtCreateRegion"));
-    return O32_ExtCreateRegion(arg1, arg2, arg3);
+ HRGN hRgn;
+
+    hRgn = O32_ExtCreateRegion(arg1, arg2, arg3);
+    dprintf(("GDI32: ExtCreateRegion %x %x %x returned %x", arg1, arg2, arg3, hRgn));
+    return hRgn;
 }
 //******************************************************************************
 //******************************************************************************
@@ -130,10 +133,14 @@ DWORD WIN32API GetRegionData( HRGN arg1, DWORD arg2, PRGNDATA  arg3)
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API GetRgnBox( HRGN arg1, PRECT  arg2)
+int WIN32API GetRgnBox(HRGN hRgn, PRECT pRect)
 {
-    dprintf(("GDI32: GetRgnBox"));
-    return O32_GetRgnBox(arg1, arg2);
+    dprintf(("GDI32: GetRgnBox %x %x", hRgn, pRect));
+    if(hRgn == 0) {
+////	SetLastError(ERROR_INVALID_PARAMETER);
+	return NULLREGION;
+    }
+    return O32_GetRgnBox(hRgn, pRect);
 }
 //******************************************************************************
 //******************************************************************************
