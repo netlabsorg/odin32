@@ -1,4 +1,4 @@
-/* $Id: win32wbasepos.cpp,v 1.29 2002-03-20 10:30:08 sandervl Exp $ */
+/* $Id: win32wbasepos.cpp,v 1.30 2003-02-27 14:22:45 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (nonclient/position methods)
  *
@@ -331,7 +331,7 @@ UINT Win32BaseWindow::MinMaximize(UINT cmd, LPRECT lpRect)
             if(getStyle() & WS_MINIMIZE )
             {
                 setStyle(getStyle() & ~WS_MINIMIZE);
-                OSLibSetWindowStyle(getOS2FrameWindowHandle(), getOS2WindowHandle(), getStyle(), getExStyle());
+                OSLibSetWindowStyle(getOS2FrameWindowHandle(), getOS2WindowHandle(), getStyle(), getExStyle(), getStyle());
             }
             setStyle(getStyle() | WS_MAXIMIZE);
 
@@ -343,7 +343,7 @@ UINT Win32BaseWindow::MinMaximize(UINT cmd, LPRECT lpRect)
             if(getStyle() & WS_MINIMIZE)
             {
                 setStyle(getStyle() & ~WS_MINIMIZE);
-                OSLibSetWindowStyle(getOS2FrameWindowHandle(), getOS2WindowHandle(), getStyle(), getExStyle());
+                OSLibSetWindowStyle(getOS2FrameWindowHandle(), getOS2WindowHandle(), getStyle(), getExStyle(), getStyle());
 
                 if( getFlags() & WIN_RESTORE_MAX)
                 {

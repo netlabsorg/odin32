@@ -1,4 +1,4 @@
-/* $Id: win32wbasenonclient.cpp,v 1.48 2003-02-13 10:12:27 sandervl Exp $ */
+/* $Id: win32wbasenonclient.cpp,v 1.49 2003-02-27 14:22:45 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (non-client methods)
  *
@@ -1335,6 +1335,14 @@ LONG Win32BaseWindow::HandleSysCommand(WPARAM wParam,POINT *pt32)
         break;
 
     case SC_RESTORE:
+
+        //PF Start PM restoration routine first if we restore from icon
+        //so all internal PM logic will work - this routine will always
+        //lead to ShowWindow(SW_RESTORE)
+
+        if (getOldStyle() & WS_MINIMIZE)
+          OSLibWinRestoreWindow(getOS2FrameWindowHandle());
+        else
         ShowWindow(SW_RESTORE);
         break;
 

@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.359 2003-02-17 13:40:11 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.360 2003-02-27 14:22:44 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -3759,14 +3759,17 @@ LONG Win32BaseWindow::SetWindowLong(int index, ULONG value, BOOL fUnicode)
                 SendMessageA(getWindowHandle(),WM_STYLECHANGING,GWL_EXSTYLE,(LPARAM)&ss);
                 setExStyle(ss.styleNew);
                 SendMessageA(getWindowHandle(),WM_STYLECHANGED,GWL_EXSTYLE,(LPARAM)&ss);
-                OSLibSetWindowStyle(getOS2FrameWindowHandle(), getOS2WindowHandle(), getStyle(), getExStyle());
+
+                OSLibSetWindowStyle(getOS2FrameWindowHandle(), getOS2WindowHandle(), 
+                                    getStyle(), getExStyle(),ss.styleOld);
+
                 oldval = ss.styleOld;
                 break;
         }
         case GWL_STYLE:
         {
                 STYLESTRUCT ss;
-
+ 
                 //SvL: TODO: Can you change minimize or maximize status here too?
 
                 if(dwStyle == value) {
@@ -3781,8 +3784,9 @@ LONG Win32BaseWindow::SetWindowLong(int index, ULONG value, BOOL fUnicode)
                 SendMessageA(getWindowHandle(),WM_STYLECHANGING,GWL_STYLE,(LPARAM)&ss);
                 setStyle(ss.styleNew);
                 SendMessageA(getWindowHandle(),WM_STYLECHANGED,GWL_STYLE,(LPARAM)&ss);
-                OSLibSetWindowStyle(getOS2FrameWindowHandle(), getOS2WindowHandle(), 
-                                    getStyle(), getExStyle());
+
+                 OSLibSetWindowStyle(getOS2FrameWindowHandle(), getOS2WindowHandle(), 
+                                    getStyle(), getExStyle(),ss.styleOld);
 
                 //TODO: Might not be correct to use ShowWindow here
                 if((ss.styleOld & WS_VISIBLE) != (ss.styleNew & WS_VISIBLE)) {
