@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.37 1999-08-31 14:36:45 sandervl Exp $
+# $Id: makefile,v 1.38 1999-09-04 12:41:46 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -250,6 +250,7 @@ iccio.OBJ: \
 
 winres.OBJ: \
     .\winres.cpp \
+    cvtresource.h \
     $(PDWIN32_INCLUDE)\winresmenu.h \
     $(PDWIN32_INCLUDE)\winres.h \
     $(PDWIN32_INCLUDE)\nameid.h \
@@ -348,7 +349,7 @@ cvtcursorgrp.obj: cvtcursorgrp.cpp $(PDWIN32_INCLUDE)\wincursor.h $(PDWIN32_INCL
 interlock.obj: interlock.asm
 
 clean:
-        $(RM) *.OBJ *.LIB *.dll *~ *.map *.pch
+        $(RM) *.OBJ *.LIB *.dll *.lrf *.res *.map *.pch
         $(RM) $(PDWIN32_LIB)\$(TARGET).LIB
         $(RM) $(PDWIN32_BIN)\$(TARGET).dll
 

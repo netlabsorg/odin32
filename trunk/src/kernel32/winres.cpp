@@ -1,4 +1,4 @@
-/* $Id: winres.cpp,v 1.14 1999-08-31 17:15:30 sandervl Exp $ */
+/* $Id: winres.cpp,v 1.15 1999-09-04 12:41:46 sandervl Exp $ */
 
 /*
  * Win32 resource class
@@ -330,10 +330,45 @@ PVOID Win32Resource::lockOS2Resource()
    return os2resdata;
 }
 //******************************************************************************
+//return size of converted win32 resource
+//******************************************************************************
+ULONG Win32Resource::getOS2Size()
+{
+  switch(type) {
+    case NTRT_NEWBITMAP:
+    case NTRT_BITMAP:
+	return QueryConvertedBitmapSize((WINBITMAPINFOHEADER *)winresdata, ressize);
+
+    case NTRT_CURSOR:
+	return QueryConvertedCursorSize((CursorComponent *)winresdata, ressize);
+
+    case NTRT_ICON:
+	return QueryConvertedIconSize((WINBITMAPINFOHEADER *)winresdata, ressize);
+
+    case NTRT_GROUP_ICON:
+    case NTRT_GROUP_CURSOR:
+    case NTRT_ACCELERATORS:
+    case NTRT_NEWMENU:
+    case NTRT_MENU:
+    case NTRT_NEWDIALOG:
+    case NTRT_DIALOG:
+    case NTRT_FONTDIR:
+    case NTRT_FONT:
+    case NTRT_MESSAGETABLE:
+    case NTRT_RCDATA:
+    case NTRT_VERSION:
+    case NTRT_STRING:
+    default:
+	dprintf(("Win32Resource::getOS2Size SHOULDN'T BE CALLED for this resource type (%d) (NOT IMPLEMENTED)!!", type));
+	break;
+  }
+  return 0;
+}
+//******************************************************************************
 //******************************************************************************
 PVOID Win32Resource::convertResource(void *win32res)
 {
- ULONG cvtressize;
+ int cvtressize;
 
   switch(type) {
     case NTRT_NEWBITMAP:
@@ -341,7 +376,7 @@ PVOID Win32Resource::convertResource(void *win32res)
 	return ConvertBitmap((WINBITMAPINFOHEADER *)win32res, ressize, &ressize);
 
     case NTRT_CURSOR:
-	return ConvertCursor((CursorComponent *)win32res, ressize);
+	return ConvertCursor((CursorComponent *)win32res, ressize, &cvtressize);
 
     case NTRT_GROUP_CURSOR:
 	return ConvertCursorGroup((CursorHeader *)win32res, ressize, module);
@@ -350,7 +385,7 @@ PVOID Win32Resource::convertResource(void *win32res)
 	return ConvertIconGroup((IconHeader *)win32res, ressize, module);
 
     case NTRT_ICON:
-	return ConvertIcon((WINBITMAPINFOHEADER *)win32res, ressize);
+	return ConvertIcon((WINBITMAPINFOHEADER *)win32res, ressize, &cvtressize);
 
     case NTRT_ACCELERATORS:
 	return ConvertAccelerator((WINACCEL *)win32res, ressize);
