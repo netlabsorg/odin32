@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.22 1999-06-25 15:58:05 sandervl Exp $ */
+ /* $Id: changelog,v 1.23 1999-06-25 18:13:22 achimha Exp $ */
+ 99-06-25: Achim Hasenmueller
+        - Finally fixed changelog date format to be compliant with
+          the official EU date format :)
 
  99-06-25: Christoph Bratschi
 	- USER32: GetSysColorPen bugfix (syscolor.cpp)
@@ -6,10 +9,10 @@
  99-06-24: Patrick Haller
         - SHELL32: partial port form WINE
 
- 99-24-06: Edgar Buerkle
+ 99-06-24: Edgar Buerkle
 	- KERNEL32: Implemented GetLocaleInfoA/W
 
- 99-24-06: Sander van Leeuwen
+ 99-06-24: Sander van Leeuwen
 	- include\winos2def.h: Changed OS/2 apis to use wrappers (FS save/restore)
 	  and added DosQueryCtryInfo
 
@@ -22,23 +25,23 @@
         - COMDLG32: basic unicode support added, thou broken somehow
         - source code splitups and beautification ;-)
 
- 99-23-06: Achim Hasenmueller
+ 99-06-23: Achim Hasenmueller
         - ported latest WINE fixes and additions for comctl32. Changes
           involve better undoc. DSA APIs, right colors for the tab control,
           many improvements for the listview...
 
- 99-21-06: Achim Hasenmueller
+ 99-06-21: Achim Hasenmueller
         - ported latest WINE DrawEdge code and moved everything to the
           new file src/user32/uitools.cpp
 
- 99-21-06: Sander van Leeuwen
+ 99-06-21: Sander van Leeuwen
 	- include\os2wrap.h, removed calling convention
 
- 99-21-06: Christoph Bratschi
+ 99-06-21: Christoph Bratschi
         - COMCTL32: Progress bar finished (progress.c, USER32 bugs to fix)
         - COMCTL32: Trackbar finished (trackbar.c)
 
- 99-20-06: Sander van Leeuwen
+ 99-06-20: Sander van Leeuwen
 	- KERNEL32: Call HMInitialize from initterm, not winexe object creation
 	- KERNEL32: Added comctl to list of system dlls (windll.cpp)
 	- KERNEL32: Fixed dll detach (windll.cpp) for converted win32 dlls
@@ -52,11 +55,11 @@
 	- USER32: Fixed bug in wndproc.cpp (release build only)
 	- USER32: Added preliminary support for parent notification
 
- 99-19-06: Sander van Leeuwen
+ 99-06-19: Sander van Leeuwen
 	- ALL (except dsound/ddraw): Include <os2wrap.h> instead of <os2.h>
 	- KERNEL32: Changes for win32 TEB (not active)
 
- 99-07-06: Sander van Leeuwen
+ 99-06-07: Sander van Leeuwen
 	- Removed unecessary files
 	- Modified os2win.h to save FS selector before calling Open32 api
 	  and restoring it afterwards.
@@ -64,7 +67,7 @@
 	- GDI32: Fixed SetDIBitsToDevice bugfix (palette size)
 	- USER32: Fixed RegisterSystemClasses
 
- 99-07-06: Achim Hasenmueller
+ 99-06-07: Achim Hasenmueller
 	- Added comctl32, mostly untested includes all controls, some undocumented
 	  APIs missing
 	- Added internal GetSysColorPen() to user32 - handy API used in WINE
@@ -75,89 +78,89 @@
           as reported on mailinglist by Edgar Buerkle.
 	  Also FindResourceA/W.
 
- 99-01-06: David Raison
+ 99-06-01: David Raison
 	- OLE32: Changed everything to make it compile with the new headers
 	- include/win/ole.2 - line 170
 	- include/wine/win/obj_oleview.h - line 32 & 36
 
- 99-23-05: Sander van Leeuwen
+ 99-05-23: Sander van Leeuwen
 	- ADVAPI32: Fixed Open32 bugs in RegOpenKeyA (set return key to 0 when failed)
                     Fixed key definition conflict in convertkey.
 	- KERNEL32: Fixed exception handler, don't continue after process termination 
                     exception! (fixes annoying exitlist hangs)
 
- 99-19-05: Sander van Leeuwen
+ 99-05-19: Sander van Leeuwen
 	- KERNEL32: Corrected wrong export for HeapSize (reported by Vit Timchishin)
 
- 99-15-05: Sander van Leeuwen
+ 99-05-15: Sander van Leeuwen
 	- Fixed a number of bugs introduced during the Wine header update
  	- KERNEL32: Added high/low fixup support for pe loader
 
- 99-13-05: Sander van Leeuwen
+ 99-05-13: Sander van Leeuwen
 	- Updated USER32
 	- Fixed unicode apis in USER32
 	- Added .def files for ADVAPI32, COMDLG32, GDI32, KERNEL32 & USER32 that
 	  export all apis with the correct names. (_apiname@nrofparameterbytes)
 
- 99-12-05: Sander van Leeuwen
+ 99-05-12: Sander van Leeuwen
 	- Finished KERNEL32
 	- Updated WINMM
 
- 99-10-05: Vince Vielhaber
+ 99-05-10: Vince Vielhaber
 	- Rewrote WSOCK32 for Wine headers
 
- 99-08-05: Sander van Leeuwen
+ 99-05-08: Sander van Leeuwen
 	- Updated CAPI32, COMDLG32 & GDI32, MPR, NTDLL, TAPI32, WINSPOOL, WNETAP32
           for new headers
 	- Started with KERNEL32 changes (75% done)
 	- Made basic changes to OLE32 for new headers, but still tons of errors
 	- Fixed some unicode apis in GDI32
 
- 99-04-05: Sander van Leeuwen
+ 99-05-04: Sander van Leeuwen
 	- Stripped os2win.h and put it in include directory
 	- WINE header files in include\win
           (some modified for IBM VAC)
 	- All Open32 apis have 'O32_' as prefix, Open32 specific declarations
 	  are appended with _O32.
 
- 99-01-05: Sander van Leeuwen
+ 99-05-01: Sander van Leeuwen
 	- Changed makefile structure:
 		nmake DEBUG=1	builds debug version
 		nmake		builds release version
 
- 99-11-04: Sander van Leeuwen
+ 99-04-11: Sander van Leeuwen
 	- Everything except user32 & kernel32: copyrights added to most files
           Moved a few header files in \include
 	- Fixed import problem in peldr (include\winimage.h), SetFullPath must
           be a virtual method.
 
- 98-26-10: Sander van Leeuwen
+ 98-10-26: Sander van Leeuwen
 	- OLE32: CoInitialize takes one parameter, not 0
 
- 98-11-10: Sander van Leeuwen
+ 98-10-11: Sander van Leeuwen
 	- KERNEL32: except.asm Wrong calling convention for SetExceptionChain
 	- KERNEL32: exceptions.cpp/wprocess.cpp SetExceptionChain(-1) instead of SetExceptionChain(0)
 
- 98-28-09: Sander van Leeuwen
+ 98-09-28: Sander van Leeuwen
 	- PE2LX: icon.cpp: palette only for <= 8 bpp
 	- PE2LX: icon.cpp: check if image size in bmp header is correct before using it
 
- 98-25-09: Sander van Leeuwen
+ 98-09-25: Sander van Leeuwen
 	- PE2LX: Don't fail if an exe/dll doesn't contain any imports (pe.cpp:ProcessImports)
 
 ********************************************************************************
 ***** Release 0.03/4
 ********************************************************************************
- 98-15-09: KSO
+ 98-09-15: KSO
 	- WIN32K: pe2lx\misc.cpp changes
 
- 98-13-09: Sander van Leeuwen
+ 98-09-13: Sander van Leeuwen
 	- KERNEL32: windll.cpp: fixed bug with szModule not being initialized
 	- PE2LX: pe.cpp: Only read first 1 MB for huge files. (as they are most
                          likely InstallShield archives; exe appended with 
 			 installation data)
 
- 98-12-09: Sander van Leeuwen
+ 98-09-12: Sander van Leeuwen
 	- WSOCK32: Changed fd_set to Wfd_set or else it won't compile over here
 	- KERNEL32: Winimage.cpp, extra checks added
 	- KERNEL32: OS2GetModuleFileName bugfix
@@ -169,34 +172,34 @@
 	- GDI32: DIBSection ctor: bug in BITMAPINFO2 malloc
 	- GDI32: BitBlt: (dibsection) HDC == HPS (thank you, IBM!)
 	
- 98-02-09: Sander van Leeuwen
+ 98-09-02: Sander van Leeuwen
 	- KERNEL32/USER32: Split up code
 	- USER32 (/new): Started with new class & window managment code
 			 (not compiled nor tested, so don't change it)
 
- 98-01-09: Patrick Haller
+ 98-09-01: Patrick Haller
 	- WSOCK32: Circular linker dependency removed
 
- 98-31-08: kso
+ 98-08-31: kso
     	- KERNEL32: changed lfile.c to use OS2CreateFile,OS2CloseHandle,.... as
       	  NT does. Notepad (W95) is now working better.
     	- KERNEL32: fixed a open32 bug (or win32 feature) - WriteFile with
       	  nrbytes = 0 is equal to a SetEndOfFile(..);
 
- 98-17-08: Sander van Leeuwen
+ 98-08-17: Sander van Leeuwen
 	- KERNEL32: Changed LoadLibraryA(W/ExA/ExW) to try to load the dll
 		    directly first and if that fails, load it manually.
 
- 98-15-08: Sander van Leeuwen
+ 98-08-15: Sander van Leeuwen
  	- DDRAW: LOTS of changes,additions and fixes
 		 (ddex1-ddex5 DirectX SDK samples work(ed) + Quake 2 in 
 		  DirectDraw mode)
 	- DSOUND: Skeleton code extended
 
- 98-13-08: Sander van Leeuwen
+ 98-08-13: Sander van Leeuwen
 	- PE2LX: Replaced stack page removal code; (adjusted GetNrPages instead)
 
- 98-13-08: KSO:
+ 98-08-13: KSO:
 	- PE2LX: Borland bugfixes
 
  98-08-08: Sander van Leeuwen
@@ -207,7 +210,7 @@
 	- LocalReAlloc bugfix, notepad assumes it returns the same
 	  address when the new size is smaller than the old one.
 
- 98-03-08 KSO:
+ 98-08-03 KSO:
 	- pe.cpp:	line 600 - added OS2Exe to the parameterlist
 	- bitmap.cpp: replace file - much.
 	- bitmap.h: replace file - typo (BitMap to Bitmap)
@@ -258,14 +261,14 @@
  98-07-09: Patrick Haller
         - stubs for Winspool 100%
 
+ 98-07-01 Joel Troster
+        - KERNEL32: update to nameid.cpp
+
  98-06-07 Joel Troster
         - WINMM: WaveOpen bugfix
 
  98-06-07 Felix Maschek
         - CAPI32: bugfix
-
- 98-01-07 Joel Troster
-        - KERNEL32: update to nameid.cpp
 
  98-06-15: Patrick Haller
         - GDI32:    stubs for all missing functions
@@ -311,16 +314,16 @@
 ***** Release 0.02
 ********************************************************************************
 
- 05-04-98: Patrick Haller
+ 98-04-05: Patrick Haller
 	- KERNEL32: Resource bugfix
 
- 30-03-98: Joel Troster
+ 98-03-30: Joel Troster
 	- WINMM: midiStream* stubs added
 
- 30-03-98: Sander van Leeuwen
+ 98-03-30: Sander van Leeuwen
 	- PE2LX: Set console flag when exe has no resources
 
- 27-03-98: Joel Troster
+ 98-03-27: Joel Troster
 	- WINMM: Midi changes/bugfixes, mci* api stubs added
 	- GDI32: SetObjectOwner stub added
 
