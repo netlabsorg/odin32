@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.8 1999-09-05 15:53:10 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.9 1999-09-05 15:59:37 dengert Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -16,7 +16,7 @@
 #ifdef __cplusplus
 
 #include <win32class.h>
-//#include "open32wbase.h"
+#include "open32wbase.h"
 #include <gen_object.h>
 #include <win32wndchild.h>
 #include <winres.h>
@@ -147,9 +147,9 @@ Win32BaseWindow *getParent()                    { return (Win32BaseWindow *)Chil
          BOOL   EnableWindow(BOOL fEnable);
          BOOL   CloseWindow();
   static HWND   GetActiveWindow();
-	 //Window handle has already been verified, so just return true
+         //Window handle has already been verified, so just return true
          BOOL   IsWindow()                    { return TRUE; };
-	 BOOL   IsDialog()                    { return fIsDialog; };
+         BOOL   IsDialog()                    { return fIsDialog; };
 
          BOOL   IsWindowEnabled();
          BOOL   IsWindowVisible();
@@ -235,7 +235,7 @@ protected:
         BOOL    isIcon;
         BOOL    fCreated;
         BOOL    fFirstShow;
-	BOOL    fIsDialog;
+        BOOL    fIsDialog;
 
    Win32BaseWindow *owner;
 
@@ -275,10 +275,10 @@ private:
 #endif
 
 public:
-//       void SetFakeOpen32()    { WinSetDAXData (OS2Hwnd, &fakeWinBase); }
-//       void RemoveFakeOpen32() { WinSetDAXData (OS2Hwnd, NULL); }
+       void SetFakeOpen32()    { WinSetDAXData (OS2Hwnd, &fakeWinBase); }
+       void RemoveFakeOpen32() { WinSetDAXData (OS2Hwnd, NULL); }
 
-//  fakeOpen32WinBaseClass fakeWinBase;
+       fakeOpen32WinBaseClass fakeWinBase;
 };
 
 

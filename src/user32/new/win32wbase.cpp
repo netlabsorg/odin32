@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.10 1999-09-05 15:53:09 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.11 1999-09-05 15:59:36 dengert Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -428,9 +428,8 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
   }
 #endif
 
-//  fakeWinBase.hwndThisObject = OS2Hwnd;
-//  fakeWinBase.pWindowClass = windowClass;
-//  *(PULONG)&fakeWinBase -= 0x90 - 8;
+  fakeWinBase.hwndThis     = OS2Hwnd;
+  fakeWinBase.pWindowClass = windowClass;
 //  SetFakeOpen32();
 
   /* Set the window menu */
