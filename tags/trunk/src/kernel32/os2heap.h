@@ -1,4 +1,4 @@
-/* $Id: os2heap.h,v 1.4 1999-10-04 09:55:57 sandervl Exp $ */
+/* $Id: os2heap.h,v 1.5 2001-07-06 13:47:19 sandervl Exp $ */
 
 /*
  *
@@ -17,16 +17,20 @@
 #include "vmutex.h"
 
 #define MAGIC_NR_HEAP  0x87654321
+//must be a multiple of 8 bytes (alignment)
 typedef struct _tagHEAPELEM {
   DWORD  magic;     //magic number
+  LPVOID lpMem;     //pointer returned by malloc
   struct _tagHEAPELEM *prev;
   struct _tagHEAPELEM *next;
-  DWORD  flags;     //set by LocalAlloc only
-  DWORD  lockCnt;   //LocalLock/Unlock
 } HEAPELEM;
 
-#define HEAP_OVERHEAD (sizeof(HEAPELEM)+60)
-//#define HEAP_OVERHEAD sizeof(HEAPELEM)
+//extra overhead needed for quake 2 or 3 (a long time ago...)
+//#define HEAP_OVERHEAD (sizeof(HEAPELEM)+60)
+//+8 to make sure we can align the pointer at 8 byte boundary
+#define HEAP_OVERHEAD (sizeof(HEAPELEM)+8)
+
+#define GET_HEAPOBJ(ptr) (HEAPELEM *)((char *)ptr - sizeof(HEAPELEM));
 
 class OS2Heap
 {
@@ -43,12 +47,6 @@ public:
     DWORD  Compact(DWORD dwFlags);
     BOOL   Validate(DWORD dwFlags, LPCVOID lpMem);
     BOOL   Walk(void *lpEntry);
-
-    LPVOID Alloc(DWORD dwFlags, DWORD dwBytes, DWORD LocalAllocFlags);
-    BOOL   Lock(LPVOID lpMem);
-    BOOL   Unlock(LPVOID lpMem);
-    int    GetLockCnt(LPVOID lpMem);
-    DWORD  GetFlags(LPVOID lpMem);
 
    static OS2Heap *find(HANDLE hHeap);
 

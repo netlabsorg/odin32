@@ -1,4 +1,4 @@
-/* $Id: heap.cpp,v 1.28 2001-07-05 18:10:08 sandervl Exp $ */
+/* $Id: heap.cpp,v 1.29 2001-07-06 13:47:18 sandervl Exp $ */
 
 /*
  * Win32 heap API functions for OS/2
@@ -201,9 +201,12 @@ ODINFUNCTIONNODBG0(HANDLE, GetProcessHeap)
 #define GLOBAL_LOCK_MAX   0xFF
 #define HANDLE_TO_INTERN(h)  ((PGLOBAL32_INTERN)(((char *)(h))-2))
 #define INTERN_TO_HANDLE(i)  ((HGLOBAL) &((i)->Pointer))
-#define POINTER_TO_HANDLE(p) (*(((HGLOBAL *)(p))-1))
 #define ISHANDLE(h)          (((DWORD)(h)&2)!=0)
 #define ISPOINTER(h)         (((DWORD)(h)&2)==0)
+
+//SvL: -2 for 8 byte alignment
+#define POINTER_TO_HANDLE(p) (*(((HGLOBAL *)(p))-2))
+#define HGLOBAL_SIZE         2*sizeof(HGLOBAL)
 
 #pragma pack(1)
 
@@ -250,12 +253,14 @@ HGLOBAL WINAPI GlobalAlloc(
       if (!pintern) return 0;
       if(size)
       {
-	 if (!(palloc=HeapAlloc(GetProcessHeap(), hpflags, size+sizeof(HGLOBAL)))) {
+         //SvL: 2*sizeof for 8 byte alignment
+	 if (!(palloc=HeapAlloc(GetProcessHeap(), hpflags, size+HGLOBAL_SIZE))) {
 	    HeapFree(GetProcessHeap(), 0, pintern);
 	    return 0;
 	 }
 	 *(HGLOBAL *)palloc=INTERN_TO_HANDLE(pintern);
-	 pintern->Pointer=(char *) palloc+sizeof(HGLOBAL);
+         //SvL: 2*sizeof for 8 byte alignment
+	 pintern->Pointer=(char *) palloc+HGLOBAL_SIZE;
       }
       else
 	 pintern->Pointer=NULL;
@@ -282,7 +287,7 @@ LPVOID WINAPI GlobalLock(
    LPVOID           palloc;
 
 
-   if(ISPOINTER(hmem)) {
+   if(hmem == NULL || ISPOINTER(hmem)) {
       dprintf(("KERNEL32: GlobalLock %x returned %x", hmem, hmem));
       return (LPVOID) hmem;
    }
@@ -323,7 +328,7 @@ BOOL WINAPI GlobalUnlock(
 
    dprintf(("KERNEL32: GlobalUnlock %x", hmem));
 
-   if(ISPOINTER(hmem))
+   if(hmem == NULL || ISPOINTER(hmem))
       return FALSE;
 
    /* HeapLock(GetProcessHeap()); */
@@ -395,7 +400,8 @@ HGLOBAL WINAPI GlobalHandle(
 
         if (maybe_intern->Magic == MAGIC_GLOBAL_USED) {
             test = maybe_intern->Pointer;
-            if (HeapValidate( GetProcessHeap(), 0, ((HGLOBAL *)test)-1 ) && /* obj(-handle) valid arena? */
+            //SvL: -2 for 8 byte alignment
+            if (HeapValidate( GetProcessHeap(), 0, ((HGLOBAL *)test)-2 ) && /* obj(-handle) valid arena? */
                 HeapValidate( GetProcessHeap(), 0, maybe_intern ))  /* intern valid arena? */
             {
                 return handle;
@@ -519,25 +525,25 @@ HGLOBAL WINAPI GlobalReAlloc(
 	    if(pintern->Pointer)
 	    {
 	       if((palloc = HeapReAlloc(GetProcessHeap(), heap_flags,
-				   (char *) pintern->Pointer-sizeof(HGLOBAL),
-				   size+sizeof(HGLOBAL))) == NULL)
+				   (char *) pintern->Pointer-HGLOBAL_SIZE,
+				   size+HGLOBAL_SIZE)) == NULL)
 		   return 0; /* Block still valid */
-	       pintern->Pointer=(char *) palloc+sizeof(HGLOBAL);
+	       pintern->Pointer=(char *) palloc+HGLOBAL_SIZE;
 	    }
 	    else
 	    {
-	        if((palloc=HeapAlloc(GetProcessHeap(), heap_flags, size+sizeof(HGLOBAL)))
+	        if((palloc=HeapAlloc(GetProcessHeap(), heap_flags, size+HGLOBAL_SIZE))
 		   == NULL)
 		    return 0;
 	       *(HGLOBAL *)palloc=hmem;
-	       pintern->Pointer=(char *) palloc+sizeof(HGLOBAL);
+	       pintern->Pointer=(char *) palloc+HGLOBAL_SIZE;
 	    }
 	 }
 	 else
 	 {
 	    if(pintern->Pointer)
 	    {
-	       HeapFree(GetProcessHeap(), 0, (char *) pintern->Pointer-sizeof(HGLOBAL));
+	       HeapFree(GetProcessHeap(), 0, (char *) pintern->Pointer-HGLOBAL_SIZE);
 	       pintern->Pointer=NULL;
 	    }
 	 }
@@ -580,7 +586,7 @@ HGLOBAL WINAPI GlobalFree(
       /*    SetLastError(ERROR_INVALID_HANDLE);  */
 
 	 if(pintern->Pointer)
-	    if(!HeapFree(GetProcessHeap(), 0, (char *)(pintern->Pointer)-sizeof(HGLOBAL)))
+	    if(!HeapFree(GetProcessHeap(), 0, (char *)(pintern->Pointer)-HGLOBAL_SIZE))
 	       hreturned=hmem;
 	 if(!HeapFree(GetProcessHeap(), 0, pintern))
 	    hreturned=hmem;
@@ -619,8 +625,9 @@ DWORD WINAPI GlobalSize(
         if (!pintern->Pointer) /* handle case of GlobalAlloc( ??,0) */
             return 0;
 	 retval=HeapSize(GetProcessHeap(), 0,
-	                 (char *)(pintern->Pointer)-sizeof(HGLOBAL))-4;
-	 if (retval == 0xffffffff-4) retval = 0;
+	                 (char *)(pintern->Pointer)-HGLOBAL_SIZE)-HGLOBAL_SIZE;
+         //SvL: ???
+	 if (retval == 0xffffffff-HGLOBAL_SIZE) retval = 0;
       }
       else
       {
@@ -631,6 +638,7 @@ DWORD WINAPI GlobalSize(
    }
    /* HeapSize returns 0xffffffff on failure */
    if (retval == 0xffffffff) retval = 0;
+   dprintf(("KERNEL32: GlobalSize %x = %d", hmem, retval));
    return retval;
 }
 
@@ -928,11 +936,11 @@ BOOL WIN32API LocalUnlock(HLOCAL hMem)
 //******************************************************************************
 HLOCAL WIN32API LocalReAlloc(HLOCAL hMem, DWORD cbBytes, UINT fuFlags)
 {
-  HLOCAL hLocalNew;
-  LPVOID lpMem;
+  HLOCAL hLocalNew, hLocalOld;
+  LPVOID lpMem, lpMemOld;
   DWORD  cbOldSize;
 
-  dprintf(("KERNEL32: LocalReAlloc %X %d %X\n", hMem, cbBytes, fuFlags));
+    dprintf(("KERNEL32: LocalReAlloc %X %d %X\n", hMem, cbBytes, fuFlags));
 
     // Check flags
     if(fuFlags & (~(LMEM_MOVEABLE | LMEM_DISCARDABLE | LMEM_NOCOMPACT |
@@ -948,18 +956,7 @@ HLOCAL WIN32API LocalReAlloc(HLOCAL hMem, DWORD cbBytes, UINT fuFlags)
     if(cbOldSize > cbBytes)
         return hMem;
 
-    hLocalNew = LocalAlloc(fuFlags, cbBytes);
-    if(hLocalNew != 0)
-    {
-        lpMem = LocalLock(hLocalNew);
-
-        if (lpMem != NULL) /* copy memory if successful */
-            memcpy(lpMem, (LPVOID)hMem, min(cbBytes, cbOldSize));
-
-        LocalUnlock(hLocalNew);
-        LocalFree(hMem);
-    }
-    return(hLocalNew);
+    return GlobalReAlloc(hMem, cbBytes, fuFlags);
 }
 //******************************************************************************
 //******************************************************************************
