@@ -1239,6 +1239,29 @@ static HRESULT WINAPI OLEClipbrd_IDataObject_GetData(
 
   hData = GetClipboardData(pformatetcIn->cfFormat);
 
+#ifdef __WIN32OS2__
+{
+  //must make a copy of global handle returned by GetClipboardData; it
+  //is not valid after we call CloseClipboard
+  //Application is responsible for freeing the memory (Forte Agent does this)
+  LPVOID src;
+  LPVOID dest;
+  ULONG  size;
+  HANDLE hDest;
+
+  src = GlobalLock(hData);
+  if(src) {
+      size = GlobalSize(hData);
+      hDest = GlobalAlloc(GHND, size);
+      dest  = GlobalLock(hDest);
+      memcpy(dest, src, size);
+      GlobalUnlock(hDest);
+  }
+  GlobalUnlock(hData);
+  hData = hDest;
+}
+#endif
+
   /* 
    * Return the clipboard data in the storage medium structure
    */
