@@ -1,9 +1,10 @@
-/* $Id: changelog,v 1.1845 2001-11-22 11:41:52 phaller Exp $ */
+/* $Id: changelog,v 1.1846 2001-11-22 11:55:58 phaller Exp $ */
 
  2001-11-22: Patrick Haller <patrick.haller@innotek.de>
     - ODINPROF: o initial version
                   PROFILE images using ODINCRTP generate a <pid>.prof file
                   (the optimized release build of ODINPROF should be used)
+                  No source code modification required.
                   Problem: mapsym seems to corrupt kernel32.sym
 
  2001-11-21: knut st. osmundsen <kosmunds@csc.com>
