@@ -1,4 +1,4 @@
-/* $Id: winuser.h,v 1.7 1999-09-02 19:07:17 phaller Exp $ */
+/* $Id: winuser.h,v 1.8 1999-09-08 12:12:28 sandervl Exp $ */
 
 #ifndef __INCLUDE_WINUSER_H
 #define __INCLUDE_WINUSER_H
@@ -1225,7 +1225,7 @@ typedef struct
     LPARAM    lParam;
     DWORD     time;
     POINT   pt;
-} MSG, *LPMSG;
+} MSG, *PMSG, *NPMSG, *LPMSG;
 
 
 /* Cursors / Icons */
@@ -1509,6 +1509,7 @@ typedef struct
     INT     nPos;
     INT     nTrackPos;
 } SCROLLINFO, *LPSCROLLINFO;
+typedef SCROLLINFO CONST *LPCSCROLLINFO;
 
 /* GetScrollInfo() flags */
 #define SIF_RANGE           0x0001
