@@ -1,4 +1,4 @@
-/* $Id: dart.cpp,v 1.4 2001-03-06 20:11:16 mike Exp $ */
+/* $Id: dart.cpp,v 1.5 2001-04-20 13:22:37 phaller Exp $ */
 /*
  *  Dart Interface..
  *
@@ -50,15 +50,18 @@ LONG APIENTRY OS2_Dart_Update(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer, ULONG ulF
          (ulStatus == ERROR_DEVICE_UNDERRUN)) )
      )
    {
-      lLastBuff++;
-      if (lLastBuff == ulNumDartBuffs){
-         lLastBuff = 0;
-      }
+     // wrap last buffer index
+     lLastBuff++;
+     if (lLastBuff >= ulNumDartBuffs)
+     {
+       lLastBuff = 0;
+     }
 
-      if( fIsPlaying == FALSE /*&& lLastBuff == 0*/ ){
-         mciSendCommand(usDeviceID, MCI_STOP, MCI_WAIT, NULL, 0);
-         return TRUE;
-      }
+     if( fIsPlaying == FALSE /*&& lLastBuff == 0*/ )
+     {
+       mciSendCommand(usDeviceID, MCI_STOP, MCI_WAIT, NULL, 0);
+       return TRUE;
+     }
 
       /* Now mix sound from all playing secondary SoundBuffers into the primary buffer */
       MixCallback(BUFFER_SIZE/ulNumDartBuffs);
@@ -369,25 +372,42 @@ long Dart_Stop(USHORT usDeviceID)
 
 long Dart_Play(USHORT usDeviceID, void *vpMixSetup, void *vpMixBuffer, long playing)
 {
-   ULONG   rc;
-   MCI_MIXSETUP_PARMS  *MixSetup;
-   MCI_MIX_BUFFER      *MixBuffer;
+  ULONG   rc;
+  MCI_MIXSETUP_PARMS  *MixSetup;
+  MCI_MIX_BUFFER      *MixBuffer;
 
-   MixSetup  = (MCI_MIXSETUP_PARMS*)vpMixSetup;
-   MixBuffer = (MCI_MIX_BUFFER*)vpMixBuffer;
+  MixSetup  = (MCI_MIXSETUP_PARMS*)vpMixSetup;
+  MixBuffer = (MCI_MIX_BUFFER*)vpMixBuffer;
 
-   dprintf(("DSOUND-DART: Dart_Play"));
+  dprintf(("DSOUND-DART: Dart_Play"));
 
-   if (playing == TRUE) {
-      rc = mciSendCommand(usDeviceID, MCI_RESUME, MCI_WAIT, NULL, 0);
-      if (rc != MCIERR_SUCCESS) {
-         dprintf(("DSOUND-DART: MCI_RESUME %d", rc));
-         return DSERR_GENERIC;
-      }
-   } else { //if (playing==FALSE)
-      dprintf(("DSOUND-DART: Playback started!!!!"));
+  if (playing == TRUE) 
+  {
+    rc = mciSendCommand(usDeviceID, MCI_RESUME, MCI_WAIT, NULL, 0);
+    if (rc != MCIERR_SUCCESS) 
+    {
+      dprintf(("DSOUND-DART: MCI_RESUME %d", rc));
+      return DSERR_GENERIC;
+    }
+  }
+  else
+  { //if (playing==FALSE)
+    dprintf(("DSOUND-DART: Playback started!!!!"));
+    
+    // verify if buffers have actually been allocated
+    // PH 2001-04-20 Power DVD 3 seens to come in here
+    // with ulNumDartBuffs == 0 and also pmixWrite==NULL.
+    // However pmixEvent is != NULL. So I assume (!)
+    // this might fix the cause.
+    //
+    // Does fix the crash actually. I suspect DART cannot
+    // deliver mixing functions for the requested sound format:
+    // 16-Bit, 4-channel?, 48kHz.
+    if( (MixSetup->pmixWrite != NULL) &&
+        (MixSetup->ulNumBuffers > 0) )
+    {
 
-      /* Mix the first buffer before playing */
+    /* Mix the first buffer before playing */
       MixCallback(BUFFER_SIZE/ulNumDartBuffs);
       memcpy(MixBuffer[lLastBuff].pBuffer, &pDSoundBuff[lLastBuff*(BUFFER_SIZE/ulNumDartBuffs)], BUFFER_SIZE/ulNumDartBuffs);
 
@@ -397,7 +417,8 @@ long Dart_Play(USHORT usDeviceID, void *vpMixSetup, void *vpMixBuffer, long play
       MixSetupParms.pmixWrite(MixSetupParms.ulMixHandle, MixBuffer, 2);
       SetFS(sel);
       fIsPlaying = TRUE;
-   }
+    }
+  }
 
-   return DS_OK;
+  return DS_OK;
 }
