@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.298 2001-11-07 15:36:10 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.299 2001-11-14 14:36:06 phaller Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -151,7 +151,8 @@ void Win32BaseWindow::Init()
   state            = STATE_INIT;
   windowNameA      = NULL;
   windowNameW      = NULL;
-
+  windowNameLength = 0;
+  
   userWindowBytes  = NULL;;
   nrUserWindowBytes= 0;
 
@@ -599,39 +600,42 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndOS2)
         vertScrollInfo->MaxVal = 100;
         vertScrollInfo->flags  = ESB_ENABLE_BOTH;
     }
-
+  
+    // initially allocate the window name fields
     if(HIWORD(cs->lpszName))
     {
         if (!isUnicode)
         {
-            int wndNameLength = strlen(cs->lpszName);
-            windowNameA = (LPSTR)_smalloc(wndNameLength+1);
-            strcpy(windowNameA,cs->lpszName);
-            windowNameW = (LPWSTR)_smalloc((wndNameLength+1)*sizeof(WCHAR));
-            lstrcpyAtoW(windowNameW,windowNameA);
-            windowNameA[wndNameLength] = 0;
-            windowNameW[wndNameLength] = 0;
+            windowNameLength = strlen(cs->lpszName);
+            windowNameA = (LPSTR)_smalloc(windowNameLength+1);
+            memcpy(windowNameA,cs->lpszName,windowNameLength+1);
+            windowNameW = (LPWSTR)_smalloc((windowNameLength+1)*sizeof(WCHAR));
+            lstrcpynAtoW(windowNameW,windowNameA,windowNameLength+1);
+            windowNameA[windowNameLength] = 0;
+            windowNameW[windowNameLength] = 0;
         }
         else
         {
             // Wide
-            int wndNameLength = lstrlenW((LPWSTR)cs->lpszName);
-            windowNameW = (LPWSTR)_smalloc((wndNameLength+1)*sizeof(WCHAR));
-            lstrcpyW(windowNameW,(LPWSTR)cs->lpszName);
-            windowNameW[lstrlenW((LPWSTR)cs->lpszName)] = 0; // need ?
+            windowNameLength = lstrlenW((LPWSTR)cs->lpszName);
+            windowNameW = (LPWSTR)_smalloc( (windowNameLength+1)*sizeof(WCHAR) );
+            memcpy(windowNameW,(LPWSTR)cs->lpszName, (windowNameLength+1)*sizeof(WCHAR) );
+          
+            // windowNameW[lstrlenW((LPWSTR)cs->lpszName)] = 0; // need ?
+          
             // Ascii
-            LPSTR tmp = HEAP_strdupWtoA(GetProcessHeap(), 0, (LPWSTR)cs->lpszName);
-            if(tmp) {
-                long tmpLength = strlen( tmp );
-                windowNameA = (LPSTR)_smalloc(tmpLength+1);
-                strcpy(windowNameA,tmp);
-                windowNameA[tmpLength] = 0; // need ?
-                HEAP_free(tmp);
-            } else {
-                windowNameA = (LPSTR)_smalloc(1);
-                windowNameA[0] = 0;
-            }
+            windowNameA = (LPSTR)_smalloc(windowNameLength+1);
+            WideCharToMultiByte(CP_ACP,
+                                0,
+                                windowNameW,
+                                windowNameLength,
+                                windowNameA,
+                                windowNameLength + 1,
+                                0,
+                                NULL);
+            windowNameA[windowNameLength] = 0;
         }
+      
         if(fOS2Look) {
             OSLibWinSetTitleBarText(OS2HwndFrame, windowNameA);
         }
@@ -1468,38 +1472,59 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
         return 0;
 
     case WM_GETTEXTLENGTH:
-        if(windowNameA) {
-          return strlen(windowNameA);
-        }
-        else {
-          return 0;
-        }
+        return windowNameLength;
 
     case WM_GETTEXT:
-        if (!lParam || !wParam) return 0;
-        if (!windowNameA) ((LPSTR)lParam)[0] = 0;
-        else lstrcpynA((LPSTR)lParam, windowNameA, wParam);
-        return min((windowNameA ? strlen(windowNameA) : 0), wParam);
+        if (!lParam || !wParam) 
+          return 0;
+        if (!windowNameA) 
+          ((LPSTR)lParam)[0] = 0;
+        else 
+          memcpy((LPSTR)lParam, windowNameA, min(windowNameLength+1, wParam) );
+        return min(windowNameLength, wParam);
 
     case WM_SETTEXT:
     {
         LPCSTR lpsz = (LPCSTR)lParam;
-
-        if(windowNameA) free(windowNameA);
-        if(windowNameW) free(windowNameW);
-        if (lParam)
+      
+        // reallocate if new buffer is larger
+        if (!lParam)
         {
-            int wndNameLength = strlen(lpsz);
-            windowNameA = (LPSTR)_smalloc(wndNameLength+1);
-            strcpy(windowNameA, lpsz);
-            windowNameW = (LPWSTR)_smalloc((wndNameLength+1)*sizeof(WCHAR));
-            lstrcpyAtoW(windowNameW, windowNameA);
+          free(windowNameA);
+          free(windowNameW);
+          windowNameLength = 0;
+          windowNameA      = NULL;
+          windowNameW      = NULL;
         }
         else
         {
-            windowNameA = NULL;
-            windowNameW = NULL;
+          // determine length of new text
+          int iTextLength = strlen(lpsz);
+          
+          if (windowNameLength < iTextLength)
+          {
+            if (windowNameA)
+            {
+              free(windowNameA);
+              windowNameA = NULL;
+            }
+          
+            if (windowNameW)
+            {
+              free(windowNameW);
+              windowNameW = NULL;
+            }
+          }
+      
+          windowNameLength = iTextLength;
+          if(!windowNameA)
+            windowNameA = (LPSTR)_smalloc(windowNameLength+1);
+          memcpy(windowNameA, lpsz, windowNameLength+1);
+          if(!windowNameW)
+            windowNameW = (LPWSTR)_smalloc((windowNameLength+1)*sizeof(WCHAR));
+          lstrcpynAtoW(windowNameW, windowNameA, windowNameLength+1);
         }
+      
         dprintf(("WM_SETTEXT of %x to %s\n", Win32Hwnd, lParam));
         if ((dwStyle & WS_CAPTION) == WS_CAPTION)
         {
@@ -1963,48 +1988,59 @@ LRESULT Win32BaseWindow::DefWindowProcW(UINT Msg, WPARAM wParam, LPARAM lParam)
     switch(Msg)
     {
     case WM_GETTEXTLENGTH:
-        if(windowNameW) {
-             return lstrlenW(windowNameW);
-        }
-        else return 0;
+        return windowNameLength;
 
     case WM_GETTEXT:
-        if (!lParam || !wParam) return 0;
-        if (!windowNameW) ((LPWSTR)lParam)[0] = 0;
-        else lstrcpynW((LPWSTR)lParam,windowNameW,wParam);
-        return min((windowNameW ? lstrlenW(windowNameW) : 0),wParam);
+        if (!lParam || !wParam) 
+          return 0;
+        if (!windowNameW)
+          ((LPWSTR)lParam)[0] = 0;
+        else 
+          memcpy((LPSTR)lParam, windowNameW, min( sizeof(WCHAR) * (windowNameLength+1), wParam) );
+        return min(windowNameLength, wParam);
 
     case WM_SETTEXT:
     {
         LPWSTR lpsz = (LPWSTR)lParam;
-
-        if(windowNameA) free(windowNameA);
-        if(windowNameW) free(windowNameW);
-        if (lParam)
+      
+        // reallocate if new buffer is larger
+        if (!lParam)
         {
-            // Wide
-            int wndNameLength = lstrlenW(lpsz);
-            windowNameW = (LPWSTR)_smalloc((wndNameLength+1)*sizeof(WCHAR));
-            lstrcpyW(windowNameW,lpsz);
-            // Ascii
-            LPSTR tmp = HEAP_strdupWtoA(GetProcessHeap(), 0, lpsz);
-            if(tmp) {
-                long tmpLength = strlen( tmp );
-                windowNameA = (LPSTR)_smalloc(tmpLength+1);
-                strcpy(windowNameA,tmp);
-                windowNameA[tmpLength] = 0; // need ?
-                HEAP_free(tmp);
-            }
-            else {
-                windowNameA = (LPSTR)_smalloc(1);
-                windowNameA[0] = 0;
-            }
+          free(windowNameA);
+          free(windowNameW);
+          windowNameLength = 0;
+          windowNameA      = NULL;
+          windowNameW      = NULL;
         }
         else
         {
-            windowNameA = NULL;
-            windowNameW = NULL;
+          // determine length of new text
+          int iTextLength = lstrlenW(lpsz);
+          
+          if (windowNameLength < iTextLength)
+          {
+            if (windowNameA)
+            {
+              free(windowNameA);
+              windowNameA = NULL;
+            }
+          
+            if (windowNameW)
+            {
+              free(windowNameW);
+              windowNameW = NULL;
+            }
+          }
+      
+          windowNameLength = iTextLength;
+          if(!windowNameA)
+            windowNameA = (LPSTR)_smalloc(windowNameLength+1);
+          lstrcpynWtoA(windowNameA, windowNameW, windowNameLength+1);
+          if(!windowNameW)
+            windowNameW = (LPWSTR)_smalloc((windowNameLength+1)*sizeof(WCHAR));
+          memcpy(windowNameW, lpsz, (windowNameLength+1) * sizeof(WCHAR));
         }
+
         dprintf(("WM_SETTEXT of %x\n",Win32Hwnd));
         if ((dwStyle & WS_CAPTION) == WS_CAPTION)
         {
@@ -3531,18 +3567,7 @@ int Win32BaseWindow::GetWindowTextLength(BOOL fUnicode)
     }
     //else get data directory from window structure
     //TODO: must lock window structure.... (TODO)
-    if(fUnicode) {
-        if(windowNameW) {
-             return strlenW(windowNameW);
-        }
-        else return 0;
-    }
-    else {
-        if(windowNameA) {
-             return strlen(windowNameA);
-        }
-        else return 0;
-    }
+    return windowNameLength;
 }
 //******************************************************************************
 //When using this API for a window that was created by a different process, NT
@@ -3554,11 +3579,12 @@ int Win32BaseWindow::GetWindowTextA(LPSTR lpsz, int cch)
     if(dwProcessId == currentProcessId) {
         return SendInternalMessageA(WM_GETTEXT,(WPARAM)cch,(LPARAM)lpsz);
     }
+  
     //else get data directory from window structure
     if (!lpsz || !cch) return 0;
     if (!windowNameA) lpsz[0] = 0;
-    else lstrcpynA(lpsz, windowNameA, cch);
-    return min((windowNameA ? strlen(windowNameA) : 0), cch);
+    else memcpy(lpsz, windowNameA, min(windowNameLength + 1, cch) );
+    return min(windowNameLength, cch);
 }
 //******************************************************************************
 //When using this API for a window that was created by a different process, NT
@@ -3571,10 +3597,14 @@ int Win32BaseWindow::GetWindowTextW(LPWSTR lpsz, int cch)
         return SendInternalMessageW(WM_GETTEXT,(WPARAM)cch,(LPARAM)lpsz);
     }
     //else get data directory from window structure
-    if (!lpsz || !cch) return 0;
-    if (!windowNameW) lpsz[0] = 0;
-    else lstrcpynW(lpsz, windowNameW, cch);
-    return min((windowNameW ? strlenW(windowNameW) : 0), cch);
+  if (!lpsz || !cch) 
+    return 0;
+  if (!windowNameW) 
+    lpsz[0] = 0;
+  else 
+    memcpy(lpsz, windowNameW, min( sizeof(WCHAR) * (windowNameLength+1), cch));
+           
+  return min(windowNameLength, cch);
 }
 //******************************************************************************
 //TODO: How does this work when the target window belongs to a different process???

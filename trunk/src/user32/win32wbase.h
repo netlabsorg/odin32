@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.132 2001-10-28 10:38:14 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.133 2001-11-14 14:36:03 phaller Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -317,8 +317,9 @@ virtual  BOOL   DestroyWindow();
          VOID   freeWindowNamePtr(PVOID namePtr);
          CHAR  *getWindowNameA()              { return windowNameA; }; //only for MDI windows!
          WCHAR *getWindowNameW()              { return windowNameW; }; //only for MDI windows!
-Win32WndClass  *getClass()  { return windowClass; };
-Win32BaseWindow *getOwner()                         { return owner; };
+         int    getWindowNameLength()         { return windowNameLength; };
+         Win32WndClass  *getClass()  { return windowClass; };
+         Win32BaseWindow *getOwner() { return owner; };
         void    setOwner(Win32BaseWindow *newOwner) { owner = newOwner; };
 
  SCROLLBAR_INFO *getScrollInfo(int nBar);
@@ -443,7 +444,8 @@ protected:
 
         char   *windowNameA;
         WCHAR  *windowNameW;
-
+        int     windowNameLength;
+  
         char   *userWindowBytes;
         ULONG   nrUserWindowBytes;
 
