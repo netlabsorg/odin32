@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.407 1999-11-03 23:29:11 sandervl Exp $ */
+ /* $Id: changelog,v 1.408 1999-11-04 10:56:26 phaller Exp $ */
+
+ 99-11-04: Patrick Haller <phaller@gmx.net>
+	- WNETAP32:	Add:	numerous undocumented functions stubbed
 
  99-11-03: knut st. osmundsen <knut.stange.osmundsen@pmsc.no>
 	- Makefiles: Changes to build the libraries first
@@ -25,6 +28,7 @@
 	- KERNEL32:	Fix: 	undocumented behaviour in SearchPathA 
 				and bugfix in SearchPathW
 	- USER32:	Fix:	TrackPopupMenuEx lpPM can be NULL
+			Fix	LoadBitmapA checked for incorrect return value
 
  99-11-02  Markus Montkowski <mmontkowski@gmx.de>
 	- DDRAW: Changed debug output to DDRAW: ...
