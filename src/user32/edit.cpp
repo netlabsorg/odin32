@@ -1,4 +1,4 @@
-/* $Id: edit.cpp,v 1.15 1999-11-17 17:04:52 cbratschi Exp $ */
+/* $Id: edit.cpp,v 1.16 1999-11-21 14:04:11 achimha Exp $ */
 /*
  *      Edit control
  *
@@ -27,6 +27,10 @@
 #include <string.h>
 #include "controls.h"
 #include "combo.h"
+
+#ifdef DEBUG
+char *GetMsgText(int Msg);
+#endif
 
 #define BUFLIMIT_MULTI          65534   /* maximum buffer size (not including '\0')
                                            FIXME: BTW, new specs say 65535 (do you dare ???) */
@@ -296,6 +300,9 @@ LRESULT WINAPI EditWndProc( HWND hwnd, UINT msg,
 {
         EDITSTATE *es = (EDITSTATE*)GetInfoPtr(hwnd);
         LRESULT result = 0;
+
+//      dprintf(("EditWndProc hwnd: %04x, msg %s, wp %08x lp %08lx\n",
+//               hwnd, GetMsgText(msg), wParam, lParam));
 
         switch (msg) {
         case WM_DESTROY:
