@@ -5,17 +5,18 @@
  * Copyright 1998,1999 Bertho A. Stultiens
  */
 
+#include <string.h>
 #include "winbase.h"
 #include "windef.h"
+#include "winnls.h"
 #include "wingdi.h"
 #include "winuser.h"
-#include "wine/winestring.h"
 #include "commdlg.h"
 #include "cderr.h"
 #include "dlgs.h"
 #include "debugtools.h"
 
-DEFAULT_DEBUG_CHANNEL(commdlg)
+DEFAULT_DEBUG_CHANNEL(commdlg);
 
 #include "cdlg.h"
 
@@ -86,7 +87,9 @@ static void COMDLG32_FR_HandleWMCommand(HWND hDlgWnd, COMDLG32_FR_Data *pData, i
 				pData->user_fr.fra->Flags |= COMDLG32_FR_GetFlags(hDlgWnd) | FR_FINDNEXT;
                                 if(pData->fr.Flags & FR_WINE_UNICODE)
                                 {
-                                	lstrcpyAtoW(pData->user_fr.frw->lpstrFindWhat, pData->fr.lpstrFindWhat);
+                                    MultiByteToWideChar( CP_ACP, 0, pData->fr.lpstrFindWhat, -1,
+                                                         pData->user_fr.frw->lpstrFindWhat,
+                                                         0x7fffffff );
                                 }
                                 else
                                 {
@@ -117,8 +120,12 @@ Replace:
 				pData->user_fr.fra->Flags |= COMDLG32_FR_GetFlags(hDlgWnd) | flag;
                                 if(pData->fr.Flags & FR_WINE_UNICODE)
                                 {
-                                	lstrcpyAtoW(pData->user_fr.frw->lpstrFindWhat, pData->fr.lpstrFindWhat);
-                                	lstrcpyAtoW(pData->user_fr.frw->lpstrReplaceWith, pData->fr.lpstrReplaceWith);
+                                    MultiByteToWideChar( CP_ACP, 0, pData->fr.lpstrFindWhat, -1,
+                                                         pData->user_fr.frw->lpstrFindWhat,
+                                                         0x7fffffff );
+                                    MultiByteToWideChar( CP_ACP, 0, pData->fr.lpstrReplaceWith, -1,
+                                                         pData->user_fr.frw->lpstrReplaceWith,
+                                                         0x7fffffff );
                                 }
                                 else
                                 {
@@ -212,13 +219,7 @@ static BOOL CALLBACK COMDLG32_FindReplaceDlgProc(HWND hDlgWnd, UINT iMsg, WPARAM
 		/* We do not do ShowWindow if hook exists and is FALSE  */
 		/*   per MSDN Article Q96135                            */
               	if((pdata->fr.Flags & FR_ENABLEHOOK)
-#ifdef __WIN32OS2__
-//SvL: Must use LPFINDREPLACEA/W pointer as lParam; old docs are wrong, later 
-//     revisions have been corrected
-	             && ! pdata->fr.lpfnHook(hDlgWnd, iMsg, wParam, (LPARAM)pdata->user_fr.fra))
-#else
-	             && ! pdata->fr.lpfnHook(hDlgWnd, iMsg, wParam, pdata->fr.lCustData))
-#endif
+	             && ! pdata->fr.lpfnHook(hDlgWnd, iMsg, wParam, (LPARAM) &pdata->fr))
 		        return TRUE;
 		ShowWindow(hDlgWnd, SW_SHOWNORMAL);
 		UpdateWindow(hDlgWnd);
@@ -279,7 +280,7 @@ static BOOL CALLBACK COMDLG32_FindReplaceDlgProc(HWND hDlgWnd, UINT iMsg, WPARAM
  * Check various fault conditions in the supplied parameters that
  * cause an extended error to be reported.
  *	RETURNS
- *		TRUE: Succes
+ *		TRUE: Success
  *		FALSE: Failure
  */
 static BOOL COMDLG32_FR_CheckPartial(
@@ -311,12 +312,12 @@ static BOOL COMDLG32_FR_CheckPartial(
                 return FALSE;
         }
 
-	if((FindReplaceMessage = RegisterWindowMessageA(FINDMSGSTRING)) == 0)
+	if((FindReplaceMessage = RegisterWindowMessageA(FINDMSGSTRINGA)) == 0)
         {
         	COMDLG32_SetCommDlgExtendedError(CDERR_REGISTERMSGFAIL);
                 return FALSE;
         }
-	if((HelpMessage = RegisterWindowMessageA(HELPMSGSTRING)) == 0)
+	if((HelpMessage = RegisterWindowMessageA(HELPMSGSTRINGA)) == 0)
         {
         	COMDLG32_SetCommDlgExtendedError(CDERR_REGISTERMSGFAIL);
                 return FALSE;
@@ -347,7 +348,7 @@ static BOOL COMDLG32_FR_CheckPartial(
  *	COMDLG32_FR_DoFindReplace		[internal]
  * Actual load and creation of the Find/Replace dialog.
  *	RETURNS
- *		Window handle to created dialog:Succes
+ *		Window handle to created dialog:Success
  *		NULL:Failure
  */
 static HWND COMDLG32_FR_DoFindReplace(
@@ -425,7 +426,7 @@ cleanup:
 /***********************************************************************
  *	FindTextA 				[COMDLG32.6]
  *	RETURNS
- *		Window handle to created dialog: Succes
+ *		Window handle to created dialog: Success
  *		NULL: Failure
  */
 HWND WINAPI FindTextA(
@@ -449,7 +450,7 @@ HWND WINAPI FindTextA(
 /***********************************************************************
  *	ReplaceTextA 				[COMDLG32.19]
  *	RETURNS
- *		Window handle to created dialog: Succes
+ *		Window handle to created dialog: Success
  *		NULL: Failure
  */
 HWND WINAPI ReplaceTextA(
@@ -474,60 +475,69 @@ HWND WINAPI ReplaceTextA(
 /***********************************************************************
  *	FindTextW 				[COMDLG32.7]
  *	RETURNS
- *		Window handle to created dialog: Succes
+ *		Window handle to created dialog: Success
  *		NULL: Failure
  */
 HWND WINAPI FindTextW(
 	LPFINDREPLACEW pfr	/* [in] Find/replace structure*/
 ) {
 	COMDLG32_FR_Data *pdata;
+        DWORD len;
 
         TRACE("LPFINDREPLACE=%p\n", pfr);
 
 	if(!COMDLG32_FR_CheckPartial((LPFINDREPLACEA)pfr, FALSE))
         	return 0;
 
-	if((pdata = (COMDLG32_FR_Data *)COMDLG32_AllocMem(sizeof(COMDLG32_FR_Data)
-        						   + pfr->wFindWhatLen)) == NULL)
-        	return 0; /* Error has been set */
+        len = WideCharToMultiByte( CP_ACP, 0, pfr->lpstrFindWhat, pfr->wFindWhatLen,
+                                   NULL, 0, NULL, NULL );
+        if((pdata = (COMDLG32_FR_Data *)COMDLG32_AllocMem(sizeof(COMDLG32_FR_Data) + len)) == NULL)
+            return 0; /* Error has been set */
 
         pdata->user_fr.frw = pfr;
         pdata->fr = *(LPFINDREPLACEA)pfr;	/* FINDREPLACEx have same size */
 	pdata->fr.Flags |= FR_WINE_UNICODE;
-        pdata->fr.lpstrFindWhat = (LPSTR)(((LPFINDREPLACEA)(pdata+1))+1);	/* Set string pointer */
-        lstrcpynWtoA(pdata->fr.lpstrFindWhat, pfr->lpstrFindWhat, pfr->wFindWhatLen);
+        pdata->fr.lpstrFindWhat = (LPSTR)(pdata + 1);  /* Set string pointer */
+        WideCharToMultiByte( CP_ACP, 0, pfr->lpstrFindWhat, pfr->wFindWhatLen,
+                             pdata->fr.lpstrFindWhat, len, NULL, NULL );
         return COMDLG32_FR_DoFindReplace(pdata);
 }
 
 /***********************************************************************
  *	ReplaceTextW 				[COMDLG32.20]
  *	RETURNS
- *		Window handle to created dialog: Succes
+ *		Window handle to created dialog: Success
  *		NULL: Failure
  */
 HWND WINAPI ReplaceTextW(
 	LPFINDREPLACEW pfr	/* [in] Find/replace structure*/
 ) {
 	COMDLG32_FR_Data *pdata;
+        DWORD len1, len2;
 
         TRACE("LPFINDREPLACE=%p\n", pfr);
 
 	if(!COMDLG32_FR_CheckPartial((LPFINDREPLACEA)pfr, FALSE))
         	return 0;
 
+        len1 = WideCharToMultiByte( CP_ACP, 0, pfr->lpstrFindWhat, pfr->wFindWhatLen,
+                                    NULL, 0, NULL, NULL );
+        len2 = WideCharToMultiByte( CP_ACP, 0, pfr->lpstrReplaceWith, pfr->wReplaceWithLen,
+                                    NULL, 0, NULL, NULL );
 	if((pdata = (COMDLG32_FR_Data *)COMDLG32_AllocMem(sizeof(COMDLG32_FR_Data)
-        						   + pfr->wFindWhatLen
-        						   + pfr->wReplaceWithLen)) == NULL)
-
-        	return 0; /* Error has been set */
+                                                          + len1 + len2)) == NULL)
+            return 0; /* Error has been set */
 
         pdata->user_fr.frw = pfr;
         pdata->fr = *(LPFINDREPLACEA)pfr;	/* FINDREPLACEx have same size */
 	pdata->fr.Flags |= FR_WINE_REPLACE | FR_WINE_UNICODE;
-        pdata->fr.lpstrFindWhat = (LPSTR)(((LPFINDREPLACEA)(pdata+1))+1);	/* Set string pointers */
-        pdata->fr.lpstrReplaceWith = (LPSTR)(((LPFINDREPLACEA)(pdata+1))+1) + pfr->wFindWhatLen;
-        lstrcpynWtoA(pdata->fr.lpstrFindWhat, pfr->lpstrFindWhat, pfr->wFindWhatLen);
-        lstrcpynWtoA(pdata->fr.lpstrReplaceWith, pfr->lpstrReplaceWith, pfr->wReplaceWithLen);
+        pdata->fr.lpstrFindWhat = (LPSTR)(pdata + 1);  /* Set string pointer */
+        pdata->fr.lpstrReplaceWith = pdata->fr.lpstrFindWhat + len1;
+
+        WideCharToMultiByte( CP_ACP, 0, pfr->lpstrFindWhat, pfr->wFindWhatLen,
+                             pdata->fr.lpstrFindWhat, len1, NULL, NULL );
+        WideCharToMultiByte( CP_ACP, 0, pfr->lpstrReplaceWith, pfr->wReplaceWithLen,
+                             pdata->fr.lpstrReplaceWith, len2, NULL, NULL );
         return COMDLG32_FR_DoFindReplace(pdata);
 }
 
