@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.2454 2003-01-22 17:01:26 sandervl Exp $ */
+/* $Id: changelog,v 1.2455 2003-01-22 17:08:59 sandervl Exp $ */
 
  2003-01-22: Sander van Leeuwen <sandervl@innotek   >
     - ODINCRT:  o Renamed wrapper functions
@@ -7,6 +7,7 @@
                   (those that change FS when called)
     - MAKE, INCLUDE\*.mk:
                 o Add include\incl_vac first to include path (/I)
+    - KERNEL32: o Removed WriteLogError
 
  2003-01-22: Platon Fomichev <platon@innotek   >
     - NTDLL:    o Dll load/unload changes
