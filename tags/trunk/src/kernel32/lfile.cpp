@@ -1,4 +1,4 @@
-/* $Id: lfile.cpp,v 1.7 2000-06-16 00:04:30 phaller Exp $ */
+/* $Id: lfile.cpp,v 1.8 2003-05-12 15:29:09 sandervl Exp $ */
 
 /*
  *
@@ -104,7 +104,7 @@ HFILE WIN32API _lcreat(LPCSTR arg1,
  *****************************************************************************/
 
 HFILE WIN32API _lopen(LPCSTR pszFileName,
-                      int    arg2)
+                      int    mode)
 {
    ULONG  ulAccess = 0;
    ULONG  ulShare;
@@ -112,18 +112,22 @@ HFILE WIN32API _lopen(LPCSTR pszFileName,
 
    dprintf(("KERNEL32: _lopen(%s, %08xh)\n",
             pszFileName,
-            arg2));
+            mode));
 
-   if (arg2 & ~(OF_READ|OF_READWRITE|OF_WRITE|OF_SHARE_COMPAT|OF_SHARE_DENY_NONE|OF_SHARE_DENY_READ|OF_SHARE_DENY_WRITE|OF_SHARE_EXCLUSIVE))
+   if (mode & ~(OF_READ|OF_READWRITE|OF_WRITE|OF_SHARE_COMPAT|OF_SHARE_DENY_NONE|OF_SHARE_DENY_READ|OF_SHARE_DENY_WRITE|OF_SHARE_EXCLUSIVE))
       dprintf(("KERNEL32: (warn) _lopen has unknown flag(s) set.\n"));
 
    /* Access */
-   ulAccess |= arg2 & OF_READ      ? GENERIC_READ                 : 0;
-   ulAccess |= arg2 & OF_WRITE     ? GENERIC_WRITE                : 0;
-   ulAccess |= arg2 & OF_READWRITE ? GENERIC_READ | GENERIC_WRITE : 0;
+   switch(mode & 0x03)
+   {
+   case OF_READ:      ulAccess = GENERIC_READ; break;
+   case OF_WRITE:     ulAccess = GENERIC_WRITE; break;
+   case OF_READWRITE: ulAccess = GENERIC_READ | GENERIC_WRITE; break;
+   default:           ulAccess = 0; break;
+   }
 
    /* Share */
-   ulShare = arg2 & (OF_SHARE_COMPAT | OF_SHARE_DENY_NONE | OF_SHARE_DENY_READ | OF_SHARE_DENY_WRITE | OF_SHARE_EXCLUSIVE);
+   ulShare = mode & (OF_SHARE_COMPAT | OF_SHARE_DENY_NONE | OF_SHARE_DENY_READ | OF_SHARE_DENY_WRITE | OF_SHARE_EXCLUSIVE);
    if (ulShare == OF_SHARE_DENY_READ)
       ulShare = FILE_SHARE_WRITE;
    else if (ulShare == OF_SHARE_DENY_WRITE)
