@@ -1,4 +1,4 @@
-/* $Id: odinbuild.h,v 1.70 2001-05-18 03:30:50 bird Exp $
+/* $Id: odinbuild.h,v 1.71 2001-05-21 03:59:40 bird Exp $
  *
  * Odin32 version number and build numbers.
  *
@@ -18,9 +18,10 @@
 #define ODIN32_VERSION_MAJOR    0
 #define ODIN32_VERSION_MINOR    5
 #define ODIN32_VERSION       "0.5"
-#define ODIN32_BUILD_NR       376        /* This started at 300 on the 17th Des 2000. */
+#define ODIN32_BUILD_NR       377        /* This started at 300 on the 17th Des 2000. */
 
 #endif
+
 
 
 
