@@ -1,4 +1,12 @@
-# $Id: makefile,v 1.4 2001-06-25 13:54:43 bird Exp $
+# $Id: makefile,v 1.5 2001-06-26 00:08:46 bird Exp $
+
+#
+# WRC makefile.
+#
+#   Note. If you wanna recompile everything you'll need flex and bison.
+#         Both are found at hobbes.
+#         AND you'll have to set env.var. HAVE_BISON and HAVE_FLEX.
+#
 
 
 #
@@ -17,6 +25,7 @@ VIO = 1
 STATIC_CRT = 1
 NO_MAIN_BIN_COPY = 1
 
+
 # Subdirectories.
 SUBDIRS = \
 .\u
@@ -25,14 +34,23 @@ SUBDIRS = \
 #
 # include common definitions
 #
-CCENV=EMX
 !include ../../makefile.inc
+
 
 #
 # Addjust common definitions
 #
-#DEFS      = -D__WINE__ -D__WIN32OS2__ -idirafter ../../include/win -idirafter ../../include
-CDEFINES   = -D__EMX__ -DMASM -D__SEMICOLON__
+!if "$(CCENV)" == "EMX"
+CDEFINES   = $(CDEFINES) -D__EMX__ -DMASM -D__SEMICOLON__
+!else
+CDEFINES   = $(CDEFINES) -DMASM -D__SEMICOLON__ -DYY_USE_PROTOS
+!endif
+!if "$(VAC3)" == "1" || "$(VAC36)" == "1"
+!ifdef DEBUG
+CFLAGS     = $(CFLAGS) -O+ -Tm-
+!endif
+!endif
+
 
 YACC    = bison
 YACCOPT = #-v
@@ -60,6 +78,9 @@ $(OBJDIR)\lexyy.$(OBJ) \
 $(OBJDIR)\ppy.tab.$(OBJ) \
 $(OBJDIR)\lex.ppl.$(OBJ) \
 $(OBJDIR)\writeres.$(OBJ) \
+!if "$(CCENV)" == "VAC36" || "$(CCENV)" == "VAC3"
+$(OBJDIR)\getopt.$(OBJ)
+!endif
 
 
 #
@@ -84,17 +105,26 @@ TARGET = wrc
 
 
 #
+# Needed tools
+#
+needed: all
+
+
+#
 # Extra rules.
 #
+!ifdef HAVE_BISON
 y.tab.c y.tab.h: parser.y
     $(YACC) -d -t parser.y -o y.tab.c
 
+ppy.tab.c ppy.tab.h: ppy.y
+    $(YACC) $(YACCOPT) -bppy -ppp -d -t ppy.y -o ppy.tab.c
+!endif
+
+!ifdef HAVE_FLEX
 lexyy.c: parser.l
     $(LEX) -8 -d parser.l
 
-ppy.tab.c ppy.tab.h: ppy.y
-    $(YACC) $(YACCOPT) -bppy -ppp -d -t ppy.y -o ppy.tab.c
-
 lex.ppl.c: ppl.l
     $(LEX) $(LEXOPT) -d -Ppp -8 -olex.ppl.c ppl.l
-
+!endif
