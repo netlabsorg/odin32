@@ -1,4 +1,4 @@
-/* $Id: propsheet.c,v 1.13 1999-11-14 10:58:38 achimha Exp $ */
+/* $Id: propsheet.c,v 1.14 1999-11-19 16:16:38 achimha Exp $ */
 /*
  * Property Sheets
  *
@@ -12,7 +12,7 @@
  *   - Unicode property sheets
  */
 
-/* WINE 991031 level */
+/* WINE 991114 level */
 
 /* CB: Odin problems:
  - trap in PROPSHEET_DialogProc (tab control creation)
@@ -1014,6 +1014,10 @@ static BOOL PROPSHEET_Back(HWND hwndDlg)
   PropSheetInfo* psInfo = (PropSheetInfo*) GetPropA(hwndDlg,
                                                     PropSheetInfoStr);
 
+  if (psInfo->active_page <= 0)
+     return FALSE;
+
+  hdr.hwndFrom = hwndDlg;
   hdr.code = PSN_WIZBACK;
 
   hwndPage = psInfo->proppage[psInfo->active_page].hwndPage;
@@ -1021,7 +1025,11 @@ static BOOL PROPSHEET_Back(HWND hwndDlg)
   if (SendMessageA(hwndPage, WM_NOTIFY, 0, (LPARAM) &hdr) == -1)
     return FALSE;
 
-  res = PROPSHEET_SetCurSel(hwndDlg, psInfo->active_page - 1, 0);
+  res = PROPSHEET_CanSetCurSel(hwndDlg);
+  if(res != FALSE)
+  {
+    res = PROPSHEET_SetCurSel(hwndDlg, psInfo->active_page - 1, 0);
+  }
 
   /* if we went to page 0, disable Back button */
   if (res && (psInfo->active_page == 0))
@@ -1040,6 +1048,9 @@ static BOOL PROPSHEET_Next(HWND hwndDlg)
   LRESULT msgResult = 0;
   PropSheetInfo* psInfo = (PropSheetInfo*) GetPropA(hwndDlg,
                                                     PropSheetInfoStr);
+
+  if (psInfo->active_page < 0 || psInfo->active_page == psInfo->nPages - 1)
+     return FALSE;
 
   hdr.hwndFrom = hwndDlg;
   hdr.code = PSN_WIZNEXT;
@@ -1072,6 +1083,9 @@ static BOOL PROPSHEET_Finish(HWND hwndDlg)
   PropSheetInfo* psInfo = (PropSheetInfo*) GetPropA(hwndDlg,
                                                     PropSheetInfoStr);
 
+  if (psInfo->active_page < 0)
+     return FALSE;
+
   hdr.hwndFrom = hwndDlg;
   hdr.code = PSN_WIZFINISH;
 
@@ -1103,6 +1117,9 @@ static BOOL PROPSHEET_Apply(HWND hwndDlg)
   LRESULT msgResult;
   PropSheetInfo* psInfo = (PropSheetInfo*) GetPropA(hwndDlg,
                                                     PropSheetInfoStr);
+
+  if (psInfo->active_page < 0)
+     return FALSE;
 
   hdr.hwndFrom = hwndDlg;
 
@@ -1140,9 +1157,13 @@ static void PROPSHEET_Cancel(HWND hwndDlg)
 {
   PropSheetInfo* psInfo = (PropSheetInfo*) GetPropA(hwndDlg,
                                                     PropSheetInfoStr);
-  HWND hwndPage = psInfo->proppage[psInfo->active_page].hwndPage;
+  HWND hwndPage;
   NMHDR hdr;
 
+  if (psInfo->active_page < 0)
+     return;
+
+  hwndPage = psInfo->proppage[psInfo->active_page].hwndPage;
   hdr.hwndFrom = hwndDlg;
   hdr.code = PSN_QUERYCANCEL;
 
@@ -1166,9 +1187,13 @@ static void PROPSHEET_Help(HWND hwndDlg)
 {
   PropSheetInfo* psInfo = (PropSheetInfo*) GetPropA(hwndDlg,
                                                     PropSheetInfoStr);
-  HWND hwndPage = psInfo->proppage[psInfo->active_page].hwndPage;
+  HWND hwndPage;
   NMHDR hdr;
 
+  if (psInfo->active_page < 0)
+     return;
+
+  hwndPage = psInfo->proppage[psInfo->active_page].hwndPage;
   hdr.hwndFrom = hwndDlg;
   hdr.code = PSN_HELP;
 
@@ -1287,9 +1312,8 @@ static BOOL PROPSHEET_CanSetCurSel(HWND hwndDlg)
   HWND hwndPage;
   NMHDR hdr;
 
-  if (!psInfo)
-    return FALSE;
-
+  if (!psInfo || psInfo->active_page < 0)
+     return FALSE;
   /*
    * Notify the current page.
    */
@@ -1314,6 +1338,9 @@ static BOOL PROPSHEET_SetCurSel(HWND hwndDlg,
   HWND hwndHelp  = GetDlgItem(hwndDlg, IDHELP);
   NMHDR hdr;
 
+  if (psInfo->active_page < 0)
+     return FALSE;
+
   hwndPage = psInfo->proppage[psInfo->active_page].hwndPage;
 
   hdr.hwndFrom = hwndDlg;
@@ -1321,14 +1348,12 @@ static BOOL PROPSHEET_SetCurSel(HWND hwndDlg,
    * hpage takes precedence over index.
    */
   if (hpage != NULL)
-  {
     index = PROPSHEET_GetPageIndex(hpage, psInfo);
 
-    if (index == -1)
-    {
-      TRACE("Could not find page to remove!\n");
-      return FALSE;
-    }
+  if (index < 0 || index >= psInfo->nPages)
+  {
+    TRACE("Could not find page to select!\n");
+    return FALSE;
   }
 
   hwndPage = psInfo->proppage[index].hwndPage;
@@ -1366,10 +1391,17 @@ static BOOL PROPSHEET_SetCurSel(HWND hwndDlg,
  */
 static void PROPSHEET_SetTitleA(HWND hwndDlg, DWORD dwStyle, LPCSTR lpszText)
 {
+  PropSheetInfo*	psInfo = (PropSheetInfo*) GetPropA(hwndDlg, PropSheetInfoStr);
+  char 				szTitle[256];
+
+  if (HIWORD(lpszText) == 0) {
+    if (!LoadStringA(psInfo->ppshheader->hInstance, 
+                     LOWORD(lpszText), szTitle, sizeof(szTitle)-1))
+      return;
+    lpszText = szTitle;
+  }
   if (dwStyle & PSH_PROPTITLE)
   {
-    PropSheetInfo* psInfo = (PropSheetInfo*) GetPropA(hwndDlg,
-                                                      PropSheetInfoStr);
     char* dest;
     int lentitle = strlen(lpszText);
     int lenprop  = strlen(psInfo->strPropertiesFor);
@@ -1781,6 +1813,8 @@ PROPSHEET_DialogProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
       HWND hwndTabCtrl = GetDlgItem(hwnd, IDC_TABCONTROL);
       LPCPROPSHEETPAGEA ppshpage;
 
+      SetPropA(hwnd, PropSheetInfoStr, (HANDLE)psInfo);
+
       /*
        * Small icon in the title bar.
        */
@@ -1844,9 +1878,6 @@ PROPSHEET_DialogProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
       if (!(psInfo->ppshheader->dwFlags & PSH_WIZARD))
         SendMessageA(hwndTabCtrl, TCM_SETCURSEL, psInfo->active_page, 0);
-
-      SetPropA(hwnd, PropSheetInfoStr, (HANDLE)psInfo);
-
 
       if (!HIWORD(psInfo->ppshheader->pszCaption) &&
               psInfo->ppshheader->hInstance)
