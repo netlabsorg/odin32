@@ -1,4 +1,4 @@
-; $Id: odincrt.asm,v 1.4 2002-09-19 09:38:27 sandervl Exp $
+; $Id: odincrt.asm,v 1.5 2003-01-22 17:06:43 sandervl Exp $
 
 ;/*
 ; * Project Odin Software License can be found in LICENSE.TXT
@@ -35,12 +35,12 @@ __threadid proc near
         ret     
 __threadid endp
 
-	PUBLIC os2__nw__FUiPCcT1
+	PUBLIC odin___nw__FUiPCcT1
 	EXTERN __nw__FUiPCcT1:NEAR
 ;input: eax = size
 ;       ecx = line nr
 ;       edx = source filename
-os2__nw__FUiPCcT1 proc near
+odin___nw__FUiPCcT1 proc near
 	push	fs
 	push	eax
 	mov	ax, 150bh
@@ -58,14 +58,14 @@ ENDIF
 	add	esp, 0Ch	
 	pop	fs
 	ret
-os2__nw__FUiPCcT1 endp
+odin___nw__FUiPCcT1 endp
 
-	PUBLIC os2__dl__FPvPCcUi
+	PUBLIC odin___dl__FPvPCcUi
 	EXTERN __dl__FPvPCcUi:NEAR
 ;input: eax = this ptr
 ;       ecx = line nr
 ;       edx = source filename
-os2__dl__FPvPCcUi proc near
+odin___dl__FPvPCcUi proc near
 	push	fs
 	push	eax
 	mov	ax, 150bh
@@ -83,7 +83,7 @@ ENDIF
 	add	esp, 0Ch	
 	pop	fs
 	ret
-os2__dl__FPvPCcUi endp
+odin___dl__FPvPCcUi endp
 
         PUBLIC GetFS
 GetFS   proc near

@@ -1,4 +1,4 @@
-/* $Id: file.cpp,v 1.3 2000-03-19 11:04:17 sandervl Exp $ */
+/* $Id: file.cpp,v 1.4 2003-01-22 17:06:42 sandervl Exp $ */
 /*
  * Project Odin Software License can be found in LICENSE.TXT
  * strncpy replacement (one in RTL lib is buggy; doesn't stop at 0 terminator)
@@ -7,11 +7,12 @@
  * Copyright 1999 Patrick Haller
  *
  */
+#define ORIGINAL_VAC_FUNCTIONS
 #include <stdio.h>
 #include <os2sel.h>
 #include <wchar.h>
 
-int  _LNK_CONV os2_fclose( FILE *fp )
+int  _LNK_CONV CRTWRAP(fclose)( FILE *fp )
 {
     unsigned short sel = RestoreOS2FS();
     int rc;
@@ -21,7 +22,7 @@ int  _LNK_CONV os2_fclose( FILE *fp )
 	return rc;
 }
 
-int _LNK_CONV os2_feof( FILE *fp )
+int _LNK_CONV CRTWRAP(feof)( FILE *fp )
 {
     unsigned short sel = RestoreOS2FS();
     int rc;
@@ -30,7 +31,7 @@ int _LNK_CONV os2_feof( FILE *fp )
 	SetFS(sel);
 	return rc;
 }
-int _LNK_CONV os2_ferror( FILE *fp )
+int _LNK_CONV CRTWRAP(ferror)( FILE *fp )
 {
     unsigned short sel = RestoreOS2FS();
     int rc;
@@ -40,7 +41,7 @@ int _LNK_CONV os2_ferror( FILE *fp )
 	return rc;
 }
 
-int _LNK_CONV os2_fflush( FILE *fp )
+int _LNK_CONV CRTWRAP(fflush)( FILE *fp )
 {
     unsigned short sel = RestoreOS2FS();
     int rc;
@@ -50,7 +51,7 @@ int _LNK_CONV os2_fflush( FILE *fp )
 	return rc;
 }
 
-int _LNK_CONV os2_fgetc( FILE *fp )
+int _LNK_CONV CRTWRAP(fgetc)( FILE *fp )
 {
     unsigned short sel = RestoreOS2FS();
     int rc;
@@ -60,7 +61,7 @@ int _LNK_CONV os2_fgetc( FILE *fp )
 	return rc;
 }
 
-int _LNK_CONV os2_fgetpos( FILE *fp, fpos_t *pos)
+int _LNK_CONV CRTWRAP(fgetpos)( FILE *fp, fpos_t *pos)
 {
     unsigned short sel = RestoreOS2FS();
     int rc;
@@ -70,7 +71,7 @@ int _LNK_CONV os2_fgetpos( FILE *fp, fpos_t *pos)
 	return rc;
 }
 
-char *_LNK_CONV os2_fgets( char *buf, int size, FILE *fp )
+char *_LNK_CONV CRTWRAP(fgets)( char *buf, int size, FILE *fp )
 {
     unsigned short sel = RestoreOS2FS();
     char * rc;
@@ -80,7 +81,7 @@ char *_LNK_CONV os2_fgets( char *buf, int size, FILE *fp )
 	return rc;
 }
 
-FILE * _LNK_CONV os2_fopen( const char *name, const char *type)
+FILE * _LNK_CONV CRTWRAP(fopen)( const char *name, const char *type)
 {
     unsigned short sel = RestoreOS2FS();
     FILE * rc;
@@ -90,7 +91,7 @@ FILE * _LNK_CONV os2_fopen( const char *name, const char *type)
 	return rc;
 }
 
-int _LNK_CONV os2_fputc( int c, FILE *fp )
+int _LNK_CONV CRTWRAP(fputc)( int c, FILE *fp )
 {
     unsigned short sel = RestoreOS2FS();
     int rc;
@@ -100,7 +101,7 @@ int _LNK_CONV os2_fputc( int c, FILE *fp )
 	return rc;
 }
 
-int _LNK_CONV os2_fputs( const char *string, FILE *fp )
+int _LNK_CONV CRTWRAP(fputs)( const char *string, FILE *fp )
 {
     unsigned short sel = RestoreOS2FS();
     int rc;
@@ -110,7 +111,7 @@ int _LNK_CONV os2_fputs( const char *string, FILE *fp )
 	return rc;
 }
 
-size_t _LNK_CONV os2_fread( void *buf, size_t size, size_t elsize, FILE *fp )
+size_t _LNK_CONV CRTWRAP(fread)( void *buf, size_t size, size_t elsize, FILE *fp )
 {
     unsigned short sel = RestoreOS2FS();
     size_t rc;
@@ -120,7 +121,7 @@ size_t _LNK_CONV os2_fread( void *buf, size_t size, size_t elsize, FILE *fp )
 	return rc;
 }
 
-FILE *  _LNK_CONV os2_freopen( const char *name, const char *type, FILE *fp )
+FILE *  _LNK_CONV CRTWRAP(freopen)( const char *name, const char *type, FILE *fp )
 {
     unsigned short sel = RestoreOS2FS();
     FILE * rc;
@@ -130,7 +131,7 @@ FILE *  _LNK_CONV os2_freopen( const char *name, const char *type, FILE *fp )
 	return rc;
 }
 
-int _LNK_CONV os2_fseek( FILE *fp, long int pos, int type)
+int _LNK_CONV CRTWRAP(fseek)( FILE *fp, long int pos, int type)
 {
     unsigned short sel = RestoreOS2FS();
     int rc;
@@ -140,7 +141,7 @@ int _LNK_CONV os2_fseek( FILE *fp, long int pos, int type)
 	return rc;
 }
 
-int _LNK_CONV os2_fsetpos( FILE *fp, const fpos_t *pos)
+int _LNK_CONV CRTWRAP(fsetpos)( FILE *fp, const fpos_t *pos)
 {
     unsigned short sel = RestoreOS2FS();
     int rc;
@@ -150,7 +151,7 @@ int _LNK_CONV os2_fsetpos( FILE *fp, const fpos_t *pos)
 	return rc;
 }
 
-long int _LNK_CONV os2_ftell( FILE *fp )
+long int _LNK_CONV CRTWRAP(ftell)( FILE *fp )
 {
     unsigned short sel = RestoreOS2FS();
     long rc;
@@ -160,7 +161,7 @@ long int _LNK_CONV os2_ftell( FILE *fp )
 	return rc;
 }
 
-size_t  _LNK_CONV os2_fwrite( const void *buf, size_t size, size_t elsize, FILE *fp )
+size_t  _LNK_CONV CRTWRAP(fwrite)( const void *buf, size_t size, size_t elsize, FILE *fp )
 {
     unsigned short sel = RestoreOS2FS();
     size_t rc;
@@ -170,7 +171,7 @@ size_t  _LNK_CONV os2_fwrite( const void *buf, size_t size, size_t elsize, FILE 
 	return rc;
 }
 
-int _LNK_CONV os2_vfprintf( FILE *fp, const char *string, __va_list list )
+int _LNK_CONV CRTWRAP(vfprintf)( FILE *fp, const char *string, __va_list list )
 {
     unsigned short sel = RestoreOS2FS();
     int rc;
@@ -180,7 +181,7 @@ int _LNK_CONV os2_vfprintf( FILE *fp, const char *string, __va_list list )
 	return rc;
 }
 
-wint_t  _LNK_CONV os2_fgetwc(FILE *fp)
+wint_t  _LNK_CONV CRTWRAP(fgetwc)(FILE *fp)
 {
     unsigned short sel = RestoreOS2FS();
     wint_t rc;
@@ -190,7 +191,7 @@ wint_t  _LNK_CONV os2_fgetwc(FILE *fp)
 	return rc;
 }
 
-wchar_t * _LNK_CONV os2_fgetws(wchar_t *buf, int size, FILE *fp)
+wchar_t * _LNK_CONV CRTWRAP(fgetws)(wchar_t *buf, int size, FILE *fp)
 {
     unsigned short sel = RestoreOS2FS();
     wchar_t * rc;
@@ -200,7 +201,7 @@ wchar_t * _LNK_CONV os2_fgetws(wchar_t *buf, int size, FILE *fp)
 	return rc;
 }
 
-wint_t _LNK_CONV os2_fputwc(wchar_t character, FILE *fp)
+wint_t _LNK_CONV CRTWRAP(fputwc)(wchar_t character, FILE *fp)
 {
     unsigned short sel = RestoreOS2FS();
     wint_t rc;
@@ -210,7 +211,7 @@ wint_t _LNK_CONV os2_fputwc(wchar_t character, FILE *fp)
 	return rc;
 }
 
-int _LNK_CONV os2_fputws(const wchar_t *string, FILE *fp)
+int _LNK_CONV CRTWRAP(fputws)(const wchar_t *string, FILE *fp)
 {
     unsigned short sel = RestoreOS2FS();
     int rc;
@@ -220,7 +221,7 @@ int _LNK_CONV os2_fputws(const wchar_t *string, FILE *fp)
 	return rc;
 }
 
-FILE * _LNK_CONV os2_fdopen( int a, const char *bla)
+FILE * _LNK_CONV CRTWRAP(fdopen)( int a, const char *bla)
 {
     unsigned short sel = RestoreOS2FS();
     FILE *rc;

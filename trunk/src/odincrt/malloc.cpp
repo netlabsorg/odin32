@@ -1,4 +1,4 @@
-/* $Id: malloc.cpp,v 1.7 2002-09-19 09:38:26 sandervl Exp $ */
+/* $Id: malloc.cpp,v 1.8 2003-01-22 17:06:42 sandervl Exp $ */
 /*
  * Project Odin Software License can be found in LICENSE.TXT
  * Memory RTL function wrappers
@@ -7,7 +7,7 @@
  *
  */
 
-//#undef __DEBUG_ALLOC__
+#define ORIGINAL_VAC_FUNCTIONS
 #include <malloc.h>
 #include <umalloc.h>
 #include <os2sel.h>
@@ -47,7 +47,7 @@ void __cdecl delete_free(void *ptr)
 
 #endif
 
-void * _LNK_CONV os2calloc( size_t a, size_t b )
+void * _LNK_CONV CRTWRAP(calloc)( size_t a, size_t b )
 {
     unsigned short sel = RestoreOS2FS();
     void *rc;
@@ -61,7 +61,7 @@ void * _LNK_CONV os2calloc( size_t a, size_t b )
 	return rc;
 }
 
-void   _LNK_CONV os2free( void *a )
+void   _LNK_CONV CRTWRAP(free)( void *a )
 {
     unsigned short sel = RestoreOS2FS();
 
@@ -73,7 +73,7 @@ void   _LNK_CONV os2free( void *a )
 	SetFS(sel);
 }
 
-void * _LNK_CONV os2malloc( size_t a)
+void * _LNK_CONV CRTWRAP(malloc)( size_t a)
 {
     unsigned short sel = RestoreOS2FS();
     void *rc;
@@ -88,7 +88,7 @@ void * _LNK_CONV os2malloc( size_t a)
 	return rc;
 }
 
-void * _LNK_CONV os2realloc( void *a, size_t b)
+void * _LNK_CONV CRTWRAP(realloc)( void *a, size_t b)
 {
     unsigned short sel = RestoreOS2FS();
     void *rc;
@@ -102,7 +102,7 @@ void * _LNK_CONV os2realloc( void *a, size_t b)
 	return rc;
 }
 
-void * _LNK_CONV os2_debug_calloc( size_t a, size_t b, const char *c, size_t d)
+void * _LNK_CONV CRTWRAP(_debug_calloc)( size_t a, size_t b, const char *c, size_t d)
 {
     unsigned short sel = RestoreOS2FS();
     void *rc;
@@ -117,7 +117,7 @@ void * _LNK_CONV os2_debug_calloc( size_t a, size_t b, const char *c, size_t d)
 	return rc;
 }
 
-void   _LNK_CONV os2_debug_free( void *a, const char *b, size_t c)
+void   _LNK_CONV CRTWRAP(_debug_free)( void *a, const char *b, size_t c)
 {
     unsigned short sel = RestoreOS2FS();
 
@@ -130,7 +130,7 @@ void   _LNK_CONV os2_debug_free( void *a, const char *b, size_t c)
 	SetFS(sel);
 }
 
-void * _LNK_CONV os2_debug_malloc( size_t a, const char *b, size_t c)
+void * _LNK_CONV CRTWRAP(_debug_malloc)( size_t a, const char *b, size_t c)
 {
     unsigned short sel = RestoreOS2FS();
     void *rc;
@@ -144,7 +144,7 @@ void * _LNK_CONV os2_debug_malloc( size_t a, const char *b, size_t c)
 	return rc;
 }
 
-void * _LNK_CONV os2_debug_realloc( void *a, size_t b, const char *c, size_t d)
+void * _LNK_CONV CRTWRAP(_debug_realloc)( void *a, size_t b, const char *c, size_t d)
 {
     unsigned short sel = RestoreOS2FS();
     void *rc;
@@ -157,7 +157,7 @@ void * _LNK_CONV os2_debug_realloc( void *a, size_t b, const char *c, size_t d)
 	return rc;
 }
 
-void * _LNK_CONV os2_umalloc(Heap_t a, size_t b)
+void * _LNK_CONV CRTWRAP(_umalloc)(Heap_t a, size_t b)
 {
     unsigned short sel = RestoreOS2FS();
     void *rc;
@@ -171,7 +171,7 @@ void * _LNK_CONV os2_umalloc(Heap_t a, size_t b)
 	return rc;
 }
 
-void * _LNK_CONV os2_ucalloc(Heap_t a, size_t b, size_t c)
+void * _LNK_CONV CRTWRAP(_ucalloc)(Heap_t a, size_t b, size_t c)
 {
     unsigned short sel = RestoreOS2FS();
     void *rc;
@@ -185,7 +185,7 @@ void * _LNK_CONV os2_ucalloc(Heap_t a, size_t b, size_t c)
 	return rc;
 }
 
-void * _LNK_CONV os2_debug_umalloc(Heap_t a, size_t b, const char *c, size_t d)
+void * _LNK_CONV CRTWRAP(_debug_umalloc)(Heap_t a, size_t b, const char *c, size_t d)
 {
     unsigned short sel = RestoreOS2FS();
     void *rc;
@@ -199,7 +199,7 @@ void * _LNK_CONV os2_debug_umalloc(Heap_t a, size_t b, const char *c, size_t d)
 	return rc;
 }
 
-void * _LNK_CONV os2_debug_ucalloc(Heap_t a, size_t b, size_t c, const char *d, size_t e)
+void * _LNK_CONV CRTWRAP(_debug_ucalloc)(Heap_t a, size_t b, size_t c, const char *d, size_t e)
 {
     unsigned short sel = RestoreOS2FS();
     void *rc;
