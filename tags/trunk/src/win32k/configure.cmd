@@ -1,9 +1,9 @@
-/* $Id: configure.cmd,v 1.12 2000-12-02 23:32:38 bird Exp $
+/* $Id: configure.cmd,v 1.13 2000-12-11 06:27:57 bird Exp $
  *
  * Configuration script.
  * Generates makefile.inc and an empty .depend file.
  *
- * Copyright (c) 1999-2000 knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * Copyright (c) 1999-2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -92,6 +92,14 @@
         call lineout sIncFile, 'MSCPATH          =' sMSC
         call lineout sIncFile, ''
 
+        call lineout sIncFile, '################################################################################'
+        call lineout sIncFile, '# Grep'
+        call lineout sIncFile, '################################################################################'
+        sGrep = SearchPaths('PATH', 'grep.exe', 'Path to UNIX-like grep utility which supports -v.');
+        if (sGrep <> '') then
+            call lineout sIncFile, 'GREP             =' sGrep || 'grep.exe'
+        call lineout sIncFile, ''
+
         call stream sIncFile, 'c', 'close';
 
         /*
@@ -153,8 +161,11 @@ SearchPaths: procedure expose fInteractive;
         sPath = SysSearchPath(sEnv, sFile);
         /* debug: say 'sEnv:'sEnv 'sFile:'sFile 'sPath:'sPath 'i:'i */
         i = i + 2;
-        sEnv  = arg(i);
-        sFile = arg(i+1);
+        if (arg() > i + 1) then
+        do
+            sEnv  = arg(i);
+            sFile = arg(i+1);
+        end
     end
 
     if (sPath == '' & sEnv <> '' & sFile == '') then
@@ -167,10 +178,11 @@ SearchPaths: procedure expose fInteractive;
     end
     else
     do
-        if sPath <> '' then do
-            /*  */
+        if (sPath <> '') then
+        do
+            /* look for ..\. */
             i = lastpos('..\', sFile);
-            if i <> 0 then
+            if (i <> 0) then
                 sFile = substr(sFile, i + 2);
 
             /* cut equally */
