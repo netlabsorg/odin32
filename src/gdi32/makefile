@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.40 2001-10-01 01:40:08 bird Exp $
+# $Id: makefile,v 1.41 2001-12-15 18:50:27 sandervl Exp $
 
 #
 # Odin32 API
@@ -50,6 +50,7 @@ $(OBJDIR)\blit.obj \
 $(OBJDIR)\rgbcvt.obj \
 $(OBJDIR)\objhandle.obj \
 $(OBJDIR)\printer.obj \
+$(OBJDIR)\gdistats.obj \
 $(OBJDIR)\dbglocal.obj \
 $(OBJDIR)\gdi32rsrc.obj
 
