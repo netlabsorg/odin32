@@ -1,4 +1,4 @@
-/* $Id: asyncthread.h,v 1.11 2002-02-20 15:07:14 sandervl Exp $ */
+/* $Id: asyncthread.h,v 1.12 2002-02-23 16:39:09 sandervl Exp $ */
 
 /*
  * Async thread help functions
@@ -32,7 +32,7 @@ typedef struct _ASYNCTHREADPARM
 	BOOL 		fActive;
 	BOOL            fCancelled;
 	BOOL            fConnected;
-        BOOL            fWaitSelect;
+        BOOL            fWaitSelect;       
         BOOL            fRemoved;  //async select
 	AsyncRequestType request;
 	LHANDLE		hAsyncTaskHandle;

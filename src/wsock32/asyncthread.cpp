@@ -1,4 +1,4 @@
-/* $Id: asyncthread.cpp,v 1.14 2002-02-20 15:07:13 sandervl Exp $ */
+/* $Id: asyncthread.cpp,v 1.15 2002-02-23 16:39:09 sandervl Exp $ */
 
 /*
  * Async thread help functions
@@ -238,10 +238,21 @@ PASYNCTHREADPARM FindAsyncEvent(SOCKET s)
 BOOL FindAndSetAsyncEvent(SOCKET s, int mode, int notifyHandle, int notifyData, ULONG lEventMask)
 {
  PASYNCTHREADPARM pThreadInfo;
- 
+
    asyncThreadMutex.enter();
    pThreadInfo = FindAsyncEvent(s);
-   if(pThreadInfo) {
+   if(pThreadInfo) 
+   {
+        int size, state, tmp;
+        state = ioctl(s, FIOBSTATUS, (char *)&tmp, sizeof(tmp));
+        dprintf(("FindAndSetAsyncEvent: state %x", state));
+
+        //Don't send FD_CONNECT is socket was already connected (accept returns connected socket)
+        if(state & SS_ISCONNECTED) {
+             pThreadInfo->fConnected = TRUE;
+        }
+        else pThreadInfo->fConnected = FALSE;
+
         pThreadInfo->u.asyncselect.mode           = mode;
 	pThreadInfo->u.asyncselect.lEvents        = lEventMask;
         pThreadInfo->u.asyncselect.lEventsPending = lEventMask;
