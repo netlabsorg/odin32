@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.56 1999-12-24 18:39:12 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.57 1999-12-24 21:44:04 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -375,23 +375,17 @@ protected:
 
          ULONG  EraseBkgndFlag:1,
                 PSEraseFlag:1,
-                SupressEraseFlag:1,
+                SuppressEraseFlag:1,
                 filler:29;
 public:
          VOID   setEraseBkgnd (BOOL erase, BOOL PSErase = FALSE)
                     { EraseBkgndFlag = erase; PSEraseFlag = PSErase; }
-         VOID   setSupressErase (BOOL erase = FALSE)
-                    { SupressEraseFlag = erase; }
+         VOID   setSuppressErase (BOOL erase = FALSE)
+                    { SuppressEraseFlag = erase; }
          BOOL   isEraseBkgnd()   { return EraseBkgndFlag; }
          BOOL   isPSErase()      { return EraseBkgndFlag | PSEraseFlag; }
-         BOOL   isSupressErase() { return SupressEraseFlag; }
+         BOOL   isSuppressErase() { return SuppressEraseFlag; }
 };
-
-#define WMMOVE_LBUTTON          1
-#define WMMOVE_MBUTTON          2
-#define WMMOVE_RBUTTON          4
-#define WMMOVE_CTRL             8
-#define WMMOVE_SHIFT            16
 
 #endif //__cplusplus
 
