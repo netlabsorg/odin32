@@ -1,4 +1,5 @@
-/*
+/* $Id: odinwrap.h,v 1.35 2001-09-02 10:42:16 phaller Exp $
+ *
  * Project Odin Software License can be found in LICENSE.TXT
  *
  * ODIN FS: Selector function wrapper macros
