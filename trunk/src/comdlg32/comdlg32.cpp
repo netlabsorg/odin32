@@ -1,4 +1,4 @@
-/* $Id: comdlg32.cpp,v 1.21 2000-02-03 23:05:49 sandervl Exp $ */
+/* $Id: comdlg32.cpp,v 1.22 2000-02-03 23:29:06 sandervl Exp $ */
 
 /*
  * COMDLG32 implementation
@@ -168,8 +168,6 @@ static DWORD iFileDlg_CleanFilterArray( LPSTR lpstrFilters)
 ODINFUNCTION1(BOOL, GetSaveFileNameA,
               LPOPENFILENAMEA, lpofn)
 {
-  Win32WindowProc *wndproc;
-
   if(lpofn->Flags & (OFN_ENABLETEMPLATE|OFN_ENABLETEMPLATEHANDLE)) {
    return GetFileDialog95A(lpofn, SAVE_DIALOG);
   }
@@ -199,7 +197,6 @@ ODINFUNCTION1(BOOL, GetSaveFileNameA,
 ODINFUNCTION1(BOOL, GetSaveFileNameW,
               LPOPENFILENAMEW, lpofn)
 {
-  Win32WindowProc *wndproc;
   OPENFILENAMEA   ofn;
   char*           szFile;
   char*           szFileTitle;
@@ -322,7 +319,6 @@ ODINFUNCTION1(BOOL, GetSaveFileNameW,
 ODINFUNCTION1(BOOL, GetOpenFileNameA,
               LPOPENFILENAMEA, lpofn)
 {
-  Win32WindowProc *wndproc;
   BOOL rc;
 
   CheckCurFS();
@@ -356,7 +352,6 @@ ODINFUNCTION1(BOOL, GetOpenFileNameA,
 ODINFUNCTION1(BOOL, GetOpenFileNameW,
               LPOPENFILENAMEW, lpofn)
 {
-  Win32WindowProc *wndproc;
   OPENFILENAMEA   ofn;
   char*           szFile;
   char*           szFileTitle;
@@ -502,7 +497,6 @@ ODINFUNCTION3(INT16, GetFileTitleA32,
 ODINFUNCTION1(BOOL, ChooseColorA,
               LPCHOOSECOLORA, lpcc)
 {
-  Win32WindowProc *wndproc;
 
   COMDLG32_CHECKHOOK(lpcc, CC_ENABLEHOOK, LPCCHOOKPROC)
 
@@ -526,7 +520,6 @@ ODINFUNCTION1(BOOL, ChooseColorA,
 ODINFUNCTION1(BOOL, ChooseColorW,
               LPCHOOSECOLORW, lpcc)
 {
-  Win32WindowProc *wndproc;
   BOOL            bResult;
   LPCWSTR         lpTemplateNameBackup = lpcc->lpTemplateName;
 
@@ -569,7 +562,6 @@ ODINFUNCTION1(BOOL, ChooseColorW,
 ODINFUNCTION1(BOOL, ChooseFontA,
               LPCHOOSEFONTA, lpcf)
 {
-  Win32WindowProc *wndproc;
 
   COMDLG32_CHECKHOOK(lpcf, CF_ENABLEHOOK, WNDPROC)
 
@@ -593,7 +585,6 @@ ODINFUNCTION1(BOOL, ChooseFontA,
 ODINFUNCTION1(BOOL, ChooseFontW,
               LPCHOOSEFONTW, lpcf)
 {
-  Win32WindowProc *wndproc;
   BOOL            bResult;
   CHOOSEFONTA     asciicf;
   LOGFONTA        asciilf;
@@ -700,7 +691,6 @@ ODINFUNCTION0(DWORD, CommDlgExtendedError32)
 ODINFUNCTION1(HWND, FindTextA32,
               LPFINDREPLACEA, lpfr)
 {
-  Win32WindowProc *wndproc;
 
   COMDLG32_CHECKHOOK(lpfr, FR_ENABLEHOOK, WNDPROC)
 
@@ -723,7 +713,6 @@ ODINFUNCTION1(HWND, FindTextA32,
 ODINFUNCTION1(HWND, FindTextW32,
               LPFINDREPLACEW, lpfr)
 {
-  Win32WindowProc *wndproc;
   BOOL            bResult;
   FINDREPLACEA    fr;
 
@@ -828,7 +817,6 @@ ODINFUNCTION3(INT16, GetFileTitleW32,
 ODINFUNCTION1(BOOL, PrintDlgA,
               LPPRINTDLGA, lppd)
 {
-  Win32WindowProc *wndproc;
 
   COMDLG32_CHECKHOOK2(lppd, PD_ENABLEPRINTHOOK, LPPRINTHOOKPROC,lpfnPrintHook)
   COMDLG32_CHECKHOOK2(lppd, PD_ENABLESETUPHOOK, LPSETUPHOOKPROC,lpfnSetupHook)
@@ -852,7 +840,6 @@ ODINFUNCTION1(BOOL, PrintDlgA,
 ODINFUNCTION1(BOOL, PrintDlgW,
               LPPRINTDLGW, lppd)
 {
-  Win32WindowProc *wndproc;
 
   PRINTDLGA pd;
   BOOL      bResult;
@@ -910,7 +897,6 @@ ODINFUNCTION1(BOOL, PrintDlgW,
 ODINFUNCTION1(HWND, ReplaceTextA32,
               LPFINDREPLACEA, lpfr)
 {
-  Win32WindowProc *wndproc;
 
   COMDLG32_CHECKHOOK(lpfr, FR_ENABLEHOOK, WNDPROC)
 
@@ -933,7 +919,6 @@ ODINFUNCTION1(HWND, ReplaceTextA32,
 ODINFUNCTION1(HWND, ReplaceTextW32,
               LPFINDREPLACEW, lpfr)
 {
-  Win32WindowProc *wndproc;
   BOOL            bResult;
   FINDREPLACEA    fr;
 
@@ -1006,7 +991,6 @@ ODINFUNCTION1(HWND, ReplaceTextW32,
 ODINFUNCTION1(BOOL, PageSetupDlgA,
               LPPAGESETUPDLGA, lppsd)
 {
-  Win32WindowProc *wndproc;
 
   dprintf(("COMDLG32: PageSetupDlgA not implemented.\n"));
 
@@ -1031,7 +1015,6 @@ ODINFUNCTION1(BOOL, PageSetupDlgA,
 ODINFUNCTION1(BOOL, PageSetupDlgW,
               LPPAGESETUPDLGW, lppsd)
 {
-  Win32WindowProc *wndproc;
 
   dprintf(("COMDLG32: PageSetupDlgW(%08xh) not implemented.\n"));
 
