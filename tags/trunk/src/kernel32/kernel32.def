@@ -1,4 +1,4 @@
-; $Id: kernel32.def,v 1.154 2003-03-31 11:54:27 sandervl Exp $
+; $Id: kernel32.def,v 1.155 2003-07-16 18:06:59 sandervl Exp $
 
 ;Basis is Windows95 KERNEL32
 LIBRARY KERNEL32 INITINSTANCE TERMINSTANCE
@@ -975,6 +975,9 @@ EXPORTS
     lstrncmpiA                 = _lstrncmpiA@12              @887
     lstrncmpiW                 = _lstrncmpiW@12              @888
 
+    lstrlenAtoW                = _lstrlenAtoW@8              @890
+    lstrlenWtoA                = _lstrlenWtoA@8              @891
+
     GetLongPathNameA           = _GetLongPathNameA@12        @900
     GetLongPathNameW           = _GetLongPathNameW@12        @901
 
@@ -994,7 +997,7 @@ EXPORTS
     FindNextVolumeMountPointA  = _FindNextVolumeMountPointA@12  @911
     FindNextVolumeMountPointW  = _FindNextVolumeMountPointW@12  @912
     FindVolumeMountPointClose  = _FindVolumeMountPointClose@4   @913
-  
+
     GetVolumeNameForVolumeMountPointA = _GetVolumeNameForVolumeMountPointA@12 @914
     GetVolumeNameForVolumeMountPointW = _GetVolumeNameForVolumeMountPointW@12 @915
 
@@ -1182,7 +1185,7 @@ EXPORTS
 
     wctype_table                                                  @2006 NONAME
     casemap_upper                                                 @2007 NONAME
-    casemap_lower			                          @2008 NONAME
+    casemap_lower                                     @2008 NONAME
 
 ; @@PF this exports were cut-out as a result of migration to new unicode
 ; header 29.07.2002 and replaced by 3 new entries
@@ -1191,7 +1194,7 @@ EXPORTS
 ;    get_char_typeW                                                @2008 NONAME
 
     _GetProcessTIBSel@0                                           @2012 NONAME
-   
+
     _SetRegistryRootKey@8                                         @2013 NONAME
     _SetCustomBuildName@12                                        @2014 NONAME
     _RegisterCustomDriver@36                                      @2015 NONAME
@@ -1207,9 +1210,9 @@ EXPORTS
     cp_get_table                                                  @2025 NONAME
 
     OSLibDosDevIOCtl                                              @2026 NONAME
-    
-    vsnprintfW							  @2030 NONAME
-    snprintfW						 	  @2031 NONAME
+
+    vsnprintfW                            @2030 NONAME
+    snprintfW                             @2031 NONAME
 
 ; custom dll hook installer
     _ODIN_SetDllLoadCallback@4                                    @2100 NONAME
@@ -1217,7 +1220,7 @@ EXPORTS
     _ODIN_SetProcAddress@12                                       @2101 NONAME
 
 ; override TIB switching
-    _ODIN_SetTIBSwitch@4                                          @2102 NONAME                                           
+    _ODIN_SetTIBSwitch@4                                          @2102 NONAME
 
     GetDisplayCodepage                                            @3000 NONAME
     GetWindowsCodepage                                            @3001 NONAME
