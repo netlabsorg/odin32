@@ -1,4 +1,4 @@
-/* $Id: DoWithDirs.cmd,v 1.12 2001-09-30 00:24:35 bird Exp $
+/* $Id: DoWithDirs.cmd,v 1.13 2002-08-20 04:07:11 bird Exp $
  *
  * Syntax: dowithdirs.cmd [-e<list of excludes>] [-c] [-i] [-l] [-r] <cmd with args...>
  *    -e      Exclude directories.
@@ -23,8 +23,7 @@ end
 /*
  * Color config.
  */
-if (  (value('BUILD_NOCOLOR',,'OS2ENVIRONMENT') = ''),
-    & (value('SLKRUNS',,'OS2ENVIRONMENT') = '')) then
+if ((getenv('BUILD_NOCOLORS') = '') & (getenv('SLKRUNS') = '')) then
 do
     sClrMak = '[35;1m'
     sClrErr = '[31;1m'
@@ -36,6 +35,14 @@ do
     sClrErr = ''
     sClrRst = ''
 end
+
+
+/*
+ * Build Pass
+ */
+sPass = getenv('_BUILD_PASS');
+if (sPass <> '') then
+    sPass = 'Pass '||sPass||' - '
 
 
 /* init options */
@@ -168,7 +175,7 @@ do ii = 1 to asDirs.0
         if (fCD) then
         do
             /* exectute the command in the directory */
-            say sClrMak||'[Entering directory:' asDirs.i']'||sClrRst;
+            say sClrMak||'['||sPass||'Entering Directory: '||asDirs.i']'||sClrRst;
             /* save old dir and enter the new dir. */
             sOldDir = directory();
             call directory asDirs.i;
@@ -182,10 +189,10 @@ do ii = 1 to asDirs.0
                     do
                         /* restore old directory and return sucessfully */
                         call directory sOldDir;
-                        say '[ !Lock found, stops processing.]';
+                        say sClrMak||'['||sPass||'!Lock found, stops processing.'||']'||sClrRst;
                         exit(0);
                     end
-                    say sClrMak||'[ !Skipping ' || asDirs.i || ' - directory was locked.]'||sClrRst;
+                    say sClrMak||'['||sPass||'!Skipping '||asDirs.i||' - Directory was locked.'||']'||sClrRst;
                     fOK = 0;
                 end
 
@@ -206,15 +213,15 @@ do ii = 1 to asDirs.0
                     /* complain and fail if errors aren't ignored. */
                     if (\fIgnoreFailure) then
                     do
-                        say sClrErr||'[ - rc = 'ret' ' || asDirs.i || ']'||sClrErr;
+                        say sClrErr||'['||sPass||'rc = 'ret' '||asDirs.i||']'||sClrErr;
                         exit(rc);
                     end
-                    say '[ - rc = 'ret' ' || asDirs.i || ']';
+                    say sClrMak||'['||sPass||'rc = 'ret' '||asDirs.i||']'||sClrRst;
                 end
             end
 
             /* restore old directory */
-            say sClrMak||'[Leaving  directory:' directory()']'||sClrRst;
+            say sClrMak||'['||sPass||'Leaving  Directory:' directory()||']'||sClrRst;
             call directory sOldDir;
         end
         else
@@ -223,7 +230,7 @@ do ii = 1 to asDirs.0
             'call' sCmds filespec('name', asDirs.i);
             if (rc <> 0) then
             do
-                say '[ - rc = ' || rc']';
+                say sClrErr||'['||sPass||'rc = '||rc||']'||sClrRst;
                 if (\fIgnoreFailure) then
                     exit(rc);
             end
@@ -268,4 +275,15 @@ unlockdir: procedure
     rc = stream('.dirlocked' || sTag, 'c', 'close');
     call SysFileDelete '.dirlocked' || sTag;
     return 0;
+
+
+/**
+ * Get environment variable value.
+ * @returns Environment variable value if set.
+ *          '' if not set.
+ * @param   sVar    Variable name.
+ */
+getenv: procedure
+parse arg sVar
+return value(sVar,,'OS2ENVIRONMENT');
 

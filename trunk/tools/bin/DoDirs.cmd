@@ -1,4 +1,4 @@
-/* $Id: DoDirs.cmd,v 1.4 2001-09-30 00:24:35 bird Exp $
+/* $Id: DoDirs.cmd,v 1.5 2002-08-20 04:07:11 bird Exp $
  *
  * Rexx script which executes a given command in each of the given
  * directories. It will fail when a command failes in one of the
@@ -16,8 +16,7 @@ parse arg '"'sDirs'" 'sCommand
 /*
  * Color config.
  */
-if (  (value('BUILD_NOCOLOR',,'OS2ENVIRONMENT') = ''),
-    & (value('SLKRUNS',,'OS2ENVIRONMENT') = '')) then
+if ((getenv('BUILD_NOCOLORS') = '') & (getenv('SLKRUNS') = '')) then
 do
     sClrMak = '[35;1m'
     sClrErr = '[31;1m'
@@ -29,6 +28,14 @@ do
     sClrErr = ''
     sClrRst = ''
 end
+
+
+/*
+ * Build Pass
+ */
+sPass = getenv('_BUILD_PASS');
+if (sPass <> '') then
+    sPass = 'Pass '||sPass||' - '
 
 
 /*
@@ -63,18 +70,18 @@ do while (iStart <= length(sDirs))
             iterate;
         if (directory(sDir) <> '') then
         do
-            say sClrMak||'[Entering directory:' directory()']'||sClrRst;
+            say sClrMak||'['||sPass||'Entering  Directory:' directory()||']'||sClrRst;
             sCommand
             if (rc <> 0) then
             do
-                say sClrErr||'[Failed rc='rc' directory:' directory()']'||sClrRst;
+                say sClrErr||'['||sPass||'Failed rc='rc' directory:' directory()||']'||sClrRst;
                 exit(rc);
             end
-            say sClrMak||'[Leaving  directory:' directory()']'||sClrRst;
+            say sClrMak||'['||sPass||'Leaving   Directory:' directory()||']'||sClrRst;
         end
         else
         do
-            say sClrErr||'[Failed to change directory to' sDir']'||sClrRst;
+            say sClrErr||'['||sPass||'Failed to change directory to' sDir||']'||sClrRst;
             exit(267);                  /* ERROR_DIRECTORY */
         end
         call directory sCurrentDir;     /* Restore start directory. */
@@ -88,3 +95,14 @@ end
  * Return successfully.
  */
 exit(0);
+
+
+/**
+ * Get environment variable value.
+ * @returns Environment variable value if set.
+ *          '' if not set.
+ * @param   sVar    Variable name.
+ */
+getenv: procedure
+parse arg sVar
+return value(sVar,,'OS2ENVIRONMENT');
