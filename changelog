@@ -3,6 +3,8 @@
 	- KERNEL32: Added comctl to list of system dlls (windll.cpp)
 	- KERNEL32: Fixed dll detach (windll.cpp) for converted win32 dlls
 	- KERNEL32: Module name detection (windll.cpp)
+	- COMCTL32: Fixed crash on exit (moved unregister of class into exit list handler)
+	- USER32: Changed bugfix (WS_CLIPCHILDREN) for winhlp32 (same as Wine now)
 
  99-19-06: Sander van Leeuwen
 	- ALL (except dsound/ddraw): Include <os2wrap.h> instead of <os2.h>

@@ -1,4 +1,4 @@
-/* $Id: wndclass.cpp,v 1.3 1999-06-10 16:50:37 phaller Exp $ */
+/* $Id: wndclass.cpp,v 1.4 1999-06-20 14:02:13 sandervl Exp $ */
 
 /*
  * Win32 Window Class Managment Code for OS/2
@@ -708,7 +708,7 @@ LRESULT EXPENTRY_O32 OS2ToWinCallback(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM
  char                  szClass[128];
  Win32WindowClass     *wclass;
 
-#ifdef DEBUG1
+#ifdef DEBUG
   dprintf(("OS2ToWinCallback for message %s", GetMsgText(Msg)));
 #endif
 

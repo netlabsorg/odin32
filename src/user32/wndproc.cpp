@@ -1,14 +1,12 @@
-/* $Id: wndproc.cpp,v 1.4 1999-06-10 16:50:37 phaller Exp $ */
+/* $Id: wndproc.cpp,v 1.5 1999-06-20 14:02:13 sandervl Exp $ */
 
-/*
- *
- * Project Odin Software License can be found in LICENSE.TXT
- *
- */
 /*
  * Win32 window procedure class for OS/2
  *
  * Copyright 1998 Sander van Leeuwen
+ *
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
  *
  */
 #include <os2win.h>

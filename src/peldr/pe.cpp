@@ -1,4 +1,4 @@
-/* $Id: pe.cpp,v 1.3 1999-06-19 10:54:46 sandervl Exp $ */
+/* $Id: pe.cpp,v 1.4 1999-06-20 14:02:13 sandervl Exp $ */
 
 /*
  *
@@ -22,10 +22,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-#include "win32type.h"
-#include "misc.h"
-#include "winexe.h"
-#include "windll.h"
+#include <win32type.h>
+#include <misc.h>
+#include <winexe.h>
+#include <windll.h>
+#include <wprocess.h>
 
 char INFO_BANNER[]      = "Usage: PE winexe commandline";
 char szErrorTitle[]     = "Odin";
@@ -102,6 +103,7 @@ int main(int argc, char *argv[])
         return(1);
   }
   WinExe->start();
+
   delete WinExe;
 
   if(hmq) WinDestroyMsgQueue( hmq );             /* Tidy up...                   */
