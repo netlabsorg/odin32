@@ -1,13 +1,12 @@
-/* $Id: probkrnl.h,v 1.2 2001-09-16 03:10:20 bird Exp $
+/* $Id: probkrnl.h,v 1.3 2001-09-17 00:11:36 bird Exp $
  *
  * Include file for ProbKrnl.
  *
- * Copyright (c) 1998-2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * Copyright (c) 1998-2001 knut st. osmundsen (kosmunds@csc.com)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
-
 
 #ifndef _ProbKrnl_h_
 #define _ProbKrnl_h_
@@ -34,6 +33,7 @@
 #define EPT_BIT_MASK            0x80    /* Mask bit entry-point */
 #define EPT16BitEntry(a)        (((a).fType & EPT_BIT_MASK) == EPT_16BIT)
 #define EPT32BitEntry(a)        (((a).fType & EPT_BIT_MASK) == EPT_32BIT)
+#define EPTProc(a)              (((a).fType & ~(EPT_BIT_MASK | EPT_WRAPPED | EPT_NOT_REQ)) == EPT_PROC)
 #define EPTProcHybrid(a)        (((a).fType & ~(EPT_BIT_MASK | EPT_WRAPPED | EPT_NOT_REQ)) == EPT_PROCH)
 #define EPTVar(a)               (((a).fType & ~(EPT_BIT_MASK | EPT_NOT_REQ)) == EPT_VAR)
 
@@ -71,6 +71,21 @@
 
 
 /*
+ * Calltab entry sizes.
+ */
+#define OVERLOAD16_ENTRY    0x18        /* This is intentionally 4 bytes larger than the one defined in calltaba.asm. */
+#define OVERLOAD32_ENTRY    0x14
+#define IMPORTH16_ENTRY     0x08
+#define VARIMPORT_ENTRY     0x10
+
+
+/*
+ * Opcode.
+ */
+#define OPCODE_IGNORE   0               /* chOpcode value. */
+
+
+/*
  * Fixup stuff.
  */
 /* entry tab types*/
@@ -84,12 +99,6 @@
 #define EXP_VAR32       6
 #define EXP_VAR16       7
 #define EXP_PROC16      8
-
-
-/*
- * Opcode.
- */
-#define OPCODE_IGNORE   0               /* chOpcode value. */
 
 
 /*******************************************************************************
@@ -147,16 +156,6 @@ extern KRNLDBENTRY   DATA16_INIT    aKrnlSymDB[];                   /* Defined i
     #pragma map( aImportTab , "_aImportTab"  )
     #pragma map( szSymbolFile,"_szSymbolFile")
     #pragma map( aKrnlSymDB , "_aKrnlSymDB"  )
-    extern struct OTE               KKL_ObjTab[4];                  /* calltaba.asm */
-    extern struct OTE               KKL_ObjTab_DosCalls[20];        /* calltaba.asm */
-    extern char                     KKL_EntryTab[1];                /* calltaba.asm */
-    extern char DATA16_INIT         KKL_EntryTabFixups[1];          /* calltaba.asm */
-    #ifdef _OS2KLDR_H_
-    extern MTE                      kKrnlLibMTE;                    /* calltaba.asm */
-    #endif
-    extern char                     callTab[1];                     /* calltaba.asm */
-    extern char                     callTab16[1];                   /* calltaba.asm */
-    extern unsigned                 auNopFuncs[NBR_OF_KRNLIMPORTS]; /* calltaba.asm */
 #endif
 
 /*
