@@ -1,4 +1,4 @@
-; $Id: cpuhlp.asm,v 1.1 1999-11-23 19:31:35 sandervl Exp $
+; $Id: cpuhlp.asm,v 1.2 2000-02-03 18:56:39 sandervl Exp $
 
 ;/*
 ; * Project Odin Software License can be found in LICENSE.TXT
@@ -8,7 +8,15 @@
 ; *
 ; */
 .586
-                NAME    except
+                NAME    cpuhlp
+
+DATA32  SEGMENT DWORD PUBLIC USE32 'DATA'
+        ASSUME  DS:FLAT,SS:FLAT
+
+	PUBLIC  CPUFeatures
+CPUFeatures     dd 0
+
+DATA32  ENDS
 
 CODE32          SEGMENT DWORD PUBLIC USE32 'CODE'
 
@@ -75,6 +83,8 @@ GetCPUFeatures proc near
 	cpuid
 
 	mov	eax, edx	
+
+	mov	[CPUFeatures], eax
 
 	pop	edx
 	pop	ecx
