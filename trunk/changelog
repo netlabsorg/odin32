@@ -1,4 +1,8 @@
- /* $Id: changelog,v 1.1128 2000-09-16 09:33:04 sandervl Exp $ */
+ /* $Id: changelog,v 1.1129 2000-09-16 17:29:46 bird Exp $ */
+
+ 2000-09-16: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - Tools\dbginfo: Solved DosCall1.DLL problem. Successfully creates HLL
+                HLL debuginfo from .SYM files and add it to LX files.
 
  2000-09-15: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - KERNEL32: Corrected logging for GetModuleFileNameA/W (a handle and
