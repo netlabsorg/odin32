@@ -1,4 +1,4 @@
-/* $Id: static.cpp,v 1.22 2001-03-25 08:50:42 sandervl Exp $ */
+/* $Id: static.cpp,v 1.23 2001-03-30 11:14:36 sandervl Exp $ */
 /*
  * Static control
  *
@@ -413,6 +413,7 @@ LRESULT STATIC_NCHitTest(HWND hwnd,WPARAM wParam,LPARAM lParam)
   DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
   LRESULT lResult;
 
+#ifndef ODIN_HITTEST
   //SvL: If a static window has children, then we can't return HTTRANSPARENT
   //     here. For some reason PM then sends all mouse messages to the parent
   //     of the static window; even if they are intended for the children of
@@ -422,6 +423,7 @@ LRESULT STATIC_NCHitTest(HWND hwnd,WPARAM wParam,LPARAM lParam)
   if(GetWindow(hwnd, GW_HWNDFIRST) != 0) {
        return HTCLIENT;
   }
+#endif
 
   if (dwStyle & SS_NOTIFY)
        lResult = HTCLIENT;
@@ -655,7 +657,7 @@ static void STATIC_PaintTextfn(HWND hwnd, HDC hdc )
         hBrush = SendMessageA( GetParent(hwnd), WM_CTLCOLORSTATIC,
                              hdc, hwnd );
         if (!hBrush) hBrush = GetStockObject(WHITE_BRUSH);
-        FillRect( hdc, &rc, hBrush );    
+        FillRect( hdc, &rc, hBrush );
     }
 #else
     hBrush = SendMessageA( GetParent(hwnd), WM_CTLCOLORSTATIC,

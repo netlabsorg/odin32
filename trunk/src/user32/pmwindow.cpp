@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.120 2001-02-23 14:52:41 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.121 2001-03-30 11:14:35 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -104,7 +104,11 @@ BOOL InitPM()
         hab,                               /* Anchor block handle          */
         (PSZ)WIN32_STDCLASS,               /* Window class name            */
         (PFNWP)Win32WindowProc,            /* Address of window procedure  */
+#ifdef ODIN_HITTEST
+        0,
+#else
         CS_HITTEST,
+#endif
         NROF_WIN32WNDBYTES))
     {
             dprintf(("WinRegisterClass Win32BaseWindow failed"));
@@ -124,7 +128,11 @@ BOOL InitPM()
         hab,                               /* Anchor block handle          */
         (PSZ)WIN32_STDFRAMECLASS,          /* Window class name            */
         (PFNWP)Win32FrameWindowProc,       /* Address of window procedure  */
+#ifdef ODIN_HITTEST
+        CS_FRAME,
+#else
         CS_HITTEST | CS_FRAME,
+#endif
         FrameClassInfo.cbWindowData+NROF_WIN32WNDBYTES))
     {
         dprintf(("WinRegisterClass Win32BaseWindow failed %x", WinGetLastError(hab)));
@@ -929,6 +937,7 @@ PosChangedEnd:
     //**************************************************************************
     //Mouse messages (OS/2 Window coordinates -> Win32 coordinates relative to screen
     //**************************************************************************
+#ifndef ODIN_HITTEST
     case WM_HITTEST:
     {
         if(win32wnd->getWindowHandle() != pWinMsg->hwnd) {
@@ -943,6 +952,7 @@ PosChangedEnd:
         }
         return (MRESULT)HT_NORMAL;
     }
+#endif
 
     case WM_BUTTON1DOWN:
     case WM_BUTTON1UP:

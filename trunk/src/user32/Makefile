@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.80 2001-01-09 18:14:01 sandervl Exp $
+# $Id: Makefile,v 1.81 2001-03-30 11:14:35 sandervl Exp $
 
 #
 # Odin32 API
@@ -17,9 +17,9 @@
 # Overrides.
 #
 !ifndef WAT
-CDEFINES = $(CDEFINES) -DINVERT
+CDEFINES = $(CDEFINES) -DINVERT -DODIN_HITTEST
 !else
-CDEFINES += -DINVERT
+CDEFINES += -DINVERT -DODIN_HITTEST
 !endif
 
 

@@ -1,4 +1,4 @@
-/* $Id: win32wbasenonclient.cpp,v 1.29 2001-02-21 20:51:07 sandervl Exp $ */
+/* $Id: win32wbasenonclient.cpp,v 1.30 2001-03-30 11:14:36 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (non-client methods)
  *
@@ -448,6 +448,9 @@ LONG Win32BaseWindow::HandleNCHitTest(POINT pt)
   RECT rect;
 
   if (dwStyle & WS_MINIMIZE) return HTCAPTION;
+
+  //TODO: is this correct???
+  if (dwStyle & WS_DISABLED) return HTERROR;
 
   GetWindowRect(getWindowHandle(), &rect);
 

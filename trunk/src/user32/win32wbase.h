@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.111 2001-02-23 14:52:42 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.112 2001-03-30 11:14:36 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -133,7 +133,9 @@ virtual  ULONG  MsgEnable(BOOL fEnable);
          ULONG  MsgChar(MSG *msg);
          ULONG  MsgPaint(ULONG tmp1, BOOL select = TRUE);
          ULONG  MsgEraseBackGround(HDC hdc);
+#ifndef ODIN_HITTEST
          ULONG  MsgHitTest(MSG *msg);
+#endif
          ULONG  MsgNCPaint();
          ULONG  MsgFormatFrame(WINDOWPOS *lpWndPos);
          ULONG  DispatchMsgA(MSG *msg);
@@ -160,7 +162,6 @@ virtual  WORD   GetWindowWord(int index);
  Win32WndClass *getWindowClass()                { return windowClass; };
 
          LONG   getLastHitTestVal()             { return lastHitTestVal; }
-         LONG   sendHitTest(ULONG lParam);
 
          DWORD  getWindowContextHelpId()        { return contextHelpId; };
          void   setWindowContextHelpId(DWORD id){ contextHelpId = id; };

@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.246 2001-03-29 17:39:19 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.247 2001-03-30 11:14:36 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -905,6 +905,7 @@ ULONG Win32BaseWindow::MsgScroll(ULONG msg, ULONG scrollCode, ULONG scrollPos)
 }
 //******************************************************************************
 //******************************************************************************
+#ifndef ODIN_HITTEST
 ULONG Win32BaseWindow::MsgHitTest(MSG *msg)
 {
   lastHitTestVal = DispatchMsgA(msg);
@@ -916,6 +917,7 @@ ULONG Win32BaseWindow::MsgHitTest(MSG *msg)
   else
     return HTOS_NORMAL;
 }
+#endif
 //******************************************************************************
 //******************************************************************************
 ULONG Win32BaseWindow::MsgActivate(BOOL fActivate, BOOL fMinimized, HWND hwnd, HWND hwndOS2Win)
@@ -1216,13 +1218,6 @@ ULONG Win32BaseWindow::MsgGetTextLength()
 void Win32BaseWindow::MsgGetText(char *wndtext, ULONG textlength)
 {
     SendInternalMessageA(WM_GETTEXT, textlength, (LPARAM)wndtext);
-}
-//******************************************************************************
-//******************************************************************************
-LONG Win32BaseWindow::sendHitTest(ULONG lParam)
-{
-    lastHitTestVal = SendInternalMessageA(WM_NCHITTEST, 0, lParam);
-    return lastHitTestVal;
 }
 //******************************************************************************
 //******************************************************************************
@@ -1966,6 +1961,9 @@ LRESULT Win32BaseWindow::SendInternalMessageA(ULONG Msg, WPARAM wParam, LPARAM l
                 rc = win32wndproc(getWindowHandle(), Msg, wParam, lParam);
                 break;
         }
+        case WM_NCHITTEST:
+                rc = lastHitTestVal = win32wndproc(getWindowHandle(), WM_NCHITTEST, wParam, lParam);
+                break;
 
         case WM_DESTROY:
                 rc = win32wndproc(getWindowHandle(), WM_DESTROY, 0, 0);
@@ -2022,6 +2020,10 @@ LRESULT Win32BaseWindow::SendInternalMessageW(ULONG Msg, WPARAM wParam, LPARAM l
         case WM_RBUTTONDOWN:
                 NotifyParent(Msg, wParam, lParam);
                 rc = win32wndproc(getWindowHandle(), Msg, wParam, lParam);
+                break;
+
+        case WM_NCHITTEST:
+                rc = lastHitTestVal = win32wndproc(getWindowHandle(), WM_NCHITTEST, wParam, lParam);
                 break;
 
         case WM_DESTROY:
