@@ -1,4 +1,4 @@
-/* $Id: dibsect.cpp,v 1.48 2001-03-27 20:47:52 sandervl Exp $ */
+/* $Id: dibsect.cpp,v 1.49 2001-03-29 18:52:53 sandervl Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -195,7 +195,7 @@ DIBSection::DIBSection(BITMAPINFOHEADER_W *pbmi, char *pColors, DWORD iUsage, DW
      while ( (dsect->next != this) &&
              (dsect->next != NULL) )
      {
-       dprintf2(("Increment section to %08X\n",dsect->next));
+////       dprintf2(("Increment section to %08X\n",dsect->next));
        dsect = dsect->next;
      }
      dsect->next = this;
@@ -470,17 +470,8 @@ BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nDestWidth,
         hdcWidth  = rect.right - rect.left;
   }
   else {
-        DIBSection *dsect = DIBSection::findHDC(hdcDest);
-        if(dsect)
-        {
-            hdcHeight = dsect->GetHeight();
-            hdcWidth  = dsect->GetWidth();
-        }
-        else
-        {
-            hdcHeight = pOS2bmp->cy;
-            hdcWidth  = pOS2bmp->cx;
-        }
+        hdcHeight = pHps->bitmapHeight;
+        hdcWidth  = pHps->bitmapWidth;
   }
 
   //win32 coordinates are relative to left top, OS/2 expects left bottom
