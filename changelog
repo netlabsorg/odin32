@@ -1,4 +1,4 @@
- /* $Id: changelog,v 1.709 2000-02-08 14:55:04 bird Exp $ */
+ /* $Id: changelog,v 1.710 2000-02-08 22:30:21 sandervl Exp $ */
 
  2000-02-08: Knut Stange Osmundsen <knut.stange.osmundsen>
 	- Win32k: Temporarily disabled some unused imported kernelfunctions.
@@ -7,6 +7,11 @@
 
  2000-02-07: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Don't use shell positioning for child windows (breaks Notes)
+                  Turn of WM_BACKERASEBKGND when calling RedrawWindow to
+                  invalidate a window (without erase flag set; but also without
+                  noerase) -> fixes flickering in pingpong Opengl sample
+	- KERNEL32: Search path for executables when they can't be found in
+                    the current directory.
 
  2000-02-07: Christoph Bratschi <cbratschi@datacomm.ch>
 	- KERNEL32: Ported more Wine thunk apis
