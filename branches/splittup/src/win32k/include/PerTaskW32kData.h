@@ -1,8 +1,8 @@
-/* $Id: PerTaskW32kData.h,v 1.2.2.1 2001-09-27 03:08:17 bird Exp $
+/* $Id: PerTaskW32kData.h,v 1.2.2.2 2002-04-01 10:01:01 bird Exp $
  *
  * Per Task (Win32k) Data.
  *
- * Copyright (c) 2001 knut st. osmundsen (kosmunds@csc.no)
+ * Copyright (c) 2001-2002 knut st. osmundsen (bird@anduin.net)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *

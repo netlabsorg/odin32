@@ -1,8 +1,8 @@
-/* $Id: omf.h,v 1.3 2000-09-02 21:08:03 bird Exp $ */
+/* $Id: omf.h,v 1.3.2.1 2002-04-01 10:01:04 bird Exp $ */
 /*
  * OMF stuff
  *
- * Copyright (c) 1999 knut st. osmundsen
+ * Copyright (c) 1999-2002 knut st. osmundsen (bird@anduin.net)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *

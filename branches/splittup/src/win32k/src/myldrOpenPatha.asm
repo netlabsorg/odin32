@@ -1,8 +1,8 @@
-; $Id: myldrOpenPatha.asm,v 1.1.2.1 2002-03-31 20:09:18 bird Exp $
+; $Id: myldrOpenPatha.asm,v 1.1.2.2 2002-04-01 09:57:19 bird Exp $
 ;
 ; myldrOpenPatha - assembly helpers for myldrOpenPath.
 ;
-; Copyright (c) 2000-2001 knut st. osmundsen (kosmunds@csc.com)
+; Copyright (c) 2000-2002 knut st. osmundsen (bird@anduin.net)
 ;
 ; Project Odin Software License can be found in LICENSE.TXT
 ;

@@ -1,8 +1,8 @@
-/* $Id: d16globl.c,v 1.1.2.1 2002-03-31 20:09:05 bird Exp $
+/* $Id: d16globl.c,v 1.1.2.2 2002-04-01 09:57:10 bird Exp $
  *
  * d16globals - global data (16-bit)
  *
- * Copyright (c) 1999-2001 knut st. osmundsen (kosmunds@csc.com)
+ * Copyright (c) 1999-2002 knut st. osmundsen (bird@anduin.net)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *

@@ -1,4 +1,4 @@
-/* $Id: MZexe.h,v 1.1.2.1 2002-04-01 08:28:33 bird Exp $
+/* $Id: MZexe.h,v 1.1.2.2 2002-04-01 10:01:00 bird Exp $
  *
  * MZ DEFINITIONS AND DECLARATIONS.
  * --------------------------------
@@ -7,7 +7,7 @@
  * Copyright IBM Corp 1984-1992
  * Copyright IBM Corp 1987-1992
  * Copyright Microsoft Corp 1984-1987
- * Copyright knut st. osmundsen 2001 (I've messed them up ;-)
+ * Copyright knut st. osmundsen (bird@anduin.net)
  *
  */
 

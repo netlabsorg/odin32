@@ -1,7 +1,7 @@
-/* $Id: dev1632.h,v 1.8.2.1 2001-09-27 03:08:17 bird Exp $
+/* $Id: dev1632.h,v 1.8.2.2 2002-04-01 10:01:02 bird Exp $
  * dev1632.h - Common header file for 16-bit and 32-bit C
  *
- * Copyright (c) 1999 knut st. osmundsen
+ * Copyright (c) 1999-2002 knut st. osmundsen (bird@anduin.net)
  *
  */
 

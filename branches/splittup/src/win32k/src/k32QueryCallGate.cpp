@@ -1,14 +1,14 @@
-/* $Id: k32QueryCallGate.cpp,v 1.1.2.2 2002-04-01 09:06:05 bird Exp $
+/* $Id: k32QueryCallGate.cpp,v 1.1.2.3 2002-04-01 09:57:14 bird Exp $
  *
  * k32QueryCallGate - Query the callgate selector for the callgate to the k32 APIs.
  *
- * Copyright (c) 2001 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * Copyright (c) 2001-2002 knut st. osmundsen (bird@anduin.net)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
 #ifndef NOFILEID
-static const char szFileId[] = "$Id: k32QueryCallGate.cpp,v 1.1.2.2 2002-04-01 09:06:05 bird Exp $";
+static const char szFileId[] = "$Id: k32QueryCallGate.cpp,v 1.1.2.3 2002-04-01 09:57:14 bird Exp $";
 #endif
 
 
@@ -50,7 +50,7 @@ static const char szFileId[] = "$Id: k32QueryCallGate.cpp,v 1.1.2.2 2002-04-01 0
  *          Try copy the CallGate selecto to the passed in variable pointer.
  *          return the result of this attempt.
  * @status  Completely implelemnted.
- * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @author  knut st. osmundsen (bird@anduin.net)
  */
 APIRET k32QueryCallGate(PUSHORT pusCGSelector)
 {

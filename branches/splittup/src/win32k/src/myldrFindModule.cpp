@@ -1,15 +1,15 @@
-/* $Id: myldrFindModule.cpp,v 1.1.2.2 2002-04-01 09:06:08 bird Exp $
+/* $Id: myldrFindModule.cpp,v 1.1.2.3 2002-04-01 09:57:17 bird Exp $
  *
  * ldrFindModule - ldrFindModule replacement with support for long DLL names
  *                  and .DLL-extention dependency.
  *
- * Copyright (c) 1999-2001 knut st. osmundsen (kosmunds@csc.com)
+ * Copyright (c) 1999-2002 knut st. osmundsen (bird@anduin.net)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
 #ifndef NOFILEID
-static const char szFileId[] = "$Id: myldrFindModule.cpp,v 1.1.2.2 2002-04-01 09:06:08 bird Exp $";
+static const char szFileId[] = "$Id: myldrFindModule.cpp,v 1.1.2.3 2002-04-01 09:57:17 bird Exp $";
 #endif
 
 /*******************************************************************************

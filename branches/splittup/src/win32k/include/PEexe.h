@@ -1,10 +1,10 @@
-/* $Id: PEexe.h,v 1.1.2.1 2002-04-01 08:28:34 bird Exp $
+/* $Id: PEexe.h,v 1.1.2.2 2002-04-01 10:01:01 bird Exp $
  *
  * PE DEFINITIONS AND DECLARATIONS.
  * --------------------------------
  *
  * Copyright Eric Youngdale (1994)
- * Copyright knut st. osmundsen (2001) (I've messed them up ;-)
+ * Copyright knut st. osmundsen (bird@anduin.net)
  *
  */
 

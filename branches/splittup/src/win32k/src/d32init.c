@@ -1,14 +1,14 @@
-/* $Id: d32init.c,v 1.1.2.2 2002-04-01 09:06:04 bird Exp $
+/* $Id: d32init.c,v 1.1.2.3 2002-04-01 09:57:12 bird Exp $
  *
  * d32init.c - 32-bits init routines.
  *
- * Copyright (c) 1998-1999 knut st. osmundsen
+ * Copyright (c) 1998-2002 knut st. osmundsen (bird@anduin.net)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
 #ifndef NOFILEID
-static const char szFileId[] = "$Id: d32init.c,v 1.1.2.2 2002-04-01 09:06:04 bird Exp $";
+static const char szFileId[] = "$Id: d32init.c,v 1.1.2.3 2002-04-01 09:57:12 bird Exp $";
 #endif
 
 /*******************************************************************************

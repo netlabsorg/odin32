@@ -1,10 +1,10 @@
-; $Id: myldrGetFileName.asm,v 1.1.2.1 2002-03-31 20:09:17 bird Exp $
+; $Id: myldrGetFileName.asm,v 1.1.2.2 2002-04-01 09:57:17 bird Exp $
 ;
 ; myldrGetFileName2 - assembly helper for ldrGetFileName.
 ;           This makes ldrGetFileName work for filenames which
 ;           doesn't have a path, and return correct *ppachExt.
 ;
-; Copyright (c) 2000-2001 knut st. osmundsen (kosmunds@csc.com)
+; Copyright (c) 2000-2002 knut st. osmundsen (bird@anduin.net)
 ;
 ; Project Odin Software License can be found in LICENSE.TXT
 ;

@@ -1,15 +1,15 @@
-/* $Id: myldrOpenPath.cpp,v 1.1.2.2 2002-04-01 09:06:09 bird Exp $
+/* $Id: myldrOpenPath.cpp,v 1.1.2.3 2002-04-01 09:57:18 bird Exp $
  *
  * myldrOpenPath - ldrOpenPath used to open executables we'll override
  * this to altern the search path for DLLs.
  *
- * Copyright (c) 2000-2001 knut st. osmundsen (kosmunds@csc.com)
+ * Copyright (c) 2000-2002 knut st. osmundsen (bird@anduin.net)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
 #ifndef NOFILEID
-static const char szFileId[] = "$Id: myldrOpenPath.cpp,v 1.1.2.2 2002-04-01 09:06:09 bird Exp $";
+static const char szFileId[] = "$Id: myldrOpenPath.cpp,v 1.1.2.3 2002-04-01 09:57:18 bird Exp $";
 #endif
 
 /*******************************************************************************

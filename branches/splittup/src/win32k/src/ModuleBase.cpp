@@ -1,14 +1,14 @@
-/* $Id: ModuleBase.cpp,v 1.1.2.2 2002-04-01 09:06:02 bird Exp $
+/* $Id: ModuleBase.cpp,v 1.1.2.3 2002-04-01 09:57:09 bird Exp $
  *
  * ModuleBase - Implementetation.
  *
- * Copyright (c) 1999-2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * Copyright (c) 1999-2002 knut st. osmundsen (bird@anduin.net)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
 #ifndef NOFILEID
-static const char szFileId[] = "$Id: ModuleBase.cpp,v 1.1.2.2 2002-04-01 09:06:02 bird Exp $";
+static const char szFileId[] = "$Id: ModuleBase.cpp,v 1.1.2.3 2002-04-01 09:57:09 bird Exp $";
 #endif
 
 /*******************************************************************************
@@ -295,7 +295,7 @@ BOOL  ModuleBase::queryIsModuleName(PCSZ pszFilename)
 /**
  * Gets the fullpath filename.
  * @returns     Const ("Readonly") pointer to the filename.
- * @author      knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @author      knut st. osmundsen (bird@anduin.net)
  */
 PCSZ ModuleBase::getFilename()
 {
@@ -306,7 +306,7 @@ PCSZ ModuleBase::getFilename()
 /**
  * Gets the modulename.
  * @returns     Const ("Readonly") pointer to the module name.
- * @author      knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @author      knut st. osmundsen (bird@anduin.net)
  * @remark      Modulename is filename without path and extention.
  */
 PCSZ ModuleBase::getModuleName()

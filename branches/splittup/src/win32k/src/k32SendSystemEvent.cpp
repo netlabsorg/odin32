@@ -1,15 +1,15 @@
-/* $Id: k32SendSystemEvent.cpp,v 1.1.2.2 2002-04-01 09:06:06 bird Exp $
+/* $Id: k32SendSystemEvent.cpp,v 1.1.2.3 2002-04-01 09:57:15 bird Exp $
  *
  * k32SendSystemEvent - Send a system event like Ctrl-Alt-Delete
  *          and Ctrl-Alt-2xNumLock.
  *
- * Copyright (c) 2001 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * Copyright (c) 2001-2002 knut st. osmundsen (bird@anduin.net)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
 #ifndef NOFILEID
-static const char szFileId[] = "$Id: k32SendSystemEvent.cpp,v 1.1.2.2 2002-04-01 09:06:06 bird Exp $";
+static const char szFileId[] = "$Id: k32SendSystemEvent.cpp,v 1.1.2.3 2002-04-01 09:57:15 bird Exp $";
 #endif
 
 
@@ -54,7 +54,7 @@ static const char szFileId[] = "$Id: k32SendSystemEvent.cpp,v 1.1.2.2 2002-04-01
  *                      TRUE:  Take control of the event.<br>
  *                      FALSE: Give control back to the OS of this event. (hev must match the current handle!)
  * @status  partially implemented.
- * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @author  knut st. osmundsen (bird@anduin.net)
  * @remark  Not all events are implemented yet.
  */
 APIRET k32SendSystemEvent(ULONG ulEvent, BOOL fHandle)

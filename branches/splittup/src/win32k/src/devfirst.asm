@@ -1,8 +1,8 @@
-; $Id: devfirst.asm,v 1.1.2.1 2002-03-31 20:09:07 bird Exp $
+; $Id: devfirst.asm,v 1.1.2.2 2002-04-01 09:57:12 bird Exp $
 ;
 ; DevFirst - entrypoint and segment definitions
 ;
-; Copyright (c) 1999 knut st. osmundsen
+; Copyright (c) 1999-2002 knut st. osmundsen (bird@anduin.net)
 ;
 ; Project Odin Software License can be found in LICENSE.TXT
 ;
@@ -220,7 +220,7 @@ GetOS2KrnlMTE ENDP
 ; @param    [ebp+14h]   Process Id or Screen Group Id.
 ; @uses     eax, edx, ecx
 ; @status   completely implemented.
-; @author   knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+; @author   knut st. osmundsen (bird@anduin.net)
 ; @remark   Used by importTabInit.
 POST_SIGNAL32 proc near
     push    ebp

@@ -1,10 +1,10 @@
-/* $Id: vprntf16.h,v 1.2 2000-09-02 21:08:04 bird Exp $
+/* $Id: vprntf16.h,v 1.2.2.1 2002-04-01 10:01:05 bird Exp $
  *
  * printf/vprintf header file - 16bit.
  *
  * WARNING: Do not include stdarg.h! AND it's only for use during init!!!
  *
- * Copyright (c) 1999 knut st. osmundsen
+ * Copyright (c) 1999-2002 knut st. osmundsen (bird@anduin.net)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *

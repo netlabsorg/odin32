@@ -1,14 +1,14 @@
-/* $Id: d32Win32kIOCtl.c,v 1.1.2.2 2002-04-01 09:06:03 bird Exp $
+/* $Id: d32Win32kIOCtl.c,v 1.1.2.3 2002-04-01 09:57:11 bird Exp $
  *
  * Win32k driver IOCtl handler function.
  *
- * Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * Copyright (c) 2000-2002 knut st. osmundsen (bird@anduin.net)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
 #ifndef NOFILEID
-static const char szFileId[] = "$Id: d32Win32kIOCtl.c,v 1.1.2.2 2002-04-01 09:06:03 bird Exp $";
+static const char szFileId[] = "$Id: d32Win32kIOCtl.c,v 1.1.2.3 2002-04-01 09:57:11 bird Exp $";
 #endif
 
 /*******************************************************************************
@@ -48,7 +48,7 @@ APIRET _Optlink Win32kAPIRouter(ULONG ulFunction, PVOID pvParam);  /* implemente
  * IOCtl handler for the Win32k part of the driver.
  * @returns   Gen IOCtl return code.
  * @param     pRpIOCtl  Pointer to 32-bit request packet. (not to the original packet)
- * @author    knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @author    knut st. osmundsen (bird@anduin.net)
  */
 USHORT _loadds _Far32 _Pascal Win32kIOCtl(PRP32GENIOCTL pRpIOCtl)
 {

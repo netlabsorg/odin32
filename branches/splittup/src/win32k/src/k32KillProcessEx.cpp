@@ -1,14 +1,14 @@
-/* $Id: k32KillProcessEx.cpp,v 1.1.2.2 2002-04-01 09:06:05 bird Exp $
+/* $Id: k32KillProcessEx.cpp,v 1.1.2.3 2002-04-01 09:57:13 bird Exp $
  *
  * k32KillProcessEx - DosKillProcessEx extention.
  *
- * Copyright (c) 2001 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * Copyright (c) 2001-2002 knut st. osmundsen (bird@anduin.net)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
 #ifndef NOFILEID
-static const char szFileId[] = "$Id: k32KillProcessEx.cpp,v 1.1.2.2 2002-04-01 09:06:05 bird Exp $";
+static const char szFileId[] = "$Id: k32KillProcessEx.cpp,v 1.1.2.3 2002-04-01 09:57:13 bird Exp $";
 #endif
 
 
@@ -52,7 +52,7 @@ static const char szFileId[] = "$Id: k32KillProcessEx.cpp,v 1.1.2.2 2002-04-01 0
  * @param   pid         The identity of the process or root in process tree to be killed.
  * @sketch
  * @status  Paritially implemented.
- * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @author  knut st. osmundsen (bird@anduin.net)
  */
 APIRET k32KillProcessEx(ULONG flAction, PID pid)
 {

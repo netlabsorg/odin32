@@ -1,14 +1,14 @@
-/* $Id: PerTaskW32kData.c,v 1.1.2.1 2002-04-01 09:07:31 bird Exp $
+/* $Id: PerTaskW32kData.c,v 1.1.2.2 2002-04-01 09:57:09 bird Exp $
  *
  * Per Task (Win32k) Data.
  *
- * Copyright (c) 2001 knut st. osmundsen (kosmunds@csc.no)
+ * Copyright (c) 2001-2002 knut st. osmundsen (bird@anduin.net)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
 #ifndef NOFILEID
-static const char szFileId[] = "$Id: PerTaskW32kData.c,v 1.1.2.1 2002-04-01 09:07:31 bird Exp $";
+static const char szFileId[] = "$Id: PerTaskW32kData.c,v 1.1.2.2 2002-04-01 09:57:09 bird Exp $";
 #endif
 
 /*******************************************************************************
@@ -58,7 +58,7 @@ PID InternalGetPid(void);
  * @param   fCreate TRUE:  Create structure if not found.
  *                  FALSE: Return NULL if not found.
  * @status  completely implemented.
- * @author  knut st. osmundsen (kosmunds@csc.no)
+ * @author  knut st. osmundsen (bird@anduin.net)
  */
 PPTD    GetTaskData(PPTDA pPTDA, BOOL fCreate)
 {
@@ -89,7 +89,7 @@ PPTD    GetTaskData(PPTDA pPTDA, BOOL fCreate)
  * Remove the give process id.
  * @param   pPTDA   Pointer to PTDA for the task.
  * @status  completely implemented.
- * @author  knut st. osmundsen (kosmunds@csc.no)
+ * @author  knut st. osmundsen (bird@anduin.net)
  */
 void    RemoveTaskData(PPTDA pPTDA)
 {
@@ -118,7 +118,7 @@ void    RemoveTaskData(PPTDA pPTDA)
  * @returns Process id.
  *          -1 on error.
  * @status  completely implemented.
- * @author  knut st. osmundsen (kosmunds@csc.no)
+ * @author  knut st. osmundsen (bird@anduin.net)
  * @remark
  */
 PID InternalGetPid(void)

@@ -1,14 +1,14 @@
-/* $Id: myLDRQAppType.cpp,v 1.1.2.2 2002-04-01 09:06:07 bird Exp $
+/* $Id: myLDRQAppType.cpp,v 1.1.2.3 2002-04-01 09:57:16 bird Exp $
  *
  * _myLDRQAppType - _LDRQAppType overload.
  *
- * Copyright (c) 1998-1999 knut  St.  osmundsen
+ * Copyright (c) 1998-2002 knut st. osmundsen (bird@anduin.net)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
 #ifndef NOFILEID
-static const char szFileId[] = "$Id: myLDRQAppType.cpp,v 1.1.2.2 2002-04-01 09:06:07 bird Exp $";
+static const char szFileId[] = "$Id: myLDRQAppType.cpp,v 1.1.2.3 2002-04-01 09:57:16 bird Exp $";
 #endif
 
 /*******************************************************************************

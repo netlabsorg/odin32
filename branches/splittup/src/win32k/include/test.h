@@ -1,8 +1,8 @@
-/* $Id: test.h,v 1.10.2.1 2001-09-27 03:08:20 bird Exp $
+/* $Id: test.h,v 1.10.2.2 2002-04-01 10:01:04 bird Exp $
  *
  * Definitions and declarations for test moduls.
  *
- * Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * Copyright (c) 2000-2002 knut st. osmundsen (bird@anduin.net)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *

@@ -1,8 +1,8 @@
-; $Id: mytkExecPgm.asm,v 1.1.2.1 2002-03-31 20:09:19 bird Exp $
+; $Id: mytkExecPgm.asm,v 1.1.2.2 2002-04-01 09:57:19 bird Exp $
 ;
 ; mytkExecPgm - tkExecPgm overload
 ;
-; Copyright (c) 2000-2001 knut st. osmundsen (kosmunds@csc.no)
+; Copyright (c) 2000-2002 knut st. osmundsen (bird@anduin.net)
 ;
 ; Project Odin Software License can be found in LICENSE.TXT
 ;
@@ -126,7 +126,7 @@ CODE32 SEGMENT
 ;            may modify later if this is a UNIX shellscript or
 ;            a PE-file started by pe.exe.
 ; @status    completely implemented.
-; @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+; @author    knut st. osmundsen (bird@anduin.net)
 ;
 ;
 myg_tkExecPgm PROC FAR
@@ -430,7 +430,7 @@ myg_tkExecPgm ENDP
 ; @uses      eax, edx, ecx
 ; @sketch
 ; @status
-; @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+; @author    knut st. osmundsen (bird@anduin.net)
 ; @remark
 tkExecPgmCopyEnv PROC NEAR
 cchEnv  = -04h
@@ -500,7 +500,7 @@ tkExecPgmCopyEnv ENDP
 ; @uses      eax, edx, ecx
 ; @sketch
 ; @status
-; @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+; @author    knut st. osmundsen (bird@anduin.net)
 ; @remark
 tkExecPgmEnvLength PROC NEAR
     ASSUME ds:FLAT, es:FLAT, ss:NOTHING

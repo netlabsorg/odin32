@@ -1,14 +1,14 @@
-/* $Id: elf2lx.cpp,v 1.1.2.2 2002-04-01 09:06:04 bird Exp $
+/* $Id: elf2lx.cpp,v 1.1.2.3 2002-04-01 09:57:13 bird Exp $
  *
  * Elf2Lx - implementation.
  *
- * Copyright (c) 1999-2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * Copyright (c) 1999-2002 knut st. osmundsen (bird@anduin.net)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
 #ifndef NOFILEID
-static const char szFileId[] = "$Id: elf2lx.cpp,v 1.1.2.2 2002-04-01 09:06:04 bird Exp $";
+static const char szFileId[] = "$Id: elf2lx.cpp,v 1.1.2.3 2002-04-01 09:57:13 bird Exp $";
 #endif
 
 
@@ -245,7 +245,7 @@ ULONG Elf2Lx::init(PCSZ pszFilename)
  *            FALSE: invalid header.
  * @param     pEhdr  Pointer to elf header.
  * @status    completely implemented.
- * @author    knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @author    knut st. osmundsen (bird@anduin.net)
  */
 BOOL Elf2Lx::validHeader(Elf32_Ehdr *pEhdr)
 {

@@ -1,8 +1,8 @@
-/* $Id: k32.h,v 1.11 2001-07-10 05:24:33 bird Exp $
+/* $Id: k32.h,v 1.11.2.1 2002-04-01 10:01:03 bird Exp $
  *
  * k32 API - definitions.
  *
- * Copyright (c) 2000-2001 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * Copyright (c) 2000-2002 knut st. osmundsen (bird@anduin.net)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
