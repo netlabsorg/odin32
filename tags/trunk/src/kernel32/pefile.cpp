@@ -1,4 +1,4 @@
-/* $Id: pefile.cpp,v 1.9 2000-06-26 13:21:34 sandervl Exp $ */
+/* $Id: pefile.cpp,v 1.10 2000-10-06 11:04:01 sandervl Exp $ */
 
 /*
  * PE2LX PE utility functions
@@ -103,17 +103,16 @@ BOOL GetSectionHdrByImageDir(LPVOID lpFile, DWORD dwIMAGE_DIRECTORY, PIMAGE_SECT
 } 
 //******************************************************************************
 //******************************************************************************
-BOOL IsImportSection(LPVOID lpFile, PIMAGE_SECTION_HEADER psh) 
+BOOL IsSectionType(LPVOID lpFile, PIMAGE_SECTION_HEADER psh, DWORD dwIMAGE_DIRECTORY)
 {
   PIMAGE_OPTIONAL_HEADER poh = (PIMAGE_OPTIONAL_HEADER)OPTHEADEROFF (lpFile);
   int     	         i = 0;
   DWORD                  ImageDirVA;
 
-    ImageDirVA = poh->DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].VirtualAddress;
+    ImageDirVA = poh->DataDirectory[dwIMAGE_DIRECTORY].VirtualAddress;
 
     if(psh->VirtualAddress <= ImageDirVA &&
-       psh->VirtualAddress + max(psh->Misc.VirtualSize,psh->SizeOfRawData) > ImageDirVA &&
-       strcmp(psh->Name, ".idata") == 0)
+       psh->VirtualAddress + max(psh->Misc.VirtualSize,psh->SizeOfRawData) > ImageDirVA)
     {
 	return TRUE;
     }

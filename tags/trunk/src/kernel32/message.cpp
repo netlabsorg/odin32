@@ -1,4 +1,4 @@
-/* $Id: message.cpp,v 1.11 2000-07-06 21:18:43 sandervl Exp $ */
+/* $Id: message.cpp,v 1.12 2000-10-06 11:04:01 sandervl Exp $ */
 
 /*
  * Win32 message API functions for OS/2
@@ -173,7 +173,10 @@ DWORD WIN32API FormatMessageA(DWORD   dwFlags,
    {
      INT   bufsize;
 
+//SvL/MN: VACPPWIN uses message ids > 64k!!
+#ifndef __WIN32OS2__
      dwMessageId &= 0xFFFF;
+#endif
      bufsize=LoadMessageA((HMODULE)lpSource,dwMessageId,dwLanguageId,NULL,100);
      if (bufsize)
      {
@@ -404,7 +407,10 @@ DWORD WINAPI FormatMessageW(DWORD   dwFlags,
    {
       INT   bufsize;
 
+//SvL/MN: VACPPWIN uses message ids > 64k!!
+#ifndef __WIN32OS2__
       dwMessageId &= 0xFFFF;
+#endif
       bufsize=LoadMessageA((HMODULE)lpSource,dwMessageId,dwLanguageId,NULL,100);
       if (bufsize)
       {
