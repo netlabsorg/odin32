@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.301 2001-11-21 11:51:38 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.302 2001-11-24 13:55:13 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -3845,12 +3845,6 @@ WORD Win32BaseWindow::GetWindowWord(int index)
     dprintf(("WARNING: GetWindowWord %x %d returned %x INVALID index!", getWindowHandle(), index));
     SetLastError(ERROR_INVALID_INDEX);  //verified in NT4, SP6
     return 0;
-}
-//******************************************************************************
-//******************************************************************************
-void Win32BaseWindow::setWindowId(DWORD id)
-{
-    dwIDMenu = id;
 }
 //******************************************************************************
 //Locates window in linked list and increases reference count (if found)

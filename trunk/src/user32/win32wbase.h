@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.134 2001-11-21 11:51:38 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.135 2001-11-24 13:55:14 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -205,7 +205,7 @@ Win32BaseWindow *getParent();
        WNDPROC  getWindowProc()                 { return win32wndproc; };
          void   setWindowProc(WNDPROC newproc)  { win32wndproc = newproc; };
         DWORD   getWindowId()                   { return dwIDMenu; };
-         void   setWindowId(DWORD id);
+         void   setWindowId(DWORD id)           { dwIDMenu = id; };
          ULONG  getWindowHeight()               { return rectWindow.bottom - rectWindow.top; };
          ULONG  getWindowWidth()                { return rectWindow.right - rectWindow.left; };
          ULONG  getClientHeight()               { return rectClient.bottom - rectClient.top; };
