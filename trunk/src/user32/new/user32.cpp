@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.19 1999-09-05 17:11:24 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.20 1999-09-10 19:00:11 dengert Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -324,7 +324,7 @@ BOOL WIN32API UnionRect( PRECT lprcDst, const RECT *lprcSrc1, const RECT *lprcSr
         lprcDst->left   = MIN(lprcSrc1->left,lprcSrc2->left);
         lprcDst->right  = MAX(lprcSrc1->right,lprcSrc2->right);
         lprcDst->top    = MIN(lprcSrc1->top,lprcSrc2->top);
-        lprcDst->bottom = MAX(lprcSrc1->bottom,lprcSrc2->bottom);	
+        lprcDst->bottom = MAX(lprcSrc1->bottom,lprcSrc2->bottom);
       }
     }
 
@@ -1037,6 +1037,7 @@ DWORD WIN32API GetTabbedTextExtentW( HDC arg1, LPCWSTR arg2, int arg3, int arg4,
 }
 //******************************************************************************
 //******************************************************************************
+#if 0
 int WIN32API GetUpdateRgn( HWND arg1, HRGN arg2, BOOL  arg3)
 {
 #ifdef DEBUG
@@ -1044,6 +1045,7 @@ int WIN32API GetUpdateRgn( HWND arg1, HRGN arg2, BOOL  arg3)
 #endif
     return O32_GetUpdateRgn(arg1, arg2, arg3);
 }
+#endif
 //******************************************************************************
 
 
@@ -1240,33 +1242,33 @@ BOOL WIN32API SystemParametersInfoA(UINT uiAction, UINT uiParam, PVOID pvParam, 
         break;
     case SPI_GETICONTITLELOGFONT:
     {
-	LPLOGFONTA lpLogFont = (LPLOGFONTA)pvParam;
+        LPLOGFONTA lpLogFont = (LPLOGFONTA)pvParam;
 
-	/* from now on we always have an alias for MS Sans Serif */
-	strcpy(lpLogFont->lfFaceName, "MS Sans Serif");
-	lpLogFont->lfHeight = -GetProfileIntA("Desktop","IconTitleSize", 8);
-	lpLogFont->lfWidth = 0;
-	lpLogFont->lfEscapement = lpLogFont->lfOrientation = 0;
-	lpLogFont->lfWeight = FW_NORMAL;
-	lpLogFont->lfItalic = FALSE;
-	lpLogFont->lfStrikeOut = FALSE;
-	lpLogFont->lfUnderline = FALSE;
-	lpLogFont->lfCharSet = ANSI_CHARSET;
-	lpLogFont->lfOutPrecision = OUT_DEFAULT_PRECIS;
-	lpLogFont->lfClipPrecision = CLIP_DEFAULT_PRECIS;
-	lpLogFont->lfPitchAndFamily = DEFAULT_PITCH | FF_SWISS;
-	break;
+        /* from now on we always have an alias for MS Sans Serif */
+        strcpy(lpLogFont->lfFaceName, "MS Sans Serif");
+        lpLogFont->lfHeight = -GetProfileIntA("Desktop","IconTitleSize", 8);
+        lpLogFont->lfWidth = 0;
+        lpLogFont->lfEscapement = lpLogFont->lfOrientation = 0;
+        lpLogFont->lfWeight = FW_NORMAL;
+        lpLogFont->lfItalic = FALSE;
+        lpLogFont->lfStrikeOut = FALSE;
+        lpLogFont->lfUnderline = FALSE;
+        lpLogFont->lfCharSet = ANSI_CHARSET;
+        lpLogFont->lfOutPrecision = OUT_DEFAULT_PRECIS;
+        lpLogFont->lfClipPrecision = CLIP_DEFAULT_PRECIS;
+        lpLogFont->lfPitchAndFamily = DEFAULT_PITCH | FF_SWISS;
+        break;
     }
     case SPI_GETBORDER:
-	*(INT *)pvParam = GetSystemMetrics( SM_CXFRAME );
-	break;
+        *(INT *)pvParam = GetSystemMetrics( SM_CXFRAME );
+        break;
 
     case SPI_GETWORKAREA:
-	SetRect( (RECT *)pvParam, 0, 0,
-		GetSystemMetrics( SM_CXSCREEN ),
-		GetSystemMetrics( SM_CYSCREEN )
-	);
-	break;
+        SetRect( (RECT *)pvParam, 0, 0,
+                GetSystemMetrics( SM_CXSCREEN ),
+                GetSystemMetrics( SM_CYSCREEN )
+        );
+        break;
 
     case 104: //TODO: Undocumented
         rc = 16;
@@ -1315,22 +1317,22 @@ BOOL WIN32API SystemParametersInfoW(UINT uiAction, UINT uiParam, PVOID pvParam, 
         break;
     case SPI_GETICONTITLELOGFONT:
     {
-	LPLOGFONTW lpLogFont = (LPLOGFONTW)pvParam;
+        LPLOGFONTW lpLogFont = (LPLOGFONTW)pvParam;
 
-	/* from now on we always have an alias for MS Sans Serif */
-	lstrcpyW(lpLogFont->lfFaceName, (LPCWSTR)L"MS Sans Serif");
-	lpLogFont->lfHeight = -GetProfileIntA("Desktop","IconTitleSize", 8);
-	lpLogFont->lfWidth = 0;
-	lpLogFont->lfEscapement = lpLogFont->lfOrientation = 0;
-	lpLogFont->lfWeight = FW_NORMAL;
-	lpLogFont->lfItalic = FALSE;
-	lpLogFont->lfStrikeOut = FALSE;
-	lpLogFont->lfUnderline = FALSE;
-	lpLogFont->lfCharSet = ANSI_CHARSET;
-	lpLogFont->lfOutPrecision = OUT_DEFAULT_PRECIS;
-	lpLogFont->lfClipPrecision = CLIP_DEFAULT_PRECIS;
-	lpLogFont->lfPitchAndFamily = DEFAULT_PITCH | FF_SWISS;
-	return TRUE;
+        /* from now on we always have an alias for MS Sans Serif */
+        lstrcpyW(lpLogFont->lfFaceName, (LPCWSTR)L"MS Sans Serif");
+        lpLogFont->lfHeight = -GetProfileIntA("Desktop","IconTitleSize", 8);
+        lpLogFont->lfWidth = 0;
+        lpLogFont->lfEscapement = lpLogFont->lfOrientation = 0;
+        lpLogFont->lfWeight = FW_NORMAL;
+        lpLogFont->lfItalic = FALSE;
+        lpLogFont->lfStrikeOut = FALSE;
+        lpLogFont->lfUnderline = FALSE;
+        lpLogFont->lfCharSet = ANSI_CHARSET;
+        lpLogFont->lfOutPrecision = OUT_DEFAULT_PRECIS;
+        lpLogFont->lfClipPrecision = CLIP_DEFAULT_PRECIS;
+        lpLogFont->lfPitchAndFamily = DEFAULT_PITCH | FF_SWISS;
+        return TRUE;
     }
     default:
         pvParamA = pvParam;
