@@ -1,7 +1,10 @@
-/* $Id: changelog,v 1.2387 2002-12-17 13:48:09 sandervl Exp $ */
+/* $Id: changelog,v 1.2388 2002-12-17 14:16:33 sandervl Exp $ */
 
  2002-12-17: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o CreateProcess bugfix (heap corruption)
+    - USER32:   o Merged dialog directory functions with latest Rewind
+                  (fixes double drive string in folder dialog of some
+                   Installshield installers)
 
  2002-12-13: Sander van Leeuwen <sandervl@innotek   >
     - USER32;   o Query loader path for WPS object creation
