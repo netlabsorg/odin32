@@ -1,8 +1,10 @@
-/* $Id: changelog,v 1.1755 2001-10-16 14:48:46 sandervl Exp $ */
+/* $Id: changelog,v 1.1756 2001-10-16 17:50:50 sandervl Exp $ */
 
  2001-10-16: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32, CUSTOMBUILD, USER32:
                 o Custom build fixes + changes
+                o GlobalMemoryStatus: limit amount of virtual memory to 2GB - 1
+                  Some applications interpret this value as a signed long.
     - USER32:   o Fix for pointer conversion
 
  2001-10-16: Patrick Haller <patrick.haller@innotek.de>
