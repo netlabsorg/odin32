@@ -1,4 +1,4 @@
-/* $Id: pmkbdhkp.h,v 1.3 2003-10-22 12:45:13 sandervl Exp $ */
+/* $Id: pmkbdhkp.h,v 1.4 2003-10-22 15:56:07 sandervl Exp $ */
 /*
  * Window low-level keyboard hook
  *
@@ -34,8 +34,6 @@ typedef struct _HOOKDATA
 {
    HAB         habDaemonObject;    // anchor block of hwndDaemonObject; cached for speed
    BOOL        fPreAccelHooked;
-   ULONG       pid;
-   HWND        hwndVio;
    HMODULE     hmodDLL;            // module handle
    char        szWindowClass[256];
 } HOOKDATA, *PHOOKDATA;
