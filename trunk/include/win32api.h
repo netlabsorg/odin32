@@ -117,6 +117,8 @@ INT     WIN32API CombineRgn(HRGN,HRGN,HRGN,INT);
 BOOL    WIN32API SetRectRgn(HRGN,INT,INT,INT,INT);
 BOOL    WIN32API EnumChildWindows(HWND hwnd, WNDENUMPROC lpfn, LPARAM lParam);
 BOOL    WIN32API UpdateWindow (HWND hwnd);
+BOOL    WIN32API GetViewportOrgEx(HDC hdc, LPPOINT pPoint);
+BOOL    WIN32API SetViewportOrgEx(HDC hdc, int xOrg, int yOrg, LPPOINT pPoint);
 
 LPCSTR  WIN32API GetCommandLineA(VOID);
 LPCWSTR WIN32API GetCommandLineW(VOID);
