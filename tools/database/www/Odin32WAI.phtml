@@ -2,6 +2,12 @@
 $Naziv="Odin32 API Implementation";
 
 require "stilovi.php3";
+require "Odin32DBHelpers.php3";
+
+/* Profiling */
+$sPageTimer = Odin32DBTimerStart("page timer");
+/* Profiling */
+
 
 require "01-PreTitle.php3";
 echo $Naziv;
@@ -82,10 +88,8 @@ TekstEnd();
  * Loop thru them displaying standard information.
  *
  */
-Require "Odin32DBHelpers.php3";
+require "Odin32DBConnect.php3";
 
-$db = mysql_connect("127.0.0.1", "root", "");
-$rc = mysql_select_db("odin32", $db);
 $sql="SELECT    g.refcode       AS refcode,
                 g.name          AS name,
                 g.team          AS team,
@@ -423,4 +427,9 @@ $Kada=date ("j M Y", filemtime(__file__));
 require "12-OdinBanner.php3";
 
 require "13-Closing.php3";
+
+/* Profiling */
+Odin32DBTimerStop($sPageTimer);
+/* Profiling */
+
 ?>

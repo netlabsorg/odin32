@@ -1,14 +1,19 @@
 <?php
-$Title ="The Odin32 API Database";
 
 require "stilovi.php3";
 require "Odin32DBHelpers.php3";
 
+/* Profiling */
+$sPageTimer = Odin32DBTimerStart("page timer");
+/* Profiling */
+
+$Title ="The Odin32 API Database";
+
+
 /*
  * Connect to database
  */
-$db = mysql_connect("127.0.0.1", "root", "");
-$rc = mysql_select_db("odin32", $db);
+require "Odin32DBConnect.php3";
 
 
 /*
@@ -133,12 +138,6 @@ else                echo $Title."<br>".$sCategoryName.": ".$sName;
 require "06-ColumnTwoHeader2.php3";
 
 
-/*
- * Init the contents array.
- */
-$aContent = array();
-
-
 TekstBeg();
 
 if (!$fNoData)
@@ -147,31 +146,31 @@ if (!$fNoData)
     {
         case "dll":
         {
-            Odin32DBDllInfo($aContent, $db, $iRefcode, $fFunctions, $fFiles, $fAPIGroups, $fAuthors, $fSortByState);
+            Odin32DBDllInfo($db, $iRefcode, $fFunctions, $fFiles, $fAPIGroups, $fAuthors, $fSortByState);
             break;
         }
 
         case "file":
         {
-            Odin32DBFileInfo($aContent, $db, $iRefcode, $fFunctions, $fAPIGroups, $fAuthors, $fSortByState);
+            Odin32DBFileInfo($db, $iRefcode, $fFunctions, $fAPIGroups, $fAuthors, $fSortByState);
             break;
         }
 
         case "function":
         {
-            Odin32DBFunctionInfo($aContent, $db, $iRefcode);
+            Odin32DBFunctionInfo($db, $iRefcode);
             break;
         }
 
         case "apigroup":
         {
-            Odin32DBAPIGroupInfo(&$aContent, $db, $iRefcode, $fFunctions, $fFiles, $fAuthors, $fSortByState);
+            Odin32DBAPIGroupInfo($db, $iRefcode, $fFunctions, $fFiles, $fAuthors, $fSortByState);
             break;
         }
 
         case "author":
         {
-            Odin32DBAuthorInfo($aContent, $db, $iRefcode, $fDlls, $fFunctions, $fFiles, $fAPIGroups, $fSortByState, $authordll);
+            Odin32DBAuthorInfo($db, $iRefcode, $fDlls, $fFunctions, $fFiles, $fAPIGroups, $fSortByState, $authordll);
             break;
         }
 
@@ -181,7 +180,7 @@ if (!$fNoData)
              * The root page.
              */
             Odin32DBNavigationTop("","");
-            Odin32DBNaslov($aContent, "Welcome to the Odin32 API Database", "welcome", "");
+            Odin32DBNaslov("Welcome to the Odin32 API Database", "welcome", "");
             echo "This is the first Beta edition of the Odin32 API Database.<br>\n".
                  "There might be dead or non-functioning links. Currently feedback is <i>NOT</i> needed.\n".
                  "<p>\n".
@@ -189,7 +188,7 @@ if (!$fNoData)
                  "for the time being. This will improve within some months.<br>\n".
                  "-Enjoy!<br>\n";
 
-            Odin32DBNaslov($aContent, "Root Menu", "menu", "");
+            Odin32DBNaslov("Root Menu", "menu", "");
             echo "<font size=3>".
                  "<ul>\n".
                  "  <li><b><a href=\"Odin32DB.phtml?dlls=1\">Dlls</a></b>\n".
@@ -208,7 +207,7 @@ if (!$fNoData)
              * List all dlls.
              */
             Odin32DBNavigationTop("","");
-            Odin32DBNaslov($aContent, "Welcome to the Odin32 API Database", "welcome", "");
+            Odin32DBNaslov("Welcome to the Odin32 API Database", "welcome", "");
             echo "This is the first Beta edition of the Odin32 API Database.<br>\n".
                  "There might be dead or non-functioning links. Currently feedback is <i>NOT</i> needed.\n".
                  "<p>\n".
@@ -216,7 +215,7 @@ if (!$fNoData)
                  "for the time being. This will improve within some months.<br>\n".
                  "-Enjoy!<br>\n";
 
-            Odin32DBNaslov($aContent, "All Dlls", "dlls", "");
+            Odin32DBNaslov("All Dlls", "dlls", "");
             $sql = "SELECT\n".
                    "    d.name              AS name,\n".
                    "    d.refcode           AS refcode,\n".
@@ -255,7 +254,7 @@ if (!$fNoData)
              * List all authors.
              */
             Odin32DBNavigationTop("","");
-            Odin32DBNaslov($aContent, "Welcome to the Odin32 API Database", "welcome", "");
+            Odin32DBNaslov("Welcome to the Odin32 API Database", "welcome", "");
             echo "This is the first Beta edition of the Odin32 API Database.<br>\n".
                  "There might be dead or non-functioning links. Currently feedback is <i>NOT</i> needed.\n".
                  "<p>\n".
@@ -263,7 +262,7 @@ if (!$fNoData)
                  "for the time being. This will improve within some months.<br>\n".
                  "-Enjoy!<br>\n";
 
-            Odin32DBNaslov($aContent, "All Authors", "authors", "");
+            Odin32DBNaslov("All Authors", "authors", "");
             $sql = "SELECT\n".
                    "    name,\n".
                    "    refcode, \n".
@@ -300,7 +299,7 @@ if (!$fNoData)
              * List all API Groups.
              */
             Odin32DBNavigationTop("","");
-            Odin32DBNaslov($aContent, "Welcome to the Odin32 API Database", "welcome", "");
+            Odin32DBNaslov("Welcome to the Odin32 API Database", "welcome", "");
             echo "This is the first Beta edition of the Odin32 API Database.<br>\n".
                  "There might be dead or non-functioning links. Currently feedback is <i>NOT</i> needed.\n".
                  "<p>\n".
@@ -308,7 +307,7 @@ if (!$fNoData)
                  "for the time being. This will improve within some months.<br>\n".
                  "-Enjoy!<br>\n";
 
-            Odin32DBNaslov($aContent, "All API Groups", "apigroups", "");
+            Odin32DBNaslov("All API Groups", "apigroups", "");
             $sql = "SELECT\n".
                    "    a.name              AS name,\n".
                    "    a.refcode           AS refcode,\n".
@@ -356,7 +355,7 @@ require "07-ColumnTwoFooter.php3";
 require "08-News.php3";
 require "09-ContentsTitle.php3";
 
-Odin32DBWriteContents($aContent);
+Odin32DBWriteContents();
 
 require "10-EndOfContent.php3";
 require "11-NetlabsContact.php3";
@@ -365,5 +364,10 @@ $Kada=date ("j M Y", filemtime(__file__));
 require "12-OdinBanner.php3";
 
 require "13-Closing.php3";
+
+
+/* Profiling */
+Odin32DBTimerStop($sPageTimer);
+/* Profiling */
 ?>
 
