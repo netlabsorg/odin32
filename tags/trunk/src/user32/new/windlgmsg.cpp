@@ -1,4 +1,4 @@
-/* $Id: windlgmsg.cpp,v 1.2 1999-09-05 12:03:34 sandervl Exp $ */
+/* $Id: windlgmsg.cpp,v 1.3 1999-09-05 15:53:10 sandervl Exp $ */
 /*
  * Win32 dialog message APIs for OS/2
  *
@@ -110,7 +110,7 @@ static BOOL DIALOG_IsAccelerator( HWND hwnd, HWND hwndDlg, WPARAM vKey )
                             SendMessageA( hwndDlg, WM_NEXTDLGCTL, 0, 0);
                         }
                         else if (dlgCode &
-			    (DLGC_DEFPUSHBUTTON | DLGC_UNDEFPUSHBUTTON))
+                (DLGC_DEFPUSHBUTTON | DLGC_UNDEFPUSHBUTTON))
                         {
                             /* send command message as from the control */
                             SendMessageA( hwndDlg, WM_COMMAND,
@@ -125,37 +125,37 @@ static BOOL DIALOG_IsAccelerator( HWND hwnd, HWND hwndDlg, WPARAM vKey )
                             SendMessageA( hwndControl, WM_LBUTTONUP, 0, 0);
                         }
                         RetVal = TRUE;
-			WIN_ReleaseWndPtr(wndPtr);
+            WIN_ReleaseWndPtr(wndPtr);
                         break;
                     }
                 }
-		hwndNext = GetWindow( hwndControl, GW_CHILD );
+        hwndNext = GetWindow( hwndControl, GW_CHILD );
             }
-	    else
-	    {
-		hwndNext = 0;
-	    }
+        else
+        {
+        hwndNext = 0;
+        }
             WIN_ReleaseWndPtr(wndPtr);
-	    if (!hwndNext)
-	    {
-	        hwndNext = GetWindow( hwndControl, GW_HWNDNEXT );
-	    }
-	    while (!hwndNext)
-	    {
-		hwndControl = GetParent( hwndControl );
-		if (hwndControl == hwndDlg)
-		{
-		    if(hwnd==hwndDlg){  /* prevent endless loop */
-		        hwndNext=hwnd;
-			break;
-		    }
-		    hwndNext = GetWindow( hwndDlg, GW_CHILD );
-		}
-		else
-		{
-		    hwndNext = GetWindow( hwndControl, GW_HWNDNEXT );
-		}
-	    }
+        if (!hwndNext)
+        {
+            hwndNext = GetWindow( hwndControl, GW_HWNDNEXT );
+        }
+        while (!hwndNext)
+        {
+        hwndControl = GetParent( hwndControl );
+        if (hwndControl == hwndDlg)
+        {
+            if(hwnd==hwndDlg){  /* prevent endless loop */
+                hwndNext=hwnd;
+            break;
+            }
+            hwndNext = GetWindow( hwndDlg, GW_CHILD );
+        }
+        else
+        {
+            hwndNext = GetWindow( hwndControl, GW_HWNDNEXT );
+        }
+        }
             hwndControl = hwndNext;
         }
         while (hwndControl != hwnd);
@@ -183,7 +183,7 @@ static BOOL DIALOG_IsDialogMessage( HWND hwnd, HWND hwndDlg,
       /* Only the key messages get special processing */
     if ((message != WM_KEYDOWN) &&
         (message != WM_SYSCHAR) &&
-    	(message != WM_CHAR))
+        (message != WM_CHAR))
         return FALSE;
 
     if (dlgCode & DLGC_WANTMESSAGE)

@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.9 1999-09-05 12:03:33 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.10 1999-09-05 15:53:09 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1159,7 +1159,7 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
         return 1;
     }
     case WM_GETDLGCODE:
-	    return 0;
+        return 0;
 
     case WM_NCLBUTTONDOWN:
     case WM_NCLBUTTONUP:
@@ -1210,10 +1210,6 @@ LRESULT Win32BaseWindow::SendMessageA(ULONG Msg, WPARAM wParam, LPARAM lParam)
   {
         case WM_CREATE:
         {
-                if(win32wndproc(getWindowHandle(), WM_NCCREATE, 0, lParam) == 0) {
-                        dprintf(("WM_NCCREATE returned FALSE\n"));
-                        return(-1); //don't create window
-                }
                 if(win32wndproc(getWindowHandle(), WM_CREATE, 0, lParam) == -1) {
                         dprintf(("WM_CREATE returned -1\n"));
                         return(-1); //don't create window
@@ -1253,10 +1249,6 @@ LRESULT Win32BaseWindow::SendMessageW(ULONG Msg, WPARAM wParam, LPARAM lParam)
   {
         case WM_CREATE:
         {
-                if(win32wndproc(getWindowHandle(), WM_NCCREATE, 0, lParam) == 0) {
-                        dprintf(("WM_NCCREATE returned FALSE\n"));
-                        return(0); //don't create window
-                }
                 if(win32wndproc(getWindowHandle(), WM_CREATE, 0, lParam) == 0) {
                         dprintf(("WM_CREATE returned FALSE\n"));
                         return(0); //don't create window
@@ -1298,10 +1290,6 @@ LRESULT Win32BaseWindow::SendInternalMessageA(ULONG Msg, WPARAM wParam, LPARAM l
   {
         case WM_CREATE:
         {
-                if(win32wndproc(getWindowHandle(), WM_NCCREATE, 0, lParam) == 0) {
-                        dprintf(("WM_NCCREATE returned FALSE\n"));
-                        return(0); //don't create window
-                }
                 if(win32wndproc(getWindowHandle(), WM_CREATE, 0, lParam) == 0) {
                         dprintf(("WM_CREATE returned FALSE\n"));
                         return(0); //don't create window
@@ -1340,10 +1328,6 @@ LRESULT Win32BaseWindow::SendInternalMessageW(ULONG Msg, WPARAM wParam, LPARAM l
   {
         case WM_CREATE:
         {
-                if(win32wndproc(getWindowHandle(), WM_NCCREATE, 0, lParam) == 0) {
-                        dprintf(("WM_NCCREATE returned FALSE\n"));
-                        return(0); //don't create window
-                }
                 if(win32wndproc(getWindowHandle(), WM_CREATE, 0, lParam) == 0) {
                         dprintf(("WM_CREATE returned FALSE\n"));
                         return(0); //don't create window
@@ -1403,6 +1387,18 @@ void Win32BaseWindow::NotifyParent(UINT Msg, WPARAM wParam, LPARAM lParam)
 
         window = parentwindow;
    }
+}
+//******************************************************************************
+//******************************************************************************
+Win32BaseWindow *Win32BaseWindow::getTopParent()
+{
+ Win32BaseWindow *tmpWnd = this;
+
+    while( tmpWnd && (tmpWnd->getStyle() & WS_CHILD))
+    {
+        tmpWnd = tmpWnd->getParent();
+    }
+    return tmpWnd;
 }
 //******************************************************************************
 //******************************************************************************
