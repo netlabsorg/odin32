@@ -1,13 +1,17 @@
-/* $Id: changelog,v 1.2122 2002-06-02 12:42:34 sandervl Exp $ */
+/* $Id: changelog,v 1.2123 2002-06-02 19:30:58 sandervl Exp $ */
 
  2002-06-02: Sander van Leeuwen <sandervl@innotek.de>
     - USER32\CONTROLS:
                 o New dll for user32 controls (latest Wine)
                   (not activated, not finished (resync))
     - USER32:   o Moved drag & drop code to seperate file
+                o Updates for OLE drag 'n drop
     - KERNEL32: o LogException: check lockcount before changing it on entry
                   (it is not always > 0 -> previously caused hang in exception
                    handler (zombie process))
+    - SHELL32:  o Added automatic asii/unicode conversion to DragQueryFileA/W
+    - OLE32:    o Implemented OLE drag and drop (WPS -> Odin app)
+                  (todo: Odin app -> WPS)
 
  2002-06-01: Sander van Leeuwen <sandervl@innotek.de>
     - SHELL32:  o IShellFolder_fnCompareIDs shortcut added to improve
