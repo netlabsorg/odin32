@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.594 1999-12-30 18:30:52 cbratschi Exp $ */
+ /* $Id: ChangeLog,v 1.595 1999-12-30 18:54:05 sandervl Exp $ */
 
  99-12-30: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: ported menu control from WINE (not yet activated)
@@ -10,9 +10,12 @@
 	- KERNEL32: Added stubs for Load/FreeLibrary16 & GetProcAddress16
                     (ordinals 35,36 & 37)
                     Added support for SEC_COMMIT memory map flag
+                    Don't fail for unknown handles in (Msg)WaitForMultipleObject;
+                    they could be thread or process handles (which we don't translate)
 	- USER32:   Load bitmaps file completely in LoadBitmapA. Creating
                     a file mapping with reserved memory has little use
                     as the entire file will be read completely anyway.
+                    Added some useful logging for DDE apis.
 	- GDI32:    Fixed GetObject for DIB sections
 
  99-12-30: Bart van Leeuwen <Bart_van_Leeuwen@netage.nl>
