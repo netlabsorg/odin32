@@ -1,7 +1,14 @@
-/* $Id: ChangeLog,v 1.1518 2001-06-15 10:19:53 achimha Exp $ */
+/* $Id: ChangeLog,v 1.1519 2001-06-15 14:06:52 sandervl Exp $ */
+
+ 2001-06-15: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o Removed yesterday's getControl dialog change. 
+                  (causes errors for certain installshield installers)
+                o Add frame controls when app changes style flags (os/2 appearance)
+                  (fixes missing titlebar when switching between maximized &
+                   restored state for MDI windows in Opera)
 
  2001-06-14: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
-    - KERKEN32: o Correct bug in LoadLibrary which prevented dynamically
+    - KERNEL32: o Correct bug in LoadLibrary which prevented dynamically
     - WIN32K:   o Forgot to close file on failure in ldrOpen. When Pe2Lx
                   failed (due to wrong subsystem), the file remained open.
 
