@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.1360 2001-04-15 17:04:00 sandervl Exp $ */
+/* $Id: changelog,v 1.1361 2001-04-16 06:42:34 bird Exp $ */
+
+ 2001-04-16: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - DSOUND:   o Removed pmwinx.lib from makefile. Wasn't used; and it had
+                  bad path (ie. no path).
 
  2001-04-15: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o RegQueryValueExA/W broken. Reserved & type parameters reversed.
