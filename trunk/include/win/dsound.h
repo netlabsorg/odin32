@@ -1,4 +1,4 @@
-/* $Id: dsound.h,v 1.2 1999-10-23 22:59:39 sandervl Exp $ */
+/* $Id: dsound.h,v 1.3 2000-02-03 23:55:07 sandervl Exp $ */
 
 #ifndef __WINE_DSOUND_H
 #define __WINE_DSOUND_H
@@ -299,7 +299,8 @@ ICOM_DEFINE(IDirectSoundBuffer,IUnknown)
 
 #define DSBPN_OFFSETSTOP		-1
 
-#define ICOM_INTERFACE IDirectSoundNotify
+//#define ICOM_INTERFACE IDirectSoundNotify
+#define ICOM_INTERFACE VOID
 #define IDirectSoundNotify_METHODS \
     ICOM_METHOD2(HRESULT,SetNotificationPositions, DWORD,cPositionNotifies, LPCDSBPOSITIONNOTIFY,lpcPositionNotifies)
 #define IDirectSoundNotify_IMETHODS \
