@@ -1,6 +1,14 @@
-/* $Id: changelog,v 1.2047 2002-04-16 00:23:58 bird Exp $ */
+/* $Id: changelog,v 1.2048 2002-04-17 04:09:31 bird Exp $ */
 
- 2002-04-13: knut st. osmundsen <bird@anduin.net>
+ 2002-04-17: knut st. osmundsen <bird@anduin.net>
+    - Makefiles:
+                o Use the VAC40 profiler for profiling in PROFILE=1, DEBUG=
+                  mode. See /tools/profilerfix/Readme.1st for details.
+    - ProfilerFix:
+                o Added readme.1st for VAC308, vac365 profiling using the
+                  VAC4 profiler features.
+
+ 2002-04-14: knut st. osmundsen <bird@anduin.net>
     - KERNEL32: o Cache CDROM drive letters in OSLibGetDriveType.
                 o Added testcases to makescripts in the testcase subdir.
                   'nmake build testcase' from that dir will build test
