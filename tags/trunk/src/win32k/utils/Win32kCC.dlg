@@ -73,9 +73,6 @@ BEGIN
         RTEXT           "257", TX_HEAP_SWP_INIT_VAL, 206, 74, 46, 8
         LTEXT           "Used (KB)", TX_HEAP_SWP_USED, 150, 58, 50, 8
         RTEXT           "257", TX_HEAP_SWP_USED_VAL, 206, 58, 46, 8
-        DEFPUSHBUTTON   "~Refresh", PB_REFRESH, 6, 5, 40, 14
-        PUSHBUTTON      "Apply", PB_APPLY, 49, 5, 40, 14
-        PUSHBUTTON      "Close", IDS_ERR_DIALOGLOAD, 92, 5, 40, 14
         LTEXT           "Free (KB)", TX_HEAP_RES_FREE, 22, 50, 50, 8
         RTEXT           "257", TX_HEAP_RES_FREE_VAL, 78, 50, 46, 8
         LTEXT           "Current (KB)", TX_HEAP_RES_SIZE, 22, 66, 56, 8
@@ -102,5 +99,9 @@ BEGIN
                         WS_DISABLED
         RTEXT           "3", TX_LDR_ELF_MODULES_VAL, 205, 158, 47, 8,
                         WS_DISABLED
+        DEFPUSHBUTTON   "~Refresh", PB_REFRESH, 6, 5, 40, 14
+        PUSHBUTTON      "~Apply", PB_APPLY, 49, 5, 40, 14
+        PUSHBUTTON      "Update Config.sys", PB_UPD_CONFIGSYS, 92, 5, 100, 14
+        PUSHBUTTON      "~Close", DID_OK, 195, 5, 40, 14
     END
 END

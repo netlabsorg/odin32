@@ -1,4 +1,4 @@
-/* $Id: Win32kCC.c,v 1.3 2000-09-03 23:53:18 bird Exp $
+/* $Id: Win32kCC.c,v 1.4 2000-11-26 13:36:51 bird Exp $
  *
  * Win32CC - Win32k Control Center.
  *
@@ -32,6 +32,7 @@
 #define INCL_WINSTDSPIN
 #define INCL_WINBUTTONS
 #define INCL_WINWINDOWMGR
+#define INCL_DOSMISC
 
 /*******************************************************************************
 *   Header Files                                                               *
@@ -41,7 +42,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdarg.h>
-#include <malloc.h>
+#include <stdlib.h>
 
 #include <Win32k.h>
 #include <devSegDf.h>                   /* Win32k segment definitions. */
@@ -80,11 +81,12 @@ BOOL    fNotExit;                       /* Global variable used to stop WM_QUITS
 *   Internal Functions                                                         *
 *******************************************************************************/
 MRESULT EXPENTRY    Win32kCCDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2);
+ULONG               ShowMessage(HWND hwndOwner, int id, ULONG flStyle);
 BOOL                Complain(HWND hwndOwner, int id, ...);
 PCSZ                getLastErrorMsg(HAB hab);
 PSZ                 getMessage(ULONG id);
 int                 GetFixpackDesc(ULONG ulBuild, ULONG flKernel, PSZ pszBuffer);
-
+char *              stristr(const char *pszStr, const char *pszSubStr);
 
 
 
@@ -309,10 +311,7 @@ MRESULT EXPENTRY Win32kCCDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
                     /* Check if data is dirty */
                     if (!WinSendMsg(hwnd, WM_QUERYCONTROLS, (MPARAM)FALSE, NULL) || pThis->fDirty)
                     {
-                        if (WinMessageBox(HWND_DESKTOP, hwnd,
-                                          getMessage(IDM_INFO_DIRTY),
-                                         "Win32k Control Center", 0, MB_YESNO | MB_WARNING | MB_MOVEABLE)
-                             != MBID_YES)
+                        if (ShowMessage(hwnd, IDM_INFO_DIRTY, MB_YESNO | MB_WARNING) != MBID_YES)
                         {
                             fNotExit = TRUE;
                             return NULL;
@@ -323,6 +322,104 @@ MRESULT EXPENTRY Win32kCCDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
                     WinDismissDlg(hwnd, 0);
                     WinPostMsg(hwnd, WM_QUIT, NULL, NULL);
                     break;
+
+                /*
+                 * The use requested update of config.sys.
+                 */
+                case PB_UPD_CONFIGSYS:
+                {
+                    ULONG   ulBootDrv;
+                    FILE *  phConfigSys;
+                    char *  pszConfigSys = "A:\\Config.sys";
+                    char    szArgs[120];
+
+                    if (!WinSendMsg(hwnd, WM_QUERYCONTROLS, (MPARAM)TRUE, NULL))
+                        break;
+                    if (DosQuerySysInfo(QSV_BOOT_DRIVE, QSV_BOOT_DRIVE, &ulBootDrv, sizeof(ulBootDrv)))
+                        break;
+
+                    /*
+                     * Make argument list.
+                     */
+                    szArgs[0] = '\0';
+                    if (pThis->NewOptions.fLogging)             strcat(szArgs, " -L:Y");
+                    if (pThis->NewOptions.usCom == 0x3f8)       strcat(szArgs, " -C1");
+                    /*if (pThis->NewOptions.usCom != 0x2f8)       strcat(szArgs, " -C2"); - default */
+                    if (pThis->NewOptions.usCom == 0x3e8)       strcat(szArgs, " -C3");
+                    if (pThis->NewOptions.usCom == 0x2e8)       strcat(szArgs, " -C4");
+                    if (pThis->NewOptions.fPE == FLAGS_PE_PE2LX)strcat(szArgs, " -P:pe2lx");
+                    if (pThis->NewOptions.fPE == FLAGS_PE_MIXED)strcat(szArgs, " -P:mixed");
+                    if (pThis->NewOptions.fPE == FLAGS_PE_PE)   strcat(szArgs, " -P:pe");
+                    if (pThis->NewOptions.fPE == FLAGS_PE_NOT)  strcat(szArgs, " -P:not");
+                    if (pThis->NewOptions.ulInfoLevel != 0) /* -W0 is default */
+                        sprintf(szArgs + strlen(szArgs), " -W%d", pThis->NewOptions.ulInfoLevel); /* FIXME - to be changed */
+                    if (pThis->NewOptions.fElf)                 strcat(szArgs, " -E:Y"); /* default is disabled */
+                    if (!pThis->NewOptions.fUNIXScript)         strcat(szArgs, " -Script:N");
+                    if (!pThis->NewOptions.fREXXScript)         strcat(szArgs, " -Rexx:N");
+                    if (!pThis->NewOptions.fJava)               strcat(szArgs, " -Java:N");
+                    if (pThis->NewOptions.fNoLoader)            strcat(szArgs, " -Noloader");
+                    if (pThis->NewOptions.cbSwpHeapMax != CB_SWP_MAX)
+                        sprintf(szArgs + strlen(szArgs), " -HeapMax:%d", pThis->NewOptions.cbSwpHeapMax); /* FIXME - to be changed */
+                    if (pThis->NewOptions.cbResHeapMax != CB_RES_MAX)
+                        sprintf(szArgs + strlen(szArgs), " -ResHeapMax:%d", pThis->NewOptions.cbResHeapMax); /* FIXME - to be changed */
+                    strcat(szArgs, "\n");
+
+                    /*
+                     * Update Config.sys.
+                     */
+                    *pszConfigSys += ulBootDrv - 1;
+                    phConfigSys = fopen(pszConfigSys, "r+");
+                    if (phConfigSys)
+                    {
+                        ULONG   cbConfigSys;
+                        if (    fseek(phConfigSys, 0, SEEK_END) == 0
+                            &&  (cbConfigSys = ftell(phConfigSys)) > 0
+                            &&  fseek(phConfigSys, 0, SEEK_SET) == 0
+                            )
+                        {
+                            char *  pszConfigSys;
+
+                            cbConfigSys += 1024;
+                            pszConfigSys = (char*)calloc(1, cbConfigSys);
+                            if (pszConfigSys)
+                            {
+                                char *pszCurrent = pszConfigSys;
+
+                                /* Read and modify config.sys */
+                                while (fgets(pszCurrent, cbConfigSys + pszCurrent - pszConfigSys, phConfigSys))
+                                {
+                                    char *pszWin32k;
+                                    /* NB! This statment will not only update the "device=" statements!
+                                     * We'll call this a feature...
+                                     */
+                                    pszWin32k = stristr(pszCurrent, "win32k.sys");
+                                    if (pszWin32k)
+                                        strcpy(pszWin32k + 10, szArgs);
+
+                                    /* next */
+                                    pszCurrent += strlen(pszCurrent);
+                                }
+
+                                /* Write it back */
+                                if (    fseek(phConfigSys, 0, SEEK_SET) == 0
+                                    &&  fwrite(pszConfigSys, 1, pszCurrent - pszConfigSys, phConfigSys))
+                                {
+                                    ShowMessage(hwnd, IDM_CONFIGSYS_UPDATED, MB_OK);
+                                }
+                                else
+                                    Complain(hwnd, IDS_FWRITE_FAILED, pszConfigSys);
+                            }
+                            else
+                                Complain(hwnd, IDS_MALLOC_FAILED, cbConfigSys + 256);
+                        }
+                        else
+                            Complain(hwnd, IDS_FSIZE_FAILED, pszConfigSys);
+                        fclose(phConfigSys);
+                    }
+                    else
+                        Complain(hwnd, IDS_ERR_FOPEN_FAILED, pszConfigSys);
+                    break;
+                }
             }
             return NULL;
 
@@ -597,6 +694,29 @@ MRESULT EXPENTRY Win32kCCDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 
 
 /**
+ * Pops up a message box displaying a message from the message table.
+ * @returns Return from WinMessageBox
+ * @param   hwndOwner   Handle to owner window.
+ * @param   id          Message table id of the message.
+ * @param   flStyle     Messagebox style.
+ *                      If 0 the apply default style.
+ */
+ULONG   ShowMessage(HWND hwndOwner, int id, ULONG flStyle)
+{
+    return WinMessageBox(HWND_DESKTOP,
+                         hwndOwner,
+                         getMessage(id),
+                         "Win32k Control Center", 0,
+                         (flStyle == 0
+                            ? MB_OK | MB_INFORMATION
+                            : flStyle)
+                         | MB_MOVEABLE
+                         );
+}
+
+
+
+/**
  * Pops up a message box displaying some complaint or error.
  * @returns     Success indicator.
  * @param       hwndOwner   Handle of owner window.
@@ -757,3 +877,37 @@ int GetFixpackDesc(ULONG ulBuild, ULONG flKernel, PSZ pszBuffer)
 
     return 0;
 }
+
+
+/**
+ * Upcases a char.
+ * @returns   Upper case of the char given in ch.
+ * @param     ch  Char to capitalize.
+ */
+#define  upcase(ch) ((ch) >= 'a' && (ch) <= 'z' ?  (char)((ch) - ('a' - 'A')) : (ch))
+
+
+/**
+ * Searches for a substring in a string.
+ * @returns   Pointer to start of substring when found, NULL when not found.
+ * @param     pszStr     String to be searched.
+ * @param     pszSubStr  String to be searched.
+ * @remark    Depends on the upcase function.
+ */
+static char *stristr(const char *pszStr, const char *pszSubStr)
+{
+    int cchSubStr = strlen(pszSubStr);
+    int i = 0;
+
+    while (*pszStr != '\0' && i < cchSubStr)
+    {
+        i = 0;
+        while (i < cchSubStr && pszStr[i] != '\0' &&
+               (upcase(pszStr[i]) == upcase(pszSubStr[i])))
+            i++;
+        pszStr++;
+    }
+
+    return (char*)(*pszStr != '\0' ? (char*)pszStr - 1 : NULL);
+}
+
