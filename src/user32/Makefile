@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.60 2000-02-04 17:17:56 cbratschi Exp $
+# $Id: Makefile,v 1.61 2000-02-05 02:12:20 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -95,7 +95,7 @@ syscolor.obj: syscolor.cpp syscolor.h
 dde.obj: dde.cpp
 hook.obj: hook.cpp $(PDWIN32_INCLUDE)\win\hook.h
 defwndproc.obj: defwndproc.cpp syscolor.h win32wmdiclient.h win32wbase.h win32wnd.h win32dlg.h
-initterm.obj: initterm.cpp $(PDWIN32_INCLUDE)\spy.h pmwindow.h initterm.h
+initterm.obj: initterm.cpp $(PDWIN32_INCLUDE)\spy.h pmwindow.h initterm.h $(PDWIN32_INCLUDE)\exitlist.h
 uitools.obj: uitools.cpp win32wbase.h
 unknown.obj: unknown.cpp
 wndmsg.obj: wndmsg.cpp wndmsg.h $(PDWIN32_INCLUDE)\spy.h
@@ -146,9 +146,9 @@ oslibmsgtranslate.obj: oslibmsgtranslate.cpp oslibmsg.h timer.h win32wbase.h win
 oslibgdi.obj:   oslibgdi.cpp oslibgdi.h win32wbase.h
 oslibres.obj:   oslibres.cpp oslibwin.h oslibres.h $(PDWIN32_INCLUDE)\winconst.h
 oslibdos.obj:   oslibdos.cpp oslibdos.h
-dc.obj:         dc.cpp win32wbase.h dc.h dcdata.h
+dc.obj:         dc.cpp win32wbase.h dc.h $(PDWIN32_INCLUDE)\dcdata.h
 timer.obj:      timer.cpp win32wbase.h timer.h
-caret.obj:      caret.cpp win32wbase.h caret.h dcdata.h
+caret.obj:      caret.cpp win32wbase.h caret.h $(PDWIN32_INCLUDE)\dcdata.h
 text.obj:       text.cpp
 
 clipboard.obj:  clipboard.cpp win32wbase.h
