@@ -1,4 +1,4 @@
-/* $Id: menu.cpp,v 1.13 2000-01-30 18:48:27 sandervl Exp $*/
+/* $Id: menu.cpp,v 1.14 2000-01-31 22:30:52 sandervl Exp $*/
 /*
  * Menu functions
  *
@@ -1704,6 +1704,7 @@ static BOOL MENU_SetItemData( MENUITEM *item, UINT flags, UINT id,
     LPSTR prevText = IS_STRING_ITEM(item->fType) ? item->text : NULL;
 
     //debug_print_menuitem("MENU_SetItemData from: ", item, "");
+
 
     if (IS_STRING_ITEM(flags))
     {
@@ -4124,7 +4125,7 @@ static BOOL SetMenuItemInfo_common(MENUITEM * menu,
 BOOL WINAPI SetMenuItemInfoA(HMENU hmenu, UINT item, BOOL bypos,
                                  const MENUITEMINFOA *lpmii)
 {
-    dprintf(("USER32: SetMenuItemInfoA"));
+    dprintf(("USER32: SetMenuItemInfoA %x %d %d %x", hmenu, item, bypos, lpmii));
 
     return SetMenuItemInfo_common(MENU_FindItem(&hmenu, &item, bypos? MF_BYPOSITION : 0),
                                     lpmii, FALSE);
@@ -4243,7 +4244,7 @@ BOOL WINAPI InsertMenuItemA(HMENU hMenu, UINT uItem, BOOL bypos,
 {
     MENUITEM *item = MENU_InsertItem(hMenu, uItem, bypos ? MF_BYPOSITION : 0 );
 
-    dprintf(("USER32: InsertMenuItemA"));
+    dprintf(("USER32: InsertMenuItemA %x %d %d %x", hMenu, uItem, bypos, lpmii->wID));
 
     return SetMenuItemInfo_common(item, lpmii, FALSE);
 }
