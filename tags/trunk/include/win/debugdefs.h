@@ -1,3 +1,4 @@
+/* $Id: debugdefs.h,v 1.2 1999-08-22 22:47:17 sandervl Exp $ */
 /* Do not modify this file -- it is automatically generated! */
 
 #include "debugtools.h"

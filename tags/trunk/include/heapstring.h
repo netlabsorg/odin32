@@ -1,4 +1,4 @@
-/* $Id */
+/* $Id: heapstring.h,v 1.3 1999-08-22 22:46:22 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
