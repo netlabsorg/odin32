@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.103 2003-05-23 13:53:42 sandervl Exp $ */
+/* $Id: HandleManager.cpp,v 1.104 2003-06-02 16:25:15 sandervl Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -4522,7 +4522,7 @@ BOOL   HMPeekNamedPipe(HANDLE hPipe,
  *
  * Author    : Przemyslaw Dobrowolski
  *****************************************************************************/
-DWORD HMCreateNamedPipe(LPCTSTR lpName,
+HANDLE HMCreateNamedPipe(LPCTSTR lpName,
                       DWORD   dwOpenMode,
                       DWORD   dwPipeMode,
                       DWORD   nMaxInstances,
@@ -4545,7 +4545,7 @@ DWORD HMCreateNamedPipe(LPCTSTR lpName,
   if (-1 == iIndexNew)                            /* oops, no free handles ! */
   {
     SetLastError(ERROR_NOT_ENOUGH_MEMORY);      /* use this as error message */
-    return 0;
+    return INVALID_HANDLE_VALUE;
   }
 
   /* initialize the complete HMHANDLEDATA structure */
@@ -4574,7 +4574,7 @@ DWORD HMCreateNamedPipe(LPCTSTR lpName,
   if (rc == -1)     /* oops, creation failed within the device handler */
   {
       TabWin32Handles[iIndexNew].hmHandleData.hHMHandle = INVALID_HANDLE_VALUE;
-      return 0;                                           /* signal error */
+      return INVALID_HANDLE_VALUE;                         /* signal error */
   }
 
   dprintf(("Named pipe %x", iIndexNew));
@@ -4816,105 +4816,6 @@ BOOL HMSetNamedPipeHandleState(HANDLE  hPipe,
                                                                 lpdwCollectDataTimeout);
 
   return (lpResult);                                  /* deliver return code */
-}
-
-/*****************************************************************************
- * Name      : HMCreatePipe
- * Purpose   :
- * Parameters:
- * Variables :
- * Result    :
- * Remark    :
- * Status    : NOT TESTED!
- *
- * Author    : Przemyslaw Dobrowolski
- *****************************************************************************/
-BOOL HMCreatePipe(PHANDLE phRead,
-                  PHANDLE phWrite,
-                  LPSECURITY_ATTRIBUTES lpsa,
-                  DWORD                 cbPipe)
-{
-  int             iIndex;                     /* index into the handle table */
-  int             iIndexNewRead;              /* index into the handle table */
-  int             iIndexNewWrite;             /* index into the handle table */
-  HMDeviceHandler *pDeviceHandler;            /* device handler for this handle */
-  PHMHANDLEDATA   pHMHandleData;
-  HANDLE          rc;                                     /* API return code */
-
-  SetLastError(ERROR_SUCCESS);
-
-  pDeviceHandler = HMGlobals.pHMNamedPipe;         /* device is predefined */
-
-  iIndexNewRead = _HMHandleGetFree();              /* get free handle */
-  if (-1 == iIndexNewRead)                         /* oops, no free handles ! */
-  {
-    SetLastError(ERROR_NOT_ENOUGH_MEMORY);      /* use this as error message */
-    return 0;
-  }
-
-  iIndexNewWrite = _HMHandleGetFree();              /* get free handle */
-  if (-1 == iIndexNewWrite)                         /* oops, no free handles ! */
-  {
-    HMHandleFree(iIndexNewRead);
-    SetLastError(ERROR_NOT_ENOUGH_MEMORY);      /* use this as error message */
-    return 0;
-  }
-
-
-  /* initialize the complete HMHANDLEDATA structure */
-  pHMHandleData = &TabWin32Handles[iIndexNewRead].hmHandleData;
-  pHMHandleData->dwAccess   = 0;
-  pHMHandleData->dwShare    = 0;
-  pHMHandleData->dwCreation = 0;
-  pHMHandleData->dwFlags    = 0;
-  pHMHandleData->lpHandlerData = NULL;
-
-  /* we've got to mark the handle as occupied here, since another device */
-  /* could be created within the device handler -> deadlock */
-
-  /* write appropriate entry into the handle table if open succeeded */
-  TabWin32Handles[iIndexNewRead].hmHandleData.hHMHandle = iIndexNewRead;
-  TabWin32Handles[iIndexNewRead].pDeviceHandler         = pDeviceHandler;
-
-  /* initialize the complete HMHANDLEDATA structure */
-  pHMHandleData = &TabWin32Handles[iIndexNewWrite].hmHandleData;
-  pHMHandleData->dwAccess   = 0;
-  pHMHandleData->dwShare    = 0;
-  pHMHandleData->dwCreation = 0;
-  pHMHandleData->dwFlags    = 0;
-  pHMHandleData->lpHandlerData = NULL;
-
-  /* we've got to mark the handle as occupied here, since another device */
-  /* could be created within the device handler -> deadlock */
-
-  /* write appropriate entry into the handle table if open succeeded */
-  TabWin32Handles[iIndexNewWrite].hmHandleData.hHMHandle = iIndexNewWrite;
-  TabWin32Handles[iIndexNewWrite].pDeviceHandler         = pDeviceHandler;
-  /* call the device handler */
-
-  rc = pDeviceHandler->CreatePipe(&TabWin32Handles[iIndexNewRead].hmHandleData,
-                                  &TabWin32Handles[iIndexNewWrite].hmHandleData,
-                                  lpsa,
-                                  cbPipe);
-
-  if (rc == 0)     /* oops, creation failed within the device handler */
-  {
-      HMHandleFree(iIndexNewRead);
-      HMHandleFree(iIndexNewWrite);
-      return FALSE;                                           /* signal error */
-  }
-
-  dprintf(("Read pipe %x, Write pipe %x", iIndexNewRead, iIndexNewWrite));
-  if(lpsa && lpsa->bInheritHandle) {
-      dprintf(("Set inheritance for child processes"));
-      HMSetHandleInformation(iIndexNewRead, HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
-      HMSetHandleInformation(iIndexNewWrite, HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
-  }
-
-  *phRead  = iIndexNewRead;
-  *phWrite = iIndexNewWrite;
-
-  return TRUE;
 }
 
 /*****************************************************************************

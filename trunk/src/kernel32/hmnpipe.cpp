@@ -1,4 +1,4 @@
-/* $Id: hmnpipe.cpp,v 1.10 2003-01-10 15:19:53 sandervl Exp $ */
+/* $Id: hmnpipe.cpp,v 1.11 2003-06-02 16:25:18 sandervl Exp $ */
 /*
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -11,6 +11,7 @@
  * PD: All my work for Odin I dedicate to my deceased mother.
  *
  */
+#include <stdio.h>
 #include <odin.h>
 #include <os2win.h>
 #include <misc.h>
@@ -183,28 +184,6 @@ BOOL HMDeviceNamedPipeClass::CloseHandle(PHMHANDLEDATA pHMHandleData)
 
   OSLibDosDisconnectNamedPipe(pHMHandleData->hHMHandle);
   return OSLibDosClose(pHMHandleData->hHMHandle);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL HMDeviceNamedPipeClass::CreatePipe(PHMHANDLEDATA pHMHandleDataRead,
-                                        PHMHANDLEDATA pHMHandleDataWrite,
-                                        LPSECURITY_ATTRIBUTES lpsa, 
-                                        DWORD         cbPipe)
-{ 
-  pHMHandleDataRead->dwInternalType  = HMTYPE_PIPE;
-  pHMHandleDataWrite->dwInternalType = HMTYPE_PIPE;
-
-  dprintfl(("KERNEL32: HMDeviceNamedPipeClass::CreatePipe"));
-
-  if(!OSLibDosCreatePipe(&pHMHandleDataRead->hHMHandle,
-                         &pHMHandleDataWrite->hHMHandle,
-                         lpsa,
-                         cbPipe))
-  {
-     return TRUE;
-  }
-  else
-     return FALSE;
 }
 //******************************************************************************
 //******************************************************************************
