@@ -1,4 +1,4 @@
-/* $Id: odin32pack.cmd,v 1.23 2002-06-26 22:11:57 bird Exp $
+/* $Id: odin32pack.cmd,v 1.24 2003-02-18 01:01:02 bird Exp $
  *
  * Make the two zip files.
  *
@@ -23,6 +23,8 @@
     /*
      * Make .WPI files.
      */
+if 0 then
+do
     call ChDir 'tools\install';
     'call odin.cmd 'sTypeOdinCMD' debug'
     if (RC <> 0) then call failure rc, 'odin.cmd debug failed.';
@@ -31,22 +33,25 @@
     'move *.wpi' sStartDir;
     if (RC <> 0) then call failure rc, 'failed to move the *.wpi ->' sStartDir;
     call ChDir '..\..';
+end
 
     /*
      * Make .ZIP files.
      */
     call packdir 'bin\debug', 'debug'
-    call packdir3dx 'bin\debug\glide', 'glide-debug'
+    /*call packdir3dx 'bin\debug\glide', 'glide-debug' */
     call packdir 'bin\release', 'release'
-    call packdir3dx 'bin\release\glide', 'glide-release'
+    /*call packdir3dx 'bin\release\glide', 'glide-release'*/
 
     /*
      * Make copy.
      */
+     /*
     if (sType = 'W') then
         'copy *.wpi e:\DailyBuildArchive\'
     else
         'copy *.zip e:\DailyBuildArchive\'
+      */
 
     /* return successfully */
     exit(0);
@@ -100,13 +105,15 @@ parse arg sDir, sBldType;
      */
     'ren' sRoot'\'sDir '.\system32'
     if (RC <> 0) then call failure rc, 'renaming' sDir'->system32 failed';
-    'ren .\system32\glide ..\glide_tmp'
+    'if exist .\system32\glide ren .\system32\glide ..\glide_tmp'
+    /*
     if (RC <> 0) then
     do
         rc2 = rc;
         call backout sDir, sBldType, sRoot;
         call failure rc2, 'renaming system32\glide -> ..\glide_tmp failed';
     end
+    */
 
     call copy sRoot'\bin\wgss50.dll', 'system32\wgss50.dll';
     /*call copy sRoot'\bin\odin.ini', 'system32\Odin.ini';*/
