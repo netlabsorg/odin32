@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.319 2002-03-22 11:02:04 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.320 2002-03-27 10:56:25 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2975,9 +2975,8 @@ BOOL Win32BaseWindow::EnumThreadWindows(DWORD dwThreadId, WNDENUMPROC lpfn, LPAR
     for (child = (Win32BaseWindow *)getFirstChild(); child; child = (Win32BaseWindow *)child->getNextChild())
     {
         OSLibWinQueryWindowProcess(child->getOS2WindowHandle(), &pid, &tid);
-        ULONG wtid = MAKE_THREADID( pid, tid);
 
-        if(dwThreadId == wtid) {
+        if(dwThreadId == tid) {
             dprintf2(("EnumThreadWindows: Found Window %x", child->getWindowHandle()));
             if((rc = lpfn(child->getWindowHandle(), lParam)) == FALSE) {
                 break;
