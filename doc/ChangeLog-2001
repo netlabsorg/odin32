@@ -1,4 +1,215 @@
- /* $Id: ChangeLog-2001,v 1.11 2001-12-08 10:13:41 sandervl Exp $ */
+ /* $Id: ChangeLog-2001,v 1.12 2002-02-21 23:10:45 sandervl Exp $ */
+
+ 2001-12-31: Sander van Leeuwen <sandervl@xs4all.nl>
+    - GDI32:    o Use critical section in dibsection class instead of vmutex
+
+ 2001-12-31: knut st. osmundsen <bird@anduin.net>
+    - Tools/CmdQd:
+                o Corrected bad statement in the clean2 rule.
+
+ 2001-12-30: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Fixed some wrong return values for disk functions (hmdisk)
+                o GetVolumeInformation: use original volume name to
+                  determine maximum file name length
+    - USER32:   o Enforce WS_EX_WINDOWEDGE style (Wine)
+                  (fixes Opera 6 menu)
+    - GDI32:    o BitBlt, StretchBlt: sync dib section if selected into
+                  destination HDC
+                  (fixes Opera 6 background)
+
+ 2001-12-28: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o Do not send WM_SETCURSOR when mouse is captured (SDK docs)
+
+ 2001-12-26: Achim Hasenmueller <achimha@innotek.de>
+    - USER32:   o don't use hardcoded font height values for menu fonts. Query
+                  graphics driver instead (DevQueryCaps) so that we correctly
+                  take font settings into account (small, medium, large)
+
+ 2001-12-26: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o Use Wine version of DrawText(Ex)A/W
+                  (fixes underscore painting & positioning of text)
+                o (Auto)Check, (Auto)Radio & (Auto)3State buttons send
+                  WM_CTLCOLORSTATIC instead of WM_CTLCOLORBTN (verified in NT4)
+                  (fixes opening dialog buttons in Opera 6 (choose interface))
+                o RedrawWindow change: call UpdateWindow if window has invalid
+                  rectangle and RDW_UPDATENOW flag set
+    - GDI32:    o Removed InternalDrawTextExA/W
+    - ODINBUG:  o Update by Herwig Bauernfeind (0.5.5)
+
+ 2001-12-23: Sander van Leeuwen <sandervl@xs4all.nl>
+    - WINMM:    o DisableWaveAudio function added to disable wave audio (custom build)
+    - GDI32:    o CreateFont call wrong for DEFAULT_GUI_FONT (pointsize)
+
+ 2001-12-22: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Print more information when a missing api is called
+                  (image that is responsible)
+
+ 2001-12-20: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Allow all sections to be accessed when loading an executable/dll
+                  with LOAD_LIBRARY_AS_DATAFILE
+                  (fixes crashes when accessing resources outside the resource
+                   section in Opera 6 binaries)
+    - GDI32:    o DIB Section blit: don't check source & destination sizes
+                                    with DC size (GpiDrawBits does that for us)
+                  (fixes the two bitmaps in the opening window of Opera 6
+                   (choice between MDI & SDI interface))
+    - USER32:   o GetClassNameW: return size in characters and truncate name
+                                 if buffer not large enough
+                  (fixes crash in Opera 6 during startup)
+
+ 2001-12-19: knut st. osmundsen <kosmunds@csc.com>
+    - MAKEFILES:o Changed inference rules in /src/mesa/3dfx to support MULTIJOBS.
+                o Fixed some problems with /tools/cmdqd while MULTIJOBS is enabled.
+    - TOOLS:    o Created a tiny preload script, PreloadTools.cmd, which preload
+                  the tools which will be invoked during a make. (Too bad we can't
+                  do this with rexx scripts too...)
+
+ 2001-12-17: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o GetVolumeInformation changes:
+                  - report JFS as NTFS
+                  - report UDF & CDFS as UDF & CDFS (no change)
+                  - report everthing else as FAT16
+                  (some applications make assumptions about maximium file size
+                   based on the volume name)
+
+ 2001-12-16: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o Fixed memory DC leak in DrawIcon & DrawIconEx
+
+ 2001-12-15: Sander van Leeuwen <sandervl@xs4all.nl>
+    - GDI32:    o Added statistics for font, bitmap, pen, brush & region objects.
+
+ 2001-12-14: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o CancelIo & GetOverlappedResult added for custom device drivers
+                o Enabled overlapped IO for custom device drivers
+
+ 2001-12-13: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o Added function to override name of the PM keyboard hook dll
+                  (custombuild)
+    - WINTRUST: o Added stub dll
+    - KERNEL32/USER32/ODINCRT:
+                o Collect some simple statistics about memory & DC usage
+                  (will be extended & enhanced in the future)
+
+ 2001-12-12: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o Put back old windows key scancodes
+                o Fix for handling Alt-F4 in default window handler
+                o SendInput fix; send message and clear extra info
+                  afterwards
+    - COMCTL32: o Comboex, rebar, tooltips, toolbar bugfixes: (Wine)
+                  NEVER delete the font object received by WM_SETFONT
+
+ 2001-12-11: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o Swallow message if WH_KEYBOARD_LL hook returns TRUE
+                o Fixed windows key scancodes
+                o Do no generate a left control key message when Alt-Gr
+                  is pressed (experimental change)
+
+ 2001-12-11: Patrick Haller <patrick.haller@innotek.de>
+    - PMKBDHK:  o Interception of PM Window Hoteys (i. e. Alt-F7)
+                  TODO: generate accelerators in Odin
+
+ 2001-12-10: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Overlapped IO updates
+
+ 2001-12-09: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Overlapped IO fix (poll & half or full duplex support)
+    - MAKEFILES:o Delete dummy.c after copying custom library (CUSTOMBUILD=1)
+
+ 2001-12-08: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Added read & write functions to custom driver interface
+                o OdinSetVersion added to override windows version reported by
+                  Odin (Win98, WinME, NT4, Win2000, WinXP)
+                o NEW DEFAULT WINDOWS VERSION IS WINDOWS 2000 SP2 (!)
+                o New versions available for odin.ini version override
+                  [WinVersion]
+                  Version=Win98        -> Windows 98
+                  Version=WinME        -> Windows ME
+                  Version=NT4          -> Windows NT4  SP6
+                  Version=Win2000      -> Windows 2000 SP2 (default)
+                  Version=WinXP        -> Windows XP
+                o IOCTL_STORAGE_GET_MEDIA_TYPES is identical to
+                  IOCTL_DISK_GET_MEDIA_TYPES
+                o Support for Windows 2000 GetVersionEx extension (OSVERSIONINFOEX
+                  structure) added
+                o Added symbolic link for Windows 2000 device driver names
+                  \\.\Global -> \\.
+                o Clear GENERIC_WRITE flag if application tries to open
+                  readonly device (e.g. cdrom). This is not allowed in OS/2.
+    - INSTALL:  o Add font mapping for 'MS Shell Dlg 2' to WarpSans
+
+ 2001-12-07: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o GetFileType for parallel port device returns FILE_TYPE_PIPE
+                  (verified in NT4, SP6)
+                o Comm functions not valid for parallel port handles
+                o Overlapped IO updates
+                o Com port now uses new overlapped class for overlapped IO
+                o Call ExitProcess when executable entrypoint returns (LX images)
+                o Be careful when cleaning up threads after ExitProcess has
+                  been called
+
+ 2001-12-06: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Added FindFirstFileExA/FindFirstFileExW
+                o Overlapped IO updates (still untested)
+    - DINPUT:   o Link with guidlib.lib
+    - GUIDLIB:  o Include dinput.h for DirectInput GUIDs
+
+ 2001-12-05: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Merged WriteFile & WriteFileEx, ReadFile & ReadFileEx
+                  handle manager functions
+                o Removed dwType handle manager structure member; added
+                  win32 handle to structure
+                  (NOTE: All work in progress for new framework for overlapped IO)
+                o ReadFileEx/WriteFileEx: lpOverlapped->Offset & lpOverlapped->OffsetHigh
+                  must be 0 if used with named pipes
+
+ 2001-12-04: Patrick Haller <patrick.haller@innotek.de>
+    - KERNEL32: o parallel port support restricted to physical ports
+                  (LAN redirections not supported)
+
+ 2001-12-04: Sander van Leeuwen <sandervl@xs4all.nl>
+    - COMCTL32: o Hack added for proper resizing of wizard property sheet in
+                  CVP. Not sure if it's always correct or whether it has a
+                  bad effect on other apps (none found so far).
+    - WININET:  o HttpSendRequestA fix: strlen(NULL) crashes
+
+ 2001-12-03: Patrick Haller <patrick.haller@innotek.de>
+    - KERNEL32: o put in correct ioctl identifiers for parport support
+                  in winioctl.h
+                o parallel port support (hardware configuration) enabled
+
+ 2001-12-03: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Use DosSleep in Sleep (don't call WGSS)
+                o GetThreadPriority: return priority stored in TEB
+                o Rewrote SetThreadPriority; allow it to change priority
+                  classes too. WGSS only changes delta in SetThreadPriority
+                  and class in SetPriorityClass (but that one affects the whole
+                  process, so it is rarely used by applications)
+                  THREAD_PRIORITY_IDLE          -> PRTYC_IDLETIME, 0
+                  THREAD_PRIORITY_LOWEST        -> PRTYC_REGULAR, PRTYD_MINIMUM
+                  THREAD_PRIORITY_BELOW_NORMAL  -> PRTYC_REGULAR, -15
+                  THREAD_PRIORITY_NORMAL        -> PRTYC_REGULAR, 0
+                  THREAD_PRIORITY_ABOVE_NORMAL  -> PRTYC_REGULAR, 15
+                  THREAD_PRIORITY_HIGHEST       -> PRTYC_REGULAR, PRTYD_MAXIMUM
+                  THREAD_PRIORITY_TIME_CRITICAL -> PRTYC_TIMECRITICAL, 0
+                o SetPriorityClass; just return success for now
+
+ 2001-12-02: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o Don't send WM_SIZE message to dialog before it receives
+                  WM_INITDIALOG
+                  (winzip 8.0 and Opera crash when sending this message too soon)
+                  (TODO: check in NT if this is really correct)
+    - COMCTL32: o Restored old property sheet code as latest Wine version
+                  causes too many new problems.
+
+ 2001-12-01: knut st. osmundsen <kosmunds@csc.com>
+    - CRTDLL:   o Include ctype.h from dir.c and string.c. (Noted by Ye][ow.)
+
+ 2001-12-01: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Fixed GetThreadTEB macro & GetCurrentThreadId
+                  (completely broke debug build among other things)
+
+ 2000-12-01: Yuri Dario <mc6530@mclink.it>
+    - USER32:   o MENU_FindItem: extra check added for loops in menus
 
  2001-11-30: Patrick Haller <patrick.haller@innotek.de>
     - KERNEL32: o heapstring.cpp: improvement on HEAP_malloc, HEAP_free,

@@ -1,0 +1,58 @@
+ /* $Id: ChangeLog-2002,v 1.1 2002-02-21 23:10:46 sandervl Exp $ */
+
+ 2002-01-26: Sander van Leeuwen <sandervl@xs4all.nl>
+    - OLE32:    o Fixed bug in OLE clipboard implementation; the handle
+                  returned by GetClipboardData is no longer valid after
+                  calling CloseClipboard. A copy of the data must be made.
+
+ 2002-01-20: Vitali Pelenyov <sunlover@anduin.net>
+    - USER32:   o Fix for position of fake window (CreateFakeWindowEx)
+
+ 2002-01-18: Vitali Pelenyov <sunlover@anduin.net>
+    - KERNEL32: o GetDriveType fix for detection cdrom drives under certain
+                  circumstances (when cdrom is not the last drive letter)
+
+ 2002-01-10: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o CreateFakeWindowEx change; need to specifiy window class
+                  Added DestroyFakeWindow for deleting fake window object.
+    - KERNEL32: o Custom device driver changes for driver instance pointer
+
+ 2002-01-09: knut st. osmundsen <bird@anduin.net>
+    - Tools/CmdQd:
+                o Corrected bad fix from 2002-01-01.
+
+ 2002-01-09: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Add driver data parameter to custom device driver calls
+
+ 2002-01-08: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Fixes for DosQueryAffinity & DosSetAffinity on non-SMP
+                  systems (set default/ignore)
+    - USER32:   o Fixed restoring of windows after minimizing/maximizing
+                o Allocate more memory for 40x40 icon generation
+                o Fixed SetClipboardData for CF_UNICODETEXT (translate to
+                  ascii and use CF_TEXT)
+
+ 2002-01-06: knut st. osmundsen <bird@anduin.net>
+    - DailyBuild:
+                o - Do not distribute odin.ini.
+
+ 2002-01-06: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Changed HeapAlloc/HeapReAlloc:
+                  - round up size to next 8 bytes boundary
+                  - when reallocating memory block, don't use different
+                    memory block unless new size is larger than old size
+                    (rounded up to next 8 bytes boundary)
+                  (Verified this behaviour in NT4 (Global/Heap(Re)Alloc);
+                   fixes crashes in Opera 5.12 which relies on this 'feature')
+    - GDI32:    o Print handle type name in SelectObject
+                o EnumFontProcExW -> must restore FS in enum handler
+
+ 2002-01-04: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Rewrote GetDriveType (fixes detection of LAN drives)
+
+ 2002-01-02: Sander van Leeuwen <sandervl@xs4all.nl>
+    - GDI32:    o Better logging for some text functions
+
+ 2002-01-01: knut st. osmundsen <bird@anduin.net>
+    - Tools/CmdQd:
+                o Ignore the CmdQd kill returncode in clean2.
