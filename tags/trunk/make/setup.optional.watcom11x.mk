@@ -1,10 +1,11 @@
-# $Id: setup.optional.watcom11x.mk,v 1.8 2002-08-30 20:51:08 bird Exp $
+# $Id: setup.optional.watcom11x.mk,v 1.9 2002-09-14 23:31:28 bird Exp $
 
 #
 #  Helper file for all the optional stuff which is common for
 #  all watcom11xx compilers.
 #  Concidering the size of this, it really make sense putting it here.
 #
+MAKE_INCLUDE_CX_OPT = $(PATH_MAKE)\setup.optional.watcom11x.mk
 
 
 #

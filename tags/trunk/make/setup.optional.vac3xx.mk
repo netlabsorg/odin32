@@ -1,10 +1,11 @@
-# $Id: setup.optional.vac3xx.mk,v 1.5 2002-09-05 02:56:11 bird Exp $
+# $Id: setup.optional.vac3xx.mk,v 1.6 2002-09-14 23:31:27 bird Exp $
 
 #
 #  Helper file for all the optional stuff which is common for
 #  all vac3x compilers.
 #  Concidering the size of this, it really make sense putting it here.
 #
+MAKE_INCLUDE_CX_OPT = $(PATH_MAKE)\setup.optional.vac3xx.mk
 
 
 #
