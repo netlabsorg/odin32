@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.83 2001-05-11 08:39:41 sandervl Exp $
+# $Id: Makefile,v 1.84 2001-06-03 12:02:25 sandervl Exp $
 
 #
 # Odin32 API
@@ -29,6 +29,7 @@ CDEFINES += -DINVERT -DCLIENTFRAME
 OBJS = \
 $(OBJDIR)\dc.obj \
 $(OBJDIR)\dcrgn.obj \
+$(OBJDIR)\dcscroll.obj \
 $(OBJDIR)\user32.obj \
 $(OBJDIR)\loadres.obj \
 $(OBJDIR)\dde.obj \

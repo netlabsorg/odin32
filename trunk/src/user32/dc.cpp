@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.107 2001-06-02 14:26:52 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.108 2001-06-03 12:02:26 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -1282,6 +1282,7 @@ BOOL WIN32API RedrawWindow(HWND hwnd, const RECT* pRect, HRGN hrgn, DWORD redraw
 
     if(WinQueryUpdateRect(hwnd, &rectl))
     {
+        dprintf2(("Update region (%d,%d)(%d,%d)", rectl.xLeft, rectl.yBottom, rectl.xRight, rectl.yTop));
         //TODO: Does this work if RDW_ALLCHILDREN is set??
         if(redraw & RDW_UPDATENOW_W) {
             RECT rectUpdate;
@@ -1485,177 +1486,6 @@ BOOL setPMRgnIntoWinRgn (HPS hps, HRGN hrgnPM, HRGN hrgnWin, LONG height)
    }
 
    return (rc);
-}
-//******************************************************************************
-//TODO: Check if this one works correctly...
-//Have to check if dc is for frame or client!!
-//******************************************************************************
-BOOL WIN32API ScrollDC(HDC hDC, int dx, int dy, const RECT *pScroll,
-                       const RECT *pClip, HRGN hrgnUpdate, LPRECT pRectUpdate)
-{
-    Win32BaseWindow *wnd;
-    BOOL rc = TRUE;
-
-    if (!hDC)
-    {
-        dprintf (("USER32: ScrollDC %x (%d,%d), %x %x %x %x -> invalid hdc", hDC, dx, dy, pScroll, pClip, hrgnUpdate, pRectUpdate));
-        return (FALSE);
-    }
-
-    pDCData pHps         = (pDCData)GpiQueryDCData ((HPS)hDC);
-    HWND    hwnd         = pHps->hwnd;
-    if(pHps->isClient) {
-        wnd = Win32BaseWindow::GetWindowFromOS2Handle (hwnd);
-    }
-    else {
-        //assume (for now) that this is not allowed (TODO)
-        dprintf (("USER32: ScrollDC %x (%d,%d), %x %x %x %x", hDC, dx, dy, pScroll, pClip, hrgnUpdate, pRectUpdate));
-        dprintf(("ScrollDC used for frame HDC!!"));
-        DebugInt3();
-        return FALSE;
-    }
-    if((hwnd == NULLHANDLE) || !wnd)
-    {
-        dprintf (("USER32: ScrollDC %x (%d,%d), %x %x %x %x -> invalid window handle", hDC, dx, dy, pScroll, pClip, hrgnUpdate, pRectUpdate));
-        return (FALSE);
-    }
-
-    dprintf (("USER32: ScrollDC %x (hwnd %x) (%d,%d), %x %x %x %x", hDC, wnd->getWindowHandle(), dx, dy, pScroll, pClip, hrgnUpdate, pRectUpdate));
-    POINTL ptl[2] = { 0, 0, dx, dy };
-
-    GpiConvert (pHps->hps, CVTC_WORLD, CVTC_DEVICE, 2, ptl);
-    dx = (int)(ptl[1].x - ptl[0].x);
-    dy = (int)(ptl[1].y - ptl[0].y);
-
-    RECT scrollRect;
-    RECT clipRect;
-
-    if (pClip)
-    {
-        dprintf (("ScrollDC: Clip rectangle (%d,%d)(%d,%d)", pClip->left, pClip->top, pClip->right, pClip->bottom));
-#if 1
-        clipRect = *pClip;
-        LPtoDP(hDC, (LPPOINT)&clipRect, 2);
-#else
-        memcpy(&clipRect, pClip, sizeof(clipRect));
-
-        if ((pHps->graphicsMode == GM_COMPATIBLE_W) &&
-            (clipRect.left   != clipRect.right)   &&
-            (clipRect.bottom != clipRect.top))
-        {
-            if (abs((int)pHps->viewportXExt) <= abs((int)pHps->windowExt.cx))
-                clipRect.right -= abs(pHps->worldXDeltaFor1Pixel);
-            else
-                clipRect.left  += abs(pHps->worldXDeltaFor1Pixel);
-
-            if (abs((int)pHps->viewportYExt) <= abs((int)pHps->windowExt.cy))
-                clipRect.bottom -= abs(pHps->worldYDeltaFor1Pixel);
-            else
-                clipRect.top    += abs(pHps->worldYDeltaFor1Pixel);
-        }
-        GpiConvert(pHps->hps, CVTC_WORLD, CVTC_DEVICE, 2, (PPOINTL)&clipRect);
-        if (clipRect.right < clipRect.left) {
-            ULONG temp     = clipRect.left;
-            clipRect.left  = clipRect.right;
-            clipRect.right = temp;
-        }
-        if (clipRect.bottom < clipRect.top) {
-            ULONG temp       = clipRect.top;
-            clipRect.top     = clipRect.bottom;
-            clipRect.bottom  = temp;
-        }
-#endif
-    }
-
-    if (pScroll)
-    {
-#if 1
-        dprintf (("ScrollDC: Scroll rectangle (%d,%d)(%d,%d)", pScroll->left, pScroll->top, pScroll->right, pScroll->bottom));
-        scrollRect = *pScroll;
-        LPtoDP(hDC, (LPPOINT)&scrollRect, 2);
-#else
-        memcpy(&scrollRect, pScroll, sizeof(scrollRect));
-
-        if ((pHps->graphicsMode == GM_COMPATIBLE_W) &&
-            (scrollRect.left != scrollRect.right)   &&
-            (scrollRect.top  != scrollRect.bottom))
-        {
-            if (abs((int)pHps->viewportXExt) <= abs((int)pHps->windowExt.cx))
-                scrollRect.right -= abs(pHps->worldXDeltaFor1Pixel);
-            else
-                scrollRect.left  += abs(pHps->worldXDeltaFor1Pixel);
-
-            if (abs((int)pHps->viewportYExt) <= abs((int)pHps->windowExt.cy))
-                scrollRect.bottom  -= abs(pHps->worldYDeltaFor1Pixel);
-            else
-                scrollRect.top     += abs(pHps->worldYDeltaFor1Pixel);
-        }
-        GpiConvert (pHps->hps, CVTC_WORLD, CVTC_DEVICE, 2, (PPOINTL)&scrollRect);
-        if (scrollRect.right < scrollRect.left) {
-            ULONG temp       = scrollRect.left;
-            scrollRect.left  = scrollRect.right;
-            scrollRect.right = temp;
-        }
-        if (scrollRect.bottom < scrollRect.top) {
-            ULONG temp        = scrollRect.top;
-            scrollRect.top    = scrollRect.bottom;
-            scrollRect.bottom = temp;
-        }
-#endif
-    }
-    RECTL  rectlUpdate;
-    HRGN   hrgn = NULLHANDLE;
-    RECTL  clipOS2;
-    RECTL  scrollOS2;
-    PRECTL pScrollOS2 = NULL;
-    PRECTL pClipOS2   = NULL;
-    HPS    hpsScreen  = 0;
-
-    if(pScroll) {
-        mapWin32ToOS2Rect(wnd->getClientHeight(), &scrollRect, (PRECTLOS2)&scrollOS2);
-        pScrollOS2 = &scrollOS2;
-        dprintf2(("ScrollDC: PM Scroll rectangle (%d,%d)(%d,%d)", pScrollOS2->xLeft, pScrollOS2->yBottom, pScrollOS2->xRight, pScrollOS2->yTop));
-    }
-
-    if(pClip) {
-        mapWin32ToOS2Rect(wnd->getClientHeight(), &clipRect, (PRECTLOS2)&clipOS2);
-        pClipOS2 = &clipOS2;
-        dprintf2(("ScrollDC: PM Clip rectangle (%d,%d)(%d,%d)", pClipOS2->xLeft, pClipOS2->yBottom, pClipOS2->xRight, pClipOS2->yTop));
-    }
-
-    if(hrgnUpdate) {
-        RECTL rectl = { 1, 1, 2, 2 };
-
-        hpsScreen = WinGetScreenPS (HWND_DESKTOP);
-        hrgn      = GpiCreateRegion(hpsScreen, 1, &rectl);
-    }
-
-    LONG lComplexity = WinScrollWindow(hwnd, dx, dy, pScrollOS2,
-                                       pClipOS2, hrgn, &rectlUpdate, 0);
-    if (lComplexity == RGN_ERROR)
-    {
-        dprintf(("ScrollDC: lComplexity == RGN_ERROR" ));
-        return (FALSE);
-    }
-
-    RECT winRectUpdate;
-
-    dprintf2(("ScrollDC: PM Update rectangle (%d,%d)(%d,%d)", rectlUpdate.xLeft, rectlUpdate.yBottom, rectlUpdate.xRight, rectlUpdate.yTop));
-
-    mapOS2ToWin32Rect(wnd->getClientHeight(), (PRECTLOS2)&rectlUpdate, &winRectUpdate);
-
-    dprintf2(("ScrollDC: Update rectangle (%d,%d)(%d,%d)", winRectUpdate.left, winRectUpdate.top, winRectUpdate.right, winRectUpdate.bottom));
-
-    if (pRectUpdate)
-        *pRectUpdate = winRectUpdate;
-
-    if (hrgnUpdate) {
-        rc = setPMRgnIntoWinRgn(hpsScreen, hrgn, hrgnUpdate, wnd->getClientHeight());
-        GpiDestroyRegion(hpsScreen, hrgn);
-        WinReleasePS(hpsScreen);
-    }
-
-    return (rc);
 }
 //******************************************************************************
 //Using WinScrollWindow to scroll child windows is better (smoother).
