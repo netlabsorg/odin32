@@ -1,4 +1,4 @@
-/* $Id: osliblvm.h,v 1.1 2002-05-09 13:55:35 sandervl Exp $ */
+/* $Id: osliblvm.h,v 1.2 2002-05-10 14:55:13 sandervl Exp $ */
 /*
  * OS/2 LVM (Logical Volume Management) functions
  *
@@ -320,6 +320,7 @@ typedef struct _Volume_Information_Record {
 
 #endif
 
+#define VOLUME_NAME_PREFIX  "\\\\?\\Volume\\"
 
 BOOL   OSLibLVMInit();
 void   OSLibLVMExit();
@@ -328,8 +329,9 @@ void   OSLibLVMFreeVolumeControlData(HANDLE hVolumeControlData);
 BOOL   OSLibLVMQueryVolumeName(HANDLE hVolumeControlData, ULONG volindex, 
                                LPSTR lpszVolumeName, DWORD cchBufferLength);
 
-BOOL   OSLibLVMGetPartitionInfo(ULONG driveLetter, PPARTITION_INFORMATION pPartition);
-BOOL   OSLibLVMGetVolumeExtents(ULONG driveLetter, PVOLUME_DISK_EXTENTS pVolExtent);
+BOOL   OSLibLVMGetPartitionInfo(ULONG driveLetter, LPSTR lpszVolumeName, PPARTITION_INFORMATION pPartition);
+BOOL   OSLibLVMGetVolumeExtents(ULONG driveLetter, LPSTR lpszVolumeName, PVOLUME_DISK_EXTENTS pVolExtent, BOOL *pfLVMVolume = NULL);
+
 ULONG  OSLibLVMGetDriveType(LPCSTR lpszVolume);
 CHAR   OSLibLVMQueryDriveFromVolumeName(LPCSTR lpszVolume);
 BOOL   OSLibLVMGetVolumeNameForVolumeMountPoint(LPCSTR lpszVolumeMountPoint, LPSTR lpszVolumeName, 
@@ -338,5 +340,7 @@ BOOL   OSLibLVMGetVolumeNameForVolumeMountPoint(LPCSTR lpszVolumeMountPoint, LPS
 
 DWORD  OSLibLVMQueryVolumeFS(LPSTR lpszVolume, LPSTR lpFileSystemNameBuffer, DWORD nFileSystemNameSize);
 DWORD  OSLibLVMQueryVolumeSerialAndName(LPSTR lpszVolume, LPDWORD lpVolumeSerialNumber, LPSTR lpVolumeNameBuffer, DWORD nVolumeNameSize);
+
+BOOL   OSLibLVMStripVolumeName(LPCSTR lpszWin32VolumeName, LPSTR lpszOS2VolumeName, DWORD cchBufferLength);
 
 #endif //__OSLIBLVM_H__

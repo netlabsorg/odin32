@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.150 2002-04-29 17:05:30 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.151 2002-05-10 14:55:13 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -33,6 +33,7 @@
 
 #include "odin32validate.h"
 #include "exceptutil.h"
+#include "asmutil.h"
 #include "oslibdos.h"
 #include "oslibmisc.h"
 #include "oslibdebug.h"

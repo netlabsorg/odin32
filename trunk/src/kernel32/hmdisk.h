@@ -1,4 +1,4 @@
-/* $Id: hmdisk.h,v 1.9 2002-05-09 13:55:33 sandervl Exp $ */
+/* $Id: hmdisk.h,v 1.10 2002-05-10 14:55:12 sandervl Exp $ */
 
 #ifndef __HMDISK_H__
 #define __HMDISK_H__
@@ -10,8 +10,6 @@
 #include <handlemanager.h>
 #include "HMDevice.h"
 #include "HMObjects.h"
-
-#define VOLUME_NAME_PREFIX  "\\\\?\\Volume\\"
 
 /*****************************************************************************
  * Structures                                                                *
@@ -60,6 +58,10 @@ public:
                                      LPVOID lpInBuffer, DWORD nInBufferSize,
                                      LPVOID lpOutBuffer, DWORD nOutBufferSize,
                                      LPDWORD lpBytesReturned, LPOVERLAPPED lpOverlapped);
+
+  /* this is a handler method for calls to GetFileSize() */
+  virtual DWORD GetFileSize(PHMHANDLEDATA pHMHandleData,
+                            PDWORD        pSizeHigh);
 
   /* this is a handler method for calls to GetFileType() */
   virtual DWORD GetFileType (PHMHANDLEDATA pHMHandleData);

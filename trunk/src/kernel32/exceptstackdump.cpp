@@ -1,4 +1,4 @@
-/* $Id: exceptstackdump.cpp,v 1.4 2001-07-20 15:33:29 sandervl Exp $ */
+/* $Id: exceptstackdump.cpp,v 1.5 2002-05-10 14:55:11 sandervl Exp $ */
 /*
  * Stack dump code
  *
@@ -19,6 +19,7 @@
 #include <misc.h>
 #include "exceptstackdump.h"
 #include "exceptutil.h"
+#include "asmutil.h"
 #include "oslibmisc.h"
 #include "winexebase.h"
 #include "windllbase.h"
