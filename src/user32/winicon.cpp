@@ -1,4 +1,4 @@
-/* $Id: winicon.cpp,v 1.23 2001-05-17 11:25:49 sandervl Exp $ */
+/* $Id: winicon.cpp,v 1.24 2001-06-11 20:08:26 sandervl Exp $ */
 /*
  * Win32 Icon Code for OS/2
  *
@@ -808,7 +808,11 @@ static HGLOBAL CURSORICON_CreateFromResource( HINSTANCE hInstance, DWORD dwResGr
         return 0;
     }
 
+#ifdef __WIN32OS2__
+    if( (hdc = CreateCompatibleDC( 0 )) )
+#else
     if( (hdc = GetDC( 0 )) )
+#endif
     {
         BITMAPINFO* pInfo;
 
@@ -997,7 +1001,11 @@ static HGLOBAL CURSORICON_CreateFromResource( HINSTANCE hInstance, DWORD dwResGr
              }
              HeapFree( GetProcessHeap(), 0, pInfo );
         }
+#ifdef __WIN32OS2__
+        DeleteDC(hdc );
+#else
         ReleaseDC( 0, hdc );
+#endif
     }
 
     if( !hXorBits || !hAndBits )

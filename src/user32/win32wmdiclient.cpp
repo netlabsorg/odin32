@@ -1,4 +1,4 @@
-/* $Id: win32wmdiclient.cpp,v 1.36 2001-06-11 15:05:44 sandervl Exp $ */
+/* $Id: win32wmdiclient.cpp,v 1.37 2001-06-11 20:08:25 sandervl Exp $ */
 /*
  * Win32 MDI Client Window Class for OS/2
  *
@@ -252,7 +252,7 @@ LRESULT Win32MDIClientWindow::MDIClientWndProc(UINT message, WPARAM wParam, LPAR
             rect.right = LOWORD(lParam);
             rect.bottom = HIWORD(lParam);
 
-            AdjustWindowRectEx(&rect, GetWindowLongA(maximizedChild, GWL_STYLE), 0, GetWindowLongA(maximizedChild, GWL_EXSTYLE));
+            AdjustWindowRectEx(&rect, ::GetWindowLongA(maximizedChild, GWL_STYLE), 0, ::GetWindowLongA(maximizedChild, GWL_EXSTYLE));
             ::MoveWindow(maximizedChild, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, 1);
         }
         else postUpdate(SB_BOTH+1);

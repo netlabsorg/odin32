@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.263 2001-06-11 14:37:46 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.264 2001-06-11 20:08:24 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2902,18 +2902,23 @@ BOOL Win32BaseWindow::EnumChildWindows(WNDENUMPROC lpfn, LPARAM lParam)
  Win32BaseWindow *prevchild = 0, *child = 0;
 
     dprintf(("EnumChildWindows of %x parameter %x %x (%x)", getWindowHandle(), lpfn, lParam, getFirstChild()));
+    lock();
     for (child = (Win32BaseWindow *)getFirstChild(); child; child = (Win32BaseWindow *)child->getNextChild())
     {
         dprintf(("EnumChildWindows: enumerating child %x (owner %x; parent %x)", child->getWindowHandle(), (child->getOwner()) ? child->getOwner()->getWindowHandle() : 0, getWindowHandle()));
         hwnd = child->getWindowHandle();
-        if(child->getOwner()) {
+        if(child->IsWindowDestroyed() || child->getOwner()) {
                 continue; //shouldn't have an owner (Wine)
         }
+        child->addRef();
+        unlock();
         if(lpfn(hwnd, lParam) == FALSE)
         {
-                rc = FALSE;
-                break;
+                child->release();
+                return FALSE;
         }
+        child->release();
+        lock();
         //check if the window still exists
         if(!::IsWindow(hwnd))
         {
@@ -2923,14 +2928,19 @@ BOOL Win32BaseWindow::EnumChildWindows(WNDENUMPROC lpfn, LPARAM lParam)
         if(child->getFirstChild() != NULL)
         {
             dprintf(("EnumChildWindows: Enumerate children of %x", child->getWindowHandle()));
+            child->addRef();
+            unlock();
             if(child->EnumChildWindows(lpfn, lParam) == FALSE)
             {
-                rc = FALSE;
-                break;
+                child->release();
+                return FALSE;
             }
+            child->release();
+            lock();
         }
         prevchild = child;
     }
+    unlock();
     return rc;
 }
 //******************************************************************************
@@ -3475,7 +3485,7 @@ LONG Win32BaseWindow::SetWindowLongA(int index, ULONG value, BOOL fUnicode)
                     type = (fUnicode) ? WIN_PROC_32W : WIN_PROC_32A;
                 }
                 oldval = (LONG)WINPROC_GetProc(win32wndproc, (fUnicode) ? WIN_PROC_32W : WIN_PROC_32A);
-                dprintf(("SetWindowLong GWL_WNDPROC %x old %x new style %x", getWindowHandle(), oldval, value));
+                dprintf(("SetWindowLong GWL_WNDPROC %x old %x new wndproc %x", getWindowHandle(), oldval, value));
                 WINPROC_SetProc((HWINDOWPROC *)&win32wndproc, (WNDPROC)value, type, WIN_PROC_WINDOW);
                 break;
         }
