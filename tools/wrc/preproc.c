@@ -296,7 +296,11 @@ FILE *open_include(const char *name, int search, char **newpath)
 	if(search)
 	{
 		/* Search current dir and then -I path */
+#ifdef __EMX__
 		fp = fopen(cpy, "rb");
+#else
+		fp = fopen(cpy, "rt");
+#endif
 		if(fp)
 		{
 			if(debuglevel & DEBUGLEVEL_PPMSG)
@@ -316,7 +320,11 @@ FILE *open_include(const char *name, int search, char **newpath)
 		strcpy(path, includepath[i]);
 		strcat(path, "/");
 		strcat(path, cpy);
-		fp = fopen(path, "rb");
+#ifdef __EMX__
+		fp = fopen(cpy, "rb");
+#else
+		fp = fopen(cpy, "rt");
+#endif
 		if(fp && (debuglevel & DEBUGLEVEL_PPMSG))
 			printf("Going to include <%s>\n", path);
 		if(fp)
