@@ -1,6 +1,10 @@
-/* $Id: changelog,v 1.1374 2001-04-22 10:55:43 sandervl Exp $ */
+/* $Id: changelog,v 1.1375 2001-04-22 17:22:23 sandervl Exp $ */
 
  2001-04-22: Sander van Leeuwen <sandervl@xs4all.nl>
+    - DDRAW:    o Wrong calling convention of io_init2. Parameter is pushed
+                  on the stack, not put in eax.
+                  (fixes crash in release ddraw & systems with xf86sup.sys 
+                   installed)
     - KERNEL32: o Removed wrong segment definitions introduced by yesterday's
                   EXC_CallHandler rewrite.
                   (fixes global data section)
@@ -27,7 +31,7 @@
 
  2001-04-20: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Commented out RestoreCursor call in user32 exitlist handler.
-                  Seems to cause PM hangs on some (a lot?) of machines for
+                  Seems to cause PM hangs on some (a lot?) machines for
                   reasons unknown.
 
  2001-04-20: Patrick Haller <patrick.haller@innotek.de>
