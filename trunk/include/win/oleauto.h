@@ -526,7 +526,7 @@ typedef struct tagMETHODDATA {
     PARAMDATA * ppdata; /* pointer to an array of PARAMDATAs */
     DISPID dispid;      /* method ID */
     UINT iMeth;         /* method index */
-    CALLCONV_OLE2 cc;        /* calling convention */
+    CALLCONV cc;        /* calling convention */
     UINT cArgs;         /* count of arguments */
     WORD wFlags;        /* same wFlags as on IDispatch::Invoke() */
     VARTYPE vtReturn;
@@ -561,7 +561,7 @@ HRESULT WINAPI CreateDispTypeInfo(INTERFACEDATA* pidata, LCID lcid,
             ITypeInfo** pptinfo);
 HRESULT WINAPI CreateStdDispatch(IUnknown* punkOuter, void* pvThis,
             ITypeInfo* ptinfo, IUnknown** ppunkStdDisp);
-HRESULT WINAPI DispCallFunc(void* pvInstance, ULONG oVft, CALLCONV_OLE2 cc,
+HRESULT WINAPI DispCallFunc(void* pvInstance, ULONG oVft, CALLCONV cc,
             VARTYPE vtReturn, UINT  cActuals, VARTYPE* prgvt,
             VARIANTARG** prgpvarg, VARIANT* pvargResult);
 
