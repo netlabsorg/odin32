@@ -1,3 +1,4 @@
+/* $Id: dinput.cpp,v 1.2 1999-11-08 13:50:41 sandervl Exp $ */
 /*		DirectInput
  *
  * Copyright 1998 Marcus Meissner
