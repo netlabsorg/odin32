@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.88 2000-08-17 18:22:18 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.89 2000-08-18 18:16:34 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -1354,7 +1354,7 @@ FARPROC WIN32API GetProcAddress(HMODULE hModule, LPCSTR lpszProc)
  ULONG     ulAPIOrdinal;
 
   if(hModule == 0 || hModule == -1 || (WinExe && hModule == WinExe->getInstanceHandle())) {
-    winmod = WinExe;
+        winmod = WinExe;
   }
   else  winmod = (Win32ImageBase *)Win32DllBase::findModule((HINSTANCE)hModule);
 
@@ -1373,6 +1373,9 @@ FARPROC WIN32API GetProcAddress(HMODULE hModule, LPCSTR lpszProc)
 #endif
         	SetLastError(ERROR_PROC_NOT_FOUND);
     	}
+  	if(HIWORD(lpszProc))
+    		dprintf(("KERNEL32:  GetProcAddress %s from %X returned %X\n", lpszProc, hModule, proc));
+	else  	dprintf(("KERNEL32:  GetProcAddress %x from %X returned %X\n", lpszProc, hModule, proc));
     	return proc;
   }
   proc = O32_GetProcAddress(hModule, lpszProc);
