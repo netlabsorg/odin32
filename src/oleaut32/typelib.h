@@ -1,3 +1,4 @@
+/* $Id: typelib.h,v 1.2 1999-08-22 22:08:49 sandervl Exp $ */
 /*
  * typelib.h  internal wine data structures
  * used to decode typelib's

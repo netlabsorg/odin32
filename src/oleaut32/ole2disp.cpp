@@ -1,3 +1,4 @@
+/* $Id: ole2disp.cpp,v 1.2 1999-08-22 22:08:47 sandervl Exp $ */
 /*
  *	OLE2DISP library
  *

@@ -1,3 +1,4 @@
+/* $Id: variant.cpp,v 1.2 1999-08-22 22:08:50 sandervl Exp $ */
 /*
  * VARIANT
  *
