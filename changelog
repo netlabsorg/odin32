@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.1358 2001-04-15 09:46:52 sandervl Exp $ */
+/* $Id: changelog,v 1.1359 2001-04-15 14:28:43 sandervl Exp $ */
 
  2001-04-15: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o RegQueryValueExA/W broken. Reserved & type parameters reversed.
@@ -7,6 +7,7 @@
                   is the same as old one.
                   (fixes high cpu load in PowerDVD when holding mouse cursor over
                    control window; PM kept sending WM_MOUSEMOVE messages)
+                o Rewrote ClipCursor & GetClipCursor
 
  2001-04-14: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - configure,win32k:
