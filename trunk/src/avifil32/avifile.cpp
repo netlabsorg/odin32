@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <assert.h>
 
-#include <odin.h>
+#include <os2win.h>
 #define CINTERFACE
 #define ICOM_CINTERFACE 1
 #define INITGUID
