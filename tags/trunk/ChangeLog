@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.163 1999-09-01 00:04:33 phaller Exp $ */
+ /* $Id: ChangeLog,v 1.164 1999-09-01 07:30:25 sandervl Exp $ */
+
+ 99-09-01: Jens Wiessner <wiessnej@rfi.de>
+	- RASAPI32: Created stub dll
 
  99-08-31: Patrick Haller <phaller@gmx.net>
 	- WINMM:    	revision of timer services (C&C RA)
