@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.2647 2003-11-14 13:44:50 sandervl Exp $ */
+/* $Id: changelog,v 1.2648 2003-11-17 13:14:42 sandervl Exp $ */
+
+ 2003-11-17: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o Destroy switch entry before hiding window in DestroyWindow.
+                  (workaround for XCenter problems)
 
  2003-11-14: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o Updates
