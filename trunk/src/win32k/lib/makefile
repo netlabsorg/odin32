@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.11 2001-02-18 14:49:04 bird Exp $
+# $Id: makefile,v 1.12 2001-02-21 07:47:59 bird Exp $
 
 #
 # Odin32 API
@@ -45,7 +45,8 @@ $(OBJDIR)\libW32kHandleSystemEvent.obj \
 $(OBJDIR)\libW32kQueryOTEs.obj \
 $(OBJDIR)\libW32kQuerySystemMemInfo.obj \
 $(OBJDIR)\libW32kProcessReadWrite.obj \
-$(OBJDIR)\libGetCS.obj
+$(OBJDIR)\libGetCS.obj \
+$(OBJDIR)\libCallThruCallGate.obj
 
 
 #

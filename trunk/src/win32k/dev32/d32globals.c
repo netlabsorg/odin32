@@ -1,4 +1,4 @@
-/* $Id: d32globals.c,v 1.5 2000-02-25 18:15:03 bird Exp $
+/* $Id: d32globals.c,v 1.6 2001-02-21 07:44:57 bird Exp $
  *
  * d32globals - global data (32-bit)
  *
@@ -21,5 +21,10 @@
 /*******************************************************************************
 *   Global Variables                                                           *
 *******************************************************************************/
+/*
+ * This is the pointer to the TK(TasK)SS(Stack Segment) FLAT Base address variable.
+ * It is used by the SSToDS macro to convert stack based addresses to FLAT ds
+ * based addressed.
+ */
 PULONG          pulTKSSBase32;
 

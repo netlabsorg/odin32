@@ -1,4 +1,4 @@
-/* $Id: libW32kQuerySystemMemInfo.c,v 1.1 2001-02-11 15:24:04 bird Exp $
+/* $Id: libW32kQuerySystemMemInfo.c,v 1.2 2001-02-21 07:47:59 bird Exp $
  *
  * libW32kQuerySystemMemInfo - Collects more or less useful information on the
  *                             memory state of the system.
@@ -23,13 +23,7 @@
 *******************************************************************************/
 #include <os2.h>
 #include "win32k.h"
-
-
-/*******************************************************************************
-*   Global Variables                                                           *
-*******************************************************************************/
-extern BOOL     fInited;
-extern HFILE    hWin32k;
+#include "libPrivate.h"
 
 
 /**
@@ -53,9 +47,12 @@ APIRET APIENTRY  W32kQuerySystemMemInfo(PK32SYSTEMMEMINFO pMemInfo)
         ULONG                   cbParam = sizeof(Param);
         ULONG                   cbData = 0UL;
 
-        Param.pMemInfo = pMemInfo;
-        Param.rc = ERROR_INVALID_PARAMETER;
+        Param.hdr.cb    = sizeof(Param);
+        Param.hdr.rc    = ERROR_NOT_SUPPORTED;
+        Param.pMemInfo  = pMemInfo;
 
+        if (usCGSelector)
+            return libCallThruCallGate(K32_QUERYSYSTEMMEMINFO, &Param);
         rc = DosDevIOCtl(hWin32k,
                          IOCTL_W32K_K32,
                          K32_QUERYSYSTEMMEMINFO,
@@ -63,7 +60,7 @@ APIRET APIENTRY  W32kQuerySystemMemInfo(PK32SYSTEMMEMINFO pMemInfo)
                          "", 1, &cbData);
 
         if (rc == NO_ERROR)
-            rc = Param.rc;
+            rc = Param.hdr.rc;
     }
     else
         rc = ERROR_INIT_ROUTINE_FAILED;

@@ -1,4 +1,4 @@
-/* $Id: libW32kHandleSystemEvent.c,v 1.1 2001-02-18 14:46:31 bird Exp $
+/* $Id: libW32kHandleSystemEvent.c,v 1.2 2001-02-21 07:47:58 bird Exp $
  *
  * libW32kHandleSystemEvent - Override system events like Ctrl-Alt-Delete
  *          and Ctrl-Alt-2xNumLock.
@@ -23,13 +23,7 @@
 *******************************************************************************/
 #include <os2.h>
 #include "win32k.h"
-
-
-/*******************************************************************************
-*   Global Variables                                                           *
-*******************************************************************************/
-extern BOOL     fInited;
-extern HFILE    hWin32k;
+#include "libPrivate.h"
 
 
 /**
@@ -63,11 +57,14 @@ APIRET APIENTRY  W32kHandleSystemEvent(ULONG ulEvent, HEV hev, BOOL fHandle)
         ULONG                   cbParam = sizeof(Param);
         ULONG                   cbData = 0UL;
 
-        Param.ulEvent = ulEvent;
-        Param.hev = hev;
-        Param.fHandle = fHandle;
-        Param.rc = ERROR_INVALID_PARAMETER;
+        Param.hdr.cb    = sizeof(Param);
+        Param.hdr.rc    = ERROR_NOT_SUPPORTED;
+        Param.ulEvent   = ulEvent;
+        Param.hev       = hev;
+        Param.fHandle   = fHandle;
 
+        if (usCGSelector)
+            return libCallThruCallGate(K32_HANDLESYSTEMEVENT, &Param);
         rc = DosDevIOCtl(hWin32k,
                          IOCTL_W32K_K32,
                          K32_HANDLESYSTEMEVENT,
@@ -75,7 +72,7 @@ APIRET APIENTRY  W32kHandleSystemEvent(ULONG ulEvent, HEV hev, BOOL fHandle)
                          "", 1, &cbData);
 
         if (rc == NO_ERROR)
-            rc = Param.rc;
+            rc = Param.hdr.rc;
     }
     else
         rc = ERROR_INIT_ROUTINE_FAILED;

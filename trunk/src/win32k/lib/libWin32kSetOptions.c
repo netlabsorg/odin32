@@ -1,8 +1,8 @@
-/* $Id: libWin32kSetOptions.c,v 1.3 2001-02-14 12:46:56 bird Exp $
+/* $Id: libWin32kSetOptions.c,v 1.4 2001-02-21 07:47:59 bird Exp $
  *
  * libWin32kSetOptions - Sets the changable options of win32k.sys the options.
  *
- * Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * Copyright (c) 2000-2001 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -22,13 +22,7 @@
 *******************************************************************************/
 #include <os2.h>
 #include "win32k.h"
-
-
-/*******************************************************************************
-*   Global Variables                                                           *
-*******************************************************************************/
-extern BOOL     fInited;
-extern HFILE    hWin32k;
+#include "libPrivate.h"
 
 
 /**
@@ -64,9 +58,12 @@ APIRET APIENTRY  libWin32kSetOptions(PK32OPTIONS pOptions)
         ULONG           cbParam = sizeof(Param);
         ULONG           cbData = 0UL;
 
+        Param.hdr.cb    = sizeof(Param);
+        Param.hdr.rc    = ERROR_NOT_SUPPORTED;
         Param.pOptions  = pOptions;
-        Param.rc = ERROR_INVALID_PARAMETER;
 
+        if (usCGSelector)
+            return libCallThruCallGate(K32_SETOPTIONS, &Param);
         rc = DosDevIOCtl(hWin32k,
                          IOCTL_W32K_K32,
                          K32_SETOPTIONS,
@@ -74,7 +71,7 @@ APIRET APIENTRY  libWin32kSetOptions(PK32OPTIONS pOptions)
                          "", 1, &cbData);
 
         if (rc == NO_ERROR)
-            rc = Param.rc;
+            rc = Param.hdr.rc;
     }
     else
         rc = ERROR_INIT_ROUTINE_FAILED;

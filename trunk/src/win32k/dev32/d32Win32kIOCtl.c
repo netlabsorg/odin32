@@ -1,4 +1,4 @@
-/* $Id: d32Win32kIOCtl.c,v 1.6 2001-02-20 05:02:40 bird Exp $
+/* $Id: d32Win32kIOCtl.c,v 1.7 2001-02-21 07:44:57 bird Exp $
  *
  * Win32k driver IOCtl handler function.
  *
@@ -37,8 +37,7 @@
 /*******************************************************************************
 *   Internal Functions                                                         *
 *******************************************************************************/
-APIRET _Optlink Win32kAPIRouter(ULONG ulFunction, PVOID pvParam);  /* called from d32CallGate.asm too. */
-
+APIRET _Optlink Win32kAPIRouter(ULONG ulFunction, PVOID pvParam);  /* implemented in d32CallGate.asm. */
 
 
 /**
@@ -50,7 +49,8 @@ APIRET _Optlink Win32kAPIRouter(ULONG ulFunction, PVOID pvParam);  /* called fro
 USHORT _loadds _Far32 _Pascal Win32kIOCtl(PRP32GENIOCTL pRpIOCtl)
 {
     /* validate parameter pointer */
-    if (pRpIOCtl == NULL || pRpIOCtl->ParmPacket == NULL || pRpIOCtl->Function == 0 || pRpIOCtl->Function > K32_LASTIOCTLFUNCTION)
+    if (pRpIOCtl == NULL || pRpIOCtl->ParmPacket == NULL
+        || pRpIOCtl->Function == 0 || pRpIOCtl->Function > K32_LASTIOCTLFUNCTION)
         return STATUS_DONE | STERR | ERROR_I24_INVALID_PARAMETER;
 
     switch (pRpIOCtl->Category)
@@ -59,115 +59,11 @@ USHORT _loadds _Far32 _Pascal Win32kIOCtl(PRP32GENIOCTL pRpIOCtl)
             {
             APIRET rc = Win32kAPIRouter(pRpIOCtl->Function, pRpIOCtl->ParmPacket);
             if (    rc != 0xdeadbeefUL
-                &&  TKSuULongNF(pRpIOCtl->ParmPacket, SSToDS(&rc)) == NO_ERROR)
+                &&  TKSuULongNF(&((PK32HDR)pRpIOCtl->ParmPacket)->rc, SSToDS(&rc)) == NO_ERROR)
                 return STATUS_DONE;     /* Successfull return */
             break;
             }
     }
 
     return STATUS_DONE | STERR | ERROR_I24_INVALID_PARAMETER;
-}
-
-
-/**
- * Internal function router which calls the correct function.
- * Called from IOCtl worker and callgate in d32CallGate.asm.
- * @returns function return code.
- *          0xdeadbeef if invalid function number.
- * @param   ulFunction  Function number to call.
- * @param   pvParam     Parameter package for that function.
- * @sketch
- * @status  partially implemented.
- * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
- * @remark  This could be reimplemented in assembly.
- *          Make generic parameter layout to limit amount of memory copied back.
- */
-APIRET _Optlink Win32kAPIRouter(ULONG ulFunction, PVOID pvParam)
-{
-    static ULONG acbParams[] =
-    {
-        0,                              /* Not used - ie. invalid */
-        sizeof(K32ALLOCMEMEX),          /* K32_ALLOCMEMEX          0x01 */
-        sizeof(K32QUERYOTES),           /* K32_QUERYOTES           0x02 */
-        sizeof(K32QUERYOPTIONSSTATUS),  /* K32_QUERYOPTIONSSTATUS  0x03 */
-        sizeof(K32SETOPTIONS),          /* K32_SETOPTIONS          0x04 */
-        sizeof(K32PROCESSREADWRITE),    /* K32_PROCESSREADWRITE    0x05 */
-        sizeof(K32HANDLESYSTEMEVENT),   /* K32_HANDLESYSTEMEVENT   0x06 */
-        sizeof(K32QUERYSYSTEMMEMINFO)   /* K32_QUERYSYSTEMMEMINFO  0x07 */
-    };
-    APIRET  rc;
-    char    achBuffer[MAX_PARAMSIZE];
-    PVOID   pv = SSToDS(&achBuffer[0]);
-
-    /*
-     * Validate the function number.
-     * Fetch parameters from user buffer onto our Ring-0 stack.
-     */
-    if (ulFunction == 0 || ulFunction > sizeof(acbParams) / sizeof(acbParams[0]))
-        return 0xdeadbeaf;
-    rc = TKFuBuff(pv, pvParam, acbParams[ulFunction], TK_FUSU_NONFATAL);
-    if (rc)
-    {
-        kprintf(("Win32kAPIRouter: Failed to fetch user parameters rc=%d.\n", rc));
-        return rc;                      /* This can't happen when called from by IOCtl (I hope). */
-    }
-
-
-    /*
-     * Call the actual function.
-     */
-    switch (ulFunction)
-    {
-        case K32_ALLOCMEMEX:
-        {
-            PK32ALLOCMEMEX pParm = (PK32ALLOCMEMEX)pv;
-            return k32AllocMemEx(pParm->ppv, pParm->cb, pParm->flFlags, pParm->ulCS, pParm->ulEIP);
-        }
-
-        case K32_QUERYOTES:
-        {
-            PK32QUERYOTES pParm = (PK32QUERYOTES)pv;
-            return k32QueryOTEs((HMTE)pParm->hMTE, pParm->pQOte, pParm->cbQOte);
-        }
-
-        case K32_QUERYOPTIONSSTATUS:
-        {
-            PK32QUERYOPTIONSSTATUS pParm = (PK32QUERYOPTIONSSTATUS)pv;
-            return k32QueryOptionsStatus(pParm->pOptions, pParm->pStatus);
-        }
-
-        case K32_SETOPTIONS:
-        {
-            PK32SETOPTIONS pParm = (PK32SETOPTIONS)pv;
-            return k32SetOptions(pParm->pOptions);
-        }
-
-        case K32_PROCESSREADWRITE:
-        {
-            PK32PROCESSREADWRITE pParm = (PK32PROCESSREADWRITE)pv;
-            return k32ProcessReadWrite(pParm->pid, pParm->cb, pParm->pvSource, pParm->pvTarget, pParm->fRead);
-        }
-
-        case K32_HANDLESYSTEMEVENT:
-        {
-            //PK32HANDLESYSTEMEVENT pParm = (PK32HANDLESYSTEMEVENT)pv;
-            //return k32HandleSystemEvent(pParm->ulEvent, pParm->hev, pParm->fHandle);
-            return ERROR_NOT_SUPPORTED;
-        }
-
-        case K32_QUERYSYSTEMMEMINFO:
-        {
-            PK32QUERYSYSTEMMEMINFO pParm = (PK32QUERYSYSTEMMEMINFO)pv;
-            return k32QuerySystemMemInfo(pParm->pMemInfo);
-        }
-    }
-
-
-    /*
-     * This will never happen.
-     */
-    kprintf(("Win32kAPIRouter: Internal processing error\n"));
-    Int3();
-
-    return 0xdeadbeaf;
 }
