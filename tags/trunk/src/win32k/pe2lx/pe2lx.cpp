@@ -1,4 +1,4 @@
-/* $Id: pe2lx.cpp,v 1.9 1999-11-16 16:11:43 bird Exp $
+/* $Id: pe2lx.cpp,v 1.10 1999-11-16 17:09:31 bird Exp $
  *
  * Pe2Lx class implementation. Ring 0 and Ring 3
  *
@@ -1908,7 +1908,6 @@ ULONG Pe2Lx::makeFixups()
     if (fBaseRelocs)
         rc = pRelocReader->readAtRVA(ulRVABaseReloc, SSToDS(&BaseReloc), sizeof(BaseReloc));
 
-
     /*
      *  The Loop! Iterate thru all pages for all objects.
      */
@@ -2026,42 +2025,46 @@ ULONG Pe2Lx::makeFixups()
             ULONG c = (BaseReloc.SizeOfBlock - sizeof(BaseReloc.SizeOfBlock) - sizeof(BaseReloc.VirtualAddress)) / sizeof(WORD); /* note that sizeof(BaseReloc) is 12 bytes! */
             PWORD pawoffFixup;
 
-            pawoffFixup = (PWORD)malloc((size_t)(c * sizeof(WORD)));
-            if (pawoffFixup != NULL)
-                rc = pRelocReader->readAtRVA(ulRVABaseReloc + offsetof(IMAGE_BASE_RELOCATION, TypeOffset),
-                                             pawoffFixup, c * sizeof(WORD));
-            else
-                rc = ERROR_NOT_ENOUGH_MEMORY;
-
-            /* loop thru the baserelocation in this chunk. */
-            for (ul = 0; ul < c && rc == NO_ERROR; ul++)
+            if (c != 0)
             {
-                WORD  woffFixup;
-                ULONG ulTarget;
-                /* Get relocation type/offset. */
+                pawoffFixup = (PWORD)malloc((size_t)(c * sizeof(WORD)));
                 if (pawoffFixup != NULL)
-                    woffFixup = pawoffFixup[ul];
+                    rc = pRelocReader->readAtRVA(ulRVABaseReloc + offsetof(IMAGE_BASE_RELOCATION, TypeOffset),
+                                                 pawoffFixup, c * sizeof(WORD));
+                else
+                    rc = ERROR_NOT_ENOUGH_MEMORY;
 
-                /* Get target. */
-                rc = pPageReader->readAtRVA(BaseReloc.VirtualAddress + (woffFixup & 0x0FFF),
-                                            SSToDS(&ulTarget), sizeof(ulTarget));
-                if (rc == NO_ERROR)
+                /* loop thru the baserelocation in this chunk. */
+                for (ul = 0; ul < c && rc == NO_ERROR; ul++)
                 {
-                    switch (woffFixup >> 12)
+                    WORD  woffFixup;
+                    ULONG ulTarget;
+                    /* Get relocation type/offset. */
+                    if (pawoffFixup != NULL)
+                        woffFixup = pawoffFixup[ul];
+
+                    /* Get target. */
+                    rc = pPageReader->readAtRVA(BaseReloc.VirtualAddress + (woffFixup & 0x0FFF),
+                                                SSToDS(&ulTarget), sizeof(ulTarget));
+                    if (rc == NO_ERROR)
                     {
-                        case IMAGE_REL_BASED_HIGHLOW:
-                            rc = add32OffsetFixup((WORD)(woffFixup & 0x0FFF), ulTarget);
-                            printInfA(("Fixup: 0x%03x target 0x%08x (rc = %d) %s\n",
-                                       (woffFixup & 0x0FFF), ulTarget, rc,
-                                       pvCrossPageFixup ? "crosspage" : ""));
-                            break;
-                        case IMAGE_REL_BASED_ABSOLUTE: /* ignored! */
-                            break;
-                        default:
-                            printWar(("Unknown/unsupported fixup type!, 0x%1x\n", woffFixup >> 12));
+                        switch (woffFixup >> 12)
+                        {
+                            case IMAGE_REL_BASED_HIGHLOW:
+                                rc = add32OffsetFixup((WORD)(woffFixup & 0x0FFF), ulTarget);
+                                printInfA(("Fixup: 0x%03x target 0x%08x (rc = %d) %s\n",
+                                           (woffFixup & 0x0FFF), ulTarget, rc,
+                                           pvCrossPageFixup ? "crosspage" : ""));
+                                break;
+                            case IMAGE_REL_BASED_ABSOLUTE: /* ignored! */
+                                break;
+                            default:
+                                printWar(("Unknown/unsupported fixup type!, 0x%1x\n", woffFixup >> 12));
+                        }
                     }
                 }
             }
+
             /* cleanup */
             if (pawoffFixup != NULL)
                 free(pawoffFixup);
