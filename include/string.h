@@ -50,7 +50,11 @@
    size_t _Builtin __strlen( const char * );
    char * _Builtin __strncat( char *, const char *, size_t );
    int    _Builtin __strncmp( const char *, const char *, size_t );
+#ifndef PE2LX
    char * _LNK_CONV __strncpy( char *, const char *, size_t );
+#else
+   char * _Builtin __strncpy( char *, const char *, size_t );
+#endif
    char * _Builtin __strrchr( const char *, int );
    #endif
 
