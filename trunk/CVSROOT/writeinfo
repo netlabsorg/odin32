@@ -21,20 +21,20 @@
 /src/Odin32API                             sandervl bird
 /src/lz32                                  sandervl achimha phaller
 /src/mpr                                   sandervl phaller achimha bird
-/src/NTDLL                                 sandervl phaller achimha jens
+/src/NTDLL                                 sandervl phaller achimha 
 /src/ole32                                 sandervl davidr achimha
 /src/oleaut32                              sandervl davidr
 /src/olesvr32                              sandervl davidr
 /src/olecli32                              sandervl davidr
 /src/oledlg                                sandervl davidr
-/src/imm32                                 sandervl jens
-/src/imagehlp                              sandervl jens
-/src/rasapi32                              sandervl jens
-/src/msacm32                               sandervl jens
-/src/psapi                                 sandervl jens
-/src/msvfw32                               sandervl jens
-/src/crtdll                                sandervl jens phaller
-/src/msvcrt                                sandervl jens phaller
+/src/imm32                                 sandervl 
+/src/imagehlp                              sandervl 
+/src/rasapi32                              sandervl 
+/src/msacm32                               sandervl 
+/src/psapi                                 sandervl 
+/src/msvfw32                               sandervl 
+/src/crtdll                                sandervl phaller
+/src/msvcrt                                sandervl phaller
 /src/odincrt                               sandervl phaller achimha hugh
 /src/odinwps                               sandervl phaller achimha ktk umoeller
 /src/OMFDUMP                               sandervl phaller achimha bird
