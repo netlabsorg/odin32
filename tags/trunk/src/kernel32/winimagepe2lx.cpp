@@ -1,4 +1,4 @@
-/* $Id: winimagepe2lx.cpp,v 1.15 2000-09-22 04:35:09 bird Exp $ */
+/* $Id: winimagepe2lx.cpp,v 1.16 2000-10-02 04:00:35 bird Exp $ */
 
 /*
  * Win32 PE2LX Image base class
@@ -269,7 +269,7 @@ BOOL Win32Pe2LxImage::init()
          *  We'll have to make the resource section writable.
          *  And we'll have to make the pages before it readable.
          */
-        ULONG iSection = getSectionIndexFromRVA(ulRVAResourceSection);
+        LONG iSection = getSectionIndexFromRVA(ulRVAResourceSection);
         if (iSection >= 0)
         {
             rc = DosSetMem((PVOID)paSections[iSection].ulAddress, paSections[iSection].cbVirtual, PAG_WRITE | PAG_READ);
@@ -312,27 +312,34 @@ BOOL Win32Pe2LxImage::init()
         && pNtHdrs->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].Size != 0UL)
     {
         PIMAGE_TLS_DIRECTORY pTLSDir;
+        LONG                 iSection;
+        iSection = getSectionIndexFromRVA(pNtHdrs->OptionalHeader.
+                                          DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].
+                                          VirtualAddress);
         pTLSDir = (PIMAGE_TLS_DIRECTORY)getPointerFromRVA(pNtHdrs->OptionalHeader.
                                                           DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].
                                                           VirtualAddress);
 
-        if (pTLSDir != NULL)
+        if (pTLSDir != NULL && iSection != -1)
         {
             PVOID pv;
             ULONG ulBorlandRVAFix = 0UL;
 
-            pv = getPointerFromRVA(pTLSDir->StartAddressOfRawData);
             /*
              * Borland seems to have problems getting things right...
-             * Needs to subtract image base to make the TLSDir "RVA"s real
-             * RVAs before converting them to pointers.
+             *      Uses real pointers with baserelocations.
+             * Needs to subtract image loadaddress to make the TLSDir them RVAs.
+             *
+             * We'll check if the StartAddressOfRawData pointer is an RVA or an real address by
+             * check if it is within the TLS section or not.
+             * ASSUMES: StartAddressOfRawData is in the same section as the TLS Directory.
              */
-            if ((pv == NULL || pTLSDir->StartAddressOfRawData == 0UL)
-                && pTLSDir->StartAddressOfRawData > this->pNtHdrs->OptionalHeader.ImageBase)
-                {
-                ulBorlandRVAFix = this->pNtHdrs->OptionalHeader.ImageBase;
-                pv = getPointerFromRVA(pTLSDir->StartAddressOfRawData - ulBorlandRVAFix);
+            if (paSections[iSection].ulRVA > pTLSDir->StartAddressOfRawData ||
+                paSections[iSection].ulRVA + paSections[iSection].cbVirtual <= pTLSDir->StartAddressOfRawData)
+                { /* StartAddressOfRawData was not an RVA within the same section as the TLS directory */
+                ulBorlandRVAFix = paSections[iSection].ulAddress - paSections[iSection].ulRVA;
                 }
+            pv = getPointerFromRVA(pTLSDir->StartAddressOfRawData - ulBorlandRVAFix);
             if (pv == NULL || pTLSDir->StartAddressOfRawData == 0UL)
             {
                 eprintf(("Win32Pe2LxImage::init: invalid RVA to TLS StartAddressOfRawData - %#8x.\n",
@@ -728,9 +735,9 @@ PVOID  Win32Pe2LxImage::getPointerFromRVA(ULONG ulRVA)
  * @remark    Should not be called until getSections has returned successfully.
  *            RVA == 0 is ignored.
  */
-ULONG Win32Pe2LxImage::getSectionIndexFromRVA(ULONG ulRVA)
+LONG Win32Pe2LxImage::getSectionIndexFromRVA(ULONG ulRVA)
 {
-    int i;
+    LONG i;
     #ifdef DEBUG
         if (paSections == NULL)
             return -1;
