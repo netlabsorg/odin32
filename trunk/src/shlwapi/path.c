@@ -1,4 +1,4 @@
-/* $Id: path.c,v 1.2 2000-06-11 08:44:54 phaller Exp $ */
+/* $Id: path.c,v 1.3 2000-06-13 11:42:05 achimha Exp $ */
 
 /*
  * Path Functions
@@ -62,7 +62,7 @@ ODINDEBUGCHANNEL(SHLWAPI-SHELLPATH)
  */
 LPSTR WINAPI PathAppendA(
 	LPSTR lpszPath1,
-	LPCSTR lpszPath2) 
+	LPSTR lpszPath2) 
 {
 	TRACE("%s %s\n",lpszPath1, lpszPath2);
 	while (lpszPath2[0]=='\\') lpszPath2++;
