@@ -1,4 +1,4 @@
-/* $Id: tooltips.cpp,v 1.4 2000-03-18 16:17:32 cbratschi Exp $ */
+/* $Id: tooltips.cpp,v 1.5 2000-03-21 17:30:45 cbratschi Exp $ */
 /*
  * Tool tip control
  *
@@ -78,9 +78,104 @@ static VOID TOOLTIPS_Draw (HWND hwnd, HDC hdc)
     if (oldBkMode != TRANSPARENT) SetBkMode(hdc,oldBkMode);
 }
 
+static VOID TOOLTIPS_GetCallbackText(HWND hwnd,TOOLTIPS_INFO *infoPtr,TTTOOL_INFO *toolPtr)
+{
+  if (isUnicodeNotify(&infoPtr->header))
+  {
+    NMTTDISPINFOW ttnmdi;
 
-static VOID
-TOOLTIPS_GetTipText(HWND hwnd,TOOLTIPS_INFO *infoPtr,INT nTool)
+    /* fill NMHDR struct */
+    ZeroMemory (&ttnmdi,sizeof(NMTTDISPINFOW));
+    ttnmdi.hdr.hwndFrom = hwnd;
+    ttnmdi.hdr.idFrom = toolPtr->uId;
+    ttnmdi.hdr.code = TTN_GETDISPINFOW;
+    ttnmdi.lpszText = (WCHAR*)&ttnmdi.szText;
+    ttnmdi.uFlags = toolPtr->uFlags;
+    ttnmdi.lParam = toolPtr->lParam;
+    SendMessageA(toolPtr->hwnd,WM_NOTIFY,(WPARAM)toolPtr->uId,(LPARAM)&ttnmdi);
+
+    if ((ttnmdi.hinst) && (HIWORD((UINT)ttnmdi.lpszText) == 0))
+    {
+      LoadStringW(ttnmdi.hinst,(UINT)ttnmdi.lpszText,infoPtr->szTipText,INFOTIPSIZE);
+      if (ttnmdi.uFlags & TTF_DI_SETITEM)
+      {
+        toolPtr->hinst = ttnmdi.hinst;
+        toolPtr->lpszText = (LPWSTR)ttnmdi.lpszText;
+      }
+    } else
+    {
+      if (ttnmdi.lpszText != LPSTR_TEXTCALLBACKW)
+      {
+        if (!HIWORD(ttnmdi.lpszText) && (ttnmdi.lpszText != NULL))
+        {
+          //error
+          infoPtr->szTipText[0] = '\0';
+          return;
+        }
+        lstrcpynW(infoPtr->szTipText,ttnmdi.lpszText,INFOTIPSIZE);
+        if (ttnmdi.uFlags & TTF_DI_SETITEM)
+        {
+          INT len = lstrlenW(ttnmdi.lpszText);
+          toolPtr->hinst = 0;
+          toolPtr->lpszText = (WCHAR*)COMCTL32_Alloc((len+1)*sizeof(WCHAR));
+          lstrcpyW(toolPtr->lpszText,ttnmdi.lpszText);
+        }
+      } else
+      {
+        //ERR (tooltips, "recursive text callback!\n");
+        infoPtr->szTipText[0] = '\0';
+      }
+    }
+  } else
+  {
+    NMTTDISPINFOA ttnmdi;
+
+    /* fill NMHDR struct */
+    ZeroMemory (&ttnmdi,sizeof(NMTTDISPINFOA));
+    ttnmdi.hdr.hwndFrom = hwnd;
+    ttnmdi.hdr.idFrom = toolPtr->uId;
+    ttnmdi.hdr.code = TTN_GETDISPINFOA;
+    ttnmdi.lpszText = (CHAR*)&ttnmdi.szText;
+    ttnmdi.uFlags = toolPtr->uFlags;
+    ttnmdi.lParam = toolPtr->lParam;
+    SendMessageA(toolPtr->hwnd,WM_NOTIFY,(WPARAM)toolPtr->uId,(LPARAM)&ttnmdi);
+
+    if ((ttnmdi.hinst) && (HIWORD((UINT)ttnmdi.lpszText) == 0))
+    {
+      LoadStringW(ttnmdi.hinst,(UINT)ttnmdi.lpszText,infoPtr->szTipText,INFOTIPSIZE);
+      if (ttnmdi.uFlags & TTF_DI_SETITEM)
+      {
+        toolPtr->hinst = ttnmdi.hinst;
+        toolPtr->lpszText = (LPWSTR)ttnmdi.lpszText;
+      }
+    } else
+    {
+      if (ttnmdi.lpszText != LPSTR_TEXTCALLBACKA)
+      {
+        if (!HIWORD(ttnmdi.lpszText) && (ttnmdi.lpszText != NULL))
+        {
+          //error
+          infoPtr->szTipText[0] = '\0';
+          return;
+        }
+        lstrcpynAtoW(infoPtr->szTipText,ttnmdi.lpszText,INFOTIPSIZE);
+        if (ttnmdi.uFlags & TTF_DI_SETITEM)
+        {
+          INT len = lstrlenA(ttnmdi.lpszText);
+          toolPtr->hinst = 0;
+          toolPtr->lpszText = (WCHAR*)COMCTL32_Alloc((len+1)*sizeof(WCHAR));
+          lstrcpyAtoW(toolPtr->lpszText,ttnmdi.lpszText);
+        }
+      } else
+      {
+        //ERR (tooltips, "recursive text callback!\n");
+        infoPtr->szTipText[0] = '\0';
+      }
+    }
+  }
+}
+
+static VOID TOOLTIPS_GetTipText(HWND hwnd,TOOLTIPS_INFO *infoPtr,INT nTool)
 {
     TTTOOL_INFO *toolPtr = &infoPtr->tools[nTool];
 
@@ -92,69 +187,17 @@ TOOLTIPS_GetTipText(HWND hwnd,TOOLTIPS_INFO *infoPtr,INT nTool)
     } else if (toolPtr->lpszText)
     {
       if (toolPtr->lpszText == LPSTR_TEXTCALLBACKW)
-      {
-        NMTTDISPINFOA ttnmdi;
-
-        /* fill NMHDR struct */
-        ZeroMemory (&ttnmdi,sizeof(NMTTDISPINFOA));
-        ttnmdi.hdr.hwndFrom = hwnd;
-        ttnmdi.hdr.idFrom = toolPtr->uId;
-        ttnmdi.hdr.code = TTN_GETDISPINFOA;
-        ttnmdi.lpszText = (LPSTR)&ttnmdi.szText;
-        ttnmdi.uFlags = toolPtr->uFlags;
-        ttnmdi.lParam = toolPtr->lParam;
-        SendMessageA (toolPtr->hwnd,WM_NOTIFY,(WPARAM)toolPtr->uId,(LPARAM)&ttnmdi);
-
-        if ((ttnmdi.hinst) && (HIWORD((UINT)ttnmdi.szText) == 0))
-        {
-          LoadStringW (ttnmdi.hinst,(UINT)ttnmdi.szText,infoPtr->szTipText,INFOTIPSIZE);
-          if (ttnmdi.uFlags & TTF_DI_SETITEM)
-          {
-            toolPtr->hinst = ttnmdi.hinst;
-            toolPtr->lpszText = (LPWSTR)ttnmdi.szText;
-          }
-        } else if (ttnmdi.szText[0])
-        {
-          lstrcpynAtoW(infoPtr->szTipText,ttnmdi.szText,INFOTIPSIZE);
-          if (ttnmdi.uFlags & TTF_DI_SETITEM)
-          {
-            INT len = lstrlenA(ttnmdi.szText);
-            toolPtr->hinst = 0;
-            toolPtr->lpszText = (WCHAR*)COMCTL32_Alloc((len+1)* sizeof(WCHAR));
-            lstrcpyAtoW(toolPtr->lpszText,ttnmdi.szText);
-          }
-        } else if (ttnmdi.lpszText == 0)
-        {
-          /* no text available */
-          infoPtr->szTipText[0] = '\0';
-        } else if (ttnmdi.lpszText != LPSTR_TEXTCALLBACKA)
-        {
-          lstrcpynAtoW(infoPtr->szTipText,ttnmdi.lpszText,INFOTIPSIZE);
-          if (ttnmdi.uFlags & TTF_DI_SETITEM)
-          {
-            INT len = lstrlenA(ttnmdi.lpszText);
-            toolPtr->hinst = 0;
-            toolPtr->lpszText = (WCHAR*)COMCTL32_Alloc((len+1)*sizeof(WCHAR));
-            lstrcpyAtoW(toolPtr->lpszText,ttnmdi.lpszText);
-          }
-        } else
-        {
-          //ERR (tooltips, "recursive text callback!\n");
-          infoPtr->szTipText[0] = '\0';
-        }
-      } else
+        TOOLTIPS_GetCallbackText(hwnd,infoPtr,toolPtr);
+      else
       {
         /* the item is a usual (unicode) text */
         lstrcpynW(infoPtr->szTipText,toolPtr->lpszText,INFOTIPSIZE);
       }
-    }
-    else
+    } else
     {
       /* no text available */
       infoPtr->szTipText[0] = '\0';
     }
-
-//    TRACE (tooltips, "\"%s\"\n", debugstr_w(infoPtr->szTipText));
 }
 
 static VOID
@@ -625,8 +668,6 @@ TOOLTIPS_CheckTool (HWND hwnd, BOOL bShowTest)
             return -1;
     }
 
-//    TRACE (tooltips, "tool %d\n", nTool);
-
     return nTool;
 }
 
@@ -637,9 +678,6 @@ TOOLTIPS_Activate (HWND hwnd, WPARAM wParam, LPARAM lParam)
     TOOLTIPS_INFO *infoPtr = TOOLTIPS_GetInfoPtr(hwnd);
 
     infoPtr->bActive = (BOOL)wParam;
-
-//    if (infoPtr->bActive)
-//      TRACE (tooltips, "activate!\n");
 
     if (!(infoPtr->bActive) && (infoPtr->nCurrentTool != -1))
         TOOLTIPS_Hide (hwnd, infoPtr);
@@ -1227,7 +1265,7 @@ TOOLTIPS_GetTextA (HWND hwnd, WPARAM wParam, LPARAM lParam)
     nTool = TOOLTIPS_GetToolFromInfoA (infoPtr, lpToolInfo);
     if (nTool == -1) return 0;
 
-    TOOLTIPS_GetTipText(hwnd,infoPtr,nTool); //CB: get text
+    TOOLTIPS_GetTipText(hwnd,infoPtr,nTool);
 
     lstrcpyWtoA(lpToolInfo->lpszText,infoPtr->szTipText);
 
@@ -1250,7 +1288,7 @@ TOOLTIPS_GetTextW (HWND hwnd, WPARAM wParam, LPARAM lParam)
     nTool = TOOLTIPS_GetToolFromInfoW (infoPtr, lpToolInfo);
     if (nTool == -1) return 0;
 
-    TOOLTIPS_GetTipText(hwnd,infoPtr,nTool); //CB: get text
+    TOOLTIPS_GetTipText(hwnd,infoPtr,nTool);
 
     lstrcpyW(lpToolInfo->lpszText,infoPtr->szTipText);
 

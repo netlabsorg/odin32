@@ -1,4 +1,4 @@
-/* $Id: header.cpp,v 1.3 2000-03-18 16:17:23 cbratschi Exp $ */
+/* $Id: header.cpp,v 1.4 2000-03-21 17:30:41 cbratschi Exp $ */
 /*
  *  Header control
  *
@@ -251,7 +251,7 @@ HEADER_DrawItem (HWND hwnd, HDC hdc, INT iItem, BOOL bHotTrack,BOOL bEraseTextBk
     } else
     {
       UINT uTextJustify;
-      WCHAR* pszText = phdi->pszText;
+      WCHAR *pszText = phdi->pszText,*orgPtr;
 
       if ((phdi->fmt & HDF_JUSTIFYMASK) == HDF_CENTER)
         uTextJustify = DT_CENTER;
@@ -268,11 +268,13 @@ HEADER_DrawItem (HWND hwnd, HDC hdc, INT iItem, BOOL bHotTrack,BOOL bEraseTextBk
         nmhdr.cchTextMax = phdi->cchTextMax;
         if (isUnicodeNotify(&infoPtr->header))
         {
-          nmhdr.pszText    = (WCHAR*)COMCTL32_Alloc(phdi->cchTextMax*sizeof(WCHAR));
+          orgPtr = (WCHAR*)COMCTL32_Alloc(phdi->cchTextMax*sizeof(WCHAR));
+          nmhdr.pszText    = orgPtr;
           if (nmhdr.pszText) nmhdr.pszText[0] = 0;
         } else
         {
-          nmhdr.pszText    = (WCHAR*)COMCTL32_Alloc(phdi->cchTextMax*sizeof(CHAR));
+          orgPtr = (WCHAR*)COMCTL32_Alloc(phdi->cchTextMax*sizeof(CHAR));
+          nmhdr.pszText    = orgPtr;
           if (nmhdr.pszText) ((LPSTR)nmhdr.pszText)[0] = 0;
         }
         nmhdr.lParam     = phdi->lParam;
@@ -290,7 +292,7 @@ HEADER_DrawItem (HWND hwnd, HDC hdc, INT iItem, BOOL bHotTrack,BOOL bEraseTextBk
               phdi->pszText = (WCHAR*)COMCTL32_Alloc((len+1)*sizeof(WCHAR));
               lstrcpyW(phdi->pszText,pszText);
             } else phdi->pszText = NULL;
-            COMCTL32_Free(pszText);
+            if (pszText == orgPtr) COMCTL32_Free(pszText);
             pszText = phdi->pszText;
           } else
           {
@@ -301,10 +303,9 @@ HEADER_DrawItem (HWND hwnd, HDC hdc, INT iItem, BOOL bHotTrack,BOOL bEraseTextBk
               pszText = (WCHAR*)COMCTL32_Alloc((len+1)*sizeof(WCHAR));
               lstrcpyAtoW(pszText,(LPSTR)nmhdr.pszText);
             } else pszText = NULL;
-            COMCTL32_Free(nmhdr.pszText);
+            if (nmhdr.pszText == orgPtr) COMCTL32_Free(nmhdr.pszText);
 
-            if (nmhdr.mask & HDI_DI_SETITEM)
-              phdi->pszText = pszText;
+            phdi->pszText = pszText;
           }
         }
       }
@@ -328,7 +329,7 @@ HEADER_DrawItem (HWND hwnd, HDC hdc, INT iItem, BOOL bHotTrack,BOOL bEraseTextBk
             HEADER_DrawItemText(hdc,infoPtr,phdi,&r,pszText,uTextJustify,bEraseTextBkgnd,bHotTrack);
         }
       }
-      if (phdi->pszText == LPSTR_TEXTCALLBACKW) COMCTL32_Free(pszText);
+      if ((phdi->pszText == LPSTR_TEXTCALLBACKW) && (pszText == orgPtr)) COMCTL32_Free(pszText);
     }
 
     return phdi->rect.right;
@@ -1641,11 +1642,9 @@ HEADER_LButtonUp (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
         HEADER_SendItemClick(hwnd,infoPtr->iMoveItem,0);
       }
-//      TRACE (header, "Released item %d!\n", infoPtr->iMoveItem);
       infoPtr->bPressed = FALSE;
     } else if (infoPtr->bTracking)
     {
-//      TRACE (header, "End tracking item %d!\n", infoPtr->iMoveItem);
       infoPtr->bTracking = FALSE;
 
       HEADER_SendEndTrack(hwnd,infoPtr->iMoveItem,0);
@@ -1665,11 +1664,10 @@ HEADER_LButtonUp (HWND hwnd, WPARAM wParam, LPARAM lParam)
           if (infoPtr->nOldWidth != nWidth)
           {
             infoPtr->items[infoPtr->iMoveItem].cxy = nWidth;
-            HEADER_SendItemChanged(hwnd,infoPtr->iMoveItem);
 
             HEADER_SetItemBounds (hwnd,infoPtr->iMoveItem);
-
             HEADER_Refresh(hwnd);
+            HEADER_SendItemChanged(hwnd,infoPtr->iMoveItem);
           }
         }
       }
@@ -1815,7 +1813,6 @@ HEADER_MouseMove (HWND hwnd, WPARAM wParam, LPARAM lParam)
         }
 
         HEADER_SendTrack(hwnd,infoPtr->iMoveItem);
-//          TRACE (header, "Tracking item %d!\n", infoPtr->iMoveItem);
       }
     }
 

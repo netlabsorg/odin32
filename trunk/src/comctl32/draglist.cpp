@@ -1,3 +1,4 @@
+/* $Id: draglist.cpp,v 1.2 2000-03-21 17:30:41 cbratschi Exp $ */
 /*
  * Drag List control
  *
@@ -22,15 +23,15 @@ static DWORD dwLastScrollTime = 0;
 
 BOOL WINAPI MakeDragList (HWND hwndLB)
 {
-    dprintf(("COMCTL32: MakeDragList - empty stub!"));
+  dprintf(("COMCTL32: MakeDragList - empty stub!"));
 
-    return FALSE;
+  return FALSE;
 }
 
 
 VOID WINAPI DrawInsert (HWND hwndParent, HWND hwndLB, INT nItem)
 {
-    dprintf(("COMCTL32: DrawInsert - empty stub!"));
+  dprintf(("COMCTL32: DrawInsert - empty stub!"));
 }
 
 
@@ -92,5 +93,5 @@ static LRESULT CALLBACK
 DRAGLIST_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 
-    return FALSE;
+  return FALSE;
 }

@@ -1,4 +1,4 @@
-/* $Id: pager.cpp,v 1.2 2000-03-17 17:13:23 cbratschi Exp $ */
+/* $Id: pager.cpp,v 1.3 2000-03-21 17:30:44 cbratschi Exp $ */
 /*
  * Pager control
  *
@@ -200,7 +200,6 @@ PAGER_Create (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
     /* allocate memory for info structure */
     infoPtr = (PAGER_INFO*)initControl(hwnd,sizeof(PAGER_INFO));
-    SetWindowLongA (hwnd, 0, (DWORD)infoPtr);
 
     /* set default settings */
     infoPtr->hwndChild = (HWND)NULL;
@@ -276,7 +275,27 @@ PAGER_Size (HWND hwnd, WPARAM wParam, LPARAM lParam)
     return TRUE;
 }
 
+static VOID PAGER_Draw(HWND hwnd,HDC hdc,RECT *updateRect)
+{
+  drawStubControl(hwnd,hdc);
+}
 
+static LRESULT PAGER_Paint(HWND hwnd,WPARAM wParam,LPARAM lParam)
+{
+  HDC hdc = (HDC)wParam;
+
+  if (!hdc)
+  {
+    PAINTSTRUCT ps;
+
+    hdc = BeginPaint(hwnd,&ps);
+    PAGER_Draw(hwnd, hdc,&ps.rcPaint);
+    EndPaint(hwnd,&ps);
+  } else
+      PAGER_Draw(hwnd,hdc,NULL);
+
+  return 0;
+}
 
 static LRESULT WINAPI
 PAGER_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -337,17 +356,17 @@ PAGER_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         case WM_COMMAND:
             return SendMessageA (GetParent (hwnd), uMsg, wParam, lParam);
 
-/*      case WM_PAINT: */
-/*          return PAGER_Paint (hwnd, wParam); */
+        case WM_PAINT:
+          return PAGER_Paint(hwnd,wParam,lParam);
 
         case WM_SIZE:
             return PAGER_Size (hwnd, wParam, lParam);
 
         default:
-//          if (uMsg >= WM_USER)
-//              ERR (pager, "unknown msg %04x wp=%08x lp=%08lx\n",
-//                   uMsg, wParam, lParam);
-            return defComCtl32ProcA (hwnd, uMsg, wParam, lParam);
+          //if (uMsg >= WM_USER)
+          //    ERR (pager, "unknown msg %04x wp=%08x lp=%08lx\n",
+          //         uMsg, wParam, lParam);
+          return defComCtl32ProcA (hwnd, uMsg, wParam, lParam);
     }
     return 0;
 }
