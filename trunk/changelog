@@ -1,4 +1,4 @@
- /* $Id: changelog,v 1.1063 2000-08-12 09:52:41 sandervl Exp $ */
+ /* $Id: changelog,v 1.1064 2000-08-12 16:59:08 sandervl Exp $ */
 
  2000-08-12: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: Do not set OPEN_ACCESS_READWRITE flag in OSLibDosCreateFile
@@ -8,6 +8,8 @@
                 Removed share mode hack. Caused by the bug mentioned above.
                 (You can change the file sharing mode when opening the same
                  file several times in OS/2)
+                Fixed system dll unload bug.
+                Extra checks in Win32ImageBase::isPEImage (nr of bytes read is correct or not)
 
  2000-08-11: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: Lock/Unlock
