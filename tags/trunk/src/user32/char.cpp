@@ -1,4 +1,4 @@
-/* $Id: char.cpp,v 1.15 2001-04-03 20:55:46 sandervl Exp $ */
+/* $Id: char.cpp,v 1.16 2001-07-28 12:57:57 sandervl Exp $ */
 
 /*
  * USER string functions
@@ -432,19 +432,22 @@ BOOL WINAPI IsCharAlphaW(WCHAR x)
     dprintf2(("IsCharAlphaW %x", x));
     return get_char_typeW(x) & (C1_ALPHA|C1_LOWER|C1_UPPER);
 }
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API IsCharAlphaA( CHAR x)
+{
+    WCHAR wch;
 
-//******************************************************************************
-//TODO:
-//******************************************************************************
-BOOL WIN32API IsCharAlphaA( CHAR arg1)
-{
-    dprintf(("USER32: IsCharAlphaA %x", arg1));
-    return O32_IsCharAlpha(arg1);
+    dprintf(("USER32: IsCharAlphaA %x", x));
+    MultiByteToWideChar(CP_ACP, 0, &x, 1, &wch, 1);
+    return IsCharAlphaW(wch);
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API IsCharAlphaNumericA( CHAR arg1)
+BOOL WIN32API IsCharAlphaNumericA( CHAR x)
 {
-    dprintf(("USER32: IsCharAlphaNumericA %x", arg1));
-    return O32_IsCharAlphaNumeric(arg1);
+    dprintf(("USER32: IsCharAlphaNumericA %x", x));
+    return (get_char_typeW(x) & C1_ALPHA) != 0;
 }
+//******************************************************************************
+//******************************************************************************
