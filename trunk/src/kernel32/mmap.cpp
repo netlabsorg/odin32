@@ -1,4 +1,4 @@
-/* $Id: mmap.cpp,v 1.23 1999-11-22 20:35:50 sandervl Exp $ */
+/* $Id: mmap.cpp,v 1.24 1999-12-06 21:31:43 sandervl Exp $ */
 
 /*
  * Win32 Memory mapped file & view classes
@@ -511,10 +511,11 @@ Win32MemMapView::Win32MemMapView(Win32MemMap *map, ULONG offset, ULONG size,
 	accessAttr = PAG_READ;
 	mfAccess   = MEMMAP_ACCESS_READ;
 	break;
+  case FILE_MAP_ALL_ACCESS:
   case FILE_MAP_WRITE:
   case FILE_MAP_COPY:
 	accessAttr = (PAG_READ|PAG_WRITE);
-	mfAccess   = MEMMAP_ACCESS_WRITE;
+	mfAccess   = MEMMAP_ACCESS_READ | MEMMAP_ACCESS_WRITE;
 	break;
   }
   if(map->getMemName() != NULL) {
@@ -568,7 +569,7 @@ Win32MemMapView::~Win32MemMapView()
 
   dprintf(("Win32MemMapView dtor: deleting view %x %x", mOffset, mSize));
 
-  if(mfAccess != MEMMAP_ACCESS_READ)
+  if(mfAccess & MEMMAP_ACCESS_WRITE)
   	mParentMap->flushView(mOffset, mSize);
 
   //Don't free memory for executable image map views (only used internally)
