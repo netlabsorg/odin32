@@ -147,9 +147,12 @@ void add_cmdline_define(char *set)
 	free(cpy);
 }
 
-#if defined(_Windows) || defined(__MSDOS__) || defined(__WIN32OS2__)
+/*kso added test for __SEMICOLON__ since __WIN32OS2__ isn't defined! */
+#if defined(__SEMICOLON__) || defined(_Windows) || defined(__MSDOS__) || defined(__WIN32OS2__)
 #define INCLUDESEPARATOR	";"
+#warning "Using ; as include separator"
 #else
+#warning "Using : as include separator"
 #define INCLUDESEPARATOR	":"
 #endif
 
