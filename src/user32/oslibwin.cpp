@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.28 1999-10-14 18:27:57 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.29 1999-10-14 19:31:30 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -879,6 +879,8 @@ void OSLibSetWindowStyle(HWND hwnd, ULONG dwStyle)
   ULONG OSWinStyle, OSFrameStyle, borderWidth, borderHeight,dwExStyle;
 
   OSLibWinConvertStyle(dwStyle, &dwExStyle, &OSWinStyle, &OSFrameStyle, &borderWidth, &borderHeight);
+
+  OSWinStyle = OSWinStyle & ~(WS_TABSTOP | WS_GROUP | WS_CLIPCHILDREN);
 
   WinSetWindowULong(hwnd, QWL_STYLE,
                     (WinQueryWindowULong(hwnd, QWL_STYLE) & ~0xffff0000) |
