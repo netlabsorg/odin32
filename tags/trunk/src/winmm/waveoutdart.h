@@ -1,4 +1,4 @@
-/* $Id: waveoutdart.h,v 1.2 2001-04-01 12:31:01 sandervl Exp $ */
+/* $Id: waveoutdart.h,v 1.3 2002-06-04 17:36:56 sandervl Exp $ */
 
 /*
  * Wave playback class (DART)
@@ -37,7 +37,7 @@ public:
      virtual  MMRESULT write(LPWAVEHDR pwh, UINT cbwh);
      virtual  MMRESULT pause();
      virtual  MMRESULT stop();
-     virtual  MMRESULT restart();
+     virtual  MMRESULT resume();
      virtual  MMRESULT setVolume(ULONG ulVol);
      virtual  MMRESULT reset();
      virtual  ULONG    getPosition();

@@ -1,4 +1,4 @@
-/* $Id: waveout.cpp,v 1.24 2002-05-28 14:09:25 sandervl Exp $ */
+/* $Id: waveout.cpp,v 1.25 2002-06-04 17:36:55 sandervl Exp $ */
 //#undef DEBUG
 /*
  * Wave out MM apis
@@ -152,7 +152,7 @@ MMRESULT WINAPI waveOutRestart(HWAVEOUT hwaveout)
     WaveOut *dwave = (WaveOut *)hwaveout;
 
     if(WaveOut::find(dwave) == TRUE)
-         return(dwave->restart());
+         return(dwave->resume());
     else return(MMSYSERR_INVALHANDLE);
 }
 /******************************************************************************/
