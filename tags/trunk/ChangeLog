@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.100 1999-08-18 23:42:19 phaller Exp $ */
+ /* $Id: ChangeLog,v 1.101 1999-08-19 10:24:27 sandervl Exp $ */
+ 99-08-19: Sander van Leeuwen <sandervl@xs4all.nl>
+	- KERNEL32: PE loader resource fixes + ConvertNameId bugfix
+
  99-08-18: Patrick Haller <phaller@gmx.net>
         - NTDLL:    tons of new stubs and crt functions
         - WNETAP32: tons of new stubs
