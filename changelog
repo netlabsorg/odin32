@@ -1,7 +1,15 @@
-/* $Id: changelog,v 1.1593 2001-07-13 08:07:28 sandervl Exp $ */
+/* $Id: changelog,v 1.1594 2001-07-13 14:29:42 sandervl Exp $ */
 
  2001-07-13: Sander van Leeuwen <sandervl@xs4all.nl>
     - COMDLG32: o Fix for windows 3.1 style file dialog
+    - KERNEL32: o Check for NULL pointer in lstrlenA/W
+                  (fixes crash during AutoCAD 14 install)
+    - USER32:   o Removed very old check for negative x or y coordinates during
+                  window creation. 
+                  (file open dialog in InstallShield doesn't show weird edit control
+                   anymore and the MS Word 97 main window looks better now)
+                o RegisterClassA/W: check icon first before copying it 
+                  (gets rid of some annoying warnings in the logfile)
 
  2001-07-12: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Atom fixes
