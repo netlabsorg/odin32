@@ -1,10 +1,14 @@
- /* $Id: changelog,v 1.1012 2000-06-29 11:12:51 sandervl Exp $ */
+ /* $Id: changelog,v 1.1013 2000-06-29 12:25:25 sandervl Exp $ */
 
  2000-06-29: Sander van Leeuwen <sandervl@xs4all.nl>
     - INCLUDE\WIN\commctrl.h: 
                    Put undocumented parts in #ifdef COMCTL32UNDOC statement
     - INCLUDE\makefiles
                    Added -DCOMCTL32UNDOC to Odin compile flags
+    - USER32:      Added HCBT_ACTIVATE hook call to SetActiveWindow
+                   Send WM_ACTIVATE from WM_WINDOWPOSCHANGED if SWP_ACTIVATE
+                   flag set -> fixes activation of odin windows
+                   Removed forwarding of messages to PM frame window handler.
 
  2000-06-28: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32:    Cleaned up resource handling (findResourceA/W); much
@@ -43,6 +47,7 @@
     - KERNEL32:    Added check for crossing limit of relocation section when
                    applying fixups. (fixes crash in IBM VisualAge Java setup)
 
+ 2000-06-25: Michal Necasek <mike@mendelu.cz>
     - KERNEL32:    When creating files and mode is readonly, change to
                    read/write (or else DosOpen fails)
                    GetFileTime failed in OpenFile because handle wasn't
