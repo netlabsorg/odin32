@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.140 2003-02-27 14:22:42 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.141 2003-03-27 11:02:26 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -1325,6 +1325,12 @@ HWND OSLibWinCreateInvisibleScroller(HWND parentHWND, int direction)
 {
     return WinCreateWindow(parentHWND, WC_SCROLLBAR, NULL, direction,
                            0, 0, 0, 0, parentHWND, HWND_BOTTOM, 1, NULL, NULL);
+}
+//******************************************************************************
+//******************************************************************************
+void OSLibWinLockVisibleRegions(BOOL fLock)
+{
+    WinLockVisRegions(HWND_DESKTOP, fLock);
 }
 //******************************************************************************
 //******************************************************************************

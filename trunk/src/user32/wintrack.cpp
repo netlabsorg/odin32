@@ -46,6 +46,10 @@
  */
 static void draw_moving_frame( HDC hdc, RECT *rect, BOOL thickframe, DWORD hittest, BOOL fRedraw)
 {
+    if(hdc == 0) {
+        DebugInt3(); 
+        return;
+    }
     if (thickframe)
     {
         const int width = GetSystemMetrics(SM_CXFRAME);
@@ -464,7 +468,6 @@ void Frame_SysCommandSizeMove(Win32BaseWindow *win32wnd, WPARAM wParam )
     pt.y = SHIWORD(dwPoint);
     capturePoint = pt;
 
-//    if (IsZoomed(hwnd) || !IsWindowVisible(hwnd) || (exstyle & WS_EX_MANAGED)) return;
     if (IsZoomed(hwnd) || !IsWindowVisible(hwnd)) return;
 
     if(fOS2Look) {
@@ -496,9 +499,7 @@ void Frame_SysCommandSizeMove(Win32BaseWindow *win32wnd, WPARAM wParam )
         }
     }
 
-      /* Get min/max info */
-
-//    WINPOS_GetMinMaxInfo( hwnd, NULL, NULL, &minTrack, &maxTrack );
+    /* Get min/max info */
     win32wnd->AdjustTrackInfo(&minTrack, &maxTrack);
     GetWindowRect( hwnd, &sizingRect );
     if (style & WS_CHILD)
@@ -538,14 +539,15 @@ void Frame_SysCommandSizeMove(Win32BaseWindow *win32wnd, WPARAM wParam )
     if (parent) MapWindowPoints( parent, 0, (LPPOINT)&mouseRect, 2 );
 
     /* Retrieve a default cache DC (without using the window style) */
-    hdc = GetDCEx( parent, 0, DCX_CACHE);
+    hdc = 0;
+    if(!DragFullWindows) 
+        hdc = GetDCEx( parent, 0, DCX_CACHE);
 
     if( iconic ) /* create a cursor for dragging */
     {
         HICON hIcon = GetClassLongA( hwnd, GCL_HICON);
         if(!hIcon) hIcon = (HICON)SendMessageA( hwnd, WM_QUERYDRAGICON, 0, 0L);
         if( hIcon ) hDragCursor = hIcon;
-// CURSORICON_IconToCursor( hIcon, TRUE );
         if( !hDragCursor ) iconic = FALSE;
     }
 
@@ -555,8 +557,10 @@ void Frame_SysCommandSizeMove(Win32BaseWindow *win32wnd, WPARAM wParam )
     SendMessageA( hwnd, WM_ENTERSIZEMOVE, 0, 0 );
     SetCapture( hwnd );
 
+    BOOL fMove = (wParam & 0xfff0) == SC_MOVE;
+
     //prevent the app from drawing to this window (or its children)    
-    if(!DragFullWindows) 
+    if(!DragFullWindows || fMove) 
         LockWindowUpdate(hwnd);
 
     while(1)
@@ -629,8 +633,6 @@ void Frame_SysCommandSizeMove(Win32BaseWindow *win32wnd, WPARAM wParam )
                 else 
                 if (ON_BOTTOM_BORDER(hittest)) newRect.bottom += dy;
 
-////                if(!iconic && !DragFullWindows) draw_moving_frame( hdc, &sizingRect, thickframe, hittest, TRUE);
-
                 /* determine the hit location */
                 if (hittest >= HTLEFT && hittest <= HTBOTTOMRIGHT)
                     wpSizingHit = WMSZ_LEFT + (hittest - HTLEFT);
@@ -659,15 +661,17 @@ void Frame_SysCommandSizeMove(Win32BaseWindow *win32wnd, WPARAM wParam )
                     if(!DragFullWindows)
                         draw_moving_frame( hdc, &newRect, thickframe, hittest, TRUE );
                     else {
-                        /* To avoid any deadlocks, all the locks on the windows
-			   structures must be suspended before the SetWindowPos */
-//                        iWndsLocks = WIN_SuspendWndsLock();
+                        if (!fMove) {
+                            LockWindowUpdate(hwnd);
+                        }
                         SetWindowPos( hwnd, 0, newRect.left, newRect.top,
                                       newRect.right - newRect.left,
-                                      newRect.bottom - newRect.top,
+                                      newRect.bottom - newRect.top, 
                                       ((hittest == HTCAPTION ) ? SWP_NOSIZE : 0 ) | 
                                       ((fControl) ? (SWP_NOACTIVATE|SWP_NOZORDER) : 0));
-//                        WIN_RestoreWndsLock(iWndsLocks);
+                        if (!fMove) {
+                            LockWindowUpdate(NULL);
+                        }
                     }
                 }
             }
@@ -675,7 +679,7 @@ void Frame_SysCommandSizeMove(Win32BaseWindow *win32wnd, WPARAM wParam )
     }
 
     //Enable window update
-    if(!DragFullWindows) 
+    if(!DragFullWindows || fMove) 
         LockWindowUpdate(NULL);
 
     ReleaseCapture();
@@ -691,18 +695,7 @@ void Frame_SysCommandSizeMove(Win32BaseWindow *win32wnd, WPARAM wParam )
     else if (moved && !DragFullWindows)
         draw_moving_frame( hdc, &lastsizingRect, thickframe, hittest, FALSE);
 
-    ReleaseDC( parent, hdc );
-
-//    wine_tsx11_lock();
-//    XUngrabPointer( display, CurrentTime );
-//    if (grab)
-//    {
-//        XSync( display, False );
-//        XUngrabServer( display );
-//        XSync( display, False );
-//        gdi_display = old_gdi_display;
-//    }
-//    wine_tsx11_unlock();
+    if(hdc) ReleaseDC( parent, hdc );
 
     if (HOOK_CallHooksA( WH_CBT, HCBT_MOVESIZE, (WPARAM)hwnd, (LPARAM)&lastsizingRect )) moved = FALSE;
 
@@ -712,10 +705,6 @@ void Frame_SysCommandSizeMove(Win32BaseWindow *win32wnd, WPARAM wParam )
     /* window moved or resized */
     if (moved)
     {
-        /* To avoid any deadlocks, all the locks on the windows
-	   structures must be suspended before the SetWindowPos */
-//        iWndsLocks = WIN_SuspendWndsLock();
-
         /* if the moving/resizing isn't canceled call SetWindowPos
          * with the new position or the new size of the window
          */
@@ -738,8 +727,6 @@ void Frame_SysCommandSizeMove(Win32BaseWindow *win32wnd, WPARAM wParam )
                               origRect.bottom - origRect.top,
                               ( hittest == HTCAPTION ) ? SWP_NOSIZE : 0 );
         }
-
-//        WIN_RestoreWndsLock(iWndsLocks);
     }
     else
     if (!((msg.message == WM_KEYDOWN) && (msg.wParam == VK_ESCAPE)) ) {
