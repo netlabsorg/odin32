@@ -104,7 +104,7 @@ int WINAPI WSAEventSelect(SOCKET s, WSAEVENT hEvent, LONG lEvent)
 {
     TRACE("WS2_32: WSAEventSelect %08x, hEvent %08x, event %08x\n", s, hEvent, (unsigned)lEvent );
 #ifdef DEBUG
-    // log all event event bits set
+    // log all event bits that are set
     char tmpbuf[300];
     strcpy(tmpbuf, "");
     if (lEvent & FD_READ)
