@@ -1,8 +1,13 @@
+/* $Id: asmutil.h,v 1.5 1999-12-21 01:28:17 hugh Exp $ */
+
 /*
  * asmutil.asm function definition
  *
  * Copyright 1998 Sander van Leeuwen
  *           1999 Markus Montkowski
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
+ *
  */
 
 #ifndef __ASMUTIL_H__

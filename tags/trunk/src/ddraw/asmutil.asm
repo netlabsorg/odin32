@@ -1,7 +1,13 @@
+; $Id: asmutil.asm,v 1.5 1999-12-21 01:28:19 hugh Exp $
+
+;
 ; asmutil.asm Color key bit blitting for DirectDraw
 ;
 ; Copyright 1998 Sander van Leeuwen
 ;           1999 Markus Montkowski
+;
+; Project Odin Software License can be found in LICENSE.TXT
+;
 
                 NAME    asmutil
 .586p

@@ -1,3 +1,15 @@
+/* $Id: OS2DDRAW.H,v 1.9 1999-12-21 01:28:19 hugh Exp $ */
+
+/*
+ * DX Draw base class definition
+ *
+ * Copyright 1998 Sander va Leeuwen
+ * Copyright 1999 Markus Montkowski
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
+ *
+ */
+
 #ifndef __OS2DDRAW_HPP__
   #define __OS2DDRAW_HPP__
 
@@ -66,6 +78,7 @@ class OS2IDirectDraw
     HDIVE   hDiveColorConv;  // Handle to Offscreen DIVE instance for Color conversion
     char   *pFrameBuffer;
     HWND    hwndClient;
+    DWORD   dwCoopMode;
     int     screenwidth, screenheight, screenbpp;
     BOOL    PrimaryExists;
     BOOL    bScale;

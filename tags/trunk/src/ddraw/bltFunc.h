@@ -1,3 +1,13 @@
+/* $Id: bltFunc.h,v 1.2 1999-12-21 01:28:17 hugh Exp $ */
+
+/*
+ * Blitting functions definitions
+ *
+ * Copyright 1999 Markus Montkowski
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
+ *
+ */
 
 
 // without ColorConversion

@@ -1,3 +1,13 @@
+/* $Id: os2ddrawmodes.h,v 1.2 1999-12-21 01:28:19 hugh Exp $ */
+
+/*
+ * Defintions of common videomodes we report back
+ *
+ * Copyright 1999 Markus Montkowski
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
+ *
+ */
 #ifndef __OS2DDRAWMODES__
 #define __OS2DDRAWMODES__
 
