@@ -1,3 +1,5 @@
+; $Id: winspool.DEF,v 1.2 1999-06-10 16:19:02 phaller Exp $
+
 ;Created by BLAST for IBM's compiler
 LIBRARY WINSPOOL INITINSTANCE
 DATA MULTIPLE NONSHARED
@@ -27,7 +29,7 @@ EXPORTS
   AddPrinterW				= _AddPrinterW@12				@22 ;stubonly
   AdvancedDocumentPropertiesA 		= _AdvancedDocumentPropertiesA@20 		@23 ;stubonly
   AdvancedDocumentPropertiesW 		= _AdvancedDocumentPropertiesA@20		@24 ;stubonly		
-;025 stub AdvancedSetupDialog 
+;025 stub AdvancedSetupDialog
   ClosePrinter				= _ClosePrinter@4				@26 ;stubonly
   ConfigurePortA 			= _ConfigurePortA@12				@27 ;stubonly
   ConfigurePortW 			= _ConfigurePortW@12				@28 ;stubonly
