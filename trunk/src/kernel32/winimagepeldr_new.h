@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.h,v 1.11 2001-05-30 08:23:21 sandervl Exp $ */
+/* $Id: winimagepeldr_new.h,v 1.1 2001-05-30 08:23:22 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -54,20 +54,11 @@ typedef struct {
   ULONG  flags;         //psh[i].Characteristics
 } Section;
 
-typedef struct {
-  ULONG  virtaddr;
-  ULONG  ordinal;
-  ULONG  nlength;
-  char   name[4];
-} NameExport;
-
-typedef struct {
-  ULONG  virtaddr;
-  ULONG  ordinal;
-} OrdExport;
-
 class Win32DllBase;
 class Win32MemMap;
+class CIndexLookupLimit;
+class CHashtableLookup;
+
 
 class Win32PeLdrImage : public virtual Win32ImageBase
 {
@@ -123,15 +114,13 @@ protected:
         void  AddOrdExport(ULONG virtaddr, ULONG ordinal, BOOL fAbsoluteAddress=FALSE);
         BOOL  AddForwarder(ULONG virtaddr, char *apiname, ULONG ordinal);
 
-Win32DllBase *loadDll(char *pszCurModule);
+        Win32DllBase *loadDll(char *pszCurModule);
 
  	IMAGE_OPTIONAL_HEADER oh;
 	IMAGE_FILE_HEADER     fh;
 
         ULONG                 nrNameExports, nameExportSize;
         ULONG                 nrOrdExports;
-        NameExport           *nameexports, *curnameexport;
-        OrdExport            *ordexports, *curordexport;
 
         ULONG                 nrsections, imageSize, imageVirtBase, imageVirtEnd;
         //OS/2 virtual base address
@@ -147,6 +136,9 @@ Win32DllBase *loadDll(char *pszCurModule);
         DWORD                  dwFixupSize;
 
         Win32MemMap          *memmap;
+
+        CIndexLookupLimit    *pLookupOrdinal;
+        CHashtableLookup     *pLookupName;
 private:
 };
 
