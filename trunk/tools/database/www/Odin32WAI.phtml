@@ -82,6 +82,8 @@ TekstEnd();
  * Loop thru them displaying standard information.
  *
  */
+Require "Odin32DBHelpers.php3";
+
 $db = mysql_connect("127.0.0.1", "root", "");
 $rc = mysql_select_db("odin32", $db);
 $sql="SELECT    g.refcode       AS refcode,
@@ -106,10 +108,10 @@ else
 {
     while ($group = @mysql_fetch_array($result))
     {
-        Naslov($group[name]." Group", $group[name]);
+        Naslov($group["name"]." Group", $group["name"]);
 
         TekstBeg();
-        echo $group[description];
+        echo $group["description"];
         TekstEnd();
 
         PodNaslov("Code maintainers:");
@@ -120,7 +122,7 @@ else
                         WHERE   m.tgroup            = %d   AND
                                 m.codemaintainer    = 'Y'  AND
                                 a.refcode           = m.author ",
-                      $group[refcode]);
+                      $group["refcode"]);
         $result2 = mysql_query($sql, $db);
         TekstBeg();
         printf("<ul>\n");
@@ -128,9 +130,9 @@ else
         {
             while ($member = @mysql_fetch_array($result2))
                 printf("  <li><a href=\"mailto:%s?Subject=Odin32 %s\">%s</a>\n",
-                       $member[email],
-                       $group[name],
-                       $member[name]
+                       $member["email"],
+                       $group["name"],
+                       $member["name"]
                        );
         }
         else
@@ -147,14 +149,14 @@ else
                         WHERE   m.tgroup            = %d   AND
                                 m.codemaintainer    = 'N'  AND
                                 a.refcode           = m.author ",
-                      $group[refcode]);
+                      $group["refcode"]);
         $result2 = mysql_query($sql, $db);
         TekstBeg();
         printf("<ul>\n");
         if (@mysql_num_rows($result2) > 0)
         {
             while ($member = @mysql_fetch_array($result2))
-                printf("  <li> %s\n", $member[name]);
+                printf("  <li> %s\n", $member["name"]);
         }
         else
             printf("  <li> <font color=ff0000> <b>NOBODY</b> </font>");
@@ -162,24 +164,21 @@ else
         TekstEnd();
 
 
-        PodNaslov("Completed:");
-        $sql = sprintf("SELECT  UPPER(d.name)  AS name
+        PodNaslov("Implementation Status:");
+        $sql = sprintf("SELECT  UPPER(d.name)   AS name,
+                                d.refcode       AS refcode
                         FROM    dll d,
                                 tgroupdll t
                         WHERE   t.tgroup = %d AND
                                 t.dll = d.refcode
                         ORDER BY name",
-                      $group[refcode]);
+                      $group["refcode"]);
         $result2 = mysql_query($sql, $db);
         TekstBeg();
         if (@mysql_num_rows($result2) > 0)
         {
             while ($dll = @mysql_fetch_array($result2))
-            {
-                /*$finished = Odin32ComputeCompletion($dll[name]);  - TODO */
-                $finished = 7;
-                DoneBar($finished, $dll[name]);
-            }
+                Odin32DBCompletionBar($dll["refcode"], $dll["name"], $db);
         }
         else
             printf("  <font color=ff0000> <b>Huh! NO DLLs?</b> </font>");
@@ -189,7 +188,7 @@ else
         PodNaslov("Notes:");
         TekstBeg();
         echo "<ul>";
-        echo $group[notes];
+        echo $group["notes"];
         echo "</ul>";
         TekstEnd();
 
@@ -201,15 +200,15 @@ else
                         WHERE   t.tgroup = %d AND
                                 t.dll = d.refcode
                         ORDER BY name",
-                      $group[refcode]);
+                      $group["refcode"]);
         $result2 = mysql_query($sql, $db);
         TekstBeg();
         if (@mysql_num_rows($result2) > 0)
         {
             while ($dll = @mysql_fetch_array($result2))
             {
-                printf(" To Access the %s part of the Odin32 API database, click ", $dll[name]);
-                $lnk = sprintf("Odin32DB.phtml?dll=%s", $dll[name]);
+                printf(" To Access the %s part of the Odin32 API database, click ", $dll["name"]);
+                $lnk = sprintf("Odin32DB.phtml?dll=%s", $dll["name"]);
                 LocLink($lnk, "here");
                 printf(".<BR>\n");
             }
@@ -228,7 +227,6 @@ else
 
 Naslov("Summary", "summary");
 
-        /*
         TekstBeg();
         echo "
                   For DLLs with no active maintaner, you can contact maintaners of
@@ -270,7 +268,7 @@ Naslov("Summary", "summary");
         if (@mysql_num_rows($result) > 0)
         {
             while ($member = @mysql_fetch_array($result))
-                printf("  <li> %s\n", $member[name]);
+                printf("  <li> %s\n", $member["name"]);
         }
         else
             printf("  <li> No unassigned members.");
@@ -284,7 +282,7 @@ Naslov("Summary", "summary");
 
 
 
-        PodNaslov("Completed API summary:");
+        PodNaslov("Implementation Status:");
         $sql = "SELECT  name,
                         refcode
                 FROM    dll
@@ -295,16 +293,12 @@ Naslov("Summary", "summary");
         if (@mysql_num_rows($result) > 0)
         {
             while ($dll = @mysql_fetch_array($result))
-            {
-                /* $finished = Odin32CalculateCompleteness($dll[name]) */
-                $finieshed = 8;
-                DoneBar($finished, &dll[name]);
+                Odin32DBCompletionBar($dll["refcode"], $dll["name"],  $db);
         }
         else
             printf("  <li> <font color=ff0000> <b>NOBODY</b> </font>");
         printf("</ul>\n");
         TekstEnd();
-        */
 
 
         PodNaslov("Notes:");
@@ -402,15 +396,22 @@ $result = @mysql_query($sql,$db);
 if (@mysql_num_rows($result) > 0)
 {
     while ($group = @mysql_fetch_array($result))
-    {
-        AnchNaslov($group[name]." Group", $group[name], "");
-    }
+        AnchNaslov($group["name"]." Group", $group["name"], "");
 }
 /*
- * Start kso Wed 19.07.2000 2:19am
+ * End kso Wed 19.07.2000 2:19am
  */
     AnchNaslov("Summary", "summary", "");
 TocEnd();
+
+/*
+ * Start kso Jul 20 2000 12:22am
+ */
+Odin32DBStateLegend($db);
+/*
+ * End kso Jul 20 2000 12:22am
+ */
+
 
 require "10-EndOfContent.php3";
 require "11-NetlabsContact.php3";
