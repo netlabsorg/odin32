@@ -1,4 +1,4 @@
-/* $Id: odinlx.h,v 1.9 2003-01-23 20:21:30 sandervl Exp $ */
+/* $Id: odinlx.h,v 1.10 2004-01-12 09:53:28 sandervl Exp $ */
 
 /*
  *
@@ -79,6 +79,6 @@ BOOL WIN32API RegisterLxExe(WINMAIN EntryPoint, PVOID pResData);
 //Create Dummy Exe object
 //******************************************************************************
 BOOL WIN32API RegisterDummyExe(LPSTR pszExeName);
-
+BOOL WIN32API IsDummyExeLoaded();
 
 #endif
