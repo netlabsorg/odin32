@@ -1,4 +1,4 @@
- /* $Id: changelog,v 1.765 2000-03-01 18:50:02 jeroen Exp $ */
+ /* $Id: changelog,v 1.766 2000-03-01 21:59:05 sandervl Exp $ */
 
  2000-03-01: Jeroen van den Horn <J.vandenHorn@fibre.a2000.nl>
         - OPENGL: Implemented DIVE support in Mesa
@@ -28,6 +28,8 @@
 		  Removed circular header dependency (breaks build)
 	- OPENGL\MESA\3dfx:
 		  Copy 3dfx opengl32.dll to bin\glide
+	- OPENGL\MESA:
+		  Color conversion bugfix for 16bpp
 
  2000-03-01: Edgar Buerkle <Edgar.Buerkle@gmx.net>
 	- USER32: Fixed dprintf in CreateWindowExW
