@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.70 2001-08-04 14:10:09 bird Exp $
+# $Id: Makefile,v 1.71 2001-09-05 09:29:06 bird Exp $
 
 #
 # Win32k makefile.
@@ -161,6 +161,13 @@ dep:
 win32k.vpj:
     ..\..\tools\vslick\genproject.cmd $@  $(CINCLUDES) -s -r
 
+
+#
+# Api doc
+#
+StateUpd:
+    ..\..\tools\bin\StateUpd.exe -Dll:Win32k dev16 dev32 misc ldr elf2lx mmf k32
+    ..\..\tools\bin\StateUpd.exe -Dll:Pe2Lx Pe2Lx
 
 #
 # Documentation generation - require SDS - http://www.ii.uib.no/~stig/
