@@ -1,4 +1,9 @@
-/* $Id: changelog,v 1.1766 2001-10-18 13:27:10 sandervl Exp $ */
+/* $Id: changelog,v 1.1767 2001-10-18 15:36:49 achimha Exp $ */
+
+ 2001-10-18: Achim Hasenmueller <achimha@innotek.de>
+    - USER32:   o temporarily backed out a change from earlier today
+                  in the color pointer conversion code that causes
+                  severe regressions. Look for @@@AH in oslibres.cpp
 
  2001-10-18: Sander van Leeuwen <sandervl@xs4all.nl>
     - DDRAW:    o Check if DirectDraw object is associated with Clipper.
