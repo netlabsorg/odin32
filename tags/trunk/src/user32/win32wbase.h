@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.120 2001-06-14 11:30:57 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.121 2001-06-22 18:32:11 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -24,10 +24,11 @@
 
 class Win32BaseWindow;
 
-#define OFFSET_WIN32WNDPTR        0
-#define OFFSET_WIN32PM_MAGIC      4
-#define OFFSET_WIN32FLAGS         8
-#define NROF_WIN32WNDBYTES        12
+#define OFFSET_RESERVED           0 //reserved for odin apps (such as Opera)
+#define OFFSET_WIN32WNDPTR        4
+#define OFFSET_WIN32PM_MAGIC      8
+#define OFFSET_WIN32FLAGS         12
+#define NROF_WIN32WNDBYTES        16
 
 #define WINDOWFLAG_ACTIVE	  1
 
