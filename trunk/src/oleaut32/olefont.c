@@ -25,7 +25,6 @@
 #include "ole2.h"
 #include "olectl.h"
 #include "debugtools.h"
-#include "heap.h"
 #include "connpt.h" /* for CreateConnectionPoint */
 
 DEFAULT_DEBUG_CHANNEL(ole);
@@ -290,6 +289,9 @@ HRESULT WINAPI OleCreateFontIndirect(
     return E_POINTER;
 
   *ppvObj = 0;
+
+  if (lpFontDesc == 0)
+    return NO_ERROR; /* MSDN Oct 2001 */
 
   /*
    * Try to construct a new instance of the class.
@@ -1340,6 +1342,7 @@ static HRESULT WINAPI OLEFontImpl_Load(
   BYTE  bVersion;
   BYTE  bAttributes;
   BYTE  bStringSize;
+  INT len;
 
   _ICOM_THIS_From_IPersistStream(OLEFontImpl, iface);
   
@@ -1398,7 +1401,6 @@ static HRESULT WINAPI OLEFontImpl_Load(
   if (cbRead!=1)
     return E_FAIL;
 
-  memset(readBuffer, 0, 0x100);
   IStream_Read(pLoadStream, readBuffer, bStringSize, &cbRead);
 
   if (cbRead!=bStringSize)
@@ -1407,9 +1409,10 @@ static HRESULT WINAPI OLEFontImpl_Load(
   if (this->description.lpstrName!=0)
     HeapFree(GetProcessHeap(), 0, this->description.lpstrName);
 
-  this->description.lpstrName = HEAP_strdupAtoW(GetProcessHeap(), 
-						    HEAP_ZERO_MEMORY,
-						    readBuffer);
+  len = MultiByteToWideChar( CP_ACP, 0, readBuffer, bStringSize, NULL, 0 );
+  this->description.lpstrName = HeapAlloc( GetProcessHeap(), 0, (len+1) * sizeof(WCHAR) );
+  MultiByteToWideChar( CP_ACP, 0, readBuffer, bStringSize, this->description.lpstrName, len );
+  this->description.lpstrName[len] = 0;
 
   return S_OK;
 }
@@ -1487,7 +1490,8 @@ static HRESULT WINAPI OLEFontImpl_Save(
    * FontName
    */
   if (this->description.lpstrName!=0)
-    bStringSize = lstrlenW(this->description.lpstrName);
+    bStringSize = WideCharToMultiByte( CP_ACP, 0, this->description.lpstrName,
+                                       strlenW(this->description.lpstrName), NULL, 0, NULL, NULL );
   else
     bStringSize = 0;
 
@@ -1498,15 +1502,12 @@ static HRESULT WINAPI OLEFontImpl_Save(
 
   if (bStringSize!=0)
   {
-    writeBuffer = HEAP_strdupWtoA(GetProcessHeap(), 
-				  HEAP_ZERO_MEMORY,
-				  this->description.lpstrName);
-
-    if (writeBuffer==0)
-      return E_OUTOFMEMORY;
+      if (!(writeBuffer = HeapAlloc( GetProcessHeap(), 0, bStringSize ))) return E_OUTOFMEMORY;
+      WideCharToMultiByte( CP_ACP, 0, this->description.lpstrName,
+                           strlenW(this->description.lpstrName),
+                           writeBuffer, bStringSize, NULL, NULL );
 
     IStream_Write(pOutStream, writeBuffer, bStringSize, &cbWritten);
-    
     HeapFree(GetProcessHeap(), 0, writeBuffer);
 
     if (cbWritten!=bStringSize)
@@ -1659,27 +1660,21 @@ static ULONG WINAPI SFCF_Release(LPCLASSFACTORY iface) {
 static HRESULT WINAPI SFCF_CreateInstance(
 	LPCLASSFACTORY iface,LPUNKNOWN pOuter,REFIID riid,LPVOID *ppobj
 ) {
-	ICOM_THIS(IClassFactoryImpl,iface);
+	FONTDESC fd;
 
-	if (IsEqualGUID(riid,&IID_IFont)) {
-	    FONTDESC fd;
+	WCHAR fname[] = { 'S','y','s','t','e','m',0 };
 
-	    WCHAR fname[] = { 'S','y','s','t','e','m',0 };
+	fd.cbSizeofstruct = sizeof(fd);
+	fd.lpstrName      = fname;
+	fd.cySize.s.Lo    = 80000;
+	fd.cySize.s.Hi    = 0;
+	fd.sWeight 	      = 0;
+	fd.sCharset       = 0;
+	fd.fItalic	      = 0;
+	fd.fUnderline     = 0;
+	fd.fStrikethrough = 0;
+	return OleCreateFontIndirect(&fd,riid,ppobj);
 
-	    fd.cbSizeofstruct = sizeof(fd);
-	    fd.lpstrName      = fname;
-	    fd.cySize.s.Lo    = 80000;
-	    fd.cySize.s.Hi    = 0;
-	    fd.sWeight 	      = 0;
-	    fd.sCharset       = 0;
-	    fd.fItalic	      = 0;
-	    fd.fUnderline     = 0;
-	    fd.fStrikethrough = 0;
-	    return OleCreateFontIndirect(&fd,riid,ppobj);
-	}
-
-	FIXME("(%p)->(%p,%s,%p)\n",This,pOuter,debugstr_guid(riid),ppobj);
-	return E_NOINTERFACE;
 }
 
 static HRESULT WINAPI SFCF_LockServer(LPCLASSFACTORY iface,BOOL dolock) {

@@ -1023,6 +1023,10 @@ static HRESULT Coerce( VARIANTARG* pd, LCID lcid, ULONG dwFlags, VARIANTARG* ps,
 	case( VT_I4 ):
 		switch( vtFrom )
 		{
+		case( VT_EMPTY ):
+		        V_UNION(pd,lVal) = 0;
+		        res = S_OK;
+		    	break;
 		case( VT_I1 ):
 			res = VarI4FromI1( V_UNION(ps,cVal), &V_UNION(pd,lVal) );
 			break;
@@ -1401,6 +1405,10 @@ static HRESULT Coerce( VARIANTARG* pd, LCID lcid, ULONG dwFlags, VARIANTARG* ps,
 	case( VT_BOOL ):
 		switch( vtFrom )
 		{
+		case( VT_EMPTY ):
+		    	res = S_OK;
+			V_UNION(pd,boolVal) = VARIANT_FALSE;
+			break;
 		case( VT_I1 ):
 			res = VarBoolFromI1( V_UNION(ps,cVal), &V_UNION(pd,boolVal) );
 			break;
@@ -1955,7 +1963,7 @@ HRESULT WINAPI VariantCopyInd(VARIANT* pvargDest, VARIANTARG* pvargSrc)
 	       * We will copy this data into the union of the destination
 	       * Variant.
 	       */
-	      memcpy( &pvargDest->n1.n2, V_UNION(pvargSrc,byref), SizeOfVariantData( pvargSrc ) );
+	      memcpy( &pvargDest->n1.n2.n3, V_UNION(pvargSrc,byref), SizeOfVariantData( pvargSrc ) );
 	      break;
 	  }
 	}
@@ -4273,7 +4281,7 @@ INT WINAPI DosDateTimeToVariantTime(USHORT wDosDate, USHORT wDosTime,
 {
     struct tm t;
 
-    TRACE("( 0x%x, 0x%x, 0x%p ), stub\n", wDosDate, wDosTime, pvtime );
+    TRACE("( 0x%x, 0x%x, %p ), stub\n", wDosDate, wDosTime, pvtime );
     
     t.tm_sec = (wDosTime & 0x001f) * 2;
     t.tm_min = (wDosTime & 0x07e0) >> 5;
@@ -4361,18 +4369,11 @@ HRESULT WINAPI VarNumFromParseNum(NUMPARSE * pnumprs, BYTE * rgbDig,
  */
 INT WINAPI VariantTimeToDosDateTime(DATE pvtime, USHORT *wDosDate, USHORT *wDosTime)
 {
-  struct tm t;
-  
-#ifdef __WIN32OS2__
+    struct tm t;
     *wDosTime = 0;
     *wDosDate = 0;
-#else
-  // PH 2001-11-15: this is definately gonna crash!
-    wDosTime = 0;
-    wDosDate = 0;
-#endif
 
-    TRACE("( 0x%x, 0x%x, 0x%p ), stub\n", *wDosDate, *wDosTime, &pvtime );
+    TRACE("( 0x%x, 0x%x, %p ), stub\n", *wDosDate, *wDosTime, &pvtime );
 
     if (DateToTm(pvtime, 0, &t) < 0) return 0;
 
@@ -4666,3 +4667,26 @@ HRESULT WINAPI VarBstrCat(BSTR left, BSTR right, BSTR *out)
     return 1;
 }
 
+/**********************************************************************
+ *              VarCat [OLEAUT32.441]
+ */
+HRESULT WINAPI VarCat(LPVARIANT left, LPVARIANT right, LPVARIANT out)
+{
+    /* Should we VariantClear out? */
+    /* Can we handle array, vector, by ref etc. */
+    if ((V_VT(left)&VT_TYPEMASK) == VT_NULL &&
+        (V_VT(right)&VT_TYPEMASK) == VT_NULL)
+    {
+        V_VT(out) = VT_NULL;
+        return S_OK;
+    }
+    else if (V_VT(left) == VT_BSTR && V_VT(right) == VT_BSTR)
+    {
+        V_VT(out) = VT_BSTR;
+        VarBstrCat (V_BSTR(left), V_BSTR(right), &V_BSTR(out));
+        return S_OK;
+    }
+    else
+        FIXME ("types not supported\n");
+    return S_OK;
+}

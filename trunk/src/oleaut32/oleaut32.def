@@ -1,4 +1,4 @@
-;/* $Id: oleaut32.def,v 1.8 2001-10-03 19:21:59 sandervl Exp $ */
+;/* $Id: oleaut32.def,v 1.9 2002-02-15 15:07:37 sandervl Exp $ */
 LIBRARY OLAUTOS2 INITINSTANCE
 DESCRIPTION 'Odin32 System DLL - OleAut32'
 DATA MULTIPLE NONSHARED
@@ -299,7 +299,9 @@ OleLoadPictureEx   = _OleLoadPictureEx@32    @425
 ;426 stub GetRecordInfoFromGuids ; stdcall (ptr long long long ptr ptr)
 ;427 stub GetRecordInfoFromTypeInfo ; stdcall (ptr ptr)
 ;428 stub OleLoadPictureFileEx
-;429 stub SafeArrayAllocDescriptorEx
+
+SafeArrayAllocDescriptorEx = _SafeArrayAllocDescriptorEx@12 @429
+
 ;430 stub SafeArrayCreateEx
 ;431 stub SafeArrayCreateVectorEx
 ;432 stub SafeArrayGetIID
@@ -311,7 +313,8 @@ OleLoadPictureEx   = _OleLoadPictureEx@32    @425
 ;438 stub VarAnd ; stdcall (ptr ptr ptr)
 VarBstrCat          = _VarBstrCat@12                    @439
 VarBstrCmp          = _VarBstrCmp@16                    @440
-;441 stub VarCat ; stdcall (ptr ptr ptr)
+VarCat              = _VarCat@12                        @441
+
 ;442 stub VarCmp ; stdcall (ptr ptr long long)
 ;443 stub VarCyAbs
 ;444 stub VarCyAdd

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.31 2001-11-19 12:33:37 sandervl Exp $
+# $Id: makefile,v 1.32 2002-02-15 15:07:36 sandervl Exp $
 
 #
 # Odin32 API
@@ -6,6 +6,11 @@
 #       ole32aut.dll makefile
 #
 
+
+!if "$(DEBUG)" == "1"
+DEFFILE    = oleaut32dbg.def
+ORGDEFFILE = oleaut32.def
+!endif
 
 #
 # Compiler, tools, and interference rules.
@@ -33,6 +38,7 @@ $(OBJDIR)\asmutil.obj \
 #$(OBJDIR)\iPictureIcon.obj \
 #$(OBJDIR)\iPictureEmf.obj \
 $(OBJDIR)\typelib.obj \
+$(OBJDIR)\tmarshal.obj \
 #$(OBJDIR)\itypelib.obj \
 #$(OBJDIR)\itypecomp.obj \
 #$(OBJDIR)\itypeinfo.obj \
@@ -40,7 +46,11 @@ $(OBJDIR)\hash.obj \
 $(OBJDIR)\safearray.obj \
 $(OBJDIR)\connpt.obj \
 $(OBJDIR)\dispatch.obj \
+$(OBJDIR)\propertyframe.obj \
 $(OBJDIR)\stubs.obj \
+!if "$(DEBUG)" == "1"
+$(OBJDIR)\dbgwrap.obj \
+!endif
 $(OBJDIR)\oleaut32rsrc.obj
 
 
@@ -52,6 +62,7 @@ $(ODIN32_LIB)/advapi32.lib \
 $(ODIN32_LIB)/kernel32.lib \
 $(ODIN32_LIB)/user32.lib \
 $(ODIN32_LIB)/ole32.lib \
+$(ODIN32_LIB)/comctl32.lib \
 $(ODIN32_LIB)/gdi32.lib \
 $(ODIN32_LIB)/guidlib.lib \
 $(ODIN32_LIB)/$(ODINCRT).lib \

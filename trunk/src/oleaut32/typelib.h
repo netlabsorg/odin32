@@ -127,7 +127,7 @@ typedef struct tagMSFT_TypeInfoBase {
         INT16   cImplTypes;     /* nr of implemented interfaces */
         INT16   cbSizeVft;      /* virtual table size, not including inherits */
 /*050*/ INT     size;           /* size in bytes, at least for structures */
-        /* fixme: name of this field */
+        /* FIXME: name of this field */
         INT     datatype1;      /* position in type description table */
                                 /* or in base intefaces */
                                 /* if coclass: offset in reftable */
@@ -541,6 +541,8 @@ WORD type == VT_CARRAY
 WORD offset from start of block to SAFEARRAY
 WORD typeofarray
 */
+
+extern DWORD _invoke(LPVOID func,CALLCONV callconv, int nrargs, DWORD *args);
 
 #include "poppack.h"
 
