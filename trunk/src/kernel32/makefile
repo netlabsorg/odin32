@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.67 1999-12-09 00:52:20 sandervl Exp $
+# $Id: makefile,v 1.68 1999-12-09 11:00:40 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -34,7 +34,7 @@ profile.obj THREAD.OBJ virtual.obj THUNK.OBJ OBSOLETE.OBJ COMM.OBJ\
 MESSAGE.OBJ RESOURCE.OBJ EXCEPTIONS.OBJ heapshared.obj cpuhlp.obj heapcode.obj \
 LFILE.OBJ NPIPE.OBJ oslibdos.obj oslibmisc.obj MISC.OBJ EXCEPTUTIL.OBJ \
 LANG.OBJ ICCIO.OBJ MAP.OBJ WIN32UTIL.OBJ heap.OBJ heapstring.obj \
-os2heap.OBJ vmutex.OBJ initterm.OBJ handlemanager.OBJ  \
+os2heap.OBJ vmutex.OBJ initterm.OBJ handlemanager.OBJ environ.obj \
 hmdevice.obj hmopen32.obj hmobjects.obj hmevent.obj hmmutex.obj hmcomm.obj \
 hmsemaphore.obj wprocess.OBJ conprop.OBJ conprop2.obj winimagelx.obj \
 winimagebase.OBJ windllbase.OBJ winexebase.OBJ time.obj mmap.obj \
@@ -389,6 +389,7 @@ heapshared.obj: heapshared.cpp $(PDWIN32_INCLUDE)\heapshared.h
 heapcode.obj: heapcode.cpp $(PDWIN32_INCLUDE)\heapshared.h $(PDWIN32_INCLUDE)\heapcode.h
 cpu.obj: cpu.cpp cpuhlp.h
 cpuhlp.obj: cpuhlp.asm
+environ.obj: environ.cpp $(PDWIN32_INCLUDE)\misc.h
 
 clean:
         $(RM) *.OBJ *.LIB *.dll *.lrf *.res *.map *.pch
