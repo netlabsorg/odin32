@@ -1,4 +1,4 @@
-/* $Id: exceptions.cpp,v 1.55 2001-07-03 13:24:25 bird Exp $ */
+/* $Id: exceptions.cpp,v 1.56 2001-10-18 13:27:39 sandervl Exp $ */
 
 /*
  * Win32 Exception functions for OS/2
@@ -347,7 +347,13 @@ DWORD RtlDispatchException(WINEXCEPTION_RECORD *pRecord, WINCONTEXT *pContext)
 
 
         /* call handler */
-        rc = EXC_CallHandler(pRecord, pFrame, pContext, &dispatch, pFrame->Handler, EXC_RaiseHandler );
+        if(pFrame->Handler) {
+            rc = EXC_CallHandler(pRecord, pFrame, pContext, &dispatch, pFrame->Handler, EXC_RaiseHandler );
+        }
+        else {
+            dprintf(("pFrame->Handler is NULL!!!!!"));
+            rc = ExceptionContinueSearch;
+        }
 
         PrintWin32ExceptionChain(pFrame);
 
@@ -483,7 +489,13 @@ int _Pascal OS2RtlUnwind(PWINEXCEPTION_FRAME  pEndFrame,
 
         /* Call handler */
         dprintf(("KERNEL32: RtlUnwind - calling exception handler %08X", frame->Handler));
-        rc = EXC_CallHandler(pRecord, frame, &context, &dispatch, frame->Handler, EXC_UnwindHandler );
+        if(frame->Handler) {
+            rc = EXC_CallHandler(pRecord, frame, &context, &dispatch, frame->Handler, EXC_UnwindHandler );
+        }
+        else {
+            dprintf(("pFrame->Handler is NULL!!!!!"));
+            rc = ExceptionContinueSearch;
+        }
         dprintf(("KERNEL32: RtlUnwind - handler returned %#x", rc));
         switch (rc)
         {
