@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.50 1999-12-19 20:16:46 sandervl Exp $
+# $Id: Makefile,v 1.51 1999-12-24 18:51:55 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -41,7 +41,7 @@ OBJS =  user32.obj loadres.obj \
         oslibutil.obj oslibmsg.obj dib.obj oslibdos.obj win32wmdichild.obj \
         winprop.obj wingdi.obj oslibgdi.obj winaccel.obj win32wbasepos.obj \
         oslibres.obj dummy.obj oslibmenu.obj dc.obj timer.obj \
-        caret.obj resource.obj winproc.obj text.obj \
+        caret.obj resource.obj winproc.obj text.obj oslibmsgtranslate.obj \
         windlgmsg.obj windlg.obj win32wdesktop.obj
 
 
@@ -140,6 +140,7 @@ gen_object.obj: gen_object.cpp gen_object.h $(PDWIN32_INCLUDE)\heapshared.h
 oslibwin.obj:   oslibwin.cpp oslibwin.h oslibutil.h oslibgdi.h $(PDWIN32_INCLUDE)\winconst.h
 oslibutil.obj:  oslibutil.cpp oslibutil.h $(PDWIN32_INCLUDE)\wprocess.h oslibmsg.h
 oslibmsg.obj:   oslibmsg.cpp oslibmsg.h timer.h win32wbase.h win32wnd.h
+oslibmsgtranslate.obj: oslibmsgtranslate.cpp oslibmsg.h timer.h win32wbase.h win32wnd.h
 oslibmenu.obj:  oslibmenu.cpp oslibmenu.h
 oslibgdi.obj:   oslibgdi.cpp oslibgdi.h win32wbase.h
 oslibres.obj:   oslibres.cpp oslibwin.h oslibres.h $(PDWIN32_INCLUDE)\winconst.h
