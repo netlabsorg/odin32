@@ -1,4 +1,4 @@
-/* $Id: comctl32.h,v 1.9 1999-11-05 13:01:32 achimha Exp $ */
+/* $Id: comctl32.h,v 1.10 1999-11-14 10:58:37 achimha Exp $ */
 /*
  * Win32 common controls implementation
  *
@@ -41,6 +41,11 @@ void CDECL UnregisterCOMCTL32WindowClasses(void);
 #ifdef __cplusplus
 }
 #endif
+
+
+// string functions from kernel32
+LPWSTR WIN32API HEAP_strdupAtoW( HANDLE heap, DWORD flags, LPCSTR str );
+LPSTR  WIN32API HEAP_strdupWtoA( HANDLE heap, DWORD flags, LPCWSTR str );
 
 
 /**************************************************************************

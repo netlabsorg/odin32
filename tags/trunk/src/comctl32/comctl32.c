@@ -1,4 +1,4 @@
-/* $Id: comctl32.c,v 1.10 1999-09-26 11:01:08 achimha Exp $ */
+/* $Id: comctl32.c,v 1.11 1999-11-14 10:58:37 achimha Exp $ */
 /*
  * Win32 common controls implementation
  *
@@ -364,9 +364,7 @@ DrawStatusTextA (HDC hdc, LPRECT lprc, LPCSTR text, UINT style)
 VOID WINAPI
 DrawStatusTextW (HDC hdc, LPRECT lprc, LPCWSTR text, UINT style)
 {
-// ERROR DON'T KNOW HOW TO TRANSLATE!!!
-LPSTR p;
-//    LPSTR p = HEAP_strdupWtoA (GetProcessHeap (), 0, text);
+    LPSTR p = HEAP_strdupWtoA (GetProcessHeap (), 0, text);
     DrawStatusTextA (hdc, lprc, p, style);
     HeapFree (GetProcessHeap (), 0, p );
 }

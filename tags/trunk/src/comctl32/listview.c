@@ -49,6 +49,7 @@
 #include "commctrl.h"
 #include "listview.h"
 #include "debugtools.h"
+#include "comctl32.h"
 
 /*
  * constants
@@ -1771,8 +1772,8 @@ static VOID LISTVIEW_DrawSubItem(HWND hwnd, HDC hdc, INT nItem, INT nSubItem,
   CHAR szDispText[DISP_TEXT_SIZE];
   LVITEMA lvItem;
 
-  TRACE("(hwnd=%x, hdc=%x, nItem=%d, nSubItem=%d\n", hwnd, hdc,
-        nItem, nSubItem);
+//  TRACE("(hwnd=%x, hdc=%x, nItem=%d, nSubItem=%d\n", hwnd, hdc,
+//        nItem, nSubItem);
 
   /* get information needed for drawing the item */
   ZeroMemory(&lvItem, sizeof(LVITEMA));
@@ -1815,7 +1816,7 @@ static VOID LISTVIEW_DrawItem(HWND hwnd, HDC hdc, INT nItem, RECT rcItem)
   DWORD dwBkColor;
   DWORD dwTextColor;
 
-  TRACE("(hwnd=%x, hdc=%x, nItem=%d\n", hwnd, hdc, nItem);
+//  TRACE("(hwnd=%x, hdc=%x, nItem=%d\n", hwnd, hdc, nItem);
 
   /* get information needed for drawing the item */
   ZeroMemory(&lvItem, sizeof(LVITEMA));
@@ -1934,9 +1935,9 @@ static VOID LISTVIEW_DrawLargeItem(HWND hwnd, HDC hdc, INT nItem, RECT rcItem)
   TEXTMETRICA tm;
   LVITEMA lvItem;
 
-  TRACE("(hwnd=%x, hdc=%x, nItem=%d, left=%d, top=%d, right=%d, \
-bottom=%d)\n", hwnd, hdc, nItem, rcItem.left, rcItem.top, rcItem.right,
-        rcItem.bottom);
+//  TRACE("(hwnd=%x, hdc=%x, nItem=%d, left=%d, top=%d, right=%d, \
+//bottom=%d)\n", hwnd, hdc, nItem, rcItem.left, rcItem.top, rcItem.right,
+//        rcItem.bottom);
 
   /* get information needed for drawing the item */
   ZeroMemory(&lvItem, sizeof(LVITEMA));
@@ -2468,7 +2469,7 @@ static LRESULT LISTVIEW_DeleteAllItems(HWND hwnd)
   INT j;
   HDPA hdpaSubItems;
 
-  TRACE("(hwnd=%x,)\n", hwnd);
+//  TRACE("(hwnd=%x,)\n", hwnd);
 
   if (GETITEMCOUNT(infoPtr) > 0)
   {
@@ -2623,7 +2624,7 @@ static LRESULT LISTVIEW_DeleteItem(HWND hwnd, INT nItem)
   LISTVIEW_SUBITEM *lpSubItem;
   INT i;
 
-  TRACE("(hwnd=%x,nItem=%d)\n", hwnd, nItem);
+//  TRACE("(hwnd=%x,nItem=%d)\n", hwnd, nItem);
 
   if ((nItem >= 0) && (nItem < GETITEMCOUNT(infoPtr)))
   {
@@ -3498,7 +3499,7 @@ static LRESULT LISTVIEW_GetItemA(HWND hwnd, LPLVITEMA lpLVItem)
   LISTVIEW_ITEM *lpItem;
   HDPA hdpaSubItems;
 
-  TRACE("(hwnd=%x, lpLVItem=%p)\n", hwnd, lpLVItem);
+//  TRACE("(hwnd=%x, lpLVItem=%p)\n", hwnd, lpLVItem);
 
   if (lpLVItem != NULL)
   {
@@ -3737,8 +3738,8 @@ static BOOL LISTVIEW_GetItemPosition(HWND hwnd, INT nItem,
   INT nCountPerColumn;
   INT nRow;
 
-  TRACE("(hwnd=%x,nItem=%d,lpptPosition=%p)\n", hwnd, nItem,
-        lpptPosition);
+//  TRACE("(hwnd=%x,nItem=%d,lpptPosition=%p)\n", hwnd, nItem,
+//        lpptPosition);
 
   if ((nItem >= 0) && (nItem < GETITEMCOUNT(infoPtr)) &&
       (lpptPosition != NULL))
@@ -3820,7 +3821,7 @@ static LRESULT LISTVIEW_GetItemRect(HWND hwnd, INT nItem, LPRECT lprc)
   INT nLabelWidth;
   TEXTMETRICA tm;
 
-  TRACE("(hwnd=%x, nItem=%d, lprc=%p)\n", hwnd, nItem, lprc);
+//  TRACE("(hwnd=%x, nItem=%d, lprc=%p)\n", hwnd, nItem, lprc);
 
   if ((nItem >= 0) && (nItem < GETITEMCOUNT(infoPtr)) && (lprc != NULL))
   {
@@ -4138,7 +4139,7 @@ INT LISTVIEW_GetLabelWidth(HWND hwnd, INT nItem)
   INT nLabelWidth = 0;
   LVITEMA lvItem;
 
-  TRACE("(hwnd=%x, nItem=%d)\n", hwnd, nItem);
+//  TRACE("(hwnd=%x, nItem=%d)\n", hwnd, nItem);
 
   ZeroMemory(&lvItem, sizeof(LVITEMA));
   lvItem.mask = LVIF_TEXT;
@@ -4420,7 +4421,7 @@ static LRESULT LISTVIEW_GetOrigin(HWND hwnd, LPPOINT lpptOrigin)
   INT nListHeight = infoPtr->rcList.bottom - infoPtr->rcList.top;
   BOOL bResult = FALSE;
 
-  TRACE("(hwnd=%x, lpptOrigin=%p)\n", hwnd, lpptOrigin);
+//  TRACE("(hwnd=%x, lpptOrigin=%p)\n", hwnd, lpptOrigin);
 
   if ((uView == LVS_SMALLICON) || (uView == LVS_ICON))
   {
@@ -4581,8 +4582,8 @@ static INT LISTVIEW_HitTestItem(HWND hwnd, LPLVHITTESTINFO lpHitTestInfo)
   RECT rcItem;
   INT i;
 
-  TRACE("(hwnd=%x, x=%ld, y=%ld)\n", hwnd, lpHitTestInfo->pt.x,
-        lpHitTestInfo->pt.y);
+//  TRACE("(hwnd=%x, x=%ld, y=%ld)\n", hwnd, lpHitTestInfo->pt.x,
+//        lpHitTestInfo->pt.y);
 
   for (i = 0; i < GETITEMCOUNT(infoPtr); i++)
   {
@@ -4692,8 +4693,8 @@ static LRESULT LISTVIEW_InsertColumnA(HWND hwnd, INT nColumn,
   HDITEMA hdi;
   INT nNewColumn = -1;
 
-  TRACE("(hwnd=%x, nColumn=%d, lpColumn=%p)\n",hwnd, nColumn,
-        lpColumn);
+//  TRACE("(hwnd=%x, nColumn=%d, lpColumn=%p)\n",hwnd, nColumn,
+//        lpColumn);
 
   if (lpColumn != NULL)
   {
@@ -4791,9 +4792,8 @@ static LRESULT LISTVIEW_InsertColumnW(HWND hwnd, INT nColumn,
   LRESULT               lres;
 
   memcpy(&lvca,lpColumn,sizeof(lvca));
-//AH: todo
-//  if (lpColumn->mask & LVCF_TEXT)
-//    lvca.pszText = HEAP_strdupWtoA(GetProcessHeap(),0,lpColumn->pszText);
+  if (lpColumn->mask & LVCF_TEXT)
+    lvca.pszText = HEAP_strdupWtoA(GetProcessHeap(),0,lpColumn->pszText);
   lres = LISTVIEW_InsertColumnA(hwnd,nColumn,&lvca);
   if (lpColumn->mask & LVCF_TEXT)
     HeapFree(GetProcessHeap(),0,lvca.pszText);
@@ -4823,7 +4823,7 @@ static LRESULT LISTVIEW_InsertItemA(HWND hwnd, LPLVITEMA lpLVItem)
   HDPA hdpaSubItems;
   LISTVIEW_ITEM *lpItem = NULL;
 
-  TRACE("(hwnd=%x,lpLVItem=%p)\n", hwnd, lpLVItem);
+//  TRACE("(hwnd=%x,lpLVItem=%p)\n", hwnd, lpLVItem);
 
   if (lpLVItem != NULL)
   {
@@ -4906,9 +4906,8 @@ static LRESULT LISTVIEW_InsertItemW(HWND hwnd, LPLVITEMW lpLVItem) {
   if (lvia.mask & LVIF_TEXT) {
     if (lpLVItem->pszText == LPSTR_TEXTCALLBACKW)
       lvia.pszText = LPSTR_TEXTCALLBACKA;
-//AH: todo
-//    else
-//      lvia.pszText = HEAP_strdupWtoA(GetProcessHeap(),0,lpLVItem->pszText);
+    else
+      lvia.pszText = HEAP_strdupWtoA(GetProcessHeap(),0,lpLVItem->pszText);
   }
   lres = LISTVIEW_InsertItemA(hwnd, &lvia);
   if (lvia.mask & LVIF_TEXT) {
@@ -5351,7 +5350,7 @@ static BOOL LISTVIEW_SetItemPosition(HWND hwnd, INT nItem,
   HDPA hdpaSubItems;
   BOOL bResult = FALSE;
 
-  TRACE("(hwnd=%x,nItem=%d,X=%d,Y=%d)\n", hwnd, nItem, nPosX, nPosY);
+//  TRACE("(hwnd=%x,nItem=%d,X=%d,Y=%d)\n", hwnd, nItem, nPosX, nPosY);
 
   if ((nItem >= 0) || (nItem < GETITEMCOUNT(infoPtr)))
   {
@@ -6138,7 +6137,7 @@ static LRESULT LISTVIEW_LButtonDblClk(HWND hwnd, WORD wKey, WORD wPosX,
   LONG nCtrlId = GetWindowLongA(hwnd, GWL_ID);
   NMHDR nmh;
 
-  TRACE("(hwnd=%x,key=%hu,X=%hu,Y=%hu)\n", hwnd, wKey, wPosX, wPosY);
+//  TRACE("(hwnd=%x,key=%hu,X=%hu,Y=%hu)\n", hwnd, wKey, wPosX, wPosY);
 
   /* send NM_DBLCLK notification */
   nmh.hwndFrom = hwnd;
@@ -6177,8 +6176,8 @@ static LRESULT LISTVIEW_LButtonDown(HWND hwnd, WORD wKey, WORD wPosX,
   NMHDR nmh;
   INT nItem;
 
-  TRACE("(hwnd=%x, key=%hu, X=%hu, Y=%hu)\n", hwnd, wKey, wPosX,
-        wPosY);
+//  TRACE("(hwnd=%x, key=%hu, X=%hu, Y=%hu)\n", hwnd, wKey, wPosX,
+//        wPosY);
 
   /* send NM_RELEASEDCAPTURE notification */
   nmh.hwndFrom = hwnd;
@@ -6259,7 +6258,7 @@ static LRESULT LISTVIEW_LButtonUp(HWND hwnd, WORD wKey, WORD wPosX,
 {
   LISTVIEW_INFO *infoPtr = (LISTVIEW_INFO *)GetWindowLongA(hwnd, 0);
 
-  TRACE("(hwnd=%x,key=%hu,X=%hu,Y=%hu)\n", hwnd, wKey, wPosX, wPosY);
+//  TRACE("(hwnd=%x,key=%hu,X=%hu,Y=%hu)\n", hwnd, wKey, wPosX, wPosY);
 
   if (infoPtr->bLButtonDown != FALSE)
   {
@@ -6453,7 +6452,7 @@ static LRESULT LISTVIEW_Paint(HWND hwnd, HDC hdc)
 {
   PAINTSTRUCT ps;
 
-   TRACE("(hwnd=%x,hdc=%x)\n", hwnd, hdc);
+//   TRACE("(hwnd=%x,hdc=%x)\n", hwnd, hdc);
 
   if (hdc == 0)
   {
@@ -6488,7 +6487,7 @@ static LRESULT LISTVIEW_RButtonDblClk(HWND hwnd, WORD wKey, WORD wPosX,
   INT nCtrlId = GetWindowLongA(hwnd, GWL_ID);
   NMHDR nmh;
 
-  TRACE("(hwnd=%x,key=%hu,X=%hu,Y=%hu)\n", hwnd, wKey, wPosX, wPosY);
+//  TRACE("(hwnd=%x,key=%hu,X=%hu,Y=%hu)\n", hwnd, wKey, wPosX, wPosY);
 
   /* send NM_RELEASEDCAPTURE notification */
   nmh.hwndFrom = hwnd;
@@ -6525,7 +6524,7 @@ static LRESULT LISTVIEW_RButtonDown(HWND hwnd, WORD wKey, WORD wPosX,
   NMHDR nmh;
   INT nItem;
 
-  TRACE("(hwnd=%x,key=%hu,X=%hu,Y=%hu)\n", hwnd, wKey, wPosX, wPosY);
+//  TRACE("(hwnd=%x,key=%hu,X=%hu,Y=%hu)\n", hwnd, wKey, wPosX, wPosY);
 
   /* send NM_RELEASEDCAPTURE notification */
   nmh.hwndFrom = hwnd;
@@ -6581,7 +6580,7 @@ static LRESULT LISTVIEW_RButtonUp(HWND hwnd, WORD wKey, WORD wPosX,
   INT nCtrlId = GetWindowLongA(hwnd, GWL_ID);
   NMHDR nmh;
 
-  TRACE("(hwnd=%x,key=%hu,X=%hu,Y=%hu)\n", hwnd, wKey, wPosX, wPosY);
+//  TRACE("(hwnd=%x,key=%hu,X=%hu,Y=%hu)\n", hwnd, wKey, wPosX, wPosY);
 
   if (infoPtr->bRButtonDown != FALSE)
   {
@@ -6648,7 +6647,7 @@ static LRESULT LISTVIEW_SetFont(HWND hwnd, HFONT hFont, WORD fRedraw)
   LISTVIEW_INFO *infoPtr = (LISTVIEW_INFO *)GetWindowLongA(hwnd, 0);
   UINT uView = GetWindowLongA(hwnd, GWL_STYLE) & LVS_TYPEMASK;
 
-  TRACE("(hwnd=%x,hfont=%x,redraw=%hu)\n", hwnd, hFont, fRedraw);
+//  TRACE("(hwnd=%x,hfont=%x,redraw=%hu)\n", hwnd, hFont, fRedraw);
 
   if (hFont == 0)
   {
@@ -6695,7 +6694,7 @@ static LRESULT LISTVIEW_Size(HWND hwnd, int Width, int Height)
   LONG lStyle = GetWindowLongA(hwnd, GWL_STYLE);
   UINT uView = lStyle & LVS_TYPEMASK;
 
-  TRACE("(hwnd=%x, width=%d, height=%d)\n",hwnd, Width, Height);
+//  TRACE("(hwnd=%x, width=%d, height=%d)\n",hwnd, Width, Height);
 
   LISTVIEW_UpdateSize(hwnd);
 
@@ -6789,8 +6788,8 @@ static INT LISTVIEW_StyleChanged(HWND hwnd, WPARAM wStyleType,
   UINT uOldView = lpss->styleOld & LVS_TYPEMASK;
   RECT rcList = infoPtr->rcList;
 
-  TRACE("(hwnd=%x, styletype=%x, stylestruct=%p)\n",
-        hwnd, wStyleType, lpss);
+//  TRACE("(hwnd=%x, styletype=%x, stylestruct=%p)\n",
+//        hwnd, wStyleType, lpss);
 
   if (wStyleType == GWL_STYLE)
   {

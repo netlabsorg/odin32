@@ -1,4 +1,4 @@
-/* $Id: propsheet.c,v 1.12 1999-11-05 13:01:33 achimha Exp $ */
+/* $Id: propsheet.c,v 1.13 1999-11-14 10:58:38 achimha Exp $ */
 /*
  * Property Sheets
  *
@@ -295,15 +295,13 @@ BOOL PROPSHEET_CollectPageInfo(LPCPROPSHEETPAGEA lppsp,
       if ( !LoadStringA( lppsp->hInstance, (UINT) lppsp->pszTitle, szTitle, 256 ) )
 	return FALSE;
 
-//AH: TODO      
-//      psInfo->proppage[index].pszText = HEAP_strdupAtoW( GetProcessHeap(),
-//							 0, szTitle );
+      psInfo->proppage[index].pszText = HEAP_strdupAtoW( GetProcessHeap(),
+							 0, szTitle );
     }
-//AH: TODO
-//    else
-//      psInfo->proppage[index].pszText = HEAP_strdupAtoW(GetProcessHeap(),
-//							0,
-//							lppsp->pszTitle);
+    else
+      psInfo->proppage[index].pszText = HEAP_strdupAtoW(GetProcessHeap(),
+							0,
+							lppsp->pszTitle);
   }
 
   /*
