@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.12 2000-01-13 20:11:36 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.13 2000-01-14 14:45:15 sandervl Exp $ */
 
 /*
  * DC functions for USER32

@@ -1,4 +1,4 @@
-/* $Id: windowword.cpp,v 1.5 2000-01-01 14:57:36 cbratschi Exp $ */
+/* $Id: windowword.cpp,v 1.6 2000-01-14 14:45:18 sandervl Exp $ */
 
 /*
  * Win32 Get/SetWindowLong/Word user32 API functions for OS/2
@@ -25,30 +25,8 @@ LONG WIN32API SetWindowLongA(HWND hwnd, int nIndex, LONG  lNewLong)
     {
       return window->SetWindowLongA(nIndex,lNewLong);
     }
-    else
-    {
-      if (nIndex == GWL_WNDPROC && !Win32BaseWindow::GetWindowFromOS2Handle(hwnd))
-      {
-        dprintf(("Start subclassing OS/2 window"));
-
-        window = new Win32BaseWindow(hwnd,(PVOID)lNewLong);
-
-        if(window == NULL)
-        {
-          dprintf(("Win32BaseWindow creation failed!!"));
-          return 0;
-        }
-
-        if(GetLastError() != 0)
-        {
-          dprintf(("Win32BaseWindow error found!!"));
-          delete window;
-          return 0;
-        }
-
-        return (LONG)window->getOldWndProc();
-      }
-      else dprintf(("SetWindowLongA; window %x not found!", hwnd));
+    else {
+	 dprintf(("SetWindowLongA; window %x not found!", hwnd));
     }
     return 0;
 }
@@ -63,30 +41,8 @@ LONG WIN32API SetWindowLongW(HWND hwnd, int nIndex, LONG  lNewLong)
     {
       return window->SetWindowLongA(nIndex,lNewLong, TRUE);
     }
-    else
-    {
-      if (nIndex == GWL_WNDPROC && !Win32BaseWindow::GetWindowFromOS2Handle(hwnd))
-      {
-        dprintf(("Start subclassing OS/2 window"));
-
-        window = new Win32BaseWindow(hwnd,(PVOID)lNewLong);
-
-        if(window == NULL)
-        {
-          dprintf(("Win32BaseWindow creation failed!!"));
-          return 0;
-        }
-
-        if(GetLastError() != 0)
-        {
-          dprintf(("Win32BaseWindow error found!!"));
-          delete window;
-          return 0;
-        }
-
-        return (LONG)window->getOldWndProc();
-      }
-      else dprintf(("SetWindowLongW; window %x not found!", hwnd));
+    else {
+	 dprintf(("SetWindowLongW; window %x not found!", hwnd));
     }
     return 0;
 }
