@@ -1,4 +1,4 @@
-/* $Id: hmdevice.h,v 1.4 1999-08-24 14:36:05 phaller Exp $ */
+/* $Id: hmdevice.h,v 1.5 1999-08-24 18:46:39 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -20,6 +20,13 @@
  * Includes                                                                  *
  *****************************************************************************/
 
+/*****************************************************************************
+ * defines                                                                   *
+ *****************************************************************************/
+
+#define HMTYPE_UNKNOWN	0
+#define HMTYPE_MEMMAP	1
+//.....
 
 /*****************************************************************************
  * Structures                                                                *
@@ -35,6 +42,9 @@ typedef struct _HMHANDLEDATA
   DWORD           dwShare;                       /* share mode of the handle */
   DWORD           dwCreation;                       /* dwCreationDisposition */
   DWORD           dwFlags;                           /* flags and attributes */
+
+  DWORD           dwUserData;
+  DWORD           dwInternalType;
 
   LPVOID          lpHandlerData;    /* for private use of the device handler */
 } HMHANDLEDATA, *PHMHANDLEDATA;
@@ -238,11 +248,6 @@ public:
                                  LONG          cReleaseCount,
                                  LPLONG        lpPreviousCount);
 
-
-  /***************************************************************************
-   * File Mappings                                                           *
-   ***************************************************************************/
-
                 /* this is a handler method for calls to CreateFileMapping() */
   virtual DWORD CreateFileMapping   (PHMHANDLEDATA              pHMHandleData,
                                      HANDLE                     hFile,
@@ -250,36 +255,21 @@ public:
                                      DWORD                      flProtect,
                                      DWORD                      dwMaximumSizeHigh,
                                      DWORD                      dwMaximumSizeLow,
-                                     LPCTSTR                    lpName);
+                                     LPCSTR                     lpName);
 
                   /* this is a handler method for calls to OpenFileMapping() */
   virtual DWORD OpenFileMapping     (PHMHANDLEDATA              pHMHandleData,
+		                     DWORD access,   /* [in] Access mode */
                                      BOOL                       fInherit,
-                                     LPCTSTR                    lpName);
+                                     LPCSTR                     lpName);
 
-                    /* this is a handler method for calls to MapViewOfFile() */
-  virtual LPVOID MapViewOfFile      (PHMHANDLEDATA              pHMHandleData,
-                                     DWORD                      dwDesiredAccess,
-                                     DWORD                      dwFileOffsetHigh,
-                                     DWORD                      dwFileOffsetLow,
-                                     DWORD                      dwNumberOfBytesToMap);
-
-                  /* this is a handler method for calls to MapViewOfFileEx() */
+                    /* this is a handler method for calls to MapViewOfFileEx() */
   virtual LPVOID MapViewOfFileEx    (PHMHANDLEDATA              pHMHandleData,
                                      DWORD                      dwDesiredAccess,
                                      DWORD                      dwFileOffsetHigh,
                                      DWORD                      dwFileOffsetLow,
                                      DWORD                      dwNumberOfBytesToMap,
-                                     LPVOID                     lpBaseAddress);
-
-                  /* this is a handler method for calls to UnmapViewOfFile() */
-  virtual BOOL UnmapViewOfFile      (PHMHANDLEDATA              pHMHandleData,
-                                     LPVOID                     lpBaseAddress);
-
-                  /* this is a handler method for calls to FlushViewOfFile() */
-  virtual BOOL FlushViewOfFile      (PHMHANDLEDATA              pHMHandleData,
-                                     LPVOID                     lpBaseAddress,
-                                     DWORD                      dwNumberOfBytesToFlush);
+			             LPVOID                     lpBaseAddress);
 
 };
 
