@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.22 2000-12-16 22:47:28 bird Exp $
+# $Id: makefile,v 1.23 2001-09-29 20:24:55 bird Exp $
 #
 # Odin32 API
 #
@@ -21,7 +21,6 @@ mcicda
 
 # All the common rules like all, lib, clean and dep.
 $(COMMONRULES):
-    $(MAKE_CMD) -f winmm.mak $@
-    $(DODIRS) "$(SUBDIRS)" $(MAKE_CMD) $@
-
+    @$(MAKE_CMD) -f winmm.mak $@
+    @$(DODIRS) "$(SUBDIRS)" $(MAKE_CMD) $@
 
