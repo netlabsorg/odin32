@@ -1,31 +1,14 @@
-/* $Id: wsprintf.cpp,v 1.8 2000-06-23 19:04:13 sandervl Exp $ */
-
 /*
- * Win32 misc user32 API functions for OS/2
  * wsprintf functions
  *
  * Copyright 1996 Alexandre Julliard
- * Copyright 1999 Patrick Haller
- *
- * Project Odin Software License can be found in LICENSE.TXT
  */
 
-
-/****************************************************************************
- * Includes                                                                 *
- ****************************************************************************/
-
+#ifdef __WIN32OS2__
 #include <odin.h>
 #include <odinwrap.h>
 #include <os2sel.h>
 #include <os2win.h>
-
-#include <stdarg.h>
-#include <string.h>
-#include "stackframe.h"
-#include "module.h"
-#include "global.h"
-#include "debugtools.h"
 
 #include <misc.h>
 
@@ -33,11 +16,20 @@
 #include "dbglocal.h"
 
 ODINDEBUGCHANNEL(USER32-WSPRINTF)
+#endif
 
+#include <stdarg.h>
+#include <string.h>
+#include <stdio.h>
+#include "wine/winbase16.h"
+#include "windef.h"
+#include "wingdi.h"
+#include "winuser.h"
+#include "stackframe.h"
+#include "debugtools.h"
 
-/****************************************************************************
- * Definitions & Structures                                                 *
- ****************************************************************************/
+DEFAULT_DEBUG_CHANNEL(string);
+
 
 #define WPRINTF_LEFTALIGN   0x0001  /* Align output on the left ('-' prefix) */
 #define WPRINTF_PREFIX_HEX  0x0002  /* Prefix hex with 0x ('#' prefix) */
@@ -75,14 +67,8 @@ typedef union {
     INT     int_view;
 } WPRINTF_DATA;
 
-
-/****************************************************************************
- * Module global variables                                                  *
- ****************************************************************************/
-
 static const CHAR null_stringA[] = "(null)";
 static const WCHAR null_stringW[] = { '(', 'n', 'u', 'l', 'l', ')', 0 };
-
 
 /***********************************************************************
  *           WPRINTF_ParseFormatA
@@ -133,12 +119,10 @@ static INT WPRINTF_ParseFormatA( LPCSTR format, WPRINTF_FORMAT *res )
         res->type = WPR_SIGNED;
         break;
     case 's':
-        res->type = (res->flags & (WPRINTF_LONG |WPRINTF_WIDE))
-	            ? WPR_WSTRING : WPR_STRING;
+        res->type = (res->flags & (WPRINTF_LONG |WPRINTF_WIDE)) ? WPR_WSTRING : WPR_STRING;
         break;
     case 'S':
-        res->type = (res->flags & (WPRINTF_SHORT|WPRINTF_WIDE))
-	            ? WPR_STRING : WPR_WSTRING;
+        res->type = (res->flags & (WPRINTF_SHORT|WPRINTF_WIDE)) ? WPR_STRING : WPR_WSTRING;
         break;
     case 'u':
         res->type = WPR_UNSIGNED;
@@ -265,12 +249,8 @@ static UINT WPRINTF_GetLen( WPRINTF_FORMAT *format, WPRINTF_DATA *arg,
         break;
     case WPR_HEXA:
         len = sprintf( number,
-                        (format->flags & WPRINTF_UPPER_HEX) ? "%X" : "%x",
-                        (UINT)arg->int_view);
-        if (format->flags & WPRINTF_PREFIX_HEX) {
-            len += 2;
-            format->width += 2;
-        }
+                       (format->flags & WPRINTF_UPPER_HEX) ? "%X" : "%x",
+                       (UINT)arg->int_view);
         break;
     default:
         return 0;
@@ -280,40 +260,111 @@ static UINT WPRINTF_GetLen( WPRINTF_FORMAT *format, WPRINTF_DATA *arg,
     if (format->precision > maxlen) format->precision = maxlen;
     if ((format->flags & WPRINTF_ZEROPAD) && (format->width > format->precision))
         format->precision = format->width;
+    if (format->flags & WPRINTF_PREFIX_HEX) len += 2;
     return len;
 }
 
+
+#ifndef __WIN32OS2__
 /***********************************************************************
- *           WPRINTF_ExtractVAPtr (Not a Windows API)
+ *           wvsnprintf16   (Not a Windows API)
  */
-static WPRINTF_DATA WPRINTF_ExtractVAPtr( WPRINTF_FORMAT *format, va_list* args )
+static INT16 wvsnprintf16( LPSTR buffer, UINT16 maxlen, LPCSTR spec,
+                           LPCVOID args )
 {
-    WPRINTF_DATA result;
-    switch(format->type)
+    WPRINTF_FORMAT format;
+    LPSTR p = buffer;
+    UINT i, len;
+    CHAR number[20];
+    WPRINTF_DATA cur_arg;
+    SEGPTR seg_str;
+
+    while (*spec && (maxlen > 1))
     {
-        case WPR_WCHAR:
-            result.wchar_view = va_arg( *args, WCHAR );     break;
+        if (*spec != '%') { *p++ = *spec++; maxlen--; continue; }
+        spec++;
+        if (*spec == '%') { *p++ = *spec++; maxlen--; continue; }
+        spec += WPRINTF_ParseFormatA( spec, &format );
+        switch(format.type)
+        {
+        case WPR_WCHAR:  /* No Unicode in Win16 */
         case WPR_CHAR:
-            result.char_view = va_arg( *args, CHAR );       break;
+            cur_arg.char_view = VA_ARG16( args, CHAR );
+            break;
+        case WPR_WSTRING:  /* No Unicode in Win16 */
         case WPR_STRING:
-            result.lpcstr_view = va_arg( *args, LPCSTR);    break;
-        case WPR_WSTRING:
-            result.lpcwstr_view = va_arg( *args, LPCWSTR);  break;
+            seg_str = VA_ARG16( args, SEGPTR );
+            if (IsBadReadPtr16(seg_str, 1 )) cur_arg.lpcstr_view = "";
+            else cur_arg.lpcstr_view = MapSL( seg_str );
+            break;
+        case WPR_SIGNED:
+            if (!(format.flags & WPRINTF_LONG))
+            {
+                cur_arg.int_view = VA_ARG16( args, INT16 );
+                break;
+            }
+            /* fall through */
         case WPR_HEXA:
+        case WPR_UNSIGNED:
+            if (format.flags & WPRINTF_LONG)
+                cur_arg.int_view = VA_ARG16( args, UINT );
+            else
+                cur_arg.int_view = VA_ARG16( args, UINT16 );
+            break;
+        case WPR_UNKNOWN:
+            continue;
+        }
+        len = WPRINTF_GetLen( &format, &cur_arg, number, maxlen - 1 );
+        if (!(format.flags & WPRINTF_LEFTALIGN))
+            for (i = format.precision; i < format.width; i++, maxlen--)
+                *p++ = ' ';
+        switch(format.type)
+        {
+        case WPR_WCHAR:  /* No Unicode in Win16 */
+        case WPR_CHAR:
+            *p= cur_arg.char_view;
+            if (*p != '\0') p++;
+            else if (format.width > 1) *p++ = ' ';
+            else len = 0;
+            break;
+        case WPR_WSTRING:  /* No Unicode in Win16 */
+        case WPR_STRING:
+            if (len) memcpy( p, cur_arg.lpcstr_view, len );
+            p += len;
+            break;
+        case WPR_HEXA:
+            if ((format.flags & WPRINTF_PREFIX_HEX) && (maxlen > 3))
+            {
+                *p++ = '0';
+                *p++ = (format.flags & WPRINTF_UPPER_HEX) ? 'X' : 'x';
+                maxlen -= 2;
+                len -= 2;
+            }
+            /* fall through */
         case WPR_SIGNED:
         case WPR_UNSIGNED:
-            result.int_view = va_arg( *args, INT );         break;
-        default:
-            result.wchar_view = 0;                          break;
+            for (i = len; i < format.precision; i++, maxlen--) *p++ = '0';
+            if (len) memcpy( p, number, len );
+            p += len;
+            break;
+        case WPR_UNKNOWN:
+            continue;
+        }
+        if (format.flags & WPRINTF_LEFTALIGN)
+            for (i = format.precision; i < format.width; i++, maxlen--)
+                *p++ = ' ';
+        maxlen -= len;
     }
-    return result;
+    *p = 0;
+    return (maxlen > 1) ? (INT)(p - buffer) : -1;
 }
+#endif //!__WIN32OS2__
+
 
 /***********************************************************************
- *           wvsnprintfA   (Not a Windows API)
+ *           wvsnprintfA   (USER32.@) (Not a Windows API, but we export it from USER32 anyway)
  */
-INT WINAPI wvsnprintfA( LPSTR buffer, UINT maxlen, LPCSTR spec,
-                            va_list args )
+INT WINAPI wvsnprintfA( LPSTR buffer, UINT maxlen, LPCSTR spec, va_list args )
 {
     WPRINTF_FORMAT format;
     LPSTR p = buffer;
@@ -321,13 +372,39 @@ INT WINAPI wvsnprintfA( LPSTR buffer, UINT maxlen, LPCSTR spec,
     CHAR number[20];
     WPRINTF_DATA argData;
 
-    while (spec && *spec && (maxlen > 1))
+    TRACE("%p %u %s\n", buffer, maxlen, debugstr_a(spec));
+
+    while (*spec && (maxlen > 1))
     {
         if (*spec != '%') { *p++ = *spec++; maxlen--; continue; }
         spec++;
         if (*spec == '%') { *p++ = *spec++; maxlen--; continue; }
         spec += WPRINTF_ParseFormatA( spec, &format );
-        argData = WPRINTF_ExtractVAPtr( &format, &args );
+
+        switch(format.type)
+        {
+        case WPR_WCHAR:
+            argData.wchar_view = (WCHAR)va_arg( args, int );
+            break;
+        case WPR_CHAR:
+            argData.char_view = (CHAR)va_arg( args, int );
+            break;
+        case WPR_STRING:
+            argData.lpcstr_view = va_arg( args, LPCSTR );
+            break;
+        case WPR_WSTRING:
+            argData.lpcwstr_view = va_arg( args, LPCWSTR );
+            break;
+        case WPR_HEXA:
+        case WPR_SIGNED:
+        case WPR_UNSIGNED:
+            argData.int_view = va_arg( args, INT );
+            break;
+        default:
+            argData.wchar_view = 0;
+            break;
+        }
+
         len = WPRINTF_GetLen( &format, &argData, number, maxlen - 1 );
         if (!(format.flags & WPRINTF_LEFTALIGN))
             for (i = format.precision; i < format.width; i++, maxlen--)
@@ -335,13 +412,13 @@ INT WINAPI wvsnprintfA( LPSTR buffer, UINT maxlen, LPCSTR spec,
         switch(format.type)
         {
         case WPR_WCHAR:
-	    *p = argData.wchar_view;
+            *p = argData.wchar_view;
             if (*p != '\0') p++;
             else if (format.width > 1) *p++ = ' ';
             else len = 0;
             break;
         case WPR_CHAR:
-	    *p = argData.char_view;
+            *p = argData.char_view;
             if (*p != '\0') p++;
             else if (format.width > 1) *p++ = ' ';
             else len = 0;
@@ -363,8 +440,6 @@ INT WINAPI wvsnprintfA( LPSTR buffer, UINT maxlen, LPCSTR spec,
                 *p++ = (format.flags & WPRINTF_UPPER_HEX) ? 'X' : 'x';
                 maxlen -= 2;
                 len -= 2;
-                format.precision -= 2;
-                format.width -= 2;
             }
             /* fall through */
         case WPR_SIGNED:
@@ -372,7 +447,6 @@ INT WINAPI wvsnprintfA( LPSTR buffer, UINT maxlen, LPCSTR spec,
             for (i = len; i < format.precision; i++, maxlen--) *p++ = '0';
             memcpy( p, number, len );
             p += len;
-            /* Go to the next arg */
             break;
         case WPR_UNKNOWN:
             continue;
@@ -383,54 +457,81 @@ INT WINAPI wvsnprintfA( LPSTR buffer, UINT maxlen, LPCSTR spec,
         maxlen -= len;
     }
     *p = 0;
-    TRACE("%s\n",buffer);
+    TRACE("%s\n",debugstr_a(buffer));
     return (maxlen > 1) ? (INT)(p - buffer) : -1;
 }
 
 
 /***********************************************************************
- *           wvsnprintfW   (Not a Windows API)
+ *           wvsnprintfW   (USER32.@) (Not a Windows API, but we export it from USER32 anyway)
  */
-INT WINAPI wvsnprintfW( LPWSTR buffer, UINT maxlen, LPCWSTR spec,
-                            va_list args )
+INT WINAPI wvsnprintfW( LPWSTR buffer, UINT maxlen, LPCWSTR spec, va_list args )
 {
     WPRINTF_FORMAT format;
     LPWSTR p = buffer;
     UINT i, len;
     CHAR number[20];
+    WPRINTF_DATA argData;
 
-    while (spec && *spec && (maxlen > 1))
+    TRACE("%p %u %s\n", buffer, maxlen, debugstr_w(spec));
+
+    while (*spec && (maxlen > 1))
     {
         if (*spec != '%') { *p++ = *spec++; maxlen--; continue; }
         spec++;
         if (*spec == '%') { *p++ = *spec++; maxlen--; continue; }
         spec += WPRINTF_ParseFormatW( spec, &format );
-        len = WPRINTF_GetLen( &format, (WPRINTF_DATA*)args, number, maxlen - 1 );
+
+        switch(format.type)
+        {
+        case WPR_WCHAR:
+            argData.wchar_view = (WCHAR)va_arg( args, int );
+            break;
+        case WPR_CHAR:
+            argData.char_view = (CHAR)va_arg( args, int );
+            break;
+        case WPR_STRING:
+            argData.lpcstr_view = va_arg( args, LPCSTR );
+            break;
+        case WPR_WSTRING:
+            argData.lpcwstr_view = va_arg( args, LPCWSTR );
+            break;
+        case WPR_HEXA:
+        case WPR_SIGNED:
+        case WPR_UNSIGNED:
+            argData.int_view = va_arg( args, INT );
+            break;
+        default:
+            argData.wchar_view = 0;
+            break;
+        }
+
+        len = WPRINTF_GetLen( &format, &argData, number, maxlen - 1 );
         if (!(format.flags & WPRINTF_LEFTALIGN))
             for (i = format.precision; i < format.width; i++, maxlen--)
                 *p++ = ' ';
         switch(format.type)
         {
         case WPR_WCHAR:
-	    *p = va_arg( args, WCHAR );
+            *p = argData.wchar_view;
             if (*p != '\0') p++;
             else if (format.width > 1) *p++ = ' ';
             else len = 0;
             break;
         case WPR_CHAR:
-	    *p = (WCHAR)va_arg( args, CHAR );
+            *p = argData.char_view;
             if (*p != '\0') p++;
             else if (format.width > 1) *p++ = ' ';
             else len = 0;
             break;
         case WPR_STRING:
             {
-                LPCSTR ptr = va_arg( args, LPCSTR );
+                LPCSTR ptr = argData.lpcstr_view;
                 for (i = 0; i < len; i++) *p++ = (WCHAR)*ptr++;
             }
             break;
         case WPR_WSTRING:
-            if (len) memcpy( p, va_arg( args, LPCWSTR ), len * sizeof(WCHAR) );
+            if (len) memcpy( p, argData.lpcwstr_view, len * sizeof(WCHAR) );
             p += len;
             break;
         case WPR_HEXA:
@@ -440,15 +541,12 @@ INT WINAPI wvsnprintfW( LPWSTR buffer, UINT maxlen, LPCWSTR spec,
                 *p++ = (format.flags & WPRINTF_UPPER_HEX) ? 'X' : 'x';
                 maxlen -= 2;
                 len -= 2;
-                format.precision -= 2;
-                format.width -= 2;
             }
             /* fall through */
         case WPR_SIGNED:
         case WPR_UNSIGNED:
             for (i = len; i < format.precision; i++, maxlen--) *p++ = '0';
             for (i = 0; i < len; i++) *p++ = (WCHAR)number[i];
-            (void)va_arg( args, INT ); /* Go to the next arg */
             break;
         case WPR_UNKNOWN:
             continue;
@@ -459,96 +557,90 @@ INT WINAPI wvsnprintfW( LPWSTR buffer, UINT maxlen, LPCWSTR spec,
         maxlen -= len;
     }
     *p = 0;
+    TRACE("%s\n",debugstr_w(buffer));
     return (maxlen > 1) ? (INT)(p - buffer) : -1;
 }
 
 
+#ifndef __WIN32OS2__
 /***********************************************************************
- *           wvsprintfA   (USER32.587)
+ *           wvsprintf16   (USER.421)
  */
-ODINFUNCTION3(INT,    wvsprintfA,
-              LPSTR,  buffer,
-              LPCSTR, spec,
-              va_list,args )
+INT16 WINAPI wvsprintf16( LPSTR buffer, LPCSTR spec, LPCVOID args )
 {
-  return wvsnprintfA( buffer, 0xffffffff, spec, args );
+    INT16 res;
+
+    TRACE("for %p got:\n",buffer);
+    res = wvsnprintf16( buffer, 1024, spec, args );
+    return ( res == -1 ) ? 1024 : res;
+}
+#endif //!__WIN32OS2__
+
+
+/***********************************************************************
+ *           wvsprintfA   (USER32.@)
+ */
+INT WINAPI wvsprintfA( LPSTR buffer, LPCSTR spec, va_list args )
+{
+    INT res = wvsnprintfA( buffer, 1024, spec, args );
+    return ( res == -1 ) ? 1024 : res;
 }
 
 
 /***********************************************************************
- *           wvsprintfW   (USER32.588)
+ *           wvsprintfW   (USER32.@)
  */
-ODINFUNCTION3(INT,     wvsprintfW,
-              LPWSTR,  buffer,
-              LPCWSTR, spec,
-              va_list, args )
+INT WINAPI wvsprintfW( LPWSTR buffer, LPCWSTR spec, va_list args )
 {
-  return wvsnprintfW( buffer, 0xffffffff, spec, args );
+    INT res = wvsnprintfW( buffer, 1024, spec, args );
+    return ( res == -1 ) ? 1024 : res;
 }
+
+#ifndef __WIN32OS2__
+/***********************************************************************
+ *           wsprintf16   (USER.420)
+ */
+INT16 WINAPIV wsprintf16(void)
+{
+    VA_LIST16 valist;
+    INT16 res;
+    SEGPTR buffer, spec;
+
+    VA_START16( valist );
+    buffer = VA_ARG16( valist, SEGPTR );
+    spec   = VA_ARG16( valist, SEGPTR );
+    res = wvsnprintf16( MapSL(buffer), 1024, MapSL(spec), valist );
+    VA_END16( valist );
+    return ( res == -1 ) ? 1024 : res;
+}
+#endif //!__WIN32OS2__
 
 
 /***********************************************************************
- *           wsprintfA   (USER32.585)
+ *           wsprintfA   (USER32.@)
  */
 INT WINAPIV wsprintfA( LPSTR buffer, LPCSTR spec, ... )
 {
     va_list valist;
     INT res;
 
-    TRACE("for %p got:\n",buffer);
     va_start( valist, spec );
-    res = wvsnprintfA( buffer, 0xffffffff, spec, valist );
+    res = wvsnprintfA( buffer, 1024, spec, valist );
     va_end( valist );
-    return res;
+    return ( res == -1 ) ? 1024 : res;
 }
 
 
 /***********************************************************************
- *           wsprintfW   (USER32.586)
+ *           wsprintfW   (USER32.@)
  */
 INT WINAPIV wsprintfW( LPWSTR buffer, LPCWSTR spec, ... )
 {
     va_list valist;
     INT res;
 
-    TRACE("wsprintfW for %p\n",buffer);
     va_start( valist, spec );
-    res = wvsnprintfW( buffer, 0xffffffff, spec, valist );
+    res = wvsnprintfW( buffer, 1024, spec, valist );
     va_end( valist );
-    return res;
+    return ( res == -1 ) ? 1024 : res;
 }
-
-
-/***********************************************************************
- *           wsnprintfA   (Not a Windows API)
- */
-INT WINAPIV wsnprintfA( LPSTR buffer, UINT maxlen, LPCSTR spec, ... )
-{
-    va_list valist;
-    INT res;
-
-    va_start( valist, spec );
-    res = wvsnprintfA( buffer, maxlen, spec, valist );
-    va_end( valist );
-    return res;
-}
-
-
-/***********************************************************************
- *           wsnprintfW   (Not a Windows API)
- */
-INT WINAPIV wsnprintfW( LPWSTR buffer, UINT maxlen, LPCWSTR spec, ... )
-{
-    va_list valist;
-    INT res;
-
-    va_start( valist, spec );
-    res = wvsnprintfW( buffer, maxlen, spec, valist );
-    va_end( valist );
-    return res;
-}
-
-
-
-
-
