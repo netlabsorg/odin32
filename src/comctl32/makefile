@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.22 2000-02-22 17:11:40 cbratschi Exp $
+# $Id: makefile,v 1.23 2000-02-23 17:09:44 cbratschi Exp $
 #
 # PD-Win32 API
 #
@@ -22,7 +22,7 @@ TARGET = comctl32
 OBJS =  comctl32.obj initterm.obj progress.obj comctl32undoc.obj imagelist.obj \
         comboex.obj animate.obj datetime.obj flatsb.obj hotkey.obj monthcal.obj \
         nativefont.obj pager.obj tab.obj status.obj header.obj updown.obj \
-        rebar.obj cache.obj trackbar.obj tooltips.obj toolbar.obj treeview.obj \
+        rebar.obj trackbar.obj tooltips.obj toolbar.obj treeview.obj \
         propsheet.obj listview.obj draglist.obj ipaddress.obj resource.obj \
         ccbase.obj
 
@@ -34,6 +34,7 @@ $(TARGET).dll: $(OBJS) $(TARGET).def
           $(PDWIN32_LIB)/kernel32.lib \
           $(PDWIN32_LIB)/gdi32.lib \
           $(PDWIN32_LIB)/user32.lib  $(PDWIN32_LIB)/odincrt.lib \
+          $(PDWIN32_LIB)/winmm.lib \
           OS2386.LIB  $(RTLLIB_O)
     $(CP) $@ $(PDWIN32_BIN)
 

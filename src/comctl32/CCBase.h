@@ -1,4 +1,4 @@
-/* $Id: CCBase.h,v 1.1 2000-02-22 17:11:38 cbratschi Exp $ */
+/* $Id: CCBase.h,v 1.2 2000-02-23 17:09:40 cbratschi Exp $ */
 /*
  * COMCTL32 Base Functions and Macros for all Controls
  *
@@ -25,6 +25,11 @@ LRESULT defComCtl32ProcA(HWND hwnd,UINT Msg,WPARAM wParam,LPARAM lParam);
 LRESULT defComCtl32ProcW(HWND hwnd,UINT Msg,WPARAM wParam,LPARAM lParam);
 
 LRESULT sendNotify(HWND hwnd,UINT code);
+LRESULT sendNotify(HWND hwnd,UINT code,LPNMHDR nmhdr);
 LRESULT sendNotifyFormat(HWND hwnd,HWND hwndFrom,LPARAM command);
+LRESULT sendCommand(HWND hwnd,UINT wNotifyCode);
+
+HWND createToolTip(HWND hwnd,UINT flags);
+VOID destroyToolTip(HWND hwndToolTip);
 
 #endif
