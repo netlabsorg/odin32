@@ -1,15 +1,31 @@
- /* $Id: changelog,v 1.341 1999-10-19 12:32:12 dengert Exp $ */
+ /* $Id: changelog,v 1.342 1999-10-19 12:56:04 sandervl Exp $ */
+
+ 99-10-19: Sander van Leeuwen <sandervl@xs4all.nl>
+	- KERNEL32: FindResource bugfix: "DIB" type is the same as "BITMAP"
+                    (VPBuddy fix)
+                    NOTE: Currently disabled. VPBuddy expects something other
+                          than a pointer to the raw resource data for such
+                          bitmaps. (TODO)
+        - USER32: Windows without a parent have the desktop window as parent
+
+ 99-10-19: Yuri Dario <mc6530@mclink.it>
+	- USER32: Initialize MDI client variables before calling Win32BaseWindow
+                  constructor
+
+ 99-10-19: Jens Wiessner <wiessnej@rfi.de>
+	- RASAPI32: Added stubs
 
  99-10-19: Daniela Engert <dani@ngrt.de>
 	- USER32: excessive background erases tamed
 
  99-10-18: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Set/clear WS_VISIBLE flag in ShowWindow
-		  Fix for scrollbar redraw
-		  Rewrote EnumChildWindows (winzip works quite well now!)
+                  Fix for scrollbar redraw
+                  Put back original Wine code for LISTBOX_UpdateScroll.
+                  Rewrote EnumChildWindows (winzip works quite well now!)
 
  99-10-18: Edgar Buerkle <Edgar.Buerkle@gmx.net>
-	- COMDLG32: Disable comdlg hooks for now. They don't anyway.
+	- COMDLG32: Disable comdlg hooks for now. They don't work anyway.
 
  99-10-17: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Ported AdjustWindowRectEx from Wine (990815)
