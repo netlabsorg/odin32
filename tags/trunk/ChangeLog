@@ -1,4 +1,10 @@
- /* $Id: ChangeLog,v 1.143 1999-08-27 16:53:59 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.144 1999-08-27 17:49:44 dengert Exp $ */
+
+ 99-08-27: Daniela Engert <dani@ngrt.de>
+        - USER32\NEW: window creation, window relationship, window sizing and
+                    positioning enhanced.
+        - USER32\NEW: window and client rectangles are in sync with the WINE
+                    structures now.
 
  99-08-27: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Rewrote memory mapped files for multiple views

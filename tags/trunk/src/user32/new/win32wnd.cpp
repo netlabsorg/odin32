@@ -1,4 +1,4 @@
-/* $Id: win32wnd.cpp,v 1.30 1999-08-25 15:08:50 dengert Exp $ */
+/* $Id: win32wnd.cpp,v 1.31 1999-08-27 17:50:56 dengert Exp $ */
 /*
  * Win32 Window Code for OS/2
  *
@@ -255,6 +255,12 @@ BOOL Win32Window::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
   if ((cs->style & WS_CHILD) && cs->hwndParent)
   {
         SetParent(cs->hwndParent);
+        owner = GetWindowFromHandle(cs->hwndParent);
+        if(owner == NULL)
+        {
+            dprintf(("HMHandleTranslateToOS2 couldn't find owner window %x!!!", cs->hwndParent));
+            return FALSE;
+        }
   }
   else
   {
@@ -366,7 +372,7 @@ BOOL Win32Window::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
 
   OS2Hwnd = OSLibWinCreateWindow((getParent()) ? getParent()->getOS2WindowHandle() : OSLIB_HWND_DESKTOP,
                                  dwOSWinStyle, dwOSFrameStyle, (char *)cs->lpszName,
-                                 (owner) ? owner->getOS2FrameWindowHandle() : OSLIB_HWND_DESKTOP,
+                                 (owner) ? owner->getOS2WindowHandle() : OSLIB_HWND_DESKTOP,
                                  (hwndLinkAfter == HWND_BOTTOM) ? TRUE : FALSE,
                                  &OS2HwndFrame);
 
@@ -1067,14 +1073,15 @@ LRESULT Win32Window::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
         WPARAM     wp   = SIZE_RESTORED;
 
         if (!(wpos->flags & SWP_NOCLIENTMOVE))
-            SendMessageA(WM_MOVE, 0, MAKELONG(wpos->x, wpos->y));
+            SendMessageA(WM_MOVE, 0, MAKELONG(rectClient.left, rectClient.top));
 
         if (!(wpos->flags & SWP_NOCLIENTSIZE))
         {
             if (dwStyle & WS_MAXIMIZE) wp = SIZE_MAXIMIZED;
             else if (dwStyle & WS_MINIMIZE) wp = SIZE_MINIMIZED;
 
-            SendMessageA(WM_SIZE, wp, MAKELONG(wpos->cx,wpos->cy));
+           SendMessageA(WM_SIZE, wp, MAKELONG(rectClient.right  - rectClient.left,
+                                              rectClient.bottom - rectClient.top));
         }
         return 0;
     }
@@ -1468,6 +1475,7 @@ BOOL Win32Window::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, int c
 {
    BOOL rc = FALSE;
    Win32Window *window;
+   HWND hParent = 0;
 
    dprintf (("SetWindowPos %x %x (%d,%d)(%d,%d) %x", Win32Hwnd, hwndInsertAfter, x, y, cx, cy, fuFlags));
 
@@ -1483,7 +1491,6 @@ BOOL Win32Window::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, int c
 
    WINDOWPOS wpos;
    SWP swp, swpOld;
-   ULONG parentHeight;
 
    //****************************
    // Set up with Windows values.
@@ -1500,12 +1507,14 @@ BOOL Win32Window::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, int c
    // Convert from Windows to PM coords and flags.
    //**********************************************
    if(~fuFlags & (SWP_NOMOVE | SWP_NOSIZE)) {
-       OSLibWinQueryWindowPos(OS2Hwnd, &swpOld);
-       parentHeight = isChild() ?
-           OSLibGetWindowHeight(getParent()->getOS2WindowHandle())
-         : OSLibQueryScreenHeight();
+       if (isChild())
+       {
+           hParent = getParent()->getOS2WindowHandle();
+           OSLibWinQueryWindowPos(OS2Hwnd, &swpOld);
+       } else
+           OSLibWinQueryWindowPos(OS2HwndFrame, &swpOld);
    }
-   OSLibMapWINDOWPOStoSWP(&wpos, &swp, &swpOld, parentHeight);
+   OSLibMapWINDOWPOStoSWP(&wpos, &swp, &swpOld, hParent, OS2HwndFrame);
 
    /* MapSWP can clear the SWP_MOVE and SWP_SIZE flags if the window is not
     * being moved or sized.  If these were the only operations to be done
