@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.2690 2004-02-27 19:52:14 sandervl Exp $ */
+/* $Id: changelog,v 1.2691 2004-02-27 20:14:16 sandervl Exp $ */
 
  2004-02-27: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o Re-assert DC transformation and y-inversion after SetWindowPos
@@ -7,6 +7,7 @@
                 o StretchDIBits: If biClrUsed equals 0, set it to (1<<bitcount)
                                  Disabled DIB_PAL_COLORS workaround
                 o SetDIBitsToDevice: removed Matrix driver bug workaround; 
+    - NETAPI32: o Removed all OS/2 Netbios dependencies
 
  2003-02-24: Dietrich Teickner <Dietrich_Teickner@t-online   >
     - KERNEL32: o CreateProcess fix
