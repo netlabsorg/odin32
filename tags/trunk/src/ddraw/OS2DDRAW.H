@@ -1,4 +1,4 @@
-/* $Id: OS2DDRAW.H,v 1.14 2001-03-18 21:44:42 mike Exp $ */
+/* $Id: OS2DDRAW.H,v 1.15 2001-10-05 12:33:09 sandervl Exp $ */
 
 /*
  * DX Draw base class definition
@@ -25,7 +25,7 @@
 #undef THIS
 #define THIS VOID*
 
-#define MAX_FOURCC_CODES        3
+#define MAX_FOURCC_CODES        4
 
 #define ODINDDRAW_SECTION       "DirectDraw"
 
