@@ -1,4 +1,4 @@
-/* $Id: malloc.c,v 1.3 1999-10-27 02:03:00 bird Exp $
+/* $Id: malloc.c,v 1.4 1999-11-01 09:28:58 bird Exp $
  *
  * Heap.
  *
@@ -623,7 +623,7 @@ int _heap_check(void)
  */
 int _rmem_init(void)
 {
-    int rc = heapInit(HEAP_SIZE);
+    int rc = heapInit(0x100000);
     return rc;
 }
 
