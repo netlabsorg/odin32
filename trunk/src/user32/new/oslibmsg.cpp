@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.cpp,v 1.6 2000-01-01 14:57:18 cbratschi Exp $ */
+/* $Id: oslibmsg.cpp,v 1.7 2000-01-03 21:37:17 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -177,8 +177,13 @@ LONG OSLibWinDispatchMsg(MSG *msg, BOOL isUnicode)
             thdb->nrOfMsgs = 1;
             thdb->msgstate++; //odd -> next call to our PM window handler should dispatch the translated msg
             memcpy(&thdb->msg, msg, sizeof(MSG));
+	    return (LONG)WinDispatchMsg(thdb->hab, &os2msg);
         }
-        return (LONG)WinDispatchMsg(thdb->hab, &os2msg);
+	//SvL: TODO; What to do if messages posted by PostThreadMessage are
+        //     dispatched? Wine doesn't appear to do this.
+        //     If we call WinDispatchMsg, every window created by the thread
+        //     receives this message. Does this also happen in NT?
+        return 0;
   }
   else {//is this allowed?
 //        dprintf(("WARNING: OSLibWinDispatchMsg: called with own message!"));
@@ -192,6 +197,7 @@ BOOL OSLibWinGetMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterMa
 {
  BOOL rc, eaten;
  THDB *thdb;
+ QMSG  os2msg;
 
   thdb = GetThreadTHDB();
   if(thdb == NULL) {
@@ -222,17 +228,22 @@ continuegetmsg:
             rc = OSLibWinPeekMsg(pMsg, hwnd, uMsgFilterMin, uMsgFilterMax, PM_REMOVE_W, isUnicode);
         }
         while(rc == FALSE);
+
+	return rc;
   }
   else
   {
     do {
         eaten = FALSE;
-        rc = WinGetMsg(thdb->hab, MsgThreadPtr, TranslateWinMsg(uMsgFilterMin, TRUE), TranslateWinMsg(uMsgFilterMax, FALSE), 0);
-        if (MsgThreadPtr->msg == WM_TIMER)
-            eaten = TIMER_HandleTimer (MsgThreadPtr);
+        rc = WinGetMsg(thdb->hab, &os2msg, TranslateWinMsg(uMsgFilterMin, TRUE), TranslateWinMsg(uMsgFilterMax, FALSE), 0);
+        if (os2msg.msg == WM_TIMER)
+            eaten = TIMER_HandleTimer(&os2msg);
     } while (eaten);
   }
-  OS2ToWinMsgTranslate((PVOID)thdb, MsgThreadPtr, pMsg, isUnicode, MSG_REMOVE);
+  if(rc) {
+	OS2ToWinMsgTranslate((PVOID)thdb, &os2msg, pMsg, isUnicode, MSG_REMOVE);
+        memcpy(MsgThreadPtr, &os2msg, sizeof(QMSG));
+  }
   return rc;
 }
 //******************************************************************************
@@ -392,21 +403,33 @@ BOOL OSLibPostMessage(HWND hwnd, ULONG msg, ULONG wParam, ULONG lParam, BOOL fUn
     return WinPostMsg(hwnd, WIN32APP_POSTMSG, (MPARAM)((fUnicode) ? WIN32MSG_MAGICW : WIN32MSG_MAGICA), (MPARAM)packet);
 }
 //******************************************************************************
+BOOL    _System _O32_PostThreadMessage( DWORD, UINT, WPARAM, LPARAM );
+
+inline BOOL O32_PostThreadMessage(DWORD a, UINT b, WPARAM c, LPARAM d)
+{
+ BOOL yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = _O32_PostThreadMessage(a, b, c, d);
+    SetFS(sel);
+
+    return yyrc;
+} 
 //******************************************************************************
 BOOL OSLibPostThreadMessage(ULONG threadid, UINT msg, WPARAM wParam, LPARAM lParam, BOOL fUnicode)
 {
- THDB *thdb = GetTHDBFromThreadId(threadid);
+// THDB *thdb = GetTHDBFromThreadId(threadid);
  POSTMSG_PACKET *packet = (POSTMSG_PACKET *)_smalloc(sizeof(POSTMSG_PACKET));
 
-    if(thdb == NULL) {
-        dprintf(("OSLibPostThreadMessage: thread %x not found!", threadid));
-        return FALSE;
-    }
+//    if(thdb == NULL) {
+//        dprintf(("OSLibPostThreadMessage: thread %x not found!", threadid));
+//        return FALSE;
+//    }
     dprintf(("PostThreadMessageA %x %x %x %x", threadid, msg, wParam, lParam));
     packet->Msg = msg;
     packet->wParam = wParam;
     packet->lParam = lParam;
-    return WinPostQueueMsg(thdb->hmq, WIN32APP_POSTMSG, (MPARAM)((fUnicode) ? WIN32MSG_MAGICW : WIN32MSG_MAGICA), (MPARAM)packet);
+    return _O32_PostThreadMessage(threadid, WIN32APP_POSTMSG-OPEN32_MSGDIFF, ((fUnicode) ? WIN32MSG_MAGICW : WIN32MSG_MAGICA), (LPARAM)packet);
 }
 //******************************************************************************
 //******************************************************************************

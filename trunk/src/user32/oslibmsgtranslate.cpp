@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.6 1999-12-29 22:54:01 cbratschi Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.7 2000-01-03 21:37:16 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -131,7 +131,8 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
             winMsg->message = packet->Msg;
             winMsg->wParam  = packet->wParam;
             winMsg->lParam  = packet->lParam;
-            if(fMsgRemoved == MSG_REMOVE) free(packet); //free the shared memory here
+            if(fMsgRemoved == MSG_REMOVE) 
+		free(packet); //free the shared memory here
             break;
         }
         goto dummymessage;
