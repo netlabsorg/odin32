@@ -1,4 +1,4 @@
-// $Id: dplaysp.cpp,v 1.2 2000-09-24 22:47:37 hugh Exp $
+// $Id: dplaysp.cpp,v 1.3 2000-10-06 19:49:04 hugh Exp $
 /* This contains the implementation of the interface Service
  * Providers require to communicate with Direct Play
  *
@@ -27,6 +27,7 @@
 
 DEFAULT_DEBUG_CHANNEL(dplay);
 
+#undef  debugstr_guid
 #define debugstr_guid(a) a
 
 
@@ -379,6 +380,8 @@ static HRESULT WINAPI IDirectPlaySPImpl_GetSPPlayerData
   FIXME( "(%p)->(0x%08lx,%p,%p,0x%08lx): stub\n",
          This, idPlayer, lplpData, lpdwDataSize, dwFlags );
 
+  /* What to do in the case where there is nothing set yet? */
+
   *lplpData     = This->sp->lpPlayerData;
   *lpdwDataSize = This->sp->dwPlayerDataSize;
 
@@ -450,6 +453,8 @@ static HRESULT WINAPI IDirectPlaySPImpl_HandleMessage
       break;
     }
 
+    case DPMSGCMD_GETNAMETABLE:
+    case DPMSGCMD_GETNAMETABLEREPLY:
     case DPMSGCMD_NEWPLAYERIDREPLY:
     case DPMSGCMD_REQUESTNEWPLAYERID:
     {
