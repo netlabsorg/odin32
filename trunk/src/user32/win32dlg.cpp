@@ -1,4 +1,4 @@
-/* $Id: win32dlg.cpp,v 1.60 2001-04-02 17:30:58 sandervl Exp $ */
+/* $Id: win32dlg.cpp,v 1.61 2001-04-04 09:32:25 sandervl Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -24,6 +24,7 @@
 #include "controls.h"
 #include "syscolor.h"
 #include <math.h>
+#include <unicode.h>
 
 #define DBG_LOCALLOG    DBG_win32dlg
 #include "dbglocal.h"
