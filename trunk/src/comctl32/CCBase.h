@@ -1,4 +1,4 @@
-/* $Id: CCBase.h,v 1.10 2000-04-16 18:52:38 cbratschi Exp $ */
+/* $Id: CCBase.h,v 1.11 2000-11-19 11:51:47 sandervl Exp $ */
 /*
  * COMCTL32 Base Functions and Macros for all Controls
  *
@@ -22,19 +22,31 @@ typedef struct
 PVOID initControl(HWND hwnd,DWORD dwSize);
 VOID doneControl(HWND hwnd);
 
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 LRESULT defComCtl32ProcA(HWND hwnd,UINT Msg,WPARAM wParam,LPARAM lParam);
 LRESULT defComCtl32ProcW(HWND hwnd,UINT Msg,WPARAM wParam,LPARAM lParam);
 
-BOOL isUnicodeNotify(COMCTL32_HEADER *infoPtr);
-BOOL isUnicodeNotify(HWND hwnd);
+#ifdef __cplusplus
+}
+#endif
 
-HWND getNotifyWindow(COMCTL32_HEADER *infoPtr);
+BOOL isUnicodeNotify(COMCTL32_HEADER *infoPtr);
+#ifdef __cplusplus
+BOOL isUnicodeNotify(HWND hwnd);
+#endif
+
 HWND getNotifyWindow(COMCTL32_HEADER *infoPtr);
 
 LRESULT sendNotify(HWND hwnd,UINT code);
+#ifdef __cplusplus
 LRESULT sendNotify(HWND hwndFrom,HWND hwndTo,UINT code);
 LRESULT sendNotify(HWND hwnd,UINT code,LPNMHDR nmhdr);
 LRESULT sendNotify(HWND hwndFrom,HWND hwndTo,UINT code,LPNMHDR nmhdr);
+#endif
 LRESULT sendNotifyFormat(HWND hwnd,HWND hwndFrom,LPARAM command);
 LRESULT sendCommand(HWND hwnd,UINT wNotifyCode);
 LRESULT sendHScroll(HWND hwnd,UINT wNotifyCode);
@@ -65,5 +77,6 @@ WCHAR* lstrstrWtoA(WCHAR *text,CHAR *subtext);
 WCHAR* lstrstrAW(WCHAR *text,BOOL textunicode,WCHAR *subtext,BOOL subtextunicode);
 
 #define TICKDIFF(start,end) ((end > start) ? (end-start):(0xFFFFFFFF-start+end))
+
 
 #endif
