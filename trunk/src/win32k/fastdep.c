@@ -1,28 +1,59 @@
 /*
- * Fast dependands. (Fase = Quick and Dirty!)
+ * Fast dependants. (Fast = Quick and Dirty!)
  *
  * Copyright (c) 1999 knut st. osmundsen
  *
  */
 
+/*******************************************************************************
+*   Defined Constants And Macros                                               *
+*******************************************************************************/
 #define INCL_DOSERRORS
 #define INCL_FILEMGR
+
+/*******************************************************************************
+*   Header Files                                                               *
+*******************************************************************************/
 #include <os2.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-/*@Global***********************************************************************
+
+/*******************************************************************************
+*   Structures and Typedefs                                                    *
+*******************************************************************************/
+typedef struct _Options
+{
+    const char *    pszInclude;
+    const char *    pszExclude;
+    BOOL            fExcludeAll;
+    const char *    pszObjectDir;
+    BOOL            fObjRule;
+    BOOL            fNoObjectPath;
+} OPTIONS, *POPTIONS;
+
+
+/*******************************************************************************
 *   Global Variables                                                           *
 *******************************************************************************/
 static const char pszDefaultDepFile[] = ".depend";
 
-
-/*@IntFunc**********************************************************************
+/*******************************************************************************
 *   Internal Functions                                                         *
 *******************************************************************************/
-static int makeDependent(FILE *phDep, const char *pszSource, const char *pszInclude, const char *pszObjectDir);
+static void syntax(void);
+static int makeDependent(FILE *phDep, const char *pszFilename, POPTIONS pOptions);
 static int getFullIncludename(char *pszFilename, const char *pszInclude);
+
+/* file operations */
+char *filePath(const char *pszFilename, char *pszBuffer);
+char *filePathSlash(const char *pszFilename, char *pszBuffer);
+char *fileName(const char *pszFilename, char *pszBuffer);
+char *fileNameNoExt(const char *pszFilename, char *pszBuffer);
+char *fileExt(const char *pszFilename, char *pszBuffer);
+
+char *pathlistFindFile(const char *pszPathList, const char *pszFilename, char *pszBuffer);
 
 
 /**
@@ -46,8 +77,20 @@ int main(int argc, char **argv)
     int         rc   = 0;
     int         argi = 1;
     const char *pszDepFile = pszDefaultDepFile;
-    char        szObjectDir[CCHMAXPATH] = {0};
+
+    static char szObjectDir[CCHMAXPATH] = {0};
     static char szInclude[32768] = ";";
+    static char szExclude[32768] = ";";
+
+    OPTIONS options =
+    {
+        szInclude,       /* pszInclude */
+        szExclude,       /* pszExclude */
+        FALSE,           /* fExcludeAll */
+        szObjectDir,     /* pszObjectDir */
+        TRUE,            /* fObjRule */
+        FALSE            /* fNoObjectPath */
+    };
 
     /* look for depend filename option "-d <filename>" */
     if (argc >= 3 && strcmp(argv[1], "-d") == 0)
@@ -61,16 +104,31 @@ int main(int argc, char **argv)
     {
         while (argi < argc)
         {
-            ULONG        ulRc;
-            FILEFINDBUF3 filebuf;
-            HDIR         hDir = HDIR_CREATE;
-            ULONG        ulFound = 1;
-
             if (argv[argi][0] == '-' || argv[argi][0] == '/')
             {
                 /* parameters */
                 switch (argv[argi][1])
                 {
+                    case 'E': /* list of paths. If a file is found in one of these directories the */
+                    case 'e': /* filename will be used without the directory path. */
+                        /* Eall<[+]|-> ? */
+                        if (strlen(&argv[argi][1]) <= 5 && strnicmp(&argv[argi][1], "Eall", 4) == 0)
+                        {
+                            options.fExcludeAll = argv[argi][5] != '-';
+                            break;
+                        }
+                        /* path or path list */
+                        if (strlen(argv[argi]) > 2)
+                            strcat(szExclude, &argv[argi][2]);
+                        else
+                        {
+                            strcat(szExclude, argv[argi+1]);
+                            argi++;
+                        }
+                        if (szExclude[strlen(szExclude)-1] != ';')
+                            strcat(szExclude, ";");
+                        break;
+
                     case 'I': /* optional include path. This has precedence over the INCLUDE environment variable. */
                     case 'i':
                         if (strlen(argv[argi]) > 2)
@@ -84,10 +142,44 @@ int main(int argc, char **argv)
                             strcat(szInclude, ";");
                         break;
 
-                    case 'o': /* object base directory */
-                    case 'O':
-                        strcpy(szObjectDir, argv[argi]+2);
+                    case 'n': /* no object path , -N<[+]|-> */
+                    case 'N':
+                        if (strlen(argv[argi]) <= 1+1+1)
+                            options.fNoObjectPath = argv[argi][2] != '-';
+                        else
+                        {
+                            fprintf(stderr, "error: invalid parameter!, '%s'\n", argv[argi]);
+                            return -1;
+                        }
                         break;
+
+                    case 'o': /* object base directory or Obr<[+]|-> */
+                    case 'O':
+                        if (strlen(&argv[argi][1]) <= 4 && strnicmp(&argv[argi][1], "Obr", 3) == 0)
+                        {
+                            options.fObjRule = argv[argi][4] != '-';
+                            break;
+                        }
+
+                        /* path */
+                        if (strlen(argv[argi]) > 2)
+                            strcpy(szObjectDir, argv[argi]+2);
+                        else
+                        {
+                            strcpy(szObjectDir, argv[argi+1]);
+                            argi++;
+                        }
+                        if (szObjectDir[strlen(szObjectDir)-1] != '\\'
+                            && szObjectDir[strlen(szObjectDir)-1] != '/'
+                            )
+                            strcat(szObjectDir, "\\");
+                        break;
+
+                    case 'h':
+                    case 'H':
+                    case '?':
+                        syntax();
+                        return 1;
 
                     default:
                         fprintf(stderr, "error: invalid parameter! '%s'\n", argv[argi]);
@@ -96,8 +188,12 @@ int main(int argc, char **argv)
 
             }
             else
-            {
-                /* not a parameter! */
+            {   /* not a parameter! */
+                ULONG        ulRc;
+                FILEFINDBUF3 filebuf;
+                HDIR         hDir = HDIR_CREATE;
+                ULONG        ulFound = 1;
+
                 ulRc = DosFindFirst(argv[argi], &hDir,
                                     FILE_READONLY |  FILE_HIDDEN | FILE_SYSTEM | FILE_ARCHIVED,
                                     &filebuf, sizeof(FILEFINDBUF3), &ulFound, FIL_STANDARD);
@@ -129,9 +225,8 @@ int main(int argc, char **argv)
                     }
 
                     strcat(szSource, filebuf.achName);
-                    rc -= makeDependent(phDep, &szSource[0], &szInclude[0], &szObjectDirTmp[0]);
+                    rc -= makeDependent(phDep, &szSource[0], &options);
                     ulRc = DosFindNext(hDir, &filebuf, sizeof(filebuf), &ulFound);
-
                 }
                 DosFindClose(hDir);
             }
@@ -148,104 +243,173 @@ int main(int argc, char **argv)
 }
 
 
+/**
+ * Displays the syntax description for this util.
+ * @status    completely implemented.
+ * @author    knut st. osmundsen
+ */
+static void syntax(void)
+{
+    printf(
+        "FastDep v0.1\n"
+        "Quick and dirty dependant scanner. Creates a makefile readable depend file.\n"
+        "\n"
+        "Syntax: FastDep [-d <outputfn>] [-e <excludepath>] [-eall<[+]|->]\n"
+        "                [-i <include>] [-n<[+]|->] [-o <objdir>] [-obr<[+]|->]\n"
+        "\n"
+        "   -d <outputfn>   Output filename. Default: %s\n"
+        "   -e excludepath  Exclude paths. If a filename is found in any\n"
+        "                   of these paths only the filename is used, not\n"
+        "                   the path+filename (which is default).\n"
+        "   -eall<[+]|->    -eall+: No path are added to the filename.\n"
+        "                   -eall-: The filename is appended the include path\n"
+        "                           was found in.\n"
+        "                   Default: eall-\n"
+        "   -i <include>    Additional include paths. INCLUDE is searched after this.\n"
+        "   -n<[+]|->       No path for object files in the rules.\n"
+        "   -o <objdir>     Path were object files are placed. This path replaces the\n"
+        "                   entire filename path\n"
+        "   -obr<[+]|->     -obr+: Object rule.\n"
+        "                   -obr-: No object rule, rule for source filename is generated.\n"
+        "\n",
+        pszDefaultDepFile
+        );
+}
+
 
 /**
  * Generates depend info on this file, and fwrites it to phDep.
  * @returns
- * @param     phDep         Pointer to file struct for outfile.
- * @param     pszSource     Name of source file.
- * @param     pszIncldue    Pointer to additional include path.
- * @param     pszObjectDir  Pointer to object directory.
+ * @param     phDep        Pointer to file struct for outfile.
+ * @param     pszFilename  Pointer to source filename.
+ * @param     pOptions     Pointer to options struct.
+ * @status    completely implemented.
+ * @author    knut st. osmundsen
  */
-static int makeDependent(FILE *phDep, const char *pszSource, const char *pszInclude, const char *pszObjectDir)
+static int makeDependent(FILE *phDep, const char *pszFilename, POPTIONS pOptions)
 {
     FILE  *phFile;
 
-    phFile = fopen(pszSource, "r");
+    phFile = fopen(pszFilename, "r");
     if (phFile != NULL)
     {
         char szBuffer[4096]; /* max line lenght */
-        int  k = strlen(pszSource) - 1;
+        int  k = strlen(pszFilename) - 1;
         int  l;
+        int  iLine;
+
         /**********************************/
         /* print file name to depend file */
         /**********************************/
-        while (pszSource[k] != '.' && k >= 0) k--;
-        l = k;
-        while (pszSource[l] != '\\' && pszSource[l] != '/' && l >= 0)
-            l--;
-        if (stricmp(&pszSource[k], ".c") == 0
-            || stricmp(&pszSource[k], ".cpp") == 0
-            || stricmp(&pszSource[k], ".asm") == 0
-           )
-            fprintf(phDep, "%s%.*s.obj:%*s %s",
-                    pszObjectDir,
-                    k - l, &pszSource[l],
-                    (k - l + strlen(pszObjectDir)) + 4 > 20 ? 0 : 20 - (k - l + strlen(pszObjectDir)) - 4, "",
-                    pszSource);
-        else if (stricmp(&pszSource[k], ".rc") == 0)
-            fprintf(phDep, "%s%.*s.res:%*s %s",
-                    pszObjectDir,
-                    k - l, &pszSource[l],
-                    (k - l + strlen(pszObjectDir)) + 4 > 20 ? 0 : 20 - (k - l + strlen(pszObjectDir)) - 4, "",
-                    pszSource);
-        else
-            fprintf(phDep, "%s:%-*s", pszSource, strlen(pszSource) > 20 ? 0 : 20 - strlen(pszSource), "");
+        if (pOptions->fObjRule)
+        {
+            char szExt[CCHMAXPATH];
+            char szObj[CCHMAXPATH];
 
+            if (pOptions->fNoObjectPath)
+                fileNameNoExt(pszFilename, szObj);
+            else if (*pOptions->pszObjectDir != '\0')
+            {
+                fileNameNoExt(pszFilename, szExt);
+                strcpy(szObj, pOptions->pszObjectDir);
+                strcat(szObj, szExt);
+            }
+            else
+            {
+                filePathSlash(pszFilename, szObj);
+                fileNameNoExt(pszFilename, szObj + strlen(szObj));
+            }
+
+            fileExt(pszFilename, szExt);
+            if (!stricmp(szExt, "c") || !stricmp(szExt, "sqc")
+                || !stricmp(szExt, "cpp") || !stricmp(szExt, "asm")
+                || !stricmp(szExt, "rc"))
+            {
+                if (!stricmp(szExt, "rc"))
+                    strcat(szObj, ".res");
+                else
+                    strcat(szObj, ".obj");
+                fprintf(phDep, "%s:%-*s", szObj,
+                        strlen(szObj) > 19 ? 0 : 19 - strlen(szObj), "");
+            }
+            else
+                fprintf(phDep, "%s:%-*s", pszFilename,
+                        strlen(pszFilename) > 19 ? 0 : 19 - strlen(pszFilename), "");
+        }
+        else
+            fprintf(phDep, "%s:%-*s", pszFilename,
+                    strlen(pszFilename) > 19 ? 0 : 19 - strlen(pszFilename), "");
 
         /*******************/
         /* find dependants */
         /*******************/
-        while (!feof(phFile))
+        iLine = 0;
+        while (!feof(phFile)) /* line loop */
         {
             if (fgets(szBuffer, sizeof(szBuffer), phFile) != NULL)
             {
-                /* search for #include */
+                /* search for #include or RCINCLUDE */
                 int cbLen;
                 int i = 0;
                 int f = 0;
+                iLine++;
 
                 cbLen = strlen(szBuffer);
                 while (i + 9 < cbLen
                        && !(f = (strncmp(&szBuffer[i], "#include", 8) == 0
                                  || strncmp(&szBuffer[i], "RCINCLUDE", 9) == 0)
-                           )
-                       /*&& (szBuffer[i] == ' ' || szBuffer[i] == '\t') */
+                            )
                       )
                     i++;
 
-                /* found */
+                /* Found include! */
                 if (f)
                 {
                     /* extract info between "" or <> */
                     f = 0;
                     while (i < cbLen && !(f = (szBuffer[i] == '"' || szBuffer[i] == '<')))
                         i++;
-                    i++; /* skipp '"' or '<' */
+                    i++; /* skip '"' or '<' */
                     if (f)
                     {
                         int j;
                         /* find end */
                         j = f = 0;
-                        while (i + j < cbLen &&  j < 260 && !(f = (szBuffer[i+j] == '"' || szBuffer[i+j] == '>')))
+                        while (i + j < cbLen &&  j < CCHMAXPATH &&
+                               !(f = (szBuffer[i+j] == '"' || szBuffer[i+j] == '>')))
                             j++;
 
                         if (f)
                         {
-                            char szFullname[261];
+                            char szFullname[CCHMAXPATH];
+                            char *psz;
 
-                            /* find include file path */
-                            strncpy(&szFullname[1], &szBuffer[i], j);
-                            szFullname[j+1] = '\0'; /* ensure terminatition. */
-                            if (getFullIncludename(&szFullname[1], pszInclude) == 0)
+                            /* copy filename */
+                            strncpy(szFullname, &szBuffer[i], j);
+                            szFullname[j] = '\0'; /* ensure terminatition. */
+
+                            /* find include file! */
+                            psz = pathlistFindFile(pOptions->pszInclude, szFullname, szBuffer);
+                            if (psz == NULL)
+                                psz = pathlistFindFile(getenv("INCLUDE"), szFullname, szBuffer);
+
+                            if (psz != NULL)
                             {
-                                szFullname[0] = ' '; /* blank char at begining */
-                                if (fwrite(&szFullname[0], strlen(szFullname), 1, phDep) != 1)
-                                    fprintf(stderr, "fwrite failed - loc 2\n");
+                                char szBuffer2[CCHMAXPATH];
+                                if (pOptions->fExcludeAll ||
+                                    pathlistFindFile(pOptions->pszExclude, szFullname, szBuffer2) != NULL
+                                    )
+                                    strcpy(szBuffer, szFullname);
+                                if (fwrite(" ", 1, 1, phDep) != 1) /* blank */
+                                    fprintf(stderr, "fwrite failed 1!\n");
+                                if (fwrite(szBuffer, strlen(szBuffer), 1, phDep) != 1)
+                                    fprintf(stderr, "fwrite failed 2!\n");
                             }
+                            else
+                                fprintf(stderr, "%s(%d): warning include file '%s' not found!\n",
+                                        pszFilename, iLine, szFullname+1);
                         }
                     }
-
                 }
             }
             /*
@@ -255,7 +419,8 @@ static int makeDependent(FILE *phDep, const char *pszSource, const char *pszIncl
         } /*while*/
         fputs("\n", phDep);
         fclose(phFile);
-    } else
+    }
+    else
         return -1;
 
     return 0;
@@ -338,3 +503,207 @@ static int getFullIncludename(char *pszFilename, const char *pszInclude)
 
     return -1;
 }
+
+
+
+/**
+ * Copies the path part (excluding the slash) into pszBuffer and returns
+ * a pointer to the buffer.
+ * If no path is found "" is returned.
+ * @returns   Pointer to pszBuffer with path.
+ * @param     pszFilename  Pointer to readonly filename.
+ * @param     pszBuffer    Pointer to output Buffer.
+ * @status    completely implemented.
+ * @author    knut st. osmundsen
+ */
+char *filePath(const char *pszFilename, char *pszBuffer)
+{
+    char *psz = strrchr(pszFilename, '\\');
+    if (psz == NULL)
+        psz = strrchr(pszFilename, '/');
+
+    if (psz == NULL)
+        *pszBuffer = '\0';
+    else
+    {
+        strncpy(pszBuffer, pszFilename, psz - pszFilename - 1);
+        pszBuffer[psz - pszFilename - 1] = '\0';
+    }
+
+    return pszBuffer;
+}
+
+
+/**
+ * Copies the path part including the slash into pszBuffer and returns
+ * a pointer to the buffer.
+ * If no path is found "" is returned.
+ * @returns   Pointer to pszBuffer with path.
+ * @param     pszFilename  Pointer to readonly filename.
+ * @param     pszBuffer    Pointer to output Buffer.
+ * @status    completely implemented.
+ * @author    knut st. osmundsen
+ */
+char *filePathSlash(const char *pszFilename, char *pszBuffer)
+{
+    char *psz = strrchr(pszFilename, '\\');
+    if (psz == NULL)
+        psz = strrchr(pszFilename, '/');
+
+    if (psz == NULL)
+        *pszBuffer = '\0';
+    else
+    {
+        strncpy(pszBuffer, pszFilename, psz - pszFilename + 1);
+        pszBuffer[psz - pszFilename + 1] = '\0';
+    }
+
+    return pszBuffer;
+}
+
+
+/**
+ * Copies the path name (with extention) into pszBuffer and returns
+ * a pointer to the buffer.
+ * If no path is found "" is returned.
+ * @returns   Pointer to pszBuffer with path.
+ * @param     pszFilename  Pointer to readonly filename.
+ * @param     pszBuffer    Pointer to output Buffer.
+ * @status    completely implemented.
+ * @author    knut st. osmundsen
+ */
+char *fileName(const char *pszFilename, char *pszBuffer)
+{
+    char *psz = strrchr(pszFilename, '\\');
+    if (psz == NULL)
+        psz = strrchr(pszFilename, '/');
+
+    strcpy(pszBuffer, psz == NULL ? pszFilename : psz + 1);
+
+    return pszBuffer;
+}
+
+
+/**
+ * Copies the name part with out extention into pszBuffer and returns
+ * a pointer to the buffer.
+ * If no name is found "" is returned.
+ * @returns   Pointer to pszBuffer with path.
+ * @param     pszFilename  Pointer to readonly filename.
+ * @param     pszBuffer    Pointer to output Buffer.
+ * @status    completely implemented.
+ * @author    knut st. osmundsen
+ */
+char *fileNameNoExt(const char *pszFilename, char *pszBuffer)
+{
+    char *psz = strrchr(pszFilename, '\\');
+    if (psz == NULL)
+        psz = strrchr(pszFilename, '/');
+
+    strcpy(pszBuffer, psz == NULL ? pszFilename : psz + 1);
+
+    psz = strrchr(pszBuffer, '.');
+    if (psz > pszBuffer) /* an extetion on it's own (.depend) is a filename not an extetion! */
+        *psz = '\0';
+
+    return pszBuffer;
+}
+
+
+/**
+ * Copies the extention part into pszBuffer and returns
+ * a pointer to the buffer.
+ * If no extention is found "" is returned.
+ * The dot ('.') is not included!
+ * @returns   Pointer to pszBuffer with path.
+ * @param     pszFilename  Pointer to readonly filename.
+ * @param     pszBuffer    Pointer to output Buffer.
+ * @status    completely implemented.
+ * @author    knut st. osmundsen
+ */
+char *fileExt(const char *pszFilename, char *pszBuffer)
+{
+    char *psz = strrchr(pszFilename, '.');
+    if (psz != NULL)
+    {
+        if (strchr(psz, '\\') != NULL || strchr(psz, '/') != NULL)
+            *pszBuffer = '\0';
+        else
+            strcpy(pszBuffer, psz + 1);
+    }
+    else
+        *pszBuffer = '\0';
+
+    return pszBuffer;
+}
+
+
+
+
+/**
+ * Finds a filename in a specified pathlist.
+ * @returns   Pointer to a filename consiting of the path part + the given filename.
+ *            (pointer into pszBuffer)
+ *            NULL if file is not found. ("" in buffer)
+ * @param     pszPathList  Path list to search for filename.
+ * @parma     pszFilename  Filename to find.
+ * @parma     pszBuffer    Ouput Buffer.
+ * @status    completely implemented.
+ * @author    knut st. osmundsen
+ */
+char *pathlistFindFile(const char *pszPathList, const char *pszFilename, char *pszBuffer)
+{
+    const char *psz = pszPathList;
+    const char *pszNext = NULL;
+
+    *pszBuffer = '\0';
+
+    if (pszPathList == NULL)
+        return NULL;
+
+    while (*psz != '\0')
+    {
+        /* find end of this path */
+        pszNext = strchr(psz, ';');
+        if (pszNext == NULL)
+            pszNext = psz + strlen(psz);
+
+        if (pszNext - psz > 0)
+        {
+            HDIR            hDir = HDIR_CREATE;
+            ULONG           cFiles = 1UL;
+            FILEFINDBUF3    FileFindBuf;
+            APIRET          rc;
+            char            szFile[CCHMAXPATH];
+
+            /* make search statment */
+            strncpy(szFile, psz, pszNext - psz);
+            szFile[pszNext - psz] = '\0';
+            if (szFile[pszNext - psz - 1] != '\\' && szFile[pszNext - psz - 1] != '/')
+                strcpy(&szFile[pszNext - psz], "\\");
+            strcat(szFile, pszFilename);
+
+            /* search for file */
+            rc = DosFindFirst(szFile, &hDir, FILE_NORMAL, &FileFindBuf, sizeof(FileFindBuf),
+                              &cFiles, FIL_STANDARD);
+            DosFindClose(hDir);
+            if (rc == NO_ERROR && cFiles == 1UL)
+            {
+                strncpy(pszBuffer, psz, pszNext - psz);
+                pszBuffer[pszNext - psz] = '\0';
+                if (pszBuffer[pszNext - psz - 1] != '\\' && pszBuffer[pszNext - psz - 1] != '/')
+                    strcpy(&pszBuffer[pszNext - psz], "\\");
+                strcat(pszBuffer, pszFilename);
+                break;
+            }
+        }
+
+        /* next */
+        if (*pszNext != ';')
+            break;
+        psz = pszNext + 1;
+    }
+
+    return *pszBuffer == '\0' ? NULL : pszBuffer;
+}
+
