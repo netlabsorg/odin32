@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.2 1999-09-10 19:00:10 dengert Exp $ */
+/* $Id: dc.cpp,v 1.3 1999-09-12 15:44:20 dengert Exp $ */
 
 /*
  * DC functions for USER32
@@ -22,6 +22,7 @@
 #include <win32wbase.h>
 #include <math.h>
 #include <limits.h>
+#include "oslibwin.h"
 
 #ifndef OPEN32API
 #define OPEN32API _System
@@ -102,18 +103,32 @@ typedef struct _penobject
 #define GM_COMPATIBLE_W     1
 #define GM_ADVANCED_W       2
 
-#define DCX_WINDOW                    0x00000001L
-#define DCX_CACHE                     0x00000002L
-#define DCX_NORESETATTRS              0x00000004L
-#define DCX_CLIPCHILDREN              0x00000008L
-#define DCX_CLIPSIBLINGS              0x00000010L
-#define DCX_PARENTCLIP                0x00000020L
-#define DCX_EXCLUDERGN                0x00000040L
-#define DCX_INTERSECTRGN              0x00000080L
-#define DCX_EXCLUDEUPDATE             0x00000100L
-#define DCX_INTERSECTUPDATE           0x00000200L
-#define DCX_LOCKWINDOWUPDATE          0x00000400L
-#define DCX_VALIDATE                  0x00200000L
+#define DCX_WINDOW_W                    0x00000001L
+#define DCX_CACHE_W                     0x00000002L
+#define DCX_NORESETATTRS_W              0x00000004L
+#define DCX_CLIPCHILDREN_W              0x00000008L
+#define DCX_CLIPSIBLINGS_W              0x00000010L
+#define DCX_PARENTCLIP_W                0x00000020L
+#define DCX_EXCLUDERGN_W                0x00000040L
+#define DCX_INTERSECTRGN_W              0x00000080L
+#define DCX_EXCLUDEUPDATE_W             0x00000100L
+#define DCX_INTERSECTUPDATE_W           0x00000200L
+#define DCX_LOCKWINDOWUPDATE_W          0x00000400L
+#define DCX_VALIDATE_W                  0x00200000L
+
+typedef struct _RGNDATAHEADER_W {
+    DWORD       dwSize;
+    DWORD       iType;
+    DWORD       nCount;
+    DWORD       nRgnSize;
+    RECT        rcBound;
+} RGNDATAHEADER_W, *LPRGNDATAHEADER_W;
+
+typedef struct _RGNDATA_W {
+    RGNDATAHEADER_W     rdh;
+    char                Buffer[1];
+} RGNDATA_W , *PRGNDATA_W , *LPRGNDATA_W ;
+
 
 /* Xform FLAGS */
 #define MWT_IDENTITY_W        1
@@ -250,6 +265,8 @@ HDC     OPEN32API HPSToHDC (HWND hwnd, HPS hps, HDC hdc, PVOID);
 void    OPEN32API DeleteHDC (HDC hdc);
 BOOL    OPEN32API _O32_EndPaint (HWND hwnd, const PAINTSTRUCT_W *lpps);
 int     OPEN32API _O32_GetUpdateRgn (HWND hwnd, HRGN hrgn, BOOL erase);
+ULONG   OPEN32API _O32_GetRegionData (HRGN hrgn, ULONG count, PRGNDATA_W pData);
+BOOL    OPEN32API _O32_DeleteObject (LHANDLE hgdiobj);
 
 #define FLOAT_TO_FIXED(x) ((FIXED) ((x) * 65536.0))
 #define MICRO_HPS_TO_HDC(x) ((x) & 0xFFFFFFFE)
@@ -275,9 +292,9 @@ int     OPEN32API _O32_GetUpdateRgn (HWND hwnd, HRGN hrgn, BOOL erase);
 const XFORM_W XFORMIdentity = { 1.0, 0.0, 0.0, 1.0, 0, 0 };
 const MATRIXLF matrixlfIdentity = { 0x10000, 0, 0, 0, 0x10000, 0, 0, 0, 0};
 
-BOOL setPageXForm(pDCData pHps);
-BOOL changePageXForm(pDCData pHps, PPOINTL pValue, int x, int y, PPOINTL pPrev);
-LONG clientHeight(HWND hwnd, pDCData pHps);
+BOOL setPageXForm(Win32BaseWindow *wnd, pDCData pHps);
+BOOL changePageXForm(Win32BaseWindow *wnd, pDCData pHps, PPOINTL pValue, int x, int y, PPOINTL pPrev);
+LONG clientHeight(Win32BaseWindow *wnd, HWND hwnd, pDCData pHps);
 
 void TestWideLine (pDCData pHps)
 {
@@ -313,7 +330,7 @@ void Calculate1PixelDelta(pDCData pHps)
 
 //******************************************************************************
 
-int setMapMode(pDCData pHps, int mode)
+int setMapMode(Win32BaseWindow *wnd, pDCData pHps, int mode)
 {
    int    prevMode = 0;
    ULONG  flOptions;
@@ -375,29 +392,29 @@ int setMapMode(pDCData pHps, int mode)
    {
       if (pHps->lWndXExtSave && pHps->lWndYExtSave)
       {
-         changePageXForm( pHps, (PPOINTL)&pHps->windowExt,
+         changePageXForm (wnd, pHps, (PPOINTL)&pHps->windowExt,
                           pHps->lWndXExtSave, pHps->lWndYExtSave, NULL );
          pHps->lWndXExtSave = pHps->lWndYExtSave = 0;
       }
       if (pHps->lVwpXExtSave && pHps->lVwpYExtSave)
       {
-         changePageXForm( pHps, NULL,
+         changePageXForm (wnd, pHps, NULL,
                           pHps->lVwpXExtSave, pHps->lVwpYExtSave, NULL );
          pHps->lVwpXExtSave = pHps->lVwpYExtSave = 0;
       }
    }
 
-   setPageXForm(pHps);
+   setPageXForm(wnd, pHps);
 
    return prevMode;
 }
 
-BOOL setPageXForm(pDCData pHps)
+BOOL setPageXForm(Win32BaseWindow *wnd, pDCData pHps)
 {
    MATRIXLF mlf;
    BOOL rc = TRUE;
 
-   pHps->height = clientHeight(0, pHps) - 1;
+   pHps->height = clientHeight(wnd, 0, pHps) - 1;
 
    double xScale =  pHps->viewportXExt / (double)pHps->windowExt.cx;
    double yScale =  pHps->viewportYExt / (double)pHps->windowExt.cy;
@@ -444,7 +461,7 @@ BOOL setPageXForm(pDCData pHps)
    return rc;
 }
 
-BOOL changePageXForm(pDCData pHps, PPOINTL pValue, int x, int y, PPOINTL pPrev)
+BOOL changePageXForm(Win32BaseWindow *wnd, pDCData pHps, PPOINTL pValue, int x, int y, PPOINTL pPrev)
 {
    BOOL result = FALSE;
 
@@ -499,20 +516,22 @@ BOOL changePageXForm(pDCData pHps, PPOINTL pValue, int x, int y, PPOINTL pPrev)
             pHps->viewportYExt = yExt;
       }
    }
-   result = setPageXForm(pHps);
+   result = setPageXForm(wnd, pHps);
 
    return (result);
 }
 
-LONG clientHeight(HWND hwnd, pDCData pHps)
+LONG clientHeight(Win32BaseWindow *wnd, HWND hwnd, pDCData pHps)
 {
    if ((hwnd == 0) && (pHps != 0))
       hwnd = pHps->hwnd;
 
    if ((hwnd != 0) || (pHps == 0))
    {
-      Win32BaseWindow *wnd = Win32BaseWindow::GetWindowFromOS2Handle(hwnd);
-      return (wnd->getWindowHeight());
+      if (wnd)
+         return (wnd->getWindowHeight());
+      else
+         return OSLibQueryScreenHeight();
    }
    else if (pHps->bitmapHandle)
    {
@@ -548,11 +567,13 @@ VOID removeClientArea(pDCData pHps)
    }
 }
 
-void selectClientArea(Win32BaseWindow *wnd, pDCData pHps, PRECTL prclPaint)
+BOOL selectClientArea(Win32BaseWindow *wnd, pDCData pHps, PRECTL prclPaint)
 {
    RECTL rcl;
    HRGN hrgnRect;
    HWND hwnd;
+
+   if (!wnd) return (FALSE);
 
    pHps->isClient = TRUE;
    hwnd = pHps->hwnd;
@@ -582,6 +603,8 @@ void selectClientArea(Win32BaseWindow *wnd, pDCData pHps, PRECTL prclPaint)
 
    pHps->isClientArea = TRUE;
    GreDestroyRegion(pHps->hps, hrgnRect);
+
+   return (TRUE);
 }
 
 HDC sendEraseBkgnd (Win32BaseWindow *wnd)
@@ -671,9 +694,9 @@ dprintf (("USER32: BeginPaint(%x)", hWnd));
    }
 
    if (hPS_ownDC == 0)
-      setMapMode(pHps, MM_TEXT_W);
+      setMapMode (wnd, pHps, MM_TEXT_W);
    else
-      setPageXForm(pHps);
+      setPageXForm (wnd, pHps);
 
    pHps->hdcType = TYPE_3;
    lpps->hdc = (HDC)hps;
@@ -798,6 +821,162 @@ int WIN32API GetUpdateRgn (HWND hwnd, HRGN hrgn, BOOL erase)
    SetFS(sel);
    return Complexity;
 }
+
+// This implementation of GetDCEx supports
+// DCX_WINDOW
+// DCX_CACHE
+// DCX_EXCLUDERGN (complex regions allowed)
+// DCX_INTERSECTRGN (complex regions allowed)
+
+HDC WIN32API GetDCEx (HWND hwnd, HRGN hrgn, ULONG flags)
+{
+   USHORT sel = RestoreOS2FS();
+   Win32BaseWindow *wnd = NULL;
+   HWND     hWindow;
+   BOOL     success;
+   pDCData  pHps = NULL;
+   HPS      hps  = NULLHANDLE;
+   BOOL     drawingAllowed = TRUE;
+   BOOL     isWindowOwnDC;
+   BOOL     creatingOwnDC = FALSE;
+   PS_Type  psType;
+
+   if (hwnd)
+   {
+      wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
+      if (flags & DCX_WINDOW_W)
+         hWindow = wnd->getOS2FrameWindowHandle();
+      else
+         hWindow = wnd->getOS2WindowHandle();
+   }
+   else
+      hWindow = HWND_DESKTOP;
+
+dprintf (("User32: GetDCEx hwnd %x (%x %x) -> wnd %x", hwnd, hrgn, flags, wnd));
+
+   isWindowOwnDC = (((hWindow == HWND_DESKTOP) ? FALSE : wnd->isOwnDC())
+                 && !(flags & DCX_CACHE_W));
+   if (isWindowOwnDC)
+   {
+      hps = wnd->getOwnDC();
+      if (hps)
+      {
+         pDCData pHps = (pDCData)GpiQueryDCData (hps);
+         if (!pHps)
+            goto error;
+
+         if (flags & DCX_WINDOW_W)
+            removeClientArea (pHps);
+         else
+            selectClientArea (wnd, pHps, 0);
+
+         setPageXForm (wnd, pHps);
+
+         pHps->hdcType = TYPE_1;
+         SetFS(sel);
+         return (HDC)hps;
+      }
+      else
+         creatingOwnDC = TRUE;
+   }
+
+   if (isWindowOwnDC)
+   {
+      SIZEL sizel = {0,0};
+      hps = GpiCreatePS (WinQueryAnchorBlock (hWindow),
+                         WinOpenWindowDC (hWindow),
+                         &sizel, PU_PELS | GPIT_MICRO | GPIA_ASSOC );
+      psType = MICRO;
+   }
+   else
+   {
+      if (hWindow == HWND_DESKTOP)
+         hps = WinGetScreenPS (hWindow);
+      else
+         hps = WinGetPS (hWindow);
+
+      psType = MICRO_CACHED;
+   }
+
+   if (!hps)
+      goto error;
+
+   HPSToHDC (hWindow, hps, NULL, NULL);
+   pHps = (pDCData)GpiQueryDCData (hps);
+
+   if (!(flags & DCX_WINDOW_W)) {
+      if (selectClientArea (wnd, pHps, 0))
+         setMapMode (wnd, pHps, MM_TEXT_W);
+   }
+
+   if ((flags & DCX_EXCLUDERGN_W) || (flags & DCX_INTERSECTRGN_W))
+   {
+      ULONG BytesNeeded;
+      PRGNDATA_W RgnData;
+      PRECTL pr;
+      int i;
+
+      if (!hrgn)
+         goto error;
+
+      BytesNeeded = _O32_GetRegionData (hrgn, 0, NULL);
+      RgnData = (PRGNDATA_W)_alloca (BytesNeeded);
+      if (RgnData == NULL)
+          goto error;
+      _O32_GetRegionData (hrgn, BytesNeeded, RgnData);
+
+      i = RgnData->rdh.nCount;
+      pr = (PRECTL)(RgnData->Buffer);
+
+      success = TRUE;
+      if (flags & DCX_EXCLUDERGN_W)
+         for (; (i > 0) && success; i--, pr++)
+            success &= GpiExcludeClipRectangle (pHps->hps, pr);
+      else
+         for (; (i > 0) && success; i--, pr++)
+            success &= GpiIntersectClipRectangle (pHps->hps, pr);
+      if (!success)
+         goto error;
+   }
+
+   if (creatingOwnDC)
+      wnd->setOwnDC ((HDC)hps);
+
+   pHps->psType  = psType;
+   pHps->hdcType = TYPE_1;
+   GpiSetDrawControl (hps, DCTL_DISPLAY, drawingAllowed ? DCTL_ON : DCTL_OFF);
+
+   SetFS(sel);
+   return (HDC)pHps->hps;
+
+error:
+   /* Something went wrong; clean up
+    */
+   if (pHps)
+   {
+      if (pHps->hps)
+      {
+         if(pHps->psType == MICRO_CACHED)
+            WinReleasePS(pHps->hps);
+         else
+            GpiDestroyPS(pHps->hps);
+      }
+
+      if (pHps->hdc)     DevCloseDC(pHps->hdc);
+      if (pHps->hrgnHDC) GpiDestroyRegion(pHps->hps, pHps->hrgnHDC);
+
+      _O32_DeleteObject (pHps->nullBitmapHandle);
+   }
+//   SET_ERROR_LAST();
+   SetFS(sel);
+   return NULL;
+}
+
+HDC WIN32API GetDC (HWND hwnd)
+{
+  return GetDCEx (hwnd, NULL, 0);
+}
+
 
 //******************************************************************************
 //******************************************************************************
