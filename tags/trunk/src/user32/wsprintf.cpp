@@ -1,4 +1,4 @@
-/* $Id: wsprintf.cpp,v 1.2 1999-11-22 20:33:25 sandervl Exp $ */
+/* $Id: wsprintf.cpp,v 1.3 1999-12-17 17:24:52 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -18,12 +18,10 @@
 #include <odin.h>
 #include <odinwrap.h>
 #include <os2sel.h>
+#include <os2win.h>
 
 #include <stdarg.h>
 #include <string.h>
-#include "wine/winbase16.h"
-#include "winuser.h"
-//#include "ldt.h"
 #include "stackframe.h"
 #include "module.h"
 #include "global.h"

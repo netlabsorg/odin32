@@ -1,4 +1,4 @@
-/* $Id: misc.h,v 1.12 1999-12-12 14:31:29 sandervl Exp $ */
+/* $Id: misc.h,v 1.13 1999-12-17 17:25:28 sandervl Exp $ */
 
 /*
  * Miscellaneous definitions
@@ -9,7 +9,7 @@
 #ifndef __MISC_H__
 #define __MISC_H__
 
-#ifndef _OS2WIN_H
+#if !defined(_OS2WIN_H) && !defined(__INCLUDE_WINUSER_H) && !defined(__WINE_WINBASE_H)
   #include <win32type.h>
 #endif
 
