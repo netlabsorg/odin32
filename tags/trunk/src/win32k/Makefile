@@ -1,5 +1,5 @@
 ################################################################################
-# $Id: Makefile,v 1.2 1999-09-12 00:26:27 bird Exp $
+# $Id: Makefile,v 1.3 1999-10-04 09:56:03 sandervl Exp $
 #
 # Copyright 1998-1999 knut st. osmundsen
 #
@@ -15,8 +15,13 @@ NAME = win32k
 ################################################################################
 # COMPILER/LINKER/ASSEMBLER
 ################################################################################
-CC16        = cl
+CC16        = $(MSCPATH)\binp\cl
 CC          = icc
+!if "$(CCENV)" == "VAC36"
+ILIB        = ilib /nofree
+!else
+ILIB        = ilib 
+!endif
 LD          = ilink
 AS          = alp
 
@@ -71,7 +76,8 @@ CINCLUDES  = -I$(WIN32KBASE)\include                \
 CINCLUDES16= -I$(WIN32KBASE)\include                \
              -I.                                    \
              -I$(DDKPATH)\h                         \
-             -If:\ddktools\toolkits\msc60\include   \
+             -I$(MSCPATH)\include                   \
+#             -If:\ddktools\toolkits\msc60\include   \
              -I$(PDWIN32_INCLUDE)
 
 AINCLUDES  = -Fdi:$(WIN32KBASE)\include             \
@@ -133,7 +139,8 @@ AINCLUDES  = -Fdi:$(WIN32KBASE)\include             \
 ################################################################################
 # TARGETS
 ################################################################################
-all:$(NAME).sys
+all: ProbKrnl.exe $(NAME).sys
+#all:$(NAME).sys
 
 
 
@@ -180,7 +187,11 @@ OBJSINIT =                                  \
         object\probkrnl.obj
 
 
+!if "$(CCENV)" == "VAC36"
+LIBS  = $(VACPATH)\lib\cpprni36.lib         \
+!else
 LIBS  = $(VACPATH)\lib\cppon30.lib          \
+!endif
         $(DDKPATH)\lib\os2286.lib
 
 LIBSINIT = \
@@ -196,7 +207,8 @@ ProbKrnl.exe: dev16\ProbKrnl.c $(WIN32KBASE)\include\sym.h \
     $(CC16) -c -W4 -Asfw -G2s -Zp -Zl -nologo -Fo$@ -Fa -Zi -Od -Lp \
         $(CDEFINES16) -DDEBUGR3 -Fa$(WIN32KLIST)\$(*B).s     \
         -Foprobkrnl.obj $(CINCLUDES16) dev16\probkrnl.c
-    link /NOD /MAP:FULL /CO /pmtype:vio probkrnl.obj, probkrnl.exe, probkrnl.map, f:\toolkit\lib\os2286.lib + $(MSCPATH)\lib\clibcep.lib;
+    $(MSCPATH)\binb\link /NOD /MAP:FULL /CO /pmtype:vio probkrnl.obj, probkrnl.exe, probkrnl.map, $(TOOLKIT)\lib\os2286.lib + $(MSCPATH)\lib\clibcr.lib;
+#    link /NOD /MAP:FULL /CO /pmtype:vio probkrnl.obj, probkrnl.exe, probkrnl.map, f:\toolkit\lib\os2286.lib + $(MSCPATH)\lib\clibcep.lib;
 
 
 
@@ -217,15 +229,18 @@ $(OBJS) $(LIBS) last.lib $(OBJSINIT) /IG $(LIBSINIT) $(NAME).def
 ################################################################################
 devhelp.lib: $(DDKPATH)\lib\dhcalls.lib libconv.exe
     libconv $(DDKPATH)\lib\dhcalls.lib $@
-    ilib /nologo /nobackup /convformat $@;
+    $(ILIB) /nologo /nobackup /convformat $@;
+#   ilib /nologo /nobackup /convformat $@;
 
 clib.lib: $(MSCPATH)\lib\slibcep.lib libconv.exe
     libconv $(MSCPATH)\lib\clibcep.lib $@ > nul
-    ilib /nologo /nobackup /convformat $@;
+    $(ILIB) /nologo /nobackup /convformat $@;
+#   ilib /nologo /nobackup /convformat $@;
 
 last.lib: object\devlast.obj
     -@del $@ > nul 2> nul
-    ilib /nologo /nobackup $@ $**;
+    $(ILIB) /nologo /nobackup $@ $**;
+#   ilib /nologo /nobackup $@ $**;
 
 libconv.exe: libconv.c
     icc -Q+ libconv.c

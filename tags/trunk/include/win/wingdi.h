@@ -1,4 +1,4 @@
-/* $Id: wingdi.h,v 1.6 1999-09-22 09:46:19 sandervl Exp $ */
+/* $Id: wingdi.h,v 1.7 1999-10-04 09:55:51 sandervl Exp $ */
 
 #ifndef __WINE_WINGDI_H
 #define __WINE_WINGDI_H
@@ -1512,10 +1512,34 @@ typedef struct
     DWORD 	biClrImportant;
 } BITMAPINFOHEADER, *PBITMAPINFOHEADER, *LPBITMAPINFOHEADER;
 
+typedef struct {
+        DWORD        bV4Size;
+        LONG         bV4Width;
+        LONG         bV4Height;
+        WORD         bV4Planes;
+        WORD         bV4BitCount;
+        DWORD        bV4V4Compression;
+        DWORD        bV4SizeImage;
+        LONG         bV4XPelsPerMeter;
+        LONG         bV4YPelsPerMeter;
+        DWORD        bV4ClrUsed;
+        DWORD        bV4ClrImportant;
+        DWORD        bV4RedMask;
+        DWORD        bV4GreenMask;
+        DWORD        bV4BlueMask;
+        DWORD        bV4AlphaMask;
+        DWORD        bV4CSType;
+        CIEXYZTRIPLE bV4Endpoints;
+        DWORD        bV4GammaRed;
+        DWORD        bV4GammaGreen;
+        DWORD        bV4GammaBlue;
+} BITMAPV4HEADER, *LPBITMAPV4HEADER, *PBITMAPV4HEADER;
+
   /* biCompression */
 #define BI_RGB           0
 #define BI_RLE8          1
 #define BI_RLE4          2
+#define BI_BITFIELDS     3
 
 typedef struct {
 	BITMAPINFOHEADER bmiHeader;
@@ -2695,6 +2719,7 @@ HBITMAP   WINAPI CreateCompatibleBitmap(HDC,INT,INT);
 HDC       WINAPI CreateCompatibleDC(HDC);
 HDC       WINAPI CreateDCA(LPCSTR,LPCSTR,LPCSTR,const DEVMODEA*);
 HDC       WINAPI CreateDCW(LPCWSTR,LPCWSTR,LPCWSTR,const DEVMODEW*);
+#define   CreateDC WINELIB_NAME_AW(CreateDC)
 HBITMAP   WINAPI CreateDIBitmap(HDC,const BITMAPINFOHEADER*,DWORD,LPCVOID,const BITMAPINFO*,UINT);
 HBRUSH    WINAPI CreateDIBPatternBrush(HGLOBAL,UINT);
 HBITMAP   WINAPI CreateDIBSection (HDC, BITMAPINFO *, UINT,LPVOID *, HANDLE, DWORD offset);
@@ -2935,6 +2960,7 @@ BOOL      WINAPI SetWindowOrgEx(HDC,INT,INT,LPPOINT);
 HENHMETAFILE WINAPI SetWinMetaFileBits(UINT,CONST BYTE*,HDC,CONST METAFILEPICT *);
 INT       WINAPI StartDocA(HDC,const DOCINFOA*);
 INT       WINAPI StartDocW(HDC,const DOCINFOW*);
+#define StartDoc WINELIB_NAME_AW(StartDoc)
 INT       WINAPI StartPage(HDC);
 INT       WINAPI EndPage(HDC);
 BOOL      WINAPI StretchBlt(HDC,INT,INT,INT,INT,HDC,INT,INT,INT,INT,DWORD);

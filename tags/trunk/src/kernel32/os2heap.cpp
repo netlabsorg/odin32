@@ -1,4 +1,4 @@
-/* $Id: os2heap.cpp,v 1.10 1999-10-01 16:03:10 sandervl Exp $ */
+/* $Id: os2heap.cpp,v 1.11 1999-10-04 09:55:56 sandervl Exp $ */
 
 /*
  * Heap class for OS/2
@@ -149,6 +149,7 @@ LPVOID OS2Heap::Alloc(DWORD dwFlags, DWORD dwBytes)
   heapelem->prev    = NULL;
   heapelem->flags   = 0;    //only used when allocated with LocalAlloc
   heapelem->lockCnt = 0;    //..    ..
+  heapelem->magic   = MAGIC_NR_HEAP;
 
   if(hmutex) {
     hmutex->leave();
@@ -178,6 +179,12 @@ BOOL OS2Heap::Lock(LPVOID lpMem)
   if(lpMem == NULL)
     return(FALSE);
 
+  if(helem->magic != MAGIC_NR_HEAP)
+  {
+    dprintf(("OS2Heap::Lock ERROR BAD HEAP POINTER:%X\n", lpMem));
+    return FALSE;
+  }
+
   helem->lockCnt++;
 
   return(TRUE);
@@ -194,6 +201,12 @@ BOOL OS2Heap::Unlock(LPVOID lpMem)
   if(helem->lockCnt == 0)
     return(FALSE);
 
+  if(helem->magic != MAGIC_NR_HEAP)
+  {
+    dprintf(("OS2Heap::UnLock ERROR BAD HEAP POINTER:%X\n", lpMem));
+    return FALSE;
+  }
+
   helem->lockCnt--;
 
   return(TRUE);
@@ -207,6 +220,12 @@ DWORD OS2Heap::GetFlags(LPVOID lpMem)
   if(lpMem == NULL)
     return(FALSE);
 
+  if(helem->magic != MAGIC_NR_HEAP)
+  {
+    dprintf(("OS2Heap::GetFlags ERROR BAD HEAP POINTER:%X\n", lpMem));
+    return FALSE;
+  }
+
   return(helem->flags);
 }
 //******************************************************************************
@@ -217,6 +236,12 @@ int OS2Heap::GetLockCnt(LPVOID lpMem)
 
   if(lpMem == NULL)
     return(666);
+
+  if(helem->magic != MAGIC_NR_HEAP)
+  {
+    dprintf(("OS2Heap::GetLockCnt ERROR BAD HEAP POINTER:%X\n", lpMem));
+    return FALSE;
+  }
 
   return(helem->lockCnt);
 }
@@ -234,6 +259,7 @@ DWORD OS2Heap::Size(DWORD dwFlags, PVOID lpMem)
 //******************************************************************************
 LPVOID OS2Heap::ReAlloc(DWORD dwFlags, LPVOID lpMem, DWORD dwBytes)
 {
+  HEAPELEM *helem = (HEAPELEM *)((char *)lpMem - sizeof(HEAPELEM));
   LPVOID lpNewMem;
   int    i;
 
@@ -243,6 +269,12 @@ LPVOID OS2Heap::ReAlloc(DWORD dwFlags, LPVOID lpMem, DWORD dwBytes)
   //      though it apparently doesn't work in Windows.
   if (lpMem == 0)   return Alloc(dwFlags, dwBytes);
 //  if (lpMem == 0)   return NULL;
+
+  if (helem->magic != MAGIC_NR_HEAP)
+  {
+    dprintf(("OS2Heap::ReAlloc ERROR BAD HEAP POINTER:%X\n", lpMem));
+    return lpMem;
+  }
 
   if (Size(0,lpMem) == dwBytes) return lpMem; // if reallocation with same size
                                                 // don't do anything
@@ -266,6 +298,13 @@ BOOL OS2Heap::Free(DWORD dwFlags, LPVOID lpMem)
     dprintf(("OS2Heap::Free lpMem == NULL\n"));
     return(FALSE);
   }
+
+  if(helem->magic != MAGIC_NR_HEAP)
+  {
+    dprintf(("OS2Heap::Free ERROR BAD HEAP POINTER:%X\n", lpMem));
+    return FALSE;
+  }
+
 #ifdef DEBUG1
   int size = Size(0, lpMem);
   dprintf(("OS2Heap::Free lpMem = %X, size %d\n", lpMem, size));

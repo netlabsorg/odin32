@@ -1,4 +1,4 @@
-/* $Id: os2heap.h,v 1.3 1999-06-10 19:11:30 phaller Exp $ */
+/* $Id: os2heap.h,v 1.4 1999-10-04 09:55:57 sandervl Exp $ */
 
 /*
  *
@@ -16,7 +16,9 @@
 
 #include "vmutex.h"
 
+#define MAGIC_NR_HEAP  0x87654321
 typedef struct _tagHEAPELEM {
+  DWORD  magic;     //magic number
   struct _tagHEAPELEM *prev;
   struct _tagHEAPELEM *next;
   DWORD  flags;     //set by LocalAlloc only

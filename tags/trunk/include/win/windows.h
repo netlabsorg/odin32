@@ -1,4 +1,4 @@
-/* $Id: windows.h,v 1.3 1999-09-18 15:55:45 sandervl Exp $ */
+/* $Id: windows.h,v 1.4 1999-10-04 09:55:51 sandervl Exp $ */
 
 #ifndef __WINE_WINDOWS_H
 #define __WINE_WINDOWS_H
@@ -18,6 +18,7 @@ extern "C" {
 #include "windef.h"
 #include "shell.h"
 #include "winreg.h"
+#include "ddeml.h"
 #include "winnetwk.h"
 #include "winver.h"
 #include "lzexpand.h"

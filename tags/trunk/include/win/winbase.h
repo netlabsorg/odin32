@@ -1,4 +1,4 @@
-/* $Id: winbase.h,v 1.5 1999-09-02 17:39:36 phaller Exp $ */
+/* $Id: winbase.h,v 1.6 1999-10-04 09:55:50 sandervl Exp $ */
 
 #ifndef __WINE_WINBASE_H
 #define __WINE_WINBASE_H
@@ -1797,6 +1797,8 @@ UINT      WINAPI LocalShrink(HGLOBAL,UINT);
 UINT      WINAPI LocalSize(HLOCAL);
 BOOL      WINAPI LocalUnlock(HLOCAL);
 LPVOID      WINAPI LockResource(HGLOBAL);
+#define UnlockResource(hResData) ((hResData), 0)
+
 #define     LockSegment(handle) GlobalFix((HANDLE)(handle))
 #define     MakeProcInstance(proc,inst) (proc)
 HFILE16     WINAPI OpenFile16(LPCSTR,OFSTRUCT*,UINT16);
