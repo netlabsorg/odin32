@@ -1,4 +1,4 @@
-# $Id: MkCallTab.mak,v 1.9 2002-08-20 07:04:34 bird Exp $
+# $Id: MkCallTab.mak,v 1.10 2002-08-22 02:57:24 bird Exp $
 
 #
 # MkCallTab - 16-bit source generator.
@@ -8,33 +8,26 @@
 # GPL
 #
 
-
 #
-# Setup.
+# Setup config
 #
 !if [SET INCLUDE=]
 !endif
 BUILD_ENV_FORCE = MSCV6-16
 PATH_ROOT  = ..\..\..\..
-!include $(PATH_ROOT)\make\setup.mak
+!include $(PATH_ROOT)\$(BUILD_SETUP_MAK)
 !include ..\..\makefile.inc
-PATH_BIN   = $(PATH_TOOLS)
-
-
 
 #
-# Config.
+# Target config
 #
-TARGET_MODE = EXE
-TARGET_NAME = MkCallTab
-MAKEFILE    = $(TARGET_NAME).mak
-CC_INCLUDES = -I../include -I../kLib/include -I$(PATH_DDKBASE)/h -I$(PATH_MSC)/include -I$(PATH_TOOLKIT)/h
-ALL_DEFINES = -DMKCALLTAB
+TARGET_NAME     = MkCallTab
+TARGET_NEEDED   = 1
+TARGET_PUBNAME  = $(PATH_TOOLS)\$(TARGET_NAME).$(TARGET_EXT)
+MAKEFILE        = $(TARGET_NAME).mak
+CC_INCLUDES     = -I../include -I../kLib/include -I$(PATH_DDKBASE)/h -I$(PATH_MSC)/include -I$(PATH_TOOLKIT)/h
+ALL_DEFINES     = -DMKCALLTAB
 
-
-#
-# Targets.
-#
 TARGET_OBJS =\
 $(PATH_TARGET)\MkCallTab.$(EXT_OBJ)\
 $(PATH_TARGET)\krnlImportTable.$(EXT_OBJ)\
@@ -47,42 +40,29 @@ TARGET_LIBS =\
 $(PATH_TOOLKIT)\lib\$(LIB_OS)\
 $(PATH_MSC)\lib\$(LIB_C_OBJ)\
 
-
 #
-# Rules to automatically forward.
+# Rule config
 #
-RULES_FORWARD = calltaba.asm kKrnlLib.def TstFakers.c tst
-
-
-#
-# Process.
-#
+RULES_FORWARD = calltaba.asm ..\kKrnlLibImpLib.$(EXT_DEF) TstFakers.c tst
 !include $(MAKE_INCLUDE_PROCESS)
 
-
 !if !$(BUILD_FORWARDING)
-#
-# Install duplicate...
-#
-$(PATH_TOOLS)\$(TARGET_NAME).$(TARGET_EXT): $(TARGET)
-    $(TOOL_COPY) $(TARGET) $(PATH_BIN)
-
 
 #
 # Rules For Source Generation.
 #
 
 # kKrnlLib Import library definition file.
-kKrnlLib.def: $(PATH_TARGET)\kKrnlLibImpLib.def
-..\kKrnlLibImpLib.def:      $(PATH_TOOLS)\$(TARGET_NAME).$(TARGET_EXT)
-    $(PATH_TOOLS)\MkCallTab.exe deffile > $@
+..\kKrnlLibimplib.$(EXT_DEF): $(TARGET_PUBNAME)
+    $(TARGET_PUBNAME) deffile > $@
 
 # Generate calltaba.asm
-calltaba.asm:               $(PATH_TOOLS)\$(TARGET_NAME).$(TARGET_EXT)
-    $(PATH_TOOLS)\MkCallTab.exe calltab > $@
+calltaba.asm:           $(TARGET_PUBNAME)
+    $(TARGET_PUBNAME) calltab > $@
 
 # Generate TstFakers.c
-TstFakers.c:                $(PATH_TOOLS)\$(TARGET_NAME).$(TARGET_EXT)
-    $(PATH_TOOLS)\MkCallTab.exe tstfakers > $@
+TstFakers.c:            $(TARGET_PUBNAME)
+    $(TARGET_PUBNAME) tstfakers > $@
 
 !endif # !BUILD_FORWARDING
+
