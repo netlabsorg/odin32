@@ -1,4 +1,4 @@
-/* $Id: winicon.cpp,v 1.32 2001-10-15 17:09:05 sandervl Exp $ */
+/* $Id: winicon.cpp,v 1.33 2001-10-27 10:30:11 sandervl Exp $ */
 /*
  * Win32 Icon Code for OS/2
  *
@@ -226,7 +226,7 @@ HICON WINAPI CreateIconIndirect(ICONINFO *iconinfo)
         }
 
 #ifdef __WIN32OS2__
-        info->hColorBmp = OSLibWinCreatePointer(info, (char*)(info + 1), (LPBITMAP_W)&bmpAnd, (char*)(info + 1) + sizeAnd, (LPBITMAP_W)&bmpXor, iconinfo->fIcon);
+        info->hColorBmp = OSLibWinCreatePointer(info, (char*)(info + 1), (LPBITMAP_W)&bmpAnd, (char*)(info + 1) + sizeAnd, (LPBITMAP_W)&bmpXor, iconinfo->fIcon == FALSE);
 #endif
         GlobalUnlock(hObj);
 
