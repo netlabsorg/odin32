@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.85 2001-06-09 14:50:15 sandervl Exp $
+# $Id: Makefile,v 1.86 2001-06-23 07:20:55 achimha Exp $
 
 #
 # Odin32 API
@@ -95,7 +95,8 @@ $(OBJDIR)\dbglocal.obj \
 $(OBJDIR)\caret.obj \
 $(OBJDIR)\text.obj \
 $(OBJDIR)\oldnls32.obj \
-$(OBJDIR)\user32rsrc.obj
+$(OBJDIR)\user32rsrc.obj \
+$(OBJDIR)\oslibprf.obj
 
 
 #
