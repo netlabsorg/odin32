@@ -1,4 +1,4 @@
-# $Id: setup.os2relwat11-16.mk,v 1.14 2002-08-30 18:27:28 bird Exp $
+# $Id: setup.os2relwat11-16.mk,v 1.15 2002-08-30 19:44:51 bird Exp $
 
 #
 # Note! Watcom is unable to do debug info release builds.
@@ -49,7 +49,7 @@ _CC_OPTIM_IFS = -out
 _CC_OPTIM_ =
 _CC_OPTIM_IFS =
 !endif
-CC_FLAGS=-bt=os2 -dOS2 -d__16BIT__ -zq -bm -ze -w4 -zld $(_CC_OPTIONAL) $(CC_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CC_INCLUDES:-I=-i=) $(ALL_INCLUDES:-I=-i=) -i=$(PATH_INCLUDES) -i=$(WATCOM)\h
+CC_FLAGS=-bt=os2 -dOS2 -d__16BIT__ -zq -fr=nul -bm -ze -w4 -zld $(_CC_OPTIONAL) $(CC_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CC_INCLUDES:-I=-i=) $(ALL_INCLUDES:-I=-i=) -i=$(PATH_INCLUDES) -i=$(WATCOM)\h
 CC_FLAGS_EXE=$(CC_FLAGS) $(_CC_OPTIM_) -zc
 CC_FLAGS_DLL=$(CC_FLAGS) $(_CC_OPTIM_) -zc -bd
 CC_FLAGS_SYS=$(CC_FLAGS) $(_CC_OPTIM_) -s -zff -zgf -zu
@@ -64,7 +64,7 @@ _CXX_OPTIM_ = -omlinear
 !else
 _CXX_OPTIM_ =
 !endif
-CXX_FLAGS=-bt=os2 -dOS2 -d__16BIT__ -zq -bm -ze -w4 -zld $(_CXX_OPTIONAL)  $(CXX_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CXX_INCLUDES:-I=-i=) $(ALL_INCLUDES:-I=-i=) -i=$(PATH_INCLUDES) -i=$(WATCOM)\h
+CXX_FLAGS=-bt=os2 -dOS2 -d__16BIT__ -zq -fr=nul -bm -ze -w4 -zld $(_CXX_OPTIONAL)  $(CXX_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CXX_INCLUDES:-I=-i=) $(ALL_INCLUDES:-I=-i=) -i=$(PATH_INCLUDES) -i=$(WATCOM)\h
 CXX_FLAGS_EXE=$(CXX_FLAGS) $(_CXX_OPTIM_) -zc
 CXX_FLAGS_DLL=$(CXX_FLAGS) $(_CXX_OPTIM_) -zc -bd
 CXX_FLAGS_SYS=$(CXX_FLAGS) $(_CXX_OPTIM_) -s -zff -zgf -zu
