@@ -1,4 +1,10 @@
- /* $Id: ChangeLog,v 1.956 2000-05-22 18:48:18 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.957 2000-05-23 18:48:12 sandervl Exp $ */
+
+ 2000-05-23: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: Rewrote GetVolumeInformationA/W
+                Fixed call to GetFileTime in OpenFile
+    - DDRAW:    Bugfix for querying HEL caps in DrawGetCaps
+                (support for different DX versions)
 
  2000-05-22: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: GetFileAttributes bugfix:
