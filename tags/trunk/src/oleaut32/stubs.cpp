@@ -1,4 +1,4 @@
-/* $Id: stubs.cpp,v 1.8 2000-12-24 14:39:56 sandervl Exp $ */
+/* $Id: stubs.cpp,v 1.9 2001-07-12 17:16:12 sandervl Exp $ */
 /* 
  * Win32 COM/OLE stubs for OS/2
  * 
@@ -50,39 +50,6 @@ INT WIN32API VariantTimeToDosDateTime(DOUBLE vtime, USHORT * pwDosDate, USHORT *
 {
     dprintf(("OLEAUT32: VariantTimeToDosDateTime - stub"));
     return 0;
-}
-
-//*****************************************************************************
-//*****************************************************************************
-HRESULT WIN32API RegisterActiveObject
-   (IUnknown *		punk,
-    REFCLSID		rclsid,
-    DWORD		dwFlags,
-    DWORD *		pdwRegister)
-{
-    dprintf(("OLEAUT32: RegisterActiveObject - stub"));
-    return S_OK;
-}
-
-//*****************************************************************************
-//*****************************************************************************
-HRESULT WIN32API RevokeActiveObject
-   (DWORD		dwRegister,
-    void *		pvReserved)
-{
-    dprintf(("OLEAUT32: RevokeActiveObject - stub"));
-    return S_OK;
-}
-
-//*****************************************************************************
-//*****************************************************************************
-HRESULT WIN32API GetActiveObject
-   (REFCLSID		rclsid,
-   void *		pvReserved,
-   IUnknown **		ppunk)
-{
-    dprintf(("OLEAUT32: GetActiveObject - stub"));
-    return S_OK;
 }
 
 //*****************************************************************************

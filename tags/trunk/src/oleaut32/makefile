@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.27 2001-06-07 12:48:18 sandervl Exp $
+# $Id: makefile,v 1.28 2001-07-12 17:16:12 sandervl Exp $
 
 #
 # Odin32 API
@@ -17,6 +17,7 @@
 #
 OBJS = \
 $(OBJDIR)\oleaut32.obj \
+$(OBJDIR)\oleaut.obj \
 $(OBJDIR)\guid.obj \
 $(OBJDIR)\oList.obj \
 $(OBJDIR)\initterm.obj \
