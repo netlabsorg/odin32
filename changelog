@@ -1,4 +1,8 @@
- /* $Id: changelog,v 1.78 1999-08-11 22:24:17 phaller Exp $ */
+ /* $Id: changelog,v 1.79 1999-08-12 23:33:36 phaller Exp $ */
+
+ 99-08-12: Patrick Haller <phaller@gmx.net>
+	- VERSION: enhanced plus odinwrap macros
+
  99-08-11: Patrick Haller <phaller@gmx.net>
 	- ODINCRT: ordinal exports
 	- ADVAPI32:odinwrap macros (partially)
