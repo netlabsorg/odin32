@@ -1,4 +1,4 @@
-/* $Id: iphlpapi.cpp,v 1.3 2001-10-10 17:37:44 phaller Exp $ */
+/* $Id: iphlpapi.cpp,v 1.4 2001-10-10 22:55:21 phaller Exp $ */
 /*
  *	IPHLPAPI library
  *
@@ -14,7 +14,6 @@
 #include <os2sel.h>
 
 #include <os2win.h>
-#include <odinwrap.h>
 #include <winversion.h>
 
 #include <string.h>
