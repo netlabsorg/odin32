@@ -1,4 +1,4 @@
-/* $Id: button.cpp,v 1.24 1999-12-21 17:03:42 cbratschi Exp $ */
+/* $Id: button.cpp,v 1.25 1999-12-26 17:30:14 cbratschi Exp $ */
 /* File: button.cpp -- Button type widgets
  *
  * Copyright (C) 1993 Johannes Ruscheinski
@@ -218,7 +218,9 @@ static LRESULT BUTTON_LButtonDown(HWND hwnd,WPARAM wParam,LPARAM lParam)
 {
   BUTTONINFO* infoPtr = (BUTTONINFO*)GetInfoPtr(hwnd);
   DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
+  DWORD style = dwStyle & 0x0F;
 
+  if (style == BS_GROUPBOX) return 0;
   SetCapture(hwnd);
   SetFocus(hwnd);
   SendMessageA(hwnd,BM_SETSTATE,TRUE,0);
@@ -233,9 +235,11 @@ static LRESULT BUTTON_LButtonUp(HWND hwnd,WPARAM wParam,LPARAM lParam)
 {
   BUTTONINFO* infoPtr = (BUTTONINFO*)GetInfoPtr(hwnd);
   DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
+  DWORD style = dwStyle & 0x0F;
   RECT rect;
   POINT pt;
 
+  if (style == BS_GROUPBOX) return 0;
   pt.x = LOWORD(lParam);
   pt.y = HIWORD(lParam);
 
@@ -459,12 +463,16 @@ static LRESULT BUTTON_Click(HWND hwnd,WPARAM wParam,LPARAM lParam)
 
 static LRESULT BUTTON_SetStyle(HWND hwnd,WPARAM wParam,LPARAM lParam)
 {
-  DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
+  DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE),newStyle;
 
   if ((wParam & 0x0f) >= MAX_BTN_TYPE) return 0;
-  dwStyle = (dwStyle & 0xfffffff0) | (wParam & 0x0000000f);
-  SetWindowLongA(hwnd,GWL_STYLE,dwStyle);
-  PAINT_BUTTON(hwnd,dwStyle & 0x0f,ODA_DRAWENTIRE);
+  newStyle = (dwStyle & 0xfffffff0) | (wParam & 0x0000000f);
+
+  if (newStyle != dwStyle)
+  {
+    SetWindowLongA(hwnd,GWL_STYLE,newStyle);
+    PAINT_BUTTON(hwnd,newStyle & 0x0f,ODA_DRAWENTIRE);
+  }
 
   return 0;
 }
@@ -541,7 +549,7 @@ static LRESULT BUTTON_GetState(HWND hwnd,WPARAM wParam,LPARAM lParam)
 static LRESULT BUTTON_SetState(HWND hwnd,WPARAM wParam,LPARAM lParam)
 {
   BUTTONINFO* infoPtr = (BUTTONINFO*)GetInfoPtr(hwnd);
-  DWORD style = GetWindowLongA(hwnd,GWL_STYLE) & 0x0f;
+  DWORD style = GetWindowLongA(hwnd,GWL_STYLE) & 0x0F;
 
   if (wParam)
   {

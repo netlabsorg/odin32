@@ -1,4 +1,4 @@
-/* $Id: edit.cpp,v 1.24 1999-12-21 17:03:43 cbratschi Exp $ */
+/* $Id: edit.cpp,v 1.25 1999-12-26 17:30:14 cbratschi Exp $ */
 /*
  *      Edit control
  *
@@ -175,7 +175,7 @@ static void     EDIT_MoveHome(HWND hwnd, EDITSTATE *es, BOOL extend);
 static void     EDIT_MoveWordBackward(HWND hwnd, EDITSTATE *es, BOOL extend);
 static void     EDIT_MoveWordForward(HWND hwnd, EDITSTATE *es, BOOL extend);
 static void     EDIT_PaintLine(HWND hwnd, EDITSTATE *es, HDC hdc, INT line, BOOL rev);
-static INT      EDIT_PaintText(HWND hwnd, EDITSTATE *es, HDC hdc, INT x, INT y, INT line, INT col, INT count, BOOL rev);
+static VOID     EDIT_PaintText(HWND hwnd, EDITSTATE *es, HDC hdc, INT x, INT y, INT line, INT col, INT count, BOOL rev);
 static void     EDIT_SetCaretPos(HWND hwnd, EDITSTATE *es, INT pos, BOOL after_wrap);
 static void     EDIT_SetRectNP(HWND hwnd, EDITSTATE *es, LPRECT lprc);
 static void     EDIT_UnlockBuffer(HWND hwnd, EDITSTATE *es, BOOL force);
@@ -1632,15 +1632,14 @@ static void EDIT_PaintLine(HWND hwnd, EDITSTATE *es, HDC dc, INT line, BOOL rev)
  *      EDIT_PaintText
  *
  */
-static INT EDIT_PaintText(HWND hwnd, EDITSTATE *es, HDC dc, INT x, INT y, INT line, INT col, INT count, BOOL rev)
+static VOID EDIT_PaintText(HWND hwnd, EDITSTATE *es, HDC dc, INT x, INT y, INT line, INT col, INT count, BOOL rev)
 {
         COLORREF BkColor;
         COLORREF TextColor;
-        INT ret;
         INT li;
 
         if (!count)
-                return 0;
+                return;
         BkColor = GetBkColor(dc);
         TextColor = GetTextColor(dc);
         if (rev)
@@ -1651,21 +1650,14 @@ static INT EDIT_PaintText(HWND hwnd, EDITSTATE *es, HDC dc, INT x, INT y, INT li
         li = EDIT_EM_LineIndex(hwnd, es, line);
         if (es->style & ES_MULTILINE)
         {
-                ret = (INT)LOWORD(TabbedTextOutA(dc, x, y, es->text + li + col, count,
-                                        es->tabs_count, es->tabs, es->format_rect.left - es->x_offset));
+                TabbedTextOutA(dc, x, y, es->text + li + col, count,
+                               es->tabs_count, es->tabs, es->format_rect.left - es->x_offset);
         } else
         {
           LPSTR text = EDIT_GetPasswordPointer_SL(hwnd, es);
           POINT pt;
-          UINT oldAlign = GetTextAlign(dc);
-
-          MoveToEx(dc,x,y,NULL);
-          SetTextAlign(dc,(oldAlign & ~TA_NOUPDATECP) | TA_UPDATECP);
 
           TextOutA(dc,x,y,text+li+col,count);
-          GetCurrentPositionEx(dc,&pt);
-          SetTextAlign(dc,oldAlign);
-          ret = pt.x-x;
           if (es->style & ES_PASSWORD)
             HeapFree(es->heap, 0, text);
         }
@@ -1674,7 +1666,6 @@ static INT EDIT_PaintText(HWND hwnd, EDITSTATE *es, HDC dc, INT x, INT y, INT li
                 SetBkColor(dc, BkColor);
                 SetTextColor(dc, TextColor);
         }
-        return ret;
 }
 
 
@@ -1714,12 +1705,14 @@ static void EDIT_SetCaretPos(HWND hwnd, EDITSTATE *es, INT pos,
 static void EDIT_SetRectNP(HWND hwnd, EDITSTATE *es, LPRECT rc)
 {
         CopyRect(&es->format_rect, rc);
-        if (es->style & WS_BORDER) {
-                INT bw = GetSystemMetrics(SM_CXBORDER) + 1;
-                es->format_rect.left += bw;
-                es->format_rect.top += bw;
-                es->format_rect.right -= bw;
-                es->format_rect.bottom -= bw;
+        if (es->style & WS_BORDER)
+        {
+          INT bw = GetSystemMetrics(SM_CXBORDER)+1,bh = GetSystemMetrics(SM_CYBORDER)+1;
+
+          es->format_rect.left += bw;
+          es->format_rect.top += bh;
+          es->format_rect.right -= bw;
+          es->format_rect.bottom -= bh;
         }
         es->format_rect.left += es->left_margin;
         es->format_rect.right -= es->right_margin;
@@ -2744,6 +2737,7 @@ static void EDIT_EM_SetSel(HWND hwnd, EDITSTATE *es, UINT start, UINT end, BOOL 
         ORDER_UINT(end, old_end);
         ORDER_UINT(start, old_start);
         ORDER_UINT(old_start, old_end);
+        if (start == old_start && end == old_end) return;
         if (end != old_start)
         {
 /*

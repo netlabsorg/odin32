@@ -1,4 +1,4 @@
-/* $Id: scroll.cpp,v 1.28 1999-12-16 16:53:57 cbratschi Exp $ */
+/* $Id: scroll.cpp,v 1.29 1999-12-26 17:30:17 cbratschi Exp $ */
 /*
  * Scrollbar control
  *
@@ -731,22 +731,7 @@ LRESULT SCROLL_HandleScrollEvent(HWND hwnd,WPARAM wParam,LPARAM lParam,INT nBar,
       {
         if (!(dwStyle & SBS_SIZEGRIP)) return res;
 
-        if (msg == WM_SETCURSOR)
-        {
-          RECT rect;
-
-          SCROLL_GetSizeBox(hwnd,dwStyle,&rect);
-          GetCursorPos(&pt);
-          ScreenToClient(hwnd,&pt);
-
-          if (PtInRect(&rect,pt))
-          {
-            SetCursor(LoadCursorA(0,IDC_SIZENWSEA));
-            return TRUE;
-          }
-
-          return DefWindowProcA(hwnd,WM_SETCURSOR,wParam,lParam);
-        } else if (msg == WM_LBUTTONDOWN)
+        if (msg == WM_NCHITTEST)
         {
           if (dwStyle & SBS_SIZEGRIP)
           {
@@ -754,30 +739,29 @@ LRESULT SCROLL_HandleScrollEvent(HWND hwnd,WPARAM wParam,LPARAM lParam,INT nBar,
 
             pt.x = (SHORT)LOWORD(lParam);
             pt.y = (SHORT)HIWORD(lParam);
+            ScreenToClient(hwnd,&pt);
             SCROLL_GetSizeBox(hwnd,dwStyle,&rect);
             if (PtInRect(&rect,pt))
             {
-              HWND hwndFrame;
-
-              Win32BaseWindow *win32wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
-              if (!win32wnd) return res;
-              hwndFrame = OSLibWinQueryWindow(win32wnd->getOS2WindowHandle(),QWOS_OWNER);
-              win32wnd = Win32BaseWindow::GetWindowFromOS2FrameHandle(hwndFrame);
-              if (!win32wnd) return res;
-              FrameTrackFrame(win32wnd,dwStyle & SBS_SIZEBOXTOPLEFTALIGN);
+              if (dwStyle & SBS_SIZEBOXTOPLEFTALIGN)
+                return HTTOPLEFT;
+              else
+                return HTBOTTOMRIGHT;
             }
           }
+          return DefWindowProcA(hwnd,WM_NCHITTEST,wParam,lParam);
+        } else if (msg == WM_LBUTTONDOWN)
+        {
+          return DefWindowProcA(hwnd,WM_LBUTTONDOWN,wParam,lParam);
         }
 
         return res;
       }
     }
 
-    if (msg == WM_SETCURSOR) return DefWindowProcA(hwnd,WM_SETCURSOR,wParam,lParam);
-    if (!SCROLL_Scrolling && msg != WM_LBUTTONDOWN) return res;
+    if (msg == WM_NCHITTEST) return DefWindowProcA(hwnd,WM_NCHITTEST,wParam,lParam);
 
-    vertical = SCROLL_GetScrollBarRect( hwnd, nBar, &rect,
-                                        &arrowSize, &thumbSize, &thumbPos );
+    vertical = SCROLL_GetScrollBarRect(hwnd,nBar,&rect,&arrowSize,&thumbSize,&thumbPos);
     if (nBar == SB_CTL) hwndOwner = GetParent(hwnd); else
     {
       Win32BaseWindow *win32wnd;
@@ -791,7 +775,7 @@ LRESULT SCROLL_HandleScrollEvent(HWND hwnd,WPARAM wParam,LPARAM lParam,INT nBar,
       hwndOwner = win32wnd->getWindowHandle();
     }
 
-    hwndCtl   = (nBar == SB_CTL) ? hwnd : 0;
+    hwndCtl = (nBar == SB_CTL) ? hwnd:0;
 
     switch (msg)
     {
@@ -799,7 +783,7 @@ LRESULT SCROLL_HandleScrollEvent(HWND hwnd,WPARAM wParam,LPARAM lParam,INT nBar,
         pt.x = (SHORT)LOWORD(lParam);
         pt.y = (SHORT)HIWORD(lParam);
         SCROLL_trackVertical = vertical;
-        SCROLL_trackHitTest = hittest = SCROLL_HitTest( hwnd, nBar, pt, FALSE );
+        SCROLL_trackHitTest = hittest = SCROLL_HitTest(hwnd,nBar,pt,FALSE);
         if (SCROLL_trackHitTest == SCROLL_NOWHERE)
         {
           MessageBeep(MB_ICONEXCLAMATION);
@@ -818,15 +802,18 @@ LRESULT SCROLL_HandleScrollEvent(HWND hwnd,WPARAM wParam,LPARAM lParam,INT nBar,
         lastMousePos  = lastClickPos;
         trackThumbPos = thumbPos;
         prevPt = pt;
-        SetCapture( hwnd );
-        if (nBar == SB_CTL) SetFocus( hwnd );
+        if (nBar == SB_CTL) SetFocus(hwnd);
+        SetCapture(hwnd);
         break;
 
       case WM_MOUSEMOVE:
-        pt.x = (SHORT)LOWORD(lParam);
-        pt.y = (SHORT)HIWORD(lParam);
-        hittest = SCROLL_HitTest( hwnd, nBar, pt, TRUE );
-        prevPt = pt;
+        if (SCROLL_Scrolling)
+        {
+          pt.x = (SHORT)LOWORD(lParam);
+          pt.y = (SHORT)HIWORD(lParam);
+          hittest = SCROLL_HitTest(hwnd,nBar,pt,TRUE);
+          prevPt = pt;
+        } else return res;
         break;
 
       case WM_LBUTTONUP:
@@ -1137,9 +1124,9 @@ LRESULT WINAPI ScrollBarWndProc( HWND hwnd, UINT message, WPARAM wParam,
 
     case WM_LBUTTONDOWN:
     case WM_LBUTTONUP:
+    case WM_NCHITTEST:
     case WM_CAPTURECHANGED:
     case WM_MOUSEMOVE:
-    case WM_SETCURSOR:
     case WM_SYSTIMER:
     case WM_SETFOCUS:
     case WM_KILLFOCUS:
@@ -1215,9 +1202,9 @@ LRESULT WINAPI HorzScrollBarWndProc(HWND hwnd,UINT message,WPARAM wParam,LPARAM 
   {
     case WM_LBUTTONDOWN:
     case WM_LBUTTONUP:
+    case WM_NCHITTEST:
     case WM_CAPTURECHANGED:
     case WM_MOUSEMOVE:
-    case WM_SETCURSOR:
     case WM_SYSTIMER:
     case WM_SETFOCUS:
     case WM_KILLFOCUS:
@@ -1270,9 +1257,9 @@ LRESULT WINAPI VertScrollBarWndProc(HWND hwnd,UINT message,WPARAM wParam,LPARAM 
   {
     case WM_LBUTTONDOWN:
     case WM_LBUTTONUP:
+    case WM_NCHITTEST:
     case WM_CAPTURECHANGED:
     case WM_MOUSEMOVE:
-    case WM_SETCURSOR:
     case WM_SYSTIMER:
     case WM_SETFOCUS:
     case WM_KILLFOCUS:

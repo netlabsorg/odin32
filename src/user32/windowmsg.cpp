@@ -1,4 +1,4 @@
-/* $Id: windowmsg.cpp,v 1.11 1999-12-24 18:39:13 sandervl Exp $ */
+/* $Id: windowmsg.cpp,v 1.12 1999-12-26 17:30:20 cbratschi Exp $ */
 /*
  * Win32 window message APIs for OS/2
  *
@@ -10,7 +10,6 @@
  *
  * TODO: GetQueueStatus: QS_HOTKEY (oslibmsg.cpp) & low word bits
  * TODO: MsgWaitForMultipleObjects: timeout isn't handled correctly (can return too late)
- * TODO: GetMessageExtraInfo
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -21,6 +20,7 @@
 #include <win.h>
 #include <heapstring.h>
 #include <handlemanager.h>
+#include "oslibutil.h"
 #include "oslibwin.h"
 #include "oslibmsg.h"
 
@@ -94,12 +94,12 @@ BOOL WIN32API PeekMessageW(LPMSG msg, HWND hwndOwner, UINT uMsgFilterMin,
     return fFoundMsg;
 }
 //******************************************************************************
-//TODO: 
+//TODO:
 //******************************************************************************
 LONG WIN32API GetMessageExtraInfo()
 {
-    dprintf(("USER32: GetMessageExtraInfo NOT SUPPORTED"));
-    return 0;
+    dprintf(("USER32: GetMessageExtraInfo"));
+    return GetThreadMessageExtraInfo();
 }
 //******************************************************************************
 //******************************************************************************
@@ -123,8 +123,8 @@ LRESULT WIN32API SendMessageA(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
     if (hwnd == HWND_BROADCAST|| hwnd == HWND_TOPMOST)
     {
-	Win32BaseWindow::BroadcastMessageA(BROADCAST_SEND, msg, wParam, lParam);
-	return TRUE;
+        Win32BaseWindow::BroadcastMessageA(BROADCAST_SEND, msg, wParam, lParam);
+        return TRUE;
     }
 
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
@@ -142,8 +142,8 @@ LRESULT WIN32API SendMessageW(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
     if (hwnd == HWND_BROADCAST|| hwnd == HWND_TOPMOST)
     {
-	Win32BaseWindow::BroadcastMessageW(BROADCAST_SEND, msg, wParam, lParam);
-	return TRUE;
+        Win32BaseWindow::BroadcastMessageW(BROADCAST_SEND, msg, wParam, lParam);
+        return TRUE;
     }
 
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
@@ -161,8 +161,8 @@ BOOL WIN32API PostMessageA(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
     if (hwnd == HWND_BROADCAST) //Not HWND_TOPMOST???
     {
-	Win32BaseWindow::BroadcastMessageA(BROADCAST_POST, msg, wParam, lParam);
-	return TRUE;
+        Win32BaseWindow::BroadcastMessageA(BROADCAST_POST, msg, wParam, lParam);
+        return TRUE;
     }
 
     if(hwnd == NULL)
@@ -184,8 +184,8 @@ BOOL WIN32API PostMessageW(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
     if (hwnd == HWND_BROADCAST) //Not HWND_TOPMOST???
     {
-	Win32BaseWindow::BroadcastMessageW(BROADCAST_POST, msg, wParam, lParam);
-	return TRUE;
+        Win32BaseWindow::BroadcastMessageW(BROADCAST_POST, msg, wParam, lParam);
+        return TRUE;
     }
 
     if(hwnd == NULL)
@@ -263,7 +263,7 @@ UINT WIN32API RegisterWindowMessageW( LPCWSTR arg1)
     return rc;
 }
 //******************************************************************************
-//No need to support this
+//No need to support this (obsolete, not implemented by Win32)
 //******************************************************************************
 BOOL WIN32API SetMessageQueue(int cMessagesMax)
 {
@@ -319,9 +319,9 @@ BOOL WIN32API SendNotifyMessageW(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lPar
 LPARAM WIN32API SetMessageExtraInfo(LPARAM lParam)
 {
 #ifdef DEBUG
-  WriteLog("USER32:  SetMessageExtraInfo, not implemented\n");
+  WriteLog("USER32:  SetMessageExtraInfo\n");
 #endif
-  return(0);
+  return SetThreadMessageExtraInfo(lParam);
 }
 /*****************************************************************************
  * Name      : BOOL WIN32API SendMessageCallbackA
@@ -446,34 +446,34 @@ long WIN32API BroadcastSystemMessage(DWORD   dwFlags,
 //******************************************************************************
 //******************************************************************************
 /**********************************************************************
- *	     WINPROC_TestCBForStr
+ *           WINPROC_TestCBForStr
  *
  * Return TRUE if the lparam is a string
  */
 BOOL WINPROC_TestCBForStr ( HWND hwnd )
 {
     BOOL retvalue;
-    DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);  
+    DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
     retvalue = ( !(LOWORD(dwStyle) & (CBS_OWNERDRAWFIXED | CBS_OWNERDRAWVARIABLE)) ||
-	      (LOWORD(dwStyle) & CBS_HASSTRINGS) );
+              (LOWORD(dwStyle) & CBS_HASSTRINGS) );
     return retvalue;
 }
 /**********************************************************************
- *	     WINPROC_TestLBForStr
+ *           WINPROC_TestLBForStr
  *
  * Return TRUE if the lparam is a string
  */
 BOOL WINPROC_TestLBForStr ( HWND hwnd )
 {
     BOOL retvalue;
-    DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);  
+    DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
     retvalue = ( !(LOWORD(dwStyle) & (LBS_OWNERDRAWFIXED | LBS_OWNERDRAWVARIABLE)) ||
-	    (LOWORD(dwStyle) & LBS_HASSTRINGS) );
+            (LOWORD(dwStyle) & LBS_HASSTRINGS) );
     return retvalue;
 }
 
 /**********************************************************************
- *	     WINPROC_MapMsg32ATo32W
+ *           WINPROC_MapMsg32ATo32W
  *
  * Map a message from Ansi to Unicode.
  * Return value is -1 on error, 0 if OK, 1 if an UnmapMsg call is needed.
@@ -483,7 +483,7 @@ BOOL WINPROC_TestLBForStr ( HWND hwnd )
  *
  * FIXME:
  *  WM_GETTEXT/WM_SETTEXT and static control with SS_ICON style:
- *  the first four bytes are the handle of the icon 
+ *  the first four bytes are the handle of the icon
  *  when the WM_SETTEXT message has been used to set the icon
  */
 INT WINPROC_MapMsg32ATo32W( HWND hwnd, UINT msg, WPARAM wParam, LPARAM *plparam )
@@ -549,24 +549,24 @@ INT WINPROC_MapMsg32ATo32W( HWND hwnd, UINT msg, WPARAM wParam, LPARAM *plparam 
 /* Listbox */
     case LB_ADDSTRING:
     case LB_INSERTSTRING:
-	if ( WINPROC_TestLBForStr( hwnd ))
+        if ( WINPROC_TestLBForStr( hwnd ))
           *plparam = (LPARAM)HEAP_strdupAtoW( GetProcessHeap(), 0, (LPCSTR)*plparam );
         return (*plparam ? 1 : -1);
 
-    case LB_GETTEXT:		    /* fixme: fixed sized buffer */
+    case LB_GETTEXT:                /* fixme: fixed sized buffer */
         { if ( WINPROC_TestLBForStr( hwnd ))
-	  { LPARAM *ptr = (LPARAM *)HeapAlloc( GetProcessHeap(), 0, 256 * sizeof(WCHAR) + sizeof(LPARAM) );
+          { LPARAM *ptr = (LPARAM *)HeapAlloc( GetProcessHeap(), 0, 256 * sizeof(WCHAR) + sizeof(LPARAM) );
             if (!ptr) return -1;
             *ptr++ = *plparam;  /* Store previous lParam */
             *plparam = (LPARAM)ptr;
-	  }
+          }
         }
         return 1;
 
 /* Combobox */
     case CB_ADDSTRING:
     case CB_INSERTSTRING:
-	if ( WINPROC_TestCBForStr( hwnd ))
+        if ( WINPROC_TestCBForStr( hwnd ))
           *plparam = (LPARAM)HEAP_strdupAtoW( GetProcessHeap(), 0, (LPCSTR)*plparam );
         return (*plparam ? 1 : -1);
 
@@ -576,19 +576,19 @@ INT WINPROC_MapMsg32ATo32W( HWND hwnd, UINT msg, WPARAM wParam, LPARAM *plparam 
             if (!ptr) return -1;
             *ptr++ = *plparam;  /* Store previous lParam */
             *plparam = (LPARAM)ptr;
-	  }
+          }
         }
         return 1;
 
 /* Multiline edit */
     case EM_GETLINE:
         { WORD len = (WORD)*plparam;
-	  LPARAM *ptr = (LPARAM *) HEAP_xalloc( GetProcessHeap(), 0, sizeof(LPARAM) + sizeof (WORD) + len*sizeof(WCHAR) );
+          LPARAM *ptr = (LPARAM *) HEAP_xalloc( GetProcessHeap(), 0, sizeof(LPARAM) + sizeof (WORD) + len*sizeof(WCHAR) );
           if (!ptr) return -1;
           *ptr++ = *plparam;  /* Store previous lParam */
-	  *((WORD *) ptr) = len;   /* Store the length */
+          *((WORD *) ptr) = len;   /* Store the length */
           *plparam = (LPARAM)ptr;
-	}
+        }
         return 1;
 
     case WM_ASKCBFORMATNAME:
@@ -605,7 +605,7 @@ INT WINPROC_MapMsg32ATo32W( HWND hwnd, UINT msg, WPARAM wParam, LPARAM *plparam 
 
 
 /**********************************************************************
- *	     WINPROC_UnmapMsg32ATo32W
+ *           WINPROC_UnmapMsg32ATo32W
  *
  * Unmap a message that was mapped from Ansi to Unicode.
  */
@@ -661,39 +661,39 @@ void WINPROC_UnmapMsg32ATo32W( HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam
 /* Listbox */
     case LB_ADDSTRING:
     case LB_INSERTSTRING:
-	if ( WINPROC_TestLBForStr( hwnd ))
+        if ( WINPROC_TestLBForStr( hwnd ))
           HeapFree( GetProcessHeap(), 0, (void *)lParam );
         break;
 
     case LB_GETTEXT:
         { if ( WINPROC_TestLBForStr( hwnd ))
           { LPARAM *ptr = (LPARAM *)lParam - 1;
-	    lstrcpyWtoA( (LPSTR)*ptr, (LPWSTR)(lParam) );
+            lstrcpyWtoA( (LPSTR)*ptr, (LPWSTR)(lParam) );
             HeapFree( GetProcessHeap(), 0, ptr );
-	  }
+          }
         }
         break;
 
 /* Combobox */
     case CB_ADDSTRING:
     case CB_INSERTSTRING:
-	if ( WINPROC_TestCBForStr( hwnd ))
+        if ( WINPROC_TestCBForStr( hwnd ))
           HeapFree( GetProcessHeap(), 0, (void *)lParam );
         break;
 
     case CB_GETLBTEXT:
         { if ( WINPROC_TestCBForStr( hwnd ))
-	  { LPARAM *ptr = (LPARAM *)lParam - 1;
+          { LPARAM *ptr = (LPARAM *)lParam - 1;
             lstrcpyWtoA( (LPSTR)*ptr, (LPWSTR)(lParam) );
             HeapFree( GetProcessHeap(), 0, ptr );
-	  }
+          }
         }
         break;
 
 /* Multiline edit */
     case EM_GETLINE:
         { LPARAM * ptr = (LPARAM *)lParam - 1;  /* get the old lParam */
-	  WORD len = *(WORD *) lParam;
+          WORD len = *(WORD *) lParam;
           lstrcpynWtoA( (LPSTR)*ptr , (LPWSTR)lParam, len );
           HeapFree( GetProcessHeap(), 0, ptr );
         }
@@ -703,7 +703,7 @@ void WINPROC_UnmapMsg32ATo32W( HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam
 
 
 /**********************************************************************
- *	     WINPROC_MapMsg32WTo32A
+ *           WINPROC_MapMsg32WTo32A
  *
  * Map a message from Unicode to Ansi.
  * Return value is -1 on error, 0 if OK, 1 if an UnmapMsg call is needed.
@@ -771,46 +771,46 @@ INT WINPROC_MapMsg32WTo32A( HWND hwnd, UINT msg, WPARAM wParam, LPARAM *plparam)
 /* Listbox */
     case LB_ADDSTRING:
     case LB_INSERTSTRING:
-	if ( WINPROC_TestLBForStr( hwnd ))
+        if ( WINPROC_TestLBForStr( hwnd ))
           *plparam = (LPARAM)HEAP_strdupWtoA( GetProcessHeap(), 0, (LPCWSTR)*plparam );
         return (*plparam ? 1 : -1);
 
-    case LB_GETTEXT:			/* fixme: fixed sized buffer */
+    case LB_GETTEXT:                    /* fixme: fixed sized buffer */
         { if ( WINPROC_TestLBForStr( hwnd ))
-	  { LPARAM *ptr = (LPARAM *)HeapAlloc( GetProcessHeap(), 0, 256 + sizeof(LPARAM) );
+          { LPARAM *ptr = (LPARAM *)HeapAlloc( GetProcessHeap(), 0, 256 + sizeof(LPARAM) );
             if (!ptr) return -1;
             *ptr++ = *plparam;  /* Store previous lParam */
             *plparam = (LPARAM)ptr;
-	  }
+          }
         }
         return 1;
 
 /* Combobox */
     case CB_ADDSTRING:
     case CB_INSERTSTRING:
-	if ( WINPROC_TestCBForStr( hwnd ))
+        if ( WINPROC_TestCBForStr( hwnd ))
           *plparam = (LPARAM)HEAP_strdupWtoA( GetProcessHeap(), 0, (LPCWSTR)*plparam );
         return (*plparam ? 1 : -1);
 
-    case CB_GETLBTEXT:		/* fixme: fixed sized buffer */
+    case CB_GETLBTEXT:          /* fixme: fixed sized buffer */
         { if ( WINPROC_TestCBForStr( hwnd ))
-	  { LPARAM *ptr = (LPARAM *)HeapAlloc( GetProcessHeap(), 0, 256 + sizeof(LPARAM) );
+          { LPARAM *ptr = (LPARAM *)HeapAlloc( GetProcessHeap(), 0, 256 + sizeof(LPARAM) );
             if (!ptr) return -1;
             *ptr++ = *plparam;  /* Store previous lParam */
             *plparam = (LPARAM)ptr;
-	  }
+          }
         }
         return 1;
 
 /* Multiline edit */
     case EM_GETLINE:
         { WORD len = (WORD)*plparam;
-	  LPARAM *ptr = (LPARAM *) HEAP_xalloc( GetProcessHeap(), 0, sizeof(LPARAM) + sizeof (WORD) + len*sizeof(CHAR) );
+          LPARAM *ptr = (LPARAM *) HEAP_xalloc( GetProcessHeap(), 0, sizeof(LPARAM) + sizeof (WORD) + len*sizeof(CHAR) );
           if (!ptr) return -1;
           *ptr++ = *plparam;  /* Store previous lParam */
-	  *((WORD *) ptr) = len;   /* Store the length */
+          *((WORD *) ptr) = len;   /* Store the length */
           *plparam = (LPARAM)ptr;
-	}
+        }
         return 1;
 
     case WM_ASKCBFORMATNAME:
@@ -827,7 +827,7 @@ INT WINPROC_MapMsg32WTo32A( HWND hwnd, UINT msg, WPARAM wParam, LPARAM *plparam)
 
 
 /**********************************************************************
- *	     WINPROC_UnmapMsg32WTo32A
+ *           WINPROC_UnmapMsg32WTo32A
  *
  * Unmap a message that was mapped from Unicode to Ansi.
  */
@@ -883,7 +883,7 @@ void WINPROC_UnmapMsg32WTo32A( HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam
 /* Listbox */
     case LB_ADDSTRING:
     case LB_INSERTSTRING:
-	if ( WINPROC_TestLBForStr( hwnd ))
+        if ( WINPROC_TestLBForStr( hwnd ))
           HeapFree( GetProcessHeap(), 0, (void *)lParam );
         break;
 
@@ -892,14 +892,14 @@ void WINPROC_UnmapMsg32WTo32A( HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam
           { LPARAM *ptr = (LPARAM *)lParam - 1;
             lstrcpyAtoW( (LPWSTR)*ptr, (LPSTR)(lParam) );
             HeapFree(GetProcessHeap(), 0, ptr );
-	  }
+          }
         }
         break;
 
 /* Combobox */
     case CB_ADDSTRING:
     case CB_INSERTSTRING:
-	if ( WINPROC_TestCBForStr( hwnd ))
+        if ( WINPROC_TestCBForStr( hwnd ))
           HeapFree( GetProcessHeap(), 0, (void *)lParam );
         break;
 
@@ -908,14 +908,14 @@ void WINPROC_UnmapMsg32WTo32A( HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam
           { LPARAM *ptr = (LPARAM *)lParam - 1;
             lstrcpyAtoW( (LPWSTR)*ptr, (LPSTR)(lParam) );
             HeapFree( GetProcessHeap(), 0, ptr );
-	  }
+          }
         }
         break;
 
 /* Multiline edit */
     case EM_GETLINE:
         { LPARAM * ptr = (LPARAM *)lParam - 1;  /* get the old lparam */
-	  WORD len = *(WORD *)ptr;
+          WORD len = *(WORD *)ptr;
           lstrcpynAtoW( (LPWSTR) *ptr, (LPSTR)lParam, len );
           HeapFree( GetProcessHeap(), 0, ptr );
         }
@@ -924,7 +924,7 @@ void WINPROC_UnmapMsg32WTo32A( HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam
 }
 
 /**********************************************************************
- *	     WINPROC_CallProc32ATo32W
+ *           WINPROC_CallProc32ATo32W
  *
  * Call a window procedure, translating args from Ansi to Unicode.
  */
@@ -941,7 +941,7 @@ LRESULT WINPROC_CallProc32ATo32W( WNDPROC func, HWND hwnd,
 }
 
 /**********************************************************************
- *	     WINPROC_CallProc32WTo32A
+ *           WINPROC_CallProc32WTo32A
  *
  * Call a window procedure, translating args from Unicode to Ansi.
  */
@@ -969,7 +969,7 @@ DWORD WIN32API GetQueueStatus( UINT flags)
 
     dprintf(("USER32:  GetQueueStatus"));
     queueStatus = OSLibWinQueryQueueStatus();
- 
+
     queueStatus = MAKELONG(queueStatus, queueStatus);
     return queueStatus & MAKELONG(flags, flags);
 }
@@ -1010,27 +1010,27 @@ DWORD MsgWaitForMultipleObjects(DWORD nCount, LPHANDLE pHandles, BOOL fWaitAll,
   // @@@PH this is a temporary bugfix for WINFILE.EXE
   if (nCount == 0)
   {
-	if(dwMilliseconds == 0) {
-		if(GetQueueStatus(dwWakeMask) == 0) {
-			return WAIT_TIMEOUT;
-		}
-		return WAIT_OBJECT_0;
-	}
+        if(dwMilliseconds == 0) {
+                if(GetQueueStatus(dwWakeMask) == 0) {
+                        return WAIT_TIMEOUT;
+                }
+                return WAIT_OBJECT_0;
+        }
         //SvL: Check time, wait for any message, check msg type and determine if
         //     we have to return
-	//TODO: Timeout isn't handled correctly (can return too late)
-	curtime = GetCurrentTime();
+        //TODO: Timeout isn't handled correctly (can return too late)
+        curtime = GetCurrentTime();
         endtime = curtime + dwMilliseconds;
-	while(curtime < endtime || dwMilliseconds == INFINITE) {
-    		if(OSLibWinWaitMessage() == FALSE) {
-			dprintf(("OSLibWinWaitMessage returned FALSE!"));
-			return -1;
-		}
-		if(GetQueueStatus(dwWakeMask) != 0) {
-			return WAIT_OBJECT_0;
-		}
-		curtime = GetCurrentTime();
-	}
+        while(curtime < endtime || dwMilliseconds == INFINITE) {
+                if(OSLibWinWaitMessage() == FALSE) {
+                        dprintf(("OSLibWinWaitMessage returned FALSE!"));
+                        return -1;
+                }
+                if(GetQueueStatus(dwWakeMask) != 0) {
+                        return WAIT_OBJECT_0;
+                }
+                curtime = GetCurrentTime();
+        }
         return WAIT_TIMEOUT;
   }
   //SvL: Call handlemanager function as we need to translate handles
