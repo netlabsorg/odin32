@@ -1,4 +1,4 @@
-/* $Id: odin32env.cmd,v 1.17 2001-03-15 20:12:46 bird Exp $
+/* $Id: odin32env.cmd,v 1.18 2001-04-02 01:54:11 bird Exp $
  *
  * Sets the build environment.
  *
@@ -30,12 +30,12 @@ parse arg sCompiler
     call Jade 0;
     call DocBookXML 0;
     call WarpIn 0;
-    call EMX 0;
     call mySQL 0;
     call Perl 0;
     call CVS 0;
     call DDKBase 0;
     call MSC60 0;
+    call EMX 0;
     if (sCompiler = 'watcom') then
     do /* watcom */
         call VAC30 1;
@@ -142,7 +142,7 @@ DDKBase: procedure
 
 /*
  * DocBook 4.1.x XML.
- */               
+ */
 DocBookXML: procedure
     parse arg fRM
 
@@ -150,16 +150,16 @@ DocBookXML: procedure
      * DocBook XML dir.
      */
     sDocBookXML = 'e:\coding\DocBook\XML'
-    
+
     call EnvVar_Set      fRM, 'docbookxml',         sDocBookXML
     call EnvVar_AddFront fRM, 'SGML_CATALOG_FILES', sDocBookXML'\docbook.cat;'
-     
+
     return 0;
-    
+
 
 /*
  * Jade 1.2.1 for OS/2.
- */               
+ */
 Jade: procedure
     parse arg fRM
 
@@ -167,15 +167,15 @@ Jade: procedure
      * Jade install dir.
      */
     sJadeMain = 'e:\apps\jade'
-    
+
     call EnvVar_Set      fRM, 'jademain',           sJadeMain
     call EnvVar_AddFront fRM, 'path',               sJadeMain';'
     call EnvVar_AddFront fRM, 'SGML_CATALOG_FILES', sJadeMain'\catalog;'
     call EnvVar_AddEnd   fRM, 'SGML_CATALOG_FILES', '.\catalog;'
-     
+
     return 0;
 
-    
+
 /*
  * Microsoft C v6.0a
  */
