@@ -1,4 +1,4 @@
-/* $Id: fastdep.c,v 1.23 2000-11-21 04:35:36 bird Exp $
+/* $Id: fastdep.c,v 1.24 2000-11-26 11:26:40 bird Exp $
  *
  * Fast dependents. (Fast = Quick and Dirty!)
  *
@@ -98,6 +98,7 @@ typedef struct _Options
     BOOL            fAppend;            /* append to the output file, not overwrite it. */
     BOOL            fCheckCyclic;       /* allways check for cylic dependency before inserting an dependent. */
     BOOL            fCacheSearchDirs;   /* cache entire search dirs. */
+    const char *    pszExcludeFiles;    /* List of excluded files. */
 } OPTIONS, *POPTIONS;
 
 
@@ -313,6 +314,7 @@ int main(int argc, char **argv)
     static char szRsrcExt[64]   = "res";
     static char szInclude[32768] = ";";
     static char szExclude[32768] = ";";
+    static char szExcludeFiles[65536] = "";
 
     OPTIONS options =
     {
@@ -328,7 +330,8 @@ int main(int argc, char **argv)
         TRUE,            /* fSrcWhenObj */
         FALSE,           /* fAppend */
         TRUE,            /* fCheckCyclic */
-        TRUE             /* fCacheSearchDirs */
+        TRUE,            /* fCacheSearchDirs */
+        szExcludeFiles   /* pszExcludeFiles */
     };
 
     szObjectDir[0] = '\0';
@@ -400,8 +403,9 @@ int main(int argc, char **argv)
                         pszDepFile = &argv[argi][2];
                     else
                     {
-                        if (argi + 1 < argc)
-                            pszDepFile = argv[++argi];
+                        argi++;
+                        if (argi < argc)
+                            pszDepFile = argv[argi];
                         else
                         {
                             fprintf(stderr, "invalid parameter -d, filename missing!\n");
@@ -440,8 +444,12 @@ int main(int argc, char **argv)
                         psz = &argv[argi][2];
                     else
                     {
-                        psz = argv[argi+1];
-                        argi++;
+                        if (++argi >= argc)
+                        {
+                            fprintf(stderr, "syntax error! Option -e.\n");
+                            return 1;
+                        }
+                        psz = argv[argi];
                     }
                     /* check if enviroment variable */
                     if (*psz == '%')
@@ -477,8 +485,12 @@ int main(int argc, char **argv)
                         psz = &argv[argi][2];
                     else
                     {
-                        psz = argv[argi+1];
-                        argi++;
+                        if (++argi >= argc)
+                        {
+                            fprintf(stderr, "syntax error! Option -i.\n");
+                            return 1;
+                        }
+                        psz = argv[argi];
                     }
                     /* check if enviroment variable */
                     if (*psz == '%')
@@ -533,8 +545,12 @@ int main(int argc, char **argv)
                             strcpy(szObjectExt, argv[argi]+4);
                         else
                         {
-                            strcpy(szObjectExt, argv[argi+1]);
-                            argi++;
+                            if (++argi >= argc)
+                            {
+                                fprintf(stderr, "syntax error! Option -obj.\n");
+                                return 1;
+                            }
+                            strcpy(szObjectExt, argv[argi]);
                         }
                         break;
                     }
@@ -550,8 +566,12 @@ int main(int argc, char **argv)
                     }
                     else
                     {
-                        strcpy(szObjectDir, argv[argi+1]);
-                        argi++;
+                        if (++argi >= argc)
+                        {
+                            fprintf(stderr, "syntax error! Option -o.\n");
+                            return 1;
+                        }
+                        strcpy(szObjectDir, argv[argi]);
                     }
                     if (szObjectDir[0] != '\0'
                         && szObjectDir[strlen(szObjectDir)-1] != '\\'
@@ -566,8 +586,43 @@ int main(int argc, char **argv)
                         strcpy(szRsrcExt, argv[argi]+2);
                     else
                     {
-                        strcpy(szRsrcExt, argv[argi+1]);
-                        argi++;
+                        if (++argi >= argc)
+                        {
+                            fprintf(stderr, "syntax error! Option -r.\n");
+                            return 1;
+                        }
+                        strcpy(szRsrcExt, argv[argi]);
+                    }
+                    break;
+
+                case 'x':
+                case 'X': /* Exclude files */
+                    psz = &achBuffer[CCHMAXPATH+8];
+                    if (strlen(argv[argi]) > 2)
+                        strcpy(psz, &argv[argi][2]);
+                    else
+                    {
+                        if (++argi >= argc)
+                        {
+                            fprintf(stderr, "syntax error! Option -x.\n");
+                            return 1;
+                        }
+                        strcpy(psz, argv[argi]);
+                    }
+                    while (psz != NULL && *psz != ';')
+                    {
+                        char *  pszNext = strchr(psz, ';');
+                        int     cch = strlen(szExcludeFiles);
+                        if (pszNext)
+                            *pszNext++ = '\0';
+                        if (DosQueryPathInfo(psz, FIL_QUERYFULLNAME, &szExcludeFiles[cch], CCHMAXPATH))
+                        {
+                            fprintf(stderr, "error: Invalid exclude name\n");
+                            return -1;
+                        }
+                        strlwr(&szExcludeFiles[cch]);
+                        strcat(&szExcludeFiles[cch], ";");
+                        psz = pszNext;
                     }
                     break;
 
@@ -669,8 +724,9 @@ int main(int argc, char **argv)
                      i++, pfindbuf3 = (PFILEFINDBUF3)((int)pfindbuf3 + pfindbuf3->oNextEntryOffset)
                      )
                 {
-                    char *psz;
-                    char  szSource[CCHMAXPATH];
+                    const char *    psz;
+                    char            szSource[CCHMAXPATH];
+                    BOOL            fExcluded;
 
                     /*
                      * Make full path.
@@ -685,6 +741,21 @@ int main(int argc, char **argv)
                     strcat(szSource, pfindbuf3->achName);
                     strlwr(szSource);
                     fileNormalize(szSource);
+
+                    /*
+                     * Check if this is an excluded file.
+                     */
+                    fExcluded = FALSE;
+                    psz = options.pszExcludeFiles;
+                    while (*psz != '\0' && *psz != ';')
+                    {
+                        const char * pszNext = strchr(psz, ';');
+                        if (strlen(szSource) == pszNext - psz && strncmp(szSource, psz, pszNext - psz) == 0)
+                            fExcluded = TRUE;
+                        psz = pszNext + 1;
+                    }
+                    if (fExcluded)
+                        continue;
 
                     /*
                      * Analyse the file.
@@ -728,7 +799,8 @@ static void syntax(void)
         "\n"
         "Syntax: FastDep [-a<[+]|->] [-ca] [-cy<[+]|->] [-d <outputfn>]\n"
         "                [-e <excludepath>] [-eall<[+]|->] [-i <include>] [-n<[+]|->]\n"
-        "                [-o <objdir>] [-obr<[+]|->]  <files>\n"
+        "                [-o <objdir>] [-obr<[+]|->] [-x <f1[;f2]>] [-r <rsrcext>]\n"
+        "                <files> [more options [more files [...]]]\n"
         "    or\n"
         "        FastDep [options] @<parameterfile>\n"
         "\n"
@@ -755,8 +827,10 @@ static void syntax(void)
         "                   -obr-: No object rule, rule for source filename is generated.\n"
         "   -obj[ ]<objext> Object extention.           Default: obj\n"
         "   -r[ ]<rsrcext>  Resource binary extention.  Default: res\n"
+        "   -x[ ]<f1[;f2]>  Files to exclude. Only exact filenames.\n"
         "   <files>         Files to scan. Wildchars are allowed.\n"
         "\n"
+        "Options and files could be mixed.\n"
         " copyright (c) 1999-2000 knut st. osmundsen (knut.stange.osmundsen@pmsc.no)\n",
         pszDefaultDepFile
         );
