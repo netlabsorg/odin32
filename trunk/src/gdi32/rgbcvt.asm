@@ -1,4 +1,4 @@
-; $Id: rgbcvt.asm,v 1.5 2001-07-09 18:07:39 sandervl Exp $
+; $Id: rgbcvt.asm,v 1.6 2002-11-21 11:39:37 sandervl Exp $
 ; Copyright 2000 Daniela Engert (dani@ngrt.de)
 
 	.586p
@@ -175,7 +175,7 @@ cvt:
 
 lastpixels:
 	pop	ecx
-	and	ecx, 3
+	and	ecx, 7
 	jz	short done
 
 cvt2loop:
@@ -263,7 +263,7 @@ cvt:
 
 lastpixels:
 	pop	ecx
-	and	ecx, 3
+	and	ecx, 7
 	jz	short done
 
 cvt2loop:
