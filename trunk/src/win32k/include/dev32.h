@@ -1,4 +1,5 @@
-/*
+/* $Id: dev32.h,v 1.2 1999-10-14 01:16:49 bird Exp $
+ *
  * dev32 - header file for 32-bit part of the driver.
  *
  * Copyright (c) 1999 knut st. osmundsen
