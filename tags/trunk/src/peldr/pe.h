@@ -1,4 +1,4 @@
-/* $Id: pe.h,v 1.4 1999-08-16 13:54:07 sandervl Exp $ */
+/* $Id: pe.h,v 1.5 2000-01-30 14:48:51 sandervl Exp $ */
 
 /*
  *
@@ -14,6 +14,16 @@
 #ifndef __PE_H__
 #define __PE_H__
 
+#ifndef PAG_ANY
+    #define PAG_ANY    0x00000400
+#endif
+
+#ifndef QSV_VIRTUALADDRESSLIMIT
+    #define QSV_VIRTUALADDRESSLIMIT 30
+#endif
+
+#define FALLOC_SIZE (1024*1024)
+
 extern char szErrorTitle[];
 extern char szMemErrorMsg[];
 extern char szFileErrorMsg[];
@@ -21,8 +31,6 @@ extern char szPEErrorMsg[];
 extern char szCPUErrorMsg[];
 extern char szExeErrorMsg[];
 extern char szInteralErrorMsg[];
-
-ULONG SYSTEM ReserveMem();
 
 #endif // NOIMAGE
 
