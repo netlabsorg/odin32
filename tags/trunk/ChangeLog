@@ -1,4 +1,4 @@
-/* $Id: ChangeLog,v 1.1404 2001-05-11 08:34:26 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1405 2001-05-11 13:31:32 sandervl Exp $ */
 
  2001-05-11: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Rewrote window handling. Back to using frame and client windows
@@ -25,6 +25,9 @@
                 o Mark window's visible region as changed when client receives
                   WM_SIZE (PM). BeginPaint sends a WM_ERASEBKGND when this
                   flag is set (regardless of erase flag set by RedrawWindow)
+                o ScrollDC (window handle transation)
+                o ScrollDC and ScrollWindow bugfix (setting update region)
+                  (fixes scrolling in MS Word 97)
 
  2001-05-10: Shingo Tsuda <sofiya@din.or.jp>
     - GDI32:    o Rop conversion for DIB Section blits
