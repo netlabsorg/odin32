@@ -1,4 +1,4 @@
-/* $Id: d16strat.c,v 1.7 2000-02-23 20:10:19 bird Exp $
+/* $Id: d16strat.c,v 1.8 2000-02-25 18:15:02 bird Exp $
  *
  * d16strat.c - 16-bit strategy routine, device headers, device_helper (ptr)
  *              and 16-bit IOClts.
@@ -63,13 +63,6 @@ DDHDR aDevHdrs[2] = /* This is the first piece data in the driver!!!!!!! */
     }
 };
 
-/* Note: All global variables must be initialized!  *
- *       Uninitialized variables ends up in DATA32. */
-PFN     Device_Help = NULL;
-ULONG   TKSSBase16  = 0;
-USHORT  R0FlatCS16  = 0;
-USHORT  R0FlatDS16  = 0;
-BOOL    fInitTime   = TRUE;
 
 
 /*******************************************************************************
@@ -128,10 +121,15 @@ extern char end;
 USHORT dev0GenIOCtl(PRP_GENIOCTL pRp)
 {
     USHORT rc;
+
     if (pRp->Category == D16_IOCTL_CAT)
     {
         switch (pRp->Function)
         {
+            /*
+             * This is the IOCtl which does the R0-initiation of the device driver.
+             * Only available at init time...
+             */
             case D16_IOCTL_RING0INIT:
                 if (fInitTime)
                 {
@@ -141,7 +139,14 @@ USHORT dev0GenIOCtl(PRP_GENIOCTL pRp)
                 }
                 break;
 
-            case D16_IOCTL_GETKRNLOTES:
+            /*
+             * This is the IOCtl collects info of the running kernel.
+             * Only available at init time.
+             *
+             * Since this IOCtl is issued before R0-Init is done, we'll have to
+             * init TKSSBase for both 16-bit and 32-bit code and be a bit carefull.
+             */
+            case D16_IOCTL_GETKRNLINFO:
                 if (fInitTime)
                 {
                     ULONG ulLin;
@@ -150,11 +155,18 @@ USHORT dev0GenIOCtl(PRP_GENIOCTL pRp)
                     if (DevHelp_VirtToLin(SELECTOROF(pRp->DataPacket), OFFSETOF(pRp->DataPacket),
                                           &ulLin) != NO_ERROR)
                         return STATUS_DONE | STERR | ERROR_I24_INVALID_PARAMETER;
-                    return CallGetOTEs32(ulLin);
+                    return CallGetKernelInfo32(ulLin);
                 }
                 break;
 
-            case D16_IOCTL_VERIFYPROCTAB:
+            /*
+             * This is the IOCtl verifies the data in the ImportTab.
+             * Only available at init time.
+             *
+             * Since this IOCtl is issued before R0-Init is done, we'll have to
+             * init TKSSBase for both 16-bit and 32-bit code and be a bit carefull.
+             */
+            case D16_IOCTL_VERIFYIMPORTTAB:
                 if (fInitTime)
                 {
                     if (TKSSBase16 == 0)

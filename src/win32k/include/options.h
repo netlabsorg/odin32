@@ -1,4 +1,4 @@
-/* $Id: options.h,v 1.9 2000-02-21 15:59:21 bird Exp $
+/* $Id: options.h,v 1.10 2000-02-25 18:15:06 bird Exp $
  *
  * Options.
  *
@@ -15,8 +15,8 @@
 *   Defined Constants And Macros                                               *
 *******************************************************************************/
 /* fKernel */
-#define KF_UNI      0x00000000UL
-#define KF_SMP      0x00000001UL
+#define KF_UNI              0x00000000UL
+#define KF_SMP              0x00000001UL
 
 /* fPE */
 #define FLAGS_PE_NOT        0x00000000UL
@@ -25,51 +25,52 @@
 #define FLAGS_PE_MIXED      0x00000003UL
 
 /* ulInfoLevel */
-#define INFOLEVEL_QUIET      0x00000000UL
-#define INFOLEVEL_ERROR      0x00000001UL
-#define INFOLEVEL_WARNING    0x00000002UL
-#define INFOLEVEL_INFO       0x00000003UL
-#define INFOLEVEL_INFOALL    0x00000004UL
+#define INFOLEVEL_QUIET     0x00000000UL
+#define INFOLEVEL_ERROR     0x00000001UL
+#define INFOLEVEL_WARNING   0x00000002UL
+#define INFOLEVEL_INFO      0x00000003UL
+#define INFOLEVEL_INFOALL   0x00000004UL
 
 /* default heapsizes */
-#define CB_SWP_INIT         (1024*512)
-#define CB_SWP_MAX          (1024*1024*16)
-#define CB_RES_INIT         (1024*256)
-#define CB_RES_MAX          (1024*1024*10)
+#define CB_SWP_INIT         (1024*512)      /* 512KB */
+#define CB_SWP_MAX          (1024*1024*16)  /*  16MB  */
+#define CB_RES_INIT         (1024*256)      /* 256KB */
+#define CB_RES_MAX          (1024*1024*10)  /*  10MB  */
 
+/* default assignments */
+#define DEFAULT_OPTION_ASSIGMENTS                           \
+            {FALSE,                 /* fQuiet        */     \
+            OUTPUT_COM2,            /* usCom         */     \
+            FALSE,                  /* fLogging      */     \
+            KF_UNI,                 /* fKernel       */     \
+            ~0UL,                   /* ulBuild       */     \
+            (unsigned short)~0,     /* usVerMajor    */     \
+            (unsigned short)~0,     /* usVerMinor    */     \
+            FLAGS_PE_PE2LX,         /* fPE           */     \
+            INFOLEVEL_QUIET,        /* ulInfoLevel   */     \
+            FALSE,                  /* fElf          */     \
+            TRUE,                   /* fScript       */     \
+            FALSE,                  /* fNoLoader     */     \
+            CB_SWP_INIT,            /* cbSwpHeapInit */     \
+            CB_SWP_MAX,             /* cbSwpHeapMax  */     \
+            CB_RES_INIT,            /* cbResHeapInit */     \
+            CB_RES_MAX}             /* cbResHeapMax  */
 
-/* Set defaults. */
-#define SET_OPTIONS_TO_DEFAULT(o)                   \
-            o.fQuiet        = FALSE;                \
-            o.usCom         = OUTPUT_COM2;          \
-            o.fLogging      = FALSE;                \
-            o.fKernel       = KF_UNI;               \
-            o.ulBuild       = ~0UL;                 \
-            o.usVerMajor    = (unsigned short)~0;   \
-            o.usVerMinor    = (unsigned short)~0;   \
-            o.fPE           = FLAGS_PE_PE2LX;       \
-            o.ulInfoLevel   = INFOLEVEL_QUIET;      \
-            o.fElf          = FALSE;                \
-            o.fScript       = TRUE;                 \
-            o.fNoLoader     = FALSE;                \
-            o.cbSwpHeapInit = CB_SWP_INIT;          \
-            o.cbSwpHeapMax  = CB_SWP_MAX;           \
-            o.cbResHeapInit = CB_RES_INIT;          \
-            o.cbResHeapMax  = CB_RES_MAX;
 
 
 /*******************************************************************************
 *   Structures and Typedefs                                                    *
 *******************************************************************************/
 /** Option struct */
+#pragma pack(4)
 struct options
 {
     /** @cat misc */
-    BOOL        fQuiet;                 /* Quiet initialization. */
+    ULONG       fQuiet;                 /* Quiet initialization. */
 
     /** @cat logging options */
     USHORT      usCom;                  /* Output port no. */
-    BOOL        fLogging;               /* Logging. */
+    ULONG       fLogging;               /* Logging. */
 
     /** @cat kernel selection */
     ULONG       fKernel;                /* Smp or uni kernel. */
@@ -78,17 +79,17 @@ struct options
     USHORT      usVerMinor;             /* OS/2 minor ver - 30,40 */
 
     /** @cat Options affecting the generated LX executables */
-    BOOL        fPE;                    /* Flags set the type of conversion. */
+    ULONG       fPE;                    /* Flags set the type of conversion. */
     ULONG       ulInfoLevel;            /* Pe2Lx InfoLevel. */
 
     /** @cat Options affecting the generated ELF executables */
-    BOOL        fElf;                   /* Elf flags. */
+    ULONG       fElf;                   /* Elf flags. */
 
     /** @cat Options affecting the script executables */
-    BOOL        fScript;                /* Script flags. */
+    ULONG       fScript;                /* Script flags. */
 
     /** @cat Options affecting the script executables */
-    BOOL        fNoLoader;              /* No loader stuff. */
+    ULONG       fNoLoader;              /* No loader stuff. */
 
     /** @cat Options affecting the heap. */
     ULONG       cbSwpHeapInit;          /* Initial heapsize. */
@@ -96,11 +97,16 @@ struct options
     ULONG       cbResHeapInit;          /* Initial residentheapsize. */
     ULONG       cbResHeapMax;           /* Maxiumem residentheapsize. */
 };
+#pragma pack()
+
 
 /*******************************************************************************
 *   Global Variables                                                           *
 *******************************************************************************/
-extern struct options options;          /* defined in d32globals.c */
+extern struct options options;      /* defined in d32globals.c */
+#if defined(__IBMC__) || defined(__IBMCPP__)
+    #pragma map( options , "_options"  )
+#endif
 
 #endif
 
