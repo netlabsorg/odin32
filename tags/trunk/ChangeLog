@@ -1,4 +1,13 @@
- /* $Id: ChangeLog,v 1.475 1999-11-26 17:04:25 cbratschi Exp $ */
+ /* $Id: ChangeLog,v 1.476 1999-11-27 00:08:20 sandervl Exp $ */
+
+ 99-11-26: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32: Implemented GetInputState and GetQueueStatus
+                  Rewrote MsgWaitForMultipleObjects for waiting on 0 objects
+                  (== waiting for messages)
+	- KERNEL32: TLS bugfix (callback == 0)
+
+ 99-11-25: Vitali E. Pelenyov <Vitali.Pelenyov@dpt.ustu.ru>
+	- USER32: Extended key fix (for cursor keys in Quake 2/Hexen 2 etc)
 
  99-11-26: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: fixed rect mapping -> edit scroll redraw bug fixed
