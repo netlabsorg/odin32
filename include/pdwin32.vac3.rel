@@ -1,4 +1,4 @@
-# $Id: pdwin32.vac3.rel,v 1.31 2000-11-20 04:58:14 bird Exp $
+# $Id: pdwin32.vac3.rel,v 1.32 2000-11-21 04:39:19 bird Exp $
 # ODIN / win32os2 Project
 #
 # RELEASE makefile for the VAC3 compiler environment
@@ -61,6 +61,7 @@ CXXTARGETFLAGS   = -Ge+
 CTARGETFLAGS     = -Ge-
 CXXTARGETFLAGS   = -Ge-
 !endif
+CXXEXCEPTIONS    = -Gx-
 CFLAGS           = -Q -Si -G5 -O+ -Oi+ -Ss+ -W3 -Gm+ /Gn+ $(CTARGETFLAGS)
 CXXFLAGS         = -Q -Si -G5 -O+ -Oi+ -Ss+ -W3 -Gm+ /Gn+ $(CXXTARGETFLAGS) /Gx+
 CXXFLAGS_ODINCRT = -Q -Si -G5 -O+ -Oi+ -Ss+ -W3 -Gm+ /Gn- $(CXXTARGETFLAGS) /Gx+
@@ -79,8 +80,13 @@ CDEFINES_WIN32APP= -D__WIN32OS2__ -D__i386__
 #   when we add new flags to for example LD2FLAGS too many times.
 #
 !ifdef EXETARGET
-LDTARGETFLAGS    = -Ge+
-LD2TARGETFLAGS   = /EXEC
+!   ifdef VIO
+LDTARGETFLAGS    = -Ge+ -B"/pmtype:vio"
+LD2TARGETFLAGS   = /EXEC /pmtype:vio
+!   else
+LDTARGETFLAGS    = -Ge+ -B"/pmtype:pm"
+LD2TARGETFLAGS   = /EXEC /pmtype:pm
+!   endif
 !else
 LDTARGETFLAGS    = -Ge-
 LD2TARGETFLAGS   = /DLL
