@@ -52,7 +52,12 @@
   #define WINAPI    __stdcall
   #define SYSTEM    _System
   #define PASCAL    __stdcall
-  #define INLINE    inline              /* is this allowed for C too? */
+  #ifdef __cplusplus
+  #define INLINE    inline
+  #else
+  #define INLINE    __inline
+  #define inline    __inline
+  #endif
   #define UNALIGNED
   #define __attribute__(x)
 
