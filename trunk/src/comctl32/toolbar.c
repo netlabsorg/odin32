@@ -1,4 +1,4 @@
-/* $Id: toolbar.c,v 1.17 1999-11-02 21:44:03 achimha Exp $ */
+/* $Id: toolbar.c,v 1.18 1999-11-19 16:19:22 achimha Exp $ */
 /*
  * Toolbar control
  *
@@ -26,7 +26,7 @@
  *   - Microsofts controlspy examples.
  */
 
-/* WINE 991031 level */
+/* WINE 991114 level */
 
 /* CB: Odin32/WINE bugs
   - IMAGELIST_Draw draws a line too at the bottom of the bitmap (toolbar.exe)
@@ -4034,7 +4034,9 @@ ToolbarWindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         case TB_ISBUTTONPRESSED:
             return TOOLBAR_IsButtonPressed (hwnd, wParam, lParam);
 
-/*      case TB_LOADIMAGES:                     */ /* 4.70 */
+      case TB_LOADIMAGES:                      /* 4.70 */
+//        FIXME("missing standard imagelists\n");
+        return 0;
 /*      case TB_MAPACCELERATORA:                */ /* 4.71 */
 /*      case TB_MAPACCELERATORW:                */ /* 4.71 */
 /*      case TB_MARKBUTTON:                     */ /* 4.71 */
