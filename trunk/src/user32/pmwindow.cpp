@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.196 2003-02-10 18:31:45 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.197 2003-02-11 14:20:01 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -256,7 +256,6 @@ BOOL InitPM()
     return TRUE;
 } /* End of main */
 //******************************************************************************
-#ifdef NEW_WGSS
 HBITMAP OPEN32API _O32_CreateBitmapFromPMHandle(HBITMAP hPMBitmap);
 
 inline HBITMAP O32_CreateBitmapFromPMHandle(HBITMAP hPMBitmap)
@@ -269,7 +268,6 @@ inline HBITMAP O32_CreateBitmapFromPMHandle(HBITMAP hPMBitmap)
 
     return yyrc;
 }
-#endif
 //******************************************************************************
 static void QueryPMMenuBitmaps()
 {
@@ -299,7 +297,6 @@ static void QueryPMMenuBitmaps()
         hbmFrameMenu[PMMENU_CLOSEBUTTON] = GpiLoadBitmap(hdc, hModDisplay, SBMP_CLOSE, 0, 0);
         hbmFrameMenu[PMMENU_CLOSEBUTTONDOWN] = GpiLoadBitmap(hdc, hModDisplay, SBMP_CLOSEDEP, 0, 0);
 
-#ifdef NEW_WGSS
         //Create win32 bitmap handles of the OS/2 min, max and restore buttons
         hBmpMinButton     = O32_CreateBitmapFromPMHandle(hbmFrameMenu[PMMENU_MINBUTTON]);
         hBmpMinButtonDown = O32_CreateBitmapFromPMHandle(hbmFrameMenu[PMMENU_MINBUTTONDOWN]);
@@ -309,7 +306,6 @@ static void QueryPMMenuBitmaps()
         hBmpRestoreButtonDown = O32_CreateBitmapFromPMHandle(hbmFrameMenu[PMMENU_RESTOREBUTTONDOWN]);
         hBmpCloseButton   = O32_CreateBitmapFromPMHandle(hbmFrameMenu[PMMENU_CLOSEBUTTON]);
         hBmpCloseButtonDown   = O32_CreateBitmapFromPMHandle(hbmFrameMenu[PMMENU_CLOSEBUTTONDOWN]);
-#endif
         DevCloseDC(hdc);
     }
 }
@@ -713,7 +709,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
     {
       HWND hwndFocus = (HWND)mp1;
 
-        dprintf(("OS2: WM_SETFOCUS %x %x (%x) %d", win32wnd->getWindowHandle(), mp1, OS2ToWin32Handle(hwndFocus), mp2));
+        dprintf(("OS2: WM_SETFOCUS %x %x (%x) %d cur focus %x", win32wnd->getWindowHandle(), mp1, OS2ToWin32Handle(hwndFocus), mp2, WinQueryFocus(HWND_DESKTOP)));
 
         //PM doesn't allow SetFocus calls during WM_SETFOCUS message processing;
         //must delay this function call
@@ -807,7 +803,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
       /* NO BREAK! FALLTHRU CASE! */
 
     case WM_CHAR:
-        dprintf(("OS2: WM_CHAR %x %x %x, %x %x", win32wnd->getWindowHandle(), mp1, mp2, pWinMsg->wParam, pWinMsg->lParam));
+        dprintf(("OS2: WM_CHAR %x %x %x, %x %x focus wnd %x", win32wnd->getWindowHandle(), mp1, mp2, pWinMsg->wParam, pWinMsg->lParam, WinQueryFocus(HWND_DESKTOP)));
         win32wnd->MsgChar(pWinMsg);
         break;
 
@@ -1577,6 +1573,7 @@ adjustend:
                     //CB: redraw all children for now
                     //    -> problems with update region if we don't do it
                     //       todo: rewrite whole handling
+                    dprintf(("PMFRAME: WM_WINDOWPOSCHANGED invalidate all"));
                     WinInvalidateRect(hwnd,NULL,TRUE);
                 }
                 else
@@ -1763,7 +1760,7 @@ PosChangedEnd:
 #ifdef DEBUG
     case WM_SETFOCUS:
     {
-        dprintf(("PMFRAME: WM_SETFOCUS %x %x", win32wnd->getWindowHandle(), hwnd));
+        dprintf(("PMFRAME: WM_SETFOCUS %x %x %d -> %x", win32wnd->getWindowHandle(), hwnd, mp2, mp1));
         goto RunDefFrameWndProc;
     }
 #endif
