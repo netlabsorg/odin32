@@ -1,4 +1,4 @@
-/* $Id: ChangeLog,v 1.1735 2001-10-10 21:29:30 phaller Exp $ */
+/* $Id: ChangeLog,v 1.1736 2001-10-10 22:07:39 phaller Exp $ */
 
  2001-10-10: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Do not blindly add ODIN_FUNCTION macros to functions that
@@ -25,6 +25,8 @@
                         IOCTL_DISK_CHECK_VERIFY
     - IPHLPAPI: o added fake version of GetAdaptersInfo()
     - ODINWRAP: o standard C compiler compatibility
+    - MAKE:     o fixes to the profile make include
+    - SHELL32:  o PIDL: instrumentation for performance tuning
 
  2001-10-09: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Image header page must be readonly
