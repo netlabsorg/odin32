@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.12 1999-10-31 21:38:17 achimha Exp $ */
+/* $Id: gdi32.cpp,v 1.13 1999-11-05 09:17:27 sandervl Exp $ */
 
 /*
  * GDI32 apis
@@ -296,10 +296,48 @@ HDC WIN32API CreateCompatibleDC( HDC arg1)
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API StretchDIBits( HDC arg1, int arg2, int arg3, int arg4, int arg5, int arg6, int arg7, int arg8, int arg9, const void * arg10, const BITMAPINFO *arg11, UINT arg12, DWORD arg13)
+INT WIN32API StretchDIBits(HDC hdc, INT xDst, INT yDst, INT widthDst,
+                           INT heightDst, INT xSrc, INT ySrc, INT widthSrc,
+                           INT heightSrc, const void *bits,
+                           const BITMAPINFO *info, UINT wUsage, DWORD dwRop )
 {
+#if 1
+    dprintf(("GDI32: StretchDIBits"));
+
+    if(wUsage == DIB_PAL_COLORS && info->bmiHeader.biSize == sizeof(BITMAPINFOHEADER))
+    {
+      // workaround for open32 bug.
+      // If syscolors > 256 and wUsage == DIB_PAL_COLORS.
+
+      int i;
+      USHORT *pColorIndex = (USHORT *)info->bmiColors;
+      RGBQUAD *pColors = (RGBQUAD *) alloca(info->bmiHeader.biClrUsed *
+                         sizeof(RGBQUAD));
+      BITMAPINFO *infoLoc = (BITMAPINFO *) alloca(sizeof(BITMAPINFO) +
+                             info->bmiHeader.biClrUsed * sizeof(RGBQUAD));
+
+      memcpy(infoLoc, info, sizeof(BITMAPINFO));
+
+      if(GetDIBColorTable(hdc, 0, info->bmiHeader.biClrUsed, pColors) == 0)
+        return FALSE;
+
+      for(i=0;i<info->bmiHeader.biClrUsed;i++, pColorIndex++)
+      {
+         infoLoc->bmiColors[i] = pColors[*pColorIndex];
+      }
+
+      return O32_StretchDIBits(hdc, xDst, yDst, widthDst, heightDst, xSrc, ySrc,
+                               widthSrc, heightSrc, (void *)bits,
+                               (PBITMAPINFO)infoLoc, DIB_RGB_COLORS, dwRop);
+    }
+
+    return O32_StretchDIBits(hdc, xDst, yDst, widthDst, heightDst, xSrc, ySrc,
+                             widthSrc, heightSrc, (void *)bits,
+                             (PBITMAPINFO)info, wUsage, dwRop);
+#else
     dprintf(("GDI32: StretchDIBits\n"));
     return O32_StretchDIBits(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, (void *)arg10, (PBITMAPINFO)arg11, arg12, arg13);
+#endif
 }
 //******************************************************************************
 //******************************************************************************
@@ -2053,7 +2091,6 @@ UINT WIN32API GetDIBColorTable(HDC hdc, UINT uStartIndex, UINT cEntries,
  UINT rc;
  int i;
 
-  dprintf(("GDI32: OS2GetDIBColorTable, not implemented?\n"));
   rc = O32_GetPaletteEntries(hpal,
                          uStartIndex,
                          cEntries,
@@ -2062,9 +2099,13 @@ UINT WIN32API GetDIBColorTable(HDC hdc, UINT uStartIndex, UINT cEntries,
       i<cEntries;
       i++)
   {
+    BYTE tmp;
+    tmp = pColors[i].rgbBlue;
+    pColors[i].rgbBlue = pColors[i].rgbRed;
+    pColors[i].rgbRed = tmp;
     pColors[i].rgbReserved = 0;
   }
-  dprintf(("GDI32: GetDIBColor returns %d\n", rc));
+  dprintf(("GDI32: GetDIBColorTable returns %d\n", rc));
   return(rc);
 }
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: oleClip.cpp,v 1.2 1999-09-08 11:29:28 davidr Exp $ */
+/* $Id: oleClip.cpp,v 1.3 1999-11-05 09:15:51 sandervl Exp $ */
 /* 
  * 
  * Project Odin Software License can be found in LICENSE.TXT
@@ -700,8 +700,8 @@ static HWND OLEClipbrd_CreateWindow()
    */
 
 //  if ( !( atom = GlobalFindAtomA(OLEClipbrd_WNDCLASS) ) || !( CLASS_FindClassByAtom(atom, 0) ) )
-  if ( !( atom = GlobalFindAtomA(OLEClipbrd_WNDCLASS) ) )
-  {
+//  if ( !( atom = GlobalFindAtomA(OLEClipbrd_WNDCLASS) ) )
+//  {
     ZeroMemory( &wcex, sizeof(WNDCLASSEXA));
 
     wcex.cbSize         = sizeof(WNDCLASSEXA);
@@ -714,7 +714,7 @@ static HWND OLEClipbrd_CreateWindow()
     wcex.lpszClassName  = OLEClipbrd_WNDCLASS;
 
     RegisterClassExA(&wcex);
-  }
+//  }
 
   /*
    * Create a hidden window to receive OLE clipboard messages 

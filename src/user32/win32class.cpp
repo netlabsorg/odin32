@@ -1,4 +1,4 @@
-/* $Id: win32class.cpp,v 1.5 1999-11-01 19:11:42 sandervl Exp $ */
+/* $Id: win32class.cpp,v 1.6 1999-11-05 09:16:22 sandervl Exp $ */
 /*
  * Win32 Window Class Managment Code for OS/2
  *
@@ -157,9 +157,15 @@ BOOL Win32WndClass::hasClassName(LPSTR classname, BOOL fUnicode)
     return classAtom == (DWORD)classname;
   }
   if(fUnicode) {
-    return (lstrcmpW(classNameW, (LPWSTR)classname) == 0);
+    	if(classNameW)
+		return (lstrcmpW(classNameW, (LPWSTR)classname) == 0);
+	return FALSE;
   }
-  else  return (strcmp(classNameA, classname) == 0);
+  else {
+    	if(classNameA)
+		return (strcmp(classNameA, classname) == 0);
+	return FALSE;
+  }
 }
 //******************************************************************************
 //******************************************************************************
@@ -176,14 +182,14 @@ Win32WndClass *Win32WndClass::FindClass(HINSTANCE hInstance, LPSTR id)
 
   if(HIWORD(id) != 0) {
 //CB: read comment below!
-        if(stricmp(wndclass->classNameA, id) == 0 && wndclass->hInstance == hInstance) {
+        if(lstrcmpiA(wndclass->classNameA, id) == 0 && wndclass->hInstance == hInstance) {
                 leaveMutex(OBJTYPE_CLASS);
                 return(wndclass);
         }
         else {
                 wndclass = (Win32WndClass *)wndclass->GetNext();
                 while(wndclass != NULL) {
-                        if(stricmp(wndclass->classNameA, id) == 0)
+                        if(lstrcmpiA(wndclass->classNameA, id) == 0)
                         {
                                 //SvL: According to Wine, if the instance handle is the one of the main exe, everything is ok
                                 if(hInstance == NULL || GetModuleHandleA(NULL) == hInstance ||
