@@ -1,4 +1,4 @@
-/* $Id: winimagepe2lx.h,v 1.7 2001-06-15 09:42:49 bird Exp $ */
+/* $Id: winimagepe2lx.h,v 1.8 2001-07-10 20:18:49 bird Exp $ */
 
 /*
  * Win32 PE2LX Image base class
@@ -74,6 +74,7 @@ protected:
     BOOL                fWin32k;    /* flag which indicates wether this is a Win32k loaded
                                      * module (TRUE) or and Pe2Lx module (FALSE). */
     HMODULE             hmod;       /* OS/2 handle of the module. */
+    BOOL                fDll;       /* Set by Win32Pe2LxDll. */
 };
 
 
