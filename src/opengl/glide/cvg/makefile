@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.8 2000-03-07 11:11:10 bird Exp $
+# $Id: makefile,v 1.9 2000-05-26 15:03:08 bird Exp $
 
 #
 # Odin32 API
@@ -84,6 +84,8 @@ $(TARGET).def
 
 # Copy rule - copies the dll.
 $(PDWIN32_BIN)\Glide\Voodoo2\$(TARGET).dll: $(OBJDIR)\$(TARGET).dll
+    -mkdir $(PDWIN32_BIN)\Glide > nul 2>&1
+    -mkdir $(PDWIN32_BIN)\Glide\Voodoo2 > nul 2>&1
     $(CP) $** $@
     $(CP) $** ..\..\..\..\bin\Glide\Voodoo2\$(TARGET).dll
 
