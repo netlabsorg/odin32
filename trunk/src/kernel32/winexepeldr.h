@@ -1,4 +1,4 @@
-/* $Id: winexepeldr.h,v 1.8 2002-12-20 11:39:41 sandervl Exp $ */
+/* $Id: winexepeldr.h,v 1.9 2003-01-13 16:51:40 sandervl Exp $ */
 
 /*
  * Win32 PE loader Exe class
@@ -21,6 +21,8 @@ class Win32PeLdrExe : public Win32PeLdrImage, public Win32ExeBase
 public:
 	Win32PeLdrExe(char *szFileName, BOOL fConsoleApp);
 virtual ~Win32PeLdrExe();
+
+virtual ULONG getDefaultStackSize();
 
 protected:
 private:

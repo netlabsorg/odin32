@@ -1,4 +1,4 @@
-/* $Id: oslibmisc.cpp,v 1.14 2003-01-02 11:50:46 sandervl Exp $ */
+/* $Id: oslibmisc.cpp,v 1.15 2003-01-13 16:51:39 sandervl Exp $ */
 /*
  * Misc OS/2 util. procedures
  *
@@ -134,14 +134,38 @@ void OSLibWait(ULONG msec)
 //******************************************************************************
 ULONG OSLibAllocSel(ULONG size, USHORT *selector)
 {
+#if 1
+   PVOID  pSelMem;
+   ULONG  sel;
+   APIRET rc;
+
+   rc = DosAllocMem(&pSelMem, size, PAG_COMMIT|PAG_READ|PAG_WRITE|OBJ_TILE);
+   if(rc != NO_ERROR) {
+       dprintf(("OSLibAllocSel: DosAllocMem failed with %d", rc));
+       DebugInt3();
+       return FALSE;
+   }
+   *selector = (DosFlatToSel((ULONG)pSelMem) >> 16);
+   return *selector != 0;
+#else
    return (Dos16AllocSeg(size, selector, SEG_NONSHARED) == 0);
+#endif
 }
 //******************************************************************************
 //Wrapper for Dos16FreeSeg
 //******************************************************************************
 ULONG OSLibFreeSel(USHORT selector)
 {
+#if 1
+   PVOID  pSelMem;
+   APIRET rc;
+
+   pSelMem = (PVOID)((ULONG)selector * 64*1024);
+   rc = DosFreeMem(pSelMem);
+   return rc == NO_ERROR;
+#else
    return (Dos16FreeSeg(selector) == 0);
+#endif
 }
 //******************************************************************************
 //Wrapper for Dos32SelToFlat

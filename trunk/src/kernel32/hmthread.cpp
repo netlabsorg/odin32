@@ -1,4 +1,4 @@
-/* $Id: hmthread.cpp,v 1.16 2002-12-29 14:11:23 sandervl Exp $ */
+/* $Id: hmthread.cpp,v 1.17 2003-01-13 16:51:39 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -34,6 +34,7 @@
 #include <win\thread.h>
 #include "thread.h"
 #include "asmutil.h"
+#include "winexebase.h"
 
 #define DBG_LOCALLOG	DBG_hmthread
 #include "dbglocal.h"
@@ -76,10 +77,13 @@ HANDLE HMDeviceThreadClass::CreateThread(PHMHANDLEDATA          pHMHandleData,
     // @@@PH Note: with debug code enabled, ODIN might request more stack space!
     //SvL: Also need more stack in release build (RealPlayer 7 sometimes runs
     //     out of stack
-    if (cbStack > 0)
+    if (cbStack > 0) {
         cbStack <<= 1;     // double stack
-    else
-        cbStack = 1048576; // per default 1MB stack per thread
+    }
+    else {
+        cbStack = (WinExe) ? WinExe->getDefaultStackSize() : 0x100000; // per default 1MB stack per thread
+    }
+    dprintf(("Thread stack size 0x%x", cbStack));
 
     //************************************************************************************
     //NOTE: If we ever decide to allocate our own stack, then we MUST use VirtualAlloc!!!!
@@ -87,6 +91,11 @@ HANDLE HMDeviceThreadClass::CreateThread(PHMHANDLEDATA          pHMHandleData,
     //************************************************************************************
     pHMHandleData->hHMHandle = O32_CreateThread(lpsa, cbStack, winthread->GetOS2Callback(),
                                                 (LPVOID)winthread, fdwCreate, lpIDThread);
+
+    if(pHMHandleData->hHMHandle == 0) {
+        dprintf(("Thread creation failed!!"));
+        DebugInt3();
+    }
 
     *lpIDThread = MAKE_THREADID(O32_GetCurrentProcessId(), *lpIDThread);
     
@@ -242,7 +251,8 @@ BOOL HMDeviceThreadClass::GetExitCodeThread(HANDLE hThread, PHMHANDLEDATA pHMHan
 //******************************************************************************
 BOOL HMDeviceThreadClass::CloseHandle(PHMHANDLEDATA pHMHandleData)
 {
-  return TRUE;
+    dprintf(("HMThread::CloseHandle %08x", pHMHandleData->hHMHandle));
+    return O32_CloseHandle(pHMHandleData->hHMHandle);
 }
 //******************************************************************************
 //******************************************************************************

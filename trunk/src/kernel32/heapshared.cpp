@@ -1,4 +1,4 @@
-/* $Id: heapshared.cpp,v 1.10 2002-07-21 09:17:28 sandervl Exp $ */
+/* $Id: heapshared.cpp,v 1.11 2003-01-13 16:51:39 sandervl Exp $ */
 /*
  * Shared heap functions for OS/2
  *
@@ -196,7 +196,11 @@ void _LNK_CONV releaseShared(Heap_t pHeap, void *block, size_t size)
 //******************************************************************************
 void * SYSTEM _smalloc(int size)
 {
-    return _umalloc(sharedHeap, size);
+    void *chunk;
+
+    chunk = _umalloc(sharedHeap, size);
+    dprintf2(("_smalloc %x returned %x", size, chunk));
+    return chunk;
 }
 //******************************************************************************
 //******************************************************************************
@@ -208,6 +212,7 @@ void * SYSTEM _smallocfill(int size, int filler)
     if(chunk) {
         memset(chunk, 0, size);
     }
+    dprintf2(("_smallocfill %x %x returned %x", size, filler, chunk));
     return chunk;
 }
 //******************************************************************************

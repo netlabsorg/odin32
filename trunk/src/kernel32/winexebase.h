@@ -1,4 +1,4 @@
-/* $Id: winexebase.h,v 1.3 2000-09-12 19:01:59 sandervl Exp $ */
+/* $Id: winexebase.h,v 1.4 2003-01-13 16:51:40 sandervl Exp $ */
 
 /*
  * Win32 PE Exe base class
@@ -28,6 +28,8 @@ virtual ~Win32ExeBase();
 virtual ULONG start();
 
 virtual BOOL  isDll();
+
+virtual ULONG  getDefaultStackSize();
 	
 protected:
 	BOOL   fConsoleApp;
