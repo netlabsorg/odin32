@@ -1,4 +1,4 @@
-/* $Id: cvticongrp.cpp,v 1.7 2000-05-28 16:45:12 sandervl Exp $ */
+/* $Id: cvticongrp.cpp,v 1.8 2001-08-07 21:34:16 sandervl Exp $ */
 
 /*
  * PE2LX Icon group code
@@ -34,8 +34,9 @@
 
 //******************************************************************************
 //******************************************************************************
-void *ConvertIconGroup(IconHeader *ihdr, int size, Win32ImageBase *module)
+void * WIN32API ConvertIconGroup(void *hdr, HINSTANCE hInstance, DWORD *ressize)
 {
+ IconHeader *ihdr = (IconHeader *)hdr;
  ResourceDirectory *rdir = (ResourceDirectory *)(ihdr + 1);
  int i, groupsize = 0, os2iconsize;
  BITMAPARRAYFILEHEADER2 *bafh, *orgbafh;
@@ -52,13 +53,14 @@ void *ConvertIconGroup(IconHeader *ihdr, int size, Win32ImageBase *module)
         dprintf2(("Colors  : %d", (int)rdir->bColorCount));
         dprintf2(("Bits    : %d", rdir->wBitCount));
         dprintf2(("ResBytes: %d", rdir->lBytesInRes));
-	hRes = FindResourceA(module->getInstanceHandle(), 
+	hRes = FindResourceA(hInstance, 
                              (LPCSTR)rdir->wNameOrdinal, (LPSTR)NTRT_ICON);
 
-	groupsize += QueryConvertedResourceSize(module->getInstanceHandle(), (char *)NTRT_ICON, hRes);
+	groupsize += QueryConvertedResourceSize(hInstance, (char *)NTRT_ICON, hRes);
         rdir++;
   }
-  bafh    = (BITMAPARRAYFILEHEADER2 *)malloc(groupsize+ihdr->wCount*sizeof(BITMAPARRAYFILEHEADER2));
+  groupsize = groupsize+ihdr->wCount*sizeof(BITMAPARRAYFILEHEADER2);
+  bafh    = (BITMAPARRAYFILEHEADER2 *)malloc(groupsize);
   orgbafh = bafh;
 
   rdir = (ResourceDirectory *)(ihdr + 1);
@@ -67,7 +69,7 @@ void *ConvertIconGroup(IconHeader *ihdr, int size, Win32ImageBase *module)
         bafh->cbSize    = sizeof(BITMAPARRAYFILEHEADER2);
         bafh->cxDisplay = 0;
         bafh->cyDisplay = 0;
-	hRes = FindResourceA(module->getInstanceHandle(), 
+	hRes = FindResourceA(hInstance, 
                              (LPCSTR)rdir->wNameOrdinal, (LPSTR)NTRT_ICON);
 
         if(hRes == NULL) {
@@ -76,8 +78,8 @@ void *ConvertIconGroup(IconHeader *ihdr, int size, Win32ImageBase *module)
                 continue;
         }
 
-	iconhdr = (WINBITMAPINFOHEADER *)LockResource(LoadResource(module->getInstanceHandle(), hRes));
-	os2icon = ConvertIcon(iconhdr, SizeofResource(module->getInstanceHandle(), hRes), &os2iconsize, (int)bafh - (int)orgbafh + sizeof(BITMAPARRAYFILEHEADER2)-sizeof(BITMAPFILEHEADER2));
+	iconhdr = (WINBITMAPINFOHEADER *)LockResource(LoadResource(hInstance, hRes));
+	os2icon = ConvertIcon(iconhdr, SizeofResource(hInstance, hRes), &os2iconsize, (int)bafh - (int)orgbafh + sizeof(BITMAPARRAYFILEHEADER2)-sizeof(BITMAPFILEHEADER2));
 
         if(os2icon == NULL) {
                 dprintf(("Can't convert icon!"));
@@ -97,6 +99,7 @@ void *ConvertIconGroup(IconHeader *ihdr, int size, Win32ImageBase *module)
 
         rdir++;
   }
+  *ressize = groupsize;
   return (void *)orgbafh;
 }
 //******************************************************************************
