@@ -1,7 +1,11 @@
-; $Id: comctl32.def,v 1.27 2002-10-29 12:18:25 sandervl Exp $
+; $Id: comctl32.def,v 1.28 2003-04-09 11:58:39 sandervl Exp $
 LIBRARY COMCTL32 INITINSTANCE
 DESCRIPTION 'Odin32 System DLL - ComCtl32 - Common Controls Library'
 DATA MULTIPLE NONSHARED
+
+; GCC 3.2.1 cdecl bug will be 100% fixed in 3.2.2
+IMPORTS
+ __wtoi = NTDLL._wtoi
 
 EXPORTS
   MenuHelp                     = _MenuHelp@28                        @2
@@ -201,3 +205,4 @@ EXPORTS
   GetWindowSubclass    = _GetWindowSubclass@16      @501
   RemoveWindowSubclass = _RemoveWindowSubclass@12   @502
   SetWindowSubclass    = _SetWindowSubclass@16      @503
+
