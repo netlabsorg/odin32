@@ -1,4 +1,7 @@
-/* $Id: ChangeLog,v 1.1506 2001-06-13 04:52:54 bird Exp $ */
+/* $Id: ChangeLog,v 1.1507 2001-06-13 08:19:16 sandervl Exp $ */
+
+ 2001-06-13: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o Corrected position of PM titlebar control
 
  2001-06-13: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - WIN16LDR: o Made it compile with Watcom and MSC60.
