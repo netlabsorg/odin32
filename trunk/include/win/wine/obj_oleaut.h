@@ -47,6 +47,9 @@ typedef struct ITypeLib2 ITypeLib2,*LPTYPELIB2;
 DEFINE_OLEGUID(IID_ITypeInfo2,      0x00020412,0,0);
 typedef struct ITypeInfo2 ITypeInfo2,*LPTYPEINFO2;
 
+/* The OLE Automation ProxyStub Interface Class (aka Typelib Marshaler) */
+DEFINE_OLEGUID(CLSID_PSOAInterface, 0x00020424,0,0);
+
 /*****************************************************************************
  * Automation data types
  */
@@ -140,7 +143,7 @@ struct tagVARIANT
             WORD wReserved3;
             union /* DUMMYUNIONNAME */
             {
-                /* B    y value. */
+                /* By value. */
                 CHAR cVal;
                 USHORT uiVal;
                 ULONG ulVal;
@@ -231,7 +234,11 @@ typedef struct tagEXCEPINFO
     BSTR  bstrHelpFile;
     DWORD dwHelpContext;
     PVOID pvReserved;
-    HRESULT (* __stdcall pfnDeferredFillIn)(struct tagEXCEPINFO *);
+#ifdef __WIN32OS2__
+    HRESULT (* WINAPI pfnDeferredFillIn)(struct tagEXCEPINFO *);
+#else
+    HRESULT (__stdcall *pfnDeferredFillIn)(struct tagEXCEPINFO *);
+#endif
     SCODE scode;
 } EXCEPINFO, * LPEXCEPINFO;
 
@@ -260,7 +267,7 @@ typedef struct tagPARAMDESC
 #define PARAMFLAG_FRETVAL       (0x08)
 #define PARAMFLAG_FOPT          (0x10)
 #define PARAMFLAG_FHASDEFAULT   (0x20)
-
+#define PARAMFLAG_FHASCUSTDATA  (0x40)
 
 typedef struct tagTYPEDESC
 {
@@ -316,31 +323,23 @@ typedef struct tagTYPEATTR
 	IDLDESC idldescType;
 } TYPEATTR, *LPTYPEATTR;
 
-#define TYPEFLAG_NONE                     (0x00)
-#define TYPEFLAG_FAPPOBJECT               (0x01)
-#define TYPEFLAG_FCANCREATE               (0x02)
-#define TYPEFLAG_FLICENSED                (0x04)
-#define TYPEFLAG_FPREDECLID               (0x08) 
-#define TYPEFLAG_FHIDDEN                  (0x0f) 
-#define TYPEFLAG_FCONTROL                 (0x20)  
-#define TYPEFLAG_FDUAL                    (0x40)  
-#define TYPEFLAG_FNONEXTENSIBLE           (0x80)           
-#define TYPEFLAG_FOLEAUTOMATION           (0x100)  
-#define TYPEFLAG_FRESTRICTED              (0x200)  
-#define TYPEFLAG_FAGGREGATABLE            (0x400)  
-#define TYPEFLAG_FREPLACEABLE             (0x800)  
-#define TYPEFLAG_FDISPATCHABLE            (0x1000)  
-#define TYPEFLAG_FREVERSEBIND             (0x2000) 
-#define TYPEFLAG_FPROXY                   (0x4000)
-#define TYPEFLAG_DEFAULTFILTER            (0x8000) 
-#define TYPEFLAG_COCLASSATTRIBUTES        (0x63f)
-#define TYPEFLAG_INTERFACEATTRIBUTES      (0x7bd0)
-#define TYPEFLAG_DISPATCHATTRIBUTES       (0x5a90)
-#define TYPEFLAG_ALIASATTRIBUTES          (0x210)
-#define TYPEFLAG_MODULEATTRIBUTES         (0x210) 
-#define TYPEFLAG_ENUMATTRIBUTES           (0x210) 
-#define TYPEFLAG_RECORDATTRIBUTES         (0x210) 
-#define TYPEFLAG_UNIONATTRIBUTES          (0x210) 
+typedef enum tagTYPEFLAGS {
+	TYPEFLAG_FAPPOBJECT =             0x01,
+	TYPEFLAG_FCANCREATE =             0x02,
+	TYPEFLAG_FLICENSED =              0x04,
+	TYPEFLAG_FPREDECLID =             0x08,
+	TYPEFLAG_FHIDDEN =                0x10,
+	TYPEFLAG_FCONTROL =               0x20,
+	TYPEFLAG_FDUAL =                  0x40,
+	TYPEFLAG_FNONEXTENSIBLE =         0x80,
+	TYPEFLAG_FOLEAUTOMATION =         0x100,
+	TYPEFLAG_FRESTRICTED =            0x200,
+	TYPEFLAG_FAGGREGATABLE =          0x400,
+	TYPEFLAG_FREPLACEABLE =           0x800,
+	TYPEFLAG_FDISPATCHABLE =          0x1000,
+	TYPEFLAG_FREVERSEBIND =           0x2000,
+	TYPEFLAG_FPROXY =                 0x4000
+} TYPEFLAGS;
 
 typedef struct tagARRAYDESC
 {
@@ -358,12 +357,29 @@ typedef enum tagFUNCKIND
 	FUNC_DISPATCH = 4
 } FUNCKIND;
 
+typedef enum tagFUNCFLAGS
+{
+	FUNCFLAG_FRESTRICTED = 0x1,
+	FUNCFLAG_FSOURCE = 0x2,
+	FUNCFLAG_FBINDABLE = 0x4,
+	FUNCFLAG_FREQUESTEDIT = 0x8,
+	FUNCFLAG_FDISPLAYBIND = 0x10,
+	FUNCFLAG_FDEFAULTBIND = 0x20,
+	FUNCFLAG_FHIDDEN = 0x40,
+	FUNCFLAG_FUSESGETLASTERROR = 0x80,
+	FUNCFLAG_FDEFAULTCOLLELEM = 0x100,
+	FUNCFLAG_FUIDEFAULT = 0x200,
+	FUNCFLAG_FNONBROWSABLE = 0x400,
+	FUNCFLAG_FREPLACEABLE = 0x800,
+	FUNCFLAG_FIMMEDIATEBIND = 0x1000
+} FUNCFLAGS;
+
 typedef enum tagINVOKEKIND
 {
 	INVOKE_FUNC = 1,
 	INVOKE_PROPERTYGET = 2,
-	INVOKE_PROPERTYPUT = 3,
-	INVOKE_PROPERTYPUTREF = 4
+	INVOKE_PROPERTYPUT = 4,
+	INVOKE_PROPERTYPUTREF = 8
 } INVOKEKIND;
 
 typedef struct tagFUNCDESC
@@ -435,7 +451,7 @@ typedef enum tagDESCKIND
 	DESCKIND_VARDESC = 2,
 	DESCKIND_TYPECOMP = 3,
 	DESCKIND_IMPLICITAPPOBJ = 4,
-	DESCKIND_MAX = 6
+	DESCKIND_MAX = 5
 } DESCKIND;
 
 typedef union tagBINDPTR
