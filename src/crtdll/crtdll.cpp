@@ -1,4 +1,4 @@
-/* $Id: crtdll.cpp,v 1.14 1999-11-30 20:42:10 sandervl Exp $ */
+/* $Id: crtdll.cpp,v 1.15 1999-12-11 13:33:30 sandervl Exp $ */
 
 /*
  * The C RunTime DLL
@@ -307,6 +307,7 @@ DWORD CDECL CRTDLL__GetMainArgs(LPDWORD argc,LPSTR **argv,
 	/* missing threading init */
 
 	i=0;xargv=NULL;xargc=0;afterlastspace=0;
+/*
 	while (cmdline[i]) {
 		if (cmdline[i]==' ') {
 			xargv=(char**)HeapReAlloc( GetProcessHeap(), 0, xargv,
@@ -330,6 +331,7 @@ DWORD CDECL CRTDLL__GetMainArgs(LPDWORD argc,LPSTR **argv,
 	cmdline[i]='\0';
 	xargv[xargc-1] = HEAP_strdupA( GetProcessHeap(), 0,
                                        cmdline+afterlastspace);
+*/
 	CRTDLL_argc_dll	= xargc;
 	*argc		= xargc;
 	CRTDLL_argv_dll	= xargv;

@@ -1,4 +1,4 @@
-/* $Id: msvcrt.cpp,v 1.8 1999-11-30 19:44:04 sandervl Exp $ */
+/* $Id: msvcrt.cpp,v 1.9 1999-12-11 13:35:52 sandervl Exp $ */
 
 /*
  * The Visual C RunTime DLL (MSVCRT/MSVCRT20/MSVCRT40)
@@ -12,7 +12,6 @@
 #include <os2win.h>
 #include <odinwrap.h>
 #include <wchar.h>
-#include <except.h>
 #include <heapstring.h>
 #include <crtdll.h>
 #include "msvcrt.h"
@@ -673,6 +672,7 @@ DWORD CDECL MSVCRT___GetMainArgs(LPDWORD argc,LPSTR **argv,
 	/* missing threading init */
 
 	i=0;xargv=NULL;xargc=0;afterlastspace=0;
+/*
 	while (cmdline[i]) {
 		if (cmdline[i]==' ') {
 			xargv=(char**)HeapReAlloc( GetProcessHeap(), 0, xargv,
@@ -696,12 +696,13 @@ DWORD CDECL MSVCRT___GetMainArgs(LPDWORD argc,LPSTR **argv,
 	cmdline[i]='\0';
 	xargv[xargc-1] = HEAP_strdupA( GetProcessHeap(), 0,
                                        cmdline+afterlastspace);
+*/
 	MSVCRT___argc  	= xargc;
 	*argc		= xargc;
 	MSVCRT___argv  	= xargv;
 	*argv		= xargv;
-	dprintf(("MSVCRT: GetMainArgs end\n"));
 	MSVCRT__environ = *environ = GetEnvironmentStringsA();
+	dprintf(("MSVCRT: GetMainArgs end\n"));
 	return 0;
 }
 
