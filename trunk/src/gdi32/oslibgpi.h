@@ -1,4 +1,4 @@
-/* $Id: oslibgpi.h,v 1.4 2000-02-10 00:36:11 sandervl Exp $ */
+/* $Id: oslibgpi.h,v 1.5 2000-04-03 18:29:05 sandervl Exp $ */
 
 /*
  * GPI interface code
@@ -38,6 +38,19 @@ inline BOOL GpiEnableYInversion(ULONG hps, LONG lHeight)
  USHORT sel = RestoreOS2FS();
 
     yyrc = _GpiEnableYInversion(hps, lHeight);
+    SetFS(sel);
+
+    return yyrc;
+}
+
+BOOL APIENTRYOS2 _GpiQueryYInversion(ULONG hps);
+
+inline BOOL GpiQueryYInversion(ULONG hps)
+{
+ BOOL yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = _GpiQueryYInversion(hps);
     SetFS(sel);
 
     return yyrc;
