@@ -1,8 +1,9 @@
-/* $Id: changelog,v 1.1870 2001-11-30 18:47:14 sandervl Exp $ */
+/* $Id: changelog,v 1.1871 2001-11-30 19:08:05 phaller Exp $ */
 
  2001-11-30: Patrick Haller <patrick.haller@innotek.de>
     - KERNEL32: o heapstring.cpp: improvement on HEAP_malloc, HEAP_free,
                   HEAP_realloc, HEAP_size
+                o acceleration on GetCurrentThreadId()
     - SHELL32:  o use HEAP_xxx functions for frequently called APIs
     - ODINPROF: o Note: SET PROFILEHOOKS=1 before doing NMAKE PROFILE=1
                   This will enable the profiler in ODINCRTP.DLL
