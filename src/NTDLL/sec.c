@@ -1,4 +1,4 @@
-/* $Id: sec.cpp,v 1.10 2002-05-08 14:08:55 sandervl Exp $ */
+/* $Id: sec.c,v 1.3 2003-01-16 15:22:40 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -12,19 +12,13 @@
  * Copyright 1996-1998 Marcus Meissner
  */
 
-#include <odin.h>
-#include <odinwrap.h>
-#include <os2sel.h>
-
+#include <windows.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
 #include <ctype.h>
 #include <math.h>
-
-#include <os2win.h>
 #include "ntdll.h"
-
 #include <debugtools.h>
 
 ODINDEBUGCHANNEL(NTDLL-SEC)
@@ -176,10 +170,10 @@ DWORD WINAPI RtlLengthSid(PSID sid)
 /**************************************************************************
  *                 RtlInitializeSid            [NTDLL.410]
  */
-ODINFUNCTION3(DWORD, RtlInitializeSid,
-              PSID, psid,
-              PSID_IDENTIFIER_AUTHORITY, psidauth,
-              DWORD, c)
+DWORD WINAPI RtlInitializeSid(
+              PSID psid,
+              PSID_IDENTIFIER_AUTHORITY psidauth,
+              DWORD c)
 {
   BYTE  a = c & 0xff;
 
@@ -210,9 +204,7 @@ PSID_IDENTIFIER_AUTHORITY WINAPI RtlIdentifierAuthoritySid( PSID pSid )
 /**************************************************************************
  *                 RtlSubAuthoritySid          [NTDLL.497]
  */
-ODINFUNCTION2(LPDWORD, RtlSubAuthoritySid,
-              PSID, psid,
-              DWORD, nr)
+LPDWORD WINAPI RtlSubAuthoritySid(PSID psid, DWORD nr)
 {
   return &(psid->SubAuthority[nr]);
 }

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.32 2002-06-15 11:16:52 sandervl Exp $
+# $Id: makefile,v 1.33 2003-01-16 15:22:36 sandervl Exp $
 
 #
 # Odin32 API
@@ -6,6 +6,9 @@
 #       ntdll.dll makefile
 #
 
+
+CCENV = EMX
+NOTEXPDEF = 1
 
 #
 # Compiler, tools, and interference rules.
@@ -32,6 +35,7 @@ $(OBJDIR)\initterm.obj \
 $(OBJDIR)\time.obj \
 $(OBJDIR)\unknown.obj \
 $(OBJDIR)\large_int.obj \
+$(OBJDIR)\large_int_odin.obj \
 $(OBJDIR)\regfunc.obj \
 $(OBJDIR)\error.obj \
 $(OBJDIR)\loader.obj \
@@ -44,13 +48,6 @@ $(OBJDIR)\ntdllrsrc.obj
 #
 # Libraries. One space before the '\'.
 #
-LIBS = \
-$(ODIN32_LIB)/kernel32.lib \
-$(ODIN32_LIB)/user32.lib \
-$(ODIN32_LIB)/crtdll.lib \
-$(ODIN32_LIB)/$(ODINCRT).lib \
-OS2386.LIB \
-$(RTLLIB_O)
 
 
 #
@@ -58,9 +55,26 @@ $(RTLLIB_O)
 #
 TARGET = ntdll
 
+all: $(OBJDIR) $(OBJDIR)\$(TARGET).dll $(TARGET).lib
+
+$(OBJDIR)\$(TARGET).dll: $(OBJS) $(TARGET).def
+    $(LD) $(LDFLAGS) -L$(ODIN32_LIB_)\Release -Zso -Zsys $(OBJS) $(TARGET).def -L.\libs -lm\
+      -liberty_s -lstdcxx -o $(OBJDIR)\$(TARGET).dll
+    touch $(OBJDIR)\$(TARGET).map
+    @echo "Illegal Sym File for EMX" > $(OBJDIR)\$(TARGET).sym
+
+$(TARGET).lib: 
+    implib $(OBJDIR)\$(TARGET).lib ntdll.def
+    @copy $(OBJDIR)\$(TARGET).lib $(ODIN32_LIB_)\Release > nul:
+    @copy $(OBJDIR)\$(TARGET).lib $(ODIN32_LIB_)\Debug  > nul:
 
 #
 # Includes the common rules.
 #
 !include $(ODIN32_POST_INC)
 
+lib:
+    $(IMPDEF) $(IMPDEF_FLAGS) ntdll-vac.def $(OBJDIR)\ntdllexp.def
+    implib $(OBJDIR)\$(TARGET).lib $(OBJDIR)\ntdllexp.def
+    @copy $(OBJDIR)\$(TARGET).lib $(ODIN32_LIB_)\Release > nul:
+    @copy $(OBJDIR)\$(TARGET).lib $(ODIN32_LIB_)\Debug  > nul:

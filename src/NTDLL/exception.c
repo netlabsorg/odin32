@@ -1,4 +1,4 @@
-/* $Id: exception.cpp,v 1.2 1999-11-30 20:20:31 sandervl Exp $ */
+/* $Id: exception.c,v 1.1 2003-01-16 15:22:35 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT

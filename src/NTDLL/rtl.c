@@ -1,4 +1,4 @@
-/* $Id: rtl.cpp,v 1.15 2002-05-16 12:16:47 sandervl Exp $ */
+/* $Id: rtl.c,v 1.3 2003-01-16 15:22:39 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -19,7 +19,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <odinwrap.h>
-#include <os2win.h>
 
 #include "debugtools.h"
 
@@ -412,9 +411,7 @@ NTSTATUS WINAPI RtlFormatCurrentUserKeyPath(IN OUT PUNICODE_STRING pustrKeyPath)
 /******************************************************************************
  *  RtlOpenCurrentUser                      [NTDLL]
  */
-ODINFUNCTION2(DWORD,      RtlOpenCurrentUser,
-              ACCESS_MASK,DesiredAccess,
-              PHANDLE,    pKeyHandle)
+DWORD WINAPI RtlOpenCurrentUser(IN ACCESS_MASK DesiredAccess, OUT PHANDLE pKeyHandle)
 {
   /* Note: this is not the correct solution,
    * But this works pretty good on wine and NT4.0 binaries
@@ -648,4 +645,70 @@ PLUID WINAPI RtlCopyLuid(PLUID pluid1,
   pluid2->LowPart  = pluid1->LowPart;
   pluid2->HighPart = pluid1->HighPart;
   return (pluid1);
+}
+
+/******************************************************************************
+ *  RtlGetNtVersionNumbers       [NTDLL.@]
+ *
+ * Introduced in Windows XP (NT5.1)
+ */
+void WINAPI RtlGetNtVersionNumbers(LPDWORD major, LPDWORD minor, LPDWORD build)
+{
+	OSVERSIONINFOEXW versionInfo;
+	versionInfo.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEXW);
+	GetVersionExW((OSVERSIONINFOW*)&versionInfo);
+
+	if (major)
+	{
+		*major = versionInfo.dwMajorVersion;
+	}
+
+	if (minor)
+	{
+		*minor = versionInfo.dwMinorVersion;
+	}
+
+	if (build)
+	{
+		/* FIXME: Does anybody know the real formula? */
+		*build = (0xF0000000 | versionInfo.dwBuildNumber);
+	}
+}
+
+/*************************************************************************
+ * RtlFillMemoryUlong   [NTDLL.@]
+ *
+ * Fill memory with a 32 bit (dword) value.
+ *
+ * PARAMS
+ *  lpDest  [I] Bitmap pointer
+ *  ulCount [I] Number of dwords to write
+ *  ulValue [I] Value to fill with
+ *
+ * RETURNS
+ *  Nothing.
+ */
+VOID WINAPI RtlFillMemoryUlong(ULONG* lpDest, ULONG ulCount, ULONG ulValue)
+{
+  TRACE("(%p,%ld,%ld)\n", lpDest, ulCount, ulValue);
+
+  while(ulCount--)
+    *lpDest++ = ulValue;
+}
+
+/*************************************************************************
+ * RtlGetLongestNtPathLength    [NTDLL.@]
+ *
+ * Get the longest allowed path length
+ *
+ * PARAMS
+ *  None.
+ *
+ * RETURNS
+ *  The longest allowed path length (277 characters under Win2k).
+ */
+DWORD WINAPI RtlGetLongestNtPathLength(void)
+{
+  TRACE("()\n");
+  return 277;
 }

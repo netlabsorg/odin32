@@ -2,10 +2,24 @@
  * Large integer functions
  *
  * Copyright 2000 Alexandre Julliard
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include "winnt.h"
-#include "ntddk.h"
+#include "windef.h"
+#include "winternl.h"
 
 /*
  * Note: we use LONGLONG instead of LARGE_INTEGER, because
@@ -127,10 +141,14 @@ ULONGLONG WINAPI RtlEnlargedUnsignedMultiply( UINT a, UINT b )
 UINT WINAPI RtlEnlargedUnsignedDivide( ULONGLONG a, UINT b, UINT *remptr )
 {
 #if defined(__i386__) && defined(__GNUC__)
-    UINT ret, rem;
+    UINT ret, rem, p1, p2;
+
+    p1 = a >> 32;
+    p2 = a &  0xffffffffLL;
+
     __asm__("div %4,%%eax"
             : "=a" (ret), "=d" (rem)
-            : "0" (*(UINT*)&a), "1" (*((UINT*)&a+1)), "g" (b) );
+            : "0" (p2), "1" (p1), "g" (b) );
     if (remptr) *remptr = rem;
     return ret;
 #else
@@ -225,3 +243,4 @@ ULONGLONG WINAPI _aullrem( ULONGLONG a, ULONGLONG b )
 {
     return a % b;
 }
+

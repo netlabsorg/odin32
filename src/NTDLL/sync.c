@@ -1,4 +1,4 @@
-/* $Id: sync.cpp,v 1.4 2000-08-20 15:17:00 phaller Exp $ */
+/* $Id: sync.c,v 1.3 2003-01-16 15:22:41 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -10,7 +10,9 @@
  * Process synchronisation
  */
 
-#include "ntdll.h"
+#include <windows.h>
+#include <dbglog.h>
+#include "ntddk.h"
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
@@ -26,7 +28,7 @@
  */
 NTSTATUS WINAPI NtCreateSemaphore(PHANDLE            SemaphoreHandle,
                                   ACCESS_MASK        DesiredAccess,
-                                  POBJECT_ATTRIBUTES ObjectAttributes,
+                                  const OBJECT_ATTRIBUTES *ObjectAttributes,
                                   ULONG              InitialCount,
                                   ULONG              MaximumCount)
 {
@@ -37,6 +39,7 @@ NTSTATUS WINAPI NtCreateSemaphore(PHANDLE            SemaphoreHandle,
            InitialCount,
            MaximumCount));
 
+ 
   return 0;
 }
 
@@ -102,7 +105,7 @@ NTSTATUS WINAPI NtReleaseSemaphore(HANDLE SemaphoreHandle,
  */
 NTSTATUS WINAPI NtCreateEvent(PHANDLE            EventHandle,
                               ACCESS_MASK        DesiredAccess,
-                              POBJECT_ATTRIBUTES ObjectAttributes,
+                              const OBJECT_ATTRIBUTES * ObjectAttributes,
                               BOOLEAN            ManualReset,
                               BOOLEAN            InitialState)
 {
@@ -122,7 +125,7 @@ NTSTATUS WINAPI NtCreateEvent(PHANDLE            EventHandle,
  */
 NTSTATUS WINAPI NtOpenEvent(PHANDLE            EventHandle,
                             ACCESS_MASK        DesiredAccess,
-                            POBJECT_ATTRIBUTES ObjectAttributes)
+                            const OBJECT_ATTRIBUTES *ObjectAttributes)
 {
   dprintf(("NTDLL: NtOpenEvent(%08xh,%08xh,%08xh) not implemented.\n",
            EventHandle,
@@ -149,7 +152,7 @@ NTSTATUS WINAPI NtSetEvent(HANDLE EventHandle,
 /**************************************************************************
  *                 NtResetEvent                   [NTDLL.?]
  */
-NTSTATUS WIN32API NtResetEvent(HANDLE hEvent)
+NTSTATUS WIN32API NtResetEvent(HANDLE hEvent, PULONG UnknownVariable)
 {
   dprintf(("NTDLL: NtResetEvent(%08xh) not implemented.\n",
            hEvent));
