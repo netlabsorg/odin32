@@ -1,4 +1,4 @@
-/* $Id: pe.cpp,v 1.3 1999-06-10 17:08:55 phaller Exp $ */
+/* $Id: pe.cpp,v 1.4 1999-06-21 01:15:40 buerkle Exp $ */
 
 /*
  * PE2LX PE image interpreter
@@ -616,6 +616,7 @@ void ProcessResSubDir(PIMAGE_RESOURCE_DIRECTORY prdType, int level,
                 cout << "Resource Data RVA " << hex(pData->OffsetToData - VirtualAddress) << endl;
                 cout << "Resource Data RVA " << hex(pData->OffsetToData) << endl;
                 cout << "Resource Data VA  " << hex(VirtualAddress) << endl;
+                cout << "Resource Codepage " << pData->CodePage << endl;
                 if(pData->Size) {//winamp17 winzip archive has resource with size 0
                  switch(type) {
                         case NTRT_MENU:
