@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.14.2.3 2002-04-07 22:40:36 bird Exp $
+# $Id: makefile,v 1.14.2.4 2002-04-21 23:38:48 bird Exp $
 
 #
 # Odin32 API
@@ -17,7 +17,8 @@ PATH_ROOT = ..\..\..
 #
 # Config.
 #
-TARGET_MODE = PUBLIB
+TARGET_MODE = LIB
+TARGET_PUBLIC  = 1
 TARGET_NAME = Win32k
 ALL_DEFINES = -DRING3 -DWIN32KLIB
 
