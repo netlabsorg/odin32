@@ -1,4 +1,4 @@
-/* $Id: hmparport.cpp,v 1.17 2001-12-05 18:06:02 sandervl Exp $ */
+/* $Id: hmparport.cpp,v 1.18 2001-12-07 11:28:10 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -47,48 +47,6 @@
 #define PRT_QUERYDATAXFERMODE              0x0073
 #define PRT_QUERDEVICEID                   0x0074
 
-
-#if 0
-#pragma pack(1)
-typedef struct _DCBINFO
-{
-  USHORT   usWriteTimeout;         /*  Time period used for Write Timeout processing. */
-  USHORT   usReadTimeout;          /*  Time period used for Read Timeout processing. */
-  BYTE     fbCtlHndShake;          /*  HandShake Control flag. */
-  BYTE     fbFlowReplace;          /*  Flow Control flag. */
-  BYTE     fbTimeOut;              /*  Timeout flag. */
-  BYTE     bErrorReplacementChar;  /*  Error Replacement Character. */
-  BYTE     bBreakReplacementChar;  /*  Break Replacement Character. */
-  BYTE     bXONChar;               /*  Character XON. */
-  BYTE     bXOFFChar;              /*  Character XOFF. */
-} DCBINFO;
-typedef DCBINFO *PDCBINFO;
-
-
-typedef struct _RXQUEUE
-{
-  USHORT   cch;  /*  Number of characters in the queue. */
-  USHORT   cb;   /*  Size of receive/transmit queue. */
-} RXQUEUE;
-
-typedef RXQUEUE *PRXQUEUE;
-
-
-typedef struct _MODEMSTATUS
-{
-  BYTE   fbModemOn;   /*  Modem Control Signals ON Mask. */
-  BYTE   fbModemOff;  /*  Modem Control Signals OFF Mask. */
-} MODEMSTATUS;
-
-typedef MODEMSTATUS *PMODEMSTATUS;
-
-
-#pragma pack()
-
-
-#endif
-
-
 // Hardwired parallel port configuration information.
 // @@@PH better query the Resource Manager
 typedef struct tagParallelPortConfiguration
@@ -120,6 +78,8 @@ typedef struct _HMDEVPARPORTDATA
   PPARALLELPORTCONFIGURATION pHardwareConfiguration;
 } HMDEVPARPORTDATA, *PHMDEVPARPORTDATA;
 
+//******************************************************************************
+//******************************************************************************
 static VOID *CreateDevData()
 {
   PHMDEVPARPORTDATA pData;
@@ -134,8 +94,8 @@ static VOID *CreateDevData()
   }
   return pData;
 }
-
-
+//******************************************************************************
+//******************************************************************************
 HMDeviceParPortClass::HMDeviceParPortClass(LPCSTR lpDeviceName) : 
   HMDeviceHandler(lpDeviceName)
 {
@@ -230,7 +190,8 @@ BOOL HMDeviceParPortClass::FindDevice(LPCSTR lpClassDevName, LPCSTR lpDeviceName
 
   return FALSE;
 }
-
+//******************************************************************************
+//******************************************************************************
 DWORD HMDeviceParPortClass::CreateFile(LPCSTR lpFileName,
                                        PHMHANDLEDATA pHMHandleData,
                                        PVOID lpSecurityAttributes,
@@ -297,8 +258,28 @@ DWORD HMDeviceParPortClass::CreateFile(LPCSTR lpFileName,
   }
 }
 
+/*****************************************************************************
+ * Name      : DWORD HMDeviceParPortClass::GetFileType
+ * Purpose   : determine the handle type
+ * Parameters: PHMHANDLEDATA pHMHandleData
+ * Variables :
+ * Result    : API returncode
+ * Remark    :
+ * Status    :
+ *
+ * Author    : SvL
+ *****************************************************************************/
 
-                      /* this is a handler method for calls to CloseHandle() */
+DWORD HMDeviceParPortClass::GetFileType(PHMHANDLEDATA pHMHandleData)
+{
+    dprintf(("KERNEL32: HMDeviceParPortClass::GetFileType %s(%08x)\n",
+             lpHMDeviceName, pHMHandleData));
+
+    return FILE_TYPE_PIPE; //this is what NT4 returns
+}
+//******************************************************************************
+/* this is a handler method for calls to CloseHandle() */
+//******************************************************************************
 BOOL HMDeviceParPortClass::CloseHandle(PHMHANDLEDATA pHMHandleData)
 {
   dprintf(("HMDeviceParPortClass: Parallel port close request(%08xh)\n",
@@ -425,138 +406,8 @@ BOOL HMDeviceParPortClass::ReadFile(PHMHANDLEDATA pHMHandleData,
   }
   return ret;
 }
-
-BOOL HMDeviceParPortClass::GetCommProperties( PHMHANDLEDATA pHMHandleData,
-                                             LPCOMMPROP lpcmmp)
-{
-  dprintf(("HMDeviceParPortClass::GetCommProperties(%08xh, %08xh)\n",
-           pHMHandleData,
-           lpcmmp));
-  
-  APIRET rc;
-  ULONG ulLen;
-  int i;
-  
-#if 0
-  USHORT COMErr;
-  EXTBAUDGET BaudInfo;
-  ulLen = sizeof(EXTBAUDGET);
-  rc = OSLibDosDevIOCtl( pHMHandleData->hHMHandle,
-                    IOCTL_ASYNC,
-                    ASYNC_EXTGETBAUDRATE,
-                    0,0,0,
-                        &BaudInfo,ulLen,&ulLen);
-#endif
-  rc = NO_ERROR;
-  
-  memset(lpcmmp,0,sizeof(COMMPROP));
-  lpcmmp->wPacketLength  = sizeof(COMMPROP);
-  lpcmmp->wPacketVersion = 1; //???
-  lpcmmp->dwProvSubType =  PST_PARALLELPORT;
-  
-#if 0
-  lpcmmp->dwServiceMask  = SP_SERIALCOMM;
-  for(i=0;i<BaudTableSize && BaudInfo.ulMaxBaud <= BaudTable[i].dwBaudRate;i++);
-  lpcmmp->dwMaxBaud      = BaudTable[i].dwBaudFlag;
-  lpcmmp->dwProvCapabilities = PCF_DTRDSR | PCF_PARITY_CHECK |
-                               PCF_RTSCTS | PCF_SETXCHAR |
-                               PCF_XONXOFF;
-  lpcmmp->dwSettableParams   = SP_BAUD | SP_DATABITS |
-                               SP_HANDSHAKEING | SP_PARITY |
-                               SP_PARITY_CHECK | SP_STOPBIT;
-  lpcmmp->dwSettableBaud = 0;
-  for(i=0;i<BaudTableSize;i++)
-  {
-    if ( (BaudTable[i].dwBaudRate>=BaudInfo.ulMinBaud) &&
-         (BaudTable[i].dwBaudRate<=BaudInfo.ulMaxBaud) )
-      lpcmmp->dwSettableBaud |= BaudTable[i].dwBaudFlag;
-  }
-  lpcmmp->dwSettableBaud |= BAUD_USER;
-  lpcmmp->wSettableData = DATABITS_5 | DATABITS_6 | DATABITS_7 | DATABITS_8;
-  lpcmmp->wSettableStopParity = STOPBITS_10 | STOPBITS_15 | STOPBITS_20 |
-                                PARITY_NONE | PARITY_ODD | PARITY_EVEN |
-    PARITY_MARK | PARITY_SPACE;
-#endif
-  
-  return(rc==0);
-}
-
-BOOL HMDeviceParPortClass::ClearCommError( PHMHANDLEDATA pHMHandleData,
-                                          LPDWORD lpdwErrors,
-                                          LPCOMSTAT lpcst)
-{
-  dprintf(("HMDeviceParPortClass::ClearCommError(%08xh,%08xh,%08xh)\n",
-           pHMHandleData,
-           lpdwErrors,
-           lpcst));
-  
-  APIRET rc;
-  ULONG ulLen;
-  USHORT COMErr;
-
-  ulLen = sizeof(USHORT);
-  
-  *lpdwErrors = 0;
-  rc = NO_ERROR;
-  
-#if 0
-  // ParPort: CE_DNS, CE_OOP CE_PTO
-  
-  rc = OSLibDosDevIOCtl( pHMHandleData->hHMHandle,
-                    IOCTL_ASYNC,
-                    ASYNC_GETCOMMERROR,
-                    0,0,0,
-                    &COMErr,2,&ulLen);
-  *lpdwErrors |= (COMErr & 0x0001)?CE_OVERRUN:0;
-  *lpdwErrors |= (COMErr & 0x0002)?CE_RXOVER:0;
-  *lpdwErrors |= (COMErr & 0x0004)?CE_RXPARITY:0;
-  *lpdwErrors |= (COMErr & 0x0008)?CE_FRAME:0;
-
-  if(lpcst)
-  {
-    UCHAR ucStatus;
-    RXQUEUE qInfo;
-    ulLen = 1;
-    rc = OSLibDosDevIOCtl( pHMHandleData->hHMHandle,
-                      IOCTL_ASYNC,
-                      ASYNC_GETCOMMSTATUS,
-                      0,0,0,
-                      &ucStatus,ulLen,&ulLen);
-    if(!rc)
-    {
-      lpcst->fCtsHold  = ((ucStatus & 0x01)>0);
-      lpcst->fDsrHold  = ((ucStatus & 0x02)>0);
-      lpcst->fRlsdHold = FALSE;//(ucStatus & 0x04)>0);
-      lpcst->fXoffHold = ((ucStatus & 0x08)>0);
-      lpcst->fXoffSend = ((ucStatus & 0x10)>0);
-      lpcst->fEof      = ((ucStatus & 0x20)>0);// Is break = Eof ??
-      lpcst->fTxim     = ((ucStatus & 0x40)>0);
-
-      ulLen = sizeof(qInfo);
-      rc = OSLibDosDevIOCtl( pHMHandleData->hHMHandle,
-                        IOCTL_ASYNC,
-                        ASYNC_GETINQUECOUNT,
-                        0,0,0,
-                        &qInfo,ulLen,&ulLen);
-      if(!rc)
-      {
-        lpcst->cbInQue   = qInfo.cch;
-        rc = OSLibDosDevIOCtl( pHMHandleData->hHMHandle,
-                          IOCTL_ASYNC,
-                          ASYNC_GETOUTQUECOUNT,
-                          0,0,0,
-                          &qInfo,ulLen,&ulLen);
-        if(!rc)
-          lpcst->cbOutQue = qInfo.cch;
-      }
-    }
-  }
-#endif
-  
-  return(rc==NO_ERROR);
-}
-
-
+//******************************************************************************
+//******************************************************************************
 BOOL HMDeviceParPortClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, 
                                            DWORD dwIoControlCode,
                                            LPVOID lpInBuffer, 
@@ -718,98 +569,7 @@ BOOL HMDeviceParPortClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData,
     SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
     return FALSE;
 }
+//******************************************************************************
+//******************************************************************************
 
 
-BOOL HMDeviceParPortClass::SetDefaultCommConfig( PHMHANDLEDATA pHMHandleData,
-                                                LPCOMMCONFIG lpCC,
-                                                DWORD dwSize)
-{
-  dprintf(("HMDeviceParPortClass::SetDefaultCommConfig(%08xh,%08xh,%08xh)\n",
-           pHMHandleData,
-           lpCC,
-           dwSize));
-  
-  PHMDEVPARPORTDATA pDevData = (PHMDEVPARPORTDATA)pHMHandleData->lpDeviceData;
-  if((NULL==pDevData) || (pDevData->ulMagic != MAGIC_PARPORT) )
-  {
-    SetLastError(ERROR_INVALID_HANDLE);
-    return FALSE;
-  }
-  memset(&pDevData->CommCfg,0, sizeof(COMMCONFIG));
-  memcpy(&pDevData->CommCfg,lpCC,dwSize>sizeof(COMMCONFIG)?sizeof(COMMCONFIG):dwSize);
-
-  return(TRUE);
-}
-
-
-BOOL HMDeviceParPortClass::GetDefaultCommConfig( PHMHANDLEDATA pHMHandleData,
-                                                LPCOMMCONFIG lpCC,
-                                                LPDWORD lpdwSize)
-{
-  dprintf(("HMDeviceParPortClass::GetDefaultCommConfig(%08xh,%08xh,%08xh)\n",
-           pHMHandleData,
-           lpCC,
-           lpdwSize));
-
-  
-  PHMDEVPARPORTDATA pDevData = (PHMDEVPARPORTDATA)pHMHandleData->lpDeviceData;
-
-  if( O32_IsBadWritePtr(lpCC,sizeof(COMMCONFIG)) ||
-      *lpdwSize< sizeof(COMMCONFIG) )
-  {
-    SetLastError(ERROR_INSUFFICIENT_BUFFER);
-    *lpdwSize= sizeof(COMMCONFIG);
-    return FALSE;
-  }
-
-  if((NULL==pDevData) || (pDevData->ulMagic != MAGIC_PARPORT) )
-  {
-    SetLastError(ERROR_INVALID_HANDLE);
-    return FALSE;
-  }
-
-  memcpy(lpCC,&pDevData->CommCfg,sizeof(COMMCONFIG));
-  *lpdwSize = sizeof(COMMCONFIG);
-  return(TRUE);
-}
-
-
-BOOL HMDeviceParPortClass::SetCommConfig( PHMHANDLEDATA pHMHandleData,
-                                         LPCOMMCONFIG lpCC,
-                                         DWORD dwSize )
-{
-  dprintf(("HMDeviceParPortClass::SetCommConfig not implemented"));
-
-  return(TRUE);
-}
-
-
-BOOL HMDeviceParPortClass::GetCommConfig( PHMHANDLEDATA pHMHandleData,
-                                         LPCOMMCONFIG lpCC,
-                                         LPDWORD lpdwSize )
-{
-  PHMDEVPARPORTDATA pDevData = (PHMDEVPARPORTDATA)pHMHandleData->lpHandlerData;
-
-  dprintf(("HMDeviceParPortClass::GetCommConfig(%08xh,%08xh,%08xh)\n",
-           pHMHandleData,
-           lpCC,
-           lpdwSize));
-
-  if( O32_IsBadWritePtr(lpCC,sizeof(COMMCONFIG)) ||
-      *lpdwSize< sizeof(COMMCONFIG) )
-  {
-    SetLastError(ERROR_INSUFFICIENT_BUFFER);
-    *lpdwSize= sizeof(COMMCONFIG);
-    return FALSE;
-  }
-
-  if((NULL==pDevData) || (pDevData->ulMagic != MAGIC_PARPORT) )
-  {
-    SetLastError(ERROR_INVALID_HANDLE);
-    return FALSE;
-  }
-
-  memcpy(lpCC,&pDevData->CommCfg,sizeof(COMMCONFIG));
-  *lpdwSize = sizeof(COMMCONFIG);
-  return(TRUE);
-}

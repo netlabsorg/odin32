@@ -1,4 +1,4 @@
-/* $Id: Fileio.cpp,v 1.61 2001-12-06 15:57:51 sandervl Exp $ */
+/* $Id: Fileio.cpp,v 1.62 2001-12-07 11:28:09 sandervl Exp $ */
 
 /*
  * Win32 File IO API functions for OS/2
@@ -1659,6 +1659,9 @@ ODINFUNCTION4(BOOL, GetOverlappedResult,
               LPDWORD, lpTransferred,     /* [in/out] number of bytes transferred  */
               BOOL, bWait)                /* [in] wait for the transfer to complete ? */
 {
+  //NOTE: According to the SDK docs lpOverlapped->hEvent can be 0. This function
+  //      is supposed to wait on the file handle in that case. We don't support
+  //      this, so we just fail.
   if(lpOverlapped == NULL || lpOverlapped->hEvent == 0) {
       dprintf(("!ERROR!: lpOverlapped == NULL || lpOverlapped->hEvent == 0"));
       SetLastError(ERROR_INVALID_PARAMETER);

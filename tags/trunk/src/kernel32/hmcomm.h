@@ -1,4 +1,4 @@
-/* $Id: hmcomm.h,v 1.12 2001-12-05 14:15:59 sandervl Exp $ */
+/* $Id: hmcomm.h,v 1.13 2001-12-07 11:28:10 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -12,7 +12,14 @@
 #ifndef _HM_COMM_H_
 #define _HM_COMM_H_
 
-#define MAGIC_COM 0x12abcd34
+#include <handlemanager.h>
+#include "hmdevice.h"
+#include "overlappedio.h"
+
+#define MAX_COMPORTS        8
+#define MAGIC_COM           0x12abcd34
+
+#define TIMEOUT_COMM        50
 
 typedef struct
 {
@@ -83,18 +90,16 @@ typedef MODEMSTATUS *PMODEMSTATUS;
 
 typedef struct _HMDEVCOMDATA
 {
-  ULONG ulMagic;
+  ULONG                 ulMagic;
   // Win32 Device Control Block
-  COMMCONFIG   CommCfg;
-  COMMTIMEOUTS CommTOuts;
-  DWORD dwInBuffer, dwOutBuffer;
-  DWORD dwEventMask;
-  OVERLAPPED overlapped;
-  DWORD *lpfdwEvtMask;
-  BOOL fCancelIo;
-  DWORD dwLastError;
+  COMMCONFIG            CommCfg;
+  COMMTIMEOUTS          CommTOuts;
+  DWORD                 dwInBuffer;
+  DWORD                 dwOutBuffer;
+  DWORD                 dwEventMask;
+  OverlappedIOHandler  *iohandler;
   //OS/2 Device Control Block
-  DCBINFO dcbOS2;
+  DCBINFO               dcbOS2;
 } HMDEVCOMDATA, *PHMDEVCOMDATA;
 
 #pragma pack(1)
@@ -114,6 +119,8 @@ typedef struct
   UCHAR ucFrac;
 } EXTBAUDSET, *PEXTBAUDSET;
 #pragma pack()
+
+
 
 class HMDeviceCommClass : public HMDeviceHandler
 {
@@ -208,7 +215,10 @@ class HMDeviceCommClass : public HMDeviceHandler
                                    LPDWORD       arg3,
                                    BOOL          arg4);
 
+  static void CloseOverlappedIOHandlers();
+
   private:
+
   APIRET SetLine( PHMHANDLEDATA pHMHandleData,
                   UCHAR ucSize,UCHAR Parity, UCHAR Stop);
   APIRET SetOS2DCB( PHMHANDLEDATA pHMHandleData,
@@ -221,6 +231,9 @@ class HMDeviceCommClass : public HMDeviceHandler
                     BYTE XoffChar,BYTE ErrorChar);
   APIRET SetBaud( PHMHANDLEDATA pHMHandleData,
                   DWORD dwNewBaud);
+
+
+    static OverlappedIOHandler *handler[MAX_COMPORTS];
 };
 
 
