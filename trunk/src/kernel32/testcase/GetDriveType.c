@@ -1,4 +1,4 @@
-/* $Id: GetDriveType.c,v 1.1 2002-04-13 04:38:54 bird Exp $
+/* $Id: GetDriveType.c,v 1.2 2002-04-16 00:06:24 bird Exp $
  *
  * Test of GetDriveType.c
  *
@@ -138,7 +138,7 @@ int main(int argc, char **argv)
 
             if (uValue != ~0)
             {
-                if (uValue != uResult)
+                if (uValue == uResult)
                     printf("ok\n", argv[argi]);
                 else
                 {
