@@ -1,4 +1,4 @@
-/* $Id: debug.cpp,v 1.4 2000-07-03 12:12:38 bird Exp $ */
+/* $Id: debug.cpp,v 1.5 2000-07-03 12:20:10 bird Exp $ */
 
 /*
  * Win32 debug Subsystem for OS/2
@@ -91,8 +91,9 @@ BOOL WIN32API ContinueDebugEvent( DWORD dwProcessId, DWORD dwThreadId,
  */
 BOOL WIN32API IsDebuggerPresent(VOID)
 {
-    dprintf(("KERNEL32:  IsDebuggerPresent() -> FALSE\n"));
-    return (getenv("ODIN32.DEBUGGERPRESENT") != NULL);
+    BOOL fRet = getenv("ODIN32.DEBUGGERPRESENT") != NULL;
+    dprintf(("KERNEL32:  IsDebuggerPresent() -> %s\n", fRet ? "TRUE" : "FALSE"));
+    return fRet;
 }
 
 
