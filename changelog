@@ -1,4 +1,10 @@
-/* $Id: changelog,v 1.2442 2003-01-12 16:20:29 sandervl Exp $ */
+/* $Id: changelog,v 1.2443 2003-01-13 16:51:23 sandervl Exp $ */
+
+ 2003-01-13: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o Don't allocate selectors anymore. Allocate tiled memory
+                  and call Dos32FlatToSel.
+                o Get default stack size from PE header. 
+                o Thread handles not closed properly.
 
  2003-01-12: Sander van Leeuwen <sandervl@xs4all   >
     - KERNEL32: o Ported QueryDosDeviceA/W from Rewind
