@@ -1,4 +1,7 @@
-/* $Id: ChangeLog,v 1.2732 2004-05-24 09:02:26 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2733 2004-06-16 10:22:17 sandervl Exp $ */
+
+ 2002-06-16: Dmitry Froloff <froloff@os2   >
+    - GDI32:    o Fixed font creation for ANSI_CHARSET
 
  2004-05-24: Eugene Romanenko <eros2@os2   >
     - SHELL32:  o Systray integration with XWP
