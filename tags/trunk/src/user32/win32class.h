@@ -1,4 +1,4 @@
-/* $Id: win32class.h,v 1.5 1999-11-17 17:04:54 cbratschi Exp $ */
+/* $Id: win32class.h,v 1.6 1999-12-09 00:53:37 sandervl Exp $ */
 /*
  * Win32 Window Class Managment Code for OS/2
  *
@@ -15,17 +15,17 @@
 class Win32WndClass : public GenericObject
 {
 public:
-        Win32WndClass(WNDCLASSEXA *wndclass, BOOL isUnicode = FALSE);
+        Win32WndClass(WNDCLASSEXA *wndclass, BOOL fUnicode = FALSE);
        ~Win32WndClass();
 
-         ULONG  getClassLongA(int index, BOOL isUnicode = FALSE);
+         ULONG  getClassLongA(int index, BOOL fUnicode = FALSE);
          ULONG  getClassLongW(int index)
          {
                 return getClassLongA(index, TRUE);
          };
          WORD   getClassWord(int index);
 
-         ULONG  setClassLongA(int index, LONG lNewVal, BOOL isUnicode = FALSE);
+         ULONG  setClassLongA(int index, LONG lNewVal, BOOL fUnicode = FALSE);
          ULONG  setClassLongW(int index, LONG lNewVal)
          {
                 return setClassLongA(index, lNewVal, TRUE);
@@ -55,7 +55,7 @@ public:
           void  DecreaseWindowCount()   { cWindows--; };
           DWORD GetWindowCount()        { return cWindows; };
 
-          BOOL  hasClassName(LPSTR classname, BOOL fUnicode = 0);
+          BOOL  hasClassName(LPSTR classname, BOOL fUnicode = FALSE);
 
           BOOL  isAppClass(ULONG curProcessId);
 

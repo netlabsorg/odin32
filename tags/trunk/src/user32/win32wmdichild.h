@@ -1,4 +1,4 @@
-/* $Id: win32wmdichild.h,v 1.3 1999-10-16 14:51:43 sandervl Exp $ */
+/* $Id: win32wmdichild.h,v 1.4 1999-12-09 00:53:38 sandervl Exp $ */
 /*
  * Win32 MDI Client Window Class for OS/2
  *
@@ -20,7 +20,7 @@ class Win32MDIClientWindow;
 class Win32MDIChildWindow : public Win32BaseWindow
 {
 public:
-                Win32MDIChildWindow(CREATESTRUCTA *lpCreateStructA, ATOM classAtom, BOOL isUnicode);
+                Win32MDIChildWindow(CREATESTRUCTA *lpCreateStructA, ATOM classAtom, BOOL fUnicode);
 virtual        ~Win32MDIChildWindow();
 
 virtual  ULONG  MsgActivate(BOOL fActivate, BOOL fMinimized, HWND hwnd);
