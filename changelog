@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2693 2004-03-09 14:25:03 sandervl Exp $ */
+/* $Id: changelog,v 1.2694 2004-03-10 09:22:02 sandervl Exp $ */
+
+ 2004-03-10: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o Added support for WH_MOUSE hook
 
  2004-03-09: Sander van Leeuwen <sandervl@innotek   >
     - GDI32:    o SetDIBitsToDevice: fixes for xSrc offset
