@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.1139 2000-09-22 09:19:58 bird Exp $ */
+ /* $Id: ChangeLog,v 1.1140 2000-09-22 10:47:21 bird Exp $ */
 
  2000-09-22: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - Win32k/Pe2Lx:
@@ -16,6 +16,8 @@
                 the tools directory of the base DDK.
     - KERNEL32: Changed Pe2Lx to use module address (address of the header
                 object) as hinstance. Some programs depends on this.
+    - opengl\glu\nurbs\internals: Turned off optimization. Internal
+                compiler error in release mode compiling sorter.cpp.
 
  2000-09-21: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - INCLUDE\makefiles: Made cleanrule omittable by defining NOCLEAN.
