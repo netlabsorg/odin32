@@ -32,7 +32,7 @@ EXPORTS
     CoGetTreatAsClass          = _DbgCoGetTreatAsClass@8        @25
     CoInitializeEx             = _DbgCoInitializeEx@8           @9998
     CoInitialize               = _DbgCoInitialize@4             @26
-    CoInitializeWOW            = _DbgCoInitializeWOW@0          @27
+    CoInitializeWOW            = _DbgCoInitializeWOW@8          @27
     CoIsHandlerConnected       = _DbgCoIsHandlerConnected@4     @28
     CoIsOle1Class              = _DbgCoIsOle1Class@4            @29
     CoLoadLibrary              = _DbgCoLoadLibrary@8            @30
