@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.3 1999-07-17 11:52:22 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.4 1999-07-17 12:49:41 cbratschi Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -29,6 +29,7 @@
 #include <wchar.h>
 #include <stdlib.h>
 #include <string.h>
+#include <oslibwin.h>
 
 //undocumented stuff
 // WIN32API CalcChildScroll
@@ -185,28 +186,33 @@ int __cdecl wsprintfW(LPWSTR lpOut, LPCWSTR lpFmt, ...)
 //******************************************************************************
 BOOL WIN32API MessageBeep( UINT arg1)
 {
+    INT flStyle;
+
 #ifdef DEBUG
     WriteLog("USER32:  MessageBeep\n");
 #endif
-/*
+
     switch (arg1)
     {
       case 0xFFFFFFFF:
-        DosBeep(500,50);
+        OSLibDosBeep(500,50);
         return TRUE;
       case MB_ICONASTERISK:
-        return WinAlarm(HWND_DESKTOP,WA_ERROR);
+        flStyle = WA_NOTE;
+        break;
       case MB_ICONEXCLAMATION:
-        return WinAlaram(HWND_DESKTOP,WA_WARNING);
+        flStyle = WA_WARNING;
+        break;
       case MB_ICONHAND:
       case MB_ICONQUESTION:
       case MB_OK:
-        return WinAlaram(HWND_DESKTOP,WA_NOTE);
+        flStyle = WA_NOTE;
+        break;
       default:
-        return WinAlarm(HWND_DESKTOP,WA_ERROR); //CB: should be right
+        flStyle = WA_ERROR; //CB: should be right
+        break;
     }
-*/
-    return O32_MessageBeep(arg1);
+    return OSLibWinAlarm(HWND_DESKTOP,flStyle);
 }
 //******************************************************************************
 //******************************************************************************
@@ -223,7 +229,8 @@ BOOL WIN32API IsDlgButtonChecked( HWND arg1, UINT  arg2)
 int WIN32API GetWindowTextLengthA( HWND arg1)
 {
     dprintf(("USER32:  GetWindowTextLength\n"));
-    //return WinQueryWindowTextLength(arg1);
+    //win32 to OS/2 handle
+    //return OSLibWinQueryWindowTextLength(arg1);
     return O32_GetWindowTextLength(arg1);
 }
 //******************************************************************************
@@ -231,7 +238,8 @@ int WIN32API GetWindowTextLengthA( HWND arg1)
 int WIN32API GetWindowTextA( HWND arg1, LPSTR arg2, int  arg3)
 {
     dprintf(("USER32:  GetWindowTextA\n"));
-    //return WinQueryWindowText(arg1,arg3,arg2);
+    //win32 to OS/2 handle
+    //return OSLibWinQueryWindowText(arg1,arg3,arg2);
     return O32_GetWindowText(arg1, arg2, arg3);
 }
 //******************************************************************************
@@ -258,16 +266,15 @@ int WIN32API InternalGetWindowText(HWND   hwnd,
 HWND WIN32API GetNextDlgTabItem( HWND arg1, HWND arg2, BOOL  arg3)
 {
     dprintf(("USER32:  GetNextDlgTabItem\n"));
+    //get next WS_TABSTOP
     return O32_GetNextDlgTabItem(arg1, arg2, arg3);
 }
-//******************************************************************************
-//******************************************************************************
 //******************************************************************************
 //******************************************************************************
 HWND WIN32API GetFocus(void)
 {
 //    dprintf(("USER32:  GetFocus\n"));
-    //return WinQueryFocus(HWND_DESKTOP);
+    //return OS2LibWinQueryFocus(HWND_DESKTOP);
     return O32_GetFocus();
 }
 //******************************************************************************
@@ -275,7 +282,7 @@ HWND WIN32API GetFocus(void)
 HWND WIN32API GetDlgItem(HWND arg1, int  arg2)
 {
  HWND rc;
-
+    //return OSLibWinWindowFromID(arg1,arg2);
     rc = O32_GetDlgItem(arg1, arg2);
     dprintf(("USER32:  GetDlgItem %d returned %d\n", arg2, rc));
     return(rc);
@@ -285,6 +292,8 @@ HWND WIN32API GetDlgItem(HWND arg1, int  arg2)
 int WIN32API GetDlgCtrlID( HWND arg1)
 {
     dprintf(("USER32:  GetDlgCtrlID\n"));
+    //return OSLibWinQueryWindowUShort(arg1,QWS_ID);
+    //use internal ID -> DWORD
     return O32_GetDlgCtrlID(arg1);
 }
 //******************************************************************************
@@ -303,6 +312,7 @@ BOOL WIN32API EnumThreadWindows(DWORD dwThreadId, WNDENUMPROC lpfn, LPARAM lPara
  EnumWindowCallback *callback = new EnumWindowCallback(lpfn, lParam);
 
   dprintf(("USER32:  EnumThreadWindows\n"));
+  //replace
   rc = O32_EnumThreadWindows(dwThreadId, callback->GetOS2Callback(), (LPARAM)callback);
   if(callback)
     delete callback;
@@ -315,37 +325,47 @@ BOOL WIN32API EndDialog( HWND arg1, int  arg2)
  BOOL rc;
 
     dprintf(("USER32:  EndDialog\n"));
+    //return OSLibDismissDialog(arg1,arg2);
     rc = O32_EndDialog(arg1, arg2);
     return(rc);
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API OffsetRect( PRECT arg1, int arg2, int  arg3)
+BOOL WIN32API OffsetRect( PRECT lprc, int x, int  y)
 {
 #ifdef DEBUG
 ////    WriteLog("USER32:  OffsetRect\n");
 #endif
     //CB: inc values
-    // todo
-    return O32_OffsetRect(arg1, arg2, arg3);
+    if (lprc)
+    {
+      lprc->left   += x;
+      lprc->right  += x;
+      lprc->top    += y;
+      lprc->bottom += y;
+
+      return TRUE;
+    } else return FALSE;
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API CopyRect( PRECT arg1, const RECT * arg2)
+BOOL WIN32API CopyRect( PRECT lprcDst, const RECT * lprcSrc)
 {
 //    ddprintf(("USER32:  CopyRect\n"));
-    //memcpy();
-    return O32_CopyRect(arg1, arg2);
+    if (!lprcDst || !lprcSrc) return FALSE;
+
+    memcpy(lprcDst,lprcSrc,sizeof(RECT));
+
+    return TRUE;
 }
 //******************************************************************************
-// Not implemented by Open32 (5-31-99 Christoph Bratschi)
 //******************************************************************************
 BOOL WIN32API CheckDlgButton( HWND arg1, int arg2, UINT  arg3)
 {
 #ifdef DEBUG
     WriteLog("USER32:  CheckDlgButton\n");
 #endif
-//    return O32_CheckDlgButton(arg1, arg2, arg3);
+    //CB: set button state
     return (BOOL)SendDlgItemMessageA(arg1,arg2,BM_SETCHECK,arg3,0);
 }
 //******************************************************************************
@@ -353,7 +373,7 @@ BOOL WIN32API CheckDlgButton( HWND arg1, int arg2, UINT  arg3)
 HWND WIN32API SetFocus( HWND arg1)
 {
     dprintf(("USER32:  SetFocus\n"));
-    //return WinSetFocus(HWND_DESKTOP,arg1);
+    //return OSLibWinSetFocus(HWND_DESKTOP,arg1);
     return O32_SetFocus(arg1);
 }
 //******************************************************************************
@@ -363,7 +383,7 @@ int WIN32API ReleaseDC( HWND arg1, HDC  arg2)
 #ifdef DEBUG
     WriteLog("USER32:  ReleaseDC\n");
 #endif
-    //return WinReleasePS(arg2);
+    //return OSLibWinReleasePS(arg2);
     return O32_ReleaseDC(arg1, arg2);
 }
 //******************************************************************************
@@ -375,7 +395,7 @@ BOOL WIN32API InvalidateRect(HWND arg1, const RECT *arg2, BOOL arg3)
         WriteLog("USER32:  InvalidateRect for window %X (%d,%d)(%d,%d) %d\n", arg1, arg2->left, arg2->top, arg2->right, arg2->bottom, arg3);
     else    WriteLog("USER32:  InvalidateRect for window %X NULL, %d\n", arg1, arg3);
 #endif
-    //return WinInvalidateRect(arg1,arg2,arg3);
+    //return OSLibWinInvalidateRect(arg1,arg2,arg3);
     return O32_InvalidateRect(arg1, arg2, arg3);
 }
 //******************************************************************************
@@ -385,6 +405,8 @@ BOOL WIN32API GetUpdateRect( HWND arg1, PRECT arg2, BOOL  arg3)
 #ifdef DEBUG
     WriteLog("USER32:  GetUpdateRect\n");
 #endif
+    // OSLibWinQueryUpdateRect(arg1,arg2);
+    // translate top,bottom
     return O32_GetUpdateRect(arg1, arg2, arg3);
 }
 //******************************************************************************
@@ -393,7 +415,7 @@ HDC WIN32API GetDC( HWND arg1)
 {
  HDC hdc;
 
-   //hdc = WinGetPS(arg1);
+   //hdc = OSLibWinGetPS(arg1);
    hdc = O32_GetDC(arg1);
 #ifdef DEBUG
    WriteLog("USER32:  GetDC of %X returns %X\n", arg1, hdc);
@@ -407,7 +429,7 @@ HDC WIN32API GetDCEx(HWND arg1, HRGN arg2, DWORD arg3)
 #ifdef DEBUG
     WriteLog("USER32:  GetDCEx\n");
 #endif
-    //return GetDC(arg1);
+    //return OSLibGetDC(arg1);
     //change values
     return O32_GetDCEx(arg1, arg2, arg3);
 }
@@ -418,7 +440,7 @@ BOOL WIN32API EndPaint( HWND arg1, const PAINTSTRUCT * arg2)
 #ifdef DEBUG
     WriteLog("USER32:  EndPaint\n");
 #endif
-    //return WinEndPaint(arg2->hdc);
+    //return OSLibWinEndPaint(arg2->hdc);
     return O32_EndPaint(arg1, arg2);
 }
 //******************************************************************************
@@ -428,7 +450,7 @@ BOOL WIN32API EndPaint( HWND arg1, const PAINTSTRUCT * arg2)
 HDC WIN32API BeginPaint(HWND arg1, PPAINTSTRUCT  arg2)
 {
     dprintf(("USER32: BeginPaint %X\n", arg2));
-    //return WinBeginPaint(arg1,);
+    //return OSLibWinBeginPaint(arg1,);
     //CB: emulate
     return O32_BeginPaint(arg1, arg2);
 }
@@ -440,13 +462,13 @@ int WIN32API GetSystemMetrics(int arg1)
 
    switch(arg1) {
     case SM_CXICONSPACING: //TODO: size of grid cell for large icons
-        //rc = WinQuerySysValue(HWND_DESKTOP,SV_CXICON);
+        //rc = OSLibWinQuerySysValue(HWND_DESKTOP,SV_CXICON);
         //CB: better: return standard windows icon size
-        //rc = 32;
-        rc = O32_GetSystemMetrics(SM_CXICON);
+        rc = 32;
         break;
     case SM_CYICONSPACING:
-        rc = O32_GetSystemMetrics(SM_CYICON);
+        //read SM_CXICONSPACING comment
+        rc = 32;
         break;
     case SM_PENWINDOWS:
         rc = FALSE;
@@ -558,6 +580,7 @@ BOOL WIN32API KillTimer(HWND arg1, UINT arg2)
 #ifdef DEBUG
     WriteLog("USER32:  KillTimer\n");
 #endif
+    //WinStopTimer
     return O32_KillTimer(arg1, arg2);
 }
 //******************************************************************************
@@ -567,6 +590,7 @@ BOOL WIN32API InflateRect( PRECT arg1, int arg2, int  arg3)
 #ifdef DEBUG
     WriteLog("USER32:  InflateRect\n");
 #endif
+    //don't know how Win32 handles this
     return O32_InflateRect(arg1, arg2, arg3);
 }
 //******************************************************************************
@@ -589,6 +613,7 @@ UINT WIN32API GetDlgItemTextA(HWND arg1, int arg2, LPSTR arg3, UINT arg4)
 {
  UINT rc;
 
+    //WinQueryDlgItemText(arg1,arg2,arg4,arg3);
     rc = O32_GetDlgItemText(arg1, arg2, arg3, arg4);
 #ifdef DEBUG
     if(rc)
@@ -604,16 +629,23 @@ int WIN32API ShowCursor( BOOL arg1)
 #ifdef DEBUG
     WriteLog("USER32:  ShowCursor\n");
 #endif
+    //WinShowCursor(HWND_DESKTOP,arg1); //not the same
     return O32_ShowCursor(arg1);
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API SetRect( PRECT arg1, int arg2, int arg3, int arg4, int  arg5)
+BOOL WIN32API SetRect( PRECT lprc, int nLeft, int nTop, int nRight, int  nBottom)
 {
 #ifdef DEBUG
     WriteLog("USER32:  SetRect\n");
 #endif
-    return O32_SetRect(arg1, arg2, arg3, arg4, arg5);
+
+    lprc->left   = nLeft;
+    lprc->top    = nTop;
+    lprc->right  = nRight;
+    lprc->bottom = nBottom;
+
+    return TRUE;
 }
 //******************************************************************************
 //******************************************************************************
@@ -622,6 +654,7 @@ BOOL WIN32API SetDlgItemInt( HWND arg1, int arg2, UINT arg3, BOOL  arg4)
 #ifdef DEBUG
     WriteLog("USER32:  SetDlgItemInt\n");
 #endif
+    //get item text and translate to int
     return O32_SetDlgItemInt(arg1, arg2, arg3, arg4);
 }
 //******************************************************************************
@@ -631,6 +664,7 @@ BOOL WIN32API SetDlgItemTextA( HWND arg1, int arg2, LPCSTR  arg3)
 #ifdef DEBUG
     WriteLog("USER32:  SetDlgItemText to %s\n", arg3);
 #endif
+    //WinSetDlgItemText(arg1,arg2,arg3);
     return O32_SetDlgItemText(arg1, arg2, arg3);
 }
 //******************************************************************************
@@ -650,6 +684,8 @@ int WIN32API TranslateAcceleratorA(HWND arg1, HACCEL arg2, LPMSG  arg3)
 #ifdef DEBUG
 ////    WriteLog("USER32:  TranslateAccelerator\n");
 #endif
+    //WinTranslateAccel();
+    //get hab, translate
     return O32_TranslateAccelerator(arg1, arg2, arg3);
 }
 //******************************************************************************
@@ -659,6 +695,7 @@ BOOL WIN32API SubtractRect( PRECT arg1, const RECT * arg2, const RECT * arg3)
 #ifdef DEBUG
     WriteLog("USER32:  SubtractRect");
 #endif
+    // how?
     return O32_SubtractRect(arg1, arg2, arg3);
 }
 //******************************************************************************
