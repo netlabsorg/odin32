@@ -1,4 +1,4 @@
-/* $Id: pmframe.cpp,v 1.17 2000-01-14 13:16:57 sandervl Exp $ */
+/* $Id: pmframe.cpp,v 1.18 2000-01-16 18:17:11 cbratschi Exp $ */
 /*
  * Win32 Frame Managment Code for OS/2
  *
@@ -117,6 +117,15 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
       if ((swp->fl & SWP_MAXIMIZE) == SWP_MAXIMIZE)
       {
         win32wnd->setStyle((win32wnd->getStyle() & ~WS_MINIMIZE_W) | WS_MAXIMIZE_W);
+
+        RECT rect;
+
+        rect.left = rect.top = rect.right = rect.bottom = 0;
+        win32wnd->AdjustMaximizedRect(&rect);
+        swp->x += rect.left;
+        swp->cx += rect.right-rect.left;
+        swp->y -= rect.bottom;
+        swp->cy += rect.bottom-rect.top;
       }
       else if ((swp->fl & SWP_MINIMIZE) == SWP_MINIMIZE)
       {
@@ -130,7 +139,14 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
     }
 
     case WM_QUERYBORDERSIZE:
-      goto RunDefFrameProc;
+    {
+      PWPOINT size = (PWPOINT)mp1;
+
+      size->x = 0;
+      size->y = 0;
+      RestoreOS2TIB();
+      return (MRESULT)TRUE;
+    }
 
     case WM_BUTTON1DOWN:
     case WM_BUTTON1UP:
@@ -211,7 +227,7 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
 
         if(!win32wnd->CanReceiveSizeMsgs())
            break;
-//CB: todo: adjust maximized window rect (how does WINE it?)
+
         WinQueryWindowPos(hwnd, &swpOld);
         if(pswp->fl & (SWP_MOVE | SWP_SIZE)) {
             if (win32wnd->isChild()) {
@@ -262,7 +278,7 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
 
         if ((pswp->fl & (SWP_SIZE | SWP_MOVE | SWP_ZORDER)) == 0)
         {
-        	goto RunDefFrameProc;
+                goto RunDefFrameProc;
         }
 
         if(pswp->fl & (SWP_MOVE | SWP_SIZE)) {
@@ -275,14 +291,14 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
         }
         OSLibMapSWPtoWINDOWPOSFrame(pswp, &wp, &swpOld, hParent, hwnd);
 
-	if(pswp->fl & SWP_ACTIVATE)
-	{
-             WinSendMsg(hwnd, WM_ACTIVATE, (MPARAM)TRUE, (MPARAM)hwnd);
-	}
-
-        if(pswp->fl & (SWP_MOVE | SWP_SIZE))
+        if(pswp->fl & SWP_ACTIVATE)
         {
-	  //Note: Also updates the new window rectangle
+             WinSendMsg(hwnd, WM_ACTIVATE, (MPARAM)TRUE, (MPARAM)hwnd);
+        }
+
+        if((pswp->fl & (SWP_MOVE | SWP_SIZE)) && !(win32wnd->getStyle() & WS_MINIMIZE_W))
+        {
+          //Note: Also updates the new window rectangle
           win32wnd->MsgFormatFrame(&wp);
 
           //CB: todo: use result for WM_CALCVALIDRECTS
@@ -324,7 +340,7 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
             if (redrawAll)
             {
               WinInvalidateRect(hwnd,NULL,TRUE);
-            } 
+            }
             else
             {
               HPS hps = WinGetPS(hwnd);
@@ -359,7 +375,7 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
               WinReleasePS(hps);
             }
           }
-        } 
+        }
         else
         {
           //update child positions: rectWindow is in window coordinates
@@ -377,7 +393,7 @@ PosChangedEnd:
     }
 
     case WM_ERASEBACKGROUND:
-	break;
+        break;
 
     case WM_CALCVALIDRECTS:
     {
@@ -452,13 +468,13 @@ VOID FrameUpdateClient(Win32BaseWindow *win32wnd)
   RECTL rect;
   SWP swpClient = {0};
 
-	rectOld = *win32wnd->getClientRectPtr();
+        rectOld = *win32wnd->getClientRectPtr();
         win32wnd->MsgFormatFrame(NULL);
         rectNew = *win32wnd->getClientRectPtr();
         if(WinEqualRect(0, (PRECTL)&rectOld, (PRECTL)&rectNew) == 1) {
-		WinInvalidateRect(win32wnd->getOS2FrameWindowHandle(), NULL, FALSE);
-		return;
-	} 
+                WinInvalidateRect(win32wnd->getOS2FrameWindowHandle(), NULL, FALSE);
+                return;
+        }
         //CB: todo: use result for WM_CALCVALIDRECTS
         mapWin32ToOS2Rect(win32wnd->getOS2FrameWindowHandle(), win32wnd->getClientRectPtr(), (PRECTLOS2)&rect);
 

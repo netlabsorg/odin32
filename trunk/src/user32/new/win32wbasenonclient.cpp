@@ -1,4 +1,4 @@
-/* $Id: win32wbasenonclient.cpp,v 1.12 2000-01-15 17:27:20 sandervl Exp $ */
+/* $Id: win32wbasenonclient.cpp,v 1.13 2000-01-16 18:17:13 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (non-client methods)
  *
@@ -316,6 +316,23 @@ BOOL Win32BaseWindow::WindowNeedsWMBorder()
 }
 //******************************************************************************
 //******************************************************************************
+VOID Win32BaseWindow::AdjustMaximizedRect(LPRECT rect)
+{
+  /* Decide if the window will be managed (see CreateWindowEx) */
+  //if (!WindowNeedsWMBorder()) //CB: check Options.managed
+  {
+    if (HAS_THICKFRAME(dwStyle,dwExStyle ))
+      InflateRect( rect, GetSystemMetrics(SM_CXFRAME), GetSystemMetrics(SM_CYFRAME) );
+    else
+      if (HAS_DLGFRAME( dwStyle, dwExStyle ))
+        InflateRect(rect, GetSystemMetrics(SM_CXDLGFRAME), GetSystemMetrics(SM_CYDLGFRAME) );
+      else
+        if (HAS_THINFRAME( dwStyle ))
+          InflateRect( rect, GetSystemMetrics(SM_CXBORDER), GetSystemMetrics(SM_CYBORDER));
+  }
+}
+//******************************************************************************
+//******************************************************************************
 VOID Win32BaseWindow::AdjustRectOuter(LPRECT rect,BOOL menu)
 {
   if(dwStyle & WS_ICONIC) return;
@@ -367,6 +384,8 @@ LONG Win32BaseWindow::HandleNCCalcSize(BOOL calcValidRects,RECT *winRect)
   LONG result = 0;
   UINT style;
 
+    dprintf(("Default WM_NCCALCSIZE handler"));
+
     if (!calcValidRects) return 0;
 
     style = (UINT) GetClassLongA(Win32Hwnd,GCL_STYLE);
@@ -407,9 +426,9 @@ LONG Win32BaseWindow::HandleNCHitTest(POINT pt)
 {
   RECT rect = rectWindow;
 
-  if (!PtInRect(&rect,pt)) return HTNOWHERE;
-
   if (dwStyle & WS_MINIMIZE) return HTCAPTION;
+
+  if (!PtInRect(&rect,pt)) return HTNOWHERE;
 
   if (!(flags & WIN_MANAGED))
   {
@@ -1196,15 +1215,20 @@ LONG Win32BaseWindow::HandleNCLButtonDblClk(WPARAM wParam,LPARAM lParam)
 //******************************************************************************
 LONG Win32BaseWindow::HandleNCRButtonUp(WPARAM wParam,LPARAM lParam)
 {
-  if (wParam == HTCAPTION)
+  switch(wParam)
   {
-    if (GetActiveWindow() != Win32Hwnd)
+    case HTCAPTION:
+      if (GetActiveWindow() != Win32Hwnd)
         SetActiveWindow();
 
-    if ((GetActiveWindow() == Win32Hwnd) && (dwStyle & WS_SYSMENU))
-    {
-      SendInternalMessageA(WM_SYSCOMMAND,SC_MOUSEMENU+HTCAPTION,lParam);
-    }
+      if ((GetActiveWindow() == Win32Hwnd) && (dwStyle & WS_SYSMENU))
+      {
+        SendInternalMessageA(WM_SYSCOMMAND,SC_MOUSEMENU+HTCAPTION,lParam);
+      }
+      break;
+
+    default:
+      break;
   }
 
   return 0;
@@ -1224,7 +1248,9 @@ LONG Win32BaseWindow::HandleSysCommand(WPARAM wParam,POINT *pt32)
 
     case SC_SIZE:
     {
-      DWORD flags = 0;
+      DWORD flags;
+
+      if (dwStyle & WS_MAXIMIZE) break;
 
       switch ((wParam & 0xF)+2)
       {
@@ -1259,12 +1285,17 @@ LONG Win32BaseWindow::HandleSysCommand(WPARAM wParam,POINT *pt32)
         case HTBOTTOMRIGHT:
           flags = TFOS_BOTTOM | TFOS_RIGHT;
           break;
+
+        default:
+          flags = TFOS_BOTTOM | TFOS_RIGHT;
+          break;
       }
       if (flags) FrameTrackFrame(this,flags);
       break;
     }
 
     case SC_MOVE:
+        if (dwStyle & WS_MAXIMIZE) break;
         FrameTrackFrame(this,TFOS_MOVE);
         break;
 

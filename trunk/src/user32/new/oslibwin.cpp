@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.38 2000-01-15 14:18:16 cbratschi Exp $ */
+/* $Id: oslibwin.cpp,v 1.39 2000-01-16 18:17:11 cbratschi Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -995,7 +995,8 @@ ULONG OSLibWinGetLastError()
 //******************************************************************************
 void OSLibWinShowTaskList(HWND hwndFrame)
 {
-  WinPostMsg(NULLHANDLE, WM_SYSCOMMAND, (MPARAM)SC_TASKMANAGER, MPFROM2SHORT(CMDSRC_MENU, TRUE));
+  //CB: don't know if this works on all machines
+  WinSetActiveWindow(HWND_DESKTOP,0x8000000E);
 }
 //******************************************************************************
 //******************************************************************************

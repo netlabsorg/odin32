@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.43 2000-01-15 14:18:17 cbratschi Exp $ */
+/* $Id: win32wbase.cpp,v 1.44 2000-01-16 18:17:12 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1122,6 +1122,7 @@ SCROLLBAR_INFO *Win32BaseWindow::getScrollInfo(int nBar)
       if (!horzScrollInfo)
       {
         horzScrollInfo = (SCROLLBAR_INFO*)malloc(sizeof(SCROLLBAR_INFO));
+        if (!horzScrollInfo) break;
         horzScrollInfo->MinVal = horzScrollInfo->CurVal = horzScrollInfo->Page = 0;
         horzScrollInfo->MaxVal = 100;
         horzScrollInfo->flags  = ESB_ENABLE_BOTH;
@@ -1132,6 +1133,7 @@ SCROLLBAR_INFO *Win32BaseWindow::getScrollInfo(int nBar)
       if (!vertScrollInfo)
       {
         vertScrollInfo = (SCROLLBAR_INFO*)malloc(sizeof(SCROLLBAR_INFO));
+        if (!vertScrollInfo) break;
         vertScrollInfo->MinVal = vertScrollInfo->CurVal = vertScrollInfo->Page = 0;
         vertScrollInfo->MaxVal = 100;
         vertScrollInfo->flags  = ESB_ENABLE_BOTH;
@@ -1405,12 +1407,12 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
 
                 point.x = rectClient.left;
                 point.y = rectClient.top;
-                MapWindowPoints(getWindowHandle(), getParent()->getWindowHandle(), &point, 1);
+                ClientToScreen(getParent()->getWindowHandle(),&point);
 
                 lParam = MAKELONG(point.x, point.y);
             }
             else {//in screen coordinates
-                lParam = MAKELONG(rectWindow.left+rectClient.left, rectWindow.top+rectClient.top);
+                lParam = MAKELONG(rectClient.left,rectClient.top);
             }
             SendInternalMessageA(WM_MOVE, 0, lParam);
         }

@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.30 2000-01-15 14:18:18 cbratschi Exp $ */
+/* $Id: win32wbase.h,v 1.31 2000-01-16 18:17:12 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -426,6 +426,8 @@ public:
          void RemoveFakeOpen32() { WinSetDAXData (OS2Hwnd, NULL); }
 
          fakeOpen32WinBaseClass fakeWinBase;
+
+         VOID  AdjustMaximizedRect(LPRECT rect);
 
          BOOL   isOwnDC() { return (windowClass && windowClass->getStyle() & CS_OWNDC_W); }
          HDC    getOwnDC() { return ownDC; }

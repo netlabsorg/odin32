@@ -1,4 +1,4 @@
-/* $Id: menu.cpp,v 1.10 2000-01-15 14:18:16 cbratschi Exp $*/
+/* $Id: menu.cpp,v 1.11 2000-01-16 18:17:10 cbratschi Exp $*/
 /*
  * Menu functions
  *
@@ -103,6 +103,7 @@ typedef struct
 #define TPM_ENTERIDLEEX         0x80000000              /* set owner window for WM_ENTERIDLE */
 #define TPM_BUTTONDOWN          0x40000000              /* menu was clicked before tracking */
 #define TPM_POPUPMENU           0x20000000              /* menu is a popup menu */
+#define TPM_CAPTIONSYSMENU      0x10000000
 
   /* popup menu shade thickness */
 #define POPUP_XSHADE            4
@@ -2013,7 +2014,7 @@ static void MENU_HideSubPopups( HWND hwndOwner, HMENU hmenu,
  * Return the handle of the submenu, or hmenu if no submenu to display.
  */
 static HMENU MENU_ShowSubPopup( HWND hwndOwner, HMENU hmenu,
-                                  BOOL selectFirst, UINT wFlags )
+                                  BOOL selectFirst, UINT wFlags,POINT *pt)
 {
     RECT rect;
     POPUPMENU *menu;
@@ -2070,10 +2071,18 @@ static HMENU MENU_ShowSubPopup( HWND hwndOwner, HMENU hmenu,
 
         MENU_InitSysMenuPopup(item->hSubMenu,GetWindowLongA(menu->hWnd,GWL_STYLE), GetClassLongA(menu->hWnd, GCL_STYLE));
 
-        if (win32wnd) win32wnd->GetSysPopupPos(&rect);
-        rect.top = rect.bottom;
-        rect.right = GetSystemMetrics(SM_CXSIZE);
-        rect.bottom = GetSystemMetrics(SM_CYSIZE);
+        if ((wFlags & TPM_CAPTIONSYSMENU) && pt)
+        {
+          rect.top = pt->y;
+          rect.left = pt->x;
+          rect.bottom = rect.right = 0;
+        } else
+        {
+          if (win32wnd) win32wnd->GetSysPopupPos(&rect);
+          rect.top = rect.bottom;
+          rect.right = GetSystemMetrics(SM_CXSIZE);
+          rect.bottom = GetSystemMetrics(SM_CYSIZE);
+        }
     }
     else
     {
@@ -2184,7 +2193,7 @@ static INT MENU_ExecFocusedItem( MTRACKER* pmt, HMENU hMenu, UINT wFlags )
         }
     }
     else
-        pmt->hCurrentMenu = MENU_ShowSubPopup(pmt->hOwnerWnd, hMenu, TRUE, wFlags);
+        pmt->hCurrentMenu = MENU_ShowSubPopup(pmt->hOwnerWnd, hMenu, TRUE, wFlags,&pmt->pt);
 
     return -1;
 }
@@ -2242,7 +2251,7 @@ static BOOL MENU_ButtonDown( MTRACKER* pmt, HMENU hPtMenu, UINT wFlags )
             /* If the popup menu is not already "popped" */
             if(!(item->fState & MF_MOUSESELECT ))
             {
-                pmt->hCurrentMenu = MENU_ShowSubPopup( pmt->hOwnerWnd, hPtMenu, FALSE, wFlags );
+                pmt->hCurrentMenu = MENU_ShowSubPopup(pmt->hOwnerWnd,hPtMenu,FALSE,wFlags,&pmt->pt);
             }
 
             return TRUE;
@@ -2320,7 +2329,7 @@ static BOOL MENU_MouseMove( MTRACKER* pmt, HMENU hPtMenu, UINT wFlags )
     else if( ptmenu->FocusedItem != id )
     {
             MENU_SwitchTracking( pmt, hPtMenu, id );
-            pmt->hCurrentMenu = MENU_ShowSubPopup(pmt->hOwnerWnd, hPtMenu, FALSE, wFlags);
+            pmt->hCurrentMenu = MENU_ShowSubPopup(pmt->hOwnerWnd, hPtMenu, FALSE, wFlags,&pmt->pt);
     }
     return TRUE;
 }
@@ -2509,7 +2518,7 @@ static void MENU_KeyLeft( MTRACKER* pmt, UINT wFlags )
 
             if( !MENU_SuspendPopup( pmt, WM_KEYDOWN ) )
                 pmt->hCurrentMenu = MENU_ShowSubPopup(pmt->hOwnerWnd,
-                                                pmt->hTopMenu, TRUE, wFlags);
+                                                pmt->hTopMenu, TRUE, wFlags,&pmt->pt);
         }
     }
 }
@@ -2537,7 +2546,7 @@ static void MENU_KeyRight( MTRACKER* pmt, UINT wFlags )
         /* If already displaying a popup, try to display sub-popup */
 
         hmenutmp = pmt->hCurrentMenu;
-        pmt->hCurrentMenu = MENU_ShowSubPopup(pmt->hOwnerWnd, hmenutmp, TRUE, wFlags);
+        pmt->hCurrentMenu = MENU_ShowSubPopup(pmt->hOwnerWnd, hmenutmp, TRUE, wFlags,&pmt->pt);
 
         /* if subpopup was displayed then we are done */
         if (hmenutmp != pmt->hCurrentMenu) return;
@@ -2567,7 +2576,7 @@ static void MENU_KeyRight( MTRACKER* pmt, UINT wFlags )
         if( hmenutmp || pmt->trackFlags & TF_SUSPENDPOPUP )
             if( !MENU_SuspendPopup(pmt, WM_KEYDOWN) )
                 pmt->hCurrentMenu = MENU_ShowSubPopup(pmt->hOwnerWnd,
-                                                       pmt->hTopMenu, TRUE, wFlags);
+                                                       pmt->hTopMenu, TRUE, wFlags,&pmt->pt);
     }
 }
 
@@ -2696,7 +2705,7 @@ static INT MENU_TrackMenu(HMENU hmenu,UINT wFlags,INT x,INT y,HWND hwnd,BOOL inM
 
                     menu = (POPUPMENU*)mt.hCurrentMenu;
                     if (!(menu->wFlags & MF_POPUP))
-                        mt.hCurrentMenu = MENU_ShowSubPopup(mt.hOwnerWnd, mt.hTopMenu, TRUE, wFlags);
+                        mt.hCurrentMenu = MENU_ShowSubPopup(mt.hOwnerWnd, mt.hTopMenu, TRUE, wFlags,&mt.pt);
                     else      /* otherwise try to move selection */
                         MENU_MoveSelection( mt.hOwnerWnd, mt.hCurrentMenu, ITEM_NEXT );
                     break;
@@ -2843,6 +2852,9 @@ void MENU_TrackMouseMenuBar( HWND hWnd, INT ht, POINT pt )
 
     if (IsMenu(hMenu))
     {
+        if (ht == HTCAPTION) wFlags |= TPM_CAPTIONSYSMENU;
+        if (IsIconic(hWnd)) wFlags |= TPM_BOTTOMALIGN; //CB: todo: for minimized windows
+
         MENU_InitTracking( hWnd, hMenu, FALSE, wFlags );
         MENU_TrackMenu( hMenu, wFlags, pt.x, pt.y, hWnd,ht == 0, NULL );
         MENU_ExitTracking(hWnd);
