@@ -302,6 +302,8 @@ DECL_WINELIB_TYPE_AW(CHARFORMAT2)
 #define CFE_SUPERSCRIPT	      0x00020000
 #define CFE_AUTOCOLOR         0x40000000
 
+#define CFE_AUTOBACKCOLOR     CFM_BACKCOLOR
+
 /* ECO operations */
 #define ECOOP_SET             0x0001
 #define ECOOP_OR              0x0002
