@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.2190 2002-06-26 11:07:50 sandervl Exp $ */
+/* $Id: changelog,v 1.2191 2002-06-26 13:34:37 sandervl Exp $ */
 
  2002-06-26: Sander van Leeuwen <sandervl@innotek.de>
     - KERNEL32: o There are no bugs in the WGSS SystemTimeToFileTime & 
@@ -10,6 +10,8 @@
                 o Fixed bug in OSLibGetDriveType; broke GetDriveType for
                   floppy drives
                 o Fixed CreateFile for disks
+                o IOCTL_DISK_GET_DRIVE_GEOMETRY must fail if no disk is inserted;
+                  IOCTL_STORAGE_GET_MEDIA_TYPES/IOCTL_DISK_GET_MEDIA_TYPES shouldn't
 
  2002-06-26: knut st. osmundsen <bird@anduin.net>
     - KERNEL32\testcase:
