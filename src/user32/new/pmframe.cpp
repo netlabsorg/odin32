@@ -1,4 +1,4 @@
-/* $Id: pmframe.cpp,v 1.1 2000-01-01 14:57:21 cbratschi Exp $ */
+/* $Id: pmframe.cpp,v 1.2 2000-01-01 17:07:42 cbratschi Exp $ */
 /*
  * Win32 Frame Managment Code for OS/2
  *
@@ -214,33 +214,110 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
  Win32BaseWindow *win32wnd;
  PFNWP            OldFrameProc;
  MRESULT          rc;
+ THDB            *thdb;
+ MSG             *pWinMsg;
 
   SetWin32TIB();
 
+  thdb = GetThreadTHDB();
   win32wnd = Win32BaseWindow::GetWindowFromOS2FrameHandle(hwnd);
 
-  if(win32wnd == NULL || !win32wnd->getOldFrameProc())
+  if (!thdb || (win32wnd == NULL) || !win32wnd->getOldFrameProc())
   {
     dprintf(("Invalid win32wnd pointer for frame %x!!", hwnd));
     goto RunDefWndProc;
   }
+  pWinMsg = &thdb->msg;
 
   OldFrameProc = (PFNWP)win32wnd->getOldFrameProc();
 
   switch(msg)
   {
     case WM_FORMATFRAME:
+    {
+      RECTL *client;
+
       dprintf(("PMFRAME: WM_FORMATFRAME %x",hwnd));
-      //CB: call WM_NCCALCSIZE and set client pos
-      //    WM_PAINT -> WM_NCPAINT
-      //    WM_HITTEST -> MsgHitTest()
-      //    mouse messages -> MsgButton()
+      client = (PRECTL)mp2;
+#if 0
+//CB: todo: client rect is wrong/not set with WM_NCCALCSIZE
+      mapWin32ToOS2Rect(hwnd,win32wnd->getClientRectPtr(),(PRECTLOS2)client);
+
+      RestorOS2TIB();
+      return (MRESULT)1;
+#else
+      goto RunDefFrameProc;
+#endif
+    }
+
+    case WM_MINMAXFRAME:
+      dprintf(("PMFRAME: WM_MINMAXFRAME %x",hwnd));
+      //CB: todo
       goto RunDefFrameProc;
 
     case WM_QUERYBORDERSIZE:
-      //CB: todo: set to 0
       goto RunDefFrameProc;
 
+    case WM_BUTTON1DOWN:
+    case WM_BUTTON1UP:
+    case WM_BUTTON1DBLCLK:
+    case WM_BUTTON2DOWN:
+    case WM_BUTTON2UP:
+    case WM_BUTTON2DBLCLK:
+    case WM_BUTTON3DOWN:
+    case WM_BUTTON3UP:
+    case WM_BUTTON3DBLCLK:
+        win32wnd->MsgButton(pWinMsg);
+        RestoreOS2TIB();
+        return (MRESULT)TRUE;
+
+    case WM_BUTTON2MOTIONSTART:
+    case WM_BUTTON2MOTIONEND:
+    case WM_BUTTON2CLICK:
+    case WM_BUTTON1MOTIONSTART:
+    case WM_BUTTON1MOTIONEND:
+    case WM_BUTTON1CLICK:
+    case WM_BUTTON3MOTIONSTART:
+    case WM_BUTTON3MOTIONEND:
+    case WM_BUTTON3CLICK:
+        RestoreOS2TIB();
+        return (MRESULT)TRUE;
+
+    case WM_MOUSEMOVE:
+    {
+        //OS/2 Window coordinates -> Win32 Window coordinates
+        win32wnd->MsgMouseMove(pWinMsg);
+        RestoreOS2TIB();
+        return (MRESULT)TRUE;
+    }
+
+    case WM_HITTEST:
+    {
+      DWORD res;
+
+      // Only send this message if the window is enabled
+      if (!WinIsWindowEnabled(hwnd))
+        res = HT_ERROR;
+      else if (win32wnd->getIgnoreHitTest())
+        res = HT_NORMAL;
+      else
+      {
+        dprintf(("USER32: WM_HITTEST %x (%d,%d)",hwnd,(*(POINTS *)&mp1).x,(*(POINTS *)&mp1).y));
+
+        //CB: WinWindowFromPoint: PM sends WM_HITTEST -> loop -> stack overflow
+        win32wnd->setIgnoreHitTest(TRUE);
+        res = win32wnd->MsgHitTest(pWinMsg);
+        win32wnd->setIgnoreHitTest(FALSE);
+      }
+      RestoreOS2TIB();
+      return (MRESULT)res;
+    }
+
+    case WM_PAINT:
+        win32wnd->DispatchMsgA(pWinMsg);
+        goto RunDefWndProc;
+
+//CB: not yet checked
     case WM_ADJUSTWINDOWPOS:
     {
       PSWP     pswp = (PSWP)mp1;
@@ -398,92 +475,10 @@ PosChangedEnd:
     }
 
     case WM_DESTROY:
-      #ifdef PMFRAMELOG
-       dprintf(("PMFRAME: WM_DESTROY"));
-      #endif
+      dprintf(("PMFRAME: WM_DESTROY %x",hwnd));
       WinSubclassWindow(hwnd,OldFrameProc);
       win32wnd->setOldFrameProc(NULL);
       goto RunDefFrameProc;
-
-    case WM_MOUSEMOVE:
-      if (InSizeBox(win32wnd,(POINTS*)&mp1))
-      {
-        WinSetPointer(HWND_DESKTOP,WinQuerySysPointer(HWND_DESKTOP,SPTR_SIZENWSE,FALSE));
-        RestoreOS2TIB();
-        return (MRESULT)TRUE;
-      }
-      else if (win32wnd->isChild()) goto RunDefWndProc;
-      else goto RunDefFrameProc;
-
-    case WM_BUTTON1DOWN:
-      #ifdef PMFRAMELOG
-       dprintf(("PMFRAME: WM_BUTTON1DOWN"));
-      #endif
-
-      if (InSizeBox(win32wnd,(POINTS*)&mp1))
-      {
-        WinSetActiveWindow(HWND_DESKTOP,hwnd);
-        WinSendMsg(hwnd,WM_TRACKFRAME,(MPARAM)(TF_RIGHT | TF_BOTTOM),(MPARAM)0);
-        RestoreOS2TIB();
-        return (MRESULT)TRUE;
-      }
-      else if (win32wnd->isChild()) goto RunDefWndProc;
-      else goto RunDefFrameProc;
-
-    case WM_BUTTON2DOWN:
-    case WM_BUTTON3DOWN:
-      #ifdef PMFRAMELOG
-       dprintf(("PMFRAME: WM_BUTTON2/3DOWN"));
-      #endif
-      if (win32wnd->isChild()) goto RunDefWndProc;
-      else goto RunDefFrameProc;
-
-    case WM_PAINT:
-      #ifdef PMFRAMELOG
-       dprintf(("PMFRAME: WM_PAINT %x",hwnd));
-      #endif
-      if (!win32wnd->isChild())
-      {
-        if (CanDrawSizeBox(win32wnd))
-        {
-          MRESULT res;
-          HPS hps;
-          RECTL rect;
-
-          RestoreOS2TIB();
-          res = OldFrameProc(hwnd,msg,mp1,mp2);
-          SetWin32TIB();
-
-          GetSizeBox(win32wnd,&rect);
-          hps = WinGetClipPS(hwnd,0,PSF_CLIPCHILDREN | PSF_CLIPSIBLINGS);
-          DrawSizeBox(hps,rect);
-          WinReleasePS(hps);
-
-          RestoreOS2TIB();
-          return res;
-        }
-        else goto RunDefFrameProc;
-      }
-      else
-      {
-        RECTL rect;
-        HPS hps;
-
-        RestoreOS2TIB();
-        OldFrameProc(hwnd,msg,mp1,mp2);
-        SetWin32TIB();
-
-        WinQueryWindowRect(hwnd,&rect);
-        rect.xRight = rect.xRight-rect.xLeft;
-        rect.yTop = rect.yTop-rect.yBottom;
-        rect.xLeft = rect.yBottom = 0;
-        hps = WinGetClipPS(hwnd,0,PSF_CLIPCHILDREN | PSF_CLIPSIBLINGS);
-        DrawFrame(hps,&rect,win32wnd);
-        WinReleasePS(hps);
-
-        RestoreOS2TIB();
-        return (MRESULT)0;
-      }
 
     default:
       RestoreOS2TIB();
