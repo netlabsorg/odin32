@@ -1,3 +1,4 @@
+/* $Id: custcntl.h,v 1.3 1999-09-08 13:47:21 sandervl Exp $ */
 #ifndef __CUSTCNTL_H__
 #define __CUSTCNTL_H__
 
