@@ -1,4 +1,4 @@
-/* $Id: mmap.cpp,v 1.69 2004-03-18 13:11:04 sandervl Exp $ */
+/* $Id: mmap.cpp,v 1.70 2004-03-18 13:13:50 sandervl Exp $ */
 
 /*
  * Win32 Memory mapped file & view classes
@@ -63,12 +63,11 @@ void InitializeMemMaps()
 {
     if(globalmapcritsect.hevLock == 0) {
          dprintf(("InitializeMemMaps -> create shared critical section"));
-         DosInitializeCriticalSection(&globalmapcritsect, pszMMapSemName);
     }
     else {
          dprintf(("InitializeMemMaps -> access shared critical section"));
-         DosAccessCriticalSection(&globalmapcritsect, pszMMapSemName);
     }
+    DosAccessCriticalSection(&globalmapcritsect, pszMMapSemName);
 }
 //******************************************************************************
 //******************************************************************************
