@@ -1,4 +1,4 @@
-/* $Id: internet.c,v 1.4 2000-12-27 23:15:05 sandervl Exp $
+/* $Id: internet.c,v 1.5 2001-04-01 10:30:32 sandervl Exp $
  *
  * Wininet
  *
@@ -186,7 +186,7 @@ INTERNETAPI HINTERNET WINAPI InternetOpenA(LPCSTR lpszAgent,
  *    FALSE on failure
  *
  */
-BOOLAPI InternetGetLastResponseInfoA(LPDWORD lpdwError,
+BOOL WINAPI InternetGetLastResponseInfoA(LPDWORD lpdwError,
     LPSTR lpszBuffer, LPDWORD lpdwBufferLength)
 {
     LPWITHREADERROR lpwite=(LPWITHREADERROR)TlsGetValue(g_dwTlsErrIndex);
@@ -214,7 +214,7 @@ BOOLAPI InternetGetLastResponseInfoA(LPDWORD lpdwError,
  *    modem, lan...) in it.
  *    FALSE if not connected
  */
-BOOLAPI InternetGetConnectedState(LPDWORD lpdwStatus, DWORD dwReserved)
+BOOL WINAPI InternetGetConnectedState(LPDWORD lpdwStatus, DWORD dwReserved)
 {
   FIXME("Stub\n");
   return FALSE;
@@ -273,7 +273,7 @@ INTERNETAPI HINTERNET WINAPI InternetConnectA(HINTERNET hInternet,
  *    FALSE on failure
  *
  */
-BOOLAPI InternetFindNextFileA(HINTERNET hFind, LPVOID lpvFindData)
+BOOL WINAPI InternetFindNextFileA(HINTERNET hFind, LPVOID lpvFindData)
 {
         LPWININETAPPINFOA hIC = NULL;
         LPWININETFINDNEXTA lpwh = (LPWININETFINDNEXTA) hFind;
@@ -397,7 +397,7 @@ void INTERNET_CloseHandle(LPWININETAPPINFOA lpwai)
  *    FALSE on failure
  *
  */
-BOOLAPI InternetCloseHandle(HINTERNET hInternet)
+BOOL WINAPI InternetCloseHandle(HINTERNET hInternet)
 {
         BOOL retval = FALSE;
         LPWININETHANDLEHEADER lpwh = (LPWININETHANDLEHEADER) hInternet;
@@ -485,7 +485,7 @@ BOOL SetUrlComponentValue(LPSTR* lppszComponent, LPDWORD dwComponentLen, LPCSTR 
  *    FALSE on failure
  *
  */
-BOOLAPI InternetCrackUrlA(LPCSTR lpszUrl, DWORD dwUrlLength, DWORD dwFlags,
+BOOL WINAPI InternetCrackUrlA(LPCSTR lpszUrl, DWORD dwUrlLength, DWORD dwFlags,
                 LPURL_COMPONENTSA lpUrlComponents)
 {
   /*
@@ -700,7 +700,7 @@ INTERNETAPI DWORD WINAPI InternetAttemptConnect(DWORD dwReserved)
  *    FALSE on failure
  *
  */
-BOOLAPI InternetCanonicalizeUrlA(LPCSTR lpszUrl, LPSTR lpszBuffer,
+BOOL WINAPI InternetCanonicalizeUrlA(LPCSTR lpszUrl, LPSTR lpszBuffer,
         LPDWORD lpdwBufferLength, DWORD dwFlags)
 {
   BOOL bSuccess = FALSE;
@@ -755,7 +755,7 @@ INTERNETAPI INTERNET_STATUS_CALLBACK WINAPI InternetSetStatusCallback(
  *    FALSE on failure
  *
  */
-BOOLAPI InternetWriteFile(HINTERNET hFile, LPCVOID lpBuffer ,
+BOOL WINAPI InternetWriteFile(HINTERNET hFile, LPCVOID lpBuffer ,
         DWORD dwNumOfBytesToWrite, LPDWORD lpdwNumOfBytesWritten)
 {
         BOOL retval = FALSE;
@@ -807,7 +807,7 @@ BOOLAPI InternetWriteFile(HINTERNET hFile, LPCVOID lpBuffer ,
  *    FALSE on failure
  *
  */
-BOOLAPI InternetReadFile(HINTERNET hFile, LPVOID lpBuffer,
+BOOL WINAPI InternetReadFile(HINTERNET hFile, LPVOID lpBuffer,
         DWORD dwNumOfBytesToRead, LPDWORD dwNumOfBytesRead)
 {
         BOOL retval = FALSE;
@@ -955,7 +955,7 @@ INTERNET_SCHEME GetInternetScheme(LPCSTR lpszScheme, int nMaxCmp)
  *      TRUE on success and FALSE on failure.
  * On failure ERROR_NOT_CONNECTED is placed into GetLastError
  */
-BOOLAPI InternetCheckConnectionA( LPCSTR lpszUrl, DWORD dwFlags, DWORD dwReserved)
+BOOL WINAPI InternetCheckConnectionA( LPCSTR lpszUrl, DWORD dwFlags, DWORD dwReserved)
 {
   /* Instead of WINE's shelling out and executing a 'ping' we'll use the */
   /* ICMP.DLL instead.                                                   */
