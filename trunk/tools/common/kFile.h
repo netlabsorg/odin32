@@ -1,4 +1,4 @@
-/* $Id: kFile.h,v 1.5 2000-10-02 04:01:39 bird Exp $
+/* $Id: kFile.h,v 1.6 2000-10-03 05:42:38 bird Exp $
  *
  * kFile - Simple (for the time being) file class.
  *
@@ -53,6 +53,7 @@ public:
     BOOL            read(void *pvBuffer, long cbBuffer) throw(int);
     BOOL            readAt(void *pvBuffer, long cbBuffer, long off) throw(int);
     void *          readFile() throw(int);
+    BOOL            readln(char *pszBuffer, long cchBuffer);
 
     BOOL            write(void *pvBuffer, long cbBuffer) throw(int);
     BOOL            writeAt(void *pvBuffer, long cbBuffer, long off) throw(int);
@@ -60,6 +61,8 @@ public:
     int             printf(const char *pszFormat, ...) throw (int);
 
     BOOL            setSize(unsigned long cbFile = ~0UL);
+
+    kFile &         operator+=(kFile &AppendFile);
 
     /** @cat File seek methods */
     BOOL            move(long off) throw(int);

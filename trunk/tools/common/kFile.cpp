@@ -1,4 +1,4 @@
-/* $Id: kFile.cpp,v 1.5 2000-10-02 04:01:39 bird Exp $
+/* $Id: kFile.cpp,v 1.6 2000-10-03 05:42:38 bird Exp $
  *
  * kFile - Simple (for the time being) file class.
  *
@@ -24,6 +24,7 @@
 #include <string.h>
 #include <stdarg.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "kFile.h"
 
@@ -244,6 +245,56 @@ void *          kFile::readFile() throw(int)
 
 
 /**
+ * Reads a single line from the file into the given buffer.
+ * Newline is stripped!
+ * @returns Success indicator.
+ * @param   pszBuffer   Pointer to string buffer.
+ *                      Will hold a zero-string upon successful return.
+ * @param   cchBuffer   Buffer size.
+ * @sketch
+ * @status  partially implemented.
+ * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @remark  Should implemented buffered read ASAP!
+ */
+BOOL            kFile::readln(char *pszBuffer, long cchBuffer) throw (int)
+{
+    char    *psz;
+    long    cbRead = min(max((long)filestatus.cbFile - (long)offVirtual, 0), cchBuffer-1);
+
+    /*
+     * Read full buffer length or remining part of file into the buffer.
+     * Look for line end.
+     * Found lineend: cut buffer there and rewind file back to that point (but skipping the newline).
+     */
+    if (cbRead == 0 || !read(pszBuffer, cbRead) )
+        return FALSE;
+
+    pszBuffer[cbRead] = '\0';
+
+    psz = strpbrk(pszBuffer, "\r\n");
+    if (psz != NULL)
+    {
+        cbRead -= psz - pszBuffer;
+        if (*psz == '\r')
+        {
+            if (psz[1] == '\n')
+                cbRead -= 2;
+            else
+                cbRead--;
+        }
+        else if (*psz == '\n')
+            cbRead--;
+
+        *psz = '\0';
+
+        return move(-cbRead);
+    }
+
+    return TRUE;
+}
+
+
+/**
  * Writes <cbBuffer> bytes to the file at the current file position.
  * @returns     success indicator. (TRUE/FALSE)
  * @param       pvBuffer    Output buffer.
@@ -346,6 +397,44 @@ BOOL            kFile::setSize(unsigned long cbFile/*= ~0UL*/)
         throw ((int)rc);
 
     return rc == NO_ERROR;
+}
+
+
+
+/**
+ * Appends the AppendFile to this file.
+ * @returns Reference to this file.
+ * @param   AppendFile  Reference to the file we're to append.
+ */
+kFile &         kFile::operator+=(kFile &AppendFile)
+{
+    long    cb;
+    char *  pachBuffer  = new char[1024*256];
+    long    pos         = AppendFile.getPos();
+    BOOL    fAppend     = AppendFile.fThrowErrors;
+    BOOL    fThis       = fThrowErrors;
+
+    setThrowOnErrors();
+    AppendFile.setThrowOnErrors();
+
+    end();
+    AppendFile.start();
+    AppendFile.refreshFileStatus();
+
+    cb = min(1024*256, AppendFile.filestatus.cbFile);
+    while (cb > 0)
+    {
+        AppendFile.read(pachBuffer, cb);
+        write(pachBuffer, cb);
+        cb = min(1024*256, (long)AppendFile.filestatus.cbFile - (long)AppendFile.offVirtual);
+    }
+
+    delete pachBuffer;
+    AppendFile.set(pos);
+    AppendFile.fThrowErrors = fAppend;
+    fThrowErrors            = fThis;
+
+    return *this;
 }
 
 
@@ -467,10 +556,10 @@ BOOL            kFile::isEOF()
     #if 0
     throw(ERROR_NOT_SUPPORTED); //this method don't currently work! Need to use flag!
     #else
-    if (!refreshFileStatus())
+    if (!fReadOnly && !refreshFileStatus())
         return (BOOL)-1;
 
-    return filestatus.cbFile >= offReal; //???
+    return filestatus.cbFile <= offVirtual; //??? - !!!
     #endif
 }
 

@@ -1,4 +1,4 @@
-/* $Id: ImpDef.cpp,v 1.3 1999-09-08 07:30:09 bird Exp $ */
+/* $Id: ImpDef.cpp,v 1.4 2000-10-03 05:42:41 bird Exp $ */
 /*
  * ImpDef - Create export file which use internal names and ordinals.
  *
@@ -14,6 +14,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "ImpDef.h"
+#include "kFile.h"
 #include "kFileFormatBase.h"
 #include "kFileDef.h"
 
@@ -74,11 +75,11 @@ int main(int argc, char **argv)
                     {
                         options.ulOrdStartInternalFunctions = atol(&argv[argi][3]);
                         if (options.ulOrdStartInternalFunctions == 0)
-                            fprintf(stderr, "warning: internal functions starts at ordinal 0!\n");
+                            kFile::StdErr.printf("warning: internal functions starts at ordinal 0!\n");
                     }
                     else
                     {
-                        fprintf(stderr, "incorrect parameter -I:<ord>. (argi=%d, argv[argi]=%s)\n", argi, argv[argi]);
+                        kFile::StdErr.printf("incorrect parameter -I:<ord>. (argi=%d, argv[argi]=%s)\n", argi, argv[argi]);
                         fFatal = TRUE;
                     }
                     break;
@@ -95,7 +96,7 @@ int main(int argc, char **argv)
                     return 0;
 
                 default:
-                    fprintf(stderr, "incorrect parameter. (argi=%d, argv[argi]=%s)\n", argi, argv[argi]);
+                    kFile::StdErr.printf("incorrect parameter. (argi=%d, argv[argi]=%s)\n", argi, argv[argi]);
                     fFatal = TRUE;
                     break;
             }
@@ -108,7 +109,7 @@ int main(int argc, char **argv)
                 pszOutput = argv[argi];
             else
             {
-                fprintf(stderr, "To many files are specified!\n");
+                kFile::StdErr.printf("To many files are specified!\n");
                 fFatal = TRUE;
             }
         }
@@ -118,12 +119,12 @@ int main(int argc, char **argv)
     if (pszInput == NULL)
     {
         fFatal = TRUE;
-        fprintf(stderr, "Missing input file.\n");
+        kFile::StdErr.printf("Missing input file.\n");
     }
     else if (pszOutput == NULL)
     {
         fFatal = TRUE;
-        fprintf(stderr, "Missing output file.\n");
+        kFile::StdErr.printf("Missing output file.\n");
     }
 
     if (!fFatal)
@@ -140,27 +141,28 @@ int main(int argc, char **argv)
  */
 static void syntax(void)
 {
-    printf("\n"
-           "ImpDef - Creates internal import definition file\n"
-           "------------------------------------------------\n"
-           "syntax: ImpDef.exe [-h|-?] [-S] <infile> <outfile>\n"
-           "    -h or -?      Syntax help. (this)\n"
-           "    -F<[+]|->     Fix! Export int.name for int.functions. default: F+\n"
-           "    -I:<ord>      Start of internal function.  default: I:%d\n"
-           "    -O<[+]|->     Remove OS2 prefix on APIs.   default: O-\n"
-           "    -S<[+]|->     Similar to exported name.    default: S+\n"
-           "    infile        Name of input file\n"
-           "    outfile       Name of output file\n"
-           "\n"
-           "Notes:\n"
-           "   -S+ only works on stdcall functions (having '@' in the internal name).\n"
-           "   -S+ takes the '_' and the '@..' parts from the internal name and adds it\n"
-           "   to the exported name. This way the OS2 prefix is removed.\n"
-           "   -O+ has no effect on stdcall functions when -S+ is set. -S+ has higher\n"
-           "   precedence than -O+.\n"
-           "   -O+ only removes the OS2 prefix from internal names.\n",
-           ORD_START_INTERNAL_FUNCTIONS
-           );
+    kFile::StdOut.printf(
+        "\n"
+        "ImpDef - Creates internal import definition file\n"
+        "------------------------------------------------\n"
+        "syntax: ImpDef.exe [-h|-?] [-S] <infile> <outfile>\n"
+        "    -h or -?      Syntax help. (this)\n"
+        "    -F<[+]|->     Fix! Export int.name for int.functions. default: F+\n"
+        "    -I:<ord>      Start of internal function.  default: I:%d\n"
+        "    -O<[+]|->     Remove OS2 prefix on APIs.   default: O-\n"
+        "    -S<[+]|->     Similar to exported name.    default: S+\n"
+        "    infile        Name of input file\n"
+        "    outfile       Name of output file\n"
+        "\n"
+        "Notes:\n"
+        "   -S+ only works on stdcall functions (having '@' in the internal name).\n"
+        "   -S+ takes the '_' and the '@..' parts from the internal name and adds it\n"
+        "   to the exported name. This way the OS2 prefix is removed.\n"
+        "   -O+ has no effect on stdcall functions when -S+ is set. -S+ has higher\n"
+        "   precedence than -O+.\n"
+        "   -O+ only removes the OS2 prefix from internal names.\n",
+        ORD_START_INTERNAL_FUNCTIONS
+        );
 }
 
 
@@ -178,34 +180,33 @@ static void syntax(void)
  */
 static long processFile(const char *pszInput, const char *pszOutput, const POPTIONS pOptions)
 {
-    FILE *phInput;
-    FILE *phOutput;
     long lRc = 0;
 
-    phInput = fopen(pszInput, "rb");
-    if (phInput != NULL)
+    try
     {
+        kFile Input(pszInput);
         try
         {
-            kFileDef DefFile(phInput);
-            phOutput = fopen(pszOutput, "w");
-            if (phOutput != NULL)
+            kFileDef DefFile(&Input);
+            try
             {
                 EXPORTENTRY export;
+                kFile Output(pszOutput, FALSE);
 
                 /* generate LIBRARY line */
-                fputs(";Internal export definition file - autogenerated by ImpDef.", phOutput);
-                fputc('\n', phOutput);
-                fputs(DefFile.queryType(), phOutput);
-                fputc('\n', phOutput);
+                Output.printf(
+                    ";Internal export definition file - autogenerated by ImpDef.\n"
+                    "%s\n",
+                    DefFile.queryType());
+
+                /* Description line */
                 if (DefFile.queryDescription())
-                {
-                    fputs(DefFile.queryDescription(), phOutput);
-                    fputc('\n', phOutput);
-                }
+                    Output.printf("DESCRIPTION %s\n", DefFile.queryDescription());
+
+                /* Exports */
                 if (DefFile.findFirstExport(&export))
                 {
-                    fputs("EXPORTS\n", phOutput);
+                    Output.printf("EXPORTS\n");
                     do
                     {
                         char        szName[MAXEXPORTNAME];
@@ -214,41 +215,43 @@ static long processFile(const char *pszInput, const char *pszOutput, const POPTI
                         /* validate export struct */
                         if (export.achName[0] == '\0')
                         {
-                            fprintf(stderr, "Warning export name is missing.\n");
-                            fprintf(stderr, "info:\texport.achIntName=%s\n\texport.achName=%s\n\texport.ulOrdinal=%ld\n", export.achIntName, export.achName, export.ulOrdinal);
+                            kFile::StdErr.printf(
+                                "Warning export name is missing.\n"
+                                "info:\texport.achIntName=%s\n\texport.achName=%s\n\texport.ulOrdinal=%ld\n",
+                                export.achIntName, export.achName, export.ulOrdinal);
                             continue;
                         }
                         if (export.ulOrdinal == ~0UL)
                         {
-                            fprintf(stderr, "warning: export is missing ordinal value. Export is ignored\n");
-                            fprintf(stderr, "info:\texport.achIntName=%s\n\texport.achName=%s\n\texport.ulOrdinal=%ld\n", export.achIntName, export.achName, export.ulOrdinal);
+                            kFile::StdErr.printf(
+                                "warning: export is missing ordinal value. Export is ignored\n"
+                                "info:\texport.achIntName=%s\n\texport.achName=%s\n\texport.ulOrdinal=%ld\n",
+                                    export.achIntName, export.achName, export.ulOrdinal);
                             continue;
                         }
 
                         /* real work */
                         pszName = generateExportName(&export, &szName[0], pOptions);
 
-                        fprintf(phOutput, "    %-*s  @%ld\n", 40, pszName, export.ulOrdinal);
+                        Output.printf("    %-*s  @%ld\n", 40, pszName, export.ulOrdinal);
                     } while (DefFile.findNextExport(&export));
                 }
-                fclose(phOutput);
             }
-            else
+            catch (int errorcode)
             {
-                fprintf(stderr, "error creating output file, '%s'\n", pszOutput);
+                kFile::StdErr.printf("error creating output file, '%s', errorcode 0x%x\n", pszOutput, errorcode);
                 lRc = -4;
             }
         }
         catch (int errorcode)
         {
-            fprintf(stderr, "%s is not a valid def file, errorcode 0x%x\n", pszInput, errorcode);
+            kFile::StdErr.printf("%s is not a valid def file, errorcode 0x%x\n", pszInput, errorcode);
             lRc = -3;
         }
-        fclose(phInput);
     }
-    else
+    catch (int errorcode)
     {
-        fprintf(stderr, "error openining inputfile, '%s'\n", pszInput);
+        kFile::StdErr.printf( "error openining inputfile, '%s', errorcode 0x%x\n", pszInput, errorcode);
         lRc = -2;
     }
 

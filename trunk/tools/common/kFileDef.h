@@ -50,7 +50,7 @@ typedef struct _DefExport
     char               *pszName;
     char               *pszIntName;
     BOOL                fResident;
-    ULONG               cParam;
+    unsigned long       cParam;
     struct _DefExport  *pNext;
 } DEFEXPORT, *PDEFEXPORT;
 
@@ -65,6 +65,17 @@ class kFileDef : public kFileFormatBase
     private:
         /**@cat pointers to different sections */
         char *pszType;
+        BOOL  fProgram;
+        BOOL  fLibrary;
+        BOOL  fPhysicalDevice;
+        BOOL  fVirtualDevice;
+        BOOL  fInitInstance;
+        BOOL  fTermInstance;
+        BOOL  fInitGlobal;
+        BOOL  fTermGlobal;
+        char *pszModName;
+        char  chAppType;
+
         char *pszBase;
         char *pszCode;
         char *pszData;
@@ -82,13 +93,14 @@ class kFileDef : public kFileFormatBase
         PDEFEXPORT  pExports;
 
         /**@cat internal functions */
-        void  read(FILE *phFile) throw (int);
-        char *readln(FILE *phFile, char *pszBuffer, int cbBuffer) throw (int);
+        void  read(kFile *pFile) throw (int);
+        char *readln(kFile *pFile, char *pszBuffer, int cbBuffer) throw (int);
         BOOL  isKeyword(const char *psz);
+        BOOL  setModuleName(void);
 
     public:
         /**@cat Constructor/Destructor */
-        kFileDef(FILE *phFile) throw(int);
+        kFileDef(kFile *pFile) throw(int);
         virtual ~kFileDef();
 
         /**@cat queries... */
@@ -96,6 +108,7 @@ class kFileDef : public kFileFormatBase
         BOOL        findFirstExport(PEXPORTENTRY pExport);
         BOOL        findNextExport(PEXPORTENTRY pExport);
         BOOL        isDef() const                { return TRUE;}
+        char const *queryModuleName(void) const  { return pszModName;     }
         char const *queryType(void) const        { return pszType;        }
         char const *queryBase(void) const        { return pszBase;        }
         char const *queryCode(void) const        { return pszCode;        }
@@ -107,6 +120,11 @@ class kFileDef : public kFileFormatBase
         char const *queryProtmode(void) const    { return pszProtmode;    }
         char const *queryStackSize(void) const   { return pszStackSize;   }
         char const *queryStub(void) const        { return pszStub;        }
+
+        /**@cat Operations */
+        BOOL        makeWatcomLinkFileAddtion(kFile *pFile) throw(int);
+
+        enum {fullscreen = 0, pmvio = 2, pm = 3, unknown = 255};
 };
 
 

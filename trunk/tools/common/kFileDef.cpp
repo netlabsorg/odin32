@@ -17,7 +17,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <assert.h>
 
+#include "kFile.h"
 #include "kFileFormatBase.h"
 #include "kFileDef.h"
 
@@ -25,22 +27,38 @@
 /*******************************************************************************
 *   Internal Functions                                                         *
 *******************************************************************************/
-static char *dupeString(const char *psz);
+static char *dupeString(const char *psz, BOOL fSkipFirstWord = FALSE);
 static char *trim(char *psz);
+static char *ltrim(const char *psz);
 static char *removeFnutts(char *pszStr);
+inline char  upcase(char ch);
+static char *stristr(const char *pszStr, const char *pszSubStr);
+
 
 /**
  * Duplicates a string.
- * @returns   Pointer to stringcopy. Remeber to delete this!
- * @param     psz  Pointer to string to duplicate.
+ * @returns Pointer to stringcopy. Remeber to delete this!
+ * @param   psz             Pointer to string to duplicate.
+ * @param   fSkipFirstWord  Skips the first word before duplicating the string.
  */
-static char *dupeString(const char *psz)
+static char *dupeString(const char *psz, BOOL fSkipFirstWord/* = FALSE*/)
 {
     char *pszDupe;
     if (psz == NULL)
         return NULL;
+
+    if (fSkipFirstWord)
+    {
+        while (*psz != ' ' && *psz != '\t' && *psz != '\n' && *psz != '\r' && *psz != '\0')
+            psz++;
+        psz = ltrim(psz);
+    }
+
     pszDupe = new char[strlen(psz)+1];
-    return strcpy(pszDupe, psz);
+    strcpy(pszDupe, psz);
+    if (fSkipFirstWord)
+        return removeFnutts(pszDupe);
+    return pszDupe;
 }
 
 
@@ -55,25 +73,47 @@ static char *trim(char *psz)
     int i;
     if (psz == NULL)
         return NULL;
-    while (*psz == ' ')
+    while (*psz == ' ' || *psz == '\t')
         psz++;
     i = strlen(psz) - 1;
-    while (i >= 0 && psz[i] == ' ')
+    while (i >= 0 && (psz[i] == ' ' || psz[i] == '\t'))
         i--;
     psz[i+1] = '\0';
     return psz;
 }
 
 
-kFileDef::kFileDef(FILE *phFile) throw(int)
-    :pszType(NULL), pszBase(NULL), pszCode(NULL), pszData(NULL), pszDescription(NULL),
+/**
+ * Trims a string, that is removing blank spaces at start and end.
+ * @returns   Pointer to first non-blank char.
+ * @param     psz  Pointer to string.
+ * @result    Blank at end of string is removed. ('\0' is moved to the left.)
+ */
+static char *ltrim(const char *psz)
+{
+    if (psz == NULL)
+        return NULL;
+
+    while (*psz == ' ' || *psz == '\t')
+        psz++;
+    return (char *)psz;
+}
+
+
+
+kFileDef::kFileDef(kFile *pFile) throw(int)
+    :pszType(NULL), pszModName(NULL), pszBase(NULL), pszCode(NULL), pszData(NULL), pszDescription(NULL),
     pszExeType(NULL), pszHeapSize(NULL), pszOld(NULL), pszProtmode(NULL), pszStackSize(NULL),
-    pszStub(NULL), pSegments(NULL), pImports(NULL), pExports(NULL)
+    pszStub(NULL), pSegments(NULL), pImports(NULL), pExports(NULL),
+    fProgram(FALSE), fLibrary(FALSE), fPhysicalDevice(FALSE), fVirtualDevice(FALSE),
+    fInitInstance(FALSE), fTermInstance(FALSE), fInitGlobal(FALSE), fTermGlobal(FALSE),
+    chAppType(kFileDef::unknown)
 {
     /* determin file size */
-    if (!fseek(phFile, 0, SEEK_SET))
+
+    if (pFile->start())
     {
-        this->read(phFile);
+        this->read(pFile);
     }
     else
         throw (0x001);
@@ -125,17 +165,17 @@ kFileDef::~kFileDef()
 
 /**
  * Read/parse the Definition file.
- * @param     phFile  Handle to file.
- * @remark    throws errorcode on error (TODO: errorhandling)
+ * @param   pFile   Pointer to fileobject.
+ * @remark  throws errorcode on error (TODO: errorhandling)
  */
-void kFileDef::read(FILE *phFile) throw (int)
+void kFileDef::read(kFile *pFile) throw (int)
 {
     char *pszTmp;
     char *psz;
     char  szBuffer[256];
 
     /* readloop */
-    psz = readln(phFile, &szBuffer[0], sizeof(szBuffer));
+    psz = readln(pFile, &szBuffer[0], sizeof(szBuffer));
     while (psz != NULL)
     {
         BOOL fNext = TRUE;
@@ -145,46 +185,67 @@ void kFileDef::read(FILE *phFile) throw (int)
         {
             if (pszType != NULL) throw (0x101);
             pszType = dupeString(psz);
+            fLibrary = TRUE;
+            if (!setModuleName())
+                throw (0x107);
+            fInitInstance = stristr(pszType, "INITINSTANCE") != NULL;
+            fInitGlobal   = stristr(pszType, "INITGLOBAL")   != NULL || !fInitInstance;
+            fTermInstance = stristr(pszType, "TERMINSTANCE") != NULL;
+            fTermGlobal   = stristr(pszType, "TERMGLOBAL")   != NULL || !fTermInstance;
         }
         else if (StringCase(psz, "NAME"))
         {
             if (pszType != NULL) throw (0x101);
             pszType = dupeString(psz);
+            fProgram = TRUE;
+            setModuleName();
+            if (stristr(pszType, "WINDOWAPI"))
+                chAppType = kFileDef::pm;
+            else if (stristr(pszType, "NOTWINDOWCOMPAT"))
+                chAppType = kFileDef::fullscreen;
+            else if (stristr(pszType, "WINDOWCOMPAT"))
+                chAppType = kFileDef::pmvio;
+            else
+                chAppType = kFileDef::unknown;
         }
         else if (StringCase(psz, "PHYSICAL DEVICE")) //gap is fixed to one space, this may be fixed in readln.
         {
             if (pszType != NULL) throw (0x101);
             pszType = dupeString(psz);
+            fPhysicalDevice = TRUE;
+            setModuleName();
         }
         else if (StringCase(psz, "VIRTUAL DEVICE")) //gap is fixed to one space, this may be fixed in readln.
         {
             if (pszType != NULL) throw (0x101);
             pszType = dupeString(psz);
+            fVirtualDevice = TRUE;
+            setModuleName();
         }
         else if (StringCase(psz, "BASE"))
-            pszBase = dupeString(psz);
+            pszBase = dupeString(psz, TRUE);
         else if (StringCase(psz, "CODE"))
-            pszCode = dupeString(psz);
+            pszCode = dupeString(psz, TRUE);
         else if (StringCase(psz, "DATA"))
-            pszData = dupeString(psz);
+            pszData = dupeString(psz, TRUE);
         else if (StringCase(psz, "DESCRIPTION"))
-            pszDescription = dupeString(psz);
+            pszDescription = dupeString(psz, TRUE);
         else if (StringCase(psz, "EXETYPE"))
-            pszExeType = dupeString(psz);
+            pszExeType = dupeString(psz, TRUE);
         else if (StringCase(psz, "HEAPSIZE"))
-            pszHeapSize = dupeString(psz);
+            pszHeapSize = dupeString(psz, TRUE);
         else if (StringCase(psz, "OLD"))
-            pszOld = dupeString(psz);
+            pszOld = dupeString(psz, TRUE);
         else if (StringCase(psz, "PROTMODE"))
-            pszProtmode = dupeString(psz);
+            pszProtmode = dupeString(psz, TRUE);
         else if (StringCase(psz, "STACKSIZE"))
-            pszStackSize = dupeString(psz);
+            pszStackSize = dupeString(psz, TRUE);
         else if (StringCase(psz, "STUB"))
-            pszStub = dupeString(psz);
+            pszStub = dupeString(psz, TRUE);
         else if (StringCase(psz, "SEGMENTS"))
         {
             PDEFSEGMENT *pps = &pSegments;
-            while (!isKeyword(psz = readln(phFile, &szBuffer[0], sizeof(szBuffer))) && psz != NULL)
+            while (!isKeyword(psz = readln(pFile, &szBuffer[0], sizeof(szBuffer))) && psz != NULL)
             {
                 *pps = new DEFSEGMENT; memset(*pps, 0, sizeof(**pps));
                 (**pps).psz = dupeString(psz);
@@ -195,7 +256,7 @@ void kFileDef::read(FILE *phFile) throw (int)
         else if (StringCase(psz, "IMPORTS"))
         {
             PDEFIMPORT *ppi = &pImports;
-            while (!isKeyword(psz = readln(phFile, &szBuffer[0], sizeof(szBuffer))) && psz != NULL)
+            while (!isKeyword(psz = readln(pFile, &szBuffer[0], sizeof(szBuffer))) && psz != NULL)
             {
                 //DOSCALL1.154 or DosQueryHeaderInfo = DOSCALL1.154
                 *ppi = new DEFIMPORT; memset(*ppi, 0, sizeof(**ppi));
@@ -228,7 +289,7 @@ void kFileDef::read(FILE *phFile) throw (int)
         else if (StringCase(psz, "EXPORTS"))
         {
             PDEFEXPORT *ppe = &pExports;
-            while (!isKeyword(psz = readln(phFile, &szBuffer[0], sizeof(szBuffer))) && psz != NULL)
+            while (!isKeyword(psz = readln(pFile, &szBuffer[0], sizeof(szBuffer))) && psz != NULL)
             {
                 /* CloseHandle = CloseHandle@4 @1234 RESIDENTNAME 2 */
                 *ppe = new DEFEXPORT; memset(*ppe, 0, sizeof(**ppe));
@@ -311,24 +372,24 @@ void kFileDef::read(FILE *phFile) throw (int)
 
         /* next ? */
         if (fNext)
-            psz = readln(phFile, &szBuffer[0], sizeof(szBuffer));
+            psz = readln(pFile, &szBuffer[0], sizeof(szBuffer));
     }
 
     /* sanity check */
     if (pszType == NULL)
-        throw (0x106);
+        throw ((int)0x106);
 }
 
 
 /**
  * Reads first meaning full line from a file into a buffer.
  * @returns   Pointer to buffer on success;  NULL on error.
- * @param     phFile     Filea handle.
+ * @param     pFile      Pointer to fileobject to read line from.
  * @param     pszBuffer  Pointer to buffer.
  * @param     cbBuffer   Size of buffer.
  * @remark    tabs are expanded. string is trimmed. comments removed.
  */
-char *kFileDef::readln(FILE *phFile, char *pszBuffer, int cbBuffer) throw (int)
+char *kFileDef::readln(kFile *pFile, char *pszBuffer, int cbBuffer) throw (int)
 {
     int i;
     int cch;
@@ -336,12 +397,11 @@ char *kFileDef::readln(FILE *phFile, char *pszBuffer, int cbBuffer) throw (int)
     do
     {
         /* read line */
-        if (!fgets(pszBuffer, cbBuffer, phFile))
+        if (!pFile->readln(pszBuffer, cbBuffer))
         {
-            if (feof(phFile))
-                return FALSE;
-            else
+            if (!pFile->isEOF())
                 throw (0x201);
+            return FALSE;
         }
 
         /* check for and remove comments, and get string length. */
@@ -377,7 +437,7 @@ char *kFileDef::readln(FILE *phFile, char *pszBuffer, int cbBuffer) throw (int)
             if (i > 0)
                 memmove(pszBuffer, &pszBuffer[i], cch + 1);
         }
-    } while ((*pszBuffer == ';' || cch == 0) && !feof(phFile));
+    } while ((*pszBuffer == ';' || cch == 0) && !pFile->isEOF());
 
     return !(*pszBuffer == ';' || cch == 0) ? pszBuffer : NULL;
 }
@@ -415,26 +475,48 @@ BOOL kFileDef::isKeyword(const char *psz)
 
 
 /**
- * Queries the module name.
+ * Extracts the module name from the pszType string.
  * @returns   Success indicator.
  * @param     pszBuffer  Pointer to string buffer which is to hold the module name upon return.
  * @remark    Assumes that pszBuffer is large enough.
  */
-BOOL  kFileDef::queryModuleName(char *pszBuffer)
+BOOL  kFileDef::setModuleName(void)
 {
-    char *psz;
+    char *pszEnd;
+    char *pszStart;
 
-    if (pszType != NULL && StringCase(pszType, "LIBRARY"))
+    assert(pszType);
+
+    /* skip the first word */
+    pszStart = strpbrk(pszType, " \t");
+    if (pszStart != NULL)
     {
-        psz = pszType + sizeof("LIBRARY") - 1;
-        while (*psz == ' ')
-            psz++;
-        while (*psz != '\0' && *psz != ' ')
-            *pszBuffer++ = *psz++;
-        *pszBuffer = '\0';
+        pszStart = ltrim(pszStart);
+        pszEnd = strpbrk(pszStart, " \t");
+        if (pszEnd == NULL)
+            pszEnd = pszStart + strlen(pszEnd);
+        pszModName = new char[pszEnd - pszStart + 1];
+        memcpy(pszModName, pszStart, pszEnd - pszStart);
+        pszModName[pszEnd - pszStart] = '\0';
     }
     else
+        return !StringCase(pszType, "LIBRARY");
+    return TRUE;
+}
+
+
+/**
+ * Query for the module name.
+ * @returns   Success indicator. TRUE / FALSE.
+ * @param     pszBuffer  Pointer to buffer which to put the name into.
+ */
+BOOL  kFileDef::queryModuleName(char *pszBuffer)
+{
+    if (pszModName == NULL)
         return FALSE;
+
+    strcpy(pszBuffer, pszModName);
+
     return TRUE;
 }
 
@@ -496,6 +578,124 @@ BOOL  kFileDef::findNextExport(PEXPORTENTRY pExport)
 
 
 /**
+ * Make a Watcom Linker parameter file addtition of this definition file.
+ * @returns Success indicator.
+ * @param   pFile   File which we're to write to (append).
+ *                  Appends at current posistion.
+ * @sketch
+ * @status
+ * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @remark
+ */
+BOOL  kFileDef::makeWatcomLinkFileAddtion(kFile *pFile) throw(int)
+{
+    PDEFSEGMENT pSeg;
+    PDEFIMPORT  pImp;
+    PDEFEXPORT  pExp;
+    pFile->setThrowOnErrors();
+
+    /*
+     * Write a little remark first to tell that converted stuff starts here.
+     */
+    pFile->printf("#\n# Directives generated from .DEF-file.\n#\n");
+
+    /* Format - Module type */
+    pFile->printf("FORMAT OS2 LX %s %s %s\n",
+                  fLibrary                               ? "DLL" :
+                    (fProgram ? (chAppType == pm         ? "PM"
+                              : (chAppType == fullscreen ? "FULLSCREEN"
+                                                         : "PMCOMPATIBLE"))
+                    : (fVirtualDevice                    ? "VIRTDEVICE"
+                                                         : "PHYSDEVICE" )),
+                  fLibrary ? (fInitGlobal ? "INITGLOBAL" : "INITINSTANCE") : "",
+                  fLibrary ? (fTermGlobal ? "TERMGLOBAL" : "TERMINSTANCE") : "");
+
+
+    /* Module name */
+    if (pszModName)
+        pFile->printf("OPTION MODNAME=%s\n", pszModName);
+
+    /* Description */
+    if (pszDescription)
+        pFile->printf("OPTION DESCRIPTION '%s'\n", pszDescription);
+
+    /* Base */
+    if (pszBase)
+        pFile->printf("OPTION OFFSET=%s\n", pszBase);
+
+    /* Stub */
+    if (pszStub)
+        pFile->printf("OPTION STUB='%s'\n", pszStub);
+
+    /* Old */
+    if (pszOld)
+        pFile->printf("OPTION OLDLIBRARY=%s\n", pszOld);
+
+    /* Protected mode */
+    if (pszProtmode)
+        pFile->printf("OPTION PROTMODE\n", pszProtmode);
+
+    /* Stacksize */
+    if (pszStackSize)
+        pFile->printf("OPTION STACK=%s\n", pszStackSize);
+
+    /* HeapSize */
+    if (pszHeapSize)
+        pFile->printf("OPTION HEAPSIZE=%s\n", pszHeapSize);
+
+    /* Code  -  not supported */
+
+    /* Data  -  not supported */
+
+    /*
+     * Segments.
+     */
+    pSeg = pSegments;
+    while (pSeg != NULL)
+    {
+        pFile->printf("SEGMENT %s\n", pSeg->psz);
+        pSeg = pSeg->pNext;
+    }
+
+    /*
+     * Imports.
+     */
+    pImp = pImports;
+    while (pImp != NULL)
+    {
+        if (pImp->pszName == NULL)
+            pFile->printf("IMPORT '%s' '%s'.%d\n", pImp->pszIntName, pImp->pszDll, pImp->ulOrdinal);
+        else
+            pFile->printf("IMPORT '%s' '%s'.'%s'\n", pImp->pszIntName, pImp->pszDll, pImp->pszName);
+        pImp = pImp->pNext;
+    }
+
+    /*
+     * Exports.
+     */
+    pExp = pExports;
+    while (pExp != NULL)
+    {
+        pFile->printf("EXPORT '%s'", pExp->pszName);
+        if (pExp->ulOrdinal != ~0UL)
+            pFile->printf(".%d", pExp->ulOrdinal);
+        if (pExp->pszIntName)
+            pFile->printf("='%s'", pExp->pszIntName);
+        if (pExp->fResident)
+            pFile->printf(" RESIDENT");
+        if (pExp->cParam != ~0UL)
+            pFile->printf(" %d", pExp->cParam * 2); /* .DEFs this is number of words. Watcom should have bytes. */
+        pFile->printf("\n");
+        pExp = pExp->pNext;
+    }
+
+    return TRUE;
+}
+
+
+
+
+/**
  * Removes '"' and ''' at start and end of the string.
  * @returns     pszStr!
  * @param       pszStr  String that is to have "s and 's removed.
@@ -513,3 +713,40 @@ static char *removeFnutts(char *pszStr)
     }
     return pszStr;
 }
+
+
+/**
+ * Upcases a char.
+ * @returns   Upper case of the char given in ch.
+ * @param     ch  Char to capitalize.
+ */
+inline char upcase(char ch)
+{
+    return ch >= 'a' && ch <= 'z' ? (char)(ch - ('a' - 'A')) : ch;
+}
+
+
+/**
+ * Searches for a substring in a string.
+ * @returns   Pointer to start of substring when found, NULL when not found.
+ * @param     pszStr     String to be searched.
+ * @param     pszSubStr  String to be searched.
+ * @remark    Depends on the upcase function.
+ */
+static char *stristr(const char *pszStr, const char *pszSubStr)
+{
+    int cchSubStr = strlen(pszSubStr);
+    int i = 0;
+
+    while (*pszStr != '\0' && i < cchSubStr)
+    {
+        i = 0;
+        while (i < cchSubStr && pszStr[i] != '\0' &&
+               (upcase(pszStr[i]) == upcase(pszSubStr[i])))
+            i++;
+        pszStr++;
+    }
+
+    return (char*)(*pszStr != '\0' ? pszStr - 1 : NULL);
+}
+
