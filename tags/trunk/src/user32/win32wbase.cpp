@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.108 1999-12-09 00:53:37 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.109 1999-12-09 10:59:04 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1538,7 +1538,7 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
     case WM_GETTEXT:
         if (!lParam || !wParam) return 0;
         if (!windowNameA) ((LPSTR)lParam)[0] = 0;
-        else strncpy((LPSTR)lParam, windowNameA, wParam);
+        else lstrcpynA((LPSTR)lParam, windowNameA, wParam);
         return min(wndNameLength, wParam);
 
     case WM_SETTEXT:

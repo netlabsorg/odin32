@@ -1,4 +1,4 @@
-/* $Id: win32class.cpp,v 1.7 1999-12-09 00:53:36 sandervl Exp $ */
+/* $Id: win32class.cpp,v 1.8 1999-12-09 10:59:37 sandervl Exp $ */
 /*
  * Win32 Window Class Managment Code for OS/2
  *
@@ -279,7 +279,7 @@ BOOL Win32WndClass::getClassInfo(WNDCLASSEXW *wndclass)
 ULONG Win32WndClass::getClassName(LPSTR lpszClassName, ULONG cchClassName)
 {
   if(HIWORD(classNameA)) {
-        strncpy(lpszClassName, classNameA, cchClassName-1);
+        lstrncpyA(lpszClassName, classNameA, cchClassName-1);
         return strlen(lpszClassName);
   }
   *(ULONG *)lpszClassName = classAtom;
