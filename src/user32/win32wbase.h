@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.73 2000-01-21 13:30:35 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.74 2000-01-26 18:02:37 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -428,6 +428,7 @@ public:
          fakeOpen32WinBaseClass fakeWinBase;
 
          VOID  AdjustMaximizedRect(LPRECT rect);
+         VOID  AdjustTrackInfo(PPOINT minTrackSize,PPOINT maxTrackSize);
 
          BOOL   isOwnDC() { return (windowClass && windowClass->getStyle() & CS_OWNDC_W); }
          HDC    getOwnDC() { return ownDC; }

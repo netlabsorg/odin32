@@ -1,4 +1,4 @@
-/* $Id: win32wbasenonclient.cpp,v 1.4 2000-01-20 16:48:57 cbratschi Exp $ */
+/* $Id: win32wbasenonclient.cpp,v 1.5 2000-01-26 18:02:37 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (non-client methods)
  *
@@ -330,6 +330,13 @@ VOID Win32BaseWindow::AdjustMaximizedRect(LPRECT rect)
         if (HAS_THINFRAME( dwStyle ))
           InflateRect( rect, GetSystemMetrics(SM_CXBORDER), GetSystemMetrics(SM_CYBORDER));
   }
+}
+//******************************************************************************
+//******************************************************************************
+VOID Win32BaseWindow::AdjustTrackInfo(PPOINT minTrackSize,PPOINT maxTrackSize)
+{
+  if ((dwStyle & WS_THICKFRAME) || !(dwStyle & (WS_POPUP | WS_CHILD)))
+    GetMinMaxInfo(NULL,NULL,minTrackSize,maxTrackSize);
 }
 //******************************************************************************
 //******************************************************************************

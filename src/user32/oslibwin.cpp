@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.63 2000-01-21 13:30:34 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.64 2000-01-26 18:02:34 cbratschi Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -92,7 +92,7 @@ HWND OSLibWinCreateWindow(HWND hwndParent,ULONG dwWinStyle,
                                 id, &FCData, NULL);
 
   if (*hwndFrame) {
-    hwndClient = WinCreateWindow (*hwndFrame,saveBits ? WIN32_STDCLASS:WIN32_STDCLASS2,
+    hwndClient = WinCreateWindow (*hwndFrame,saveBits ? WIN32_STDCLASS2:WIN32_STDCLASS,
                                   NULL, dwClientStyle, 0, 0, 0, 0,
                                   *hwndFrame, HWND_TOP, FID_CLIENT, NULL, NULL);
     return hwndClient;
@@ -524,11 +524,19 @@ void OSLibMapSWPtoWINDOWPOS(PSWP pswp, PWINDOWPOS pwpos, PSWP pswpOld, HWND hPar
     {
         point.x = swpFrame.x;
         point.y = swpFrame.y;
-        if(hParent)
+
+        if (hParent)
         {
-                WinMapWindowPoints(hParent, HWND_DESKTOP, &point, 1);
+          RECTL parentRect;
+
+          WinQueryWindowRect(hParent,&parentRect);
+          parentHeight = parentRect.yTop;
+        } else
+        {
+          parentHeight = ScreenHeight;
         }
-        point.y = ScreenHeight-point.y-swpFrame.cy;
+
+        point.y = parentHeight-point.y-swpFrame.cy;
 
         cy = swpFrame.cy;
         cx = swpFrame.cx;
@@ -609,14 +617,19 @@ void OSLibMapSWPtoWINDOWPOSFrame(PSWP pswp, struct tagWINDOWPOS *pwpos, PSWP psw
 
     if(fuFlags & (SWP_MOVE | SWP_SIZE))
     {
-        point.x = x;
-        point.y = y;
-
-        if(hParent)
+        if (hParent)
         {
-                WinMapWindowPoints(hParent, HWND_DESKTOP, &point, 1);
+          RECTL parentRect;
+
+          WinQueryWindowRect(hParent,&parentRect);
+          parentHeight = parentRect.yTop;
+        } else
+        {
+          parentHeight = ScreenHeight;
         }
-        point.y = ScreenHeight-point.y-cy;
+
+        point.x = x;
+        point.y = parentHeight-y-cy;
 
         x  = point.x;
         y  = point.y;
@@ -705,10 +718,7 @@ void OSLibMapWINDOWPOStoSWP(PWINDOWPOS pwpos, PSWP pswp, PSWP pswpOld, HWND hPar
          x = pswpOld->x;
          y = pswpOld->y;
 
-         if (!((y == 0) && (pswpOld->cy == 0)))
-         {
-            y = parentHeight-y-pswpOld->cy;
-         }
+         y = parentHeight-y-pswpOld->cy;
       }
 
       if (flags & SWP_SIZE)
@@ -723,8 +733,7 @@ void OSLibMapWINDOWPOStoSWP(PWINDOWPOS pwpos, PSWP pswp, PSWP pswpOld, HWND hPar
       }
       y  = parentHeight-y-cy;
 
-
-       if ((pswpOld->x == x) && (pswpOld->y == y))
+      if ((pswpOld->x == x) && (pswpOld->y == y))
          flags &= ~SWP_MOVE;
 
       if ((pswpOld->cx == cx) && (pswpOld->cy == cy))
@@ -756,7 +765,6 @@ void OSLibMapWINDOWPOStoSWPFrame(PWINDOWPOS pwpos, PSWP pswp, PSWP pswpOld, HWND
    long cy              = pwpos->cy;
    UINT fuFlags         = pwpos->flags;
    ULONG parentHeight;
-   POINTL point;
 
    HWND  hWinAfter;
    ULONG flags = 0;
@@ -786,20 +794,16 @@ void OSLibMapWINDOWPOStoSWPFrame(PWINDOWPOS pwpos, PSWP pswp, PSWP pswpOld, HWND
 
    if (flags & (SWP_MOVE | SWP_SIZE))
    {
-      point.x = x;
-      point.y = y;
+      if (hParent)
+      {
+        RECTL parentRect;
 
-      if(hParent) {
-            parentHeight = OSLibGetWindowHeight(hParent);
-
-            point.y = ScreenHeight-point.y-cy;
-            WinMapWindowPoints(HWND_DESKTOP, hParent, &point, 1);
-            point.y = parentHeight-point.y-cy;
+        WinQueryWindowRect(hParent,&parentRect);
+        parentHeight = parentRect.yTop;
+      } else
+      {
+        parentHeight = ScreenHeight;
       }
-      else  parentHeight = ScreenHeight;
-
-      x  = point.x;
-      y  = point.y;
 
       if (flags & SWP_SIZE)
       {
@@ -813,8 +817,7 @@ void OSLibMapWINDOWPOStoSWPFrame(PWINDOWPOS pwpos, PSWP pswp, PSWP pswpOld, HWND
       }
       y  = parentHeight-y-cy;
 
-
-       if ((pswpOld->x == x) && (pswpOld->y == y))
+      if ((pswpOld->x == x) && (pswpOld->y == y))
          flags &= ~SWP_MOVE;
 
       if ((pswpOld->cx == cx) && (pswpOld->cy == cy))
