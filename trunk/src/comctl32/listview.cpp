@@ -1,4 +1,4 @@
-/*$Id: listview.cpp,v 1.9 2000-03-27 15:08:07 cbratschi Exp $*/
+/*$Id: listview.cpp,v 1.10 2000-03-31 14:44:20 cbratschi Exp $*/
 /*
  * Listview control
  *
@@ -163,7 +163,6 @@ static VOID LISTVIEW_Refresh(HWND hwnd)
 
   if ((infoPtr->uView == LVS_REPORT) && !(infoPtr->dwStyle & LVS_NOCOLUMNHEADER))
   {
-    LISTVIEW_INFO *infoPtr = (LISTVIEW_INFO*)LISTVIEW_GetInfoPtr(hwnd);
     RECT rect,rect2;
 
     GetClientRect(hwnd,&rect);
@@ -3556,10 +3555,11 @@ static LRESULT LISTVIEW_GetCountPerPage(HWND hwnd)
  */
 static LRESULT LISTVIEW_GetExtendedListViewStyle(HWND hwnd)
 {
-    LISTVIEW_INFO *infoPtr;
+    LISTVIEW_INFO *infoPtr = (LISTVIEW_INFO *)LISTVIEW_GetInfoPtr(hwnd);
+
     /* make sure we can get the listview info */
-    if (!(infoPtr = (LISTVIEW_INFO *)LISTVIEW_GetInfoPtr(hwnd)))
-        return (0);
+    if (!infoPtr)
+      return (0);
     return (infoPtr->dwExStyle);
 }
 
@@ -4038,10 +4038,11 @@ static LRESULT LISTVIEW_GetItem(HWND hwnd,LPLVITEMW lpLVItem,BOOL unicode,BOOL i
  */
 static LRESULT LISTVIEW_GetHotItem(HWND hwnd)
 {
-    LISTVIEW_INFO *infoPtr;
+    LISTVIEW_INFO *infoPtr = (LISTVIEW_INFO *)LISTVIEW_GetInfoPtr(hwnd);
+
     /* make sure we can get the listview info */
-    if (!(infoPtr = (LISTVIEW_INFO *)LISTVIEW_GetInfoPtr(hwnd)))
-        return (-1);
+    if (!infoPtr)
+      return (-1);
     return (infoPtr->nHotItem);
 }
 
@@ -5494,17 +5495,18 @@ static LRESULT LISTVIEW_SetColumnOrderArray(HWND hwnd, INT iCount, LPINT lpiArra
  */
 static LRESULT LISTVIEW_SetColumnWidth(HWND hwnd, INT iCol, INT cx)
 {
-    LISTVIEW_INFO *infoPtr;
+    LISTVIEW_INFO *infoPtr = (LISTVIEW_INFO *)LISTVIEW_GetInfoPtr(hwnd);
     HDITEMA hdi;
     LRESULT lret;
+
+    // make sure we can get the listview info
+    if (!infoPtr)
+        return (FALSE);
 
     // set column width only if in report mode
     if (infoPtr->uView != LVS_REPORT)
         return (FALSE);
 
-    // make sure we can get the listview info
-    if (!(infoPtr = (LISTVIEW_INFO *)LISTVIEW_GetInfoPtr(hwnd)))
-        return (FALSE);
     if (!infoPtr->hwndHeader) // make sure we have a header
         return (FALSE);
 
@@ -5541,11 +5543,12 @@ static LRESULT LISTVIEW_SetColumnWidth(HWND hwnd, INT iCol, INT cx)
  */
 static LRESULT LISTVIEW_SetExtendedListViewStyle(HWND hwnd, DWORD dwMask, DWORD dwStyle)
 {
-    LISTVIEW_INFO *infoPtr;
+    LISTVIEW_INFO *infoPtr = (LISTVIEW_INFO *)LISTVIEW_GetInfoPtr(hwnd);
     DWORD dwOldStyle;
+
     /* make sure we can get the listview info */
-    if (!(infoPtr = (LISTVIEW_INFO *)LISTVIEW_GetInfoPtr(hwnd)))
-        return (0);
+    if (!infoPtr)
+      return (0);
     /* store previous style */
     dwOldStyle = infoPtr->dwExStyle;
     /* set new style */
@@ -5569,10 +5572,11 @@ static LRESULT LISTVIEW_SetExtendedListViewStyle(HWND hwnd, DWORD dwMask, DWORD 
  */
 static LRESULT LISTVIEW_SetHotItem(HWND hwnd, INT iIndex)
 {
-    LISTVIEW_INFO *infoPtr;
+    LISTVIEW_INFO *infoPtr = (LISTVIEW_INFO *)LISTVIEW_GetInfoPtr(hwnd);
     INT iOldIndex;
+
     /* make sure we can get the listview info */
-    if (!(infoPtr = (LISTVIEW_INFO *)LISTVIEW_GetInfoPtr(hwnd)))
+    if (!infoPtr)
         return (-1);
     /* store previous index */
     iOldIndex = infoPtr->nHotItem;
@@ -5925,6 +5929,7 @@ static LRESULT LISTVIEW_SetSelectionMark(HWND hwnd, INT nIndex)
 {
   LISTVIEW_INFO *infoPtr = (LISTVIEW_INFO *)LISTVIEW_GetInfoPtr(hwnd);
   INT nOldIndex = infoPtr->nSelectionMark;
+
   infoPtr->nSelectionMark = nIndex;
   return nOldIndex;
 }
@@ -7541,6 +7546,8 @@ static INT LISTVIEW_StyleChanged(HWND hwnd, WPARAM wStyleType,
  */
 static LRESULT LISTVIEW_Command(HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
+    LISTVIEW_INFO *infoPtr = (LISTVIEW_INFO *)LISTVIEW_GetInfoPtr(hwnd);
+
     switch (HIWORD(wParam))
     {
         case EN_UPDATE:
@@ -7549,7 +7556,6 @@ static LRESULT LISTVIEW_Command(HWND hwnd, WPARAM wParam, LPARAM lParam)
              * Adjust the edit window size
              */
             char buffer[1024];
-            LISTVIEW_INFO *infoPtr = (LISTVIEW_INFO *)LISTVIEW_GetInfoPtr(hwnd);
             HDC           hdc      = GetDC(infoPtr->hwndEdit);
             HFONT         hFont, hOldFont = 0;
             RECT          rect;

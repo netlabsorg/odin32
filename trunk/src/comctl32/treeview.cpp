@@ -1,4 +1,4 @@
-/* $Id: treeview.cpp,v 1.5 2000-03-30 15:39:10 cbratschi Exp $ */
+/* $Id: treeview.cpp,v 1.6 2000-03-31 14:44:25 cbratschi Exp $ */
 /* Treeview control
  *
  * Copyright 1998 Eric Kohl <ekohl@abo.rhein-zeitung.de>
@@ -29,7 +29,8 @@
  - (WINE 991212 level)
 */
 
-/* CB: todo
+/* CB: todo/bugs
+ - startup: missing WM_SIZE messages -> i.e. wrong info tip calculation
  - bug in SetScrollInfo/ShowScrollBar: WM_SIZE and WM_NCPAINT problems (i.e. RegEdit)
  - VK_LEFT in WinHlp32 displays expanded icon
  - expand not finished
@@ -83,6 +84,7 @@ static BOOL    TREEVIEW_CalcItems(HWND hwnd,HDC hdc,TREEVIEW_INFO *infoPtr);
 static LRESULT TREEVIEW_EnsureVisible(HWND hwnd,HTREEITEM hItem);
 static VOID    TREEVIEW_ISearch(HWND hwnd,CHAR ch);
 static VOID    TREEVIEW_CheckInfoTip(HWND hwnd);
+static VOID TREEVIEW_HideInfoTip(HWND hwnd,TREEVIEW_INFO *infoPtr);
 
 static LRESULT CALLBACK TREEVIEW_Edit_SubclassProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
@@ -1358,6 +1360,7 @@ static BOOL TREEVIEW_CalcItems(HWND hwnd,HDC hdc,TREEVIEW_INFO *infoPtr)
 
   if (infoPtr->uInternalStatus & TV_CALCALL)
   {
+    TREEVIEW_HideInfoTip(hwnd,infoPtr);
     itemHeight = 0;
     ImageList_GetIconSize (infoPtr->himlNormal, &x, &itemHeight);
     itemHeight = MAX(infoPtr->uItemHeight,itemHeight);
@@ -2783,7 +2786,10 @@ TREEVIEW_Create (HWND hwnd, WPARAM wParam, LPARAM lParam)
   infoPtr->tipItem = 0;
   infoPtr->hwndToolTip = 0;
   if (!(dwStyle & TVS_NOTOOLTIPS))
-    infoPtr->hwndToolTip = createToolTip(hwnd,TTF_TRACK | TTF_ABSOLUTE,TRUE);
+  {
+    infoPtr->hwndToolTip = createToolTip(hwnd,TTF_TRACK | TTF_ABSOLUTE | TTF_TRANSPARENT,TRUE);
+    SendMessageA(infoPtr->hwndToolTip,WM_SETFONT,infoPtr->hFont,0);
+  }
 
   if (dwStyle & TVS_CHECKBOXES)
   {
@@ -3753,6 +3759,36 @@ TREEVIEW_LButtonDoubleClick (HWND hwnd, WPARAM wParam, LPARAM lParam)
  return TRUE;
 }
 
+HTREEITEM TREEVIEW_GetInfoTipItem(HWND hwnd,TREEVIEW_INFO *infoPtr,POINT pt)
+{
+  TVHITTESTINFO ht;
+
+  ht.pt = pt;
+  TREEVIEW_HitTest(hwnd,&ht,FALSE);
+
+  if (ht.hItem && (ht.flags & TVHT_ONITEM))
+  {
+    TREEVIEW_ITEM *item;
+
+    item = &infoPtr->items[(INT)ht.hItem];
+    if (item->visible && ((item->text.left < 0) || (item->text.right > infoPtr->uVisibleWidth)))
+      return ht.hItem;
+  }
+
+  //check tool rect -> no flickering on tip frame
+  if (infoPtr->tipItem)
+  {
+    POINT pt2 = pt;
+    RECT rect;
+
+    GetWindowRect(infoPtr->hwndToolTip,&rect);
+    ClientToScreen(hwnd,&pt2);
+    return PtInRect(&rect,pt2) ? infoPtr->tipItem:0;
+  }
+
+  return 0;
+}
+
 VOID TREEVIEW_ShowInfoTip(HWND hwnd,TREEVIEW_INFO *infoPtr,TREEVIEW_ITEM *item)
 {
   LPWSTR text;
@@ -3761,7 +3797,7 @@ VOID TREEVIEW_ShowInfoTip(HWND hwnd,TREEVIEW_INFO *infoPtr,TREEVIEW_ITEM *item)
   POINT pt;
   DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
 
-  if(dwStyle & TVS_INFOTIP)
+  if (dwStyle & TVS_INFOTIP)
   {
     NMTVGETINFOTIPW tvgit;
     WCHAR* buf = (WCHAR*)COMCTL32_Alloc(isUnicodeNotify(&infoPtr->header) ? INFOTIPSIZE*sizeof(WCHAR):INFOTIPSIZE*sizeof(CHAR));
@@ -3799,6 +3835,7 @@ VOID TREEVIEW_ShowInfoTip(HWND hwnd,TREEVIEW_INFO *infoPtr,TREEVIEW_ITEM *item)
   ti.hwnd     = hwnd;
   ti.hinst    = 0;
   ti.lpszText = text;
+  SendMessageA(infoPtr->hwndToolTip,TTM_TRACKACTIVATE,(WPARAM)FALSE,(LPARAM)&ti);
   pt.x = item->text.left;
   pt.y = item->text.top;
   ClientToScreen(hwnd,&pt);
@@ -3830,44 +3867,45 @@ VOID TREEVIEW_HideInfoTip(HWND hwnd,TREEVIEW_INFO *infoPtr)
 static VOID TREEVIEW_CheckInfoTip(HWND hwnd)
 {
   TREEVIEW_INFO *infoPtr = TREEVIEW_GetInfoPtr(hwnd);
-  TVHITTESTINFO ht;
+  HTREEITEM hItem;
+  POINT pt;
 
-  GetCursorPos(&ht.pt);
-  ScreenToClient(hwnd,&ht.pt);
-  TREEVIEW_HitTest(hwnd,&ht,TRUE);
+  GetCursorPos(&pt);
+  ScreenToClient(hwnd,&pt);
+  hItem = TREEVIEW_GetInfoTipItem(hwnd,infoPtr,pt);
 
-  if ((ht.hItem != infoPtr->tipItem) || !(ht.flags & TVHT_ONITEMLABEL))
+  if (hItem != infoPtr->tipItem)
     TREEVIEW_HideInfoTip(hwnd,infoPtr);
 }
 
 static LRESULT TREEVIEW_MouseMove(HWND hwnd,WPARAM wParam,LPARAM lParam)
 {
   TREEVIEW_INFO *infoPtr = TREEVIEW_GetInfoPtr(hwnd);
-  TVHITTESTINFO ht;
-  TREEVIEW_ITEM *item;
+  DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
+  POINT pt;
 
-  ht.pt.x = (INT)LOWORD(lParam);
-  ht.pt.y = (INT)HIWORD(lParam);
+  pt.x = (INT)LOWORD(lParam);
+  pt.y = (INT)HIWORD(lParam);
 
-  TREEVIEW_HitTest(hwnd,&ht,FALSE);
-
-  if (ht.hItem)
+  if (infoPtr->hwndToolTip)
   {
-    DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
+    HTREEITEM hItem = TREEVIEW_GetInfoTipItem(hwnd,infoPtr,pt);
 
-    item = &infoPtr->items[(INT)ht.hItem];
-
-    if (infoPtr->hwndToolTip && (ht.flags & TVHT_ONITEMLABEL) &&
-        ((item->text.left < 0) || (item->text.right > infoPtr->uVisibleWidth) || (item->text.top < 0) || (item->text.bottom > infoPtr->uVisibleHeight)) &&
-        (infoPtr->tipItem != item->hItem))
-      TREEVIEW_ShowInfoTip(hwnd,infoPtr,item);
-    else
-      TREEVIEW_HideInfoTip(hwnd,infoPtr);
-
-    if (dwStyle & TVS_TRACKSELECT)
+    if (infoPtr->tipItem != hItem)
     {
-      //CB: todo: hottracking
+      if (hItem)
+      {
+        TREEVIEW_ITEM *item;
+
+        item = &infoPtr->items[(INT)hItem];
+        TREEVIEW_ShowInfoTip(hwnd,infoPtr,item);
+      } else TREEVIEW_HideInfoTip(hwnd,infoPtr);
     }
+  }
+
+  if (dwStyle & TVS_TRACKSELECT)
+  {
+    //CB: todo: hottracking
   }
 
   return 0;
@@ -4234,6 +4272,7 @@ TREEVIEW_SetFont (HWND hwnd, WPARAM wParam, LPARAM lParam)
   DeleteObject(infoPtr->hBoldFont);
   infoPtr->hBoldFont = CreateFontIndirectA (&logFont);
 
+  SendMessageA(infoPtr->hwndToolTip,WM_SETFONT,infoPtr->hFont,1);
   infoPtr->uInternalStatus |= TV_CALCALL;
   TREEVIEW_CalcItems(hwnd,0,infoPtr);
 
@@ -4294,6 +4333,7 @@ TREEVIEW_VScroll(HWND hwnd,WPARAM wParam,LPARAM lParam)
   {
     INT scrollY = infoPtr->lefttop.y-newY;
 
+    TREEVIEW_HideInfoTip(hwnd,infoPtr);
     infoPtr->lefttop.y = newY;
     if (!TREEVIEW_UnqueueRefresh(hwnd,TRUE,TRUE))
       TREEVIEW_CalcItems(hwnd,0,infoPtr);
@@ -4360,6 +4400,7 @@ TREEVIEW_HScroll (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
   if (lastPos != infoPtr->lefttop.x)
   {
+    TREEVIEW_HideInfoTip(hwnd,infoPtr);
     if (!TREEVIEW_UnqueueRefresh(hwnd,TRUE,TRUE))
       TREEVIEW_CalcItems(hwnd,0,infoPtr);
     ScrollWindowEx(hwnd,lastPos-infoPtr->lefttop.x,0,NULL,NULL,0,NULL,SW_INVALIDATE | SW_SCROLLCHILDREN | (infoPtr->uScrollTime << 16));
@@ -4802,34 +4843,6 @@ static LRESULT TREEVIEW_SetCursor(HWND hwnd,WPARAM wParam,LPARAM lParam)
   return DefWindowProcA(hwnd,WM_SETCURSOR,wParam,lParam);
 }
 
-static LRESULT TREEVIEW_Notify(HWND hwnd,WPARAM wParam,LPARAM lParam)
-{
-  TREEVIEW_INFO *infoPtr = TREEVIEW_GetInfoPtr(hwnd);
-  LPNMHDR hdr = (LPNMHDR)lParam;
-
-  if (hdr->hwndFrom == infoPtr->hwndToolTip)
-  {
-    LPARAM lp = (LPARAM)GetMessagePos();
-    POINT pt;
-
-    pt.x = (INT)LOWORD(lp);
-    pt.y = (INT)HIWORD(lp);
-    ScreenToClient(hwnd,&pt);
-    lp = MAKELONG(pt.x,pt.y);
-
-    if (hdr->code == (UINT)NM_CLICK)
-      TREEVIEW_LButtonDown(hwnd,0,lp);
-    else if (hdr->code == (UINT)NM_RCLICK)
-      TREEVIEW_RButtonDown(hwnd,0,lp);
-    else if (hdr->code == (UINT)NM_DBLCLK)
-      TREEVIEW_LButtonDoubleClick(hwnd,0,lp);
-    else if (hdr->code == (UINT)NM_RDBLCLK)
-      TREEVIEW_RButtonDoubleClick(hwnd,0,lp);
-  }
-
-  return 0;
-}
-
 static LRESULT WINAPI
 TREEVIEW_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
@@ -5023,9 +5036,6 @@ TREEVIEW_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
         case WM_RBUTTONDBLCLK:
           return TREEVIEW_RButtonDoubleClick(hwnd,wParam,lParam);
-
-        case WM_NOTIFY:
-          return TREEVIEW_Notify(hwnd,wParam,lParam);
 
         case WM_STYLECHANGED:
           return TREEVIEW_StyleChanged (hwnd, wParam, lParam);

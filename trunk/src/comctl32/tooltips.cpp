@@ -1,4 +1,4 @@
-/* $Id: tooltips.cpp,v 1.6 2000-03-30 15:39:09 cbratschi Exp $ */
+/* $Id: tooltips.cpp,v 1.7 2000-03-31 14:44:23 cbratschi Exp $ */
 /*
  * Tool tip control
  *
@@ -2083,37 +2083,7 @@ TOOLTIPS_MouseMessage (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
   if (infoPtr->nTrackTool > -1)
   {
-    DWORD code = 0;
-
-    switch (uMsg)
-    {
-      case WM_LBUTTONDOWN:
-        code = NM_CLICK;
-        break;
-
-      case WM_LBUTTONDBLCLK:
-        code = NM_DBLCLK;
-        break;
-
-      case WM_RBUTTONDOWN:
-        code = NM_RCLICK;
-        break;
-
-      case WM_RBUTTONDBLCLK:
-        code = NM_RDBLCLK;
-        break;
-    }
-
-    if (code)
-    {
-      TTTOOL_INFO *toolPtr = &infoPtr->tools[infoPtr->nTrackTool];
-      NMHDR hdr;
-
-      hdr.hwndFrom = hwnd;
-      hdr.idFrom = toolPtr->uId;
-      hdr.code = code;
-      SendMessageA(toolPtr->hwnd,WM_NOTIFY,(WPARAM)toolPtr->uId,(LPARAM)&hdr);
-    }
+    //CB: tocheck: tracking tool without TTF_TRANSPARENT style
   } else
   {
     TOOLTIPS_Hide (hwnd, infoPtr);
