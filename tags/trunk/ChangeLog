@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.453 1999-11-14 23:26:50 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.454 1999-11-17 17:03:16 cbratschi Exp $ */
+
+ 99-11-17: Christoph Bratschi <cbratschi@datacomm.ch>
+	- USER32/COMCTL32: Fixed cursor handling
 
  99-11-14  Markus Montkowski <mmontkowski@gmx.de>
         - DDRAW:  Code cleanup and some fixes in handling blts in the virtuel buffers.
