@@ -1,4 +1,4 @@
-
+/* $Id: win32_glx.c,v 1.2 2000-02-09 08:46:22 jeroen Exp $ */
 /* Copyright (c) Nate Robins, 1997. */
 
 /* This program is freely distributable without licensing fees

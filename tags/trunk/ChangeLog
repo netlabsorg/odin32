@@ -1,25 +1,30 @@
- /* $Id: ChangeLog,v 1.710 2000-02-08 22:30:21 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.711 2000-02-09 08:51:20 jeroen Exp $ */
+
+ 2000-02-09: Jeroen van den Horn <J.vandenHorn@fibre.a2000.nl>
+        - OpenGL base: Various minor fixes
+        - OpenGL GLUT: Various minor fixes
+        - OpenGL GLU:  'Native' port of SGI GLU
 
  2000-02-08: Knut Stange Osmundsen <knut.stange.osmundsen>
-	- Win32k: Temporarily disabled some unused imported kernelfunctions.
-	          Corrected a problem with overloading _ldrEnum32bitRelRecs;
-	          it failed on WS4eB. (Message 'DosDevIOCtl failed')
+        - Win32k: Temporarily disabled some unused imported kernelfunctions.
+                  Corrected a problem with overloading _ldrEnum32bitRelRecs;
+                  it failed on WS4eB. (Message 'DosDevIOCtl failed')
 
  2000-02-07: Sander van Leeuwen <sandervl@xs4all.nl>
-	- USER32: Don't use shell positioning for child windows (breaks Notes)
+        - USER32: Don't use shell positioning for child windows (breaks Notes)
                   Turn of WM_BACKERASEBKGND when calling RedrawWindow to
                   invalidate a window (without erase flag set; but also without
                   noerase) -> fixes flickering in pingpong Opengl sample
-	- KERNEL32: Search path for executables when they can't be found in
+        - KERNEL32: Search path for executables when they can't be found in
                     the current directory.
 
  2000-02-07: Christoph Bratschi <cbratschi@datacomm.ch>
-	- KERNEL32: Ported more Wine thunk apis
+        - KERNEL32: Ported more Wine thunk apis
 
  2000-02-07: Sander van Leeuwen <sandervl@xs4all.nl>
-	- USER32: Fix for DCX_INTERSECTRGN in GetDCEx (use ExtSelectClipRgn
+        - USER32: Fix for DCX_INTERSECTRGN in GetDCEx (use ExtSelectClipRgn
                   to combine current & new clip region)
-	- ADVAPI32: Ported Wine LookupAccountSidA/W (semi-stubs now)
+        - ADVAPI32: Ported Wine LookupAccountSidA/W (semi-stubs now)
 
  2000-02-06: Jens Wiessner <wiessnej@rfi.de>
 	- WINMM: Updated MCI dlls (added version info)

@@ -1,4 +1,4 @@
-
+/* $Id: glut_teapot.c,v 1.2 2000-02-09 08:46:17 jeroen Exp $ */
 /* Copyright (c) Mark J. Kilgard, 1994. */
 
 /**
@@ -195,13 +195,13 @@ teapot(GLint grid, GLdouble scale, GLenum type)
 }
 
 /* CENTRY */
-void APIENTRY 
+void APIENTRY
 glutSolidTeapot(GLdouble scale)
 {
   teapot(14, scale, GL_FILL);
 }
 
-void APIENTRY 
+void APIENTRY
 glutWireTeapot(GLdouble scale)
 {
   teapot(10, scale, GL_LINE);

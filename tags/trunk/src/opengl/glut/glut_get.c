@@ -1,4 +1,4 @@
-
+/* $Id: glut_get.c,v 1.2 2000-02-09 08:46:12 jeroen Exp $ */
 /* Copyright (c) Mark J. Kilgard, 1994, 1997, 1998. */
 
 /* This program is freely distributable without licensing fees

@@ -1,4 +1,4 @@
-
+/* $Id: glut_space.c,v 1.2 2000-02-09 08:46:16 jeroen Exp $ */
 /* Copyright (c) Mark J. Kilgard, 1994. */
 
 /* This program is freely distributable without licensing fees
@@ -7,7 +7,7 @@
 
 #include "glutint.h"
 
-void APIENTRY 
+void APIENTRY
 glutSpaceballMotionFunc(GLUTspaceMotionCB spaceMotionFunc)
 {
   __glutCurrentWindow->spaceMotion = spaceMotionFunc;
@@ -16,7 +16,7 @@ glutSpaceballMotionFunc(GLUTspaceMotionCB spaceMotionFunc)
     GLUT_DEVICE_MASK_WORK);
 }
 
-void APIENTRY 
+void APIENTRY
 glutSpaceballRotateFunc(GLUTspaceRotateCB spaceRotateFunc)
 {
   __glutCurrentWindow->spaceRotate = spaceRotateFunc;
@@ -25,7 +25,7 @@ glutSpaceballRotateFunc(GLUTspaceRotateCB spaceRotateFunc)
     GLUT_DEVICE_MASK_WORK);
 }
 
-void APIENTRY 
+void APIENTRY
 glutSpaceballButtonFunc(GLUTspaceButtonCB spaceButtonFunc)
 {
   __glutCurrentWindow->spaceButton = spaceButtonFunc;

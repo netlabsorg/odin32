@@ -1,21 +1,23 @@
-/* $Id: opengl32.cpp,v 1.3 2000-02-05 15:54:53 sandervl Exp $ */
+/* $Id: opengl32.cpp,v 1.4 2000-02-09 08:50:54 jeroen Exp $ */
 /*****************************************************************************/
 /*                                                                           */
 /* OpenGL32                                                                  */
 /*                                                                           */
 /*****************************************************************************/
 #define INCL_BASE
-#include <os2.h>
 #include <os2wrap.h>
 #include <misc.h>
 #include <malloc.h>
 #include <memory.h>
+#include <float.h>
 
 #include "pglos2.h"
 #include "initterm.h"
 
-HWND WIN32API WindowFromDC(HDC hdc);
-HWND          Win32ToOS2Handle(HWND hwnd);
+HWND    WIN32API WindowFromDC(HDC hdc);
+HWND             Win32ToOS2Handle(HWND hwnd);
+HWND             OS2ToWin32Handle(HWND hwnd);
+LRESULT WIN32API SendMessageA(HWND,ULONG,WPARAM,LPARAM);
 
 #define PFD_TYPE_RGBA       0
 #define PFD_TYPE_COLORINDEX 1
@@ -579,10 +581,10 @@ BOOL WIN32API wglSwapBuffers(HDC hdc)
 
   hWnd=Win32ToOS2Handle(WindowFromDC(hdc));
 
-  if(hdc)
+  if(hWnd)
     OS2pglSwapBuffers(hdc,hWnd);
 
-  return hdc!=NULL;
+  return hWnd!=NULL;
 }
 
 int WIN32API wglChoosePixelFormat(HDC hdc,PIXELFORMATDESCRIPTOR *pfd)
@@ -759,17 +761,25 @@ BOOL WIN32API wglUseFontBitmapsW(HDC   hdc,
 
 HGC WIN32API wglGetCurrentContext(void)
 {
-  /* FIXME: parameter '0'! */
-  return OS2pglGetCurrentContext(0);
+  HWND     hwnd;
+  PFDINFO *pfdi;
+
+  hwnd=OS2ToWin32Handle(OS2pglGetCurrentWindow(WinQueryAnchorBlock(HWND_DESKTOP)));
+
+  pfdi=query_pfdi_by_hwnd(hwnd);
+
+  if(pfdi)
+    return pfdi->hgc;
+
+  return 0;
 }
 
 HDC WIN32API wglGetCurrentDC(void)
 {
-  /* FIXME: parameter '0'! */
   HWND     hwnd;
   PFDINFO *pfdi;
 
-  hwnd=OS2pglGetCurrentWindow(0);
+  hwnd=OS2ToWin32Handle(OS2pglGetCurrentWindow(WinQueryAnchorBlock(HWND_DESKTOP)));
 
   pfdi=query_pfdi_by_hwnd(hwnd);
 
@@ -1345,6 +1355,8 @@ void WIN32API glFinish(void)
 void WIN32API glFlush(void)
 {
   OS2glFlush();
+
+  dprintf(("OPENGL32: glFlush() complete\n"));
 }
 
 void WIN32API glFogf(GLenum pname,
@@ -3027,6 +3039,26 @@ void WIN32API glVertexPointer(GLint size,
 
 /*****************************************************************************/
 /*                                                                           */
+/* As of yet unsupported gl functions                                        */
+/*                                                                           */
+/*****************************************************************************/
+
+void WIN32API glTexImage3D(GLenum target,
+                           GLint level,
+                           GLint component,
+                           GLsizei width,
+                           GLsizei height,
+                           GLsizei depth,
+                           GLint border,
+                           GLenum format,
+                           GLenum type,
+                           const GLvoid *pixels)
+{
+  dprintf(("OPENGL32: glTexImage3D - not implemented\n"));
+}
+
+/*****************************************************************************/
+/*                                                                           */
 /* Module Internal init and cleanup - called by initterm                     */
 /*                                                                           */
 /*****************************************************************************/
@@ -3036,6 +3068,9 @@ void mod_init(void)
   /* OpenGL32 Initialize - Query all valid configs for this system and */
   /* store them. All indexes returned are based upon this list!        */
   dprintf(("OPENGL32: INIT\n"));
+
+  _control87(EM_UNDERFLOW,EM_UNDERFLOW);
+  _control87(EM_OVERFLOW,EM_OVERFLOW);
 
   DosCreateMutexSem(NULL,&hmtxPfdInfo,0,0);
 
@@ -3060,10 +3095,10 @@ void mod_cleanup(void)
   /* Cleanup all structures we allocated */
   pfdi_destroy_all();
 
-  if(global_visual_config_list)
-    free(global_visual_config_list);
-
   DosCloseMutexSem(hmtxPfdInfo);
+
+  _control87(0,EM_UNDERFLOW);
+  _control87(0,EM_OVERFLOW);
 
   dprintf(("OPENGL32 TERM\n"));
 }

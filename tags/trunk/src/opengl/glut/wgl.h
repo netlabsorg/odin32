@@ -1,4 +1,4 @@
-/* JvdH - define the wglXXX functions */
+/* $Id: wgl.h,v 1.2 2000-02-09 08:46:22 jeroen Exp $ */
 
 typedef ULONG HGC;
 

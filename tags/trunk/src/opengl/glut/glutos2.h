@@ -1,3 +1,4 @@
+/* $Id: glutos2.h,v 1.2 2000-02-09 08:46:20 jeroen Exp $ */
 #ifndef __glutos2_h__
 #define __glutos2_h__
 

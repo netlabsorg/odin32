@@ -1,4 +1,4 @@
-
+/* $Id: win32_winproc.c,v 1.2 2000-02-09 08:46:23 jeroen Exp $ */
 /* Copyright (c) Nate Robins, 1997. */
 /* portions Copyright (c) Mark Kilgard, 1997, 1998. */
 
@@ -9,6 +9,7 @@
 
 #include "glutint.h"
 #if defined(__WIN32OS2__)
+#include "wgl.h"
 #include <ctype.h>
 #endif
 #if defined(__CYGWIN32__)
@@ -58,9 +59,10 @@ __glutWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
   PAINTSTRUCT   ps;                     /* Paint structure. */
   LPMINMAXINFO  minmax;                 /* Minimum/maximum info structure. */
   GLUTwindow*   window;                 /* GLUT window associated with message. */
-  GLUTmenu*     menu;                   /* GLUT menu associated with message. */
+  GLUTmenu*     menu;                 /* GLUT menu associated with message.*/
   int x, y, width, height, key;
   int button = -1;
+  int fSendKeyStroke=1;
 
   switch(msg) {
   case WM_CREATE:
@@ -68,7 +70,7 @@ __glutWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
   case WM_CLOSE:
     PostQuitMessage(0);
     return 0;
-#if 0
+#if defined(__WIN32OS2__)
   case WM_DESTROY:
     /* XXX NVidia's NT OpenGL can have problems closing down
        its OpenGL internal data structures if we just allow
@@ -87,10 +89,13 @@ __glutWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     return 0;
 #endif
   case WM_PAINT:
+    dprintf(("GLUT32: WM_PAINT processing...\n"));
     window = __glutGetWindow(hwnd);
     if (window) {
-      BeginPaint(hwnd, &ps);            /* Must have this for some Win32 reason. */
+#ifndef __WIN32OS2__
+      BeginPaint(hwnd, &ps);       /* Must have this for some Win32 reason.*/
       EndPaint(hwnd, &ps);
+#endif
       if (window->win == hwnd) {
         __glutPostRedisplay(window, GLUT_REPAIR_WORK);
       } else if (window->overlay && window->overlay->win == hwnd) {
@@ -210,7 +215,7 @@ __glutWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
       ScreenToClient(window->win, &point);
       __glutSetWindow(window);
       __glutModifierMask = 0;
-      if (GetKeyState(VK_SHIFT) < 0)    /* < 0 = high order bit is on */
+      if (GetKeyState(VK_SHIFT) < 0)          /* < 0 = high order bit is on*/
         __glutModifierMask |= ShiftMask;
       if (GetKeyState(VK_CONTROL) < 0)
         __glutModifierMask |= ControlMask;
@@ -292,7 +297,7 @@ __glutWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
       ScreenToClient(window->win, &point);
       __glutSetWindow(window);
       __glutModifierMask = 0;
-      if (GetKeyState(VK_SHIFT) < 0)    /* < 0 = high order bit is on */
+      if (GetKeyState(VK_SHIFT) < 0)          /* < 0 = high order bit is on*/
         __glutModifierMask |= ShiftMask;
       if (GetKeyState(VK_CONTROL) < 0)
         __glutModifierMask |= ControlMask;
@@ -303,28 +308,70 @@ __glutWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     } else if (window->keyboard) {
       /* Specially handle any keys that match ASCII values but
          do not generate Windows WM_SYSCHAR or WM_CHAR messages. */
+
       switch (wParam) {
       case VK_DELETE:
       handleDelete:
         /* Delete is an ASCII character. */
-        GetCursorPos(&point);
-        ScreenToClient(window->win, &point);
-        __glutSetWindow(window);
-        __glutModifierMask = 0;
-        if (GetKeyState(VK_SHIFT) < 0)  /* < 0 = high order bit is on */
-          __glutModifierMask |= ShiftMask;
-        if (GetKeyState(VK_CONTROL) < 0)
-          __glutModifierMask |= ControlMask;
-        if (GetKeyState(VK_MENU) < 0)
-          __glutModifierMask |= Mod1Mask;
-        window->keyboard((unsigned char) 127, point.x, point.y);
-        __glutModifierMask = (unsigned int) ~0;
-        return 0;
+        dprintf(("VK_DELETE - wParam is %d\n",wParam));
+        key=(unsigned char)127;
+        break;
+
+#ifdef __WIN32OS2__
+        /* For some reason Odin doesn't generate WM_CHARS for 'special' keys */
+        /* at least - none that are received here. Create 'em here!!         */
+      case VK_F1:
+      case VK_F2:
+      case VK_F3:
+      case VK_F4:
+      case VK_F5:
+      case VK_F6:
+      case VK_F7:
+      case VK_F8:
+      case VK_F9:
+      case VK_F10:
+      case VK_F11:
+      case VK_F12:
+      case VK_LEFT:
+      case VK_UP:
+      case VK_RIGHT:
+      case VK_DOWN:
+      case VK_PRIOR:
+      case VK_NEXT:
+      case VK_HOME:
+      case VK_END:
+      case VK_INSERT:
+      case VK_ESCAPE:
+        key=wParam;
+        break;
+#endif
+
       default:
         /* Let the following WM_SYSCHAR or WM_CHAR message generate
            the keyboard callback. */
+        fSendKeyStroke=0;
         break;
       }
+
+      if(fSendKeyStroke)
+        {
+          dprintf(("Sending keystroke %d...\n",key));
+
+          GetCursorPos(&point);
+          ScreenToClient(window->win, &point);
+          __glutSetWindow(window);
+          __glutModifierMask = 0;
+          if (GetKeyState(VK_SHIFT) < 0)      /* < 0 = high order bit is on*/
+            __glutModifierMask |= ShiftMask;
+          if (GetKeyState(VK_CONTROL) < 0)
+            __glutModifierMask |= ControlMask;
+          if (GetKeyState(VK_MENU) < 0)
+            __glutModifierMask |= Mod1Mask;
+          window->keyboard(key, point.x, point.y);
+          __glutModifierMask = (unsigned int) ~0;
+
+          return 0;
+        }
     }
     return 0;
 
@@ -565,6 +612,7 @@ __glutWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     return 0;
 
   case WM_SIZE:
+    dprintf(("GLUT32: Handling WM_SIZE..."));
     window = __glutGetWindow(hwnd);
     if (window) {
       width = LOWORD(lParam);
@@ -585,9 +633,11 @@ __glutWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         window->forceReshape = FALSE;
         /* A reshape should be considered like posting a
            repair request. */
+        dprintf(("GLUT32: WM_SIZE processing -> GLUT_REPAIR_WORK\n"));
         __glutPostRedisplay(window, GLUT_REPAIR_WORK);
       }
     }
+    dprintf(("GLUT32: Handled WM_SIZE..."));
     return 0;
 
   case WM_SETCURSOR:

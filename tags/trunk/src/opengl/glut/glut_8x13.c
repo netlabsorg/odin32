@@ -1,4 +1,4 @@
-
+/* $Id: glut_8x13.c,v 1.2 2000-02-09 08:46:07 jeroen Exp $ */
 /* GENERATED FILE -- DO NOT MODIFY */
 
 #define glutBitmap8By13 XXX
