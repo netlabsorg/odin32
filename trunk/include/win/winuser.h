@@ -1,4 +1,4 @@
-/* $Id: winuser.h,v 1.28 2000-01-13 20:51:14 sandervl Exp $ */
+/* $Id: winuser.h,v 1.29 2000-01-15 14:16:32 cbratschi Exp $ */
 
 #ifndef __INCLUDE_WINUSER_H
 #define __INCLUDE_WINUSER_H
@@ -1010,6 +1010,10 @@ typedef struct
 #define SC_TASKLIST     0xf130
 #define SC_SCREENSAVE   0xf140
 #define SC_HOTKEY       0xf150
+#define SC_DEFAULT      0xF160
+#define SC_MONITORPOWER 0xF170
+#define SC_CONTEXTHELP  0xF180
+#define SC_SEPARATOR    0xF00F
 
 #define CS_VREDRAW          0x0001
 #define CS_HREDRAW          0x0002

@@ -1,4 +1,13 @@
- /* $Id: changelog,v 1.648 2000-01-14 22:08:26 achimha Exp $ */
+ /* $Id: changelog,v 1.649 2000-01-15 14:17:22 cbratschi Exp $ */
+
+ 2000-01-15: Christoph Bratschi <cbratschi@datacomm.ch>
+	- USER32/NEW: cache menu and caption drawing
+		      changed minimize button position
+		      don't redraw system menu icon in menu.cpp
+		      hilighted menubar items don't have an edge in Win9x
+		      don't open system menu on mouseover if menubar is used and vice versa
+		      show sysmenu on WM_NCRBUTTONUP with HTCAPTION set (todo: position)
+		      use WIN32_STDCLASS2 for windows with CS_SAVEBITS class style
 
  2000-01-14: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32/NEW: added caption clipping for faster window text updates
@@ -38,6 +47,11 @@
 	- KERNEL32:   Added DisableLogging & EnableLogging functions to
                       disable logging in parts of code. Logging will only be
                       done if the logcount is bigger than 0.
+<<<<<<< ChangeLog
+>>>>>>> 1.646
+
+=======
+>>>>>>> 1.648
 
  2000-01-12: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32/NEW: fixed WM_CALCVALIDRECTS
