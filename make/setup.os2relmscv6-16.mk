@@ -1,4 +1,4 @@
-# $Id: setup.os2relmscv6-16.mk,v 1.8 2002-08-24 22:33:13 bird Exp $
+# $Id: setup.os2relmscv6-16.mk,v 1.9 2002-08-27 03:58:02 bird Exp $
 
 # ---OS2, RELEASE, MSCV6-------------------------
 ENV_NAME="OS/2, Release, Microsoft C v6.0a 16-bit"
@@ -15,6 +15,7 @@ ENV_16BIT = 16
 # Include some shared standard stuff: ALP.
 #
 !include $(PATH_MAKE)\setup.os2relalp.mk
+!include $(PATH_MAKE)\setup.os2relrc.mk
 !include $(PATH_MAKE)\setup.os2relwrc.mk
 !include $(PATH_MAKE)\setup.optional.mscvx-16.mk
 
@@ -27,8 +28,6 @@ CC=cl.exe
 CXX=false
 LINK=ilink.exe
 IMPLIB=implib.exe
-RC=rc.exe
-RL=rc.exe
 
 
 #
@@ -94,8 +93,6 @@ LINK_LNK4=$(TARGET_LIBS: =+^
 ),
 LINK_LNK5=$(TARGET_DEF_LINK)
 
-RC_FLAGS=-r -n $(RC_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(RC_INCLUDES:-I=-i ) $(ALL_INCLUDES:-I=-i ) -i $(PATH_INCLUDES:;= -i )
-RL_FLAGS=-x2 -n
 
 
 #
