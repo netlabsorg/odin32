@@ -1,4 +1,4 @@
-/* $Id: windowmsg.cpp,v 1.1 1999-07-14 08:35:37 sandervl Exp $ */
+/* $Id: windowmsg.cpp,v 1.2 1999-07-14 21:05:59 cbratschi Exp $ */
 /*
  * Win32 window message APIs for OS/2
  *
@@ -36,7 +36,7 @@ VOID WIN32API PostQuitMessage( int nExitCode)
 {
     dprintf(("USER32:  PostQuitMessage\n"));
 
-    O32_PostQuitMessage(arg1);
+    O32_PostQuitMessage(nExitCode);
 }
 //******************************************************************************
 //******************************************************************************
