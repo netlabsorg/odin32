@@ -1,4 +1,8 @@
- /* $Id: ChangeLog,v 1.422 1999-11-08 20:54:56 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.423 1999-11-08 21:23:41 sandervl Exp $ */
+
+ 99-11-08: Edgar Buerkle <Edgar.Buerkle@gmx.net>
+	- KERNEL32: SetCurrentDirectory, CreateDirectory, RemoveDirectory bugfixes.
+                    (remove terminating backslash if present)
 
  99-11-08: Patrick Haller <phaller@gmx.net>
 	- COMCTL32:	Fix: EDIT: if obtaining font information fails, 
