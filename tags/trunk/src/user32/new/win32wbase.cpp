@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.22 2000-01-05 21:25:07 cbratschi Exp $ */
+/* $Id: win32wbase.cpp,v 1.23 2000-01-06 17:05:52 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -699,7 +699,7 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndFrame, HWND hwndClient)
   rectWindow.top = cs->y;
   rectWindow.bottom = cs->y+cs->cy;
   rectClient = rectWindow; //dummy client rect
-  MapWindowPoints(getParent() ? getParent()->getWindowHandle():OSLIB_HWND_DESKTOP,0,(PPOINT)&rectWindow,2);
+  if (getParent()) MapWindowPoints(getParent()->getWindowHandle(),0,(PPOINT)&rectWindow,2);
   /* Send the WM_CREATE message
    * Perhaps we shouldn't allow width/height changes as well.
    * See p327 in "Internals".
@@ -720,11 +720,11 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndFrame, HWND hwndClient)
         rectWindow.top = cs->y;
         rectWindow.bottom = cs->y+cs->cy;
         rectClient = rectWindow;
-        MapWindowPoints(getParent() ? getParent()->getWindowHandle():OSLIB_HWND_DESKTOP,0,(PPOINT)&rectWindow,2);
+        if (getParent()) MapWindowPoints(getParent()->getWindowHandle(),0,(PPOINT)&rectWindow,2);
         OffsetRect(&rectWindow, maxPos.x - rectWindow.left, maxPos.y - rectWindow.top);
         //set the window size and update the client
         rect = rectWindow;
-        MapWindowPoints(0,getParent() ? getParent()->getWindowHandle():OSLIB_HWND_DESKTOP,(PPOINT)&rect,2);
+        if (getParent()) MapWindowPoints(0,getParent()->getWindowHandle(),(PPOINT)&rect,2);
         SetWindowPos(hwndLinkAfter,rect.left,rect.top,rect.right-rect.left,rect.bottom-rect.top,SWP_NOACTIVATE | SWP_NOREDRAW | SWP_FRAMECHANGED);
         fNoSizeMsg = FALSE;
         if( (SendInternalMessageA(WM_CREATE, 0, (LPARAM)cs )) != -1 )
@@ -1117,7 +1117,7 @@ ULONG  Win32BaseWindow::MsgFormatFrame()
   wndPos.hwnd = Win32Hwnd;
   wndPos.hwndInsertAfter = 0;
   rect = rectWindow;
-  MapWindowPoints(Win32Hwnd,(getParent()) ? getParent()->getWindowHandle():HWND_DESKTOP,(PPOINT)&rect,2);
+  if (getParent()) MapWindowPoints(0,getParent()->getWindowHandle(),(PPOINT)&rect,2);
   wndPos.x = rect.left;
   wndPos.y = rect.top;
   wndPos.cx = rect.right-rect.left;
@@ -1552,11 +1552,8 @@ LONG Win32BaseWindow::HandleNCCalcSize(BOOL calcValidRects,RECT *winRect)
   if (style & CS_HREDRAW) result |= WVR_HREDRAW;
 
   clientRect = &((NCCALCSIZE_PARAMS*)winRect)->rgrc[2];
-  clientRect->left = 0;
-  clientRect->right = rectWindow.right-rectWindow.left;
-  clientRect->top = 0;
-  clientRect->bottom = rectWindow.bottom-rectWindow.top;
-  mapWin32Rect(OS2HwndFrame,getParent() ? getParent()->getWindowHandle():OSLIB_HWND_DESKTOP,clientRect);
+  *clientRect = rectWindow;
+  if (getParent()) MapWindowPoints(0,getParent()->getOS2WindowHandle(),(PPOINT)clientRect,2);
 
   if(!(dwStyle & WS_MINIMIZE))
   {
