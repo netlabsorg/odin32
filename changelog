@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.1452 2001-05-28 17:18:33 phaller Exp $ */
+/* $Id: changelog,v 1.1453 2001-05-28 18:15:17 phaller Exp $ */
 
  2001-05-28: Patrick Haller <patrick.haller@innotek.de>
     - GDI32:    o Split GDI32.CPP into ICM.CPP and GDI32.CPP
@@ -7,6 +7,8 @@
     - KERNEL32: o mmap.cpp: slightly accelerated ::findMapByView()
     		o directory.cpp: don't trap in CreateDirectory(NULL, NULL)                
     - DDRAW:    o implemented DirectDrawCreateClipper()
+    - WOW32:	o created initial (fake) version of WOW32.DLL
+    		  (SBLiveXP accesses this directly)
 
  2001-05-27: Sander van Leeuwen <sandervl@xs4all.nl>
     - COMCTL32: o Listview: merged old LISTVIEW_EnsureVisible
