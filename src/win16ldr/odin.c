@@ -1,4 +1,8 @@
+#ifndef MSC6
 #include <windows.h>
+#else
+#include "msc60win.h"
+#endif
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -15,13 +19,13 @@ BOOL InitInstance(HANDLE hInstance, int nCmdShow);
 HANDLE hModule = 0;
 
 
-//*****************************************************************************************            
-//*****************************************************************************************            
+//*****************************************************************************************
+//*****************************************************************************************
 int PASCAL WinMain(HANDLE hInstance, HANDLE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
     MSG msg;
-    
-    if (!hPrevInstance)                       
+
+    if (!hPrevInstance)
         if (!InitApplication(hInstance))
             return (FALSE);
 
@@ -33,11 +37,11 @@ int PASCAL WinMain(HANDLE hInstance, HANDLE hPrevInstance, LPSTR lpCmdLine, int 
 	hModule = WinExec(lpCmdLine, SW_SHOW);
 
 	if(hModule >= 32) {
-    	while (GetMessage(&msg, NULL, NULL, NULL)) 
+    	while (GetMessage(&msg, NULL, NULL, NULL))
     	{
         	TranslateMessage(&msg);
         	DispatchMessage(&msg);
-    	}         
+    	}
 	}
 	else {
 		char errormsg[256];
@@ -46,14 +50,14 @@ int PASCAL WinMain(HANDLE hInstance, HANDLE hPrevInstance, LPSTR lpCmdLine, int 
 		MessageBox(hwnd, errormsg, "Ïnternal Error", MB_ICONHAND);
 		DestroyWindow(hwnd);
 	}
-		    
+		
 	FreeLibrary(hDll);
     return (msg.wParam);
-}                 
-//*****************************************************************************************            
-//*****************************************************************************************            
+}
+//*****************************************************************************************
+//*****************************************************************************************
 BOOL InitApplication(HANDLE hInstance)
-{                                 
+{
 	WNDCLASS wc;
 	
 	hDll = LoadLibrary("odindll.dll");
@@ -62,7 +66,7 @@ BOOL InitApplication(HANDLE hInstance)
 	}
 	
     wc.style = NULL;
-    wc.lpfnWndProc = MainWndProc;      
+    wc.lpfnWndProc = MainWndProc;
     wc.cbClsExtra = 0;
     wc.cbWndExtra = 0;
     wc.hInstance = hInstance;
@@ -74,8 +78,8 @@ BOOL InitApplication(HANDLE hInstance)
 
     return (RegisterClass(&wc));
 }
-//*****************************************************************************************            
-//*****************************************************************************************            
+//*****************************************************************************************
+//*****************************************************************************************
 BOOL InitInstance(HANDLE hInstance, int nCmdShow)
 {
     hinstApp = hInstance;
@@ -96,14 +100,14 @@ BOOL InitInstance(HANDLE hInstance, int nCmdShow)
 
     if (!hwnd)
         return (FALSE);
-        
+
     return (TRUE);
 
 }
-//*****************************************************************************************            
-//*****************************************************************************************            
+//*****************************************************************************************
+//*****************************************************************************************
 long FAR PASCAL __export MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
-{           
+{
 	char modname[256];
 	
     switch (message) {
@@ -127,5 +131,5 @@ long FAR PASCAL __export MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPA
     }
     return (NULL);
 }
-//*****************************************************************************************            
-//*****************************************************************************************            
+//*****************************************************************************************
+//*****************************************************************************************
