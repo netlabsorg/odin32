@@ -88,6 +88,7 @@
 #include "dlgs.h"
 
 #ifdef __WIN32OS2__
+#include "pmwindow.h"
 #include <heapstring.h>
 #define WIN_GetFullHandle(a)	a
 #endif
@@ -1050,11 +1051,25 @@ static BOOL MDI_AugmentFrameMenu( HWND frame, HWND hChild )
     if (!(hSysPopup = LoadMenuA(GetModuleHandleA("USER32"), "SYSMENU")))
 	return 0;
 
+#ifdef __WIN32OS2__
+    if(fOS2Look) 
+    {//different order for OS2 GUI mode    
+        AppendMenuA(menu,MF_HELP | MF_BITMAP,
+                    SC_CLOSE, (LPSTR)(DWORD)HBMMENU_MBAR_CLOSE );
+        AppendMenuA(menu,MF_HELP | MF_BITMAP,
+                    SC_MINIMIZE, (LPSTR)(DWORD)HBMMENU_MBAR_MINIMIZE ) ;
+        AppendMenuA(menu,MF_HELP | MF_BITMAP,
+                    SC_RESTORE, (LPSTR)(DWORD)HBMMENU_MBAR_RESTORE );
+    }
+    else {
+#endif
     AppendMenuA(menu,MF_HELP | MF_BITMAP,
                    SC_MINIMIZE, (LPSTR)(DWORD)HBMMENU_MBAR_MINIMIZE ) ;
     AppendMenuA(menu,MF_HELP | MF_BITMAP,
                    SC_RESTORE, (LPSTR)(DWORD)HBMMENU_MBAR_RESTORE );
-
+#ifdef __WIN32OS2__
+    }
+#endif
   /* In Win 95 look, the system menu is replaced by the child icon */
 
 #ifndef __WIN32OS2__
@@ -1104,15 +1119,15 @@ static BOOL MDI_AugmentFrameMenu( HWND frame, HWND hChild )
     }
 
     /* The close button is only present in Win 95 look */
-#ifndef __WIN32OS2__
+#ifdef __WIN32OS2__
+    if(!fOS2Look) 
+#else
     if(TWEAK_WineLook > WIN31_LOOK)
-    {
 #endif
+    {
         AppendMenuA(menu,MF_HELP | MF_BITMAP,
                        SC_CLOSE, (LPSTR)(DWORD)HBMMENU_MBAR_CLOSE );
-#ifndef __WIN32OS2__
     }
-#endif
 
     EnableMenuItem(hSysPopup, SC_SIZE, MF_BYCOMMAND | MF_GRAYED);
     EnableMenuItem(hSysPopup, SC_MOVE, MF_BYCOMMAND | MF_GRAYED);

@@ -1,4 +1,4 @@
-/* $Id: pmwindow.h,v 1.17 2002-06-20 14:18:15 sandervl Exp $ */
+/* $Id: pmwindow.h,v 1.18 2002-11-27 13:56:27 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -30,6 +30,12 @@ extern HWND  hwndCD;
 extern LONG CapsCharHeight;
 extern BOOL  fDragDropActive;
 
+//Win32 bitmap handles of the OS/2 min, max and restore buttons
+extern HBITMAP hBmpMinButton, hBmpMinButtonDown;
+extern HBITMAP hBmpMaxButton, hBmpMaxButtonDown;
+extern HBITMAP hBmpRestoreButton, hBmpRestoreButtonDown;
+extern HBITMAP hBmpCloseButton, hBmpCloseButtonDown;
+
 #define TFOS_LEFT                    0x0001
 #define TFOS_TOP                     0x0002
 #define TFOS_RIGHT                   0x0004
@@ -37,7 +43,9 @@ extern BOOL  fDragDropActive;
 /* TF_MOVE = TF_LEFT | TF_TOP | TF_RIGHT | TF_BOTTOM */
 #define TFOS_MOVE                    0x000F
 
+#ifdef __cplusplus
 VOID FrameTrackFrame(Win32BaseWindow *win32wnd,DWORD flags);
 void Frame_SysCommandSizeMove(Win32BaseWindow *win32wnd, WPARAM wParam);
+#endif
 
 #endif

@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.189 2002-09-26 16:04:34 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.190 2002-11-27 13:56:26 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -27,7 +27,7 @@
 #include <winconst.h>
 #include <winuser32.h>
 #include <wprocess.h>
-#include <misc.h>
+#include <dbglog.h>
 #include <win32wbase.h>
 #include <win32dlg.h>
 #include "win32wdesktop.h"
@@ -68,7 +68,28 @@ BOOL    fOS2Look = FALSE;
 BOOL    fForceMonoCursor = FALSE;
 BOOL    fDragDropActive = FALSE;
 BOOL    fDragDropDisabled = FALSE;
-HBITMAP hbmFrameMenu[3] = {0};
+
+
+#define PMMENU_MINBUTTON           0
+#define PMMENU_MAXBUTTON           1
+#define PMMENU_RESTOREBUTTON       2
+#define PMMENU_CLOSEBUTTON         3
+#define PMMENU_MINBUTTONDOWN       4
+#define PMMENU_MAXBUTTONDOWN       5
+#define PMMENU_RESTOREBUTTONDOWN   6
+#define PMMENU_CLOSEBUTTONDOWN     7
+
+HBITMAP hbmFrameMenu[8] = {0};
+
+//Win32 bitmap handles of the OS/2 min, max and restore buttons
+HBITMAP hBmpMinButton     = 0;
+HBITMAP hBmpMaxButton     = 0;
+HBITMAP hBmpRestoreButton = 0;
+HBITMAP hBmpCloseButton   = 0;
+HBITMAP hBmpMinButtonDown     = 0;
+HBITMAP hBmpMaxButtonDown     = 0;
+HBITMAP hBmpRestoreButtonDown = 0;
+HBITMAP hBmpCloseButtonDown   = 0;
 
 static PFNWP pfnFrameWndProc = NULL;
 static HWND  hwndFocusChange = 0;
@@ -87,6 +108,7 @@ static BOOL fKeyAltGrDown = FALSE;
 
 static char *PMDragExtractFiles(PDRAGINFO pDragInfo, ULONG *pcItems, ULONG *pulBytes);
 static BOOL  PMDragValidate(PDRAGINFO pDragInfo);
+static void  QueryPMMenuBitmaps();
 
 MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2);
 MRESULT EXPENTRY Win32CDWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2);
@@ -216,19 +238,8 @@ BOOL InitPM()
     fOS2Look = PROFILE_GetOdinIniBool(ODINSYSTEM_SECTION, "OS2Look", FALSE);
     if(fOS2Look)
     {
-        CHAR szDisplay[30];
-        HMODULE hModDisplay;
-
         SYSCOLOR_Init(FALSE); //use OS/2 colors
-
-        // query the name of the display driver resource DLL to load
-        // some standard bitmaps from it
-        DspInitSystemDriverName(szDisplay, sizeof(szDisplay));
-        DosQueryModuleHandle(szDisplay, &hModDisplay);
-
-        hbmFrameMenu[0] = GpiLoadBitmap(hdc, hModDisplay, SBMP_MINBUTTON, 0, 0);
-        hbmFrameMenu[1] = GpiLoadBitmap(hdc, hModDisplay, SBMP_MAXBUTTON, 0, 0);
-        hbmFrameMenu[2] = GpiLoadBitmap(hdc, hModDisplay, SBMP_RESTOREBUTTON, 0, 0);
+        QueryPMMenuBitmaps();
     }
 
     // find out which colordepth we're running
@@ -243,41 +254,72 @@ BOOL InitPM()
     return TRUE;
 } /* End of main */
 //******************************************************************************
+HBITMAP OPEN32API _O32_CreateBitmapFromPMHandle(HBITMAP hPMBitmap);
+
+inline HBITMAP O32_CreateBitmapFromPMHandle(HBITMAP hPMBitmap)
+{
+ HBITMAP yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = _O32_CreateBitmapFromPMHandle(hPMBitmap);
+    SetFS(sel);
+
+    return yyrc;
+}
+//******************************************************************************
+static void QueryPMMenuBitmaps()
+{
+    CHAR szDisplay[30];
+    HMODULE hModDisplay;
+
+    if(hbmFrameMenu[0] == 0)
+    {
+        CHAR szDisplay[30];
+        HMODULE hModDisplay;
+        HDC   hdc;              /* Device-context handle                */
+        DEVOPENSTRUC dop = {NULL, "DISPLAY", NULL, NULL, NULL, NULL,
+                            NULL, NULL, NULL};
+
+        /* create memory device context */
+        hdc = DevOpenDC(hab, OD_MEMORY, "*", 5L, (PDEVOPENDATA)&dop, NULLHANDLE);
+
+        DspInitSystemDriverName(szDisplay, sizeof(szDisplay));
+        DosQueryModuleHandle(szDisplay, &hModDisplay);
+
+        hbmFrameMenu[PMMENU_MINBUTTON] = GpiLoadBitmap(hdc, hModDisplay, SBMP_MINBUTTON, 0, 0);
+        hbmFrameMenu[PMMENU_MINBUTTONDOWN] = GpiLoadBitmap(hdc, hModDisplay, SBMP_MINBUTTONDEP, 0, 0);
+        hbmFrameMenu[PMMENU_MAXBUTTON] = GpiLoadBitmap(hdc, hModDisplay, SBMP_MAXBUTTON, 0, 0);
+        hbmFrameMenu[PMMENU_MAXBUTTONDOWN] = GpiLoadBitmap(hdc, hModDisplay, SBMP_MAXBUTTONDEP, 0, 0);
+        hbmFrameMenu[PMMENU_RESTOREBUTTON] = GpiLoadBitmap(hdc, hModDisplay, SBMP_RESTOREBUTTON, 0, 0);
+        hbmFrameMenu[PMMENU_RESTOREBUTTONDOWN] = GpiLoadBitmap(hdc, hModDisplay, SBMP_RESTOREBUTTONDEP, 0, 0);
+        hbmFrameMenu[PMMENU_CLOSEBUTTON] = GpiLoadBitmap(hdc, hModDisplay, SBMP_CLOSE, 0, 0);
+        hbmFrameMenu[PMMENU_CLOSEBUTTONDOWN] = GpiLoadBitmap(hdc, hModDisplay, SBMP_CLOSEDEP, 0, 0);
+
+#ifdef NEW_WGSS
+        //Create win32 bitmap handles of the OS/2 min, max and restore buttons
+        hBmpMinButton     = O32_CreateBitmapFromPMHandle(hbmFrameMenu[PMMENU_MINBUTTON]);
+        hBmpMinButtonDown = O32_CreateBitmapFromPMHandle(hbmFrameMenu[PMMENU_MINBUTTONDOWN]);
+        hBmpMaxButton     = O32_CreateBitmapFromPMHandle(hbmFrameMenu[PMMENU_MAXBUTTON]);
+        hBmpMaxButtonDown = O32_CreateBitmapFromPMHandle(hbmFrameMenu[PMMENU_MAXBUTTONDOWN]);
+        hBmpRestoreButton = O32_CreateBitmapFromPMHandle(hbmFrameMenu[PMMENU_RESTOREBUTTON]);
+        hBmpRestoreButtonDown = O32_CreateBitmapFromPMHandle(hbmFrameMenu[PMMENU_RESTOREBUTTONDOWN]);
+        hBmpCloseButton   = O32_CreateBitmapFromPMHandle(hbmFrameMenu[PMMENU_CLOSEBUTTON]);
+        hBmpCloseButtonDown   = O32_CreateBitmapFromPMHandle(hbmFrameMenu[PMMENU_CLOSEBUTTONDOWN]);
+#endif
+        DevCloseDC(hdc);
+    }
+}
+//******************************************************************************
 //menu.cpp
 BOOL MENU_Init();
 //******************************************************************************
-// AH TODO 2002-07-18
-// Note: this looks a lot like unnecessary code duplication. We should call this
-// function from InitPM...
 //******************************************************************************
 void WIN32API SetWindowAppearance(int fLooks)
 {
     if(fLooks == OS2_APPEARANCE || fLooks == OS2_APPEARANCE_SYSMENU)
     {
-        CHAR szDisplay[30];
-        HMODULE hModDisplay;
-
         SYSCOLOR_Init(FALSE); //use OS/2 colors
-
-        if(hbmFrameMenu[0] == 0)
-        {
-            CHAR szDisplay[30];
-            HMODULE hModDisplay;
-            HDC   hdc;              /* Device-context handle                */
-            DEVOPENSTRUC dop = {NULL, "DISPLAY", NULL, NULL, NULL, NULL,
-                                NULL, NULL, NULL};
-
-            /* create memory device context */
-            hdc = DevOpenDC(hab, OD_MEMORY, "*", 5L, (PDEVOPENDATA)&dop, NULLHANDLE);
-
-            DspInitSystemDriverName(szDisplay, sizeof(szDisplay));
-            DosQueryModuleHandle(szDisplay, &hModDisplay);
-
-            hbmFrameMenu[0] = GpiLoadBitmap(hdc, hModDisplay, SBMP_MINBUTTON, 0, 0);
-            hbmFrameMenu[1] = GpiLoadBitmap(hdc, hModDisplay, SBMP_MAXBUTTON, 0, 0);
-            hbmFrameMenu[2] = GpiLoadBitmap(hdc, hModDisplay, SBMP_RESTOREBUTTON, 0, 0);
-            DevCloseDC(hdc);
-        }
+        QueryPMMenuBitmaps();
     }
     fOS2Look = fLooks;
     MENU_Init();
@@ -1258,30 +1300,30 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
                  if((dwOldStyle & WS_MINIMIZE_W) && !(dwStyle & WS_MINIMIZE_W)) {
                      //SC_RESTORE -> SC_MINIMIZE
                      dprintf(("%x -> SC_RESTORE -> SC_MINIMIZE", win32wnd->getWindowHandle()));
-                     FrameReplaceMenuItem(WinWindowFromID(hwnd, FID_MINMAX), 0, SC_RESTORE, SC_MINIMIZE, hbmFrameMenu[0]);
+                     FrameReplaceMenuItem(WinWindowFromID(hwnd, FID_MINMAX), 0, SC_RESTORE, SC_MINIMIZE, hbmFrameMenu[PMMENU_MINBUTTON]);
                      if(dwStyle & WS_MAXIMIZE_W) {
                          //SC_MAXIMIZE -> SC_RESTORE
                          dprintf(("%x -> SC_MAXIMIZE -> SC_RESTORE", win32wnd->getWindowHandle()));
-                         FrameReplaceMenuItem(WinWindowFromID(hwnd, FID_MINMAX), MIT_END, SC_MAXIMIZE, SC_RESTORE, hbmFrameMenu[2]);
+                         FrameReplaceMenuItem(WinWindowFromID(hwnd, FID_MINMAX), MIT_END, SC_MAXIMIZE, SC_RESTORE, hbmFrameMenu[PMMENU_RESTOREBUTTON]);
                      }
                  }
                  else
                  if((dwOldStyle & WS_MAXIMIZE_W) && !(dwStyle & WS_MAXIMIZE_W)) {
                      //SC_RESTORE -> SC_MAXIMIZE
                      dprintf(("%x -> SC_RESTORE -> SC_MAXIMIZE", win32wnd->getWindowHandle()));
-                     FrameReplaceMenuItem(WinWindowFromID(hwnd, FID_MINMAX), MIT_END, SC_RESTORE, SC_MAXIMIZE, hbmFrameMenu[1]);
+                     FrameReplaceMenuItem(WinWindowFromID(hwnd, FID_MINMAX), MIT_END, SC_RESTORE, SC_MAXIMIZE, hbmFrameMenu[PMMENU_MAXBUTTON]);
                  }
                  else
                  if(!(dwOldStyle & WS_MINIMIZE_W) && (dwStyle & WS_MINIMIZE_W)) {
                      //SC_MINIMIZE -> SC_RESTORE
                      dprintf(("%x -> SC_MINIMIZE -> SC_RESTORE", win32wnd->getWindowHandle()));
-                     FrameReplaceMenuItem(WinWindowFromID(hwnd, FID_MINMAX), 0, SC_MINIMIZE, SC_RESTORE, hbmFrameMenu[2]);
+                     FrameReplaceMenuItem(WinWindowFromID(hwnd, FID_MINMAX), 0, SC_MINIMIZE, SC_RESTORE, hbmFrameMenu[PMMENU_RESTOREBUTTON]);
                  }
                  else
                  if(!(dwOldStyle & WS_MAXIMIZE_W) && (dwStyle & WS_MAXIMIZE_W)) {
                      //SC_MAXIMIZE -> SC_RESTORE
                      dprintf(("%x -> SC_MAXIMIZE -> SC_RESTORE", win32wnd->getWindowHandle()));
-                     FrameReplaceMenuItem(WinWindowFromID(hwnd, FID_MINMAX), MIT_END, SC_MAXIMIZE, SC_RESTORE, hbmFrameMenu[2]);
+                     FrameReplaceMenuItem(WinWindowFromID(hwnd, FID_MINMAX), MIT_END, SC_MAXIMIZE, SC_RESTORE, hbmFrameMenu[PMMENU_RESTOREBUTTON]);
                  }
              }
         }
