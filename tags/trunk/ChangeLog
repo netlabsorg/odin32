@@ -1,4 +1,10 @@
-/* $Id: ChangeLog,v 1.1251 2001-02-11 23:47:10 bird Exp $ */
+/* $Id: ChangeLog,v 1.1252 2001-02-13 20:00:19 sandervl Exp $ */
+
+ 2000-02-13: Michal Necasek <mike@mendelu.cz>
+    - USER32:   o Wrong unicode<->ascii translation for some listbox & combobox
+                  messages. Must check if the control style includes LB/CB_HASSTRINGS.
+                  (CB_FINDSTRING, CB_FINDSTRINGEXACT, CB_SELECTSTRING,
+                   LB_FINDSTRING, LB_FINDSTRINGEXACT, LB_SELECTSTRING)
 
  2001-02-11: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - Win32k:   o Added symbols for the 14062D kernels.
@@ -11,9 +17,9 @@
     - WINMM, GLU, CRTDLL, KERNEL32:
                 o Compile fixes for VAC 3.6.5
     - RASAPI32: o Can't use LXLITE as it crashes on this binary
-    - KERNEL32: o Check for valid pointer in LocalLock and return NULL if invalid
-                  (some apps use LocalLock to get access to GDI objects; doesn't
-                   work in Odin)
+    - KERNEL32: o Check handle in LocalLock and return NULL if invalid
+                  (some apps use LocalLock to get access to GDI objects; doesn't 
+                   work in Odin (TODO))
 
  2001-02-10: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Check if window has been destroyed before accessing
