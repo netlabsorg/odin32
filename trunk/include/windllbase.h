@@ -1,4 +1,4 @@
-/* $Id: windllbase.h,v 1.6 1999-12-13 21:04:58 sandervl Exp $ */
+/* $Id: windllbase.h,v 1.7 2000-03-04 19:51:13 sandervl Exp $ */
 
 /*
  * Win32 Dll base class
@@ -69,7 +69,9 @@ static  void      tlsDetachThreadFromAllDlls();
 // enable / disable thread attach/detach calls
 	void      setThreadLibraryCalls(BOOL fEnable);
 
-static  void      deleteAll();
+        void      SetDynamicallyLoaded() { fDynamicLoad = TRUE; };
+
+static  void      deleteAll(BOOL fDynamicLoad = FALSE);
 
 static	BOOL      isSystemDll(char *szFileName);
 
@@ -89,6 +91,8 @@ protected:
 	WIN32DLLENTRY dllEntryPoint;
 
 	ULONG         referenced;
+
+        BOOL          fDynamicLoad;
 
 private:
 static  Win32DllBase *head;
