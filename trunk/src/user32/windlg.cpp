@@ -1,4 +1,4 @@
-/* $Id: windlg.cpp,v 1.25 2001-10-01 17:28:09 sandervl Exp $ */
+/* $Id: windlg.cpp,v 1.26 2001-10-13 00:49:28 sandervl Exp $ */
 /*
  * Win32 dialog apis for OS/2
  *
@@ -573,6 +573,8 @@ HWND WIN32API GetNextDlgGroupItem( HWND hwndDlg, HWND hwndCtrl, BOOL fPrevious)
 
 #ifdef __WIN32OS2__
             hwnd = GetWindow( hwndDlg, GW_HWNDFIRSTCHILD );
+            if(!hwnd) break;
+
             for (tmp = hwnd; tmp; tmp = GetWindow( tmp, GW_HWNDNEXTCHILD ) )
 #else
             hwnd = GetWindow( hwndDlg, GW_CHILD );
