@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.131 2001-07-28 18:03:38 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.132 2001-08-06 16:01:11 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -138,6 +138,8 @@ TEB * WIN32API InitializeTIB(BOOL fMainThread)
 
     //Allocate one dword to store the flat address of our TEB
     if(fMainThread) {
+        dprintf(("InitializeTIB Process handle %x, id %x", GetCurrentProcess(), GetCurrentProcessId()));
+
         TIBFlatPtr = (DWORD *)OSLibAllocThreadLocalMemory(1);
         if(TIBFlatPtr == 0) {
             dprintf(("InitializeTIB: local thread memory alloc failed!!"));
@@ -1641,7 +1643,7 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
     // Note: Open32 does not translate ERROR_INVALID_EXE_SIGNATURE,
     // it is also valid in Win32.
     DWORD dwError = GetLastError();
-    if (ERROR_INVALID_EXE_SIGNATURE != dwError && ERROR_FILE_NOT_FOUND != dwError)
+    if (ERROR_INVALID_EXE_SIGNATURE != dwError && ERROR_FILE_NOT_FOUND != dwError && ERROR_ACCESS_DENIED != dwError)
     {
         dprintf(("CreateProcess: O32_CreateProcess failed with rc=%d, not PE-executable !",
                 dwError));
