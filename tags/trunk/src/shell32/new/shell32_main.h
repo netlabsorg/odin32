@@ -17,6 +17,12 @@
 #include "wine/obj_shelllink.h"
 #include "wine/obj_extracticon.h"
 
+#ifdef __cplusplus
+  extern "C" {
+#endif /* defined(__cplusplus) */
+
+
+
 /*******************************************
 *  global SHELL32.DLL variables
 */
@@ -38,17 +44,17 @@ extern HICON	(WINAPI* pImageList_GetIcon) (HIMAGELIST, INT, UINT);
 extern INT	(WINAPI* pImageList_GetImageCount)(HIMAGELIST);
 extern COLORREF (WINAPI *pImageList_SetBkColor)(HIMAGELIST, COLORREF);
 
-extern LPVOID	(WINAPI* pCOMCTL32_Alloc) (INT);  
-extern BOOL	(WINAPI* pCOMCTL32_Free) (LPVOID);  
+extern LPVOID	(WINAPI* pCOMCTL32_Alloc) (INT);
+extern BOOL	(WINAPI* pCOMCTL32_Free) (LPVOID);
 
-extern HDPA	(WINAPI* pDPA_Create) (INT);  
-extern INT	(WINAPI* pDPA_InsertPtr) (const HDPA, INT, LPVOID); 
-extern BOOL	(WINAPI* pDPA_Sort) (const HDPA, PFNDPACOMPARE, LPARAM); 
-extern LPVOID	(WINAPI* pDPA_GetPtr) (const HDPA, INT);   
-extern BOOL	(WINAPI* pDPA_Destroy) (const HDPA); 
+extern HDPA	(WINAPI* pDPA_Create) (INT);
+extern INT	(WINAPI* pDPA_InsertPtr) (const HDPA, INT, LPVOID);
+extern BOOL	(WINAPI* pDPA_Sort) (const HDPA, PFNDPACOMPARE, LPARAM);
+extern LPVOID	(WINAPI* pDPA_GetPtr) (const HDPA, INT);
+extern BOOL	(WINAPI* pDPA_Destroy) (const HDPA);
 extern INT	(WINAPI* pDPA_Search) (const HDPA, LPVOID, INT, PFNDPACOMPARE, LPARAM, UINT);
 extern LPVOID	(WINAPI* pDPA_DeletePtr) (const HDPA hdpa, INT i);
-#define pDPA_GetPtrCount(hdpa)  (*(INT*)(hdpa))   
+#define pDPA_GetPtrCount(hdpa)  (*(INT*)(hdpa))
 
 extern HICON (WINAPI *pLookupIconIdFromDirectoryEx)(LPBYTE dir, BOOL bIcon, INT width, INT height, UINT cFlag);
 extern HICON (WINAPI *pCreateIconFromResourceEx)(LPBYTE bits,UINT cbSize, BOOL bIcon, DWORD dwVersion, INT width, INT height,UINT cFlag);
@@ -70,9 +76,9 @@ void SIC_Destroy(void);
 BOOL PidlToSicIndex (IShellFolder * sh, LPITEMIDLIST pidl, BOOL bBigIcon, UINT * pIndex);
 
 /* Classes Root */
-BOOL HCR_MapTypeToValue ( LPCSTR szExtension, LPSTR szFileType, DWORD len, BOOL bPrependDot);
-BOOL HCR_GetExecuteCommand ( LPCSTR szClass, LPCSTR szVerb, LPSTR szDest, DWORD len );
-BOOL HCR_GetDefaultIcon (LPCSTR szClass, LPSTR szDest, DWORD len, LPDWORD dwNr);
+BOOL HCR_MapTypeToValue ( LPCSTR szExtension, LPSTR szFileType, LONG len, BOOL bPrependDot);
+BOOL HCR_GetExecuteCommand ( LPCSTR szClass, LPCSTR szVerb, LPSTR szDest, LONG len );
+BOOL HCR_GetDefaultIcon (LPCSTR szClass, LPSTR szDest, LONG len, LPDWORD dwNr);
 BOOL HCR_GetClassName (REFIID riid, LPSTR szDest, DWORD len);
 BOOL HCR_GetFolderAttributes (REFIID riid, LPDWORD szDest);
 
@@ -134,5 +140,11 @@ HRESULT WINAPI Shell_MergeMenus (HMENU hmDst, HMENU hmSrc, UINT uInsert, UINT uI
 	(((kst) & MK_CONTROL) ?\
 	(((kst) & MK_SHIFT) ? DROPEFFECT_LINK : DROPEFFECT_COPY):\
 	DROPEFFECT_MOVE)
+
+#ifdef __cplusplus
+  }
+#endif /* defined(__cplusplus) */
+
+
 
 #endif
