@@ -1,4 +1,4 @@
-/* $Id: os2native.cpp,v 1.3 1999-06-19 10:54:42 sandervl Exp $ */
+/* $Id: os2native.cpp,v 1.4 1999-06-20 12:46:09 sandervl Exp $ */
 
 /*
  * Misc procedures
@@ -107,7 +107,8 @@ LPVOID WIN32API VirtualAlloc(LPVOID lpvAddress, DWORD cbSize, DWORD fdwAllocatio
 		{
 		    	rc = DosAllocMem(&Address, cbSize, flag | flAllocMem );
 		}
-		else	dprintf(("Unexpected DosSetMem error %x", rc));
+		else	
+		if(rc)	dprintf(("Unexpected DosSetMem error %x", rc));
 	}
   }
   else {

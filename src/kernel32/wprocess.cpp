@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.11 1999-06-20 10:55:36 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.12 1999-06-20 12:46:09 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -36,6 +36,8 @@ BOOL      fFreeLibrary = FALSE;
 PDB       ProcessPDB = {0};  
 USHORT	  ProcessTIBSel = 0;
 DWORD    *TIBFlatPtr    = 0;
+
+extern "C" ULONG QueryExceptionChain();
 
 //******************************************************************************
 // Set up the TIB selector and memory for the current thread
@@ -103,6 +105,7 @@ TEB *InitializeTIB(BOOL fMainThread)
 	ProcessTIBSel = tibsel;
    }
    dprintf(("InitializeTIB setup TEB with selector %x", tibsel));
+   dprintf(("InitializeTIB: FS(%x):[0] = %x", GetFS(), QueryExceptionChain()));
    return winteb;
 #else
    return 0;
@@ -118,7 +121,8 @@ void DestroyTIB()
  TEB   *winteb;
  THDB  *thdb;
 
-   dprintf(("DestroyTIB: FS = %x", GetFS()));
+   dprintf(("DestroyTIB: FS     = %x", GetFS()));
+   dprintf(("DestroyTIB: FS:[0] = %x", QueryExceptionChain()));
 
    winteb = (TEB *)TIBFlatPtr;
    if(winteb) {
@@ -133,6 +137,7 @@ void DestroyTIB()
    }
    else dprintf(("Already destroyed TIB"));
 
+   dprintf(("DestroyTIB: FS(%x):[0] = %x", GetFS(), QueryExceptionChain()));
    TIBFlatPtr = NULL;
    return;
 #endif
@@ -224,7 +229,7 @@ VOID WIN32API RegisterResourceUsage(LONG Win32TableId, LONG NameTableId,
 
   RegisterExe(Win32TableId, NameTableId, VersionResId, Pe2lxVersion, hinstance);
 
-  dprintf(("RegisterResourceUsage: FS = %x", GetFS()));
+  dprintf(("RegisterResourceUsage: FS(%x):[0] = %x", GetFS(), QueryExceptionChain()));
 }
 //******************************************************************************
 //******************************************************************************
@@ -314,11 +319,7 @@ BOOL WIN32API DLLExitList(HINSTANCE hInstance)
 VOID WIN32API ExitProcess(DWORD exitcode)
 {
   dprintf(("KERNEL32:  ExitProcess %d\n", exitcode));
-
-#ifdef WIN32_TIBSEL
-  //Restore original OS/2 TIB selector
-  DestroyTIB();
-#endif
+  dprintf(("KERNEL32:  ExitProcess FS = %x\n", GetFS()));
 
   //avoid crashes since win32 & OS/2 exception handler aren't identical
   //(terminate process generates two exceptions)
@@ -326,16 +327,12 @@ VOID WIN32API ExitProcess(DWORD exitcode)
   if (iConsoleIsActive())
     iConsoleWaitClose();
 
-  try {
-     Win32DllExitList(-1);
-  }
-  catch(...) {
-    dprintf(("dll exitlist exception\n"));
-  }
+  Win32DllExitList(0);
 
-#ifndef WIN32_TIBSEL
+  //Restore original OS/2 TIB selector
+  DestroyTIB();
   SetExceptionChain((ULONG)-1);
-#endif
+
   O32_ExitProcess(exitcode);
 }
 //******************************************************************************

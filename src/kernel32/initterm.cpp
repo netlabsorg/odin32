@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.5 1999-06-20 10:55:36 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.6 1999-06-20 12:46:09 sandervl Exp $ */
 
 /*
  * KERNEL32 DLL entry point
@@ -118,10 +118,6 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
             if (rc)
                 return 0UL;
 
-            rc = DosExitList(0x00002A00|EXLST_ADD, Win32DllExitList);
-            if (rc)
-                return 0UL;
-
             /* knut: check for high memory support */
             rc = DosQuerySysInfo(QSV_VIRTUALADDRESSLIMIT, QSV_VIRTUALADDRESSLIMIT, &sysinfo, sizeof(sysinfo));
 
@@ -149,7 +145,7 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
 
 static void APIENTRY cleanup(ULONG ulReason)
 {
-    dprintf(("kernel32 exit\n"));
+    dprintf(("kernel32 exit %d\n", ulReason));
     _dump_allocated(10);    /*PLF Wed  98-03-18 23:55:07*/
     DestroyTIB();
     _ctordtorTerm();

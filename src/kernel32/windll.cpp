@@ -1,4 +1,4 @@
-/* $Id: windll.cpp,v 1.4 1999-06-19 10:54:43 sandervl Exp $ */
+/* $Id: windll.cpp,v 1.5 1999-06-20 12:46:09 sandervl Exp $ */
 
 /*
  * Win32 DLL class
@@ -35,7 +35,6 @@
 
 void _System SetLastError(ULONG ulError);
 
-
 //******************************************************************************
 //******************************************************************************
 Win32Dll::Win32Dll(char *szDllName) : Win32Image(szDllName), referenced(0), 
@@ -49,8 +48,14 @@ Win32Dll::Win32Dll(char *szDllName) : Win32Image(szDllName), referenced(0),
   strcpy(szModule, StripPath(szFileName));
   UpCase(szModule);
   char *dot = strstr(szModule, ".");
+  while(dot) {
+	char *newdot = strstr(dot+1, ".");
+	if(newdot == NULL)	break;
+	dot = newdot;
+  }
   if(dot)
 	*dot = 0;
+  dprintf(("Win32Dll::Win32Dll %s %s", szFileName, szModule));
 }
 //******************************************************************************
 //******************************************************************************
@@ -68,9 +73,15 @@ Win32Dll::Win32Dll(HINSTANCE hinstance, int NameTableId, int Win32TableId,
   strcpy(szModule, name);
   UpCase(szModule);
   char *dot = strstr(szModule, ".");
+  while(dot) {
+	char *newdot = strstr(dot+1, ".");
+	if(newdot == NULL)	break;
+	dot = newdot;
+  }
   if(dot)
 	*dot = 0;
 
+  dprintf(("Win32Dll::Win32Dll %s", szModule));
 }
 //******************************************************************************
 //******************************************************************************
@@ -84,6 +95,11 @@ void Win32Dll::OS2DllInit(HINSTANCE hinstance, int NameTableId, int Win32TableId
   strcpy(szModule, name);
   UpCase(szModule);
   char *dot = strstr(szModule, ".");
+  while(dot) {
+	char *newdot = strstr(dot+1, ".");
+	if(newdot == NULL)	break;
+	dot = newdot;
+  }
   if(dot)
 	*dot = 0;
 
@@ -94,6 +110,8 @@ void Win32Dll::OS2DllInit(HINSTANCE hinstance, int NameTableId, int Win32TableId
 Win32Dll::~Win32Dll()
 {
  Win32Dll *dll = head;
+
+  dprintf(("Win32Dll::~Win32Dll %s", szModule));
 
   //first remove it from the linked list so converted win32 dlls won't
   //be deleted twice (as DosFreeModule results in a call to DllExitList (wprocess.cpp)
@@ -110,14 +128,11 @@ Win32Dll::~Win32Dll()
 	}
 	dll->next = next;
   }
-  if(errorState == NO_ERROR && !fUnloaded) {
-	if(fNativePEImage) {
+  if(errorState == NO_ERROR && !fUnloaded) 
+  {
+	if(!fSystemDll) {
 		detachProcess();
-	}
-	else {
-		if(!fSystemDll) //let OS/2 unload them, unless ordered by FreeLibrary (see ::Release)
-	 		DosFreeModule((HMODULE)hinstance);
-	}
+	}	
   }
 }
 //******************************************************************************
@@ -184,7 +199,7 @@ BOOL Win32Dll::init()
 char *sysmodules[] = {"KERNEL32", "USER32", "GDI32", "WINMM", "DSOUND", "DDRAW",
 		      "WNETAP32", "MPR", "OLE32", "ADVAPI32", "COMMDLG", 
 		      "WINSPOOL", "SHELL32", "TAPI32", "CAPI32", "VERSION",
-		      "WSOCK32"};
+		      "WSOCK32", "COMCTL32"};
 //******************************************************************************
 BOOL Win32Dll::isSystemDll(char *szFileName)
 {
@@ -248,7 +263,7 @@ ULONG Win32Dll::getApi(char *name)
       return(0);
     }
 
-    //Add to lookkup table, so we don't have to call DosQueryProcAddr
+    //Add to lookup table, so we don't have to call DosQueryProcAddr
     //multiple times for the same api (when imported by other dlls)
     AddNameExport(apiaddr, name, 0);
     return(apiaddr);
