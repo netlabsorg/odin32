@@ -1,4 +1,4 @@
-/* $Id: winconst.h,v 1.33 2000-05-28 16:40:23 sandervl Exp $ */
+/* $Id: winconst.h,v 1.34 2000-06-01 11:26:15 sandervl Exp $ */
 
 /*
  * Win32 constants
@@ -1349,3 +1349,69 @@
     #define    NTRT_NEWBITMAP        (NTRT_BITMAP|NTRT_NEWRESOURCE)
     #define    NTRT_NEWMENU          (NTRT_MENU|NTRT_NEWRESOURCE)
     #define    NTRT_NEWDIALOG        (NTRT_DIALOG|NTRT_NEWRESOURCE)
+
+
+/* Device parameters for GetDeviceCaps() */
+#define DRIVERVERSION_W     0
+#define TECHNOLOGY_W        2
+#define HORZSIZE_W          4
+#define VERTSIZE_W          6
+#define HORZRES_W           8
+#define VERTRES_W           10
+#define BITSPIXEL_W         12
+#define PLANES_W            14
+#define NUMBRUSHES_W        16
+#define NUMPENS_W           18
+#define NUMMARKERS_W        20
+#define NUMFONTS_W          22
+#define NUMCOLORS_W         24
+#define PDEVICESIZE_W       26
+#define CURVECAPS_W         28
+#define LINECAPS_W          30
+#define POLYGONALCAPS_W     32
+#define TEXTCAPS_W          34
+#define CLIPCAPS_W          36
+#define RASTERCAPS_W        38
+#define ASPECTX_W           40
+#define ASPECTY_W           42
+#define ASPECTXY_W          44
+#define LOGPIXELSX_W        88
+#define LOGPIXELSY_W        90
+#define SIZEPALETTE_W       104
+#define NUMRESERVED_W       106
+#define COLORRES_W          108
+#define PHYSICALWIDTH_W     110 
+#define PHYSICALHEIGHT_W    111 
+#define PHYSICALOFFSETX_W   112 
+#define PHYSICALOFFSETY_W   113 
+#define SCALINGFACTORX_W    114 
+#define SCALINGFACTORY_W    115 
+
+#define OF_READ_W               0x0000
+#define OF_WRITE_W              0x0001
+#define OF_READWRITE_W          0x0002
+#define OF_SHARE_COMPAT_W       0x0000
+#define OF_SHARE_EXCLUSIVE_W    0x0010
+#define OF_SHARE_DENY_WRITE_W   0x0020
+#define OF_SHARE_DENY_READ_W    0x0030
+#define OF_SHARE_DENY_NONE_W    0x0040
+#define OF_PARSE_W              0x0100
+#define OF_DELETE_W             0x0200
+#define OF_VERIFY_W             0x0400   /* Used with OF_REOPEN */
+#define OF_SEARCH_W             0x0400   /* Used without OF_REOPEN */
+#define OF_CANCEL_W             0x0800
+#define OF_CREATE_W             0x1000
+#define OF_PROMPT_W             0x2000
+#define OF_EXIST_W              0x4000
+#define OF_REOPEN_W             0x8000
+
+#define HFILE_ERROR_W     	((HFILE)-1)
+
+// LockFileEx flags
+
+#define LOCKFILE_FAIL_IMMEDIATELY_W   0x00000001
+#define LOCKFILE_EXCLUSIVE_LOCK_W     0x00000002
+
+#define FILE_BEGIN_W              0
+#define FILE_CURRENT_W            1
+#define FILE_END_W                2
