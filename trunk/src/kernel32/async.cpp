@@ -1,4 +1,4 @@
-/* $Id: async.cpp,v 1.9 2000-09-15 13:24:29 sandervl Exp $ */
+/* $Id: async.cpp,v 1.10 2001-03-13 18:45:32 sandervl Exp $ */
 
 /*
  * Win32 Asynchronous I/O Subsystem for OS/2
@@ -35,7 +35,6 @@
 #define  INCL_VIO
 #define  INCL_AVIO
 #include <os2wrap.h>	//Odin32 OS/2 api wrappers
-#include <builtin.h>
 
 #include <stdlib.h>
 #include <string.h>

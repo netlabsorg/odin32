@@ -89,8 +89,7 @@ static HMODULE dllHandle = 0;
 /* linkage convention MUST be used because the operating system loader is   */
 /* calling this function.                                                   */
 /****************************************************************************/
-unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
-                                    ulFlag)
+ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
 {
     size_t i;
     APIRET rc;
@@ -115,7 +114,7 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
             strcpy(kernel32Path, OSLibGetDllName(hModule));
             char *endofpath = strrchr(kernel32Path, '\\');
             *(endofpath+1) = 0;
-            dprintf(("kernel32 init %s %s", __DATE__, __TIME__));
+            dprintf(("kernel32 init %s %s (%x)", __DATE__, __TIME__, DLLENTRYPOINT_NAME));
             ctordtorInit();
 
             CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/

@@ -1,4 +1,4 @@
-/* $Id: conout.cpp,v 1.9 2001-01-23 18:31:25 sandervl Exp $ */
+/* $Id: conout.cpp,v 1.10 2001-03-13 18:45:32 sandervl Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -57,7 +57,6 @@
 #define  INCL_VIO
 #define  INCL_AVIO
 #include <os2wrap.h>	//Odin32 OS/2 api wrappers
-#include <builtin.h>
 #include <stdlib.h>
 #include <string.h>
 

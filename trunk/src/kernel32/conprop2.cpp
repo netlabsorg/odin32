@@ -1,4 +1,4 @@
-/* $Id: conprop2.cpp,v 1.6 2000-03-03 11:15:57 sandervl Exp $ */
+/* $Id: conprop2.cpp,v 1.7 2001-03-13 18:45:33 sandervl Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -36,7 +36,6 @@
 #define  INCL_VIO
 #define  INCL_AVIO
 #include <os2wrap.h>    //Odin32 OS/2 api wrappers
-#include <builtin.h>
 
 #include <win32type.h>
 #include <win32api.h>

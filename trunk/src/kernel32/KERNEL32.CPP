@@ -1,4 +1,4 @@
-/* $Id: KERNEL32.CPP,v 1.58 2001-01-23 18:31:25 sandervl Exp $ */
+/* $Id: KERNEL32.CPP,v 1.59 2001-03-13 18:45:32 sandervl Exp $ */
 
 /*
  * Win32 compatibility file functions for OS/2
@@ -31,7 +31,6 @@
 #include <ctype.h>
 
 #include "misc.h"
-#include <builtin.h>
 #include "heap.h"
 #include "handlemanager.h"
 #include "wprocess.h"

@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.113 2001-02-09 18:31:06 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.114 2001-03-13 18:45:35 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -30,10 +30,6 @@
 #include "windlllx.h"
 #include <vmutex.h>
 #include <handlemanager.h>
-
-#ifdef __IBMCPP__
-#include <builtin.h>
-#endif
 
 #include "odin32validate.h"
 #include "exceptutil.h"

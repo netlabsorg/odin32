@@ -1,4 +1,4 @@
-/* $Id: version.cpp,v 1.2 2000-10-02 18:39:36 sandervl Exp $ */
+/* $Id: version.cpp,v 1.3 2001-03-13 18:45:34 sandervl Exp $ */
 
 /*
  * Win32 compatibility file functions for OS/2
@@ -28,10 +28,9 @@
 #include <ctype.h>
 #include <heapstring.h>
 
-#include "misc.h"
-#include <builtin.h>
+#include <misc.h>
 #include "heap.h"
-#include "handlemanager.h"
+#include <handlemanager.h>
 #include "wprocess.h"
 #include "oslibdos.h"
 #include <versionos2.h>
