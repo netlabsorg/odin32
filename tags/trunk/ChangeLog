@@ -1,9 +1,11 @@
-/* $Id: ChangeLog,v 1.1207 2001-01-08 20:16:58 bird Exp $ */
+/* $Id: ChangeLog,v 1.1208 2001-01-08 22:56:53 bird Exp $ */
 
  2001-01-08: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - tools\dailybuild:
                 o Updated with temporary server address.
                 o Put ftp userid/passwords into separate file.
+                o Build number incrementation. (Stored in versionos2.h)
+                  (Use bldlevel on the DLLs to look at it.)
 
     - Win32k:   o Added support for the ldrCheckInternalName bug. :-)
                   (see /src/win32k/ldr/myldrCheckInternalName.cpp for details.)
@@ -11,6 +13,12 @@
 
     - bin\bldlevelinf.cmd:
                 o Removed colon after otherwise to make it work with Object REXX.
+
+    - makefiles:
+                o Merged BuildLevel revisions with the LXOpt revisions.
+                  (There seems like there have been some kind of revision mixup in
+                   Sanders tree?)
+                o Updated the other post files with LXOpt.
 
  2001-01-06: Sander van Leeuwen <sandervl@xs4all.nl>
     - install:  o Win32k installation temporarily disabled due to a WarpIn bug
