@@ -1,4 +1,4 @@
-/* $Id: blit.cpp,v 1.42 2002-12-28 14:01:37 sandervl Exp $ */
+/* $Id: blit.cpp,v 1.43 2003-01-01 16:32:07 sandervl Exp $ */
 
 /*
  * GDI32 blit code
@@ -14,7 +14,8 @@
 #include <stdarg.h>
 #include <string.h>
 #include <cpuhlp.h>
-#include "misc.h"
+#include <winuser32.h>
+#include <dbglog.h>
 #include "dibsect.h"
 #include "rgbcvt.h"
 
@@ -249,6 +250,10 @@ INT WIN32API SetDIBitsToDevice(HDC hdc, INT xDest, INT yDest, DWORD cx,
     INT rc = 0;
     char *newBits = NULL;
 
+    if(startscan != 0 || lines != abs(info->bmiHeader.biHeight)) {
+        dprintf(("WARNING: SetDIBitsToDevice: startscan != 0 || lines != abs(info->bmiHeader.biHeight"));
+    }
+
     //If upside down, reverse scanlines and call SetDIBitsToDevice again
 //    if(info->bmiHeader.biHeight < 0 && info->bmiHeader.biBitCount != 8 && info->bmiHeader.biCompression == 0) {
     if(info->bmiHeader.biHeight < 0 && (info->bmiHeader.biCompression == BI_RGB ||
@@ -256,11 +261,11 @@ INT WIN32API SetDIBitsToDevice(HDC hdc, INT xDest, INT yDest, DWORD cx,
     {
         // upside down
         INT rc = -1;
-        BITMAPINFO newInfo;
-        newInfo.bmiHeader = info->bmiHeader;
-        long lLineByte = ((newInfo.bmiHeader.biWidth * (info->bmiHeader.biBitCount == 15 ? 16 : info->bmiHeader.biBitCount) + 31) / 32) * 4;
-        long lHeight   = -newInfo.bmiHeader.biHeight;
-        newInfo.bmiHeader.biHeight = -info->bmiHeader.biHeight;
+        long lLineByte = DIB_GetDIBWidthBytes(info->bmiHeader.biWidth, info->bmiHeader.biBitCount);
+        long lHeight   = -info->bmiHeader.biHeight;
+
+        //TODO: doesn't work if memory is readonly!!
+        ((BITMAPINFO *)info)->bmiHeader.biHeight = -info->bmiHeader.biHeight;
 
         char *newBits = (char *)malloc( lLineByte * lHeight );
         if(newBits) {
@@ -272,10 +277,13 @@ INT WIN32API SetDIBitsToDevice(HDC hdc, INT xDest, INT yDest, DWORD cx,
                 pbSrc -= lLineByte;
             }
             //We only convert the necessary data so xSrc & ySrc are now 0
-            rc = SetDIBitsToDevice( hdc, xDest, yDest, cx, cy, 0, 0, startscan, lines, (void *)newBits, &newInfo, coloruse );
+            rc = SetDIBitsToDevice( hdc, xDest, yDest, cx, cy, 0, 0, startscan, lines, (void *)newBits, info, coloruse );
             free( newBits );
         }
         else DebugInt3();
+
+        //TODO: doesn't work if memory is readonly!!
+        ((BITMAPINFO *)info)->bmiHeader.biHeight = -info->bmiHeader.biHeight;
 
         return rc;
     }
