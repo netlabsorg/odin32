@@ -1,4 +1,4 @@
-/* $Id: dev32.h,v 1.2 2001-09-14 01:50:16 bird Exp $
+/* $Id: dev32.h,v 1.3 2001-09-16 03:38:50 bird Exp $
  *
  * dev32 - header file for 32-bit part of the driver.
  *
@@ -72,12 +72,23 @@ PMTE _System GetOS2KrnlMTE(void); /* (devfirst.asm) */
 ULONG  _Optlink InitCallGate(void);
 ULONG  _Optlink x86DisableWriteProtect(void);
 ULONG  _Optlink x86RestoreWriteProtect(ULONG flWP);
+int     interpretFunctionProlog32(char *pach);
+int     interpretFunctionProlog16(char *pach);
+int     krnlInit(void);
 
 
 
 /*
  * Global variables
  */
+#ifdef _OS2KLDR_H_
+extern POTE    pKrnlOTE;                /* d32init.c */
+extern PSMTE   pKrnlSMTE;               /* d32init.c */
+#endif
+extern PULONG TKSSBase16;
+#if defined(__IBMC__) || defined(__IBMCPP__)
+    #pragma map( TKSSBase16 , "_TKSSBase16"  )
+#endif
 #ifndef SSToDS
 extern PULONG pulTKSSBase32;
 extern USHORT CallGateGDT;
