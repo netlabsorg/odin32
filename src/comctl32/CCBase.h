@@ -1,4 +1,4 @@
-/* $Id: CCBase.h,v 1.5 2000-03-18 16:17:21 cbratschi Exp $ */
+/* $Id: CCBase.h,v 1.6 2000-03-21 17:30:40 cbratschi Exp $ */
 /*
  * COMCTL32 Base Functions and Macros for all Controls
  *
@@ -40,5 +40,7 @@ LRESULT sendVScroll(HWND hwnd,UINT wNotifyCode);
 
 HWND createToolTip(HWND hwnd,UINT flags,BOOL addtool);
 VOID destroyToolTip(HWND hwndToolTip);
+
+VOID drawStubControl(HWND hwnd,HDC hdc);
 
 #endif

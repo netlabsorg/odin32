@@ -1,4 +1,4 @@
-/* $Id: comboex.cpp,v 1.2 2000-02-25 17:00:15 cbratschi Exp $ */
+/* $Id: comboex.cpp,v 1.3 2000-03-21 17:30:40 cbratschi Exp $ */
 /*
  * ComboBoxEx control
  *
@@ -38,8 +38,6 @@ COMBOEX_GetComboControl (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
     COMBOEX_INFO *infoPtr = COMBOEX_GetInfoPtr (hwnd);
 
-//    TRACE (comboex, "\n");
-
     return (LRESULT)infoPtr->hwndCombo;
 }
 
@@ -51,8 +49,6 @@ COMBOEX_GetEditControl (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
     if ((GetWindowLongA (hwnd, GWL_STYLE) & CBS_DROPDOWNLIST) != CBS_DROPDOWN)
         return 0;
-
-//    TRACE (comboex, "-- 0x%x\n", GetDlgItem (infoPtr->hwndCombo, ID_CB_EDIT));
 
     return (LRESULT)GetDlgItem (infoPtr->hwndCombo, ID_CB_EDIT);
 }
@@ -72,16 +68,13 @@ COMBOEX_GetImageList (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
     COMBOEX_INFO *infoPtr = COMBOEX_GetInfoPtr (hwnd);
 
-//    TRACE (comboex, "(0x%08x 0x%08lx)\n", wParam, lParam);
-
     return (LRESULT)infoPtr->himl;
 }
 
 
 
 
-static LRESULT
-COMBOEX_InsertItemA (HWND hwnd, WPARAM wParam, LPARAM lParam)
+static LRESULT COMBOEX_InsertItem(HWND hwnd,WPARAM wParam,LPARAM lParam,BOOL unicode)
 {
     /* COMBOEX_INFO *infoPtr = COMBOEX_GetInfoPtr (hwnd); */
 
@@ -97,8 +90,6 @@ COMBOEX_SetExtendedStyle (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
     COMBOEX_INFO *infoPtr = COMBOEX_GetInfoPtr (hwnd);
     DWORD dwTemp;
-
-//    TRACE (comboex, "(0x%08x 0x%08lx)\n", wParam, lParam);
 
     dwTemp = infoPtr->dwExtStyle;
 
@@ -120,8 +111,6 @@ COMBOEX_SetImageList (HWND hwnd, WPARAM wParam, LPARAM lParam)
     COMBOEX_INFO *infoPtr = COMBOEX_GetInfoPtr (hwnd);
     HIMAGELIST himlTemp;
 
-//    TRACE (comboex, "(0x%08x 0x%08lx)\n", wParam, lParam);
-
     himlTemp = infoPtr->himl;
     infoPtr->himl = (HIMAGELIST)lParam;
 
@@ -129,8 +118,7 @@ COMBOEX_SetImageList (HWND hwnd, WPARAM wParam, LPARAM lParam)
 }
 
 
-static LRESULT
-COMBOEX_SetItemA (HWND hwnd, WPARAM wParam, LPARAM lParam)
+static LRESULT COMBOEX_SetItem(HWND hwnd,WPARAM wParam,LPARAM lParam,BOOL unicode)
 {
     /* COMBOEX_INFO *infoPtr = COMBOEX_GetInfoPtr (hwnd); */
 
@@ -138,9 +126,6 @@ COMBOEX_SetItemA (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
     return TRUE;
 }
-
-
-/* << COMBOEX_SetItem32W >> */
 
 
 static LRESULT
@@ -241,14 +226,14 @@ COMBOEX_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 /*      case CBEM_GETITEM32A:
         case CBEM_GETITEM32W:
-        case CBEM_GETUNICODEFORMAT:
         case CBEM_HASEDITCHANGED:
 */
 
         case CBEM_INSERTITEMA:
-            return COMBOEX_InsertItemA (hwnd, wParam, lParam);
+            return COMBOEX_InsertItem(hwnd,wParam,lParam,FALSE);
 
-/*      case CBEM_INSERTITEM32W: */
+        case CBEM_INSERTITEMW:
+            return COMBOEX_InsertItem(hwnd,wParam,lParam,TRUE);
 
         case CBEM_SETEXTENDEDSTYLE:
             return COMBOEX_SetExtendedStyle (hwnd, wParam, lParam);
@@ -257,11 +242,10 @@ COMBOEX_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
             return COMBOEX_SetImageList (hwnd, wParam, lParam);
 
         case CBEM_SETITEMA:
-            return COMBOEX_SetItemA (hwnd, wParam, lParam);
+            return COMBOEX_SetItem(hwnd,wParam,lParam,FALSE);
 
-/*      case CBEM_SETITEM32W:
-        case CBEM_SETUNICODEFORMAT:
-*/
+        case CBEM_SETITEMW:
+            return COMBOEX_SetItem(hwnd,wParam,lParam,TRUE);
 
         case CB_DELETESTRING:
         case CB_FINDSTRINGEXACT:

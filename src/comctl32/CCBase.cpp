@@ -1,4 +1,4 @@
-/* $Id: CCBase.cpp,v 1.4 2000-03-18 16:17:20 cbratschi Exp $ */
+/* $Id: CCBase.cpp,v 1.5 2000-03-21 17:30:40 cbratschi Exp $ */
 /*
  * COMCTL32 Base Functions and Macros for all Controls
  *
@@ -249,4 +249,29 @@ HWND createToolTip(HWND hwnd,UINT flags,BOOL addtool)
 VOID destroyToolTip(HWND hwndToolTip)
 {
   if (hwndToolTip) DestroyWindow(hwndToolTip);
+}
+
+//stub control
+
+VOID drawStubControl(HWND hwnd,HDC hdc)
+{
+  RECT rect;
+  HBRUSH brush = CreateSolidBrush(RGB(0,0,255));
+  HPEN pen = CreatePen(PS_SOLID,0,RGB(255,0,0)),oldPen;
+  COLORREF oldColor;
+
+  GetClientRect(hwnd,&rect);
+  FillRect(hdc,&rect,brush);
+  oldPen = SelectObject(hdc,pen);
+  MoveToEx(hdc,0,0,NULL);
+  LineTo(hdc,rect.right,rect.bottom);
+  MoveToEx(hdc,rect.right,0,NULL);
+  LineTo(hdc,0,rect.bottom);
+  SelectObject(hdc,oldPen);
+  oldColor = SetTextColor(hdc,RGB(255,255,255));
+  DrawTextA(hdc,"Unimplemented Control!",-1,&rect,DT_CENTER | DT_SINGLELINE | DT_VCENTER);
+  SetTextColor(hdc,oldColor);
+
+  DeleteObject(brush);
+  DeleteObject(pen);
 }
