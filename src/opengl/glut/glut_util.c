@@ -1,4 +1,4 @@
-
+/* $Id: glut_util.c,v 1.2 2000-02-09 08:46:19 jeroen Exp $ */
 /* Copyright (c) Mark J. Kilgard, 1994. */
 
 /* This program is freely distributable without licensing fees
@@ -43,7 +43,6 @@ __glutWarning(char *format,...)
   sprintf(errmsg, format, args);
   dprintf(("GLUT32: %s\n",errmsg));
 #endif
-
   fprintf(stderr, "GLUT: Warning in %s: ",
     __glutProgramName ? __glutProgramName : "(unamed)");
   vfprintf(stderr, format, args);

@@ -1,3 +1,4 @@
+/* $Id: os2_glx.h,v 1.2 2000-02-09 08:46:21 jeroen Exp $ */
 #ifndef __os2_glx_h__
 #define __os2_glx_h__
 

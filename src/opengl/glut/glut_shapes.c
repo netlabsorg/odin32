@@ -1,4 +1,4 @@
-
+/* $Id: glut_shapes.c,v 1.2 2000-02-09 08:46:16 jeroen Exp $ */
 /* Copyright (c) Mark J. Kilgard, 1994, 1997. */
 
 /**
@@ -69,8 +69,8 @@ void APIENTRY
 glutWireSphere(GLdouble radius, GLint slices, GLint stacks)
 {
   QUAD_OBJ_INIT();
-  gluQuadricDrawStyle(quadObj, GLU_LINE);
-  gluQuadricNormals(quadObj, GLU_SMOOTH);
+  gluQuadricDrawStyle(quadObj, (GLenum)GLU_LINE);
+  gluQuadricNormals(quadObj, (GLenum)GLU_SMOOTH);
   /* If we ever changed/used the texture or orientation state
      of quadObj, we'd need to change it to the defaults here
      with gluQuadricTexture and/or gluQuadricOrientation. */
@@ -81,8 +81,8 @@ void APIENTRY
 glutSolidSphere(GLdouble radius, GLint slices, GLint stacks)
 {
   QUAD_OBJ_INIT();
-  gluQuadricDrawStyle(quadObj, GLU_FILL);
-  gluQuadricNormals(quadObj, GLU_SMOOTH);
+  gluQuadricDrawStyle(quadObj, (GLenum)GLU_FILL);
+  gluQuadricNormals(quadObj, (GLenum)GLU_SMOOTH);
   /* If we ever changed/used the texture or orientation state
      of quadObj, we'd need to change it to the defaults here
      with gluQuadricTexture and/or gluQuadricOrientation. */
@@ -94,8 +94,8 @@ glutWireCone(GLdouble base, GLdouble height,
   GLint slices, GLint stacks)
 {
   QUAD_OBJ_INIT();
-  gluQuadricDrawStyle(quadObj, GLU_LINE);
-  gluQuadricNormals(quadObj, GLU_SMOOTH);
+  gluQuadricDrawStyle(quadObj, (GLenum)GLU_LINE);
+  gluQuadricNormals(quadObj, (GLenum)GLU_SMOOTH);
   /* If we ever changed/used the texture or orientation state
      of quadObj, we'd need to change it to the defaults here
      with gluQuadricTexture and/or gluQuadricOrientation. */
@@ -107,8 +107,8 @@ glutSolidCone(GLdouble base, GLdouble height,
   GLint slices, GLint stacks)
 {
   QUAD_OBJ_INIT();
-  gluQuadricDrawStyle(quadObj, GLU_FILL);
-  gluQuadricNormals(quadObj, GLU_SMOOTH);
+  gluQuadricDrawStyle(quadObj, (GLenum)GLU_FILL);
+  gluQuadricNormals(quadObj, (GLenum)GLU_SMOOTH);
   /* If we ever changed/used the texture or orientation state
      of quadObj, we'd need to change it to the defaults here
      with gluQuadricTexture and/or gluQuadricOrientation. */

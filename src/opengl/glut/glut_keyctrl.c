@@ -1,4 +1,4 @@
-
+/* $Id: glut_keyctrl.c,v 1.2 2000-02-09 08:46:13 jeroen Exp $ */
 /* Copyright (c) Mark J. Kilgard, 1996, 1997. */
 
 /* This program is freely distributable without licensing fees

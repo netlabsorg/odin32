@@ -1,3 +1,4 @@
+/* $Id: os2_x11.h,v 1.2 2000-02-09 08:46:21 jeroen Exp $ */
 #ifndef __os2_x11_h__
 #define __os2_x11_h__
 

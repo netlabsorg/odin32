@@ -1,3 +1,4 @@
+/* $Id: layerutil.h,v 1.2 2000-02-09 08:46:21 jeroen Exp $ */
 #ifndef __layerutil_h__
 #define __layerutil_h__
 

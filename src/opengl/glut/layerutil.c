@@ -1,4 +1,4 @@
-
+/* $Id: layerutil.c,v 1.2 2000-02-09 08:46:20 jeroen Exp $ */
 /* Copyright (c) Mark J. Kilgard, 1993, 1994. */
 
 /* This program is freely distributable without licensing fees

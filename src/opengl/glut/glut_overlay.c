@@ -1,4 +1,4 @@
-
+/* $Id: glut_overlay.c,v 1.2 2000-02-09 08:46:15 jeroen Exp $ */
 /* Copyright (c) Mark J. Kilgard, 1996, 1997.  */
 
 /* This program is freely distributable without licensing fees
@@ -455,7 +455,7 @@ glutEstablishOverlay(void)
 #endif
 
   window->overlay = overlay;
-  glutUseLayer(GLUT_OVERLAY);
+  glutUseLayer((GLenum)GLUT_OVERLAY);
 
   if (overlay->treatAsSingle) {
     glDrawBuffer(GL_FRONT);
@@ -474,7 +474,7 @@ glutRemoveOverlay(void)
 
   /* If using overlay, switch to the normal layer. */
   if (window->renderWin == overlay->win) {
-    glutUseLayer(GLUT_NORMAL);
+    glutUseLayer((GLenum)GLUT_NORMAL);
   }
 #if !defined(_WIN32) && !defined(__WIN32OS2__)
   addStaleWindow(window, overlay->win);

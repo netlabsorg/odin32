@@ -1,4 +1,4 @@
-
+/* $Id: win32_x11.c,v 1.2 2000-02-09 08:46:23 jeroen Exp $ */
 /* Copyright (c) Nate Robins, 1997. */
 /* portions Copyright (c) Mark Kilgard, 1998. */
 

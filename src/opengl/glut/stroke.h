@@ -1,3 +1,4 @@
+/* $Id: stroke.h,v 1.2 2000-02-09 08:46:21 jeroen Exp $ */
 /* $XConsortium: wfont.h,v 5.1 91/02/16 09:46:37 rws Exp $ */
 
 /*****************************************************************
@@ -5,18 +6,18 @@ Copyright (c) 1989,1990, 1991 by Sun Microsystems, Inc. and the X Consortium.
 
                         All Rights Reserved
 
-Permission to use, copy, modify, and distribute this software and its 
-documentation for any purpose and without fee is hereby granted, 
+Permission to use, copy, modify, and distribute this software and its
+documentation for any purpose and without fee is hereby granted,
 provided that the above copyright notice appear in all copies and that
-both that copyright notice and this permission notice appear in 
+both that copyright notice and this permission notice appear in
 supporting documentation, and that the names of Sun Microsystems,
-the X Consortium, and MIT not be used in advertising or publicity 
-pertaining to distribution of the software without specific, written 
-prior permission.  
+the X Consortium, and MIT not be used in advertising or publicity
+pertaining to distribution of the software without specific, written
+prior permission.
 
-SUN MICROSYSTEMS DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, 
-INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT 
-SHALL SUN MICROSYSTEMS BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL 
+SUN MICROSYSTEMS DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE,
+INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT
+SHALL SUN MICROSYSTEMS BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL
 DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS,
 WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
 ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
@@ -84,7 +85,7 @@ typedef struct {
   int n_pts;                    /* number of points in the subpath */
   Path_pt_ptr pts;              /* pointer to them */
   int closed;                   /* true if the subpath is closed */
-  int dcmp_flag;                /* flag for pgon dcmp, pgon type 
+  int dcmp_flag;                /* flag for pgon dcmp, pgon type
                                  * and dcmped triangle type */
 } Path_subpath;
 
