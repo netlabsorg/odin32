@@ -1,4 +1,10 @@
-/* $Id: changelog,v 1.2148 2002-06-10 09:15:43 sandervl Exp $ */
+/* $Id: changelog,v 1.2149 2002-06-10 09:53:36 sandervl Exp $ */
+
+ 2002-06-10: Herwig Bauernfeind <herwig.bauernfeind@aon.at>
+    - TOOLS\ODINBUG:
+                o Added VX-REXX sources for OdinBug
+    - DOC:      o OdinBug.HLP update
+    - BIN:      o OdinBug.exe update
 
  2002-06-10: Sander van Leeuwen <sandervl@xs4all.nl>
     - OLE32:    o Fixed bug in StgStreamImpl_Seek
