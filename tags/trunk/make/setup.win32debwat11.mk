@@ -1,4 +1,4 @@
-# $Id: setup.win32debwat11.mk,v 1.12 2002-08-30 18:27:28 bird Exp $
+# $Id: setup.win32debwat11.mk,v 1.13 2002-08-30 19:44:51 bird Exp $
 
 # ---WIN32, DEBUG, WAT11-------------------------
 ENV_NAME="Win32, Debug, Watcom C/C++ v11.0c"
@@ -46,7 +46,7 @@ _AR_LNK1= "$(TARGET_OBJS: ="&^
 AR_LNK1= $(_AR_LNK1:""=)
 AR_LNK2= $(@R).lst
 
-CC_FLAGS=-bt=os2v2 -dDEBUG -dWIN32 -d__32BIT__ -d__i386__ -zq -bm -ze -w4 -d2 -hc -zc $(_CC_OPTIONAL) $(CC_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CC_INCLUDES:-I=-i=) $(ALL_INCLUDES:-I=-i=) -i=$(PATH_INCLUDES) -i=$(WATCOM)\h
+CC_FLAGS=-bt=os2v2 -dDEBUG -dWIN32 -d__32BIT__ -d__i386__ -zq -fr=nul -bm -ze -w4 -d2 -hc -zc $(_CC_OPTIONAL) $(CC_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CC_INCLUDES:-I=-i=) $(ALL_INCLUDES:-I=-i=) -i=$(PATH_INCLUDES) -i=$(WATCOM)\h
 CC_FLAGS_EXE=$(CC_FLAGS)
 CC_FLAGS_DLL=$(CC_FLAGS) -bd
 CC_FLAGS_SYS=$(CC_FLAGS) -s -zdp -zff -zgf
@@ -56,7 +56,7 @@ CC_OBJ_OUT=-fo=
 CC_LST_OUT=
 CC_PC_2_STDOUT=-pc
 
-CXX_FLAGS=-bt=os2v2 -dDEBUG -dWIN32 -d__32BIT__ -d__i386__ -zq -bm -ze -w4 -d2 -hc -zc (_CXX_OPTIONAL)  $(CXX_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CXX_INCLUDES:-I=-i=) $(ALL_INCLUDES:-I=-i=) -i=$(PATH_INCLUDES) -i=$(WATCOM)\h
+CXX_FLAGS=-bt=os2v2 -dDEBUG -dWIN32 -d__32BIT__ -d__i386__ -zq -fr=nul -bm -ze -w4 -d2 -hc -zc (_CXX_OPTIONAL)  $(CXX_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CXX_INCLUDES:-I=-i=) $(ALL_INCLUDES:-I=-i=) -i=$(PATH_INCLUDES) -i=$(WATCOM)\h
 CXX_FLAGS_EXE=$(CXX_FLAGS)
 CXX_FLAGS_DLL=$(CXX_FLAGS) -bd
 CXX_FLAGS_SYS=$(CXX_FLAGS) -s -zdp -zff -zgf
