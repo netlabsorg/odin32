@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.11 2000-02-03 13:27:40 sandervl Exp $
+# $Id: makefile,v 1.12 2000-02-03 23:05:49 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -50,7 +50,7 @@ resource.asm: rsrc.rc
 
 resource.obj: resource.asm
 
-comdlg32.obj: comdlg32.cpp $(PDWIN32_INCLUDE)\wndproc.h
+comdlg32.obj: comdlg32.cpp $(PDWIN32_INCLUDE)\win32wnd.h
 initterm.obj: initterm.cpp
 
 cdlg32.obj: cdlg32.cpp cdlg.h
