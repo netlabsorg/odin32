@@ -1,4 +1,4 @@
-; $Id: VERSION.DEF,v 1.5 1999-08-12 23:33:37 phaller Exp $
+; $Id: VERSION.DEF,v 1.6 1999-08-17 13:29:09 phaller Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY VERSION INITINSTANCE
@@ -6,7 +6,7 @@ DATA MULTIPLE NONSHARED
 
 IMPORTS
     _LZOpenFileA@12            = LZ32.1
-    _LZCopy@8                  = LZ32.0
+    _LZCopy@8                  = LZ32.LZCopy
     _LZClose@4                 = LZ32.5
 
 EXPORTS

@@ -11,7 +11,7 @@ IMPORTS
        _HEAP_strdupWtoA@12   = KERNEL32.HEAP_strdupWtoA
 
 EXPORTS
-       LZCopy                = _LZCopy@8           @0
+       LZCopy                = _LZCopy@8           ; @0 -- PH: can't be exported?
        LZOpenFileA           = _LZOpenFileA@12     @1
        LZInit                = _LZInit@4           @2
        LZSeek                = _LZSeek@12          @3
