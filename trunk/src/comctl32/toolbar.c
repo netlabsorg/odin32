@@ -1,4 +1,4 @@
-/* $Id: toolbar.c,v 1.13 1999-08-15 19:12:50 cbratschi Exp $ */
+/* $Id: toolbar.c,v 1.14 1999-10-14 09:21:14 sandervl Exp $ */
 /*
  * Toolbar control
  *
@@ -3467,7 +3467,8 @@ TOOLBAR_EraseBackground (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
     TOOLBAR_INFO *infoPtr = TOOLBAR_GetInfoPtr (hwnd);
 
-    if (infoPtr->bTransparent)
+    //SvL: Check ptr
+    if (infoPtr && infoPtr->bTransparent)
         return SendMessageA (GetParent (hwnd), WM_ERASEBKGND, wParam, lParam);
 
     return DefWindowProcA (hwnd, WM_ERASEBKGND, wParam, lParam);
