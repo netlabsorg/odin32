@@ -1,4 +1,4 @@
-# $Id: setup.os2debwlink.mk,v 1.2 2002-08-29 10:01:43 bird Exp $
+# $Id: setup.os2debwlink.mk,v 1.3 2002-08-29 12:06:18 bird Exp $
 
 #
 # Include optional stuff.
@@ -14,7 +14,7 @@ TOOL_DEFCONV    = $(PATH_TOOLS)\kDef2Wat.exe $(_LD_FORMAT)
 #
 # The flags
 #
-LINK_FLAGS      = Option eliminate, manglednames, caseexact, verbose, cache $(_LD_OPTIONAL) Debug codeview all
+LINK_FLAGS      = Option eliminate, manglednames, caseexact, verbose $(_LD_OPTIONAL) Debug codeview all
 LINK_FLAGS_EXE  = $(LINK_FLAGS)
 LINK_FLAGS_DLL  = $(LINK_FLAGS)
 !if "$(LD_FORMAT)" == "NE"

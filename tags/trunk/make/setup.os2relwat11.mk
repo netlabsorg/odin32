@@ -1,4 +1,4 @@
-# $Id: setup.os2relwat11.mk,v 1.10 2002-08-29 10:01:46 bird Exp $
+# $Id: setup.os2relwat11.mk,v 1.11 2002-08-29 12:06:18 bird Exp $
 
 #
 # Note! Watcom is unable to do debug info release builds.
@@ -54,7 +54,7 @@ CC_FLAGS_EXE=$(CC_FLAGS) $(_CC_OPTIM_) -zc
 CC_FLAGS_DLL=$(CC_FLAGS) $(_CC_OPTIM_) -zc -bd
 CC_FLAGS_SYS=$(CC_FLAGS) $(_CC_OPTIM_) -s -zdp -zff -zgf -zu
 CC_FLAGS_VDD=$(CC_FLAGS_SYS)
-CC_FLAGS_IFS=$(CC_FLAGS_SYS) $(_CC_OPTIM_IFS) -bd
+CC_FLAGS_IFS=$(CC_FLAGS) $(_CC_OPTIM_IFS) -s -zdp -zff -zgf -zu -bd
 CC_OBJ_OUT=-fo=
 CC_LST_OUT=
 CC_PC_2_STDOUT=-pc
@@ -69,9 +69,9 @@ _CXX_OPTIM_IFS =
 CXX_FLAGS=-bt=os2v2 -dOS2 -d__32BIT__ -d__i386__ -zq -bm -ze -w4 -zld $(_CXX_OPTIONAL)  $(CXX_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CXX_INCLUDES:-I=-i=) $(ALL_INCLUDES:-I=-i=) -i=$(PATH_INCLUDES) -i=$(WATCOM)\h
 CXX_FLAGS_EXE=$(CXX_FLAGS) $(_CXX_OPTIM_) -zc
 CXX_FLAGS_DLL=$(CXX_FLAGS) $(_CXX_OPTIM_) -zc -bd
-CXX_FLAGS_SYS=$(CXX_FLAGS) $(_CXX_OPTIM_) -omlinear -s -zdp -zff -zgf -zu
+CXX_FLAGS_SYS=$(CXX_FLAGS) $(_CXX_OPTIM_) -s -zdp -zff -zgf -zu
 CXX_FLAGS_VDD=$(CXX_FLAGS_SYS)
-CXX_FLAGS_IFS=$(CXX_FLAGS_SYS) $(_CXX_OPTIM_IFS) -bd
+CXX_FLAGS_IFS=$(CXX_FLAGS) $(_CXX_OPTIM_IFS) -s -zdp -zff -zgf -zu -bd
 CXX_OBJ_OUT=-fo=
 CXX_LST_OUT=
 CXX_PC_2_STDOUT=-pc
