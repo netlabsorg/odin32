@@ -1,20 +1,13 @@
-/* $Id: network.cpp,v 1.5 1999-06-22 08:09:29 sandervl Exp $ */
-
-/*
- *
- * Project Odin Software License can be found in LICENSE.TXT
- *
- */
 /*
  * Win32 Network apis
  *
  * Copyright 1998 Peter Fitzsimmons
+ *           1999 Przemyslaw Dobrowolski
  *
  */
 #define INCL_DOSEXCEPTIONS
 #define INCL_DOSMEMMGR
 #include <os2wrap.h>	//Odin32 OS/2 api wrappers
-//#include <pmwsock.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -25,49 +18,55 @@
 //******************************************************************************
 BOOL WIN32API GetComputerNameA(LPSTR name, LPDWORD size)
 {
-#if 1   /*PLF Wed  98-03-18 23:38:28*/
-//*plf removing need for wsock32 call.
-// This should be done with UPM anyway.
-return FALSE;
-#else
-  if (-1==gethostname(name,*size))
-    return FALSE;
+  char *szHostname;
+  char szDefault[]="NONAME";
+  int  cbSize;
+  
+  szHostname=getenv("HOSTNAME");
 
-  *size = strlen(name);
+  if (!szHostname) szHostname=szDefault;
+     
+  if (name) strncpy(name,szHostname,*size);
+
+  *size=strlen(name);  
+
+  dprintf(("KERNEL32 GetComputerNameA: %s (size %d)",name,*size));
+
   return TRUE;
-#endif
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API GetComputerNameW(LPSTR name, LPDWORD size)
+BOOL WIN32API GetComputerNameW(LPWSTR name, LPDWORD size)
 {
-#if 1   /*PLF Wed  98-03-18 23:38:28*/
-//*plf removing need for wsock32 call.
-// This should be done with UPM anyway.
-return FALSE;
-#else
-  if (-1==OS2gethostname(name,*size))
-    return FALSE;
-  @@@PH do unicode conversion
+  LPSTR nameA = NULL;
+  BOOL  ret;
 
-  *size = strlen(name);
-  return TRUE;
-#endif
+  if (name) nameA=(LPSTR)malloc(2**size);
+
+  ret = GetComputerNameA(nameA,size);
+
+  if (ret) AsciiToUnicode(nameA,name);
+
+  free(nameA);
+
+  return ret;
 }
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API GetComputerName32W(LPWSTR name, LPDWORD size)
 {
- LPSTR nameA = (LPSTR)malloc(*size);
- BOOL  ret = GetComputerNameA(nameA,size);
+  LPSTR nameA = NULL;
+  BOOL  ret;
 
-    if (ret)
-      AsciiToUnicode(nameA, name);
+  if (name) nameA=(LPSTR)malloc(2**size);
 
-    free(nameA);
-    /* FIXME : size correct? */
-    return ret;
+  ret = GetComputerNameA(nameA,size);
+
+  if (ret) AsciiToUnicode(nameA, name);
+
+  free(nameA);
+
+  return ret;
 }
 //******************************************************************************
 //******************************************************************************
-
