@@ -1,8 +1,9 @@
- /* $Id: ChangeLog,v 1.971 2000-06-03 12:50:37 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.972 2000-06-03 16:40:15 sandervl Exp $ */
 
  2000-06-03: Jeroen van den Horn <J.vandenHorn@fibre.a2000.nl>
     - WINMM:        Don't start playback when WaveOutRestart is called
                     before any buffers have been added.
+                    Clear WHDR_INQUEUE bit for buffers returned in WaveOutReset
 
  2000-06-03: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - Win32k/REXX:  Rewrote the REXX stub program in assembly.
