@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.423 1999-11-08 21:23:41 sandervl Exp $ */
+ /* $Id: changelog,v 1.424 1999-11-08 22:25:27 hugh Exp $ */
+
+ 99-11-08: Markus Montkowski <mmontkowski@gmx.de>
+	- WING32: Added first implementation of this old 32bit DLL.
 
  99-11-08: Edgar Buerkle <Edgar.Buerkle@gmx.net>
 	- KERNEL32: SetCurrentDirectory, CreateDirectory, RemoveDirectory bugfixes.
