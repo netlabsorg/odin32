@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.12 2000-12-27 23:06:17 sandervl Exp $
+# $Id: makefile,v 1.13 2001-04-01 10:30:32 sandervl Exp $
 
 #
 # Odin32 API
@@ -18,6 +18,7 @@
 #
 OBJS = \
 $(OBJDIR)\wininet.obj \
+$(OBJDIR)\wininet_main.obj \
 $(OBJDIR)\ftp.obj \
 $(OBJDIR)\http.obj \
 $(OBJDIR)\utility.obj \
