@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.55 1999-12-19 17:46:26 cbratschi Exp $ */
+/* $Id: win32wbase.h,v 1.56 1999-12-24 18:39:12 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -70,31 +70,23 @@ virtual  ULONG  MsgEnable(BOOL fEnable);
          ULONG  MsgShow(BOOL fShow);
          ULONG  MsgPosChanging(LPARAM lp);
          ULONG  MsgPosChanged(LPARAM lp);
-         ULONG  MsgMove(ULONG x, ULONG y);
-         ULONG  MsgHitTest(ULONG x, ULONG y);
-         ULONG  MsgSize(ULONG width, ULONG height, BOOL fMinimize, BOOL fMaximize);
 virtual  ULONG  MsgActivate(BOOL fActivate, BOOL fMinimized, HWND hwnd);
          ULONG  MsgSetFocus(HWND hwnd);
          ULONG  MsgKillFocus(HWND hwnd);
-         ULONG  MsgTimer(ULONG TimerID);
-         ULONG  MsgSysTimer(ULONG TimerID);
          ULONG  MsgScroll(ULONG msg, ULONG scrollCode, ULONG scrollPos);
-         ULONG  MsgCommand(ULONG cmd, ULONG Id, HWND hwnd);
-         ULONG  MsgSysCommand(ULONG win32sc, ULONG x, ULONG y);
-         ULONG  MsgChar(ULONG cmd, ULONG repeatcnt, ULONG scancode, ULONG vkey, ULONG keyflags);
-         ULONG  MsgKeyUp (ULONG repeatCount, ULONG scancode, ULONG virtualKey);
-         ULONG  MsgKeyDown (ULONG repeatCount, ULONG scancode, ULONG virtualKey, BOOL keyWasPressed);
-         ULONG  MsgSysKeyUp (ULONG repeatCount, ULONG scancode, ULONG virtualKey);
-         ULONG  MsgSysKeyDown (ULONG repeatCount, ULONG scancode, ULONG virtualKey, BOOL keyWasPressed);
-         ULONG  MsgButton(ULONG msg, ULONG ncx, ULONG ncy, ULONG clx, ULONG cly);
-         ULONG  MsgMouseMove(ULONG keystate, ULONG x, ULONG y);
+         ULONG  MsgButton(MSG *msg);
+         ULONG  MsgMouseMove(MSG *msg);
          ULONG  MsgPaint(ULONG tmp1, BOOL select = TRUE);
          ULONG  MsgEraseBackGround(HDC hdc);
+	 ULONG  MsgInitMenu(MSG *msg);
+	 ULONG  MsgHitTest(MSG *msg);
+         ULONG  MsgNCPaint();
+	 ULONG  DispatchMsg(MSG *msg);
+
          ULONG  MsgSetText(LPSTR lpsz, LONG cch);
          ULONG  MsgGetTextLength();
          char  *MsgGetText();
          ULONG  MsgContextMenu(ULONG x,ULONG y);
-         void   MsgInitMenu(HWND hMenu);
          VOID   updateWindowStyle(DWORD oldExStyle,DWORD oldStyle);
 
 virtual  LONG   SetWindowLongA(int index, ULONG value, BOOL fUnicode = FALSE);
@@ -365,6 +357,8 @@ private:
                 return SendInternalMessageW(msg, wParam, lParam);
         else    return SendInternalMessageA(msg, wParam, lParam);
      }
+#else
+friend BOOL  OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode, BOOL fTranslateExtraMsgs);
 #endif
 
 public:
@@ -393,32 +387,11 @@ public:
          BOOL   isSupressErase() { return SupressEraseFlag; }
 };
 
-
-#define BUTTON_LEFTDOWN         0
-#define BUTTON_LEFTUP           1
-#define BUTTON_LEFTDBLCLICK     2
-#define BUTTON_RIGHTUP          3
-#define BUTTON_RIGHTDOWN        4
-#define BUTTON_RIGHTDBLCLICK    5
-#define BUTTON_MIDDLEUP         6
-#define BUTTON_MIDDLEDOWN       7
-#define BUTTON_MIDDLEDBLCLICK   8
-
 #define WMMOVE_LBUTTON          1
 #define WMMOVE_MBUTTON          2
 #define WMMOVE_RBUTTON          4
 #define WMMOVE_CTRL             8
 #define WMMOVE_SHIFT            16
-
-
-#define CMD_MENU                1
-#define CMD_CONTROL             2
-#define CMD_ACCELERATOR         3
-
-#define KEY_ALTDOWN             1
-#define KEY_PREVDOWN            2
-#define KEY_UP                  4
-#define KEY_DEADKEY             8
 
 #endif //__cplusplus
 

@@ -1,4 +1,4 @@
-/* $Id: pmframe.cpp,v 1.28 1999-12-19 17:46:24 cbratschi Exp $ */
+/* $Id: pmframe.cpp,v 1.29 1999-12-24 18:39:10 sandervl Exp $ */
 /*
  * Win32 Frame Managment Code for OS/2
  *
@@ -25,10 +25,6 @@
 #include "caret.h"
 
 #define PMFRAMELOG
-
-#define GCL_STYLE_W           (-26)
-#define CS_VREDRAW_W          0x0001
-#define CS_HREDRAW_W          0x0002
 
 //******************************************************************************
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.h,v 1.6 1999-12-05 00:31:47 sandervl Exp $ */
+/* $Id: oslibmsg.h,v 1.7 1999-12-24 18:39:10 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -17,17 +17,24 @@
 
 ULONG TranslateWinMsg(ULONG msg);
 
+#define ODINMSG_NOEXTRAMSGS	0
+#define ODINMSG_EXTRAMSGS	1
+
 #ifdef OS2DEF_INCLUDED
-void  OS2ToWinMsgTranslate(QMSG *os2Msg, MSG *winMsg, BOOL isUnicode);
+BOOL  OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode, BOOL fTranslateExtraMsgs = ODINMSG_EXTRAMSGS);
 void  WinToOS2MsgTranslate(MSG *winMsg, QMSG *os2Msg, BOOL isUnicode);
+
+extern QMSG *MsgThreadPtr;
+
 #endif
 
 BOOL  OSLibWinGetMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, 
                      UINT uMsgFilterMax, BOOL isUnicode = FALSE);
 BOOL  OSLibWinPeekMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, 
-                      UINT uMsgFilterMax, BOOL fRemove, BOOL isUnicode = FALSE);
+                      UINT uMsgFilterMax, DWORD fRemove, BOOL isUnicode = FALSE);
 void  OSLibWinPostQuitMessage(ULONG nExitCode);
 LONG  OSLibWinDispatchMsg(MSG *msg, BOOL isUnicode = FALSE);
+BOOL  OSLibWinTranslateMessage(MSG *msg);
 
 ULONG OSLibWinQueryMsgTime();
 BOOL  OSLibInitMsgQueue();
@@ -36,7 +43,6 @@ BOOL  OSLibWinInSendMessage();
 DWORD OSLibWinGetMessagePos();
 LONG  OSLibWinGetMessageTime();
 BOOL  OSLibWinReplyMessage(ULONG result);
-
 ULONG OSLibWinQueryQueueStatus();
 
 #define WINWM_NULL                  0x0000
@@ -93,6 +99,12 @@ ULONG OSLibWinQueryQueueStatus();
 #define WINWM_POWER                 0x0048
 #define WINWM_COPYDATA              0x004A
 #define WINWM_CANCELJOURNAL         0x004B
+#define WINWM_CONTEXTMENU           0x007b
+#define WINWM_STYLECHANGING         0x007c
+#define WINWM_STYLECHANGED          0x007d
+#define WINWM_DISPLAYCHANGE         0x007e
+#define WINWM_GETICON               0x007f
+#define WINWM_SETICON               0x0080
 #define WINWM_NCCREATE              0x0081
 #define WINWM_NCDESTROY             0x0082
 #define WINWM_NCCALCSIZE            0x0083
@@ -128,6 +140,7 @@ ULONG OSLibWinQueryQueueStatus();
 #define WINWM_VSCROLL               0x0115
 #define WINWM_INITMENU              0x0116
 #define WINWM_INITMENUPOPUP         0x0117
+#define WINWM_SYSTIMER              0x0118
 #define WINWM_MENUSELECT            0x011F
 #define WINWM_MENUCHAR              0x0120
 #define WINWM_ENTERIDLE             0x0121
@@ -186,16 +199,16 @@ ULONG OSLibWinQueryQueueStatus();
 #define WINWM_PALETTECHANGED        0x0311
 #define WINWM_HOTKEY                0x0312
 #define WINWM_DDE_FIRST             0x03E0
-#define WINWM_DDE_INITIATE          (WM_DDE_FIRST)
-#define WINWM_DDE_TERMINATE         (WM_DDE_FIRST + 1)
-#define WINWM_DDE_ADVISE            (WM_DDE_FIRST + 2)
-#define WINWM_DDE_UNADVISE          (WM_DDE_FIRST + 3)
-#define WINWM_DDE_ACK               (WM_DDE_FIRST + 4)
-#define WINWM_DDE_DATA              (WM_DDE_FIRST + 5)
-#define WINWM_DDE_REQUEST           (WM_DDE_FIRST + 6)
-#define WINWM_DDE_POKE              (WM_DDE_FIRST + 7)
-#define WINWM_DDE_EXECUTE           (WM_DDE_FIRST + 8)
-#define WINWM_DDE_LAST              (WM_DDE_FIRST + 8)
+#define WINWM_DDE_INITIATE          (WINWM_DDE_FIRST)
+#define WINWM_DDE_TERMINATE         (WINWM_DDE_FIRST + 1)
+#define WINWM_DDE_ADVISE            (WINWM_DDE_FIRST + 2)
+#define WINWM_DDE_UNADVISE          (WINWM_DDE_FIRST + 3)
+#define WINWM_DDE_ACK               (WINWM_DDE_FIRST + 4)
+#define WINWM_DDE_DATA              (WINWM_DDE_FIRST + 5)
+#define WINWM_DDE_REQUEST           (WINWM_DDE_FIRST + 6)
+#define WINWM_DDE_POKE              (WINWM_DDE_FIRST + 7)
+#define WINWM_DDE_EXECUTE           (WINWM_DDE_FIRST + 8)
+#define WINWM_DDE_LAST              (WINWM_DDE_FIRST + 8)
 #define WINWM_USER                  0x0400
 
 /*******

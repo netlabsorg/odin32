@@ -1,4 +1,4 @@
-/* $Id: win32dlg.cpp,v 1.37 1999-12-16 00:11:46 sandervl Exp $ */
+/* $Id: win32dlg.cpp,v 1.38 1999-12-24 18:39:11 sandervl Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -292,13 +292,13 @@ INT Win32Dialog::doDialogBox()
 #if 1
         while (TRUE)
         {
-          if (!OSLibWinPeekMsg(&msg,0,0,0,MSG_NOREMOVE))
+          if (!OSLibWinPeekMsg(&msg,0,0,0,PM_NOREMOVE))
           {
                 if(!(getStyle() & DS_NOIDLEMSG))
                     topOwner->SendMessageA(WM_ENTERIDLE,MSGF_DIALOGBOX,getWindowHandle());
                 OSLibWinGetMsg(&msg,0,0,0);
           }
-          else  OSLibWinPeekMsg(&msg,0,0,0,MSG_REMOVE);
+          else  OSLibWinPeekMsg(&msg,0,0,0,PM_REMOVE);
 
           if(msg.message == WM_QUIT)
           {
@@ -318,7 +318,7 @@ INT Win32Dialog::doDialogBox()
 //        while (OSLibWinPeekMsg(&msg, getWindowHandle(), owner, MSGF_DIALOGBOX,
 //                                       MSG_REMOVE, !(getStyle() & DS_NOIDLEMSG), NULL ))
 //            if(OSLibWinPeekMsg(&msg, topOwner->getOS2FrameWindowHandle(), 0, 0, MSG_REMOVE))
-            if(OSLibWinPeekMsg(&msg, 0, 0, 0, MSG_REMOVE))
+            if(OSLibWinPeekMsg(&msg, 0, 0, 0, PM_REMOVE))
             {
                 if(msg.message == WM_QUIT) {
                     dprintf(("Win32Dialog::doDialogBox: received  WM_QUIT"));

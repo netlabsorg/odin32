@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.116 1999-12-19 19:55:41 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.117 1999-12-24 18:39:12 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -777,7 +777,7 @@ ULONG Win32BaseWindow::MsgQuit()
 ULONG Win32BaseWindow::MsgClose()
 {
   if(SendInternalMessageA(WM_CLOSE, 0, 0) == 0) {
-    dprintf(("Win32BaseWindow::MsgClose, app handles msg"));
+        dprintf(("Win32BaseWindow::MsgClose, app handles msg"));
         return 0; //app handles this message
   }
   return 1;
@@ -871,36 +871,12 @@ ULONG Win32BaseWindow::MsgPosChanged(LPARAM lp)
 }
 //******************************************************************************
 //******************************************************************************
-ULONG Win32BaseWindow::MsgMove(ULONG x, ULONG y)
-{
-    dprintf(("MsgMove to (%d,%d)", x, y));
-    if(fNoSizeMsg || (getParent() && getParent()->InMovingChildren()))
-        return 1;
-
-    return SendInternalMessageA(WM_MOVE, 0, MAKELONG((USHORT)x, (USHORT)y));
-}
-//******************************************************************************
-//******************************************************************************
 #if 0
 ULONG Win32BaseWindow::MsgMinMax()
 {
 
 }
 #endif
-//******************************************************************************
-//******************************************************************************
-ULONG Win32BaseWindow::MsgTimer(ULONG TimerID)
-{
-  // TODO: call TIMERPROC if not NULL
-  return SendInternalMessageA(WM_TIMER, TimerID, 0);
-}
-//******************************************************************************
-//******************************************************************************
-ULONG Win32BaseWindow::MsgSysTimer(ULONG TimerID)
-{
-  // TODO: call TIMERPROC if not NULL
-  return SendInternalMessageA(WM_SYSTIMER, TimerID, 0);
-}
 //******************************************************************************
 //******************************************************************************
 ULONG Win32BaseWindow::MsgScroll(ULONG msg, ULONG scrollCode, ULONG scrollPos)
@@ -911,49 +887,11 @@ ULONG Win32BaseWindow::MsgScroll(ULONG msg, ULONG scrollCode, ULONG scrollPos)
 }
 //******************************************************************************
 //******************************************************************************
-ULONG Win32BaseWindow::MsgCommand(ULONG cmd, ULONG Id, HWND hwnd)
+ULONG Win32BaseWindow::MsgHitTest(MSG *msg)
 {
-  switch(cmd) {
-    case CMD_MENU:
-        return SendInternalMessageA(WM_COMMAND, MAKELONG(Id, 0), 0);
-    case CMD_CONTROL:
-        return 0; //todo
-    case CMD_ACCELERATOR:
-        // this fit not really windows behavior.
-        // maybe TranslateAccelerator() is better
-        dprintf(("accelerator command"));
-        return SendInternalMessageA(WM_COMMAND, MAKELONG(Id, 0), 0);
-  }
-  return 0;
-}
-//******************************************************************************
-//******************************************************************************
-ULONG Win32BaseWindow::MsgHitTest(ULONG x, ULONG y)
-{
-  lastHitTestVal = SendInternalMessageA(WM_NCHITTEST, 0, MAKELONG((USHORT)x, (USHORT)y));
-  dprintf(("MsgHitTest returned %x", lastHitTestVal));
+  lastHitTestVal = SendInternalMessageA(WM_NCHITTEST, 0, MAKELONG((USHORT)msg->pt.x, (USHORT)msg->pt.y));
+  dprintf2(("MsgHitTest returned %x", lastHitTestVal));
   return 1; //TODO: May need to change this
-}
-//******************************************************************************
-//TODO: Send WM_NCCALCSIZE message here and correct size if necessary
-//******************************************************************************
-ULONG Win32BaseWindow::MsgSize(ULONG width, ULONG height, BOOL fMinimize, BOOL fMaximize)
-{
- WORD fwSizeType = 0;
-
-    dwStyle &= ~(WS_MINIMIZE|WS_MAXIMIZE);
-    if(fMinimize) {
-            fwSizeType = SIZE_MINIMIZED;
-            dwStyle |= WS_MINIMIZE;
-    }
-    else
-    if(fMaximize) {
-            fwSizeType = SIZE_MAXIMIZED;
-            dwStyle |= WS_MAXIMIZE;
-    }
-    else    fwSizeType = SIZE_RESTORED;
-
-    return SendInternalMessageA(WM_SIZE, fwSizeType, MAKELONG((USHORT)width, (USHORT)height));
 }
 //******************************************************************************
 //******************************************************************************
@@ -982,12 +920,6 @@ ULONG Win32BaseWindow::MsgActivate(BOOL fActivate, BOOL fMinimized, HWND hwnd)
     return rc;
 }
 //******************************************************************************
-//******************************************************************************
-ULONG Win32BaseWindow::MsgSysCommand(ULONG win32sc, ULONG x, ULONG y)
-{
-    return SendInternalMessageA(WM_SYSCOMMAND, win32sc, MAKELONG((USHORT)x, (USHORT)y));
-}
-//******************************************************************************
 //TODO: Is this correct and complete?
 //Add print screen, break & numlock
 //******************************************************************************
@@ -1010,109 +942,10 @@ void Win32BaseWindow::setExtendedKey(ULONG virtualkey, ULONG *lParam)
     }
 }
 //******************************************************************************
-//TODO: virtual key & (possibly) scancode translation, extended keyboard bit & Unicode
 //******************************************************************************
-ULONG Win32BaseWindow::MsgChar(ULONG cmd, ULONG repeatcnt, ULONG scancode, ULONG vkey, ULONG keyflags)
+ULONG Win32BaseWindow::DispatchMsg(MSG *msg)
 {
- ULONG lParam = 0;
-
-    lParam  = repeatcnt;
-    lParam |= (scancode << 16);
-    setExtendedKey(vkey, &lParam);
-
-    if(keyflags & KEY_ALTDOWN)
-        lParam |= (1<<29);
-    if(keyflags & KEY_PREVDOWN)
-        lParam |= (1<<30);
-    if(keyflags & KEY_UP)
-        lParam |= (1<<31);
-    if(keyflags & KEY_DEADKEY) {
-        dprintf(("WM_DEADCHAR: %x %x %08x", OS2Hwnd, cmd, lParam));
-        return SendInternalMessageA(WM_DEADCHAR, cmd, lParam);
-    }
-    else {
-        dprintf(("WM_CHAR: %x %x %08x", OS2Hwnd, cmd, lParam));
-        return SendInternalMessageA(WM_CHAR, cmd, lParam);
-    }
-}
-//******************************************************************************
-//******************************************************************************
-ULONG Win32BaseWindow::MsgKeyUp (ULONG repeatCount, ULONG scancode, ULONG virtualKey)
-{
-  ULONG lParam=0;
-
-    lParam = repeatCount & 0x0FFFF;                 // bit 0-15, repeatcount
-    lParam |= (scancode & 0x0FF) << 16;             // bit 16-23, scancode
-                                                    // bit 24, 1=extended key
-                                                    // bit 25-28, reserved
-    lParam |= 0 << 29;                              // bit 29, key is released, always 0 for WM_KEYUP ?? <- conflict according to the MS docs
-    lParam |= 1 << 30;                              // bit 30, previous state, always 1 for a WM_KEYUP message
-    lParam |= 1 << 31;                              // bit 31, transition state, always 1 for WM_KEYUP
-
-    dprintf(("WM_KEYUP: vkey:(%x) param:(%x)", virtualKey, lParam));
-
-    setExtendedKey(virtualKey, &lParam);
-    return SendInternalMessageA (WM_KEYUP, virtualKey, lParam);
-}
-//******************************************************************************
-//******************************************************************************
-ULONG Win32BaseWindow::MsgKeyDown (ULONG repeatCount, ULONG scancode, ULONG virtualKey, BOOL keyWasPressed)
-{
-  ULONG lParam=0;
-
-    lParam = repeatCount & 0x0FFFF;                 // bit 0-15, repeatcount
-    lParam |= (scancode & 0x0FF) << 16;             // bit 16-23, scancode
-                                                    // bit 24, 1=extended key
-                                                    // bit 25-28, reserved
-                                                    // bit 29, key is pressed, always 0 for WM_KEYDOWN ?? <- conflict according to the MS docs
-    if (keyWasPressed)
-        lParam |= 1 << 30;                          // bit 30, previous state, 1 means key was pressed
-                                                    // bit 31, transition state, always 0 for WM_KEYDOWN
-
-    setExtendedKey(virtualKey, &lParam);
-
-    dprintf(("WM_KEYDOWN: vkey:(%x) param:(%x)", virtualKey, lParam));
-
-    return SendInternalMessageA (WM_KEYDOWN, virtualKey, lParam);
-}
-//******************************************************************************
-//******************************************************************************
-ULONG Win32BaseWindow::MsgSysKeyUp (ULONG repeatCount, ULONG scancode, ULONG virtualKey)
-{
-  ULONG lParam=0;
-
-    lParam = repeatCount & 0x0FFFF;                 // bit 0-15,repeatcount
-    lParam |= (scancode & 0x0FF) << 16;             // bit 16-23, scancode
-                                                    // bit 24, 1=extended key
-                                                    // bit 25-28, reserved
-    lParam |= 0 << 29;                              // bit 29, key is released, always 1 for WM_SYSKEYUP ?? <- conflict according to the MS docs
-    lParam |= 1 << 30;                              // bit 30, previous state, always 1 for a WM_KEYUP message
-    lParam |= 1 << 31;                              // bit 31, transition state, always 1 for WM_KEYUP
-
-    setExtendedKey(virtualKey, &lParam);
-    dprintf(("WM_SYSKEYUP: vkey:(%x) param:(%x)", virtualKey, lParam));
-
-    return SendInternalMessageA (WM_SYSKEYUP, virtualKey, lParam);
-}
-//******************************************************************************
-//******************************************************************************
-ULONG Win32BaseWindow::MsgSysKeyDown (ULONG repeatCount, ULONG scancode, ULONG virtualKey, BOOL keyWasPressed)
-{
- ULONG lParam=0;
-
-    lParam = repeatCount & 0x0FFFF;                 // bit 0-15, repeatcount
-    lParam |= (scancode & 0x0FF) << 16;             // bit 16-23, scancode
-                                                    // bit 24, 1=extended key
-                                                    // bit 25-28, reserved
-                                                    // bit 29, key is released, always 1 for WM_SYSKEYUP ?? <- conflict according to the MS docs
-    if (keyWasPressed)
-        lParam |= 1 << 30;                          // bit 30, previous state, 1 means key was pressed
-                                                    // bit 31, transition state, always 0 for WM_KEYDOWN
-
-    setExtendedKey(virtualKey, &lParam);
-    dprintf(("WM_SYSKEYDOWN: vkey:(%x) param:(%x)", virtualKey, lParam));
-
-    return SendInternalMessageA (WM_SYSKEYDOWN, virtualKey, lParam);
+    return SendInternalMessageA(msg->message, msg->wParam, msg->lParam);
 }
 //******************************************************************************
 //******************************************************************************
@@ -1128,82 +961,33 @@ ULONG Win32BaseWindow::MsgKillFocus(HWND hwnd)
 }
 //******************************************************************************
 //******************************************************************************
-ULONG Win32BaseWindow::MsgButton(ULONG msg, ULONG ncx, ULONG ncy, ULONG clx, ULONG cly)
+ULONG Win32BaseWindow::MsgButton(MSG *msg)
 {
- ULONG win32msg;
- ULONG win32ncmsg;
  BOOL  fClick = FALSE;
 
-    if(ISMOUSE_CAPTURED()) {
-    if(DInputMouseHandler(getWindowHandle(), MOUSEMSG_BUTTON, ncx, ncy, msg))
-        return 0;
+    dprintf(("MsgButton at (%d,%d)", msg->pt.x, msg->pt.y));
+    switch(msg->message) { //TODO: double click also?
+        case WM_LBUTTONDBLCLK:
+        case WM_RBUTTONDBLCLK:
+        case WM_MBUTTONDBLCLK:
+                if (!(windowClass && windowClass->getClassLongA(GCL_STYLE) & CS_DBLCLKS))
+                {
+                    msg->message = msg->message - (WM_LBUTTONDBLCLK - WM_LBUTTONDOWN); //dblclick -> down
+                    MsgButton(msg);
+                    return MsgButton(msg);
+                }
+                break;
+        case WM_LBUTTONDOWN:
+        case WM_RBUTTONDOWN:
+        case WM_MBUTTONDOWN:
+                fClick = TRUE;
+                break;
     }
 
-    dprintf(("MsgButton to (%d,%d)", ncx, ncy));
-    switch(msg) {
-        case BUTTON_LEFTDOWN:
-                win32msg = WM_LBUTTONDOWN;
-                win32ncmsg = WM_NCLBUTTONDOWN;
-                fClick = TRUE;
-                break;
-        case BUTTON_LEFTUP:
-                win32msg = WM_LBUTTONUP;
-                win32ncmsg = WM_NCLBUTTONUP;
-                break;
-        case BUTTON_LEFTDBLCLICK:
-                if (windowClass && windowClass->getClassLongA(GCL_STYLE) & CS_DBLCLKS)
-                {
-                  win32msg = WM_LBUTTONDBLCLK;
-                  win32ncmsg = WM_NCLBUTTONDBLCLK;
-                } else
-                {
-                  MsgButton(BUTTON_LEFTDOWN,ncx,ncy,clx,cly);
-                  return MsgButton(BUTTON_LEFTUP,ncx,ncy,clx,cly);
-                }
-                break;
-        case BUTTON_RIGHTUP:
-                win32msg = WM_RBUTTONUP;
-                win32ncmsg = WM_NCRBUTTONUP;
-                break;
-        case BUTTON_RIGHTDOWN:
-                win32msg = WM_RBUTTONDOWN;
-                win32ncmsg = WM_NCRBUTTONDOWN;
-                fClick = TRUE;
-                break;
-        case BUTTON_RIGHTDBLCLICK:
-                if (windowClass && windowClass->getClassLongA(GCL_STYLE) & CS_DBLCLKS)
-                {
-                  win32msg = WM_RBUTTONDBLCLK;
-                  win32ncmsg = WM_NCRBUTTONDBLCLK;
-                } else
-                {
-                  MsgButton(BUTTON_RIGHTDOWN,ncx,ncy,clx,cly);
-                  return MsgButton(BUTTON_RIGHTUP,ncx,ncy,clx,cly);
-                }
-                break;
-        case BUTTON_MIDDLEUP:
-                win32msg = WM_MBUTTONUP;
-                win32ncmsg = WM_NCMBUTTONUP;
-                break;
-        case BUTTON_MIDDLEDOWN:
-                win32msg = WM_MBUTTONDOWN;
-                win32ncmsg = WM_NCMBUTTONDOWN;
-                fClick = TRUE;
-                break;
-        case BUTTON_MIDDLEDBLCLICK:
-                if (windowClass && windowClass->getClassLongA(GCL_STYLE) & CS_DBLCLKS)
-                {
-                  win32msg = WM_MBUTTONDBLCLK;
-                  win32ncmsg = WM_NCMBUTTONDBLCLK;
-                } else
-                {
-                  MsgButton(BUTTON_MIDDLEDOWN,ncx,ncy,clx,cly);
-                  return MsgButton(BUTTON_MIDDLEUP,ncx,ncy,clx,cly);
-                }
-                break;
-        default:
-                dprintf(("Win32BaseWindow::Button: invalid msg!!!!"));
-                return 1;
+    if(ISMOUSE_CAPTURED())
+    {
+        if(DInputMouseHandler(getWindowHandle(), MOUSEMSG_BUTTON, msg->pt.x, msg->pt.y))
+            return 0;
     }
 
     if(fClick)
@@ -1223,7 +1007,7 @@ ULONG Win32BaseWindow::MsgButton(ULONG msg, ULONG ncx, ULONG ncy, ULONG clx, ULO
         if (hwndTop && getWindowHandle() != GetActiveWindow())
         {
                 LONG ret = SendInternalMessageA(WM_MOUSEACTIVATE, hwndTop,
-                                                MAKELONG( HTCLIENT, win32msg ) );
+                                                MAKELONG( HTCLIENT, msg->message) );
 
 #if 0
                 if ((ret == MA_ACTIVATEANDEAT) || (ret == MA_NOACTIVATEANDEAT))
@@ -1237,61 +1021,9 @@ ULONG Win32BaseWindow::MsgButton(ULONG msg, ULONG ncx, ULONG ncy, ULONG clx, ULO
         }
     }
 
-    SendInternalMessageA(WM_SETCURSOR, Win32Hwnd, MAKELONG(lastHitTestVal, win32ncmsg));
+    SendInternalMessageA(WM_SETCURSOR, getWindowHandle(), MAKELONG(lastHitTestVal, msg->message));
 
-    //WM_NC*BUTTON* is posted when the cursor is in a non-client area of the window
-    if(lastHitTestVal != HTCLIENT) {
-            return SendInternalMessageA(win32ncmsg, lastHitTestVal, MAKELONG(ncx, ncy)); //TODO:
-    }
-    return  SendInternalMessageA(win32msg, 0, MAKELONG(clx, cly));
-}
-//******************************************************************************
-//******************************************************************************
-ULONG Win32BaseWindow::MsgMouseMove(ULONG keystate, ULONG x, ULONG y)
-{
- ULONG winstate = 0;
- ULONG setcursormsg = WM_MOUSEMOVE;
-
-    if(ISMOUSE_CAPTURED()) {
-        POINT point = {x,y};
-
-        MapWindowPoints(getWindowHandle(), HWND_DESKTOP, &point, 1);
-        if(DInputMouseHandler(getWindowHandle(), MOUSEMSG_MOVE, point.x, point.y, keystate))
-            return 0;
-    }
-
-    if(keystate & WMMOVE_LBUTTON)
-        winstate |= MK_LBUTTON;
-    if(keystate & WMMOVE_RBUTTON)
-        winstate |= MK_RBUTTON;
-    if(keystate & WMMOVE_MBUTTON)
-        winstate |= MK_MBUTTON;
-    if(keystate & WMMOVE_SHIFT)
-        winstate |= MK_SHIFT;
-    if(keystate & WMMOVE_CTRL)
-        winstate |= MK_CONTROL;
-
-    if(lastHitTestVal != HTCLIENT) {
-        setcursormsg = WM_NCMOUSEMOVE;
-    }
-    //TODO: hiword should be 0 if window enters menu mode (SDK docs)
-    SendInternalMessageA(WM_SETCURSOR, Win32Hwnd, MAKELONG(lastHitTestVal, setcursormsg));
-
-    //WM_NCMOUSEMOVE is posted when the cursor moves into a non-client area of the window
-    if(lastHitTestVal != HTCLIENT) {
-            SendInternalMessageA(WM_NCMOUSEMOVE, lastHitTestVal, MAKELONG(x, y));
-    }
-    return  SendInternalMessageA(WM_MOUSEMOVE, winstate, MAKELONG(x, y));
-}
-//******************************************************************************
-//TODO: Depending on menu type, we should send WM_INITMENU or WM_INITPOPUPMENU
-//TODO: PM sends it for each submenu that gets activated; Windows only for the first
-//      submenu; once the menu bar is active, moving the cursor doesn't generate other
-//      WM_INITMENU msgs. Not really a problem, but might need to fix this later on.
-//******************************************************************************
-void Win32BaseWindow::MsgInitMenu(HWND hMenu)
-{
-    SendInternalMessageA(WM_INITMENU, (WPARAM)hMenu, 0);
+    return  SendInternalMessageA(msg->message, msg->wParam, msg->lParam);
 }
 //******************************************************************************
 //******************************************************************************
@@ -1321,6 +1053,37 @@ ULONG Win32BaseWindow::MsgEraseBackGround(HDC hdc)
     if (hdc == 0)
         O32_ReleaseDC(OS2Hwnd, hdcErase);
     return (rc);
+}
+//******************************************************************************
+//******************************************************************************
+ULONG Win32BaseWindow::MsgMouseMove(MSG *msg)
+{
+    if(ISMOUSE_CAPTURED()) {
+        if(DInputMouseHandler(getWindowHandle(), MOUSEMSG_MOVE, msg->pt.x, msg->pt.y))
+            return 0;
+    }
+
+    //TODO: hiword should be 0 if window enters menu mode (SDK docs)
+    SendInternalMessageA(WM_SETCURSOR, Win32Hwnd, MAKELONG(lastHitTestVal, msg->message));
+
+    //translated message == WM_(NC)MOUSEMOVE
+    return SendInternalMessageA(msg->message, msg->wParam, msg->lParam);
+}
+//******************************************************************************
+//TODO: Depending on menu type, we should send WM_INITMENU or WM_INITPOPUPMENU
+//TODO: PM sends it for each submenu that gets activated; Windows only for the first
+//      submenu; once the menu bar is active, moving the cursor doesn't generate other
+//      WM_INITMENU msgs. Not really a problem, but might need to fix this later on.
+//******************************************************************************
+ULONG Win32BaseWindow::MsgInitMenu(MSG *msg)
+{
+    return SendInternalMessageA(msg->message, msg->wParam, msg->lParam);
+}
+//******************************************************************************
+//******************************************************************************
+ULONG Win32BaseWindow::MsgNCPaint()
+{
+    return SendInternalMessageA(WM_PAINT, 0, 0);
 }
 //******************************************************************************
 //******************************************************************************
@@ -1603,6 +1366,7 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
     switch(Msg)
     {
     case WM_CLOSE:
+    dprintf(("DefWindowProcA: WM_CLOSE %x", getWindowHandle()));
         DestroyWindow();
         return 0;
 
