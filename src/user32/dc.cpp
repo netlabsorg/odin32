@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.103 2001-05-17 10:03:57 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.104 2001-05-18 07:21:27 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -1402,7 +1402,7 @@ BOOL WIN32API InvalidateRect (HWND hwnd, const RECT *pRect, BOOL erase)
     else dprintf(("InvalidateRect %x NULL erase=%d", hwnd, erase));
 #if 1
     result = RedrawWindow (hwnd, pRect, NULLHANDLE,
-                           RDW_INVALIDATE_W |
+                           RDW_ALLCHILDREN_W | RDW_INVALIDATE_W |
                            (erase ? RDW_ERASE_W : 0) |
                            (hwnd == NULLHANDLE ? RDW_UPDATENOW_W : 0));
 #else
@@ -1422,7 +1422,7 @@ BOOL WIN32API InvalidateRgn (HWND hwnd, HRGN hrgn, BOOL erase)
     dprintf(("InvalidateRgn %x %x erase=%d", hwnd, hrgn, erase));
 #if 1
     result = RedrawWindow (hwnd, NULL, hrgn,
-                          RDW_INVALIDATE_W |
+                          RDW_ALLCHILDREN_W | RDW_INVALIDATE_W |
                           (erase ? RDW_ERASE_W : 0) |
                           (hwnd == NULLHANDLE ? RDW_UPDATENOW_W : 0));
 #else
