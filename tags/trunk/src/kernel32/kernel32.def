@@ -1,4 +1,4 @@
-; $Id: kernel32.def,v 1.76 2000-03-29 15:17:27 cbratschi Exp $
+; $Id: kernel32.def,v 1.77 2000-03-29 17:17:17 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is Windows95 KERNEL32
@@ -678,7 +678,7 @@ EXPORTS
     QueryPerformanceFrequency  = _QueryPerformanceFrequency@4 @565
 ;   QueryWin31IniFilesMappedToRegistry = _QueryWin31IniFilesMappedToRegistry@?? ;NT
 ;   QueueUserAPC               = _QueueUserAPC@??            @566
-    RaiseException             = RaiseExceptionAsm           @567
+    RaiseException             = _RaiseException@16          @567
     ReadConsoleA               = _ReadConsoleA@20            @568
     ReadConsoleInputA          = _ReadConsoleInputA@16       @569
 ;   ReadConsoleInputExA        = _ReadConsoleInputExA@??                ;NT
@@ -709,7 +709,7 @@ EXPORTS
     ResumeThread               = _ResumeThread@4             @587
     RtlFillMemory              = _RtlFillMemory@12           @588
     RtlMoveMemory              = _RtlMoveMemory@12           @589
-    RtlUnwind                  = RtlUnwindAsm                   @590
+    RtlUnwind                  = _RtlUnwind@16               @590
     RtlZeroMemory              = _RtlZeroMemory@8            @591
     SMapLS                     = _SMapLS@4                   @592       ;W95
     SMapLS_IP_EBP_12           = _SMapLS_IP_EBP_12@4         @593       ;W95
