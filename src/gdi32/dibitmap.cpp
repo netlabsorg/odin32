@@ -1,4 +1,4 @@
-/* $Id: dibitmap.cpp,v 1.25 2001-07-06 13:46:07 sandervl Exp $ */
+/* $Id: dibitmap.cpp,v 1.26 2001-08-26 14:22:44 sandervl Exp $ */
 
 /*
  * GDI32 dib & bitmap code
@@ -362,6 +362,15 @@ int WIN32API GetDIBits(HDC hdc, HBITMAP hBitmap, UINT uStartScan, UINT cScanLine
     }
     dprintf(("GDI32: GetDIBits returned %d", nrlines));
     return nrlines;
+}
+//******************************************************************************
+//******************************************************************************
+void WIN32API ConvertRGB555to565(LPVOID dest, LPVOID src, UINT imgsize)
+{
+    if(CPUFeatures & CPUID_MMX) {
+         RGB555to565MMX((WORD *)dest, (WORD *)src, imgsize/sizeof(WORD));
+    }
+    else RGB555to565((WORD *)dest, (WORD *)src, imgsize/sizeof(WORD));
 }
 //******************************************************************************
 //******************************************************************************
