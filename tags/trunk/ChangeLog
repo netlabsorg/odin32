@@ -1,4 +1,8 @@
-/* $Id: ChangeLog,v 1.2748 2004-12-07 20:12:36 sao2l02 Exp $ */
+/* $Id: ChangeLog,v 1.2749 2004-12-20 18:11:02 sao2l02 Exp $ */
+2004-12-20: Dietrich Teickner <dietrich_teickner@arcor   >
+    - Kernel32: o \include\win\thread.h,
+                  \src\kernel32\dbglog.cpp,src\kernel32\wprocess.cpp
+                  better splitt the functions for debugstr_data structure.
 2004-12-07: Dietrich Teickner <dietrich_teickner@arcor   >
     - Kernel32: o \include\win\thread.h,
                   \src\kernel32\dbglog.cpp,src\kernel32\wprocess.cpp

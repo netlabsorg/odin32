@@ -172,7 +172,7 @@ typedef struct _TEB
               // used for call stack tracking
               ULONG          dbgCallDepth;     // is de-/incremented by ODINWRAP macros
               PVOID*         arrstrCallStack;  // keep track of thread's call stack
-              PVOID*         DebugStr;  // pointer for debugstr-handling
+              PVOID          DebugStr;  // pointer for debugstr-handling
 #endif
           } odin;
 #endif
@@ -192,6 +192,20 @@ typedef struct _TEB
     DWORD        pad9[24];                   /* --n f20 */
     PVOID	 ErrorInfo;                  /* -2- f80 used by ole32 (IErrorInfo*) */
 } TEB;
+
+#ifdef __WIN32OS2__
+/* ------------------------------------------------------------------------- *
+ * Structures for debugstr_wn/an                                             *
+ * protects the debugstr_.. same time from overwriting                       *
+ * ------------------------------------------------------------------------- */
+#ifndef _debugstr_data_res_len
+#define _debugstr_data_res_len 512
+#endif
+struct debugstr_data {
+   LPSTR pToRes [3] /* = { NULL, &res[0] ,&res[sizeof(res)]} */;
+   char res[_debugstr_data_res_len];
+};
+#endif
 #pragma pack()
 
 /* Thread exception flags */

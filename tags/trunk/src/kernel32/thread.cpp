@@ -1,4 +1,4 @@
-/* $Id: thread.cpp,v 1.55 2004-05-24 08:56:07 sandervl Exp $ */
+/* $Id: thread.cpp,v 1.56 2004-12-20 18:11:23 sao2l02 Exp $ */
 
 /*
  * Win32 Thread API functions
@@ -63,9 +63,7 @@ DWORD WIN32API GetCurrentThreadId()
 //******************************************************************************
 HANDLE WIN32API GetCurrentThread()
 {
-    TEB *teb;
-
-    teb = GetThreadTEB();
+    TEB *teb = GetThreadTEB();
     if(teb == 0) {
         DebugInt3();
         SetLastError(ERROR_INVALID_HANDLE); //todo
@@ -80,9 +78,7 @@ HANDLE WIN32API GetCurrentThread()
 ULONG WIN32API dbg_GetThreadCallDepth()
 {
 #ifdef DEBUG
-  TEB *teb;
-
-  teb = GetThreadTEB();
+  TEB *teb = GetThreadTEB();
   if(teb == NULL)
     return 0;
   else
@@ -96,9 +92,7 @@ ULONG WIN32API dbg_GetThreadCallDepth()
 void WIN32API dbg_IncThreadCallDepth()
 {
 #ifdef DEBUG
-  TEB *teb;
-
-  teb = GetThreadTEB();
+  TEB *teb = GetThreadTEB();
   if(teb != NULL)
     teb->o.odin.dbgCallDepth++;
 #endif
@@ -112,10 +106,9 @@ static char *pszLastCaller = NULL;
 void WIN32API dbg_ThreadPushCall(char *pszCaller)
 {
 #ifdef DEBUG
-  TEB *teb;
+  TEB *teb = GetThreadTEB();
 
   // embedded dbg_IncThreadCallDepth
-  teb = GetThreadTEB();
   if(teb == NULL)
     return;
 
@@ -140,9 +133,7 @@ void WIN32API dbg_ThreadPushCall(char *pszCaller)
 void WIN32API dbg_DecThreadCallDepth()
 {
 #ifdef DEBUG
-  TEB *teb;
-
-  teb = GetThreadTEB();
+  TEB *teb = GetThreadTEB();
   if(teb != NULL)
     --(teb->o.odin.dbgCallDepth);
 #endif
@@ -152,10 +143,9 @@ void WIN32API dbg_DecThreadCallDepth()
 void WIN32API dbg_ThreadPopCall()
 {
 #ifdef DEBUG
-  TEB *teb;
+  TEB *teb = GetThreadTEB();
 
   // embedded dbg_DecThreadCallDepth
-  teb = GetThreadTEB();
   if(teb == NULL)
     return;
 
@@ -176,10 +166,9 @@ char* WIN32API dbg_GetLastCallerName()
 {
 #ifdef DEBUG
   // retrieve last caller name from stack
-  TEB *teb;
+  TEB *teb = GetThreadTEB();
 
   // embedded dbg_DecThreadCallDepth
-  teb = GetThreadTEB();
   if(teb != NULL)
   {
     int iIndex = teb->o.odin.dbgCallDepth - 1;
@@ -198,11 +187,10 @@ char* WIN32API dbg_GetLastCallerName()
 VOID WIN32API ExitThread(DWORD exitcode)
 {
     EXCEPTION_FRAME *exceptFrame;
-    TEB             *teb;
+    TEB             *teb = GetThreadTEB();
 
     dprintf(("ExitThread %x (%x)", GetCurrentThread(), exitcode));
 
-    teb = GetThreadTEB();
     if(teb != 0) {
          exceptFrame = (EXCEPTION_FRAME *)teb->o.odin.exceptFrame;
     }

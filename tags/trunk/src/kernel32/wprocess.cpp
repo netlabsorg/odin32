@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.196 2004-12-07 20:12:54 sao2l02 Exp $ */
+/* $Id: wprocess.cpp,v 1.197 2004-12-20 18:11:28 sao2l02 Exp $ */
 
 /*
  * Win32 process functions
@@ -313,6 +313,7 @@ BOOL WIN32API InitializeThread(TEB *winteb, BOOL fMainThread)
     winteb->o.odin.pWsockData      = NULL;
 #ifdef DEBUG
     winteb->o.odin.dbgCallDepth    = 0;
+    winteb->o.odin.DebugStr        = NULL;
 #endif
     winteb->o.odin.pMessageBuffer  = NULL;
     winteb->o.odin.lcid            = GetUserDefaultLCID();
@@ -348,6 +349,28 @@ BOOL WIN32API InitializeThread(TEB *winteb, BOOL fMainThread)
     dprintf(("InitializeTIB setup TEB with selector %x", winteb->teb_sel));
     dprintf(("InitializeTIB: FS(%x):[0] = %x", GetFS(), QueryExceptionChain()));
     return TRUE;
+}
+//******************************************************************************
+//  if debug, returns the pointer to the debugstr_.. environment. otherwithe NULL
+//******************************************************************************
+/* ------------------------------------------------------------------------- *
+ * CallBackHelperfunction for Alloc + Init the Debugstring Pointer Strukture *
+ * ------------------------------------------------------------------------- */
+//debugstr_data* WIN32API GetDebugStrPtr(debugstr_data* (WIN32API *pInit)(debugstr_data* retData), int size);
+debugstr_data* WIN32API pInit(debugstr_data* retData);
+debugstr_data* WIN32API GetDebugStrPtr(debugstr_data* (WIN32API *pInit)(debugstr_data* retData), int size)
+{
+   debugstr_data* ret = NULL;
+#ifdef DEBUG
+   TEB* teb = GetThreadTEB();
+   if (teb) {
+      ret = (debugstr_data*)teb->o.odin.DebugStr;
+      if (!ret) {
+         ret = (debugstr_data*)(teb->o.odin.DebugStr = (PVOID)pInit((debugstr_data*)malloc(size)));
+      }
+   }
+#endif
+    return ret;
 }
 //******************************************************************************
 // Destroy the TIB selector and memory for the current thread

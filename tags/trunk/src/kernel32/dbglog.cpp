@@ -1,4 +1,4 @@
-/* $Id: dbglog.cpp,v 1.11 2004-12-07 20:12:48 sao2l02 Exp $ */
+/* $Id: dbglog.cpp,v 1.12 2004-12-20 18:11:19 sao2l02 Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -861,34 +861,31 @@ LPSTR debug_c (LPSTR dst, unsigned int c, BOOL LongChar)
    *dst++ = c;
   return dst;
 }
+
 /* ------------------------------------------------------------------------- *
- * Structures for debugstr_wn/an                                             *
- * protects the debugstr_.. same time from overwriting                       *
+ * CallBackHelperfunction for Init the Debugstring Pointer Strukture         *
  * ------------------------------------------------------------------------- */
-#define _debugstr_data_res_len 512
-struct debugstr_data {
-   LPSTR pToRes [3] /* = { NULL, &res[0] ,&res[sizeof(res)]} */;
-   char res[_debugstr_data_res_len];
-};
+debugstr_data* WIN32API GetDebugStrDataInit(debugstr_data* retData) {
+  if (retData) {
+    retData->pToRes[0] = retData->pToRes[1] = &retData->res[0];
+    retData->pToRes[2] = &retData->res[sizeof(retData->res)];
+  }
+  return retData;
+}
+/* ------------------------------------------------------------------------- *
+ * CallBackHelperfunction for Alloc + Init the Debugstring Pointer Strukture *
+ * ------------------------------------------------------------------------- */
+debugstr_data* WIN32API GetDebugStrPtr(debugstr_data* (WIN32API *pInit)(debugstr_data* retData), int size);
 /* ------------------------------------------------------------------------- *
  * Helperfunction for semistatic strings                                     *
  * returns as a funktion of the current threadid the debugstr-structure      *
  * ------------------------------------------------------------------------- */
 debugstr_data* GetDebugStrData() {
+  debugstr_data* retData = NULL;
 #ifdef DEBUG
-  TEB *teb = GetThreadTEB();
-  if (!teb) return NULL;
-  debugstr_data* retData = (debugstr_data*)teb->o.odin.DebugStr;
-  if (retData) return retData;
-  retData = (debugstr_data*)malloc(sizeof(debugstr_data));
-  if (!retData) return NULL;
-  retData->pToRes[0] = retData->pToRes[1] = &retData->res[0];
-  retData->pToRes[2] = &retData->res[sizeof(retData->res)];
-  teb->o.odin.DebugStr = (PVOID*)retData;
-  return retData;
-#else
-  return NULL;
+  retData = GetDebugStrPtr(GetDebugStrDataInit,sizeof(debugstr_data));
 #endif
+  return retData;
 }
 /* ------------------------------------------------------------------------- *
  * Helperfunction for semistatic strings                                     *
