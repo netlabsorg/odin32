@@ -1,4 +1,4 @@
-/* $Id: exceptions.cpp,v 1.47 2000-10-18 17:09:31 sandervl Exp $ */
+/* $Id: exceptions.cpp,v 1.48 2000-11-18 16:20:06 sandervl Exp $ */
 
 /* WARNING: Compiling this module with ICC with optimizations turned on   */
 /* currently breaks this module. To get correct code, it is not necessary */
@@ -1101,6 +1101,17 @@ ULONG APIENTRY OS2ExceptionHandler(PEXCEPTIONREPORTRECORD       pERepRec,
         if(pERepRec->ExceptionInfo[1] == 0 && pERepRec->ExceptionInfo[1] == XCPT_DATA_UNKNOWN) {
                 goto continueFail;
         }
+//------------->>> WARNING: potentially dangerous workaround!!
+        /* Some apps set ES = FS and Odin doesn't like that!       */
+        /* Note: maybe we could even check for ES != DS? But maybe */
+        /* that might cause more harm than good...                 */
+        if (pCtxRec->ContextFlags & CONTEXT_SEGMENTS)
+            if (pCtxRec->ctx_SegEs == pCtxRec->ctx_SegFs) {
+                /* Let's just reset ES to the DS value and hope it's okay */
+                pCtxRec->ctx_SegEs = pCtxRec->ctx_SegDs;
+                goto continueexecution;
+        }
+
         switch(pERepRec->ExceptionInfo[0]) {
         case XCPT_READ_ACCESS:
                 accessflag = MEMMAP_ACCESS_READ;
