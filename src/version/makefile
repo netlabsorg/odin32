@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.21 2003-10-24 14:47:25 sandervl Exp $
+# $Id: makefile,v 1.22 2003-10-29 19:18:14 sandervl Exp $
 
 #
 # Odin32 API
@@ -25,6 +25,7 @@ OBJS = \
 $(OBJDIR)\install.obj \
 $(OBJDIR)\info.obj \
 $(OBJDIR)\resource.obj \
+$(OBJDIR)\dbglocal.obj \
 !ifdef DEBUG
 $(OBJDIR)\dbgwrap.obj \
 !endif
