@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.65 2000-01-05 19:39:57 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.66 2000-01-06 20:07:10 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -574,7 +574,7 @@ LPCSTR WIN32API GetCommandLineA()
  LPTSTR cmdline = NULL;
 
   if(WinExe) {
-    cmdline = WinExe->getCommandLine();
+    cmdline = WinExe->getCommandLineA();
   }
   if(cmdline == NULL) //not used for converted exes
     cmdline = O32_GetCommandLine();
@@ -596,7 +596,8 @@ LPCWSTR WIN32API GetCommandLineW(void)
         return(UnicodeCmdLine); //already called before
 
     if(WinExe) {
-      asciicmdline = WinExe->getCommandLine();
+      	if(WinExe->getCommandLineW())
+		return WinExe->getCommandLineW();
     }
     if(asciicmdline == NULL) //not used for converted exes
       asciicmdline = O32_GetCommandLine();

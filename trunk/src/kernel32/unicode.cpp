@@ -1,4 +1,4 @@
-/* $Id: unicode.cpp,v 1.20 1999-12-27 18:42:25 sandervl Exp $ */
+/* $Id: unicode.cpp,v 1.21 2000-01-06 20:07:10 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -373,7 +373,7 @@ void CodepageToUnicodeN(const char *ascii, WCHAR *unicode, int asciilen, UconvOb
     out_buf = (UniChar*)unicode;
 
     uni_chars_left = in_bytes_left; //elements
-    dprintf(("KERNEL32: AsciiToUnicode %d\n", in_bytes_left));
+    dprintf2(("KERNEL32: AsciiToUnicode %d\n", in_bytes_left));
 
     rc = UniUconvToUcs( uconv_object,
                         (void**)&in_buf, &in_bytes_left,

@@ -1,4 +1,4 @@
-/* $Id: winexelx.cpp,v 1.3 1999-10-09 13:33:24 sandervl Exp $ */
+/* $Id: winexelx.cpp,v 1.4 2000-01-06 20:07:10 sandervl Exp $ */
 
 /*
  * Win32 LX Exe class (compiled in OS/2 using Odin32 api)
@@ -112,7 +112,7 @@ ULONG Win32LxExe::start()
   OS2SetExceptionHandler((void *)&exceptFrame);
 
   SetWin32TIB();
-  rc = ((WINMAIN)entryPoint)(hinstance, 0, cmdline, SW_SHOWNORMAL_W);
+  rc = ((WINMAIN)entryPoint)(hinstance, 0, cmdLineA, SW_SHOWNORMAL_W);
   RestoreOS2TIB();
 
   OS2UnsetExceptionHandler((void *)&exceptFrame);
