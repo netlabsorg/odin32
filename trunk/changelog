@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.1705 2001-09-28 14:31:39 phaller Exp $ */
+/* $Id: changelog,v 1.1706 2001-09-29 14:49:50 sandervl Exp $ */
+
+ 2001-09-29: Sander van Leeuwen <sandervl@xs4all.nl>
+    - WGSS50:   o WGSS update
 
  2001-09-28: Patrick Haller <patrick.haller@innotek.de>
     - USER32:   o added experimental support for WH_KEYBOARD_LL hook
