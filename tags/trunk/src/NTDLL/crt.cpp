@@ -1,4 +1,4 @@
-/* $Id: crt.cpp,v 1.11 1999-11-09 09:30:20 phaller Exp $ */
+/* $Id: crt.cpp,v 1.12 1999-12-03 11:56:26 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -500,9 +500,7 @@ LPSTR CDECL OS2sprintf(LPSTR lpstrBuffer,
 LPSTR CDECL OS2strcat(      LPSTR str1,
                       const LPSTR str2)
 {
-  dprintf(("NTDLL: strcat(%s,%s)\n",
-           str1,
-           str2));
+  dprintf(("NTDLL: strcat\n"));
 
   return (strcat(str1, str2));
 }
@@ -592,9 +590,7 @@ int CDECL OS2_stricmp(const LPSTR str1,
 LPSTR CDECL OS2strcpy(      LPSTR str1,
                        const LPSTR str2)
 {
-  dprintf(("NTDLL: strcpy(%s,%s)\n",
-           str1,
-           str2));
+  dprintf(("NTDLL: strcpy\n"));
 
   return (strcpy(str1, str2));
 }
