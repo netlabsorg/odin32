@@ -1,11 +1,22 @@
+; $Id: mini.asm,v 1.1.2.5 2001-08-14 19:17:40 bird Exp $
 ;
-; Standard edition.
+; Haveing great fun making small executables...
 ;
-ifdef NORMAL  ;
+; Copyright (c) 2001 knut st. osmundsen (kosmunds@csc.com)
+;
+; Project Odin Software License can be found in LICENSE.TXT
+;
 
+
+ifdef NORMAL  ;
+;
+;
+;
+; High-octane stock.
+;
+;
+;
     .386
-    .model flat
-    .stack 1000h-35
 
     ;APIRET APIENTRY  DosPutMessage(HFILE hfile,
     ;                               ULONG cbMsg,
@@ -13,28 +24,26 @@ ifdef NORMAL  ;
     extrn DosPutMessage:PROC
 
 
-
-;DATA32 segment dword public 'CODE' use32
-CODE32 segment dword public 'CODE' use32
-
+DATA32 segment byte common use32 'STACK'
 ;
 ; Data
 ;
-ImReallySmall   db  "I'm really small!",013
-
 public minilx
 minilx:
-    int 3
-    push    10000h
+    push    offset ImReallySmall
     push    18
     push    eax
     call    DosPutMessage
-    add     esp,12
+    add     esp, 12
     ret
-;DATA32 ENDS
-CODE32 ENDS
+ImReallySmall   db  "I'm really small!",013
 
+DATA32 ends
+
+
+END minilx
 endif
+
 
 
 ifndef NORMAL
@@ -237,7 +246,7 @@ fixup dd 0h
     ret
 ImReallySmall   db  "I'm really small!",013
 
-db '123'
+db 0,0,0
 ;lxdump db 'lxdumplxdumplxdumplxdump'
 ;       db 'lxdumplxdumplxdumplxdump'
 ;       db 'lxdumplxdumplxdumplxdump'
@@ -245,7 +254,7 @@ dataend:
 
 ALL ENDS
 
+END
 endif
 
-END minilx
 
