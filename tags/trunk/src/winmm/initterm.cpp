@@ -119,6 +119,8 @@ ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
          if(dllHandle == 0) 
            return 0UL;/* Error */
 
+         dprintf(("winmm init %s %s (%x)", __DATE__, __TIME__, DLLENTRYPOINT_NAME));
+
          break;
       case 1 :
          auxOS2Close(); /* SvL: Close aux device if necessary */
