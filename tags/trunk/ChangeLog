@@ -1,6 +1,18 @@
-/* $Id: ChangeLog,v 1.1299 2001-03-10 06:21:04 mike Exp $ */
+/* $Id: ChangeLog,v 1.1300 2001-03-11 16:51:58 bird Exp $ */
 
- 2000-03-09: Michal Necasek <michalnec@volny.cz>
+ 2001-03-11: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - Win32k, Pe2Lx, Elf2Lx, Xx2Lx:
+                o Made generic Xx2Lx util for both Pe2Lx and Elf2Lx
+                  (and any future loaders).
+                  Pe2Lx.exe is now named Xx2Lx.exe!
+                o Makefile fixes.
+                o Elf2Lx compiles (non-working dummy).
+                o Fixed vprint and vprintf16 to not skip multiple LF/CRs.
+
+    - Configure.cmd:
+                o Changed to configure Win32k as well. Re-run Configure.cmd!!!
+
+ 2001-03-09: Michal Necasek <michalnec@volny.cz>
     - DDRAW:    o Watcomized (not complete) and cleaned up a bit.
                   Also synced DDRAW\NEW with the main directory.
     - DSOUND:   o Implemented DuplicateSoundBuffer (finally!). That
