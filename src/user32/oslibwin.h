@@ -1,4 +1,4 @@
-/* $Id: oslibwin.h,v 1.63 2002-01-12 14:09:31 sandervl Exp $ */
+/* $Id: oslibwin.h,v 1.64 2002-01-20 15:26:21 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -237,6 +237,7 @@ HWND  OSLibWinQueryActiveWindow();
 #define RELATIVE_TO_WINDOW 0
 #define RELATIVE_TO_SCREEN 1
 BOOL  OSLibWinQueryWindowRect(Win32BaseWindow *window, PRECT pRect, int RelativeTo = RELATIVE_TO_WINDOW);
+BOOL  OSLibQueryWindowRectAbsolute (HWND hwndOS2, PRECT pRect);
 ULONG OSLibGetWindowHeight(HWND hwnd); //for point transformation
 
 BOOL  OSLibWinQueryWindowClientRect(HWND hwnd, PRECT pRect);
