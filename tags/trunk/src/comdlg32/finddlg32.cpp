@@ -1,4 +1,4 @@
-/* $Id: finddlg32.cpp,v 1.1 1999-11-02 19:09:42 sandervl Exp $ */
+/* $Id: finddlg32.cpp,v 1.2 1999-11-02 20:37:43 sandervl Exp $ */
 /*
  *  Common Dialog Boxes interface (32 bit) (990815)
  *  Find/Replace
@@ -6,6 +6,8 @@
  * Copyright 1998,1999 Bertho A. Stultiens
  */
 
+// ><DJR 17.05.99 Force to use C-interfaces for now to prevent CALLBACK definition compiler error
+#define CINTERFACE 1
 #include <os2win.h>
 #include "winuser.h"
 #include "commdlg.h"
