@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.12 2000-08-17 05:11:22 bird Exp $
+# $Id: makefile,v 1.13 2000-11-20 05:00:50 bird Exp $
 
 #
 # PD-Win32 API
@@ -22,11 +22,25 @@
 #
 #
 
+#
+# Directory macros.
+#
+PDWIN32_INCLUDE = .\include
+PDWIN32_TOOLS   = .\tools
+PDWIN32_LIB     = .\lib
+PDWIN32_BIN     = .\bin
+
+
+#
+# Include makefile. (Not completeled)
+#
+#!include $(PDWIN32_INCLUDE)/pdwin32.mk
+
 all:		odin_libraries  needed_tools
     cd src
-    nmake -nologo all
+    nmake -nologo  all
     cd ..\tools\install
-    nmake -nologo all
+    nmake -nologo  all
 
 clean:
     cd lib
@@ -44,10 +58,9 @@ debug:		odin_libraries  needed_tools
 
 debugsmp:	odin_libraries  needed_tools
     cd src
-    start nmake -i -f makefile.smp -nologo all DEBUG=1
-    nmake -nologo all DEBUG=1
+    nmake -nologo DEBUG=1 smp
     cd ..\tools\install
-    nmake -nologo all DEBUG=1
+    nmake -nologo DEBUG=1 all
 
 nodebuginfo:	odin_libraries  needed_tools
     cd src
@@ -57,10 +70,9 @@ nodebuginfo:	odin_libraries  needed_tools
 
 nodebuginfosmp:	odin_libraries  needed_tools
     cd src
-    start nmake -i -f makefile.smp -nologo all DEBUG=1 NODEBUGINFO=1
-    nmake -nologo all DEBUG=1 NODEBUGINFO=1
+    nmake -nologo DEBUG=1 NODEBUGINFO=1 smp
     cd ..\tools\install
-    nmake -nologo all DEBUG=1 NODEBUGINFO=1
+    nmake -nologo DEBUG=1 NODEBUGINFO=1 all
 
 release:	odin_libraries  needed_tools
     SET DEBUG=
@@ -72,8 +84,7 @@ release:	odin_libraries  needed_tools
 releasesmp:	odin_libraries  needed_tools
     SET DEBUG=
     cd src
-    start nmake -i -f makefile.smp -nologo all
-    nmake -nologo all
+    nmake -nologo smp
     cd ..\tools\install
     nmake -nologo all
 
