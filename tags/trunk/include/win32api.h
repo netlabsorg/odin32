@@ -1,4 +1,4 @@
-/* $Id: win32api.h,v 1.12 2000-06-01 11:26:14 sandervl Exp $ */
+/* $Id: win32api.h,v 1.13 2000-06-08 18:11:02 sandervl Exp $ */
 
 /*
  *
@@ -102,5 +102,8 @@ PVOID   WIN32API LockResource(HGLOBAL hRes);
 BOOL    WIN32API SetWindowOrgEx(HDC hdc, int X, int Y, LPPOINT lpPoint);
 BOOL    WIN32API SetWindowExtEx(HDC hdc, int nXExtent, int nYExtent, LPPOINT lpSize);
 int     WIN32API GetDeviceCaps(HDC hdc, int nIndex);
+int     WIN32API GetMapMode(HDC hdc);
+BOOL    WIN32API DPtoLP(HDC,LPPOINT,INT);
+BOOL    WIN32API RedrawWindow(HWND,const RECT*,HRGN, DWORD);
 
 #endif
