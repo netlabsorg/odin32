@@ -1,4 +1,4 @@
-/* $Id: OS2SURFACE.CPP,v 1.37 2001-10-10 14:40:45 sandervl Exp $ */
+/* $Id: OS2SURFACE.CPP,v 1.38 2001-10-17 08:08:52 sandervl Exp $ */
 
 /*
  * DirectDraw Surface class implementaion
@@ -2300,8 +2300,11 @@ HRESULT WIN32API SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lpD
   }
   delete pIRectDest;
 
-  if (NULL!=lpSrcRect)
+  //src == NULL for colorfill
+  if(src) 
   {
+   if (NULL!=lpSrcRect)
+   {
 #ifdef RA_HACK
     // Same as for dest rectangle now for src
 
@@ -2352,18 +2355,18 @@ HRESULT WIN32API SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lpD
 #else
     memcpy(&SrcRect,lpSrcRect,sizeof(RECT) );
 #endif
-  }
-  else
-  {
+   }
+   else
+   {
     pIRectSrc = new DDRectangle( 0, 0, src->width, src->height);
     SrcRect.top    = 0;
     SrcRect.left   = 0;
     SrcRect.bottom = src->height;
     SrcRect.right  = src->width;
-  }
-
-  if(src->fLocked)
-  {
+   }
+  
+   if(src->fLocked)
+   {
     if (NULL==lpSrcRect)
     {
       // If anything is locked we can't blit from the complete surface as
@@ -2394,8 +2397,9 @@ HRESULT WIN32API SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lpD
 
       return(DDERR_SURFACEBUSY);
     }
-  }
-  delete pIRectSrc;
+   }
+   delete pIRectSrc;
+  } //if(src)
 
   if(dest->diveBufNr == DIVE_BUFFER_SCREEN &&
      !(dwFlags & (DDBLT_COLORFILL|DDBLT_DEPTHFILL|DDBLT_ROP) ) &&
@@ -2529,15 +2533,16 @@ dodiveblit:
                   if(IntersectRect(&newdest, &DestRect, &lpClipRect[i]) == TRUE) 
                   {
                       //TODO: This is not correct for stretching blits
-                      newsrc.left   = SrcRect.left + (newdest.left - DestRect.left);
-                      newsrc.top    = SrcRect.top + (newdest.top - DestRect.top);
-                      newsrc.right  = newsrc.left + RECT_WIDTH(&newdest);
-                      newsrc.bottom = newsrc.top + RECT_HEIGHT(&newdest);
-
+                      if(lpSrcRect) {
+                          newsrc.left   = SrcRect.left + (newdest.left - DestRect.left);
+                          newsrc.top    = SrcRect.top + (newdest.top - DestRect.top);
+                          newsrc.right  = newsrc.left + RECT_WIDTH(&newdest);
+                          newsrc.bottom = newsrc.top + RECT_HEIGHT(&newdest);
+                      }
 //                      DDSURFACEDESC2 surfdesc = {0};
 //                      SurfLock4(dest, &newdest, &surfdesc, 0, 0);
-
-                      ret = SurfDoBlt(This, &newdest, lpDDSrcSurface, &newsrc, dwFlags, lpDDBltFx);
+   
+                      ret = SurfDoBlt(This, &newdest, lpDDSrcSurface, (lpSrcRect) ? &newsrc : NULL, dwFlags, lpDDBltFx);
                       if(ret != DD_OK) {
                           break;
                       }
@@ -2559,7 +2564,7 @@ dodiveblit:
       }
   }
 doblit:
-  return SurfDoBlt(This, &DestRect, lpDDSrcSurface, &SrcRect, dwFlags, lpDDBltFx);
+  return SurfDoBlt(This, &DestRect, lpDDSrcSurface, (lpSrcRect) ? &SrcRect : NULL, dwFlags, lpDDBltFx);
 }
 //******************************************************************************
 //******************************************************************************
