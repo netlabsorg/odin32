@@ -1,4 +1,4 @@
-/* $Id: winaccel.cpp,v 1.1 1999-09-15 23:19:02 sandervl Exp $ */
+/* $Id: winaccel.cpp,v 1.2 1999-10-24 12:30:29 sandervl Exp $ */
 /*
  * Win32 accelartor key functions for OS/2
  *
@@ -41,9 +41,9 @@ BOOL WIN32API DestroyAcceleratorTable( HACCEL haccel)
  Win32Resource *winres;
 
     if(HIWORD(haccel) == 0) {
-    dprintf(("DestroyAcceleratorTable: invalid haccel %x", haccel));
-    SetLastError(ERROR_INVALID_PARAMETER);
-    return FALSE;
+    	dprintf(("DestroyAcceleratorTable: invalid haccel %x", haccel));
+    	SetLastError(ERROR_INVALID_PARAMETER);
+    	return FALSE;
     }
     dprintf(("DestroyAcceleratorTable %x\n", haccel));
     winres = (Win32Resource *)haccel;
@@ -64,8 +64,8 @@ int WIN32API TranslateAcceleratorA(HWND hwnd, HACCEL haccel, LPMSG lpmsg)
         return FALSE;
     }
     if(window->GetAccelTable() != haccel) {
-    dprintf(("TranslateAcceleratorA %X %X %X", hwnd, haccel, lpmsg->hwnd));
-    window->SetAccelTable(haccel);
+    	dprintf(("TranslateAcceleratorA %X %X %X", hwnd, haccel, lpmsg->hwnd));
+    	window->SetAccelTable(haccel);
     }
 
     //SvL: OS/2 automatically translates accelerator keys
