@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.102 2003-05-06 12:06:07 sandervl Exp $ */
+/* $Id: HandleManager.cpp,v 1.103 2003-05-23 13:53:42 sandervl Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -3563,7 +3563,7 @@ BOOL HMCommClearCommError( HANDLE hCommDev,
     return (NULL);                                         /* signal failure */
   }
 
-  if(IsBadWritePtr(lpdwErrors,sizeof(DWORD)) ||
+  if((lpdwErrors != NULL && IsBadWritePtr(lpdwErrors,sizeof(DWORD))) ||
      (NULL!=lpcst && IsBadWritePtr(lpcst,sizeof(COMSTAT)) ) )
   {
     SetLastError(ERROR_INVALID_PARAMETER);
