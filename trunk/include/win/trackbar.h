@@ -1,9 +1,10 @@
-/* $Id: trackbar.h,v 1.1 1999-05-24 20:19:20 ktk Exp $ */
+/* $Id: trackbar.h,v 1.2 1999-06-21 15:28:44 cbratschi Exp $ */
 
 /*
  * Trackbar class extra info
  *
  * Copyright 1998 Eric Kohl
+ * Copyright 1999 Christoph Bratschi
  */
 
 #ifndef __WINE_TRACKBAR_H
@@ -32,6 +33,7 @@ typedef struct tagTRACKBAR_INFO
     BOOL bFocus;
     RECT rcChannel;
     RECT rcSelection;
+    RECT rcFullThumb;
     RECT rcThumb;
 	INT  dragPos;
     LPLONG tics;
