@@ -1,4 +1,4 @@
-/* $Id: thread.cpp,v 1.39 2001-12-07 14:13:38 sandervl Exp $ */
+/* $Id: thread.cpp,v 1.40 2002-01-13 14:29:57 sandervl Exp $ */
 
 /*
  * Win32 Thread API functions
@@ -316,9 +316,9 @@ DWORD OPEN32API Win32ThreadProc(LPVOID lpData)
       SetThreadAffinityMask(GetCurrentThread(), dwProcessAffinityMask);
   }
 
-  WinExe->tlsAttachThread();		  //setup TLS structure of main exe
+  if(WinExe) WinExe->tlsAttachThread();	    //setup TLS structure of main exe
   Win32DllBase::tlsAttachThreadToAllDlls(); //setup TLS structures of all dlls
-  Win32DllBase::attachThreadToAllDlls();	  //send DLL_THREAD_ATTACH message to all dlls
+  Win32DllBase::attachThreadToAllDlls();    //send DLL_THREAD_ATTACH message to all dlls
 
   //Set FPU control word to 0x27F (same as in NT)
   CONTROL87(0x27F, 0xFFF);
