@@ -1,4 +1,4 @@
-/* $Id: xform.c,v 1.1 2000-02-29 00:50:16 sandervl Exp $ */
+/* $Id: xform.c,v 1.2 2000-03-01 18:49:41 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -49,9 +49,9 @@
 #include "GL/xf86glx.h"
 #endif
 #include "vb.h"
+#include "types.h"
 #include "context.h"
 #include "mmath.h"
-#include "types.h"
 #include "vb.h"
 #include "xform.h"
 #endif

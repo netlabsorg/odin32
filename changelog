@@ -1,7 +1,10 @@
- /* $Id: changelog,v 1.764 2000-03-01 14:49:34 sandervl Exp $ */
+ /* $Id: changelog,v 1.765 2000-03-01 18:50:02 jeroen Exp $ */
+
+ 2000-03-01: Jeroen van den Horn <J.vandenHorn@fibre.a2000.nl>
+        - OPENGL: Implemented DIVE support in Mesa
 
  2000-03-01: Sander van Leeuwen <sandervl@xs4all.nl>
-	- USER32: Fixes for FindWindow(ExA/W) - now more like Wine
+        - USER32: Fixes for FindWindow(ExA/W) - now more like Wine
                   (FindWindowExW was not working correctly either)
                   First send WM_NCACTIVATE, then WM_ACTIVATE
                   Fixed focus problems with Odin apps
@@ -12,14 +15,14 @@
                         always call WinSetFocus???
                   Call Dinput handler when translating mouse & keyboard
                   messages (during Get/PeekMessage)
-	- OPENGL: Always build release version of glide, mesa, glu32 & glut
+        - OPENGL: Always build release version of glide, mesa, glu32 & glut
                   Build mesa software & 3dfx dlls; don't build OS/2 opengl
                   wrapper anymore
-        - OPENGL\GLIDE\CVG\GLIDE: 
+        - OPENGL\GLIDE\CVG\GLIDE:
                   Disable instruction scheduling in release build -> messed up
                   colors when turned on (most likely VAC optimizer bug)
-		  TODO: Somebody should also check this for the voodoo 1 glide dll.
-	- OPENGL\GLIDE\CVG:
+                  TODO: Somebody should also check this for the voodoo 1 glide dll.
+        - OPENGL\GLIDE\CVG:
 		  Fixed makefile
 	- OPENGL\MESA\GL\gl.h
 		  Removed circular header dependency (breaks build)
@@ -60,7 +63,7 @@
 	- KERNEL32: Only call ExitProcess the first time KillWin32Process
                     is executed. Call DosExit otherwise.
                     Fix for GpdDev device io (needed for native glide dll)
-                   
+
  2000-02-28: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Call ExitProcess in KillWin32Process to make sure
                     the dll libmain handlers are called after a crash.

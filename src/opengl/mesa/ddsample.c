@@ -1,4 +1,4 @@
-/* $Id: ddsample.c,v 1.1 2000-02-29 00:50:01 sandervl Exp $ */
+/* $Id: ddsample.c,v 1.2 2000-03-01 18:49:26 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -62,9 +62,9 @@
 #include "GL/xf86glx.h"
 #endif
 #include "GL/FooMesa.h"
+#include "types.h"
 #include "context.h"
 #include "matrix.h"
-#include "types.h"
 #include "vb.h"
 
 
@@ -75,9 +75,9 @@
  */
 struct foo_mesa_visual {
    GLvisual *gl_visual;
-   GLboolean db_flag;		/* double buffered? */
-   GLboolean rgb_flag;		/* RGB mode? */
-   GLuint depth;		/* bits per pixel (1, 8, 24, etc) */
+   GLboolean db_flag;           /* double buffered? */
+   GLboolean rgb_flag;          /* RGB mode? */
+   GLuint depth;                /* bits per pixel (1, 8, 24, etc) */
 };
 
 

@@ -1,4 +1,4 @@
-/* $Id: config.h,v 1.1 2000-02-29 00:48:27 sandervl Exp $ */
+/* $Id: config.h,v 1.2 2000-03-01 18:49:24 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -216,6 +216,8 @@
 
 
 typedef struct gl_context GLcontext;
+typedef struct gl_visual  GLvisual;
+typedef struct gl_frame_buffer GLframebuffer;
 
 extern void gl_read_config_file( struct gl_context *ctx );
 

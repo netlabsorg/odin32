@@ -1,4 +1,4 @@
-/* $Id: colors.h,v 1.1 2000-02-29 00:48:26 sandervl Exp $ */
+/* $Id: colors.h,v 1.2 2000-03-01 18:49:24 jeroen Exp $ */
 
 /*      File name       :       colors.h
  *  Version             :       2.3
@@ -26,8 +26,8 @@
 
 /*
  * $Log: colors.h,v $
- * Revision 1.1  2000-02-29 00:48:26  sandervl
- * created
+ * Revision 1.2  2000-03-01 18:49:24  jeroen
+ * *** empty log message ***
  *
  * Revision 1.1.1.1  1999/08/19 00:55:42  jtg
  * Imported sources
@@ -44,8 +44,8 @@
 
 /*
  * $Log: colors.h,v $
- * Revision 1.1  2000-02-29 00:48:26  sandervl
- * created
+ * Revision 1.2  2000-03-01 18:49:24  jeroen
+ * *** empty log message ***
  *
  * Revision 1.1.1.1  1999/08/19 00:55:42  jtg
  * Imported sources
@@ -62,8 +62,8 @@
 
 /*
  * $Log: colors.h,v $
- * Revision 1.1  2000-02-29 00:48:26  sandervl
- * created
+ * Revision 1.2  2000-03-01 18:49:24  jeroen
+ * *** empty log message ***
  *
  * Revision 1.1.1.1  1999/08/19 00:55:42  jtg
  * Imported sources
@@ -88,7 +88,7 @@
 #define PF_BADFORMAT    11
 #define PF_INDEX8               12
 
-char ColorMap16[] = {
+static char ColorMap16[] = {
 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
 0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01,
 0x02,0x02,0x02,0x02,0x02,0x02,0x02,0x02,
@@ -122,32 +122,29 @@ char ColorMap16[] = {
 0x1E,0x1E,0x1E,0x1E,0x1E,0x1E,0x1E,0x1E,
 0x1F,0x1F,0x1F,0x1F,0x1F,0x1F,0x1F,0x1F};
 
-#define BGR8(r,g,b)		(unsigned)(((BYTE)(b & 0xc0 | (g & 0xe0)>>2 | (r & 0xe0)>>5)))
+#define BGR8(r,g,b)             (unsigned)(((BYTE)(b & 0xc0 | (g & 0xe0)>>2 | (r & 0xe0)>>5)))
 #ifdef DDRAW
-#define BGR16(r,g,b)	((WORD)(((BYTE)(ColorMap16[b]) | ((BYTE)(g&0xfc) << 3)) | (((WORD)(BYTE)(ColorMap16[r])) << 11)))
+#define BGR16(r,g,b)    ((WORD)(((BYTE)(ColorMap16[b]) | ((BYTE)(g&0xfc) << 3)) | (((WORD)(BYTE)(ColorMap16[r])) << 11)))
 #else
-#ifdef __WIN32OS2__
-#define BGR16(r,g,b)	((WORD)(((BYTE)(ColorMap16[b]) | ((BYTE)(ColorMap16[g]*2) << 5)) | (((WORD)(BYTE)(ColorMap16[r])) << 11)))
-#else
-#define BGR16(r,g,b)	((WORD)(((BYTE)(ColorMap16[b]) | ((BYTE)(ColorMap16[g]) << 5)) | (((WORD)(BYTE)(ColorMap16[r])) << 10)))
+#define BGR16(r,g,b)    ((WORD)(((BYTE)(ColorMap16[b]) | ((BYTE)(ColorMap16[g]) << 5)) | (((WORD)(BYTE)(ColorMap16[r])) << 10)))
 #endif
-#endif
-#define BGR24(r,g,b)	(unsigned long)(((DWORD)(((BYTE)(b)|((WORD)((BYTE)(g))<<8))|(((DWORD)(BYTE)(r))<<16))))
-#define BGR32(r,g,b)	(unsigned long)((DWORD)(((BYTE)(b)|((WORD)((BYTE)(g))<<8))|(((DWORD)(BYTE)(r))<<16)))
+/* JvdH -- FIX! In BGR24 don't shift another 8 bits (was <<8) */
+#define BGR24(r,g,b)    (unsigned long)(((DWORD)(((BYTE)(b)|((WORD)((BYTE)(g))<<8))|(((DWORD)(BYTE)(r))<<16))))
+#define BGR32(r,g,b)    (unsigned long)((DWORD)(((BYTE)(b)|((WORD)((BYTE)(g))<<8))|(((DWORD)(BYTE)(r))<<16)))
 
 
 
 /*
  * If pixelformat==PF_8A8B8G8R:
  */
-#define PACK_8A8B8G8R( R, G, B, A )	\
-	( ((A) << 24) | ((B) << 16) | ((G) << 8) | (R) )
+#define PACK_8A8B8G8R( R, G, B, A )     \
+        ( ((A) << 24) | ((B) << 16) | ((G) << 8) | (R) )
 
 
 /*
  * If pixelformat==PF_8R8G8B:
  */
-#define PACK_8R8G8B( R, G, B)	 ( ((R) << 16) | ((G) << 8) | (B) )
+#define PACK_8R8G8B( R, G, B)    ( ((R) << 16) | ((G) << 8) | (B) )
 
 
 /*
@@ -159,9 +156,9 @@ char ColorMap16[] = {
 #define PACK_5R6G5B( R, G, B) ((WORD)(((BYTE)(ColorMap16[B]) | ((BYTE)(G&0xfc) << 3)) | (((WORD)(BYTE)(ColorMap16[R])) << 11)))
 #else
 #ifdef __WIN32OS2__
-#define PACK_5R6G5B( R, G, B)	((WORD)(((BYTE)(ColorMap16[B]) | ((BYTE)(ColorMap16[G]*2) << 5)) | (((WORD)(BYTE)(ColorMap16[R])) << 11)))
+#define PACK_5R6G5B( R, G, B)   ((WORD)(((BYTE)(ColorMap16[B]) | ((BYTE)(ColorMap16[G]*2) << 5)) | (((WORD)(BYTE)(ColorMap16[R])) << 11)))
 #else
-#define PACK_5R6G5B( R, G, B)	((WORD)(((BYTE)(ColorMap16[B]) | ((BYTE)(ColorMap16[G]) << 5)) | (((WORD)(BYTE)(ColorMap16[R])) << 10)))
+#define PACK_5R6G5B( R, G, B)   ((WORD)(((BYTE)(ColorMap16[B]) | ((BYTE)(ColorMap16[G]) << 5)) | (((WORD)(BYTE)(ColorMap16[R])) << 10)))
 #endif
 #endif
 /*----------------------------------------------------------------------------

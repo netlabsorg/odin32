@@ -1,4 +1,4 @@
-/* $Id: clip_tmp.h,v 1.1 2000-02-29 00:48:26 sandervl Exp $ */
+/* $Id: clip_tmp.h,v 1.2 2000-03-01 18:49:24 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -35,11 +35,11 @@
  * the case where the cliptest passes.  This isn't essential,
  * and an asm implementation needn't replicate that behaviour.
  */
-static GLvector4f * TAG(cliptest_points4)( GLvector4f *clip_vec,
-					   GLvector4f *proj_vec,
-					   GLubyte clipMask[],
-					   GLubyte *orMask,
-					   GLubyte *andMask )
+static GLvector4f * __cdecl TAG(cliptest_points4)( GLvector4f *clip_vec,
+                                           GLvector4f *proj_vec,
+                                           GLubyte clipMask[],
+                                           GLubyte *orMask,
+                                           GLubyte *andMask )
 {
    const GLuint stride = clip_vec->stride;
    const GLfloat *from = (GLfloat *)clip_vec->start;
@@ -75,20 +75,20 @@ static GLvector4f * TAG(cliptest_points4)( GLvector4f *clip_vec,
 
       clipMask[i] = mask;
       if (mask) {
-	 c++;
-	 tmpAndMask &= mask;
-	 tmpOrMask |= mask;
-	 vProj[i][0] = 0;	/* no longer required? */
-	 vProj[i][1] = 0;
-	 vProj[i][2] = 0;
-	 vProj[i][3] = 1;
+         c++;
+         tmpAndMask &= mask;
+         tmpOrMask |= mask;
+         vProj[i][0] = 0;       /* no longer required? */
+         vProj[i][1] = 0;
+         vProj[i][2] = 0;
+         vProj[i][3] = 1;
       } else {
-	 GLfloat oow = 1.0F / cw;	
-	 vProj[i][3] = oow;
-	 vProj[i][0] = cx * oow;
-	 vProj[i][1] = cy * oow;
-	 vProj[i][2] = cz * oow;
-      }	
+         GLfloat oow = 1.0F / cw;
+         vProj[i][3] = oow;
+         vProj[i][0] = cx * oow;
+         vProj[i][1] = cy * oow;
+         vProj[i][2] = cz * oow;
+      }
    }
 
    *orMask = tmpOrMask;
@@ -100,11 +100,11 @@ static GLvector4f * TAG(cliptest_points4)( GLvector4f *clip_vec,
    return proj_vec;
 }
 
-static GLvector4f * TAG(cliptest_points3)( GLvector4f *clip_vec,
-					   GLvector4f *proj_vec,
-					   GLubyte clipMask[],
-					   GLubyte *orMask,
-					   GLubyte *andMask )
+static GLvector4f * __cdecl TAG(cliptest_points3)( GLvector4f *clip_vec,
+                                           GLvector4f *proj_vec,
+                                           GLubyte clipMask[],
+                                           GLubyte *orMask,
+                                           GLubyte *andMask )
 {
    const GLuint stride = clip_vec->stride;
    const GLuint count = clip_vec->count;
@@ -134,11 +134,11 @@ static GLvector4f * TAG(cliptest_points3)( GLvector4f *clip_vec,
    return clip_vec;
 }
 
-static GLvector4f * TAG(cliptest_points2)( GLvector4f *clip_vec,
-					   GLvector4f *proj_vec,
-					   GLubyte clipMask[],
-					   GLubyte *orMask,
-					   GLubyte *andMask )
+static GLvector4f * __cdecl TAG(cliptest_points2)( GLvector4f *clip_vec,
+                                           GLvector4f *proj_vec,
+                                           GLubyte clipMask[],
+                                           GLubyte *orMask,
+                                           GLubyte *andMask )
 {
    const GLuint stride = clip_vec->stride;
    const GLuint count = clip_vec->count;

@@ -1,4 +1,4 @@
-/* $Id: vertices.h,v 1.1 2000-02-29 00:48:43 sandervl Exp $ */
+/* $Id: vertices.h,v 1.2 2000-03-01 18:49:39 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -29,17 +29,17 @@
 #define VERTICES_H_
 
 
-typedef void (*gl_transform_func)( GLfloat *first_vert,
-				   const GLfloat *m,
-				   const GLfloat *src,
-				   GLuint src_stride,
-				   GLuint count );
+typedef void (* __cdecl gl_transform_func)( GLfloat *first_vert,
+                                   const GLfloat *m,
+                                   const GLfloat *src,
+                                   GLuint src_stride,
+                                   GLuint count );
 
-typedef void (*gl_cliptest_func)( GLfloat *first_vert,
-				  GLfloat *last_vert, /* use count instead? */
-				  GLubyte *or_mask,
-				  GLubyte *and_mask,
-				  GLubyte *clip_mask );
+typedef void (* __cdecl gl_cliptest_func)( GLfloat *first_vert,
+                                  GLfloat *last_vert, /* use count instead? */
+                                  GLubyte *or_mask,
+                                  GLubyte *and_mask,
+                                  GLubyte *clip_mask );
 
 typedef void (*gl_project_clipped_func)( GLfloat *first,
 					 GLfloat *last,

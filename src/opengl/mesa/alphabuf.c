@@ -1,4 +1,4 @@
-/* $Id: alphabuf.c,v 1.1 2000-02-29 00:49:57 sandervl Exp $ */
+/* $Id: alphabuf.c,v 1.2 2000-03-01 18:49:22 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -38,10 +38,10 @@
 #ifdef PC_HEADER
 #include "all.h"
 #else
+#include "types.h"
 #include "alphabuf.h"
 #include "context.h"
 #include "macros.h"
-#include "types.h"
 #endif
 
 

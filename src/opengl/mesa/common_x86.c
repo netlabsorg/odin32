@@ -1,4 +1,4 @@
-/* $Id: common_x86.c,v 1.1 2000-02-29 00:49:59 sandervl Exp $ */
+/* $Id: common_x86.c,v 1.2 2000-03-01 18:49:24 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -53,16 +53,24 @@ static void message(const char *msg)
 void gl_init_all_x86_asm (void)
 {
 #ifdef USE_X86_ASM
+
 #ifdef __WIN32OS2__
    /* Odin specific - use 'built in' cpuhlp lib */
    if(CPUFeatures & CPUID_FPU_PRESENT)
-     gl_init_x86_asm_transforms();
+     {
+       dprintf(("OPENGL32: Initializing Assembly Transforms"));
+       gl_init_x86_asm_transforms();
+     }
 
 #if defined(USE_3DNOW_ASM)
    if(CPUFeatures /*& CPUID_3DNOW*/)
-     gl_init_3dnow_asm_transforms();
-#endif
-#else
+     {
+       dprintf(("OPENGL32: Initializing 3DNow! Transforms"));
+       gl_init_3dnow_asm_transforms();
+     }
+#endif                                 /* USE_3DNOW_ASM                    */
+
+#else                                  /* __WIN32OS2__                     */
    gl_x86_cpu_features = gl_identify_x86_cpu_features ();
    gl_x86_cpu_features |= GL_CPU_AnyX86;
 
@@ -86,7 +94,7 @@ void gl_init_all_x86_asm (void)
          gl_x86_cpu_features &= (~GL_CPU_MMX);
       }
    }
-#endif
+#endif                                 /* USE_MMX_ASM                      */
 
 
 #ifdef USE_3DNOW_ASM
@@ -99,8 +107,10 @@ void gl_init_all_x86_asm (void)
          gl_x86_cpu_features &= (~GL_CPU_3Dnow);
       }
    }
-#endif
-#endif
-#endif
+#endif                                 /* USE_3DNOW_ASM                    */
+
+#endif                                 /* __WIN32OS2__                     */
+
+#endif                                 /* USE_X86_ASM                      */
 }
 

@@ -1,4 +1,4 @@
-/* $Id: logic.c,v 1.1 2000-02-29 00:50:06 sandervl Exp $ */
+/* $Id: logic.c,v 1.2 2000-03-01 18:49:31 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -37,12 +37,12 @@
 #include "GL/xf86glx.h"
 #endif
 #include "alphabuf.h"
+#include "types.h"
 #include "context.h"
 #include "logic.h"
 #include "macros.h"
 #include "pb.h"
 #include "span.h"
-#include "types.h"
 #endif
 
 

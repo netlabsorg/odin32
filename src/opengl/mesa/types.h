@@ -1,4 +1,4 @@
-/* $Id: types.h,v 1.1 2000-02-29 00:48:41 sandervl Exp $ */
+/* $Id: types.h,v 1.2 2000-03-01 18:49:38 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -183,7 +183,7 @@ typedef void (*render_vb_func)( GLcontext *ctx );
 /*
  * Blending function
  */
-typedef void (*blend_func)( GLcontext *ctx, GLuint n, const GLubyte mask[],
+typedef void (* __cdecl blend_func)( GLcontext *ctx, GLuint n, const GLubyte mask[],
                             GLubyte src[][4], CONST GLubyte dst[][4] );
 
 

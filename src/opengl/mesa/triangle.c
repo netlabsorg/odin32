@@ -1,4 +1,4 @@
-/* $Id: triangle.c,v 1.1 2000-02-29 00:50:12 sandervl Exp $ */
+/* $Id: triangle.c,v 1.2 2000-03-01 18:49:38 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -44,6 +44,7 @@
 #else
 #include "GL/xf86glx.h"
 #endif
+#include "types.h"
 #include "context.h"
 #include "depth.h"
 #include "feedback.h"
@@ -52,13 +53,12 @@
 #include "span.h"
 #include "texstate.h"
 #include "triangle.h"
-#include "types.h"
 #include "vb.h"
 #endif
 
 
 GLboolean gl_cull_triangle( GLcontext *ctx,
-			    GLuint v0, GLuint v1, GLuint v2, GLuint pv )
+                            GLuint v0, GLuint v1, GLuint v2, GLuint pv )
 {
    struct vertex_buffer *VB = ctx->VB;
    GLfloat (*win)[4] = VB->Win.data;
