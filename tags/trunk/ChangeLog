@@ -1,4 +1,8 @@
- /* $Id: ChangeLog,v 1.338 1999-10-17 20:17:18 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.339 1999-10-18 10:53:02 sandervl Exp $ */
+
+ 99-10-18: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32: Set/clear WS_VISIBLE flag in ShowWindow
+                  Fix for scrollbar redraw
 
  99-10-17: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Ported AdjustWindowRectEx from Wine (990815)
