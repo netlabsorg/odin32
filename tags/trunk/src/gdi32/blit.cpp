@@ -1,4 +1,4 @@
-/* $Id: blit.cpp,v 1.23 2001-01-18 21:09:34 sandervl Exp $ */
+/* $Id: blit.cpp,v 1.24 2001-02-23 10:37:42 sandervl Exp $ */
 
 /*
  * GDI32 blit code
@@ -126,21 +126,6 @@ INT WIN32API SetDIBitsToDevice(HDC hdc, INT xDest, INT yDest, DWORD cx,
     if (xSrc + cx >= width) cx = width - xSrc;
 
     if (!cx || !cy) goto invalid_parameter;
-
-    // EB: ->>> Crazy. Nobody seen this Open32 bug ?
-    // Dont't like dirty pointers, but Open32 needs a bit help.
-    // Only tested with winmine.
-    palsize = QueryPaletteSize((BITMAPINFOHEADER*)&info->bmiHeader);
-    imgsize = CalcBitmapSize(info->bmiHeader.biBitCount,
-                             info->bmiHeader.biWidth, info->bmiHeader.biHeight);
-    ptr = ((char *)info) + palsize + sizeof(BITMAPINFOHEADER);
-    if(bits >= ptr && bits < ptr + imgsize)
-    {
-        bits = (char *)bits - imgsize +
-                   CalcBitmapSize(info->bmiHeader.biBitCount,
-                                  info->bmiHeader.biWidth, lines);
-    }
-    // EB: <<<-
 
     //SvL: RP7's bitmap size is not correct; fix it here or else
     //     the blit is messed up in Open32
