@@ -1,5 +1,5 @@
 ################################################################################
-# $Id: Makefile,v 1.43.4.8 2000-08-30 04:11:22 bird Exp $
+# $Id: Makefile,v 1.43.4.9 2000-08-30 04:19:42 bird Exp $
 #
 # Win32k makefile.
 #
@@ -71,9 +71,9 @@ ASDEFINES   = $(ASDEFINES)  -D:RELEASE
 !else
 
 # DEBUG
-CFLAGS      = $(CFLAGS)     -O- -Ti+
+CFLAGS      = $(CFLAGS)     -O+ -Os- -Ti+
 CFLAGS16    = $(CFLAGS16)   -Zi -Od
-CPPFLAGS    = $(CPPFLAGS)   -O- -Ti+
+CPPFLAGS    = $(CPPFLAGS)   -O+ -Os- -Ti+
 LFLAGS      = $(LFLAGS)     /NOEXEPACK /DEBUG
 ASFLAGS     = $(ASFLAGS)    -Od+
 CDEFINES    = $(CDEFINESB)  -DDEBUG
@@ -84,8 +84,8 @@ ASDEFINES   = $(ASDEFINES)  -D:DEBUG
 !ifdef NODEBUGINFO
 LFLAGS      = $(LFLAGS)     /NODEB /EXEPACK:2 /PACKD /PACKC
 CFLAGS16    = $(CFLAGS16)   -Owis
-CFLAGS      = $(CFLAGS)     -O+ -Oi-
-CPPFLAGS    = $(CPPFLAGS)   -O+ -Oi-
+CFLAGS      = $(CFLAGS)     -O+ -Os- -Oi-
+CPPFLAGS    = $(CPPFLAGS)   -O+ -Os- -Oi-
 !endif
 
 CDEFINES_TST    = $(CDEFINES)   -DR3TST
