@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.230 1999-09-23 14:59:22 phaller Exp $ */
+ /* $Id: ChangeLog,v 1.231 1999-09-23 15:58:01 phaller Exp $ */
 
  99-09-23: Patrick Haller <phaller@gmx.net>
 	- KERNEL32:	Fix: WinImgRes:findResourceW erroneously tried to free 
@@ -10,6 +10,7 @@
 				now returns Win32MenuRes object instead of PM handle
 			Fix: in USER32:WinMenu:GetSystemMenu 
 				now returns Win32MenuRes object instead of PM handle
+			Fix: in USER32:Char:CharPrevW intermixed arguments
 
  99-09-23: Jens Wiessner <wiessnej@rfi.de>
 	- CRTDLL: Added stubs, implemented some stubs
