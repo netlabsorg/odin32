@@ -1,4 +1,4 @@
-/* $Id: mixeros2.cpp,v 1.2 2002-05-23 13:50:15 sandervl Exp $ */
+/* $Id: mixeros2.cpp,v 1.3 2002-05-24 18:02:48 sandervl Exp $ */
 
 /*
  * OS/2 Mixer multimedia
@@ -173,8 +173,8 @@ BOOL OSLibMixGetVolume(DWORD dwControl, BOOL *pfMute, DWORD *pdwVolLeft, DWORD *
     }
     dwFunc += MONOINQUERY;
 
-    if(mixerapiIOCTL90(hPDDMix, dwFunc, &mixstruct, sizeof(mixstruct)) == TRUE) {
-        return TRUE;
+    if(mixerapiIOCTL90(hPDDMix, dwFunc, &mixstruct, sizeof(mixstruct)) == FALSE) {
+        return FALSE;
     }
     if(pfMute)      *pfMute      = mixstruct.Mute;
     if(pdwVolLeft)  *pdwVolLeft  = mixstruct.VolumeL;
@@ -184,9 +184,7 @@ BOOL OSLibMixGetVolume(DWORD dwControl, BOOL *pfMute, DWORD *pdwVolLeft, DWORD *
         dprintf(("OSLibMixGetVolume: Volume (%d,%d) out of RANGE!!", mixstruct.VolumeL, mixstruct.VolumeR));
         return FALSE;
     }
-
-    dprintf(("OSLibMixGetVolume: mixerapiIOCTL90 %d failed!!", dwFunc));
-    return FALSE;
+    return TRUE;
 }
 /******************************************************************************/
 /******************************************************************************/
