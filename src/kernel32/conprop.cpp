@@ -36,6 +36,8 @@
 #include <string.h>
 #include <stdarg.h>
 #include <stdio.h>
+
+#include <odin.h>
 #include "win32type.h"
 #include "misc.h"
 #include "console.h"
