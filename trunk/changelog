@@ -1,4 +1,10 @@
-/* $Id: changelog,v 1.2368 2002-11-27 14:27:49 sandervl Exp $ */
+/* $Id: changelog,v 1.2369 2002-11-28 19:48:46 sandervl Exp $ */
+
+ 2002-11-28: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o Make sure the stack is properly aligned
+                  We're asking for problems if our stack start near a 64kb
+                  boundary. Some OS/2 thunking procedures can choke on misaligned 
+                  stack addresses. (workaround; not a real fix)
 
  2002-11-27: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o Fixed CopyBitmap (CopyImage, IMAGE_BITMAP)
