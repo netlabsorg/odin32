@@ -1,4 +1,4 @@
-/* $Id: pe.cpp,v 1.12 1999-11-24 19:33:04 sandervl Exp $ */
+/* $Id: pe.cpp,v 1.13 2000-01-30 14:48:51 sandervl Exp $ */
 
 /*
  * PELDR main exe loader code
@@ -62,6 +62,12 @@ KRNL32EXCEPTPROC       Krnl32UnsetExceptionHandler = 0;
 
 WIN32CTOR              CreateWin32Exe       = 0;
 
+ULONG                  reservedMemory       = 0;
+
+void AllocateExeMem(char *filename);
+
+//******************************************************************************
+//******************************************************************************
 int main(int argc, char *argv[])
 {
  HAB    hab = 0;                             /* PM anchor block handle       */
@@ -69,6 +75,12 @@ int main(int argc, char *argv[])
  char   exeName[CCHMAXPATH];
  APIRET  rc;
  HMODULE hmodPMWin = 0, hmodKernel32 = 0;
+
+  if(argc >= 2) {
+	strcpy(exeName, argv[1]);
+	strupr(exeName);
+	AllocateExeMem(exeName);
+  }
 
   rc = DosLoadModule(exeName, sizeof(exeName), "PMWIN.DLL", &hmodPMWin);
   rc = DosQueryProcAddr(hmodPMWin, ORD_WIN32INITIALIZE, NULL, (PFN *)&MyWinInitialize);
@@ -96,7 +108,7 @@ int main(int argc, char *argv[])
 
   strcpy(exeName, argv[1]);
   strupr(exeName);
-  if(CreateWin32Exe(exeName, ReserveMem()) == FALSE) {
+  if(CreateWin32Exe(exeName, reservedMemory) == FALSE) {
         goto fail;
   }
 
@@ -114,6 +126,129 @@ fail:
   if(hmodPMWin) 	DosFreeModule(hmodPMWin);
   if(hmodKernel32) 	DosFreeModule(hmodKernel32);
   return(1);
+}
+//******************************************************************************
+//SvL: Reserve memory for win32 exes without fixups
+//     This is done before any Odin or PMWIN dll is loaded, so we'll get
+//     a very low virtual address. (which is exactly what we want)
+//******************************************************************************
+void AllocateExeMem(char *filename)
+{
+ HFILE  dllfile = 0;
+ char   szFileName[CCHMAXPATH], *tmp;
+ ULONG  action, ulRead, signature;
+ APIRET rc;
+ IMAGE_DOS_HEADER doshdr;
+ IMAGE_OPTIONAL_HEADER oh;
+ IMAGE_FILE_HEADER     fh;
+ ULONG  address = 0;
+ ULONG  *memallocs;
+ ULONG  alloccnt = 0;
+ ULONG  diff, i, baseAddress;
+ ULONG  ulSysinfo, flAllocMem = 0;
+
+  strcpy(szFileName, filename);
+  tmp = szFileName;
+  while(*tmp != ' ' && *tmp != 0)
+	tmp++;
+  *tmp = 0;
+
+  if(!strchr(szFileName, '.')) {
+	strcat(szFileName,".EXE");
+  }
+  rc = DosOpen(szFileName, &dllfile, &action, 0, FILE_READONLY, OPEN_ACTION_OPEN_IF_EXISTS|OPEN_ACTION_FAIL_IF_NEW, OPEN_SHARE_DENYNONE|OPEN_ACCESS_READONLY, NULL);
+  if(rc != 0) {
+	if(!strstr(szFileName, ".EXE")) {
+		strcat(szFileName,".EXE");
+	}
+  }
+  else	DosClose(dllfile);
+
+  rc = DosOpen(szFileName, &dllfile, &action, 0, FILE_READONLY, OPEN_ACTION_OPEN_IF_EXISTS|OPEN_ACTION_FAIL_IF_NEW, OPEN_SHARE_DENYNONE|OPEN_ACCESS_READONLY, NULL);
+  if(rc) {
+	goto end; //oops
+  }
+
+  //read dos header
+  if(DosRead(dllfile, (LPVOID)&doshdr, sizeof(doshdr), &ulRead)) {
+    	goto end;
+  }
+  if(DosSetFilePtr(dllfile, doshdr.e_lfanew, FILE_BEGIN, &ulRead)) {
+    	goto end;
+  }
+  //read signature dword
+  if(DosRead(dllfile, (LPVOID)&signature, sizeof(signature), &ulRead)) {
+    	goto end;
+  }
+  //read pe header
+  if(DosRead(dllfile, (LPVOID)&fh, sizeof(fh), &ulRead)) {
+    	goto end;
+  }
+  //read optional header
+  if(DosRead(dllfile, (LPVOID)&oh, sizeof(oh), &ulRead)) {
+    	goto end;
+  }
+  if(doshdr.e_magic != IMAGE_DOS_SIGNATURE || signature != IMAGE_NT_SIGNATURE) {
+    	goto end;
+  }
+  if(!(fh.Characteristics & IMAGE_FILE_RELOCS_STRIPPED)) {
+	goto end; //no need to allocate anything now
+  }
+
+  // check for high memory support
+  rc = DosQuerySysInfo(QSV_VIRTUALADDRESSLIMIT, QSV_VIRTUALADDRESSLIMIT, &ulSysinfo, sizeof(ulSysinfo));
+  if (rc == 0 && ulSysinfo > 512)   //VirtualAddresslimit is in MB
+  {
+  	flAllocMem = PAG_ANY;      // high memory support. Let's use it!
+  }
+
+  //Reserve enough space to store 4096 pointers to 1MB memory chunks
+  memallocs = (ULONG *)alloca(4096*sizeof(ULONG *));
+  if(memallocs == NULL) {
+	goto end; //oops
+  }
+
+  if(oh.ImageBase < 512*1024*1024) {
+	flAllocMem = 0;
+  }
+  else {
+	if(flAllocMem == 0) {
+		goto end; //no support for > 512 MB
+	}
+  }
+  while(TRUE) {
+    	rc = DosAllocMem((PPVOID)&address, FALLOC_SIZE, PAG_READ | flAllocMem);
+    	if(rc) break;
+
+    	if(address + FALLOC_SIZE >= oh.ImageBase) {
+        	if(address > oh.ImageBase) {//we've passed it!
+            		DosFreeMem((PVOID)address);
+            		break;
+        	}
+        	//found the right address
+        	DosFreeMem((PVOID)address);
+
+        	diff = oh.ImageBase - address;
+        	if(diff) {
+            		rc = DosAllocMem((PPVOID)&address, diff, PAG_READ | flAllocMem);
+            		if(rc) break;
+        	}
+        	rc = DosAllocMem((PPVOID)&baseAddress, oh.SizeOfImage, PAG_READ | PAG_WRITE | flAllocMem);
+        	if(rc) break;
+
+        	if(diff) DosFreeMem((PVOID)address);
+
+        	reservedMemory = baseAddress;
+        	break;
+    	}
+	memallocs[alloccnt++] = address;
+  }
+  for(i=0;i<alloccnt;i++) {
+    	DosFreeMem((PVOID)memallocs[i]);
+  }
+end:
+  if(dllfile) DosClose(dllfile);
+  return;
 }
 //******************************************************************************
 //******************************************************************************
