@@ -1,4 +1,4 @@
-/* $Id: eventlog.cpp,v 1.1 1999-12-20 10:12:05 sandervl Exp $ */
+/* $Id: eventlog.cpp,v 1.2 2000-05-09 18:59:10 sandervl Exp $ */
 
 /*
  * Win32 advanced API functions for OS/2
@@ -58,7 +58,8 @@ BOOL WIN32API ReportEventW(     /*PLF Sat  98-03-07 00:36:43*/
      LPVOID     lpRawData
     )
 {
-    dprintf(("ReportEventW(): NIY\n"));
+    dprintf(("ReportEventW %x %x %x %x %x %x %x %x %x: not implemented\n",hEventLog, wType, 
+              wCategory, dwEventID, lpUserSid, wNumStrings, dwDataSize, lpStrings, lpRawData));
     return TRUE;
 }
 
