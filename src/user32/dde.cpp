@@ -1,4 +1,4 @@
-/* $Id: dde.cpp,v 1.12 2001-04-04 09:01:24 sandervl Exp $ */
+/* $Id: dde.cpp,v 1.13 2001-07-31 07:56:48 sandervl Exp $ */
 
 /*
  * Win32 default window API functions for OS/2
@@ -20,21 +20,21 @@
 //******************************************************************************
 BOOL WIN32API DdeAbandonTransaction( DWORD arg1, HCONV arg2, DWORD  arg3)
 {
-    dprintf(("USER32:  DdeAbandonTransaction\n"));
+    dprintf(("USER32: DdeAbandonTransaction %x %x %x", arg1, arg2, arg3));
     return O32_DdeAbandonTransaction(arg1, arg2, arg3);
 }
 //******************************************************************************
 //******************************************************************************
 PBYTE WIN32API DdeAccessData(HDDEDATA arg1, PDWORD  arg2)
 {
-    dprintf(("USER32:  DdeAccessData\n"));
+    dprintf(("USER32: DdeAccessData %x %x", arg1, arg2));
     return O32_DdeAccessData(arg1, arg2);
 }
 //******************************************************************************
 //******************************************************************************
 HDDEDATA WIN32API DdeAddData( HDDEDATA arg1, PVOID arg2, DWORD arg3, DWORD  arg4)
 {
-    dprintf(("USER32:  DdeAddData"));
+    dprintf(("USER32: DdeAddData %x %x %x %x", arg1, arg2, arg3, arg4));
     return O32_DdeAddData(arg1, arg2, arg3, arg4);
 }
 //******************************************************************************
@@ -43,7 +43,7 @@ HDDEDATA WIN32API DdeClientTransaction(PVOID arg1, DWORD arg2, HCONV arg3,
                                        HSZ arg4, UINT arg5, UINT arg6, DWORD arg7, 
                                        PDWORD  arg8)
 {
-    dprintf(("USER32:  DdeClientTransaction\n"));
+    dprintf(("USER32: DdeClientTransaction %x %x %x %x %x %x %x %x", arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8));
 
     return O32_DdeClientTransaction(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
 }
@@ -51,8 +51,7 @@ HDDEDATA WIN32API DdeClientTransaction(PVOID arg1, DWORD arg2, HCONV arg3,
 //******************************************************************************
 int WIN32API DdeCmpStringHandles( HSZ arg1, HSZ  arg2)
 {
-
-    dprintf(("USER32:  DdeCmpStringHandles\n"));
+    dprintf(("USER32: DdeCmpStringHandles %x %x", arg1, arg2));
 
     return O32_DdeCmpStringHandles(arg1, arg2);
 }
@@ -72,7 +71,7 @@ HCONV WIN32API DdeConnect(DWORD idInst, HSZ hszService, HSZ hszTopic,
 HCONVLIST WIN32API DdeConnectList(DWORD arg1, HSZ arg2, HSZ arg3, HCONVLIST arg4, LPCONVCONTEXT  arg5)
 {
 
-    dprintf(("USER32:  DdeConnectList\n"));
+    dprintf(("USER32: DdeConnectList %x %x %x %x %x", arg1, arg2, arg3, arg4, arg5));
 
     return O32_DdeConnectList(arg1, arg2, arg3, arg4, arg5);
 }
@@ -81,7 +80,7 @@ HCONVLIST WIN32API DdeConnectList(DWORD arg1, HSZ arg2, HSZ arg3, HCONVLIST arg4
 HDDEDATA WIN32API DdeCreateDataHandle(DWORD arg1, PVOID arg2, DWORD arg3, DWORD arg4, 
                                       HSZ arg5, UINT arg6, UINT  arg7)
 {
-    dprintf(("USER32:  DdeCreateDataHandle\n"));
+    dprintf(("USER32: DdeCreateDataHandle %x %x %x %x %x %x %x", arg1, arg2, arg3, arg4, arg5, arg6, arg7));
     return O32_DdeCreateDataHandle(arg1, arg2, arg3, arg4, arg5, arg6, arg7);
 }
 //******************************************************************************
@@ -110,8 +109,7 @@ HSZ WIN32API DdeCreateStringHandleW(DWORD arg1, LPCWSTR arg2, int arg3)
 //******************************************************************************
 BOOL WIN32API DdeDisconnect(HCONV arg1)
 {
-
-    dprintf(("USER32:  DdeDisconnect\n"));
+    dprintf(("USER32: DdeDisconnect %x", arg1));
 
     return O32_DdeDisconnect(arg1);
 }
@@ -119,8 +117,7 @@ BOOL WIN32API DdeDisconnect(HCONV arg1)
 //******************************************************************************
 BOOL WIN32API DdeDisconnectList( HCONVLIST arg1)
 {
-
-    dprintf(("USER32:  DdeDisconnectList\n"));
+    dprintf(("USER32: DdeDisconnectList %x", arg1));
 
     return O32_DdeDisconnectList(arg1);
 }
@@ -128,8 +125,7 @@ BOOL WIN32API DdeDisconnectList( HCONVLIST arg1)
 //******************************************************************************
 BOOL WIN32API DdeEnableCallback(DWORD arg1, HCONV arg2, UINT  arg3)
 {
-
-    dprintf(("USER32:  DdeEnableCallback\n"));
+    dprintf(("USER32: DdeEnableCallback %x %x %x", arg1, arg2, arg3));
 
     return O32_DdeEnableCallback(arg1, arg2, arg3);
 }
@@ -137,8 +133,7 @@ BOOL WIN32API DdeEnableCallback(DWORD arg1, HCONV arg2, UINT  arg3)
 //******************************************************************************
 BOOL WIN32API DdeFreeDataHandle( HDDEDATA arg1)
 {
-
-    dprintf(("USER32:  DdeFreeDataHandle\n"));
+    dprintf(("USER32: DdeFreeDataHandle %x", arg1));
 
     return O32_DdeFreeDataHandle(arg1);
 }
@@ -146,8 +141,7 @@ BOOL WIN32API DdeFreeDataHandle( HDDEDATA arg1)
 //******************************************************************************
 BOOL WIN32API DdeFreeStringHandle(DWORD arg1, HSZ  arg2)
 {
-
-    dprintf(("USER32:  DdeFreeStringHandle\n"));
+    dprintf(("USER32: DdeFreeStringHandle %x %x", arg1, arg2));
 
     return O32_DdeFreeStringHandle(arg1, arg2);
 }
@@ -155,8 +149,7 @@ BOOL WIN32API DdeFreeStringHandle(DWORD arg1, HSZ  arg2)
 //******************************************************************************
 DWORD WIN32API DdeGetData( HDDEDATA arg1, PVOID arg2, DWORD arg3, DWORD  arg4)
 {
-
-    dprintf(("USER32:  DdeGetData\n"));
+    dprintf(("USER32: DdeGetData %x %x %x %x", arg1, arg2, arg3, arg4));
 
     return O32_DdeGetData(arg1, arg2, arg3, arg4);
 }
@@ -164,11 +157,11 @@ DWORD WIN32API DdeGetData( HDDEDATA arg1, PVOID arg2, DWORD arg3, DWORD  arg4)
 //******************************************************************************
 UINT WIN32API DdeGetLastError(DWORD arg1)
 {
-
-    dprintf(("USER32:  DdeGetLastError\n"));
+    dprintf(("USER32: DdeGetLastError %x", arg1));
 
     return O32_DdeGetLastError(arg1);
 }
+#ifdef USING_OPEN32
 //******************************************************************************
 //******************************************************************************
 HDDEDATA EXPENTRY_O32 DdeCallback(UINT uType, UINT uFmt, HCONV hconv, HSZ hsz1, 
@@ -179,6 +172,7 @@ HDDEDATA EXPENTRY_O32 DdeCallback(UINT uType, UINT uFmt, HCONV hconv, HSZ hsz1,
             hdata, dwData1, dwData2));
    return 0;
 }
+#endif
 //******************************************************************************
 //******************************************************************************
 UINT WIN32API DdeInitializeA(PDWORD lpidInst, PFNCALLBACK pfnCallback, 
@@ -186,8 +180,11 @@ UINT WIN32API DdeInitializeA(PDWORD lpidInst, PFNCALLBACK pfnCallback,
 {
  UINT ret;
 
-//    ret = O32_DdeInitialize(lpidInst, pfnCallback, afCmd, ulRes);
+#ifdef USING_OPEN32
     ret = O32_DdeInitialize(lpidInst, (PFNCALLBACK_O32)DdeCallback, afCmd, ulRes);
+#else
+    ret = O32_DdeInitialize(lpidInst, (PFNCALLBACK_O32)pfnCallback, afCmd, ulRes);
+#endif
     dprintf(("USER32: DdeInitialize %x %x %x %x returned %x", lpidInst, pfnCallback, afCmd, ulRes, ret));
     return ret;
 }
@@ -199,7 +196,11 @@ UINT WIN32API DdeInitializeW(PDWORD lpidInst, PFNCALLBACK pfnCallback,
  UINT ret;
 
     // NOTE: This will not work as is (needs UNICODE support)
+#ifdef USING_OPEN32
     ret = O32_DdeInitialize(lpidInst, (PFNCALLBACK_O32)DdeCallback, afCmd, ulRes);
+#else
+    ret = O32_DdeInitialize(lpidInst, (PFNCALLBACK_O32)pfnCallback, afCmd, ulRes);
+#endif
     dprintf(("USER32: DdeInitializeW %x %x %x %x returned %x", lpidInst, pfnCallback, afCmd, ulRes, ret));
     return ret;
 //    return O32_DdeInitialize(arg1, arg2, arg3, arg4);
@@ -208,7 +209,6 @@ UINT WIN32API DdeInitializeW(PDWORD lpidInst, PFNCALLBACK pfnCallback,
 //******************************************************************************
 BOOL WIN32API DdeKeepStringHandle(DWORD arg1, HSZ  arg2)
 {
-
     dprintf(("USER32:  DdeKeepStringHandle\n"));
 
     return O32_DdeKeepStringHandle(arg1, arg2);
@@ -217,7 +217,6 @@ BOOL WIN32API DdeKeepStringHandle(DWORD arg1, HSZ  arg2)
 //******************************************************************************
 HDDEDATA WIN32API DdeNameService( DWORD arg1, HSZ  arg2, HSZ  arg3, UINT  arg4)
 {
-
     dprintf(("USER32:  DdeNameService\n"));
 
     return O32_DdeNameService(arg1, arg2, arg3, arg4);
@@ -310,7 +309,6 @@ BOOL WIN32API DdeUninitialize(DWORD arg1)
 //******************************************************************************
 BOOL WIN32API FreeDDElParam( UINT arg1, LONG  arg2)
 {
-
     dprintf(("USER32:  FreeDDElParam\n"));
 
     return O32_FreeDDElParam(arg1, arg2);
@@ -319,7 +317,6 @@ BOOL WIN32API FreeDDElParam( UINT arg1, LONG  arg2)
 //******************************************************************************
 LONG WIN32API PackDDElParam(UINT arg1, UINT arg2, UINT  arg3)
 {
-
     dprintf(("USER32:  PackDDElParam\n"));
 
     return O32_PackDDElParam(arg1, arg2, arg3);
@@ -328,7 +325,6 @@ LONG WIN32API PackDDElParam(UINT arg1, UINT arg2, UINT  arg3)
 //******************************************************************************
 UINT WIN32API ReuseDDElParam( UINT arg1, UINT arg2, UINT arg3, UINT arg4, UINT arg5)
 {
-
     dprintf(("USER32:  ReuseDDElParam\n"));
 
     return O32_ReuseDDElParam(arg1, arg2, arg3, arg4, arg5);
@@ -337,7 +333,6 @@ UINT WIN32API ReuseDDElParam( UINT arg1, UINT arg2, UINT arg3, UINT arg4, UINT a
 //******************************************************************************
 BOOL WIN32API UnpackDDElParam(UINT arg1, UINT arg2, LPUINT arg3, LPUINT  arg4)
 {
-
     dprintf(("USER32:  UnpackDDElParam\n"));
 
     return O32_UnpackDDElParam(arg1, arg2, arg3, arg4);
