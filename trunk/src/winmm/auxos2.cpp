@@ -1,4 +1,4 @@
-/* $Id: auxos2.cpp,v 1.5 1999-08-19 18:46:04 phaller Exp $ */
+/* $Id: auxos2.cpp,v 1.6 1999-10-05 19:24:00 phaller Exp $ */
 
 /*
  * Auxilary multimedia OS/2 implementation
@@ -26,7 +26,7 @@
 #include "misc.h"
 #include "unicode.h"
 
-#include "aux.h"
+#include "auxiliary.h"
 
 ULONG auxDeviceId = -1;
 
