@@ -1,4 +1,4 @@
-/* $Id: odin32env.cmd,v 1.29 2003-02-06 21:05:38 bird Exp $
+/* $Id: odin32env.cmd,v 1.30 2003-02-11 15:06:36 bird Exp $
  *
  * Sets the build environment.
  *
@@ -17,7 +17,7 @@ sDir = filespec('drive', sSrc) || filespec('path', sSrc);
 /* base env */
 sOldDir = directory();
 call directory sSrc||'\bin';
-call BuildEnv 'warpin mysql perl cvs ddkbase mscv6-16 emx gcc303 vac365õ watcomc11cõ vac40õ vac308 toolkit40 debug'
+call BuildEnv 'warpin mysql perl~ cvs ddkbase mscv6-16 emx gcc303 vac365õ watcomc11cõ vac40õ vac308 toolkit40 debug'
 call directory sOldDir;
 
 /* minor adjustments. */
