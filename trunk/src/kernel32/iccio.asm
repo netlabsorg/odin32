@@ -1,3 +1,5 @@
+; $Id: iccio.asm,v 1.3 1999-06-10 20:47:59 phaller Exp $
+
 ; **********************************************************************
 ; Copyright (C) 1995 by Holger Veit (Holger.Veit@gmd.de)
 ; Use at your own risk! No Warranty! The author is not responsible for

@@ -1,3 +1,5 @@
+# $Id: makefile,v 1.4 1999-06-10 20:48:00 phaller Exp $
+
 #
 # PD-Win32 API
 #
@@ -66,7 +68,7 @@ OBJS = KERNEL32.OBJ      \
 
 TARGET = kernel32
 
-all: $(PDWIN32_LIB)\pmwinx.lib $(TARGET).dll $(TARGET).LIB 
+all: $(PDWIN32_LIB)\pmwinx.lib $(TARGET).dll $(TARGET).LIB
 
 
 $(TARGET).dll: $(OBJS) $(TARGET).def
@@ -95,22 +97,22 @@ comm.OBJ: \
     $(PDWIN32_INCLUDE)\unicode.h
 
 profile.obj: profile.cpp \
-    $(PDWIN32_INCLUDE)\unicode.h 
+    $(PDWIN32_INCLUDE)\unicode.h
 
 directory.obj: directory.cpp \
-    $(PDWIN32_INCLUDE)\unicode.h 
+    $(PDWIN32_INCLUDE)\unicode.h
 
 disk.obj: disk.cpp \
-    $(PDWIN32_INCLUDE)\unicode.h 
+    $(PDWIN32_INCLUDE)\unicode.h
 
 atom.obj: atom.cpp \
-    $(PDWIN32_INCLUDE)\unicode.h 
+    $(PDWIN32_INCLUDE)\unicode.h
 
 time.obj: time.cpp \
-    $(PDWIN32_INCLUDE)\unicode.h 
+    $(PDWIN32_INCLUDE)\unicode.h
 
 fileio.obj: fileio.cpp \
-    $(PDWIN32_INCLUDE)\unicode.h 
+    $(PDWIN32_INCLUDE)\unicode.h
 
 thread.OBJ: \
     .\thread.cpp \
@@ -148,10 +150,10 @@ devio.OBJ: \
     .\devio.cpp \
     devio.h \
     map.h \
-    cio.h 
+    cio.h
 
 LANG.OBJ: \
-    .\lang.cpp 
+    .\lang.cpp
 
 wprocess.OBJ: \
     .\wprocess.cpp \
@@ -172,11 +174,11 @@ map.OBJ: \
 
 os2native.OBJ: \
     .\os2native.cpp \
-    $(PDWIN32_INCLUDE)\unicode.h 
+    $(PDWIN32_INCLUDE)\unicode.h
 
 network.OBJ: \
     .\network.cpp \
-    $(PDWIN32_INCLUDE)\unicode.h 
+    $(PDWIN32_INCLUDE)\unicode.h
 
 misc.OBJ: \
     .\misc.cpp \
@@ -209,7 +211,7 @@ mmap.OBJ: \
 lfile.OBJ: \
     .\lfile.cpp \
     wprocess.h \
-    os2util.h 
+    os2util.h
 
 obsolete.OBJ: \
     .\obsolete.cpp
@@ -273,7 +275,7 @@ async.OBJ: \
 pefile.OBJ:    pefile.cpp $(PDWIN32_INCLUDE)\pefile.h
 winimage.OBJ:  winimage.cpp $(PDWIN32_INCLUDE)\winimage.h $(PDWIN32_INCLUDE)\windll.h $(PDWIN32_INCLUDE)\pefile.h
 winimgres.OBJ: winimgres.cpp $(PDWIN32_INCLUDE)\winimage.h $(PDWIN32_INCLUDE)\windll.h $(PDWIN32_INCLUDE)\pefile.h $(PDWIN32_INCLUDE)\winexe.h winres.h
-windll.OBJ:    windll.cpp $(PDWIN32_INCLUDE)\winimage.h $(PDWIN32_INCLUDE)\windll.h 
+windll.OBJ:    windll.cpp $(PDWIN32_INCLUDE)\winimage.h $(PDWIN32_INCLUDE)\windll.h
 winexe.OBJ:    winexe.cpp $(PDWIN32_INCLUDE)\winimage.h $(PDWIN32_INCLUDE)\windll.h $(PDWIN32_INCLUDE)\winexe.h
 stubs.obj:     stubs.cpp stubs.h
 

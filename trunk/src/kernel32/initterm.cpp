@@ -1,3 +1,5 @@
+/* $Id: initterm.cpp,v 1.2 1999-06-10 20:47:59 phaller Exp $ */
+
 /*
  * KERNEL32 DLL entry point
  *
