@@ -1,4 +1,12 @@
- /* $Id: ChangeLog,v 1.790 2000-03-09 16:17:57 mike Exp $ */
+ /* $Id: ChangeLog,v 1.791 2000-03-09 19:19:51 sandervl Exp $ */
+
+ 2000-03-09: Sander van Leeuwen <sandervl@xs4all.nl>
+	- KERNEL32: Major rewrite of PE loader classes to correctly support 
+                    dll dependencies
+                    TODO: Circular dependencies only partly working
+                          (a->b->a works, but a->b->c->a won't)
+	- USER32: Fixed bug in dialog constructor (class name translation)
+                  (only showed up in release build)
 
  2000-03-08: Michal Necasek <mike@mendelu.cz>
         - dsound\new: Fixed volume and panning calculation that
