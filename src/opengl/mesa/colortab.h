@@ -1,8 +1,8 @@
-/* $Id: colortab.h,v 1.1 2000-02-29 00:48:26 sandervl Exp $ */
+/* $Id: colortab.h,v 1.2 2000-05-21 20:19:06 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -35,21 +35,26 @@
 #include "types.h"
 
 
-extern void gl_ColorTable( GLcontext *ctx, GLenum target,
-                           GLenum internalformat,
-                           struct gl_image *table );
+extern void
+_mesa_ColorTable( GLenum target, GLenum internalformat,
+                  GLsizei width, GLenum format, GLenum type,
+                  const GLvoid *table );
 
-extern void gl_ColorSubTable( GLcontext *ctx, GLenum target,
-                              GLsizei start, struct gl_image *data );
+extern void
+_mesa_ColorSubTable( GLenum target, GLsizei start,
+                     GLsizei count, GLenum format, GLenum type,
+                     const GLvoid *table );
 
-extern void gl_GetColorTable( GLcontext *ctx, GLenum target, GLenum format,
-                              GLenum type, GLvoid *table );
+extern void
+_mesa_GetColorTable( GLenum target, GLenum format,
+                     GLenum type, GLvoid *table );
 
-extern void gl_GetColorTableParameterfv( GLcontext *ctx, GLenum target,
-                                         GLenum pname, GLfloat *params );
+extern void
+_mesa_GetColorTableParameterfv( GLenum target, GLenum pname, GLfloat *params );
 
-extern void gl_GetColorTableParameteriv( GLcontext *ctx, GLenum target,
-                                         GLenum pname, GLint *params );
+extern void
+_mesa_GetColorTableParameteriv( GLenum target, GLenum pname, GLint *params );
+
 
 
 #endif

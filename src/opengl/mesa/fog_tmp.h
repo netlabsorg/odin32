@@ -1,4 +1,4 @@
-/* $Id: fog_tmp.h,v 1.1 2000-02-29 00:48:30 sandervl Exp $ */
+/* $Id: fog_tmp.h,v 1.2 2000-05-21 20:46:23 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -28,8 +28,8 @@
  * calculation.  Not called from standard pipelines.
  */
 static void TAG(make_fog_coord)( struct vertex_buffer *VB,
-				 const GLvector4f *eye,
-				 GLubyte flag)
+                                 const GLvector4f *eye,
+                                 GLubyte flag)
 {
    const GLcontext *ctx = VB->ctx;
    GLfloat end  = ctx->Fog.End;
@@ -37,7 +37,7 @@ static void TAG(make_fog_coord)( struct vertex_buffer *VB,
    GLfloat *v = eye->start;
    GLuint stride = eye->stride;
    GLuint n = VB->Count - VB->Start;
-   GLubyte (*out)[4];		
+   GLubyte (*out)[4];
    GLfloat d;
    GLuint i;
 
@@ -51,36 +51,36 @@ static void TAG(make_fog_coord)( struct vertex_buffer *VB,
    if (VB->EyePtr->size > 2) {
       switch (ctx->Fog.Mode) {
       case GL_LINEAR:
-	 d = 1.0F / (ctx->Fog.End - ctx->Fog.Start);
-	 for ( i = 0 ; i < n ; i++, STRIDE_F(v, stride)) {
-	    CULLCHECK {
-	       GLfloat f = (end - ABSF(v[2])) * d;
-	       FLOAT_COLOR_TO_UBYTE_COLOR(out[i][3], f);
-	    }
-	 }
-	 break;
+         d = 1.0F / (ctx->Fog.End - ctx->Fog.Start);
+         for ( i = 0 ; i < n ; i++, STRIDE_F(v, stride)) {
+            CULLCHECK {
+               GLfloat f = (end - ABSF(v[2])) * d;
+               FLOAT_COLOR_TO_UBYTE_COLOR(out[i][3], f);
+            }
+         }
+         break;
       case GL_EXP:
-	 d = -ctx->Fog.Density;
-	 for ( i = 0 ; i < n ; i++, STRIDE_F(v,stride)) {
-	    CULLCHECK {
-	       GLfloat f = exp( d*ABSF(v[2]) ); /* already clamped */
-	       FLOAT_COLOR_TO_UBYTE_COLOR(out[i][3], f);
-	    }
-	 }
-	 break;
+         d = -ctx->Fog.Density;
+         for ( i = 0 ; i < n ; i++, STRIDE_F(v,stride)) {
+            CULLCHECK {
+               GLfloat f = exp( d*ABSF(v[2]) ); /* already clamped */
+               FLOAT_COLOR_TO_UBYTE_COLOR(out[i][3], f);
+            }
+         }
+         break;
       case GL_EXP2:
-	 d = -(ctx->Fog.Density*ctx->Fog.Density);
-	 for ( i = 0 ; i < n ; i++, STRIDE_F(v, stride)) {
-	    CULLCHECK {
-	       GLfloat z = v[2];
-	       GLfloat f = exp( d*z*z ); /* already clamped */
-	       FLOAT_COLOR_TO_UBYTE_COLOR(out[i][3], f);
-	    }
-	 }
-	 break;
+         d = -(ctx->Fog.Density*ctx->Fog.Density);
+         for ( i = 0 ; i < n ; i++, STRIDE_F(v, stride)) {
+            CULLCHECK {
+               GLfloat z = v[2];
+               GLfloat f = exp( d*z*z ); /* already clamped */
+               FLOAT_COLOR_TO_UBYTE_COLOR(out[i][3], f);
+            }
+         }
+         break;
       default:
-	 gl_problem(ctx, "Bad fog mode in make_fog_coord");
-	 return;
+         gl_problem(ctx, "Bad fog mode in make_fog_coord");
+         return;
       }
    }
    else
@@ -88,14 +88,14 @@ static void TAG(make_fog_coord)( struct vertex_buffer *VB,
       GLubyte r = 0;
 
       if (ctx->Fog.Mode == GL_LINEAR) {
-	 GLfloat f = ctx->Fog.End * (ctx->Fog.End - ctx->Fog.Start);
-	 CLAMP_FLOAT_COLOR( f );
-	 f = 1.0 - f;
-	 FLOAT_COLOR_TO_UBYTE_COLOR(r, f);
+         GLfloat f = ctx->Fog.End * (ctx->Fog.End - ctx->Fog.Start);
+         CLAMP_FLOAT_COLOR( f );
+         f = 1.0 - f;
+         FLOAT_COLOR_TO_UBYTE_COLOR(r, f);
       }
 
       for (i = 0 ; i < n ; i++)
-	 out[i][3] = r;
+         out[i][3] = r;
    }
 }
 
@@ -104,13 +104,13 @@ static void TAG(make_fog_coord)( struct vertex_buffer *VB,
 
 
 #if 0
-/* For 3.3: use fog coordinates as intermediate step in all fog
+/* TODO : use fog coordinates as intermediate step in all fog
  * calculations.
  */
 
 static void TAG(fog_rgba_vertices)( struct vertex_buffer *VB,
-				    GLuint side,
-				    GLubyte flag)
+                                    GLuint side,
+                                    GLubyte flag)
 {
    const GLcontext *ctx = VB->ctx;
    const GLubyte rFog = ctx->Fog.ByteColor[0];
@@ -142,11 +142,11 @@ static void TAG(fog_rgba_vertices)( struct vertex_buffer *VB,
 
    for ( i = 0 ; i < n ; i++, STRIDE_F(spec, sp_stride), in += in_stride) {
       CULLCHECK {
-	 GLint fc = (GLint) spec[3], ifc = 255 - fc;
-	
-	 out[i][0] = (fc * in[0] + ifc * rFog) >> 8;
-	 out[i][1] = (fc * in[1] + ifc * gFog) >> 8;
-	 out[i][2] = (fc * in[2] + ifc * bFog) >> 8;
+         GLint fc = (GLint) spec[3], ifc = 255 - fc;
+
+         out[i][0] = (fc * in[0] + ifc * rFog) >> 8;
+         out[i][1] = (fc * in[1] + ifc * gFog) >> 8;
+         out[i][2] = (fc * in[2] + ifc * bFog) >> 8;
       }
    }
 }
@@ -154,8 +154,8 @@ static void TAG(fog_rgba_vertices)( struct vertex_buffer *VB,
 
 
 static void TAG(fog_ci_vertices)( struct vertex_buffer *VB,
-				  GLuint side,
-				  GLubyte flag )
+                                  GLuint side,
+                                  GLubyte flag )
 {
    GLcontext *ctx = VB->ctx;
 
@@ -181,7 +181,7 @@ static void TAG(fog_ci_vertices)( struct vertex_buffer *VB,
    out = VB->IndexPtr->start;
 
 
-   /* NOTE: the extensive use of casts generates better/faster code for MIPS */
+   /* NOTE: the use of casts generates better/faster code for MIPS */
    for ( i = 0; i < n ; i++, STRIDE_F(v,stride), STRIDE_UI(in,in_stride))
       CULLCHECK {
       GLfloat f = (fogend - ABSF(v[2])) * d;
@@ -199,8 +199,8 @@ static void TAG(fog_ci_vertices)( struct vertex_buffer *VB,
 
 
 static void TAG(fog_rgba_vertices)( struct vertex_buffer *VB,
-				    GLuint side,
-				    GLubyte flag)
+                                    GLuint side,
+                                    GLubyte flag)
 {
    const GLcontext *ctx = VB->ctx;
    GLfloat rFog = ctx->Fog.Color[0];
@@ -232,67 +232,67 @@ static void TAG(fog_rgba_vertices)( struct vertex_buffer *VB,
    if (VB->EyePtr->size > 2) {
       switch (ctx->Fog.Mode) {
       case GL_LINEAR:
-	 d = 1.0F / (ctx->Fog.End - ctx->Fog.Start);
-	 for ( i = 0 ; i < n ; i++, STRIDE_F(v, stride), in += in_stride) {
-	    CULLCHECK {
-	       GLfloat f = (end - ABSF(v[2])) * d;
-	       if (f >= 1.0) continue;
-	       if (f < 0) {
-		  CLAMPED_FLOAT_COLOR_TO_UBYTE_COLOR(out[i][0], rFog);
-		  CLAMPED_FLOAT_COLOR_TO_UBYTE_COLOR(out[i][1], gFog);
-		  CLAMPED_FLOAT_COLOR_TO_UBYTE_COLOR(out[i][2], bFog);
-	       } else {
-		  t = f * UBYTE_COLOR_TO_FLOAT_COLOR(in[0]) + (1.0F-f)*rFog;
-		  CLAMPED_FLOAT_COLOR_TO_UBYTE_COLOR(out[i][0], t);
-	
-		  t = f * UBYTE_COLOR_TO_FLOAT_COLOR(in[1]) + (1.0F-f)*gFog;
-		  CLAMPED_FLOAT_COLOR_TO_UBYTE_COLOR(out[i][1], t);
-	
-		  t = f * UBYTE_COLOR_TO_FLOAT_COLOR(in[2]) + (1.0F-f)*bFog;
-		  CLAMPED_FLOAT_COLOR_TO_UBYTE_COLOR(out[i][2], t);
+         d = 1.0F / (ctx->Fog.End - ctx->Fog.Start);
+         for ( i = 0 ; i < n ; i++, STRIDE_F(v, stride), in += in_stride) {
+            CULLCHECK {
+               GLfloat f = (end - ABSF(v[2])) * d;
+               if (f >= 1.0) continue;
+               if (f < 0) {
+                  CLAMPED_FLOAT_COLOR_TO_UBYTE_COLOR(out[i][0], rFog);
+                  CLAMPED_FLOAT_COLOR_TO_UBYTE_COLOR(out[i][1], gFog);
+                  CLAMPED_FLOAT_COLOR_TO_UBYTE_COLOR(out[i][2], bFog);
+               } else {
+                  t = f * UBYTE_COLOR_TO_FLOAT_COLOR(in[0]) + (1.0F-f)*rFog;
+                  CLAMPED_FLOAT_COLOR_TO_UBYTE_COLOR(out[i][0], t);
 
-	       }
-	    }
-	 }
-	 break;
+                  t = f * UBYTE_COLOR_TO_FLOAT_COLOR(in[1]) + (1.0F-f)*gFog;
+                  CLAMPED_FLOAT_COLOR_TO_UBYTE_COLOR(out[i][1], t);
+
+                  t = f * UBYTE_COLOR_TO_FLOAT_COLOR(in[2]) + (1.0F-f)*bFog;
+                  CLAMPED_FLOAT_COLOR_TO_UBYTE_COLOR(out[i][2], t);
+
+               }
+            }
+         }
+         break;
       case GL_EXP:
-	 d = -ctx->Fog.Density;
-	 for ( i = 0 ; i < n ; i++, STRIDE_F(v,stride), in += in_stride) {
-	    CULLCHECK {
-	       GLfloat f = exp( d*ABSF(v[2]) ); /* already clamped */
+         d = -ctx->Fog.Density;
+         for ( i = 0 ; i < n ; i++, STRIDE_F(v,stride), in += in_stride) {
+            CULLCHECK {
+               GLfloat f = exp( d*ABSF(v[2]) ); /* already clamped */
 
-	       t = f * UBYTE_COLOR_TO_FLOAT_COLOR(in[0]) + (1.0F-f)*rFog;
-	       CLAMPED_FLOAT_COLOR_TO_UBYTE_COLOR(out[i][0], t);
-	
-	       t = f * UBYTE_COLOR_TO_FLOAT_COLOR(in[1]) + (1.0F-f)*gFog;
-	       CLAMPED_FLOAT_COLOR_TO_UBYTE_COLOR(out[i][1], t);
-	
-	       t = f * UBYTE_COLOR_TO_FLOAT_COLOR(in[2]) + (1.0F-f)*bFog;
-	       CLAMPED_FLOAT_COLOR_TO_UBYTE_COLOR(out[i][2], t);
-	    }
-	 }
-	 break;
+               t = f * UBYTE_COLOR_TO_FLOAT_COLOR(in[0]) + (1.0F-f)*rFog;
+               CLAMPED_FLOAT_COLOR_TO_UBYTE_COLOR(out[i][0], t);
+
+               t = f * UBYTE_COLOR_TO_FLOAT_COLOR(in[1]) + (1.0F-f)*gFog;
+               CLAMPED_FLOAT_COLOR_TO_UBYTE_COLOR(out[i][1], t);
+
+               t = f * UBYTE_COLOR_TO_FLOAT_COLOR(in[2]) + (1.0F-f)*bFog;
+               CLAMPED_FLOAT_COLOR_TO_UBYTE_COLOR(out[i][2], t);
+            }
+         }
+         break;
       case GL_EXP2:
-	 d = -(ctx->Fog.Density*ctx->Fog.Density);
-	 for ( i = 0 ; i < n ; i++, STRIDE_F(v, stride), in += in_stride) {
-	    CULLCHECK {
-	       GLfloat z = v[2];
-	       GLfloat f = exp( d*z*z ); /* already clamped */
+         d = -(ctx->Fog.Density*ctx->Fog.Density);
+         for ( i = 0 ; i < n ; i++, STRIDE_F(v, stride), in += in_stride) {
+            CULLCHECK {
+               GLfloat z = v[2];
+               GLfloat f = exp( d*z*z ); /* already clamped */
 
-	       t = f * UBYTE_COLOR_TO_FLOAT_COLOR(in[0]) + (1.0F-f)*rFog;
-	       CLAMPED_FLOAT_COLOR_TO_UBYTE_COLOR(out[i][0], t);
-	
-	       t = f * UBYTE_COLOR_TO_FLOAT_COLOR(in[1]) + (1.0F-f)*gFog;
-	       CLAMPED_FLOAT_COLOR_TO_UBYTE_COLOR(out[i][1], t);
-	
-	       t = f * UBYTE_COLOR_TO_FLOAT_COLOR(in[2]) + (1.0F-f)*bFog;
-	       CLAMPED_FLOAT_COLOR_TO_UBYTE_COLOR(out[i][2], t);
-	    }
-	 }
-	 break;
-	 default:
-	    gl_problem(ctx, "Bad fog mode in gl_fog_rgba_vertices");
-	 return;
+               t = f * UBYTE_COLOR_TO_FLOAT_COLOR(in[0]) + (1.0F-f)*rFog;
+               CLAMPED_FLOAT_COLOR_TO_UBYTE_COLOR(out[i][0], t);
+
+               t = f * UBYTE_COLOR_TO_FLOAT_COLOR(in[1]) + (1.0F-f)*gFog;
+               CLAMPED_FLOAT_COLOR_TO_UBYTE_COLOR(out[i][1], t);
+
+               t = f * UBYTE_COLOR_TO_FLOAT_COLOR(in[2]) + (1.0F-f)*bFog;
+               CLAMPED_FLOAT_COLOR_TO_UBYTE_COLOR(out[i][2], t);
+            }
+         }
+         break;
+         default:
+            gl_problem(ctx, "Bad fog mode in gl_fog_rgba_vertices");
+         return;
       }
    }
    else if (ctx->Fog.Mode == GL_LINEAR)
@@ -311,11 +311,11 @@ static void TAG(fog_rgba_vertices)( struct vertex_buffer *VB,
       CLAMPED_FLOAT_COLOR_TO_UBYTE_COLOR(b, bFog);
 
       for (i = 0 ; i < n ; i++) {
-	 /* CULLCHECK */ {
-	    out[i][0] = r;
-	    out[i][1] = g;
-	    out[i][2] = b;
-	 }
+         /* CULLCHECK */ {
+            out[i][0] = r;
+            out[i][1] = g;
+            out[i][2] = b;
+         }
       }
    }
 }
@@ -329,8 +329,8 @@ static void TAG(fog_rgba_vertices)( struct vertex_buffer *VB,
  * In/Out: indx - array of vertex color indexes
  */
 static void TAG(fog_ci_vertices)( struct vertex_buffer *VB,
-				  GLuint side,
-				  GLubyte flag )
+                                  GLuint side,
+                                  GLubyte flag )
 {
    GLcontext *ctx = VB->ctx;
 
@@ -361,50 +361,50 @@ static void TAG(fog_ci_vertices)( struct vertex_buffer *VB,
       switch (ctx->Fog.Mode) {
       case GL_LINEAR:
       {
-	 GLfloat d = 1.0F / (ctx->Fog.End - ctx->Fog.Start);
-	 GLfloat fogindex = ctx->Fog.Index;
-	 GLfloat fogend = ctx->Fog.End;
+         GLfloat d = 1.0F / (ctx->Fog.End - ctx->Fog.Start);
+         GLfloat fogindex = ctx->Fog.Index;
+         GLfloat fogend = ctx->Fog.End;
 
- 	 for ( i = 0; i < n ; i++, STRIDE_F(v,stride), STRIDE_UI(in,in_stride))
-	 {
-	    CULLCHECK {
-	       GLfloat f = (fogend - ABSF(v[2])) * d;
-	       f = CLAMP( f, 0.0, 1.0 );
-	       *out = (GLint) ((GLfloat)(GLint) *in + (1.0F-f) * fogindex);
-	    }
-	 }
-	 break;
+         for ( i = 0; i < n ; i++, STRIDE_F(v,stride), STRIDE_UI(in,in_stride))
+         {
+            CULLCHECK {
+               GLfloat f = (fogend - ABSF(v[2])) * d;
+               f = CLAMP( f, 0.0, 1.0 );
+               *out = (GLint) ((GLfloat)(GLint) *in + (1.0F-f) * fogindex);
+            }
+         }
+         break;
       }
       case GL_EXP:
       {
-	 GLfloat d = -ctx->Fog.Density;
-	 GLfloat fogindex = ctx->Fog.Index;
- 	 for ( i = 0; i < n ; i++, STRIDE_F(v,stride), STRIDE_UI(in,in_stride))
-	 {
-	    CULLCHECK {
-	       GLfloat f = exp( d * ABSF(v[2]) );
-	       *out = (GLint) ((GLfloat)(GLint) *in + (1.0F-f) * fogindex);
-	    }
-	 }
-	 break;
+         GLfloat d = -ctx->Fog.Density;
+         GLfloat fogindex = ctx->Fog.Index;
+         for ( i = 0; i < n ; i++, STRIDE_F(v,stride), STRIDE_UI(in,in_stride))
+         {
+            CULLCHECK {
+               GLfloat f = exp( d * ABSF(v[2]) );
+               *out = (GLint) ((GLfloat)(GLint) *in + (1.0F-f) * fogindex);
+            }
+         }
+         break;
       }
       case GL_EXP2:
       {
-	 GLfloat d = -(ctx->Fog.Density*ctx->Fog.Density);
-	 GLfloat fogindex = ctx->Fog.Index;
- 	 for ( i = 0; i < n ; i++, STRIDE_F(v,stride),STRIDE_UI(in,in_stride))
-	 {
-	    CULLCHECK {
-	       GLfloat z = v[2]; /*ABSF(v[i][2]);*/
-	       GLfloat f = exp( d * z*z ); /* was -d ??? */
-	       out[i] = (GLint) ((GLfloat)(GLint) *in + (1.0F-f) * fogindex);
-	    }
-	 }
-	 break;
+         GLfloat d = -(ctx->Fog.Density*ctx->Fog.Density);
+         GLfloat fogindex = ctx->Fog.Index;
+         for ( i = 0; i < n ; i++, STRIDE_F(v,stride),STRIDE_UI(in,in_stride))
+         {
+            CULLCHECK {
+               GLfloat z = v[2]; /*ABSF(v[i][2]);*/
+               GLfloat f = exp( d * z*z ); /* was -d ??? */
+               out[i] = (GLint) ((GLfloat)(GLint) *in + (1.0F-f) * fogindex);
+            }
+         }
+         break;
       }
       default:
-	 gl_problem(ctx, "Bad fog mode in gl_fog_ci_vertices");
-	 return;
+         gl_problem(ctx, "Bad fog mode in gl_fog_ci_vertices");
+         return;
       }
    } else if (ctx->Fog.Mode == GL_LINEAR) {
       GLuint fogindex;
@@ -413,12 +413,12 @@ static void TAG(fog_ci_vertices)( struct vertex_buffer *VB,
       f = 1.0 - CLAMP( f, 0.0F, 1.0F );
       fogindex = (GLuint)(f * ctx->Fog.Index);
       if (fogindex) {
- 	 for ( i = 0; i < n ; i++, STRIDE_F(v,stride), STRIDE_UI(in,in_stride))
-	 {
-	    CULLCHECK {
-	       *out = *in + fogindex;
-	    }
-	 }
+         for ( i = 0; i < n ; i++, STRIDE_F(v,stride), STRIDE_UI(in,in_stride))
+         {
+            CULLCHECK {
+               *out = *in + fogindex;
+            }
+         }
       }
    }
 }

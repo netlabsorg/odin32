@@ -1,8 +1,8 @@
-/* $Id: blend.h,v 1.1 2000-02-29 00:48:25 sandervl Exp $ */
+/* $Id: blend.h,v 1.2 2000-05-21 20:10:29 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -37,32 +37,31 @@
 
 
 extern void
-gl_blend_span( GLcontext *ctx, GLuint n, GLint x, GLint y,
-               GLubyte rgba[][4], const GLubyte mask[] );
+_mesa_blend_span( GLcontext *ctx, GLuint n, GLint x, GLint y,
+                  GLubyte rgba[][4], const GLubyte mask[] );
 
 
 extern void
-gl_blend_pixels( GLcontext *ctx,
-                 GLuint n, const GLint x[], const GLint y[],
-                 GLubyte rgba[][4], const GLubyte mask[] );
+_mesa_blend_pixels( GLcontext *ctx,
+                    GLuint n, const GLint x[], const GLint y[],
+                    GLubyte rgba[][4], const GLubyte mask[] );
 
 
 extern void
-gl_BlendFunc( GLcontext *ctx, GLenum sfactor, GLenum dfactor );
+_mesa_BlendFunc( GLenum sfactor, GLenum dfactor );
 
 
 extern void
-gl_BlendFuncSeparate( GLcontext *ctx, GLenum sfactorRGB, GLenum dfactorRGB,
-                      GLenum sfactorA, GLenum dfactorA );
+_mesa_BlendFuncSeparateEXT( GLenum sfactorRGB, GLenum dfactorRGB,
+                            GLenum sfactorA, GLenum dfactorA );
 
 
 extern void
-gl_BlendEquation( GLcontext *ctx, GLenum mode );
+_mesa_BlendEquation( GLenum mode );
 
 
 extern void
-gl_BlendColor( GLcontext *ctx, GLclampf red, GLclampf green,
-               GLclampf blue, GLclampf alpha );
+_mesa_BlendColor(GLclampf red, GLclampf green, GLclampf blue, GLclampf alpha);
 
 
 #endif
