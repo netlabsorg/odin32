@@ -119,5 +119,8 @@ void WIN32API SetExceptionLogging(BOOL fEnable);
 //Disable OS2CDROM.DMD aspi support
 void WIN32API DisableCDIo();
 
+//Force DirectDraw to report only one fullscreen mode
+void WIN32API SetCustomFullScreenMode(DWORD dwWidth, DWORD dwHeight, DWORD dwBPP);
+
 #endif  /*__CUSTOMBUILD_H__*/
 
