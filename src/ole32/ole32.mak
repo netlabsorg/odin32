@@ -1,4 +1,4 @@
-# $Id: ole32.mak,v 1.8 2001-06-06 17:17:21 bird Exp $
+# $Id: ole32.mak,v 1.9 2001-06-06 17:21:21 bird Exp $
 
 #
 # Odin32 API
@@ -19,10 +19,11 @@ MAKEFILE = ole32.mak
 
 
 #
-# Overrides.
+# Overrides
+# (NONAMELESS* is required for files which don't include
+#  neither ole32.h nor olestd.h, like datacache.c.)
 #
-CDEFINES    = $(CDEFINES) -DNONAMELESSSTRUCT -DNONAMELESSUNION
-CDEFINES    = $(CDEFINES) -DWINE_LARGE_INTEGER
+CDEFINES    = $(CDEFINES) -DNONAMELESSSTRUCT -DNONAMELESSUNION -DWINE_LARGE_INTEGER
 
 
 #
