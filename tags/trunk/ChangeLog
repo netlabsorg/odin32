@@ -1,11 +1,34 @@
- /* $Id: ChangeLog,v 1.791 2000-03-09 19:19:51 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.792 2000-03-09 21:12:01 bird Exp $ */
+
+ 2000-03-09: knut st. osmundsen <knut.stange.osmundse@pmsc.no>
+        - include\pdwin32.tools: New tool, EXISTS --> \tools\bin\Exists.cmd
+        - tools\bin\Exists.cmd: New tool which checks if the file passed in
+                exists. If the file exists it returns 0, else 1. This is
+                used to check if .depend and other files exists in the
+                makefiles. (See pdwin32.post to see how.)
+        - include\pdwin32.post: .depend is only included if it exists. You'll
+                get a warning if it don't, but the makefile works fine.
+                Added a check on OBJDIR not being empty in the clean rule.
+                $(RM) $(OBJDIR)\* is will remove all files in the root dir if
+                OBJDIR is empty.
+        - win32k: Updated makefile with the use of EXISTS for both .depend and
+                makfile.inc. An update check for makefile.inc <-> configure.cmd
+                was also added.
+                Added checks for empty variables in clean rule, and we no longer
+                deletes * in any directory.
+
+        A CVS tip:
+            When new directories are added you have to to a 'cvs checkout .'
+            from the root.
+            A 'cvs update' don't get the new directories it seems
+        (There have been added some dirs under win32k lately so please do this.)
 
  2000-03-09: Sander van Leeuwen <sandervl@xs4all.nl>
-	- KERNEL32: Major rewrite of PE loader classes to correctly support 
+        - KERNEL32: Major rewrite of PE loader classes to correctly support
                     dll dependencies
                     TODO: Circular dependencies only partly working
                           (a->b->a works, but a->b->c->a won't)
-	- USER32: Fixed bug in dialog constructor (class name translation)
+        - USER32: Fixed bug in dialog constructor (class name translation)
                   (only showed up in release build)
 
  2000-03-08: Michal Necasek <mike@mendelu.cz>
@@ -18,7 +41,7 @@
                       for me with Quake 3, Moorhuhn and WinAmp.
 
 
- 2000-03-05: knut st. osmundsen <knut.stange.osmundse@pmsc.no>
+ 2000-03-07: knut st. osmundsen <knut.stange.osmundse@pmsc.no>
         - makefiles and include\pdwin32.*:
             * Updated nearly all makefiles to the new makefile style.
               Win32k, pe2lx and some subdirs of Winmm
