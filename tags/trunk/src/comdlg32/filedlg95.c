@@ -1215,9 +1215,6 @@ static LRESULT FILEDLG95_OnWMCommand(HWND hwnd, WPARAM wParam, LPARAM lParam)
       BOOL fResult = FILEDLG95_OnOpen(hwnd);
       if(fResult)
         SendCustomDlgNotificationMessage(hwnd,CDN_FILEOK);
-
-      FILEDLG95_Clean(hwnd);
-      EndDialog(hwnd, fResult);
       break;
     }
 #endif
@@ -1349,15 +1346,8 @@ BOOL FILEDLG95_OnOpenMultipleFiles(HWND hwnd, LPSTR lpstrFileList, UINT nFileCou
   fodInfos->ofnInfos->nFileExtension = 0;
 
   /* clean and exit */
-#ifndef __WIN32OS2__
-  // 20011017 PH
-  // some apps require the resources to be still there
-  // for the CDN_ processing.
   FILEDLG95_Clean(hwnd);
   return EndDialog(hwnd,TRUE);
-#else
-  return TRUE;
-#endif
 }
 
 /***********************************************************************
@@ -1705,31 +1695,15 @@ BOOL FILEDLG95_OnOpen(HWND hwnd)
 	    }
 	  }
           
-#ifndef __WIN32OS2__
-  // 20011017 PH
-  // some apps require the resources to be still there
-  // for the CDN_ processing.
-          
           TRACE("close\n");
 	  FILEDLG95_Clean(hwnd);
           ret = EndDialog(hwnd, TRUE);
-#else
-          ret = TRUE;
-#endif
 	}
 	else
         {
           /* FIXME set error FNERR_BUFFERTOSMALL */
-#ifndef __WIN32OS2__
-  // 20011017 PH
-  // some apps require the resources to be still there
-  // for the CDN_ processing.
-          
           FILEDLG95_Clean(hwnd);
           ret = EndDialog(hwnd, FALSE);
-#else
-          ret = FALSE;
-#endif
         }
         goto ret;
       }
