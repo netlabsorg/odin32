@@ -1,4 +1,4 @@
-/* $Id: OS2KVM.h,v 1.10 2001-02-11 15:02:27 bird Exp $
+/* $Id: OS2KVM.h,v 1.11 2001-02-19 05:53:53 bird Exp $
  *
  * OS/2 kernel VM functions.
  *
@@ -99,7 +99,7 @@
 #define VMA_ARENASYSTEM     0x00000000UL  /* System Arena */
 #define VMA_ARENAPRIVATE    0x02000000UL  /* (VPMVMAC_ARENAPRV) Private Arena */
 #define VMA_ARENAHEAP       0x06000000UL  /* Heap Arena */
-#define VMA_ARENAHIGHA      0x00008000UL  /* High shared arena (Warp >= fp13) */
+#define VMA_ARENAHIGHA      0x00008000UL  /* High shared arena (Warp >= fp13) - flag! Use together with VMA_ARENASHARED or VMA_ARENAPRIVATE */
 #define VMA_ARENAHIGH   (options.ulBuild >= AURORAGA ? VMA_ARENAHIGHA : 0UL)
 #define VMA_ARENAMASKW      0x06000000UL  /* Warp < fp13 Arena Mask */
 #define VMA_ARENAMASKA      0x06008000UL  /* Aurora Arena Mask */
@@ -116,15 +116,20 @@
 
 
 /*
- * VMAlloc flFlags2 guessings
+ * VMAlloc flFlags2 guessings - These are flags to the Selector Manager.
+ * Now prefixed SELAF - SELectorAllocFlags.
  */
 #if 0 /*???*/
 #define VDHAM_FIXED         0x0000UL
 #define VDHAM_SWAPPABLE     0x0001UL
-#define VPMVMFM_VDM         0x00000004UL  /* Request on behalf of VDM */
+#define VPMVMFM_VDM         0x00000004UL/* Request on behalf of VDM */
 #endif
-
-#define VMAF2_WRITE         0x00000002UL  /* PAG_WRITE */
+#define SELAF_SELMAP        0x0400
+#define SELAF_WRITE         0x0002      /* Writable selector. (PAG_WRITE) */
+#define SELAF_DPL0          0x0000      /* Descriptor privilege level - Ring 0 */
+#define SELAF_DPL1          0x0020      /* Descriptor privilege level - Ring 1 */
+#define SELAF_DPL2          0x0040      /* Descriptor privilege level - Ring 2 */
+#define SELAF_DPL3          0x0060      /* Descriptor privilege level - Ring 3 */
 
 
 /*
