@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.261 2001-06-10 09:19:58 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.262 2001-06-10 12:05:40 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -468,12 +468,12 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
 
     teb->o.odin.newWindow = (ULONG)this;
 
-    DWORD dwOSWinStyle;
+    DWORD dwOSWinStyle, dwOSFrameStyle;
 
-    OSLibWinConvertStyle(dwStyle,dwExStyle,&dwOSWinStyle);
+    OSLibWinConvertStyle(dwStyle,dwExStyle,&dwOSWinStyle, &dwOSFrameStyle);
 
     OS2Hwnd = OSLibWinCreateWindow((getParent()) ? getParent()->getOS2WindowHandle() : OSLIB_HWND_DESKTOP,
-                                   dwOSWinStyle,(char *)windowNameA,
+                                   dwOSWinStyle, dwOSFrameStyle, (char *)windowNameA,
                                    (owner) ? owner->getOS2WindowHandle() : ((getParent()) ? getParent()->getOS2WindowHandle() : OSLIB_HWND_DESKTOP),
                                    (hwndLinkAfter == HWND_BOTTOM) ? TRUE : FALSE,
                                    0, fTaskList,fXDefault | fCXDefault,windowClass->getStyle(), &OS2HwndFrame);
@@ -581,6 +581,9 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndOS2)
                 windowNameA = (LPSTR)_smalloc(1);
                 windowNameA[0] = 0;
             }
+        }
+        if(fOS2Look) {
+            OSLibWinSetTitleBarText(OS2HwndFrame, windowNameA);
         }
     }
 
@@ -1201,6 +1204,24 @@ ULONG Win32BaseWindow::MsgFormatFrame(WINDOWPOS *lpWndPos)
     }
   }
 #endif
+  if(fOS2Look && ((dwStyle & WS_CAPTION) == WS_CAPTION))
+  {
+      RECT rect = {0};
+      int  height  = getWindowHeight();
+      RECTLOS2 rectOS2;
+
+      AdjustRectOuter(&rect, FALSE);
+
+      rect.left   = -rect.left;
+      rect.top    = rect.bottom - rect.top;
+      rect.right  = rectWindow.right - rectWindow.left - rect.right;
+ 
+      rectOS2.xLeft   = rect.left;
+      rectOS2.xRight  = rect.right;
+      rectOS2.yBottom = height - rect.top;
+      rectOS2.yTop    = height - rect.bottom;
+      OSLibWinPositionFrameControls(getOS2FrameWindowHandle(), &rectOS2);
+  }
   return rc;
 }
 //******************************************************************************
@@ -1422,6 +1443,9 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
             HandleNCPaint((HRGN)1);
             if(hTaskList) {
                 OSLibWinChangeTaskList(hTaskList, OS2HwndFrame, getWindowNameA(), (getStyle() & WS_VISIBLE) ? 1 : 0);
+                if(fOS2Look) {
+                    OSLibWinSetTitleBarText(OS2HwndFrame, getWindowNameA());
+                }
             }
         }
 
@@ -1912,6 +1936,9 @@ LRESULT Win32BaseWindow::DefWindowProcW(UINT Msg, WPARAM wParam, LPARAM lParam)
             HandleNCPaint((HRGN)1);
             if(hTaskList) {
                 OSLibWinChangeTaskList(hTaskList, OS2HwndFrame, getWindowNameA(), (getStyle() & WS_VISIBLE) ? 1 : 0);
+                if(fOS2Look) {
+                    OSLibWinSetTitleBarText(OS2HwndFrame, getWindowNameA());
+                }
             }
         }
 
@@ -2765,7 +2792,10 @@ HWND Win32BaseWindow::SetParent(HWND hwndNewParent)
         }
    }
    else {
+        if(newparent) RELEASE_WNDOBJ(newparent);
+
         setParent(windowDesktop);
+        windowDesktop->addRef();
         windowDesktop->addChild(this);
         OSLibWinSetParent(getOS2FrameWindowHandle(), OSLIB_HWND_DESKTOP);
 
@@ -3650,7 +3680,7 @@ Win32BaseWindow *Win32BaseWindow::GetWindowFromHandle(HWND hwnd)
     lock(&critsect);
     if(HwGetWindowHandleData(hwnd, (DWORD *)&window) == TRUE) {
          if(window) {
-             dprintf(("addRef %x; refcount %d", hwnd, window->getRefCount()+1));
+////             dprintf(("addRef %x; refcount %d", hwnd, window->getRefCount()+1));
              window->addRef();
          }
          unlock(&critsect);
