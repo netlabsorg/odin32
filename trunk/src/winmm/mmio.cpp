@@ -23,6 +23,9 @@
 #include "mmsystem.h"
 #include "debugtools.h"
 
+#define DBG_LOCALLOG	DBG_mmio
+#include "dbglocal.h"
+
 ODINDEBUGCHANNEL(WINMM-MMIO)
 
 /**************************************************************************

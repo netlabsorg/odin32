@@ -1,4 +1,4 @@
-/* $Id: mci.cpp,v 1.4 1999-08-19 18:46:04 phaller Exp $ */
+/* $Id: mci.cpp,v 1.5 2000-02-17 14:09:31 sandervl Exp $ */
 
 /*
  * MCI stubs
@@ -25,6 +25,9 @@
 #include <unicode.h>
 
 #include "winmm.h"
+
+#define DBG_LOCALLOG	DBG_mci
+#include "dbglocal.h"
 
 ODINDEBUGCHANNEL(WINMM-MCI)
 

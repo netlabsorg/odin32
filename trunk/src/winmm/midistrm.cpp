@@ -1,4 +1,4 @@
-/* $Id: midistrm.cpp,v 1.4 1999-08-19 18:46:04 phaller Exp $ */
+/* $Id: midistrm.cpp,v 1.5 2000-02-17 14:09:31 sandervl Exp $ */
 
 /*
  * RTMIDI code
@@ -23,6 +23,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <unicode.h>
+
+#define DBG_LOCALLOG	DBG_midistrm
+#include "dbglocal.h"
 
 
 ODINDEBUGCHANNEL(WINMM-MIDISTRM)

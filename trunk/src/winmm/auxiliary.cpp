@@ -1,4 +1,4 @@
-/* $Id: auxiliary.cpp,v 1.2 2000-01-03 10:29:02 sandervl Exp $ */
+/* $Id: auxiliary.cpp,v 1.3 2000-02-17 14:09:30 sandervl Exp $ */
 
 /*
  * Auxilary multimedia apis
@@ -26,6 +26,9 @@
 
 #include "winmm.h"
 #include "auxiliary.h"
+
+#define DBG_LOCALLOG	DBG_auxiliary
+#include "dbglocal.h"
 
 ODINDEBUGCHANNEL(WINMM-AUX)
 

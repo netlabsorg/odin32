@@ -1,4 +1,4 @@
-/* $Id: midi.cpp,v 1.7 1999-09-23 09:35:25 sandervl Exp $ */
+/* $Id: midi.cpp,v 1.8 2000-02-17 14:09:31 sandervl Exp $ */
 
 /*
  * RTMIDI code
@@ -26,6 +26,9 @@
 #include "midi.hpp"
 #include <winos2def.h>
 #include <wprocess.h>
+
+#define DBG_LOCALLOG	DBG_midi
+#include "dbglocal.h"
 
 ODINDEBUGCHANNEL(WINMM-MIDI)
 
