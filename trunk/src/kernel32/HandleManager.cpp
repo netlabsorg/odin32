@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.85 2001-12-08 15:12:15 sandervl Exp $ */
+/* $Id: HandleManager.cpp,v 1.86 2001-12-09 16:00:30 bird Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -83,8 +83,6 @@
 /*****************************************************************************
  * Structures                                                                *
  *****************************************************************************/
-
-typedef struct _HMDEVICE;
 
 typedef struct _HMHANDLE
 {
@@ -264,7 +262,7 @@ static ULONG _HMHandleGetFree(void)
     if (INVALID_HANDLE_VALUE == TabWin32Handles[ulLoop].hmHandleData.hHMHandle) {
         //SvL: Mark handle as allocated here. Doing it outside of this function
         //     isn't thread safe. (and not very smart)
-        TabWin32Handles[ulLoop].hmHandleData.hHMHandle      = ulLoop; 
+        TabWin32Handles[ulLoop].hmHandleData.hHMHandle      = ulLoop;
         TabWin32Handles[ulLoop].hmHandleData.dwUserData     = 0;
         TabWin32Handles[ulLoop].hmHandleData.dwInternalType = HMTYPE_UNKNOWN;
         TabWin32Handles[ulLoop].hmHandleData.hWin32Handle   = (HANDLE)ulLoop;
@@ -434,9 +432,9 @@ DWORD HMInitialize(void)
            sizeof(HMGlobals));
 
     HMGlobals.fIsInitialized = TRUE;                             /* OK, done */
-    
+
 #if 1
-    //This is a very bad idea. \\\\.\\NTICE -> NTICE, if the file exits, then 
+    //This is a very bad idea. \\\\.\\NTICE -> NTICE, if the file exits, then
     //it will open the file instead of the device driver
     /* add standard symbolic links first, so local symbolic links in the
      * device handlers get precedence over the default here.
@@ -471,7 +469,7 @@ DWORD HMInitialize(void)
       HandleNamesAddSymbolicLink("\\\\.\\Global", "\\\\.");
     }
 #endif
-    
+
     /* copy standard handles from OS/2's Open32 Subsystem */
     HMGlobals.pHMStandard   = new HMDeviceStandardClass("\\\\STANDARD_HANDLE\\");
     HMSetStdHandle(STD_INPUT_HANDLE,  O32_GetStdHandle(STD_INPUT_HANDLE));
@@ -584,7 +582,7 @@ DWORD HMHandleAllocate (PULONG phHandle16,
            phHandle16,
            hHandleOS2));
 #endif
-  
+
   // @@@PH 2001-09-27
   // prevent too quick re-use of last handle
   ulHandle = HMGlobals.ulHandleLast + 1;                  /* get free handle */
@@ -1035,8 +1033,8 @@ HFILE HMCreateFile(LPCSTR lpFileName,
       // use the resolved name
       lpFileName = szFilename;
     }
-      
-    
+
+
     pDeviceHandler = _HMDeviceFind((LPSTR)lpFileName);        /* find device */
     if (NULL == pDeviceHandler)                /* this name is unknown to us */
     {
@@ -1102,8 +1100,8 @@ HFILE HMCreateFile(LPCSTR lpFileName,
 
   if (rc != NO_ERROR)     /* oops, creation failed within the device handler */
   {
-    TabWin32Handles[iIndexNew].hmHandleData.hHMHandle = INVALID_HANDLE_VALUE;  
-    
+    TabWin32Handles[iIndexNew].hmHandleData.hHMHandle = INVALID_HANDLE_VALUE;
+
     // Note:
     // device handlers have to return an Win32-style error code
     // from CreateFile() !
@@ -1173,7 +1171,7 @@ HANDLE HMOpenFile(LPCSTR    lpFileName,
   VOID            *pDevData;
   PHMHANDLEDATA   pHMHandleData;
   DWORD           rc;                                     /* API return code */
-  
+
   // name resolving
   CHAR szFilename[260];
   if (TRUE == HandleNamesResolveName((PSZ)lpFileName,
@@ -1184,8 +1182,8 @@ HANDLE HMOpenFile(LPCSTR    lpFileName,
     // use the resolved name
     lpFileName = szFilename;
   }
-  
-  
+
+
   if(fuMode & OF_REOPEN) {
        pDeviceHandler = _HMDeviceFind((LPSTR)pOFStruct->szPathName);          /* find device */
   }
@@ -1202,7 +1200,7 @@ HANDLE HMOpenFile(LPCSTR    lpFileName,
        pDevData       = _HMDeviceGetData((LPSTR)pOFStruct->szPathName);
   }
   else pDevData       = _HMDeviceGetData((LPSTR)lpFileName);
-  
+
 
   if(pDeviceHandler == HMGlobals.pHMOpen32) {
     pDeviceHandler = HMGlobals.pHMFile;
@@ -1917,7 +1915,7 @@ DWORD HMWaitForSingleObject(HANDLE hObject,
           //(WaitSingleObject now calls MsgWaitMultipleObjects and
           // processes messages while waiting for the process to die)
           //(Napster install now doesn't block PM anymore (forcing a reboot))
- 
+
           HMODULE hUser32 = LoadLibraryA("USER32.DLL");
 
           BOOL (* WINAPI pfnPeekMessageA)(LPMSG,HWND,UINT,UINT,UINT);
@@ -1940,12 +1938,12 @@ DWORD HMWaitForSingleObject(HANDLE hObject,
 //          teb->o.odin.fIgnoreMsgs = TRUE;
 
           while(TRUE) {
-              dwResult = HMMsgWaitForMultipleObjects(1, &hObject, FALSE, 
+              dwResult = HMMsgWaitForMultipleObjects(1, &hObject, FALSE,
                                                      INFINITE, QS_ALLINPUT);
               if(dwResult == WAIT_OBJECT_0 + 1) {
                   MSG msg ;
-   
-                  while (pfnPeekMessageA(&msg, NULL, 0, 0, PM_REMOVE)) 
+
+                  while (pfnPeekMessageA(&msg, NULL, 0, 0, PM_REMOVE))
                   {
                      if (msg.message == WM_QUIT) {
                          dprintf(("ERROR: WaitForSingleObject call abandoned because WM_QUIT msg was received!!"));
@@ -1953,10 +1951,10 @@ DWORD HMWaitForSingleObject(HANDLE hObject,
                          FreeLibrary(hUser32);
                          return WAIT_ABANDONED;
                      }
-   
+
                      /* otherwise dispatch it */
                      pfnDispatchMessageA(&msg);
-   
+
                   } // end of PeekMessage while loop
               }
               else {
@@ -2272,7 +2270,7 @@ HANDLE HMCreateEvent(LPSECURITY_ATTRIBUTES lpsa,
   pHMHandleData->dwAccess   = 0;
   pHMHandleData->dwShare    = 0;
   pHMHandleData->dwCreation = 0;
-  pHMHandleData->dwFlags    = 0;    
+  pHMHandleData->dwFlags    = 0;
   pHMHandleData->lpHandlerData = NULL;
 
   /* we've got to mark the handle as occupied here, since another device */
@@ -2542,7 +2540,7 @@ HANDLE HMCreateSemaphore(LPSECURITY_ATTRIBUTES lpsa,
           return handle;
       }
   }
-  
+
   pDeviceHandler = HMGlobals.pHMSemaphore;               /* device is predefined */
 
   iIndexNew = _HMHandleGetFree();                         /* get free handle */
@@ -3025,7 +3023,7 @@ DWORD HMWaitForMultipleObjectsEx (DWORD   cObjects,
  * Author    : Patrick Haller [Wed, 1999/06/17 20:44]
  *****************************************************************************/
 
-DWORD  HMMsgWaitForMultipleObjects  (DWORD      cObjects, 
+DWORD  HMMsgWaitForMultipleObjects  (DWORD      cObjects,
                                      LPHANDLE   lphObjects,
                                      BOOL       fWaitAll,
                                      DWORD      dwTimeout,
@@ -4686,7 +4684,7 @@ BOOL HMCreatePipe(PHANDLE phRead,
  * Variables :
  * Result    :
  * Remark    :
- * Status    : 
+ * Status    :
  *
  * Author    : SvL
  *****************************************************************************/
@@ -4747,7 +4745,7 @@ HANDLE HMCreateMailslotA(LPCSTR lpName, DWORD nMaxMessageSize,
  * Variables :
  * Result    :
  * Remark    :
- * Status    : 
+ * Status    :
  *
  * Author    : SvL
  *****************************************************************************/
@@ -4785,7 +4783,7 @@ BOOL HMGetMailslotInfo(HANDLE  hMailslot,
  * Variables :
  * Result    :
  * Remark    :
- * Status    : 
+ * Status    :
  *
  * Author    : SvL
  *****************************************************************************/
