@@ -1,4 +1,4 @@
-/* $Id: d32Win32kIOCtl.c,v 1.1.4.1 2000-08-29 19:47:01 bird Exp $
+/* $Id: d32Win32kIOCtl.c,v 1.1.4.2 2000-09-02 20:49:11 bird Exp $
  *
  * Win32k driver IOCtl handler function.
  *
@@ -21,6 +21,7 @@
 *******************************************************************************/
 #include <os2.h>
 
+#include "devSegDf.h"
 #include "dev1632.h"
 #include "dev32.h"
 #include "OS2Krnl.h"
@@ -60,6 +61,25 @@ USHORT _loadds _Far32 _Pascal Win32kIOCtl(PRP32GENIOCTL pRpIOCtl)
                     pParm->rc = k32QueryOTEs((HMTE)pParm->hMTE, pParm->pQOte, pParm->cbQOte);
                     return STATUS_DONE;
                 }
+
+                case K32_QUERYOPTIONSSTATUS:
+                {
+                    PK32QUERYOPTIONSSTATUS pParm = (PK32QUERYOPTIONSSTATUS)pRpIOCtl->ParmPacket;
+                    if (pParm == NULL)
+                        return STATUS_DONE | STERR | ERROR_I24_INVALID_PARAMETER;
+                    pParm->rc = k32QueryOptionsStatus(pParm->pOptions, pParm->pStatus);
+                    return STATUS_DONE;
+                }
+
+                case K32_SETOPTIONS:
+                {
+                    PK32SETOPTIONS pParm = (PK32SETOPTIONS)pRpIOCtl->ParmPacket;
+                    if (pParm == NULL)
+                        return STATUS_DONE | STERR | ERROR_I24_INVALID_PARAMETER;
+                    pParm->rc = k32SetOptions(pParm->pOptions);
+                    return STATUS_DONE;
+                }
+
             }
             break;
     }

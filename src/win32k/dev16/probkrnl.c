@@ -1,4 +1,4 @@
-/* $Id: probkrnl.c,v 1.20.4.14 2000-08-30 04:45:58 bird Exp $
+/* $Id: probkrnl.c,v 1.20.4.15 2000-09-02 20:49:10 bird Exp $
  *
  * Description:   Autoprobes the os2krnl file and os2krnl[*].sym files.
  *                Another Hack!
@@ -60,6 +60,11 @@
 #include <strat2.h>
 #include <reqpkt.h>
 
+#include "devSegDf.h"
+#undef  DATA16_INIT
+#define DATA16_INIT
+#undef  CODE16_INIT
+#define CODE16_INIT
 #include "os2krnl.h"                    /* must be included before dev1632.h! */
 #include "sym.h"
 #include "probkrnl.h"
@@ -74,9 +79,7 @@
 *   Global Variables                                                           *
 *   Note: must be inited or else we'll get BSS segment                         *
 *******************************************************************************/
-/*
- * kernel data - !only valid during init!
- */
+
 
 /*
  * aImportTab defines the imported and overloaded OS/2 kernel functions.
@@ -85,7 +88,7 @@
  *            When adding/removing/shuffling items in aImportTab, aulProc and
  *            calltab.asm has to be updated immediately!
  */
-IMPORTKRNLSYM aImportTab[NBR_OF_KRNLIMPORTS] =
+IMPORTKRNLSYM DATA16_GLOBAL aImportTab[NBR_OF_KRNLIMPORTS] =
 {/* iFound     cchName                  offObject    usSel     fType    */
  /*      iObject      achName                 ulAddress  cProlog        */
     {FALSE, -1,  8, "_ldrRead",             -1,  -1,  -1,  -1, EPT_PROC32},        /* 0 */
@@ -133,16 +136,18 @@ IMPORTKRNLSYM aImportTab[NBR_OF_KRNLIMPORTS] =
 
 };
 
+char DATA16_GLOBAL  szUsrSym[50] = {0};
+
+
 
 /*
  * privat data
  */
 #if defined(DEBUGR3)
-static char         szUsrOS2Krnl[50] = {0};
-static char         szOS2Krnl[]      = {"c:\\os2krnl"};
+static char     DATA16_INIT szUsrOS2Krnl[50] = {0};
+static char     DATA16_INIT szOS2Krnl[]      = {"c:\\os2krnl"};
 #endif
-static char         szUsrSym[50]     = {0};
-static char *       apszSym[]        =
+static char *   DATA16_INIT apszSym[]        =
 {
     {"c:\\os2krnl.sym"},                              /* usual for debugkernel */
     {"c:\\os2\\pdpsi\\pmdf\\warp4\\os2krnlr.sym"},    /* warp 4 */
@@ -163,8 +168,8 @@ static char *       apszSym[]        =
 };
 
 /* Result from GetKernelInfo/ReadOS2Krnl. */
-static unsigned char  cObjects = 0;
-static POTE           paKrnlOTEs = NULL;
+static unsigned char DATA16_INIT  cObjects = 0;
+static POTE          DATA16_INIT  paKrnlOTEs = NULL;
 
 
 /*
@@ -174,7 +179,7 @@ static struct
 {
     short       sErr;
     const char *pszMsg;
-} aErrorMsgs[] =
+} DATA16_INIT aErrorMsgs[] =
 {
     {ERROR_PROB_KRNL_OPEN_FAILED,       "Krnl: Failed to open kernel file."},
     {ERROR_PROB_KRNL_SEEK_SIZE,         "Krnl: Failed to seek to end to of file."},
@@ -220,10 +225,10 @@ static struct
  * Fake data for Ring-3 testing.
  */
 #ifdef R3TST
-USHORT      usFakeVerMajor = 0;
-USHORT      usFakeVerMinor = 0;
+USHORT DATA16_INIT usFakeVerMajor = 0;
+USHORT DATA16_INIT usFakeVerMinor = 0;
 #ifdef R3TST
-static ach[11] =  {0}; /* works around compiler/linker bug */
+static DATA16_INIT ach[11] =  {0}; /* works around compiler/linker bug */
 #endif
 #endif
 
@@ -264,6 +269,14 @@ static int      ReadOS2Krnl(char *pszFilename);
 static int      ReadOS2Krnl2(HFILE hKrnl, unsigned long  cbKrnl);
 static int      processFile(const char *pszFilename);
 
+#if 0 /*ndef CODE16_INIT*/
+#pragma alloc_text(CODE16_INIT, fopen, fread, fseek, fsize)
+#pragma alloc_text(CODE16_INIT, kmemcpy, kstrstr, kstrcmp, kstrncmp, kstrnicmp, kstrlen, kstrcpy, kargncpy)
+#pragma alloc_text(CODE16_INIT, GetErrorMsg)
+#pragma alloc_text(CODE16_INIT, LookupKrnlEntry, VerifyPrologs, ProbeSymFile, GetKernelInfo)
+#pragma alloc_text(CODE16_INIT, ShowResult)
+#pragma alloc_text(CODE16_INIT, VerifyKernelVer, ReadOS2Krnl, ReadOS2Krnl2, processFile)
+#endif
 
 
 
@@ -489,7 +502,7 @@ static char * kstrcpy(char * pszTarget, register const char * pszSource)
 
     while (*pszSource != '\0')
         *psz++ = *pszSource++;
-
+    *psz = '\0';
     return pszTarget;
 }
 
@@ -948,7 +961,7 @@ static int ProbeSymFile(const char * pszFilename)
 static int   GetKernelInfo(void)
 {
 #if !defined(DEBUGR3) && !defined(EXTRACT) /* This IOCtl is not available after inittime! */
-    static KRNLINFO KrnlInfo = {0};
+    static KRNLINFO DATA16_INIT KrnlInfo = {0};
     APIRET          rc;
     HFILE           hDev0 = 0;
     USHORT          usAction = 0;
@@ -1232,7 +1245,7 @@ int ProbeKernel(PRPINITIN pReqPack)
                  ) != NO_ERROR
                 )
             {
-                #ifndef R3TST
+                #if 1 /* ndef R3TST */
                 APIRET rc2;
                 /* search on disk */
                 i = 0;
@@ -1244,6 +1257,8 @@ int ProbeKernel(PRPINITIN pReqPack)
                     if (rc2 >= ERROR_PROB_SYM_VERIFY_FIRST)
                         rc = rc2;
                 }
+                if (rc == 1 || rc2 == NO_ERROR)
+                    rc = rc2;
                 #endif
             }
         }
@@ -1252,6 +1267,10 @@ int ProbeKernel(PRPINITIN pReqPack)
     /* show the result and set return-value */
     dprintf(("rc=%d; i=%d\n", rc, i));
     ShowResult(rc, i);
+
+    /* Copy the symbol file name to szUsrSym. */
+    if (szUsrSym[0] == '\0' && apszSym[i] != NULL)
+        kstrcpy(szUsrSym, apszSym[i]);
 
     return rc;
 }
@@ -1330,7 +1349,7 @@ static int ReadOS2Krnl(char * pszFilename)
 static int ReadOS2Krnl2(HFILE hKrnl, unsigned long  cbKrnl)
 {
     #if defined(DEBUGR3) || !defined(EXTRACT)
-    static KRNLINFO KrnlInfo = {0};
+    static KRNLINFO DATA16_INIT KrnlInfo = {0};
     #endif
     int            i, j;
     int            rc = 0;
@@ -1659,7 +1678,7 @@ int main(int argc, char **argv)
     /*
      * Set paKrnlOTEs to point to an zeroed array of OTEs.
      */
-    static KRNLINFO KrnlInfo = {0};
+    static KRNLINFO DATA16_INIT  KrnlInfo = {0};
     paKrnlOTEs = &KrnlInfo.aObjects[0];
 
     if (argc > 1)
@@ -1694,7 +1713,7 @@ int main(int argc, char **argv)
         FILEFINDBUF ffb;
         int         i;
 
-        printf16("/* $Id: probkrnl.c,v 1.20.4.14 2000-08-30 04:45:58 bird Exp $\n"
+        printf16("/* $Id: probkrnl.c,v 1.20.4.15 2000-09-02 20:49:10 bird Exp $\n"
                  "*\n"
                  "* Autogenerated kernel symbol database.\n"
                  "*\n"
@@ -1708,11 +1727,12 @@ int main(int argc, char **argv)
                  "#define INCL_NOPMAPI\n"
                  "#define INCL_NOBASEAPI\n"
                  "#include <os2.h>\n"
+                 "#include \"DevSegDf.h\"\n"
                  "#include \"probkrnl.h\"\n"
                  "#include \"options.h\"\n"
                  "\n");
 
-        printf16("KRNLDBENTRY aKrnlSymDB[] = \n"
+        printf16("KRNLDBENTRY DATA16_INIT aKrnlSymDB[] = \n"
                  "{\n");
 
         rc = DosFindFirst("*.sym", &hDir, FILE_NORMAL,

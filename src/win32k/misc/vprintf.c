@@ -1,4 +1,4 @@
-/* $Id: vprintf.c,v 1.7.4.1 2000-07-16 22:43:41 bird Exp $
+/* $Id: vprintf.c,v 1.7.4.2 2000-09-02 20:49:24 bird Exp $
  *
  * vprintf and printf
  *
@@ -46,6 +46,7 @@
 
 #include <stdarg.h>
 
+#include "devSegDf.h"                   /* Win32k segment definitions. */
 #include "dev32.h"
 #include "vprintf.h"
 #ifdef COMOUTPUT

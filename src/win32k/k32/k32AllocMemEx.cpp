@@ -1,4 +1,4 @@
-/* $Id: k32AllocMemEx.cpp,v 1.2.4.1 2000-08-29 19:47:02 bird Exp $
+/* $Id: k32AllocMemEx.cpp,v 1.2.4.2 2000-09-02 20:49:16 bird Exp $
  *
  * k32AllocMemEx - Equivalent to DosAllocMem, but this one
  *                 uses the address in ppv.
@@ -28,6 +28,7 @@
 *   Header Files                                                               *
 *******************************************************************************/
 #include <os2.h>
+#include "devSegDf.h"                   /* Win32k segment definitions. */
 #include "OS2Krnl.h"
 #include "win32k.h"
 #include "k32.h"

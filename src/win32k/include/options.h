@@ -1,4 +1,4 @@
-/* $Id: options.h,v 1.10.4.3 2000-08-28 22:42:38 bird Exp $
+/* $Id: options.h,v 1.10.4.4 2000-09-02 20:49:15 bird Exp $
  *
  * Options.
  *
@@ -51,7 +51,7 @@
             ~0UL,                   /* ulBuild       */     \
             (unsigned short)~0,     /* usVerMajor    */     \
             (unsigned short)~0,     /* usVerMinor    */     \
-            FLAGS_PE_PE2LX,         /* fPE           */     \
+            FLAGS_PE_MIXED,         /* fPE           */     \
             INFOLEVEL_QUIET,        /* ulInfoLevel   */     \
             FALSE,                  /* fElf          */     \
             TRUE,                   /* fUNIXScript   */     \
@@ -130,11 +130,10 @@ struct options
 };
 #pragma pack()
 
-
 /*******************************************************************************
 *   Global Variables                                                           *
 *******************************************************************************/
-extern struct options options;      /* defined in d32globals.c */
+extern struct options DATA16_GLOBAL options;    /* defined in d16globals.c */
 #if defined(__IBMC__) || defined(__IBMCPP__)
     #pragma map( options , "_options"  )
 #endif

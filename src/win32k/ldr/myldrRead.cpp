@@ -1,4 +1,4 @@
-/* $Id: myldrRead.cpp,v 1.6.4.1 2000-07-16 22:43:38 bird Exp $
+/* $Id: myldrRead.cpp,v 1.6.4.2 2000-09-02 20:49:20 bird Exp $
  *
  * myldrRead - ldrRead.
  *
@@ -22,6 +22,7 @@
 #include <memory.h>
 #include <stdlib.h>
 
+#include "devSegDf.h"                   /* Win32k segment definitions. */
 #include "log.h"
 #include "avl.h"
 #include "dev32.h"

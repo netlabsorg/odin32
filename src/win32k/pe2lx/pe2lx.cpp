@@ -1,4 +1,4 @@
-/* $Id: pe2lx.cpp,v 1.18.4.11 2000-09-01 08:01:37 bird Exp $
+/* $Id: pe2lx.cpp,v 1.18.4.12 2000-09-02 20:49:25 bird Exp $
  *
  * Pe2Lx class implementation. Ring 0 and Ring 3
  *
@@ -79,6 +79,8 @@
 #include <neexe.h>                      /* Wine NE structs and definitions. */
 #include <newexe.h>                     /* OS/2 NE structs and definitions. */
 #include <exe386.h>                     /* OS/2 LX structs and definitions. */
+
+#include "devSegDf.h"                   /* Win32k segment definitions. */
 
 #include "malloc.h"                     /* win32k malloc (resident). Not C library! */
 #include "smalloc.h"                    /* win32k swappable heap. */

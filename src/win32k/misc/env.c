@@ -1,4 +1,4 @@
-/* $Id: env.c,v 1.2.4.1 2000-07-16 22:43:39 bird Exp $
+/* $Id: env.c,v 1.2.4.2 2000-09-02 20:49:21 bird Exp $
  *
  * Environment access functions
  *
@@ -20,6 +20,7 @@
 *******************************************************************************/
 #include <os2.h>
 
+#include "devSegDf.h"                   /* Win32k segment definitions. */
 #include "dev32.h"
 #include "dev32hlp.h"
 #include "log.h"

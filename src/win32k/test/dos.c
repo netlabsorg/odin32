@@ -1,4 +1,4 @@
-/* $Id: dos.c,v 1.1 2000-07-16 22:18:14 bird Exp $
+/* $Id: dos.c,v 1.1.4.1 2000-09-02 20:49:28 bird Exp $
  *
  * Thunkers for OS/2 APIs.
  *
@@ -21,6 +21,8 @@
 *   Header Files                                                               *
 *******************************************************************************/
 #include <os2.h>
+
+#include "devSegDf.h"                   /* Win32k segment definitions. */
 
 #include "test.h"
 

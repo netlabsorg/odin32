@@ -1,4 +1,4 @@
-/* $Id: vprntf16.c,v 1.2.4.2 2000-08-15 06:16:00 bird Exp $
+/* $Id: vprntf16.c,v 1.2.4.3 2000-09-02 20:49:10 bird Exp $
  *
  * vprintf and printf - 16-bit.
  *
@@ -35,12 +35,13 @@
 *******************************************************************************/
 #include <os2.h>
 
+#include "devSegDf.h"                   /* Win32k segment definitions. */
+#include "dev16.h"
 #include "vprntf16.h"
 #ifdef RING0
 #include "options.h"
 #include "conio.h"
 #endif
-#include "dev16.h"
 
 /*******************************************************************************
 *   Global Variables                                                           *
@@ -217,7 +218,7 @@ static char * numtostr(long lValue, unsigned int uiBase,
  * @param     pszFormat   Format string.
  * @param     args        Argument list.
  */
-int vprintf16(const char *pszFormat, va_list args)
+int FAR vprintf16(const char *pszFormat, va_list args)
 {
     int cch = 0;
 
@@ -391,7 +392,7 @@ int vprintf16(const char *pszFormat, va_list args)
  * @param     pszFormat  Pointer to format string.
  * @param     ...        Optional parameters.
  */
-int printf16(const char *pszFormat, ...)
+int FAR printf16(const char *pszFormat, ...)
 {
     int     cch;
     va_list arguments;
