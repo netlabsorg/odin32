@@ -113,7 +113,7 @@ extern "C" {
 #endif
 
 #ifndef __export
-  #define __export    
+  #define __export
 #endif
 
 #ifndef CDECL
@@ -268,7 +268,7 @@ typedef WORD            LANGID;
 typedef DWORD           LCTYPE;
 typedef float           FLOAT;
 #ifdef __WIN32OS2__
-#if (__IBMC__ < 400) && (__IBMCPP__ < 360) && !defined(__WATCOMC__)
+#if (__IBMC__ < 400) && (__IBMCPP__ < 360) && !defined(__WATCOMC__) && !defined(__EMX__)
 typedef double	        __int64;
 #endif
 #else
