@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.49 2000-06-01 19:00:05 sandervl Exp $ */
+/* $Id: gdi32.cpp,v 1.50 2000-06-08 18:07:06 sandervl Exp $ */
 
 /*
  * GDI32 apis
@@ -684,13 +684,6 @@ int WIN32API Escape( HDC arg1, int arg2, int arg3, LPCSTR arg4, PVOID  arg5)
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API ExcludeClipRect( HDC arg1, int arg2, int arg3, int arg4, int  arg5)
-{
-    dprintf(("GDI32: ExcludeClipRect"));
-    return O32_ExcludeClipRect(arg1, arg2, arg3, arg4, arg5);
-}
-//******************************************************************************
-//******************************************************************************
 HPEN WIN32API ExtCreatePen( DWORD arg1, DWORD arg2, const LOGBRUSH * arg3, DWORD arg4, const DWORD *  arg5)
 {
     dprintf(("GDI32: ExtCreatePen"));
@@ -848,10 +841,10 @@ DWORD WIN32API GetKerningPairsW( HDC arg1, DWORD arg2, LPKERNINGPAIR  arg3)
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API GetMapMode( HDC arg1)
+int WIN32API GetMapMode( HDC hdc)
 {
-    dprintf(("GDI32: GetMapMode"));
-    return O32_GetMapMode(arg1);
+    dprintf(("GDI32: GetMapMode %x", hdc));
+    return O32_GetMapMode(hdc);
 }
 //******************************************************************************
 //******************************************************************************
@@ -1066,16 +1059,6 @@ BOOL WIN32API GetWorldTransform( HDC arg1, LPXFORM  arg2)
 {
     dprintf(("GDI32: GetWorldTransform"));
     return O32_GetWorldTransform(arg1, arg2);
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API IntersectClipRect(HDC arg1, int arg2, int arg3, int arg4, int  arg5)
-{
- int rc;
-
-  rc = O32_IntersectClipRect(arg1, arg2, arg3, arg4, arg5);
-  dprintf(("GDI32: IntersectClipRect returned %d\n", rc));
-  return(rc);
 }
 //******************************************************************************
 //******************************************************************************
