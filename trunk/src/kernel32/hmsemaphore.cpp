@@ -1,4 +1,4 @@
-/* $Id: hmsemaphore.cpp,v 1.7 2001-06-23 07:45:43 sandervl Exp $ */
+/* $Id: hmsemaphore.cpp,v 1.8 2001-06-23 16:59:28 sandervl Exp $ */
 
 /*
  * Win32 Semaphore implementation
@@ -33,6 +33,7 @@
 #ifdef USE_OS2SEMAPHORES
 #define INCL_DOSSEMAPHORES
 #define INCL_DOSERRORS
+#define INCL_WIN
 #include <os2wrap.h>
 #include <win32type.h>
 #include <win32api.h>
@@ -60,15 +61,6 @@
                                 /* waiter and auto-reset the semaphore when*/
                                 /* there are multiple waiters.             */
 
-#endif
-
-#ifdef USE_OS2SEMAPHORES
-typedef struct {
-    LONG currentCount;
-    LONG maximumCount;
-    LONG refCount;
-    HEV  hev;
-} SEM_INFO, *PSEM_INFO;
 #endif
 
 /*****************************************************************************
@@ -124,6 +116,7 @@ DWORD HMDeviceSemaphoreClass::CreateSemaphore(PHMHANDLEDATA         pHMHandleDat
       strcpy(szSemName, "\\SEM32\\");
       strcat(szSemName, lpszSemaphoreName);
       lpszSemaphoreName = szSemName;
+      FixSemName((char *)lpszSemaphoreName);
   }
   rc = DosCreateEventSem(lpszSemaphoreName, &hev, DCE_POSTONE, lInitialCount);
 
@@ -201,6 +194,7 @@ DWORD HMDeviceSemaphoreClass::OpenSemaphore(PHMHANDLEDATA         pHMHandleData,
 
   strcpy(szSemName, "\\SEM32\\");
   strcat(szSemName, lpszSemaphoreName);
+  FixSemName(szSemName);
   rc = DosOpenEventSem(szSemName, &hev);
   if(rc) {
       dprintf(("DosOpenEventSem %x failed with rc %d", pHMHandleData->hHMHandle, rc));
@@ -417,18 +411,178 @@ DWORD HMDeviceSemaphoreClass::MsgWaitForMultipleObjects(PHMHANDLEDATA pHMHandleD
                                                         DWORD      dwMilliseconds,
                                                         DWORD      dwWakeMask)
 {
-    dprintf(("KERNEL32: ERROR: HandleManager::DeviceHandler::MsgWaitForMultipleObjects %08x %d %x %d %d %x",
-              pHMHandleData->hHMHandle, nCount, pHandles, fWaitAll, dwMilliseconds, dwWakeMask));
+    return HMSemMsgWaitForMultipleObjects(nCount, pHandles, fWaitAll, dwMilliseconds, dwWakeMask);
+}
 
-    if(!(pHMHandleData->dwAccess & SYNCHRONIZE_W) )
-    {
-        dprintf(("ERROR: Access denied!!"));
-        SetLastError(ERROR_ACCESS_DENIED_W);
+DWORD HMSemMsgWaitForMultipleObjects(DWORD   cObjects,
+                                     PHANDLE lphObjects,
+                                     BOOL    fWaitAll,
+                                     DWORD   dwTimeout,
+                                     DWORD   dwWakeMask)
+{
+    PHMHANDLEDATA *pHandles;
+    HMUX hmux;
+    PSEMRECORD pSemRec;
+    int i, j;
+    APIRET rc;
+    ULONG  ulUser;
+    static HMODULE hUser32 = 0;
+    static BOOL (* WINAPI pfnPeekMessageA)(LPMSG,HWND,UINT,UINT,UINT);
+
+    dprintf(("KERNEL32: WaitForMultipleObjects %d %x %d %x",
+              cObjects, lphObjects, fWaitAll, dwTimeout));
+
+    if(pfnPeekMessageA == NULL) {
+          hUser32 = LoadLibraryA("USER32.DLL");
+          *(FARPROC *)&pfnPeekMessageA = GetProcAddress(hUser32,"PeekMessageA");
+    }   
+
+    if(cObjects == 1) {
+        //Can't use DosCreateMuxWaitSem here (will return error 292)
+        PHMHANDLEDATA pHandle = HMQueryHandleData(lphObjects[0]);
+        if(pHandle == NULL) {
+            return WAIT_FAILED_W;
+        }
+        if(!(pHandle->dwAccess & SYNCHRONIZE_W) )
+        {
+            dprintf(("ERROR: Access denied (handle %x, index 0)!!", lphObjects[0]));
+            SetLastError(ERROR_ACCESS_DENIED_W);
+            return WAIT_FAILED_W;
+        }
+
+        switch(pHandle->dwInternalType) {
+        case HMTYPE_SEMAPHORE:
+        {
+            PSEM_INFO pSemInfo  = (PSEM_INFO)pHandle->hHMHandle;
+
+            dprintf(("KERNEL32: HMWaitForMultipleObjects: handle 0: ODIN-%08xh, OS/2-%08xh",
+                     lphObjects[0], pSemInfo->hev));
+            if(InterlockedDecrement(&pSemInfo->currentCount) >= 0) {
+                return WAIT_OBJECT_0_W;
+            }
+            rc = WinWaitEventSem(pSemInfo->hev, dwTimeout);
+            break;
+        }
+        case HMTYPE_EVENTSEM:
+            dprintf(("KERNEL32: HMWaitForMultipleObjects: handle 0: ODIN-%08xh, OS/2-%08xh",
+                     lphObjects[0], pHandle->hHMHandle));
+            rc = WinWaitEventSem((HEV)pHandle->hHMHandle, dwTimeout);
+            break;
+        case HMTYPE_MUTEXSEM:
+            dprintf(("KERNEL32: HMWaitForMultipleObjects: handle %3i: ODIN-%08xh, OS/2-%08xh",
+                     lphObjects[0], pHandle->hHMHandle));
+            rc = WinRequestMutexSem((HMTX)pHandle->hHMHandle, dwTimeout);
+            break;
+        }
+        if(rc && rc != ERROR_INTERRUPT && rc != ERROR_TIMEOUT && rc != ERROR_SEM_OWNER_DIED) {
+            dprintf(("WinWaitEventSem/WinRequestMutexSem %x failed with rc %d", pHandle->hHMHandle, rc));
+            SetLastError(error2WinError(rc));
+            return WAIT_FAILED_W;
+        }
+        SetLastError(ERROR_SUCCESS_W);
+        if(rc == ERROR_INTERRUPT || rc == ERROR_SEM_OWNER_DIED) {
+            dprintf(("WAIT_ABANDONED_W"));
+            return WAIT_ABANDONED_W;
+        }
+        else 
+        if(rc == ERROR_TIMEOUT) {
+            dprintf(("WAIT_TIMEOUT_W"));
+            return WAIT_TIMEOUT_W;
+        }
+        MSG msg ;
+   
+        if(pfnPeekMessageA(&msg, NULL, 0, 0, PM_NOREMOVE_W) == TRUE) {
+            dprintf(("WAIT_OBJECT_0_W+1"));
+            return WAIT_OBJECT_0_W + 1;
+        }
+        dprintf(("WAIT_OBJECT_0_W+1"));
+        return WAIT_OBJECT_0_W;
+    }
+    pHandles = (PHMHANDLEDATA *)alloca(cObjects * sizeof(PHMHANDLEDATA));
+    pSemRec  = (PSEMRECORD)alloca(cObjects * sizeof(SEMRECORD));
+    if(pHandles == NULL || pSemRec == NULL) {
+        dprintf(("ERROR: out of memory!!"));
+        SetLastError(ERROR_OUTOFMEMORY_W);
         return WAIT_FAILED_W;
     }
+    for(i=0;i<cObjects;i++) {
+        pHandles[i] = HMQueryHandleData(lphObjects[i]);
+        if(pHandles[i] == NULL) {
+            dprintf(("ERROR: handle %x not recognized", lphObjects[i]));
+            SetLastError(ERROR_INVALID_HANDLE_W);
+            return WAIT_FAILED_W;
+        }
+        if(!(pHandles[i]->dwAccess & SYNCHRONIZE_W) )
+        {
+            dprintf(("ERROR: Access denied (handle %x, index %d)!!", lphObjects[i], i));
+            SetLastError(ERROR_ACCESS_DENIED_W);
+            return WAIT_FAILED_W;
+        }
+        if(pHandles[i]->dwInternalType == HMTYPE_SEMAPHORE) {
+            PSEM_INFO pSemInfo  = (PSEM_INFO)pHandles[i]->hHMHandle;
+            dprintf(("KERNEL32: HMWaitForMultipleObjects: handle %3i: ODIN-%08xh, OS/2-%08xh",
+                     i, lphObjects[i], pSemInfo->hev));
+        }
+        else 
+            dprintf(("KERNEL32: HMWaitForMultipleObjects: handle %3i: ODIN-%08xh, OS/2-%08xh",
+                     i, lphObjects[i], pHandles[i]->hHMHandle));
 
-    return WAIT_FAILED_W;
+    }
+    j = 0;
+    for(i=0;i<cObjects;i++) {
+        if(pHandles[i]->dwInternalType == HMTYPE_SEMAPHORE) {
+            PSEM_INFO pSemInfo  = (PSEM_INFO)pHandles[i]->hHMHandle;
+
+            if(InterlockedDecrement(&pSemInfo->currentCount) >= 0) {
+                if(!fWaitAll) {
+                    return WAIT_OBJECT_0_W + i;
+                }
+            }
+            else {
+                pSemRec[j].hsemCur = (HSEM)pSemInfo->hev;
+                pSemRec[j].ulUser = j;
+                j++;
+            }
+        }
+        else {
+            pSemRec[j].hsemCur = (HSEM)pHandles[i]->hHMHandle;
+            pSemRec[j].ulUser = j;
+            j++;
+        }
+    }
+    rc = DosCreateMuxWaitSem(NULL, &hmux, j, pSemRec, (fWaitAll) ? DCMW_WAIT_ALL : DCMW_WAIT_ANY);
+    if(rc) {
+        dprintf(("DosCreateMuxWaitSem failed with rc %d", rc));
+        SetLastError(error2WinError(rc));
+        return WAIT_FAILED_W;
+    }
+    ulUser = -1;
+    rc = WinWaitMuxWaitSem(hmux, dwTimeout, &ulUser);
+    DosCloseMuxWaitSem(hmux);
+    if(rc && rc != ERROR_INTERRUPT && rc != ERROR_TIMEOUT && rc != ERROR_SEM_OWNER_DIED) {
+        dprintf(("DosWaitMuxWaitSem %x failed with rc %d", hmux, rc));
+        SetLastError(error2WinError(rc));
+        return WAIT_FAILED_W;
+    }
+    SetLastError(ERROR_SUCCESS_W);
+    if(rc == ERROR_INTERRUPT || rc == ERROR_SEM_OWNER_DIED) {
+        //TODO: add index of handle that caused the error....
+        dprintf(("WAIT_ABANDONED_W"));
+        return WAIT_ABANDONED_W;
+    }
+    else 
+    if(rc == ERROR_TIMEOUT) {
+        dprintf(("WAIT_TIMEOUT_W"));
+        return WAIT_TIMEOUT_W;
+    }
+    if(ulUser == -1) {
+        dprintf(("WAIT_OBJECT_0_W+%d", cObjects));
+        return WAIT_OBJECT_0_W + cObjects; //message waiting
+    }
+    dprintf(("WAIT_OBJECT_0_W+%d", ulUser));
+    return WAIT_OBJECT_0_W + ulUser;
 }
+
 #endif
 
 #ifdef USE_OS2SEMAPHORES
@@ -448,18 +602,99 @@ DWORD HMDeviceSemaphoreClass::WaitForMultipleObjects(PHMHANDLEDATA pHMHandleData
                                                  BOOL    fWaitAll,
                                                  DWORD   dwTimeout)
 {
-    dprintf(("KERNEL32: ERROR: HandleManager::DeviceHandler::WaitForMultipleObjects %08x %d %x %d %x",
-              pHMHandleData->hHMHandle, cObjects, lphObjects, fWaitAll, dwTimeout));
+    return HMSemWaitForMultipleObjects(cObjects, lphObjects, fWaitAll, dwTimeout);
+}
 
-    if(!(pHMHandleData->dwAccess & SYNCHRONIZE_W) )
-    {
-        dprintf(("ERROR: Access denied!!"));
-        SetLastError(ERROR_ACCESS_DENIED_W);
+DWORD HMSemWaitForMultipleObjects(DWORD   cObjects,
+                                  PHANDLE lphObjects,
+                                  BOOL    fWaitAll,
+                                  DWORD   dwTimeout)
+{
+    PHMHANDLEDATA *pHandles;
+    HMUX hmux;
+    PSEMRECORD pSemRec;
+    int i, j;
+    APIRET rc;
+    ULONG  ulUser;
+
+    dprintf(("KERNEL32: WaitForMultipleObjects %d %x %d %x",
+              cObjects, lphObjects, fWaitAll, dwTimeout));
+
+    pHandles = (PHMHANDLEDATA *)alloca(cObjects * sizeof(PHMHANDLEDATA));
+    pSemRec  = (PSEMRECORD)alloca(cObjects * sizeof(SEMRECORD));
+    if(pHandles == NULL || pSemRec == NULL) {
+        dprintf(("ERROR: out of memory!!"));
+        SetLastError(ERROR_OUTOFMEMORY_W);
         return WAIT_FAILED_W;
     }
+    for(i=0;i<cObjects;i++) {
+        pHandles[i] = HMQueryHandleData(lphObjects[i]);
+        if(pHandles[i] == NULL) {
+            dprintf(("ERROR: handle %x not recognized", lphObjects[i]));
+        }
+        if(!(pHandles[i]->dwAccess & EVENT_MODIFY_STATE_W) )
+        {
+            dprintf(("ERROR: Access denied (handle %x, index %d)!!", lphObjects[i], i));
+            SetLastError(ERROR_INVALID_HANDLE_W);
+            return WAIT_FAILED_W;
+        }
+        if(pHandles[i]->dwInternalType == HMTYPE_SEMAPHORE) {
+            PSEM_INFO pSemInfo  = (PSEM_INFO)pHandles[i]->hHMHandle;
+            dprintf(("KERNEL32: HMWaitForMultipleObjects: handle %3i: ODIN-%08xh, OS/2-%08xh",
+                     i, lphObjects[i], pSemInfo->hev));
+        }
+        else 
+            dprintf(("KERNEL32: HMWaitForMultipleObjects: handle %3i: ODIN-%08xh, OS/2-%08xh",
+                     i, lphObjects[i], pHandles[i]->hHMHandle));
 
-    return WAIT_FAILED_W;
+    }
+    j = 0;
+    for(i=0;i<cObjects;i++) {
+        if(pHandles[i]->dwInternalType == HMTYPE_SEMAPHORE) {
+            PSEM_INFO pSemInfo  = (PSEM_INFO)pHandles[i]->hHMHandle;
+
+            if(InterlockedDecrement(&pSemInfo->currentCount) >= 0) {
+                if(!fWaitAll) {
+                    return WAIT_OBJECT_0_W + i;
+                }
+            }
+            else {
+                pSemRec[j].hsemCur = (HSEM)pSemInfo->hev;
+                pSemRec[j].ulUser = j;
+                j++;
+            }
+        }
+        else {
+            pSemRec[j].hsemCur = (HSEM)pHandles[i]->hHMHandle;
+            pSemRec[j].ulUser = j;
+            j++;
+        }
+    }
+    rc = DosCreateMuxWaitSem(NULL, &hmux, j, pSemRec, (fWaitAll) ? DCMW_WAIT_ALL : DCMW_WAIT_ANY);
+    if(rc) {
+        dprintf(("DosCreateMuxWaitSem failed with rc %d", rc));
+        SetLastError(error2WinError(rc));
+        return WAIT_FAILED_W;
+    }
+    rc = DosWaitMuxWaitSem(hmux, dwTimeout, &ulUser);
+    DosCloseMuxWaitSem(hmux);
+    if(rc && rc != ERROR_INTERRUPT && rc != ERROR_TIMEOUT && rc != ERROR_SEM_OWNER_DIED) {
+        dprintf(("DosWaitMuxWaitSem %x failed with rc %d", hmux, rc));
+        SetLastError(error2WinError(rc));
+        return WAIT_FAILED_W;
+    }
+    SetLastError(ERROR_SUCCESS_W);
+    if(rc == ERROR_INTERRUPT || rc == ERROR_SEM_OWNER_DIED) {
+        //TODO: add index of handle that caused the error....
+        return WAIT_ABANDONED_W;
+    }
+    else 
+    if(rc == ERROR_TIMEOUT) {
+        return WAIT_TIMEOUT_W;
+    }
+    return WAIT_OBJECT_0_W + ulUser;
 }
+
 #endif
 
 /*****************************************************************************
@@ -506,7 +741,7 @@ BOOL HMDeviceSemaphoreClass::ReleaseSemaphore(PHMHANDLEDATA pHMHandleData,
   }
 
   rc = DosResetEventSem(pSemInfo->hev, &count);
-  if(rc) {
+  if(rc && rc != ERROR_ALREADY_RESET) {
       dprintf(("DosResetEventSem %x failed with rc %d", pSemInfo->hev, rc));
       SetLastError(error2WinError(rc));
       return FALSE;
@@ -525,3 +760,23 @@ BOOL HMDeviceSemaphoreClass::ReleaseSemaphore(PHMHANDLEDATA pHMHandleData,
 #endif
 }
 
+//******************************************************************************
+//Replaces illegal characters in semaphore name (or else OS/2 will return 
+//ERROR_INVALID_NAME
+//******************************************************************************
+void FixSemName(char *lpszSemaphoreName)
+{
+    while(TRUE) {
+        switch(*lpszSemaphoreName) {
+        case 0:
+            return;
+        case '?':
+        case ':':
+            *lpszSemaphoreName = '_';
+            break;
+        }
+        lpszSemaphoreName++;
+    }
+}
+//******************************************************************************
+//******************************************************************************

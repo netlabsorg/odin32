@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.67 2001-06-23 07:45:42 sandervl Exp $ */
+/* $Id: HandleManager.cpp,v 1.68 2001-06-23 16:59:26 sandervl Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -608,7 +608,19 @@ DWORD  HMHandleValidate (ULONG hHandle16)
 
   return (NO_ERROR);
 }
+//*****************************************************************************
+//*****************************************************************************
+PHMHANDLEDATA HMQueryHandleData(HANDLE handle)
+{
+  int iIndex;
 
+  iIndex = _HMHandleQuery(handle);                   /* get the index */
+  if (-1 == iIndex)                                  /* error ? */
+  {
+      return NULL;
+  }
+  return &TabWin32Handles[iIndex].hmHandleData;      /* call device handler */
+}
 
 /*****************************************************************************
  * Name      : DWORD HMHandleTranslateToWin
@@ -2882,6 +2894,13 @@ DWORD HMWaitForMultipleObjects (DWORD   cObjects,
   if(cObjects == 1) {
       return HMWaitForSingleObject(*lphObjects, dwTimeout);
   }
+
+  if(cObjects > MAXIMUM_WAIT_OBJECTS) {
+      dprintf(("KERNEL32: HMWaitForMultipleObjects: Too many objects (%d)", cObjects));
+      SetLastError(ERROR_INVALID_PARAMETER);
+      return WAIT_FAILED;
+  }
+
                                                           /* validate handle */
   iIndex = _HMHandleQuery(*lphObjects);                   /* get the index */
   if (-1 == iIndex)                                       /* error ? */
@@ -3013,6 +3032,12 @@ DWORD  HMMsgWaitForMultipleObjects  (DWORD      cObjects,
    //TODO: rewrite handling of other handles; don't forward to open32
       dprintf(("WANRING: HMWaitForMultipleObjects: unknown handle passed on to Open32 -> will not work if other handles are semaphores"));
       return O32_MsgWaitForMultipleObjects(cObjects, lphObjects, fWaitAll, dwTimeout, dwWakeMask);
+  }
+
+  if(cObjects > MAXIMUM_WAIT_OBJECTS) {
+      dprintf(("KERNEL32: HMMsgWaitForMultipleObjects: Too many objects (%d)", cObjects));
+      SetLastError(ERROR_INVALID_PARAMETER);
+      return WAIT_FAILED;
   }
 
   pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */

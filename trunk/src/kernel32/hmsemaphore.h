@@ -1,4 +1,4 @@
-/* $Id: hmsemaphore.h,v 1.4 2001-06-21 21:07:54 sandervl Exp $ */
+/* $Id: hmsemaphore.h,v 1.5 2001-06-23 16:59:28 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -22,6 +22,15 @@
 
 #include "HMDevice.h"
 #include "HMOpen32.h"
+
+#ifdef USE_OS2SEMAPHORES
+typedef struct {
+    LONG   currentCount;
+    LONG   maximumCount;
+    LONG   refCount;
+    ULONG  hev;
+} SEM_INFO, *PSEM_INFO;
+#endif
 
 
 /*****************************************************************************
@@ -95,6 +104,19 @@ public:
                                  LPLONG        lpPreviousCount);
 };
 
+
+DWORD HMSemWaitForMultipleObjects (DWORD   cObjects,
+                                   PHANDLE lphObjects,
+                                   BOOL    fWaitAll,
+                                   DWORD   dwTimeout);
+
+DWORD HMSemMsgWaitForMultipleObjects (DWORD   cObjects,
+                                      PHANDLE lphObjects,
+                                      BOOL    fWaitAll,
+                                      DWORD   dwTimeout, 
+                                      DWORD   dwWakeMask);
+
+void FixSemName(char *lpszSemaphoreName);
 
 #endif /* _HM_DEVICE_SEMAPHORE_H_ */
 

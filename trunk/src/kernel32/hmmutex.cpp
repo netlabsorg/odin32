@@ -1,4 +1,4 @@
-/* $Id: hmmutex.cpp,v 1.6 2001-06-22 19:40:28 sandervl Exp $ */
+/* $Id: hmmutex.cpp,v 1.7 2001-06-23 16:59:28 sandervl Exp $ */
 
 /*
  * Win32 Mutex Semaphore implementation
@@ -46,6 +46,7 @@
 
 #include "HandleManager.H"
 #include "HMMutex.h"
+#include "HMSemaphore.h"
 
 #define DBG_LOCALLOG	DBG_hmmutex
 #include "dbglocal.h"
@@ -95,6 +96,7 @@ DWORD HMDeviceMutexClass::CreateMutex(PHMHANDLEDATA         pHMHandleData,
       strcpy(szSemName, "\\SEM32\\");
       strcat(szSemName, lpszMutexName);
       lpszMutexName = szSemName;
+      FixSemName((char *)lpszMutexName);
   }
   rc = DosCreateMutexSem(lpszMutexName, &htmx, 0, fInitialOwner);
 
@@ -164,6 +166,7 @@ DWORD HMDeviceMutexClass::OpenMutex(PHMHANDLEDATA         pHMHandleData,
 
   strcpy(szSemName, "\\SEM32\\");
   strcat(szSemName, lpszMutexName);
+  FixSemName(szSemName);
   rc = DosOpenMutexSem(szSemName, &hmtx);
   if(rc) {
       dprintf(("DosOpenMutexSem %x failed with rc %d", pHMHandleData->hHMHandle, rc));
@@ -375,16 +378,7 @@ DWORD HMDeviceMutexClass::MsgWaitForMultipleObjects(PHMHANDLEDATA pHMHandleData,
                                                     DWORD      dwMilliseconds,
                                                     DWORD      dwWakeMask)
 {
-    dprintf(("KERNEL32: ERROR: HandleManager::DeviceHandler::MsgWaitForMultipleObjects %08x %d %x %d %d %x",
-              pHMHandleData->hHMHandle, nCount, pHandles, fWaitAll, dwMilliseconds, dwWakeMask));
-
-    if(!(pHMHandleData->dwAccess & SYNCHRONIZE_W) )
-    {
-        dprintf(("ERROR: Access denied!!"));
-        SetLastError(ERROR_ACCESS_DENIED_W);
-        return WAIT_FAILED_W;
-    }
-    return WAIT_FAILED_W;
+    return HMSemMsgWaitForMultipleObjects(nCount, pHandles, fWaitAll, dwMilliseconds, dwWakeMask);
 }
 #endif
 
@@ -405,16 +399,7 @@ DWORD HMDeviceMutexClass::WaitForMultipleObjects(PHMHANDLEDATA pHMHandleData,
                                                  BOOL    fWaitAll,
                                                  DWORD   dwTimeout)
 {
-    dprintf(("KERNEL32: ERROR: HandleManager::DeviceHandler::WaitForMultipleObjects %08x %d %x %d %x",
-              pHMHandleData->hHMHandle, cObjects, lphObjects, fWaitAll, dwTimeout));
-
-    if(!(pHMHandleData->dwAccess & SYNCHRONIZE_W) )
-    {
-        dprintf(("ERROR: Access denied!!"));
-        SetLastError(ERROR_ACCESS_DENIED_W);
-        return WAIT_FAILED_W;
-    }
-    return WAIT_FAILED_W;
+    return HMSemWaitForMultipleObjects(cObjects, lphObjects, fWaitAll, dwTimeout);
 }
 #endif
 

@@ -1,4 +1,4 @@
-/* $Id: hmdevice.h,v 1.28 2001-06-22 19:40:27 sandervl Exp $ */
+/* $Id: hmdevice.h,v 1.29 2001-06-23 16:59:27 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -58,6 +58,7 @@ typedef struct _HMHANDLEDATA
   LPVOID          lpDeviceData;
 } HMHANDLEDATA, *PHMHANDLEDATA;
 
+PHMHANDLEDATA HMQueryHandleData(HANDLE handle);
 
 
 class HMDeviceHandler
