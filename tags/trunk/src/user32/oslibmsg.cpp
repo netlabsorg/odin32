@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.cpp,v 1.66 2003-03-20 09:15:31 sandervl Exp $ */
+/* $Id: oslibmsg.cpp,v 1.67 2003-03-28 11:49:01 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -526,8 +526,8 @@ continuepeekmsg:
          //unused PM message; dispatch immediately and grab next one
         dprintf2(("OSLibWinPeekMsg: Untranslated message; dispatched immediately"));
         if(!(fRemove & PM_REMOVE_W)) {
-            rc = WinPeekMsg(teb->o.odin.hab, &os2msg, hwndOS2, TranslateWinMsg(uMsgFilterMin, TRUE),
-                            TranslateWinMsg(uMsgFilterMax, FALSE), PM_REMOVE);
+            rc = WinPeekMsg(teb->o.odin.hab, &os2msg, os2msg.hwnd, os2msg.msg,
+                            os2msg.msg, PM_REMOVE);
         }
         WinDispatchMsg(teb->o.odin.hab, &os2msg);
         return OSLibWinPeekMsg(pMsg, hwnd, uMsgFilterMin, uMsgFilterMax, fRemove, isUnicode);
