@@ -1,4 +1,4 @@
-/* $Id: time.cpp,v 1.4 1999-08-18 19:35:30 phaller Exp $ */
+/* $Id: time.cpp,v 1.5 1999-08-18 21:45:14 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -268,3 +268,25 @@ VOID WINAPI RtlTimeToElapsedTimeFields(PLARGE_INTEGER liTime,
            liTime,
            TimeFields));
 }
+
+
+/*****************************************************************************
+ * Name      : NtQuerySystemTime
+ * Purpose   : unknown
+ * Parameters: unknown, probably wrong
+ * Variables :
+ * Result    :
+ * Remark    : NTDLL.?
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1999/06/01 09:00]
+ *****************************************************************************/
+
+DWORD WIN32API NtQuerySystemTime(LPFILETIME ft)
+{
+  dprintf(("NTDLL: NtQuerySystemTime(%08xh) not implemented.\n",
+           ft));
+
+  return 0;
+}
+

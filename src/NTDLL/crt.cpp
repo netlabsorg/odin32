@@ -1,10 +1,14 @@
-/* $Id: crt.cpp,v 1.4 1999-07-23 18:06:25 sandervl Exp $ */
+/* $Id: crt.cpp,v 1.5 1999-08-18 21:45:13 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
  * Win32 NT Runtime / NTDLL for OS/2
  * Copyright 1999 Patrick Haller (phaller@gmx.net)
  */
+
+/****************************************************************************
+ * Include                                                                  *
+ ****************************************************************************/
 
 #include <odin.h>
 #include <stdlib.h>
@@ -23,6 +27,103 @@ NTDLL.sprintf
 NTDLL._itoa
 NTDLL._wcsicmp
 */
+
+
+/****************************************************************************
+ * Local Prototypes                                                         *
+ ****************************************************************************/
+
+
+LPWSTR CDECL OS2_wcsupr(LPWSTR str);
+int    CDECL OS2_wcsnicmp(LPWSTR str1, LPWSTR str2, long l);
+
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : NTDLL.879
+ * Status    :
+ *
+ * Author    : Patrick Haller [Thu, 1999/06/22 20:44]
+ *****************************************************************************/
+
+int CDECL OS2_wcsicmp(LPWSTR str1, LPWSTR str2)
+{
+  dprintf(("NTDLL: _wcsicmp(%08xh,%08xh)\n",
+           str1,
+           str2));
+
+  return (OS2_wcsnicmp(str1,
+                       str2,
+                       wcslen((wchar_t*) str1)));
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : NTDLL.880
+ * Status    :
+ *
+ * Author    : Patrick Haller [Thu, 1999/06/22 20:44]
+ *****************************************************************************/
+
+LPWSTR CDECL OS2_wcslwr(LPWSTR str)
+{
+  DWORD dwIndex;
+
+  dprintf(("NTDLL: _wcslwr(%08xh)\n",
+           str));
+
+  for (dwIndex = wcslen((const wchar_t*)str);
+       dwIndex;
+       dwIndex--)
+  {
+    towlower(str[dwIndex]);
+  }
+
+  return (str);
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : NTDLL.881
+ * Status    :
+ *
+ * Author    : Patrick Haller [Thu, 1999/06/22 20:44]
+ *****************************************************************************/
+
+int CDECL OS2_wcsnicmp(LPWSTR str1, LPWSTR str2, long l)
+{
+  LPWSTR w1;
+  LPWSTR w2;
+
+  dprintf(("NTDLL: _wcsnicmp(%08xh,%08xh,%08xh)\n",
+           str1,
+           str2,
+           l));
+
+  w1 = HEAP_strdupW(GetProcessHeap(),0,str1);
+  w2 = HEAP_strdupW(GetProcessHeap(),0,str2);
+  OS2_wcsupr(w1);
+  OS2_wcsupr(w2);
+
+  return (wcsncmp((wchar_t*)w1,
+                  (wchar_t*)w2,
+                  l));
+}
 
 
 /*****************************************************************************
@@ -450,6 +551,29 @@ int CDECL OS2strcmp(const LPSTR str1,
            str2));
 
   return (strcmp(str1, str2));
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : NTDLL.?
+ * Status    :
+ *
+ * Author    : Patrick Haller [Thu, 1999/06/22 20:44]
+ *****************************************************************************/
+
+int CDECL OS2_stricmp(const LPSTR str1,
+                      const LPSTR str2)
+{
+  dprintf(("NTDLL: _stricmp(%s,%s)\n",
+           str1,
+           str2));
+
+  return (stricmp(str1, str2));
 }
 
 
@@ -994,5 +1118,28 @@ wchar_t* CDECL OS2wcsstr(const wchar_t* str1,
            str2));
 
   return (wcsstr(str1, str2));
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : NTDLL.?
+ * Status    :
+ *
+ * Author    : Patrick Haller [Thu, 1999/06/22 20:44]
+ *****************************************************************************/
+
+char * CDECL OS2_itoa(int i, char *s, int r)
+{
+  dprintf(("NTDLL: _itoa(%08xh, %08xh, %08xh)\n",
+           i,
+           s,
+           r));
+
+  return (_itoa(i,s,r));
 }
 
