@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.32 2000-05-26 18:43:33 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.33 2000-05-29 22:43:31 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -766,7 +766,7 @@ VirtualKeyFound:
                     winMsg->lParam |= 1 << 30;                          // bit 30, previous state, 1 means key was pressed
             }
         }
-        if((fMsgRemoved == MSG_REMOVE) && ISKDB_CAPTURED())
+        if(ISKDB_CAPTURED())
         {
             if(DInputKeyBoardHandler(winMsg)) {
                 goto dummymessage; //dinput swallowed message
