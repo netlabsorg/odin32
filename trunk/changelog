@@ -1,8 +1,18 @@
-/* $Id: changelog,v 1.2173 2002-06-18 21:34:01 bird Exp $ */
+/* $Id: changelog,v 1.2174 2002-06-19 02:28:09 bird Exp $ */
 
  2002-06-18: knut st. osmundsen <bird@anduin.net>
     - Win32k:   o Fixed compiler warning which caused the M$ compiler
                   to choke on some systems.
+    - Testsuite:
+                o A collection of testcases running real win32 apps.
+                  Not finished, just an idea currently, intended for
+                  testing odin releases and changes.
+                  Currently limiting ourselfs to CUI progs.
+                o A simple DoxyGen testcase is checked in.
+                o Read the micro howto in testsuite/Makefile.
+    - Make:     o Synced with outside world. (NMAKE5 changes mostly.)
+                o Added support for TARGET_MODE = TESTCASE.
+                o Added separate tools file for the testsuite.
 
  2002-06-17: Sander van Leeuwen <sandervl@innotek.de>
     - USER32:   o Disabled drag 'n drop temporarily (not yet stable)
