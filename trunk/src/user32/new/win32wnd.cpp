@@ -1,4 +1,4 @@
-/* $Id: win32wnd.cpp,v 1.14 1999-07-19 11:50:04 sandervl Exp $ */
+/* $Id: win32wnd.cpp,v 1.15 1999-07-19 13:58:38 sandervl Exp $ */
 /*
  * Win32 Window Code for OS/2
  *
@@ -668,6 +668,19 @@ ULONG Win32Window::MsgShow(BOOL fShow)
 ULONG Win32Window::MsgMove(ULONG xParent, ULONG yParent)
 {
   return SendInternalMessageA(WM_MOVE, 0, MAKELONG((USHORT)xParent, (USHORT)yParent));
+}
+//******************************************************************************
+//******************************************************************************
+ULONG Win32Window::MsgCommand(ULONG cmd, ULONG Id, HWND hwnd)
+{
+  switch(cmd) {
+    case CMD_MENU:
+        return SendInternalMessageA(WM_COMMAND, MAKELONG(Id, 0), 0);
+    case CMD_CONTROL:
+        return 0; //todo
+    case CMD_ACCELERATOR:
+        return 0; //todo
+  }
 }
 //******************************************************************************
 //******************************************************************************
