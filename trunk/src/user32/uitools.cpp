@@ -1,4 +1,4 @@
-/* $Id: uitools.cpp,v 1.35 2003-02-13 12:44:53 sandervl Exp $ */
+/* $Id: uitools.cpp,v 1.36 2004-01-21 12:16:14 sandervl Exp $ */
 /*
  * User Interface Functions
  *
@@ -1723,12 +1723,17 @@ BOOL WIN32API DrawIconEx(HDC hdc, int xLeft, int yTop, HICON hIcon,
   {
     cxWidth = GetSystemMetrics(SM_CXICON);
     cyWidth = GetSystemMetrics(SM_CYICON);
-  } else if (cxWidth == 0)
+  } 
+  else 
   {
-    cxWidth = bmp.bmWidth;
-  } else if (cyWidth == 0)
-  {
-    cyWidth = ii.hbmColor ? bmp.bmHeight:bmp.bmHeight/2;
+      if (cxWidth == 0)
+      {
+        cxWidth = bmp.bmWidth;
+      } 
+      if (cyWidth == 0)
+      {
+        cyWidth = ii.hbmColor ? bmp.bmHeight:bmp.bmHeight/2;
+      }
   }
 
   if (hbrFlickerFreeDraw)
