@@ -1,4 +1,4 @@
-# $Id: odin32.post.vac3.mk,v 1.12 2001-02-11 10:35:29 sandervl Exp $
+# $Id: odin32.post.vac3.mk,v 1.13 2001-06-10 02:12:42 bird Exp $
 
 #
 # Odin32 API
@@ -271,7 +271,7 @@ libs: all
 !ifndef NO_MAIN_RULE
 $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION): $(OBJS)
     $(RM) $@
-    $(ILIB) $(ILIBFLAGS) $@ @<<
+    -4 $(ILIB) $(ILIBFLAGS) $@ @<<
 $(OBJS:  =&^
 )
 $(OBJDIR)\$(@B).lst
