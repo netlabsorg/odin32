@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7 1999-11-03 23:28:05 sandervl Exp $
+# $Id: makefile,v 1.8 1999-11-04 10:55:31 phaller Exp $
 
 #
 # PD-Win32 API
@@ -38,7 +38,7 @@ $(TARGET).lib: $(TARGET).def
 	$(CP) $@ $(PDWIN32_LIB)
 
 
-mpr.obj: mpr.cpp mpr.h
+mpr.obj: mpr.cpp
 initterm.obj: initterm.cpp
 
 clean:
