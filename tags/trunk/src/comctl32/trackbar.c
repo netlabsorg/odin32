@@ -1,4 +1,4 @@
-/* $Id: trackbar.c,v 1.24 1999-12-27 22:54:49 cbratschi Exp $ */
+/* $Id: trackbar.c,v 1.25 2000-02-17 17:26:50 cbratschi Exp $ */
 /*
  * Trackbar control
  *
@@ -9,7 +9,7 @@
  *
  *
  * Status: complete
- * Version: 5.00
+ * Version: 5.80
  *
  * Note: TBM_SETTHUMBLENGTH implemented, COMCTL32 5.00 ignores it
  *       Microsoft(TM) should fix this bug :)
@@ -19,7 +19,6 @@
 #include "commctrl.h"
 #include "trackbar.h"
 #include <stdio.h>
-
 
 #define TRACKBAR_GetInfoPtr(hwnd) ((TRACKBAR_INFO*)GetWindowLongA(hwnd,0))
 
