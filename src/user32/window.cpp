@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.83 2000-11-09 18:15:22 sandervl Exp $ */
+/* $Id: window.cpp,v 1.84 2000-11-11 18:39:31 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -56,7 +56,6 @@ HWND WIN32API CreateWindowExA(DWORD exStyle, LPCSTR className,
     if(exStyle & WS_EX_MDICHILD)
         return CreateMDIWindowA(className, windowName, style, x, y, width, height, parent, instance, (LPARAM)data);
 
-#if 1
     /* Find the class atom */
     if (!(classAtom = GlobalFindAtomA(className)))
     {
@@ -74,28 +73,6 @@ HWND WIN32API CreateWindowExA(DWORD exStyle, LPCSTR className,
       sprintf(tmpClass,"#%d", (int) className);
       className = tmpClass;
     }
-#else
-    /* Find the class atom */
-    if (!HIWORD(className) || !(classAtom = GlobalFindAtomA(className)))
-    {
-        if (!HIWORD(className))
-        {
-          sprintf(tmpClass,"#%d", (int) className);
-          classAtom = GlobalFindAtomA(tmpClass);
-          className = tmpClass;
-        }
-        if (!classAtom)
-        {
-          if (!HIWORD(className)) {
-                  dprintf(("CreateWindowEx32A: bad class name %04x\n", LOWORD(className)));
-          }
-          else    dprintf(("CreateWindowEx32A: bad class name '%s'\n", className ));
-
-          SetLastError(ERROR_INVALID_PARAMETER);
-          return 0;
-        }
-    }
-#endif
 
     /* Create the window */
     cs.lpCreateParams = data;
@@ -164,37 +141,33 @@ HWND WIN32API CreateWindowExW(DWORD exStyle, LPCWSTR className,
   Win32BaseWindow *window;
   ATOM classAtom;
   CREATESTRUCTA cs;
-  char tmpClassA[20];
   WCHAR tmpClassW[20];
 
     if(exStyle & WS_EX_MDICHILD)
         return CreateMDIWindowW(className, windowName, style, x, y, width, height, parent, instance, (LPARAM)data);
 
     /* Find the class atom */
-    if (!HIWORD(className) || !(classAtom = GlobalFindAtomW(className)))
+    if (!(classAtom = GlobalFindAtomW(className)))
     {
-        if (!HIWORD(className))
-        {
-          sprintf(tmpClassA,"#%d", (int) className);
-          AsciiToUnicode(tmpClassA, tmpClassW);
-          classAtom = GlobalFindAtomW(tmpClassW);
-          className = (LPCWSTR)tmpClassW;
-        }
-        if (!classAtom)
-        {
-          if (!HIWORD(className)) {
-                  dprintf(("CreateWindowEx32W: bad class name %04x\n", LOWORD(className)));
-          }
-          else    dprintf(("CreateWindowEx32W: bad class name "));
+       if (!HIWORD(className))
+           dprintf(("CreateWindowEx32W: bad class name %04x",LOWORD(className)));
+       else
+           dprintf(("CreateWindowEx32W: bad class name '%x'", className));
 
-          SetLastError(ERROR_INVALID_PARAMETER);
-          return 0;
-        }
+       SetLastError(ERROR_INVALID_PARAMETER);
+       return 0;
     }
+
     if(HIWORD(className)) {
          dprintf(("CreateWindowExW: class %ls name %x parent %x (%d,%d) (%d,%d), %x %x", className, windowName, parent, x, y, width, height, style, exStyle));
     }
     else dprintf(("CreateWindowExW: class %d name %x parent %x (%d,%d) (%d,%d), %x %x", className, windowName, parent, x, y, width, height, style, exStyle));
+
+    if (!HIWORD(className))
+    {
+      wsprintfW(tmpClassW, (LPCWSTR)L"#%d", (int) className);
+      className = tmpClassW;
+    }
 
     /* Create the window */
     cs.lpCreateParams = data;
