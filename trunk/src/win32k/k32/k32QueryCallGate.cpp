@@ -1,4 +1,4 @@
-/* $Id: k32QueryCallGate.cpp,v 1.2 2001-02-21 15:42:11 bird Exp $
+/* $Id: k32QueryCallGate.cpp,v 1.3 2001-02-23 04:01:48 bird Exp $
  *
  * k32QueryCallGate - Query the callgate selector for the callgate to the k32 APIs.
  *
@@ -51,12 +51,6 @@
 APIRET k32QueryCallGate(PUSHORT pusCGSelector)
 {
     APIRET  rc;
-
-    /*
-     * Callgate is not safte on SMP yet.
-     */
-    if (isSMPKernel())
-        return ERROR_NOT_SUPPORTED;
 
     if (CallGateGDT > 7)
         rc = TKSuULongNF(pusCGSelector, &CallGateGDT);
