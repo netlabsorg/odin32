@@ -1,4 +1,4 @@
-/* $Id: hmparport.h,v 1.4 2001-11-26 14:54:03 sandervl Exp $ */
+/* $Id: hmparport.h,v 1.5 2001-12-05 09:09:52 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -90,6 +90,9 @@ class HMDeviceParPortClass : public HMDeviceHandler
                             LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine);
 
   private:
+    // The number of physically present parallel ports in the system,
+    // LAN-redirectors don't count. See note in ::CreateFile()
+    BYTE bNumberOfParallelPorts;
 };
 
 
