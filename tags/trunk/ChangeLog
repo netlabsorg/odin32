@@ -1,4 +1,12 @@
-/* $Id: ChangeLog,v 1.2548 2003-04-09 11:59:08 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2549 2003-04-10 10:25:15 sandervl Exp $ */
+
+ 2003-04-10: Platon Fomichev <stauff@innotek   >
+    - MSVCRT  : o MSVCRT updates, forwarders to stdcall functions, lots of funcs
+                  now directly imported from NTDLL, resync with latest Wine
+    - EMXLIBS : o Added yet another wrapper for FS and added some funcs for new
+                  msvcrt
+    - INCLUDE : o OS2SEL functions corrected for potential optimizing problems
+                  in release build. (Bug found and corrected by Dietrich)
 
  2002-04-09: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o Unmap memory view when deleting PE dll object. 
