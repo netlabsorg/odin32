@@ -1,10 +1,21 @@
-/* $Id: changelog,v 1.1638 2001-08-07 10:04:40 bird Exp $ */
+/* $Id: changelog,v 1.1639 2001-08-07 21:32:28 sandervl Exp $ */
+
+ 2001-08-07: Sander van Leeuwen <sandervl@xs4all.nl>
+    - INSTALL:  o Create Odin folder with program objects for readme, changelog
+                  and license files.
+    - USER32:   o Added function to create program objects + folders
+    - SHELL32:  o Create program objects during installation of windows 
+                  applications
+                  (Desktop objects created on the OS/2 desktop; program objects
+                   created in app folder inside Odin folder)
+    - KERNEL32: o Put back source files to convert icons and icon groups
+                  (not working right yet)
 
  2001-08-06: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Check for ERROR_ACCESS_DENIED in CreateProcess
                   (fixes Notes + installers)
                 o Memory map fixes (GetCurrentProcess returns handles
-                  that are no unique)
+                  that are not unique)
                 o Init fix for logfile names of multiple processes
                 o Support different ordinal base for custom build
     - CUSTOMBUILD:
