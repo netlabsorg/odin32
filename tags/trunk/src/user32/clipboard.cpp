@@ -1,4 +1,4 @@
-/* $Id: clipboard.cpp,v 1.16 2002-11-25 09:48:13 sandervl Exp $ */
+/* $Id: clipboard.cpp,v 1.17 2003-07-31 16:07:56 sandervl Exp $ */
 
 /*
  * Win32 Clipboard API functions for OS/2
@@ -56,22 +56,19 @@ BOOL WIN32API ChangeClipboardChain( HWND hwndRemove, HWND hwndNext)
 //******************************************************************************
 int WIN32API CountClipboardFormats(void)
 {
-    dprintf(("USER32: CountClipboardFormats"));
     return O32_CountClipboardFormats();
 }
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API EmptyClipboard(void)
 {
-    dprintf(("USER32: EmptyClipboard"));
     return O32_EmptyClipboard();
 }
 //******************************************************************************
 //******************************************************************************
-UINT WIN32API EnumClipboardFormats(UINT arg1)
+UINT WIN32API EnumClipboardFormats(UINT uFormat)
 {
-    dprintf(("USER32: EnumClipboardFormats %d", arg1));
-    return O32_EnumClipboardFormats(arg1);
+    return O32_EnumClipboardFormats(uFormat);
 }
 //******************************************************************************
 //******************************************************************************
@@ -166,7 +163,6 @@ HWND WIN32API GetOpenClipboardWindow(void)
     Win32BaseWindow *window;
     HWND hwnd;
 
-    dprintf(("USER32: GetOpenClipboardWindow"));
     hwnd = O32_GetOpenClipboardWindow();
 
     window = Win32BaseWindow::GetWindowFromOS2Handle(hwnd);
@@ -215,7 +211,6 @@ BOOL WIN32API OpenClipboard( HWND hwnd)
 //******************************************************************************
 BOOL WIN32API CloseClipboard(void)
 {
-    dprintf(("USER32: CloseClipboard"));
     return O32_CloseClipboard();
 }
 //******************************************************************************
