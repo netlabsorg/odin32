@@ -1,4 +1,21 @@
-/* $Id: ChangeLog,v 1.1648 2001-08-11 12:02:38 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1649 2001-08-16 04:33:12 bird Exp $ */
+
+ 2001-08-16: knut st. osmundsen <kosmunds@csc.com>
+    - Tools\CmdQd:
+                o Added command queue daemon which is used in the multiple job
+                  build feature.
+    - Makefiles:
+                o Implemented multiple job build feature. This works like
+                  GNU Make --jobs[=N].
+                  <ul>
+                  <li> Start the daemon tools\bin\cmdqd init <N> where N is the
+                       then number of workers. Need tools have to be made first.
+                  <li> Define the env.var. MULTIJOBS to enable this feature.
+                  <li> Do make as usual.
+                  <li> tools\bin\cmdqd kill to kill the daemon.
+                  </ul>
+                o This feature will speedup make of single modules alot on SMP
+                  machines.
 
  2001-08-10: Sander van Leeuwen <sandervl@xs4all.nl>
     - INSTALL:  o Add COM registry keys for OLE32 & OLEAUT32
