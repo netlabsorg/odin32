@@ -1,4 +1,4 @@
-/* $Id: win32api.h,v 1.14 2000-06-14 13:19:44 sandervl Exp $ */
+/* $Id: win32api.h,v 1.15 2000-06-17 09:46:46 sandervl Exp $ */
 
 /*
  *
@@ -107,5 +107,12 @@ BOOL    WIN32API DPtoLP(HDC,LPPOINT,INT);
 BOOL    WIN32API RedrawWindow(HWND,const RECT*,HRGN, DWORD);
 HGDIOBJ WIN32API SelectObject(HDC,HGDIOBJ);
 BOOL    WIN32API DeleteObject(HANDLE hObj);
+DWORD   WIN32API GetRegionData(HRGN,DWORD,LPRGNDATA);
+BOOL    WIN32API SetRectRgn(HRGN,INT,INT,INT,INT);
+HRGN    WIN32API CreateRectRgn(INT,INT,INT,INT);
+HRGN    WIN32API CreateRectRgnIndirect(const RECT*);
+HRGN    WIN32API CreateRoundRectRgn(INT,INT,INT,INT,INT,INT);
+INT     WIN32API CombineRgn(HRGN,HRGN,HRGN,INT);
+BOOL    WIN32API SetRectRgn(HRGN,INT,INT,INT,INT);
 
 #endif
