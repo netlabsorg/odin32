@@ -1,4 +1,4 @@
-/* $Id: text.cpp,v 1.12 2000-08-18 18:14:59 sandervl Exp $ */
+/* $Id: text.cpp,v 1.13 2000-10-02 13:11:47 phaller Exp $ */
 
 /*
  * GDI32 text apis
@@ -318,7 +318,9 @@ INT SYSTEM EXPORT InternalDrawTextExA(HDC hdc,LPCSTR lpchText,INT cchText,LPRECT
 
       newText = (char*)malloc(newTextLen+1);
       strncpy(newText,lpchText,cchText);
-      slashPos = strrchr(newText,(int)"\\");
+      
+      // PH 2000/10/01 "//" appeared wrong ...
+      slashPos = strrchr(newText,(int)'\\');
       if (slashPos != NULL)
       {
         int preLen = slashPos-newText;
