@@ -1,7 +1,9 @@
-/* $Id: changelog,v 1.1591 2001-07-12 16:24:33 sandervl Exp $ */
+/* $Id: changelog,v 1.1592 2001-07-12 17:17:02 sandervl Exp $ */
 
  2001-07-12: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Atom fixes
+    - OLEAUT32: o Added RegisterActiveObject, RevokeActiveObject & 
+                  GetActiveObject from Wine.
 
  2001-07-10: Sander van Leeuwen <sandervl@xs4all.nl>
     - COMDLG32: o Don't clear filename when selecting of switching
