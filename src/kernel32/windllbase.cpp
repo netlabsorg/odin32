@@ -1,4 +1,4 @@
-/* $Id: windllbase.cpp,v 1.13 2000-05-02 20:53:14 sandervl Exp $ */
+/* $Id: windllbase.cpp,v 1.14 2000-06-14 02:27:33 phaller Exp $ */
 
 /*
  * Win32 Dll base class
@@ -420,8 +420,19 @@ BOOL Win32DllBase::attachProcess()
   }
 
   dprintf(("attachProcess to dll %s", szModule));
-
-  rc = dllEntryPoint(hinstance, DLL_PROCESS_ATTACH, 0);
+  
+  // @@@PH 2000/06/13 lpvReserved, Starcraft STORM.DLL
+  // if DLL_PROCESS_ATTACH, lpvReserved is NULL for dynamic loads
+  //   and non-NULL for static loads.
+  // same goes for process termination
+  LPVOID lpvReserved;
+  
+  if (isDynamicLib())
+    lpvReserved = NULL;
+  else
+    lpvReserved = (LPVOID)0xdeadface; // some arbitrary value
+  
+  rc = dllEntryPoint(hinstance, DLL_PROCESS_ATTACH, lpvReserved);
 
   dprintf(("attachProcess to dll %s DONE", szModule));
 
@@ -460,7 +471,20 @@ BOOL Win32DllBase::detachProcess()
 
   fUnloaded = TRUE;
   sel = SetWin32TIB();
-  rc = dllEntryPoint(hinstance, DLL_PROCESS_DETACH, 0);
+  
+  // @@@PH 2000/06/13 lpvReserved, Starcraft STORM.DLL
+  // if DLL_PROCESS_ATTACH, lpvReserved is NULL for dynamic loads
+  //   and non-NULL for static loads.
+  // same goes for process termination
+  LPVOID lpvReserved;
+  
+  if (isDynamicLib())
+    lpvReserved = NULL;
+  else
+    lpvReserved = (LPVOID)0xdeadface; // some arbitrary value
+  
+  rc = dllEntryPoint(hinstance, DLL_PROCESS_DETACH, lpvReserved);
+  
   SetFS(sel);
   tlsDetachThread();	//destroy TLS (main thread)
   tlsDelete();
@@ -480,7 +504,7 @@ BOOL Win32DllBase::attachThread()
 	return(TRUE);
 
   dprintf(("attachThread to dll %s", szModule));
-
+  
   rc = dllEntryPoint(hinstance, DLL_THREAD_ATTACH, 0);
 
   dprintf(("attachThread to dll %s DONE", szModule));
@@ -498,7 +522,7 @@ BOOL Win32DllBase::detachThread()
 	return(TRUE);
 
   dprintf(("detachThread from dll %s", szModule));
-
+  
   rc =  dllEntryPoint(hinstance, DLL_THREAD_DETACH, 0);
   return rc;
 }

@@ -1,4 +1,4 @@
-/* $Id: windllbase.h,v 1.2 2000-05-02 20:53:14 sandervl Exp $ */
+/* $Id: windllbase.h,v 1.3 2000-06-14 02:27:33 phaller Exp $ */
 
 /*
  * Win32 Dll base class
@@ -79,7 +79,7 @@ static  void      tlsDetachThreadFromAllDlls();
 	void      incDynamicLib();
 	void      decDynamicLib();
 	BOOL      isDynamicLib()   { return nrDynamicLibRef != 0; };
-
+  
 	void      setUnloadOrder(Win32ImageBase *parent);
 
 	void      updateDependencies();
@@ -140,7 +140,7 @@ protected:
 	//This flag is set when a dll has been loaded with DosLoadModule
         BOOL          fLoadLibrary;
 	BOOL	      fDisableUnload;
-
+  
 private:
 static  Queue         loadLibDlls;
 static  Win32DllBase *head;
