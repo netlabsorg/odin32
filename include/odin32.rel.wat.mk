@@ -1,4 +1,4 @@
-# $Id: odin32.rel.wat.mk,v 1.2 2000-12-16 23:41:35 bird Exp $
+# $Id: odin32.rel.wat.mk,v 1.3 2000-12-17 19:54:56 bird Exp $
 
 #
 # Odin32 API
@@ -104,9 +104,18 @@ CXXFLAGS         += -bd
 #
 # Linker flags.
 #
+!ifndef STACKSIZE
+STACKSIZE = 0x50000
+!endif
 LDFLAGS          = option nodefaultlibs, maxe=25, q, symf
 LDFLAGS_ODINCRT  = option maxe=25, q, symf
 
+!ifdef EXETARGET
+LDFLAGS          += option stack=$(STACKSIZE)
+LDFLAGS_ODINCRT  += option stack=$(STACKSIZE)
+!endif
+
 LD2FLAGS         = $(LDFLAGS)
 LD2FLAGS_ODINCRT = $(LDFLAGS_ODINCRT)
+
 
