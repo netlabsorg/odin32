@@ -2062,17 +2062,17 @@ typedef struct {
 typedef struct {
 	DWORD		dwCallback;
 	MCIDEVICEID	wDeviceID;
-	LPSTR		lpstrDeviceType;
-	LPSTR		lpstrElementName;
-	LPSTR		lpstrAlias;
+	LPCSTR		lpstrDeviceType;
+	LPCSTR		lpstrElementName;
+	LPCSTR		lpstrAlias;
 } MCI_OPEN_PARMSA, *LPMCI_OPEN_PARMSA;
 
 typedef struct {
 	DWORD		dwCallback;
 	MCIDEVICEID	wDeviceID;
-	LPWSTR		lpstrDeviceType;
-	LPWSTR		lpstrElementName;
-	LPWSTR		lpstrAlias;
+	LPCWSTR		lpstrDeviceType;
+	LPCWSTR		lpstrElementName;
+	LPCWSTR		lpstrAlias;
 } MCI_OPEN_PARMSW, *LPMCI_OPEN_PARMSW;
 
 DECL_WINELIB_TYPE_AW(MCI_OPEN_PARMS)

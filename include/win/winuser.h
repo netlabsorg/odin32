@@ -1488,6 +1488,12 @@ typedef struct
 #define TPM_NONOTIFY      0x0080
 #define TPM_RETURNCMD     0x0100
 
+/* return codes for WM_MENUCHAR */
+#define MNC_IGNORE  0
+#define MNC_CLOSE   1
+#define MNC_EXECUTE 2
+#define MNC_SELECT  3
+
 typedef struct
 {
     UINT   cbSize;
@@ -3335,7 +3341,7 @@ INT       WINAPI MessageBoxExA(HWND,LPCSTR,LPCSTR,UINT,WORD);
 INT       WINAPI MessageBoxExW(HWND,LPCWSTR,LPCWSTR,UINT,WORD);
 #define     MessageBoxEx WINELIB_NAME_AW(MessageBoxEx)
 HMONITOR    WINAPI MonitorFromPoint(POINT,DWORD);
-HMONITOR    WINAPI MonitorFromRect(LPRECT,DWORD);
+HMONITOR    WINAPI MonitorFromRect(LPCRECT,DWORD);
 HMONITOR    WINAPI MonitorFromWindow(HWND,DWORD);
 DWORD       WINAPI MsgWaitForMultipleObjects(DWORD,HANDLE*,BOOL,DWORD,DWORD);
 BOOL      WINAPI PaintDesktop(HDC);
@@ -3960,7 +3966,7 @@ BOOL      WINAPI ShowWindow(HWND,INT);
 BOOL      WINAPI ShowWindowAsync(HWND hwnd, int nCmdShow);
 BOOL      WINAPI SubtractRect(LPRECT,const RECT*,const RECT*);
 BOOL      WINAPI SwapMouseButton(BOOL);
-BOOL      WINAPI SwitchToThisWindow(HWND,BOOL);
+VOID      WINAPI SwitchToThisWindow(HWND,BOOL);
 BOOL      WINAPI SystemParametersInfoA(UINT,UINT,LPVOID,UINT);
 BOOL      WINAPI SystemParametersInfoW(UINT,UINT,LPVOID,UINT);
 #define     SystemParametersInfo WINELIB_NAME_AW(SystemParametersInfo)

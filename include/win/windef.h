@@ -14,6 +14,10 @@
 
 #define WINVER 0x0500
 
+#ifdef UNICODE
+#include <wchar.h>
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -227,9 +231,17 @@ typedef unsigned short  USHORT;
 typedef char            CHAR;
 typedef unsigned char   UCHAR;
 /* Some systems might have wchar_t, but we really need 16 bit characters */
+#ifdef UNICODE
+typedef wchar_t         WCHAR;
+#else
 typedef unsigned short  WCHAR;
+#endif
 typedef unsigned short  BOOL16;
+#ifdef __FORCE_BOOL_AS_INT__
+typedef int             BOOL;
+#else
 typedef unsigned long   BOOL;
+#endif
 typedef double          DATE;
 typedef long            LONG_PTR;
 typedef unsigned long   ULONG_PTR;
