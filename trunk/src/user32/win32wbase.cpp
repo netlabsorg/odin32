@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.202 2000-06-23 19:04:12 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.203 2000-06-29 12:26:01 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -723,7 +723,7 @@ if (!cs->hMenu) cs->hMenu = LoadMenuA(windowClass->getInstance(),"MYAPP");
 
             /* Call WH_SHELL hook */
             if (!(getStyle() & WS_CHILD) && !owner)
-                HOOK_CallHooksA(WH_SHELL, HSHELL_WINDOWCREATED, getWindowHandle(), 0 );
+                HOOK_CallHooksA(WH_SHELL, HSHELL_WINDOWCREATED, getWindowHandle(), 0);
 
             SetLastError(0);
             return TRUE;
@@ -2132,6 +2132,10 @@ BOOL Win32BaseWindow::ShowWindow(ULONG nCmdShow)
 
     SetWindowPos(HWND_TOP, newPos.left, newPos.top, newPos.right, newPos.bottom, LOWORD(swp));
 
+    if(!(swp & SWP_NOACTIVATE)) {
+	OSLibWinSetActiveWindow(OS2Hwnd);
+    }
+
     if (flags & WIN_NEED_SIZE)
     {
         /* should happen only in CreateWindowEx() */
@@ -2282,7 +2286,6 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
 		OSLibWinChangeTaskList(hTaskList, OS2Hwnd, getWindowNameA(), (getStyle() & WS_VISIBLE) ? 1 : 0);
 	}
     }
-
     if(rc == FALSE)
     {
         dprintf(("OSLibWinSetMultWindowPos failed! Error %x",OSLibWinGetLastError()));
@@ -2802,6 +2805,21 @@ HWND Win32BaseWindow::SetActiveWindow()
  HWND hwndActive;
 
     dprintf(("SetActiveWindow %x", getWindowHandle()));
+    if (HOOK_IsHooked( WH_CBT ))
+    {
+        CBTACTIVATESTRUCT cbta;
+        LRESULT ret;
+
+        cbta.fMouse = FALSE;
+        cbta.hWndActive = GetActiveWindow();
+        ret = HOOK_CallHooksA(WH_CBT, HCBT_ACTIVATE, getWindowHandle(), (LPARAM)&cbta);
+        if(ret)
+        {
+            dprintf(("SetActiveWindow %x, CBT hook cancelled operation", getWindowHandle()));
+            return cbta.hWndActive;
+        }
+    }
+
     if(OSLibWinSetActiveWindow(OS2Hwnd) == FALSE) {
         dprintf(("OSLibWinSetActiveWindow %x returned FALSE!", OS2Hwnd));
     }
