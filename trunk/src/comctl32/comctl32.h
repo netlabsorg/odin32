@@ -17,6 +17,7 @@
 #include "wingdi.h"
 #include "winuser.h"
 #include <win/commctrl.h>
+#include "unicode.h"
 
 
 #ifdef __cplusplus

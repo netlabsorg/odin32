@@ -25,6 +25,7 @@
 #include "winbase.h"
 #include "commctrl.h"
 #include "header.h"
+#include "comctl32.h"
 
 
 #define __HDM_LAYOUT_HACK__
@@ -767,7 +768,7 @@ HEADER_InsertItemA (HWND hwnd, WPARAM wParam, LPARAM lParam)
 	    len = lstrlenA (phdi->pszText);
 	    lpItem->pszText = COMCTL32_Alloc ((len+1)*sizeof(WCHAR));
 //	    lstrcpyAtoW (lpItem->pszText, phdi->pszText);
-	    strcpy(lpItem->pszText, phdi->pszText);
+	    AsciiToUnicode(phdi->pszText, lpItem->pszText);
 	}
 	else
 	    lpItem->pszText = LPSTR_TEXTCALLBACKW;
@@ -975,7 +976,7 @@ HEADER_SetItemA (HWND hwnd, WPARAM wParam, LPARAM lParam)
 		INT len = lstrlenA (phdi->pszText);
 		lpItem->pszText = COMCTL32_Alloc ((len+1)*sizeof(WCHAR));
 //		lstrcpyAtoW (lpItem->pszText, phdi->pszText);
-		strcpy(lpItem->pszText, phdi->pszText);
+	        AsciiToUnicode(phdi->pszText, lpItem->pszText);
 	    }
 	}
 	else
