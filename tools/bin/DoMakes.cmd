@@ -1,4 +1,4 @@
-/* $Id: DoMakes.cmd,v 1.3 2002-08-24 04:29:06 bird Exp $
+/* $Id: DoMakes.cmd,v 1.4 2002-08-29 11:49:36 bird Exp $
  *
  * Rexx script which executes a given command with each of
  * the spesified makefiles using the option -f.
@@ -10,6 +10,7 @@
  * Project Odin Software License can be found in LICENSE.TXT
  */
 signal on novalue name NoValueHandler
+Address CMD '@echo off'
 
 parse arg '"'sMakefiles'" 'sCommand
 
