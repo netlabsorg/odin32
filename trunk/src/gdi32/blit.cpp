@@ -1,4 +1,4 @@
-/* $Id: blit.cpp,v 1.32 2001-06-11 15:57:15 sandervl Exp $ */
+/* $Id: blit.cpp,v 1.33 2001-07-13 19:34:21 sandervl Exp $ */
 
 /*
  * GDI32 blit code
@@ -511,6 +511,9 @@ INT WIN32API StretchDIBits(HDC hdc, INT xDst, INT yDst, INT widthDst,
         long lHeight   = -newInfo.bmiHeader.biHeight;
         newInfo.bmiHeader.biHeight = -newInfo.bmiHeader.biHeight;
 
+        //TODO: doesn't work if memory is readonly!!
+        ((BITMAPINFO *)info)->bmiHeader.biHeight = -info->bmiHeader.biHeight;
+
         char *newBits = (char *)malloc( lLineByte * lHeight );
         if(newBits) {
             unsigned char *pbSrc = (unsigned char *)bits + lLineByte * (lHeight - 1);
@@ -523,6 +526,9 @@ INT WIN32API StretchDIBits(HDC hdc, INT xDst, INT yDst, INT widthDst,
             rc = StretchDIBits_(hdc, xDst, yDst, widthDst, heightDst, xSrc, ySrc, widthSrc, heightSrc, newBits, info, wUsage, dwRop);
             free( newBits );
         }
+
+        //TODO: doesn't work if memory is readonly!!
+        ((BITMAPINFO *)info)->bmiHeader.biHeight = -info->bmiHeader.biHeight;
         return rc;
     } else {
         return StretchDIBits_(hdc, xDst, yDst, widthDst, heightDst, xSrc, ySrc, widthSrc, heightSrc, bits, info, wUsage, dwRop);
