@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.97 2001-10-07 11:48:27 sandervl Exp $
+# $Id: Makefile,v 1.98 2001-12-13 15:32:57 sandervl Exp $
 
 #
 # Odin32 API
@@ -100,7 +100,8 @@ $(OBJDIR)\text.obj \
 $(OBJDIR)\wintrack.obj \
 $(OBJDIR)\oldnls32.obj \
 $(OBJDIR)\user32rsrc.obj \
-$(OBJDIR)\oslibprf.obj
+$(OBJDIR)\oslibprf.obj \
+$(OBJDIR)\stats.obj
 
 
 #

@@ -1,4 +1,4 @@
-/* $Id: inituser32.cpp,v 1.8 2001-12-13 12:24:42 sandervl Exp $ */
+/* $Id: inituser32.cpp,v 1.9 2001-12-13 15:32:57 sandervl Exp $ */
 /*
  * USER32 DLL entry point
  *
@@ -46,6 +46,7 @@
 #include "initterm.h"
 #include <exitlist.h>
 #include <initdll.h>
+#include <stats.h>
 
 #define DBG_LOCALLOG    DBG_initterm
 #include "dbglocal.h"
@@ -261,6 +262,7 @@ void APIENTRY cleanupUser32(ULONG ulReason)
    MONITOR_Finalize(&MONITOR_PrimaryMonitor);
    SYSCOLOR_Save();
    CloseSpyQueue();
+   STATS_DumpStats();
    dprintf(("user32 exit done\n"));
 }
 //******************************************************************************
