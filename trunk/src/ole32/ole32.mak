@@ -1,4 +1,4 @@
-# $Id: ole32.mak,v 1.1 2000-11-19 09:05:15 bird Exp $
+# $Id: ole32.mak,v 1.2 2000-11-21 11:36:51 sandervl Exp $
 
 #
 # Odin32 API
@@ -29,6 +29,7 @@ $(OBJDIR)\clsid.obj \
 $(OBJDIR)\compositemoniker.obj \
 $(OBJDIR)\datacache.obj \
 $(OBJDIR)\defaulthandler.obj \
+$(OBJDIR)\errorinfo.obj \
 $(OBJDIR)\filemoniker.obj \
 $(OBJDIR)\guid.obj \
 $(OBJDIR)\hglobalstream.obj \

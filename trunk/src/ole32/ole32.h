@@ -1,4 +1,4 @@
-/* $Id: ole32.h,v 1.11 2000-09-17 10:29:43 davidr Exp $ */
+/* $Id: ole32.h,v 1.12 2000-11-21 11:36:50 sandervl Exp $ */
 /*
  *
  * Project Odin Software License can be found in LICENSE.TXT
@@ -43,6 +43,7 @@
 #include "wine/obj_inplace.h"
 #include "wine/obj_oleobj.h"
 #include "wine/obj_surrogate.h"
+#include "wine/obj_errorinfo.h"
 #include "wine/obj_oleview.h"
 #include "wine/obj_cache.h"
 
