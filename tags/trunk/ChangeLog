@@ -1,4 +1,4 @@
-/* $Id: ChangeLog,v 1.1321 2001-03-25 22:02:14 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1322 2001-03-25 22:35:12 sandervl Exp $ */
 
  2001-03-25: Michal Necasek <michalnec@volny.cz>
     - KERNEL32: o Turn off all optimizations for exceptions.cpp in release build (!)
@@ -16,6 +16,8 @@
                   (fixes Roger Wilco config window input)
                 o Call GlobalAddAtomA/W in RegisterWindowMessageA/W
                   (don't use Open32)
+    - KERNEL32: o OSLibStripPath bugfix (wrong comparison if path contains
+                  both back- and forward slashes)
 
  2001-03-24: Sander van Leeuwen <sandervl@xs4all.nl>
     - WINMM:    o mmsystemGetVersion returned wrong version. Should be 0x030A.
