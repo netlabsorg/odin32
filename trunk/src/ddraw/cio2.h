@@ -10,6 +10,7 @@
 extern "C"
 {
  int io_init1();
+ int io_init2(short);
  int io_exit1();
 
  char c_inb1(short);
