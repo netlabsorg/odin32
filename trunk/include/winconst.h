@@ -1,4 +1,4 @@
-/* $Id: winconst.h,v 1.27 2000-03-03 11:14:24 sandervl Exp $ */
+/* $Id: winconst.h,v 1.28 2000-03-13 12:44:05 sandervl Exp $ */
 
 /*
  * Win32 constants
@@ -981,6 +981,30 @@
 #define ERROR_REC_NON_EXISTENT_W                4005L
 #define ERROR_RPL_NOT_ALLOWED_W                 4006L
 
+/* Access rights */
+
+#define DELETE                     0x00010000
+#define READ_CONTROL               0x00020000
+#define WRITE_DAC                  0x00040000
+#define WRITE_OWNER                0x00080000
+#define SYNCHRONIZE                0x00100000
+#define STANDARD_RIGHTS_REQUIRED   0x000f0000
+
+#define STANDARD_RIGHTS_READ       READ_CONTROL
+#define STANDARD_RIGHTS_WRITE      READ_CONTROL
+#define STANDARD_RIGHTS_EXECUTE    READ_CONTROL
+
+#define STANDARD_RIGHTS_ALL        0x001f0000
+
+#define SPECIFIC_RIGHTS_ALL        0x0000ffff
+
+#define GENERIC_READ               0x80000000
+#define GENERIC_WRITE              0x40000000
+#define GENERIC_EXECUTE            0x20000000
+#define GENERIC_ALL                0x10000000
+
+#define MAXIMUM_ALLOWED            0x02000000
+#define ACCESS_SYSTEM_SECURITY     0x01000000
 
 #ifndef LOWORD
 #define LOWORD(l)              ((WORD)(DWORD)(l))
@@ -1072,7 +1096,27 @@
 #define REG_RESOURCE_LIST                8  /* resource list? huh? */
 #define REG_FULL_RESOURCE_DESCRIPTOR     9  /* full resource descriptor? huh? */
 
-#define KEY_ALL_ACCESS 0x0000003f
+#define KEY_QUERY_VALUE         0x00000001
+#define KEY_SET_VALUE           0x00000002
+#define KEY_CREATE_SUB_KEY      0x00000004
+#define KEY_ENUMERATE_SUB_KEYS  0x00000008
+#define KEY_NOTIFY              0x00000010
+#define KEY_CREATE_LINK         0x00000020
+
+#define KEY_READ                (STANDARD_RIGHTS_READ|	\
+				 KEY_QUERY_VALUE|	\
+				 KEY_ENUMERATE_SUB_KEYS|\
+				 KEY_NOTIFY		\
+				)
+#define KEY_WRITE               (STANDARD_RIGHTS_WRITE|	\
+				 KEY_SET_VALUE|		\
+				 KEY_CREATE_SUB_KEY	\
+				)
+#define KEY_EXECUTE             KEY_READ
+#define KEY_ALL_ACCESS          (STANDARD_RIGHTS_ALL|	\
+				 KEY_READ|KEY_WRITE|	\
+				 KEY_CREATE_LINK	\
+				)
 
 #define HKEY_CLASSES_ROOT       ((HKEY) 0x80000000)
 #define HKEY_CURRENT_USER       ((HKEY) 0x80000001)
