@@ -1290,6 +1290,12 @@ typedef struct
     POINT   pt;
 } MSG, *PMSG, *NPMSG, *LPMSG;
 
+#define POINTSTOPOINT(pt, pts)                          \
+        { (pt).x = (LONG)(SHORT)LOWORD(*(LONG*)&pts);   \
+          (pt).y = (LONG)(SHORT)HIWORD(*(LONG*)&pts); }          
+
+#define POINTTOPOINTS(pt)      (MAKELONG((short)((pt).x), (short)((pt).y)))
+
 
 /* Cursors / Icons */
 

@@ -199,7 +199,12 @@ static LPCSTR debugstr_an (LPCSTR src, int n)
   LPSTR dst;
   static char res[128];
 
-  if (!src) return "(null)";
+  if (!HIWORD(src))
+  {
+        if (!src) return "(null)";
+        sprintf(res, "#%04x", LOWORD(src) );
+        return res;
+  }
   if (n > sizeof(res)) return "(null)";
 
   if (n < 0) n = 0;
@@ -245,7 +250,12 @@ static LPCSTR debugstr_wn (LPCWSTR src, int n)
   LPSTR dst;
   static char res[128];
 
-  if (!src) return "(null)";
+  if (!HIWORD(src))
+  {
+        if (!src) return "(null)";
+        sprintf(res, "#%04x", LOWORD(src) );
+        return res;
+  }
   if (n > sizeof(res)) return "(null)";
   if (n < 0) n = 0;
 

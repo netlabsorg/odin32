@@ -1,4 +1,3 @@
-/* $Id: debugstr.h,v 1.3 2000-08-30 13:56:37 sandervl Exp $ */
 #ifndef __WINE_DEBUGSTR_H
 #define __WINE_DEBUGSTR_H
 
@@ -8,8 +7,8 @@
    quotes.  The string will be valid for some time, but not indefinitely
    as strings are re-used.  */
 
-#define debugstr_a(a) a
-#define debugstr_w(a) a
+#define debugstr_a(a) debugstr_an(a, 80)
+#define debugstr_w(a) debugstr_wn(a, 80)
 
 //extern LPSTR debugstr_a (LPCSTR s);
 //extern LPSTR debugstr_w (LPCWSTR s);
