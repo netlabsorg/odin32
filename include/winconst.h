@@ -1,4 +1,4 @@
-/* $Id: winconst.h,v 1.6 1999-09-10 18:56:35 dengert Exp $ */
+/* $Id: winconst.h,v 1.7 1999-09-15 23:29:08 sandervl Exp $ */
 
 /*
  * Win32 constants
@@ -164,3 +164,19 @@
 #define SIMPLEREGION_W    2
 #define COMPLEXREGION_W   3
 
+/* ShowWindow() codes */
+#define SW_HIDE_W             0
+#define SW_SHOWNORMAL_W       1
+#define SW_NORMAL_W           1
+#define SW_SHOWMINIMIZED_W    2
+#define SW_SHOWMAXIMIZED_W    3
+#define SW_MAXIMIZE_W         3
+#define SW_SHOWNOACTIVATE_W   4
+#define SW_SHOW_W             5
+#define SW_MINIMIZE_W         6
+#define SW_SHOWMINNOACTIVE_W  7
+#define SW_SHOWNA_W           8
+#define SW_RESTORE_W          9
+#define SW_SHOWDEFAULT_W      10
+#define SW_MAX_W              10
+#define SW_NORMALNA_W         0xCC        /* undoc. flag in MinMaximize */

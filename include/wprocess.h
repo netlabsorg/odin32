@@ -1,4 +1,4 @@
-/* $Id: wprocess.h,v 1.6 1999-07-17 09:19:15 sandervl Exp $ */
+/* $Id: wprocess.h,v 1.7 1999-09-15 23:29:09 sandervl Exp $ */
 /*
  * Process help functions
  *
@@ -28,6 +28,7 @@ void   WIN32API RestoreOS2TIB();
 USHORT WIN32API SetWin32TIB();
 
 extern BOOL fExeStarted;
+extern BOOL fFreeLibrary;
 
 //Flat pointer to thread TIB structure
 extern DWORD  *TIBFlatPtr;

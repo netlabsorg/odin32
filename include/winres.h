@@ -1,4 +1,4 @@
-/* $Id: winres.h,v 1.9 1999-09-04 12:42:10 sandervl Exp $ */
+/* $Id: winres.h,v 1.10 1999-09-15 23:29:08 sandervl Exp $ */
 
 /*
  * Win32 resource class
@@ -12,7 +12,7 @@
 #ifndef __WINRES_H__
 #define __WINRES_H__
 
-class Win32Image;
+class Win32ImageBase;
 
 //Use to distinguish between converted OS/2 resources in an image (pe2lx'ed) or
 //resources that are loaded from the original win32 image (pe loader)
@@ -26,8 +26,8 @@ class Win32Resource
 public:
                    // Constructors and destructors
                    Win32Resource(); //custum resource (i.e. created by app in runtime)
-                   Win32Resource(Win32Image *module, HRSRC hRes, ULONG id, ULONG type);
-                   Win32Resource(Win32Image *module, ULONG id, ULONG type,
+                   Win32Resource(Win32ImageBase *module, HRSRC hRes, ULONG id, ULONG type);
+                   Win32Resource(Win32ImageBase *module, ULONG id, ULONG type,
 	                         ULONG size, char *resdata);
     virtual       ~Win32Resource();
 
@@ -42,7 +42,7 @@ public:
   	     ULONG getOS2Handle()   		{ return OS2ResHandle; };
 	      void setOS2Handle(ULONG handle) 	{ OS2ResHandle = handle; };
 
-    static    void destroyAll(Win32Image *module);
+    static    void destroyAll(Win32ImageBase *module);
 
 protected:
 
@@ -50,7 +50,7 @@ protected:
 
 	     PVOID convertResource(void *win32res);
 
-       Win32Image *module;
+    Win32ImageBase *module;
 
              HRSRC hres;
              ULONG type;
@@ -71,7 +71,7 @@ protected:
   Win32Resource*   next;               // Next Resource in module
 
 private:
-    friend    class Win32Image;
+    friend    class Win32ImageBase;
 };
 
 
@@ -95,5 +95,8 @@ private:
     #define    NTRT_NEWMENU          (NTRT_MENU|NTRT_NEWRESOURCE)
     #define    NTRT_NEWDIALOG        (NTRT_DIALOG|NTRT_NEWRESOURCE)
 
+
+#define MAX_RES 17
+extern char *ResTypes[MAX_RES];
 
 #endif
