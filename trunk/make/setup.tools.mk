@@ -1,4 +1,4 @@
-# $Id: setup.tools.mk,v 1.4 2002-04-16 00:08:25 bird Exp $
+# $Id: setup.tools.mk,v 1.5 2002-04-22 00:30:54 bird Exp $
 
 
 #
@@ -11,7 +11,7 @@ BUILD_NOCOLORS = 1;
 !ifndef BUILD_NOCOLORS
 CLRTXT=[32;1m
 CLRERR=[31;1m
-CLRFIL=[34;1m
+CLRFIL=[33;1m
 CLRRST=[0m
 !else
 CLRTXT=
@@ -57,6 +57,7 @@ EXT_DLL = dll
 EXT_RES = res
 EXT_SYS = sys
 EXT_IFS = ifs
+EXT_VDD = sys
 EXT_RES = res
 
 
