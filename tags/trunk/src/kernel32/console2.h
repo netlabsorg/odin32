@@ -1,4 +1,4 @@
-/* $Id: console2.h,v 1.10 2000-10-20 11:46:47 sandervl Exp $ */
+/* $Id: console2.h,v 1.11 2001-10-01 01:43:35 bird Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -421,7 +421,7 @@ extern "C" {
 
 
                                                    /* console message thread */
-VOID   _Optlink iConsoleMsgThread    (void *pParameters);
+VOID /*_Optlink*/ iConsoleMsgThread    (void *pParameters);
 
 MRESULT EXPENTRY iConsoleWindowProc(HWND   hwnd,   /* window procedure */
                                           ULONG  msg,
