@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.60 2000-11-09 18:16:57 sandervl Exp $ */
+/* $Id: gdi32.cpp,v 1.61 2000-11-14 14:28:22 sandervl Exp $ */
 
 /*
  * GDI32 apis
@@ -113,10 +113,10 @@ HPEN WIN32API CreatePenIndirect(const LOGPEN * lplgpn)
 }
 //******************************************************************************
 //******************************************************************************
-HBRUSH WIN32API CreateDIBPatternBrushPt( const VOID * arg1, UINT  arg2)
+HBRUSH WIN32API CreateDIBPatternBrushPt( const VOID * buffer, UINT usage)
 {
-    dprintf(("GDI32: CreateDIBPatternBrushPt\n"));
-    return O32_CreateDIBPatternBrushPt(arg1, arg2);
+    dprintf(("GDI32: CreateDIBPatternBrushPt %x %x", buffer, usage));
+    return O32_CreateDIBPatternBrushPt(buffer, usage);
 }
 //******************************************************************************
 //******************************************************************************
