@@ -1,7 +1,12 @@
- /* $Id: ChangeLog,v 1.164 1999-09-01 07:30:25 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.165 1999-09-01 18:51:01 sandervl Exp $ */
+
+ 99-09-01: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32\NEW: Fixed GetWindowDC (Freecell 'Cards Left' string drawn
+                      at the right place)
 
  99-09-01: Jens Wiessner <wiessnej@rfi.de>
 	- RASAPI32: Created stub dll
+	- MSACM32: Created (partly) stub dll
 
  99-08-31: Patrick Haller <phaller@gmx.net>
 	- WINMM:    	revision of timer services (C&C RA)
