@@ -1,8 +1,9 @@
- /* $Id: changelog,v 1.844 2000-03-28 17:09:22 sandervl Exp $ */
+ /* $Id: changelog,v 1.845 2000-03-28 17:14:46 sandervl Exp $ */
 
  2000-03-28: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Fixed VirtualQuery; cbLength is length of memory structure,
                     not range of pages
+                    Fixed compare of imported api names with length < 4
                     Fixed OpenFile; if filename doesn't contain path, look for
                     it in:
 		    1: dir from which the app loaded
