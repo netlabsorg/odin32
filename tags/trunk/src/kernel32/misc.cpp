@@ -1,4 +1,4 @@
-/* $Id: misc.cpp,v 1.42 2001-09-26 15:31:05 phaller Exp $ */
+/* $Id: misc.cpp,v 1.43 2001-11-10 17:03:05 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -555,7 +555,7 @@ void CloseLogFile()
   if(oldcrtmsghandle)
     _set_crt_msg_handle(oldcrtmsghandle);
 
-  fclose(flog);
+  if(flog) fclose(flog);
   flog = 0;
 }
 //******************************************************************************
