@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.2717 2004-03-24 16:56:20 sandervl Exp $ */
+/* $Id: changelog,v 1.2718 2004-03-25 14:52:51 sandervl Exp $ */
+
+ 2004-03-25: Sander van Leeuwen <sandervl@innotek   >
+    - GDI32:    o LineTo: special case in toWin32LineEnd when inside a path
+                          definition
 
  2004-03-24: Sander van Leeuwen <sandervl@innotek   >
     - GDI32:    o CreateDIBitmap: added workaround for DIB_PAL_COLORS mode
