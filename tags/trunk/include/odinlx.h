@@ -1,4 +1,4 @@
-/* $Id: odinlx.h,v 1.4 1999-10-23 22:59:38 sandervl Exp $ */
+/* $Id: odinlx.h,v 1.5 2000-08-11 10:54:20 sandervl Exp $ */
 
 /*
  *
@@ -13,6 +13,8 @@
 #ifndef _ODINLX_H
 #define _ODINLX_H
 
+#include <win\peexe.h>
+#include <versionos2.h>
 
 typedef ULONG (* WIN32API WIN32DLLENTRY)(ULONG hInstance, ULONG reason, LPVOID reserved);
 typedef int (* WIN32API WINMAIN)(HANDLE hInstance, HANDLE hPrevInstance, LPSTR lpCmdLine, int nShowCmd);
@@ -20,9 +22,22 @@ typedef int (* WIN32API WINMAIN)(HANDLE hInstance, HANDLE hPrevInstance, LPSTR l
 //******************************************************************************
 //Create LX Dll object and send process attach message
 //System dlls set EntryPoint to 0
+//Parameters:
+//  HINSTANCE hInstance		- OS/2 module handle
+//  WIN32DLLENTRY EntryPoint    - Win32 dll entrypoint address
+//  PVOID pResData              - pointer to win32 resource data
+//  DWORD MajorImageVersion     - major image/os version (for fake win32 header)
+//  DWORD MinorImageVersion     - minor image/os version (for fake win32 header)
+//  DWORD Subsystem             - subsystem type (for fake win32 header)
+//                                (IMAGE_SUBSYSTEM_WINDOWS_CUI/IMAGE_SUBSYSTEM_WINDOWS_GUI/IMAGE_SUBSYSTEM_WINDOWS_NATIVE)
+//
 //Returns: Odin32 module handle
 //******************************************************************************
-DWORD WIN32API RegisterLxDll(HINSTANCE hInstance, WIN32DLLENTRY EntryPoint, PVOID pResData);
+DWORD WIN32API RegisterLxDll(HINSTANCE hInstance, WIN32DLLENTRY EntryPoint, 
+                             PVOID pResData, 
+                             DWORD MajorImageVersion = ODINNT_MAJOR_VERSION, 
+                             DWORD MinorImageVersion = ODINNT_MINOR_VERSION,
+                             DWORD Subsystem = IMAGE_SUBSYSTEM_WINDOWS_CUI);
 
 //******************************************************************************
 //Destroy LX Dll object
