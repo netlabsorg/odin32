@@ -1,4 +1,4 @@
- /* $Id: changelog,v 1.240 1999-09-25 16:48:18 cbratschi Exp $ */
+ /* $Id: changelog,v 1.241 1999-09-25 19:10:27 sandervl Exp $ */
 
  99-09-25: Christoph Bratschi<cbratschi@datacomm.ch>
         - USER32: WS_EX_* 3D frame support for child windows
@@ -10,6 +10,12 @@
                     cursor to system default)
                     RedrawWindow: set window pointer to desktop window when hwnd == NULL
 	- KERNEL32: Cursor & cursorgroup fixes
+                    Fixes for thread local memory allocation (only done for thread 0)
+                    Create TEB selector + memory for threads we don't create.
+                    (i.e. DART threads in WINMM)
+                    NOTE: Not tested.
+	- USER32\OLD, KERNEL32\OLD: Fixed makefiles + changes to make them
+                                    work with new dlls.
 
  99-09-25: Daniela Engert <dani@ngrt.de>
 	- USER32: ClientToScreen and ScreenToClient didn't work -> fixed.
