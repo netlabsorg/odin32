@@ -1,4 +1,4 @@
-/* $Id: oslibmisc.cpp,v 1.15 2003-01-13 16:51:39 sandervl Exp $ */
+/* $Id: oslibmisc.cpp,v 1.16 2003-01-16 00:44:31 sandervl Exp $ */
 /*
  * Misc OS/2 util. procedures
  *
@@ -160,7 +160,7 @@ ULONG OSLibFreeSel(USHORT selector)
    PVOID  pSelMem;
    APIRET rc;
 
-   pSelMem = (PVOID)((ULONG)selector * 64*1024);
+   pSelMem = (PVOID)DosSelToFlat(selector << 16);
    rc = DosFreeMem(pSelMem);
    return rc == NO_ERROR;
 #else
