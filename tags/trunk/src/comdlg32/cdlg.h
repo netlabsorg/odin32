@@ -1,4 +1,4 @@
-/* $Id: cdlg.h,v 1.4 2000-02-03 13:27:36 sandervl Exp $ */
+/* $Id: cdlg.h,v 1.5 2000-05-16 20:00:13 sandervl Exp $ */
 /*
  *  Common Dialog Boxes interface (32 bit)
  *
@@ -92,6 +92,53 @@ typedef struct {
 #include "shellapi.h"
 
 /* DPA */
+#ifdef __WIN32OS2__
+#include <win\shell.h>
+
+#define COMDLG32_DPA_Create             DPA_Create
+#define COMDLG32_DPA_GetPtr             DPA_GetPtr
+#define COMDLG32_DPA_DeleteAllPtrs      DPA_DeleteAllPtrs
+#define COMDLG32_DPA_DeletePtr          DPA_DeletePtr
+#define COMDLG32_DPA_InsertPtr          DPA_InsertPtr
+#define COMDLG32_DPA_Destroy		DPA_Destroy
+
+#define COMDLG32_ImageList_GetIcon     	ImageList_GetIcon
+#define COMDLG32_ImageList_LoadImageA   ImageList_LoadImageA
+#define COMDLG32_ImageList_Draw         ImageList_Draw
+#define COMDLG32_ImageList_Destroy      ImageList_Destroy
+
+/* ITEMIDLIST */
+
+LPITEMIDLIST WINAPI ILClone(LPCITEMIDLIST pidl);
+LPITEMIDLIST WINAPI ILCombine(LPCITEMIDLIST pidl1, LPCITEMIDLIST pidl2);
+LPITEMIDLIST WINAPI ILGetNext(LPITEMIDLIST pidl);
+BOOL         WINAPI ILRemoveLastID(LPCITEMIDLIST pidl);
+BOOL         WINAPI ILIsEqual(LPCITEMIDLIST pidl1, LPCITEMIDLIST pidl2);
+
+#define COMDLG32_PIDL_ILClone		ILClone
+#define COMDLG32_PIDL_ILCombine		ILCombine
+#define COMDLG32_PIDL_ILGetNext		ILGetNext
+#define COMDLG32_PIDL_ILRemoveLastID	ILRemoveLastID
+#define COMDLG32_PIDL_ILIsEqual		ILIsEqual
+
+/* SHELL */
+#define COMDLG32_SHGetPathFromIDListA	SHGetPathFromIDListA
+#define COMDLG32_SHGetSpecialFolderLocation	SHGetSpecialFolderLocation
+#define COMDLG32_SHGetDesktopFolder	SHGetDesktopFolder
+#define COMDLG32_SHGetFileInfoA		SHGetFileInfoA
+#define COMDLG32_SHFree			SHFree
+
+DWORD WINAPI PathRemoveFileSpecA(LPSTR fn);
+BOOL  WINAPI PathMatchSpecW(LPCWSTR name, LPCWSTR mask);
+
+/* PATH */
+#define COMDLG32_PathIsRootA		PathIsRootA
+#define COMDLG32_PathFindFilenameA	PathFindFilenameA
+#define COMDLG32_PathRemoveFileSpecA	PathRemoveFileSpecA
+#define COMDLG32_PathMatchSpecW		PathMatchSpecW
+#define COMDLG32_PathAddBackslashA	PathAddBackslashA
+
+#else
 extern HDPA	(* WINAPI COMDLG32_DPA_Create) (INT);  
 extern LPVOID	(* WINAPI COMDLG32_DPA_GetPtr) (const HDPA, INT);   
 extern LPVOID	(* WINAPI COMDLG32_DPA_DeleteAllPtrs) (const HDPA hdpa);
@@ -126,5 +173,7 @@ extern LPCSTR (* WINAPI COMDLG32_PathFindFilenameA)(LPCSTR path);
 extern DWORD (* WINAPI COMDLG32_PathRemoveFileSpecA)(LPSTR fn);
 extern BOOL (* WINAPI COMDLG32_PathMatchSpecW)(LPCWSTR x, LPCWSTR y);
 extern LPSTR (* WINAPI COMDLG32_PathAddBackslashA)(LPSTR path);
+#endif
+
 #endif
 
