@@ -1,5 +1,3 @@
-/* $Id: OS2CLIPPER.H,v 1.1 1999-05-24 20:19:36 ktk Exp $ */
-
 /*
  * DirectDraw Clipper Class
  *

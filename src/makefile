@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 1999-06-03 17:50:29 achimha Exp $ 
+# $Id: makefile,v 1.3 1999-06-07 20:57:55 sandervl Exp $ 
 
 #
 # PD-Win32 API
@@ -29,6 +29,8 @@ all:
         cd ..\advapi32
         $(MAKE_CMD)
         cd ..\comdlg32
+        $(MAKE_CMD)
+        cd ..\comctl32
         $(MAKE_CMD)
         cd ..\capi2032
         $(MAKE_CMD)
@@ -74,6 +76,8 @@ clean:
         cd ..\advapi32
         $(MAKE_CMD) clean
         cd ..\comdlg32
+        $(MAKE_CMD) clean
+        cd ..\comctl32
         $(MAKE_CMD) clean
         cd ..\ole32
         $(MAKE_CMD) clean

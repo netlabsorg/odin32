@@ -1,5 +1,3 @@
-/* $Id: LX.CPP,v 1.1 1999-05-24 20:19:52 ktk Exp $ */
-
 /*
  * PE2LX LX code
  *
@@ -39,6 +37,9 @@
 #ifndef min
 #define min(a,b)  ((a<b) ? (a) : (b))
 #endif
+
+//In pe.cpp
+char *hex(ULONG num);
 
 LXHeader OS2Exe;
 
@@ -641,7 +642,7 @@ void LXHeader::AddOff32Fixup(int address)
 
   type = GetSectionByAddress(address);
   if(type == -1) {
-        cout << "Oops, fixup error 1...." << endl;
+        cout << "Oops, fixup error 1.... at " << hex(address) << endl;
         return;     //hmmmmmmmmmm
   }
   frec->srcpage  = (USHORT)GetAddressPage(address);
@@ -658,7 +659,7 @@ void LXHeader::AddOff32Fixup(int address)
   //     GetSectionByAddress
   type = GetRealSectionByAddress(targetaddr);
   if(type == -1){
-        cout << "Oops, fixup error 2...." << endl;
+        cout << "Oops, fixup error 2.... at " << hex(targetaddr) << endl;
         return;     //hmmmmmmmmmm
   }
 

@@ -1,5 +1,3 @@
-/* $Id: OS2PALETTE.H,v 1.1 1999-05-24 20:19:37 ktk Exp $ */
-
 /*
  * DirectDraw Palette class
  *

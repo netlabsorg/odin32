@@ -1,5 +1,3 @@
-/* $Id: nameid.cpp,v 1.2 1999-05-31 22:08:12 phaller Exp $ */
-
 /*
  *
  * Project Odin Software License can be found in LICENSE.TXT
@@ -19,14 +17,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#include <odin.h>
-#include "win32type.h"
-#include "misc.h"
+#include <win32type.h>
+#include <misc.h>
 #include "nameid.h"
 #include "win32util.h"
-#include "winimage.h"
-#include "winexe.h"
+#include <winimage.h>
+#include <winexe.h>
 #include "os2util.h"
 
 void UpCase(char *mixedcase);

@@ -1,5 +1,3 @@
-/* $Id: comdlg32.cpp,v 1.2 1999-05-31 22:08:08 phaller Exp $ */
-
 /*
  * COMDLG32 implementation
  *
@@ -9,11 +7,10 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
-#include <stdarg.h>
-
 #include <os2win.h>
+#include <stdarg.h>
 #include <misc.h>
-#include "wndproc.h"
+#include <wndproc.h>
 
 //******************************************************************************
 //TODO:template names in structures!!!!

@@ -1,5 +1,3 @@
-# $Id: Makefile,v 1.1 1999-05-24 20:19:59 ktk Exp $ 
-
 #
 # PD-Win32 API
 #
@@ -67,7 +65,7 @@ wndsubproc.obj: wndsubproc.cpp wndsubproc.h \
 wndclass.obj: wndclass.cpp \
               $(PDWIN32_INCLUDE)\wndproc.h $(PDWIN32_INCLUDE)\wndclass.h
 
-initterm.obj: initterm.c
+initterm.obj: initterm.cpp
 
 
 

@@ -1,5 +1,3 @@
-/* $Id: message.cpp,v 1.2 1999-05-31 22:08:11 phaller Exp $ */
-
 /*
  *
  * Project Odin Software License can be found in LICENSE.TXT
@@ -23,8 +21,6 @@
 #include <string.h>
 #include <stdarg.h>
 #include "unicode.h"
-#include "misc.h"
-
 
 //******************************************************************************
 //******************************************************************************

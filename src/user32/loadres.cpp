@@ -1,5 +1,3 @@
-/* $Id: loadres.cpp,v 1.2 1999-05-31 22:08:15 phaller Exp $ */
-
 /*
  *
  * Project Odin Software License can be found in LICENSE.TXT
@@ -12,8 +10,6 @@
  *
  */
 #include <os2win.h>
-#include <misc.h>
-
 #include "user32.h"
 #include "resstring.h"
 

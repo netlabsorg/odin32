@@ -1,5 +1,3 @@
-/* $Id: aux.cpp,v 1.1 1999-05-24 20:20:06 ktk Exp $ */
-
 /*
  * Auxilary multimedia apis
  *

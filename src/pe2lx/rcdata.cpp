@@ -1,5 +1,3 @@
-/* $Id: rcdata.cpp,v 1.1 1999-05-24 20:19:56 ktk Exp $ */
-
 /*
  * PE2LX RCDATA resources
  *

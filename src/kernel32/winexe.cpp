@@ -1,5 +1,3 @@
-/* $Id: winexe.cpp,v 1.1 1999-05-24 20:19:49 ktk Exp $ */
-
 /*
  *
  * Project Odin Software License can be found in LICENSE.TXT

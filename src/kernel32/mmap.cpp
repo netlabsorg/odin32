@@ -1,5 +1,3 @@
-/* $Id: mmap.cpp,v 1.2 1999-05-31 22:08:09 phaller Exp $ */
-
 /*
  *
  * Project Odin Software License can be found in LICENSE.TXT
@@ -8,8 +6,6 @@
 #include <os2win.h>
 #include "unicode.h"
 #include "mmap.h"
-#include "misc.h"
-
 
 //******************************************************************************
 //******************************************************************************

@@ -1,6 +1,4 @@
-/* $Id: icon.h,v 1.1 1999-05-24 20:19:55 ktk Exp $ */
-
-/* $Header: /home/ktk/tmp/odin/2007/netlabs.cvs/odin32/src/pe2lx/icon.h,v 1.1 1999-05-24 20:19:55 ktk Exp $
+/* $Header: /home/ktk/tmp/odin/2007/netlabs.cvs/odin32/src/pe2lx/icon.h,v 1.2 1999-06-07 20:58:12 sandervl Exp $
  *
  * Declarations, protypes and defintions for conversion of icons.
  *

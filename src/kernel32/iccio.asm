@@ -1,5 +1,3 @@
-; $Id: iccio.asm,v 1.1 1999-05-24 20:19:46 ktk Exp $ 
-
 ; **********************************************************************
 ; Copyright (C) 1995 by Holger Veit (Holger.Veit@gmd.de)
 ; Use at your own risk! No Warranty! The author is not responsible for

@@ -1,5 +1,3 @@
-# $Id: makefile,v 1.1 1999-05-24 20:20:08 ktk Exp $ 
-
 #
 # PD-Win32 API 
 #
@@ -37,8 +35,8 @@ $(TARGET).lib: $(TARGET).dll
 	$(CP) $@ $(PDWIN32_LIB)
 
 
-winspool.obj: winspool.c
-initterm.obj: initterm.c
+winspool.obj: winspool.cpp
+initterm.obj: initterm.cpp
 
 
 

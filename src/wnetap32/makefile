@@ -1,5 +1,3 @@
-# $Id: makefile,v 1.1 1999-05-24 20:20:08 ktk Exp $ 
-
 #
 # PD-Win32 API 
 #
@@ -38,7 +36,7 @@ $(TARGET).lib: $(TARGET).dll
 
 
 wnetap32.obj: wnetap32.cpp
-initterm.obj: initterm.c
+initterm.obj: initterm.cpp
 
 
 clean:

@@ -1,5 +1,3 @@
-# $Id: makefile,v 1.1 1999-05-24 20:20:06 ktk Exp $ 
-
 #
 # PD-Win32 API
 #
@@ -57,9 +55,9 @@ midi.obj:       midi.cpp midi.hpp  irtmidi.hpp
 midistrm.obj:   midistrm.cpp midi.hpp   irtmidi.hpp
 irtmidi.obj:    irtmidi.cpp irtmidi.hpp
 dwaveout.obj:   dwaveout.cpp dwaveout.h $(PDWIN32_INCLUDE)\vmutex.h
-timegettime.obj: timegettime.c
-initterm.obj:   initterm.c aux.h
-playsound.obj:  playsound.c
+timegettime.obj: timegettime.cpp
+initterm.obj:   initterm.cpp aux.h
+playsound.obj:  playsound.cpp
 
 clean:
         $(RM) *.obj *.lib *.dll *~ *.map *.pch

@@ -1,5 +1,3 @@
-/* $Id: map.h,v 1.1 1999-05-24 20:19:47 ktk Exp $ */
-
 /* Copyright (C) 1995 by Holger Veit (Holger.Veit@gmd.de)
  * Use at your own risk! No Warranty! The author is not responsible for
  * any damage or loss of data caused by proper or improper use of this

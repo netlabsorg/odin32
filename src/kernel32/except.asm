@@ -1,5 +1,3 @@
-; $Id: except.asm,v 1.1 1999-05-24 20:19:46 ktk Exp $ 
-
 ;/*
 ; *
 ; * Project Odin Software License can be found in LICENSE.TXT
@@ -156,14 +154,27 @@ GetDllEntryPoint endp
 
         PUBLIC getEAX
         PUBLIC getEBX
-getEAX proc near
+getEAX 	proc near
         ret
-getEAX endp
+getEAX 	endp
 
-getEBX proc near
+getEBX 	proc near
         mov  eax, ebx
         ret
-getEBX endp
+getEBX 	endp
+
+        PUBLIC GetFS
+GetFS  	proc near
+	mov	eax, fs
+	ret
+GetFS  	endp
+
+        PUBLIC SetFS
+SetFS	proc near
+	mov  	eax, [esp+4]
+	mov	fs, eax
+	ret
+SetFS	endp
 
 CODE32          ENDS
 

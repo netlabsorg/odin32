@@ -1,5 +1,3 @@
-/* $Id: MIDI.HPP,v 1.1 1999-05-24 20:20:05 ktk Exp $ */
-
 /*
  * RTMIDI code
  *

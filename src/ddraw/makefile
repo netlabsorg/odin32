@@ -1,5 +1,3 @@
-# $Id: makefile,v 1.1 1999-05-24 20:19:37 ktk Exp $ 
-
 #
 # PD-Win32 API 
 #
@@ -83,7 +81,7 @@ os2surface.obj: os2surface.cpp  \
     os2surface.h \
     os2ddraw.h 
 
-initterm.obj: initterm.c
+initterm.obj: initterm.cpp
 
 asmutil.obj: asmutil.asm
 
