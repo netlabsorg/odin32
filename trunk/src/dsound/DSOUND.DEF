@@ -1,4 +1,4 @@
-; $Id: DSOUND.DEF,v 1.4 2001-03-06 21:44:40 mike Exp $
+; $Id: DSOUND.DEF,v 1.5 2001-11-22 16:08:13 sandervl Exp $
 
 LIBRARY DSOUND INITINSTANCE TERMINSTANCE
 DATA MULTIPLE NONSHARED READWRITE LOADONCALL
@@ -12,6 +12,6 @@ EXPORTS
    DirectSoundCaptureEnumerateA = _OS2DirectSoundEnumerateA@8      @7
    DirectSoundCaptureEnumerateW = _OS2DirectSoundEnumerateW@8      @8
 
-   DllCanUnloadNow   = _DllCanUnloadNow@0                          @4
-   DllGetClassObject = _DllGetClassObject@12                       @5
+   DllCanUnloadNow   = _DSOUNDDllCanUnloadNow@0                    @4
+   DllGetClassObject = _DSOUNDDllGetClassObject@12                 @5
 

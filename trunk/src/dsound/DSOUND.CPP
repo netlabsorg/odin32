@@ -1,4 +1,4 @@
-/* $Id: DSOUND.CPP,v 1.8 2001-03-06 20:11:16 mike Exp $ */
+/* $Id: DSOUND.CPP,v 1.9 2001-11-22 16:08:12 sandervl Exp $ */
 
 /*
  * DirectSound exported APIs
@@ -202,7 +202,7 @@ static ICOM_VTABLE(IClassFactory) DSCF_Vtbl =
 static IClassFactoryImpl DSOUND_CF = {&DSCF_Vtbl, 1 };
 
 
-HRESULT WINAPI DllGetClassObject( REFCLSID rclsid,
+HRESULT WINAPI DSOUNDDllGetClassObject( REFCLSID rclsid,
                                   REFIID riid,
                                   LPVOID *ppv)
 {
@@ -237,7 +237,7 @@ HRESULT WINAPI DllGetClassObject( REFCLSID rclsid,
  *    Success: S_OK
  *    Failure: S_FALSE
  */
-HRESULT WINAPI DllCanUnloadNow(void)
+HRESULT WINAPI DSOUNDDllCanUnloadNow(void)
 {
   dprintf(("DSOUND:DllCanUnloadNow(void) stub\n"));
   return S_FALSE;
