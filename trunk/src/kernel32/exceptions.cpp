@@ -1,4 +1,4 @@
-/* $Id: exceptions.cpp,v 1.9 1999-08-05 13:11:38 phaller Exp $ */
+/* $Id: exceptions.cpp,v 1.10 1999-08-22 11:11:10 sandervl Exp $ */
 
 /*
  * Win32 Device IOCTL API functions for OS/2
@@ -54,7 +54,7 @@
 #include <string.h>
 #include <builtin.h>
 #include "exceptions.h"
-#include "except.h"
+#include "exceptutil.h"
 #include "misc.h"
 
 //Global Process Unhandled exception filter
@@ -449,9 +449,10 @@ void KillWin32Process(void)
   excptnr   = getEAX();
   excptaddr = getEBX();
 
-  dprintf(("KERNEL32: KillWin32Process: Do you feel lucky, punk?!\n"));
-//  sprintf(excptmsg, "Fatal Exception %X at %X", excptnr, excptaddr);
-//  WinMessageBox(HWND_DESKTOP, NULL, excptmsg, "Win32 for OS/2", 0, MB_ERROR | MB_OK);
+  dprintf(("KERNEL32: KillWin32Process: Do you feel lucky, punk? (FS=%d)!\n", GetFS()));
+  //Restore original OS/2 TIB selector
+  RestoreOS2FS();
+
   SetExceptionChain((ULONG)0);
   DosExit(EXIT_PROCESS, 666);
 }
@@ -860,10 +861,10 @@ void static dprintfException(PEXCEPTIONREPORTRECORD       pERepRec,
 #define XCPT_CONTINUE_STOP 0x00716668
 #endif
 
-ERR _System OS2ExceptionHandler(PEXCEPTIONREPORTRECORD       pERepRec,
-                                PEXCEPTIONREGISTRATIONRECORD pERegRec,
-                                PCONTEXTRECORD               pCtxRec,
-                                PVOID                        p)
+ULONG APIENTRY OS2ExceptionHandler(PEXCEPTIONREPORTRECORD       pERepRec,
+                                   PEXCEPTIONREGISTRATIONRECORD pERegRec,
+                                   PCONTEXTRECORD               pCtxRec,
+                                   PVOID                        p)
 {
   //  pERegRec->prev_structure = 0;
   dprintfException(pERepRec, pERegRec, pCtxRec, p);
@@ -884,7 +885,7 @@ ERR _System OS2ExceptionHandler(PEXCEPTIONREPORTRECORD       pERepRec,
                pCtxRec->ctx_stack[0].hisig = 0;
                pCtxRec->ctx_stack[0].signexp = 0;
 
-      return (ERR)(XCPT_CONTINUE_EXECUTION);
+      return (XCPT_CONTINUE_EXECUTION);
 
     case XCPT_PROCESS_TERMINATE:
     case XCPT_ASYNC_PROCESS_TERMINATE:
@@ -910,7 +911,7 @@ ERR _System OS2ExceptionHandler(PEXCEPTIONREPORTRECORD       pERepRec,
     pCtxRec->ctx_RegEsp = pCtxRec->ctx_RegEsp + 0x10;
     pCtxRec->ctx_RegEax = pERepRec->ExceptionNum;
     pCtxRec->ctx_RegEbx = pCtxRec->ctx_RegEip;
-    return (ERR)(XCPT_CONTINUE_EXECUTION);
+    return (XCPT_CONTINUE_EXECUTION);
 
   default: //non-continuable exceptions
         return (XCPT_CONTINUE_SEARCH);
@@ -918,6 +919,45 @@ ERR _System OS2ExceptionHandler(PEXCEPTIONREPORTRECORD       pERepRec,
   return (XCPT_CONTINUE_SEARCH);
 }
 
+/*****************************************************************************
+ * Name      : void OS2SetExceptionHandler
+ * Purpose   : Sets the main thread exception handler in FS:[0] (original OS/2 FS selector)
+ * Parameters: exceptframe: pointer to exception handler frame on stack (2 ULONGs)
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Sander van Leeuwen [Sun, 1999/08/21 12:16]
+ *****************************************************************************/
+void OS2SetExceptionHandler(void *exceptframe)
+{
+ PEXCEPTIONREGISTRATIONRECORD pExceptRec = (PEXCEPTIONREGISTRATIONRECORD)exceptframe;
+
+  pExceptRec->prev_structure   = 0;
+  pExceptRec->ExceptionHandler = OS2ExceptionHandler;
+
+  /* disable trap popups */
+//  DosError(FERR_DISABLEEXCEPTION | FERR_DISABLEHARDERR);
+
+  DosSetExceptionHandler(pExceptRec);
+}
+
+/*****************************************************************************
+ * Name      : void OS2UnsetExceptionHandler
+ * Purpose   : Removes the main thread exception handler in FS:[0] (original OS/2 FS selector)
+ * Parameters: exceptframe: pointer to exception handler frame on stack (2 ULONGs)
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Sander van Leeuwen [Sun, 1999/08/21 12:16]
+ *****************************************************************************/
+void OS2UnsetExceptionHandler(void *exceptframe)
+{
+  DosUnsetExceptionHandler((PEXCEPTIONREGISTRATIONRECORD)exceptframe);
+}
 
 /*****************************************************************************
  * Name      : void ReplaceExceptionHandler

@@ -1,4 +1,4 @@
-/* $Id: thread.cpp,v 1.10 1999-08-17 17:04:52 sandervl Exp $ */
+/* $Id: thread.cpp,v 1.11 1999-08-22 11:11:10 sandervl Exp $ */
 
 /*
  * Win32 Thread API functions
@@ -12,11 +12,12 @@
 #include <os2win.h>
 #include <stdarg.h>
 #include "thread.h"
-#include "except.h"
+#include "exceptutil.h"
 #include <misc.h>
 #include <wprocess.h>
 #include <windll.h>
 #include <winexe.h>
+#include <except.h>
 
 static DWORD OPEN32API Win32ThreadProc(LPVOID lpData);
 
@@ -153,6 +154,7 @@ PTHREAD_START_ROUTINE_O32 Win32Thread::GetOS2Callback()
 //******************************************************************************
 static DWORD OPEN32API Win32ThreadProc(LPVOID lpData)
 {
+ EXCEPTION_FRAME exceptFrame;
  Win32Thread     *me = (Win32Thread *)lpData;
  WIN32THREADPROC  winthread = me->pCallback;
  LPVOID           userdata  = me->lpUserData;
@@ -178,7 +180,11 @@ static DWORD OPEN32API Win32ThreadProc(LPVOID lpData)
   Win32Dll::tlsAttachThreadToAllDlls(); //setup TLS structures of all dlls
   Win32Dll::attachThreadToAllDlls();	  //send DLL_THREAD_ATTACH message to all dlls
 
+  //Note: The Win32 exception structure references by FS:[0] is the same
+  //      in OS/2
+  OS2SetExceptionHandler((void *)&exceptFrame);
   rc = winthread(userdata);
+  OS2UnsetExceptionHandler((void *)&exceptFrame);
 
   Win32Dll::detachThreadFromAllDlls();  //send DLL_THREAD_DETACH message to all dlls
   Win32Dll::tlsDetachThreadFromAllDlls(); //destroy TLS structures of all dlls

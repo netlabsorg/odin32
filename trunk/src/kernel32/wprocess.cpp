@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.23 1999-08-19 22:10:03 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.24 1999-08-22 11:11:11 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -22,7 +22,7 @@
 #include <builtin.h>
 #endif
 
-#include "except.h"
+#include "exceptutil.h"
 #include "os2util.h"
 
 #include "console.h"

@@ -1,4 +1,4 @@
-/* $Id: devio.cpp,v 1.3 1999-06-19 10:54:41 sandervl Exp $ */
+/* $Id: devio.cpp,v 1.4 1999-08-22 11:11:09 sandervl Exp $ */
 
 /*
  * Win32 Device IOCTL API functions for OS/2
@@ -25,7 +25,7 @@
 #include "devio.h"
 #include "cio.h"
 #include "map.h"
-#include "except.h"
+#include "exceptutil.h"
 
 static fX86Init  = FALSE;
 //SvL: Used in iccio.asm (how can you put these in the .asm data segment without messing things up?)

@@ -1,4 +1,4 @@
-/* $Id: winexe.cpp,v 1.9 1999-08-16 13:54:32 sandervl Exp $ */
+/* $Id: winexe.cpp,v 1.10 1999-08-22 11:11:11 sandervl Exp $ */
 
 /*
  * Win32 exe class
@@ -26,6 +26,8 @@
 #include <winexe.h>
 #include <wprocess.h>
 #include <pefile.h>
+#include "exceptions.h"
+#include "exceptutil.h"
 #include "cio.h"
 
 #include "conwin.h"          // Windows Header for console only
@@ -43,7 +45,7 @@ Win32Exe* WIN32API CreateWin32Exe(char *szFileName)
 //******************************************************************************
 //******************************************************************************
 Win32Exe::Win32Exe(char *szFileName) : Win32Image(szFileName), fConsoleApp(FALSE),
-                   cmdline(NULL), OS2InstanceHandle(-1)
+                   cmdline(NULL)
 {
   fConsoleApp = (oh.Subsystem == IMAGE_SUBSYSTEM_WINDOWS_CUI);
   WinExe = this;
@@ -62,7 +64,7 @@ Win32Exe::Win32Exe(char *szFileName) : Win32Image(szFileName), fConsoleApp(FALSE
 //******************************************************************************
 Win32Exe::Win32Exe(HINSTANCE hinstance, int NameTableId, int Win32TableId) :
          Win32Image(hinstance, NameTableId, Win32TableId),
-         fConsoleApp(FALSE), cmdline(NULL), OS2InstanceHandle(-1)
+         fConsoleApp(FALSE), cmdline(NULL)
 {
   if(GET_CONSOLE(Win32TableId) == 1) {//console app
    dprintf(("Console application!\n"));
@@ -85,6 +87,7 @@ Win32Exe::~Win32Exe()
 //******************************************************************************
 ULONG Win32Exe::start()
 {
+ WINEXCEPTION_FRAME exceptFrame;
  ULONG rc;
 
   if(getenv("WIN32_IOPL2")) {
@@ -98,9 +101,16 @@ ULONG Win32Exe::start()
   tlsAlloc();
   tlsAttachThread();	//setup TLS (main thread)
 
+  //Note: The Win32 exception structure references by FS:[0] is the same
+  //      in OS/2
+  OS2SetExceptionHandler((void *)&exceptFrame);
+
   SetWin32TIB();
   rc = ((WIN32EXEENTRY)entryPoint)();
   RestoreOS2TIB();
+
+  OS2UnsetExceptionHandler((void *)&exceptFrame);
+
   return rc;
 }
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: wintls.cpp,v 1.3 1999-07-09 15:58:54 sandervl Exp $ */
+/* $Id: wintls.cpp,v 1.4 1999-08-22 11:11:11 sandervl Exp $ */
 /*
  * Win32 TLS API functions
  *
@@ -12,6 +12,8 @@
 #include <winimage.h>
 #include <thread.h>
 #include <wprocess.h>
+#include <except.h>
+#include "exceptutil.h"
 
 //******************************************************************************
 //******************************************************************************
@@ -48,9 +50,11 @@ void Win32Image::tlsDelete()	//Free TLS index for this module
 //******************************************************************************
 void Win32Image::tlsAttachThread()	//setup TLS structures for new thread
 {
+ EXCEPTION_FRAME exceptFrame;
  PIMAGE_TLS_CALLBACK *pCallback;
- TEB  *winteb;
- char *tibmem;
+ USHORT sel;
+ TEB   *winteb;
+ char  *tibmem;
 
    if(!tlsAddress) 
 	return;
@@ -85,7 +89,13 @@ void Win32Image::tlsAttachThread()	//setup TLS structures for new thread
 	pCallback = tlsCallBackAddr;
 	while(*pCallback) {
 		dprintf(("tlsAttachThread: calling TLS Callback %x", *pCallback));
+
+  		OS2SetExceptionHandler((void *)&exceptFrame);	
+		sel = SetWin32TIB();
 		(*pCallback)((LPVOID)hinstance, DLL_THREAD_ATTACH, 0);
+                SetFS(sel);
+  		OS2UnsetExceptionHandler((void *)&exceptFrame);
+
 		dprintf(("tlsAttachThread: finished calling TLS Callback %x", *pCallback));
 		*pCallback++;
 	}
@@ -96,8 +106,10 @@ void Win32Image::tlsAttachThread()	//setup TLS structures for new thread
 //******************************************************************************
 void Win32Image::tlsDetachThread()	//destroy TLS structures
 {
+ EXCEPTION_FRAME exceptFrame;
  PIMAGE_TLS_CALLBACK *pCallback;
- TEB  *winteb;
+ USHORT sel;
+ TEB   *winteb;
 
    if(!tlsAddress) 
 	return;
@@ -108,7 +120,13 @@ void Win32Image::tlsDetachThread()	//destroy TLS structures
 	pCallback = tlsCallBackAddr;
 	while(*pCallback) {
 		dprintf(("tlsDetachThread: calling TLS Callback %x", *pCallback));
+
+  		OS2SetExceptionHandler((void *)&exceptFrame);	
+		sel = SetWin32TIB();
 		(*pCallback)((LPVOID)hinstance, DLL_THREAD_DETACH, 0);
+                SetFS(sel);
+  		OS2UnsetExceptionHandler((void *)&exceptFrame);
+
 		dprintf(("tlsDetachThread: finished calling TLS Callback %x", *pCallback));
 		*pCallback++;
 	}

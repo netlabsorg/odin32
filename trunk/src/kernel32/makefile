@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.23 1999-08-21 16:29:27 sandervl Exp $
+# $Id: makefile,v 1.24 1999-08-22 11:11:10 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -20,23 +20,10 @@ CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE) /Tm+
 
 OBJS = KERNEL32.OBJ KOBJECTS.OBJ CONSOLE.OBJ CONIN.OBJ CONBUFFER.OBJ \
        CONOUT.OBJ UNICODE.OBJ network.OBJ DEVIO.OBJ profile.obj \
-       THREAD.OBJ virtual.obj THUNK.OBJ \
-       OBSOLETE.OBJ \
-       COMM.OBJ \
-       MESSAGE.OBJ \
-       RESOURCE.OBJ \
-       NAMEID.OBJ \
-       WINRES.OBJ \
-       WINMOD.OBJ \
-       OS2NATIVE.OBJ \
-       EXCEPTIONS.OBJ \
-       LFILE.OBJ \
-       NPIPE.OBJ \
-       MISC.OBJ \
-       EXCEPT.OBJ \
-       LANG.OBJ \
-       ICCIO.OBJ \
-       MAP.OBJ \
+       THREAD.OBJ virtual.obj THUNK.OBJ OBSOLETE.OBJ COMM.OBJ \
+       MESSAGE.OBJ RESOURCE.OBJ NAMEID.OBJ WINRES.OBJ WINMOD.OBJ \
+       OS2NATIVE.OBJ EXCEPTIONS.OBJ LFILE.OBJ NPIPE.OBJ \
+       MISC.OBJ EXCEPTUTIL.OBJ LANG.OBJ ICCIO.OBJ MAP.OBJ \
        WIN32UTIL.OBJ \
        heap.OBJ \
        heapstring.obj \
@@ -94,7 +81,7 @@ $(PDWIN32_LIB)\pmwinx.lib:
         $(IMPLIB) $(IMPLIBFLAGS) $@ $(PDWIN32_LIB)\pmwinx.def
 
 kernel32.OBJ: kernel32.cpp \
-    except.h \
+    exceptutil.h \
     $(PDWIN32_INCLUDE)\unicode.h \
     $(PDWIN32_INCLUDE)\heap.h \
     $(PDWIN32_INCLUDE)\wprocess.h \
@@ -161,7 +148,7 @@ vmutex.OBJ: vmutex.cpp \
 exceptions.OBJ: \
     .\exceptions.cpp \
     $(PDWIN32_INCLUDE)\exceptions.h \
-    except.h
+    exceptutil.h
 
 message.OBJ: \
     .\message.cpp \
@@ -169,6 +156,7 @@ message.OBJ: \
 
 devio.OBJ: \
     .\devio.cpp \
+    exceptutil.h \
     devio.h \
     map.h \
     cio.h
@@ -261,8 +249,8 @@ resource.OBJ: \
     $(PDWIN32_INCLUDE)\winres.h \
     $(PDWIN32_INCLUDE)\misc.h
 
-except.OBJ: \
-    .\except.asm
+exceptutil.OBJ: \
+    .\exceptutil.asm
 
 iccio.OBJ: \
     .\iccio.asm
