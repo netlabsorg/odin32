@@ -1,7 +1,8 @@
-/* $Id: changelog,v 1.2356 2002-11-13 11:49:04 sandervl Exp $ */
+/* $Id: changelog,v 1.2357 2002-11-13 12:15:45 sandervl Exp $ */
 
  2002-11-13: Sander van Leeuwen <sandervl@innotek   >
-    - SETUPAPI: o Wine resync
+    - SETUPAPI, RICHED32: 
+                o Wine resync
 
  2002-11-12: Sander van Leeuwen <sandervl@innotek   >
     - COMCTL32: o Wine resync (toolbar, propsheet, imagelist)
