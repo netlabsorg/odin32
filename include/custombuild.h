@@ -8,6 +8,7 @@
 #define CUSTOM_BUILD_OPTIONS_KEY  "System\\CustomBuild"
 #define DISABLE_AUDIO_KEY         "DisableAudio"
 #define DISABLE_ASPI_KEY          "DisableASPI"
+#define ENABLE_POSTSCRIPT_PASSTHROUGH "EnablePostscriptPassthrough"
 
 #define ODIN_WIN32_CDCLASS        "Win32CDWindowClass"
 #define ODIN_WIN32_STDCLASS       "Win32WindowClass"
@@ -50,7 +51,7 @@ typedef struct {
 } CUSTOMBUILD_PRIVATE_INITTERM;
 
 typedef struct {
-  PFN_PRECUSTOMIZE    pfnPreCustomize;	//called after kernel32, user32 and gdi32 are initialized
+  PFN_PRECUSTOMIZE    pfnPreCustomize;	//called after kernel32 is initialized
   PFN_POSTCUSTOMIZE   pfnPostCustomize;	//called at the end of dll load
   PFN_ENDCUSTOMIZE    pfnEndCustomize;  //called when dll is unloaded
 
@@ -423,6 +424,8 @@ void WIN32API SetFreeTypeIntegration(BOOL fEnabled);
 // Special function to change dwords in the startup structure of a process
 void WINAPI ODIN_SetProcessDword( DWORD dwProcessID, INT offset, DWORD value );
 
+void WIN32API ODIN_SetPostscriptPassthrough(BOOL fEnable);
+
 //PE headers of system dlls
 #ifdef __cplusplus
 extern "C" {
@@ -464,6 +467,7 @@ extern IMAGE_FILE_HEADER nt_dsound_header;
 extern IMAGE_FILE_HEADER nt_uxtheme_header;
 extern IMAGE_FILE_HEADER nt_mciwave_header;
 extern IMAGE_FILE_HEADER nt_urlmon_header;
+extern IMAGE_FILE_HEADER nt_netapi32_header;
 #ifdef __cplusplus
 }
 #endif
