@@ -109,7 +109,8 @@ IPADDRESS_Create (HWND hwnd, WPARAM wParam, LPARAM lParam)
 		SetPropA ((HWND)hwnd, IP_SUBCLASS_PROP,
 					(HANDLE)lpipsi);
 /*		infoPtr->lpipsi= lpipsi; */
-	} else 
+//	} else 
+	}
 //		WARN (ipaddress,"IP-create called twice\n");
 	
 	for (i=0; i<=3; i++) {

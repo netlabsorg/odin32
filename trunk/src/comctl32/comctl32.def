@@ -50,35 +50,56 @@ EXPORTS
   
 
 
-  COMCTL32_Alloc     = _COMCTL32_Alloc@4        @71
-  COMCTL32_ReAlloc   = _COMCTL32_ReAlloc@8      @72
-  COMCTL32_Free      = _COMCTL32_Free@4         @73
-  COMCTL32_GetSize   = _COMCTL32_GetSize@4      @74
+  DPA_Merge           = _DPA_Merge@24              @11
 
-  Str_GetPtrA        = _Str_GetPtrA@12          @233
-  Str_SetPtrA        = _Str_SetPtrA@8           @234
-  Str_GetPtrW        = _Str_GetPtrW@12          @235
-  Str_SetPtrW        = _Str_SetPtrW@8           @236
+  COMCTL32_Alloc      = _COMCTL32_Alloc@4          @71
+  COMCTL32_ReAlloc    = _COMCTL32_ReAlloc@8        @72
+  COMCTL32_Free       = _COMCTL32_Free@4           @73
+  COMCTL32_GetSize    = _COMCTL32_GetSize@4        @74
 
-  DSA_Create         = _DSA_Create@8            @320
-  DSA_Destroy        = _DSA_Destroy@4           @321
-  DSA_GetItem        = _DSA_GetItem@12          @322
-  DSA_GetItemPtr     = _DSA_GetItemPtr@8        @323
-  DSA_SetItem        = _DSA_SetItem@12          @324
-  DSA_InsertItem     = _DSA_InsertItem@12       @325
-  DSA_DeleteItem     = _DSA_DeleteItem@8        @326
-  DSA_DeleteAllItems = _DSA_DeleteAllItems@4    @327
+  CreateMRUListA      = _CreateMRUListA@4          @151
+; ordinals????
+  FreeMRUListA        = _FreeMRUListA@4            @152
+  AddMRUData          = _AddMRUData@12             @153
+  FindMRUData         = _FindMRUData@16            @154
+  CreateMRUListLazyA  = _CreateMRUListLazyA@16     @155
 
-  DPA_Create         = _DPA_Create@4            @328
-  DPA_Destroy        = _DPA_Destroy@4           @329
-  DPA_Grow           = _DPA_Grow@8              @330
-  DPA_Clone          = _DPA_Clone@8             @331
-  DPA_GetPtr         = _DPA_GetPtr@8            @332
-  DPA_GetPtrIndex    = _DPA_GetPtrIndex@8       @333
-  DPA_InsertPtr      = _DPA_InsertPtr@12        @334
-  DPA_SetPtr         = _DPA_SetPtr@12           @335
-  DPA_DeletePtr      = _DPA_DeletePtr@8         @336
-  DPA_DeleteAllPtrs  = _DPA_DeleteAllPtrs@4     @337
-  DPA_Sort           = _DPA_Sort@12             @338
-  DPA_Search         = _DPA_Search@24           @339
-  DPA_CreateEx       = _DPA_CreateEx@8          @440
+  Str_GetPtrA         = _Str_GetPtrA@12            @233
+  Str_SetPtrA         = _Str_SetPtrA@8             @234
+  Str_GetPtrW         = _Str_GetPtrW@12            @235
+  Str_SetPtrW         = _Str_SetPtrW@8             @236
+
+  DSA_Create          = _DSA_Create@8              @320
+  DSA_Destroy         = _DSA_Destroy@4             @321
+  DSA_GetItem         = _DSA_GetItem@12            @322
+  DSA_GetItemPtr      = _DSA_GetItemPtr@8          @323
+  DSA_SetItem         = _DSA_SetItem@12            @324
+  DSA_InsertItem      = _DSA_InsertItem@12         @325
+  DSA_DeleteItem      = _DSA_DeleteItem@8          @326
+  DSA_DeleteAllItems  = _DSA_DeleteAllItems@4      @327 
+
+  DPA_Create          = _DPA_Create@4              @328
+  DPA_Destroy         = _DPA_Destroy@4             @329
+  DPA_Grow            = _DPA_Grow@8                @330
+  DPA_Clone           = _DPA_Clone@8               @331
+  DPA_GetPtr          = _DPA_GetPtr@8              @332
+  DPA_GetPtrIndex     = _DPA_GetPtrIndex@8         @333
+  DPA_InsertPtr       = _DPA_InsertPtr@12          @334
+  DPA_SetPtr          = _DPA_SetPtr@12             @335
+  DPA_DeletePtr       = _DPA_DeletePtr@8           @336
+  DPA_DeleteAllPtrs   = _DPA_DeleteAllPtrs@4       @337
+  DPA_Sort            = _DPA_Sort@12               @338
+  DPA_Search          = _DPA_Search@24             @339
+  DPA_CreateEx        = _DPA_CreateEx@8            @440
+
+  SendNotify          = _COMCTL32_SendNotify@16    @341
+  SendNotifyEx        = _COMCTL32_SendNotifyEx@20  @342
+
+  StrChrA             = _COMCTL32_StrChrA@8        @350
+  StrStrIA            = _COMCTL32_StrStrIA@8       @355
+  StrToIntA           = _COMCTL32_StrToIntA@4      @357
+
+  DPA_EnumCallback    = _DPA_EnumCallback@12       @385
+  DPA_DestroyCallback = _DPA_DestroyCallback@12    @386
+  DSA_EnumCallback    = _DSA_EnumCallback@12       @387
+  DSA_DestroyCallback = _DSA_DestroyCallback@12    @388
