@@ -1,4 +1,4 @@
-; $Id: kernel32.def,v 1.155 2003-07-16 18:06:59 sandervl Exp $
+; $Id: kernel32.def,v 1.156 2003-07-31 15:59:48 sandervl Exp $
 
 ;Basis is Windows95 KERNEL32
 LIBRARY KERNEL32 INITINSTANCE TERMINSTANCE
@@ -977,6 +977,7 @@ EXPORTS
 
     lstrlenAtoW                = _lstrlenAtoW@8              @890
     lstrlenWtoA                = _lstrlenWtoA@8              @891
+    lstrtrunc                  = _lstrtrunc@8                @892
 
     GetLongPathNameA           = _GetLongPathNameA@12        @900
     GetLongPathNameW           = _GetLongPathNameW@12        @901
@@ -1210,6 +1211,8 @@ EXPORTS
     cp_get_table                                                  @2025 NONAME
 
     OSLibDosDevIOCtl                                              @2026 NONAME
+
+    fIsDBCSEnv                                                    @2103 NONAME
 
     vsnprintfW                            @2030 NONAME
     snprintfW                             @2031 NONAME

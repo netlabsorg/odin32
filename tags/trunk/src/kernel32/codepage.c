@@ -1,4 +1,4 @@
-/* $Id: codepage.c,v 1.2 2002-07-30 12:55:05 sandervl Exp $
+/* $Id: codepage.c,v 1.3 2003-07-31 15:59:49 sandervl Exp $
  *
  * Code page functions
  *
@@ -27,6 +27,9 @@
 
 #define DBG_LOCALLOG    DBG_codepage
 #include "dbglocal.h"
+
+BOOL fIsDBCSEnv = FALSE;
+
 #endif
 
 DEFAULT_DEBUG_CHANNEL(string);
@@ -101,6 +104,10 @@ void CODEPAGE_Init(void)
            oem_cptable->info.codepage, mac_cptable->info.codepage );
 #ifdef __WIN32OS2__
     dprintf(("Language %s", getenv("LANG")));
+
+    if(ansi_cptable->info.char_size == 2) {
+        fIsDBCSEnv = TRUE;
+    }
 #endif
 }
 
