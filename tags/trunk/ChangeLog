@@ -1,10 +1,14 @@
- /* $Id: ChangeLog,v 1.1119 2000-09-12 04:32:59 bird Exp $ */
+ /* $Id: ChangeLog,v 1.1120 2000-09-12 04:43:03 bird Exp $ */
 
  2000-09-12: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - KERNEL32: Rewrote GetCommandLineA/W. Don't depend on Open32 any longer.
                 The commandline strings are moved to global variables in
                 wprocess.cpp.
                 Added/extended some OSLib calls.
+
+    - Wink32:   When invoking PE.EXE the first argument (Win32 exe name)
+                should be in quotes.
+                This is not yet corrected for the other invokers. (Scripts/Java).
 
  2000-09-09: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: Don't dispatch exceptions after application has called
