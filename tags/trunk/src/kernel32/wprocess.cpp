@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.194 2004-02-24 11:46:10 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.195 2004-12-06 19:42:58 sao2l02 Exp $ */
 
 /*
  * Win32 process functions
@@ -114,9 +114,8 @@ TEB *WIN32API GetThreadTEB()
 //******************************************************************************
 TEB *WIN32API GetTEBFromThreadId(ULONG threadId)
 {
- TEB *teb = threadList;
-
     threadListMutex.enter();
+    TEB *teb = threadList;
     while(teb) {
         if(teb->o.odin.threadId == threadId) {
             break;
@@ -130,9 +129,8 @@ TEB *WIN32API GetTEBFromThreadId(ULONG threadId)
 //******************************************************************************
 TEB *WIN32API GetTEBFromThreadHandle(HANDLE hThread)
 {
- TEB *teb = threadList;
-
     threadListMutex.enter();
+    TEB *teb = threadList;
     while(teb) {
         if(teb->o.odin.hThread == hThread) {
             break;
@@ -167,6 +165,7 @@ TEB *WIN32API CreateTEB(HANDLE hThread, DWORD dwThreadId)
     dprintf(("TIB selector %x; linaddr 0x%x", tibsel, winteb));
 
     threadListMutex.enter();
+#if 0
     TEB *teblast   = threadList;
     if(!teblast) {
         threadList = winteb;
@@ -178,6 +177,10 @@ TEB *WIN32API CreateTEB(HANDLE hThread, DWORD dwThreadId)
         }
         teblast->o.odin.next = winteb;
     }
+#else
+    winteb->o.odin.next = threadList;
+    threadList = winteb;
+#endif
     threadListMutex.leave();
 
     winteb->except      = (PVOID)-1;               /* 00 Head of exception handling chain */
@@ -353,12 +356,12 @@ void WIN32API DestroyTEB(TEB *winteb)
 {
     SHORT orgtibsel;
 
-    dprintf(("DestroyTIB: FS     = %x", GetFS()));
-    dprintf(("DestroyTIB: FS:[0] = %x", QueryExceptionChain()));
+    dprintf(("DestroyTEB: FS     = %x", GetFS()));
+    dprintf(("DestroyTEB: FS:[0] = %x", QueryExceptionChain()));
 
     orgtibsel = winteb->o.odin.OrgTIBSel;
 
-    dprintf(("DestroyTIB: OSLibFreeSel %x", winteb->teb_sel));
+    dprintf(("DestroyTEB: OSLibFreeSel %x", winteb->teb_sel));
 
     threadListMutex.enter();
     TEB *curteb        = threadList;
@@ -369,7 +372,7 @@ void WIN32API DestroyTEB(TEB *winteb)
         while(curteb->o.odin.next != winteb) {
             curteb = curteb->o.odin.next;
             if(curteb == NULL) {
-                dprintf(("DestroyTIB: couldn't find teb %x", winteb));
+                dprintf(("DestroyTEB: couldn't find teb %x", winteb));
                 DebugInt3();
                 break;
             }
@@ -406,9 +409,13 @@ void WIN32API DestroyTEB(TEB *winteb)
     //And free our own
     OSLibFreeSel(winteb->teb_sel);
 
-    *TIBFlatPtr = 0;
+    if ((DWORD)winteb == *TIBFlatPtr) {
+    // DT: without this I can not destroy any invalid TEB 
+       *TIBFlatPtr = 0;
+    }
 
-    dprintf(("DestroyTIB: FS(%x):[0] = %x", GetFS(), QueryExceptionChain()));
+
+    dprintf(("DestroyTEB: FS(%x):[0] = %x", GetFS(), QueryExceptionChain()));
     return;
 }
 //******************************************************************************

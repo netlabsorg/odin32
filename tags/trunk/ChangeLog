@@ -1,4 +1,9 @@
-/* $Id: ChangeLog,v 1.2746 2004-12-04 21:37:13 sao2l02 Exp $ */
+/* $Id: ChangeLog,v 1.2747 2004-12-06 19:42:44 sao2l02 Exp $ */
+2004-12-06: Dietrich Teickner <dietrich_teickner@arcor   >
+    - Kernel32: o src\kernel32\hmthread.cpp,src/kernel32/wprocess.cpp
+                  Never remove the current TEB with the destroy
+                  for the TEB from failed CreateThread.
+                  Do some actions inside the threadListMutex.
 2004-12-04: Dietrich Teickner <dietrich_teickner@arcor   >
     - Kernel32: o src\kernel32\hmthread.cpp snall correction
 2004-12-04: Dietrich Teickner <dietrich_teickner@arcor   >
