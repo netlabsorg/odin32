@@ -1,4 +1,4 @@
-/* $Id: async.cpp,v 1.7 2000-02-16 14:25:30 sandervl Exp $ */
+/* $Id: async.cpp,v 1.8 2000-06-01 11:28:44 sandervl Exp $ */
 
 /*
  * Win32 Asynchronous I/O Subsystem for OS/2
@@ -112,88 +112,5 @@ DWORD WIN32API SleepEx(DWORD dwTimeout,
 
   return (0);
 }
-
-
-/*****************************************************************************
- * Name      : BOOL ReadFileEx
- * Purpose   : The ReadFileEx function reads data from a file asynchronously.
- *             It is designed solely for asynchronous operation, unlike the
- *             ReadFile function, which is designed for both synchronous and
- *             asynchronous operation. ReadFileEx lets an application perform
- *             other processing during a file read operation.
- *             The ReadFileEx function reports its completion status asynchronously,
- *             calling a specified completion routine when reading is completed
- *             and the calling thread is in an alertable wait state.
- * Parameters: HANDLE       hFile                handle of file to read
- *             LPVOID       lpBuffer             address of buffer
- *             DWORD        nNumberOfBytesToRead number of bytes to read
- *             LPOVERLAPPED lpOverlapped         address of offset
- *             LPOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine address of completion routine
- * Variables :
- * Result    : TRUE / FALSE
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
- *****************************************************************************/
-
-#define LPOVERLAPPED_COMPLETION_ROUTINE LPVOID
-
-DWORD WIN32API ReadFileEx(HANDLE       hFile,
-                             LPVOID       lpBuffer,
-                             DWORD        nNumberOfBytesToRead,
-                             LPOVERLAPPED lpOverlapped,
-                             LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine)
-{
-  dprintf(("Kernel32: ReadFileEx(%08xh,%08xh,%08xh,%08xh,%08xh) not implemented.\n",
-           hFile,
-           lpBuffer,
-           nNumberOfBytesToRead,
-           lpOverlapped,
-           lpCompletionRoutine));
-
-
-  return (FALSE);
-}
-
-
-/*****************************************************************************
- * Name      : BOOL WriteFileEx
- * Purpose   : The WriteFileEx function writes data to a file. It is designed
- *             solely for asynchronous operation, unlike WriteFile, which is
- *             designed for both synchronous and asynchronous operation.
- *             WriteFileEx reports its completion status asynchronously,
- *             calling a specified completion routine when writing is completed
- *             and the calling thread is in an alertable wait state.
- * Parameters: HANDLE       hFile                handle of file to write
- *             LPVOID       lpBuffer             address of buffer
- *             DWORD        nNumberOfBytesToRead number of bytes to write
- *             LPOVERLAPPED lpOverlapped         address of offset
- *             LPOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine address of completion routine
- * Variables :
- * Result    : TRUE / FALSE
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
- *****************************************************************************/
-
-DWORD WIN32API WriteFileEx(HANDLE       hFile,
-                              LPVOID       lpBuffer,
-                              DWORD        nNumberOfBytesToWrite,
-                              LPOVERLAPPED lpOverlapped,
-                              LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine)
-{
-  dprintf(("Kernel32: WriteFileEx(%08xh,%08xh,%08xh,%08xh,%08xh) not implemented.\n",
-           hFile,
-           lpBuffer,
-           nNumberOfBytesToWrite,
-           lpOverlapped,
-           lpCompletionRoutine));
-
-
-  return (FALSE);
-}
-
 
 #endif /* _ASYNCIOSUBSYSTEM_H_ */

@@ -1,4 +1,4 @@
-/* $Id: Fileio.cpp,v 1.33 2000-05-22 19:07:53 sandervl Exp $ */
+/* $Id: Fileio.cpp,v 1.34 2000-06-01 11:28:45 sandervl Exp $ */
 
 /*
  * Win32 File IO API functions for OS/2
@@ -233,10 +233,27 @@ ODINFUNCTION4(BOOL, SetFileTime,
 //******************************************************************************
 //******************************************************************************
 ODINFUNCTION2(INT, CompareFileTime,
-              FILETIME *, arg1,
-              FILETIME *, arg2)
+              FILETIME *, lpft1,
+              FILETIME *, lpft2)
 {
-  return O32_CompareFileTime(arg1, arg2);
+   if (lpft1 == NULL || lpft2 == NULL) {
+	SetLastError(ERROR_INVALID_PARAMETER);
+	return -1;
+   }     
+
+   if(lpft1->dwHighDateTime > lpft2->dwHighDateTime)
+	return 1;
+
+   if(lpft1->dwHighDateTime < lpft2->dwHighDateTime)
+	return -1;
+
+   if(lpft1->dwLowDateTime > lpft2->dwLowDateTime)
+ 	return 1;
+
+   if(lpft1->dwLowDateTime < lpft2->dwLowDateTime)
+	return -1;
+
+   return 0; //equal
 }
 //******************************************************************************
 //******************************************************************************
@@ -287,7 +304,10 @@ ODINFUNCTION1(BOOL, DeleteFileA,
 {
  BOOL rc;
 
-  rc = O32_DeleteFile(lpszFile);
+#if 0
+  return 1;
+#else
+  rc = OSLibDosDelete((LPSTR)lpszFile);
   if(!rc) {
   	dprintf(("DeleteFileA %s returned FALSE; last error %x", lpszFile, GetLastError()));
 	if(GetLastError() == 20) {
@@ -297,6 +317,7 @@ ODINFUNCTION1(BOOL, DeleteFileA,
   else  dprintf(("DeleteFileA %s", lpszFile));
 
   return rc;
+#endif
 }
 //******************************************************************************
 //******************************************************************************
@@ -381,6 +402,68 @@ ODINFUNCTION5(BOOL,         ReadFile,
 }
 //******************************************************************************
 //******************************************************************************
+ODINFUNCTION5(BOOL,         ReadFileEx, 
+              HANDLE,       hFile,
+              LPVOID,       lpBuffer,
+              DWORD,        nNumberOfBytesToRead,
+              LPOVERLAPPED, lpOverlapped,
+              LPOVERLAPPED_COMPLETION_ROUTINE,  lpCompletionRoutine)
+{
+  return (HMReadFileEx(hFile,
+                       lpBuffer,
+                       nNumberOfBytesToRead,
+                       lpOverlapped, lpCompletionRoutine));
+}
+//******************************************************************************
+//******************************************************************************
+ODINFUNCTION5(BOOL, WriteFile,
+              HANDLE, hFile,
+              LPCVOID, buffer,
+              DWORD, nrbytes,
+              LPDWORD, nrbyteswritten,
+              LPOVERLAPPED, lpOverlapped)
+{
+  return (HMWriteFile(hFile,
+                      buffer,
+                      nrbytes,
+                      nrbyteswritten,
+                      lpOverlapped));
+}
+/*****************************************************************************
+ * Name      : BOOL WriteFileEx
+ * Purpose   : The WriteFileEx function writes data to a file. It is designed
+ *             solely for asynchronous operation, unlike WriteFile, which is
+ *             designed for both synchronous and asynchronous operation.
+ *             WriteFileEx reports its completion status asynchronously,
+ *             calling a specified completion routine when writing is completed
+ *             and the calling thread is in an alertable wait state.
+ * Parameters: HANDLE       hFile                handle of file to write
+ *             LPVOID       lpBuffer             address of buffer
+ *             DWORD        nNumberOfBytesToRead number of bytes to write
+ *             LPOVERLAPPED lpOverlapped         address of offset
+ *             LPOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine address of completion routine
+ * Variables :
+ * Result    : TRUE / FALSE
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
+ *****************************************************************************/
+
+ODINFUNCTION5(BOOL,         WriteFileEx, 
+              HANDLE,       hFile,
+              LPVOID,       lpBuffer,
+              DWORD,        nNumberOfBytesToWrite,
+              LPOVERLAPPED, lpOverlapped,
+              LPOVERLAPPED_COMPLETION_ROUTINE,  lpCompletionRoutine)
+{
+  return (HMWriteFileEx(hFile,
+                        lpBuffer,
+                        nNumberOfBytesToWrite,
+                        lpOverlapped, lpCompletionRoutine));
+}
+//******************************************************************************
+//******************************************************************************
 ODINFUNCTION4(DWORD, SetFilePointer,
               HANDLE, hFile,
               LONG, lDistanceToMove,
@@ -397,28 +480,6 @@ ODINFUNCTION4(DWORD, SetFilePointer,
                          lDistanceToMove,
                          lpDistanceToMoveHigh,
                          dwMoveMethod));
-}
-//******************************************************************************
-//******************************************************************************
-ODINFUNCTION5(BOOL, WriteFile,
-              HANDLE, hFile,
-              LPCVOID, buffer,
-              DWORD, nrbytes,
-              LPDWORD, nrbyteswritten,
-              LPOVERLAPPED, lpOverlapped)
-{
-  dprintf(("KERNEL32: WriteFile(%08xh,%08xh,%08xh,%08xh,%08xh)\n",
-           hFile,
-           buffer,
-           nrbytes,
-           nrbyteswritten,
-           lpOverlapped));
-
-  return (HMWriteFile(hFile,
-                      buffer,
-                      nrbytes,
-                      nrbyteswritten,
-                      lpOverlapped));
 }
 //******************************************************************************
 //******************************************************************************
@@ -750,11 +811,10 @@ ODINFUNCTION5(BOOL, UnlockFileEx,
            nNumberOfBytesToLockHigh,
            lpOverlapped));
 
-  return(HMUnlockFile(hFile,
-                      lpOverlapped->Offset,
-                      lpOverlapped->OffsetHigh,
-                      nNumberOfBytesToLockLow,
-                      nNumberOfBytesToLockHigh));
+  return(HMUnlockFileEx(hFile, dwReserved,
+                        nNumberOfBytesToLockLow,
+                        nNumberOfBytesToLockHigh,
+                        lpOverlapped));
 }
 //******************************************************************************
 //******************************************************************************

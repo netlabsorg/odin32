@@ -1,4 +1,4 @@
-/* $Id: oslibdos.h,v 1.15 2000-05-23 18:45:13 sandervl Exp $ */
+/* $Id: oslibdos.h,v 1.16 2000-06-01 11:28:48 sandervl Exp $ */
 
 /*
  * Wrappers for OS/2 Dos* API
@@ -12,6 +12,8 @@
 #ifndef __OSLIBDOS_H__
 #define __OSLIBDOS_H__
 
+
+void  OSLibInitWSeBFileIO();
 
 DWORD OSLibDosAliasMem(LPVOID pb, ULONG cb, LPVOID *ppbAlias, ULONG fl);
 DWORD OSLibDosAllocMem(LPVOID *lplpMemAddr, DWORD size, DWORD flags);
@@ -67,10 +69,7 @@ BOOL OSLibDosGetFileAttributesEx(LPSTR pszName, ULONG ulDummy, PVOID pBuffer);
 
 DWORD OSLibDosOpen(char *lpszFileName, DWORD flags);
 DWORD OSLibDosClose(DWORD hFile);
-DWORD OSLibDosGetFileSize(DWORD hFile);
-DWORD OSLibDosRead(DWORD hFile, LPVOID lpBuffer, DWORD size, DWORD *nrBytesRead);
-DWORD OSLibDosWrite(DWORD hFile, LPVOID lpBuffer, DWORD size, DWORD *nrBytesWritten);
-DWORD OSLibDosDelete(char *lpszFileName);
+BOOL OSLibDosDelete(char *lpszFileName);
 
 #define OSLIB_SETPTR_FILE_CURRENT       1
 #define OSLIB_SETPTR_FILE_BEGIN         2
@@ -85,17 +84,40 @@ DWORD OSLibDosSetFilePtr(DWORD hFile, DWORD offset, DWORD method);
 
 DWORD OSLibDosSearchPath(DWORD cmd, char *path, char *name, char *full_name, DWORD length_fullname);
 
+DWORD OSLibDosCreateFile(CHAR *lpFileName, DWORD dwAccess,
+                         DWORD dwShare, LPSECURITY_ATTRIBUTES lpSecurityAttributes,
+                         DWORD dwCreation, DWORD dwFlags, HANDLE hTemplate);
 
-DWORD OSLibDosCreate(CHAR *lpFileName,
-                     DWORD dwAccess,
-                     DWORD dwShare,
-                     LPSECURITY_ATTRIBUTES lpSecurityAttributes,
-                     DWORD dwCreation,
-                     DWORD dwFlags,
-                     HANDLE hTemplate,
-                     DWORD *dwFile);
+DWORD OSLibDosOpenFile(CHAR *lpszFile, UINT fuMode);
 
-DWORD OSLibDosResetBuffer(DWORD hFile);
+BOOL  OSLibDosLockFile(DWORD hFile, DWORD dwFlags,
+                       DWORD OffsetLow, DWORD OffsetHigh,
+                       DWORD nNumberOfBytesToLockLow, DWORD nNumberOfBytesToLockHigh,
+                       LPOVERLAPPED lpOverlapped);
+
+BOOL  OSLibDosUnlockFile(DWORD hFile, DWORD OffsetLow, DWORD OffsetHigh,
+                         DWORD nNumberOfBytesToLockLow, DWORD nNumberOfBytesToLockHigh,
+                         LPOVERLAPPED lpOverlapped);
+
+BOOL  OSLibDosFlushFileBuffers(DWORD hFile);
+BOOL  OSLibDosSetEndOfFile(DWORD hFile);
+
+DWORD OSLibDosGetFileSize(DWORD hFile, LPDWORD lpdwFileSizeHigh);
+BOOL  OSLibDosRead(DWORD hFile, LPVOID lpBuffer, DWORD size, DWORD *nrBytesRead);
+BOOL  OSLibDosWrite(DWORD hFile, LPVOID lpBuffer, DWORD size, DWORD *nrBytesWritten);
+
+BOOL  OSLibDosGetFileInformationByHandle(DWORD hFile, BY_HANDLE_FILE_INFORMATION* pHFI);
+
+BOOL  OSLibDosSetFileTime(DWORD hFile, WORD creationdate, WORD creationtime, 
+                          WORD lastaccessdate, WORD lastaccesstime, 
+                          WORD lastwritedate, WORD lastwritetime);
+
+BOOL  OSLibDosGetFileTime(DWORD hFile, WORD *creationdate, WORD *creationtime, 
+                          WORD *lastaccessdate, WORD *lastaccesstime, 
+                          WORD *lastwritedate, WORD *lastwritetime);
+
+DWORD OSLibDosSetFilePointer(DWORD hFile, DWORD OffsetLow, DWORD *OffsetHigh, DWORD method);
+
 DWORD OSLibDosDupHandle(DWORD hFile, DWORD *hNew);
 DWORD OSLibDosSetFilePtr2(DWORD hFile, DWORD offset, DWORD method);
 
@@ -154,5 +176,80 @@ BOOL  OSLibDosFindClose(DWORD hFindFile);
 DWORD OSLibDosQueryVolumeFS(int drive, LPSTR lpFileSystemNameBuffer, DWORD nFileSystemNameSize);
 DWORD OSLibDosQueryVolumeSerialAndName(int drive, LPDWORD lpVolumeSerialNumber, LPSTR lpVolumeNameBuffer, DWORD nVolumeNameSize);
 
+
+#ifdef OS2DEF_INCLUDED
+#ifndef FIL_STANDARDL
+    typedef struct _LONGLONG {  /* LONGLONG */
+        ULONG ulLo;
+        LONG ulHi;
+    } LONGLONG;
+    typedef LONGLONG *PLONGLONG;
+
+    typedef struct _ULONGLONG {  /* ULONGLONG */
+        ULONG ulLo;
+        ULONG ulHi;
+    } ULONGLONG;
+    typedef ULONGLONG *PULONGLONG;
+
+   #define FIL_STANDARDL         11     /* LFS - Info level 11, standard file info for large files*/
+   #define FIL_QUERYEASIZEL      12     /* LFS - Level 12, return Full EA size for large files */
+   #define FIL_QUERYEASFROMLISTL 13     /* LFS - Level 13, return requested EA's */
+
+   typedef struct _FILESTATUS3L     /* fsts3L */
+   {
+      FDATE    fdateCreation;
+      FTIME    ftimeCreation;
+      FDATE    fdateLastAccess;
+      FTIME    ftimeLastAccess;
+      FDATE    fdateLastWrite;
+      FTIME    ftimeLastWrite;
+      LONGLONG cbFile;
+      LONGLONG cbFileAlloc;
+      ULONG    attrFile;
+   } FILESTATUS3L;
+   typedef FILESTATUS3L *PFILESTATUS3L;
+
+   /* Large File Support >2GB */
+   typedef struct _FILESTATUS4L      /* fsts4L */
+   {
+      FDATE    fdateCreation;
+      FTIME    ftimeCreation;
+      FDATE    fdateLastAccess;
+      FTIME    ftimeLastAccess;
+      FDATE    fdateLastWrite;
+      FTIME    ftimeLastWrite;
+      LONGLONG cbFile;
+      LONGLONG cbFileAlloc;
+      ULONG    attrFile;
+      ULONG    cbList;
+   } FILESTATUS4L;
+   typedef FILESTATUS4L  *PFILESTATUS4L;
+
+   typedef struct _FILELOCKL     /* flock */
+   {
+      LONGLONG lOffset;
+      LONGLONG lRange;
+   } FILELOCKL;
+   typedef FILELOCKL  *PFILELOCKL;
+#endif
+
+
+   typedef APIRET (* APIENTRY PROC_DosSetFileSizeL)(HFILE hFile, LONGLONG cbSize);
+   APIRET OdinDosSetFileSize(HFILE hFile,
+                             LONGLONG cbSize);
+
+   typedef APIRET (* APIENTRY PROC_DosSetFilePtrL)(HFILE hFile, LONGLONG ib, ULONG method, PLONGLONG ibActual);
+   APIRET OdinDosSetFilePtr(HFILE hFile,
+                            LONGLONG ib,
+                            ULONG method,
+                            PLONGLONG ibActual);
+
+   typedef APIRET (* APIENTRY PROC_DosSetFileLocksL)(HFILE hFile, PFILELOCKL pflUnlock, PFILELOCKL pflLock, ULONG timeout, ULONG flags);
+   APIRET OdinDosSetFileLocks(HFILE hFile,
+                              PFILELOCKL pflUnlock,
+                              PFILELOCKL pflLock,
+                              ULONG timeout,
+                              ULONG flags);
+#endif
 
 #endif

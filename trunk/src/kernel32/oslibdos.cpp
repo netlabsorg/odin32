@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.28 2000-05-23 18:45:12 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.29 2000-06-01 11:28:47 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -32,6 +32,67 @@
 #define DBG_LOCALLOG    DBG_oslibdos
 #include "dbglocal.h"
 
+static PROC_DosSetFileSizeL  DosSetFileSizeLProc = 0;
+static PROC_DosSetFilePtrL   DosSetFilePtrLProc   = 0;
+static PROC_DosSetFileLocksL DosSetFileLocksLProc = 0;
+static BOOL f64BitIO = FALSE;
+//******************************************************************************
+//******************************************************************************
+void OSLibInitWSeBFileIO()
+{ 
+ HMODULE hDoscalls;
+
+  if(DosQueryModuleHandle("DOSCALLS", &hDoscalls) != NO_ERROR) {
+	return;
+  }
+  if(DosQueryProcAddr(hDoscalls, 989, NULL, (PFN *)&DosSetFileSizeLProc) != NO_ERROR) {
+	return;
+  }
+  if(DosQueryProcAddr(hDoscalls, 988, NULL, (PFN *)&DosSetFilePtrLProc) != NO_ERROR) {
+	return;
+  }
+  if(DosQueryProcAddr(hDoscalls, 986, NULL, (PFN *)&DosSetFileLocksLProc) != NO_ERROR) {
+	return;
+  }
+  f64BitIO = TRUE;
+}
+//******************************************************************************
+//******************************************************************************
+APIRET OdinDosSetFileSizeL(HFILE hFile, LONGLONG cbSize)
+{
+ APIRET yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = DosSetFileSizeLProc(hFile, cbSize);
+    SetFS(sel);
+
+    return yyrc;
+}
+//******************************************************************************
+//******************************************************************************
+APIRET OdinDosSetFilePtrL(HFILE hFile, LONGLONG ib, ULONG method, PLONGLONG ibActual)
+{
+ APIRET yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = DosSetFilePtrLProc(hFile, ib, method, ibActual);
+    SetFS(sel);
+
+    return yyrc;
+}
+//******************************************************************************
+//******************************************************************************
+APIRET OdinDosSetFileLocksL(HFILE hFile, PFILELOCKL pflUnlock, PFILELOCKL pflLock,
+                            ULONG timeout, ULONG flags)
+{
+ APIRET yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = DosSetFileLocksLProc(hFile, pflUnlock, pflLock, timeout, flags);
+    SetFS(sel);
+
+    return yyrc;
+}
 //******************************************************************************
 // translate OS/2 error codes to Windows codes
 // NOTE: add all codes you need, list is not complete!
@@ -41,88 +102,137 @@ DWORD error2WinError(APIRET rc,DWORD defaultCode = ERROR_NOT_ENOUGH_MEMORY_W)
   switch (rc)
   {
     case NO_ERROR: //0
-      return ERROR_SUCCESS_W;
+      	return ERROR_SUCCESS_W;
+
+    case ERROR_INVALID_FUNCTION: //1
+        return ERROR_INVALID_FUNCTION_W;
 
     case ERROR_FILE_NOT_FOUND: //2
-      return ERROR_FILE_NOT_FOUND_W;
+      	return ERROR_FILE_NOT_FOUND_W;
 
     case ERROR_PATH_NOT_FOUND: //3
-      return ERROR_PATH_NOT_FOUND_W;
+      	return ERROR_PATH_NOT_FOUND_W;
+
+    case ERROR_TOO_MANY_OPEN_FILES: //4
+      	return ERROR_TOO_MANY_OPEN_FILES_W;
 
     case ERROR_ACCESS_DENIED: //5
-      return ERROR_ACCESS_DENIED_W;
+      	return ERROR_ACCESS_DENIED_W;
 
     case ERROR_INVALID_HANDLE: //6
-      return ERROR_INVALID_HANDLE_W;
+      	return ERROR_INVALID_HANDLE_W;
 
     case ERROR_NOT_ENOUGH_MEMORY: //8
-      return ERROR_NOT_ENOUGH_MEMORY_W;
+      	return ERROR_NOT_ENOUGH_MEMORY_W;
 
     case ERROR_BAD_FORMAT: //11
-      return ERROR_BAD_FORMAT_W;
+      	return ERROR_BAD_FORMAT_W;
+ 
+    case ERROR_INVALID_ACCESS: //12
+     	return ERROR_INVALID_ACCESS_W;
 
     case ERROR_NO_MORE_FILES: //18
-      return ERROR_NO_MORE_FILES_W;
+      	return ERROR_NO_MORE_FILES_W;
+
+    case ERROR_WRITE_PROTECT: //19
+        return ERROR_WRITE_PROTECT_W;
 
     case ERROR_NOT_DOS_DISK: //26
-      return ERROR_NOT_DOS_DISK_W;
+      	return ERROR_NOT_DOS_DISK_W;
+
+    case ERROR_WRITE_FAULT: //29
+        return ERROR_WRITE_FAULT_W;
+
+    case ERROR_SHARING_VIOLATION: //32
+       	return ERROR_SHARING_VIOLATION_W;
+
+    case ERROR_LOCK_VIOLATION: //32
+       	return ERROR_LOCK_VIOLATION_W;
+
+    case ERROR_SHARING_BUFFER_EXCEEDED: //36
+       	return ERROR_SHARING_BUFFER_EXCEEDED_W;
+
+    case ERROR_CANNOT_MAKE: //82
+        return ERROR_CANNOT_MAKE_W;
 
     case ERROR_OUT_OF_STRUCTURES: //84
-      return ERROR_OUT_OF_STRUCTURES_W;
+      	return ERROR_OUT_OF_STRUCTURES_W;
 
     case ERROR_INVALID_PARAMETER: //87
-      return ERROR_INVALID_PARAMETER_W;
+      	return ERROR_INVALID_PARAMETER_W;
 
     case ERROR_INTERRUPT: //95
-      return ERROR_INVALID_AT_INTERRUPT_TIME_W; //CB: right???
+      	return ERROR_INVALID_AT_INTERRUPT_TIME_W; //CB: right???
+
+    case ERROR_DEVICE_IN_USE: //99
+	return ERROR_DEVICE_IN_USE_W;
 
     case ERROR_DRIVE_LOCKED: //108
-      return ERROR_DRIVE_LOCKED_W;
+      	return ERROR_DRIVE_LOCKED_W;
 
     case ERROR_BROKEN_PIPE: //109
-      return ERROR_BROKEN_PIPE_W;
+      	return ERROR_BROKEN_PIPE_W;
+
+    case ERROR_OPEN_FAILED: //110
+	return ERROR_OPEN_FAILED_W;
 
     case ERROR_BUFFER_OVERFLOW: //111
-      return ERROR_BUFFER_OVERFLOW_W;
+      	return ERROR_BUFFER_OVERFLOW_W;
+
+    case ERROR_DISK_FULL: //112
+	return ERROR_DISK_FULL_W;
 
     case ERROR_NO_MORE_SEARCH_HANDLES: //113
-      return ERROR_NO_MORE_SEARCH_HANDLES_W;
+      	return ERROR_NO_MORE_SEARCH_HANDLES_W;
 
     case ERROR_SEM_TIMEOUT: //121
-      return ERROR_SEM_TIMEOUT_W;
+      	return ERROR_SEM_TIMEOUT_W;
+
+    case ERROR_DIRECT_ACCESS_HANDLE: //130
+        return ERROR_DIRECT_ACCESS_HANDLE_W;
+
+    case ERROR_NEGATIVE_SEEK: //131
+        return ERROR_NEGATIVE_SEEK;
+
+    case ERROR_SEEK_ON_DEVICE: //132
+        return ERROR_SEEK_ON_DEVICE_W;
 
     case ERROR_DISCARDED: //157
-      return ERROR_DISCARDED_W;
+      	return ERROR_DISCARDED_W;
 
     case ERROR_FILENAME_EXCED_RANGE: //206
-      return ERROR_FILENAME_EXCED_RANGE_W;
+      	return ERROR_FILENAME_EXCED_RANGE_W;
 
     case ERROR_META_EXPANSION_TOO_LONG: //208
-      return ERROR_META_EXPANSION_TOO_LONG_W;
+      	return ERROR_META_EXPANSION_TOO_LONG_W;
 
     case ERROR_BAD_PIPE: //230
-      return ERROR_BAD_PIPE_W;
+      	return ERROR_BAD_PIPE_W;
 
     case ERROR_PIPE_BUSY: //231
-      return ERROR_PIPE_BUSY_W;
+      	return ERROR_PIPE_BUSY_W;
+
+    case ERROR_NO_DATA: //232
+      	return ERROR_NO_DATA_W;
 
     case ERROR_PIPE_NOT_CONNECTED: //233
-      return ERROR_PIPE_NOT_CONNECTED_W;
+      	return ERROR_PIPE_NOT_CONNECTED_W;
 
     case ERROR_MORE_DATA: //234
-      return ERROR_MORE_DATA_W;
+      	return ERROR_MORE_DATA_W;
 
     case ERROR_INVALID_EA_NAME: //254
-      return ERROR_INVALID_EA_NAME_W;
+      	return ERROR_INVALID_EA_NAME_W;
 
     case ERROR_EA_LIST_INCONSISTENT: //255
-      return ERROR_EA_LIST_INCONSISTENT_W;
+      	return ERROR_EA_LIST_INCONSISTENT_W;
 
     case ERROR_EAS_DIDNT_FIT: //275
-      return ERROR_EAS_DIDNT_FIT;
+      	return ERROR_EAS_DIDNT_FIT;
 
     default:
-      return defaultCode;
+    	dprintf(("WARNING: error2WinError: error %d not included!!!!", rc));
+      	return defaultCode;
   }
 }
 //******************************************************************************
@@ -381,15 +491,23 @@ DWORD OSLibDosSetInitialMaxFileHandles(DWORD maxhandles)
 }
 //******************************************************************************
 //******************************************************************************
-DWORD OSLibDosRead(DWORD hFile, LPVOID lpBuffer, DWORD size, DWORD *nrBytesRead)
+BOOL OSLibDosRead(DWORD hFile, LPVOID lpBuffer, DWORD size, DWORD *nrBytesRead)
 {
-  return DosRead(hFile, lpBuffer, size, nrBytesRead);
+ APIRET rc;
+
+  rc = DosRead(hFile, lpBuffer, size, nrBytesRead);
+  SetLastError(error2WinError(rc));
+  return (rc == NO_ERROR);
 }
 //******************************************************************************
 //******************************************************************************
-DWORD OSLibDosWrite(DWORD hFile, LPVOID lpBuffer, DWORD size, DWORD *nrBytesWritten)
+BOOL OSLibDosWrite(DWORD hFile, LPVOID lpBuffer, DWORD size, DWORD *nrBytesWritten)
 {
-  return DosWrite(hFile, lpBuffer, size, nrBytesWritten);
+ APIRET rc;
+
+  rc = DosWrite(hFile, lpBuffer, size, nrBytesWritten);
+  SetLastError(error2WinError(rc));
+  return (rc == NO_ERROR);
 }
 //******************************************************************************
 //******************************************************************************
@@ -420,9 +538,16 @@ DWORD OSLibDosSetFilePtr(DWORD hFile, DWORD offset, DWORD method)
 }
 //******************************************************************************
 //******************************************************************************
-DWORD OSLibDosDelete(char *lpszFileName)
+BOOL OSLibDosDelete(char *lpszFileName)
 {
-  return DosDelete(lpszFileName);
+ APIRET rc;
+
+  rc = DosDelete(lpszFileName);
+  if(rc) {
+	SetLastError(error2WinError(rc));	
+	return FALSE;
+  }
+  return TRUE;
 }
 //******************************************************************************
 //******************************************************************************
@@ -551,107 +676,571 @@ DWORD OSLibDosSearchPath(DWORD cmd, char *path, char *name, char *full_name,
 }
 //******************************************************************************
 //******************************************************************************
-DWORD OSLibDosCreate(CHAR *lpFileName,
-                     DWORD dwAccess,
-                     DWORD dwShare,
-                     LPSECURITY_ATTRIBUTES lpSecurityAttributes,
-                     DWORD dwCreation,
-                     DWORD dwFlags,
-                     HANDLE hTemplate,
-                     DWORD *dwFile)
+APIRET OSLibDosQueryPathInfo(PSZ   pszPathName,
+                             ULONG ulInfoLevel,
+                             PVOID pInfoBuf,
+                             ULONG cbInfoBuf)
 {
-   APIRET rc;
-   HFILE  hFile;
-   ULONG  ulAction=0;
-   DWORD  os2Attrib=0;
-   DWORD  os2Flags = 0; //OPEN_FLAGS_NOINHERIT;
-   DWORD  os2Open=0;
+   APIRET rc = DosQueryPathInfo( pszPathName, ulInfoLevel,
+                                 pInfoBuf, cbInfoBuf );
 
-    if(dwAccess == (GENERIC_READ_W | GENERIC_WRITE_W))
-      os2Flags |= OPEN_ACCESS_READWRITE;
-    else if(dwAccess & GENERIC_WRITE_W)
-      os2Flags |= OPEN_ACCESS_WRITEONLY;
-    else if(dwAccess & GENERIC_READ_W)
-      os2Flags |= OPEN_ACCESS_READONLY;
+   if(rc == ERROR_TOO_MANY_OPEN_FILES)
+   {
+      	LONG  reqCount = 2;
+      	ULONG maxFiles;
 
-    if(dwShare == 0)
-      os2Flags |= OPEN_SHARE_DENYREADWRITE;
-    else if(dwShare == (FILE_SHARE_READ_W | FILE_SHARE_WRITE_W))
-      os2Flags |= OPEN_SHARE_DENYNONE;
-    else if(dwShare & FILE_SHARE_READ_W)
-      os2Flags |= OPEN_SHARE_DENYWRITE;
-    else if(dwShare & FILE_SHARE_WRITE_W)
-      os2Flags |= OPEN_SHARE_DENYREAD;
-
-    if(dwCreation == CREATE_NEW_W)
-      os2Open = OPEN_ACTION_FAIL_IF_EXISTS | OPEN_ACTION_CREATE_IF_NEW;
-    else if(dwCreation == CREATE_ALWAYS_W)
-      os2Open = OPEN_ACTION_REPLACE_IF_EXISTS | OPEN_ACTION_CREATE_IF_NEW;
-    else if(dwCreation == OPEN_EXISTING_W)
-      os2Open = OPEN_ACTION_OPEN_IF_EXISTS | OPEN_ACTION_FAIL_IF_NEW;
-    else if(dwCreation == OPEN_ALWAYS_W)
-      os2Open = OPEN_ACTION_OPEN_IF_EXISTS | OPEN_ACTION_CREATE_IF_NEW;
-    else if(dwCreation == TRUNCATE_EXISTING_W)
-      os2Open = OPEN_ACTION_REPLACE_IF_EXISTS;// |OPEN_ACTION_FAIL_IF_NEW;
-
-    if(dwFlags & FILE_ATTRIBUTE_READONLY_W)
-      os2Attrib |= FILE_READONLY;
-    if(dwFlags & FILE_ATTRIBUTE_HIDDEN_W)
-      os2Attrib |= FILE_HIDDEN;
-    if(dwFlags & FILE_ATTRIBUTE_SYSTEM_W)
-      os2Attrib |= FILE_SYSTEM;
-    if(dwFlags & FILE_ATTRIBUTE_DIRECTORY_W)
-      os2Attrib |= FILE_DIRECTORY;
-    if(dwFlags & FILE_ATTRIBUTE_ARCHIVE_W)
-      os2Attrib |= FILE_ARCHIVED;
-    if(dwFlags & FILE_ATTRIBUTE_NORMAL_W)
-      os2Attrib |= FILE_NORMAL;
-
-    if(dwFlags & FILE_FLAG_WRITE_THROUGH_W)
-      os2Flags |= OPEN_FLAGS_WRITE_THROUGH;
-    if(dwFlags & FILE_FLAG_NO_BUFFERING_W)
-      os2Flags |= OPEN_FLAGS_NO_CACHE;
-    if(dwFlags & FILE_FLAG_RANDOM_ACCESS_W)
-      os2Flags |= OPEN_FLAGS_RANDOM;
-    if(dwFlags & FILE_FLAG_SEQUENTIAL_SCAN_W)
-      os2Flags |= OPEN_FLAGS_SEQUENTIAL;
-
-    // TODO:
-    // if(dwFlags & FILE_FLAG_OVERLAPPED_W)
-    // if(dwFlags & FILE_FLAG_DELETE_ON_CLOSE_W
-
-    rc = DosOpen(lpFileName, &hFile, &ulAction, 0,
-                 os2Attrib, os2Open, os2Flags, 0);
-
-    if(rc)
-    {
-      // TODO: TEST TEST
-      dprintf(("DosOpen Error rc:%d, try without GENERIC_WRITE_W", rc));
-      if(dwAccess & GENERIC_WRITE_W)
-        os2Flags &= ~(OPEN_ACCESS_READWRITE | OPEN_ACCESS_WRITEONLY);
-      rc = DosOpen(lpFileName, &hFile, &ulAction, 0,
-                   os2Attrib, os2Open, os2Flags, 0);
-      if(rc)
-      {
-        dprintf(("DosOpen Error rc:%d os2Attrib:%X os2Open:%X os2Flags:%X",
-                 rc, os2Attrib, os2Open, os2Flags));
-        hFile = -1;
-      }
-    }
-
-    *dwFile = hFile;
-    return rc;
+      	if(DosSetRelMaxFH(&reqCount, &maxFiles) == NO_ERROR)
+         	rc = DosQueryPathInfo(pszPathName, ulInfoLevel,
+                                      pInfoBuf, cbInfoBuf );
+   }
+   return rc;
 }
 //******************************************************************************
-//(without changing file pointer)
 //******************************************************************************
-DWORD OSLibDosGetFileSize(DWORD hFile)
+DWORD OSLibDosCreateFile(CHAR *lpszFile,
+                         DWORD fuAccess,
+                         DWORD fuShare,
+                         LPSECURITY_ATTRIBUTES lpSecurityAttributes,
+                         DWORD fuCreate,
+                         DWORD fuAttrFlags,
+                         HANDLE hTemplateFile)
 {
-  FILESTATUS3  fsts3ConfigInfo = {{0}};
-  ULONG        ulBufSize     = sizeof(FILESTATUS3);
+   HFILE   hFile;
+   ULONG   actionTaken = 0;
+   ULONG   fileSize = 0;
+   ULONG   fileAttr = FILE_NORMAL;
+   ULONG   openFlag = 0;
+   ULONG   openMode = 0;
+   APIRET  rc = ERROR_NOT_ENOUGH_MEMORY;;
 
-  DosQueryFileInfo(hFile, FIL_STANDARD, &fsts3ConfigInfo, ulBufSize);
-  return fsts3ConfigInfo.cbFile;
+   //TODO: lpSecurityAttributes (inheritance)
+
+   if(fuAttrFlags & FILE_ATTRIBUTE_ARCHIVE_W)
+      	fileAttr |= FILE_ARCHIVED;
+   if(fuAttrFlags & FILE_ATTRIBUTE_HIDDEN_W)
+        fileAttr |= FILE_HIDDEN;
+   if(fuAttrFlags & FILE_ATTRIBUTE_SYSTEM_W)
+        fileAttr |= FILE_SYSTEM;
+   if(fuAttrFlags & FILE_ATTRIBUTE_READONLY_W)
+        fileAttr |= FILE_READONLY;
+   // TODO: FILE_ATTRIBUTE_TEMPORARY_W
+
+   switch(fuCreate)
+   {
+   case CREATE_NEW_W:
+	openFlag |= OPEN_ACTION_CREATE_IF_NEW | OPEN_ACTION_FAIL_IF_EXISTS;
+        break;
+   case CREATE_ALWAYS_W:
+        openFlag |= OPEN_ACTION_CREATE_IF_NEW | OPEN_ACTION_REPLACE_IF_EXISTS;
+        break;
+   case OPEN_EXISTING_W:
+        openFlag |= OPEN_ACTION_FAIL_IF_NEW | OPEN_ACTION_OPEN_IF_EXISTS;
+        break;
+   case OPEN_ALWAYS_W:
+        openFlag |= OPEN_ACTION_CREATE_IF_NEW | OPEN_ACTION_OPEN_IF_EXISTS;
+        break;
+   case TRUNCATE_EXISTING_W:
+        openFlag |= OPEN_ACTION_FAIL_IF_NEW | OPEN_ACTION_REPLACE_IF_EXISTS;
+        break;
+   }
+
+   if(fuAttrFlags & FILE_FLAG_WRITE_THROUGH_W)   openMode |= OPEN_FLAGS_WRITE_THROUGH;
+   if(fuAttrFlags & FILE_FLAG_NO_BUFFERING_W)    openMode |= OPEN_FLAGS_NO_CACHE;
+   if(fuAttrFlags & FILE_FLAG_RANDOM_ACCESS_W)   openMode |= OPEN_FLAGS_RANDOM;
+   if(fuAttrFlags & FILE_FLAG_SEQUENTIAL_SCAN_W) openMode |= OPEN_FLAGS_SEQUENTIAL;
+   // TODO: FILE_FLAG_BACKUP_SEMANTICS_W
+   //       FILE_FLAG_POSIX_SEMANTICS_W are not supported
+
+   if(fuShare == 0)
+	openMode |= OPEN_SHARE_DENYREADWRITE;
+   else 
+   if(fuShare == (FILE_SHARE_READ_W | FILE_SHARE_WRITE_W))
+      	openMode |= OPEN_SHARE_DENYNONE;
+   else 
+   if(fuShare & FILE_SHARE_READ_W)          
+        openMode |= OPEN_SHARE_DENYWRITE;
+   else 
+   if(fuShare & FILE_SHARE_WRITE_W)
+ 	openMode |= OPEN_SHARE_DENYREAD;
+
+   if(fuAccess == (GENERIC_READ_W | GENERIC_WRITE_W))
+	openMode |= OPEN_ACCESS_READWRITE;
+   else 
+   if(fuAccess & GENERIC_READ_W)            
+	openMode |= OPEN_ACCESS_READONLY;
+   else
+   if(fuAccess & GENERIC_WRITE_W)
+       	openMode |= OPEN_ACCESS_WRITEONLY;
+
+   int retry = 0;
+   while(retry < 2) 
+   {
+        rc = DosOpen((PSZ)lpszFile,
+                      &hFile,
+                      &actionTaken,
+                      fileSize,
+                      fileAttr,
+                      openFlag,
+                      openMode,
+                      NULL);
+  	if(rc == ERROR_TOO_MANY_OPEN_FILES) 
+        {
+   	  ULONG CurMaxFH;
+   	  LONG  ReqCount = 32;
+
+		rc = DosSetRelMaxFH(&ReqCount, &CurMaxFH);
+		if(rc) {
+			dprintf(("DosSetRelMaxFH returned %d", rc));
+			SetLastError(ERROR_TOO_MANY_OPEN_FILES_W);
+			return INVALID_HANDLE_VALUE_W;
+		}
+		dprintf(("DosOpen failed -> increased nr open files to %d", CurMaxFH));
+  	}
+	else	break;
+	retry++;
+   }
+
+   if(rc)
+   {
+      SetLastError(error2WinError(rc));
+      return INVALID_HANDLE_VALUE_W;
+   }
+   SetLastError(ERROR_SUCCESS_W);
+   return hFile;
+}
+//******************************************************************************
+//******************************************************************************
+DWORD OSLibDosOpenFile(CHAR *lpszFile, UINT fuMode)
+{
+   ULONG   actionTaken = 0;
+   ULONG   fileSize = 0;
+   ULONG   fileAttr = FILE_NORMAL;
+   ULONG   openFlag = 0;
+   ULONG   openMode = 0;
+   APIRET  rc = ERROR_NOT_ENOUGH_MEMORY;
+   HFILE   hFile;
+
+   if(!(fuMode & (OF_CREATE_W | OF_READWRITE_W | OF_WRITE_W)))
+   {
+      	openMode |= OPEN_ACCESS_READONLY;
+      	openFlag |= OPEN_ACTION_OPEN_IF_EXISTS;
+   }
+   else
+   {
+       	if(fuMode & OF_CREATE_W) {
+          	openFlag |= OPEN_ACTION_CREATE_IF_NEW |
+                            OPEN_ACTION_REPLACE_IF_EXISTS;
+	}
+       	else    openFlag |= OPEN_ACTION_OPEN_IF_EXISTS;                                //180575
+
+       	if(fuMode & OF_READWRITE_W)
+          	openMode |= OPEN_ACCESS_READWRITE;
+       	else 
+	if(fuMode & OF_WRITE_W)
+          	openMode |= OPEN_ACCESS_WRITEONLY;
+       	else 
+	if(fuMode & OF_CREATE_W)
+          	openMode |= OPEN_ACCESS_READWRITE;
+   }
+
+   if((fuMode & OF_SHARE_DENY_WRITE_W) ||
+      !(fuMode & (OF_SHARE_DENY_READ_W | OF_SHARE_DENY_NONE_W | OF_SHARE_EXCLUSIVE_W)))
+      	openMode |= OPEN_SHARE_DENYWRITE;
+   else 
+   if (fuMode & OF_SHARE_DENY_NONE_W)
+      	openMode |= OPEN_SHARE_DENYNONE;
+   else 
+   if (fuMode & OF_SHARE_DENY_READ_W)
+      	openMode |= OPEN_SHARE_DENYREAD;
+   else 
+   if (fuMode & OF_SHARE_EXCLUSIVE_W)
+      	openMode |= OPEN_SHARE_DENYREADWRITE;
+
+   rc = DosOpen((PSZ)lpszFile,
+                &hFile,
+                &actionTaken,
+                fileSize,
+                fileAttr,
+                openFlag,
+                openMode,
+                NULL);
+
+   if(rc != NO_ERROR)
+   {
+       	if(fuMode & OF_EXIST_W)
+       	{
+          	if(rc == ERROR_OPEN_FAILED || rc == ERROR_FILE_NOT_FOUND)
+          	{
+             		SetLastError(ERROR_FILE_NOT_FOUND_W);
+             		return HFILE_ERROR_W;
+          	}
+       	}
+      	if((rc == ERROR_OPEN_FAILED) && (openFlag & OPEN_ACTION_OPEN_IF_EXISTS))
+      	{
+          	SetLastError(ERROR_FILE_NOT_FOUND_W);
+      	} 
+      	else    SetLastError(error2WinError(rc));
+
+      	return HFILE_ERROR_W;
+   }
+   SetLastError(ERROR_SUCCESS_W);
+   return hFile;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibDosLockFile(DWORD hFile, DWORD dwFlags,
+                      DWORD OffsetLow, DWORD OffsetHigh,
+                      DWORD nNumberOfBytesToLockLow, DWORD nNumberOfBytesToLockHigh,
+                      LPOVERLAPPED lpOverlapped)
+{
+  APIRET   rc;
+
+   // Set 5 secs timeout for locking file and no other can access this
+   // file region
+
+   if(lpOverlapped) {//TODO:
+	dprintf(("OSLibDosLockFile: overlapped lock not yet implemented!!"));
+   }
+   //TODO: Locking region crossing end of file is permitted. Works in OS/2??
+   if(f64BitIO) 
+   {
+    FILELOCKL lockRangeL;
+
+ 	lockRangeL.lOffset.ulLo = OffsetLow;
+ 	lockRangeL.lOffset.ulHi = OffsetHigh;
+ 	lockRangeL.lRange.ulLo  = nNumberOfBytesToLockLow;
+ 	lockRangeL.lRange.ulHi  = nNumberOfBytesToLockHigh;
+
+   	rc = OdinDosSetFileLocksL(hFile, NULL, &lockRangeL, 
+                                  (dwFlags & LOCKFILE_FAIL_IMMEDIATELY_W) ? 0 : 5000, 0);
+   }
+   else 
+   {
+    FILELOCK lockRange = { OffsetLow, nNumberOfBytesToLockLow };
+
+   	rc = DosSetFileLocks(hFile, NULL, &lockRange, 
+                             (dwFlags & LOCKFILE_FAIL_IMMEDIATELY_W) ? 0 : 5000, 0);
+   }
+   if(rc) {
+   	SetLastError(error2WinError(rc));
+	return FALSE;
+   }
+   SetLastError(ERROR_SUCCESS_W);
+   return TRUE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibDosUnlockFile(DWORD hFile, DWORD OffsetLow, DWORD OffsetHigh,
+                        DWORD nNumberOfBytesToLockLow, DWORD nNumberOfBytesToLockHigh,
+                        LPOVERLAPPED lpOverlapped)
+{
+  APIRET   rc;
+
+   // Set 5 secs timeout for unlocking file and no other can access this
+   // file region
+
+   if(lpOverlapped) {//TODO:
+	dprintf(("OSLibDosUnlockFile: overlapped unlock not yet implemented!!"));
+   }
+   if(f64BitIO) 
+   {
+    FILELOCKL unlockRangeL;
+
+ 	unlockRangeL.lOffset.ulLo = OffsetLow;
+ 	unlockRangeL.lOffset.ulHi = OffsetHigh;
+ 	unlockRangeL.lRange.ulLo  = nNumberOfBytesToLockLow;
+ 	unlockRangeL.lRange.ulHi  = nNumberOfBytesToLockHigh;
+
+   	rc = OdinDosSetFileLocksL(hFile, &unlockRangeL, NULL, 5000, 0);
+   }
+   else 
+   {
+    FILELOCK unlockRange = { OffsetLow, nNumberOfBytesToLockLow };
+
+        rc = DosSetFileLocks(hFile, &unlockRange, NULL,  5000, 0);
+   }
+   if(rc) {
+   	SetLastError(error2WinError(rc));
+	return FALSE;
+   }
+   SetLastError(ERROR_SUCCESS_W);
+   return TRUE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibDosFlushFileBuffers(DWORD hFile)
+{
+  APIRET   rc;
+  
+   rc = DosResetBuffer(hFile);
+   SetLastError(error2WinError(rc));
+   return (rc == NO_ERROR);
+}
+//******************************************************************************
+//******************************************************************************
+DWORD OSLibDosGetFileSize(DWORD hFile, LPDWORD lpdwFileSizeHigh)
+{
+ APIRET rc;
+ ULONG  sizeLow;
+  
+   if(f64BitIO) 
+   {
+     FILESTATUS3L fsts3ConfigInfoL = {{0}};
+     ULONG        ulBufSize       = sizeof(FILESTATUS3L);
+
+   	rc = DosQueryFileInfo(hFile, FIL_STANDARDL, &fsts3ConfigInfoL, ulBufSize);
+   	if(lpdwFileSizeHigh) {
+  		*lpdwFileSizeHigh = fsts3ConfigInfoL.cbFile.ulHi;
+	}
+	sizeLow = fsts3ConfigInfoL.cbFile.ulLo;
+   }
+   else 
+   {
+     FILESTATUS3 fsts3ConfigInfo = {{0}};
+     ULONG       ulBufSize       = sizeof(FILESTATUS3);
+
+   	if(lpdwFileSizeHigh) {
+  		*lpdwFileSizeHigh = 0;
+	}
+   	rc = DosQueryFileInfo(hFile, FIL_STANDARD, &fsts3ConfigInfo, ulBufSize);
+	sizeLow = fsts3ConfigInfo.cbFile;
+   }
+   if(rc) {
+   	SetLastError(error2WinError(rc));
+   	return -1;
+   }
+   SetLastError(ERROR_SUCCESS_W);
+   return sizeLow;
+}
+//******************************************************************************
+//******************************************************************************
+DWORD OSLibDosSetFilePointer(DWORD hFile, DWORD OffsetLow, DWORD *OffsetHigh, DWORD method)
+{
+ LONGLONG offsetL;
+ LONGLONG newoffsetL;
+ APIRET   rc;
+ DWORD    newoffset;
+
+   switch(method) {
+   case FILE_BEGIN_W:
+	method = FILE_BEGIN;
+	break;
+
+   case FILE_CURRENT_W:
+	method = FILE_CURRENT;
+	break;
+
+   case FILE_END_W:
+     	method = FILE_END;
+	break;
+   }
+   if(f64BitIO) {
+	offsetL.ulLo = OffsetLow;
+	offsetL.ulHi = (OffsetHigh) ? *OffsetHigh : 0;
+	rc = OdinDosSetFilePtrL(hFile, offsetL, method, &newoffsetL);
+	if(OffsetHigh) {
+		*OffsetHigh = newoffsetL.ulHi;
+	}
+	newoffset = newoffsetL.ulLo;
+   }
+   else	rc = DosSetFilePtr(hFile, OffsetLow, method, &newoffset);
+   if(rc) {
+   	SetLastError(error2WinError(rc));
+   	return -1;
+   }
+   SetLastError(ERROR_SUCCESS_W);
+   return newoffset;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibDosSetEndOfFile(DWORD hFile)
+{
+ ULONG    newFilePos;
+ LONGLONG FilePosL = {0,0};
+ LONGLONG newFilePosL;
+ APIRET   rc;
+ 
+   if(f64BitIO) {
+	rc = OdinDosSetFilePtrL(hFile, FilePosL, FILE_CURRENT, &newFilePosL);
+	if(rc == 0) {
+        	rc = OdinDosSetFileSizeL(hFile, newFilePosL);
+	}
+   }
+   else {
+   	rc = DosSetFilePtr(hFile, 0, FILE_CURRENT, &newFilePos);
+	if(rc == 0) {
+        	rc = DosSetFileSize(hFile, newFilePos);
+	}
+   }
+   if(rc) {
+   	SetLastError(error2WinError(rc));
+   	return FALSE;
+   }
+   SetLastError(ERROR_SUCCESS_W);
+   return TRUE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibDosGetFileInformationByHandle(DWORD hFile, BY_HANDLE_FILE_INFORMATION* pInfo)
+{
+ APIRET       rc;
+ 
+   if(f64BitIO) 
+   {
+     FILESTATUS4L statusL = { 0 };
+
+   	rc = DosQueryFileInfo(hFile,
+        	              FIL_QUERYEASIZEL,
+                	      &statusL,
+                              sizeof(statusL));
+   	if(rc == NO_ERROR) 
+   	{
+	  	pInfo->dwFileAttributes = 0;
+		if(!(statusL.attrFile & NOT_NORMAL))
+		  	pInfo->dwFileAttributes |= FILE_ATTRIBUTE_NORMAL_W;
+		if(statusL.attrFile & FILE_READONLY)
+		        pInfo->dwFileAttributes |= FILE_ATTRIBUTE_READONLY_W;
+		if(statusL.attrFile & FILE_HIDDEN)
+		        pInfo->dwFileAttributes |= FILE_ATTRIBUTE_HIDDEN_W;
+		if(statusL.attrFile & FILE_SYSTEM)
+		        pInfo->dwFileAttributes |= FILE_ATTRIBUTE_SYSTEM_W;
+		if(statusL.attrFile & FILE_DIRECTORY)
+		        pInfo->dwFileAttributes |= FILE_ATTRIBUTE_DIRECTORY_W;
+		if(statusL.attrFile & FILE_ARCHIVED)
+		        pInfo->dwFileAttributes |= FILE_ATTRIBUTE_ARCHIVE_W;
+			
+		pmDateTimeToFileTime(&statusL.fdateCreation,
+	                             &statusL.ftimeCreation,
+	                             &pInfo->ftCreationTime);
+		pmDateTimeToFileTime(&statusL.fdateLastAccess,
+	                             &statusL.ftimeLastAccess,
+	                             &pInfo->ftLastAccessTime);
+		pmDateTimeToFileTime(&statusL.fdateLastWrite,
+	                             &statusL.ftimeLastWrite,
+	                             &pInfo->ftLastWriteTime);
+	
+		pInfo->nFileSizeHigh = statusL.cbFile.ulHi;
+		pInfo->nFileSizeLow  = statusL.cbFile.ulLo;
+		pInfo->dwVolumeSerialNumber = 0; //todo
+		pInfo->nNumberOfLinks = 1;
+		pInfo->nFileIndexHigh = 0;
+		pInfo->nFileIndexLow  = 0;
+	   }
+   }
+   else 
+   {
+     FILESTATUS4  status  = { 0 };
+
+   	rc = DosQueryFileInfo(hFile,
+        	              FIL_QUERYEASIZE,
+                	      &status,
+                              sizeof(status));
+   	if(rc == NO_ERROR) 
+   	{
+	  	pInfo->dwFileAttributes = 0;
+		if(!(status.attrFile & NOT_NORMAL))
+		  	pInfo->dwFileAttributes |= FILE_ATTRIBUTE_NORMAL_W;
+		if(status.attrFile & FILE_READONLY)
+		        pInfo->dwFileAttributes |= FILE_ATTRIBUTE_READONLY_W;
+		if(status.attrFile & FILE_HIDDEN)
+		        pInfo->dwFileAttributes |= FILE_ATTRIBUTE_HIDDEN_W;
+		if(status.attrFile & FILE_SYSTEM)
+		        pInfo->dwFileAttributes |= FILE_ATTRIBUTE_SYSTEM_W;
+		if(status.attrFile & FILE_DIRECTORY)
+		        pInfo->dwFileAttributes |= FILE_ATTRIBUTE_DIRECTORY_W;
+		if(status.attrFile & FILE_ARCHIVED)
+		        pInfo->dwFileAttributes |= FILE_ATTRIBUTE_ARCHIVE_W;
+			
+		pmDateTimeToFileTime(&status.fdateCreation,
+	                             &status.ftimeCreation,
+	                             &pInfo->ftCreationTime);
+		pmDateTimeToFileTime(&status.fdateLastAccess,
+	                             &status.ftimeLastAccess,
+	                             &pInfo->ftLastAccessTime);
+		pmDateTimeToFileTime(&status.fdateLastWrite,
+	                             &status.ftimeLastWrite,
+	                             &pInfo->ftLastWriteTime);
+	
+		pInfo->nFileSizeHigh = 0;
+		pInfo->nFileSizeLow = status.cbFile;
+		pInfo->dwVolumeSerialNumber = 0; //todo
+		pInfo->nNumberOfLinks = 1;
+		pInfo->nFileIndexHigh = 0;
+		pInfo->nFileIndexLow = 0;
+	   }
+   }
+   if(rc) {
+      	SetLastError(error2WinError(rc));
+   	return FALSE;
+   }
+   SetLastError(ERROR_SUCCESS_W);
+   return TRUE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibDosSetFileTime(DWORD hFile, WORD creationdate, WORD creationtime, 
+                         WORD lastaccessdate, WORD lastaccesstime, 
+                         WORD lastwritedate, WORD lastwritetime)
+{
+  FILESTATUS3 fileInfo;
+  APIRET      rc;
+
+  rc = DosQueryFileInfo(hFile, FIL_STANDARD, &fileInfo, sizeof(fileInfo));
+
+  if(rc == NO_ERROR)
+  {
+	if(creationdate && creationtime) {
+		fileInfo.fdateCreation   = *(FDATE *)&creationdate;
+        	fileInfo.ftimeCreation   = *(FTIME *)&creationtime;
+	}
+	if(lastaccessdate && lastaccesstime) {
+		fileInfo.fdateLastAccess = *(FDATE *)&lastaccessdate;
+        	fileInfo.ftimeLastAccess = *(FTIME *)&lastaccesstime;
+	}
+	if(lastwritedate && lastwritetime) {
+		fileInfo.fdateLastWrite  = *(FDATE *)&lastwritedate;
+        	fileInfo.ftimeLastWrite  = *(FTIME *)&lastwritetime;
+	}
+
+ 	rc = DosSetFileInfo(hFile, FIL_STANDARD, &fileInfo, sizeof(fileInfo));
+  }
+
+  if(rc)
+  {
+      	SetLastError(error2WinError(rc));
+     	return FALSE;
+  }
+  SetLastError(ERROR_SUCCESS_W);
+  return TRUE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibDosGetFileTime(DWORD hFile, WORD *creationdate, WORD *creationtime, 
+                         WORD *lastaccessdate, WORD *lastaccesstime, 
+                         WORD *lastwritedate, WORD *lastwritetime)
+{
+  FILESTATUS3 fileInfo;
+  APIRET      rc;
+
+  rc = DosQueryFileInfo(hFile, FIL_STANDARD, &fileInfo, sizeof(fileInfo));
+
+  if(rc == NO_ERROR)
+  {
+	*creationdate   = *(WORD *)&fileInfo.fdateCreation;
+        *creationtime   = *(WORD *)&fileInfo.ftimeCreation;
+	*lastaccessdate = *(WORD *)&fileInfo.fdateLastAccess;
+        *lastaccesstime = *(WORD *)&fileInfo.ftimeLastAccess;
+	*lastwritedate  = *(WORD *)&fileInfo.fdateLastWrite;
+        *lastwritetime  = *(WORD *)&fileInfo.ftimeLastWrite;
+  }
+
+  if(rc)
+  {
+      	SetLastError(error2WinError(rc));
+     	return FALSE;
+  }
+  SetLastError(ERROR_SUCCESS_W);
+  return TRUE;
 }
 //******************************************************************************
 //******************************************************************************
@@ -661,32 +1250,25 @@ DWORD OSLibDosSetFilePtr2(DWORD hFile, DWORD offset, DWORD method)
  APIRET rc;
 
 
-  rc = DosSetFilePtr(hFile, offset, method, &newoffset);
-  if(rc) {
-    dprintf(("DosSetFilePtr Error rc:%d", rc));
-    return -1;
-  }
-  else  return newoffset;
-}
-//******************************************************************************
-//(FlushBuffer)
-//******************************************************************************
-DWORD OSLibDosResetBuffer(DWORD hFile)
-{
-  return DosResetBuffer(hFile);
+   rc = DosSetFilePtr(hFile, offset, method, &newoffset);
+   if(rc) {
+    	dprintf(("DosSetFilePtr Error rc:%d", rc));
+    	return -1;
+   }
+   else  return newoffset;
 }
 //******************************************************************************
 //******************************************************************************
 DWORD OSLibDosDupHandle(DWORD hFile, DWORD *hNew)
 {
-  *hNew = -1;
-  return DosDupHandle(hFile, hNew);
+   *hNew = -1;
+   return DosDupHandle(hFile, hNew);
 }
 //******************************************************************************
 //******************************************************************************
 void OSLibDosDisableHardError(BOOL fTurnOff)
 {
-  DosError((fTurnOff) ? FERR_DISABLEHARDERR : FERR_ENABLEHARDERR);
+   DosError((fTurnOff) ? FERR_DISABLEHARDERR : FERR_ENABLEHARDERR);
 }
 //******************************************************************************
 //Returns time spent in kernel & user mode in milliseconds

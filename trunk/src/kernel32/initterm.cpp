@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.41 2000-04-29 18:26:59 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.42 2000-06-01 11:28:47 sandervl Exp $ */
 
 /*
  * KERNEL32 DLL entry point
@@ -153,6 +153,7 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
             {
                 flAllocMem = PAG_ANY;      // high memory support. Let's use it!
                 ulMaxAddr = ulSysinfo * (1024*1024);
+		OSLibInitWSeBFileIO();
             }
             else
                 flAllocMem = 0;        // no high memory support
