@@ -1,4 +1,4 @@
-/* $Id: comctl32undoc.c,v 1.13 1999-11-02 21:44:01 achimha Exp $ */
+/* $Id: comctl32undoc.c,v 1.14 1999-11-05 13:01:32 achimha Exp $ */
 /*
  * Undocumented functions from COMCTL32.DLL
  *
@@ -1830,7 +1830,9 @@ INT WINAPI COMCTL32_StrCSpnA( LPCSTR lpStr, LPCSTR lpSet) {
  *
  */
 LPWSTR WINAPI COMCTL32_StrChrW( LPCWSTR lpStart, WORD wMatch) {
+  dprintf(("COMCTL32: StrChrW - unimplemented stub\n"));
 //  return CRTDLL_wcschr(lpStart, wMatch);
+  return 0;
 }
 
 /**************************************************************************
@@ -1846,7 +1848,9 @@ INT WINAPI COMCTL32_StrCmpNA( LPCSTR lpStr1, LPCSTR lpStr2, int nChar) {
  *
  */
 INT WINAPI COMCTL32_StrCmpNW( LPCWSTR lpStr1, LPCWSTR lpStr2, int nChar) {
+  dprintf(("COMCTL32: StrCmpNW - unimplemented stub\n"));
 //  return lstrncmpW(lpStr1, lpStr2, nChar);
+  return 0;
 }
 
 /**************************************************************************
@@ -1855,6 +1859,7 @@ INT WINAPI COMCTL32_StrCmpNW( LPCWSTR lpStr1, LPCWSTR lpStr2, int nChar) {
  */
 INT WINAPI COMCTL32_StrCmpNIW( LPCWSTR lpStr1, LPCWSTR lpStr2, int nChar) {
 //  FIXME("(%s, %s, %i): stub\n", debugstr_w(lpStr1), debugstr_w(lpStr2), nChar);
+  dprintf(("COMCTL32: StrCmpNIW - unimplemented stub\n"));
   return 0;
 }
 
@@ -1863,7 +1868,9 @@ INT WINAPI COMCTL32_StrCmpNIW( LPCWSTR lpStr1, LPCWSTR lpStr2, int nChar) {
  *
  */
 LPSTR WINAPI COMCTL32_StrRChrA( LPCSTR lpStart, LPCSTR lpEnd, WORD wMatch) {
+  dprintf(("COMCTL32: lstrrchr - unimplemented stub\n"));
 //  return lstrrchr(lpStart, lpEnd, wMatch);
+  return 0;
 }
 
 /**************************************************************************
@@ -1871,7 +1878,9 @@ LPSTR WINAPI COMCTL32_StrRChrA( LPCSTR lpStart, LPCSTR lpEnd, WORD wMatch) {
  *
  */
 LPWSTR WINAPI COMCTL32_StrRChrW( LPCWSTR lpStart, LPCWSTR lpEnd, WORD wMatch) {
+  dprintf(("COMCTL32: StrRChrW - unimplemented stub\n"));
 //  return lstrrchrw(lpStart, lpEnd, wMatch);
+  return 0;
 }
 
 /**************************************************************************
@@ -1887,7 +1896,9 @@ LPSTR WINAPI COMCTL32_StrStrA( LPCSTR lpFirst, LPCSTR lpSrch) {
  *
  */
 LPWSTR WINAPI COMCTL32_StrStrW( LPCWSTR lpFirst, LPCWSTR lpSrch) {
+  dprintf(("COMCTL32: StrStrW - unimplemented stub\n"));
 //  return strstrw(lpFirst, lpSrch);
+  return 0;
 }
 
 /**************************************************************************
@@ -1896,6 +1907,9 @@ LPWSTR WINAPI COMCTL32_StrStrW( LPCWSTR lpFirst, LPCWSTR lpSrch) {
  */
 INT WINAPI COMCTL32_StrSpnW( LPWSTR lpStr, LPWSTR lpSet) {
   LPWSTR lpLoop = lpStr;
+
+  dprintf(("COMCTL32: StrSpnW - unimplemented stub\n"));
+  return 0;
 
   /* validate ptr */
   if ((lpStr == 0) || (lpSet == 0)) return 0;
@@ -1918,6 +1932,7 @@ INT WINAPI COMCTL32_StrSpnW( LPWSTR lpStr, LPWSTR lpSet) {
 
 BOOL WINAPI comctl32_410( HWND hw, DWORD b, DWORD c, DWORD d) {
 
+  dprintf(("COMCTL32: comctl32_410 - unimplemented stub\n"));
    //FIXME_(commctrl)("(%x, %lx, %lx, %lx): stub!\n", hw, b, c, d);
 
    return TRUE;
@@ -1933,6 +1948,7 @@ BOOL WINAPI comctl32_410( HWND hw, DWORD b, DWORD c, DWORD d) {
 BOOL WINAPI InitMUILanguage( DWORD a ) {
 
    //FIXME_(commctrl)("(%lx): stub!\n", a);
+  dprintf(("COMCTL32: InitMUILanguage - unimplemented stub\n"));
 
    return TRUE;
 }

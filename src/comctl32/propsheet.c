@@ -1,4 +1,4 @@
-/* $Id: propsheet.c,v 1.11 1999-11-02 21:44:02 achimha Exp $ */
+/* $Id: propsheet.c,v 1.12 1999-11-05 13:01:33 achimha Exp $ */
 /*
  * Property Sheets
  *
@@ -889,7 +889,7 @@ static int PROPSHEET_CreatePage(HWND hwndParent,
   PropPageInfo* ppInfo = psInfo->proppage;
   PADDING_INFO padding;
 
-  TRACE("index %d\n", index);
+//  TRACE("index %d\n", index);
 
   if (ppshpage->dwFlags & PSP_DLGINDIRECT)
     pTemplate = (DLGTEMPLATE*)ppshpage->u1.pResource;
@@ -1050,7 +1050,7 @@ static BOOL PROPSHEET_Next(HWND hwndDlg)
 
   msgResult = SendMessageA(hwndPage, WM_NOTIFY, 0, (LPARAM) &hdr);
 
-  TRACE("msg result %ld\n", msgResult);
+//  TRACE("msg result %ld\n", msgResult);
 
   if (msgResult == -1)
     return FALSE;
@@ -1081,7 +1081,7 @@ static BOOL PROPSHEET_Finish(HWND hwndDlg)
 
   msgResult = SendMessageA(hwndPage, WM_NOTIFY, 0, (LPARAM) &hdr);
 
-  TRACE("msg result %ld\n", msgResult);
+//  TRACE("msg result %ld\n", msgResult);
 
   if (msgResult != 0)
     return FALSE;
@@ -1521,7 +1521,7 @@ static BOOL PROPSHEET_RemovePage(HWND hwndDlg,
   PropPageInfo* oldPages;
 
   if (!psInfo) {
-    FIXME("No psInfo for propertysheet at windows 0x%04x, returning FALSE...\n", hwndDlg);
+//    FIXME("No psInfo for propertysheet at windows 0x%04x, returning FALSE...\n", hwndDlg);
     return FALSE;
   }
   oldPages = psInfo->proppage;
@@ -1536,12 +1536,12 @@ static BOOL PROPSHEET_RemovePage(HWND hwndDlg,
   /* Make shure that index is within range */
   if (index < 0 || index >= psInfo->nPages)
     {
-      TRACE("Could not find page to remove!\n");
+//      TRACE("Could not find page to remove!\n");
       return FALSE;
     }
 
-  TRACE("total pages %d removing page %d active page %d\n",
-        psInfo->nPages, index, psInfo->active_page);
+//  TRACE("total pages %d removing page %d active page %d\n",
+//        psInfo->nPages, index, psInfo->active_page);
   /*
    * Check if we're removing the active page.
    */
@@ -1562,7 +1562,7 @@ static BOOL PROPSHEET_RemovePage(HWND hwndDlg,
     }
     else
     {
-      TRACE("Removing the only page, close the dialog!\n");
+//      TRACE("Removing the only page, close the dialog!\n");
 
       if (psInfo->isModeless)
         psInfo->active_page = -1;
