@@ -1,4 +1,4 @@
-/* $Id: shlview.cpp,v 1.12 2000-03-29 15:24:08 cbratschi Exp $ */
+/* $Id: shlview.cpp,v 1.13 2000-04-02 15:12:48 cbratschi Exp $ */
 /*
  * ShellView
  *
@@ -448,7 +448,7 @@ static INT CALLBACK ShellView_ListViewCompareItems(LPVOID lParam1, LPVOID lParam
             /* Sort by Text */
             _ILSimpleGetText(pItemIdList1, strName1, MAX_PATH);
             _ILSimpleGetText(pItemIdList2, strName2, MAX_PATH);
-            nDiff = strcmp(strName1, strName2);
+            nDiff = strcmpi(strName1, strName2);
         }
         /* Sort by File Size, Only valid for Files */
         else if(pSortInfo->nHeaderID == FILEDIALOG_COLUMN_SIZE)
@@ -461,7 +461,7 @@ static INT CALLBACK ShellView_ListViewCompareItems(LPVOID lParam1, LPVOID lParam
             /* Sort by Type */
             _ILGetFileType(pItemIdList1, strName1, MAX_PATH);
             _ILGetFileType(pItemIdList2, strName2, MAX_PATH);
-            nDiff = strcmp(strName1, strName2);
+            nDiff = strcmpi(strName1, strName2);
         }
     }
     /*  If the Date, FileSize, FileType, Attrib was the same, sort by FileName */
@@ -470,7 +470,7 @@ static INT CALLBACK ShellView_ListViewCompareItems(LPVOID lParam1, LPVOID lParam
     {
         _ILSimpleGetText(pItemIdList1, strName1, MAX_PATH);
         _ILSimpleGetText(pItemIdList2, strName2, MAX_PATH);
-        nDiff = strcmp(strName1, strName2);
+        nDiff = strcmpi(strName1, strName2);
     }
 
     if(!pSortInfo->bIsAscending)

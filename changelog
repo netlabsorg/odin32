@@ -1,4 +1,13 @@
- /* $Id: changelog,v 1.860 2000-04-02 14:52:23 sandervl Exp $ */
+ /* $Id: changelog,v 1.861 2000-04-02 15:10:35 cbratschi Exp $ */
+
+ 2000-04-02: Przemyslaw Dobrowolski <dobrawka@asua.org.pl>
+	- SHELL32: don't sort files case sensitive
+
+ 2000-04-02: Christoph Bratschi <cbratschi@datacomm.ch>
+	- KERNEL32: FindFirst: don't return "." and ".." in root
+		    wrote long to short name conversion
+		    added error code converter
+	- USER32: removed 'What You See Is What You Get On First Of April'
 
  2000-04-02: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: dc.cpp cleanup
