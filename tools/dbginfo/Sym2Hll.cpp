@@ -1,4 +1,4 @@
-/* $Id: Sym2Hll.cpp,v 1.2 2000-03-26 21:56:36 bird Exp $
+/* $Id: Sym2Hll.cpp,v 1.3 2000-03-27 10:20:41 bird Exp $
  *
  * Sym2Hll - Symbol file to HLL debuginfo converter.
  *
@@ -7,11 +7,18 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+/*******************************************************************************
+*   Defined Constants And Macros                                               *
+*******************************************************************************/
+#define INCL_DOSERRORS
+#define WORD    USHORT
+#define DWORD   ULONG
 
 /*******************************************************************************
 *   Internal Functions                                                         *
 *******************************************************************************/
 #include <os2.h>
+#include <exe386.h>
 
 #include <stdio.h>
 #include <malloc.h>
@@ -24,6 +31,8 @@
 #include "kList.h"
 #include "kHll.h"
 #include "sym.h"
+#include "kFileFormatBase.h"
+#include "kFileLX.h"
 
 /*******************************************************************************
 *   Internal Functions                                                         *
@@ -32,11 +41,17 @@ void *          readfile(const char *pszFilename);
 signed long     fsize(FILE *phFile);
 
 
+/*******************************************************************************
+*   External Functions                                                         *
+*******************************************************************************/
+APIRET APIENTRY DosReplaceModule (PSZ pszOldModule, PSZ pszNewModule, PSZ pszBackupModule);
+
 
 
 int main(int argc, char **argv)
 {
-    kHll *pHll;
+    kHll *      pHll;
+    kFileLX *   pFileLX;
 
     /*
      * Quite simple input currently:
@@ -50,6 +65,15 @@ int main(int argc, char **argv)
 
     pHll = new kHll();
     assert(pHll != NULL);
+
+    try {
+        pFileLX = new kFileLX(argv[2]);
+    } catch (int errcd)
+    {
+        fprintf(stderr, "failed to open/read LX file (%s). errcd=%d\n", argv[2], errcd);
+        return -3;
+    }
+
 
 
     /*
@@ -116,6 +140,7 @@ int main(int argc, char **argv)
             iSegment = 1;
             while (pSegDef != NULL)
             {
+                struct o32_obj *pLXObject;
                 PSYMDEF32       pSymDef32;  /* Symbol definition 32-bit */
                 PSYMDEF16       pSymDef16;  /* Symbol definition 16-bit */
                 int             iSym;
@@ -159,7 +184,15 @@ int main(int argc, char **argv)
                 /*
                  * Add segment to the module - FIXME - need info from the LX Object table...
                  */
-
+                pLXObject = pFileLX->getObject(iSegment-1);
+                if (pLXObject)
+                {
+                    if (!pModule->addSegInfo(iSegment, 0, pLXObject->o32_size))
+                        fprintf(stderr, "warning: addseginfo failed!\n");
+                }
+                else
+                    fprintf(stderr, "warning: pFileLX->getObject failed for iSegment=%d\n",
+                            iSegment);
 
                 /*
                  * Read and convert symbols
@@ -232,7 +265,16 @@ int main(int argc, char **argv)
          * debug
          */
         pHll->write("debug.hll");
-        pHll->writeToLX(argv[2]);
+        rc = pHll->writeToLX(argv[2]);
+        if (rc == ERROR_ACCESS_DENIED)
+        {
+
+            rc = DosReplaceModule(argv[2], NULL, NULL);
+            if (rc == NO_ERROR)
+            {
+                rc = pHll->writeToLX(argv[2]);
+            }
+        }
     }
     else
     {
@@ -288,28 +330,6 @@ void *readfile(const char *pszFilename)
     return pvFile;
 }
 
-
-/**
- * Find the size of a file.
- * @returns   Size of file. -1 on error.
- * @param     phFile  File handle.
- */
-signed long fsize(FILE *phFile)
-{
-    int ipos;
-    signed long cb;
-
-    if ((ipos = ftell(phFile)) < 0
-        ||
-        fseek(phFile, 0, SEEK_END) != 0
-        ||
-        (cb = ftell(phFile)) < 0
-        ||
-        fseek(phFile, ipos, SEEK_SET) != 0
-        )
-        cb = -1;
-    return cb;
-}
 
 
 

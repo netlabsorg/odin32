@@ -1,4 +1,4 @@
-/* $Id: dbgLXDumper.c,v 1.3 2000-03-26 21:56:37 bird Exp $
+/* $Id: dbgLXDumper.c,v 1.4 2000-03-27 10:20:42 bird Exp $
  *
  * dbgLXDumper - reads and interprets the debuginfo found in an LX executable.
  *
@@ -11,11 +11,11 @@
 /*******************************************************************************
 *   Defined Constants And Macros                                               *
 *******************************************************************************/
-#define INCL_TYPES
 #define INCL_DOSERRORS
 #define FOR_EXEHDR          1           /* exe386.h flag */
 #define DWORD               ULONG       /* Used by exe386.h / newexe.h */
 #define WORD                USHORT      /* Used by exe386.h / newexe.h */
+
 
 /*******************************************************************************
 *   Header Files                                                               *
@@ -301,6 +301,7 @@ int dumpHLL(FILE *phOut, PBYTE pb, int cb)
                         "    overlay       %d\n"
                         "    ilib          %d\n"
                         "    pad           %d\n"
+                        "    cSegInfo      %d\n"
                         "    usDebugStyle  %#04x %c%c\n"
                         "    HLL Version   %d.%d\n"
                         "    cchName       %d\n"
@@ -310,6 +311,7 @@ int dumpHLL(FILE *phOut, PBYTE pb, int cb)
                         pModule->overlay,
                         pModule->iLib,
                         pModule->pad,
+                        pModule->cSegInfo,
                         pModule->usDebugStyle,
                         pModule->usDebugStyle & 0xFF,
                         pModule->usDebugStyle >> 8,
@@ -334,7 +336,7 @@ int dumpHLL(FILE *phOut, PBYTE pb, int cb)
 
                 c = pModule->cSegInfo > 0 ? pModule->cSegInfo : 0;
                 paSegInfo = (PHLLSEGINFO)((void*)&pModule->achName[pModule->cchName]);
-                for (j = 0; j < c; j++)
+                for (j = 0; j + 1 < c; j++)
                 {
                     fprintf(phOut,
                         "    SegmentInfo %d\n"
