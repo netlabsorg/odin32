@@ -1,4 +1,4 @@
-/* $Id: oleaut32.h,v 1.6 1999-11-14 01:26:36 davidr Exp $ */
+/* $Id: oleaut32.h,v 1.7 2000-01-02 21:29:58 davidr Exp $ */
 /*
  * Win32 OLE stubs for OS/2
  *
@@ -50,5 +50,11 @@
 #include "wine/obj_picture.h"
 
 #include <heapstring.h>
+
+extern int 	loadNr;
+extern char *	oleaut32Path;
+
+void ClosePrivateLogFileTypelib();
+void OpenPrivateLogFileTypelib();
 
 #endif

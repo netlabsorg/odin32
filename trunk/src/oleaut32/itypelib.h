@@ -1,4 +1,4 @@
-/* $Id: itypelib.h,v 1.1 1999-12-08 19:59:25 davidr Exp $ */
+/* $Id: itypelib.h,v 1.2 2000-01-02 21:29:58 davidr Exp $ */
 /* 
  * OLE Typelib functions private header
  *
@@ -178,7 +178,7 @@ typedef struct TLBSegDir
 						/* hash table w offsets to guid????? */
 /*6*/pSeg			pGuidTab;     	/* all guids are stored here together with  */
 						/* offset in some table???? */
-/*7*/pSeg			res07;        	/* always created, alway same size (0x200) */
+/*7*/pSeg			pRes7;        	/* always created, alway same size (0x200) */
 						/* purpose largely unknown */
 /*8*/pSeg			pNameTab;     	/* name tables */
 /*9*/pSeg			pStringTab;   	/*string table */
@@ -187,8 +187,8 @@ typedef struct TLBSegDir
 /*C*/pSeg			pCustData;    	/*  data table, used for custom data and default */
 						/* parameter values */
 /*D*/pSeg			pCDGuids;     	/* table with offsets for the guids and into the customer data table */
-/*E*/pSeg			res0e;          /* unknown */
-/*F*/pSeg			res0f;          /* unknown  */
+/*E*/pSeg			pResE;          /* unknown */
+/*F*/pSeg			pResF;          /* unknown  */
 } TLBSegDir;
 
 
@@ -242,7 +242,7 @@ typedef struct TLBImpInfo
 typedef struct
 {
     INT16   			recsize;	// record size including some xtra stuff 
-    INT16   			unk02;		// 
+    INT16   			index;		// 99.12.19 This must be the function index :-)
     INT   			DataType;       /* data type of memeber, eg return of function */
     INT   			Flags;          /* something to do with attribute flags (LOWORD) */
     INT16 			VtableOffset;   /* offset in vtable */
@@ -295,14 +295,17 @@ typedef struct
     INT16 			VarKind;      /* VarKind */
     INT16 			res3;         /* some offset into dunno what */
     INT   			OffsValue;    /* value of the variable or the offset  */
-                        /* in the data structure */
-    /* optional attribute fields, the number of them is variable */
-    /* controlled by record length */
-    INT   			HelpContext;
-    INT   			oHelpString;
-    INT   			res9;         /* unknown (-1) */
-    INT   			oCustData;        /* custom data for variable */
-    INT   			HelpStringContext;
+
+    INT   			OptAttr[1];
+
+//                        /* in the data structure */
+//    /* optional attribute fields, the number of them is variable */
+//  /* controlled by record length */
+//    INT   			HelpContext;
+//    INT   			oHelpString;
+//    INT   			res9;         /* unknown (-1) */
+//    INT   			oCustData;        /* custom data for variable */
+//    INT   			HelpStringContext;
 } TLBVarRecord;
 
 /* Structure of the reference data  */
@@ -406,6 +409,7 @@ public:
 private:
 
     ITypeLibImpl *	m_pITypeLib;		// Pointer to typelib resource...
+    BOOL		m_fFree;		// Set if we need to free m_pITypeLib
     BOOL		m_fValid;
     HANDLE		m_hHeap;		// Heap Handle
     void *		m_pTypeLib;
@@ -425,6 +429,9 @@ private:
     TLBArray *		m_pArray;
     void *		m_pCustData;
     TLBCDGuid *		m_pCDGuid;
+    void *		m_pRes7;
+    void *		m_pResE;
+    void *		m_pResF;
 
     BOOL	Read(HANDLE hFile, void * buffer, DWORD count, DWORD * pBytesRead, long where);
     HRESULT	Load(char * szName);
@@ -445,8 +452,6 @@ private:
     void	ParseImplemented(ITypeInfoImpl * pTypeInfo, TLBTypeInfoBase * pBase);
     void	GetTypedesc(int type, TYPEDESC * pTypedesc);
 
-    // Debug only...
-    void	DumpHeader();
 };
 
 // ----------------------------------------------------------------------

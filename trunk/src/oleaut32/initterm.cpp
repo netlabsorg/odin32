@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.2 1999-09-15 23:26:08 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.3 2000-01-02 21:29:57 davidr Exp $ */
 
 /*
  * DLL entry point
@@ -40,6 +40,14 @@ void CDECL _ctordtorInit( void );
 void CDECL _ctordtorTerm( void );
 }
 
+//Global DLL Data
+#pragma data_seg(_GLOBALDATA)
+int globLoadNr = 0;
+#pragma data_seg()
+
+char  oleaut32Path[CCHMAXPATH] = "";
+int   loadNr = 0;
+
 /*-------------------------------------------------------------------*/
 /* A clean up routine registered with DosExitList must be used if    */
 /* runtime calls are required and the runtime is dynamically linked. */
@@ -71,6 +79,15 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
 
    switch (ulFlag) {
       case 0 :
+      {
+	 loadNr = globLoadNr++;
+
+#if 0
+ 	 strcpy(oleaut32Path, OSLibGetDllName(hModule));
+	 char *endofpath = strrchr(oleaut32Path, '\\');
+	 *(endofpath+1) = 0;
+#endif
+
          _ctordtorInit();
 
          CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
@@ -87,7 +104,11 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
          if(rc)
                 return 0UL;
 
+         OpenPrivateLogFiles();
+
+
          break;
+      }
       case 1 :
 	 UnregisterLxDll(hModule);
          break;
@@ -105,6 +126,7 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
 static void APIENTRY cleanup(ULONG ulReason)
 {
    _ctordtorTerm();
+   ClosePrivateLogFiles();
    DosExitList(EXLST_EXIT, cleanup);
    return ;
 }

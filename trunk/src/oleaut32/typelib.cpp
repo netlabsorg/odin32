@@ -1,4 +1,19 @@
-/* $Id: typelib.cpp,v 1.6 1999-12-08 19:59:58 davidr Exp $ */
+/* $Id: typelib.cpp,v 1.7 2000-01-02 21:29:58 davidr Exp $ */
+/* 
+ * ITypelib interface
+ * 
+ * 1/12/99
+ * 
+ * Copyright 1999 David J. Raison
+ * Some portions based on original work on Wine
+ *   Copyright 1997 Marcus Meissner
+ 	       1999 Rein Klazes
+ * 
+ * Project Odin Software License can be found in LICENSE.TXT
+ *
+ * NB: Logging from this module is piped into TLIB_n.LOG via
+ * the private logging interface.
+ */
 
 typedef enum tagREGKIND
 {
@@ -7,10 +22,45 @@ typedef enum tagREGKIND
     REGKIND_NONE
 } REGKIND;
 
+#define PRIVATE_LOGGING	// Private logfile
+
 #include "oleaut32.h"
 #include "olectl.h"
 #include "oList.h"	// linked list template
 #include "itypelib.h"
+
+static FILE *_privateLogFile = NULL;
+
+// ----------------------------------------------------------------------
+// OpenPrivateLogFileTypelib
+// ----------------------------------------------------------------------
+void OpenPrivateLogFileTypelib()
+{
+    char logname[1024];
+
+    sprintf(logname, "tlib_%d.log", loadNr);
+    _privateLogFile = fopen(logname, "w");
+#if 0
+    if(_privateLogFile == NULL)
+    {
+	sprintf(logname, "%stlib_%d.log", oleaut32Path, loadNr);
+	_privateLogFile = fopen(logname, "w");
+    }
+#endif
+    dprintfGlobal(("TLIB LOGFILE : %s", logname));
+}
+
+// ----------------------------------------------------------------------
+// ClosePrivateLogFileTypelib
+// ----------------------------------------------------------------------
+void ClosePrivateLogFileTypelib()
+{
+    if(_privateLogFile)
+    {
+	fclose(_privateLogFile);
+	_privateLogFile = NULL;
+    }
+}
 
 // ======================================================================
 // Local Data
@@ -48,7 +98,7 @@ HRESULT WINAPI QueryPathOfRegTypeLib(
     char	pathname[260];
     DWORD	plen;
 
-    dprintf(("OLEAUT32: QueryPathOfRegTypeLib()"));
+    dprintfGlobal(("OLEAUT32: QueryPathOfRegTypeLib()"));
 
     if (HIWORD(guid))
     {
@@ -60,7 +110,7 @@ HRESULT WINAPI QueryPathOfRegTypeLib(
     else
     {
 	sprintf(xguid, "<guid 0x%08lx>", (DWORD)guid);
-	dprintf(("OLEAUT32: QueryPathOfRegTypeLib(%s,%d,%d,0x%04lx,%p) - stub!",
+	dprintfGlobal(("OLEAUT32: QueryPathOfRegTypeLib(%s,%d,%d,0x%04lx,%p) - stub!",
 	    xguid, wMaj, wMin, (DWORD)lcid, path));
 	return E_FAIL;
     }
@@ -71,7 +121,7 @@ HRESULT WINAPI QueryPathOfRegTypeLib(
 	if (SUBLANGID(lcid))
 	    return QueryPathOfRegTypeLib(guid, wMaj, wMin, PRIMARYLANGID(lcid), path);
 
-	dprintf(("OLEAUT32: QueryPathOfRegTypeLib() - key \"%s\" not found", typelibkey));
+	dprintfGlobal(("OLEAUT32: QueryPathOfRegTypeLib() - key \"%s\" not found", typelibkey));
 	return E_FAIL;
     }
     *path = HEAP_strdupAtoW(GetProcessHeap(), 0, pathname);
@@ -102,7 +152,7 @@ HRESULT WINAPI LoadTypeLibEx(
     HRESULT		rc;
 
     szFileA = HEAP_strdupWtoA(hHeap, 0, szFile);
-    dprintf(("OLEAUT32: LoadTypeLibEx(%s)", szFileA));
+    dprintfGlobal(("OLEAUT32: LoadTypeLibEx(%s)", szFileA));
 
     // Sanity check...
     if (ppTlib == 0)
@@ -118,7 +168,7 @@ HRESULT WINAPI LoadTypeLibEx(
     if (!extractor.Valid())
     {
 	HeapFree(hHeap, 0, szFileA);
-	dprintf(("  Invalid typelib file"));
+	dprintfGlobal(("  Invalid typelib file"));
 	return E_FAIL;
     }
 
@@ -140,7 +190,7 @@ HRESULT WINAPI LoadTypeLib(
 {
     HRESULT		res;
 
-    dprintf(("OLEAUT32: LoadTypeLib()"));
+    dprintfGlobal(("OLEAUT32: LoadTypeLib()"));
 
     return LoadTypeLibEx(szFile, REGKIND_DEFAULT, ppTLib);
 }
@@ -161,7 +211,7 @@ HRESULT WINAPI LoadRegTypeLib(
     BSTR		bstr = NULL;
     HRESULT		res;
 
-    dprintf(("OLEAUT32: LoadRegTypeLib()"));
+    dprintfGlobal(("OLEAUT32: LoadRegTypeLib()"));
 
     res = QueryPathOfRegTypeLib( rguid, wVerMajor, wVerMinor, lcid, &bstr);
 
@@ -185,7 +235,7 @@ HRESULT WINAPI RegisterTypeLib(
     OLECHAR *		szHelpDir)  	/* [in] dir to the helpfile for the library,
 							 may be NULL*/
 {
-    dprintf(("OLEAUT32: RegisterTypeLib() - stub\n"));
+    dprintfGlobal(("OLEAUT32: RegisterTypeLib() - stub\n"));
 
     return S_OK;	/* FIXME: pretend everything is OK */
 }
@@ -202,10 +252,369 @@ HRESULT WINAPI UnRegisterTypeLib(
     LCID		lcid,		/* [in] locale id */
     SYSKIND		syskind)
 {
-    dprintf(("OLEAUT32: UnRegisterTypeLib() - stub"));
+    dprintfGlobal(("OLEAUT32: UnRegisterTypeLib() - stub"));
 
     return S_OK;	/* FIXME: pretend everything is OK */
 }
+
+// ======================================================================
+// Local functions.
+// ======================================================================
+
+#if defined(DEBUG)
+
+// ----------------------------------------------------------------------
+// dprintfLine2
+// ----------------------------------------------------------------------
+static void dprintfLine2(void)
+{
+    dprintf((LOG, "========================================"));
+}
+
+// ----------------------------------------------------------------------
+// dprintfLine
+// ----------------------------------------------------------------------
+static void dprintfLine(void)
+{
+    dprintf((LOG, "----------------------------------------"));
+}
+
+// ----------------------------------------------------------------------
+// TypeKindAsString
+// ----------------------------------------------------------------------
+char * TypeKindAsString(int typekind)
+{
+    char *	p;
+    switch (typekind)
+    {
+	case TKIND_ENUM: p = "TKIND_ENUM"; break;
+	case TKIND_RECORD: p = "TKIND_RECORD"; break;
+	case TKIND_MODULE: p = "TKIND_MODULE"; break;
+	case TKIND_INTERFACE: p = "TKIND_INTERFACE"; break;
+	case TKIND_DISPATCH: p = "TKIND_DISPATCH"; break;
+	case TKIND_COCLASS: p = "TKIND_COCLASS"; break;
+	case TKIND_ALIAS: p = "TKIND_ALIAS"; break;
+	case TKIND_UNION: p = "TKIND_UNION"; break;
+	case TKIND_MAX: p = "TKIND_MAX"; break;
+	default: p = "*UNKNOWN*"; break;
+    }
+    return p;
+}
+
+// ----------------------------------------------------------------------
+// FuncKindAsString
+// ----------------------------------------------------------------------
+char * FuncKindAsString(int funckind)
+{
+    char *	p;
+    switch (funckind)
+    {
+	case FUNC_VIRTUAL: p = "FUNC_VIRTUAL"; break;
+	case FUNC_PUREVIRTUAL: p = "FUNC_PUREVIRTUAL"; break;
+	case FUNC_NONVIRTUAL: p = "FUNC_NONVIRTUAL"; break;
+	case FUNC_STATIC: p = "FUNC_STATIC"; break;
+	case FUNC_DISPATCH: p = "FUNC_DISPATCH"; break;
+	default: p = "*UNKNOWN*"; break;
+    }
+    return p;
+}
+
+// ----------------------------------------------------------------------
+// InvKindAsString
+// ----------------------------------------------------------------------
+char * InvKindAsString(int invkind)
+{
+    char *	p;
+    switch (invkind)
+    {
+	case INVOKE_FUNC: p = "INVOKE_FUNC"; break;
+	case INVOKE_PROPERTYGET: p = "INVOKE_PROPERTYGET"; break;
+	case INVOKE_PROPERTYPUT: p = "INVOKE_PROPERTYPUT"; break;
+	case INVOKE_PROPERTYPUTREF: p = "INVOKE_PROPERTYPUTREF"; break;
+	default: p = "*UNKNOWN*"; break;
+    }
+    return p;
+}
+
+// ----------------------------------------------------------------------
+// VarKindAsString
+// ----------------------------------------------------------------------
+char * VarKindAsString(int varkind)
+{
+    char *	p;
+    switch (varkind)
+    {
+	case VAR_PERINSTANCE: p = "VAR_PERINSTANCE"; break;
+	case VAR_STATIC: p = "VAR_STATIC"; break;
+	case VAR_CONST: p = "VAR_CONST"; break;
+	case VAR_DISPATCH: p = "VAR_DISPATCH"; break;
+	default: p = "*UNKNOWN*"; break;
+    }
+    return p;
+}
+
+// ----------------------------------------------------------------------
+// CallConvAsString
+// ----------------------------------------------------------------------
+char * CallConvAsString(int callconv)
+{
+    char *	p;
+    switch (callconv)
+    {
+	case CC_CDECL: p = "CC_CDECL"; break; 
+//	case CC_MSCPASCAL: p = "CC_MSCPASCAL"; break; 
+	case CC_PASCAL: p = "CC_PASCAL"; break; 
+	case CC_MACPASCAL: p = "CC_MACPASCAL"; break; 
+	case CC_STDCALL: p = "CC_STDCALL"; break; 
+	case CC_RESERVED: p = "CC_RESERVED"; break; 
+	case CC_SYSCALL: p = "CC_SYSCALL"; break; 
+	case CC_MPWCDECL: p = "CC_MPWCDECL"; break; 
+	case CC_MPWPASCAL: p = "CC_MPWPASCAL"; break; 
+	case CC_MAX: p = "CC_MAX"; break; 
+
+	default: p = "*UNKNOWN*"; break;
+    }
+    return p;
+}
+
+// ----------------------------------------------------------------------
+// VariantAsString
+// ----------------------------------------------------------------------
+char * VariantTypeAsString(int vt)
+{
+    char *	p;
+
+    switch(vt & VT_TYPEMASK)
+    {
+	case VT_EMPTY: p = "VT_EMPTY"; break;
+	case VT_NULL: p = "VT_NULL"; break;
+	case VT_I2: p = "VT_I2"; break;
+	case VT_I4: p = "VT_I4"; break;
+	case VT_R4: p = "VT_R4"; break;
+	case VT_ERROR: p = "VT_ERROR"; break;
+	case VT_BOOL: p = "VT_BOOL"; break;
+	case VT_I1: p = "VT_I1"; break;
+	case VT_UI1: p = "VT_UI1"; break;
+	case VT_UI2: p = "VT_UI2"; break;
+	case VT_UI4: p = "VT_UI4"; break;
+	case VT_INT: p = "VT_INT"; break;
+	case VT_UINT: p = "VT_UINT"; break;
+	case VT_VOID: p = "VT_VOID"; break;
+	case VT_HRESULT: p = "VT_HRESULT"; break;
+	case VT_R8: p = "VT_R8"; break;
+	case VT_CY: p = "VT_CY"; break;
+	case VT_DATE: p = "VT_DATE"; break;
+	case VT_I8: p = "VT_I8"; break;
+	case VT_UI8: p = "VT_UI8"; break;
+	case VT_DECIMAL: p = "VT_DECIMAL"; break;
+	case VT_FILETIME: p = "VT_FILETIME"; break;
+	case VT_BSTR: p = "VT_BSTR"; break;
+	case VT_DISPATCH: p = "VT_DISPATCH"; break;
+	case VT_VARIANT: p = "VT_VARIANT"; break;
+	case VT_UNKNOWN: p = "VT_UNKNOWN"; break;
+	case VT_PTR: p = "VT_PTR"; break;
+	case VT_SAFEARRAY: p = "VT_SAFEARRAY"; break;
+	case VT_CARRAY: p = "VT_CARRAY"; break;
+	case VT_USERDEFINED: p = "VT_USERDEFINED"; break;
+	case VT_LPSTR: p = "VT_LPSTR"; break;
+	case VT_LPWSTR: p = "VT_LPWSTR"; break;
+	case VT_BLOB: p = "VT_BLOB"; break;
+	case VT_STREAM: p = "VT_STREAM"; break;
+	case VT_STORAGE: p = "VT_STORAGE"; break;
+	case VT_STREAMED_OBJECT: p = "VT_STREAMED_OBJECT"; break;
+	case VT_STORED_OBJECT: p = "VT_STORED_OBJECT"; break;
+	case VT_BLOB_OBJECT: p = "VT_BLOB_OBJECT"; break;
+	case VT_CF: p = "VT_CF"; break;
+	case VT_CLSID: p = "VT_CLSID"; break;
+	default: p = "*UNKNOWN*"; break;
+    }
+
+    return p;
+}
+
+// ----------------------------------------------------------------------
+// VariantTypeAsString2
+// ----------------------------------------------------------------------
+char * VariantTypeAsString2(int vt)
+{
+    char *	p;
+
+    switch(vt & VT_TYPEMASK)
+    {
+	case VT_EMPTY: p = "(empty)"; break;
+	case VT_NULL: p = "(null)"; break;
+	case VT_I2: p = "short"; break;
+	case VT_I4: p = "long"; break;
+	case VT_R4: p = "float"; break;
+	case VT_ERROR: p = "(error)"; break;
+	case VT_BOOL: p = "boolean"; break;
+	case VT_I1: p = "char"; break;
+	case VT_UI1: p = "unsigned char"; break;
+	case VT_UI2: p = "unsigned short"; break;
+	case VT_UI4: p = "unsigned long"; break;
+	case VT_INT: p = "int"; break;
+	case VT_UINT: p = "unsigned int"; break;
+	case VT_VOID: p = "void"; break;
+	case VT_HRESULT: p = "HRESULT"; break;
+	case VT_R8: p = "double"; break;
+	case VT_CY: p = "currency"; break;
+	case VT_DATE: p = "date"; break;
+	case VT_I8: p = "long long"; break;
+	case VT_UI8: p = "unsigned long long"; break;
+	case VT_DECIMAL: p = "decimal"; break;
+	case VT_FILETIME: p = "FILETIME"; break;
+	case VT_BSTR: p = "BSTR"; break;
+	case VT_DISPATCH: p = "IDISPATCH"; break;
+	case VT_VARIANT: p = "VARIANT"; break;
+	case VT_UNKNOWN: p = "IUNKNOWN"; break;
+	case VT_PTR: p = "*"; break;
+	case VT_SAFEARRAY: p = "SAFEARRAY"; break;
+	case VT_CARRAY: p = "CARRAY"; break;
+	case VT_USERDEFINED: p = "USERDEFINED"; break;
+	case VT_LPSTR: p = "LPSTR"; break;
+	case VT_LPWSTR: p = "LPWSTR"; break;
+	case VT_BLOB: p = "BLOB"; break;
+	case VT_STREAM: p = "STREAM"; break;
+	case VT_STORAGE: p = "STORAGE"; break;
+	case VT_STREAMED_OBJECT: p = "STREAMED_OBJECT"; break;
+	case VT_STORED_OBJECT: p = "STORED_OBJECT"; break;
+	case VT_BLOB_OBJECT: p = "BLOB_OBJECT"; break;
+	case VT_CF: p = "CF"; break;
+	case VT_CLSID: p = "CLSID"; break;
+	default: p = "*UNKNOWN*"; break;
+    }
+
+    return p;
+}
+// ----------------------------------------------------------------------
+// dprintTypeDesc
+// ----------------------------------------------------------------------
+size_t sprintfTypeDesc(char * buf, TYPEDESC * pDesc)
+{
+    LONG	ii;
+    size_t	len = 0;
+
+    if (pDesc->vt & VT_ARRAY)
+    {
+	ARRAYDESC *	pArray = V_UNION(pDesc, lpadesc);
+	
+	len += sprintfTypeDesc(buf + len, &pArray->tdescElem);
+	for (ii = 0; ii < pArray->cDims; ii++)
+	{
+	    if (ii)
+		len += sprintf(buf + len, ", ");
+
+	    len += sprintf(buf + len, "[%ld..%ld]", pArray->rgbounds[ii].lLbound,
+				pArray->rgbounds[ii].lLbound + pArray->rgbounds[ii].cElements);
+	}
+
+    }
+    else if (pDesc->vt == VT_PTR)
+    {
+	len += sprintfTypeDesc(buf + len, V_UNION(pDesc, lptdesc)) ;	// 'ware recursion...!
+	len += sprintf(buf + len,  "%s ", VariantTypeAsString2(pDesc->vt));
+    }
+    else if (pDesc->vt == VT_USERDEFINED)
+    {
+	len += sprintf(buf + len, "(%ld) ", V_UNION(pDesc, hreftype)  );
+    }
+    else
+    {
+	len += sprintf(buf + len, "%s ",  VariantTypeAsString2(pDesc->vt));
+    }
+    return len;
+}
+
+typedef struct FlagSt
+{
+    char *		name;
+    ULONG		value;
+} FLAGST;
+
+static FLAGST FKCCICFlagData[] =
+{
+    {"custom data",	    0x80},
+    {"default values",	    0x1000},
+    {"numeric entry",	    0x2000},
+    {"has retval",	    0x4000},	// Set for methods with a retval parameter
+    {"0x8000",		    0x8000},
+    {0, 0}
+};
+
+static FLAGST VarFlagData[] =
+{
+    {"readonly",	    0x1},
+    {"source",		    0x2},
+    {"bindable",	    0x4},
+    {"requestedit ",	    0x8},
+    {"displaybind ",	    0x10},
+    {"defaultbinD ",	    0x20},
+    {"hidden",		    0x40},
+    {"restricted",	    0x80},
+    {"defaultcollElem",	    0x100},
+    {"uidefault ",	    0x200},
+    {"nonbrowsable",	    0x400},
+    {"replaceable ",	    0x800},
+    {"immediatebind ",	    0x1000},
+    {0, 0}
+};
+
+static FLAGST ParamFlagData[] =
+{
+    {"in",		    0x01},
+    {"out",		    0x02},
+    {"lcid",		    0x04},
+    {"retval",		    0x08},
+    {"opt",		    0x10},
+    {"hasdefault",	    0x20},
+    {0, 0}
+};
+
+static FLAGST FuncFlagData[] =
+{
+    {"restricted",    	    0x1},
+    {"source",        	    0x2},
+    {"bindable",      	    0x4},
+    {"requestedit",   	    0x8},
+    {"displaybind",   	    0x10},
+    {"defaultbind",   	    0x20},
+    {"hidden",        	    0x40},
+    {"usesgetlasterror",    0x80},
+    {"defaultcollelem",     0x100},
+    {"uidefault",     	    0x200},
+    {"nonbrowsable",  	    0x400},
+    {"replaceable",   	    0x800},
+    {"immediatebind", 	    0x1000},
+    {0, 0}
+};
+
+// ----------------------------------------------------------------------
+// sprintfFlags
+// ----------------------------------------------------------------------
+size_t sprintfFlags(char * buf, FLAGST const * pData, ULONG flags)
+{
+    size_t	len = 0;
+
+    len += sprintf(buf + len, "[");
+
+    while (pData->name != 0)
+    {
+	if (flags & pData->value)
+	{
+	    if (len > 1)
+		len += sprintf(buf + len, ", ");
+
+	    len += sprintf(buf + len, pData->name);
+	}
+	pData++;
+    }
+    len += sprintf(buf + len, "]");
+
+    return len;
+}
+
+
+#endif
 
 // ======================================================================
 // Class functions.
@@ -214,10 +623,11 @@ HRESULT WINAPI UnRegisterTypeLib(
 // ----------------------------------------------------------------------
 // TypeLibExtract::TypeLibExtract
 // ----------------------------------------------------------------------
-TypeLibExtract::TypeLibExtract(char * szName) : m_fValid(0), m_hHeap(GetProcessHeap())
+TypeLibExtract::TypeLibExtract(char * szName)
+    : m_fValid(0), m_hHeap(GetProcessHeap()), m_fFree(FALSE)
 {
     if ((Load(szName) == S_OK)
-	&& (EstablishPointers() == S_OK))
+    && (EstablishPointers() == S_OK))
     {
 	m_fValid = TRUE;
     }
@@ -230,7 +640,7 @@ TypeLibExtract::~TypeLibExtract()
 {
     m_fValid = 0;
 
-    if (m_pTypeLib)
+    if (m_fFree)
 	HeapFree(m_hHeap, 0, m_pTypeLib);
 
     m_hHeap = 0;
@@ -243,6 +653,7 @@ HRESULT TypeLibExtract::EstablishPointers()
 {
     // Locate segment directory...
     m_pHeader = (TLB2Header *)m_pTypeLib;
+
     if (m_pHeader->varflags & HELPDLLFLAG)
     {
 	m_pHelpStringOff = (ULONG *)(m_pHeader + 1);
@@ -258,65 +669,152 @@ HRESULT TypeLibExtract::EstablishPointers()
     // Segment directory sanity check...
     if (m_pSegDir->pTypeInfoTab.res0c != 0x0F || m_pSegDir->pImpInfo.res0c != 0x0F)
     {
-	dprintf(("  Segment directory sanity check failed!"));
+	dprintf((LOG, "  Segment directory sanity check failed!"));
 	return E_FAIL;
     }
 
-//    m_pLib
-    if (m_pSegDir->pImpInfo.offset > 0)
+    // Decode the segment offsets...
+    dprintf((LOG, "Segment Offsets:"));
+
+    if (m_pSegDir->pImpInfo.offset != 0xffffffff)
+    {
 	m_pImpInfo = (TLBImpInfo *)((char *)m_pTypeLib + m_pSegDir->pImpInfo.offset);
+	dprintf((LOG, "  ImpInfo       0x%08lx", m_pSegDir->pImpInfo.offset));
+    }
     else
+    {
 	m_pImpInfo = 0;
+    }
 
-    if (m_pSegDir->pRefTab.offset > 0)
+    if (m_pSegDir->pRefTab.offset != 0xffffffff)
+    {
 	m_pRef = (TLBRefRecord *)((char *)m_pTypeLib + m_pSegDir->pRefTab.offset);
+	dprintf((LOG, "  RefTab        0x%08lx", m_pSegDir->pRefTab.offset));
+    }
     else
+    {
 	m_pRef = 0;
+    }
 
-    if (m_pSegDir->pGuidTab.offset > 0)
+    if (m_pSegDir->pGuidTab.offset != 0xffffffff)
+    {
 	m_pGUID = (GUID *)((char *)m_pTypeLib + m_pSegDir->pGuidTab.offset);
+	dprintf((LOG, "  GuidTab       0x%08lx", m_pSegDir->pGuidTab.offset));
+    }
     else
+    {
 	m_pGUID = 0;
+    }
 
-    if (m_pSegDir->pNameTab.offset > 0)
+    if (m_pSegDir->pNameTab.offset != 0xffffffff)
+    {
 	m_pName = (TLBName *)((char *)m_pTypeLib + m_pSegDir->pNameTab.offset);
+	dprintf((LOG, "  NameTab       0x%08lx", m_pSegDir->pNameTab.offset));
+    }
     else
+    {
 	m_pName = 0;
+    }
 
-    if (m_pSegDir->pStringTab.offset > 0)
+    if (m_pSegDir->pStringTab.offset != 0xffffffff)
+    {
 	m_pString = (TLBString *)((char *)m_pTypeLib + m_pSegDir->pStringTab.offset);
+	dprintf((LOG, "  StringTab     0x%08lx", m_pSegDir->pStringTab.offset));
+    }
     else
+    {
 	m_pString = 0;
+    }
 
-    if (m_pSegDir->pTypedescTab.offset > 0)
+    if (m_pSegDir->pTypedescTab.offset != 0xffffffff)
+    {
 	m_pTypedesc = (TLBTypedesc *)((char *)m_pTypeLib + m_pSegDir->pTypedescTab.offset);
+	dprintf((LOG, "  TypedescTab   0x%08lx", m_pSegDir->pTypedescTab.offset));
+    }
     else
+    {
 	m_pTypedesc = 0;
+    }
 
-    if (m_pSegDir->pTypedescTab.offset > 0)
-	m_pArray = (TLBArray *)((char *)m_pTypeLib + m_pSegDir->pTypedescTab.offset);
-    else
-	m_pArray = 0;
-
-    if (m_pSegDir->pCustData.offset > 0)
+    if (m_pSegDir->pCustData.offset != 0xffffffff)
+    {
 	m_pCustData = (void *)((char *)m_pTypeLib + m_pSegDir->pCustData.offset);
+	dprintf((LOG, "  CustData      0x%08lx", m_pSegDir->pCustData.offset));
+    }
     else
+    {
 	m_pCustData = 0;
+    }
 
-    if (m_pSegDir->pCDGuids.offset > 0)
+    if (m_pSegDir->pCDGuids.offset != 0xffffffff)
+    {
         m_pCDGuid = (TLBCDGuid *)((char *)m_pTypeLib + m_pSegDir->pCDGuids.offset);
+	dprintf((LOG, "  CDGuids       0x%08lx", m_pSegDir->pCDGuids.offset));
+    }
     else
+    {
 	m_pCDGuid = 0;
+    }
 
-    if (m_pSegDir->pImpFiles.offset > 0)
+    if (m_pSegDir->pImpFiles.offset != 0xffffffff)
+    {
         m_pImpFile = (TLBImpFile *)((char *)m_pTypeLib + m_pSegDir->pImpFiles.offset);
+	dprintf((LOG, "  ImpFiles      0x%08lx", m_pSegDir->pImpFiles.offset));
+    }
     else
+    {
 	m_pImpFile = 0;
+    }
 
-    if (m_pSegDir->pTypeInfoTab.offset > 0)
+    if (m_pSegDir->pTypeInfoTab.offset != 0xffffffff)
+    {
         m_pTypeInfo = (TLBTypeInfoBase *)((char *)m_pTypeLib + m_pSegDir->pTypeInfoTab.offset);
+	dprintf((LOG, "  TypeInfoTab   0x%08lx", m_pSegDir->pTypeInfoTab.offset));
+    }
     else
+    {
 	m_pTypeInfo = 0;
+    }
+
+    if (m_pSegDir->pArrayDescriptions.offset != 0xffffffff)
+    {
+        m_pArray = (TLBArray *)((char *)m_pTypeLib + m_pSegDir->pArrayDescriptions.offset);
+	dprintf((LOG, "  ArrayDesc     0x%08lx", m_pSegDir->pArrayDescriptions.offset));
+    }
+    else
+    {
+	m_pArray = 0;
+    }
+
+    if (m_pSegDir->pRes7.offset != 0xffffffff)
+    {
+        m_pRes7 = (void *)((char *)m_pTypeLib + m_pSegDir->pRes7.offset);
+	dprintf((LOG, "  Res7          0x%08lx", m_pSegDir->pRes7.offset));
+    }
+    else
+    {
+	m_pRes7 = 0;
+    }
+
+    if (m_pSegDir->pResE.offset != 0xffffffff)
+    {
+        m_pResE = (void *)((char *)m_pTypeLib + m_pSegDir->pResE.offset);
+	dprintf((LOG, "  ResE          0x%08lx", m_pSegDir->pResE.offset));
+    }
+    else
+    {
+	m_pResE = 0;
+    }
+
+    if (m_pSegDir->pResF.offset != 0xffffffff)
+    {
+        m_pResF = (void *)((char *)m_pTypeLib + m_pSegDir->pResF.offset);
+	dprintf((LOG, "  ResF          0x%08lx", m_pSegDir->pResF.offset));
+    }
+    else
+    {
+	m_pResF = 0;
+    }
 
     return S_OK;
 }
@@ -508,7 +1006,7 @@ void TypeLibExtract::ParseValue(int offset, VARIANT * pVar)
         case VT_CLSID   :
         default:
             size = 0;
-            dprintf(("OLEAUT32: VARTYPE %d is not supported, setting pointer to NULL\n", pVar->vt));
+            dprintf((LOG, " VARTYPE %d is not supported, setting pointer to NULL\n", pVar->vt));
     }
 
     if (size > 0) /* (big|small) endian correct? */
@@ -524,10 +1022,11 @@ void TypeLibExtract::ParseCustomData(int offset, oList<TLBCustData *> * pCustomD
     TLBCDGuid *		pCDGuid;
     TLBCustData *	pNew;
 
-    while (offset >=0)
+    while (offset != 0xffffffff)
     {
 	pCDGuid = (TLBCDGuid *)((char *)m_pCDGuid + offset);
 	pNew = new TLBCustData;
+        memset(pNew, 0, sizeof(*pNew));	// Ensure that unset fields get nulled out.
 
 	ParseGuid(pCDGuid->GuidOffset, &(pNew->guid));
 	ParseValue(pCDGuid->DataOffset, &(pNew->data));
@@ -567,8 +1066,6 @@ void TypeLibExtract::ParseTypeInfo(ITypeInfoImpl * pTypeInfo, TLBTypeInfoBase * 
     /* name, eventually add to a hash table */
     ParseName(pBase->NameOffset, &pTypeInfo->szName);
 
-    dprintf(("  -> typeinfo \"%s\"\n", pTypeInfo->szName));
-
     /* help info */
     ParseString(pBase->docstringoffs, &pTypeInfo->szDocString);
     pTypeInfo->lHelpStringContext = pBase->helpstringcontext;
@@ -576,6 +1073,28 @@ void TypeLibExtract::ParseTypeInfo(ITypeInfoImpl * pTypeInfo, TLBTypeInfoBase * 
     /* note: InfoType's Help file and HelpStringDll come from the containing
      * library. Further HelpString and Docstring appear to be the same thing :(
      */
+
+#if defined(DEBUG)	    
+    dprintfLine2();
+    dprintf((LOG, "TypeInfo        %s", pTypeInfo->szName));
+    dprintf((LOG, "  .typeKind:    %08x (%s)", pTypeInfo->TypeAttr.typekind,
+						TypeKindAsString(pTypeInfo->TypeAttr.typekind)));
+    char	guid[128];
+    WINE_StringFromCLSID(&pTypeInfo->TypeAttr.guid, guid);
+    dprintf((LOG, "  .GUID:        %s", guid));
+    dprintf((LOG, "  .lcid:        %08x", pTypeInfo->TypeAttr.lcid));
+    dprintf((LOG, "  .memidCon:    %08x", pTypeInfo->TypeAttr.memidConstructor));
+    dprintf((LOG, "  .memidDest:   %08x", pTypeInfo->TypeAttr.memidDestructor));
+    dprintf((LOG, "  .SizeInst:    %08x", pTypeInfo->TypeAttr.cbSizeInstance));
+    dprintf((LOG, "  .cFuncs:      %08x", pTypeInfo->TypeAttr.cFuncs));
+    dprintf((LOG, "  .cVars:       %08x", pTypeInfo->TypeAttr.cVars));
+    dprintf((LOG, "  .cbAlignment: %08x", pTypeInfo->TypeAttr.cbAlignment));
+    dprintf((LOG, "  .TypeFlags:   %08x", pTypeInfo->TypeAttr.wTypeFlags));
+    dprintf((LOG, "  .MajorVerNum: %08x", pTypeInfo->TypeAttr.wMajorVerNum));
+    dprintf((LOG, "  .MinorVerNum: %08x", pTypeInfo->TypeAttr.wMinorVerNum));
+    dprintf((LOG, "  .cImplTypes:  %08x", pTypeInfo->TypeAttr.cImplTypes));
+    dprintf((LOG, "  .cbSizeVft:   %08x", pTypeInfo->TypeAttr.cbSizeVft));
+#endif
 
     // Functions/
     ParseMembers(pTypeInfo, pBase);
@@ -587,14 +1106,24 @@ void TypeLibExtract::ParseTypeInfo(ITypeInfoImpl * pTypeInfo, TLBTypeInfoBase * 
     // RefTypes {DR: not sure this is OK yet}
     else if (pTypeInfo->TypeAttr.typekind != TKIND_DISPATCH)
     {
-	TLBRefType *	pNew = new TLBRefType;
-        ParseReference(pBase->datatype1, pNew);
-        pTypeInfo->pImplements.AddAtEnd(pNew);
+	if (pBase->datatype1 != 0xffffffff)
+	{
+	    TLBRefType *	pNew = new TLBRefType;
+	    memset(pNew, 0, sizeof(*pNew));	// Ensure that unset fields get nulled out.
 
+	    dprintf((LOG, "Datatype1:      %08x", pBase->datatype1));
+	    ParseReference(pBase->datatype1, pNew);
+	    pTypeInfo->pImplements.AddAtEnd(pNew);
+	}
     }
 
     // Load Custom data
     ParseCustomData(pBase->oCustData, &pTypeInfo->pCustData);
+
+#if defined(DEBUG)	    
+    dprintfLine();
+#endif
+
 }
 
 // ----------------------------------------------------------------------
@@ -623,7 +1152,7 @@ void TypeLibExtract::ParseReference(int offset, TLBRefType * pNew)
 		return;
 	    }
         }
-	dprintf((" WARNING: Cannot find a reference\n"));
+	dprintf((LOG, " WARNING: Cannot find a reference\n"));
 	pNew->reference = -1;
 	pNew->pImpTLInfo = (TLBImpLib *)-1;
     }
@@ -655,6 +1184,7 @@ void TypeLibExtract::ParseImplemented(ITypeInfoImpl * pTypeInfo, TLBTypeInfoBase
 
 	pRefRec = (TLBRefRecord *)((char *)m_pRef + offset);
 	pNew = new TLBRefType;
+        memset(pNew, 0, sizeof(*pNew));	// Ensure that unset fields get nulled out.
 
         ParseReference(pRefRec->reftype, pNew);
         pNew->flags = pRefRec->flags;
@@ -697,6 +1227,7 @@ void TypeLibExtract::ParseImplemented(ITypeInfoImpl * pTypeInfo, TLBTypeInfoBase
 // ----------------------------------------------------------------------
 void	TypeLibExtract::ParseMembers(ITypeInfoImpl * pTypeInfo, TLBTypeInfoBase * pBase)
 {
+    char * 		pMemberRec;
     TLBFuncRecord *	pFuncRec;
     TLBVarRecord *	pVarRec;
     int			ii;
@@ -706,48 +1237,29 @@ void	TypeLibExtract::ParseMembers(ITypeInfoImpl * pTypeInfo, TLBTypeInfoBase * p
     INT *		pNameOff;
     INT *		pMemberID;
     INT *		pMemberOff;
+    INT *		pDefaultOff;
+    INT *		pCustomOff;
+    LONG		lMembers = pTypeInfo->TypeAttr.cFuncs + pTypeInfo->TypeAttr.cVars;
 
     // Map ptrs to sections of the typeinfo record...
     pInfoLen = (INT *)((char *)m_pTypeLib + pBase->memoffset);
-    pFuncRec = (TLBFuncRecord *)(pInfoLen + 1);
-    pMemberID = (INT *)((char *)pFuncRec + *pInfoLen);
-    pNameOff = pMemberID + pTypeInfo->TypeAttr.cFuncs + pTypeInfo->TypeAttr.cVars;
-    pMemberOff = pNameOff + pTypeInfo->TypeAttr.cFuncs + pTypeInfo->TypeAttr.cVars;
+    pMemberRec = (char *)(pInfoLen + 1);
+    pMemberID = (INT *)(pMemberRec + *pInfoLen);
+    pNameOff = pMemberID + lMembers;
+    pMemberOff = pNameOff + lMembers;
 
     // loop through each function...
     for (ii = 0; ii < pTypeInfo->TypeAttr.cFuncs; ii++)
     {
+        // Get record...
+        pFuncRec = (TLBFuncRecord *)(pMemberRec + pMemberOff[ii]);
+
 	TLBFuncDesc *	pNew;
 
         pNew = new TLBFuncDesc;
+        memset(pNew, 0, sizeof(*pNew));	// Ensure that unset fields get nulled out.
+
         ParseName(pNameOff[ii], &pNew->szName);
-
-	dprintf(("    -> function \"%s\"\n", pNew->szName));
-
-	// decode optional attributes
-        iAttrCount = (pFuncRec->recsize
-			- pFuncRec->nrargs * 3 * sizeof(int) - 0x18) / sizeof(int);
-
-        if (iAttrCount > 0)
-            pNew->helpcontext = pFuncRec->OptAttr[0] ;
-
-	if (iAttrCount > 1)
-	    ParseString(pFuncRec->OptAttr[1], &pNew->szHelpString);
-
-	if (iAttrCount > 2)
-	{
-	    if (pFuncRec->FKCCIC & 0x2000)
-		pNew->szEntry = (char *) pFuncRec->OptAttr[2] ;
-	    else
-		ParseString(pFuncRec->OptAttr[2], &pNew->szEntry);
-	}
-
-	if (iAttrCount > 5 )
-	    pNew->lHelpStringContext = pFuncRec->OptAttr[5] ;
-
-	if (iAttrCount > 6 && pFuncRec->FKCCIC & 0x80)
-	    ParseCustomData(pFuncRec->OptAttr[6], &pNew->pCustData);
-
 	// fill the FuncDesc Structure
 	pNew->funcdesc.memid = pMemberID[ii];
         pNew->funcdesc.funckind = (tagFUNCKIND)((pFuncRec->FKCCIC) & 0x7);
@@ -758,6 +1270,120 @@ void	TypeLibExtract::ParseMembers(ITypeInfoImpl * pTypeInfo, TLBTypeInfoBase * p
         pNew->funcdesc.oVft = pFuncRec->VtableOffset ;
         pNew->funcdesc.wFuncFlags = LOWORD(pFuncRec->Flags)  ;
         GetTypedesc(pFuncRec->DataType, &pNew->funcdesc.elemdescFunc.tdesc) ;
+
+	// Calc remaining attributes to be decoded.
+	iAttrCount = pFuncRec->recsize
+			- 24		// OFFSETOF(OptAttr[0])
+			- (pFuncRec->nrargs * sizeof(TLBParameterInfo));
+
+	iAttrCount /= sizeof(INT);
+
+	// If the 'default values' flag is set
+	// allow for a default value for each argument
+	// (include the return value)
+	if (pFuncRec->FKCCIC & 0x1000)
+	    iAttrCount -= pFuncRec->nrargs;
+
+	// If the 'custom data' flag is set
+	// allow for one dataoffset for the method
+	// plus one for each argument
+	// (include the return value)
+	if (pFuncRec->FKCCIC & 0x0080)
+	    iAttrCount -= pFuncRec->nrargs + 1;
+
+	// Loop through 'size specified' block to rip info...
+	for (jj = 0; jj < iAttrCount; jj++)
+	{
+	    switch(jj)
+	    {
+		case 0:
+		    pNew->helpcontext = pFuncRec->OptAttr[jj];
+		    break;
+
+		case 1:
+		    ParseString(pFuncRec->OptAttr[jj], &pNew->szHelpString);
+		    break;
+
+		case 2:
+		    if (pFuncRec->FKCCIC & 0x2000)
+			pNew->szEntry = (char *)(pFuncRec->OptAttr[jj]);
+		    else
+			ParseString(pFuncRec->OptAttr[jj], &pNew->szEntry);
+		    break;
+
+		case 5:
+		    pNew->lHelpStringContext = pFuncRec->OptAttr[jj];
+		    break;
+
+		default:
+		    if (pFuncRec->OptAttr[jj] != 0xffffffff)
+			dprintf((LOG, "- skipping pFuncRec->OptAttr[%lx] (%08x)...",
+				jj, pFuncRec->OptAttr[jj]));
+	    }
+	}
+
+	// Default & custom data come after size specified' block...
+	pCustomOff = pDefaultOff = pFuncRec->OptAttr + iAttrCount;
+
+	// Only advance custom data if there are defaults...
+	if (pFuncRec->FKCCIC & 0x1000)
+	    pCustomOff += pFuncRec->nrargs;
+
+	// Rip the method custom data...
+	if (pFuncRec->FKCCIC & 0x80)
+	    ParseCustomData(pCustomOff[0], &pNew->pCustData);
+
+#if defined(DEBUG)
+	{
+	dprintfLine();
+        char	 buf[1024];
+	dprintf((LOG, "Method          \"%s\"\n", pNew->szName));
+	dprintf((LOG, "  .memid        %08x", pNew->funcdesc.memid));
+        dprintf((LOG, "  .funckind     %08x (%s)",
+				    pNew->funcdesc.funckind,
+				    FuncKindAsString(pNew->funcdesc.funckind)));
+        dprintf((LOG, "  .invkind      %08x (%s)",
+				    pNew->funcdesc.invkind,
+				    InvKindAsString(pNew->funcdesc.invkind)));
+        dprintf((LOG, "  .callconv     %08x (%s)",
+				    pNew->funcdesc.callconv,
+				    CallConvAsString(pNew->funcdesc.callconv)));
+        dprintf((LOG, "  .cParams      %08x", pNew->funcdesc.cParams));
+        dprintf((LOG, "  .cParamsOpt   %08x", pNew->funcdesc.cParamsOpt));
+        dprintf((LOG, "  .oVft         %08x", pNew->funcdesc.oVft));
+        sprintfFlags(buf, FuncFlagData, pNew->funcdesc.wFuncFlags);
+        dprintf((LOG, "  .wFuncFlags   %s", buf));
+        sprintfTypeDesc(buf, &pNew->funcdesc.elemdescFunc.tdesc);
+        dprintf((LOG, "  .tdesc        %s", buf));
+        dprintf((LOG, "  .helpcontext  %08x", pNew->helpcontext));
+        dprintf((LOG, "  .helpstring   %s", pNew->szHelpString));
+        if (pFuncRec->FKCCIC & 0x2000)
+	    dprintf((LOG, "  .entry        %08x", pNew->szHelpString));
+        else
+	    dprintf((LOG, "  .entry        %s", pNew->szHelpString));
+#if 0
+        dprintf((LOG, "pFuncRec"));
+        dprintf((LOG, "  .recsize      %08lx", pFuncRec->recsize));
+        dprintf((LOG, "  .index        %08lx", pFuncRec->index));
+        dprintf((LOG, "  .Datatype     %08lx", pFuncRec->DataType));
+        dprintf((LOG, "  .Flags        %08lx", pFuncRec->Flags));
+        dprintf((LOG, "  .res3         %08lx", pFuncRec->res3));
+
+        sprintfFlags(buf, FKCCICFlagData, pFuncRec->FKCCIC);
+        dprintf((LOG, "  .FKCCIC       %08lx (%s)", pFuncRec->FKCCIC, buf));
+        dprintf((LOG, "  .nrargs       %04lx", pFuncRec->nrargs));
+        dprintf((LOG, "  .nroargs      %04lx", pFuncRec->nroargs));
+	for (jj = 0;
+		(pFuncRec->recsize
+		    - (jj * sizeof(INT))
+		    - 24
+		    - (pFuncRec->nrargs * sizeof(TLBParameterInfo))) > 0 ;
+		jj++)
+	    dprintf((LOG, "  .optattr[%d]   %08lx", jj, pFuncRec->OptAttr[jj]));
+
+#endif // 0
+	}
+#endif // defined(DEBUG)
 
         // do the parameters/arguments 
         if (pFuncRec->nrargs)
@@ -778,25 +1404,36 @@ void	TypeLibExtract::ParseMembers(ITypeInfoImpl * pTypeInfo, TLBTypeInfoBase * p
 		    paramdesc.wParamFlags)  =  pParam->Flags;
 		// Name
                 ParseName(pParam->oName, &pNew->pParamDesc[jj].szName);
-		dprintf(("      -> param \"%s\"\n", pNew->pParamDesc[jj].szName));
 
                 // default value
                 if ((PARAMFLAG_FHASDEFAULT & V_UNION(&(pNew->funcdesc.
-                    lprgelemdescParam[jj]),paramdesc.wParamFlags)) &&
-                    ((pFuncRec->FKCCIC) & 0x1000))
+			lprgelemdescParam[jj]),paramdesc.wParamFlags)) )
 		{
-                    INT *pInt = (INT *)((char *)pFuncRec + pFuncRec->recsize -
-                        (pFuncRec->nrargs * 4 + 1) * sizeof(INT) );
-                    PARAMDESC * pParamDesc =  &V_UNION(&(pNew->funcdesc.
-                        lprgelemdescParam[jj]),paramdesc);
-                    pParamDesc->pparamdescex  = new PARAMDESCEX;
-                    pParamDesc->pparamdescex->cBytes = sizeof(PARAMDESCEX);
-                    ParseValue(pInt[jj], &(pParamDesc->pparamdescex->varDefaultValue));
+		    if (pDefaultOff[jj] != 0xffffffff)	// jic
+		    {
+			PARAMDESC * pParamDesc =  &V_UNION(&(pNew->funcdesc.
+				lprgelemdescParam[jj]), paramdesc);
+			pParamDesc->pparamdescex  = new PARAMDESCEX;
+			pParamDesc->pparamdescex->cBytes = sizeof(PARAMDESCEX);
+			ParseValue(pDefaultOff[jj], &(pParamDesc->pparamdescex->varDefaultValue));
+		    }
                 }
 
                 // custom info
-                if (iAttrCount > 7 + jj && pFuncRec->FKCCIC & 0x80)
-                    ParseCustomData(pFuncRec->OptAttr[7 + jj], &pNew->pParamDesc[jj].pCustData);
+                if (pFuncRec->FKCCIC & 0x80)
+                    ParseCustomData(pCustomOff[1 + jj], &pNew->pParamDesc[jj].pCustData);
+
+#if defined(DEBUG)
+	dprintfLine();
+	dprintf((LOG, "Parameter       \"%s\"\n", pNew->pParamDesc[jj].szName));
+	char	buf[1024];
+	sprintfTypeDesc(buf, &pNew->funcdesc.lprgelemdescParam[jj].tdesc);
+	dprintf((LOG, "  .tdesc        %s", buf));
+	sprintfFlags(buf, ParamFlagData,
+		V_UNION(&pNew->funcdesc.lprgelemdescParam[jj], paramdesc.wParamFlags));
+	dprintf((LOG, "  .wParamFlags  %s", buf));
+#endif
+
 
                 pParam++;	// Next record.
             }
@@ -809,35 +1446,50 @@ void	TypeLibExtract::ParseMembers(ITypeInfoImpl * pTypeInfo, TLBTypeInfoBase * p
 	// Store
 	pTypeInfo->pFunctions.AddAtEnd(pNew);
 
-        // Next record...
-        pFuncRec = (TLBFuncRecord *)((char *)pFuncRec + pFuncRec->recsize);
     }
-
-    // Wine calc's for this ptr were b**ll***s
-    pVarRec = (TLBVarRecord *)pFuncRec;
 
     for (ii = 0; ii < pTypeInfo->TypeAttr.cVars; ii++)
     {
+        // Get record...
+        pVarRec = (TLBVarRecord *)(pMemberRec + pMemberOff[pTypeInfo->TypeAttr.cFuncs + ii]);
+
 	TLBVarDesc *	pNew;
 
 	pNew = new TLBVarDesc;
+        memset(pNew, 0, sizeof(*pNew));	// Ensure that unset fields get nulled out.
 
 	// name, eventually add to a hash table 
 	ParseName(pNameOff[ii], &pNew->szName);
-	dprintf(("    -> variable \"%s\"\n", pNew->szName));
+
+	// Calc remaining attributes to be decoded.
+	iAttrCount = pVarRec->recsize - 20;
+
+	iAttrCount /= sizeof(INT);
 
 	// Optional data
-        if (pVarRec->recsize > (6 * sizeof(INT)) )
-            pNew->lHelpContext = pVarRec->HelpContext;
+	for (jj = 0; jj < iAttrCount; jj++)
+	{
+	    switch(jj)
+	    {
+		case 0:
+		    pNew->lHelpContext = pVarRec->OptAttr[jj];
+		    break;
 
-        if (pVarRec->recsize > (7 * sizeof(INT)) )
-            ParseString(pVarRec->oHelpString, &pNew->szHelpString);
+		case 1:
+		    ParseString(pVarRec->OptAttr[jj], &pNew->szHelpString);
+		    break;
 
-        if (pVarRec->recsize > (8 * sizeof(INT)) )
-	    ;
+		case 4:
+		    pNew->lHelpStringContext = pVarRec->OptAttr[jj];
+		    break;
 
-        if (pVarRec->recsize > (9 * sizeof(INT)) )
-            pNew->lHelpStringContext = pVarRec->HelpStringContext;
+		default:
+		    if (pVarRec->OptAttr[jj] != 0xffffffff)
+			dprintf((LOG, "- skipping pVarRec->OptAttr[%lx] (%08x)...",
+				jj, pVarRec->OptAttr[jj]));
+
+	    }
+	}
 
 	// fill the VarDesc Structure
         pNew->vardesc.memid = pMemberID[ii];
@@ -853,13 +1505,40 @@ void	TypeLibExtract::ParseMembers(ITypeInfoImpl * pTypeInfo, TLBTypeInfoBase * p
         else
             V_UNION(&(pNew->vardesc), oInst) = pVarRec->OffsValue;
 
+#if defined(DEBUG)
+	{
+	dprintfLine();
+        char	 buf[1024];
+	dprintf((LOG, "Variable        \"%s\"\n", pNew->szName));
+	dprintf((LOG, "  .MemberID     %08x", pNew->vardesc.memid));
+	dprintf((LOG, "  .VarKind      %08x (%s)",
+					pNew->vardesc.varkind,
+					VarKindAsString(pNew->vardesc.varkind)));
+        sprintfFlags(buf, FuncFlagData, pNew->vardesc.wVarFlags);
+	dprintf((LOG, "  .VarFlags     %08x %s", pNew->vardesc.wVarFlags, buf));
+	sprintfTypeDesc(buf, &pNew->vardesc.elemdescVar.tdesc);
+	dprintf((LOG, "  .TDesc        %s", buf));
+	dprintf((LOG, "  .HelpContext  %08x", pNew->lHelpContext));
+        dprintf((LOG, "  .HelpStrCtx   %08x", pNew->lHelpStringContext));
+        dprintf((LOG, "  .HelpStr      %s", pNew->szHelpString));
+
+        dprintf((LOG, "pVarRec"));
+	for (jj = 0; jj < iAttrCount; jj++)
+	    dprintf((LOG, "  .optattr[%d]   %08lx", jj, pVarRec->OptAttr[jj]));
+        }
+
+#endif // defined(DEBUG)
+
 	// Store
 	pTypeInfo->pVariables.AddAtEnd(pNew);
-
-        // Next record...
-        pVarRec = (TLBVarRecord *)((char *)pVarRec + pVarRec->recsize);
     }
 }
+
+typedef struct LoadSt
+{
+    ULONG	cLibs;
+    VOID * *	ppLib;
+} LoadSt;
 
 // ----------------------------------------------------------------------
 // LoadSub
@@ -868,14 +1547,20 @@ void	TypeLibExtract::ParseMembers(ITypeInfoImpl * pTypeInfo, TLBTypeInfoBase * p
 // ----------------------------------------------------------------------
 static BOOL	WIN32API LoadSub(HANDLE hMod, LPCTSTR pResType, LPTSTR pResName, LONG lParm)
 {
-    dprintf((" LoadSub called"));
-    HRSRC	hRsrc;
-    HGLOBAL	hData;
+    LoadSt *	pLoad = (LoadSt *)lParm;
 
-    hRsrc = FindResourceA(hMod, pResName, pResType);
-    hData =  LoadResource(hMod, hRsrc);
-    *((void **)lParm) = LockResource(hData);
-    return FALSE;
+    if (--pLoad->cLibs == 0)
+    {
+
+	HRSRC	hRsrc;
+	HGLOBAL	hData;
+
+	hRsrc = FindResourceA(hMod, pResName, pResType);
+	hData =  LoadResource(hMod, hRsrc);
+	*(pLoad->ppLib) = LockResource(hData);
+	return FALSE;
+    }
+    return TRUE;
 }
 
 // ----------------------------------------------------------------------
@@ -892,121 +1577,110 @@ HRESULT TypeLibExtract::Load(char * szFile)
     OFSTRUCT		ofStruct;
     HANDLE		hFile;
     HRESULT		rc;
+    HINSTANCE		hInst;
+    LoadSt		loadData;
 
-    dprintf(("OLEAUT32: TypeLibExtract::Load()"));
+    dprintf((LOG, "TypeLibExtract::Load()"));
 
     // Open file
-    if ((hFile = OpenFile(szFile, &ofStruct, OF_READ)) == HFILE_ERROR)
+    if ((hFile = OpenFile(szFile, &ofStruct, OF_READ)) != HFILE_ERROR)
     {
-	dprintf(("  Error opening file - 0x%08x", GetLastError()));
-	return E_ACCESSDENIED;
-    }
+	lStart = 0;
 
-    lStart = 0;
-
-    // Read first four byts of file to identify it...
-    if (!Read(hFile, (void *)buf, 4, &lReadLen, lStart))
-    {
-	CloseHandle(hFile);
-	dprintf(("  Failed to read file start bytes"));
-	return E_FAIL;
-    }
-
-    // Check to see if this is a type 1 typelib...
-    if ((buf[0] == 'S') && (buf[1] == 'L') && (buf[2] == 'T') && (buf[3] == 'G'))
-    {
-	dprintf(("  File identified as TYPE1 TYPELIB - not supported yet :-("));
-	CloseHandle(hFile);
-	return E_FAIL;
-    }
-
-    // Check to see if this is a type 2 typelib...
-    if ((buf[0] == 'M') && (buf[1] == 'S') && (buf[2] == 'F') && (buf[3] == 'T'))
-    {
-	// Get typelib file size...
-	lFileSize = GetFileSize(hFile, NULL);
-	dprintf(("  File identified as TYPE2 TYPELIB - Loading image (%lu bytes)...", lFileSize));
-
-	m_pTypeLib = HeapAlloc(m_hHeap, 0, lFileSize);
-	if (!m_pTypeLib)
+	// Read first four byts of file to identify it...
+	if (!Read(hFile, (void *)buf, 4, &lReadLen, lStart))
 	{
 	    CloseHandle(hFile);
-	    dprintf(("  Failed to allocate a memory pool for typelib image"));
-	    return E_OUTOFMEMORY;
-	}
-
-	// Read whole file into memory...
-	if (!Read(hFile, m_pTypeLib, lFileSize, &lReadLen, lStart))
-	{
-	    CloseHandle(hFile);
-	    dprintf(("  Failed to read typelib"));
-	    HeapFree(m_hHeap, 0, m_pTypeLib);
+	    dprintf((LOG, "  Failed to read file start bytes"));
 	    return E_FAIL;
 	}
 
-	// Return buffer...
+	// Check to see if this is a type 1 typelib...
+	if ((buf[0] == 'S') && (buf[1] == 'L') && (buf[2] == 'T') && (buf[3] == 'G'))
+	{
+	    CloseHandle(hFile);
+	    dprintf((LOG, "  File identified as TYPE1 TYPELIB - not supported yet :-("));
+	    return E_FAIL;
+	}
+
+	// Check to see if this is a type 2 typelib...
+	if ((buf[0] == 'M') && (buf[1] == 'S') && (buf[2] == 'F') && (buf[3] == 'T'))
+	{
+	    // Get typelib file size...
+	    lFileSize = GetFileSize(hFile, NULL);
+	    dprintf((LOG, "  File identified as TYPE2 TYPELIB - Loading image (%lu bytes)", lFileSize));
+
+	    m_pTypeLib = HeapAlloc(m_hHeap, 0, lFileSize);
+	    if (!m_pTypeLib)
+	    {
+		CloseHandle(hFile);
+		dprintf((LOG, "  Failed to allocate a memory pool for typelib image"));
+		return E_OUTOFMEMORY;
+	    }
+
+	    // Read whole file into memory...
+	    if (!Read(hFile, m_pTypeLib, lFileSize, &lReadLen, lStart))
+	    {
+		CloseHandle(hFile);
+		dprintf((LOG, "  Failed to read typelib"));
+		HeapFree(m_hHeap, 0, m_pTypeLib);
+		return E_FAIL;
+	    }
+
+	    // Return buffer...
+	    CloseHandle(hFile);
+	    m_fFree = TRUE;
+	    return S_OK;
+	}
+
+	// Done with file handle...
 	CloseHandle(hFile);
-	return S_OK;
     }
+    else
+    {
+	// Failed to open file - Check to see if this is a request for a given resource
+	HRSRC			hRsrc;
+	HGLOBAL			hData;
+	char *			szLibName = HEAP_strdupA(m_hHeap, 0, szFile);
+	char *			p = strrchr(szLibName, '\\');
+	ULONG			lResId;
 
-    // Done with file handle...
-    CloseHandle(hFile);
+	if (p)
+	{
+	    // Filename of form {drive:}{\\path\\}file\\resid
+	    *p = 0;
+	    lResId = atoi(p + 1);
+	    hInst = CoLoadLibrary(szLibName, TRUE);
+	    HeapFree(m_hHeap, 0, szLibName);
+	    if (hInst != 0)
+	    {
+		HRSRC	hRsrc;
+		HGLOBAL	hData;
 
-    HINSTANCE		hInst;
+		if ((hRsrc = FindResourceA(hInst, (LPTSTR)lResId, "TYPELIB")) != 0)
+		{
+		    hData =  LoadResource(hInst, hRsrc);
+		    m_pTypeLib = LockResource(hData);
+		    return S_OK;
+		}
+		return E_FAIL;
+	    }
+	}
+	HeapFree(m_hHeap, 0, szLibName);
+    }
 
     // Check to see if this is a module...
     hInst = CoLoadLibrary(szFile, TRUE);
     if (hInst)
     {
-	// Yup - use EnumResourceNames to locate & load resource.
-	EnumResourceNamesA(hInst, "TYPELIB", LoadSub, (LONG)&m_pTypeLib);
+	loadData.cLibs = 1;
+	loadData.ppLib = &m_pTypeLib;
+	// Yup - use EnumResourceNames to locate & load 1st resource.
+	EnumResourceNamesA(hInst, "TYPELIB", LoadSub, (LONG)&loadData);
+	return m_pTypeLib ? S_OK : E_FAIL;
     }
 
-    if (!m_pTypeLib)
-    {
-	dprintf(("  No TYPELIB resources found..."));
-	return E_FAIL;
-    }
-
-    return S_OK;
-}
-
-// ----------------------------------------------------------------------
-// TypeLibExtract::DumpHeader
-//
-// Drop a debug print of the header content to the ODIN log.
-// ----------------------------------------------------------------------
-void TypeLibExtract::DumpHeader()
-{
-    dprintf(("TYPELIB HEADER:"));
-    if (m_fValid)
-    {
-	dprintf(("  Magic1            - 0x%08lx", m_pHeader->magic1));
-	dprintf(("  Magic2            - 0x%08lx", m_pHeader->magic2));
-	dprintf(("  posguid           - 0x%08lx", m_pHeader->posguid));
-	dprintf(("  lcid              - 0x%08lx", m_pHeader->lcid));
-	dprintf(("  lcid2             - 0x%08lx", m_pHeader->lcid2));
-	dprintf(("  varflags          - 0x%08lx", m_pHeader->varflags));
-	dprintf(("  version           - 0x%08lx", m_pHeader->version));
-	dprintf(("  flags             - 0x%08lx", m_pHeader->flags));
-	dprintf(("  nrtypeinfos       - 0x%08lx", m_pHeader->nrtypeinfos));
-	dprintf(("  helpstring        - 0x%08lx", m_pHeader->helpstring));
-	dprintf(("  helpstringcontext - 0x%08lx", m_pHeader->helpstringcontext));
-	dprintf(("  helpcontext       - 0x%08lx", m_pHeader->helpcontext));
-	dprintf(("  nametablecount    - 0x%08lx", m_pHeader->nametablecount));
-	dprintf(("  nametablechars    - 0x%08lx", m_pHeader->nametablechars));
-	dprintf(("  nameoffset        - 0x%08lx", m_pHeader->nameOffset));
-	dprintf(("  helpfile          - 0x%08lx", m_pHeader->helpfile));
-	dprintf(("  custdataoffset    - 0x%08lx", m_pHeader->customDataOffset));
-	dprintf(("  res44             - 0x%08lx", m_pHeader->res44));
-	dprintf(("  res48             - 0x%08lx", m_pHeader->res48));
-	dprintf(("  dispatchpos       - 0x%08lx", m_pHeader->dispatchpos));
-	dprintf(("  res50             - 0x%08lx", m_pHeader->res50));
-    }
-    else
-    {
-	dprintf(("  INVALID"));
-    }
+    return E_FAIL;
 }
 
 // ----------------------------------------------------------------------
@@ -1014,7 +1688,7 @@ void TypeLibExtract::DumpHeader()
 // ----------------------------------------------------------------------
 HRESULT TypeLibExtract::MakeITypeLib(ITypeLibImpl * * ppObject)
 {
-    dprintf(("OLEAUT32: TypeLibExtract::MakeITypeLib"));
+    dprintf((LOG, "TypeLibExtract::MakeITypeLib"));
 
     HRESULT		rc;
 
@@ -1041,7 +1715,10 @@ HRESULT TypeLibExtract::MakeITypeLib(ITypeLibImpl * * ppObject)
 HRESULT TypeLibExtract::Parse()
 {
 
-    dprintf(("OLEAUT32: TypeLibExtract::Parse"));
+    dprintf((LOG, "TypeLibExtract::Parse"));
+
+    // name, eventually add to a hash table
+    ParseName(m_pHeader->nameOffset, &m_pITypeLib->szName);
 
     // Load header info...
     ParseGuid(m_pHeader->posguid, &m_pITypeLib->LibAttr.guid);
@@ -1052,16 +1729,27 @@ HRESULT TypeLibExtract::Parse()
     m_pITypeLib->LibAttr.wMinorVerNum = HIWORD(m_pHeader->version);
     m_pITypeLib->LibAttr.wLibFlags = (WORD) m_pHeader->flags & 0xffff;	/* check mask */
 
-    // name, eventually add to a hash table
-    ParseName(m_pHeader->nameOffset, &m_pITypeLib->szName);
-    dprintf((" reading library: \"%s\"", m_pITypeLib->szName));
-
     // help info
     m_pITypeLib->lHelpContext = m_pHeader->helpstringcontext;
     ParseString(m_pHeader->helpstring, &m_pITypeLib->szDocString);
     ParseString(m_pHeader->helpfile, &m_pITypeLib->szHelpFile);
     if (m_pHelpStringOff)
 	ParseString(*m_pHelpStringOff, &m_pITypeLib->szHelpStringDll);
+
+#if defined(DEBUG)
+
+    dprintfLine2();
+    dprintf((LOG, "Library:        \"%s\"", m_pITypeLib->szName));
+    char	guid[128];
+    WINE_StringFromCLSID(&m_pITypeLib->LibAttr.guid, guid);
+    dprintf((LOG, "  .GUID:        %s", guid));
+    dprintf((LOG, "  .lcid:        %08x", m_pITypeLib->LibAttr.lcid));
+    dprintf((LOG, "  .syskind:     %08x", m_pITypeLib->LibAttr.syskind));
+    dprintf((LOG, "  .MajorVer:    %08x", m_pITypeLib->LibAttr.wMajorVerNum));
+    dprintf((LOG, "  .MinorVer:    %08x", m_pITypeLib->LibAttr.wMinorVerNum));
+    dprintf((LOG, "  .LibFlags:    %08x", m_pITypeLib->LibAttr.wLibFlags));
+
+#endif
 
     // Load Custom data
     ParseCustomData(m_pHeader->customDataOffset, &m_pITypeLib->pCustData);
@@ -1082,6 +1770,7 @@ HRESULT TypeLibExtract::Parse()
 	for (ii = 0; ii < clTd; ii++)
 	{
 	    pNew = new TYPEDESC;
+	    memset(pNew, 0, sizeof(*pNew));	// Ensure that unset fields get nulled out.
 	    m_pITypeLib->pTypedesc.AddAtEnd(pNew);
 	}
 
@@ -1091,12 +1780,17 @@ HRESULT TypeLibExtract::Parse()
 	    pNew = m_pITypeLib->pTypedesc[ii];
 
 	    pNew->vt = pTd->rec0 & VT_TYPEMASK;
-	    if ((pNew->vt == VT_PTR) || (pNew->vt == VT_SAFEARRAY))
+	    if (pNew->vt == VT_PTR)
 	    {
-		if (pTd->rec3 < 0)
+		// >< 99.12.18 DJR Changed test
+		if ((pTd->rec3 & 0x8000))
 		    V_UNION(pNew, lptdesc) = &stndTypeDesc[pTd->rec2];
 		else
-		    V_UNION(pNew, lptdesc) = m_pITypeLib->pTypedesc[pTd->rec3 / 8];
+		    V_UNION(pNew, lptdesc) = m_pITypeLib->pTypedesc[pTd->rec2 / 8];
+	    }
+	    if (pNew->vt == VT_SAFEARRAY)
+	    {
+		dprintf((LOG, "VT_SAFEARRAY - NIY"));
 	    }
 	    else if (pNew->vt == VT_CARRAY) 
 	    {
@@ -1125,6 +1819,25 @@ HRESULT TypeLibExtract::Parse()
 	    {
 		V_UNION(pNew, hreftype) = MAKELONG(pTd->rec2, pTd->rec3);
 	    }
+
+#if defined(DEBUG)	    
+	    dprintfLine2();
+	    dprintf((LOG, "TypeDesc:       %i", ii));
+	    char	buf[1024];
+	    sprintfTypeDesc(buf, pNew);
+	    dprintf((LOG, "  desc          %s", buf));
+	    dprintf((LOG, "  pTd->rec0:    %04x", pTd->rec0));
+	    dprintf((LOG, "  pTd->rec1:    %04x", pTd->rec1));
+	    dprintf((LOG, "  pTd->rec2:    %04x", pTd->rec2));
+	    dprintf((LOG, "  pTd->rec3:    %04x", pTd->rec3));
+	    if (pNew->vt == VT_CARRAY) 
+	    {
+		dprintf((LOG, "  pArray->rec0: %04x", pArray->rec0));
+		dprintf((LOG, "  pArray->rec1: %04x", pArray->rec1));
+		dprintf((LOG, "  pArray->rec2: %04x", pArray->rec2));
+		dprintf((LOG, "  pArray->rec3: %04x", pArray->rec3));
+	    }
+#endif
 	}
     }
 
@@ -1140,6 +1853,7 @@ HRESULT TypeLibExtract::Parse()
         while(totLen < m_pSegDir->pImpFiles.length)
         {
 	    pNew = new TLBImpLib;
+	    memset(pNew, 0, sizeof(*pNew));	// Ensure that unset fields get nulled out.
             pNew->offset = totLen;
 
             ParseGuid(pImpFile->offGuid, &(pNew->guid));
@@ -1158,6 +1872,14 @@ HRESULT TypeLibExtract::Parse()
             recLen = (sizeof(TLBImpFile) + size + 3) & 0xfffffffc;
             totLen += recLen;
             pImpFile = (TLBImpFile *)((char *)pImpFile + recLen);
+#if defined(DEBUG)	    
+	    dprintfLine2();
+	    dprintf((LOG, "ImpLib %i", pNew->offset));
+	    char	guid[128];
+	    WINE_StringFromCLSID(&(pNew->guid), guid);
+	    dprintf((LOG, "  .GUID:        %s", guid));
+	    dprintf((LOG, "  .Name:        %s", pNew->name));
+#endif
         }
     }
 
