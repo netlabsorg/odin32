@@ -1,3 +1,5 @@
+# $Id: makefile.vac,v 1.2 1999-05-31 14:21:50 phaller Exp $ 
+
 #
 # PD-Win32 API
 #
@@ -11,10 +13,14 @@
 #
 #
 #
+!ifdef DEBUG
+MAKE_CMD = nmake -nologo DEBUG=1
+!else
 MAKE_CMD = nmake -nologo
+!endif
 
 all:
-        cd ..\kernel32
+        cd kernel32
         $(MAKE_CMD)
         cd ..\gdi32
         $(MAKE_CMD)
@@ -26,11 +32,11 @@ all:
         $(MAKE_CMD)
         cd ..\capi2032
         $(MAKE_CMD)
+        cd ..\wsock32
+        $(MAKE_CMD)
         cd ..\tapi32
         $(MAKE_CMD)
         cd ..\wnetap32
-        $(MAKE_CMD)
-        cd ..\wsock32
         $(MAKE_CMD)
         cd ..\mpr
         $(MAKE_CMD)
@@ -54,8 +60,6 @@ all:
         $(MAKE_CMD)
         cd ..\ole32
         $(MAKE_CMD)
-
-
 
 clean:
         cd pe2lx
