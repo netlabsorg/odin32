@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.163 2001-10-29 13:54:39 achimha Exp $ */
+/* $Id: pmwindow.cpp,v 1.164 2001-11-07 15:36:09 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -246,6 +246,7 @@ void WIN32API SetWindowAppearance(int fLooks)
 }
 //******************************************************************************
 //CD notification window class
+#define TIMERID_DRIVEPOLL 	0x1717
 //******************************************************************************
 MRESULT EXPENTRY Win32CDWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 {
@@ -298,9 +299,9 @@ MRESULT EXPENTRY Win32CDWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
            }
            drive[0]++;
         }
-        WinStartTimer(hab, hwnd, 17, 32*60);
-////        WinStartTimer(hab, hwnd, 17, 32*3);
-////        WinStartTimer(hab, hwnd, 17, 5000);
+        WinStartTimer(hab, hwnd, TIMERID_DRIVEPOLL, 32*60);
+////        WinStartTimer(hab, hwnd, TIMERID_DRIVEPOLL, 32*3);
+////        WinStartTimer(hab, hwnd, TIMERID_DRIVEPOLL, 5000);
         rc = (MRESULT)FALSE;
         break;
     }
@@ -372,7 +373,7 @@ MRESULT EXPENTRY Win32CDWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
     }
 
     case WM_DESTROY:
-        WinStopTimer(hab, hwnd, 17);
+        WinStopTimer(hab, hwnd, TIMERID_DRIVEPOLL);
         break;
 
     default:

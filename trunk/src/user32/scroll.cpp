@@ -1,4 +1,4 @@
-/* $Id: scroll.cpp,v 1.45 2001-10-24 09:53:14 sandervl Exp $ */
+/* $Id: scroll.cpp,v 1.46 2001-11-07 15:36:10 sandervl Exp $ */
 /*
  * Scrollbar control
  *
@@ -1268,6 +1268,8 @@ INT WINAPI SetScrollInfo(HWND hwnd,INT nBar,const SCROLLINFO *info,BOOL bRedraw)
 
     dprintf(("USER32: SetScrollInfo %x %d",hwnd,nBar));
 
+    if(info == NULL) return 0; //Last error not changed (NT4, SP6)
+
     if (!(infoPtr = SCROLL_GetInfoPtr(hwnd,nBar))) return 0;
     if (info->fMask & ~(SIF_ALL | SIF_DISABLENOSCROLL)) return 0;
     if ((info->cbSize != sizeof(*info)) &&
@@ -1346,7 +1348,7 @@ INT WINAPI SetScrollInfo(HWND hwnd,INT nBar,const SCROLLINFO *info,BOOL bRedraw)
     if (info->fMask & (SIF_RANGE | SIF_PAGE | SIF_DISABLENOSCROLL))
     {
       new_flags = infoPtr->flags;
-      if (infoPtr->MinVal >= infoPtr->MaxVal - MAX( infoPtr->Page-1, 0 ))
+      if (infoPtr->MinVal >= infoPtr->MaxVal - MAX( infoPtr->Page-1, 0))
       {
         /* Hide or disable scroll-bar */
         if (info->fMask & SIF_DISABLENOSCROLL)
@@ -1538,6 +1540,7 @@ BOOL WINAPI GetScrollRange(
 {
   SCROLLBAR_INFO *infoPtr;
 
+    dprintf(("GetScrollRange %x %d %x %x", hwnd, nBar, lpMin, lpMax));
     infoPtr = SCROLL_GetInfoPtr(hwnd,nBar);
     if (!infoPtr)
     {
@@ -1664,6 +1667,8 @@ BOOL WINAPI GetScrollBarInfo(HWND hwnd,LONG idObject,PSCROLLBARINFO psbi)
 
     return FALSE;
   }
+
+  dprintf(("GetScrollBarInfo %x %d %x", hwnd, idObject, psbi));
 
   INT nBar,arrowSize;
 
