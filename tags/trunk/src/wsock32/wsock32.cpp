@@ -1,4 +1,4 @@
-/* $Id: wsock32.cpp,v 1.22 2000-03-22 18:46:19 sandervl Exp $ */
+/* $Id: wsock32.cpp,v 1.23 2000-03-22 20:07:28 sandervl Exp $ */
 
 /*
  *
@@ -7,10 +7,6 @@
  * Win32 SOCK32 for OS/2
  *
  * Copyright (C) 1999 Patrick Haller <phaller@gmx.net>
- * Copyright (C) 2000 Sander van Leeuwen (sandervl@xs4all.nl)
- *
- * Some parts based on Wine code: (dlls\winsock\socket.c)
- * (C) 1993,1994,1996,1997 John Brezak, Erik Bos, Alex Korobka.
  *
  */
 
@@ -20,8 +16,6 @@
  * 1999/12/01 experimental rewrite works (TELNET)
  *            -> open issue: WSASetLastError / WSAGetLastError
  *               call SetLastError / GetLastError according to docs
- *
- * 2000/22/03 Complete rewrite -> got rid of pmwsock
  *
  * identical structures:
  * - sockaddr_in
@@ -43,22 +37,19 @@
  * Includes                                                                  *
  *****************************************************************************/
 
-#define INCL_BASE
-#include <os2wrap.h>	//Odin32 OS/2 api wrappers
-
-#include <string.h>
+#include <pmwsock.h>
+#include <odin.h>
 #include <odinwrap.h>
 #include <os2sel.h>
+#include <misc.h>
+#include <wprocess.h>
+#include <heapstring.h>
+#include <win32wnd.h>
 #include <stdlib.h>
 #include <win32api.h>
-#include <win32wnd.h>
-#include <wprocess.h>
-#include <misc.h>
 
 #include "wsock32.h"
-#include "wsastruct.h"
-#include "asyncthread.h"
-
+#include "relaywin.h"
 #define DBG_LOCALLOG	DBG_wsock32
 #include "dbglocal.h"
 
@@ -70,521 +61,545 @@ ODINDEBUGCHANNEL(WSOCK32-WSOCK32)
  * Local variables                                                           *
  *****************************************************************************/
 
-static LPWSINFO lpFirstIData = NULL;
+#define ERROR_SUCCESS 0
 
-//******************************************************************************
-//******************************************************************************
-LPWSINFO WINSOCK_GetIData(HANDLE tid)
+
+static WSOCKTHREADDATA wstdFallthru; // for emergency only
+
+static HWND hwndRelay = NULL; // handle to our relay window
+
+BOOL fWSAInitialized = FALSE;
+
+/*****************************************************************************
+ * Prototypes                                                                *
+ *****************************************************************************/
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : free memory when thread dies
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+PWSOCKTHREADDATA iQueryWsockThreadData(void)
 {
-    LPWSINFO iData;
-    BOOL     fCurrentThread = FALSE;
+  struct _THDB*     pThreadDB = (struct _THDB*)GetThreadTHDB();
+  PWSOCKTHREADDATA pwstd;
 
-    if(tid == CURRENT_THREAD) {
-	tid = GetCurrentThread();
-	fCurrentThread = TRUE;
+  // check for existing pointer
+  if (pThreadDB != NULL)
+  {
+    if (pThreadDB->pWsockData == NULL)
+    {
+      // allocate on demand + initialize
+      pwstd = (PWSOCKTHREADDATA)HEAP_malloc (sizeof(WSOCKTHREADDATA));
+      pThreadDB->pWsockData = (LPVOID)pwstd;
     }
-tryagain:
-    for (iData = lpFirstIData; iData; iData = iData->lpNextIData) {
-	if (iData->dwThisThread == tid)
-	    break;
-    }
-    if(iData == NULL && fCurrentThread) {
-	WINSOCK_CreateIData();
-	fCurrentThread = FALSE; //just to prevent infinite loops
-	goto tryagain;
-    }
-    else {
-	dprintf(("WINSOCK_GetIData: couldn't find struct for thread %x", tid));
-	DebugInt3();// should never happen!!!!!!!
-    }
-    return iData;
+    else
+      // use already allocated memory
+      pwstd = (PWSOCKTHREADDATA)pThreadDB->pWsockData;
+  }
+
+  if (pwstd == NULL)
+    pwstd = &wstdFallthru; // no memory and not allocated already
+
+  return pwstd;
 }
-//******************************************************************************
-//******************************************************************************
-BOOL WINSOCK_CreateIData(void)
+
+
+#if 0
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
+
+#define CASEERR2(a) case SOC##a: case a: return WSA##a;
+#define CASEERR1(a) case SOC##a: return WSA##a;
+
+int iTranslateSockErrToWSock(int iError)
 {
-    LPWSINFO iData;
-    
-    iData = (LPWSINFO)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(WSINFO));
-    if (!iData)
-	return FALSE;
-    iData->dwThisThread = GetCurrentThread();
-    iData->lpNextIData = lpFirstIData;
-    lpFirstIData = iData;
-    return TRUE;
+  switch(iError)
+  {
+    CASEERR2(EINTR)
+    CASEERR2(EBADF)
+    CASEERR2(EACCES)
+    CASEERR2(EINVAL)
+    CASEERR2(EMFILE)
+
+    CASEERR1(EWOULDBLOCK)
+    CASEERR1(EINPROGRESS)
+    CASEERR1(EALREADY)
+    CASEERR1(ENOTSOCK)
+//  CASEERR1(EDESTADRREQ)
+    CASEERR1(EMSGSIZE)
+    CASEERR1(EPROTOTYPE)
+    CASEERR1(ENOPROTOOPT)
+    CASEERR1(EPROTONOSUPPORT)
+    CASEERR1(ESOCKTNOSUPPORT)
+    CASEERR1(EOPNOTSUPP)
+    CASEERR1(EPFNOSUPPORT)
+    CASEERR1(EAFNOSUPPORT)
+    CASEERR1(EADDRINUSE)
+    CASEERR1(EADDRNOTAVAIL)
+    CASEERR1(ENETDOWN)
+    CASEERR1(ENETUNREACH)
+    CASEERR1(ENETRESET)
+    CASEERR1(ECONNABORTED)
+    CASEERR1(ECONNRESET)
+    CASEERR1(ENOBUFS)
+    CASEERR1(EISCONN)
+    CASEERR1(ENOTCONN)
+    CASEERR1(ESHUTDOWN)
+    CASEERR1(ETOOMANYREFS)
+    CASEERR1(ETIMEDOUT)
+    CASEERR1(ECONNREFUSED)
+    CASEERR1(ELOOP)
+    CASEERR1(ENAMETOOLONG)
+    CASEERR1(EHOSTDOWN)
+    CASEERR1(EHOSTUNREACH)
+
+    CASEERR1(ENOTEMPTY)
+//    CASEERR(EPROCLIM)
+//    CASEERR(EUSERS)
+//    CASEERR(EDQUOT)
+//    CASEERR(ESTALE)
+//    CASEERR(EREMOTE)
+//    CASEERR(EDISCON)
+
+
+    default:
+      dprintf(("WSOCK32: Unknown error condition: %d\n",
+               iError));
+      return iError;
+  }
 }
-//******************************************************************************
-//******************************************************************************
-void WINSOCK_DeleteIData(void)
-{
-    LPWSINFO ppid, iData;
 
-    if (iData) {
-	ppid = lpFirstIData;
-	while(ppid) 
-	{
-		iData = ppid;
-		ppid  = ppid->lpNextIData;
+#endif
 
-		if( iData->flags & WSI_BLOCKINGCALL )
-	    		dprintf(("\tinside blocking call!\n"));
 
-		/* delete scratch buffers */
 
-		if(iData->he)	free(iData->he);
-		if(iData->se)	free(iData->se);
-		if(iData->pe)	free(iData->pe);
 
-	////	if( iData->buffer ) SEGPTR_FREE(iData->buffer);
-	////	if( iData->dbuffer ) SEGPTR_FREE(iData->dbuffer);
 
-		HeapFree(GetProcessHeap(), 0, iData);
-	}
-    }
-}
-//******************************************************************************
-//******************************************************************************
-ODINPROCEDURE1(WSASetLastError,
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
+
+
+ODINPROCEDURE1(OS2WSASetLastError,
                int,iError)
 {
   // according to the docs, WSASetLastError() is just a call-through
   // to SetLastError()
+  WSASetLastError(iError);
   SetLastError(iError);
 }
-//******************************************************************************
-//******************************************************************************
-ODINFUNCTION0(int,WSAGetLastError)
-{
-  return GetLastError();
-}
-//******************************************************************************
-//******************************************************************************
-ODINFUNCTION2(int,OS2shutdown,
-              SOCKET,s,
-              int,how)
-{
- int ret;
 
-   if(!fWSAInitialized) {
-      	WSASetLastError(WSANOTINITIALISED);
-      	return SOCKET_ERROR;
-   } 
-   else 
-   if(WSAIsBlocking()) {
-      	WSASetLastError(WSAEINPROGRESS);
-      	return SOCKET_ERROR;
-   } 
-   ret = shutdown(s, how);
-   
-   if(ret == SOCKET_ERROR) {
- 	WSASetLastError(wsaErrno());
-   }
-   else WSASetLastError(NO_ERROR);
-   return ret;
-}
-//******************************************************************************
-//******************************************************************************
-ODINFUNCTION3(SOCKET,OS2socket,
-              int,af,
-              int,type,
-              int,protocol)
-{
- SOCKET s;
 
-   if(!fWSAInitialized) {
-      	WSASetLastError(WSANOTINITIALISED);
-      	return SOCKET_ERROR;
-   } 
-   else 
-   if(WSAIsBlocking()) {
-      	WSASetLastError(WSAEINPROGRESS);
-      	return SOCKET_ERROR;
-   } 
-   s = socket(af, type, protocol);
-   
-   if(s == SOCKET_ERROR && sock_errno() == SOCEPFNOSUPPORT) {
-	//map SOCEPFNOSUPPORT to SOCEPFNOSUPPORT
-       	WSASetLastError(SOCEPFNOSUPPORT);
-   }
-   else
-   if(s == SOCKET_ERROR) {
- 	WSASetLastError(wsaErrno());
-   }
-   else WSASetLastError(NO_ERROR);
-   return s;
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION0(int,OS2WSAGetLastError)
+{
+  // according to the docs, WSASetLastError() is just a call-through
+  // to SetLastError(). However, what can be implemented here?
+  return WSAGetLastError();
 }
-//******************************************************************************
-//******************************************************************************
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION2(int,OS2__WSAFDIsSet,SOCKET, s,
+                                  fd_set*,fds)
+{
+  return (__WSAFDIsSet(s,fds));
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION3(SOCKET,OS2accept, SOCKET,           s,
+                                struct sockaddr *,addr,
+                                int *,            addrlen)
+{
+  return(accept(s,addr,addrlen));
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION3(int,OS2bind,
+              SOCKET ,s,
+              const struct sockaddr *,addr,
+              int, namelen)
+{
+  return(bind(s,addr,namelen));
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
+
 ODINFUNCTION1(int,OS2closesocket,SOCKET, s)
 {
- int ret;
-
-   if(!fWSAInitialized) {
-      	WSASetLastError(WSANOTINITIALISED);
-      	return SOCKET_ERROR;
-   } 
-   else 
-   if(WSAIsBlocking()) {
-      	WSASetLastError(WSAEINPROGRESS);
-      	return SOCKET_ERROR;
-   } 
-   ret = soclose(s);
-
-   //Close WSAAsyncSelect thread if one was created for this socket
-   EnableAsyncEvent(s, 0L);
-   
-   if(ret == SOCKET_ERROR) {
- 	WSASetLastError(wsaErrno());
-   }
-   else WSASetLastError(NO_ERROR);
-   return ret;
+  return(closesocket(s));
 }
-//******************************************************************************
-//******************************************************************************
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
+
 ODINFUNCTION3(int,OS2connect,
               SOCKET, s,
               const struct sockaddr *,name,
               int, namelen)
 {
- int ret;
-
-   if(!fWSAInitialized) {
-      	WSASetLastError(WSANOTINITIALISED);
-      	return SOCKET_ERROR;
-   } 
-   else 
-   if(WSAIsBlocking()) {
-      	WSASetLastError(WSAEINPROGRESS);
-      	return SOCKET_ERROR;
-   } 
-   ret = connect(s, (sockaddr *)name, namelen);
-   // map BSD error codes
-   if(ret == SOCKET_ERROR) {
-      	if(sock_errno() == SOCEINPROGRESS) {
-         	WSASetLastError(WSAEWOULDBLOCK);
-      	} 
-	else 
-	if (sock_errno() == SOCEOPNOTSUPP) {
-         	WSASetLastError(WSAEINVAL);
-      	}
-	else	WSASetLastError(wsaErrno());
-   }
-   else WSASetLastError(NO_ERROR);
-   return ret;
+  return(connect(s,name,namelen));
 }
-//******************************************************************************
-//******************************************************************************
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
+
 ODINFUNCTION3(int,OS2ioctlsocket,
               SOCKET,s,
               long, cmd,
               u_long *,argp)
 {
- int ret;
-
-   if(!fWSAInitialized) {
-      	WSASetLastError(WSANOTINITIALISED);
-      	return SOCKET_ERROR;
-   } 
-   else 
-   if(WSAIsBlocking()) {
-      	WSASetLastError(WSAEINPROGRESS);
-      	return SOCKET_ERROR;
-   } 
-   if(cmd != FIONBIO && cmd != FIONREAD && cmd != SIOCATMARK) {
-        WSASetLastError(WSAEINVAL);
-      	return SOCKET_ERROR;
-   }
-
-   WSASetLastError(NO_ERROR);
-
-   //check if app want to set a socket, which has an outstanding async select,
-   //to blocking mode
-   if (cmd == FIONBIO) {
-	HWND  hwnd;
-	int   msg;
- 	ULONG lEvent;
-
-	if(QueryAsyncEvent(s, &hwnd, &msg, &lEvent) == TRUE) {
-		if(*argp != 0) {
-			//nothing to do; already non-blocking
-			return NO_ERROR;
-		}
-		else {
-			dprintf(("Trying to set socket to blocking mode while async select active -> return error!"));
-                  	WSASetLastError(WSAEINVAL);
-                  	return SOCKET_ERROR;
-		}
-	}
-   }
-   // clear high word (not used in OS/2's tcpip stack)
-   ret = ioctl(s, LOUSHORT(cmd), (char *)argp, sizeof(int));
-
-   // Map EOPNOTSUPP to EINVAL
-   if(ret == SOCKET_ERROR && sock_errno() == SOCEOPNOTSUPP)
-     	WSASetLastError(WSAEINVAL);
-   else
-   if(ret == SOCKET_ERROR) {
- 	WSASetLastError(wsaErrno());
-   }
-   else WSASetLastError(NO_ERROR);
-   return ret;
+  return(ioctlsocket(s,cmd,argp));
 }
-//******************************************************************************
-//******************************************************************************
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
+
 ODINFUNCTION3(int,OS2getpeername,
               SOCKET, s,
               struct sockaddr *,name,
               int *, namelen)
 {
- int ret;
-
-   if(!fWSAInitialized) {
-      	WSASetLastError(WSANOTINITIALISED);
-      	return SOCKET_ERROR;
-   } 
-   else 
-   if(WSAIsBlocking()) {
-      	WSASetLastError(WSAEINPROGRESS);
-      	return SOCKET_ERROR;
-   } 
-   else 
-   if (namelen == NULL || *namelen < (int)sizeof(struct sockaddr_in)) {
-      	WSASetLastError(WSAEFAULT);
-      	return SOCKET_ERROR;
-   }
-   ret = getsockname(s, name, namelen);
-   if(ret == SOCKET_ERROR) {
- 	WSASetLastError(wsaErrno());
-   }
-   else WSASetLastError(NO_ERROR);
-   return ret;
+  return(getpeername(s,name,namelen));
 }
-//******************************************************************************
-//******************************************************************************
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
+
 ODINFUNCTION3(int,OS2getsockname,
               SOCKET,s,
               struct sockaddr *,name,
               int *, namelen)
 {
- int ret;
-
-   if(!fWSAInitialized) {
-      	WSASetLastError(WSANOTINITIALISED);
-      	return SOCKET_ERROR;
-   } 
-   else 
-   if(WSAIsBlocking()) {
-      	WSASetLastError(WSAEINPROGRESS);
-      	return SOCKET_ERROR;
-   } 
-   else 
-   if (namelen == NULL || *namelen < (int)sizeof(struct sockaddr_in)) {
-      	WSASetLastError(WSAEFAULT);
-      	return SOCKET_ERROR;
-   }
-   ret = getsockname(s, name, namelen);
-   if(ret == SOCKET_ERROR) {
- 	WSASetLastError(wsaErrno());
-   }
-   else WSASetLastError(NO_ERROR);
-   return ret;
+  return(getsockname(s,name,namelen));
 }
-//******************************************************************************
-//******************************************************************************
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION5(int,OS2getsockopt,
+              SOCKET, s,
+              int, level,
+              int, optname,
+              char *, optval,
+              int *,optlen)
+{
+  return(getsockopt(s,
+                    level,
+                    optname,
+                    optval,
+                    optlen));
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
+
 ODINFUNCTION1(u_long,OS2htonl,
               u_long,hostlong)
 {
   return(htonl(hostlong));
 }
-//******************************************************************************
-//******************************************************************************
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
+
 ODINFUNCTION1(u_short,OS2htons,
               u_short,hostshort)
 {
   return(htons(hostshort));
 }
-//******************************************************************************
-//******************************************************************************
-ODINFUNCTION1(u_long,OS2ntohl,
-              u_long,netlong)
-{
-  return(ntohl(netlong));
-}
-//******************************************************************************
-//******************************************************************************
-ODINFUNCTION1(u_short,OS2ntohs,
-              u_short,netshort)
-{
-  return(ntohs(netshort));
-}
-//******************************************************************************
-//******************************************************************************
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
+
 ODINFUNCTION1(unsigned long,OS2inet_addr,
               const char *, cp)
 {
   dprintf(("WSOCK32: OS2inet_addr(%s)\n",
            cp));
 
-  return (inet_addr((char *)cp));
+  return (inet_addr(cp));
 }
-//******************************************************************************
-//******************************************************************************
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
+
 ODINFUNCTION1(char *,OS2inet_ntoa,
               struct in_addr, in)
 {
   return(inet_ntoa(in));
 }
-//******************************************************************************
-//******************************************************************************
-ODINFUNCTION3(SOCKET,OS2accept, SOCKET,           s,
-                                struct sockaddr *,addr,
-                                int *,            addrlen)
-{
- int   ret, msg;
- HWND  hwnd;
- ULONG lEvent;
 
-   if(!fWSAInitialized) {
-      	WSASetLastError(WSANOTINITIALISED);
-      	return SOCKET_ERROR;
-   } 
-   else 
-   if(WSAIsBlocking()) {
-      	WSASetLastError(WSAEINPROGRESS);
-      	return SOCKET_ERROR;
-   } 
-   else 
-   if ((addr != NULL) && (addrlen != NULL)) {
-        if (*addrlen < (int)sizeof(struct sockaddr_in)) {
-      		WSASetLastError(WSAEFAULT);
-      		return SOCKET_ERROR;
-        }
-   }
-   ret = accept(s, addr, addrlen);
 
-   if(ret != SOCKET_ERROR) {
-	//Enable FD_ACCEPT event flag if WSAAsyncSelect was called for this socket
-      	EnableAsyncEvent(s, FD_ACCEPT);
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
 
-	//if this socket has an active async. select pending, then call WSAAsyncSelect
-        //with the same parameters for the new socket (see docs)
-	if(QueryAsyncEvent(s, &hwnd, &msg, &lEvent) == TRUE) {
-        	if(WSAAsyncSelect(ret, hwnd, msg, lEvent) == SOCKET_ERROR) {
-            		ret = SOCKET_ERROR;
-		}
-	}
-   }
-   if(ret == SOCKET_ERROR) {
-   	WSASetLastError(wsaErrno());
-   }
-   else WSASetLastError(NO_ERROR);
-   return ret;
-}
-//******************************************************************************
-//******************************************************************************
-ODINFUNCTION3(int,OS2bind,
-              SOCKET ,s,
-              const struct sockaddr *,addr,
-              int, namelen)
-{
- int ret;
-
-   if(!fWSAInitialized) {
-      	WSASetLastError(WSANOTINITIALISED);
-      	return SOCKET_ERROR;
-   } 
-   else 
-   if(WSAIsBlocking()) {
-      	WSASetLastError(WSAEINPROGRESS);
-      	return SOCKET_ERROR;
-   } 
-   else 
-   if(namelen < (int)sizeof(struct sockaddr_in)) {
-      	WSASetLastError(WSAEFAULT);
-      	return SOCKET_ERROR;
-   }
-   ret = bind(s, (struct sockaddr *)addr, namelen);
-
-   if(ret == SOCKET_ERROR) {
-   	WSASetLastError(wsaErrno());
-   }
-   else WSASetLastError(NO_ERROR);
-   return ret;
-}
-//******************************************************************************
-//******************************************************************************
 ODINFUNCTION2(int,OS2listen,
               SOCKET, s,
               int, backlog)
 {
-   int ret, tmp, namelen;
-   struct sockaddr_in name;
-
-   if(!fWSAInitialized) {
-      	WSASetLastError(WSANOTINITIALISED);
-      	return SOCKET_ERROR;
-   } 
-   else 
-   if(WSAIsBlocking()) {
-      	WSASetLastError(WSAEINPROGRESS);
-      	return SOCKET_ERROR;
-   } 
-   namelen = sizeof(name);
-   ret = getsockname(s, (struct sockaddr *)&name, &namelen);
-   if (ret == 0) {
-        if (name.sin_port == 0 && name.sin_addr.s_addr == 0) {
-            	// Socket is not bound
-            	WSASetLastError(WSAEINVAL);
-            	return SOCKET_ERROR;
-        } 
-      	ret = ioctl(s, FIOBSTATUS, (char *)&tmp, sizeof(tmp)) &
-                   (SS_ISCONNECTING | SS_ISCONNECTED | SS_ISDISCONNECTING);
-        if(ret) {
-        	// Socket is already connected
-            	WSASetLastError(WSAEISCONN);
-               	return SOCKET_ERROR;
-	}
-        ret = listen(s, backlog);
-	//todo: reset FD_ACCEPT bit? (wine seems to do this, but it's not documented)
-   }
-   if(ret == SOCKET_ERROR) {
-   	WSASetLastError(wsaErrno());
-   }
-   else WSASetLastError(NO_ERROR);
-   return ret;
+  return(listen(s,backlog));
 }
-//******************************************************************************
-//******************************************************************************
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION1(u_long,OS2ntohl,
+              u_long,netlong)
+{
+  return(ntohl(netlong));
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION1(u_short,OS2ntohs,
+              u_short,netshort)
+{
+  return(ntohs(netshort));
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
+
 ODINFUNCTION4(int,OS2recv,
               SOCKET,s,
               char *,buf,
               int,len,
               int,flags)
 {
-   int ret;
-
-   if(!fWSAInitialized) {
-      	WSASetLastError(WSANOTINITIALISED);
-      	return SOCKET_ERROR;
-   } 
-   else 
-   if(WSAIsBlocking()) {
-      	WSASetLastError(WSAEINPROGRESS);
-      	return SOCKET_ERROR;
-   } 
-   ret = recv(s, buf, len, flags);
-
-   if(ret == SOCKET_ERROR) {
- 	WSASetLastError(wsaErrno());
-   }
-   else WSASetLastError(NO_ERROR);
-
-   //Reset FD_READ event flagfor  WSAAsyncSelect thread if one was created for this socket
-   EnableAsyncEvent(s, FD_READ);
-   return ret;
+  return(recv(s,
+              buf,
+              len,
+              flags));
 }
-//******************************************************************************
-//******************************************************************************
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
+
 ODINFUNCTION6(int,OS2recvfrom,
               SOCKET,s,
               char *,buf,
@@ -593,65 +608,80 @@ ODINFUNCTION6(int,OS2recvfrom,
               struct sockaddr *,from,
               int *,fromlen)
 {
-   int ret;
 
-   if(!fWSAInitialized) {
-      	WSASetLastError(WSANOTINITIALISED);
-      	return SOCKET_ERROR;
-   } 
-   else 
-   if(WSAIsBlocking()) {
-      	WSASetLastError(WSAEINPROGRESS);
-      	return SOCKET_ERROR;
-   } 
-   else 
-   if(fromlen == NULL || *fromlen < (int)sizeof(struct sockaddr_in)) {
-      	WSASetLastError(WSAEFAULT);
-      	return SOCKET_ERROR;
-   }
-   ret = recvfrom(s, buf, len, flags, from, fromlen);
-
-   if(ret == SOCKET_ERROR) {
- 	WSASetLastError(wsaErrno());
-   }
-   else WSASetLastError(NO_ERROR);
-
-   //Reset FD_READ event flagfor  WSAAsyncSelect thread if one was created for this socket
-   EnableAsyncEvent(s, FD_READ);
-   return ret;
+  return(recvfrom(s,
+                buf,
+                len,
+                flags,
+                from,
+                fromlen));
 }
-//******************************************************************************
-//******************************************************************************
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION5(int,OS2select,
+              int,nfds,
+              fd_set *,readfds,
+              fd_set *,writefds,
+              fd_set *,exceptfds,
+              const struct timeval *,timeout)
+{
+  return(select(nfds,
+                readfds,
+                writefds,
+                exceptfds,
+                timeout));
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
+
 ODINFUNCTION4(int,OS2send,
               SOCKET,s,
               const char *,buf,
               int,len,
               int,flags)
 {
-   int ret;
-
-   if(!fWSAInitialized) {
-      	WSASetLastError(WSANOTINITIALISED);
-      	return SOCKET_ERROR;
-   } 
-   else 
-   if(WSAIsBlocking()) {
-      	WSASetLastError(WSAEINPROGRESS);
-      	return SOCKET_ERROR;
-   } 
-   ret = send(s, (char *)buf, len, flags);
-
-   if(ret == SOCKET_ERROR) {
- 	WSASetLastError(wsaErrno());
-   }
-   else WSASetLastError(NO_ERROR);
-
-   //Reset FD_WRITE event flagfor  WSAAsyncSelect thread if one was created for this socket
-   EnableAsyncEvent(s, FD_WRITE);
-   return ret;
+  return(send(s,
+              buf,
+              len,
+              flags));
 }
-//******************************************************************************
-//******************************************************************************
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
+
 ODINFUNCTION6(int,OS2sendto,
               SOCKET,s,
               const char *,buf,
@@ -660,157 +690,27 @@ ODINFUNCTION6(int,OS2sendto,
               const struct sockaddr *,to,
               int,tolen)
 {
-   int ret;
-
-   if(!fWSAInitialized) {
-      	WSASetLastError(WSANOTINITIALISED);
-      	return SOCKET_ERROR;
-   } 
-   else 
-   if(WSAIsBlocking()) {
-      	WSASetLastError(WSAEINPROGRESS);
-      	return SOCKET_ERROR;
-   } 
-   else 
-   if(tolen < (int)sizeof(struct sockaddr_in)) {
-      	WSASetLastError(WSAEFAULT);
-      	return SOCKET_ERROR;
-   }
-   ret = sendto(s, (char *)buf, len, flags, (struct sockaddr *)to, tolen);
-
-   if(ret == SOCKET_ERROR) {
- 	WSASetLastError(wsaErrno());
-   }
-   else WSASetLastError(NO_ERROR);
-
-   //Reset FD_WRITE event flagfor  WSAAsyncSelect thread if one was created for this socket
-   EnableAsyncEvent(s, FD_WRITE);
-   return ret;
+  return(sendto(s,
+              buf,
+              len,
+              flags,
+              to,
+              tolen));
 }
-//******************************************************************************
-//******************************************************************************
-ODINFUNCTION5(int,OS2select,
-              int,nfds,
-              ws_fd_set *,readfds,
-              ws_fd_set *,writefds,
-              ws_fd_set *,exceptfds,
-              const struct timeval *,timeout)
-{
- int ret, i, j;
- int *sockets, *socktmp;
- int nrread, nrwrite, nrexcept;
- ULONG ttimeout;
 
-   WSASetLastError(NO_ERROR);
 
-   if(!fWSAInitialized) {
-      	WSASetLastError(WSANOTINITIALISED);
-      	return SOCKET_ERROR;
-   } 
-   else 
-   if(WSAIsBlocking()) {
-      	WSASetLastError(WSAEINPROGRESS);
-      	return SOCKET_ERROR;
-   } 
-   else {
-	nrread = nrwrite = nrexcept = 0;
-	if(readfds) {
-		nrread += readfds->fd_count;
-	}
-	if(writefds) {
-		nrwrite += writefds->fd_count;
-	}
-	if(exceptfds) {
-		nrexcept += exceptfds->fd_count;
-	}
-      	if(nrread + nrwrite + nrexcept  == 0) {
-         	WSASetLastError(WSAEINVAL);
-         	return SOCKET_ERROR;
-	}
-      	if(timeout != NULL && (timeout->tv_sec < 0 || timeout->tv_usec < 0)) {
-         	WSASetLastError(WSAEINVAL);
-         	return SOCKET_ERROR;
-      	}
-        if(timeout == NULL) {
-            	ttimeout = -1L; // no timeout
-        } 
-	else    ttimeout = timeout->tv_sec * 1000 + timeout->tv_usec / 1000;
-	
-	sockets = (int *)malloc(sizeof(int) * (nrread+nrwrite+nrexcept));
-	if(readfds) {
-		memcpy(&sockets[0], readfds->fd_array, nrread * sizeof(SOCKET));
-	}
-	if(writefds) {
-		memcpy(&sockets[nrread], writefds->fd_array, nrwrite * sizeof(SOCKET));
-	}
-	if(exceptfds) {
-		memcpy(&sockets[nrread+nrwrite], exceptfds->fd_array, nrexcept * sizeof(SOCKET));
-	}
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
 
-        ret = select(sockets, nrread, nrwrite, nrexcept, ttimeout);
-
-      	if(ret == SOCKET_ERROR) 
-	{
-            	if(readfds != NULL)
-               		readfds->fd_count = 0;
-
-            	if(writefds != NULL)
-               		writefds->fd_count = 0;
-
-            	if(exceptfds != NULL)
-               		exceptfds->fd_count = 0;
-
- 		WSASetLastError(wsaErrno());
-		free(sockets);
-		return SOCKET_ERROR;
-      	} 
-
-        if(ret != 0) {
-		socktmp = sockets;
-            	if(readfds != NULL) {
-               		for(i=0;i<nrread;i++) {
-                  		if(socktmp[i] != -1) {
-	                     		readfds->fd_array[j] = socktmp[i];
-				}
-	                }
-	               	readfds->fd_count = i;
-			socktmp += nrread;
-	        }
-
-            	if(writefds != NULL) {
-               		for(i=0;i<nrwrite;i++) {
-                  		if(socktmp[i] != -1) {
-	                     		writefds->fd_array[j] = socktmp[i];
-				}
-	                }
-	               	writefds->fd_count = i;
-			socktmp += nrwrite;
-            	}
-            	if(exceptfds != NULL) {
-               		for(i=0;i<nrexcept;i++) {
-                  		if(socktmp[i] != -1) {
-	                     		exceptfds->fd_array[j] = socktmp[i];
-				}
-	                }
-	               	exceptfds->fd_count = i;
-            	}
-         } 
-	else {
-            if(readfds != NULL)
-               readfds->fd_count = 0;
-
-            if(writefds != NULL)
-               writefds->fd_count = 0;
-
-            if(exceptfds != NULL)
-               exceptfds->fd_count = 0;
-        }
-	free(sockets);
-   }
-   return ret;
-}
-//******************************************************************************
-//******************************************************************************
 ODINFUNCTION5(int,OS2setsockopt,
               SOCKET,s,
               int,level,
@@ -818,344 +718,841 @@ ODINFUNCTION5(int,OS2setsockopt,
               const char *,optval,
               int,optlen)
 {
-  struct ws_linger *yy;
-  struct linger     xx;
-  int               ret;
-  ULONG             size;
+  struct Wlinger *yy;
+  struct linger xx;
+  int    rc;
 
-   if(!fWSAInitialized) {
-      	WSASetLastError(WSANOTINITIALISED);
-      	return SOCKET_ERROR;
-   } 
-   else 
-   if(WSAIsBlocking()) {
-      	WSASetLastError(WSAEINPROGRESS);
-      	return SOCKET_ERROR;
-   } 
-   if (level == SOL_SOCKET) {
-	switch(optname) {
-	case SO_DONTLINGER:
-	case SO_LINGER:
-            	if(optlen < (int)sizeof(ws_linger)) {
-               		WSASetLastError(WSAEFAULT);
-               		return SOCKET_ERROR;
-            	}
-    		yy = (struct ws_linger *)optval;
-		xx.l_onoff  = (optname == SO_DONTLINGER) ? !yy->l_onoff : yy->l_onoff;
-		xx.l_linger = yy->l_linger;
+  if(level   == SOL_SOCKET &&
+     optname == SO_LINGER)
+  {
+    yy = (struct Wlinger *)optval;
+    xx.l_onoff = (int)yy->l_onoff;
+    xx.l_linger = (int)yy->l_linger;
 
-		ret = setsockopt(s,level,optname,(char *)&xx, sizeof(xx));
-		break;
-	case SO_SNDBUF:
-	case SO_RCVBUF:
-            	if(optlen < (int)sizeof(int)) {
-               		WSASetLastError(WSAEFAULT);
-               		return SOCKET_ERROR;
-            	}
+    rc = setsockopt(s,level,optname,(char *)&xx, sizeof(xx));
+  }
+  else 
+  if(level == SOL_SOCKET && (optname == SO_SNDBUF || optname == SO_RCVBUF)) {
+	ULONG size;
 
-		size = *(ULONG *)optval;
+	size = *(ULONG *)optval;
 tryagain:
-		ret = setsockopt(s,level,optname, (char *)&size, sizeof(ULONG));
-		if(ret == SOCKET_ERROR && size > 65535) {
-			//SvL: Limit send & receive buffer length to 64k
-	                //     (only happens with 16 bits tcpip stack?)
-			size = 65000;
-			goto tryagain;
-		}
-		break;
+	rc = setsockopt(s,level,optname, (char *)&size, sizeof(ULONG));
+	if(rc == SOCKET_ERROR && size > 65535) {
+		//SvL: Limit send & receive buffer length to 64k
+                //     (only happens with 16 bits tcpip stack?)
+		size = 65000;
+		goto tryagain;
+	}
 
-	case SO_BROADCAST:
-	case SO_DEBUG:
-	case SO_KEEPALIVE:
-	case SO_DONTROUTE:
-	case SO_OOBINLINE:
-	case SO_REUSEADDR:
-            	if(optlen < (int)sizeof(int)) {
-               		WSASetLastError(WSAEFAULT);
-               		return SOCKET_ERROR;
-            	}
-                ret = setsockopt(s, level, optname, (char *)optval, optlen);
-		break;
-	default: 
-            	WSASetLastError(WSAENOPROTOOPT);
-            	return SOCKET_ERROR;
-        } 
-   }
-   else 
-   if(level == IPPROTO_TCP) {
-       	if(optname == TCP_NODELAY) {
-            	if(optlen < (int)sizeof(int)) {
-               		WSASetLastError(WSAEFAULT);
-               		return SOCKET_ERROR;
-            	}
-               	ret = setsockopt(s, level, optname, (char *)optval, optlen);
-        } 
-	else {
-       		WSASetLastError(WSAENOPROTOOPT);
-      		return SOCKET_ERROR;
-        }
-   } 
-   else {
-       	WSASetLastError(WSAEINVAL);
-	return SOCKET_ERROR;
-   }
+  }
+  else {
+    rc = setsockopt(s,level,optname,(char *)optval,optlen);
+  }
 
-   if(ret == SOCKET_ERROR) {
- 	WSASetLastError(wsaErrno());
-   }
-   else WSASetLastError(NO_ERROR);
-   return ret;
+  if (rc == SOCKET_ERROR)
+    //OS2WSASetLastError(iTranslateSockErrToWSock(sock_errno()));
+    OS2WSASetLastError(WSAEINVAL);
+  else
+    OS2WSASetLastError(ERROR_SUCCESS);
+
+  return rc;
 }
-//******************************************************************************
-//******************************************************************************
-ODINFUNCTION5(int,OS2getsockopt,
-              SOCKET, s,
-              int, level,
-              int, optname,
-              char *, optval,
-              int *,optlen)
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION2(int,OS2shutdown,
+              SOCKET,s,
+              int,how)
 {
-  struct ws_linger *yy;
-  struct linger     xx;
-  int               ret;
-  int               size, options;
-
-   if(!fWSAInitialized) {
-      	WSASetLastError(WSANOTINITIALISED);
-      	return SOCKET_ERROR;
-   } 
-   else 
-   if(WSAIsBlocking()) {
-      	WSASetLastError(WSAEINPROGRESS);
-      	return SOCKET_ERROR;
-   } 
-   if (level == SOL_SOCKET) {
-	switch(optname) {
-	case SO_DONTLINGER:
-	case SO_LINGER:
-            	if(optlen == NULL || *optlen < sizeof(ws_linger)) {
-               		WSASetLastError(WSAEFAULT);
-               		return SOCKET_ERROR;
-            	}
-		size = sizeof(xx);
-		ret = getsockopt(s,level,optname,(char *)&xx, &size);
-    		yy = (struct ws_linger *)optval;
-		yy->l_onoff  = (optname == SO_DONTLINGER) ? !xx.l_onoff : xx.l_onoff;
-		yy->l_linger = xx.l_linger;
-		*optlen = size;
-		break;
-
-	case SO_SNDBUF:
-	case SO_RCVBUF:
-	case SO_BROADCAST:
-	case SO_DEBUG:
-	case SO_KEEPALIVE:
-	case SO_DONTROUTE:
-	case SO_OOBINLINE:
-	case SO_REUSEADDR:
-	case SO_TYPE:
-            	if(optlen == NULL || *optlen < sizeof(int)) {
-               		WSASetLastError(WSAEFAULT);
-               		return SOCKET_ERROR;
-            	}
-                ret = getsockopt(s, level, optname, (char *)optval, optlen);
-		break;
-	case SO_ACCEPTCONN:
-            	if(optlen == NULL || *optlen < sizeof(int)) {
-               		WSASetLastError(WSAEFAULT);
-               		return SOCKET_ERROR;
-            	}
-                size = sizeof(options);
-                ret = getsockopt(s, SOL_SOCKET, SO_OPTIONS, (char *)&options, &size);
-                if(ret != SOCKET_ERROR) {
-                   	*(BOOL *)optval = (options & SO_ACCEPTCONN) == SO_ACCEPTCONN;
-                   	*optlen = sizeof(BOOL);
-                }
-		break;
-	default: 
-            	WSASetLastError(WSAENOPROTOOPT);
-            	return SOCKET_ERROR;
-        } 
-   }
-   else 
-   if(level == IPPROTO_TCP) {
-       	if(optname == TCP_NODELAY) {
-            	if(optlen == NULL || *optlen < sizeof(int)) {
-               		WSASetLastError(WSAEFAULT);
-               		return SOCKET_ERROR;
-            	}
-               	ret = getsockopt(s, level, optname, (char *)optval, optlen);
-        } 
-	else {
-       		WSASetLastError(WSAENOPROTOOPT);
-      		return SOCKET_ERROR;
-        }
-   } 
-   else {
-       	WSASetLastError(WSAEINVAL);
-	return SOCKET_ERROR;
-   }
-
-   if(ret == SOCKET_ERROR) {
- 	WSASetLastError(wsaErrno());
-   }
-   else WSASetLastError(NO_ERROR);
-   return ret;
+  return(shutdown(s,
+                  how));
 }
-//******************************************************************************
-//******************************************************************************
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION3(SOCKET,OS2socket,
+              int,af,
+              int,type,
+              int,protocol)
+{
+  return(socket(af,
+                type,
+                protocol));
+}
+
+
 /* Database function prototypes */
-//******************************************************************************
-//******************************************************************************
-ODINFUNCTION2(int,OS2gethostname,
-              char *,name,
-              int,namelen)
-{
- int ret;
 
-   ret = gethostname(name, namelen);
-   if(ret == NULL) {
-   	WSASetLastError(NO_ERROR);
-	return 0;
-   }
-   WSASetLastError((errno == EINVAL) ? WSAEFAULT : wsaErrno());
-   return SOCKET_ERROR;
-}
-//******************************************************************************
-//******************************************************************************
-ODINFUNCTION3(ws_hostent *,OS2gethostbyaddr,
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION3(struct Whostent *,OS2gethostbyaddr,
               const char *,addr,
               int,len,
               int,type)
 {
-    LPWSINFO pwsi = WINSOCK_GetIData();
+  WHOSTENT         *yy;
+  struct hostent   *xx;
+  PWSOCKTHREADDATA pwstd;
 
-    if( pwsi )
-    {
-	struct hostent*	host;
-	if( (host = gethostbyaddr((char *)addr, len, type)) != NULL ) {
-	    	if( WS_dup_he(pwsi, host) ) {
-			WSASetLastError(NO_ERROR);
-			return pwsi->he;
-		}
-		else 	WSASetLastError(WSAENOBUFS);
-	}
-	else 	WSASetLastError((h_errno < 0) ? wsaErrno() : wsaHerrno());
-    }
-    else WSASetLastError(WSANOTINITIALISED);
-    return NULL;
+  xx = gethostbyaddr((char *)addr,len,type);
+  //PH: we assume PMWSOCK sets WSASetLastError correctly!
+
+  if(xx == NULL)
+     return (WHOSTENT *)NULL;
+
+  // access current thread wsock data block
+  pwstd = iQueryWsockThreadData();
+
+  pwstd->whsnt.h_name      = xx->h_name;
+  pwstd->whsnt.h_aliases   = xx->h_aliases;
+  pwstd->whsnt.h_addrtype  = (short)xx->h_addrtype;
+  pwstd->whsnt.h_length    = (short)xx->h_length;
+  pwstd->whsnt.h_addr_list = xx->h_addr_list;
+
+  return &pwstd->whsnt;
 }
-//******************************************************************************
-//******************************************************************************
-ODINFUNCTION1(ws_hostent *,OS2gethostbyname,
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION1(struct Whostent *,OS2gethostbyname,
               const char *,name)
 {
-    LPWSINFO pwsi = WINSOCK_GetIData();
+  WHOSTENT         *yy;
+  struct hostent   *xx;
+  PWSOCKTHREADDATA pwstd;
 
-    if( pwsi )
-    {
-	struct hostent*     host;
-	if( (host = gethostbyname((char *)name)) != NULL ) {
-	    	if( WS_dup_he(pwsi, host) ) {
-			WSASetLastError(NO_ERROR);
-			return pwsi->he;
-		}
-		else 	WSASetLastError(WSAENOBUFS);
-	}
-	else 	WSASetLastError((h_errno < 0) ? wsaErrno() : wsaHerrno());
-    }
-    else WSASetLastError(WSANOTINITIALISED);
-    return NULL;
+
+  xx = gethostbyname((char *)name);
+  //PH: we assume PMWSOCK sets WSASetLastError correctly!
+
+  if(xx == NULL)
+    return (WHOSTENT *)NULL;
+
+  // access current thread wsock data block
+  pwstd = iQueryWsockThreadData();
+
+  pwstd->whsnt.h_name      = xx->h_name;
+  pwstd->whsnt.h_aliases   = xx->h_aliases;
+  pwstd->whsnt.h_addrtype  = (short)xx->h_addrtype;
+  pwstd->whsnt.h_length    = (short)xx->h_length;
+  pwstd->whsnt.h_addr_list = xx->h_addr_list;
+
+  return &pwstd->whsnt;
 }
-//******************************************************************************
-//******************************************************************************
-ODINFUNCTION2(struct ws_servent *,OS2getservbyport,
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION2(int,OS2gethostname,
+              char *,name,
+              int,namelen)
+{
+   //PH: we assume PMWSOCK sets WSASetLastError correctly!
+   return(gethostname(name,
+                     namelen));
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION2(struct Wservent *,OS2getservbyport,
               int,              port,
               const char *,     proto)
 {
-    LPWSINFO pwsi = WINSOCK_GetIData();
+  struct servent   *xx;
+  PWSOCKTHREADDATA pwstd;
 
-    if( pwsi )
-    {
-	struct servent* serv;
-	if( (serv = getservbyport(port, pwsi->buffer)) != NULL ) {
-		if( WS_dup_se(pwsi, serv) ) {
-			WSASetLastError(NO_ERROR);
-		    	return pwsi->se;
-		}
-		else 	WSASetLastError(WSAENOBUFS);
-	}
-	else 	WSASetLastError(WSANO_DATA);
-    } 
-    else WSASetLastError(WSANOTINITIALISED);
-    return NULL;
+  //PH: we assume PMWSOCK sets WSASetLastError correctly!
+  xx = getservbyport(port,(char *)proto);
+
+  if(xx == NULL)
+    return (WSERVENT *)NULL;
+
+  // access current thread wsock data block
+  pwstd = iQueryWsockThreadData();
+
+  pwstd->wsvnt.s_name    = xx->s_name;
+  pwstd->wsvnt.s_aliases = xx->s_aliases;
+  pwstd->wsvnt.s_port    = (short)xx->s_port;
+  pwstd->wsvnt.s_proto   = xx->s_proto;
+
+  return &pwstd->wsvnt;
 }
-//******************************************************************************
-//******************************************************************************
-ODINFUNCTION2(struct ws_servent *,OS2getservbyname,
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION2(struct Wservent *,OS2getservbyname,
               const char *,     name,
               const char *,     proto)
 {
-    LPWSINFO pwsi = WINSOCK_GetIData();
+  WSERVENT         *yy;
+  struct servent   *xx;
+  PWSOCKTHREADDATA pwstd;
 
-    if( pwsi )
-    {
-	struct servent*     serv;
-	if( (serv = getservbyname(pwsi->buffer, pwsi->buffer)) != NULL ) {
-		if( WS_dup_se(pwsi, serv) ) {
-			WSASetLastError(NO_ERROR);
-		    	return pwsi->se;
-		}
-		else 	WSASetLastError(WSAENOBUFS);
-    	}
-   	else 	WSASetLastError(WSANO_DATA);
-    } 
-    else WSASetLastError(WSANOTINITIALISED);
-    return NULL;
+
+  //PH: we assume PMWSOCK sets WSASetLastError correctly!
+  xx = getservbyname((char *)name,(char *)proto);
+
+  if(xx == NULL)
+    return (WSERVENT *)NULL;
+
+  // access current thread wsock data block
+  pwstd = iQueryWsockThreadData();
+
+  pwstd->wsvnt.s_name    = xx->s_name;
+  pwstd->wsvnt.s_aliases = xx->s_aliases;
+  pwstd->wsvnt.s_port    = (short)xx->s_port;
+  pwstd->wsvnt.s_proto   = xx->s_proto;
+
+  return &pwstd->wsvnt;
 }
-//******************************************************************************
-//******************************************************************************
-ODINFUNCTION1(struct ws_protoent *,OS2getprotobynumber,
-              int,number)
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION1(struct Wprotoent *,OS2getprotobynumber,
+              int,proto)
 {
-    LPWSINFO pwsi = WINSOCK_GetIData();
+  struct protoent  *xx;
+  PWSOCKTHREADDATA pwstd;
 
-    if( pwsi )
-    {
-	struct protoent* proto;
-	if( (proto = getprotobynumber(number)) != NULL ) {
-	    	if( WS_dup_pe(pwsi, proto) ) {
-			WSASetLastError(NO_ERROR);
-			return pwsi->pe;
-		}
-	    	else 	WSASetLastError(WSAENOBUFS);
-	}
-	else 	WSASetLastError(WSANO_DATA);
-    }
-    else WSASetLastError(WSANOTINITIALISED);
-    return NULL;
+  //PH: we assume PMWSOCK sets WSASetLastError correctly!
+  xx = getprotobynumber(proto);
+
+  if(xx == NULL)
+    return (WPROTOENT *)NULL;
+
+  // access current thread wsock data block
+  pwstd = iQueryWsockThreadData();
+
+  pwstd->wptnt.p_name    = xx->p_name;
+  pwstd->wptnt.p_aliases = xx->p_aliases;
+  pwstd->wptnt.p_proto   = (short)xx->p_proto;
+
+  return &pwstd->wptnt;
 }
-//******************************************************************************
-//******************************************************************************
-ODINFUNCTION1(struct ws_protoent *,OS2getprotobyname,
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION1(struct Wprotoent *,OS2getprotobyname,
               const char *,name)
 {
-    LPWSINFO pwsi = WINSOCK_GetIData();
+  struct protoent  *xx;
+  PWSOCKTHREADDATA pwstd;
 
-    if( pwsi )
-    {
-	struct protoent * proto;
-	if( (proto = getprotobyname((char *)name)) != NULL ) {
-	    	if(WS_dup_pe(pwsi, proto)) {
-			WSASetLastError(NO_ERROR);
-			return pwsi->pe;
-	    	}
-	    	else 	WSASetLastError(WSAENOBUFS);
-	}
-	else 	WSASetLastError((h_errno < 0) ? wsaErrno() : wsaHerrno());
-    }
-    else WSASetLastError(WSANOTINITIALISED);
-    return NULL;
+  //PH: we assume PMWSOCK sets WSASetLastError correctly!
+  xx = getprotobyname((char *)name);
+
+  if(xx == NULL)
+    return (WPROTOENT *)NULL;
+
+  // access current thread wsock data block
+  pwstd = iQueryWsockThreadData();
+
+  pwstd->wptnt.p_name    = xx->p_name;
+  pwstd->wptnt.p_aliases = xx->p_aliases;
+  pwstd->wptnt.p_proto   = (short)xx->p_proto;
+
+  return &pwstd->wptnt;
 }
-//******************************************************************************
-//******************************************************************************
+
+
+
+/* Microsoft Windows Extension function prototypes */
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION2(int,OS2WSAStartup,
+              USHORT,wVersionRequired,
+              LPWSADATA,lpWSAData)
+{
+  fWSAInitialized = TRUE;
+  return(WSAStartup(wVersionRequired,
+                    lpWSAData));
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION0(int,OS2WSACleanup)
+{
+  fWSAInitialized = FALSE;
+  return(WSACleanup());
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION0(BOOL,OS2WSAIsBlocking)
+{
+  return WSAIsBlocking();
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION0(int,OS2WSAUnhookBlockingHook)
+{
+  return WSAUnhookBlockingHook();
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION1(PFN,OS2WSASetBlockingHook,
+              PFN,lpBlockFunc)
+{
+  return(WSASetBlockingHook(lpBlockFunc));
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION0(int,OS2WSACancelBlockingCall)
+{
+  return(WSACancelBlockingCall());
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION6(LHANDLE,OS2WSAAsyncGetServByName,
+              HWND,hWnd,
+              u_int,wMsg,
+              const char *,name,
+              const char *,proto,
+              char *,buf,
+              int,buflen)
+{
+  int   rc;
+  HWND  hwndOS2 = Win32ToOS2Handle(hWnd);
+  ULONG ulNewID;
+
+  if (hwndRelay == NULL) // already initialized ?
+    hwndRelay = RelayInitialize(hwndOS2);
+
+  // add entry to list, we need to store both our temp buffer and the apps buffer
+  ulNewID = RelayAlloc(hWnd,
+                       wMsg,
+                       ASYNCREQUEST_GETSERVBYNAME,
+                       FALSE,
+                       buf);
+
+  // call pmwsock function, will fill our temp buffer
+  rc = WSAAsyncGetServByName(hwndRelay,
+                              ulNewID,
+                              name,
+                              proto,
+                              buf,
+                              buflen);
+
+  // if an error occurs, free the allocated relay entry
+  if (rc == SOCKET_ERROR)
+    RelayFree(ulNewID);
+
+  return (rc);
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION6(LHANDLE,OS2WSAAsyncGetServByPort,
+              HWND,hWnd,
+              u_int,wMsg,
+              int,port,
+              const char *,proto,
+              char *,buf,
+              int,buflen)
+{
+  int   rc;
+  HWND  hwndOS2 = Win32ToOS2Handle(hWnd);
+  ULONG ulNewID;
+
+  if (hwndRelay == NULL) // already initialized ?
+    hwndRelay = RelayInitialize(hwndOS2);
+
+  // add entry to list, we need to store both our temp buffer and the apps buffer
+  ulNewID = RelayAlloc(hWnd,
+                       wMsg,
+                       ASYNCREQUEST_GETSERVBYPORT,
+                       FALSE,
+                       buf);
+
+  // call pmwsock function, will fill our temp buffer
+  rc = WSAAsyncGetServByPort(hwndRelay,
+                             ulNewID,
+                             port,
+                             proto,
+                             buf,
+                             buflen);
+
+  // if an error occurs, free the allocated relay entry
+  if (rc == SOCKET_ERROR)
+    RelayFree(ulNewID);
+
+  return rc;
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION5(LHANDLE,OS2WSAAsyncGetProtoByName,
+              HWND,hWnd,
+              u_int,wMsg,
+              const char *,name,
+              char *,buf,
+              int,buflen)
+{
+  int   rc;
+  HWND  hwndOS2 = Win32ToOS2Handle(hWnd);
+  ULONG ulNewID;
+
+  if (hwndRelay == NULL) // already initialized ?
+    hwndRelay = RelayInitialize(hwndOS2);
+
+  // add entry to list, we need to store both our temp buffer and the apps buffer
+  ulNewID = RelayAlloc(hWnd,
+                       wMsg,
+                       ASYNCREQUEST_GETPROTOBYNAME,
+                       FALSE,
+                       buf);
+
+  // call pmwsock function, will fill our temp buffer
+  rc = WSAAsyncGetProtoByName(hwndRelay,
+                              ulNewID,
+                              name,
+                              buf,
+                              buflen);
+
+  // if an error occurs, free the allocated relay entry
+  if (rc == SOCKET_ERROR)
+    RelayFree(ulNewID);
+
+  return (rc);
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION5(LHANDLE,OS2WSAAsyncGetProtoByNumber,
+              HWND,hWnd,
+              u_int,wMsg,
+              int,number,
+              char *,buf,
+              int,buflen)
+{
+  int   rc;
+  HWND  hwndOS2 = Win32ToOS2Handle(hWnd);
+  ULONG ulNewID;
+
+  if (hwndRelay == NULL) // already initialized ?
+    hwndRelay = RelayInitialize(hwndOS2);
+
+  // add entry to list, we need to store both our temp buffer and the apps buffer
+  ulNewID = RelayAlloc(hWnd,
+                       wMsg,
+                       ASYNCREQUEST_GETPROTOBYNUMBER,
+                       FALSE,
+                       buf);
+
+  // call pmwsock function, will fill our temp buffer
+  rc = WSAAsyncGetProtoByNumber(hwndRelay,
+                                ulNewID,
+                                number,
+                                buf,
+                                buflen);
+
+  // if an error occurs, free the allocated relay entry
+  if (rc == SOCKET_ERROR)
+    RelayFree(ulNewID);
+
+  return rc;
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION5(LHANDLE,OS2WSAAsyncGetHostByName,
+              HWND,hWnd,
+              u_int,wMsg,
+              const char *,name,
+              char *,buf,
+              int,buflen)
+{
+  int   rc;
+  HWND  hwndOS2 = Win32ToOS2Handle(hWnd);
+  ULONG ulNewID;
+
+  dprintf(("WSAAsyncGetHostByName %s", name));
+
+  if (hwndRelay == NULL) // already initialized ?
+    hwndRelay = RelayInitialize(hwndOS2);
+
+  // add entry to list, we need to store both our temp buffer and the apps buffer
+  ulNewID = RelayAlloc(hWnd,
+                       wMsg,
+                       ASYNCREQUEST_GETHOSTBYNAME,
+                       FALSE,
+                       (PVOID)buf, (PVOID)buflen);
+
+  // call pmwsock function, will fill our temp buffer
+  rc = WSAAsyncGetHostByName(hwndRelay,
+                             ulNewID,
+                             name,
+                             buf,
+                             buflen);
+
+  // if an error occurs, free the allocated relay entry
+  if (rc == SOCKET_ERROR)
+    RelayFree(ulNewID);
+
+  return rc;
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION7(LHANDLE,OS2WSAAsyncGetHostByAddr,
+              HWND,hWnd,
+              u_int,wMsg,
+              const char *,addr,
+              int,len,
+              int,type,
+              char *,buf,
+              int,buflen)
+{
+  int   rc;
+  HWND  hwndOS2 = Win32ToOS2Handle(hWnd);
+  ULONG ulNewID;
+
+  if (hwndRelay == NULL) // already initialized ?
+    hwndRelay = RelayInitialize(hwndOS2);
+
+  // add entry to list, we need to store both our temp buffer and the apps buffer
+  ulNewID = RelayAlloc(hWnd,
+                       wMsg,
+                       ASYNCREQUEST_GETHOSTBYADDR,
+                       FALSE,
+                       buf);
+
+  // call pmwsock function, will fill our temp buffer
+  rc = WSAAsyncGetHostByAddr(hwndRelay,
+                             ulNewID,
+                             addr,
+                             len,
+                             type,
+                             buf,
+                             buflen);
+
+  // if an error occurs, free the allocated relay entry
+  if (rc == SOCKET_ERROR)
+    RelayFree(ulNewID);
+
+  return (rc);
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION1(int,OS2WSACancelAsyncRequest,
+              LHANDLE,hAsyncTaskHandle)
+{
+  return(WSACancelAsyncRequest(hAsyncTaskHandle));
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/25 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION4(int,OS2WSAAsyncSelect,
+              SOCKET,s,
+              HWND,hWnd,
+              u_int,wMsg,
+              long,lEvent)
+{
+  int   rc;
+//  int   iError;
+  HWND  hwndOS2 = Win32ToOS2Handle(hWnd);
+  ULONG ulNewID;
+
+  if (hwndRelay == NULL) // already initialized ?
+    hwndRelay = RelayInitialize(hwndOS2);
+
+  /* @@@PH: our source window doesn't seem to have an anchor block.
+            Docs suggest we've missed to call WinInitialize on the
+            caller thread.
+
+            Cause however is the Open32 handle is (of course!) invalid
+            in plain PM Window Manager! -> use DAPWSOCK
+
+            Unfortunately, DAPWSOCK calls WinQueryAnchorBlock(hOpen32), too.
+            So, we're stuck until I resolve hWnd to it's valid PM
+            counterpart.
+
+            new problem: we've ultimately got to use PostMessageA instead
+            anything else. => create invisible msg relay window:
+            - hMsg = registerMessage(hWnd, wMsg)
+            - call WSAAsyncSelect with object window handle
+            - overwrite hWnd relay for "same handles"
+   */
+
+  // add event to list or remove any list entry in case of WSAAsyncSelect(hwnd,0,0)
+  if ( (wMsg == 0) && (lEvent == 0) )
+  {
+    // remove entry from list
+    RelayFreeByHwnd(hWnd);
+  }
+  else
+    // add entry to list
+    ulNewID = RelayAlloc(hWnd,
+                         wMsg,
+                         ASYNCREQUEST_SELECT,
+			 FALSE); //SvL: allow multiple selects -> pmwsock should fail if it not allowed
+//                         TRUE);
+
+  rc = WSAAsyncSelect(s,
+                      hwndRelay,
+                      ulNewID,
+                      lEvent);
+
+  // if an error occurs, free the allocated relay entry
+  if (rc == SOCKET_ERROR)
+    RelayFree(ulNewID);
+
+  return (rc);
+}
