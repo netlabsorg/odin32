@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.cpp,v 1.30 2000-03-13 13:10:46 sandervl Exp $ */
+/* $Id: oslibmsg.cpp,v 1.31 2000-03-29 17:16:06 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -24,6 +24,7 @@
 #include <misc.h>
 #include "oslibmsg.h"
 #include <winconst.h>
+#include <win32api.h>
 #include <win32wnd.h>
 #include "oslibutil.h"
 #include "timer.h"
@@ -203,11 +204,22 @@ BOOL OSLibWinGetMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterMa
  BOOL rc, eaten;
  THDB *thdb;
  QMSG  os2msg;
+ HWND  hwndOS2 = 0;
+
+  if(hwnd) {
+  	hwndOS2 = Win32BaseWindow::Win32ToOS2Handle(hwnd);
+	if(hwndOS2 == NULL) {
+		memset(pMsg, 0, sizeof(MSG));
+		dprintf(("GetMsg: window %x NOT FOUND!", hwnd));
+		SetLastError(ERROR_INVALID_WINDOW_HANDLE_W);
+		return TRUE;
+	}
+  }
 
   thdb = GetThreadTHDB();
   if(thdb == NULL) {
         DebugInt3();
-        return FALSE;
+	return TRUE;
   }
 
   if(thdb->fTranslated && (!hwnd || hwnd == thdb->msgWCHAR.hwnd)) {
@@ -274,6 +286,16 @@ BOOL OSLibWinPeekMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterM
  BOOL  rc, eaten;
  THDB *thdb;
  QMSG  os2msg;
+ HWND  hwndOS2 = 0;
+
+  if(hwnd && hwnd != -1) {
+  	hwndOS2 = Win32BaseWindow::Win32ToOS2Handle(hwnd);
+	if(hwndOS2 == NULL) {
+		dprintf(("PeekMsg: window %x NOT FOUND!", hwnd));
+		SetLastError(ERROR_INVALID_WINDOW_HANDLE_W);
+		return FALSE;
+	}
+  }
 
   thdb = GetThreadTHDB();
   if(thdb == NULL) {
@@ -303,7 +325,7 @@ BOOL OSLibWinPeekMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterM
 continuepeekmsg:
   do {
         eaten = FALSE;
-        rc = WinPeekMsg(thdb->hab, &os2msg, Win32BaseWindow::OS2ToWin32Handle(hwnd), TranslateWinMsg(uMsgFilterMin, TRUE),
+        rc = WinPeekMsg(thdb->hab, &os2msg, hwndOS2, TranslateWinMsg(uMsgFilterMin, TRUE),
                         TranslateWinMsg(uMsgFilterMax, FALSE), (fRemove & PM_REMOVE_W) ? PM_REMOVE : PM_NOREMOVE);
 
         if (rc && (fRemove & PM_REMOVE_W) && os2msg.msg == WM_TIMER) {

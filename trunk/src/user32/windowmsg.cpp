@@ -1,4 +1,4 @@
-/* $Id: windowmsg.cpp,v 1.20 2000-03-23 23:06:53 sandervl Exp $ */
+/* $Id: windowmsg.cpp,v 1.21 2000-03-29 17:16:06 sandervl Exp $ */
 /*
  * Win32 window message APIs for OS/2
  *
@@ -71,7 +71,7 @@ BOOL WIN32API PeekMessageA(LPMSG msg, HWND hwndOwner, UINT uMsgFilterMin,
 {
  BOOL fFoundMsg;
 
-    fFoundMsg = OSLibWinPeekMsg(msg, 0, uMsgFilterMin, uMsgFilterMax,
+    fFoundMsg = OSLibWinPeekMsg(msg, hwndOwner, uMsgFilterMin, uMsgFilterMax,
                                 fuRemoveMsg, FALSE);
     if(fFoundMsg) {
         if (msg->message == WM_QUIT && (fuRemoveMsg & PM_REMOVE)) {
@@ -87,7 +87,7 @@ BOOL WIN32API PeekMessageW(LPMSG msg, HWND hwndOwner, UINT uMsgFilterMin,
 {
  BOOL fFoundMsg;
 
-    fFoundMsg = OSLibWinPeekMsg(msg, 0, uMsgFilterMin, uMsgFilterMax,
+    fFoundMsg = OSLibWinPeekMsg(msg, hwndOwner, uMsgFilterMin, uMsgFilterMax,
                                 fuRemoveMsg, FALSE);
     if(fFoundMsg) {
         if (msg->message == WM_QUIT && (fuRemoveMsg & (PM_REMOVE))) {
