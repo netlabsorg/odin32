@@ -1,4 +1,4 @@
-/* $Id: winimagebase.cpp,v 1.11 2000-04-14 22:35:28 sandervl Exp $ */
+/* $Id: winimagebase.cpp,v 1.12 2000-04-15 12:43:31 sandervl Exp $ */
 
 /*
  * Win32 PE Image base class
@@ -162,7 +162,7 @@ void Win32ImageBase::findDll(char *szFileName, char *szFullName, int cchFullFile
 	    	strcat(modname, szFileName);
 		dllfile = OSLibDosOpen(modname, OSLIB_ACCESS_READONLY|OSLIB_ACCESS_SHAREDENYNONE);
 		if(dllfile == NULL) {
-			OSLibDosSearchPath(OSLIB_SEARCHENV, "PATH", modname, szFullName, cchFullFileName);
+			OSLibDosSearchPath(OSLIB_SEARCHENV, "PATH", szFullName, szFullName, cchFullFileName);
 		}
 	    	else {
 			strcpy(szFullName, modname);
