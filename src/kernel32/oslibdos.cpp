@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.9 1999-11-22 20:35:50 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.10 1999-11-26 00:05:18 sandervl Exp $ */
 
 /*
  * Wrappers for OS/2 Dos* API
@@ -46,7 +46,8 @@ DWORD OSLibDosAliasMem(LPVOID pb, ULONG cb, LPVOID *ppbAlias, ULONG fl)
   size+= PAGE_SIZE;
   if(size != cb) {
 	dprintf(("ERROR: OSLibDosAliasMem: size != cb (%x!=%x)!!!!!!!!", size, cb));
-	return 5;
+	//ignore this and continue return 5;
+	attr = fl; //just use original protection flags (NOT CORRECT)
   }
   attr &= (PAG_READ|PAG_WRITE|PAG_EXECUTE|PAG_GUARD|PAG_DEFAULT);
   if(attr != fl) {

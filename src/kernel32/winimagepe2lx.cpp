@@ -1,4 +1,4 @@
-/* $Id: winimagepe2lx.cpp,v 1.5 1999-11-18 08:55:06 bird Exp $ */
+/* $Id: winimagepe2lx.cpp,v 1.6 1999-11-26 00:05:19 sandervl Exp $ */
 
 /*
  * Win32 PE2LX Image base class
@@ -15,6 +15,7 @@
 *******************************************************************************/
 #define INCL_DOSERRORS          /* DOS Error values */
 #define INCL_DOSPROFILE         /* DosQuerySysState (Toolkit 4.5) */
+#define INCL_DOSMODULEMGR   /* DOS Module management */
 
 #define ALIGN(a, alignment) (((a) + (alignment - 1UL)) & ~(alignment - 1UL))
 
@@ -523,3 +524,41 @@ PVOID  Win32Pe2LxImage::getPointerFromRVA(ULONG ulRVA)
     return (PVOID)(ulRVA - paSections[i].ulRVA + paSections[i].ulAddress);
 }
 
+/**
+ * Gets pointer to an exported procedure by procedure name.
+ * @returns   Address of exported procedure. 0UL if not found.
+ * @param     name  Exported procedure name.
+ * @status    completely implemented.
+ * @author    Sander van Leeuwen
+ * @remark
+ */
+ULONG Win32Pe2LxImage::getApi(char *name)
+{
+    APIRET      rc;
+    ULONG       ulApiAddr;
+
+    rc = DosQueryProcAddr(hinstance, 0, name, (PFN *)&ulApiAddr);
+    return rc == NO_ERROR ? ulApiAddr : 0;
+}
+
+
+/**
+ * Gets pointer to an exported procedure by ordinal.
+ * @returns   Pointer to an exported procedure. 0UL if not found.
+ * @param     ordinal  Export ordinal number.
+ * @status    completely implemented.
+ * @author    Sander van Leeuwen
+ * @remark    FIXME:
+ *            This function should be implemented for both Exe and Dll images!
+ *            It could be done similar in both peldr image and pe2lx images by
+ *            accessing PE structures.
+ */
+ULONG Win32Pe2LxImage::getApi(int ordinal)
+{
+    APIRET      rc;
+    ULONG       ulApiAddr;
+
+    rc = DosQueryProcAddr(hinstance, ordinal, NULL, (PFN *)&ulApiAddr);
+
+    return rc == NO_ERROR ? ulApiAddr : 0;
+}

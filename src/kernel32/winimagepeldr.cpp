@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.16 1999-11-24 19:52:34 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.17 1999-11-26 00:05:19 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -314,11 +314,6 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
 	{
 		tlsDir = (IMAGE_TLS_DIRECTORY *)ImageDirectoryOffset(win32file, IMAGE_DIRECTORY_ENTRY_TLS);
 		if(tlsDir) {
-			fout << "TLS Directory" << endl;
-			fout << "TLS Address of Index     " << hex((ULONG)tlsDir->AddressOfIndex) << endl;
-			fout << "TLS Address of Callbacks " << hex((ULONG)tlsDir->AddressOfCallBacks) << endl;
-			fout << "TLS SizeOfZeroFill       " << hex(tlsDir->SizeOfZeroFill) << endl;
-			fout << "TLS Characteristics      " << hex(tlsDir->Characteristics) << endl;
 		        addSection(SECTION_TLS, psh[i].PointerToRawData,
                 		   psh[i].SizeOfRawData, psh[i].VirtualAddress + oh.ImageBase,
                    		   psh[i].Misc.VirtualSize);
@@ -439,6 +434,11 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
 		fout << "Couldn't find TLS section!!" << endl;
 	    	goto failure;
 	}
+	fout << "TLS Directory" << endl;
+	fout << "TLS Address of Index     " << hex((ULONG)tlsDir->AddressOfIndex) << endl;
+	fout << "TLS Address of Callbacks " << hex((ULONG)tlsDir->AddressOfCallBacks) << endl;
+	fout << "TLS SizeOfZeroFill       " << hex(tlsDir->SizeOfZeroFill) << endl;
+	fout << "TLS Characteristics      " << hex(tlsDir->Characteristics) << endl;
   	setTLSAddress((char *)sect->realvirtaddr);
   	setTLSInitSize(tlsDir->EndAddressOfRawData - tlsDir->StartAddressOfRawData);
   	setTLSTotalSize(tlsDir->EndAddressOfRawData - tlsDir->StartAddressOfRawData + tlsDir->SizeOfZeroFill);
@@ -462,12 +462,12 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
 	pFixups = (PIMAGE_BASE_RELOCATION)ImageDirectoryOffset(win32file, IMAGE_DIRECTORY_ENTRY_BASERELOC);
 	commitPage((ULONG)pFixups, FALSE);
    }
-   if(fh.Characteristics & IMAGE_FILE_DLL) {
+//   if(fh.Characteristics & IMAGE_FILE_DLL) {
     	if(processExports((char *)win32file) == FALSE) {
         	fout << "Failed to process exported apis" << endl;
 	    	goto failure;
     	}
-   }
+//   }
   }
 
   for (i=0; i<nSections; i++) {
@@ -1428,6 +1428,62 @@ BOOL Win32PeLdrImage::processImports(char *win32file)
 
   free(pszModules);
   return TRUE;
+}
+//******************************************************************************
+//******************************************************************************
+ULONG Win32PeLdrImage::getApi(char *name)
+{
+  ULONG       apiaddr, i, apilen;
+  char       *apiname;
+  char        tmp[4];
+  NameExport *curexport;
+  ULONG       ulAPIOrdinal;                      /* api requested by ordinal */
+  
+  apilen = strlen(name) + 1;
+  if(apilen < 4) 
+  {
+	*(ULONG *)tmp = 0;
+	strcpy(tmp, name);
+	apiname = tmp;
+  }
+  else	apiname = name;
+
+  curexport = nameexports;
+  for(i=0; i<nrNameExports; i++) 
+  {
+    if(apilen == curexport->nlength && 
+       *(ULONG *)curexport->name == *(ULONG *)name) 
+    {
+      	if(strcmp(curexport->name, name) == 0) 
+        	return(curexport->virtaddr);
+    }
+    curexport = (NameExport *)((ULONG)curexport->name + curexport->nlength);
+  }
+  return(0);
+}
+//******************************************************************************
+//******************************************************************************
+ULONG Win32PeLdrImage::getApi(int ordinal)
+{
+ ULONG       apiaddr, i;
+ OrdExport  *curexport;
+ NameExport *nexport;
+
+  curexport = ordexports;
+  for(i=0;i<nrOrdExports;i++) {
+	if(curexport->ordinal == ordinal)
+		return(curexport->virtaddr);
+	curexport++;
+  }
+  //Name exports also contain an ordinal, so check this 
+  nexport = nameexports;
+  for(i=0;i<nrNameExports;i++) {
+	if(nexport->ordinal == ordinal)
+		return(nexport->virtaddr);
+
+	nexport = (NameExport *)((ULONG)nexport->name + nexport->nlength);
+  }
+  return(0);
 }
 //******************************************************************************
 //******************************************************************************

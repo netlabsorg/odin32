@@ -1,4 +1,4 @@
-/* $Id: windllpe2lx.cpp,v 1.3 1999-10-17 01:49:08 bird Exp $ */
+/* $Id: windllpe2lx.cpp,v 1.4 1999-11-26 00:05:19 sandervl Exp $ */
 
 /*
  * Win32 PE2LX Dll class
@@ -165,46 +165,6 @@ BOOL Win32Pe2LxDll::init()
         return FALSE;
     return TRUE;
 }
-
-/**
- * Gets pointer to an exported procedure by procedure name.
- * @returns   Address of exported procedure. 0UL if not found.
- * @param     name  Exported procedure name.
- * @status    completely implemented.
- * @author    Sander van Leeuwen
- * @remark
- */
-ULONG Win32Pe2LxDll::getApi(char *name)
-{
-    APIRET      rc;
-    ULONG       ulApiAddr;
-
-    rc = DosQueryProcAddr(hinstance, 0, name, (PFN *)&ulApiAddr);
-    return rc == NO_ERROR ? ulApiAddr : 0;
-}
-
-
-/**
- * Gets pointer to an exported procedure by ordinal.
- * @returns   Pointer to an exported procedure. 0UL if not found.
- * @param     ordinal  Export ordinal number.
- * @status    completely implemented.
- * @author    Sander van Leeuwen
- * @remark    FIXME:
- *            This function should be implemented for both Exe and Dll images!
- *            It could be done similar in both peldr image and pe2lx images by
- *            accessing PE structures.
- */
-ULONG Win32Pe2LxDll::getApi(int ordinal)
-{
-    APIRET      rc;
-    ULONG       ulApiAddr;
-
-    rc = DosQueryProcAddr(hinstance, ordinal, NULL, (PFN *)&ulApiAddr);
-
-    return rc == NO_ERROR ? ulApiAddr : 0;
-}
-
 
 /**
  * Simple question: -Native LX dll?
