@@ -1,4 +1,4 @@
-/* $Id: initgdi32.cpp,v 1.11 2001-12-31 12:08:23 sandervl Exp $
+/* $Id: initgdi32.cpp,v 1.12 2002-03-18 13:18:44 sandervl Exp $
  *
  * DLL entry point
  *
@@ -50,7 +50,7 @@ extern "C" {
 static HMODULE dllHandle = 0;
 //******************************************************************************
 //******************************************************************************
-BOOL WINAPI OdinLibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
+BOOL WINAPI GdiLibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
 {
    switch (fdwReason)
    {
@@ -97,7 +97,7 @@ ULONG APIENTRY inittermGdi32(ULONG hModule, ULONG ulFlag)
              return 0UL;
          }
          DIBSection::initDIBSection();
-         dllHandle = RegisterLxDll(hModule, OdinLibMain, (PVOID)&gdi32_PEResTab,
+         dllHandle = RegisterLxDll(hModule, GdiLibMain, (PVOID)&gdi32_PEResTab,
                                    GDI32_MAJORIMAGE_VERSION, GDI32_MINORIMAGE_VERSION,
                                    IMAGE_SUBSYSTEM_NATIVE);
          if(dllHandle == 0)
