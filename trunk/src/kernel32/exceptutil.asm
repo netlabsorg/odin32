@@ -1,4 +1,4 @@
-; $Id: exceptutil.asm,v 1.21 2002-11-29 09:30:55 sandervl Exp $
+; $Id: exceptutil.asm,v 1.22 2003-02-05 14:04:33 sandervl Exp $
 
 ;/*
 ; * Project Odin Software License can be found in LICENSE.TXT
@@ -158,6 +158,18 @@ _SetExceptionChain endp
 _AsmCallThreadHandler proc near
         push	ebp
         mov	ebp, esp
+
+;We're asking for problems if our stack start near a 64kb boundary
+;Some OS/2 thunking procedures can choke on misaligned stack addresses
+        mov     eax, esp
+        and     eax, 0FFFFh
+        cmp     eax, 0E000h
+        jge     @goodthreadstack
+
+        ;set ESP to the top of the next 64kb block
+        add     eax, 16
+        sub     esp, eax
+@goodthreadstack:
 
         push    dword ptr [ebp+12]
         mov     eax, dword ptr [ebp+8]
