@@ -1,4 +1,4 @@
-/* $Id: oslibwin.h,v 1.21 1999-08-25 15:08:50 dengert Exp $ */
+/* $Id: oslibwin.h,v 1.22 1999-08-27 17:50:56 dengert Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -233,7 +233,7 @@ BOOL  OSLibWinGetBorderSize(HWND hwnd, OSLIBPOINT *pointl);
 BOOL  OSLibWinSetIcon(HWND hwnd, HANDLE hIcon);
 
 BOOL  OSLibWinQueryWindowPos (HWND hwnd, PSWP pswp);
-void  OSLibMapSWPtoWINDOWPOS(PSWP pswp, struct tagWINDOWPOS *pwpos, PSWP pswpOld, ULONG parentHeight);
-void  OSLibMapWINDOWPOStoSWP(struct tagWINDOWPOS *pwpos, PSWP pswp, PSWP pswpOld, ULONG parentHeight);
+void  OSLibMapSWPtoWINDOWPOS(PSWP pswp, struct tagWINDOWPOS *pwpos, PSWP pswpOld, HWND hParent, HWND hFrame);
+void  OSLibMapWINDOWPOStoSWP(struct tagWINDOWPOS *pwpos, PSWP pswp, PSWP pswpOld, HWND hParent, HWND hFrame);
 
 #endif //__OSLIBWIN_H__

@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.21 1999-08-25 15:08:50 dengert Exp $ */
+/* $Id: pmwindow.cpp,v 1.22 1999-08-27 17:50:56 dengert Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -178,17 +178,22 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
       SWP      swpOld;
       WINDOWPOS wp;
       ULONG    parentHeight = 0;
+      HWND      hParent = NULLHANDLE, hFrame = NULLHANDLE;
 
         dprintf(("OS2: WM_ADJUSTWINDOWPOS %x %x (%d,%d) (%d,%d)", hwnd, pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
+
+        if ((pswp->fl & (SWP_SIZE | SWP_MOVE | SWP_ZORDER)) == 0) break;
 
         WinQueryWindowPos(hwnd, &swpOld);
 
         if(pswp->fl & (SWP_MOVE | SWP_SIZE)) {
-            parentHeight = (win32wnd->isChild()) ?
-                OSLibGetWindowHeight(win32wnd->getParent()->getOS2WindowHandle())
-              : OSLibQueryScreenHeight();
+            if (win32wnd->isChild())
+                hParent = win32wnd->getParent()->getOS2WindowHandle();
+            else
+                hFrame = win32wnd->getOS2FrameWindowHandle();
         }
-        OSLibMapSWPtoWINDOWPOS(pswp, &wp, &swpOld, parentHeight);
+        OSLibMapSWPtoWINDOWPOS(pswp, &wp, &swpOld, hParent, hFrame);
+
         wp.hwnd = win32wnd->getWindowHandle();
         if ((pswp->fl & SWP_ZORDER) && (pswp->hwndInsertBehind > HWND_BOTTOM))
         {
@@ -201,17 +206,27 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 
     case WM_WINDOWPOSCHANGED:
     {
-      PSWP      pswp = (PSWP)mp1;
+      PSWP      pswp  = (PSWP)mp1;
+      PSWP      pswpo = pswp + 1;
       WINDOWPOS wp;
       ULONG     parentHeight = 0;
+      HWND      hParent = NULLHANDLE, hFrame = NULLHANDLE;
 
         dprintf(("OS2: WM_WINDOWPOSCHANGED %x %x (%d,%d) (%d,%d)", hwnd, pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
+
+        if ((pswp->fl & (SWP_SIZE | SWP_MOVE | SWP_ZORDER)) == 0) break;
+
         if(pswp->fl & (SWP_MOVE | SWP_SIZE)) {
-            parentHeight = (win32wnd->isChild()) ?
-                OSLibGetWindowHeight(win32wnd->getParent()->getOS2WindowHandle())
-              : OSLibQueryScreenHeight();
+            if (win32wnd->isChild())
+                hParent = win32wnd->getParent()->getOS2WindowHandle();
+            else
+                hFrame = win32wnd->getOS2FrameWindowHandle();
         }
-        OSLibMapSWPtoWINDOWPOS(pswp, &wp, pswp+1, parentHeight);
+        OSLibMapSWPtoWINDOWPOS(pswp, &wp, pswpo, hParent, hFrame);
+
+        win32wnd->setWindowRect(wp.x, wp.y, wp.x + wp.cx, wp.y + wp.cy);
+        win32wnd->setClientRect(pswpo->x, pswpo->y, pswpo->x + pswpo->cx, pswpo->y + pswpo->cy);
+
         wp.hwnd = win32wnd->getWindowHandle();
         if ((pswp->fl & SWP_ZORDER) && (pswp->hwndInsertBehind > HWND_BOTTOM))
         {
