@@ -1,4 +1,4 @@
-/* $Id: obj_base.h,v 1.12 1999-09-08 10:35:41 phaller Exp $ */
+/* $Id: obj_base.h,v 1.13 1999-11-02 19:06:43 sandervl Exp $ */
 /*
  * This file defines the macros and types necessary to define COM interfaces,
  * and the three most basic COM interfaces: IUnknown, IMalloc and IClassFactory.
@@ -867,7 +867,7 @@ HRESULT WINAPI DllCanUnloadNow(void);
  * Internal WINE API
  */
 #ifdef __WINE__
-HRESULT WIN32API WINE_StringFromCLSID(const CLSID *id, LPSTR);
+HRESULT WINAPI WINE_StringFromCLSID(const CLSID *id, LPSTR);
 #endif
 
 #endif /* __WINE_WINE_OBJ_BASE_H */
