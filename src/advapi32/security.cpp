@@ -1,4 +1,4 @@
-/* $Id: security.cpp,v 1.3 2000-01-06 20:05:00 sandervl Exp $ */
+/* $Id: security.cpp,v 1.4 2000-01-06 20:23:47 sandervl Exp $ */
 /*
  * Win32 security API functions for OS/2
  *
@@ -25,8 +25,7 @@
 #include "ntsecapi.h"
 #include "debugtools.h"
 
-DECLARE_DEBUG_CHANNEL(advapi)
-DECLARE_DEBUG_CHANNEL(security)
+DECLARE_DEBUG_CHANNEL(advapi-security)
 
 static BOOL fInitSecurity = FALSE;
 static BOOL fHasSecurity = FALSE;
