@@ -276,7 +276,9 @@
 #define WH_SHELL_W            10
 #define WH_FOREGROUNDIDLE_W   11
 #define WH_CALLWNDPROCRET_W   12
-#define WH_MAX_W              12
+#define WH_KEYBOARD_LL        13
+#define WH_MOUSE_LL           14
+#define WH_MAX_W              14
 
 #define WH_MINHOOK_W          WH_MIN_W
 #define WH_MAXHOOK_W          WH_MAX_W
