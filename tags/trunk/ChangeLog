@@ -1,4 +1,9 @@
- /* $Id: ChangeLog,v 1.490 1999-12-01 00:12:52 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.491 1999-12-01 01:13:57 phaller Exp $ */
+
+ 99-11-30: Patrick Haller <phaller@gmx.net>
+	- WSOCK32\NEW: Experimental rewrite using PMWSOCK successful.
+			One problem regarding ODIN message translation remains,
+			TELNET works fine under debugger.
 
  99-11-30: Sander van Leeuwen <sandervl@xs4all.nl>
 	- ODINCRT: Wrappers for allocation/free functions to prevent them
