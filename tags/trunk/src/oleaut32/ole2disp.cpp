@@ -1,4 +1,4 @@
-/* $Id: ole2disp.cpp,v 1.3 2000-04-05 22:28:48 davidr Exp $ */
+/* $Id: ole2disp.cpp,v 1.4 2000-09-17 22:31:41 davidr Exp $ */
 /*
  *	OLE2DISP library
  *
@@ -227,7 +227,7 @@ INT WINAPI OleTranslateColor(
   COLORREF colorref;
   BYTE b = HIBYTE(HIWORD(clr));
 
-  TRACE("OleTranslateColor(%08lx, %d, %p)\n", clr, hpal, pColorRef);
+  TRACE("OLEAUT32: OleTranslateColor(%08lx, %d, %p)\n", clr, hpal, pColorRef);
 
   /*
    * In case pColorRef is NULL, provide our own to simplify the code.

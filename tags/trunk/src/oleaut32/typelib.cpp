@@ -1,4 +1,4 @@
-/* $Id: typelib.cpp,v 1.14 2000-04-30 17:05:51 sandervl Exp $ */
+/* $Id: typelib.cpp,v 1.15 2000-09-17 22:31:41 davidr Exp $ */
 /* 
  * ITypelib interface
  * 
@@ -23,6 +23,7 @@ typedef enum tagREGKIND
 } REGKIND;
 
 #define PRIVATE_LOGGING	// Private logfile
+#define DEBUG2
 
 #include "oleaut32.h"
 #include "olectl.h"
@@ -982,12 +983,18 @@ void TypeLibExtract::ParseValue(int offset, VARIANT * pVar)
             char *	pString = (char *)(pStringLen + 1);
 
 	    // Allocate BSTR container and then convert directly into it...
-//???A Fix
-	    //SvL: *pStringLen == -1 in MS Office 2k install
+	    // SvL: *pStringLen == -1 in MS Office 2k install
+	    // DjR: *pStringLen == -1 is used to denote VBA.vbNullString
+	    //      *pStringLen == 0 for a string that happens to be 0 length
+	    //      *pStringLen > 0 for a string with defined content.
             if(*pStringLen == -1)
 		*pStringLen = 0;
+
 	    V_UNION(pVar, bstrVal) = SysAllocStringLen(NULL, *pStringLen);
-	    AsciiToUnicodeN(pString, V_UNION(pVar, bstrVal), *pStringLen);
+
+	    if (*pStringLen != 0)	// Save cluttering up logfile
+		AsciiToUnicodeN(pString, V_UNION(pVar, bstrVal), *pStringLen);
+
 	    return;
 	}
 
@@ -1011,7 +1018,10 @@ void TypeLibExtract::ParseValue(int offset, VARIANT * pVar)
         case VT_CLSID   :
         default:
             size = 0;
-            dprintf((LOG, " VARTYPE %d is not supported, setting pointer to NULL\n", pVar->vt));
+            dprintf((LOG,
+            	     " VARTYPE %d (%s) is not supported yet, setting to NULL\n",
+            	     pVar->vt,
+            	     VariantTypeAsString(pVar->vt)));
     }
 
     if (size > 0) /* (big|small) endian correct? */
@@ -1620,7 +1630,7 @@ HRESULT TypeLibExtract::Load(char * szFile)
     HINSTANCE		hInst;
     LoadSt		loadData;
 
-    dprintf((LOG, "TypeLibExtract::Load()"));
+    dprintf((LOG, "TypeLibExtract::Load(%s)", szFile));
 
     // Open file
     if ((hFile = OpenFile(szFile, &ofStruct, OF_READ)) != HFILE_ERROR)

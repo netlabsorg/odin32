@@ -1,4 +1,4 @@
-/* $Id: itypeinfo.cpp,v 1.3 2000-04-05 22:28:47 davidr Exp $ */
+/* $Id: itypeinfo.cpp,v 1.4 2000-09-17 22:31:41 davidr Exp $ */
 /* 
  * ITypeInfo interface
  * 
@@ -76,7 +76,7 @@ ITypeInfoImpl * ITypeInfoImpl_Constructor()
 {
     ITypeInfoImpl *	pNew;
 
-    dprintf(("OLEAUT32: ITypeInfo()->Constructor()"));
+//    dprintf(("OLEAUT32: ITypeInfo()->Constructor()"));
 
     pNew = new ITypeInfoImpl;
 
@@ -118,13 +118,29 @@ HRESULT WIN32API ITypeInfoImpl_QueryInterface(LPTYPEINFO iface,
 
     // Go find the correct interface...
     if (IsEqualIID(&IID_IUnknown, riid))
+    {
 	*ppvObject = &(This->lpvtbl);
+	dprintf(("          ->IUnknown"));
+    }
     else if (IsEqualIID(&IID_ITypeInfo, riid))
+    {
 	*ppvObject = &(This->lpvtbl);
+	dprintf(("          ->ITypeInfo"));
+    }
     else if (IsEqualIID(&IID_ITypeInfo2, riid))
+    {
 	*ppvObject = &(This->lpvtbl);
+	dprintf(("          ->ITypeInfo2"));
+    }
     else
+    {
+	char	tmp[50];
+
+	WINE_StringFromCLSID(riid, tmp);
+
+	dprintf(("          ->E_NOINTERFACE(%s)", tmp));
 	return E_NOINTERFACE; 
+    }
 
     // Query Interface always increases the reference count by one...
     ITypeInfoImpl_AddRef((LPTYPEINFO)This);
