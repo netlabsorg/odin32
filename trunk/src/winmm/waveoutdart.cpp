@@ -1,4 +1,4 @@
-/* $Id: waveoutdart.cpp,v 1.12 2002-08-01 16:06:43 sandervl Exp $ */
+/* $Id: waveoutdart.cpp,v 1.13 2002-08-14 17:37:55 sandervl Exp $ */
 
 /*
  * Wave playback class (DART)
@@ -631,7 +631,7 @@ sendbuffer:
     //Transfer buffer to DART
     // MCI_MIXSETUP_PARMS->pMixWrite does alter FS: selector!
     USHORT selTIB = RestoreOS2FS(); // save current FS selector
-    MixSetupParms->pmixWrite(MixSetupParms->ulMixHandle, &MixBuffer[curPlayBuf], 1);
+    MixSetupParms->pmixWrite(MixSetupParms->ulMixHandle, &MixBuffer[curFillBuf], 1);
     SetFS(selTIB);           // switch back to the saved FS selector
 
     dprintf2(("WINMM: handler DONE"));
