@@ -1,4 +1,4 @@
-# $Id: odin32.post.vac3.mk,v 1.28 2002-06-09 15:07:00 bird Exp $
+# $Id: odin32.post.vac3.mk,v 1.29 2003-02-28 10:28:10 sandervl Exp $
 
 #
 # Odin32 API
@@ -132,7 +132,10 @@ lib:    $(OBJDIR) \
 !ifndef NO_MAIN_RULE
 $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION): $(LIBS) $(OBJS) $(OS2RES) $(DEFFILE) $(OBJDIR)\bldlevel.$(ORGDEFFILE) $(OBJDIR)\$(TARGET).lrf
     $(CMDQD_WAIT)
-    -4 $(LD2) $(LD2FLAGS) @$(OBJDIR)\$(TARGET).lrf
+!if "$(CCENV)" != "EMX"
+    -4  \
+!endif	
+    $(LD2) $(LD2FLAGS) @$(OBJDIR)\$(TARGET).lrf
 !ifdef OS2RES
     $(OS2RC) $(OS2RCLFLAGS) $(OS2RES) $@
 !endif
@@ -156,19 +159,19 @@ $(OBJDIR)\$(TARGET).lrf: $(MAKEFILE) $(ODIN32_INCLUDE)\odin32.post.vac3.mk
 /MAP:$(OBJDIR)\$(TARGET).map
 $(OBJS:  =^
 )
-$(OBJ_PROFILE)
+$(OBJ_PROFILE) $(LIB_PROFILE)
 $(LIBS:  =^
 )
 $(OBJDIR)\bldlevel.$(ORGDEFFILE)
 <<keep
 !else
     @echo Creating file <<$@
-$(OBJS: =+^
-)+$(EMX)\lib\dll0.obj,
+$(EMX)\lib\dll0.obj+$(OBJ_PROFILE)+$(OBJS: =+^
+),
 $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION),
 $(OBJDIR)\$(TARGET).map,
-$(LIBS: =+^
-),
+$(LIB_PROFILE)+$(LIBS: =+^
+)+$(EMX)\lib\end.lib,
 $(OBJDIR)\bldlevel.$(ORGDEFFILE);
 <<keep
 !endif
@@ -232,19 +235,19 @@ $(OBJDIR)\$(TARGET).lrf: $(MAKEFILE) $(ODIN32_INCLUDE)\odin32.post.vac3.mk
 /MAP:$(OBJDIR)\$(TARGET).map
 $(OBJS:  =^
 )
-$(OBJ_PROFILE)
+$(OBJ_PROFILE) $(LIB_PROFILE)
 $(LIBS:  =^
 )
 $(OBJDIR)\bldlevel.$(ORGDEFFILE)
 <<keep
 !else
     @echo Creating file <<$@
-$(OBJS: =+^
-)+$(EMX)\lib\crt0.obj,
+$(EMX)\lib\crt0.obj+$(OBJ_PROFILE)$(OBJS: =+^
+),
 $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION),
 $(OBJDIR)\$(TARGET).map,
-$(LIBS: =+^
-),
+$(LIB_PROFILE)+$(LIBS: =+^
+)+$(EMX)\lib\end.lib,
 $(OBJDIR)\bldlevel.$(ORGDEFFILE);
 <<keep
 !endif

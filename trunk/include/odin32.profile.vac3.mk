@@ -1,4 +1,4 @@
-# $Id: odin32.profile.vac3.mk,v 1.16 2003-02-02 14:24:21 sandervl Exp $
+# $Id: odin32.profile.vac3.mk,v 1.17 2003-02-28 10:28:10 sandervl Exp $
 
 #
 # Odin32 API
@@ -15,10 +15,14 @@ RTLLIB   = cppom30.lib
 RTLLIB_O = cppom30o.lib
 RTLLIB_NRE = cppon30.lib
 DLLENTRY = $(ODIN32_LIB)\dllentry.obj
-ODINCRT  = odincrtp
+ODINCRT  = odincrt
+!ifdef DEBUG
+ODINCRT  = odincrtd
+!endif
 LIB_DEMANGLE = demangl.lib
 !ifndef DEBUG
-OBJ_PROFILE = $(ODIN32_LIB)\cppopa3.obj $(ODIN32_LIB)\cppopa3_fix2.obj
+# OBJ_PROFILE = $(ODIN32_LIB)\cppopa3.obj $(ODIN32_LIB)\cppopa3_fix2.obj
+LIB_PROFILE = $(ODIN32_LIB)\kProfile.lib
 NO_LXLITE = 1
 !endif
 
@@ -68,7 +72,7 @@ OS2RCLFLAGS      = -x2 -n
 #   when we add new flags to for example CXXFLAGS too many times.
 #
 !ifndef NOPROFILEHOOKS
-PROFILEFLAGS=-Gh+
+PROFILEFLAGS     = -Gh+
 !endif
 !ifdef EXETARGET
 CTARGETFLAGS     = -Ge+
@@ -84,9 +88,10 @@ CXXFLAGS         = -c -Q -Si -G5 -O- -Oi- -Ss+ -W3 -Gm+ /Gn+ -Ti+ $(PROFILEFLAGS
 CXXFLAGS_ODINCRT = -c -Q -Si -G5 -O- -Oi- -Ss+ -W3 -Gm+ /Gn- -Ti+ $(PROFILEFLAGS) $(CXXTARGETFLAGS) -Gx+
 CFLAGS_WIN32APP  = -c -Q -Si -G5 -O- -Oi- -Ss+ -W3 -Gm+ /Gn+ -Ti+ $(PROFILEFLAGS) $(CTARGETFLAGS)
 CXXFLAGS_WIN32APP= -c -Q -Si -G5 -O- -Oi- -Ss+ -W3 -Gm+ /Gn+ -Ti+ $(PROFILEFLAGS) $(CXXTARGETFLAGS)
-CINCLUDES        = -I$(ODIN32_INCLUDE)\Win -I. -I$(ODIN32_INCLUDE) 
 !ifndef STATIC_CRT
-CINCLUDES        = -I$(ODIN32_INCLUDE)\incl_vac $(CINCLUDES) 
+CINCLUDES        = -I$(ODIN32_INCLUDE)\incl_vac -I$(ODIN32_INCLUDE)\Win -I. -I$(ODIN32_INCLUDE)
+!else STATIC_CRT
+CINCLUDES        = -I$(ODIN32_INCLUDE)\Win -I. -I$(ODIN32_INCLUDE)
 !endif
 CDEFINES         = -D__WIN32OS2__ -D__WINE__ -D__i386__ -DTCPV40HDRS -DCOMCTL32UNDOC
 CDEFINES_ODINCRT = -D__WIN32OS2__ -D__WINE__ -D__i386__
@@ -115,10 +120,11 @@ LD2TARGETFLAGS   = /EXEC /pmtype:pm   /stack:$(STACKSIZE)
 LDTARGETFLAGS    = -Ge-
 LD2TARGETFLAGS   = /DLL
 !endif
-LDFLAGS          = -Q   -B"/noe /map /linenumbers  /nod" -Ti+ -Si -W3 -Gm+ $(PROFILEFLAGS) $(LDTARGETFLAGS)
-LDFLAGS_ODINCRT  = -Q   -B"/noe /map /linenumbers  "     -Ti+ -Si -W3 -Gm+ $(PROFILEFLAGS) $(LDTARGETFLAGS)
-LD2FLAGS         = /nologo /noe /map /linenumbers  /nod /debug $(LD2TARGETFLAGS)
-LD2FLAGS_ODINCRT = /nologo /noe /map /linenumbers       /debug $(LD2TARGETFLAGS)
+LDFLAGS          = -Q   -B"/noe /map /packcode /packdata /exepack:2 /linenumbers /dbgpack /nod" -Ti -Si -W3 -Gm+ $(PROFILEFLAGS) $(LDTARGETFLAGS)
+LDFLAGS_ODINCRT  = -Q   -B"/noe /map /packcode /packdata /exepack:2 /linenumbers /dbgpack "     -Ti -Si -W3 -Gm+ $(PROFILEFLAGS) $(LDTARGETFLAGS)
+LD2FLAGS         = /nologo /noe /map /packcode /packdata /exepack:2 /linenumbers /dbgpack /nod /debug $(LD2TARGETFLAGS)
+LD2FLAGS_ODINCRT = /nologo /noe /map /packcode /packdata /exepack:2 /linenumbers /dbgpack      /debug $(LD2TARGETFLAGS)
+
 
 !else
 #
@@ -157,11 +163,11 @@ CTARGETFLAGS     = -Ge-
 CXXTARGETFLAGS   = -Ge-
 !endif
 CXXEXCEPTIONS    = -Gx-
-CFLAGS           = -c -Q -Si -Ti -Tm+ -Ss+ -W3 -Gm+ /Gn+ $(PROFILEFLAGS) $(CTARGETFLAGS)
-CXXFLAGS         = -c -Q -Si -Ti -Tm+ -Ss+ -W3 -Gm+ /Gn+ $(PROFILEFLAGS) $(CXXTARGETFLAGS) /Gx+
-CXXFLAGS_ODINCRT = -c -Q -Si -Ti -Tm+ -Ss+ -W3 -Gm+ /Gn- $(PROFILEFLAGS) $(CXXTARGETFLAGS) /Gx+
-CFLAGS_WIN32APP  = -c -Q -Si -Ti -Tm+ -Ss+ -W3 -Gm+ /Gn+ $(PROFILEFLAGS) $(CTARGETFLAGS)
-CXXFLAGS_WIN32APP= -c -Q -Si -Ti -Tm+ -Ss+ -W3 -Gm+ /Gn+ $(PROFILEFLAGS) $(CXXTARGETFLAGS)
+CFLAGS           = -c -Q -Si -Ti+ -Tm+ -Ss+ -W3 -Gm+ /Gn+ $(PROFILEFLAGS) $(CTARGETFLAGS)
+CXXFLAGS         = -c -Q -Si -Ti+ -Tm+ -Ss+ -W3 -Gm+ /Gn+ $(PROFILEFLAGS) $(CXXTARGETFLAGS) /Gx+
+CXXFLAGS_ODINCRT = -c -Q -Si -Ti+ -Tm+ -Ss+ -W3 -Gm+ /Gn- $(PROFILEFLAGS) $(CXXTARGETFLAGS) /Gx+
+CFLAGS_WIN32APP  = -c -Q -Si -Ti+ -Tm+ -Ss+ -W3 -Gm+ /Gn+ $(PROFILEFLAGS) $(CTARGETFLAGS)
+CXXFLAGS_WIN32APP= -c -Q -Si -Ti+ -Tm+ -Ss+ -W3 -Gm+ /Gn+ $(PROFILEFLAGS) $(CXXTARGETFLAGS)
 CINCLUDES        = -I$(ODIN32_INCLUDE)\Win -I. -I$(ODIN32_INCLUDE)
 CDEFINES_WIN32APP= -DDEBUG -DPROFILE -D__WIN32OS2__ -D__i386__
 CDEFINES_ODINCRT = -DDEBUG -DPROFILE -D__WIN32OS2__ -D__i386__ -D__WINE__

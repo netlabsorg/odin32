@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.31 2003-01-22 17:06:42 sandervl Exp $
+# $Id: makefile,v 1.32 2003-02-28 10:32:50 sandervl Exp $
 
 #
 # Odin32 API
@@ -30,16 +30,9 @@ CDEFINES    = $(CDEFINES_ODINCRT)
 !endif
 IMPLIBFLAGS = $(IMPLIBFLAGS) /NOIgnoreCase
 
+DBG=
 !ifdef DEBUG
 DBG=d
-!endif
-
-!ifdef PROFILE
-DBG=p
-!endif
-
-!ifdef RELEASE
-DBG=
 !endif
 
 # Sorry, this looks like hell now.

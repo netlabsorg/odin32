@@ -1,4 +1,4 @@
-# $Id: odin32.mk,v 1.8 2002-04-11 21:45:09 bird Exp $
+# $Id: odin32.mk,v 1.9 2003-02-28 10:28:10 sandervl Exp $
 
 #
 # Odin32 API
@@ -78,19 +78,19 @@ DEBUG   = 1
 !ifndef ODIN32_BIN
 !   ifdef DEBUG
 !       ifndef PROFILE
-ODIN32_BIN  = $(ODIN32_BIN_)\Debug$(DIREXT)
-ODIN32_BIN__= $(ODIN32_BIN_)\Debug$(DIREXT)
+ODIN32_BIN  = $(ODIN32_BIN_)\Debug
+ODIN32_BIN__= $(ODIN32_BIN_)\Debug
 !       else
-ODIN32_BIN  = $(ODIN32_BIN_)\Profile$(DIREXT)
-ODIN32_BIN__= $(ODIN32_BIN_)\Profile$(DIREXT)
+ODIN32_BIN  = $(ODIN32_BIN_)\Profile
+ODIN32_BIN__= $(ODIN32_BIN_)\Profile
 !       endif
 !   else
 !       ifdef PROFILE
-ODIN32_BIN  = $(ODIN32_BIN_)\Profile$(DIREXT)
-ODIN32_BIN__= $(ODIN32_BIN_)\Profile$(DIREXT)
+ODIN32_BIN  = $(ODIN32_BIN_)\Profile
+ODIN32_BIN__= $(ODIN32_BIN_)\Profile
 !       else
-ODIN32_BIN  = $(ODIN32_BIN_)\Release$(DIREXT)
-ODIN32_BIN__= $(ODIN32_BIN_)\Release$(DIREXT)
+ODIN32_BIN  = $(ODIN32_BIN_)\Release
+ODIN32_BIN__= $(ODIN32_BIN_)\Release
 !       endif
 !   endif
 !endif
@@ -98,19 +98,19 @@ ODIN32_BIN__= $(ODIN32_BIN_)\Release$(DIREXT)
 !ifndef ODIN32_LIB
 !   ifdef DEBUG
 !       ifndef PROFILE
-ODIN32_LIB  = $(ODIN32_LIB_)\Debug$(DIREXT)
-ODIN32_LIB__= $(ODIN32_LIB_)\Debug$(DIREXT)
+ODIN32_LIB  = $(ODIN32_LIB_)\Debug
+ODIN32_LIB__= $(ODIN32_LIB_)\Debug
 !       else
-ODIN32_LIB  = $(ODIN32_LIB_)\Profile$(DIREXT)
-ODIN32_LIB__= $(ODIN32_LIB_)\Profile$(DIREXT)
+ODIN32_LIB  = $(ODIN32_LIB_)\Profile
+ODIN32_LIB__= $(ODIN32_LIB_)\Profile
 !       endif
 !   else
 !       ifdef PROFILE
-ODIN32_LIB  = $(ODIN32_LIB_)\Profile$(DIREXT)
-ODIN32_LIB__= $(ODIN32_LIB_)\Profile$(DIREXT)
+ODIN32_LIB  = $(ODIN32_LIB_)\Profile
+ODIN32_LIB__= $(ODIN32_LIB_)\Profile
 !       else
-ODIN32_LIB  = $(ODIN32_LIB_)\Release$(DIREXT)
-ODIN32_LIB__= $(ODIN32_LIB_)\Release$(DIREXT)
+ODIN32_LIB  = $(ODIN32_LIB_)\Release
+ODIN32_LIB__= $(ODIN32_LIB_)\Release
 !       endif
 !   endif
 !endif
@@ -142,7 +142,7 @@ ODIN32_POST_INC = $(ODIN32_INCLUDE)/odin32.post.mk
 # Common rules macro. (All makefiles should have these!)
 # (Please don't change order of these rules!)
 #
-COMMONRULES = clean dep lib all nothing
+COMMONRULES = cleanall clean dep lib all nothing
 
 
 #

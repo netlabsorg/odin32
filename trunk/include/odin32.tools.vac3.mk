@@ -1,4 +1,4 @@
-# $Id: odin32.tools.vac3.mk,v 1.8 2002-04-11 22:47:49 bird Exp $
+# $Id: odin32.tools.vac3.mk,v 1.9 2003-02-28 10:28:11 sandervl Exp $
 
 #
 # Odin32 API
@@ -21,15 +21,17 @@ MAKE_CMD    = nmake /nologo
 !else
 MAKE_CMD    = nmake /nologo CUSTOMBUILD=1
 !endif
+
 !ifdef DEBUG
+! ifndef PROFILE
 MAKE_CMD    = $(MAKE_CMD) DEBUG=1
-!endif
-!ifdef PROFILE
-!ifdef DEBUG
+! else
 MAKE_CMD    = $(MAKE_CMD) PROFILE=1 DEBUG=1
+! endif
 !else
+! ifdef PROFILE
 MAKE_CMD    = $(MAKE_CMD) PROFILE=1
-!endif
+! endif
 !endif
 !ifdef NODEBUGINFO
 MAKE_CMD    = $(MAKE_CMD) NODEBUGINFO=1
@@ -48,60 +50,64 @@ MAKE_CMD    = $(MAKE_CMD) NODEP=1
 .SILENT :
 !endif
 
+_SRC = $(MAKEDIR)\$(<F)
+_DST = $(OBJDIR)\$(@F)
+
+
 .c{$(OBJDIR)}.obj:
 !ifdef USERAPP
-    $(CMDQD_SUB) $(CC) $(CFLAGS) $(CINCLUDES) $(CDEFINES_WIN32APP) -Fo$(OBJDIR)\$(@B).obj -c $<
+    $(CMDQD_SUB) $(CC) $(CFLAGS) $(CINCLUDES) $(CDEFINES_WIN32APP) -Fo$(_DST) -c $(_SRC)
 !else
-    $(CMDQD_SUB) $(CC) $(CFLAGS) $(CINCLUDES) $(CDEFINES) -Fo$(OBJDIR)\$(@B).obj -c $<
+    $(CMDQD_SUB) $(CC) $(CFLAGS) $(CINCLUDES) $(CDEFINES) -Fo$(_DST) -c $(_SRC)
 !endif
 
 .c.obj:
 !ifdef USERAPP
-    $(CMDQD_SUB) $(CC) $(CFLAGS) $(CINCLUDES) $(CDEFINES_WIN32APP) -Fo$(OBJDIR)\$(@B).obj -c $<
+    $(CMDQD_SUB) $(CC) $(CFLAGS) $(CINCLUDES) $(CDEFINES_WIN32APP) -Fo$(_DST) -c $(_SRC)
 !else
-    $(CMDQD_SUB) $(CC) $(CFLAGS) $(CINCLUDES) $(CDEFINES) -Fo$(OBJDIR)\$(@B).obj -c $<
+    $(CMDQD_SUB) $(CC) $(CFLAGS) $(CINCLUDES) $(CDEFINES) -Fo$(_DST) -c $(_SRC)
 !endif
 
 .c.pre-c:
 !ifdef USERAPP
-    $(CMDQD_SUB) $(CC) $(CFLAGS) $(CINCLUDES) $(CDEFINES_WIN32APP) -P+ -Pd -Pc+ -c $< > $@
+    $(CMDQD_SUB) $(CC) $(CFLAGS) $(CINCLUDES) $(CDEFINES_WIN32APP) -P+ -Pd -Pc+ -c $(_SRC) > $@
 !else
-    $(CMDQD_SUB) $(CC) $(CFLAGS) $(CINCLUDES) $(CDEFINES) -P+ -Pd -Pc+ -c $< > $@
+    $(CMDQD_SUB) $(CC) $(CFLAGS) $(CINCLUDES) $(CDEFINES) -P+ -Pd -Pc+ -c $(_SRC) > $@
 !endif
 
 
 .cpp{$(OBJDIR)}.obj:
 !ifdef USERAPP
-    $(CMDQD_SUB) $(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES_WIN32APP) -Fo$(OBJDIR)\$(@B).obj -c $<
+    $(CMDQD_SUB) $(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES_WIN32APP) -Fo$(_DST) -c $(_SRC)
 !else
-    $(CMDQD_SUB) $(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES) -Fo$(OBJDIR)\$(@B).obj -c $<
+    $(CMDQD_SUB) $(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES) -Fo$(_DST) -c $(_SRC)
 !endif
 
 .cpp.obj:
 !ifdef USERAPP
-    $(CMDQD_SUB) $(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES_WIN32APP) -Fo$(OBJDIR)\$(@B).obj -c $<
+    $(CMDQD_SUB) $(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES_WIN32APP) -Fo$(_DST) -c $(_SRC)
 !else
-    $(CMDQD_SUB) $(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES) -Fo$(OBJDIR)\$(@B).obj -c $<
+    $(CMDQD_SUB) $(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES) -Fo$(_DST) -c $(_SRC)
 !endif
 
 .cpp.pre-cpp:
 !ifdef USERAPP
-    $(CMDQD_SUB) $(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES_WIN32APP) -P+ -Pd -Pc+ -c $< > $@
+    $(CMDQD_SUB) $(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES_WIN32APP) -P+ -Pd -Pc+ -c $(_SRC) > $@
 !else
-    $(CMDQD_SUB) $(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES) -P+ -Pd -Pc+ -c $< > $@
+    $(CMDQD_SUB) $(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES) -P+ -Pd -Pc+ -c $(_SRC) > $@
 !endif
 
 
 .asm{$(OBJDIR)}.obj:
-    $(CMDQD_SUB) $(AS) $(ASFLAGS) -Fdo:$(OBJDIR) $<
+    $(CMDQD_SUB) $(AS) $(ASFLAGS) -Fdo:$(OBJDIR) $(_SRC)
 
 .orc{$(OBJDIR)}.orc_asm:
-    $(CMDQD_SUB) $(RC) $(RCFLAGS) $(CINCLUDES) -o $(OBJDIR)\$(@B).orc_asm $<
+    $(CMDQD_SUB) $(RC) $(RCFLAGS) $(CINCLUDES) -o $(OBJDIR)\$(@B).orc_asm $(_SRC)
 
 .orc{$(OBJDIR)}.obj:
-    $(RC) $(RCFLAGS) $(CINCLUDES) -o $(OBJDIR)\$(@B).orc_asm $<
+    $(RC) $(RCFLAGS) $(CINCLUDES) -o $(OBJDIR)\$(@B).orc_asm $(_SRC)
     $(AS) $(ASFLAGS) -Fdo:$(OBJDIR) $(OBJDIR)\$(@B).orc_asm
 
 .rc{$(OBJDIR)}.res:
-    $(CMDQD_SUB) $(OS2RC) $(OS2RCFLAGS) $(CINCLUDES:-I=-i ) $< $@
+    $(CMDQD_SUB) $(OS2RC) $(OS2RCFLAGS) $(CINCLUDES:-I=-i ) $(_SRC) $(_DST)
 

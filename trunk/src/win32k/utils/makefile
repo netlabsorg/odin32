@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7 2001-10-01 01:42:09 bird Exp $
+# $Id: makefile,v 1.8 2003-02-28 10:32:23 sandervl Exp $
 
 #
 # Odin32 API
@@ -11,6 +11,7 @@
 # Tell buildenvironment that we're making an exe and to invoke additional dep rule
 #
 EXETARGET=1
+STATIC_CRT =1
 ADDITIONAL_DEP = mydep
 WIN32KAPI     = ..\api
 WIN32KMISC    = ..\misc
