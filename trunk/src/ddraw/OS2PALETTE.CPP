@@ -9,7 +9,6 @@
 #include "misc.h"
 #include "os2palset.h"
 #include <winerror.h>
-#include <odincrt.h>
 
 //******************************************************************************
 //******************************************************************************
@@ -96,7 +95,7 @@ ULONG __stdcall PalRelease(THIS This)
     me->Referenced--;
     if(me->Referenced == 0)
     {
-      ODIN_delete(me);
+      delete(me);
       return(0);
     }
     else
@@ -141,13 +140,9 @@ HRESULT __stdcall PalGetEntries(THIS This, DWORD dwFlags,
   if( (NULL== lpEntries) ||(0!=dwFlags) ||(dwBase<0) ||((dwBase + dwNumEntries)>me->dwSize) )
     return(DDERR_INVALIDPARAMS);
 
-  ODIN_FS_BEGIN
-
   memcpy( (char *)lpEntries,
           (char *)(me->os2pal + dwBase),
           dwNumEntries*sizeof(PALETTEENTRY));
-
-  ODIN_FS_END
 
   return(DD_OK);
 }
@@ -175,13 +170,9 @@ HRESULT __stdcall PalSetEntries(THIS This, DWORD dwFlags,
   if( (NULL== lpNewEntries) ||(0!=dwFlags) ||(dwBase<0) ||((dwBase + dwNumEntries)>me->dwSize) )
     return(DDERR_INVALIDPARAMS);
 
-  ODIN_FS_BEGIN
-
   memcpy((char *)(me->os2pal + dwBase),
          (char *)lpNewEntries,
          dwNumEntries*sizeof(PALETTEENTRY));
-
-  ODIN_FS_END
 
   if(me->fAttachedToPrimary)
     me->SetPhysPalette();

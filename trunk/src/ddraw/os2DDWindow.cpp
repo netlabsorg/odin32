@@ -1,6 +1,5 @@
 #define INCL_WIN
 #include <os2wrap.h>
-#include <odincrt.h>
 #include <odinwrap.h>
 #include "os2DDWindow.h"
 
@@ -37,8 +36,6 @@ MRESULT EXPENTRY DDOS2WindowProc(HWND hwnd, ULONG ulMsg, MPARAM mp1, MPARAM mp2)
 {
   USHORT usFlags;
 
-  ODIN_FS_BEGIN
-
   switch(ulMsg)
   {
     // capture the mouse
@@ -63,8 +60,6 @@ MRESULT EXPENTRY DDOS2WindowProc(HWND hwnd, ULONG ulMsg, MPARAM mp1, MPARAM mp2)
     default:
       break;
   }
-
-  ODIN_FS_END
 
   return pfnOrgClientProc(hwnd, ulMsg, mp1,mp2);
 }
