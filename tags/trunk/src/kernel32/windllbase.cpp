@@ -1,4 +1,4 @@
-/* $Id: windllbase.cpp,v 1.7 1999-12-13 21:07:40 sandervl Exp $ */
+/* $Id: windllbase.cpp,v 1.8 2000-01-05 19:39:57 sandervl Exp $ */
 
 /*
  * Win32 Dll base class
@@ -239,7 +239,7 @@ BOOL Win32DllBase::detachThread()
   if(fSkipEntryCalls || dllEntryPoint == NULL)
 	return(TRUE);
 
-  dprintf(("attachThread from dll %s", szModule));
+  dprintf(("detachThread from dll %s", szModule));
 
   rc =  dllEntryPoint(hinstance, DLL_THREAD_DETACH, 0);
   return rc;

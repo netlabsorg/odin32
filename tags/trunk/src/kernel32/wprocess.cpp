@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.64 2000-01-02 22:09:02 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.65 2000-01-05 19:39:57 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -100,6 +100,22 @@ THDB *WIN32API GetTHDBFromThreadId(ULONG threadId)
    return thdb;
 }
 //******************************************************************************
+//******************************************************************************
+THDB *WIN32API GetTHDBFromThreadHandle(HANDLE hThread)
+{
+ THDB *thdb = threadList;
+
+   threadListMutex.enter();
+   while(thdb) {
+	if(thdb->hThread == hThread) {
+		break;
+	}
+	thdb = thdb->next;
+   }
+   threadListMutex.leave();
+   return thdb;
+}
+//******************************************************************************
 // Set up the TIB selector and memory for the current thread
 //******************************************************************************
 TEB *InitializeTIB(BOOL fMainThread)
@@ -153,6 +169,7 @@ TEB *InitializeTIB(BOOL fMainThread)
    thdb->OrgTIBSel       = GetFS();
    thdb->pWsockData      = NULL;
    thdb->threadId        = GetCurrentThreadId();
+   thdb->hThread         = GetCurrentThread();
 
    threadListMutex.enter();
    THDB *thdblast        = threadList;

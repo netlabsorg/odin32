@@ -1,4 +1,4 @@
-; $Id: kernel32.def,v 1.62 1999-12-30 11:19:53 sandervl Exp $
+; $Id: kernel32.def,v 1.63 2000-01-05 19:39:55 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is Windows95 KERNEL32
@@ -1016,13 +1016,14 @@ EXPORTS
    HMHandleFree__FUl                                              @1232
    HMHandleTranslateToOS2__FUlPUl                                 @1233
    HMMsgWaitForMultipleObjects__FUlPUlN31                         @1260
-   HMOpenThreadToken__FUlT1UcT1PUl                                @1261
+   HMOpenThreadToken__FUlN21PUl                                   @1261
    HMOpenProcessToken__FUlN21PUl                                  @1262
    HMHandleGetUserData__FUl                                       @1263
 
    _GetThreadTEB@0                         			  @1234
    _GetThreadTHDB@0                        			  @1235
    _GetTHDBFromThreadId@4                     			  @1255
+   _GetTHDBFromThreadHandle@4                                     @1256
 
 ; HEAP Management (heap.cpp, heapstring.cpp)
     HEAP_xalloc                = _HEAP_xalloc@12                  @1240
