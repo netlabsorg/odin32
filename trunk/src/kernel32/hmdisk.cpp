@@ -1,4 +1,4 @@
-/* $Id: hmdisk.cpp,v 1.2 2000-09-13 21:14:18 sandervl Exp $ */
+/* $Id: hmdisk.cpp,v 1.3 2000-09-14 19:08:36 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -9,24 +9,16 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
-#define INCL_DOSPROFILE
-#define INCL_DOSDEVICES
-#define INCL_DOSDEVIOCTL
-#define INCL_GPI
-#define INCL_DOSFILEMGR          /* File Manager values      */
-#define INCL_DOSERRORS           /* DOS Error values         */
-#define INCL_DOSPROCESS          /* DOS Process values       */
-#define INCL_DOSMISC             /* DOS Miscellanous values  */
-#include <os2wrap.h>	//Odin32 OS/2 api wrappers
+#include <os2win.h>
 #include <string.h>
 
-#include <win32type.h>
-#include <win32api.h>
 #include <misc.h>
 #include "hmdisk.h"
 #include "oslibdos.h"
 #include <win\winioctl.h>
 #include <win\ntddscsi.h>
+#include <win\wnaspi32.h>
+#include <win\aspi.h>
 
 #define DBG_LOCALLOG	DBG_hmdisk
 #include "dbglocal.h"
@@ -67,6 +59,7 @@ DWORD HMDeviceDiskClass::CreateFile (LPCSTR lpFileName,
   if (hFile != INVALID_HANDLE_ERROR)
   {
      	pHMHandleData->hHMHandle  = hFile;
+	pHMHandleData->dwUserData = GetDriveTypeA(lpFileName);
      	return (NO_ERROR);
   }
   else {
@@ -130,19 +123,69 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
 
 	case IOCTL_SCSI_GET_ADDRESS:
         {
+         HINSTANCE hInstAspi;
+	 DWORD (WIN32API *GetASPI32SupportInfo)();
+         DWORD (CDECL *SendASPI32Command)(LPSRB lpSRB);
+         DWORD numAdapters, rc;
+         SRB   srb;
+         int   i, j, k;
+
 	        if(!lpOutBuffer || nOutBufferSize < 8) {
-			SetLastError(ERROR_INSUFFICIENT_BUFFER_W);  //todo: right error?
+			SetLastError(ERROR_INSUFFICIENT_BUFFER);  //todo: right error?
 	            	return(FALSE);
 		}
-                //TODO: Not finished yet (need to query id + lun of drive)
 		SCSI_ADDRESS *addr = (SCSI_ADDRESS *)lpOutBuffer;
 		addr->Length = sizeof(SCSI_ADDRESS);
 		addr->PortNumber = 0;
 		addr->PathId     = 0;
-		addr->TargetId   = 1;
-		addr->Lun        = 3;
+		hInstAspi = LoadLibraryA("WNASPI32.DLL");
+		if(hInstAspi == NULL) {
+			SetLastError(ERROR_INVALID_PARAMETER); //todo
+			return FALSE;
+		}
+		*(FARPROC *)&GetASPI32SupportInfo = GetProcAddress(hInstAspi, "GetASPI32SupportInfo");
+		*(FARPROC *)&SendASPI32Command    = GetProcAddress(hInstAspi, "SendASPI32Command");
+		numAdapters = GetASPI32SupportInfo();
+		if(LOBYTE(numAdapters) == 0) goto failure;
+
+		memset(&srb, 0, sizeof(srb));
+		srb.common.SRB_Cmd = SC_HA_INQUIRY;
+		rc = SendASPI32Command(&srb);
+
+		for(i=0;i<LOBYTE(numAdapters);i++) {
+			for(j=0;j<8;j++) {
+				for(k=0;k<16;k++) {
+					memset(&srb, 0, sizeof(srb));
+					srb.common.SRB_Cmd     = SC_GET_DEV_TYPE;
+					srb.devtype.SRB_HaId   = i;
+					srb.devtype.SRB_Target = j;
+					srb.devtype.SRB_Lun    = k;
+					rc = SendASPI32Command(&srb);
+					if(rc == SS_COMP) {
+						if(srb.devtype.SRB_DeviceType == SS_DEVTYPE_CDROM && 
+                                                   pHMHandleData->dwUserData == DRIVE_CDROM)
+ 						{
+							goto done;
+						}
+					}
+				}
+			}
+		}
+done:
+		if(rc == SS_COMP) {
+			addr->TargetId   = j;
+			addr->Lun        = k;
+			SetLastError(ERROR_SUCCESS);
+		}
+		else	SetLastError(ERROR_FILE_NOT_FOUND); //todo
+		FreeLibrary(hInstAspi);
 		return TRUE;
+failure:
+		FreeLibrary(hInstAspi);
+		SetLastError(ERROR_INVALID_PARAMETER); //todo
+		return FALSE;
         }
+
 	case IOCTL_SCSI_RESCAN_BUS:
 	case IOCTL_SCSI_GET_DUMP_POINTERS:
 	case IOCTL_SCSI_FREE_DUMP_POINTERS:
@@ -151,7 +194,7 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
 
    }
    dprintf(("HMDeviceDiskClass::DeviceIoControl: unimplemented dwIoControlCode=%08lx\n", dwIoControlCode));
-   SetLastError( ERROR_CALL_NOT_IMPLEMENTED_W );
+   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
    return FALSE;
 }
 //******************************************************************************
