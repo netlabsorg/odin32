@@ -1,4 +1,4 @@
-/* $Id: win32type.h,v 1.20 1999-09-09 18:01:10 dengert Exp $ */
+/* $Id: win32type.h,v 1.21 1999-09-21 11:56:04 phaller Exp $ */
 
 /*
  * Win32 type definitions for OS/2
@@ -423,6 +423,20 @@ typedef struct
   int nFileIndexHigh;
   int nFileIndexLow;
 } BY_HANDLE_FILE_INFORMATION ;
+
+typedef enum _GET_FILEEX_INFO_LEVELS {
+    GetFileExInfoStandard
+} GET_FILEEX_INFO_LEVELS;
+
+typedef struct _WIN32_FILE_ATTRIBUTES_DATA {
+    DWORD    dwFileAttributes;
+    FILETIME ftCreationTime;
+    FILETIME ftLastAccessTime;
+    FILETIME ftLastWriteTime;
+    DWORD    nFileSizeHigh;
+    DWORD    nFileSizeLow;
+} WIN32_FILE_ATTRIBUTE_DATA, *LPWIN32_FILE_ATTRIBUTE_DATA;
+
 
 #define CALLBACK WIN32API
 
