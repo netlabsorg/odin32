@@ -1,4 +1,4 @@
-/* $Id: win32wbasepos.cpp,v 1.4 2000-01-10 17:18:11 cbratschi Exp $ */
+/* $Id: win32wbasepos.cpp,v 1.5 2000-01-11 17:34:44 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (nonclient/position methods)
  *
@@ -37,38 +37,6 @@
 #include "dc.h"
 #include "pmframe.h"
 #include "win32wdesktop.h"
-
-  /* Some useful macros */
-#define HAS_DLGFRAME(style,exStyle) \
-    (((exStyle) & WS_EX_DLGMODALFRAME) || \
-     (((style) & WS_DLGFRAME) && !((style) & WS_THICKFRAME)))
-
-#define HAS_THICKFRAME(style,exStyle) \
-    (((style) & WS_THICKFRAME) && \
-     !((exStyle) & WS_EX_DLGMODALFRAME))
-
-#define HAS_THINFRAME(style) \
-    (((style) & WS_BORDER) || !((style) & (WS_CHILD | WS_POPUP)))
-
-#define HAS_BIGFRAME(style,exStyle) \
-    (((style) & (WS_THICKFRAME | WS_DLGFRAME)) || \
-     ((exStyle) & WS_EX_DLGMODALFRAME))
-
-#define HAS_ANYFRAME(style,exStyle) \
-    (((style) & (WS_THICKFRAME | WS_DLGFRAME | WS_BORDER)) || \
-     ((exStyle) & WS_EX_DLGMODALFRAME) || \
-     !((style) & (WS_CHILD | WS_POPUP)))
-
-#define HAS_3DFRAME(exStyle) \
-    ((exStyle & WS_EX_CLIENTEDGE) || (exStyle & WS_EX_STATICEDGE) || (exStyle & WS_EX_WINDOWEDGE))
-
-#define HAS_BORDER(style, exStyle) \
-    ((style & WS_BORDER) || HAS_THICKFRAME(style) || HAS_DLGFRAME(style,exStyle))
-
-#define IS_OVERLAPPED(style) \
-    !(style & (WS_CHILD | WS_POPUP))
-
-#define HAS_MENU()  (!(getStyle() & WS_CHILD) && (GetMenu() != 0))
 
 /*******************************************************************
  *           GetMinMaxInfo

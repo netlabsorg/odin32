@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.35 2000-01-11 13:52:18 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.36 2000-01-11 17:34:43 cbratschi Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -25,9 +25,6 @@
 #include "oslibmsg.h"
 #include "oslibgdi.h"
 #include "pmwindow.h"
-
-#define HAS_3DFRAME(exStyle) \
-    ((exStyle & WS_EX_CLIENTEDGE_W) || (exStyle & WS_EX_STATICEDGE_W) || (exStyle & WS_EX_WINDOWEDGE_W))
 
 //******************************************************************************
 //******************************************************************************
