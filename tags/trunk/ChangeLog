@@ -1,8 +1,13 @@
-/* $Id: ChangeLog,v 1.1304 2001-03-13 23:17:15 hugh Exp $ */
+/* $Id: ChangeLog,v 1.1305 2001-03-14 15:55:24 sandervl Exp $ */
+
  2001-03-14: Markus Montkowski <mmontkowski@gmx.de>
     - DPLAYX:   o Sync with latest WINE stuff
     - include\win\dplay.h   o Syncd with WINE
     - include\win\dplobby.h o Syncd with WINE
+
+ 2001-03-14: Bart van Leeuwen <Bart_van_Leeuwen@netage.nl>
+    - USER32:   o Wrong setting of fErase in PAINTSTRUCT (BeginPaint)
+                  (fixes background in CDRLabel)
 
  2001-03-13: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Removed include <builtin.h> from several files. (no longer necessary)
