@@ -1,4 +1,4 @@
-/* $Id: myldrOpen.cpp,v 1.2 1999-10-14 01:25:38 bird Exp $
+/* $Id: myldrOpen.cpp,v 1.3 1999-10-27 02:02:58 bird Exp $
  *
  * myldrOpen - _ldrOpen.
  *
@@ -28,10 +28,11 @@
 #include <exe386.h>
 #include "OS2Krnl.h"
 #include "pe2lx.h"
+#include "elf.h"
+#include "avl.h"
 #include "ldr.h"
 #include "ldrCalls.h"
 
-#include "elf.h"
 
 /**
  * _ldrOpen override.
@@ -70,49 +71,33 @@ ULONG LDRCALL myldrOpen(PSFN phFile, char *pszFilename, ULONG param3)
                 rc = _ldrRead(*phFile, pMzHdr->e_lfanew, pMzHdr, 0UL, 4UL, NULL);
                 if (rc == NO_ERROR && *(PULONG)pach == IMAGE_NT_SIGNATURE)
                 {   /* PE signature found */
-                    PPENODE pNode;
+                    PMODULE pMod;
 
-                    kprintf(("_ldrOpen: PE executable!(?)\n"));
+                    kprintf(("_ldrOpen: PE executable...\n"));
                     #pragma info(none)
                     if (/* invoke pe.exe or do conversion now? */ 1)
                     {   /* pe2lx - win32k */
                     #pragma info(restore)
-                        pNode = allocateNode();
-                        if (pNode != NULL)
+                        Pe2Lx * pPe2Lx = new Pe2Lx(*phFile);
+                        if (pPe2Lx != NULL)
                         {
-                            pNode->pPe2Lx = new Pe2Lx(*phFile);
-                            if (pNode->pPe2Lx != NULL)
+                            rc = pPe2Lx->init(pszFilename);
+                            if (rc == NO_ERROR)
                             {
-                                rc = pNode->pPe2Lx->init(pszFilename);
+                                kprintf(("_ldrOpen: Successfully init of Pe2Lx object.\n"));
+                                rc = addModule(*phFile, NULL, MOD_TYPE_PE2LX, pPe2Lx);
                                 if (rc == NO_ERROR)
-                                {
-                                    kprintf(("_ldrOpen: Successfully init of Pe2Lx object.\n"));
-                                    rc = insertNode(pNode);
-                                    if (rc != NO_ERROR)
-                                    {
-                                        kprintf(("_ldrOpen: Failed to insert PeNode into tree. rc=%d\n"));
-                                        delete pNode->pPe2Lx;
-                                        pNode->pPe2Lx = NULL;
-                                        freeNode(pNode);
-                                        SetState(*phFile, HSTATE_OUR);
-                                    }
-                                }
+                                    SetState(*phFile, HSTATE_OUR);
                                 else
-                                {
-                                    kprintf(("_ldrOpen: Failed to init Pe2Lx object. rc=%d\n"));
-                                    delete pNode->pPe2Lx;
-                                    pNode->pPe2Lx = NULL;
-                                    freeNode(pNode);
-                                }
+                                    kprintf(("_ldrOpen: Failed to add the module. rc=%d\n"));
                             }
                             else
-                            {
-                                kprintf(("_ldrOpen: Failed to allocate Pe2Lx object.\n"));
-                                freeNode(pNode);
-                            }
+                                kprintf(("_ldrOpen: Failed to init Pe2Lx object. rc=%d\n"));
+                            if (rc != NO_ERROR)
+                                delete pPe2Lx;
                         }
                         else
-                            kprintf(("_ldrOpen: Failed to allocate node.\n"));
+                            kprintf(("_ldrOpen: Failed to allocate Pe2Lx object.\n"));
                     }
                     else
                     {   /* pe.exe */

@@ -1,4 +1,4 @@
-/* $Id: vprintf.c,v 1.1 1999-10-14 01:19:22 bird Exp $
+/* $Id: vprintf.c,v 1.2 1999-10-27 02:03:00 bird Exp $
  *
  * vprintf and printf
  *
@@ -30,20 +30,27 @@
 
 #include <stdarg.h>
 
-#ifdef RING0
-    #include "dev32.h"
-#else
-    #define SSToDS(a) (a)
-#endif
+#include "dev32.h"
 #include "vprintf.h"
+#ifdef RING0
+    #include <builtin.h>
+    #include "options.h"
+#endif
 
+
+/*******************************************************************************
+*   Global Variables                                                           *
+*******************************************************************************/
+static char chNewLine = '\n';
+static char chReturn  = '\r';
 
 /*******************************************************************************
 *   Internal Functions                                                         *
 *******************************************************************************/
 static int       _atoi_skip(const char **ppsz);
 static unsigned  _strnlen(const char *psz, unsigned cchMax);
-_Inline void     chout(int ch);
+static void      chout(int ch);
+static char *    strout(char *psz, signed cchMax);
 
 
 /**
@@ -161,7 +168,7 @@ static char * numtostr(long lValue, unsigned int uiBase,
         }
     #if 0
     else if (!(fFlags & NTSF_LEFT) && cchWidth > 0)
-    {   /* not supported! */
+    {   /* not yet supported! */
         /*
         for (j = i-1; j >= 0; j--)
             psz[cchWidth + j] = psz[j];
@@ -206,10 +213,25 @@ static char * numtostr(long lValue, unsigned int uiBase,
  */
 int vprintf(const char *pszFormat, va_list args)
 {
+    #ifdef RING0
+        if (options.fQuiet)
+            return 0;
+    #else
+        int cch = 0;
+    #endif
+
     while (*pszFormat != '\0')
     {
         if (*pszFormat == '%')
         {
+            #ifndef RING0
+                if (cch > 0)
+                {
+                    strout((char*)(pszFormat - cch), cch);
+                    cch = 0;
+                }
+            #endif
+
             pszFormat++;  /* skip '%' */
             if (*pszFormat == '%')    /* '%%'-> '%' */
                 chout(*pszFormat++);
@@ -305,7 +327,6 @@ int vprintf(const char *pszFormat, va_list args)
 
                     case 's':   /* string */
                     {
-                        int   i;
                         int   cchStr;
                         char *pszStr = va_arg(args, char*);
 
@@ -315,8 +336,8 @@ int vprintf(const char *pszFormat, va_list args)
                         if (!(fFlags & NTSF_LEFT))
                             while (--cchWidth >= cchStr)
                                  chout(' ');
-                        for (i = cchStr; i > 0; i--)
-                            chout(*pszStr++);
+
+                        pszStr = strout(pszStr, cchStr);
 
                         while (--cchWidth >= cchStr)
                             chout(' ');
@@ -351,8 +372,23 @@ int vprintf(const char *pszFormat, va_list args)
             }
         }
         else
-            chout(*pszFormat++);
+        {
+            #ifdef RING0
+                chout(*pszFormat++);
+            #else
+                cch++;
+                pszFormat++;
+            #endif
+        }
     }
+
+    #ifndef RING0
+        if (cch > 0)
+        {
+            strout((char*)(pszFormat - cch), cch);
+            cch = 0;
+        }
+    #endif
 
     return 0UL;
 }
@@ -375,6 +411,11 @@ int printf(const char *pszFormat, ...)
     int     cch;
     va_list arguments;
 
+    #ifdef RING0
+        if (options.fQuiet)
+            return 0;
+    #endif
+
     va_start(arguments, pszFormat);
     cch = vprintf(pszFormat, arguments);
     va_end(arguments);
@@ -389,6 +430,11 @@ int _printfieee(const char *pszFormat, ...)
     int     cch;
     va_list arguments;
 
+    #ifdef RING0
+        if (options.fQuiet)
+            return 0;
+    #endif
+
     va_start(arguments, pszFormat);
     cch = vprintf(pszFormat, arguments);
     va_end(arguments);
@@ -401,6 +447,11 @@ int _printf_ansi(const char *pszFormat, ...)
 {
     int     cch;
     va_list arguments;
+
+    #ifdef RING0
+        if (options.fQuiet)
+            return 0;
+    #endif
 
     va_start(arguments, pszFormat);
     cch = vprintf(pszFormat, arguments);
@@ -418,11 +469,9 @@ int _printf_ansi(const char *pszFormat, ...)
  * @status    completely
  * @author    knut st. osmundsen
  */
-_Inline void  chout(int ch)
+static void chout(int ch)
 {
-    #ifdef RING0
-
-    #else
+    #ifndef RING0
         ULONG ulWrote;
     #endif
 
@@ -430,18 +479,77 @@ _Inline void  chout(int ch)
     {
         if (ch == '\n')
         {
-            static char chReturn = '\r';
             #ifdef RING0
-
+                while (!(_inp(options.usCom + 5) & 0x20));  /* Waits for the port to be ready. */
+                _outp(options.usCom, chReturn);             /* Put the char. */
             #else
                 DosWrite(1, (void*)&chReturn, 1, &ulWrote);
             #endif
         }
         #ifdef RING0
-
+            while (!(_inp(options.usCom + 5) & 0x20));  /* Waits for the port to be ready. */
+            _outp(options.usCom, ch);                   /* Put the char. */
         #else
             DosWrite(1, (void*)&ch, 1, &ulWrote);
         #endif
     }
+}
+
+
+/**
+ * Write a string to the output device.
+ * @returns   pointer end of string.
+ * @param     psz     Pointer to the string to write.
+ * @param     cchMax  Max count of chars to write. (or until '\0')
+ * @status    completely implemented.
+ * @author    knut st. osmundsen
+ */
+static char *strout(char *psz, signed cchMax)
+{
+    while (cchMax > 0 && *psz != '\0')
+    {
+        ULONG cch = 0;
+        ULONG ul;
+
+        while (cchMax - cch > 0 && psz[cch] != '\0' && psz[cch] != '\r' && psz[cch] != '\n')
+            cch++;
+
+        /* write string part */
+        #ifdef RING0
+            for (ul = 0; ul < cch; ul++)
+            {
+                while (!(_inp(options.usCom + 5) & 0x20));  /* Waits for the port to be ready. */
+                _outp(options.usCom, psz[ul]);              /* Put the char. */
+            }
+        #else
+            DosWrite(1, (void*)psz, cch, &ul);
+        #endif
+
+        /* cr and lf check + skip */
+        if (psz[cch] == '\n' || psz[cch] == '\r')
+        {
+            if (psz[cch] == '\n')
+            {
+            #ifdef RING0
+                while (!(_inp(options.usCom + 5) & 0x20));  /* Waits for the port to be ready. */
+                _outp(options.usCom, chReturn);             /* Put the char. */
+                while (!(_inp(options.usCom + 5) & 0x20));  /* Waits for the port to be ready. */
+                _outp(options.usCom, chNewLine);            /* Put the char. */
+            #else
+                DosWrite(1, (void*)&chReturn, 1, &ul);
+                DosWrite(1, (void*)&chNewLine, 1, &ul);
+            #endif
+
+            }
+
+            while (cchMax - cch > 0 && (psz[cch] == '\r' || psz[cch] == '\n'))
+                cch++;
+        }
+
+        /* next */
+        psz += cch;
+        cchMax -= cch;
+    }
+    return psz;
 }
 

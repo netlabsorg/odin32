@@ -1,4 +1,4 @@
-/* $Id: pe2lx.cpp,v 1.4 1999-10-14 02:36:51 bird Exp $
+/* $Id: pe2lx.cpp,v 1.5 1999-10-27 02:03:01 bird Exp $
  *
  * Pe2Lx class implementation. Ring 0 and Ring 3
  *
@@ -43,18 +43,6 @@
 #define ALIGN(a, alignment) (((a) + (alignment - 1UL)) & ~(alignment - 1UL))
                                             /* aligns something, a,  up to nearest alignment boundrary-
                                              * Note: Aligment must be a 2**n number. */
-
-#ifndef RING0
-    #define SSToDS(p)  (p)                  /* In RING-0 this translates pointers to stack memory in the
-                                             * Stack Segment (SS) to pointers to stack memory in the
-                                             * Data Segment (DS). SS is 16-bit compatible, DS is 32-bit flat.
-                                             * It is vitally important to use this macro whenever creating
-                                             * a pointer to stack memory which don't implies that is a pointer
-                                             * relative to SS. For example when passing the pointer to an stack
-                                             * variable into an function call; like the addToModule calls.
-                                             */
-#endif
-
 
 /*
  * (macro)
@@ -130,13 +118,11 @@
 #include <stdarg.h>                         /* C library stdarg.h. */
 
 #include "vprintf.h"                        /* win32k printf and vprintf. Not C library! */
-
+#include "dev32.h"                          /* 32-Bit part of the device driver. (SSToDS) */
+#include "OS2Krnl.h"                        /* kernel structs.  (SFN) */
 #ifdef RING0
-    #include "dev32.h"                      /* 32-Bit part of the device driver. (SSToDS) */
-    #include "OS2Krnl.h"                    /* kernel structs.  (SFN) */
     #include "ldrCalls.h"                   /* _ldr* calls. (_ldrRead) */
 #endif
-
 #include "pe2lx.h"                          /* Pe2Lx class definitions, ++. */
 #include <versionos2.h>                     /* Pe2Lx version. */
 

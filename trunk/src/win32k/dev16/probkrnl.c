@@ -1,4 +1,4 @@
-/* $Id: probkrnl.c,v 1.1 1999-09-06 02:19:55 bird Exp $
+/* $Id: probkrnl.c,v 1.2 1999-10-27 02:02:53 bird Exp $
  *
  * Description:   Autoprobes the os2krnl file and os2krnl[*].sym files.
  *                Another Hack!
@@ -12,10 +12,10 @@
  *
  *                How this works:
  *                1. parses the device-line parameters and collects some "SysInfo".
- *                2. gets the kernel object table. (win32i$)
+ *                2. gets the kernel object table. (elf$)
  *                3. finds the kernel image and scans it for a build number.
  *                4. locates and scans the symbol-file(s) for the entrypoints which are wanted.
- *                5. the entry points are verified. (win32i$)
+ *                5. the entry points are verified. (elf$)
  *                6. finished.
  *
  * Copyright (c) 1998-1999 knut st. osmundsen
@@ -28,12 +28,14 @@
 *******************************************************************************/
 #ifdef DEBUGR3
     #if 1
+        int printf(const char *, ...);
         #define dprintf(a) printf a
     #else
         #define dprintf(a)
     #endif
 #else
     #define dprintf(a)
+    #define static
 #endif
 
 #define fclose(a) DosClose(a)
@@ -124,7 +126,7 @@ static KRNLOBJTABLE KrnlOTEs = {0};
 static char szBanner[]   = "Win32k - Odin32 support driver.";
 static char szMsg1[]     = "\n\r\tFound kernel: ";
 static char szMsg1a[]    = "\n\r\tBuild: ";
-static char szMsg2[]     = "\n\r\n\r\tFound symbolfile: ";
+static char szMsg2[]     = "\n\r\tFound symbolfile: ";
 static char szMsg4[]     = "\n\r\tFailed to find symbolfile!\n\r";
 static char szMsgfailed[]= "failed!";
 
@@ -310,15 +312,18 @@ static int kstrncmp(const char * p1, const char * p2, int len)
 
 
 /**
- * kstrlen - String length
- * @returns   length of string
- * @param     p  Pointer to string
+ * kstrlen - String length.
+ * @returns   Length of the string.
+ * @param     psz  Pointer to string.
+ * @status    completely implemented and tested.
+ * @author    knut st. osmundsen
  */
-static int kstrlen(const char * p)
+static int kstrlen(const char * psz)
 {
-    int len = 0;
-    while ( p[len++] != '\0');
-    return len-1;
+    int cch = 0;
+    while (psz[cch] != '\0')
+        cch++;
+    return cch;
 }
 
 
@@ -380,7 +385,7 @@ static int VerifyPrologs(void)
     HFILE           hDev0 = 0;
     USHORT          usAction = 0;
 
-    rc = DosOpen("\\dev\\win32i$", &hDev0, &usAction, 0UL, FILE_NORMAL,
+    rc = DosOpen("\\dev\\elf$", &hDev0, &usAction, 0UL, FILE_NORMAL,
                  OPEN_ACTION_FAIL_IF_NEW | OPEN_ACTION_OPEN_IF_EXISTS,
                  OPEN_SHARE_DENYNONE | OPEN_ACCESS_READONLY,
                  0UL);
@@ -429,7 +434,7 @@ static int ProbeSymFile(char * pszFilename)
 
     /* read header and display it */
     rc = fread(&MapDef, sizeof(MAPDEF), 1, SymFile);
-    if ( rc )
+    if (rc)
     {
         Buffer[0] = MapDef.achModName[0];
         fread(&Buffer[1], 1, MapDef.cbModName, SymFile);
@@ -590,7 +595,18 @@ static int ReadOS2Krnl(char * filename)
     return rc;
 }
 
-/* Worker function for ReadOS2Krnl */
+/**
+ * Worker function for ReadOS2Krnl
+ * @returns   0 on success.
+ *            errorcodes on failure. (-1 >= rc >= -14)
+ * @param
+ * @equiv
+ * @time
+ * @sketch
+ * @status
+ * @author    knut st. osmundsen
+ * @remark
+ */
 static int ReadOS2Krnl2(HFILE krnl, unsigned long  cbKrnl)
 {
     int            i, j;
@@ -721,8 +737,11 @@ static int ReadOS2Krnl2(HFILE krnl, unsigned long  cbKrnl)
                 return -11;
             if (pObj->o32_size < KrnlOTEs.aObjects[i].ote_size)
                 return -12;
+
+            #if 0 /* don't work! */
             if ((pObj->o32_flags & 0xffffUL) != (KrnlOTEs.aObjects[i].ote_flags & 0xffffUL))
                 return -14;
+            #endif
         }
     }
     else
@@ -763,7 +782,7 @@ static int   GetKernelOTEs(void)
     HFILE           hDev0 = 0;
     USHORT          usAction = 0;
 
-    rc = DosOpen("\\dev\\win32i$", &hDev0, &usAction, 0UL, FILE_NORMAL,
+    rc = DosOpen("\\dev\\elf$", &hDev0, &usAction, 0UL, FILE_NORMAL,
                  OPEN_ACTION_FAIL_IF_NEW | OPEN_ACTION_OPEN_IF_EXISTS,
                  OPEN_SHARE_DENYNONE | OPEN_ACCESS_READONLY,
                  0UL);
@@ -778,6 +797,7 @@ static int   GetKernelOTEs(void)
 
     return rc;
 #else
+    KrnlOTEs.cObjects = 23;
     return 0;
 #endif
 }
@@ -856,7 +876,7 @@ static void ShowResult(int rc, int iSym)
             puts(szMsgfailed);
 
         /* functions */
-        if (rc > -50)
+        if (rc == 0)
         {
             puts(szMsg2);
             if (szUsrSym[0] == '\0')

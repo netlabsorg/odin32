@@ -1,0 +1,74 @@
+A overview of the win32k device driver.
+----------------------------------------
+
+Notation:
+---------
+
+--> <routine name>                      (<source module>)
+    A Call to the given routine. The procedings of that routine
+    continues at the next indent level.
+<-- [return value description]
+<some state description>:
+<action>
+    Identifing when and what happens.
+
+
+Init packet - $win32ki
+-----------------------
+_strategyAsm0                                               (devFirst.asm)
+_strategyAsm                                                (devFirst.asm)
+--> strategy(PRPH pRpH, unsigned short usDev)               (d16strat.c)
+    init - dev 0:
+    --> dev0Init(PRPINITIN pRpIn, PRPINITOUT pRpOut)        (d16init.c)
+        <-- (STATUS_DONE - can't fail)
+    <-- (fwd)
+<-- (fwd)
+
+
+Init packet - $win32k
+----------------------
+_strategyAsm1                                               (devFirst.asm)
+_strategyAsm                                                (devFirst.asm)
+--> strategy(PRPH pRpH, unsigned short usDev)               (d16strat.c)
+    init - dev 1:
+    --> dev1Init(PRPINITIN pRpIn, PRPINITOUT pRpOut)        (d16init.c)
+        --> ProbeKrnl                                       (probkrnl.c)
+            <--
+        <Opens $win32ki>
+        <issue IO Ctrl to $win32ki - D16_IOCTL_RING0INIT>
+        <-- (STATUS_DONE - may fail)
+    <-- (fwd)
+<-- (fwd)
+
+
+D16_IOCTL_RING0INIT packet
+---------------------------
+_strategyAsm0                                               (devFirst.asm)
+_strategyAsm                                                (devFirst.asm)
+--> strategy(PRPH pRpH, unsigned short usDev)               (d16strat.c)
+    gen IO-Ctrl - dev 0:
+    --> dev0GenIOCtl(PRP_GENIOCTL pRp)                      (d16strat.c)
+        D16RING0INIT:
+        --> R0Init16(PRP_GENIOCTL pRp)                      (d16init.c)
+            --> _CallR0Init32(LIN pRpInit)                  (devlast.asm)
+                --> R0Init32(RP32INIT *pRpInit)             (d32init.c)
+                    --> heapInit(unsigned cbSize)           (malloc.c)
+                        ...
+                        <--
+                    --> coutInit(USHORT usCom)              (cout.c)
+                        ...
+                        <--
+                    --> ldrInit(void)                       (ldr.cpp)
+                        ...
+                        <--
+                    --> procInit(void)                      (d32init.c)
+                        ...
+                        <--
+                    <--
+                <--
+            <--
+        <--
+    <--
+<--
+
+

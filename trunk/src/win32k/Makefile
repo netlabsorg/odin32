@@ -1,5 +1,5 @@
 ################################################################################
-# $Id: Makefile,v 1.9 1999-10-17 02:12:19 bird Exp $
+# $Id: Makefile,v 1.10 1999-10-27 02:02:52 bird Exp $
 #
 # Copyright 1998-1999 knut st. osmundsen
 #
@@ -154,36 +154,22 @@ OBJS  = object\devfirst.obj                 \
         object\d32globals.obj               \
         object\asmutils.obj                 \
         object\calltab.obj                  \
-        object\cout.obj                     \
-        object\log.obj                      \
         object\malloc.obj                   \
         object\new.obj                      \
         object\stricmp.obj                  \
         object\yield.obj                    \
         object\vsprintf.obj                 \
         object\vprintf.obj                  \
+        object\avl.obj                      \
         object\ldr.obj                      \
         object\myldrClose.obj               \
         object\myldrOpen.obj                \
         object\myldrRead.obj                \
         object\myLDRQAppType.obj            \
         object\pe2lx.obj
-#
-#        object\lxSuper.obj                  \
-#        object\lxFile.obj                   \
-#        object\accelerator.obj              \
-#        object\bitmap.obj                   \
-#        object\cursor.obj                   \
-#        object\cursorgrp.obj                \
-#        object\dialog.obj                   \
-#        object\icon.obj                     \
-#        object\icongrp.obj                  \
-#        object\menu.obj                     \
-#        object\misc.obj                     \
-#        object\pefile.obj                   \
-#        object\rcdata.obj                   \
-#        object\strings.obj                  \
 
+# not used
+#         object\cout.obj
 
 OBJSINIT =                                  \
         object\d16init.obj                  \
@@ -225,6 +211,8 @@ $(OBJS) $(LIBS) last.lib $(OBJSINIT) /IG $(LIBSINIT) $(NAME).def
 <<
     @mapsym $*.map > nul
     $(CP) $@ $(PDWIN32_BIN)
+    copy win32k.sym c:\temp
+    copy win32k.sys c:\temp
 
 
 ################################################################################

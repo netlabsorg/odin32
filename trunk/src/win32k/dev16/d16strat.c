@@ -1,4 +1,4 @@
-/* $Id: d16strat.c,v 1.1 1999-09-06 02:19:55 bird Exp $
+/* $Id: d16strat.c,v 1.2 1999-10-27 02:02:53 bird Exp $
  *
  * d16strat.c - 16-bit strategy routine, device headers, device_helper (ptr)
  *              and 16-bit IOClts.
@@ -35,11 +35,11 @@
 DDHDR aDevHdrs[2] = /* This is the first piece data in the driver!!!!!!! */
 {
     {
-        (unsigned long)(void _far *)(&aDevHdrs[1]),    /* NextHeader */
+        (unsigned long)(void _far *)(&aDevHdrs[1]), /* NextHeader */
         DEVLEV_3 | DEV_30 | DEV_CHAR_DEV,           /* SDevAtt */
         (unsigned short)(void _near *)strategyAsm0, /* StrategyEP */
         0,                                          /* InterruptEP */
-        "win32i$ ", /* Later: elf ?*/               /* DevName */
+        "elf$    ",                                 /* DevName */
         0,                                          /* SDevProtCS */
         0,                                          /* SDevProtDS */
         0,                                          /* SDevRealCS */
@@ -66,6 +66,7 @@ PFN     Device_Help = NULL;
 ULONG   TKSSBase16  = 0;
 USHORT  R0FlatCS16  = 0;
 USHORT  R0FlatDS16  = 0;
+BOOL    fInitTime   = TRUE;
 
 
 /*******************************************************************************
@@ -78,19 +79,24 @@ USHORT NEAR dev1GenIOCtl(PRP_GENIOCTL pRp);
 /**
  * Strategy routine.
  * @returns   Status word.
- * @param     pRpH   Pointer to request packed header.
+ * @param     pRpH   Pointer to request packed header. (Do not change the pointer!)
  * @parma     usDev  Device number.
  * @remark    This function is called from the entrypoint in dev1st.asm
  */
 USHORT NEAR strategy(PRPH pRpH, unsigned short usDev)
 {
+
     switch (pRpH->Cmd)
     {
         case CMDInit:                   /* INIT command */
-            if (usDev == 0)
-                return dev0Init((PRPINITIN)pRpH, (PRPINITOUT)pRpH);
-            else
-                return dev1Init((PRPINITIN)pRpH, (PRPINITOUT)pRpH);
+            if (fInitTime)
+            {
+                if (usDev == 0)
+                    return dev0Init((PRPINITIN)pRpH, (PRPINITOUT)pRpH);
+                else
+                    return dev1Init((PRPINITIN)pRpH, (PRPINITOUT)pRpH);
+            }
+            break;
 
         case CMDGenIOCTL:               /* Generic IOCTL */
             if (usDev == 0)
@@ -103,10 +109,9 @@ USHORT NEAR strategy(PRPH pRpH, unsigned short usDev)
         case CMDDeInstall:              /* De-Install driver */
         case CMDShutdown:
             return STATUS_DONE;
-
-        default:
-            return STATUS_DONE | STATUS_ERR_UNKCMD;
     }
+
+    return STATUS_DONE | STATUS_ERR_UNKCMD;
 }
 
 extern char end;
@@ -120,9 +125,34 @@ extern char end;
  */
 USHORT dev0GenIOCtl(PRP_GENIOCTL pRp)
 {
-/*    _asm int 3;*/
-    if (pRp->Category == D16_IOCTL_CAT && pRp->Function == D16_IOCTL_RING0INIT)
-        return R0Init16(pRp);
+    USHORT rc;
+    if (pRp->Category == D16_IOCTL_CAT)
+    {
+        switch (pRp->Function)
+        {
+            case D16_IOCTL_RING0INIT:
+                if (fInitTime)
+                {
+                    rc = R0Init16(pRp);
+                    fInitTime = FALSE;
+                    return rc;
+                }
+                break;
+
+            case D16_IOCTL_GETKRNLOTES:
+            {
+                ULONG ulLin;
+                if (DevHelp_VirtToLin(SELECTOROF(pRp->DataPacket), OFFSETOF(pRp->DataPacket), &ulLin) != NO_ERROR)
+                    return STATUS_DONE | STERR | ERROR_I24_INVALID_PARAMETER;
+                return CallGetOTEs32(ulLin);
+            }
+
+            case D16_IOCTL_VERIFYPROCTAB:
+                if (fInitTime)
+                    return CallVerifyProcTab32();
+                break;
+        }
+    }
 
     return STATUS_DONE | STERR | ERROR_I24_INVALID_PARAMETER;
 }

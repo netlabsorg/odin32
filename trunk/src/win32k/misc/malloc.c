@@ -1,4 +1,4 @@
-/* $Id: malloc.c,v 1.2 1999-10-14 01:19:21 bird Exp $
+/* $Id: malloc.c,v 1.3 1999-10-27 02:03:00 bird Exp $
  *
  * Heap.
  *
@@ -9,7 +9,7 @@
  *
  */
 
-
+#define static
 /******************************************************************************
 *  Defined macros and constants
 ******************************************************************************/
@@ -288,7 +288,7 @@ int heapInit(unsigned cbSize)
     pUsed = NULL;
 
     #ifdef RING0
-        pFree = D32Hlp_VMAlloc(VMDHA_SWAP | VMDHA_USEHIGHMEM, cbSize, ~0UL);
+        pFree = D32Hlp_VMAlloc(VMDHA_SWAP, cbSize, ~0UL);
     #else
         if (DosAllocMem((void*)&pFree, cbSize, PAG_COMMIT | PAG_READ | PAG_WRITE) != 0)
             pFree = NULL;

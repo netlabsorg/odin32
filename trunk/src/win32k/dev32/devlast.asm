@@ -1,9 +1,12 @@
-; $Id: devlast.asm,v 1.1 1999-09-06 02:19:56 bird Exp $
-; DevLast - the last object file which is resident all the time.
-; Object files which are linked in after this is discarded after init.
+; $Id: devlast.asm,v 1.2 1999-10-27 02:02:54 bird Exp $
+;
+; DevLast - the object file termintating the resident part of the objects.
+; Code after the ???END labes and object files and which are linked in
+; after this file is discarded after init.
 ;
 ; Copyright (c) 1999 knut st. osmundsen
 ;
+; Project Odin Software License can be found in LICENSE.TXT
 ;
        .model flat
        .386p
@@ -27,7 +30,7 @@
     public BSS32END
     public CONST32_ROEND
     public _CallR0Init32
-
+    public _CallVerifyProcTab32
 
 
 
@@ -48,21 +51,45 @@ DATA16_CONST ends
 
 
 extrn R0INIT32:FAR
+extrn VERIFYPROCTAB32:FAR
 
 CODE16 segment
-    ASSUME CS:CODE16
 CODE16END db ?
 
-
+;;
+; Thunk procedure for R0Init32.
+; @cproto    USHORT NEAR CallR0Init32(LIN pRpInit);
+; @returns   Same as R0Init32.
+; @param     pRpInit  32-bit pointer to request packet.
+; @status    completely implemented.
+; @author    knut st. osmundsen
 _CallR0Init32 PROC NEAR
+    ASSUME CS:CODE16
     push    ds
-    push    word ptr [esp+4]
-    push    word ptr [esp+8]
+    push    word ptr [esp+6]            ; push high word.
+    push    word ptr [esp+6]            ; push low word.
     call    far ptr FLAT:R0INIT32
     pop     ds
     retn
 _CallR0Init32 ENDP
+
+
+;;
+; Thunk procedure for VerifyProcTab32.
+; @cproto    USHORT NEAR CallVerifyProcTab32(void);
+; @returns   Same as VerifyProcTab32.
+; @status    completely implemented.
+; @author    knut st. osmundsen
+_CallVerifyProcTab32 PROC NEAR
+    ASSUME CS:CODE16
+    push    ds
+    call    far ptr FLAT:VERIFYPROCTAB32
+    pop     ds
+    retn
+_CallVerifyProcTab32 ENDP
+
 CODE16 ends
+
 
 CODE32 segment
 CODE32END db ?

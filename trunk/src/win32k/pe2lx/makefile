@@ -1,5 +1,5 @@
 ##############################################################################
-# $Id: makefile,v 1.4 1999-10-14 13:20:16 bird Exp $
+# $Id: makefile,v 1.5 1999-10-27 02:03:01 bird Exp $
 #
 # PD-Win32 API
 #
@@ -111,12 +111,14 @@ clean:
 $(PE2LXOBJ)\pe2lx.$(OBJEXT):     \
     pe2lx.cpp \
     $(WIN32K_INCLUDE)\pe2lx.h \
+    $(WIN32K_INCLUDE)\OS2Krnl.h \
     $(WIN32K_INCLUDE)\malloc.h \
     $(WIN32K_INCLUDE)\new.h
 
 $(PE2LXOBJ)\pe2lxmain.$(OBJEXT): \
     pe2lxmain.cpp \
     $(WIN32K_INCLUDE)\pe2lx.h \
+    $(WIN32K_INCLUDE)\OS2Krnl.h
 
 $(PE2LXOBJ)\malloc.$(OBJEXT): \
     $(WIN32K_MISC)\malloc.c \

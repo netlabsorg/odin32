@@ -1,4 +1,4 @@
-/* $Id: pe2lxmain.cpp,v 1.2 1999-10-14 13:27:02 bird Exp $
+/* $Id: pe2lxmain.cpp,v 1.3 1999-10-27 02:03:01 bird Exp $
  *
  * Pe2Lx main program. (Ring 3 only!)
  *
@@ -26,6 +26,7 @@
 #include <malloc.h>
 #include <string.h>
 #include <stdlib.h>
+#include "OS2Krnl.h"
 #include "pe2lx.h"
 #include <stdio.h>
 #include <versionos2.h>

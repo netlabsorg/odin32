@@ -1,4 +1,4 @@
-/* $Id: vsprintf.c,v 1.2 1999-10-14 01:19:22 bird Exp $
+/* $Id: vsprintf.c,v 1.3 1999-10-27 02:03:00 bird Exp $
  *
  * vsprintf and sprintf
  *
@@ -30,11 +30,7 @@
 
 #include <stdarg.h>
 
-#ifdef RING0
-    #include "dev32.h"
-#else
-    #define SSToDS(a) (a)
-#endif
+#include "dev32.h"
 #include "sprintf.h"
 
 

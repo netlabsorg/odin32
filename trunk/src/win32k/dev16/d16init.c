@@ -1,4 +1,4 @@
-/* $Id: d16init.c,v 1.1 1999-09-06 02:19:55 bird Exp $
+/* $Id: d16init.c,v 1.2 1999-10-27 02:02:53 bird Exp $
  *
  * d16init - init routines for both drivers.
  *
@@ -32,9 +32,9 @@
 #include <string.h>
 #include <memory.h>
 
+#include "probkrnl.h"
 #include "dev1632.h"
 #include "dev16.h"
-
 
 /**
  * init function - device 0.
@@ -60,7 +60,7 @@ USHORT _near dev0Init(PRPINITIN pRpIn, PRPINITOUT pRpOut)
 
 /**
  * init function - device 1.
- * We will send an IOCtl request to the win32i$ (device 0) which will
+ * We will send an IOCtl request to the elf$ (device 0) which will
  * perform the Ring-0 initiation of the driver.
  * @returns   Status word.
  * @param     pRpIn   Pointer to input request packet.  Actually the same memory as pRpOut but another struct.
@@ -76,33 +76,37 @@ USHORT _near dev1Init(PRPINITIN pRpIn, PRPINITOUT pRpOut)
     USHORT          usAction = 0;
     NPSZ            npszErrMsg = NULL;
 
-    rc = DosOpen("\\dev\\win32i$", &hDev0, &usAction, 0UL, FILE_NORMAL,
-                 OPEN_ACTION_FAIL_IF_NEW | OPEN_ACTION_OPEN_IF_EXISTS,
-                 OPEN_SHARE_DENYNONE | OPEN_ACCESS_READONLY,
-                 0UL);
+    rc = ProbeKernel(pRpIn);
     if (rc == NO_ERROR)
     {
-        param.pRpInitIn = pRpIn;
-        rc = DosDevIOCtl(&data, &param, D16_IOCTL_RING0INIT, D16_IOCTL_CAT, hDev0);
-/*        _asm int 3; */
+        rc = DosOpen("\\dev\\elf$", &hDev0, &usAction, 0UL, FILE_NORMAL,
+                     OPEN_ACTION_FAIL_IF_NEW | OPEN_ACTION_OPEN_IF_EXISTS,
+                     OPEN_SHARE_DENYNONE | OPEN_ACCESS_READONLY,
+                     0UL);
         if (rc == NO_ERROR)
         {
-            if (data.Status != STATUS_DONE)
-                npszErrMsg = "Ring-0 initiation failed\n\r";
-            else
+            param.pRpInitIn = pRpIn;
+            rc = DosDevIOCtl(&data, &param, D16_IOCTL_RING0INIT, D16_IOCTL_CAT, hDev0);
+            if (rc == NO_ERROR)
             {
-                register NPSZ npsz = "Test.sys succesfully initiated!\n\r";
-                DosPutMessage(1, strlen(npsz)+1, npsz);
-                pRpOut->Status = data.Status;
+                if (data.Status != STATUS_DONE)
+                    npszErrMsg = "Ring-0 initiation failed\n\r";
+                else
+                {
+                    register NPSZ npsz = "Win32k.sys succesfully initiated!\n\r";
+                    DosPutMessage(1, strlen(npsz)+1, npsz);
+                    pRpOut->Status = data.Status;
+                }
             }
+            else
+                npszErrMsg = "DosDevIOCtl failed.\n\r";
+            DosClose(hDev0);
         }
         else
-            npszErrMsg = "DosDevIOCtl failed\n\r";
-        DosClose(hDev0);
+            npszErrMsg = "DosOpen failed.\n\r";
     }
     else
-        npszErrMsg = "DosOpen failed\n\r";
-
+        npszErrMsg = "ProbeKernel failed.\n\r";
     pRpOut->BPBArray = NULL;
     pRpOut->CodeEnd = (USHORT)&CODE16END;
     pRpOut->DataEnd = (USHORT)&DATA16END;
@@ -143,7 +147,7 @@ USHORT R0Init16(PRP_GENIOCTL pRp)
         ULONG ulLinData;
 
         pDT2 = (PDOSTABLE2)((char FAR *)pDT + pDT->cul*4 + 1);
-        TKSSBase16 = pDT2->TKSSBase;
+        TKSSBase16 = (ULONG)pDT2->pTKSSBase;
         R0FlatCS16 = (USHORT)pDT2->R0FlatCS;
         R0FlatDS16 = (USHORT)pDT2->R0FlatDS;
         if (!DevHelp_VirtToLin(SELECTOROF(pRp->ParmPacket), OFFSETOF(pRp->ParmPacket), &ulLinParm)
@@ -168,14 +172,12 @@ USHORT R0Init16(PRP_GENIOCTL pRp)
                     !DevHelp_VirtToLin(SELECTOROF(rp32init.InitArgs), OFFSETOF(rp32init.InitArgs), (PLIN)&rp32init.InitArgs)
                    )
                 {
-                    /*_asm int 3;*/
                     usRc = CallR0Init32(SSToDS_16(&rp32init));
-                    /*_asm int 3;*/
                 }
                 else
                     usRc |= ERROR_I24_INVALID_PARAMETER;
 
-             ((PD16R0INITDATA)pRp->DataPacket)->Status = usRc;
+                ((PD16R0INITDATA)pRp->DataPacket)->Status = usRc;
 
                 /* finished - unlock data and parm */
                 DevHelp_VMUnLock((LIN)SSToDS_16(&hLockParm[0]));

@@ -1,4 +1,4 @@
-/* $Id: d32init.c,v 1.1 1999-09-06 02:19:56 bird Exp $
+/* $Id: d32init.c,v 1.2 1999-10-27 02:02:54 bird Exp $
  *
  * d32init.c - 32-bits init routines.
  *
@@ -11,6 +11,7 @@
 *******************************************************************************/
 #define MAXSIZE_PROLOG 0x10             /* Note that this must be synced with */
                                         /* the one used in calltab.asm.       */
+#define static
 
 #define INCL_DOSERRORS
 #define INCL_NOPMAPI
@@ -30,7 +31,6 @@
 #include "probkrnl.h"
 #include "log.h"
 #include "asmutils.h"
-#include "cout.h"
 #include "malloc.h"
 #include "ldr.h"
 #include "ldrCalls.h"
@@ -57,13 +57,22 @@ extern char callTab[NUMBER_OF_PROCS][MAXSIZE_PROLOG];
  * Ring-0, 32-bit, init function.
  * @returns   Status word.
  * @param     pRpInit  Pointer init request packet.
+ * @sketch    Set TKSSBase32.
+ *            Set default parameters.
+ *            Parse command line options.
+ *            Show (kprint) configuration.
+ *            Init heap.
+ *            Init ldr.
+ *            Init procs. (overloaded ldr procedures)
+ * @status    completely implemented.
+ * @author    knut st. osmundsen
  */
 USHORT _loadds _Far32 _Pascal R0Init32(RP32INIT *pRpInit)
 {
     char *pszTmp2;
     char *pszTmp;
 
-    TKSSBase32 = _TKSSBase16;
+    pulTKSSBase32 = (PULONG)_TKSSBase16;
 
     SET_OPTIONS_TO_DEFAULT(options);
 
@@ -79,38 +88,25 @@ USHORT _loadds _Far32 _Pascal R0Init32(RP32INIT *pRpInit)
         cch = strlen(pszTmp);
         switch (*pszTmp)
         {
-            case 'C': /* -C[1|2] - com-port no */
+            case 'C': /* -C[1|2] - com-port no, def:-C2 */
                 switch (pszTmp[1])
                 {
                     case '1':
                         options.usCom = OUTPUT_COM1;
                         break;
+
                     case '2':
+                    default:
                         options.usCom = OUTPUT_COM2;
-                        break;
                 }
                 break;
 
-            case 'L': /*-L:[Y|N or ]*/
+            case 'L': /* -L[..]<:|=| >[<Y..|E..| > | <N..|D..>] */
                 pszTmp2 = strpbrk(pszTmp, ":=/- ");
-                if (pszTmp2 != NULL && (int)(pszTmp2-pszTmp) < cch-1 && (*pszTmp2 == '=' || *pszTmp2 == ':' || *pszTmp2 == ' ' && (pszTmp2[1] != '-' || pszTmp2[1] != '/')))
-                {
-                    switch (pszTmp2[1])
-                    {
-                        case 'D': /*disable*/
-                            options.fLogging = FALSE;
-                            break;
-                        case 'E': /*enable*/
-                            options.fLogging = TRUE;
-                            break;
-                        case 'Y': /*yes*/
-                            options.fLogging = TRUE;
-                            break;
-                        case 'N': /*no*/
-                            options.fLogging = FALSE;
-                            break;
-                    }
-                }
+                if (pszTmp2 != NULL && (int)(pszTmp2-pszTmp) < cch-1
+                    && (pszTmp2[1] == 'N' ||pszTmp2[1] == 'n' || pszTmp2[1] == 'D' || pszTmp2[1] == 'd')
+                    )
+                    options.fLogging = FALSE;
                 else
                     options.fLogging = TRUE;
                 break;
@@ -125,7 +121,7 @@ USHORT _loadds _Far32 _Pascal R0Init32(RP32INIT *pRpInit)
                 break;
 
             case 'V': /* verbose initialization */
-                options.fQuiet = TRUE;
+                options.fQuiet = FALSE;
                 break;
 
             case 'U': /* UNI kernel */
@@ -163,13 +159,9 @@ USHORT _loadds _Far32 _Pascal R0Init32(RP32INIT *pRpInit)
     /*
      * init sub-parts
      */
-
     /* heap */
     if (heapInit(HEAP_SIZE) != NO_ERROR)
         return STATUS_DONE | STERR | ERROR_I24_QUIET_INIT_FAIL;
-
-    /* cout init */
-    coutInit(options.usCom);
 
     /* loader */
     if (ldrInit() != NO_ERROR)
@@ -200,10 +192,16 @@ USHORT _loadds _Far32 _Pascal VerifyProcTab32(void)
         if (!_aProcTab[i].fFound)
         {
             kprintf(("VerifyProcTab32: procedure no.%d was not found!\n", i));
-            return 1;
+            return STATUS_DONE | STERR | 1;
         }
 
-        /* verify read/writeable. - NOT IMPLEMENTED (yet) */
+        /* verify read/writeable. - FIXME */
+        if (_aProcTab[i].ulAddress < 0xffe00000UL)
+        {
+            kprintf(("VerifyProcTab32: procedure no.%d has an invlalid address, %#08x!\n",
+                     i, _aProcTab[i].ulAddress));
+            return STATUS_DONE | STERR | 2;
+        }
 
         /* verify known function prolog. (only EPT_PROC) */
         if (_aProcTab[i].fType == EPT_PROC)
@@ -211,24 +209,28 @@ USHORT _loadds _Far32 _Pascal VerifyProcTab32(void)
             if ((cb = interpretFunctionProlog((char*)_aProcTab[i].ulAddress)) <= 0 && cb + 5 >= MAXSIZE_PROLOG)
             {
                 kprintf(("VerifyProcTab32: verify failed for procedure no.%d\n",i));
-                return 2;
+                return STATUS_DONE | STERR | 3;
             }
         }
         else
         {
             kprintf(("VerifyProcTab32: only EPT_PROC is implemented\n",i));
-            return 3;
+            return STATUS_DONE | STERR | 4;
         }
     }
 
-    return 0;
+    return STATUS_DONE;
 }
 
 
 /**
  * Get kernel OTEs
- * @returns   0 if ok. !0 on failiure.
+ * @returns   Strategy return code:
+ *            STATUS_DONE on success.
+ *            STATUS_DONE | STERR | errorcode on failure.
  * @param     pOTEBuf  Pointer to output buffer.
+ * @status    completely implemented and tested.
+ * @author    knut st. osmundsen
  * @remark    Called from IOCtl.
  */
 USHORT _loadds _Far32 _Pascal GetOTEs32(PKRNLOBJTABLE pOTEBuf)
@@ -270,7 +272,7 @@ USHORT _loadds _Far32 _Pascal GetOTEs32(PKRNLOBJTABLE pOTEBuf)
     if (usRc != 0)
         kprintf(("GetOTEs32: failed. usRc = %d\n", usRc));
 
-    return usRc;
+    return usRc | (usRc != 0 ? STATUS_DONE | STERR : STATUS_DONE);
 }
 
 
@@ -291,11 +293,17 @@ static int interpretFunctionProlog(char *p)
      * which is:
      *     push ebp
      *     mov ebp,esp
+     *  or
+     *     push ebp
+     *     mov ecx, dword ptr [123407452]
      */
 
-    if (p[0] == 0x55 && p[1] == 0x8b && p[2] == 0xec)
+    if (p[0] == 0x55 && p[1] == 0x8b)
     {
-        rc = 3;
+        if (p[2] == 0xec)
+            rc = 3;
+        else
+            rc = 1;
         while (rc < 5)
         {
             /*
@@ -307,6 +315,12 @@ static int interpretFunctionProlog(char *p)
             {
                 case 0x33: /* xor (ldrClose, ldrOpen) */
                     rc +=2;
+                    break;
+                case 0x8b:
+                    if (p[rc+1] == 0x0d)
+                        rc += 6;
+                    else
+                        rc += 2; /*????!*/
                     break;
                 case 0x8d: /* lea (ldrRead) */
                     rc += 3;
@@ -340,9 +354,10 @@ static int procInit(void)
     /* verify */
     for (i = 0; i < NUMBER_OF_PROCS; i++)
     {
-        if ((cb = interpretFunctionProlog((char*)_aProcTab[i].ulAddress)) <= 0 && cb + 5 >= MAXSIZE_PROLOG)
+        cb = interpretFunctionProlog((char*)_aProcTab[i].ulAddress);
+        if (cb <= 0 || cb + 5 >= MAXSIZE_PROLOG)
         {
-            kprintf(("rehookFunctions: verify failed for procedure no.%d\n", i));
+            kprintf(("rehookFunctions: verify failed for procedure no.%d, cb=%d\n", i, cb));
             return 1;
         }
     }
@@ -368,7 +383,7 @@ static int procInit(void)
             }
 
             /* copy function prolog */
-            memcpy(callTab[i], (char*)_aProcTab[i].ulAddress, cb);
+            memcpy(callTab[i], (void*)_aProcTab[i].ulAddress, (size_t)cb);
 
             /* jump from calltab to original function */
             callTab[i][cb] = 0xE9; /* jmp */
@@ -385,7 +400,6 @@ static int procInit(void)
             Int3(); /* ipe - later! */
             return 1;
         }
-        i++;
     }
 
     return NO_ERROR;
