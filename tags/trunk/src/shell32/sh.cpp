@@ -1,4 +1,4 @@
-/* $Id: sh.cpp,v 1.14 2002-02-19 12:53:38 sandervl Exp $ */
+/* $Id: sh.cpp,v 1.15 2002-06-07 08:21:43 sandervl Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -48,26 +48,6 @@ static LPUNKNOWN SHELL32_IExplorerInterface=0;
 
 
 
-/*****************************************************************************
- * Name      : LPITEMIDLIST SHBrowseForFolder
- * Purpose   :
- * Parameters: LPBROWSEINFOA lpbi
- * Variables :
- * Result    :
- * Remark    : SHELL32.236
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Tue, 1999/06/09 20:02]
- *****************************************************************************/
-
-LPITEMIDLIST WIN32API SHBrowseForFolder(LPBROWSEINFOA lpbi)
-{
-  dprintf(("SHELL32: SHBrowseForFolder not implemented.\n"));
-
-  //@@@PH automatically decide between A and W
-
-  return(NULL);
-}
 
 
 /*****************************************************************************

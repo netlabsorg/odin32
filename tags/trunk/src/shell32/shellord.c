@@ -1,65 +1,59 @@
 /*
  * The parameters of many functions changes between different OS versions
  * (NT uses Unicode strings, 95 uses ASCII strings)
- * 
+ *
  * Copyright 1997 Marcus Meissner
  *           1998 Jürgen Schmied
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
-
-/****************************************************************************
- * includes
- ****************************************************************************/
-
-#include <odin.h>
-#include <os2sel.h>
-#include <odinwrap.h>
-
-ODINDEBUGCHANNEL(SHELL32-SHELLORD)
-
-
 #include <string.h>
 #include <stdio.h>
 #include "winerror.h"
 #include "winreg.h"
-#include "debugtools.h"
+#include "wine/debug.h"
 #include "winnls.h"
-
-#ifdef __WIN32OS2__
-#include "heapstring.h"
-#else
 #include "heap.h"
-#endif
 
-#include "shlwapi.h"
+#include "wine/obj_base.h"
 #include "shellapi.h"
 #include "shlguid.h"
 #include "shlobj.h"
 #include "shell32_main.h"
-#ifdef __WIN32OS2__
-#include "wine\undocshell.h"
-#else
 #include "undocshell.h"
-#endif
 #include "pidl.h"
 #include "shlwapi.h"
 #include "commdlg.h"
 
-DEFAULT_DEBUG_CHANNEL(shell);
+WINE_DEFAULT_DEBUG_CHANNEL(shell);
+WINE_DECLARE_DEBUG_CHANNEL(pidl);
 
 /*************************************************************************
  * ParseFieldA					[internal]
  *
- * copys a field from a ',' delimited string
- * 
+ * copies a field from a ',' delimited string
+ *
  * first field is nField = 1
  */
 DWORD WINAPI ParseFieldA(
 	LPCSTR src,
 	DWORD nField,
 	LPSTR dst,
-	DWORD len) 
+	DWORD len)
 {
-	WARN("('%s',0x%08lx,%p,%ld) semi-stub.\n",src,nField,dst,len);
+	WARN("(%s,0x%08lx,%p,%ld) semi-stub.\n",debugstr_a(src),nField,dst,len);
 
 	if (!src || !src[0] || !dst || !len)
 	  return 0;
@@ -73,10 +67,10 @@ DWORD WINAPI ParseFieldA(
 
 	/* copy part till the next ',' to dst */
 	while ( *src!='\0' && *src!=',' && (len--)>0 ) *(dst++)=*(src++);
-	
+
 	/* finalize the string */
 	*dst=0x0;
-	
+
 	return TRUE;
 }
 
@@ -84,10 +78,10 @@ DWORD WINAPI ParseFieldA(
  * ParseFieldW			[internal]
  *
  * copies a field from a ',' delimited string
- * 
+ *
  * first field is nField = 1
  */
-DWORD WINAPI ParseFieldW(LPCWSTR src, DWORD nField, LPWSTR dst, DWORD len) 
+DWORD WINAPI ParseFieldW(LPCWSTR src, DWORD nField, LPWSTR dst, DWORD len)
 {
 	FIXME("(%s,0x%08lx,%p,%ld) stub\n",
 	  debugstr_w(src), nField, dst, len);
@@ -97,7 +91,7 @@ DWORD WINAPI ParseFieldW(LPCWSTR src, DWORD nField, LPWSTR dst, DWORD len)
 /*************************************************************************
  * ParseField			[SHELL32.58]
  */
-DWORD WINAPI ParseFieldAW(LPCVOID src, DWORD nField, LPVOID dst, DWORD len) 
+DWORD WINAPI ParseFieldAW(LPCVOID src, DWORD nField, LPVOID dst, DWORD len)
 {
 	if (SHELL_OsIsUnicode())
 	  return ParseFieldW(src, nField, dst, len);
@@ -106,7 +100,7 @@ DWORD WINAPI ParseFieldAW(LPCVOID src, DWORD nField, LPVOID dst, DWORD len)
 
 /*************************************************************************
  * GetFileNameFromBrowse			[SHELL32.63]
- * 
+ *
  */
 BOOL WINAPI GetFileNameFromBrowse(
 	HWND hwndOwner,
@@ -115,7 +109,7 @@ BOOL WINAPI GetFileNameFromBrowse(
 	LPCSTR lpstrInitialDir,
 	LPCSTR lpstrDefExt,
 	LPCSTR lpstrFilter,
-                                    LPCSTR lpstrTitle)
+	LPCSTR lpstrTitle)
 {
     HMODULE hmodule;
     FARPROC pGetOpenFileNameA;
@@ -126,7 +120,6 @@ BOOL WINAPI GetFileNameFromBrowse(
 	  hwndOwner, lpstrFile, nMaxFile, lpstrInitialDir, lpstrDefExt,
 	  lpstrFilter, lpstrTitle);
 
-    /* OFN_HIDEREADONLY|OFN_NOCHANGEDIR|OFN_FILEMUSTEXIST|OFN_unknown */
     hmodule = LoadLibraryA("comdlg32.dll");
     if(!hmodule) return FALSE;
     pGetOpenFileNameA = GetProcAddress(hmodule, "GetOpenFileNameA");
@@ -148,7 +141,7 @@ BOOL WINAPI GetFileNameFromBrowse(
     ofn.lpstrDefExt = lpstrDefExt;
     ofn.Flags = OFN_EXPLORER | OFN_HIDEREADONLY | OFN_FILEMUSTEXIST;
     ret = pGetOpenFileNameA(&ofn);
-    
+
     FreeLibrary(hmodule);
     return ret;
 }
@@ -163,7 +156,7 @@ VOID WINAPI SHGetSetSettings(DWORD x, DWORD y, DWORD z)
 
 /*************************************************************************
  * SHGetSettings				[SHELL32.@]
- * 
+ *
  * NOTES
  *  the registry path are for win98 (tested)
  *  and possibly are the same in nt40
@@ -176,11 +169,11 @@ VOID WINAPI SHGetSettings(LPSHELLFLAGSTATE lpsfs, DWORD dwMask)
 	DWORD	dwDataSize = sizeof (DWORD);
 
 	TRACE("(%p 0x%08lx)\n",lpsfs,dwMask);
-	
+
 	if (RegCreateKeyExA(HKEY_CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
 				 0, 0, 0, KEY_ALL_ACCESS, 0, &hKey, 0))
 	  return;
-	
+
 	if ( (SSF_SHOWEXTENSIONS & dwMask) && !RegQueryValueExA(hKey, "HideFileExt", 0, 0, (LPBYTE)&dwData, &dwDataSize))
 	  lpsfs->fShowExtensions  = ((dwData == 0) ?  0 : 1);
 
@@ -222,7 +215,7 @@ VOID WINAPI SHGetSettings(LPSHELLFLAGSTATE lpsfs, DWORD dwMask)
  * SHShellFolderView_Message			[SHELL32.73]
  *
  * PARAMETERS
- *  hwndCabinet defines the explorer cabinet window that contains the 
+ *  hwndCabinet defines the explorer cabinet window that contains the
  *              shellview you need to communicate with
  *  uMsg        identifying the SFVM enum to perform
  *  lParam
@@ -234,7 +227,7 @@ VOID WINAPI SHGetSettings(LPSHELLFLAGSTATE lpsfs, DWORD dwMask)
  *    that was clicked.
  */
 int WINAPI SHShellFolderView_Message(
-	HWND hwndCabinet, 
+	HWND hwndCabinet,
 	DWORD dwMessage,
 	DWORD dwParam)
 {
@@ -248,7 +241,7 @@ int WINAPI SHShellFolderView_Message(
  * PARAMS
  *      hwnd [I]  window handle
  *      y    [I]  flag ????
- * 
+ *
  * NOTES
  *     exported by ordinal
  */
@@ -299,7 +292,7 @@ int WINAPIV ShellMessageBoxW(
 	else
 	  pszText = lpText;
 
-	FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_STRING, 
+	FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_STRING,
 		       pszText, 0, 0, (LPWSTR)&pszTemp, 0, &args);
 
 	va_end(args);
@@ -341,7 +334,7 @@ int WINAPIV ShellMessageBoxA(
 	else
 	  pszText = lpText;
 
-	FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_STRING, 
+	FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_STRING,
 		       pszText, 0, 0, (LPSTR)&pszTemp, 0, &args);
 
 	va_end(args);
@@ -359,8 +352,7 @@ int WINAPIV ShellMessageBoxA(
  *     exported by ordinal
  */
 #define MEM_DEBUG 0
-
-void WIN32API SHFree(LPVOID x)
+void WINAPI SHFree(LPVOID x)
 {
 #if MEM_DEBUG
 	WORD len = *(LPWORD)((LPBYTE)x-2);
@@ -379,12 +371,7 @@ void WIN32API SHFree(LPVOID x)
 #else
 	TRACE("%p\n",x);
 #endif
-  
-#if __WIN32OS2__
-  HEAP_free(x);
-#else
-  HeapFree(GetProcessHeap(), 0, x);
-#endif
+	HeapFree(GetProcessHeap(), 0, x);
 }
 
 /*************************************************************************
@@ -394,22 +381,14 @@ void WIN32API SHFree(LPVOID x)
  *     void *task_alloc(DWORD len), uses SHMalloc allocator
  *     exported by ordinal
  */
-LPVOID WIN32API SHAlloc(DWORD len)
+LPVOID WINAPI SHAlloc(DWORD len)
 {
 	LPBYTE ret;
-  
-#ifdef __WIN32OS2__
-#if MEM_DEBUG
-	ret = (LPVOID) HEAP_malloc(len+6);
-#else
-	ret = (LPVOID) HEAP_malloc(len);
-#endif
-#else
+
 #if MEM_DEBUG
 	ret = (LPVOID) HeapAlloc(GetProcessHeap(),0,len+6);
 #else
 	ret = (LPVOID) HeapAlloc(GetProcessHeap(),0,len);
-#endif
 #endif
 
 #if MEM_DEBUG
@@ -470,7 +449,7 @@ HRESULT WINAPI SHDoDragDrop(
 
 /*************************************************************************
  * ArrangeWindows				[SHELL32.184]
- * 
+ *
  */
 WORD WINAPI ArrangeWindows(
 	HWND hwndParent,
@@ -516,7 +495,7 @@ static INT SHADD_get_policy(LPSTR policy, LPDWORD type, LPVOID buffer, LPDWORD l
     HKEY Policy_basekey;
     INT ret;
 
-    /* Get the key for the policies location in the registry 
+    /* Get the key for the policies location in the registry
      */
     if (RegOpenKeyExA(HKEY_LOCAL_MACHINE,
 		      "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer",
@@ -525,8 +504,8 @@ static INT SHADD_get_policy(LPSTR policy, LPDWORD type, LPVOID buffer, LPDWORD l
 	if (RegOpenKeyExA(HKEY_CURRENT_USER,
 			  "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer",
 			  0, KEY_READ, &Policy_basekey)) {
-            TRACE("No Explorer Policies location exists. Policy wanted=%s\n",
-                  policy);
+	    TRACE("No Explorer Policies location exists. Policy wanted=%s\n",
+		  policy);
 	    *len = 0;
 	    return ERROR_FILE_NOT_FOUND;
 	}
@@ -574,12 +553,12 @@ static INT SHADD_create_add_mru_data(HANDLE mruhandle, LPSTR doc_name, LPSTR new
 {
     LPSTR ptr;
     INT wlen;
-    
+
     /*FIXME: Document:
      *  RecentDocs MRU data structure seems to be:
      *    +0h   document file name w/ terminating 0h
      *    +nh   short int w/ size of remaining
-     *    +n+2h 02h 30h, or 01h 30h, or 00h 30h  -  unknown 
+     *    +n+2h 02h 30h, or 01h 30h, or 00h 30h  -  unknown
      *    +n+4h 10 bytes zeros  -   unknown
      *    +n+eh shortcut file name w/ terminating 0h
      *    +n+e+nh 3 zero bytes  -  unknown
@@ -603,7 +582,7 @@ static INT SHADD_create_add_mru_data(HANDLE mruhandle, LPSTR doc_name, LPSTR new
     ptr += 3;
     *len = ptr - buffer;
 
-    /* Add the new entry into the MRU list 
+    /* Add the new entry into the MRU list
      */
     return pAddMRUData(mruhandle, (LPCVOID)buffer, *len);
 }
@@ -620,10 +599,9 @@ static INT SHADD_create_add_mru_data(HANDLE mruhandle, LPSTR doc_name, LPSTR new
  *
  * FIXME: ?? MSDN shows this as a VOID
  */
-DWORD WINAPI SHAddToRecentDocs (UINT uFlags,LPCVOID pv)   
+DWORD WINAPI SHAddToRecentDocs (UINT uFlags,LPCVOID pv)
 {
 
-#ifndef __WIN32OS2__
 /* FIXME: !!! move CREATEMRULIST and flags to header file !!! */
 /*        !!! it is in both here and comctl32undoc.c      !!! */
 typedef struct tagCREATEMRULIST
@@ -648,7 +626,7 @@ typedef struct tagCREATEMRULIST
  * where cbData is the no. of bytes to compare.
  * Need to check what return value means identical - 0?
  */
-#endif
+
 
     UINT olderrormode;
     HKEY HCUbasekey;
@@ -666,7 +644,7 @@ typedef struct tagCREATEMRULIST
      *  RecentDocs MRU data structure seems to be:
      *    +0h   document file name w/ terminating 0h
      *    +nh   short int w/ size of remaining
-     *    +n+2h 02h 30h, or 01h 30h, or 00h 30h  -  unknown 
+     *    +n+2h 02h 30h, or 01h 30h, or 00h 30h  -  unknown
      *    +n+4h 10 bytes zeros  -   unknown
      *    +n+eh shortcut file name w/ terminating 0h
      *    +n+e+nh 3 zero bytes  -  unknown
@@ -681,7 +659,7 @@ typedef struct tagCREATEMRULIST
 	return 0;
     }
     if (ret == ERROR_SUCCESS) {
-	if (!( (type == REG_DWORD) || 
+	if (!( (type == REG_DWORD) ||
 	       ((type == REG_BINARY) && (datalen == 4)) )) {
 	    ERR("Error policy data for \"NoRecentDocsHistory\" not formated correctly, type=%ld, len=%ld\n",
 		type, datalen);
@@ -701,26 +679,26 @@ typedef struct tagCREATEMRULIST
      *        key is stored in the DLL global data.
      */
     if (RegCreateKeyExA(HKEY_CURRENT_USER,
-		  "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer",
-                  0, 0, 0, KEY_READ, 0, &HCUbasekey ,0)) {
-      ERR("Failed to create 'Software\\Microsoft\\Windows\\CurrentVersion\\Explorer'\n");
-      return 0;
+			"Software\\Microsoft\\Windows\\CurrentVersion\\Explorer",
+			0, 0, 0, KEY_READ, 0, &HCUbasekey, 0)) {
+	ERR("Failed to create 'Software\\Microsoft\\Windows\\CurrentVersion\\Explorer'\n");
+	return 0;
     }
 
     /* Get path to user's "Recent" directory
      */
     if(SUCCEEDED(SHGetMalloc(&ppM))) {
-	if (SUCCEEDED(SHGetSpecialFolderLocation(hwnd, CSIDL_RECENT, 
+	if (SUCCEEDED(SHGetSpecialFolderLocation(hwnd, CSIDL_RECENT,
 						 &pidl))) {
 	    SHGetPathFromIDListA(pidl, link_dir);
 	    IMalloc_Free(ppM, pidl);
 	}
-        else {
-            /* serious issues */
-            link_dir[0] = 0;
-            ERR("serious issues 1\n");
-        }
-        IMalloc_Release(ppM);
+	else {
+	    /* serious issues */
+	    link_dir[0] = 0;
+	    ERR("serious issues 1\n");
+	}
+	IMalloc_Release(ppM);
     }
     else {
 	/* serious issues */
@@ -760,7 +738,7 @@ typedef struct tagCREATEMRULIST
     /* Have data to add, the jobs to be done:
      *   1. Add document to MRU list in registry "HKCU\Software\
      *      Microsoft\Windows\CurrentVersion\Explorer\RecentDocs".
-     *   2. Add shortcut to document in the user's Recent directory 
+     *   2. Add shortcut to document in the user's Recent directory
      *      (CSIDL_RECENT).
      *   3. Add shortcut to Start menu's Documents submenu.
      */
@@ -774,20 +752,20 @@ typedef struct tagCREATEMRULIST
 	lstrcpyA(doc_name, (LPSTR) pv);
     }
     TRACE("full document name %s\n", doc_name);
-    PathStripPathA(doc_name);;
+    PathStripPathA(doc_name);
     TRACE("stripped document name %s\n", doc_name);
 
 
     /* ***  JOB 1: Update registry for ...\Explorer\RecentDocs list  *** */
 
-    {  /* on input needs: 
-	*      doc_name    -  pure file-spec, no path 
+    {  /* on input needs:
+	*      doc_name    -  pure file-spec, no path
 	*      link_dir    -  path to the user's Recent directory
 	*      HCUbasekey  -  key of ...Windows\CurrentVersion\Explorer" node
 	* creates:
 	*      new_lnk_name-  pure file-spec, no path for new .lnk file
 	*      new_lnk_filepath
-	*                  -  path and file name of new .lnk file 
+	*                  -  path and file name of new .lnk file
 	*/
 	CREATEMRULIST mymru;
 	HANDLE mruhandle;
@@ -815,10 +793,10 @@ typedef struct tagCREATEMRULIST
 	len = lstrlenA(doc_name);
 	pos = pFindMRUData(mruhandle, doc_name, len, 0);
 
-	/* Now get the MRU entry that will be replaced 
-	 * and delete the .lnk file for it 
+	/* Now get the MRU entry that will be replaced
+	 * and delete the .lnk file for it
 	 */
-	if ((bufused = pEnumMRUListA(mruhandle, (pos == -1) ? 14 : pos, 
+	if ((bufused = pEnumMRUListA(mruhandle, (pos == -1) ? 14 : pos,
 				     buffer, 2048)) != -1) {
 	    ptr = buffer;
 	    ptr += (lstrlenA(buffer) + 1);
@@ -881,10 +859,10 @@ typedef struct tagCREATEMRULIST
 
     /* ***  JOB 2: Create shortcut in user's "Recent" directory  *** */
 
-    {  /* on input needs: 
+    {  /* on input needs:
 	*      doc_name    -  pure file-spec, no path
 	*      new_lnk_filepath
-	*                  -  path and file name of new .lnk file 
+	*                  -  path and file name of new .lnk file
  	*      uFlags[in]  -  flags on call to SHAddToRecentDocs
 	*      pv[in]      -  document path/pidl on call to SHAddToRecentDocs
 	*/
@@ -903,7 +881,7 @@ typedef struct tagCREATEMRULIST
 				 (LPVOID )&psl);
 	if(SUCCEEDED(hres)) {
 
-	    hres = IShellLinkA_QueryInterface(psl, &IID_IPersistFile, 
+	    hres = IShellLinkA_QueryInterface(psl, &IID_IPersistFile,
 					     (LPVOID *)&pPf);
 	    if(FAILED(hres)) {
 		/* bombed */
@@ -932,7 +910,7 @@ typedef struct tagCREATEMRULIST
 		goto fail;
 	    }
 
-	    MultiByteToWideChar(CP_ACP, 0, new_lnk_filepath, -1, 
+	    MultiByteToWideChar(CP_ACP, 0, new_lnk_filepath, -1,
 				widelink, MAX_PATH);
 	    /* create the short cut */
 	    hres = IPersistFile_Save(pPf, widelink, TRUE);
@@ -946,7 +924,7 @@ typedef struct tagCREATEMRULIST
 	    hres = IPersistFile_SaveCompleted(pPf, widelink);
 	    IPersistFile_Release(pPf);
 	    IShellLinkA_Release(psl);
-	    TRACE("shortcut %s has been created, result=%08lx\n", 
+	    TRACE("shortcut %s has been created, result=%08lx\n",
 		  new_lnk_filepath, hres);
 	}
 	else {
@@ -974,13 +952,13 @@ HRESULT WINAPI SHCreateShellFolderViewEx(
 {
 	IShellView * psf;
 	HRESULT hRes;
-	
-	TRACE("sf=%p pidl=%p cb=%p mode=0x%08x parm=0x%08lx\n", 
+
+	TRACE("sf=%p pidl=%p cb=%p mode=0x%08x parm=0x%08lx\n",
 	  psvcbi->pshf, psvcbi->pidlFolder, psvcbi->lpfnCallback,
 	  psvcbi->uViewMode, psvcbi->dwUser);
 
 	psf = IShellView_Constructor(psvcbi->pshf);
-	
+
 	if (!psf)
 	  return E_OUTOFMEMORY;
 
@@ -1034,32 +1012,33 @@ BOOL WINAPI ShellExecuteExA (LPSHELLEXECUTEINFOA sei)
 	int gap, len;
 	STARTUPINFOA  startup;
 	PROCESS_INFORMATION info;
-			
+
 	WARN("mask=0x%08lx hwnd=0x%04x verb=%s file=%s parm=%s dir=%s show=0x%08x class=%s incomplete\n",
-		sei->fMask, sei->hwnd, sei->lpVerb, sei->lpFile,
-		sei->lpParameters, sei->lpDirectory, sei->nShow, 
-		(sei->fMask & SEE_MASK_CLASSNAME) ? sei->lpClass : "not used");
+	     sei->fMask, sei->hwnd, debugstr_a(sei->lpVerb),
+	     debugstr_a(sei->lpFile), debugstr_a(sei->lpParameters),
+	     debugstr_a(sei->lpDirectory), sei->nShow,
+	     (sei->fMask & SEE_MASK_CLASSNAME) ? debugstr_a(sei->lpClass) : "not used");
 
 	ZeroMemory(szApplicationName,MAX_PATH);
 	if (sei->lpFile)
 	  strcpy(szApplicationName, sei->lpFile);
-	
+
 	ZeroMemory(szCommandline,MAX_PATH);
 	if (sei->lpParameters)
 	  strcpy(szCommandline, sei->lpParameters);
-			
+
 	if (sei->fMask & (SEE_MASK_CLASSKEY | SEE_MASK_INVOKEIDLIST | SEE_MASK_ICON | SEE_MASK_HOTKEY |
 			  SEE_MASK_CONNECTNETDRV | SEE_MASK_FLAG_DDEWAIT |
-			  SEE_MASK_DOENVSUBST | SEE_MASK_FLAG_NO_UI | SEE_MASK_UNICODE | 
+			  SEE_MASK_DOENVSUBST | SEE_MASK_FLAG_NO_UI | SEE_MASK_UNICODE |
 			  SEE_MASK_NO_CONSOLE | SEE_MASK_ASYNCOK | SEE_MASK_HMONITOR ))
 	{
 	  FIXME("flags ignored: 0x%08lx\n", sei->fMask);
 	}
-	
+
 	/* launch a document by fileclass like 'Wordpad.Document.1' */
 	if (sei->fMask & SEE_MASK_CLASSNAME)
-        {
-        /* FIXME: szCommandline should not be of a fixed size. Plus MAX_PATH is way too short! */
+	{
+	  /* FIXME: szCommandline should not be of a fixed size. Plus MAX_PATH is way too short! */
 	  /* the commandline contains 'c:\Path\wordpad.exe "%1"' */
 	  HCR_GetExecuteCommand(sei->lpClass, (sei->lpVerb) ? sei->lpVerb : "open", szCommandline, sizeof(szCommandline));
 	  /* FIXME: get the extension of lpFile, check if it fits to the lpClass */
@@ -1084,7 +1063,7 @@ BOOL WINAPI ShellExecuteExA (LPSHELLEXECUTEINFOA sei)
 	      pv = SHLockShared(hmem,0);
 	      sprintf(szPidl,":%p",pv );
 	      SHUnlockShared(pv);
-	    
+
 	      gap = strlen(szPidl);
 	      len = strlen(pos)-2;
 	      memmove(pos+gap,pos+2,len);
@@ -1097,30 +1076,56 @@ BOOL WINAPI ShellExecuteExA (LPSHELLEXECUTEINFOA sei)
 	TRACE("execute:'%s','%s'\n",szApplicationName, szCommandline);
 
 	if (szCommandline[0]) {
-		strcat(szApplicationName, " ");
-		strcat(szApplicationName, szCommandline);
+	  strcat(szApplicationName, " ");
+	  strcat(szApplicationName, szCommandline);
 	}
 
 	ZeroMemory(&startup,sizeof(STARTUPINFOA));
 	startup.cb = sizeof(STARTUPINFOA);
 
 	if (! CreateProcessA(NULL, szApplicationName,
-			 NULL, NULL, FALSE, 0, 
-			 NULL, sei->lpDirectory, 
-			&startup, &info))
+			 NULL, NULL, FALSE, 0,
+			 NULL, sei->lpDirectory,
+			 &startup, &info))
 	{
-	  sei->hInstApp = GetLastError();
-	  return FALSE;
+        BOOL failed = TRUE;
+
+        if ((!sei->lpVerb)||(strcasecmp(sei->lpVerb,"open")))
+        {
+            LPSTR   ext = PathFindExtensionA(szApplicationName);
+            CHAR    key[1023];
+            CHAR    buffer[1023];
+            CHAR    cmdline[1023];
+            DWORD   size;
+
+            sprintf(key,"Software\\Classes\\%s",ext);
+            size = 1023;
+            if (!RegQueryValueA(HKEY_LOCAL_MACHINE,key,buffer,&size))
+            {
+                sprintf(key,"Software\\Classes\\%s\\shell\\%s\\command", buffer,
+                    (sei->lpVerb)?sei->lpVerb:"open");
+                size = 1023;
+                if (!RegQueryValueA(HKEY_LOCAL_MACHINE,key,buffer,&size))
+                {
+                    sprintf(cmdline,"%s \"%s\"",buffer,szApplicationName);
+                    if (CreateProcessA(NULL,cmdline,  NULL, NULL, FALSE, 0,
+                                   NULL, sei->lpDirectory, &startup, &info))
+                        failed = FALSE;
+                }
+            }
+        }
+
+        if (failed)
+        {
+            sei->hInstApp = GetLastError();
+            return FALSE;
+        }
 	}
 
         sei->hInstApp = 33;
-	
-    	/* Give 30 seconds to the app to come up */
-	if ( WaitForInputIdle ( info.hProcess, 30000 ) ==  0xFFFFFFFF )
-	  ERR("WaitForInputIdle failed: Error %ld\n", GetLastError() );
- 
+
 	if(sei->fMask & SEE_MASK_NOCLOSEPROCESS)
-	  sei->hProcess = info.hProcess;	  
+	  sei->hProcess = info.hProcess;
         else
           CloseHandle( info.hProcess );
         CloseHandle( info.hThread );
@@ -1137,7 +1142,7 @@ BOOL WINAPI ShellExecuteExW (LPSHELLEXECUTEINFOW sei)
 	TRACE("%p\n", sei);
 
 	memcpy(&seiA, sei, sizeof(SHELLEXECUTEINFOA));
-	
+
         if (sei->lpVerb)
 	  seiA.lpVerb = HEAP_strdupWtoA( GetProcessHeap(), 0, sei->lpVerb);
 
@@ -1154,7 +1159,7 @@ BOOL WINAPI ShellExecuteExW (LPSHELLEXECUTEINFOW sei)
 	  seiA.lpClass = HEAP_strdupWtoA( GetProcessHeap(), 0, sei->lpClass);
 	else
 	  seiA.lpClass = NULL;
-	  	  
+
 	ret = ShellExecuteExA(&seiA);
 
         if (seiA.lpVerb)	HeapFree( GetProcessHeap(), 0, (LPSTR) seiA.lpVerb );
@@ -1277,19 +1282,19 @@ HRESULT WINAPI IsUserAdmin(void)
 HGLOBAL WINAPI SHAllocShared(LPVOID psrc, DWORD size, DWORD procID)
 {	HGLOBAL hmem;
 	LPVOID pmem;
-	
+
 	TRACE("ptr=%p size=0x%04lx procID=0x%04lx\n",psrc,size,procID);
 	hmem = GlobalAlloc(GMEM_FIXED, size);
 	if (!hmem)
 	  return 0;
-	
+
 	pmem =  GlobalLock (hmem);
 
 	if (! pmem)
 	  return 0;
-	  
+
 	memcpy (pmem, psrc, size);
-	GlobalUnlock(hmem); 
+	GlobalUnlock(hmem);
 	return hmem;
 }
 /*************************************************************************
@@ -1298,7 +1303,7 @@ HGLOBAL WINAPI SHAllocShared(LPVOID psrc, DWORD size, DWORD procID)
  * NOTES
  *  parameter1 is return value from SHAllocShared
  *  parameter2 is return value from GetCurrentProcessId
- *  the receiver of (WM_USER+2) tries to lock the HANDLE (?) 
+ *  the receiver of (WM_USER+2) tries to lock the HANDLE (?)
  *  the return value seems to be a memory address
  */
 LPVOID WINAPI SHLockShared(HANDLE hmem, DWORD procID)
@@ -1314,7 +1319,7 @@ LPVOID WINAPI SHLockShared(HANDLE hmem, DWORD procID)
 BOOL WINAPI SHUnlockShared(LPVOID pv)
 {
 	TRACE("%p\n",pv);
-	return GlobalUnlock((HANDLE)pv); 
+	return GlobalUnlock((HANDLE)pv);
 }
 /*************************************************************************
  * SHFreeShared					[SHELL32.523]
@@ -1388,7 +1393,7 @@ HRESULT WINAPI SHFlushClipboard(void)
  *
  */
 BOOL WINAPI SHWaitForFileToOpen(
-	LPCITEMIDLIST pidl, 
+	LPCITEMIDLIST pidl,
 	DWORD dwFlags,
 	DWORD dwTimeout)
 {
@@ -1462,15 +1467,15 @@ HRESULT WINAPI DoEnvironmentSubstAW(LPVOID x, LPVOID y)
 
 /*************************************************************************
  *      @                             [SHELL32.243]
- * 
+ *
  * Win98+ by-ordinal routine.  In Win98 this routine returns zero and
  * does nothing else.  Possibly this does something in NT or SHELL32 5.0?
  *
  */
 
-BOOL WINAPI shell32_243(DWORD a, DWORD b) 
-{ 
-  return FALSE; 
+BOOL WINAPI shell32_243(DWORD a, DWORD b)
+{
+  return FALSE;
 }
 
 /*************************************************************************
@@ -1519,38 +1524,27 @@ DWORD WINAPI SHDestroyPropSheetExtArray(DWORD a)
 }
 
 /*************************************************************************
-*      CIDLData_CreateFromIDArray[SHELL32.83]
-*
-*  Create IDataObject from PIDLs??
-*/
+ *      CIDLData_CreateFromIDArray	[SHELL32.83]
+ *
+ *  Create IDataObject from PIDLs??
+ */
 HRESULT WINAPI CIDLData_CreateFromIDArray(
-                                          LPCITEMIDLIST pidlFolder,
-                                          DWORD cpidlFiles,
-                                          LPCITEMIDLIST *lppidlFiles,
-                                          LPDATAOBJECT *ppdataObject)
+	LPCITEMIDLIST pidlFolder,
+	DWORD cpidlFiles,
+	LPCITEMIDLIST *lppidlFiles,
+	LPDATAOBJECT *ppdataObject)
 {
-  INT i;
-  HWND hwnd = 0;   /*FIXME: who should be hwnd of owner? set to desktop */
-  BOOL boldpidl;
-  
-#ifndef __WIN32OS2__
-  if (TRACE_ON(shell)) {
-    TRACE("(%p, %ld, %p, %p)\n", pidlFolder, cpidlFiles,
-          lppidlFiles, ppdataObject);
-    boldpidl = TRACE_ON(pidl);
-    __SET_DEBUGGING(__DBCL_TRACE, __wine_dbch_shell, FALSE);
-    __SET_DEBUGGING(__DBCL_TRACE, __wine_dbch_pidl, TRUE);
-    pdump (pidlFolder);
-    for (i=0; i<cpidlFiles; i++){
-      pdump (lppidlFiles[i]);
-    }
-    __SET_DEBUGGING(__DBCL_TRACE, __wine_dbch_shell, TRUE);
-    __SET_DEBUGGING(__DBCL_TRACE, __wine_dbch_pidl, boldpidl);
-  }
-#endif
+    INT i;
+    HWND hwnd = 0;   /*FIXME: who should be hwnd of owner? set to desktop */
 
-  *ppdataObject = IDataObject_Constructor( hwnd, pidlFolder,
-                                          lppidlFiles, cpidlFiles);
-  if (*ppdataObject) return S_OK;
-  return E_OUTOFMEMORY;
+    TRACE("(%p, %ld, %p, %p)\n", pidlFolder, cpidlFiles, lppidlFiles, ppdataObject);
+    if (TRACE_ON(pidl))
+    {
+	pdump (pidlFolder);
+	for (i=0; i<cpidlFiles; i++) pdump (lppidlFiles[i]);
+    }
+    *ppdataObject = IDataObject_Constructor( hwnd, pidlFolder,
+					     lppidlFiles, cpidlFiles);
+    if (*ppdataObject) return S_OK;
+    return E_OUTOFMEMORY;
 }
