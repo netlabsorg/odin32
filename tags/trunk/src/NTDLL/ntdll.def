@@ -1,4 +1,4 @@
-; $Id: ntdll.def,v 1.17 1999-08-19 20:43:19 phaller Exp $
+; $Id: ntdll.def,v 1.18 1999-09-13 19:45:34 phaller Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is NT4.0's NTDLL.DLL
@@ -7,7 +7,7 @@ DATA MULTIPLE NONSHARED
 
 IMPORTS
     fwd_RtlUnwind                    =  KERNEL32.RtlUnwind
-    fwd_memmove                      =  KERNEL32.memmove
+    fwd_memmove                      =  KERNEL32.memmove	     
     fwd_RtlFillMemory                =  KERNEL32.RtlFillMemory
     fwd_RtlMoveMemory                =  KERNEL32.RtlMoveMemory
     fwd_RtlZeroMemory                =  KERNEL32.RtlZeroMemory
@@ -29,7 +29,6 @@ EXPORTS
 
 ; forwarders
     RtlUnwind                    =  fwd_RtlUnwind
-    memmove                      =  fwd_memmove
     RtlFillMemory                =  fwd_RtlFillMemory
     RtlMoveMemory                =  fwd_RtlMoveMemory
     RtlZeroMemory                =  fwd_RtlZeroMemory
@@ -329,6 +328,19 @@ EXPORTS
 
 ; NTDLL's C runtime
 ; Note: CDECL does not decorate the function names with parameter bytes!
+    _CIpow			  = _NTDLL__CIpow		      @749
+    _ftol			  = _NTDLL__ftol		      @864
+    _ltoa			  = _NTDLL__ltoa		      @866
+    _memicmp			  = _NTDLL__memicmp		      @868
+    _snprintf			  = _NTDLL__snprintf      	      @869
+    _snwprintf			  = _NTDLL__snwprintf		      @870
+    _splitpath			  = _NTDLL__splitpath  		      @871
+    _strcmpi			  = _NTDLL__strcmpi		      @872
+    _strlwr			  = _NTDLL__strlwr		      @874
+    _strnicmp			  = _NTDLL__strnicmp		      @875
+    _strupr			  = _NTDLL__strupr		      @876
+    _ultoa			  = _NTDLL__ultoa 		      @877
+    _vsnprintf			  = _NTDLL__vsnprintf		      @878
     _wcsicmp                      = _OS2_wcsicmp                      @879
     _wcslwr                       = _OS2_wcslwr                       @880
     _wcsnicmp                     = _OS2_wcsnicmp                     @881
@@ -347,8 +359,24 @@ EXPORTS
     isprint                       = _OS2isprint                       @894
     isspace                       = _OS2isspace                       @895
     isupper                       = _OS2isupper                       @896
+    iswalpha			  = _NTDLL_iswalpha		      @897
+    iswctype			  = _NTDLL_iswctype		      @898
+    isxdigit			  = _NTDLL_isxdigit		      @899
 
+    labs                          = _NTDLL_labs			      @900
+    log                           = _NTDLL_log			      @901
+    mbstowcs                      = _NTDLL_mbstowcs		      @902
+    memchr                        = _NTDLL_memchr		      @903
+    memcmp                        = _NTDLL_memcmp		      @904
+    memcpy                        = _NTDLL_memcpy		      @905
+    memmove                       = fwd_memmove			      @906
+    memset                        = _NTDLL_memset		      @907
+    pow                           = _NTDLL_pow			      @908
+    qsort                         = _NTDLL_qsort		      @909
+    sin                           = _NTDLL_sin			      @910
     sprintf                       = _OS2sprintf                       @911
+    sqrt			  = _NTDLL_sqrt			      @912
+    sscanf			  = _NTDLL_sscanf		      @913
     strcat                        = _OS2strcat                        @914
     strchr                        = _OS2strchr                        @915
     strcmp                        = _OS2strcmp                        @916
@@ -368,8 +396,7 @@ EXPORTS
     tolower                       = _OS2tolower                       @930
     towlower                      = _OS2towlower                      @931
     towupper                      = _OS2towupper                      @932
-
-
+    vsprintf			  = _NTDLL_vsprintf		      @933
     wcscat                        = _OS2wcscat                        @934
     wcschr                        = _OS2wcschr                        @935
     wcscmp                        = _OS2wcscmp                        @936
@@ -383,6 +410,13 @@ EXPORTS
     wcsrchr                       = _OS2wcsrchr                       @944
     wcsspn                        = _OS2wcsspn                        @945
     wcsstr                        = _OS2wcsstr                        @946
+    wcstok                        = _NTDLL_wcstok                     @947
+    wcstol                        = _NTDLL_wcstol                     @948
+    wcstombs                      = _NTDLL_wcstombs                   @949
+    wcstoul                       = _NTDLL_wcstoul                    @950
+
+    _wtoi			  = _NTDLL__wtoi		      @983
+    _wtol			  = _NTDLL__wtol		      @984
 
     _stricmp                      = _OS2_stricmp
     _itoa                         = _OS2_itoa
