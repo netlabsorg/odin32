@@ -1,4 +1,4 @@
-/* $Id: mmap.cpp,v 1.8 1999-08-24 18:46:40 sandervl Exp $ */
+/* $Id: mmap.cpp,v 1.9 1999-08-25 10:28:40 sandervl Exp $ */
 
 /*
  * Win32 Memory mapped file class
@@ -17,6 +17,7 @@
  *       I'm assuming they aren't for now.
  *
  * TODO: Handles returned should be usable by all apis that accept file handles
+ * TODO: Sharing memory mapped files between multiple processes
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -114,6 +115,67 @@ Win32MemMap::~Win32MemMap()
 }
 //******************************************************************************
 //******************************************************************************
+BOOL Win32MemMap::hasReadAccess()
+{
+  return TRUE; //should have at least this
+}
+//******************************************************************************
+//******************************************************************************
+BOOL Win32MemMap::hasWriteAccess()
+{
+  return !(mProtFlags & PAGE_READONLY);
+}
+//******************************************************************************
+//Might want to add this feature for memory mapping executable & dll files in 
+//the loader (done in Win32 with the SEC_IMAGE flag?)
+//******************************************************************************
+BOOL Win32MemMap::hasExecuteAccess()
+{
+  return FALSE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL Win32MemMap::commitPage(LPVOID lpPageFaultAddr, ULONG nrpages)
+{
+ DWORD pageAddr = (DWORD)lpPageFaultAddr & ~0xFFF;
+ DWORD oldProt, newProt, nrBytesRead, offset, size;
+ 
+//  mapMutex.enter();
+  newProt  = mProtFlags & (PAGE_READONLY | PAGE_READWRITE | PAGE_WRITECOPY);
+  newProt |= MEM_COMMIT;
+
+  dprintf(("Win32MemMap::commitPage %x (faultaddr %x), nr of pages %d", pageAddr, lpPageFaultAddr, nrpages));
+  if(VirtualProtect((LPVOID)pageAddr, nrpages*PAGE_SIZE, newProt, &oldProt) == FALSE) {
+	goto fail;
+  }
+  if(hMemFile != -1) {
+	offset = pageAddr - (ULONG)pMapping;
+	size   = nrpages*PAGE_SIZE;
+	if(offset + size > mSize) {
+		size = mSize - offset;
+	}
+	if(SetFilePointer(hMemFile, offset, NULL, FILE_BEGIN) != offset) {
+		dprintf(("Win32MemMap::commitPage: SetFilePointer failed to set pos to %x", offset));
+		goto fail;
+	}
+	if(ReadFile(hMemFile, (LPSTR)pageAddr, size, &nrBytesRead, NULL) == FALSE) {
+		dprintf(("Win32MemMap::commitPage: ReadFile failed for %x", pageAddr));
+		goto fail;
+	}
+	if(nrBytesRead != size) {
+		dprintf(("Win32MemMap::commitPage: ReadFile didn't read all bytes for %x", pageAddr));
+		goto fail;
+	}
+  }
+
+//  mapMutex.leave();
+  return TRUE;
+fail:
+//  mapMutex.leave();
+  return FALSE;
+}
+//******************************************************************************
+//******************************************************************************
 BOOL Win32MemMap::unmapViewOfFile()
 {
   if(fMapped == FALSE)
@@ -144,11 +206,17 @@ LPVOID Win32MemMap::mapViewOfFile(ULONG size, ULONG offset, ULONG fdwAccess)
 	goto parmfail;
   if(fdwAccess & FILE_MAP_COPY && !(mProtFlags & PAGE_WRITECOPY)) 
 	goto parmfail;
-  
+
+//TODO: If committed, read file into memory
+#if 0  
   if(mProtFlags & SEC_COMMIT)
 	fAlloc |= MEM_COMMIT;
+  else
   if(mProtFlags & SEC_RESERVE)
  	fAlloc |= MEM_RESERVE;
+#else
+  fAlloc = MEM_RESERVE;
+#endif
 
   if(fMapped == FALSE) {//if not mapped, reserve/commit entire view
   	pMapping = VirtualAlloc(0, mSize, fAlloc, mProtFlags);
@@ -178,10 +246,10 @@ fail:
 BOOL Win32MemMap::flushView(LPVOID lpvBase, ULONG cbFlush)
 {
  MEMORY_BASIC_INFORMATION memInfo;
- ULONG nrpages, nrBytesWritten;
+ ULONG nrpages, nrBytesWritten, offset, size;
  int   i;
 
-  mapMutex.enter();
+//  mapMutex.enter();
   if(fMapped == FALSE)
 	goto parmfail;
 
@@ -203,24 +271,35 @@ BOOL Win32MemMap::flushView(LPVOID lpvBase, ULONG cbFlush)
 	if(memInfo.State & MEM_COMMIT && 
            memInfo.AllocationProtect & (PAGE_READWRITE|PAGE_WRITECOPY|PAGE_EXECUTE_READWRITE|PAGE_EXECUTE_WRITECOPY)) 
         {//committed and allowed for writing?
-		if(WriteFile(hMemFile, (LPSTR)lpvBase+i*PAGE_SIZE, PAGE_SIZE, &nrBytesWritten, NULL) == FALSE) {
+		offset = (ULONG)lpvBase+i*PAGE_SIZE - (ULONG)pMapping;
+		size   = PAGE_SIZE;
+		if(offset + size > mSize) {
+			size = mSize - offset;
+		}
+		dprintf(("Win32MemMap::flushView for offset %x, size %d", offset, size));
+
+		if(SetFilePointer(hMemFile, offset, NULL, FILE_BEGIN) != offset) {
+			dprintf(("Win32MemMap::flushView: SetFilePointer failed to set pos to %x", offset));
+			goto fail;
+		}
+		if(WriteFile(hMemFile, (LPSTR)lpvBase+i*PAGE_SIZE, size, &nrBytesWritten, NULL) == FALSE) {
 			dprintf(("Win32MemMap::flushView: WriteFile failed for %x", (ULONG)lpvBase+i*PAGE_SIZE));
 			goto fail;
 		}
-		if(nrBytesWritten != PAGE_SIZE) {
+		if(nrBytesWritten != size) {
 			dprintf(("Win32MemMap::flushView: WriteFile didn't write all bytes for %x", (ULONG)lpvBase+i*PAGE_SIZE));
 			goto fail;
 		}
 	}
   }
-  mapMutex.leave();
+//  mapMutex.leave();
   return TRUE;
 parmfail:
   SetLastError(ERROR_INVALID_PARAMETER);
-  mapMutex.leave();
+//  mapMutex.leave();
   return FALSE;
 fail:
-  mapMutex.leave();
+//  mapMutex.leave();
   return FALSE;
 }
 //******************************************************************************
@@ -260,6 +339,14 @@ Win32MemMap *Win32MemMap::findMap(ULONG address)
   }
   globalmapMutex.leave();
   return map;
+}
+//******************************************************************************
+//******************************************************************************
+void Win32MemMap::deleteAll()
+{
+  while(memmaps) {
+	CloseHandle(memmaps->hMemMap);
+  }
 }
 //******************************************************************************
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: mmap.h,v 1.6 1999-08-24 18:46:40 sandervl Exp $ */
+/* $Id: mmap.h,v 1.7 1999-08-25 10:28:41 sandervl Exp $ */
 
 /*
  * Memory mapped class
@@ -36,8 +36,17 @@ public:
    void   AddRef()                       { ++referenced; };
    void   Release()                      { if(--referenced == 0) delete this; };
 
+   BOOL   hasReadAccess();
+   BOOL   hasWriteAccess();
+   BOOL   hasExecuteAccess();
+ 
+   BOOL   commitPage(LPVOID lpPageFaultAddr, ULONG nrpages);
+
 static Win32MemMap *findMap(LPSTR lpszName);
 static Win32MemMap *findMap(ULONG address);
+
+//Should only be called in ExitProcess
+static void deleteAll();
 
 protected:
    HFILE  hMemMap, hMemFile;
