@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.42 1999-10-14 18:27:59 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.43 1999-10-14 19:31:32 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1962,6 +1962,11 @@ BOOL Win32BaseWindow::ShowWindow(ULONG nCmdShow)
         break;
     }
 
+#if 0
+    if(showstate & SWPOS_SHOW && (getStyle() & WS_VISIBLE) == 0) {
+        SetWindowLongA(GWL_STYLE, getStyle() | WS_VISIBLE);
+    }
+#endif
     BOOL rc = OSLibWinShowWindow(OS2HwndFrame, showstate);
     return rc;
 }

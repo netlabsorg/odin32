@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.41 1999-10-13 16:02:42 phaller Exp $ */
+/* $Id: user32.cpp,v 1.42 1999-10-14 19:31:31 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -2315,26 +2315,6 @@ BOOL WIN32API ScrollDC( HDC arg1, int arg2, int arg3, const RECT * arg4, const R
     return O32_ScrollDC(arg1, arg2, arg3, arg4, arg5, arg6, arg7);
 }
 #endif
-
-/* Resource Functions */
-
-HANDLE WIN32API CopyImage(HANDLE hImage, UINT uType, int cxDesired, int cyDesired, UINT fuFlags)
-{
-#ifdef DEBUG
-  WriteLog("USER32:  CopyImage, not implemented\n");
-#endif
-  switch(uType) {
-    case IMAGE_BITMAP:
-    case IMAGE_CURSOR:
-    case IMAGE_ICON:
-    default:
-#ifdef DEBUG
-        WriteLog("USER32:  CopyImage, unknown type\n");
-#endif
-        return(NULL);
-  }
-  return(NULL);
-}
 
 /* Icon Functions */
 
