@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.24 1999-09-10 19:00:11 dengert Exp $ */
+/* $Id: window.cpp,v 1.25 1999-09-14 20:46:40 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -23,7 +23,6 @@
 #include <oslibgdi.h>
 #include "user32.h"
 #include "winicon.h"
-#include "usrcall.h"
 
 //******************************************************************************
 //******************************************************************************
@@ -982,15 +981,103 @@ BOOL WIN32API SwitchToThisWindow(HWND hwnd,
 //******************************************************************************
 BOOL WIN32API EnumThreadWindows(DWORD dwThreadId, WNDENUMPROC lpfn, LPARAM lParam)
 {
- BOOL                rc;
- EnumWindowCallback *callback = new EnumWindowCallback(lpfn, lParam);
+ Win32BaseWindow *window;
+ BOOL   rc;
+ ULONG  henum;
+ HWND   hwndNext;
+ ULONG  tid;
+ ULONG  pid, curpid;
 
-  dprintf(("USER32:  EnumThreadWindows\n"));
-  //CB: replace
-  rc = O32_EnumThreadWindows(dwThreadId, callback->GetOS2Callback(), (LPARAM)callback);
-  if(callback)
-    delete callback;
-  return(rc);
+  dprintf(("EnumThreadWindows\n"));
+
+  curpid = GetCurrentProcessId();
+
+  henum = OSLibWinBeginEnumWindows(OSLIB_HWND_DESKTOP);          
+  while ((hwndNext = OSLibWinGetNextWindow(henum)) != 0)
+  {
+      	OSLibWinQueryWindowProcess(hwndNext, &pid, &tid);
+      	if(!(curpid == pid && dwThreadId == tid))
+        	continue;
+
+      	window = Win32BaseWindow::GetWindowFromHandle(hwndNext);
+	if(window == NULL) {
+		//OS/2 window or non-frame window, so skip it
+		continue;
+	}
+      	if((rc = lpfn(window->getWindowHandle(), lParam)) == FALSE)
+        	break;
+  }
+  OSLibWinEndEnumWindows (henum);
+  return TRUE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API EnumChildWindows(HWND hwnd, WNDENUMPROC lpfn, LPARAM lParam)
+{
+ Win32BaseWindow *window, *parentwindow;
+ BOOL   rc = TRUE;
+ ULONG  henum;
+ HWND   hwndNext;
+
+  dprintf(("EnumChildWindows %x %x\n", hwnd, lParam));
+
+  parentwindow = Win32BaseWindow::GetWindowFromHandle(hwnd);
+  if(!parentwindow) {
+        dprintf(("EnumChildWindows, window %x not found", hwnd));
+        return FALSE;
+  }
+
+  henum = OSLibWinBeginEnumWindows(OSLIB_HWND_DESKTOP);          
+  while ((hwndNext = OSLibWinGetNextWindow(henum)) != 0)
+  {
+      	window = Win32BaseWindow::GetWindowFromHandle(hwndNext);
+	if(window == NULL) {
+		//OS/2 window or non-frame window, so skip it
+		continue;
+	}
+      	if((rc = lpfn(window->getWindowHandle(), lParam)) == FALSE)
+	{
+		rc = FALSE;
+        	break;
+	}
+  }
+  OSLibWinEndEnumWindows(henum);
+  return rc;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API EnumWindows(WNDENUMPROC lpfn, LPARAM lParam)
+{
+ Win32BaseWindow *window;
+ BOOL   rc;
+ ULONG  henum;
+ HWND   hwndNext, hwndParent = OSLIB_HWND_DESKTOP;
+
+  dprintf(("EnumThreadWindows\n"));
+
+  do {
+  	henum = OSLibWinBeginEnumWindows(hwndParent);          
+  	while ((hwndNext = OSLibWinGetNextWindow(henum)) != 0)
+  	{
+      		window = Win32BaseWindow::GetWindowFromHandle(hwndNext);
+		if(window == NULL) {
+			//OS/2 window or non-frame window, so skip it
+			continue;
+		}
+	      	if((rc = lpfn(window->getWindowHandle(), lParam)) == FALSE) {
+	        	goto Abort;
+		}
+	}
+      	if(hwndParent == OSLIB_HWND_OBJECT)
+         	break;
+      	hwndParent = OSLIB_HWND_OBJECT;
+	OSLibWinEndEnumWindows(henum);
+  }
+  while(TRUE);
+
+Abort:
+  OSLibWinEndEnumWindows(henum);
+  return TRUE;
 }
 //******************************************************************************
 //******************************************************************************

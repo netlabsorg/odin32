@@ -1,4 +1,4 @@
-/* $Id: oslibwin.h,v 1.24 1999-09-05 15:53:09 sandervl Exp $ */
+/* $Id: oslibwin.h,v 1.25 1999-09-14 20:46:39 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -30,6 +30,8 @@ typedef struct _SWP    /* swp */
 #endif
 
 #define OSLIB_HWND_DESKTOP      0
+#define OSLIB_HWND_OBJECT       1
+
 BOOL  OSLibWinSetParent(HWND hwnd, HWND hwndParent, ULONG fRedraw = TRUE);
 
 
@@ -234,5 +236,6 @@ HWND  OSLibWinBeginEnumWindows(HWND hwnd);
 HWND  OSLibWinGetNextWindow(HWND hwndEnum);
 HWND  OSLibWinQueryClientWindow(HWND hwndFrame);
 BOOL  OSLibWinEndEnumWindows(HWND hwndEnum);
+BOOL  OSLibWinQueryWindowProcess(HWND hwnd, ULONG *pid, ULONG *tid);
 
 #endif //__OSLIBWIN_H__
