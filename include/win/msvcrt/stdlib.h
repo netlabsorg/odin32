@@ -25,8 +25,15 @@
 #ifndef _MAX_PATH
 #define _MAX_DRIVE          3
 #define _MAX_FNAME          256
+
+#ifndef _MAX_DIR
 #define _MAX_DIR            _MAX_FNAME
+#endif
+
+#ifndef _MAX_EXT
 #define _MAX_EXT            _MAX_FNAME
+#endif
+
 #define _MAX_PATH           260
 #endif
 
@@ -42,8 +49,17 @@ typedef struct MSVCRT(_ldiv_t) {
 } MSVCRT(ldiv_t);
 
 
+#ifdef __min /* watcom stdlib.h defines this */
+#undef __min
+#endif
+
+#ifdef __max /* watcom stdlib.h defines this */
+#undef __max
+#endif
+
 #define __max(a,b) (((a) > (b)) ? (a) : (b))
 #define __min(a,b) (((a) < (b)) ? (a) : (b))
+
 #ifndef __cplusplus
 #define max(a,b)   (((a) > (b)) ? (a) : (b))
 #define min(a,b)   (((a) < (b)) ? (a) : (b))
@@ -166,7 +182,7 @@ WCHAR*      _i64tow(__int64,WCHAR*,int);
 WCHAR*      _ltow(long,WCHAR*,int);
 WCHAR*      _ui64tow(unsigned __int64,WCHAR*,int);
 WCHAR*      _ultow(unsigned long,WCHAR*,int);
-WCHAR*      _wfullpath(WCHAR*,const WCHAR*,size_t);
+WCHAR*      _wfullpath(WCHAR*,const WCHAR*,MSVCRT(size_t));
 WCHAR*      _wgetenv(const WCHAR*);
 void        _wmakepath(WCHAR*,const WCHAR*,const WCHAR*,const WCHAR*,const WCHAR*);
 void        _wperror(const WCHAR*);
