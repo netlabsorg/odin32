@@ -1,4 +1,4 @@
-/* $Id: pidl.cpp,v 1.3 1999-10-27 09:03:31 phaller Exp $ */
+/* $Id: pidl.cpp,v 1.4 1999-11-02 20:05:35 phaller Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -854,6 +854,26 @@ ODINFUNCTION3(HRESULT,SHGetSpecialFolderLocation,HWND,          hwndOwner,
          hr = NOERROR;
          break;
 
+       case CSIDL_NETWORK:
+         *ppidl = _ILCreateNetwork ();
+         hr = NOERROR;
+         break;
+
+       case CSIDL_CONTROLS:
+         *ppidl = _ILCreateControl ();
+         hr = NOERROR;
+         break;
+
+       case CSIDL_PRINTERS:
+         *ppidl = _ILCreatePrinter ();
+         hr = NOERROR;
+         break;
+
+       case CSIDL_BITBUCKET:
+         *ppidl = _ILCreateBitBucket ();
+         hr = NOERROR;
+         break;
+
        default:
          if (SHGetSpecialFolderPathA(hwndOwner, szPath, nFolder, TRUE))
          {
@@ -1101,6 +1121,26 @@ ODINFUNCTION0(LPITEMIDLIST,_ILCreateMyComputer)
 ODINFUNCTION0(LPITEMIDLIST,_ILCreateIExplore)
 {
    return _ILCreate(PT_MYCOMP, &IID_IExplore, sizeof(GUID));
+}
+
+ODINFUNCTION0(LPITEMIDLIST,_ILCreateControl)
+{
+   return _ILCreate(PT_SPECIAL, &IID_Control, sizeof(GUID));
+}
+
+ODINFUNCTION0(LPITEMIDLIST,_ILCreatePrinter)
+{
+   return _ILCreate(PT_SPECIAL, &IID_Printer, sizeof(GUID));
+}
+
+ODINFUNCTION0(LPITEMIDLIST,_ILCreateNetwork)
+{
+   return _ILCreate(PT_MYCOMP, &IID_Network, sizeof(GUID));
+}
+
+ODINFUNCTION0(LPITEMIDLIST,_ILCreateBitBucket)
+{
+   return _ILCreate(PT_MYCOMP, &IID_BitBucket, sizeof(GUID));
 }
 
 ODINFUNCTION1(LPITEMIDLIST,_ILCreateDrive,LPCSTR,lpszNew)
@@ -1540,42 +1580,89 @@ ODINFUNCTION1(REFIID,_ILGetGUIDPointer,LPCITEMIDLIST, pidl)
    return NULL;
 }
 
+/*************************************************************************
+ * _ILGetFileDateTime
+ *
+ * Given the ItemIdList, get the FileTime
+ *
+ * PARAMS
+ *      pidl        [I] The ItemIDList
+ *      pFt         [I] the resulted FILETIME of the file
+ *
+ * RETURNS
+ *     True if Successful
+ *
+ * NOTES
+ *
+ */
+
+ODINFUNCTION2(BOOL, _ILGetFileDateTime,LPCITEMIDLIST, pidl,
+                                       FILETIME *,    pFt)
+{
+    LPPIDLDATA pdata =_ILGetDataPointer(pidl);
+
+    switch (pdata->type)
+    {
+        case PT_FOLDER:
+            DosDateTimeToFileTime(pdata->u.folder.uFileDate, pdata->u.folder.uFileTime, pFt);
+            break;
+        case PT_VALUE:
+            DosDateTimeToFileTime(pdata->u.file.uFileDate, pdata->u.file.uFileTime, pFt);
+            break;
+        default:
+            return FALSE;
+    }
+    return TRUE;
+}
+
+
 ODINFUNCTION3(BOOL, _ILGetFileDate, LPCITEMIDLIST, pidl,
                                     LPSTR,         pOut,
                                     UINT,          uOutSize)
-{  LPPIDLDATA pdata =_ILGetDataPointer(pidl);
+{
    FILETIME ft;
    SYSTEMTIME time;
 
-   switch (pdata->type)
-   { case PT_FOLDER:
-       DosDateTimeToFileTime(pdata->u.folder.uFileDate, pdata->u.folder.uFileTime, &ft);
-       break;
-     case PT_VALUE:
-       DosDateTimeToFileTime(pdata->u.file.uFileDate, pdata->u.file.uFileTime, &ft);
-       break;
-     default:
-       return FALSE;
-   }
+   if (! _ILGetFileDateTime( pidl, &ft )) return FALSE;
+
    FileTimeToSystemTime (&ft, &time);
    return GetDateFormatA(LOCALE_USER_DEFAULT,DATE_SHORTDATE,&time, NULL,  pOut, uOutSize);
 }
 
+/*************************************************************************
+ * _ILGetFileSize
+ *
+ * Given the ItemIdList, get the FileSize
+ *
+ * PARAMS
+ *      pidl    [I] The ItemIDList
+ * pOut  [I] The buffer to save the result
+ *      uOutsize [I] The size of the buffer
+ *
+ * RETURNS
+ *     The FileSize
+ *
+ * NOTES
+ * pOut can be null when no string is needed
+ *
+ */
 
 ODINFUNCTION3(BOOL,_ILGetFileSize,LPCITEMIDLIST, pidl,
                                   LPSTR,         pOut,
                                   UINT,          uOutSize)
-{  LPPIDLDATA pdata =_ILGetDataPointer(pidl);
+{
+   LPPIDLDATA pdata =_ILGetDataPointer(pidl);
+   DWORD dwSize;
 
    switch (pdata->type)
    { case PT_VALUE:
-       break;
-     default:
-       return FALSE;
+       dwSize = pdata->u.file.dwFileSize;
+       if (pOut) StrFormatByteSizeA(dwSize, pOut, uOutSize);
+       return dwSize;
    }
-   StrFormatByteSizeA(pdata->u.file.dwFileSize, pOut, uOutSize);
-   return TRUE;
+   return 0;
 }
+
 
 
 ODINFUNCTION3(BOOL,_ILGetExtension,LPCITEMIDLIST, pidl,
@@ -1602,5 +1689,113 @@ ODINFUNCTION3(BOOL,_ILGetExtension,LPCITEMIDLIST, pidl,
    TRACE_(pidl)("%s\n",pOut);
 
    return TRUE;
+}
+
+/*************************************************************************
+ * _ILGetFileType
+ *
+ * Given the ItemIdList, get the file type description
+ *
+ * PARAMS
+ *      pidl        [I] The ItemIDList (simple)
+ *      pOut        [I] The buffer to save the result
+ *      uOutsize    [I] The size of the buffer
+ *
+ * RETURNS
+ * nothing
+ *
+ * NOTES
+ * This function copies as much as possible into the buffer.
+ */
+ODINPROCEDURE3(_ILGetFileType,LPCITEMIDLIST, pidl,
+                              LPSTR,         pOut,
+                              UINT,          uOutSize)
+{
+   if(_ILIsValue(pidl))
+   {
+     char sTemp[64];
+          if(uOutSize > 0)
+          {
+            pOut[0] = 0;
+          }
+     if (_ILGetExtension (pidl, sTemp, 64))
+     {
+       if (!( HCR_MapTypeToValue(sTemp, sTemp, 64, TRUE)
+           && HCR_MapTypeToValue(sTemp, pOut, uOutSize, FALSE )))
+       {
+         lstrcpynA (pOut, sTemp, uOutSize - 6);
+         strcat (pOut, "-file");
+       }
+     }
+   }
+   else
+   {
+     lstrcpynA(pOut, "Folder", uOutSize);
+   }
+}
+
+/*************************************************************************
+ * _ILGetAttributeStr
+ *
+ * Given the ItemIdList, get the Attrib string format
+ *
+ * PARAMS
+ *      pidl        [I] The ItemIDList
+ *      pOut        [I] The buffer to save the result
+ *      uOutsize    [I] The size of the Buffer
+ *
+ * RETURNS
+ *     True if successful
+ *
+ * NOTES
+ *
+ */
+ODINFUNCTION3(BOOL, _ILGetAttributeStr, LPCITEMIDLIST, pidl,
+                                        LPSTR,         pOut,
+                                        UINT,          uOutSize)
+{
+    LPPIDLDATA pData =_ILGetDataPointer(pidl);
+    WORD wAttrib;
+    int i;
+
+    /* Need At Least 6 characters to represent the Attrib String */
+    if(uOutSize < 6)
+    {
+        return FALSE;
+    }
+    switch(pData->type)
+    {
+        case PT_FOLDER:
+            wAttrib = pData->u.folder.uFileAttribs;
+            break;
+        case PT_VALUE:
+            wAttrib = pData->u.file.uFileAttribs;
+            break;
+        default:
+            return FALSE;
+    }
+    i=0;
+    if(wAttrib & FILE_ATTRIBUTE_READONLY)
+    {
+        pOut[i++] = 'R';
+    }
+    if(wAttrib & FILE_ATTRIBUTE_HIDDEN)
+    {
+        pOut[i++] = 'H';
+    }
+    if(wAttrib & FILE_ATTRIBUTE_SYSTEM)
+    {
+        pOut[i++] = 'S';
+    }
+    if(wAttrib & FILE_ATTRIBUTE_ARCHIVE)
+    {
+        pOut[i++] = 'A';
+    }
+    if(wAttrib & FILE_ATTRIBUTE_COMPRESSED)
+    {
+        pOut[i++] = 'C';
+    }
+    pOut[i] = 0x00;
+    return TRUE;
 }
 

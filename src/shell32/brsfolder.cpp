@@ -1,4 +1,4 @@
-/* $Id: brsfolder.cpp,v 1.1 1999-10-09 11:13:18 sandervl Exp $ */
+/* $Id: brsfolder.cpp,v 1.2 1999-11-02 20:05:33 phaller Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -221,7 +221,7 @@ Done:
         SetCursor(LoadCursorA(0, IDC_ARROWA));
 
         if (lpe)
-          lpe->lpvtbl->fnRelease(lpe);
+          IEnumIDList_Release(lpe);
         if (pidlTemp )
           SHFree(pidlTemp);
 }
