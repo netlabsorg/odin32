@@ -1,4 +1,4 @@
-/* $Id: aspilib.cpp,v 1.4 2000-09-14 19:09:16 sandervl Exp $ */
+/* $Id: aspilib.cpp,v 1.5 2000-09-15 13:25:46 sandervl Exp $ */
 /*
  *  ASPI Router Library
  *  for Odin WNASPI32.DLL
@@ -20,7 +20,9 @@
 #include     <string.h>
 #include     <stdio.h>
 #include     <misc.h>
-#include "aspilib.h"
+#include     "aspilib.h"
+
+#define WNASPI32_MUTEX_NAME "\\SEM32\\ODIN\\ASPIROUT"
 
 //***************************************************************************
 //*                                                                         *
@@ -29,7 +31,7 @@
 //*  Standard constructor                                                   *
 //*                                                                         *
 //***************************************************************************
-scsiObj::scsiObj() : buffer(NULL)
+scsiObj::scsiObj() : buffer(NULL), hmtxDriver(0)
 {
    memset(&SRBlock, 0, sizeof(SRBlock));
    memset(&AbortSRB, 0, sizeof(AbortSRB));
@@ -201,19 +203,30 @@ BOOL scsiObj::initBuffer()
 //***************************************************************************
 BOOL scsiObj::init(ULONG bufsize)
 {
-  BOOL  success;
-  ULONG rc;
+  BOOL   success;
+  APIRET rc;
 
-  rc = DosAllocMem(&buffer, bufsize, OBJ_TILE | PAG_READ | PAG_WRITE | PAG_COMMIT);
-  if (rc) return FALSE;
-  success=openDriver();                         // call openDriver member function
-  if (!success) return FALSE;
-  success=initSemaphore();                      // call initSemaphore member function
-  if (!success) return FALSE;
 
-  success=initBuffer();
+   rc = DosCreateMutexSem(WNASPI32_MUTEX_NAME, (HMTX*)&hmtxDriver,
+                          0, TRUE);
+   if(rc == ERROR_DUPLICATE_NAME) {
+	rc = DosOpenMutexSem(WNASPI32_MUTEX_NAME, (HMTX*)&hmtxDriver);
+   }
+   if(rc != NO_ERROR) {
+	dprintf(("scsiObj::init: DosCreate/OpenMutexSem failed! (rc=%d)", rc));
+        return FALSE;
+   }
 
-  return TRUE;
+   rc = DosAllocMem(&buffer, bufsize, OBJ_TILE | PAG_READ | PAG_WRITE | PAG_COMMIT);
+   if (rc) return FALSE;
+   success=openDriver();                         // call openDriver member function
+   if (!success) return FALSE;
+   success=initSemaphore();                      // call initSemaphore member function
+   if (!success) return FALSE;
+
+   success=initBuffer();
+ 
+   return TRUE;
 }
 
 
@@ -238,21 +251,29 @@ BOOL scsiObj::close()
   success=closeSemaphore();                     // call closeSemaphore member function
   if (!success)
   {
-    printf("closeSemaphore() unsuccessful.\n");
+    dprintf(("scsiObj::close: closeSemaphore() unsuccessful."));
     return FALSE;
   }
   success=closeDriver();                        // call closeDriver member function
   if (!success)
   {
+    dprintf(("scsiObj::close: closeDriver() unsucessful."));
     return FALSE;
-    printf("closeDriver() unsucessful.\n");
   }
   rc = DosFreeMem(buffer);
   if (rc)
   {
-    printf("DosFreeMem unsuccessful. return code: %ld\n", rc);
+    dprintf(("scsiObj::close: DosFreeMem unsuccessful. return code: %ld", rc));
     return FALSE;
   }
+  if(hmtxDriver) {
+  	rc = DosCloseMutexSem((HMTX)hmtxDriver);
+  	if(rc != NO_ERROR) {
+    		dprintf(("scsiObj::close: DosCloseMutexSem unsuccessful. return code: %ld", rc));
+    		return FALSE;
+  	}
+  }
+
   return TRUE;
 }
 
@@ -450,45 +471,34 @@ ULONG scsiObj::SendSRBlock(VOID)
 }
 //***************************************************************************
 //***************************************************************************
-BOOL fGainDrvAccess( BOOL fWait,
-                     ULONG *phSem)
+BOOL scsiObj::access(BOOL fWait)
 {
-  ULONG rc;
-  rc = DosCreateMutexSem ( "\\SEM32\\ODIN\\ASPIROUT",
-                           (HMTX*)phSem,
-                           0,
-                           TRUE);
-  if(NO_ERROR==rc)
-    return TRUE;
-  if((ERROR_DUPLICATE_NAME!=rc)||(!fWait))
-    return FALSE;
-  rc = DosOpenMutexSem ( "\\SEM32\\ODIN\\ASPIROUT",
-                         (HMTX*)phSem);
-  if(NO_ERROR!=rc)
-    return FALSE;
+ APIRET rc;
 
-  rc = DosRequestMutexSem( (HMTX)(*phSem),
-                           SEM_INDEFINITE_WAIT);
+  if(!fWait) {
+  	rc = DosRequestMutexSem((HMTX) hmtxDriver, SEM_INDEFINITE_WAIT);
+  }
+  else 	rc = DosRequestMutexSem((HMTX) hmtxDriver, 100);
 
-  if(NO_ERROR!=rc)
-    return FALSE;
+  if(rc != NO_ERROR) {
+	dprintf(("scsiObj::access: DosRequestMutexSem failed with rc = %d", rc));
+    	return FALSE;
+  }
+  return TRUE;
+}
+//***************************************************************************
+//***************************************************************************
+BOOL scsiObj::release()
+{
+  APIRET rc;
+
+  rc = DosReleaseMutexSem((HMTX)hmtxDriver);
+  if(rc != NO_ERROR) {
+	dprintf(("scsiObj::access: DosReleaseMutexSem failed with rc = %d", rc));
+    	return FALSE;
+  }
 
   return TRUE;
 }
 //***************************************************************************
 //***************************************************************************
-BOOL fReleaseDrvAccess(ULONG hSem)
-{
-  ULONG rc;
-  BOOL frc = TRUE;
-
-  rc = DosReleaseMutexSem((HMTX)hSem);
-  if(NO_ERROR!=rc)
-    frc=FALSE;
-
-  rc = DosCloseMutexSem((HMTX)hSem);
-  if(NO_ERROR!=rc)
-    frc=FALSE;
-
-  return frc;
-}
