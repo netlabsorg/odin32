@@ -1,4 +1,21 @@
- /* $Id: changelog,v 1.761 2000-02-29 22:44:56 sandervl Exp $ */
+ /* $Id: changelog,v 1.762 2000-03-01 13:31:06 sandervl Exp $ */
+
+ 2000-03-01: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32: Fixes for FindWindow(ExA/W) - now more like Wine
+                  (FindWindowExW was not working correctly either)
+                  First send WM_NCACTIVATE, then WM_ACTIVATE
+                  Fixed focus problems with Odin apps
+                  (Call WinSetFocus in OSLibWinSetActiveWindow instead of
+                   WinSetActiveWindow when a user clicks on the titlebar
+                   of an inactive window & after sending WM_MOUSEACTIVATE)
+                  TODO: Does WinSetActiveWindow work properly or should we
+                        always call WinSetFocus???
+                  Call Dinput handler when translating mouse & keyboard
+                  messages (during Get/PeekMessage)
+
+ 2000-03-01: Edgar Buerkle <Edgar.Buerkle@gmx.net>
+	- USER32: Fixed dprintf in CreateWindowExW
+                  Added left & right cursor keys to Win32BaseWindow::setExtendedKey
 
  2000-02-29: Edgar Buerkle <Edgar.Buerkle@gmx.net>
 	- USER32: Added support for keyboard hooks (fixes Moorhuhn)
@@ -12,7 +29,7 @@
                         Resource files (OS/2 resources at least...)
                         COBOL (just for fun! - I'll use it at job)
                     Things seems to work ok, but if an error occurs, please
-                    fix it or send me a not and I'll fix it ASAP.
+                    fix it or send me a note and I'll fix it ASAP.
 
  2000-02-29: Sander van Leeuwen <sandervl@xs4all.nl>
 	- OPENGL\MESA: Added Odin port of Mesa Opengl library
