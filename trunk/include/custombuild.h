@@ -143,6 +143,9 @@ BOOL WIN32API ODIN_QueryLoaders(LPSTR pszPECmdLoader, INT cchPECmdLoader,
                                 LPSTR pszPEGUILoader, INT cchPEGUILoader,
                                 LPSTR pszNELoader, INT cchNELoader);
 
+//Checks whether program is LX or PE
+BOOL WIN32API ODIN_IsWin32App(LPSTR lpszProgramPath);
+
 //Custom build function to disable loading of LX dlls
 void WIN32API ODIN_DisableLXDllLoading();
 
