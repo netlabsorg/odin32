@@ -1,4 +1,4 @@
-/* $Id: trackbar.c,v 1.21 1999-10-24 22:49:49 sandervl Exp $ */
+/* $Id: trackbar.c,v 1.22 1999-11-09 17:09:27 cbratschi Exp $ */
 /*
  * Trackbar control
  *
@@ -587,11 +587,11 @@ static VOID TRACKBAR_DrawThumb(TRACKBAR_INFO *infoPtr,HWND hwnd,HDC hdc,DWORD dw
             pen = GetSysColorPen(COLOR_3DLIGHT);
             oldPen = SelectObject(hdc,pen);
             MoveToEx(hdc,points[4].x,points[4].y,NULL);
-            LineTo(hdc,points[3].x-1,points[3].y-1);
+            LineTo(hdc,points[3].x,points[3].y);
             pen = GetSysColorPen(COLOR_BTNHIGHLIGHT);
             SelectObject(hdc,pen);
             MoveToEx(hdc,points[4].x,points[4].y+1,NULL);
-            LineTo(hdc,points[3].x-2,points[3].y-1);
+            LineTo(hdc,points[3].x-1,points[3].y);
             SelectObject(hdc,oldPen);
 
             triangle.right = points[3].x;
