@@ -1,4 +1,4 @@
-/* $Id: heapstring.cpp,v 1.34 2000-10-23 19:35:11 sandervl Exp $ */
+/* $Id: heapstring.cpp,v 1.35 2000-11-21 14:10:08 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -546,13 +546,13 @@ int WIN32API lstrcpynCtoA(LPSTR  astring,
     /* idiots unicode conversion :) */
     for (i = 0; i < unilen-1; i++)
     {
-      astring[i] = (ustring[i] > 255) ? (char)20 : (char)ustring[i]; //CB: handle invalid characters as space
+      astring[i] = (ustring[i] > 255) ? (char)0x20 : (char)ustring[i]; //CB: handle invalid characters as space
       if (ustring[i] == 0) return i; //asta la vista, baby
     }
 
-    astring[unilen-1] = 0; // @@@PH: 1999/06/09 fix - always terminate string
-
-    return(unilen-1);
+//    astring[unilen-1] = 0; // @@@PH: 1999/06/09 fix - always terminate string
+//    return(unilen-1);
+    return unilen;
   }
 }
 
@@ -565,7 +565,14 @@ int WIN32API lstrcpynWtoA(LPSTR  astring,
  int ret;
 
     ret = lstrcpynCtoA(astring, ustring, unilen, GetWindowsUconvObject());
-    astring[unilen-1] = 0;
+    //Must not always set the last character to 0; some apps send the wrong
+    //string size to apis that use this function (i.e. GetMenuStringW (Notes))
+    //-> overwrites stack
+    if(ret == unilen) {
+         astring[unilen-1] = 0;
+    }
+    else astring[ret] = 0;
+    
     return ret;
 }
 
@@ -679,7 +686,13 @@ int WIN32API lstrcpynAtoW(LPWSTR unicode,
  int ret;
 
     ret = lstrcpynAtoC(unicode, ascii, asciilen, GetWindowsUconvObject());
-    unicode[asciilen-1] = 0;
+    //Must not always set the last character to 0; some apps send the wrong
+    //string size to apis that use this function (i.e. GetMenuStringW (Notes))
+    //-> overwrites stack
+    if(ret == asciilen) {
+         unicode[asciilen-1] = 0;
+    }
+    else unicode[ret] = 0;
     return ret;
 }
 

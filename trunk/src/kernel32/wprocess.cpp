@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.108 2000-11-21 11:35:09 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.109 2000-11-21 14:10:09 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -92,7 +92,6 @@ static HINSTANCE hInstNTDll = 0;
 TEB *WIN32API GetThreadTEB()
 {
     if(TIBFlatPtr == NULL) {
-        DebugInt3();
         return 0;
     }
     return (TEB *)*TIBFlatPtr;
