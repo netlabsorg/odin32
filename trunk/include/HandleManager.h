@@ -528,6 +528,9 @@ BOOL HMGetMailslotInfo(HANDLE  hMailslot,
 BOOL HMSetMailslotInfo(HANDLE hMailslot,
                        DWORD  dwReadTimeout);
 
+
+BOOL HMGetFileNameFromHandle(HANDLE hFile, LPSTR lpszFileName, DWORD cbFileName);
+
 #ifdef __cplusplus__
   }
 #endif
