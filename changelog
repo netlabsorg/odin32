@@ -1,4 +1,21 @@
-/* $Id: changelog,v 1.2321 2002-09-24 15:15:48 sandervl Exp $ */
+/* $Id: changelog,v 1.2322 2002-09-26 16:02:33 sandervl Exp $ */
+
+ 2002-09-26: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o OS/2 Physical partition names have base 1 (0 for win32)
+                o Convert ERROR_PATH_NOT_FOUND to ERROR_FILE_NOT_FOUND in
+                  OSLibDosCreateFile
+                o IOCTL_DISK_GET_DRIVE_GEOMETRY fix for physical drive
+                o Fixed return value for FindNextVolumeMountPointA/W
+                o Fixed read & write for unmounted volumes; must update
+                  current file position manually & check for boundaries
+    - WINMM:    o Fixed debug wrapper logging
+    - USER32:   o WM_ADJUSTFRAMEPOS:
+                  The PM frame control changes the z-order of a child window
+                  if it receives focus after a window has been destroyed
+                  We can't let this happen as this breaks assumptions
+                  elsewhere (e.g. GetNextDlgGroupItem)
+                  By returning 0 here, we prevent the default frame handler
+                  from messing things up. (one example is a group of radio buttons)
 
  2002-09-24: Vit Timchishin <tivv@ukr    >
     - KERNEL32: o Fix for OSLibDosFreeMem
