@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.101 1999-12-01 18:43:08 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.102 1999-12-02 19:30:40 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -414,6 +414,7 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
   }
   else
   {
+        SetParent(0);
         if (!cs->hwndParent || cs->hwndParent == windowDesktop->getWindowHandle()) {
             owner = NULL;
         }
@@ -2446,12 +2447,24 @@ BOOL Win32BaseWindow::DestroyWindow()
 }
 //******************************************************************************
 //******************************************************************************
+Win32BaseWindow *Win32BaseWindow::getParent()
+{
+  Win32BaseWindow *wndparent = (Win32BaseWindow *)ChildWindow::GetParent();
+  return ((ULONG)wndparent == (ULONG)windowDesktop) ? NULL : wndparent;
+}
+//******************************************************************************
+//******************************************************************************
 HWND Win32BaseWindow::GetParent()
 {
-  if(getParent()) {
-        return getParent()->getWindowHandle();
-  }
-  else  return 0;
+ Win32BaseWindow *wndparent;
+
+    if ((!(getStyle() & (WS_POPUP|WS_CHILD))))
+    {
+        return 0;
+    }
+    wndparent = ((getStyle() & WS_CHILD) ? getParent() : getOwner());
+
+    return (wndparent) ? wndparent->getWindowHandle() : 0;
 }
 //******************************************************************************
 //******************************************************************************
@@ -2475,8 +2488,8 @@ HWND Win32BaseWindow::SetParent(HWND hwndNewParent)
         return oldhwnd;
    }
    else {
-    setParent(windowDesktop);
-        getParent()->AddChild(this);
+        setParent(windowDesktop);
+        windowDesktop->AddChild(this);
         OSLibWinSetParent(getOS2FrameWindowHandle(), OSLIB_HWND_DESKTOP);
         return oldhwnd;
    }
@@ -2556,6 +2569,9 @@ BOOL Win32BaseWindow::EnumChildWindows(WNDENUMPROC lpfn, LPARAM lParam)
     {
         dprintf(("EnumChildWindows: enumerating child %x", child->getWindowHandle()));
         hwnd = child->getWindowHandle();
+        if(child->getOwner()) {
+                continue; //shouldn't have an owner (Wine)
+        }
         if(lpfn(hwnd, lParam) == FALSE)
         {
                 rc = FALSE;
@@ -2579,6 +2595,53 @@ BOOL Win32BaseWindow::EnumChildWindows(WNDENUMPROC lpfn, LPARAM lParam)
         prevchild = child;
     }
     return rc;
+}
+//******************************************************************************
+//Enumerate first-level children only and check thread id
+//******************************************************************************
+BOOL Win32BaseWindow::EnumThreadWindows(DWORD dwThreadId, WNDENUMPROC lpfn, LPARAM lParam)
+{
+ Win32BaseWindow *child = 0;
+ ULONG  tid, pid;
+ BOOL   rc;
+ HWND   hwnd;
+
+    dprintf(("EnumThreadWindows %x %x %x", dwThreadId, lpfn, lParam));
+
+    for (child = (Win32BaseWindow *)getFirstChild(); child; child = (Win32BaseWindow *)child->getNextChild())
+    {
+        OSLibWinQueryWindowProcess(child->getOS2WindowHandle(), &pid, &tid);
+	
+        if(dwThreadId == tid) {
+            dprintf2(("EnumThreadWindows: Found Window %x", child->getWindowHandle()));
+            if((rc = lpfn(child->getWindowHandle(), lParam)) == FALSE) {
+                break;
+            }
+        }
+    }
+    return TRUE;
+}
+//******************************************************************************
+//Enumerate first-level children only
+//******************************************************************************
+BOOL Win32BaseWindow::EnumWindows(WNDENUMPROC lpfn, LPARAM lParam)
+{
+ Win32BaseWindow *child = 0;
+ BOOL   rc;
+ HWND   hwnd;
+
+    dprintf(("EnumWindows %x %x", lpfn, lParam));
+
+    for (child = (Win32BaseWindow *)getFirstChild(); child; child = (Win32BaseWindow *)child->getNextChild())
+    {
+        hwnd = child->getWindowHandle();
+
+        dprintf2(("EnumWindows: Found Window %x", child->getWindowHandle()));
+        if((rc = lpfn(child->getWindowHandle(), lParam)) == FALSE) {
+            break;
+        }
+    }
+    return TRUE;
 }
 //******************************************************************************
 //******************************************************************************
