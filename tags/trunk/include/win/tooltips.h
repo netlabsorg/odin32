@@ -1,4 +1,4 @@
-/* $Id: tooltips.h,v 1.2 2000-03-17 17:10:53 cbratschi Exp $ */
+/* $Id: tooltips.h,v 1.3 2000-03-18 16:10:57 cbratschi Exp $ */
 
 /*
  * Tool tips class extra info
@@ -32,12 +32,14 @@ typedef struct tagTTTOOL_INFO
 
 typedef struct tagTOOLTIPS_INFO
 {
-    WCHAR      szTipText[INFOTIPSIZE];
+    COMCTL32_HEADER header;
+
+    WCHAR    szTipText[INFOTIPSIZE];
     BOOL     bActive;
     BOOL     bTrackActive;
     UINT     uNumTools;
-    COLORREF   clrBk;
-    COLORREF   clrText;
+    COLORREF clrBk;
+    COLORREF clrText;
     HFONT    hFont;
     INT      xTrackPos;
     INT      yTrackPos;

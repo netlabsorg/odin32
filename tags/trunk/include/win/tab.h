@@ -1,4 +1,4 @@
-/* $Id: tab.h,v 1.2 1999-07-04 19:03:36 sandervl Exp $ */
+/* $Id: tab.h,v 1.3 2000-03-18 16:10:56 cbratschi Exp $ */
 
 /*
  * Tab control class extra info
@@ -25,6 +25,8 @@ typedef struct tagTAB_ITEM
 
 typedef struct tagTAB_INFO
 {
+  COMCTL32_HEADER header;
+
   UINT       uNumItem;        /* number of tab items */
   INT        tabHeight;       /* height of the tab row */
   INT        tabWidth;        /* width of tabs */

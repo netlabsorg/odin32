@@ -1,4 +1,4 @@
-/* $Id: trackbar.h,v 1.4 2000-03-17 17:10:53 cbratschi Exp $ */
+/* $Id: trackbar.h,v 1.5 2000-03-18 16:10:57 cbratschi Exp $ */
 
 /*
  * Trackbar class extra info
@@ -40,11 +40,8 @@ typedef struct tagTRACKBAR_INFO
     LPLONG tics;
 } TRACKBAR_INFO;
 
-
 #define TB_REFRESH_TIMER       1
 #define TB_REFRESH_DELAY       1
-
-
 
 extern VOID TRACKBAR_Register (VOID);
 extern VOID TRACKBAR_Unregister (VOID);
