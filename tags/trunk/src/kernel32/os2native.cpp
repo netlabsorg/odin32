@@ -1,4 +1,4 @@
-/* $Id: os2native.cpp,v 1.2 1999-06-10 19:09:35 phaller Exp $ */
+/* $Id: os2native.cpp,v 1.3 1999-06-19 10:54:42 sandervl Exp $ */
 
 /*
  * Misc procedures
@@ -15,7 +15,7 @@
 #define INCL_DOSEXCEPTIONS
 #define INCL_DOSMEMMGR
 #define INCL_DOSPROCESS
-#include <os2.h>
+#include <os2wrap.h>	//Odin32 OS/2 api wrappers
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>

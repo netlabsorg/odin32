@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.2 1999-06-10 20:47:59 phaller Exp $ */
+/* $Id: initterm.cpp,v 1.3 1999-06-19 10:54:41 sandervl Exp $ */
 
 /*
  * KERNEL32 DLL entry point
@@ -27,7 +27,7 @@
 #define  INCL_DOSMODULEMGR
 #define  INCL_DOSMISC
 #define  INCL_DOSPROCESS
-#include <os2.h>
+#include <os2wrap.h>	//Odin32 OS/2 api wrappers
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>

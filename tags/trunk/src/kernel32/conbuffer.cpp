@@ -1,4 +1,4 @@
-/* $Id: conbuffer.cpp,v 1.1 1999-06-17 18:21:37 phaller Exp $ */
+/* $Id: conbuffer.cpp,v 1.2 1999-06-19 10:54:39 sandervl Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -61,7 +61,7 @@
 #define  INCL_DOSMODULEMGR
 #define  INCL_VIO
 #define  INCL_AVIO
-#include <os2.h>
+#include <os2wrap.h>	//Odin32 OS/2 api wrappers
 
 #include <misc.h>
 #include <string.h>

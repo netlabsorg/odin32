@@ -1,4 +1,4 @@
-/* $Id: SYSCLR.CPP,v 1.4 1999-06-16 15:29:27 cbratschi Exp $ */
+/* $Id: SYSCLR.CPP,v 1.5 1999-06-19 10:54:46 sandervl Exp $ */
 
 /*
  * Win32 system color API functions for OS/2
@@ -11,7 +11,7 @@
  *
  */
 #define INCL_WINSYS
-#include <os2.h>
+#include <os2wrap.h>	//Odin32 OS/2 api wrappers
 #include "os2native.h"
 #include "misc.h"
 #include "sysclr.h"

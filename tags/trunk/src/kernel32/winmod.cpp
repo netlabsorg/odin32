@@ -1,21 +1,19 @@
-/* $Id: winmod.cpp,v 1.4 1999-06-16 20:25:45 cbratschi Exp $ */
+/* $Id: winmod.cpp,v 1.5 1999-06-19 10:54:44 sandervl Exp $ */
 
-/*
- *
- * Project Odin Software License can be found in LICENSE.TXT
- *
- */
 /*
  * Win32 PE Image class
  *
  * Copyright 1998 Sander van Leeuwen (sandervl@xs4all.nl)
+ *
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
  *
  */
 #define INCL_BASE
 #define INCL_WIN
 #define INCL_WINERRORS
 #define INCL_DOSFILEMGR
-#include <os2.h>
+#include <os2wrap.h>	//Odin32 OS/2 api wrappers
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

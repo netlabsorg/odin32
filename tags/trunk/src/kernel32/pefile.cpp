@@ -1,4 +1,4 @@
-/* $Id: pefile.cpp,v 1.3 1999-06-10 20:48:01 phaller Exp $ */
+/* $Id: pefile.cpp,v 1.4 1999-06-19 10:54:43 sandervl Exp $ */
 
 /*
  * PE2LX PE utility functions
@@ -7,7 +7,7 @@
  *
  */
 #define INCL_BASE
-#include <os2.h>
+#include <os2wrap.h>	//Odin32 OS/2 api wrappers
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
