@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.6 1999-07-17 11:52:22 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.7 1999-07-17 12:49:40 cbratschi Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -63,7 +63,7 @@ HWND OSLibWinCreateWindow(HWND hwndParent, ULONG dwWinStyle, ULONG dwFrameStyle,
 
                 return hwndClient;
         }
-	dprintf(("OSLibWinCreateWindow: WinCreateStdWindow failed (%x)", WinGetLastError(GetThreadHAB())));
+        dprintf(("OSLibWinCreateWindow: WinCreateStdWindow failed (%x)", WinGetLastError(GetThreadHAB())));
         return 0;
   }
   hwndClient = WinCreateWindow(hwndParent, WIN32_STDCLASS, pszName, dwWinStyle, x, y, cx, cy,
@@ -144,13 +144,37 @@ HWND OSLibWinCreateMenu(HWND hwndParent, PVOID menutemplate)
 }
 //******************************************************************************
 //******************************************************************************
+BOOL OSLibWinAlarm(HWND hwndDeskTop,ULONG flStyle)
+{
+  return WinAlarm(hwndDeskTop,flStyle);
+}
+//******************************************************************************
+//******************************************************************************
+APIRET OSLibDosBeep(ULONG freg,ULONG dur)
+{
+  return DosBeep(freg,dur);
+}
+//******************************************************************************
+//******************************************************************************
+LONG OSLibWinQueryWindowTextLength(HWND hwnd)
+{
+  return WinQueryWindowTextLength(hwnd);
+}
+//******************************************************************************
+//******************************************************************************
+LONG OSLibWinQueryWindowText(HWND hwnd,LONG lLength,char* pun)
+{
+  return WinQueryWindowText(hwnd,lLength,pun);
+}
+//******************************************************************************
+//******************************************************************************
 HWND OSLibWinQueryWindow(HWND hwnd, ULONG lCode)
 {
   return WinQueryWindow(hwnd, lCode);
 }
 //******************************************************************************
 //******************************************************************************
-BOOL OSLibWinSetWindowPos(HWND hwnd, HWND hwndInsertBehind, LONG x, LONG y, LONG cx, 
+BOOL OSLibWinSetWindowPos(HWND hwnd, HWND hwndInsertBehind, LONG x, LONG y, LONG cx,
                           LONG cy, ULONG fl)
 {
   return WinSetWindowPos(hwnd, hwndInsertBehind, x, y, cx, cy, fl);
@@ -182,13 +206,13 @@ BOOL OSLibWinIsIconic(HWND hwnd)
 
   rc = WinQueryWindowPos(hwnd, &swp);
   if(rc == FALSE) {
-	dprintf(("OSLibWinIsIconic: WinQueryWindowPos %x failed", hwnd));
-	return FALSE;
+        dprintf(("OSLibWinIsIconic: WinQueryWindowPos %x failed", hwnd));
+        return FALSE;
   }
 
   if(swp.fl & SWP_MINIMIZE)
-	return TRUE;
-  else	return FALSE;
+        return TRUE;
+  else  return FALSE;
 }
 //******************************************************************************
 //******************************************************************************
@@ -254,3 +278,4 @@ BOOL OSLibWinGetMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterMa
 }
 //******************************************************************************
 //******************************************************************************
+
