@@ -1,4 +1,4 @@
-/* $Id: mmap.h,v 1.23 2002-07-21 09:20:56 sandervl Exp $ */
+/* $Id: mmap.h,v 1.24 2002-07-23 13:51:48 sandervl Exp $ */
 
 /*
  * Memory mapped class
@@ -121,8 +121,8 @@ public:
 
    DWORD  getAccessFlags()               { return mfAccess; };
    DWORD  getSize()                      { return mSize;    };
-   LPVOID getViewAddr()                  { return pMapView; };
    ULONG  getOffset()                    { return mOffset;  };
+   LPVOID getViewAddr()                  { return (LPVOID)((char *)pMapView + getOffset()); };
 
    BOOL   everythingOk()                 { return errorState == 0; };
 
