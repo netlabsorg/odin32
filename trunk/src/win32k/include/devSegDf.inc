@@ -1,8 +1,8 @@
-; $Id: devSegDf.inc,v 1.4 2000-02-21 04:45:46 bird Exp $
+; $Id: devSegDf.inc,v 1.5 2000-02-21 09:24:00 bird Exp $
 ;
 ; Segment definitions for win32k.sys.
 ;
-; Copyright (c) 1998-1999 knut st. osmundsen
+; Copyright (c) 1998-2000 knut st. osmundsen
 ;
 ; Project Odin Software License can be found in LICENSE.TXT
 ;
@@ -30,12 +30,9 @@ CODE32 ends
 EH_CODE segment dword public 'CODE' use32
 EH_CODE ends
 
-CALLTAB segment dword public 'DATA' use32
-CALLTAB ends
-
 
 ;DGROUP group BSS32, DATA32
-DGROUP group BSS32, DATA32, CONST32_RO, _VFT, EH_DATA, CALLTAB
+DGROUP group BSS32, DATA32, CONST32_RO, _VFT, EH_DATA
 
 DATA32  segment dword public 'DATA' use32
 DATA32 ends
@@ -57,4 +54,8 @@ _VFT ends
 
 EH_DATA segment byte public 'CONST' use32
 EH_DATA ends
+
+
+CALLTAB segment dword public 'DATA' use32
+CALLTAB ends
 

@@ -1,4 +1,4 @@
-/* $Id: probkrnl.c,v 1.13 2000-02-21 04:45:45 bird Exp $
+/* $Id: probkrnl.c,v 1.14 2000-02-21 09:24:00 bird Exp $
  *
  * Description:   Autoprobes the os2krnl file and os2krnl[*].sym files.
  *                Another Hack!
@@ -93,7 +93,7 @@ IMPORTKRNLSYM aImportTab[NBR_OF_KRNLIMPORTS] =
     {FALSE, -1,  8, "_ldrRead",             -1,  -1,  -1,  -1, EPT_PROC32},        /* 0 */
     {FALSE, -1,  8, "_ldrOpen",             -1,  -1,  -1,  -1, EPT_PROC32},        /* 1 */
     {FALSE, -1,  9, "_ldrClose",            -1,  -1,  -1,  -1, EPT_PROC32},        /* 2 */
-    {FALSE, -1, 12, "_LDRQAppType",         -1,  -1,  -1,  -1, EPT_PROCIMPORT32},  /* 3 */ /* to be removed? */
+    {FALSE, -1, 12, "_LDRQAppType",         -1,  -1,  -1,  -1, EPT_PROC32},        /* 3 */
     {FALSE, -1, 20, "_ldrEnum32bitRelRecs", -1,  -1,  -1,  -1, EPT_PROC32},        /* 4 */
     {FALSE, -1, 10, "_IOSftOpen",           -1,  -1,  -1,  -1, EPT_PROCIMPORT32},  /* 5 */
     {FALSE, -1, 11, "_IOSftClose",          -1,  -1,  -1,  -1, EPT_PROCIMPORT32},  /* 6 */
@@ -103,8 +103,9 @@ IMPORTKRNLSYM aImportTab[NBR_OF_KRNLIMPORTS] =
     {FALSE, -1, 12, "_SftFileSize",         -1,  -1,  -1,  -1, EPT_PROCIMPORT32},  /* 10 */
     {FALSE, -1, 11, "_VMAllocMem",          -1,  -1,  -1,  -1, EPT_PROCIMPORT32},  /* 11 */
     {FALSE, -1, 11, "_VMGetOwner",          -1,  -1,  -1,  -1, EPT_PROCIMPORT32},  /* 12 */
-    {FALSE, -1, 11, "g_tkExecPgm",          -1,  -1,  -1,  -1, EPT_PROC32},        /* 13 */
+    {FALSE, -1, 11, "g_tkExecPgm",          -1,  -1,  -1,  -1, EPT_PROCIMPORT32},        /* 13 */ /* currently disabled! */
     {FALSE, -1, 11, "f_FuStrLenZ",          -1,  -1,  -1,  -1, EPT_PROCIMPORT16},  /* 14 */
+    {FALSE, -1, 10, "f_FuStrLen",           -1,  -1,  -1,  -1, EPT_PROCIMPORT16},  /* 14 */
     {FALSE, -1,  8, "f_FuBuff",             -1,  -1,  -1,  -1, EPT_PROCIMPORT16}   /* 15 */
 /*    {FALSE, -1, 11, "",          -1,  -1, -1, EPT_PROCIMPORT16} */ /* 16 */
 };
@@ -696,6 +697,7 @@ static int ProbeSymFile(char * pszFilename)
                 {   /* Symbol was found */
                     aImportTab[i].offObject = (SegDef.bFlags & 0x01 ? SymDef32.wSymVal : SymDef16.wSymVal);
                     aImportTab[i].ulAddress = aImportTab[i].offObject + KrnlOTEs.aObjects[iSeg].ote_base;
+                    aImportTab[i].iObject   = (unsigned char)iSeg;
                     aImportTab[i].usSel     = KrnlOTEs.aObjects[iSeg].ote_sel;
 
                     /* Paranoia test! */

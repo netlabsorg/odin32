@@ -1,4 +1,4 @@
-/* $Id: myldrOpen.cpp,v 1.9 2000-02-21 05:00:52 bird Exp $
+/* $Id: myldrOpen.cpp,v 1.10 2000-02-21 09:24:01 bird Exp $
  *
  * myldrOpen - ldrOpen.
  *
@@ -42,6 +42,10 @@
 #include "options.h"
 #include "myExecPgm.h"
 
+/*******************************************************************************
+*   Global Variables                                                           *
+*******************************************************************************/
+extern BOOL fQAppType;                  /* From LDRQAppType */
 
 /*******************************************************************************
 *   Internal Functions                                                         *
@@ -97,15 +101,12 @@ ULONG LDRCALL myldrOpen(PSFN phFile, char *pszFilename, ULONG param3)
         /*
          * Try get the filesize
          */
-        /*
         rc = SftFileSize(*phFile, (PULONG)SSToDS(&cbFile));
         if (rc != NO_ERROR)
         {
             kprintf(("ldrOpen: SftFileSize failed with rc=%d\n", rc));
-        */
             cbFile = (unsigned)~0;
-        /*
-        } */
+        }
 
         /*
          * See if this is an recognizable module format.
@@ -234,90 +235,98 @@ ULONG LDRCALL myldrOpen(PSFN phFile, char *pszFilename, ULONG param3)
                     return NO_ERROR;
                 }
             }
+        }
 
-            /*
-             * Only unreconized files and readerror passes this point!
-             *
-             * * Fileformats with lower priority should reside here. *
-             *
-             */
+        /*
+         * Only unreconized files and readerror passes this point!
+         *
+         * * Fileformats with lower priority should reside here. *
+         *
+         */
 
+        /*
+         * If the initial readoperation failed try to read a smaller amount, in case it is a small script...
+         * 4 bytes is a small amount isn't it?
+         */
+        if (rc != NO_ERROR)
+        {
+            kprintf(("ldrOpen: first ldrread failed with rc=%d. tries to read 4 byte.\n", rc));
+            cchRead = 4;
+            if ((rc = ldrRead(*phFile, 0UL, pach, 0UL, cchRead, NULL)) != NO_ERROR)
+                kprintf(("ldrOpen: second ldrread failed with rc=%d.\n ", rc));
+        }
+
+        /*
+         * Now we'll try again, UNIX styled script?
+         */
+        if (rc == NO_ERROR && *pach == '#' && pach[1] == '!')
+        {
             /*
-             * If the initial readoperation failed try to read a smaller amount, in case it is a small script...
-             * 4 bytes is a small amount isn't it?
+             * UNIX styled script?
+             * FIXME! Must be more than 64 bytes long?
+             *        No options!
+             *        Firstline < 64 bytes!
              */
-            if (rc != NO_ERROR)
+            kprintf(("ldrOpen: unix script?\n"));
+            cchRead = min(cbFile, 256);
+            rc = ldrRead(*phFile, 0UL, pach, 0UL, cchRead, NULL);
+            if (rc == NO_ERROR)
             {
-                kprintf(("ldrOpen: first ldrread failed with rc=%d. tries to read 4 byte.\n", rc));
-                cchRead = 4;
-                if ((rc = ldrRead(*phFile, 0UL, pach, 0UL, cchRead, NULL)) != NO_ERROR)
-                    kprintf(("ldrOpen: second ldrread failed with rc=%d.\n ", rc));
-            }
+                char *pszStart = pach+2;
+                kprintf(("ldrOpen: script debug 1\n"));
 
-            /*
-             * Now we'll try again, UNIX styled script?
-             */
-            if (rc == NO_ERROR && *pach == '#' && pach[1] == '!')
-            {
+                /* Make sure we don't read to much... */
+                pszBuffer[cchRead] = '\0';
+
                 /*
-                 * UNIX styled script?
-                 * FIXME! Must be more than 64 bytes long?
-                 *        No options!
-                 *        Firstline < 64 bytes!
+                 * Skip blanks
                  */
-                kprintf(("ldrOpen: unix script?\n"));
+                pszStart = pszBuffer + 2; /* skips the "#!" stuff. */
+                while (*pszStart != '\0' && (*pszStart == ' ' || *pszStart == '\t'))
+                    pszStart++;
+                kprintf(("ldrOpen: script debug 2\n"));
 
-                cchRead = min(cbFile, 256);
-                rc = ldrRead(*phFile, 0UL, pach, 0UL, cchRead, NULL);
-                if (rc != NO_ERROR)
+                /* anything left on the line? */
+                if (*pszStart != '\0' && *pszStart != '\r' && *pszStart != '\n')
                 {
-                    char *pszStart = pach+2;
-                    kprintf(("ldrOpen: script debug 1\n"));
-
-                    /* Make sure we don't read to much... */
-                    pszBuffer[cchRead] = '\0';
+                    char *      pszEnd;         /* Pointer to the end of the string(s) when the next step is finished. */
+                    unsigned    cchToAdd = 1;   /* Chars to add */
+                    BOOL        fFirst = TRUE;  /* Set if a '\0' has not been set yet.
+                                                 * If this is clear, there are one or more parameters after the interpreter name. */
 
                     /*
-                     * Skip blanks
+                     * find linesize and make parameters ready for copying
                      */
-                    pszStart = pszBuffer + 2; /* skips the "#!" stuff. */
-                    while (*pszStart != '\0' && (*pszStart == ' ' || *pszStart == '\t'))
-                        pszStart++;
-                    kprintf(("ldrOpen: script debug 2\n"));
-
-                    /* anything left on the line? */
-                    if (*pszStart != '\0' && *pszStart != '\r' && *pszStart != '\n')
+                    pszEnd = pszStart;
+                    kprintf(("ldrOpen: script debug 3\n"));
+                    while (*pszEnd != '\0' && *pszEnd != '\r' && *pszEnd != '\n')
                     {
-                        char *      pszEnd;         /* Pointer to the end of the string(s) when the next step is finished. */
-                        //char *      pszFirstArg;    /* Pointer to the first argument, the one after the interpreter name. */
-                        unsigned    cchToAdd = 1;   /* Chars to add */
-                        int         f = TRUE;       /* flag which tells me if I have just closed the last argument.  */
-                        /*
-                         * find linesize and make parameters ready for copying
-                         */
-                        pszEnd = pszStart;
-                        kprintf(("ldrOpen: script debug 3\n"));
-                        //pszFirstArg = NULL;
-                        while (*pszEnd != '\0' && *pszEnd != '\r' && *pszEnd != '\n')
+                        if (fFirst && (*pszEnd == ' ' || *pszEnd == '\t'))
                         {
-                            if (f)
-                            {
-                                f = FALSE;
-                                //if (pszFirstArg != NULL) pszFirstArg = pszEnd + 1;
-                            }
-                            else if (!f && (*pszEnd == ' ' || *pszEnd == '\t'))
-                            {
-                                 *pszEnd = '\0';
-                                 f = TRUE;
-                            }
-
-                            /* next */
-                            pszEnd++;
-                            cchToAdd++;
+                            *pszEnd = '\0';
+                            fFirst = FALSE;
+                            if (pszEnd[1] == '\0' || pszEnd[1] == '\r' || pszEnd[1] == '\n')
+                                fFirst = TRUE;
                         }
-                        *pszEnd = '\0';
-                        kprintf(("ldrOpen: script debug 4\n"));
 
+                        /* next */
+                        pszEnd++;
+                        cchToAdd++;
+                    }
+                    *pszEnd = '\0';
+                    kprintf(("ldrOpen: script debug 4\n"));
+
+                    /*
+                     * If ldrQueryApp type we don't have any ExecPgm buffer we need to mess with.
+                     * We'll simply try open the the interpreter.
+                     */
+                    if (fQAppType)
+                    {
+                        rc = ldrClose(*phFile);
+                        rc = ldrOpen(phFile, pszStart, param3); /* FIXME, recusion! check that name not equal! Use flags to prevent race? */
+                    }
+                    else
+                    {
                         /*
                          * Find the ExecPgm buffer.
                          */
@@ -325,15 +334,15 @@ ULONG LDRCALL myldrOpen(PSFN phFile, char *pszFilename, ULONG param3)
                         kprintf(("ldrOpen: script debug 5\n"));
                         if (pBuffer != NULL)
                         {
-                            unsigned cchArguments = getArgsLength(pBuffer->achArgs);
-                            kprintf(("ldrOpen: debug1\n"));
+                            unsigned cchArguments = getArgsLength(pBuffer->achArgs); /* minus the first argument. */
+                            unsigned cchScriptnameDelta = strlen(pBuffer->szFilename) - strlen(pBuffer->achArgs); /* scriptname size difference. */
 
                             kprintf(("ldrOpen: script debug 6\n"));
 
                             /*
                              * Is there enough space in the struct?
                              */
-                            if (cchArguments + cchToAdd < sizeof(pBuffer->achArgs))
+                            if (cchArguments + cchToAdd + cchScriptnameDelta < sizeof(pBuffer->achArgs))
                             {
                                 kprintf(("ldrOpen: script debug 7\n"));
                                 /*
@@ -343,11 +352,39 @@ ULONG LDRCALL myldrOpen(PSFN phFile, char *pszFilename, ULONG param3)
                                 rc = ldrOpen(phFile, pszStart, param3); /* FIXME, recusion! check that name not equal! Use flags to prevent race? */
                                 if (rc == NO_ERROR)
                                 {
-                                    kprintf(("ldrOpen: scritp debug 8\n"));
+                                    kprintf(("ldrOpen: script debug 8\n"));
                                     /* Make space for the addition arguments. */
-                                    memmove(&pBuffer->achArgs[cchToAdd], &pBuffer->achArgs[0], cchArguments);
-                                    memcpy(&pBuffer->achArgs[0], pszBuffer, cchToAdd);
-                                    kprintf(("ldrOpen: script debug 9\n"));
+                                    #ifdef DEBUG
+                                    char *psz = &pBuffer->achArgs[0];
+                                    int   i = 0;
+                                    while (*psz != '\0')
+                                    {
+                                        kprintf(("Arg %d: %s\n", i++, psz));
+                                        psz += 1 + strlen(psz);
+                                    }
+                                    #endif
+                                    memmove(&pBuffer->achArgs[cchToAdd + cchScriptnameDelta],
+                                            &pBuffer->achArgs[0], cchArguments);
+
+                                    /*
+                                     * Copy the arguments.
+                                     */
+                                    kprintf(("ldrOpen: script debug 8\n"));
+                                    memcpy(&pBuffer->achArgs[0], pszStart, cchToAdd); /* Interpreter with arguments */
+                                    if (!fFirst)
+                                        pBuffer->achArgs[cchToAdd - 1] = ' ';
+                                    strcpy(&pBuffer->achArgs[cchToAdd], pszFilename); /* Scriptname */
+                                    kprintf(("ldrOpen: script debug a\n"));
+
+                                    #ifdef DEBUG
+                                    psz = &pBuffer->achArgs[0];
+                                    i = 0;
+                                    while (*psz != '\0')
+                                    {
+                                        kprintf(("Arg %d: %s\n", i++, psz));
+                                        psz += 1 + strlen(psz);
+                                    }
+                                    #endif
                                 }
                                 else
                                     kprintf(("ldrOpen: failed to open interpreter (%s), rc=%d\n", pszStart, rc));
@@ -364,23 +401,18 @@ ULONG LDRCALL myldrOpen(PSFN phFile, char *pszFilename, ULONG param3)
                             rc = ERROR_BAD_EXE_FORMAT; /*?*/
                         }
                     }
-                    else
-                    {
-                        kprintf(("ldrOpen: no interpereter on the first line.\n"));
-                        rc = ERROR_BAD_EXE_FORMAT; /*?*/
-                    }
                 }
                 else
                 {
-                    kprintf(("ldrOpen: read of min(cbFile, 256) = %d failed, rc = %d\n", cchRead, rc));
+                    kprintf(("ldrOpen: no interpereter on the first line.\n"));
+                    rc = ERROR_BAD_EXE_FORMAT; /*?*/
                 }
-            } /* else inn other formats here. */
-        }
-        else
-        {
-            kprintf(("ldrOpen: ldrRead failed with rc=%d when reading DosHdr.\n", rc));
-            rc = NO_ERROR;
-        }
+            }
+            else
+            {
+                kprintf(("ldrOpen: read of min(cbFile, 256) = %d failed, rc = %d\n", cchRead, rc));
+            }
+        } /* else inn other formats here. */
         rfree(pszBuffer);
     }
     return rc;
