@@ -1,4 +1,4 @@
-/* $Id: wndmsg.cpp,v 1.3 1999-09-15 23:19:03 sandervl Exp $ */
+/* $Id: wndmsg.cpp,v 1.4 1999-10-11 15:26:07 sandervl Exp $ */
 /*
  * Win32 window message text function for OS/2
  *
@@ -161,6 +161,11 @@ MSGDESC gaMsgs[] =
     { "WM_HELP", WM_HELP, 0},                               // 0x53
     { "WM_USERCHANGED", WM_USERCHANGED, 0},                 // 0x54
     { "WM_NOTIFYFORMAT", WM_NOTIFYFORMAT, 0},               // 0x55
+    { "WM_STYLECHANGING", WM_STYLECHANGING, 0},             // 0x7C
+    { "WM_STYLECHANGED", WM_STYLECHANGED, 0},               // 0x7D
+    { "WM_DISPLAYCHANGE", WM_DISPLAYCHANGE, 0},             // 0x7E
+    { "WM_GETICON", WM_GETICON, 0},                         // 0x7F
+    { "WM_SETICON", WM_SETICON, 0},                         // 0x80
     { "WM_NCCREATE", WM_NCCREATE,                           // 0x0081
         MTF_TYPE_NC},
     { "WM_NCDESTROY", WM_NCDESTROY,                         // 0x0082

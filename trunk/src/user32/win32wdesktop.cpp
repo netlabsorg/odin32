@@ -1,4 +1,4 @@
-/* $Id: win32wdesktop.cpp,v 1.3 1999-10-09 19:12:03 sandervl Exp $ */
+/* $Id: win32wdesktop.cpp,v 1.4 1999-10-11 15:26:06 sandervl Exp $ */
 /*
  * Win32 Desktop Window for OS/2
  *
@@ -57,6 +57,13 @@ Win32Desktop::Win32Desktop() : Win32BaseWindow(OBJTYPE_WINDOW)
 //******************************************************************************
 Win32Desktop::~Win32Desktop()
 {
+}
+//******************************************************************************
+//Disabling the desktop is not a good idea (mouse no longer responds)
+//******************************************************************************
+BOOL Win32Desktop::EnableWindow(BOOL fEnable)
+{
+  return TRUE; //of course we succeeded
 }
 //******************************************************************************
 //Dummy window procedure. Does nothing.
