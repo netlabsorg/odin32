@@ -1,4 +1,4 @@
-/* $Id: ReportingBugs.txt,v 1.1 2000-07-22 09:34:01 sandervl Exp $ */
+/* $Id: ReportingBugs.txt,v 1.2 2000-07-23 11:59:30 sandervl Exp $ */
 
 Reporting Odin bugs
 -------------------
@@ -37,7 +37,7 @@ Fixpack level:
 Windows application:	name, version + url (if it can be downloaded somewhere)
 Problem desription:	Try to give an accurate desription so we can reproduce it on our systems
 
-Log file:		Search for 'stack dump' in odin_0.log and include the exception information + last few lines preceding it.
+Log file:		Search for 'stack dump' in odin32_0.log and include the exception information + last few lines preceding it.
 			i.e:
 			t1: GDI32: SaveDC
 			t1: GDI32: StretchDIBits 1000245 to (0,0) (740,61) from (0,0) (740,61), 1d3001c 18817f0 0 cc0020
