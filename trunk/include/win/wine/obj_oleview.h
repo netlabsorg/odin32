@@ -1,15 +1,17 @@
-/* $Id: obj_oleview.h,v 1.5 1999-08-22 22:52:09 sandervl Exp $ */
+/* $Id: obj_oleview.h,v 1.6 1999-09-02 19:07:18 phaller Exp $ */
 /*
  * Defines the COM interfaces and APIs related to ViewObject
  *
- * Depends on 'obj_base.h'.
  */
 
 #ifndef __WINE_WINE_OBJ_OLEVIEW_H
 #define __WINE_WINE_OBJ_OLEVIEW_H
 
 
-#include "winbase.h"
+#include "wine/obj_base.h"
+#include "wine/obj_dataobject.h"
+
+struct tagLOGPALETTE;
 
 #ifdef __cplusplus
 extern "C" {
@@ -38,7 +40,7 @@ typedef BOOL    (CALLBACK* IVO_ContCallback)(DWORD);
 #define ICOM_INTERFACE IViewObject
 #define IViewObject_METHODS \
 	ICOM_METHOD10(HRESULT,Draw, DWORD,dwDrawAspect, LONG,lindex, void*,pvAspect, DVTARGETDEVICE*,ptd, HDC,hdcTargetDev, HDC,hdcDraw, LPCRECTL,lprcBounds, LPCRECTL,lprcWBounds, IVO_ContCallback, pfnContinue, DWORD,dwContinue) \
-	ICOM_METHOD6(HRESULT,GetColorSet, DWORD,dwDrawAspect, LONG,lindex, void*,pvAspect, DVTARGETDEVICE*,ptd, HDC,hicTargetDevice, LOGPALETTE**,ppColorSet) \
+	ICOM_METHOD6(HRESULT,GetColorSet, DWORD,dwDrawAspect, LONG,lindex, void*,pvAspect, DVTARGETDEVICE*,ptd, HDC,hicTargetDevice, struct tagLOGPALETTE**,ppColorSet) \
 	ICOM_METHOD4(HRESULT,Freeze, DWORD,dwDrawAspect, LONG,lindex, void*,pvAspect, DWORD*,pdwFreeze) \
 	ICOM_METHOD1(HRESULT,Unfreeze, DWORD,dwFreeze) \
 	ICOM_METHOD3(HRESULT,SetAdvise, DWORD,aspects, DWORD,advf, IAdviseSink*,pAdvSink) \
