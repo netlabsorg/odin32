@@ -1,4 +1,4 @@
- /* $Id: changelog,v 1.245 1999-09-26 14:44:21 sandervl Exp $ */
+ /* $Id: changelog,v 1.246 1999-09-26 15:26:25 sandervl Exp $ */
 
  99-09-26: Achim Hasenmueller <achimha@innotek.de>
         - COMCTL32: Merged with WINE 990923 changes
@@ -6,7 +6,7 @@
 
  99-09-26: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32:   Started with standard window scrollbar implementation
-                    Rewrote ScrollWindow (not done and not working correctly)
+                    Rewrote ScrollWindow (seems to work ok)
                     Set text bugfix (crash in about dialog box of generic.exe)
                     Send WM_INITDLG after creation of dialog controls.
                     Set last error to 0 at end of BeginPaint/EndPaint.
