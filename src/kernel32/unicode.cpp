@@ -1,4 +1,4 @@
-/* $Id: unicode.cpp,v 1.10 1999-06-30 13:25:01 sandervl Exp $ */
+/* $Id: unicode.cpp,v 1.11 1999-06-30 21:19:42 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -139,8 +139,8 @@ int WIN32API UnicodeToAsciiN(WCHAR *ustring, char *astring, int unilen)
       return 0; //no data
     }
 
-    uni_chars_left = unilen; //elements
-    out_bytes_left = unilen; //size in bytes
+    uni_chars_left = unilen-1; //elements
+    out_bytes_left = uni_chars_left; //size in bytes == elements
     in_buf  = (UniChar*)ustring;
     out_buf = astring;
     rc = UniUconvFromUcs(uconv_object,
@@ -148,20 +148,25 @@ int WIN32API UnicodeToAsciiN(WCHAR *ustring, char *astring, int unilen)
                          (void**)&out_buf, &out_bytes_left,
                          &num_subs);
 
+    unilen -= 1+out_bytes_left; //end + left bytes
+    astring[unilen] = 0; //terminate
+
+    return unilen;
+
 //    dprintf(("KERNEL32: UnicodeToAsciiN(%d) '%s'\n", rc, astring ));
   } else
   {
     /* idiots unicode conversion :) */
-    for(i = 0; i < unilen-1; i++)
+    for (i = 0; i < unilen-1; i++)
     {
       astring[i] = (ustring[i] > 255) ? (char)20 : (char)ustring[i]; //CB: handle invalid characters as space
       if (ustring[i] == 0) return i; //asta la vista, baby
     }
+
+    astring[unilen-1] = 0; // @@@PH: 1999/06/09 fix - always terminate string
+
+    return(unilen-1);
   }
-
-  astring[unilen-1] = 0; // @@@PH: 1999/06/09 fix - always terminate string
-
-  return(unilen-1);
 }
 //******************************************************************************
 // Converts unicode string to ascii string
@@ -231,16 +236,18 @@ void WIN32API AsciiToUnicodeN(char *ascii, WCHAR *unicode, int asciilen)
     }
 
     in_buf        = ascii;
-    in_bytes_left = asciilen; //buffer size in bytes
+    in_bytes_left = asciilen-1; //buffer size in bytes
     out_buf = (UniChar*)unicode;
 
-    uni_chars_left = asciilen; //elements
+    uni_chars_left = in_bytes_left; //elements
     dprintf(("KERNEL32: AsciiToUnicode %d\n", in_bytes_left));
 
     rc = UniUconvToUcs( uconv_object,
                         (void**)&in_buf, &in_bytes_left,
                         &out_buf,        &uni_chars_left,
                         &num_subs );
+
+    unicode[asciilen-1-in_bytes_left] = 0;
 
     //if (rc != ULS_SUCCESS && in_bytes_left > 0) //CB: never the case during my tests
     //   dprintf(("KERNEL32: AsciiToUnicode failed, %d bytes left!\n",in_bytes_left));
@@ -253,9 +260,9 @@ void WIN32API AsciiToUnicodeN(char *ascii, WCHAR *unicode, int asciilen)
       unicode[i] = ascii[i];
       if (ascii[i] == 0) return; //work done
     }
-  }
 
-  unicode[asciilen-1] = 0;
+    unicode[asciilen-1] = 0;
+  }
 }
 //******************************************************************************
 // Copies the full string from ascii to unicode
@@ -275,6 +282,7 @@ void WIN32API AsciiToUnicode(char *ascii, WCHAR *unicode)
   /* forward to call with length parameter */
   AsciiToUnicodeN(ascii, unicode, strlen(ascii)+1); //end included
 }
+
 
 
 
