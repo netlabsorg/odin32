@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.370 2003-05-02 15:33:16 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.371 2003-05-02 17:18:57 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1178,15 +1178,7 @@ ULONG Win32BaseWindow::MsgButton(MSG *msg)
         case WM_RBUTTONDOWN:
         {
                 if (getParent())
-                {
-                    POINTS pt = MAKEPOINTS(msg->lParam);
-                    POINT point;
-
-                    point.x = pt.x;
-                    point.y = pt.y;
-                    MapWindowPoints(getWindowHandle(), getParent()->getWindowHandle(), &point, 1);
-                    NotifyParent(msg->message, msg->wParam, MAKELPARAM(point.x,point.y));
-                }
+                    NotifyParent(msg->message, msg->wParam, 0);
                 break;
         }
     }
@@ -2306,8 +2298,21 @@ void Win32BaseWindow::NotifyParent(UINT Msg, WPARAM wParam, LPARAM lParam)
                 /* Notify the parent window only */
                 parentwindow = window->getParent();
                 if(parentwindow) {
+                    /* PF We should map points for each window accordingly! */
+                    if (Msg == WM_LBUTTONDOWN || Msg == WM_MBUTTONDOWN || Msg == WM_RBUTTONDOWN)
+                    {
+                      POINTS pt = MAKEPOINTS(lParam);
+                      POINT point;
+
+                      point.x = pt.x;
+                      point.y = pt.y;
+
+                      MapWindowPoints(getWindowHandle(),parentwindow->getWindowHandle(), &point, 1);
+                      lParam = MAKELPARAM(point.x, point.y);
+                    }
                     SendMessageA(parentwindow->getWindowHandle(), WM_PARENTNOTIFY, MAKEWPARAM(Msg, getWindowId()), lParam );
                 }
+
         }
         else    break;
 
