@@ -1,4 +1,4 @@
-/* $Id: crtdll.cpp,v 1.24 2000-02-21 23:11:30 sandervl Exp $ */
+/* $Id: crtdll.cpp,v 1.25 2000-04-13 18:46:15 sandervl Exp $ */
 
 /*
  * The C RunTime DLL
@@ -2301,10 +2301,14 @@ double CDECL CRTDLL_difftime( time_t t1, time_t t0 )
 /*********************************************************************
  *                  div		(CRTDLL.355)
  */
-div_t CDECL CRTDLL_div( int numer, int denom )
+ULONG CDECL CRTDLL_div( int number, int denom )
 {
+ div_t divt;
+
   dprintf2(("CRTDLL: div\n"));
-  return (div(numer, denom));
+  divt = (div(number, denom));
+  SetEDX(divt.rem); //NOTE: make sure the compiler doesn't overwrite edx!
+  return divt.quot;
 }
 
 

@@ -1,4 +1,4 @@
-; $Id: asmhlp.asm,v 1.1 1999-12-21 12:27:11 sandervl Exp $
+; $Id: asmhlp.asm,v 1.2 2000-04-13 18:46:15 sandervl Exp $
 
 .586P
                NAME    asmhlp
@@ -12,6 +12,12 @@ _POP_FPU proc near
 	fstp	qword ptr [eax]
 	ret
 _POP_FPU endp
+
+public		_SetEDX
+_SetEDX proc near
+	mov	edx, [esp+4];
+	ret
+_SetEDX endp
 
 CODE32          ENDS
 
