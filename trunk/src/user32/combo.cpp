@@ -1,4 +1,4 @@
-/* $Id: combo.cpp,v 1.28 2000-03-18 16:13:26 cbratschi Exp $ */
+/* $Id: combo.cpp,v 1.29 2000-03-26 16:30:29 cbratschi Exp $ */
 /*
  * Combo controls
  *
@@ -13,12 +13,6 @@
  * Status:  in progress
  * Version: ?.??
  */
-
-/* CB: bugs
- - problems with focus handling (Win32 <-> OS/2)
-   will be fixed soon
- - several other bugs
-*/
 
 #include <string.h>
 #include <os2win.h>
@@ -763,7 +757,7 @@ static void CBPaintText(
        dis.hwndItem     = lphc->hwndself;
        dis.itemAction   = ODA_DRAWENTIRE;
        dis.itemID       = id;
-       dis.itemState    = itemState;
+       dis.itemState    = itemState | ODS_COMBOBOXEDIT;
        dis.hDC          = hdc;
        dis.rcItem       = rectEdit;
        dis.itemData     = SendMessageA( lphc->hWndLBox, LB_GETITEMDATA,
