@@ -621,6 +621,60 @@ function Odin32DBDocRow(&$aContent, $sName, $sLabel, $array, $sValueName)
 }
 
 
+/* NAVIGATION */
+/* NAVIGATION */
+/* NAVIGATION */
+
+/**
+ * Make top of page navigation stuff for the Odin32 database pages.
+ * @param       $sExpand    Expand arguments.
+ * @param       $sCollapse  Collapse arguments.
+ * @author      knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ */
+function Odin32DBNavigationTop($sExpand, $sCollapse)
+{
+    echo "\n<center><font size=1>\n";
+
+    echo "<a href=\"Odin32DB.phtml\">Root</a>\n".
+         " - <a href=\"Odin32DB.phtml?dlls=1\">Dlls</a>\n".
+         " - <a href=\"Odin32DB.phtml?authors=1\">Authors</a>\n".
+         " - <a href=\"Odin32DB.phtml?apigroups=1\">API Groups</a>\n";
+
+    if ($sExpand != "" && $sCollapse != "")
+    {
+        echo "<br><a href=\"Odin32DB.phtml?".$sExpand."\">Expand</a> - \n".
+             "<a href=\"Odin32DB.phtml?".$sCollapse."\">Collapse</a>\n";
+    }
+
+    echo "</font></center>\n";
+}
+
+
+/**
+ * Make bottom of page navigation stuff for the Odin32 database pages.
+ * @param       $sExpand    Expand arguments.
+ * @param       $sCollapse  Collapse arguments.
+ * @author      knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ */
+function Odin32DBNavigationBottom($sExpand, $sCollapse)
+{
+    echo "\n<p><br><center>\n".
+         "<font size=1>\n";
+
+    if ($sExpand != "" && $sCollapse != "")
+    {
+        echo "<a href=\"Odin32DB.phtml?".$sExpand."\">Expand</a> - \n".
+             "<a href=\"Odin32DB.phtml?".$sCollapse."\">Collapse</a><br>\n";
+    }
+
+    echo
+         "<a href=\"Odin32DB.phtml\">Root</a>\n".
+         " - <a href=\"Odin32DB.phtml?dlls=1\">Dlls</a>\n".
+         " - <a href=\"Odin32DB.phtml?authors=1\">Authors</a>\n".
+         " - <a href=\"Odin32DB.phtml?apigroups=1\">API Groups</a>\n";
+    echo "</font></<center>\n";
+}
+
 
 
 /* INFO OUTPUT */
@@ -641,6 +695,8 @@ function Odin32DBDocRow(&$aContent, $sName, $sLabel, $array, $sValueName)
  */
 function Odin32DBFunctionInfo(&$aContent, $db, $iRefcode)
 {
+    Odin32DBNavigationTop("","");
+
     $sql = sprintf("SELECT\n".
                    "    f.name          AS name,\n".
                    "    f.intname       AS intname,\n".
@@ -861,6 +917,7 @@ function Odin32DBFunctionInfo(&$aContent, $db, $iRefcode)
         echo "<p> No data! Invalid refcode? </p>";
         Odin32DBSqlError($sql);
     }
+    Odin32DBNavigationBottom("","");
 }
 
 
@@ -884,8 +941,17 @@ function Odin32DBFunctionInfo(&$aContent, $db, $iRefcode)
  */
 function Odin32DBDllInfo(&$aContent, $db, $iRefcode, $fFunctions, $fFiles, $fAPIGroups, $fAuthors, $fSortByState)
 {
+    /*
+     * Navigation - TOP
+     */
+    $sExpand    = "dllrefcode=".$iRefcode."&fFiles=1&fFunctions=1&fAPIGroups=1&fAuthors=1";
+    if ($fSortByState)  $sExpand = $sExpand."&fSortByState=".$fSortByState;
+    $sCollapse  = "dllrefcode=".$iRefcode;
+    Odin32DBNavigationTop($sExpand, $sCollapse);
 
-
+    /*
+     * Fetch (vital) data.
+     */
     $sql = sprintf("SELECT\n".
                    "    d.name          AS name,\n".
                    "    d.description   AS description,\n".
@@ -900,11 +966,6 @@ function Odin32DBDllInfo(&$aContent, $db, $iRefcode, $fFunctions, $fFiles, $fAPI
                     $iRefcode);
     if (($result = mysql_query($sql, $db)) && mysql_num_rows($result) > 0 && ($array = mysql_fetch_array($result)))
     {
-        echo "<a href=\"Odin32DB.phtml?dllrefcode=".$iRefcode."&fFiles=1&fFunctions=1&fAPIGroups=1&fAuthors=1";
-        if ($fSortByState)  echo "&fSortByState=".$fSortByState;
-        echo "\">Expand all.</a>\n";
-        echo "<a href=\"Odin32DB.phtml?dllrefcode=".$iRefcode."\">Collapse all.</a>\n";
-
         /*
          * General
          */
@@ -1232,6 +1293,11 @@ function Odin32DBDllInfo(&$aContent, $db, $iRefcode, $fFunctions, $fFiles, $fAPI
         echo "<p> No data! Invalid refcode? </p>";
         Odin32DBSqlError($sql);
     }
+
+    /*
+     * Navigation - Bottom
+     */
+    Odin32DBNavigationBottom($sExpand, $sCollapse);
 }
 
 
@@ -1254,7 +1320,17 @@ function Odin32DBDllInfo(&$aContent, $db, $iRefcode, $fFunctions, $fFiles, $fAPI
  */
 function Odin32DBFileInfo(&$aContent, $db, $iRefcode, $fFunctions, $fAPIGroups, $fAuthors, $fSortByState)
 {
+    /*
+     * Navigation - TOP
+     */
+    $sExpand    = "filerefcode=".$iRefcode."&fFiles=1&fFunctions=1&fAPIGroups=1&fAuthors=1";
+    if ($fSortByState)  $sExpand = $sExpand."&fSortByState=".$fSortByState;
+    $sCollapse  = "filerefcode=".$iRefcode;
+    Odin32DBNavigationTop($sExpand, $sCollapse);
 
+    /*
+     * Fetch (vital) data.
+     */
     $sql = sprintf("SELECT\n".
                    "    f.name          AS name,\n".
                    "    f.refcode       AS refcode,\n".
@@ -1276,11 +1352,6 @@ function Odin32DBFileInfo(&$aContent, $db, $iRefcode, $fFunctions, $fAPIGroups, 
                     $iRefcode);
     if (($result = mysql_query($sql, $db)) && mysql_num_rows($result) > 0 && ($array = mysql_fetch_array($result)))
     {
-        echo "<a href=\"Odin32DB.phtml?filerefcode=".$iRefcode."&fFiles=1&fFunctions=1&fAPIGroups=1&fAuthors=1";
-        if ($fSortByState)  echo "&fSortByState=".$fSortByState;
-        echo "\">Expand all.</a>\n";
-        echo "<a href=\"Odin32DB.phtml?filerefcode=".$iRefcode."\">Collapse all.</a>\n";
-
         /*
          * General
          */
@@ -1541,6 +1612,11 @@ function Odin32DBFileInfo(&$aContent, $db, $iRefcode, $fFunctions, $fAPIGroups, 
         echo "<p> No data! Invalid refcode? </p>";
         Odin32DBSqlError($sql);
     }
+
+    /*
+     * Navigation - Bottom
+     */
+    Odin32DBNavigationBottom($sExpand, $sCollapse);
 }
 
 
@@ -1566,6 +1642,17 @@ function Odin32DBFileInfo(&$aContent, $db, $iRefcode, $fFunctions, $fAPIGroups, 
  */
 function Odin32DBAuthorInfo(&$aContent, $db, $iRefcode, $fDlls, $fFunctions, $fFiles, $fAPIGroups, $fSortByState, $iDllRefcode)
 {
+    /*
+     * Navigation - TOP
+     */
+    $sExpand    = "authorrefcode=".$iRefcode."&fDlls=1&fFiles=1&fFunctions=1&fAPIGroups=1&fAuthors=1&dll=".$iDllRefcode;
+    if ($fSortByState)  $sExpand = $sExpand."&fSortByState=".$fSortByState;
+    $sCollapse  = "authorrefcode=".$iRefcode;
+    Odin32DBNavigationTop($sExpand, $sCollapse);
+
+    /*
+     * Fetch (vital) data.
+     */
     $sql = sprintf("SELECT\n".
                    "    a.name          AS name,\n".
                    "    a.refcode       AS refcode,\n".
@@ -1582,12 +1669,6 @@ function Odin32DBAuthorInfo(&$aContent, $db, $iRefcode, $fDlls, $fFunctions, $fF
                    $iRefcode);
     if (($result = mysql_query($sql, $db)) && mysql_num_rows($result) > 0 && ($array = mysql_fetch_array($result)))
     {
-        echo "<a href=\"Odin32DB.phtml?authorrefcode=".$iRefcode."&fDlls=1&fFiles=1&fFunctions=1&fAPIGroups=1&fAuthors=1&dll=".$iDllRefcode;
-        if ($fSortByState)  echo "&fSortByState=".$fSortByState;
-        echo "\">Expand all.</a>\n";
-        echo "<a href=\"Odin32DB.phtml?authorrefcode=".$iRefcode."\">Collapse all.</a>\n";
-
-
         /*
          * General
          */
@@ -1942,6 +2023,11 @@ function Odin32DBAuthorInfo(&$aContent, $db, $iRefcode, $fDlls, $fFunctions, $fF
         echo "<p> No data! Invalid refcode? </p>";
         Odin32DBSqlError($sql);
     }
+
+    /*
+     * Navigation - Bottom
+     */
+    Odin32DBNavigationBottom($sExpand, $sCollapse);
 }
 
 
@@ -1964,6 +2050,17 @@ function Odin32DBAuthorInfo(&$aContent, $db, $iRefcode, $fDlls, $fFunctions, $fF
  */
 function Odin32DBAPIGroupInfo(&$aContent, $db, $iRefcode, $fFunctions, $fFiles, $fAuthors, $fSortByState)
 {
+    /*
+     * Navigation - TOP
+     */
+    $sExpand    = "apigrouprefcode=".$iRefcode."&fFiles=1&fFunctions=1&fAuthors=1";
+    if ($fSortByState)  $sExpand = $sExpand."&fSortByState=".$fSortByState;
+    $sCollapse  = "apigrouprefcode=".$iRefcode;
+    Odin32DBNavigationTop($sExpand, $sCollapse);
+
+    /*
+     * Fetch (vital) data.
+     */
     $sql = sprintf("SELECT\n".
                    "    g.name          AS name,\n".
                    "    g.refcode       AS refcode,\n".
@@ -1979,11 +2076,6 @@ function Odin32DBAPIGroupInfo(&$aContent, $db, $iRefcode, $fFunctions, $fFiles, 
                    $iRefcode);
     if (($result = mysql_query($sql, $db)) && mysql_num_rows($result) > 0 && ($array = mysql_fetch_array($result)))
     {
-        echo "<a href=\"Odin32DB.phtml?apigrouprefcode=".$iRefcode."&fFiles=1&fFunctions=1&fAuthors=1";
-        if ($fSortByState)  echo "&fSortByState=".$fSortByState;
-        echo "\">Expand all.</a>\n";
-        echo "<a href=\"Odin32DB.phtml?apigrouprefcode=".$iRefcode."\">Collapse all.</a>\n";
-
         /*
          * General
          */
@@ -2245,6 +2337,11 @@ function Odin32DBAPIGroupInfo(&$aContent, $db, $iRefcode, $fFunctions, $fFiles, 
         echo "<p> No data! Invalid refcode? </p>";
         Odin32DBSqlError($sql);
     }
+
+    /*
+     * Navigation - Bottom
+     */
+    Odin32DBNavigationBottom($sExpand, $sCollapse);
 }
 
 
@@ -2259,7 +2356,7 @@ function Odin32DBAPIGroupInfo(&$aContent, $db, $iRefcode, $fFunctions, $fFiles, 
  * Makes the contents for this page.
  * @sketch      Writes the headers present in the contents array.
  */
-function DBWriteContents(&$aContent)
+function Odin32DBWriteContents(&$aContent)
 {
     TocBeg();
     for ($i = 0; $i < sizeof($aContent); $i += 2)

@@ -15,8 +15,8 @@ $rc = mysql_select_db("odin32", $db);
  * Global Variables
  */
 $iRefcode       = -1;                   /* Reference number. (< 0 is all members in the category) */
-$sCategory      = "";                   /* Category name for internal use (equal to table name). */
-$sCategoryName  = "";                   /* Category name for presentation. */
+$sCategory      = "root";               /* Category name for internal use (equal to table name). */
+$sCategoryName  = "Root Menu";          /* Category name for presentation. */
 $fNoData        = 0;                    /* Flag which is set if refcode don't give matches in the DB. */
 
 
@@ -77,14 +77,29 @@ else if (isset($authorrefcode))
     $fSortByState=(isset($fSortByState) && $fSortByState!= '0');
     if (!(isset($authordll) && $authordll != "" && @(int)$authordll >= 0))
         $authordll = -1;
-} /* else: initial page */
+}
+else if (isset($dlls))
+{   /* All dlls */
+    $sCategory      = "dlls";
+    $sCategoryName  = "Dlls";
+}
+else if (isset($apigroups))
+{   /* All API Groups */
+    $sCategory      = "apigroups";
+    $sCategoryName  = "API Groups";
+}
+else if (isset($authors))
+{   /* All authors */
+    $sCategory      = "authors";
+    $sCategoryName  = "Authors";
+} /* else: root page */
 
 
 /*
  * Get name of the item we're to display data on.
  */
 if ($iRefcode < 0)
-    $sName = "All"; //FIXME
+    $sName = ""; //FIXME
 else
 {
     $sql = sprintf("SELECT name FROM %s WHERE refcode = %d",
@@ -105,14 +120,16 @@ else
 }
 
 require "01-PreTitle.php3";
-echo $Title." - ".$sCategoryName.": ".$sName;
+if ($sName == "")   echo $Title." - ".$sCategoryName;
+else                echo $Title." - ".$sCategoryName.": ".$sName;
 require "02-PostTitle.php3";
 
 require "03-MainTableBeg.php3";
 require "04-ColumnOne.php3";
 
 require "05-ColumnTwoHeader.php3";
-echo $Title."<br>".$sCategoryName.": ".$sName;
+if ($sName == "")   echo $Title."<br>".$sCategoryName;
+else                echo $Title."<br>".$sCategoryName.": ".$sName;
 require "06-ColumnTwoHeader2.php3";
 
 
@@ -123,46 +140,215 @@ $aContent = array();
 
 
 TekstBeg();
+
 if (!$fNoData)
 {
     switch ($sCategory)
     {
         case "dll":
-            {
+        {
             Odin32DBDllInfo($aContent, $db, $iRefcode, $fFunctions, $fFiles, $fAPIGroups, $fAuthors, $fSortByState);
             break;
-            }
+        }
 
         case "file":
-            {
+        {
             Odin32DBFileInfo($aContent, $db, $iRefcode, $fFunctions, $fAPIGroups, $fAuthors, $fSortByState);
             break;
-            }
+        }
 
         case "function":
-            {
+        {
             Odin32DBFunctionInfo($aContent, $db, $iRefcode);
             break;
-            }
+        }
 
         case "apigroup":
-            {
+        {
             Odin32DBAPIGroupInfo(&$aContent, $db, $iRefcode, $fFunctions, $fFiles, $fAuthors, $fSortByState);
             break;
-            }
+        }
 
         case "author":
-            {
+        {
             Odin32DBAuthorInfo($aContent, $db, $iRefcode, $fDlls, $fFunctions, $fFiles, $fAPIGroups, $fSortByState, $authordll);
             break;
+        }
+
+        case "root":
+        {
+            /*
+             * The root page.
+             */
+            Odin32DBNavigationTop("","");
+            Odin32DBNaslov($aContent, "Welcome to the Odin32 API Database", "welcome", "");
+            echo "This is the first Beta edition of the Odin32 API Database.<br>\n".
+                 "There might be dead or non-functioning links. Currently feedback is <i>NOT</i> needed.\n".
+                 "<p>\n".
+                 "Please note that the quality of the data avilable is quite poor\n".
+                 "for the time being. This will improve within some months.<br>\n".
+                 "-Enjoy!<br>\n";
+
+            Odin32DBNaslov($aContent, "Root Menu", "menu", "");
+            echo "<font size=3>".
+                 "<ul>\n".
+                 "  <li><b><a href=\"Odin32DB.phtml?dlls=1\">Dlls</a></b>\n".
+                 "  <li><b><a href=\"Odin32DB.phtml?apigroups=1\">API Groups</a></b>\n".
+                 "  <li><b><a href=\"Odin32DB.phtml?authors=1\">Authors</a></b>\n".
+                 "  <li><i><a href=\"Odin32DB.phtml?searchapi=1\">Search API (not implemeted)</a></i>\n".
+                 "</ul>\n";
+                 "</font>\n";
+            Odin32DBNavigationBottom("","");
+            break;
+        }
+
+        case "dlls":
+        {
+            /*
+             * List all dlls.
+             */
+            Odin32DBNavigationTop("","");
+            Odin32DBNaslov($aContent, "Welcome to the Odin32 API Database", "welcome", "");
+            echo "This is the first Beta edition of the Odin32 API Database.<br>\n".
+                 "There might be dead or non-functioning links. Currently feedback is <i>NOT</i> needed.\n".
+                 "<p>\n".
+                 "Please note that the quality of the data avilable is quite poor\n".
+                 "for the time being. This will improve within some months.<br>\n".
+                 "-Enjoy!<br>\n";
+
+            Odin32DBNaslov($aContent, "All Dlls", "dlls", "");
+            $sql = "SELECT\n".
+                   "    d.name              AS name,\n".
+                   "    d.refcode           AS refcode,\n".
+                   "    COUNT(f.refcode)    AS functions\n".
+                   "FROM\n".
+                   "    dll d\n".
+                   "    JOIN function f\n".
+                   "WHERE\n".
+                   "    f.dll = d.refcode\n".
+                   "GROUP BY d.refcode\n".
+                   "ORDER BY d.name\n";
+            if ($result = mysql_query($sql, $db))
+            {
+                if (mysql_num_rows($result) <= 0)
+                    echo "<i>No dlls!</i>\n";
+                else
+                {
+                    echo "\n<font size=-1><ul><b>";
+                    while ($aDll = mysql_fetch_array($result))
+                    {
+                        echo "<li><a href=\"Odin32DB.phtml?dllrefcode=".$aDll["refcode"].
+                             "\">".$aDll["name"]."</a> (".$aDll["functions"].")\n";
+                    }
+                    echo "</b></ul></font>\n";
+                }
             }
+            else
+                Odin32DBSqlError($sql);
+            Odin32DBNavigationBottom("","");
+            break;
+        }
+
+        case "authors":
+        {
+            /*
+             * List all authors.
+             */
+            Odin32DBNavigationTop("","");
+            Odin32DBNaslov($aContent, "Welcome to the Odin32 API Database", "welcome", "");
+            echo "This is the first Beta edition of the Odin32 API Database.<br>\n".
+                 "There might be dead or non-functioning links. Currently feedback is <i>NOT</i> needed.\n".
+                 "<p>\n".
+                 "Please note that the quality of the data avilable is quite poor\n".
+                 "for the time being. This will improve within some months.<br>\n".
+                 "-Enjoy!<br>\n";
+
+            Odin32DBNaslov($aContent, "All Authors", "authors", "");
+            $sql = "SELECT\n".
+                   "    name,\n".
+                   "    refcode, \n".
+                   "    COUNT(fa.function)  AS functions\n".
+                   "FROM\n".
+                   "    author a\n".
+                   "    LEFT OUTER JOIN fnauthor fa ON a.refcode = fa.author\n".
+                   "GROUP BY name\n".
+                   "ORDER BY name\n";
+            if ($result = mysql_query($sql, $db))
+            {
+                if (mysql_num_rows($result) <= 0)
+                    echo "<i>No dlls!</i>\n";
+                else
+                {
+                    echo "\n<font size=-1><ul><b>";
+                    while ($aAuthor = mysql_fetch_array($result))
+                    {
+                        echo "<li><a href=\"Odin32DB.phtml?authorrefcode=".$aAuthor["refcode"].
+                             "\">".$aAuthor["name"]."</a> (".$aAuthor["functions"].")\n";
+                    }
+                    echo "</ul></b></font>\n";
+                }
+            }
+            else
+                Odin32DBSqlError($sql);
+            Odin32DBNavigationBottom("","");
+            break;
+        }
+
+        case "apigroups":
+        {
+            /*
+             * List all API Groups.
+             */
+            Odin32DBNavigationTop("","");
+            Odin32DBNaslov($aContent, "Welcome to the Odin32 API Database", "welcome", "");
+            echo "This is the first Beta edition of the Odin32 API Database.<br>\n".
+                 "There might be dead or non-functioning links. Currently feedback is <i>NOT</i> needed.\n".
+                 "<p>\n".
+                 "Please note that the quality of the data avilable is quite poor\n".
+                 "for the time being. This will improve within some months.<br>\n".
+                 "-Enjoy!<br>\n";
+
+            Odin32DBNaslov($aContent, "All API Groups", "apigroups", "");
+            $sql = "SELECT\n".
+                   "    a.name              AS name,\n".
+                   "    a.refcode           AS refcode,\n".
+                   "    COUNT(f.refcode)    AS functions\n".
+                   "FROM\n".
+                   "    apigroup a\n".
+                   "    JOIN function f\n".
+                   "WHERE\n".
+                   "    f.apigroup = a.refcode\n".
+                   "GROUP BY a.name\n".
+                   "ORDER BY a.name\n";
+            if ($result = mysql_query($sql, $db))
+            {
+                if (mysql_num_rows($result) <= 0)
+                    echo "<i>No dlls!</i>\n";
+                else
+                {
+                    echo "\n<font size=-1><ul><b>";
+                    while ($aAPIGroup = mysql_fetch_array($result))
+                    {
+                        echo "<li><a href=\"Odin32DB.phtml?apigrouprefcode=".$aAPIGroup["refcode"].
+                             "\">".$aAPIGroup["name"]."</a> (".$aAPIGroup["functions"].")\n";
+                    }
+                    echo "</ul></b></font>\n";
+                }
+            }
+            else
+                Odin32DBSqlError($sql);
+            Odin32DBNavigationBottom("","");
+            break;
+        }
 
         default:
             echo "!IPE!"; //FIXME
     }
 }
 else
-    echo "Sorry, but there is not data available!";
+{
+}
+
 
 TekstEnd();
 
@@ -170,7 +356,7 @@ require "07-ColumnTwoFooter.php3";
 require "08-News.php3";
 require "09-ContentsTitle.php3";
 
-DBWriteContents($aContent);
+Odin32DBWriteContents($aContent);
 
 require "10-EndOfContent.php3";
 require "11-NetlabsContact.php3";
