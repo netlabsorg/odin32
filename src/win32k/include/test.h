@@ -1,4 +1,4 @@
-/* $Id: test.h,v 1.2 2000-09-02 21:08:04 bird Exp $
+/* $Id: test.h,v 1.3 2000-09-08 21:34:11 bird Exp $
  *
  * Definitions and declarations for test moduls.
  *
@@ -44,6 +44,13 @@ ULONG LDRCALL fakeldrEnum32bitRelRecs(
     ULONG   ulPageAddress,
     PVOID   pvPTDA
     );
+ULONG LDRCALL fakeldrSetVMflags(
+    PMTE        pMTE,
+    ULONG       flObj,
+    PULONG      pflFlags1,
+    PULONG      pflFlags2
+    );
+
 APIRET KRNLCALL fakeIOSftOpen(
     PSZ pszFilename,
     ULONG flOpenFlags,

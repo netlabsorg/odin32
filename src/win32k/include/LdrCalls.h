@@ -1,4 +1,4 @@
-/* $Id: LdrCalls.h,v 1.4 2000-09-02 21:08:02 bird Exp $
+/* $Id: LdrCalls.h,v 1.5 2000-09-08 21:34:11 bird Exp $
  *
  * Prototypes for the loader overrided function.
  *
@@ -220,6 +220,24 @@ extern PMTE LDRCALL ldrValidateMteHandle(HMTE hMTE);
  * @sketch
  */
 extern PMTE KRNLCALL ldrASMpMTEFromHandle(HMTE  hMTE);
+
+
+/**
+ * Sets the VM flags for an executable object.
+ * @returns     void
+ * @param       pMTE        Pointer to the module table entry.
+ * @param       flObj       LX Object flags.
+ * @param       pflFlags1   Pointer to the flFlags1 of VMAllocMem (out).
+ * @param       pflFlags2   Pointer to the flFlags2 of VMAllocMem (out).
+ */
+extern VOID LDRCALL  ldrSetVMflags( /* retd  0x10 */
+    PMTE        pMTE,               /* ebp + 0x08 */
+    ULONG       flObj,              /* ebp + 0x0c */
+    PULONG      pflFlags1,          /* ebp + 0x10 */
+    PULONG      pflFlags2           /* ebp + 0x14 */
+    );
+
+VOID LDRCALL myldrSetVMflags(PMTE pMTE, ULONG flObj, PULONG pflFlags1, PULONG pflFlags2);
 
 
 /**

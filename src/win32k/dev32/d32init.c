@@ -1,4 +1,4 @@
-/* $Id: d32init.c,v 1.22 2000-09-04 16:40:49 bird Exp $
+/* $Id: d32init.c,v 1.23 2000-09-08 21:34:10 bird Exp $
  *
  * d32init.c - 32-bits init routines.
  *
@@ -1217,7 +1217,10 @@ int importTabInit(void)
         0,                              /* 38 */
         0,                              /* 39 */
         0,                              /* 40 */
-        (unsigned)nopSecPathFromSFN,    /* 41 */
+        (unsigned)nopSecPathFromSFN     /* 41 */
+        #if 0 /* experimenting */
+        ,(unsigned)myldrSetVMflags,      /* 42 */
+        #endif
     };
     int i;
     int cb;
@@ -1516,6 +1519,9 @@ VOID R3TstFixImportTab(VOID)
         {(unsigned)&fakeptda_pBeginLIBPATH, 4},
         {(unsigned)&fakeldrpFileNameBuf,    3},
         {(unsigned)&fakeSecPathFromSFN,     3}
+        #if 0 /* experimenting */
+        ,{(unsigned)&fakeldrSetVMflags,      1}
+        #endif
     };
     int i;
 
