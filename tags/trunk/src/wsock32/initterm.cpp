@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.5 1999-08-16 16:55:33 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.6 1999-08-18 08:58:22 sandervl Exp $ */
 
 /*
  * DLL entry point
@@ -70,6 +70,8 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
    switch (ulFlag) {
       case 0 :
          _ctordtorInit();
+
+         CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
 
          /*******************************************************************/
          /* A DosExitList routine must be used to clean up if runtime calls */
