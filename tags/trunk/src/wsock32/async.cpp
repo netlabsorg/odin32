@@ -1,4 +1,4 @@
-/* $Id: async.cpp,v 1.14 1999-11-13 17:55:41 achimha Exp $ */
+/* $Id: async.cpp,v 1.15 1999-11-16 22:03:56 phaller Exp $ */
 
 /*
  *
@@ -423,6 +423,9 @@ PASYNCREQUEST WSAAsyncWorker::popRequest(void)
 // insert request into queue
 void WSAAsyncWorker::pushRequest(PASYNCREQUEST pNew)
 {
+  if (pNew == NULL) // ensure proper parameters
+    return;
+
   lockQueue();  // lock queue
 
   // alter queue
@@ -591,6 +594,9 @@ PASYNCREQUEST WSAAsyncWorker::createRequest  (ULONG ulType,
                                               ULONG ul3)
 {
   PASYNCREQUEST pNew = new ASYNCREQUEST();
+
+  if (pNew == NULL) // check for proper allocation
+   return pNew;
 
   // fill the structure
   pNew->pPrev          = NULL;
@@ -1488,7 +1494,6 @@ ODINFUNCTION4(int, WSAAsyncSelect,SOCKET,       s,
   wsaWorker->pushRequest(pRequest);
   // return (HANDLE)pRequest;
   // AH: WINE returns 0 on this call
-  //TODO: what about error handling? can the createRequest fail?
   return 0;
 }
 
