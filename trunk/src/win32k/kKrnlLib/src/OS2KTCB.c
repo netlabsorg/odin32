@@ -1,4 +1,4 @@
-/* $Id: OS2KTCB.c,v 1.2 2002-04-01 12:47:28 bird Exp $
+/* $Id: OS2KTCB.c,v 1.3 2002-04-01 13:51:17 bird Exp $
  *
  * TCB - Thread Control Block access methods.
  *
@@ -14,8 +14,7 @@
 *******************************************************************************/
 #include <os2.h>
 #include <OS2KTCB.h>
-#include "devSegDf.h"                   /* Win32k segment definitions. */
-#include "options.h"
+#include "kKLKernel.h"
 
 
 /*******************************************************************************

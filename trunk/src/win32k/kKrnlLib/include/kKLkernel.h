@@ -1,4 +1,4 @@
-/* $Id: kKLkernel.h,v 1.1 2002-04-01 13:43:45 bird Exp $
+/* $Id: kKLkernel.h,v 1.2 2002-04-01 13:51:16 bird Exp $
  *
  *
  *
@@ -52,12 +52,24 @@
 #define KF_HALFSTRICT       0x7000
 
 
+#define isSMPKernel()               (fKernel & KF_SMP)
+#define isUNIKernel()               (!(fKernel & KF_SMP))
+
+#define isHighMemorySupported()     (ulKernelBuild >= 14000 || isSMPKernel())
+
+
 /*******************************************************************************
 *   Global Variables                                                           *
 *******************************************************************************/
-extern ULONG    fKernel;
-extern ULONG    ulKernelBuild;
-#if defined(KKRNLLIB) && defined(RING0) && defined(INCL_32)
+#ifndef DATA16_GLOBAL
+    extern unsigned long                fKernel;
+    extern unsigned long                ulKernelBuild;
+#else
+    extern unsigned long DATA16_GLOBAL  fKernel;
+    extern unsigned long DATA16_GLOBAL  ulKernelBuild;
+#endif
+
+#if defined(KKRNLLIB) && defined(RING0)
     #if defined(__IBMC__) || defined(__IBMCPP__)
         #pragma map(fKernel,        "_fKernel")
         #pragma map(ulKernelBuild,  "_ulKernelBuild")
