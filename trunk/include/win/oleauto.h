@@ -1,4 +1,4 @@
-/* $Id: oleauto.h,v 1.1 1999-05-24 20:19:16 ktk Exp $ */
+/* $Id: oleauto.h,v 1.2 1999-08-22 22:15:15 sandervl Exp $ */
 
 #ifndef __WINE_OLEAUTO_H
 #define __WINE_OLEAUTO_H
@@ -95,7 +95,7 @@ SafeArrayRedim(SAFEARRAY *psa, SAFEARRAYBOUND *psaboundNew);
 
 /* These are macros that help accessing the VARIANT date type.
  */
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(NONAMELESSUNION)
 #define V_UNION(A, B)	((A)->B)
 #define V_VT(A) 		((A)->vt)
 #else
@@ -480,7 +480,7 @@ typedef struct tagMETHODDATA {
     PARAMDATA * ppdata;  /* pointer to an array of PARAMDATAs */
     DISPID dispid;      /* method ID */
     UINT16 iMeth;         /* method index */
-    CALLCONV cc;        /* calling convention */
+    CALLCONV_OLE2 cc;        /* calling convention */
     UINT16 cArgs;         /* count of arguments */
     WORD wFlags;        /* same wFlags as on IDispatch::Invoke() */
     VARTYPE vtReturn;
