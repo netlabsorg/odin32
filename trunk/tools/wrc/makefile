@@ -1,0 +1,54 @@
+# $Id: makefile,v 1.1 1999-09-11 23:40:07 bird Exp $
+#
+# NMAKE version of makefile.os2
+#
+
+!include ..\..\include\pdwin32.tools
+
+DEFS      = -D__WINE__ -D__WIN32OS2__ -idirafter ../../include/win -idirafter ../../include
+
+PROGRAMS = wrc.exe
+MODULE   = none
+
+OBJS = \
+        dumpres.o \
+        genres.o \
+        newstruc.o \
+        preproc.o \
+        readres.o \
+        utils.o \
+        wrc.o \
+        y.tab.o \
+        lexyy.o \
+        writeres.o
+
+EXTRA_SRCS = parser.y parser.l
+EXTRA_OBJS = y.tab.o lex.yy.o
+
+all: $(PROGRAMS)
+
+CC = gcc
+#CFLAGS_G = -Wall
+YACC=bison
+LEX=flex
+
+.SUFFIXES:
+.SUFFIXES: .c .o
+
+.c.o:
+        $(CC) $(CFLAGS_G) $(DEFS) -c $< -o $@
+
+wrc.exe: lexyy.c y.tab.c $(OBJS)
+        $(CC) $(CFLAGS) -o $@ $(OBJS)
+        $(CP) $@ ..\bin
+
+y.tab.c y.tab.h: parser.y
+        $(YACC) -d -t parser.y -o y.tab.c
+
+lexyy.c: parser.l
+        $(LEX) -8 parser.l
+
+clean:
+        $(RM) *.o *.exe
+#       $(RM) y.tab.c y.tab.h lexyy.c *.o *.exe
+
