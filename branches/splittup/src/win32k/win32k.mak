@@ -1,383 +1,66 @@
-# $Id: win32k.mak,v 1.13.2.3 2001-10-14 22:57:31 bird Exp $
+# $Id: win32k.mak,v 1.13.2.4 2002-04-01 12:42:15 bird Exp $
 
 #
-# Win32k.sys makefile.
+# win32k.sys
 #
-# Copyright 1998-2001 knut st. osmundsen (kosmunds@csc.com)
-#
-# Project Odin Software License can be found in LICENSE.TXT
+# Copyright (c) 1998-2002 knut st. osmundsen (bird@anduin.net)
 #
 
 
 #
-# Include path definitions, common stuff and our own tools.
+# Setup.
 #
-!include makefile.inc
-!include ../../makefile.inc
-!include win32k.tools.mk
+PATH_ROOT = ..\..
+!include $(PATH_ROOT)\tools\make\setup.mak
 
 
 #
-# Main targetname
+# kLib overrides variables.
 #
-NAME = Win32k
-
-
-#
-# Main rules.
-#
-!if "$(DDKPATH)" == "" || "$(MSCPATH)" == ""  || "$(TOOLKIT)" == "" || "$(VACPATH)" == ""
-all:    $(WIN32KBIN)\$(NAME).sys
+!if [SET KLIB_INC=$(MAKEDIR)\kLib.inc]
 !endif
 
 
 #
-# Win32k.sys objects and libraries - Don't mess with the order or objects and libraries!
+# Config.
 #
-OBJS  =\
-    $(WIN32KOBJ)\devfirst.obj \
-    $(WIN32KOBJ)\d16strat.obj \
-    $(WIN32KOBJ)\d32CallGate.obj \
-    $(WIN32KOBJ)\d32globals.obj \
-    $(WIN32KOBJ)\d16globl.obj \
-    $(WIN32KOBJ)\PerTaskW32kData.obj \
-    $(WIN32KOBJ)\ldr.obj \
-    $(WIN32KOBJ)\myldrClose.obj \
-    $(WIN32KOBJ)\myldrOpen.obj \
-    $(WIN32KOBJ)\myldrRead.obj \
-    $(WIN32KOBJ)\myLDRQAppType.obj \
-    $(WIN32KOBJ)\myldrEnum32bitRelRecs.obj \
-    $(WIN32KOBJ)\myldrOpenPath.obj \
-    $(WIN32KOBJ)\myldrOpenPatha.obj \
-    $(WIN32KOBJ)\myldrFindModule.obj \
-    $(WIN32KOBJ)\myldrCheckInternalName.obj \
-    $(WIN32KOBJ)\myldrGetFileName.obj \
-    $(WIN32KOBJ)\d32Events.obj \
-    $(WIN32KOBJ)\pe2lx.obj \
-    $(WIN32KOBJ)\ModuleBase.obj \
-    $(WIN32KOBJ)\d32Win32kIOCtl.obj \
-    $(WIN32KOBJ)\d32Win32kOpenClose.obj \
-    $(WIN32KOBJ)\k32AllocMemEx.obj \
-    $(WIN32KOBJ)\k32KillProcessEx.obj \
-    $(WIN32KOBJ)\k32HandleSystemEvent.obj \
-    $(WIN32KOBJ)\k32ProcessReadWrite.obj \
-    $(WIN32KOBJ)\k32QueryCallGate.obj \
-    $(WIN32KOBJ)\k32QueryOTEs.obj \
-    $(WIN32KOBJ)\k32QueryOptionsStatus.obj \
-    $(WIN32KOBJ)\k32QuerySystemMemInfo.obj \
-    $(WIN32KOBJ)\k32SetEnvironment.obj \
-    $(WIN32KOBJ)\k32SetOptions.obj \
-    $(WIN32KOBJ)\mytkExecPgm.obj \
-    $(WIN32KOBJ)\mytkStartProcess.obj \
-    $(WIN32KOBJ)\vprntf16.obj \
-    $(WIN32KOBJ)\d32init.obj \
-    $(WIN32KOBJ)\d16init.obj_init
-
-LASTOBJ =\
-    $(WIN32KOBJ)\devlast.obj
-
-LASTLIB = $(WIN32KOBJ)\lastlib.lib
-
-LIBS =\
-    $(ODIN32_LIB)\kKrnlLib.lib \
-    $(VACPATH)\lib\$(RTLLIB_NRE) \
-    $(DDKPATH)\lib\os2386.lib \
-    $(WIN32KOBJ)\devhelp.lib \
-    $(WIN32KOBJ)\clib.lib
+TARGET_MODE = SYS
+TARGET_NAME = win32k
+MAKEFILE    = $(TARGET_NAME).mak
 
 
 #
-# Win32k.sys rule. (Don't mess with the order or objects and libraries!)
+# Object files.
 #
-$(NAME).sys: $(WIN32KBIN)\$(NAME).sys
+TARGET_OBJS =\
+$(PATH_OBJ)\Win32k_first.$(EXT_LIB)\Win32k_first.$(EXT_LIB)\
+$(PATH_OBJ)\Win32k_src.$(EXT_LIB)\Win32k_src.$(EXT_LIB)\
 
-$(WIN32KBIN)\$(NAME).sys:   $(WIN32KBIN)\clfix.exe \
-                            $(WIN32KBIN)\ignore.exe \
-                            $(WIN32KINCLUDE)\options.inc \
-                            $(WIN32KINCLUDE)\api.inc \
-                            $(WIN32KINCLUDE)\win32k.inc \
-                            $(OBJS) \
-                            $(LIBS) \
-                            $(WIN32KOBJ)\$(NAME)bldlevel.def \
-                            $(LASTLIB) \
-                            $(LIBSINIT) \
-                            $(WIN32KOBJ)\$(@B).lnk \
-                            win32k.mak makefile.inc ..\..\makefile.inc
-    -@$(ECHO) recompiling d16globl to get correct build time and date:
-    $(CC16) -c $(CFLAGS16) $(CDEFINES16) $(CINCLUDES16) -Fo$(WIN32KOBJ)\d16globl.obj \
-        -Fa$(WIN32KLIST)\d16globl.s dev16\d16globl.c
-    -@$(ECHO) linking: $@
-!ifdef GREP
-    -4 $(LD) /FORCE $(LFLAGS) @$(WIN32KOBJ)\$(@B).lnk | $(GREP) -v LNK4001 | $(GREP) -v LNK4031
+TARGET_LIBS =\
+kKrnlLib\kKrnlLib.$(EXT_LIB)\
+os2386p.$(EXT_LIB)\
+os2386.$(EXT_LIB)\
+os2286p.$(EXT_LIB)\
+!if "$(BUILD_ENV)" == "VAC308"
+cppon30.$(EXT_LIB)\
 !else
-    -4 $(LD) $(LFLAGS) @$(WIN32KOBJ)\$(@B).lnk
-!endif
-    cd $(WIN32KBIN)
-    @mapsym $(*B).map > nul
-    cd $(WIN32KBASE)
-    if not exist $(ODIN32_BIN) $(CREATEPATH) $(ODIN32_BIN)
-    $(CP) $@ $(ODIN32_BIN)
-    $(CP) $*.sym $(ODIN32_BIN)
-    $(CP) $(WIN32KBASE)\$(*B).ddp $(ODIN32_BIN)
-
-# Linker file.
-$(WIN32KOBJ)\$(NAME).lnk: win32k.mak makefile.inc ..\..\makefile.inc
-    echo Creating linkerfile: @<<$(WIN32KOBJ)\$(NAME).lnk
-/OUT:$(WIN32KBIN)\$(NAME).sys
-/MAP:$(WIN32KBIN)\$(NAME).map
-$(OBJS:  =^
-)
-/IG
-$(LIBS:  =^
-)
-$(LASTLIB)
-$(WIN32KOBJ)\$(NAME)bldlevel.def
-<<KEEP
-
-# Add bldlevel signature to win32k.def - creates temporary win32kbldlevel.def.
-$(WIN32KOBJ)\$(NAME)bldlevel.def: $(NAME).def win32k.mak
-    -$(ECHO) Creates $@ with bldlevel signature string.
-    $(BLDLEVELINF) $(NAME).def $@ -R"$(NAME).def" \
-        -V"#define=ODIN32_VERSION,$(ODIN32_INCLUDE)\odinbuild.h" \
-        -M"#define=ODIN32_BUILD_NR,$(ODIN32_INCLUDE)\odinbuild.h"
-
-# Last lib - needed to get LASTOBJ in after the importlibraries.
-$(LASTLIB): $(LASTOBJ)
-    -@$(RM) $@ > nul 2> nul
-    $(ILIB) $@ $**;
-
-
-#
-# Win32ktst.exe object configuration.
-#   (It should be as identical as possible to win32k.sys.)
-#   (Don't mess with the order or objects and libraries!)
-#
-TSTOBJS =\
-    $(WIN32KOBJ)\devfirst.obj \
-    $(WIN32KOBJ)\d16strat.obj \
-    $(WIN32KOBJ)\d32CallGate.obj \
-    $(WIN32KOBJ)\d32hlp.obj \
-    $(WIN32KOBJ)\d32globals.obj \
-    $(WIN32KOBJ)\d16globl.obj \
-    $(WIN32KOBJ)\asmutils.obj \
-    $(WIN32KOBJ)\locks.obj \
-    $(WIN32KOBJ)\PerTaskW32kData.obj \
-    $(WIN32KOBJ)\ldr.obj \
-    $(WIN32KOBJ)\myldrClose.obj \
-    $(WIN32KOBJ)\myldrOpen.obj \
-    $(WIN32KOBJ)\myldrRead.obj \
-    $(WIN32KOBJ)\myLDRQAppType.obj \
-    $(WIN32KOBJ)\myldrEnum32bitRelRecs.obj \
-    $(WIN32KOBJ)\myldrOpenPath.obj \
-    $(WIN32KOBJ)\myldrOpenPatha.obj \
-    $(WIN32KOBJ)\myldrFindModule.obj \
-    $(WIN32KOBJ)\myldrCheckInternalName.obj \
-    $(WIN32KOBJ)\myldrGetFileName.obj \
-    $(WIN32KOBJ)\d32Events.obj \
-    $(WIN32KOBJ)\OS2KTCB.obj \
-    $(WIN32KOBJ)\OS2KPTDA.obj \
-    $(WIN32KOBJ)\pe2lx.obj \
-    $(WIN32KOBJ)\ModuleBase.obj \
-    $(WIN32KOBJ)\d32Win32kIOCtl.obj \
-    $(WIN32KOBJ)\d32Win32kOpenClose.obj \
-    $(WIN32KOBJ)\k32AllocMemEx.obj \
-    $(WIN32KOBJ)\k32KillProcessEx.obj \
-    $(WIN32KOBJ)\k32HandleSystemEvent.obj \
-    $(WIN32KOBJ)\k32ProcessReadWrite.obj \
-    $(WIN32KOBJ)\k32QueryCallGate.obj \
-    $(WIN32KOBJ)\k32QueryOTEs.obj \
-    $(WIN32KOBJ)\k32QueryOptionsStatus.obj \
-    $(WIN32KOBJ)\k32QuerySystemMemInfo.obj \
-    $(WIN32KOBJ)\k32SetEnvironment.obj \
-    $(WIN32KOBJ)\k32SetOptions.obj \
-    $(WIN32KOBJ)\mytkExecPgm.obj \
-    $(WIN32KOBJ)\mytkStartProcess.obj \
-    $(WIN32KOBJ)\vprntf16.obj_tst. \
-    $(WIN32KOBJ)\d32init.obj_tst. \
-    $(WIN32KOBJ)\d16init.obj_tst_init. \
-    $(WIN32KOBJ)\$(NAME)tst.obj \
-    $(WIN32KOBJ)\dh.obj \
-    $(WIN32KOBJ)\dos.obj \
-    $(WIN32KOBJ)\dosa.obj \
-    $(WIN32KOBJ)\init.obj \
-    $(WIN32KOBJ)\fake.obj \
-    $(WIN32KOBJ)\fakea.obj \
-
-TSTLASTOBJ = $(LASTOBJ)
-
-TSTLIBS = $(LIBS)
-
-
-#
-# Win32ktst.exe rule.
-#   This is a test executable; win32k.sys wrapped into an executable with emulation
-#   code for most of the OS/2 kernel dependencies.
-#
-$(NAME)tst.exe: $(WIN32KBIN)\$(NAME)tst.exe
-    $(CP) $(WIN32KBIN)\$@ $@
-$(WIN32KBIN)\$(NAME)tst.exe:    clfix.exe \
-                                ignore.exe \
-                                Test\TstFakers.c \
-                                $(NAME)tst.def \
-                                $(TSTOBJS:. = ) \
-                                $(TSTLIBS) \
-                                $(TSTLASTOBJ) \
-                                $(WIN32KOBJ)\$(@B).lnk \
-                                win32k.mak makefile.inc ..\..\makefile.inc
-    -@$(ECHO) linking: $@
-!ifdef GREP
-    -4 $(LD) $(LFLAGS) @$(WIN32KOBJ)\$(@B).lnk | $(GREP) -v LNK4001 | $(GREP) -v LNK4031
+!if "$(BUILD_ENV)" == "VAC365"
+cpprni36.$(EXT_LIB)\
 !else
-    -4 $(LD) $(LFLAGS) @$(WIN32KOBJ)\$(@B).lnk
+$(LIB_C_OBJ)\
 !endif
-
-# Linker file.
-$(WIN32KOBJ)\$(NAME)tst.lnk: win32k.mak makefile.inc ..\..\makefile.inc
-    echo Creating linkerfile: @<<$(WIN32KOBJ)\$(NAME)tst.lnk
-/DEBUG
-/OUT:$(WIN32KBIN)\$(NAME)tst.exe
-/MAP:$(WIN32KBIN)\$(NAME)tst.map
-$(TSTOBJS:  =^
-)
-/IG
-$(TSTLIBS:  =^
-)
-$(TSTLASTOBJ)
-$(NAME)tst.def
-<<KEEP
-
-
-
-#
-#
-#   L i b r a r i e s
-#
-#
-
-#
-# Libraries - segments are renamed for the 16-bit libraries.
-#
-
-# List of object files in the converted devhelp library.
-DHLPOBJS =  +$(WIN32KOBJ)\dhcall5b.obj +$(WIN32KOBJ)\dhcal11a.obj \
-            +$(WIN32KOBJ)\dhcal11g.obj +$(WIN32KOBJ)\dhret.obj
-
-# Make corrected devhelp library with only the required object files.
-$(WIN32KOBJ)\devhelp.lib: $(DDKPATH)\lib\dhcalls.lib $(WIN32KBIN)\libconv.exe $(DHLPOBJS:+=)
-    @$(RM) $@
-    @cd $(WIN32KOBJ)
-    $(DDKPATH)\tools\lib /nologo $@ $(DHLPOBJS);
-    @cd $(MAKEDIR)
-
-# Convert devhelp library.
-$(WIN32KOBJ)\devhelp_.lib: $(DDKPATH)\lib\dhcalls.lib
-    $(WIN32KBIN)\libconv $** $@
-
-# Extract required object files from the converted devhelp library.
-$(DHLPOBJS:+=): $(WIN32KOBJ)\devhelp_.lib
-    @cd $(WIN32KOBJ)
-    $(DDKPATH)\tools\lib /nologo $** *$@;
-    @cd $(MAKEDIR)
-
-
-# List of object files in the converted crt library.
-CLIBOBJS =  +$(WIN32KOBJ)\inp.obj       +$(WIN32KOBJ)\outp.obj \
-            +$(WIN32KOBJ)\anfalmul.obj  +$(WIN32KOBJ)\anfaldiv.obj \
-            +$(WIN32KOBJ)\anfalrem.obj  +$(WIN32KOBJ)\anfauldi.obj \
-            +$(WIN32KOBJ)\anuldiv.obj   +$(WIN32KOBJ)\fmemcpy.obj \
-            +$(WIN32KOBJ)\anulrem.obj   +$(WIN32KOBJ)\anlmul.obj \
-            +$(WIN32KOBJ)\__AHINCR.obj  +$(WIN32KOBJ)\anlshl.obj
-
-# Make corrected crt library with only the required object files.
-$(WIN32KOBJ)\clib.lib: $(MSCPATH)\lib\clibcep.lib $(WIN32KBIN)\libconv.exe $(CLIBOBJS:+=)
-    @$(RM) $@
-    @cd $(WIN32KOBJ)
-    $(DDKPATH)\tools\lib /nologo $@ $(CLIBOBJS);
-    @cd $(MAKEDIR)
-
-# Convert devhelp library.
-$(WIN32KOBJ)\clib_.lib: $(MSCPATH)\lib\clibcep.lib
-    $(WIN32KBIN)\libconv $** $@ > nul
-
-# Extract required object files from the converted crt library.
-$(CLIBOBJS:+=): $(WIN32KOBJ)\clib_.lib
-    @cd $(WIN32KOBJ)
-    $(ILIB) $** *$@;
-    @cd $(MAKEDIR)
-
-
-#
-# Make last library.
-#
-$(WIN32KOBJ)\last.lib: $(WIN32KOBJ)\devlast.obj
-    -@$(RM) $@ > nul 2> nul
-    $(ILIB) $@ $**;
-
-
-#
-#
-#   S o u r c e
-#
-#
-
-#
-# Make assembly version of options.h; options.inc
-#
-$(WIN32KINCLUDE)\options.inc:  $(WIN32KINCLUDE)\options.h
-    @$(ECHO) H2Inc: $**
-    $(H2INC) $** > $@
-
-
-#
-# Make assembly version of api.h; api.inc
-#
-$(WIN32KINCLUDE)\api.inc:  $(WIN32KINCLUDE)\api.h
-    @$(ECHO) H2Inc: $**
-    $(H2INC) $** > $@
-
-#
-# Make assembly version of win32k.h; win32k.inc
-#
-$(WIN32KINCLUDE)\win32k.inc:  $(ODIN32_INCLUDE)\win32k.h
-    @$(ECHO) H2Inc: $**
-    $(H2INC) $** > $@
-
-
-#
-#
-#   T o o l s
-#
-#
-
-#
-# Make the convert tool.
-#
-$(WIN32KBIN)\libconv.exe: kKrnlLib\tools\libconv.c
-    icc -Q+ -Ti+ -Fe$@ -Fo$(WIN32KOBJ)\$(*B).obj $**
-
-
-#
-# Make the clfix.exe utillity - clfix.exe
-#   This should fix some of the problems we are experiencing with the
-#   MSC v6.0a compiler (cl.exe) (16-bit).
-#
-$(WIN32KBIN)\clfix.exe: kKrnlLib\tools\clfix.c
-    icc -Q+ -Ti+ -Fe$@ -Fo$(WIN32KOBJ)\$(*B).obj $**
-
-#
-# Ignore utility used to ignore output from icc and linker.
-#
-$(WIN32KBIN)\ignore.exe: kKrnlLib\tools\ignore.c
-    icc -Q+ -Ti+ -Fe$@ -Fo$(WIN32KOBJ)\$(*B).obj $**
-
-
-#
-# Include the .depend file.
-#
-!if [$(EXISTS) .depend] == 0
-!   include .depend
-!else
-!   if [$(ECHO) .depend doesn't exist]
-!   endif
 !endif
+$(PATH_OBJ)\Win32k_last.$(EXT_LIB)\Win32k_last.$(EXT_LIB)
+
+TARGET_DEPS =\
+$(PATH_OBJ)\Win32k_last.$(EXT_LIB)\Win32k_last.$(EXT_LIB)
+
+#SUBDIRS     = kKrnlLib include src
+SUBDIRS     = include src
+
+
+#
+# Process
+#
+!include $(MAKE_INCLUDE_PROCESS)
 
