@@ -1,4 +1,4 @@
-/* $Id: odin32pack.cmd,v 1.11 2001-01-11 07:57:56 bird Exp $
+/* $Id: odin32pack.cmd,v 1.12 2001-01-12 15:05:50 bird Exp $
  *
  * Make the two zip files.
  *
@@ -11,6 +11,7 @@
  */
     sStartDir = directory();
 
+if (0) then do
     /*
      * Make .WPI files.
      */
@@ -22,7 +23,7 @@
     'move *.wpi' sStartDir;
     if (RC <> 0) then call failure rc, 'failed to move the *.wpi ->' sStartDir;
     call ChDir '..\..';
-
+end
 
     /*
      * Make .ZIP files.
@@ -68,7 +69,7 @@ parse arg sDir, sType;
 
     /* Copy root files into the pack directory. */
     call copy sRoot'\bin\odin.ini'
-    call copy sRoot'\doc\odin.ini.txt'
+/*    call copy sRoot'\doc\odin.ini.txt' */
     call copy sRoot'\LICENSE.txt';
     call copy sRoot'\ChangeLog';
     call copy sRoot'\doc\Readme.txt';
@@ -87,28 +88,43 @@ parse arg sDir, sType;
     if (RC <> 0) then
     do
         rc2 = rc;
-        'ren .\system32' sRoot'\'sDir
+        call backout sDir, sType, sRoot;
         call failure rc2, 'renaming system32\glide -> ..\glide_tmp failed';
     end
 
     call copy sRoot'\bin\wgss50.dll', 'system32\wgss50.dll';
+    if (pos('debug', sType) > 0) then
+    do
+        call copy sRoot'\bin\release\odincrt.dll', 'system32\odincrt.dll'
+        call copy sRoot'\bin\release\odincrt.sym', 'system32\odincrt.sym'
+    end
 
     say 'zip -9 -R' sZipFile '* -xCVS';
     'zip -9 -R' sZipFile '* -xCVS';
     if (RC <> 0) then
     do
         rc2 = rc;
-        'ren ..\glide_tmp .\system32\glide'
-        'ren .\system32' sRoot'\'sDir
+        call backout sDir, sType, sRoot;
         call failure rc2, 'zip...';
     end
-    'ren ..\glide_tmp .\system32\glide'
-    if (RC <> 0) then call failure rc, 'renaming glide_tmp failed';
-    'ren .\system32' sRoot'\'sDir
-    if (RC <> 0) then call failure rc, 'renaming' sDir'->system32 failed';
+
+    /* resotre */
+    call backout sDir, sType, sRoot;
 
     /* restore directory */
     call directory(sRoot);
+    return;
+
+/* backout procedure for packdir */
+backout: procedure;
+    parse arg sDir, sType, sRoot
+    if (pos('debug', sType) > 0) then
+    do
+        'del system32\odincrt.dll'
+        'del system32\odincrt.sym'
+    end
+    'ren ..\glide_tmp .\system32\glide'
+    'ren .\system32' sRoot'\'sDir
     return;
 
 /*
