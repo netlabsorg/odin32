@@ -1,4 +1,7 @@
-/* $Id: ChangeLog,v 1.1596 2001-07-13 19:37:31 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1597 2001-07-14 07:44:03 sandervl Exp $ */
+
+ 2001-07-14: Sander van Leeuwen <sandervl@xs4all.nl>
+    - PELDR:    o Fix for parsing cmd line consisting of directory with spaces
 
  2001-07-13: Sander van Leeuwen <sandervl@xs4all.nl>
     - COMDLG32: o Fix for windows 3.1 style file dialog
