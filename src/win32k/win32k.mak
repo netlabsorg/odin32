@@ -1,4 +1,4 @@
-# $Id: win32k.mak,v 1.13.2.1 2001-09-27 03:08:08 bird Exp $
+# $Id: win32k.mak,v 1.13.2.2 2001-09-27 03:27:18 bird Exp $
 
 #
 # Win32k.sys makefile.
@@ -76,12 +76,14 @@ OBJS  =\
 LASTOBJ =\
     $(WIN32KOBJ)\devlast.obj
 
+LASTLIB = $(WIN32KOBJ)\lastlib.lib
+
 LIBS =\
+    $(ODIN32_LIB)\kKrnlLib.lib \
     $(VACPATH)\lib\$(RTLLIB_NRE) \
     $(DDKPATH)\lib\os2386.lib \
     $(WIN32KOBJ)\devhelp.lib \
-    $(WIN32KOBJ)\clib.lib \
-    $(ODIN32_LIB)\kKrnlLib.lib
+    $(WIN32KOBJ)\clib.lib
 
 
 #
@@ -96,7 +98,7 @@ $(WIN32KBIN)\$(NAME).sys:   $(WIN32KBIN)\clfix.exe \
                             $(OBJS) \
                             $(LIBS) \
                             $(WIN32KOBJ)\$(NAME)bldlevel.def \
-                            $(LASTOBJ) \
+                            $(LASTLIB) \
                             $(LIBSINIT) \
                             $(WIN32KOBJ)\$(@B).lnk \
                             win32k.mak makefile.inc ..\..\makefile.inc
@@ -105,7 +107,7 @@ $(WIN32KBIN)\$(NAME).sys:   $(WIN32KBIN)\clfix.exe \
         -Fa$(WIN32KLIST)\d16globl.s dev16\d16globl.c
     -@$(ECHO) linking: $@
 !ifdef GREP
-    -4 $(LD) $(LFLAGS) @$(WIN32KOBJ)\$(@B).lnk | $(GREP) -v LNK4001 | $(GREP) -v LNK4031
+    -4 $(LD) /FORCE $(LFLAGS) @$(WIN32KOBJ)\$(@B).lnk | $(GREP) -v LNK4001 | $(GREP) -v LNK4031
 !else
     -4 $(LD) $(LFLAGS) @$(WIN32KOBJ)\$(@B).lnk
 !endif
@@ -127,7 +129,7 @@ $(OBJS:  =^
 /IG
 $(LIBS:  =^
 )
-$(LASTOBJ)
+$(LASTLIB)
 $(WIN32KOBJ)\$(NAME)bldlevel.def
 <<KEEP
 
@@ -137,6 +139,11 @@ $(WIN32KOBJ)\$(NAME)bldlevel.def: $(NAME).def win32k.mak
     $(BLDLEVELINF) $(NAME).def $@ -R"$(NAME).def" \
         -V"#define=ODIN32_VERSION,$(ODIN32_INCLUDE)\odinbuild.h" \
         -M"#define=ODIN32_BUILD_NR,$(ODIN32_INCLUDE)\odinbuild.h"
+
+# Last lib - needed to get LASTOBJ in after the importlibraries.
+$(LASTLIB): $(LASTOBJ)
+    -@$(RM) $@ > nul 2> nul
+    $(ILIB) $@ $**;
 
 
 #
