@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.12 2000-08-11 10:56:15 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.13 2001-01-05 23:25:30 sandervl Exp $ */
 
 /*
  * DLL entry point
@@ -92,11 +92,6 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
 
          ParseLogStatus();
          CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
-
-         /*******************************************************************/
-         /* A DosExitList routine must be used to clean up if runtime calls */
-         /* are required and the runtime is dynamically linked.             */
-         /*******************************************************************/
 
 	 if(InitRegionSpace() == FALSE) {
 		return 0UL;

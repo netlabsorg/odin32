@@ -1,4 +1,4 @@
-/* $Id: gdi32rsrc.orc,v 1.3 2000-11-23 19:23:01 sandervl Exp $ */
+/* $Id: gdi32rsrc.orc,v 1.4 2001-01-05 23:25:30 sandervl Exp $ */
 
 #include "winuser.h"
 #include "odinrsrc.h"
@@ -27,7 +27,7 @@ BEGIN
             VALUE "FileDescription", "GDI32 System dll\0"
             VALUE "FileVersion", "4.00\0"
             VALUE "InternalName", "GDI32\0"
-            VALUE "LegalCopyright", "Copyright (C) 2000\0"
+            VALUE "LegalCopyright", "Copyright (C) 1999-2001\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "GDI32.DLL\0"
             VALUE "ProductName", "Odin32 - GDI32\0"

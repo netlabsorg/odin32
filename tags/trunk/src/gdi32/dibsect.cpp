@@ -1,4 +1,4 @@
-/* $Id: dibsect.cpp,v 1.44 2000-12-29 18:40:43 sandervl Exp $ */
+/* $Id: dibsect.cpp,v 1.45 2001-01-05 23:25:30 sandervl Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -24,6 +24,7 @@
 #include <vmutex.h>
 #include <win32api.h>
 #include <winconst.h>
+#include <winuser32.h>
 #include <cpuhlp.h>
 #include <dcdata.h>
 #include "oslibgpi.h"
@@ -514,13 +515,6 @@ BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nDestWidth,
            point[1].x, point[1].y, point[2].x, point[2].y, point[3].x, point[3].y,
            nDestWidth, nDestHeight, nSrcWidth, nSrcHeight));
 
-/*
-  hwndDest = Win32ToOS2Handle(hwndDest);
-  if(hwndDest != 0)
-  {
-      hps = WinGetPS(hwndDest);
-  }
-*/
 #ifdef INVERT
   oldyinversion = GpiQueryYInversion(hps);
   if(oldyinversion != 0) {
@@ -602,12 +596,6 @@ BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nDestWidth,
   }
   else  rc = GpiDrawBits(hps, bitmapBits, pOS2bmp, 4, &point[0], ROP_SRCCOPY, os2mode);
 
-/*
-  if(hwndDest != 0)
-  {
-    WinReleasePS(hps);
-  }
-*/
   if(rc == GPI_OK) {
         DIBSection *destdib = DIBSection::findHDC(hdcDest);
         if(destdib) {
