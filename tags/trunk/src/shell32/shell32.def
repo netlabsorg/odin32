@@ -1,4 +1,4 @@
-; $Id: shell32.def,v 1.16 1999-10-19 10:23:27 phaller Exp $
+; $Id: shell32.def,v 1.17 1999-11-02 19:08:17 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 ;based on Windows 95
@@ -52,6 +52,7 @@ EXPORTS
     DoEnvironmentSubstA               = _DoEnvironmentSubstA@8                @44
     PathFileExists                    = _PathFileExistsA@4                    @45
     PathMatchSpec                     = _PathMatchSpecAW@8                    @46
+    PathMatchSpecW                    = _PathMatchSpecW@8                     @346
 ;   PathMakeUniqueName                = _PathMakeUniqueNameAW@20              @47
     PathSetDlgItemPath                = _PathSetDlgItemPathAW@12              @48
     PathQualify                       = _PathQualifyAW@4                      @49
@@ -104,6 +105,8 @@ EXPORTS
 ;   Win32RemoveDirectory              = _Win32RemoveDirectory@?               @94
     SHLogILFromFSIL                   = _SHLogILFromFSIL@4                    @95
     StrRetToStrN                      = _StrRetToStrN@16                      @96
+    StrRetToStrNA                     = _StrRetToStrNA@16                     @396
+    StrRetToStrNW                     = _StrRetToStrNW@16                     @397
     SHWaitForFileToOpen               = _SHWaitForFileToOpen@12               @97
     SHGetRealIDL                      = _SHGetRealIDL@12                      @98
     SetAppStartingCursor              = _SetAppStartingCursor@8               @99
