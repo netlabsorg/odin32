@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.cpp,v 1.7 1999-11-05 09:16:22 sandervl Exp $ */
+/* $Id: oslibmsg.cpp,v 1.8 1999-11-05 12:54:10 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -77,6 +77,13 @@ MSGTRANSTAB MsgTransTab[] = {
    WM_BUTTON3DBLCLK, WINWM_MBUTTONDBLCLK,
    0x020a, 0x020a,   // WM_???,             WM_???
    WM_CHAR,          WINWM_CHAR,
+   
+   //TODO: Needs better translation!
+   WM_CHAR,          WINWM_KEYDOWN,
+   WM_CHAR,          WINWM_KEYUP,
+   WM_CHAR,          WINWM_SYSKEYDOWN,
+   WM_CHAR,          WINWM_SYSKEYUP,
+   WM_CHAR,          WINWM_KEYLAST
 };
 #define MAX_MSGTRANSTAB (sizeof(MsgTransTab)/sizeof(MsgTransTab[0]))
 
@@ -120,6 +127,11 @@ void OS2ToWinMsgTranslate(QMSG *os2Msg, MSG *winMsg, BOOL isUnicode)
 
   memcpy(winMsg, os2Msg, sizeof(MSG));
   winMsg->hwnd = Win32Window::OS2ToWin32Handle(os2Msg->hwnd);
+
+  if(os2Msg->msg >= WIN32APP_USERMSGBASE) {
+    	winMsg->message = os2Msg->msg - WIN32APP_USERMSGBASE;
+	return;
+  }
   for(i=0;i<MAX_MSGTRANSTAB;i++)
   {
     if(MsgTransTab[i].msgOS2 == os2Msg->msg)
@@ -144,8 +156,8 @@ ULONG TranslateWinMsg(ULONG msg)
 	thdb->fMsgTranslated = TRUE;
   }
 
-  if(msg >= WIN32APP_USERMSGBASE)
-    return msg - WIN32APP_USERMSGBASE;
+  if(msg >= WINWM_USER)
+    return msg + WIN32APP_USERMSGBASE;
 
   for(int i=0;i<MAX_MSGTRANSTAB;i++)
   {
