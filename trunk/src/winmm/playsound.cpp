@@ -1,4 +1,4 @@
-/* $Id: playsound.cpp,v 1.3 1999-06-19 10:54:48 sandervl Exp $ */
+/* $Id: playsound.cpp,v 1.4 1999-08-19 18:46:05 phaller Exp $ */
 
 /*
  * Playsound stubs
@@ -9,13 +9,22 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
-#include <os2wrap.h>	//Odin32 OS/2 api wrappers
+
+
+/****************************************************************************
+ * Includes                                                                 *
+ ****************************************************************************/
+
+#include <os2wrap.h>       //Odin32 OS/2 api wrappers
+#include <odinwrap.h>
 #include "win32type.h"
 #include "misc.h"
 
+ODINDEBUGCHANNEL(WINMM-PLAYSOUND)
+
+
 /*****************************************************************************
- * Name      : BOOL WIN32API PlaySound
- * Purpose   : Plays a sound specified by the given filename, resource, or
+ *             Plays a sound specified by the given filename, resource, or
  *             system event.
  * Parameters: LPCSTR  pszSound
  *             HMODULE hMod
@@ -27,14 +36,19 @@
  *
  * Author    : Patrick Haller [Tue, 1998/05/05 10:44]
  *****************************************************************************/
-BOOL WIN32API PlaySoundA(LPCSTR pszSound, HMODULE hmod, DWORD fdwSound )
+
+ODINFUNCTION3(BOOL, PlaySoundA,
+              LPCSTR, pszSound,
+              HMODULE, hmod,
+              DWORD, fdwSound)
 {
   dprintf(("WINMM:PlaySoundA not implemented\n"));
   return(FALSE);
 }
+
+
 /*****************************************************************************
- * Name      : BOOL WIN32API PlaySoundW
- * Purpose   : Plays a sound specified by the given filename, resource, or
+ *             Plays a sound specified by the given filename, resource, or
  *             system event.
  * Parameters: LPCSTR  pszSound
  *             HMODULE hMod
@@ -46,24 +60,56 @@ BOOL WIN32API PlaySoundA(LPCSTR pszSound, HMODULE hmod, DWORD fdwSound )
  *
  * Author    : Patrick Haller [Tue, 1998/05/05 10:44]
  *****************************************************************************/
-BOOL WIN32API PlaySoundW(LPCWSTR pszSound, HMODULE hmod, DWORD fdwSound )
+
+ODINFUNCTION3(BOOL, PlaySoundW,
+              LPCWSTR, pszSound,
+              HMODULE, hmod,
+              DWORD, fdwSound)
 {
   dprintf(("WINMM:PlaySoundW not implemented\n"));
   return(FALSE);
 }
-/******************************************************************************/
-/******************************************************************************/
-BOOL WIN32API sndPlaySoundA(LPCSTR pszSound, UINT fuSound)
+
+
+/*****************************************************************************
+ *             Plays a sound specified by the given filename
+ * Parameters: LPCSTR  pszSound
+ *             UINT    fuSound
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Tue, 1998/05/05 10:44]
+ *****************************************************************************/
+
+ODINFUNCTION2(BOOL, sndPlaySoundA,
+              LPCSTR, pszSound,
+              UINT, fuSound)
 {
   dprintf(("WINMM:sndPlaySoundA not implemented\n"));
   return(FALSE);
 }
-/******************************************************************************/
-/******************************************************************************/
-BOOL WIN32API sndPlaySoundW(LPCWSTR pszSound, UINT fuSound)
+
+
+/*****************************************************************************
+ *             Plays a sound specified by the given filename
+ * Parameters: LPCWSTR  pszSound
+ *             HMODULE  hMod
+ *             DWORD    fdwSound
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Tue, 1998/05/05 10:44]
+ *****************************************************************************/
+
+ODINFUNCTION2(BOOL, sndPlaySoundW,
+              LPCWSTR, pszSound,
+              UINT, fuSound)
 {
   dprintf(("WINMM:sndPlaySoundW not implemented\n"));
   return(FALSE);
 }
-/******************************************************************************/
-/******************************************************************************/
+

@@ -1,4 +1,4 @@
-/* $Id: mci.cpp,v 1.3 1999-06-10 16:24:34 phaller Exp $ */
+/* $Id: mci.cpp,v 1.4 1999-08-19 18:46:04 phaller Exp $ */
 
 /*
  * MCI stubs
@@ -9,9 +9,15 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+
+
+/****************************************************************************
+ * Includes                                                                 *
+ ****************************************************************************/
+
 #include <os2win.h>
 #include <mmsystem.h>
-
+#include <odinwrap.h>
 #include <string.h>
 #include <stdio.h>
 
@@ -20,67 +26,87 @@
 
 #include "winmm.h"
 
-BOOL WIN32API mciDriverNotify(HWND hwndCallback, UINT uDeviceID, UINT uStatus)
+ODINDEBUGCHANNEL(WINMM-MCI)
+
+
+ODINFUNCTION3(BOOL, mciDriverNotify,
+              HWND, hwndCallback,
+              UINT, uDeviceID,
+              UINT, uStatus)
 {
   dprintf(("WINMM:mciDriverNotify - stub\n"));
   return FALSE;
 }
 
-UINT WIN32API mciDriverYield(UINT uDeviceID)
+ODINFUNCTION1(UINT, mciDriverYield,
+              UINT, uDeviceID)
 {
   dprintf(("WINMM:mciDriverYield - stub\n"));
   return 0;
 }
 
-BOOL WIN32API mciExecute(LPCSTR pszCommand)
+ODINFUNCTION1(BOOL, mciExecute,
+              LPCSTR, pszCommand)
 {
   dprintf(("WINMM:mciExecute(%s) - stub\n", pszCommand));
   return FALSE;
 }
 
-BOOL WIN32API mciFreeCommandResource(UINT uTable)
+ODINFUNCTION1(BOOL, mciFreeCommandResource,
+              UINT, uTable)
 {
   dprintf(("WINMM:mciFreeCommandResource - stub\n"));
   return FALSE;
 }
 
-HTASK WIN32API mciGetCreatorTask(MCIDEVICEID mciId)
+ODINFUNCTION1(HTASK, mciGetCreatorTask,
+              MCIDEVICEID, mciId)
 {
   dprintf(("WINMM:mciGetCreatorTask - stub\n"));
   return 0;
 }
 
-MCIDEVICEID WIN32API mciGetDeviceIDA(LPCSTR pszDevice)
+ODINFUNCTION1(MCIDEVICEID, mciGetDeviceIDA,
+              LPCSTR, pszDevice)
 {
   dprintf(("WINMM:mciGetDeviceIDA - stub\n"));
   return 0;
 }
 
-MCIDEVICEID WIN32API mciGetDeviceIDW(LPCWSTR pszDevice)
+ODINFUNCTION1(MCIDEVICEID, mciGetDeviceIDW,
+              LPCWSTR, pszDevice)
 {
   dprintf(("WINMM:mciGetDeviceIDW - stub\n"));
   return 0;
 }
 
-MCIDEVICEID WIN32API mciGetDeviceIDFromElementIDA(DWORD dwElementID, LPCSTR lpstrType )
+ODINFUNCTION2(MCIDEVICEID, mciGetDeviceIDFromElementIDA,
+              DWORD, dwElementID,
+              LPCSTR, lpstrType)
 {
   dprintf(("WINMM:mciGetDeviceIDFromElementIDA - stub\n"));
   return 0;
 }
 
-MCIDEVICEID WIN32API mciGetDeviceIDFromElementIDW(DWORD dwElementID, LPCWSTR lpstrType )
+ODINFUNCTION2(MCIDEVICEID, mciGetDeviceIDFromElementIDW,
+              DWORD, dwElementID,
+              LPCWSTR, lpstrType)
 {
   dprintf(("WINMM:mciGetDeviceIDFromElementIDW - stub\n"));
   return 0;
 }
 
-DWORD WIN32API mciGetDriverData(UINT uDeviceID)
+ODINFUNCTION1(DWORD, mciGetDriverData,
+              UINT, uDeviceID)
 {
   dprintf(("WINMM:mciGetDriverData - stub\n"));
   return 0;
 }
 
-BOOL WIN32API mciGetErrorStringA( MCIERROR mcierr, LPSTR pszText, UINT cchText )
+ODINFUNCTION3(BOOL, mciGetErrorStringA,
+              MCIERROR, mcierr,
+              LPSTR, pszText,
+              UINT, cchText)
 {
   dprintf(("WINMM:mciGetErrorStringA(%d)\n", mcierr ));
   char * theMsg = getWinmmMsg( mcierr );
@@ -95,7 +121,10 @@ BOOL WIN32API mciGetErrorStringA( MCIERROR mcierr, LPSTR pszText, UINT cchText )
   return TRUE;
 }
 
-BOOL WIN32API mciGetErrorStringW( MCIERROR mcierr, LPWSTR pszText, UINT cchText )
+ODINFUNCTION3(BOOL, mciGetErrorStringW,
+              MCIERROR, mcierr,
+              LPWSTR, pszText,
+              UINT, cchText)
 {
   dprintf(("WINMM:mciGetErrorStringW(%d)\n", mcierr ));
   char * theMsg = getWinmmMsg( mcierr );
@@ -110,51 +139,78 @@ BOOL WIN32API mciGetErrorStringW( MCIERROR mcierr, LPWSTR pszText, UINT cchText 
   return TRUE;
 }
 
-YIELDPROC WIN32API mciGetYieldProc(MCIDEVICEID mciId, LPDWORD pdwYieldData)
+ODINFUNCTION2(YIELDPROC, mciGetYieldProc,
+              MCIDEVICEID, mciId,
+              LPDWORD, pdwYieldData)
 {
   dprintf(("WINMM:mciGetYieldProc - stub\n"));
   return 0;
 }
 
-UINT WIN32API mciLoadCommandResource(HINSTANCE hInstance, LPCWSTR lpResName, UINT uType)
+ODINFUNCTION3(UINT, mciLoadCommandResource,
+              HINSTANCE, hInstance,
+              LPCWSTR, lpResName,
+              UINT, uType)
 {
   dprintf(("WINMM:mciLoadCOmmandResource - stub\n"));
   return 0;
 }
 
-MCIERROR WIN32API mciSendCommandA(MCIDEVICEID mciId, UINT uMsg, DWORD dwParam1, DWORD dwParam2)
+ODINFUNCTION4(MCIERROR, mciSendCommandA,
+              MCIDEVICEID, mciId,
+              UINT, uMsg,
+              DWORD, dwParam1,
+              DWORD, dwParam2)
 {
   dprintf(("WINMM:mciSendCommandA - stub %X %X %X %X\n", mciId, uMsg, dwParam1, dwParam2));
   return(MMSYSERR_NODRIVER);
 }
 
-MCIERROR WIN32API mciSendCommandW(MCIDEVICEID mciId, UINT uMsg, DWORD dwParam1, DWORD dwParam2)
+ODINFUNCTION4(MCIERROR, mciSendCommandW,
+              MCIDEVICEID, mciId,
+              UINT, uMsg,
+              DWORD, dwParam1,
+              DWORD, dwParam2)
 {
   dprintf(("WINMM:mciSendCommandW - stub %X %X %X %X\n", mciId, uMsg, dwParam1, dwParam2));
   return(MMSYSERR_NODRIVER);
 }
 
-MCIERROR WIN32API mciSendStringA(LPCSTR lpstrCommand, LPSTR lpstrReturnString, UINT uReturnLength, HWND hwndCallback)
+ODINFUNCTION4(MCIERROR, mciSendStringA,
+              LPCSTR, lpstrCommand,
+              LPSTR, lpstrReturnString,
+              UINT, uReturnLength,
+              HWND, hwndCallback)
 {
   dprintf(("WINMM:mciSendStringA - stub\n"));
   return(MMSYSERR_NODRIVER);
 }
 
-MCIERROR WIN32API mciSendStringW(LPCWSTR lpstrCommand, LPWSTR lpstrReturnString, UINT uReturnLength, HWND hwndCallback)
+ODINFUNCTION4(MCIERROR, mciSendStringW,
+              LPCWSTR, lpstrCommand,
+              LPWSTR, lpstrReturnString,
+              UINT, uReturnLength,
+              HWND, hwndCallback)
 {
   dprintf(("WINMM:mciSendStringW - stub\n"));
   return(MMSYSERR_NODRIVER);
 }
 
-BOOL WIN32API mciSetDriverData(UINT uDeviceID, DWORD dwData)
+ODINFUNCTION2(BOOL, mciSetDriverData,
+              UINT, uDeviceID,
+              DWORD, dwData)
 {
   dprintf(("WINMM:mciSetDriverData - stub\n"));
   return FALSE;
 }
 
-BOOL WIN32API mciSetYieldProc(MCIDEVICEID mciId, YIELDPROC fpYieldProc, DWORD dwYieldData)
+ODINFUNCTION3(BOOL, mciSetYieldProc,
+              MCIDEVICEID, mciId,
+              YIELDPROC, fpYieldProc,
+              DWORD, dwYieldData)
 {
   dprintf(("WINMM:mciSetYieldProc - stub\n"));
   return FALSE;
 }
+
 

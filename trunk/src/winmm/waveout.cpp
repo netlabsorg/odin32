@@ -1,4 +1,4 @@
-/* $Id: waveout.cpp,v 1.3 1999-06-10 16:24:35 phaller Exp $ */
+/* $Id: waveout.cpp,v 1.4 1999-08-19 18:46:05 phaller Exp $ */
 
 /*
  * Wave out MM apis
@@ -9,8 +9,15 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+
+
+/****************************************************************************
+ * Includes                                                                 *
+ ****************************************************************************/
+
 #include <os2win.h>
 #include <mmsystem.h>
+#include <odinwrap.h>
 
 #include <string.h>
 #include <stdio.h>
@@ -21,16 +28,20 @@
 #include "misc.h"
 #include "winmm.h"
 
-/******************************************************************************/
-/******************************************************************************/
-MMRESULT WIN32API waveOutOpen(LPHWAVEOUT phwo, UINT uDeviceID,
-                              const LPWAVEFORMATEX pwfx, DWORD dwCallback,
-                              DWORD dwInstance, DWORD fdwOpen)
-{
- MMRESULT rc;
+ODINDEBUGCHANNEL(WINMM-WAVEOUT)
 
-  dprintf(("WINMM:waveOutOpen %d %X %X\n", uDeviceID, fdwOpen, dwCallback));
-  dprintf(("WINMM:waveOutOpen = %X\n", waveOutOpen));
+
+/******************************************************************************/
+/******************************************************************************/
+ODINFUNCTION6(MMRESULT, waveOutOpen,
+              LPHWAVEOUT, phwo,
+              UINT, uDeviceID,
+              const LPWAVEFORMATEX, pwfx,
+              DWORD, dwCallback,
+              DWORD, dwInstance,
+              DWORD, fdwOpen)
+{
+  MMRESULT rc;
 
   if(pwfx == NULL)
         return(WAVERR_BADFORMAT);
@@ -64,145 +75,165 @@ MMRESULT WIN32API waveOutOpen(LPHWAVEOUT phwo, UINT uDeviceID,
         delete (DartWaveOut *)*phwo;
         return(rc);
   }
-  dprintf(("WINMM:waveOutOpen success\n"));
   return(MMSYSERR_NOERROR);
 }
 /******************************************************************************/
 /******************************************************************************/
-MMRESULT WIN32API waveOutWrite(HWAVEOUT hwo, LPWAVEHDR pwh, UINT cbwh)
+ODINFUNCTION3(MMRESULT, waveOutWrite,
+              HWAVEOUT, hwo,
+              LPWAVEHDR, pwh,
+              UINT, cbwh)
 {
- DartWaveOut *dwave = (DartWaveOut *)hwo;
+  DartWaveOut *dwave = (DartWaveOut *)hwo;
 
-#ifdef DEBUG1
-  WriteLog("WINMM:waveOutWrite %X %d\n", pwh, cbwh);
-#endif
-  if(DartWaveOut::find(dwave) == TRUE) {
-        if(!(pwh->dwFlags & WHDR_PREPARED) || pwh->lpData == NULL)
-                return WAVERR_UNPREPARED;
-        if(pwh->dwFlags & WHDR_INQUEUE)
-                return WAVERR_STILLPLAYING;
+  if(DartWaveOut::find(dwave) == TRUE)
+  {
+    if(!(pwh->dwFlags & WHDR_PREPARED) || pwh->lpData == NULL)
+      return WAVERR_UNPREPARED;
 
-        pwh->dwFlags |= WHDR_INQUEUE;
-        pwh->dwFlags &= ~WHDR_DONE;
+    if(pwh->dwFlags & WHDR_INQUEUE)
+      return WAVERR_STILLPLAYING;
 
-        return(dwave->write(pwh, cbwh));
+    pwh->dwFlags |= WHDR_INQUEUE;
+    pwh->dwFlags &= ~WHDR_DONE;
+
+    return(dwave->write(pwh, cbwh));
   }
-  else  return(MMSYSERR_INVALHANDLE);
+  else
+    return(MMSYSERR_INVALHANDLE);
 }
 /******************************************************************************/
 /******************************************************************************/
-MMRESULT WIN32API waveOutReset(HWAVEOUT hwaveout)
+ODINFUNCTION1(MMRESULT, waveOutReset,
+              HWAVEOUT, hwaveout)
 {
- DartWaveOut *dwave = (DartWaveOut *)hwaveout;
+  DartWaveOut *dwave = (DartWaveOut *)hwaveout;
 
-  dprintf(("WINMM:waveOutReset %X\n", hwaveout));
-  if(DartWaveOut::find(dwave) == TRUE) {
-        return(dwave->reset());
-  }
-  else  return(MMSYSERR_INVALHANDLE);
+  if(DartWaveOut::find(dwave) == TRUE)
+    return(dwave->reset());
+  else
+    return(MMSYSERR_INVALHANDLE);
 }
 /******************************************************************************/
 /******************************************************************************/
-MMRESULT WIN32API waveOutBreakLoop(HWAVEOUT hwaveout)
+ODINFUNCTION1(MMRESULT, waveOutBreakLoop,
+              HWAVEOUT, hwaveout)
 {
- DartWaveOut *dwave = (DartWaveOut *)hwaveout;
+  DartWaveOut *dwave = (DartWaveOut *)hwaveout;
 
   dprintf(("WINMM:waveOutBreakLoop (implemented as reset) %X\n", hwaveout));
-  if(DartWaveOut::find(dwave) == TRUE) {
-        return(dwave->reset());
-  }
-  else  return(MMSYSERR_INVALHANDLE);
+  if(DartWaveOut::find(dwave) == TRUE)
+    return(dwave->reset());
+  else
+    return(MMSYSERR_INVALHANDLE);
 }
 /******************************************************************************/
 /******************************************************************************/
-MMRESULT WIN32API waveOutClose(HWAVEOUT hwaveout)
+ODINFUNCTION1(MMRESULT, waveOutClose,
+              HWAVEOUT, hwaveout)
 {
- DartWaveOut *dwave = (DartWaveOut *)hwaveout;
+  DartWaveOut *dwave = (DartWaveOut *)hwaveout;
 
-  dprintf(("WINMM:waveOutClose %X\n", hwaveout));
-  if(DartWaveOut::find(dwave) == TRUE) {
-        if(dwave->getState() == STATE_PLAYING)
-                return(WAVERR_STILLPLAYING);
-        delete dwave;
-        return(MMSYSERR_NOERROR);
+  if(DartWaveOut::find(dwave) == TRUE)
+  {
+    if(dwave->getState() == STATE_PLAYING)
+      return(WAVERR_STILLPLAYING);
+
+    delete dwave;
+    return(MMSYSERR_NOERROR);
   }
-  else  return(MMSYSERR_INVALHANDLE);
+  else
+    return(MMSYSERR_INVALHANDLE);
 }
 /******************************************************************************/
 /******************************************************************************/
-MMRESULT WIN32API waveOutPause(HWAVEOUT hwaveout)
+ODINFUNCTION1(MMRESULT, waveOutPause,
+              HWAVEOUT, hwaveout)
 {
- DartWaveOut *dwave = (DartWaveOut *)hwaveout;
+  DartWaveOut *dwave = (DartWaveOut *)hwaveout;
 
-  dprintf(("WINMM:waveOutPause %X\n", hwaveout));
-  if(DartWaveOut::find(dwave) == TRUE) {
-        return(dwave->pause());
-  }
-  else  return(MMSYSERR_INVALHANDLE);
+  if(DartWaveOut::find(dwave) == TRUE)
+    return(dwave->pause());
+  else
+    return(MMSYSERR_INVALHANDLE);
 }
 /******************************************************************************/
 /******************************************************************************/
-MMRESULT WIN32API waveOutRestart(HWAVEOUT hwaveout)
+ODINFUNCTION1(MMRESULT, waveOutRestart,
+              HWAVEOUT, hwaveout)
 {
- DartWaveOut *dwave = (DartWaveOut *)hwaveout;
+  DartWaveOut *dwave = (DartWaveOut *)hwaveout;
 
-  dprintf(("WINMM:waveOutRestart %X\n", hwaveout));
-  if(DartWaveOut::find(dwave) == TRUE) {
-        return(dwave->restart());
-  }
-  else  return(MMSYSERR_INVALHANDLE);
+  if(DartWaveOut::find(dwave) == TRUE)
+    return(dwave->restart());
+  else
+    return(MMSYSERR_INVALHANDLE);
 }
 /******************************************************************************/
 /******************************************************************************/
-MMRESULT WIN32API waveOutPrepareHeader(HWAVEOUT hwo, LPWAVEHDR pwh, UINT cbwh)
+ODINFUNCTION3(MMRESULT, waveOutPrepareHeader,
+              HWAVEOUT, hwo,
+              LPWAVEHDR, pwh,
+              UINT, cbwh)
 {
- DartWaveOut *dwave = (DartWaveOut *)hwo;
+  DartWaveOut *dwave = (DartWaveOut *)hwo;
 
-  dprintf(("WINMM:waveOutPrepareHeader %X %d\n", pwh, cbwh));
+  if(DartWaveOut::find(dwave) == TRUE)
+  {
+    if(pwh->dwFlags & WHDR_INQUEUE)
+      return WAVERR_STILLPLAYING;
 
-  if(DartWaveOut::find(dwave) == TRUE) {
-        if(pwh->dwFlags & WHDR_INQUEUE)
-                return WAVERR_STILLPLAYING;
-        pwh->dwFlags |= WHDR_PREPARED;
-        pwh->dwFlags &= ~WHDR_DONE;
-        pwh->lpNext   = NULL;
-        return(MMSYSERR_NOERROR);
+    pwh->dwFlags |= WHDR_PREPARED;
+    pwh->dwFlags &= ~WHDR_DONE;
+    pwh->lpNext   = NULL;
+    return(MMSYSERR_NOERROR);
   }
-  else  return(MMSYSERR_INVALHANDLE);
+  else
+    return(MMSYSERR_INVALHANDLE);
 }
 /******************************************************************************/
 /******************************************************************************/
-MMRESULT WIN32API waveOutUnprepareHeader(HWAVEOUT hwo, LPWAVEHDR pwh, UINT cbwh)
+ODINFUNCTION3(MMRESULT, waveOutUnprepareHeader,
+              HWAVEOUT, hwo,
+              LPWAVEHDR, pwh,
+              UINT, cbwh)
 {
- DartWaveOut *dwave = (DartWaveOut *)hwo;
+  DartWaveOut *dwave = (DartWaveOut *)hwo;
 
-  dprintf(("WINMM:waveOutUnprepareHeader %X %d\n", pwh, cbwh));
-  if(DartWaveOut::find(dwave) == TRUE) {
-        if(pwh->dwFlags & WHDR_INQUEUE)
-                return WAVERR_STILLPLAYING;
+  if(DartWaveOut::find(dwave) == TRUE)
+  {
+    if(pwh->dwFlags & WHDR_INQUEUE)
+      return WAVERR_STILLPLAYING;
 
-        pwh->dwFlags &= ~WHDR_PREPARED;
-        pwh->dwFlags |= WHDR_DONE;
-        return(MMSYSERR_NOERROR);
+    pwh->dwFlags &= ~WHDR_PREPARED;
+    pwh->dwFlags |= WHDR_DONE;
+   return(MMSYSERR_NOERROR);
   }
-  else  return(MMSYSERR_INVALHANDLE);
+  else
+   return(MMSYSERR_INVALHANDLE);
 }
 /******************************************************************************/
 /******************************************************************************/
-MMRESULT WIN32API waveOutGetPosition(HWAVEOUT hwo, LPMMTIME pmmt, UINT cbmmt)
+ODINFUNCTION3(MMRESULT, waveOutGetPosition,
+              HWAVEOUT, hwo,
+              LPMMTIME, pmmt,
+              UINT, cbmmt)
 {
   DartWaveOut *dwave = (DartWaveOut *)hwo;
   dprintf(("WINMM:waveOutGetPosition - not implemented\n"));
-  if(DartWaveOut::find(dwave) == TRUE) {
-        return(MMSYSERR_NOERROR);
-  }
-  else  return(MMSYSERR_INVALHANDLE);
+  if(DartWaveOut::find(dwave) == TRUE)
+    return(MMSYSERR_NOERROR);
+  else
+    return(MMSYSERR_INVALHANDLE);
 }
 /******************************************************************************/
 /******************************************************************************/
-MMRESULT WIN32API waveOutGetDevCapsA(UINT uDeviceID, LPWAVEOUTCAPSA pwoc, UINT cbwoc)
+ODINFUNCTION3(MMRESULT, waveOutGetDevCapsA,
+              UINT, uDeviceID,
+              LPWAVEOUTCAPSA, pwoc,
+              UINT, cbwoc)
 {
-  dprintf(("WINMM:waveOutGetDevCapsA - stub\n"));
+  dprintf(("WINMM:waveOutGetDevCapsA - not implemented\n"));
   // we have to fill in this thing
   pwoc->wMid = 0;                  /* manufacturer ID */
   pwoc->wPid = 0;                  /* product ID */
@@ -223,9 +254,12 @@ MMRESULT WIN32API waveOutGetDevCapsA(UINT uDeviceID, LPWAVEOUTCAPSA pwoc, UINT c
 }
 /******************************************************************************/
 /******************************************************************************/
-MMRESULT WIN32API waveOutGetDevCapsW(UINT uDeviceID, LPWAVEOUTCAPSW pwoc, UINT cbwoc)
+ODINFUNCTION3(MMRESULT, waveOutGetDevCapsW,
+              UINT, uDeviceID,
+              LPWAVEOUTCAPSW, pwoc,
+              UINT, cbwoc)
 {
-  dprintf(("WINMM:waveOutGetDevCapsW - stub\n"));
+  dprintf(("WINMM:waveOutGetDevCapsW - not implemented\n"));
   // we have to fill in this thing
   pwoc->wMid = 0;                  /* manufacturer ID */
   pwoc->wPid = 0;                  /* product ID */
@@ -246,16 +280,17 @@ MMRESULT WIN32API waveOutGetDevCapsW(UINT uDeviceID, LPWAVEOUTCAPSW pwoc, UINT c
 }
 /******************************************************************************/
 /******************************************************************************/
-UINT WIN32API waveOutGetNumDevs(void)
+ODINFUNCTION0(UINT, waveOutGetNumDevs)
 {
-  dprintf(("WINMM:waveOutGetNumDevs\n"));
   return 1;
 }
 /******************************************************************************/
 /******************************************************************************/
-MMRESULT WIN32API waveOutGetErrorTextA(MMRESULT wError, LPSTR lpText, UINT cchText)
+ODINFUNCTION3(MMRESULT, waveOutGetErrorTextA,
+              MMRESULT, wError,
+              LPSTR, lpText,
+              UINT, cchText)
 {
-  dprintf(("WINMM:waveOutGetErrorTextA(%d)\n", wError ));
   char * theMsg = getWinmmMsg( wError );
   if ( theMsg )
     strncpy( lpText, theMsg, cchText );
@@ -268,9 +303,11 @@ MMRESULT WIN32API waveOutGetErrorTextA(MMRESULT wError, LPSTR lpText, UINT cchTe
   return MMSYSERR_NOERROR;
 }
 
-MMRESULT WIN32API waveOutGetErrorTextW(MMRESULT wError, LPWSTR lpText, UINT cchText)
+ODINFUNCTION3(MMRESULT, waveOutGetErrorTextW,
+              MMRESULT, wError,
+              LPWSTR, lpText,
+              UINT, cchText)
 {
-  dprintf(("WINMM:waveOutGetErrorTextW(%d) - stub\n", wError ));
   char * theMsg = getWinmmMsg( wError );
   if ( theMsg )
     AsciiToUnicode( theMsg, lpText );
@@ -283,9 +320,10 @@ MMRESULT WIN32API waveOutGetErrorTextW(MMRESULT wError, LPWSTR lpText, UINT cchT
   return MMSYSERR_NOERROR;
 }
 
-MMRESULT WIN32API waveOutGetID(HWAVEOUT hwo, LPUINT puDeviceID)
+ODINFUNCTION2(MMRESULT, waveOutGetID,
+              HWAVEOUT, hwo,
+              LPUINT, puDeviceID)
 {
-  dprintf(("WINMM:waveOutGetID" ));
   DartWaveOut *dwave = (DartWaveOut *)hwo;
   if(DartWaveOut::find(dwave) == TRUE)
   {
@@ -296,9 +334,32 @@ MMRESULT WIN32API waveOutGetID(HWAVEOUT hwo, LPUINT puDeviceID)
     return(MMSYSERR_INVALHANDLE);
 }
 
-MMRESULT WIN32API waveOutGetPitch(HWAVEOUT hwo, LPDWORD pdwPitch)
+ODINFUNCTION2(MMRESULT, waveOutGetPitch,
+              HWAVEOUT, hwo,
+              LPDWORD, pdwPitch)
 {
-  dprintf(("WINMM:waveOutGetPitch"));
+  DartWaveOut *dwave = (DartWaveOut *)hwo;
+  if(DartWaveOut::find(dwave) == TRUE)
+    return MMSYSERR_NOTSUPPORTED;
+  else
+    return(MMSYSERR_INVALHANDLE);
+}
+
+ODINFUNCTION2(MMRESULT, waveOutSetPitch,
+              HWAVEOUT, hwo,
+              DWORD, dwPitch)
+{
+  DartWaveOut *dwave = (DartWaveOut *)hwo;
+  if(DartWaveOut::find(dwave) == TRUE)
+    return MMSYSERR_NOTSUPPORTED;
+  else
+    return(MMSYSERR_INVALHANDLE);
+}
+
+ODINFUNCTION2(MMRESULT, waveOutGetVolume,
+              HWAVEOUT, hwo,
+              LPDWORD, pdwVolume)
+{
   DartWaveOut *dwave = (DartWaveOut *)hwo;
   if(DartWaveOut::find(dwave) == TRUE)
   {
@@ -308,9 +369,10 @@ MMRESULT WIN32API waveOutGetPitch(HWAVEOUT hwo, LPDWORD pdwPitch)
     return(MMSYSERR_INVALHANDLE);
 }
 
-MMRESULT WIN32API waveOutSetPitch(HWAVEOUT hwo, DWORD dwPitch)
+ODINFUNCTION2(MMRESULT, waveOutSetVolume,
+              HWAVEOUT, hwo,
+              DWORD, dwVolume)
 {
-  dprintf(("WINMM:waveOutSetPitch"));
   DartWaveOut *dwave = (DartWaveOut *)hwo;
   if(DartWaveOut::find(dwave) == TRUE)
   {
@@ -320,9 +382,10 @@ MMRESULT WIN32API waveOutSetPitch(HWAVEOUT hwo, DWORD dwPitch)
     return(MMSYSERR_INVALHANDLE);
 }
 
-MMRESULT WIN32API waveOutGetVolume(HWAVEOUT hwo, LPDWORD pdwVolume)
+ODINFUNCTION2(MMRESULT, waveOutGetPlaybackRate,
+              HWAVEOUT, hwo,
+              LPDWORD, pdwRate)
 {
-  dprintf(("WINMM:waveOutGetVolume"));
   DartWaveOut *dwave = (DartWaveOut *)hwo;
   if(DartWaveOut::find(dwave) == TRUE)
   {
@@ -332,9 +395,10 @@ MMRESULT WIN32API waveOutGetVolume(HWAVEOUT hwo, LPDWORD pdwVolume)
     return(MMSYSERR_INVALHANDLE);
 }
 
-MMRESULT WIN32API waveOutSetVolume(HWAVEOUT hwo, DWORD dwVolume)
+ODINFUNCTION2(MMRESULT, waveOutSetPlaybackRate,
+              HWAVEOUT, hwo,
+              DWORD, dwRate)
 {
-  dprintf(("WINMM:waveOutSetVolume"));
   DartWaveOut *dwave = (DartWaveOut *)hwo;
   if(DartWaveOut::find(dwave) == TRUE)
   {
@@ -344,9 +408,12 @@ MMRESULT WIN32API waveOutSetVolume(HWAVEOUT hwo, DWORD dwVolume)
     return(MMSYSERR_INVALHANDLE);
 }
 
-MMRESULT WIN32API waveOutGetPlaybackRate(HWAVEOUT hwo, LPDWORD pdwRate)
+ODINFUNCTION4(MMRESULT, waveOutMessage,
+              HWAVEOUT, hwo,
+              UINT, uMsg,
+              DWORD, dw1,
+              DWORD, dw2)
 {
-  dprintf(("WINMM:waveOutGetPlaybackRate"));
   DartWaveOut *dwave = (DartWaveOut *)hwo;
   if(DartWaveOut::find(dwave) == TRUE)
   {
@@ -356,27 +423,4 @@ MMRESULT WIN32API waveOutGetPlaybackRate(HWAVEOUT hwo, LPDWORD pdwRate)
     return(MMSYSERR_INVALHANDLE);
 }
 
-MMRESULT WIN32API waveOutSetPlaybackRate(HWAVEOUT hwo, DWORD dwRate)
-{
-  dprintf(("WINMM:waveOutSetPlaybackRate"));
-  DartWaveOut *dwave = (DartWaveOut *)hwo;
-  if(DartWaveOut::find(dwave) == TRUE)
-  {
-    return MMSYSERR_NOTSUPPORTED;
-  }
-  else
-    return(MMSYSERR_INVALHANDLE);
-}
-
-MMRESULT WIN32API waveOutMessage(HWAVEOUT hwo, UINT uMsg, DWORD dw1, DWORD dw2)
-{
-  dprintf(("WINMM:waveOutMessage"));
-  DartWaveOut *dwave = (DartWaveOut *)hwo;
-  if(DartWaveOut::find(dwave) == TRUE)
-  {
-    return MMSYSERR_NOTSUPPORTED;
-  }
-  else
-    return(MMSYSERR_INVALHANDLE);
-}
 

@@ -1,4 +1,4 @@
-/* $Id: mixer.cpp,v 1.3 1999-06-10 16:24:34 phaller Exp $ */
+/* $Id: mixer.cpp,v 1.4 1999-08-19 18:46:04 phaller Exp $ */
 
 /*
  * Mixer stubs
@@ -9,108 +9,158 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+
+/****************************************************************************
+ * Includes                                                                 *
+ ****************************************************************************/
+
 #include <os2win.h>
 #include <mmsystem.h>
+#include <odinwrap.h>
 #include <misc.h>
+
+
+ODINDEBUGCHANNEL(WINMM-MIXER)
 
 //
 // All Stubs
 //
 
 /******************************************************************************/
-MMRESULT WIN32API mixerClose( HMIXER hmx )
+ODINFUNCTION1(MMRESULT, mixerClose,
+              HMIXER, hmx)
 {
   dprintf(("WINMM:mixerClose - stub\n" ));
   return MMSYSERR_INVALHANDLE;
 }
 
 /******************************************************************************/
-MMRESULT WIN32API mixerGetControlDetailsA(HMIXEROBJ hmxobj, LPMIXERCONTROLDETAILS pmxcd, DWORD fdwDetails)
+ODINFUNCTION3(MMRESULT, mixerGetControlDetailsA,
+              HMIXEROBJ, hmxobj,
+              LPMIXERCONTROLDETAILS, pmxcd,
+              DWORD, fdwDetails)
 {
   dprintf(("WINMM:mixerGetControlDetailsA - stub\n" ));
   return MIXERR_INVALCONTROL;
 }
 
 /******************************************************************************/
-MMRESULT WIN32API mixerGetControlDetailsW(HMIXEROBJ hmxobj, LPMIXERCONTROLDETAILS pmxcd, DWORD fdwDetails)
+ODINFUNCTION3(MMRESULT, mixerGetControlDetailsW,
+              HMIXEROBJ, hmxobj,
+              LPMIXERCONTROLDETAILS, pmxcd,
+              DWORD, fdwDetails)
 {
   dprintf(("WINMM:mixerGetControlDetailsW - stub\n" ));
   return MIXERR_INVALCONTROL;
 }
 
 /******************************************************************************/
-MMRESULT WIN32API mixerGetDevCapsA( UINT uMxId, LPMIXERCAPSA pmxcaps, UINT cbmxcaps)
+ODINFUNCTION3(MMRESULT, mixerGetDevCapsA,
+              UINT, uMxId,
+              LPMIXERCAPSA, pmxcaps,
+              UINT, cbmxcaps)
 {
   dprintf(("WINMM:mixerGetDevCapsA(%d) -stub\n", uMxId ));
   return MMSYSERR_BADDEVICEID;
 }
 
 /******************************************************************************/
-MMRESULT WIN32API mixerGetLineControlsA(HMIXEROBJ hmxobj, LPMIXERLINECONTROLSA pmxlc, DWORD fdwControls)
+ODINFUNCTION3(MMRESULT, mixerGetLineControlsA,
+              HMIXEROBJ, hmxobj,
+              LPMIXERLINECONTROLSA, pmxlc,
+              DWORD, fdwControls)
 {
   dprintf(("WINMM:mixerGetGetLineControlsA - stub\n" ));
   return MIXERR_INVALLINE;
 }
 
 /******************************************************************************/
-MMRESULT WIN32API mixerGetLineControlsW(HMIXEROBJ hmxobj, LPMIXERLINECONTROLSW pmxlc, DWORD fdwControls)
+ODINFUNCTION3(MMRESULT, mixerGetLineControlsW,
+              HMIXEROBJ, hmxobj,
+              LPMIXERLINECONTROLSW, pmxlc,
+              DWORD, fdwControls)
 {
   dprintf(("WINMM:mixerGetGetLineControlsW - stub\n" ));
   return MIXERR_INVALLINE;
 }
 
 /******************************************************************************/
-MMRESULT WIN32API mixerGetDevCapsW( UINT uMxId, LPMIXERCAPSW pmxcaps, UINT cbmxcaps)
+ODINFUNCTION3(MMRESULT, mixerGetDevCapsW,
+              UINT, uMxId,
+              LPMIXERCAPSW, pmxcaps,
+              UINT, cbmxcaps)
 {
   dprintf(("WINMM:mixerGetDevCapsW(%u) - stub\n", uMxId ));
   return MMSYSERR_BADDEVICEID;
 }
 
 /******************************************************************************/
-MMRESULT WIN32API mixerGetID( HMIXEROBJ hmxobj, UINT *puMxId, DWORD fdwId)
+ODINFUNCTION3(MMRESULT, mixerGetID,
+              HMIXEROBJ, hmxobj,
+              UINT *, puMxId,
+              DWORD, fdwId)
 {
   dprintf(("WINMM:mixerGetID - stub\n" ));
   return MMSYSERR_INVALHANDLE;
 }
 
 /******************************************************************************/
-MMRESULT WIN32API mixerGetLineInfoA(HMIXEROBJ hmxobj, LPMIXERLINEA pmxl, DWORD fdwInfo)
+ODINFUNCTION3(MMRESULT, mixerGetLineInfoA,
+              HMIXEROBJ, hmxobj,
+              LPMIXERLINEA, pmxl,
+              DWORD, fdwInfo)
 {
   dprintf(("WINMM:mixerGetLineInfoA - stub\n" ));
   return MIXERR_INVALLINE;
 }
 
 /******************************************************************************/
-MMRESULT WIN32API mixerGetLineInfoW(HMIXEROBJ hmxobj, LPMIXERLINEW pmxl, DWORD fdwInfo)
+ODINFUNCTION3(MMRESULT, mixerGetLineInfoW,
+              HMIXEROBJ, hmxobj,
+              LPMIXERLINEW, pmxl,
+              DWORD, fdwInfo)
 {
   dprintf(("WINMM:mixerGetLineInfoW - stub\n" ));
   return MIXERR_INVALLINE;
 }
 
 /******************************************************************************/
-MMRESULT WIN32API mixerMessage( HMIXER hmx, UINT uMsg, DWORD dwParam1, DWORD dwParam2)
+ODINFUNCTION4(MMRESULT, mixerMessage,
+              HMIXER, hmx,
+              UINT, uMsg,
+              DWORD, dwParam1,
+              DWORD, dwParam2)
 {
   dprintf(("WINMM:mixerMessage - stub\n" ));
   return 0;
 }
 
 /******************************************************************************/
-UINT WIN32API mixerGetNumDevs( void )
+ODINFUNCTION0(UINT, mixerGetNumDevs)
 {
   dprintf(("WINMM:mixerGetNumDevs - returning 0\n"));
   return 0;
 }
 
 /******************************************************************************/
-MMRESULT WIN32API mixerOpen( LPHMIXER phmx, UINT uMxId, DWORD dwCallback, DWORD dwInstance, DWORD fdwOpen)
+ODINFUNCTION5(MMRESULT, mixerOpen,
+              LPHMIXER, phmx,
+              UINT, uMxId,
+              DWORD, dwCallback,
+              DWORD, dwInstance,
+              DWORD, fdwOpen)
 {
   dprintf(("WINMM:mixerOpen(%d) - stub\n", uMxId ));
   return MMSYSERR_BADDEVICEID;
 }
 
-MMRESULT WIN32API mixerSetControlDetails(HMIXEROBJ hmxobj, LPMIXERCONTROLDETAILS pmxcd, DWORD fdwDetails)
+ODINFUNCTION3(MMRESULT, mixerSetControlDetails,
+              HMIXEROBJ, hmxobj,
+              LPMIXERCONTROLDETAILS, pmxcd,
+              DWORD, fdwDetails)
 {
   dprintf(("WINMM:mixerSetControlDetails - stub\n" ));
   return MIXERR_INVALCONTROL;
 }
+
 

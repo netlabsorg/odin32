@@ -1,4 +1,4 @@
-/* $Id: joyos2.cpp,v 1.2 1999-06-30 11:29:40 sandervl Exp $ */
+/* $Id: joyos2.cpp,v 1.3 1999-08-19 18:46:04 phaller Exp $ */
 /*
  * OS/2 Joystick apis
  *
@@ -8,10 +8,17 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+
+
+/****************************************************************************
+ * Includes                                                                 *
+ ****************************************************************************/
+
 #define  INCL_BASE
-#include <os2wrap.h>	//Odin32 OS/2 api wrappers
+#include <os2wrap.h>     //Odin32 OS/2 api wrappers
 #include <misc.h>
 #include "joyos2.h"
+
 
 #define GAMEPDDNAME     "GAME$"
 
@@ -169,4 +176,5 @@ LONG JoyInstalled(USHORT wID)
   }
   return (flReturn);
 }
+
 

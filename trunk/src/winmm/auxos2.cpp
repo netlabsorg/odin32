@@ -1,4 +1,4 @@
-/* $Id: auxos2.cpp,v 1.4 1999-06-19 10:54:47 sandervl Exp $ */
+/* $Id: auxos2.cpp,v 1.5 1999-08-19 18:46:04 phaller Exp $ */
 
 /*
  * Auxilary multimedia OS/2 implementation
@@ -10,9 +10,14 @@
  *
  */
 
+
+/****************************************************************************
+ * Includes                                                                 *
+ ****************************************************************************/
+
 #define  INCL_BASE
 #define  INCL_OS2MM
-#include <os2wrap.h>	//Odin32 OS/2 api wrappers
+#include <os2wrap.h>    //Odin32 OS/2 api wrappers
 #include <os2me.h>
 #include <string.h>
 
@@ -99,3 +104,4 @@ DWORD auxOS2GetVolume(DWORD *dwVolume)
 }
 /******************************************************************************/
 /******************************************************************************/
+
