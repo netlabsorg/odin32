@@ -1,4 +1,4 @@
-; $Id: kernel32dbg.def,v 1.31 2003-07-31 15:59:49 sandervl Exp $
+; $Id: kernel32dbg.def,v 1.32 2003-08-01 16:25:48 sandervl Exp $
 
 ;Basis is Windows95 KERNEL32
 LIBRARY KERNEL32 INITINSTANCE TERMINSTANCE
@@ -593,7 +593,7 @@ EXPORTS
 
     InitAtomTable              = _DbgInitAtomTable@4             @471
     InitializeCriticalSection  = _DbgInitializeCriticalSection@4 @472
-;   InitializeCriticialSectionAndSpinCount = _InitializeCriticalSectionAndSpinCount@?? ;NT
+    InitializeCriticalSectionAndSpinCount = _InitializeCriticalSectionAndSpinCount@8 @1473
     InterlockedCompareExchange = _InterlockedCompareExchange@12 @787        ;NT
     InterlockedDecrement       = _InterlockedDecrement@4     @473
     InterlockedExchange        = _InterlockedExchange@8      @474
