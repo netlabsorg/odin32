@@ -1,8 +1,10 @@
- /* $Id: ChangeLog,v 1.463 1999-11-21 14:05:40 achimha Exp $ */
+ /* $Id: ChangeLog,v 1.464 1999-11-21 17:07:05 cbratschi Exp $ */
 
  99-11-21: Christoph Bratschi <cbratschi@datacomm.ch>
         - KERNEL32: Fixed trailing newline bug in LoadMessageA/W,
                     updated to WINE 991031 level
+	- USER32: fixed window text handling
+		  added static WM_GETTEXT for SS_ICON style
 
  99-11-21: Achim Hasenmueller <achimha@innotek.de>
         - USER32: send WM_SETTEXT for edit and static text controls
