@@ -1,4 +1,4 @@
-/* $Id: progress.cpp,v 1.1 2000-02-23 17:09:46 cbratschi Exp $ */
+/* $Id: progress.cpp,v 1.2 2000-03-17 17:13:23 cbratschi Exp $ */
 /*
  * Progress control
  *
@@ -13,16 +13,16 @@
 
 #include "winbase.h"
 #include "commctrl.h"
+#include "ccbase.h"
 #include "progress.h"
 #include "comctl32.h"
-
 
 /* Control configuration constants */
 
 #define LED_GAP      2
 #define BORDER_WIDTH 1
 
-#define PROGRESS_GetInfoPtr(hwnd) ((PROGRESS_INFO *)GetWindowLongA(hwnd,0))
+#define PROGRESS_GetInfoPtr(hwnd) ((PROGRESS_INFO*)getInfoPtr(hwnd))
 
 
 /***********************************************************************
@@ -278,7 +278,7 @@ static LRESULT PROGRESS_Create(HWND hwnd,WPARAM wParam,LPARAM lParam)
   PROGRESS_INFO *infoPtr;
 
   /* allocate memory for info struct */
-  infoPtr = (PROGRESS_INFO *)COMCTL32_Alloc(sizeof(PROGRESS_INFO));
+  infoPtr = (PROGRESS_INFO*)initControl(hwnd,sizeof(PROGRESS_INFO));
   SetWindowLongA(hwnd,0,(DWORD)infoPtr);
 
   /* initialize the info struct */
@@ -289,7 +289,6 @@ static LRESULT PROGRESS_Create(HWND hwnd,WPARAM wParam,LPARAM lParam)
   infoPtr->ColorBar = CLR_DEFAULT;
   infoPtr->ColorBk = CLR_DEFAULT;
   infoPtr->hFont = (HANDLE)NULL;
-//      TRACE(progress, "Progress Ctrl creation, hwnd=%04x\n", hwnd);
 
   return 0;
 }
@@ -298,8 +297,7 @@ static LRESULT PROGRESS_Destroy(HWND hwnd,WPARAM wParam,LPARAM lParam)
 {
   PROGRESS_INFO *infoPtr = PROGRESS_GetInfoPtr(hwnd);
 
-  //      TRACE (progress, "Progress Ctrl destruction, hwnd=%04x\n", hwnd);
-  COMCTL32_Free (infoPtr);
+  doneControl(hwnd);
 
   return 0;
 }
@@ -535,7 +533,7 @@ static LRESULT WINAPI ProgressWindowProc(HWND hwnd, UINT message,
 //      if (message >= WM_USER)
 //      ERR(progress, "unknown msg %04x wp=%04x lp=%08lx\n",
 //                  message, wParam, lParam );
-      return DefWindowProcA( hwnd, message, wParam, lParam );
+      return defComCtl32ProcA( hwnd, message, wParam, lParam );
     }
 
     return 0;
@@ -552,9 +550,6 @@ VOID
 PROGRESS_Register (VOID)
 {
     WNDCLASSA wndClass;
-
-//SvL: Don't check this now
-//    if (GlobalFindAtomA(PROGRESS_CLASSA)) return;
 
     ZeroMemory (&wndClass, sizeof( WNDCLASSA));
     wndClass.style         = CS_GLOBALCLASS | CS_VREDRAW | CS_HREDRAW;
@@ -577,7 +572,6 @@ PROGRESS_Register (VOID)
 VOID
 PROGRESS_Unregister (VOID)
 {
-    if (GlobalFindAtomA(PROGRESS_CLASSA))
-        UnregisterClassA(PROGRESS_CLASSA, (HINSTANCE)NULL);
+    UnregisterClassA(PROGRESS_CLASSA, (HINSTANCE)NULL);
 }
 

@@ -1,4 +1,4 @@
-/* $Id: propsheet.cpp,v 1.1 2000-02-23 17:09:46 cbratschi Exp $ */
+/* $Id: propsheet.cpp,v 1.2 2000-03-17 17:13:24 cbratschi Exp $ */
 /*
  * Property Sheets
  *
@@ -19,7 +19,6 @@
 #include "commctrl.h"
 #include "prsht.h"
 #include "dialog.h"
-#include "win.h"
 #include "winnls.h"
 #include "comctl32.h"
 #include "heap.h"
@@ -348,17 +347,18 @@ BOOL PROPSHEET_CollectPageInfo(LPCPROPSHEETPAGEA lppsp,
  */
 static INT PROPSHEET_DoDialogBox( HWND hwnd, HWND owner)
 {
-   WND * wndPtr;
    DIALOGINFO * dlgInfo;
    MSG msg;
    INT retval;
 
-//AH: that WINE internal - design violation!!1
-#if 0
+   dprintf(("PROPSHEET: PROPSHEET_DoDialogBox not implemented!!!"));
+
+#if 0 //CB: implement! sync with user32\win32dlg.cpp DoDialogBox method (not easy)
+      //    this functions isn't used so far
      /* Owner must be a top-level window */
    owner = WIN_GetTopParent( owner );
-   if (!(wndPtr = WIN_FindWndPtr( hwnd ))) return -1;
-   dlgInfo = (DIALOGINFO *)wndPtr->wExtra;
+   if (!IsWindow(hwnd))) return -1;
+   dlgInfo = (DIALOGINFO*)wndPtr->wExtra;
 
    if (!dlgInfo->flags & DF_END) /* was EndDialog called in WM_INITDIALOG ? */
    {
@@ -376,8 +376,6 @@ static INT PROPSHEET_DoDialogBox( HWND hwnd, HWND owner)
        EnableWindow( owner, TRUE );
    }
    retval = dlgInfo->idResult;
-
-   WIN_ReleaseWndPtr(wndPtr);
 #endif
    DestroyWindow( hwnd );
    return retval;
@@ -389,57 +387,8 @@ static INT PROPSHEET_DoDialogBox( HWND hwnd, HWND owner)
  * Creates the actual property sheet.
  */
 
-//AH: WINE 9912123 not merged due to design violation (internal WINE structures used)
-
 BOOL PROPSHEET_CreateDialog(PropSheetInfo* psInfo)
 {
-#if 0
-  LRESULT ret;
-  LPCVOID template;
-  LPVOID temp = 0;
-  HRSRC hRes;
-  DWORD resSize;
-  WORD resID = IDD_PROPSHEET;
-
-  if (psInfo->ppshheader->dwFlags & PSH_WIZARD)
-    resID = IDD_WIZARD;
-
-  if(!(hRes = FindResourceA(COMCTL32_hModule,
-                            MAKEINTRESOURCEA(resID),
-                            RT_DIALOGA)))
-    return FALSE;
-
-  if(!(template = (LPVOID)LoadResource(COMCTL32_hModule, hRes)))
-    return FALSE;
-
-  /*
-   * Make a copy of the dialog template.
-   */
-  resSize = SizeofResource(COMCTL32_hModule, hRes);
-
-  temp = COMCTL32_Alloc(resSize);
-
-  if (!temp)
-    return FALSE;
-
-  memcpy(temp, template, resSize);
-
-  if (psInfo->useCallback)
-    (*(psInfo->ppshheader->pfnCallback))(0, PSCB_PRECREATE, (LPARAM)temp);
-
-  ret = CreateDialogIndirectParamA(psInfo->ppshheader->hInstance,
-                                     (LPDLGTEMPLATEA) temp,
-                                     psInfo->ppshheader->hwndParent,
-                                     (DLGPROC) PROPSHEET_DialogProc,
-                                     (LPARAM)psInfo);
-
-  if (!(psInfo->ppshheader->dwFlags & PSH_MODELESS))
-     ret = PROPSHEET_DoDialogBox((HWND)ret, psInfo->ppshheader->hwndParent);
-
-  COMCTL32_Free(temp);
-
-  return ret;
-#endif
   LRESULT ret;
   LPCVOID templ;
   LPVOID temp = 0;

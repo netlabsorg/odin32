@@ -1,4 +1,4 @@
-/* $Id: pager.cpp,v 1.1 2000-02-23 17:09:45 cbratschi Exp $ */
+/* $Id: pager.cpp,v 1.2 2000-03-17 17:13:23 cbratschi Exp $ */
 /*
  * Pager control
  *
@@ -17,11 +17,10 @@
 
 #include "winbase.h"
 #include "commctrl.h"
+#include "ccbase.h"
 #include "pager.h"
 
-
-#define PAGER_GetInfoPtr(hwnd) ((PAGER_INFO *)GetWindowLongA(hwnd, 0))
-
+#define PAGER_GetInfoPtr(hwnd) ((PAGER_INFO*)getInfoPtr(hwnd))
 
 static LRESULT
 PAGER_ForwardMouse (HWND hwnd, WPARAM wParam)
@@ -93,12 +92,8 @@ PAGER_RecalcSize (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
     if (infoPtr->hwndChild) {
         ZeroMemory (&nmpgcs, sizeof (NMPGCALCSIZE));
-        nmpgcs.hdr.hwndFrom = hwnd;
-        nmpgcs.hdr.idFrom   = GetWindowLongA (hwnd, GWL_ID);
-        nmpgcs.hdr.code = PGN_CALCSIZE;
         nmpgcs.dwFlag = (dwStyle & PGS_HORZ) ? PGF_CALCWIDTH : PGF_CALCHEIGHT;
-        SendMessageA (GetParent (hwnd), WM_NOTIFY,
-                        (WPARAM)nmpgcs.hdr.idFrom, (LPARAM)&nmpgcs);
+        sendNotify(hwnd,PGN_CALCSIZE,&nmpgcs.hdr);
 
         infoPtr->nChildSize = (dwStyle & PGS_HORZ) ? nmpgcs.iWidth : nmpgcs.iHeight;
 
@@ -204,7 +199,7 @@ PAGER_Create (HWND hwnd, WPARAM wParam, LPARAM lParam)
     PAGER_INFO *infoPtr;
 
     /* allocate memory for info structure */
-    infoPtr = (PAGER_INFO *)COMCTL32_Alloc (sizeof(PAGER_INFO));
+    infoPtr = (PAGER_INFO*)initControl(hwnd,sizeof(PAGER_INFO));
     SetWindowLongA (hwnd, 0, (DWORD)infoPtr);
 
     /* set default settings */
@@ -224,11 +219,8 @@ PAGER_Destroy (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
     PAGER_INFO *infoPtr = PAGER_GetInfoPtr (hwnd);
 
-
-
-
     /* free pager info data */
-    COMCTL32_Free (infoPtr);
+    doneControl(hwnd);
 
     return 0;
 }
@@ -355,7 +347,7 @@ PAGER_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 //          if (uMsg >= WM_USER)
 //              ERR (pager, "unknown msg %04x wp=%08x lp=%08lx\n",
 //                   uMsg, wParam, lParam);
-            return DefWindowProcA (hwnd, uMsg, wParam, lParam);
+            return defComCtl32ProcA (hwnd, uMsg, wParam, lParam);
     }
     return 0;
 }
@@ -365,9 +357,6 @@ VOID
 PAGER_Register (VOID)
 {
     WNDCLASSA wndClass;
-
-//SvL: Don't check this now
-//    if (GlobalFindAtomA (WC_PAGESCROLLERA)) return;
 
     ZeroMemory (&wndClass, sizeof(WNDCLASSA));
     wndClass.style         = CS_GLOBALCLASS | CS_DBLCLKS | CS_SAVEBITS;
@@ -385,7 +374,6 @@ PAGER_Register (VOID)
 VOID
 PAGER_Unregister (VOID)
 {
-    if (GlobalFindAtomA (WC_PAGESCROLLERA))
-        UnregisterClassA (WC_PAGESCROLLERA, (HINSTANCE)NULL);
+    UnregisterClassA (WC_PAGESCROLLERA, (HINSTANCE)NULL);
 }
 

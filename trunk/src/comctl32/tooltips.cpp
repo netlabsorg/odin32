@@ -1,4 +1,4 @@
-/* $Id: tooltips.cpp,v 1.2 2000-02-25 09:57:19 achimha Exp $ */
+/* $Id: tooltips.cpp,v 1.3 2000-03-17 17:13:26 cbratschi Exp $ */
 /*
  * Tool tip control
  *
@@ -41,8 +41,7 @@ LRESULT CALLBACK
 TOOLTIPS_SubclassProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 
-static VOID
-TOOLTIPS_Refresh (HWND hwnd, HDC hdc)
+static VOID TOOLTIPS_Draw (HWND hwnd, HDC hdc)
 {
     TOOLTIPS_INFO *infoPtr = TOOLTIPS_GetInfoPtr(hwnd);
     RECT rc;
@@ -169,7 +168,7 @@ TOOLTIPS_CalcTipRect (HWND hwnd,TOOLTIPS_INFO *infoPtr,TTTOOL_INFO *toolPtr,LPRE
       uFlags |= DT_WORDBREAK;
     }
     if (GetWindowLongA(hwnd,GWL_STYLE) & TTS_NOPREFIX) uFlags |= DT_NOPREFIX;
-//    TRACE (tooltips, "\"%s\"\n", debugstr_w(infoPtr->szTipText));
+    //TRACE (tooltips, "\"%s\"\n", debugstr_w(infoPtr->szTipText));
 
     hdc = GetDC(hwnd);
     hOldFont = SelectObject(hdc,infoPtr->hFont);
@@ -180,17 +179,32 @@ TOOLTIPS_CalcTipRect (HWND hwnd,TOOLTIPS_INFO *infoPtr,TTTOOL_INFO *toolPtr,LPRE
     size.cx = rc.right-rc.left+4+infoPtr->rcMargin.left+infoPtr->rcMargin.right;
     size.cy = rc.bottom-rc.top+4+infoPtr->rcMargin.bottom+infoPtr->rcMargin.top;
 
-    //CB: optimize
-
     if (toolPtr->uFlags & TTF_ABSOLUTE)
     {
       rc.left = infoPtr->xTrackPos;
       rc.top  = infoPtr->yTrackPos;
 
-      if (toolPtr->uFlags & TTF_CENTERTIP)
+      if (toolPtr->uFlags & TTF_ALIGNMASK)
       {
-        rc.left -= (size.cx/2);
-        rc.top  -= (size.cy/2);
+        //CB: Odin only (Win32 does something similar but with an undocumented mechanism)
+
+        if (toolPtr->uFlags & TTF_ALIGNLEFT)
+          rc.left -= size.cx;
+        else if (toolPtr->uFlags & TTF_HCENTER)
+          rc.left -= size.cx/2;
+
+        if (toolPtr->uFlags & TTF_ALIGNTOP)
+          rc.top -= size.cy;
+        else if (toolPtr->uFlags & TTF_VCENTER)
+          rc.top -= size.cy/2;
+
+      } else
+      {
+        if (toolPtr->uFlags & TTF_CENTERTIP)
+        {
+          rc.left -= (size.cx/2);
+          rc.top  -= (size.cy/2);
+        }
       }
     } else
     {
@@ -234,7 +248,7 @@ TOOLTIPS_CalcTipRect (HWND hwnd,TOOLTIPS_INFO *infoPtr,TTTOOL_INFO *toolPtr,LPRE
       }
     }
 
-//    TRACE (tooltips, "pos %d - %d\n", rect.left, rect.top);
+    //TRACE (tooltips, "pos %d - %d\n", rect.left, rect.top);
 
     rc.right = rc.left+size.cx;
     rc.bottom = rc.top+size.cy;
@@ -259,7 +273,7 @@ TOOLTIPS_CalcTipSize (HWND hwnd, TOOLTIPS_INFO *infoPtr, LPSIZE lpSize)
     }
     if (GetWindowLongA (hwnd, GWL_STYLE) & TTS_NOPREFIX)
         uFlags |= DT_NOPREFIX;
-//    TRACE("\"%s\"\n", debugstr_w(infoPtr->szTipText));
+    //TRACE("\"%s\"\n", debugstr_w(infoPtr->szTipText));
 
     hdc = GetDC (hwnd);
     hOldFont = SelectObject (hdc, infoPtr->hFont);
@@ -363,7 +377,7 @@ TOOLTIPS_Show (HWND hwnd, TOOLTIPS_INFO *infoPtr)
 
     /* repaint the tooltip */
     hdc = GetDC (hwnd);
-    TOOLTIPS_Refresh (hwnd, hdc);
+    TOOLTIPS_Draw(hwnd, hdc);
     ReleaseDC (hwnd, hdc);
 
     SetTimer (hwnd, ID_TIMERPOP, infoPtr->nAutoPopTime, 0);
@@ -406,11 +420,11 @@ TOOLTIPS_TrackShow (HWND hwnd, TOOLTIPS_INFO *infoPtr)
 
     if (infoPtr->nTrackTool == -1)
     {
-//    TRACE (tooltips, "invalid tracking tool (-1)!\n");
+      //TRACE (tooltips, "invalid tracking tool (-1)!\n");
       return;
     }
 
-//    TRACE (tooltips, "show tracking tooltip pre %d!\n", infoPtr->nTrackTool);
+    //TRACE (tooltips, "show tracking tooltip pre %d!\n", infoPtr->nTrackTool);
 
     TOOLTIPS_GetTipText(hwnd,infoPtr,infoPtr->nTrackTool);
 
@@ -420,7 +434,7 @@ TOOLTIPS_TrackShow (HWND hwnd, TOOLTIPS_INFO *infoPtr)
       return;
     }
 
-//    TRACE (tooltips, "show tracking tooltip %d!\n", infoPtr->nTrackTool);
+    //TRACE (tooltips, "show tracking tooltip %d!\n", infoPtr->nTrackTool);
     toolPtr = &infoPtr->tools[infoPtr->nTrackTool];
 
     hdr.hwndFrom = hwnd;
@@ -428,7 +442,7 @@ TOOLTIPS_TrackShow (HWND hwnd, TOOLTIPS_INFO *infoPtr)
     hdr.code = TTN_SHOW;
     SendMessageA(toolPtr->hwnd,WM_NOTIFY,(WPARAM)toolPtr->uId,(LPARAM)&hdr);
 
-//    TRACE (tooltips, "\"%s\"\n", debugstr_w(infoPtr->szTipText));
+    //TRACE (tooltips, "\"%s\"\n", debugstr_w(infoPtr->szTipText));
 
     TOOLTIPS_CalcTipRect(hwnd,infoPtr,toolPtr,&rect);
 
@@ -437,7 +451,7 @@ TOOLTIPS_TrackShow (HWND hwnd, TOOLTIPS_INFO *infoPtr)
                     SWP_SHOWWINDOW | SWP_NOACTIVATE );
 
     hdc = GetDC (hwnd);
-    TOOLTIPS_Refresh (hwnd, hdc);
+    TOOLTIPS_Draw(hwnd, hdc);
     ReleaseDC (hwnd, hdc);
 }
 
@@ -1739,7 +1753,7 @@ TOOLTIPS_TrackActivate (HWND hwnd, WPARAM wParam, LPARAM lParam)
       infoPtr->nTrackTool = TOOLTIPS_GetToolFromInfoA(infoPtr,lpToolInfo);
       if (infoPtr->nTrackTool != -1)
       {
-//      TRACE (tooltips, "activated!\n");
+        //TRACE (tooltips, "activated!\n");
         infoPtr->bTrackActive = TRUE;
         TOOLTIPS_TrackShow(hwnd,infoPtr);
       }
@@ -1751,7 +1765,7 @@ TOOLTIPS_TrackActivate (HWND hwnd, WPARAM wParam, LPARAM lParam)
       infoPtr->bTrackActive = FALSE;
       infoPtr->nTrackTool = -1;
 
-//      TRACE (tooltips, "deactivated!\n");
+      //TRACE (tooltips, "deactivated!\n");
     }
 
     return 0;
@@ -2089,7 +2103,7 @@ TOOLTIPS_Paint (HWND hwnd, WPARAM wParam, LPARAM lParam)
     PAINTSTRUCT ps;
 
     hdc = (wParam == 0) ? BeginPaint (hwnd, &ps) : (HDC)wParam;
-    TOOLTIPS_Refresh (hwnd, hdc);
+    TOOLTIPS_Draw(hwnd, hdc);
     if (!wParam)
         EndPaint (hwnd, &ps);
     return 0;
@@ -2460,9 +2474,6 @@ TOOLTIPS_Register (VOID)
 {
     WNDCLASSA wndClass;
 
-//SvL: Don't check this now
-//    if (GlobalFindAtomA (TOOLTIPS_CLASSA)) return;
-
     ZeroMemory (&wndClass, sizeof(WNDCLASSA));
     wndClass.style         = CS_GLOBALCLASS | CS_DBLCLKS | CS_SAVEBITS;
     wndClass.lpfnWndProc   = (WNDPROC)TOOLTIPS_WindowProc;
@@ -2479,7 +2490,6 @@ TOOLTIPS_Register (VOID)
 VOID
 TOOLTIPS_Unregister (VOID)
 {
-    if (GlobalFindAtomA (TOOLTIPS_CLASSA))
-        UnregisterClassA (TOOLTIPS_CLASSA, (HINSTANCE)NULL);
+    UnregisterClassA (TOOLTIPS_CLASSA, (HINSTANCE)NULL);
 }
 
