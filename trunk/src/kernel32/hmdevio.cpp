@@ -1,4 +1,4 @@
-/* $Id: hmdevio.cpp,v 1.7 2000-10-05 13:48:09 sandervl Exp $ */
+/* $Id: hmdevio.cpp,v 1.8 2001-01-29 00:47:55 bird Exp $ */
 
 /*
  * Win32 Device IOCTL API functions for OS/2
@@ -30,7 +30,7 @@
 #define DBG_LOCALLOG	DBG_hmdevio
 #include "dbglocal.h"
 
-static fX86Init  = FALSE;
+static BOOL fX86Init  = FALSE;
 //SvL: Used in iccio.asm (how can you put these in the .asm data segment without messing things up?)
 ULONG  ioentry   = 0;
 USHORT gdt       = 0;
