@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.36 2001-09-30 09:01:07 bird Exp $
+# $Id: makefile,v 1.37 2001-11-19 12:34:04 sandervl Exp $
 
 #
 # Odin32 API
@@ -39,7 +39,6 @@ $(OBJDIR)\memorystream.obj \
 $(OBJDIR)\pidl.obj \
 $(OBJDIR)\shell32_main.obj \
 $(OBJDIR)\shell32_odin.obj \
-$(OBJDIR)\shellguid.obj \
 $(OBJDIR)\shelllink.obj \
 $(OBJDIR)\shlmenu.obj \
 $(OBJDIR)\shellpath.obj \
@@ -75,6 +74,7 @@ $(ODIN32_LIB)/gdi32.lib \
 $(ODIN32_LIB)/ole32.lib \
 $(ODIN32_LIB)/version.lib \
 $(ODIN32_LIB)/comctl32.lib \
+$(ODIN32_LIB)/guidlib.lib \
 $(ODIN32_LIB)/$(ODINCRT).lib \
 $(ODIN32_LIB)/pmwinx.lib \
 $(ODIN32_LIB)/shlwapi.lib \

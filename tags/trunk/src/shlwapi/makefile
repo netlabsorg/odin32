@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.23 2001-07-20 15:37:52 sandervl Exp $
+# $Id: makefile,v 1.24 2001-11-19 12:34:54 sandervl Exp $
 
 #
 # Odin32 API
@@ -24,7 +24,6 @@ $(OBJDIR)\url_odin.obj \
 $(OBJDIR)\reg_odin.obj \
 $(OBJDIR)\reg.obj \
 $(OBJDIR)\regstream.obj \
-$(OBJDIR)\shlwapiguid.obj \
 $(OBJDIR)\pathcpp.obj \
 $(OBJDIR)\path.obj \
 $(OBJDIR)\string_odin.obj \
@@ -42,6 +41,7 @@ LIBS = \
 $(ODIN32_LIB)/kernel32.lib \
 $(ODIN32_LIB)/user32.lib \
 $(ODIN32_LIB)/gdi32.lib \
+$(ODIN32_LIB)/guidlib.lib \
 $(ODIN32_LIB)/$(ODINCRT).lib \
 OS2386.LIB \
 $(RTLLIB_O)
