@@ -1,4 +1,9 @@
-/* $Id: changelog,v 1.2538 2003-04-02 11:01:34 sandervl Exp $ */
+/* $Id: changelog,v 1.2539 2003-04-02 12:56:23 sandervl Exp $ */
+
+ 2002-04-02: Yuri Dario <mc6530@mclink   >
+    - INCLUDE, GDI32, USER32, KERNEL32:
+                o Corrected & changed headers + source updates
+    - USER32:   o Button: WM_SETTEXT fix
 
  2003-04-02: Platon Fomichev <platon@innotek   >
     - INCLUDE, KERNEL32:
