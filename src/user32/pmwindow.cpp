@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.125 2001-05-11 08:39:44 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.126 2001-05-11 19:02:01 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -1250,7 +1250,12 @@ PosChangedEnd:
         PSWP pswp   = (PSWP)mp1;
 
         dprintf(("PMFRAME:WM_ADJUSTFRAMEPOS %x %x %x (%d,%d) (%d,%d)", win32wnd->getWindowHandle(), pswp->hwnd, pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
-        goto RunDefFrameWndProc;
+//Calling the default frame handler changes the Z-order of this window when
+//setting the focus. Messes up hotlist window in Opera 5.
+//Also gets rid of focus problems in e.g. button (open odin info dialog ->
+//close, focus back to button dialog now)
+//        goto RunDefFrameWndProc;
+        break;
     }
 
     case WM_OWNERPOSCHANGE:
