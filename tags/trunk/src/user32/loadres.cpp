@@ -1,4 +1,4 @@
-/* $Id: loadres.cpp,v 1.16 1999-11-14 23:29:25 sandervl Exp $ */
+/* $Id: loadres.cpp,v 1.17 1999-12-30 11:20:34 sandervl Exp $ */
 
 /*
  * Win32 resource API functions for OS/2
@@ -315,7 +315,7 @@ HANDLE LoadBitmapA(HINSTANCE hinst, LPCSTR lpszName, int cxDesired, int cyDesire
     }
     else
     {
-        hMapping = VIRTUAL_MapFileA( lpszName, (LPVOID *)&ptr);
+        hMapping = VIRTUAL_MapFileA( lpszName, (LPVOID *)&ptr, TRUE);
         if (hMapping == INVALID_HANDLE_VALUE) return 0;
         info = (BITMAPINFO *)(ptr + sizeof(BITMAPFILEHEADER));
     }
