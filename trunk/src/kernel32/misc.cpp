@@ -1,4 +1,4 @@
-/* $Id: misc.cpp,v 1.24 2000-07-22 12:52:45 sandervl Exp $ */
+/* $Id: misc.cpp,v 1.25 2000-08-11 10:56:16 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -29,6 +29,7 @@
 #include "initterm.h"
 #include "logging.h"
 #include <wprocess.h>
+#include <versionos2.h>
 
 /*****************************************************************************
  * PMPRINTF Version                                                          *

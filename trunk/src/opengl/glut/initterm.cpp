@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.8 2000-03-04 19:10:16 jeroen Exp $ */
+/* $Id: initterm.cpp,v 1.9 2000-08-11 10:56:23 sandervl Exp $ */
 
 /*
  * DLL entry point
@@ -43,6 +43,7 @@ void CDECL _ctordtorTerm( void );
  //Win32 resource table (produced by wrc)
  extern DWORD _Resource_PEResTab;
 }
+static HMODULE dllHandle = 0;
 
 void CDECL Glut32Terminate(void);
 
@@ -87,20 +88,17 @@ unsigned long _System _DLL_InitTerm(unsigned long hModule, unsigned long
       case 0 :
          _ctordtorInit();
 
-         /*******************************************************************/
-         /* A DosExitList routine must be used to clean up if runtime calls */
-         /* are required and the runtime is dynamically linked.             */
-         /*******************************************************************/
-
-         if(RegisterLxDll(hModule, LibMain, (PVOID)&_Resource_PEResTab) == FALSE)
-                return 0UL;
-
          CheckVersionFromHMOD(PE2LX_VERSION, hModule);/* PLF Wed  98-03-18 05:28:48*/
 
-         break;
+	 dllHandle = RegisterLxDll(hModule, LibMain, (PVOID)&_Resource_PEResTab);
+         if(dllHandle == 0) 
+		return 0UL;
 
+         break;
       case 1 :
-         UnregisterLxDll(hModule);
+         if(dllHandle) {
+	 	UnregisterLxDll(dllHandle);
+         }
          break;
 
       default  :

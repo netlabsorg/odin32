@@ -1,4 +1,4 @@
-/* $Id: oslibmisc.cpp,v 1.9 2000-05-09 18:56:09 sandervl Exp $ */
+/* $Id: oslibmisc.cpp,v 1.10 2000-08-11 10:56:18 sandervl Exp $ */
 /*
  * Misc OS/2 util. procedures
  *
@@ -39,7 +39,13 @@ char *OSLibGetDllName(ULONG hModule)
   return(modname);
 }
 //******************************************************************************
-/*****************************************************************************
+//******************************************************************************
+BOOL OSLibGetDllName(ULONG hModule, char *name, int length)
+{
+  return DosQueryModuleName(hModule, length, name) == 0;
+}
+//******************************************************************************
+/******************************************************************************
  * Name      : ULONG OSLibiGetModuleHandleA
  * Purpose   : replacement for IBM Open32's GetModuleHandle
  * Parameters: LPCTSTR lpszModule

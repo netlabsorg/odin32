@@ -1,4 +1,4 @@
-/* $Id: oslibmisc.h,v 1.5 2000-06-23 19:02:38 sandervl Exp $ */
+/* $Id: oslibmisc.h,v 1.6 2000-08-11 10:56:18 sandervl Exp $ */
 /*
  * Misc util. procedures
  *
@@ -11,6 +11,7 @@
 #define __OSLIBMISC_H__
 
 char *OSLibGetDllName(ULONG hModule);
+BOOL  OSLibGetDllName(ULONG hModule, char *name, int length);
 
 char *OSLibStripPath(char *path);
 

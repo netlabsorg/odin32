@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.22 2000-03-13 13:10:45 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.23 2000-08-11 10:56:26 sandervl Exp $ */
 
 /*
  * USER32 DLL entry point
@@ -62,7 +62,6 @@ void CDECL _ctordtorTerm( void );
  //Win32 resource table (produced by wrc)
  extern DWORD _Resource_PEResTab;
 }
-
 DWORD hInstanceUser32 = 0;
 
 /****************************************************************************/
@@ -92,7 +91,9 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
 
          CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
 
-         hInstanceUser32 = RegisterLxDll(hModule, 0, (PVOID)&_Resource_PEResTab);
+         hInstanceUser32 = RegisterLxDll(hModule, 0, (PVOID)&_Resource_PEResTab,
+                                         USER32_MAJORIMAGE_VERSION, USER32_MINORIMAGE_VERSION,
+                                         IMAGE_SUBSYSTEM_WINDOWS_GUI);
          if(hInstanceUser32 == 0)
                 return 0UL;
 
@@ -122,7 +123,9 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
 
          break;
       case 1 :
-         UnregisterLxDll(hModule);
+         if(hInstanceUser32) {
+         	UnregisterLxDll(hInstanceUser32);
+         }
          break;
       default  :
          return 0UL;

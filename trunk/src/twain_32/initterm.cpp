@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.8 2000-02-05 02:11:41 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.9 2000-08-11 10:56:25 sandervl Exp $ */
 
 /*
  * DLL entry point
@@ -53,6 +53,8 @@ TW_UINT16 (APIENTRY *TWAINOS2_DSM_Entry)( pTW_IDENTITY, pTW_IDENTITY,
 static HINSTANCE hTWAIN = 0;
 
 }
+static HMODULE dllHandle = 0;
+
 //******************************************************************************
 //******************************************************************************
 BOOL WINAPI LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
@@ -142,7 +144,9 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
             return 0UL;
          }
 	}
-	 if(RegisterLxDll(hModule, LibMain, (PVOID)&_Resource_PEResTab) == FALSE) 
+
+	 dllHandle = RegisterLxDll(hModule, LibMain, (PVOID)&_Resource_PEResTab);
+         if(dllHandle == 0) 
 		return 0UL;
 
          break;
@@ -150,7 +154,9 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
          if(hTWAIN) 
 	 	FreeLibrary(hTWAIN);
          hTWAIN = 0;
-	 UnregisterLxDll(hModule);
+         if(dllHandle) {
+	 	UnregisterLxDll(dllHandle);
+         }
          break;
       default  :
          return 0UL;

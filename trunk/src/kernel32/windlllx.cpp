@@ -1,4 +1,4 @@
-/* $Id: windlllx.cpp,v 1.11 2000-07-18 18:37:29 sandervl Exp $ */
+/* $Id: windlllx.cpp,v 1.12 2000-08-11 10:56:18 sandervl Exp $ */
 
 /*
  * Win32 LX Dll class (compiled in OS/2 using Odin32 api)
@@ -41,24 +41,45 @@
 //******************************************************************************
 //Create LX Dll object and send process attach message
 //System dlls set EntryPoint to 0
+//Parameters:
+//  HINSTANCE hInstance		- OS/2 module handle
+//  WIN32DLLENTRY EntryPoint    - Win32 dll entrypoint address
+//  PVOID pResData              - pointer to win32 resource data
+//  DWORD MajorImageVersion     - major image/os version (for fake win32 header)
+//  DWORD MinorImageVersion     - minor image/os version (for fake win32 header)
+//  DWORD Subsystem             - subsystem type (for fake win32 header)
+//                                (IMAGE_SUBSYSTEM_WINDOWS_CUI/IMAGE_SUBSYSTEM_WINDOWS_GUI)
+//
 //Returns: Odin32 module handle
 //******************************************************************************
 DWORD WIN32API RegisterLxDll(HINSTANCE hInstance, WIN32DLLENTRY EntryPoint, 
-                             PVOID pResData)
-{
- Win32LxDll *windll;
+                             PVOID pResData, 
+                             DWORD MajorImageVersion, 
+                             DWORD MinorImageVersion,
+                             DWORD Subsystem)
+{ 
+ APIRET        rc;
+ Win32LxDll    *windll;
  Win32DllBase *windlldep;
+ char          szFileName[CCHMAXPATH], szErrName[CCHMAXPATH];
 
-   windll = (Win32LxDll *)Win32DllBase::findModule(hInstance);
-   if(windll) {
-	char *name = OSLibGetDllName(hInstance);
-	dprintf(("RegisterLxDll: Register existing dll %x %s", hInstance, name));
-	return FALSE;
+   if(OSLibGetDllName(hInstance, szFileName, sizeof(szFileName)) == FALSE) {
+	dprintf(("ERROR: RegisterLxDll: OSLibGetDllName %x failed!!", hInstance));
+	return 0;
    }
-   windll = new Win32LxDll(hInstance, EntryPoint, pResData);
+   //Make sure DosLoadModule is called at least 
+   //once for a dll (to make sure OS/2 doesn't unload the dll when it's
+   //still needed)
+   rc = DosLoadModule(szErrName, sizeof(szErrName), szFileName, &hInstance);
+   if(rc != 0) { 
+	dprintf(("ERROR: RegisterLxDll: DosLoadModule %s failed (rc=%d)!!", szFileName, rc));
+	return 0;
+   }
+   windll = new Win32LxDll(hInstance, EntryPoint, pResData, MajorImageVersion,
+                           MinorImageVersion, Subsystem);
    if(windll == NULL) {
 	dprintf(("RegisterLxDll: windll == NULL!!!"));
-	return FALSE;
+	return 0;
    }
    if(!fPeLoader) {
    	windll->AddRef();
@@ -73,7 +94,6 @@ DWORD WIN32API RegisterLxDll(HINSTANCE hInstance, WIN32DLLENTRY EntryPoint,
    ULONG            offset;
    char             modulename[CCHMAXPATH];
    char             modsize;
-   APIRET           rc;
    int              i;
 
    //SvL: This code reads the import name table of the dll to get the dependencies
@@ -117,14 +137,14 @@ hdrerror:
 //******************************************************************************
 BOOL WIN32API UnregisterLxDll(HINSTANCE hInstance)
 {
- Win32LxDll *windll;
+ Win32DllBase *windll;
 
    //Don't proceed for pe2lx/win32k (os/2 dll unload dependency bug)
    //Don't do it either after ExitProcess has been called
    if(!fPeLoader || WinExe == NULL)
    	return TRUE;
 
-   windll = (Win32LxDll *)Win32DllBase::findModule(hInstance);
+   windll = Win32DllBase::findModule(hInstance);
    if(!windll) {
 	dprintf(("UnregisterLxDll: Can't find dll with handle %x (already deleted)", hInstance));
 	return TRUE; //already deleted by Win32LxDll::Release
@@ -136,7 +156,9 @@ BOOL WIN32API UnregisterLxDll(HINSTANCE hInstance)
 }
 //******************************************************************************
 //******************************************************************************
-Win32LxDll::Win32LxDll(HINSTANCE hInstance, WIN32DLLENTRY EntryPoint, PVOID pResData) 
+Win32LxDll::Win32LxDll(HINSTANCE hInstance, WIN32DLLENTRY EntryPoint, PVOID pResData,
+                       DWORD MajorImageVersion, DWORD MinorImageVersion,
+                       DWORD Subsystem) 
                 : Win32ImageBase(hInstance),
                   Win32LxImage(hInstance, pResData), 
                   Win32DllBase(hInstance, EntryPoint)
@@ -145,36 +167,15 @@ Win32LxDll::Win32LxDll(HINSTANCE hInstance, WIN32DLLENTRY EntryPoint, PVOID pRes
   	fSkipThreadEntryCalls    = TRUE;
   	fAttachedToProcess = TRUE;
   }
+  hinstanceOS2 = hInstance;
+  //new win32 instance handle must be pointer to PE header
+  hinstance = (HINSTANCE)buildHeader(MajorImageVersion, MinorImageVersion,
+                                     Subsystem);
 }
 //******************************************************************************
 //******************************************************************************
 Win32LxDll::~Win32LxDll()
 {
-}
-//******************************************************************************
-//Load it again so OS/2 takes care of the reference count (to make sure
-//a dll isn't unloaded when the win32 app still needs it)
-//******************************************************************************
-void Win32LxDll::loadLibrary()
-{
- char   szModuleFailure[CCHMAXPATH] = "";
- ULONG  hInstanceNewDll;
- APIRET rc;
-
-  if(fLoadLibrary) {
-	DebugInt3();
-	return;
-  }
-
-  dprintf(("Win32LxDll::loadLibrary %s", getModuleName()));
-  rc = DosLoadModule(szModuleFailure, sizeof(szModuleFailure), getFullPath(), (HMODULE *)&hInstanceNewDll);
-  if(rc) {
-	dprintf(("DosLoadModule returned %X for %s\n", rc, szModuleFailure));
-	DebugInt3(); //should NEVER happen
-	return;
-  }
-  //only do this once, so set the fLoadLibrary flag to true
-  setLoadLibrary();
 }
 //******************************************************************************
 //******************************************************************************
@@ -226,14 +227,10 @@ ULONG Win32LxDll::Release()
  HINSTANCE hinst;
  ULONG     ret;
  APIRET    rc;
- BOOL      fLoadLib = fLoadLibrary;
 
-  if(fDisableUnload) {//only set for kernel32.dll
-	fLoadLib = FALSE;
-  }
-  hinst = hinstance;
+  hinst = hinstanceOS2;
   ret = Win32DllBase::Release();
-  if(ret == 0 && fLoadLib) {
+  if(ret == 0 && !fDisableUnload) {//only set for kernel32.dll (fDisableUnload)
 	//DosFreeModule sends a termination message to the dll.
         //The LX dll informs us when it's removed (UnregisterDll call)
 	rc = DosFreeModule(hinst);
@@ -248,6 +245,36 @@ ULONG Win32LxDll::Release()
 BOOL Win32LxDll::isLxDll()
 {
   return TRUE;
+}
+//******************************************************************************
+//******************************************************************************
+void Win32LxDll::setDllHandleOS2(HINSTANCE hInstanceOS2) 
+{ 
+  //Loaded with LoadLibrary(Ex); no need for a 2nd DosLoadModule
+  //Dlls that are indirectly loaded (i.e. GDI32->KERNEL32 dependancy) need
+  //this additional DosLoadModule (and setDllHandleOS2 isn't called for those)
+  if(this->hinstanceOS2) {
+	DosFreeModule(this->hinstanceOS2);
+  }
+  this->hinstanceOS2 = hInstanceOS2;
+}
+//******************************************************************************
+//******************************************************************************
+Win32LxDll *Win32LxDll::findModuleByOS2Handle(HINSTANCE hinstance)
+{
+   dlllistmutex.enter();
+
+   Win32LxDll *mod = (Win32LxDll*)Win32DllBase::head;
+   while(mod != NULL) {
+	dbgCheckObj(mod);
+	if(mod->isLxDll() && mod->hinstanceOS2 == hinstance) {
+		dlllistmutex.leave();
+		return(mod);
+        }
+	mod = (Win32LxDll*)mod->next;
+   }
+   dlllistmutex.leave();
+   return(NULL);
 }
 //******************************************************************************
 //******************************************************************************

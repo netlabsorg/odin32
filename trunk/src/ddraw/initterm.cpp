@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.12 2000-02-05 01:55:52 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.13 2000-08-11 10:56:14 sandervl Exp $ */
 
 /*
  * DLL entry point
@@ -45,6 +45,7 @@ void CDECL _ctordtorTerm( void );
 }
 
 char ddrawPath[CCHMAXPATH] = "";
+static HMODULE dllHandle = 0;
 
 //******************************************************************************
 //******************************************************************************
@@ -96,13 +97,18 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
 
          CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
 
-	 if(RegisterLxDll(hModule, LibMain, (PVOID)&_Resource_PEResTab) == FALSE) 
+	 dllHandle = RegisterLxDll(hModule, LibMain, (PVOID)&_Resource_PEResTab,
+                                   DDRAW_MAJORIMAGE_VERSION, DDRAW_MINORIMAGE_VERSION,
+                                   IMAGE_SUBSYSTEM_WINDOWS_GUI);
+         if(dllHandle == 0) 
 		return 0UL;
 
          break;
       }
       case 1 :
-	 UnregisterLxDll(hModule);
+         if(dllHandle) {
+	 	UnregisterLxDll(dllHandle);
+         }
          break;
       default  :
          return 0UL;

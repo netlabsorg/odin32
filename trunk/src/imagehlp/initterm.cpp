@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.3 2000-02-05 02:00:05 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.4 2000-08-11 10:56:15 sandervl Exp $ */
 
 /*
  * DLL entry point
@@ -43,6 +43,7 @@ void CDECL _ctordtorTerm( void );
  //Win32 resource table (produced by wrc)
  extern DWORD _Resource_PEResTab;
 }
+static HMODULE dllHandle = 0;
 
 BOOL WINAPI IMAGEHLP_LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved);
 
@@ -90,17 +91,15 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
 
          CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
 
-         /*******************************************************************/
-         /* A DosExitList routine must be used to clean up if runtime calls */
-         /* are required and the runtime is dynamically linked.             */
-         /*******************************************************************/
-
-	 if(RegisterLxDll(hModule, LibMain, (PVOID)&_Resource_PEResTab) == FALSE) 
+	 dllHandle = RegisterLxDll(hModule, LibMain, (PVOID)&_Resource_PEResTab);
+         if(dllHandle == 0) 
 		return 0UL;
 
          break;
       case 1 :
-	 UnregisterLxDll(hModule);
+         if(dllHandle) {
+	 	UnregisterLxDll(dllHandle);
+         }
          break;
 
       default  :

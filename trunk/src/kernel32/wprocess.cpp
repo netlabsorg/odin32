@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.85 2000-08-09 18:59:03 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.86 2000-08-11 10:56:20 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -24,6 +24,7 @@
 #include "windllpeldr.h"
 #include "winexepeldr.h"
 #include "winfakepeldr.h"
+#include "windlllx.h"
 #include <vmutex.h>
 #include <handlemanager.h>
 
@@ -50,7 +51,6 @@ ODINDEBUGCHANNEL(KERNEL32-WPROCESS)
 
 //******************************************************************************
 //******************************************************************************
-BOOL      fFreeLibrary = FALSE;
 BOOL      fIsOS2Image = FALSE;  //TRUE  -> Odin32 OS/2 application (not converted!)
                             //FALSE -> otherwise
 //Process database
@@ -447,13 +447,7 @@ BOOL WIN32API FreeLibrary(HINSTANCE hinstance)
         }
         return(TRUE);
     }
-    dprintf(("KERNEL32: FreeLibrary %s %X\n", OSLibGetDllName(hinstance), hinstance));
-
-    //TODO: Not thread safe
-    fFreeLibrary  = TRUE; //ditch dll
-    rc = O32_FreeLibrary(hinstance);
-    fFreeLibrary = FALSE;
-    dprintf(("FreeLibrary returned %X\n", rc));
+    dprintf(("WARNING: KERNEL32: FreeLibrary %s %x NOT FOUND!", OSLibGetDllName(hinstance), hinstance));
     return(TRUE);
 }
 /******************************************************************************/
@@ -706,14 +700,6 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HANDLE hFile, DWORD dwFla
     pModule = Win32DllBase::findModule((LPSTR)lpszLibFile);
     if (pModule)
     {
-        if (pModule->isLxDll() && !pModule->isLoaded() && fPeLoader)
-        {
-            //can happen with i.e. wininet
-            //wininet depends on wsock32; when the app loads wsock32 afterwards
-            //with LoadLibrary or as a child of another dll, we need to make
-            //sure it's loaded once with DosLoadModule
-            pModule->setLoadLibrary();
-        }
         pModule->incDynamicLib();
         pModule->AddRef();
         dprintf(("KERNEL32: LoadLibraryExA(%s, 0x%x, 0x%x): returns 0x%x. Dll found %s",
@@ -770,19 +756,25 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HANDLE hFile, DWORD dwFla
         if (hDll)
         {
             /* OS/2 dll, system dll, converted dll or win32k took care of it.*/
-            pModule = Win32DllBase::findModule(hDll);
-            if (pModule)
+            pModule = (Win32DllBase *)Win32LxDll::findModuleByOS2Handle(hDll);
+            if(pModule)
             {
-                if (pModule->isLxDll() && fPeLoader)
+		
+                if(pModule->isLxDll())
                 {
-                    pModule->setLoadLibrary();
-                    pModule->AddRef();
+			((Win32LxDll *)pModule)->setDllHandleOS2(hDll);
+			if(fPeLoader) {
+                    		pModule->AddRef();
+			}
                 }
                 pModule->incDynamicLib();
             }
+            else {
+                return hDll; //happens when LoadLibrary is called in kernel32's initterm (nor harmful)
+            }
             dprintf(("KERNEL32: LoadLibraryExA(%s, 0x%x, 0x%x): returns 0x%x. Loaded %s using O32_LoadLibrary.",
                      lpszLibFile, hFile, dwFlags, hDll, szModname));
-            return hDll;
+            return pModule->getInstanceHandle();
         }
         dprintf(("KERNEL32: LoadLibraryExA(%s, 0x%x, 0x%x): O32_LoadLibrary(%s) failed. LastError=%d",
                  lpszLibFile, hFile, dwFlags, szModname, GetLastError()));
@@ -1098,11 +1090,13 @@ DWORD WIN32API GetModuleFileNameA(HMODULE hinstModule, LPTSTR lpszPath, DWORD cc
         strncpy(lpszPath, fpath, rc);
 	lpszPath[rc-1] = 0;
   }
+  //only needed for call inside kernel32's initterm (profile init)
   else  rc = O32_GetModuleFileName(hinstModule, lpszPath, cchPath);
 
   if(rc) {
-    dprintf(("KERNEL32: GetModuleFileName %s %d\n", lpszPath, hinstModule));
+        dprintf(("KERNEL32: GetModuleFileName %s %d\n", lpszPath, hinstModule));
   }
+  else  dprintf(("KERNEL32: WARNING: GetModuleFileName %x not found!", hinstModule));
   return(rc);
 }
 //******************************************************************************
@@ -1131,10 +1125,11 @@ HANDLE WIN32API GetModuleHandleA(LPCTSTR lpszModule)
 
   if(lpszModule == NULL) {
     if(WinExe)
-        hMod = WinExe->getInstanceHandle();
+            hMod = WinExe->getInstanceHandle();
     else    hMod = -1;
   }
-  else {
+  else 
+  {
     strcpy(szModule, OSLibStripPath((char *)lpszModule));
     strupr(szModule);
     if(strstr(szModule, ".DLL")) {
@@ -1157,9 +1152,8 @@ HANDLE WIN32API GetModuleHandleA(LPCTSTR lpszModule)
     else {
         windll = Win32DllBase::findModule(szModule);
         if(windll) {
-            hMod = windll->getInstanceHandle();
+              hMod = windll->getInstanceHandle();
         }
-        else    hMod = OSLibiGetModuleHandleA((char *)lpszModule);
     }
   }
 

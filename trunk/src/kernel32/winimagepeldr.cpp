@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.51 2000-08-04 21:12:10 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.52 2000-08-11 10:56:19 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -41,6 +41,7 @@
 #include "winimagebase.h"
 #include "winimagepeldr.h"
 #include "windllpeldr.h"
+#include "windlllx.h"
 #include <pefile.h>
 #include <unicode.h>
 #include "oslibmisc.h"
@@ -1217,7 +1218,7 @@ BOOL Win32PeLdrImage::processImports(char *win32file)
  ULONG *pulImport;
  ULONG  ulCurFixup;
  int    Size;
- Win32PeLdrDll *WinDll;
+ Win32DllBase *WinDll;
  Section *section;
 
 /* "algorithm:"
@@ -1334,7 +1335,7 @@ BOOL Win32PeLdrImage::processImports(char *win32file)
     dprintf((LOG, "**********************************************************************" ));
     dprintf((LOG, "************** Import Module %s ", pszCurModule ));
     dprintf((LOG, "**********************************************************************" ));
-    WinDll = (Win32PeLdrDll *)Win32DllBase::findModule(pszCurModule);
+    WinDll = Win32DllBase::findModule(pszCurModule);
 
     if(WinDll == NULL)
     {  //not found, so load it
@@ -1349,6 +1350,7 @@ BOOL Win32PeLdrImage::processImports(char *win32file)
 		APIRET rc;
   		char   szModuleFailure[CCHMAXPATH] = "";
 		ULONG  hInstanceNewDll;
+                Win32LxDll *lxdll;
 
 		char *dot = strchr(modname, '.');
 		if(dot) {
@@ -1362,21 +1364,22 @@ BOOL Win32PeLdrImage::processImports(char *win32file)
 			errorState = rc;
 			return(FALSE);
   		}
-		WinDll = (Win32PeLdrDll *)Win32DllBase::findModule(hInstanceNewDll);
-		if(WinDll == NULL) {//shouldn't happen!
+		lxdll = Win32LxDll::findModuleByOS2Handle(hInstanceNewDll);
+		if(lxdll == NULL) {//shouldn't happen!
 			dprintf((LOG, "Just loaded the dll, but can't find it anywhere?!!?"));
 			errorState = ERROR_INTERNAL;
 			return(FALSE);
 		}
-		//Mark this dll as loaded by DosLoadModule
-  		WinDll->setLoadLibrary();
-		WinDll->AddRef();
+		lxdll->setDllHandleOS2(hInstanceNewDll);
+		lxdll->AddRef();
+                WinDll = (Win32DllBase*)lxdll;
 	}
 	else {
-        	WinDll = new Win32PeLdrDll(modname, this);
+         Win32PeLdrDll *pedll;
 
-        	if(WinDll == NULL) {
-	            dprintf((LOG, "WinDll: Error allocating memory" ));
+        	pedll = new Win32PeLdrDll(modname, this);
+        	if(pedll == NULL) {
+	            dprintf((LOG, "pedll: Error allocating memory" ));
 	            WinMessageBox(HWND_DESKTOP, HWND_DESKTOP, szMemErrorMsg, szErrorTitle, 0, MB_OK | MB_ERROR | MB_MOVEABLE);
 	            errorState = ERROR_INTERNAL;
 	            return(FALSE);
@@ -1384,21 +1387,22 @@ BOOL Win32PeLdrImage::processImports(char *win32file)
 	        dprintf((LOG, "**********************************************************************" ));
 	        dprintf((LOG, "**********************     Loading Module        *********************" ));
 	        dprintf((LOG, "**********************************************************************" ));
-	        if(WinDll->init(0) == FALSE) {
-	            dprintf((LOG, "Internal WinDll error ", WinDll->getError() ));
+	        if(pedll->init(0) == FALSE) {
+	            dprintf((LOG, "Internal WinDll error ", pedll->getError() ));
 	            return(FALSE);
 	        }
 #ifdef DEBUG
-    		WinDll->AddRef(getModuleName());
+    		pedll->AddRef(getModuleName());
 #else
-    		WinDll->AddRef();
+    		pedll->AddRef();
 #endif
-	        if(WinDll->attachProcess() == FALSE) {
+	        if(pedll->attachProcess() == FALSE) {
         	    dprintf((LOG, "attachProcess failed!" ));
-		    delete WinDll;
+		    delete pedll;
 	            errorState = ERROR_INTERNAL;
 	            return(FALSE);
 	        }
+		WinDll = (Win32DllBase*)pedll;
 	}
 
 	dprintf((LOG, "**********************************************************************" ));
@@ -1406,19 +1410,12 @@ BOOL Win32PeLdrImage::processImports(char *win32file)
         dprintf((LOG, "**********************************************************************" ));
     }
     else {
-	if(WinDll->isLxDll() && !WinDll->isLoaded()) {
-		//can happen with i.e. wininet
-		//wininet depends on wsock32; when the app loads wsock32 afterwards
-	  	//with LoadLibrary or as a child of another dll, we need to make
-                //sure it's loaded once with DosLoadModule
-		WinDll->loadLibrary();
-	}
 	WinDll->AddRef();
 	
 	dprintf((LOG, "Already found ", pszCurModule));
     }
     //add the dll we just loaded to dependency list for this image
-    addDependency((Win32DllBase *)WinDll);
+    addDependency(WinDll);
 
     //Make sure the dependency list is correct (already done
     //in the ctor of Win32DllBase, but for LX dlls the parent is

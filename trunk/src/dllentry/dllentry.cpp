@@ -1,4 +1,4 @@
-/* $Id: dllentry.cpp,v 1.1 2000-02-05 01:49:48 sandervl Exp $ */
+/* $Id: dllentry.cpp,v 1.2 2000-08-11 10:56:14 sandervl Exp $ */
 
 /*
  * DLL entry point
@@ -43,6 +43,9 @@ void CDECL _ctordtorTerm( void );
  //Win32 resource table (produced by wrc)
  extern DWORD _Resource_PEResTab;
 }
+
+static HMODULE dllHandle = 0;
+
 //******************************************************************************
 //******************************************************************************
 BOOL WINAPI LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
@@ -83,19 +86,22 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
    /*-------------------------------------------------------------------------*/
 
    switch (ulFlag) {
-      case 0 :
+      case 0:
          _ctordtorInit();
 
          CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
 
-	 if(RegisterLxDll(hModule, LibMain, (PVOID)&_Resource_PEResTab) == FALSE) 
+	 dllHandle = RegisterLxDll(hModule, LibMain, (PVOID)&_Resource_PEResTab);
+         if(dllHandle == 0) 
 		return 0UL;
 
          break;
-      case 1 :
-	 UnregisterLxDll(hModule);
+      case 1:
+         if(dllHandle) {
+	 	UnregisterLxDll(dllHandle);
+         }
          break;
-      default  :
+      default:
          return 0UL;
    }
 

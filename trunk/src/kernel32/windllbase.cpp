@@ -1,4 +1,4 @@
-/* $Id: windllbase.cpp,v 1.15 2000-07-18 18:37:29 sandervl Exp $ */
+/* $Id: windllbase.cpp,v 1.16 2000-08-11 10:56:18 sandervl Exp $ */
 
 /*
  * Win32 Dll base class
@@ -52,7 +52,7 @@ Win32DllBase::Win32DllBase(HINSTANCE hinstance, WIN32DLLENTRY DllEntryPoint,
                  : Win32ImageBase(hinstance),
   	           referenced(0), fSkipThreadEntryCalls(FALSE), next(NULL), fInserted(FALSE),
                    fAttachedToProcess(FALSE), fUnloaded(FALSE), 
-                   nrDynamicLibRef(0), fLoadLibrary(FALSE), fDisableUnload(FALSE)
+                   nrDynamicLibRef(0), fDisableUnload(FALSE)
 {
   dllEntryPoint = DllEntryPoint;
 
@@ -88,12 +88,6 @@ Win32DllBase::~Win32DllBase()
 	dll->next = next;
   }
   dlllistmutex.leave();
-}
-//******************************************************************************
-//******************************************************************************
-void Win32DllBase::loadLibrary()
-{
-  //dummy
 }
 //******************************************************************************
 //******************************************************************************

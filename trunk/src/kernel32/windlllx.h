@@ -1,4 +1,4 @@
-/* $Id: windlllx.h,v 1.1 2000-03-09 19:03:21 sandervl Exp $ */
+/* $Id: windlllx.h,v 1.2 2000-08-11 10:56:19 sandervl Exp $ */
 
 /*
  * Win32 LX Dll class (compiled in OS/2 using Odin32 api)
@@ -18,7 +18,9 @@
 class Win32LxDll : public Win32LxImage, public Win32DllBase
 {
 public:
-	Win32LxDll(HINSTANCE hInstance, WIN32DLLENTRY DllEntryPoint, PVOID pResData);
+	Win32LxDll(HINSTANCE hInstance, WIN32DLLENTRY DllEntryPoint, PVOID pResData,
+                   DWORD MajorImageVersion, DWORD MinorImageVersion,
+                   DWORD Subsystem);
 virtual ~Win32LxDll();
 
 #ifdef DEBUG
@@ -28,18 +30,11 @@ virtual ULONG     AddRef();
 #endif
 virtual	ULONG     Release();
 
-	// Loaded by DosLoadModule (only relevant for LX dlls)
-virtual	void      setLoadLibrary() { fLoadLibrary = TRUE; };
-
-	// isLoaded returns TRUE when a dll has been loaded with DosLoadModule
-virtual BOOL      isLoaded()       { return fLoadLibrary; };
-
-	//Should only be called to make sure DosLoadModule is called at least 
-        //once for a dll (to make sure OS/2 doesn't unload the dll when it's
-        //still needed)
-virtual	void      loadLibrary();
+        void      setDllHandleOS2(HINSTANCE hInstanceOS2);
 
 virtual BOOL      isLxDll();
+
+static  Win32LxDll *findModuleByOS2Handle(HINSTANCE hinstance);
     
 protected:
 
