@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.9 1999-06-28 07:55:16 sandervl Exp $
+# $Id: makefile,v 1.10 1999-07-04 09:41:33 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -284,17 +284,17 @@ os2util.OBJ: .\os2util.cpp
 
 handlemanager.OBJ: \
         .\handlemanager.cpp \
-        .\handlemanager.h
+        $(PDWIN32_INCLUDE)\handlemanager.h
 
 hmdevice.OBJ: \
         .\hmdevice.cpp \
         .\hmdevice.h \
-        .\handlemanager.h
+        $(PDWIN32_INCLUDE)\handlemanager.h
 
 hmopen32.OBJ: \
         .\hmopen32.cpp \
         .\hmopen32.h \
-        .\handlemanager.h
+        $(PDWIN32_INCLUDE)\handlemanager.h
 
 
 conprop.OBJ: \

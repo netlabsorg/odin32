@@ -1,4 +1,4 @@
-; $Id: kernel32exp.def,v 1.6 1999-06-26 18:24:50 sandervl Exp $
+; $Id: kernel32exp.def,v 1.7 1999-07-04 09:41:33 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is Windows95 KERNEL32
@@ -832,3 +832,6 @@ SetFS					   @1227
 _RestoreOS2TIB@0                         @1228
 _SetWin32TIB@0                           @1229
 RestoreOS2FS                             @1230
+   ;SvL: HandleManager functions
+   HMHandleAllocate__FPUlUl				           @1231
+   HMHandleFree__FUl  	  	 	 	                   @1232

@@ -1,4 +1,4 @@
-/* $Id: HandleManager.h,v 1.4 1999-06-17 18:21:36 phaller Exp $ */
+/* $Id: HandleManager.h,v 1.1 1999-07-04 09:36:02 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
