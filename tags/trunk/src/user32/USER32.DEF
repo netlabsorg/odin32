@@ -1,4 +1,4 @@
-; $Id: USER32.DEF,v 1.82 2003-11-12 14:10:18 sandervl Exp $
+; $Id: USER32.DEF,v 1.83 2004-04-14 11:04:56 sandervl Exp $
 
 LIBRARY USER32 INITINSTANCE TERMINSTANCE
 DESCRIPTION 'Odin32 System Dll - User32'
@@ -29,6 +29,7 @@ IMPORTS
     Win32RemoveClipbrdViewer    = PMMERGE.5443
     Win32QueryClipbrdViewerChain= PMMERGE.5444
     Win32QueryOpenClipbrdWindow = PMMERGE.5446
+    _OpenClipbrd                = PMMERGE.10021
 
     WINSETSCANSTATETABLE        = PMMERGE.3266
     WINGETSCANSTATE             = PMMERGE.3138
