@@ -1,4 +1,4 @@
-/* $Id: hmdevio.h,v 1.9 2001-12-14 10:22:38 sandervl Exp $ */
+/* $Id: hmdevio.h,v 1.10 2002-01-12 10:28:17 sandervl Exp $ */
 
 #ifndef __DEVIO_H__
 #define __DEVIO_H__
@@ -144,12 +144,12 @@ class HMCustomDriver : public HMDeviceDriver
 
 {
 public:
-  HMCustomDriver(HINSTANCE hInstance, LPCSTR lpDeviceName);
+  HMCustomDriver(HINSTANCE hInstance, LPCSTR lpDeviceName, LPVOID lpDriverData);
   HMCustomDriver(PFNDRVOPEN pfnDriverOpen, PFNDRVCLOSE pfnDriverClose, 
                  PFNDRVIOCTL pfnDriverIOCtl, PFNDRVREAD pfnDriverRead,
                  PFNDRVWRITE pfnDriverWrite, PFNDRVCANCELIO pfnDriverCancelIo,
                  PFNDRVGETOVERLAPPEDRESULT pfnDriverGetOverlappedResult,
-                 LPCSTR lpDeviceName);
+                 LPCSTR lpDeviceName, LPVOID lpDriverData);
 
   virtual ~HMCustomDriver();
 
@@ -200,6 +200,7 @@ private:
   PFNDRVCANCELIO pfnDriverCancelIo;
   PFNDRVGETOVERLAPPEDRESULT pfnDriverGetOverlappedResult;
   HINSTANCE      hDrvDll;
+  LPVOID         lpDriverData;
 };
 
 void  RegisterDevices();

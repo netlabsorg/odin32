@@ -13,45 +13,50 @@ void DisableOdinIni();
 void DisableOdinSysMenuItems();
 
 
-typedef HANDLE (* WIN32API PFNDRVOPEN)(DWORD dwAccess, DWORD dwShare, DWORD dwFlags, PVOID *ppDriverData);
-typedef void   (* WIN32API PFNDRVCLOSE)(HANDLE hDevice, DWORD dwFlags, PVOID lpDriverData);
-typedef BOOL   (* WIN32API PFNDRVIOCTL)(HANDLE hDevice, DWORD dwFlags, DWORD dwIoControlCode,
+typedef HANDLE (* WIN32API PFNDRVOPEN)(LPVOID lpDriverData, DWORD dwAccess, DWORD dwShare, DWORD dwFlags, PVOID *ppHandleData);
+typedef void   (* WIN32API PFNDRVCLOSE)(LPVOID lpDriverData, HANDLE hDevice, DWORD dwFlags, PVOID lpHandleData);
+typedef BOOL   (* WIN32API PFNDRVIOCTL)(LPVOID lpDriverData, HANDLE hDevice, DWORD dwFlags, DWORD dwIoControlCode,
                                         LPVOID lpInBuffer, DWORD nInBufferSize,
                                         LPVOID lpOutBuffer, DWORD nOutBufferSize,
                                         LPDWORD lpBytesReturned, LPOVERLAPPED lpOverlapped,
-                                        PVOID lpDriverData);
+                                        LPVOID lpHandleData);
 
-typedef BOOL   (* WIN32API PFNDRVREAD)(HANDLE        hDevice,
+typedef BOOL   (* WIN32API PFNDRVREAD)(LPVOID        lpDriverData, 
+                                       HANDLE        hDevice,
                                        DWORD         dwFlags,
                                        LPCVOID       lpBuffer,
                                        DWORD         nNumberOfBytesToRead,
                                        LPDWORD       lpNumberOfBytesRead,
                                        LPOVERLAPPED  lpOverlapped,
                                        LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine,
-                                       PVOID         lpDriverData);
+                                       LPVOID        lpHandleData);
 
-typedef BOOL   (* WIN32API PFNDRVWRITE)(HANDLE        hDevice,
+typedef BOOL   (* WIN32API PFNDRVWRITE)(LPVOID        lpDriverData, 
+                                        HANDLE        hDevice,
                                         DWORD         dwFlags,
                                         LPCVOID       lpBuffer,
                                         DWORD         nNumberOfBytesToWrite,
                                         LPDWORD       lpNumberOfBytesWrite,
                                         LPOVERLAPPED  lpOverlapped,
                                         LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine,
-                                        PVOID         lpDriverData);
+                                        LPVOID        lpHandleData);
 
-typedef BOOL   (* WIN32API PFNDRVCANCELIO)(HANDLE hDevice, DWORD dwFlags, PVOID lpDriverData);
-typedef DWORD  (* WIN32API PFNDRVGETOVERLAPPEDRESULT)(HANDLE        hDevice,
+typedef BOOL   (* WIN32API PFNDRVCANCELIO)(LPVOID lpDriverData, HANDLE hDevice, DWORD dwFlags, PVOID lpHandleData);
+typedef DWORD  (* WIN32API PFNDRVGETOVERLAPPEDRESULT)(LPVOID        lpDriverData, 
+                                                      HANDLE        hDevice,
                                                       DWORD         dwFlags,
                                                       LPOVERLAPPED  lpOverlapped,
                                                       LPDWORD       lpcbTransfer,
                                                       BOOL          fWait,
-                                                      PVOID         lpDriverData);
+                                                      LPVOID        lpHandleData);
 
 BOOL WIN32API RegisterCustomDriver(PFNDRVOPEN pfnDriverOpen, PFNDRVCLOSE pfnDriverClose, 
                                    PFNDRVIOCTL pfnDriverIOCtl, PFNDRVREAD pfnDriverRead,
                                    PFNDRVWRITE pfnDriverWrite, PFNDRVCANCELIO pfnDriverCancelIo,
                                    PFNDRVGETOVERLAPPEDRESULT pfnDriverGetOverlappedResult,
-                                   LPCSTR lpDeviceName);
+                                   LPCSTR lpDriverName, LPVOID lpDriverData);
+
+BOOL WIN32API UnRegisterCustomDriver(LPCSTR lpDriverName);
 
 
 //SetDialogHook can be used by a custom Odin build to register a hook procedure
