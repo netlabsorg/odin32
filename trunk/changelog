@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2002 2002-02-24 02:57:14 bird Exp $ */
+/* $Id: changelog,v 1.2003 2002-02-24 20:21:57 sandervl Exp $ */
+
+ 2002-02-24: Sander van Leeuwen <sandervl@xs4all.nl>
+    - OLE32:    o Added some missing exports
 
  2002-02-23: knut st. osmundsen <bird@anduin.net>
     - MAKEFILES:
