@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2603 2003-07-16 10:52:01 sandervl Exp $ */
+/* $Id: changelog,v 1.2604 2003-07-16 11:03:29 sandervl Exp $ */
+
+ 2003-07-16: KO Myung-Hun <komh@chollian    >
+    - SHELL32:  o DragQueryFileW; allocate more for unicode conversion (DBCS)
 
  2002-07-16: Yuri Dario <mc6530@mclink   >
     - INSTALL:  o Do not overwrite program files registry entry if it already
