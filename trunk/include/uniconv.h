@@ -1,9 +1,9 @@
-/* $Id: uniconv.h,v 1.3 1999-06-10 16:21:50 achimha Exp $ */
+/* $Id: uniconv.h,v 1.4 1999-07-22 08:04:18 sandervl Exp $ */
 /*
  * OS/2 Unicode API definitions
  *
  * Copyright 1999 Achim Hasenmueller
- *
+ *           1999 Przemyslaw Dobrowolski
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -167,6 +167,31 @@ typedef int LocaleItem;
 #ifndef _NL_NUM_ITEMS
 #define _NL_NUM_ITEMS 66
 #endif
+// Evil UNI Items hackeckeur ;-)
+// PD 21-07-99: Undefined Uni items!!!! Thanx IBM for undocumented items :-P
+// Names like regedit2 uses:
+#define XLOCALETOKEN      50
+#define XWINLOCALE        51
+#define SINTLSYMBOL       87
+#define SABBREVLANGNAME   88 
+#define SLANGUAGE        104
+#define WTIMEFORMAT      123 
+#define WSHORTDATE       124
+#define WLONGDATE        125
+#define SENGCOUNTRYNAME  105
+#define SENGLANGUAGE     103 
+#define SCOUNTRY         106 // Fixme or 107?
+#define IANSICODEPAGE    110
+#define ICODEPAGE        111
+#define IALTCODEPAGE     112
+#define IMACCODEPAGE     113
+#define ICOUNTRY         108
+#define SISO639LANGNAME  101
+#define SISO3166CTRYNAME 102
+#define SABBREVCTRYNAME  102
+#define SNATIVEDIGITS     53
+
+
 #if defined(__IBMCPP__) || defined(__IBMC__)
    #define CALLCONV    _System
 #else
