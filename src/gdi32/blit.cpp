@@ -1,4 +1,4 @@
-/* $Id: blit.cpp,v 1.39 2002-07-15 10:02:28 sandervl Exp $ */
+/* $Id: blit.cpp,v 1.40 2002-10-28 12:21:51 sandervl Exp $ */
 
 /*
  * GDI32 blit code
@@ -185,7 +185,8 @@ static INT SetDIBitsToDevice_(HDC hdc, INT xDest, INT yDest, DWORD cx,
         if(CPUFeatures & CPUID_MMX) {
              RGB555to565MMX(newbits, (WORD *)bits, imgsize/sizeof(WORD));
         }
-        else RGB555to565(newbits, (WORD *)bits, imgsize/sizeof(WORD));
+        else
+          RGB555to565(newbits, (WORD *)bits, imgsize/sizeof(WORD));
         bits = newbits;
     }
 
@@ -534,14 +535,16 @@ static INT StretchDIBits_(HDC hdc, INT xDst, INT yDst, INT widthDst,
     {//RGB 555?
         dprintf(("RGB 555->565 conversion required %x %x %x", bitfields[0], bitfields[1], bitfields[2]));
 
-        int imgsize = CalcBitmapSize(info->bmiHeader.biBitCount,
-                                     info->bmiHeader.biWidth, info->bmiHeader.biHeight);
-
-        newbits = (WORD *)malloc(imgsize);
+        ULONG imgsize = CalcBitmapSize(info->bmiHeader.biBitCount,
+                                     widthSrc, heightSrc);
+        ULONG offset = CalcBitmapSize(info->bmiHeader.biBitCount,
+                                     xSrc, ySrc)/sizeof(WORD);
+        newbits = (WORD *) HeapAlloc(GetProcessHeap(), 0, imgsize);
         if(CPUFeatures & CPUID_MMX) {
-             RGB555to565MMX(newbits, (WORD *)bits, imgsize/sizeof(WORD));
+             RGB555to565MMX(newbits, (WORD *)bits+offset, imgsize/sizeof(WORD));
         }
-        else RGB555to565(newbits, (WORD *)bits, imgsize/sizeof(WORD));
+        else 
+          RGB555to565(newbits, (WORD *)bits+offset, imgsize/sizeof(WORD));
         bits = newbits;
     }
     //SvL: Ignore BI_BITFIELDS type (SetDIBitsToDevice fails otherwise)
@@ -557,7 +560,7 @@ static INT StretchDIBits_(HDC hdc, INT xDst, INT yDst, INT widthDst,
     if(compression == BI_BITFIELDS) {
         ((BITMAPINFO *)info)->bmiHeader.biCompression = BI_BITFIELDS;
     }
-    if(newbits) free(newbits);
+    if(newbits) HeapFree(GetProcessHeap(), 0, newbits);
 
     //Open32 always returns height of bitmap (regardless of how many scanlines were copied)
     if(rc != heightSrc && rc != info->bmiHeader.biHeight) {
