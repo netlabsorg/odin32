@@ -1,4 +1,8 @@
-/* $Id: ChangeLog,v 1.1627 2001-07-31 07:57:41 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1628 2001-07-31 21:56:12 bird Exp $ */
+
+ 2001-07-29: knut st. osmundsen <kosmunds@csc.com>
+    - win32k:   o Merged in a patch from Rafal which as a final attempt to find
+                  a symbol file will look thru the pmdfvers.lst file.
 
  2001-07-31: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o PostThreadMessage & DDE callback change for new wgss
