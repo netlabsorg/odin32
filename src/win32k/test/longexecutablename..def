@@ -1,0 +1,13 @@
+; $Id: longexecutablename..def,v 1.1 2000-12-11 06:43:13 bird Exp $
+;
+; Long dll name test - no extention.
+;
+; Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+;
+; Project Odin Software License can be found in LICENSE.TXT
+;
+LIBRARY "LONGEXECUTABLENAME."
+
+EXPORTS
+    hello
+
