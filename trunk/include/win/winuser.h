@@ -1,4 +1,4 @@
-/* $Id: winuser.h,v 1.5 1999-07-19 08:07:51 sandervl Exp $ */
+/* $Id: winuser.h,v 1.6 1999-08-05 19:47:22 phaller Exp $ */
 
 #ifndef __INCLUDE_WINUSER_H
 #define __INCLUDE_WINUSER_H
@@ -3554,7 +3554,6 @@ INT       WINAPI wvsnprintfW(LPWSTR,UINT,LPCWSTR,va_list);
 #define     wvsnprintf WINELIB_NAME_AW(wvsnprintf)
 INT       WINAPI wvsprintfA(LPSTR,LPCSTR,va_list);
 INT       WINAPI wvsprintfW(LPWSTR,LPCWSTR,va_list);
-#define     wvsprintf WINELIB_NAME_AW(wvsprintf)
 
 BOOL      WINAPI RegisterShellHook16(HWND16,UINT16);
 /* NOTE: This is SYSTEM.3, not USER.182, which is also named KillSystemTimer */
