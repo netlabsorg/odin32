@@ -1,4 +1,4 @@
-/* $Id: KERNEL32.CPP,v 1.53 2000-09-25 04:35:01 phaller Exp $ */
+/* $Id: KERNEL32.CPP,v 1.54 2000-09-25 19:57:17 phaller Exp $ */
 
 /*
  * Win32 compatibility file functions for OS/2
@@ -212,11 +212,11 @@ void _GlobalMemoryStatus(MEMORYSTATUS *lpMemStat)
     lpMemStat->dwAvailPhys = sys[0] - sys[1];
 
     // bytes of paging file
-    lpMemStat->dwTotalPageFile = sys[2] - sys[0];
+    // @@@PH add swapper.dat size?
+    lpMemStat->dwTotalPageFile = sys[2];
 
     // free bytes of paging file
-    // @@@PH subtract swapper.dat size?
-    lpMemStat->dwAvailPageFile = lpMemStat->dwTotalPageFile;
+    lpMemStat->dwAvailPageFile = sys[2];
 
     // user bytes of address space
     lpMemStat->dwTotalVirtual = max(sys[2], sys[3]);
