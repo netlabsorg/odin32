@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.1955 2002-02-05 18:00:17 sandervl Exp $ */
+/* $Id: changelog,v 1.1956 2002-02-06 10:34:43 sandervl Exp $ */
+
+ 2002-02-06: Sander van Leeuwen <sandervl@xs4all.nl>
+    - WSOCK32:  o minor recv update for error handling
 
  2002-02-05: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Ported SendMessageCallbackA/W, SendMessageTimeoutA/W,
