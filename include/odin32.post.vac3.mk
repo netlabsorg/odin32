@@ -1,4 +1,4 @@
-# $Id: odin32.post.vac3.mk,v 1.23 2001-10-29 10:00:57 achimha Exp $
+# $Id: odin32.post.vac3.mk,v 1.24 2001-10-29 14:20:12 bird Exp $
 
 #
 # Odin32 API
@@ -461,7 +461,7 @@ clean:
 !else
 clean:  clean2
 !endif
-    $(RM) *.lib *.res *.map *.pch \
+    $(RM) *.lib *.res *.map *.pch dummy.c \
 !if "$(OBJDIR)" != ""
      $(OBJDIR)\* \
 !endif
