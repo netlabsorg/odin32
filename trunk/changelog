@@ -1,4 +1,13 @@
-/* $Id: changelog,v 1.2537 2003-04-01 15:57:28 sandervl Exp $ */
+/* $Id: changelog,v 1.2538 2003-04-02 11:01:34 sandervl Exp $ */
+
+ 2003-04-02: Platon Fomichev <platon@innotek   >
+    - INCLUDE, KERNEL32:
+                o Corrected HFILE definition as it is in Wine and in Win2k + 
+                  header updates.
+    - INCLUDE\EMXRUNTIME:
+                o Modified EMX headers
+    - LIB\EMXSUPPORT:
+                o Modified EMX libraries
 
  2003-04-01: Sander van Leeuwen <sandervl@innotek   >
     - GDI32:    o Fix for partial dibsection resyncs
