@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.12 2000-05-15 02:42:35 phaller Exp $
+# $Id: makefile,v 1.13 2000-05-18 14:07:22 sandervl Exp $
 
 #
 # Odin32 API
@@ -27,6 +27,7 @@ $(OBJDIR)\shlwapi.obj \
 $(OBJDIR)\mem.obj \
 $(OBJDIR)\url.obj \
 $(OBJDIR)\reg.obj \
+$(OBJDIR)\pathcpp.obj \
 $(OBJDIR)\path.obj \
 $(OBJDIR)\string.obj \
 $(OBJDIR)\shlwapirsrc.obj \
@@ -62,6 +63,8 @@ $(OBJS)
 $(PDWIN32_LIB)/kernel32.lib
 $(PDWIN32_LIB)/user32.lib
 $(PDWIN32_LIB)/odincrt.lib
+$(PDWIN32_LIB)/shell32.lib
+$(PDWIN32_LIB)/crtdll.lib
 OS2386.LIB
 $(RTLLIB_O)
 $(TARGET).def
