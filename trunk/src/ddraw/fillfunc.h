@@ -1,4 +1,4 @@
-/* $Id: fillfunc.h,v 1.2 2001-03-18 21:44:45 mike Exp $ */
+/* $Id: fillfunc.h,v 1.3 2002-07-01 19:15:26 sandervl Exp $ */
 
 /*
  * Colorfill function definitions
@@ -8,6 +8,9 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+
+//RGB 555 -> RGB 565
+#define MAKE_RGB565(a)  (((a<<1)& 0xFFC0) | (a & 0x1F))
 
 
 // without ColorConversion

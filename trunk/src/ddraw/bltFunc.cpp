@@ -1,4 +1,4 @@
-/* $Id: bltFunc.cpp,v 1.4 2001-04-04 09:02:14 sandervl Exp $ */
+/* $Id: bltFunc.cpp,v 1.5 2002-07-01 19:15:26 sandervl Exp $ */
 
 /*
  * Blitting functions
@@ -15,6 +15,7 @@
 #include <memory.h>
 #include <misc.h>
 #include "bltFunc.h"
+#include "asmutil.h"
 
 //
 // Blt Functions
