@@ -1,4 +1,13 @@
-/* $Id: ChangeLog,v 1.1479 2001-06-03 14:52:13 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1480 2001-06-04 21:18:15 sandervl Exp $ */
+
+ 2001-06-04: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Added driver dll plugin for custom device driver emulation
+                  Enumerates keys in HKEY_LOCAL_MACHINE\System\CurrentControlSet\Services
+                  that contain 'DllName' keys.
+                  DllName contains the name of the plugin dll that exports
+                  DrvOpen, DrvClose & DrvIOCtl.
+                o Dispatch breakpoint exception to application (release build only)
+                  Some nasty applications expect this.
 
  2001-06-03: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Ported & fixed ScrollDC (Wine)
