@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.cpp,v 1.54 2002-03-28 11:25:59 sandervl Exp $ */
+/* $Id: oslibmsg.cpp,v 1.55 2002-03-28 11:35:38 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -161,6 +161,8 @@ void OSLibWinPostQuitMessage(ULONG nExitCode)
 {
  APIRET rc;
 
+  //NOTE: mp2 must always be zero or else we won't be able to distinguish
+  //      between the WM_QUIT sent by us and the one sent by the window list!!
   rc = WinPostQueueMsg(NULLHANDLE, WM_QUIT, MPFROMLONG(nExitCode), 0);
   dprintf(("WinPostQueueMsg %d returned %d", nExitCode, rc));
 }
