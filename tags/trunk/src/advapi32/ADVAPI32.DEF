@@ -1,4 +1,4 @@
-; $Id: ADVAPI32.DEF,v 1.14 2000-10-26 17:26:58 sandervl Exp $
+; $Id: ADVAPI32.DEF,v 1.15 2001-04-22 10:39:27 sandervl Exp $
 
 ;
 ; Based on NT 4.0 SP6: ADVAPI32.DLL 
@@ -239,7 +239,7 @@ EXPORTS
      EnumServicesStatusW        = _EnumServicesStatusW@32            @109
      EqualPrefixSid             = _EqualPrefixSid@8                  @110
      EqualSid                   = _EqualSid@8                        @111
-     FindFirstFreeAce           = _FindFirstFreeAce@8                @112
+     FindFirstFreeAce           = _RtlFirstFreeAce@8                 @112
      FreeSid                    = _FreeSid@4                         @113
 ;    GetAccessPermissionsForObjectA				@114
 ;    GetAccessPermissionsForObjectW				@115
