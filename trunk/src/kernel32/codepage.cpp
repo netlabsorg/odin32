@@ -507,3 +507,11 @@ WCHAR WIN32API toupperW( WCHAR ch )
     extern const WCHAR casemap_upper[];
     return ch + casemap_upper[casemap_upper[ch >> 8] + (ch & 0xff)];
 }
+
+/* the character type contains the C1_* flags in the low 12 bits */
+/* and the C2_* type in the high 4 bits */
+unsigned short get_char_typeW( WCHAR ch )
+{
+    extern const unsigned short wctype_table[];
+    return wctype_table[wctype_table[ch >> 8] + (ch & 0xff)];
+}

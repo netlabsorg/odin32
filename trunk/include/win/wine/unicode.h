@@ -71,14 +71,6 @@ static inline int is_dbcs_leadbyte( const union cptable *table, unsigned char ch
     return (table->info.char_size == 2) && (table->dbcs.cp2uni_leadbytes[ch]);
 }
 
-/* the character type contains the C1_* flags in the low 12 bits */
-/* and the C2_* type in the high 4 bits */
-static inline unsigned short get_char_typeW( WCHAR ch )
-{
-    extern const unsigned short wctype_table[];
-    return wctype_table[wctype_table[ch >> 8] + (ch & 0xff)];
-}
-
 /* some useful string manipulation routines */
 
 static inline unsigned int strlenW( const WCHAR *str )
@@ -183,6 +175,6 @@ static inline WCHAR *struprW( WCHAR *str )
 extern int strcmpiW( const WCHAR *str1, const WCHAR *str2 );
 extern int strncmpiW( const WCHAR *str1, const WCHAR *str2, int n );
 extern WCHAR *strstrW( const WCHAR *str, const WCHAR *sub );
-
+extern unsigned short get_char_typeW( WCHAR ch );
 
 #endif  /* __WINE_UNICODE_H */

@@ -1,4 +1,4 @@
-/* $Id: shellpath.c,v 1.3 2000-11-06 10:20:56 sandervl Exp $ */
+/* $Id: shellpath.c,v 1.4 2001-04-03 18:42:42 sandervl Exp $ */
 /*
  * Path Functions
  *
@@ -346,7 +346,7 @@ static BOOL PathIsExeW (LPCWSTR lpszPath)
 	TRACE("path=%s\n",debugstr_w(lpszPath));
 
 	for(i=0; lpszExtensions[i]; i++)
-	  if (!strcmpiW(lpszExtension,lpszExtensions[i])) return TRUE;
+	  if (!lstrcmpiW(lpszExtension,lpszExtensions[i])) return TRUE;
 	  
 	return FALSE;
 }
