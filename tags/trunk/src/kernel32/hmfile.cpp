@@ -1,4 +1,4 @@
-/* $Id: hmfile.cpp,v 1.1 2000-06-01 11:28:46 sandervl Exp $ */
+/* $Id: hmfile.cpp,v 1.2 2000-06-08 18:08:56 sandervl Exp $ */
 
 /*
  * File IO win32 apis
@@ -136,7 +136,7 @@ DWORD HMDeviceFileClass::OpenFile (LPCSTR        lpszFileName,
 
   SetLastError(ERROR_SUCCESS);
 
-  dprintf(("KERNEL32: HMDeviceFileClass::OpenFile %s(%s,%08x,%08x,%08x) - stub?\n",
+  dprintf(("KERNEL32: HMDeviceFileClass::OpenFile %s(%s,%08x,%08x,%08x)",
            lpHMDeviceName,
            lpFileName,
            pHMHandleData,
@@ -164,7 +164,9 @@ DWORD HMDeviceFileClass::OpenFile (LPCSTR        lpszFileName,
 	LPSTR filenameinpath;
 
 	if(SearchPathA(NULL, lpFileName, NULL, sizeof(filepath), filepath, &filenameinpath) == 0
-           && !(fuMode & OF_CREATE) ) {
+           && !(fuMode & OF_CREATE) ) 
+        {
+  		pOFStruct->nErrCode = ERROR_FILE_NOT_FOUND;
 		SetLastError(ERROR_FILE_NOT_FOUND);
 		return HFILE_ERROR;
 	}
