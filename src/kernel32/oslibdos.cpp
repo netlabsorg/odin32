@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.17 2000-01-27 21:51:17 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.18 2000-02-08 22:29:15 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -376,10 +376,17 @@ DWORD OSLibDosSearchPath(DWORD cmd, char *path, char *name, char *full_name,
 
   case OSLIB_SEARCHENV:
   {
-	if(DosSearchPath(SEARCH_IGNORENETERRS | SEARCH_ENVIRONMENT, path,
-                         name, full_name, length_fullname) != 0) {
+   PCSZ envstring;
+   CHAR szResult[CCHMAXPATH];
+
+	if(DosScanEnv(path, &envstring) != 0) {
 		return 0;
 	}
+	if(DosSearchPath(SEARCH_IGNORENETERRS, envstring,
+                         name, szResult, sizeof(szResult)) != 0) {
+		return 0;
+	}
+	strcpy(full_name, szResult);
 	return strlen(full_name);
   }
   }
