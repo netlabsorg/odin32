@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.15 2000-12-03 01:10:12 bird Exp $
+# $Id: makefile,v 1.16 2001-07-08 11:00:28 sandervl Exp $
 
 #
 # Odin32 API
@@ -51,7 +51,7 @@ $(RTLLIB_O)
 #
 # Target name - name of the dll without extention and path.
 #
-TARGET = crtdll
+TARGET = crtdll32
 
 
 #
