@@ -1,4 +1,4 @@
-/* $Id: oslibres.cpp,v 1.6 1999-08-23 13:56:35 sandervl Exp $ */
+/* $Id: oslibres.cpp,v 1.7 1999-08-31 14:38:08 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -25,12 +25,6 @@
 #include "pmwindow.h"
 
 
-//******************************************************************************
-//******************************************************************************
-HWND OSLibWinCreateMenu(HWND hwndParent, PVOID menutemplate)
-{
-  return WinCreateMenu(hwndParent, menutemplate);
-}
 //******************************************************************************
 //******************************************************************************
 HANDLE OSLibWinSetAccelTable(HWND hwnd, HANDLE hAccel, PVOID acceltemplate)
