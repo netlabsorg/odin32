@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.15 2000-12-03 00:58:02 bird Exp $
+# $Id: makefile,v 1.16 2000-12-09 16:04:55 phaller Exp $
 
 #
 # Odin32
@@ -6,13 +6,14 @@
 #   Top of the tree makefile
 #
 #
-#   Usage: nmake ( debug | nodebuginfo | release | all | dep | clean )
+#   Usage: nmake ( debug | nodebuginfo | profile | release | all | dep | clean )
 #
 #            debug: Change to a debug build.
 #            debugsmp: Start nmake process in background that processes all
 #                      dlls in reverse
 #            nodebuginfo: Change to a debug build without debug info in binaries
 #            nodebuginfosmp: Change to an SMP debug build without debug info in binaries
+#            profile: Change to a debug build with profiling hooks
 #            release: Change to a release build.
 #            releasesmp: Change to an SMP release build.
 #            all: Build the entire tree.
@@ -50,6 +51,12 @@ clean:
     $(MAKE) -nologo clean
     cd ..\src
     $(MAKE) -nologo clean
+
+profile:      odin_libraries  needed_tools
+    cd src
+    $(MAKE) -nologo all DEBUG=1 PROFILE=1
+    cd ..\tools\install
+    $(MAKE) -nologo all DEBUG=1 PROFILE=1
 
 debug:      odin_libraries  needed_tools
     cd src
@@ -107,3 +114,4 @@ needed_tools:
     cd tools
     $(MAKE) -nologo needed
     cd ..
+

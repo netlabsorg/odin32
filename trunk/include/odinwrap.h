@@ -1,4 +1,4 @@
-/* $Id: odinwrap.h,v 1.28 2000-10-02 21:13:45 phaller Exp $ */
+/* $Id: odinwrap.h,v 1.29 2000-12-09 16:04:24 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -24,8 +24,8 @@
 //#define DEBUG
 
 // override profiling
-//#undef PROFILE_ODIN
-//#define PROFILE_ODIN
+//#undef PROFILE
+//#define PROFILE
 
 
 
@@ -73,7 +73,7 @@ extern unsigned long int WIN32API GetCurrentThreadId(); //kernel32
 
 // ---------------------------------------------------------------------------
 // PH: this is for profiling cumulative method call times
-#ifdef PROFILE_ODIN
+#ifdef PROFILE
 
 #  define PROFILE_START(a)        \
      LARGE_INTEGER liStart;       \

@@ -1,4 +1,4 @@
-# $Id: odin32.tools.vac3.mk,v 1.1 2000-12-02 23:50:49 bird Exp $
+# $Id: odin32.tools.vac3.mk,v 1.2 2000-12-09 16:04:22 phaller Exp $
 
 #
 # Odin32 API
@@ -19,6 +19,9 @@ MAPSYM      = mapsym
 MAKE_CMD    = nmake /nologo
 !ifdef DEBUG
 MAKE_CMD    = $(MAKE_CMD) DEBUG=1
+!endif
+!ifdef PROFILE
+MAKE_CMD    = $(MAKE_CMD) DEBUG=1 PROFILE=1
 !endif
 !ifdef NODEBUGINFO
 MAKE_CMD    = $(MAKE_CMD) NODEBUGINFO=1
