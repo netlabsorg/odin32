@@ -1,4 +1,4 @@
-/* $Id: hmdevio.cpp,v 1.2 2000-02-16 14:23:59 sandervl Exp $ */
+/* $Id: hmdevio.cpp,v 1.3 2000-02-29 22:44:02 sandervl Exp $ */
 
 /*
  * Win32 Device IOCTL API functions for OS/2
@@ -107,6 +107,11 @@ DWORD HMDeviceDriver::CreateFile (LPCSTR lpFileName,
   else
   if(pHMHandleData->dwShare & FILE_SHARE_READ)
     sharetype |= OPEN_SHARE_DENYWRITE;
+
+  if(szOS2Name[0] == 0) {
+     	pHMHandleData->hHMHandle = 0;
+     	return (NO_ERROR);
+  }
 
   rc = DosOpen(	szOS2Name,                        /* File path name */
                	&hfFileHandle,                  /* File handle */
