@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.41 2000-01-14 14:45:17 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.42 2000-01-14 17:48:32 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1252,9 +1252,8 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
     case WM_SETTEXT:
     {
         LPCSTR lpsz = (LPCSTR)lParam;
-
-        if(windowNameA) free(windowNameA);
-        if(windowNameW) free(windowNameW);
+        CHAR* oldNameA = windowNameA;
+        WCHAR* oldNameW = windowNameW;
 
         if (lParam)
         {
@@ -1271,15 +1270,15 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
           wndNameLength = 0;
         }
         dprintf(("WM_SETTEXT of %x to %s\n", Win32Hwnd, lParam));
-        if (dwStyle & WS_CAPTION)
+        if ((dwStyle & WS_CAPTION) && (lstrcmpA(oldNameA,windowNameA) != 0))
         {
-          //CB: optimize!
-          HandleNCPaint(0);
+          UpdateCaptionText();
+          OSLibWinSetWindowText(OS2HwndFrame,(LPSTR)windowNameA);
         }
-/* //CB: endless loop in trackbar.exe -> to fix
-        if(OS2HwndFrame && (dwStyle & WS_CAPTION) == WS_CAPTION)
-          return OSLibWinSetWindowText(OS2HwndFrame,(LPSTR)windowNameA);
-*/
+
+        if(oldNameA) free(oldNameA);
+        if(oldNameW) free(oldNameW);
+
         return TRUE;
     }
 
@@ -1678,8 +1677,8 @@ LRESULT Win32BaseWindow::DefWindowProcW(UINT Msg, WPARAM wParam, LPARAM lParam)
     {
         LPWSTR lpsz = (LPWSTR)lParam;
 
-        if(windowNameA) free(windowNameA);
-        if(windowNameW) free(windowNameW);
+        CHAR* oldNameA = windowNameA;
+        WCHAR* oldNameW = windowNameW;
 
         if (lParam)
         {
@@ -1695,9 +1694,15 @@ LRESULT Win32BaseWindow::DefWindowProcW(UINT Msg, WPARAM wParam, LPARAM lParam)
           windowNameW = NULL;
           wndNameLength = 0;
         }
+        dprintf(("WM_SETTEXT of %x\n",Win32Hwnd));
+        if ((dwStyle & WS_CAPTION) && (lstrcmpW(oldNameW,windowNameW) != 0))
+        {
+          UpdateCaptionText();
+          OSLibWinSetWindowText(OS2HwndFrame,(LPSTR)windowNameA);
+        }
 
-        if(OS2HwndFrame && (dwStyle & WS_CAPTION) == WS_CAPTION)
-          return OSLibWinSetWindowText(OS2HwndFrame,(LPSTR)windowNameA);
+        if(oldNameA) free(oldNameA);
+        if(oldNameW) free(oldNameW);
 
         return TRUE;
     }
