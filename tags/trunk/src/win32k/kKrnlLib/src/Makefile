@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.4 2002-03-31 19:01:05 bird Exp $
+# $Id: Makefile,v 1.5 2002-04-01 12:45:55 bird Exp $
 
 #
 # kKrnlLib/dev32 makefile.
@@ -40,6 +40,7 @@ $(PATH_TARGET)\krnlLockedWrite.$(EXT_OBJ)\
 $(PATH_TARGET)\krnlOverloading.$(EXT_OBJ)\
 $(PATH_TARGET)\krnlPrologs.$(EXT_OBJ)\
 $(PATH_TARGET)\krnlStubs.$(EXT_OBJ)\
+$(PATH_TARGET)\krnlWrappers.$(EXT_OBJ)\
 $(PATH_TARGET)\OS2KPTDA.$(EXT_OBJ)\
 $(PATH_TARGET)\OS2KTCB.$(EXT_OBJ)\
 \
@@ -73,6 +74,6 @@ $(PATH_ROOT)\obj\$(NAME_1)$(NAME_2)mscv6\kKrnlLib_dev16.$(EXT_LIB)\kKrnlLib_dev1
 
 
 # generated code.
-calltaba.asm:
+calltaba.asm: .force
     $(TOOL_DOMAKES) "MkCallTab.mak" $(TOOL_MAKE) $@
 
