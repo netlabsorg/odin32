@@ -1,4 +1,4 @@
-/* $Id: shellord.cpp,v 1.4 1999-12-28 23:16:33 sandervl Exp $ */
+/* $Id: shellord.cpp,v 1.5 1999-12-30 00:21:33 phaller Exp $ */
 /*
  * The parameters of many functions changes between different OS versions
  * (NT uses Unicode strings, 95 uses ASCII strings)
@@ -6,8 +6,16 @@
  * Copyright 1997 Marcus Meissner
  *           1998 Jürgen Schmied
  */
+
+
+/*****************************************************************************
+ * Includes                                                                  *
+ *****************************************************************************/
+
 #include <string.h>
 #include <odin.h>
+#include <odinwrap.h>
+#include <os2sel.h>
 
 #define ICOM_CINTERFACE 1
 #define CINTERFACE 1
@@ -27,8 +35,17 @@
 
 #include <heapstring.h>
 #include <misc.h>
+#include <ctype.h>
+#include <wctype.h>
+#include <wcstr.h>
 
-DEFAULT_DEBUG_CHANNEL(shell)
+
+/*****************************************************************************
+ * Local Variables                                                           *
+ *****************************************************************************/
+
+ODINDEBUGCHANNEL(shell32-shellord)
+
 
 /*************************************************************************
  * SHChangeNotifyRegister			[SHELL32.2]
@@ -1495,3 +1512,162 @@ BOOL WINAPI Win32DeleteFile(LPSTR fName)
 
   return TRUE;
 }
+
+
+/*****************************************************************************
+ * Name      : StrChrIA
+ * Purpose   : Searches a string for the first occurrence of a character that
+ *             matches the specified character. The comparison is not case sensitive.
+ * Parameters: LPCSTR lpStart Address of the string to be searched.
+ *             TCHAR  wMatch  Character to be used for comparison.
+ * Variables :
+ * Result    : Returns the address of the first occurrence of the character in
+ *             the string if successful, or NULL otherwise.
+ * Remark    : SHELL32.
+ * Status    : UNTESTED UNKNOWN
+ *
+ * Author    : Patrick Haller [Wed, 1999/12/29 09:00]
+ *****************************************************************************/
+
+ODINFUNCTION2(LPSTR,  StrChrIA,
+              LPCSTR, lpStart,
+              CHAR,   wMatch)
+{
+  LPSTR lpRes;
+
+  wMatch = tolower(wMatch);
+  lpRes = strchr(lpStart, wMatch);    // lower case comparsion
+  if (NULL == lpRes)
+  {
+    wMatch = toupper(wMatch);
+    lpRes = strchr(lpStart, wMatch);  // upper case comparsion
+  }
+
+  return lpRes;
+}
+
+
+/*****************************************************************************
+ * Name      : StrChrIW
+ * Purpose   : Searches a string for the first occurrence of a character that
+ *             matches the specified character. The comparison is not case sensitive.
+ * Parameters: LPCSTR lpStart Address of the string to be searched.
+ *             TCHAR  wMatch  Character to be used for comparison.
+ * Variables :
+ * Result    : Returns the address of the first occurrence of the character in
+ *             the string if successful, or NULL otherwise.
+ * Remark    : SHELL32.
+ * Status    : UNTESTED UNKNOWN
+ *
+ * Author    : Patrick Haller [Wed, 1999/12/29 09:00]
+ *****************************************************************************/
+
+ODINFUNCTION2(LPWSTR,   StrChrIW,
+              LPCWSTR, lpStart,
+              WCHAR,    wMatch)
+{
+  LPWSTR lpRes;
+
+  wMatch = towlower(wMatch);
+  lpRes = (WCHAR*)wcschr((const wchar_t*)lpStart, wMatch);    // lower case comparsion
+  if (NULL == lpRes)
+  {
+    wMatch = towupper(wMatch);
+    lpRes = (WCHAR*)wcschr((const wchar_t*)lpStart, wMatch);  // upper case comparsion
+  }
+
+  return lpRes;
+}
+
+
+/*****************************************************************************
+ * Name      : StrStrIA
+ * Purpose   : Finds the first occurrence of a substring within a string. The
+ *             comparison is not case sensitive.
+ * Parameters: LPCSTR lpFirst
+ *             LPCSTR lpSrch
+ * Variables :
+ * Result    : Returns the address of the first occurrence of the matching
+ *             substring if successful, or NULL otherwise.
+ * Remark    : SHELL32.
+ * Status    : UNTESTED UNKNOWN
+ *
+ * Author    : Patrick Haller [Wed, 1999/12/29 09:00]
+ *****************************************************************************/
+
+ODINFUNCTION2(LPSTR,  StrStrIA,
+              LPCSTR, lpFirst,
+              LPCSTR, lpSrch)
+{
+  char  ch = lpSrch[0];          // look for 1st character
+  LONG  lLen = lstrlenA(lpSrch); // length of search string
+  int   iRes;                    // comparsion result
+
+  do
+  {
+    lpFirst = StrChrIA(lpFirst, // find first matching character
+                       ch);
+    if (NULL == lpFirst)        // not found
+      return NULL;
+
+    iRes   = StrCmpNIA((LPSTR)lpFirst, // compare search string
+                       (LPSTR)lpSrch,
+                       lLen);
+
+    if (0 == iRes)              // Found!
+      return (LPSTR)lpFirst;
+
+    lpFirst = CharNextA(lpFirst); // skip to next character
+  }
+  while (*lpFirst != 0);        // safe termination
+
+  return NULL;                  // default result
+}
+
+
+
+/*****************************************************************************
+ * Name      : StrStrIW
+ * Purpose   : Finds the first occurrence of a substring within a string. The
+ *             comparison is not case sensitive.
+ * Parameters: LPCWSTR lpFirst
+ *             LPCWSTR lpSrch
+ * Variables :
+ * Result    : Returns the address of the first occurrence of the matching
+ *             substring if successful, or NULL otherwise.
+ * Remark    : SHELL32.
+ * Status    : UNTESTED UNKNOWN
+ *
+ * Author    : Patrick Haller [Wed, 1999/12/29 09:00]
+ *****************************************************************************/
+
+ODINFUNCTION2(LPWSTR,  StrStrIW,
+              LPCWSTR, lpFirst,
+              LPCWSTR, lpSrch)
+{
+  WCHAR  ch = lpSrch[0];          // look for 1st character
+  LONG   lLen = lstrlenW(lpSrch); // length of search string
+  int   iRes;                    // comparsion result
+
+  do
+  {
+    lpFirst = StrChrIW(lpFirst, // find first matching character
+                       ch);
+    if (NULL == lpFirst)        // not found
+      return NULL;
+
+    iRes   = StrCmpNIW((LPWSTR)lpFirst, // compare search string
+                       (LPWSTR)lpSrch,
+                       lLen);
+
+    if (0 == iRes)              // Found!
+      return (LPWSTR)lpFirst;
+
+    lpFirst = CharNextW(lpFirst); // skip to next character
+  }
+  while (*lpFirst != 0);        // safe termination
+
+  return NULL;                  // default result
+}
+
+
