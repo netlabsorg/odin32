@@ -1,4 +1,4 @@
-/* $Id: class.h,v 1.1 1999-05-24 20:19:09 ktk Exp $ */
+/* $Id: class.h,v 1.2 1999-07-04 15:34:18 sandervl Exp $ */
 
 /*
  * Window classes definitions
@@ -39,7 +39,7 @@ typedef struct tagCLASS
     LONG             wExtra[1];     /* Class extra bytes */
 } CLASS;
 
-extern void CLASS_DumpClass( CLASS *class );
+extern void CLASS_DumpClass( CLASS *Class );
 extern void CLASS_WalkClasses(void);
 extern void CLASS_FreeModuleClasses( HMODULE16 hModule );
 extern CLASS *CLASS_FindClassByAtom( ATOM atom, HINSTANCE hinstance );
