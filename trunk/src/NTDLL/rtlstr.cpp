@@ -1,4 +1,4 @@
-/* $Id: rtlstr.cpp,v 1.4 1999-06-10 17:06:46 phaller Exp $ */
+/* $Id: rtlstr.cpp,v 1.5 1999-08-18 18:43:54 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -21,6 +21,7 @@
 #include "ntdll.h"
 #include "windef.h"
 
+#define HAVE_WCTYPE_H
 #ifdef HAVE_WCTYPE_H
 # include <wctype.h>
 #endif
@@ -578,6 +579,32 @@ DWORD WINAPI RtlCompareUnicodeString(PUNICODE_STRING String1,
            CaseInSensitive));
 
   return 0;
+}
+
+
+
+/**************************************************************************
+ *                 RtlUpcaseUnicodeStringToOemString    [NTDLL.?]
+ * @@@PH: parameters are pure speculation!
+ */
+DWORD WINAPI RtlUpcaseUnicodeStringToOemString(PANSI_STRING    oem,
+                                               PUNICODE_STRING uni,
+                                               BOOLEAN         alloc)
+{
+  DWORD rc;
+
+  dprintf(("NTDLL: RtlUpcaseUnicodeStringToOemString(%08xh,%08xh,%08xh)\n",
+           oem,
+           uni,
+           alloc));
+
+  rc = RtlUnicodeStringToOemString(oem,
+                                   uni,
+                                   alloc);
+  if (rc == 0)
+     strupr(oem->Buffer);
+
+  return rc;
 }
 
 
