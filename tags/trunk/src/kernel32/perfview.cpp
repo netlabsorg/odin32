@@ -1,4 +1,4 @@
-/* $Id: perfview.cpp,v 1.3 2001-10-12 03:48:06 phaller Exp $ */
+/* $Id: perfview.cpp,v 1.4 2001-11-12 23:04:57 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -18,7 +18,8 @@
 
 // insert "nullified" dummies here to save space in the executable image
 void PerfView_Initialize(void) {}
-void PerfView_RegisterCall(char* pszFunctionName, 
+void PerfView_RegisterCall(char* pszCallerName,
+                           char* pszFunctionName, 
                            unsigned long int nTicks) {}
 
 void PerfView_DumpProfile(FILE *file) {}
@@ -86,7 +87,8 @@ void PerfView_Initialize(void)
 
 
 // register a call to a function
-void _Optlink PerfView_RegisterCall(char* pszFunctionName, 
+void _Optlink PerfView_RegisterCall(char* pszCallerName,
+                                    char* pszFunctionName, 
                                     unsigned long int nTicks)
 {
   // don't record call if currently locked
@@ -126,6 +128,43 @@ void _Optlink PerfView_RegisterCall(char* pszFunctionName,
   
   if (nTicks > p->nMaximumTicks)
     p->nMaximumTicks = nTicks;
+
+
+  // add call-path tracing
+  if (NULL != pszCallerName)
+  {
+    // build path name
+    char szBuf[256];
+    strcpy(szBuf, pszCallerName);
+    strcat(szBuf, "->");
+    strcat(szBuf, pszFunctionName);
+    
+    // check if that particular callpath is registered already
+    PPERFVIEW_FUNCTION p2 = (PPERFVIEW_FUNCTION)pProfileMap->getElement(szBuf);
+    if (NULL == p2)
+    {
+      // new function call
+      p2 = (PPERFVIEW_FUNCTION)malloc( sizeof( PERFVIEW_FUNCTION ) );
+      p2->pszFunctionName = strdup( szBuf );
+      p2->nCalled = 0;
+      p2->nTotalTicks = 0;
+      p2->nMinimumTicks = 0xffffffff;
+      p2->nMaximumTicks = 0;
+      
+      // add to the hashtable
+      pProfileMap->addElement(p2->pszFunctionName, p2);
+    }
+    
+    // update statistical data
+    p2->nCalled++;
+    p2->nTotalTicks += nTicks;
+    
+    if (nTicks < p2->nMinimumTicks)
+      p2->nMinimumTicks = nTicks;
+    
+    if (nTicks > p2->nMaximumTicks)
+      p2->nMaximumTicks = nTicks;
+  }
 }
 
 
