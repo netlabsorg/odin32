@@ -1,4 +1,4 @@
-/* $Id: ModuleBase.h,v 1.2 2000-01-22 18:20:58 bird Exp $
+/* $Id: ModuleBase.h,v 1.3 2000-02-27 02:16:43 bird Exp $
  *
  * ModuleBase - Declaration of the Basic module class.
  *
@@ -30,6 +30,14 @@
                                             /* aligns something, a,  up to nearest alignment boundrary-
                                              * Note: Aligment must be a 2**n number. */
 
+#define PAGESHIFT                   12      /* bytes to pages or pages to bytes shift value. */
+#ifndef PAGESIZE
+#define PAGESIZE                    0x1000  /* pagesize on i386 */
+#endif
+#define PAGEOFFSET(addr) ((addr) &  (PAGESIZE-1)) /* Gets the offset into the page addr points into. */
+#define PAGESTART(addr)  ((addr) & ~(PAGESIZE-1)) /* Gets the address of the page addr points into. */
+
+
 /*
  * Output macros.
  * Macros:          option   infolevel
@@ -59,10 +67,33 @@
 
 
 /*
- * Misc
+ * Read macros.
+ *  ReadAt:  Reads from a file, hFile, at a given offset, ulOffset, into a buffer, pvBuffer,
+ *           an amount of bytes, cbToRead.
+ *           RING0: Map this to ldrRead with 0UL as flFlags.
+ *           RING3: Implementes this function as a static function, ReadAt.
+ *  ReadAtF: Same as ReadAt but two extra parameters; an additional flag and a pointer to an MTE.
+ *           Used in the read method.
+ *           RING0: Map directly to ldrRead.
+ *           RING3: Map to ReadAt, ignoring the two extra parameters.
  */
-#define PAGESIZE                    0x1000
+#ifdef RING0
+    #define ReadAt(hFile, ulOffset, pvBuffer, cbToRead) \
+        ldrRead(hFile, ulOffset, pvBuffer, 0UL, cbToRead, NULL)
+    #define ReadAtF(hFile, ulOffset, pvBuffer, cbToRead, flFlags, pMTE) \
+        ldrRead(hFile, ulOffset, pvBuffer, flFlags, cbToRead, pMTE)
+#else
+    #define ReadAtF(hFile, ulOffset, pvBuffer, cbToRead, flFlags, pMTE) \
+        ReadAt(hFile, ulOffset, pvBuffer, cbToRead)
+#endif
 
+
+/*******************************************************************************
+*   Functions                                                                  *
+*******************************************************************************/
+#ifndef RING0
+APIRET ReadAt(SFN hFile, ULONG ulOffset, PVOID pvBuffer, ULONG cbToRead);
+#endif
 
 
 
