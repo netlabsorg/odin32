@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.294 1999-10-09 11:17:59 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.295 1999-10-09 13:30:18 sandervl Exp $ */
 
  99-10-09: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Clipboard fixes (window handle translation)
@@ -6,6 +6,9 @@
                   Use the supported Open32 system colors and only use
                   those from Wine for the new (9x) colors
         - SHELL32: Moved old to current, current to old dir
+	- KERNEL32: Don't switch FS selectors for Odin32 OS/2 apps (win32
+                    apps compiled in OS/2).
+                    Fixed reversed stack top & bottom in TEB structure.
 
  99-10-09: Jens Wiessner <wiessnej@rfi.de>
 	- CRTDLL: Implemented functions; only 80 stubs left
