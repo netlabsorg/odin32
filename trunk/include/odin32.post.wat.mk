@@ -1,4 +1,4 @@
-# $Id: odin32.post.wat.mk,v 1.7 2000-12-03 05:14:29 bird Exp $
+# $Id: odin32.post.wat.mk,v 1.8 2000-12-16 23:40:54 bird Exp $
 
 #
 # Odin32 API
@@ -8,7 +8,7 @@
 # If ORGTARGET is defined it is used to generate the importlibrary.
 #
 # Define NOTEXPDEF to remove the $(TARGET).lib and $(TARGET)exp.def rules.
-# Define EXETARGET to make an executable. (This also applies to pdwin32.mk.)
+# Define EXETARGET to make an executable. (This also applies to odin32.mk.)
 # Define LIBTARGET to make an internal library.
 # Define LOCALCLEAN if only the local directory is to be clean.
 # Define CLEAN2 to invoke a second clean rule named 'clean2'.
@@ -67,11 +67,9 @@ MAKEFILE = makefile
 ORGTARGET=$(TARGET)
 !endif
 
-# Set default DEFFILE if needed. (Currently for dlls only.)
+# Set default DEFFILE if needed. (Required for both DLLs and EXEs!)
 !ifndef DEFFILE
-!   ifndef EXETARGET
 DEFFILE = $(ORGTARGET).def
-!   endif
 !endif
 
 # Set INTLIBS (interal) if SUBDIRS is defined and NO_INTERNAL_LIBS is undefined.
@@ -121,7 +119,7 @@ lib:    $(OBJDIR) \
 # Dll: Main target rule - builds the target dll.
 #
 !ifndef NO_MAIN_RULE
-$(OBJDIR)\$(TARGET).$(TARGET_EXTENSION): $(OBJS) $(OS2RES) $(DEFFILE) $(OBJDIR)\$(TARGET).lrf
+$(OBJDIR)\$(TARGET).$(TARGET_EXTENSION): $(OBJS) $(OS2RES) $(OBJDIR)\$(TARGET).lrf
     $(LD2) @$(OBJDIR)\$(TARGET).lrf
 !ifdef OS2RES
     $(OS2RC) $(OS2RCLFLAGS) $(OS2RES) $@
@@ -133,9 +131,9 @@ $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION): $(OBJS) $(OS2RES) $(DEFFILE) $(OBJDIR)\
 # Dll: Linker file - creates the parameter file passed on to the linker.
 #
 !ifndef NO_LNKFILE_RULE
-$(OBJDIR)\$(TARGET).lrf: makefile $(DEFFILE) $(ODIN32_INCLUDE)\pdwin32.wat.post
+$(OBJDIR)\$(TARGET).lrf: $(__MAKEFILES__) $(OBJDIR)\bldlevel.$(DEFFILE) $(DEFFILE) $(ODIN32_INCLUDE)\odin32.post.wat.mk
     $(RM) $(OBJDIR)\$(TARGET).lrf2 $@
-    $(KDEF2WAT) $(DEFFILE) $@ <<$(OBJDIR)\$(TARGET).lrf2
+    $(KDEF2WAT) $(OBJDIR)\bldlevel.$(DEFFILE) $@ <<$(OBJDIR)\$(TARGET).lrf2
 $(LD2FLAGS)
 name $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION)
 option map=$(OBJDIR)\$(TARGET).map
@@ -176,7 +174,7 @@ lib: .SYMBOLIC
 # Exe: Main target rule - builds the target exe.
 #
 !ifndef NO_MAIN_RULE
-$(OBJDIR)\$(TARGET).$(TARGET_EXTENSION): $(OBJS) $(OS2RES) $(DEFFILE) $(OBJDIR)\$(TARGET).lrf
+$(OBJDIR)\$(TARGET).$(TARGET_EXTENSION): $(OBJS) $(OS2RES) $(OBJDIR)\$(TARGET).lrf
     $(LD2) @$(OBJDIR)\$(TARGET).lrf
 !ifdef OS2RES
     $(OS2RC) $(OS2RCLFLAGS) $(OS2RES) $@
@@ -188,10 +186,10 @@ $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION): $(OBJS) $(OS2RES) $(DEFFILE) $(OBJDIR)\
 # Exe: Linker file - creates the parameter file passed on to the linker.
 #
 !ifndef NO_LNKFILE_RULE
-$(OBJDIR)\$(TARGET).lrf: makefile  $(ODIN32_INCLUDE)\pdwin32.wat.post $(DEFFILE)
+$(OBJDIR)\$(TARGET).lrf: $(__MAKEFILES__) $(ODIN32_INCLUDE)\odin32.post.wat.mk $(OBJDIR)\bldlevel.$(DEFFILE)
     $(RM) $(OBJDIR)\$(TARGET).lrf2 $@
 !ifdef DEFFILE
-    $(KDEF2WAT) $(DEFFILE) $@ <<$(OBJDIR)\$(TARGET).lrf2
+    $(KDEF2WAT) $(OBJDIR)\bldlevel.$(DEFFILE) $@ <<$(OBJDIR)\$(TARGET).lrf2
 !else
     $(ECHO) Creating <<$@
 !endif
@@ -373,10 +371,31 @@ $(OBJDIR)\$(ORGTARGET)exp.def: $(DEFFILE)
 
 
 #
+# Common: Make .def-file with buildlevel info.
+#
+$(OBJDIR)\bldlevel.$(DEFFILE): $(DEFFILE)
+    $(BLDLEVELINF) $(DEFFILE) $@ -R"$(DEFFILE)" \
+        -V"#define=ODIN32_VERSION,$(ODIN32_INCLUDE)\versionos2.h" \
+        -M"#define=ODIN32_BUILD_NR,$(ODIN32_INCLUDE)\versionos2.h"
+
+
+#
 # Common: Create the object directory.
 #
 $(OBJDIR): .SYMBOLIC
     @if not exist $(OBJDIR) $(CREATEPATH) $(OBJDIR)
+
+
+#
+# Common: Generate Visual SlickEdit project.
+#
+!ifndef NO_VSLICKRULES
+!ifdef ORGTARGET
+vslick $(ORGTARGET).vpj: .SYMBOLIC
+    $(RM) $(ORGTARGET).vtg
+    $(ODIN32_BASE)\tools\vslick\genproject.cmd $(CINCLUDES) $(ORGTARGET).vpj
+!endif
+!endif
 
 
 #
