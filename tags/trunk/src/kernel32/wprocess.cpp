@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.157 2002-07-26 10:47:59 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.158 2002-08-01 16:02:41 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -192,6 +192,9 @@ TEB *WIN32API CreateTEB(HANDLE hThread, DWORD dwThreadId)
     winteb->o.odin.hThread  = hThread;
     winteb->o.odin.threadId = dwThreadId;
 
+    // Event semaphore (auto-reset) to signal message post to MsgWaitForMultipleObjects
+    winteb->o.odin.hPostMsgEvent = CreateEventA(NULL, FALSE, FALSE, NULL);
+
     return winteb;
 }
 //******************************************************************************
@@ -376,6 +379,11 @@ void WIN32API DestroyTEB(TEB *winteb)
 
     // free allocated memory for security structures
     free( winteb->o.odin.threadinfo.pTokenGroups );
+
+    // free PostMessage event semaphore
+    if(winteb->o.odin.hPostMsgEvent) {
+        CloseHandle(winteb->o.odin.hPostMsgEvent);
+    }
 
 #ifdef DEBUG
     if (winteb->o.odin.arrstrCallStack != NULL)
