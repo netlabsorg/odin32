@@ -192,4 +192,7 @@ BOOL    WIN32API CloseHandle(HANDLE);
 
 BOOL    WIN32API CharToOemBuffA( LPCSTR s, LPSTR d, DWORD len );
 
+LONG    WIN32API GetWindowLongA(HWND,INT);
+LONG    WIN32API GetWindowLongW(HWND,INT);
+
 #endif

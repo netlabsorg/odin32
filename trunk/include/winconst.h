@@ -1948,4 +1948,19 @@
 #define COLOR_GRADIENTACTIVECAPTION_W    27
 #define COLOR_GRADIENTINACTIVECAPTION_W  28
 
+/* Offsets for GetWindowLong() and GetWindowWord() */
+#define GWL_USERDATA_W        (-21)
+#define GWL_EXSTYLE_W         (-20)
+#define GWL_STYLE_W           (-16)
+#define GWW_ID_W              (-12)
+#define GWL_ID_W              GWW_ID_W
+#define GWW_HWNDPARENT_W      (-8)
+#define GWL_HWNDPARENT_W      GWW_HWNDPARENT_W
+#define GWW_HINSTANCE_W       (-6)
+#define GWL_HINSTANCE_W       GWW_HINSTANCE_W
+#define GWL_WNDPROC_W         (-4)
+#define DWL_MSGRESULT_W       0
+#define DWL_DLGPROC_W         4
+#define DWL_USER_W            8
+
 #endif //__WINCONST_H__

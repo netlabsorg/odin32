@@ -74,6 +74,16 @@ DWORD WIN32API Dbg##a(DWORD arg1, DWORD arg2) \
     return ret;                            \
 }
 
+#define DEBUGWRAP8_NORET(a) \
+void WIN32API Dbg##a(DWORD arg1, DWORD arg2) \
+{                                          \
+    dprintf((DBGWRAP_MODULE": %s %x %x", #a, arg1, arg2));         \
+    dbg_ThreadPushCall(#a); \
+    ((DBG_WINPROC8)a)(arg1, arg2);         \
+    dbg_ThreadPopCall(); \
+    dprintf((DBGWRAP_MODULE": %s", #a)); \
+}
+
 #define DEBUGWRAP12(a) \
 DWORD WIN32API Dbg##a(DWORD arg1, DWORD arg2, DWORD arg3) \
 {                                          \
@@ -126,7 +136,7 @@ DWORD WIN32API Dbg##a(DWORD arg1, DWORD arg2, DWORD arg3, DWORD arg4, DWORD arg5
 DWORD WIN32API Dbg##a(DWORD arg1, DWORD arg2, DWORD arg3, DWORD arg4, DWORD arg5, DWORD arg6, DWORD arg7) \
 {                                          \
     DWORD ret;                             \
-    dprintf((DBGWRAP_MODULE": %s %x %x %x %x %x %x %x", #a, arg1, arg2, arg3, arg4, arg5, arg7));         \
+    dprintf((DBGWRAP_MODULE": %s %x %x %x %x %x %x %x", #a, arg1, arg2, arg3, arg4, arg5, arg6, arg7));         \
     dbg_ThreadPushCall(#a); \
     ret = ((DBG_WINPROC28)a)(arg1, arg2, arg3, arg4, arg5, arg6, arg7);         \
     dbg_ThreadPopCall(); \
@@ -138,7 +148,7 @@ DWORD WIN32API Dbg##a(DWORD arg1, DWORD arg2, DWORD arg3, DWORD arg4, DWORD arg5
 DWORD WIN32API Dbg##a(DWORD arg1, DWORD arg2, DWORD arg3, DWORD arg4, DWORD arg5, DWORD arg6, DWORD arg7, DWORD arg8) \
 {                                          \
     DWORD ret;                             \
-    dprintf((DBGWRAP_MODULE": %s %x %x %x %x %x %x %x %x ", #a, arg1, arg2, arg3, arg4, arg5, arg7, arg8));         \
+    dprintf((DBGWRAP_MODULE": %s %x %x %x %x %x %x %x %x ", #a, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8));         \
     dbg_ThreadPushCall(#a); \
     ret = ((DBG_WINPROC32)a)(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);         \
     dbg_ThreadPopCall(); \
@@ -150,7 +160,7 @@ DWORD WIN32API Dbg##a(DWORD arg1, DWORD arg2, DWORD arg3, DWORD arg4, DWORD arg5
 DWORD WIN32API Dbg##a(DWORD arg1, DWORD arg2, DWORD arg3, DWORD arg4, DWORD arg5, DWORD arg6, DWORD arg7, DWORD arg8, DWORD arg9) \
 {                                          \
     DWORD ret;                             \
-    dprintf((DBGWRAP_MODULE": %s %x %x %x %x %x %x %x %x %x", #a, arg1, arg2, arg3, arg4, arg5, arg7, arg8, arg9));         \
+    dprintf((DBGWRAP_MODULE": %s %x %x %x %x %x %x %x %x %x", #a, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9));         \
     dbg_ThreadPushCall(#a); \
     ret = ((DBG_WINPROC36)a)(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);         \
     dbg_ThreadPopCall(); \
@@ -162,7 +172,7 @@ DWORD WIN32API Dbg##a(DWORD arg1, DWORD arg2, DWORD arg3, DWORD arg4, DWORD arg5
 DWORD WIN32API Dbg##a(DWORD arg1, DWORD arg2, DWORD arg3, DWORD arg4, DWORD arg5, DWORD arg6, DWORD arg7, DWORD arg8, DWORD arg9, DWORD arg10) \
 {                                          \
     DWORD ret;                             \
-    dprintf((DBGWRAP_MODULE": %s %x %x %x %x %x %x %x %x %x %x", #a, arg1, arg2, arg3, arg4, arg5, arg7, arg8, arg9, arg10));         \
+    dprintf((DBGWRAP_MODULE": %s %x %x %x %x %x %x %x %x %x %x", #a, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10));         \
     dbg_ThreadPushCall(#a); \
     ret = ((DBG_WINPROC40)a)(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10);         \
     dbg_ThreadPopCall(); \
@@ -174,7 +184,7 @@ DWORD WIN32API Dbg##a(DWORD arg1, DWORD arg2, DWORD arg3, DWORD arg4, DWORD arg5
 DWORD WIN32API Dbg##a(DWORD arg1, DWORD arg2, DWORD arg3, DWORD arg4, DWORD arg5, DWORD arg6, DWORD arg7, DWORD arg8, DWORD arg9, DWORD arg10, DWORD arg11) \
 {                                          \
     DWORD ret;                             \
-    dprintf((DBGWRAP_MODULE": %s %x %x %x %x %x %x %x %x %x %x %x", #a, arg1, arg2, arg3, arg4, arg5, arg7, arg8, arg9, arg10, arg11));         \
+    dprintf((DBGWRAP_MODULE": %s %x %x %x %x %x %x %x %x %x %x %x", #a, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11));         \
     dbg_ThreadPushCall(#a); \
     ret = ((DBG_WINPROC44)a)(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11);         \
     dbg_ThreadPopCall(); \
@@ -186,7 +196,7 @@ DWORD WIN32API Dbg##a(DWORD arg1, DWORD arg2, DWORD arg3, DWORD arg4, DWORD arg5
 DWORD WIN32API Dbg##a(DWORD arg1, DWORD arg2, DWORD arg3, DWORD arg4, DWORD arg5, DWORD arg6, DWORD arg7, DWORD arg8, DWORD arg9, DWORD arg10, DWORD arg11, DWORD arg12) \
 {                                          \
     DWORD ret;                             \
-    dprintf((DBGWRAP_MODULE": %s %x %x %x %x %x %x %x %x %x %x %x %x", #a, arg1, arg2, arg3, arg4, arg5, arg7, arg8, arg9, arg10, arg11, arg12));         \
+    dprintf((DBGWRAP_MODULE": %s %x %x %x %x %x %x %x %x %x %x %x %x", #a, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12));         \
     dbg_ThreadPushCall(#a); \
     ret = ((DBG_WINPROC48)a)(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12);         \
     dbg_ThreadPopCall(); \
@@ -198,7 +208,7 @@ DWORD WIN32API Dbg##a(DWORD arg1, DWORD arg2, DWORD arg3, DWORD arg4, DWORD arg5
 DWORD WIN32API Dbg##a(DWORD arg1, DWORD arg2, DWORD arg3, DWORD arg4, DWORD arg5, DWORD arg6, DWORD arg7, DWORD arg8, DWORD arg9, DWORD arg10, DWORD arg11, DWORD arg12, DWORD arg13) \
 {                                          \
     DWORD ret;                             \
-    dprintf((DBGWRAP_MODULE": %s %x %x %x %x %x %x %x %x %x %x %x %x %x", #a, arg1, arg2, arg3, arg4, arg5, arg7, arg8, arg9, arg10, arg11, arg12, arg13));         \
+    dprintf((DBGWRAP_MODULE": %s %x %x %x %x %x %x %x %x %x %x %x %x %x", #a, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13));         \
     dbg_ThreadPushCall(#a); \
     ret = ((DBG_WINPROC52)a)(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13);         \
     dbg_ThreadPopCall(); \
@@ -296,7 +306,7 @@ DWORD WIN32API Dbg##a(DWORD arg1, DWORD arg2, DWORD arg3, DWORD arg4, DWORD arg5
 DWORD WIN32API Dbg##a(DWORD arg1, DWORD arg2, DWORD arg3, DWORD arg4, DWORD arg5, DWORD arg6, DWORD arg7) \
 {                                          \
     DWORD ret;                             \
-    dprintf2((DBGWRAP_MODULE": %s %x %x %x %x %x %x", #a, arg1, arg2, arg3, arg4, arg5, arg7));         \
+    dprintf2((DBGWRAP_MODULE": %s %x %x %x %x %x %x", #a, arg1, arg2, arg3, arg4, arg5, arg6, arg7));         \
     dbg_ThreadPushCall(#a); \
     ret = ((DBG_WINPROC28)a)(arg1, arg2, arg3, arg4, arg5, arg6, arg7);         \
     dbg_ThreadPopCall(); \
@@ -308,7 +318,7 @@ DWORD WIN32API Dbg##a(DWORD arg1, DWORD arg2, DWORD arg3, DWORD arg4, DWORD arg5
 DWORD WIN32API Dbg##a(DWORD arg1, DWORD arg2, DWORD arg3, DWORD arg4, DWORD arg5, DWORD arg6, DWORD arg7, DWORD arg8) \
 {                                          \
     DWORD ret;                             \
-    dprintf2((DBGWRAP_MODULE": %s %x %x %x %x %x %x", #a, arg1, arg2, arg3, arg4, arg5, arg7, arg8));         \
+    dprintf2((DBGWRAP_MODULE": %s %x %x %x %x %x %x", #a, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8));         \
     dbg_ThreadPushCall(#a); \
     ret = ((DBG_WINPROC32)a)(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);         \
     dbg_ThreadPopCall(); \
@@ -320,7 +330,7 @@ DWORD WIN32API Dbg##a(DWORD arg1, DWORD arg2, DWORD arg3, DWORD arg4, DWORD arg5
 DWORD WIN32API Dbg##a(DWORD arg1, DWORD arg2, DWORD arg3, DWORD arg4, DWORD arg5, DWORD arg6, DWORD arg7, DWORD arg8, DWORD arg9) \
 {                                          \
     DWORD ret;                             \
-    dprintf2((DBGWRAP_MODULE": %s %x %x %x %x %x %x", #a, arg1, arg2, arg3, arg4, arg5, arg7, arg8, arg9));         \
+    dprintf2((DBGWRAP_MODULE": %s %x %x %x %x %x %x", #a, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9));         \
     dbg_ThreadPushCall(#a); \
     ret = ((DBG_WINPROC36)a)(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);         \
     dbg_ThreadPopCall(); \
@@ -332,7 +342,7 @@ DWORD WIN32API Dbg##a(DWORD arg1, DWORD arg2, DWORD arg3, DWORD arg4, DWORD arg5
 DWORD WIN32API Dbg##a(DWORD arg1, DWORD arg2, DWORD arg3, DWORD arg4, DWORD arg5, DWORD arg6, DWORD arg7, DWORD arg8, DWORD arg9, DWORD arg10) \
 {                                          \
     DWORD ret;                             \
-    dprintf2((DBGWRAP_MODULE": %s %x %x %x %x %x %x", #a, arg1, arg2, arg3, arg4, arg5, arg7, arg8, arg9, arg10));         \
+    dprintf2((DBGWRAP_MODULE": %s %x %x %x %x %x %x", #a, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10));         \
     dbg_ThreadPushCall(#a); \
     ret = ((DBG_WINPROC40)a)(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10);         \
     dbg_ThreadPopCall(); \
@@ -344,7 +354,7 @@ DWORD WIN32API Dbg##a(DWORD arg1, DWORD arg2, DWORD arg3, DWORD arg4, DWORD arg5
 DWORD WIN32API Dbg##a(DWORD arg1, DWORD arg2, DWORD arg3, DWORD arg4, DWORD arg5, DWORD arg6, DWORD arg7, DWORD arg8, DWORD arg9, DWORD arg10, DWORD arg11) \
 {                                          \
     DWORD ret;                             \
-    dprintf2((DBGWRAP_MODULE": %s %x %x %x %x %x %x", #a, arg1, arg2, arg3, arg4, arg5, arg7, arg8, arg9, arg10, arg11));         \
+    dprintf2((DBGWRAP_MODULE": %s %x %x %x %x %x %x", #a, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11));         \
     dbg_ThreadPushCall(#a); \
     ret = ((DBG_WINPROC44)a)(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11);         \
     dbg_ThreadPopCall(); \
@@ -356,7 +366,7 @@ DWORD WIN32API Dbg##a(DWORD arg1, DWORD arg2, DWORD arg3, DWORD arg4, DWORD arg5
 DWORD WIN32API Dbg##a(DWORD arg1, DWORD arg2, DWORD arg3, DWORD arg4, DWORD arg5, DWORD arg6, DWORD arg7, DWORD arg8, DWORD arg9, DWORD arg10, DWORD arg11, DWORD arg12) \
 {                                          \
     DWORD ret;                             \
-    dprintf2((DBGWRAP_MODULE": %s %x %x %x %x %x %x", #a, arg1, arg2, arg3, arg4, arg5, arg7, arg8, arg9, arg10, arg11, arg12));         \
+    dprintf2((DBGWRAP_MODULE": %s %x %x %x %x %x %x", #a, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12));         \
     dbg_ThreadPushCall(#a); \
     ret = ((DBG_WINPROC48)a)(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12);         \
     dbg_ThreadPopCall(); \
@@ -368,7 +378,7 @@ DWORD WIN32API Dbg##a(DWORD arg1, DWORD arg2, DWORD arg3, DWORD arg4, DWORD arg5
 DWORD WIN32API Dbg##a(DWORD arg1, DWORD arg2, DWORD arg3, DWORD arg4, DWORD arg5, DWORD arg6, DWORD arg7, DWORD arg8, DWORD arg9, DWORD arg10, DWORD arg11, DWORD arg12, DWORD arg13) \
 {         \
     DWORD ret;                                 \
-    dprintf2((DBGWRAP_MODULE": %s %x %x %x %x %x %x %x %x %x %x %x %x %x", #a, arg1, arg2, arg3, arg4, arg5, arg7, arg8, arg9, arg10, arg11, arg12, arg13));         \
+    dprintf2((DBGWRAP_MODULE": %s %x %x %x %x %x %x %x %x %x %x %x %x %x", #a, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13));         \
     dbg_ThreadPushCall(#a); \
     ret = ((DBG_WINPROC52)a)(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13);         \
     dbg_ThreadPopCall(); \
@@ -496,7 +506,7 @@ DWORD WIN32API a(DWORD arg1, DWORD arg2, DWORD arg3, DWORD arg4, DWORD arg5, DWO
 DWORD WIN32API Dbg##a(DWORD arg1, DWORD arg2, DWORD arg3, DWORD arg4, DWORD arg5, DWORD arg6, DWORD arg7) \
 {                                          \
     DWORD ret;                             \
-    dprintf((DBGWRAP_MODULE": %s %x %x %x %x %x %x", #a, arg1, arg2, arg3, arg4, arg5, arg7));         \
+    dprintf((DBGWRAP_MODULE": %s %x %x %x %x %x %x", #a, arg1, arg2, arg3, arg4, arg5, arg6, arg7));         \
     dbg_ThreadPushCall(#a); \
     ret = ((DBG_WINPROC28)a)(arg1, arg2, arg3, arg4, arg5, arg6, arg7);         \
     dbg_ThreadPopCall(); \
@@ -509,7 +519,7 @@ DWORD WIN32API a(DWORD arg1, DWORD arg2, DWORD arg3, DWORD arg4, DWORD arg5, DWO
 DWORD WIN32API Dbg##a(DWORD arg1, DWORD arg2, DWORD arg3, DWORD arg4, DWORD arg5, DWORD arg6, DWORD arg7, DWORD arg8) \
 {                                          \
     DWORD ret;                             \
-    dprintf((DBGWRAP_MODULE": %s %x %x %x %x %x %x", #a, arg1, arg2, arg3, arg4, arg5, arg7, arg8));         \
+    dprintf((DBGWRAP_MODULE": %s %x %x %x %x %x %x", #a, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8));         \
     dbg_ThreadPushCall(#a); \
     ret = ((DBG_WINPROC32)a)(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);         \
     dbg_ThreadPopCall(); \
@@ -522,7 +532,7 @@ DWORD WIN32API a(DWORD arg1, DWORD arg2, DWORD arg3, DWORD arg4, DWORD arg5, DWO
 DWORD WIN32API Dbg##a(DWORD arg1, DWORD arg2, DWORD arg3, DWORD arg4, DWORD arg5, DWORD arg6, DWORD arg7, DWORD arg8, DWORD arg9) \
 {                                          \
     DWORD ret;                             \
-    dprintf((DBGWRAP_MODULE": %s %x %x %x %x %x %x", #a, arg1, arg2, arg3, arg4, arg5, arg7, arg8, arg9));         \
+    dprintf((DBGWRAP_MODULE": %s %x %x %x %x %x %x", #a, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9));         \
     dbg_ThreadPushCall(#a); \
     ret = ((DBG_WINPROC36)a)(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);         \
     dbg_ThreadPopCall(); \
@@ -535,7 +545,7 @@ DWORD WIN32API a(DWORD arg1, DWORD arg2, DWORD arg3, DWORD arg4, DWORD arg5, DWO
 DWORD WIN32API Dbg##a(DWORD arg1, DWORD arg2, DWORD arg3, DWORD arg4, DWORD arg5, DWORD arg6, DWORD arg7, DWORD arg8, DWORD arg9, DWORD arg10) \
 {                                          \
     DWORD ret;                             \
-    dprintf((DBGWRAP_MODULE": %s %x %x %x %x %x %x", #a, arg1, arg2, arg3, arg4, arg5, arg7, arg8, arg9, arg10));         \
+    dprintf((DBGWRAP_MODULE": %s %x %x %x %x %x %x", #a, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10));         \
     dbg_ThreadPushCall(#a); \
     ret = ((DBG_WINPROC40)a)(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10);         \
     dbg_ThreadPopCall(); \
@@ -548,7 +558,7 @@ DWORD WIN32API a(DWORD arg1, DWORD arg2, DWORD arg3, DWORD arg4, DWORD arg5, DWO
 DWORD WIN32API Dbg##a(DWORD arg1, DWORD arg2, DWORD arg3, DWORD arg4, DWORD arg5, DWORD arg6, DWORD arg7, DWORD arg8, DWORD arg9, DWORD arg10, DWORD arg11) \
 {                                          \
     DWORD ret;                             \
-    dprintf((DBGWRAP_MODULE": %s %x %x %x %x %x %x", #a, arg1, arg2, arg3, arg4, arg5, arg7, arg8, arg9, arg10, arg11));         \
+    dprintf((DBGWRAP_MODULE": %s %x %x %x %x %x %x", #a, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11));         \
     dbg_ThreadPushCall(#a); \
     ret = ((DBG_WINPROC44)a)(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11);         \
     dbg_ThreadPopCall(); \
@@ -561,7 +571,7 @@ DWORD WIN32API a(DWORD arg1, DWORD arg2, DWORD arg3, DWORD arg4, DWORD arg5, DWO
 DWORD WIN32API Dbg##a(DWORD arg1, DWORD arg2, DWORD arg3, DWORD arg4, DWORD arg5, DWORD arg6, DWORD arg7, DWORD arg8, DWORD arg9, DWORD arg10, DWORD arg11, DWORD arg12) \
 {                                          \
     DWORD ret;                             \
-    dprintf((DBGWRAP_MODULE": %s %x %x %x %x %x %x", #a, arg1, arg2, arg3, arg4, arg5, arg7, arg8, arg9, arg10, arg11, arg12));         \
+    dprintf((DBGWRAP_MODULE": %s %x %x %x %x %x %x", #a, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12));         \
     dbg_ThreadPushCall(#a); \
     ret = ((DBG_WINPROC48)a)(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12);         \
     dbg_ThreadPopCall(); \
@@ -574,7 +584,7 @@ DWORD WIN32API #a(DWORD arg1, DWORD arg2, DWORD arg3, DWORD arg4, DWORD arg5, DW
 DWORD WIN32API Dbg##a(DWORD arg1, DWORD arg2, DWORD arg3, DWORD arg4, DWORD arg5, DWORD arg6, DWORD arg7, DWORD arg8, DWORD arg9, DWORD arg10, DWORD arg11, DWORD arg12, DWORD arg13) \
 {         \
     DWORD ret;                                 \
-    dprintf((DBGWRAP_MODULE": %s %x %x %x %x %x %x %x %x %x %x %x %x %x", #a, arg1, arg2, arg3, arg4, arg5, arg7, arg8, arg9, arg10, arg11, arg12, arg13));         \
+    dprintf((DBGWRAP_MODULE": %s %x %x %x %x %x %x %x %x %x %x %x %x %x", #a, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13));         \
     dbg_ThreadPushCall(#a); \
     ret = ((DBG_WINPROC52)a)(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13);         \
     dbg_ThreadPopCall(); \
