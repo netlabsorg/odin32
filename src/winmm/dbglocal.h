@@ -1,4 +1,4 @@
-/* $Id: dbglocal.h,v 1.4 2001-03-19 19:28:38 sandervl Exp $ */
+/* $Id: dbglocal.h,v 1.5 2001-03-23 16:23:42 sandervl Exp $ */
 
 /*
  * debug logging functions for OS/2
@@ -21,7 +21,7 @@ void ParseLogStatus();
 
 #define DBG_os2timer        0
 #define DBG_waveout         1
-#define DBG_dwaveout        2
+#define DBG_waveoutdart     2
 #define DBG_time            3
 #define DBG_wavein          4
 #define DBG_auxiliary       5
@@ -38,8 +38,11 @@ void ParseLogStatus();
 #define DBG_playsound       16
 #define DBG_joyos2          17
 #define DBG_resource        18
-#define DBG_dwavein         19
-#define DBG_MAXFILES        20
+#define DBG_waveindart      19
+#define DBG_waveoutdaud     20
+#define DBG_waveoutbase     21
+#define DBG_waveinoutbase   22
+#define DBG_MAXFILES        23
 
 extern USHORT DbgEnabled[DBG_MAXFILES];
 extern USHORT DbgEnabledLvl2[DBG_MAXFILES];
