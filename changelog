@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.2587 2003-05-27 08:40:48 sandervl Exp $ */
+/* $Id: changelog,v 1.2588 2003-05-27 09:46:50 sandervl Exp $ */
+
+ 2003-05-27: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o Do not send WM_STYLECHANGING/ED messages when the scrollbar
+                  control is shown or hidden.
 
  2003-05-26: Sander van Leeuwen <sandervl@innotek   >
     - COMCTL32: o Use the new resources from Wine.
