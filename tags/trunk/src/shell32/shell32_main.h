@@ -66,7 +66,7 @@ extern BOOL	(* WINAPI pCOMCTL32_Free) (LPVOID);
 #define pAddMRUData	AddMRUData
 #define pFindMRUData	FindMRUData
 #define pEnumMRUListA	EnumMRUListA
-#define pFreeMRUListA	FreeMRUListA
+#define pFreeMRUListA	FreeMRUList
 #define pCreateMRUListA CreateMRUListA
 
 /* ole2 */
