@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 1999-08-09 12:08:54 phaller Exp $
+# $Id: makefile,v 1.2 1999-08-09 18:10:50 achimha Exp $
 
 #
 # PD-Win32 API
@@ -26,7 +26,8 @@ all: $(TARGET).dll $(TARGET).lib
 
 
 $(TARGET).dll: $(OBJS) $(TARGET).def
-        $(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) $(TARGET).def
+        $(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) CPPOM30.LIB CPPOM30O.LIB \
+        OS2386.LIB SOMTK.LIB $(TARGET).def
         $(CP) $@ $(PDWIN32_BIN)
 
 
