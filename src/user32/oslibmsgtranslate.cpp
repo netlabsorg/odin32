@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.65 2001-10-24 13:18:59 phaller Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.66 2001-10-24 15:41:54 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -160,6 +160,9 @@ USHORT pmscan2winkey [][2] = {
     0x5C, 0x15C     // 0x6F RMenu? (PM scan 0x7F)
 };
 
+static BOOL fGenerateDoubleClick = FALSE;
+static MSG  doubleClickMsg = {0};
+
 //******************************************************************************
 //******************************************************************************
 ULONG GetMouseKeyState()
@@ -184,6 +187,12 @@ ULONG GetMouseKeyState()
 LONG IsNCMouseMsg(Win32BaseWindow *win32wnd)
 {
   return ((win32wnd->getLastHitTestVal() != HTCLIENT_W) && (WinQueryCapture(HWND_DESKTOP) != win32wnd->getOS2WindowHandle()));
+}
+//******************************************************************************
+//******************************************************************************
+void SetMenuDoubleClick(BOOL fSet)
+{
+  fGenerateDoubleClick = fSet;
 }
 //******************************************************************************
 //******************************************************************************
@@ -388,6 +397,8 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
     {
         //WM_NC*BUTTON* is posted when the cursor is in a non-client area of the window
 
+        dprintf(("MsgButton %x (%x) %d at (%d,%d) time %x", winMsg->hwnd, os2Msg->hwnd, WINWM_NCLBUTTONDOWN + (os2Msg->msg - WM_BUTTON1DOWN), winMsg->pt.x, winMsg->pt.y, winMsg->time));
+
         HWND hwnd;
 
         DisableLogging();
@@ -444,6 +455,37 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
             }
             else goto dummymessage; //don't send mouse messages to disabled windows
         }
+
+        DisableLogging();
+        if ((winMsg->message == WINWM_LBUTTONDOWN) ||
+            (winMsg->message == WINWM_RBUTTONDOWN) ||
+            (winMsg->message == WINWM_MBUTTONDOWN) ||
+            (winMsg->message == WINWM_NCLBUTTONDOWN) ||
+            (winMsg->message == WINWM_NCRBUTTONDOWN) ||
+            (winMsg->message == WINWM_NCMBUTTONDOWN))
+        {
+            if(fGenerateDoubleClick && doubleClickMsg.message == winMsg->message && 
+               winMsg->time - doubleClickMsg.time < GetDoubleClickTime() &&
+               (abs(winMsg->pt.x - doubleClickMsg.pt.x) < GetSystemMetrics(SM_CXDOUBLECLK_W)/2) &&
+               (abs(winMsg->pt.y - doubleClickMsg.pt.y) < GetSystemMetrics(SM_CYDOUBLECLK_W)/2)) 
+            {
+                 dprintf(("single -> double click"));
+                 if(winMsg->message >= WINWM_LBUTTONDOWN) {
+                      winMsg->message += (WINWM_LBUTTONDBLCLK - WINWM_LBUTTONDOWN);
+                 }
+                 else winMsg->message += (WINWM_LBUTTONDBLCLK - WINWM_NCLBUTTONDOWN);
+                 doubleClickMsg.message = 0;
+            }
+            else {
+                 dprintf(("save for double click"));
+                 doubleClickMsg = *winMsg;
+                 if(doubleClickMsg.message >= WINWM_NCLBUTTONDOWN && doubleClickMsg.message <= WINWM_NCMBUTTONDOWN) {
+                      doubleClickMsg.message += (WINWM_LBUTTONDOWN - WINWM_NCLBUTTONDOWN);
+                 }
+            }
+        }
+        EnableLogging();
+
         break;
     }
 

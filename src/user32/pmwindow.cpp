@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.156 2001-10-18 13:28:08 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.157 2001-10-24 15:41:54 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -330,9 +330,6 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 
     case WM_SHOW:
         dprintf(("OS2: WM_SHOW %x %d", hwnd, mp1));
-        //SvL: When a window is made visible, then we don't receive a
-        //     WM_VRNENABLED message (for some weird reason)
-        win32wnd->callVisibleRgnNotifyProc(TRUE);
         win32wnd->MsgShow((ULONG)mp1);
         break;
 
@@ -694,7 +691,7 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
     case WM_CREATE:
     {
         //WM_CREATE handled during client window creation
-        dprintf(("PMFRAME: WM_CREATE %x"));
+        dprintf(("PMFRAME: WM_CREATE %x", hwnd));
         goto RunDefFrameWndProc;
     }
 
@@ -969,6 +966,16 @@ adjustend:
         dprintf(("PMFRAME:WM_WINDOWPOSCHANGED (%x) %x %x (%d,%d) (%d,%d)", mp2, win32wnd->getWindowHandle(), pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
         if(win32wnd->IsParentChanging()) {
             goto PosChangedEnd;
+        }
+
+        //SvL: When a window is made visible, then we don't receive a
+        //     WM_VRNENABLED message (for some weird reason)
+        if(pswp->fl & SWP_SHOW) {
+            win32wnd->callVisibleRgnNotifyProc(TRUE);
+        }
+        else 
+        if(pswp->fl & SWP_HIDE) {
+            win32wnd->callVisibleRgnNotifyProc(FALSE);
         }
 
         if ((pswp->fl & (SWP_SIZE | SWP_MOVE | SWP_ZORDER)) == 0)
