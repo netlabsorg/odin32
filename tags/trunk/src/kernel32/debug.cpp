@@ -1,4 +1,4 @@
-/* $Id: debug.cpp,v 1.5 2000-07-03 12:20:10 bird Exp $ */
+/* $Id: debug.cpp,v 1.6 2001-04-05 05:54:51 sandervl Exp $ */
 
 /*
  * Win32 debug Subsystem for OS/2
@@ -14,6 +14,7 @@
  *****************************************************************************/
 #include <os2win.h>
 #include <misc.h>
+#include <unicode.h>
 #include "oslibdebug.h"
 
 #define DBG_LOCALLOG	DBG_debug
