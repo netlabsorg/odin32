@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.12 2000-02-09 23:46:58 bird Exp $
+# $Id: makefile,v 1.13 2000-02-10 01:01:39 bird Exp $
 
 #
 # PD-Win32 API
@@ -104,7 +104,7 @@ clean:
         $(PDWIN32_BIN)\$(TARGET).dll \
         $(PDWIN32_BIN)\$(TARGET20).dll \
         $(PDWIN32_BIN)\$(TARGET40).dll \
-        $(PDWIN32_LIB)\$(TARGET).lib
-        $(PDWIN32_LIB)\$(TARGET20).lib
+        $(PDWIN32_LIB)\$(TARGET).lib   \
+        $(PDWIN32_LIB)\$(TARGET20).lib \
         $(PDWIN32_LIB)\$(TARGET40).lib
 
