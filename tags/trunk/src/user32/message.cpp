@@ -1,4 +1,4 @@
-/* $Id: message.cpp,v 1.5 2002-08-01 16:04:19 sandervl Exp $ */
+/* $Id: message.cpp,v 1.6 2003-08-22 13:16:44 sandervl Exp $ */
 /*
  * Win32 window message APIs for OS/2
  *
@@ -209,7 +209,7 @@ LRESULT WINAPI SendMessageTimeoutW( HWND hwnd, UINT msg, WPARAM wparam, LPARAM l
     {
         //otherwise use WinSendMsg to send it to the right process/thread
         dprintf(("SendMessages (inter-process/thread) %x %x %x %x", Win32ToOS2Handle(hwnd), msg, wparam, lparam));
-        result = OSLibSendMessage(Win32ToOS2Handle(hwnd), msg, wparam, lparam, TRUE);
+        result = OSLibSendMessage(hwnd, Win32ToOS2Handle(hwnd), msg, wparam, lparam, TRUE);
         ret = 1;
     }
 
@@ -254,7 +254,7 @@ LRESULT WINAPI SendMessageTimeoutA( HWND hwnd, UINT msg, WPARAM wparam, LPARAM l
     {
         //otherwise use WinSendMsg to send it to the right process/thread
         dprintf(("SendMessages (inter-process/thread) %x %x %x %x", Win32ToOS2Handle(hwnd), msg, wparam, lparam));
-        result = OSLibSendMessage(Win32ToOS2Handle(hwnd), msg, wparam, lparam, FALSE);
+        result = OSLibSendMessage(hwnd, Win32ToOS2Handle(hwnd), msg, wparam, lparam, FALSE);
         ret = 1;
     }
     if (ret && res_ptr) *res_ptr = result;
