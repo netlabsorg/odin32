@@ -1,4 +1,4 @@
-/* $Id: ntdll.c,v 1.5 2003-01-23 20:21:59 sandervl Exp $ */
+/* $Id: ntdll.c,v 1.6 2003-02-13 17:17:05 sandervl Exp $ */
 
 /*
  *
@@ -51,9 +51,6 @@
 
 #define NTSTATUS DWORD
 
-//SvL: per process heap for NTDLL
-HANDLE NTDLL_hHeap = 0;
-
 PROCESSTHREAD_SECURITYINFO ProcSecInfo = {0};
 
 /*****************************************************************************
@@ -93,8 +90,6 @@ BOOL WIN32API NTDLL_LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReser
     {
         SID_IDENTIFIER_AUTHORITY sidIdAuth = {0};
 
-     	NTDLL_hHeap = HeapCreate(0, 0x10000, 0);
-
 	ProcSecInfo.dwType = SECTYPE_PROCESS | SECTYPE_INITIALIZED;
         RtlAllocateAndInitializeSid(&sidIdAuth, 1, 0, 0, 0, 0, 0, 0, 0, 0, &ProcSecInfo.SidUser.User.Sid);
 	ProcSecInfo.SidUser.User.Attributes = 0; //?????????
@@ -114,8 +109,6 @@ BOOL WIN32API NTDLL_LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReser
 	break;
     }
     case DLL_PROCESS_DETACH:
-        HeapDestroy(NTDLL_hHeap);
-        NTDLL_hHeap = 0;
 	break;
     case DLL_THREAD_ATTACH:
 	break;
