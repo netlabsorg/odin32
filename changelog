@@ -1,4 +1,15 @@
- /* $Id: changelog,v 1.1006 2000-06-25 12:34:04 sandervl Exp $ */
+ /* $Id: changelog,v 1.1007 2000-06-26 10:28:06 sandervl Exp $ */
+
+ 2000-06-26: Sander van Leeuwen <sandervl@xs4all.nl>
+    - GDI32:       Fixed inverse video in RealPlayer 7 with SDD video drivers
+    - USER32:      Fixed bug in InvalidateRect/Rgn, don't include children
+                   in WinInvalidateRect/Region call -> fixes painting of
+                   background bitmap in XWing vs Tie Fighter install app.
+                   WinInvalidateRegion with fIncludeChildren=0 invalidates both 
+                   the parent and child windows (for !WS_CLIPCHILDREN window)
+                   fIncludeChildren=1 -> invalidates only child (in xwing case
+                   as it overlaps the invalid region completely; though parent
+                   window doesn't have WS_CLIPCHILDREN style)
 
  2000-06-24: Michal Necasek <mike@mendelu.cz>
     - KERNEL32:    When creating files and mode is readonly, change to
