@@ -1,4 +1,4 @@
-/* $Id: windll.cpp,v 1.5 1999-06-20 12:46:09 sandervl Exp $ */
+/* $Id: windll.cpp,v 1.6 1999-06-20 17:54:53 sandervl Exp $ */
 
 /*
  * Win32 DLL class
@@ -197,9 +197,9 @@ BOOL Win32Dll::init()
 }
 //******************************************************************************
 char *sysmodules[] = {"KERNEL32", "USER32", "GDI32", "WINMM", "DSOUND", "DDRAW",
-		      "WNETAP32", "MPR", "OLE32", "ADVAPI32", "COMMDLG", 
+		      "WNETAP32", "MPR", "OLE32", "ADVAPI32", "COMDLG32", 
 		      "WINSPOOL", "SHELL32", "TAPI32", "CAPI32", "VERSION",
-		      "WSOCK32", "COMCTL32"};
+		      "WSOCK32", "COMCTL32", "NTDLL"};
 //******************************************************************************
 BOOL Win32Dll::isSystemDll(char *szFileName)
 {
