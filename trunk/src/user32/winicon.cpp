@@ -1,4 +1,4 @@
-/* $Id: winicon.cpp,v 1.17 2000-11-22 21:04:32 sandervl Exp $ */
+/* $Id: winicon.cpp,v 1.18 2000-11-24 13:16:26 sandervl Exp $ */
 /*
  * Win32 Icon Code for OS/2
  *
@@ -899,6 +899,7 @@ HGLOBAL CURSORICON_ExtCopy(HGLOBAL Handle, UINT nType,
             dwResGroupId = iconinfo->dwResGroupId;
             GlobalUnlock( Handle );
             if(dwResGroupId == -1) {
+                //todo: if scaling is necessary..
                 dprintf(("WARNING: no resource associated with icon/cursor -> copy without scaling!"));
                 hNew = CURSORICON_Copy(Handle);
                 return hNew;
@@ -916,15 +917,17 @@ HGLOBAL CURSORICON_ExtCopy(HGLOBAL Handle, UINT nType,
             /* Retreive the CURSORICONDIRENTRY
             */
             hRsrc = FindResourceW(hInstance, (LPWSTR)dwResGroupId, bIsIcon ? RT_GROUP_ICONW : RT_GROUP_CURSORW);
-            if(!hRsrc)  return 0;
+            if(!hRsrc)  {
+                goto notfound;
+            }
 
             if (!(hMem = LoadResource( hInstance, hRsrc)))
             {
-                return 0;
+                goto notfound;
             }
             if (!(pDir = (CURSORICONDIR*)LockResource( hMem )))
             {
-                return 0;
+                goto notfound;
             }
 
             /* Find Best Fit
@@ -949,11 +952,11 @@ HGLOBAL CURSORICON_ExtCopy(HGLOBAL Handle, UINT nType,
             if (!(hRsrc = FindResourceW(hInstance ,
                 MAKEINTRESOURCEW(wResId), bIsIcon ? RT_ICONW : RT_CURSORW)))
             {
-                return 0;
+                goto notfound;
             }
             if (!(hMem = LoadResource( hInstance, hRsrc )))
             {
-                return 0;
+                goto notfound;
             }
 
             pBits = (LPBYTE)LockResource( hMem );
@@ -974,6 +977,11 @@ HGLOBAL CURSORICON_ExtCopy(HGLOBAL Handle, UINT nType,
     {
             hNew = CURSORICON_Copy(Handle);
     }
+    return hNew;
+
+notfound:
+    dprintf(("WARNING: unable to find resource associated with icon/cursor -> copy without scaling!"));
+    hNew = CURSORICON_Copy(Handle);
     return hNew;
 }
 
