@@ -277,6 +277,9 @@ typedef struct tagLISTVIEW_INFO
   INT nSearchParamLength;
   WCHAR szSearchParam[ MAX_PATH ];
   BOOL bIsDrawing;
+#ifdef __WIN32OS2__
+  BOOL              bDragInProcess;
+#endif
 } LISTVIEW_INFO;
 
 /*
@@ -2399,6 +2402,23 @@ static INT LISTVIEW_CalculateItemHeight(LISTVIEW_INFO *infoPtr)
 	    nItemHeight = max(nItemHeight, infoPtr->iconSize.cy);
 	if (infoPtr->himlState || infoPtr->himlSmall)
 	    nItemHeight += HEIGHT_PADDING;
+
+#ifdef __WIN32OS2__
+        if(infoPtr->dwStyle & LVS_OWNERDRAWFIXED) {
+            /* Get item height */
+
+           MEASUREITEMSTRUCT mis;
+           UINT              id = GetWindowLongA(infoPtr->hwndSelf,GWL_ID);
+
+           mis.CtlType    = ODT_LISTVIEW;
+           mis.CtlID      = id;
+           mis.itemID     = 0;
+           mis.itemData   = 0;     //TODO:!!!!
+           mis.itemHeight = nItemHeight;
+           SendMessageA(GetParent(infoPtr->hwndSelf), WM_MEASUREITEM, id, (LPARAM)&mis );
+           nItemHeight = mis.itemHeight;
+       }
+#endif
     }
 
     return max(nItemHeight, 1);
@@ -3167,7 +3187,15 @@ static LRESULT LISTVIEW_MouseMove(LISTVIEW_INFO *infoPtr, WORD fwKeys, POINTS pt
        _TrackMouseEvent(&trackinfo);
     }
   }
-
+#ifdef __WIN32OS2__
+  else 
+  if(!infoPtr->bDragInProcess && (infoPtr->bLButtonDown || infoPtr->bRButtonDown) && infoPtr->nSelectionMark != -1) {
+      NMLISTVIEW nml = {0};
+      nml.iItem = infoPtr->nSelectionMark;
+      notify_listview(infoPtr, (infoPtr->bLButtonDown) ? LVN_BEGINDRAG : LVN_BEGINRDRAG, &nml);
+      infoPtr->bDragInProcess = TRUE;
+  }
+#endif  
   return 0;
 }
 
@@ -5843,6 +5871,25 @@ static INT LISTVIEW_GetStringWidthT(LISTVIEW_INFO *infoPtr, LPCWSTR lpszText, BO
   	    GetTextExtentPointA(hdc, (LPCSTR)lpszText, lstrlenA((LPCSTR)lpszText), &stringSize);
     	SelectObject(hdc, hOldFont);
     	ReleaseDC(infoPtr->hwndSelf, hdc);
+#ifdef __WIN32OS2__
+        if(infoPtr->dwStyle & LVS_OWNERDRAWFIXED) {
+        /* Get item width */
+
+        MEASUREITEMSTRUCT mis;
+        UINT             id = GetWindowLongA(infoPtr->hwndSelf,GWL_ID);
+        mis.CtlType    = ODT_LISTVIEW;
+        mis.CtlID      = id;
+        mis.itemID     = 0;
+        mis.itemData   = 0;     //TODO:!!!!
+        mis.itemHeight = 0;
+        mis.itemWidth  = 0;
+        if (isW)  
+         SendMessageW(GetParent(infoPtr->hwndSelf), WM_MEASUREITEM, id, (LPARAM)&mis );
+        else
+         SendMessageA(GetParent(infoPtr->hwndSelf), WM_MEASUREITEM, id, (LPARAM)&mis );
+        stringSize.cx  = (mis.itemWidth) ? mis.itemWidth : infoPtr->nItemWidth;
+    }
+#endif
     }
     return stringSize.cx;
 }
@@ -7685,7 +7732,12 @@ static LRESULT LISTVIEW_KeyDown(LISTVIEW_INFO *infoPtr, INT nVirtualKey, LONG lK
   /* send LVN_KEYDOWN notification */
   nmKeyDown.wVKey = nVirtualKey;
   nmKeyDown.flags = 0;
+#ifdef __WIN32OS2__
+  if(notify_hdr(infoPtr, LVN_KEYDOWN, &nmKeyDown.hdr) == TRUE) 
+    return 0;    //application processed this key press
+#else
   notify_hdr(infoPtr, LVN_KEYDOWN, &nmKeyDown.hdr);
+#endif
 
   switch (nVirtualKey)
   {
@@ -7910,6 +7962,11 @@ static LRESULT LISTVIEW_LButtonDown(LISTVIEW_INFO *infoPtr, WORD wKey, POINTS pt
     LISTVIEW_DeselectAll(infoPtr);
   }
 
+#ifdef __WIN32OS2__
+  //SvL: Send WM_COMMAND as well. (also done by NT's comctl32)
+  SendMessageA(GetParent(infoPtr->hwndSelf), WM_COMMAND, (1<<16) | GetWindowLongW(infoPtr->hwndSelf, GWL_ID), infoPtr->hwndSelf);
+#endif
+
   return 0;
 }
 
@@ -7946,6 +8003,12 @@ static LRESULT LISTVIEW_LButtonUp(LISTVIEW_INFO *infoPtr, WORD wKey, POINTS pts)
     /* if we clicked on a selected item, edit the label */
     if(lvHitTestInfo.iItem == infoPtr->nEditLabelItem && (lvHitTestInfo.flags & LVHT_ONITEMLABEL))
         LISTVIEW_EditLabelT(infoPtr, lvHitTestInfo.iItem, TRUE);
+
+#ifdef __WIN32OS2__
+  if(infoPtr->bDragInProcess) {
+      infoPtr->bDragInProcess = FALSE;
+  }
+#endif  
 
     return 0;
 }
