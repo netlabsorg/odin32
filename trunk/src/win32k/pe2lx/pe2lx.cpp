@@ -1,4 +1,4 @@
-/* $Id: pe2lx.cpp,v 1.27 2001-06-13 04:49:11 bird Exp $
+/* $Id: pe2lx.cpp,v 1.28 2001-07-08 03:23:44 bird Exp $
  *
  * Pe2Lx class implementation. Ring 0 and Ring 3
  *
@@ -17,6 +17,7 @@
 #define FOR_EXEHDR 1                    /* To make all object flags OBJ???. */
 #define INCL_DOSERRORS                  /* DOS Error codes. */
 #define INCL_OS2KRNL_LDR                /* Loader definitions. */
+#define INCL_OS2KRNL_PTDA               /* PTDA definitions. */
 #ifdef RING0
     #define INCL_NOAPI                  /* RING0: No apis. */
 #else /*RING3*/
@@ -100,6 +101,8 @@
     #include "avl.h"                    /* AVL tree. (ldr.h need it) */
     #include "ldr.h"                    /* ldr helpers. (ldrGetExePath) */
     #include "env.h"                    /* Environment helpers. */
+    #include "dev32hlp.h"               /* 32-bit devhlpers. Needs LOCKHANDLE. */
+    #include "PerTaskW32kData.h"        /* Per Task Win32k Data. */
 #endif
 #include "modulebase.h"                 /* ModuleBase class definitions, ++. */
 #include "pe2lx.h"                      /* Pe2Lx class definitions, ++. */
@@ -586,15 +589,18 @@ ULONG Pe2Lx::init(PCSZ pszFilename)
             LXHdr.e32_stacksize = paObjects[i].cbVirtual;
         }
     }
+    ulImageBase = pNtHdrs->OptionalHeader.ImageBase;
     LXHdr.e32_mflags = pNtHdrs->OptionalHeader.Subsystem == IMAGE_SUBSYSTEM_WINDOWS_GUI
         ? E32PMAPI : E32PMW;
     if (pNtHdrs->FileHeader.Characteristics & IMAGE_FILE_DLL)
         LXHdr.e32_mflags |= E32LIBINIT | E32LIBTERM | E32MODDLL;
     else
+    {
         LXHdr.e32_mflags |= E32MODEXE;
-    if (pNtHdrs->FileHeader.Characteristics & IMAGE_FILE_RELOCS_STRIPPED)
-        LXHdr.e32_mflags |= E32NOINTFIX;
-    ulImageBase = pNtHdrs->OptionalHeader.ImageBase;
+        if (    pNtHdrs->FileHeader.Characteristics & IMAGE_FILE_RELOCS_STRIPPED     /* Force location if possible. */
+            ||  ulImageBase < 0x04000000 && ulImageBase + pNtHdrs->OptionalHeader.SizeOfImage < 0x04000000)
+            LXHdr.e32_mflags |= E32NOINTFIX;
+    }
 
     /* 13.Convert exports. */
     rc = makeExports();
@@ -1090,7 +1096,7 @@ ULONG  Pe2Lx::applyFixups(PMTE pMTE, ULONG iObject, ULONG iPageTable, PVOID pvPa
                 int i = 0;
                 #ifdef DEBUG
                 if (cObjects != pSMTE->smte_objcnt)
-                    printErr(("cObject(%d) != smte_objcnt(%d)\n", cObjects, pSMTE->smte_objcnt));
+                    printErr(("cObjects(%d) != smte_objcnt(%d)\n", cObjects, pSMTE->smte_objcnt));
                 #endif
                 fApplyFixups = FALSE;
                 while (i < cObjects && (!fApplyFixups || fDeltaOnly))
@@ -1107,15 +1113,23 @@ ULONG  Pe2Lx::applyFixups(PMTE pMTE, ULONG iObject, ULONG iPageTable, PVOID pvPa
                 return NO_ERROR;
         }
 
+        if (fDeltaOnly)
+            return applyFixupsDelta(pvPage, ulDelta, ulRVAPage);
+
+        /*
+         * Iterate thru the fixup chunks until we find one or two with fixups valid for
+         * this page. I say one or two since we might have cross page fixups from the previous page
+         * So, we'll have to start working at the previous page.
+         * ASSUME: -fixups are sorted ascendingly on page RVA. only one chunk per page.
+         *         -only one cross page fixup at each end which doesn't overlapp with other fixups.
+         */
         PIMAGE_BASE_RELOCATION pbr = pBaseRelocs;
-        ULONG ulBefore;
-        ULONG ulAfter;
-        ULONG flRead = 0;   /* bitmask: 0 = no read, 1 = ulBefore is read, 2 = ulAfter is read */
 
         while ((unsigned)pbr - (unsigned)pBaseRelocs + 8 < cbBaseRelocs /* 8= VirtualAddress and SizeOfBlock members */
                && pbr->SizeOfBlock >= 8
                && pbr->VirtualAddress < ulRVAPage + PAGESIZE)
         {
+
             if (pbr->VirtualAddress + PAGESIZE >= ulRVAPage)
             {
                 PWORD pwoffFixup   = &pbr->TypeOffset[0];
@@ -1128,52 +1142,71 @@ ULONG  Pe2Lx::applyFixups(PMTE pMTE, ULONG iObject, ULONG iPageTable, PVOID pvPa
                     cRelocations = (((unsigned)pBaseRelocs + cbBaseRelocs) - (unsigned)pbr - offsetof(IMAGE_BASE_RELOCATION, TypeOffset)) / sizeof(WORD);
                 }
 
+
+                /*
+                 * skip to near end of previous page to save time
+                 * I just don't dare to skip to the second last offset,
+                 * 7 offsets from the end sounds nice and secure.
+                 */
+                if (pbr->VirtualAddress < ulRVAPage && cRelocations > 7)
+                {
+                    pwoffFixup += cRelocations - 7; /*  */
+                    cRelocations = 7;
+                }
+
+
+                /*
+                 * Loop thru the fixups in this chunk.
+                 */
                 while (cRelocations != 0)
                 {
-                    static char acbFixupTypes[16] = {0x00, 0x02, 0x02, 0x04,
+                    /*
+                     * Fixup size table. 0xFF for fixups which aren't supported
+                     * or is just non-sense.
+                     */
+                    #define CBFIXUPMAX 4
+                    static char acbFixupTypes[16] = {0xFF, 0x02, 0x02, 0x04,
                                                      0xFF, 0xFF, 0xFF, 0xFF,
                                                      0xFF, 0xFF, 0xFF, 0xFF,
                                                      0xFF, 0xFF, 0xFF, 0xFF};
-                    int   offFixup  = *pwoffFixup & (PAGESIZE-1);
+                    int   offFixup  = *pwoffFixup & (int)(PAGESIZE-1);
                     int   fType     = *pwoffFixup >> 12;
                     int   cbFixup   = acbFixupTypes[fType];
 
-                    if (cbFixup != 0 && cbFixup <= 4
+                    if (cbFixup <= CBFIXUPMAX
                         && offFixup + pbr->VirtualAddress + (cbFixup-1) >= ulRVAPage
                         && offFixup + pbr->VirtualAddress < ulRVAPage + PAGESIZE
                         )
                     {
                         ULONG       iObj;
                         ULONG       ulTarget;
-                        PULONG      pul;        /* Pointer to fixup target */
-                        ULONG       ul;         /* Crosspage fixups: Conent of fixup target */
-                        unsigned    uShift1;    /* Crosspage fixups: Shift */
-                        unsigned    uShift2;    /* Crosspage fixups: Inverse of Shift1 */
+                        ULONG       ul;         /* Crosspage fixups: Content of fixup target */
 
                         if (offFixup + pbr->VirtualAddress < ulRVAPage)
                         {   /*
                              * Crosspagefixup - from the page before
+                             *  Start by reading the bytes on the previous page. We have to in case
+                             *  of carray.
                              */
-                            uShift1 = (unsigned)((offFixup + pbr->VirtualAddress) % cbFixup) * 8;
-                            uShift2 = cbFixup * 8 - uShift1;
-                            pul     = (PULONG)pvPage;
-                            ul      = *pul;
+                            //printInf(("Crosspagefixup at offset=%d type=%d\n", offFixup - PAGESIZE, fType));
+                            printf("Crosspagefixup at offset=%d type=%d\n", offFixup - PAGESIZE, fType);
+                            rc = readAtRVA(ulRVAPage + offFixup - PAGESIZE, SSToDS(&ul), sizeof(ul));
+                            if (rc != NO_ERROR)
+                            {
+                                printErr(("readAtRVA(0x%08x, ul(Before)..) failed with rc=%d\n", ulRVAPage + offFixup - PAGESIZE, rc));
+                                return rc;
+                            }
+
+                            /*
+                             * If none-delta and highlow fixup try resolve target address.
+                             * Falls back on delta fixup. We have to do this because of
+                             * object alignment problems.
+                             */
+                            iObj = ~0UL;
                             if (!fDeltaOnly && fType == IMAGE_REL_BASED_HIGHLOW)
                             {
-                                /* Read? */
-                                if ((flRead & 1) == 0)
-                                {
-                                    rc = readAtRVA(ulRVAPage - 4, SSToDS(&ulBefore), sizeof(ulBefore));
-                                    if (rc != NO_ERROR)
-                                    {
-                                        printErr(("readAtRVA(0x%08x, ulBefore..) failed with rc=%d\n", ulRVAPage-4, rc));
-                                        return rc;
-                                    }
-                                    flRead |= 1;
-                                }
                                 /* Get target pointer, find it's object and apply the fixup */
-                                ulTarget = (ulBefore >> uShift1) | (ul << uShift2);
-                                ulTarget -= ulImageBase; /* ulTarget is now an RVA */
+                                ulTarget = ul - ulImageBase;        /* ulTarget is now an RVA */
                                 iObj = 0UL;
                                 while (iObj < cObjects
                                        && ulTarget >= (iObj + 1 < cObjects ? paObjects[iObj+1].ulRVA
@@ -1181,53 +1214,61 @@ ULONG  Pe2Lx::applyFixups(PMTE pMTE, ULONG iObject, ULONG iPageTable, PVOID pvPa
                                        )
                                     iObj++;
                                 if (iObj < cObjects)
-                                    *pul = ((pSMTE->smte_objtab[iObj].ote_base + ulTarget - paObjects[iObj].ulRVA) >> uShift2)
-                                                         | (ul & ((~0UL) << uShift1));
-                                else
-                                    *pul = (((ulDelta >> uShift2) + ul) & ((~0UL) >> uShift2)) | (ul & ((~0UL) << uShift1));
+                                    ul = pSMTE->smte_objtab[iObj].ote_base + ulTarget - paObjects[iObj].ulRVA;
                             }
-                            else
-                            {   /* apply delta fixup */
+
+                            /*
+                             * Apply delta fixup.
+                             */
+                            if (iObj >= cObjects)
+                            {
                                 switch (fType)
                                 {
+                                    case IMAGE_REL_BASED_LOW:
                                     case IMAGE_REL_BASED_HIGHLOW:
-                                        *pul = (((ulDelta >> uShift2) + ul) & ((~0UL) >> uShift2)) | (ul & ((~0UL) << uShift1));
+                                        ul += ulDelta;
                                         break;
                                     case IMAGE_REL_BASED_HIGH:
                                     case IMAGE_REL_BASED_HIGHADJ:  /* According to M$ docs these seems to be the same fixups. */
                                     case IMAGE_REL_BASED_HIGH3ADJ:
-                                        *pul = (((ulDelta >> 24) + ul) & 0xFF) | (ul & 0xFFFFFF00UL);
+                                        ul += ulDelta >> 16;
                                         break;
-                                    case IMAGE_REL_BASED_LOW:
-                                        *pul = (((ulDelta >>  8) + ul) & 0xFF) | (ul & 0xFFFFFF00UL);
+                                    case IMAGE_REL_BASED_ABSOLUTE:
                                         break;
+                                    default:
+                                        printErr(("Unknown fixup type %d offset=%0x%08x\n", fType, offFixup));
                                 }
                             }
+
+                            /*
+                             * Copy the needed fixup data from ul to the page.
+                             */
+                            if (cbFixup <= CBFIXUPMAX)
+                                memcpy(pvPage, (char*)SSToDS(&ul) + PAGESIZE - offFixup, (size_t)(cbFixup - PAGESIZE + offFixup));
                         }
                         else if (offFixup + pbr->VirtualAddress + cbFixup > ulRVAPage + PAGESIZE)
                         {   /*
                              * Crosspagefixup - into the page afterwards
                              */
-                            uShift1 = (unsigned)((offFixup + pbr->VirtualAddress) % cbFixup) * 8;
-                            uShift2 = cbFixup * 8 - uShift1;
-                            pul = (PULONG)((unsigned)pvPage + PAGESIZE - sizeof(ULONG));
-                            ul = *pul;
+                            printInf(("Crosspagefixup at offset=%d type=%d\n", PAGESIZE-offFixup, fType));
+
+                            /*
+                             * If none-delta and highlow fixup then read the full 4 bytes so we can
+                             * resolve the target address and fix it.
+                             * If we fail to fix it we'll fall back on delta fixup.
+                             */
+                            iObj = ~0UL;
                             if (!fDeltaOnly && fType == IMAGE_REL_BASED_HIGHLOW)
                             {
-                                /* Read? */
-                                if ((flRead & 2) == 0)
+                                rc = readAtRVA(ulRVAPage +  offFixup, SSToDS(&ul), sizeof(ul));
+                                if (rc != NO_ERROR)
                                 {
-                                    rc = readAtRVA(ulRVAPage+PAGESIZE, SSToDS(&ulAfter), sizeof(ulAfter));
-                                    if (rc != NO_ERROR)
-                                    {
-                                        printErr(("readAtRVA(0x%08x, ulAfter..) failed with rc=%d\n", ulRVAPage+PAGESIZE, rc));
-                                        return rc;
-                                    }
-                                    flRead |= 2;
+                                    printErr(("readAtRVA(0x%08x, ul(After)..) failed with rc=%d\n", ulRVAPage+offFixup, rc));
+                                    return rc;
                                 }
+
                                 /* Get target pointer, find it's object and apply the fixup */
-                                ulTarget = (ulAfter << uShift2) | (ul >> uShift1);
-                                ulTarget -= ulImageBase; /* ulTarget is now an RVA */
+                                ulTarget = ul - ulImageBase; /* ulTarget is now an RVA */
                                 iObj = 0UL;
                                 while (iObj < cObjects
                                        && ulTarget >= (iObj + 1 < cObjects ? paObjects[iObj+1].ulRVA
@@ -1235,33 +1276,45 @@ ULONG  Pe2Lx::applyFixups(PMTE pMTE, ULONG iObject, ULONG iPageTable, PVOID pvPa
                                        )
                                     iObj++;
                                 if (iObj < cObjects)
-                                    *pul = ((pSMTE->smte_objtab[iObj].ote_base + ulTarget - paObjects[iObj].ulRVA) << uShift1)
-                                           | (ul & ((~0UL) >> uShift2));
-                                else
-                                    *pul += ulDelta << uShift1;
+                                    ul = pSMTE->smte_objtab[iObj].ote_base + ulTarget - paObjects[iObj].ulRVA;
                             }
-                            else
-                            {   /* apply delta fixup */
+
+                            /*
+                             * Apply delta fixup.
+                             */
+                            if (iObj >= cObjects)
+                            {
+                                ul = 0;
+                                memcpy(SSToDS(&ul), (char*)pvPage + offFixup, (size_t)(PAGESIZE - offFixup));
                                 switch (fType)
                                 {
+                                    case IMAGE_REL_BASED_LOW:
                                     case IMAGE_REL_BASED_HIGHLOW:
-                                        *pul += ulDelta << uShift1;
+                                        ul += ulDelta;
                                         break;
                                     case IMAGE_REL_BASED_HIGH:
                                     case IMAGE_REL_BASED_HIGHADJ:  /* According to M$ docs these seems to be the same fixups. */
                                     case IMAGE_REL_BASED_HIGH3ADJ:
-                                        *pul += ulDelta << 8;
+                                        ul += ulDelta >> 8;
                                         break;
-                                    case IMAGE_REL_BASED_LOW:
-                                        *pul += ulDelta << 24;
+                                    case IMAGE_REL_BASED_ABSOLUTE:
                                         break;
+                                    default:
+                                        printErr(("Unknown fixup type %d offset=%0x%08x\n", fType, offFixup));
                                 }
                             }
+
+                            /*
+                             * Copy the needed fixup data from ul to the page.
+                             */
+                            if (cbFixup <= CBFIXUPMAX)
+                                memcpy((char*)pvPage + offFixup, (char*)SSToDS(&ul), (size_t)(PAGESIZE - offFixup));
                         }
                         else
                         {   /*
                              * Common fixup
                              */
+                            PULONG      pul;        /* Pointer to fixup target */
                             pul = (PULONG)((unsigned)pvPage + offFixup + pbr->VirtualAddress - ulRVAPage);
                             switch (fType)
                             {
@@ -1271,8 +1324,7 @@ ULONG  Pe2Lx::applyFixups(PMTE pMTE, ULONG iObject, ULONG iPageTable, PVOID pvPa
                                         *pul += ulDelta;
                                     else
                                     {
-                                        ulTarget = *pul;
-                                        ulTarget -= ulImageBase; /* ulTarget is now an RVA */
+                                        ulTarget = *pul - ulImageBase;  /* ulTarget is now an RVA */
                                         iObj = 0UL;
                                         while (iObj < cObjects
                                                && ulTarget >= (iObj + 1 < cObjects ? paObjects[iObj+1].ulRVA
@@ -1285,6 +1337,11 @@ ULONG  Pe2Lx::applyFixups(PMTE pMTE, ULONG iObject, ULONG iPageTable, PVOID pvPa
                                             *pul += ulDelta;
                                     }
                                     break;
+
+                                /* Placeholder. */
+                                case IMAGE_REL_BASED_ABSOLUTE:
+                                    break;
+
                                 /* Will probably not work very well until the 64KB object alignment is gone! */
                                 case IMAGE_REL_BASED_HIGH:
                                 case IMAGE_REL_BASED_HIGHADJ:   /* According to M$ docs these seems to be the same fixups. */
@@ -1297,20 +1354,27 @@ ULONG  Pe2Lx::applyFixups(PMTE pMTE, ULONG iObject, ULONG iPageTable, PVOID pvPa
                                     printInfA(("IMAGE_REL_BASED_LOW  offset=0x%08x\n", offFixup));
                                     *(PUSHORT)pul += (USHORT)ulDelta;
                                     break;
+                                default:
+                                    printErr(("Unknown fixup type %d offset=%0x%08x\n", fType, offFixup));
                             }
                         }
                     }
 
-                    /* Next offset/type */
+                    /*
+                     * Next offset/type
+                     */
                     pwoffFixup++;
                     cRelocations--;
-                }
-            }
+                } /* while loop */
 
-            /* next */
+            } /* else: not touching this page */
+
+            /*
+             * Next Fixup chunk. (i.e. next page)
+             */
             pbr = (PIMAGE_BASE_RELOCATION)((unsigned)pbr + pbr->SizeOfBlock);
-        }
-    }
+        } /* while loop */
+    } /* else: don't need to apply fixups */
     NOREF(iPageTable);
     NOREF(pvPTDA);
 
@@ -1318,6 +1382,199 @@ ULONG  Pe2Lx::applyFixups(PMTE pMTE, ULONG iObject, ULONG iPageTable, PVOID pvPa
 }
 
 
+/**
+ * applyFixups worker used when only deltas are to be applied.
+ */
+ULONG  Pe2Lx::applyFixupsDelta(PVOID pvPage, ULONG ulDelta, ULONG ulRVAPage)
+{
+    /*
+     * Iterate thru the fixup chunks until we find one or two with fixups valid for
+     * this page. I say one or two since we might have cross page fixups from the previous page
+     * So, we'll have to start working at the previous page.
+     * ASSUME: -fixups are sorted ascendingly on page RVA. only one chunk per page.
+     *         -only one cross page fixup at each end which doesn't overlapp with other fixups.
+     */
+    PIMAGE_BASE_RELOCATION pbr = pBaseRelocs;
+
+    while ((unsigned)pbr - (unsigned)pBaseRelocs + 8 < cbBaseRelocs /* 8= VirtualAddress and SizeOfBlock members */
+           && pbr->SizeOfBlock >= 8
+           && pbr->VirtualAddress < ulRVAPage + PAGESIZE)
+    {
+
+        if (pbr->VirtualAddress + PAGESIZE >= ulRVAPage)
+        {
+            PWORD pwoffFixup   = &pbr->TypeOffset[0];
+            ULONG cRelocations = (pbr->SizeOfBlock - offsetof(IMAGE_BASE_RELOCATION, TypeOffset)) / sizeof(WORD); /* note that sizeof(BaseReloc) is 12 bytes! */
+
+            /* Some bound checking just to be sure it works... */
+            if ((unsigned)pbr - (unsigned)pBaseRelocs + pbr->SizeOfBlock > cbBaseRelocs)
+            {
+                printWar(("Block ends after BaseRelocation datadirectory.\n"));
+                cRelocations = (((unsigned)pBaseRelocs + cbBaseRelocs) - (unsigned)pbr - offsetof(IMAGE_BASE_RELOCATION, TypeOffset)) / sizeof(WORD);
+            }
+
+
+            /*
+             * skip to near end of previous page to save time
+             * I just don't dare to skip to the second last offset,
+             * 7 offsets from the end sounds nice and secure.
+             */
+            if (pbr->VirtualAddress < ulRVAPage && cRelocations > 7)
+            {
+                pwoffFixup += cRelocations - 7; /*  */
+                cRelocations = 7;
+            }
+
+
+            /*
+             * Loop thru the fixups in this chunk.
+             */
+            while (cRelocations != 0)
+            {
+                /*
+                 * Fixup size table. 0xFF for fixups which aren't supported
+                 * or is just non-sense.
+                 */
+                #define CBFIXUPMAX 4
+                static char acbFixupTypes[16] = {0xFF, 0x02, 0x02, 0x04,
+                                                 0xFF, 0xFF, 0xFF, 0xFF,
+                                                 0xFF, 0xFF, 0xFF, 0xFF,
+                                                 0xFF, 0xFF, 0xFF, 0xFF};
+                int   offFixup  = *pwoffFixup & (int)(PAGESIZE-1);
+                int   fType     = *pwoffFixup >> 12;
+                int   cbFixup   = acbFixupTypes[fType];
+
+                if (cbFixup <= CBFIXUPMAX
+                    && offFixup + pbr->VirtualAddress + (cbFixup-1) >= ulRVAPage
+                    && offFixup + pbr->VirtualAddress < ulRVAPage + PAGESIZE
+                    )
+                {
+                    ULONG       ul;         /* Crosspage fixups: Content of fixup target */
+
+                    if (offFixup + pbr->VirtualAddress < ulRVAPage)
+                    {   /*
+                         * Crosspagefixup - from the page before
+                         *  Start by reading the bytes on the previous page. We have to in case
+                         *  of carray.
+                         */
+                        printInf(("Crosspagefixup at offset=%d type=%d\n", offFixup - PAGESIZE, fType));
+                        APIRET rc = readAtRVA(ulRVAPage + offFixup - PAGESIZE, SSToDS(&ul), sizeof(ul));
+                        if (rc != NO_ERROR)
+                        {
+                            printErr(("readAtRVA(0x%08x, ul(Before)..) failed with rc=%d\n", ulRVAPage + offFixup - PAGESIZE, rc));
+                            return rc;
+                        }
+
+                        /*
+                         * Apply delta fixup.
+                         */
+                        switch (fType)
+                        {
+                            case IMAGE_REL_BASED_LOW:
+                            case IMAGE_REL_BASED_HIGHLOW:
+                                ul += ulDelta;
+                                break;
+                            case IMAGE_REL_BASED_HIGH:
+                            case IMAGE_REL_BASED_HIGHADJ:  /* According to M$ docs these seems to be the same fixups. */
+                            case IMAGE_REL_BASED_HIGH3ADJ:
+                                ul += ulDelta >> 16;
+                                break;
+                            case IMAGE_REL_BASED_ABSOLUTE:
+                                break;
+                            default:
+                                printErr(("Unknown fixup type %d offset=%0x%08x\n", fType, offFixup));
+                        }
+
+                        /*
+                         * Copy the needed fixup data from ul to the page.
+                         */
+                        if (cbFixup <= CBFIXUPMAX)
+                            memcpy(pvPage, (char*)SSToDS(&ul) + PAGESIZE - offFixup, (size_t)(cbFixup - PAGESIZE + offFixup));
+                    }
+                    else if (offFixup + pbr->VirtualAddress + cbFixup > ulRVAPage + PAGESIZE)
+                    {   /*
+                         * Crosspagefixup - into the page afterwards
+                         */
+                        printInf(("Crosspagefixup at offset=%d type=%d\n", PAGESIZE-offFixup, fType));
+
+                        /*
+                         * Apply delta fixup.
+                         */
+                        ul = 0;
+                        memcpy(SSToDS(&ul), (char*)pvPage + offFixup, (size_t)(PAGESIZE - offFixup));
+                        switch (fType)
+                        {
+                            case IMAGE_REL_BASED_LOW:
+                            case IMAGE_REL_BASED_HIGHLOW:
+                                ul += ulDelta;
+                                break;
+                            case IMAGE_REL_BASED_HIGH:
+                            case IMAGE_REL_BASED_HIGHADJ:  /* According to M$ docs these seems to be the same fixups. */
+                            case IMAGE_REL_BASED_HIGH3ADJ:
+                                ul += ulDelta >> 8;
+                                break;
+                            case IMAGE_REL_BASED_ABSOLUTE:
+                                break;
+                            default:
+                                printErr(("Unknown fixup type %d offset=%0x%08x\n", fType, offFixup));
+                        }
+
+                        /*
+                         * Copy the needed fixup data from ul to the page.
+                         */
+                        if (cbFixup <= CBFIXUPMAX)
+                            memcpy((char*)pvPage + offFixup, (char*)SSToDS(&ul), (size_t)(PAGESIZE - offFixup));
+                    }
+                    else
+                    {   /*
+                         * Common fixup
+                         */
+                        PULONG      pul;        /* Pointer to fixup target */
+                        pul = (PULONG)((unsigned)pvPage + offFixup + pbr->VirtualAddress - ulRVAPage);
+                        switch (fType)
+                        {
+                            case IMAGE_REL_BASED_HIGHLOW:
+                                printInfA(("IMAGE_REL_BASED_HIGHLOW offset=0x%08x\n", offFixup));
+                                *pul += ulDelta;
+                                break;
+                            /* Placeholder. */
+                            case IMAGE_REL_BASED_ABSOLUTE:
+                                break;
+                            /* Will probably not work very well until the 64KB object alignment is gone! */
+                            case IMAGE_REL_BASED_HIGH:
+                            case IMAGE_REL_BASED_HIGHADJ:   /* According to M$ docs these seems to be the same fixups. */
+                            case IMAGE_REL_BASED_HIGH3ADJ:
+                                printInfA(("IMAGE_REL_BASED_HIGH offset=0x%08x\n", offFixup));
+                                *(PUSHORT)pul += (USHORT)(ulDelta >> 16);
+                                break;
+                            /* Will probably not work very well until the 64KB object alignment is gone! */
+                            case IMAGE_REL_BASED_LOW:
+                                printInfA(("IMAGE_REL_BASED_LOW  offset=0x%08x\n", offFixup));
+                                *(PUSHORT)pul += (USHORT)ulDelta;
+                                break;
+                            default:
+                                printErr(("Unknown fixup type %d offset=%0x%08x\n", fType, offFixup));
+                        }
+                    }
+                }
+
+                /*
+                 * Next offset/type
+                 */
+                pwoffFixup++;
+                cRelocations--;
+            } /* while loop */
+
+        } /* else: not touching this page */
+
+        /*
+         * Next Fixup chunk. (i.e. next page)
+         */
+        pbr = (PIMAGE_BASE_RELOCATION)((unsigned)pbr + pbr->SizeOfBlock);
+    } /* while loop */
+
+    return NO_ERROR;
+}
 
 /**
  * openPath - opens file eventually searching loader specific paths.
@@ -1350,7 +1607,16 @@ ULONG  Pe2Lx::openPath(PCHAR pachFilename, USHORT cchFilename, ldrlv_t *pLdrLv, 
      * Mark the SFN invalid in the case of error.
      * Initiate the Odin32 Path static variable and call worker.
      */
+    #ifdef DEBUG
+    APIRET rc;
+    //kprintf(("pe2lx::openPath(%.*s, %d, %x, %x, %x)\n",
+    //         cchFilename, pachFilename, cchFilename, pLdrLv, pful, lLibPath));
+    rc = openPath2(pachFilename, cchFilename, pLdrLv, pful, lLibPath, initOdin32Path());
+    //kprintf(("pe2lx::openPath rc=%d\n", rc));
+    return rc;
+    #else
     return openPath2(pachFilename, cchFilename, pLdrLv, pful, lLibPath, initOdin32Path());
+    #endif
 
     #else
     NOREF(pachFilename);
@@ -1387,6 +1653,7 @@ ULONG  Pe2Lx::openPath(PCHAR pachFilename, USHORT cchFilename, ldrlv_t *pLdrLv, 
  * @remark      cchFilename has to be ULONG due to an optimization bug in VA 3.08.
  *              (cchFilename should have been USHORT. But, then the compiler would
  *               treat it as an ULONG.)
+ *              TODO: Support quotes.
  */
 ULONG  Pe2Lx::openPath2(PCHAR pachFilename, ULONG cchFilename, ldrlv_t *pLdrLv, PULONG pful, ULONG lLibPath, BOOL fOdin32PathValid)
 {
@@ -1406,7 +1673,7 @@ ULONG  Pe2Lx::openPath2(PCHAR pachFilename, ULONG cchFilename, ldrlv_t *pLdrLv, 
     #define FINDDLL_LIBPATH         8   /* uses ldrOpenPath */
     #define FINDDLL_ENDLIBPATH      9   /* uses ldrOpenPath */
     #define FINDDLL_FIRST           FINDDLL_EXECUTABLEDIR
-    #define FINDDLL_LAST            FINDDLL_PATH
+    #define FINDDLL_LAST            FINDDLL_ENDLIBPATH
 
     struct _LocalVars
     {
@@ -1423,7 +1690,10 @@ ULONG  Pe2Lx::openPath2(PCHAR pachFilename, ULONG cchFilename, ldrlv_t *pLdrLv, 
     pLdrLv->lv_sfn = 0xffff;
     pVars = (struct _LocalVars*)rmalloc(sizeof(struct _LocalVars));
     if (pVars == NULL)
+    {
+        printErr(("openPath2: rmalloc failed\n"));
         return ERROR_NOT_ENOUGH_MEMORY;
+    }
 
     cchExt = cchFilename - 1;
     while (cchExt != 0 && pachFilename[cchExt] != '.')
@@ -1445,7 +1715,10 @@ ULONG  Pe2Lx::openPath2(PCHAR pachFilename, ULONG cchFilename, ldrlv_t *pLdrLv, 
         {
             case FINDDLL_EXECUTABLEDIR:
                 if ((pszPath = ldrGetExePath(pVars->szPath, TRUE)) == NULL)
+                {
+                    //kprintf(("openPath2: failed to find exe path.\n")); //DEBUG
                     continue;
+                }
                 break;
 
             case FINDDLL_CURRENTDIR:
@@ -1454,7 +1727,10 @@ ULONG  Pe2Lx::openPath2(PCHAR pachFilename, ULONG cchFilename, ldrlv_t *pLdrLv, 
 
             case FINDDLL_SYSTEM32DIR:
                 if (!fOdin32PathValid)
+                {
+                    //kprintf(("openPath2: invalid odin32 paths.\n"));
                     continue;
+                }
                 pszPath = pVars->szPath;
                 strcpy(pszPath, pszOdin32Path);
                 strcpy(pszPath + cchOdin32Path, "System32");
@@ -1462,7 +1738,10 @@ ULONG  Pe2Lx::openPath2(PCHAR pachFilename, ULONG cchFilename, ldrlv_t *pLdrLv, 
 
             case FINDDLL_SYSTEM16DIR:
                 if (!fOdin32PathValid)
+                {
+                    //kprintf(("openPath2: invalid odin32 paths.\n"));
                     continue;
+                }
                 pszPath = pVars->szPath;
                 strcpy(pszPath, pszOdin32Path);
                 strcpy(pszPath + cchOdin32Path, "System");
@@ -1470,22 +1749,37 @@ ULONG  Pe2Lx::openPath2(PCHAR pachFilename, ULONG cchFilename, ldrlv_t *pLdrLv, 
 
             case FINDDLL_WINDIR:
                 if (!fOdin32PathValid)
+                {
+                    //kprintf(("openPath2: invalid odin32 paths.\n"));
                     continue;
+                }
                 pszPath = pVars->szPath;
                 strcpy(pszPath, pszOdin32Path);
                 pszPath[cchOdin32Path - 1] = '\0'; /* remove slash */
                 break;
 
             case FINDDLL_PATH:
-                pszPath = (char*)GetEnv(TRUE);
+            {
+                PPTD    pptd = GetTaskData(0);
+                pszPath = NULL;
+                if (pptd)
+                    pszPath = pptd->pszzOdin32Env;
+                if (!pszPath)
+                    pszPath = (char*)GetEnv(TRUE);
                 if (pszPath == NULL)
+                {
+                    //kprintf(("openPath2: failed to GetEnv.\n"));
                     continue;
+                }
                 pszPath = (char*)ScanEnv(pszPath, "PATH");
                 break;
+            }
 
-            #if 0
+            #if 1
             case FINDDLL_BEGINLIBPATH:
-                pszPath = ptda_GetBeginLibpath()...  ;
+                pszPath = NULL;
+                if (ptdaGetCur())
+                    pszPath = ptdaGet_ptda_pBeginLIBPATH(ptdaGetCur());
                 if (pszPath == NULL)
                     continue;
                 break;
@@ -1495,17 +1789,21 @@ ULONG  Pe2Lx::openPath2(PCHAR pachFilename, ULONG cchFilename, ldrlv_t *pLdrLv, 
                 break;
 
             case FINDDLL_ENDLIBPATH:
-                pszPath = ptda_GetEndLibpath()...  ;
+                pszPath = NULL;
+                if (ptdaGetCur())
+                    pszPath = ptdaGet_ptda_pEndLIBPATH(ptdaGetCur());
                 if (pszPath == NULL)
                     continue;
                 break;
             #endif
+
             default: /* !internalerror! */
                 printIPE(("Pe2Lx::openPath(%.*s,..): iPath is %d which is invalid.\n", cchFilename, pachFilename, iPath));
                 rfree(pVars);
                 return ERROR_FILE_NOT_FOUND;
         }
 
+        //kprintf(("openPath2: level:%d path=%s\n", iPath, pszPath));
 
         /** @sketch
          * pszPath is now set to the pathlist to be searched.
@@ -1596,7 +1894,7 @@ ULONG  Pe2Lx::openPath2(PCHAR pachFilename, ULONG cchFilename, ldrlv_t *pLdrLv, 
      * Since we haven't found the file yet we'll return thru ldrOpenPath.
      */
     rfree(pVars);
-    return ldrOpenPath(pachFilename, (USHORT)cchFilename, pLdrLv, pful, lLibPath);
+    return ERROR_FILE_NOT_FOUND;//ldrOpenPath(pachFilename, (USHORT)cchFilename, pLdrLv, pful, lLibPath);
 
     #else
     NOREF(pachFilename);
@@ -1631,7 +1929,7 @@ ULONG Pe2Lx::testApplyFixups()
     smte.smte_objtab = (POTE)malloc(cObjects * sizeof(OTE));
     makeObjectTable();
     memcpy(smte.smte_objtab, paObjTab, sizeof(OTE) * cObjects);
-    smte.smte_objtab[0].ote_base = 0x125D0000;
+    smte.smte_objtab[0].ote_base = 0x132d0000;
     for (i = 1; i < cObjects; i++)
         smte.smte_objtab[i].ote_base = ALIGN(smte.smte_objtab[i-1].ote_size + smte.smte_objtab[i-1].ote_base, 0x10000);
 
@@ -1659,7 +1957,7 @@ ULONG Pe2Lx::testApplyFixups()
                 printErr(("readAtRVA failed with rc=%d\n"));
                 return rc;
             }
-            rc = applyFixups(&mte, 1, 1, &achPage[0], ulAddress, NULL);
+            rc = applyFixups(&mte, i, ulRVA >> PAGESHIFT, &achPage[0], ulAddress, NULL);
             if (rc != NO_ERROR)
             {
                 printErr(("applyFixups failed with rc=%d\n"));
