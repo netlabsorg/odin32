@@ -1,4 +1,10 @@
- /* $Id: changelog,v 1.747 2000-02-23 01:07:23 sandervl Exp $ */
+ /* $Id: changelog,v 1.748 2000-02-23 17:06:19 cbratschi Exp $ */
+
+ 2000-02-23: Christoph Bratschi <cbratschi@datacomm.ch>
+	- USER32: export 55AA pattern functions for COMCTL32
+		  fixed EN_CHANGED
+	- COMCTL32: converted to C++ -> needs nmake dep
+		    ported animate control
 
  2000-02-22: Sander van Leeuwen <sandervl@xs4all.nl>
 	- WINMM/GDI32/KERNEL32/USER32: Fixed compile problems for release build
