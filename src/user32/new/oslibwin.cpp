@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.31 2000-01-02 19:30:43 cbratschi Exp $ */
+/* $Id: oslibwin.cpp,v 1.32 2000-01-03 20:53:50 cbratschi Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -57,7 +57,7 @@ HWND OSLibWinCreateWindow(HWND hwndParent,ULONG dwWinStyle,
 {
  HWND  hwndClient;
 
-  dprintf(("WinCreateWindow %x %x %x %s", hwndParent, pszName));
+  dprintf(("WinCreateWindow %x %s", hwndParent, pszName));
 
   if(pszName && *pszName == 0) {
         pszName = NULL;
