@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.53 1999-11-11 13:17:30 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.54 1999-11-14 16:35:55 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -1882,9 +1882,7 @@ DWORD WIN32API GetQueueStatus( UINT flags)
 
 DWORD WIN32API GetTabbedTextExtentA( HDC hDC, LPCSTR lpString, int nCount, int nTabPositions, LPINT lpnTabStopPositions)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  GetTabbedTextExtentA\n");
-#endif
+    dprintf2(("USER32: GetTabbedTextExtentA %x %s", hDC, lpString));
     return O32_GetTabbedTextExtent(hDC,lpString,nCount,nTabPositions,lpnTabStopPositions);
 }
 //******************************************************************************
@@ -1894,9 +1892,7 @@ DWORD WIN32API GetTabbedTextExtentW( HDC hDC, LPCWSTR lpString, int nCount, int 
  char *astring = UnicodeToAsciiString((LPWSTR)lpString);
  DWORD rc;
 
-#ifdef DEBUG
-    WriteLog("USER32:  GetTabbedTextExtentW\n");
-#endif
+    dprintf2(("USER32: GetTabbedTextExtentW %x %s", hDC, astring));
     rc = O32_GetTabbedTextExtent(hDC,astring,nCount,nTabPositions,lpnTabStopPositions);
     FreeAsciiString(astring);
     return rc;
@@ -1923,26 +1919,6 @@ LONG WIN32API TabbedTextOutW( HDC hdc, int x, int y, LPCWSTR lpString, int nCoun
     rc = O32_TabbedTextOut(hdc,x,y,astring,nCount,nTabPositions,lpnTabStopPositions,nTabOrigin);
     FreeAsciiString(astring);
     return rc;
-}
-
-/* Icon Functions */
-int WIN32API LookupIconIdFromDirectory(PBYTE presbits, BOOL fIcon)
-{
-#ifdef DEBUG
-  WriteLog("USER32:  LookupIconIdFromDirectory, not implemented\n");
-#endif
-  return(0);
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API LookupIconIdFromDirectoryEx(PBYTE presbits, BOOL  fIcon,
-                        int cxDesired, int cyDesired,
-                        UINT Flags)
-{
-#ifdef DEBUG
-  WriteLog("USER32:  LookupIconIdFromDirectoryEx, not implemented\n");
-#endif
-  return(0);
 }
 
 /* Device Context Functions */

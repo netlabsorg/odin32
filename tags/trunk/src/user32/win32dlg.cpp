@@ -1,4 +1,4 @@
-/* $Id: win32dlg.cpp,v 1.33 1999-11-11 13:17:31 sandervl Exp $ */
+/* $Id: win32dlg.cpp,v 1.34 1999-11-14 16:35:56 sandervl Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -638,6 +638,8 @@ BOOL Win32Dialog::createControls(LPCSTR dlgtemplate, HINSTANCE hInst)
         if(HIWORD(info.windowName)) {
              windowNameA = UnicodeToAsciiString((LPWSTR)info.windowName);
         }
+	else windowNameA = (char *)info.windowName;
+
         hwndCtrl = ::CreateWindowExA( info.exStyle | WS_EX_NOPARENTNOTIFY,
                                       classNameA,
                                       windowNameA,
@@ -651,7 +653,7 @@ BOOL Win32Dialog::createControls(LPCSTR dlgtemplate, HINSTANCE hInst)
         if(HIWORD(classNameA)) {
             FreeAsciiString(classNameA);
         }
-        if(windowNameA) {
+        if(HIWORD(windowNameA)) {
             FreeAsciiString(windowNameA);
         }
 

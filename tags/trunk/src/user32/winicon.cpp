@@ -1,16 +1,23 @@
-/* $Id: winicon.cpp,v 1.2 1999-11-03 19:51:44 sandervl Exp $ */
+/* $Id: winicon.cpp,v 1.3 1999-11-14 16:35:58 sandervl Exp $ */
 /*
  * Win32 Icon Code for OS/2
  *
  *
  * Copyright 1998 Sander van Leeuwen (sandervl@xs4all.nl)
  *
+ * LookupIconIdFromDirectory(Ex) (+help functions) ported from Wine (991031)
+ *
+ * Copyright 1995 Alexandre Julliard
+ *           1996 Martin Von Loewis
+ *           1997 Alex Korobka
+ *           1998 Turchanov Sergey
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
 #include <os2win.h>
 #include <winicon.h>
+#include <win\cursoricon.h>
 
 //******************************************************************************
 //******************************************************************************
@@ -123,6 +130,158 @@ BOOL WIN32API GetIconInfo( HICON arg1, LPICONINFO  arg2)
     WriteLog("USER32:  GetIconInfo\n");
 #endif
     return O32_GetIconInfo(arg1, arg2);
+}
+/**********************************************************************
+ *	    CURSORICON_FindBestIcon
+ *
+ * Find the icon closest to the requested size and number of colors.
+ */
+static CURSORICONDIRENTRY *CURSORICON_FindBestIcon( CURSORICONDIR *dir, int width,
+                                                    int height, int colors )
+{
+    int i; 
+    CURSORICONDIRENTRY *entry, *bestEntry = NULL;
+    UINT iTotalDiff, iXDiff=0, iYDiff=0, iColorDiff;
+    UINT iTempXDiff, iTempYDiff, iTempColorDiff;
+
+    if (dir->idCount < 1)
+    {
+        dprintf(("Empty directory!\n" ));
+        return NULL;
+    }
+    if (dir->idCount == 1) return &dir->idEntries[0];  /* No choice... */
+
+    /* Find Best Fit */
+    iTotalDiff = 0xFFFFFFFF;
+    iColorDiff = 0xFFFFFFFF;
+    for (i = 0, entry = &dir->idEntries[0]; i < dir->idCount; i++,entry++)
+        {
+	iTempXDiff = abs(width - entry->ResInfo.icon.bWidth);
+	iTempYDiff = abs(height - entry->ResInfo.icon.bHeight);
+
+        if(iTotalDiff > (iTempXDiff + iTempYDiff))
+        {
+            iXDiff = iTempXDiff;
+            iYDiff = iTempYDiff;
+	    iTotalDiff = iXDiff + iYDiff;
+        }
+        }
+
+    /* Find Best Colors for Best Fit */
+    for (i = 0, entry = &dir->idEntries[0]; i < dir->idCount; i++,entry++)
+        {
+        if(abs(width - entry->ResInfo.icon.bWidth) == iXDiff &&
+            abs(height - entry->ResInfo.icon.bHeight) == iYDiff)
+        {
+            iTempColorDiff = abs(colors - entry->ResInfo.icon.bColorCount);
+            if(iColorDiff > iTempColorDiff)
+        {
+            bestEntry = entry;
+                iColorDiff = iTempColorDiff;
+        }
+        }
+    }
+
+    return bestEntry;
+}
+
+
+/**********************************************************************
+ *	    CURSORICON_FindBestCursor
+ *
+ * Find the cursor closest to the requested size.
+ * FIXME: parameter 'color' ignored and entries with more than 1 bpp
+ *        ignored too
+ */
+static CURSORICONDIRENTRY *CURSORICON_FindBestCursor( CURSORICONDIR *dir,
+                                                  int width, int height, int color)
+{
+    int i, maxwidth, maxheight;
+    CURSORICONDIRENTRY *entry, *bestEntry = NULL;
+
+    if (dir->idCount < 1)
+    {
+        dprintf(("Empty directory!\n" ));
+        return NULL;
+    }
+    if (dir->idCount == 1) return &dir->idEntries[0]; /* No choice... */
+
+    /* Double height to account for AND and XOR masks */
+
+    height *= 2;
+
+    /* First find the largest one smaller than or equal to the requested size*/
+
+    maxwidth = maxheight = 0;
+    for(i = 0,entry = &dir->idEntries[0]; i < dir->idCount; i++,entry++)
+        if ((entry->ResInfo.cursor.wWidth <= width) && (entry->ResInfo.cursor.wHeight <= height) &&
+            (entry->ResInfo.cursor.wWidth > maxwidth) && (entry->ResInfo.cursor.wHeight > maxheight) &&
+	    (entry->wBitCount == 1))
+        {
+            bestEntry = entry;
+            maxwidth  = entry->ResInfo.cursor.wWidth;
+            maxheight = entry->ResInfo.cursor.wHeight;
+        }
+    if (bestEntry) return bestEntry;
+
+    /* Now find the smallest one larger than the requested size */
+
+    maxwidth = maxheight = 255;
+    for(i = 0,entry = &dir->idEntries[0]; i < dir->idCount; i++,entry++)
+        if ((entry->ResInfo.cursor.wWidth < maxwidth) && (entry->ResInfo.cursor.wHeight < maxheight) &&
+	    (entry->wBitCount == 1))
+        {
+            bestEntry = entry;
+            maxwidth  = entry->ResInfo.cursor.wWidth;
+            maxheight = entry->ResInfo.cursor.wHeight;
+        }
+
+    return bestEntry;
+}
+/**********************************************************************
+ *          LookupIconIdFromDirectoryEx16	(USER.364)
+ *
+ * FIXME: exact parameter sizes
+ */
+INT WIN32API LookupIconIdFromDirectoryEx(LPBYTE xdir, BOOL bIcon,
+     	                                 INT width, INT height, UINT cFlag )
+{
+    CURSORICONDIR	*dir = (CURSORICONDIR*)xdir;
+    UINT retVal = 0;
+
+    dprintf(("LookupIconIdFromDirectoryEx %x %d (%d,%d)", xdir, bIcon, width, height));
+    if( dir && !dir->idReserved && (dir->idType & 3) )
+    {
+	CURSORICONDIRENTRY* entry;
+	HDC hdc;
+	UINT palEnts;
+	int colors;
+	hdc = GetDC(0);
+	palEnts = GetSystemPaletteEntries(hdc, 0, 0, NULL);
+	if (palEnts == 0)
+	    palEnts = 256;
+	colors = (cFlag & LR_MONOCHROME) ? 2 : palEnts;
+
+	ReleaseDC(0, hdc);
+
+	if( bIcon )
+	    entry = CURSORICON_FindBestIcon( dir, width, height, colors );
+	else
+	    entry = CURSORICON_FindBestCursor( dir, width, height, 1);
+
+	if( entry ) retVal = entry->wResId;
+    }
+    else dprintf(("invalid resource directory\n"));
+    return retVal;
+}
+/**********************************************************************
+ *          LookupIconIdFromDirectory		(USER32.379)
+ */
+INT WIN32API LookupIconIdFromDirectory( LPBYTE dir, BOOL bIcon )
+{
+    return LookupIconIdFromDirectoryEx( dir, bIcon, 
+	   bIcon ? GetSystemMetrics(SM_CXICON) : GetSystemMetrics(SM_CXCURSOR),
+	   bIcon ? GetSystemMetrics(SM_CYICON) : GetSystemMetrics(SM_CYCURSOR), bIcon ? 0 : LR_MONOCHROME );
 }
 //******************************************************************************
 //******************************************************************************
