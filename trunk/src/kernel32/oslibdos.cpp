@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.104 2002-06-08 11:40:15 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.105 2002-06-26 07:42:34 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -859,30 +859,36 @@ DWORD OSLibDosSetFilePtr(DWORD hFile, DWORD offset, DWORD method)
 //******************************************************************************
 BOOL OSLibDosDelete(char *lpszFileName)
 {
- APIRET rc;
- char lOemFileName[260];
+    APIRET rc;
+    char lOemFileName[260];
 
- CharToOemA(lpszFileName, lOemFileName);
+    CharToOemA(lpszFileName, lOemFileName);
 
-  rc = DosDelete(lOemFileName);
-  if(rc) {
-      SetLastError(error2WinError(rc));
-      return FALSE;
-  }
-  return TRUE;
+    rc = DosDelete(lOemFileName);
+    if(rc) {
+        SetLastError(error2WinError(rc));
+        return FALSE;
+    }
+    return TRUE;
 }
 //******************************************************************************
 //******************************************************************************
 BOOL pmDateTimeToFileTime(FDATE *pDate,FTIME *pTime,FILETIME *pFT)
 {
-  register USHORT dosTime, dosDate;
+    USHORT   dosTime, dosDate;
+    BOOL     ret;
+    FILETIME dummy;
 
-  dosTime = *(USHORT*)pTime;
-  dosDate = *(USHORT*)pDate;
+    dosTime = *(USHORT*)pTime;
+    dosDate = *(USHORT*)pDate;
 
-  // PH: probably replace with faster implementation than calling Open32
-  // through the external interface!
-  return DosDateTimeToFileTime(dosDate,dosTime,pFT);
+    ret = DosDateTimeToFileTime(dosDate, dosTime, &dummy);
+    if(ret == FALSE) {
+        return FALSE;
+    }
+    //time we get from OS2 is local time; win32 expects file time (UTC)
+    ret = LocalFileTimeToFileTime(&dummy, pFT);
+    return ret;
 }
 //******************************************************************************
 //******************************************************************************
