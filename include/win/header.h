@@ -1,4 +1,4 @@
-/* $Id: header.h,v 1.8 2000-02-25 16:58:33 cbratschi Exp $ */
+/* $Id: header.h,v 1.9 2000-04-08 18:30:11 cbratschi Exp $ */
 
 /*
  * Header window definitions
@@ -60,6 +60,8 @@ typedef struct
     HEADER_ITEM *items;         /* pointer to array of HEADER_ITEM's */
 } HEADER_INFO;
 
+extern DWORD HEADER_GetExpandedColumnTextWidth(HWND hwnd,INT iItem);
+extern LRESULT HEADER_GetItemRect(HWND hwnd,WPARAM wParam,LPARAM lParam);
 
 extern VOID HEADER_Register (VOID);
 extern VOID HEADER_Unregister (VOID);
