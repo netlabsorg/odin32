@@ -1,4 +1,4 @@
-/* $Id: waveoutbase.cpp,v 1.2 2001-06-02 08:30:35 sandervl Exp $ */
+/* $Id: waveoutbase.cpp,v 1.3 2001-06-16 11:35:22 sandervl Exp $ */
 
 /*
  * Wave playback class (DART)
@@ -99,13 +99,14 @@ int WaveOut::getNumDevices()
 /******************************************************************************/
 void WaveOut::setDefaultVolume(ULONG volume)
 {
-  defvolume = volume;
+    dprintf(("WaveOut::setDefaultVolume %x", volume));
+    defvolume = volume;
 }
 /******************************************************************************/
 /******************************************************************************/
 DWORD WaveOut::getDefaultVolume()
 {
-  return defvolume;
+    return defvolume;
 }
 /******************************************************************************/
 /******************************************************************************/
