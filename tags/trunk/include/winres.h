@@ -1,4 +1,4 @@
-/* $Id: winres.h,v 1.3 1999-07-20 15:45:47 sandervl Exp $ */
+/* $Id: winres.h,v 1.4 1999-08-19 12:52:49 sandervl Exp $ */
 
 /*
  * Win32 resource class
@@ -60,6 +60,11 @@
 #ifdef __cplusplus
 class Win32Image;
 
+//Use to distinguish between converted OS/2 resources in an image (pe2lx'ed) or
+//resources that are loaded from the original win32 image (pe loader)
+#define RSRC_PELOADER	0
+#define RSRC_PE2LX	1
+
 class Win32Resource
 {
 public:
@@ -97,6 +102,7 @@ private:
 	     ULONG OS2ResHandle;
 
              ULONG ressize;
+	       int resType;
 
                                // Linked list management
   Win32Resource*   next;               // Next Resource in module
