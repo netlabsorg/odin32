@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2003-09-07 03:55:57 bird Exp $
+# $Id: makefile,v 1.3 2004-04-13 14:15:54 sandervl Exp $
 
 #
 # Odin32 API
@@ -1622,7 +1622,11 @@ $(OBJDIR)\_WinWindowFromID.obj \
 $(OBJDIR)\_WinWindowFromPoint.obj \
 $(OBJDIR)\__OpenClipbrd.obj \
 $(OBJDIR)\O32_GetStartupInfo.obj \
-$(OBJDIR)\O32_WaitForInputIdle.obj
+$(OBJDIR)\O32_WaitForInputIdle.obj \
+$(OBJDIR)\O32_CreateBitmapFromPMHandle.obj \
+$(OBJDIR)\O32_CreatePaletteFromPMHandle.obj \
+$(OBJDIR)\O32_GetPMHandleFromGDIHandle.obj \
+$(OBJDIR)\_WinSetErrorInfo.obj
 
 
 TARGET  = libwrap
@@ -1633,7 +1637,7 @@ TARGET  = libwrap
 #
 !include $(ODIN32_POST_INC)
 
-
+	
 #
 # The fast way
 #
@@ -3244,4 +3248,8 @@ _WinWindowFromPoint.asm
 __OpenClipbrd.asm
 O32_GetStartupInfo.asm
 O32_WaitForInputIdle.asm
+O32_CreateBitmapFromPMHandle.asm
+O32_CreatePaletteFromPMHandle.asm
+O32_GetPMHandleFromGDIHandle.asm
+_WinSetErrorInfo.asm
 <<KEEP	

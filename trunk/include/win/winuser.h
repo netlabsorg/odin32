@@ -1438,7 +1438,7 @@ typedef struct
 
 #define POINTSTOPOINT(pt, pts)                          \
         { (pt).x = (LONG)(SHORT)LOWORD(*(LONG*)&pts);   \
-          (pt).y = (LONG)(SHORT)HIWORD(*(LONG*)&pts); }          
+          (pt).y = (LONG)(SHORT)HIWORD(*(LONG*)&pts); }
 
 #define POINTTOPOINTS(pt)      (MAKELONG((short)((pt).x), (short)((pt).y)))
 
@@ -3084,6 +3084,7 @@ typedef struct
 #define CF_DSPTEXT          0x0081
 #define CF_DSPBITMAP        0x0082
 #define CF_DSPMETAFILEPICT  0x0083
+#define CF_DSPENHMETAFILE   0x008E
 
 /* "Private" formats don't get GlobalFree()'d */
 #define CF_PRIVATEFIRST     0x0200

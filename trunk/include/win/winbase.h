@@ -553,6 +553,17 @@ typedef struct
 #define GHND                (GMEM_MOVEABLE | GMEM_ZEROINIT)
 #define GPTR                (GMEM_FIXED | GMEM_ZEROINIT)
 
+#define GlobalLRUNewest(h)  ((HANDLE)(h))
+#define GlobalLRUOldest(h)  ((HANDLE)(h))
+#define GlobalDiscard(h)    (GlobalReAlloc((h),0,GMEM_MOVEABLE))
+
+#define INVALID_ATOM        ((ATOM)0)
+#define MAXINTATOM          0xc000
+#define MAKEINTATOMA(atom)  ((LPCSTR)((ULONG_PTR)((WORD)(atom))))
+#define MAKEINTATOMW(atom)  ((LPCWSTR)((ULONG_PTR)((WORD)(atom))))
+#ifndef MAKEINTATOM //bird: it's in windef.h too for us.
+#define MAKEINTATOM  WINELIB_NAME_AW(MAKEINTATOM)
+#endif
 
 typedef struct tagMEMORYSTATUS
 {
@@ -2545,18 +2556,18 @@ HANDLE WINAPI FindFirstVolumeA(LPTSTR lpszVolumeName, DWORD cchBufferLength);
 HANDLE WINAPI FindFirstVolumeW(LPWSTR lpszVolumeName, DWORD cchBufferLength);
 #define     FindFirstVolume WINELIB_NAME_AW(FindFirstVolume)
 
-BOOL   WINAPI FindNextVolumeA(HANDLE hFindVolume, LPTSTR lpszVolumeName, 
+BOOL   WINAPI FindNextVolumeA(HANDLE hFindVolume, LPTSTR lpszVolumeName,
                               DWORD cchBufferLength);
-BOOL   WINAPI FindNextVolumeW(HANDLE hFindVolume, LPWSTR lpszVolumeName, 
+BOOL   WINAPI FindNextVolumeW(HANDLE hFindVolume, LPWSTR lpszVolumeName,
                               DWORD cchBufferLength);
 #define     FindNextVolume WINELIB_NAME_AW(FindNextVolume)
 
 BOOL   WINAPI FindVolumeClose(HANDLE hFindVolume);
 
-HANDLE WINAPI FindFirstVolumeMountPointA(LPTSTR lpszRootPathName, 
+HANDLE WINAPI FindFirstVolumeMountPointA(LPTSTR lpszRootPathName,
                                          LPTSTR lpszVolumeMountPoint,
                                          DWORD cchBufferLength);
-HANDLE WINAPI FindFirstVolumeMountPointW(LPWSTR lpszRootPathName, 
+HANDLE WINAPI FindFirstVolumeMountPointW(LPWSTR lpszRootPathName,
                                          LPWSTR lpszVolumeMountPoint,
                                          DWORD cchBufferLength);
 #define     FindFirstVolumeMountPoint WINELIB_NAME_AW(FindFirstVolumeMountPoint)

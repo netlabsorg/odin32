@@ -1,4 +1,4 @@
-/* $Id: dibitmap.cpp,v 1.43 2004-03-24 16:55:35 sandervl Exp $ */
+/* $Id: dibitmap.cpp,v 1.44 2004-04-13 14:17:17 sandervl Exp $ */
 
 /*
  * GDI32 dib & bitmap code
@@ -47,13 +47,13 @@ HBITMAP WIN32API CreateDIBitmap(HDC hdc, const BITMAPINFOHEADER *lpbmih,
         //TODO: doesn't work if memory is readonly!!
         ((BITMAPINFOHEADER *)lpbmih)->biHeight = -lpbmih->biHeight;
 
-        if(lpbInit && fdwInit == CBM_INIT) 
+        if(lpbInit && fdwInit == CBM_INIT)
         {
             // upside down
             HBITMAP rc = 0;
             long lLineByte = DIB_GetDIBWidthBytes(lpbmih->biWidth, lpbmih->biBitCount);
             long lHeight   = lpbmih->biHeight;
-    
+
             newbits = (WORD *)malloc( lLineByte * lHeight );
             if(newbits) {
                 unsigned char *pbSrc = (unsigned char *)lpbInit + lLineByte * (lHeight - 1);
@@ -94,7 +94,7 @@ HBITMAP WIN32API CreateDIBitmap(HDC hdc, const BITMAPINFOHEADER *lpbmih,
 
       	memcpy(infoLoc, lpbmi, sizeof(BITMAPINFO));
 
-      	if(GetDIBColorTable(hdc, 0, biClrUsed, pColors) == 0) 
+      	if(GetDIBColorTable(hdc, 0, biClrUsed, pColors) == 0)
         {
             dprintf(("ERROR: StretchDIBits: GetDIBColorTable failed!!"));
             return FALSE;
@@ -106,7 +106,7 @@ HBITMAP WIN32API CreateDIBitmap(HDC hdc, const BITMAPINFOHEADER *lpbmih,
 
       	rc = CreateDIBitmap(hdc, lpbmih, fdwInit, lpbInit, (PBITMAPINFO)infoLoc,
                             DIB_RGB_COLORS);
-   
+
     	return rc;
     }
 
@@ -164,7 +164,7 @@ HBITMAP WIN32API CreateDIBitmap(HDC hdc, const BITMAPINFOHEADER *lpbmih,
     ((BITMAPINFOHEADER *)lpbmih)->biHeight   = iHeight;
     ((BITMAPINFOHEADER *)lpbmih)->biBitCount = biBitCount;
 
-    if(rc) { 
+    if(rc) {
         STATS_CreateDIBitmap(rc, hdc, lpbmih, fdwInit, lpbInit, lpbmi, fuUsage);
         if(bitfields[1] == RGB565_GREEN_MASK) {
             //mark bitmap as RGB565
@@ -180,7 +180,7 @@ HBITMAP WIN32API CreateDIBitmap(HDC hdc, const BITMAPINFOHEADER *lpbmih,
 HBITMAP WIN32API CreateCompatibleBitmap( HDC hdc, int nWidth, int nHeight)
 {
     HBITMAP hBitmap;
-    pDCData pHps;  
+    pDCData pHps;
 
     pHps = (pDCData)OSLibGpiQueryDCData((HPS)hdc);
     if(!pHps)
@@ -239,7 +239,7 @@ HBITMAP WIN32API CreateDIBSection( HDC hdc, BITMAPINFO *pbmi, UINT iUsage,
     BOOL    fFlip = 0;
     int     iHeight, iWidth;
     BOOL    fCreateDC = FALSE;
-    
+
     dprintf(("GDI32: CreateDIBSection %x %x %x %x %x %d", hdc, pbmi, iUsage, ppvBits, hSection, dwOffset));
 
     //SvL: 13-9-98: StarCraft uses bitmap with negative height
@@ -405,7 +405,7 @@ int WIN32API GetDIBits(HDC hdc, HBITMAP hBitmap, UINT uStartScan, UINT cScanLine
                        void *lpvBits, PBITMAPINFO lpbi, UINT uUsage)
 {
     int nrlines;
-    pDCData pHps;  
+    pDCData pHps;
     HDC hdcMem;
     DWORD biCompression;
 
@@ -435,7 +435,7 @@ int WIN32API GetDIBits(HDC hdc, HBITMAP hBitmap, UINT uStartScan, UINT cScanLine
 
     //If the app wants bitmap data and upside down, then flip image
     if(lpvBits && lpbi->bmiHeader.biHeight < 0 && (lpbi->bmiHeader.biCompression == BI_RGB ||
-       lpbi->bmiHeader.biCompression == BI_BITFIELDS)) 
+       lpbi->bmiHeader.biCompression == BI_BITFIELDS))
     {
         INT rc = -1;
         long lLineByte;
@@ -460,21 +460,19 @@ int WIN32API GetDIBits(HDC hdc, HBITMAP hBitmap, UINT uStartScan, UINT cScanLine
             free(pNewBits);
         }
         else DebugInt3();
- 
+
         //restore height
         lpbi->bmiHeader.biHeight = height;
     }
-    else {
-        LONG height = lpbi->bmiHeader.biHeight;
-
-        if(lpbi->bmiHeader.biHeight < 0) {
-            lpbi->bmiHeader.biHeight = -lpbi->bmiHeader.biHeight;
-        }
+    else if (lpbi->bmiHeader.biHeight < 0)
+    {
+        LONG cySaved = lpbi->bmiHeader.biHeight;
+        lpbi->bmiHeader.biHeight = -cySaved;
         nrlines = O32_GetDIBits(hdcMem, hBitmap, uStartScan, cScanLines, lpvBits, lpbi, uUsage);
-
-        //restore height
-        lpbi->bmiHeader.biHeight = height;
+        lpbi->bmiHeader.biHeight = cySaved;
     }
+    else
+        nrlines = O32_GetDIBits(hdcMem, hBitmap, uStartScan, cScanLines, lpvBits, lpbi, uUsage);
 
     if(lpvBits) {
         //WGSS always sets it to BI_RGB
@@ -527,11 +525,18 @@ int WIN32API GetDIBits(HDC hdc, HBITMAP hBitmap, UINT uStartScan, UINT cScanLine
 
     //WGSS/Open32 returns 1 when querying the bitmap info; must return nr of scanlines
     //(0 signals failure)
-    if(lpvBits == NULL) {
-       if(nrlines != 0)
-            nrlines = cScanLines;
-       else dprintf(("GetDIBits failed!!"));
+    #if 0//XP returns 1 just like Open32 does for the query bitmap info header mode.
+    if (lpvBits == NULL)
+    {
+       if (nrlines != 0)
+           nrlines = cScanLines;
+       else
+           dprintf(("GetDIBits failed!!"));
     }
+    #else
+    if (!nrlines)
+        dprintf(("GetDIBits failed!!"));
+    #endif
     return nrlines;
 }
 //******************************************************************************
@@ -620,7 +625,7 @@ int WIN32API SetDIBits(HDC hdc, HBITMAP hBitmap, UINT startscan, UINT numlines, 
 
     //If upside down, reverse scanlines and call SetDIBits again
     if(pBitmapInfo->bmiHeader.biHeight < 0 && (pBitmapInfo->bmiHeader.biCompression == BI_RGB ||
-       pBitmapInfo->bmiHeader.biCompression == BI_BITFIELDS)) 
+       pBitmapInfo->bmiHeader.biCompression == BI_BITFIELDS))
     {
         // upside down
         INT rc = -1;
