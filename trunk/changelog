@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.1210 2001-01-09 19:07:18 bird Exp $ */
+/* $Id: changelog,v 1.1211 2001-01-09 19:08:15 bird Exp $ */
+
+ 2001-01-09: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - tools\dailybuild:
+                o Added wgss50.dll to the .ZIPs.
 
  2001-01-08: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - tools\dailybuild:
