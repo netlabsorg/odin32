@@ -21,24 +21,25 @@
 #include <misc.h>
 
 static MCI_MIXSETUP_PARMS *MixSetup_Global;
-static MCI_MIX_BUFFER     *pMixBuffs;
 static long               lLastBuff;
 static char               *pDSoundBuff;
 static BOOL               fIsPlaying = FALSE;
 
 USHORT               usDeviceID;                 /* Amp Mixer device id          */
-MCI_MIX_BUFFER       MixBuffers[NUM_DART_BUFFS]; /* Device buffers               */
+
+/* TODO: scrap this variable! */
+MCI_MIX_BUFFER       *pMixBuffers;               /* Device buffers               */
+
 MCI_MIXSETUP_PARMS   MixSetupParms;              /* Mixer parameters             */
 MCI_BUFFER_PARMS     BufferParms;                /* Device buffer parms          */
-
+ULONG                ulNumDartBuffs;             /* # of DART buffers            */
 
 #define ULONG_LOWD(ul)  (*(USHORT *)((ULONG *)(&ul)))     /* Low  Word */
 
 //******************************************************************************
 //******************************************************************************
-LONG APIENTRY OS2_Dart_Update(ULONG ulStatus,PMCI_MIX_BUFFER pBuffer,ULONG ulFlags)
+LONG APIENTRY OS2_Dart_Update(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer, ULONG ulFlags)
 {
-   //MCI_STATUS_PARMS Status;
    ULONG           rc;
 
    if ((ulFlags == MIX_WRITE_COMPLETE) ||
@@ -46,17 +47,17 @@ LONG APIENTRY OS2_Dart_Update(ULONG ulStatus,PMCI_MIX_BUFFER pBuffer,ULONG ulFla
        (ulStatus == ERROR_DEVICE_UNDERRUN)))
    {
       lLastBuff++;
-      if (lLastBuff == NUM_DART_BUFFS)
+      if (lLastBuff == ulNumDartBuffs)
          lLastBuff = 0;
 
       /* Now mix sound from all playing secondary SoundBuffers into the primary buffer */
-      MixCallback(BUFFER_SIZE/NUM_DART_BUFFS);
+      MixCallback(BUFFER_SIZE/ulNumDartBuffs);
 
       /* Fill The next buff from the DSound Buffer */
-      memcpy( pMixBuffs[lLastBuff].pBuffer, &pDSoundBuff[lLastBuff*(BUFFER_SIZE/NUM_DART_BUFFS)], BUFFER_SIZE/NUM_DART_BUFFS );
+      memcpy( pMixBuffers[lLastBuff].pBuffer, &pDSoundBuff[lLastBuff*(BUFFER_SIZE/ulNumDartBuffs)], BUFFER_SIZE/ulNumDartBuffs );
 
       /* Send the NEXT Buffer to Dart for playing! */
-      rc = MixSetup_Global->pmixWrite(MixSetup_Global->ulMixHandle, &pMixBuffs[lLastBuff], 1 );
+      rc = MixSetup_Global->pmixWrite(MixSetup_Global->ulMixHandle, &pMixBuffers[lLastBuff], 1 );
       //dprintf(("DSOUND-DART: Playing Next Buffer %d", rc));
    }
 
@@ -69,20 +70,23 @@ long Dart_Open_Device(USHORT *pusDeviceID, void **vpMixBuffer, void **vpMixSetup
 {
 
    MCI_AMP_OPEN_PARMS  AmpOpenParms;
-   //MCI_WAVE_SET_PARMS WaveSetParms;
    ULONG   rc, ulNew;
    LONG    lAdd = 5;
    short   device = 0;
 
    dprintf(("DSOUND-DART: Dart_Open_Device"));
 
+   /* TODO: remove eventually... */
    DosSetRelMaxFH(&lAdd, &ulNew);
 
-   *vpMixBuffer    = &MixBuffers;
+   ulNumDartBuffs = BUFFER_SIZE * 44100 / (2 * 2 * 2048 * 22050);
+
+   pMixBuffers = (MCI_MIX_BUFFER*)malloc(sizeof(MCI_MIX_BUFFER) * ulNumDartBuffs);
+
+   *vpMixBuffer    = pMixBuffers;
    *vpMixSetup     = &MixSetupParms;
    *vpBuffParms    = &BufferParms;
 
-   pMixBuffs = &MixBuffers[0];
    lLastBuff = 0;
 
    /* Is there a way to avoid the use of the MixSetup_Global ????? */
@@ -133,12 +137,11 @@ long Dart_Open_Device(USHORT *pusDeviceID, void **vpMixBuffer, void **vpMixSetup
    // playing. This maybe less CPU friendly then other methods but it's the best
    // my little brain could come up with!!
 
-   MixSetupParms.ulBufferSize = BUFFER_SIZE/NUM_DART_BUFFS;
+   MixSetupParms.ulBufferSize = BUFFER_SIZE / ulNumDartBuffs;
 
-//   BufferParms->ulStructLength = sizeof(MCI_BUFFER_PARMS);
-   BufferParms.ulNumBuffers   = NUM_DART_BUFFS;
+   BufferParms.ulNumBuffers   = ulNumDartBuffs;
    BufferParms.ulBufferSize   = MixSetupParms.ulBufferSize;
-   BufferParms.pBufList       = MixBuffers;
+   BufferParms.pBufList       = pMixBuffers;
 
    rc = mciSendCommand(usDeviceID, MCI_BUFFER, MCI_WAIT | MCI_ALLOCATE_MEMORY,
                                 (PVOID)&BufferParms, 0);
@@ -154,8 +157,8 @@ long Dart_Open_Device(USHORT *pusDeviceID, void **vpMixBuffer, void **vpMixSetup
    // 8bit data and unsigned for 16it.. Anyhow the worst that can happen by setting
    // the buffer to 0 is a click on Dart_Play and a Clink when real sound is written
    // to the buffer!
-   for (device = 0; device < NUM_DART_BUFFS; device++) {
-      memset(MixBuffers[device].pBuffer, 0, BUFFER_SIZE/NUM_DART_BUFFS);
+   for (device = 0; device < ulNumDartBuffs; device++) {
+      memset(pMixBuffers[device].pBuffer, 0, BUFFER_SIZE/ulNumDartBuffs);
    }
 
    // Allocate memory for the DSound "Holder" buffer.
@@ -204,7 +207,7 @@ long Dart_GetPosition(USHORT usDeviceID, LONG *pulPosition)
 {
    dprintf(("DSOUND-DART: Dart_GetPosition"));
 
-   *pulPosition = (lLastBuff * (BUFFER_SIZE/NUM_DART_BUFFS)) + (BUFFER_SIZE/NUM_DART_BUFFS);
+   *pulPosition = (lLastBuff * (BUFFER_SIZE/ulNumDartBuffs)) + (BUFFER_SIZE/ulNumDartBuffs);
    if (*pulPosition > BUFFER_SIZE)
       *pulPosition = 0;
 
@@ -213,18 +216,26 @@ long Dart_GetPosition(USHORT usDeviceID, LONG *pulPosition)
    return DS_OK;
 }
 
-long Dart_SetFormat(USHORT *pusDeviceID, void *vpMixSetup, void *vpBufferParms, void *vpMixBuffer, LONG lBPS, LONG lSPS, LONG lChannels )
+long Dart_SetFormat(USHORT *pusDeviceID, void *vpMixSetup, void *vpBufferParms, void **vpMixBuffer, LONG lBPS, LONG lSPS, LONG lChannels )
 {
    ULONG   rc;
    MCI_MIXSETUP_PARMS  *MixSetup;
    MCI_BUFFER_PARMS    *BufferParms;
-   MCI_MIX_BUFFER      *MixBuffer;
    MCI_AMP_OPEN_PARMS  AmpOpenParms;
    short               device = 0;
 
-   MixSetup    = (MCI_MIXSETUP_PARMS*)vpMixSetup;
-   BufferParms = (MCI_BUFFER_PARMS*)vpBufferParms;
-   MixBuffer   = (MCI_MIX_BUFFER*)vpMixBuffer;
+   /* Recalculate the number of DART buffers based on the new data rate      */
+   /* Note: the factor 2048 means a 2K buffer, 1024 = 4K, 512 = 8K and so on */
+   ulNumDartBuffs = BUFFER_SIZE * 44100 / ((lBPS / 8) * lChannels * 2048 * lSPS);
+
+   /* Reallocate the MCI_MIX_BUFFER array */
+   free(pMixBuffers);
+   pMixBuffers = (MCI_MIX_BUFFER*)malloc(sizeof(MCI_MIX_BUFFER) * ulNumDartBuffs);
+
+   MixSetup     = (MCI_MIXSETUP_PARMS*)vpMixSetup;
+   BufferParms  = (MCI_BUFFER_PARMS*)vpBufferParms;
+   *vpMixBuffer = pMixBuffers;
+
 
    dprintf(("DSOUND-DART: Dart_SetFormat"));
 
@@ -279,19 +290,19 @@ long Dart_SetFormat(USHORT *pusDeviceID, void *vpMixSetup, void *vpBufferParms, 
    }
 
    memset(BufferParms, 0, sizeof(MCI_BUFFER_PARMS));
-   memset(MixBuffer,   0, sizeof(MCI_MIX_BUFFER) * NUM_DART_BUFFS);
+   memset(pMixBuffers, 0, sizeof(MCI_MIX_BUFFER) * ulNumDartBuffs);
    BufferParms->ulStructLength = sizeof(MCI_BUFFER_PARMS);
-   BufferParms->ulNumBuffers   = NUM_DART_BUFFS;
-   BufferParms->ulBufferSize   = BUFFER_SIZE/NUM_DART_BUFFS;
-   BufferParms->pBufList       = MixBuffer;
-   MixBuffer->pBuffer          = NULL;
+   BufferParms->ulNumBuffers   = ulNumDartBuffs;
+   BufferParms->ulBufferSize   = BUFFER_SIZE/ulNumDartBuffs;
+   BufferParms->pBufList       = pMixBuffers;
+   pMixBuffers->pBuffer        = NULL;
 
    rc = mciSendCommand(*pusDeviceID, MCI_BUFFER, MCI_WAIT | MCI_ALLOCATE_MEMORY,
                        (PVOID)BufferParms, 0);
    if (rc != MCIERR_SUCCESS) {
       dprintf(("DSOUND-DART: MCI_BUFFER_ALLOCATE_MEMORY (SetFormat) %d", rc));
       mciSendCommand(*pusDeviceID, MCI_CLOSE, MCI_WAIT, NULL, 0);
-      memset(MixBuffer, 0, sizeof(MCI_MIX_BUFFER) * NUM_DART_BUFFS);
+      memset(pMixBuffers, 0, sizeof(MCI_MIX_BUFFER) * ulNumDartBuffs);
       return DSERR_OUTOFMEMORY;
    }
 
@@ -301,8 +312,8 @@ long Dart_SetFormat(USHORT *pusDeviceID, void *vpMixSetup, void *vpBufferParms, 
    // 8bit data and unsigned for 16it.. Anyhow the worst that can happen by setting
    // the buffer to 0 is a click on Dart_Play and a Clink when real sound is written
    // to the buffer!
-   for (int i=0; i<NUM_DART_BUFFS; i++) {
-      memset(MixBuffer[i].pBuffer, 0, BUFFER_SIZE/NUM_DART_BUFFS);
+   for (int i=0; i<ulNumDartBuffs; i++) {
+      memset(pMixBuffers[i].pBuffer, 0, BUFFER_SIZE/ulNumDartBuffs);
    }
 
    /* If the primary buffer was playing, we have to restart it!! */
@@ -310,13 +321,13 @@ long Dart_SetFormat(USHORT *pusDeviceID, void *vpMixSetup, void *vpBufferParms, 
       dprintf(("DSOUND-DART: Restarting playback!!!!"));
 
       /* Mix the first buffer before playing */
-      MixCallback(BUFFER_SIZE/NUM_DART_BUFFS);
-      memcpy(pMixBuffs[lLastBuff].pBuffer, &pDSoundBuff[lLastBuff*(BUFFER_SIZE/NUM_DART_BUFFS)], BUFFER_SIZE/NUM_DART_BUFFS);
+      MixCallback(BUFFER_SIZE/ulNumDartBuffs);
+      memcpy(pMixBuffers[lLastBuff].pBuffer, &pDSoundBuff[lLastBuff*(BUFFER_SIZE/ulNumDartBuffs)], BUFFER_SIZE/ulNumDartBuffs);
 
       USHORT  sel = RestoreOS2FS();
       /* Note: the call to pmixWrite trashes the FS selector, we have to save */
       /* and then restore FS!!! Otherwise exception handling will be broken.  */
-      MixSetupParms.pmixWrite(MixSetupParms.ulMixHandle, MixBuffers, 2);
+      MixSetupParms.pmixWrite(MixSetupParms.ulMixHandle, pMixBuffers, 2);
       SetFS(sel);
       fIsPlaying = TRUE;
    }
@@ -365,13 +376,13 @@ long Dart_Play(USHORT usDeviceID, void *vpMixSetup, void *vpMixBuffer, long play
       dprintf(("DSOUND-DART: Playback started!!!!"));
 
       /* Mix the first buffer before playing */
-      MixCallback(BUFFER_SIZE/NUM_DART_BUFFS);
-      memcpy(pMixBuffs[lLastBuff].pBuffer, &pDSoundBuff[lLastBuff*(BUFFER_SIZE/NUM_DART_BUFFS)], BUFFER_SIZE/NUM_DART_BUFFS);
+      MixCallback(BUFFER_SIZE/ulNumDartBuffs);
+      memcpy(MixBuffer[lLastBuff].pBuffer, &pDSoundBuff[lLastBuff*(BUFFER_SIZE/ulNumDartBuffs)], BUFFER_SIZE/ulNumDartBuffs);
 
       USHORT  sel = RestoreOS2FS();
       /* Note: the call to pmixWrite trashes the FS selector, we have to save */
       /* and then restore FS!!! Otherwise exception handling will be broken.  */
-      MixSetupParms.pmixWrite(MixSetupParms.ulMixHandle, MixBuffers, 2);
+      MixSetupParms.pmixWrite(MixSetupParms.ulMixHandle, MixBuffer, 2);
       SetFS(sel);
       fIsPlaying = TRUE;
    }
