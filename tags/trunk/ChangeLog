@@ -1,4 +1,12 @@
-/* $Id: ChangeLog,v 1.2659 2004-01-11 12:16:08 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2660 2004-01-14 11:05:39 sandervl Exp $ */
+
+ 2004-01-14: KO Myung-Hun <komh@chollian    >
+    - GDI32:    o Fixed Ft2CharStringPosAtW(), passing lCount instead len.
+                o Modified Ft2GetTextExtentW(). Now use OSLibGpiQueryCharStringPosAt().
+                o Fixed InternalTextOutAW(). When using font association, the height of
+                  DBCS and SBCS chars may be different. In this case, background
+                  color make stair below chars.
+                o Fixed GetTextExtentPointA() and GetTextExtentExPointA() to support DBCS.
 
  2003-01-11: Sander van Leeuwen <sandervl@innotek   >
     - GDI32, USER32, KERNEL32:
