@@ -1,4 +1,4 @@
-/* $Id: avl.h,v 1.1 2000-03-16 21:10:10 bird Exp $
+/* $Id: avl.h,v 1.2 2000-03-16 23:51:25 bird Exp $
  *
  * AVL-Tree (lookalike) declaration.
  *
@@ -7,7 +7,7 @@
  * macros you are able to create different trees. Currently you may only have
  * one type of trees within one program (module).
  *
- * TREETYPE: Case Insensitive Strings (Key is pointer).
+ * TREETYPE: Case Sensitive Strings (Key is pointer).
  *
  *
  * Copyright (c) 1999-2000 knut st. osmundsen
@@ -31,12 +31,12 @@ extern "C" {
 /*
  * AVL Compare macros
  */
-#define AVL_L(key1, key2)  (stricmp(key1, key2) <  0)
-#define AVL_LE(key1, key2) (stricmp(key1, key2) <= 0)
-#define AVL_G(key1, key2)  (stricmp(key1, key2) >  0)
-#define AVL_GE(key1, key2) (stricmp(key1, key2) >= 0)
-#define AVL_E(key1, key2)  (stricmp(key1, key2) == 0)
-#define AVL_NE(key1, key2) (stricmp(key1, key2) != 0)
+#define AVL_L(key1, key2)  (strcmp(key1, key2) <  0)
+#define AVL_LE(key1, key2) (strcmp(key1, key2) <= 0)
+#define AVL_G(key1, key2)  (strcmp(key1, key2) >  0)
+#define AVL_GE(key1, key2) (strcmp(key1, key2) >= 0)
+#define AVL_E(key1, key2)  (strcmp(key1, key2) == 0)
+#define AVL_NE(key1, key2) (strcmp(key1, key2) != 0)
 
 
 /**

@@ -1,4 +1,4 @@
-/* $Id: fastdep.c,v 1.9 2000-03-16 21:10:11 bird Exp $
+/* $Id: fastdep.c,v 1.10 2000-03-16 23:51:26 bird Exp $
  *
  * Fast dependents. (Fast = Quick and Dirty!)
  *
@@ -151,15 +151,19 @@ int langCOBOL(const char *pszFilename, void *pvFile, BOOL fHeader, POPTIONS pOpt
 static int strnicmpwords(const char *pszS1, const char *pszS2, int cch);
 
 /* file operations */
-char *filePath(const char *pszFilename, char *pszBuffer);
-char *filePathSlash(const char *pszFilename, char *pszBuffer);
-char *fileName(const char *pszFilename, char *pszBuffer);
-char *fileNameNoExt(const char *pszFilename, char *pszBuffer);
-char *fileExt(const char *pszFilename, char *pszBuffer);
+static char *fileNormalize(char *pszFilename);
+       char *filePath(const char *pszFilename, char *pszBuffer);
+static char *filePathSlash(const char *pszFilename, char *pszBuffer);
+static char *filePathSlash2(const char *pszFilename, char *pszBuffer);
+static char *fileName(const char *pszFilename, char *pszBuffer);
+static char *fileNameNoExt(const char *pszFilename, char *pszBuffer);
+static char *fileExt(const char *pszFilename, char *pszBuffer);
 
 /* filecache operations */
-static BOOL filecacheAdd(const char *pszFilename);
+static BOOL filecacheAddFile(const char *pszFilename);
+static BOOL filecacheAddDir(const char *pszDir);
 static BOOL filecacheFind(const char *pszFilename);
+static BOOL filecacheIsDirCached(const char *pszDir);
 
 /* pathlist operations */
 static char *pathlistFindFile(const char *pszPathList, const char *pszFilename, char *pszBuffer);
@@ -201,12 +205,15 @@ static BOOL  depCleanFile(const char *pszFilename);
  * Pointer to the list of dependencies.
  */
 static PDEPRULE pdepList = NULL;
+static BOOL     fCacheSearchDirs = FALSE;
+
 
 /*
  * Filecache - tree starts here.
  */
 static PFCACHEENTRY pfcTree = NULL;
 static unsigned     cfcNodes = 0;
+static PFCACHEENTRY pfcDirTree = NULL;
 
 
 /*
@@ -451,12 +458,12 @@ int main(int argc, char **argv)
         }
         else
         {   /* not a parameter! */
-            ULONG        ulRc;
-            FILEFINDBUF3 filebuf;
-            HDIR         hDir = HDIR_CREATE;
-            ULONG        ulFound = 1;
-
-            memset(&filebuf, 0, sizeof(filebuf));
+            ULONG           ulRc;
+            char            achBuffer[4096];
+            PFILEFINDBUF3   pfindbuf3 = (PFILEFINDBUF3)(void*)&achBuffer[0];
+            HDIR            hDir = HDIR_CREATE;
+            ULONG           cFiles = ~0UL;
+            int             i;
 
             /*
              * If append option is specified we'll have to read the existing dep file
@@ -470,31 +477,41 @@ int main(int argc, char **argv)
              */
             ulRc = DosFindFirst(argv[argi], &hDir,
                                 FILE_READONLY |  FILE_HIDDEN | FILE_SYSTEM | FILE_ARCHIVED,
-                                &filebuf, sizeof(FILEFINDBUF3), &ulFound, FIL_STANDARD);
+                                pfindbuf3, sizeof(achBuffer), &cFiles, FIL_STANDARD);
+            if (!fCacheSearchDirs)
+                fCacheSearchDirs = cFiles > 25;
             while (ulRc == NO_ERROR)
             {
-                char *psz;
-                char  szSource[CCHMAXPATH];
-
-                /*
-                 * Make full path.
-                 */
-                if ((psz = strrchr(argv[argi], '\\')) || (psz = strrchr(argv[argi], '/')))
+                for (i = 0;
+                     i < cFiles;
+                     i++, pfindbuf3 = (PFILEFINDBUF3)((int)pfindbuf3 + pfindbuf3->oNextEntryOffset)
+                     )
                 {
-                    strncpy(szSource, argv[argi], psz - argv[argi] + 1);
-                    szSource[psz - argv[argi] + 1]  = '\0';
-                }
-                else
-                    szSource[0]  = '\0';
-                strcat(szSource, filebuf.achName);
+                    char *psz;
+                    char  szSource[CCHMAXPATH];
 
-                /*
-                 * Analyse the file.
-                 */
-                rc -= makeDependent(&szSource[0], &options);
+                    /*
+                     * Make full path.
+                     */
+                    if ((psz = strrchr(argv[argi], '\\')) || (psz = strrchr(argv[argi], '/')))
+                    {
+                        strncpy(szSource, argv[argi], psz - argv[argi] + 1);
+                        szSource[psz - argv[argi] + 1]  = '\0';
+                    }
+                    else
+                        szSource[0]  = '\0';
+                    strcat(szSource, pfindbuf3->achName);
+
+                    /*
+                     * Analyse the file.
+                     */
+                    rc -= makeDependent(&szSource[0], &options);
+                }
 
                 /* next file */
-                ulRc = DosFindNext(hDir, &filebuf, sizeof(filebuf), &ulFound);
+                cFiles = ~0UL;
+                pfindbuf3 = (PFILEFINDBUF3)(void*)&achBuffer[0];
+                ulRc = DosFindNext(hDir, pfindbuf3, sizeof(achBuffer), &cFiles);
             }
             DosFindClose(hDir);
         }
@@ -1302,6 +1319,22 @@ static int strnicmpwords(const char *pszS1, const char *pszS2, int cch)
     return cch == 0 ? 0 : *pszS1 - *pszS2;
 }
 
+
+/**
+ * Normalizes the path slashes for the filename.
+ * @returns   pszFilename
+ * @param     pszFilename  Pointer to filename string.
+ */
+char *fileNormalize(char *pszFilename)
+{
+    char *psz = pszFilename;
+
+    while ((pszFilename = strchr(pszFilename, '//')) != NULL)
+        *pszFilename++ = '\\';
+
+    return psz;
+}
+
 /**
  * Copies the path part (excluding the slash) into pszBuffer and returns
  * a pointer to the buffer.
@@ -1340,7 +1373,7 @@ char *filePath(const char *pszFilename, char *pszBuffer)
  * @status    completely implemented.
  * @author    knut st. osmundsen
  */
-char *filePathSlash(const char *pszFilename, char *pszBuffer)
+static char *filePathSlash(const char *pszFilename, char *pszBuffer)
 {
     char *psz = strrchr(pszFilename, '\\');
     if (psz == NULL)
@@ -1352,6 +1385,39 @@ char *filePathSlash(const char *pszFilename, char *pszBuffer)
     {
         strncpy(pszBuffer, pszFilename, psz - pszFilename + 1);
         pszBuffer[psz - pszFilename + 1] = '\0';
+    }
+
+    return pszBuffer;
+}
+
+
+/**
+ * Copies the path part including the slash into pszBuffer and returns
+ * a pointer to the buffer. If no path is found "" is returned.
+ * The path is normalized to only use '\\'.
+ * @returns   Pointer to pszBuffer with path.
+ * @param     pszFilename  Pointer to readonly filename.
+ * @param     pszBuffer    Pointer to output Buffer.
+ * @status    completely implemented.
+ * @author    knut st. osmundsen
+ */
+static char *filePathSlash2(const char *pszFilename, char *pszBuffer)
+{
+    char *psz = strrchr(pszFilename, '\\');
+    if (psz == NULL)
+        psz = strrchr(pszFilename, '/');
+
+    if (psz == NULL)
+        *pszBuffer = '\0';
+    else
+    {
+        strncpy(pszBuffer, pszFilename, psz - pszFilename + 1);
+        pszBuffer[psz - pszFilename + 1] = '\0';
+
+        /* normalize all '/' to '\\' */
+        psz = pszBuffer;
+        while ((psz = strchr(psz, '/')) != NULL)
+               *psz++ = '\\';
     }
 
     return pszBuffer;
@@ -1438,7 +1504,7 @@ char *fileExt(const char *pszFilename, char *pszBuffer)
  * @returns   Success indicator.
  * @param     pszFilename   Name of the file which is to be added. (with path!)
  */
-static BOOL filecacheAdd(const char *pszFilename)
+static BOOL filecacheAddFile(const char *pszFilename)
 {
     PFCACHEENTRY pfcNew;
 
@@ -1456,7 +1522,6 @@ static BOOL filecacheAdd(const char *pszFilename)
         free(pfcNew);
         return TRUE;
     }
-
     cfcNodes++;
 
     return TRUE;
@@ -1465,13 +1530,104 @@ static BOOL filecacheAdd(const char *pszFilename)
 
 
 /**
- * Checks if pszFile is exists in the cache.
+ * Adds a file to the cache.
+ * @returns   Success indicator.
+ * @param     pszDir   Name of the path which is to be added. (with slash!)
+ */
+static BOOL filecacheAddDir(const char *pszDir)
+{
+    PFCACHEENTRY    pfcNew;
+    APIRET          rc;
+    char            szDir[CCHMAXPATH];
+    int             cchDir;
+    char            achBuffer[16384];
+    PFILEFINDBUF3   pfindbuf3 = (PFILEFINDBUF3)(void*)&achBuffer[0];
+    HDIR            hDir = HDIR_CREATE;
+    ULONG           cFiles = 0xFFFFFFF;
+    int             i;
+
+    /* Make path */
+    filePathSlash2(pszDir, szDir);
+    strlwr(szDir); /* Convert name to lower case to allow faster searchs! */
+    cchDir = strlen(szDir);
+
+
+    /* Add directory to pfcDirTree. */
+    pfcNew = malloc(sizeof(FCACHEENTRY) + cchDir + 1);
+    if (pfcNew == NULL)
+    {
+        fprintf(stderr, "error: out of memory! (line=%d)\n", __LINE__);
+        DosFindClose(hDir);
+        return FALSE;
+    }
+    pfcNew->Key = (char*)(void*)pfcNew + sizeof(FCACHEENTRY);
+    strcpy((char*)(unsigned)pfcNew->Key, szDir);
+    AVLInsert(&pfcDirTree, pfcNew);
+
+
+    /* Start to search directory - all files */
+    strcat(szDir + cchDir, "*");
+    rc = DosFindFirst(szDir, &hDir, FILE_NORMAL,
+                      pfindbuf3, sizeof(achBuffer),
+                      &cFiles, FIL_STANDARD);
+    while (rc == NO_ERROR)
+    {
+        for (i = 0;
+             i < cFiles;
+             i++, pfindbuf3 = (PFILEFINDBUF3)((int)pfindbuf3 + pfindbuf3->oNextEntryOffset)
+             )
+        {
+            pfcNew = malloc(sizeof(FCACHEENTRY) + cchDir + pfindbuf3->cchName + 1);
+            if (pfcNew == NULL)
+            {
+                fprintf(stderr, "error: out of memory! (line=%d)\n", __LINE__);
+                DosFindClose(hDir);
+                return FALSE;
+            }
+            pfcNew->Key = (char*)(void*)pfcNew + sizeof(FCACHEENTRY);
+            strcpy((char*)(unsigned)pfcNew->Key, szDir);
+            strcpy((char*)(unsigned)pfcNew->Key + cchDir, pfindbuf3->achName);
+            strlwr((char*)(unsigned)pfcNew->Key + cchDir); /* Convert name to lower case to allow faster searchs! */
+            if (!AVLInsert(&pfcTree, pfcNew))
+                free(pfcNew);
+            else
+                cfcNodes++;
+            _heap_check();
+        }
+
+        /* next */
+        cFiles = 0xFFFFFFF;
+        pfindbuf3 = (PFILEFINDBUF3)(void*)&achBuffer[0];
+        rc = DosFindNext(hDir, pfindbuf3, sizeof(achBuffer), &cFiles);
+    }
+
+    DosFindClose(hDir);
+
+    return TRUE;
+}
+
+
+/**
+ * Checks if pszFilename is exists in the cache.
  * @return    TRUE if found. FALSE if not found.
  * @param     pszFilename   Name of the file to be found. (with path!)
+ *                          This is in lower case!
  */
 static BOOL filecacheFind(const char *pszFilename)
 {
     return AVLGet(&pfcTree, (AVLKEY)pszFilename) != NULL;
+}
+
+
+/**
+ * Checks if pszFilename is exists in the cache.
+ * @return    TRUE if found. FALSE if not found.
+ * @param     pszFilename   Name of the file to be found. (with path!)
+ *                          This is in lower case!
+ */
+static BOOL filecacheIsDirCached(const char *pszDir)
+{
+    return AVLGet(&pfcDirTree, (AVLKEY)pszDir) != NULL;
 }
 
 
@@ -1516,6 +1672,8 @@ static char *pathlistFindFile(const char *pszPathList, const char *pszFilename, 
             if (szFile[pszNext - psz - 1] != '\\' && szFile[pszNext - psz - 1] != '/')
                 strcpy(&szFile[pszNext - psz], "\\");
             strcat(szFile, pszFilename);
+            strlwr(szFile); /* to speed up AVL tree search we'll lowercase all names. */
+            fileNormalize(szFile);
 
             /*
              * Search for the file in this directory.
@@ -1523,13 +1681,30 @@ static char *pathlistFindFile(const char *pszPathList, const char *pszFilename, 
              */
             if (!filecacheFind(szFile))
             {
-                FILESTATUS3 fsts3;
+                char szDir[CCHMAXPATH];
 
-                /* ask the OS */
-                rc = DosQueryPathInfo(szFile, FIL_STANDARD, &fsts3, sizeof(fsts3));
-                if (rc == NO_ERROR)
-                {   /* add file to cache. */
-                    filecacheAdd(szFile);
+                filePathSlash(szFile, szDir);
+                if (filecacheIsDirCached(szDir))
+                    rc = ERROR_FILE_NOT_FOUND;
+                else
+                {
+                    /*
+                     * If caching of entire dirs are enabled, we'll
+                     * add the directory to the cache and search it.
+                     */
+                    if (fCacheSearchDirs && filecacheAddDir(szDir))
+                        rc = filecacheFind(szFile) ? NO_ERROR : ERROR_FILE_NOT_FOUND;
+                    else
+                    {
+                        FILESTATUS3 fsts3;
+
+                        /* ask the OS */
+                        rc = DosQueryPathInfo(szFile, FIL_STANDARD, &fsts3, sizeof(fsts3));
+                        if (rc == NO_ERROR)
+                        {   /* add file to cache. */
+                            filecacheAddFile(szFile);
+                        }
+                    }
                 }
             }
             else

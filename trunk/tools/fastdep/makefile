@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2000-03-16 21:10:10 bird Exp $
+# $Id: makefile,v 1.5 2000-03-16 23:51:26 bird Exp $
 
 #
 # PD-Win32 API
@@ -16,7 +16,7 @@ PDWIN32_INCLUDE = ..\..\include
 !ifdef DEBUG
 CFLAGS   = $(CFLAGS)  -Ge+ -Tx+ -I..\common \
            -W3 -Wall+ppt-ppc-inl-cnv-gnr-vft-gen-uni-ext- -O+ -Tm-
-#          -W3 -Wall+ppt-ppc-inl-cnv-gnr-vft-gen-uni-ext- -Gh+
+#          -W3 -Wall+ppt-ppc-inl-cnv-gnr-vft-gen-uni-ext- -Gh+ -Tm- #-O+
 LDFLAGS  = $(LDFLAGS) -Ge+ -Fe$@ /B"/MAP:full"
 !else
 CFLAGS   = $(CFLAGS)  -Ge+ -Tx+ -I..\common      \
@@ -31,7 +31,7 @@ all: fastdep.exe ..\bin\fastdep.exe
 
 fastdep.exe: fastdep.obj avl.obj
     $(LD) $(LDFLAGS) $** $(RTLLIB) os2386.lib
-#   $(LD) $(LDFLAGS) $** CPPOPA3.OBJ $(RTLLIB) os2386.lib
+#   $(LD) $(LDFLAGS) $** CPPOPA3.OBJ $(RTLLIB) _DOSCALL.LIB os2386.lib
 
 ..\bin\fastdep.exe: fastdep.exe
    $(CP) $** $@
