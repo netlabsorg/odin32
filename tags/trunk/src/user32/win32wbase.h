@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.139 2002-02-05 17:59:01 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.140 2002-02-26 11:12:25 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -317,6 +317,10 @@ virtual  BOOL   DestroyWindow();
          Win32WndClass  *getClass()  { return windowClass; };
          Win32BaseWindow *getOwner() { return owner; };
         void    setOwner(Win32BaseWindow *newOwner) { owner = newOwner; };
+
+
+         DWORD  getThreadId()        { return dwThreadId; };
+         DWORD  getProcessId()       { return dwProcessId; };
 
  SCROLLBAR_INFO *getScrollInfo(int nBar);
 
