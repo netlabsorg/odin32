@@ -1,4 +1,4 @@
-/* $Id: stubs.cpp,v 1.18 2002-02-15 19:15:39 sandervl Exp $ */
+/* $Id: stubs.cpp,v 1.19 2002-02-16 11:39:34 sandervl Exp $ */
 /* 
  * Win32 COM/OLE stubs for OS/2
  * 
@@ -55,13 +55,6 @@ HRESULT WIN32API CoGetTreatAsClass(REFCLSID clsidOld, LPCLSID pclsidNew)
 {
     dprintf(("OLE32: CoGetTreatAsClass - stub"));
     return S_FALSE;
-}
-//*******************************************************************************
-//*******************************************************************************
-HRESULT WIN32API CoInitializeWOW()
-{
-    dprintf(("OLE32: CoInitializeWOW, UNKNOWN API - stub"));
-    return 0;
 }
 //*******************************************************************************
 //*******************************************************************************

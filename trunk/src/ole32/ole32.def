@@ -32,7 +32,7 @@ EXPORTS
     CoGetTreatAsClass          = _CoGetTreatAsClass@8        @25
     CoInitializeEx             = _CoInitializeEx@8           @9998
     CoInitialize               = _CoInitialize@4             @26
-    CoInitializeWOW            = _CoInitializeWOW@0          @27
+    CoInitializeWOW            = _CoInitializeWOW@8          @27
     CoIsHandlerConnected       = _CoIsHandlerConnected@4     @28
     CoIsOle1Class              = _CoIsOle1Class@4            @29
     CoLoadLibrary              = _CoLoadLibrary@8            @30
