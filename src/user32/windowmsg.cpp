@@ -1,4 +1,4 @@
-/* $Id: windowmsg.cpp,v 1.40 2003-02-27 14:22:22 sandervl Exp $ */
+/* $Id: windowmsg.cpp,v 1.41 2003-03-20 09:15:31 sandervl Exp $ */
 /*
  * Win32 window message APIs for OS/2
  *
@@ -168,8 +168,22 @@ LONG WIN32API GetMessageTime(void)
 //******************************************************************************
 BOOL WIN32API WaitMessage(void)
 {
-    dprintf2(("USER32: WaitMessage"));
-    return OSLibWinWaitMessage();
+#ifdef DEBUG
+    MSG msg;
+
+    if(PeekMessageA(&msg, 0, 0, 0, PM_NOREMOVE) == FALSE) {
+          dprintf2(("USER32: WaitMessage %x", GetThreadHAB()));
+    }
+    else  dprintf2(("USER32: WaitMessage %x; message %x present", GetThreadHAB(), msg.message));
+#endif
+
+    BOOL ret = OSLibWinWaitMessage();
+#ifdef DEBUG
+    if(PeekMessageA(&msg, 0, 0, 0, PM_NOREMOVE) == FALSE) {
+          dprintf2(("USER32: WaitMessage returned with no message in the queue"));
+    }
+#endif
+    return ret;
 }
 //******************************************************************************
 //******************************************************************************

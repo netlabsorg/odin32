@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.131 2003-02-13 10:12:27 sandervl Exp $ */
+/* $Id: window.cpp,v 1.132 2003-03-20 09:15:31 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -1730,6 +1730,13 @@ static BOOL IsPointInWindow(HWND hwnd,  POINT point)
         (wndPtr->hrgnWnd ?  PtInRegion(wndPtr->hrgnWnd, 1))
 #endif
     {
+        DWORD dwThreadId = GetCurrentThreadId();
+
+        //Don't send WM_NCHITTEST if this window doesn't belong to the current thread
+        if(dwThreadId != GetWindowThreadProcessId(hwnd, NULL))
+        {
+            return TRUE;
+        }
         hittest = SendMessageA(hwnd, WM_NCHITTEST, 0, MAKELONG(point.x, point.y));
         if(hittest != HTTRANSPARENT) {
             return TRUE;
