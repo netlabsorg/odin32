@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2000-02-09 23:40:51 bird Exp $
+# $Id: makefile,v 1.3 2000-02-29 13:56:50 sandervl Exp $
 #
 # PD-Win32 API
 #
@@ -13,7 +13,7 @@ PDWIN32_TOOLS = ..\..\..\..\tools\bin
 
 !include $(PDWIN32_INCLUDE)/pdwin32.mk
 
-CINCLUDE=-I.. -I..\..\mesa -I$(PDWIN32_INCLUDE) -I..\include
+CINCLUDE=-I.. -I..\..\mesa -I$(PDWIN32_INCLUDE) -I..\include -I..\..\mesa\GL
 
 CFLAGS = $(CFLAGS) $(CINCLUDE) -Tdp -DNDEBUG
 CXXFLAGS = $(CXXFLAGS) $(CINCLUDE)  -Tdp -DNDEBUG

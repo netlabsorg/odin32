@@ -1,8 +1,8 @@
-/* $Id: gluos.h,v 1.1 2000-02-09 08:50:55 jeroen Exp $ */
+/* $Id: gluos.h,v 1.2 2000-02-29 13:56:48 sandervl Exp $ */
 /*
 ** gluos.h - operating system dependencies for GLU
 **
-** $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glu/include/gluos.h,v 1.1 2000-02-09 08:50:55 jeroen Exp $*/
+** $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glu/include/gluos.h,v 1.2 2000-02-29 13:56:48 sandervl Exp $*/
 
 #if defined(_WIN32)
 
@@ -18,8 +18,7 @@
 
 #else
 #if defined(__WIN32OS2__)
-#include <os2win.h>
-#define GLAPI WIN32API
+#include <windows.h>
 #else
 /* Disable Microsoft-specific keywords */
 #define GLAPI

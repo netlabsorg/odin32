@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.6 2000-02-09 23:40:52 bird Exp $
+# $Id: Makefile,v 1.7 2000-02-29 13:56:51 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -23,8 +23,8 @@ L=/DE
 !endif
 !endif
 
-CFLAGS = -Tdp -I..\mesa -I..\glu $(CFLAGS) -I$(PDWIN32_INCLUDE)
-CXXFLAGS = -Tdp -I..\mesa -I..\glu $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
+CFLAGS = -Tdp -I..\mesa\GL -I..\glu $(CFLAGS) -I$(PDWIN32_INCLUDE) -I..\mesa
+CXXFLAGS = -Tdp -I..\mesa\GL -I..\glu $(CXXFLAGS) -I$(PDWIN32_INCLUDE) -I..\mesa
 
 TARGET=GLUT32
 
@@ -78,7 +78,7 @@ resource.asm: $(TARGET).rc
 
 
 dep:
-    $(DEPEND) -I$(PDWIN32_INCLUDE);$(PDWIN32_INCLUDE)\win \
+    $(DEPEND) -I$(PDWIN32_INCLUDE);$(PDWIN32_INCLUDE)\win -I..\mesa\GL \
         *.c *.cpp *.asm *.inc $(PDWIN32_INCLUDE)\*.h
 
 !ifndef NODEP

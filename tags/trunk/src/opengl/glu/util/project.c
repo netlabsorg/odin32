@@ -1,4 +1,4 @@
-/* $Id: project.c,v 1.1 2000-02-09 08:47:14 jeroen Exp $ */
+/* $Id: project.c,v 1.2 2000-02-29 13:56:50 sandervl Exp $ */
 /*
 ** License Applicability. Except to the extent portions of this file are
 ** made subject to an alternative license as permitted in the SGI Free
@@ -32,8 +32,8 @@
 ** published by SGI, but has not been independently verified as being
 ** compliant with the OpenGL(R) version 1.2.1 Specification.
 **
-** $Date: 2000-02-09 08:47:14 $ $Revision: 1.1 $
-** $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glu/util/project.c,v 1.1 2000-02-09 08:47:14 jeroen Exp $
+** $Date: 2000-02-29 13:56:50 $ $Revision: 1.2 $
+** $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glu/util/project.c,v 1.2 2000-02-29 13:56:50 sandervl Exp $
 */
 
 #include "gluos.h"
@@ -366,9 +366,8 @@ gluUnProject4(GLdouble winx, GLdouble winy, GLdouble winz, GLdouble clipw,
     return(GL_TRUE);
 }
 
-void GLAPI
-gluPickMatrix(GLdouble x, GLdouble y, GLdouble deltax, GLdouble deltay,
-		  GLint viewport[4])
+GLUAPI void GLAPIENTRY gluPickMatrix(GLdouble x, GLdouble y, GLdouble deltax, GLdouble deltay,
+       	     	                     const GLint viewport[4])
 {
     if (deltax <= 0 || deltay <= 0) {
 	return;
