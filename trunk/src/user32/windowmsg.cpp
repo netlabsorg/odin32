@@ -1,4 +1,4 @@
-/* $Id: windowmsg.cpp,v 1.29 2001-09-19 15:39:52 sandervl Exp $ */
+/* $Id: windowmsg.cpp,v 1.30 2001-09-27 10:42:59 phaller Exp $ */
 /*
  * Win32 window message APIs for OS/2
  *
@@ -14,6 +14,11 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+
+#include <odin.h>
+#include <odinwrap.h>
+#include <os2sel.h>
+
 #include <os2win.h>
 #include <misc.h>
 #include <win32wbase.h>
@@ -27,6 +32,9 @@
 
 #define DBG_LOCALLOG	DBG_windowmsg
 #include "dbglocal.h"
+
+ODINDEBUGCHANNEL(USER32-WINDOWMSG)
+
 
 //******************************************************************************
 //******************************************************************************
@@ -51,9 +59,22 @@ LONG WIN32API DispatchMessageW( const MSG * msg)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API TranslateMessage( const MSG * msg)
+BOOL WIN32API TranslateMessage(const MSG *msg)
 {
-   return OSLibWinTranslateMessage((MSG *)msg);
+  // check the message code
+  if ( (msg->message <  WM_KEYDOWN) ||
+       (msg->message >  WM_SYSKEYUP)||
+       (msg->message == WM_CHAR)    ||
+       (msg->message == WM_DEADCHAR) )
+  {
+    SetLastError(ERROR_INVALID_PARAMETER);
+    return FALSE;
+  }
+  
+  // only WM_KEYDOWN, WM_KEYUP, WM_SYSKEYDOWN, WM_SYSKEYUP
+  // can go into TranslateMessage
+  
+  return OSLibWinTranslateMessage((MSG *)msg);
 }
 //******************************************************************************
 //******************************************************************************
