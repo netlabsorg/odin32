@@ -1,4 +1,4 @@
-/* $Id: dbglog.cpp,v 1.7 2003-02-14 13:24:48 sandervl Exp $ */
+/* $Id: dbglog.cpp,v 1.8 2003-03-06 10:22:26 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -308,7 +308,7 @@ int SYSTEM WriteLog(char *tekst, ...)
 
 #ifdef WIN32_IP_LOGGING
         char *logserver = getenv("WIN32LOG_IPSERVER");
-        if(logserver) {
+        if(logserver && loadNr == 0) {
              sock_init();
 
              memset(&servername, 0, sizeof(servername));
@@ -319,34 +319,28 @@ int SYSTEM WriteLog(char *tekst, ...)
              logSocket = socket(PF_INET, SOCK_DGRAM, 0);
         }
 #endif
-        char logname[CCHMAXPATH];
+        char szLogFile[CCHMAXPATH];
+        const char *pszLogBase = getenv("WIN32LOG_FILEBASE");
+        if (!pszLogBase)
+            pszLogBase = "odin32_";
 
-        sprintf(logname, "odin32_%d.log", loadNr);
-        flog = fopen(logname, "w");
-        if(flog == NULL) {//probably running exe on readonly device
-            sprintf(logname, "%sodin32_%d.log", kernel32Path, loadNr);
-            flog = fopen(logname, "w");
+        sprintf(szLogFile, "%s%d.log", pszLogBase, loadNr);
+        flog = fopen(szLogFile, "w");
+        if(flog == NULL) 
+        {//probably running exe on readonly device
+            sprintf(szLogFile, "%sodin32_%d.log", kernel32Path, loadNr);
+            flog = fopen(szLogFile, "w");
         }
         oldcrtmsghandle = _set_crt_msg_handle(fileno(flog));
     }
     else
       fLogging = FALSE;
 
-    if(getenv("DISABLE_THREAD1")) {
-      fDisableThread[0] = TRUE;
-    }
-    if(getenv("DISABLE_THREAD2")) {
-      fDisableThread[1] = TRUE;
-    }
-    if(getenv("DISABLE_THREAD3")) {
-      fDisableThread[2] = TRUE;
-    }
-    if(getenv("DISABLE_THREAD4")) {
-      fDisableThread[3] = TRUE;
-    }
-    if(getenv("DISABLE_THREAD5")) {
-      fDisableThread[4] = TRUE;
-    }
+    fDisableThread[0] = getenv("DISABLE_THREAD1") != NULL;
+    fDisableThread[1] = getenv("DISABLE_THREAD2") != NULL;
+    fDisableThread[2] = getenv("DISABLE_THREAD3") != NULL;
+    fDisableThread[3] = getenv("DISABLE_THREAD4") != NULL;
+    fDisableThread[4] = getenv("DISABLE_THREAD5") != NULL;
   }
 
   if(teb) {
@@ -442,12 +436,21 @@ int SYSTEM WriteLog(char *tekst, ...)
 #else
             ulCallDepth = 0;
 #endif
+#ifdef LOG_TIME
+            if(sel == 0x150b && fSwitchTIBSel) 
+                sprintf(logbuffer, "t%02d (%3d): %x (FS=150B) ",
+                        LOWORD(teb->o.odin.threadId), ulCallDepth, GetTickCount());
+            else 
+                sprintf(logbuffer, "t%02d (%3d): %x ",
+                        LOWORD(teb->o.odin.threadId), ulCallDepth, GetTickCount());
+#else
             if(sel == 0x150b && fSwitchTIBSel) 
                 sprintf(logbuffer, "t%02d (%3d): (FS=150B) ",
                         LOWORD(teb->o.odin.threadId), ulCallDepth);
             else 
                 sprintf(logbuffer, "t%02d (%3d): ",
                         LOWORD(teb->o.odin.threadId), ulCallDepth);
+#endif
             prefixlen = strlen(logbuffer);
         }
 
