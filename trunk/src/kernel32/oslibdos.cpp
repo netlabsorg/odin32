@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.66 2001-06-19 10:50:25 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.67 2001-06-20 20:51:58 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -2340,17 +2340,17 @@ BOOL OSLibGetDiskFreeSpace(LPSTR lpRootPathName, LPDWORD lpSectorsPerCluster,
 }
 //******************************************************************************
 //******************************************************************************
-BOOL  OSLibDosGetDiskGeometry(DWORD cDisk, PVOID pdiskgeom)
+BOOL  OSLibDosGetDiskGeometry(HANDLE hDisk, DWORD cDisk, PVOID pdiskgeom)
 {
    PDISK_GEOMETRY pGeom = (PDISK_GEOMETRY)pdiskgeom;
-   BYTE  param[2] = {0, 0};
+   BYTE  param[2] = {1, 0};
    ULONG parsize = 2;
    BIOSPARAMETERBLOCK bpb;
    ULONG datasize = sizeof(bpb);
    APIRET rc;
 
    param[1] = cDisk - 'A';
-   rc = DosDevIOCtl(-1, IOCTL_DISK, DSK_GETDEVICEPARAMS, param, 2, &parsize, &bpb, sizeof(bpb), &datasize);
+   rc = DosDevIOCtl((hDisk) ? hDisk : -1, IOCTL_DISK, DSK_GETDEVICEPARAMS, param, 2, &parsize, &bpb, sizeof(bpb), &datasize);
    if(rc == 0)
    {
         pGeom->SectorsPerTrack   = bpb.usSectorsPerTrack;
