@@ -1,4 +1,4 @@
-/* $Id: opengl.cpp,v 1.10 2004-01-11 11:42:19 sandervl Exp $ */
+/* $Id: opengl.cpp,v 1.11 2004-04-14 09:44:13 sandervl Exp $ */
 
 /*
  * GDI32 OpenGl stubs
@@ -118,7 +118,7 @@ static BOOL internalOpenGLEnable(void)
  * Author    : Patrick Haller [Fri, 1998/02/27 11:55]
  *****************************************************************************/
 
-int WIN32API ChoosePixelFormat(HDC hdc, CONST PIXELFORMATDESCRIPTOR* pformat)
+int WIN32API ChoosePixelFormat(HDC hdc, const LPPIXELFORMATDESCRIPTOR pformat)
 {
   if (glChoosePixelFormat == NULL)
     if (internalOpenGLEnable() == FALSE)

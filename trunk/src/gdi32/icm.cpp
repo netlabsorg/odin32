@@ -1,4 +1,4 @@
-/* $Id: icm.cpp,v 1.5 2004-01-11 11:42:17 sandervl Exp $ */
+/* $Id: icm.cpp,v 1.6 2004-04-14 09:44:13 sandervl Exp $ */
 
 /*
  * GDI32 Color Management apis
@@ -298,8 +298,8 @@ BOOL WIN32API GetICMProfileW(HDC    hdc,
 
 #define LPLOGCOLORSPACE LPVOID
 BOOL WIN32API GetLogColorSpaceA(HCOLORSPACE     hColorSpace,
-                                   LPLOGCOLORSPACE lpBuffer,
-                                   DWORD           nSize)
+                                LPLOGCOLORSPACEA lpBuffer,
+                                DWORD           nSize)
 {
   dprintf(("GDI32: GetLogColorSpaceA(%08xh, %08xh, %08xh) not implemented.\n",
            hColorSpace,
@@ -326,8 +326,8 @@ BOOL WIN32API GetLogColorSpaceA(HCOLORSPACE     hColorSpace,
  *****************************************************************************/
 
 BOOL WIN32API GetLogColorSpaceW(HCOLORSPACE     hColorSpace,
-                                   LPLOGCOLORSPACE lpBuffer,
-                                   DWORD           nSize)
+                                LPLOGCOLORSPACEW lpBuffer,
+                                DWORD           nSize)
 {
   dprintf(("GDI32: GetLogColorSpaceW(%08xh, %08xh, %08xh) not implemented.\n",
            hColorSpace,
