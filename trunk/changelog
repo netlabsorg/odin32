@@ -1,4 +1,11 @@
-/* $Id: changelog,v 1.1448 2001-05-26 10:08:29 sandervl Exp $ */
+/* $Id: changelog,v 1.1449 2001-05-27 19:00:43 sandervl Exp $ */
+
+ 2001-05-27: Sander van Leeuwen <sandervl@xs4all.nl>
+    - COMCTL32: o Listview: merged old LISTVIEW_EnsureVisible
+                  (gets rid of excessive repaints)
+    - USER32:   o Replaced TabbedTextOutA/W & GetTabbedTextExtentA/W with
+                  Wine version. GPI doesn't support strings > 512 characters.
+    - GDI32:    o Commented out InternalTabbedTextOutA/W & InternalGetTabbedTextExtentA/W
 
  2001-05-26: Sander van Leeuwen <sandervl@xs4all.nl>
     - COMCTL32: o Datetime control resync with Wine (get/setrange added)
