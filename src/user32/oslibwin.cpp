@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.118 2002-04-24 08:56:17 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.119 2002-04-28 15:47:09 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -553,6 +553,12 @@ BOOL OSLibWinMinimizeWindow(HWND hwnd)
     rc = WinSetWindowPos(hwnd, 0, 0, 0, 0, 0, SWP_MINIMIZE);
     if (rc) {
         rc = WinSetWindowPos(hwnd, HWND_BOTTOM, 0, 0, 0, 0, SWP_DEACTIVATE | SWP_ZORDER);
+        if (rc)
+        {
+          HWND activeHandle = (HWND)WinSendMsg(hwnd, WM_QUERYFOCUSCHAIN, MPFROMSHORT(QFC_ACTIVE), MPFROMHWND(hwnd));
+          if (activeHandle != NULLHANDLE)
+           rc = WinSetWindowPos(activeHandle, HWND_TOP, 0, 0, 0, 0, SWP_ACTIVATE | SWP_ZORDER);
+        }
     }
     return (rc);
 }
