@@ -1,4 +1,4 @@
-/* $Id: thread.h,v 1.1 1999-05-24 20:19:20 ktk Exp $ */
+/* $Id: thread.h,v 1.2 1999-06-19 13:57:50 sandervl Exp $ */
 
 /*
  * Thread definitions
@@ -11,7 +11,7 @@
 
 #include "config.h"
 #include "winbase.h"
-#include "selectors.h"  /* for SET_FS */
+//#include "selectors.h"  /* for SET_FS */
 
 struct _PDB;
 

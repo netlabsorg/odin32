@@ -1,4 +1,4 @@
-/* $Id: winprocess.h,v 1.1 1999-05-24 20:19:22 ktk Exp $ */
+/* $Id: winprocess.h,v 1.2 1999-06-19 13:57:50 sandervl Exp $ */
 
 /*
  * Process definitions
@@ -10,7 +10,10 @@
 #define __WINE_PROCESS_H
 
 #include "windef.h"
-#include "module.h"
+//#include "module.h"
+
+//TODO: Fix this
+typedef ULONG WINE_MODREF;
 
 struct _NE_MODULE;
 struct _THREAD_ENTRY;
