@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.7 1999-09-22 08:58:35 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.8 1999-09-23 16:44:33 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -191,6 +191,7 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
   {
         GlobalGetAtomNameA( classAtom, buffer, sizeof(buffer) );
         dprintf(("Bad class '%s'\n", buffer ));
+        SetLastError(ERROR_INVALID_PARAMETER);
         return 0;
   }
 
@@ -303,8 +304,13 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
   dwStyle   = cs->style & ~WS_VISIBLE;
   dwExStyle = cs->dwExStyle;
 
+#if 1
+  //SvL: Messes up Z-order of dialog controls
+  hwndLinkAfter = HWND_TOP;
+#else
   hwndLinkAfter = ((cs->style & (WS_CHILD|WS_MAXIMIZE)) == WS_CHILD)
                   ? HWND_BOTTOM : HWND_TOP;
+#endif
 
 #if 0
 //TODO
@@ -2169,6 +2175,28 @@ Win32BaseWindow *Win32BaseWindow::GetWindowFromOS2Handle(HWND hwnd)
         return win32wnd;
   }
   return 0;
+}
+//******************************************************************************
+//******************************************************************************
+HWND Win32BaseWindow::Win32ToOS2Handle(HWND hwnd)
+{
+        Win32BaseWindow *window = GetWindowFromHandle(hwnd);
+
+        if(window) {
+                return window->getOS2WindowHandle();
+        }
+        else  return hwnd;    //OS/2 window handle
+}
+//******************************************************************************
+//******************************************************************************
+HWND Win32BaseWindow::OS2ToWin32Handle(HWND hwnd)
+{
+        Win32BaseWindow *window = GetWindowFromOS2Handle(hwnd);
+
+        if(window) {
+                return window->getWindowHandle();
+        }
+        else  return hwnd;    //OS/2 window handle
 }
 //******************************************************************************
 //******************************************************************************

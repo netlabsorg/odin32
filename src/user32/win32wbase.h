@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.4 1999-09-22 08:58:36 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.5 1999-09-23 16:44:33 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -185,25 +185,8 @@ Win32BaseWindow *getTopParent();
     static HWND FindWindowEx(HWND hwndParent, HWND hwndChildAfter, LPSTR lpszClass, LPSTR lpszWindow,
                              BOOL fUnicode = 0);
 
-    static HWND Win32ToOS2Handle(HWND hwnd)
-    {
-        Win32BaseWindow *window = GetWindowFromHandle(hwnd);
-
-        if(window) {
-                return window->getOS2WindowHandle();
-        }
-        else  return hwnd;    //OS/2 window handle
-    }
-
-    static HWND OS2ToWin32Handle(HWND hwnd)
-    {
-        Win32BaseWindow *window = GetWindowFromOS2Handle(hwnd);
-
-        if(window) {
-                return window->getWindowHandle();
-        }
-        else  return hwnd;    //OS/2 window handle
-    }
+    static HWND Win32ToOS2Handle(HWND hwnd);
+    static HWND OS2ToWin32Handle(HWND hwnd);
 
 static Win32BaseWindow *GetWindowFromHandle(HWND hwnd);
 static Win32BaseWindow *GetWindowFromOS2Handle(HWND hwnd);
