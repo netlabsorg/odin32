@@ -1,4 +1,4 @@
-/* $Id: ChangeLog,v 1.1333 2001-03-31 13:23:03 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1334 2001-03-31 13:51:22 sandervl Exp $ */
 
  2001-03-31: Sander van Leeuwen <sandervl@xs4all.nl>   
     - KERNEL32: o Fix for loading executable with sections not starting on
@@ -12,6 +12,7 @@
     - COMCTL32: o Resynced with Wine (pager, datetime, flatsb, comboboxex, monthcal)
                 o Fixed previous merge (INFOPTR structures too small)
                 o Corrected ordinals of a lot of exports
+                o Fixed bug in animate control merge; now it works again
 
  2001-03-30: Sander van Leeuwen <sandervl@xs4all.nl>   
     - USER32:   o Rewrote WM_NCHITTEST handling. No longer relies on PM.
