@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.10 2001-12-06 10:13:59 sandervl Exp $
+# $Id: makefile,v 1.11 2002-04-30 14:52:03 sandervl Exp $
 
 #
 # Odin32 API
@@ -6,6 +6,7 @@
 #       dinput.dll makefile
 #
 
+WRC_PREFIX_RESOURCE=1
 
 #
 # Compiler, tools, and interference rules.
@@ -17,10 +18,13 @@
 # Object files. Prefix with OBJDIR and one space before the '\'.
 #
 OBJS = \
-$(OBJDIR)\dinput.obj \
-$(OBJDIR)\oslibinput.obj \
-$(OBJDIR)\dinputrsrc.obj \
-$(DLLENTRY)
+$(OBJDIR)\device.obj \
+$(OBJDIR)\keyboard.obj \
+$(OBJDIR)\mouse.obj \
+$(OBJDIR)\dinput_main.obj \
+$(OBJDIR)\initterm.obj \
+$(OBJDIR)\initdinput.obj \
+$(OBJDIR)\dinputrsrc.obj 
 
 
 #
