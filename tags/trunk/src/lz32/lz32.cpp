@@ -1,4 +1,4 @@
-/* $Id: lz32.cpp,v 1.7 1999-12-05 10:03:16 sandervl Exp $ */
+/* $Id: lz32.cpp,v 1.8 2000-01-03 10:25:57 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -22,12 +22,11 @@
 #include <heapstring.h>
 #include <lz32.h>
 #include "debugtools.h"
-
+#include <misc.h>
 
 ODINDEBUGCHANNEL(LZ32)
 
 #define SystemHeap GetProcessHeap()
-#define dprintf(a)
 
 
 /****************************************************************************
