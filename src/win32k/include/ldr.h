@@ -1,4 +1,4 @@
-/* $Id: ldr.h,v 1.5.4.3 2000-08-19 14:37:07 bird Exp $
+/* $Id: ldr.h,v 1.5.4.4 2000-08-21 22:59:38 bird Exp $
  *
  * ldr - Our loader "subsystem" public header file.
  *
@@ -27,8 +27,7 @@ extern "C" {
 #endif
 
 
-/** @design
- * Loader State.
+/** @design Loader State.
  *
  * Used to determin behaviour in different cases.
  * Use the isLdrState<State> macros to query current state.

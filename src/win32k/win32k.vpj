@@ -1,6 +1,6 @@
 [COMPILER]
 MACRO=odin32_maketagfile();\n
-FILTEREXPANSION=1 1 1 0 0 0 0 0 1 0 0 0 0 1
+FILTEREXPANSION=1 1 1 1 0 0 0 0 1 0 0 0 0 1
 compile=concur|capture|clear|:Compile:&Compile,nmake %n.obj
 make=concur|capture|clear|:Build:&Build,nmake
 rebuild=concur|capture|clear|:Rebuild:&Rebuild,nmake /A

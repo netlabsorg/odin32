@@ -1,4 +1,4 @@
-/* $Id: ldr.cpp,v 1.7.4.1 2000-07-16 22:43:34 bird Exp $
+/* $Id: ldr.cpp,v 1.7.4.2 2000-08-21 22:59:39 bird Exp $
  *
  * ldr.cpp - Loader helpers.
  *
@@ -237,6 +237,19 @@ ULONG       addModule(SFN hFile, PMTE pMTE, ULONG fFlags, ModuleBase *pModObj)
         AVLInsert(&pMTERoot, (PAVLNODECORE)((unsigned)pMod + offsetof(MODULE, coreMTE)));
     }
 
+    /*
+     * Increment the object counters.
+     */
+    switch (fFlags & MOD_TYPE_MASK)
+    {
+        case MOD_TYPE_PE2LX:  Pe2Lx::cLoadedModules++;
+#ifdef DEBUG
+        /*case MOD_TYPE_ELF2LX: Elf2Lx::cElf2Lx++;*/
+        default:
+            kprintf(("addModule: fFlags don't have any MOD_TYPE_* (%x).\n", fFlags));
+#endif
+    }
+
     return NO_ERROR;
 }
 
@@ -276,13 +289,17 @@ ULONG      removeModule(SFN hFile)
     {
         case MOD_TYPE_PE2LX:
             delete pMod->Data.pPe2Lx;
+            Pe2Lx::cLoadedModules--;
             break;
-
+/*
         case MOD_TYPE_ELF2LX:
-        case MOD_TYPE_SCRIPT:
-        case MOD_TYPE_PE:
+            Elf2Lx::cLoadedModules--;
+            break;
+*/
+#ifdef DEBUG
         default:
             kprintf(("removeModule: Unknown type, %#x\n", pMod->fFlags & MOD_TYPE_MASK));
+#endif
     }
 
     /* Free the module node. */

@@ -1,4 +1,4 @@
-/* $Id: pe2lx.h,v 1.9.4.2 2000-08-20 08:08:45 bird Exp $
+/* $Id: pe2lx.h,v 1.9.4.3 2000-08-21 22:59:38 bird Exp $
  *
  * Pe2Lx class declarations. Ring 0 and Ring 3
  *
@@ -75,7 +75,9 @@ public:
     BOOL    isExe();
     BOOL    isDll();
     static HMTE getKernel32SFN()        {   return sfnKernel32;   }
-    static VOID setKernel32SFN(SFN sfn) {   sfnKernel32 = sfn;   }
+    static VOID setKernel32SFN(SFN sfn) {   sfnKernel32 = sfn;    }
+    static VOID invalidateOdin32Path();
+    static LONG getLoadedModuleCount()  {   return cLoadedModules;}
 
     /** @cat public Helper methods */
     ULONG  querySizeOfLxFile();
@@ -127,6 +129,7 @@ private:
     /** @cat static helpers */
     static PCSZ queryOdin32ModuleName(PCSZ pszWin32ModuleName);
     static BOOL initOdin32Path();
+    static BOOL setOdin32Path(const char *psz);
 
     /** @cat static dump methods */
     static VOID dumpNtHeaders(PIMAGE_NT_HEADERS pNtHdrs);
@@ -203,7 +206,8 @@ private:
         ULONG flFlags;                      /* equivalent object flags */
     } paSecChars2Flags[];
 
-    static const char *     pszOdin32Path;  /* Odin32 base path. */
+    static LONG             cLoadedModules; /* Count of existing objects. Updated by constructor and destructor. */
+    static const char *     pszOdin32Path;  /* Odin32 base path (include a slash). */
     static SFN              sfnKernel32;    /* Odin32 Kernel32 filehandle. */
 };
 

@@ -1,4 +1,4 @@
-/* $Id: pe2lx.cpp,v 1.18.4.4 2000-08-20 08:08:47 bird Exp $
+/* $Id: pe2lx.cpp,v 1.18.4.5 2000-08-21 22:59:40 bird Exp $
  *
  * Pe2Lx class implementation. Ring 0 and Ring 3
  *
@@ -99,6 +99,7 @@
 #include "pe2lx.h"                      /* Pe2Lx class definitions, ++. */
 #include <versionos2.h>                 /* Pe2Lx version. */
 #include "yield.h"                      /* Yield CPU. */
+#include "options.h"                    /* Win32k options. */
 
 
 /*******************************************************************************
@@ -204,6 +205,7 @@ Pe2Lx::Pe2Lx(SFN hFile) :
     LXHdr.e32_os        = NE_OS2;
     LXHdr.e32_pagesize  = PAGESIZE;
     LXHdr.e32_objtab    = sizeof(LXHdr);
+    cLoadedModules++;
 }
 
 
@@ -276,6 +278,20 @@ Pe2Lx::~Pe2Lx()
     }
     _res_heapmin();
     _swp_heapmin();
+
+    /*
+     * If no Pe2Lx objects left, then invalidate the Odin32Path.
+     *  We'll have to do this since we may (theoretically) not receive
+     *  a close on a kernel32 handle if loading failes before kernel32
+     *  is loaded and the odin32path is determined using ldrOpenPath.
+     *  (Ie. no sfnKernel32.)
+     */
+    if (--cLoadedModules <= 0)
+        invalidateOdin32Path();
+#ifdef DEBUG
+    if (cLoadedModules < 0)
+        printIPE(("Pe2Lx::cLoadedModules is %d which is less that zero!\n", cLoadedModules));
+#endif
 }
 
 
@@ -1724,6 +1740,24 @@ BOOL    Pe2Lx::isExe()
 BOOL    Pe2Lx::isDll()
 {
     return ((this->LXHdr.e32_mflags & E32MODMASK) == E32MODDLL);
+}
+
+
+/**
+ * Invalidates the odin32path.
+ * Called by ldrClose when the kernel32 handle is closed.
+ * @sketch      Free path
+ *              nullify path pointer and kernel32 handle.
+ * @author      knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ */
+VOID Pe2Lx::invalidateOdin32Path()
+{
+    if (pszOdin32Path != NULL)
+    {
+        rfree((void*)pszOdin32Path);
+        pszOdin32Path = NULL;
+    }
+    sfnKernel32 = NULLHANDLE;
 }
 
 
@@ -4646,6 +4680,15 @@ PCSZ Pe2Lx::queryOdin32ModuleName(PCSZ pszWin32ModuleName)
 }
 
 
+
+/**
+ * Initiates the odin32path.
+ * @returns     Success indicator.
+ * @sketch
+ * @status
+ * @author      knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @remark
+ */
 BOOL Pe2Lx::initOdin32Path()
 {
     APIRET rc;
@@ -4660,41 +4703,109 @@ BOOL Pe2Lx::initOdin32Path()
      */
     pMTE = NULL;
     rc = ldrFindModule("KERNEL32", 8, CLASS_GLOBAL, &pMTE);
-    if (rc == NO_ERROR && pMTE != NULL)
+    if (rc == NO_ERROR && pMTE != NULL && pMTE->mte_swapmte != NULL)
     {
-        char *psz = pMTE->mte_swapmte->smte_path;
-        if (psz != NULL)
+        /*
+         * We now take the smte_path. Start at the end and skip the filename,
+         * and one directory up. We assume a fully qualified path is found in
+         * smte_path.
+         */
+        if (pMTE->mte_swapmte->smte_path != NULL)//paranoia
         {
-            char * pszEnd = psz + strlen(psz) - 1;
-            while (pszEnd > psz && *pszEnd != '\\' && *pszEnd != '/' && *pszEnd != ':')
-                pszEnd--;
-            pszEnd--;
-            while (pszEnd > psz && *pszEnd != '\\' && *pszEnd != '/' && *pszEnd != ':')
-                pszEnd--;
-            if (pszEnd > psz)
-            {
-                char * pszPath = (char*)malloc(pszEnd - psz);
-                memcpy(pszPath, psz, pszEnd - psz);
-                pszPath[pszEnd - psz] = '\0';
-
-                if (pszOdin32Path)
-                    free((void*)pszOdin32Path);
-                pszOdin32Path = pszPath;
-                sfnKernel32 = pMTE->mte_sfn;
-
-                return TRUE;
-            }
+            sfnKernel32 = pMTE->mte_sfn;
+            return setOdin32Path(pMTE->mte_swapmte->smte_path);
         }
     }
 
+
+    /*
+     * KERNEL32 isn't loaded. We'll only search the paths if
+     */
+    if (pszOdin32Path != NULL)
+        return TRUE;
+
+
     /*
      * Try find it searching the LIBPATHs.
-     * (Don't thing we should use ldrOpenPath since it
-     *  end's up calling ldrOpen - which is overloaded.)
+     *
+     * For the time being:
+     *  We'll use ldrOpenPath to do this, but we'll have to
+     *  disable the win32k.sys overloading temporarily.
      */
+    ldrlv_t lv = {0};
+    ULONG   ful = 0;
+    ULONG   ul;
+
+    ul = options.fNoLoader;
+    options.fNoLoader = TRUE;
+    rc = ldrOpenPath("KERNEL32", 8, &lv, &ful);
+    options.fNoLoader = ul;
+    if (rc == NO_ERROR)
+    {
+        /*
+         * Set the odin32path according to the kernel32 path we've found.
+         * (ldrOpen sets ldrpFileNameBuf to the fully qualified path of
+         *  the last opended filed, which in this case is kernel32.dll.)
+         * We'll close the file handle first of course.
+         */
+        ldrClose(lv.lv_sfn);
+        return setOdin32Path(ldrpFileNameBuf);
+    }
+
+    return rc == NO_ERROR;
+}
+
+
+
+/**
+ * Sets the Odin32Path to the given fully qualified filename of kernel32.
+ * @returns     Success indicator.
+ * @param       psz     Fully qualified filename of kernel32 with path.
+ * @sketch
+ * @status
+ * @author      knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @remark
+ */
+BOOL Pe2Lx::setOdin32Path(const char *psz)
+{
+    const char * pszEnd;
+    char * pszPath;
+
+    /*
+     * We now take the psz. Start at the end and skip the filename,
+     * and one directory up. We assume a fully qualified path.
+     */
+    pszEnd = psz + strlen(psz) - 1;
+    while (pszEnd > psz && *pszEnd != '\\' && *pszEnd != '/' && *pszEnd != ':')
+        pszEnd--;
+    pszEnd--;
+    while (pszEnd > psz && *pszEnd != '\\' && *pszEnd != '/' && *pszEnd != ':')
+        pszEnd--;
+    if (pszEnd > psz)
+    {
+        /*
+         * Free old path (if any) and allocate space for a new path.
+         * Copy the path including the slash.
+         * Remember the kernel32 filehandle (to be able to invalidate the path).
+         */
+        if (pszOdin32Path)
+            rfree((void*)pszOdin32Path);
+        if (*pszEnd == ':') //in case someone installed odin in a root directory.
+            pszEnd++;
+        pszEnd++;       //include the slash
+        pszPath = (char*)rmalloc(pszEnd - psz);
+        if (pszPath == NULL) return FALSE;
+        memcpy(pszPath, psz, pszEnd - psz);
+        pszPath[pszEnd - psz] = '\0';
+        pszOdin32Path = pszPath;
+
+        return TRUE;
+    }
 
     return FALSE;
 }
+
+
 
 
 /**
