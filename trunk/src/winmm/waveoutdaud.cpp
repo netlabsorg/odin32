@@ -1,4 +1,4 @@
-/* $Id: waveoutdaud.cpp,v 1.7 2002-04-07 14:36:32 sandervl Exp $ */
+/* $Id: waveoutdaud.cpp,v 1.8 2002-06-04 17:36:56 sandervl Exp $ */
 
 /*
  * Wave playback class (DirectAudio)
@@ -159,17 +159,16 @@ MMRESULT DAudioWaveOut::write(LPWAVEHDR pwh, UINT cbwh)
         return MMSYSERR_ERROR;
     }
 
-    if(State == STATE_STOPPED) {//continue playback
-        restart();
-    }
-    else
-    if(fUnderrun) {
-        dprintf(("Resume playback after underrun"));
+    if(State == STATE_STOPPED || fUnderrun) {
+        wmutex.enter();
+        State     = STATE_PLAYING;
         fUnderrun = FALSE;
-        State = STATE_PLAYING;
+        wmutex.leave();
 
-        // Resume the playback.
-        resume();
+        if(sendIOCTL(DAUDIO_START, &cmd)) {
+            dprintf(("Unable to (re)start stream!!!!!"));
+            return MMSYSERR_ERROR;
+        }
     }
     return(MMSYSERR_NOERROR);
 }
@@ -262,23 +261,6 @@ MMRESULT DAudioWaveOut::reset()
 
     wmutex.leave();
     return(MMSYSERR_NOERROR);
-}
-/******************************************************************************/
-/******************************************************************************/
-MMRESULT DAudioWaveOut::restart()
-{
-    DAUDIO_CMD cmd;
-
-    dprintf(("DAudioWaveOut::restart"));
-    if(State == STATE_PLAYING)
-        return(MMSYSERR_NOERROR);
-
-    wmutex.enter();
-    State     = STATE_PLAYING;
-    fUnderrun = FALSE;
-    wmutex.leave();
-
-    return sendIOCTL(DAUDIO_START, &cmd);
 }
 /******************************************************************************/
 /******************************************************************************/

@@ -1,4 +1,4 @@
-/* $Id: waveoutbase.h,v 1.2 2001-06-02 08:30:35 sandervl Exp $ */
+/* $Id: waveoutbase.h,v 1.3 2002-06-04 17:36:55 sandervl Exp $ */
 
 /*
  * Wave playback class (base)
@@ -26,7 +26,7 @@ public:
      virtual  MMRESULT write(LPWAVEHDR pwh, UINT cbwh) = 0;
      virtual  MMRESULT pause() = 0;
      virtual  MMRESULT stop() = 0;
-     virtual  MMRESULT restart() = 0;
+     virtual  MMRESULT resume() = 0;
      virtual  MMRESULT reset() = 0;
      virtual  ULONG    getPosition() = 0;
      virtual  MMRESULT setVolume(ULONG ulVol) = 0;

@@ -1,4 +1,4 @@
-/* $Id: waveoutdaud.h,v 1.4 2001-04-30 21:06:56 sandervl Exp $ */
+/* $Id: waveoutdaud.h,v 1.5 2002-06-04 17:36:56 sandervl Exp $ */
 
 /*
  * Wave playback class (DirectAudio)
@@ -29,7 +29,7 @@ public:
      virtual  MMRESULT write(LPWAVEHDR pwh, UINT cbwh);
      virtual  MMRESULT pause();
      virtual  MMRESULT stop();
-     virtual  MMRESULT restart();
+     virtual  MMRESULT resume();
      virtual  MMRESULT setVolume(ULONG ulVol);
      virtual  MMRESULT reset();
      virtual  ULONG    getPosition();
@@ -43,7 +43,6 @@ public:
 protected:
 
 private:
-       MMRESULT resume();
        BOOL     handler();
        MMRESULT sendIOCTL(ULONG cmd, DAUDIO_CMD *pDataPacket);
 
