@@ -1,4 +1,4 @@
--- $Id: Teams.sql,v 1.1 2000-07-18 22:12:30 bird Exp $
+-- $Id: Teams.sql,v 1.2 2000-07-18 22:18:56 bird Exp $
 --
 -- Team data.
 --
@@ -742,7 +742,7 @@ INSERT INTO tgroupmember(tgroup, author)
 INSERT INTO tgroupmember(tgroup, author)
     SELECT 4000, refcode FROM author WHERE name = 'Richard P. Burke';
 INSERT INTO tgroupmember(tgroup, author)
-    SELECT 4000, refcode FROM author WHERE name = 'TechnicalDirector@webwombat.com.au';
+    SELECT 4000, refcode FROM author WHERE name = 'TechnicalDirector@...';
 INSERT INTO tgroupmember(tgroup, author)
     SELECT 4000, refcode FROM author WHERE name = 'knut st. osmundsen';
 
