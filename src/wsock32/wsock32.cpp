@@ -1,4 +1,4 @@
-/* $Id: wsock32.cpp,v 1.42 2001-10-13 18:51:08 sandervl Exp $ */
+/* $Id: wsock32.cpp,v 1.43 2001-10-13 19:04:39 achimha Exp $ */
 
 /*
  *
@@ -751,6 +751,10 @@ ODINFUNCTION6(int,OS2sendto,
       	WSASetLastError(WSAEFAULT);
       	return SOCKET_ERROR;
    }
+   // check if the socket is a raw socket and has the IP_HDRINCL switch
+   // if this is the case, we overwrite the IP header length field with
+   // the actual length because some apps tend to put in garbage in there
+   // and rely on Windows correcting this
    optlen = sizeof(option);
    option = 0;
    ret = getsockopt(s, IPPROTO_IP, IP_HDRINCL_OS2, (char *)&option, &optlen);
