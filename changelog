@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.2153 2002-06-11 16:31:54 sandervl Exp $ */
+/* $Id: changelog,v 1.2154 2002-06-11 16:42:17 sandervl Exp $ */
+
+ 2002-06-11: Platon Fomichev <platon@innotek.de>
+    - SHELL32:  o Ignore name changes for 'My Computer' and other non-file
+                  objects (file dialogs)
 
  2002-06-11: Sander van Leeuwen <sandervl@innotek.de>
     - OLEAUT32, SHELL32:
