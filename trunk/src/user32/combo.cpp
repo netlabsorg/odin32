@@ -1,4 +1,4 @@
-/* $Id: combo.cpp,v 1.26 2000-02-16 14:34:06 sandervl Exp $ */
+/* $Id: combo.cpp,v 1.27 2000-03-14 15:00:58 sandervl Exp $ */
 /*
  * Combo controls
  *
@@ -1384,7 +1384,22 @@ static LRESULT COMBO_Command(HWND hwnd,WPARAM wParam,LPARAM lParam)
                 break;
 
            case (EN_UPDATE >> 8):
-                CB_NOTIFY( lphc, CBN_EDITUPDATE );
+		//SvL: Don't send updates either. (Realplayer 7 infinite loops)
+               /*
+                * In some circumstances (when the selection of the combobox
+                * is changed for example) we don't wans the EN_CHANGE notification
+                * to be forwarded to the parent of the combobox. This code
+                * checks a flag that is set in these occasions and ignores the
+                * notification.
+                */
+                if (lphc->wState & CBF_NOEDITNOTIFY)
+                {
+                  lphc->wState &= ~CBF_NOEDITNOTIFY;
+                }
+                else
+                {
+                	CB_NOTIFY( lphc, CBN_EDITUPDATE );
+		}
                 break;
 
            case (EN_ERRSPACE >> 8):
@@ -2104,13 +2119,15 @@ static LRESULT COMBO_SetCurSel(HWND hwnd,WPARAM wParam,LPARAM lParam)
     SendMessageA( lphc->hWndLBox, LB_SETTOPINDEX, wParam, 0);
   if( lphc->wState & CBF_SELCHANGE )
   {
+    //SvL: Clear the flag here; doing it after calling CBUpdateEdit causes
+    //     an infinite loop in RealPlayer 7
+    lphc->wState &= ~CBF_SELCHANGE;
+
     /* no LBN_SELCHANGE in this case, update manually */
     if( lphc->wState & CBF_EDIT )
         CBUpdateEdit( lphc, (INT)wParam );
     else
         InvalidateRect(CB_HWND(lphc), &lphc->textRect, TRUE);
-
-    lphc->wState &= ~CBF_SELCHANGE;
   }
 
   return lParam;
