@@ -1,4 +1,4 @@
-/* $Id: glrenderer.h,v 1.1 2000-02-09 08:49:01 jeroen Exp $ */
+/* $Id: glrenderer.h,v 1.2 2000-03-11 09:05:02 jeroen Exp $ */
 /*
 ** License Applicability. Except to the extent portions of this file are
 ** made subject to an alternative license as permitted in the SGI Free
@@ -36,8 +36,8 @@
 /*
  * glrenderer.h
  *
- * $Date: 2000-02-09 08:49:01 $ $Revision: 1.1 $
- * $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glu/nurbs/interface/glrenderer.h,v 1.1 2000-02-09 08:49:01 jeroen Exp $
+ * $Date: 2000-03-11 09:05:02 $ $Revision: 1.2 $
+ * $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glu/nurbs/interface/glrenderer.h,v 1.2 2000-03-11 09:05:02 jeroen Exp $
  */
 
 #ifndef __gluglrenderer_h_
@@ -55,40 +55,40 @@ public:
                 GLUnurbs( void );
     void        loadGLMatrices( void );
     void        useGLMatrices( const GLfloat modelMatrix[16],
-			       const GLfloat projMatrix[16],
-			       const GLint viewport[4] );
-    void		setSamplingMatrixIdentity( void );
+                               const GLfloat projMatrix[16],
+                               const GLint viewport[4] );
+    void                setSamplingMatrixIdentity( void );
 
-    void 	errorHandler( int );
-    void	bgnrender( void );
-    void	endrender( void );
-    void	setautoloadmode( INREAL value )
-      		    {
-		
-		      if (value) autoloadmode = GL_TRUE;
-		      else autoloadmode = GL_FALSE;
-			
-		    }
-    GLboolean	getautoloadmode( void ) { return autoloadmode; }
+    void        errorHandler( int );
+    void        bgnrender( void );
+    void        endrender( void );
+    void        setautoloadmode( INREAL value )
+                    {
 
-    void	(GLAPI *errorCallback)( GLenum );
-    void	postError( int which )
-		    { if (errorCallback) (*errorCallback)( (GLenum)which ); }
+                      if (value) autoloadmode = GL_TRUE;
+                      else autoloadmode = GL_FALSE;
 
-    void        putSurfCallBack(GLenum which, GLvoid (GLAPI *fn)(...))
+                    }
+    GLboolean   getautoloadmode( void ) { return autoloadmode; }
+
+    void        (GLCALLBACK *errorCallback)( GLenum );
+    void        postError( int which )
+                    { if (errorCallback) (*errorCallback)( (GLenum)which ); }
+
+    void        putSurfCallBack(GLenum which, GLvoid (GLCALLBACK *fn)(...))
       {
-	curveEvaluator.putCallBack(which, fn);
-	surfaceEvaluator.putCallBack(which, fn);
+        curveEvaluator.putCallBack(which, fn);
+        surfaceEvaluator.putCallBack(which, fn);
       }
 
     int         get_vertices_call_back()
       {
-	return surfaceEvaluator.get_vertices_call_back();
+        return surfaceEvaluator.get_vertices_call_back();
       }
 
     void        put_vertices_call_back(int flag)
       {
-	surfaceEvaluator.put_vertices_call_back(flag);
+        surfaceEvaluator.put_vertices_call_back(flag);
       }
 
     int         get_callback_auto_normal()
@@ -111,34 +111,34 @@ public:
     //for LOD
     void LOD_eval_list(int level)
       {
-	surfaceEvaluator.LOD_eval_list(level);
+        surfaceEvaluator.LOD_eval_list(level);
       }
 
     //NEWCALLBACK
     int        is_callback()
       {
-	return callbackFlag;
+        return callbackFlag;
       }
     void       put_callbackFlag(int flag)
       {
-	callbackFlag = flag;
-	surfaceEvaluator.put_vertices_call_back(flag);
-	curveEvaluator.put_vertices_call_back(flag);
+        callbackFlag = flag;
+        surfaceEvaluator.put_vertices_call_back(flag);
+        curveEvaluator.put_vertices_call_back(flag);
       }
 
 private:
-    GLboolean			autoloadmode;
-    OpenGLSurfaceEvaluator	surfaceEvaluator;
-    OpenGLCurveEvaluator	curveEvaluator;
+    GLboolean                   autoloadmode;
+    OpenGLSurfaceEvaluator      surfaceEvaluator;
+    OpenGLCurveEvaluator        curveEvaluator;
 
-    void		loadSamplingMatrix( const GLfloat vmat[4][4],
-			        const GLint viewport[4] );
-    void		loadCullingMatrix( GLfloat vmat[4][4] );
-    static void		grabGLMatrix( GLfloat vmat[4][4] );
-    static void		transform4d( GLfloat A[4], GLfloat B[4],
-				GLfloat mat[4][4] );
-    static void		multmatrix4d( GLfloat n[4][4], GLfloat left[4][4],
-				GLfloat right[4][4] );
+    void                loadSamplingMatrix( const GLfloat vmat[4][4],
+                                const GLint viewport[4] );
+    void                loadCullingMatrix( GLfloat vmat[4][4] );
+    static void         grabGLMatrix( GLfloat vmat[4][4] );
+    static void         transform4d( GLfloat A[4], GLfloat B[4],
+                                GLfloat mat[4][4] );
+    static void         multmatrix4d( GLfloat n[4][4], GLfloat left[4][4],
+                                GLfloat right[4][4] );
 
    int                  callbackFlag;
 };

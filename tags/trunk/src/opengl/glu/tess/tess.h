@@ -1,4 +1,4 @@
-/* $Id: tess.h,v 1.1 2000-02-09 08:47:38 jeroen Exp $ */
+/* $Id: tess.h,v 1.2 2000-03-11 09:05:04 jeroen Exp $ */
 /*
 ** License Applicability. Except to the extent portions of this file are
 ** made subject to an alternative license as permitted in the SGI Free
@@ -36,8 +36,8 @@
 /*
 ** Author: Eric Veach, July 1994.
 **
-** $Date: 2000-02-09 08:47:38 $ $Revision: 1.1 $
-** $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glu/tess/tess.h,v 1.1 2000-02-09 08:47:38 jeroen Exp $
+** $Date: 2000-03-11 09:05:04 $ $Revision: 1.2 $
+** $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glu/tess/tess.h,v 1.2 2000-03-11 09:05:04 jeroen Exp $
 */
 
 #ifndef __tess_h_
@@ -57,88 +57,88 @@ enum TessState { T_DORMANT, T_IN_POLYGON, T_IN_CONTOUR };
 /* We cache vertex data for single-contour polygons so that we can
  * try a quick-and-dirty decomposition first.
  */
-#define TESS_MAX_CACHE	100
+#define TESS_MAX_CACHE  100
 
 typedef struct CachedVertex {
-  GLdouble	coords[3];
-  void		*data;
+  GLdouble      coords[3];
+  void          *data;
 } CachedVertex;
 
 struct GLUtesselator {
 
   /*** state needed for collecting the input data ***/
 
-  enum TessState state;		/* what begin/end calls have we seen? */
+  enum TessState state;         /* what begin/end calls have we seen? */
 
-  GLUhalfEdge	*lastEdge;	/* lastEdge->Org is the most recent vertex */
-  GLUmesh	*mesh;		/* stores the input contours, and eventually
+  GLUhalfEdge   *lastEdge;      /* lastEdge->Org is the most recent vertex */
+  GLUmesh       *mesh;          /* stores the input contours, and eventually
                                    the tessellation itself */
 
-  void		(GLAPI *callError)( GLenum errnum );
+  void          (GLCALLBACK *callError)( GLenum errnum );
 
   /*** state needed for projecting onto the sweep plane ***/
 
-  GLdouble	normal[3];	/* user-specified normal (if provided) */
-  GLdouble	sUnit[3];	/* unit vector in s-direction (debugging) */
-  GLdouble	tUnit[3];	/* unit vector in t-direction (debugging) */
+  GLdouble      normal[3];      /* user-specified normal (if provided) */
+  GLdouble      sUnit[3];       /* unit vector in s-direction (debugging) */
+  GLdouble      tUnit[3];       /* unit vector in t-direction (debugging) */
 
   /*** state needed for the line sweep ***/
 
-  GLdouble	relTolerance;	/* tolerance for merging features */
-  GLenum	windingRule;	/* rule for determining polygon interior */
-  GLboolean	fatalError;	/* fatal error: needed combine callback */
+  GLdouble      relTolerance;   /* tolerance for merging features */
+  GLenum        windingRule;    /* rule for determining polygon interior */
+  GLboolean     fatalError;     /* fatal error: needed combine callback */
 
-  Dict		*dict;		/* edge dictionary for sweep line */
-  PriorityQ	*pq;		/* priority queue of vertex events */
-  GLUvertex	*event;		/* current sweep event being processed */
+  Dict          *dict;          /* edge dictionary for sweep line */
+  PriorityQ     *pq;            /* priority queue of vertex events */
+  GLUvertex     *event;         /* current sweep event being processed */
 
-  void		(GLAPI *callCombine)( GLdouble coords[3], void *data[4],
-			        GLfloat weight[4], void **outData );
+  void          (GLCALLBACK *callCombine)( GLdouble coords[3], void *data[4],
+                                GLfloat weight[4], void **outData );
 
   /*** state needed for rendering callbacks (see render.c) ***/
 
-  GLboolean	flagBoundary;	/* mark boundary edges (use EdgeFlag) */
-  GLboolean	boundaryOnly;	/* Extract contours, not triangles */
-  GLUface	*lonelyTriList;
+  GLboolean     flagBoundary;         /* mark boundary edges (use EdgeFlag)*/
+  GLboolean     boundaryOnly;          /* Extract contours, not triangles  */
+  GLUface       *lonelyTriList;
     /* list of triangles which could not be rendered as strips or fans */
 
-  void		(GLAPI *callBegin)( GLenum type );
-  void		(GLAPI *callEdgeFlag)( GLboolean boundaryEdge );
-  void		(GLAPI *callVertex)( void *data );
-  void		(GLAPI *callEnd)( void );
-  void		(GLAPI *callMesh)( GLUmesh *mesh );
+  void          (GLCALLBACK *callBegin)( GLenum type );
+  void          (GLCALLBACK *callEdgeFlag)( GLboolean boundaryEdge );
+  void          (GLCALLBACK *callVertex)( void *data );
+  void          (GLCALLBACK *callEnd)( void );
+  void          (GLCALLBACK *callMesh)( GLUmesh *mesh );
 
 
   /*** state needed to cache single-contour polygons for renderCache() */
 
-  GLboolean	emptyCache;		/* empty cache on next vertex() call */
-  int		cacheCount;		/* number of cached vertices */
-  CachedVertex	cache[TESS_MAX_CACHE];	/* the vertex data */
+  GLboolean     emptyCache;            /* empty cache on next vertex() call*/
+  int           cacheCount;            /* number of cached vertices        */
+  CachedVertex  cache[TESS_MAX_CACHE]; /* the vertex data                  */
 
   /*** rendering callbacks that also pass polygon data  ***/
-  void		(GLAPI *callBeginData)( GLenum type, void *polygonData );
-  void		(GLAPI *callEdgeFlagData)( GLboolean boundaryEdge,
-				     void *polygonData );
-  void		(GLAPI *callVertexData)( void *data, void *polygonData );
-  void		(GLAPI *callEndData)( void *polygonData );
-  void		(GLAPI *callErrorData)( GLenum errnum, void *polygonData );
-  void		(GLAPI *callCombineData)( GLdouble coords[3], void *data[4],
-				    GLfloat weight[4], void **outData,
-				    void *polygonData );
+  void          (GLCALLBACK *callBeginData)( GLenum type, void *polygonData );
+  void          (GLCALLBACK *callEdgeFlagData)( GLboolean boundaryEdge,
+                                     void *polygonData );
+  void          (GLCALLBACK *callVertexData)( void *data, void *polygonData );
+  void          (GLCALLBACK *callEndData)( void *polygonData );
+  void          (GLCALLBACK *callErrorData)( GLenum errnum, void *polygonData );
+  void          (GLCALLBACK *callCombineData)( GLdouble coords[3], void *data[4],
+                                    GLfloat weight[4], void **outData,
+                                    void *polygonData );
 
-  jmp_buf env;			/* place to jump to when memAllocs fail */
+  jmp_buf env;                      /* place to jump to when memAllocs fail*/
 
-  void *polygonData;		/* client data for current polygon */
+  void *polygonData;                     /* client data for current polygon*/
 };
 
-void GLAPI __gl_noBeginData( GLenum type, void *polygonData );
-void GLAPI __gl_noEdgeFlagData( GLboolean boundaryEdge, void *polygonData );
-void GLAPI __gl_noVertexData( void *data, void *polygonData );
-void GLAPI __gl_noEndData( void *polygonData );
-void GLAPI __gl_noErrorData( GLenum errnum, void *polygonData );
-void GLAPI __gl_noCombineData( GLdouble coords[3], void *data[4],
-			 GLfloat weight[4], void **outData,
-			 void *polygonData );
+void GLCALLBACK __gl_noBeginData( GLenum type, void *polygonData );
+void GLCALLBACK __gl_noEdgeFlagData( GLboolean boundaryEdge, void *polygonData );
+void GLCALLBACK __gl_noVertexData( void *data, void *polygonData );
+void GLCALLBACK __gl_noEndData( void *polygonData );
+void GLCALLBACK __gl_noErrorData( GLenum errnum, void *polygonData );
+void GLCALLBACK __gl_noCombineData( GLdouble coords[3], void *data[4],
+                         GLfloat weight[4], void **outData,
+                         void *polygonData );
 
 #define CALL_BEGIN_OR_BEGIN_DATA(a) \
    if (tess->callBeginData != &__gl_noBeginData) \

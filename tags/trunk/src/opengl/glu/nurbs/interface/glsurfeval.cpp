@@ -1,4 +1,4 @@
-/* $Id: glsurfeval.cpp,v 1.2 2000-03-04 19:10:13 jeroen Exp $ */
+/* $Id: glsurfeval.cpp,v 1.3 2000-03-11 09:05:02 jeroen Exp $ */
 /*
 ** License Applicability. Except to the extent portions of this file are
 ** made subject to an alternative license as permitted in the SGI Free
@@ -36,8 +36,8 @@
 /*
  * glsurfeval.c++
  *
- * $Date: 2000-03-04 19:10:13 $ $Revision: 1.2 $
- * $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glu/nurbs/interface/glsurfeval.cpp,v 1.2 2000-03-04 19:10:13 jeroen Exp $
+ * $Date: 2000-03-11 09:05:02 $ $Revision: 1.3 $
+ * $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glu/nurbs/interface/glsurfeval.cpp,v 1.3 2000-03-11 09:05:02 jeroen Exp $
  */
 
 /* Polynomial Evaluator Interface */
@@ -51,11 +51,10 @@
 #include "nurbsconsts.h"
 #include "bezierPatchMesh.h"
 
-
 //extern int surfcount;
 //int surfcount=0;
 
-/*#define USE_INTERNAL_EVAL*/ //use internal evaluator
+#define USE_INTERNAL_EVAL                     /* use internal evaluator*/
 
 /*whether do evaluation or not*/
 /*#define NO_EVALUATION*/
@@ -1125,7 +1124,6 @@ if(output_triangles)
 else
     glEvalCoord2f((GLfloat) u, (GLfloat) v);
 
-
 #endif
 
 
@@ -1191,45 +1189,45 @@ return;
 }
 
 void
-OpenGLSurfaceEvaluator::putCallBack(GLenum which, GLvoid (GLAPI *fn)(...))
+OpenGLSurfaceEvaluator::putCallBack(GLenum which, GLvoid (GLCALLBACK *fn)(...))
 {
   switch(which)
     {
     case GLU_NURBS_BEGIN:
-      beginCallBackN = (void (GLAPI *) (GLenum)) fn;
+      beginCallBackN = (void (GLCALLBACK *) (GLenum)) fn;
       break;
     case GLU_NURBS_END:
-      endCallBackN = (void (GLAPI *) (void)) fn;
+      endCallBackN = (void (GLCALLBACK *) (void)) fn;
       break;
     case GLU_NURBS_VERTEX:
-      vertexCallBackN = (void (GLAPI *) (const GLfloat*)) fn;
+      vertexCallBackN = (void (GLCALLBACK *) (const GLfloat*)) fn;
       break;
     case GLU_NURBS_NORMAL:
-      normalCallBackN = (void (GLAPI *) (const GLfloat*)) fn;
+      normalCallBackN = (void (GLCALLBACK *) (const GLfloat*)) fn;
       break;
     case GLU_NURBS_COLOR:
-      colorCallBackN = (void (GLAPI *) (const GLfloat*)) fn;
+      colorCallBackN = (void (GLCALLBACK *) (const GLfloat*)) fn;
       break;
     case GLU_NURBS_TEXTURE_COORD:
-      texcoordCallBackN = (void (GLAPI *) (const GLfloat*)) fn;
+      texcoordCallBackN = (void (GLCALLBACK *) (const GLfloat*)) fn;
       break;
     case GLU_NURBS_BEGIN_DATA:
-      beginCallBackData = (void (GLAPI *) (GLenum, void*)) fn;
+      beginCallBackData = (void (GLCALLBACK *) (GLenum, void*)) fn;
       break;
     case GLU_NURBS_END_DATA:
-      endCallBackData = (void (GLAPI *) (void*)) fn;
+      endCallBackData = (void (GLCALLBACK *) (void*)) fn;
       break;
     case GLU_NURBS_VERTEX_DATA:
-      vertexCallBackData = (void (GLAPI *) (const GLfloat*, void*)) fn;
+      vertexCallBackData = (void (GLCALLBACK *) (const GLfloat*, void*)) fn;
       break;
     case GLU_NURBS_NORMAL_DATA:
-      normalCallBackData = (void (GLAPI *) (const GLfloat*, void*)) fn;
+      normalCallBackData = (void (GLCALLBACK *) (const GLfloat*, void*)) fn;
       break;
     case GLU_NURBS_COLOR_DATA:
-      colorCallBackData = (void (GLAPI *) (const GLfloat*, void*)) fn;
+      colorCallBackData = (void (GLCALLBACK *) (const GLfloat*, void*)) fn;
       break;
     case GLU_NURBS_TEXTURE_COORD_DATA:
-      texcoordCallBackData = (void (GLAPI *) (const GLfloat*, void*)) fn;
+      texcoordCallBackData = (void (GLCALLBACK *) (const GLfloat*, void*)) fn;
       break;
 
     }

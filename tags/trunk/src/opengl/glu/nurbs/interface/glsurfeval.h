@@ -1,4 +1,4 @@
-/* $Id: glsurfeval.h,v 1.1 2000-02-09 08:49:02 jeroen Exp $ */
+/* $Id: glsurfeval.h,v 1.2 2000-03-11 09:05:03 jeroen Exp $ */
 /*
 ** License Applicability. Except to the extent portions of this file are
 ** made subject to an alternative license as permitted in the SGI Free
@@ -36,8 +36,8 @@
 /*
  * glsurfeval.h
  *
- * $Date: 2000-02-09 08:49:02 $ $Revision: 1.1 $
- * $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glu/nurbs/interface/glsurfeval.h,v 1.1 2000-02-09 08:49:02 jeroen Exp $
+ * $Date: 2000-03-11 09:05:03 $ $Revision: 1.2 $
+ * $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glu/nurbs/interface/glsurfeval.h,v 1.2 2000-03-11 09:05:03 jeroen Exp $
  */
 
 #ifndef __gluglsurfeval_h_
@@ -61,7 +61,7 @@ class StoredVertex;
 #ifndef IN_MAX_BEZIER_ORDER
 #define IN_MAX_BEZIER_ORDER 40 /*XXX should be bigger than machine order*/
 #endif
-			
+
 #ifndef IN_MAX_DIMENSION
 #define IN_MAX_DIMENSION 4
 #endif
@@ -89,49 +89,49 @@ typedef struct surfEvalMachine{
 
 class StoredVertex {
 public:
-    		StoredVertex() { type = 0; }
-		~StoredVertex(void) {}
-    void	saveEvalCoord(REAL x, REAL y)
-		    {coord[0] = x; coord[1] = y; type = TYPECOORD; }
-    void	saveEvalPoint(long x, long y)
-		    {point[0] = x; point[1] = y; type = TYPEPOINT; }
-    void	invoke(OpenGLSurfaceEvaluator *eval);
+                StoredVertex() { type = 0; }
+                ~StoredVertex(void) {}
+    void        saveEvalCoord(REAL x, REAL y)
+                    {coord[0] = x; coord[1] = y; type = TYPECOORD; }
+    void        saveEvalPoint(long x, long y)
+                    {point[0] = x; point[1] = y; type = TYPEPOINT; }
+    void        invoke(OpenGLSurfaceEvaluator *eval);
 
 private:
-    int		type;
-    REAL	coord[2];
-    long	point[2];
+    int         type;
+    REAL        coord[2];
+    long        point[2];
 };
 
 class OpenGLSurfaceEvaluator : public BasicSurfaceEvaluator {
 public:
-			OpenGLSurfaceEvaluator();
-    			~OpenGLSurfaceEvaluator( void );
-    void		polymode( long style );
-    void		range2f( long, REAL *, REAL * );
-    void		domain2f( REAL, REAL, REAL, REAL );
-    void		addMap( SurfaceMap * ) { }
+                        OpenGLSurfaceEvaluator();
+                        ~OpenGLSurfaceEvaluator( void );
+    void                polymode( long style );
+    void                range2f( long, REAL *, REAL * );
+    void                domain2f( REAL, REAL, REAL, REAL );
+    void                addMap( SurfaceMap * ) { }
 
-    void		enable( long );
-    void		disable( long );
-    void		bgnmap2f( long );
-    void		map2f( long, REAL, REAL, long, long,
-				     REAL, REAL, long, long, REAL * );
-    void		mapgrid2f( long, REAL, REAL, long, REAL, REAL );
-    void		mapmesh2f( long, long, long, long, long );
-    void		evalcoord2f( long, REAL, REAL );
-    void		evalpoint2i( long, long );
-    void		endmap2f( void );
+    void                enable( long );
+    void                disable( long );
+    void                bgnmap2f( long );
+    void                map2f( long, REAL, REAL, long, long,
+                                     REAL, REAL, long, long, REAL * );
+    void                mapgrid2f( long, REAL, REAL, long, REAL, REAL );
+    void                mapmesh2f( long, long, long, long, long );
+    void                evalcoord2f( long, REAL, REAL );
+    void                evalpoint2i( long, long );
+    void                endmap2f( void );
 
-    void	 	bgnline( void );
-    void	 	endline( void );
-    void	 	bgnclosedline( void );
-    void	 	endclosedline( void );
-    void	 	bgntmesh( void );
-    void	 	swaptmesh( void );
-    void	 	endtmesh( void );
-    void	 	bgnqstrip( void );
-    void	 	endqstrip( void );
+    void                bgnline( void );
+    void                endline( void );
+    void                bgnclosedline( void );
+    void                endclosedline( void );
+    void                bgntmesh( void );
+    void                swaptmesh( void );
+    void                endtmesh( void );
+    void                bgnqstrip( void );
+    void                endqstrip( void );
 
     void                bgntfan( void );
     void                endtfan( void );
@@ -140,20 +140,20 @@ public:
     void                evalVStrip(int n_left, REAL u_left, REAL* left_val,
                                    int n_right, REAL u_right, REAL* right_val);
 
-    void		coord2f( REAL, REAL );
-    void		point2i( long, long );
+    void                coord2f( REAL, REAL );
+    void                point2i( long, long );
 
-    void		newtmeshvert( REAL, REAL );
-    void		newtmeshvert( long, long );
+    void                newtmeshvert( REAL, REAL );
+    void                newtmeshvert( long, long );
 
-    void 	        putCallBack(GLenum which, GLvoid (GLAPI *fn)(...));
+    void                putCallBack(GLenum which, GLvoid (GLCALLBACK *fn)(...));
     int                 get_vertices_call_back()
       {
-	return output_triangles;
+        return output_triangles;
       }
     void                put_vertices_call_back(int flag)
       {
-	output_triangles = flag;
+        output_triangles = flag;
       }
 
     void                 put_callback_auto_normal(int flag)
@@ -178,52 +178,52 @@ public:
 
 
 private:
-    StoredVertex	*vertexCache[VERTEX_CACHE_SIZE];
-    int			tmeshing;
-    int			which;
-    int			vcount;
+    StoredVertex        *vertexCache[VERTEX_CACHE_SIZE];
+    int                 tmeshing;
+    int                 which;
+    int                 vcount;
 
     GLint              gl_polygon_mode[2];/*to save and restore so that
-					 *no side effect
-					 */
+                                         *no side effect
+                                         */
     bezierPatchMesh        *global_bpm; //for output triangles
     int                output_triangles; //true 1 or false 0
 
 
 
-    void (GLAPI *beginCallBackN) (GLenum type);
-    void (GLAPI *endCallBackN)   (void);
-    void (GLAPI *vertexCallBackN) (const GLfloat *vert);
-    void (GLAPI *normalCallBackN) (const GLfloat *normal);
-    void (GLAPI *colorCallBackN) (const GLfloat *color);
-    void (GLAPI *texcoordCallBackN) (const GLfloat *texcoord);
+    void (GLCALLBACK *beginCallBackN) (GLenum type);
+    void (GLCALLBACK *endCallBackN)   (void);
+    void (GLCALLBACK *vertexCallBackN) (const GLfloat *vert);
+    void (GLCALLBACK *normalCallBackN) (const GLfloat *normal);
+    void (GLCALLBACK *colorCallBackN) (const GLfloat *color);
+    void (GLCALLBACK *texcoordCallBackN) (const GLfloat *texcoord);
 
-    void (GLAPI *beginCallBackData) (GLenum type, void* data);
-    void (GLAPI *endCallBackData)   (void* data);
-    void (GLAPI *vertexCallBackData) (const GLfloat *vert, void* data);
-    void (GLAPI *normalCallBackData) (const GLfloat *normal, void* data);
-    void (GLAPI *colorCallBackData) (const GLfloat *color, void* data);
-    void (GLAPI *texcoordCallBackData) (const GLfloat *texcoord, void* data);
+    void (GLCALLBACK *beginCallBackData) (GLenum type, void* data);
+    void (GLCALLBACK *endCallBackData)   (void* data);
+    void (GLCALLBACK *vertexCallBackData) (const GLfloat *vert, void* data);
+    void (GLCALLBACK *normalCallBackData) (const GLfloat *normal, void* data);
+    void (GLCALLBACK *colorCallBackData) (const GLfloat *color, void* data);
+    void (GLCALLBACK *texcoordCallBackData) (const GLfloat *texcoord, void* data);
 
-    void               beginCallBack (GLenum type, void* data);
-    void               endCallBack   (void* data);
-    void               vertexCallBack (const GLfloat *vert, void* data);
-    void               normalCallBack (const GLfloat *normal, void* data);
-    void               colorCallBack (const GLfloat *color, void* data);
-    void               texcoordCallBack (const GLfloat *texcoord, void* data);
+    void         beginCallBack (GLenum type, void* data);
+    void         endCallBack   (void* data);
+    void         vertexCallBack (const GLfloat *vert, void* data);
+    void         normalCallBack (const GLfloat *normal, void* data);
+    void         colorCallBack (const GLfloat *color, void* data);
+    void         texcoordCallBack (const GLfloat *texcoord, void* data);
 
 
-    void* userData; //the opaque pointer for Data callback functions.
+    void* userData;      /* the opaque pointer for Data callback functions.*/
 
    /*LOD evaluation*/
    void LOD_triangle(REAL A[2], REAL B[2], REAL C[2],
-		     int level);
+                     int level);
    void LOD_eval(int num_vert, REAL* verts, int type, int level);
-		
-  int LOD_eval_level; //set by LOD_eval_list()
+
+  int LOD_eval_level;                  /* set by LOD_eval_list()           */
 
    /*************begin for internal evaluators*****************/
-			
+
  /*the following global variables are only defined in this file.
  *They are used to cache the precomputed Bezier polynomial values.
  *These calues may be used consecutively in which case we don't have
@@ -271,41 +271,41 @@ private:
 
 /*functions*/
  void inDoDomain2WithDerivs(int k, REAL u, REAL v,
-				REAL u1, REAL u2, int uorder,
-				REAL v1,  REAL v2, int vorder,
-				REAL *baseData,
-				REAL *retPoint, REAL *retdu, REAL *retdv);
+                                REAL u1, REAL u2, int uorder,
+                                REAL v1,  REAL v2, int vorder,
+                                REAL *baseData,
+                                REAL *retPoint, REAL *retdu, REAL *retdv);
  void inPreEvaluate(int order, REAL vprime, REAL *coeff);
  void inPreEvaluateWithDeriv(int order, REAL vprime, REAL *coeff, REAL *coeffDeriv);
  void inComputeFirstPartials(REAL *p, REAL *pu, REAL *pv);
  void inComputeNormal2(REAL *pu, REAL *pv, REAL *n);
  void inDoEvalCoord2(REAL u, REAL v,
-		     REAL *retPoint, REAL *retNormal);
+                     REAL *retPoint, REAL *retNormal);
  void inDoEvalCoord2NOGE(REAL u, REAL v,
-		     REAL *retPoint, REAL *retNormal);
+                     REAL *retPoint, REAL *retNormal);
  void inMap2f(int k,
-	      REAL ulower,
-	      REAL uupper,
-	      int ustride,
-	      int uorder,
-	      REAL vlower,
-	      REAL vupper,
-	      int vstride,
-	      int vorder,
-	      REAL *ctlPoints);
+              REAL ulower,
+              REAL uupper,
+              int ustride,
+              int uorder,
+              REAL vlower,
+              REAL vupper,
+              int vstride,
+              int vorder,
+              REAL *ctlPoints);
 
  void inMapGrid2f(int nu, REAL u0, REAL u1,
-		  int nv, REAL v0, REAL v1);
+                  int nv, REAL v0, REAL v1);
 
  void inEvalMesh2(int lowU, int lowV, int highU, int highV);
  void inEvalPoint2(int i, int j);
  void inEvalCoord2f(REAL u, REAL v);
 
 void inEvalULine(int n_points, REAL v, REAL* u_vals,
-	int stride, REAL ret_points[][3], REAL ret_normals[][3]);
+        int stride, REAL ret_points[][3], REAL ret_normals[][3]);
 
 void inEvalVLine(int n_points, REAL u, REAL* v_vals,
-	int stride, REAL ret_points[][3], REAL ret_normals[][3]);
+        int stride, REAL ret_points[][3], REAL ret_normals[][3]);
 
 void inEvalUStrip(int n_upper, REAL v_upper, REAL* upper_val,
                        int n_lower, REAL v_lower, REAL* lower_val
@@ -325,23 +325,23 @@ void inPreEvaluateBU_intfac(REAL u)
   }
 
 void inDoDomain2WithDerivsBV(int k, REAL u, REAL v,
-			     REAL u1, REAL u2, int uorder,
-			     REAL v1, REAL v2, int vorder,
-			     REAL *baseData,
-			     REAL *retPoint, REAL* retdu, REAL *retdv);
+                             REAL u1, REAL u2, int uorder,
+                             REAL v1, REAL v2, int vorder,
+                             REAL *baseData,
+                             REAL *retPoint, REAL* retdu, REAL *retdv);
 
 void inDoDomain2WithDerivsBU(int k, REAL u, REAL v,
-			     REAL u1, REAL u2, int uorder,
-			     REAL v1, REAL v2, int vorder,
-			     REAL *baseData,
-			     REAL *retPoint, REAL* retdu, REAL *retdv);
+                             REAL u1, REAL u2, int uorder,
+                             REAL v1, REAL v2, int vorder,
+                             REAL *baseData,
+                             REAL *retPoint, REAL* retdu, REAL *retdv);
 
 
 void inDoEvalCoord2NOGE_BV(REAL u, REAL v,
-			   REAL *retPoint, REAL *retNormal);
+                           REAL *retPoint, REAL *retNormal);
 
 void inDoEvalCoord2NOGE_BU(REAL u, REAL v,
-			   REAL *retPoint, REAL *retNormal);
+                           REAL *retPoint, REAL *retNormal);
 
 void inBPMEval(bezierPatchMesh* bpm);
 void inBPMListEval(bezierPatchMesh* list);
@@ -361,21 +361,21 @@ int color_flag;
 int texcoord_flag;
 
 void inMap2fEM(int which, //0:vert,1:norm,2:color,3:tex
-	       int dimension,
-	      REAL ulower,
-	      REAL uupper,
-	      int ustride,
-	      int uorder,
-	      REAL vlower,
-	      REAL vupper,
-	      int vstride,
-	      int vorder,
-	      REAL *ctlPoints);
+               int dimension,
+              REAL ulower,
+              REAL uupper,
+              int ustride,
+              int uorder,
+              REAL vlower,
+              REAL vupper,
+              int vstride,
+              int vorder,
+              REAL *ctlPoints);
 
 void inDoDomain2WithDerivsEM(surfEvalMachine *em, REAL u, REAL v,
-				REAL *retPoint, REAL *retdu, REAL *retdv);
+                                REAL *retPoint, REAL *retdu, REAL *retdv);
 void inDoDomain2EM(surfEvalMachine *em, REAL u, REAL v,
-				REAL *retPoint);
+                                REAL *retPoint);
  void inDoEvalCoord2EM(REAL u, REAL v);
 
 void inBPMEvalEM(bezierPatchMesh* bpm);
@@ -385,20 +385,20 @@ void inBPMListEvalEM(bezierPatchMesh* list);
 
 
    /*************end for internal evaluators*****************/
-		
+
 };
 
 inline void StoredVertex::invoke(OpenGLSurfaceEvaluator *eval)
 {
     switch(type) {
       case TYPECOORD:
-	eval->coord2f(coord[0], coord[1]);
-	break;
+        eval->coord2f(coord[0], coord[1]);
+        break;
       case TYPEPOINT:
-	eval->point2i(point[0], point[1]);
-	break;
+        eval->point2i(point[0], point[1]);
+        break;
       default:
-	break;
+        break;
     }
 }
 

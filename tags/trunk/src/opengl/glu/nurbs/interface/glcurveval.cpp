@@ -1,4 +1,4 @@
-/* $Id: glcurveval.cpp,v 1.1 2000-02-09 08:49:00 jeroen Exp $ */
+/* $Id: glcurveval.cpp,v 1.2 2000-03-11 09:05:01 jeroen Exp $ */
 /*
 ** License Applicability. Except to the extent portions of this file are
 ** made subject to an alternative license as permitted in the SGI Free
@@ -36,8 +36,8 @@
 /*
  * glcurveval.c++
  *
- * $Date: 2000-02-09 08:49:00 $ $Revision: 1.1 $
- * $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glu/nurbs/interface/glcurveval.cpp,v 1.1 2000-02-09 08:49:00 jeroen Exp $
+ * $Date: 2000-03-11 09:05:01 $ $Revision: 1.2 $
+ * $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glu/nurbs/interface/glcurveval.cpp,v 1.2 2000-03-11 09:05:01 jeroen Exp $
  */
 
 /* Polynomial Evaluator Interface */
@@ -87,22 +87,22 @@ OpenGLCurveEvaluator::~OpenGLCurveEvaluator(void)
 void
 OpenGLCurveEvaluator::addMap(CurveMap *m)
 {
-	m = m;
+        m = m;
 }
 
 void
 OpenGLCurveEvaluator::range1f(long type, REAL *from, REAL *to)
 {
-	type = type;
-	from = from;
-	to = to;
+        type = type;
+        from = from;
+        to = to;
 }
 
 void
 OpenGLCurveEvaluator::domain1f(REAL ulo, REAL uhi)
 {
-	ulo = ulo;
-	uhi = uhi;
+        ulo = ulo;
+        uhi = uhi;
 }
 
 void
@@ -201,12 +201,12 @@ OpenGLCurveEvaluator::endmap1f(void)
  */
 void
 OpenGLCurveEvaluator::map1f(
-    long type,		 	/* map type */
-    REAL ulo,			/* lower parametric bound */
-    REAL uhi,			/* upper parametric bound */
-    long stride, 		/* distance to next point in REALS */
-    long order,			/* parametric order */
-    REAL *pts 			/* control points */
+    long type,                  /* map type */
+    REAL ulo,                   /* lower parametric bound */
+    REAL uhi,                   /* upper parametric bound */
+    long stride,                /* distance to next point in REALS */
+    long order,                 /* parametric order */
+    REAL *pts                   /* control points */
 )
 {
   if(output_triangles)
@@ -215,48 +215,48 @@ OpenGLCurveEvaluator::map1f(
       int which;
       switch(type){
       case GL_MAP1_VERTEX_3:
-	which = 0;
-	dimension = 3;
-	break;
+        which = 0;
+        dimension = 3;
+        break;
       case GL_MAP1_VERTEX_4:
-	which=0;
-	dimension = 4;
-	break;
+        which=0;
+        dimension = 4;
+        break;
       case GL_MAP1_INDEX:
-	which=2;
-	dimension = 1;
-	break;
+        which=2;
+        dimension = 1;
+        break;
       case GL_MAP1_COLOR_4:
-	which=2;
-	dimension = 4;
-	break;
+        which=2;
+        dimension = 4;
+        break;
       case GL_MAP1_NORMAL:
-	which=1;
-	dimension = 3;
-	break;
+        which=1;
+        dimension = 3;
+        break;
       case GL_MAP1_TEXTURE_COORD_1:
-	which=3;
-	dimension = 1;
-	break;
+        which=3;
+        dimension = 1;
+        break;
       case GL_MAP1_TEXTURE_COORD_2:
-	which=3;
-	dimension = 2;
-	break;
-	
+        which=3;
+        dimension = 2;
+        break;
+
       case GL_MAP1_TEXTURE_COORD_3:
-	which=3;
-	dimension = 3;
-	break;
+        which=3;
+        dimension = 3;
+        break;
       case GL_MAP1_TEXTURE_COORD_4:
-	which=3;
-	dimension = 4;
-	break;	
+        which=3;
+        dimension = 4;
+        break;
       }
-      inMap1f(which, dimension, ulo, uhi, stride, order, pts); 	
+      inMap1f(which, dimension, ulo, uhi, stride, order, pts);
     }
   else
     glMap1f((GLenum) type, (GLfloat) ulo, (GLfloat) uhi, (GLint) stride,
-	    (GLint) order, (const GLfloat *) pts);
+            (GLint) order, (const GLfloat *) pts);
 }
 
 /*-------------------------------------------------------------------------
@@ -275,11 +275,11 @@ void OpenGLCurveEvaluator::mapmesh1f(long style, long from, long to)
       default:
       case N_MESHFILL:
       case N_MESHLINE:
-	glEvalMesh1((GLenum) GL_LINE, (GLint) from, (GLint) to);
-	break;
+        glEvalMesh1((GLenum) GL_LINE, (GLint) from, (GLint) to);
+        break;
       case N_MESHPOINT:
-	glEvalMesh1((GLenum) GL_POINT, (GLint) from, (GLint) to);
-	break;
+        glEvalMesh1((GLenum) GL_POINT, (GLint) from, (GLint) to);
+        break;
       }
     }
 }
@@ -303,45 +303,45 @@ void OpenGLCurveEvaluator::evalcoord1f(long, REAL u)
 }
 
 void
-OpenGLCurveEvaluator::putCallBack(GLenum which, GLvoid (GLAPI *fn)(...))
+OpenGLCurveEvaluator::putCallBack(GLenum which, GLvoid (GLCALLBACK *fn)(...))
 {
   switch(which)
   {
     case GLU_NURBS_BEGIN:
-      beginCallBackN = (void (GLAPI *) (GLenum)) fn;
+      beginCallBackN = (void (GLCALLBACK *) (GLenum)) fn;
       break;
     case GLU_NURBS_END:
-      endCallBackN = (void (GLAPI *) (void)) fn;
+      endCallBackN = (void (GLCALLBACK *) (void)) fn;
       break;
     case GLU_NURBS_VERTEX:
-      vertexCallBackN = (void (GLAPI *) (const GLfloat*)) fn;
+      vertexCallBackN = (void (GLCALLBACK *) (const GLfloat*)) fn;
       break;
     case GLU_NURBS_NORMAL:
-      normalCallBackN = (void (GLAPI *) (const GLfloat*)) fn;
+      normalCallBackN = (void (GLCALLBACK *) (const GLfloat*)) fn;
       break;
     case GLU_NURBS_COLOR:
-      colorCallBackN = (void (GLAPI *) (const GLfloat*)) fn;
+      colorCallBackN = (void (GLCALLBACK *) (const GLfloat*)) fn;
       break;
     case GLU_NURBS_TEXTURE_COORD:
-      texcoordCallBackN = (void (GLAPI *) (const GLfloat*)) fn;
+      texcoordCallBackN = (void (GLCALLBACK *) (const GLfloat*)) fn;
       break;
     case GLU_NURBS_BEGIN_DATA:
-      beginCallBackData = (void (GLAPI *) (GLenum, void*)) fn;
+      beginCallBackData = (void (GLCALLBACK *) (GLenum, void*)) fn;
       break;
     case GLU_NURBS_END_DATA:
-      endCallBackData = (void (GLAPI *) (void*)) fn;
+      endCallBackData = (void (GLCALLBACK *) (void*)) fn;
       break;
     case GLU_NURBS_VERTEX_DATA:
-      vertexCallBackData = (void (GLAPI *) (const GLfloat*, void*)) fn;
+      vertexCallBackData = (void (GLCALLBACK *) (const GLfloat*, void*)) fn;
       break;
     case GLU_NURBS_NORMAL_DATA:
-      normalCallBackData = (void (GLAPI *) (const GLfloat*, void*)) fn;
+      normalCallBackData = (void (GLCALLBACK *) (const GLfloat*, void*)) fn;
       break;
     case GLU_NURBS_COLOR_DATA:
-      colorCallBackData = (void (GLAPI *) (const GLfloat*, void*)) fn;
+      colorCallBackData = (void (GLCALLBACK *) (const GLfloat*, void*)) fn;
       break;
     case GLU_NURBS_TEXTURE_COORD_DATA:
-      texcoordCallBackData = (void (GLAPI *) (const GLfloat*, void*)) fn;
+      texcoordCallBackData = (void (GLCALLBACK *) (const GLfloat*, void*)) fn;
       break;
   }
 }

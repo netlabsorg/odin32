@@ -1,4 +1,4 @@
-/* $Id: api1.c,v 1.1 2000-02-29 00:49:57 sandervl Exp $ */
+/* $Id: api1.c,v 1.2 2000-03-11 09:05:06 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -53,6 +53,8 @@
 #include "vbfill.h"
 #endif
 
+#include <misc.h>
+
 /*
  * Part 1 of API functions
  */
@@ -84,16 +86,16 @@ GLboolean GLAPIENTRY glAreTexturesResident(CTX_ARG GLsizei n, const GLuint *text
 /* Enough funny business going on in here it might be quicker to use a
  * function pointer.
  */
-#define ARRAY_ELT( IM, i )					\
-{								\
-   GLuint count = IM->Count;					\
-   IM->Elt[count] = i;						\
-   IM->Flag[count] = ((IM->Flag[count] & IM->ArrayAndFlags) |	\
-		      VERT_ELT);				\
-   IM->FlushElt |= IM->ArrayEltFlush;				\
-   IM->Count = count += IM->ArrayIncr;				\
-   if (count == VB_MAX)						\
-      IM->maybe_transform_vb( IM );				\
+#define ARRAY_ELT( IM, i )                                      \
+{                                                               \
+   GLuint count = IM->Count;                                    \
+   IM->Elt[count] = i;                                          \
+   IM->Flag[count] = ((IM->Flag[count] & IM->ArrayAndFlags) |   \
+                      VERT_ELT);                                \
+   IM->FlushElt |= IM->ArrayEltFlush;                           \
+   IM->Count = count += IM->ArrayIncr;                          \
+   if (count == VB_MAX)                                         \
+      IM->maybe_transform_vb( IM );                             \
 }
 
 
@@ -124,7 +126,7 @@ void GLAPIENTRY glBegin(CTX_ARG GLenum mode )
 
    if (mode < GL_POINTS || mode > GL_POLYGON) {
       gl_compile_error( CC, GL_INVALID_ENUM, "glBegin" );
-      return;		
+      return;
    }
 
    gl_Begin(CC,mode);
@@ -250,45 +252,45 @@ void GLAPIENTRY glClipPlane(CTX_ARG GLenum plane, const GLdouble *equation )
  * to implement that mechanism to get good performance from
  * color-material and vertex arrays.
  */
-#define COLOR( IM, r,g,b,a )			\
-{						\
-   GLuint count = IM->Count;			\
-   IM->Flag[count] |= VERT_RGBA;		\
-   IM->Color[count][0] = r;			\
-   IM->Color[count][1] = g;			\
-   IM->Color[count][2] = b;			\
-   IM->Color[count][3] = a;			\
+#define COLOR( IM, r,g,b,a )                    \
+{                                               \
+   GLuint count = IM->Count;                    \
+   IM->Flag[count] |= VERT_RGBA;                \
+   IM->Color[count][0] = r;                     \
+   IM->Color[count][1] = g;                     \
+   IM->Color[count][2] = b;                     \
+   IM->Color[count][3] = a;                     \
 }
 
 #if 0
-#define COLOR4F( IM, r,g,b,a )				\
-{							\
-   GLuint count = IM->Count;				\
-   IM->Flag[count] |= VERT_RGBA | VERT_FLOAT_RGBA;	\
-   IM->FloatColor[count][0] = r;			\
-   IM->FloatColor[count][1] = g;			\
-   IM->FloatColor[count][2] = b;			\
-   IM->FloatColor[count][3] = a;			\
+#define COLOR4F( IM, r,g,b,a )                          \
+{                                                       \
+   GLuint count = IM->Count;                            \
+   IM->Flag[count] |= VERT_RGBA | VERT_FLOAT_RGBA;      \
+   IM->FloatColor[count][0] = r;                        \
+   IM->FloatColor[count][1] = g;                        \
+   IM->FloatColor[count][2] = b;                        \
+   IM->FloatColor[count][3] = a;                        \
 }
 #else
-#define COLOR4F(IM, r, g, b, a)			\
-{						\
-   GLubyte col[4];				\
-   FLOAT_COLOR_TO_UBYTE_COLOR(col[0], r);	\
-   FLOAT_COLOR_TO_UBYTE_COLOR(col[1], g);	\
-   FLOAT_COLOR_TO_UBYTE_COLOR(col[2], b);	\
-   FLOAT_COLOR_TO_UBYTE_COLOR(col[3], a);	\
-   COLORV( IM, col );				\
+#define COLOR4F(IM, r, g, b, a)                 \
+{                                               \
+   GLubyte col[4];                              \
+   FLOAT_COLOR_TO_UBYTE_COLOR(col[0], r);       \
+   FLOAT_COLOR_TO_UBYTE_COLOR(col[1], g);       \
+   FLOAT_COLOR_TO_UBYTE_COLOR(col[2], b);       \
+   FLOAT_COLOR_TO_UBYTE_COLOR(col[3], a);       \
+   COLORV( IM, col );                           \
 }
 #endif
 
 
 
-#define COLORV( IM, v )				\
-{						\
-   GLuint count = IM->Count;			\
-   IM->Flag[count] |= VERT_RGBA;		\
-   COPY_4UBV(IM->Color[count], v);		\
+#define COLORV( IM, v )                         \
+{                                               \
+   GLuint count = IM->Count;                    \
+   IM->Flag[count] |= VERT_RGBA;                \
+   COPY_4UBV(IM->Color[count], v);              \
 }
 
 
@@ -296,10 +298,10 @@ void GLAPIENTRY glColor3b(CTX_ARG GLbyte red, GLbyte green, GLbyte blue )
 {
    GET_IMMEDIATE;
    COLOR( IM,
-	  BYTE_TO_UBYTE(red),
-	  BYTE_TO_UBYTE(green),
-	  BYTE_TO_UBYTE(blue),
-	  255 );
+          BYTE_TO_UBYTE(red),
+          BYTE_TO_UBYTE(green),
+          BYTE_TO_UBYTE(blue),
+          255 );
 }
 
 
@@ -338,9 +340,9 @@ void GLAPIENTRY glColor3i(CTX_ARG GLint red, GLint green, GLint blue )
 {
    GET_IMMEDIATE;
    COLOR( IM, INT_TO_UBYTE(red),
-	  INT_TO_UBYTE(green),
-	  INT_TO_UBYTE(blue),
-	  255);
+          INT_TO_UBYTE(green),
+          INT_TO_UBYTE(blue),
+          255);
 }
 
 
@@ -348,9 +350,9 @@ void GLAPIENTRY glColor3s(CTX_ARG GLshort red, GLshort green, GLshort blue )
 {
    GET_IMMEDIATE;
    COLOR( IM, SHORT_TO_UBYTE(red),
-	  SHORT_TO_UBYTE(green),
-	  SHORT_TO_UBYTE(blue),
-	  255);
+          SHORT_TO_UBYTE(green),
+          SHORT_TO_UBYTE(blue),
+          255);
 }
 
 
@@ -365,9 +367,9 @@ void GLAPIENTRY glColor3ui(CTX_ARG GLuint red, GLuint green, GLuint blue )
 {
    GET_IMMEDIATE;
    COLOR( IM, UINT_TO_UBYTE(red),
-	  UINT_TO_UBYTE(green),
-	  UINT_TO_UBYTE(blue),
-	  255 );
+          UINT_TO_UBYTE(green),
+          UINT_TO_UBYTE(blue),
+          255 );
 }
 
 
@@ -375,8 +377,8 @@ void GLAPIENTRY glColor3us(CTX_ARG GLushort red, GLushort green, GLushort blue )
 {
    GET_IMMEDIATE;
    COLOR( IM, USHORT_TO_UBYTE(red), USHORT_TO_UBYTE(green),
-	  USHORT_TO_UBYTE(blue),
-	  255 );
+          USHORT_TO_UBYTE(blue),
+          255 );
 }
 
 
@@ -384,12 +386,12 @@ void GLAPIENTRY glColor4b(CTX_ARG GLbyte red, GLbyte green, GLbyte blue, GLbyte 
 {
    GET_IMMEDIATE;
    COLOR( IM, BYTE_TO_UBYTE(red), BYTE_TO_UBYTE(green),
-	  BYTE_TO_UBYTE(blue), BYTE_TO_UBYTE(alpha) );
+          BYTE_TO_UBYTE(blue), BYTE_TO_UBYTE(alpha) );
 }
 
 
 void GLAPIENTRY glColor4d(CTX_ARG GLdouble red, GLdouble green, GLdouble blue,
-			   GLdouble alpha )
+                           GLdouble alpha )
 {
    GLubyte col[4];
    GLfloat r = red;
@@ -425,7 +427,7 @@ void GLAPIENTRY glColor4i(CTX_ARG GLint red, GLint green, GLint blue, GLint alph
 {
    GET_IMMEDIATE;
    COLOR( IM, INT_TO_UBYTE(red), INT_TO_UBYTE(green),
-	  INT_TO_UBYTE(blue), INT_TO_UBYTE(alpha) );
+          INT_TO_UBYTE(blue), INT_TO_UBYTE(alpha) );
 }
 
 
@@ -434,7 +436,7 @@ void GLAPIENTRY glColor4s(CTX_ARG GLshort red, GLshort green,
 {
    GET_IMMEDIATE;
    COLOR( IM, SHORT_TO_UBYTE(red), SHORT_TO_UBYTE(green),
-	  SHORT_TO_UBYTE(blue), SHORT_TO_UBYTE(alpha) );
+          SHORT_TO_UBYTE(blue), SHORT_TO_UBYTE(alpha) );
 }
 
 void GLAPIENTRY glColor4ub(CTX_ARG GLubyte red, GLubyte green,
@@ -449,7 +451,7 @@ void GLAPIENTRY glColor4ui(CTX_ARG GLuint red, GLuint green,
 {
    GET_IMMEDIATE;
    COLOR( IM, UINT_TO_UBYTE(red), UINT_TO_UBYTE(green),
-	  UINT_TO_UBYTE(blue), UINT_TO_UBYTE(alpha) );
+          UINT_TO_UBYTE(blue), UINT_TO_UBYTE(alpha) );
 }
 
 void GLAPIENTRY glColor4us(CTX_ARG GLushort red, GLushort green,
@@ -457,7 +459,7 @@ void GLAPIENTRY glColor4us(CTX_ARG GLushort red, GLushort green,
 {
    GET_IMMEDIATE;
    COLOR( IM, USHORT_TO_UBYTE(red), USHORT_TO_UBYTE(green),
-	  USHORT_TO_UBYTE(blue), USHORT_TO_UBYTE(alpha) );
+          USHORT_TO_UBYTE(blue), USHORT_TO_UBYTE(alpha) );
 }
 
 
@@ -465,7 +467,7 @@ void GLAPIENTRY glColor3bv(CTX_ARG const GLbyte *v )
 {
    GET_IMMEDIATE;
    COLOR( IM, BYTE_TO_UBYTE(v[0]), BYTE_TO_UBYTE(v[1]),
-	  BYTE_TO_UBYTE(v[2]), 255 );
+          BYTE_TO_UBYTE(v[2]), 255 );
 }
 
 
@@ -504,7 +506,7 @@ void GLAPIENTRY glColor3iv(CTX_ARG const GLint *v )
 {
    GET_IMMEDIATE;
    COLOR( IM, INT_TO_UBYTE(v[0]), INT_TO_UBYTE(v[1]),
-	  INT_TO_UBYTE(v[2]), 255 );
+          INT_TO_UBYTE(v[2]), 255 );
 }
 
 
@@ -512,7 +514,7 @@ void GLAPIENTRY glColor3sv(CTX_ARG const GLshort *v )
 {
    GET_IMMEDIATE;
    COLOR( IM, SHORT_TO_UBYTE(v[0]), SHORT_TO_UBYTE(v[1]),
-	  SHORT_TO_UBYTE(v[2]), 255 );
+          SHORT_TO_UBYTE(v[2]), 255 );
 }
 
 
@@ -527,7 +529,7 @@ void GLAPIENTRY glColor3uiv(CTX_ARG const GLuint *v )
 {
    GET_IMMEDIATE;
    COLOR( IM, UINT_TO_UBYTE(v[0]), UINT_TO_UBYTE(v[1]),
-	  UINT_TO_UBYTE(v[2]), 255 );
+          UINT_TO_UBYTE(v[2]), 255 );
 }
 
 
@@ -535,7 +537,7 @@ void GLAPIENTRY glColor3usv(CTX_ARG const GLushort *v )
 {
    GET_IMMEDIATE;
    COLOR( IM, USHORT_TO_UBYTE(v[0]), USHORT_TO_UBYTE(v[1]),
-	  USHORT_TO_UBYTE(v[2]), 255 );
+          USHORT_TO_UBYTE(v[2]), 255 );
 
 }
 
@@ -544,7 +546,7 @@ void GLAPIENTRY glColor4bv(CTX_ARG const GLbyte *v )
 {
    GET_IMMEDIATE;
    COLOR( IM, BYTE_TO_UBYTE(v[0]), BYTE_TO_UBYTE(v[1]),
-	  BYTE_TO_UBYTE(v[2]), BYTE_TO_UBYTE(v[3]) );
+          BYTE_TO_UBYTE(v[2]), BYTE_TO_UBYTE(v[3]) );
 }
 
 
@@ -584,7 +586,7 @@ void GLAPIENTRY glColor4iv(CTX_ARG const GLint *v )
 {
    GET_IMMEDIATE;
    COLOR( IM, INT_TO_UBYTE(v[0]), INT_TO_UBYTE(v[1]),
-	  INT_TO_UBYTE(v[2]), INT_TO_UBYTE(v[3]) );
+          INT_TO_UBYTE(v[2]), INT_TO_UBYTE(v[3]) );
 }
 
 
@@ -592,7 +594,7 @@ void GLAPIENTRY glColor4sv(CTX_ARG const GLshort *v )
 {
    GET_IMMEDIATE;
    COLOR( IM, SHORT_TO_UBYTE(v[0]), SHORT_TO_UBYTE(v[1]),
-	  SHORT_TO_UBYTE(v[2]), SHORT_TO_UBYTE(v[3]) );
+          SHORT_TO_UBYTE(v[2]), SHORT_TO_UBYTE(v[3]) );
 }
 
 
@@ -607,7 +609,7 @@ void GLAPIENTRY glColor4uiv(CTX_ARG const GLuint *v )
 {
    GET_IMMEDIATE;
    COLOR( IM, UINT_TO_UBYTE(v[0]), UINT_TO_UBYTE(v[1]),
-	  UINT_TO_UBYTE(v[2]), UINT_TO_UBYTE(v[3]) );
+          UINT_TO_UBYTE(v[2]), UINT_TO_UBYTE(v[3]) );
 }
 
 
@@ -615,7 +617,7 @@ void GLAPIENTRY glColor4usv(CTX_ARG const GLushort *v )
 {
    GET_IMMEDIATE;
    COLOR( IM, USHORT_TO_UBYTE(v[0]), USHORT_TO_UBYTE(v[1]),
-	  USHORT_TO_UBYTE(v[2]), USHORT_TO_UBYTE(v[3]) );
+          USHORT_TO_UBYTE(v[2]), USHORT_TO_UBYTE(v[3]) );
 }
 
 
@@ -832,15 +834,15 @@ void GLAPIENTRY glEnd(CTX_VOID )
 
    state = IM->BeginState;
    inflags = (~state) & (VERT_BEGIN_0|VERT_BEGIN_1);
-   state |= inflags << 2;	/* errors */
+   state |= inflags << 2;       /* errors */
 
    if (MESA_VERBOSE&VERBOSE_API) {
       if (MESA_VERBOSE&VERBOSE_IMMEDIATE)
-	 fprintf(stderr, "glEnd(IM %d), BeginState is %x, errors %x\n",
-		 IM->id, state,
-		 inflags<<2);
+         fprintf(stderr, "glEnd(IM %d), BeginState is %x, errors %x\n",
+                 IM->id, state,
+                 inflags<<2);
       else
-	 fprintf(stderr, ">");
+         fprintf(stderr, ">");
    }
 
 
@@ -856,8 +858,8 @@ void GLAPIENTRY glEnd(CTX_VOID )
       IM->Primitive[count] = GL_POLYGON+1;
 
       if (IM->FlushElt) {
-	 gl_exec_array_elements( IM->backref, IM, last, count );
-	 IM->FlushElt = 0;
+         gl_exec_array_elements( IM->backref, IM, last, count );
+         IM->FlushElt = 0;
       }
    }
 
@@ -880,14 +882,14 @@ void gl_End( GLcontext *ctx )
 
    if (MESA_VERBOSE&VERBOSE_API) {
       if (MESA_VERBOSE&VERBOSE_IMMEDIATE)
-	 fprintf(stderr, "gl_End(IM %d), BeginState is %x, errors %x\n",
-		 IM->id, state,
-		 inflags<<2);
+         fprintf(stderr, "gl_End(IM %d), BeginState is %x, errors %x\n",
+                 IM->id, state,
+                 inflags<<2);
       else
-	 fprintf(stderr, ">");
+         fprintf(stderr, ">");
    }
 
-   state |= inflags << 2;	/* errors */
+   state |= inflags << 2;       /* errors */
 
    if (inflags != (VERT_BEGIN_0|VERT_BEGIN_1))
    {
@@ -901,8 +903,8 @@ void gl_End( GLcontext *ctx )
       IM->Primitive[count] = GL_POLYGON+1;
 
       if (IM->FlushElt) {
-	 gl_exec_array_elements( ctx, IM, last, count );
-	 IM->FlushElt = 0;
+         gl_exec_array_elements( ctx, IM, last, count );
+         IM->FlushElt = 0;
       }
    }
 
@@ -949,40 +951,42 @@ void GLAPIENTRY glEndList(CTX_VOID )
  */
 
 
-#define EVALCOORD1(IM, x)				\
-{							\
-   GLuint count = IM->Count++;				\
-   IM->Flag[count] |= VERT_EVAL_C1;			\
-   ASSIGN_4V(IM->Obj[count], x, 0, 0, 1);		\
-   if (count == VB_MAX-1)				\
-      IM->maybe_transform_vb( IM );			\
+#define EVALCOORD1(IM, x)                               \
+{                                                       \
+   GLuint count = IM->Count++;                          \
+   IM->Flag[count] |= VERT_EVAL_C1;                     \
+   ASSIGN_4V(IM->Obj[count], x, 0, 0, 1);               \
+   if (count == VB_MAX-1)                               \
+      IM->maybe_transform_vb( IM );                     \
 }
 
-#define EVALCOORD2(IM, x, y)				\
-{							\
-   GLuint count = IM->Count++;				\
-   IM->Flag[count] |= VERT_EVAL_C2;			\
-   ASSIGN_4V(IM->Obj[count], x, y, 0, 1);		\
-   if (count == VB_MAX-1)				\
-      IM->maybe_transform_vb( IM );			\
+#define EVALCOORD2(IM, x, y)                            \
+{                                                       \
+   GLuint count = IM->Count++;                          \
+   IM->Flag[count] |= VERT_EVAL_C2;                     \
+   ASSIGN_4V(IM->Obj[count], x, y, 0, 1);               \
+   WriteLog("OPENGL32: EVALCOORD2 (%f,%f) IM: %08X - cnt %d\n",x,y,IM,count); \
+   if (count == VB_MAX-1)                               \
+   {WriteLog("OPENGL32: EVALCOORD2 is calling maybe_transform\n"); \
+      IM->maybe_transform_vb( IM );                     }\
 }
 
-#define EVALPOINT1(IM, x)				\
-{							\
-   GLuint count = IM->Count++;				\
-   IM->Flag[count] |= VERT_EVAL_P1;			\
-   ASSIGN_4V(IM->Obj[count], x, 0, 0, 1);		\
-   if (count == VB_MAX-1)				\
-      IM->maybe_transform_vb( IM );			\
+#define EVALPOINT1(IM, x)                               \
+{                                                       \
+   GLuint count = IM->Count++;                          \
+   IM->Flag[count] |= VERT_EVAL_P1;                     \
+   ASSIGN_4V(IM->Obj[count], x, 0, 0, 1);               \
+   if (count == VB_MAX-1)                               \
+      IM->maybe_transform_vb( IM );                     \
 }
 
-#define EVALPOINT2(IM, x, y)				\
-{							\
-   GLuint count = IM->Count++;				\
-   IM->Flag[count] |= VERT_EVAL_P2;			\
-   ASSIGN_4V(IM->Obj[count], x, y, 0, 1);		\
-   if (count == VB_MAX-1)				\
-      IM->maybe_transform_vb( IM );			\
+#define EVALPOINT2(IM, x, y)                            \
+{                                                       \
+   GLuint count = IM->Count++;                          \
+   IM->Flag[count] |= VERT_EVAL_P2;                     \
+   ASSIGN_4V(IM->Obj[count], x, y, 0, 1);               \
+   if (count == VB_MAX-1)                               \
+      IM->maybe_transform_vb( IM );                     \
 }
 
 
@@ -1172,14 +1176,14 @@ void GLAPIENTRY glFogiv(CTX_ARG GLenum pname, const GLint *params )
       case GL_FOG_START:
       case GL_FOG_END:
       case GL_FOG_INDEX:
-	 p[0] = (GLfloat) *params;
-	 break;
+         p[0] = (GLfloat) *params;
+         break;
       case GL_FOG_COLOR:
-	 p[0] = INT_TO_FLOAT( params[0] );
-	 p[1] = INT_TO_FLOAT( params[1] );
-	 p[2] = INT_TO_FLOAT( params[2] );
-	 p[3] = INT_TO_FLOAT( params[3] );
-	 break;
+         p[0] = INT_TO_FLOAT( params[0] );
+         p[1] = INT_TO_FLOAT( params[1] );
+         p[2] = INT_TO_FLOAT( params[2] );
+         p[3] = INT_TO_FLOAT( params[3] );
+         break;
       default:
          /* Error will be caught later in gl_Fogfv */
          ;
@@ -1476,13 +1480,13 @@ void GLAPIENTRY glHint(CTX_ARG GLenum target, GLenum mode )
 }
 
 
-#define INDEX( c )				\
-{						\
-   GLuint count;				\
-   GET_IMMEDIATE;				\
-   count = IM->Count;				\
-   IM->Index[count] = c;			\
-   IM->Flag[count] |= VERT_INDEX;		\
+#define INDEX( c )                              \
+{                                               \
+   GLuint count;                                \
+   GET_IMMEDIATE;                               \
+   count = IM->Count;                           \
+   IM->Index[count] = c;                        \
+   IM->Flag[count] |= VERT_INDEX;               \
 }
 
 
@@ -1739,7 +1743,7 @@ void GLAPIENTRY glLoadMatrixd(CTX_ARG const GLdouble *m )
    CHECK_CONTEXT;
 
    for (i=0;i<16;i++) {
-	  fm[i] = (GLfloat) m[i];
+          fm[i] = (GLfloat) m[i];
    }
 
    (*CC->API.LoadMatrixf)( CC, fm );
@@ -1945,7 +1949,7 @@ void GLAPIENTRY glMultMatrixd(CTX_ARG const GLdouble *m )
    CHECK_CONTEXT;
 
    for (i=0;i<16;i++) {
-	  fm[i] = (GLfloat) m[i];
+          fm[i] = (GLfloat) m[i];
    }
 
    (*CC->API.MultMatrixf)( CC, fm );
@@ -1973,23 +1977,23 @@ void GLAPIENTRY glNewList(CTX_ARG GLuint list, GLenum mode )
  *     call.  The Flag member allows the identification of missing
  *     (ie shared) normals.
  */
-#define NORMAL( x,y,z )				\
-{						\
-   GLuint count;				\
-   GLfloat *normal;				\
-   GET_IMMEDIATE;				\
-   count = IM->Count;				\
-   IM->Flag[count] |= VERT_NORM;		\
-   normal = IM->Normal[count];			\
-   ASSIGN_3V(normal, x,y,z);			\
+#define NORMAL( x,y,z )                         \
+{                                               \
+   GLuint count;                                \
+   GLfloat *normal;                             \
+   GET_IMMEDIATE;                               \
+   count = IM->Count;                           \
+   IM->Flag[count] |= VERT_NORM;                \
+   normal = IM->Normal[count];                  \
+   ASSIGN_3V(normal, x,y,z);                    \
 }
 
 
 void GLAPIENTRY glNormal3b(CTX_ARG GLbyte nx, GLbyte ny, GLbyte nz )
 {
    NORMAL( BYTE_TO_FLOAT(nx),
-	   BYTE_TO_FLOAT(ny),
-	   BYTE_TO_FLOAT(nz) );
+           BYTE_TO_FLOAT(ny),
+           BYTE_TO_FLOAT(nz) );
 }
 
 
@@ -2008,24 +2012,24 @@ void GLAPIENTRY glNormal3f(CTX_ARG GLfloat nx, GLfloat ny, GLfloat nz )
 void GLAPIENTRY glNormal3i(CTX_ARG GLint nx, GLint ny, GLint nz )
 {
    NORMAL( INT_TO_FLOAT(nx),
-	   INT_TO_FLOAT(ny),
-	   INT_TO_FLOAT(nz) );
+           INT_TO_FLOAT(ny),
+           INT_TO_FLOAT(nz) );
 }
 
 
 void GLAPIENTRY glNormal3s(CTX_ARG GLshort nx, GLshort ny, GLshort nz )
 {
    NORMAL( SHORT_TO_FLOAT(nx),
-	   SHORT_TO_FLOAT(ny),
-	   SHORT_TO_FLOAT(nz) );
+           SHORT_TO_FLOAT(ny),
+           SHORT_TO_FLOAT(nz) );
 }
 
 
 void GLAPIENTRY glNormal3bv(CTX_ARG const GLbyte *v )
 {
    NORMAL( BYTE_TO_FLOAT(v[0]),
-	   BYTE_TO_FLOAT(v[1]),
-	   BYTE_TO_FLOAT(v[2]) );
+           BYTE_TO_FLOAT(v[1]),
+           BYTE_TO_FLOAT(v[2]) );
 }
 
 
@@ -2044,15 +2048,15 @@ void GLAPIENTRY glNormal3fv(CTX_ARG const GLfloat *v )
 void GLAPIENTRY glNormal3iv(CTX_ARG const GLint *v )
 {
    NORMAL( INT_TO_FLOAT(v[0]),
-	   INT_TO_FLOAT(v[1]),
-	   INT_TO_FLOAT(v[2]) );
+           INT_TO_FLOAT(v[1]),
+           INT_TO_FLOAT(v[2]) );
 }
 
 
 void GLAPIENTRY glNormal3sv(CTX_ARG const GLshort *v )
 {
    NORMAL( SHORT_TO_FLOAT(v[0]),
-	   SHORT_TO_FLOAT(v[1]),
-	   SHORT_TO_FLOAT(v[2]) );
+           SHORT_TO_FLOAT(v[1]),
+           SHORT_TO_FLOAT(v[2]) );
 }
 

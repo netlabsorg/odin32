@@ -1,4 +1,4 @@
-/* $Id: glcurveval.h,v 1.1 2000-02-09 08:49:01 jeroen Exp $ */
+/* $Id: glcurveval.h,v 1.2 2000-03-11 09:05:02 jeroen Exp $ */
 /*
 ** License Applicability. Except to the extent portions of this file are
 ** made subject to an alternative license as permitted in the SGI Free
@@ -36,8 +36,8 @@
 /*
  * glcurveval.h
  *
- * $Date: 2000-02-09 08:49:01 $ $Revision: 1.1 $
- * $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glu/nurbs/interface/glcurveval.h,v 1.1 2000-02-09 08:49:01 jeroen Exp $
+ * $Date: 2000-03-11 09:05:02 $ $Revision: 1.2 $
+ * $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glu/nurbs/interface/glcurveval.h,v 1.2 2000-03-11 09:05:02 jeroen Exp $
  */
 
 #ifndef __gluglcurveval_h_
@@ -71,33 +71,33 @@ typedef struct curveEvalMachine{
 
 class OpenGLCurveEvaluator : public BasicCurveEvaluator  {
 public:
-			OpenGLCurveEvaluator(void);
-			~OpenGLCurveEvaluator(void);
-    void		range1f(long, REAL *, REAL *);
-    void		domain1f(REAL, REAL);
-    void		addMap(CurveMap *);
+                        OpenGLCurveEvaluator(void);
+                        ~OpenGLCurveEvaluator(void);
+    void                range1f(long, REAL *, REAL *);
+    void                domain1f(REAL, REAL);
+    void                addMap(CurveMap *);
 
-    void		enable(long);
-    void		disable(long);
-    void		bgnmap1f(long);
-    void		map1f(long, REAL, REAL, long, long, REAL *);
-    void		mapgrid1f(long, REAL, REAL);
-    void		mapmesh1f(long, long, long);
-    void		evalpoint1i(long);
-    void		evalcoord1f(long, REAL);
-    void		endmap1f(void);
+    void                enable(long);
+    void                disable(long);
+    void                bgnmap1f(long);
+    void                map1f(long, REAL, REAL, long, long, REAL *);
+    void                mapgrid1f(long, REAL, REAL);
+    void                mapmesh1f(long, long, long);
+    void                evalpoint1i(long);
+    void                evalcoord1f(long, REAL);
+    void                endmap1f(void);
 
-    void		bgnline(void);
-    void		endline(void);
+    void                bgnline(void);
+    void                endline(void);
 
     void                put_vertices_call_back(int flag)
       {
-	output_triangles = flag;
+        output_triangles = flag;
       }
-    void               putCallBack(GLenum which, GLvoid (GLAPI *fn)(...));
+    void               putCallBack(GLenum which, GLvoid (GLCALLBACK *fn)(...));
     void               set_callback_userData(void *data)
       {
-	userData = data;
+        userData = data;
       }
 
 /*------------------begin for curveEvalMachine------------*/
@@ -115,34 +115,34 @@ int global_grid_u1;
 int global_grid_nu;
 
 void inMap1f(int which, //0: vert, 1: norm, 2: color, 3: tex
-	     int dimension,
-	     REAL ulower,
-	     REAL uupper,
-	     int ustride,
-	     int uorder,
-	     REAL *ctlpoints);
+             int dimension,
+             REAL ulower,
+             REAL uupper,
+             int ustride,
+             int uorder,
+             REAL *ctlpoints);
 
 void inPreEvaluate(int order, REAL vprime, REAL *coeff);
 void inDoDomain1(curveEvalMachine *em, REAL u, REAL *retPoint);
 void inDoEvalCoord1(REAL u);
 void inMapMesh1f(int umin, int umax);
 
-void     (GLAPI *beginCallBackN) (GLenum type);
-void     (GLAPI *endCallBackN)   (void);
-void     (GLAPI *vertexCallBackN) (const GLfloat *vert);
-void     (GLAPI *normalCallBackN) (const GLfloat *normal);
-void     (GLAPI *colorCallBackN) (const GLfloat *color);
-void     (GLAPI *texcoordCallBackN) (const GLfloat *texcoord);
+void     (GLCALLBACK *beginCallBackN) (GLenum type);
+void     (GLCALLBACK *endCallBackN)   (void);
+void     (GLCALLBACK *vertexCallBackN) (const GLfloat *vert);
+void     (GLCALLBACK *normalCallBackN) (const GLfloat *normal);
+void     (GLCALLBACK *colorCallBackN) (const GLfloat *color);
+void     (GLCALLBACK *texcoordCallBackN) (const GLfloat *texcoord);
 
-void     (GLAPI *beginCallBackData) (GLenum type, void* data);
-void     (GLAPI *endCallBackData)   (void* data);
-void     (GLAPI *vertexCallBackData) (const GLfloat *vert, void* data);
-void     (GLAPI *normalCallBackData) (const GLfloat *normal, void* data);
-void     (GLAPI *colorCallBackData) (const GLfloat *color, void* data);
-void     (GLAPI *texcoordCallBackData) (const GLfloat *texcoord, void* data);
+void     (GLCALLBACK *beginCallBackData) (GLenum type, void* data);
+void     (GLCALLBACK *endCallBackData)   (void* data);
+void     (GLCALLBACK *vertexCallBackData) (const GLfloat *vert, void* data);
+void     (GLCALLBACK *normalCallBackData) (const GLfloat *normal, void* data);
+void     (GLCALLBACK *colorCallBackData) (const GLfloat *color, void* data);
+void     (GLCALLBACK *texcoordCallBackData) (const GLfloat *texcoord, void* data);
 
-void* userData; //the opaque pointer for Data callback functions
-void  beginCallBack(GLenum type, void* data);
+void* userData;           /* the opaque pointer for Data callback functions*/
+void beginCallBack(GLenum type, void* data);
 void endCallBack(void* data);
 void vertexCallBack(const GLfloat *vert, void *data);
 void normalCallBack(const GLfloat *normal, void* data);
