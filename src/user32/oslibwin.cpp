@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.17 1999-10-08 16:13:07 cbratschi Exp $ */
+/* $Id: oslibwin.cpp,v 1.18 1999-10-08 21:25:26 cbratschi Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -656,7 +656,7 @@ BOOL OSLibGetMinMaxInfo(HWND hwndFrame, MINMAXINFO *pMinMax)
 
    memset(&tinfo, 0, sizeof(TRACKINFO));
    WinSendMsg(hwndFrame, WM_QUERYTRACKINFO, (MPARAM)0,(MPARAM)&tinfo);
-   
+
    pMinMax->ptMinTrackSize.x = tinfo.ptlMinTrackSize.x;
    pMinMax->ptMinTrackSize.y = tinfo.ptlMinTrackSize.y;
    pMinMax->ptMaxTrackSize.x = tinfo.ptlMaxTrackSize.x;
@@ -845,6 +845,8 @@ void OSLibSetWindowStyle(HWND hwnd, ULONG dwStyle)
   WinSetWindowULong(hwnd, QWL_STYLE,
                     (WinQueryWindowULong(hwnd, QWL_STYLE) & ~0xffff0000) |
                     OSWinStyle);
+
+  //CB: bug: it doesn't work with child windows!
 
   if(OSFrameStyle != 0)  // maybe WinQueryClassName == WC_FRAME is better
   {
