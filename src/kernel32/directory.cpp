@@ -1,4 +1,4 @@
-/* $Id: directory.cpp,v 1.12 1999-11-24 19:31:22 sandervl Exp $ */
+/* $Id: directory.cpp,v 1.13 1999-12-09 11:59:28 sandervl Exp $ */
 
 /*
  * Win32 Directory functions for OS/2
@@ -39,6 +39,18 @@ ODINDEBUGCHANNEL(KERNEL32-DIRECTORY)
 static char DIR_Windows[MAX_PATHNAME_LEN];
 static char DIR_System[MAX_PATHNAME_LEN];
 
+//******************************************************************************
+//******************************************************************************
+char *InternalGetWindowsDirectoryA()
+{
+   return DIR_Windows;
+}
+//******************************************************************************
+//******************************************************************************
+char *InternalGetSystemDirectoryA()
+{
+   return DIR_System;
+}
 //******************************************************************************
 //******************************************************************************
 void InitDirectories()
