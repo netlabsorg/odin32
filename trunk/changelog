@@ -1,8 +1,9 @@
-/* $Id: changelog,v 1.1862 2001-11-29 10:31:48 phaller Exp $ */
+/* $Id: changelog,v 1.1863 2001-11-29 12:06:16 phaller Exp $ */
 
  2001-11-29: Patrick Haller <patrick.haller@innotek.de>
     - KERNEL32: o Split dosdevice.cpp from stubs.cpp
                   (DefineDosDevice, QueryDosDevice)
+    - OLEAUT32: o olepicture.c: fixed null pointer exception
 
  2001-11-28: Patrick Haller <patrick.haller@innotek.de>
     - KERNEL32: o fixes in ::CreateFile calls (return codes must be Win32)
