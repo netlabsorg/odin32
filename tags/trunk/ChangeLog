@@ -1,9 +1,10 @@
-/* $Id: ChangeLog,v 1.1633 2001-08-04 16:03:24 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1634 2001-08-04 17:20:28 sandervl Exp $ */
 
  2001-08-04: Sander van Leeuwen <sandervl@xs4all.nl>
     - CUSTOMBUILD: 
                 o Add registration of gdi32 & advapi32
                 o Use toupperW in kernel32 instead of toupper (C runtime lib)
+                o Removed NTDLL dependency
     - CRTDLL:   o Use toupperW in kernel32 instead of toupper (C runtime lib)
     - TESTDRV:  o Added sample of device specific driver dll
 
