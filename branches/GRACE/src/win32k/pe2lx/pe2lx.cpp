@@ -1,4 +1,4 @@
-/* $Id: pe2lx.cpp,v 1.18.4.9 2000-08-27 03:38:28 bird Exp $
+/* $Id: pe2lx.cpp,v 1.18.4.10 2000-08-29 04:08:24 bird Exp $
  *
  * Pe2Lx class implementation. Ring 0 and Ring 3
  *
@@ -480,10 +480,12 @@ ULONG Pe2Lx::init(PCSZ pszFilename)
 
         dumpSectionHeader(&paSections[i]);
 
-        /* 8a. Convert characteristics to flags */
+        /* 8a. Convert characteristics to flags and check/fix incompatible flags! */
         for (j = 0; j < (sizeof(paSecChars2Flags)/sizeof(paSecChars2Flags[0])); j++)
             if ((paSections[i].Characteristics & paSecChars2Flags[j].Characteristics) == paSecChars2Flags[j].Characteristics)
                 flFlags |= paSecChars2Flags[j].flFlags;
+        if ((flFlags & (OBJEXEC | OBJWRITE)) == (OBJEXEC | OBJWRITE))
+            flFlags &= (ULONG)~OBJEXEC;
 
         /* 8b. Virtual/physical size */
         /* The virtual size and physical size is somewhat problematic. Some linkers sets Misc.VirtualSize and
@@ -552,6 +554,7 @@ ULONG Pe2Lx::init(PCSZ pszFilename)
 
     /* 11.Align section. (Fix which is applied to EXEs/Dlls which contain no fixups and has an
      *    alignment which is not a multiple of 64Kb. The sections are concatenated into one big object. */
+    /* TODO! this test has to be enhanced a bit. WWPack32, new Borland++ depends on image layout. */
     fAllInOneObject = (pNtHdrs->FileHeader.Characteristics & IMAGE_FILE_RELOCS_STRIPPED) == IMAGE_FILE_RELOCS_STRIPPED;
     if (fAllInOneObject)
     {
@@ -680,8 +683,10 @@ ULONG Pe2Lx::init(PCSZ pszFilename)
 
     Yield();
     _res_heapmin();
-    #if 0 /* testing */
+    #ifndef RING0
+    #if 1 /* testing */
     testApplyFixups();
+    #endif
     #endif
 
     return NO_ERROR;
@@ -1100,6 +1105,7 @@ ULONG  Pe2Lx::applyFixups(PMTE pMTE, ULONG iObject, ULONG iPageTable, PVOID pvPa
         ULONG flRead = 0;   /* bitmask: 0 = no read, 1 = ulBefore is read, 2 = ulAfter is read */
 
         while ((unsigned)pbr - (unsigned)pBaseRelocs + 8 < cbBaseRelocs /* 8= VirtualAddress and SizeOfBlock members */
+               && pbr->SizeOfBlock >= 8
                && pbr->VirtualAddress < ulRVAPage + PAGESIZE)
         {
             if (pbr->VirtualAddress + PAGESIZE >= ulRVAPage)
@@ -1584,6 +1590,7 @@ ULONG  Pe2Lx::openPath2(PCHAR pachFilename, USHORT cchFilename, ldrlv_t *pLdrLv,
     NOREF(cchFilename);
     NOREF(pLdrLv);
     NOREF(pful);
+    NOREF(fOdin32PathValid);
     return ERROR_NOT_SUPPORTED;
     #endif
 }
@@ -1621,21 +1628,30 @@ ULONG Pe2Lx::testApplyFixups()
         return rc;
     }
 
-    rc = readAtRVA(0x00000000, &achPage[0], PAGESIZE);
-    if (rc != NO_ERROR)
+    /*
+     * Test load and apply all (internal) fixups.
+     */
+    for (i = 0; i < cObjects; i++)
     {
-        printErr(("readAtRVA failed with rc=%d\n"));
-        return rc;
+        ULONG ulAddress = smte.smte_objtab[i].ote_base;
+        ULONG ulRVA = paObjects[i].ulRVA;
+        LONG  cbObject = paObjects[i].cbVirtual;
+        for (i=i; cbObject > 0; cbObject -= PAGESIZE, ulAddress += PAGESIZE, ulRVA += PAGESIZE)
+        {
+            rc = readAtRVA(ulRVA, &achPage[0], PAGESIZE);
+            if (rc != NO_ERROR)
+            {
+                printErr(("readAtRVA failed with rc=%d\n"));
+                return rc;
+            }
+            rc = applyFixups(&mte, 1, 1, &achPage[0], ulAddress, NULL);
+            if (rc != NO_ERROR)
+            {
+                printErr(("applyFixups failed with rc=%d\n"));
+                return rc;
+            }
+        }
     }
-    rc = applyFixups(&mte, 0, ~0UL, &achPage[0], 0x125D0000, NULL);
-
-    rc = readAtRVA(0x00001000, &achPage[0], PAGESIZE);
-    if (rc != NO_ERROR)
-    {
-        printErr(("readAtRVA failed with rc=%d\n"));
-        return rc;
-    }
-    rc = applyFixups(&mte, 1, 1, &achPage[0], 0x125E0000, NULL);
 
     return rc;
 }
@@ -1689,7 +1705,7 @@ ULONG Pe2Lx::writeFile(PCSZ pszLXFilename)
         while (cbLXFile > 0UL)
         {
             ULONG cbToRead = min(cbLXFile, sizeof(achReadBuffer));
-            rc = read(offLXFile, &achReadBuffer[0], cbToRead, 0UL, NULL);
+            rc = read(offLXFile, &achReadBuffer[0], 0UL, cbToRead, NULL);
             if (rc != NO_ERROR)
             {
                 printErr(("read failed with rc=%d.\n", rc));
@@ -3107,7 +3123,8 @@ ULONG Pe2Lx::loadBaseRelocations()
             else
             {
                 PIMAGE_BASE_RELOCATION pbrCur = pBaseRelocs;
-                while ((void*)pbrCur < (void*)((unsigned)pBaseRelocs + cbBaseRelocs))
+                while ((void*)pbrCur < (void*)((unsigned)pBaseRelocs + cbBaseRelocs)
+                       && pbrCur->SizeOfBlock >= 8)
                 {
                     if ((unsigned)pbrCur->SizeOfBlock + (unsigned)pbrCur > (unsigned)pBaseRelocs + cbBaseRelocs)
                         printErr(("Debug-check - Chunk is larger than the base relocation directory. "
