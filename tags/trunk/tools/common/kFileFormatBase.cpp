@@ -1,8 +1,8 @@
-/* $Id: kFileFormatBase.cpp,v 1.5 2001-06-22 17:07:47 bird Exp $
+/* $Id: kFileFormatBase.cpp,v 1.6 2002-02-24 02:47:25 bird Exp $
  *
  * kFileFormatBase - Base class for kFile<format> classes.
  *
- * Copyright (c) 1999-2000 knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * Copyright (c) 1999-2001 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -13,15 +13,40 @@
 /*******************************************************************************
 *   Header Files                                                               *
 *******************************************************************************/
-#include <os2.h>
-
-#include <malloc.h>
-#include <string.h>
-#include <stdio.h>
-
+#include "kTypes.h"
+#include "kError.h"
 #include "kFile.h"
-#include "kInterfaces.h"
+#include "kFileInterfaces.h"
 #include "kFileFormatBase.h"
+
+
+
+/**
+ * Constructor.
+ * Saves the file object pointer.
+ * @param   pFile   This will be deleted if the object is
+ *                  successfully constructed (by the destructor).
+ * @status  completely implemented.
+ * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ */
+kFileFormatBase::kFileFormatBase(kFile *pFile)
+    : pFile(pFile)
+{
+}
+
+
+/**
+ * Destructor.
+ * Deletes the file object if it exists.
+ * @status  completely implemented.
+ * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ */
+kFileFormatBase::~kFileFormatBase()
+{
+    if (pFile)
+        delete pFile;
+    pFile = NULL;
+}
 
 
 /**
@@ -29,15 +54,9 @@
  * @returns Successindicator.
  * @param   pOut    Output file.
  */
-BOOL   kFileFormatBase::dump(kFile *pOut)
+KBOOL   kFileFormatBase::dump(kFile *pOut)
 {
     pOut->printf("Sorry, dump() is not implemented for this file format.\n");
     return FALSE;
-}
-
-
-kFileFormatBase::~kFileFormatBase()
-{
-
 }
 

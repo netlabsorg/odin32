@@ -1,4 +1,4 @@
-# $Id: common.mak,v 1.5 2002-02-23 23:27:18 bird Exp $
+# $Id: common.mak,v 1.6 2002-02-24 02:47:23 bird Exp $
 
 #
 # Odin32 API
@@ -39,7 +39,10 @@ $(OBJDIR)\kFileLX.obj \
 $(OBJDIR)\kFilePE.obj \
 $(OBJDIR)\kFileSDF.obj \
 $(OBJDIR)\kFileFormatBase.obj \
-$(OBJDIR)\kFile.obj
+$(OBJDIR)\kFile.obj \
+$(OBJDIR)\kFileInterfaces.obj \
+$(OBJDIR)\kAssert.obj \
+$(OBJDIR)\kError.obj \
 
 
 #

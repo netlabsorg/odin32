@@ -1,4 +1,4 @@
-/* $Id: kList.h,v 1.3 2000-08-31 03:00:13 bird Exp $ */
+/* $Id: kList.h,v 1.4 2002-02-24 02:47:28 bird Exp $ */
 /*
  * Simple list and sorted list template class.
  *
@@ -76,12 +76,12 @@
     {
         public:
             #if 0 //MUST BE IMPLEMENTED!
-            virtual BOOL operator==(const k..Entry &entry) const = 0;
-            virtual BOOL operator!=(const k..Entry &entry) const = 0;
-            virtual BOOL operator< (const k..Entry &entry) const = 0;
-            virtual BOOL operator<=(const k..Entry &entry) const = 0;
-            virtual BOOL operator> (const k..Entry &entry) const = 0;
-            virtual BOOL operator>=(const k..Entry &entry) const = 0;
+            virtual KBOOL operator==(const k..Entry &entry) const = 0;
+            virtual KBOOL operator!=(const k..Entry &entry) const = 0;
+            virtual KBOOL operator< (const k..Entry &entry) const = 0;
+            virtual KBOOL operator<=(const k..Entry &entry) const = 0;
+            virtual KBOOL operator> (const k..Entry &entry) const = 0;
+            virtual KBOOL operator>=(const k..Entry &entry) const = 0;
             #endif
     };
 

@@ -1,4 +1,4 @@
-/* $Id: kFileLX.h,v 1.5 2001-04-17 00:26:11 bird Exp $
+/* $Id: kFileLX.h,v 1.6 2002-02-24 02:47:26 bird Exp $
  *
  * kFileLX - Linear Executable file reader.
  *
@@ -11,60 +11,87 @@
 #ifndef _kFileLX_h_
 #define _kFileLX_h_
 
+struct e32_exe;
+struct o32_obj;
+struct o32_map;
 
 
-
-class kFileLX : public kFileFormatBase, public kExecutableI /*, public kPageI*/
+class kFileLX : public kFileFormatBase, public kExecutableI, public kPageI, public kRelocI
 {
-protected:
-    PVOID               pvBase;         /* Pointer to filemapping. */
-    ULONG               cbFile;         /* Size of filemapping. */
-    ULONG               offLXHdr;       /* Offset of the LX header. */
-    struct e32_exe *    pe32;           /* Pointer to the exe header within the filemapping. */
-    struct o32_obj *    paObject;       /* Pointer to the objecttable. */
-    struct o32_map *    paMap;          /* Pointer to page map table. */
-
-    BOOL                queryExportName(int iOrdinal, char *pszBuffer);
-
 public:
-    kFileLX(const char *pszFilename) throw (int);
-    kFileLX(kFile *pFile) throw (int);
+    kFileLX(const char *pszFilename) throw (kError);
+    kFileLX(kFile *pFile) throw (kError);
     ~kFileLX();
 
     /** @cat Module information methods. */
-    BOOL        moduleGetName(char *pszBuffer, int cchSize = 260);
+    KBOOL               moduleGetName(char *pszBuffer, int cchSize = 260);
 
-    /** @cat Export enumeration methods. */
-    BOOL        exportFindFirst(kExportEntry *pExport);
-    BOOL        exportFindNext(kExportEntry *pExport);
-    void        exportFindClose(kExportEntry *pExport);
-
-    /** @cat Export Lookup methods */
-    BOOL        exportLookup(unsigned long ulOrdinal, kExportEntry *pExport);
-    BOOL        exportLookup(const char *  pszName, kExportEntry *pExport);
-
-    virtual BOOL        isLx() const {return TRUE;};
+    /** @cat Misc */
+    virtual KBOOL       isLx() const {return TRUE;};
 
     struct o32_obj *    getObject(int iObject);
     int                 getObjectCount();
 
-#if 0
-    /** @cat Get and put page methods. (the first ones are generic) */
-    BOOL                getPage(char *pachPage, ULONG ulAddress);
-    BOOL                getPage(char *pachPage, int iObject, int offObject);
-    BOOL                putPage(const char *pachPage, ULONG ulAddress);
-    BOOL                putPage(const char *pachPage, int iObject, int offObject);
+    /** @cat Export enumeration methods. */
+    KBOOL               exportFindFirst(kExportEntry *pExport);
+    KBOOL               exportFindNext(kExportEntry *pExport);
+    void                exportFindClose(kExportEntry *pExport);
 
-    BOOL                getPageLX(char *pachPage, int iObject, int iPage);
-    BOOL                getPageLX(char *pachPage, int iPage);
-    BOOL                putPageLX(const char *pachPage, int iObject, int iPage);
-    BOOL                putPageLX(const char *pachPage, int iPage);
+    /** @cat Export Lookup methods */
+    KBOOL               exportLookup(unsigned long ulOrdinal, kExportEntry *pExport);
+    KBOOL               exportLookup(const char *  pszName, kExportEntry *pExport);
+
+    /** @cat Get and put page methods. */
+    int                 pageGet(char *pachPage, unsigned long ulAddress) const;
+    int                 pageGet(char *pachPage, int iObject, int offObject) const;
+    int                 pagePut(const char *pachPage, unsigned long ulAddress);
+    int                 pagePut(const char *pachPage, int iObject, int offObject);
+    int                 pageGetPageSize() const;
 
     /** @cat Compression and expansion methods compatible with exepack:1 and exepack:2. */
-    static BOOL         expandPage1(char *pachPage, const char * pachSrcPage, int cchSrcPage);
-    static BOOL         expandPage2(char *pachPage, const char * pachSrcPage, int cchSrcPage);
-    static int          compressPage1(char *pachPage, const char * pachSrcPage);
-    static int          compressPage2(char *pachPage, const char * pachSrcPage);
-#endif
+    static int          expandPage1(char *pachPage, int cchPage, const char * pachSrcPage, int cchSrcPage);
+    static int          expandPage2(char *pachPage, int cchPage, const char * pachSrcPage, int cchSrcPage);
+    static int          compressPage1(char *pachPage, const char * pachSrcPage, int cchSrcPage);
+    static int          compressPage2(char *pachPage, const char * pachSrcPage, int cchSrcPage);
+
+    /** @cat Relocation methods */
+    KBOOL               relocFindFirst(unsigned long iSegment, unsigned long offObject, kRelocEntry *preloc);
+    KBOOL               relocFindFirst(unsigned long ulAddress, kRelocEntry *preloc);
+    KBOOL               relocFindNext(kRelocEntry *preloc);
+    void                relocFindClose(kRelocEntry *preloc);
+
+
+protected:
+    /** @cat Internal data */
+    void *              pvBase;         /* Pointer to filemapping. */
+    unsigned long       cbFile;         /* Size of filemapping. */
+    unsigned long       offLXHdr;       /* Offset of the LX header. */
+    struct e32_exe *    pe32;           /* Pointer to the exe header within the filemapping. */
+    struct o32_obj *    paObject;       /* Pointer to the objecttable. */
+    struct o32_map *    paMap;          /* Pointer to page map table. */
+    unsigned long   *   paulFixupPageTable; /* Pointer to the fixup page table. */
+    char *              pchFixupRecs;   /* Pointer to the fixup record table. */
+
+    /** @cat Export and Module information worker. */
+    KBOOL               queryExportName(int iOrdinal, char *pszBuffer);
+
+    /** @cat Get and put page workers. */
+    /*
+    int                 pageGetLX(char *pachPage, int iObject, int iPage) const;
+    int                 pageGetLX(char *pachPage, int iPage) const;
+    int                 pagePutLX(const char *pachPage, int iObject, int iPage);
+    int                 pagePutLX(const char *pachPage, int iPage);
+    */
+
+    /** @cat Address mapping helpers. */
+    unsigned long       lxAddressToObjectOffset(unsigned long ulAddress, unsigned long * pulObject) const;
+    unsigned long       lxSpecialSelectorToObjectOffset(unsigned long offObject, unsigned long * pulObject) const;
+    KBOOL               lxValidateObjectOffset(unsigned long ulObject, unsigned long offOffset) const;
+    KBOOL               lxValidateAddress(unsigned long ulAddress) const;
+
+    /** @cat Import Helpers */
+    char *              lxGetImportModuleName(unsigned long ordModule) const;
+    char *              lxGetImportProcName(unsigned long offProc) const;
 };
+
 #endif

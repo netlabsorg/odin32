@@ -1,4 +1,4 @@
-/* $Id: kLIFO.cpp,v 1.1 1999-09-05 02:09:17 bird Exp $ */
+/* $Id: kLIFO.cpp,v 1.2 2002-02-24 02:47:27 bird Exp $ */
 /*
  * Simple LIFO template class implementation.
  *
@@ -159,7 +159,7 @@ void kLIFO<kEntry>::popPush(const kEntry *pToEntry, kLIFO<kEntry> &lifoTo)
  * @returns   TRUE - empty, FALSE - not empty.
  */
 template <class kEntry>
-BOOL kLIFO<kEntry>::isEmpty(void) const
+KBOOL kLIFO<kEntry>::isEmpty(void) const
 {
     return pTop == NULL;
 }
@@ -189,7 +189,7 @@ kEntry *kLIFO<kEntry>::find(const char *pszKey) const
  * @param     pEntry  Pointer to node.
  */
 template <class kEntry>
-BOOL kLIFO<kEntry>::exists(const kEntry *pEntry) const
+KBOOL kLIFO<kEntry>::exists(const kEntry *pEntry) const
 {
     kEntry *pCurrentEntry = pTop;
 

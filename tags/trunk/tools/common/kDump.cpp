@@ -1,4 +1,4 @@
-/* $Id: kDump.cpp,v 1.3 2001-04-17 00:26:10 bird Exp $
+/* $Id: kDump.cpp,v 1.4 2002-02-24 02:47:24 bird Exp $
  *
  * Generic dumper...
  *
@@ -18,13 +18,13 @@
 /*******************************************************************************
 *   Header Files                                                               *
 *******************************************************************************/
-#include <os2.h>
-
 #include <stdio.h>
 
+#include "kTypes.h"
+#include "kError.h"
 #include "kFile.h"
 #include "kFileFormatBase.h"
-#include "kInterfaces.h"
+#include "kFileInterfaces.h"
 #include "kFileDef.h"
 #include "kFileLX.h"
 #include "kFilePE.h"
@@ -41,16 +41,15 @@ int main(int argc, char **argv)
     {
         try
         {
-            kFile               file(argv[argi]);
             kFileFormatBase *   pFile = NULL;
-            try {pFile = new kFilePE(&file);}
-            catch (int err)
+            try {pFile = new kFilePE(new kFile(argv[argi]));}
+            catch (kError err)
             {
-                try {pFile = new kFileLX(&file);}
-                catch (int err)
+                try {pFile = new kFileLX(new kFile(argv[argi]));}
+                catch (kError err)
                 {
-                    try {pFile = new kFileDef(&file);}
-                    catch (int err)
+                    try {pFile = new kFileDef(new kFile(argv[argi]));}
+                    catch (kError err)
                     {
                         kFile::StdErr.printf("Failed to recognize file %s.\n", argv[argi]);
                         return -2;
@@ -67,9 +66,9 @@ int main(int argc, char **argv)
                 delete pFile;
             }
         }
-        catch (int err)
+        catch (kError err)
         {
-            fprintf(stderr, "Fatal: Failed to open file %s err=%d.\n", argv[argi], err);
+            fprintf(stderr, "Fatal: Failed to open file %s err=%d.\n", argv[argi], err.getErrno());
             return -1;
         }
     }
