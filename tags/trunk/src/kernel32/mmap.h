@@ -1,4 +1,4 @@
-/* $Id: mmap.h,v 1.22 2002-05-20 13:47:59 sandervl Exp $ */
+/* $Id: mmap.h,v 1.23 2002-07-21 09:20:56 sandervl Exp $ */
 
 /*
  * Memory mapped class
@@ -72,7 +72,7 @@ static void deleteAll();
 #ifdef __DEBUG_ALLOC__
     void *operator new(size_t size, const char *filename, size_t lineno)
     {
-        return _umalloc(sharedHeap, size);
+        return _smalloc(size);
     }
     void operator delete(void *location, const char *filename, size_t lineno)
     {
@@ -81,7 +81,7 @@ static void deleteAll();
 #else
     void *operator new(size_t size)
     {
-        return _umalloc(sharedHeap, size);
+        return _smalloc(size);
     }
     void operator delete(void *location)
     {
@@ -136,7 +136,7 @@ static Win32MemMapView *findView(LPVOID address);
 #ifdef __DEBUG_ALLOC__
     void *operator new(size_t size, const char *filename, size_t lineno)
     {
-        return _umalloc(sharedHeap, size);
+        return _smalloc(size);
     }
     void operator delete(void *location, const char *filename, size_t lineno)
     {
@@ -145,7 +145,7 @@ static Win32MemMapView *findView(LPVOID address);
 #else
     void *operator new(size_t size)
     {
-        return _umalloc(sharedHeap, size);
+        return _smalloc(size);
     }
     void operator delete(void *location)
     {
