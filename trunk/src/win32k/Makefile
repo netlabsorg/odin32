@@ -1,15 +1,28 @@
 ################################################################################
-# $Id: Makefile,v 1.28 2000-02-25 18:15:01 bird Exp $
+# $Id: Makefile,v 1.29 2000-02-26 16:20:28 bird Exp $
 #
 # Copyright 1998-1999 knut st. osmundsen
 #
 # Project Odin Software License can be found in LICENSE.TXT
 #
 ################################################################################
+
 ################################################################################
 # Include path definitions
 ################################################################################
-!include makefile.inc
+# Note! This crazy !ifdef stuff handles the case when makefile.inc don't exist
+# and someone is trying to make dependencies. A makefile.inc is then generated
+# and we'll try again making dependencies by the dep2 rule.
+!ifdef NODEP
+!   ifdef MAKEFILE_INC
+!       include makefile.inc
+!   else
+PDWIN32_INCLUDE = ..\..\include
+PDWIN32_TOOLS = ..\..\tools\bin
+!   endif
+!else
+!   include makefile.inc
+!endif
 !include $(PDWIN32_INCLUDE)\pdwin32.tools
 
 NAME = win32k
@@ -325,7 +338,14 @@ clean:
 # DEPENDENCIES - c and c++ deps are autogenereated.
 #                asm deps must be updated by hand
 ################################################################################
+# If makefile.inc doesn't exist we'll make a quit and dirty one.
+# So when we are sure that makefile.inc exist we'll invoke nmake and
+# ask it to make dependencies again using the dep2 rule.
 dep:
+    IF NOT EXIST makefile.inc configure.cmd noninteractive
+    $(MAKE_CMD) NODEP=1 MAKEFILE_INC=1 dep2
+
+dep2:
     $(PDWIN32_TOOLS)\fastdep -o$(WIN32KOBJ) $(CINCLUDES) misc\*.c* ldr\*.c* dev32\*.c* \
         dev16\*.c* pe2lx\*.c* k32\*.c* lib\*.c include\*.h
     $(PDWIN32_TOOLS)\fastdep -a+ -o$(WIN32KOBJ) $(CINCLUDES16) dev16\*.c*
