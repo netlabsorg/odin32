@@ -1,9 +1,10 @@
-/* $Id: ChangeLog,v 1.1674 2001-09-06 22:16:40 phaller Exp $ */
+/* $Id: ChangeLog,v 1.1675 2001-09-07 08:22:28 phaller Exp $ */
 
  2001-09-07: Patrick Haller <patrick.haller@innotek.de>
     - include:  o removed ./include/wine/server.h (Wine Server)
                   because of collisiton with server.h in OS/2 toolkit
     - WNETAP32: o NetServerEnum implemented
+                o split into numerous smaller source modules
 
  2001-09-05: knut st. osmundsen <kosmunds@csc.com>
     - src\*:    o Added/fixed CVS $Id tag in source files.
