@@ -1,4 +1,4 @@
-; $Id: shlwapi.def,v 1.30 2002-06-07 08:02:19 sandervl Exp $
+; $Id: shlwapi.def,v 1.31 2003-10-24 12:49:18 sandervl Exp $
 
 ; updated export ordinals to NT4 SP6 version of SHLWAPI.DLL
 ; Note: W95/W98 has DIFFERENT export ordinals
@@ -183,7 +183,8 @@ EXPORTS
                              _SetWindowTextW@8                    @143 NONAME
                              _StartDocW@8                         @144 NONAME
                              _SystemParametersInfoW@16            @145 NONAME
-                             _TranslateAcceleratorW@12            @146 NONAME
+;;the same as _TranslateAcceleratorW@12
+                             _TranslateAcceleratorA@12            @146 NONAME
                              _UnregisterClassW@8                  @147 NONAME
                              _VkKeyScanW@4                        @148 NONAME
                              _WinHelpW@16                         @149 NONAME
@@ -359,8 +360,8 @@ EXPORTS
                              _SHLWAPI_437@4                       @437 NONAME
 
                              _GetEnvironmentVariableW@12          @442 NONAME
-                             _GetSystemWindowsDirectoryA@8        @443 NONAME
-                             _GetSystemWindowsDirectoryW@8        @444 NONAME
+                             _GetWindowsDirectoryA@8              @443 NONAME
+                             _GetWindowsDirectoryW@8              @444 NONAME
     ColorRGBToHLS          = _ColorRGBToHLS@16                    @445
 
     DllGetVersion          = _SHLWAPI_DllGetVersion@4             @1046
