@@ -1,4 +1,13 @@
- /* $Id: changelog,v 1.536 1999-12-14 19:15:27 sandervl Exp $ */
+ /* $Id: changelog,v 1.537 1999-12-16 00:10:20 sandervl Exp $ */
+
+ 99-12-14: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32: Tasklist fix
+                  Rewrote SendMessage handling; Uses WinSendMsg now if window
+                  is created by a different process/thread.
+                  Started with port of Wine hook code
+                  ShowWindowAsync calls ShowWindow now (not correct, but better than nothing)
+	- KERNEL32: Added GetTHDBFromThreadId (used in USER32) & link THDB structures during creation
+	- GDI32: Extra logging for Create*Rgn apis
 
  99-12-13: Edgar Buerkle <Edgar.Buerkle@gmx.net>
 	- KERNEL32: Added null pointer checks in lstrcatA/W
