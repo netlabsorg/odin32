@@ -1,4 +1,4 @@
-/* $Id: uitools.cpp,v 1.12 1999-10-10 11:26:34 cbratschi Exp $ */
+/* $Id: uitools.cpp,v 1.13 1999-10-12 14:47:22 sandervl Exp $ */
 /*
  * User Interface Functions
  *
@@ -13,6 +13,7 @@
 
 #include "winuser.h"
 #include "user32.h"
+#include "win32wbase.h"
 
 static const WORD wPattern_AA55[8] = { 0xaaaa, 0x5555, 0xaaaa, 0x5555,
                                        0xaaaa, 0x5555, 0xaaaa, 0x5555 };
@@ -1780,12 +1781,18 @@ BOOL WIN32API DrawIconEx(HDC hdc, int xLeft, int xRight, HICON hIcon,
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API DrawMenuBar( HWND arg1)
+BOOL WIN32API DrawMenuBar(HWND hwnd)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  DrawMenuBar\n");
-#endif
-    return O32_DrawMenuBar(arg1);
+ Win32BaseWindow *window;
+
+    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
+    if(!window) {
+        dprintf(("DrawMenuBar, window %x not found", hwnd));
+	SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+        return 0;
+    }
+    dprintf(("DrawMenuBar\n"));
+    return O32_DrawMenuBar(window->getOS2FrameWindowHandle());
 }
 //******************************************************************************
 //******************************************************************************
@@ -2031,7 +2038,7 @@ BOOL WIN32API DrawCaptionTempA(HWND       hwnd,
       CHAR szText[128];
       INT  nLen;
 
-      nLen = O32_GetWindowText (hwnd,
+      nLen = O32_GetWindowText (Win32BaseWindow::Win32ToOS2FrameHandle(hwnd),
                                 szText,
                                 128);
 

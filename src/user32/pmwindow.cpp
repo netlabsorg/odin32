@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.24 1999-10-09 15:36:58 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.25 1999-10-12 14:47:22 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -182,9 +182,8 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         goto RunDefWndProc;
   }
   if(msg > WIN32APP_USERMSGBASE) {
-    //win32 app user message
-    dprintf(("PMWINDOW: Message %x (%x,%x) posted to window %x", (ULONG)msg-WIN32APP_USERMSGBASE, mp1, mp2, hwnd));
-        win32wnd->SendMessageA((ULONG)msg-WIN32APP_USERMSGBASE, (ULONG)mp1, (ULONG)mp2);
+        //win32 app user message
+        return (MRESULT)win32wnd->SendMessageA((ULONG)msg-WIN32APP_USERMSGBASE, (ULONG)mp1, (ULONG)mp2);
   }
   switch( msg )
   {
@@ -573,9 +572,11 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
             keystate |= WMMOVE_CTRL;
 
         //OS/2 Window coordinates -> Win32 Window coordinates
-        //NOTE: Do not call the default OS/2 window handler as that one changes
-        //      the mousepointer!
-        win32wnd->MsgMouseMove(keystate, SHORT1FROMMP(mp1), MapOS2ToWin32Y(win32wnd, SHORT2FROMMP(mp1)));
+        if(win32wnd->MsgMouseMove(keystate, SHORT1FROMMP(mp1), MapOS2ToWin32Y(win32wnd, SHORT2FROMMP(mp1))))
+    {
+        //Changes mouse cursor to default
+            goto RunDefWndProc;
+    }
         break;
     }
 

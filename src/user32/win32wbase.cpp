@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.36 1999-10-11 20:54:25 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.37 1999-10-12 14:47:23 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -56,6 +56,10 @@
 
 #define IS_OVERLAPPED(style) \
     !(style & (WS_CHILD | WS_POPUP))
+
+/* bits in the dwKeyData */
+#define KEYDATA_ALT         0x2000
+#define KEYDATA_PREVSTATE   0x4000
 
 void PrintWindowStyle(DWORD dwStyle, DWORD dwExStyle);
 
@@ -550,7 +554,7 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
   }
 
   //Subclass frame
-  if (isFrameWindow())
+  if (isFrameWindow() && HAS_3DFRAME(dwExStyle))
   {
     pOldFrameProc = FrameSubclassFrameWindow(this);
     if (isChild()) FrameSetBorderSize(this,TRUE);
@@ -1085,7 +1089,7 @@ ULONG Win32BaseWindow::MsgSysKeyUp (ULONG repeatCount, ULONG scancode, ULONG vir
     lParam |= (scancode & 0x0FF) << 16;             // bit 16-23, scancode
                                                     // bit 24, 1=extended key
                                                     // bit 25-28, reserved
-    lParam |= 0 << 29;                              // bit 29, key is released, always 0 for WM_KEYUP ?? <- conflict according to the MS docs
+    lParam |= 0 << 29;                              // bit 29, key is released, always 1 for WM_SYSKEYUP ?? <- conflict according to the MS docs
     lParam |= 1 << 30;                              // bit 30, previous state, always 1 for a WM_KEYUP message
     lParam |= 1 << 31;                              // bit 31, transition state, always 1 for WM_KEYUP
 
@@ -1104,7 +1108,7 @@ ULONG Win32BaseWindow::MsgSysKeyDown (ULONG repeatCount, ULONG scancode, ULONG v
     lParam |= (scancode & 0x0FF) << 16;             // bit 16-23, scancode
                                                     // bit 24, 1=extended key
                                                     // bit 25-28, reserved
-                                                    // bit 29, key is pressed, always 0 for WM_KEYDOWN ?? <- conflict according to the MS docs
+                                            // bit 29, key is released, always 1 for WM_SYSKEYUP ?? <- conflict according to the MS docs
     if (keyWasPressed)
         lParam |= 1 << 30;                          // bit 30, previous state, 1 means key was pressed
                                                     // bit 31, transition state, always 0 for WM_KEYDOWN
@@ -1444,6 +1448,79 @@ done:
 
     return infoPtr->CurVal;
 }
+/***********************************************************************
+ *           NC_HandleSysCommand
+ *
+ * Handle a WM_SYSCOMMAND message. Called from DefWindowProc().
+ *
+ * TODO: Not done (see #if 0)
+ */
+LONG Win32BaseWindow::HandleSysCommand(WPARAM wParam, POINT *pt32)
+{
+    UINT uCommand = wParam & 0xFFF0;
+
+    if (getStyle() & WS_CHILD && uCommand != SC_KEYMENU )
+        ScreenToClient(getParent()->getWindowHandle(), pt32 );
+
+    switch (uCommand)
+    {
+#if 0
+    case SC_SIZE:
+    case SC_MOVE:
+        NC_DoSizeMove( hwnd, wParam );
+        break;
+#endif
+
+    case SC_MINIMIZE:
+        ShowWindow(SW_MINIMIZE);
+        break;
+
+    case SC_MAXIMIZE:
+        ShowWindow(SW_MAXIMIZE);
+        break;
+
+    case SC_RESTORE:
+        ShowWindow(SW_RESTORE);
+        break;
+
+    case SC_CLOSE:
+        return SendMessageA(WM_CLOSE, 0, 0);
+
+#if 0
+    case SC_VSCROLL:
+    case SC_HSCROLL:
+        NC_TrackScrollBar( hwnd, wParam, pt32 );
+        break;
+
+    case SC_MOUSEMENU:
+        MENU_TrackMouseMenuBar( wndPtr, wParam & 0x000F, pt32 );
+        break;
+
+    case SC_KEYMENU:
+        MENU_TrackKbdMenuBar( wndPtr , wParam , pt.x );
+        break;
+
+    case SC_TASKLIST:
+        WinExec( "taskman.exe", SW_SHOWNORMAL );
+        break;
+
+    case SC_SCREENSAVE:
+        if (wParam == SC_ABOUTWINE)
+            ShellAboutA(hwnd, "Odin", WINE_RELEASE_INFO, 0);
+        else
+        if (wParam == SC_PUTMARK)
+            dprintf(("Mark requested by user\n"));
+        break;
+
+    case SC_HOTKEY:
+    case SC_ARRANGE:
+    case SC_NEXTWINDOW:
+    case SC_PREVWINDOW:
+        break;
+#endif
+    }
+    return 0;
+}
 //******************************************************************************
 //******************************************************************************
 LRESULT Win32BaseWindow::DefWndControlColor(UINT ctlType, HDC hdc)
@@ -1577,7 +1654,7 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
         return 1;
     }
     case WM_MOUSEMOVE:
-        return 0;
+        return 1; //Let OS/2 change the mouse cursor back to the default
 
     case WM_WINDOWPOSCHANGED:
     {
@@ -1633,20 +1710,51 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
     case WM_NCHITTEST: //TODO: Calculate position of
         return HTCLIENT;
 
-#if 0
+    case WM_SYSCOMMAND:
+    {
+     POINT point;
+
+        point.x = LOWORD(lParam);
+        point.y = HIWORD(lParam);
+        return HandleSysCommand(wParam, &point);
+    }
+
     case WM_SYSKEYDOWN:
         if(HIWORD(lParam) & KEYDATA_ALT)
         {
             if(wParam == VK_F4) /* try to close the window */
             {
-                HWND hWnd = WIN_GetTopParent( wndPtr->hwndSelf );
-                wndPtr = WIN_FindWndPtr( hWnd );
-                if( wndPtr && !(getClass()->getStyle() & CS_NOCLOSE) )
-                    PostMessage(WM_SYSCOMMAND, SC_CLOSE, 0);
+                Win32BaseWindow *window = GetTopParent();
+                if(window && !(window->getClass()->getStyle() & CS_NOCLOSE) )
+                    window->PostMessageA(WM_SYSCOMMAND, SC_CLOSE, 0);
             }
         }
         return 0;
-#endif
+
+    case WM_QUERYOPEN:
+    case WM_QUERYENDSESSION:
+        return 1;
+
+    case WM_NOTIFYFORMAT:
+        if (IsUnicode()) return NFR_UNICODE;
+        else return NFR_ANSI;
+
+    case WM_SETICON:
+    case WM_GETICON:
+    {
+            LRESULT result = 0;
+            int index = GCL_HICON;
+
+            if (wParam == ICON_SMALL)
+                index = GCL_HICONSM;
+
+            result = windowClass->getClassLongA(index);
+
+            if (Msg == WM_SETICON)
+                windowClass->setClassLongA(index, lParam);
+
+            return result;
+    }
 
     default:
         return 1;
@@ -1973,7 +2081,7 @@ BOOL Win32BaseWindow::ShowWindow(ULONG nCmdShow)
 {
  ULONG showstate = 0;
 
-    dprintf(("ShowWindow %x", nCmdShow));
+    dprintf(("ShowWindow %x %x", getWindowHandle(), nCmdShow));
     if(fFirstShow) {
         if(isFrameWindow() && IS_OVERLAPPED(getStyle()) && !isChild()) {
                 SendMessageA(WM_SIZE, SIZE_RESTORED,
@@ -2018,6 +2126,7 @@ BOOL Win32BaseWindow::ShowWindow(ULONG nCmdShow)
         showstate = SWPOS_RESTORE | SWPOS_ACTIVATE | SWPOS_SHOW;
         break;
     }
+
     BOOL rc = OSLibWinShowWindow(OS2HwndFrame, showstate);
     return rc;
 }
@@ -2155,16 +2264,29 @@ HWND Win32BaseWindow::SetParent(HWND hwndNewParent)
 //******************************************************************************
 BOOL Win32BaseWindow::IsChild(HWND hwndParent)
 {
-  if(getParent()) {
+    if(getParent()) {
         return getParent()->getWindowHandle() == hwndParent;
-  }
-  else  return 0;
+    }
+    else  return 0;
 }
 //******************************************************************************
 //******************************************************************************
 HWND Win32BaseWindow::GetTopWindow()
 {
-  return GetWindow(GW_CHILD);
+    return GetWindow(GW_CHILD);
+}
+//******************************************************************************
+// Get the top-level parent for a child window.
+//******************************************************************************
+Win32BaseWindow *Win32BaseWindow::GetTopParent()
+{
+ Win32BaseWindow *window = this;
+
+    while(window && (window->getStyle() & WS_CHILD))
+    {
+        window = window->getParent();
+    }
+    return window;
 }
 //******************************************************************************
 //Don't call WinUpdateWindow as that one also updates the child windows
@@ -2615,33 +2737,44 @@ Win32BaseWindow *Win32BaseWindow::GetWindowFromOS2Handle(HWND hwnd)
 //******************************************************************************
 Win32BaseWindow *Win32BaseWindow::GetWindowFromOS2FrameHandle(HWND hwnd)
 {
-  return GetWindowFromOS2Handle(OSLibWinWindowFromID(hwnd,OSLIB_FID_CLIENT));
+    return GetWindowFromOS2Handle(OSLibWinWindowFromID(hwnd,OSLIB_FID_CLIENT));
 }
 //******************************************************************************
 //******************************************************************************
 HWND Win32BaseWindow::Win32ToOS2Handle(HWND hwnd)
 {
-        Win32BaseWindow *window = GetWindowFromHandle(hwnd);
+    Win32BaseWindow *window = GetWindowFromHandle(hwnd);
 
-        if(window) {
-                return window->getOS2WindowHandle();
-        }
-        else  return hwnd;    //OS/2 window handle
+    if(window) {
+            return window->getOS2WindowHandle();
+    }
+    else    return hwnd;
+}
+//******************************************************************************
+//******************************************************************************
+HWND Win32BaseWindow::Win32ToOS2FrameHandle(HWND hwnd)
+{
+    Win32BaseWindow *window = GetWindowFromHandle(hwnd);
+
+    if(window) {
+            return window->getOS2FrameWindowHandle();
+    }
+    else    return hwnd;
 }
 //******************************************************************************
 //******************************************************************************
 HWND Win32BaseWindow::OS2ToWin32Handle(HWND hwnd)
 {
-        Win32BaseWindow *window = GetWindowFromOS2Handle(hwnd);
+    Win32BaseWindow *window = GetWindowFromOS2Handle(hwnd);
 
-        if(window) {
-                return window->getWindowHandle();
-        }
-        window = GetWindowFromOS2FrameHandle(hwnd);
-        if(window) {
-                return window->getWindowHandle();
-        }
-        else    return hwnd;    //OS/2 window handle
+    if(window) {
+            return window->getWindowHandle();
+    }
+    window = GetWindowFromOS2FrameHandle(hwnd);
+    if(window) {
+            return window->getWindowHandle();
+    }
+    else    return hwnd;    //OS/2 window handle
 }
 //******************************************************************************
 //******************************************************************************
@@ -2651,90 +2784,90 @@ void PrintWindowStyle(DWORD dwStyle, DWORD dwExStyle)
  char style[256] = "";
  char exstyle[256] = "";
 
-  /* Window styles */
-  if(dwStyle & WS_CHILD)
+    /* Window styles */
+    if(dwStyle & WS_CHILD)
         strcat(style, "WS_CHILD ");
-  if(dwStyle & WS_POPUP)
+    if(dwStyle & WS_POPUP)
         strcat(style, "WS_POPUP ");
-  if(dwStyle & WS_VISIBLE)
+    if(dwStyle & WS_VISIBLE)
         strcat(style, "WS_VISIBLE ");
-  if(dwStyle & WS_DISABLED)
+    if(dwStyle & WS_DISABLED)
         strcat(style, "WS_DISABLED ");
-  if(dwStyle & WS_CLIPSIBLINGS)
+    if(dwStyle & WS_CLIPSIBLINGS)
         strcat(style, "WS_CLIPSIBLINGS ");
-  if(dwStyle & WS_CLIPCHILDREN)
+    if(dwStyle & WS_CLIPCHILDREN)
         strcat(style, "WS_CLIPCHILDREN ");
-  if(dwStyle & WS_MAXIMIZE)
+    if(dwStyle & WS_MAXIMIZE)
         strcat(style, "WS_MAXIMIZE ");
-  if(dwStyle & WS_MINIMIZE)
+    if(dwStyle & WS_MINIMIZE)
         strcat(style, "WS_MINIMIZE ");
-  if(dwStyle & WS_GROUP)
+    if(dwStyle & WS_GROUP)
         strcat(style, "WS_GROUP ");
-  if(dwStyle & WS_TABSTOP)
+    if(dwStyle & WS_TABSTOP)
         strcat(style, "WS_TABSTOP ");
 
-  if((dwStyle & WS_CAPTION) == WS_CAPTION)
+    if((dwStyle & WS_CAPTION) == WS_CAPTION)
         strcat(style, "WS_CAPTION ");
-  if(dwStyle & WS_DLGFRAME)
+    if(dwStyle & WS_DLGFRAME)
         strcat(style, "WS_DLGFRAME ");
-  if(dwStyle & WS_BORDER)
+    if(dwStyle & WS_BORDER)
         strcat(style, "WS_BORDER ");
 
-  if(dwStyle & WS_VSCROLL)
+    if(dwStyle & WS_VSCROLL)
         strcat(style, "WS_VSCROLL ");
-  if(dwStyle & WS_HSCROLL)
+    if(dwStyle & WS_HSCROLL)
         strcat(style, "WS_HSCROLL ");
-  if(dwStyle & WS_SYSMENU)
+    if(dwStyle & WS_SYSMENU)
         strcat(style, "WS_SYSMENU ");
-  if(dwStyle & WS_THICKFRAME)
+    if(dwStyle & WS_THICKFRAME)
         strcat(style, "WS_THICKFRAME ");
-  if(dwStyle & WS_MINIMIZEBOX)
+    if(dwStyle & WS_MINIMIZEBOX)
         strcat(style, "WS_MINIMIZEBOX ");
-  if(dwStyle & WS_MAXIMIZEBOX)
+    if(dwStyle & WS_MAXIMIZEBOX)
         strcat(style, "WS_MAXIMIZEBOX ");
 
-  if(dwExStyle & WS_EX_DLGMODALFRAME)
+    if(dwExStyle & WS_EX_DLGMODALFRAME)
         strcat(exstyle, "WS_EX_DLGMODALFRAME ");
-  if(dwExStyle & WS_EX_ACCEPTFILES)
+    if(dwExStyle & WS_EX_ACCEPTFILES)
         strcat(exstyle, "WS_EX_ACCEPTFILES ");
-  if(dwExStyle & WS_EX_NOPARENTNOTIFY)
+    if(dwExStyle & WS_EX_NOPARENTNOTIFY)
         strcat(exstyle, "WS_EX_NOPARENTNOTIFY ");
-  if(dwExStyle & WS_EX_TOPMOST)
+    if(dwExStyle & WS_EX_TOPMOST)
         strcat(exstyle, "WS_EX_TOPMOST ");
-  if(dwExStyle & WS_EX_TRANSPARENT)
+    if(dwExStyle & WS_EX_TRANSPARENT)
         strcat(exstyle, "WS_EX_TRANSPARENT ");
 
-  if(dwExStyle & WS_EX_MDICHILD)
+    if(dwExStyle & WS_EX_MDICHILD)
         strcat(exstyle, "WS_EX_MDICHILD ");
-  if(dwExStyle & WS_EX_TOOLWINDOW)
+    if(dwExStyle & WS_EX_TOOLWINDOW)
         strcat(exstyle, "WS_EX_TOOLWINDOW ");
-  if(dwExStyle & WS_EX_WINDOWEDGE)
+    if(dwExStyle & WS_EX_WINDOWEDGE)
         strcat(exstyle, "WS_EX_WINDOWEDGE ");
-  if(dwExStyle & WS_EX_CLIENTEDGE)
+    if(dwExStyle & WS_EX_CLIENTEDGE)
         strcat(exstyle, "WS_EX_CLIENTEDGE ");
-  if(dwExStyle & WS_EX_CONTEXTHELP)
+    if(dwExStyle & WS_EX_CONTEXTHELP)
         strcat(exstyle, "WS_EX_CONTEXTHELP ");
-  if(dwExStyle & WS_EX_RIGHT)
+    if(dwExStyle & WS_EX_RIGHT)
         strcat(exstyle, "WS_EX_RIGHT ");
-  if(dwExStyle & WS_EX_LEFT)
+    if(dwExStyle & WS_EX_LEFT)
         strcat(exstyle, "WS_EX_LEFT ");
-  if(dwExStyle & WS_EX_RTLREADING)
+    if(dwExStyle & WS_EX_RTLREADING)
         strcat(exstyle, "WS_EX_RTLREADING ");
-  if(dwExStyle & WS_EX_LTRREADING)
+    if(dwExStyle & WS_EX_LTRREADING)
         strcat(exstyle, "WS_EX_LTRREADING ");
-  if(dwExStyle & WS_EX_LEFTSCROLLBAR)
+    if(dwExStyle & WS_EX_LEFTSCROLLBAR)
         strcat(exstyle, "WS_EX_LEFTSCROLLBAR ");
-  if(dwExStyle & WS_EX_RIGHTSCROLLBAR)
+    if(dwExStyle & WS_EX_RIGHTSCROLLBAR)
         strcat(exstyle, "WS_EX_RIGHTSCROLLBAR ");
-  if(dwExStyle & WS_EX_CONTROLPARENT)
+    if(dwExStyle & WS_EX_CONTROLPARENT)
         strcat(exstyle, "WS_EX_CONTROLPARENT ");
-  if(dwExStyle & WS_EX_STATICEDGE)
+    if(dwExStyle & WS_EX_STATICEDGE)
         strcat(exstyle, "WS_EX_STATICEDGE ");
-  if(dwExStyle & WS_EX_APPWINDOW)
+    if(dwExStyle & WS_EX_APPWINDOW)
         strcat(exstyle, "WS_EX_APPWINDOW ");
 
-  dprintf(("Window style:   %x %s", dwStyle, style));
-  dprintf(("Window exStyle: %x %s", dwExStyle, exstyle));
+    dprintf(("Window style:   %x %s", dwStyle, style));
+    dprintf(("Window exStyle: %x %s", dwExStyle, exstyle));
 }
 #endif
 //******************************************************************************
