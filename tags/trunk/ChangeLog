@@ -1,4 +1,9 @@
- /* $Id: ChangeLog,v 1.77 1999-08-11 17:16:03 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.78 1999-08-11 22:24:17 phaller Exp $ */
+ 99-08-11: Patrick Haller <phaller@gmx.net>
+	- ODINCRT: ordinal exports
+	- ADVAPI32:odinwrap macros (partially)
+        - LZ32:    odinwrap macros
+
  99-08-10: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32/NEW: Fixed makefile (link with odincrt)
 

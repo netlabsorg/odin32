@@ -1,4 +1,4 @@
-/* $Id: reg.cpp,v 1.2 1999-06-10 17:06:46 phaller Exp $ */
+/* $Id: reg.cpp,v 1.3 1999-08-11 22:23:47 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -10,7 +10,10 @@
  * registry functions
  */
 
-#include "winreg.h"
+#include <os2win.h>
+#include <winnt.h>
+#include <ntdef.h>
+#include <winreg.h>
 
 #include "ntdll.h"
 

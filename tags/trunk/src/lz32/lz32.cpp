@@ -1,4 +1,4 @@
-/* $Id: lz32.cpp,v 1.3 1999-08-11 16:46:27 phaller Exp $ */
+/* $Id: lz32.cpp,v 1.4 1999-08-11 22:22:44 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -13,12 +13,11 @@
 
 #include <string.h>
 #include <ctype.h>
+#include <odin.h>
 #include <odincrt.h>
 #include <odinwrap.h>
 #include <windef.h>
 #include <winbase.h>
-
-#define WIN32API WINAPI
 #include <heap.h>
 #include <heapstring.h>
 #include <lz32.h>
@@ -92,22 +91,6 @@ static struct lzstate *lzstates[MAX_LZSTATES];
 /****************************************************************************
  * Internal Prototypes                                                      *
  ****************************************************************************/
-
-#define ODIN_INTERNAL _Optlink
-
-// internal interface
-VOID        ODIN_INTERNAL LZDone(void);
-LONG        ODIN_INTERNAL CopyLZFile(HFILE,HFILE);
-HFILE       ODIN_INTERNAL LZOpenFileA(LPCSTR,LPOFSTRUCT,UINT);
-HFILE       ODIN_INTERNAL LZOpenFileW(LPCWSTR,LPOFSTRUCT,UINT);
-INT         ODIN_INTERNAL LZRead(HFILE,LPVOID,UINT);
-INT         ODIN_INTERNAL LZStart(void);
-void        ODIN_INTERNAL LZClose(HFILE);
-LONG        ODIN_INTERNAL LZCopy(HFILE,HFILE);
-HFILE       ODIN_INTERNAL LZInit(HFILE);
-LONG        ODIN_INTERNAL LZSeek(HFILE,LONG,INT);
-INT         ODIN_INTERNAL GetExpandedNameA(LPCSTR,LPSTR);
-INT         ODIN_INTERNAL GetExpandedNameW(LPCWSTR,LPWSTR);
 
 static int _lzget(struct lzstate *lzs,BYTE *b);
 static INT read_header(HFILE fd,struct lzfileheader *head);

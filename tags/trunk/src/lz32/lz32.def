@@ -11,16 +11,16 @@ IMPORTS
        _HEAP_strdupWtoA@12   = KERNEL32.HEAP_strdupWtoA
 
 EXPORTS
-       LZCopy                = _ODIN_LZCopy@8           @0
-       LZOpenFileA           = _ODIN_LZOpenFileA@12     @1
-       LZInit                = _ODIN_LZInit@4           @2
-       LZSeek                = _ODIN_LZSeek@12          @3
-       LZRead                = _ODIN_LZRead@12          @4
-       LZClose               = _ODIN_LZClose@4          @5
-       LZStart               = _ODIN_LZStart@0          @6
-       CopyLZFile            = _ODIN_CopyLZFile@8       @7
-       LZDone                = _ODIN_LZDone@0           @8
-       GetExpandedNameA      = _ODIN_GetExpandedNameA@8 @9
-       LZOpenFileW           = _ODIN_LZOpenFileW@12     @10
-       GetExpandedNameW      = _ODIN_GetExpandedNameW@8 @11
+       LZCopy                = _LZCopy@8           @0
+       LZOpenFileA           = _LZOpenFileA@12     @1
+       LZInit                = _LZInit@4           @2
+       LZSeek                = _LZSeek@12          @3
+       LZRead                = _LZRead@12          @4
+       LZClose               = _LZClose@4          @5
+       LZStart               = _LZStart@0          @6
+       CopyLZFile            = _CopyLZFile@8       @7
+       LZDone                = _LZDone@0           @8
+       GetExpandedNameA      = _GetExpandedNameA@8 @9
+       LZOpenFileW           = _LZOpenFileW@12     @10
+       GetExpandedNameW      = _GetExpandedNameW@8 @11
 
