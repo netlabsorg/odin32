@@ -1,4 +1,19 @@
-/* $Id: changelog,v 1.2286 2002-08-23 15:46:10 sandervl Exp $ */
+/* $Id: changelog,v 1.2287 2002-08-24 05:00:54 bird Exp $ */
+
+ 2002-08-23: Yuri Dario <mc6530@mclink   >
+    - TOOLS:    o VAC40 filter fixes for mapsym.cmd.
+
+ 2002-08-23: knut st. osmundsen <bird@anduin   >
+    - TOOLS:    o Made mapsym.cmd quiet on 4os2 too.
+                o Made BldLevelInf.cmd respecting BUILD_VERBOSE and BUILD_QUIET;
+                  and fixed an old typo.
+                o Update the Do* and BldLevelInf.cmd with novalue signalhandlers.
+                  (Something all rexx script should use!)
+    - MAKE:     o Completed Odin32 config.
+                o Default target is DLL, but if CUSTOMBUILD defined LIB.
+    - ADVAPI32, ODINCRT:
+                o Made makefiles support the new build system.
+                  (Using the new if BUILD_SETUP_MAK is defined.)
 
  2002-08-23: Herwig Bauernfeind <herwig.bauernfeind@aon   >
     - TOOLS\ODINBUG, DOC, BIN
@@ -32,7 +47,7 @@
                   anything.
     - CMDQD, FASTDEP:
                 o Made makefiles support the new build system.
-                  (Testing for the env.var. BUILD_SETUP_MAK.)
+                  (Using the new if BUILD_SETUP_MAK is defined.)
 
  2002-08-21: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o EV_RLSD/MS_RLSD_ON status corresponds to OS/2 DCD (data carrier detect) status
