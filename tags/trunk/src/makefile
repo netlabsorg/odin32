@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.19 1999-09-15 15:43:13 phaller Exp $
+# $Id: makefile,v 1.20 1999-09-15 23:25:10 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -85,13 +85,13 @@ all:
         $(MAKE_CMD)
         cd ..\msacm32
         $(MAKE_CMD)
-        cd ..\avifil32
-        $(MAKE_CMD)
         cd ..\imagehlp
         $(MAKE_CMD)
-        cd ..\wnaspi32
+        cd ..\avifil32
         $(MAKE_CMD)
         cd ..\dplay
+        $(MAKE_CMD)
+        cd ..\wnaspi32
         $(MAKE_CMD)
         cd ..\dsound
         $(MAKE_CMD)
@@ -163,9 +163,9 @@ clean:
         $(MAKE_CMD) clean
         cd ..\msvfw32
         $(MAKE_CMD) clean
-        cd ..\wnaspi32
-        $(MAKE_CMD)
         cd ..\avifil32
-        $(MAKE_CMD)
+        $(MAKE_CMD) clean
         cd ..\dplay
-        $(MAKE_CMD)
+        $(MAKE_CMD) clean
+        cd ..\wnaspi32
+        $(MAKE_CMD) clean

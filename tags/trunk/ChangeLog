@@ -1,4 +1,23 @@
- /* $Id: ChangeLog,v 1.203 1999-09-15 16:08:31 phaller Exp $ */
+ /* $Id: ChangeLog,v 1.204 1999-09-15 23:27:06 sandervl Exp $ */
+
+ 99-09-15: Sander van Leeuwen <sandervl@xs4all.nl>
+	- KERNEL32: Moved old kernel32 code to kernel32\old
+                    Rewritten win32 exe/dll classes. 
+                    There are now classes for the following exes/dlls:
+	            Pe2lx images, win32 images loaded by the pe loader and
+                    LX images (win32 apps compiled in OS/2 and system dlls)
+		    Bugfixes for unicode resource apis.
+                    Not completely tested yet, but works for most apps.
+          NOTE:     Resource handling for pe2lx & win32 apps compiled in OS/2
+                    will be added in the near future. For now it's compatible
+                    with the old pe2lx.
+	  NOTE:     New kernel32 doesn't work with old user32
+          NOTE:     Win32Resource::lockResource not complete yet, but that part
+                    will be removed after the pe2lx rewrite.
+	- USER32:   Moved new user32 into user32 dir, old one to user32\old
+	- ALL:      Changed initterm.cpp to create LX dll object during initialization.
+          IMPORTANT NOTE: Version increased from 3 to 4. Complete recompilation
+                          of everything is required!
 
  99-09-14: Patrick Haller <phaller@gmx.net>
         - AVIFIL32:   ported AVIFIL32 from WINE
