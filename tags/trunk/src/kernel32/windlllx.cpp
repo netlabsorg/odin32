@@ -1,4 +1,4 @@
-/* $Id: windlllx.cpp,v 1.6 1999-12-13 21:07:40 sandervl Exp $ */
+/* $Id: windlllx.cpp,v 1.7 2000-02-15 14:37:43 sandervl Exp $ */
 
 /*
  * Win32 LX Dll class (compiled in OS/2 using Odin32 api)
@@ -105,12 +105,15 @@ Win32LxDll::~Win32LxDll()
 ULONG Win32LxDll::Release()
 { 
  ULONG ret = --referenced;
+ HINSTANCE hinst;
 
   if(ret == 0) {
 	dprintf(("Win32LxDll::Release, referenced == 0\n"));
 	//DosFreeModule sends a termination message to the dll.
         //The LX dll informs us when it's removed (UnregisterDll call)
-	DosFreeModule(hinstance);
+	hinst = hinstance;
+	delete this;
+	DosFreeModule(hinst);
   }
   return(ret);
 }
