@@ -1,4 +1,4 @@
-/* $Id: oslibdos.h,v 1.38 2001-11-10 12:47:47 sandervl Exp $ */
+/* $Id: oslibdos.h,v 1.39 2001-11-11 13:46:19 bird Exp $ */
 
 /*
  * Wrappers for OS/2 Dos* API
@@ -319,19 +319,23 @@ BOOL  OSLibDosGetDiskGeometry(HANDLE hDisk, DWORD cDisk, void *pGeom);
                                 ULONG fsOpenMode,
                                 PEAOP2 peaop2);
 
+   #ifndef AFNTY_THREAD                 /* don't declare this if it's allready there */
 
-   typedef struct _MPAFFINITY { /* afnty */
-      ULONG          mask[2]; /* CPUs 0 thru 31 in [0], CPUs 32 thru 63 in [1] */
-   } MPAFFINITY;
-   typedef MPAFFINITY *PMPAFFINITY;
+      typedef struct _MPAFFINITY { /* afnty */
+         ULONG          mask[2]; /* CPUs 0 thru 31 in [0], CPUs 32 thru 63 in [1] */
+      } MPAFFINITY;
+      typedef MPAFFINITY *PMPAFFINITY;
+
+
+      /* scope values for QueryThreadAffinity */
+
+      #define AFNTY_THREAD       0
+      #define AFNTY_SYSTEM       1
+
+   #endif
 
    typedef APIRET (* APIENTRY PROC_DosQueryThreadAffinity)(ULONG scope,
                                                            PMPAFFINITY pAffinity);
-
-   /* scope values for QueryThreadAffinity */
-
-   #define AFNTY_THREAD       0
-   #define AFNTY_SYSTEM       1
 
    typedef APIRET (* APIENTRY PROC_DosSetThreadAffinity)(PMPAFFINITY pAffinity);
 
