@@ -1,4 +1,4 @@
-/* $Id: dwaveout.cpp,v 1.28 2000-07-18 18:34:41 sandervl Exp $ */
+/* $Id: dwaveout.cpp,v 1.29 2000-09-03 09:35:14 sandervl Exp $ */
 
 /*
  * Wave playback class
@@ -580,7 +580,8 @@ BOOL DartWaveOut::queryFormat(ULONG formatTag, ULONG nChannels,
                        MCI_WAIT | MCI_OPEN_TYPE_ID,
                        (PVOID) &mciOpenParms,
                        0);
-  if (rc != 0) {
+  if((rc & 0xFFFF) != MCIERR_SUCCESS) {
+        mciError(rc);
         return(FALSE);
   }
   DeviceId = mciOpenParms.usDeviceID;
