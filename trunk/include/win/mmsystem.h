@@ -1,4 +1,4 @@
-/* $Id: mmsystem.h,v 1.3 2000-01-03 10:24:25 sandervl Exp $ */
+/* $Id: mmsystem.h,v 1.4 2000-01-15 22:01:09 sandervl Exp $ */
 /* 
  * MMSYSTEM - Multimedia Wine Extension ... :-)
  */
@@ -1917,6 +1917,11 @@ YIELDPROC	WINAPI	mciGetYieldProc(UINT,DWORD*);
 
 #define MCI_INFO_PRODUCT                0x00000100L
 #define MCI_INFO_FILE                   0x00000200L
+#define MCI_INFO_MEDIA_UPC              0x00000400L
+#define MCI_INFO_MEDIA_IDENTITY         0x00000800L
+#define MCI_INFO_NAME                   0x00001000L
+#define MCI_INFO_COPYRIGHT              0x00002000L
+
 
 #define MCI_GETDEVCAPS_ITEM             0x00000100L
 
