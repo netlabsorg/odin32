@@ -1,4 +1,4 @@
-/* $Id: odin32.e,v 1.7 2001-10-22 03:54:53 bird Exp $
+/* $Id: odin32.e,v 1.8 2001-10-22 04:11:08 bird Exp $
  *
  * Visual SlickEdit Documentation Macros.
  *
@@ -25,7 +25,8 @@
  *
  * Ctrl+Shift+B: KLOGENTRYX(..)
  * Ctrl+Shift+E: KLOGEXIT(..)
- * Ctrl+Shift+Q: Do kLog stuff for the current file.
+ * Ctrl+Shift+N: Do kLog stuff for the current file. No questions.
+ * Ctrl+Shift+Q: Do kLog stuff for the current file. Ask a lot of questions.
  *
  * Remember to set the correct sOdin32UserName, sOdin32UserEmail and sOdin32UserInitials
  * before compiling and loading the macros into Visual SlickEdit.
@@ -44,8 +45,9 @@ def  'C-S-H' = odin32_headerbox
 def  'C-S-I' = odin32_intfuncbox
 def  'C-S-K' = odin32_constbox
 def  'C-S-M' = odin32_modulebox
+def  'C-S-N' = odin32_klog_file_no_ask
 def  'C-S-O' = odin32_oneliner
-def  'C-S-Q' = odin32_klog_file
+def  'C-S-Q' = odin32_klog_file_ask
 def  'C-S-S' = odin32_structbox
 def  'C-S-T' = odin32_maketagfile
 
@@ -309,7 +311,7 @@ void odin32_modulebox()
     _begin_line();
     if (file_eq(p_extension, 'asm'))
     {
-        _insert_text("; $Id: odin32.e,v 1.7 2001-10-22 03:54:53 bird Exp $\n");
+        _insert_text("; $Id: odin32.e,v 1.8 2001-10-22 04:11:08 bird Exp $\n");
         _insert_text("; \n");
         _insert_text("; \n");
         _insert_text("; \n");
@@ -322,7 +324,7 @@ void odin32_modulebox()
     }
     else
     {
-        _insert_text("/* $Id: odin32.e,v 1.7 2001-10-22 03:54:53 bird Exp $\n");
+        _insert_text("/* $Id: odin32.e,v 1.8 2001-10-22 04:11:08 bird Exp $\n");
         _insert_text(" * \n");
         _insert_text(" * \n");
         _insert_text(" * \n");
@@ -448,11 +450,11 @@ void odin32_klogexit()
             }
             else
             {
-                if (sType == 'unsigned' || sType == 'UNSIGNED' || sType == 'DWORD' || sType == 'ULONG' || sType == 'UINT')
+                if (sType == 'unsigned' || sType == 'UNSIGNED' || sType == 'UINT')
                     _insert_text("KLOGEXITUINT();");
-                else if (sType == 'unsigned' || sType == 'UNSIGNED' || sType == 'DWORD' || sType == 'ULONG' || sType == 'UINT')
+                else if (sType == 'int' || sType == 'INT')
                     _insert_text("KLOGEXITINT();");
-                else if (sType == 'void *' || sType == 'VOID *' || sType == 'PVOID')
+                else if (sType == 'void *' || sType == 'VOID *' || sType == 'PVOID' || sType == 'LPVOID')
                     _insert_text("KLOGEXITHEX();");
                 else
                     _insert_text("KLOGEXIT(\""sType"\", );");
@@ -511,16 +513,35 @@ void odin32_klogexit()
 
 
 /**
- * Goes thru a file.
+ * Processes a file - ask user all the time.
  */
-void odin32_klog_file()
+void odin32_klog_file_ask()
+{
+    odin32_klog_file_int(true)
+}
+
+
+/**
+ * Processes a file - no questions.
+ */
+void odin32_klog_file_no_ask()
+{
+    odin32_klog_file_int(false)
+}
+
+
+
+/**
+ * Processes a file.
+ */
+static void odin32_klog_file_int(boolean fAsk)
 {
     show_all();
     bottom();
     _refresh_scroll();
 
     /* ask question so we can get to the right position somehow.. */
-    if (_message_box("kLog process this file?", "Visual SlickEdit", MB_YESNO | MB_ICONQUESTION) != IDYES)
+    if (fAsk && _message_box("kLog process this file?", "Visual SlickEdit", MB_YESNO | MB_ICONQUESTION) != IDYES)
         return;
 
     /*
@@ -528,6 +549,8 @@ void odin32_klog_file()
      */
     while (!prev_proc())
     {
+        //say 'entry main loop: ' odin32_getfunction();
+
         /*
          * Skip prototypes.
          */
@@ -540,7 +563,7 @@ void odin32_klog_file()
         center_line();
         _refresh_scroll();
         sFunction = odin32_getfunction();
-        rc = _message_box("Process this function ("sFunction")?", "Visual SlickEdit", MB_YESNOCANCEL | MB_ICONQUESTION);
+        rc = fAsk ? _message_box("Process this function ("sFunction")?", "Visual SlickEdit", MB_YESNOCANCEL | MB_ICONQUESTION) : IDYES;
         if (rc == IDYES)
         {
             _save_pos2(procpos);
@@ -562,6 +585,7 @@ void odin32_klog_file()
     {
         _save_pos2(procpos);
         sCurFunction = odin32_getfunction();
+        //say 'exit main loop: ' sCurFunction
 
         /*
          * Skip prototypes.
@@ -574,13 +598,14 @@ void odin32_klog_file()
          */
         while (!search("return", "WE<+") && odin32_getfunction() == sCurFunction)
         {
+            //say 'exit sub loop: ' p_line
             /*
              * Ask User.
              */
             center_line();
             _refresh_scroll();
             sFunction = odin32_getfunction();
-            rc = _message_box("Process this exit from "sFunction"?", "Visual SlickEdit", MB_YESNOCANCEL | MB_ICONQUESTION);
+            rc =  fAsk ? _message_box("Process this exit from "sFunction"?", "Visual SlickEdit", MB_YESNOCANCEL | MB_ICONQUESTION) : IDYES;
             deselect();
             if (rc == IDYES)
             {
@@ -619,7 +644,7 @@ void odin32_klog_file()
                     center_line();
                     _refresh_scroll();
                     sFunction = odin32_getfunction();
-                    rc = _message_box("Process this exit from "sFunction"?", "Visual SlickEdit", MB_YESNOCANCEL | MB_ICONQUESTION);
+                    rc = fAsk ? _message_box("Process this exit from "sFunction"?", "Visual SlickEdit", MB_YESNOCANCEL | MB_ICONQUESTION) : IDYES;
                     deselect();
                     if (rc == IDYES)
                     {
@@ -922,8 +947,6 @@ static int odin32_countparams(_str sParams)
         else if (ch == ')')
             iParLevel--;
     }
-
-    say 'returntype='odin32_getreturntype(true);
 
     return iCurParam + 1;
 }
