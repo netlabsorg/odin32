@@ -1,4 +1,4 @@
-/* $Id: exceptions.cpp,v 1.65 2002-07-26 10:47:33 sandervl Exp $ */
+/* $Id: exceptions.cpp,v 1.66 2002-10-01 11:37:19 sandervl Exp $ */
 
 /*
  * Win32 Exception functions for OS/2
@@ -1136,8 +1136,12 @@ ULONG APIENTRY OS2ExceptionHandler(PEXCEPTIONREPORTRECORD       pERepRec,
     //     next dprintf won't wait forever
     int prevlock = LogException(ENTER_EXCEPTION);
 
-    //print exception name & exception type
-    sprintfException(pERepRec, pERegRec, pCtxRec, p, szTrapDump);
+    //Print exception name & exception type
+    //Not for a guard page exception as sprintfException uses a lot of stack
+    //and can trigger nested guard page exceptions (crash)
+    if(pERepRec->ExceptionNum != XCPT_GUARD_PAGE_VIOLATION) {
+        sprintfException(pERepRec, pERegRec, pCtxRec, p, szTrapDump);
+    }
 
     /* Access violation at a known location */
     switch(pERepRec->ExceptionNum)
