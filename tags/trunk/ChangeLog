@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.800 2000-03-11 20:06:28 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.801 2000-03-11 21:52:15 sandervl Exp $ */
 
  2000-03-11: Przemyslaw Dobrowolski <dobrawka@asua.org.pl>
 	- OPENGL\GLIDE: Fix for Voodoo 1 glide (missing io ports)
@@ -15,6 +15,7 @@
                         explicitely specify which api type you use (ascii or unicode)!)
 
 	- OPENGL\GLIDE: Fixed wrong binary path for voodoo1 glide
+	- include\win\debugtools.h: Disable TRACE, WARN etc when DEBUG is not defined
 
  2000-03-11: Jeroen van den Horn <J.vandenHorn@fibre.a2000.nl>
         - OPENGL: Fixed error preventing build to complete
