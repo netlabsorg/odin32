@@ -1,4 +1,4 @@
-/* $Id: windlgmsg.cpp,v 1.1 1999-09-15 23:19:02 sandervl Exp $ */
+/* $Id: windlgmsg.cpp,v 1.2 1999-10-08 21:30:52 cbratschi Exp $ */
 /*
  * Win32 dialog message APIs for OS/2
  *
@@ -26,7 +26,7 @@ LONG WIN32API SendDlgItemMessageA( HWND hwnd, int id, UINT Msg, WPARAM wParam, L
   Win32BaseWindow *dlgcontrol;
 
     dialog = (Win32Dialog *)Win32BaseWindow::GetWindowFromHandle(hwnd);
-    if(!dialog || !dialog->IsDialog()) {
+    if(!dialog) {
         dprintf(("SendDlgItemMessageA, window %x not found", hwnd));
         return 0;
     }
@@ -44,7 +44,7 @@ LONG WIN32API SendDlgItemMessageW( HWND hwnd, int id, UINT Msg, WPARAM wParam, L
   Win32BaseWindow *dlgcontrol;
 
     dialog = (Win32Dialog *)Win32BaseWindow::GetWindowFromHandle(hwnd);
-    if(!dialog || !dialog->IsDialog()) {
+    if(!dialog) {
         dprintf(("SendDlgItemMessageW, window %x not found", hwnd));
         return 0;
     }
