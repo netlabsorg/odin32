@@ -3,9 +3,6 @@
  *
  * 2001 John R. Sheets (for CodeWeavers)
  */
-#ifdef __WIN32OS2__
-#define INITGUID
-#endif
 
 #include "debugtools.h"
 
