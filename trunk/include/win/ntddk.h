@@ -1,4 +1,4 @@
-/* $Id: ntddk.h,v 1.5 2000-02-07 14:29:22 sandervl Exp $ */
+/* $Id: ntddk.h,v 1.6 2000-08-29 21:20:49 sandervl Exp $ */
 /*
 	this file defines interfaces mainly exposed to device drivers and
 	native nt dll's
@@ -29,7 +29,7 @@ typedef struct _IO_STATUS_BLOCK
 	ULONG_PTR Information;
 } IO_STATUS_BLOCK, *PIO_STATUS_BLOCK;    
 
-typedef VOID (NTAPI *PIO_APC_ROUTINE) ( PVOID ApcContext, PIO_STATUS_BLOCK IoStatusBlock, ULONG Reserved );
+typedef VOID (* NTAPI PIO_APC_ROUTINE) ( PVOID ApcContext, PIO_STATUS_BLOCK IoStatusBlock, ULONG Reserved );
 
 typedef enum _KEY_INFORMATION_CLASS {
 	KeyBasicInformation,
