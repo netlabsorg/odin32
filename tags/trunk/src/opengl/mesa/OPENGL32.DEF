@@ -1,3 +1,4 @@
+; $Id: OPENGL32.DEF,v 1.3 2000-05-23 20:40:19 jeroen Exp $
 LIBRARY OPENGL32 INITINSTANCE
 
 DATA MULTIPLE NONSHARED
@@ -360,7 +361,7 @@ EXPORTS
    glTexGeniv=_glTexGeniv@12                                            @308
    glTexImage1D=_glTexImage1D@32                                        @309
    glTexImage2D=_glTexImage2D@36                                        @310
-   glTexImage3D=_glTexImage3D@40                                        @400
+;  glTexImage3D=_glTexImage3D@40                                        @400
    glTexImage3DEXT=_glTexImage3DEXT@40                                  @435
    glTexParameterf=_glTexParameterf@12                                  @311
    glTexParameterfv=_glTexParameterfv@12                                @312

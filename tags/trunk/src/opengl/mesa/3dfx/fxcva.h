@@ -2,7 +2,7 @@
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -49,14 +49,14 @@
 
 
 extern GLboolean fxMergeAndRenderCVA( struct vertex_buffer *VB,
-				      struct vertex_buffer *cvaVB );
+                                      struct vertex_buffer *cvaVB );
 
 
 
 extern void fxRenderCVAElements( struct vertex_buffer *VB,
-				 GLenum mode,
-				 GLuint *elts,
-				 GLuint n );
+                                 GLenum mode,
+                                 GLuint *elts,
+                                 GLuint n );
 
 
 extern GLboolean fxCheckCVA( GLcontext *ctx );

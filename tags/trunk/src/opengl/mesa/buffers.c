@@ -1,10 +1,10 @@
-/* $Id: glmisc.c,v 1.2 2000-03-01 18:49:29 jeroen Exp $ */
+/* $Id: buffers.c,v 1.1 2000-05-23 20:40:24 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
- * Copyright (C) 1999  Brian Paul   All Rights Reserved.
+ * Copyright (C) 1999-2000  Brian Paul   All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -25,37 +25,31 @@
  */
 
 
-/* $XFree86: xc/lib/GL/mesa/src/glmisc.c,v 1.2 1999/04/04 00:20:25 dawes Exp $ */
-
 #ifdef PC_HEADER
 #include "all.h"
 #else
-#ifndef XFree86Server
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-#else
-#include "GL/xf86glx.h"
-#endif
+#include "glheader.h"
 #include "accum.h"
 #include "alphabuf.h"
+#include "buffers.h"
 #include "context.h"
 #include "depth.h"
 #include "enums.h"
-#include "extensions.h"
-#include "glmisc.h"
 #include "macros.h"
 #include "masking.h"
+#include "mem.h"
 #include "stencil.h"
+#include "state.h"
 #include "types.h"
 #endif
 
 
 
-void gl_ClearIndex( GLcontext *ctx, GLfloat c )
+void
+_mesa_ClearIndex( GLfloat c )
 {
+   GET_CURRENT_CONTEXT(ctx);
    ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx, "glClearIndex");
-
    ctx->Color.ClearIndex = (GLuint) c;
    if (!ctx->Visual->RGBAflag) {
       /* it's OK to call glClearIndex in RGBA mode but it should be a NOP */
@@ -65,9 +59,11 @@ void gl_ClearIndex( GLcontext *ctx, GLfloat c )
 
 
 
-void gl_ClearColor( GLcontext *ctx, GLclampf red, GLclampf green,
-                    GLclampf blue, GLclampf alpha )
+void
+_mesa_ClearColor( GLclampf red, GLclampf green,
+                  GLclampf blue, GLclampf alpha )
 {
+   GET_CURRENT_CONTEXT(ctx);
    ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx, "glClearColor");
 
    ctx->Color.ClearColor[0] = CLAMP( red,   0.0F, 1.0F );
@@ -84,35 +80,28 @@ void gl_ClearColor( GLcontext *ctx, GLclampf red, GLclampf green,
    }
 }
 
+
+
+
 /*
  * Clear the color buffer when glColorMask or glIndexMask is in effect.
  */
-static void clear_color_buffer_with_masking( GLcontext *ctx )
+static void
+clear_color_buffer_with_masking( GLcontext *ctx )
 {
-   GLint x, y, height, width;
-
-   /* Compute region to clear */
-   if (ctx->Scissor.Enabled) {
-      x = ctx->Buffer->Xmin;
-      y = ctx->Buffer->Ymin;
-      height = ctx->Buffer->Ymax - ctx->Buffer->Ymin + 1;
-      width  = ctx->Buffer->Xmax - ctx->Buffer->Xmin + 1;
-   }
-   else {
-      x = 0;
-      y = 0;
-      height = ctx->Buffer->Height;
-      width  = ctx->Buffer->Width;
-   }
+   const GLint x = ctx->DrawBuffer->Xmin;
+   const GLint y = ctx->DrawBuffer->Ymin;
+   const GLint height = ctx->DrawBuffer->Ymax - ctx->DrawBuffer->Ymin + 1;
+   const GLint width  = ctx->DrawBuffer->Xmax - ctx->DrawBuffer->Xmin + 1;
 
    if (ctx->Visual->RGBAflag) {
       /* RGBA mode */
-      GLubyte r = (GLint) (ctx->Color.ClearColor[0] * 255.0F);
-      GLubyte g = (GLint) (ctx->Color.ClearColor[1] * 255.0F);
-      GLubyte b = (GLint) (ctx->Color.ClearColor[2] * 255.0F);
-      GLubyte a = (GLint) (ctx->Color.ClearColor[3] * 255.0F);
+      const GLubyte r = (GLint) (ctx->Color.ClearColor[0] * 255.0F);
+      const GLubyte g = (GLint) (ctx->Color.ClearColor[1] * 255.0F);
+      const GLubyte b = (GLint) (ctx->Color.ClearColor[2] * 255.0F);
+      const GLubyte a = (GLint) (ctx->Color.ClearColor[3] * 255.0F);
       GLint i;
-      for (i=0;i<height;i++,y++) {
+      for (i = 0; i < height; i++) {
          GLubyte rgba[MAX_WIDTH][4];
          GLint j;
          for (j=0; j<width; j++) {
@@ -121,23 +110,23 @@ static void clear_color_buffer_with_masking( GLcontext *ctx )
             rgba[j][BCOMP] = b;
             rgba[j][ACOMP] = a;
          }
-         gl_mask_rgba_span( ctx, width, x, y, rgba );
-         (*ctx->Driver.WriteRGBASpan)( ctx, width, x, y,
-                                       (const GLubyte (*)[4])rgba, NULL );
+         gl_mask_rgba_span( ctx, width, x, y + i, rgba );
+         (*ctx->Driver.WriteRGBASpan)( ctx, width, x, y + i,
+                                       (CONST GLubyte (*)[4])rgba, NULL );
       }
    }
    else {
       /* Color index mode */
-      GLuint indx[MAX_WIDTH];
+      GLuint span[MAX_WIDTH];
       GLubyte mask[MAX_WIDTH];
       GLint i, j;
       MEMSET( mask, 1, width );
-      for (i=0;i<height;i++,y++) {
+      for (i=0;i<height;i++) {
          for (j=0;j<width;j++) {
-            indx[j] = ctx->Color.ClearIndex;
+            span[j] = ctx->Color.ClearIndex;
          }
-         gl_mask_index_span( ctx, width, x, y, indx );
-         (*ctx->Driver.WriteCI32Span)( ctx, width, x, y, indx, mask );
+         gl_mask_index_span( ctx, width, x, y + i, span );
+         (*ctx->Driver.WriteCI32Span)( ctx, width, x, y + i, span, mask );
       }
    }
 }
@@ -145,125 +134,174 @@ static void clear_color_buffer_with_masking( GLcontext *ctx )
 
 
 /*
- * Clear the front and/or back color buffers.  Also clear the alpha
- * buffer(s) if present.
+ * Clear a color buffer without index/channel masking.
  */
-static void clear_color_buffers( GLcontext *ctx )
+static void
+clear_color_buffer(GLcontext *ctx)
 {
-   if (ctx->RasterMask & MULTI_DRAW_BIT) {
-      GLuint bufferBit;
+   const GLint x = ctx->DrawBuffer->Xmin;
+   const GLint y = ctx->DrawBuffer->Ymin;
+   const GLint height = ctx->DrawBuffer->Ymax - ctx->DrawBuffer->Ymin + 1;
+   const GLint width  = ctx->DrawBuffer->Xmax - ctx->DrawBuffer->Xmin + 1;
 
-      if (ctx->Color.DrawBuffer == GL_NONE)
-         return;
-
-      /* loop over four possible dest color buffers */
-      for (bufferBit = 1; bufferBit <= 8; bufferBit = bufferBit << 1) {
-         if (bufferBit & ctx->Color.DrawDestMask) {
-            if (bufferBit == FRONT_LEFT_BIT) {
-               (*ctx->Driver.SetBuffer)( ctx, GL_FRONT_LEFT);
-               ctx->Buffer->Alpha = ctx->Buffer->FrontLeftAlpha;
-            }
-            else if (bufferBit == FRONT_RIGHT_BIT) {
-               (*ctx->Driver.SetBuffer)( ctx, GL_FRONT_RIGHT);
-               ctx->Buffer->Alpha = ctx->Buffer->FrontRightAlpha;
-            }
-            else if (bufferBit == BACK_LEFT_BIT) {
-               (*ctx->Driver.SetBuffer)( ctx, GL_BACK_LEFT);
-               ctx->Buffer->Alpha = ctx->Buffer->BackLeftAlpha;
-            }
-            else {
-               (*ctx->Driver.SetBuffer)( ctx, GL_BACK_RIGHT);
-               ctx->Buffer->Alpha = ctx->Buffer->BackRightAlpha;
-            }
-
-            if (ctx->Color.SWmasking) {
-               clear_color_buffer_with_masking( ctx );
-            }
-            else {
-               GLint x = ctx->Buffer->Xmin;
-               GLint y = ctx->Buffer->Ymin;
-               GLint height = ctx->Buffer->Ymax - ctx->Buffer->Ymin + 1;
-               GLint width  = ctx->Buffer->Xmax - ctx->Buffer->Xmin + 1;
-               (void) (*ctx->Driver.Clear)( ctx, GL_COLOR_BUFFER_BIT,
-                                            !ctx->Scissor.Enabled,
-                                            x, y, width, height );
-            }
-         }
+   if (ctx->Visual->RGBAflag) {
+      /* RGBA mode */
+      const GLubyte r = (GLint) (ctx->Color.ClearColor[0] * 255.0F);
+      const GLubyte g = (GLint) (ctx->Color.ClearColor[1] * 255.0F);
+      const GLubyte b = (GLint) (ctx->Color.ClearColor[2] * 255.0F);
+      const GLubyte a = (GLint) (ctx->Color.ClearColor[3] * 255.0F);
+      GLubyte span[MAX_WIDTH][4];
+      GLint i;
+      ASSERT(ctx->Color.ColorMask[0] &&
+             ctx->Color.ColorMask[1] &&
+             ctx->Color.ColorMask[2] &&
+             ctx->Color.ColorMask[3]);
+      for (i = 0; i < width; i++) {
+         span[i][RCOMP] = r;
+         span[i][GCOMP] = g;
+         span[i][BCOMP] = b;
+         span[i][ACOMP] = a;
       }
-
-      /* restore default dest buffer */
-      (void) (*ctx->Driver.SetBuffer)( ctx, ctx->Color.DriverDrawBuffer );
+      for (i = 0; i < height; i++) {
+         (*ctx->Driver.WriteRGBASpan)( ctx, width, x, y + i,
+                                       (CONST GLubyte (*)[4]) span, NULL );
+      }
    }
    else {
-      /* normal case:  clear exactly one color buffer */
-#ifndef DIVE
-      if (ctx->Color.SWmasking) {
-         clear_color_buffer_with_masking( ctx );
+      /* Color index mode */
+      ASSERT(ctx->Color.IndexMask == ~0);
+      if (ctx->Visual->IndexBits == 8) {
+         /* 8-bit clear */
+         GLubyte span[MAX_WIDTH];
+         GLint i;
+         MEMSET(span, ctx->Color.ClearIndex, width);
+         for (i = 0; i < height; i++) {
+            (*ctx->Driver.WriteCI8Span)( ctx, width, x, y + i, span, NULL );
+         }
       }
       else {
-         GLint x = ctx->Buffer->Xmin;
-         GLint y = ctx->Buffer->Ymin;
-         GLint height = ctx->Buffer->Ymax - ctx->Buffer->Ymin + 1;
-         GLint width  = ctx->Buffer->Xmax - ctx->Buffer->Xmin + 1;
-         (void) (*ctx->Driver.Clear)( ctx, GL_COLOR_BUFFER_BIT,
-                                      !ctx->Scissor.Enabled,
-                                      x, y, width, height );
+         /* non 8-bit clear */
+         GLuint span[MAX_WIDTH];
+         GLint i;
+         for (i = 0; i < width; i++) {
+            span[i] = ctx->Color.ClearIndex;
+         }
+         for (i = 0; i < height; i++) {
+            (*ctx->Driver.WriteCI32Span)( ctx, width, x, y + i, span, NULL );
+         }
       }
-#endif
    }
 }
 
 
 
-void gl_Clear( GLcontext *ctx, GLbitfield mask )
+/*
+ * Clear the front/back/left/right color buffers.
+ * This function is usually only called if we need to clear the
+ * buffers with masking.
+ */
+static void
+clear_color_buffers(GLcontext *ctx)
 {
+   GLuint bufferBit;
+
+   /* loop over four possible dest color buffers */
+   for (bufferBit = 1; bufferBit <= 8; bufferBit = bufferBit << 1) {
+      if (bufferBit & ctx->Color.DrawDestMask) {
+         if (bufferBit == FRONT_LEFT_BIT) {
+            (void) (*ctx->Driver.SetDrawBuffer)( ctx, GL_FRONT_LEFT);
+         }
+         else if (bufferBit == FRONT_RIGHT_BIT) {
+            (void) (*ctx->Driver.SetDrawBuffer)( ctx, GL_FRONT_RIGHT);
+         }
+         else if (bufferBit == BACK_LEFT_BIT) {
+            (void) (*ctx->Driver.SetDrawBuffer)( ctx, GL_BACK_LEFT);
+         }
+         else {
+            (void) (*ctx->Driver.SetDrawBuffer)( ctx, GL_BACK_RIGHT);
+         }
+
+         if (ctx->Color.SWmasking) {
+            clear_color_buffer_with_masking(ctx);
+         }
+         else {
+            clear_color_buffer(ctx);
+         }
+      }
+   }
+
+   /* restore default dest buffer */
+   (void) (*ctx->Driver.SetDrawBuffer)( ctx, ctx->Color.DriverDrawBuffer );
+}
+
+
+
+void
+_mesa_Clear( GLbitfield mask )
+{
+   GET_CURRENT_CONTEXT(ctx);
 #ifdef PROFILE
    GLdouble t0 = gl_time();
 #endif
-
    ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx, "glClear");
 
    if (MESA_VERBOSE & VERBOSE_API)
       fprintf(stderr, "glClear 0x%x\n", mask);
 
+   if (ctx->NewState) {
+      gl_update_state( ctx );
+   }
+
    if (ctx->RenderMode==GL_RENDER) {
-      GLint x, y, width, height;
+      const GLint x = ctx->DrawBuffer->Xmin;
+      const GLint y = ctx->DrawBuffer->Ymin;
+      const GLint height = ctx->DrawBuffer->Ymax - ctx->DrawBuffer->Ymin + 1;
+      const GLint width  = ctx->DrawBuffer->Xmax - ctx->DrawBuffer->Xmin + 1;
+      GLbitfield ddMask;
       GLbitfield newMask;
 
-      if (ctx->NewState) {
-         gl_update_state( ctx );
+      /* don't clear depth buffer if depth writing disabled */
+      if (!ctx->Depth.Mask)
+         CLEAR_BITS(mask, GL_DEPTH_BUFFER_BIT);
+
+      /* Build bitmask to send to driver Clear function */
+      ddMask = mask & (GL_DEPTH_BUFFER_BIT |
+                       GL_STENCIL_BUFFER_BIT |
+                       GL_ACCUM_BUFFER_BIT);
+      if (mask & GL_COLOR_BUFFER_BIT) {
+         ddMask |= ctx->Color.DrawDestMask;
       }
 
-      x = ctx->Buffer->Xmin;
-      y = ctx->Buffer->Ymin;
-      height = ctx->Buffer->Ymax - ctx->Buffer->Ymin + 1;
-      width  = ctx->Buffer->Xmax - ctx->Buffer->Xmin + 1;
+      ASSERT(ctx->Driver.Clear);
+      newMask = (*ctx->Driver.Clear)( ctx, ddMask, !ctx->Scissor.Enabled,
+                                      x, y, width, height );
 
-      /* clear software alpha buffer(s) */
-      if ( (mask & GL_COLOR_BUFFER_BIT) && (ctx->RasterMask & ALPHABUF_BIT) ) {
+#ifdef DEBUG
+      {
+         GLbitfield legalBits = DD_FRONT_LEFT_BIT |
+                                DD_FRONT_RIGHT_BIT |
+                                DD_BACK_LEFT_BIT |
+                                DD_BACK_RIGHT_BIT |
+                                DD_DEPTH_BIT |
+                                DD_STENCIL_BIT |
+                                DD_ACCUM_BIT;
+         ASSERT((newMask & (~legalBits)) == 0);
+      }
+#endif
+
+      /* do software clearing here */
+      if (newMask) {
+         if (newMask & ctx->Color.DrawDestMask)   clear_color_buffers( ctx );
+         if (newMask & GL_DEPTH_BUFFER_BIT)    _mesa_clear_depth_buffer( ctx );
+         if (newMask & GL_ACCUM_BUFFER_BIT)    _mesa_clear_accum_buffer( ctx );
+         if (newMask & GL_STENCIL_BUFFER_BIT)  gl_clear_stencil_buffer( ctx );
+      }
+
+      /* clear software-based alpha buffer(s) */
+      if ( (mask & GL_COLOR_BUFFER_BIT) && ctx->Visual->SoftwareAlpha
+           && ctx->Color.ColorMask[RCOMP]) {
          gl_clear_alpha_buffers( ctx );
       }
-
-      /* let device driver try to clear the buffers */
-      if ((mask & GL_COLOR_BUFFER_BIT) != 0
-          && (ctx->Color.SWmasking || (ctx->RasterMask & MULTI_DRAW_BIT))) {
-         /* Driver can't clear color buffer for some reason, let it try
-          * to clear the other ancillary buffers.
-          */
-         GLbitfield mask2 = mask & (~GL_COLOR_BUFFER_BIT);
-         newMask = (*ctx->Driver.Clear)( ctx, mask2, !ctx->Scissor.Enabled,
-                                         x, y, width, height );
-         newMask |= GL_COLOR_BUFFER_BIT;
-      }
-      else {
-         newMask = (*ctx->Driver.Clear)( ctx, mask, !ctx->Scissor.Enabled,
-                                         x, y, width, height );
-      }
-
-      if (newMask & GL_COLOR_BUFFER_BIT)    clear_color_buffers( ctx );
-      if (newMask & GL_DEPTH_BUFFER_BIT)    gl_clear_depth_buffer( ctx );
-      if (newMask & GL_ACCUM_BUFFER_BIT)    gl_clear_accum_buffer( ctx );
-      if (newMask & GL_STENCIL_BUFFER_BIT)  gl_clear_stencil_buffer( ctx );
 
 #ifdef PROFILE
       ctx->ClearTime += gl_time() - t0;
@@ -273,117 +311,10 @@ void gl_Clear( GLcontext *ctx, GLbitfield mask )
 }
 
 
-
-void gl_Finish( GLcontext *ctx )
+void
+_mesa_DrawBuffer( GLenum mode )
 {
-   /* Don't compile into display list */
-   ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx, "glFinish");
-
-   if (ctx->Driver.Finish) {
-      (*ctx->Driver.Finish)( ctx );
-   }
-}
-
-void gl_Flush( GLcontext *ctx )
-{
-   /* Don't compile into display list */
-   ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx, "glFlush");
-
-   if (ctx->Driver.Flush) {
-      (*ctx->Driver.Flush)( ctx );
-   }
-}
-
-GLboolean gl_Hint( GLcontext *ctx, GLenum target, GLenum mode )
-{
-   ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH_WITH_RETVAL(ctx, "glHint", GL_FALSE);
-
-   if (MESA_VERBOSE & VERBOSE_API)
-      fprintf(stderr, "glHint %s %d\n", gl_lookup_enum_by_nr(target), mode);
-
-   switch (target) {
-   case GL_FOG_HINT:
-      ctx->Hint.Fog = mode;
-      break;
-   case GL_LINE_SMOOTH_HINT:
-      ctx->Hint.LineSmooth = mode;
-      break;
-   case GL_PERSPECTIVE_CORRECTION_HINT:
-      ctx->Hint.PerspectiveCorrection = mode;
-      break;
-   case GL_POINT_SMOOTH_HINT:
-      ctx->Hint.PointSmooth = mode;
-      break;
-   case GL_POLYGON_SMOOTH_HINT:
-      ctx->Hint.PolygonSmooth = mode;
-      break;
-   case GL_PREFER_DOUBLEBUFFER_HINT_PGI:
-   case GL_STRICT_DEPTHFUNC_HINT_PGI:
-      break;
-   case GL_STRICT_LIGHTING_HINT_PGI:
-      ctx->Hint.StrictLighting = mode;
-      break;
-   case GL_STRICT_SCISSOR_HINT_PGI:
-   case GL_FULL_STIPPLE_HINT_PGI:
-   case GL_NATIVE_GRAPHICS_BEGIN_HINT_PGI:
-   case GL_NATIVE_GRAPHICS_END_HINT_PGI:
-   case GL_CONSERVE_MEMORY_HINT_PGI:
-   case GL_RECLAIM_MEMORY_HINT_PGI:
-      break;
-   case GL_ALWAYS_FAST_HINT_PGI:
-      if (mode) {
-         ctx->Hint.AllowDrawWin = GL_TRUE;
-         ctx->Hint.AllowDrawSpn = GL_FALSE;
-         ctx->Hint.AllowDrawMem = GL_FALSE;
-      } else {
-         ctx->Hint.AllowDrawWin = GL_TRUE;
-         ctx->Hint.AllowDrawSpn = GL_TRUE;
-         ctx->Hint.AllowDrawMem = GL_TRUE;
-      }
-      break;
-   case GL_ALWAYS_SOFT_HINT_PGI:
-      ctx->Hint.AllowDrawWin = GL_TRUE;
-      ctx->Hint.AllowDrawSpn = GL_TRUE;
-      ctx->Hint.AllowDrawMem = GL_TRUE;
-      break;
-   case GL_ALLOW_DRAW_OBJ_HINT_PGI:
-      break;
-   case GL_ALLOW_DRAW_WIN_HINT_PGI:
-      ctx->Hint.AllowDrawWin = mode;
-      break;
-   case GL_ALLOW_DRAW_SPN_HINT_PGI:
-      ctx->Hint.AllowDrawSpn = mode;
-      break;
-   case GL_ALLOW_DRAW_MEM_HINT_PGI:
-      ctx->Hint.AllowDrawMem = mode;
-      break;
-   case GL_CLIP_NEAR_HINT_PGI:
-   case GL_CLIP_FAR_HINT_PGI:
-   case GL_WIDE_LINE_HINT_PGI:
-   case GL_BACK_NORMALS_HINT_PGI:
-   case GL_NATIVE_GRAPHICS_HANDLE_PGI:
-      break;
-
-      /* GL_EXT_clip_volume_hint */
-   case GL_CLIP_VOLUME_CLIPPING_HINT_EXT:
-      ctx->Hint.ClipVolumeClipping = mode;
-      break;
-
-   default:
-      gl_error( ctx, GL_INVALID_ENUM, "glHint(target)" );
-      return GL_FALSE;
-   }
-   ctx->NewState |= NEW_ALL;   /* just to be safe */
-
-   if (ctx->Driver.Hint) {
-      (*ctx->Driver.Hint)( ctx, target, mode );
-   }
-
-   return GL_TRUE;
-}
-
-void gl_DrawBuffer( GLcontext *ctx, GLenum mode )
-{
+   GET_CURRENT_CONTEXT(ctx);
    ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx, "glDrawBuffer");
 
    if (MESA_VERBOSE & VERBOSE_API)
@@ -499,13 +430,13 @@ void gl_DrawBuffer( GLcontext *ctx, GLenum mode )
     */
    if (ctx->Visual->SoftwareAlpha) {
       if (ctx->Color.DriverDrawBuffer == GL_FRONT_LEFT)
-         ctx->Buffer->Alpha = ctx->Buffer->FrontLeftAlpha;
+         ctx->DrawBuffer->Alpha = ctx->DrawBuffer->FrontLeftAlpha;
       else if (ctx->Color.DriverDrawBuffer == GL_BACK_LEFT)
-         ctx->Buffer->Alpha = ctx->Buffer->BackLeftAlpha;
+         ctx->DrawBuffer->Alpha = ctx->DrawBuffer->BackLeftAlpha;
       else if (ctx->Color.DriverDrawBuffer == GL_FRONT_RIGHT)
-         ctx->Buffer->Alpha = ctx->Buffer->FrontRightAlpha;
+         ctx->DrawBuffer->Alpha = ctx->DrawBuffer->FrontRightAlpha;
       else if (ctx->Color.DriverDrawBuffer == GL_BACK_RIGHT)
-         ctx->Buffer->Alpha = ctx->Buffer->BackRightAlpha;
+         ctx->DrawBuffer->Alpha = ctx->DrawBuffer->BackRightAlpha;
    }
 
    /*
@@ -515,8 +446,8 @@ void gl_DrawBuffer( GLcontext *ctx, GLenum mode )
     * for example.  We'll take care of that in the core code by looping
     * over the individual buffers.
     */
-   ASSERT(ctx->Driver.SetBuffer);
-   if ( (*ctx->Driver.SetBuffer)(ctx, ctx->Color.DriverDrawBuffer) ) {
+   ASSERT(ctx->Driver.SetDrawBuffer);
+   if ( (*ctx->Driver.SetDrawBuffer)(ctx, ctx->Color.DriverDrawBuffer) ) {
       /* All OK, the driver will do all buffer writes */
       ctx->Color.MultiDrawBuffer = GL_FALSE;
    }
@@ -524,15 +455,19 @@ void gl_DrawBuffer( GLcontext *ctx, GLenum mode )
       /* We'll have to loop over the multiple draw buffer targets */
       ctx->Color.MultiDrawBuffer = GL_TRUE;
       /* Set drawing buffer to front for now */
-      (*ctx->Driver.SetBuffer)(ctx, GL_FRONT_LEFT);
+      (void) (*ctx->Driver.SetDrawBuffer)(ctx, GL_FRONT_LEFT);
    }
 
    ctx->Color.DrawBuffer = mode;
    ctx->NewState |= NEW_RASTER_OPS;
 }
 
-void gl_ReadBuffer( GLcontext *ctx, GLenum mode )
+
+
+void
+_mesa_ReadBuffer( GLenum mode )
 {
+   GET_CURRENT_CONTEXT(ctx);
    ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx, "glReadBuffer");
 
    if (MESA_VERBOSE & VERBOSE_API)
@@ -583,4 +518,47 @@ void gl_ReadBuffer( GLcontext *ctx, GLenum mode )
 
    ctx->Pixel.ReadBuffer = mode;
    ctx->NewState |= NEW_RASTER_OPS;
+}
+
+
+/*
+ * GL_MESA_resize_buffers extension
+ */
+void
+_mesa_ResizeBuffersMESA( void )
+{
+   GLcontext *ctx = gl_get_current_context();
+
+   GLuint buf_width, buf_height;
+
+   if (MESA_VERBOSE & VERBOSE_API)
+      fprintf(stderr, "glResizeBuffersMESA\n");
+
+   /* ask device driver for size of output buffer */
+   (*ctx->Driver.GetBufferSize)( ctx, &buf_width, &buf_height );
+
+   /* see if size of device driver's color buffer (window) has changed */
+   if (ctx->DrawBuffer->Width == (GLint) buf_width &&
+       ctx->DrawBuffer->Height == (GLint) buf_height)
+      return;
+
+   ctx->NewState |= NEW_RASTER_OPS;  /* to update scissor / window bounds */
+
+   /* save buffer size */
+   ctx->DrawBuffer->Width = buf_width;
+   ctx->DrawBuffer->Height = buf_height;
+
+   /* Reallocate other buffers if needed. */
+   if (ctx->DrawBuffer->UseSoftwareDepthBuffer) {
+      _mesa_alloc_depth_buffer( ctx );
+   }
+   if (ctx->DrawBuffer->UseSoftwareStencilBuffer) {
+      gl_alloc_stencil_buffer( ctx );
+   }
+   if (ctx->DrawBuffer->UseSoftwareAccumBuffer) {
+      _mesa_alloc_accum_buffer( ctx );
+   }
+   if (ctx->Visual->SoftwareAlpha) {
+      gl_alloc_alpha_buffers( ctx );
+   }
 }

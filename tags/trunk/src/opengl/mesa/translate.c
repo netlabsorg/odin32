@@ -1,8 +1,8 @@
-/* $Id: translate.c,v 1.1 2000-02-29 00:50:12 sandervl Exp $ */
+/* $Id: translate.c,v 1.2 2000-05-23 20:40:58 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -29,9 +29,13 @@
  */
 
 
+#include "glheader.h"
 #include "types.h"
 #include "translate.h"
 #include "mmath.h"
+#include "mem.h"
+
+#undef CHECK
 
 trans_1ui_func gl_trans_1ui_tab[MAX_TYPES];
 trans_1ub_func gl_trans_1ub_tab[MAX_TYPES];
@@ -49,7 +53,7 @@ trans_elt_4f_func  gl_trans_elt_4f_tab[5][MAX_TYPES];
 #define PTR_ELT(ptr, elt) (((SRC *)ptr)[elt])
 
 
-#define TAB(x) gl_trans_##x##_tab
+#define TAB(x) gl_trans##x##_tab
 #define ARGS   GLuint start, GLuint n
 #define SRC_START  start
 #define DST_START  0
@@ -107,9 +111,9 @@ trans_elt_4f_func  gl_trans_elt_4f_tab[5][MAX_TYPES];
  */
 #define SRC GLubyte
 #define SRC_IDX TYPE_IDX(GL_UNSIGNED_BYTE)
-#define TRX_3F(f,n)		/* unused */
-#define TRX_4F(f,n)		/* unused */
-#define TRX_UB(ub, f,n)	     ub = PTR_ELT(f,n)
+#define TRX_3F(f,n)             /* unused */
+#define TRX_4F(f,n)             /* unused */
+#define TRX_UB(ub, f,n)      ub = PTR_ELT(f,n)
 #define TRX_UI(f,n)          (GLuint)PTR_ELT(f,n)
 
 /* 4ub->4ub handled in special case below.
@@ -273,7 +277,7 @@ trans_elt_4f_func  gl_trans_elt_4f_tab[5][MAX_TYPES];
 #define TRX_3F(f,n)   INT_TO_FLOAT( PTR_ELT(f,n) )
 #define TRX_4F(f,n)   (GLfloat)( PTR_ELT(f,n) )
 #define TRX_UB(ub, f,n)  ub = (GLubyte) (PTR_ELT(f,n) >> 24)
-#define TRX_UI(f,n)		PTR_ELT(f,n)
+#define TRX_UI(f,n)             PTR_ELT(f,n)
 
 
 #define SZ 4
@@ -386,8 +390,8 @@ trans_elt_4f_func  gl_trans_elt_4f_tab[5][MAX_TYPES];
 
 
 static void trans_4_GLubyte_4ub_raw (GLubyte (*t)[4],
-				     const struct gl_client_array *from,
-				     ARGS )
+                                     const struct gl_client_array *from,
+                                     ARGS )
 {
    GLuint stride = from->StrideB;
    const GLubyte *f = (GLubyte *) from->Ptr + SRC_START * stride;
@@ -397,14 +401,14 @@ static void trans_4_GLubyte_4ub_raw (GLubyte (*t)[4],
       /* Aligned.
        */
       for (i = DST_START ; i < n ; i++, f += stride) {
-	 COPY_4UBV( t[i], f );
+         COPY_4UBV( t[i], f );
       }
    } else {
       for (i = DST_START ; i < n ; i++, f += stride) {
-	 t[i][0] = f[0];
-	 t[i][1] = f[1];
-	 t[i][2] = f[2];
-	 t[i][3] = f[3];
+         t[i][0] = f[0];
+         t[i][1] = f[1];
+         t[i][2] = f[2];
+         t[i][3] = f[3];
       }
    }
 }
@@ -412,13 +416,13 @@ static void trans_4_GLubyte_4ub_raw (GLubyte (*t)[4],
 
 static void init_translate_raw(void)
 {
-   MEMSET( TAB(1ui), 0, sizeof(TAB(1ui)) );
-   MEMSET( TAB(1ub), 0, sizeof(TAB(1ub)) );
-   MEMSET( TAB(3f),  0, sizeof(TAB(3f)) );
-   MEMSET( TAB(4ub), 0, sizeof(TAB(4ub)) );
-   MEMSET( TAB(4f),  0, sizeof(TAB(4f)) );
+   MEMSET( TAB(_1ui), 0, sizeof(TAB(_1ui)) );
+   MEMSET( TAB(_1ub), 0, sizeof(TAB(_1ub)) );
+   MEMSET( TAB(_3f),  0, sizeof(TAB(_3f)) );
+   MEMSET( TAB(_4ub), 0, sizeof(TAB(_4ub)) );
+   MEMSET( TAB(_4f),  0, sizeof(TAB(_4f)) );
 
-   TAB(4ub)[4][TYPE_IDX(GL_UNSIGNED_BYTE)] = trans_4_GLubyte_4ub_raw;
+   TAB(_4ub)[4][TYPE_IDX(GL_UNSIGNED_BYTE)] = trans_4_GLubyte_4ub_raw;
 
    init_trans_4_GLbyte_raw();
    init_trans_3_GLbyte_raw();
@@ -475,13 +479,13 @@ static void init_translate_raw(void)
  *
  * That the correct value for normal is used.
  */
-#define TAB(x) gl_trans_elt_##x##_tab
+#define TAB(x) gl_trans_elt##x##_tab
 #define ARGS   GLuint *flags, GLuint *elts, GLuint match, \
                GLuint start, GLuint n
 #define SRC_START  0
 #define DST_START  start
 #define CHECK  if ((flags[i]&match) == VERT_ELT)
-#define NEXT_F  1
+#define NEXT_F  (void)1
 #define NEXT_F2 f = first + elts[i] * stride;
 
 
@@ -531,9 +535,9 @@ static void init_translate_raw(void)
  */
 #define SRC GLubyte
 #define SRC_IDX TYPE_IDX(GL_UNSIGNED_BYTE)
-#define TRX_3F(f,n)		/* unused */
-#define TRX_4F(f,n)		/* unused */
-#define TRX_UB(ub, f,n)	     ub = PTR_ELT(f,n)
+#define TRX_3F(f,n)             /* unused */
+#define TRX_4F(f,n)             /* unused */
+#define TRX_UB(ub, f,n)      ub = PTR_ELT(f,n)
 #define TRX_UI(f,n)          (GLuint)PTR_ELT(f,n)
 
 /* 4ub->4ub handled in special case below.
@@ -697,7 +701,7 @@ static void init_translate_raw(void)
 #define TRX_3F(f,n)   UINT_TO_FLOAT( PTR_ELT(f,n) )
 #define TRX_4F(f,n)   (GLfloat)( PTR_ELT(f,n) )
 #define TRX_UB(ub, f,n)  ub = (GLubyte) (PTR_ELT(f,n) >> 24)
-#define TRX_UI(f,n)		PTR_ELT(f,n)
+#define TRX_UI(f,n)             PTR_ELT(f,n)
 
 
 #define SZ 4
@@ -809,8 +813,8 @@ static void init_translate_raw(void)
 
 
 static void trans_4_GLubyte_4ub(GLubyte (*t)[4],
-				const struct gl_client_array *from,
-				ARGS )
+                                const struct gl_client_array *from,
+                                ARGS )
 {
    GLuint stride = from->StrideB;
    const GLubyte *f = (GLubyte *) from->Ptr + SRC_START * stride;
@@ -821,20 +825,20 @@ static void trans_4_GLubyte_4ub(GLubyte (*t)[4],
       /* Aligned.
        */
       for (i = DST_START ; i < n ; i++, NEXT_F) {
-	 CHECK {
-	    NEXT_F2;
-	    COPY_4UBV( t[i], f );
-	 }
+         CHECK {
+            NEXT_F2;
+            COPY_4UBV( t[i], f );
+         }
       }
    } else {
       for (i = DST_START ; i < n ; i++, NEXT_F) {
-	 CHECK {
-	    NEXT_F2;
-	    t[i][0] = f[0];
-	    t[i][1] = f[1];
-	    t[i][2] = f[2];
-	    t[i][3] = f[3];
-	 }
+         CHECK {
+            NEXT_F2;
+            t[i][0] = f[0];
+            t[i][1] = f[1];
+            t[i][2] = f[2];
+            t[i][3] = f[3];
+         }
       }
    }
 }
@@ -842,13 +846,13 @@ static void trans_4_GLubyte_4ub(GLubyte (*t)[4],
 
 static void init_translate_elt(void)
 {
-   MEMSET( TAB(1ui), 0, sizeof(TAB(1ui)) );
-   MEMSET( TAB(1ub), 0, sizeof(TAB(1ub)) );
-   MEMSET( TAB(3f),  0, sizeof(TAB(3f)) );
-   MEMSET( TAB(4ub), 0, sizeof(TAB(4ub)) );
-   MEMSET( TAB(4f),  0, sizeof(TAB(4f)) );
+   MEMSET( TAB(_1ui), 0, sizeof(TAB(_1ui)) );
+   MEMSET( TAB(_1ub), 0, sizeof(TAB(_1ub)) );
+   MEMSET( TAB(_3f),  0, sizeof(TAB(_3f)) );
+   MEMSET( TAB(_4ub), 0, sizeof(TAB(_4ub)) );
+   MEMSET( TAB(_4f),  0, sizeof(TAB(_4f)) );
 
-   TAB(4ub)[4][TYPE_IDX(GL_UNSIGNED_BYTE)] = trans_4_GLubyte_4ub;
+   TAB(_4ub)[4][TYPE_IDX(GL_UNSIGNED_BYTE)] = trans_4_GLubyte_4ub;
 
    init_trans_4_GLbyte_elt();
    init_trans_3_GLbyte_elt();

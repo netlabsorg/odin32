@@ -1,8 +1,8 @@
-/* $Id: zoom.c,v 1.1 2000-02-29 00:50:16 sandervl Exp $ */
+/* $Id: zoom.c,v 1.2 2000-05-23 20:41:08 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -31,11 +31,7 @@
 #ifdef PC_HEADER
 #include "all.h"
 #else
-#ifndef XFree86Server
-#include <assert.h>
-#else
-#include "GL/xf86glx.h"
-#endif
+#include "glheader.h"
 #include "macros.h"
 #include "span.h"
 #include "stencil.h"
@@ -63,7 +59,7 @@ gl_write_zoomed_rgba_span( GLcontext *ctx,
    GLint i, j, skipcol;
    GLubyte zrgba[MAX_WIDTH][4];  /* zoomed pixel colors */
    GLdepth zdepth[MAX_WIDTH];  /* zoomed depth values */
-   GLint maxwidth = MIN2( ctx->Buffer->Width, MAX_WIDTH );
+   GLint maxwidth = MIN2( ctx->DrawBuffer->Width, MAX_WIDTH );
    const GLuint *srcRGBA32 = (const GLuint *) rgba;
    GLuint *dstRGBA32 = (GLuint *) zrgba;
 
@@ -95,7 +91,7 @@ gl_write_zoomed_rgba_span( GLcontext *ctx,
       /* below window */
       return;
    }
-   if (r0>=ctx->Buffer->Height && r1>=ctx->Buffer->Height) {
+   if (r0>=ctx->DrawBuffer->Height && r1>=ctx->DrawBuffer->Height) {
       /* above window */
       return;
    }
@@ -114,7 +110,7 @@ gl_write_zoomed_rgba_span( GLcontext *ctx,
       return;
    }
 
-   assert( m <= MAX_WIDTH );
+   ASSERT( m <= MAX_WIDTH );
 
    /* zoom the span horizontally */
    if (ctx->Pixel.ZoomX==-1.0F) {
@@ -153,7 +149,7 @@ gl_write_zoomed_rgb_span( GLcontext *ctx,
    GLint i, j, skipcol;
    GLubyte zrgba[MAX_WIDTH][4];  /* zoomed pixel colors */
    GLdepth zdepth[MAX_WIDTH];  /* zoomed depth values */
-   GLint maxwidth = MIN2( ctx->Buffer->Width, MAX_WIDTH );
+   GLint maxwidth = MIN2( ctx->DrawBuffer->Width, MAX_WIDTH );
 
    /* compute width of output row */
    m = (GLint) ABSF( n * ctx->Pixel.ZoomX );
@@ -183,7 +179,7 @@ gl_write_zoomed_rgb_span( GLcontext *ctx,
       /* below window */
       return;
    }
-   if (r0>=ctx->Buffer->Height && r1>=ctx->Buffer->Height) {
+   if (r0>=ctx->DrawBuffer->Height && r1>=ctx->DrawBuffer->Height) {
       /* above window */
       return;
    }
@@ -202,7 +198,7 @@ gl_write_zoomed_rgb_span( GLcontext *ctx,
       return;
    }
 
-   assert( m <= MAX_WIDTH );
+   ASSERT( m <= MAX_WIDTH );
 
    /* zoom the span horizontally */
    if (ctx->Pixel.ZoomX==-1.0F) {
@@ -250,7 +246,7 @@ gl_write_zoomed_index_span( GLcontext *ctx,
    GLint i, j, skipcol;
    GLuint zindexes[MAX_WIDTH];  /* zoomed color indexes */
    GLdepth zdepth[MAX_WIDTH];  /* zoomed depth values */
-   GLint maxwidth = MIN2( ctx->Buffer->Width, MAX_WIDTH );
+   GLint maxwidth = MIN2( ctx->DrawBuffer->Width, MAX_WIDTH );
 
    /* compute width of output row */
    m = (GLint) ABSF( n * ctx->Pixel.ZoomX );
@@ -280,7 +276,7 @@ gl_write_zoomed_index_span( GLcontext *ctx,
       /* below window */
       return;
    }
-   if (r0>=ctx->Buffer->Height && r1>=ctx->Buffer->Height) {
+   if (r0>=ctx->DrawBuffer->Height && r1>=ctx->DrawBuffer->Height) {
       /* above window */
       return;
    }
@@ -299,7 +295,7 @@ gl_write_zoomed_index_span( GLcontext *ctx,
       return;
    }
 
-   assert( m <= MAX_WIDTH );
+   ASSERT( m <= MAX_WIDTH );
 
    /* zoom the span horizontally */
    if (ctx->Pixel.ZoomX==-1.0F) {
@@ -340,7 +336,7 @@ gl_write_zoomed_stencil_span( GLcontext *ctx,
    GLint r0, r1, row, r;
    GLint i, j, skipcol;
    GLstencil zstencil[MAX_WIDTH];  /* zoomed stencil values */
-   GLint maxwidth = MIN2( ctx->Buffer->Width, MAX_WIDTH );
+   GLint maxwidth = MIN2( ctx->DrawBuffer->Width, MAX_WIDTH );
 
    /* compute width of output row */
    m = (GLint) ABSF( n * ctx->Pixel.ZoomX );
@@ -370,7 +366,7 @@ gl_write_zoomed_stencil_span( GLcontext *ctx,
       /* below window */
       return;
    }
-   if (r0>=ctx->Buffer->Height && r1>=ctx->Buffer->Height) {
+   if (r0>=ctx->DrawBuffer->Height && r1>=ctx->DrawBuffer->Height) {
       /* above window */
       return;
    }
@@ -389,7 +385,7 @@ gl_write_zoomed_stencil_span( GLcontext *ctx,
       return;
    }
 
-   assert( m <= MAX_WIDTH );
+   ASSERT( m <= MAX_WIDTH );
 
    /* zoom the span horizontally */
    if (ctx->Pixel.ZoomX==-1.0F) {

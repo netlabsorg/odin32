@@ -1,8 +1,8 @@
-/* $Id: pointers.h,v 1.1 2000-02-29 00:48:35 sandervl Exp $ */
+/* $Id: mem.c,v 1.1 2000-05-23 20:40:41 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -25,17 +25,50 @@
  */
 
 
+/*
+ * Memory allocation functions.  Called via the MALLOC, CALLOC and
+ * FREE macros when DEBUG symbol is defined.
+ * You might want to set breakpoints on these functions or plug in
+ * other memory allocation functions.  The Mesa sources should only
+ * use the MALLOC and FREE macros (which could also be overriden).
+ */
 
-
-
-#include "types.h"
-
-
-#ifndef POINTERS_H
-#define POINTERS_H
-
-
-extern void gl_init_api_function_pointers( GLcontext *ctx );
-
-
+#ifdef PC_HEADER
+#include "all.h"
+#else
+#include "glheader.h"
+#include "mem.h"
 #endif
+
+
+
+/*
+ * Allocate memory (uninitialized)
+ */
+void *
+_mesa_malloc(size_t bytes)
+{
+   return malloc(bytes);
+}
+
+
+/*
+ * Allocate memory and initialize to zero.
+ */
+void *
+_mesa_calloc(size_t bytes)
+{
+   return calloc(1, bytes);
+}
+
+
+/*
+ * Free memory
+ */
+void
+_mesa_free(void *ptr)
+{
+   free(ptr);
+}
+
+

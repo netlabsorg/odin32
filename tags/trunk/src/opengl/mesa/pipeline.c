@@ -1,8 +1,8 @@
-/* $Id: pipeline.c,v 1.2 2000-03-01 18:49:33 jeroen Exp $ */
+/* $Id: pipeline.c,v 1.3 2000-05-23 20:40:43 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -28,11 +28,7 @@
  * Copyright (C) 1999 Keith Whitwell.
  */
 
-#ifndef XFree86Server
-#include <stdio.h>
-#else
-#include "GL/xf86glx.h"
-#endif
+#include "glheader.h"
 #include "bbox.h"
 #include "clip.h"
 #include "types.h"
@@ -49,7 +45,9 @@
 #include "shade.h"
 #include "stages.h"
 #include "translate.h"
+#include "state.h"
 #include "xform.h"
+#include "mem.h"
 
 #ifndef MESA_VERBOSE
 int MESA_VERBOSE = 0
@@ -77,19 +75,19 @@ int MESA_DEBUG_FLAGS = 0
 void gl_print_pipe_ops( const char *msg, GLuint flags )
 {
    fprintf(stderr,
-	   "%s: (0x%x) %s%s%s%s%s%s%s%s%s%s\n",
-	   msg,
-	   flags,
-	   (flags & PIPE_OP_CVA_PREPARE)   ? "cva-prepare, " : "",
-	   (flags & PIPE_OP_VERT_XFORM)    ? "vert-xform, " : "",
-	   (flags & PIPE_OP_NORM_XFORM)    ? "norm-xform, " : "",
-	   (flags & PIPE_OP_LIGHT)         ? "light, " : "",
-	   (flags & PIPE_OP_FOG)           ? "fog, " : "",
-	   (flags & PIPE_OP_TEX0)          ? "tex-0, " : "",
-	   (flags & PIPE_OP_TEX1)          ? "tex-1, " : "",
-	   (flags & PIPE_OP_RAST_SETUP_0)  ? "rast-0, " : "",
-	   (flags & PIPE_OP_RAST_SETUP_1)  ? "rast-1, " : "",
-	   (flags & PIPE_OP_RENDER)        ? "render, " : "");
+           "%s: (0x%x) %s%s%s%s%s%s%s%s%s%s\n",
+           msg,
+           flags,
+           (flags & PIPE_OP_CVA_PREPARE)   ? "cva-prepare, " : "",
+           (flags & PIPE_OP_VERT_XFORM)    ? "vert-xform, " : "",
+           (flags & PIPE_OP_NORM_XFORM)    ? "norm-xform, " : "",
+           (flags & PIPE_OP_LIGHT)         ? "light, " : "",
+           (flags & PIPE_OP_FOG)           ? "fog, " : "",
+           (flags & PIPE_OP_TEX0)          ? "tex-0, " : "",
+           (flags & PIPE_OP_TEX1)          ? "tex-1, " : "",
+           (flags & PIPE_OP_RAST_SETUP_0)  ? "rast-0, " : "",
+           (flags & PIPE_OP_RAST_SETUP_1)  ? "rast-1, " : "",
+           (flags & PIPE_OP_RENDER)        ? "render, " : "");
 
 }
 
@@ -110,7 +108,7 @@ void gl_reset_cva_vb( struct vertex_buffer *VB, GLuint stages )
    if (stages & PIPE_OP_VERT_XFORM)
    {
       if (VB->ClipOrMask & CLIP_USER_BIT)
-	 MEMSET(VB->UserClipMask, 0, VB->Count);
+         MEMSET(VB->UserClipMask, 0, VB->Count);
 
       VB->ClipOrMask = 0;
       VB->ClipAndMask = CLIP_ALL_BITS;
@@ -131,13 +129,13 @@ void gl_reset_cva_vb( struct vertex_buffer *VB, GLuint stages )
    else if (stages & PIPE_OP_FOG)
    {
       if (ctx->Light.Enabled) {
-	 VB->Color[0] = VB->LitColor[0];
-	 VB->Color[1] = VB->LitColor[1];
-	 VB->Index[0] = VB->LitIndex[0];
-	 VB->Index[1] = VB->LitIndex[1];
+         VB->Color[0] = VB->LitColor[0];
+         VB->Color[1] = VB->LitColor[1];
+         VB->Index[0] = VB->LitIndex[0];
+         VB->Index[1] = VB->LitIndex[1];
       } else {
-	 VB->Color[0] = VB->Color[1] = &ctx->CVA.v.Color;
-	 VB->Index[0] = VB->Index[1] = &ctx->CVA.v.Index;
+         VB->Color[0] = VB->Color[1] = &ctx->CVA.v.Color;
+         VB->Index[0] = VB->Index[1] = &ctx->CVA.v.Index;
       }
       VB->ColorPtr = VB->Color[0];
       VB->IndexPtr = VB->Index[0];
@@ -176,14 +174,14 @@ void gl_pipeline_init( GLcontext *ctx )
 {
    if (ctx->Driver.RegisterPipelineStages)
       ctx->NrPipelineStages =
-	 ctx->Driver.RegisterPipelineStages( ctx->PipelineStage,
-					     gl_default_pipeline,
-					     gl_default_nr_stages );
+         ctx->Driver.RegisterPipelineStages( ctx->PipelineStage,
+                                             gl_default_pipeline,
+                                             gl_default_nr_stages );
    else
    {
       MEMCPY( ctx->PipelineStage,
-	      gl_default_pipeline,
-	      sizeof(*gl_default_pipeline) * gl_default_nr_stages );
+              gl_default_pipeline,
+              sizeof(*gl_default_pipeline) * gl_default_nr_stages );
 
       ctx->NrPipelineStages = gl_default_nr_stages;
    }
@@ -200,13 +198,13 @@ void gl_pipeline_init( GLcontext *ctx )
 #define MINIMAL_VERT_DATA (VERT_DATA&~(VERT_TEX0_4|VERT_TEX1_4|VERT_EVAL_ANY))
 
 #define VERT_CURRENT_DATA (VERT_TEX0_1234|VERT_TEX1_1234|VERT_RGBA| \
-			   VERT_INDEX|VERT_EDGE|VERT_NORM| \
-	                   VERT_MATERIAL)
+                           VERT_INDEX|VERT_EDGE|VERT_NORM| \
+                           VERT_MATERIAL)
 
 /* Called prior to every recomputation of the CVA precalc data, except where
  * the driver is able to calculate the pipeline unassisted.
  */
-void gl_build_full_precalc_pipeline( GLcontext *ctx )
+static void build_full_precalc_pipeline( GLcontext *ctx )
 {
    struct gl_pipeline_stage *pipeline = ctx->PipelineStage;
    struct gl_cva *cva = &ctx->CVA;
@@ -218,9 +216,9 @@ void gl_build_full_precalc_pipeline( GLcontext *ctx )
    GLuint oldoutputs = pre->outputs;
    GLuint oldinputs = pre->inputs;
    GLuint fallback = (VERT_CURRENT_DATA & ctx->Current.Flag &
-		      ~ctx->Array.Summary);
+                      ~ctx->Array.Summary);
    GLuint changed_outputs = (ctx->Array.NewArrayState |
-			     (fallback & cva->orflag));
+                             (fallback & cva->orflag));
    GLuint available = fallback | ctx->Array.Flags;
 
    pre->cva_state_change = 0;
@@ -260,40 +258,40 @@ void gl_build_full_precalc_pipeline( GLcontext *ctx )
 
       if (pipeline[i].type & PIPE_PRECALC)
       {
-	 if ((newstate & pipeline[i].cva_state_change) ||
-	     (changed_outputs & pipeline[i].inputs) ||
-	     !pipeline[i].inputs)
-	 {	
-	    changed_ops |= pipeline[i].ops;
-	    changed_outputs |= pipeline[i].outputs;
-	    pipeline[i].active &= ~PIPE_PRECALC;
+         if ((newstate & pipeline[i].cva_state_change) ||
+             (changed_outputs & pipeline[i].inputs) ||
+             !pipeline[i].inputs)
+         {
+            changed_ops |= pipeline[i].ops;
+            changed_outputs |= pipeline[i].outputs;
+            pipeline[i].active &= ~PIPE_PRECALC;
 
-	    if ((pipeline[i].inputs & ~available) == 0 &&
-		(pipeline[i].ops & pre->ops) == 0)
-	    {
-	       pipeline[i].active |= PIPE_PRECALC;
-	       *stages++ = &pipeline[i];
-	    }
-	 }
+            if ((pipeline[i].inputs & ~available) == 0 &&
+                (pipeline[i].ops & pre->ops) == 0)
+            {
+               pipeline[i].active |= PIPE_PRECALC;
+               *stages++ = &pipeline[i];
+            }
+         }
 
-	 /* Incompatible with multiple stages structs implementing
-	  * the same stage.
-	  */
-	 available &= ~pipeline[i].outputs;
-	 pre->outputs &= ~pipeline[i].outputs;
+         /* Incompatible with multiple stages structs implementing
+          * the same stage.
+          */
+         available &= ~pipeline[i].outputs;
+         pre->outputs &= ~pipeline[i].outputs;
 
-	 if (pipeline[i].active & PIPE_PRECALC) {
-	    pre->ops |= pipeline[i].ops;
-	    pre->outputs |= pipeline[i].outputs;
-	    available |= pipeline[i].outputs;
-	    pre->forbidden_inputs |= pipeline[i].pre_forbidden_inputs;
-	 }
+         if (pipeline[i].active & PIPE_PRECALC) {
+            pre->ops |= pipeline[i].ops;
+            pre->outputs |= pipeline[i].outputs;
+            available |= pipeline[i].outputs;
+            pre->forbidden_inputs |= pipeline[i].pre_forbidden_inputs;
+         }
       }
       else if (pipeline[i].active & PIPE_PRECALC)
       {
-	 pipeline[i].active &= ~PIPE_PRECALC;
-	 changed_outputs |= pipeline[i].outputs;
-	 changed_ops |= pipeline[i].ops;
+         pipeline[i].active &= ~PIPE_PRECALC;
+         changed_outputs |= pipeline[i].outputs;
+         changed_ops |= pipeline[i].ops;
       }
    }
 
@@ -317,7 +315,7 @@ void gl_build_precalc_pipeline( GLcontext *ctx )
 
    if (!ctx->Driver.BuildPrecalcPipeline ||
        !ctx->Driver.BuildPrecalcPipeline( ctx ))
-      gl_build_full_precalc_pipeline( ctx );
+      build_full_precalc_pipeline( ctx );
 
    pre->data_valid = 0;
    pre->pipeline_valid = 1;
@@ -330,7 +328,7 @@ void gl_build_precalc_pipeline( GLcontext *ctx )
 }
 
 
-static void gl_build_full_immediate_pipeline( GLcontext *ctx )
+static void build_full_immediate_pipeline( GLcontext *ctx )
 {
    struct gl_pipeline_stage *pipeline = ctx->PipelineStage;
    struct gl_cva *cva = &ctx->CVA;
@@ -351,35 +349,35 @@ static void gl_build_full_immediate_pipeline( GLcontext *ctx )
    }
 
 
-   elt->outputs = 0;		/* not used */
+   elt->outputs = 0;            /* not used */
    elt->inputs = 0;
 
    for (i = 0 ; i < ctx->NrPipelineStages ; i++) {
       pipeline[i].active &= ~PIPE_IMMEDIATE;
 
       if ((pipeline[i].state_change & newstate) ||
-  	  (pipeline[i].elt_forbidden_inputs & available))
+          (pipeline[i].elt_forbidden_inputs & available))
       {
-	 pipeline[i].check(ctx, &pipeline[i]);
+         pipeline[i].check(ctx, &pipeline[i]);
       }
 
       if ((pipeline[i].type & PIPE_IMMEDIATE) &&
-	  (pipeline[i].ops & active_ops) == 0 &&
-	  (pipeline[i].elt_forbidden_inputs & available) == 0
-	 )
+          (pipeline[i].ops & active_ops) == 0 &&
+          (pipeline[i].elt_forbidden_inputs & available) == 0
+         )
       {
-	 if (pipeline[i].inputs & ~available)
-	    elt->forbidden_inputs |= pipeline[i].inputs & ~available;
-	 else
-	 {
-	    elt->inputs |= pipeline[i].inputs & ~generated;
-	    elt->forbidden_inputs |= pipeline[i].elt_forbidden_inputs;
-	    pipeline[i].active |= PIPE_IMMEDIATE;
-	    *stages++ = &pipeline[i];
-	    generated |= pipeline[i].outputs;
-	    available |= pipeline[i].outputs;
-	    active_ops |= pipeline[i].ops;
-	 }
+         if (pipeline[i].inputs & ~available)
+            elt->forbidden_inputs |= pipeline[i].inputs & ~available;
+         else
+         {
+            elt->inputs |= pipeline[i].inputs & ~generated;
+            elt->forbidden_inputs |= pipeline[i].elt_forbidden_inputs;
+            pipeline[i].active |= PIPE_IMMEDIATE;
+            *stages++ = &pipeline[i];
+            generated |= pipeline[i].outputs;
+            available |= pipeline[i].outputs;
+            active_ops |= pipeline[i].ops;
+         }
       }
    }
 
@@ -402,7 +400,7 @@ void gl_build_immediate_pipeline( GLcontext *ctx )
 
    if (!ctx->Driver.BuildEltPipeline ||
        !ctx->Driver.BuildEltPipeline( ctx )) {
-      gl_build_full_immediate_pipeline( ctx );
+      build_full_immediate_pipeline( ctx );
    }
 
    elt->pipeline_valid = 1;
@@ -432,28 +430,28 @@ void gl_update_pipelines( GLcontext *ctx )
       GLuint flags = VERT_WIN;
 
       if (ctx->Visual->RGBAflag)
-	 flags |= VERT_RGBA;
+         flags |= VERT_RGBA;
       else
-	 flags |= VERT_INDEX;
+         flags |= VERT_INDEX;
 
       if (ctx->Texture.Enabled & 0xf) {
-	 if (ctx->Texture.Unit[0].EnvMode == GL_REPLACE)
-	    flags &= ~VERT_RGBA;
+         if (ctx->Texture.Unit[0].EnvMode == GL_REPLACE)
+            flags &= ~VERT_RGBA;
 
-	 flags |= VERT_TEX0_ANY;
+         flags |= VERT_TEX0_ANY;
       }
 
       if (ctx->Texture.Enabled & 0xf0)
-	 flags |= VERT_TEX1_ANY;
+         flags |= VERT_TEX1_ANY;
 
       if (ctx->Polygon.Unfilled)
-	 flags |= VERT_EDGE;
+         flags |= VERT_EDGE;
 
       if (ctx->RenderMode==GL_FEEDBACK)
       {
-	 flags = (VERT_WIN|VERT_RGBA|VERT_INDEX|
-		  VERT_NORM|VERT_EDGE|
-		  VERT_TEX0_ANY|VERT_TEX1_ANY);
+         flags = (VERT_WIN|VERT_RGBA|VERT_INDEX|
+                  VERT_NORM|VERT_EDGE|
+                  VERT_TEX0_ANY|VERT_TEX1_ANY);
       }
 
       ctx->RenderFlags = flags;
@@ -480,9 +478,9 @@ void gl_run_pipeline( struct vertex_buffer *VB )
 {
    struct gl_pipeline *pipe = VB->pipeline;
    struct gl_pipeline_stage **stages = pipe->stages;
-   short x;
+   unsigned short x;
 
-   pipe->data_valid = 1;	/* optimized stages might want to reset this. */
+   pipe->data_valid = 1;        /* optimized stages might want to reset this. */
 
    START_FAST_MATH(x);
 
@@ -497,55 +495,55 @@ void gl_run_pipeline( struct vertex_buffer *VB )
 void gl_print_vert_flags( const char *name, GLuint flags )
 {
    fprintf(stderr,
-	   "%s: (0x%x) %s%s%s%s%s%s%s%s%s%s%s%s%s%s%s\n",
-	   name,
-	   flags,
-	   (flags & VERT_OBJ_ANY)    ? "vertices (obj), " : "",
-	   (flags & VERT_ELT)        ? "array-elt, " : "",
-	   (flags & VERT_RGBA)       ? "colors, " : "",
-	   (flags & VERT_NORM)       ? "normals, " : "",
-	   (flags & VERT_INDEX)      ? "index, " : "",
-	   (flags & VERT_EDGE)       ? "edgeflag, " : "",
-	   (flags & VERT_MATERIAL)   ? "material, " : "",
-	   (flags & VERT_TEX0_ANY)   ? "texcoord0, " : "",
-	   (flags & VERT_TEX1_ANY)   ? "texcoord1, " : "",
-	   (flags & VERT_EVAL_ANY)   ? "eval-coord, " : "",
-	   (flags & VERT_EYE)        ? "eye, " : "",
-	   (flags & VERT_WIN)        ? "win, " : "",
-	   (flags & VERT_PRECALC_DATA) ? "precalc data, " : "",
-	   (flags & VERT_SETUP_FULL) ? "driver-data, " : "",
-	   (flags & VERT_SETUP_PART) ? "partial-driver-data, " : ""
+           "%s: (0x%x) %s%s%s%s%s%s%s%s%s%s%s%s%s%s%s\n",
+           name,
+           flags,
+           (flags & VERT_OBJ_ANY)    ? "vertices (obj), " : "",
+           (flags & VERT_ELT)        ? "array-elt, " : "",
+           (flags & VERT_RGBA)       ? "colors, " : "",
+           (flags & VERT_NORM)       ? "normals, " : "",
+           (flags & VERT_INDEX)      ? "index, " : "",
+           (flags & VERT_EDGE)       ? "edgeflag, " : "",
+           (flags & VERT_MATERIAL)   ? "material, " : "",
+           (flags & VERT_TEX0_ANY)   ? "texcoord0, " : "",
+           (flags & VERT_TEX1_ANY)   ? "texcoord1, " : "",
+           (flags & VERT_EVAL_ANY)   ? "eval-coord, " : "",
+           (flags & VERT_EYE)        ? "eye, " : "",
+           (flags & VERT_WIN)        ? "win, " : "",
+           (flags & VERT_PRECALC_DATA) ? "precalc data, " : "",
+           (flags & VERT_SETUP_FULL) ? "driver-data, " : "",
+           (flags & VERT_SETUP_PART) ? "partial-driver-data, " : ""
       );
 }
 
 void gl_print_tri_caps( const char *name, GLuint flags )
 {
    fprintf(stderr,
-	   "%s: (0x%x) %s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s\n",
-	   name,
-	   flags,
-	   (flags & DD_FEEDBACK)            ? "feedback, " : "",
-	   (flags & DD_SELECT)              ? "select, " : "",
-	   (flags & DD_FLATSHADE)           ? "flat-shade, " : "",
-	   (flags & DD_MULTIDRAW)           ? "multidraw, " : "",
-	   (flags & DD_SEPERATE_SPECULAR)   ? "seperate-specular, " : "",
-	   (flags & DD_TRI_LIGHT_TWOSIDE)   ? "tri-light-twoside, " : "",
-	   (flags & DD_TRI_UNFILLED)        ? "tri-unfilled, " : "",
-	   (flags & DD_TRI_STIPPLE)         ? "tri-stipple, " : "",
-	   (flags & DD_TRI_OFFSET)          ? "tri-offset, " : "",
-	   (flags & DD_TRI_CULL)            ? "tri-bf-cull, " : "",
-	   (flags & DD_LINE_SMOOTH)         ? "line-smooth, " : "",
-	   (flags & DD_LINE_STIPPLE)        ? "line-stipple, " : "",
-	   (flags & DD_LINE_WIDTH)          ? "line-wide, " : "",
-	   (flags & DD_POINT_SMOOTH)        ? "point-smooth, " : "",
-	   (flags & DD_POINT_SIZE)          ? "point-size, " : "",
-	   (flags & DD_POINT_ATTEN)         ? "point-atten, " : "",
-	   (flags & DD_LIGHTING_CULL)       ? "lighting-cull, " : "",
-	   (flags & DD_POINT_SW_RASTERIZE)  ? "sw-points, " : "",
-	   (flags & DD_LINE_SW_RASTERIZE)   ? "sw-lines, " : "",
-	   (flags & DD_TRI_SW_RASTERIZE)    ? "sw-tris, " : "",
-	   (flags & DD_QUAD_SW_RASTERIZE)   ? "sw-quads, " : "",
-	   (flags & DD_TRI_CULL_FRONT_BACK) ? "cull-all, " : ""
+           "%s: (0x%x) %s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s\n",
+           name,
+           flags,
+           (flags & DD_FEEDBACK)            ? "feedback, " : "",
+           (flags & DD_SELECT)              ? "select, " : "",
+           (flags & DD_FLATSHADE)           ? "flat-shade, " : "",
+           (flags & DD_MULTIDRAW)           ? "multidraw, " : "",
+           (flags & DD_SEPERATE_SPECULAR)   ? "seperate-specular, " : "",
+           (flags & DD_TRI_LIGHT_TWOSIDE)   ? "tri-light-twoside, " : "",
+           (flags & DD_TRI_UNFILLED)        ? "tri-unfilled, " : "",
+           (flags & DD_TRI_STIPPLE)         ? "tri-stipple, " : "",
+           (flags & DD_TRI_OFFSET)          ? "tri-offset, " : "",
+           (flags & DD_TRI_CULL)            ? "tri-bf-cull, " : "",
+           (flags & DD_LINE_SMOOTH)         ? "line-smooth, " : "",
+           (flags & DD_LINE_STIPPLE)        ? "line-stipple, " : "",
+           (flags & DD_LINE_WIDTH)          ? "line-wide, " : "",
+           (flags & DD_POINT_SMOOTH)        ? "point-smooth, " : "",
+           (flags & DD_POINT_SIZE)          ? "point-size, " : "",
+           (flags & DD_POINT_ATTEN)         ? "point-atten, " : "",
+           (flags & DD_LIGHTING_CULL)       ? "lighting-cull, " : "",
+           (flags & DD_POINT_SW_RASTERIZE)  ? "sw-points, " : "",
+           (flags & DD_LINE_SW_RASTERIZE)   ? "sw-lines, " : "",
+           (flags & DD_TRI_SW_RASTERIZE)    ? "sw-tris, " : "",
+           (flags & DD_QUAD_SW_RASTERIZE)   ? "sw-quads, " : "",
+           (flags & DD_TRI_CULL_FRONT_BACK) ? "cull-all, " : ""
       );
 }
 
@@ -568,37 +566,37 @@ void gl_print_pipeline( GLcontext *ctx, struct gl_pipeline *p )
 
    if (0)
       for (i = 0 ; i < ctx->NrPipelineStages ; i++)
-	 if (pipeline[i].active & p->type) {
-	    fprintf(stderr,"%u: %s\n", i, pipeline[i].name);
-	
-	    gl_print_vert_flags("\tinputs", pipeline[i].inputs);
-	    gl_print_vert_flags("\toutputs", pipeline[i].outputs);
-	
-	    if (p->type == PIPE_PRECALC && pipeline[i].pre_forbidden_inputs)
-	       gl_print_vert_flags("\tforbidden",
-				   pipeline[i].pre_forbidden_inputs);
+         if (pipeline[i].active & p->type) {
+            fprintf(stderr,"%u: %s\n", i, pipeline[i].name);
 
-	    if (p->type == PIPE_IMMEDIATE && pipeline[i].elt_forbidden_inputs)
-	       gl_print_vert_flags("\tforbidden",
-				   pipeline[i].elt_forbidden_inputs);
+            gl_print_vert_flags("\tinputs", pipeline[i].inputs);
+            gl_print_vert_flags("\toutputs", pipeline[i].outputs);
 
-	 }
+            if (p->type == PIPE_PRECALC && pipeline[i].pre_forbidden_inputs)
+               gl_print_vert_flags("\tforbidden",
+                                   pipeline[i].pre_forbidden_inputs);
+
+            if (p->type == PIPE_IMMEDIATE && pipeline[i].elt_forbidden_inputs)
+               gl_print_vert_flags("\tforbidden",
+                                   pipeline[i].elt_forbidden_inputs);
+
+         }
 
 
    if (1) {
       struct gl_pipeline_stage **stages = p->stages;
       fprintf(stderr,"\nStages requiring precalculation:\n");
       for ( i=0 ; stages[i] ; i++) {
-	 fprintf(stderr, "%u: %s\n", i, stages[i]->name);
-	 gl_print_vert_flags("\tinputs", stages[i]->inputs);
-	 gl_print_vert_flags("\toutputs", stages[i]->outputs);
-	 if (p->type == PIPE_PRECALC && pipeline[i].pre_forbidden_inputs)
-	    gl_print_vert_flags("\tforbidden",
-				pipeline[i].pre_forbidden_inputs);
+         fprintf(stderr, "%u: %s\n", i, stages[i]->name);
+         gl_print_vert_flags("\tinputs", stages[i]->inputs);
+         gl_print_vert_flags("\toutputs", stages[i]->outputs);
+         if (p->type == PIPE_PRECALC && pipeline[i].pre_forbidden_inputs)
+            gl_print_vert_flags("\tforbidden",
+                                pipeline[i].pre_forbidden_inputs);
 
-	 if (p->type == PIPE_IMMEDIATE && pipeline[i].elt_forbidden_inputs)
-	    gl_print_vert_flags("\tforbidden",
-				pipeline[i].elt_forbidden_inputs);
+         if (p->type == PIPE_IMMEDIATE && pipeline[i].elt_forbidden_inputs)
+            gl_print_vert_flags("\tforbidden",
+                                pipeline[i].elt_forbidden_inputs);
       }
    }
 }
@@ -630,8 +628,8 @@ void gl_print_active_pipeline( GLcontext *ctx, struct gl_pipeline *p )
       gl_print_vert_flags("\toutputs", stages[i]->outputs);
 
       if (p->type == PIPE_PRECALC && stages[i]->pre_forbidden_inputs)
-	    gl_print_vert_flags("\tforbidden",
-				stages[i]->pre_forbidden_inputs);
+            gl_print_vert_flags("\tforbidden",
+                                stages[i]->pre_forbidden_inputs);
       }
 }
 

@@ -1,6 +1,6 @@
- $Id: LICENSE.TXT,v 1.1 2000-02-29 00:49:56 sandervl Exp $
+ * $Id: LICENSE.TXT,v 1.2 2000-05-23 20:40:18 jeroen Exp $
  * This is an additional Odin license agreement.
- * It supercedes the main Odin license, but is only valid in 
+ * It supercedes the main Odin license, but is only valid in
  * the source directory in which it is present.
 
  * Mesa 3-D graphics library

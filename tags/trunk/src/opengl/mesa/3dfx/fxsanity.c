@@ -2,7 +2,7 @@
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -67,11 +67,11 @@ void fx_sanity_triangle( GrVertex *v1, GrVertex *v2, GrVertex *v3 )
    GLuint rv = 1, print = 0;
 
    GLfloat area = ((v1->x - v3->x) * (v2->y - v3->y) -
-		   (v1->y - v3->y) * (v2->x - v3->x));
+                   (v1->y - v3->y) * (v2->x - v3->x));
 
    if (v1->x < 0 || v1->y < 0 || v1->x > WID || v1->y > HI ||
        v2->x < 0 || v2->y < 0 || v2->x > WID || v2->y > HI ||
-       v3->x < 0 || v3->y < 0 || v3->x > WID || v3->y > HI) 
+       v3->x < 0 || v3->y < 0 || v3->x > WID || v3->y > HI)
    {
       fprintf(stderr,"not clipped/set up!!!!!\n");
       rv = 0;
@@ -93,26 +93,32 @@ void fx_sanity_triangle( GrVertex *v1, GrVertex *v2, GrVertex *v3 )
 
    if (print) {
       fprintf(stderr,"v1: %f %f %f %f col %.0f %.0f %.0f %.0f t0 %f %f %f t1 %f %f %f\n",
-	      v1->x, v1->y, v1->ooz, v1->oow,
-	      v1->r, v1->g, v1->b, v1->a,
-	      v1->tmuvtx[0].sow, v1->tmuvtx[0].tow, v1->tmuvtx[0].oow,
-	      v1->tmuvtx[1].sow, v1->tmuvtx[1].tow, v1->tmuvtx[1].oow);
+              v1->x, v1->y, v1->ooz, v1->oow,
+              v1->r, v1->g, v1->b, v1->a,
+              v1->tmuvtx[0].sow, v1->tmuvtx[0].tow, v1->tmuvtx[0].oow,
+              v1->tmuvtx[1].sow, v1->tmuvtx[1].tow, v1->tmuvtx[1].oow);
       fprintf(stderr,"v2: %f %f %f %f col %.0f %.0f %.0f %.0f t0 %f %f %f t1 %f %f %f\n",
-	      v2->x, v2->y, v2->ooz, v2->oow,
-	      v2->r, v2->g, v2->b, v2->a,
-	      v2->tmuvtx[0].sow, v2->tmuvtx[0].tow, v2->tmuvtx[0].oow,
-	      v2->tmuvtx[1].sow, v2->tmuvtx[1].tow, v2->tmuvtx[1].oow);
+              v2->x, v2->y, v2->ooz, v2->oow,
+              v2->r, v2->g, v2->b, v2->a,
+              v2->tmuvtx[0].sow, v2->tmuvtx[0].tow, v2->tmuvtx[0].oow,
+              v2->tmuvtx[1].sow, v2->tmuvtx[1].tow, v2->tmuvtx[1].oow);
       fprintf(stderr,"v3: %f %f %f %f col %.0f %.0f %.0f %.0f t0 %f %f %f t1 %f %f %f\n",
-	      v3->x, v3->y, v3->ooz, v3->oow,
-	      v3->r, v3->g, v3->b, v3->a,
-	      v3->tmuvtx[0].sow, v3->tmuvtx[0].tow, v3->tmuvtx[0].oow,
-	      v3->tmuvtx[1].sow, v3->tmuvtx[1].tow, v3->tmuvtx[1].oow);
+              v3->x, v3->y, v3->ooz, v3->oow,
+              v3->r, v3->g, v3->b, v3->a,
+              v3->tmuvtx[0].sow, v3->tmuvtx[0].tow, v3->tmuvtx[0].oow,
+              v3->tmuvtx[1].sow, v3->tmuvtx[1].tow, v3->tmuvtx[1].oow);
    }
 
-   if (1) 
+   if (1)
       FX_grDrawTriangle(v1,v2,v3);
-   else 
+   else
       fprintf(stderr, "\n\n\n");
+}
+
+#else
+
+void gl_fxsanity_dummy()
+{
 }
 
 #endif

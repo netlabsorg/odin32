@@ -1,8 +1,8 @@
-/* $Id: vbindirect.c,v 1.1 2000-02-29 00:50:14 sandervl Exp $ */
+/* $Id: vbindirect.c,v 1.2 2000-05-23 20:41:02 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -29,6 +29,7 @@
  */
 
 
+#include "glheader.h"
 #include "vb.h"
 #include "vbcull.h"
 #include "vbrender.h"
@@ -114,8 +115,8 @@ static void
 indexed_render_points( struct vertex_buffer *VB,
                        const struct gl_prim_state *state,
                        const GLuint *elt,
-		       GLuint start,
-		       GLuint count )
+                       GLuint start,
+                       GLuint count )
 {
    GLcontext *ctx = VB->ctx;
    GLuint i;
@@ -125,20 +126,20 @@ indexed_render_points( struct vertex_buffer *VB,
    if (VB->ClipOrMask) {
       const GLubyte *clip = VB->ClipMask;
       for (i = start ; i < count ; i++)
-	 if (!clip[elt[i]])
-	    ctx->Driver.PointsFunc( ctx, elt[i], elt[i] );
+         if (!clip[elt[i]])
+            ctx->Driver.PointsFunc( ctx, elt[i], elt[i] );
    } else {
       for (i = start ; i < count ; i++)
-	 ctx->Driver.PointsFunc( ctx, elt[i], elt[i] );
+         ctx->Driver.PointsFunc( ctx, elt[i], elt[i] );
    }
 }
 
 static void
 indexed_render_lines( struct vertex_buffer *VB,
-		      const struct gl_prim_state *state,
-		      const GLuint *elt,
-		      GLuint start,
-		      GLuint count )
+                      const struct gl_prim_state *state,
+                      const GLuint *elt,
+                      GLuint start,
+                      GLuint count )
 {
    GLcontext *ctx = VB->ctx;
    GLuint i;
@@ -150,34 +151,34 @@ indexed_render_lines( struct vertex_buffer *VB,
       GLuint prev = 0;
 
       for (i = start ; i < count ; i++) {
-	 GLuint curr = elt[i];
-	 if (state->draw) {
-	    if (clip[curr] | clip[prev])
-	       gl_render_clipped_line( ctx, prev, curr );
-	    else
-	       ctx->Driver.LineFunc( ctx, prev, curr, curr );	
+         GLuint curr = elt[i];
+         if (state->draw) {
+            if (clip[curr] | clip[prev])
+               gl_render_clipped_line( ctx, prev, curr );
+            else
+               ctx->Driver.LineFunc( ctx, prev, curr, curr );
          }
-	 prev = curr;	
-	 state = state->next;
+         prev = curr;
+         state = state->next;
       }
       if (state->finish_loop) {
-	 GLuint curr = elt[start];
-	 if (clip[curr] | clip[prev])
-	    gl_render_clipped_line( ctx, prev, curr );
-	 else
-	    ctx->Driver.LineFunc( ctx, prev, curr, curr );
+         GLuint curr = elt[start];
+         if (clip[curr] | clip[prev])
+            gl_render_clipped_line( ctx, prev, curr );
+         else
+            ctx->Driver.LineFunc( ctx, prev, curr, curr );
       }
    } else {
       GLuint prev = 0;
       for (i = start ; i < count ; i++) {
-	 GLuint curr = elt[i];
-	 if (state->draw) ctx->Driver.LineFunc( ctx, prev, curr, curr );
-	 prev = curr;
-	 state = state->next;
+         GLuint curr = elt[i];
+         if (state->draw) ctx->Driver.LineFunc( ctx, prev, curr, curr );
+         prev = curr;
+         state = state->next;
       }
       if (state->finish_loop) {
-	 GLuint curr = elt[start];
-	 ctx->Driver.LineFunc( ctx, prev, curr, curr );
+         GLuint curr = elt[start];
+         ctx->Driver.LineFunc( ctx, prev, curr, curr );
       }
    }
 }
@@ -186,10 +187,10 @@ indexed_render_lines( struct vertex_buffer *VB,
 
 static void
 indexed_render_tris( struct vertex_buffer *VB,
-		     const struct gl_prim_state *state,
-		     const GLuint *elt,
-		     GLuint start,
-		     GLuint count )
+                     const struct gl_prim_state *state,
+                     const GLuint *elt,
+                     GLuint start,
+                     GLuint count )
 {
    GLcontext *ctx = VB->ctx;
    GLuint i;
@@ -202,32 +203,32 @@ indexed_render_tris( struct vertex_buffer *VB,
 
       const GLubyte *clip = VB->ClipMask;
       for (i = start ; i < count ; i++) {
-	 v[2] = elt[i];
-	 if (state->draw) {
-	    if (clip[v[0]] | clip[v[1]] | clip[v[2]]) {
-	       if (!(clip[v[0]] & clip[v[1]] & clip[v[2]] & CLIP_ALL_BITS)) {
-		  COPY_3V(vlist, v);
-		  gl_render_clipped_triangle( ctx, 3, vlist, vlist[2] );
-	       }
-	    }
-	    else
-	       ctx->TriangleFunc( ctx, v[0], v[1], v[2], v[2] );
-	 }
-	 v[0] = v[state->v0];
-	 v[1] = v[state->v1];
-	 state = state->next;
+         v[2] = elt[i];
+         if (state->draw) {
+            if (clip[v[0]] | clip[v[1]] | clip[v[2]]) {
+               if (!(clip[v[0]] & clip[v[1]] & clip[v[2]] & CLIP_ALL_BITS)) {
+                  COPY_3V(vlist, v);
+                  gl_render_clipped_triangle( ctx, 3, vlist, vlist[2] );
+               }
+            }
+            else
+               ctx->TriangleFunc( ctx, v[0], v[1], v[2], v[2] );
+         }
+         v[0] = v[state->v0];
+         v[1] = v[state->v1];
+         state = state->next;
       }
    } else {
       GLuint v[3];
       const triangle_func tf = ctx->TriangleFunc;
 
       for (i = start ; i < count ; i++) {
-	 v[2] = elt[i];
-	 if (state->draw)
-	    tf( ctx, v[0], v[1], v[2], v[2] );
-	 v[0] = v[state->v0];
-	 v[1] = v[state->v1];
-	 state = state->next;
+         v[2] = elt[i];
+         if (state->draw)
+            tf( ctx, v[0], v[1], v[2], v[2] );
+         v[0] = v[state->v0];
+         v[1] = v[state->v1];
+         state = state->next;
       }
    }
 }
@@ -235,24 +236,24 @@ indexed_render_tris( struct vertex_buffer *VB,
 
 static void
 indexed_render_noop( struct vertex_buffer *VB,
-		     const struct gl_prim_state *state,
-		     const GLuint *elt,
-		     GLuint start,
-		     GLuint count )
+                     const struct gl_prim_state *state,
+                     const GLuint *elt,
+                     GLuint start,
+                     GLuint count )
 {
-	(void) VB;
-	(void) state;
-	(void) elt;
-	(void) start;
-	(void) count;
+        (void) VB;
+        (void) state;
+        (void) elt;
+        (void) start;
+        (void) count;
 }
 
 
 typedef void (*indexed_render_func)( struct vertex_buffer *VB,
-				     const struct gl_prim_state *state,
-				     const GLuint *elt,
-				     GLuint start,
-				     GLuint count );
+                                     const struct gl_prim_state *state,
+                                     const GLuint *elt,
+                                     GLuint start,
+                                     GLuint count );
 
 
 indexed_render_func prim_func[GL_POLYGON+2] = {
@@ -296,9 +297,9 @@ void gl_render_elts( struct vertex_buffer *VB )
    GLuint p = 0;
 
    gl_import_client_data( VB, ctx->RenderFlags,
-			  (VB->ClipOrMask
-			   ? VEC_WRITABLE|VEC_GOOD_STRIDE
-			   : VEC_GOOD_STRIDE));
+                          (VB->ClipOrMask
+                           ? VEC_WRITABLE|VEC_GOOD_STRIDE
+                           : VEC_GOOD_STRIDE));
 
    ctx->VB = VB;
 
@@ -312,13 +313,13 @@ void gl_render_elts( struct vertex_buffer *VB )
       func( VB, state, elt, 0, nr );
 
       if (ctx->TriangleCaps & DD_TRI_LIGHT_TWOSIDE) {
-	 VB->Specular = VB->Spec[0];
-	 VB->ColorPtr = VB->Color[0];
-	 VB->IndexPtr = VB->Index[0];
+         VB->Specular = VB->Spec[0];
+         VB->ColorPtr = VB->Color[0];
+         VB->IndexPtr = VB->Index[0];
       }
 
    } while (ctx->Driver.MultipassFunc &&
-	    ctx->Driver.MultipassFunc( VB, ++p ));
+            ctx->Driver.MultipassFunc( VB, ++p ));
 
 
    if (ctx->PB->count > 0)
@@ -345,9 +346,9 @@ void gl_render_vb_indirect( struct vertex_buffer *VB )
    GLuint p = 0;
 
    gl_import_client_data( cvaVB, ctx->RenderFlags,
-			  (VB->ClipOrMask
-			   ? VEC_WRITABLE|VEC_GOOD_STRIDE
-			   : VEC_GOOD_STRIDE));
+                          (VB->ClipOrMask
+                           ? VEC_WRITABLE|VEC_GOOD_STRIDE
+                           : VEC_GOOD_STRIDE));
 
    ctx->VB = cvaVB;
 
@@ -359,23 +360,23 @@ void gl_render_vb_indirect( struct vertex_buffer *VB )
 
    do {
       for (i = VB->CopyStart ; i < count ; parity = 0, i = next ) {
-	 prim = VB->Primitive[i];
-	 next = VB->NextPrimitive[i];
+         prim = VB->Primitive[i];
+         next = VB->NextPrimitive[i];
 
-	 state = gl_prim_state_machine[prim][parity];
-	 func = prim_func[prim];
+         state = gl_prim_state_machine[prim][parity];
+         func = prim_func[prim];
 
-	 func( cvaVB, state, VB->EltPtr->data, i, next );
+         func( cvaVB, state, VB->EltPtr->data, i, next );
 
-	 if (ctx->TriangleCaps & DD_TRI_LIGHT_TWOSIDE) {
-	    cvaVB->Specular = cvaVB->Spec[0];
-	    cvaVB->ColorPtr = cvaVB->Color[0];
-	    cvaVB->IndexPtr = cvaVB->Index[0];
-	 }
+         if (ctx->TriangleCaps & DD_TRI_LIGHT_TWOSIDE) {
+            cvaVB->Specular = cvaVB->Spec[0];
+            cvaVB->ColorPtr = cvaVB->Color[0];
+            cvaVB->IndexPtr = cvaVB->Index[0];
+         }
       }
 
    } while (ctx->Driver.MultipassFunc &&
-	    ctx->Driver.MultipassFunc( VB, ++p ));
+            ctx->Driver.MultipassFunc( VB, ++p ));
 
 
    if (ctx->PB->count > 0)

@@ -1,8 +1,8 @@
-/* $Id: vb.c,v 1.1 2000-02-29 00:50:13 sandervl Exp $ */
+/* $Id: vb.c,v 1.2 2000-05-23 20:41:00 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -31,16 +31,12 @@
 #ifdef PC_HEADER
 #include "all.h"
 #else
-#ifndef XFree86Server
-#include <stdlib.h>
-#include <stdio.h>
-#else
-#include "GL/xf86glx.h"
-#endif
+#include "glheader.h"
 #include "types.h"
 #include "vb.h"
 #include "vbxform.h"
 #include "xform.h"
+#include "mem.h"
 #endif
 
 
@@ -82,8 +78,8 @@ struct vertex_buffer *gl_vb_create_for_immediate( GLcontext *ctx )
 
    VB->store.Obj = &IM->v.Obj;
    VB->store.Normal = &IM->v.Normal;
-   VB->store.Color = 0;		/* not used */
-   VB->store.Index = 0;		/* not used */
+   VB->store.Color = 0;         /* not used */
+   VB->store.Index = 0;         /* not used */
    VB->store.EdgeFlag = &IM->v.EdgeFlag;
    VB->store.TexCoord[0] = &IM->v.TexCoord[0];
    VB->store.TexCoord[1] = &IM->v.TexCoord[1];
@@ -207,7 +203,7 @@ void gl_vb_free( struct vertex_buffer *VB )
 
    if (VB->IM) {
       if ( ! --VB->IM->ref_count )
-	 gl_immediate_free( VB->IM );
+         gl_immediate_free( VB->IM );
 
       FREE( VB->CullMask );
       FREE( VB->NormCullMask );
@@ -274,8 +270,8 @@ struct immediate *gl_immediate_alloc( GLcontext *ctx )
    IM->LastCalcedLength = 0;
    IM->FlushElt = 0;
    IM->LastPrimitive = VB_START;
-   IM->Count = VB_MAX;		/* force clear of Flag. */
-   IM->Start = VB_START;	
+   IM->Count = VB_MAX;          /* force clear of Flag. */
+   IM->Start = VB_START;
    IM->Material = 0;
    IM->MaterialMask = 0;
 
@@ -324,13 +320,13 @@ void gl_immediate_free( struct immediate *IM )
 
    if (ctx->nr_im_queued > 5) {
       if (MESA_VERBOSE&VERBOSE_IMMEDIATE)
-	 fprintf(stderr, "really free immediate %d\n", IM->id);
+         fprintf(stderr, "really free immediate %d\n", IM->id);
 
       FREE( IM );
    }
    else {
       if (MESA_VERBOSE&VERBOSE_IMMEDIATE)
-	 fprintf(stderr, "requeue immediate %d\n", IM->id);
+         fprintf(stderr, "requeue immediate %d\n", IM->id);
 
       IM->next = ctx->freed_im_queue;
       ctx->freed_im_queue = IM;

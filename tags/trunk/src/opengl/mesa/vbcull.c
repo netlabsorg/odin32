@@ -1,8 +1,8 @@
-/* $Id: vbcull.c,v 1.2 2000-03-01 18:49:39 jeroen Exp $ */
+/* $Id: vbcull.c,v 1.3 2000-05-23 20:41:01 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -32,11 +32,7 @@
 #ifdef PC_HEADER
 #include "all.h"
 #else
-#ifndef XFree86Server
-#include <stdio.h>
-#else
-#include "GL/xf86glx.h"
-#endif
+#include "glheader.h"
 #include "types.h"
 #include "context.h"
 #include "macros.h"
@@ -44,6 +40,7 @@
 #include "vbcull.h"
 #include "vbrender.h"
 #include "xform.h"
+#include "mem.h"
 #endif
 
 
@@ -82,10 +79,10 @@ const char *gl_prim_name[GL_POLYGON+2] = {
 };
 
 static GLuint gl_cull_points( struct vertex_buffer *VB,
-			      GLuint start,
-			      GLuint count,
-			      GLuint parity,
-			      CONST GLfloat (*proj)[4])
+                              GLuint start,
+                              GLuint count,
+                              GLuint parity,
+                              CONST GLfloat (*proj)[4])
 {
    const GLubyte *clipmask = VB->ClipMask;
    GLubyte *cullmask = VB->CullMask;
@@ -98,9 +95,9 @@ static GLuint gl_cull_points( struct vertex_buffer *VB,
     */
    for (i=start+1;i<count;i++) {
       if (clipmask[i] == 0)
-	 cullmask[i] = VERT_FACE_FRONT | PRIM_FACE_FRONT;
+         cullmask[i] = VERT_FACE_FRONT | PRIM_FACE_FRONT;
       else {
-	 cullcount++;
+         cullcount++;
       }
    }
    return cullcount;
@@ -111,10 +108,10 @@ static GLuint gl_cull_points( struct vertex_buffer *VB,
  * activated.
  */
 static GLuint gl_cull_points_neither( struct vertex_buffer *VB,
-				      GLuint start,
-				      GLuint count,
-				      GLuint parity,
-				      CONST GLfloat (*proj)[4])
+                                      GLuint start,
+                                      GLuint count,
+                                      GLuint parity,
+                                      CONST GLfloat (*proj)[4])
 {
    GLubyte unculled_prim = VERT_FACE_FRONT|PRIM_FACE_FRONT;
    (void) parity;
@@ -125,31 +122,31 @@ static GLuint gl_cull_points_neither( struct vertex_buffer *VB,
 
 
 
-#define CULL_LINE( i1, i, nr )						 \
-do {									 \
-   GLubyte ClipOr = VB->ClipMask[i1] | VB->ClipMask[i];			 \
-									 \
-   if (ClipOr) {							 \
-      if (VB->ClipMask[i1] & VB->ClipMask[i] & CLIP_ALL_BITS) {		 \
-	 cullcount+=nr;							 \
-      }									 \
-      else {								 \
-	 cullmask[i1] |= VERT_FACE_FRONT;				 \
-	 cullmask[i] |= VERT_FACE_FRONT | PRIM_FACE_FRONT | PRIM_CLIPPED; \
-      }									 \
-   } else {								 \
-      cullmask[i1] |= VERT_FACE_FRONT;					 \
-      cullmask[i] |= VERT_FACE_FRONT | PRIM_FACE_FRONT;			 \
-   }									 \
+#define CULL_LINE( i1, i, nr )                                           \
+do {                                                                     \
+   GLubyte ClipOr = VB->ClipMask[i1] | VB->ClipMask[i];                  \
+                                                                         \
+   if (ClipOr) {                                                         \
+      if (VB->ClipMask[i1] & VB->ClipMask[i] & CLIP_ALL_BITS) {          \
+         cullcount+=nr;                                                  \
+      }                                                                  \
+      else {                                                             \
+         cullmask[i1] |= VERT_FACE_FRONT;                                \
+         cullmask[i] |= VERT_FACE_FRONT | PRIM_FACE_FRONT | PRIM_CLIPPED; \
+      }                                                                  \
+   } else {                                                              \
+      cullmask[i1] |= VERT_FACE_FRONT;                                   \
+      cullmask[i] |= VERT_FACE_FRONT | PRIM_FACE_FRONT;                  \
+   }                                                                     \
 } while (0)
 
 
 
 static GLuint gl_cull_lines( struct vertex_buffer *VB,
-			     GLuint start,
-			     GLuint count,
-			     GLuint parity,
-			     CONST GLfloat (*proj)[4])
+                             GLuint start,
+                             GLuint count,
+                             GLuint parity,
+                             CONST GLfloat (*proj)[4])
 {
    GLubyte *cullmask = VB->CullMask;
    GLuint cullcount = 0;
@@ -171,10 +168,10 @@ static GLuint gl_cull_lines( struct vertex_buffer *VB,
 
 
 static GLuint gl_cull_line_strip( struct vertex_buffer *VB,
-				  GLuint start,
-				  GLuint count,
-				  GLuint parity,
-				  CONST GLfloat (*proj)[4])
+                                  GLuint start,
+                                  GLuint count,
+                                  GLuint parity,
+                                  CONST GLfloat (*proj)[4])
 {
    GLubyte *cullmask = VB->CullMask;
    GLuint cullcount = 0;
@@ -197,10 +194,10 @@ static GLuint gl_cull_line_strip( struct vertex_buffer *VB,
 
 
 static GLuint gl_cull_line_loop( struct vertex_buffer *VB,
-				 GLuint start,
-				 GLuint count,
-				 GLuint parity,
-				 CONST GLfloat (*proj)[4])
+                                 GLuint start,
+                                 GLuint count,
+                                 GLuint parity,
+                                 CONST GLfloat (*proj)[4])
 {
    GLuint cullcount = 0;
    GLubyte *cullmask = VB->CullMask;
@@ -220,120 +217,120 @@ static GLuint gl_cull_line_loop( struct vertex_buffer *VB,
 }
 
 
-#define CULL_TRI( do_clip, do_area, i2, i1, i0, parity, nr )		\
-do {									\
-   GLubyte ClipOr = 0;							\
-   if (do_clip) {							\
-      ClipOr = (VB->ClipMask[i2] |					\
-		VB->ClipMask[i1] |					\
-		VB->ClipMask[i0]);					\
-   }									\
-									\
-   if (do_clip && (ClipOr&CLIP_ALL_BITS))				\
-   {									\
-      if (VB->ClipMask[i2] & VB->ClipMask[i1] & VB->ClipMask[i0] &	\
-	  CLIP_ALL_BITS)						\
-      {									\
-	 cullcount+=nr;							\
-      }									\
-      else								\
-      {									\
-	 cullmask[i0]   = cull_faces | PRIM_CLIPPED;			\
-	 cullmask[i1] |= cull_faces;					\
-	 cullmask[i2] |= cull_faces;					\
-      }									\
-   }									\
-   else									\
-   {									\
-      GLfloat area;							\
-      GLubyte face_flags;						\
-									\
-      if (do_area) {							\
-	 area = ((proj[i2][0] - proj[i0][0]) *				\
-		 (proj[i1][1] - proj[i0][1]) -				\
-		 (proj[i2][1] - proj[i0][1]) *				\
-		 (proj[i1][0] - proj[i0][0]));				\
-									\
-	 face_flags = (((area<0.0F) ^ parity) + 1) & cull_faces;	\
-      } else {								\
-	 face_flags = cull_faces;					\
-      }									\
-									\
-      if (!do_area || face_flags)					\
-      {									\
-	 cullmask[i0]  = face_flags | (face_flags << PRIM_FLAG_SHIFT);	\
-	 cullmask[i1] |= face_flags;					\
-	 cullmask[i2] |= face_flags;					\
-	 if (do_clip && ClipOr) cullmask[i0] |= PRIM_CLIPPED;		\
-      }									\
-      else								\
-      {									\
-	 cullcount+=nr;							\
-      }									\
-   }									\
+#define CULL_TRI( do_clip, do_area, i2, i1, i0, parity, nr )            \
+do {                                                                    \
+   GLubyte ClipOr = 0;                                                  \
+   if (do_clip) {                                                       \
+      ClipOr = (VB->ClipMask[i2] |                                      \
+                VB->ClipMask[i1] |                                      \
+                VB->ClipMask[i0]);                                      \
+   }                                                                    \
+                                                                        \
+   if (do_clip && (ClipOr&CLIP_ALL_BITS))                               \
+   {                                                                    \
+      if (VB->ClipMask[i2] & VB->ClipMask[i1] & VB->ClipMask[i0] &      \
+          CLIP_ALL_BITS)                                                \
+      {                                                                 \
+         cullcount+=nr;                                                 \
+      }                                                                 \
+      else                                                              \
+      {                                                                 \
+         cullmask[i0]   = cull_faces | PRIM_CLIPPED;                    \
+         cullmask[i1] |= cull_faces;                                    \
+         cullmask[i2] |= cull_faces;                                    \
+      }                                                                 \
+   }                                                                    \
+   else                                                                 \
+   {                                                                    \
+      GLfloat area;                                                     \
+      GLubyte face_flags;                                               \
+                                                                        \
+      if (do_area) {                                                    \
+         area = ((proj[i2][0] - proj[i0][0]) *                          \
+                 (proj[i1][1] - proj[i0][1]) -                          \
+                 (proj[i2][1] - proj[i0][1]) *                          \
+                 (proj[i1][0] - proj[i0][0]));                          \
+                                                                        \
+         face_flags = (((area<0.0F) ^ parity) + 1) & cull_faces;        \
+      } else {                                                          \
+         face_flags = cull_faces;                                       \
+      }                                                                 \
+                                                                        \
+      if (!do_area || face_flags)                                       \
+      {                                                                 \
+         cullmask[i0]  = face_flags | (face_flags << PRIM_FLAG_SHIFT);  \
+         cullmask[i1] |= face_flags;                                    \
+         cullmask[i2] |= face_flags;                                    \
+         if (do_clip && ClipOr) cullmask[i0] |= PRIM_CLIPPED;           \
+      }                                                                 \
+      else                                                              \
+      {                                                                 \
+         cullcount+=nr;                                                 \
+      }                                                                 \
+   }                                                                    \
 } while (0)
 
 
 
 
 
-#define CULL_QUAD( do_clip, do_area, i3, i2, i1, i, nr )		\
-do {									\
-   GLubyte ClipOr = 0;							\
-									\
-   if (do_clip) {							\
-      ClipOr = (VB->ClipMask[i3] |					\
-		VB->ClipMask[i2] | 					\
-		VB->ClipMask[i1] | 					\
-		VB->ClipMask[i]);					\
-   }									\
-									\
-   if (do_clip && (ClipOr&CLIP_ALL_BITS))				\
-   {									\
-      if (VB->ClipMask[i3] & VB->ClipMask[i2] & 			\
-	  VB->ClipMask[i1] & VB->ClipMask[i] &				\
-	  CLIP_ALL_BITS) 						\
-      {									\
-	 cullcount+=nr;							\
-      }									\
-      else								\
-      {									\
-	 cullmask[i] = cull_faces | PRIM_CLIPPED;			\
-	 cullmask[i1] = cull_faces | PRIM_CLIPPED; 			\
-	 cullmask[i2] |= cull_faces; 			\
-	 cullmask[i3] |= cull_faces; 					\
-      }									\
-   }									\
-   else 								\
-   {									\
-      GLfloat area;							\
-      GLubyte face_flags;						\
-      									\
-      if (do_area) {							\
-	 area = ((proj[i1][0] - proj[i3][0]) * /* ex */			\
-		 (proj[i ][1] - proj[i2][1]) - /* fy */			\
-		 (proj[i1][1] - proj[i3][1]) * /* ey */			\
-		 (proj[i ][0] - proj[i2][0])); /* fx */			\
-	    								\
-	 face_flags = (((area<0.0F) ^ face_bit) + 1) & cull_faces;	\
-      } else {								\
-	 face_flags = cull_faces;					\
-      }									\
-   									\
-      if (do_area && !face_flags)					\
-      {									\
-	 cullcount+=nr;							\
-      }									\
-      else 								\
-      {									\
-	 cullmask[i]  = face_flags | (face_flags<<PRIM_FLAG_SHIFT);	\
-	 cullmask[i1] = face_flags | (face_flags<<PRIM_FLAG_SHIFT);	\
-	 cullmask[i2] |= face_flags;					\
-	 cullmask[i3] |= face_flags;					\
-	 if (ClipOr)							\
-	    cullmask[i] |= PRIM_CLIPPED;				\
-      } 								\
-   }									\
+#define CULL_QUAD( do_clip, do_area, i3, i2, i1, i, nr )                \
+do {                                                                    \
+   GLubyte ClipOr = 0;                                                  \
+                                                                        \
+   if (do_clip) {                                                       \
+      ClipOr = (VB->ClipMask[i3] |                                      \
+                VB->ClipMask[i2] |                                      \
+                VB->ClipMask[i1] |                                      \
+                VB->ClipMask[i]);                                       \
+   }                                                                    \
+                                                                        \
+   if (do_clip && (ClipOr&CLIP_ALL_BITS))                               \
+   {                                                                    \
+      if (VB->ClipMask[i3] & VB->ClipMask[i2] &                         \
+          VB->ClipMask[i1] & VB->ClipMask[i] &                          \
+          CLIP_ALL_BITS)                                                \
+      {                                                                 \
+         cullcount+=nr;                                                 \
+      }                                                                 \
+      else                                                              \
+      {                                                                 \
+         cullmask[i] = cull_faces | PRIM_CLIPPED;                       \
+         cullmask[i1] = cull_faces | PRIM_CLIPPED;                      \
+         cullmask[i2] |= cull_faces;                    \
+         cullmask[i3] |= cull_faces;                                    \
+      }                                                                 \
+   }                                                                    \
+   else                                                                 \
+   {                                                                    \
+      GLfloat area;                                                     \
+      GLubyte face_flags;                                               \
+                                                                        \
+      if (do_area) {                                                    \
+         area = ((proj[i1][0] - proj[i3][0]) * /* ex */                 \
+                 (proj[i ][1] - proj[i2][1]) - /* fy */                 \
+                 (proj[i1][1] - proj[i3][1]) * /* ey */                 \
+                 (proj[i ][0] - proj[i2][0])); /* fx */                 \
+                                                                        \
+         face_flags = (((area<0.0F) ^ face_bit) + 1) & cull_faces;      \
+      } else {                                                          \
+         face_flags = cull_faces;                                       \
+      }                                                                 \
+                                                                        \
+      if (do_area && !face_flags)                                       \
+      {                                                                 \
+         cullcount+=nr;                                                 \
+      }                                                                 \
+      else                                                              \
+      {                                                                 \
+         cullmask[i]  = face_flags | (face_flags<<PRIM_FLAG_SHIFT);     \
+         cullmask[i1] = face_flags | (face_flags<<PRIM_FLAG_SHIFT);     \
+         cullmask[i2] |= face_flags;                                    \
+         cullmask[i3] |= face_flags;                                    \
+         if (ClipOr)                                                    \
+            cullmask[i] |= PRIM_CLIPPED;                                \
+      }                                                                 \
+   }                                                                    \
 } while(0)
 
 
@@ -356,10 +353,10 @@ do {									\
 
 
 static GLuint gl_cull_dummy_prim( struct vertex_buffer *VB,
-				  GLuint start,
-				  GLuint count,
-				  GLuint parity,
-				  CONST GLfloat (*proj)[4])
+                                  GLuint start,
+                                  GLuint count,
+                                  GLuint parity,
+                                  CONST GLfloat (*proj)[4])
 {
    (void) VB;
    (void) parity;
@@ -379,8 +376,8 @@ static GLuint gl_cull_dummy_prim( struct vertex_buffer *VB,
  * KW: Copy now organized to grow towards zero.
  */
 static GLuint gl_copy_last_cull( struct vertex_buffer *VB,
-				 GLuint start, GLuint count,
-				 GLuint ovf, CONST GLfloat (*proj)[4])
+                                 GLuint start, GLuint count,
+                                 GLuint ovf, CONST GLfloat (*proj)[4])
 {
    const GLcontext *ctx = VB->ctx;
    GLubyte *cullmask = VB->CullMask;
@@ -398,9 +395,9 @@ static GLuint gl_copy_last_cull( struct vertex_buffer *VB,
 }
 
 static GLuint gl_copy_first_and_last_cull( struct vertex_buffer *VB,
-					   GLuint start,
-					   GLuint count, GLuint ovf,
-					   CONST GLfloat (*proj)[4] )
+                                           GLuint start,
+                                           GLuint count, GLuint ovf,
+                                           CONST GLfloat (*proj)[4] )
 {
    const GLcontext *ctx = VB->ctx;
    GLuint rv = 0;
@@ -426,9 +423,9 @@ static GLuint gl_copy_first_and_last_cull( struct vertex_buffer *VB,
  *
  */
 static GLuint gl_copy_last_two_cull( struct vertex_buffer *VB,
-				     GLuint start,
-				     GLuint count, GLuint ovf,
-				     CONST GLfloat (*proj)[4] )
+                                     GLuint start,
+                                     GLuint count, GLuint ovf,
+                                     CONST GLfloat (*proj)[4] )
 {
    const GLcontext *ctx = VB->ctx;
    GLubyte *cullmask = VB->CullMask;
@@ -451,8 +448,8 @@ static GLuint gl_copy_last_two_cull( struct vertex_buffer *VB,
 
    if (ovf == 1) {
       if (cullmask[count-3] == 0) {
-	 rv++;
-	 cullmask[count-3] = ctx->Polygon.CullBits;
+         rv++;
+         cullmask[count-3] = ctx->Polygon.CullBits;
       }
       VB->CopyCount = 3;
       VB->Copy[0] = count-3;
@@ -466,8 +463,8 @@ static GLuint gl_copy_last_two_cull( struct vertex_buffer *VB,
 /* Eg, quads - just copy the overflow, guarenteed to all be culled.
  */
 static GLuint gl_copy_overflow_cull( struct vertex_buffer *VB,
-				     GLuint start, GLuint count,
-				     GLuint ovf, CONST GLfloat (*proj)[4] )
+                                     GLuint start, GLuint count,
+                                     GLuint ovf, CONST GLfloat (*proj)[4] )
 {
    const GLcontext *ctx = VB->ctx;
    GLubyte *cullmask = VB->CullMask;
@@ -486,8 +483,8 @@ static GLuint gl_copy_overflow_cull( struct vertex_buffer *VB,
 
 
 static GLuint gl_copy_last( struct vertex_buffer *VB,
-			    GLuint start, GLuint count,
-			    GLuint ovf, CONST GLfloat (*proj)[4])
+                            GLuint start, GLuint count,
+                            GLuint ovf, CONST GLfloat (*proj)[4])
 {
    (void) start;
    (void) ovf;
@@ -498,9 +495,9 @@ static GLuint gl_copy_last( struct vertex_buffer *VB,
 }
 
 static GLuint gl_copy_first_and_last( struct vertex_buffer *VB,
-				      GLuint start,
-				      GLuint count,
-				      GLuint ovf, CONST GLfloat (*proj)[4])
+                                      GLuint start,
+                                      GLuint count,
+                                      GLuint ovf, CONST GLfloat (*proj)[4])
 {
    (void) ovf;
    VB->CopyCount = 2;
@@ -512,8 +509,8 @@ static GLuint gl_copy_first_and_last( struct vertex_buffer *VB,
 }
 
 static GLuint gl_copy_last_two( struct vertex_buffer *VB,
-				GLuint start, GLuint count,
-				GLuint ovf, CONST GLfloat (*proj)[4])
+                                GLuint start, GLuint count,
+                                GLuint ovf, CONST GLfloat (*proj)[4])
 {
    (void) start;
    VB->CopyCount = 2;
@@ -532,10 +529,10 @@ static GLuint gl_copy_last_two( struct vertex_buffer *VB,
 }
 
 static GLuint gl_copy_overflow( struct vertex_buffer *VB,
-				GLuint start,
-				GLuint count,
-				GLuint ovf,
-				CONST GLfloat (*proj)[4] )
+                                GLuint start,
+                                GLuint count,
+                                GLuint ovf,
+                                CONST GLfloat (*proj)[4] )
 {
    GLuint src_offset = count - ovf;
    GLuint dst_offset = 3 - ovf;
@@ -556,8 +553,8 @@ static GLuint gl_copy_overflow( struct vertex_buffer *VB,
 
 
 static void gl_fast_copy_noop( struct vertex_buffer *VB,
-			       GLuint start, GLuint count,
-			       GLuint ovf)
+                               GLuint start, GLuint count,
+                               GLuint ovf)
 {
    (void) start;
    (void) ovf;
@@ -566,8 +563,8 @@ static void gl_fast_copy_noop( struct vertex_buffer *VB,
 }
 
 static void gl_fast_copy_last( struct vertex_buffer *VB,
-			       GLuint start, GLuint count,
-			       GLuint ovf)
+                               GLuint start, GLuint count,
+                               GLuint ovf)
 {
    (void) start;
    (void) ovf;
@@ -576,9 +573,9 @@ static void gl_fast_copy_last( struct vertex_buffer *VB,
 }
 
 static void gl_fast_copy_first_and_last( struct vertex_buffer *VB,
-					 GLuint start,
-					 GLuint count,
-					 GLuint ovf)
+                                         GLuint start,
+                                         GLuint count,
+                                         GLuint ovf)
 {
    (void) ovf;
    VB->CopyCount = 2;
@@ -587,8 +584,8 @@ static void gl_fast_copy_first_and_last( struct vertex_buffer *VB,
 }
 
 static void gl_fast_copy_last_two( struct vertex_buffer *VB,
-				   GLuint start, GLuint count,
-				   GLuint ovf )
+                                   GLuint start, GLuint count,
+                                   GLuint ovf )
 {
    (void) start;
    VB->CopyCount = 2;
@@ -602,9 +599,9 @@ static void gl_fast_copy_last_two( struct vertex_buffer *VB,
 }
 
 static void gl_fast_copy_overflow( struct vertex_buffer *VB,
-				   GLuint start,
-				   GLuint count,
-				   GLuint ovf )
+                                   GLuint start,
+                                   GLuint count,
+                                   GLuint ovf )
 {
    GLuint src_offset = count - ovf;
    GLuint dst_offset = 3 - ovf;
@@ -617,25 +614,25 @@ static void gl_fast_copy_overflow( struct vertex_buffer *VB,
 
 
 typedef void (*fast_copy_func)( struct vertex_buffer *VB,
-				GLuint start,
-				GLuint count,
-				GLuint ovf );
+                                GLuint start,
+                                GLuint count,
+                                GLuint ovf );
 
 
 
 
 typedef GLuint (*cull_func)( struct vertex_buffer *VB,
-			     GLuint start,
-			     GLuint count,
-			     GLuint parity,
-			     CONST GLfloat (*proj)[4]);
+                             GLuint start,
+                             GLuint count,
+                             GLuint parity,
+                             CONST GLfloat (*proj)[4]);
 
 
 typedef GLuint (*copy_func)( struct vertex_buffer *VB,
-			     GLuint start,
-			     GLuint end,
-			     GLuint ovf,
-			     CONST GLfloat (*proj)[4] );
+                             GLuint start,
+                             GLuint end,
+                             GLuint ovf,
+                             CONST GLfloat (*proj)[4] );
 
 
 
@@ -774,12 +771,12 @@ void gl_purge_vertices( struct vertex_buffer *VB )
       out_prim[j] = in_prim[start];
 
       for ( i = start ; i < next ; i++) {
-	 if (~(flags[i] & purge)) {
-	    indirect[j] = i;
-	    cullmask[i] = PRIM_CLIPPED;	/* nonzero */
-	    j++;
-	 }
-	
+         if (~(flags[i] & purge)) {
+            indirect[j] = i;
+            cullmask[i] = PRIM_CLIPPED; /* nonzero */
+            j++;
+         }
+
       }
 
       out_nextprim[startj] = j;
@@ -793,13 +790,13 @@ void gl_purge_vertices( struct vertex_buffer *VB )
 #define VERT_NOT_CLIPPED 0x80
 
 static void build_clip_vert_bits( GLubyte *clipmask, const GLubyte *cullmask,
-				  GLuint count )
+                                  GLuint count )
 {
    GLuint i = 0;
    for (;;)
       if (cullmask[++i]==0) {
-	 clipmask[i] |= CLIP_CULLED_BIT;
-	 if (&cullmask[i] == &cullmask[count]) return;
+         clipmask[i] |= CLIP_CULLED_BIT;
+         if (&cullmask[i] == &cullmask[count]) return;
       }
 }
 
@@ -844,9 +841,9 @@ GLuint gl_cull_vb( struct vertex_buffer *VB )
       n = cull_funcs[prim]( VB, i, next, parity, (const GLfloat (*)[4])proj );
 
       if (n == next - i)
-	 out_prim[i] = GL_POLYGON+1;
+         out_prim[i] = GL_POLYGON+1;
       else
-	 out_prim[i] = prim;
+         out_prim[i] = prim;
 
       cullcount += n;
    }
@@ -854,11 +851,11 @@ GLuint gl_cull_vb( struct vertex_buffer *VB )
 
    if (VB->LastPrimitive <  VB->Count) {
       if (copy_tab_cull[lastprim])
-	 cullcount -= copy_tab_cull[prim]( VB,
-					   first,
-					   VB->Count,
-					   VB->Ovf,
-					   (const GLfloat (*)[4])proj );
+         cullcount -= copy_tab_cull[prim]( VB,
+                                           first,
+                                           VB->Count,
+                                           VB->Ovf,
+                                           (const GLfloat (*)[4])proj );
    }
 
    VB->Primitive = out_prim;
@@ -870,7 +867,7 @@ GLuint gl_cull_vb( struct vertex_buffer *VB )
       VB->CullFlag[0] = VB->CullFlag[1] = CLIP_CULLED_BIT&ctx->AllowVertexCull;
 
       if (cullcount < VB->Count)
-	 build_clip_vert_bits( VB->ClipMask, VB->CullMask, VB->Count );
+         build_clip_vert_bits( VB->ClipMask, VB->CullMask, VB->Count );
 
    }
    if (VB->ClipOrMask) {
@@ -905,14 +902,14 @@ void gl_dont_cull_vb( struct vertex_buffer *VB )
       GLuint prim = VB->Primitive[first];
 
       if (first == VB_START)
-	 first = VB->Start;
+         first = VB->Start;
 
       if (copy_tab_no_cull[prim])
-	 copy_tab_no_cull[prim]( VB,
-				 first,
-				 VB->Count,
-				 VB->Ovf,
-				 (const GLfloat (*)[4])proj );
+         copy_tab_no_cull[prim]( VB,
+                                 first,
+                                 VB->Count,
+                                 VB->Ovf,
+                                 (const GLfloat (*)[4])proj );
    }
 
    VB->CullDone = 1;
@@ -928,7 +925,7 @@ void gl_fast_copy_vb( struct vertex_buffer *VB )
       GLuint prim = VB->Primitive[first];
 
       if (first == VB_START)
-	 first = VB->Start;
+         first = VB->Start;
 
       fast_copy_tab[prim]( VB, first, VB->Count, VB->Ovf );
    }
@@ -951,22 +948,22 @@ void gl_make_normal_cullmask( struct vertex_buffer *VB )
       VB->NormCullStart = VB->NormCullMask + VB->Start;
 
       if (VB->CullMode & CULL_MASK_ACTIVE) {
-	 GLubyte *lastnorm = VB->NormCullStart;
+         GLubyte *lastnorm = VB->NormCullStart;
 
-	 for (i = VB->Start ;;) {
-	    *lastnorm |= VB->CullMask[i];
-	    if (VB->Flag[++i] & (VERT_NORM|VERT_END_VB)) {
-	       lastnorm = &VB->NormCullMask[i];
-	       if (VB->Flag[i] & VERT_END_VB) return;
-	    }
-	 }
+         for (i = VB->Start ;;) {
+            *lastnorm |= VB->CullMask[i];
+            if (VB->Flag[++i] & (VERT_NORM|VERT_END_VB)) {
+               lastnorm = &VB->NormCullMask[i];
+               if (VB->Flag[i] & VERT_END_VB) return;
+            }
+         }
       } else {
-	 VB->NormCullMask[VB->Start] = ~0;
-	 for (i = VB->Start ;; )
-	    if (VB->Flag[++i] & (VERT_NORM|VERT_END_VB)) {
-	       VB->NormCullMask[i] = ~0;
-	       if (VB->Flag[i] & VERT_END_VB) return;
-	    }
+         VB->NormCullMask[VB->Start] = ~0;
+         for (i = VB->Start ;; )
+            if (VB->Flag[++i] & (VERT_NORM|VERT_END_VB)) {
+               VB->NormCullMask[i] = ~0;
+               if (VB->Flag[i] & VERT_END_VB) return;
+            }
       }
    } else  {
       /*  Non-shared normals.

@@ -1,21 +1,21 @@
-/* $Id: osmesa.h,v 1.1 2000-02-29 00:43:33 sandervl Exp $ */
+/* $Id: osmesa.h,v 1.2 2000-05-23 20:41:28 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
- * 
+ * Version:  3.3
+ *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
  * to deal in the Software without restriction, including without limitation
  * the rights to use, copy, modify, merge, publish, distribute, sublicense,
  * and/or sell copies of the Software, and to permit persons to whom the
  * Software is furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included
  * in all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
  * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
@@ -27,7 +27,10 @@
 
 /*
  * $Log: osmesa.h,v $
- * Revision 1.1  2000-02-29 00:43:33  sandervl
+ * Revision 1.2  2000-05-23 20:41:28  jeroen
+ * *** empty log message ***
+ *
+ * Revision 1.1  2000/02/29 00:43:33  sandervl
  * created
  *
  * Revision 1.1.1.1.2.1  1999/11/24 18:39:17  brianp
@@ -92,7 +95,7 @@ extern "C" {
 
 
 #define OSMESA_MAJOR_VERSION 3
-#define OSMESA_MINOR_VERSION 1
+#define OSMESA_MINOR_VERSION 3
 
 
 
@@ -100,29 +103,38 @@ extern "C" {
  * Values for the format parameter of OSMesaCreateContext()
  * New in version 2.0.
  */
-#define OSMESA_COLOR_INDEX	GL_COLOR_INDEX
-#define OSMESA_RGBA		GL_RGBA
-#define OSMESA_BGRA		0x1
-#define OSMESA_ARGB		0x2
-#define OSMESA_RGB		GL_RGB
-#define OSMESA_BGR		0x4
+#define OSMESA_COLOR_INDEX      GL_COLOR_INDEX
+#define OSMESA_RGBA             GL_RGBA
+#define OSMESA_BGRA             0x1
+#define OSMESA_ARGB             0x2
+#define OSMESA_RGB              GL_RGB
+#define OSMESA_BGR              0x4
 
 
 /*
  * OSMesaPixelStore() parameters:
  * New in version 2.0.
  */
-#define OSMESA_ROW_LENGTH	0x10
-#define OSMESA_Y_UP		0x11
+#define OSMESA_ROW_LENGTH       0x10
+#define OSMESA_Y_UP             0x11
 
 
 /*
  * Accepted by OSMesaGetIntegerv:
  */
-#define OSMESA_WIDTH		0x20
-#define OSMESA_HEIGHT		0x21
-#define OSMESA_FORMAT		0x22
-#define OSMESA_TYPE		0x23
+#define OSMESA_WIDTH            0x20
+#define OSMESA_HEIGHT           0x21
+#define OSMESA_FORMAT           0x22
+#define OSMESA_TYPE             0x23
+
+
+
+/*
+ * Accepted by OSMesaGetBooleanv:
+ * New in version 3.3
+ */
+/* This is based on the HP proposed extension */
+#define OSMESA_OCCLUSION_TEST_RESULT_HP 0x30
 
 
 
@@ -229,6 +241,16 @@ GLAPI void GLAPIENTRY OSMesaPixelStore( GLint pname, GLint value );
  *         value - pointer to integer in which to return result.
  */
 GLAPI void GLAPIENTRY OSMesaGetIntegerv( GLint pname, GLint *value );
+
+
+
+/*
+ * Return a boolean value like glGetBooleanv.
+ * Input:  pname -
+ *                 OSMESA_OCCLUSION_TEST_RESULT_HP  return current test result
+ *         value - pointer to boolean in which to return result.
+ */
+GLAPI void GLAPIENTRY OSMesaGetBooleanv( GLint pname, GLboolean *value );
 
 
 

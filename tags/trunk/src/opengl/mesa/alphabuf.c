@@ -1,8 +1,8 @@
-/* $Id: alphabuf.c,v 1.2 2000-03-01 18:49:22 jeroen Exp $ */
+/* $Id: alphabuf.c,v 1.3 2000-05-23 20:40:20 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -38,43 +38,51 @@
 #ifdef PC_HEADER
 #include "all.h"
 #else
+#include "glheader.h"
 #include "types.h"
 #include "alphabuf.h"
 #include "context.h"
 #include "macros.h"
+#include "mem.h"
 #endif
 
 
 
-#define ALPHA_ADDR(X,Y)  (ctx->Buffer->Alpha + (Y) * ctx->Buffer->Width + (X))
+#define ALPHA_DRAW_ADDR(X,Y) \
+   (ctx->DrawBuffer->Alpha + (Y) * ctx->DrawBuffer->Width + (X))
+
+#define ALPHA_READ_ADDR(X,Y) \
+   (ctx->ReadBuffer->Alpha + (Y) * ctx->ReadBuffer->Width + (X))
 
 
 
 /*
- * Allocate a new front and back alpha buffer.
+ * Allocate new front/back/left/right alpha buffers.
+ * Input: ctx - the context
  */
-void gl_alloc_alpha_buffers( GLcontext *ctx )
+static void
+alloc_alpha_buffers( GLcontext *ctx, GLframebuffer *buf )
 {
-   GLint bytes = ctx->Buffer->Width * ctx->Buffer->Height * sizeof(GLubyte);
+   GLint bytes = buf->Width * buf->Height * sizeof(GLubyte);
 
    ASSERT(ctx->Visual->SoftwareAlpha);
 
-   if (ctx->Buffer->FrontLeftAlpha) {
-      FREE( ctx->Buffer->FrontLeftAlpha );
+   if (buf->FrontLeftAlpha) {
+      FREE( buf->FrontLeftAlpha );
    }
-   ctx->Buffer->FrontLeftAlpha = (GLubyte *) MALLOC( bytes );
-   if (!ctx->Buffer->FrontLeftAlpha) {
+   buf->FrontLeftAlpha = (GLubyte *) MALLOC( bytes );
+   if (!buf->FrontLeftAlpha) {
       /* out of memory */
       gl_error( ctx, GL_OUT_OF_MEMORY,
                 "Couldn't allocate front-left alpha buffer" );
    }
 
    if (ctx->Visual->DBflag) {
-      if (ctx->Buffer->BackLeftAlpha) {
-         FREE( ctx->Buffer->BackLeftAlpha );
+      if (buf->BackLeftAlpha) {
+         FREE( buf->BackLeftAlpha );
       }
-      ctx->Buffer->BackLeftAlpha = (GLubyte *) MALLOC( bytes );
-      if (!ctx->Buffer->BackLeftAlpha) {
+      buf->BackLeftAlpha = (GLubyte *) MALLOC( bytes );
+      if (!buf->BackLeftAlpha) {
          /* out of memory */
          gl_error( ctx, GL_OUT_OF_MEMORY,
                       "Couldn't allocate back-left alpha buffer" );
@@ -82,22 +90,22 @@ void gl_alloc_alpha_buffers( GLcontext *ctx )
    }
 
    if (ctx->Visual->StereoFlag) {
-      if (ctx->Buffer->FrontRightAlpha) {
-         FREE( ctx->Buffer->FrontRightAlpha );
+      if (buf->FrontRightAlpha) {
+         FREE( buf->FrontRightAlpha );
       }
-      ctx->Buffer->FrontRightAlpha = (GLubyte *) MALLOC( bytes );
-      if (!ctx->Buffer->FrontRightAlpha) {
+      buf->FrontRightAlpha = (GLubyte *) MALLOC( bytes );
+      if (!buf->FrontRightAlpha) {
          /* out of memory */
          gl_error( ctx, GL_OUT_OF_MEMORY,
                    "Couldn't allocate front-right alpha buffer" );
       }
 
       if (ctx->Visual->DBflag) {
-         if (ctx->Buffer->BackRightAlpha) {
-            FREE( ctx->Buffer->BackRightAlpha );
+         if (buf->BackRightAlpha) {
+            FREE( buf->BackRightAlpha );
          }
-         ctx->Buffer->BackRightAlpha = (GLubyte *) MALLOC( bytes );
-         if (!ctx->Buffer->BackRightAlpha) {
+         buf->BackRightAlpha = (GLubyte *) MALLOC( bytes );
+         if (!buf->BackRightAlpha) {
             /* out of memory */
             gl_error( ctx, GL_OUT_OF_MEMORY,
                       "Couldn't allocate back-right alpha buffer" );
@@ -106,13 +114,25 @@ void gl_alloc_alpha_buffers( GLcontext *ctx )
    }
 
    if (ctx->Color.DriverDrawBuffer == GL_FRONT_LEFT)
-      ctx->Buffer->Alpha = ctx->Buffer->FrontLeftAlpha;
+      buf->Alpha = buf->FrontLeftAlpha;
    else if (ctx->Color.DriverDrawBuffer == GL_BACK_LEFT)
-      ctx->Buffer->Alpha = ctx->Buffer->BackLeftAlpha;
+      buf->Alpha = buf->BackLeftAlpha;
    else if (ctx->Color.DriverDrawBuffer == GL_FRONT_RIGHT)
-      ctx->Buffer->Alpha = ctx->Buffer->FrontRightAlpha;
+      buf->Alpha = buf->FrontRightAlpha;
    else if (ctx->Color.DriverDrawBuffer == GL_BACK_RIGHT)
-      ctx->Buffer->Alpha = ctx->Buffer->BackRightAlpha;
+      buf->Alpha = buf->BackRightAlpha;
+}
+
+
+/*
+ * Allocate a new front and back alpha buffer.
+ */
+void gl_alloc_alpha_buffers( GLcontext *ctx )
+{
+   alloc_alpha_buffers( ctx, ctx->DrawBuffer );
+   if (ctx->ReadBuffer != ctx->DrawBuffer) {
+      alloc_alpha_buffers( ctx, ctx->ReadBuffer );
+   }
 }
 
 
@@ -132,25 +152,26 @@ void gl_clear_alpha_buffers( GLcontext *ctx )
       if (bufferBit & ctx->Color.DrawDestMask) {
          GLubyte *buffer;
          if (bufferBit == FRONT_LEFT_BIT) {
-            buffer = ctx->Buffer->FrontLeftAlpha;
+            buffer = ctx->DrawBuffer->FrontLeftAlpha;
          }
          else if (bufferBit == FRONT_RIGHT_BIT) {
-            buffer = ctx->Buffer->FrontRightAlpha;
+            buffer = ctx->DrawBuffer->FrontRightAlpha;
          }
          else if (bufferBit == BACK_LEFT_BIT) {
-            buffer = ctx->Buffer->BackLeftAlpha;
+            buffer = ctx->DrawBuffer->BackLeftAlpha;
          }
          else {
-            buffer = ctx->Buffer->BackRightAlpha;
+            buffer = ctx->DrawBuffer->BackRightAlpha;
          }
 
          if (ctx->Scissor.Enabled) {
             /* clear scissor region */
             GLint j;
-            GLint rowLen = ctx->Buffer->Xmax - ctx->Buffer->Xmin + 1;
-            GLint rows = ctx->Buffer->Ymax - ctx->Buffer->Ymin + 1;
-            GLubyte *aptr = buffer + ctx->Buffer->Ymin * ctx->Buffer->Width
-                          + ctx->Buffer->Xmin;
+            GLint rowLen = ctx->DrawBuffer->Xmax - ctx->DrawBuffer->Xmin + 1;
+            GLint rows = ctx->DrawBuffer->Ymax - ctx->DrawBuffer->Ymin + 1;
+            GLubyte *aptr = buffer
+                          + ctx->DrawBuffer->Ymin * ctx->DrawBuffer->Width
+                          + ctx->DrawBuffer->Xmin;
             for (j = 0; j < rows; j++) {
                MEMSET( aptr, aclear, rowLen );
                aptr += rowLen;
@@ -158,7 +179,8 @@ void gl_clear_alpha_buffers( GLcontext *ctx )
          }
          else {
             /* clear whole buffer */
-            MEMSET( buffer, aclear, ctx->Buffer->Width * ctx->Buffer->Height );
+            GLuint bytes = ctx->DrawBuffer->Width * ctx->DrawBuffer->Height;
+            MEMSET( buffer, aclear, bytes );
          }
       }
    }
@@ -169,7 +191,7 @@ void gl_clear_alpha_buffers( GLcontext *ctx )
 void gl_write_alpha_span( GLcontext *ctx, GLuint n, GLint x, GLint y,
                           CONST GLubyte rgba[][4], const GLubyte mask[] )
 {
-   GLubyte *aptr = ALPHA_ADDR( x, y );
+   GLubyte *aptr = ALPHA_DRAW_ADDR( x, y );
    GLuint i;
 
    if (mask) {
@@ -191,7 +213,7 @@ void gl_write_alpha_span( GLcontext *ctx, GLuint n, GLint x, GLint y,
 void gl_write_mono_alpha_span( GLcontext *ctx, GLuint n, GLint x, GLint y,
                                GLubyte alpha, const GLubyte mask[] )
 {
-   GLubyte *aptr = ALPHA_ADDR( x, y );
+   GLubyte *aptr = ALPHA_DRAW_ADDR( x, y );
    GLuint i;
 
    if (mask) {
@@ -219,14 +241,14 @@ void gl_write_alpha_pixels( GLcontext *ctx,
    if (mask) {
       for (i=0;i<n;i++) {
          if (mask[i]) {
-            GLubyte *aptr = ALPHA_ADDR( x[i], y[i] );
+            GLubyte *aptr = ALPHA_DRAW_ADDR( x[i], y[i] );
             *aptr = rgba[i][ACOMP];
          }
       }
    }
    else {
       for (i=0;i<n;i++) {
-         GLubyte *aptr = ALPHA_ADDR( x[i], y[i] );
+         GLubyte *aptr = ALPHA_DRAW_ADDR( x[i], y[i] );
          *aptr = rgba[i][ACOMP];
       }
    }
@@ -242,14 +264,14 @@ void gl_write_mono_alpha_pixels( GLcontext *ctx,
    if (mask) {
       for (i=0;i<n;i++) {
          if (mask[i]) {
-            GLubyte *aptr = ALPHA_ADDR( x[i], y[i] );
+            GLubyte *aptr = ALPHA_DRAW_ADDR( x[i], y[i] );
             *aptr = alpha;
          }
       }
    }
    else {
       for (i=0;i<n;i++) {
-         GLubyte *aptr = ALPHA_ADDR( x[i], y[i] );
+         GLubyte *aptr = ALPHA_DRAW_ADDR( x[i], y[i] );
          *aptr = alpha;
       }
    }
@@ -260,7 +282,7 @@ void gl_write_mono_alpha_pixels( GLcontext *ctx,
 void gl_read_alpha_span( GLcontext *ctx,
                          GLuint n, GLint x, GLint y, GLubyte rgba[][4] )
 {
-   GLubyte *aptr = ALPHA_ADDR( x, y );
+   GLubyte *aptr = ALPHA_READ_ADDR( x, y );
    GLuint i;
    for (i=0;i<n;i++) {
       rgba[i][ACOMP] = *aptr++;
@@ -275,7 +297,7 @@ void gl_read_alpha_pixels( GLcontext *ctx,
    GLuint i;
    for (i=0;i<n;i++) {
       if (mask[i]) {
-         GLubyte *aptr = ALPHA_ADDR( x[i], y[i] );
+         GLubyte *aptr = ALPHA_READ_ADDR( x[i], y[i] );
          rgba[i][ACOMP] = *aptr;
       }
    }

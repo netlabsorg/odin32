@@ -1,8 +1,8 @@
-/* $Id: config.c,v 1.1 2000-02-29 00:50:00 sandervl Exp $ */
+/* $Id: config.c,v 1.2 2000-05-23 20:40:25 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -31,20 +31,14 @@
  * to parse and potentially very expressive.
  */
 
-#ifndef XFree86Server
-#include <stdio.h>
-#include <stdlib.h>
-#include <ctype.h>
-#else
-#include "GL/xf86glx.h"
-#endif
-
+#include "glheader.h"
 #include "enums.h"
 #include "config.h"
 #include "types.h"
 #include "extensions.h"
 #include "simple_list.h"
-#include "glmisc.h"
+#include "mem.h"
+#include "hint.h"
 
 typedef enum { nil_t, list_t, word_t } node_type;
 
@@ -69,16 +63,16 @@ static void print_list( struct cnode *n, int indent )
       if (i++ > 0) pad(indent + 2);
       switch (n->data.l.head->type) {
       case list_t:
-	 print_list( n->data.l.head, indent + 2 );
-	 break;
+         print_list( n->data.l.head, indent + 2 );
+         break;
       case word_t:
-	 printf( n->data.l.head->data.w.text );
-	 break;
+         printf( n->data.l.head->data.w.text );
+         break;
       case nil_t:
-	 printf("()");
-	 break;
+         printf("()");
+         break;
       default:
-	 puts("***");
+         puts("***");
       }
       n = n->data.l.tail;
    }
@@ -139,18 +133,18 @@ static struct cnode *get_word( int line, FILE *file )
    while (1) {
       int c = getc(file);
       if (len == sz)
-	 text = (char *) realloc( text, sizeof(char) * (sz *= 2) );
+         text = (char *) realloc( text, sizeof(char) * (sz *= 2) );
       if (c == EOF || isspace(c) || c == ')') {
-	 struct cnode *n = MALLOC_STRUCT(cnode);
-	 ungetc(c, file);
-	 text[len] = 0;
-	 n->type = word_t;
-	 n->line = line;
-	 n->data.w.text = text;
-	 return n;
+         struct cnode *n = MALLOC_STRUCT(cnode);
+         ungetc(c, file);
+         text[len] = 0;
+         n->type = word_t;
+         n->line = line;
+         n->data.w.text = text;
+         return n;
       }
       else
-	 text[len++] = c;
+         text[len++] = c;
    }
 }
 
@@ -171,13 +165,13 @@ static struct cnode *get_list( int *line, FILE *file )
       case ';': skip_comment( file ); continue;
       case '\n': (*line)++; continue;
       case '(':
-	 n = get_list( line, file );
-	 break;
+         n = get_list( line, file );
+         break;
       default:
-	 if (isspace(c)) continue;
-	 ungetc(c, file);
-	 n = get_word( *line, file );
-	 break;
+         if (isspace(c)) continue;
+         ungetc(c, file);
+         n = get_word( *line, file );
+         break;
       }
 
       (*current)->type = list_t;
@@ -206,10 +200,10 @@ static void disable_extension( GLcontext *ctx, struct cnode *args )
        is_word(head, &c))
    {
       if (gl_extensions_disable( ctx, c ) != 0)
-	 error( head, "unknown extension" );
+         error( head, "unknown extension" );
    }
    else
-      error( args, "bad args for disable-extension" );	
+      error( args, "bad args for disable-extension" );
 }
 
 
@@ -217,7 +211,6 @@ static void default_hint( GLcontext *ctx, struct cnode *args )
 {
    struct cnode *hint, *tail, *value;
    const char *hname, *vname;
-   GLenum h, v;
 
    if (is_list(args, &hint, &tail) &&
        is_list(tail, &value, &tail) &&
@@ -225,20 +218,21 @@ static void default_hint( GLcontext *ctx, struct cnode *args )
        is_word(hint, &hname) &&
        is_word(value, &vname))
    {
-      if ((h = (GLenum) gl_lookup_enum_by_name(hname)) != -1 &&
-	  (v = (GLenum) gl_lookup_enum_by_name(vname)) != -1)
+      GLint h = gl_lookup_enum_by_name(hname);
+      GLint v = gl_lookup_enum_by_name(vname);
+      if (h != -1 && v != -1)
       {
-	 printf("calling glHint(%s=%d, %s=%d)\n", hname, h, vname, v);
-	 if (!gl_Hint( ctx, h, v ))
-	    error( hint, "glHint failed");
-	 printf("allow draw mem: %d\n", ctx->Hint.AllowDrawMem);
-	 return;
+         printf("calling glHint(%s=%d, %s=%d)\n", hname, h, vname, v);
+         if (!_mesa_try_Hint( ctx, (GLenum) h, (GLenum) v ))
+            error( hint, "glHint failed");
+         printf("allow draw mem: %d\n", ctx->Hint.AllowDrawMem);
+         return;
       }
       else
-	 error( hint, "unknown or illegal value for default-hint" );
+         error( hint, "unknown or illegal value for default-hint" );
    }
    else
-      error( args, "bad args for default-hint" );	
+      error( args, "bad args for default-hint" );
 }
 
 /* Use the general-purpose set-variable
@@ -249,8 +243,8 @@ static void fx_catch_signals( GLcontext *ctx, struct cnode *args )
    const char *value;
 
 /*     error( args,  */
-/*  	  "fx-catch-signals deprecated, use " */
-/*  	  "(set-variable fx-catch-signals ...) instead"); */
+/*        "fx-catch-signals deprecated, use " */
+/*        "(set-variable fx-catch-signals ...) instead"); */
 
    if (is_list(args, &head, &tail) &&
        is_nil(tail) &&
@@ -401,7 +395,7 @@ static void free_list( struct cnode *n )
  */
 void gl_read_config_file( GLcontext *ctx )
 {
-   const char *default_config = "mesa3.1";
+   const char *default_config = "mesa3.3";
 
 #if defined(__WIN32__) || defined(__MSDOS__)
    const char *filename = "mesa.cnf";
