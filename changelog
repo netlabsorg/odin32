@@ -1,4 +1,14 @@
-/* $Id: changelog,v 1.1635 2001-08-04 17:37:54 sandervl Exp $ */
+/* $Id: changelog,v 1.1636 2001-08-06 15:59:33 sandervl Exp $ */
+
+ 2001-08-06: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Check for ERROR_ACCESS_DENIED in CreateProcess 
+                  (fixes Notes + installers)
+                o Memory map fixes (GetCurrentProcess returns handles
+                  that are no unique)
+                o Init fix for logfile names of multiple processes
+
+ 2001-08-06: Dietrich Teickner <Dietrich_Teickner@t-online.de>
+    - COMCTL32: o Datetime fixes
 
  2001-08-04: Sander van Leeuwen <sandervl@xs4all.nl>
     - CUSTOMBUILD: 
