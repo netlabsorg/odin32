@@ -1,4 +1,4 @@
-/* $Id: oslibwin.h,v 1.66 2002-08-21 12:32:41 sandervl Exp $ */
+/* $Id: oslibwin.h,v 1.67 2002-08-21 15:40:28 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -258,7 +258,6 @@ BOOL  OSLibGetMinMaxInfo(HWND hwndFrame, MINMAXINFO *pMinMax);
 #define QWOS_FRAMEOWNER   8
 
 HWND  OSLibWinQueryWindow(HWND hwnd, ULONG lCode);
-HWND  OSLibWinControlWindow(HWND hwndWindow, INT controlID, HWND hwndControl);
 
 LONG  OSLibWinQueryWindowTextLength(HWND hwnd);
 LONG  OSLibWinQueryWindowText(HWND hwnd, LONG length, LPSTR lpsz);
