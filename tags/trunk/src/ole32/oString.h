@@ -1,3 +1,4 @@
+/* $Id: oString.h,v 1.4 1999-09-08 11:29:28 davidr Exp $ */
 
 #if !defined(OSTRING_INCLUDED)
 #define OSTRING_INCLUDED

@@ -1,3 +1,4 @@
+/* $Id: guid.cpp,v 1.4 1999-09-08 11:29:27 davidr Exp $ */
 /* 
  * Concrete defintions of all IID's
  * 
