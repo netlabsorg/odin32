@@ -1,4 +1,4 @@
-/* $Id: dbgLXDumper.c,v 1.2 2000-03-25 21:09:58 bird Exp $
+/* $Id: dbgLXDumper.c,v 1.3 2000-03-26 21:56:37 bird Exp $
  *
  * dbgLXDumper - reads and interprets the debuginfo found in an LX executable.
  *
@@ -201,9 +201,10 @@ int dumpHLL(FILE *phOut, PBYTE pb, int cb)
     /*
      * Get and Dump directory
      */
-    if (pHdr->offDirectory + sizeof(HLLDIR) >= cb)
+    if (pHdr->offDirectory + sizeof(HLLDIR) > cb)
     {
-        fprintf(phOut, "error: offcEntries is incorrect!\n");
+        fprintf(phOut, "error: offDirectory is incorrect! (cb=%d, off=%d)\n",
+                cb, pHdr->offDirectory);
         return ERROR_INVALID_DATA;
     }
     pDir = (PHLLDIR)(pb + pHdr->offDirectory);
@@ -220,7 +221,7 @@ int dumpHLL(FILE *phOut, PBYTE pb, int cb)
     /*
      * Directory sanity check - check that it's not too big
      */
-    if ((PBYTE)&pDir->aEntries[pDir->cEntries] - pb >= cb)
+    if ((PBYTE)&pDir->aEntries[pDir->cEntries] - pb > cb)
     {
         fprintf(phOut, "Error: Directory is to big!\n");
         return ERROR_INVALID_DATA;
@@ -289,7 +290,7 @@ int dumpHLL(FILE *phOut, PBYTE pb, int cb)
             case HLL_DE_MODULES:
             {
                 PHLLMODULE  pModule = (PHLLMODULE)(pDir->aEntries[i].off + pb);
-                PHLLOBJECT  paObjects;
+                PHLLSEGINFO paSegInfo;
                 int         j, c;
 
                 /*
@@ -319,31 +320,31 @@ int dumpHLL(FILE *phOut, PBYTE pb, int cb)
 
 
                 /*
-                 * Dump object data
+                 * Dump Segment info
                  */
                 fprintf(phOut,
-                        "    Object %d\n"
-                        "      iObj %#x\n"
-                        "      off  %#x\n"
-                        "      cb   %#x\n",
+                        "    SegmentInfo %d\n"
+                        "      iObject   %#x\n"
+                        "      off       %#x\n"
+                        "      cb        %#x\n",
                         0,
-                        pModule->Object.iObj,
-                        pModule->Object.off,
-                        pModule->Object.cb);
+                        pModule->SegInfo0.iObject,
+                        pModule->SegInfo0.off,
+                        pModule->SegInfo0.cb);
 
-                c = pModule->cObjects > 0 ? pModule->cObjects : 0;
-                paObjects = (PHLLOBJECT)((void*)&pModule->achName[pModule->cchName]);
+                c = pModule->cSegInfo > 0 ? pModule->cSegInfo : 0;
+                paSegInfo = (PHLLSEGINFO)((void*)&pModule->achName[pModule->cchName]);
                 for (j = 0; j < c; j++)
                 {
                     fprintf(phOut,
-                        "    Object %d\n"
-                        "      iObj %#x\n"
-                        "      off  %#x\n"
-                        "      cb   %#x\n",
+                        "    SegmentInfo %d\n"
+                        "      iObject   %#x\n"
+                        "      off       %#x\n"
+                        "      cb        %#x\n",
                         j + 1,
-                        paObjects[j].iObj,
-                        paObjects[j].off,
-                        paObjects[j].cb);
+                        paSegInfo[j].iObject,
+                        paSegInfo[j].off,
+                        paSegInfo[j].cb);
                 }
                 break;
             }
@@ -357,7 +358,7 @@ int dumpHLL(FILE *phOut, PBYTE pb, int cb)
                 {
                     fprintf(phOut,
                             "    %#03x:%#08x iType=%#2x  name=%.*s\n",
-                            pPubSym->iObj,
+                            pPubSym->iObject,
                             pPubSym->off,
                             pPubSym->iType,
                             pPubSym->cchName,

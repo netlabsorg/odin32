@@ -1,4 +1,4 @@
-/* $Id: kHll.h,v 1.3 2000-03-26 14:16:19 bird Exp $
+/* $Id: kHll.h,v 1.4 2000-03-26 21:56:38 bird Exp $
  *
  * kHll - Declarations of the class kHll.
  *        That class is used to create HLL debuginfo.
@@ -17,17 +17,6 @@
 /*******************************************************************************
 *   Structures and Typedefs                                                    *
 *******************************************************************************/
-/**
- * Module object(=segment) description.
- */
-typedef struct
-{
-    unsigned short  iObject;            /* LX Object index. */
-    unsigned long   cb;                 /* Size of object part. */
-    unsigned long   offset;             /* Offset into the LX Object. */
-} MODOBJECT, *PMODOBJECT;
-
-
 
 /**
  * HLL General entry.
@@ -63,9 +52,10 @@ private:
 
 public:
     kHllPubSymEntry(
-        const char *        pszName,
+        const char *        pachName,
+        int                 cchName,
         unsigned long       off,
-        unsigned short      iObj,
+        unsigned short      iObject,
         unsigned short      iType
         );
     ~kHllPubSymEntry();
@@ -123,8 +113,8 @@ public:
     kHllModuleEntry(
         const char *        pszName,
         unsigned short      iLib,
-        unsigned char       cObjects = 0,
-        PMODOBJECT          paObjects = NULL
+        unsigned char       cSegInfo = 0,
+        PHLLSEGINFO         paSegInfo = NULL
         );
     ~kHllModuleEntry();
 
@@ -132,7 +122,7 @@ public:
     /** @cat
      * Add menthods
      */
-    BOOL            addObject(
+    BOOL            addSegInfo(
                         unsigned short int  iObject,
                         unsigned long       off,
                         unsigned long       cb
@@ -140,6 +130,13 @@ public:
 
     const void *    addPublicSymbol(
                         const char *        pszName,
+                        unsigned long int   off,
+                        unsigned short int  iObject,
+                        const void *        pvType
+                        );
+    const void *    addPublicSymbol(
+                        const char *        pachName,
+                        int                 cchName,
                         unsigned long int   off,
                         unsigned short int  iObject,
                         const void *        pvType
@@ -190,8 +187,15 @@ public:
     kHllModuleEntry *   addModule(
                             const char *        pszName,
                             const void *        pvLib,
-                            unsigned            cObjects,
-                            PMODOBJECT          paObjects
+                            unsigned            cSegInfo = 0,
+                            PHLLSEGINFO         paSegInfo = NULL
+                            );
+    kHllModuleEntry *   addModule(
+                            const char *        pachName,
+                            unsigned            cchName,
+                            const void *        pvLib,
+                            unsigned            cSegInfo = 0,
+                            PHLLSEGINFO         paSegInfo = NULL
                             );
 
 
