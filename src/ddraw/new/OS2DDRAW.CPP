@@ -1,4 +1,4 @@
-/* $Id: OS2DDRAW.CPP,v 1.1 2000-04-07 18:21:04 mike Exp $ */
+/* $Id: OS2DDRAW.CPP,v 1.2 2001-01-19 02:06:55 mike Exp $ */
 
 /*
  * DX Draw base class implementation
@@ -1604,7 +1604,7 @@ HRESULT __stdcall DrawSetDisplayMode(THIS This, DWORD dwWidth, DWORD dwHeight,
   if(me->dwCoopMode & DDSCL_FULLSCREEN)
   {
       SetWindowPos(me->hwndClient, HWND_TOP,0,0,dwWidth,dwHeight,0);
-//    SetWindowPos(me->hwndClient, HWND_TOP, 0, 0, 1024, 768, 0);
+      SetCursorPos(dwWidth / 2, dwHeight / 2);
 
     if ((me->bPMILoaded) && (ModeInSVGAModeTable(dwWidth,dwHeight,dwBPP)))
     {
