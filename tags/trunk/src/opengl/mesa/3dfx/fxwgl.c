@@ -755,16 +755,17 @@ int GLAPIENTRY wglDescribePixelFormat(HDC hdc,int iPixelFormat,UINT nBytes,
 
   qt_valid_pix = qt_pix;
 
-  if(iPixelFormat < 1 || iPixelFormat > qt_valid_pix ||
-     ((nBytes != sizeof(PIXELFORMATDESCRIPTOR)) && (nBytes != 0))) {
-    SetLastError(0);
-    return(0);
+  if (ppfd != NULL) {
+     if (iPixelFormat < 1 || iPixelFormat > qt_valid_pix ||
+        ((nBytes != sizeof(PIXELFORMATDESCRIPTOR)) && (nBytes != 0))) {
+       SetLastError(0);
+       return(0);
+     }
+
+     if (nBytes != 0)
+       *ppfd = pix[iPixelFormat - 1].pfd;
   }
-
-  if(nBytes != 0)
-    *ppfd = pix[iPixelFormat - 1].pfd;
-
-  return(qt_valid_pix);
+  return qt_valid_pix;
 }
 
 int GLAPIENTRY DescribePixelFormat(HDC hdc,int iPixelFormat,UINT nBytes,
@@ -796,7 +797,7 @@ BOOL GLAPIENTRY wglSetPixelFormat(HDC hdc,int iPixelFormat,
   qt_valid_pix = qt_pix;
 
 #ifdef __WIN32OS2__
-  if(iPixelFormat < 1 || iPixelFormat > qt_valid_pix || (ppfd && ppfd->nSize != sizeof(PIXELFORMATDESCRIPTOR))) {
+  if(iPixelFormat < 1 || iPixelFormat > qt_valid_pix /*|| (ppfd && ppfd->nSize != sizeof(PIXELFORMATDESCRIPTOR))*/) {
 #else
   if(iPixelFormat < 1 || iPixelFormat > qt_valid_pix || ppfd->nSize != sizeof(PIXELFORMATDESCRIPTOR)) {
 #endif
