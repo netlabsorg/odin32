@@ -1,4 +1,8 @@
- /* $Id: ChangeLog,v 1.1004 2000-06-23 19:01:14 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.1005 2000-06-25 07:13:55 sandervl Exp $ */
+
+ 2000-06-24: Michal Necasek <mike@mendelu.cz>
+    - KERNEL32:    When creating files and mode is readonly, change to
+                   read/write (or else DosOpen fails)
 
  2000-06-23: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32:    Changed version; Odin presents itself as Windows NT 4 Service Pack 6
