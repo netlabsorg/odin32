@@ -8,6 +8,7 @@
  * TEB at offset 0xf80
  */
 
+#include <string.h>
 #include "debugtools.h"
 #include "windef.h"
 #include "heap.h"
@@ -168,7 +169,7 @@ static HRESULT WINAPI IErrorInfoImpl_QueryInterface(
 	VOID**     ppvoid)
 {
 	_ICOM_THIS_From_IErrorInfo(ErrorInfoImpl, iface);
-////	TRACE("(%p)->(\n\tIID:\t%s,%p)\n",This,debugstr_guid(riid),ppvoid);
+	TRACE("(%p)->(\n\tIID:\t%s,%p)\n",This,debugstr_guid(riid),ppvoid);
 
 	*ppvoid = NULL;
 
@@ -329,7 +330,7 @@ static HRESULT WINAPI ICreateErrorInfoImpl_SetGUID(
 	REFGUID rguid)
 {
 	_ICOM_THIS_From_ICreateErrorInfo(ErrorInfoImpl, iface);
-////	TRACE("(%p)->(%s)\n", This, debugstr_guid(rguid));
+	TRACE("(%p)->(%s)\n", This, debugstr_guid(rguid));
 	memcpy(&This->m_Guid,  rguid, sizeof(GUID));
 	return S_OK;
 }
@@ -431,7 +432,7 @@ static HRESULT WINAPI ISupportErrorInfoImpl_InterfaceSupportsErrorInfo(
 	REFIID riid)
 {
 	_ICOM_THIS_From_ISupportErrorInfo(ErrorInfoImpl, iface);
-////	TRACE("(%p)->(%s)\n", This, debugstr_guid(riid));
+	TRACE("(%p)->(%s)\n", This, debugstr_guid(riid));
 	return (IsEqualIID(riid, &This->m_Guid)) ? S_OK : S_FALSE;
 }
 

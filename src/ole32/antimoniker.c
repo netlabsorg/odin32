@@ -1,25 +1,23 @@
-/* $Id: antimoniker.cpp,v 1.3 2000-09-14 14:57:00 davidr Exp $ */
-/* 
- * AntiMonikers functions.
- * 
- * Copyright 1999, 2000 David J. Raison
- * 
- * Direct port of Wine Implementation
- *   Copyright 1999  Noomen Hamza
+/***************************************************************************************
+ *	                      AntiMonikers implementation
  *
- * Updates.
- *   14/09/2000 Updated from CorelWine
- * 
- */
-
-#include "ole32.h"
+ *               Copyright 1999  Noomen Hamza
+ ***************************************************************************************/
+#include <assert.h>
+#include <string.h>
+#include "winbase.h"
+#include "winerror.h"
+#include "wine/unicode.h"
+#include "wine/obj_base.h"
+#include "wine/obj_misc.h"
+#include "wine/obj_storage.h"
+#include "wine/obj_moniker.h"
 #include "debugtools.h"
 
-DEFAULT_DEBUG_CHANNEL(moniker)
+DEFAULT_DEBUG_CHANNEL(ole);
 
 /* AntiMoniker data structure */
-typedef struct AntiMonikerImpl
-{
+typedef struct AntiMonikerImpl{
 
     ICOM_VTABLE(IMoniker)*  lpvtbl1;  /* VTable relative to the IMoniker interface.*/
 
@@ -82,7 +80,7 @@ HRESULT WINAPI AntiMonikerImpl_Construct(AntiMonikerImpl* iface);
 HRESULT WINAPI AntiMonikerImpl_Destroy(AntiMonikerImpl* iface);
 
 /********************************************************************************/
-/* Virtual function table for the AntiMonikerImpl class witch  include Ipersist,*/
+/* Virtual function table for the AntiMonikerImpl class which  include IPersist,*/
 /* IPersistStream and IMoniker functions.                                       */
 static ICOM_VTABLE(IMoniker) VT_AntiMonikerImpl =
 {
@@ -197,7 +195,7 @@ ULONG WINAPI AntiMonikerImpl_Release(IMoniker* iface)
  ******************************************************************************/
 HRESULT WINAPI AntiMonikerImpl_GetClassID(IMoniker* iface,CLSID *pClassID)
 {
-    TRACE("(iface:%p ClassID:%p [CLSID_AntiMoniker])\n",iface,pClassID);
+    TRACE("(%p,%p),stub!\n",iface,pClassID);
 
     if (pClassID==NULL)
         return E_POINTER;
@@ -253,20 +251,6 @@ HRESULT WINAPI AntiMonikerImpl_Save(IMoniker* iface,IStream* pStm,BOOL fClearDir
 }
 
 /******************************************************************************
- *        AntiMonikerImpl_GetSizeToSave
- ******************************************************************************/
-HRESULT AntiMonikerImpl_GetSizeToSave(IMoniker* iface,ULARGE_INTEGER* pcbSize)
-{
-    if (pcbSize==NULL)
-        return E_POINTER;
-
-    pcbSize->LowPart =  sizeof(DWORD);
-    pcbSize->HighPart = 0;
-
-    return S_OK;
-}
-
-/******************************************************************************
  *        AntiMoniker_GetSizeMax
  ******************************************************************************/
 HRESULT WINAPI AntiMonikerImpl_GetSizeMax(IMoniker* iface,
@@ -274,17 +258,19 @@ HRESULT WINAPI AntiMonikerImpl_GetSizeMax(IMoniker* iface,
 {
     TRACE("(%p,%p)\n",iface,pcbSize);
 
-    if (pcbSize == NULL)
+    if (pcbSize!=NULL)
         return E_POINTER;
 
-    /* GetSizeMax = SizeToSave + 16 */
-    AntiMonikerImpl_GetSizeToSave(iface,pcbSize);
-    pcbSize->LowPart += 16;	//FIXME - 64bit math
-//    pcbSize->HighPart = 0;
+    /* for more details see AntiMonikerImpl_Save coments */
+    
+    /* Normaly the sizemax must be the  size of DWORD ! but I tested this function it ususlly return 16 bytes */
+    /* more than the number of bytes used by AntiMoniker::Save function */
+    pcbSize->s.LowPart =  sizeof(DWORD)+16;
+
+    pcbSize->s.HighPart=0;
 
     return S_OK;
 }
-
 
 /******************************************************************************
  *         AntiMoniker_Construct (local function)
@@ -447,7 +433,7 @@ HRESULT WINAPI AntiMonikerImpl_IsRunning(IMoniker* iface,
     res=IBindCtx_GetRunningObjectTable(pbc,&rot);
 
     if (FAILED(res))
-	return res;
+    return res;
 
     res = IRunningObjectTable_IsRunning(rot,iface);
 
@@ -543,12 +529,12 @@ HRESULT WINAPI AntiMonikerImpl_GetDisplayName(IMoniker* iface,
         return E_NOTIMPL;
     }
 
-    *ppszDisplayName=(LPOLESTR)CoTaskMemAlloc(sizeof(back));
+    *ppszDisplayName=CoTaskMemAlloc(sizeof(back));
 
     if (*ppszDisplayName==NULL)
         return E_OUTOFMEMORY;
 
-    lstrcpyW(*ppszDisplayName,back);
+    strcpyW(*ppszDisplayName,back);
     
     return S_OK;
 }
@@ -568,7 +554,7 @@ HRESULT WINAPI AntiMonikerImpl_ParseDisplayName(IMoniker* iface,
 }
 
 /******************************************************************************
- *        AntiMoniker_IsSystemMonker
+ *        AntiMoniker_IsSystemMoniker
  ******************************************************************************/
 HRESULT WINAPI AntiMonikerImpl_IsSystemMoniker(IMoniker* iface,DWORD* pwdMksys)
 {
@@ -642,7 +628,7 @@ HRESULT WINAPI CreateAntiMoniker(LPMONIKER * ppmk)
     
     TRACE("(%p)\n",ppmk);
 
-    newAntiMoniker = (AntiMonikerImpl*)HeapAlloc(GetProcessHeap(), 0, sizeof(AntiMonikerImpl));
+    newAntiMoniker = HeapAlloc(GetProcessHeap(), 0, sizeof(AntiMonikerImpl));
 
     if (newAntiMoniker == 0)
         return STG_E_INSUFFICIENTMEMORY;

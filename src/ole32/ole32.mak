@@ -1,4 +1,4 @@
-# $Id: ole32.mak,v 1.5 2001-04-24 19:44:38 sandervl Exp $
+# $Id: ole32.mak,v 1.6 2001-04-26 19:32:49 sandervl Exp $
 
 #
 # Odin32 API
@@ -24,6 +24,7 @@ MAKEFILE = ole32.mak
 !if "$(CCENV)" == "VAC36"
 CDEFINES    = $(CDEFINES) -DNONAMELESSSTRUCT
 !endif
+CDEFINES    = $(CDEFINES) -DWINE_LARGE_INTEGER
 
 #
 # Object files. Prefix with OBJDIR and one space before the '\'.
@@ -42,25 +43,24 @@ $(OBJDIR)\guid.obj \
 $(OBJDIR)\hglobalstream.obj \
 $(OBJDIR)\initialise.obj \
 $(OBJDIR)\itemmoniker.obj \
-$(OBJDIR)\iunknown.obj \
 $(OBJDIR)\imessagefilter.obj \
-$(OBJDIR)\library.obj \
 $(OBJDIR)\memlockbytes.obj \
 $(OBJDIR)\moniker.obj \
 $(OBJDIR)\oString.obj \
 $(OBJDIR)\ole2impl.obj \
 $(OBJDIR)\ole2.obj \
 $(OBJDIR)\oleobj.obj \
-$(OBJDIR)\oleClip.obj \
-$(OBJDIR)\oleDrag.obj \
-$(OBJDIR)\oleMenu.obj \
+$(OBJDIR)\compobj.obj \
+$(OBJDIR)\clipboard.obj \
+$(OBJDIR)\ole2stubs.obj \
+$(OBJDIR)\ole32_main.obj \
+$(OBJDIR)\initterm.obj \
 $(OBJDIR)\stg_bigblockfile.obj \
 $(OBJDIR)\stg_stream.obj \
 $(OBJDIR)\storage32.obj \
 $(OBJDIR)\stubs.obj \
-$(OBJDIR)\taskmem.obj \
-$(OBJDIR)\ole32rsrc.obj \
-$(DLLENTRY)
+$(OBJDIR)\ifs.obj \
+$(OBJDIR)\ole32rsrc.obj 
 
 
 #
