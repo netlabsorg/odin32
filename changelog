@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.1290 2001-02-26 20:14:01 sandervl Exp $ */
+/* $Id: changelog,v 1.1291 2001-02-27 19:34:27 sandervl Exp $ */
+
+ 2001-02-27: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o Ported latest wsprintf Wine functions (not much changed; only
+                  to stay in sync)
 
  2001-02-26: Sander van Leeuwen <sandervl@xs4all.nl>
     - WINMM:    o Fixed FS corruption in RTMidi class (wrappers for RTMIDI
