@@ -1,4 +1,4 @@
-# $Id: setup.optional.watcom11x.mk,v 1.7 2002-08-29 12:06:17 bird Exp $
+# $Id: setup.optional.watcom11x.mk,v 1.8 2002-08-30 20:51:08 bird Exp $
 
 #
 #  Helper file for all the optional stuff which is common for
@@ -34,9 +34,9 @@ _CC_O_TIME  =
 _CC_O_DISABLE =
 _CC_O_X     =
 !ifdef ENV_16BIT
-_CC_O_CPU   = -5
+_CC_CPU   = -5
 !else
-_CC_O_CPU   = -5r
+_CC_CPU   = -5r
 !endif
 
 !ifdef ALL_SEG_TEXT
@@ -163,23 +163,23 @@ _CC_OPTIM = -o$(_CC_O_DISABLE)$(_CC_O_O2)$(_CC_O_INLINE)$(_CC_O_SIZE)$(_CC_O_TIM
 _CC_OPTIM =
 !endif
 
-!if defined(ALL_O_CPU)
+!if defined(ALL_CPU)
 ! ifdef ENV_16BIT
-_CC_O_CPU   = -$(ALL_O_CPU)
+_CC_CPU     = -$(ALL_CPU)
 ! else
-_CC_O_CPU   = -$(ALL_O_CPU)r
+_CC_CPU     = -$(ALL_CPU)r
 ! endif
 !endif
-!if defined(CC_O_CPU)
+!if defined(CC_CPU)
 ! ifdef ENV_16BIT
-_CC_O_CPU   = -$(CC_O_CPU)
+_CC_CPU     = -$(CC_CPU)
 ! else
-_CC_O_CPU   = -$(CC_O_CPU)r
+_CC_CPU     = -$(CC_CPU)r
 ! endif
 !endif
 
 _CC_OPTIONAL = $(_CC_SEG_TEXT) $(_CC_SEG_DATA) $(_CC_SEG_XCPT) $(_CC_SEG_TEXT_CLASS) $(_CC_DEFAULT_LIBS) \
-               $(_CC_PACK) $(_CC_MODEL) -d$(_CC_DEF_MODEL) $(_CC_OPT_R) $(_CC_O_CPU) $(_CC_OPTIM)
+               $(_CC_PACK) $(_CC_MODEL) -d$(_CC_DEF_MODEL) $(_CC_OPT_R) $(_CC_CPU) $(_CC_OPTIM)
 
 
 
@@ -211,11 +211,11 @@ _CXX_O_SIZE  =
 _CXX_O_TIME  =
 _CXX_O_DISABLE =
 _CXX_O_X     =
-_CXX_O_CPU   =
+_CXX_CPU     =
 !ifdef ENV_16BIT
-_CXX_O_CPU   = -5
+_CXX_CPU     = -5
 !else
-_CXX_O_CPU   = -5r
+_CXX_CPU     = -5r
 !endif
 
 !ifdef ALL_SEG_TEXT
@@ -353,21 +353,21 @@ _CXX_OPTIM = -o$(_CXX_O_DISABLE)$(_CXX_O_O2)$(_CXX_O_INLINE)$(_CXX_O_SIZE)$(_CXX
 _CXX_OPTIM =
 !endif
 
-!if defined(ALL_O_CPU)
+!if defined(ALL_CPU)
 ! ifdef ENV_16BIT
-_CXX_O_CPU   = -$(ALL_O_CPU)
+_CXX_CPU     = -$(ALL_CPU)
 ! else
-_CXX_O_CPU   = -$(ALL_O_CPU)r
+_CXX_CPU     = -$(ALL_CPU)r
 ! endif
 !endif
-!if defined(CXX_O_CPU)
+!if defined(CXX_CPU)
 ! ifdef ENV_16BIT
-_CXX_O_CPU   = -$(CXX_O_CPU)
+_CXX_CPU     = -$(CXX_CPU)
 ! else
-_CXX_O_CPU   = -$(CXX_O_CPU)r
+_CXX_CPU     = -$(CXX_CPU)r
 ! endif
 !endif
 
 _CXX_OPTIONAL = $(_CXX_SEG_TEXT) $(_CXX_SEG_DATA) $(_CXX_SEG_XCPT) $(_CXX_SEG_TEXT_CLASS) $(_CXX_DEFAULT_LIBS) \
-                $(_CXX_PACK) $(_CXX_XCPT) $(_CXX_MODEL) -d$(_CXX_DEF_MODEL) $(_CXX_OPT_R) $(_CXX_O_CPU) $(_CXX_OPTIM)
+                $(_CXX_PACK) $(_CXX_XCPT) $(_CXX_MODEL) -d$(_CXX_DEF_MODEL) $(_CXX_OPT_R) $(_CXX_CPU) $(_CXX_OPTIM)
 
