@@ -1,4 +1,4 @@
-/* $Id: font.cpp,v 1.32 2003-12-01 13:27:37 sandervl Exp $ */
+/* $Id: font.cpp,v 1.33 2003-12-01 13:28:10 sandervl Exp $ */
 
 /*
  * GDI32 font apis
@@ -347,6 +347,16 @@ HFONT WIN32API CreateFontIndirectA(const LOGFONTA* lplf)
   dprintf(("GDI32: lfQuality       = %X\n", lplf->lfQuality));
   dprintf(("GDI32: lfPitchAndFamily= %X\n", lplf->lfPitchAndFamily));
   dprintf(("GDI32: lfFaceName      = %s\n", lplf->lfFaceName));
+
+  if( IsDBCSEnv())
+  {
+    if( !strcmp( afont.lfFaceName, "WarpSans" ))
+    {
+        dprintf(("DBCS : WarpSans -> WarpSans Combined"));
+
+        strcpy( afont.lfFaceName, "WarpSans Combined" );
+    }
+  }
 
   hFont = O32_CreateFontIndirect(&afont);
   if(hFont) {
