@@ -1,4 +1,4 @@
-/* $Id: line.cpp,v 1.17 2004-04-30 13:27:18 sandervl Exp $ */
+/* $Id: line.cpp,v 1.18 2004-05-05 09:19:10 sandervl Exp $ */
 /*
  * Line API's
  *
@@ -167,15 +167,17 @@ BOOL WIN32API LineTo( HDC hdc, int nXEnd, int  nYEnd)
     OSLibGpiQueryCurrentPosition(pHps,&oldPoint);
     toWin32LineEnd(pHps, &oldPoint,nXEnd,nYEnd,&newPoint);
 
-    if ((oldPoint.x == newPoint.x) && (oldPoint.y == newPoint.y))
+    if (!pHps->inPath && (oldPoint.x == newPoint.x) && (oldPoint.y == newPoint.y))
     {
       rc = drawSingleLinePoint(hdc,pHps,&newPoint);
-    } else
+    } 
+    else
     {
-      if (getIsWideLine(pHps))
+      if (!pHps->inPath && getIsWideLine(pHps))
       {
         rc = O32_LineTo(hdc,newPoint.x,newPoint.y); //CB: wide line not supported
-      } else
+      } 
+      else
       {
         if (OSLibGpiLine(pHps,&newPoint) == FALSE)
           rc = FALSE;

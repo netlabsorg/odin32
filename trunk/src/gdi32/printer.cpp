@@ -1,4 +1,4 @@
-/* $Id: printer.cpp,v 1.2 2004-01-11 11:42:21 sandervl Exp $ */
+/* $Id: printer.cpp,v 1.3 2004-05-05 09:19:11 sandervl Exp $ */
 
 /*
  * GDI32 printer apis
@@ -178,6 +178,12 @@ INT WIN32API StartDocA(HDC hdc, const DOCINFOA *lpDocInfo)
          dprintf(("GDI32: StartDocA %x %x (%s %s %s %x)", hdc, lpDocInfo, lpDocInfo->lpszDocName, lpDocInfo->lpszOutput, lpDocInfo->lpszDatatype, lpDocInfo->fwType));
     }
     else dprintf(("GDI32: StartDocA %x %x", hdc, lpDocInfo));
+
+    dprintf(("lpDocInfo->cbSize %x", lpDocInfo->cbSize)); 
+    dprintf(("lpDocInfo->lpszDocName %s", lpDocInfo->lpszDocName)); 
+    dprintf(("lpDocInfo->lpszOutput %s", lpDocInfo->lpszOutput)); 
+    dprintf(("lpDocInfo->lpszDatatype %s", lpDocInfo->lpszDatatype)); 
+    dprintf(("lpDocInfo->fwType %x", lpDocInfo->fwType)); 
 
     ret = O32_StartDoc(hdc, (LPDOCINFOA)lpDocInfo);
 
