@@ -1,4 +1,9 @@
-/* $Id: changelog,v 1.1258 2001-02-15 00:33:25 sandervl Exp $ */
+/* $Id: changelog,v 1.1259 2001-02-15 08:50:45 sandervl Exp $ */
+
+ 2001-02-15: Sander van Leeuwen <sandervl@xs4all.nl>
+    - COMDLG32: o Ignore OFN_FILEMUSTEXIST flag in GetSaveFileNameA/W
+                  (NT4 seems to ignore it too and it fixes the save dialog
+                   in ElstarFormular 2000)
 
  2001-02-14: knut stange osmundsen <knut.stange.osmundsen@mynd.no>
     - Win32k.lib:
