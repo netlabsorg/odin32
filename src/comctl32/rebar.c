@@ -1,4 +1,4 @@
-/* $Id: rebar.c,v 1.9 1999-10-24 22:49:46 sandervl Exp $ */
+/* $Id: rebar.c,v 1.10 1999-11-17 17:06:23 cbratschi Exp $ */
 /*
  * Rebar control
  *
@@ -1762,8 +1762,9 @@ REBAR_SetCursor (HWND hwnd, WPARAM wParam, LPARAM lParam)
     }
     else if (flags != RBHT_CLIENT)
         SetCursor (infoPtr->hcurArrow);
+    //CB: else not handled -> cursor not changed
 
-    return 0;
+    return TRUE;
 }
 
 

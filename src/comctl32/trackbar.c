@@ -1,4 +1,4 @@
-/* $Id: trackbar.c,v 1.22 1999-11-09 17:09:27 cbratschi Exp $ */
+/* $Id: trackbar.c,v 1.23 1999-11-17 17:06:23 cbratschi Exp $ */
 /*
  * Trackbar control
  *
@@ -2210,7 +2210,7 @@ TRACKBAR_MouseMove (HWND hwnd, WPARAM wParam, LPARAM lParam)
       SendMessageA(infoPtr->hwndToolTip,TTM_TRACKPOSITION,0,(LPARAM)MAKELPARAM(pt.x,pt.y));
     }
 
-    return TRUE;
+    return 0;
 }
 
 static LRESULT

@@ -1,4 +1,4 @@
-/* $Id: status.c,v 1.13 1999-11-03 22:05:23 cbratschi Exp $ */
+/* $Id: status.c,v 1.14 1999-11-17 17:06:23 cbratschi Exp $ */
 /*
  * Interface code to StatusWindow widget/control
  *
@@ -1019,22 +1019,32 @@ STATUSBAR_WMGetText (HWND hwnd, WPARAM wParam, LPARAM lParam)
     return -1;
 }
 
+static LRESULT STATUSBAR_WMSetCursor(HWND hwnd,WPARAM wParam,LPARAM lParam)
+{
+  DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
+
+  if (dwStyle & SBARS_SIZEGRIP)
+  {
+    RECT rect = STATUSBAR_GetSizeBox(hwnd);
+    POINT pt;
+
+    GetCursorPos(&pt);
+    ScreenToClient(hwnd,&pt);
+
+    if (PtInRect(&rect,pt))
+    {
+      SetCursor(LoadCursorA(0,IDC_SIZENWSEA));
+      return TRUE;
+    }
+  }
+
+  return DefWindowProcA(hwnd,WM_SETCURSOR,wParam,lParam);
+}
 
 static LRESULT
 STATUSBAR_WMMouseMove (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
     STATUSWINDOWINFO *infoPtr = STATUSBAR_GetInfoPtr(hwnd);
-    DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
-
-    if (dwStyle & SBARS_SIZEGRIP)
-    {
-      RECT rect = STATUSBAR_GetSizeBox(hwnd);
-      POINT point;
-
-      point.x = (SHORT)LOWORD(lParam);
-      point.y = (SHORT)HIWORD(lParam);
-      if (PtInRect(&rect,point)) SetCursor(LoadCursorA(0,IDC_SIZENWSEA));
-    }
 
     if (infoPtr->hwndToolTip)
         STATUSBAR_RelayEvent (infoPtr->hwndToolTip, hwnd,
@@ -1309,6 +1319,9 @@ StatusWindowProc (HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
         case WM_RBUTTONUP:
             return STATUSBAR_SendNotify (hwnd, NM_RCLICK);
+
+        case WM_SETCURSOR:
+            return STATUSBAR_WMSetCursor(hwnd,wParam,lParam);
 
         case WM_SETFONT:
             return STATUSBAR_WMSetFont (hwnd, wParam, lParam);

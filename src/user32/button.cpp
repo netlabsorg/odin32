@@ -1,4 +1,4 @@
-/* $Id: button.cpp,v 1.17 1999-11-13 16:42:40 cbratschi Exp $ */
+/* $Id: button.cpp,v 1.18 1999-11-17 17:04:51 cbratschi Exp $ */
 /* File: button.cpp -- Button type widgets
  *
  * Copyright (C) 1993 Johannes Ruscheinski
@@ -282,8 +282,7 @@ static LRESULT BUTTON_MouseMove(HWND hwnd,WPARAM wParam,LPARAM lParam)
     SendMessageA(hwnd,BM_SETSTATE,PtInRect(&rect,pt),0);
   }
 
-  return 1; //SvL: Bugfix -> PMWINDOW expects non-zero return value if
-            //               we want to restore the default mouse cursor
+  return 0;
 }
 
 static LRESULT BUTTON_NCHitTest(HWND hwnd,WPARAM wParam,LPARAM lParam)
