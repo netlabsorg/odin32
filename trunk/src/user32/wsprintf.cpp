@@ -1,4 +1,3 @@
-/* $Id: wsprintf.cpp,v 1.11 2001-09-05 13:54:53 bird Exp $ */
 /*
  * wsprintf functions
  *
