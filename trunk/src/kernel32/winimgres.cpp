@@ -1,10 +1,15 @@
-/* $Id: winimgres.cpp,v 1.43 2000-07-10 18:38:52 sandervl Exp $ */
+/* $Id: winimgres.cpp,v 1.44 2000-08-16 08:04:44 sandervl Exp $ */
 
 /*
  * Win32 PE Image class (resource methods)
  *
  * Copyright 1998-2000 Sander van Leeuwen (sandervl@xs4all.nl)
  *
+ *
+ * Language order based on Wine Code (loader\pe_resource.c)
+ * Copyright 1995 Thomas Sandford
+ * Copyright 1996 Martin von Loewis
+ * 
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -145,32 +150,15 @@ HRSRC Win32ImageBase::findResourceA(LPCSTR lpszName, LPSTR lpszType, ULONG lang)
 	return NULL;
     }
 
-    switch(lang) {
-    case LANG_SYSTEM_DEFAULT:
-	lang = GetSystemDefaultLangID();
-	break;
-    case LANG_USER_DEFAULT:
-	lang = GetUserDefaultLangID();
-	break;    
-    case LANG_NEUTRAL:
-	//TODO: Not correct; should take language associated with current thread
-	lang = LANG_NEUTRAL;
-	break; 
-    case LANG_GETFIRST:
-        lang = GetUserDefaultLangID();
-        break;   
+    /* Here is the real difference between FindResource and FindResourceEx */
+    if(lang == MAKELANGID(LANG_NEUTRAL, SUBLANG_NEUTRAL) ||
+       lang == MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT) ||
+       lang == MAKELANGID(LANG_NEUTRAL, SUBLANG_SYS_DEFAULT) ||
+       lang == MAKELANGID(LANG_NEUTRAL, 3)) /* FIXME: real name? */
+    {
+      	 hRes = getResourceLang(pResDirRet);
     }
-
-    hRes = (HRSRC)getResDataLang(pResDirRet, lang);
-    if(!hRes) {
-	//try primary language with default sublang
-	lang = MAKELANGID(PRIMARYLANGID(lang), SUBLANG_DEFAULT);
-    	hRes = (HRSRC)getResDataLang(pResDirRet, lang);
-    	if(!hRes) {
-		//try neutral language or get first entry if nothing found
-    		hRes = (HRSRC)getResDataLang(pResDirRet, LANG_NEUTRAL, TRUE);
-	}
-    }
+    else hRes = getResourceLangEx(pResDirRet, lang);
 
     if((ULONG)lpszName != ID_GETFIRST && HIWORD(lpszName)) {
             dprintf(("FindResource %s: resource %s (type %x, lang %x)", szModule, lpszName, lpszType, lang));
@@ -215,33 +203,94 @@ HRSRC Win32ImageBase::findResourceW(LPWSTR lpszName, LPWSTR lpszType, ULONG lang
 	return NULL;
     }
 
-    switch(lang) {
-    case LANG_SYSTEM_DEFAULT:
-	lang = GetSystemDefaultLangID();
-	break;
-    case LANG_USER_DEFAULT:
-	lang = GetUserDefaultLangID();
-	break;    
-    case LANG_NEUTRAL:
-	//TODO: Not correct; should take language associated with current thread
-	lang = LANG_NEUTRAL;
-	break; 
-    case LANG_GETFIRST:
-        lang = GetUserDefaultLangID();
-        break;   
+    /* Here is the real difference between FindResource and FindResourceEx */
+    if(lang == MAKELANGID(LANG_NEUTRAL, SUBLANG_NEUTRAL) ||
+       lang == MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT) ||
+       lang == MAKELANGID(LANG_NEUTRAL, SUBLANG_SYS_DEFAULT) ||
+       lang == MAKELANGID(LANG_NEUTRAL, 3)) /* FIXME: real name? */
+    {
+      	 hRes = getResourceLang(pResDirRet);
     }
+    else hRes = getResourceLangEx(pResDirRet, lang);
 
-    hRes = (HRSRC)getResDataLang(pResDirRet, lang);
+    return hRes;
+}
+//******************************************************************************
+//According to Wine:
+/* FindResourceA/W does search in the following order:
+ * 1. Neutral language with neutral sublanguage
+ * 2. Neutral language with default sublanguage
+ * 3. Current locale lang id
+ * 4. Current locale lang id with neutral sublanguage
+ * 5. (!) LANG_ENGLISH, SUBLANG_DEFAULT
+ * 6. Return first in the list
+ */
+//******************************************************************************
+HRSRC Win32ImageBase::getResourceLang(PIMAGE_RESOURCE_DIRECTORY pResDirToSearch)
+{
+ HRSRC  hRes;
+ DWORD lang;
+
+    /* 1. Neutral language with neutral sublanguage */
+    lang = MAKELANGID(LANG_NEUTRAL, SUBLANG_NEUTRAL);
+    hRes = (HRSRC)getResDataLang(pResDirToSearch, lang);
     if(!hRes) {
-	//try primary language with default sublang
-	lang = MAKELANGID(PRIMARYLANGID(lang), SUBLANG_DEFAULT);
-    	hRes = (HRSRC)getResDataLang(pResDirRet, lang);
-    	if(!hRes) {
-		//try neutral language or get first entry if nothing found
-    		hRes = (HRSRC)getResDataLang(pResDirRet, LANG_NEUTRAL, TRUE);
-	}
+	/* 2. Neutral language with default sublanguage */
+	lang = MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT);
+        hRes = (HRSRC)getResDataLang(pResDirToSearch, lang);
     }
+    if(!hRes) {
+	/* 3. Current locale lang id */
+	lang = LANGIDFROMLCID(GetUserDefaultLCID());
+        hRes = (HRSRC)getResDataLang(pResDirToSearch, lang);
+    }
+    if(!hRes) {
+	/* 4. Current locale lang id with neutral sublanguage */
+	lang = MAKELANGID(PRIMARYLANGID(lang), SUBLANG_NEUTRAL);
+        hRes = (HRSRC)getResDataLang(pResDirToSearch, lang);
+    }
+    if(!hRes) {
+	/* 5. (!) LANG_ENGLISH, SUBLANG_DEFAULT */
+	lang = MAKELANGID(LANG_ENGLISH, SUBLANG_DEFAULT);
+        hRes = (HRSRC)getResDataLang(pResDirToSearch, lang);
+    }
+    if(!hRes) {
+	/* 6. Return first in the list */
+        hRes = (HRSRC)getResDataLang(pResDirToSearch, lang, TRUE);
+    }
+    return hRes;
+}
+//******************************************************************************
+//According to Wine:
+/* FindResourceExA/W does search in the following order:
+ * 1. Exact specified language
+ * 2. Language with neutral sublanguage
+ * 3. Neutral language with neutral sublanguage
+ * 4. Neutral language with default sublanguage
+ */
+//******************************************************************************
+HRSRC Win32ImageBase::getResourceLangEx(PIMAGE_RESOURCE_DIRECTORY pResDirToSearch,
+                                        DWORD lang)
+{
+ HRSRC  hRes;
 
+    /* 1. Exact specified language */
+    hRes = (HRSRC)getResDataLang(pResDirToSearch, lang);
+    if(!hRes) {
+	/* 2. Language with neutral sublanguage */
+        lang = MAKELANGID(PRIMARYLANGID(lang), SUBLANG_NEUTRAL);
+        hRes = (HRSRC)getResDataLang(pResDirToSearch, lang);
+    }
+    if(!hRes) {
+	/* 3. Neutral language with neutral sublanguage */
+        lang = MAKELANGID(LANG_NEUTRAL, SUBLANG_NEUTRAL);
+        hRes = (HRSRC)getResDataLang(pResDirToSearch, lang);
+    }
+    if(!hRes) {
+	/* 4. Current locale lang id with neutral sublanguage */
+	lang = MAKELANGID(PRIMARYLANGID(lang), SUBLANG_NEUTRAL);
+        hRes = (HRSRC)getResDataLang(pResDirToSearch, lang);
+    }
     return hRes;
 }
 //******************************************************************************
@@ -260,7 +309,7 @@ BOOL Win32ImageBase::getVersionStruct(char *verstruct, ULONG bufLength)
         SetLastError(ERROR_INVALID_PARAMETER);
         return FALSE;
     }
-    hRes = findResourceW((LPWSTR)ID_GETFIRST, (LPWSTR)NTRT_VERSION, LANG_GETFIRST);
+    hRes = findResourceW((LPWSTR)ID_GETFIRST, (LPWSTR)NTRT_VERSION, MAKELANGID(LANG_NEUTRAL, SUBLANG_NEUTRAL));
     if(hRes == NULL) {
 	//last error already set by findResourceW
         dprintf(("Win32PeLdrImage::getVersionStruct: couldn't find version resource!"));
