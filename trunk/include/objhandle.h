@@ -35,12 +35,12 @@ typedef enum {
 
 //...
 
-BOOL  ObjAllocateHandle(HANDLE *hObject, DWORD dwUserData, ObjectType type);
-void  ObjFreeHandle(HANDLE hObject);
-DWORD ObjGetHandleData(HANDLE hObject, ObjectType type);
+BOOL  WIN32API ObjAllocateHandle(HANDLE *hObject, DWORD dwUserData, ObjectType type);
+void  WIN32API ObjFreeHandle(HANDLE hObject);
+DWORD WIN32API ObjGetHandleData(HANDLE hObject, ObjectType type);
 
 #define ObjWinToOS2Region(a)    ObjGetHandleData(a, GDIOBJ_REGION)
 
-ObjectType ObjGetHandleType(HANDLE hObject);
+ObjectType WIN32API ObjGetHandleType(HANDLE hObject);
 
 #endif //__OBJHANDLE_H__
