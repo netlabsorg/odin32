@@ -1,4 +1,4 @@
-# $Id: process.forwarder.mak,v 1.13 2002-08-29 10:01:39 bird Exp $
+# $Id: process.forwarder.mak,v 1.14 2002-08-30 19:45:29 bird Exp $
 
 #
 # Generic makefile system.
@@ -186,7 +186,7 @@ $(TARGET) \
 !endif
 $(TARGET_ILIB) \
 $(RULES_FORWARD) \
-publish publish_target testcase nothing target:
+publish publish_target testcase nothing target packing:
     \
 !ifndef BUILD_VERBOSE
     @ \
