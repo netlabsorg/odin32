@@ -1,4 +1,4 @@
-/* $Id: regsvr32.cpp,v 1.3 1999-09-20 20:38:20 davidr Exp $ */
+/* $Id: regsvr32.cpp,v 1.4 2001-04-27 20:19:56 sandervl Exp $ */
 /* 
  * 
  * Project Odin Software License can be found in LICENSE.TXT
@@ -19,7 +19,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
-
+#include <heapstring.h>
 
 // ======================================================================
 // Local Data
@@ -183,7 +183,9 @@ static	HRESULT	parse_command(int argc, char * argv[])
 // ----------------------------------------------------------------------
 static	HRESULT	load_object(void)
 {
-    hdlObject = CoLoadLibrary(szFile, 1);
+    LPOLESTR libnameW = (LPOLESTR)HEAP_strdupAtoW(GetProcessHeap(), 0, szFile);
+    hdlObject = CoLoadLibrary(libnameW, TRUE);
+    HeapFree(GetProcessHeap(), 0, libnameW);
     if (hdlObject == 0)
 	return report_err(S_FALSE, "Failed to load '%s'", szFile);
 
