@@ -1,4 +1,4 @@
-/* $Id: mmap.h,v 1.13 1999-12-14 12:50:46 sandervl Exp $ */
+/* $Id: mmap.h,v 1.14 1999-12-30 11:19:54 sandervl Exp $ */
 
 /*
  * Memory mapped class
@@ -16,7 +16,10 @@
 #include "heapshared.h"
 
 #ifndef PAGE_SIZE
-#define PAGE_SIZE   4096
+#define PAGE_SIZE   	4096
+#endif
+#ifndef PAGE_SHIFT
+#define PAGE_SHIFT	12
 #endif
 
 //commit 4 pages at once when the app accesses it

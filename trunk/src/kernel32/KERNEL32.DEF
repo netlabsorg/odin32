@@ -1,4 +1,4 @@
-; $Id: KERNEL32.DEF,v 1.61 1999-12-27 18:42:25 sandervl Exp $
+; $Id: KERNEL32.DEF,v 1.62 1999-12-30 11:19:53 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is Windows95 KERNEL32
@@ -139,6 +139,11 @@ EXPORTS
 ;--------------
 ; name exports
 ;--------------
+
+;;Not supported; just present
+     LoadLibrary16              = _LoadLibrary16@4		  @35
+     FreeLibrary16              = _FreeLibrary16@4		  @36
+     GetProcAddress16           = _GetProcAddress16@8             @37
 
 ;;     WrongComctl32@0 @36
      AddAtomA                   = _AddAtomA@4                      @50
@@ -1032,8 +1037,8 @@ EXPORTS
     WideCharToLocal            = _WideCharToLocal@12              @1249
     LocalToWideChar            = _LocalToWideChar@12              @1250
 
-    _VIRTUAL_MapFileA@8              @1251
-    _VIRTUAL_MapFileW@8              @1252
+    _VIRTUAL_MapFileA@12              @1251
+    _VIRTUAL_MapFileW@12              @1252
 
     OS2SetExceptionHandler                                        @1253
     OS2UnsetExceptionHandler                                      @1254
