@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.17 2001-09-30 00:39:51 bird Exp $
+# $Id: makefile,v 1.18 2001-11-30 18:30:51 phaller Exp $
 
 #
 # Odin32
@@ -84,6 +84,7 @@ nodebuginfosmp: odin_libraries  needed
     @$(DODIRS) "tools\install"  $(MAKE_CMD) DEBUG=1 NODEBUGINFO=1 all
 
 profile:        odin_libraries  needed
+    SET PROFILEHOOKS=1
     @$(DODIRS) "$(BLDDIRS)"     $(MAKE_CMD) DEBUG=1 PROFILE=1 all
 
 profilesmp:     odin_libraries  needed
