@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 1999-12-21 12:27:12 sandervl Exp $
+# $Id: makefile,v 1.6 2000-02-03 21:37:49 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -21,7 +21,8 @@ CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
 
 TARGET = crtdll
 
-OBJS =  crtdll.obj bsearch.obj initterm.obj qsort.obj crt.obj asmhlp.obj
+OBJS =  crtdll.obj asmhlp.obj stubs.obj internal.obj crt_string.obj \
+	crt_memory.obj crt_mb.obj crt_wc.obj initterm.obj
 
 all: $(TARGET).dll $(TARGET).lib
 
@@ -41,12 +42,16 @@ $(TARGET)exp.def: $(TARGET).def
         $(IMPDEF) $** $@
 
 
-initterm.obj: initterm.cpp
-crtdll.obj: crtdll.cpp
-bsearch.obj: bsearch.c
-qsort.obj:    qsort.c
-crt.obj:	crt.cpp
-asmhlp.obj: asmhlp.asm
+initterm.obj:	initterm.cpp
+asmhlp.obj: 	asmhlp.asm
+stubs.obj:	stubs.cpp
+internal.obj:	internal.cpp
+crt_string.obj:	crt_string.cpp
+crt_mb.obj:	crt_mb.cpp
+crt_memory.obj:	crt_memory.cpp
+crt_wc.obj:	crt_wc.cpp
+
+crtdll.obj:	crtdll.cpp
 
 clean:
 	$(RM) *.obj *.lib *.dll *.map *.pch
