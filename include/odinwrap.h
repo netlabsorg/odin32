@@ -1,4 +1,4 @@
-/* $Id: odinwrap.h,v 1.20 2000-03-21 21:23:08 sandervl Exp $ */
+/* $Id: odinwrap.h,v 1.21 2000-04-30 23:19:36 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -18,6 +18,15 @@
 /****************************************************************************
  * Defines                                                                  *
  ****************************************************************************/
+
+// override debugging
+//#undef DEBUG
+//#define DEBUG
+
+// override profiling
+//#undef PROFILE_ODIN
+#define PROFILE_ODIN
+
 
 
 #define ODIN_INTERNAL _Optlink
@@ -60,22 +69,50 @@ extern int IsExeStarted(); //kernel32
 #define ODIN_HEAPCHECK()
 #endif
 
+// PH: this is for profiling cumulative method call times
+#ifdef PROFILE_ODIN
+
+#  define PROFILE_START(a)        \
+     LARGE_INTEGER liStart;       \
+     LARGE_INTEGER liEnd;         \
+     unsigned long ulElapsed;     \
+     QueryPerformanceCounter(&liStart);
+  
+  
+#  define PROFILE_STOP(a)            \
+     QueryPerformanceCounter(&liEnd);\
+     if (liStart.LowPart > liEnd.LowPart) \
+       ulElapsed = 0xFFFFFFFF - liStart.LowPart + liEnd.LowPart; \
+     else                                           \
+       ulElapsed = liEnd.LowPart - liStart.LowPart; \
+                                  \
+     dprintf(("%s: %s %u ticks\n",\
+              pszOdinDebugChannel,\
+              a,                  \
+              ulElapsed));
+#else
+#  define PROFILE_START(a)
+#  define PROFILE_STOP(a)
+#endif
+
 /****************************************************************************
  * General Wrapper Macros (debug instrumented)                              *
  ****************************************************************************/
 
 /* ---------- 0 parameters ---------- */
 #define ODINFUNCTION0(cRet,cName)             \
-  cRet ODIN_INTERNAL ODIN_##cName (void);            \
-  cRet WINAPI cName(void)              \
+  cRet ODIN_INTERNAL ODIN_##cName (void);     \
+  cRet WINAPI cName(void)                     \
   {                                           \
     unsigned short sel = RestoreOS2FS();      \
-    dprintf(("%s: "#cRet" "#cName"() enter\n",  \
+    dprintf(("%s: "#cRet" "#cName"() enter\n",\
              pszOdinDebugChannel));           \
     CheckFS(sel)                              \
-    ODIN_HEAPCHECK();                            \
+    ODIN_HEAPCHECK();                         \
+    PROFILE_START(#cName)                     \
     cRet   rc  = ODIN_##cName();              \
-    ODIN_HEAPCHECK();                            \
+    PROFILE_STOP(#cName)                      \
+    ODIN_HEAPCHECK();                         \
     dprintf(("%s: "#cRet" "#cName"() leave = %08xh\n", \
              pszOdinDebugChannel,             \
              rc));                            \
@@ -87,17 +124,19 @@ extern int IsExeStarted(); //kernel32
 
 
 #define ODINPROCEDURE0(cName)                 \
-  void ODIN_INTERNAL ODIN_##cName (void);            \
-  void WINAPI cName(void)              \
+  void ODIN_INTERNAL ODIN_##cName (void);     \
+  void WINAPI cName(void)                     \
   {                                           \
     unsigned short sel = RestoreOS2FS();      \
-    dprintf(("%s: void "#cName"() enter\n",    \
+    dprintf(("%s: void "#cName"() enter\n",   \
              pszOdinDebugChannel));           \
     CheckFS(sel)                              \
-    ODIN_HEAPCHECK();                            \
-    ODIN_##cName();                                  \
-    ODIN_HEAPCHECK();                            \
-    dprintf(("%s: void "#cName"() leave\n",    \
+    ODIN_HEAPCHECK();                         \
+    PROFILE_START(#cName)                     \
+    ODIN_##cName();                           \
+    PROFILE_STOP(#cName)                      \
+    ODIN_HEAPCHECK();                         \
+    dprintf(("%s: void "#cName"() leave\n",   \
              pszOdinDebugChannel));           \
     SetFS(sel);                               \
   }                                           \
@@ -107,17 +146,19 @@ extern int IsExeStarted(); //kernel32
 
 /* ---------- 1 parameters ---------- */
 #define ODINFUNCTION1(cRet,cName,t1,a1)       \
-  cRet ODIN_INTERNAL ODIN_##cName (t1 a1);           \
-  cRet WINAPI cName(t1 a1)             \
+  cRet ODIN_INTERNAL ODIN_##cName (t1 a1);    \
+  cRet WINAPI cName(t1 a1)                    \
   {                                           \
     unsigned short sel = RestoreOS2FS();      \
     dprintf(("%s: "#cRet" "#cName"("#t1" "#a1"=%08xh) enter\n", \
              pszOdinDebugChannel,             \
              a1));                            \
     CheckFS(sel)                              \
-    ODIN_HEAPCHECK();                            \
-    cRet   rc  = ODIN_##cName(a1);                   \
-    ODIN_HEAPCHECK();                            \
+    ODIN_HEAPCHECK();                         \
+    PROFILE_START(#cName)                     \
+    cRet   rc  = ODIN_##cName(a1);            \
+    PROFILE_STOP(#cName)                      \
+    ODIN_HEAPCHECK();                         \
     dprintf(("%s: "#cRet" "#cName"() leave = %08xh\n", \
              pszOdinDebugChannel,             \
              rc));                            \
@@ -128,18 +169,20 @@ extern int IsExeStarted(); //kernel32
   cRet ODIN_INTERNAL ODIN_##cName (t1 a1)
 
 #define ODINPROCEDURE1(cName,t1,a1)           \
-  void ODIN_INTERNAL ODIN_##cName (t1 a1);           \
-  void WINAPI cName(t1 a1)             \
+  void ODIN_INTERNAL ODIN_##cName (t1 a1);    \
+  void WINAPI cName(t1 a1)                    \
   {                                           \
     unsigned short sel = RestoreOS2FS();      \
     dprintf(("%s: void "#cName"("#t1" "#a1"=%08xh) enter\n", \
              pszOdinDebugChannel,             \
              a1));                            \
     CheckFS(sel)                              \
-    ODIN_HEAPCHECK();                            \
-    ODIN_##cName(a1);                                \
-    ODIN_HEAPCHECK();                            \
-    dprintf(("%s: void "#cName"() leave\n",    \
+    ODIN_HEAPCHECK();                         \
+    PROFILE_START(#cName)                     \
+    ODIN_##cName(a1);                         \
+    PROFILE_STOP(#cName)                      \
+    ODIN_HEAPCHECK();                         \
+    dprintf(("%s: void "#cName"() leave\n",   \
              pszOdinDebugChannel));           \
     SetFS(sel);                               \
   }                                           \
@@ -149,39 +192,43 @@ extern int IsExeStarted(); //kernel32
 
 /* ---------- 2 parameters ---------- */
 #define ODINFUNCTION2(cRet,cName,t1,a1,t2,a2)  \
-  cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2);      \
-  cRet WINAPI cName(t1 a1,t2 a2)        \
+  cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2); \
+  cRet WINAPI cName(t1 a1,t2 a2)               \
   {                                            \
     unsigned short sel = RestoreOS2FS();       \
     dprintf(("%s: "#cRet" "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh) enter\n", \
-             pszOdinDebugChannel,             \
-             a1,a2));                         \
-    CheckFS(sel)                              \
-    ODIN_HEAPCHECK();                            \
-    cRet   rc  = ODIN_##cName(a1,a2);                \
-    ODIN_HEAPCHECK();                            \
+             pszOdinDebugChannel,              \
+             a1,a2));                          \
+    CheckFS(sel)                               \
+    ODIN_HEAPCHECK();                          \
+    PROFILE_START(#cName)                      \
+    cRet   rc  = ODIN_##cName(a1,a2);          \
+    PROFILE_STOP(#cName)                       \
+    ODIN_HEAPCHECK();                          \
     dprintf(("%s: "#cRet" "#cName"() leave = %08xh\n", \
-             pszOdinDebugChannel,             \
-             rc));                            \
-    SetFS(sel);                               \
-    return rc;                                \
-  }                                           \
-                                              \
+             pszOdinDebugChannel,              \
+             rc));                             \
+    SetFS(sel);                                \
+    return rc;                                 \
+  }                                            \
+                                               \
   cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2)
 
 #define ODINPROCEDURE2(cName,t1,a1,t2,a2)     \
   void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2);     \
-  void WINAPI cName(t1 a1,t2 a2)       \
+  void WINAPI cName(t1 a1,t2 a2)              \
   {                                           \
     unsigned short sel = RestoreOS2FS();      \
     dprintf(("%s: void "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh) enter\n", \
              pszOdinDebugChannel,             \
              a1,a2));                         \
     CheckFS(sel)                              \
-    ODIN_HEAPCHECK();                            \
-    ODIN_##cName(a1,a2);                             \
-    ODIN_HEAPCHECK();                            \
-    dprintf(("%s: void "#cName"() leave\n",    \
+    ODIN_HEAPCHECK();                         \
+    PROFILE_START(#cName)                     \
+    ODIN_##cName(a1,a2);                      \
+    PROFILE_STOP(#cName)                      \
+    ODIN_HEAPCHECK();                         \
+    dprintf(("%s: void "#cName"() leave\n",   \
              pszOdinDebugChannel));           \
     SetFS(sel);                               \
   }                                           \
@@ -193,15 +240,17 @@ extern int IsExeStarted(); //kernel32
 #define ODINFUNCTION3(cRet,cName,t1,a1,t2,a2,t3,a3)  \
   cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3);      \
   cRet WINAPI cName(t1 a1,t2 a2,t3 a3)        \
-  {                               \
-    unsigned short sel = RestoreOS2FS();  \
+  {                                           \
+    unsigned short sel = RestoreOS2FS();      \
     dprintf(("%s: "#cRet" "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh) enter\n", \
              pszOdinDebugChannel,             \
              a1,a2,a3));                      \
     CheckFS(sel)                              \
-    ODIN_HEAPCHECK();                            \
-    cRet   rc  = ODIN_##cName(a1,a2,a3); \
-    ODIN_HEAPCHECK();                            \
+    ODIN_HEAPCHECK();                         \
+    PROFILE_START(#cName)                     \
+    cRet   rc  = ODIN_##cName(a1,a2,a3);      \
+    PROFILE_STOP(#cName)                      \
+    ODIN_HEAPCHECK();                         \
     dprintf(("%s: "#cRet" "#cName"() leave = %08xh\n", \
              pszOdinDebugChannel,             \
              rc));                            \
@@ -221,7 +270,9 @@ extern int IsExeStarted(); //kernel32
              a1,a2,a3));                      \
     CheckFS(sel)                              \
     ODIN_HEAPCHECK();                            \
+    PROFILE_START(#cName)                      \
     ODIN_##cName(a1,a2,a3);              \
+    PROFILE_STOP(#cName)                      \
     ODIN_HEAPCHECK();                            \
     dprintf(("%s: void "#cName"() leave\n",    \
              pszOdinDebugChannel));           \
@@ -242,7 +293,9 @@ extern int IsExeStarted(); //kernel32
              a1,a2,a3,a4));                   \
     CheckFS(sel)                              \
     ODIN_HEAPCHECK();                            \
+    PROFILE_START(#cName)                      \
     cRet   rc  = ODIN_##cName(a1,a2,a3,a4); \
+    PROFILE_STOP(#cName)                      \
     ODIN_HEAPCHECK();                            \
     dprintf(("%s: "#cRet" "#cName"() leave = %08xh\n", \
              pszOdinDebugChannel,             \
@@ -263,7 +316,9 @@ extern int IsExeStarted(); //kernel32
              a1,a2,a3,a4));                    \
     CheckFS(sel)                              \
     ODIN_HEAPCHECK();                            \
+    PROFILE_START(#cName)                      \
     ODIN_##cName(a1,a2,a3,a4); \
+    PROFILE_STOP(#cName)                      \
     ODIN_HEAPCHECK();                            \
     dprintf(("%s: void "#cName"() leave\n",    \
              pszOdinDebugChannel));           \
@@ -285,7 +340,9 @@ extern int IsExeStarted(); //kernel32
              a1,a2,a3,a4,a5));                \
     CheckFS(sel)                              \
     ODIN_HEAPCHECK();                            \
+    PROFILE_START(#cName)                      \
     cRet   rc  = ODIN_##cName(a1,a2,a3,a4,a5); \
+    PROFILE_STOP(#cName)                      \
     ODIN_HEAPCHECK();                            \
     dprintf(("%s: "#cRet" "#cName"() leave = %08xh\n", \
              pszOdinDebugChannel,             \
@@ -307,7 +364,9 @@ extern int IsExeStarted(); //kernel32
              a1,a2,a3,a4,a5));                \
     CheckFS(sel)                              \
     ODIN_HEAPCHECK();                            \
+    PROFILE_START(#cName)                      \
     ODIN_##cName(a1,a2,a3,a4,a5); \
+    PROFILE_STOP(#cName)                      \
     ODIN_HEAPCHECK();                            \
     dprintf(("%s: void "#cName"() leave\n",    \
              pszOdinDebugChannel));           \
@@ -329,7 +388,9 @@ extern int IsExeStarted(); //kernel32
              a1,a2,a3,a4,a5,a6));             \
     CheckFS(sel)                              \
     ODIN_HEAPCHECK();                            \
+    PROFILE_START(#cName)                      \
     cRet   rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6); \
+    PROFILE_STOP(#cName)                      \
     ODIN_HEAPCHECK();                            \
     dprintf(("%s: "#cRet" "#cName"() leave = %08xh\n", \
              pszOdinDebugChannel,             \
@@ -354,7 +415,9 @@ extern int IsExeStarted(); //kernel32
              a1,a2,a3,a4,a5,a6));             \
     CheckFS(sel)                              \
     ODIN_HEAPCHECK();                            \
+    PROFILE_START(#cName)                      \
     cRet   rc  = ODIN_##cName(sel,a1,a2,a3,a4,a5,a6); \
+    PROFILE_STOP(#cName)                      \
     ODIN_HEAPCHECK();                            \
     dprintf(("%s: "#cRet" "#cName"() leave = %08xh\n", \
              pszOdinDebugChannel,             \
@@ -377,7 +440,9 @@ extern int IsExeStarted(); //kernel32
              a1,a2,a3,a4,a5,a6));             \
     CheckFS(sel)                              \
     ODIN_HEAPCHECK();                            \
+    PROFILE_START(#cName)                      \
     ODIN_##cName(a1,a2,a3,a4,a5,a6); \
+    PROFILE_STOP(#cName)                      \
     ODIN_HEAPCHECK();                            \
     dprintf(("%s: void "#cName"() leave\n",    \
              pszOdinDebugChannel));           \
@@ -399,7 +464,9 @@ extern int IsExeStarted(); //kernel32
              a1,a2,a3,a4,a5,a6,a7));          \
     CheckFS(sel)                              \
     ODIN_HEAPCHECK();                            \
+    PROFILE_START(#cName)                      \
     cRet   rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6,a7); \
+    PROFILE_STOP(#cName)                      \
     ODIN_HEAPCHECK();                            \
     dprintf(("%s: "#cRet" "#cName"() leave = %08xh\n", \
              pszOdinDebugChannel,             \
@@ -421,7 +488,9 @@ extern int IsExeStarted(); //kernel32
              a1,a2,a3,a4,a5,a6,a7));          \
     CheckFS(sel)                              \
     ODIN_HEAPCHECK();                            \
+    PROFILE_START(#cName)                      \
     ODIN_##cName(a1,a2,a3,a4,a5,a6,a7); \
+    PROFILE_STOP(#cName)                      \
     ODIN_HEAPCHECK();                            \
     dprintf(("%s: void "#cName"() leave\n",    \
              pszOdinDebugChannel));           \
@@ -444,7 +513,9 @@ extern int IsExeStarted(); //kernel32
              a1,a2,a3,a4,a5,a6,a7,a8));       \
     CheckFS(sel)                              \
     ODIN_HEAPCHECK();                            \
+    PROFILE_START(#cName)                      \
     cRet   rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8); \
+    PROFILE_STOP(#cName)                      \
     ODIN_HEAPCHECK();                            \
     dprintf(("%s: "#cRet" "#cName"() leave = %08xh\n", \
              pszOdinDebugChannel,             \
@@ -467,7 +538,9 @@ extern int IsExeStarted(); //kernel32
              a1,a2,a3,a4,a5,a6,a7,a8));       \
     ODIN_HEAPCHECK();                            \
     CheckFS(sel)                              \
+    PROFILE_START(#cName)                      \
     ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8); \
+    PROFILE_STOP(#cName)                      \
     ODIN_HEAPCHECK();                            \
     dprintf(("%s: void "#cName"() leave\n",    \
              pszOdinDebugChannel));           \
@@ -490,7 +563,9 @@ extern int IsExeStarted(); //kernel32
              a1,a2,a3,a4,a5,a6,a7,a8,a9));    \
     CheckFS(sel)                              \
     ODIN_HEAPCHECK();                            \
+    PROFILE_START(#cName)                      \
     cRet   rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9); \
+    PROFILE_STOP(#cName)                      \
     ODIN_HEAPCHECK();                            \
     dprintf(("%s: "#cRet" "#cName"() leave = %08xh\n", \
              pszOdinDebugChannel,             \
@@ -513,7 +588,9 @@ extern int IsExeStarted(); //kernel32
              a1,a2,a3,a4,a5,a6,a7,a8,a9));    \
     CheckFS(sel)                              \
     ODIN_HEAPCHECK();                            \
+    PROFILE_START(#cName)                      \
     ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9); \
+    PROFILE_STOP(#cName)                      \
     ODIN_HEAPCHECK();                            \
     dprintf(("%s: void "#cName"() leave\n",    \
              pszOdinDebugChannel));           \
@@ -536,7 +613,9 @@ extern int IsExeStarted(); //kernel32
              a1,a2,a3,a4,a5,a6,a7,a8,a9,a10));\
     CheckFS(sel)                              \
     ODIN_HEAPCHECK();                            \
+    PROFILE_START(#cName)                      \
     cRet   rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10); \
+    PROFILE_STOP(#cName)                      \
     ODIN_HEAPCHECK();                            \
     dprintf(("%s: "#cRet" "#cName"() leave = %08xh\n", \
              pszOdinDebugChannel,             \
@@ -559,7 +638,9 @@ extern int IsExeStarted(); //kernel32
              a1,a2,a3));                      \
     CheckFS(sel)                              \
     ODIN_HEAPCHECK();                            \
+    PROFILE_START(#cName)                      \
     ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10); \
+    PROFILE_STOP(#cName)                      \
     ODIN_HEAPCHECK();                            \
     dprintf(("%s: void "#cName"() leave\n",    \
              pszOdinDebugChannel));           \
@@ -582,7 +663,9 @@ extern int IsExeStarted(); //kernel32
              a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11)); \
     CheckFS(sel)                              \
     ODIN_HEAPCHECK();                            \
+    PROFILE_START(#cName)                      \
     cRet   rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11); \
+    PROFILE_STOP(#cName)                      \
     ODIN_HEAPCHECK();                            \
     dprintf(("%s: "#cRet" "#cName"() leave = %08xh\n", \
              pszOdinDebugChannel,             \
@@ -605,7 +688,9 @@ extern int IsExeStarted(); //kernel32
              a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11)); \
     CheckFS(sel)                              \
     ODIN_HEAPCHECK();                            \
+    PROFILE_START(#cName)                      \
     ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11); \
+    PROFILE_STOP(#cName)                      \
     ODIN_HEAPCHECK();                            \
     dprintf(("%s: void "#cName"() leave\n",    \
              pszOdinDebugChannel));           \
@@ -629,7 +714,9 @@ extern int IsExeStarted(); //kernel32
              a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12)); \
     CheckFS(sel)                              \
     ODIN_HEAPCHECK();                            \
+    PROFILE_START(#cName)                      \
     cRet   rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12); \
+    PROFILE_STOP(#cName)                      \
     ODIN_HEAPCHECK();                            \
     dprintf(("%s: "#cRet" "#cName"() leave = %08xh\n", \
              pszOdinDebugChannel,             \
@@ -653,7 +740,9 @@ extern int IsExeStarted(); //kernel32
              a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12));  \
     CheckFS(sel)                              \
     ODIN_HEAPCHECK();                            \
+    PROFILE_START(#cName)                      \
     ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12); \
+    PROFILE_STOP(#cName)                      \
     ODIN_HEAPCHECK();                            \
     dprintf(("%s: void "#cName"() leave\n",    \
              pszOdinDebugChannel));           \
@@ -677,7 +766,9 @@ extern int IsExeStarted(); //kernel32
              a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13)); \
     CheckFS(sel)                              \
     ODIN_HEAPCHECK();                            \
+    PROFILE_START(#cName)                      \
     cRet   rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13); \
+    PROFILE_STOP(#cName)                      \
     ODIN_HEAPCHECK();                            \
     dprintf(("%s: "#cRet" "#cName"() leave = %08xh\n", \
              pszOdinDebugChannel,             \
@@ -701,7 +792,9 @@ extern int IsExeStarted(); //kernel32
              a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13));  \
     CheckFS(sel)                              \
     ODIN_HEAPCHECK();                            \
+    PROFILE_START(#cName)                      \
     ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13); \
+    PROFILE_STOP(#cName)                      \
     ODIN_HEAPCHECK();                            \
     dprintf(("%s: void "#cName"() leave\n",    \
              pszOdinDebugChannel));           \
@@ -725,6 +818,7 @@ extern int IsExeStarted(); //kernel32
              a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14)); \
     CheckFS(sel)                              \
     ODIN_HEAPCHECK();                            \
+    PROFILE_START(#cName)                      \
     cRet   rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14); \
     ODIN_HEAPCHECK();                            \
     dprintf(("%s: "#cRet" "#cName"() leave = %08xh\n", \
@@ -749,7 +843,9 @@ extern int IsExeStarted(); //kernel32
              a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14));  \
     CheckFS(sel)                              \
     ODIN_HEAPCHECK();                            \
+    PROFILE_START(#cName)                      \
     ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14); \
+    PROFILE_STOP(#cName)                      \
     ODIN_HEAPCHECK();                            \
     dprintf(("%s: void "#cName"() leave\n",    \
              pszOdinDebugChannel));           \
