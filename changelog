@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2237 2002-07-28 15:37:22 sandervl Exp $ */
+/* $Id: changelog,v 1.2238 2002-07-29 11:25:44 sandervl Exp $ */
+
+ 2002-07-29: Sander van Leeuwen <sandervl@innotek.de> 
+    - GDI32:    o Cleanup fixes (call ctordtorTerm in existlist handler)
 
  2002-07-28: Sander van Leeuwen <sandervl@innotek.de> 
     - KERNEL32: o Added function to disable os2cdrom.dmd aspi support
