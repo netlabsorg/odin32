@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.31 1999-12-18 21:45:53 sandervl Exp $ */
+/* $Id: HandleManager.cpp,v 1.32 1999-12-29 13:04:52 phaller Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -2520,11 +2520,12 @@ DWORD HMWaitForMultipleObjects (DWORD   cObjects,
   pArrayOfHandles = (PHANDLE)alloca(cObjects * sizeof(HANDLE));
   if (pArrayOfHandles == NULL)
   {
-	dprintf(("ERROR: HMWaitForMultipleObjects: alloca failed to allocate %d handles", cObjects));
-    	O32_SetLastError(ERROR_NOT_ENOUGH_MEMORY);
-    	return WAIT_FAILED;
+    dprintf(("ERROR: HMWaitForMultipleObjects: alloca failed to allocate %d handles", cObjects));
+    O32_SetLastError(ERROR_NOT_ENOUGH_MEMORY);
+    return WAIT_FAILED;
   }
-  else  pLoop2 = pArrayOfHandles;
+  else
+    pLoop2 = pArrayOfHandles;
 
   // convert array to odin handles
   for (ulIndex = 0;
@@ -2538,8 +2539,18 @@ DWORD HMWaitForMultipleObjects (DWORD   cObjects,
     rc = HMHandleTranslateToOS2 (*pLoop1, // translate handle
                                  pLoop2);
 
+    dprintf(("KERNEL32: HMWaitForMultipleObjects: handle %3i: ODIN-%08xh, Open32-%08xh\n",
+             ulIndex,
+             *pLoop1,
+             *pLoop2));
+
+    //  @@@PH to imlpement: check handle type!
+
     if (rc != NO_ERROR)
     {
+      dprintf(("KERNEL32: HMWaitForMultipleObjects - ERROR: handle %08xh is NOT an Open32 handle (not yet implemented)\n",
+               *pLoop1));
+
       O32_SetLastError(ERROR_INVALID_HANDLE);
       return (WAIT_FAILED);
     }
