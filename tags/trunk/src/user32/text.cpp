@@ -1,11 +1,10 @@
-/* $Id: text.cpp,v 1.7 2000-02-16 14:34:35 sandervl Exp $ */
+/* $Id: text.cpp,v 1.8 2000-02-22 17:07:40 cbratschi Exp $ */
 
 /*
  * Font and Text Functions
  *
  * Copyright 1999 Christoph Bratschi
  *
- * Copyright 1997 Bertho A. Stultiens
  * Copyright 1993, 1994 Alexandre Julliard
  *
  * Project Odin Software License can be found in LICENSE.TXT
@@ -13,40 +12,12 @@
 
 #include "winuser.h"
 #include "user32.h"
+#include "syscolor.h"
 
-#define DBG_LOCALLOG	DBG_text
+#define DBG_LOCALLOG    DBG_text
 #include "dbglocal.h"
 
 //WINE parts: wine-991031
-
-static const WORD wPattern55AA[] =
-{
-    0x5555, 0xaaaa, 0x5555, 0xaaaa,
-    0x5555, 0xaaaa, 0x5555, 0xaaaa
-};
-
-static HBRUSH  hPattern55AABrush = 0;
-static HBITMAP hPattern55AABitmap = 0;
-
-/*********************************************************************
- *      CACHE_GetPattern55AABitmap
- */
-HBITMAP CACHE_GetPattern55AABitmap(void)
-{
-    if (!hPattern55AABitmap)
-        hPattern55AABitmap = CreateBitmap( 8, 8, 1, 1, wPattern55AA );
-    return hPattern55AABitmap;
-}
-
-/*********************************************************************
- *      CACHE_GetPattern55AABrush
- */
-HBRUSH CACHE_GetPattern55AABrush(void)
-{
-    if (!hPattern55AABrush)
-        hPattern55AABrush = CreatePatternBrush(CACHE_GetPattern55AABitmap());
-    return hPattern55AABrush;
-}
 
 INT WIN32API DrawTextA(HDC hDC,LPCSTR lpString,INT nCount,PRECT lpRect,UINT nFormat)
 {
@@ -55,7 +26,7 @@ INT WIN32API DrawTextA(HDC hDC,LPCSTR lpString,INT nCount,PRECT lpRect,UINT nFor
   dprintf(("USER32: DrawTextA %x %s %d (%d,%d)(%d,%d) %x",hDC, lpString, nCount, lpRect->left, lpRect->top, lpRect->right, lpRect->bottom, nFormat));
 
   if(nFormat == 0x828) {
-	bla = 1;
+        bla = 1;
   }
   return InternalDrawTextExA(hDC,lpString,nCount,lpRect,nFormat,NULL,FALSE);
 }
