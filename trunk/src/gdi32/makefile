@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.43 2003-08-08 15:52:26 sandervl Exp $
+# $Id: makefile,v 1.44 2003-08-12 08:22:41 sandervl Exp $
 
 #
 # Odin32 API
@@ -43,7 +43,6 @@ $(OBJDIR)\initterm.obj \
 $(OBJDIR)\initgdi32.obj \
 $(OBJDIR)\oslibgdi.obj \
 $(OBJDIR)\font.obj \
-$(OBJDIR)\fontres.obj \
 $(OBJDIR)\text.obj \
 $(OBJDIR)\palette.obj \
 $(OBJDIR)\line.obj \
