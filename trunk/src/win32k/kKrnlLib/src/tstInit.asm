@@ -1,4 +1,4 @@
-; $Id: tstInit.asm,v 1.1 2002-03-30 17:05:47 bird Exp $
+; $Id: tstInit.asm,v 1.1 2002-04-07 22:39:16 bird Exp $
 ;
 ; Thunks to call stratgy entry points with init packets.
 ;

@@ -1,4 +1,4 @@
-/* $Id: tstFake.c,v 1.1 2002-03-30 17:05:46 bird Exp $
+/* $Id: tstFake.c,v 1.1 2002-04-07 22:39:14 bird Exp $
  *
  * Fake stubs for the ldr and kernel functions we imports or overloads.
  *
@@ -8,7 +8,7 @@
  *
  */
 #ifndef NOFILEID
-static const char szFileId[] = "$Id: tstFake.c,v 1.1 2002-03-30 17:05:46 bird Exp $";
+static const char szFileId[] = "$Id: tstFake.c,v 1.1 2002-04-07 22:39:14 bird Exp $";
 #endif
 
 /*******************************************************************************
