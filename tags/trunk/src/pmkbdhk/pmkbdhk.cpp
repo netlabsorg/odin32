@@ -1,4 +1,4 @@
-/* $Id: pmkbdhk.cpp,v 1.3 2002-02-11 13:45:33 sandervl Exp $ */
+/* $Id: pmkbdhk.cpp,v 1.4 2003-02-16 18:29:05 sandervl Exp $ */
 /*
  * OS/2 native Presentation Manager hooks
  *
@@ -472,7 +472,6 @@ BOOL EXPENTRY hookPreAccelHook(HAB hab, PQMSG pqmsg, ULONG option)
             
             case PMSCAN_PRINT:
             case PMSCAN_ALTLEFT:
-            case PMSCAN_ALTRIGHT:
             case PMSCAN_SCROLLLOCK:
             case PMSCAN_ENTER:
             case PMSCAN_PADENTER:
@@ -486,6 +485,101 @@ BOOL EXPENTRY hookPreAccelHook(HAB hab, PQMSG pqmsg, ULONG option)
               pqmsg->msg = WM_CHAR_SPECIAL;
             
               break;
+
+        //
+        // AltGr needs special handling
+        //
+        // AltGr -> WM_KEYDOWN (VK_CONTROL), WM_KEYDOWN (VK_MENU) 
+        //          WM_SYSKEYUP (VK_CONTROL)
+        //          WM_KEYUP (VK_MENU)
+        //
+        // Ctrl+AltGr -> WM_KEYDOWN (VK_CONTROL), WM_KEYUP (VK_CONTROL) 
+        //               WM_KEYDOWN (VK_CONTROL)
+        //               WM_KEYDOWN (VK_MENU) 
+        //               WM_KEYUP (VK_MENU)
+        //               WM_KEYUP (VK_CONTROL) 
+        //
+        // AltGr+Ctrl -> WM_KEYDOWN (VK_CONTROL), WM_KEYDOWN (VK_MENU) 
+        //               WM_KEYDOWN (VK_CONTROL) 
+        //               WM_SYSKEYUP (VK_CONTROL) 
+        //               WM_SYSKEYUP (VK_CONTROL) 
+        //               WM_KEYUP (VK_MENU)
+        //
+        // AltGr down -> if Ctrl down, send WM_KEYUP (VK_CONTROL)
+        //               endif
+        //               Send WM_KEYDOWN (VK_CONTROL)
+        //               Send WM_KEYDOWN (VK_MENU)
+        // AltGr up ->   if !(Ctrl down before AltGr was pressed || Ctrl up)
+        //                   Send WM_SYSKEYUP (VK_CONTROL)
+        //               endif
+        //               Send WM_KEYDOWN (VK_MENU)
+        //
+        // NOTE: Ctrl = Ctrl-Left; AltGr doesn't care about the right Ctrl key
+        // 
+          case PMSCAN_ALTRIGHT:
+          {
+              QMSG   msg = *pqmsg;
+              ULONG  ctrlstate;
+              ULONG  flags;
+              ULONG  mp1, mp2;
+
+              flags = SHORT1FROMMP(pqmsg->mp1);
+
+              pqmsg->msg = WM_CHAR_SPECIAL;
+
+              if(flags & KC_KEYUP) 
+              {//AltGr up
+                  ctrlstate  = WinGetPhysKeyState(HWND_DESKTOP, PMSCAN_CTRLLEFT);
+                  if(!(ctrlstate & 0x8000)) 
+                  {//ctrl is up, translate this message to Ctrl key up
+                      mp1  = (PMSCAN_CTRLLEFT << 24);	//scancode
+                      mp1 |= (1 << 16);			//repeat count
+                      mp1 |= (KC_ALT | KC_KEYUP | KC_VIRTUALKEY | KC_SCANCODE);
+                      mp2  = (VK_CTRL << 16);		//virtual keycode
+                      pqmsg->msg = WM_CHAR_SPECIAL_ALTGRCONTROL;
+                      pqmsg->mp1 = (MPARAM)mp1;
+                      pqmsg->mp2 = (MPARAM)mp2;
+
+                      //and finally, post the AltGr WM_CHAR message            
+                      WinPostMsg(msg.hwnd, WM_CHAR_SPECIAL, msg.mp1, msg.mp2);
+                  }
+                  //else do nothing
+              }
+              else 
+              {//AltGr down
+                  ctrlstate  = WinGetPhysKeyState(HWND_DESKTOP, PMSCAN_CTRLLEFT);
+                  if(ctrlstate & 0x8000) 
+                  {//ctrl is down, translate this message to Ctrl key up
+                      mp1  = (PMSCAN_CTRLLEFT << 24);	//scancode
+                      mp1 |= (1 << 16);			//repeat count
+                      mp1 |= (KC_KEYUP | KC_VIRTUALKEY | KC_SCANCODE);
+                      mp2  = (VK_CTRL << 16);		//virtual keycode
+                      pqmsg->msg = WM_CHAR_SPECIAL_ALTGRCONTROL;
+                      pqmsg->mp1 = (MPARAM)mp1;
+                      pqmsg->mp2 = (MPARAM)mp2;
+                  }
+                  //send left control key down message
+                  mp1  = (PMSCAN_CTRLLEFT << 24);	//scancode
+                  mp1 |= (1 << 16);			//repeat count
+                  mp1 |= (KC_CTRL | KC_VIRTUALKEY | KC_SCANCODE);
+                  mp2  = (VK_CTRL << 16);		//virtual keycode
+
+                  if(ctrlstate & 0x8000) 
+                  {//ctrl is down, must post this message
+                      WinPostMsg(msg.hwnd, WM_CHAR_SPECIAL_ALTGRCONTROL, (MPARAM)mp1, (MPARAM)mp2);
+                  }
+                  else 
+                  {//translate this message into control key down
+                      pqmsg->msg = WM_CHAR_SPECIAL_ALTGRCONTROL;
+                      pqmsg->mp1 = (MPARAM)mp1;
+                      pqmsg->mp2 = (MPARAM)mp2;
+                  }
+                  //and finally, post the AltGr WM_CHAR message            
+                  WinPostMsg(msg.hwnd, WM_CHAR_SPECIAL, msg.mp1, msg.mp2);
+              }
+              break;
+          }
+
           }
         }
       
