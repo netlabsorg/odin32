@@ -1,4 +1,4 @@
-/* $Id: pmframe.cpp,v 1.46 2000-03-31 14:42:47 cbratschi Exp $ */
+/* $Id: pmframe.cpp,v 1.47 2000-04-01 10:01:53 sandervl Exp $ */
 /*
  * Win32 Frame Managment Code for OS/2
  *
@@ -148,8 +148,8 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
       RestoreOS2TIB();
       OldFrameProc(hwnd,msg,mp1,mp2);
       SetWin32TIB();
-      trackInfo->cxBorder = 0;
-      trackInfo->cyBorder = 0;
+      trackInfo->cxBorder = 4;
+      trackInfo->cyBorder = 4;
       win32wnd->AdjustTrackInfo((PPOINT)&trackInfo->ptlMinTrackSize,(PPOINT)&trackInfo->ptlMaxTrackSize);
       RestoreOS2TIB();
       return (MRESULT)TRUE;
