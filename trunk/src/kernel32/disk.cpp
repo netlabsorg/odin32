@@ -1,4 +1,4 @@
-/* $Id: disk.cpp,v 1.38 2002-09-26 16:06:06 sandervl Exp $ */
+/* $Id: disk.cpp,v 1.39 2002-09-27 14:35:56 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -517,7 +517,7 @@ HANDLE WIN32API FindFirstVolumeA(LPTSTR lpszVolumeName, DWORD cchBufferLength)
     pVolInfo->hLVMVolumeControlData = OSLibLVMQueryVolumeControlData();
     pVolInfo->lastvol               = 0;
 
-    if(OSLibLVMQueryVolumeName(pVolInfo->hLVMVolumeControlData, pVolInfo->lastvol, szVolume, sizeof(szVolume)) == FALSE) {
+    if(OSLibLVMQueryVolumeName(pVolInfo->hLVMVolumeControlData, &pVolInfo->lastvol, szVolume, sizeof(szVolume)) == FALSE) {
         SetLastError(ERROR_NO_MORE_FILES);
         goto fail;
     }
@@ -579,7 +579,7 @@ BOOL WIN32API FindNextVolumeA(HANDLE hFindVolume, LPTSTR lpszVolumeName,
         SetLastError(ERROR_INVALID_PARAMETER);
         return FALSE;
     }
-    if(OSLibLVMQueryVolumeName(pVolInfo->hLVMVolumeControlData, pVolInfo->lastvol, 
+    if(OSLibLVMQueryVolumeName(pVolInfo->hLVMVolumeControlData, &pVolInfo->lastvol, 
                                szVolume, sizeof(szVolume)) == FALSE) {
         SetLastError(ERROR_NO_MORE_FILES);
         GlobalUnlock(hFindVolume);
