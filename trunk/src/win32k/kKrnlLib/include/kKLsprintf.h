@@ -1,4 +1,4 @@
-/* $Id: kKLsprintf.h,v 1.1 2001-09-14 01:50:18 bird Exp $
+/* $Id: kKLsprintf.h,v 1.2 2002-04-01 10:04:26 bird Exp $
  *
  * sprintf/vsprintf header file.
  *
@@ -16,7 +16,11 @@ extern "C" {
 #endif
 
 #ifndef va_arg
+#if 0
     #error "must include stdarg.h"
+#else
+    #include <stdarg.h>
+#endif
 #endif
 
 
