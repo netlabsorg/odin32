@@ -1,4 +1,4 @@
-; $Id: kernel32dbg.def,v 1.32 2003-08-01 16:25:48 sandervl Exp $
+; $Id: kernel32dbg.def,v 1.33 2003-10-28 19:19:21 sandervl Exp $
 
 ;Basis is Windows95 KERNEL32
 LIBRARY KERNEL32 INITINSTANCE TERMINSTANCE
@@ -1197,7 +1197,7 @@ EXPORTS
     _GetProcessTIBSel@0                                           @2012 NONAME
 
     _SetRegistryRootKey@8                                         @2013 NONAME
-    _SetCustomBuildName@12                                        @2014 NONAME
+    _SetCustomBuildName@8                                         @2014 NONAME
     _RegisterCustomDriver@36                                      @2015 NONAME
 
     strcmpiW                                                      @2020 NONAME
