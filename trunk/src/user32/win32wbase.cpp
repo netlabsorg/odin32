@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.294 2001-10-24 10:26:45 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.295 2001-10-24 15:41:54 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1079,7 +1079,7 @@ ULONG Win32BaseWindow::MsgButton(MSG *msg)
 {
  BOOL  fClick = FALSE;
 
-//    dprintf(("MsgButton at (%d,%d)", msg->pt.x, msg->pt.y));
+    dprintf(("MsgButton %d at (%d,%d)", msg->message, msg->pt.x, msg->pt.y));
     switch(msg->message) {
         case WM_LBUTTONDBLCLK:
         case WM_RBUTTONDBLCLK:
@@ -1087,8 +1087,6 @@ ULONG Win32BaseWindow::MsgButton(MSG *msg)
                 if (!(windowClass && windowClass->getClassLongA(GCL_STYLE) & CS_DBLCLKS))
                 {
                     msg->message = msg->message - (WM_LBUTTONDBLCLK - WM_LBUTTONDOWN); //dblclick -> down
-                    MsgButton(msg);
-                    msg->message++; //button-up
                     return MsgButton(msg);
                 }
                 break;
