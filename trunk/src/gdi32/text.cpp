@@ -1,4 +1,4 @@
-/* $Id: text.cpp,v 1.42 2004-01-14 16:53:25 sandervl Exp $ */
+/* $Id: text.cpp,v 1.43 2004-01-15 11:18:58 sandervl Exp $ */
 
 /*
  * GDI32 text apis
@@ -542,6 +542,63 @@ BOOL WIN32API GetTextExtentPoint32W(HDC hdc, LPCWSTR lpsz, int cbString, PSIZE l
 {
     return GetTextExtentPointW(hdc, lpsz, cbString, lpSize);
 }
+
+typedef BOOL ( WIN32API *PFN_GETTEXTEXTENTPOINT32 )( HDC, PVOID, INT, LPSIZE );
+
+BOOL InternalGetTextExtentExPointAW(HDC hdc,
+                                    PVOID   str,
+                                    INT     count,
+                                    INT     maxExt,
+                                    LPINT   lpnFit,
+                                    LPINT   alpDx,
+                                    LPSIZE  size,
+                                    BOOL    fUnicode)
+{
+    int i, nFit;
+    SIZE tSize;
+    BOOL ret = FALSE;
+
+    PFN_GETTEXTEXTENTPOINT32 pfnGetTextExtentPoint32;
+
+    if( fUnicode )
+        pfnGetTextExtentPoint32 = ( PFN_GETTEXTEXTENTPOINT32 )GetTextExtentPoint32W;
+    else
+        pfnGetTextExtentPoint32 = ( PFN_GETTEXTEXTENTPOINT32 )GetTextExtentPoint32A;
+
+    size->cx = size->cy = nFit = i = 0;
+
+    if( lpnFit || alpDx )
+    {
+        for( i = 1; i <= count; i++ )
+        {
+            if( !pfnGetTextExtentPoint32( hdc, str, i, &tSize )) goto done;
+
+            if( lpnFit && ( maxExt < tSize.cx ))
+                break;
+
+            if( alpDx )
+                alpDx[ nFit ] = tSize.cx;
+
+            nFit++;
+        }
+    }
+
+    if(( count > 0 ) && ( i >= count ))
+    {
+        size->cx = tSize.cx;
+        size->cy = tSize.cy; // The height of a font is constant.
+    }
+    else if( !pfnGetTextExtentPoint32( hdc, str, count, size )) goto done;
+
+    if(lpnFit) *lpnFit = nFit;
+    ret = TRUE;
+
+    dprintf(("returning %d %ld x %ld\n",nFit,size->cx,size->cy));
+
+done:
+    return ret;
+}
+
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API GetTextExtentExPointA(HDC hdc,
@@ -552,76 +609,7 @@ BOOL WIN32API GetTextExtentExPointA(HDC hdc,
                                     LPINT   alpDx,
                                     LPSIZE  size)
 {
-    BOOL ret;
-    INT wlen;
-    LPWSTR p;
-    INT nFit;
-    TEXTMETRICA tmA;
-    CHAR brokenDBCS = 0;
-
-    if( IsDBCSEnv())
-    {
-        brokenDBCS = getBrokenDBCS( str, count );
-
-        GetTextMetricsA( hdc, &tmA );
-    }
-
-    if( brokenDBCS )
-       count--;
-
-    p = FONT_mbtowc( hdc, str, count, &wlen, NULL);
-    ret = GetTextExtentExPointW( hdc, p, wlen, maxExt, &nFit, alpDx, size);
-    nFit = WideCharToMultiByte(CP_ACP,0,p,nFit,NULL,0,NULL,NULL);
-    if( IsDBCSEnv() && alpDx ) // index of alpDx between ansi and wide may not match in DBCS !!!
-    {
-        LPINT alpDxNew = ( LPINT )HeapAlloc( GetProcessHeap(), 0, sizeof( alpDx[ 0 ] ) * ( nFit + 1 ));
-        INT prevDx;
-        int i, j;
-
-        for( i = j = 0; i < nFit; i++, j++ )
-        {
-            if( IsDBCSLeadByte( str[ i ]))
-            {
-                prevDx = ( i > 0 ) ? alpDxNew[ i - 1 ] : 0;
-                alpDxNew[ i++ ] = prevDx + tmA.tmAveCharWidth;
-                if( i >= nFit )
-                    break;
-            }
-            alpDxNew[ i ] = alpDx[ j ];
-        }
-
-        if(( nFit < count ) && IsDBCSLeadByte( str[ nFit ]))
-        {
-            prevDx = ( nFit > 0 ) ? alpDxNew[ nFit - 1 ] : 0;
-            if( maxExt >= prevDx + tmA.tmAveCharWidth )
-                alpDxNew[ nFit++ ] = prevDx + tmA.tmAveCharWidth;
-        }
-
-        memcpy( alpDx, alpDxNew, sizeof( alpDx[ 0 ] ) * nFit );
-
-        HeapFree( GetProcessHeap(), 0, alpDxNew );
-    }
-
-    // for broken DBCS. correct for FIXED WIDTH, not approx. for VARIABLE WIDTH
-    if( brokenDBCS )
-    {
-       size->cx += tmA.tmAveCharWidth;
-       if( count == 0 )
-          size->cy = tmA.tmHeight;
-
-       if(( maxExt > size->cx ) && ( nFit <= count )) // decreaed count by 1 above
-       {
-          if( alpDx )
-            alpDx[ nFit ] = size->cx;
-
-          nFit++;
-       }
-    }
-
-    if (lpnFit) *lpnFit = nFit;
-
-    HeapFree( GetProcessHeap(), 0, p );
-    return ret;
+    return InternalGetTextExtentExPointAW( hdc, ( PVOID )str, count, maxExt, lpnFit, alpDx, size, FALSE );
 }
 //******************************************************************************
 //******************************************************************************
@@ -633,38 +621,7 @@ BOOL WIN32API GetTextExtentExPointW(HDC hdc,
                                     LPINT   alpDx,
                                     LPSIZE  size)
 {
-    int i, nFit, extent;
-    SIZE tSize;
-    BOOL ret = FALSE;
-
-    size->cx = size->cy = nFit = extent = 0;
-
-    for( i = 1; i <= count; i++ )
-    {
-        if( !GetTextExtentPoint32W( hdc, str, i, &tSize )) goto done;
-
-        if( maxExt < tSize.cx )
-            break;
-
-        if( alpDx )
-            alpDx[ nFit ] = tSize.cx;
-
-        nFit++;
-    }
-
-    if( i >= count )
-        size->cx = tSize.cx;
-    else if( !GetTextExtentPoint32W( hdc, str, count, size )) goto done;
-
-    size->cy = tSize.cy; // The height of a font is constant.
-
-    if(lpnFit) *lpnFit = nFit;
-    ret = TRUE;
-
-    dprintf(("returning %d %ld x %ld\n",nFit,size->cx,size->cy));
-
-done:
-    return ret;
+    return InternalGetTextExtentExPointAW( hdc, ( PVOID )str, count, maxExt, lpnFit, alpDx, size, TRUE );
 }
 //******************************************************************************
 //******************************************************************************
