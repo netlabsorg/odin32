@@ -275,7 +275,7 @@ EXPORTS
    _O32_SetLastError                     @942
    _O32_GetLastError                     @943
 
-
+   _O32_GetDriveType                     @944
    _O32_CompareFileTime                  @945
    _O32_DosDateTimeToFileTime            @946
    _O32_FileTimeToDosDateTime            @947
@@ -342,3 +342,4 @@ EXPORTS
 
    _GpiQueryDCData @ 7000
 
+   _O32_CreateBitmapFromPMHandle         @7001  
