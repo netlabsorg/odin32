@@ -12,6 +12,11 @@
 #if !defined(OS2_INCLUDED) && !defined(__WIN32TYPE_H__)
 #include <windef.h>
 #endif
+#include <winnls.h>
+
+#ifndef strncasecmp
+#define strncasecmp	lstrncmpiA
+#endif
 
 /* code page info common to SBCS and DBCS */
 struct cp_info
@@ -71,10 +76,23 @@ extern int utf8_mbstowcs( int flags, const char *src, int srclen, WCHAR *dst, in
 extern WCHAR WINAPI tolowerW( WCHAR ch );
 extern WCHAR WINAPI toupperW( WCHAR ch );
 
-static inline int is_dbcs_leadbyte( const union cptable *table, unsigned char ch )
+extern unsigned short get_char_typeW( WCHAR ch );
+
+inline static int isdigitW( WCHAR wc )
 {
-    return (table->info.char_size == 2) && (table->dbcs.cp2uni_leadbytes[ch]);
+    return get_char_typeW(wc) & C1_DIGIT;
 }
+
+inline static int isxdigitW( WCHAR wc )
+{
+    return get_char_typeW(wc) & C1_XDIGIT;
+}
+
+#define  islowerW(a)    IsCharLowerW(a)
+#define  isupperW(a)    IsCharUpperW(a)
+#define  isalnumW(a)    IsCharAlphaNumericW(a)
+#define  isalphaW(a)	IsCharAlphaW(a)
+
 
 /* some useful string manipulation routines */
 
@@ -185,7 +203,6 @@ static inline WCHAR *struprW( WCHAR *str )
 extern int strcmpiW( const WCHAR *str1, const WCHAR *str2 );
 extern int strncmpiW( const WCHAR *str1, const WCHAR *str2, int n );
 extern WCHAR *strstrW( const WCHAR *str, const WCHAR *sub );
-extern unsigned short get_char_typeW( WCHAR ch );
 
 
 #if defined(__IBMC__) || defined(__IBMCPP__) || defined(__WATCOMC__) || defined(__WATCOM_CPLUSPLUS__)

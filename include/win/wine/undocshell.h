@@ -687,9 +687,6 @@ BOOL WINAPI PathIsSameRoot(
 	LPCWSTR lpszPath1,
 	LPCWSTR lpszPath2);
 
-BOOL WINAPI PathFindOnPathA(LPSTR sFile, LPCSTR sOtherDirs);
-BOOL WINAPI PathFindOnPathW(LPWSTR sFile, LPCWSTR sOtherDirs);
-#define PathFindOnPath WINELIB_NAME_AW(PathFindOnPath)
 BOOL WINAPI PathFindOnPathAW(LPVOID sFile, LPCVOID sOtherDirs);
 
 LPSTR WINAPI StrFormatByteSizeA ( DWORD dw, LPSTR pszBuf, UINT cchBuf );
