@@ -1,4 +1,4 @@
-/* $Id: hmfile.cpp,v 1.18 2000-08-14 08:10:10 sandervl Exp $ */
+/* $Id: hmfile.cpp,v 1.19 2000-09-03 09:32:19 sandervl Exp $ */
 
 /*
  * File IO win32 apis
@@ -344,6 +344,7 @@ BOOL HMDeviceFileClass::DuplicateHandle(PHMHANDLEDATA pHMHandleData,
   }
   else
   {
+    dprintf(("ERROR: DuplicateHandle; invalid parameter!!"));
     SetLastError(ERROR_INVALID_PARAMETER);
     return FALSE;
   }
@@ -788,6 +789,7 @@ BOOL HMDeviceFileClass::GetFileTime(PHMHANDLEDATA pHMHandleData,
  BOOL rc;
 
   if(!pFT1 && !pFT2 && !pFT3) {//TODO: does NT do this?
+  	dprintf(("ERROR: GetFileTime: invalid parameter!"));
 	SetLastError(ERROR_INVALID_PARAMETER);
 	return FALSE;
   }

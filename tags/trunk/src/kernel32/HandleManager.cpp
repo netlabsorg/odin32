@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.46 2000-08-11 18:42:53 sandervl Exp $ */
+/* $Id: HandleManager.cpp,v 1.47 2000-09-03 09:32:06 sandervl Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -2848,10 +2848,10 @@ DWORD  HMMsgWaitForMultipleObjects  (DWORD 			nCount,
  * Author    : Sander van Leeuwen
  *****************************************************************************/
 
-BOOL WIN32API DeviceIoControl(HANDLE hDevice, DWORD dwIoControlCode,
-                              LPVOID lpInBuffer, DWORD nInBufferSize,
-                              LPVOID lpOutBuffer, DWORD nOutBufferSize,
-                              LPDWORD lpBytesReturned, LPOVERLAPPED lpOverlapped)
+BOOL HMDeviceIoControl(HANDLE hDevice, DWORD dwIoControlCode,
+                       LPVOID lpInBuffer, DWORD nInBufferSize,
+                       LPVOID lpOutBuffer, DWORD nOutBufferSize,
+                       LPDWORD lpBytesReturned, LPOVERLAPPED lpOverlapped)
 {
   int       iIndex;                           /* index into the handle table */
   BOOL      fResult;       /* result from the device handler's CloseHandle() */
