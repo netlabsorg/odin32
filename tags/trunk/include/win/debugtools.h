@@ -125,6 +125,9 @@ extern const char * const debug_ch_name[];
 #define DEFAULT_DEBUG_CHANNEL(ch) \
     static const int *const DBCH_DEFAULT = &dbch_##ch;
 
+#define WINE_DECLARE_DEBUG_CHANNEL(ch) DECLARE_DEBUG_CHANNEL(ch)
+#define WINE_DEFAULT_DEBUG_CHANNEL(ch) DEFAULT_DEBUG_CHANNEL(ch)
+
 #define DPRINTF dbg_printf
 #define MESSAGE dbg_printf
 
