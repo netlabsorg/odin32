@@ -1,4 +1,4 @@
-/* $Id: hmdisk.cpp,v 1.23 2001-10-27 08:26:06 sandervl Exp $ */
+/* $Id: hmdisk.cpp,v 1.24 2001-10-29 13:36:32 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -869,40 +869,11 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
         //no break;
     case IOCTL_DISK_CHECK_VERIFY:
     case IOCTL_STORAGE_CHECK_VERIFY:
+    {
         dprintf(("IOCTL_CDROM(DISK/STORAGE)CHECK_VERIFY %s", drvInfo->signature));
         if(lpBytesReturned) {
             *lpBytesReturned = 0;
         }
-        //TODO: check if disk has been inserted or removed
-        if(pHMHandleData->hHMHandle == 0) {
-            SetLastError(ERROR_NOT_READY);  //NT4, SP6 returns this
-            return FALSE;
-        }
-
-        if(drvInfo->driveType == DRIVE_CDROM) 
-        {
-            DWORD parsize = 4;
-            DWORD datasize = 4;
-            DWORD status = 0;
-            DWORD rc;
-
-            //IOCTL_CDROM (0x80), CDROMDISK_DEVICESTATUS (0x60)
-            rc = OSLibDosDevIOCtl(pHMHandleData->hHMHandle, 0x80, 0x60, &drvInfo->signature[0], 4, &parsize,
-                                  &status, sizeof(status), &datasize);
-            if(rc != NO_ERROR) {
-                dprintf(("OSLibDosDevIOCtl failed with rc %d", rc));
-                return FALSE;
-            }
-            dprintf(("CDROM status 0x%x", status));
-            //if door open or no disk present, return FALSE
-            if(status & (BIT_0|BIT_11)) {
-                SetLastError(ERROR_NOT_READY);  //NT4, SP6 returns this
-                return FALSE;
-            }
-            SetLastError(NO_ERROR);
-            return TRUE;
-        }
-        else {
 #pragma pack(1)
       typedef struct
       {
@@ -911,34 +882,32 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
       } ParameterBlock;
 #pragma pack()
 
-            DWORD parsize = sizeof(ParameterBlock);
-            DWORD datasize = 2;
-            WORD status = 0;
-            DWORD rc;
-            ParameterBlock parm;
+        DWORD parsize = sizeof(ParameterBlock);
+        DWORD datasize = 2;
+        WORD status = 0;
+        DWORD rc;
+        ParameterBlock parm;
 
-            parm.ucCommandInfo = 0;
-            parm.usDriveUnit = drvInfo->driveLetter - 'A';
-            //IOCTL_DISK (0x08), DSK_GETLOCKSTATUS (0x66)
-            rc = OSLibDosDevIOCtl(pHMHandleData->hHMHandle, 0x08, 0x66, &parm, sizeof(parm), &parsize,
-                                  &status, sizeof(status), &datasize);
-            if(rc != NO_ERROR) {
-                dprintf(("OSLibDosDevIOCtl failed with rc %d", rc));
-                return FALSE;
-            }
-            dprintf(("Disk status 0x%x", status));
-            dprintf(("WARNING: IOCTL_DISK_CHECK_VERIFY not properly implemented!!"));
-            //TODO: this doesn't seem to work
-            //if no disk present, return FALSE
-//            if(!(status & (BIT_2))) {
-//                SetLastError(ERROR_NOT_READY);  //NT4, SP6 returns this
-//                return FALSE;
-//            }
-            SetLastError(NO_ERROR);
-            return TRUE;
+        parm.ucCommandInfo = 0;
+        parm.usDriveUnit = drvInfo->driveLetter - 'A';
+        //IOCTL_DISK (0x08), DSK_GETLOCKSTATUS (0x66)
+//            rc = OSLibDosDevIOCtl(pHMHandleData->hHMHandle, 0x08, 0x66, &parm, sizeof(parm), &parsize,
+        //TODO: this doesn't work for floppies for some reason...
+        rc = OSLibDosDevIOCtl(-1, 0x08, 0x66, &parm, sizeof(parm), &parsize,
+                              &status, sizeof(status), &datasize);
+        if(rc != NO_ERROR || datasize == 0) {
+            dprintf(("OSLibDosDevIOCtl failed with rc %d datasize %d", rc, datasize));
+            return FALSE;
+        }
+        dprintf(("Disk status 0x%x", status));
+        //if no disk present, return FALSE
+        if(!(status & (BIT_2))) {
+            SetLastError(ERROR_NOT_READY);  //NT4, SP6 returns this
+            return FALSE;
         }
         SetLastError(NO_ERROR);
         return TRUE;
+    }
 
     case IOCTL_DISK_EJECT_MEDIA:
     case IOCTL_STORAGE_EJECT_MEDIA:
