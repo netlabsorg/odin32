@@ -1,4 +1,4 @@
-/* $Id: winexepe2lx.cpp,v 1.5 2000-03-09 19:03:22 sandervl Exp $ */
+/* $Id: winexepe2lx.cpp,v 1.6 2000-04-14 22:35:27 sandervl Exp $ */
 
 /*
  * Win32 PE2LX Exe class
@@ -36,8 +36,6 @@
 #include "dbglocal.h"
 
 
-BOOL fPe2Lx = FALSE;
-
 /**
  * Register a Pe2Lx Executable module.
  * This is called from the TIBFix code in the Pe2Lx exe. It creates the WinExe object from
@@ -57,8 +55,6 @@ BOOL fPe2Lx = FALSE;
 void WIN32API RegisterPe2LxExe(ULONG ulPe2LxVersion, HINSTANCE hinstance, ULONG ulReserved)
 {
     Win32Pe2LxExe *pWinPe2LxExe;
-
-    fPe2Lx = TRUE;
 
     /* I/O init. */
     if (getenv("WIN32_IOPL2"))

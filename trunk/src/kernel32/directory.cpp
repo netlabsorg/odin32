@@ -1,4 +1,4 @@
-/* $Id: directory.cpp,v 1.18 2000-04-07 19:43:46 sandervl Exp $ */
+/* $Id: directory.cpp,v 1.19 2000-04-14 22:35:26 sandervl Exp $ */
 
 /*
  * Win32 Directory functions for OS/2
@@ -12,6 +12,8 @@
  * DOS directories functions
  *
  * Copyright 1995 Alexandre Julliard
+ *
+ * TODO: System/window directories should be created by install program!
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -228,33 +230,10 @@ ODINFUNCTION2(BOOL,CreateDirectoryW,LPCWSTR,             arg1,
 ODINFUNCTION2(UINT,GetSystemDirectoryA,LPSTR,lpBuffer,
                                        UINT,uSize)
 {
-  LPSTR lpstrEnv = getenv("WIN32.DIR.SYSTEM");          /* query environment */
-  CHAR  buf[255];
+  char buf[255];
+  int  len;
 
-  if (lpstrEnv != NULL)
-  {
-	if(lpBuffer)
-    		lstrcpynA(lpBuffer, lpstrEnv, uSize);
-
-    	return (lstrlenA(lpstrEnv));                /* return number of copies bytes */
-  } 
-  else
-  {
-    int len;
-
-    len = ODIN_PROFILE_GetOdinIniString(ODINDIRECTORIES,"SYSTEM","",buf,sizeof(buf));
-    if (len > 2) {
-	if(buf[len-1] == '\\') {
-		buf[len-1] = 0; 
-		len--;
-	}
-	if(lpBuffer)
-		lstrcpynA(lpBuffer, buf, uSize);
-
-	return len;
-    }
-    else {//SvL: Use path of kernel32.dll instead of calling Open32 api (which returns \OS2\SYSTEM)
-	lstrcpynA(buf, kernel32Path, sizeof(buf)-1);
+     	lstrcpynA(buf, kernel32Path, sizeof(buf)-1);
 	len = lstrlenA(buf);;
 	if(buf[len-1] == '\\') {
 		buf[len-1] = 0; 
@@ -263,8 +242,6 @@ ODINFUNCTION2(UINT,GetSystemDirectoryA,LPSTR,lpBuffer,
 	if(lpBuffer)
 		lstrcpynA(lpBuffer, buf, uSize);
 	return len;
-    }
-  }
 }
 
 
@@ -314,36 +291,17 @@ ODINFUNCTION2(UINT,GetSystemDirectoryW,LPWSTR,lpBuffer,
 ODINFUNCTION2(UINT,GetWindowsDirectoryA,LPSTR,lpBuffer,
                                         UINT,uSize)
 {
-  LPSTR lpstrEnv = getenv("WIN32.DIR.WINDOWS");         /* query environment */
+  static int fWindirExists = FALSE;
   CHAR  buf[255];
-
-  if (lpstrEnv != NULL)
-  {
-	if(lpBuffer)
-    		lstrcpynA(lpBuffer, lpstrEnv, uSize);
-
-    	return (lstrlenA(lpstrEnv));                /* return number of copies bytes */
-  } 
-  else
-  {
-    int len;
-
-    len = ODIN_PROFILE_GetOdinIniString(ODINDIRECTORIES,"WINDOWS","",buf,sizeof(buf));
-    if (len > 2) {
-	if(buf[len-1] == '\\') {
-		buf[len-1] = 0; 
-		len--;
-	}
-	if(lpBuffer)
-		lstrcpynA(lpBuffer, buf, uSize);
-
-	return len;
-    }
-    else {//SvL: Use path of kernel32.dll instead of calling Open32 api (which returns \OS2\SYSTEM)
-
+  int   len;
+  
+	//SvL: Use path of kernel32.dll instead of calling Open32 api (which returns \OS2\SYSTEM)
 	lstrcpynA(buf, kernel32Path, sizeof(buf)-1);
 	strcat(buf, "WIN");
-	O32_CreateDirectory(buf, NULL);
+	if(!fWindirExists) {
+		O32_CreateDirectory(buf, NULL);
+		fWindirExists = TRUE;
+	}
 
 	len = lstrlenA(buf);;
 	if(buf[len-1] == '\\') {
@@ -353,8 +311,6 @@ ODINFUNCTION2(UINT,GetWindowsDirectoryA,LPSTR,lpBuffer,
 	if(lpBuffer)
 		lstrcpynA(lpBuffer, buf, uSize);
 	return len;
-    }
-  }
 }
 
 

@@ -1,4 +1,4 @@
-/* $Id: winimagebase.cpp,v 1.10 2000-03-09 19:03:22 sandervl Exp $ */
+/* $Id: winimagebase.cpp,v 1.11 2000-04-14 22:35:28 sandervl Exp $ */
 
 /*
  * Win32 PE Image base class
@@ -132,9 +132,54 @@ ULONG Win32ImageBase::getVersion()
 }
 //******************************************************************************
 //******************************************************************************
-BOOL Win32ImageBase::isPEImage(char *szFileName)
+void Win32ImageBase::findDll(char *szFileName, char *szFullName, int cchFullFileName)
 {
  char   modname[CCHMAXPATH];
+ HFILE  dllfile;
+ char  *imagepath;
+
+  strcpy(szFullName, szFileName);
+  strupr(szFullName);
+  if(!strchr(szFullName, (int)'.')) {
+    	strcat(szFullName,".DLL");
+  }
+  //search order:
+  //1) current dir
+  //2) exe dir
+  //3) windows system dir (kernel32 path)
+  //4) path
+  dllfile = OSLibDosOpen(szFullName, OSLIB_ACCESS_READONLY|OSLIB_ACCESS_SHAREDENYNONE);
+  if(dllfile == NULL) {//search in libpath for dll
+	strcpy(modname, WinExe->getFullPath());
+	//remove file name from full path
+	imagepath = modname + strlen(modname) - 1;
+	while(*imagepath != '\\') imagepath--;
+	imagepath[1] = 0;
+	strcat(modname, szFileName);
+	dllfile = OSLibDosOpen(modname, OSLIB_ACCESS_READONLY|OSLIB_ACCESS_SHAREDENYNONE);
+	if(dllfile == NULL) {
+	    	strcpy(modname, kernel32Path);
+	    	strcat(modname, szFileName);
+		dllfile = OSLibDosOpen(modname, OSLIB_ACCESS_READONLY|OSLIB_ACCESS_SHAREDENYNONE);
+		if(dllfile == NULL) {
+			OSLibDosSearchPath(OSLIB_SEARCHENV, "PATH", modname, szFullName, cchFullFileName);
+		}
+	    	else {
+			strcpy(szFullName, modname);
+			OSLibDosClose(dllfile);
+		}
+	}
+    	else {
+		strcpy(szFullName, modname);
+		OSLibDosClose(dllfile);
+	}
+  }
+  else  OSLibDosClose(dllfile);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL Win32ImageBase::isPEImage(char *szFileName)
+{
  char   filename[CCHMAXPATH];
  char  *syspath;
  HFILE  dllfile;
@@ -147,28 +192,9 @@ BOOL Win32ImageBase::isPEImage(char *szFileName)
  ULONG  ulRead;
  int    nSections, i;
 
-  strcpy(filename, szFileName);
-  strupr(filename);
-  if(!strchr(filename, (int)'.')) {
-    strcat(filename,".DLL");
-  }
-  dllfile = OSLibDosOpen(filename, OSLIB_ACCESS_READONLY|OSLIB_ACCESS_SHAREDENYNONE);
-  if(dllfile == NULL) {//search in libpath for dll
-    	strcpy(modname, kernel32Path);
-    	strcat(modname, filename);
-	dllfile = OSLibDosOpen(modname, OSLIB_ACCESS_READONLY|OSLIB_ACCESS_SHAREDENYNONE);
-	if(dllfile == NULL) {
-		OSLibDosSearchPath(OSLIB_SEARCHENV, "PATH", filename, filename, sizeof(filename));
-	}
-    	else {
-		strcpy(filename, modname);
-		OSLibDosClose(dllfile);
-	}
-  }
-  else  OSLibDosClose(dllfile);
-
+  findDll(szFileName, filename, sizeof(filename));
   rc = DosOpen(filename,                       /* File path name */
-           &win32handle,                       /* File handle */
+               &win32handle,                   /* File handle */
                &ulAction,                      /* Action taken */
                0L,                             /* File primary allocation */
                0L,                             /* File attribute */

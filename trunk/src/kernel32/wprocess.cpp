@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.75 2000-03-18 19:49:44 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.76 2000-04-14 22:35:29 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -22,7 +22,7 @@
 #include "windllbase.h"
 #include "winexebase.h"
 #include "windllpeldr.h"
-#include "winexepe2lx.h"
+#include "winexepeldr.h"
 #include "winfakepeldr.h"
 #include <vmutex.h>
 #include <handlemanager.h>
@@ -422,7 +422,7 @@ static HINSTANCE iLoadLibraryA(LPCTSTR lpszLibFile, DWORD dwFlags)
 
     module = Win32DllBase::findModule((LPSTR)lpszLibFile);
     if(module) {
-        if(module->isLxDll() && !module->isLoaded() && !fPe2Lx) {
+        if(module->isLxDll() && !module->isLoaded() && fPeLoader) {
             //can happen with i.e. wininet
             //wininet depends on wsock32; when the app loads wsock32 afterwards
             //with LoadLibrary or as a child of another dll, we need to make
@@ -448,7 +448,7 @@ static HINSTANCE iLoadLibraryA(LPCTSTR lpszLibFile, DWORD dwFlags)
     if(hDll)
     {
         module = Win32DllBase::findModule(hDll);
-        if(module && module->isLxDll() && !fPe2Lx) {
+        if(module && module->isLxDll() && fPeLoader) {
             module->setLoadLibrary();
             module->AddRef();
         }

@@ -1,4 +1,4 @@
-/* $Id: windlllx.cpp,v 1.9 2000-03-09 19:03:21 sandervl Exp $ */
+/* $Id: windlllx.cpp,v 1.10 2000-04-14 22:35:27 sandervl Exp $ */
 
 /*
  * Win32 LX Dll class (compiled in OS/2 using Odin32 api)
@@ -29,6 +29,7 @@
 #include <windllbase.h>
 #include <windlllx.h>
 #include "winexepe2lx.h"
+#include "winexepeldr.h"
 #include <odinlx.h>
 #include "oslibmisc.h"
 
@@ -59,7 +60,7 @@ DWORD WIN32API RegisterLxDll(HINSTANCE hInstance, WIN32DLLENTRY EntryPoint,
 	dprintf(("RegisterLxDll: windll == NULL!!!"));
 	return FALSE;
    }
-   if(fPe2Lx) {
+   if(!fPeLoader) {
    	windll->AddRef();
 
    	if(windll->attachProcess() == 0)
@@ -120,7 +121,7 @@ BOOL WIN32API UnregisterLxDll(HINSTANCE hInstance)
 
    //Don't proceed for pe2lx/win32k (os/2 dll unload dependency bug)
    //Don't do it either after ExitProcess has been called
-   if(fPe2Lx || WinExe == NULL)
+   if(!fPeLoader || WinExe == NULL)
    	return TRUE;
 
    windll = (Win32LxDll *)Win32DllBase::findModule(hInstance);
@@ -193,7 +194,7 @@ ULONG Win32LxDll::AddRef()
   ret = Win32DllBase::AddRef();
 #endif
 
-  if(fPe2Lx)
+  if(!fPeLoader)
 	return ret;
 
   if(referenced == 1) 

@@ -1,4 +1,4 @@
-/* $Id: winexelx.cpp,v 1.5 2000-02-16 14:22:11 sandervl Exp $ */
+/* $Id: winexelx.cpp,v 1.6 2000-04-14 22:35:27 sandervl Exp $ */
 
 /*
  * Win32 LX Exe class (compiled in OS/2 using Odin32 api)
@@ -65,7 +65,16 @@ BOOL WIN32API RegisterLxExe(WINMAIN EntryPoint, PVOID pResData)
   winexe = new Win32LxExe(ppib->pib_hmte, pResData);
 
   if(winexe) {
-	winexe->setCommandLine(ppib->pib_pchcmd);
+	char *cmdline;
+	int   cmdlen = strlen(ppib->pib_pchcmd);
+
+	cmdlen += strlen(ppib->pib_pchcmd+cmdlen+1); 
+ 	cmdline = (char *)malloc(cmdlen+2); //term. 0 + space
+	strcpy(cmdline, ppib->pib_pchcmd);
+	strcat(cmdline, " ");
+	strcat(cmdline, ppib->pib_pchcmd+strlen(ppib->pib_pchcmd)+1);
+	winexe->setCommandLine(cmdline);
+	free(cmdline);
    	winexe->setEntryPoint((ULONG)EntryPoint);
    	winexe->start();
   }
