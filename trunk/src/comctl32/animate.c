@@ -29,6 +29,10 @@ DEFAULT_DEBUG_CHANNEL(animate);
 
 typedef struct
 {
+#ifdef __WIN32OS2__
+    COMCTL32_HEADER header;
+#endif
+
    /* pointer to msvideo functions. it's easier to put them here.
     * to be correct, they should be defined on a per process basis, but
     * this would required a per process storage. We're using a per object
@@ -818,7 +822,11 @@ static LRESULT ANIMATE_Create(HWND hWnd, WPARAM wParam, LPARAM lParam)
         return FALSE;
 
     /* allocate memory for info structure */
+#ifdef __WIN32OS2__
+    infoPtr = (ANIMATE_INFO*)initControl(hWnd,sizeof(ANIMATE_INFO));
+#else
     infoPtr = (ANIMATE_INFO *)COMCTL32_Alloc(sizeof(ANIMATE_INFO));
+#endif
     if (!infoPtr) {
         ERR("could not allocate info memory!\n");
         return 0;

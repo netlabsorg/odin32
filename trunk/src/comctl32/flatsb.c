@@ -20,10 +20,17 @@
 #include "commctrl.h"
 #include "debugtools.h"
 
+#ifdef __WIN32OS2__
+#include "ccbase.h"
+#endif
+
 DEFAULT_DEBUG_CHANNEL(commctrl);
 
 typedef struct
 {
+#ifdef __WIN32OS2__
+    COMCTL32_HEADER header;
+#endif
     DWORD dwDummy;  /* just to keep the compiler happy ;-) */
 } FLATSB_INFO, *LPFLATSB_INFO;
 
@@ -179,6 +186,10 @@ static LRESULT
 FlatSB_Create (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
     TRACE("[%04x] wParam=%04x lParam=%08lx\n", hwnd, wParam, lParam);
+#ifdef __WIN32OS2__
+    initControl(hwnd,sizeof(FLATSB_INFO));
+#endif
+
     return 0;
 }
 
@@ -187,6 +198,10 @@ static LRESULT
 FlatSB_Destroy (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
     TRACE("[%04x] wParam=%04x lParam=%08lx\n", hwnd, wParam, lParam);
+#ifdef __WIN32OS2__
+    /* free pager info data */
+    doneControl(hwnd);
+#endif
     return 0;
 }
 

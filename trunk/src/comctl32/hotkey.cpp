@@ -1,4 +1,4 @@
-/* $Id: hotkey.cpp,v 1.2 2000-02-25 17:00:15 cbratschi Exp $ */
+/* $Id: hotkey.cpp,v 1.3 2001-03-31 13:25:26 sandervl Exp $ */
 /*
  * Hotkey control
  *
@@ -15,6 +15,7 @@
 #include "ccbase.h"
 #include "hotkey.h"
 #include <string.h>
+#include "comctl32.h"
 
 #define HOTKEY_GetInfoPtr(hwnd) ((HOTKEY_INFO*)getInfoPtr(hwnd))
 

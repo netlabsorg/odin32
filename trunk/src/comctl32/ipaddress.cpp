@@ -1,4 +1,4 @@
-/* $Id: ipaddress.cpp,v 1.2 2000-02-25 17:00:16 cbratschi Exp $ */
+/* $Id: ipaddress.cpp,v 1.3 2001-03-31 13:25:26 sandervl Exp $ */
 /*
  * IP Address control
  *
@@ -32,7 +32,7 @@
 #include "ccbase.h"
 #include "ipaddress.h"
 //#include "heap.h"
-
+#include "comctl32.h"
 
 #define IPADDRESS_GetInfoPtr(hwnd) ((IPADDRESS_INFO*)getInfoPtr(hwnd))
 
