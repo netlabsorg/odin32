@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.4 1999-06-10 19:09:05 phaller Exp $ */
+/* $Id: wprocess.cpp,v 1.5 1999-06-15 17:57:34 phaller Exp $ */
 
 /*
  *
@@ -203,14 +203,18 @@ BOOL WIN32API FreeLibrary(HINSTANCE hinstance)
 }
 /******************************************************************************/
 /******************************************************************************/
-HINSTANCE WIN32API LoadLibraryA(LPCTSTR lpszLibFile)
+static HINSTANCE iLoadLibraryA(LPCTSTR lpszLibFile)
 {
  HINSTANCE   hDll;
  Win32Dll   *module;
 
   hDll = O32_LoadLibrary(lpszLibFile);
-  dprintf(("KERNEL32:  LoadLibraryA %s returned %X (%d)\n", lpszLibFile, hDll, GetLastError()));
-  if(hDll) {
+  dprintf(("KERNEL32:  iLoadLibraryA %s returned %X (%d)\n",
+           lpszLibFile,
+           hDll,
+           GetLastError()));
+  if(hDll)
+  {
     return hDll;    //converted dll or win32k took care of it
   }
 
@@ -238,8 +242,39 @@ HINSTANCE WIN32API LoadLibraryA(LPCTSTR lpszLibFile)
     module->AddRef();
     return module->getInstanceHandle();
   }
-  else  return(0);
+  else
+    return(0);
 }
+
+
+HINSTANCE WIN32API LoadLibraryA(LPCTSTR lpszLibFile)
+{
+  HINSTANCE hDll;
+
+  dprintf(("KERNEL32:  LoadLibraryA(%s)\n",
+           lpszLibFile));
+
+  hDll = iLoadLibraryA(lpszLibFile);
+  if (hDll == 0)
+  {
+    PSZ pszName;
+
+    // remove path from the image name
+    pszName = strrchr((PSZ)lpszLibFile,
+                      '\\');
+    if (pszName != NULL)
+    {
+      pszName++;                // skip backslash
+
+      // now try again without fully qualified path
+      hDll = iLoadLibraryA(pszName);
+    }
+  }
+
+  return hDll;
+}
+
+
 //******************************************************************************
 //******************************************************************************
 HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HANDLE hFile, DWORD dwFlags)
