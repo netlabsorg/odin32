@@ -1,4 +1,4 @@
-/* $Id: hmdevio.h,v 1.2 2001-04-26 13:22:44 sandervl Exp $ */
+/* $Id: hmdevio.h,v 1.3 2001-06-04 21:18:40 sandervl Exp $ */
 
 #ifndef __DEVIO_H__
 #define __DEVIO_H__
@@ -102,6 +102,13 @@ typedef BOOL (* WINIOCTL)(HANDLE hDevice, DWORD dwIoControlCode,
               LPVOID lpOutBuffer, DWORD nOutBufferSize,
               LPDWORD lpBytesReturned, LPOVERLAPPED lpOverlapped);
 
+typedef HANDLE (* WIN32API DrvOpen)(DWORD dwAccess, DWORD dwShare);
+typedef void   (* WIN32API DrvClose)(HANDLE hDevice);
+typedef BOOL   (* WIN32API DrvIOCtl)(HANDLE hDevice, DWORD dwIoControlCode,
+                       LPVOID lpInBuffer, DWORD nInBufferSize,
+                       LPVOID lpOutBuffer, DWORD nOutBufferSize,
+                       LPDWORD lpBytesReturned, LPOVERLAPPED lpOverlapped);
+
 typedef struct {
     char     szWin32Name[32];
     char     szOS2Name[32];
@@ -118,6 +125,7 @@ class HMDeviceDriver : public HMDeviceKernelObjectClass
 {
 public:
   HMDeviceDriver(LPCSTR lpDeviceName, LPSTR lpOS2DevName, BOOL fCreate, WINIOCTL pDevIOCtl);
+  HMDeviceDriver(LPCSTR lpDeviceName);
 
                        /* this is a handler method for calls to CreateFile() */
   virtual DWORD  CreateFile (LPCSTR        lpFileName,
@@ -136,6 +144,33 @@ private:
   BOOL     fCreateFile;
   LPSTR    szOS2Name;
   WINIOCTL devIOCtl;
+};
+
+class HMCustomDriver : public HMDeviceDriver
+
+{
+public:
+  HMCustomDriver(HINSTANCE hInstance, LPCSTR lpDeviceName);
+  virtual ~HMCustomDriver();
+
+                       /* this is a handler method for calls to CreateFile() */
+  virtual DWORD  CreateFile (LPCSTR        lpFileName,
+                             PHMHANDLEDATA pHMHandleData,
+                             PVOID         lpSecurityAttributes,
+                             PHMHANDLEDATA pHMHandleDataTemplate);
+
+  virtual BOOL   CloseHandle(PHMHANDLEDATA pHMHandleData);
+
+                    /* this is a handler method for calls to DeviceIoControl() */
+  virtual BOOL   DeviceIoControl    (PHMHANDLEDATA pHMHandleData, DWORD dwIoControlCode,
+                                     LPVOID lpInBuffer, DWORD nInBufferSize,
+                                     LPVOID lpOutBuffer, DWORD nOutBufferSize,
+                                     LPDWORD lpBytesReturned, LPOVERLAPPED lpOverlapped);
+private:
+  DrvOpen  driverOpen;
+  DrvClose driverClose;
+  DrvIOCtl driverIOCtl;
+  HINSTANCE hDrvDll;
 };
 
 void  RegisterDevices();

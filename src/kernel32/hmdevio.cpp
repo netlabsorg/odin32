@@ -1,4 +1,4 @@
-/* $Id: hmdevio.cpp,v 1.11 2001-05-20 11:02:43 sandervl Exp $ */
+/* $Id: hmdevio.cpp,v 1.12 2001-06-04 21:18:39 sandervl Exp $ */
 
 /*
  * Win32 Device IOCTL API functions for OS/2
@@ -19,10 +19,12 @@
 #define INCL_DOSMISC             /* DOS Miscellanous values  */
 #include <os2wrap.h>	//Odin32 OS/2 api wrappers
 #include <string.h>
+#include <stdio.h>
 
 #include <win32type.h>
 #include <win32api.h>
 #include <misc.h>
+#include <win\winioctl.h>
 #include "hmdevio.h"
 #include "cio.h"
 #include "map.h"
@@ -47,12 +49,13 @@ static WIN32DRV knownDriver[] =
     { "\\\\.\\MAPMEM", "PMAP$", FALSE, 0,     MAPMEMIOCtl},
     { "FXMEMMAP.VXD",  "PMAP$", FALSE, 0,     FXMEMMAPIOCtl},
 #if 1
-    { "\\\\.\\VPCAppSv", "",    TRUE,  667,   VPCIOCtl}};
+    { "\\\\.\\VPCAppSv", "", TRUE,  667,   VPCIOCtl}};
 #else
     };
 #endif
 
 static int nrKnownDrivers = sizeof(knownDriver)/sizeof(WIN32DRV);
+BOOL fVirtualPC = FALSE;
 
 //******************************************************************************
 //******************************************************************************
@@ -73,6 +76,55 @@ void RegisterDevices()
       		dprintf(("KERNEL32:RegisterDevices: registering %s failed with %u.\n",
               		  knownDriver[i].szWin32Name, rc));
     }
+
+    //check registry for Odin driver plugin dlls
+    HKEY hkDrivers, hkDrvDll;
+
+    rc = RegOpenKeyExA(HKEY_LOCAL_MACHINE,
+                       "System\\CurrentControlSet\\Services",
+                       0, KEY_READ, &hkDrivers);
+
+    if(rc == 0) {
+        char szDllName[CCHMAXPATH];
+        char szKeyName[CCHMAXPATH];
+        char szDrvName[CCHMAXPATH];
+        DWORD dwType, dwSize;
+        int iSubKey = 0;
+
+        while(rc == 0) {
+            rc = RegEnumKeyA(hkDrivers, iSubKey++, szKeyName, sizeof(szKeyName));
+            if(rc) break;
+
+            rc = RegOpenKeyExA(hkDrivers, szKeyName,
+                               0, KEY_READ, &hkDrvDll);
+            if(rc == 0) {
+                dwSize = sizeof(szDllName);
+                rc = RegQueryValueExA(hkDrvDll,
+                                      "DllName",
+                                      NULL,
+                                      &dwType,
+                                      (LPBYTE)szDllName,
+                                      &dwSize);
+
+                RegCloseKey(hkDrvDll);
+                if(rc == 0 && dwType == REG_SZ)
+                {
+                    HINSTANCE hDrvDll = LoadLibraryA(szDllName);
+                    if(hDrvDll) {
+                        sprintf(szDrvName, "\\\\.\\%s", szKeyName);
+                        driver = new HMCustomDriver(hDrvDll, szDrvName);
+
+                        rc = HMDeviceRegister(szDrvName, driver);
+                        if (rc != NO_ERROR)                                  /* check for errors */
+                              dprintf(("KERNEL32:RegisterDevices: registering %s failed with %u.\n", szDrvName, rc));
+                    }
+                }
+                rc = 0;
+            }
+        }   
+        RegCloseKey(hkDrivers);
+    }
+
     return;
 }
 //******************************************************************************
@@ -84,6 +136,12 @@ HMDeviceDriver::HMDeviceDriver(LPCSTR lpDeviceName, LPSTR lpOS2DevName, BOOL fCr
     this->fCreateFile = fCreateFile;
     this->szOS2Name   = lpOS2DevName;
     this->devIOCtl    = pDevIOCtl;
+}
+//******************************************************************************
+//******************************************************************************
+HMDeviceDriver::HMDeviceDriver(LPCSTR lpDeviceName)
+                : HMDeviceKernelObjectClass(lpDeviceName)
+{
 }
 //******************************************************************************
 //******************************************************************************
@@ -305,9 +363,11 @@ static BOOL FXMEMMAPIOCtl(HANDLE hDevice, DWORD dwIoControlCode, LPVOID lpInBuff
 //******************************************************************************
 static BOOL VPCIOCtl(HANDLE hDevice, DWORD dwIoControlCode, LPVOID lpInBuffer, DWORD nInBufferSize, LPVOID lpOutBuffer, DWORD nOutBufferSize, LPDWORD lpBytesReturned, LPOVERLAPPED lpOverlapped)
 {
+  APIRET rc;
+
+  dprintf(("VPCIOCtl func %x: %x %d %x %d %x %x", dwIoControlCode, lpInBuffer, nInBufferSize, lpOutBuffer, nOutBufferSize, lpBytesReturned, lpOverlapped));
   switch(dwIoControlCode) {
   case 0x9C402880: //0x00
-        dprintf(("VPCIOCtl func 0x9C402880: %d %x %d %x %x", nInBufferSize, lpOutBuffer, nOutBufferSize, lpBytesReturned, lpOverlapped));
         if(nOutBufferSize < 4) {
             SetLastError(ERROR_BAD_LENGTH);
             return FALSE;
@@ -315,10 +375,10 @@ static BOOL VPCIOCtl(HANDLE hDevice, DWORD dwIoControlCode, LPVOID lpInBuffer, D
         *(DWORD *)lpOutBuffer = 0x50001;
         *lpBytesReturned = 4;
         return TRUE;
+
   case 0x9C402894: //0x14 (get IDT table)
   {
         DWORD *lpBuffer = (DWORD *)lpOutBuffer;
-        dprintf(("VPCIOCtl func 0x9C402894: %d %x %d %x %x", nInBufferSize, lpOutBuffer, nOutBufferSize, lpBytesReturned, lpOverlapped));
         if(nOutBufferSize < 0x800) {
             SetLastError(ERROR_BAD_LENGTH);
             return FALSE;
@@ -334,32 +394,84 @@ static BOOL VPCIOCtl(HANDLE hDevice, DWORD dwIoControlCode, LPVOID lpInBuffer, D
         return TRUE;
   }
   case 0x9C40288C: //0x0C change IDT
-        dprintf(("VPCIOCtl func 0x9C40288C: %d %x %d %x %x", nInBufferSize, lpOutBuffer, nOutBufferSize, lpBytesReturned, lpOverlapped));
         if(nInBufferSize < 0x22) {
             SetLastError(ERROR_BAD_LENGTH);
             return FALSE;
         }
+        fVirtualPC = TRUE;
         return TRUE;
-  case 0x9C402884: //0x04
-        dprintf(("VPCIOCtl func 0x9C402884: %d %x %d %x %x", nInBufferSize, lpOutBuffer, nOutBufferSize, lpBytesReturned, lpOverlapped));
+
+  case 0x9C402884: //0x04 ExAllocatePoolWithTag
+  {
+        DWORD *lpBuffer = (DWORD *)lpInBuffer;
         if(nInBufferSize < 0x08) {
             SetLastError(ERROR_BAD_LENGTH);
             return FALSE;
         }
+        dprintf(("In: %x %x", lpBuffer[0], lpBuffer[1]));
         return TRUE;
+  }
 
   case 0x9C402898: //0x18 Remove IDT patch
-        dprintf(("VPCIOCtl func 0x9C402898: %d %x %d %x %x", nInBufferSize, lpOutBuffer, nOutBufferSize, lpBytesReturned, lpOverlapped));
         if(nInBufferSize < 0x01) {
             SetLastError(ERROR_BAD_LENGTH);
             return FALSE;
         }
+        fVirtualPC = FALSE;
         return TRUE;
-
   default:
         dprintf(("VPCIOCtl unknown func %X\n", dwIoControlCode));
         return FALSE;
   }
+}
+//******************************************************************************
+//******************************************************************************
+HMCustomDriver::HMCustomDriver(HINSTANCE hInstance, LPCSTR lpDeviceName)
+                : HMDeviceDriver(lpDeviceName)
+{
+    hDrvDll = hInstance ;
+    *(ULONG *)&driverOpen  = (ULONG)GetProcAddress(hDrvDll, "DrvOpen");
+    *(ULONG *)&driverClose = (ULONG)GetProcAddress(hDrvDll, "DrvClose");
+    *(ULONG *)&driverIOCtl = (ULONG)GetProcAddress(hDrvDll, "DrvIOCtl");
+}
+//******************************************************************************
+//******************************************************************************
+HMCustomDriver::~HMCustomDriver()
+{
+   FreeLibrary(hDrvDll);
+}
+//******************************************************************************
+//******************************************************************************
+DWORD HMCustomDriver::CreateFile (LPCSTR lpFileName,
+                                  PHMHANDLEDATA pHMHandleData,
+                                  PVOID         lpSecurityAttributes,
+                                  PHMHANDLEDATA pHMHandleDataTemplate)
+{
+   pHMHandleData->hHMHandle = driverOpen(pHMHandleData->dwAccess, pHMHandleData->dwShare);
+   if(pHMHandleData->hHMHandle == 0) {
+       return 2;
+   }
+   return 0;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL HMCustomDriver::CloseHandle(PHMHANDLEDATA pHMHandleData)
+{
+   if(pHMHandleData->hHMHandle) {
+	driverClose(pHMHandleData->hHMHandle);
+   }
+   pHMHandleData->hHMHandle = 0;
+   return TRUE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL HMCustomDriver::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoControlCode,
+                                     LPVOID lpInBuffer, DWORD nInBufferSize,
+                                     LPVOID lpOutBuffer, DWORD nOutBufferSize,
+                                     LPDWORD lpBytesReturned, LPOVERLAPPED lpOverlapped)
+{
+   return driverIOCtl(pHMHandleData->hHMHandle, dwIoControlCode, lpInBuffer, nInBufferSize,
+                      lpOutBuffer, nOutBufferSize, lpBytesReturned, lpOverlapped);
 }
 //******************************************************************************
 //******************************************************************************
