@@ -1,4 +1,4 @@
-/* $Id: guid.c,v 1.2 2001-07-29 19:02:35 sandervl Exp $ */
+/* $Id: guid.c,v 1.3 2001-08-04 15:29:20 sandervl Exp $ */
 #define ICOM_CINTERFACE 1
 #include <odin.h>
 
@@ -35,7 +35,7 @@
 #include <wine/obj_shellextinit.h>
 #include <wine/obj_shellbrowser.h>
 #include <wine/obj_serviceprovider.h>
-
+#include <wine/unicode.h>
 
 /*********************************************************************
  *           CRTDLL__wcsnicmp	 (CRTDLL.321)
@@ -48,7 +48,7 @@ int CDECL CRTDLL__wcsnicmp(LPCWSTR str1, LPCWSTR str2, int n)
         str1++;
         str2++;
     }
-    return towupper(*str1) - towupper(*str2);
+    return toupperW(*str1) - toupperW(*str2);
 }
 
 /*********************************************************************

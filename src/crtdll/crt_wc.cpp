@@ -1,4 +1,4 @@
-/* $Id: crt_wc.cpp,v 1.4 2001-02-11 10:33:13 sandervl Exp $ */
+/* $Id: crt_wc.cpp,v 1.5 2001-08-04 15:29:39 sandervl Exp $ */
 
 /*
  * The C RunTime DLL
@@ -112,12 +112,12 @@ int CDECL CRTDLL__wcsnicmp(LPCWSTR str1, LPCWSTR str2, int n)
            l));
 
     if (!n) return 0;
-    while ((--n > 0) && *str1 && (towupper(*str1) == towupper(*str2)))
+    while ((--n > 0) && *str1 && (toupperW(*str1) == toupperW(*str2)))
     {
         str1++;
         str2++;
     }
-    return towupper(*str1) - towupper(*str2);
+    return toupperW(*str1) - toupperW(*str2);
 }
 
 
@@ -177,7 +177,7 @@ LPWSTR CDECL CRTDLL__wcsupr(LPWSTR str)
        dwIndex;
        dwIndex--)
   {
-    towupper(str[dwIndex]);
+    toupperW(str[dwIndex]);
   }
 
   return (str);
@@ -427,14 +427,14 @@ WCHAR CDECL CRTDLL_towlower(WCHAR c)
 
 
 /*********************************************************************
- *                  towupper       (CRTDLL.491)
+ *                  toupperW       (CRTDLL.491)
  */
 WCHAR CDECL CRTDLL_towupper(WCHAR c)
 {
   dprintf2(("CRTDLL: towupper(%c)\n",
            c));
 
-  return (towupper(c));
+  return (toupperW(c));
 }
 
 
