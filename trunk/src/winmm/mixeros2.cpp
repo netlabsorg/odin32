@@ -1,4 +1,4 @@
-/* $Id: mixeros2.cpp,v 1.6 2002-05-28 13:35:02 sandervl Exp $ */
+/* $Id: mixeros2.cpp,v 1.7 2002-05-28 17:10:02 sandervl Exp $ */
 
 /*
  * OS/2 Mixer multimedia
@@ -24,6 +24,10 @@
 
 #include "initwinmm.h"
 #include "mixeros2.h"
+
+#ifndef LOWORD
+#define LOWORD(a)   (a & 0xffff)
+#endif
 
 static BOOL  GetAudioPDDName (char *pszPDDName);
 static HFILE DevOpen (char *ddName);
@@ -57,6 +61,25 @@ BOOL OSLibMixerOpen()
     }
 
     memset(szVolumeLevels, -1, sizeof(szVolumeLevels));
+
+    //query current master volume
+    MCI_MASTERAUDIO_PARMS parms = {0};
+    APIRET                rc;
+
+    rc = mymciSendCommand(0, MCI_MASTERAUDIO, MCI_MASTERVOL | MCI_WAIT | MCI_QUERYCURRENTSETTING, &parms, 0);
+    if(LOWORD(rc) == MCIERR_SUCCESS) 
+    {
+        dprintf(("Current master volume %d -> %d", parms.ulReturn, MMPM2MASTER_TO_WIN32_VOLUME(parms.ulReturn)));
+        szVolumeLevels[MIX_CTRL_VOL_OUT_LINE][0]  = MMPM2MASTER_TO_WIN32_VOLUME(parms.ulReturn);
+        szVolumeLevels[MIX_CTRL_VOL_OUT_LINE][1]  = szVolumeLevels[MIX_CTRL_VOL_OUT_LINE][0];
+        szVolumeLevels[MIX_CTRL_MUTE_OUT_LINE][0] = (szVolumeLevels[MIX_CTRL_MUTE_OUT_LINE][0] == 0);
+    }
+    else {
+        char szError[256] = "";
+
+        mymciGetErrorString(rc, szError, sizeof(szError));
+        dprintf(("mciSendCommand returned error %x = %s", rc, szError));
+    }
     return TRUE;
 }
 /******************************************************************************/
@@ -139,7 +162,7 @@ BOOL OSLibMixIsControlPresent(DWORD dwControl)
     DWORD idx;
 
     idx = OSLibMixGetIndex(dwControl);
-    if(idx == -1) {
+    if(idx == -1) {              
         return FALSE;
     }
     idx += MONOINSET;
@@ -152,26 +175,35 @@ BOOL OSLibMixSetVolume(DWORD dwControl, DWORD dwVolLeft, DWORD dwVolRight)
     DWORD     dwFunc, dwIOCT90VolLeft, dwIOCT90VolRight;
     MIXSTRUCT mixstruct;
 
-    //TODO: implement master volume with MMPM2
-    if(dwControl == MIX_CTRL_VOL_OUT_LINE) {
+    if(dwControl > MIX_CTRL_MAX) {
+        DebugInt3();
+        return FALSE;
+    }
+    if(dwVolLeft > MIXER_WIN32_MAX_VOLUME || dwVolRight > MIXER_WIN32_MAX_VOLUME) {
+        dprintf(("OSLibMixSetVolume: Volume (%d,%d) out of RANGE!!", dwVolLeft, dwVolRight));
+        return FALSE;
+    }
+
+    szVolumeLevels[dwControl][0] = dwVolLeft;
+    szVolumeLevels[dwControl][1] = dwVolRight;
+    
+    //Master volume/mute can't be controlled with ioctl90
+    if(dwControl == MIX_CTRL_VOL_OUT_LINE) 
+    {
+        MCI_MASTERAUDIO_PARMS parms;
+
+        if(szVolumeLevels[MIX_CTRL_MUTE_OUT_LINE][0] == TRUE) {
+            //muted, ignore
+            return TRUE;
+        }
+        memset(&parms, 0, sizeof(parms));
+        parms.ulMasterVolume = WIN32_TO_MMPM2MASTER_VOLUME(szVolumeLevels[dwControl][0]);
+
+        mymciSendCommand(0, MCI_MASTERAUDIO, MCI_MASTERVOL | MCI_WAIT, &parms, 0);
+
         return TRUE;
     }
 
-    //wave in recording levels are virtual controls as there is only
-    //one control for recording gain
-    switch(dwControl) {
-    case MIX_CTRL_VOL_IN_W_MONO:
-    case MIX_CTRL_VOL_IN_W_PHONE:
-    case MIX_CTRL_VOL_IN_W_MIC:
-    case MIX_CTRL_VOL_IN_W_LINE:
-    case MIX_CTRL_VOL_IN_W_CD:
-    case MIX_CTRL_VOL_IN_W_VIDEO:
-    case MIX_CTRL_VOL_IN_W_AUX:
-    case MIX_CTRL_VOL_IN_W_PCM:
-        szVolumeLevels[dwControl][0] = dwVolLeft;
-        szVolumeLevels[dwControl][1] = dwVolRight;
-        break;
-    }
     dwFunc = OSLibMixGetIndex(dwControl);
     if(dwFunc == -1) {
         return FALSE;
@@ -183,10 +215,6 @@ BOOL OSLibMixSetVolume(DWORD dwControl, DWORD dwVolLeft, DWORD dwVolRight)
         return FALSE;
     }
 
-    if(dwVolLeft > MIXER_WIN32_MAX_VOLUME || dwVolRight > MIXER_WIN32_MAX_VOLUME) {
-        dprintf(("OSLibMixSetVolume: Volume (%d,%d) out of RANGE!!", dwVolLeft, dwVolRight));
-        return FALSE;
-    }
     if(dwControl == MIX_CTRL_OUT_L_TREBLE) {
         //get bass value (right = treble, left = bass)
         OSLibMixGetVolume(MIX_CTRL_OUT_L_BASS, &dwVolLeft, NULL);
@@ -222,8 +250,21 @@ BOOL OSLibMixSetMute(DWORD dwControl, BOOL fMute)
     DWORD     dwFunc;
     MIXSTRUCT mixstruct;
 
-    //TODO: implement master volume with MMPM2
+    if(dwControl > MIX_CTRL_MAX) {
+        DebugInt3();
+        return FALSE;
+    }
+    szVolumeLevels[dwControl][0] = fMute;
+
+    //Master volume/mute can't be controlled with ioctl90
     if(dwControl == MIX_CTRL_MUTE_OUT_LINE) {
+        MCI_MASTERAUDIO_PARMS parms;
+
+        memset(&parms, 0, sizeof(parms));
+        parms.ulMasterVolume = (fMute) ? 0 : MMPM2MASTER_TO_WIN32_VOLUME(szVolumeLevels[MIX_CTRL_VOL_OUT_LINE][0]);
+
+        mymciSendCommand(0, MCI_MASTERAUDIO, MCI_MASTERVOL | MCI_WAIT, &parms, 0);
+
         return TRUE;
     }
 
@@ -258,10 +299,12 @@ BOOL OSLibMixGetVolume(DWORD dwControl, DWORD *pdwVolLeft, DWORD *pdwVolRight)
     DWORD     dwFunc;
     MIXSTRUCT mixstruct;
 
-    //TODO: implement master volume with MMPM2
-    if(dwControl == MIX_CTRL_VOL_OUT_LINE) {
-        if(pdwVolLeft)  *pdwVolLeft  = 50000;
-        if(pdwVolRight) *pdwVolRight = 50000;
+    //Master volume/mute can't be controlled with ioctl90
+    if(dwControl == MIX_CTRL_VOL_OUT_LINE) 
+    {
+        if(pdwVolLeft)  *pdwVolLeft  = szVolumeLevels[MIX_CTRL_VOL_OUT_LINE][0];
+        if(pdwVolRight) *pdwVolRight = szVolumeLevels[MIX_CTRL_VOL_OUT_LINE][1];
+
         return TRUE;
     }
 
@@ -323,11 +366,14 @@ BOOL OSLibMixGetMute(DWORD dwControl, BOOL *pfMute)
     DWORD     dwFunc;
     MIXSTRUCT mixstruct;
 
-    //TODO: implement master volume with MMPM2
-    if(dwControl == MIX_CTRL_MUTE_OUT_LINE) {
-        if(pfMute)      *pfMute      = 0;
+    //Master volume/mute can't be controlled with ioctl90
+    if(dwControl == MIX_CTRL_MUTE_OUT_LINE) 
+    {
+        if(pfMute) *pfMute = szVolumeLevels[MIX_CTRL_MUTE_OUT_LINE][0];
+
         return TRUE;
     }
+
     dwFunc = OSLibMixGetIndex(dwControl);
     if(dwFunc == -1) {
         return FALSE;
