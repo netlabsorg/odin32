@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.381 2003-11-14 13:44:11 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.382 2003-11-17 13:15:03 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2832,6 +2832,12 @@ BOOL Win32BaseWindow::DestroyWindow()
         }
 ////        else DebugInt3();
     }
+    //Must remove the switch entry here to avoid problems with XWorkPlace
+    if(hTaskList) {
+        OSLibWinRemoveFromTasklist(hTaskList);
+        hTaskList = 0;
+    }
+
     /* Hide the window */
     if(IsWindowVisible(getWindowHandle()))
     {
