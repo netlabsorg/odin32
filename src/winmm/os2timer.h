@@ -1,4 +1,4 @@
-/* $Id: os2timer.h,v 1.7 1999-08-31 19:24:03 phaller Exp $ */
+/* $Id: os2timer.h,v 1.8 1999-12-29 08:36:10 phaller Exp $ */
 
 #ifndef __OS2TIMER_H__
 #define __OS2TIMER_H__
@@ -23,7 +23,7 @@
  ****************************************************************************/
 
 #define OS2TIMER_RESOLUTION_MINIMUM 32
-#define OS2TIMER_RESOLUTION_MAXIMUM 0x7fffffff
+#define OS2TIMER_RESOLUTION_MAXIMUM 0x7ffffffe
 
 
 /****************************************************************************

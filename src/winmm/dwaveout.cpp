@@ -1,4 +1,4 @@
-/* $Id: dwaveout.cpp,v 1.10 1999-10-26 22:47:23 phaller Exp $ */
+/* $Id: dwaveout.cpp,v 1.11 1999-12-29 08:33:55 phaller Exp $ */
 
 /*
  * Wave playback class
@@ -48,11 +48,12 @@ DartWaveOut::DartWaveOut(LPWAVEFORMATEX pwfx)
 }
 /******************************************************************************/
 /******************************************************************************/
-DartWaveOut::DartWaveOut(LPWAVEFORMATEX pwfx, ULONG nCallback, ULONG dwInstance)
+DartWaveOut::DartWaveOut(LPWAVEFORMATEX pwfx, ULONG nCallback, ULONG dwInstance, USHORT usSel)
 {
    Init(pwfx);
 
-   mthdCallback         = (LPDRVCALLBACK)nCallback;
+   mthdCallback         = (LPDRVCALLBACK)nCallback; // callback function
+   selCallback          = usSel;                    // callback win32 tib selector
    this->dwInstance = dwInstance;
 
    if(!ulError)
@@ -73,9 +74,24 @@ DartWaveOut::DartWaveOut(LPWAVEFORMATEX pwfx, HWND hwndCallback)
 /******************************************************************************/
 void DartWaveOut::callback(HDRVR h, UINT uMessage, DWORD dwUser, DWORD dw1, DWORD dw2)
 {
-  USHORT selTIB = SetWin32TIB();
+  USHORT selTIB = GetFS(); // save current FS selector
+
+  dprintf(("WINMM:DartWaveOut::callback(HDRVR h=%08xh, UINT uMessage=%08xh, DWORD dwUser=%08xh, DWORD dw1=%08xh, DWORD dw2=%08xh)\n",
+           h,
+           uMessage,
+           dwUser,
+           dw1,
+           dw2));
+
+  if (selCallback != 0)
+    SetFS(selCallback);      // switch to callback win32 tib selector (stored in waveOutOpen)
+  else
+    dprintf(("WINMM:DartWaveOut::callback - selCallback is invalid"));
+
+  //@@@PH 1999/12/28 Shockwave Flashes seem to make assumptions on a
+  // specific stack layout. Do we have the correct calling convention here?
   mthdCallback(h,uMessage,dwUser,dw1,dw2);
-  SetFS(selTIB);
+  SetFS(selTIB);           // switch back to the saved FS selector
 }
 /******************************************************************************/
 /******************************************************************************/
@@ -93,8 +109,10 @@ void DartWaveOut::Init(LPWAVEFORMATEX pwfx)
    curhdr        = NULL;
    mthdCallback  = NULL;
    hwndCallback  = 0;
+   selCallback   = 0;
    dwInstance    = 0;
    ulError       = 0;
+   selCallback   = 0;
    State         = STATE_STOPPED;
 
    MixBuffer     = (MCI_MIX_BUFFER *)malloc(PREFILLBUF_DART*sizeof(MCI_MIX_BUFFER));
@@ -694,16 +712,19 @@ void DartWaveOut::handler(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer, ULONG ulFlags
 }
 /******************************************************************************/
 /******************************************************************************/
-LONG APIENTRY WaveOutHandler(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer,
+LONG APIENTRY WaveOutHandler(ULONG ulStatus,
+                             PMCI_MIX_BUFFER pBuffer,
                              ULONG ulFlags)
 {
- DartWaveOut *dwave;
- PTIB ptib;
- PPIB ppib;
+  // PTIB ptib;
+  // PPIB ppib;
+  // DosGetInfoBlocks(&ptib, &ppib);
+  // dprintf(("WaveOutHandler: thread %d prio %X", ptib->tib_ptib2->tib2_ultid, ptib->tib_ptib2->tib2_ulpri));
 
-  DosGetInfoBlocks(&ptib, &ppib);
-//  dprintf(("WaveOutHandler: thread %d prio %X", ptib->tib_ptib2->tib2_ultid, ptib->tib_ptib2->tib2_ulpri));
-  if(pBuffer && pBuffer->ulUserParm) {
+  DartWaveOut *dwave;
+
+  if(pBuffer && pBuffer->ulUserParm)
+  {
     dwave = (DartWaveOut *)pBuffer->ulUserParm;
     dwave->handler(ulStatus, pBuffer, ulFlags);
   }
