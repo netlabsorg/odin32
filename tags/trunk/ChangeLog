@@ -1,4 +1,8 @@
- /* $Id: ChangeLog,v 1.750 2000-02-25 00:22:08 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.751 2000-02-25 09:56:39 achimha Exp $ */
+
+ 2000-02-24: Achim Hasenmueller <achimha@innotek.de>
+	- COMCTL32: Added infoPtr == NULL checks in tooltips control
+	            to prevent crashes when tooltip creation fails
 
  2000-02-25: Sander van Leeuwen <sandervl@xs4all.nl>
 	- OPENGL\GLIDE: Added Odin version of Glide based on the OS/2 port
