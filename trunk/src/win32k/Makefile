@@ -1,5 +1,5 @@
 ################################################################################
-# $Id: Makefile,v 1.26 2000-02-21 09:23:59 bird Exp $
+# $Id: Makefile,v 1.27 2000-02-23 09:02:19 bird Exp $
 #
 # Copyright 1998-1999 knut st. osmundsen
 #
@@ -292,6 +292,8 @@ clean:
 dep:
     $(PDWIN32_TOOLS)\fastdep -oObject $(CINCLUDES) misc\*.c* ldr\*.c* dev32\*.c* \
         dev16\*.c* pe2lx\*.c* k32\*.c* lib\*.c include\*.h
+    $(PDWIN32_TOOLS)\fastdep -a+ -oObject $(CINCLUDES16) dev16\*.c*
+
 
 object\asmutils.obj:            misc\asmutils.asm     include\devsegdf.inc
 object\buffer.obj:              misc\buffer.asm       include\devsegdf.inc
