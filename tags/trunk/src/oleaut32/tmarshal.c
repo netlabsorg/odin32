@@ -263,6 +263,10 @@ static int _nroffuncs(ITypeInfo *tinfo) {
     /*NOTREACHED*/
 }
 
+#ifdef __WIN32OS2__
+#include <pshpack1.h>
+#endif
+
 typedef struct _TMAsmProxy {
     BYTE	popleax;
     BYTE	pushlval;
@@ -273,6 +277,10 @@ typedef struct _TMAsmProxy {
     BYTE	lret;
     WORD	bytestopop;
 } WINE_PACKED TMAsmProxy;
+
+#ifdef __WIN32OS2__
+#include <poppack.h>
+#endif
 
 typedef struct _TMProxyImpl {
     DWORD				*lpvtbl;
@@ -558,7 +566,11 @@ _argsize(DWORD vt_type) {
     }
 }
 
+#ifdef __WIN32OS2__
+static DWORD CDECL
+#else
 static DWORD
+#endif
 xCall(LPVOID retptr, int method, TMProxyImpl *tpinfo /*, args */) {
     DWORD		*args = ((DWORD*)&tpinfo)+1, *xargs;
     FUNCDESC		*fdesc;
