@@ -1,4 +1,4 @@
-/* $Id: asyncthread.h,v 1.9 2001-10-19 18:05:25 achimha Exp $ */
+/* $Id: asyncthread.h,v 1.10 2001-10-19 18:34:47 achimha Exp $ */
 
 /*
  * Async thread help functions
@@ -70,11 +70,12 @@ typedef struct _ASYNCTHREADPARM
 			VSemaphore *asyncSem;
 			DWORD       lEvents;
                         DWORD       lEventsPending;
-                        DWORD       lLastEvent;
 			SOCKET      s;
 			int         mode;
-                        // error codes for all events
-                        int         iErrorCode[FD_MAX_EVENTS];
+			// event bits to signal which event has occured
+			DWORD       lLastEvent;
+			// error codes for all events
+			int         iErrorCode[FD_MAX_EVENTS];
 		} asyncselect;
         } u;
         _ASYNCTHREADPARM *next;

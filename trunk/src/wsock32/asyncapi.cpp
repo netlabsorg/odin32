@@ -1,4 +1,4 @@
-/* $Id: asyncapi.cpp,v 1.16 2001-10-13 18:51:07 sandervl Exp $ */
+/* $Id: asyncapi.cpp,v 1.17 2001-10-19 18:34:47 achimha Exp $ */
 
 /*
  *
@@ -402,19 +402,33 @@ void AsyncSelectNotifyEvent(PASYNCTHREADPARM pThreadParm, ULONG event, ULONG soc
 {
     pThreadParm->u.asyncselect.lEventsPending &= ~event;
 
-    event = WSAMAKESELECTREPLY(event, socket_error);
+    // @@@AH 20011019 this changes the event code. Don' think we can do this
+    // for the semaphore notification...
+    ULONG eventReply = WSAMAKESELECTREPLY(event, socket_error);
 
     if (pThreadParm->u.asyncselect.mode == WSA_SELECT_HWND)
     {
-        dprintf(("AsyncSelectNotifyEvent: notifying window, socket: 0x%x, window handle: 0x%x, window message: 0x%x, event: 0x%x", pThreadParm->u.asyncselect.s, pThreadParm->notifyHandle, pThreadParm->notifyData, event));
+        dprintf(("AsyncSelectNotifyEvent: notifying window, socket: 0x%x, window handle: 0x%x, window message: 0x%x, event: 0x%x", pThreadParm->u.asyncselect.s, pThreadParm->notifyHandle, pThreadParm->notifyData, eventReply));
         PostMessageA((HWND)pThreadParm->notifyHandle, (DWORD)pThreadParm->notifyData, (WPARAM)pThreadParm->u.asyncselect.s,
-                     (LPARAM)event);
+                     (LPARAM)eventReply);
     }
     else
     if (pThreadParm->u.asyncselect.mode == WSA_SELECT_HEVENT)
     {
         dprintf(("AsyncSelectNotifyEvent: notifying event semaphore, socket: 0x%x, HEVENT: 0x%x, event: 0x%x", pThreadParm->u.asyncselect.s, pThreadParm->notifyHandle, event));
+        // set the event bit in the mask
         pThreadParm->u.asyncselect.lLastEvent |= event;
+        // set the error code for the right value
+        // for this, we first have to find out which bit field to write to
+        char slot = 0;
+        ULONG eventValue = event;
+        while (eventValue > 0)
+        {
+            slot++;
+            eventValue = eventValue >> 1;
+        }
+        pThreadParm->u.asyncselect.iErrorCode[slot] = socket_error;
+        // now post the semaphore so that the client can check the event
         SetEvent(pThreadParm->notifyHandle);
     }
     else
@@ -494,9 +508,10 @@ asyncloopstart:
 
 		case SOCECONNRESET:
 		case SOCEPIPE:
-       			if(lEventsPending & FD_CLOSE) {
+       			if(lEventsPending & FD_CLOSE)
+			{
 				dprintf(("FD_CLOSE; broken connection"));
-       				AsyncSelectNotifyEvent(pThreadParm, FD_CLOSE, WSAECONNRESET);
+				AsyncSelectNotifyEvent(pThreadParm, FD_CLOSE, WSAECONNRESET);
 			}
 
 			//remote connection broken (so can't receive data anymore)
@@ -700,8 +715,11 @@ int WSAAsyncSelectWorker(SOCKET s, int mode, int notifyHandle, int notifyData, l
    pThreadParm->u.asyncselect.mode           = mode;
    pThreadParm->u.asyncselect.lEvents        = lEventMask;
    pThreadParm->u.asyncselect.lEventsPending = lEventMask;
-   pThreadParm->u.asyncselect.lLastEvent     = 0;
    pThreadParm->u.asyncselect.s              = s;
+   // reset all event bits
+   pThreadParm->u.asyncselect.lLastEvent     = 0;
+   // reset all error bits
+   memset(&pThreadParm->u.asyncselect.iErrorCode, 0, sizeof(int) * FD_MAX_EVENTS);
    pThreadParm->u.asyncselect.asyncSem       = new VSemaphore;
    if(pThreadParm->u.asyncselect.asyncSem == NULL) {
 	dprintf(("WSAAsyncSelect: VSemaphore alloc failure!"));
@@ -730,11 +748,9 @@ int WSAEnumNetworkEventsWorker(SOCKET s, WSAEVENT hEvent, LPWSANETWORKEVENTS lpE
    pThreadInfo = FindAsyncEvent(s);
    if (pThreadInfo)
    {
-        // TODO return correct errors!!!
-        for (int i = 0; i < FD_MAX_EVENTS; i++)
-        {
-           lpEvent->iErrorCode[i] = 0;
-        }
+        // return our internal error bit representation
+	memcpy(&lpEvent->iErrorCode, &pThreadInfo->u.asyncselect.iErrorCode, sizeof(int) * FD_MAX_EVENTS);
+	// return our internal event bit representation
         lpEvent->lNetworkEvents = InterlockedExchange((LPLONG)&pThreadInfo->u.asyncselect.lLastEvent, 0);
    } 
    else
