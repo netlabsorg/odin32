@@ -1,4 +1,4 @@
-/* $Id: initgdi32.cpp,v 1.8 2001-10-16 11:40:17 sandervl Exp $
+/* $Id: initgdi32.cpp,v 1.9 2001-12-15 18:50:26 sandervl Exp $
  *
  * DLL entry point
  *
@@ -38,6 +38,7 @@
 #include "dbglocal.h"
 #include "region.h"
 #include <initdll.h>
+#include <stats.h>
 
 extern "C" {
  //Win32 resource table (produced by wrc)
@@ -58,6 +59,7 @@ BOOL WINAPI OdinLibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
     return TRUE;
 
    case DLL_PROCESS_DETACH:
+    STATS_DumpStats();
     ctordtorTerm();
     return TRUE;
    }

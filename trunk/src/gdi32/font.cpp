@@ -1,4 +1,4 @@
-/* $Id: font.cpp,v 1.21 2001-11-13 15:42:05 sandervl Exp $ */
+/* $Id: font.cpp,v 1.22 2001-12-15 18:50:26 sandervl Exp $ */
 
 /*
  * GDI32 font apis
@@ -37,6 +37,7 @@
 #include <win\options.h>
 #include <wprocess.h>
 #include <odininst.h>
+#include <stats.h>
 
 #define DBG_LOCALLOG    DBG_font
 #include "dbglocal.h"
@@ -286,6 +287,9 @@ ODINFUNCTION1(HFONT,CreateFontIndirectA,const LOGFONTA*, lplf)
 
   hFont = O32_CreateFontIndirect(&afont);
 
+  if(hFont) {
+      STATS_CreateFontIndirect(hFont, &afont);
+  }
   return(hFont);
 }
 //******************************************************************************

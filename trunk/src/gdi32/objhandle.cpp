@@ -1,4 +1,4 @@
-/* $Id: objhandle.cpp,v 1.19 2001-11-13 15:42:06 sandervl Exp $ */
+/* $Id: objhandle.cpp,v 1.20 2001-12-15 18:50:27 sandervl Exp $ */
 /*
  * Win32 Handle Management Code for OS/2
  *
@@ -25,6 +25,7 @@
 #include "region.h"
 #include <unicode.h>
 #include "font.h"
+#include <stats.h>
 
 #define DBG_LOCALLOG    DBG_objhandle
 #include "dbglocal.h"
@@ -327,22 +328,28 @@ VOID WIN32API UnselectGDIObjects(HDC hdc)
 //******************************************************************************
 DWORD WIN32API GetObjectType( HGDIOBJ hObj)
 {
-    dprintf2(("GDI32: GetObjectType %x", hObj));
+    DWORD objtype;
+
     //TODO: must use 16 bits gdi object handles
     if(HIWORD(hObj) == 0) {
         hObj |= GDIOBJ_PREFIX;
     }
     if(ObjGetHandleType(hObj) == GDIOBJ_REGION) {
+        dprintf2(("GDI32: GetObjectType %x REGION", hObj));
         SetLastError(ERROR_SUCCESS);
         return OBJ_REGION;
     }
-    return O32_GetObjectType(hObj);
+    objtype = O32_GetObjectType(hObj);
+    dprintf2(("GDI32: GetObjectType %x objtype %d", hObj, objtype));
+    return objtype;
 }
 //******************************************************************************
 //TODO: System objects can't be deleted (TODO: any others?? (fonts?))!!!!)
 //******************************************************************************
 BOOL WIN32API DeleteObject(HANDLE hObj)
 {
+    DWORD objtype;
+
     dprintf(("GDI32: DeleteObject %x", hObj));
 
     //TODO: must use 16 bits gdi object handles
@@ -352,7 +359,8 @@ BOOL WIN32API DeleteObject(HANDLE hObj)
     }
 
     //System objects can't be deleted (TODO: any others?? (fonts?))!!!!)
-    switch (GetObjectType(hObj))
+    objtype = GetObjectType(hObj);
+    switch (objtype)
     {
         case OBJ_PEN:
             if(IsSystemPen(hObj))
@@ -384,6 +392,8 @@ BOOL WIN32API DeleteObject(HANDLE hObj)
         // add more system-type objects as required ...
     }
 
+    STATS_DeleteObject(hObj, objtype);
+
     if(ObjGetHandleType(hObj) == GDIOBJ_REGION)
     {
         OSLibDeleteRegion(ObjGetHandleData(hObj, GDIOBJ_REGION));
@@ -397,11 +407,34 @@ BOOL WIN32API DeleteObject(HANDLE hObj)
 }
 //******************************************************************************
 //******************************************************************************
+int WIN32API EnumObjects( HDC hdc, int objType, GOBJENUMPROC objFunc, LPARAM lParam)
+{
+    //calling convention differences
+    dprintf(("!ERROR!: GDI32: EnumObjects STUB"));
+//    return O32_EnumObjects(arg1, arg2, arg3, arg4);
+    return 0;
+}
+//******************************************************************************
+//******************************************************************************
+HANDLE WIN32API GetCurrentObject( HDC hdc, UINT arg2)
+{
+    dprintf(("GDI32: GetCurrentObject %x %x", hdc, arg2));
+    return (HANDLE)O32_GetCurrentObject(hdc, arg2);
+}
+//******************************************************************************
+//******************************************************************************
 BOOL WIN32API SetObjectOwner( HGDIOBJ arg1, int arg2 )
 {
     // Here is a guess for a undocumented entry
     dprintf(("WARNING: GDI32: SetObjectOwner - stub (TRUE)\n"));
     return TRUE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API UnrealizeObject( HGDIOBJ hObject)
+{
+    dprintf(("GDI32: UnrealizeObject %x", hObject));
+    return O32_UnrealizeObject(hObject);
 }
 //******************************************************************************
 //******************************************************************************
