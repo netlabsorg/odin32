@@ -1,4 +1,4 @@
-/* $Id: Win32kCC.h,v 1.6.2.1 2001-02-17 08:57:51 bird Exp $
+/* $Id: Win32kCC.h,v 1.6.2.2 2001-02-17 20:20:08 bird Exp $
  *
  *
  *
@@ -45,6 +45,7 @@
 #define  IDS_ERR_FAILED_TO_LOAD_DLGT    20
 #define  IDS_ERR_FAILED_NTBK_BUTTONS    21
 #define  IDS_ERR_ASSERT                 22
+#define  IDS_ERR_TIMER_START            23
 
 
 /*

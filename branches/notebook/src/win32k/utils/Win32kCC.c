@@ -1,4 +1,4 @@
-/* $Id: Win32kCC.c,v 1.12.2.3 2001-02-17 08:57:50 bird Exp $
+/* $Id: Win32kCC.c,v 1.12.2.4 2001-02-17 20:20:07 bird Exp $
  *
  * Win32CC - Win32k Control Center.
  *
@@ -38,6 +38,8 @@
 #define INCL_DOSERRORS
 #define INCL_DOSFILEMGR
 #define INCL_DOSRESOURCES
+#define INCL_DOSMISC
+
 #define INCL_WINERRORS
 #define INCL_WINDIALOGS
 #define INCL_WINMESSAGEMGR
@@ -46,9 +48,14 @@
 #define INCL_WINWINDOWMGR
 #define INCL_WINSTDBOOK
 #define INCL_WINSYS
+#define INCL_WINTIMER
+
+#define INCL_WINACCELERATORS
+#define INCL_WINFRAMEMGR
+
 #define INCL_GPIPRIMITIVES
 #define INCL_GPILCIDS
-#define INCL_DOSMISC
+
 
 
 /*******************************************************************************
@@ -80,14 +87,17 @@ typedef struct _Win32kCCPage
 
 typedef struct _Win32kCC
 {
-    HWND    hwnd;
-    HWND    hwndNtbk;
-    HAB     hab;
-    BOOL    fDirty;
+    HWND            hwnd;
+    HWND            hwndNtbk;
+    HAB             hab;
+    BOOL            fDirty;
 
-    K32OPTIONS Options;
-    K32OPTIONS NewOptions;
-    K32STATUS  Status;
+    K32OPTIONS      Options;
+    K32OPTIONS      NewOptions;
+    K32STATUS       Status;
+
+    ULONG           idMemTimer;         /* The Timer ID of the MemInfo Refresh Timer. */
+    K32SYSTEMMEMINFO MemInfo;           /* Current displayed meminfo. */
 
     WIN32KCCPAGE    aPages[W32KCCPG_PAGES]; /* Array containing generic page info. */
 
@@ -263,7 +273,7 @@ MRESULT EXPENTRY Win32kCCDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
     switch (msg)
     {
         /*
-         * Sets the controls according to the data from win32k.
+         * Initialize the controls and trigger a setcontrol event.
          *
          * mr:  Focus changed or not.
          * mp1: hwnd of dialog
@@ -317,6 +327,12 @@ MRESULT EXPENTRY Win32kCCDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
                 free(pThis);
                 return FALSE;
             }
+
+
+            /*
+             * Load and set accellerator table.
+             */
+            WinSetAccelTable(pThis->hab, WinLoadAccelTable(pThis->hab, NULLHANDLE, DL_WIN32KCC), hwnd);
 
 
             /*
@@ -668,16 +684,20 @@ MRESULT EXPENTRY Win32kCCDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
             fNotExit = TRUE;
             WinSendMsg(hwnd, WM_COMMAND,
                        MPFROMSHORT(DID_OK), MPFROM2SHORT(CMDSRC_MENU, FALSE));
-            break;
+            return NULL;
 
 
         /*
          * Window is destroyed (last message which ever should reach us!)
+         *  -Free acceltable if present.
          *  -Free instance data
          *  -Set the instance data pointer to NULL (just in case).
          */
         case WM_DESTROY:
         {
+            HACCEL haccel = WinQueryAccelTable(pThis->hab, hwnd);
+            if (haccel)
+                WinDestroyAccelTable(haccel);
             free(pThis);
             WinSetWindowPtr(hwnd, QWL_USER, NULL);
             break;
@@ -769,6 +789,11 @@ MRESULT EXPENTRY Win32kCCDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
             pThis->fDirty = memcmp(&pThis->NewOptions, &pThis->Options, sizeof(K32OPTIONS)) != 0;
             return (MPARAM)TRUE;
         }
+
+        case WM_TRANSLATEACCEL:
+        {
+            break;
+        }
     }
 
     /*
@@ -804,7 +829,7 @@ MRESULT EXPENTRY    LoadersDlgProc  (HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp
     switch (msg)
     {
         /*
-         * Sets the controls according to the data from win32k.
+         * Initialize controls.
          *
          * mr:  Focus changed or not.
          * mp1: hwnd of dialog
@@ -812,17 +837,6 @@ MRESULT EXPENTRY    LoadersDlgProc  (HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp
          */
         case WM_INITDLG:
         {
-            pThis = (PWIN32KCC)mp2;
-            if (!WinSetWindowPtr(hwnd, QWL_USER, pThis))
-            {
-                /* complain, dismiss and return. */
-                Complain(hwnd, IDS_ERR_SET_INSTANCEDATA,
-                         WinGetLastError(pThis->hab),
-                         getLastErrorMsg(pThis->hab));
-                WinPostMsg(hwnd, WM_QUIT, NULL, NULL);
-                return FALSE;
-            }
-
             /*
              * Initiate controls (ie. behaviour not data).
              *  - Ranges of the info level spinbuttons.
@@ -1115,7 +1129,7 @@ MRESULT EXPENTRY    HeapsDlgProc    (HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp
     switch (msg)
     {
         /*
-         * Sets the controls according to the data from win32k.
+         * Initialize controls.
          *
          * mr:  Focus changed or not.
          * mp1: hwnd of dialog
@@ -1123,17 +1137,6 @@ MRESULT EXPENTRY    HeapsDlgProc    (HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp
          */
         case WM_INITDLG:
         {
-            pThis = (PWIN32KCC)mp2;
-            if (!WinSetWindowPtr(hwnd, QWL_USER, pThis))
-            {
-                /* complain, dismiss and return. */
-                Complain(hwnd, IDS_ERR_SET_INSTANCEDATA,
-                         WinGetLastError(pThis->hab),
-                         getLastErrorMsg(pThis->hab));
-                WinPostMsg(hwnd, WM_QUIT, NULL, NULL);
-                return FALSE;
-            }
-
             /*
              * Initiate controls (ie. behaviour not data).
              *  - Max length of the max heap size entry fields.
@@ -1296,6 +1299,7 @@ MRESULT EXPENTRY    LdrFixDlgProc   (HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp
         {
             pThis->NewOptions.fDllFixes = WinSendDlgItemMsg(hwnd, CB_LDRFIX_DLLFIXES, BM_QUERYCHECK, NULL, NULL) != 0;
             pThis->NewOptions.fForcePreload = WinSendDlgItemMsg(hwnd, CB_LDRFIX_FORCEPRELOAD, BM_QUERYCHECK, NULL, NULL) != 0;
+            pThis->NewOptions.fExeFixes = pThis->Options.fExeFixes;
             return (MRESULT)TRUE;
         }
     }
@@ -1330,7 +1334,7 @@ MRESULT EXPENTRY    MemInfoDlgProc  (HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp
     switch (msg)
     {
         /*
-         * Sets the controls according to the data from win32k.
+         * Start timer.
          *
          * mr:  Focus changed or not.
          * mp1: hwnd of dialog
@@ -1338,14 +1342,37 @@ MRESULT EXPENTRY    MemInfoDlgProc  (HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp
          */
         case WM_INITDLG:
         {
+            pThis = (PWIN32KCC)mp2;
             WinEnableWindow(WinWindowFromID(hwnd, TX_MEMINFO_PAGE_ENABLED), FALSE);
-            break;                      /* break, not return thru ntbk page default procedure. */
+            pThis->idMemTimer = WinStartTimer(pThis->hab, hwnd, 42, 1000);
+            if (!pThis->idMemTimer)
+                Complain(hwnd, IDS_ERR_TIMER_START, WinGetLastError(pThis->hab), getLastErrorMsg(pThis->hab));
+            memset(&pThis->MemInfo, -1, sizeof(pThis->MemInfo)); /* Force update of everything. */
+            break;                      /* not return, break thru the ntbk page default procedure. */
         }
 
 
         /*
-         * Gets data from win32k.
-         * Sets the controls according to the data from win32k.
+         * We've started a timer for refreshing the memory data.
+         *
+         * mr:  reserved
+         * mp1: Id of the timer which is ticking.
+         * mp2: reserved
+         */
+        case WM_TIMER:
+        {
+            if ((ULONG)mp1 != pThis->idMemTimer)
+                return NULL;
+
+            /* intented fallthru to WM_SETCONTROLS */
+        }
+
+
+        /*
+         * Save old data.
+         * Gets system meminfo data from win32k.
+         * Updated changed values.
+         * Update pThis with new meminfo.
          *
          * mr:  reserved
          * mp1: reserved
@@ -1354,50 +1381,97 @@ MRESULT EXPENTRY    MemInfoDlgProc  (HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp
         case WM_SETCONTROLS:
         {
             K32SYSTEMMEMINFO    MemInfo;
+            K32SYSTEMMEMINFO    OldMemInfo;
             APIRET              rc;
 
+            OldMemInfo = pThis->MemInfo;
             MemInfo.cb = sizeof(MemInfo);
             MemInfo.flFlags = 0;
             rc = W32kQuerySystemMemInfo(&MemInfo);
             if (rc)
             {
+                WinStopTimer(pThis->hab, hwnd, pThis->idMemTimer);
                 break;
             }
 
-            SetDlgItemTextF(hwnd, TX_MEMINFO_SWAP_SIZE       , "%d", MemInfo.cbSwapFileSize / 1024);
-            SetDlgItemTextF(hwnd, TX_MEMINFO_SWAP_AVAIL      , "%d", MemInfo.cbSwapFileAvail / 1024);
-            SetDlgItemTextF(hwnd, TX_MEMINFO_SWAP_USED       , "%d", MemInfo.cbSwapFileUsed / 1024);
-            SetDlgItemTextF(hwnd, TX_MEMINFO_SWAP_MINFREE    , "%d", MemInfo.cbSwapFileMinFree / 1024);
-            SetDlgItemTextF(hwnd, TX_MEMINFO_SWAP_CFG_MINFREE, "%d", MemInfo.cbSwapFileCFGMinFree / 1024);
-            SetDlgItemTextF(hwnd, TX_MEMINFO_SWAP_CFG_SIZE   , "%d", MemInfo.cbSwapFileCFGSwapSize / 1024);
-            SetDlgItemTextF(hwnd, TX_MEMINFO_SWAP_BROKEN_DFS , "%d", MemInfo.cSwapFileBrokenDF);
-            SetDlgItemTextF(hwnd, TX_MEMINFO_SWAP_GROW_FAILS , "%d", MemInfo.cSwapFileGrowFails);
-            SetDlgItemTextF(hwnd, TX_MEMINFO_SWAP_DFS_IN_MEMFILE, "%d", MemInfo.cSwapFileInMemFile);
+            if (MemInfo.cbSwapFileSize != OldMemInfo.cbSwapFileSize)
+                SetDlgItemTextF(hwnd, TX_MEMINFO_SWAP_SIZE       , "%d", MemInfo.cbSwapFileSize / 1024);
+            if (MemInfo.cbSwapFileAvail != OldMemInfo.cbSwapFileAvail)
+                SetDlgItemTextF(hwnd, TX_MEMINFO_SWAP_AVAIL      , "%d", MemInfo.cbSwapFileAvail / 1024);
+            if (MemInfo.cbSwapFileUsed != OldMemInfo.cbSwapFileUsed)
+                SetDlgItemTextF(hwnd, TX_MEMINFO_SWAP_USED       , "%d", MemInfo.cbSwapFileUsed / 1024);
+            if (MemInfo.cbSwapFileMinFree != OldMemInfo.cbSwapFileMinFree)
+                SetDlgItemTextF(hwnd, TX_MEMINFO_SWAP_MINFREE    , "%d", MemInfo.cbSwapFileMinFree / 1024);
+            if (MemInfo.cbSwapFileCFGMinFree != OldMemInfo.cbSwapFileCFGMinFree)
+                SetDlgItemTextF(hwnd, TX_MEMINFO_SWAP_CFG_MINFREE, "%d", MemInfo.cbSwapFileCFGMinFree / 1024);
+            if (MemInfo.cbSwapFileCFGSwapSize != OldMemInfo.cbSwapFileCFGSwapSize)
+                SetDlgItemTextF(hwnd, TX_MEMINFO_SWAP_CFG_SIZE   , "%d", MemInfo.cbSwapFileCFGSwapSize / 1024);
+            if (MemInfo.cSwapFileBrokenDF != OldMemInfo.cSwapFileBrokenDF)
+                SetDlgItemTextF(hwnd, TX_MEMINFO_SWAP_BROKEN_DFS , "%d", MemInfo.cSwapFileBrokenDF);
+            if (MemInfo.cSwapFileGrowFails != OldMemInfo.cSwapFileGrowFails)
+                SetDlgItemTextF(hwnd, TX_MEMINFO_SWAP_GROW_FAILS , "%d", MemInfo.cSwapFileGrowFails);
+            if (MemInfo.cSwapFileInMemFile != OldMemInfo.cSwapFileInMemFile)
+                SetDlgItemTextF(hwnd, TX_MEMINFO_SWAP_DFS_IN_MEMFILE, "%d", MemInfo.cSwapFileInMemFile);
 
-            SetDlgItemTextF(hwnd, TX_MEMINFO_PHYS_SIZE , "%d", MemInfo.cbPhysSize);
-            SetDlgItemTextF(hwnd, TX_MEMINFO_PHYS_AVAIL, "%d", MemInfo.cbPhysAvail);
-            SetDlgItemTextF(hwnd, TX_MEMINFO_PHYS_USED , "%d", MemInfo.cbPhysUsed);
-            WinSendDlgItemMsg(hwnd, TX_MEMINFO_PAGE_ENABLED, BM_SETCHECK, (MPARAM)MemInfo.fPagingSwapEnabled, NULL);
-            SetDlgItemTextF(hwnd, TX_MEMINFO_PAGE_FAULTS   , "%d", MemInfo.cPagingPageFaults);
-            SetDlgItemTextF(hwnd, TX_MEMINFO_PAGE_FAULTS_ACTIVE, "%d", MemInfo.cPagingPageFaultsActive);
-            SetDlgItemTextF(hwnd, TX_MEMINFO_PAGE_PHYSPAGES, "%d", MemInfo.cPagingPhysPages);
-            SetDlgItemTextF(hwnd, TX_MEMINFO_PAGE_RESPAGES , "%d", MemInfo.cPagingResidentPages);
-            SetDlgItemTextF(hwnd, TX_MEMINFO_PAGE_SWAPPAGES, "%d", MemInfo.cPagingSwappablePages);
-            SetDlgItemTextF(hwnd, TX_MEMINFO_PAGE_DISCPAGES, "%d", MemInfo.cPagingDiscardablePages);
-            SetDlgItemTextF(hwnd, TX_MEMINFO_PAGE_DISCINMEM, "%d", MemInfo.cPagingDiscardableInmem);
+            if (MemInfo.cbPhysSize != OldMemInfo.cbPhysSize)
+                SetDlgItemTextF(hwnd, TX_MEMINFO_PHYS_SIZE , "%d", MemInfo.cbPhysSize / 1024);
+            if (MemInfo.cbPhysAvail != OldMemInfo.cbPhysAvail)
+                SetDlgItemTextF(hwnd, TX_MEMINFO_PHYS_AVAIL, "%d", MemInfo.cbPhysAvail / 1024);
+            if (MemInfo.cbPhysUsed != OldMemInfo.cbPhysUsed)
+                SetDlgItemTextF(hwnd, TX_MEMINFO_PHYS_USED , "%d", MemInfo.cbPhysUsed / 1024);
+            if (MemInfo.fPagingSwapEnabled != OldMemInfo.fPagingSwapEnabled)
+                WinSendDlgItemMsg(hwnd, TX_MEMINFO_PAGE_ENABLED, BM_SETCHECK, (MPARAM)MemInfo.fPagingSwapEnabled, NULL);
+            if (MemInfo.cPagingPageFaults != OldMemInfo.cPagingPageFaults)
+                SetDlgItemTextF(hwnd, TX_MEMINFO_PAGE_FAULTS   , "%d", MemInfo.cPagingPageFaults);
+            if (MemInfo.cPagingPageFaultsActive != OldMemInfo.cPagingPageFaultsActive)
+                SetDlgItemTextF(hwnd, TX_MEMINFO_PAGE_FAULTS_ACTIVE, "%d", MemInfo.cPagingPageFaultsActive);
+            if (MemInfo.cPagingPhysPages != OldMemInfo.cPagingPhysPages)
+                SetDlgItemTextF(hwnd, TX_MEMINFO_PAGE_PHYSPAGES, "%d", MemInfo.cPagingPhysPages);
+            if (MemInfo.cPagingResidentPages != OldMemInfo.cPagingResidentPages)
+                SetDlgItemTextF(hwnd, TX_MEMINFO_PAGE_RESPAGES , "%d", MemInfo.cPagingResidentPages);
+            if (MemInfo.cPagingSwappablePages != OldMemInfo.cPagingSwappablePages)
+                SetDlgItemTextF(hwnd, TX_MEMINFO_PAGE_SWAPPAGES, "%d", MemInfo.cPagingSwappablePages);
+            if (MemInfo.cPagingDiscardablePages != OldMemInfo.cPagingDiscardablePages)
+                SetDlgItemTextF(hwnd, TX_MEMINFO_PAGE_DISCPAGES, "%d", MemInfo.cPagingDiscardablePages);
+            if (MemInfo.cPagingDiscardableInmem != OldMemInfo.cPagingDiscardableInmem)
+                SetDlgItemTextF(hwnd, TX_MEMINFO_PAGE_DISCINMEM, "%d", MemInfo.cPagingDiscardableInmem);
 
-            SetDlgItemTextF(hwnd, TX_MEMINFO_VM_ADDRESSLIMIT, "%08xh", MemInfo.ulAddressLimit);
-            SetDlgItemTextF(hwnd, TX_MEMINFO_VM_SHARED_MIN  , "%08xh", MemInfo.ulVMArenaSharedMin);
-            SetDlgItemTextF(hwnd, TX_MEMINFO_VM_SHARED_MAX  , "%08xh", MemInfo.ulVMArenaSharedMax);
-            SetDlgItemTextF(hwnd, TX_MEMINFO_VM_PRIVATE_MAX , "%08xh", MemInfo.ulVMArenaPrivMax);
-            SetDlgItemTextF(hwnd, TX_MEMINFO_VM_SYSTEM_MIN  , "%08xh", MemInfo.ulVMArenaSystemMin);
-            SetDlgItemTextF(hwnd, TX_MEMINFO_VM_SYSTEM_MAX  , "%08xh", MemInfo.ulVMArenaSystemMax);
-            SetDlgItemTextF(hwnd, TX_MEMINFO_VM_PRIVATE_HMAX, "%08xh", MemInfo.ulVMArenaHighPrivMax);
-            SetDlgItemTextF(hwnd, TX_MEMINFO_VM_SHARED_HMIN , "%08xh", MemInfo.ulVMArenaHighSharedMin);
-            SetDlgItemTextF(hwnd, TX_MEMINFO_VM_SHARED_HMAX , "%08xh", MemInfo.ulVMArenaHighSharedMax);
+            if (MemInfo.ulAddressLimit != OldMemInfo.ulAddressLimit)
+                SetDlgItemTextF(hwnd, TX_MEMINFO_VM_ADDRESSLIMIT, "%08xh", MemInfo.ulAddressLimit);
+            if (MemInfo.ulVMArenaSharedMin != OldMemInfo.ulVMArenaSharedMin)
+                SetDlgItemTextF(hwnd, TX_MEMINFO_VM_SHARED_MIN  , "%08xh", MemInfo.ulVMArenaSharedMin);
+            if (MemInfo.ulVMArenaSharedMax != OldMemInfo.ulVMArenaSharedMax)
+                SetDlgItemTextF(hwnd, TX_MEMINFO_VM_SHARED_MAX  , "%08xh", MemInfo.ulVMArenaSharedMax);
+            if (MemInfo.ulVMArenaPrivMax != OldMemInfo.ulVMArenaPrivMax)
+                SetDlgItemTextF(hwnd, TX_MEMINFO_VM_PRIVATE_MAX , "%08xh", MemInfo.ulVMArenaPrivMax);
+            if (MemInfo.ulVMArenaSystemMin != OldMemInfo.ulVMArenaSystemMin)
+                SetDlgItemTextF(hwnd, TX_MEMINFO_VM_SYSTEM_MIN  , "%08xh", MemInfo.ulVMArenaSystemMin);
+            if (MemInfo.ulVMArenaSystemMax != OldMemInfo.ulVMArenaSystemMax)
+                SetDlgItemTextF(hwnd, TX_MEMINFO_VM_SYSTEM_MAX  , "%08xh", MemInfo.ulVMArenaSystemMax);
+            if (MemInfo.ulVMArenaHighPrivMax != OldMemInfo.ulVMArenaHighPrivMax)
+                SetDlgItemTextF(hwnd, TX_MEMINFO_VM_PRIVATE_HMAX, "%08xh", MemInfo.ulVMArenaHighPrivMax);
+            if (MemInfo.ulVMArenaHighSharedMin != OldMemInfo.ulVMArenaHighSharedMin)
+                SetDlgItemTextF(hwnd, TX_MEMINFO_VM_SHARED_HMIN , "%08xh", MemInfo.ulVMArenaHighSharedMin);
+            if (MemInfo.ulVMArenaHighSharedMax != OldMemInfo.ulVMArenaHighSharedMax)
+                SetDlgItemTextF(hwnd, TX_MEMINFO_VM_SHARED_HMAX , "%08xh", MemInfo.ulVMArenaHighSharedMax);
 
+            pThis->MemInfo = MemInfo;
             return NULL;
         }
+
+        /*
+         * Cleanup.
+         *
+         * mr:  reserved
+         * mp1: reserved
+         * mp2: reserved
+         */
+        case WM_DESTROY:
+        {
+            WinStopTimer(pThis->hab, hwnd, pThis->idMemTimer);
+            break;
+        }
+
     }
 
     return NtbkDefPageDlgProc(hwnd, msg, mp1, mp2);
@@ -1436,6 +1510,11 @@ MRESULT EXPENTRY    NtbkDefPageDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM 
                 WinPostMsg(hwnd, WM_QUIT, NULL, NULL);
                 return FALSE;
             }
+
+            /*
+             * Install same acceltable as the notebook - Don't work.
+             */
+            WinSetAccelTable(pThis->hab, WinQueryAccelTable(pThis->hab, pThis->hwnd), hwnd);
             break;
         }
 
@@ -1472,6 +1551,28 @@ MRESULT EXPENTRY    NtbkDefPageDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM 
         {
             return (MRESULT)TRUE;
         }
+
+
+        #if 0
+        /*
+         * Nice little hack to get global notebook accelerators to work.
+         *
+         * mr:
+         *
+         */
+        case WM_TRANSLATEACCEL:
+        {
+            static BOOL fSem = FALSE;
+            MRESULT     mr;
+            PWIN32KCC   pThis = (PWIN32KCC)WinQueryWindowPtr(hwnd, QWL_USER);
+            if (fSem || !pThis)
+                return FALSE;
+            fSem = TRUE;
+            mr = WinSendMsg(pThis->hwnd, msg, mp1, mp2);
+            fSem = FALSE;
+            return mr;
+        }
+        #endif
     }
 
     return WinDefDlgProc(hwnd, msg, mp1, mp2);
@@ -1728,6 +1829,8 @@ static char *stristr(const char *pszStr, const char *pszSubStr)
         pszStr++;
     }
 
+    #pragma info(none)
     return (char*)(*pszStr != '\0' ? (const char*)pszStr - 1 : (const char*)NULL);
+    #pragma info(restore)
 }
 
