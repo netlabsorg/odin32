@@ -1,15 +1,17 @@
-/* $Id: capi2032.cpp,v 1.3 1999-06-10 14:27:04 phaller Exp $ */
+/* $Id: capi2032.cpp,v 1.4 2000-10-20 22:28:24 sandervl Exp $ */
 
 /*
  * CAPI2032 implementation
  *
- * Copyright 1998 Felix Maschek
+ * first implementation 1998 Felix Maschek
  *
+ * rewritten 2000 Carsten Tenbrink
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
-#include <os2win.h>
+#define  INCL_DOS
+#include <os2wrap.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -21,20 +23,6 @@
 #include "capi2032.h"
 #include "unicode.h"
 
-// definitions from OS/2 toolkit
-
-typedef unsigned long APIRET;
-typedef unsigned long HEV;
-
-#define SEM_INDEFINATE_WAIT -1
-
-extern "C"
-{
-    APIRET _System DosCloseEventSem( HEV );
-    APIRET _System DosCreateEventSem( char*, HEV*, unsigned long, unsigned long );
-    APIRET _System DosWaitEventSem( HEV, unsigned long );
-}
-
 // Implementation note:
 //
 // The Implementation for OS/2 and Win32 are nearly the same. Most of the
@@ -43,16 +31,6 @@ extern "C"
 // which will be posted if an event occures. The Win32 implementation
 // only provides a function CAPI_WAIT_FOR_EVENT; the function returns,
 // if an event occures.
-// The internal structure ImplCapi gives us the room for the event semaphore
-// handle. The event semaphore will be created the first time,
-// CAPI_WAIT_FOR_EVENT is called since some applications don't need this
-// functionality (actually they poll the CAPI)
-
-typedef struct _ImplCapi
-    {
-    DWORD ApplID;
-    HEV   hEvent;
-    } ImplCapi;
 
 //******************************************************************************
 //******************************************************************************
@@ -63,45 +41,46 @@ DWORD WIN32API OS2CAPI_REGISTER(
     DWORD maxBDataLen,
     DWORD * pApplID )
 {
-    ImplCapi* pImplCapi;
-    DWORD dwResult;
+   DWORD dwResult;
+   APIRET rc;
+   USHORT sel = RestoreOS2FS();
+   HEV    hEvent = NULLHANDLE;
+   char   szSemName[CCHMAXPATHCOMP];
 
-#ifdef DEBUG
-    WriteLog("CAPI2032: CAPI_REGISTER");
-#endif
+   dprintf(("CAPI2032: CAPI_REGISTER"));
 
-    pImplCapi = new ImplCapi;
-    if( !pImplCapi )
-    {
-#ifdef DEBUG
-        WriteLog(" failed (no memory)!\n");
-#endif
-        return 0x0108; // OS ressource error (error class 0x10..)
-    }
+   dwResult = CAPI_REGISTER( MessageBufferSize, maxLogicalConnection,
+                             maxBDataBlocks, maxBDataLen, pApplID );
 
-    memset( pImplCapi, 0, sizeof( ImplCapi ) );
+   if( dwResult )
+   {
+      dprintf((" failed (%X)!\n", dwResult ));
+      return(0x1108);
+   }
+   dprintf((" successfull (ApplID: %d)\n", *pApplID ));
 
-    dwResult = CAPI_REGISTER( MessageBufferSize, maxLogicalConnection,
-                              maxBDataBlocks, maxBDataLen, &pImplCapi->ApplID );
+    // create named semaphore if neccessary
+   if( !hEvent )
+   {
+      // create named semaphore with Application ID as last character sequenz
+      sprintf( szSemName, "\\SEM32\\CAPI2032\\SEM%d" , *pApplID );
+      rc = DosCreateEventSem( szSemName, &hEvent, DC_SEM_SHARED, FALSE );
+      if( rc )
+      {
+         dprintf((" failed (DosCreateEventSem): %d!\n",rc));
+         return 0x1108; // OS ressource error (error class 0x11..)
+      }
+      dprintf((" ok (DosCreateEventSem): hEvent:%d %s!\n", hEvent, szSemName));
 
-    // application successfully registered? -> save internal structure as Application ID
-    if( dwResult )
-    {
-        *pApplID = (DWORD) pImplCapi;
-
-#ifdef DEBUG
-        WriteLog(" successfull (ApplID: %d)\n", pImplCapi->ApplID );
-#endif
-    }
-    else
-    {
-#ifdef DEBUG
-        WriteLog(" failed (%X)!\n", dwResult );
-#endif
-        delete pImplCapi;
-    }
-
-    return dwResult;
+      dwResult = CAPI_SET_SIGNAL( *pApplID, hEvent );
+      if( dwResult )
+      {
+         dprintf((" failed (CAPI_SET_SIGNAL: %X)!\n", dwResult));
+         return 0x1108; // OS ressource error (error class 0x11..)
+      }
+   }
+   SetFS(sel);
+   return dwResult;
 }
 
 //******************************************************************************
@@ -109,21 +88,36 @@ DWORD WIN32API OS2CAPI_REGISTER(
 DWORD WIN32API OS2CAPI_RELEASE(
     DWORD ApplID )
 {
-    ImplCapi* pImplCapi = (ImplCapi*) ApplID;
-    DWORD dwResult;
+   DWORD dwResult;
+   ULONG rc;
+   HEV    hEvent = NULLHANDLE;
+   char   szSemName[CCHMAXPATHCOMP];
+   USHORT sel = RestoreOS2FS();
 
-#ifdef DEBUG
-    WriteLog("CAPI2032: CAPI_RELEASE (ApplID: %d)\n", pImplCapi->ApplID);
-#endif
+   dprintf(("CAPI2032: CAPI_RELEASE (ApplID: %d)\n", ApplID));
 
-    dwResult = CAPI_RELEASE( pImplCapi->ApplID );
+   // open semaphore
+   sprintf( szSemName, "\\SEM32\\CAPI2032\\SEM%d" , ApplID );
+   rc = DosOpenEventSem( szSemName, &hEvent );
+   if(rc)
+   {
+      dprintf((" failed (DosOpenEventSem) rc: %d!\n",rc));
+   }
+   // cleanup
+   if( hEvent )
+   {
+      dprintf(("(DosCloseEventSem) hEvent:%d %s!\n",hEvent, szSemName));
+      rc = DosCloseEventSem( hEvent );
+      hEvent = NULLHANDLE;
+      if(rc)
+      {
+         dprintf((" failed (DosCloseEventSem) rc: %d!\n",rc));
+      }
+   }
+   dwResult = CAPI_RELEASE( ApplID );
 
-    // cleanup
-    if( pImplCapi->hEvent )
-        DosCloseEventSem( pImplCapi->hEvent );
-    delete pImplCapi;
-
-    return dwResult;
+   SetFS(sel);
+   return dwResult;
 }
 
 //******************************************************************************
@@ -132,16 +126,17 @@ DWORD WIN32API OS2CAPI_PUT_MESSAGE(
     DWORD ApplID,
     PVOID pCAPIMessage )
 {
-    ImplCapi* pImplCapi = (ImplCapi*) ApplID;
-    DWORD dwResult;
+   DWORD dwResult;
+   USHORT sel = RestoreOS2FS();
 
-    dwResult = CAPI_PUT_MESSAGE( pImplCapi->ApplID, pCAPIMessage );
+   dprintf(("CAPI2032: CAPI_PUT_MESSAGE (ApplID: %d)", ApplID));
 
-#ifdef DEBUG
-    WriteLog("CAPI2032: CAPI_PUT_MESSAGE (ApplID: %d) Result: %X\n", pImplCapi->ApplID, dwResult);
-#endif
+   dwResult = CAPI_PUT_MESSAGE( ApplID, pCAPIMessage );
 
-    return dwResult;
+   dprintf((" Result: %X\n", dwResult));
+
+   SetFS(sel);
+   return dwResult;
 }
 
 //******************************************************************************
@@ -150,16 +145,16 @@ DWORD WIN32API OS2CAPI_GET_MESSAGE(
     DWORD ApplID,
     PVOID * ppCAPIMessage )
 {
-    ImplCapi* pImplCapi = (ImplCapi*) ApplID;
-    DWORD dwResult;
+   DWORD dwResult;
+   USHORT sel = RestoreOS2FS();
+   dprintf(("CAPI2032: CAPI_GET_MESSAGE (ApplID: %d)", ApplID));
 
-    dwResult = CAPI_GET_MESSAGE( pImplCapi->ApplID, ppCAPIMessage );
+   dwResult = CAPI_GET_MESSAGE( ApplID, ppCAPIMessage );
 
-#ifdef DEBUG
-    WriteLog("CAPI2032: CAPI_GET_MESSAGE (ApplID: %d) Result: %X\n", pImplCapi->ApplID, dwResult);
-#endif
+   dprintf((" Result: %X\n", dwResult));
 
-    return dwResult;
+   SetFS(sel);
+   return dwResult;
 }
 
 //******************************************************************************
@@ -167,56 +162,47 @@ DWORD WIN32API OS2CAPI_GET_MESSAGE(
 DWORD WIN32API OS2CAPI_WAIT_FOR_SIGNAL(
     DWORD ApplID )
 {
-    ImplCapi* pImplCapi = (ImplCapi*) ApplID;
-    DWORD dwResult;
-    APIRET rc;
+   DWORD dwResult;
+   ULONG ulPostCount;
+   APIRET rc;
+   HEV    hEvent = NULLHANDLE;
+   char   szSemName[CCHMAXPATHCOMP];
 
-#ifdef DEBUG
-    WriteLog("CAPI2032: CAPI_WAIT_FOR_SIGNAL (ApplID: %d)", pImplCapi->ApplID);
-#endif
+   dprintf(("CAPI2032: CAPI_WAIT_FOR_SIGNAL (ApplID: %d)", ApplID));
 
-    // create semaphore if neccessary
-    if( !pImplCapi->hEvent )			// FM 980706: fixed condition...
-    {
-        rc = DosCreateEventSem( NULL, &pImplCapi->hEvent, 0, 0 );
-        if( !rc )
-        {
-#ifdef DEBUG
-    WriteLog(" failed (DosCreateEventSem)!\n");
-#endif
-            return 0x1108; // OS ressource error (error class 0x11..)
-        }
+   // open semaphore
+   sprintf( szSemName, "\\SEM32\\CAPI2032\\SEM%d" , ApplID );
+   rc = DosOpenEventSem( szSemName, &hEvent );
+   if(rc)
+   {
+      dprintf((" failed (DosOpenEventSem) rc: %d!\n",rc));
+      return 0x1101;
+   }
 
-        dwResult = CAPI_SET_SIGNAL( pImplCapi->ApplID, pImplCapi->hEvent );
-        if( !dwResult )
-        {
-#ifdef DEBUG
-    WriteLog(" failed (CAPI_SET_SIGNAL: %X)!\n", dwResult);
-#endif
-            return 0x1108; // OS ressource error (error class 0x11..)
-        }
-    }
+   // wait for event
+   rc = DosWaitEventSem( hEvent, SEM_INDEFINITE_WAIT );
+   if(rc)
+   {
+      dprintf((" failed (DosWaitEventSem) rc: %d!\n",rc));
+      return 0x1101;
+   }
+   dprintf((" ok got hEvent: %u!\n",hEvent));
 
-    // wait for event
-    DosWaitEventSem( pImplCapi->hEvent, SEM_INDEFINATE_WAIT );
+   DosResetEventSem( hEvent, &ulPostCount );
 
-#ifdef DEBUG
-    WriteLog("\n");
-#endif
-
-    return 0;
+   return 0;
 }
 
 //******************************************************************************
 //******************************************************************************
-DWORD WIN32API OS2CAPI_GET_MANUFACTURER(
+VOID WIN32API OS2CAPI_GET_MANUFACTURER(
     char * SzBuffer )
 {
-#ifdef DEBUG
-    WriteLog("CAPI2032: CAPI_GET_MANUFACTURER\n");
-#endif
+   USHORT sel = RestoreOS2FS();
+   dprintf(("CAPI2032: CAPI_GET_MANUFACTURER\n"));
 
-    return CAPI_GET_MANUFACTURER( SzBuffer );
+   CAPI_GET_MANUFACTURER( SzBuffer );
+   SetFS(sel);
 }
 
 //******************************************************************************
@@ -227,12 +213,14 @@ DWORD WIN32API OS2CAPI_GET_VERSION(
     DWORD * pManufacturerMajor,
     DWORD * pManufacturerMinor )
 {
-#ifdef DEBUG
-    WriteLog("CAPI2032: CAPI_GET_VERSION\n");
-#endif
+   DWORD dwResult;
+   USHORT sel = RestoreOS2FS();
+   dprintf(("CAPI2032: CAPI_GET_VERSION\n"));
 
-    return CAPI_GET_VERSION( pCAPIMajor, pCAPIMinor,
-                             pManufacturerMajor, pManufacturerMinor );
+   dwResult = CAPI_GET_VERSION( pCAPIMajor, pCAPIMinor,
+                            pManufacturerMajor, pManufacturerMinor );
+   SetFS(sel);
+   return dwResult;
 }
 
 //******************************************************************************
@@ -240,11 +228,13 @@ DWORD WIN32API OS2CAPI_GET_VERSION(
 DWORD WIN32API OS2CAPI_GET_SERIAL_NUMBER(
     char * SzBuffer )
 {
-#ifdef DEBUG
-    WriteLog("CAPI2032: CAPI_GET_SERIAL_NUMBER\n");
-#endif
+   DWORD dwResult;
+   USHORT sel = RestoreOS2FS();
+   dprintf(("CAPI2032: CAPI_GET_SERIAL_NUMBER\n"));
 
-    return CAPI_GET_SERIAL_NUMBER( SzBuffer );
+   dwResult = CAPI_GET_SERIAL_NUMBER( SzBuffer );
+   SetFS(sel);
+   return dwResult;
 }
 
 //******************************************************************************
@@ -253,22 +243,27 @@ DWORD WIN32API OS2CAPI_GET_PROFILE(
     PVOID SzBuffer,
     DWORD CtrlNr )
 {
-#ifdef DEBUG
-    WriteLog("CAPI2032: CAPI_GET_PROFILE\n");
-#endif
+   DWORD dwResult;
+   USHORT sel = RestoreOS2FS();
+   dprintf(("CAPI2032: CAPI_GET_PROFILE\n"));
 
-    return CAPI_GET_PROFILE( SzBuffer, CtrlNr );
+   dwResult = CAPI_GET_PROFILE( SzBuffer, CtrlNr );
+
+   SetFS(sel);
+   return dwResult;
 }
 
 //******************************************************************************
 //******************************************************************************
-DWORD WIN32API OS2CAPI_INSTALLED()
+DWORD WIN32API OS2CAPI_INSTALLED( VOID )
 {
-#ifdef DEBUG
-    WriteLog("CAPI2032: CAPI_INSTALLED\n");
-#endif
+   DWORD dwResult;
+   USHORT sel = RestoreOS2FS();
+   dprintf(("CAPI2032: CAPI_INSTALLED"));
 
-    return CAPI_INSTALLED( );
+   dwResult = CAPI_INSTALLED( );
+
+   dprintf((" result: %d\n",dwResult));
+   SetFS(sel);
+   return dwResult;
 }
-
-

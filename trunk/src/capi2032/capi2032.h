@@ -1,10 +1,11 @@
-/* $Id: capi2032.h,v 1.3 1999-06-10 14:27:04 phaller Exp $ */
+/* $Id: capi2032.h,v 1.4 2000-10-20 22:28:24 sandervl Exp $ */
 
 /*
  * CAPI2032 implementation
  *
- * Copyright 1998 Felix Maschek
+ * first implementation 1998 Felix Maschek
  *
+ * rewritten 2000 Carsten Tenbrink
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -12,44 +13,44 @@
 #ifndef __CAPI2032_H__
 #define __CAPI2032_H__
 
-ULONG PASCAL CAPI_REGISTER(
+ULONG APIENTRY CAPI_REGISTER(
     ULONG MessageBufferSize,
     ULONG maxLogicalConnection,
     ULONG maxBDataBlocks,
     ULONG maxBDataLen,
     ULONG * pApplID );
 
-ULONG PASCAL CAPI_RELEASE(
+ULONG APIENTRY CAPI_RELEASE(
     ULONG ApplID );
 
-ULONG PASCAL CAPI_PUT_MESSAGE(
+ULONG APIENTRY CAPI_PUT_MESSAGE(
     ULONG ApplID,
     PVOID pCAPIMessage );
 
-ULONG PASCAL CAPI_GET_MESSAGE(
+ULONG APIENTRY CAPI_GET_MESSAGE(
     ULONG ApplID,
     PVOID * ppCAPIMessage );
 
-ULONG PASCAL CAPI_SET_SIGNAL(
+ULONG APIENTRY CAPI_SET_SIGNAL(
     ULONG ApplID,
     ULONG hEventSem );
 
-ULONG PASCAL CAPI_GET_MANUFACTURER(
+VOID APIENTRY CAPI_GET_MANUFACTURER(
     char * SzBuffer );
 
-ULONG PASCAL CAPI_GET_VERSION(
+ULONG APIENTRY CAPI_GET_VERSION(
     ULONG * pCAPIMajor,
     ULONG * pCAPIMinor,
     ULONG * pManufacturerMajor,
     ULONG * pManufacturerMinor );
 
-ULONG PASCAL CAPI_GET_SERIAL_NUMBER(
+ULONG APIENTRY CAPI_GET_SERIAL_NUMBER(
     char * SzBuffer );
 
-ULONG PASCAL CAPI_GET_PROFILE(
+ULONG APIENTRY CAPI_GET_PROFILE(
     PVOID SzBuffer,
     ULONG CtrlNr );
 
-ULONG PASCAL CAPI_INSTALLED();
+ULONG APIENTRY CAPI_INSTALLED(void);
 
 #endif
