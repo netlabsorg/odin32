@@ -11,6 +11,10 @@
 #ifndef __OS2FSDD__
 #define __OS2FSDD__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 ULONG APIENTRY Gre32Entry3(ULONG,ULONG,ULONG);
 
 inline ULONG APIENTRY _Gre32Entry3 (ULONG a, ULONG b, ULONG c)
@@ -41,6 +45,11 @@ inline ULONG APIENTRY _Gre32Entry5 (ULONG a, ULONG b, ULONG c, ULONG d, ULONG e)
 #define GreDeath(a) (BOOL) _Gre32Entry3((HDC)(a),0L,NGreDeath)
 #define NGreResurrection 0x000040B8L
 #define GreResurrection(a,b,c) (BOOL) _Gre32Entry5((HDC)(a),(LONG)(b),(c),0L,NGreResurrection)
+
+
+#ifdef __cplusplus
+}
+#endif
 
 ULONG SetSVGAMode (ULONG     ulHorRes,
                    ULONG     ulVerRes,

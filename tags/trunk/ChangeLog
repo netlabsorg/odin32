@@ -1,4 +1,9 @@
-/* $Id: ChangeLog,v 1.1312 2001-03-20 22:57:06 bird Exp $ */
+/* $Id: ChangeLog,v 1.1313 2001-03-20 23:18:54 mike Exp $ */
+
+ 2001-03-20: Michal Necasek <michalnec@volny.cz>
+    - include/DDRAW:
+                o Cleaned up so that it builds with Watcom. Still lots
+                  of warnings and Watcom build doesn't seem to work right now.
 
  2001-03-21: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - Odin32Api:
@@ -22,9 +27,6 @@
                    the playback stream is terminated before the stream is stopped)
     - GDI32:    o Check y inversion when resyncing dib section
 
- 2001-03-19: Michal Necasek <michalnec@volny.cz>
-    - include:  o Few updates/fixes for wmake. Enabled .AUTOEPEND which
-                  seems to be working fine for DSOUND
 
  2001-03-19: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - Pe2Lx:    o Convert CUI subsystem to VIO apps. CUI applications will

@@ -1,4 +1,4 @@
-/* $Id: rectangle.cpp,v 1.4 2001-03-18 21:44:46 mike Exp $ */
+/* $Id: rectangle.cpp,v 1.5 2001-03-20 23:18:56 mike Exp $ */
 
 /*
  * Rectangle class Implementaion
@@ -9,7 +9,7 @@
  *
  */
 
-typedef long BOOL;
+typedef unsigned long BOOL;
 
 #include "rectangle.h"
 
