@@ -1,4 +1,4 @@
-/* $Id: CmdQd.c,v 1.7 2001-09-30 05:26:52 bird Exp $
+/* $Id: CmdQd.c,v 1.8 2001-10-31 21:46:49 bird Exp $
  *
  * Command Queue Daemon / Client.
  *
@@ -627,6 +627,22 @@ int Daemon(int cWorkers)
                     pShrMem->u1.WaitResponse.fMore = fMore;
                     rc = shrmemSendDaemon(TRUE);
                 } while (!rc && fMore);
+
+                /*
+                 * Check if the wait client died.
+                 */
+                if (rc == ERROR_ALREADY_POSTED) /* seems like this is the rc we get. */
+                {
+                    /*
+                     * BUGBUG: This code is really fishy, but I'm to tired to make a real fix now.
+                     *         Hopefully this solves my current problem.
+                     */
+                    ULONG   ulDummy;
+                    rc = DosRequestMutexSem(pShrMem->hmtx, 500);
+                    rc = DosResetEventSem(pShrMem->hevClient, &ulDummy);
+                    pShrMem->enmMsgType = msgUnknown;
+                    rc = shrmemSendDaemon(TRUE);
+                }
                 break;
             }
 
@@ -1095,7 +1111,7 @@ char *WorkerArguments(char *pszArg, const char *pszzEnv, const char *pszCommand,
                 if (rc)
                 {   /* search path */
                     char    szResult[CCHMAXPATH];
-                    rc = DosSearchPath(SEARCH_IGNORENETERRS, pszPath, pszArg, &szResult[0] , sizeof(szResult));
+                    rc = DosSearchPath(SEARCH_IGNORENETERRS, (PSZ)pszPath, pszArg, &szResult[0] , sizeof(szResult));
                     if (!rc)
                     {
                         strcpy(pszArg, szResult);
@@ -1228,7 +1244,7 @@ char *fileNormalize(char *pszFilename, char *pszCurDir)
 APIRET fileExist(const char *pszFilename)
 {
     FILESTATUS3     fsts3;
-    return DosQueryPathInfo(pszFilename, FIL_STANDARD, &fsts3, sizeof(fsts3));
+    return DosQueryPathInfo((PSZ)pszFilename, FIL_STANDARD, &fsts3, sizeof(fsts3));
 }
 
 
