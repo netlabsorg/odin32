@@ -1,4 +1,4 @@
-/* $Id: dbglocal.cpp,v 1.12 2002-06-02 10:07:57 sandervl Exp $ */
+/* $Id: dbglocal.cpp,v 1.13 2002-06-09 19:53:58 sandervl Exp $ */
 
 /*
  * debug logging functions for OS/2
@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 #include "dbglocal.h"
 
 #ifdef DEBUG
@@ -118,8 +119,9 @@ void ParseLogStatusUSER32()
 	        }
 	}
 	for(i=0;i<DBG_MAXFILES;i++) {
+		int len = strlen(DbgFileNames[i]);
 	        dbgvar = strstr(envvar, DbgFileNames[i]);
-	        if(dbgvar) {
+	        if(dbgvar && !islower(dbgvar[len])) {
 	            if(*(dbgvar-1) == '-') {
 	                    DbgEnabledUSER32[i] = 0;
 	            }
@@ -140,8 +142,9 @@ void ParseLogStatusUSER32()
 	        }
 	}
 	for(i=0;i<DBG_MAXFILES;i++) {
+		int len = strlen(DbgFileNames[i]);
 	        dbgvar = strstr(envvar2, DbgFileNames[i]);
-	        if(dbgvar) {
+	        if(dbgvar && !islower(dbgvar[len])) {
 	            if(*(dbgvar-1) == '-') {
 	                    DbgEnabledLvl2USER32[i] = 0;
 	            }
