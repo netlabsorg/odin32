@@ -1,4 +1,4 @@
-/* $Id: exceptions.cpp,v 1.27 1999-10-26 23:38:12 phaller Exp $ */
+/* $Id: exceptions.cpp,v 1.28 1999-11-03 21:01:14 phaller Exp $ */
 
 /*
  * Win32 Device IOCTL API functions for OS/2
@@ -67,7 +67,7 @@
 
 //Global Process Unhandled exception filter
 static LPTOP_LEVEL_EXCEPTION_FILTER CurrentUnhExceptionFlt = NULL;
-static UINT                         CurrentErrorMode = 0;
+static UINT                         CurrentErrorMode = SEM_FAILCRITICALERRORS;
 static PEXCEPTION_HANDLER           StartupCodeHandler = NULL;
 
 extern "C" PWINEXCEPTION_FRAME GetExceptionRecord(ULONG offset, ULONG segment);
