@@ -1,4 +1,4 @@
-/* $Id: brsfolder.cpp,v 1.2 1999-11-02 20:05:33 phaller Exp $ */
+/* $Id: brsfolder.cpp,v 1.3 2000-03-21 17:33:21 cbratschi Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -241,8 +241,8 @@ static LRESULT MsgNotify(HWND hWnd,  UINT CtlID, LPNMHDR lpnmh)
         switch (pnmtv->hdr.idFrom)
         { case IDD_TREEVIEW:
             switch (pnmtv->hdr.code)
-            { case TVN_DELETEITEM:
-                { FIXME("TVN_DELETEITEM\n");
+            { case TVN_DELETEITEMA:
+                { FIXME("TVN_DELETEITEMA\n");
                   lptvid=(LPTV_ITEMDATA)pnmtv->itemOld.lParam;
                   IShellFolder_Release(lptvid->lpsfParent);
                   SHFree(lptvid->lpi);
@@ -251,8 +251,8 @@ static LRESULT MsgNotify(HWND hWnd,  UINT CtlID, LPNMHDR lpnmh)
                 }
                 break;
 
-              case TVN_ITEMEXPANDING:
-                { FIXME("TVN_ITEMEXPANDING\n");
+              case TVN_ITEMEXPANDINGA:
+                { FIXME("TVN_ITEMEXPANDINGA\n");
                   if ((pnmtv->itemNew.state & TVIS_EXPANDEDONCE))
                     break;
 
@@ -263,7 +263,7 @@ static LRESULT MsgNotify(HWND hWnd,  UINT CtlID, LPNMHDR lpnmh)
                   TreeView_SortChildren(hwndTreeView, pnmtv->itemNew.hItem, FALSE);
                 }
                 break;
-              case TVN_SELCHANGED:
+              case TVN_SELCHANGEDA:
                 lptvid=(LPTV_ITEMDATA)pnmtv->itemNew.lParam;
                 pidlRet = lptvid->lpifq;
                 break;
