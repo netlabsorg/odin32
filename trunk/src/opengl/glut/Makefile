@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.12 2000-03-08 08:55:47 bird Exp $
+# $Id: Makefile,v 1.13 2000-03-08 09:07:24 bird Exp $
 
 #
 # Odin32 API
@@ -119,8 +119,8 @@ $(TARGET).def
 
 # Dep rule - makes depenencies for C, C++ and Asm files.
 dep:
-    $(DEPEND) -I$(PDWIN32_INCLUDE);$(PDWIN32_INCLUDE)\win -I..\mesa\GL \
-        *.c *.cpp *.asm *.inc $(PDWIN32_INCLUDE)\*.h
+    $(DEPEND) -I..\mesa\GL -I..\glu -I$(PDWIN32_INCLUDE);$(PDWIN32_INCLUDE)\win -I..\mesa \
+        *.c *.cpp *.asm *.inc $(PDWIN32_INCLUDE)\*.h ..\mesa\gl\*.h
 
 
 # Includes the common rules.
