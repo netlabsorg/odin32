@@ -1,4 +1,4 @@
-# $Id: makefile.icc,v 1.11 2000-10-02 04:01:40 bird Exp $
+# $Id: makefile.icc,v 1.12 2000-10-03 05:42:40 bird Exp $
 
 #
 # PD-Win32 API
@@ -9,10 +9,6 @@
 
 
 # Directory macros.
-PDWIN32_INCLUDE = ..\..\include
-PDWIN32_BIN     = ..\..\bin\$(OBJDIR)
-PDWIN32_LIB     = ..\..\lib
-PDWIN32_TOOLS   = ..\bin
 PDWIN32_TCOMMON = ..\common
 
 
@@ -23,12 +19,12 @@ CLEANEXTRAS = commonicc.lib
 
 
 # Compiler, tools, and interference rules.
-!include $(PDWIN32_INCLUDE)\pdwin32.mk
+!include ..\..\include\pdwin32.mk
 
 
 # Addjust common definitions...
 CFLAGS   = $(CFLAGS)   -Wall+ppt-ppc-inl-cnv-gnr-vft-
-CXXFLAGS = $(CXXFLAGS) -Wall+ppt-ppc-inl-cnv-gnr-vft-
+CXXFLAGS = $(CXXFLAGS) -Wall+ppt-ppc-inl-cnv-gnr-vft- -Gx-
 
 
 #
@@ -60,11 +56,19 @@ $(OBJDIR)\commonicc.lib: $(OBJS)
     $(ILIB) /nobackup $@ $(OBJS: = +), NUL;
 
 # kDump
-kDump.exe: $(OBJDIR)\kDump.exe
+kDump.exe $(PDWIN32_TOOLS)\kDump.exe: $(OBJDIR)\kDump.exe
     $(CP) $** $@
 
 $(OBJDIR)\kDump.exe: commonicc.lib $(OBJDIR)\kDump.obj
     $(LD) $(LDFLAGS) -Fe$@ $** $(RTLLIB) OS2386.LIB
+
+# kDef2Wat.exe
+kDef2Wat.exe $(PDWIN32_TOOLS)\kDef2Wat.exe: $(OBJDIR)\kDef2Wat.exe
+    $(CP) $** $@
+
+$(OBJDIR)\kDef2Wat.exe: commonicc.lib $(OBJDIR)\kDef2Wat.obj
+    $(LD) $(LDFLAGS) -Fe$@ $** $(RTLLIB) OS2386.LIB
+
 
 
 # Dependent rule. Forward to main makefile.
