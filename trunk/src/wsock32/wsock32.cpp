@@ -1,4 +1,4 @@
-/* $Id: wsock32.cpp,v 1.32 2000-05-18 09:09:04 sandervl Exp $ */
+/* $Id: wsock32.cpp,v 1.33 2000-11-09 18:12:49 sandervl Exp $ */
 
 /*
  *
@@ -121,29 +121,28 @@ BOOL WINSOCK_CreateIData(void)
 //******************************************************************************
 void WINSOCK_DeleteIData(void)
 {
-    LPWSINFO ppid, iData;
-
+    LPWSINFO iData = WINSOCK_GetIData();
+    LPWSINFO* ppid;
     if (iData) {
-	ppid = lpFirstIData;
-	while(ppid)
-	{
-		iData = ppid;
-		ppid  = ppid->lpNextIData;
+	for (ppid = &lpFirstIData; *ppid; ppid = &(*ppid)->lpNextIData) {
+	    if (*ppid == iData) {
+	        *ppid = iData->lpNextIData;
+	        break;
+	    }
+	}
 
-		if( iData->flags & WSI_BLOCKINGCALL )
-	    		dprintf(("\tinside blocking call!\n"));
+	if( iData->flags & WSI_BLOCKINGCALL )
+		dprintf(("\tinside blocking call!\n"));
 
-		/* delete scratch buffers */
-
-		if(iData->he)	free(iData->he);
-		if(iData->se)	free(iData->se);
-		if(iData->pe)	free(iData->pe);
+	/* delete scratch buffers */
+	if(iData->he)	free(iData->he);
+	if(iData->se)	free(iData->se);
+	if(iData->pe)	free(iData->pe);
 
 	////	if( iData->buffer ) SEGPTR_FREE(iData->buffer);
 	////	if( iData->dbuffer ) SEGPTR_FREE(iData->dbuffer);
 
-		HeapFree(GetProcessHeap(), 0, iData);
-	}
+	HeapFree(GetProcessHeap(), 0, iData);
     }
 }
 //******************************************************************************
