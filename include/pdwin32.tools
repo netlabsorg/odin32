@@ -1,4 +1,4 @@
-# $Id: pdwin32.tools,v 1.4 1999-09-06 01:39:55 bird Exp $
+# $Id: pdwin32.tools,v 1.5 2000-02-09 23:52:04 bird Exp $
 # ODIN / win32os2 Project
 #
 # makefile for the build system tools and standard rules
@@ -11,25 +11,26 @@
 #
 # System Utilites
 #
-RM = rm -f
-CP = copy
-MKDIR = mkdir
-ECHO = echo
-IMPDEF = $(PDWIN32_TOOLS)\impdef.exe
-
+RM          = rm -f
+CP          = copy
+MKDIR       = mkdir
+ECHO        = echo
+IMPDEF      = $(PDWIN32_TOOLS)\impdef.exe
+DEPEND      = $(PDWIN32_TOOLS)\fastdep.exe
+DOWITHDIRS  = $(PDWIN32_TOOLS)\dowithdirs.cmd
 
 
 #
 # Targets
 #
 .c.obj:
-        $(CC) $(CFLAGS) -c $<
+    $(CC) $(CFLAGS) -c $<
 
 .cpp.obj:
-        $(CXX) $(CXXFLAGS) -c $<
+    $(CXX) $(CXXFLAGS) -c $<
 
 .asm.obj:
-        $(AS) $(ASFLAGS) $<
+    $(AS) $(ASFLAGS) $<
 
 
 

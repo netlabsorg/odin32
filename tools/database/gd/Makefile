@@ -7,7 +7,12 @@
 #If the ar command fails on your system, consult the ar manpage
 #for your system.
 
+
 all: gdgcc.a gdgcc.lib gdicc.lib
+
+PDWIN32_TOOLS = ..\..\bin
+PDWIN32_INCLUDE = ..\..\..\include
+!include ..\..\..\include\pdwin32.tools
 
 gdgcc.a: force
    @nmake /nologo OMF=0 -f makefile.gcc $@
@@ -20,6 +25,14 @@ gdicc.lib: force
 
 force:
     @echo ...
+
+dep:
+    $(DEPEND) *.c *.cpp *.h *.asm *.inc -Objo *.c *.cpp -objgobj *.c *.cpp
+
+!ifndef NODEP
+!include .depend
+!endif
+
 
 clean:
    @nmake /nologo -f makefile.icc clean
