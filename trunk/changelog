@@ -1,10 +1,15 @@
-/* $Id: changelog,v 1.1839 2001-11-18 16:03:37 sandervl Exp $ */
+/* $Id: changelog,v 1.1840 2001-11-19 12:31:15 sandervl Exp $ */
 
- 2001-11-17: Sander van Leeuwen <sandervl@xs4all.nl>
+ 2001-11-19: Sander van Leeuwen <sandervl@xs4all.nl>
+    - GUIDLIB:  o Library with all GUIDs used by Odin
+    - COMDLG32, OLE32, OLEAUT32, SHLWAPI, SHELL32:
+                o Removed guid source files and link with guidlib.lib
+
+ 2001-11-18: Sander van Leeuwen <sandervl@xs4all.nl>
     - WS2_32:   o Compile fix
     - OLEAUT32: o Don't include guid file in custom build library
 
- 2000-11-17: Yuri Dario <mc6530@mclink.it>
+ 2000-11-18: Yuri Dario <mc6530@mclink.it>
     - USER32:   o WM_SETTEXT (unicode) fix 
                   (latest changes broke Opera among other things)
 
