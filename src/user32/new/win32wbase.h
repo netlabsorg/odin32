@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.13 2000-01-01 14:54:55 cbratschi Exp $ */
+/* $Id: win32wbase.h,v 1.14 2000-01-02 19:30:45 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -130,7 +130,14 @@ Win32BaseWindow *getParent();
          ULONG  getClientHeight()               { return rectClient.bottom - rectClient.top; };
          ULONG  getClientWidth()                { return rectClient.right - rectClient.left; };
          BOOL   isChild();
-         PRECT  getClientRect()                 { return &rectClient; };
+         PRECT  getClientRectPtr()              { return &rectClient; };
+         void   getClientRect(PRECT rect)
+         {
+                *rect = rectClient;
+                rectClient.right  -= rectClient.left;
+                rectClient.bottom -= rectClient.top;
+                rectClient.left = rectClient.top = 0;
+         }
          void   setClientRect(PRECT rect)       { rectClient = *rect; };
          PRECT  getWindowRect()                 { return &rectWindow; };
          void   setClientRect(LONG left, LONG top, LONG right, LONG bottom)
@@ -178,6 +185,7 @@ Win32BaseWindow *GetTopParent();
          VOID   setOS2HwndModalDialog(HWND aHwnd) { OS2HwndModalDialog = aHwnd; };
          HWND   getOS2HwndModalDialog()       { return OS2HwndModalDialog; };
          BOOL   CanReceiveSizeMsgs()          { return !fNoSizeMsg; };
+         BOOL   IsWindowCreated()             { return fCreated; }
          BOOL   IsWindowDestroyed()           { return fIsDestroyed; };
          BOOL   IsWindowEnabled();
          BOOL   IsWindowVisible();
@@ -251,10 +259,6 @@ static Win32BaseWindow *GetWindowFromOS2FrameHandle(HWND hwnd);
        ULONG getBorderWidth() { return borderWidth; };
        ULONG getBorderHeight() { return borderHeight; };
 
-static  void  NC_AdjustRectInner(LPRECT rect, DWORD style, DWORD exStyle);
-static  void  NC_AdjustRectOuter(LPRECT rect, DWORD style, BOOL menu, DWORD exStyle);
-static  BOOL  WindowNeedsWMBorder( DWORD style, DWORD exStyle );
-
        PVOID getOldWndProc() { return pOldWndProc; }
        VOID  setOldWndProc(PVOID aOldWndProc) { pOldWndProc = aOldWndProc; }
        BOOL  isSubclassedOS2Wnd() { return fIsSubclassedOS2Wnd; };
@@ -326,8 +330,8 @@ protected:
         ULONG  *userWindowLong;
         ULONG   nrUserWindowLong;
 
-        RECT    rectWindow;
-        RECT    rectClient;
+        RECT    rectWindow; //relative to screen
+        RECT    rectClient;  //relative to parent
 
 CREATESTRUCTA  *tmpcs; //temporary pointer to CREATESTRUCT used in CreateWindowEx
         ULONG   sw;    //set in CreateWindowExA, used in MsgCreate method
@@ -345,17 +349,33 @@ private:
 #ifndef OS2_INCLUDED
         void  GetMinMaxInfo(POINT *maxSize, POINT *maxPos, POINT *minTrack, POINT *maxTrack );
         LONG  HandleWindowPosChanging(WINDOWPOS *winpos);
+        LONG  HandleNCActivate(WPARAM wParam);
+        VOID  TrackMinMaxBox(WORD wParam);
+        VOID  TrackCloseButton(WORD wParam);
         LONG  HandleNCLButtonDown(WPARAM wParam,LPARAM lParam);
         LONG  HandleNCLButtonUp(WPARAM wParam,LPARAM lParam);
         LONG  HandleNCLButtonDblClk(WPARAM wParam,LPARAM lParam);
+        BOOL  WindowNeedsWMBorder();
+        VOID  AdjustRectOuter(LPRECT rect,BOOL menu);
+        VOID  AdjustRectInner(LPRECT rect);
+        LONG  HandleNCCalcSize(RECT *winRect);
+        LONG  HandleNCHitTest(POINT pt);
+        VOID  GetInsideRect(RECT *rect);
+        VOID  DrawFrame(HDC hdc,RECT *rect,BOOL dlgFrame,BOOL active);
+        BOOL  DrawSysButton(HDC hdc,BOOL down);
+        BOOL  DrawGrayButton(HDC hdc,int x,int y);
+        VOID  DrawCloseButton(HDC hdc,BOOL down,BOOL bGrayed);
+        VOID  DrawMaxButton(HDC hdc,BOOL down,BOOL bGrayed);
+        VOID  DrawMinButton(HDC hdc,BOOL down,BOOL bGrayed);
+        VOID  DrawCaption(HDC hdc,RECT *rect,BOOL active);
+        VOID  DoNCPaint(HRGN clip,BOOL suppress_menupaint);
+        LONG  HandleNCPaint(HRGN clip);
         LONG  HandleSysCommand(WPARAM wParam, POINT *pt32);
 
         LONG  SendNCCalcSize(BOOL calcValidRect,
                              RECT *newWindowRect, RECT *oldWindowRect,
                              RECT *oldClientRect, WINDOWPOS *winpos,
                              RECT *newClientRect );
-
-        LONG  NCHandleCalcSize(WPARAM wParam, NCCALCSIZE_PARAMS *ncsize);
 
      LRESULT  SendInternalMessage(ULONG msg, WPARAM wParam, LPARAM lParam)
      {

@@ -1,4 +1,4 @@
-/* $Id: pmframe.cpp,v 1.2 2000-01-01 17:07:42 cbratschi Exp $ */
+/* $Id: pmframe.cpp,v 1.3 2000-01-02 19:30:43 cbratschi Exp $ */
 /*
  * Win32 Frame Managment Code for OS/2
  *
@@ -15,6 +15,7 @@
 #include <os2.h>                        /* PM header file               */
 #include <os2wrap.h>
 #include <stdlib.h>
+#include <string.h>
 #include "win32type.h"
 #include <misc.h>
 #include <win32wbase.h>
@@ -23,6 +24,7 @@
 #include "oslibutil.h"
 #include "oslibwin.h"
 #include "caret.h"
+#include "oslibmsg.h"
 
 #define PMFRAMELOG
 
@@ -215,7 +217,7 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
  PFNWP            OldFrameProc;
  MRESULT          rc;
  THDB            *thdb;
- MSG             *pWinMsg;
+ MSG             *pWinMsg,winMsg;
 
   SetWin32TIB();
 
@@ -227,7 +229,29 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
     dprintf(("Invalid win32wnd pointer for frame %x!!", hwnd));
     goto RunDefWndProc;
   }
-  pWinMsg = &thdb->msg;
+
+  if((thdb->msgstate & 1) == 0)
+  {//message that was sent directly to our window proc handler; translate it here
+        QMSG qmsg;
+
+        qmsg.msg  = msg;
+        qmsg.hwnd = hwnd;
+        qmsg.mp1  = mp1;
+        qmsg.mp2  = mp2;
+        qmsg.time = WinQueryMsgTime(thdb->hab);
+        WinQueryMsgPos(thdb->hab, &qmsg.ptl);
+        qmsg.reserved = 0;
+
+        if(OS2ToWinMsgTranslate((PVOID)thdb, &qmsg, &winMsg, FALSE, MSG_REMOVE) == FALSE)
+        {//message was not translated
+            memset(&winMsg, 0, sizeof(MSG));
+        }
+        pWinMsg = &winMsg;
+  }
+  else {
+        pWinMsg = &thdb->msg;
+        thdb->msgstate++;
+  }
 
   OldFrameProc = (PFNWP)win32wnd->getOldFrameProc();
 
@@ -235,19 +259,24 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
   {
     case WM_FORMATFRAME:
     {
-      RECTL *client;
+      PSWP pswp = (PSWP)mp1,swpClient;
+      RECTL *client = (PRECTL)mp2,rect;
+      INT ccount;
 
+      if (!win32wnd->IsWindowCreated()) goto RunDefFrameProc;
       dprintf(("PMFRAME: WM_FORMATFRAME %x",hwnd));
-      client = (PRECTL)mp2;
-#if 0
-//CB: todo: client rect is wrong/not set with WM_NCCALCSIZE
-      mapWin32ToOS2Rect(hwnd,win32wnd->getClientRectPtr(),(PRECTLOS2)client);
-
-      RestorOS2TIB();
-      return (MRESULT)1;
-#else
-      goto RunDefFrameProc;
-#endif
+      RestoreOS2TIB();
+      ccount = (INT)OldFrameProc(hwnd,msg,mp1,mp2);
+      SetWin32TIB();
+      mapWin32ToOS2Rect(WinQueryWindow(hwnd,QW_PARENT),win32wnd->getClientRectPtr(),(PRECTLOS2)&rect);
+      WinMapWindowPoints(WinQueryWindow(hwnd,QW_PARENT),hwnd,(PPOINTL)&rect,2);
+      swpClient = &pswp[ccount-1];
+      swpClient->x = rect.xLeft;
+      swpClient->y = rect.yBottom;
+      swpClient->cx = rect.xRight-rect.xLeft;
+      swpClient->cy = rect.yTop-rect.yBottom;
+      RestoreOS2TIB();
+      return (MRESULT)ccount;
     }
 
     case WM_MINMAXFRAME:
@@ -267,8 +296,11 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
     case WM_BUTTON3DOWN:
     case WM_BUTTON3UP:
     case WM_BUTTON3DBLCLK:
-        win32wnd->MsgButton(pWinMsg);
-        RestoreOS2TIB();
+        if (win32wnd->IsWindowCreated())
+        {
+          win32wnd->MsgButton(pWinMsg);
+          RestoreOS2TIB();
+        }
         return (MRESULT)TRUE;
 
     case WM_BUTTON2MOTIONSTART:
@@ -286,7 +318,8 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
     case WM_MOUSEMOVE:
     {
         //OS/2 Window coordinates -> Win32 Window coordinates
-        win32wnd->MsgMouseMove(pWinMsg);
+        if (win32wnd->IsWindowCreated())
+          win32wnd->MsgMouseMove(pWinMsg);
         RestoreOS2TIB();
         return (MRESULT)TRUE;
     }
@@ -296,7 +329,9 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
       DWORD res;
 
       // Only send this message if the window is enabled
-      if (!WinIsWindowEnabled(hwnd))
+      if (!win32wnd->IsWindowCreated())
+        res = HT_NORMAL;
+      else if (!WinIsWindowEnabled(hwnd))
         res = HT_ERROR;
       else if (win32wnd->getIgnoreHitTest())
         res = HT_NORMAL;
@@ -314,7 +349,9 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
     }
 
     case WM_PAINT:
-        win32wnd->DispatchMsgA(pWinMsg);
+        dprintf(("PMFRAME: WM_PAINT"));
+        if (win32wnd->IsWindowCreated())
+          win32wnd->MsgNCPaint();
         goto RunDefWndProc;
 
 //CB: not yet checked
@@ -429,8 +466,7 @@ PosChangedEnd:
       PRECTL oldRect = (PRECTL)mp1,newRect = oldRect+1;
       UINT res = CVR_ALIGNLEFT | CVR_ALIGNTOP;
 
-      //CB: only used if CS_SIZEDRAW isn't set
-      //    PM moves children -> fast, no flickering (if redraw flags not set)
+//CB: todo: use WM_NCCALCSIZE
       if (win32wnd->getWindowClass())
       {
         DWORD dwStyle = win32wnd->getWindowClass()->getClassLongA(GCL_STYLE_W);
@@ -455,19 +491,21 @@ PosChangedEnd:
         HWND hwndTitle;
         USHORT flags = WinQueryWindowUShort(hwnd,QWS_FLAGS);
 
-        //CB: emulate WM_ACTIVATE -> no flickering
-        hwndTitle = WinWindowFromID(hwnd,FID_TITLEBAR);
-        if (hwndTitle) WinSendMsg(hwndTitle,TBM_SETHILITE,mp1,MPVOID);
-
-        WinSendMsg(WinWindowFromID(hwnd,FID_CLIENT),WM_ACTIVATE,mp1,mp2);
-        WinSetWindowUShort(hwnd,QWS_FLAGS,mp1 ? (flags | FF_ACTIVE):(flags & ~FF_ACTIVE));
-
-        //CB: show owner behind the dialog
-        if (win32wnd->IsModalDialog())
+        if (win32wnd->IsWindowCreated())
         {
-          Win32BaseWindow *topOwner = win32wnd->getOwner()->GetTopParent();
+          WinSendMsg(WinWindowFromID(hwnd,FID_CLIENT),WM_ACTIVATE,mp1,mp2);
+          WinSetWindowUShort(hwnd,QWS_FLAGS,mp1 ? (flags | FF_ACTIVE):(flags & ~FF_ACTIVE));
 
-          if (topOwner) WinSetWindowPos(topOwner->getOS2FrameWindowHandle(),hwnd,0,0,0,0,SWP_ZORDER);
+          //CB: show owner behind the dialog
+          if (win32wnd->IsModalDialog())
+          {
+            Win32BaseWindow *topOwner = win32wnd->getOwner()->GetTopParent();
+
+            if (topOwner) WinSetWindowPos(topOwner->getOS2FrameWindowHandle(),hwnd,0,0,0,0,SWP_ZORDER);
+          }
+        } else
+        {
+          WinSetWindowUShort(hwnd,QWS_FLAGS,mp1 ? (flags | FF_ACTIVE):(flags & ~FF_ACTIVE));
         }
 
         RestoreOS2TIB();
