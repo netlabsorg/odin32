@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.181 2002-07-18 21:54:59 achimha Exp $ */
+/* $Id: pmwindow.cpp,v 1.182 2002-07-21 15:55:51 achimha Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -443,7 +443,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
     // restore our FS selector
     SetWin32TIB();
 
-    // BEGIN NOTE-------------->>>>>> If this is changed, also change Win32WindowProc!! <<<<<<<<<<<-------------------- BEGIN
+    // BEGIN NOTE-------------->>>>>> If this is changed, also change Win32FrameWindowProc!! <<<<<<<<<<<-------------------- BEGIN
     teb = GetThreadTEB();
     win32wnd = Win32BaseWindow::GetWindowFromOS2Handle(hwnd);
 
@@ -462,7 +462,11 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 ////    }
 
     // check if the message state counter in the TEB is odd
-    // this means that DispatchMessage has been called
+    // This means the message has been sent directly from PM to our message
+    // handler (so it is the first time we know about this PM message).
+    // If this is the case, we have to translate it here to a Win32
+    // message first. The other case is that the message is the result of a
+    // WinDispatchMsg call and therefore has already been translated.
     if((teb->o.odin.msgstate & 1) == 0)
     {
         // message that was sent directly to our window proc handler; translate it here
@@ -483,10 +487,12 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         pWinMsg = &winMsg;
     }
     else {
+        // message has already been translated before (GetMessage/PeekMessage).
+        // Use the translated information. Flip the translation flag.
         pWinMsg = &teb->o.odin.msg;
         teb->o.odin.msgstate++;
     }
-    // END NOTE-------------->>>>>> If this is changed, also change Win32WindowProc!! <<<<<<<<<<<-------------------- END
+    // END NOTE-------------->>>>>> If this is changed, also change Win32FrameWindowProc!! <<<<<<<<<<<-------------------- END
 
     if(msg >= WIN32APP_POSTMSG) {
         //probably win32 app user message
@@ -1017,6 +1023,11 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
 ////    }
 
     // check if the message state counter in the TEB is odd
+    // This means the message has been sent directly from PM to our message
+    // handler (so it is the first time we know about this PM message).
+    // If this is the case, we have to translate it here to a Win32
+    // message first. The other case is that the message is the result of a
+    // WinDispatchMsg call and therefore has already been translated.
     if((teb->o.odin.msgstate & 1) == 0)
     {//message that was sent directly to our window proc handler; translate it here
         QMSG qmsg;
@@ -1036,6 +1047,8 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
         pWinMsg = &winMsg;
     }
     else {
+        // message has already been translated before (GetMessage/PeekMessage).
+        // Use the translated information. Flip the translation flag.
         pWinMsg = &teb->o.odin.msg;
         teb->o.odin.msgstate++;
     }
