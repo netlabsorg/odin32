@@ -1,5 +1,0 @@
-lx.cpp(772): Warning! W726: col(1) no reference to formal parameter 'modname' 
-lx.cpp(772): Note! N392: col(1) 'char * modname' in 'int LXHeader::StoreImportByName( char *, int, char *, int )' defined in: lx.cpp(737) (col 40) 
-lx.cpp(1116): Warning! W389: col(43) integral value may be truncated during assignment or initialization 
-lx.cpp(1502): Warning! W726: col(1) no reference to formal parameter 'type' 
-lx.cpp(1502): Note! N392: col(1) 'int type' in 'void LXHeader::StoreWin32Resource( int, int, int, char * )' defined in: lx.cpp(1492) (col 47) 
