@@ -1,4 +1,4 @@
-/* $Id: wprocess.h,v 1.13 1999-12-16 00:09:32 sandervl Exp $ */
+/* $Id: wprocess.h,v 1.14 1999-12-16 00:21:47 sandervl Exp $ */
 /*
  * Process help functions
  *
@@ -16,6 +16,7 @@
 #ifndef OS2_INCLUDED
 #include <winprocess.h>
 #else
+#include <winconst.h>
 typedef ULONG PDB;
 #endif
 #include <thread.h>
