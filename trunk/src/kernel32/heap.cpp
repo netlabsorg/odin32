@@ -1,4 +1,4 @@
-/* $Id: heap.cpp,v 1.30 2001-07-06 19:03:42 sandervl Exp $ */
+/* $Id: heap.cpp,v 1.31 2001-07-08 07:14:45 sandervl Exp $ */
 
 /*
  * Win32 heap API functions for OS/2
@@ -288,6 +288,14 @@ LPVOID WINAPI GlobalLock(
    LPVOID           palloc;
 
 
+   /* verify lpMem address */
+   if (hmem >= (HGLOBAL)ulMaxAddr || hmem < (HGLOBAL)0x10000)
+   {
+    	dprintf(("GlobalLock ERROR BAD HEAP POINTER:%X\n", hmem));
+        DebugInt3();
+    	return 0;
+   }
+
    if(hmem == NULL || ISPOINTER(hmem)) {
       dprintf(("KERNEL32: GlobalLock %x returned %x", hmem, hmem));
       return (LPVOID) hmem;
@@ -328,6 +336,14 @@ BOOL WINAPI GlobalUnlock(
    BOOL                 locked;
 
    dprintf(("KERNEL32: GlobalUnlock %x", hmem));
+
+   /* verify lpMem address */
+   if (hmem >= (HGLOBAL)ulMaxAddr || hmem < (HGLOBAL)0x10000)
+   {
+    	dprintf(("GlobalUnlock ERROR BAD HEAP POINTER:%X\n", hmem));
+        DebugInt3();
+    	return 0;
+   }
 
    if(hmem == NULL || ISPOINTER(hmem))
       return FALSE;
@@ -573,6 +589,7 @@ HGLOBAL WINAPI GlobalFree(
    if (hmem >= (HGLOBAL)ulMaxAddr || hmem < (HGLOBAL)0x10000)
    {
     	dprintf(("GlobalFree ERROR BAD HEAP POINTER:%X\n", hmem));
+        DebugInt3();
     	return 0;
    }
 
