@@ -1,5 +1,18 @@
- /* $Id: ChangeLog,v 1.1024 2000-07-04 08:39:35 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.1025 2000-07-06 21:16:01 sandervl Exp $ */
 
+ 2000-07-06: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: Store user default language in thread database struct
+                Set/GetThreadLocale change/return this LCID value
+                Fixed EnumSystemLocalesA/W; now returns default user language id
+                (in text) (TODO: should return all supported locales)
+    - KERNEL32/GDI32/USER32: Changed/fixed calls to strncpy (for 0 termination)
+
+ 2000-07-06: Vitali E. Pelenyov <Vitali.Pelenyov@dpt.ustu.ru>
+    - ODINCRT:  Fixed wrong implementation of strncpy; do not 0 terminate
+                string unless length < length parameter
+                (this is correct behaviour according to C library manual)
+                TODO: Check lstrcpyn* functions in kernel32\heapstring.cpp!
+ 
  2000-07-04: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: Unstubbed CopyFileExA/W (calls CopyFileA/W; not properly implemented)
                 Unstubbed CreateDirectoryExA/W (calls CreateDirectoryA/W; not properly implemented)
