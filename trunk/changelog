@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.963 2000-05-28 16:41:31 sandervl Exp $ */
+ /* $Id: changelog,v 1.964 2000-05-28 19:50:13 sandervl Exp $ */
+
+ 2000-05-28: Michal Necasek <mike@mendelu.cz>
+    - USER32:   MapVirtualKeyA fix for game Commandos (not complete)
 
  2000-05-28: Sander van Leeuwen <sandervl@xs4all.nl>
     - SHELL32:  Merged ShellExecuteA/W of latest Wine release (old version
