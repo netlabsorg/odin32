@@ -1,4 +1,4 @@
-/* $Id: winuser.h,v 1.20 1999-11-24 19:17:51 cbratschi Exp $ */
+/* $Id: winuser.h,v 1.21 1999-12-01 18:21:30 cbratschi Exp $ */
 
 #ifndef __INCLUDE_WINUSER_H
 #define __INCLUDE_WINUSER_H
@@ -420,6 +420,8 @@ typedef struct
 #define EM_CHARFROMPOS           0x00d7
 /* a name change since win95 */
 #define EM_SETLIMITTEXT          EM_LIMITTEXT
+#define EM_SETIMESTATUS          0x00D8
+#define EM_GETIMESTATUS          0x00D9
 
 /* EDITWORDBREAKPROC code values */
 #define WB_LEFT         0
@@ -435,12 +437,21 @@ typedef struct
 #define EN_MAXTEXT      0x0501
 #define EN_HSCROLL      0x0601
 #define EN_VSCROLL      0x0602
+#define EN_ALIGN_LTR_EC 0x0700
+#define EN_ALIGN_RTL_EC 0x0701
 
 /* New since win95 : EM_SETMARGIN parameters */
 #define EC_LEFTMARGIN   0x0001
 #define EC_RIGHTMARGIN  0x0002
 #define EC_USEFONTINFO  0xffff
 
+/* wParam of EM_GET/SETIMESTATUS  */
+#define EMSIS_COMPOSITIONSTRING        0x0001
+
+/* lParam for EMSIS_COMPOSITIONSTRING  */
+#define EIMES_GETCOMPSTRATONCE         0x0001
+#define EIMES_CANCELCOMPSTRINFOCUS     0x0002
+#define EIMES_COMPLETECOMPSTRKILLFOCUS 0x0004
 
 /* Messages */
 
