@@ -1,9 +1,12 @@
- /* $Id: ChangeLog,v 1.699 2000-02-05 15:57:01 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.700 2000-02-05 16:25:34 sandervl Exp $ */
 
  2000-02-05: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Memory map fixes (file maps)
-	- USER32: GWL_STYLE change + mdi child creation fix
-                  (child still not activated when created)
+	- USER32: mdi child creation fix (child still not activated when created)
+                  Default WM_ERASEBKGND handler change (only erase invalid area)
+                  (note: might be wrong; have to check this in NT; probably
+                         need to rewrite code that sends those messages)
+                  -> fixes redraws for i.e. windows behind menu windows
 	- GDI32: Don't use Open32 apis to load opengl32 (nor for GetProcAddress)
                  Import wgl* apis
 	- OPENGL: Removed OS2wgl apis (they had the wrong calling convention
