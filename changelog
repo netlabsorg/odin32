@@ -1,4 +1,4 @@
- /* $Id: changelog,v 1.300 1999-10-09 19:11:38 sandervl Exp $ */
+ /* $Id: changelog,v 1.301 1999-10-09 19:25:33 sandervl Exp $ */
 
  99-10-09: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Clipboard fixes (window handle translation)
@@ -16,6 +16,7 @@
                     Only increase y position of window if it's initial y <> 0.
                     Fixed desktop window lookup (GetWindowFromHandle)
                     Set dummy desktop window handler;
+                    Mdi client bugfix (reported by Yuri Dario)
 
  99-10-09: Jens Wiessner <wiessnej@rfi.de>
 	- CRTDLL: Implemented functions; only 62 stubs left
