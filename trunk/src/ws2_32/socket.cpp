@@ -1,4 +1,4 @@
-/* $Id: socket.cpp,v 1.11 2001-10-17 10:22:37 sandervl Exp $ */
+/* $Id: socket.cpp,v 1.12 2002-03-08 11:36:11 sandervl Exp $ */
 /*
  * based on Windows Sockets 1.1 specs
  * (ftp.microsoft.com:/Advsys/winsock/spec11/WINSOCK.TXT)
@@ -103,24 +103,6 @@ ODINFUNCTION6(SOCKET, WSASocketW,
          af, type, protocol, lpProtocolInfo, g, dwFlags );
 
    return ( socket (af, type, protocol) );
-}
-//******************************************************************************
-//******************************************************************************
-ODINFUNCTION3(int, WSAEnumProtocolsA, LPINT, lpiProtocols, 
-                                      LPWSAPROTOCOL_INFOA, lpProtocolBuffer,
-                                      LPDWORD, lpdwBufferLength)
-{
-    dprintf(("NOT IMPLEMENTED"));
-    return 0;
-}
-//******************************************************************************
-//******************************************************************************
-ODINFUNCTION3(int, WSAEnumProtocolsW, LPINT, lpiProtocols, 
-                                      LPWSAPROTOCOL_INFOW, lpProtocolBuffer,
-                                      LPDWORD, lpdwBufferLength)
-{
-    dprintf(("NOT IMPLEMENTED"));
-    return 0;
 }
 //******************************************************************************
 //******************************************************************************
