@@ -1,4 +1,4 @@
-; $Id: myldrOpenPatha.asm,v 1.1 2000-09-22 09:22:40 bird Exp $
+; $Id: myldrOpenPatha.asm,v 1.2 2000-09-28 03:32:39 bird Exp $
 ;
 ; myldrOpenPatha - assembly helpers for myldrOpenPath.
 ;
@@ -54,9 +54,34 @@ _ldrOpenPath@20 PROC NEAR
     mov     eax, [esp - 04h]
     mov     [esp +  00h], eax
 
+    ;
+    ;
+    ; debug - clear the stack.
+    ;
+if 0
+    extrn   pulTKSSBase32:DWORD
+    push    ecx
+    push    edi
+    push    es
+    push    ds
+    pop     es
+
+    mov     edi, pulTKSSBase32
+    mov     edi, [edi]
+    add     edi, esp
+    mov     ecx, esp
+    and     ecx, 0fffh
+    sub     edi, ecx
+    xor     eax, eax
+    rep     stosb
+
+    pop     es
+    pop     edi
+    pop     ecx
+endif
+
 new:
     jmp     near ptr FLAT:CALLTAB:__ldrOpenPath
-
 _ldrOpenPath@20 ENDP
 
 
