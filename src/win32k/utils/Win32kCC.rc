@@ -1,0 +1,41 @@
+/* $Id: Win32kCC.rc,v 1.2 2000-09-02 21:08:23 bird Exp $
+ *
+ * Resource File for Win32k Control Center.
+ *
+ * Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
+ *
+ */
+
+#include <os2.h>
+#include "Win32kCC.h"
+
+STRINGTABLE
+BEGIN
+    /*
+     * Error strings (input for sprintf!).
+     */
+    IDS_ERR_DIALOGLOAD,         "Failed to load dialog.\rdialogid = %d\rlasterr = 0x%x\rmsg = %s"
+    IDS_ERR_MALLOC_FAILED,      "Malloc failed. (file %s; line %d; function %s)"
+    IDS_ERR_SET_INSTACEDATA,    "Call to WinSetWindowPtr failed.\rlasterror = %d\rmsg = %s"
+    IDS_ERR_WIN32K_NOT_LOADED,  "Win32k.sys is not loaded.\rTo fix it you'll have to add it to your config.sys. (see the Odin32 readme.txt for more details.)"
+    IDS_ERR_WIN32K_OPEN_FAILED, "Failed to open Win32k.sys. (rc=0x%x)"
+    IDS_ERR_QUERYOPTIONSTATUS,  "Failed to get option and status data from Win32k.sys. (rc=0x%x)"
+    IDS_ERR_NO_COM_RADIOBUTTON, "Internal error. No COM port is selected!"
+    IDS_ERR_NO_PE_RADIOBUTTON,  "Internal error. No PE Loader mode is selected!"
+    IDS_ERR_INVALID_INFOLEVEL,  "Invalid infolevel."
+    IDS_ERR_INVALID_MAXHEAPSIZE,"Invalid heapsize."
+    IDS_ERR_SETPOPTIONS,        "Error occured in win32k while changing the options. (rc=0x%x)"
+END
+
+MESSAGETABLE
+BEGIN
+    /*
+     * Messages.
+     */
+    IDM_INFO_DIRTY,             "You have changed the settings but not applied them. Sure you wan't to exit?"
+END
+
+
+RCINCLUDE "Win32kCC.dlg"

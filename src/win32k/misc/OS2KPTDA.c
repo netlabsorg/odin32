@@ -1,4 +1,4 @@
-/* $Id: OS2KPTDA.c,v 1.1 2000-07-16 22:21:17 bird Exp $
+/* $Id: OS2KPTDA.c,v 1.2 2000-09-02 21:08:12 bird Exp $
  *
  * PTDA access functions.
  *
@@ -8,12 +8,17 @@
  *
  */
 
+/*******************************************************************************
+*   Defined Constants And Macros                                               *
+*******************************************************************************/
+#define INCL_OS2KRNL_SEM
+#define INCL_OS2KRNL_PTDA
 
 /*******************************************************************************
 *   Header Files                                                               *
 *******************************************************************************/
 #include <os2.h>
-#include <OS2KPTDA.h>
+#include <OS2Krnl.h>
 
 
 /*******************************************************************************
@@ -27,6 +32,8 @@
  */
 extern ULONG    pptda_start;
 extern ULONG    pptda_environ;
+extern ULONG    pptda_ptdasem;
+extern ULONG    pptda_module;
 
 
 /**
@@ -34,10 +41,35 @@ extern ULONG    pptda_environ;
  * for the environment block of the processes.
  * @returns     Content of the pPTDA->ptda_environ member.
  * @param       pPTDA   PTDA Pointer. (NULL is not allowed!)
- * @sketch
  */
 USHORT  ptdaGet_ptda_environ(PPTDA pPTDA)
 {
     return *(PUSHORT)(void*)(((char*)(void*)pPTDA) + (pptda_environ - pptda_start));
 }
+
+
+/**
+ * Gets the ptda_module PTDA member. This member holds the MTE handle of the process's
+ * executable image.
+ * @returns     Content of the pPTDA->ptda_module member.
+ * @param       pPTDA   PTDA Pointer. (NULL is not allowed!)
+ */
+USHORT  ptdaGet_ptda_module(PPTDA pPTDA)
+{
+    return *(PUSHORT)(void*)(((char*)(void*)pPTDA) + (pptda_module - pptda_start));
+}
+
+
+/**
+ * Gets the ptda_ptdasem PTDA member. This member holds the intra-process semaphore which
+ * for example is used to serialize _LDRQAppType.
+ * @returns     Content of the pPTDA->ptda_ptdasem member.
+ * @param       pPTDA   PTDA Pointer. (NULL is not allowed!)
+ */
+HKSEMMTX    ptda_ptda_ptdasem(PPTDA pPTDA)
+{
+    return (HKSEMMTX)(void*)(((char*)(void*)pPTDA) + (pptda_ptdasem - pptda_start));
+}
+
+
 

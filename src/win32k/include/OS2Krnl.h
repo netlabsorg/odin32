@@ -1,4 +1,4 @@
-/* $Id: OS2Krnl.h,v 1.7 2000-02-15 23:39:19 bird Exp $
+/* $Id: OS2Krnl.h,v 1.8 2000-09-02 21:08:00 bird Exp $
  *
  * OS/2 kernel structures, typedefs and macros.
  *
@@ -152,6 +152,8 @@ typedef struct MTE
    CHAR           mte_modname[8];
 } MTE,*PMTE,**PPMTE;
 
+typedef USHORT HMTE, *PHMTE;
+typedef USHORT HPTDA, *PHPTDA;
 
 
 /***********/
@@ -227,6 +229,11 @@ typedef struct MTE
 #define KRNLCALL __stdcall
 
 /*
+ * Calling convention for Security Helpers.
+ */
+#define SECCALL  _System
+
+/*
  *
  * Other Kernel Parts
  *
@@ -234,6 +241,15 @@ typedef struct MTE
 #ifdef INCL_OS2KRNL_ALL
     #define INCL_OS2KRNL_IO
     #define INCL_OS2KRNL_VM
+    #define INCL_OS2KRNL_SEM
+    #define INCL_OS2KRNL_TK
+    #define INCL_OS2KRNL_PTDA
+    #define INCL_OS2KRNL_TCB
+    #define INCL_OS2KRNL_SEC
+#endif
+
+#if defined(INCL_OS2KRNL_PTDA) && !defined(INCL_OS2KRNL_SEM)
+    #define INCL_OS2KRNL_SEM
 #endif
 
 #ifdef INCL_OS2KRNL_IO
@@ -242,6 +258,26 @@ typedef struct MTE
 
 #ifdef INCL_OS2KRNL_VM
     #include <OS2KVM.h>
+#endif
+
+#ifdef INCL_OS2KRNL_SEM
+    #include <OS2KSEM.h>
+#endif
+
+#ifdef INCL_OS2KRNL_TK
+    #include <OS2KTK.h>
+#endif
+
+#ifdef INCL_OS2KRNL_PTDA
+    #include <OS2KPTDA.h>
+#endif
+
+#ifdef INCL_OS2KRNL_TCB
+    #include <OS2KTCB.h>
+#endif
+
+#ifdef INCL_OS2KRNL_SEC
+    #include <OS2KSEC.h>
 #endif
 
 #endif

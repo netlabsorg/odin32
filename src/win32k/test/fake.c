@@ -1,4 +1,4 @@
-/* $Id: fake.c,v 1.1 2000-07-16 22:18:14 bird Exp $
+/* $Id: fake.c,v 1.2 2000-09-02 21:08:20 bird Exp $
  *
  * Fake stubs for the ldr and kernel functions we imports or overloads.
  *
@@ -27,6 +27,8 @@
 #include <exe386.h>                     /* OS/2 LX structs and definitions. */
 
 #include <string.h>
+
+#include "devSegDf.h"                   /* Win32k segment definitions. */
 
 #include "log.h"
 #include "OS2Krnl.h"
@@ -59,11 +61,19 @@ typedef struct ldrrei_s /* #memb 7 size 20 (0x014) - from 14040W4 kernel.sdf */
 /*
  * Pointer to the loader semaphore.
  */
-static LONG     lfakeLDRSem = 0;        /* Used as a counter. */
-HKMTX           fakeLDRSem = (HKMTX)&lfakeLDRSem;
+KSEMMTX         fakeLDRSem;
+
+CHAR            szBeginLibPath[1024];
+CHAR            szEndLibPath[1024];
+CHAR            szLibPath[1024];
+PSZ             fakeLDRLibPath = &szLibPath[0];
+
+CHAR            szldrpFileNameBuf[CCHMAXPATH];
+PSZ             fakeldrpFileNameBuf = &szldrpFileNameBuf[0];
 
 static CHAR     achHeaderBuffer[256];   /* Buffer to read exe header into. */
 PVOID           pheaderbuf = &achHeaderBuffer[0];
+
 
 /*
  * table use by fakeldrMTEValidatePtrs.
@@ -111,6 +121,44 @@ ULONG LDRCALL   fakeldrCreateMte(struct e32_exe * pe32, ldrlv_t *plv);
 ULONG LDRCALL   fakeldrLoadImports(PMTE pmte);
 VOID  LDRCALL   fakeldrUCaseString(PCHAR pachString, USHORT cchString);
 ULONG LDRCALL   fakeldrMTEValidatePtrs(PSMTE psmte, ULONG ulMaxAddr, ULONG off);
+unsigned short  getSlot(void);
+
+
+
+/**
+ * Initiate workers (imported kernel functions / vars)
+ * @status    partially implemented.
+ * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ */
+void  workersinit(void)
+{
+    APIRET rc;
+
+    /*
+     * Make code writable.
+     */
+    DosSetMem(&CODE16START, &CODE16END - &CODE16START, PAG_WRITE | PAG_READ);
+    DosSetMem(&CODE32START, &CODE32END - &CODE32START, PAG_WRITE | PAG_READ);
+
+    /*
+     * Loader semaphore
+     */
+    fakeKSEMInit((PKSEM)(void*)&fakeLDRSem, KSEM_MUTEX, KSEM_DEFAULT);
+
+    /*
+     * Intra process semaphore.
+     */
+    fakeKSEMInit((PKSEM)(void*)&fakeptda_ptdasem, KSEM_MUTEX, KSEM_DEFAULT);
+
+    /*
+     * LIBPaths
+     */
+    rc = DosQueryExtLIBPATH(szBeginLibPath, BEGIN_LIBPATH);
+    rc = DosQueryHeaderInfo(NULLHANDLE, 0, szLibPath, sizeof(szLibPath), QHINF_LIBPATH);
+    rc = DosQueryExtLIBPATH(szEndLibPath, END_LIBPATH);
+
+    rc = rc;
+}
 
 
 /**
@@ -168,6 +216,8 @@ ULONG LDRCALL fakeldrOpen(PSFN phFile, PSZ pszFilename, PULONG pfl)
         *phFile = (USHORT)hFile;
         if (pfl != NULL)
             *pfl = 0;
+        rc = DosQueryPathInfo(pszFilename, FIL_QUERYFULLNAME, fakeldrpFileNameBuf, CCHMAXPATH);
+        rc = NO_ERROR;
     }
 
     if (!f32Stack) ThunkStack32To16();
@@ -711,14 +761,7 @@ ULONG LDRCALL fakeldrOpenPath(PCHAR pachFilename, USHORT cchFilename, ldrlv_t *p
  */
 ULONG LDRCALL fakeLDRClearSem(void)
 {
-    if (lfakeLDRSem == 0)
-        kprintf(("fakeLDRClearSem: lfakeLDRSem is 0 allready\n"));
-    else
-        lfakeLDRSem--;
-
-    printf("fakeLDRClearSem:                usage count = %d, rc = %d\n", lfakeLDRSem, NO_ERROR);
-
-    return NO_ERROR;
+    return fakeKSEMReleaseMutex(&fakeLDRSem);
 }
 
 /**
@@ -729,14 +772,156 @@ ULONG LDRCALL fakeLDRClearSem(void)
  * @status    completely implemented.
  * @remark
  */
-ULONG KRNLCALL fakeKSEMRequestMutex(HKMTX hkmtx, ULONG ulTimeout)
+ULONG KRNLCALL fakeKSEMRequestMutex(HKSEMMTX hkmtx, ULONG ulTimeout)
 {
-    (*(PLONG)hkmtx)++;
+    unsigned short usSlot = getSlot();
+    ULONG          rc = NO_ERROR;
 
-    printf("fakeKSEMRequestMutex:           hkmtx = %p, ulTimeout = 0x%x, usage count = %d, rc = %d\n",
-           hkmtx, ulTimeout, *(PLONG)hkmtx, NO_ERROR);
+    if (memcmp(&hkmtx->debug.ksem_achSignature[0], "KSEM", 4) != 0)
+    {
+        printf("fakeKSEMQueryMutex:             hkmtx = %p, invalid signature (%.4s)\n", hkmtx, hkmtx->debug.ksem_achSignature);
+        return FALSE;
+    }
 
-    return NO_ERROR;
+    if (hkmtx->debug.ksem_Owner == 0)
+    {
+        hkmtx->debug.ksem_Owner = usSlot;
+        hkmtx->debug.ksem_cusNest = 1;
+    }
+    else if (hkmtx->debug.ksem_Owner == usSlot)
+        hkmtx->debug.ksem_cusNest++;
+    else
+        rc = ERROR_SEM_BUSY;
+
+    printf("fakeKSEMRequestMutex:           hkmtx = %p, ulTimeout = 0x%x, owner = %d, usage count = %d, rc = %d\n",
+           hkmtx, ulTimeout, hkmtx->debug.ksem_cusNest, hkmtx->debug.ksem_Owner, ERROR_SEM_BUSY);
+
+    return rc;
+}
+
+
+/**
+ * KSEMReleaseMutex faker.
+ * @returns   NO_ERROR
+ * @param     hkmtx
+ * @param     ulTimeout
+ * @status    completely implemented.
+ * @remark
+ */
+ULONG KRNLCALL fakeKSEMReleaseMutex(HKSEMMTX hkmtx)
+{
+    unsigned int    usSlot = getSlot();
+    int rc = NO_ERROR;
+
+    if (memcmp(&hkmtx->debug.ksem_achSignature[0], "KSEM", 4) != 0)
+    {
+        printf("fakeKSEMQueryMutex:             hkmtx = %p, invalid signature (%.4s)\n", hkmtx, hkmtx->debug.ksem_achSignature);
+        return FALSE;
+    }
+
+    if (hkmtx->debug.ksem_Owner == usSlot)
+    {
+        if (--hkmtx->debug.ksem_cusNest == 0)
+            hkmtx->debug.ksem_Owner = 0;
+    }
+    else
+        rc = ERROR_NOT_OWNER;
+
+    printf("fakeKSEMReleaseMutex:           hkmtx = %p, usage count = %d, owner = %d, rc = %d\n",
+           hkmtx, hkmtx->debug.ksem_cusNest, hkmtx->debug.ksem_Owner, rc);
+
+    return rc;
+}
+
+
+
+/**
+ * KSEMQueryMutex faker.
+ * @returns     TRUE if owner or clear. Clear if *pcusNest is 0.
+ *              FALSE if other owner.
+ * @param       hkmtx       Handle to kernel mutex.
+ * @param       pcusNest    Pointer to variable which is to receive the nesting count.
+ *                          (ie. the number of times we have taken this semaphore.)
+ * @status      completely implemented.
+ * @author      knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ */
+BOOL KRNLCALL  fakeKSEMQueryMutex(HKSEMMTX hkmtx, PUSHORT pcusNest)
+{
+    unsigned int    usSlot = getSlot();
+    BOOL            fRc = TRUE;
+
+    if (memcmp(&hkmtx->debug.ksem_achSignature[0], "KSEM", 4) != 0)
+    {
+        printf("fakeKSEMQueryMutex:             hkmtx = %p, invalid signature (%.4s)\n", hkmtx, hkmtx->debug.ksem_achSignature);
+        return FALSE;
+    }
+
+    if (hkmtx->debug.ksem_Owner == 0)
+    {
+        if (pcusNest)
+            *pcusNest = 0;
+        fRc = FALSE;
+    }
+    else
+    {
+        fRc = (hkmtx->debug.ksem_Owner == usSlot);
+        if (pcusNest)
+            *pcusNest = hkmtx->debug.ksem_cusNest;
+    }
+
+    printf("fakeKSEMQueryMutex:             hkmtx = %p, usage count = %d, owner = %d, *pcusNest = %d, rc = %d\n",
+           hkmtx, hkmtx->debug.ksem_cusNest, hkmtx->debug.ksem_Owner, pcusNest ? *pcusNest : -1, fRc);
+
+    return fRc;
+}
+
+
+/**
+ * KSEMInit faker.
+ * @param       pksem       Pointer to the semaphore struct to initiate.
+ * @param       fulType     Semaphore type. (only KSEM_MUTEX is supported)
+ * @param       fulFlags    Semaphore flags. (not validated)
+ * @status      partially implemented.
+ * @author      knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ */
+VOID  KRNLCALL  fakeKSEMInit(PKSEM pksem, ULONG fulType, ULONG fulFlags)
+{
+    if (fulType != KSEM_MUTEX)
+    {
+        printf("fakeKSEMInit:                   Invalid fulType parameter (%d).\n", fulType);
+        return; /*ERROR_INVALID_PARAMETER;*/
+    }
+
+    memcpy(pksem->mtx.debug.ksem_achSignature, "KSEM", 4);
+    pksem->mtx.debug.ksem_bFlags = (char)fulFlags;
+    pksem->mtx.debug.ksem_bType = KSEM_MUTEX;
+    pksem->mtx.debug.ksem_cusNest = 0;
+    pksem->mtx.debug.ksem_cusPendingWriters = 0;
+    pksem->mtx.debug.ksem_Owner = 0;
+
+    printf("fakeKSEMInit:                   pksem=%p, fulType=%d, fulFlags=0x%x.\n", pksem, fulType, fulFlags);
+}
+
+
+/**
+ * Gets the thread slot number.
+ * @returns     Thread slot number.
+ * @status      completely implemented.
+ * @author      knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ */
+unsigned short getSlot(void)
+{
+    PPIB ppib;
+    PTIB ptib;
+    BOOL            f32Stack = ((int)&ppib > 0x10000);
+
+    if (!f32Stack) ThunkStack16To32();
+
+    DosGetInfoBlocks(&ptib, &ppib);
+
+    if (!f32Stack) ThunkStack32To16();
+
+    return (unsigned short)ptib->tib_ordinal;
 }
 
 
@@ -862,6 +1047,15 @@ ULONG _Optlink tkExecPgmWorker(ULONG execFlag, PSZ pArg, PSZ pEnv, PSZ pszFilena
     ldrrei_t    rei;
 
     printf("tkExecPgmWorker:                execFlag = %d, pArg = %p, pEnv = %p, pszFilename = %s\n", execFlag, pArg, pEnv, pszFilename);
+
+    /*
+     * Take loader semaphore.
+     */
+    rc = KSEMRequestMutex(&fakeLDRSem, KSEM_INDEFINITE_WAIT);
+    if (rc != NO_ERROR)
+    {
+        return rc;
+    }
 
     /*
      * Simulate loading.
@@ -1478,7 +1672,7 @@ ULONG LDRCALL   fakeldrLoadImports(PMTE pmte)
          i < pmte->mte_impmodcnt && rc == NO_ERROR;
          i++, psz += 1 + *psz)
     {
-        if (!memcmp(psz+1, "DOSCALLS", *psz))
+        if (*psz == 8 && !strnicmp(psz+1, "DOSCALLS", 8))
             continue;
 
         rc = fakeldrGetMte(psz + 1, *psz, LVTYPE_DLL, CLASS_GLOBAL, &papmte[i]);
@@ -1560,5 +1754,47 @@ ULONG LDRCALL   fakeldrMTEValidatePtrs(PSMTE psmte, ULONG ulMaxAddr, ULONG off)
     printf("fakeldrMTEValidatePtrs: *exit*  psmte = %p, ulMaxAddr = %p, off = %p, rc = %d\n",
            psmte, ulMaxAddr, off, NO_ERROR);
     return NO_ERROR;
+}
+
+
+PMTE KRNLCALL fakeldrASMpMTEFromHandle(HMTE  hMTE)
+{
+    PMTE pMte = (PMTE)hMTE;
+
+    pMte += 10; //just do something!
+
+    return NULL;
+}
+
+ULONG LDRCALL   fakeldrFindModule(PCHAR pachFilename, USHORT cchFilename, USHORT usClass, PPMTE ppMTE)
+{
+    APIRET rc = NO_ERROR;
+    usClass = usClass;
+    cchFilename = cchFilename;
+    pachFilename = pachFilename;
+    *ppMTE = NULL;
+    return rc;
+}
+
+
+/**
+ * Gets the path (name with fully qualified path) from a SFN.
+ * @returns     Pointer to the path of hFile.
+ * @param       hFile   SFN filehandle.
+ */
+PSZ SECCALL fakeSecPathFromSFN(SFN hFile)
+{
+    APIRET  rc;
+    BOOL    f32Stack = ((int)&hFile > 0x10000);
+
+    if (!f32Stack) ThunkStack16To32();
+
+    rc = ERROR_NOT_SUPPORTED;
+
+    if (!f32Stack) ThunkStack32To16();
+
+    printf("fakeSecPathFromSFN:                    - not implemented - hFile = 0x%04x, rc = %d\n", hFile, rc);
+
+    return rc;
 }
 

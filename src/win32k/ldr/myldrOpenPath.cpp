@@ -1,4 +1,4 @@
-/* $Id: myldrOpenPath.cpp,v 1.1 2000-07-16 22:21:16 bird Exp $
+/* $Id: myldrOpenPath.cpp,v 1.2 2000-09-02 21:08:10 bird Exp $
  *
  * myldrOpenPath - ldrOpenPath used to open executables we'll override
  * this to altern the search path for DLLs.
@@ -15,6 +15,7 @@
 #define INCL_DOSERRORS
 #define INCL_NOPMAPI
 #define INCL_OS2KRNL_TCB
+#define INCL_OS2KRNL_PTDA
 
 /*******************************************************************************
 *   Header Files                                                               *
@@ -24,6 +25,7 @@
 #include <memory.h>
 #include <stdlib.h>
 
+#include "devSegDf.h"                   /* Win32k segment definitions. */
 #include "log.h"
 #include "dev32.h"
 #include "dev32hlp.h"
@@ -133,20 +135,15 @@ ULONG LDRCALL myldrOpenPath( /* retd  0x10 */
         }
         else
         {
-            struct InfoSegLDT *pInfoSeg;
-            pInfoSeg = (struct InfoSegLDT *)D32Hlp_GetDOSVar(DHGETDOSV_SYSINFOSEG, 0);
-            if (pInfoSeg == NULL)
+            PPTDA   pPTDA = ptdaGetCur();
+            if (pPTDA)
             {
-                pExe = getModuleByhMTE(pInfoSeg->LIS_DI); /* LIS_DI is the same as hmod in LINFOSEG from bsedos16.h.  */
+                pExe = getModuleByhMTE(ptdaGet_ptda_module(pPTDA));
                 #ifdef DEBUG            /* While testing! */
-                kprintf(("myldrOpenPath: getModuleByhMTE returned 0x%x08 for hmod=0x%04\n",
-                         pExe, pInfoSeg->LIS_DI));
+                kprintf(("myldrOpenPath: getModuleByhMTE returned 0x%08x for hmod=0x%04x\n",
+                         pExe, ptdaGet_ptda_module(pPTDA)));
                 #endif
             }
-            #ifdef DEBUG                /* While testing! */
-            else
-                dprintf(("myldrOpenPath: D32Hlp_GetDOSVar(DHGETDOSV_SYSINFOSEG) failed.\n"));
-            #endif
         }
 
         /*

@@ -1,4 +1,4 @@
-/* $Id: rmalloc.c,v 1.3 2000-01-24 01:45:20 bird Exp $
+/* $Id: rmalloc.c,v 1.4 2000-09-02 21:08:14 bird Exp $
  *
  * Resident Heap.
  *
@@ -49,6 +49,7 @@
 *  Headerfiles
 ******************************************************************************/
 #include <os2.h>
+#include "devSegDf.h"                   /* Win32k segment definitions. */
 #ifdef RING0
     #include "dev32hlp.h"
     #include "asmutils.h"

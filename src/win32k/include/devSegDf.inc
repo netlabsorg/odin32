@@ -1,4 +1,4 @@
-; $Id: devSegDf.inc,v 1.5 2000-02-21 09:24:00 bird Exp $
+; $Id: devSegDf.inc,v 1.6 2000-09-02 21:08:01 bird Exp $
 ;
 ; Segment definitions for win32k.sys.
 ;
@@ -17,11 +17,36 @@ DATA16_BSS ends
 DATA16_CONST segment word public 'FAR_DATA' use16
 DATA16_CONST ends
 
-DATA16_GROUP    group DATA16, DATA16_CONST, DATA16_BSS
+DATA16_GLOBAL segment word public 'FAR_DATA' use16
+DATA16_GLOBAL ends
+
+;DATA16_GROUP    group DATA16, DATA16_CONST, DATA16_BSS, DATA16_GLOBAL
+
+
+DATA16_INIT segment word public 'FAR_DATA' use16
+DATA16_INIT ends
+
+DATA16_INIT_CONST segment word public 'FAR_DATA' use16
+DATA16_INIT_CONST ends
+
+DATA16_INIT_BSS segment word public 'FAR_DATA' use16
+DATA16_INIT_BSS ends
+
+;DATA16_INIT_GROUP   group DATA16_INIT, DATA16_INIT_CONST, DATA16_INIT_BSS
+;
+;A bad trick to make all the 16-bit data segments one
+;
+DATA16_GROUP    group DATA16, DATA16_CONST, DATA16_BSS, DATA16_GLOBAL, DATA16_INIT, DATA16_INIT_CONST, DATA16_INIT_BSS
 
 
 CODE16 segment word public 'CODE' use16
 CODE16 ends
+
+CODE16_INIT segment word public 'CODE' use16
+CODE16_INIT ends
+
+CODE16_IOSEG segment word public 'CODE' use16
+CODE16_IOSEG ends
 
 
 CODE32 segment dword public 'CODE' use32
@@ -32,7 +57,7 @@ EH_CODE ends
 
 
 ;DGROUP group BSS32, DATA32
-DGROUP group BSS32, DATA32, CONST32_RO, _VFT, EH_DATA
+DGROUP group CALLTAB, BSS32, DATA32, CONST32_RO, _VFT, c_common, DDE4_DATA32, CTOR_DTOR1, CTOR_DTOR2, CTOR_DTOR3, EH_DATA
 
 DATA32  segment dword public 'DATA' use32
 DATA32 ends
@@ -40,9 +65,20 @@ DATA32 ends
 c_common segment dword public 'DATA' use32
 c_common ends
 
+DDE4_DATA32  segment dword public 'DATA' use32
+DDE4_DATA32 ends
+
 BSS32 segment dword public 'BSS' use32
 BSS32 ends
 
+CTOR_DTOR1 segment dword public 'DATA' use32
+CTOR_DTOR1 ends
+
+CTOR_DTOR2 segment dword public 'DATA' use32
+CTOR_DTOR2 ends
+
+CTOR_DTOR3 segment dword public 'DATA' use32
+CTOR_DTOR3 ends
 
 ;CONSTGROUP group CONST32_RO, _VFT, EH_DATA
 
