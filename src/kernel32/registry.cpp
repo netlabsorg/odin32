@@ -1,4 +1,4 @@
-/* $Id: registry.cpp,v 1.2 2000-06-08 18:08:56 sandervl Exp $ */
+/* $Id: registry.cpp,v 1.3 2000-09-05 20:35:39 sandervl Exp $ */
 
 /*
  * Win32 registry API functions for OS/2
@@ -898,15 +898,28 @@ ODINFUNCTION5(LONG,RegSetValueA,HKEY,  hkey,
                                  LPCSTR,lpData,
                                  DWORD, cbData)
 {
+ LONG rc;
+
   //SvL: 8-11-'97: Bugfix: crash in pmwinx if size == 0 and string is large
   if(cbData == 0)
     cbData = strlen(lpData);
 
-  return(_O32_RegSetValue(ConvertKey(hkey),
+  rc = _O32_RegSetValue(ConvertKey(hkey),
                          lpSubKey,
                          dwType,
                          lpData,
-                         cbData));
+                         cbData);
+  if(rc == ERROR_NOT_ENOUGH_MEMORY && cbData == 0 && dwType == REG_SZ) 
+  {
+    char regdata = 0;
+	//SvL: Netscape sets an empty string key this way; Open32 doesn't like it
+	rc = _O32_RegSetValue(ConvertKey(hkey),
+                         lpSubKey,
+                         dwType,
+                         &regdata,
+                         1);
+  }
+  return rc;
 }
 
 
