@@ -1,7 +1,10 @@
- /* $Id: ChangeLog,v 1.249 1999-09-28 00:39:40 phaller Exp $ */
+ /* $Id: ChangeLog,v 1.250 1999-09-28 01:18:45 phaller Exp $ */
 
  99-09-28: Patrick Haller <phaller@gmx.net>
-	- KERNEL32: Add: debug info for missing API imports (WinImagePeLdr)
+	- KERNEL32: 	Add: debug info for missing API imports (WinImagePeLdr)
+			Fix: source cleanup, introduction of WIN32.DIR.SYSTEM and WIN32.DIR.WINDOWS
+			     as overrides over the STUPID Open32 result. I don't want to have Win32 apps
+			     messing up x:\OS2 ....
 
  99-09-25: Daniela Engert <dani@ngrt.de>
 	- USER32: SetTimer/KillTimer work now.
