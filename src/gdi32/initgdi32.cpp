@@ -1,4 +1,4 @@
-/* $Id: initgdi32.cpp,v 1.6 2001-09-28 07:51:18 sandervl Exp $
+/* $Id: initgdi32.cpp,v 1.7 2001-10-15 17:19:56 sandervl Exp $
  *
  * DLL entry point
  *
@@ -88,21 +88,21 @@ ULONG APIENTRY inittermGdi32(ULONG hModule, ULONG ulFlag)
 
          InitializeKernel32();
          CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
-     if(InitRegionSpace() == FALSE) {
-        return 0UL;
+         if(InitRegionSpace() == FALSE) {
+             return 0UL;
          }
-     dllHandle = RegisterLxDll(hModule, OdinLibMain, (PVOID)&gdi32_PEResTab,
+         dllHandle = RegisterLxDll(hModule, OdinLibMain, (PVOID)&gdi32_PEResTab,
                                    GDI32_MAJORIMAGE_VERSION, GDI32_MINORIMAGE_VERSION,
                                    IMAGE_SUBSYSTEM_NATIVE);
          if(dllHandle == 0)
-        return 0UL;
+             return 0UL;
 
          dprintf(("gdi32 init %s %s (%x)", __DATE__, __TIME__, inittermGdi32));
 
          break;
       case 1 :
          if(dllHandle) {
-        UnregisterLxDll(dllHandle);
+             UnregisterLxDll(dllHandle);
          }
          break;
       default  :
