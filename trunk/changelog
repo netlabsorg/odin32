@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.1747 2001-10-12 21:59:08 achimha Exp $ */
+/* $Id: changelog,v 1.1748 2001-10-13 00:48:50 sandervl Exp $ */
+
+ 2000-10-12: Yuri Dario <mc6530@mclink.it>
+    - USER32:   o GetNextDlgGroupItem fix for infinite loop in Opera
 
  2001-10-12: Achim Hasenmueller <achimha@innotek.de>
     - KERNEL32: o use bounce buffers if end of buffer crosses
