@@ -1,4 +1,4 @@
-/* $Id: dibsect.cpp,v 1.4 1999-06-19 10:54:39 sandervl Exp $ */
+/* $Id: dibsect.cpp,v 1.5 1999-10-21 19:25:06 sandervl Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -24,7 +24,7 @@
 //******************************************************************************
 //******************************************************************************
 DIBSection::DIBSection(WINBITMAPINFOHEADER *pbmi, DWORD handle, int fFlip)
-                : bmpBits(NULL), pOS2bmp(NULL)
+                : bmpBits(NULL), pOS2bmp(NULL), next(NULL)
 {
  int bmpsize = pbmi->biWidth, os2bmpsize;
 
