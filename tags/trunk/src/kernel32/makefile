@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.102 2000-10-02 13:38:56 sandervl Exp $
+# $Id: makefile,v 1.103 2000-10-10 17:14:04 sandervl Exp $
 
 #
 # Odin32 API
@@ -106,7 +106,6 @@ $(OBJDIR)\disk.obj \
 $(OBJDIR)\directory.obj \
 $(OBJDIR)\cvtbitmap.obj \
 $(OBJDIR)\hmmmap.obj \
-$(OBJDIR)\winfakepeldr.obj \
 $(OBJDIR)\cvtaccel.obj \
 $(OBJDIR)\cvticon.obj \
 $(OBJDIR)\cvticongrp.obj \

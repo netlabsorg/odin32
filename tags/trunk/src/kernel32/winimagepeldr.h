@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.h,v 1.5 2000-10-04 19:36:25 sandervl Exp $ */
+/* $Id: winimagepeldr.h,v 1.6 2000-10-10 17:14:09 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -21,8 +21,8 @@
 #define DEFAULT_NR_PAGES        16 //default nr of pages to commit during exception
 
 //SvL: To load a dll/exe for i.e. getting a single resource (GetVersionSize/Resource)
-#define REAL_LOAD		0
-#define RSRC_LOAD		1
+#define FLAG_PELDR_LOADASDATAFILE	1  //also implies FLAG_PELDR_SKIPIMPORTS
+#define FLAG_PELDR_SKIPIMPORTS		2
 
 //SvL: Amount of memory the peldr dll reserves for win32 exes without fixups
 //(most of them need to be loaded at 4 MB; except MS Office apps of course)
@@ -74,7 +74,7 @@ class Win32MemMap;
 class Win32PeLdrImage : public virtual Win32ImageBase
 {
 public:
-         Win32PeLdrImage(char *szFileName, BOOL isExe, int loadtype = REAL_LOAD);
+         Win32PeLdrImage(char *szFileName, BOOL isExe);
 virtual ~Win32PeLdrImage();
 
         //reservedMem is address of memory reserved in peldr.dll (allocated before
@@ -92,6 +92,10 @@ virtual ~Win32PeLdrImage();
 
     //Returns required OS version for this image
     virtual ULONG getVersion();
+
+        //tell loader to only process resources and ignore the rest
+        void  setLoadAsDataFile()     { dwFlags |= FLAG_PELDR_LOADASDATAFILE; };
+        void  disableImportHandling() { dwFlags |= FLAG_PELDR_SKIPIMPORTS; };
 
         //commits image page(s) when an access violation exception is dispatched
 	BOOL  commitPage(ULONG virtAddress, BOOL fWriteAccess, int fPageCmd = SECTION_PAGES);
@@ -136,7 +140,8 @@ Win32DllBase *loadDll(char *pszCurModule);
         ULONG                 realBaseAddress;
         Section               section[MAX_SECTION];
 
-	ULONG                 loadType;
+        //internal flags (see FLAGS_PELDR_*)
+	DWORD                 dwFlags;
 
 	HFILE                 hFile;
 

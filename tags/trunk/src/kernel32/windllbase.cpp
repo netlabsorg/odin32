@@ -1,4 +1,4 @@
-/* $Id: windllbase.cpp,v 1.17 2000-10-02 18:39:36 sandervl Exp $ */
+/* $Id: windllbase.cpp,v 1.18 2000-10-10 17:14:06 sandervl Exp $ */
 
 /*
  * Win32 Dll base class
@@ -52,7 +52,7 @@ Win32DllBase::Win32DllBase(HINSTANCE hinstance, WIN32DLLENTRY DllEntryPoint,
                  : Win32ImageBase(hinstance),
   	           referenced(0), fSkipThreadEntryCalls(FALSE), next(NULL), fInserted(FALSE),
                    fAttachedToProcess(FALSE), fUnloaded(FALSE), 
-                   nrDynamicLibRef(0), fDisableUnload(FALSE)
+                   nrDynamicLibRef(0), fDisableUnload(FALSE), fSkipEntryCalls(FALSE)
 {
   dllEntryPoint = DllEntryPoint;
 
@@ -394,7 +394,7 @@ BOOL Win32DllBase::attachProcess()
  THDB *thdb;
  BOOL rc, fSetExceptionHandler;
 
-  if(fAttachedToProcess)
+  if(fAttachedToProcess || fSkipEntryCalls)
 	return TRUE;
 
   fAttachedToProcess = TRUE;
@@ -459,6 +459,11 @@ BOOL Win32DllBase::detachProcess()
  WINEXCEPTION_FRAME exceptFrame;
  USHORT sel;
  BOOL rc;
+
+  if(fSkipEntryCalls) {
+	fUnloaded = TRUE;
+	return TRUE;
+  }
 
   if(dllEntryPoint == NULL) {
         tlsDetachThread();	//destroy TLS (main thread)
