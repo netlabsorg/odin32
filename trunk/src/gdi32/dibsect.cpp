@@ -1,4 +1,4 @@
-/* $Id: dibsect.cpp,v 1.15 2000-02-02 23:45:06 sandervl Exp $ */
+/* $Id: dibsect.cpp,v 1.16 2000-02-09 23:34:30 sandervl Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -57,11 +57,11 @@ DIBSection::DIBSection(BITMAPINFOHEADER_W *pbmi, char *pColors, DWORD iUsage, DW
   switch(pbmi->biBitCount)
   {
         case 1:
-                bmpsize /= 8;
+                bmpsize = ((bmpsize + 31) & ~31) / 8;
                 os2bmpsize += ((1 << pbmi->biBitCount)-1)*sizeof(RGB2);
                 break;
         case 4:
-                bmpsize /= 2;
+                bmpsize = ((bmpsize + 7) & ~7) / 2;
                 os2bmpsize += ((1 << pbmi->biBitCount)-1)*sizeof(RGB2);
                 break;
         case 8:
@@ -201,12 +201,12 @@ int DIBSection::SetDIBits(HDC hdc, HBITMAP hbitmap, UINT startscan, UINT
   switch(pbmi->biBitCount)
   {
     case 1:
-      bmpsize /= 8;
+      bmpsize = ((bmpsize + 31) & ~31) / 8;
       palsize = ((1 << pbmi->biBitCount))*sizeof(RGB2);
       os2bmpsize += palsize;
       break;
     case 4:
-      bmpsize /= 2;
+      bmpsize = ((bmpsize + 7) & ~7) / 2;
       palsize = ((1 << pbmi->biBitCount))*sizeof(RGB2);
       os2bmpsize += palsize;
       break;
