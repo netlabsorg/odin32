@@ -1,4 +1,4 @@
-/* $Id: fillfunc.cpp,v 1.6 2002-07-01 19:15:26 sandervl Exp $ */
+/* $Id: fillfunc.cpp,v 1.7 2002-07-02 09:55:13 sandervl Exp $ */
 
 /*
  * ColorFill functions
@@ -225,7 +225,6 @@ void __cdecl Fill32( char* pDst,
 {
   dprintf(("Fill16on16 %x (%d,%d)(%d,%d) %d %x", pDB+(dwTop*dwPitchDB)+(dwLeft*2), dwLeft, dwTop, dwWidth, dwHeight, dwPitchDB, dwColor));
 
-  dwColor = MAKE_RGB565(dwColor);
   dwColor = (dwColor&0xFFFF)+((dwColor&0xFFFF)<<16);
 
   Fill16( pDB+(dwTop*dwPitchDB)+(dwLeft*2),
