@@ -443,7 +443,7 @@ WCHAR WINAPI tolowerW( WCHAR ch )
     return ch + casemap_lower[casemap_lower[ch >> 8] + (ch & 0xff)];
 }
 
-int strcasecmp( char *p1, char *p2 )
+INT WINAPI strcasecmp( LPCSTR p1, LPCSTR p2 )
 {
     return stricmp( p1, p2 );
 }

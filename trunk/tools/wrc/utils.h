@@ -44,7 +44,8 @@ string_t *convert_string(const string_t *str, enum str_e type);
 void set_language(unsigned short lang, unsigned short sublang);
 
 #if defined(__IBMC__) || defined(__IBMCPP__)
-int strcasecmp( char *p1, char *p2 );
+#undef strcasecmp
+INT WINAPI strcasecmp(LPCSTR p1, LPCSTR p2);
 
 /* Borrowed from Apache NT Port and PHP */
 
