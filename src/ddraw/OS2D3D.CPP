@@ -1,4 +1,4 @@
-/* $Id: OS2D3D.CPP,v 1.12 2001-03-18 21:44:42 mike Exp $ */
+/* $Id: OS2D3D.CPP,v 1.13 2002-02-17 20:40:04 sandervl Exp $ */
 
 /*
  * DX clipper class routines
@@ -14,12 +14,15 @@
 #include <memory.h>
 
 #define INITGUID
+#define _OS2WIN_H
+#define FAR
+
+#include <odin.h>
+#include <winbase.h>
 #include "os2ddraw.h"
 #include "os2clipper.h"
 #include "os2palette.h"
 #include "os2surface.h"
-#define _OS2WIN_H
-#define FAR
 #include <misc.h>
 #include <winerror.h>
 #undef THIS

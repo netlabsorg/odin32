@@ -1,4 +1,4 @@
-/* $Id: ddraw.CPP,v 1.20 2001-09-25 18:23:41 sandervl Exp $ */
+/* $Id: ddraw.CPP,v 1.21 2002-02-17 20:40:06 sandervl Exp $ */
 
 /*
  * DXDraw DLL implementaion
@@ -13,7 +13,12 @@
  *
  */
 
+// define the following as we include winnt.h
+//#define _OS2WIN_H
+#define FAR
+
 #include <odin.h>
+#include <winbase.h>
 #include <memory.h>
 #include <stdio.h>
 #define INITGUID
@@ -22,13 +27,8 @@
 
 #include "os2ddraw.h"
 #include "winerror.h"
-// define the following as we include winnt.h
-#define _OS2WIN_H
-#define FAR
 
 #include <misc.h>
-
-extern "C" {
 
 //******************************************************************************
 //******************************************************************************
@@ -287,4 +287,3 @@ HRESULT WINAPI DDrawDllCanUnloadNow(void)
   return S_FALSE;
 }//******************************************************************************
 
-}

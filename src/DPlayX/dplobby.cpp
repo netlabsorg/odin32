@@ -1,4 +1,4 @@
-// $Id: dplobby.cpp,v 1.5 2001-04-16 17:25:23 sandervl Exp $
+// $Id: dplobby.cpp,v 1.6 2002-02-17 20:40:24 sandervl Exp $
 /* Direct Play Lobby 2 & 3 Implementation
  *
  * Copyright 1998,1999,2000 - Peter Hunnisett
@@ -12,6 +12,7 @@
 #define ICOM_CINTERFACE 1
 #define CINTERFACE
 
+#include "winbase.h"
 #include "winerror.h"
 #include "winnt.h"
 #include "winreg.h"
