@@ -1,4 +1,4 @@
-/* $Id: misc.cpp,v 1.23 2000-05-09 18:56:09 sandervl Exp $ */
+/* $Id: misc.cpp,v 1.24 2000-07-22 12:52:45 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -291,7 +291,10 @@ int SYSTEM EXPORT WriteLog(char *tekst, ...)
     va_start(argptr, tekst);
     if(thdb) { 
 	thdb->logfile = (DWORD)flog;
-    	fprintf(flog, "t%d: ", thdb->threadId);
+        if(sel == 0x150b) {
+		fprintf(flog, "t%d: (FS=150B) ", thdb->threadId);
+	}
+	else   	fprintf(flog, "t%d: ", thdb->threadId);
     }
     vfprintf(flog, tekst, argptr);
     if(thdb) thdb->logfile = 0;
