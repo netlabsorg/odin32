@@ -1,4 +1,4 @@
-/* $Id: Fileio.cpp,v 1.26 2000-03-28 17:11:48 sandervl Exp $ */
+/* $Id: Fileio.cpp,v 1.27 2000-03-29 15:17:27 cbratschi Exp $ */
 
 /*
  * Win32 File IO API functions for OS/2
@@ -28,7 +28,7 @@
 #include "handlemanager.h"
 #include "oslibdos.h"
 
-#define DBG_LOCALLOG	DBG_fileio
+#define DBG_LOCALLOG    DBG_fileio
 #include "dbglocal.h"
 
 ODINDEBUGCHANNEL(KERNEL32-FILEIO)
@@ -76,79 +76,97 @@ ODINFUNCTION7(HFILE,   CreateFileW,
 //******************************************************************************
 //******************************************************************************
 ODINFUNCTION2(HANDLE, FindFirstFileA,
-              LPCSTR, arg1,
-              WIN32_FIND_DATAA *, arg2)
+              LPCSTR, lpFileName,
+              WIN32_FIND_DATAA *, lpFindFileData)
 {
-  dprintf(("FindFirstFileA %s", arg1));
-  return O32_FindFirstFile(arg1, arg2);
+  return (HANDLE)OSLibDosFindFirst(lpFileName,lpFindFileData);
 }
-
+//******************************************************************************
+// internal function for faster access (SHELL32)
+//******************************************************************************
+ODINFUNCTION3(HANDLE, FindFirstFileMultiA,
+              LPCSTR, lpFileName,
+              WIN32_FIND_DATAA *, lpFindFileData,
+              DWORD *,count)
+{
+  return (HANDLE)OSLibDosFindFirstMulti(lpFileName,lpFindFileData,count);
+}
 //******************************************************************************
 //******************************************************************************
 ODINFUNCTION2(HANDLE,  FindFirstFileW,
-              LPCWSTR, arg1,
-              WIN32_FIND_DATAW *, arg2)
+              LPCWSTR, lpFileName,
+              WIN32_FIND_DATAW *, lpFindFileData)
 {
   HANDLE           rc;
   char             *astring;
   WIN32_FIND_DATAA wfda;
 
-  astring = UnicodeToAsciiString((LPWSTR)arg1);
-  rc = FindFirstFileA(astring, &wfda);
+  astring = UnicodeToAsciiString((LPWSTR)lpFileName);
+  rc = (HANDLE)OSLibDosFindFirst(astring,&wfda);
 
   if(rc == -1) {
-	memset(arg2, 0, sizeof(WIN32_FIND_DATAW));
+        memset(lpFindFileData, 0, sizeof(WIN32_FIND_DATAW));
   }
   else {
-  	// convert back the result structure
-	memcpy(arg2,
-	         &wfda,
-	         sizeof(WIN32_FIND_DATAA));
-	
-	lstrcpynAtoW (arg2->cFileName,
-	              wfda.cFileName,
-	              sizeof(wfda.cFileName));
-	
-	lstrcpynAtoW (arg2->cAlternateFileName,
-	              wfda.cAlternateFileName,
-	              sizeof(wfda.cAlternateFileName));
-  }	
+        // convert back the result structure
+        memcpy(lpFindFileData,
+                 &wfda,
+                 sizeof(WIN32_FIND_DATAA));
+
+        lstrcpynAtoW (lpFindFileData->cFileName,
+                      wfda.cFileName,
+                      sizeof(wfda.cFileName));
+
+        lstrcpynAtoW (lpFindFileData->cAlternateFileName,
+                      wfda.cAlternateFileName,
+                      sizeof(wfda.cAlternateFileName));
+  }
   FreeAsciiString(astring);
   return(rc);
 }
 //******************************************************************************
 //******************************************************************************
 ODINFUNCTION2(BOOL,   FindNextFileA,
-              HANDLE, arg1,
-              WIN32_FIND_DATAA *, arg2)
+              HANDLE, hFindFile,
+              WIN32_FIND_DATAA *, lpFindFileData)
 {
-  return O32_FindNextFile(arg1, arg2);
+  return OSLibDosFindNext(hFindFile,lpFindFileData);
+}
+//******************************************************************************
+// internal function for faster access (SHELL32)
+//******************************************************************************
+ODINFUNCTION3(BOOL,   FindNextFileMultiA,
+              HANDLE, hFindFile,
+              WIN32_FIND_DATAA *, lpFindFileData,
+              DWORD *,count)
+{
+  return OSLibDosFindNextMulti(hFindFile,lpFindFileData,count);
 }
 //******************************************************************************
 //******************************************************************************
 ODINFUNCTION2(BOOL, FindNextFileW,
-              HANDLE, arg1,
-              WIN32_FIND_DATAW *, arg2)
+              HANDLE, hFindFile,
+              WIN32_FIND_DATAW *, lpFindFileData)
 {
   WIN32_FIND_DATAA wfda;
   BOOL             rc;
 
-  rc = FindNextFileA(arg1, &wfda);
+  rc = OSLibDosFindNext(hFindFile,&wfda);
 
   if(rc == 0) {
-	memset(arg2, 0, sizeof(WIN32_FIND_DATAW));
+        memset(lpFindFileData, 0, sizeof(WIN32_FIND_DATAW));
   }
   else {
         // convert back the result structure
-  	memcpy(arg2,
+        memcpy(lpFindFileData,
                &wfda,
                sizeof(WIN32_FIND_DATAA));
 
-	lstrcpynAtoW (arg2->cFileName,
+        lstrcpynAtoW (lpFindFileData->cFileName,
                       wfda.cFileName,
                       sizeof(wfda.cFileName));
 
-        lstrcpynAtoW (arg2->cAlternateFileName,
+        lstrcpynAtoW (lpFindFileData->cAlternateFileName,
                       wfda.cAlternateFileName,
                       sizeof(wfda.cAlternateFileName));
   }
@@ -157,9 +175,9 @@ ODINFUNCTION2(BOOL, FindNextFileW,
 //******************************************************************************
 //******************************************************************************
 ODINFUNCTION1(BOOL, FindClose,
-              HANDLE, arg1)
+              HANDLE, hFindFile)
 {
-  return O32_FindClose(arg1);
+  return OSLibDosFindClose(hFindFile);
 }
 //******************************************************************************
 //******************************************************************************
@@ -379,12 +397,12 @@ ODINFUNCTION1(DWORD, GetFileAttributesA,
 
     if((NULL!=lpszFileName) && strlen(lpszFileName)==2 && lpszFileName[1] == ':')
     {
-      	 char szDrive[4];
-      	 szDrive[0] = lpszFileName[0];
-      	 szDrive[1] = lpszFileName[1];
-      	 szDrive[2] = '\\';
-      	 szDrive[3] = 0x00;
-      	 rc = O32_GetFileAttributes((LPSTR)szDrive);
+         char szDrive[4];
+         szDrive[0] = lpszFileName[0];
+         szDrive[1] = lpszFileName[1];
+         szDrive[2] = '\\';
+         szDrive[3] = 0x00;
+         rc = O32_GetFileAttributes((LPSTR)szDrive);
     }
     else rc = O32_GetFileAttributes((LPSTR)lpszFileName);
 

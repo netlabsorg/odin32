@@ -1,4 +1,4 @@
-; $Id: kernel32.def,v 1.75 2000-03-23 19:23:46 sandervl Exp $
+; $Id: kernel32.def,v 1.76 2000-03-29 15:17:27 cbratschi Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is Windows95 KERNEL32
@@ -1069,6 +1069,11 @@ EXPORTS
    reset__10VSemaphoreFPUl                                        @1282
    __ct__10VSemaphoreFiPUl                                        @1283
    __dt__10VSemaphoreFv                                           @1284
+
+;fast file API's
+    FindFirstFileMultiA        = _FindFirstFileMultiA@12          @1290
+    FindNextFileMultiA         = _FindNextFileMultiA@12           @1291
+
 
 ;Export for MSACM32
     _wsnprintfA                                                   @2000
