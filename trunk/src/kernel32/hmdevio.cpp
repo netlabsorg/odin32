@@ -1,4 +1,4 @@
-/* $Id: hmdevio.cpp,v 1.26 2002-01-12 10:28:17 sandervl Exp $ */
+/* $Id: hmdevio.cpp,v 1.27 2002-04-29 16:28:37 sandervl Exp $ */
 
 /*
  * Win32 Device IOCTL API functions for OS/2
@@ -139,7 +139,8 @@ BOOL WIN32API RegisterCustomDriver(PFNDRVOPEN pfnDriverOpen, PFNDRVCLOSE pfnDriv
 {
  HMDeviceDriver *driver;
  DWORD rc;
- 
+
+    dprintf(("RegisterCustomDriver %s", lpDeviceName));
     driver = new HMCustomDriver(pfnDriverOpen, pfnDriverClose, pfnDriverIOCtl, pfnDriverRead, pfnDriverWrite, pfnDriverCancelIo, pfnDriverGetOverlappedResult, lpDeviceName, lpDriverData);
     if(driver == NULL) {
         DebugInt3();
