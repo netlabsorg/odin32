@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.1447 2001-05-25 19:58:58 sandervl Exp $ */
+/* $Id: changelog,v 1.1448 2001-05-26 10:08:29 sandervl Exp $ */
+
+ 2001-05-26: Sander van Leeuwen <sandervl@xs4all.nl>
+    - COMCTL32: o Datetime control resync with Wine (get/setrange added)
 
  2001-05-25: Sander van Leeuwen <sandervl@xs4all.nl>
     - Odin.ini: o Removed MS Shell Dlg font mapping
