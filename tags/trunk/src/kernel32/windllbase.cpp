@@ -1,4 +1,4 @@
-/* $Id: windllbase.cpp,v 1.22 2000-11-21 11:35:09 sandervl Exp $ */
+/* $Id: windllbase.cpp,v 1.23 2000-12-03 10:12:33 sandervl Exp $ */
 
 /*
  * Win32 Dll base class
@@ -671,6 +671,12 @@ void Win32DllBase::setDefaultRenaming()
     {
         PROFILE_SetOdinIniString(DLLRENAMEWIN_SECTION, "WINSPOOL", "WINSPOOL.DLL");
         PROFILE_SetOdinIniString(DLLRENAMEOS2_SECTION, "WINSPOOL", "WINSPOOL.DRV");
+    }
+    if(PROFILE_GetOdinIniString(DLLRENAMEWIN_SECTION, "MCICDA", "", renameddll,
+                                sizeof(renameddll)-1) <= 1)
+    {
+        PROFILE_SetOdinIniString(DLLRENAMEWIN_SECTION, "MCICDA", "MCICDA.DLL");
+        PROFILE_SetOdinIniString(DLLRENAMEOS2_SECTION, "MCICDA", "MCICDA.DRV");
     }
 }
 //******************************************************************************
