@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.1274 2001-02-19 22:10:55 sandervl Exp $ */
+/* $Id: changelog,v 1.1275 2001-02-20 05:16:42 bird Exp $ */
 
  2000-02-19: Kai Sommerfeld <kai.sommerfeld@hamburg.de>
     - KERNEL32: o OSLibDosAllocMem fix (better checks for errors + return
@@ -8,6 +8,10 @@
  2000-02-19: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - KERNEL32: o Use DosAllocMemEx to 64KB align memory (OSLibDosAllocMem)
                   when available.
+    - Win32k:   o Prepared API code for both callgate and IOCtl invokation.
+                  This caused changes in IOCtl parameter structures.
+                  Callgate code is completed but not used yet because
+                  it isn't tested yet.
 
  2001-02-19: Sander van Leeuwen <sandervl@xs4all.nl>
     - COMDLG32: o Commented out Norse ChooseFont dialog (incomplete translation)
