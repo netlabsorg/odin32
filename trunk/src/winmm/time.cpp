@@ -1,4 +1,4 @@
-/* $Id: time.cpp,v 1.14 2001-10-03 13:47:59 sandervl Exp $ */
+/* $Id: time.cpp,v 1.15 2001-11-22 15:40:46 phaller Exp $ */
 
 /*
  * Timer MM apis
@@ -222,6 +222,11 @@ ODINFUNCTION5(MMRESULT,       timeSetEvent,
   return(MMRESULT)timerID;
 }
 
+
+#if 0
+// Note: 2001-11-22
+// WinGetCurrentTime does not touch the FS: selector.
+// It just returns the content of a variable.
 ULONG OPEN32API WinGetCurrentTime(ULONG hab);
 
 inline ULONG _WinGetCurrentTime(ULONG a)
@@ -237,6 +242,9 @@ inline ULONG _WinGetCurrentTime(ULONG a)
 
 #undef  WinGetCurrentTime
 #define WinGetCurrentTime _WinGetCurrentTime
+#else
+ULONG OPEN32API WinGetCurrentTime(ULONG hab);
+#endif
 
 /*****************************************************************************
  * Name      :
@@ -282,7 +290,15 @@ ODINFUNCTION2(MMRESULT, timeGetSystemTime,
 
 DWORD WIN32API timeGetTime()
 {
- DWORD time;
+#if 0
+  //SvL: TODO: Inaccurate
+  DWORD time = WinGetCurrentTime(0);
+  dprintf2(("timeGetTime %x", time));
+  return time;
+#else
+  return WinGetCurrentTime(0);
+#endif
+  
 #if 0
  LARGE_INTEGER lint;
  static LARGE_INTEGER freq;
@@ -296,11 +312,6 @@ DWORD WIN32API timeGetTime()
   QueryPerformanceCounter(&lint);
   time = lint.LowPart/freq.LowPart;
   dprintf2(("timeGetTime %x (%x:%x)", time, lint.LowPart, lint.HighPart));
-#else
-  //SvL: TODO: Inaccurate
-  time = WinGetCurrentTime(0);
-  dprintf2(("timeGetTime %x", time));
 #endif
-  return time;
 }
 
