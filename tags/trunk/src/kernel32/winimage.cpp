@@ -1,4 +1,4 @@
-/* $Id: winimage.cpp,v 1.18 1999-08-27 16:51:01 sandervl Exp $ */
+/* $Id: winimage.cpp,v 1.19 1999-09-08 07:09:34 bird Exp $ */
 
 /*
  * Win32 PE Image class
@@ -544,9 +544,9 @@ BOOL Win32Image::allocFixedMem(ULONG reservedMem)
  APIRET rc;
 
   realBaseAddress = 0;
-  
-  if(reservedMem && reservedMem <= oh.ImageBase && 
-     ((oh.ImageBase - reservedMem) + imageSize < PELDR_RESERVEDMEMSIZE)) 
+
+  if(reservedMem && reservedMem <= oh.ImageBase &&
+     ((oh.ImageBase - reservedMem) + imageSize < PELDR_RESERVEDMEMSIZE))
   {
 	//ok, it fits perfectly
        	realBaseAddress = oh.ImageBase;
@@ -609,7 +609,7 @@ BOOL Win32Image::storeSections(char *win32file)
  WINIMAGE_LOOKUP *imgLookup;
 
   //Commit memory for image header
-  headersize = sizeof(IMAGE_DOS_HEADER) + sizeof(IMAGE_NT_HEADERS) + 
+  headersize = sizeof(IMAGE_DOS_HEADER) + sizeof(IMAGE_NT_HEADERS) +
 	       sizeof(IMAGE_SECTION_HEADER) * fh.NumberOfSections;
 
   if(headersize + sizeof(WINIMAGE_LOOKUP) < PAGE_SIZE) {
@@ -625,7 +625,7 @@ BOOL Win32Image::storeSections(char *win32file)
 	fout << "DosSetMem failed for Image header! " << rc << endl;
 	return FALSE;
   }
-  // Store the NT header at the load addr 
+  // Store the NT header at the load addr
   memcpy((char *)realBaseAddress, win32file, sizeof(IMAGE_DOS_HEADER));
   memcpy((char *)PE_HEADER(realBaseAddress), PE_HEADER(win32file), sizeof(IMAGE_NT_HEADERS));
   memcpy(PE_SECTIONS(realBaseAddress), PE_SECTIONS(win32file),
@@ -633,7 +633,9 @@ BOOL Win32Image::storeSections(char *win32file)
 
   imgLookup = WINIMAGE_LOOKUPADDR(realBaseAddress);
   imgLookup->image = this;
+#ifdef DEBUG
   imgLookup->magic = MAGIC_WINIMAGE;
+#endif
 
   // Process all the image sections
   for(i=0;i<nrsections;i++) {
