@@ -1,4 +1,4 @@
-/* $Id: comm.cpp,v 1.5 2000-09-20 21:32:49 hugh Exp $ */
+/* $Id: comm.cpp,v 1.6 2000-09-21 20:14:39 sandervl Exp $ */
 
 /*
  * Comport functions
@@ -6,6 +6,10 @@
  * Copyright 1998 Patrick Haller (?)
  * Copyright 1998 Felix Maschek  (?)
  * Copyright 2000 Markus Montkowski
+ *
+ * Partly based on Wine code (BuildCommDCBAndTimeoutsA; misc\comm.c)
+ * 
+ * Copyright 1996 Marcus Meissner, Erik Bos
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
