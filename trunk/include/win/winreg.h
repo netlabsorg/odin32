@@ -1,4 +1,4 @@
-/* $Id: winreg.h,v 1.4 1999-12-21 00:29:31 sandervl Exp $ */
+/* $Id: winreg.h,v 1.5 2000-04-19 14:46:37 sandervl Exp $ */
 
 /*
  * 				Shell Library definitions
@@ -33,6 +33,7 @@
 #define REG_MULTI_SZ		7	/* multiple strings, delimited by \0, terminated by \0\0 (ASCII) */
 #define REG_RESOURCE_LIST	8	/* resource list? huh? */
 #define REG_FULL_RESOURCE_DESCRIPTOR	9	/* full resource descriptor? huh? */
+#define REG_RESOURCE_REQUIREMENTS_LIST	10
 
 #define HEX_REG_NONE                     0x80000000
 #define HEX_REG_SZ                       0x80000001
