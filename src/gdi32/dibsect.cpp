@@ -1,4 +1,4 @@
-/* $Id: dibsect.cpp,v 1.34 2000-06-14 18:30:15 sandervl Exp $ */
+/* $Id: dibsect.cpp,v 1.35 2000-06-17 11:58:07 sandervl Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -517,6 +517,7 @@ BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nDestWidth,
         }
 	//restore old y inversion height
 	if(fRestoryYInversion) GpiEnableYInversion(hps, oldyinversion);
+    	SetLastError(ERROR_SUCCESS_W);
     	return(TRUE);
   }
   if(fRestoryYInversion) GpiEnableYInversion(hps, oldyinversion);
