@@ -1,4 +1,4 @@
-/* $Id: Win32kCC.rc,v 1.5.2.2 2001-02-17 08:57:51 bird Exp $
+/* $Id: Win32kCC.rc,v 1.5.2.3 2001-02-17 20:20:09 bird Exp $
  *
  * Resource File for Win32k Control Center.
  *
@@ -41,6 +41,7 @@ BEGIN
     IDS_ERR_FAILED_TO_LOAD_DLGT,"Error! Failed to load dialog template id=%d, rc=%d"
     IDS_ERR_FAILED_NTBK_BUTTONS, "Error! Failed to add notebook buttons.\rlasterr = %d\rmsg = %s"
     IDS_ERR_ASSERT,             "Assertion Failed. %s(%d), %s"
+    IDS_ERR_TIMER_START,        "Failed to start mem info refresh timer.\rlasserror =%d\rmsg = %s"
 END
 
 MESSAGETABLE
@@ -56,10 +57,10 @@ END
 /*
  * Put these here as DlgEdit messes up the flags.
  */
-DLGTEMPLATE DL_WIN32KCC LOADONCALL MOVEABLE DISCARDABLE
+DLGTEMPLATE DL_WIN32KCC
 BEGIN
-    DIALOG  "Win32k Control Center", DL_WIN32KCC, 0, 0, 322, 220, WS_VISIBLE,
-            FCF_SYSMENU | FCF_TITLEBAR
+    DIALOG  "Win32k Control Center", DL_WIN32KCC, 40, 30, 322, 220, WS_VISIBLE,
+            FCF_SYSMENU | FCF_TITLEBAR | FCF_TASKLIST | FCF_HIDEBUTTON | FCF_CLOSEBUTTON
     BEGIN
         NOTEBOOK        DL_WIN32KCC_NTBK, 6, 24, 310, 196,
                         BKS_BACKPAGESTR |
@@ -74,10 +75,10 @@ BEGIN
     END
 END
 
-DLGTEMPLATE DL_WIN32KCC_OLD LOADONCALL MOVEABLE DISCARDABLE
+DLGTEMPLATE DL_WIN32KCC_OLD
 BEGIN
-    DIALOG  "Win32k Control Center", DL_WIN32KCC_OLD, 0, 0, 322, 220,
-            WS_VISIBLE, FCF_SYSMENU | FCF_TITLEBAR
+    DIALOG  "Win32k Control Center", DL_WIN32KCC_OLD, 40, 30, 322, 220, WS_VISIBLE,
+            FCF_SYSMENU | FCF_TITLEBAR | FCF_TASKLIST | FCF_HIDEBUTTON | FCF_CLOSEBUTTON
     BEGIN
         NOTEBOOK        DL_WIN32KCC_NTBK, 6, 24, 310, 196, BKS_BACKPAGESTR |
                         BKS_TABTEXTCENTER | BKS_SOLIDBIND |
@@ -89,6 +90,21 @@ BEGIN
         PUSHBUTTON      "~Close", DID_OK, 195, 4, 40, 14
     END
 END
+
+
+/*
+ * Accelerator table.
+ */
+ACCELTABLE DL_WIN32KCC
+BEGIN
+    "a", PB_APPLY,      ALT
+    "A", PB_APPLY,      ALT
+    "c", DID_OK,        ALT
+    "C", DID_OK,        ALT
+    "r", PB_REFRESH,    ALT
+    "R", PB_REFRESH,    ALT
+END
+
 
 /*
  * Redefine ID to prevent duplicate IDs.

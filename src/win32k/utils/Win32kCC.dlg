@@ -1,37 +1,7 @@
 #ifndef OS2_INCLUDED
    #include <os2.h>
 #endif
-DLGINCLUDE 1 "G:\odin32\tree\src\win32k\utils\Dialog.h"
-
-DLGTEMPLATE DL_WIN32KCC LOADONCALL MOVEABLE DISCARDABLE
-BEGIN
-    DIALOG  "Win32k Control Center", DL_WIN32KCC, 0, 0, 322, 220, WS_VISIBLE, 
-            FCF_SYSMENU | FCF_TITLEBAR
-    BEGIN
-        NOTEBOOK        DL_WIN32KCC_NTBK, 6, 24, 310, 196, BKS_BACKPAGESTR | 
-                        BKS_TABTEXTCENTER | WS_GROUP
-        DEFPUSHBUTTON   "~Refresh", PB_REFRESH, 6, 4, 40, 14
-        PUSHBUTTON      "~Apply", PB_APPLY, 49, 4, 40, 14
-        PUSHBUTTON      "Update Config.sys", PB_UPD_CONFIGSYS, 92, 4, 100, 
-                        14
-        PUSHBUTTON      "~Close", DID_OK, 195, 4, 40, 14
-    END
-END
-
-DLGTEMPLATE DL_WIN32KCC_OLD LOADONCALL MOVEABLE DISCARDABLE
-BEGIN
-    DIALOG  "Win32k Control Center", DL_WIN32KCC_OLD, 0, 0, 322, 220, 
-            WS_VISIBLE, FCF_SYSMENU | FCF_TITLEBAR
-    BEGIN
-        NOTEBOOK        DL_WIN32KCC_NTBK, 6, 24, 310, 196, BKS_BACKPAGESTR | 
-                        BKS_TABTEXTCENTER | WS_GROUP
-        DEFPUSHBUTTON   "~Refresh", PB_REFRESH, 6, 4, 40, 14
-        PUSHBUTTON      "~Apply", PB_APPLY, 49, 4, 40, 14
-        PUSHBUTTON      "Update Config.sys", PB_UPD_CONFIGSYS, 92, 4, 100, 
-                        14
-        PUSHBUTTON      "~Close", DID_OK, 195, 4, 40, 14
-    END
-END
+DLGINCLUDE 1 "D:\odin32\worktree\src\win32k\utils\Dialog.h"
 
 DLGTEMPLATE DL_HEAPS_PAGE LOADONCALL MOVEABLE DISCARDABLE
 BEGIN
@@ -78,6 +48,19 @@ BEGIN
     END
 END
 
+DLGTEMPLATE DL_LDRFIX_PAGE LOADONCALL MOVEABLE DISCARDABLE
+BEGIN
+    DIALOG  "~OS/2 Enh.", DL_LDRFIX_PAGE, 0, 0, 274, 120, NOT FS_DLGBORDER | 
+            WS_VISIBLE
+    BEGIN
+        GROUPBOX        "OS/2 Loader Fixes", GR_LDRFIX, 6, 82, 262, 34
+        AUTOCHECKBOX    "Long DLL names and non .DLL extention fixes", 
+                        CB_LDRFIX_DLLFIXES, 14, 96, 252, 10
+        AUTOCHECKBOX    "Force Preload of Executable Modules (ICAT/R3 debug)", 
+                        CB_LDRFIX_FORCEPRELOAD, 14, 86, 252, 10
+    END
+END
+
 DLGTEMPLATE DL_LOADERS_PAGE LOADONCALL MOVEABLE DISCARDABLE
 BEGIN
     DIALOG  "~Loaders", DL_LOADERS_PAGE, 0, 0, 274, 120, NOT FS_DLGBORDER | 
@@ -121,30 +104,183 @@ BEGIN
     END
 END
 
-DLGTEMPLATE DL_LDRFIX_PAGE LOADONCALL MOVEABLE DISCARDABLE
-BEGIN
-    DIALOG  "~OS/2 Enh.", DL_LDRFIX_PAGE, 0, 0, 274, 120, NOT FS_DLGBORDER | 
-            WS_VISIBLE
-    BEGIN
-        GROUPBOX        "OS/2 Loader Fixes", GR_LDRFIX, 6, 82, 262, 34
-        AUTOCHECKBOX    "Long DLL names and non .DLL extention fixes", 
-                        CB_LDRFIX_DLLFIXES, 14, 96, 252, 10
-        AUTOCHECKBOX    "Force Preload of Executable Modules (ICAT/R3 debug)", 
-                        CB_LDRFIX_FORCEPRELOAD, 14, 86, 252, 10
-    END
-END
-
 DLGTEMPLATE DL_LOGGING_PAGE LOADONCALL MOVEABLE DISCARDABLE
 BEGIN
     DIALOG  "Lo~gging", DL_LOGGING_PAGE, 0, 0, 274, 120, NOT FS_DLGBORDER | 
             WS_VISIBLE
     BEGIN
-        GROUPBOX        "Logging", GR_LOGGING, 6, 92, 262, 24
+        GROUPBOX        "Logging", GR_LOGGING, 6, 62, 139, 54
         AUTOCHECKBOX    "Enabled", CB_LOGGING_ENABLED, 14, 96, 50, 10
-        AUTORADIOBUTTON "COM1", RB_LOGGING_COM1, 76, 96, 36, 10, WS_TABSTOP
-        AUTORADIOBUTTON "COM2", RB_LOGGING_COM2, 123, 96, 36, 10, WS_TABSTOP
-        AUTORADIOBUTTON "COM3", RB_LOGGING_COM3, 167, 96, 36, 10, WS_TABSTOP
-        AUTORADIOBUTTON "COM4", RB_LOGGING_COM4, 213, 96, 36, 10, WS_TABSTOP
+        AUTORADIOBUTTON "COM1 (3f8h)", RB_LOGGING_COM1, 73, 96, 64, 10, 
+                        WS_TABSTOP
+        AUTORADIOBUTTON "COM2 (2f8h)", RB_LOGGING_COM2, 73, 86, 64, 10, 
+                        WS_TABSTOP
+        AUTORADIOBUTTON "COM3 (3e8h)", RB_LOGGING_COM3, 73, 76, 64, 10, 
+                        WS_TABSTOP
+        AUTORADIOBUTTON "COM4 (238h)", RB_LOGGING_COM4, 73, 66, 64, 10, 
+                        WS_TABSTOP
+    END
+END
+
+DLGTEMPLATE DL_MEMINFO_PAGE LOADONCALL MOVEABLE DISCARDABLE
+BEGIN
+    DIALOG  "~MemInfo", DL_MEMINFO_PAGE, 0, 0, 274, 120, NOT FS_DLGBORDER | 
+            WS_VISIBLE
+    BEGIN
+        GROUPBOX        "Swapfile", 1602, 6, 42, 102, 72
+                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
+        LTEXT           "Size", 1603, 11, 100, 52, 7
+                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
+        LTEXT           "Avail", 1604, 11, 93, 52, 7
+                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
+        LTEXT           "Used", 1605, 11, 86, 52, 7
+                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
+        LTEXT           "Min Free", 1606, 11, 79, 52, 7
+                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
+        LTEXT           "CFG Min Free", 1607, 11, 72, 52, 7
+                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
+        LTEXT           "CFG Size", 1608, 11, 65, 52, 7
+                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
+        LTEXT           "Broken DFs", 1609, 11, 58, 52, 7
+                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
+        LTEXT           "Grow Fails", GR_MEMINFO_SWAP, 11, 51, 52, 7
+                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
+        LTEXT           "DFs in Memfile", -1, 11, 44, 52, 7
+                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
+        RTEXT           "108384", TX_MEMINFO_SWAP_SIZE, 64, 100, 28, 7
+                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
+        RTEXT           "108384", TX_MEMINFO_SWAP_AVAIL, 64, 93, 28, 7
+                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
+        RTEXT           "108384", TX_MEMINFO_SWAP_USED, 64, 86, 28, 7
+                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
+        RTEXT           "108384", TX_MEMINFO_SWAP_MINFREE, 64, 79, 28, 7
+                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
+        RTEXT           "108384", TX_MEMINFO_SWAP_CFG_MINFREE, 64, 72, 28, 7
+                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
+        RTEXT           "108384", TX_MEMINFO_SWAP_CFG_SIZE, 64, 65, 28, 7
+                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
+        RTEXT           "108384", TX_MEMINFO_SWAP_BROKEN_DFS, 64, 58, 28, 7
+                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
+        RTEXT           "108384", TX_MEMINFO_SWAP_GROW_FAILS, 64, 51, 28, 7
+                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
+        RTEXT           "108384", TX_MEMINFO_SWAP_DFS_IN_MEMFILE, 64, 44, 28, 
+                        7
+                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
+        LTEXT           "KB", 1621, 93, 100, 10, 7
+                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
+        LTEXT           "KB", 1622, 93, 93, 10, 7
+                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
+        LTEXT           "KB", 1623, 93, 86, 10, 7
+                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
+        LTEXT           "KB", 1624, 93, 79, 10, 7
+                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
+        LTEXT           "KB", 1625, 93, 72, 10, 7
+                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
+        LTEXT           "KB", 1626, 93, 65, 10, 7
+                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
+        GROUPBOX        "Physical/Paging", GR_MEMINFO_PHYSPAGE, 113, 42, 155, 
+                        72
+                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
+        LTEXT           "Size", 1627, 118, 100, 21, 7
+                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
+        LTEXT           "Avail", 1628, 118, 93, 21, 7
+                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
+        LTEXT           "Used", 1629, 118, 86, 21, 7
+                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
+        RTEXT           "108384", TX_MEMINFO_PHYS_SIZE, 139, 100, 28, 7
+                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
+        RTEXT           "108384", TX_MEMINFO_PHYS_AVAIL, 139, 93, 28, 7
+                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
+        RTEXT           "108384", TX_MEMINFO_PHYS_USED, 139, 86, 28, 7
+                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
+        LTEXT           "KB", 1633, 168, 100, 10, 7
+                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
+        LTEXT           "KB", 1634, 168, 93, 10, 7
+                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
+        LTEXT           "KB", 1635, 168, 86, 10, 7
+                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
+        LTEXT           "Faults", 1636, 201, 93, 34, 7
+                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
+        RTEXT           "108384", TX_MEMINFO_PAGE_FAULTS, 235, 93, 28, 7
+                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
+        LTEXT           "Active faults", 1639, 201, 86, 39, 7
+                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
+        RTEXT           "108384", TX_MEMINFO_PAGE_FAULTS_ACTIVE, 240, 86, 23, 
+                        7
+                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
+        LTEXT           "Paging", 1638, 201, 100, 30, 7
+                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
+        LTEXT           "Resident Pages", TX_MEMINFO_PHYS_USED, 118, 65, 75, 
+                        7
+                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
+        RTEXT           "108384", TX_MEMINFO_PAGE_RESPAGES, 201, 65, 28, 7
+                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
+        LTEXT           "Swappable Pages", 1645, 118, 58, 75, 7
+                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
+        RTEXT           "108384", TX_MEMINFO_PAGE_SWAPPAGES, 201, 58, 28, 7
+                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
+        LTEXT           "Discardable Pages", 1647, 118, 51, 75, 7
+                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
+        RTEXT           "108384", TX_MEMINFO_PAGE_DISCPAGES, 201, 51, 28, 7
+                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
+        LTEXT           "Discardable In Memory", 1649, 118, 44, 75, 7
+                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
+        RTEXT           "108384", TX_MEMINFO_PAGE_DISCINMEM, 201, 44, 28, 7
+                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
+        LTEXT           "Physical Pages", TX_MEMINFO_PHYS_AVAIL, 118, 72, 75, 
+                        7
+                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
+        RTEXT           "108384", TX_MEMINFO_PAGE_PHYSPAGES, 201, 72, 28, 7
+                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
+        GROUPBOX        "Virtual Memory / Arenas", GR_MEMINFO_VM, 6, 7, 262, 
+                        30
+                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
+        LTEXT           "Address Limit", TX_MEMINFO_PAGE_FAULTS_ACTIVE, 11, 
+                        23, 48, 7
+                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
+        RTEXT           "20000000h", TX_MEMINFO_VM_ADDRESSLIMIT, 61, 23, 35, 
+                        7
+                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
+        LTEXT           "Shared Min", TX_MEMINFO_PAGE_RESPAGES, 11, 16, 48, 
+                        7
+                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
+        RTEXT           "20000000h", TX_MEMINFO_VM_SHARED_MIN, 61, 16, 35, 7
+                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
+        LTEXT           "Shared Max", TX_MEMINFO_PAGE_DISCPAGES, 11, 9, 48, 
+                        7
+                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
+        RTEXT           "20000000h", TX_MEMINFO_VM_SHARED_MAX, 61, 9, 35, 7
+                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
+        LTEXT           "Privat Max", 1659, 100, 23, 44, 7
+                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
+        RTEXT           "20000000h", TX_MEMINFO_VM_PRIVATE_MAX, 144, 23, 35, 
+                        7
+                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
+        LTEXT           "Priv HMax", 1661, 186, 23, 42, 7
+                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
+        RTEXT           "20000000h", TX_MEMINFO_VM_PRIVATE_HMAX, 228, 23, 35, 
+                        7
+                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
+        LTEXT           "Shrd HMin", 1663, 186, 16, 42, 7
+                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
+        RTEXT           "20000000h", TX_MEMINFO_VM_SHARED_HMIN, 228, 16, 35, 
+                        7
+                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
+        LTEXT           "Shrd HMax", 1665, 186, 9, 42, 7
+                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
+        RTEXT           "20000000h", TX_MEMINFO_VM_SHARED_HMAX, 228, 9, 35, 
+                        7
+                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
+        LTEXT           "System Min", 1667, 100, 16, 44, 7
+                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
+        RTEXT           "20000000h", TX_MEMINFO_VM_SYSTEM_MIN, 144, 16, 35, 
+                        7
+                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
+        LTEXT           "System Max", 1669, 100, 9, 44, 7
+                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
+        RTEXT           "20000000h", TX_MEMINFO_VM_SYSTEM_MAX, 144, 9, 35, 7
+                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
+        AUTOCHECKBOX    "", TX_MEMINFO_PAGE_ENABLED, 231, 100, 7, 7
     END
 END
 
@@ -165,168 +301,5 @@ BEGIN
         LTEXT           "04:30:12 Sep 01 2000", TX_W32K_BUILD_DATETIME_VAL, 
                         100, 90, 165, 8
         LTEXT           "9.036", TX_W32K_KERNELBUILD_VAL, 100, 74, 165, 8
-    END
-END
-
-DLGTEMPLATE DL_MEMINFO_PAGE LOADONCALL MOVEABLE DISCARDABLE
-BEGIN
-    DIALOG  "~MemInfo", DL_MEMINFO_PAGE, 0, 0, 274, 120, NOT FS_DLGBORDER | 
-            WS_VISIBLE
-    BEGIN
-        GROUPBOX        "Mem Info", GR_MEMINFO, 6, 4, 260, 112
-        GROUPBOX        "Swapfile", 1602, 12, 37, 102, 72
-                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
-        LTEXT           "Size", 1603, 17, 95, 52, 7
-                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
-        LTEXT           "Avail", 1604, 17, 88, 52, 7
-                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
-        LTEXT           "Used", 1605, 17, 81, 52, 7
-                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
-        LTEXT           "Min Free", 1606, 17, 74, 52, 7
-                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
-        LTEXT           "CFG Min Free", 1607, 17, 67, 52, 7
-                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
-        LTEXT           "CFG Size", 1608, 17, 60, 52, 7
-                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
-        LTEXT           "Broken DFs", 1609, 17, 53, 52, 7
-                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
-        LTEXT           "Grow Fails", GR_MEMINFO_SWAP, 17, 46, 52, 7
-                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
-        LTEXT           "DFs in Memfile", TX_MEMINFO_SWAP_DFS_IN_MEMFILE, 17, 
-                        39, 52, 7
-                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
-        RTEXT           "108384", TX_MEMINFO_SWAP_SIZE, 70, 95, 28, 7
-                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
-        RTEXT           "108384", TX_MEMINFO_SWAP_AVAIL, 70, 88, 28, 7
-                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
-        RTEXT           "108384", TX_MEMINFO_SWAP_USED, 70, 81, 28, 7
-                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
-        RTEXT           "108384", TX_MEMINFO_SWAP_MINFREE, 70, 74, 28, 7
-                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
-        RTEXT           "108384", TX_MEMINFO_SWAP_CFG_MINFREE, 70, 67, 28, 7
-                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
-        RTEXT           "108384", TX_MEMINFO_SWAP_CFG_SIZE, 70, 60, 28, 7
-                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
-        RTEXT           "108384", TX_MEMINFO_SWAP_BROKEN_DFS, 70, 53, 28, 7
-                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
-        RTEXT           "108384", TX_MEMINFO_SWAP_GROW_FAILS, 70, 46, 28, 7
-                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
-        RTEXT           "108384", TX_MEMINFO_SWAP_DFS_IN_MEMFILE, 70, 39, 28, 
-                        7
-                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
-        LTEXT           "KB", 1621, 99, 95, 10, 7
-                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
-        LTEXT           "KB", 1622, 99, 88, 10, 7
-                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
-        LTEXT           "KB", 1623, 99, 81, 10, 7
-                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
-        LTEXT           "KB", 1624, 99, 74, 10, 7
-                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
-        LTEXT           "KB", 1625, 99, 67, 10, 7
-                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
-        LTEXT           "KB", 1626, 99, 60, 10, 7
-                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
-        GROUPBOX        "Physical/Paging", GR_MEMINFO_PHYSPAGE, 120, 37, 140, 
-                        72
-                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
-        LTEXT           "Size", 1627, 125, 95, 21, 7
-                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
-        LTEXT           "Avail", 1628, 125, 88, 21, 7
-                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
-        LTEXT           "Used", 1629, 125, 81, 21, 7
-                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
-        RTEXT           "108384", TX_MEMINFO_PHYS_SIZE, 146, 95, 28, 7
-                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
-        RTEXT           "108384", TX_MEMINFO_PHYS_AVAIL, 146, 88, 28, 7
-                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
-        RTEXT           "108384", TX_MEMINFO_PHYS_USED, 146, 81, 28, 7
-                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
-        LTEXT           "KB", 1633, 175, 95, 10, 7
-                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
-        LTEXT           "KB", 1634, 175, 88, 10, 7
-                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
-        LTEXT           "KB", 1635, 175, 81, 10, 7
-                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
-        LTEXT           "Faults", 1636, 193, 88, 34, 7
-                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
-        RTEXT           "108384", TX_MEMINFO_PAGE_FAULTS, 227, 88, 28, 7
-                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
-        LTEXT           "Active faults", 1639, 193, 81, 39, 7
-                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
-        RTEXT           "108384", TX_MEMINFO_PAGE_FAULTS_ACTIVE, 232, 81, 23, 
-                        7
-                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
-        LTEXT           "Paging", 1638, 193, 95, 30, 7
-                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
-        LTEXT           "Resident Pages", TX_MEMINFO_PHYS_USED, 125, 60, 75, 
-                        7
-                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
-        RTEXT           "108384", TX_MEMINFO_PAGE_RESPAGES, 227, 60, 28, 7
-                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
-        LTEXT           "Swappable Pages", 1645, 125, 53, 75, 7
-                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
-        RTEXT           "108384", TX_MEMINFO_PAGE_SWAPPAGES, 227, 53, 28, 7
-                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
-        LTEXT           "Discardable Pages", 1647, 125, 46, 75, 7
-                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
-        RTEXT           "108384", TX_MEMINFO_PAGE_DISCPAGES, 227, 46, 28, 7
-                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
-        LTEXT           "Discardable In Memory", 1649, 125, 39, 75, 7
-                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
-        RTEXT           "108384", TX_MEMINFO_PAGE_DISCINMEM, 227, 39, 28, 7
-                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
-        LTEXT           "Physical Pages", TX_MEMINFO_PHYS_AVAIL, 125, 67, 75, 
-                        7
-                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
-        RTEXT           "108384", TX_MEMINFO_PAGE_PHYSPAGES, 227, 67, 28, 7
-                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
-        GROUPBOX        "Virtual Memory", GR_MEMINFO_VM, 12, 7, 248, 30
-                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
-        LTEXT           "Address Limit", TX_MEMINFO_PAGE_FAULTS_ACTIVE, 17, 
-                        23, 48, 7
-                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
-        RTEXT           "20000000h", TX_MEMINFO_VM_ADDRESSLIMIT, 64, 23, 33, 
-                        7
-                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
-        LTEXT           "Shared Min", TX_MEMINFO_PAGE_RESPAGES, 16, 16, 48, 
-                        7
-                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
-        RTEXT           "20000000h", TX_MEMINFO_VM_SHARED_MIN, 64, 16, 33, 7
-                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
-        LTEXT           "Shared Max", TX_MEMINFO_PAGE_DISCPAGES, 16, 9, 48, 
-                        7
-                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
-        RTEXT           "20000000h", TX_MEMINFO_VM_SHARED_MAX, 64, 9, 33, 7
-                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
-        LTEXT           "Privat Max", 1659, 100, 23, 44, 7
-                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
-        RTEXT           "20000000h", TX_MEMINFO_VM_PRIVATE_MAX, 144, 23, 33, 
-                        7
-                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
-        LTEXT           "Priv HMax", 1661, 180, 23, 42, 7
-                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
-        RTEXT           "20000000h", TX_MEMINFO_VM_PRIVATE_HMAX, 222, 23, 33, 
-                        7
-                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
-        LTEXT           "Shrd HMin", 1663, 180, 16, 42, 7
-                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
-        RTEXT           "20000000h", TX_MEMINFO_VM_SHARED_HMIN, 222, 16, 33, 
-                        7
-                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
-        LTEXT           "Shrd HMax", 1665, 180, 9, 42, 7
-                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
-        RTEXT           "20000000h", TX_MEMINFO_VM_SHARED_HMAX, 222, 9, 33, 
-                        7
-                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
-        LTEXT           "System Min", 1667, 100, 16, 44, 7
-                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
-        RTEXT           "20000000h", TX_MEMINFO_VM_SYSTEM_MIN, 144, 16, 33, 
-                        7
-                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
-        LTEXT           "System Max", 1669, 100, 9, 44, 7
-                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
-        RTEXT           "20000000h", TX_MEMINFO_VM_SYSTEM_MAX, 144, 9, 33, 7
-                        PRESPARAMS PP_FONTNAMESIZE, "8.Helv"
-        AUTOCHECKBOX    "", TX_MEMINFO_PAGE_ENABLED, 223, 95, 7, 7
     END
 END
