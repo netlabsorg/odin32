@@ -1,4 +1,4 @@
-/* $Id: initwinmm.cpp,v 1.14 2004-04-06 12:31:35 sandervl Exp $
+/* $Id: initwinmm.cpp,v 1.15 2004-04-13 12:49:03 sandervl Exp $
  *
  * WINMM DLL entry point
  *
@@ -180,7 +180,7 @@ BOOL WINAPI LibMainWinmm(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
             }
             RegCloseKey(hKey);
         }
-        if(OSLibGetAudioPDDName(szPDDName) == FALSE) {
+        if(!fMMPMAvailable || OSLibGetAudioPDDName(szPDDName) == FALSE) {
             fMMPMAvailable = FALSE;
         }
         else 
