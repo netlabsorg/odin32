@@ -1,4 +1,4 @@
-/* $Id: heapstring.cpp,v 1.48 2001-11-30 17:50:42 phaller Exp $ */
+/* $Id: heapstring.cpp,v 1.49 2002-02-07 16:34:52 sandervl Exp $ */
 /*
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -91,20 +91,19 @@ ODINFUNCTIONNODBG1(int, lstrlenA,
  *****************************************************************************/
 
 ODINFUNCTIONNODBG1(int, lstrlenW,
-                   LPCWSTR, arg1)
+                   LPCWSTR, str)
 {
-  int rc;
-
-  if(arg1 == NULL) {
+  if(str == NULL) {
       SetLastError( ERROR_INVALID_PARAMETER );
       return 0;
   }
 
-  rc = UniStrlen( (UniChar*)arg1);
+  const WCHAR *s = str;
+  while (*s) s++;
   dprintf2(("KERNEL32: lstrlenW(%08xh) returns %d\n",
-           arg1,
-           rc));
-  return rc;
+            str, s - str));
+
+  return s - str;
 }
 
 
@@ -148,18 +147,17 @@ ODINFUNCTIONNODBG2(LPSTR, lstrcatA,
  *****************************************************************************/
 
 ODINFUNCTIONNODBG2(LPWSTR, lstrcatW,
-                   LPWSTR, arg1,
-                   LPCWSTR, arg2)
+                   LPWSTR, dst,
+                   LPCWSTR, src)
 {
-  dprintf2(("KERNEL32: OS2lstrcatW(%08xh,%08xh)\n",
-           arg1,
-           arg2));
+    dprintf2(("KERNEL32: OS2lstrcatW(%08xh,%08xh)\n",
+              dst, src));
 
-  if(arg2 == NULL)
-    return arg1;
+    if(src == NULL)
+        return dst;
 
-  UniStrcat( (UniChar*) arg1, (UniChar*) arg2 );
-  return arg1;
+    strcpyW( dst + strlenW(dst), src );
+    return dst;
 }
 
 
@@ -374,8 +372,9 @@ ODINFUNCTIONNODBG2(LPWSTR, lstrcpyW,
     if ( (src == NULL) || (dest == NULL) ) // stupid parameter checking
         return NULL;
 
-    UniStrcpy( (UniChar*)dest,
-               (UniChar*)src );
+    WCHAR *p = dest;
+    while ((*p++ = *src++));
+
     return dest;
 }
 
@@ -431,18 +430,23 @@ ODINFUNCTIONNODBG3(LPSTR, lstrcpynA,
  *****************************************************************************/
 
 ODINFUNCTION3(LPWSTR, lstrcpynW,
-              LPWSTR, dest,
+              LPWSTR, dst,
               LPCWSTR, src,
-              int, arg3)
+              int, n)
 {
-  if (arg3 == 0)
-    return NULL;
+    LPWSTR p = dst;
 
-  UniStrncpy( (UniChar*)dest,
-              (UniChar*)src,
-              arg3-1); //CB: copy arg3-1 characters
-  dest[arg3-1] = 0; //CB: set end
-  return dest;
+    /* In real windows the whole function is protected by an exception handler
+     * that returns ERROR_INVALID_PARAMETER on faulty parameters
+     * We currently just check for NULL.
+     */
+    if (!dst || !src) {
+    	SetLastError(ERROR_INVALID_PARAMETER);
+	return 0;
+    }
+    while ((n-- > 1) && *src) *p++ = *src++;
+    if (n >= 0) *p = 0;
+    return dst;
 }
 
 
@@ -586,7 +590,7 @@ ODINFUNCTIONNODBG2(LPSTR, lstrcpyWtoA,
     /* forward to function with len parameter */
     lstrcpynWtoA(ascii,
                unicode,
-               UniStrlen((UniChar*)unicode)+1); //end included
+               lstrlenW((UniChar*)unicode)+1); //end included
 
     return ascii;
 }
