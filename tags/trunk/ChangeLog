@@ -1,4 +1,8 @@
-/* $Id: ChangeLog,v 1.1726 2001-10-08 12:18:48 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1727 2001-10-08 20:48:41 phaller Exp $ */
+
+ 2001-10-08: Patrick Haller <patrick.haller@innotek.de>
+    - USER32:   o enabled WH_KEYBOARD_LL hook, seems to work
+    - KERNEL32: o added further error codes to error2WinError
 
  2001-10-08: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o WM_WINDOWPOSCHANGED: activation fix; must clear FF_NOACTIVATESWP
