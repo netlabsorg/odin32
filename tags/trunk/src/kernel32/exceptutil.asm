@@ -1,4 +1,4 @@
-; $Id: exceptutil.asm,v 1.15 2001-04-21 09:10:14 sandervl Exp $
+; $Id: exceptutil.asm,v 1.16 2001-04-22 09:00:19 sandervl Exp $
 
 ;/*
 ; * Project Odin Software License can be found in LICENSE.TXT
@@ -16,18 +16,6 @@ CONST32_RO	segment dword use32 public 'CONST'
 CONST32_RO	ends
 BSS32	segment dword use32 public 'BSS'
 BSS32	ends
-EH_CODE	segment dword use32 public 'CODE'
-EH_CODE	ends
-CTOR_DTOR1	segment dword use32 public 'DATA'
-CTOR_DTOR1	ends
-CTOR_DTOR2	segment dword use32 public 'DATA'
-CTOR_DTOR2	ends
-CTOR_DTOR3	segment dword use32 public 'DATA'
-CTOR_DTOR3	ends
-EH_DATA	segment para use32 public 'DATA'
-EH_DATA	ends
-_VFT	segment para use32 public 'DATA'
-_VFT	ends
 DGROUP	group BSS32, DATA32
 	assume	cs:FLAT, ds:FLAT, ss:FLAT, es:FLAT
 
