@@ -1,4 +1,4 @@
-/* $Id: sym.h,v 1.1 2000-04-24 21:38:12 bird Exp $
+/* $Id: sym.h,v 1.2 2000-08-31 03:02:28 bird Exp $
  *
  * Sym-file definitions and structs.
  *
@@ -38,7 +38,7 @@ typedef struct
     unsigned short int ppNextSeg;     /* paragraph pointer to next segment     */
     unsigned short int cSymbols;      /* count of symbols in list              */
     unsigned short int pSymDef;       /* offset of symbol chain                */
-    unsigned short int wReserved1;    /* reserved                              */
+    unsigned short int wSegNum;       /* segment number (1 based)              */
     unsigned short int wReserved2;    /* reserved                              */
     unsigned short int wReserved3;    /* reserved                              */
     unsigned short int wReserved4;    /* reserved                              */
@@ -46,7 +46,7 @@ typedef struct
     unsigned char      bReserved1;    /* reserved                              */
     unsigned short int ppLineDef;     /* offset of line number record          */
     unsigned char      bReserved2;    /* reserved                              */
-    unsigned char      bReserved3;    /* reserved                              */
+    unsigned char      bReserved3;    /* reserved (0xff)                       */
     unsigned char      cbSegName;     /* length of segment name                */
     char               achSegName[1]; /* cbSegName Bytes of segment-name member*/
 } SEGDEF, *PSEGDEF;
@@ -123,4 +123,5 @@ typedef struct
                         ) \
              )
 
+#pragma pack()
 #endif

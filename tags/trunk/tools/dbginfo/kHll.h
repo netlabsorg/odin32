@@ -1,4 +1,4 @@
-/* $Id: kHll.h,v 1.9 2000-05-29 19:46:29 bird Exp $
+/* $Id: kHll.h,v 1.10 2000-08-31 03:02:27 bird Exp $
  *
  * kHll - Declarations of the class kHll.
  *        That class is used to create HLL debuginfo.
@@ -13,6 +13,14 @@
 #ifndef _kHll_h_
 #define _kHll_h_
 
+//wrong placement!
+#include <builtin.h>
+#undef assert
+#define assert(a) (!(a) ? \
+                fprintf(stderr, "assert - %s(%d): %s\n", __FUNCTION__, __LINE__, #a), \
+                __interrupt(3) \
+            :                  \
+                (void)0, (void)0)
 
 /*******************************************************************************
 *   Structures and Typedefs                                                    *
@@ -23,7 +31,7 @@
  * Provided as a base class for kList entries.
  * @author      knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
  */
-class kHllBaseEntry : public kListEntry
+class kHllBaseEntry : public kSortedListEntry
 {
 public:
     /**
@@ -54,6 +62,14 @@ public:
      */
     virtual void    ida(kFile *pFile) throw(int) = 0;
     static void     idaList(kFile *pFile, kHllBaseEntry *pEntry) throw(int);
+
+    /* temp fix */
+    BOOL operator==(const kSortedListEntry &entry) const { return TRUE;  }
+    BOOL operator!=(const kSortedListEntry &entry) const { return FALSE; }
+    BOOL operator< (const kSortedListEntry &entry) const { return TRUE;  }
+    BOOL operator<=(const kSortedListEntry &entry) const { return TRUE;  }
+    BOOL operator> (const kSortedListEntry &entry) const { return FALSE; }
+    BOOL operator>=(const kSortedListEntry &entry) const { return FALSE; }
 };
 
 
@@ -80,6 +96,28 @@ public:
     int             write(FILE *phFile);
     void            dump(FILE *ph, int cchIndent);
     void            ida(kFile *pFile) throw(int);
+
+    /** @cat
+     * Get methods.
+     */
+    /** Gets the offset of the symbol location relative to object start. */
+    unsigned long   getOffset()     {   return pPubSym->off;        }
+    /** Gets the object (segment/section/what ever) index of the symbol location. */
+    int             getObjectIndex(){   return pPubSym->iObject;    }
+    /** Gets the Type index of the symbol type. */
+    int             getTypeIndex()  {   return pPubSym->iType;      }
+    /** Gets the length of the public symbol. */
+    char            getNameLength() {   return pPubSym->cchName;    }
+    /** Gets ASCIIZ public symbol name. */
+    const char *    getName()       {   return (const char *)&pPubSym->achName[0];  }
+
+
+    BOOL operator==(const kHllPubSymEntry &entry) const;
+    BOOL operator!=(const kHllPubSymEntry &entry) const;
+    BOOL operator< (const kHllPubSymEntry &entry) const;
+    BOOL operator<=(const kHllPubSymEntry &entry) const;
+    BOOL operator> (const kHllPubSymEntry &entry) const;
+    BOOL operator>=(const kHllPubSymEntry &entry) const;
 };
 
 
@@ -168,7 +206,7 @@ private:
      */
     PHLLMODULE                  pModule;
 
-    kList<kHllPubSymEntry>      PublicSymbols;
+    kSortedList<kHllPubSymEntry>    PublicSymbols;
     /*
     kList<kHllTypeEntry>        Types;
     kList<kHllSymEntry>         Symbols;
@@ -186,6 +224,8 @@ private:
     unsigned long               cbSymbols;
     unsigned long               offSource;
     unsigned long               cbSource;
+
+    unsigned long               iObjectMax;
 
 
     /** @cat
@@ -237,7 +277,14 @@ public:
      */
     int             write(FILE *phFile, unsigned long off);
     int             writeDirEntries(FILE *phFile, unsigned short iMod);
+    void            writeSymSeg(kFile *pFile, int iSeg, PSEGDEF pSegDef,
+                                unsigned short * &paoffSyms, int &coffSymsAllocated,
+                                unsigned long offSegDef) throw (int);
 
+    /** @cat
+     * Get and queries.
+     */
+    int             queryMaxObjectIndex();
 
     /** @cat
      * Debug dump function.
@@ -259,10 +306,11 @@ private:
     /** @cat
      * Internal data.
      */
-    kList<kHllModuleEntry>     Modules;
+    kList<kHllModuleEntry>      Modules;
     /*
-    kList<kHllLibraryEntry>    Libraries;
+    kList<kHllLibraryEntry>     Libraries;
     */
+    char *                      pszModName;
 
     /** @cat
      * Internal methods.
@@ -294,6 +342,14 @@ public:
                             unsigned            cSegInfo = 0,
                             PHLLSEGINFO         paSegInfo = NULL
                             );
+    BOOL                setModName(
+                            const char *        pszModName
+                            );
+    BOOL                setModName(
+                            const char *        pachModName,
+                            int                 cchModName
+                            );
+    const char *        getModName();
 
 
     /** @cat
@@ -305,6 +361,10 @@ public:
     APIRET              writeToLX(
                             const char *pszFilename
                             );
+    void                writeSym(
+                            kFile *     pFile
+                            )               throw(int);
+
 
     /** @cat
      * Static read function(s).
@@ -313,10 +373,26 @@ public:
                             const char *pszFilename
                             );
 
+    static kHll *       readLXExports(
+                            kFileLX *FileLX
+                            ) throw(int);
+
+    static kHll *       readSym(
+                            kFile *pFile,
+                            kFileLX *pFileLX = NULL
+                            ) throw(int);
+
+
+    /** @cat
+     * Get and queries.
+     */
+    int                 queryMaxObjectIndex();
+
+
     /** @cat
      * Debug dump function.
      */
-    void                dump();
+    void                dump(FILE *ph);
     void                ida(kFile *pFile) throw(int);
 };
 
