@@ -1,4 +1,4 @@
-/* $Id: oslibres.cpp,v 1.27 2001-10-18 11:02:22 sandervl Exp $ */
+/* $Id: oslibres.cpp,v 1.28 2001-10-18 15:35:45 achimha Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -446,7 +446,12 @@ HANDLE OSLibWinCreatePointer(CURSORICONINFO *pInfo, char *pAndBits, BITMAP_W *pA
                 dprintf(("OSLibWinCreateIcon: GpiCreateBitmap failed!"));
                 goto fail;
         }
+// @@@AH 20011018 regression
+#if 0
         if(fCursor && pXorBmp->bmBitsPixel >= 8) 
+#else
+        if(pXorBmp->bmBitsPixel >= 8)
+#endif
         {
             if(isMonoBitmap(pXorBmp, (PBYTE)os2rgb) == TRUE) 
             {
