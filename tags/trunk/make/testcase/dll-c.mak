@@ -1,12 +1,12 @@
-# $Id: dll-c.mak,v 1.2 2002-08-20 07:56:24 bird Exp $
+# $Id: dll-c.mak,v 1.3 2002-08-20 21:14:29 bird Exp $
 
 # Testcase for makeing simple C DLLs.
 
 # root & setup
-!if "$(BUILD_ENV)" == "WAT11C-16"
+!if "$(BUILD_ENV)" == "WAT11C-16" || "$(BUILD_ENV)" == "MSCV6-16"
 ALL_MODEL=LARGE
 !endif
-TARGET_MODE = DLL #watcom workaround (again!)
+TARGET_MODE = DLL #watcom+msc6-16 workaround (again!)
 PATH_ROOT=..\..
 !include $(PATH_ROOT)\make\setup.mak
 
@@ -16,7 +16,10 @@ MAKEFILE    = dll-c.mak
 TARGET_LIBS = $(LIB_C_OBJ) $(LIB_OS)    # use the static library!
 
 # rules and more
+RULES_FORWARD = test
 !include $(MAKE_INCLUDE_PROCESS)
+
+!if !$(BUILD_FORWARDING)
 
 
 
@@ -37,14 +40,14 @@ _STR2 = __32BIT__
 #
 # validate that the executable actually runs and produces the desired output.
 #
+OUTFILE=out
 test:
-!if "$(MAKE_INCLUDE_PROCESS:process.forwarder=)" == "$(MAKE_INCLUDE_PROCESS)"
     $(TOOL_MAKE) -f dll-prog-c.mak rebuild
-    $(PATH_OBJ)\dll-prog-c.exe\dll-prog-c.exe $(TARGET) > out
+    $(PATH_OBJ)\dll-prog-c.exe\dll-prog-c.exe $(TARGET) > $(OUTFILE)
 ! ifdef BUILD_VERBOSE
-    type out
+    type $(OUTFILE)
 ! endif
-    $(TOOL_CMP) out <<
+    $(TOOL_CMP) $(OUTFILE) <<
 DLLInit
 $(_STR1)
 $(_STR2)
@@ -52,10 +55,6 @@ FOOName
 DLLTerm
 <<
     $(TOOL_MAKE) -f dll-prog-c.mak clean
-!else
-! ifndef BUILD_VERBOSE
-    @ \
-! endif
-    $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) -f $(MAKEFILE) $@
+
 !endif
 

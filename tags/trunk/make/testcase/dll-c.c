@@ -1,4 +1,4 @@
-/* $Id: dll-c.c,v 1.1 2002-05-16 11:37:06 bird Exp $
+/* $Id: dll-c.c,v 1.2 2002-08-20 21:14:29 bird Exp $
  *
  * Test DLL.
  *
@@ -22,7 +22,9 @@ extern "C" {
 #endif
 
 #if (defined(__IBMCPP__) || defined(__IBMC__))
-
+/*
+ * IBM C/C++
+ */
 #define DLLENTRYPOINT_CCONV _System
 #define DLLENTRYPOINT_NAME  _DLL_InitTerm
 
@@ -33,7 +35,7 @@ void _Optlink __ctordtorInit( void );
 void _Optlink __ctordtorTerm( void );
 #define ctordtorTerm()  __ctordtorTerm()
 
-#elif (__IBMCPP__ == 360) || (__IBMC__ == 360)
+#elif (__IBMCPP__ >= 360) || (__IBMC__ >= 360)
 void _Optlink __ctordtorInit( int flag );
 #define ctordtorInit()  __ctordtorInit(0)
 
@@ -41,14 +43,17 @@ void _Optlink __ctordtorTerm( int flag );
 #define ctordtorTerm()  __ctordtorTerm(0)
 
 #else
-#error "Unknown compiler!"
+#error "Unknown IBM compiler!"
 #endif
 
 int  _Optlink _CRT_init(void);
 void _Optlink _CRT_term(void);
 
-#elif defined(__WATCOMC__)
 
+#elif defined(__WATCOMC__)
+/*
+ * Watcom C
+ */
 #define DLLENTRYPOINT_CCONV _syscall
 #define DLLENTRYPOINT_NAME  LibMain
 
@@ -58,12 +63,47 @@ void _Optlink _CRT_term(void);
 #define _CRT_init() ((void)0)
 #define _CRT_term() ((void)0)
 
+#ifdef __16BIT__
+#define LOADDS _loadds
 #endif
+
+
+#elif defined(_MSC_VER)
+/*
+ * MS C
+ */
+#ifdef __16BIT__
+#define LOADDS _loadds
+#endif
+
+#elif defined(__GNUC__) && defined(__EMX__)
+/*
+ * GCC+EMX
+ */
+#define DLLENTRYPOINT_CCONV _System
+#define DLLENTRYPOINT_NAME  _DLL_InitTerm
+
+#define ctordtorInit() ((void)0)
+#define ctordtorTerm() ((void)0)
+
+int  _CRT_init(void);
+void _CRT_term(void);
+
+
+#endif /* compilers */
 
 #ifdef __cplusplus
 }
 #endif
 
+
+#ifndef LOADDS
+#ifdef __16BIT__
+#error "16-bit compiles must must define LOADDS!"
+#else
+#define LOADDS
+#endif
+#endif
 
 
 
@@ -75,14 +115,14 @@ void _Optlink _CRT_term(void);
 
 #ifdef OS2
 #include <os2.h>
-#define OSCALL APIENTRY
+#define OSCALL APIENTRY LOADDS
 #endif
 
 /**
  * Testprogram.
  * @returns 0 on success.
  */
-int OSCALL FOO42(void)
+int OSCALL LOADDS FOO42(void)
 {
     long double lrd = asin(cos(0));
     lrd = lrd;
@@ -123,7 +163,7 @@ int OSCALL FOO42(void)
 }
 
 
-int OSCALL FOONAME(void)
+int OSCALL LOADDS FOONAME(void)
 {
     puts("FOOName");
     #if !defined(DLLENTRYPOINT_NAME)
