@@ -1,9 +1,11 @@
-/* $Id: win32type.h,v 1.12 1999-07-22 19:10:50 sandervl Exp $ */
+/* $Id: win32type.h,v 1.13 1999-08-24 12:22:48 sandervl Exp $ */
 
 #ifndef __WIN32TYPE_H__
 #define __WIN32TYPE_H__
 
 #include <odin.h>
+
+#pragma pack(1)
 
 #define NEAR
 #define FAR
@@ -261,5 +263,18 @@ typedef struct tagRECT
 } RECT, *PRECT, *LPRECT;
 typedef const RECT *LPCRECT;
 #endif
+
+typedef struct _MEMORY_BASIC_INFORMATION
+{
+    LPVOID   BaseAddress;
+    LPVOID   AllocationBase;
+    DWORD    AllocationProtect;
+    DWORD    RegionSize;
+    DWORD    State;
+    DWORD    Protect;
+    DWORD    Type;
+} MEMORY_BASIC_INFORMATION,*PMEMORY_BASIC_INFORMATION,*LPMEMORY_BASIC_INFORMATION;
+
+#pragma pack()
 
 #endif
