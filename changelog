@@ -1,4 +1,8 @@
- /* $Id: changelog,v 1.841 2000-03-27 15:05:03 cbratschi Exp $ */
+ /* $Id: changelog,v 1.842 2000-03-27 21:42:58 sandervl Exp $ */
+
+ 2000-03-27: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32:   Fixed SetParent; remove child from parent's list (previously
+                    didn't happen for children of the desktop)
 
  2000-03-27: Christoph Bratschi <cbratschi@datacomm.ch>
 	- SHELL32: only scan dir once in CreateFolderEnumList
