@@ -1,5 +1,13 @@
- /* $Id: changelog,v 1.1179 2000-10-07 09:34:04 sandervl Exp $ */
- 
+ /* $Id: changelog,v 1.1180 2000-10-08 14:04:50 sandervl Exp $ */
+
+ 2000-10-08: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32: GetMinMaxInfo fix for windows with both WS_THICKFRAME and
+              WS_BORDER style (differs from Wine; see comment in win32basepos.cpp
+              Win32BaseWindow::GetMinMaxInfo)
+              Fix for CS_OWNDC windows (origin needs to be changed after
+              window size/position changes)
+    - KERNEL32: Do not export the toolhelp apis; NT4 doesn't do that. (only win9x)
+
  2000-10-07: Markus Montkowski <mmontkowski@gmx.de>
     - GDI32: Fixed bitblt, it used the size of the source DC
              when no destwindow was found. this doesn't work
