@@ -1,4 +1,4 @@
-; $Id: ntdll.def,v 1.5 1999-06-22 15:38:02 phaller Exp $
+; $Id: ntdll.def,v 1.6 1999-06-22 16:18:14 phaller Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is NT4.0's NTDLL.DLL
@@ -276,4 +276,21 @@ EXPORTS
     RtlTimeToSecondsSince1980     = _RtlTimeToSecondsSince1980@8
     RtlTimeToSecondsSince1970     = _RtlTimeToSecondsSince1970@8
     RtlTimeToElapsedTimeFields    = _RtlTimeToElapsedTimeFields@8
+
+
+; NTDLL's C runtime
+; Note: CDECL does not decorate the function names with parameter bytes!
+    strcat                        = _OS2strcat                        @914
+    strchr                        = _OS2strchr                        @915
+    strcmp                        = _OS2strcmp                        @916
+    strcpy                        = _OS2strcpy                        @917
+    strcspn                       = _OS2strcspn                       @918
+    strlen                        = _OS2strlen                        @919
+    strncat                       = _OS2strcat                        @920
+    strncmp                       = _OS2strncmp                       @921
+    strncpy                       = _OS2strncpy                       @922
+    strpbrk                       = _OS2strpbrk                       @923
+    strrchr                       = _OS2strrchr                       @924
+    strspn                        = _OS2strspn                        @925
+    strstr                        = _OS2strstr                        @926
 
