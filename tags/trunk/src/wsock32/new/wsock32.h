@@ -1,4 +1,4 @@
-/* $Id: wsock32.h,v 1.1 1999-11-22 08:18:04 phaller Exp $ */
+/* $Id: wsock32.h,v 1.2 1999-11-25 23:02:31 phaller Exp $ */
 
 /* WSOCK32.H--definitions & conversions for Odin's wsock32.dll.
  * Unused/unneeded Microsoft declarations removed.
@@ -50,6 +50,8 @@ struct  Wnetent {
         short   n_addrtype;             /* net address type */
         u_long  n_net;                  /* network # */
 };
+typedef struct Whostent WHOSTENT;
+typedef WHOSTENT *PWHOSTENT;
 
 struct  Wservent {
         char     * s_name;           /* official service name */
@@ -57,13 +59,16 @@ struct  Wservent {
         short   s_port;                 /* port # */
         char     * s_proto;          /* protocol to use */
 };
+typedef struct Wservent WSERVENT;
+typedef WSERVENT *PWSERVENT;
 
 struct  Wprotoent {
         char     * p_name;           /* official protocol name */
         char     *  * p_aliases;  /* alias list */
         short   p_proto;                /* protocol # */
 };
-
+typedef struct Wprotoent WPROTOENT;
+typedef WPROTOENT *PWPROTOENT;
 
 typedef struct tagWsockThreadData
 {
@@ -71,9 +76,11 @@ typedef struct tagWsockThreadData
   struct Whostent  whsnt;       // database conversion buffers
   struct Wservent  wsvnt;
   struct Wprotoent wptnt;
+  struct Wnetent   wntnt;
+  struct Wlinger   wlinger;
 } WSOCKTHREADDATA, *PWSOCKTHREADDATA;
 
-// internap prototype
+// internal prototype
 PWSOCKTHREADDATA iQueryWsockThreadData(void);
 
 
