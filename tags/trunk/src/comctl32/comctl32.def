@@ -3,7 +3,22 @@ DESCRIPTION 'COMCTL32 Common Controls Library'
 DATA MULTIPLE NONSHARED
 
 EXPORTS
+  MenuHelp                     = _MenuHelp@28                        @2
+  ShowHideMenuCtl              = _ShowHideMenuCtl@12                 @3
+  GetEffectiveClientRect       = _GetEffectiveClientRect@12          @4
+  DrawStatusTextA              = _DrawStatusTextA@16                 @5
+  DrawStatusTextA              = _DrawStatusTextA@16                 @27
+  DrawStatusTextW              = _DrawStatusTextW@16                 @28
+  CreateStatusWindowA          = _CreateStatusWindowA@16             @6
+  CreateStatusWindowA          = _CreateStatusWindowA@16             @21
+  CreateStatusWindowW          = _CreateStatusWindowW@16             @22
+  CreateUpdDownControl         = _CreateUpDownControl@48             @16
   InitCommonControls           = _InitCommonControls@0               @17
+  InitCommonControlsEx         = _InitCommonControlsEx@4             @81
+  CreateToolbarEx              = _CreateToolbarEx@52                 @32
+  CreateMappedBitmap           = _CreateMappedBitmap@20              @8
+  CreateToolbar                = _CreateToolbar@32                   @7
+  DllGetVersion                = _COMCTL32_DllGetVersion@4           @25
 
   ImageList_Add                = _ImageList_Add@12                   @39
   ImageList_AddIcon            = _ImageList_AddIcon@8                @40
