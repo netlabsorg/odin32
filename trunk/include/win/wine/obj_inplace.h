@@ -1,7 +1,7 @@
-/* $Id: obj_inplace.h,v 1.5 1999-08-22 22:52:08 sandervl Exp $ */
+/* $Id: obj_inplace.h,v 1.6 2004-01-30 22:22:01 bird Exp $ */
 /*
  * Defines the COM interfaces and APIs related to structured data storage.
- * 
+ *
  * Depends on 'obj_base.h'.
  */
 
@@ -106,7 +106,7 @@ typedef enum tagOLECONTF
 	OLECONTF_OLNYUSER = 8,
 	OLECONTF_ONLYIFRUNNING = 16
 } OLECONTF;
- 
+
 typedef HGLOBAL HOLEMENU;
 typedef LPRECT LPBORDERWIDTHS;
 typedef LPCRECT LPCBORDERWIDTHS;
@@ -263,7 +263,7 @@ ICOM_DEFINE(IOleInPlaceUIWindow,IOleWindow)
 #define IOleInPlaceUIWindow_SetBorderSpace(p,a)       ICOM_CALL1(SetBorderSpace,p,a)
 #define IOleInPlaceUIWindow_SetActiveObject(p,a,b)    ICOM_CALL2(SetActiveObject,p,a,b)
 #endif
-				  
+				
 
 /*****************************************************************************
  * IOleInPlaceFrame interface
@@ -288,22 +288,22 @@ ICOM_DEFINE(IOleInPlaceFrame,IOleInPlaceUIWindow)
 #define IOleInPlaceFrame_AddRef(p)                ICOM_CALL (AddRef,p)
 #define IOleInPlaceFrame_Release(p)               ICOM_CALL (Release,p)
 /*** IOleWindow methods ***/
-#define IOleInPlaceFrame_GetWindow                ICOM_CALL1(GetWindow,p,a)
-#define IOleInPlaceFrame_ContextSensitiveHelp     ICOM_CALL1(ContextSensitiveHelp,p,a)
+#define IOleInPlaceFrame_GetWindow(p,a)             ICOM_CALL1(GetWindow,p,a)
+#define IOleInPlaceFrame_ContextSensitiveHelp(p,a)  ICOM_CALL1(ContextSensitiveHelp,p,a)
 /*** IOleInPlaceUIWindow methods ***/
-#define IOleInPlaceFrame_GetBorder                ICOM_CALL1(GetBorder,p,a)
-#define IOleInPlaceFrame_RequestBorderSpace       ICOM_CALL1(RequestBorderSpace,p,a)
-#define IOleInPlaceFrame_SetBorderSpace           ICOM_CALL1(SetBorderSpace,p,a)
-#define IOleInPlaceFrame_SetActiveObject          ICOM_CALL2(SetActiveObject,p,a,b)
+#define IOleInPlaceFrame_GetBorder(p,a)             ICOM_CALL1(GetBorder,p,a)
+#define IOleInPlaceFrame_RequestBorderSpace(p,a)    ICOM_CALL1(RequestBorderSpace,p,a)
+#define IOleInPlaceFrame_SetBorderSpace(p,a)        ICOM_CALL1(SetBorderSpace,p,a)
+#define IOleInPlaceFrame_SetActiveObject(p,a,b)     ICOM_CALL2(SetActiveObject,p,a,b)
 /*** IOleInPlaceFrame methods ***/
-#define IOleInPlaceFrame_InsertMenus              ICOM_CALL2(InsertMenus,p,a,b)
-#define IOleInPlaceFrame_SetMenu                  ICOM_CALL3(SetMenu,p,a,b,c)
-#define IOleInPlaceFrame_RemoveMenus              ICOM_CALL1(RemoveMenus,p,a)
-#define IOleInPlaceFrame_SetStatusText            ICOM_CALL1(SetStatusText,p,a)
-#define IOleInPlaceFrame_EnableModeless           ICOM_CALL1(EnableModeless,p,a)
-#define IOleInPlaceFrame_TranslateAccelerator     ICOM_CALL2(TranslateAccelerator,p,a,b)
+#define IOleInPlaceFrame_InsertMenus(p,a,b)         ICOM_CALL2(InsertMenus,p,a,b)
+#define IOleInPlaceFrame_SetMenu(p,a,b,c)           ICOM_CALL3(SetMenu,p,a,b,c)
+#define IOleInPlaceFrame_RemoveMenus(p,a)           ICOM_CALL1(RemoveMenus,p,a)
+#define IOleInPlaceFrame_SetStatusText(p,a)         ICOM_CALL1(SetStatusText,p,a)
+#define IOleInPlaceFrame_EnableModeless(p,a)        ICOM_CALL1(EnableModeless,p,a)
+#define IOleInPlaceFrame_TranslateAccelerator(p,a,b) ICOM_CALL2(TranslateAccelerator,p,a,b)
 #endif
-				 
+				
 
 /*****************************************************************************
  * IOleInPlaceSite interface
@@ -400,7 +400,7 @@ ICOM_DEFINE(IParseDisplayName,IUnknown)
 /*** IParseDisplayName methods ***/
 #define IParseDisplayName_ParseDisplayName(p,a,b,c,d) ICOM_CALL4(ParseDisplayName,p,a,b,c,d)
 #endif
-				 
+				
 				
 /*****************************************************************************
  * IOleContainer interface

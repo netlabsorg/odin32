@@ -16,6 +16,7 @@
 #endif
 
 #ifdef DEBUG
+#define DEBUG_LOGGING 1
 #ifdef PRIVATE_LOGGING
   //To use private dll logging, define PRIVATE_LOGGING and
   //add Open/ClosePrivateLogFiles (see below) functions to the dll
@@ -30,7 +31,7 @@
   #define dprintf(a)      WriteLog a
   #define dprintfNoEOL(a)      WriteLogNoEOL a
 #endif
-  #define eprintf(a)      WriteLog a 
+  #define eprintf(a)      WriteLog a
   #define dassert(a, b)   if(!(a)) dprintf b
   #define dbgCheckObj(a)	a->checkObject()
   #define DisableLogging()  DecreaseLogCount()

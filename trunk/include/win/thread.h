@@ -149,7 +149,7 @@ typedef struct _TEB
               DWORD          lcid;           // thread lcid
               BOOL           fIgnoreMsgs;    // set to true if waiting in WaitForSingleObject
               BOOL           fWaitMessage;   // set if blocked in WaitMessage
-              BOOL           fWaitMessageSuspend; 
+              BOOL           fWaitMessageSuspend;
 
               CONTEXT        context;        // thread context
               USHORT         savedopcode;    // saved instruction
@@ -163,6 +163,10 @@ typedef struct _TEB
                */
               void *         pWM_COPYDATA;
               //@}
+
+              /** Thread Id of the thread is attached to this threads input queue.
+               * If 0 then no thread is attached. See AttachThreadInput() for details. */
+              unsigned      tidAttachedInputThread;
 
 #ifdef DEBUG
               // used for call stack tracking

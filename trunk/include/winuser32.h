@@ -49,7 +49,7 @@ HWND WIN32API DestroyFakeWindow(HWND hwndWin32);
 
 void WIN32API SetWindowAppearance(int fOS2Looks);
 
-BOOL WIN32API OSLibWinCreateObject(LPSTR pszPath, LPSTR pszArgs, LPSTR pszWorkDir, LPSTR pszName, 
+BOOL WIN32API OSLibWinCreateObject(LPSTR pszPath, LPSTR pszArgs, LPSTR pszWorkDir, LPSTR pszName,
                                    LPSTR pszDescription, LPSTR pszIcoPath, INT iIcoNdx, BOOL fDesktop);
 
 typedef BOOL (* WIN32API VISRGN_NOTIFY_PROC)(HWND hwnd, BOOL fDrawingAllowed, DWORD dwUserData);
@@ -76,8 +76,10 @@ BOOL WIN32API WinSetVisibleRgnNotifyProc(HWND hwnd, VISRGN_NOTIFY_PROC lpNotifyP
 
 //PostThreadMessage is done through Open32; which means the message id will be translated
 //(0xc00 added)
-#define OPEN32_MSGDIFF            0xC00
-#define WIN32APP_POSTMSG          (0x1000+OPEN32_MSGDIFF)
+#define OPEN32_MSGDIFF                  0xC00
+#define WIN32APP_POSTMSG                (0x1000+OPEN32_MSGDIFF)
+#define WIN32APP_FORWARDEDPOSTMSG       (0x1001+OPEN32_MSGDIFF)
+#define WIN32APP_FORWARDEDPOSTMSG_MAGIC 0x12345677
 
 //PM doesn't allow SetFocus during WM_SETFOCUS message processing; must delay
 //this by posting a message

@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.192 2004-01-15 16:53:25 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.193 2004-01-30 22:17:18 bird Exp $ */
 
 /*
  * Win32 process functions
@@ -2295,16 +2295,6 @@ HINSTANCE WIN32API WinExec(LPCSTR lpCmdLine, UINT nCmdShow)
     return 33;
 }
 //******************************************************************************
-//DWORD idAttach;   /* thread to attach */
-//DWORD idAttachTo; /* thread to attach to  */
-//BOOL fAttach; /* attach or detach */
-//******************************************************************************
-BOOL WIN32API AttachThreadInput(DWORD idAttach, DWORD idAttachTo, BOOL fAttach)
-{
-  dprintf(("USER32: AttachThreadInput, not implemented\n"));
-  return(TRUE);
-}
-//******************************************************************************
 //******************************************************************************
 DWORD WIN32API WaitForInputIdle(HANDLE hProcess, DWORD dwTimeOut)
 {
@@ -2397,7 +2387,7 @@ FARPROC WIN32API GetProcAddress(HMODULE hModule, LPCSTR lpszProc)
         if (ulAPIOrdinal <= 0x0000FFFF) {
                 proc = (FARPROC)winmod->getApi((int)ulAPIOrdinal);
         }
-        else 
+        else
         if (lpszProc && *lpszProc) {
                 proc = (FARPROC)winmod->getApi((char *)lpszProc);
         }
@@ -2536,7 +2526,7 @@ BOOL WIN32API DisableThreadLibraryCalls(HMODULE hModule)
 // Returns the handles of all loaded modules
 //
 //******************************************************************************
-BOOL WINAPI PSAPI_EnumProcessModules(HANDLE hProcess, HMODULE *lphModule, 
+BOOL WINAPI PSAPI_EnumProcessModules(HANDLE hProcess, HMODULE *lphModule,
                                      DWORD cb, LPDWORD lpcbNeeded)
 {
   DWORD	count;
@@ -2550,12 +2540,12 @@ BOOL WINAPI PSAPI_EnumProcessModules(HANDLE hProcess, HMODULE *lphModule,
 
   if ( lpcbNeeded != NULL )
        *lpcbNeeded = 0;
-  
+
   count = 0;
   countMax = cb / sizeof(HMODULE);
 
   count = Win32DllBase::enumDlls(lphModule, countMax);
-   
+
   if ( lpcbNeeded != NULL )
      *lpcbNeeded = sizeof(HMODULE) * count;
 
@@ -2567,14 +2557,14 @@ BOOL WINAPI PSAPI_EnumProcessModules(HANDLE hProcess, HMODULE *lphModule,
 // Returns some information about the module identified by hModule
 //
 //******************************************************************************
-BOOL WINAPI PSAPI_GetModuleInformation(HANDLE hProcess, HMODULE hModule, 
+BOOL WINAPI PSAPI_GetModuleInformation(HANDLE hProcess, HMODULE hModule,
                                        LPMODULEINFO lpmodinfo, DWORD cb)
 {
     BOOL ret = FALSE;
     Win32DllBase *winmod = NULL;
 
     dprintf(("KERNEL32: GetModuleInformation hModule=%x", hModule));
- 
+
     if (!lpmodinfo || cb < sizeof(MODULEINFO)) return FALSE;
 
     winmod = Win32DllBase::findModule((HINSTANCE)hModule);
