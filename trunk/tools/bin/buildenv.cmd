@@ -1,4 +1,4 @@
-/* $Id: buildenv.cmd,v 1.2 2002-04-07 23:01:53 bird Exp $
+/* $Id: buildenv.cmd,v 1.3 2002-04-10 15:20:42 bird Exp $
  *
  * This is the master environment script. It contains settings for many
  * enviroment configurations. Environments may be set and unset
@@ -89,13 +89,15 @@
             when (sEnv.i = 'emx') then          rc = EMX(fRM);
             when (sEnv.i = 'emxpgcc') then      rc = EMXPGCC(fRM);
             when (sEnv.i = 'icatgam') then      rc = ICATGam(fRM);
+            when (sEnv.i = 'icatgam406rc1')then rc = ICATGam406RC1(fRM);
             when (sEnv.i = 'icatpe') then       rc = ICATPe(fRM);
             when (sEnv.i = 'ida') then          rc = IDA414(fRM);
             when (sEnv.i = 'ida414') then       rc = IDA414(fRM);
             when (sEnv.i = 'ida38') then        rc = IDA38(fRM);
             when (sEnv.i = 'ida40') then        rc = IDA40(fRM);
             when (sEnv.i = 'idasdk') then       rc = IDASDK(fRM);
-            when (sEnv.i = 'msc60') then        rc = MSC60(fRM);
+            when (sEnv.i = 'mscv6') then        rc = MSCV6(fRM);
+            when (sEnv.i = 'msc60') then        rc = MSCV6(fRM);
             when (sEnv.i = 'mysql') then        rc = mySQL(fRM);
             when (sEnv.i = 'netqos2') then      rc = NetQOS2(fRM);
             when (sEnv.i = 'python') then       rc = Python(fRM);
@@ -179,13 +181,14 @@ QueryPath: procedure
         when (sProgram = 'emxpgcc') then    return 'f:\emxpgcc';
         when (sProgram = 'db2v52') then     return 'f:\sqllib52';
         when (sProgram = 'icatgam') then    return 'f:\icatos2';
+        when (sProgram = 'icatgam406rc1') then return 'f:\icatos2.4.0.6.rc1';
         when (sProgram = 'icatpe') then     return 'f:\icatpe';
         when (sProgram = 'ida38') then      return 'f:\ida38';
         when (sProgram = 'ida40') then      return 'f:\ida401';
         when (sProgram = 'ida414') then     return 'f:\ida414';
         when (sProgram = 'idasdk') then     return 'f:\idasdk';
         when (sProgram = 'ddkbase') then    return 'f:\ddk\base';
-        when (sProgram = 'msc60') then      return 'f:\ddktools\toolkits\msc60';
+        when (sProgram = 'mscv6') then      return 'f:\ddktools\toolkits\msc60';
         when (sProgram = 'mysql') then      return 'f:\mysql2';
         when (sProgram = 'netqos2') then    return 'f:\netqos2';
         when (sProgram = 'perl') then       return 'f:\perllib';
@@ -345,6 +348,21 @@ return 0;
 
 
 /*
+ * ICAT Debugger
+ */
+ICATGam406RC1: procedure
+    parse arg fRM
+    sPathICAT   = QueryPath('icatgam406rc1');
+    call EnvVar_Set      fRm, 'PATH_ICATGAM', sPathICAT;
+    call EnvVar_AddFront fRm, 'beginlibpath',sPathICAT'\dll;'
+    call EnvVar_AddFront fRm, 'path',        sPathICAT'\bin;'
+    call EnvVar_AddFront fRm, 'dpath',       sPathICAT'\help;'
+    call EnvVar_AddFront fRm, 'help',        sPathICAT'\help;'
+return 0;
+
+
+
+/*
  * ICAT Debugger for PE images.
  */
 ICATPe: procedure
@@ -447,13 +465,13 @@ return 0;
 /*
  * Microsoft C v6.0a
  */
-MSC60: procedure
+MSCV6: procedure
     parse arg fRM
 
     /*
      * Microsoft C v6.0a main directory.
      */
-    sPathMSC    = QueryPath('msc60');
+    sPathMSC    = QueryPath('mscv6');
     call EnvVar_Set      fRM, 'BUILD_ENV',  'MSCV6'
     call EnvVar_Set      fRM, 'BUILD_PLATFORM', 'OS2'
     call EnvVar_Set      fRM, 'PATH_MSC',   sPathMSC;
