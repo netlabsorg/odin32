@@ -1,4 +1,13 @@
- /* $Id: changelog,v 1.521 1999-12-07 20:46:18 sandervl Exp $ */
+ /* $Id: changelog,v 1.522 1999-12-08 20:14:08 davidr Exp $ */
+
+ 99-12-08: David Raison <djr@lemur.co.uk>
+ 	- OLEAUT32: Typelib handling:
+	            Parsing of typelib improved - Several
+	              incorrect pointer problems fixed
+	              esp. start addr. of var table.
+ 	            Use EnumResourceNames to locate
+ 	              embedded TYPELIB resources.
+		    Bugfixes.
 
  99-12-07: Achim Hasenmueller <achimha@innotek.de>
         - WSOCK32: Moved old implementation to wsock32/old and promoted
