@@ -1,4 +1,14 @@
- /* $Id: ChangeLog,v 1.1152 2000-09-30 13:38:03 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.1153 2000-10-01 03:06:52 bird Exp $ */
+
+ 2000-10-01: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - Win32k:   ú Added IOCtl API for Reading or Writing into another process'
+                  address space. (*ProcessReadWrite)
+                  This is intended used to implemented ReadProcessMemory and
+                  WriteProcessMemory (which is essensial to debuggers I think).
+                  I'll implementet them soon, but it sees that it'll
+                  require more changes in process.c that I first thought.
+                ú Simplified maintaince of kernel imports. (mkcalltab)
+                  Removed unused imports.
 
  2000-09-29: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32: Edit control fix; Ignore WM_SETTEXT if string is the same.
