@@ -1,3 +1,13 @@
+/* $Id: pidl.cpp,v 1.6 1999-10-08 10:19:23 phaller Exp $ */
+
+/*
+ * Win32 SHELL32 for OS/2
+ *
+ * Copyright 1999 Patrick Haller (haller@zebra.fh-weingarten.de)
+ * Project Odin Software License can be found in LICENSE.TXT
+ *
+ */
+
 /*
  *	pidl Handling
  *
@@ -8,11 +18,18 @@
  *
  */
 
+
+/*****************************************************************************
+ * Includes                                                                  *
+ *****************************************************************************/
+
 #include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 #include <odin.h>
+#include <odinwrap.h>
+#include <os2sel.h>
 
 #define ICOM_CINTERFACE 1
 #define CINTERFACE 1
@@ -31,8 +48,13 @@
 #include <heapstring.h>
 #include <misc.h>
 
-DECLARE_DEBUG_CHANNEL(pidl)
-DECLARE_DEBUG_CHANNEL(shell)
+
+ODINDEBUGCHANNEL(SHELL32-PIDL)
+
+
+/*****************************************************************************
+ * Implementation                                                            *
+ *****************************************************************************/
 
 void pdump (LPCITEMIDLIST pidl)
 {	DWORD type;
@@ -52,11 +74,11 @@ void pdump (LPCITEMIDLIST pidl)
 
 	if (! pidltemp)
 	{
-	  MESSAGE ("-------- pidl=NULL (Desktop)\n");
+	  dprintf(("SHELL32:pidl pdump -------- pidl=NULL (Desktop)\n"));
 	}
 	else
 	{
-	  MESSAGE ("-------- pidl=%p\n", pidl);
+	  dprintf(("SHELL32:pidl pdump -------- pidl=%p\n", pidl));
 	  if (pidltemp->mkid.cb)
 	  {
 	    do
@@ -66,8 +88,8 @@ void pdump (LPCITEMIDLIST pidl)
 	      szShortName = _ILGetSTextPointer(type, _ILGetDataPointer(pidltemp));
 	      _ILSimpleGetText(pidltemp, szName, MAX_PATH);
 
-	      MESSAGE ("-- pidl=%p size=%u type=%lx name=%s (%s,%s)\n",
-	               pidltemp, pidltemp->mkid.cb,type,szName,debugstr_a(szData), debugstr_a(szShortName));
+	      dprintf(("SHELL32:pidl pdump -- pidl=%p size=%u type=%lx name=%s (%s,%s)\n",
+	               pidltemp, pidltemp->mkid.cb,type,szName,debugstr_a(szData), debugstr_a(szShortName)));
 
 	      pidltemp = ILGetNext(pidltemp);
 
@@ -75,7 +97,7 @@ void pdump (LPCITEMIDLIST pidl)
 	  }
 	  else
 	  {
-	    MESSAGE ("empty pidl (Desktop)\n");
+	    dprintf(("SHELL32:pidl pdump empty pidl (Desktop)\n"));
 	  }
 	}
 
