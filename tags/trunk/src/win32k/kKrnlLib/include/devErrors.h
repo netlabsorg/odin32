@@ -1,16 +1,31 @@
-/* $Id: ProbKrnlErrors.h,v 1.4 2002-03-31 19:01:04 bird Exp $
+/* $Id: devErrors.h,v 1.1 2002-12-16 01:50:05 bird Exp $
  *
- * Error definitions for Win32k.sys
+ * Error definitions for kKrnlLib.
  *
- * Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * Copyright (c) 2000-2003 knut st. osmundsen <bird@anduin.net>
  *
- * Project Odin Software License can be found in LICENSE.TXT
+ *
+ * This file is part of kKrnlLib.
+ *
+ * kKrnlLib is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * kKrnlLib is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with kKrnlLib; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
 
 
-#ifndef _errors_h_
-#define _errors_h_
+#ifndef __devErrors_h__
+#define __devErrors_h__
 
 /*******************************************************************************
 *   Defined Constants And Macros                                               *
@@ -44,6 +59,7 @@
 #define ERROR_PROB_KRNL_OTE_SEEK                    (ERROR_PROB_BASE + 18)
 #define ERROR_PROB_KRNL_OTE_READ                    (ERROR_PROB_BASE + 19)
 #define ERROR_PROB_KRNL_OTE_SIZE_MIS                (ERROR_PROB_BASE + 20)
+#define ERROR_PROB_KRNL_GIS                         (ERROR_PROB_BASE + 21)
 
 #define ERROR_PROB_SYM_FIRST                        ERROR_PROB_SYM_FILE_NOT_FOUND
 #define ERROR_PROB_SYM_LAST                         ERROR_PROB_SYMDB_KRNL_NOT_FOUND
@@ -110,11 +126,17 @@
  * Procedure shift and mask.
  * Used to get or set the procedure number of an error code.
  */
-#define ERROR_D32_PROC_SHIFT                        0x10   /* code in probkrnl assumes this */
+#define ERROR_D32_PROC_SHIFT                        0x10
+
+
+
+/*******************************************************************************
+*   Functions                                                                  *
+*******************************************************************************/
+const char *    devGetErrorMsg(int sErr);
 
 
 #endif
-
 
 
 
