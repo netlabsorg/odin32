@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.46 2000-03-28 15:25:47 cbratschi Exp $ */
+/* $Id: gdi32.cpp,v 1.47 2000-05-22 19:11:28 sandervl Exp $ */
 
 /*
  * GDI32 apis
@@ -187,51 +187,6 @@ HDC WIN32API CreateCompatibleDC( HDC hdc)
     OSLibGpiSetCp(newHdc, oldcp);
     dprintf(("CreateCompatibleDC %X returned %x", hdc, newHdc));
     return newHdc;
-}
-//******************************************************************************
-//******************************************************************************
-INT WIN32API StretchDIBits(HDC hdc, INT xDst, INT yDst, INT widthDst,
-                           INT heightDst, INT xSrc, INT ySrc, INT widthSrc,
-                           INT heightSrc, const void *bits,
-                           const BITMAPINFO *info, UINT wUsage, DWORD dwRop )
-{
-#if 1
-    dprintf(("GDI32: StretchDIBits %x to (%d,%d) (%d,%d) from (%d,%d) (%d,%d), %x %x %x %x", hdc, xDst, yDst, widthDst, heightDst, xSrc, ySrc, widthSrc, heightSrc, bits, info, wUsage, dwRop));
-
-    if(wUsage == DIB_PAL_COLORS && info->bmiHeader.biSize == sizeof(BITMAPINFOHEADER))
-    {
-      // workaround for open32 bug.
-      // If syscolors > 256 and wUsage == DIB_PAL_COLORS.
-
-      int i;
-      USHORT *pColorIndex = (USHORT *)info->bmiColors;
-      RGBQUAD *pColors = (RGBQUAD *) alloca(info->bmiHeader.biClrUsed *
-                         sizeof(RGBQUAD));
-      BITMAPINFO *infoLoc = (BITMAPINFO *) alloca(sizeof(BITMAPINFO) +
-                             info->bmiHeader.biClrUsed * sizeof(RGBQUAD));
-
-      memcpy(infoLoc, info, sizeof(BITMAPINFO));
-
-      if(GetDIBColorTable(hdc, 0, info->bmiHeader.biClrUsed, pColors) == 0)
-        return FALSE;
-
-      for(i=0;i<info->bmiHeader.biClrUsed;i++, pColorIndex++)
-      {
-         infoLoc->bmiColors[i] = pColors[*pColorIndex];
-      }
-
-      return O32_StretchDIBits(hdc, xDst, yDst, widthDst, heightDst, xSrc, ySrc,
-                               widthSrc, heightSrc, (void *)bits,
-                               (PBITMAPINFO)infoLoc, DIB_RGB_COLORS, dwRop);
-    }
-
-    return O32_StretchDIBits(hdc, xDst, yDst, widthDst, heightDst, xSrc, ySrc,
-                             widthSrc, heightSrc, (void *)bits,
-                             (PBITMAPINFO)info, wUsage, dwRop);
-#else
-    dprintf(("GDI32: StretchDIBits\n"));
-    return O32_StretchDIBits(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, (void *)arg10, (PBITMAPINFO)arg11, arg12, arg13);
-#endif
 }
 //******************************************************************************
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: palette.cpp,v 1.3 2000-02-16 14:18:12 sandervl Exp $ */
+/* $Id: palette.cpp,v 1.4 2000-05-22 19:11:28 sandervl Exp $ */
 
 /*
  * GDI32 palette apis
@@ -61,13 +61,13 @@ UINT WIN32API RealizePalette( HDC hdc)
 HPALETTE WIN32API CreatePalette( const LOGPALETTE * arg1)
 {
   HPALETTE rc;
-    dprintf(("GDI32: CreatePalette\n"));
+
    for(int i=0; i<arg1->palNumEntries;i++)
    {
-     dprintf2(("Index %d : 0x%08X\n",i, *((DWORD*)(&arg1->palPalEntry[i])) ));
+     	dprintf2(("Index %d : 0x%08X\n",i, *((DWORD*)(&arg1->palPalEntry[i])) ));
    }
    rc = O32_CreatePalette(arg1);
-   dprintf(("  returns 0x%08X\n",rc));
+   dprintf(("GDI32: CreatePalette returns 0x%08X\n",rc));
 
    return rc;
 }
@@ -113,10 +113,10 @@ UINT WIN32API GetNearestPaletteIndex( HPALETTE arg1, COLORREF  arg2)
 }
 //******************************************************************************
 //******************************************************************************
-UINT WIN32API GetPaletteEntries( HPALETTE arg1, UINT arg2, UINT arg3, PPALETTEENTRY  arg4)
+UINT WIN32API GetPaletteEntries( HPALETTE hPalette, UINT arg2, UINT arg3, PPALETTEENTRY  arg4)
 {
-    dprintf(("GDI32: GetPaletteEntries"));
-    return O32_GetPaletteEntries(arg1, arg2, arg3, arg4);
+    dprintf(("GDI32: GetPaletteEntries %x %d-%d %x", hPalette, arg2, arg3, arg4));
+    return O32_GetPaletteEntries(hPalette, arg2, arg3, arg4);
 }
 //******************************************************************************
 //******************************************************************************
@@ -138,10 +138,10 @@ BOOL WIN32API ResizePalette( HPALETTE arg1, UINT  arg2)
 }
 //******************************************************************************
 //******************************************************************************
-UINT WIN32API SetPaletteEntries( HPALETTE arg1, UINT arg2, UINT arg3, PALETTEENTRY * arg4)
+UINT WIN32API SetPaletteEntries( HPALETTE hPalette, UINT arg2, UINT arg3, PALETTEENTRY * arg4)
 {
-    dprintf(("GDI32: SetPaletteEntries"));
-    return O32_SetPaletteEntries(arg1, arg2, arg3, (const PALETTEENTRY *)arg4);
+    dprintf(("GDI32: SetPaletteEntries %x %d-%d %x", hPalette, arg2, arg3, arg4));
+    return O32_SetPaletteEntries(hPalette, arg2, arg3, (const PALETTEENTRY *)arg4);
 }
 //******************************************************************************
 //******************************************************************************
