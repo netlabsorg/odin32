@@ -46,7 +46,7 @@ BOOL WINAPI WSACloseEvent(WSAEVENT hEvent)
 {
     TRACE ("WSACloseEvent event=0x%x\n", hEvent);
 
-    return CloseHandle(event);
+    return CloseHandle(hEvent);
 }
 
 /***********************************************************************
