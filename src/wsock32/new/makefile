@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 1999-12-02 07:47:26 phaller Exp $
+# $Id: makefile,v 1.7 1999-12-02 21:35:28 phaller Exp $
 
 #
 # PD-Win32 API
@@ -39,10 +39,10 @@ $(TARGET).lib: $(TARGET)exp.def
 $(TARGET)exp.def: $(TARGET).def
     $(IMPDEF) $** $@
 
-wsock32.obj: wsock32.cpp
-unknown.obj: unknown.cpp
+wsock32.obj: wsock32.cpp   relaywin.h wsock32.h
+unknown.obj: unknown.cpp   wsock32.h
 initterm.obj: initterm.cpp
-relaywin.obj: relaywin.cpp
+relaywin.obj: relaywin.cpp relaywin.h wsock32.h
 
 
 clean:

@@ -1,4 +1,4 @@
-/* $Id: wsock32.cpp,v 1.10 1999-12-02 16:12:24 achimha Exp $ */
+/* $Id: wsock32.cpp,v 1.11 1999-12-02 21:35:29 phaller Exp $ */
 
 /*
  *
@@ -62,7 +62,8 @@ ODINDEBUGCHANNEL(WSOCK32-WSOCK32)
 
 static WSOCKTHREADDATA wstdFallthru; // for emergency only
 
-static HWND hwndRelay; // handle to our relay window
+static HWND hwndRelay = NULL; // handle to our relay window
+
 
 /*****************************************************************************
  * Name      :
@@ -889,8 +890,8 @@ ODINFUNCTION2(int,OS2gethostname,
  *****************************************************************************/
 
 ODINFUNCTION2(struct Wservent *,OS2getservbyport,
-              int,port,
-              const char *, proto)
+              int,              port,
+              const char *,     proto)
 {
   struct servent   *xx;
   PWSOCKTHREADDATA pwstd;
@@ -926,8 +927,8 @@ ODINFUNCTION2(struct Wservent *,OS2getservbyport,
  *****************************************************************************/
 
 ODINFUNCTION2(struct Wservent *,OS2getservbyname,
-              const char *,name,
-              const char *,proto)
+              const char *,     name,
+              const char *,     proto)
 {
   WSERVENT         *yy;
   struct servent   *xx;
@@ -1157,12 +1158,33 @@ ODINFUNCTION6(LHANDLE,OS2WSAAsyncGetServByName,
               char *,buf,
               int,buflen)
 {
-  return(WSAAsyncGetServByName(hWnd,
-                               wMsg,
-                               name,
-                               proto,
-                               buf,
-                               buflen));
+  int   rc;
+  HWND  hwndOS2 = Win32ToOS2Handle(hWnd);
+  ULONG ulNewID;
+
+  if (hwndRelay == NULL) // already initialized ?
+    hwndRelay = RelayInitialize(hwndOS2);
+
+  // add entry to list, we need to store both our temp buffer and the apps buffer
+  ulNewID = RelayAlloc(hWnd, 
+                       wMsg, 
+                       FALSE, 
+                       ASYNCREQUEST_GETSERVBYNAME,
+                       buf);
+
+  // call pmwsock function, will fill our temp buffer
+  rc = WSAAsyncGetServByName(hwndRelay,
+                              ulNewID,
+                              name,
+                              proto,
+                              buf,
+                              buflen);
+  
+  // if an error occurs, free the allocated relay entry
+  if (rc == SOCKET_ERROR)
+    RelayFree(ulNewID);
+
+  return (rc);    
 }
 
 
@@ -1186,12 +1208,33 @@ ODINFUNCTION6(LHANDLE,OS2WSAAsyncGetServByPort,
               char *,buf,
               int,buflen)
 {
-  return(WSAAsyncGetServByPort(hWnd,
-                               wMsg,
-                               port,
-                               proto,
-                               buf,
-                               buflen));
+  int   rc;
+  HWND  hwndOS2 = Win32ToOS2Handle(hWnd);
+  ULONG ulNewID;
+
+  if (hwndRelay == NULL) // already initialized ?
+    hwndRelay = RelayInitialize(hwndOS2);
+
+  // add entry to list, we need to store both our temp buffer and the apps buffer
+  ulNewID = RelayAlloc(hWnd, 
+                       wMsg, 
+                       FALSE, 
+                       ASYNCREQUEST_GETSERVBYPORT,
+                       buf);
+
+  // call pmwsock function, will fill our temp buffer
+  rc = WSAAsyncGetServByPort(hwndRelay,
+                             ulNewID,
+                             port,
+                             proto,
+                             buf,
+                             buflen);
+  
+  // if an error occurs, free the allocated relay entry
+  if (rc == SOCKET_ERROR)
+    RelayFree(ulNewID);
+  
+  return rc;  
 }
 
 
@@ -1214,11 +1257,32 @@ ODINFUNCTION5(LHANDLE,OS2WSAAsyncGetProtoByName,
               char *,buf,
               int,buflen)
 {
-  return(WSAAsyncGetProtoByName(hWnd,
-                                wMsg,
-                                name,
-                                buf,
-                                buflen));
+  int   rc;
+  HWND  hwndOS2 = Win32ToOS2Handle(hWnd);
+  ULONG ulNewID;
+
+  if (hwndRelay == NULL) // already initialized ?
+    hwndRelay = RelayInitialize(hwndOS2);
+
+  // add entry to list, we need to store both our temp buffer and the apps buffer
+  ulNewID = RelayAlloc(hWnd, 
+                       wMsg, 
+                       FALSE, 
+                       ASYNCREQUEST_GETPROTOBYNAME,
+                       buf);
+
+  // call pmwsock function, will fill our temp buffer
+  rc = WSAAsyncGetProtoByName(hwndRelay,
+                              ulNewID,
+                              name,
+                              buf,
+                              buflen);
+  
+  // if an error occurs, free the allocated relay entry
+  if (rc == SOCKET_ERROR)
+    RelayFree(ulNewID);
+
+  return (rc);  
 }
 
 
@@ -1241,11 +1305,32 @@ ODINFUNCTION5(LHANDLE,OS2WSAAsyncGetProtoByNumber,
               char *,buf,
               int,buflen)
 {
-  return(WSAAsyncGetProtoByNumber(hWnd,
-                                  wMsg,
-                                  number,
-                                  buf,
-                                  buflen));
+  int   rc;
+  HWND  hwndOS2 = Win32ToOS2Handle(hWnd);
+  ULONG ulNewID;
+
+  if (hwndRelay == NULL) // already initialized ?
+    hwndRelay = RelayInitialize(hwndOS2);
+
+  // add entry to list, we need to store both our temp buffer and the apps buffer
+  ulNewID = RelayAlloc(hWnd, 
+                       wMsg, 
+                       FALSE, 
+                       ASYNCREQUEST_GETPROTOBYNUMBER,
+                       buf);
+
+  // call pmwsock function, will fill our temp buffer
+  rc = WSAAsyncGetProtoByNumber(hwndRelay,
+                                ulNewID,
+                                number,
+                                buf,
+                                buflen);
+  
+  // if an error occurs, free the allocated relay entry
+  if (rc == SOCKET_ERROR)
+    RelayFree(ulNewID);
+  
+  return rc;
 }
 
 
@@ -1275,15 +1360,12 @@ ODINFUNCTION5(LHANDLE,OS2WSAAsyncGetHostByName,
   if (hwndRelay == NULL) // already initialized ?
     hwndRelay = RelayInitialize(hwndOS2);
 
-  // TODO: Is this the original behaviour?
-  if ((name == NULL) || (buf == NULL))
-  {
-    // remove entry from list
-    RelayFreeByHwnd(hWnd);
-  }
-  else
-    // add entry to list, we need to store both our temp buffer and the apps buffer
-    ulNewID = RelayAlloc(hWnd, wMsg, ASYNCREQUEST_GETHOSTBYNAME, buf);
+  // add entry to list, we need to store both our temp buffer and the apps buffer
+  ulNewID = RelayAlloc(hWnd, 
+                       wMsg, 
+                       FALSE, 
+                       ASYNCREQUEST_GETHOSTBYNAME, 
+                       buf);
 
   // call pmwsock function, will fill our temp buffer
   rc = WSAAsyncGetHostByName(hwndRelay,
@@ -1291,7 +1373,11 @@ ODINFUNCTION5(LHANDLE,OS2WSAAsyncGetHostByName,
                              name,
                              buf,
                              buflen);
-
+  
+  // if an error occurs, free the allocated relay entry
+  if (rc == SOCKET_ERROR)
+    RelayFree(ulNewID);
+  
   return rc;
 }
 
@@ -1317,13 +1403,34 @@ ODINFUNCTION7(LHANDLE,OS2WSAAsyncGetHostByAddr,
               char *,buf,
               int,buflen)
 {
-  return(WSAAsyncGetHostByAddr(hWnd,
-                               wMsg,
-                               addr,
-                               len,
-                               type,
-                               buf,
-                               buflen));
+  int   rc;
+  HWND  hwndOS2 = Win32ToOS2Handle(hWnd);
+  ULONG ulNewID;
+
+  if (hwndRelay == NULL) // already initialized ?
+    hwndRelay = RelayInitialize(hwndOS2);
+
+  // add entry to list, we need to store both our temp buffer and the apps buffer
+  ulNewID = RelayAlloc(hWnd, 
+                       wMsg, 
+                       FALSE, 
+                       ASYNCREQUEST_GETHOSTBYADDR,
+                       buf);
+
+  // call pmwsock function, will fill our temp buffer
+  rc = WSAAsyncGetHostByAddr(hwndRelay,
+                             ulNewID,
+                             addr,
+                             len,
+                             type,
+                             buf,
+                             buflen);
+  
+  // if an error occurs, free the allocated relay entry
+  if (rc == SOCKET_ERROR)
+    RelayFree(ulNewID);
+
+  return (rc);
 }
 
 
@@ -1398,7 +1505,10 @@ ODINFUNCTION4(int,OS2WSAAsyncSelect,
   }
   else
     // add entry to list
-    ulNewID = RelayAlloc(hWnd, wMsg, ASYNCREQUEST_SELECT);
+    ulNewID = RelayAlloc(hWnd, 
+                         wMsg, 
+                         TRUE,
+                         ASYNCREQUEST_SELECT);
 
   rc = WSAAsyncSelect(s,
                       hwndRelay,
