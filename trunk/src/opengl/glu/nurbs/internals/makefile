@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2000-03-06 23:33:49 bird Exp $
+# $Id: makefile,v 1.5 2000-09-22 10:43:31 bird Exp $
 
 #
 # Odin32 API
@@ -27,7 +27,7 @@ CLEANEXTRAS =
 CINCLUDE    = -I..\internals -I..\nurbtess -I..\..\..\mesa\GL -I..\..\include
 CDEFS       = -DSTANDALONE -DLIBRARYBUILD -DNDEBUG
 
-CFLAGS      = $(CFLAGS) $(CINCLUDE) $(CDEFS)
+CFLAGS      = $(CFLAGS) $(CINCLUDE) $(CDEFS) -O-
 CXXFLAGS    = $(CXXFLAGS) $(CINCLUDE) $(CDEFS)
 
 
