@@ -1,4 +1,4 @@
-# $Id: setup.tools.mk,v 1.18 2002-09-20 04:35:45 bird Exp $
+# $Id: setup.tools.mk,v 1.19 2003-09-14 18:53:03 bird Exp $
 
 
 #
@@ -63,6 +63,7 @@ TOOL_JOB_SUB_MSG= (submitting job)
 TOOL_MAKE       = $(MAKE:.exe=).exe -nologo
 TOOL_MAPSYM     = $(PATH_TOOLS)\MapSym.cmd $(TOOL_MAPSYM_TYPE)
 TOOL_RM         = $(PATH_TOOLS)\rm.exe -fF
+TOOL_RMTREE     = $(PATH_TOOLS)\rm.exe -fFR
 TOOL_RMDIR      = rmdir
 TOOL_STRIP      = $(PATH_TOOLS)\lxlite.cmd
 TOOL_TYPE       = type

@@ -1,4 +1,4 @@
-# $Id: setup.os2allrc.mk,v 1.2 2002-09-14 23:35:26 bird Exp $
+# $Id: setup.os2allrc.mk,v 1.3 2003-09-14 18:53:03 bird Exp $
 
 MAKE_INCLUDE_RC_SETUP = $(PATH_MAKE)\setup.os2allrc.mk
 
@@ -23,5 +23,9 @@ RC_FLAGS = -r -n -DOS2 \
            -DDEBUG \
 !endif
            $(RC_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(RC_INCLUDES:-I=-i ) $(ALL_INCLUDES:-I=-i ) -i $(PATH_INCLUDES:;= -i )
+!if "$(RC_NO_EXEPACK2)" != ""
+RL_FLAGS = -n
+!else
 RL_FLAGS = -x2 -n
+!endif
 
