@@ -23,6 +23,9 @@
 typedef struct _DefSegment
 {
     char               *psz;
+    char               *pszName;
+    char               *pszClass;
+    char               *pszAttr;
     struct _DefSegment *pNext;
 } DEFSEGMENT, *PDEFSEGMENT;
 
