@@ -1,12 +1,12 @@
-/* $Id: odin32.e,v 1.1 2000-01-23 03:33:08 bird Exp $
+/* $Id: odin32.e,v 1.2 2000-01-28 14:53:53 bird Exp $
  *
  * Visual SlickEdit Documentation Macros.
  *
- * Copyright (c) 1999-2000 knut st. osmundsen
+ * Copyright (c) 1999-2000 knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
- **
+ ****
  *
  * This define the following keys:
  *---------------------------------
@@ -23,7 +23,7 @@
  *
  * Ctrl+Shift+T: Makes tag file
  *
- * Remember to set the correct sOdin32UserName and sOdin32UserInitials
+ * Remember to set the correct sOdin32UserName, sOdin32UserEmail and sOdin32UserInitials
  * before compiling and loading the macros into Visual SlickEdit.
  *
  * These macros are compatible with both 3.0(c) and 4.0(b).
@@ -31,23 +31,27 @@
  */
 defeventtab default_keys
 def  'C-S-A' = odin32_signature
-               def  'C-S-C' = odin32_classbox
-               def  'C-S-F' = odin32_funcbox
-               def  'C-S-G' = odin32_globalbox
-               def  'C-S-H' = odin32_headerbox
-               def  'C-S-I' = odin32_intfuncbox
-               def  'C-S-K' = odin32_constbox
-               def  'C-S-M' = odin32_modulebox
-               def  'C-S-O' = odin32_oneliner
-               def  'C-S-S' = odin32_structbox
-               def  'C-S-T' = odin32_maketagfile
+def  'C-S-C' = odin32_classbox
+def  'C-S-F' = odin32_funcbox
+def  'C-S-G' = odin32_globalbox
+def  'C-S-H' = odin32_headerbox
+def  'C-S-I' = odin32_intfuncbox
+def  'C-S-K' = odin32_constbox
+def  'C-S-M' = odin32_modulebox
+def  'C-S-O' = odin32_oneliner
+def  'C-S-S' = odin32_structbox
+def  'C-S-T' = odin32_maketagfile
 
 
 //MARKER.  Editor searches for this line!
 #pragma option(redeclvars, on)
 #include 'slick.sh'
-               _str sOdin32UserInitials = "kso";
+
+/* Remeber to change these! */
+_str sOdin32UserInitials = "kso";
 _str sOdin32UserName     = "knut st. osmundsen";
+_str sOdin32UserEmail    = "knut.stange.osmundsen@pmsc.no";
+
 
 
 /**
@@ -177,7 +181,7 @@ void odin32_classbox()
     _insert_text(" * @dstruct     \n");
     _insert_text(" * @version     \n");
     _insert_text(" * @verdesc     \n");
-    _insert_text(" * @author      "sOdin32UserName"\n");
+    _insert_text(" * @author      " sOdin32UserName " (" sOdin32UserEmail ")\n");
     _insert_text(" * @approval    \n");
     _insert_text(" */\n");
 
@@ -204,7 +208,7 @@ void odin32_funcbox()
         _insert_text("; @time      \n");
         _insert_text("; @sketch    \n");
         _insert_text("; @status    \n");
-        _insert_text("; @author    "sOdin32UserName"\n");
+        _insert_text("; @author    "sOdin32UserName" (" sOdin32UserEmail ")\n");
         _insert_text("; @remark    \n");
         up(10);
         p_col = 3;
@@ -219,7 +223,7 @@ void odin32_funcbox()
         _insert_text(" * @time      \n");
         _insert_text(" * @sketch    \n");
         _insert_text(" * @status    \n");
-        _insert_text(" * @author    "sOdin32UserName"\n");
+        _insert_text(" * @author    "sOdin32UserName" (" sOdin32UserEmail ")\n");
         _insert_text(" * @remark    \n");
         _insert_text(" */\n");
         up(10);
@@ -298,11 +302,11 @@ void odin32_modulebox()
     _begin_line();
     if (file_eq(p_extension, 'asm'))
     {
-        _insert_text("; $Id: odin32.e,v 1.1 2000-01-23 03:33:08 bird Exp $\n");
+        _insert_text("; $Id: odin32.e,v 1.2 2000-01-28 14:53:53 bird Exp $\n");
         _insert_text("; \n");
         _insert_text("; \n");
         _insert_text("; \n");
-        _insert_text("; Copyright (c) " odin32_year() " "sOdin32UserName"\n");
+        _insert_text("; Copyright (c) " odin32_year() " "sOdin32UserName" (" sOdin32UserEmail ")\n");
         _insert_text("; \n");
         _insert_text("; Project Odin Software License can be found in LICENSE.TXT\n");
         _insert_text("; \n");
@@ -311,11 +315,11 @@ void odin32_modulebox()
     }
     else
     {
-        _insert_text("/* $Id: odin32.e,v 1.1 2000-01-23 03:33:08 bird Exp $\n");
+        _insert_text("/* $Id: odin32.e,v 1.2 2000-01-28 14:53:53 bird Exp $\n");
         _insert_text(" * \n");
         _insert_text(" * \n");
         _insert_text(" * \n");
-        _insert_text(" * Copyright (c) " odin32_year() " "sOdin32UserName"\n");
+        _insert_text(" * Copyright (c) " odin32_year() " "sOdin32UserName" (" sOdin32UserEmail ")\n");
         _insert_text(" *\n");
         _insert_text(" * Project Odin Software License can be found in LICENSE.TXT\n");
         _insert_text(" *\n");
