@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.120 2003-05-06 13:50:35 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.121 2003-05-15 13:12:52 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -858,15 +858,15 @@ int WIN32API ReleaseDC (HWND hwnd, HDC hdc)
    BOOL isOwnDC = FALSE;
    int rc;
 
+    HWND hwndDC = WindowFromDC(hdc);
+
+    if(hwndDC != hwnd) {
+        dprintf(("WARNING: ReleaseDC: wrong window handle specified %x -> %x", hwnd, hwndDC));
+        hwnd = hwndDC;
+    }
+
     if (hwnd)
     {
-        HWND hwndDC = WindowFromDC(hdc);
-
-        if(hwndDC != hwnd) {
-            dprintf(("WARNING: ReleaseDC: wrong window handle specified %x -> %x", hwnd, hwndDC));
-            hwnd = hwndDC;
-        }
-
         Win32BaseWindow *wnd = Win32BaseWindow::GetWindowFromHandle (hwnd);
         if(wnd == NULL) {
             dprintf(("ERROR: ReleaseDC %x %x failed", hwnd, hdc));
