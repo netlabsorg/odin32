@@ -1,4 +1,4 @@
-/* $Id: odin32db.cmd,v 1.2 2000-09-05 17:36:22 bird Exp $
+/* $Id: odin32db.cmd,v 1.3 2001-06-27 08:55:14 bird Exp $
  *
  * Updates the Odin32 API database.
  *
@@ -19,9 +19,7 @@
 
     'cd tools\database';
     if rc <> 0 then call failure rc, 'cd db failed';
-    'nmake apiimport.exe ..\bin\APIImport.exe';
-    if rc <> 0 then call failure rc, 'nmake db failed';
-    'nmake stateupd.exe ..\bin\stateupd.exe';
+    'nmake';
     if rc <> 0 then call failure rc, 'nmake db failed';
     'cd ..\..\src';
     if rc <> 0 then call failure rc, 'cd src failed';
