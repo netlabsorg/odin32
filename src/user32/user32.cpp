@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.111 2001-07-29 18:59:27 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.112 2001-08-27 08:42:13 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -1133,6 +1133,11 @@ BOOL WIN32API PaintDesktop(HDC hdc)
 
 int WIN32API FillRect(HDC hDC, const RECT * lprc, HBRUSH hbr)
 {
+    //SvL: brush 0 means currently selected brush (verified in NT4)
+    if(hbr == 0) {
+        hbr = GetCurrentObject(hDC, OBJ_BRUSH);
+    }
+    else
     if (hbr <= (HBRUSH) (COLOR_MAX + 1)) {
 	hbr = GetSysColorBrush( (INT) hbr - 1 );
     }
