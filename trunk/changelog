@@ -1,4 +1,15 @@
- /* $Id: changelog,v 1.1039 2000-07-19 23:46:51 sandervl Exp $ */
+ /* $Id: changelog,v 1.1040 2000-07-20 18:03:39 sandervl Exp $ */
+
+ 2000-07-20: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   SetWindowPlacement bugfix for Papyrus (do not change the
+                current window position)
+                Fixed FS corruption in CreateCaret
+                Fixed positioning of caret (needed due to client/frame -> frame window changes)
+                WM_ADJUSTWINDOWPOS & WM_WINDOWPOSCHANGED bugfixes (hwndInsertAfter
+                set to HWND_TOP if non-Odin window)
+    - KERNEL32/PELDR
+                Always try to allocate an executable image at it's preferred address 
+                (even if it has fixups)
 
  2000-07-19: Sander van Leeuwen <sandervl@xs4all.nl>
     - INCLUDE\makefiles
