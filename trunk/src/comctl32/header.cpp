@@ -1,4 +1,4 @@
-/* $Id: header.cpp,v 1.6 2000-04-15 14:22:15 cbratschi Exp $ */
+/* $Id: header.cpp,v 1.7 2000-04-16 18:26:57 cbratschi Exp $ */
 /*
  *  Header control
  *
@@ -7,8 +7,6 @@
  *  Copyright 1999 Christoph Bratschi
  *
  *  TODO:
- *   - Control specific cursors (over dividers)
- *
  *   - HDS_FILTERBAR
  *   - HEADER_SetHotDivider()
  *
@@ -595,7 +593,7 @@ HEADER_InternalHitTest (HWND hwnd, LPPOINT lpPt, UINT *pFlags, INT *pItem)
             {
               *pFlags |= HHT_ONHEADER;
               *pItem = iCount;
-//                      TRACE (header, "ON HEADER %d\n", iCount);
+
               return;
             }
             if (iCount > 0)
@@ -608,13 +606,13 @@ HEADER_InternalHitTest (HWND hwnd, LPPOINT lpPt, UINT *pFlags, INT *pItem)
                 {
                   *pFlags |= HHT_ONDIVOPEN;
                   *pItem = iCount - 1;
-//                              TRACE (header, "ON DIVOPEN %d\n", *pItem);
+
                   return;
                 } else
                 {
                   *pFlags |= HHT_ONDIVIDER;
                   *pItem = iCount - 1;
-//                              TRACE (header, "ON DIVIDER %d\n", *pItem);
+
                   return;
                 }
               }
@@ -625,13 +623,13 @@ HEADER_InternalHitTest (HWND hwnd, LPPOINT lpPt, UINT *pFlags, INT *pItem)
             {
               *pFlags |= HHT_ONDIVIDER;
               *pItem = iCount;
-//                      TRACE (header, "ON DIVIDER %d\n", *pItem);
+
               return;
             }
 
             *pFlags |= HHT_ONHEADER;
             *pItem = iCount;
-//                  TRACE (header, "ON HEADER %d\n", iCount);
+
             return;
           }
         }
@@ -647,47 +645,43 @@ HEADER_InternalHitTest (HWND hwnd, LPPOINT lpPt, UINT *pFlags, INT *pItem)
           {
             *pFlags |= HHT_ONDIVOPEN;
             *pItem = infoPtr->uNumItem - 1;
-//                  TRACE (header, "ON DIVOPEN %d\n", *pItem);
+
             return;
           } else
           {
             *pFlags |= HHT_ONDIVIDER;
             *pItem = infoPtr->uNumItem-1;
-//                  TRACE (header, "ON DIVIDER %d\n", *pItem);
+
             return;
           }
         }
 
         *pFlags |= HHT_NOWHERE;
         *pItem = 1;
-//          TRACE (header, "NOWHERE\n");
+
         return;
       }
     } else
     {
       if (lpPt->x < rect.left)
       {
-//         TRACE (header, "TO LEFT\n");
         *pFlags |= HHT_TOLEFT;
       } else if (lpPt->x > rect.right)
       {
-//          TRACE (header, "TO LEFT\n");
         *pFlags |= HHT_TORIGHT;
       }
 
       if (lpPt->y < rect.top)
       {
-//          TRACE (header, "ABOVE\n");
         *pFlags |= HHT_ABOVE;
       } else if (lpPt->y > rect.bottom)
       {
-//          TRACE (header, "BELOW\n");
         *pFlags |= HHT_BELOW;
       }
     }
 
     *pItem = 1;
-//    TRACE (header, "flags=0x%X\n", *pFlags);
+
     return;
 }
 
@@ -972,8 +966,6 @@ HEADER_DeleteItem (HWND hwnd, WPARAM wParam)
     INT iItem = (INT)wParam;
     HDC hdc;
 
-//    TRACE(header, "[iItem=%d]\n", iItem);
-
     if ((iItem < 0) || (iItem >= (INT)infoPtr->uNumItem)) return FALSE;
 
     if (infoPtr->uNumItem == 1)
@@ -988,7 +980,6 @@ HEADER_DeleteItem (HWND hwnd, WPARAM wParam)
     } else
     {
       HEADER_ITEM *oldItems = infoPtr->items;
-//        TRACE(header, "Complex delete! [iItem=%d]\n", iItem);
 
       if (infoPtr->items[iItem].pszText) COMCTL32_Free(infoPtr->items[iItem].pszText);
 
@@ -1407,10 +1398,6 @@ HEADER_Layout (HWND hwnd, WPARAM wParam, LPARAM lParam)
         lpLayout->pwpos->cy = infoPtr->nHeight;
     lpLayout->pwpos->flags = SWP_NOZORDER;
 
-//    TRACE (header, "Layout x=%d y=%d cx=%d cy=%d\n",
-//           lpLayout->pwpos->x, lpLayout->pwpos->y,
-//           lpLayout->pwpos->cx, lpLayout->pwpos->cy);
-
     return TRUE;
 }
 
@@ -1538,9 +1525,9 @@ HEADER_Create (HWND hwnd, WPARAM wParam, LPARAM lParam)
     infoPtr->uNumItem = 0;
     infoPtr->hFont = 0;
     infoPtr->items = 0;
-    infoPtr->hcurArrow = LoadCursorA (0, IDC_ARROWA);
-    infoPtr->hcurDivider = LoadCursorA (0, IDC_SIZEWEA);
-    infoPtr->hcurDivopen = LoadCursorA (0, IDC_SIZENSA);
+    infoPtr->hcurArrow = LoadCursorA(0,IDC_ARROWA);
+    infoPtr->hcurDivider = LoadCursorA(COMCTL32_hModule,MAKEINTRESOURCEA(IDC_COMCTL32_DRAGHLINE));
+    infoPtr->hcurDivopen = LoadCursorA(COMCTL32_hModule,MAKEINTRESOURCEA(IDC_COMCTL32_SPLITHLINE));
     infoPtr->bCaptured = FALSE;
     infoPtr->bPressed  = FALSE;
     infoPtr->bTracking = FALSE;
@@ -1658,7 +1645,6 @@ HEADER_LButtonDown (HWND hwnd, WPARAM wParam, LPARAM lParam)
         HEADER_RefreshItem (hwnd, hdc, nItem);
         ReleaseDC (hwnd, hdc);
 
-//      TRACE (header, "Pressed item %d!\n", nItem);
     } else if ((flags == HHT_ONDIVIDER) || (flags == HHT_ONDIVOPEN))
     {
         if (!(HEADER_SendBeginTrack(hwnd,nItem,0)))
@@ -1679,7 +1665,6 @@ HEADER_LButtonDown (HWND hwnd, WPARAM wParam, LPARAM lParam)
                 ReleaseDC (hwnd, hdc);
             }
 
-//          TRACE (header, "Begin tracking item %d!\n", nItem);
         }
     }
 
@@ -1882,7 +1867,6 @@ HEADER_MouseMove (HWND hwnd, WPARAM wParam, LPARAM lParam)
             ReleaseDC (hwnd, hdc);
           }
         }
-//          TRACE (header, "Moving pressed item %d!\n", infoPtr->iMoveItem);
       } else if (infoPtr->bTracking)
       {
         if (dwStyle & HDS_FULLDRAG)
@@ -2082,8 +2066,6 @@ HEADER_SetCursor (HWND hwnd, WPARAM wParam, LPARAM lParam)
     UINT  flags;
     INT   nItem;
 
-//    TRACE (header, "code=0x%X  id=0x%X\n", LOWORD(lParam), HIWORD(lParam));
-
     GetCursorPos (&pt);
     ScreenToClient (hwnd, &pt);
 
@@ -2262,9 +2244,9 @@ HEADER_WindowProc (HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             return HEADER_Timer(hwnd,wParam,lParam);
 
         default:
-//            if (msg >= WM_USER)
-//              ERR (header, "unknown msg %04x wp=%04x lp=%08lx\n",
-//                   msg, wParam, lParam );
+            //if (msg >= WM_USER)
+            //  ERR (header, "unknown msg %04x wp=%04x lp=%08lx\n",
+            //       msg, wParam, lParam );
             return defComCtl32ProcA (hwnd, msg, wParam, lParam);
     }
     return 0;

@@ -1,4 +1,4 @@
-/* $Id: CCBase.h,v 1.8 2000-04-12 16:38:58 cbratschi Exp $ */
+/* $Id: CCBase.h,v 1.9 2000-04-16 18:26:56 cbratschi Exp $ */
 /*
  * COMCTL32 Base Functions and Macros for all Controls
  *
@@ -45,13 +45,25 @@ VOID destroyToolTip(HWND hwndToolTip);
 
 VOID drawStubControl(HWND hwnd,HDC hdc);
 
+#define lstrlenAW(text,unicode) (unicode ? lstrlenW((WCHAR*)text):lstrlenA((CHAR*)text))
+
+#define lstrcpyAW(textA,unicodeA,textB,unicodeB) (unicodeA ? (unicodeB ? lstrcpyW((WCHAR*)textA,(WCHAR*)textB):lstrcpyAtoW((WCHAR*)textA,(CHAR*)textB)):(unicodeB ? lstrcpyWtoA((CHAR*)textA,(WCHAR*)textB):lstrcpyA((CHAR*)textA,(CHAR*)textB)))
+
 INT lstrcmpAtoW(CHAR *textA,WCHAR *textW);
 INT lstrcmpAW(WCHAR *textA,BOOL textaunicode,WCHAR *textB,BOOL textbunicode);
+
+//read note in CCBase.cpp!
+INT lstrcmpniA(CHAR *textA,CHAR *textB,INT len);
+INT lstrcmpniAtoW(CHAR *textA,WCHAR* textB,INT len);
+INT lstrcmpniW(WCHAR *textA,WCHAR *textB,INT len);
+INT lstrcmpniAW(WCHAR *textA,BOOL unicodeA,WCHAR *textB,BOOL unicodeB,INT len);
 
 CHAR*  lstrstrA(CHAR *text,CHAR *subtext);
 WCHAR* lstrstrW(WCHAR *text,WCHAR *subtext);
 CHAR*  lstrstrAtoW(CHAR *text,WCHAR *subtext);
 WCHAR* lstrstrWtoA(WCHAR *text,CHAR *subtext);
 WCHAR* lstrstrAW(WCHAR *text,BOOL textunicode,WCHAR *subtext,BOOL subtextunicode);
+
+#define TICKDIFF(start,end) ((end > start) ? (end-start):(0xFFFFFFFF-start+end))
 
 #endif
