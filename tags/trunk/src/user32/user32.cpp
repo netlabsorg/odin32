@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.127 2003-07-28 11:27:47 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.128 2003-08-01 10:07:43 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -882,8 +882,11 @@ BOOL WIN32API SystemParametersInfoA(UINT uiAction, UINT uiParam, PVOID pvParam, 
         );
         break;
 
-    case SPI_GETWHEELSCROLLLINES: //TODO: Undocumented
-        rc = 16;
+    case SPI_GETWHEELSCROLLLINES:
+        //nr of lines scrolled when the mouse wheel is rotated
+        if(pvParam) {
+            *(UINT *)pvParam = 1;
+        }
         break;
 
     default:
