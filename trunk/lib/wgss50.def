@@ -263,12 +263,9 @@ EXPORTS
    _O32_SetEnvironmentVariable           @927
    _O32_GetEnvironmentVariable           @928
    _O32_GetPriorityClass                 @929
-   _O32_GetThreadPriority                @930
    _O32_OpenProcess                      @931
    _O32_ResumeThread                     @932
    _O32_SetPriorityClass                 @933
-   _O32_SetThreadPriority                @934
-   _O32_Sleep                            @935
    _O32_SuspendThread                    @936
    _O32_TerminateProcess                 @937
    _O32_TerminateThread                  @938
@@ -278,7 +275,7 @@ EXPORTS
    _O32_SetLastError                     @942
    _O32_GetLastError                     @943
 
-   _O32_GetDriveType                     @944
+
    _O32_CompareFileTime                  @945
    _O32_DosDateTimeToFileTime            @946
    _O32_FileTimeToDosDateTime            @947
