@@ -1,4 +1,4 @@
-/* $Id: thread.H,v 1.7 2001-02-11 10:34:44 sandervl Exp $ */
+/* $Id: thread.H,v 1.8 2002-06-11 16:36:54 sandervl Exp $ */
 
 /*
  * Win32 Thread API functions
@@ -23,12 +23,13 @@ public:
 
 private:
 
- LPVOID      lpUserData;
- LPTHREAD_START_ROUTINE pCallback;
- DWORD       dwFlags;
- HANDLE      hThread;
+    LPVOID      lpUserData;
+    LPTHREAD_START_ROUTINE pCallback;
+    DWORD       dwFlags;
+    HANDLE      hThread;
+    LPVOID      teb;
 
- friend DWORD OPEN32API Win32ThreadProc(LPVOID lpData);
+    friend DWORD OPEN32API Win32ThreadProc(LPVOID lpData);
 };
 
 #endif

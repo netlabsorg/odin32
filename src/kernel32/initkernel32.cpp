@@ -1,4 +1,4 @@
-/* $Id: initkernel32.cpp,v 1.18 2002-05-16 12:16:00 sandervl Exp $
+/* $Id: initkernel32.cpp,v 1.19 2002-06-11 16:36:53 sandervl Exp $
  *
  * KERNEL32 DLL entry point
  *
@@ -174,8 +174,8 @@ ULONG APIENTRY inittermKernel32(ULONG hModule, ULONG ulFlag)
             //SvL: Do it here instead of during the exe object creation
             //(std handles can be used in win32 dll initialization routines
             HMInitialize();             /* store standard handles within HandleManager */
-            InitDirectories();      //Must be done before InitializeTIB (which loads NTDLL -> USER32)
-            InitializeTIB(TRUE);        //Must be done after HMInitialize!
+            InitDirectories();          //Must be done before InitializeTIB (which loads NTDLL -> USER32)
+            InitializeMainThread();     //Must be done after HMInitialize!
             RegisterDevices();
             Win32DllBase::setDefaultRenaming();
             rc = DosQuerySysInfo(QSV_NUMPROCESSORS, QSV_NUMPROCESSORS, &ulSysinfo, sizeof(ulSysinfo));
@@ -233,7 +233,8 @@ void APIENTRY cleanupKernel32(ULONG ulReason)
     //Unload LVM subsystem for volume/mountpoint win32 functions
     OSLibLVMExit();
 
-    DestroyTIB();
+    TEB *teb = GetThreadTEB();
+    if(teb) DestroyTEB(teb);
     DestroySharedHeap();
     DestroyCodeHeap();
 
