@@ -13,6 +13,7 @@
 /src/dsound                                sandervl hugh
 /src/gdi32                                 sandervl phaller achimha bird
 /src/kernel32                              sandervl phaller achimha bird
+/src/kernel32/new                          sandervl phaller achimha bird buerkle dengert cbratschi
 /src/mpr                                   sandervl phaller achimha bird
 /src/NTDLL                                 sandervl phaller
 /src/ole32                                 sandervl davidr
