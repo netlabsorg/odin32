@@ -1,4 +1,4 @@
-/* $Id: wsock32.cpp,v 1.51 2003-02-24 11:14:56 sandervl Exp $ */
+/* $Id: wsock32.cpp,v 1.52 2003-03-03 16:34:39 sandervl Exp $ */
 
 /*
  *
@@ -723,13 +723,11 @@ ODINFUNCTION6(int,OS2recvfrom,
       	WSASetLastError(WSAEINPROGRESS);
       	return SOCKET_ERROR;
    }
-   else
-   if(fromlen == NULL || *fromlen < (int)sizeof(struct sockaddr_in)) {
-      	WSASetLastError(WSAEFAULT);
-      	return SOCKET_ERROR;
-   }
-   dprintf(("recvfrom to %s", inet_ntoa(((sockaddr_in*)from)->sin_addr)));
+   //NOTE: do not check from & fromlen; they are allowed to be NULL/0
 
+   if(from) {
+       dprintf(("recvfrom to %s", inet_ntoa(((sockaddr_in*)from)->sin_addr)));
+   }
    ret = recvfrom(s, buf, len, flags, from, fromlen);
 
    if(ret == SOCKET_ERROR) {
@@ -821,11 +819,8 @@ ODINFUNCTION6(int,OS2sendto,
       	WSASetLastError(WSAEINPROGRESS);
       	return SOCKET_ERROR;
    }
-   else
-   if(tolen < (int)sizeof(struct sockaddr_in)) {
-      	WSASetLastError(WSAEFAULT);
-      	return SOCKET_ERROR;
-   }
+   //NOTE: do not check to & tolen; they are allowed to be NULL/0
+
    // check if the socket is a raw socket and has the IP_HDRINCL switch
    // if this is the case, we overwrite the IP header length field with
    // the actual length because some apps tend to put garbage in there
@@ -836,7 +831,9 @@ ODINFUNCTION6(int,OS2sendto,
    if(ret == 0 && option != FALSE) {
        *(u_short *)&buf[2] = len;
    }
-   dprintf(("sending to %s", inet_ntoa(((sockaddr_in*)to)->sin_addr)));
+   if(to) {
+       dprintf(("sending to %s", inet_ntoa(((sockaddr_in*)to)->sin_addr)));
+   }
 #ifdef DUMP_PACKETS
    dprintf2(("Packet length %d", len));
    for(int i=0;i<(len+7)/8;i++) {
