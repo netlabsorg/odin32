@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.21 1999-07-26 20:03:49 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.22 1999-08-20 20:09:51 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -17,8 +17,8 @@
 #include <string.h>
 
 #include <misc.h>
-#include <oslibwin.h>
-#include "oslibstyle.h"
+#include <winconst.h>
+#include "oslibwin.h"
 #include "oslibutil.h"
 #include "oslibmsg.h"
 #include "oslibgdi.h"
@@ -86,48 +86,48 @@ BOOL OSLibWinConvertStyle(ULONG dwStyle, ULONG dwExStyle, ULONG *OSWinStyle, ULO
   *OSFrameStyle = 0;
 
   /* Window styles */
-  if(dwStyle & WINWS_MINIMIZE)
+  if(dwStyle & WS_MINIMIZE_W)
         *OSWinStyle |= WS_MINIMIZED;
 //Done explicitely in CreateWindowExA
 #if 0
-  if(dwStyle & WINWS_VISIBLE)
+  if(dwStyle & WS_VISIBLE_W)
         *OSWinStyle |= WS_VISIBLE;
 #endif
-  if(dwStyle & WINWS_DISABLED)
+  if(dwStyle & WS_DISABLED_W)
         *OSWinStyle |= WS_DISABLED;
-  if(dwStyle & WINWS_CLIPSIBLINGS)
+  if(dwStyle & WS_CLIPSIBLINGS_W)
         *OSWinStyle |= WS_CLIPSIBLINGS;
-  if(dwStyle & WINWS_CLIPCHILDREN)
+  if(dwStyle & WS_CLIPCHILDREN_W)
         *OSWinStyle |= WS_CLIPCHILDREN;
-  if(dwStyle & WINWS_MAXIMIZE)
+  if(dwStyle & WS_MAXIMIZE_W)
         *OSWinStyle |= WS_MAXIMIZED;
-  if(dwStyle & WINWS_GROUP)
+  if(dwStyle & WS_GROUP_W)
         *OSWinStyle |= WS_GROUP;
-  if(dwStyle & WINWS_TABSTOP)
+  if(dwStyle & WS_TABSTOP_W)
         *OSWinStyle |= WS_TABSTOP;
 
-  if(dwStyle & WINWS_CAPTION)
+  if(dwStyle & WS_CAPTION_W)
         *OSFrameStyle |= FCF_TITLEBAR;
-  if(dwStyle & WINWS_DLGFRAME)
+  if(dwStyle & WS_DLGFRAME_W)
         *OSFrameStyle |= FCF_DLGBORDER;
   else
-  if(dwStyle & WINWS_BORDER)
+  if(dwStyle & WS_BORDER_W)
         *OSFrameStyle |= FCF_BORDER;
 
-  if(dwStyle & WINWS_VSCROLL)
+  if(dwStyle & WS_VSCROLL_W)
         *OSFrameStyle |= FCF_VERTSCROLL;
-  if(dwStyle & WINWS_HSCROLL)
+  if(dwStyle & WS_HSCROLL_W)
         *OSFrameStyle |= FCF_HORZSCROLL;
-  if(dwStyle & WINWS_SYSMENU)
+  if(dwStyle & WS_SYSMENU_W)
         *OSFrameStyle |= FCF_SYSMENU;
-  if(dwStyle & WINWS_THICKFRAME)
+  if(dwStyle & WS_THICKFRAME_W)
         *OSFrameStyle |= FCF_SIZEBORDER;        //??
-  if(dwStyle & WINWS_MINIMIZEBOX)
+  if(dwStyle & WS_MINIMIZEBOX_W)
         *OSFrameStyle |= FCF_MINBUTTON;
-  if(dwStyle & WINWS_MAXIMIZEBOX)
+  if(dwStyle & WS_MAXIMIZEBOX_W)
         *OSFrameStyle |= FCF_MAXBUTTON;
 
-  if(dwExStyle & WINWS_EX_DLGMODALFRAME)
+  if(dwExStyle & WS_EX_DLGMODALFRAME_W)
         *OSFrameStyle |= FCF_DLGBORDER;
 
   return TRUE;
@@ -377,6 +377,12 @@ BOOL OSLibWinGetBorderSize(HWND hwnd, OSLIBPOINT *pointl)
   pointl->x = 0;
   pointl->y = 0;
   return (BOOL) WinSendMsg(hwnd, WM_QUERYBORDERSIZE, MPFROMP( &pointl), 0);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibWinSetIcon(HWND hwnd, HANDLE hIcon)
+{
+    return (BOOL) WinSendMsg(hwnd, WM_SETICON, (MPARAM)hIcon, 0);
 }
 //******************************************************************************
 //******************************************************************************

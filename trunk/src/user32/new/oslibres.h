@@ -1,4 +1,4 @@
-/* $Id: oslibres.h,v 1.1 1999-07-20 15:46:53 sandervl Exp $ */
+/* $Id: oslibres.h,v 1.2 1999-08-20 20:09:51 sandervl Exp $ */
 /*
  * Window GUI resource wrapper functions for OS/2
  *
@@ -18,6 +18,9 @@
  
 HWND    OSLibWinCreateMenu(HWND hwndParent, PVOID menutemplate);
 HANDLE  OSLibWinSetAccelTable(HWND hwnd, HANDLE hAccel, PVOID acceltemplate);
-HANDLE  OSLibWinSetIcon(HWND hwnd, HANDLE hIcon, PVOID iconbitmap);
+HANDLE  OSLibWinCreateIcon(PVOID iconbitmap);
+HANDLE  OSLibWinCreatePointer(PVOID cursorbitmap);
+HANDLE  OSLibWinQuerySysPointer(ULONG type);
+HANDLE  OSLibWinQuerySysIcon(ULONG type);
 
 #endif //__OSLIBGDI_H__

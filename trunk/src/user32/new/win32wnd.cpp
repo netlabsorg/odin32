@@ -1,4 +1,4 @@
-/* $Id: win32wnd.cpp,v 1.25 1999-08-16 15:54:11 dengert Exp $ */
+/* $Id: win32wnd.cpp,v 1.26 1999-08-20 20:09:51 sandervl Exp $ */
 /*
  * Win32 Window Code for OS/2
  *
@@ -1345,19 +1345,8 @@ BOOL Win32Window::SetAccelTable(HACCEL hAccel)
 //******************************************************************************
 BOOL Win32Window::SetIcon(HICON hIcon)
 {
- Win32Resource *winres = (Win32Resource *)hIcon;
- HANDLE         iconhandle;
-
-    if(HIWORD(hIcon) == 0) {
-        dprintf(("SetIcon: hIcon %x invalid", hIcon));
-        SetLastError(ERROR_INVALID_PARAMETER);
-        return FALSE;
-    }
     dprintf(("Win32Window::SetIcon %x", hIcon));
-    iconResource = winres;
-    iconhandle = OSLibWinSetIcon(OS2HwndFrame, winres->getOS2Handle(), winres->lockOS2Resource());
-    winres->setOS2Handle(iconhandle);
-    return(iconhandle != 0);
+    return OSLibWinSetIcon(OS2HwndFrame, hIcon);
 }
 //******************************************************************************
 //******************************************************************************
