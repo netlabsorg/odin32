@@ -1,4 +1,4 @@
-/* $Id: pmkbdhk.cpp,v 1.1 2001-10-22 23:13:39 phaller Exp $ */
+/* $Id: pmkbdhk.cpp,v 1.2 2001-12-11 11:10:38 phaller Exp $ */
 /*
  * OS/2 native Presentation Manager hooks
  *
@@ -450,8 +450,26 @@ BOOL EXPENTRY hookPreAccelHook(HAB hab, PQMSG pqmsg, ULONG option)
             default:
               return FALSE;
             
+            // Intercept PM Window Hotkeys such as 
+            // Alt-F7 do enable window moving by keyboard.
             case PMSCAN_F1:
+            case PMSCAN_F2:
+            case PMSCAN_F3:
+            case PMSCAN_F4:
+            case PMSCAN_F5:
+            case PMSCAN_F6:
+            case PMSCAN_F7:
+            case PMSCAN_F8:
+            case PMSCAN_F9:
             case PMSCAN_F10:
+            case PMSCAN_F11:
+            case PMSCAN_F12:
+            
+            // Try to prevent Ctrl-Esc, etc. from being intercepted by PM
+            case PMSCAN_ESC:
+            case PMSCAN_CTRLLEFT:
+            case PMSCAN_CTRLRIGHT:
+            
             case PMSCAN_PRINT:
             case PMSCAN_ALTLEFT:
             case PMSCAN_ALTRIGHT:
