@@ -1,4 +1,11 @@
-/* $Id: ChangeLog,v 1.1330 2001-03-30 22:07:43 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1331 2001-03-30 23:58:36 sandervl Exp $ */
+
+ 2001-03-31: Sander van Leeuwen <sandervl@xs4all.nl>   
+    - KERNEL32: o Fix for loading executable with sections not starting on
+                  page boundary (LOAD_LIBRARY_AS_DATAFILE).
+                  (fixes crash during install of latest RealPlayer 8)
+    - USER32:   o WindowFromPoint now works with overlapping siblings too
+                o Bugfix in mouse message translation
 
  2001-03-30: Sander van Leeuwen <sandervl@xs4all.nl>   
     - USER32:   o Rewrote WM_NCHITTEST handling. No longer relies on PM.
