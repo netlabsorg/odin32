@@ -1,4 +1,10 @@
-/* $Id: changelog,v 1.1503 2001-06-12 18:23:42 sandervl Exp $ */
+/* $Id: changelog,v 1.1504 2001-06-13 02:58:05 bird Exp $ */
+
+ 2001-06-13: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - WIN16LDR: o Made it compile with Watcom and MSC60.
+                  Currently I can't link it with MSC60 form the DDK
+                  since there is no window libraries there.
+                  Watcom links fine. But the result is not tested.
 
  2001-06-12: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Partly fixed position of PM frame controls
@@ -26,9 +32,9 @@
                   Odin.ini option:
                   [ODINSYSTEM]
                   OS2Look=1      (default = 0)
-                  Creates OS/2 Titlebar, system menu & min/max/close buttons. 
+                  Creates OS/2 Titlebar, system menu & min/max/close buttons.
                   Also overrides UseWinColors option (uses OS/2 colors).
-                  NOTE: Can interfere with windows applications that draw their 
+                  NOTE: Can interfere with windows applications that draw their
                         own custom titlebar. (e.g. RealPlayer)
     - KERNEL32: o Added OpenProfileUserMapping & CloseProfileUserMapping stubs.
                 o CreateProcess: launch win16 loader for NE executables
