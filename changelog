@@ -1,10 +1,16 @@
-/* $Id: changelog,v 1.1514 2001-06-14 11:30:08 sandervl Exp $ */
+/* $Id: changelog,v 1.1515 2001-06-14 12:56:34 sandervl Exp $ */
 
  2001-06-14: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o OSLibWinGetMsg: dispatch untranslated message immediately
                   and grab next one.
                 o Manually change min/max/restore button states (OS/2 appearance)
                 o Handle WM_SYSCOMMAND messages in frame window handler
+                o Button fix (Wine bug)
+                  Must clear WS_TABSTOP of control that is already unchecked or 
+                  else multiple control can have this style ((auto)radiobutton) 
+                  and GetNextDlgTabItem will return the wrong one.
+                  Happens in Opera preferences dialog (multimedia) where all 
+                  autoradio buttons have the WS_TABSTOP style.
 
  2001-06-13: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Corrected position of PM titlebar control
