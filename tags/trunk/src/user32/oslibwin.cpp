@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.111 2001-12-22 12:12:06 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.112 2002-01-12 14:09:30 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -356,6 +356,23 @@ BOOL OSLibWinShowWindow(HWND hwnd, ULONG fl)
 BOOL OSLibWinDestroyWindow(HWND hwnd)
 {
   return WinDestroyWindow(hwnd);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL  OSLibWinQueryWindowClientRect(HWND hwndOS2, PRECT pRect)
+{
+ BOOL     rc;
+ RECTLOS2 rectl;
+
+  rc = WinQueryWindowRect(hwndOS2, (PRECTL)&rectl);
+  if(rc) {
+        pRect->left   = 0;
+        pRect->right  = rectl.xRight - rectl.xLeft;
+        pRect->top    = 0;
+        pRect->bottom = rectl.yTop - rectl.yBottom;
+  }
+  else  memset(pRect, 0, sizeof(RECT));
+  return rc;
 }
 //******************************************************************************
 //******************************************************************************

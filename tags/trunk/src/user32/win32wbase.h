@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.137 2002-01-12 09:55:52 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.138 2002-01-12 14:09:31 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -428,7 +428,8 @@ protected:
                  isUnicode:1,
                  fMinMaxChange:1,        //set when switching between min/max/restored state
                  fVisibleRegionChanged:1, //set when visible region has changed -> erase background must be sent during next BeginPaint
-                 fEraseBkgndFlag:1;
+                 fEraseBkgndFlag:1,
+                 fFakeWindow:1;
 
         ULONG   state;
         HRGN    hWindowRegion;
