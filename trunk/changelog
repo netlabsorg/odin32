@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.50 1999-07-15 08:19:02 sandervl Exp $ */
+ /* $Id: changelog,v 1.51 1999-07-17 09:20:10 sandervl Exp $ */
+ 99-07-17: Sander van Leeuwen <sandervl@xs4all.nl>
+        - KERNEL32: Exports for getting TEB & THDB added
+	
  99-07-15: Sander van Leeuwen <sandervl@xs4all.nl>
         - USER32/NEW: Unicode & window handle translation bugfixes
 
