@@ -341,13 +341,16 @@ INT WINAPI MultiByteToWideChar( UINT page, DWORD flags, LPCSTR src, INT srclen,
     dprintf2(("MultiByteToWideChar %d %x %x %d %x %d", page, flags, src, srclen, dst, dstlen));
 #endif
 
-    if (!src || (!dst && dstlen))
+    //Docs say source ptr can't be the same as destination (Windows ME, NT4-SP6)
+    if (!src || (!dst && dstlen) || ((void *)src == (void *)dst))
     {
         SetLastError( ERROR_INVALID_PARAMETER );
         return 0;
     }
 
-    if (srclen == -1) srclen = strlen(src) + 1;
+    //Even though the docs claim this only works for -1, testing shows it
+    //is done for any negative value (Windows ME, NT4-SP6)
+    if (srclen <= -1) srclen = strlen(src) + 1;
 
     if (flags & MB_USEGLYPHCHARS) FIXME("MB_USEGLYPHCHARS not supported\n");
 
@@ -420,13 +423,16 @@ INT WINAPI WideCharToMultiByte( UINT page, DWORD flags, LPCWSTR src, INT srclen,
     dprintf2(("WideCharToMultiByte %d %x %x %d %x %d", page, flags, src, srclen, dst, dstlen));
 #endif
 
-    if (!src || (!dst && dstlen))
+    //Docs say source ptr can't be the same as destination (Windows ME, NT4-SP6)
+    if (!src || (!dst && dstlen) || ((void *)src == (void *)dst))
     {
         SetLastError( ERROR_INVALID_PARAMETER );
         return 0;
     }
 
-    if (srclen == -1) srclen = strlenW(src) + 1;
+    //Even though the docs claim this only works for -1, testing shows it
+    //is done for any negative value (Windows ME, NT4 - SP6)
+    if (srclen <= -1) srclen = strlenW(src) + 1;
 
     switch(page)
     {
