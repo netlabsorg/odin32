@@ -1,0 +1,52 @@
+[COMPILER]
+MACRO=\n
+compile=concur|capture|:Compile:&Compile,nmake %n.obj
+make=concur|capture|:Build:&Build,nmake
+rebuild=concur|capture|:Rebuild:&Rebuild,nmake /A
+debug=:Debug:&Debug,ipmd winmm.dll
+execute=:Execute:E&xecute,winmm.dll
+user1=hide|:User 1:User 1,
+user2=hide|:User 2:User 2,
+usertool_resource_editor=hide|:Resource Editor:Resource Editor,dlgedit
+workingdir=
+includedirs=..\..\include;%(INCLUDE)
+tagfiles=
+reffile=
+FILTEREXPANSION=1 1 1 1 1
+[FILES]
+aux.cpp
+aux.h
+auxos2.cpp
+driver.cpp
+dwaveout.cpp
+dwaveout.h
+INITTERM.C
+IRTMidi.cpp
+irtmidi.hpp
+joy.cpp
+make.cmd
+makefile
+mci.cpp
+midi.cpp
+MIDI.HPP
+midistrm.cpp
+mixer.cpp
+mmio.cpp
+os2timer.cpp
+os2timer.h
+playsound.c
+timegettime.c
+wavein.cpp
+waveout.cpp
+winmm.cpp
+WINMM.DEF
+winmm.h
+winmmtype.h
+wintimer.h
+wintype.h
+[ASSOCIATION]
+[STATE]
+FILEHIST: 0
+PRINTER: 2
+
+

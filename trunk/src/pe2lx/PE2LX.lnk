@@ -1,0 +1,15 @@
+name PE2LX.EXE
+file pefile.obj
+file pe.obj
+file lx.obj
+file icon.obj
+file menu.obj
+file dialog.obj
+file misc.obj
+file rcdata.obj
+file icongrp.obj
+file strings.obj
+file bitmap.obj
+file accelerator.obj
+file cursor.obj
+file cursorgrp.obj

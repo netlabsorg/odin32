@@ -1,0 +1,16 @@
+/* $Id: keyboard16.h,v 1.1 1999-05-24 20:19:24 ktk Exp $ */
+
+#ifndef _KEYBOARD16_H
+#define _KEYBOARD16_H
+
+#include "windef.h"
+
+INT16       WINAPI ToAscii16(UINT16,UINT16,LPBYTE,LPVOID,UINT16);
+WORD        WINAPI VkKeyScan16(CHAR);
+INT16       WINAPI AnsiToOem16(LPCSTR,LPSTR);
+VOID        WINAPI AnsiToOemBuff16(LPCSTR,LPSTR,UINT16);
+INT16       WINAPI OemToAnsi16(LPCSTR,LPSTR);
+VOID        WINAPI OemToAnsiBuff16(LPCSTR,LPSTR,UINT16);
+
+
+#endif /* _KEYBOARD16_H */

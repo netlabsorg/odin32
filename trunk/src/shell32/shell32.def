@@ -1,0 +1,97 @@
+;Created by BLAST for IBM's compiler
+LIBRARY SHELL32 INITINSTANCE
+DATA MULTIPLE NONSHARED
+
+EXPORTS
+    CommandLineToArgvW       = _CommandLineToArgvW@8      @5
+    DragAcceptFiles          = _DragAcceptFiles@8         @41
+    DragFinish               = _DragFinish@4              @42
+    DragQueryFile            = _DragQueryFileA@16         @44
+    DragQueryFileA           = _DragQueryFileA@16         @50
+    DragQueryFileAorW        = _DragQueryFileAorW@16      @53
+    DragQueryFileW           = _DragQueryFileW@16         @54
+    DragQueryPoint           = _DragQueryPoint@8          @76
+    ExtractIconA             = _ExtractIconA@12           @131
+    ExtractIconW             = _ExtractIconW@12           @178
+    FindExecutableA          = _FindExecutableA@12        @184
+    FindExecutableW          = _FindExecutableW@12
+    SHAddToRecentDocs        = _SHAddToRecentDocs@8       @204
+    SHBrowseForFolder        = _SHBrowseForFolder@4       @206
+    SHBrowseForFolderA       = _SHBrowseForFolder@4       @207
+    SHChangeNotify           = _SHChangeNotify@16         @208
+    SHFileOperation          = _SHFileOperationA@4        @209
+    SHFileOperationA         = _SHFileOperationA@4        @210
+    SHFileOperationW         = _SHFileOperationW@4
+    SHGetDesktopFolder       = _SHGetDesktopFolder@4      @214
+    SHGetFileInfo            = _SHGetFileInfoA@20         @215
+    SHGetFileInfoA           = _SHGetFileInfoA@20         @216
+    SHGetFileInfoW           = _SHGetFileInfoW@20         @1056
+    SHGetMalloc              = _SHGetMalloc@4             @218
+    SHGetPathFromIDList      = _SHGetPathFromIDListA@8    @219
+    SHGetPathFromIDListA     = _SHGetPathFromIDListA@8    @220
+    SHGetSpecialFolderLocation = _SHGetSpecialFolderLocation@12 @221
+    ShellAboutA              = _ShellAboutA@16            @243
+    ShellAboutW              = _ShellAboutW@16            @244
+    ShellExecute             = _ShellExecuteA@24          @245
+    ShellExecuteA            = _ShellExecuteA@24          @246
+    Shell_NotifyIcon         = _Shell_NotifyIconA@8       @249
+    Shell_NotifyIconA        = _Shell_NotifyIconA@8       @250
+    Shell_NotifyIconW        = _Shell_NotifyIconW@8
+
+    ShellExecuteEx           = _ShellExecuteExA@4
+    ShellExecuteExA          = _ShellExecuteExA@4
+    ShellExecuteExW          = _ShellExecuteExW@4
+    ExtractIconEx            = _ExtractIconExA@20
+    ExtractIconExA           = _ExtractIconExA@20
+    ExtractIconExW           = _ExtractIconExW@20
+
+
+; @@@PH 98/06/15 from WINE
+                               _SHELL32_2@24              @2
+                               _SHELL32_4@4               @4
+                               _SHELL32_16@4              @16
+                               _SHELL32_18@4              @18
+                               _SHELL32_25@8              @25
+                               _SHELL32_29@4              @29
+                               _SHELL32_30@8              @30
+                               _SHELL32_31@4              @31
+                               _SHELL32_32@4              @32
+                               _SHELL32_33@4              @33
+                               _SHELL32_34@4              @34
+                               _SHELL32_35@4              @35
+                               _SHELL32_36@8              @36
+                               _SHELL32_37@12             @37
+                               _SHELL32_39@4              @39
+                               _SHELL32_43@4              @43
+                               _SHELL32_45@4              @45
+                               _SHELL32_51@12             @51
+                               _SHELL32_52@4              @52
+                               _SHELL32_55@4              @55
+                               _SHELL32_56@4              @56
+                               _SHELL32_58@16             @58
+                               _SHELL32_59@0              @59
+                               _SHELL32_62@16             @62
+                               _SHELL32_63@28             @63
+                               _SHELL32_68@12             @68
+                               _SHELL32_71@8              @71
+                               _SHELL32_72@12             @72
+                               _SHELL32_75@8              @75
+                               _SHELL32_77@12             @77
+                               _SHELL32_79@8              @79
+                               _SHELL32_85@16             @85
+                               _SHELL32_89@12             @89
+                               _SHELL32_100@4             @100
+                               _SHELL32_102@20            @102
+                               _SHELL32_119@4             @119
+                               _SHELL32_145@8             @145
+                               _SHELL32_152@4             @152
+                               _SHELL32_155@4             @155
+                               _SHELL32_158@12            @158
+                               _SHELL32_162@4             @162
+                               _SHELL32_165@8             @165
+                               _SHELL32_175@16            @175
+                               _SHELL32_181@8             @181
+                               _SHELL32_183@24            @183
+                               _SHELL32_195@4             @195
+                               _SHELL32_196@4             @196
+
