@@ -1,4 +1,4 @@
-/* $Id: vmutex.h,v 1.4 1999-10-24 22:48:17 sandervl Exp $ */
+/* $Id: vmutex.h,v 1.5 2000-03-23 19:25:09 sandervl Exp $ */
 
 /*
  *
@@ -21,17 +21,18 @@
 class VMutex
 {
 public:
-	VMutex (int fShared = VMUTEX_NONSHARED);
+	VMutex (int fShared = VMUTEX_NONSHARED, HMTX *phMutex = NULL);
        ~VMutex();
 
 public:
-	VOID enter(ULONG timeout = VMUTEX_WAIT_FOREVER);
-	VOID leave();
+	VOID enter(ULONG timeout = VMUTEX_WAIT_FOREVER, HMTX *phMutex = NULL);
+	VOID leave(HMTX *phMutex = NULL);
 	int  getNrBlocked() { return waiting; };
 
 protected:
 	HMTX sem_handle;
 	int  waiting;
+	BOOL fShared;
 };
 
 #endif
