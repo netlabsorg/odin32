@@ -1,4 +1,4 @@
-/* $Id: odininst.h,v 1.1 2000-04-29 18:25:02 sandervl Exp $ */
+/* $Id: odininst.h,v 1.2 2000-12-30 10:17:45 sandervl Exp $ */
 
 /*
  * Exported installation procedure in kernel32
@@ -11,6 +11,8 @@
  */
 #ifndef __ODININST_H__
 #define __ODININST_H__
+
+#define ODINFONTSECTION "Font Mapping"
 
 //******************************************************************************
 //Called from the WarpIn install program to create the desktop directories and 
