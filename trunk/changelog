@@ -1,4 +1,13 @@
-/* $Id: changelog,v 1.2080 2002-05-16 12:52:50 sandervl Exp $ */
+/* $Id: changelog,v 1.2081 2002-05-16 13:40:24 bird Exp $ */
+
+ 2002-05-16: knut st. osmundsen <bird@anduin.net>
+    - MAKE:     o Merged in latest changes.
+                o Create NewConfigure.cmd for this environment.
+                  Try NewConfigure.cmd -? first.
+                  (Do 'nmake needed' before calling this. (stupid!))
+                o Please note that this is still not 100% configured for
+                  Odin32 yet. But eventually it will replace the existing
+                  make system.
 
  2002-05-16: Sander van Leeuwen <sandervl@xs4all.nl>
     - NTDLL:    o Partial resync with Wine
@@ -12,7 +21,7 @@
     - SETUPAPI: o Resync with latest Wine
 
  2002-05-14: Sander van Leeuwen <sandervl@xs4all.nl>
-    - KERNEL32: o CustForce2GBFileSize function added to force 
+    - KERNEL32: o CustForce2GBFileSize function added to force
                   GetVolumeInformation to tell the app all partitions are FAT
                   (2 GB file size limitation)
     - COMCTL32: o Merged property sheet control with latest Wine version
@@ -33,7 +42,7 @@
                   return value for some failures (-1)
 
  2002-05-09: Sander van Leeuwen <sandervl@xs4all.nl>
-    - KERNEL32: o Implemented IOCTL_DISK_GET_PARTITION_INFO & 
+    - KERNEL32: o Implemented IOCTL_DISK_GET_PARTITION_INFO &
                   IOCTL_VOLUME_GET_VOLUME_DISK_EXTENTS
                 o Implemented GetVolumeNameForVolumeMountPointA/W for disk
                   mountpoints (e.g. C:\)
@@ -54,7 +63,7 @@
     - NTDLL:    o RtlAddAccessAllowedAce stub always returns TRUE
     - KERNEL32: o Implemented volume & volume mountpoint functions
                   (win2k and up)
-                o Added stubs for IOCTL_DISK_GET_PARTITION_INFO & 
+                o Added stubs for IOCTL_DISK_GET_PARTITION_INFO &
                   IOCTL_VOLUME_GET_VOLUME_DISK_EXTENTS
 
  2002-05-08: Platon Fomichev <platon@innotek.de>
