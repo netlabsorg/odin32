@@ -1,4 +1,3 @@
-/* $Id: tooltips.cpp,v 1.11 2000-08-08 17:05:01 cbratschi Exp $ */
 /*
  * Tool tip control
  *
@@ -733,7 +732,11 @@ static VOID TOOLTIPS_Desubclass(TTTOOL_INFO *toolPtr)
         {
           SetWindowLongA ((HWND)toolPtr->uId,GWL_WNDPROC,(LONG)lpttsi->wpOrigProc);
           RemovePropA ((HWND)toolPtr->uId,COMCTL32_aSubclass);
+#ifdef __WIN32OS2__
+          COMCTL32_Free(lpttsi);
+#else
           COMCTL32_Free(&lpttsi);
+#endif
         }
           //else
           //    ERR (tooltips, "Invalid data handle!\n");
@@ -747,7 +750,11 @@ static VOID TOOLTIPS_Desubclass(TTTOOL_INFO *toolPtr)
           {
             SetWindowLongA((HWND)toolPtr->hwnd,GWL_WNDPROC,(LONG)lpttsi->wpOrigProc);
             RemovePropA((HWND)toolPtr->hwnd,COMCTL32_aSubclass);
+#ifdef __WIN32OS2__
+          COMCTL32_Free(lpttsi);
+#else
             COMCTL32_Free(&lpttsi);
+#endif
           } else lpttsi->uRefCount--;
         }
 //          else
@@ -2044,7 +2051,11 @@ TOOLTIPS_Destroy (HWND hwnd, WPARAM wParam, LPARAM lParam)
                     SetWindowLongA ((HWND)toolPtr->uId, GWL_WNDPROC,
                               (LONG)lpttsi->wpOrigProc);
                     RemovePropA ((HWND)toolPtr->uId, COMCTL32_aSubclass);
+#ifdef __WIN32OS2__
+                    COMCTL32_Free(lpttsi);
+#else
                     COMCTL32_Free (&lpttsi);
+#endif
                 }
             }
             else  {
@@ -2054,7 +2065,11 @@ TOOLTIPS_Destroy (HWND hwnd, WPARAM wParam, LPARAM lParam)
                         SetWindowLongA ((HWND)toolPtr->hwnd, GWL_WNDPROC,
                                           (LONG)lpttsi->wpOrigProc);
                         RemovePropA ((HWND)toolPtr->hwnd, COMCTL32_aSubclass);
+#ifdef __WIN32OS2__
+                        COMCTL32_Free(lpttsi);
+#else
                         COMCTL32_Free (&lpttsi);
+#endif
                     }
             }
          }
