@@ -49,7 +49,7 @@ OS2IDirectDrawPalette::OS2IDirectDrawPalette( VOID *lpDirectDraw,
   os2pal = (LPPALETTEENTRY)malloc(palsize*sizeof(PALETTEENTRY));
   memcpy((char *)os2pal, (char *)lpColorTable, palsize*sizeof(PALETTEENTRY));
 
-  dprintf(("Init CC PalTable"));
+  dprintf(("DDRAW: Init CC PalTable"));
   for(DWORD i=0;i<dwSize;i++)
   {
     aPal16[i] = (lpColorTable[i].peBlue>>3) +
@@ -79,7 +79,7 @@ OS2IDirectDrawPalette::~OS2IDirectDrawPalette()
 HRESULT __stdcall PalQueryInterface(THIS This, REFIID riid, LPVOID FAR * ppvObj)
 {
   #ifdef DEBUG
-    dprintf(("OS2IDirectDrawPalette::PalQueryInterface\n"));
+    dprintf(("DDRAW: OS2IDirectDrawPalette::PalQueryInterface\n"));
   #endif
 
   *ppvObj = NULL;
@@ -100,7 +100,7 @@ ULONG __stdcall PalAddRef(THIS This)
   OS2IDirectDrawPalette *me = (OS2IDirectDrawPalette *)This;
 
   #ifdef DEBUG
-    dprintf(("OS2IDirectDrawPalette::PalAddRef %d\n", me->Referenced+1));
+    dprintf(("DDRAW: OS2IDirectDrawPalette::PalAddRef %d\n", me->Referenced+1));
   #endif
 
   return (++me->Referenced);
@@ -112,7 +112,7 @@ ULONG __stdcall PalRelease(THIS This)
   OS2IDirectDrawPalette *me = (OS2IDirectDrawPalette *)This;
 
   #ifdef DEBUG
-    dprintf(("OS2IDirectDrawPalette::PalRelease %d\n", me->Referenced-1));
+    dprintf(("DDRAW: OS2IDirectDrawPalette::PalRelease %d\n", me->Referenced-1));
   #endif
 
   if(me->Referenced)
@@ -136,7 +136,7 @@ HRESULT __stdcall PalGetCaps(THIS This, LPDWORD lpdwCaps)
   OS2IDirectDrawPalette *me = (OS2IDirectDrawPalette *)This;
 
   #ifdef DEBUG
-    dprintf(("OS2IDirectDrawPalette::GetCaps\n"));
+    dprintf(("DDRAW: OS2IDirectDrawPalette::GetCaps\n"));
   #endif
 
   if(NULL== lpdwCaps)
@@ -159,7 +159,7 @@ HRESULT __stdcall PalGetEntries(THIS This, DWORD dwFlags,
  OS2IDirectDrawPalette *me = (OS2IDirectDrawPalette *)This;
 
   #ifdef DEBUG
-    dprintf(("OS2IDirectDrawPalette::PalGetEntries\n"));
+    dprintf(("DDRAW: OS2IDirectDrawPalette::PalGetEntries\n"));
   #endif
 
   if( (NULL== lpEntries) ||(0!=dwFlags) ||(dwBase<0) ||((dwBase + dwNumEntries)>me->dwSize) )
@@ -176,7 +176,7 @@ HRESULT __stdcall PalGetEntries(THIS This, DWORD dwFlags,
 HRESULT __stdcall PalInitialize(THIS, LPDIRECTDRAW, DWORD, LPPALETTEENTRY)
 {
   #ifdef DEBUG
-    dprintf(("OS2IDirectDrawPalette::PalInitialize\n"));
+    dprintf(("DDRAW: OS2IDirectDrawPalette::PalInitialize\n"));
   #endif
   return(DDERR_ALREADYINITIALIZED);
 }
@@ -190,7 +190,7 @@ HRESULT __stdcall PalSetEntries(THIS This, DWORD dwFlags,
  OS2IDirectDrawPalette *me = (OS2IDirectDrawPalette *)This;
 
   #ifdef DEBUG
-    dprintf(("OS2IDirectDrawPalette::PalSetEntries\n"));
+    dprintf(("DDRAW: OS2IDirectDrawPalette::PalSetEntries\n"));
   #endif
   if( (NULL== lpNewEntries) ||(0!=dwFlags) ||(dwBase<0) ||((dwBase + dwNumEntries)>me->dwSize) )
     return(DDERR_INVALIDPARAMS);
@@ -199,7 +199,7 @@ HRESULT __stdcall PalSetEntries(THIS This, DWORD dwFlags,
          (char *)lpNewEntries,
          dwNumEntries*sizeof(PALETTEENTRY));
 
-  dprintf(("Setting up CC Palentries:\n"));
+  dprintf(("DDRAW: Setting up CC Palentries:\n"));
   for(DWORD i=0;i<dwNumEntries;i++)
   {
     me->aPal16[dwBase+i] = (lpNewEntries[i].peBlue>>3) +
