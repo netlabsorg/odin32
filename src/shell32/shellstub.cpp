@@ -1,4 +1,4 @@
-/* $Id: shellstub.cpp,v 1.4 2001-10-17 09:15:22 phaller Exp $ */
+/* $Id: shellstub.cpp,v 1.5 2002-02-14 12:10:11 sandervl Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -37,76 +37,74 @@
 #include <misc.h>
 
 
-ODINDEBUGCHANNEL(SHELL32-SHELLSTUB)
-
-ODINFUNCTION3(DWORD, SHCreateStdEnumFmtEtc, DWORD, x1, DWORD, x2, DWORD, x3)
+DWORD WIN32API SHCreateStdEnumFmtEtc(DWORD x1, DWORD x2, DWORD x3)
 {
   dprintf(("STUB!"));
   return 0;
 }
 
-ODINFUNCTION2(DWORD, SHFindFiles, DWORD, x1, DWORD, x2)
+DWORD WIN32API SHFindFiles( DWORD x1, DWORD x2)
 {
   dprintf(("STUB!"));
   return 0;
 }
 
-ODINFUNCTION2(DWORD, SHFindComputer, DWORD, x1, DWORD, x2)
+DWORD WIN32API SHFindComputer(DWORD x1, DWORD x2)
 {
   dprintf(("STUB!"));
   return 0;
 }
 
-ODINFUNCTION3(DWORD, DAD_AutoScroll, DWORD, x1, DWORD, x2, DWORD, x3)
+DWORD WIN32API DAD_AutoScroll(DWORD x1, DWORD x2, DWORD x3)
 {
   dprintf(("STUB!"));
   return 0;
 }
 
-ODINFUNCTION1(DWORD, DAD_DragEnter, DWORD, x1)
+DWORD WIN32API DAD_DragEnter(DWORD x1)
 {
   dprintf(("STUB!"));
   return 0;
 }
 
-ODINFUNCTION3(DWORD, DAD_DragEnterEx, DWORD, x1, DWORD, x2, DWORD, x3)
+DWORD WIN32API DAD_DragEnterEx(DWORD x1, DWORD x2, DWORD x3)
 {
   dprintf(("STUB!"));
   return 0;
 }
 
-ODINFUNCTION0(DWORD, DAD_DragLeave)
+DWORD WIN32API DAD_DragLeave()
 {
   dprintf(("STUB!"));
   return 0;
 }
 
-ODINFUNCTION2(DWORD, DAD_DragMove, DWORD, x1, DWORD, x2)
+DWORD WIN32API DAD_DragMove(DWORD x1, DWORD x2)
 {
   dprintf(("STUB!"));
   return 0;
 }
 
-ODINFUNCTION1(DWORD, Desktop_UpdateBriefcaseOnEvent, DWORD, x1)
+DWORD WIN32API Desktop_UpdateBriefcaseOnEvent(DWORD x1)
 {
   dprintf(("STUB!"));
   return 0;
 }
 
-ODINFUNCTION1(DWORD, InvalidateDriveType, DWORD, x1)
+DWORD WIN32API InvalidateDriveType(DWORD x1)
 {
   dprintf(("STUB!"));
   return 0;
 }
 
 
-ODINFUNCTION1(DWORD, SHGlobalDefect, DWORD, x1)
+DWORD WIN32API SHGlobalDefect(DWORD x1)
 {
   dprintf(("STUB!"));
   return 0;
 }
 
-ODINFUNCTION2(DWORD, SHHandleDiskFull, DWORD, x1, DWORD, x2)
+DWORD WIN32API SHHandleDiskFull(DWORD x1, DWORD x2)
 {
   dprintf(("STUB!"));
   return 0;

@@ -105,14 +105,10 @@ DWORD WINAPI ParseFieldAW(LPCVOID src, DWORD nField, LPVOID dst, DWORD len)
  * GetFileNameFromBrowse			[SHELL32.63]
  * 
  */
-ODINFUNCTION7(BOOL, GetFileNameFromBrowse,
-              HWND, hwndOwner,
-              LPSTR, lpstrFile,
-              DWORD, nMaxFile,
-              LPCSTR, lpstrInitialDir,
-              LPCSTR, lpstrDefExt,
-              LPCSTR, lpstrFilter,
-              LPCSTR, lpstrTitle)
+BOOL WIN32API GetFileNameFromBrowse(HWND hwndOwner, LPSTR lpstrFile,
+                                    DWORD nMaxFile, LPCSTR lpstrInitialDir,
+                                    LPCSTR lpstrDefExt, LPCSTR lpstrFilter,
+                                    LPCSTR lpstrTitle)
 {
 	FIXME("(%04x,%s,%ld,%s,%s,%s,%s):stub.\n",
 	  hwndOwner, lpstrFile, nMaxFile, lpstrInitialDir, lpstrDefExt,
@@ -331,8 +327,7 @@ int WINAPIV ShellMessageBoxA(
  */
 #define MEM_DEBUG 0
 
-ODINPROCEDURE1(SHFree,
-               LPVOID, x)
+void WIN32API SHFree(LPVOID x)
 {
 #if MEM_DEBUG
 	WORD len = *(LPWORD)((LPBYTE)x-2);
@@ -366,8 +361,7 @@ ODINPROCEDURE1(SHFree,
  *     void *task_alloc(DWORD len), uses SHMalloc allocator
  *     exported by ordinal
  */
-ODINFUNCTION1(LPVOID, SHAlloc,
-              DWORD, len)
+LPVOID WIN32API SHAlloc(DWORD len)
 {
 	LPBYTE ret;
   

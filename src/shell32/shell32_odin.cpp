@@ -1,4 +1,4 @@
-/* $Id: shell32_odin.cpp,v 1.2 2000-10-28 14:36:48 sandervl Exp $ */
+/* $Id: shell32_odin.cpp,v 1.3 2002-02-14 12:10:10 sandervl Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -249,10 +249,8 @@ BOOL WINAPI AboutDlgProc( HWND hWnd, UINT msg, WPARAM wParam,
  * ShellAboutA                              [SHELL32.243]
  */
 
-ODINFUNCTION4(BOOL,ShellAboutA, HWND,   hWnd,
-                               LPCSTR, szApp,
-                               LPCSTR, szOtherStuff,
-                               HICON,  hIcon )
+BOOL WIN32API ShellAboutA(HWND hWnd, LPCSTR szApp, LPCSTR szOtherStuff,
+                          HICON  hIcon )
 {   ABOUT_INFO info;
     HRSRC hRes;
     LPVOID dlgTemplate;
@@ -274,10 +272,8 @@ ODINFUNCTION4(BOOL,ShellAboutA, HWND,   hWnd,
 /*************************************************************************
  * ShellAboutW                              [SHELL32.244]
  */
-ODINFUNCTION4(BOOL,ShellAboutW, HWND,    hWnd,
-                               LPCWSTR, szApp,
-                               LPCWSTR, szOtherStuff,
-                               HICON,   hIcon )
+BOOL WIN32API ShellAboutW(HWND hWnd, LPCWSTR szApp, LPCWSTR szOtherStuff,
+                          HICON  hIcon )
 {   INT ret;
     ABOUT_INFO info;
     HRSRC hRes;
@@ -305,10 +301,8 @@ ODINFUNCTION4(BOOL,ShellAboutW, HWND,    hWnd,
  * Return icon for given file (either from file itself or from associated
  * executable) and patch parameters if needed.
  */
-ODINFUNCTION3(HICON,     ExtractAssociatedIconA,
-              HINSTANCE, hInst,
-              LPSTR,     lpIconPath,
-              LPWORD,    lpiIcon)
+HICON WIN32API ExtractAssociatedIconA(HINSTANCE hInst, LPSTR lpIconPath,
+                                      LPWORD lpiIcon)
 {
    HICON hIcon;
 
@@ -982,12 +976,11 @@ HINSTANCE SHELL_FindExecutable( LPCSTR lpFile,
  * ShellExecuteA                            [SHELL32.245]
  */
 
-ODINFUNCTION6(HINSTANCE, ShellExecuteA, HWND,   hWnd,
-                                        LPCSTR, lpOperation,
-                                        LPCSTR, lpFile,
-                                        LPCSTR, lpParameters,
-                                        LPCSTR, lpDirectory,
-                                        INT,    iShowCmd )
+HINSTANCE WIN32API ShellExecuteA(HWND hWnd, LPCSTR lpOperation,
+                                 LPCSTR lpFile,
+                                 LPCSTR lpParameters,
+                                 LPCSTR lpDirectory,
+                                 INT    iShowCmd )
 {   HINSTANCE retval=31;
     char old_dir[1024];
     char cmd[256];
@@ -1118,11 +1111,8 @@ ODINFUNCTION6(HINSTANCE, ShellExecuteA, HWND,   hWnd,
  * Author    : Patrick Haller [Tue, 1999/06/09 20:00]
  *****************************************************************************/
 
-ODINFUNCTION4(UINT,   DragQueryFileAorW,
-              HDROP,  hDrop,
-              UINT,   iFile,
-              LPTSTR, lpszFile,
-              UINT,   cch)
+UINT WIN32API DragQueryFileAorW(HDROP hDrop, UINT iFile, LPTSTR lpszFile,
+                                UINT cch)
 {
   // @@@PH maybe they want automatic determination here
   if (SHELL_OsIsUnicode())

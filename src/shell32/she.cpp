@@ -1,4 +1,4 @@
-/* $Id: she.cpp,v 1.7 1999-10-09 11:13:20 sandervl Exp $ */
+/* $Id: she.cpp,v 1.8 2002-02-14 12:10:09 sandervl Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -51,8 +51,7 @@ ODINDEBUGCHANNEL(SHELL32-SHE)
  * Author    : Patrick Haller [Tue, 1999/06/01 09:00]
  *****************************************************************************/
 
-ODINFUNCTION1(HRESULT, SheSetCurDrive,
-              DWORD, x1)
+HRESULT WIN32API SheSetCurDrive(DWORD x1)
 {
   dprintf(("SHELL32: SheSetCurDrive not implemented.\n"));
 
@@ -72,8 +71,7 @@ ODINFUNCTION1(HRESULT, SheSetCurDrive,
  * Author    : Christoph Bratschi [Fri, 1999/08/6 19:00]
  *****************************************************************************/
 
-ODINFUNCTION1(HRESULT, SheRemoveQuotesA,
-              LPCSTR,  lpszString)
+HRESULT WIN32API SheRemoveQuotesA(LPCSTR  lpszString)
 {
   dprintf(("SHELL32: SheRemoveQuotesA\n not implemented"));
 
@@ -93,8 +91,7 @@ ODINFUNCTION1(HRESULT, SheRemoveQuotesA,
  * Author    : Christoph Bratschi [Fri, 1999/08/6 19:00]
  *****************************************************************************/
 
-ODINFUNCTION1(HRESULT, SheRemoveQuotesW,
-              LPCWSTR, lpszString)
+HRESULT WIN32API SheRemoveQuotesW(LPCWSTR lpszString)
 {
   dprintf(("SHELL32: SheRemoveQuotesW\n not implemented"));
 
