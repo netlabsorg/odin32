@@ -1,0 +1,49 @@
+;/* $Id: kKrnlLibTst.def,v 1.1 2001-09-17 01:17:01 bird Exp $
+; *
+; * Definition file for the Ring-3 test program.
+; *
+; * Copyright (c) 1998-2001 knut st. osmundsen (kosmunds@csc.com)
+; *
+; * Project Odin Software License can be found in LICENSE.TXT
+; *
+; */
+
+NAME kKrnlLibTst WINDOWCOMPAT
+DESCRIPTION "Odin32 Ring-0 Kernel Library - Ring-3 Testing - copyright (c) 1998-2001 knut st. osmundsen"
+
+STACKSIZE 4096
+
+SEGMENTS
+    DATA16              class 'FAR_DATA'
+    DATA16_BSS          class 'FAR_DATA'
+    DATA16_CONST        class 'FAR_DATA'
+    DATA16_GLOBAL       class 'FAR_DATA'
+    DATA16_INIT         class 'FAR_DATA'
+    DATA16_INIT_BSS     class 'FAR_DATA'
+    DATA16_INIT_CONST   class 'FAR_DATA'
+
+    CODE16              class 'CODE'
+    CODE16_IOSEG        class 'CODE'
+    CODE16_INIT         class 'CODE'
+
+    CODE32              class 'CODE'
+
+    DATA32              class 'DATA'
+    c_common            class 'DATA'
+    DDE4_DATA32         class 'DATA'
+    CTOR_DTOR1          class 'DATA'
+    CTOR_DTOR2          class 'DATA'
+    CTOR_DTOR3          class 'DATA'
+
+    _VFT                class 'CONST'
+    CONST32_RO          class 'CONST'
+    EH_DATA             class 'CONST'
+
+    BSS32               class 'BSS'
+
+
+IMPORTS
+     _DosWrite        = DOSCALL1.282
+     _DOS16OPEN       = DOSCALL1.70
+     _DOS16CLOSE      = DOSCALL1.59
+     DosQuerySysState = DOSCALL1.368
