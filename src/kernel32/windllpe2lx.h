@@ -1,4 +1,4 @@
-/* $Id: windllpe2lx.h,v 1.1 2000-03-10 16:12:02 sandervl Exp $ */
+/* $Id: windllpe2lx.h,v 1.2 2001-06-15 09:42:48 bird Exp $ */
 
 /*
  * Win32 PE2LX Dll class
@@ -25,11 +25,12 @@ class Win32Pe2LxDll : public Win32Pe2LxImage, public Win32DllBase
 public:
     /** @cat Constructor/Destructor */
     Win32Pe2LxDll(HINSTANCE hinstance, BOOL fWin32k) throw(ULONG);
-    virtual ~Win32Pe2LxDll();
-    BOOL     init();
+    virtual     ~Win32Pe2LxDll();
+    BOOL        init();
 
     /** @cat Query */
-    virtual BOOL  isLxDll();
+    BOOL        isPe2LxDll() const;
+    BOOL        isLxDll() const;
 };
 
 #endif

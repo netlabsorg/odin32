@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.124 2001-06-12 17:03:34 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.125 2001-06-15 09:42:49 bird Exp $ */
 
 /*
  * Win32 process functions
@@ -788,7 +788,7 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HANDLE hFile, DWORD dwFla
     fPE = Win32ImageBase::isPEImage(szModname, &Characteristics, NULL);
 
     /** @sketch
-     *  IF dwFlags == 0 && (!fPeLoader || !fPE) THEN
+     *  IF (!fPeLoader || fPE == failure) THEN
      *      Try load the executable using LoadLibrary
      *      IF successfully loaded THEN
      *          IF LX dll and is using the PE Loader THEN
@@ -801,31 +801,30 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HANDLE hFile, DWORD dwFla
      *  Endif
      */
     //only call OS/2 if LX binary or win32k process
-    if(!fPeLoader || fPE != ERROR_SUCCESS)
+    if (!fPeLoader || fPE != ERROR_SUCCESS)
     {
         hDll = OSLibDosLoadModule(szModname);
         if (hDll)
         {
             /* OS/2 dll, system dll, converted dll or win32k took care of it. */
-            pModule = (Win32DllBase *)Win32LxDll::findModuleByOS2Handle(hDll);
-            if(pModule)
+            pModule = Win32DllBase::findModuleByOS2Handle(hDll);
+            if (pModule)
             {
-                if(pModule->isLxDll())
+                if (pModule->isLxDll())
                 {
-                        ((Win32LxDll *)pModule)->setDllHandleOS2(hDll);
-                        if(fPeLoader)
-                        {
-                            if(pModule->AddRef() == -1) {//-1 -> load failed (attachProcess)
-                                dprintf(("Dll %s refused to be loaded; aborting", szModname));
-                                delete pModule;
-                                return 0;
-                            }
-                        }
+                    ((Win32LxDll *)pModule)->setDllHandleOS2(hDll);
+                    if (fPeLoader && pModule->AddRef() == -1)
+                    {   //-1 -> load failed (attachProcess)
+                        delete pModule;
+                        SetLastError(ERROR_INVALID_EXE_SIGNATURE);
+                        dprintf(("Dll %s refused to be loaded; aborting", szModname));
+                        return 0;
+                    }
+
                 }
                 pModule->incDynamicLib();
             }
-            else
-            if(fExeStarted) {
+            else if (fExeStarted) {
                 OSLibDosFreeModule(hDll);
                 SetLastError(ERROR_INVALID_EXE_SIGNATURE);
                 dprintf(("Dll %s is not an Odin dll; unload & return failure", szModname));
@@ -1564,21 +1563,21 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
 
 #ifdef DEBUG
     if(lpStartupInfo) {
-	dprintf(("lpStartupInfo->lpReserved %x", lpStartupInfo->lpReserved));
-	dprintf(("lpStartupInfo->lpDesktop %x", lpStartupInfo->lpDesktop));
-	dprintf(("lpStartupInfo->lpTitle %s", lpStartupInfo->lpTitle));
-	dprintf(("lpStartupInfo->dwX %x", lpStartupInfo->dwX));
-	dprintf(("lpStartupInfo->dwY %x", lpStartupInfo->dwY));
-	dprintf(("lpStartupInfo->dwXSize %x", lpStartupInfo->dwXSize));
-	dprintf(("lpStartupInfo->dwYSize %x", lpStartupInfo->dwYSize));
-	dprintf(("lpStartupInfo->dwXCountChars %x", lpStartupInfo->dwXCountChars));
-	dprintf(("lpStartupInfo->dwYCountChars %x", lpStartupInfo->dwYCountChars));
-	dprintf(("lpStartupInfo->dwFillAttribute %x", lpStartupInfo->dwFillAttribute));
-	dprintf(("lpStartupInfo->dwFlags %x", lpStartupInfo->dwFlags));
-	dprintf(("lpStartupInfo->wShowWindow %x", lpStartupInfo->wShowWindow));
-	dprintf(("lpStartupInfo->hStdInput %x", lpStartupInfo->hStdInput));
-	dprintf(("lpStartupInfo->hStdOutput %x", lpStartupInfo->hStdOutput));
-	dprintf(("lpStartupInfo->hStdError %x", lpStartupInfo->hStdError));
+    dprintf(("lpStartupInfo->lpReserved %x", lpStartupInfo->lpReserved));
+    dprintf(("lpStartupInfo->lpDesktop %x", lpStartupInfo->lpDesktop));
+    dprintf(("lpStartupInfo->lpTitle %s", lpStartupInfo->lpTitle));
+    dprintf(("lpStartupInfo->dwX %x", lpStartupInfo->dwX));
+    dprintf(("lpStartupInfo->dwY %x", lpStartupInfo->dwY));
+    dprintf(("lpStartupInfo->dwXSize %x", lpStartupInfo->dwXSize));
+    dprintf(("lpStartupInfo->dwYSize %x", lpStartupInfo->dwYSize));
+    dprintf(("lpStartupInfo->dwXCountChars %x", lpStartupInfo->dwXCountChars));
+    dprintf(("lpStartupInfo->dwYCountChars %x", lpStartupInfo->dwYCountChars));
+    dprintf(("lpStartupInfo->dwFillAttribute %x", lpStartupInfo->dwFillAttribute));
+    dprintf(("lpStartupInfo->dwFlags %x", lpStartupInfo->dwFlags));
+    dprintf(("lpStartupInfo->wShowWindow %x", lpStartupInfo->wShowWindow));
+    dprintf(("lpStartupInfo->hStdInput %x", lpStartupInfo->hStdInput));
+    dprintf(("lpStartupInfo->hStdOutput %x", lpStartupInfo->hStdOutput));
+    dprintf(("lpStartupInfo->hStdError %x", lpStartupInfo->hStdError));
     }
 #endif
 
@@ -1700,7 +1699,7 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
     }
 
     dprintf(("KERNEL32: CreateProcess %s\n", cmdline));
-    
+
     DWORD Characteristics, SubSystem, fNEExe;
     if(Win32ImageBase::isPEImage(exename, &Characteristics, &SubSystem, &fNEExe) == 0) {
         char *lpszPE;
@@ -1708,12 +1707,12 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
              lpszPE = "PEC.EXE";
         }
         else lpszPE = "PE.EXE";
-    
+
         //SvL: Allright. Before we call O32_CreateProcess, we must take care of
         //     lpCurrentDirectory ourselves. (Open32 ignores it!)
         if(lpCurrentDirectory) {
             char *newcmdline;
-    
+
             newcmdline = (char *)malloc(strlen(lpCurrentDirectory) + strlen(cmdline) + 32);
             sprintf(newcmdline, "%s /OPT:[CURDIR=%s] %s", lpszPE, lpCurrentDirectory, cmdline);
             free(cmdline);
@@ -1732,10 +1731,10 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
                                lpEnvironment, lpCurrentDirectory, lpStartupInfo,
                                lpProcessInfo);
     }
-    else 
+    else
     if(fNEExe) {//16 bits windows app
         char *newcmdline;
-        
+
         newcmdline = (char *)malloc(strlen(cmdline) + 16);
         sprintf(newcmdline, "w16odin.exe %s", cmdline);
         free(cmdline);
