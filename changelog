@@ -1,4 +1,14 @@
- /* $Id: changelog,v 1.771 2000-03-03 09:07:26 sandervl Exp $ */
+ /* $Id: changelog,v 1.772 2000-03-03 11:13:44 sandervl Exp $ */
+
+ 2000-03-02: Sander van Leeuwen <sandervl@xs4all.nl>
+	- KERNEL32: Create shell dirs in odin\bin directory
+                    Cleanup (never call Open32 apis directly if the proc
+                    isn't a wrapper; include win32api.h and call Odin api)
+                    Fixed FS corruption for DosAliasMem
+	- ADVAPI32/KERNEL32: Moved registry apis in kernel32 as we need them
+                             there (importing them directly creates a circular
+                             dependency (kernel32->advapi32->kernel32))
+                             Should probably be moved to ntdll
 
  2000-03-03: Jeroen van den Horn <J.vandenHorn@fibre.a2000.nl>
 	- KERNEL32: Fixed calling convention bug in conprop2.cpp
