@@ -22,7 +22,7 @@ VOID WIN32API selectClientArea(pDCData pHps);
 VOID WIN32API checkOrigin(pDCData pHps);
 VOID WIN32API removeClientArea(pDCData pHps);
 LONG WIN32API clientHeight(HWND hwnd, pDCData pHps);
-int  WIN32API setMapMode(pDCData pHps, int mode);
+int  WIN32API setMapModeDC(pDCData pHps, int mode);
 #endif
 
 int  WIN32API DIB_GetDIBWidthBytes( int width, int depth );

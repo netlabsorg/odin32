@@ -128,8 +128,8 @@ ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
     /***********************************************************/
     return 1UL;
 }
-
-
+//******************************************************************************
+//******************************************************************************
 static void APIENTRY cleanup(ULONG ulReason)
 {
     cleanupKernel32(ulReason);
@@ -139,3 +139,17 @@ static void APIENTRY cleanup(ULONG ulReason)
     DosExitList(EXLST_EXIT, cleanup);
     return ;
 }
+//******************************************************************************
+ULONG APIENTRY O32__DLL_InitTerm(ULONG handle, ULONG flag);
+//******************************************************************************
+ULONG APIENTRY InitializeKernel32()
+{
+    HMODULE hModule;
+
+    DosQueryModuleHandle("WGSS50", &hModule);
+    O32__DLL_InitTerm(hModule, 0);
+    DosQueryModuleHandle("KERNEL32", &hModule);
+    return inittermKernel32(hModule, 0);
+}
+//******************************************************************************
+//******************************************************************************
