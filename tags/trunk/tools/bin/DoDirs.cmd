@@ -1,4 +1,4 @@
-/* $Id: DoDirs.cmd,v 1.3 2001-04-17 04:00:41 bird Exp $
+/* $Id: DoDirs.cmd,v 1.4 2001-09-30 00:24:35 bird Exp $
  *
  * Rexx script which executes a given command in each of the given
  * directories. It will fail when a command failes in one of the
@@ -12,6 +12,24 @@
  */
 
 parse arg '"'sDirs'" 'sCommand
+
+/*
+ * Color config.
+ */
+if (  (value('BUILD_NOCOLOR',,'OS2ENVIRONMENT') = ''),
+    & (value('SLKRUNS',,'OS2ENVIRONMENT') = '')) then
+do
+    sClrMak = '[35;1m'
+    sClrErr = '[31;1m'
+    sClrRst = '[0m'
+end
+else
+do
+    sClrMak = ''
+    sClrErr = ''
+    sClrRst = ''
+end
+
 
 /*
  * Save current directory.
@@ -45,18 +63,18 @@ do while (iStart <= length(sDirs))
             iterate;
         if (directory(sDir) <> '') then
         do
-            say '[Entering directory:' directory()']'
+            say sClrMak||'[Entering directory:' directory()']'||sClrRst;
             sCommand
             if (rc <> 0) then
             do
-                say '[Failed rc='rc' directory:' directory()']';
+                say sClrErr||'[Failed rc='rc' directory:' directory()']'||sClrRst;
                 exit(rc);
             end
-            say '[Leaving  directory:' directory()']'
+            say sClrMak||'[Leaving  directory:' directory()']'||sClrRst;
         end
         else
         do
-            say '[Failed to change directory to' sDir']';
+            say sClrErr||'[Failed to change directory to' sDir']'||sClrRst;
             exit(267);                  /* ERROR_DIRECTORY */
         end
         call directory sCurrentDir;     /* Restore start directory. */
