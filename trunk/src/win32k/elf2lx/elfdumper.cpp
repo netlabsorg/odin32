@@ -1,8 +1,8 @@
-/* $Id: elfdumper.cpp,v 1.1 2000-01-22 00:49:21 bird Exp $
+/* $Id: elfdumper.cpp,v 1.2 2000-02-26 00:46:30 bird Exp $
  *
  * ELF dumper utility
  *
- * Copyright (c) 1999 knut st. osmundsen
+ * Copyright (c) 1999-2000 knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -56,12 +56,22 @@ static void     syntax(void);
 void *          loadELFImage(FILE *phFile);
 int             dumpELFImage(void *pv);
 int             dumpELFHdr(Elf32_Ehdr *pHdr32);
+
 int             dumpELFSectionHeader(Elf32_Ehdr * pHdr32, int iShdr);
 int             dumpELFSectionHeaderTable(Elf32_Ehdr * pHdr32);
 char *          getELFSectionNameStringTable(Elf32_Ehdr * pHdr32);
 int             dumpELFSymbolTable(Elf32_Ehdr * pHdr32,  Elf32_Shdr * pShdr);
 int             dumpELFRelcations(Elf32_Ehdr * pHdr32,  Elf32_Shdr * pShdr);
 int             dumpELFRelcationsA(Elf32_Ehdr * pHdr32,  Elf32_Shdr * pShdr);
+
+int             dumpELFProgramHeader(Elf32_Ehdr * pHdr32, int iPhdr);
+int             dumpELFProgramHeaderTable(Elf32_Ehdr * pHdr32);
+int             dumpELFDynamicSegment(Elf32_Ehdr * pHdr32,  Elf32_Phdr * pPhdr);
+int             getELFDynmaicTagValue(Elf32_Dyn *pDyn, Elf32_Sword tag, Elf32_Word *pword);
+int             dumpELFInterpreterSegment(Elf32_Ehdr * pHdr32,  Elf32_Phdr * pPhdr);
+int             dumpELFNoteSegment(Elf32_Ehdr * pHdr32,  Elf32_Phdr * pPhdr);
+
+
 
 /* output helpers */
 void printHeader(char *pszHeader);
@@ -200,6 +210,8 @@ int dumpELFImage(void *pv)
         rc = dumpELFHdr(pHdr32);
         if (rc == 0)
             rc = dumpELFSectionHeaderTable(pHdr32);
+        if (rc == 0)
+            rc = dumpELFProgramHeaderTable(pHdr32);
     }
     else
     {
@@ -389,7 +401,7 @@ int dumpELFSectionHeader(Elf32_Ehdr * pHdr32, int iShdr)
         PRINTCASE(1,SHT_DYNSYM);
         PRINTCASE(1,SHT_NUM);
         default:
-            if (pShdr->sh_type >= SHT_LOPROC && pShdr->sh_type >= SHT_HIPROC)
+            if (pShdr->sh_type >= SHT_LOPROC && pShdr->sh_type <= SHT_HIPROC)
                 printData(1, "Processor-specific");
             else if (pShdr->sh_type >= SHT_LOUSER && pShdr->sh_type <= SHT_HIUSER)
                 printData(1, "Application program specific");
@@ -582,6 +594,306 @@ int dumpELFRelcationsA(Elf32_Ehdr * pHdr32,  Elf32_Shdr * pShdr)
         pRela = (Elf32_Rela*)((unsigned)pRela + pShdr->sh_entsize);
         off += pShdr->sh_entsize;
     }
+    return 0;
+}
+
+
+/**
+ * Dumps the program header tables.
+ * @returns   0 on success. Errorcode on error (-1).
+ * @param     pHdr32  Pointer to the image.
+ * @author    knut st. osmundsen
+ */
+int dumpELFProgramHeaderTable(Elf32_Ehdr * pHdr32)
+{
+    int          i;
+    int          rc = 0;
+
+    printHeader("Program Header Table");
+
+    for (i = 0; i < pHdr32->e_phnum && rc == 0; i++)
+    {
+        if (i > 0)
+            print(0,"");
+        rc = dumpELFProgramHeader(pHdr32, i);
+    }
+    return rc;
+}
+
+
+/**
+ * Dumps a program header of an ELF image.
+ * @returns   0 on success. Errorcode on error (-1).
+ * @param     pHdr32  Pointer to the image.
+ * @param     iPhdr   Program header number.
+ * @author    knut st. osmundsen
+ */
+int dumpELFProgramHeader(Elf32_Ehdr * pHdr32, int iPhdr)
+{
+    Elf32_Phdr * pPhdr = (Elf32_Phdr*)((unsigned)pHdr32 + pHdr32->e_phoff + pHdr32->e_phentsize*iPhdr);
+
+
+    print(0, "Program Header", "no. %d  offset 0x%08x", iPhdr, (unsigned)pPhdr - (unsigned)pHdr32);
+
+    print(1, "p_type",      "0x%08x", pPhdr->p_type);
+    switch (pPhdr->p_type)
+    {
+        PRINTCASE(1,PT_NULL   );
+        PRINTCASE(1,PT_LOAD   );
+        PRINTCASE(1,PT_DYNAMIC);
+        PRINTCASE(1,PT_INTERP );
+        PRINTCASE(1,PT_NOTE   );
+        PRINTCASE(1,PT_SHLIB  );
+        PRINTCASE(1,PT_PHDR   );
+        default:
+            if (pPhdr->p_type >= PT_LOPROC && pPhdr->p_type <= PT_HIPROC)
+                printData(1, "Processor-specific");
+            else
+                printData(1, "unknown");
+    }
+    print(1, "p_offset",    "0x%08x", pPhdr->p_offset);
+    print(1, "p_vaddr",     "0x%08x", pPhdr->p_vaddr);
+    print(1, "p_paddr",     "0x%08x", pPhdr->p_paddr);
+    print(1, "p_filesz",    "0x%08x", pPhdr->p_filesz);
+    print(1, "p_memsz",     "0x%08x", pPhdr->p_memsz);
+    print(1, "p_flags",     "0x%08x", pPhdr->p_flags);
+    printBeginLongData(1);
+    PRINTFLAG(pPhdr->p_flags, PF_X);
+    PRINTFLAG(pPhdr->p_flags, PF_W);
+    PRINTFLAG(pPhdr->p_flags, PF_R);
+    printEndLongData();
+    print(1, "p_align",     "0x%08x", pPhdr->p_align);
+    printBeginLongData(1);
+    if (pPhdr->p_align &&
+        (pPhdr->p_vaddr % pPhdr->p_align != pPhdr->p_offset % pPhdr->p_align))
+        printData(1, "alignment error?");
+    printEndLongData();
+
+
+    switch (pPhdr->p_type)
+    {
+        case PT_DYNAMIC:
+            dumpELFDynamicSegment(pHdr32, pPhdr);
+            break;
+
+        case PT_INTERP:
+            dumpELFInterpreterSegment(pHdr32, pPhdr);
+            break;
+
+        case PT_NOTE:
+            dumpELFNoteSegment(pHdr32,  pPhdr);
+            break;
+    }
+    return 0;
+}
+
+
+/**
+ * Dumps a dynamic segment.
+ * @returns   0 on success.
+ * @param     pHdr32  Pointer to ELF header (and base of the loaded file).
+ * @param     pPhdr   Pointer to program header.
+ * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ */
+int dumpELFDynamicSegment(Elf32_Ehdr * pHdr32,  Elf32_Phdr * pPhdr)
+{
+    Elf32_Word      word;
+    Elf32_Addr      base;
+    int             i;
+    Elf32_Dyn *     pDyn = (Elf32_Dyn*) ((unsigned)pHdr32 + pPhdr->p_offset);
+    Elf32_Phdr *    pPhdrs = (Elf32_Phdr*)((unsigned)pHdr32 + pHdr32->e_phoff);
+    char *          paszStrings;
+
+    /* find base address */
+    i = 0;
+    while (i < pHdr32->e_phnum && pPhdrs->p_type != PT_LOAD)
+    {
+        i++;
+        pPhdrs = (Elf32_Phdr*)((unsigned)pPhdrs + pHdr32->e_phentsize);
+    }
+    if (i < pHdr32->e_phnum)
+        base = pPhdrs->p_vaddr;
+
+    /* find string table */
+    if (getELFDynmaicTagValue(pDyn, DT_STRTAB, &word) == 0)
+        paszStrings = (char*)(word - base + (int)pHdr32);
+    else
+        paszStrings = NULL;             /* no string table - funny! */
+
+    /*
+     * Loop thru the entries.
+     */
+    i = 0;
+    while (pDyn[i].d_tag != DT_NULL)
+    {
+        switch (pDyn[i].d_tag)
+        {
+            case DT_NULL:       /*   -    -   -   Marks the end of the dynamic array. */
+                break;
+            case DT_NEEDED:     /* d_val  *   *   Holds the string table offset of a null-terminated
+                                                  string, giving the name of a needed library. The
+                                                  offset is an index into the table recoreded in the
+                                                  DT_STRTAB entry. */
+                print(2, "DT_NEEDED", "0x%08x", pDyn[i].d_un.d_val);
+                if (paszStrings != NULL)
+                    printData(2, "%s", paszStrings + pDyn[i].d_un.d_val);
+                else
+                    printData(2, "(no string table)");
+                break;
+
+            case DT_PLTRELSZ:
+                print(2, "DT_PLTRELSZ", "0x%08x", pDyn[i].d_un.d_val);
+                break;
+
+            case DT_PLTGOT:
+                print(2, "DT_PLTGOT", "0x%08x", pDyn[i].d_un.d_val);
+                break;
+            case DT_HASH:
+                print(2, "DT_HASH", "0x%08x", pDyn[i].d_un.d_val);
+                break;
+            case DT_STRTAB:
+                print(2, "DT_STRTAB", "0x%08x", pDyn[i].d_un.d_val);
+                break;
+            case DT_SYMTAB:
+                print(2, "DT_SYMTAB", "0x%08x", pDyn[i].d_un.d_val);
+                break;
+            case DT_RELA:
+                print(2, "DT_RELA", "0x%08x", pDyn[i].d_un.d_val);
+                break;
+            case DT_RELASZ:
+                print(2, "DT_RELASZ", "0x%08x", pDyn[i].d_un.d_val);
+                break;
+            case DT_RELAENT:
+                print(2, "DT_RELAENT", "0x%08x", pDyn[i].d_un.d_val);
+                break;
+
+            case DT_STRSZ:      /* d_ptr  +   +   This element holds the address of the string table.
+                                                  Symbol names, library names, and other strings reside
+                                                  in this table. */
+                print(2, "DT_STRSZ", "0x%08x", pDyn[i].d_un.d_ptr);
+                break;
+
+            case DT_SYMENT:
+                print(2, "DT_SYMENT", "0x%08x", pDyn[i].d_un.d_val);
+                break;
+
+            case DT_INIT:       /* d_ptr  *   *   This element holds the address of the initialization function. */
+                print(2, "DT_INIT", "0x%08x (init function)", pDyn[i].d_un.d_val);
+                break;
+
+            case DT_FINI:       /* d_ptr  *   *   This element holds the address of the termination function. */
+                print(2, "DT_FINI", "0x%08x (term function)", pDyn[i].d_un.d_val);
+                break;
+
+            case DT_SONAME:     /* d_val  -   *   This element holds the string table offset of a
+                                                  null-terminated string, giving the name of the shared
+                                                  object. The offset is an index into the table recorded
+                                                  in the DT_STRTAB entry. */
+
+                print(2, "DT_SONAME", "0x%08x", pDyn[i].d_un.d_val);
+                if (paszStrings != NULL)
+                    printData(2, "%s", paszStrings + pDyn[i].d_un.d_val);
+                else
+                    printData(2, "(no string table)");
+                break;
+
+            case DT_RPATH:      /* d_val  +   +   This element holds the string table offset of a null-terminated
+                                                  search library search path string. The offset is an index int
+                                                  the table recorded in the DT_STRTAB entry. */
+                print(2, "DT_RPATH", "0x%08x", pDyn[i].d_un.d_val);
+                if (paszStrings != NULL)
+                    printData(2, "%s", paszStrings + pDyn[i].d_un.d_val);
+                else
+                    printData(2, "(no string table)");
+                break;
+
+            case DT_SYMBOLIC:   /*   -    -   *   This element's presence in a shared object library alters the
+                                                  dynamic linker's symbol resolution algorithm for references
+                                                  within the library. Instead of starting a symbol search with
+                                                  the executable file, the dynamic linker starts from the shared
+                                                  object file itself. If the shared object fails to supply the
+                                                  referenced symbol, the dynamic linker then searches the
+                                                  executable file and other shared objects as usual. */
+                print(2, "DT_SYMBOLIC", "(%d)", pDyn[i].d_un.d_val);
+                printData(2, "Searches within the library before the executable.");
+                break;
+
+            case DT_REL:
+                print(2, "DT_REL", "0x%08x", pDyn[i].d_un.d_val);
+                break;
+            case DT_RELSZ:
+                print(2, "DT_RELSZ", "0x%08x", pDyn[i].d_un.d_val);
+                break;
+            case DT_RELENT:
+                print(2, "DT_RELENT", "0x%08x", pDyn[i].d_un.d_val);
+                break;
+            case DT_PLTREL:
+                print(2, "DT_PLTREL", "0x%08x", pDyn[i].d_un.d_val);
+                break;
+            case DT_DEBUG:
+                print(2, "DT_DEBUG", "0x%08x", pDyn[i].d_un.d_val);
+                break;
+            case DT_TEXTREL:
+                print(2, "DT_TEXTREL", "0x%08x", pDyn[i].d_un.d_val);
+                break;
+            case DT_JMPREL:
+                print(2, "DT_JMPREL", "0x%08x", pDyn[i].d_un.d_val);
+                break;
+
+        }
+        /* next */
+        i++;
+    }
+    return 0;
+}
+
+
+/**
+ *
+ * @returns   0 on succes.
+ * @param     pDyn   Pointer to start of tag array.
+ * @param     tag    Tag type to find.
+ * @param     pword  Pointer to Elf32_Word which will hold the tag value if found.
+ * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ */
+int getELFDynmaicTagValue(Elf32_Dyn *pDyn, Elf32_Sword tag, Elf32_Word *pword)
+{
+    while (pDyn->d_tag != tag && pDyn->d_tag != DT_NULL)
+        pDyn++;
+    if (pDyn->d_tag != DT_NULL)
+    {
+        *pword = pDyn->d_un.d_val;
+        return 0;
+    }
+    return -1;
+}
+
+
+/**
+ * Dumps a Interpreter segment.
+ * @returns   0 on success.
+ * @param     pHdr32  Pointer to ELF header (and base of the loaded file).
+ * @param     pPhdr   Pointer to program header.
+ * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ */
+int dumpELFInterpreterSegment(Elf32_Ehdr * pHdr32,  Elf32_Phdr * pPhdr)
+{
+    print(2, "Interpreter name",  "%s",     (char*)pHdr32 + pPhdr->p_offset);
+    return 0;
+}
+
+
+/**
+ * Dumps a note segment.
+ * @returns   0 on success.
+ * @param     pHdr32  Pointer to ELF header (and base of the loaded file).
+ * @param     pPhdr   Pointer to program header.
+ * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ */
+int dumpELFNoteSegment(Elf32_Ehdr * pHdr32,  Elf32_Phdr * pPhdr)
+{
+    pPhdr = pPhdr;
+    pHdr32 = pHdr32;
     return 0;
 }
 
