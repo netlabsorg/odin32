@@ -4,6 +4,9 @@ A list of Open32 bugs (under construction):
   OEM scancode (should be the same as the numeric keypad arrow keys)
   Make that: extended key mappings are totally messed up
 - No support for CBS_OWNERDRAWFIXED or CBS_OWNERDRAWVARIABLE styles (COMBOBOX)
+- Crash if CBS_OWNERDRAWFIXED && !CBS_HASSTRINGS and sending CB_ADDSTRING with
+  attached item data (i.e. PERFMON sends 0,1,2,3,4 and PM treats this item data
+  as pointers)
 - Crash in PMWINX if the app isn't PM
 - Open32 isn't sending WM_NCCREATE msgs
 - HK_CBT hook not supported
