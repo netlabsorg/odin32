@@ -861,9 +861,6 @@ DEBUGWRAP8(IsBadReadPtr);
 DEBUGWRAP8(IsBadStringPtrA);
 DEBUGWRAP8(IsBadStringPtrW);
 DEBUGWRAP8(IsBadWritePtr);
-DEBUGWRAP_LVL2_12(RtlFillMemory);
-DEBUGWRAP_LVL2_12(RtlMoveMemory);
-DEBUGWRAP_LVL2_8(RtlZeroMemory);
 
 
 #undef DBG_LOCALLOG
