@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.62 1999-11-25 19:19:57 sandervl Exp $
+# $Id: makefile,v 1.63 1999-11-26 08:17:40 achimha Exp $
 
 #
 # PD-Win32 API
@@ -35,7 +35,7 @@ MESSAGE.OBJ RESOURCE.OBJ EXCEPTIONS.OBJ heapshared.obj cpuhlp.obj \
 LFILE.OBJ NPIPE.OBJ oslibdos.obj oslibmisc.obj MISC.OBJ EXCEPTUTIL.OBJ \
 LANG.OBJ ICCIO.OBJ MAP.OBJ WIN32UTIL.OBJ heap.OBJ heapstring.obj \
 os2heap.OBJ vmutex.OBJ initterm.OBJ handlemanager.OBJ  \
-hmdevice.obj hmopen32.obj hmobjects.obj hmevent.obj hmmutex.obj \
+hmdevice.obj hmopen32.obj hmobjects.obj hmevent.obj hmmutex.obj hmcomm.obj \
 hmsemaphore.obj wprocess.OBJ conprop.OBJ conprop2.obj winimagelx.obj \
 winimagebase.OBJ windllbase.OBJ winexebase.OBJ time.obj mmap.obj \
 winimagepe2lx.obj winimagepeldr.obj windllpe2lx.obj windlllx.obj windllpeldr.obj \
@@ -285,6 +285,11 @@ handlemanager.OBJ: \
         .\hmsemaphore.h \
         .\hmmmap.h \
         $(PDWIN32_INCLUDE)\winconst.h \
+        $(PDWIN32_INCLUDE)\handlemanager.h
+
+hmcomm.obj: \
+        .\hmcomm.cpp \
+        .\hmcomm.h \
         $(PDWIN32_INCLUDE)\handlemanager.h
 
 hmdevice.OBJ: \

@@ -1,4 +1,4 @@
-/* $Id */
+/* $Id: hmcomm.h,v 1.2 1999-11-26 08:18:15 achimha Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
