@@ -1,4 +1,8 @@
- /* $Id: ChangeLog,v 1.902 2000-04-19 14:43:27 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.903 2000-04-19 20:24:16 bird Exp $ */
+
+ 2000-04-19: knut st. osmundsen <knut.stange.osmundsen@pmsc.no>
+        - KERNEL32: Added fix for bug in FP13 DosQuerySysInfo.
+                Win32k/Pe2Lx loaded files didn't work.
 
  2000-04-19: Sander van Leeuwen <sandervl@xs4all.nl>
 	- TOOLS\WRC: Resync with latest Wine wrc + added code to produce
@@ -28,7 +32,7 @@
                     (no return after error detection)
                     Set FPU control word to 0x27F before calling exe entrypoint
                     (fixes some FPU exception problems in RealPlayer 7)
-                     
+
  2000-04-16: knut st. osmundsen <knut.stange.osmundsen@pmsc.no>
         - KERNEL32: Reorganized/reworte LoadLibrary/LoadLibraryEx code.
                     isPEImage was changed to return 1 if DLL and 2 if EXE.
