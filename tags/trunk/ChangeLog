@@ -1,4 +1,9 @@
-/* $Id: ChangeLog,v 1.1639 2001-08-07 21:32:28 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1640 2001-08-08 10:05:50 sandervl Exp $ */
+
+ 2001-08-08: Sander van Leeuwen <sandervl@xs4all.nl>
+    - SHELL32:  o Fix for shell link with single icon instead of icon group
+    - USER32:   o Icon conversion moved here + fixed
+    - KERNEL32: o Removed icon conversion
 
  2001-08-07: Sander van Leeuwen <sandervl@xs4all.nl>
     - INSTALL:  o Create Odin folder with program objects for readme, changelog
