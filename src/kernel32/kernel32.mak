@@ -1,4 +1,4 @@
-# $Id: kernel32.mak,v 1.22 2002-02-07 16:34:52 sandervl Exp $
+# $Id: kernel32.mak,v 1.23 2002-02-08 15:09:30 sandervl Exp $
 
 #
 # Odin32 API
@@ -14,8 +14,14 @@ MAKEFILE=kernel32.mak
 #
 # Compiler, tools, and interference rules.
 #
+!if "$(DEBUG)" == "1"
+DEFFILE = kernel32dbg.def
+!endif
+
 WRC_PREFIX_RESOURCE=1
 !include ../../makefile.inc
+
+##CDEFINES = $(CDEFINES) /Fa+
 
 #
 # Object files. Prefix with OBJDIR and one space before the '\'.
@@ -127,6 +133,7 @@ $(OBJDIR)\hmdisk.obj \
 $(OBJDIR)\version.obj \
 !ifdef DEBUG
 $(OBJDIR)\exceptstackdump.obj \
+$(OBJDIR)\dbgwrap.obj \
 !endif
 $(OBJDIR)\module.obj \
 $(OBJDIR)\hmmailslot.obj \
