@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.11 1999-11-09 14:19:47 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.12 1999-11-11 19:10:09 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -72,7 +72,7 @@ Win32PeLdrImage::Win32PeLdrImage(char *pszFileName, int loadtype) :
     nrsections(0), imageSize(0),
     imageVirtBase(-1), realBaseAddress(0), imageVirtEnd(0),
     nrNameExports(0), nrOrdExports(0), nameexports(NULL), ordexports(NULL),
-    pResSection(NULL), fImgMapping(0)
+    fImgMapping(0)
 {
  HFILE  dllfile;
 
@@ -139,6 +139,7 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
  LPVOID win32file     = NULL;
  ULONG  filesize, ulRead;
  PIMAGE_SECTION_HEADER psh;
+ IMAGE_SECTION_HEADER sh;
  IMAGE_TLS_DIRECTORY *tlsDir = NULL;
  int    nSections, i;
  char   szFullPath[CCHMAXPATH] = "";
@@ -314,34 +315,45 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
     	goto failure;
      }
    }
-   fout << "*************************PE SECTIONS END **************************" << endl;
-   imageSize += imageVirtBase - oh.ImageBase;
-   fout << "Total size of Image " << imageSize << endl;
-   fout << "imageVirtBase       " << imageVirtBase << endl;
-   fout << "imageVirtEnd        " << imageVirtEnd << endl;
+  }
+  else {
+  	if(GetSectionHdrByName (win32file, &sh, ".rsrc")) 
+        {
+            addSection(SECTION_RESOURCE, (char *)win32file+sh.PointerToRawData,
+                       sh.SizeOfRawData, sh.VirtualAddress + oh.ImageBase,
+                       sh.Misc.VirtualSize);
+  	}
+  }
+  fout << "*************************PE SECTIONS END **************************" << endl;
+  imageSize += imageVirtBase - oh.ImageBase;
+  fout << "Total size of Image " << imageSize << endl;
+  fout << "imageVirtBase       " << imageVirtBase << endl;
+  fout << "imageVirtEnd        " << imageVirtEnd << endl;
 
-   //In case there are any gaps between sections, adjust size
-   if(imageSize != imageVirtEnd - oh.ImageBase) {
+  //In case there are any gaps between sections, adjust size
+  if(imageSize != imageVirtEnd - oh.ImageBase) {
     	fout << "imageSize != imageVirtEnd - oh.ImageBase!" << endl;
     	imageSize = imageVirtEnd - oh.ImageBase;
-   }
-   if(allocSections(reservedMem) == FALSE) {
+  }
+  if(allocSections(reservedMem) == FALSE) {
     	fout << "Failed to allocate image memory, rc " << errorState << endl;
     	goto failure;
-   }
-   fout << "OS/2 base address " << realBaseAddress << endl;
-   if(storeSections((char *)win32file) == FALSE) {
+  }
+  fout << "OS/2 base address " << realBaseAddress << endl;
+  if(storeSections((char *)win32file) == FALSE) {
     	fout << "Failed to store sections, rc " << errorState << endl;
     	goto failure;
-   }
-   if(oh.AddressOfEntryPoint) {
+  }
+  if(oh.AddressOfEntryPoint) {
   	entryPoint = realBaseAddress + oh.AddressOfEntryPoint;
-   }
-   else {
+  }
+  else {
 	fout << "EntryPoint == NULL" << endl; 
 	entryPoint = NULL;
-   }
+  }
 
+  if(loadType == REAL_LOAD) 
+  {
    if(tlsDir != NULL) {
     Section *sect = findSection(SECTION_TLS);
 
@@ -380,18 +392,17 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
 	    	goto failure;
     	}
    }
-
-   //SvL: Use pointer to image header as module handle now. Some apps needs this
-   hinstance = (HINSTANCE)realBaseAddress;
   }
+
+  //SvL: Use pointer to image header as module handle now. Some apps needs this
+  hinstance = (HINSTANCE)realBaseAddress;
 
   //PH: get pResDir pointer correct first, since processImports may
   //    implicitly call functions depending on it.
-  IMAGE_SECTION_HEADER sh;
   if(GetSectionHdrByName (win32file, &sh, ".rsrc")) {
     	//get offset in resource object of directory entry
 	pResDir = (PIMAGE_RESOURCE_DIRECTORY)(sh.VirtualAddress + realBaseAddress);
-        pResourceSectionStart = (ULONG)pResSection->virtaddr - oh.ImageBase;
+        pResourceSectionStart = sh.VirtualAddress;
   }
 
   if (loadType == REAL_LOAD) 
@@ -400,15 +411,16 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
     	fout << "Failed to process imports!" << endl;
      	goto failure;
    }
-
-   //set final memory protection flags (storeSections sets them to read/write)
-   if(setMemFlags() == FALSE) {
+  }
+ 
+  //set final memory protection flags (storeSections sets them to read/write)
+  if(setMemFlags() == FALSE) {
     	fout << "Failed to set memory protection" << endl;
     	goto failure;
-   }
-   CloseHandle(fImgMapping);
-   fImgMapping = 0;
   }
+  CloseHandle(fImgMapping);
+  fImgMapping = 0;
+
   return(TRUE);
 failure:
   if(fImgMapping) CloseHandle(fImgMapping);
@@ -427,9 +439,6 @@ void Win32PeLdrImage::addSection(ULONG type, char *rawdata, ULONG rawsize, ULONG
   section[nrsections].rawsize        = rawsize;
   section[nrsections].virtaddr       = virtaddress;
 
-  if(type == SECTION_RESOURCE) {
-    	pResSection = &section[nrsections];
-  }
   virtsize   = ((virtsize - 1) & ~0xFFF) + PAGE_SIZE;
   imageSize += virtsize;
   section[nrsections].virtualsize = virtsize;

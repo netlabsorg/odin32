@@ -26,7 +26,7 @@ ODINDEBUGCHANNEL(KERNEL32-LANG)
 //******************************************************************************
 BOOL WIN32API IsValidCodePage(UINT CodePage)
 {
-  dprintf(("KERNEL32:  IsValidCodePage not implemented\n"));
+  dprintf(("KERNEL32:  IsValidCodePage %d not implemented", CodePage));
   return(TRUE);
 }
 //******************************************************************************

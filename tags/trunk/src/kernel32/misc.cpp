@@ -1,4 +1,4 @@
-/* $Id: misc.cpp,v 1.13 1999-10-25 21:38:50 phaller Exp $ */
+/* $Id: misc.cpp,v 1.14 1999-11-11 19:10:09 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -251,7 +251,11 @@ int SYSTEM EXPORT WriteLog(char *tekst, ...)
   {
     init = TRUE;
 
+#ifdef DEFAULT_LOGGING_OFF
+    if(getenv("WIN32LOG_ENABLED")) {
+#else
     if(!getenv("NOWIN32LOG")) {
+#endif
 	char logname[CCHMAXPATH];
 
 	sprintf(logname, "odin32_%d.log", loadNr);
