@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.288 1999-10-08 18:40:34 sandervl Exp $ */
+ /* $Id: changelog,v 1.289 1999-10-08 19:34:24 dengert Exp $ */
+
+ 99-10-08: Daniela Engert <dani@ngrt.de>
+	- USER32: fix: miscoloured bitmaps
 
  99-10-08: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: added WM_STYLECHANGING/WM_STYLECHANGED.
@@ -9,43 +12,43 @@
 	- KERNEL32: Accelerator conversion fixes + changes
 
  99-10-08: Sander van Leeuwen <sandervl@xs4all.nl>
- 	- USER32: Bugfix for SetWindowPos; take frame size into account
-                  Removed WM_MOVE notification class flag for Odin PM windows
-                  Removed SetWindowPos frame size bugfix
-                  Removed WM_WINDOWPOSCHANGED cy bugfix
-                  Set WS_DISABLED window style bit when receiving PM WM_ENABLE
-                  GetClassInfoA bugfix
-                  Window property bugfixes (no handle translation)
-                  Set last error when window creation fails.
-        - KERNEL32: Bugfix for loading winspool
+	- USER32: Bugfix for SetWindowPos; take frame size into account
+		  Removed WM_MOVE notification class flag for Odin PM windows
+		  Removed SetWindowPos frame size bugfix
+		  Removed WM_WINDOWPOSCHANGED cy bugfix
+		  Set WS_DISABLED window style bit when receiving PM WM_ENABLE
+		  GetClassInfoA bugfix
+		  Window property bugfixes (no handle translation)
+		  Set last error when window creation fails.
+	- KERNEL32: Bugfix for loading winspool
 
  99-10-07: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: GetCaretPos() fix
 
  99-10-07: Achim Hasenmueller <achimha@innotek.de>
-        - USER32: Corrected pageup/pagedown behavior
+	- USER32: Corrected pageup/pagedown behavior
 
  99-10-07: Rene Pronk <R.Pronk@twi.tudelft.nl>
-        - USER32: Fixed WM_WINDOWPOSCHANGED behavior so that
-                  client windows are properly resized. This fixes
-                  the Winhlp32 history resize problem
+	- USER32: Fixed WM_WINDOWPOSCHANGED behavior so that
+		  client windows are properly resized. This fixes
+		  the Winhlp32 history resize problem
 
  99-10-07: Edgar Buerkle <Edgar.Buerkle@gmx.net>
 	- USER32: Set window PM id for Odin windows.
-                  Bugfix for WM_QUERYWINDOWPARAMS handler
-                  Case insensitive string compare in CreateWindowExA/W for
-                  mdi client class check.
-                  Create ascii or unicode mdi child window based on mdi client
-                  window type.
+		  Bugfix for WM_QUERYWINDOWPARAMS handler
+		  Case insensitive string compare in CreateWindowExA/W for
+		  mdi client class check.
+		  Create ascii or unicode mdi child window based on mdi client
+		  window type.
 
  99-10-07: Jens Wiessner <wiessnej@rfi.de>
-        - CRTDLL: Includes all functions (added stubs and fully implemented functions)
-         
+	- CRTDLL: Includes all functions (added stubs and fully implemented functions)
+
  99-10-07: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Only display scrollbars when they need to be shown.
-                  (also fixes redraw problems with inactive scrollbars)
-                  Resize bugfix. Winhlp32 can now be resized without problems.
-                  Whether this fix is correct is another matter.
+		  (also fixes redraw problems with inactive scrollbars)
+		  Resize bugfix. Winhlp32 can now be resized without problems.
+		  Whether this fix is correct is another matter.
 
  99-10-06: Daniela Engert <dani@ngrt.de>
 	- USER32: fix: adjust caret position if window height changes.
