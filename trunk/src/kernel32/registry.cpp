@@ -1,4 +1,4 @@
-/* $Id: registry.cpp,v 1.5 2000-10-18 17:09:33 sandervl Exp $ */
+/* $Id: registry.cpp,v 1.6 2000-10-21 14:30:47 sandervl Exp $ */
 
 /*
  * Win32 registry API functions for OS/2
@@ -29,8 +29,9 @@
 #include <misc.h>
 #include "unicode.h"
 #include <winreg.h>
+#include <heapstring.h>
 
-#define DBG_LOCALLOG	DBG_registry
+#define DBG_LOCALLOG    DBG_registry
 #include "dbglocal.h"
 
 
@@ -643,7 +644,7 @@ ODINFUNCTION5(LONG,RegOpenKeyExW,HKEY,   arg1,
   char *astring = UnicodeToAsciiString((LPWSTR)arg2);
   LONG  rc;
 
-  rc = CALL_ODINFUNC(RegOpenKeyExA)(ConvertKey(arg1),
+  rc = CALL_ODINFUNC(RegOpenKeyExA)(arg1,
                                     astring,
                                     arg3,
                                     arg4,
@@ -740,13 +741,13 @@ ODINFUNCTION12(LONG,RegQueryInfoKeyW,HKEY,       arg1,
                            arg12);
   if(rc == ERROR_SUCCESS)
   {
-	if(*arg3) {
-    		astring = (char *)malloc(*arg3);
-		strcpy(astring, (char *)arg2);
-    		AsciiToUnicode(astring, arg2);
-    		free(astring);
-	}
-	else	*arg2 = 0;
+    if(*arg3) {
+            astring = (char *)malloc(*arg3);
+        strcpy(astring, (char *)arg2);
+            AsciiToUnicode(astring, arg2);
+            free(astring);
+    }
+    else    *arg2 = 0;
   }
   return(rc);
 }
@@ -799,18 +800,18 @@ ODINFUNCTION4(LONG,RegQueryValueW,HKEY,   hkey,
   char *astring2;
   LONG  rc;
 
-  rc = CALL_ODINFUNC(RegQueryValueA)(ConvertKey(hkey),
+  rc = CALL_ODINFUNC(RegQueryValueA)(hkey,
                                      astring1,
                                      (char *)lpszValue,
                                      pcbValue);
   if(rc == ERROR_SUCCESS)
   {
-	if(pcbValue) {
-    		astring2 = (char *)malloc(*pcbValue);
-    		strcpy(astring2, (char *)lpszValue);
-    		AsciiToUnicode(astring2, lpszValue);
-    		free(astring2);
-	}
+    if(pcbValue) {
+            astring2 = (char *)malloc(*pcbValue);
+            strcpy(astring2, (char *)lpszValue);
+            AsciiToUnicode(astring2, lpszValue);
+            free(astring2);
+    }
   }
   FreeAsciiString(astring1);
   return(rc);
@@ -829,21 +830,21 @@ ODINFUNCTION4(LONG,RegQueryValueW,HKEY,   hkey,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION6(LONG,RegQueryValueExA,HKEY,   arg1,
-                                    LPSTR,  arg2,
-                                    LPDWORD,arg3,
-                                    LPDWORD,arg4,
-                                    LPBYTE, arg5,
-                                    LPDWORD,arg6)
+ODINFUNCTION6(LONG,RegQueryValueExA,HKEY,   hkey,
+                                    LPSTR,  lpszValueName,
+                                    LPDWORD,lpdwType,
+                                    LPDWORD,lpdwReserved,
+                                    LPBYTE, lpbData,
+                                    LPDWORD,lpcbData)
 {
-  dprintf(("ADVAPI32:Registry key=%s", arg2));
+  dprintf(("ADVAPI32:Registry key=%s", lpszValueName));
 
-  return O32_RegQueryValueEx(ConvertKey(arg1),
-                             arg2,
-                             arg3,
-                             arg4,
-                             arg5,
-                             arg6);
+  return O32_RegQueryValueEx(ConvertKey(hkey),
+                             lpszValueName,
+                             lpdwType,
+                             lpdwReserved,
+                             lpbData,
+                             lpcbData);
 }
 
 
@@ -859,23 +860,56 @@ ODINFUNCTION6(LONG,RegQueryValueExA,HKEY,   arg1,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION6(LONG,RegQueryValueExW,HKEY,   arg1,
-                                    LPWSTR, arg2,
-                                    LPDWORD,arg3,
-                                    LPDWORD,arg4,
-                                    LPBYTE, arg5,
-                                    LPDWORD,arg6)
+ODINFUNCTION6(LONG,RegQueryValueExW,HKEY,   hkey,
+                                    LPWSTR, lpszValueName,
+                                    LPDWORD,lpdwType,
+                                    LPDWORD,lpdwReserved,
+                                    LPBYTE, lpbData,
+                                    LPDWORD,lpcbData)
 {
-  char *astring = UnicodeToAsciiString(arg2);
+  char *astring = UnicodeToAsciiString(lpszValueName);
+  char *akeydata = NULL;
   LONG  rc;
 
-  rc = CALL_ODINFUNC(RegQueryValueExA)(ConvertKey(arg1),
+  if(lpbData && lpcbData)
+  {
+    akeydata = (char *)malloc(*lpcbData+1);
+    akeydata[*lpcbData] = 0;
+  }
+
+  rc = CALL_ODINFUNC(RegQueryValueExA)(hkey,
                                        astring,
-                                       arg3,
-                                       arg4,
-                                       arg5,
-                                       arg6);
+                                       lpdwType,
+                                       lpdwReserved,
+                                       (LPBYTE)akeydata,
+                                       lpcbData);
+  //could also query key type (without returning data), call it again and only allocate translation
+  //buffer if string type
+  if(rc == ERROR_SUCCESS && lpbData && lpcbData)
+  {
+    if(lpdwType == NULL) {//NULL apparently means REG_SZ
+        lstrcpyAtoW((LPWSTR)lpcbData, akeydata);
+    }
+    else {
+        switch(*lpdwType) {
+        case REG_SZ:
+        case REG_EXPAND_SZ:
+            lstrcpyAtoW((LPWSTR)lpcbData, akeydata);
+            break;
+        case REG_MULTI_SZ:
+        case REG_LINK: //???
+            dprintf(("ERROR: key data must be translated from Unicode to Ascii!!"));
+            break;
+        default:
+            memcpy(lpbData, akeydata, *lpcbData);
+            break;
+        }
+    }
+  }
   FreeAsciiString(astring);
+  if(akeydata) {
+    free(akeydata);
+  }
   return(rc);
 }
 
@@ -909,11 +943,11 @@ ODINFUNCTION5(LONG,RegSetValueA,HKEY,  hkey,
                          dwType,
                          lpData,
                          cbData);
-  if(rc == ERROR_NOT_ENOUGH_MEMORY && cbData == 0 && dwType == REG_SZ) 
+  if(rc == ERROR_NOT_ENOUGH_MEMORY && cbData == 0 && dwType == REG_SZ)
   {
     char regdata = 0;
-	//SvL: Netscape sets an empty string key this way; Open32 doesn't like it
-	rc = O32_RegSetValue(ConvertKey(hkey),
+    //SvL: Netscape sets an empty string key this way; Open32 doesn't like it
+    rc = O32_RegSetValue(ConvertKey(hkey),
                          lpSubKey,
                          dwType,
                          &regdata,
@@ -945,15 +979,11 @@ ODINFUNCTION5(LONG,RegSetValueW,HKEY,   hkey,
   char *astring2 = UnicodeToAsciiString((LPWSTR)lpData);
   LONG  rc;
 
-  //SvL: 8-11-'97: Bugfix: crash in pmwinx if size == 0 and string is large
-  if(cbData == 0)
-    cbData = strlen(astring2);
-
-  rc = O32_RegSetValue(ConvertKey(hkey),
-                       astring1,
-                       dwType,
-                       astring2,
-                       cbData);
+  rc = CALL_ODINFUNC(RegSetValueA)(hkey,
+                                   astring1,
+                                   dwType,
+                                   astring2,
+                                   cbData);
 
   FreeAsciiString(astring1);
   FreeAsciiString(astring2);
@@ -973,19 +1003,38 @@ ODINFUNCTION5(LONG,RegSetValueW,HKEY,   hkey,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION6(LONG,RegSetValueExA,HKEY,  arg1,
-                                  LPSTR, arg2,
-                                  DWORD, arg3,
-                                  DWORD, arg4,
-                                  BYTE*, arg5,
-                                  DWORD, arg6)
+ODINFUNCTION6(LONG,RegSetValueExA,HKEY,  hkey,
+                                  LPSTR, lpszValueName,
+                                  DWORD, dwReserved,
+                                  DWORD, fdwType,
+                                  BYTE*, lpbData,
+                                  DWORD, cbData)
 {
-  return O32_RegSetValueEx(ConvertKey(arg1),
-                           arg2,
-                           arg3,
-                           arg4,
-                           arg5,
-                           arg6);
+  if(fdwType == REG_SZ) {
+    dprintf(("ADVAPI32: RegSetValueExA)%08xh,%s,%08xh,%08xh,%s,%08xh)",
+               hkey,
+               lpszValueName,
+               dwReserved,
+               fdwType,
+               lpbData,
+               cbData));
+  }
+  else {
+    dprintf(("ADVAPI32: RegSetValueExA)%08xh,%s,%08xh,%08xh,%08xh,%08xh)",
+               hkey,
+               lpszValueName,
+               dwReserved,
+               fdwType,
+               lpbData,
+               cbData));
+  }
+
+  return O32_RegSetValueEx(ConvertKey(hkey),
+                           lpszValueName,
+                           dwReserved,
+                           fdwType,
+                           lpbData,
+                           cbData);
 }
 
 
@@ -1001,30 +1050,37 @@ ODINFUNCTION6(LONG,RegSetValueExA,HKEY,  arg1,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION6(LONG,RegSetValueExW,HKEY,  arg1,
-                                   LPWSTR,arg2,
-                                   DWORD, arg3,
-                                   DWORD, arg4,
-                                   BYTE*, arg5,
-                                   DWORD, arg6)
+ODINFUNCTION6(LONG,RegSetValueExW,HKEY,  hkey,
+                                  LPWSTR,lpszValueName,
+                                  DWORD, dwReserved,
+                                  DWORD, fdwType,
+                                  BYTE*, lpbData,
+                                  DWORD, cbData)
 {
-  char *astring = UnicodeToAsciiString(arg2);
+  char *astring = UnicodeToAsciiString(lpszValueName);
+  char *akeydata = NULL;
   LONG  rc;
 
-  dprintf(("ADVAPI32: RegSetValueExW(%08xh,%s,%08xh,%08xh,%08xh,%08xh)\n",
-           arg1,
-           astring,
-           arg3,
-           arg4,
-           arg5,
-           arg6));
+  switch(fdwType) {
+  case REG_SZ:
+  case REG_EXPAND_SZ:
+        akeydata = UnicodeToAsciiString((LPWSTR)lpbData);
+        lpbData = (BYTE *)akeydata;
+        break;
+  case REG_MULTI_SZ:
+  case REG_LINK: //???
+        dprintf(("ERROR: key data must be translated from Unicode to Ascii!!"));
+        break;
+  }
+  rc = CALL_ODINFUNC(RegSetValueExA)(hkey,
+                                     astring,
+                                     dwReserved,
+                                     fdwType,
+                                     lpbData,
+                                     cbData);
+  if(akeydata)
+    FreeAsciiString(akeydata);
 
-  rc = O32_RegSetValueEx(ConvertKey(arg1),
-                         astring,
-                         arg3,
-                         arg4,
-                         arg5,
-                         arg6);
   FreeAsciiString(astring);
   return(rc);
 }

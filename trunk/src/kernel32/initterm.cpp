@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.48 2000-10-10 17:14:04 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.49 2000-10-21 14:30:47 sandervl Exp $ */
 
 /*
  * KERNEL32 DLL entry point
@@ -182,6 +182,10 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
             InitSystemInfo(ulSysinfo);
             //Set up environment as found in NT
             InitEnvironment(ulSysinfo);
+
+            //InitDynamicRegistry creates/changes keys that may change (i.e. odin.ini
+            //keys that affect windows version)
+            InitDynamicRegistry();
             break;
         }
 
