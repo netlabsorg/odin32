@@ -1,4 +1,12 @@
-/* $Id: changelog,v 1.2065 2002-05-07 16:15:07 sandervl Exp $ */
+/* $Id: changelog,v 1.2066 2002-05-08 11:27:07 sandervl Exp $ */
+
+ 2002-05-08: Sander van Leeuwen <sandervl@xs4all.nl>
+    - COMCTL32: o Merged progress, updown, rebar, animate, comboex, flatsb,
+                  toolbar, tab, pager, nativefont, imagelist code
+                o Updated license (LGPL) for comctl32
+
+ 2002-05-08: Platon Fomichev <platon@innotek.de>
+    - COMCTL32: o Merged listview control with latest Wine
 
  2002-05-07: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o WH_MOUSE_LL hook fixes
