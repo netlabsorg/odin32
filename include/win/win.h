@@ -1,5 +1,3 @@
-/* $Id: win.h,v 1.3 2000-10-09 17:31:04 sandervl Exp $ */
-
 /*
  * Window definitions
  *
@@ -78,36 +76,21 @@ struct tagWND_DRIVER;
 
 typedef struct tagWND
 {
-    struct tagWND *next;          /* Next sibling */
-    struct tagWND *child;         /* First child */
-    struct tagWND *parent;        /* Window parent (from CreateWindow) */
-    struct tagWND *owner;         /* Window owner */
-    struct tagCLASS *Class;       /* Window class */
-    HWINDOWPROC    winproc;       /* Window procedure */
-    DWORD          dwMagic;       /* Magic number (must be WND_MAGIC) */
-    HWND         hwndSelf;      /* Handle of this window */
-    HINSTANCE    hInstance;     /* Window hInstance (from CreateWindow) */
-    RECT         rectClient;    /* Client area rel. to parent client area */
-    RECT         rectWindow;    /* Whole window rel. to parent client area */
-    LPSTR          text;          /* Window text */
-    void          *pVScroll;      /* Vertical scroll-bar info */
-    void          *pHScroll;      /* Horizontal scroll-bar info */
-    void          *pProp;         /* Pointer to properties list */
-    struct tagDCE *dce;           /* Window DCE (if CS_OWNDC or CS_CLASSDC) */
-    HGLOBAL16      hmemTaskQ;     /* Task queue global memory handle */
-    HRGN16         hrgnUpdate;    /* Update region */
-    HWND         hwndLastActive;/* Last active popup hwnd */
+    struct tagWND *parent;
+    struct tagWND *child;
+    struct tagWND *next;
+    struct tagWND *owner;
+    HWND           hwndSelf;      /* Handle of this window */
+    HINSTANCE      hInstance;     /* Window hInstance (from CreateWindow) */
     DWORD          dwStyle;       /* Window style (from CreateWindow) */
     DWORD          dwExStyle;     /* Extended style (from CreateWindowEx) */
-    UINT         wIDmenu;       /* ID or hmenu (from CreateWindow) */
-    DWORD          helpContext;   /* Help context ID */
-    WORD           flags;         /* Misc. flags (see below) */
-    HMENU16        hSysMenu;      /* window's copy of System Menu */
-    int            irefCount;     /* window's reference count*/
-    DWORD          userdata;      /* User private data */
-    struct tagWND_DRIVER *pDriver;  /* Window driver */
-    void          *pDriverData;   /* Window driver data */
-    DWORD          wExtra[1];     /* Window extra bytes */
+    UINT           wIDmenu;       /* ID or hmenu (from CreateWindow) */
+    HMENU          hSysMenu;      /* window's copy of System Menu */
+    RECT           rectClient;
+    RECT           rectWindow;
+    LPWSTR         text;           /* Window text */
+    DWORD          cbWndExtra;
+    DWORD          wExtra[1];
 } WND;
 
 /* Host attributes */
