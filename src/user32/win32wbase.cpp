@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.265 2001-06-12 17:02:41 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.266 2001-06-13 10:29:46 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1238,7 +1238,7 @@ ULONG Win32BaseWindow::MsgFormatFrame(WINDOWPOS *lpWndPos)
       rectOS2.xRight  = rect.right;
       rectOS2.yBottom = height - rect.top;
       rectOS2.yTop    = height - rect.bottom;
-      OSLibWinPositionFrameControls(getOS2FrameWindowHandle(), &rectOS2);
+      OSLibWinPositionFrameControls(getOS2FrameWindowHandle(), &rectOS2, dwStyle, dwExStyle, IconForWindow(ICON_SMALL));
   }
   return rc;
 }
