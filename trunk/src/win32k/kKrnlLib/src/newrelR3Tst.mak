@@ -1,11 +1,11 @@
-# $Id: newrelR3Tst.mak,v 1.3 2002-08-20 04:38:00 bird Exp $
+# $Id: newrelR3Tst.mak,v 1.4 2002-08-20 05:04:43 bird Exp $
 
 #
 # newrelR3Tst - separate make file for the release new (R3Tst build).
 #
 # Copyright (c) 1998-2002 knut st. osmundsen (bird@anduin.net)
 #
-# Project Odin Software License can be found in LICENSE.TXT
+# GPL
 #
 
 
@@ -14,11 +14,11 @@
 #
 ALL_INCLUDES= -I../include -I../kLib/include
 ALL_DEFINES = -DKKRNLLIB -DR3TST
+!if "$(BUILD_ENV)" == "VAC308" || "$(BUILD_ENV)" == "VAC365"
+ALL_NO_DBGMEM = 1
+!endif
 PATH_ROOT   = ..\..\..\..
 !include $(PATH_ROOT)\make\setup.mak
-!if "$(BUILD_ENV)" == "VAC308" || "$(BUILD_ENV)" == "VAC365"
-CXX_FLAGS_SYS = $(CXX_FLAGS_SYS) -Tm-
-!endif
 
 
 #

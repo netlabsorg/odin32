@@ -1,8 +1,11 @@
-# $Id: srcR3Tst.mak,v 1.4 2002-08-20 04:38:00 bird Exp $
+# $Id: srcR3Tst.mak,v 1.5 2002-08-20 05:04:43 bird Exp $
 
 #
 # kKrnlLib/srcR3Tst makefile.
 #
+# Copyright (c) 1998-2002 knut st. osmundsen (bird@anduin.net)
+#
+# GPL
 #
 
 #
