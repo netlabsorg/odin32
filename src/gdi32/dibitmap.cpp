@@ -1,4 +1,4 @@
-/* $Id: dibitmap.cpp,v 1.26 2001-08-26 14:22:44 sandervl Exp $ */
+/* $Id: dibitmap.cpp,v 1.27 2001-08-28 18:58:57 sandervl Exp $ */
 
 /*
  * GDI32 dib & bitmap code
@@ -47,7 +47,31 @@ HBITMAP WIN32API CreateDIBitmap(HDC hdc, const BITMAPINFOHEADER *lpbmih,
     if(lpbmih->biHeight < 0)
     {
         dprintf(("GDI32: CreateDIBitmap negative height! (%d,%d)", lpbmih->biWidth, lpbmih->biHeight));
+        //TODO: doesn't work if memory is readonly!!
         ((BITMAPINFOHEADER *)lpbmih)->biHeight = -lpbmih->biHeight;
+
+        if(lpbInit && fdwInit == CBM_INIT) {
+            // upside down
+            HBITMAP rc = 0;
+            long lLineByte = DIB_GetDIBWidthBytes(lpbmih->biWidth, lpbmih->biBitCount);
+            long lHeight   = lpbmih->biHeight;
+    
+            newbits = (WORD *)malloc( lLineByte * lHeight );
+            if(newbits) {
+                unsigned char *pbSrc = (unsigned char *)lpbInit + lLineByte * (lHeight - 1);
+                unsigned char *pbDst = (unsigned char *)newbits;
+                for(int y = 0; y < lHeight; y++) {
+                    memcpy( pbDst, pbSrc, lLineByte );
+                    pbDst += lLineByte;
+                    pbSrc -= lLineByte;
+                }
+                rc = CreateDIBitmap(hdc, lpbmih, fdwInit, newbits, lpbmi, fuUsage);
+		free( newbits );
+            }
+
+            ((BITMAPINFOHEADER *)lpbmih)->biHeight = iHeight;
+            return rc;
+	}
     }
 
     // 2000/09/01 PH Netscape 4.7
