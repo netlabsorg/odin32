@@ -1,4 +1,4 @@
-/* $Id: hmdevio.cpp,v 1.24 2001-12-14 12:44:56 sandervl Exp $ */
+/* $Id: hmdevio.cpp,v 1.25 2002-01-09 16:13:17 sandervl Exp $ */
 
 /*
  * Win32 Device IOCTL API functions for OS/2
@@ -431,7 +431,7 @@ DWORD HMCustomDriver::CreateFile (LPCSTR lpFileName,
                                   PVOID         lpSecurityAttributes,
                                   PHMHANDLEDATA pHMHandleDataTemplate)
 {
-   pHMHandleData->hHMHandle = pfnDriverOpen(pHMHandleData->dwAccess, pHMHandleData->dwShare, pHMHandleData->dwFlags);
+   pHMHandleData->hHMHandle = pfnDriverOpen(pHMHandleData->dwAccess, pHMHandleData->dwShare, pHMHandleData->dwFlags, (PVOID *)&pHMHandleData->dwUserData);
    if(pHMHandleData->hHMHandle == INVALID_HANDLE_VALUE_W) {
        return GetLastError();
    }
@@ -442,7 +442,7 @@ DWORD HMCustomDriver::CreateFile (LPCSTR lpFileName,
 BOOL HMCustomDriver::CloseHandle(PHMHANDLEDATA pHMHandleData)
 {
    if(pHMHandleData->hHMHandle) {
-	pfnDriverClose(pHMHandleData->hHMHandle, pHMHandleData->dwFlags);
+	pfnDriverClose(pHMHandleData->hHMHandle, pHMHandleData->dwFlags, (PVOID)pHMHandleData->dwUserData);
    }
    pHMHandleData->hHMHandle = 0;
    return TRUE;
@@ -463,7 +463,7 @@ BOOL HMCustomDriver::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoCont
    }
 
    ret = pfnDriverIOCtl(pHMHandleData->hHMHandle, pHMHandleData->dwFlags, dwIoControlCode, lpInBuffer, nInBufferSize,
-                        lpOutBuffer, nOutBufferSize, lpBytesReturned, lpOverlapped);
+                        lpOutBuffer, nOutBufferSize, lpBytesReturned, lpOverlapped, (PVOID)pHMHandleData->dwUserData);
    dprintf(("DeviceIoControl %x returned %d", dwIoControlCode, ret));
    return ret;
 }
@@ -499,7 +499,8 @@ BOOL HMCustomDriver::ReadFile(PHMHANDLEDATA pHMHandleData,
        return FALSE;
    }
    ret = pfnDriverRead(pHMHandleData->hHMHandle, pHMHandleData->dwFlags, lpBuffer, nNumberOfBytesToRead,
-                      lpNumberOfBytesRead, lpOverlapped, lpCompletionRoutine);
+                      lpNumberOfBytesRead, lpOverlapped, lpCompletionRoutine,
+                      (PVOID)pHMHandleData->dwUserData);
    dprintf(("pfnDriverRead %x %x %x %x %x %x returned %x", pHMHandleData->hHMHandle, lpBuffer, nNumberOfBytesToRead,
              lpNumberOfBytesRead, lpOverlapped, lpCompletionRoutine, ret));
    return ret;
@@ -536,7 +537,8 @@ BOOL HMCustomDriver::WriteFile(PHMHANDLEDATA pHMHandleData,
        return FALSE;
    }
    ret = pfnDriverWrite(pHMHandleData->hHMHandle, pHMHandleData->dwFlags, lpBuffer, nNumberOfBytesToWrite,
-                        lpNumberOfBytesWritten, lpOverlapped, lpCompletionRoutine);
+                        lpNumberOfBytesWritten, lpOverlapped, lpCompletionRoutine,
+                        (PVOID)pHMHandleData->dwUserData);
    dprintf(("pfnDriverWrite %x %x %x %x %x %x returned %x", pHMHandleData->hHMHandle, lpBuffer, nNumberOfBytesToWrite,
             lpNumberOfBytesWritten, lpOverlapped, lpCompletionRoutine, ret));
    return ret;
@@ -560,7 +562,7 @@ BOOL HMCustomDriver::CancelIo(PHMHANDLEDATA pHMHandleData)
        ::SetLastError(ERROR_INVALID_FUNCTION_W);
        return FALSE;
    }
-   ret = pfnDriverCancelIo(pHMHandleData->hHMHandle, pHMHandleData->dwFlags);
+   ret = pfnDriverCancelIo(pHMHandleData->hHMHandle, pHMHandleData->dwFlags, (PVOID)pHMHandleData->dwUserData);
    dprintf(("pfnDriverCancelIo %x returned %x", pHMHandleData->hHMHandle, ret));
    return ret;
 }
@@ -599,7 +601,8 @@ BOOL HMCustomDriver::GetOverlappedResult(PHMHANDLEDATA pHMHandleData,
         ::SetLastError(ERROR_INVALID_FUNCTION_W);
         return FALSE;
     }
-    return pfnDriverGetOverlappedResult(pHMHandleData->hHMHandle, pHMHandleData->dwFlags, lpOverlapped, lpcbTransfer, fWait);
+    return pfnDriverGetOverlappedResult(pHMHandleData->hHMHandle, pHMHandleData->dwFlags, 
+                                        lpOverlapped, lpcbTransfer, fWait, (PVOID)pHMHandleData->dwUserData);
 }
 //******************************************************************************
 //******************************************************************************
