@@ -1,4 +1,4 @@
-# $Id: setup.mak,v 1.9 2002-05-16 11:37:00 bird Exp $
+# $Id: setup.mak,v 1.10 2002-06-19 02:16:41 bird Exp $
 
 #
 # Generic makefile system.
@@ -153,6 +153,20 @@ PATH_HLP    = $(PATH_ROOT)\bin\$(BUILD_MODE)
 !error fatal error: PATH_ROOT empty or undefined.
 !endif
 
+#
+# A workaround for SlickEdits inability to find the buggy files..
+# This fixes the relative paths of includes.
+# Set the make line to:
+#   '%v && cd %p && nmake PATH_ROOT_ABS=%rp. %n.obj -a'
+# (NB! Set the project directory to the root dir by creating the project there!)
+#
+!ifdef SLKRUNS
+! ifdef PATH_ROOT_ABS
+PATH_ROOT = $(PATH_ROOT_ABS)
+! endif
+!endif
+
+
 
 # -----------------------------------------------------------------------------
 # Common variables / Project variables
@@ -179,7 +193,11 @@ MAKE_INCLUDE_PROCESS    = $(PATH_MAKE)\process.mak
 
 MAKE_INCLUDE_SETUP = $(PATH_MAKE)\setup.$(SHT_TRGPLTFRM)$(SHT_BLDMD)$(SHT_BLDENV).mk
 !ifndef BUILD_QUIET
-! if [$(ECHO) Including platform setup file $(CLRFIL)$(MAKE_INCLUDE_SETUP)$(CLRRST)]
+! ifndef MAKEVER
+!  if [$(ECHO) Including platform setup file $(CLRFIL)$(MAKE_INCLUDE_SETUP)$(CLRRST)]
+!  endif
+! else
+$(ECHO) Including platform setup file $(CLRFIL)$(MAKE_INCLUDE_SETUP)$(CLRRST)
 ! endif
 !endif
 !include $(MAKE_INCLUDE_SETUP)
@@ -259,7 +277,11 @@ MAKE_INCLUDE_PROCESS = $(PATH_MAKE)\process.forwarder.mak
 ! if "$(BUILD_ENV)" != "$(BUILD_ENV_FORCE)"
 MAKE_INCLUDE_SETUP_FORCE = $(PATH_MAKE)\setup.$(SHT_TRGPLTFRM)$(SHT_BLDMD)$(SHT_BLDENVFRC).mk
 !  ifndef BUILD_QUIET
-!   if [$(ECHO) Including forced platform setup file $(CLRFIL)$(MAKE_INCLUDE_SETUP_FORCE)$(CLRRST)]
+!   ifndef MAKEVER
+!    if [$(ECHO) Including forced platform setup file $(CLRFIL)$(MAKE_INCLUDE_SETUP_FORCE)$(CLRRST)]
+!    endif
+!   else
+$(ECHO) Including forced platform setup file $(CLRFIL)$(MAKE_INCLUDE_SETUP_FORCE)$(CLRRST)
 !   endif
 !  endif
 !  include $(MAKE_INCLUDE_SETUP_FORCE)
@@ -280,4 +302,3 @@ BUILD_ENVS_CHANGE = $(BUILD_ENVS_BASE_PRE) $(BUILD_ENVS_PRE) $(ENV_ENVS) $(BUILD
 
 
 !endif # MAKE_SETUP_INCLUDED
-

@@ -1,4 +1,4 @@
-# $Id: setup.tools.mk,v 1.8 2002-05-16 11:37:05 bird Exp $
+# $Id: setup.tools.mk,v 1.9 2002-06-19 02:16:48 bird Exp $
 
 
 #
@@ -24,7 +24,12 @@ CLRRST=
 #
 # Standard tools - may be overridden by compiler specific setupfiles.
 #
+TOOL_ECHO       = @echo $(CLRTXT)
+!ifdef MAKEVER
+ECHO            = %echo $(CLRTXT)
+!else
 ECHO            = $(TOOL_ECHO)
+!endif
 TOOL_BLDLEVEL   = $(PATH_TOOLS)\BldLevelInf.cmd
 TOOL_BUILDENV   = $(PATH_TOOLS)\BuildEnv.cmd
 TOOL_CMP        = $(PATH_TOOLS)\cmp.exe
@@ -42,7 +47,6 @@ TOOL_DLLRNAME   = dllrname /q
 TOOL_DODIRS     = $(PATH_TOOLS)\dodirs.cmd
 TOOL_DOMAKES    = $(PATH_TOOLS)\domakes.cmd
 TOOL_DOWITHDIRS = $(PATH_TOOLS)\dowithdirs.cmd
-TOOL_ECHO       = @echo $(CLRTXT)
 TOOL_EXISTS     = $(PATH_TOOLS)\Exists.cmd
 !if "$(BUILD_MULTIJOBS)" != ""
 TOOL_JOB_SUB    = $(TOOL_CMDQD) submit
@@ -55,6 +59,7 @@ TOOL_JOB_SUB_MSG= (submitting job)
 TOOL_MAKE       = $(MAKE:.exe=).exe -nologo
 TOOL_MAPSYM     = $(PATH_TOOLS)\MapSym.cmd $(BUILD_ENV)
 TOOL_RM         = rm.exe -f
+TOOL_RMDIR      = rmdir
 TOOL_TYPE       = type
 
 
