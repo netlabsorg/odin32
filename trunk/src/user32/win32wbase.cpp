@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.313 2002-02-05 17:59:00 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.314 2002-02-12 18:07:20 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -278,9 +278,22 @@ Win32BaseWindow::~Win32BaseWindow()
         //parent window was also destroyed, then we 
         if(getParent()->IsWindowDestroyed())
         {
+            Win32BaseWindow *wndparent = (Win32BaseWindow *)ChildWindow::getParentOfChild();
+            RELEASE_WNDOBJ(wndparent);
             setParent(NULL);  //or else we'll crash in the dtor of the ChildWindow class
         }
     }
+    else 
+    {
+        Win32BaseWindow *wndparent = (Win32BaseWindow *)ChildWindow::getParentOfChild();
+        if(wndparent && !fDestroyAll) {
+            RELEASE_WNDOBJ(wndparent);
+        }
+    }
+    if(owner && !fDestroyAll) {
+        RELEASE_WNDOBJ(owner);
+    }
+
     /* Decrement class window counter */
     if(windowClass) {
         RELEASE_CLASSOBJ(windowClass);
@@ -313,13 +326,6 @@ Win32BaseWindow::~Win32BaseWindow()
     }
     if(propertyList) {
         removeWindowProps();
-    }
-    Win32BaseWindow *wndparent = (Win32BaseWindow *)ChildWindow::getParentOfChild();
-    if(wndparent && !fDestroyAll) {
-        RELEASE_WNDOBJ(wndparent);
-    }
-    if(owner && !fDestroyAll) {
-        RELEASE_WNDOBJ(owner);
     }
 }
 //******************************************************************************
@@ -956,7 +962,7 @@ ULONG Win32BaseWindow::MsgDestroy()
     }
     else {
         //make sure no message can ever arrive for this window again (PM or from other win32 windows)
-        dprintf(("Mark window %x (%x) as deleted", getWindowHandle(), this));
+        dprintf(("Mark window %x (%x) as deleted; refcount %d", getWindowHandle(), this, getRefCount()));
         markDeleted();
         OSLibWinSetWindowULong(OS2Hwnd, OFFSET_WIN32WNDPTR, 0);
         OSLibWinSetWindowULong(OS2Hwnd, OFFSET_WIN32PM_MAGIC, 0);

@@ -1,4 +1,4 @@
-/* $Id: windlg.cpp,v 1.29 2001-11-30 18:45:51 sandervl Exp $ */
+/* $Id: windlg.cpp,v 1.30 2002-02-12 18:07:21 sandervl Exp $ */
 /*
  * Win32 dialog apis for OS/2
  *
@@ -442,6 +442,7 @@ HWND WIN32API GetDlgItem(HWND hwnd, int id)
 int WIN32API GetDlgCtrlID(HWND hwnd)
 {
   Win32BaseWindow *dlgcontrol;
+  int              ret;
 
     dlgcontrol = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!dlgcontrol) {
@@ -450,13 +451,16 @@ int WIN32API GetDlgCtrlID(HWND hwnd)
         return 0;
     }
     dprintf(("USER32: GetDlgCtrlID %x", hwnd));
-    return dlgcontrol->getWindowId();
+    ret = dlgcontrol->getWindowId();
+    RELEASE_WNDOBJ(dlgcontrol);
+    return ret;
 }
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API EndDialog(HWND hwnd, int retval)
 {
   Win32Dialog *dialog;
+  BOOL         ret;
 
     dialog = (Win32Dialog *)Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!dialog || !dialog->IsDialog()) {
@@ -464,8 +468,9 @@ BOOL WIN32API EndDialog(HWND hwnd, int retval)
         SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
-    dprintf(("USER32: EndDialog %x %d", hwnd, retval));
-    return dialog->endDialog(retval);
+    ret = dialog->endDialog(retval);
+    RELEASE_WNDOBJ(dialog);
+    return ret;
 }
 //******************************************************************************
 //******************************************************************************
