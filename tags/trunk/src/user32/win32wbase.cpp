@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.159 2000-02-08 10:30:03 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.160 2000-02-09 13:42:38 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1729,6 +1729,7 @@ LRESULT Win32BaseWindow::SendMessageA(ULONG Msg, WPARAM wParam, LPARAM lParam)
         return SendInternalMessageA(Msg, wParam, lParam);
     }
     //otherwise use WinSendMsg to send it to the right process/thread
+    dprintf(("SendMessages (inter-process) %x %x %x %x", getWindowHandle(), Msg, wParam, lParam));
     return OSLibSendMessage(getOS2WindowHandle(), Msg, wParam, lParam, FALSE);
 }
 //******************************************************************************
