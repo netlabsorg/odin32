@@ -1,4 +1,4 @@
-/* $Id: kdev.e,v 1.5 2003-05-31 20:10:11 bird Exp $
+/* $Id: kdev.e,v 1.6 2003-05-31 20:11:21 bird Exp $
  *
  * Visual SlickEdit Documentation Macros.
  *
@@ -1188,7 +1188,7 @@ void k_javadoc_moduleheader()
 
     if (skLicense == 'Confidential')
     {
-        k_javadoc_box_line(skCompany 'confidential');
+        k_javadoc_box_line(skCompany ' confidential');
         k_javadoc_box_line();
     }
 
