@@ -1,4 +1,4 @@
-/* $Id: shell32_main.c,v 1.9 2003-10-16 10:30:54 sandervl Exp $ */
+/* $Id: shell32_main.c,v 1.10 2005-01-23 18:11:03 sao2l02 Exp $ */
 /*
  * 				Shell basics
  *
@@ -207,7 +207,7 @@ DWORD WINAPI SHGetFileInfoA(LPCSTR path,DWORD dwFileAttributes,
                               SHFILEINFOA *psfi, UINT sizeofpsfi,
                               UINT flags )
 {
-	char szLoaction[MAX_PATH];
+	char szLocation[MAX_PATH];
 	int iIndex;
 	DWORD ret = TRUE, dwAttributes = 0;
 	IShellFolder * psfParent = NULL;
@@ -217,15 +217,17 @@ DWORD WINAPI SHGetFileInfoA(LPCSTR path,DWORD dwFileAttributes,
 	BOOL IconNotYetLoaded=TRUE;
 
 	TRACE("(%s fattr=0x%lx sfi=%p(attr=0x%08lx) size=0x%x flags=0x%x)\n", 
-	  (flags & SHGFI_PIDL)? "pidl" : path, dwFileAttributes, psfi, psfi->dwAttributes, sizeofpsfi, flags);
+	  (flags & SHGFI_PIDL)? "pidl" : debugstr_a(path), dwFileAttributes, psfi, psfi->dwAttributes, sizeofpsfi, flags);
 
 	if ((flags & SHGFI_USEFILEATTRIBUTES) && (flags & (SHGFI_ATTRIBUTES|SHGFI_EXETYPE|SHGFI_PIDL)))
 	  return FALSE;
-	
+
 	/* windows initializes this values regardless of the flags */
-	psfi->szDisplayName[0] = '\0';
-	psfi->szTypeName[0] = '\0';
-	psfi->iIcon = 0;
+        if (psfi != NULL) {
+	    psfi->szDisplayName[0] = '\0';
+	    psfi->szTypeName[0] = '\0';
+	    psfi->iIcon = 0;
+        }
 
 	if (flags & SHGFI_EXETYPE) {
 	  BOOL status = FALSE;
@@ -254,14 +256,14 @@ DWORD WINAPI SHGetFileInfoA(LPCSTR path,DWORD dwFileAttributes,
 	 * Seek to the start of the file and read the header information.
 	 */
 
-	  SetFilePointer( hfile, 0, NULL, SEEK_SET );  
+	  SetFilePointer( hfile, 0, NULL, SEEK_SET );
 	  ReadFile( hfile, &mz_header, sizeof(mz_header), &len, NULL );
 
          SetFilePointer( hfile, mz_header.e_lfanew, NULL, SEEK_SET );
          ReadFile( hfile, magic, sizeof(magic), &len, NULL );
          if ( *(DWORD*)magic      == IMAGE_NT_SIGNATURE )
          {
-             SetFilePointer( hfile, mz_header.e_lfanew, NULL, SEEK_SET ); 
+             SetFilePointer( hfile, mz_header.e_lfanew, NULL, SEEK_SET );
              ReadFile( hfile, &nt, sizeof(nt), &len, NULL );
 	      CloseHandle( hfile );
 	      if (nt.OptionalHeader.Subsystem == IMAGE_SUBSYSTEM_WINDOWS_GUI) {
@@ -274,7 +276,7 @@ DWORD WINAPI SHGetFileInfoA(LPCSTR path,DWORD dwFileAttributes,
          else if ( *(WORD*)magic == IMAGE_OS2_SIGNATURE )
          {
              IMAGE_OS2_HEADER ne;
-             SetFilePointer( hfile, mz_header.e_lfanew, NULL, SEEK_SET ); 
+             SetFilePointer( hfile, mz_header.e_lfanew, NULL, SEEK_SET );
              ReadFile( hfile, &ne, sizeof(ne), &len, NULL );
 	      CloseHandle( hfile );
              if (ne.ne_exetyp == 2) return IMAGE_OS2_SIGNATURE
@@ -285,9 +287,13 @@ DWORD WINAPI SHGetFileInfoA(LPCSTR path,DWORD dwFileAttributes,
 	  return 0;
       }
 
-	
-	/* translate the path into a pidl only when SHGFI_USEFILEATTRIBUTES in not specified 
-	   the pidl functions fail on not existing file names */
+      /* psfi is NULL normally to query EXE type. If it is NULL, none of the
+       * below makes sense anyway. Windows allows this and just returns FALSE */
+      if (psfi == NULL) return FALSE;
+
+	/* translate the path into a pidl only when SHGFI_USEFILEATTRIBUTES
+    	 * is not specified.
+	   The pidl functions fail on not existing file names */
 	if (flags & SHGFI_PIDL)
 	{
 	  pidl = (LPCITEMIDLIST) path;
@@ -370,14 +376,14 @@ DWORD WINAPI SHGetFileInfoA(LPCSTR path,DWORD dwFileAttributes,
 
 	  if (SUCCEEDED(hr))
 	  {
-	    hr = IExtractIconA_GetIconLocation(pei, (flags & SHGFI_OPENICON)? GIL_OPENICON : 0,szLoaction, MAX_PATH, &iIndex, &uFlags);
-	    /* FIXME what to do with the index? */
+	    hr = IExtractIconA_GetIconLocation(pei, (flags & SHGFI_OPENICON)? GIL_OPENICON : 0,szLocation, MAX_PATH, &iIndex, &uFlags);
+           psfi->iIcon = iIndex;
 
 	    if(uFlags != GIL_NOTFILENAME)
-	      strcpy (psfi->szDisplayName, szLoaction);
+	      strcpy (psfi->szDisplayName, szLocation);
 	    else
 	      ret = FALSE;
-	      
+
 	    IExtractIconA_Release(pei);
 	  }
 	}

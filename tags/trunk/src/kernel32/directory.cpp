@@ -1,4 +1,4 @@
-/* $Id: directory.cpp,v 1.48 2005-01-15 22:17:27 sao2l02 Exp $ */
+/* $Id: directory.cpp,v 1.49 2005-01-23 18:10:34 sao2l02 Exp $ */
 
 /*
  * Win32 Directory functions for OS/2
@@ -447,6 +447,31 @@ UINT WIN32API GetSystemDirectoryW(LPWSTR lpBuffer, UINT uSize)
     AsciiToUnicode(asciibuffer, lpBuffer);
   
   return(rc);
+}
+
+/***********************************************************************
+ *           GetSystemWow64DirectoryW   (KERNEL32.@)
+ *
+ * As seen on MSDN
+ * - On Win32 we should returns ERROR_CALL_NOT_IMPLEMENTED
+ * - On Win64 we should returns the SysWow64 (system64) directory
+ */
+UINT WINAPI GetSystemWow64DirectoryW( LPWSTR lpBuffer, UINT uSize )
+{
+    SetLastError( ERROR_CALL_NOT_IMPLEMENTED );
+    return 0;
+}
+
+
+/***********************************************************************
+ *           GetSystemWow64DirectoryA   (KERNEL32.@)
+ *
+ * See comment for GetWindowsWow64DirectoryW.
+ */
+UINT WINAPI GetSystemWow64DirectoryA( LPSTR lpBuffer, UINT uSize )
+{
+    SetLastError( ERROR_CALL_NOT_IMPLEMENTED );
+    return 0;
 }
 
 

@@ -1,4 +1,4 @@
-; $Id: kernel32.def,v 1.165 2004-11-23 17:31:34 sao2l02 Exp $
+; $Id: kernel32.def,v 1.166 2005-01-23 18:10:39 sao2l02 Exp $
 
 ;Basis is Windows95 KERNEL32
 LIBRARY KERNEL32 INITINSTANCE TERMINSTANCE
@@ -1002,7 +1002,10 @@ EXPORTS
     GetVolumeNameForVolumeMountPointA = _GetVolumeNameForVolumeMountPointA@12 @914
     GetVolumeNameForVolumeMountPointW = _GetVolumeNameForVolumeMountPointW@12 @915
 
-
+    GetSystemWow64DirectoryA   = _GetSystemWow64DirectoryA@8   @916
+    GetSystemWow64DirectoryW   = _GetSystemWow64DirectoryW@8   @917
+    GetUserDefaultUILanguage   = _GetUserDefaultUILanguage@0   @918
+    GetSystemDefaultUILanguage = _GetSystemDefaultUILanguage@0 @919
 ;
 ; First free ordinal is 890
 ;
@@ -1216,6 +1219,7 @@ EXPORTS
 
     vsnprintfW                            @2030 NONAME
     snprintfW                             @2031 NONAME
+    sprintfW                              @2032 NONAME
 
 ; custom dll hook installer
     _ODIN_SetDllLoadCallback@4                                    @2100 NONAME

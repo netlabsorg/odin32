@@ -1,4 +1,4 @@
-/* $Id: mmapview.cpp,v 1.4 2003-12-29 12:29:20 sandervl Exp $ */
+/* $Id: mmapview.cpp,v 1.5 2005-01-23 18:10:56 sao2l02 Exp $ */
 
 /*
  * Win32 Memory mapped file & view classes
@@ -118,7 +118,7 @@ Win32MemMapView::Win32MemMapView(Win32MemMap *map, ULONG offset, ULONG size,
         }
     }
 
-    dprintf(("Win32MemMapView::Win32MemMapView: created %x (alias for %x), size %d", pMapView, viewaddr, size));
+    dprintf(("Win32MemMapView::Win32MemMapView: created %x (alias for %x), size (%d/0x%x)", pMapView, viewaddr, size, size));
     mParentMap->AddRef();
     mParentMap->AddView();
 

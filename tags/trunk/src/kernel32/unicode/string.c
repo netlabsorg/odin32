@@ -403,3 +403,13 @@ int snprintfW(WCHAR *str, unsigned int len, const WCHAR *format, ...)
     va_end(valist);
     return retval;
 }
+
+int sprintfW( WCHAR *str, const WCHAR *format, ...)
+{
+    int retval;
+    va_list valist;
+    va_start(valist, format);
+    retval = vsnprintfW(str, INT_MAX, format, valist);
+    va_end(valist);
+    return retval;
+}

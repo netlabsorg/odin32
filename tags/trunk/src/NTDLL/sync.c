@@ -1,4 +1,4 @@
-/* $Id: sync.c,v 1.5 2003-04-08 12:47:07 sandervl Exp $ */
+/* $Id: sync.c,v 1.6 2005-01-23 18:10:22 sao2l02 Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -11,12 +11,12 @@
  */
 
 #include <windows.h>
-#include <dbglog.h>
+#include "wine/debug.h"
 #include "ntddk.h"
+#include "ntdll_misc.h"
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-
 
 
 /*
@@ -197,3 +197,59 @@ NTSTATUS WIN32API NtQueryEvent(HANDLE hEvent,
 
   return 0;
 }
+
+/*
+ *	Timers
+ */
+
+/**************************************************************************
+ *		NtCreateTimer				[NTDLL.@]
+ *		ZwCreateTimer				[NTDLL.@]
+ */
+NTSTATUS WINAPI NtCreateTimer(
+	OUT PHANDLE TimerHandle,
+	IN ACCESS_MASK DesiredAccess,
+	IN POBJECT_ATTRIBUTES ObjectAttributes OPTIONAL,
+	IN TIMER_TYPE TimerType)
+{
+	FIXME("(%p,0x%08lx,%p,0x%08x) stub\n",
+	TimerHandle,DesiredAccess,ObjectAttributes, TimerType);
+	dump_ObjectAttributes(ObjectAttributes);
+	return 0;
+}
+/**************************************************************************
+ *		NtSetTimer				[NTDLL.@]
+ *		ZwSetTimer				[NTDLL.@]
+ */
+NTSTATUS WINAPI NtSetTimer(
+	IN HANDLE TimerHandle,
+	IN PLARGE_INTEGER DueTime,
+	IN PTIMERAPCROUTINE TimerApcRoutine,
+	IN PVOID TimerContext,
+	IN BOOLEAN WakeTimer,
+	IN ULONG Period OPTIONAL,
+	OUT PBOOLEAN PreviousState OPTIONAL)
+{
+	FIXME("(0x%08x,%p,%p,%p,%08x,0x%08lx,%p) stub\n",
+	TimerHandle,DueTime,TimerApcRoutine,TimerContext,WakeTimer,Period,PreviousState);
+	return 0;
+}
+
+/******************************************************************************
+/******************************************************************************
+ * NtQueryTimerResolution [NTDLL.@]
+ */
+NTSTATUS WINAPI NtQueryTimerResolution(OUT ULONG* min_resolution,
+                                       OUT ULONG* max_resolution,
+                                       OUT ULONG* current_resolution)
+{
+    FIXME("(%p,%p,%p), stub!\n",
+          min_resolution, max_resolution, current_resolution);
+
+    return STATUS_NOT_IMPLEMENTED;
+}
+
+/*
+ *	Process object
+ */
+

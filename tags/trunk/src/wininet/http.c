@@ -166,7 +166,7 @@ INTERNETAPI HINTERNET WINAPI HttpOpenRequestA(HINTERNET hHttpSession,
         workRequest.LPSZVERB = (DWORD)strdup(lpszVerb);
         workRequest.LPSZOBJECTNAME = (DWORD)strdup(lpszObjectName);
         workRequest.LPSZVERSION = (DWORD)strdup(lpszVersion);
-        workRequest.LPSZREFERRER = (DWORD)strdup(lpszReferrer);
+        workRequest.LPSZREFERRER = (lpszReferrer) ? (DWORD)strdup(lpszReferrer): 0;
         workRequest.LPSZACCEPTTYPES = (DWORD)lpszAcceptTypes;
         workRequest.DWFLAGS = dwFlags;
         workRequest.DWCONTEXT = dwContext;
