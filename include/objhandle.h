@@ -1,4 +1,4 @@
-/* $Id: objhandle.h,v 1.2 2000-12-05 13:03:25 sandervl Exp $ */
+/* $Id: objhandle.h,v 1.3 2000-12-09 14:43:35 sandervl Exp $ */
 /*
  * Win32 Handle Management Code for OS/2 (GDI32)
  *
@@ -29,6 +29,8 @@ typedef enum {
 } ObjectType;
 
 #define MAKE_HANDLE(a)          (a << 24)
+#define OBJHANDLE_MAGIC(a)      (a >> 24)
+
 //...
 
 BOOL  ObjAllocateHandle(HANDLE *hObject, DWORD dwUserData, ObjectType type);
