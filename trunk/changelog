@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.1997 2002-02-21 17:02:55 sandervl Exp $ */
+/* $Id: changelog,v 1.1998 2002-02-21 22:53:30 sandervl Exp $ */
+
+ 2002-02-21: Sander van Leeuwen <sandervl@xs4all.nl>
+    - NTDLL/ADVAPI32:
+                o Some Wine updates
 
  2002-02-21: Platon Fomichev <platon@innotek.de>
     - IPHLPAPI  o GetNetworkParams bugfixes
