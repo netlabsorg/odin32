@@ -1,4 +1,4 @@
-# $Id: setup.os2relvac365.mk,v 1.22 2003-06-30 13:28:59 bird Exp $
+# $Id: setup.os2relvac365.mk,v 1.23 2003-09-14 20:09:05 bird Exp $
 
 # ---OS2, RELEASE, VAC365-------------------------
 ENV_NAME="OS/2, Release, IBM VisualAge for C++ 3.6.5"
@@ -86,7 +86,7 @@ LIB_OS      = os2386.lib
 LIB_C_OBJ   = cpprms36.lib
 LIB_C_DLL   = cpprmi36.lib
 LIB_C_RTDLL = cpprmo36.lib
-LIB_C_NRE   = cpprni36.lib
+LIB_C_NRE   = cpprns36.lib
 LIB_C_DMNGL = cpprds36.lib
 OBJ_PROFILE =
 
