@@ -1,4 +1,4 @@
-/* $Id: crtdll.cpp,v 1.19 1999-12-24 18:40:41 sandervl Exp $ */
+/* $Id: crtdll.cpp,v 1.20 2000-01-08 12:07:45 sandervl Exp $ */
 
 /*
  * The C RunTime DLL
@@ -5322,10 +5322,10 @@ int CDECL CRTDLL_vwprintf( const wchar_t *s, va_list arg)
 /*********************************************************************
  *                  wcscoll    (CRTDLL.503)
  */
-int CDECL CRTDLL_wcscoll(const wchar_t *s1, const wchar_t *s2)
+DWORD CDECL CRTDLL_wcscoll(LPCWSTR str1, LPCWSTR str2)
 {
   dprintf2(("CRTDLL: wcscoll\n"));
-  return (wcscoll(s1, s2));
+  return (wcscoll((const wchar_t*)str1, (const wchar_t*)str2));
 }
 
 
@@ -5361,12 +5361,12 @@ size_t CDECL CRTDLL_wcsxfrm( wchar_t *s1, const wchar_t *s2, size_t n )
 
 
 /*********************************************************************
- *                  wcstomb   (CRTDLL.521)
+ *                  wctomb   (CRTDLL.521)
  */
-int CDECL CRTDLL_wctomb( char *s, wchar_t wchar )
+int CDECL CRTDLL_wctomb( LPSTR dst, WCHAR ch )
 {
   dprintf2(("CRTDLL: wctomb\n"));
-  return (wctomb(s,wchar));
+  return (wctomb((char*)dst,ch));
 }
 
 
