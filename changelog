@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.2143 2002-06-09 14:23:58 sandervl Exp $ */
+/* $Id: changelog,v 1.2144 2002-06-09 15:08:22 bird Exp $ */
+
+ 2002-06-09: knut st. osmundsen <bird@anduin.net>
+    - Makefiles:
+                o Exclude dummy.c from the dependencies.
 
  2002-06-09: Herwig Bauernfeind <herwig.bauernfeind@aon.at>
     - KERNEL32: o Corrections for Austrian NLS file
@@ -24,7 +28,7 @@
     - DDRAW:    o Fixed clipping bug with non-frame windows
                 o Print FOURCCs supported by Dive
 
- 2002-06-08: knut st. osmundsen <bird@anduin.net>
+ 2002-06-08: knut *st. osmundsen <bird@anduin.net>
     - TOOLS\WRC:o Compile fix
 
  2002-06-07: Sander van Leeuwen <sandervl@innotek.de>
