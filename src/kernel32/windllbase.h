@@ -1,4 +1,4 @@
-/* $Id: windllbase.h,v 1.9 2002-06-09 10:48:50 sandervl Exp $ */
+/* $Id: windllbase.h,v 1.10 2002-07-26 10:48:40 sandervl Exp $ */
 
 /*
  * Win32 Dll base class
@@ -65,6 +65,9 @@ static  void      attachThreadToAllDlls();
 //Send DLL_THREAD_DETACH message to all dlls for thread that's about to die
 static  void      detachThreadFromAllDlls();
 
+//Send DLL_PROCESS_DETACH message to all dlls for process that's about to end
+static  void      detachProcessFromAllDlls();
+
 //Setup TLS structure for all dlls for a new thread
 static  void      tlsAttachThreadToAllDlls();
 
@@ -77,7 +80,7 @@ static  void      tlsDetachThreadFromAllDlls();
     BOOL      detachThread();
 
     //This counter is incremented when the dll has been loaded with LoadLibrary(Ex)
-        //(== not loaded on behalf of another dll or the main exe)
+    //(== not loaded on behalf of another dll or the main exe)
     void      incDynamicLib();
     void      decDynamicLib();
     BOOL      isDynamicLib()   { return nrDynamicLibRef != 0; };
@@ -90,6 +93,8 @@ static  void      tlsDetachThreadFromAllDlls();
 
     //Only called for kernel32
     void      DisableUnload()  { fDisableUnload = TRUE; };
+
+    BOOL      IsUnloaded()     { return fUnloaded; };
 
 static  void      deleteDynamicLibs();
 static  void      deleteAll();
