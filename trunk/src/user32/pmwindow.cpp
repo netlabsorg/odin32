@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.183 2002-07-24 18:43:11 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.184 2002-08-05 16:31:26 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -733,6 +733,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
     case WM_RENDERFMT:
     case WM_RENDERALLFMTS:
     case WM_DESTROYCLIPBOARD:
+    case WM_DRAWCLIPBOARD:
         win32wnd->DispatchMsgA(pWinMsg);
         break;
 

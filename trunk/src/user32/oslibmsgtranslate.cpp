@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.89 2002-06-18 09:32:26 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.90 2002-08-05 16:31:26 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -894,6 +894,10 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
 
     case WM_DESTROYCLIPBOARD:
         winMsg->message = WINWM_DESTROYCLIPBOARD;
+        break;
+
+    case WM_DRAWCLIPBOARD:
+        winMsg->message = WINWM_DRAWCLIPBOARD;
         break;
 
     case WM_HSCROLL:
