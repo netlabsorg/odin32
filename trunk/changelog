@@ -1,4 +1,14 @@
-/* $Id: changelog,v 1.2036 2002-04-06 14:56:38 sandervl Exp $ */
+/* $Id: changelog,v 1.2037 2002-04-07 14:34:09 sandervl Exp $ */
+
+ 2002-04-07: Sander van Leeuwen <sandervl@xs4all.nl>
+    - ODINCRT:  o Wrote OS/2 version of CriticalSection apis (including
+                  support for shared critical sections; which is currently
+                  not possible with the Win32 version due to missing
+                  support for global object handles in kernel32)
+    - KERNEL32: o Rewrote VMutex class to use odincrt critical sections
+                o Rewrote global vmutex usage (mmap)
+    - USER32:   o Rewrote global vmutex usage (window handles)
+    - WINMM:    o Rewrote vmutex usage (wave in/out classes)
 
  2002-04-06: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Do not test for write capability with CDROM drives
