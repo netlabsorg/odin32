@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2001-08-25 13:37:12 sandervl Exp $
+# $Id: makefile,v 1.6 2001-09-30 08:45:52 bird Exp $
 
 #
 # Odin32 API
@@ -10,13 +10,16 @@
 #
 # Compiler, tools, and interference rules.
 #
+WRC_PREFIX_RESOURCE=1
 !include ../../makefile.inc
 
 
 #
 # Overrides.
 #
+!if "$(CUSTOMBUILD)" != "1"
 CDEFINES = $(CDEFINES) -DWIN32 -DSTDARG -DTHINK_C
+!endif
 
 
 #
