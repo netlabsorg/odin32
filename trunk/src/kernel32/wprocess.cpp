@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.45 1999-11-09 14:19:47 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.46 1999-11-09 19:22:33 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -56,6 +56,9 @@ DWORD    *TIBFlatPtr    = 0;
 //******************************************************************************
 TEB *WIN32API GetThreadTEB()
 {
+  if(TIBFlatPtr == NULL)
+	return 0;
+
   return (TEB *)*TIBFlatPtr;
 }
 //******************************************************************************
@@ -65,9 +68,12 @@ THDB *WIN32API GetThreadTHDB()
  TEB  *winteb;
  THDB *thdb;
 
+  if(TIBFlatPtr == NULL)
+	return 0;
+
   winteb = (TEB *)*TIBFlatPtr;
   if(winteb == NULL) {
-   return NULL;
+   	return NULL;
   }
   thdb = (THDB *)(winteb+1);
 
@@ -369,7 +375,7 @@ HINSTANCE WIN32API LoadLibraryA(LPCTSTR lpszLibFile)
 
   dprintf(("KERNEL32:  LoadLibraryA(%s)\n",
            lpszLibFile));
-  dprintf(("KERNEL32: LoadLibrary FS = %x\n", GetFS()));
+  dprintf(("KERNEL32: LoadLibrary %x FS = %x\n", GetCurrentThreadId(), GetFS()));
 
   hDll = iLoadLibraryA(lpszLibFile, 0);
   if (hDll == 0)

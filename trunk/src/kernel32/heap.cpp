@@ -1,4 +1,4 @@
-/* $Id: heap.cpp,v 1.14 1999-08-21 16:29:26 sandervl Exp $ */
+/* $Id: heap.cpp,v 1.15 1999-11-09 19:22:32 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -16,17 +16,19 @@
 #define  _WIN32
 #include "os2heap.h"
 #include <heap.h>
+#include <odinwrap.h>
 
 static HANDLE processheap = NULL;
 OS2Heap *OS2ProcessHeap = NULL;
 
 //******************************************************************************
 //******************************************************************************
-LPVOID WIN32API HeapAlloc(HANDLE hHeap, DWORD dwFlags, DWORD dwBytes)
+ODINFUNCTIONNODBG3(LPVOID, HeapAlloc, HANDLE, hHeap, DWORD, dwFlags, 
+                   DWORD, dwBytes)
 {
  OS2Heap *curheap = OS2Heap::find(hHeap);
 
-//  dprintf(("HeapAlloc %X bytes", dwBytes));
+  dprintf2(("HeapAlloc %X bytes", dwBytes));
   if(curheap == NULL)
         return(NULL);
 
@@ -34,10 +36,12 @@ LPVOID WIN32API HeapAlloc(HANDLE hHeap, DWORD dwFlags, DWORD dwBytes)
 }
 //******************************************************************************
 //******************************************************************************
-LPVOID WIN32API HeapReAlloc(HANDLE hHeap, DWORD dwFlags, LPVOID lpMem, DWORD dwBytes)
+ODINFUNCTIONNODBG4(LPVOID, HeapReAlloc, HANDLE, hHeap, DWORD, dwFlags, LPVOID, 
+                   lpMem, DWORD, dwBytes)
 {
  OS2Heap *curheap = OS2Heap::find(hHeap);
 
+  dprintf2(("HeapReAlloc %X bytes", dwBytes));
   if(curheap == NULL)
         return(NULL);
 
@@ -45,10 +49,11 @@ LPVOID WIN32API HeapReAlloc(HANDLE hHeap, DWORD dwFlags, LPVOID lpMem, DWORD dwB
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API HeapFree(HANDLE hHeap, DWORD dwFlags, LPVOID lpMem)
+ODINFUNCTIONNODBG3(BOOL, HeapFree, HANDLE, hHeap, DWORD, dwFlags, LPVOID, lpMem)
 {
  OS2Heap *curheap = OS2Heap::find(hHeap);
 
+  dprintf2(("HeapFree %X", lpMem));
   if(curheap == NULL)
         return(FALSE);
 
@@ -56,11 +61,13 @@ BOOL WIN32API HeapFree(HANDLE hHeap, DWORD dwFlags, LPVOID lpMem)
 }
 //******************************************************************************
 //******************************************************************************
-HANDLE WIN32API HeapCreate(DWORD flOptions, DWORD dwInitialSize, DWORD dwMaximumSize)
+ODINFUNCTIONNODBG3(HANDLE, HeapCreate, DWORD, flOptions, DWORD, dwInitialSize, 
+                   DWORD, dwMaximumSize)
 {
  OS2Heap *curheap;
 
   //Create Open32 heap for it's handle
+  dprintf2(("HeapCreate dwInitialSize %X", dwInitialSize));
   HANDLE hHeap = O32_HeapCreate(flOptions, 0, 4096);
   if(hHeap == NULL)
     return(NULL);
@@ -83,10 +90,11 @@ HANDLE WIN32API HeapCreate(DWORD flOptions, DWORD dwInitialSize, DWORD dwMaximum
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API HeapDestroy(HANDLE hHeap)
+ODINFUNCTIONNODBG1(BOOL, HeapDestroy, HANDLE, hHeap)
 {
  OS2Heap *curheap = OS2Heap::find(hHeap);
 
+  dprintf2(("HeapDestroy %X", hHeap));
   if(curheap == NULL)
         return(FALSE);
 
@@ -96,10 +104,11 @@ BOOL WIN32API HeapDestroy(HANDLE hHeap)
 }
 //******************************************************************************
 //******************************************************************************
-DWORD WIN32API HeapSize(HANDLE hHeap, DWORD arg2, PVOID  arg3)
+ODINFUNCTIONNODBG3(DWORD, HeapSize, HANDLE, hHeap, DWORD, arg2, PVOID, arg3)
 {
  OS2Heap *curheap = OS2Heap::find(hHeap);
 
+  dprintf2(("HeapSize %X %x", hHeap, arg2));
   if(curheap == NULL)
         return(0);
   return curheap->Size(arg2, arg3);
@@ -107,28 +116,28 @@ DWORD WIN32API HeapSize(HANDLE hHeap, DWORD arg2, PVOID  arg3)
 //******************************************************************************
 //TODO: Check this!!!
 //******************************************************************************
-DWORD WIN32API HeapCompact(HANDLE hHeap, DWORD dwFlags)
+ODINFUNCTIONNODBG2(DWORD, HeapCompact, HANDLE, hHeap, DWORD, dwFlags)
 {
   dprintf(("KERNEL32:  HeapCompact: Unknown API - stub\n"));
   return(0);
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API HeapValidate(HANDLE hHeap, DWORD dwFlags, LPCVOID lpMem)
+ODINFUNCTIONNODBG3(BOOL, HeapValidate, HANDLE, hHeap, DWORD, dwFlags, LPCVOID, lpMem)
 {
   dprintf(("KERNEL32:  HeapValidate - stub\n"));
   return(TRUE);
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API HeapUnlock(HANDLE hHeap)
+ODINFUNCTIONNODBG1(BOOL, HeapUnlock, HANDLE, hHeap)
 {
   dprintf(("KERNEL32:  HeapUnlock - stub (TRUE)\n"));
   return(TRUE);
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API HeapLock(HANDLE hHeap)
+ODINFUNCTIONNODBG1(BOOL, HeapLock, HANDLE, hHeap)
 {
   dprintf(("KERNEL32:  HeapLock - stub (TRUE)\n"));
   return(TRUE);
@@ -136,18 +145,18 @@ BOOL WIN32API HeapLock(HANDLE hHeap)
 //******************************************************************************
 //    LPPROCESS_HEAP_ENTRY lpEntry
 //******************************************************************************
-BOOL WIN32API HeapWalk(HANDLE hHeap, void *lpEntry)
+ODINFUNCTIONNODBG2(BOOL, HeapWalk, HANDLE, hHeap, LPVOID, lpEntry)
 {
   dprintf(("KERNEL32:  HeapWalk - stub (TRUE)\n"));
   return(TRUE);
 }
 //******************************************************************************
 //******************************************************************************
-HANDLE WIN32API GetProcessHeap(VOID)
+ODINFUNCTIONNODBG0(HANDLE, GetProcessHeap)
 {
  HANDLE hHeap;
 
-//    dprintf(("KERNEL32:  OS2GetProcessHeap\n"));
+    dprintf2(("KERNEL32: GetProcessHeap\n"));
     //SvL: Only one process heap per process
     if(processheap == NULL) {
       //TODO: I haven't thought real hard about this.  I added it just to make "hdr.exe" happy.
