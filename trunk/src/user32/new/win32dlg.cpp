@@ -1,4 +1,4 @@
-/* $Id: win32dlg.cpp,v 1.6 1999-09-05 17:11:25 sandervl Exp $ */
+/* $Id: win32dlg.cpp,v 1.7 1999-09-06 20:50:34 sandervl Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -18,6 +18,8 @@
 #include <misc.h>
 #include <win32dlg.h>
 #include "oslibmsg.h"
+
+#define DEFAULT_DLGFONT "9.WarpSans"
 
 //******************************************************************************
 //******************************************************************************
@@ -67,10 +69,17 @@ Win32Dialog::Win32Dialog(HINSTANCE hInst, LPCSTR dlgTemplate, HWND owner,
     {
         /* The font height must be negative as it is a point size */
         /* (see CreateFont() documentation in the Windows SDK).   */
+#if 0
+        hUserFont = CreateFontA(dlgInfo.pointSize, 0, 0, 0,
+                            dlgInfo.weight, dlgInfo.italic, FALSE,
+                            FALSE, DEFAULT_CHARSET, 0, 0, PROOF_QUALITY,
+                            FF_DONTCARE, DEFAULT_DLGFONT);
+#else
         hUserFont = CreateFontW(dlgInfo.pointSize, 0, 0, 0,
                             dlgInfo.weight, dlgInfo.italic, FALSE,
                             FALSE, DEFAULT_CHARSET, 0, 0, PROOF_QUALITY,
                             FF_DONTCARE, (LPCWSTR)dlgInfo.faceName );
+#endif
         if (hUserFont)
         {
             SIZE charSize;
