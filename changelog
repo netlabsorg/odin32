@@ -1,4 +1,8 @@
- /* $Id: changelog,v 1.908 2000-04-25 01:59:54 phaller Exp $ */
+ /* $Id: changelog,v 1.909 2000-04-25 07:55:23 achimha Exp $ */
+
+ 2000-04-25: Achim Hasenmueller <achimha@innotek.de>
+	- TOOLS/BIN: put back old wrc.exe from Oct. 99 because the
+	             new one has problems with include files...
 
  2000-04-25: Patrick Haller <phaller@gmx.net>
         - SHLWAPI: - stubbed all the UrlXXX functions (required for IE4/5 ;-)
