@@ -1,4 +1,4 @@
-/* $Id: odin32ftp2.cmd,v 1.3 2000-06-11 14:10:37 bird Exp $
+/* $Id: odin32ftp2.cmd,v 1.4 2000-07-19 12:08:50 bird Exp $
  *
  * Uploads the relase and debug builds to the FTP sites.
  *
@@ -56,7 +56,7 @@ do i = 1 to 5 /* (Retries 5 times) */
 
     end
 
-    if (sLoc = '' | sLoc = 'netlabs') then
+    if (0 /*sLoc = '' | sLoc = 'netlabs'*/) then
     do
         /*                 (                  sDeleteFile1,                   sDeleteFile2,            sLockFile,             sSite,  sUser,    sPasswd); */
         rc = deletefunction(   '/odinftp/daily/'sDeleteDbg,    '/odinftp/daily/'sDeleteRel,     'netlabs-delete', 'ftp.netlabs.org', 'user', 'xxxxxxxx');
