@@ -1,4 +1,4 @@
-/* $Id: icon.cpp,v 1.13 2001-08-09 15:02:11 sandervl Exp $ */
+/* $Id: icon.cpp,v 1.14 2002-01-07 11:17:52 sandervl Exp $ */
 
 /*
  * Win32 icon conversion functions for OS/2
@@ -196,6 +196,8 @@ void *ConvertIcon(WINBITMAPINFOHEADER *bmpHdr, int size, int *os2size, int offse
         char *q;
         int i, linesize;
 
+        //TODO:
+        dprintf(("TODO: icon conversion not correct"));
         linesize = DIB_GetDIBWidthBytes(bmpHdr->biWidth, 1);
         q = (char *)rgb + orgcolorsize;
         for (i = 0; i < bmpHdr->biHeight/2; i++) {
@@ -295,9 +297,13 @@ void * WIN32API ConvertIconGroup(void *hdr, HINSTANCE hInstance, DWORD *ressize)
 
         groupsize += QueryConvertedIconSize((WINBITMAPINFOHEADER *)LockResource(LoadResource(hInstance, hRes)),
                                             SizeofResource(hInstance, hRes));
-        if(rdir->bWidth == 32 && rdir->bHeight == 32 && rdir->wBitCount >= 4) {
+        //add centered icon if size is 32x32
+        if(rdir->bWidth == 32 && rdir->bHeight == 32 && rdir->wBitCount >= 4) 
+        {
             groupsize += QueryConvertedIconSize((WINBITMAPINFOHEADER *)LockResource(LoadResource(hInstance, hRes)),
                                                 SizeofResource(hInstance, hRes), TRUE);
+            //extra pixels
+            groupsize += (40*8 + 8*32)*rdir->wBitCount/8;
             nricons++;
         }
         nricons++;
