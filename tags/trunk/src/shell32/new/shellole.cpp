@@ -129,7 +129,7 @@ HRESULT WINAPI SHELL32_DllGetClassObject(REFCLSID rclsid, REFIID iid,LPVOID *ppv
 DWORD WINAPI SHCLSIDFromStringA (LPSTR clsid, CLSID *id)
 {
 	TRACE("(%p(%s) %p)\n", clsid, clsid, id);
-	return CLSIDFromString16(clsid, id);
+	return CLSIDFromStringA(clsid, id);
 }
 DWORD WINAPI SHCLSIDFromStringW (LPWSTR clsid, CLSID *id)
 {
