@@ -1,4 +1,14 @@
-/* $Id: changelog,v 1.1749 2001-10-13 18:50:36 sandervl Exp $ */
+/* $Id: changelog,v 1.1750 2001-10-14 20:17:42 sandervl Exp $ */
+
+ 2001-10-14: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o Convert color cursor to monochrome if it only uses two colors.
+                  This overcomes a silly limitation in some less advanced 
+                  display drivers. (SDD; IBM doesn't seem to require such a 
+                  basic feature and Scitech management couldn't care less)
+                  (fixes mouse cursor flickering & screen distortion when
+                   accessing the frame buffer directly)
+                  NOTE: This is a partial solution only. Real color cursors
+                        still use GRADD's rather poor software emulation.
 
  2001-10-13: Sander van Leeuwen <sandervl@xs4all.nl>
     - WSOCK32:  o Overwrite IP header length in sendto for raw sockets
