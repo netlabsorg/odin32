@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.11 2001-09-26 04:00:09 bird Exp $
+# $Id: Makefile,v 1.12 2001-09-27 03:01:41 bird Exp $
 
 #
 # kKrnlLib.sys makefile.
@@ -30,7 +30,11 @@ NAME = kKrnlLib
 #
 !if "$(DDKPATH)" != "" && "$(MSCPATH)" != ""  && "$(TOOLKIT)" != "" && "$(VACPATH)" != ""
 all:    $(WIN32KBIN)\$(NAME).sys \
-        $(ODIN32_LIB)\$(NAME).lib
+        lib
+lib:    $(ODIN32_LIB)\$(NAME).lib
+!else
+all:
+lib:
 !endif
 
 
