@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.29 2001-08-04 14:13:08 bird Exp $
+# $Id: makefile,v 1.30 2001-09-30 00:32:39 bird Exp $
 
 #
 # Odin32 API
@@ -21,13 +21,12 @@
 _all: all
 
 $(COMMONRULES:dep lib=):
-    $(MAKE_CMD) -f ole32.mak $@
-    $(MAKE_CMD) -f regsvr32.mak $@
+    @$(DOMAKES) "ole32.mak regsvr32.mak" $(MAKE_CMD) $@
 
 
 # don't have to make deps and libs more than once.
 lib dep:
-    $(MAKE_CMD) -f ole32.mak $@
+    @$(MAKE_CMD) -f ole32.mak $@
 
 
 #

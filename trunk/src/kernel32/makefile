@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.115 2001-09-29 20:23:07 bird Exp $
+# $Id: makefile,v 1.116 2001-09-30 00:30:52 bird Exp $
 #
 # Odin32 API
 #
@@ -22,6 +22,6 @@ unicode
 # All the common rules like all, lib, clean and dep.
 $(COMMONRULES):
     @$(DODIRS) "$(SUBDIRS)" $(MAKE_CMD) $@
-    @$(MAKE_CMD) -f kernel32.mak $@
+    @$(DOMAKES) "kernel32.mak" $(MAKE_CMD) $@
 
 
