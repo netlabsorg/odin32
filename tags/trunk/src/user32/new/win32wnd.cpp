@@ -1,4 +1,4 @@
-/* $Id: win32wnd.cpp,v 1.4 1999-07-16 11:32:09 sandervl Exp $ */
+/* $Id: win32wnd.cpp,v 1.5 1999-07-17 09:17:58 sandervl Exp $ */
 /*
  * Win32 Window Code for OS/2
  *
@@ -67,6 +67,7 @@ void Win32Window::Init()
 
   magic            = WIN32PM_MAGIC;
   OS2Hwnd          = 0;
+  OS2HwndFrame     = 0;
   OS2HwndMenu      = 0;
   Win32Hwnd        = 0;
 
@@ -91,6 +92,7 @@ void Win32Window::Init()
 
   hwndLinkAfter    = HWND_BOTTOM;
   flags            = 0;
+  isIcon           = FALSE;
   owner            = NULL;
   windowClass      = 0;
 }
@@ -328,7 +330,7 @@ BOOL Win32Window::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
                                  dwOSWinStyle, dwOSFrameStyle, (char *)cs->lpszName,
                                  cs->x, cs->y, cs->cx, cs->cy,
                                  (owner) ? owner->getOS2WindowHandle() : 0,
-                                 (hwndLinkAfter == HWND_BOTTOM) ? TRUE : FALSE);
+                                 (hwndLinkAfter == HWND_BOTTOM) ? TRUE : FALSE, &OS2HwndFrame);
 
   if(OS2Hwnd == 0) {
         dprintf(("Window creation failed!!"));
@@ -664,7 +666,11 @@ ULONG Win32Window::MsgClose()
 //******************************************************************************
 ULONG Win32Window::MsgDestroy()
 {
-  return SendMessageA(WM_DESTROY, 0, 0);
+ ULONG rc;
+
+  rc = SendMessageA(WM_DESTROY, 0, 0);
+  delete this;
+  return rc;
 }
 //******************************************************************************
 //******************************************************************************
@@ -686,6 +692,7 @@ ULONG Win32Window::MsgMove(ULONG xScreen, ULONG yScreen, ULONG xParent, ULONG yP
   return 0;
 }
 //******************************************************************************
+//TODO: Send WM_NCCALCSIZE message here and correct size if necessary
 //******************************************************************************
 ULONG Win32Window::MsgSize(ULONG width, ULONG height, BOOL fMinimize, BOOL fMaximize)
 {
@@ -910,7 +917,7 @@ BOOL Win32Window::SetMenu(ULONG hMenu)
 
    if(HMHandleTranslateToOS2(hMenu, (PULONG)&menutemplate) == NO_ERROR) 
    {
-	OS2HwndMenu = OSLibWinCreateMenu(OS2Hwnd, menutemplate);
+	OS2HwndMenu = OSLibWinCreateMenu(OS2HwndFrame, menutemplate);
 	if(OS2HwndMenu == 0) {
 		dprintf(("Win32Window::SetMenu OS2HwndMenu == 0"));
 		return FALSE;
@@ -923,13 +930,47 @@ BOOL Win32Window::SetMenu(ULONG hMenu)
 //******************************************************************************
 BOOL Win32Window::ShowWindow(ULONG nCmdShow)
 {
-  return O32_ShowWindow(OS2Hwnd, nCmdShow);
+ ULONG showstate = 0;
+
+  switch(nCmdShow)
+  {
+	case SW_SHOW:
+	case SW_SHOWDEFAULT: //todo
+		showstate = SWPOS_SHOW;
+		break;
+	case SW_HIDE:
+		showstate = SWPOS_HIDE;
+		break;
+	case SW_MINIMIZE:
+		showstate = SWPOS_MINIMIZE;
+		break;
+	case SW_SHOWMAXIMIZED:
+		showstate = SWPOS_MAXIMIZE | SWPOS_SHOW;
+		break;
+	case SW_SHOWMINIMIZED:
+		showstate = SWPOS_MINIMIZE | SWPOS_SHOW;
+		break;
+	case SW_SHOWMINNOACTIVE:  //TODO
+		showstate = SWPOS_MINIMIZE | SWPOS_SHOW;
+		break;
+	case SW_SHOWNA: //TODO
+		showstate = SWPOS_SHOW;
+		break;
+	case SW_SHOWNOACTIVATE:  //TODO
+		showstate = SWPOS_SHOW;
+		break;
+	case SW_SHOWNORMAL:
+		showstate = SWPOS_RESTORE;
+		break;
+  }
+  return OSLibWinShowWindow(OS2HwndFrame, showstate);
 }
 //******************************************************************************
 //******************************************************************************
 BOOL Win32Window::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, int cy, UINT fuFlags)
 {
  Win32Window *window;
+ ULONG        setstate = 0;
 
   switch(hwndInsertAfter) {
   	case HWND_BOTTOM:
@@ -949,12 +990,36 @@ BOOL Win32Window::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, int c
 		break;
 		
   }
-  return O32_SetWindowPos(OS2Hwnd, hwndInsertAfter, x, y, cx, cy, fuFlags);
+  setstate = SWPOS_MOVE | SWPOS_SIZE | SWPOS_ACTIVATE | SWPOS_ZORDER;
+  if(fuFlags & SWP_DRAWFRAME)
+	setstate |= 0; //TODO
+  if(fuFlags & SWP_FRAMECHANGED)
+	setstate |= 0; //TODO
+  if(fuFlags & SWP_HIDEWINDOW)
+	setstate &= ~SWPOS_ZORDER;
+  if(fuFlags & SWP_NOACTIVATE)
+	setstate &= ~SWPOS_ACTIVATE;
+  if(fuFlags & SWP_NOCOPYBITS)
+	setstate |= 0;		//TODO
+  if(fuFlags & SWP_NOMOVE)
+	setstate &= ~SWPOS_MOVE;
+  if(fuFlags & SWP_NOSIZE)
+	setstate &= ~SWPOS_SIZE;
+  if(fuFlags & SWP_NOREDRAW)
+	setstate |= SWPOS_NOREDRAW;
+  if(fuFlags & SWP_NOZORDER)
+	setstate &= ~SWPOS_ZORDER;
+  if(fuFlags & SWP_SHOWWINDOW)
+	setstate |= SWPOS_SHOW;
+
+  return OSLibWinSetWindowPos(OS2HwndFrame, hwndInsertAfter, x, y, cx, cy, setstate);
 }
+//******************************************************************************
+//Also destroys all the child windows (destroy parent, destroy children)
 //******************************************************************************
 BOOL Win32Window::DestroyWindow()
 {
-  return TRUE;
+  return OSLibWinDestroyWindow(OS2HwndFrame);
 }
 //******************************************************************************
 //TODO:
@@ -1014,26 +1079,33 @@ HWND Win32Window::GetTopWindow()
 {
  HWND topchild;
 
-  topchild = OSLibWinQueryTopMostChildWindow(OS2Hwnd);
+  topchild = OSLibWinQueryTopMostChildWindow(OS2HwndFrame);
   if(topchild)
-  {//TODO
+  {
 	return topchild;
   }
   else	return 0;
 }
 //******************************************************************************
-//TODO
+//Don't call WinUpdateWindow as that one also updates the child windows
+//Also need to send WM_PAINT directly to the window procedure, which doesn't
+//always happen with WinUpdateWindow (could be posted if thread doesn't own window)
 //******************************************************************************
 BOOL Win32Window::UpdateWindow()
 {  
+ RECTL rect;
+
+  if(OSLibWinQueryUpdateRect(OS2Hwnd, (PVOID)&rect))
+  {//update region not empty
+	SendMessageA((isIcon) ? WM_PAINTICON : WM_PAINT, 0, 0);
+  }
   return TRUE;
 }
 //******************************************************************************
-//TODO
 //******************************************************************************
 BOOL Win32Window::IsIconic()
 {
-  return FALSE;
+  return OSLibWinIsIconic(OS2HwndFrame);
 }
 //******************************************************************************
 //******************************************************************************
@@ -1143,8 +1215,9 @@ Win32Window *Win32Window::GetWindowFromHandle(HWND hwnd)
 {
  Win32Window *window;
 
-   if(HIWORD(hwnd) != 0x6800)
+   if(HIWORD(hwnd) != 0x6800) {
 	return NULL;
+   }
 
    if(HMHandleTranslateToOS2(LOWORD(hwnd), (PULONG)&window) == NO_ERROR) {
 	return window;
