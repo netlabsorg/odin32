@@ -1,6 +1,7 @@
- /* $Id: changelog,v 1.210 1999-09-18 15:55:20 sandervl Exp $ */
+ /* $Id: changelog,v 1.211 1999-09-18 17:44:56 sandervl Exp $ */
 
  99-09-18: Sander van Leeuwen <sandervl@xs4all.nl>
+	- KERNEL32: Added resource support for win32 apps compiled in OS/2
 	- INCLUDE: Header file changes for win32 apps compiled in OS/2
 	- VERSION: Create correct import lib
 	- WINMM:   Create correct import lib
