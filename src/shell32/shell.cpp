@@ -1,4 +1,4 @@
-/* $Id: shell.cpp,v 1.3 1999-10-19 10:23:27 phaller Exp $ */
+/* $Id: shell.cpp,v 1.4 2000-01-27 21:50:45 sandervl Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -103,11 +103,13 @@ static int SHELL_Attach = 0;
  *          DragAcceptFiles32               [SHELL32.54]
  */
 
-ODINPROCEDURE2(DragAcceptFiles, HWND, hWnd,
-                                BOOL, b)
+//SvL: DON'T USE ODINFUNCTION MACRO'S HERE; SetWindowLong (style) sends messages
+//     to the win32 app!!!! (FS messed up)
+void WINAPI DragAcceptFiles(HWND hWnd, BOOL b)
 {
   LONG exstyle;
 
+  dprintf(("DragAcceptFiles %x %d", hWnd, b));
   if( !IsWindow(hWnd) )
    return;
   exstyle = GetWindowLongA(hWnd,GWL_EXSTYLE);
