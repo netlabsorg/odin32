@@ -1,4 +1,4 @@
-/* $Id: buildenv.cmd,v 1.47 2003-03-19 20:51:51 bird Exp $
+/* $Id: buildenv.cmd,v 1.48 2003-03-20 19:52:27 bird Exp $
  *
  * This is the master tools environment script. It contains environment
  * configurations for many development tools. Each tool can be installed
@@ -26,7 +26,7 @@
     /*
      * Version
      */
-    sVersion = '1.0.18 [2003-03-19]';
+    sVersion = '1.0.19 [2003-03-20]';
 
     /*
      * Create argument array with lowercase arguments.
@@ -135,7 +135,9 @@
     aCfg.i.sId = 'nasm9833';        aCfg.i.sGrp = 'asm';        aCfg.i.sSet = 'NASM,''nasm9833''';      aCfg.i.sDesc = 'NASM version 0.98.33 compiled on May 28 2002'; i = i + 1;
     aCfg.i.sId = 'netqos2';         aCfg.i.sGrp = 'misc';       aCfg.i.sSet = 'NetQOS2';                aCfg.i.sDesc = 'NetQOS2 - help system for VAC40,VAC365,DB2 and more.'; i = i + 1;
     aCfg.i.sId = 'odin32testcase';  aCfg.i.sGrp = 'tests';      aCfg.i.sSet = 'Odin32Testcase';         aCfg.i.sDesc = 'Odin32 testcase setup'; i = i + 1;
-    aCfg.i.sId = 'perl';            aCfg.i.sGrp = 'script';     aCfg.i.sSet = 'Perl';                   aCfg.i.sDesc = 'Perl v5.0053'; i = i + 1;
+    aCfg.i.sId = 'perl';            aCfg.i.sGrp = 'script';     aCfg.i.sSet = 'Perl580';                aCfg.i.sDesc = 'Perl v5.8.0'; i = i + 1;
+    aCfg.i.sId = 'perl580';         aCfg.i.sGrp = 'script';     aCfg.i.sSet = 'Perl580';                aCfg.i.sDesc = 'Perl v5.8.0'; i = i + 1;
+    aCfg.i.sId = 'perl50053';       aCfg.i.sGrp = 'script';     aCfg.i.sSet = 'Perl50xxx';              aCfg.i.sDesc = 'Perl v5.0053'; i = i + 1;
     aCfg.i.sId = 'python';          aCfg.i.sGrp = 'script';     aCfg.i.sSet = 'Python';                 aCfg.i.sDesc = 'Python v1.5'; i = i + 1;
     aCfg.i.sId = 'toolkit40';       aCfg.i.sGrp = 'tlktos2';    aCfg.i.sSet = 'Toolkit40';              aCfg.i.sDesc = 'Toolkit v4.0 CSD 4'; i = i + 1;
     aCfg.i.sId = 'toolkit45';       aCfg.i.sGrp = 'tlktos2';    aCfg.i.sSet = 'Toolkit45';              aCfg.i.sDesc = 'Toolkit v4.5'; i = i + 1;
@@ -860,7 +862,8 @@ PathSetDefault: procedure expose aCfg. aPath. sPathFile
         aPath.i.sPId = 'mysql';                     aPath.i.sPath = 'f:\mysql2';                    i = i + 1;
         aPath.i.sPId = 'nasm9833';                  aPath.i.sPath = 'f:\nasm\os2\0.98.33';          i = i + 1;
         aPath.i.sPId = 'netqos2';                   aPath.i.sPath = 'f:\netqos2';                   i = i + 1;
-        aPath.i.sPId = 'perl';                      aPath.i.sPath = 'f:\perllib';                   i = i + 1;
+        aPath.i.sPId = 'perl50xxx';                 aPath.i.sPath = 'f:\perllib';                   i = i + 1;
+        aPath.i.sPId = 'perl580';                   aPath.i.sPath = 'f:\perl\v5.8.0';               i = i + 1;
         aPath.i.sPId = 'python';                    aPath.i.sPath = 'f:\python';                    i = i + 1;
         aPath.i.sPId = 'toolkit40';                 aPath.i.sPath = 'f:\toolkit\v40csd4';           i = i + 1;
         aPath.i.sPId = 'toolkit45';                 aPath.i.sPath = 'f:\toolkit\v45';               i = i + 1;
@@ -911,7 +914,8 @@ PathSetDefault: procedure expose aCfg. aPath. sPathFile
       /*aPath.i.sPId = 'mscv7-16';                  aPath.i.sPath = 'e:\msc\v7.0';                  i = i + 1;
         aPath.i.sPId = 'mysql';                     aPath.i.sPath = 'e:\mysql2';                    i = i + 1;
         aPath.i.sPId = 'netqos2';                   aPath.i.sPath = 'e:\netqos2';                   i = i + 1;
-        aPath.i.sPId = 'perl';                      aPath.i.sPath = 'e:\perllib';                   i = i + 1;
+        aPath.i.sPId = 'perl50xxx';                 aPath.i.sPath = 'e:\perllib';                   i = i + 1;
+        aPath.i.sPId = 'perl580';                   aPath.i.sPath = 'e:\dev\perl\v5.8.0';           i = i + 1;
         aPath.i.sPId = 'python';                    aPath.i.sPath = 'e:\python';                    i = i + 1;
         aPath.i.sPId = 'toolkit40';                 aPath.i.sPath = 'e:\toolkit';                   i = i + 1;
         aPath.i.sPId = 'toolkit45';                 aPath.i.sPath = 'e:\toolkit45';                 i = i + 1;
@@ -936,9 +940,9 @@ PathSetDefault: procedure expose aCfg. aPath. sPathFile
 
 
     /*
-     * Bird: work box.
+     * Bird: work boxes.
      */
-    if (translate(EnvGet('HOSTNAME')) = 'DREAM') then
+    if ((translate(EnvGet('HOSTNAME')) = 'DREAM')  | (translate(EnvGet('HOSTNAME')) = 'DESPAIR')) then
     do
         say 'Info: No or empty path file, using birds work defaults.';
         aPath.i.sPId = 'cvs';                       aPath.i.sPath = 'd:\dev\cvs\v11.1';             i = i + 1;
@@ -963,7 +967,8 @@ PathSetDefault: procedure expose aCfg. aPath. sPathFile
         aPath.i.sPId = 'mscv7-16';                  aPath.i.sPath = 'd:\dev\msc\v7.0';              i = i + 1;
         aPath.i.sPId = 'mysql';                     aPath.i.sPath = 'd:\apps\mysql\v3.23.50b1';     i = i + 1;
       /*aPath.i.sPId = 'netqos2';                   aPath.i.sPath = 'e:\netqos2';                   i = i + 1;*/
-        aPath.i.sPId = 'perl';                      aPath.i.sPath = 'd:\dev\perl\v5.00455';         i = i + 1;
+        aPath.i.sPId = 'perl50xxx';                 aPath.i.sPath = 'd:\dev\perl\v5.00455';         i = i + 1;
+        aPath.i.sPId = 'perl580';                   aPath.i.sPath = 'd:\dev\perl\v5.8.0';           i = i + 1;
       /*aPath.i.sPId = 'python';                    aPath.i.sPath = 'e:\python';                    i = i + 1;*/
         aPath.i.sPId = 'toolkit40';                 aPath.i.sPath = 'd:\dev\toolkit\v40csd1';       i = i + 1;
       /*aPath.i.sPId = 'toolkit45';                 aPath.i.sPath = 'e:\toolkit45';                 i = i + 1;
@@ -2807,13 +2812,13 @@ return 0;
 /*
  * PERL 5005_53 or 5.004_55
  */
-Perl: procedure expose aCfg. aPath. sPathFile
+Perl50xxx: procedure expose aCfg. aPath. sPathFile
     parse arg sToolId,sOperation,fRM,fQuiet
 
     /*
      * Perl main directory.
      */
-    sPathPerl       = PathQuery('perl', sToolId, sOperation);
+    sPathPerl       = PathQuery('perl50xxx', sToolId, sOperation);
     if (sPathPerl = '') then
         return 1;
     /* If config operation we're done now. */
@@ -2853,6 +2858,51 @@ Perl: procedure expose aCfg. aPath. sPathFile
         ) then
         return 2;
     rc = CheckCmdOutput('perl --version', 0, fQuiet, 'This is perl, version '||sVer||' built for os2');
+return rc;
+
+
+/*
+ * PERL v5.8.0
+ */
+Perl580: procedure expose aCfg. aPath. sPathFile
+    parse arg sToolId,sOperation,fRM,fQuiet
+
+    /*
+     * Perl main directory.
+     */
+    sPathPerl       = PathQuery('perl580', sToolId, sOperation);
+    if (sPathPerl = '') then
+        return 1;
+    /* If config operation we're done now. */
+    if (pos('config', sOperation) > 0) then
+        return 0;
+
+    /*
+     * Installing the environment variables.
+     */
+    sPathPerlForw   = translate(sPathPerl, '/', '\');
+    call EnvSet      fRM, 'PATH_PERL',      sPathPerl;
+    call EnvAddFront fRM, 'path',           sPathPerl'\bin\5.8.0;'
+    call EnvAddFront fRM, 'beginlibpath',   sPathPerl'\lib;'
+    call EnvAddEnd   fRM, 'bookshelf',      sPathPerl'\doc;'
+    call EnvSet      fRM, 'perllib_prefix', 'L:/Perl/lib;'sPathPerlForw'/lib'
+    call EnvSet      fRM, 'perl_sh_dir',    sPathPerlForw'/bin/5.8.0'
+    call EnvSet      fRM, 'manpath',        sPathPerlForw'/man'
+    call EnvSet      fRM, 'perl_badlang',   '0'
+
+    /*
+     * Verify.
+     */
+    if (pos('verify', sOperation) <= 0) then
+        return 0;
+
+    if (    \CfgVerifyFile(sPathPerl'\bin\5.8.0\perl.exe', fQuiet),
+        |   \CfgVerifyFile(sPathPerl'\lib\perlB12E.dll', fQuiet),
+        |   \CfgVerifyFile(sPathPerl'\bin\5.8.0\sh.exe', fQuiet),
+        ) then
+        return 2;
+    rc = CheckCmdOutput('perl --version', 0, fQuiet, 'This is perl, v5.8.0 built for os2_emx');
+
 return rc;
 
 
