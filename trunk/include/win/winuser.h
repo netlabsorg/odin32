@@ -3606,8 +3606,8 @@ HBRUSH    WINAPI GetSysColorBrush(INT);
 #define     GetSysModalWindow() ((HWND)0)
 HMENU     WINAPI GetSystemMenu(HWND,BOOL);
 INT       WINAPI GetSystemMetrics(INT);
-DWORD       WINAPI GetTabbedTextExtentA(HDC,LPCSTR,INT,INT,INT*);
-DWORD       WINAPI GetTabbedTextExtentW(HDC,LPCWSTR,INT,INT,INT*);
+DWORD       WINAPI GetTabbedTextExtentA(HDC,LPCSTR,INT,INT,CONST INT*);
+DWORD       WINAPI GetTabbedTextExtentW(HDC,LPCWSTR,INT,INT,CONST INT*);
 #define     GetTabbedTextExtent WINELIB_NAME_AW(GetTabbedTextExtent)
 HWND      WINAPI GetTopWindow(HWND);
 BOOL      WINAPI GetUpdateRect(HWND,LPRECT,BOOL);
@@ -3858,8 +3858,8 @@ BOOL      WINAPI SwitchToThisWindow(HWND,BOOL);
 BOOL      WINAPI SystemParametersInfoA(UINT,UINT,LPVOID,UINT);
 BOOL      WINAPI SystemParametersInfoW(UINT,UINT,LPVOID,UINT);
 #define     SystemParametersInfo WINELIB_NAME_AW(SystemParametersInfo)
-LONG        WINAPI TabbedTextOutA(HDC,INT,INT,LPCSTR,INT,INT,INT*,INT);
-LONG        WINAPI TabbedTextOutW(HDC,INT,INT,LPCWSTR,INT,INT,INT*,INT);
+LONG        WINAPI TabbedTextOutA(HDC,INT,INT,LPCSTR,INT,INT,const INT*,INT);
+LONG        WINAPI TabbedTextOutW(HDC,INT,INT,LPCWSTR,INT,INT,const INT*,INT);
 #define     TabbedTextOut WINELIB_NAME_AW(TabbedTextOut)
 INT       WINAPI ToAscii(UINT,UINT,LPBYTE,LPWORD,UINT);
 INT       WINAPI ToAsciiEx(UINT,UINT,LPBYTE,LPWORD,UINT,HKL);

@@ -1088,9 +1088,14 @@ DECL_WINELIB_TYPE_AW(FONTENUMPROCEX)
 #define TA_BASELINE         0x18
 
   /* ExtTextOut() parameters */
-#define ETO_GRAYED          0x01
-#define ETO_OPAQUE          0x02
-#define ETO_CLIPPED         0x04
+#define ETO_GRAYED          0x0001
+#define ETO_OPAQUE          0x0002
+#define ETO_CLIPPED         0x0004
+#define ETO_GLYPH_INDEX     0x0010
+#define ETO_RTLREADING      0x0080
+#define ETO_IGNORELANGUAGE  0x1000
+
+#define ASPECT_FILTERING    0x0001
 
 typedef struct
 {
