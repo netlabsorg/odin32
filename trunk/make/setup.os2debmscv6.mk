@@ -1,4 +1,4 @@
-# $Id: setup.os2debmscv6.mk,v 1.13 2002-08-28 03:42:44 bird Exp $
+# $Id: setup.os2debmscv6.mk,v 1.14 2002-08-28 05:02:20 bird Exp $
 
 # ---OS2, DEBUG, MSCV6-------------------------
 ENV_NAME="OS/2, Debug, Microsoft C v6.0a 32-bit"
@@ -15,33 +15,22 @@ ENV_ENVS_FORCE=vac308 mscv6
 # Include some shared standard stuff: ALP.
 #
 !include $(PATH_MAKE)\setup.os2debalp.mk
-!include $(PATH_MAKE)\setup.os2prfrc.mk
-!include $(PATH_MAKE)\setup.os2prfwrc.mk
-!include $(PATH_MAKE)\setup.os2prfilink.mk
+!include $(PATH_MAKE)\setup.os2debrc.mk
+!include $(PATH_MAKE)\setup.os2debwrc.mk
+!include $(PATH_MAKE)\setup.os2allilib.mk
+!include $(PATH_MAKE)\setup.os2debilink.mk
 
 
 #
 # The tools
 #
-AR=ilib.exe
 CC=cl386.exe
 CXX=false
-IMPLIB=implib.exe
 
 
 #
 # The flags
 #
-AR_FLAGS=/nologo /noignorecase
-AR_CMD=$(AR) $(AR_FLAGS) @"$(TARGET_LNK)"
-AR_LNK1= "$(@R).$(EXT_LIB)"
-AR_LNK2=y
-_AR_LNK3= +"$(TARGET_OBJS: ="&^
- +")"
-AR_LNK3= $(_AR_LNK3:+""&^
-=)
-AR_LNK4= "$(@R).lst";
-
 
 #
 # C Compiler flags.
@@ -109,8 +98,6 @@ CXX_PC_2_STDOUT=
 ! endif
 ! error
 !endif
-
-IMPLIB_FLAGS=/NOI /Nologo
 
 
 #

@@ -1,4 +1,4 @@
-# $Id: setup.os2debemx.mk,v 1.8 2002-08-28 03:42:43 bird Exp $
+# $Id: setup.os2debemx.mk,v 1.9 2002-08-28 05:02:20 bird Exp $
 
 # ---OS2, DEBUG, EMX----------------------------
 ENV_NAME="OS/2, Debug, EMX/GCC Compiler"
@@ -27,43 +27,20 @@ SPACE=_
 !include $(PATH_MAKE)\setup.os2debwrc.mk
 _LD_LAST_LIB = end.$(EXT_LIB)
 !include $(PATH_MAKE)\setup.os2debilink.mk
+!include $(PATH_MAKE)\setup.os2allilib.mk
 !include $(PATH_MAKE)\setup.optional.emx.mk
 
 
 #
 # The tools
 #
-!if 1
-AR=ilib.exe
-!else
-AR=lib.exe
-!endif
 CC=gcc.exe
 CXX=gcc.exe
-IMPLIB=implib.exe
 
 
 #
 # The flags
 #
-AR_FLAGS=/nologo /noignorecase
-!if 1
-AR_CMD=$(AR) $(AR_FLAGS) @"$(TARGET_LNK)"
-AR_LNK1= "$(@R).$(EXT_LIB)"
-AR_LNK2=y
-_AR_LNK3= +"$(TARGET_OBJS: ="&^
- +")"
-AR_LNK3= $(_AR_LNK3:+""&^
-=)
-AR_LNK4= "$(@R).lst";
-!else
-_AR_LNK1= $(TARGET), ^
-+"$(TARGET_OBJS: ="+^
-")"
-AR_LNK1= $(_AR_LNK1:""=)
-AR_LNK2= $(@R).lst
-!endif
-
 CC_FLAGS=-c -DDEBUG -DOS2 -D__32BIT__ -DMODEL=FLAT -Zomf -Wall -Wstrict-prototypes -Wno-trigraphs \
          -fno-common -march=i586 -g $(_CC_OPTIONAL) \
          $(CC_DEFINES:/D=-D) $(ALL_DEFINES:/D=-D) $(BUILD_DEFINES:/D=-D) $(CC_INCLUDES:^;= -I) $(ALL_INCLUDES:^;= -I) -I$(PATH_INCLUDES:^;= -I)
@@ -109,8 +86,6 @@ CC_FLAGS_IFS=$(CXX_FLAGS_IFS)
 ! endif
 ! error
 !endif
-
-IMPLIB_FLAGS=/NOI /Nologo
 
 
 #

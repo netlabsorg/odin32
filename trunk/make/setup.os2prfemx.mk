@@ -1,4 +1,4 @@
-# $Id: setup.os2prfemx.mk,v 1.8 2002-08-28 03:42:44 bird Exp $
+# $Id: setup.os2prfemx.mk,v 1.9 2002-08-28 05:02:21 bird Exp $
 
 # ---OS2, PROFILE, EMX----------------------------
 ENV_NAME="OS/2, Profile, EMX/GCC Compiler"
@@ -27,32 +27,20 @@ SPACE=_
 !include $(PATH_MAKE)\setup.os2prfwrc.mk
 _LD_LAST_LIB = end.$(EXT_LIB)
 !include $(PATH_MAKE)\setup.os2prfilink.mk
+!include $(PATH_MAKE)\setup.os2allilib.mk
 !include $(PATH_MAKE)\setup.optional.emx.mk
 
 
 #
 # The tools
 #
-AR=ilib.exe
 CC=gcc.exe
 CXX=gcc.exe
-IMPLIB=implib.exe
 
 
 #
 # The flags
 #
-AR_FLAGS=/nologo /noignorecase
-AR_CMD=$(AR) $(AR_FLAGS) @"$(TARGET_LNK)"
-AR_LNK1= "$(@R).$(EXT_LIB)"
-AR_LNK2=y
-_AR_LNK3= +"$(TARGET_OBJS: ="&^
- +")"
-AR_LNK3= $(_AR_LNK3:+""&^
-=)
-AR_LNK4= "$(@R).lst";
-
-
 CC_FLAGS=-c -DDEBUG -DOS2 -D__32BIT__ -DMODEL=FLAT -Zomf -Wall -Wstrict-prototypes -Wno-trigraphs \
          -fno-common -march=i586 -g $(_CC_OPTIONAL) \
          $(CC_DEFINES:/D=-D) $(ALL_DEFINES:/D=-D) $(BUILD_DEFINES:/D=-D) $(CC_INCLUDES:^;= -I) $(ALL_INCLUDES:^;= -I) -I$(PATH_INCLUDES:^;= -I)
@@ -98,8 +86,6 @@ CC_FLAGS_IFS=$(CXX_FLAGS_IFS)
 ! endif
 ! error
 !endif
-
-IMPLIB_FLAGS=/NOI /Nologo
 
 
 #

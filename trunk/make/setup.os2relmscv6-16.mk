@@ -1,4 +1,4 @@
-# $Id: setup.os2relmscv6-16.mk,v 1.10 2002-08-28 03:42:45 bird Exp $
+# $Id: setup.os2relmscv6-16.mk,v 1.11 2002-08-28 05:02:22 bird Exp $
 
 # ---OS2, RELEASE, MSCV6-------------------------
 ENV_NAME="OS/2, Release, Microsoft C v6.0a 16-bit"
@@ -18,31 +18,20 @@ ENV_16BIT = 16
 !include $(PATH_MAKE)\setup.os2relrc.mk
 !include $(PATH_MAKE)\setup.os2relwrc.mk
 !include $(PATH_MAKE)\setup.os2relilink.mk
+!include $(PATH_MAKE)\setup.os2allilib.mk
 !include $(PATH_MAKE)\setup.optional.mscvx-16.mk
 
 
 #
 # The tools
 #
-AR=ilib.exe
 CC=cl.exe
 CXX=false
-IMPLIB=implib.exe
 
 
 #
 # The flags
 #
-AR_FLAGS=/nologo /noignorecase
-AR_CMD=$(AR) $(AR_FLAGS) @"$(TARGET_LNK)"
-AR_LNK1= "$(@R).$(EXT_LIB)"
-AR_LNK2=y
-_AR_LNK3= +"$(TARGET_OBJS: ="&^
- +")"
-AR_LNK3= $(_AR_LNK3:+""&^
-=)
-AR_LNK4= "$(@R).lst";
-
 CC_FLAGS=/nologo /c /DOS2 /D__16BIT__ /W0 /G2 /Ogeitln /Zi $(_CC_OPTIONAL) $(CC_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CC_INCLUDES) $(ALL_INCLUDES) /I$(PATH_INCLUDES)
 CC_FLAGS_EXE=$(CC_FLAGS)
 CC_FLAGS_DLL=$(CC_FLAGS)
@@ -71,8 +60,6 @@ CXX_PC_2_STDOUT=
 ! endif
 ! error
 !endif
-
-IMPLIB_FLAGS=/NOI /Nologo
 
 
 #

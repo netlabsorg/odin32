@@ -1,4 +1,4 @@
-# $Id: setup.os2debvac365.mk,v 1.16 2002-08-28 03:42:44 bird Exp $
+# $Id: setup.os2debvac365.mk,v 1.17 2002-08-28 05:02:20 bird Exp $
 
 # ---OS2, DEBUG, VAC365-------------------------
 ENV_NAME="OS/2, Debug, IBM VisualAge for C++ 3.6.5"
@@ -18,31 +18,21 @@ ENV_ENVS_FORCE=vac365
 !include $(PATH_MAKE)\setup.os2prfrc.mk
 !include $(PATH_MAKE)\setup.os2prfwrc.mk
 !include $(PATH_MAKE)\setup.os2prfilink.mk
+_AR_NOFREE      = 1
+!include $(PATH_MAKE)\setup.os2allilib.mk
 !include $(PATH_MAKE)\setup.optional.vac3xx.mk
 
 
 #
 # The tools
 #
-AR=ilib.exe
 CC=icc.exe
 CXX=icc.exe
-IMPLIB=implib.exe
 
 
 #
 # The flags
 #
-AR_FLAGS=/nofree /nologo /noignorecase
-AR_CMD=$(AR) $(AR_FLAGS) @"$(TARGET_LNK)"
-AR_LNK1= "$(@R).$(EXT_LIB)"
-AR_LNK2=y
-_AR_LNK3= +"$(TARGET_OBJS: ="&^
- +")"
-AR_LNK3= $(_AR_LNK3:+""&^
-=)
-AR_LNK4= "$(@R).lst";
-
 CC_FLAGS=/Q /DDEBUG /DOS2 /D__32BIT__ /D__i386__ /DMODEL=FLAT /Ti+ /O- /Ss+ /C+ $(_CC_OPTIONAL) $(CC_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CC_INCLUDES) $(ALL_INCLUDES) /I$(PATH_INCLUDES)
 CC_FLAGS_EXE=$(CC_FLAGS) /Gm+ /Ge+
 CC_FLAGS_DLL=$(CC_FLAGS) /Gm+ /Ge-
@@ -84,8 +74,6 @@ CXX_FLAGS_SYS=$(CC_FLAGS_SYS) /Tdc
 CXX_FLAGS_VDD=$(CC_FLAGS_VDD) /Tdc
 CXX_FLAGS_IFS=$(CC_FLAGS_IFS) /Tdc
 !endif
-
-IMPLIB_FLAGS=/NOI /Nologo
 
 
 #
