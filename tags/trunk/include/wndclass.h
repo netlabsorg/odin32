@@ -1,4 +1,4 @@
-/* $Id: wndclass.h,v 1.3 1999-06-20 16:47:37 sandervl Exp $ */
+/* $Id: wndclass.h,v 1.4 1999-08-11 22:54:37 phaller Exp $ */
 
 /*
  *
@@ -19,8 +19,8 @@
 #endif
 
 //SvL: 18-7-'98, Registers system window classes (button, listbox etc etc)
-void RegisterSystemClasses(ULONG hModule);
-void UnregisterSystemClasses();
+void WINAPI RegisterSystemClasses(HMODULE hModule);
+void WINAPI UnregisterSystemClasses(void);
 
 class Win32WindowClass
 {
@@ -36,9 +36,9 @@ static WNDPROC_O32 GetOS2ClassCallback();
  static Win32WindowClass *FindClass(LPSTR id);
 
 	   WNDPROC GetWinCallback() { return pWinCallback; };
-	      void SetWinCallback(WNDPROC newcallback) 
-	      { 
-		pWinCallback = newcallback; 
+	      void SetWinCallback(WNDPROC newcallback)
+	      {
+		pWinCallback = newcallback;
 	      };
 
 private:
