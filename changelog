@@ -1,4 +1,4 @@
- /* $Id: changelog,v 1.527 1999-12-09 16:48:14 cbratschi Exp $ */
+ /* $Id: changelog,v 1.528 1999-12-09 19:11:55 sandervl Exp $ */
 
  99-12-09: Christoph Bratschi <cbratschi@datacomm.ch>
 	- GDI32: fixed TextOut and ExtTextOut bugs
@@ -9,6 +9,8 @@
                     Ported ExpandEnvironmentStringsA/W (Wine: 991114)
                     Create HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Windows
                     key and necessary subkeys (including CSD version)
+                    Corrected return value of Read/WriteFile (must be boolean, not 
+                    an error code)
 	- USER32: Major changes for window procedures
                   Now identical to Wine. Window is unicode only if it's
                   window procedure comes from a unicode class.
