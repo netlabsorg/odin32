@@ -1,4 +1,4 @@
-/* $Id: dibsect.cpp,v 1.37 2000-08-18 18:14:57 sandervl Exp $ */
+/* $Id: dibsect.cpp,v 1.38 2000-08-30 18:05:24 sandervl Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -40,6 +40,8 @@ static VMutex dibMutex;
 DIBSection::DIBSection(BITMAPINFOHEADER_W *pbmi, char *pColors, DWORD iUsage, DWORD hSection, DWORD dwOffset, DWORD handle, int fFlip)
                 : bmpBits(NULL), pOS2bmp(NULL), next(NULL), bmpBitsDblBuffer(NULL)
 {
+ int  palsize=0;
+
   bmpsize = pbmi->biWidth;
   /* @@@PH 98/06/07 -- high-color bitmaps don't have palette */
 
@@ -49,15 +51,18 @@ DIBSection::DIBSection(BITMAPINFOHEADER_W *pbmi, char *pColors, DWORD iUsage, DW
   switch(pbmi->biBitCount)
   {
         case 1:
-                bmpsize = ((bmpsize + 31) & ~31) / 8;
-                os2bmphdrsize += ((1 << pbmi->biBitCount)-1)*sizeof(RGB2);
+      		bmpsize = ((bmpsize + 31) & ~31) / 8;
+      		palsize = ((1 << pbmi->biBitCount))*sizeof(RGB2);
+      		os2bmphdrsize += palsize;
                 break;
         case 4:
                 bmpsize = ((bmpsize + 7) & ~7) / 2;
-                os2bmphdrsize += ((1 << pbmi->biBitCount)-1)*sizeof(RGB2);
+      		palsize = ((1 << pbmi->biBitCount))*sizeof(RGB2);
+                os2bmphdrsize += palsize;
                 break;
         case 8:
-                os2bmphdrsize += ((1 << pbmi->biBitCount)-1)*sizeof(RGB2);
+      		palsize = ((1 << pbmi->biBitCount))*sizeof(RGB2);
+      		os2bmphdrsize += palsize;
         	bmpsize = (bmpsize + 3) & ~3;
                 break;
         case 16:
@@ -78,6 +83,7 @@ DIBSection::DIBSection(BITMAPINFOHEADER_W *pbmi, char *pColors, DWORD iUsage, DW
    }
 
    this->hSection = hSection;
+   this->dwOffset = dwOffset;
    if(hSection) {
 	bmpBits = (char *)MapViewOfFile(hSection, FILE_MAP_ALL_ACCESS_W, 0, dwOffset, bmpsize*pbmi->biHeight);
 	if(!bmpBits) {
@@ -129,12 +135,15 @@ DIBSection::DIBSection(BITMAPINFOHEADER_W *pbmi, char *pColors, DWORD iUsage, DW
    dibinfo.dsBm.bmBitsPixel = pbmi->biBitCount;
    dibinfo.dsBm.bmBits      = bmpBits;
 
-   dibinfo.dshSection       = handle;
+   dibinfo.dshSection       = hSection;
    dibinfo.dsOffset         = dwOffset;
 
    if(iUsage == DIB_PAL_COLORS || pbmi->biBitCount <= 8)
    {
         dibinfo.dsBitfields[0] = dibinfo.dsBitfields[1] = dibinfo.dsBitfields[2] = 0;
+   	if(palsize) {
+		SetDIBColorTable(0, (1 << pbmi->biBitCount), (RGBQUAD *)(pbmi+1));
+   	}
    }
    else {
 	switch(pbmi->biBitCount)
@@ -304,7 +313,7 @@ int DIBSection::SetDIBits(HDC hdc, HBITMAP hbitmap, UINT startscan, UINT
    dibinfo.dsBm.bmBits      = bmpBits;
 
    dibinfo.dshSection       = hSection;
-   dibinfo.dsOffset         = 0; // TODO: put the correct value here (if createdibsection with file handle)
+   dibinfo.dsOffset         = dwOffset;
 
    if(coloruse == DIB_PAL_COLORS || pbmi->biBitCount <= 8)
    {
@@ -376,7 +385,9 @@ int DIBSection::SetDIBColorTable(int startIdx, int cEntries, RGBQUAD *rgb)
   for(i=startIdx;i<cEntries;i++)
   {
     pOS2bmp->argbColor[i].fcOptions = 0;
+#ifdef DEBUG_PALETTE
     dprintf2(("Index %d : 0x%08X\n",i, *((ULONG*)(&pOS2bmp->argbColor[i])) ));
+#endif
   }
 
   return(cEntries);
@@ -546,6 +557,9 @@ BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nDestWidth,
   return(FALSE);
 }
 //******************************************************************************
+int WIN32API GetDIBits(HDC hdc, HBITMAP hBitmap, UINT uStartScan, UINT cScanLines, 
+                       void *lpvBits, BITMAPINFO_W * lpbi, UINT uUsage);
+
 //******************************************************************************
 void DIBSection::sync(HDC hdc, DWORD nYdest, DWORD nDestHeight) 
 {
@@ -554,6 +568,22 @@ void DIBSection::sync(HDC hdc, DWORD nYdest, DWORD nDestHeight)
 
   dprintf(("Sync destination dibsection %x (%x)", handle, hdc));
 
+#if 0
+  BITMAPINFO_W *tmphdr = (BITMAPINFO_W *)malloc(os2bmphdrsize + sizeof(BITMAPINFO_W));
+  tmphdr->bmiHeader.biSize = sizeof(BITMAPINFOHEADER_W);
+  GetDIBits(hdc, handle, nYdest, nDestHeight, NULL, tmphdr, 0);
+  destBuf = GetDIBObject() + nYdest*dibinfo.dsBm.bmWidthBytes;
+  rc = GetDIBits(hdc, handle, nYdest, nDestHeight, destBuf, tmphdr, 0);
+#ifdef DEBUG_PALETTE
+  if(rc && tmphdr->bmiHeader.biBitCount <= 8) {
+  	for(int i=0;i<(1<<tmphdr->bmiHeader.biBitCount);i++)
+  	{
+    		dprintf2(("Index %d : 0x%08X\n",i, *((ULONG*)(&tmphdr->bmiColors[i])) ));
+  	}
+  }
+#endif
+
+#else
   BITMAPINFO2 *tmphdr = (BITMAPINFO2 *)malloc(os2bmphdrsize);
   memcpy(tmphdr, pOS2bmp, os2bmphdrsize);
 
@@ -575,7 +605,17 @@ void DIBSection::sync(HDC hdc, DWORD nYdest, DWORD nDestHeight)
   	destBuf = GetDIBObject() + nYdest*dibinfo.dsBm.bmWidthBytes;
         rc = GpiQueryBitmapBits(hdc, nYdest, nDestHeight, destBuf,
                           tmphdr);
+#ifdef DEBUG_PALETTE
+	if(rc != GPI_ALTERROR && tmphdr->cBitCount <= 8) {
+	  	for(int i=0;i<(1<<tmphdr->cBitCount);i++)
+	  	{
+	    		dprintf2(("Index %d : 0x%08X\n",i, *((ULONG*)(&tmphdr->argbColor[i])) ));
+	  	}
+	}
+#endif
   }
+#endif
+#if 0
   if(dibinfo.dsBitfields[1] == 0x3E0) {//RGB 555?
  	dprintf(("DIBSection::sync: convert RGB 565 to RGB 555"));
 
@@ -586,10 +626,31 @@ void DIBSection::sync(HDC hdc, DWORD nYdest, DWORD nDestHeight)
 	}
 	else   	RGB565to555((WORD *)destBuf, (WORD *)destBuf, (nDestHeight*dibinfo.dsBm.bmWidthBytes)/sizeof(WORD));
   }
+#endif
   free(tmphdr);
   if(rc != nDestHeight) {
 	DebugInt3();
   }
+}
+//******************************************************************************
+//manual sync if no stretching and bpp is the same
+//WARNING: this also assumes the colortables are the same 
+//******************************************************************************
+void DIBSection::sync(DWORD xDst, DWORD yDst, DWORD widthDst, DWORD heightDst, PVOID bits)
+{
+ char *srcbuf, *destbuf;
+ int  linesize;
+
+   srcbuf  = (char *)bits + dibinfo.dsBm.bmWidthBytes*yDst + 
+                    (xDst*dibinfo.dsBm.bmWidthBytes)/pOS2bmp->cx;
+   destbuf = (char *)GetDIBObject() + dibinfo.dsBm.bmWidthBytes*yDst + 
+                    (xDst*dibinfo.dsBm.bmWidthBytes)/pOS2bmp->cx;
+   linesize = (widthDst*dibinfo.dsBm.bmWidthBytes)/pOS2bmp->cx;
+   for(int i=0;i<heightDst;i++) {
+	memcpy(destbuf, srcbuf, linesize);
+	destbuf += dibinfo.dsBm.bmWidthBytes;
+	srcbuf  += linesize;
+   }
 }
 //******************************************************************************
 //******************************************************************************
