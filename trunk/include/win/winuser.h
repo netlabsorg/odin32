@@ -1,4 +1,4 @@
-/* $Id: winuser.h,v 1.27 2000-01-09 14:13:13 cbratschi Exp $ */
+/* $Id: winuser.h,v 1.28 2000-01-13 20:51:14 sandervl Exp $ */
 
 #ifndef __INCLUDE_WINUSER_H
 #define __INCLUDE_WINUSER_H
@@ -2333,6 +2333,10 @@ typedef struct
 
 #define SWP_NOSENDCHANGING  0x0400
 #define SWP_DEFERERASE      0x2000
+
+/* undocumented SWP flags - from SDK 3.1 */
+#define SWP_NOCLIENTSIZE    0x0800
+#define SWP_NOCLIENTMOVE    0x1000
 
 #define HWND_DESKTOP        ((HWND)0)
 #define HWND_BROADCAST      ((HWND)0xffff)
