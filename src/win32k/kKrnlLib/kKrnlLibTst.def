@@ -1,4 +1,4 @@
-;/* $Id: kKrnlLibTst.def,v 1.4 2001-10-19 00:08:41 bird Exp $
+;/* $Id: kKrnlLibTst.def,v 1.5 2001-11-15 04:20:15 bird Exp $
 ; *
 ; * Definition file for the Ring-3 test program.
 ; *
@@ -45,6 +45,7 @@ SEGMENTS
 
     LOGDATA_16BIT       class 'LOGDATA_16BIT'
 
+    STACK32             class 'STACK' STACK
 
 IMPORTS
      DosQuerySysState = DOSCALL1.368
