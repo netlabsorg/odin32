@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2002-02-20 11:57:31 sandervl Exp $
+# $Id: makefile,v 1.4 2002-07-26 17:18:30 sandervl Exp $
 
 #
 # Odin32 API
@@ -32,6 +32,7 @@ $(ODIN32_LIB)/$(ODINCRT).lib \
 OS2386.LIB \
 so32dll.lib \
 tcp32dll.lib \
+$(ODIN32_LIB)/wsock32.lib \
 $(RTLLIB_O)
 
 
