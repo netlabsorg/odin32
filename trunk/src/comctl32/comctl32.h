@@ -1,4 +1,4 @@
-/* $Id: comctl32.h,v 1.10 1999-11-14 10:58:37 achimha Exp $ */
+/* $Id: comctl32.h,v 1.11 1999-12-18 20:56:58 achimha Exp $ */
 /*
  * Win32 common controls implementation
  *
@@ -11,7 +11,7 @@
  *
  */
 
-/* Status: WINE 990923 */
+/* Status: WINE 991212 */
 
 #ifndef _H_COMCTL32
 #define _H_COMCTL32
@@ -73,6 +73,8 @@ extern HMODULE COMCTL32_hModule;
 #define IDC_FINISH_BUTTON 12325
 #define IDC_SUNKEN_LINE   12326
 
+#define IDS_CLOSE 4160
+
 /* Toolbar customization dialog */
 #define IDD_TBCUSTOMIZE     200
 
@@ -108,5 +110,8 @@ extern HMODULE COMCTL32_hModule;
 #define IDM_OCT				310
 #define IDM_NOV				311
 #define IDM_DEC				312
+
+/* treeview checkboxes */
+#define IDT_CHECK 401
 
 #endif /* _H_COMCTL32 */

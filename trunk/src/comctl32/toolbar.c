@@ -1,4 +1,4 @@
-/* $Id: toolbar.c,v 1.18 1999-11-19 16:19:22 achimha Exp $ */
+/* $Id: toolbar.c,v 1.19 1999-12-18 20:57:01 achimha Exp $ */
 /*
  * Toolbar control
  *
@@ -9,11 +9,12 @@
  * TODO:
  *   - A little bug in TOOLBAR_DrawMasked()
  *   - Button wrapping (under construction).
- *   - Messages.
+ *   - Messages (under construction).
  *   - Notifications.
  *   - Fix TB_SETROWS.
  *   - Tooltip support (almost complete).
- *   - Fix TOOLBAR_SetButtonInfo32A.
+ *   - Unicode support (under construction).
+ *   - Fix TOOLBAR_SetButtonInfo32A/W.
  *   - Drag & drop of buttons
  *
  * Testing:
@@ -26,7 +27,7 @@
  *   - Microsofts controlspy examples.
  */
 
-/* WINE 991114 level */
+/* WINE 991212 level */
 
 /* CB: Odin32/WINE bugs
   - IMAGELIST_Draw draws a line too at the bottom of the bitmap (toolbar.exe)
@@ -67,7 +68,7 @@ TOOLBAR_DrawFlatSeparator (LPRECT lpRect, HDC hdc)
 
 static void
 TOOLBAR_DrawString (TOOLBAR_INFO *infoPtr, TBUTTON_INFO *btnPtr,
-                    HDC hdc, INT nState)
+                    HDC hdc, INT nState, DWORD dwStyle)
 {
     RECT   rcText = btnPtr->rect;
     HFONT  hOldFont;
@@ -77,7 +78,12 @@ TOOLBAR_DrawString (TOOLBAR_INFO *infoPtr, TBUTTON_INFO *btnPtr,
     /* draw text */
     if ((btnPtr->iString > -1) && (btnPtr->iString < infoPtr->nNumStrings)) {
         InflateRect (&rcText, -3, -3);
-        rcText.top += infoPtr->nBitmapHeight;
+        if (dwStyle & TBSTYLE_LIST) {
+          rcText.left += infoPtr->nBitmapWidth;
+        }
+        else {
+          rcText.top += infoPtr->nBitmapHeight;
+        }
         if (nState & (TBSTATE_PRESSED | TBSTATE_CHECKED))
             OffsetRect (&rcText, 1, 1);
 
@@ -208,17 +214,20 @@ TOOLBAR_DrawButton (HWND hwnd, TBUTTON_INFO *btnPtr, HDC hdc)
       else
         TOOLBAR_DrawMasked (infoPtr, btnPtr, hdc, rc.left+1, rc.top+1);
 
-      TOOLBAR_DrawString (infoPtr, btnPtr, hdc, btnPtr->fsState);
+      TOOLBAR_DrawString (infoPtr, btnPtr, hdc, btnPtr->fsState, dwStyle);
       return;
     }
 
     /* pressed TBSTYLE_BUTTON */
     if (btnPtr->fsState & TBSTATE_PRESSED)
     {
-      DrawEdge (hdc, &rc, EDGE_SUNKEN, BF_RECT | BF_MIDDLE | BF_ADJUST);
+      if (dwStyle & TBSTYLE_FLAT)
+        DrawEdge(hdc, &rc, BDR_SUNKENOUTER, BF_RECT | BF_MIDDLE | BF_ADJUST);
+      else
+        DrawEdge (hdc, &rc, EDGE_SUNKEN, BF_RECT | BF_MIDDLE | BF_ADJUST);
       ImageList_Draw (infoPtr->himlDef, btnPtr->iBitmap, hdc,
                       rc.left+2, rc.top+2, ILD_NORMAL);
-      TOOLBAR_DrawString (infoPtr, btnPtr, hdc, btnPtr->fsState);
+      TOOLBAR_DrawString (infoPtr, btnPtr, hdc, btnPtr->fsState, dwStyle);
       return;
     }
 
@@ -237,7 +246,7 @@ TOOLBAR_DrawButton (HWND hwnd, TBUTTON_INFO *btnPtr, HDC hdc)
         ImageList_Draw (infoPtr->himlDef, btnPtr->iBitmap, hdc,
                         rc.left+2, rc.top+2, ILD_NORMAL);
 
-        TOOLBAR_DrawString (infoPtr, btnPtr, hdc, btnPtr->fsState);
+        TOOLBAR_DrawString (infoPtr, btnPtr, hdc, btnPtr->fsState, dwStyle);
         return;
     }
 
@@ -249,7 +258,7 @@ TOOLBAR_DrawButton (HWND hwnd, TBUTTON_INFO *btnPtr, HDC hdc)
 
       TOOLBAR_DrawPattern (hdc, &rc);
       TOOLBAR_DrawMasked (infoPtr, btnPtr, hdc, rc.left+1, rc.top+1);
-      TOOLBAR_DrawString (infoPtr, btnPtr, hdc, btnPtr->fsState);
+      TOOLBAR_DrawString (infoPtr, btnPtr, hdc, btnPtr->fsState, dwStyle);
       return;
     }
 
@@ -257,8 +266,7 @@ TOOLBAR_DrawButton (HWND hwnd, TBUTTON_INFO *btnPtr, HDC hdc)
     if (dwStyle & TBSTYLE_FLAT)
     {
       if(btnPtr->bHot)
-          DrawEdge (hdc, &rc, BDR_RAISEDINNER,
-                     BF_RECT | BF_MIDDLE | BF_SOFT);
+          DrawEdge (hdc, &rc, BDR_RAISEDINNER, BF_RECT | BF_MIDDLE);
 
       if(btnPtr->bHot && infoPtr->himlHot)
           ImageList_Draw (infoPtr->himlHot, btnPtr->iBitmap, hdc,
@@ -275,7 +283,7 @@ TOOLBAR_DrawButton (HWND hwnd, TBUTTON_INFO *btnPtr, HDC hdc)
                       rc.left+1, rc.top+1, ILD_NORMAL);
     }
 
-    TOOLBAR_DrawString (infoPtr, btnPtr, hdc, btnPtr->fsState);
+    TOOLBAR_DrawString (infoPtr, btnPtr, hdc, btnPtr->fsState, dwStyle);
 }
 
 
@@ -341,11 +349,10 @@ TOOLBAR_CalcStrings (HWND hwnd, LPSIZE lpSize)
 */
 
 static void
-TOOLBAR_WrapToolbar( HWND hwnd )
+TOOLBAR_WrapToolbar( HWND hwnd, DWORD dwStyle )
 {
     TOOLBAR_INFO *infoPtr = TOOLBAR_GetInfoPtr (hwnd);
     TBUTTON_INFO *btnPtr;
-    DWORD dwStyle = GetWindowLongA (hwnd, GWL_STYLE);
     INT x, cx, i, j;
     RECT rc;
     BOOL bWrap, bButtonWrap;
@@ -490,6 +497,7 @@ static void
 TOOLBAR_CalcToolbar (HWND hwnd)
 {
     TOOLBAR_INFO *infoPtr = TOOLBAR_GetInfoPtr(hwnd);
+    DWORD dwStyle = GetWindowLongA(hwnd, GWL_STYLE);
     TBUTTON_INFO *btnPtr;
     INT i, nRows, nSepRows;
     INT x, y, cx, cy;
@@ -499,20 +507,26 @@ TOOLBAR_CalcToolbar (HWND hwnd)
 
     TOOLBAR_CalcStrings (hwnd, &sizeString);
 
-    if (sizeString.cy > 0)
-        infoPtr->nButtonHeight = sizeString.cy + infoPtr->nBitmapHeight + 6;
-    else if (infoPtr->nButtonHeight < infoPtr->nBitmapHeight + 6)
-        infoPtr->nButtonHeight = infoPtr->nBitmapHeight + 6;
+    if (dwStyle & TBSTYLE_LIST) {
+      infoPtr->nButtonHeight = max(infoPtr->nBitmapHeight, sizeString.cy) + 6;
+      infoPtr->nButtonWidth = infoPtr->nBitmapWidth + sizeString.cx + 6;
+    }
+    else {
+      if (sizeString.cy > 0)
+          infoPtr->nButtonHeight = sizeString.cy + infoPtr->nBitmapHeight + 6;
+      else if (infoPtr->nButtonHeight < infoPtr->nBitmapHeight + 6)
+          infoPtr->nButtonHeight = infoPtr->nBitmapHeight + 6;
 
-    if (sizeString.cx > infoPtr->nBitmapWidth)
-        infoPtr->nButtonWidth = sizeString.cx + 6;
-    else if (infoPtr->nButtonWidth < infoPtr->nBitmapWidth + 6)
-        infoPtr->nButtonWidth = infoPtr->nBitmapWidth + 6;
+      if (sizeString.cx > infoPtr->nBitmapWidth)
+          infoPtr->nButtonWidth = sizeString.cx + 6;
+      else if (infoPtr->nButtonWidth < infoPtr->nBitmapWidth + 6)
+          infoPtr->nButtonWidth = infoPtr->nBitmapWidth + 6;
+    }
 
-    TOOLBAR_WrapToolbar( hwnd );
+    TOOLBAR_WrapToolbar( hwnd, dwStyle );
 
     x  = infoPtr->nIndent;
-    y  = TOP_BORDER;
+    y  = (dwStyle & TBSTYLE_FLAT) ? 0: TOP_BORDER;
     cx = infoPtr->nButtonWidth;
     cy = infoPtr->nButtonHeight;
     nRows = nSepRows = 0;
@@ -1556,30 +1570,157 @@ static BOOL TBCUSTOMIZE_MeasureItem(HWND hwnd,WPARAM wParam,LPARAM lParam)
 static BOOL WINAPI
 TOOLBAR_CustomizeDialogProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-    TOOLBAR_INFO *infoPtr;
+    TOOLBAR_INFO *infoPtr = (TOOLBAR_INFO *)GetWindowLongA (hwnd, DWL_USER);
+    static HDSA hDsa = NULL;
 
     switch (uMsg)
     {
-        case WM_INITDIALOG:
-            return TBCUSTOMIZE_InitDialog(hwnd,wParam,lParam);
+	case WM_INITDIALOG:
+	    infoPtr = (TOOLBAR_INFO *)lParam;
+	    SetWindowLongA (hwnd, DWL_USER, (DWORD)infoPtr);
 
-        case WM_CLOSE:
-            return TBCUSTOMIZE_Close(hwnd,wParam,lParam);
+	    hDsa = DSA_Create (sizeof(TBUTTON_INFO), 5);
 
-        case WM_COMMAND:
-            return TBCUSTOMIZE_Command(hwnd,wParam,lParam);
+	    if (infoPtr)
+	    {
+		TBUTTON_INFO *btnPtr;
+		INT i;
 
-        case WM_DESTROY:
-            return TBCUSTOMIZE_Destroy(hwnd,wParam,lParam);
+		/* insert 'virtual' separator button into 'available buttons' list */
+		SendDlgItemMessageA (hwnd, IDC_AVAILBTN_LBOX, LB_ADDSTRING, 0, (LPARAM)"");
 
-        case WM_DRAWITEM:
-            return TBCUSTOMIZE_DrawItem(hwnd,wParam,lParam);
+		/* copy all buttons and append them to the right listbox */		
+		btnPtr = infoPtr->buttons;
+		for (i = 0; i < infoPtr->nNumButtons; i++, btnPtr++)
+		{
+		    DSA_InsertItem (hDsa, i, btnPtr);
 
-        case WM_MEASUREITEM:
-            return TBCUSTOMIZE_MeasureItem(hwnd,wParam,lParam);
+		    /* FIXME: hidden buttons appear in the 'toolbar buttons' list too */
+		    if (btnPtr->fsState & TBSTATE_HIDDEN)
+		    {
+			SendDlgItemMessageA (hwnd, IDC_AVAILBTN_LBOX, LB_ADDSTRING, 0, (LPARAM)"");
+		    }
+		    else
+		    {
+			SendDlgItemMessageA (hwnd, IDC_TOOLBARBTN_LBOX, LB_ADDSTRING, 0, (LPARAM)"");
+		    }
+		}
 
-        default:
-            return FALSE;
+		/* append 'virtual' separator button to the 'toolbar buttons' list */
+		/* TODO */
+	    }
+	    return TRUE;
+
+	case WM_CLOSE:
+	    EndDialog(hwnd, FALSE);
+	    return TRUE;
+
+	case WM_COMMAND:
+	    switch (LOWORD(wParam))
+	    {
+		case IDCANCEL:
+		    EndDialog(hwnd, FALSE);
+		    break;
+	    }
+	    return TRUE;
+
+	case WM_DESTROY:
+	    if (hDsa)
+		DSA_Destroy (hDsa);
+	    return TRUE;
+
+	case WM_DRAWITEM:
+	    if (wParam == IDC_AVAILBTN_LBOX || wParam == IDC_TOOLBARBTN_LBOX)
+	    {
+		LPDRAWITEMSTRUCT lpdis = (LPDRAWITEMSTRUCT)lParam;
+		TBUTTON_INFO btnPtr;
+		RECT rcButton;
+		RECT rcText;
+		HPEN hOldPen;
+		HBRUSH hOldBrush;
+		COLORREF oldText = 0;
+		COLORREF oldBk = 0;
+
+		FIXME("action: %x itemState: %x\n",
+		      lpdis->itemAction, lpdis->itemState);		
+
+		DSA_GetItem (hDsa, 0 /*lpdis->itemID*/, &btnPtr);
+
+		if (lpdis->itemState & ODS_FOCUS)
+		{
+		    oldBk = SetBkColor (lpdis->hDC, GetSysColor(COLOR_HIGHLIGHT));
+		    oldText = SetTextColor (lpdis->hDC, GetSysColor(COLOR_HIGHLIGHTTEXT));
+		}
+
+		hOldPen = SelectObject (lpdis->hDC, GetSysColorPen ((lpdis->itemState & ODS_SELECTED)?COLOR_HIGHLIGHT:COLOR_WINDOW));
+		hOldBrush = SelectObject (lpdis->hDC, GetSysColorBrush ((lpdis->itemState & ODS_FOCUS)?COLOR_HIGHLIGHT:COLOR_WINDOW));
+
+		/* fill background rectangle */
+		Rectangle (lpdis->hDC, lpdis->rcItem.left, lpdis->rcItem.top,
+			   lpdis->rcItem.right, lpdis->rcItem.bottom);
+
+		/* calculate button and text rectangles */
+		CopyRect (&rcButton, &lpdis->rcItem);
+		InflateRect (&rcButton, -1, -1);
+		CopyRect (&rcText, &rcButton);
+		rcButton.right = rcButton.left + infoPtr->nBitmapWidth + 6;
+		rcText.left = rcButton.right + 2;
+
+		/* draw focus rectangle */
+		if (lpdis->itemState & ODS_FOCUS)
+		    DrawFocusRect (lpdis->hDC, &lpdis->rcItem);
+
+		/* draw button */
+		DrawEdge (lpdis->hDC, &rcButton, EDGE_RAISED, BF_RECT|BF_MIDDLE|BF_SOFT);
+
+		/* draw image and text */
+		if (wParam == IDC_AVAILBTN_LBOX && lpdis->itemID == 0)
+		{
+		    /* virtual separator in the 'available' list */
+		    DrawTextA (lpdis->hDC, "Separator", -1, &rcText,
+			       DT_LEFT | DT_VCENTER | DT_SINGLELINE);
+		}
+		else
+		{
+		    /* real button */
+
+		    ImageList_Draw (infoPtr->himlDef, btnPtr.iBitmap, lpdis->hDC,
+				    rcButton.left+1, rcButton.top+1, ILD_NORMAL);
+
+		    DrawTextW (lpdis->hDC,  infoPtr->strings[btnPtr.iString], -1, &rcText,
+			       DT_LEFT | DT_VCENTER | DT_SINGLELINE);
+
+		}
+
+		if (lpdis->itemState & ODS_FOCUS)
+		{
+		    SetBkColor (lpdis->hDC, oldBk);
+		    SetTextColor (lpdis->hDC, oldText);
+		}
+
+		SelectObject (lpdis->hDC, hOldBrush);
+		SelectObject (lpdis->hDC, hOldPen);
+
+		return TRUE;
+	    }
+	    return FALSE;
+
+	case WM_MEASUREITEM:
+	    if (wParam == IDC_AVAILBTN_LBOX || wParam == IDC_TOOLBARBTN_LBOX)
+	    {
+		MEASUREITEMSTRUCT *lpmis = (MEASUREITEMSTRUCT*)lParam;
+
+		if (infoPtr)
+		    lpmis->itemHeight = infoPtr->nBitmapHeight + 8;
+		else
+		    lpmis->itemHeight = 16 + 8; /* default height */
+
+		return TRUE;
+	    }
+	    return FALSE;
+
+	default:
+	    return FALSE;
     }
 }
 
@@ -1794,15 +1935,66 @@ TOOLBAR_AddButtonsA (HWND hwnd, WPARAM wParam, LPARAM lParam)
     return TRUE;
 }
 
-
-static LRESULT TOOLBAR_AddButtonsW(HWND hwnd,WPARAM wParam,LPARAM lParam)
+static LRESULT
+TOOLBAR_AddButtonsW (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
-  //CB: just call AddButtonsA, no Unicode used?!?
+    TOOLBAR_INFO *infoPtr = TOOLBAR_GetInfoPtr (hwnd);
+    LPTBBUTTON lpTbb = (LPTBBUTTON)lParam;
+    INT nOldButtons, nNewButtons, nAddButtons, nCount;
 
-  return TOOLBAR_AddButtonsA(hwnd,wParam,lParam);
+    TRACE("adding %d buttons!\n", wParam);
+
+    nAddButtons = (UINT)wParam;
+    nOldButtons = infoPtr->nNumButtons;
+    nNewButtons = nOldButtons + nAddButtons;
+
+    if (infoPtr->nNumButtons == 0) {
+	infoPtr->buttons =
+	    COMCTL32_Alloc (sizeof(TBUTTON_INFO) * nNewButtons);
+    }
+    else {
+	TBUTTON_INFO *oldButtons = infoPtr->buttons;
+	infoPtr->buttons =
+	    COMCTL32_Alloc (sizeof(TBUTTON_INFO) * nNewButtons);
+	memcpy (&infoPtr->buttons[0], &oldButtons[0],
+		nOldButtons * sizeof(TBUTTON_INFO));
+        COMCTL32_Free (oldButtons);
+    }
+
+    infoPtr->nNumButtons = nNewButtons;
+
+    /* insert new button data */
+    for (nCount = 0; nCount < nAddButtons; nCount++) {
+	TBUTTON_INFO *btnPtr = &infoPtr->buttons[nOldButtons+nCount];
+	btnPtr->iBitmap   = lpTbb[nCount].iBitmap;
+	btnPtr->idCommand = lpTbb[nCount].idCommand;
+	btnPtr->fsState   = lpTbb[nCount].fsState;
+	btnPtr->fsStyle   = lpTbb[nCount].fsStyle;
+	btnPtr->dwData    = lpTbb[nCount].dwData;
+	btnPtr->iString   = lpTbb[nCount].iString;
+	btnPtr->bHot      = FALSE;
+
+	if ((infoPtr->hwndToolTip) && !(btnPtr->fsStyle & TBSTYLE_SEP)) {
+	    TTTOOLINFOW ti;
+
+	    ZeroMemory (&ti, sizeof(TTTOOLINFOW));
+	    ti.cbSize   = sizeof (TTTOOLINFOW);
+	    ti.hwnd     = hwnd;
+	    ti.uId      = btnPtr->idCommand;
+	    ti.hinst    = 0;
+	    ti.lpszText = LPSTR_TEXTCALLBACKW;
+
+	    SendMessageW (infoPtr->hwndToolTip, TTM_ADDTOOLW,
+			    0, (LPARAM)&ti);
+	}
+    }
+
+    TOOLBAR_CalcToolbar (hwnd);
+
+    InvalidateRect(hwnd, NULL, FALSE);
+
+    return TRUE;
 }
-
-/* << TOOLBAR_AddButtons32W >> */
 
 
 static LRESULT
@@ -1950,7 +2142,7 @@ TOOLBAR_AddStringW (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
 
 static LRESULT
-TOOLBAR_AutoSize (HWND hwnd, WPARAM wParam, LPARAM lParam)
+TOOLBAR_AutoSize (HWND hwnd)
 {
     TOOLBAR_INFO *infoPtr = TOOLBAR_GetInfoPtr (hwnd);
     DWORD dwStyle = GetWindowLongA (hwnd, GWL_STYLE);
@@ -2217,7 +2409,13 @@ TOOLBAR_EnableButton (HWND hwnd, WPARAM wParam, LPARAM lParam)
 }
 
 
-/* << TOOLBAR_GetAnchorHighlight >> */
+static LRESULT
+TOOLBAR_GetAnchorHighlight (HWND hwnd)
+{
+    TOOLBAR_INFO *infoPtr = TOOLBAR_GetInfoPtr (hwnd);
+
+    return infoPtr->bAnchor;
+}
 
 
 static LRESULT
@@ -2355,8 +2553,6 @@ static LRESULT TOOLBAR_GetButtonInfoW(HWND hwnd,WPARAM wParam,LPARAM lParam)
     return nIndex;
 }
 
-/* << TOOLBAR_GetButtonInfo32W >> */
-
 
 static LRESULT
 TOOLBAR_GetButtonSize (HWND hwnd)
@@ -2446,7 +2642,19 @@ TOOLBAR_GetHotImageList (HWND hwnd, WPARAM wParam, LPARAM lParam)
 }
 
 
-/* << TOOLBAR_GetHotItem >> */
+static LRESULT
+TOOLBAR_GetHotItem (HWND hwnd)
+{
+    TOOLBAR_INFO *infoPtr = TOOLBAR_GetInfoPtr (hwnd);
+
+    if (!(GetWindowLongA (hwnd, GWL_STYLE) & TBSTYLE_FLAT))
+	return -1;
+
+    if (infoPtr->nHotItem < 0)
+	return -1;
+
+    return (LRESULT)infoPtr->nHotItem;
+}
 
 
 static LRESULT
@@ -2617,6 +2825,12 @@ TOOLBAR_GetUnicodeFormat (HWND hwnd, WPARAM wParam, LPARAM lParam)
     return infoPtr->bUnicode;
 }
 
+static LRESULT
+TOOLBAR_GetVersion (HWND hwnd)
+{
+    TOOLBAR_INFO *infoPtr = TOOLBAR_GetInfoPtr (hwnd);
+    return infoPtr->iVersion;
+}
 
 static LRESULT
 TOOLBAR_HideButton (HWND hwnd, WPARAM wParam, LPARAM lParam)
@@ -2686,8 +2900,27 @@ TOOLBAR_InsertButtonA (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
     if (lpTbb == NULL)
         return FALSE;
-    if (nIndex < 0)
-        return FALSE;
+
+    if (nIndex == -1) {
+       /* EPP: this seems to be an undocumented call (from my IE4)
+	* I assume in that case that:
+	* - lpTbb->iString is a string pointer (not a string index in strings[] table
+	* - index of insertion is at the end of existing buttons
+	* I only see this happen with nIndex == -1, but it could have a special
+	* meaning (like -nIndex (or ~nIndex) to get the real position of insertion).
+	*/
+       int	len = lstrlenA((char*)lpTbb->iString) + 2;
+       LPSTR	ptr = COMCTL32_Alloc(len);
+
+       nIndex = infoPtr->nNumButtons;
+       strcpy(ptr, (char*)lpTbb->iString);
+       ptr[len - 1] = 0; /* ended by two '\0' */
+       lpTbb->iString = TOOLBAR_AddStringA(hwnd, 0, (LPARAM)ptr);
+       COMCTL32_Free(ptr);
+
+    } else if (nIndex < 0)
+       return FALSE;
+
 
 //    TRACE (toolbar, "inserting button index=%d\n", nIndex);
     if (nIndex > infoPtr->nNumButtons) {
@@ -2929,7 +3162,17 @@ static LRESULT TOOLBAR_SaveRestoreW(HWND hwnd,WPARAM wParam,LPARAM lParam)
 }
 
 /* << TOOLBAR_SaveRestore32W >> */
-/* << TOOLBAR_SetAnchorHighlight >> */
+
+static LRESULT
+TOOLBAR_SetAnchorHighlight (HWND hwnd, WPARAM wParam)
+{
+    TOOLBAR_INFO *infoPtr = TOOLBAR_GetInfoPtr (hwnd);
+    BOOL bOldAnchor = infoPtr->bAnchor;
+
+    infoPtr->bAnchor = (BOOL)wParam;
+
+    return (LRESULT)bOldAnchor;
+}
 
 
 static LRESULT
@@ -3154,7 +3397,25 @@ TOOLBAR_SetHotImageList (HWND hwnd, WPARAM wParam, LPARAM lParam)
 }
 
 
-/* << TOOLBAR_SetHotItem >> */
+static LRESULT
+TOOLBAR_SetHotItem (HWND hwnd, WPARAM wParam)
+{
+    TOOLBAR_INFO *infoPtr = TOOLBAR_GetInfoPtr(hwnd);
+    INT nOldHotItem = infoPtr->nHotItem;
+
+    if (GetWindowLongA (hwnd, GWL_STYLE) & TBSTYLE_FLAT)
+    {
+	infoPtr->nHotItem = (INT)wParam;
+
+	/* FIXME: What else must be done ??? */
+
+    }
+
+    if (nOldHotItem < 0)
+	return -1;
+
+    return (LRESULT)nOldHotItem;
+}
 
 
 static LRESULT
@@ -3344,6 +3605,16 @@ TOOLBAR_SetUnicodeFormat (HWND hwnd, WPARAM wParam, LPARAM lParam)
     return bTemp;
 }
 
+static LRESULT
+TOOLBAR_SetVersion (HWND hwnd, INT iVersion)
+{
+    TOOLBAR_INFO *infoPtr = TOOLBAR_GetInfoPtr (hwnd);
+    INT iOldVersion = infoPtr->iVersion;
+
+    infoPtr->iVersion = iVersion;
+
+    return iOldVersion;
+}
 
 static LRESULT
 TOOLBAR_Create (HWND hwnd, WPARAM wParam, LPARAM lParam)
@@ -3371,7 +3642,9 @@ TOOLBAR_Create (HWND hwnd, WPARAM wParam, LPARAM lParam)
     infoPtr->nHotItem = -2; /* It has to be initially different from nOldHit */
     infoPtr->hwndNotify = GetParent (hwnd);
     infoPtr->bTransparent = (dwStyle & TBSTYLE_FLAT);
-    infoPtr->dwDTFlags = DT_CENTER;
+    infoPtr->dwDTFlags = (dwStyle & TBSTYLE_LIST) ? DT_LEFT | DT_VCENTER | DT_SINGLELINE : DT_CENTER;
+    infoPtr->bAnchor = FALSE; /* no anchor highlighting */
+    infoPtr->iVersion = 0;
 
     infoPtr->hwndToolbar = hwnd;
     infoPtr->oldButtons = NULL;
@@ -3445,6 +3718,7 @@ TOOLBAR_Destroy (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
     /* free toolbar info data */
     COMCTL32_Free (infoPtr);
+    SetWindowLongA(hwnd, 0, 0);
 
     return 0;
 }
@@ -3526,6 +3800,19 @@ TOOLBAR_LButtonDown (HWND hwnd, WPARAM wParam, LPARAM lParam)
         if (!(btnPtr->fsState & TBSTATE_ENABLED))
             return 0;
 
+	if (btnPtr->fsStyle &  TBSTYLE_DROPDOWN)
+	{
+	    NMTOOLBARA nmtb;
+
+	    nmtb.hdr.hwndFrom = hwnd;
+	    nmtb.hdr.idFrom = GetWindowLongA (hwnd, GWL_ID);
+	    nmtb.hdr.code = TBN_DROPDOWN;
+	    nmtb.iItem = btnPtr->idCommand;
+
+	    SendMessageA (infoPtr->hwndNotify, WM_NOTIFY,
+			  (WPARAM)nmtb.hdr.idFrom, (LPARAM)&nmtb);
+	}
+
         SetCapture (hwnd);
         infoPtr->bCaptured = TRUE;
         infoPtr->nButtonDown = nHit;
@@ -3596,9 +3883,32 @@ TOOLBAR_LButtonUp (HWND hwnd, WPARAM wParam, LPARAM lParam)
         TOOLBAR_DrawButton (hwnd, btnPtr, hdc);
         ReleaseDC (hwnd, hdc);
 
-        if (bSendMessage)
-            SendMessageA (infoPtr->hwndNotify, WM_COMMAND,
-                          MAKEWPARAM(btnPtr->idCommand, 0), (LPARAM)hwnd);
+	if (bSendMessage) {
+	    SendMessageA (GetParent(hwnd), WM_COMMAND,
+			  MAKEWPARAM(btnPtr->idCommand, 0), (LPARAM)hwnd);
+
+	    if ((GetWindowLongA(hwnd, GWL_STYLE) & TBSTYLE_DROPDOWN) ||
+		(btnPtr->fsStyle & 0x08/* BTNS_DROPDOWN */)) {
+	       NMTOOLBARW	nmtb;
+
+	       nmtb.hdr.hwndFrom = hwnd;
+	       nmtb.hdr.idFrom   = GetWindowLongA (hwnd, GWL_ID);
+	       nmtb.hdr.code     = TBN_DROPDOWN;
+	       nmtb.iItem        = nHit;
+	       /* nmtb.tbButton not used with TBN_DROPDOWN */
+	       if ((btnPtr->iString >= 0) && (btnPtr->iString < infoPtr->nNumStrings)) {
+		  nmtb.pszText      = infoPtr->strings[btnPtr->iString];
+		  nmtb.cchText      = lstrlenW(nmtb.pszText);
+	       } else {
+		  nmtb.pszText      = NULL;
+		  nmtb.cchText      = 0;
+	       }
+	       nmtb.rcButton     = btnPtr->rect;
+
+	       SendMessageW(infoPtr->hwndNotify, WM_NOTIFY,
+			    (WPARAM)nmtb.hdr.idFrom, (LPARAM)&nmtb);
+	    }
+	}
 
         infoPtr->nButtonDown = -1;
         infoPtr->nOldHit = -1;
@@ -3866,9 +4176,20 @@ TOOLBAR_Size (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
 
 static LRESULT
-TOOLBAR_StyleChanged (HWND hwnd, WPARAM wParam, LPARAM lParam)
+TOOLBAR_StyleChanged (HWND hwnd, INT nType, LPSTYLESTRUCT lpStyle)
 {
-    TOOLBAR_AutoSize (hwnd, wParam, lParam);
+    TOOLBAR_INFO *infoPtr = TOOLBAR_GetInfoPtr (hwnd);
+
+    if (nType == GWL_STYLE) {
+	if (lpStyle->styleNew & TBSTYLE_LIST) {
+	    infoPtr->dwDTFlags = DT_LEFT | DT_VCENTER | DT_SINGLELINE;
+	}
+	else {
+	    infoPtr->dwDTFlags = DT_CENTER;
+	}
+    }
+
+    TOOLBAR_AutoSize (hwnd);
 
     InvalidateRect(hwnd, NULL, FALSE);
 
@@ -3880,6 +4201,20 @@ TOOLBAR_StyleChanged (HWND hwnd, WPARAM wParam, LPARAM lParam)
 static LRESULT WINAPI
 ToolbarWindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
+   switch (uMsg)
+    {
+       case WM_DESTROY:
+           return TOOLBAR_Destroy (hwnd, wParam, lParam);
+
+       case WM_NCCREATE:
+           return TOOLBAR_NCCreate (hwnd, wParam, lParam);
+    }
+
+    if (!TOOLBAR_GetInfoPtr (hwnd))
+    {
+       return DefWindowProcA (hwnd, uMsg, wParam, lParam);
+    }
+
     switch (uMsg)
     {
         case TB_ADDBITMAP:
@@ -3897,8 +4232,8 @@ ToolbarWindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         case TB_ADDSTRINGW:
             return TOOLBAR_AddStringW (hwnd, wParam, lParam);
 
-        case TB_AUTOSIZE:
-            return TOOLBAR_AutoSize (hwnd, wParam, lParam);
+	case TB_AUTOSIZE:
+	    return TOOLBAR_AutoSize (hwnd);
 
         case TB_BUTTONCOUNT:
             return TOOLBAR_ButtonCount (hwnd, wParam, lParam);
@@ -3924,7 +4259,8 @@ ToolbarWindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         case TB_ENABLEBUTTON:
             return TOOLBAR_EnableButton (hwnd, wParam, lParam);
 
-/*      case TB_GETANCHORHIGHLIGHT:             */ /* 4.71 */
+	case TB_GETANCHORHIGHLIGHT:
+	    return TOOLBAR_GetAnchorHighlight (hwnd);
 
         case TB_GETBITMAP:
             return TOOLBAR_GetBitmap (hwnd, wParam, lParam);
@@ -3961,7 +4297,8 @@ ToolbarWindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         case TB_GETHOTIMAGELIST:
             return TOOLBAR_GetHotImageList (hwnd, wParam, lParam);
 
-/*      case TB_GETHOTITEM:                     */ /* 4.71 */
+	case TB_GETHOTITEM:
+	    return TOOLBAR_GetHotItem (hwnd);
 
         case TB_GETIMAGELIST:
             return TOOLBAR_GetImageList (hwnd, wParam, lParam);
@@ -3998,6 +4335,9 @@ ToolbarWindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
         case TB_GETUNICODEFORMAT:
             return TOOLBAR_GetUnicodeFormat (hwnd, wParam, lParam);
+
+	case CCM_GETVERSION:
+	    return TOOLBAR_GetVersion (hwnd);
 
         case TB_HIDEBUTTON:
             return TOOLBAR_HideButton (hwnd, wParam, lParam);
@@ -4053,7 +4393,8 @@ ToolbarWindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         case TB_SAVERESTOREW:
             return TOOLBAR_SaveRestoreW(hwnd,wParam,lParam);
 
-/*      case TB_SETANCHORHIGHLIGHT:             */ /* 4.71 */
+	case TB_SETANCHORHIGHLIGHT:
+	    return TOOLBAR_SetAnchorHighlight (hwnd, wParam);
 
         case TB_SETBITMAPSIZE:
             return TOOLBAR_SetBitmapSize (hwnd, wParam, lParam);
@@ -4087,7 +4428,8 @@ ToolbarWindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         case TB_SETHOTIMAGELIST:
             return TOOLBAR_SetHotImageList (hwnd, wParam, lParam);
 
-/*      case TB_SETHOTITEM:                     */ /* 4.71 */
+	case TB_SETHOTITEM:
+	    return TOOLBAR_SetHotItem (hwnd, wParam);
 
         case TB_SETIMAGELIST:
             return TOOLBAR_SetImageList (hwnd, wParam, lParam);
@@ -4123,14 +4465,13 @@ ToolbarWindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         case TB_SETUNICODEFORMAT:
             return TOOLBAR_SetUnicodeFormat (hwnd, wParam, lParam);
 
+	case CCM_SETVERSION:
+	    return TOOLBAR_SetVersion (hwnd, (INT)wParam);
 
 /*      case WM_CHAR: */
 
         case WM_CREATE:
             return TOOLBAR_Create (hwnd, wParam, lParam);
-
-        case WM_DESTROY:
-            return TOOLBAR_Destroy (hwnd, wParam, lParam);
 
         case WM_ERASEBKGND:
             return TOOLBAR_EraseBackground (hwnd, wParam, lParam);
@@ -4159,9 +4500,6 @@ ToolbarWindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         case WM_NCCALCSIZE:
             return TOOLBAR_NCCalcSize (hwnd, wParam, lParam);
 
-        case WM_NCCREATE:
-            return TOOLBAR_NCCreate (hwnd, wParam, lParam);
-
         case WM_NCPAINT:
             return TOOLBAR_NCPaint (hwnd, wParam, lParam);
 
@@ -4176,8 +4514,8 @@ ToolbarWindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         case WM_SIZE:
             return TOOLBAR_Size (hwnd, wParam, lParam);
 
-        case WM_STYLECHANGED:
-            return TOOLBAR_StyleChanged (hwnd, wParam, lParam);
+	case WM_STYLECHANGED:
+	    return TOOLBAR_StyleChanged (hwnd, (INT)wParam, (LPSTYLESTRUCT)lParam);
 
 /*      case WM_SYSCOLORCHANGE: */
 
