@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 1999-11-04 18:52:13 sandervl Exp $
+# $Id: makefile,v 1.5 1999-12-28 23:17:04 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -42,7 +42,7 @@ initterm.obj: initterm.cpp
 shlwapi.obj: shlwapi.cpp
 
 clean:
-	$(RM) *.obj *.lib *.dll *~ *.map *.pch
+	$(RM) *.obj *.lib *.dll *.map *.pch
 	$(RM) $(PDWIN32_BIN)\$(TARGET).dll
 	$(RM) $(PDWIN32_LIB)\$(TARGET).lib
 
