@@ -1,4 +1,4 @@
-/* $Id: winexepeldr.cpp,v 1.14 2000-10-20 11:46:48 sandervl Exp $ */
+/* $Id: winexepeldr.cpp,v 1.15 2001-02-24 12:59:44 sandervl Exp $ */
 
 /*
  * Win32 PE loader Exe class
@@ -164,6 +164,7 @@ Win32PeLdrExe::Win32PeLdrExe(char *szFileName, BOOL fConsoleApp) :
 //******************************************************************************
 Win32PeLdrExe::~Win32PeLdrExe()
 {
+    fExitProcess = TRUE;
 }
 //******************************************************************************
 //******************************************************************************
