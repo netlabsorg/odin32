@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.8 1999-10-01 10:14:59 sandervl Exp $
+# $Id: makefile,v 1.9 1999-10-20 22:36:54 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -21,7 +21,7 @@ CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
 
 TARGET = gdi32
 
-OBJS =  gdi32.obj opengl.obj callback.obj dibsect.obj initterm.obj oslibgdi.obj
+OBJS =  gdi32.obj opengl.obj callback.obj dibsect.obj initterm.obj oslibgdi.obj font.obj
 
 
 all: $(TARGET).dll $(TARGET).lib
@@ -46,6 +46,9 @@ $(TARGET)exp.def: $(TARGET).def
 gdi32.obj: gdi32.cpp \
     callback.h \
     dibsect.h \
+    $(PDWIN32_INCLUDE)\misc.h \
+
+font.obj: font.cpp \
     $(PDWIN32_INCLUDE)\misc.h \
 
 dibsect.obj: dibsect.cpp \
