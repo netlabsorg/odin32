@@ -1,4 +1,4 @@
-/* $Id: win32class.cpp,v 1.2 1999-07-14 08:35:36 sandervl Exp $ */
+/* $Id: win32class.cpp,v 1.3 1999-07-14 21:05:58 cbratschi Exp $ */
 /*
  * Win32 Window Class Managment Code for OS/2
  *
@@ -22,32 +22,36 @@
 Win32WndClass::Win32WndClass(WNDCLASSEXA *wndclass, BOOL isUnicode) : GenericObject(&wndclasses, OBJTYPE_CLASS)
 {
   if(HIWORD(wndclass->lpszClassName)) {
-	if(isUnicode) {
-	  	classNameA = (PCHAR)malloc(lstrlenW((LPWSTR)wndclass->lpszClassName)+1);
-	  	classNameW = (WCHAR *)malloc((lstrlenW((LPWSTR)wndclass->lpszClassName)+1)*sizeof(WCHAR));
-	}
-	else {
-	  	classNameA = (PCHAR)malloc(strlen(wndclass->lpszClassName)+1);
-	  	classNameW = (WCHAR *)malloc((strlen(wndclass->lpszClassName)+1)*sizeof(WCHAR));
-	}
-	if(classNameA == NULL || classNameW == NULL) {
-		dprintf(("Win32Class ctr; classNameA/classNameW == NULL"));
-		exit(1);
-	}
-	if(isUnicode) {
-		lstrcpyW(classNameW, (LPWSTR)wndclass->lpszClassName);
-		UnicodeToAscii(classNameW, classNameA);
-	}
-	else {
-		strcpy((char *)classNameA, wndclass->lpszClassName);
-		AsciiToUnicode(classNameA, classNameW);
-	}
-	classAtom    	= GlobalAddAtomA(classNameA);
+        if(isUnicode) {
+                INT len = lstrlenW((LPWSTR)wndclass->lpszClassName)+1;
+
+                classNameA = (PCHAR)malloc(len);
+                classNameW = (WCHAR *)malloc(len*sizeof(WCHAR));
+        }
+        else {
+                INT len = strlen(wndclass->lpszClassName)+1;
+
+                classNameA = (PCHAR)malloc(len);
+                classNameW = (WCHAR *)malloc(len*sizeof(WCHAR));
+        }
+        if(classNameA == NULL || classNameW == NULL) {
+                dprintf(("Win32Class ctr; classNameA/classNameW == NULL"));
+                exit(1);
+        }
+        if(isUnicode) {
+                lstrcpyW(classNameW, (LPWSTR)wndclass->lpszClassName);
+                UnicodeToAscii(classNameW, classNameA);
+        }
+        else {
+                strcpy((char *)classNameA, wndclass->lpszClassName);
+                AsciiToUnicode(classNameA, classNameW);
+        }
+        classAtom       = GlobalAddAtomA(classNameA);
   }
   else {
-	classNameA 	= NULL;
-	classNameW      = NULL;
-	classAtom	= (DWORD)wndclass->lpszClassName;
+        classNameA      = NULL;
+        classNameW      = NULL;
+        classAtom       = (DWORD)wndclass->lpszClassName;
   }
   this->isUnicode       = isUnicode;
 
@@ -61,38 +65,38 @@ Win32WndClass::Win32WndClass(WNDCLASSEXA *wndclass, BOOL isUnicode) : GenericObj
   dprintf(("USER32:  wndclass->hCursor %X\n", wndclass->hCursor));
   dprintf(("USER32:  wndclass->hbrBackground %X\n", wndclass->hbrBackground));
   if(HIWORD(wndclass->lpszClassName))
-       dprintf(("USER32:  wndclass->lpszClassName %X\n", wndclass->lpszClassName));
-  else dprintf(("USER32:  wndclass->lpszClassName %s\n", wndclass->lpszClassName));
+       dprintf(("USER32:  wndclass->lpszClassName %s\n", wndclass->lpszClassName));
+  else dprintf(("USER32:  wndclass->lpszClassName %X\n", wndclass->lpszClassName));
 
   if(HIWORD(wndclass->lpszMenuName)) {//convert string name identifier to numeric id
        dprintf(("USER32:  lpszMenuName %s\n", wndclass->lpszMenuName));
   }
   else dprintf(("USER32:  wndclass->lpszMenuName %X\n", wndclass->lpszMenuName));
 
-  nrExtraClassWords	= wndclass->cbClsExtra;
-  nrExtraWindowWords	= wndclass->cbWndExtra;
-  backgroundBrush	= wndclass->hbrBackground;	//TODO: fErase of PAINSTRUCT in WM_PAINT if == NULL
-  hCursor		= wndclass->hCursor;
-  hIcon			= wndclass->hIcon;
-  hInstance		= wndclass->hInstance;
+  nrExtraClassWords     = wndclass->cbClsExtra;
+  nrExtraWindowWords    = wndclass->cbWndExtra;
+  backgroundBrush       = wndclass->hbrBackground;      //TODO: fErase of PAINSTRUCT in WM_PAINT if == NULL
+  hCursor               = wndclass->hCursor;
+  hIcon                 = wndclass->hIcon;
+  hInstance             = wndclass->hInstance;
 
   menuNameA = 0;
   menuNameW = 0;
   setMenuName((LPSTR)wndclass->lpszMenuName);
 
-  windowStyle		= wndclass->style;
-  windowProc		= wndclass->lpfnWndProc;
+  windowStyle           = wndclass->style;
+  windowProc            = wndclass->lpfnWndProc;
 
   //User data class words/longs
   if(nrExtraClassWords) {
-	userClassLong = (ULONG *)malloc(nrExtraClassWords);
-	if(userClassLong == NULL) {
-		dprintf(("Win32Class ctr: userClassLong == NULL!"));
-		exit(1);
-	}
-	memset(userClassLong, 0, nrExtraClassWords);
+        userClassLong = (ULONG *)malloc(nrExtraClassWords);
+        if(userClassLong == NULL) {
+                dprintf(("Win32Class ctr: userClassLong == NULL!"));
+                exit(1);
+        }
+        memset(userClassLong, 0, nrExtraClassWords);
   }
-  else	userClassLong = NULL;
+  else  userClassLong = NULL;
 
   cWindows = 0;
   hIconSm  = wndclass->hIconSm;
@@ -101,13 +105,13 @@ Win32WndClass::Win32WndClass(WNDCLASSEXA *wndclass, BOOL isUnicode) : GenericObj
 //******************************************************************************
 Win32WndClass::~Win32WndClass()
 {
-  if(userClassLong)	free(userClassLong);
-  if(classNameA)	free(classNameA);
-  if(classNameW)	free(classNameW);
+  if(userClassLong)     free(userClassLong);
+  if(classNameA)        free(classNameA);
+  if(classNameW)        free(classNameW);
   if(menuNameA && HIWORD(menuNameA)) {
-	free(menuNameA);
-	assert(menuNameW);
-	free(menuNameW);
+        free(menuNameA);
+        assert(menuNameW);
+        free(menuNameW);
   }
 }
 //******************************************************************************
@@ -116,35 +120,35 @@ Win32WndClass *Win32WndClass::FindClass(HINSTANCE hInstance, LPSTR id)
 {
   Win32WndClass *wndclass = (Win32WndClass *)wndclasses;
 
-  if(wndclass == NULL)	return(NULL);
+  if(wndclass == NULL)  return(NULL);
 
   if(HIWORD(id) != 0) {
-	if(stricmp(wndclass->classNameA, id) == 0 && wndclass->hInstance == hInstance) {
-		return(wndclass);
-	}
-	else {
-		wndclass = (Win32WndClass *)wndclass->GetNext();
-		while(wndclass != NULL) {
-			if(stricmp(wndclass->classNameA, id) == 0 && wndclass->hInstance == hInstance) {
-				return(wndclass);
-			}
-			wndclass = (Win32WndClass *)wndclass->GetNext();
-	        }
-	}
+        if(stricmp(wndclass->classNameA, id) == 0 && wndclass->hInstance == hInstance) {
+                return(wndclass);
+        }
+        else {
+                wndclass = (Win32WndClass *)wndclass->GetNext();
+                while(wndclass != NULL) {
+                        if(stricmp(wndclass->classNameA, id) == 0 && wndclass->hInstance == hInstance) {
+                                return(wndclass);
+                        }
+                        wndclass = (Win32WndClass *)wndclass->GetNext();
+                }
+        }
   }
   else {
-	if(wndclass->classAtom == (DWORD)id && wndclass->hInstance == hInstance) {
-		return(wndclass);
-	}
-	else {
-		wndclass = (Win32WndClass *)wndclass->GetNext();
-		while(wndclass != NULL) {
-			if(wndclass->classAtom == (DWORD)id && wndclass->hInstance == hInstance) {
-				return(wndclass);
-			}
-			wndclass = (Win32WndClass *)wndclass->GetNext();
-	        }
-	}
+        if(wndclass->classAtom == (DWORD)id && wndclass->hInstance == hInstance) {
+                return(wndclass);
+        }
+        else {
+                wndclass = (Win32WndClass *)wndclass->GetNext();
+                while(wndclass != NULL) {
+                        if(wndclass->classAtom == (DWORD)id && wndclass->hInstance == hInstance) {
+                                return(wndclass);
+                        }
+                        wndclass = (Win32WndClass *)wndclass->GetNext();
+                }
+        }
   }
   dprintf(("Class %X (inst %X) not found!", id, hInstance));
   return(NULL);
@@ -156,14 +160,14 @@ BOOL Win32WndClass::getClassInfo(WNDCLASSEXA *wndclass)
   wndclass->cbClsExtra    = nrExtraClassWords;
   wndclass->cbWndExtra    = nrExtraWindowWords;
   wndclass->hbrBackground = backgroundBrush;
-  wndclass->hCursor	  = hCursor;
+  wndclass->hCursor       = hCursor;
   wndclass->hIcon         = hIcon;
   wndclass->hInstance     = hInstance;
   wndclass->lpszMenuName  = (LPCTSTR)menuNameA;
   wndclass->lpszClassName = (classNameA) ? (LPCTSTR)classNameA : (LPCTSTR)classAtom;
-  wndclass->style	  = windowStyle;
-  wndclass->lpfnWndProc	  = windowProc;
-  wndclass->hIconSm	  = hIconSm;
+  wndclass->style         = windowStyle;
+  wndclass->lpfnWndProc   = windowProc;
+  wndclass->hIconSm       = hIconSm;
   return(TRUE);
 }
 //******************************************************************************
@@ -173,14 +177,14 @@ BOOL Win32WndClass::getClassInfo(WNDCLASSEXW *wndclass)
   wndclass->cbClsExtra    = nrExtraClassWords;
   wndclass->cbWndExtra    = nrExtraWindowWords;
   wndclass->hbrBackground = backgroundBrush;
-  wndclass->hCursor	  = hCursor;
+  wndclass->hCursor       = hCursor;
   wndclass->hIcon         = hIcon;
   wndclass->hInstance     = hInstance;
   wndclass->lpszMenuName  = (LPCWSTR)menuNameW;
   wndclass->lpszClassName = (classNameW) ? (LPCWSTR)classNameW : (LPCWSTR)classAtom;
-  wndclass->style	  = windowStyle;
-  wndclass->lpfnWndProc	  = windowProc;
-  wndclass->hIconSm	  = hIconSm;
+  wndclass->style         = windowStyle;
+  wndclass->lpfnWndProc   = windowProc;
+  wndclass->hIconSm       = hIconSm;
   return(TRUE);
 }
 //******************************************************************************
@@ -188,8 +192,8 @@ BOOL Win32WndClass::getClassInfo(WNDCLASSEXW *wndclass)
 ULONG Win32WndClass::getClassName(LPSTR lpszClassName, ULONG cchClassName)
 {
   if(HIWORD(classNameA)) {
-	strncpy(lpszClassName, classNameA, cchClassName-1);
-	return strlen(lpszClassName);
+        strncpy(lpszClassName, classNameA, cchClassName-1);
+        return strlen(lpszClassName);
   }
   *(ULONG *)lpszClassName = classAtom;
   return(sizeof(ULONG));
@@ -201,8 +205,8 @@ ULONG Win32WndClass::getClassName(LPWSTR lpszClassName, ULONG cchClassName)
  ULONG len;
 
   if(HIWORD(classNameW)) {
-	lstrcpyW(lpszClassName, classNameW);
-	return lstrlenW(lpszClassName)*sizeof(WCHAR);
+        lstrcpyW(lpszClassName, classNameW);
+        return lstrlenW(lpszClassName)*sizeof(WCHAR);
   }
   *(ULONG *)lpszClassName = classAtom;
   return(sizeof(ULONG));
@@ -212,36 +216,36 @@ ULONG Win32WndClass::getClassName(LPWSTR lpszClassName, ULONG cchClassName)
 void Win32WndClass::setMenuName(LPSTR newMenuName)
 {
   if(HIWORD(menuNameA)) {
-	free(menuNameA);
-	free(menuNameW);
-	menuNameA = 0;
+        free(menuNameA);
+        free(menuNameW);
+        menuNameA = 0;
         menuNameW = 0;
   }
   if(HIWORD(newMenuName)) {
-	if(isUnicode) {
-	  	menuNameA = (PCHAR)malloc(lstrlenW((LPWSTR)newMenuName)+1);
-	  	menuNameW = (WCHAR *)malloc((lstrlenW((LPWSTR)newMenuName)+1)*sizeof(WCHAR));
-	}
-	else {
-	  	menuNameA = (PCHAR)malloc(strlen(newMenuName)+1);
-	  	menuNameW = (WCHAR *)malloc((strlen(newMenuName)+1)*sizeof(WCHAR));
-	}
-	if(menuNameA == NULL || menuNameW == NULL) {
-		dprintf(("Win32Class ctr; menuName/menuNameW == NULL"));
-		exit(1);
-	}
-	if(isUnicode) {
-		lstrcpyW(menuNameW, (LPWSTR)newMenuName);
-		UnicodeToAscii(menuNameW, menuNameA);
-	}
-	else {
-		strcpy((char *)menuNameA, newMenuName);
-		AsciiToUnicode(menuNameA, menuNameW);
-	}
+        if(isUnicode) {
+                menuNameA = (PCHAR)malloc(lstrlenW((LPWSTR)newMenuName)+1);
+                menuNameW = (WCHAR *)malloc((lstrlenW((LPWSTR)newMenuName)+1)*sizeof(WCHAR));
+        }
+        else {
+                menuNameA = (PCHAR)malloc(strlen(newMenuName)+1);
+                menuNameW = (WCHAR *)malloc((strlen(newMenuName)+1)*sizeof(WCHAR));
+        }
+        if(menuNameA == NULL || menuNameW == NULL) {
+                dprintf(("Win32Class ctr; menuName/menuNameW == NULL"));
+                exit(1);
+        }
+        if(isUnicode) {
+                lstrcpyW(menuNameW, (LPWSTR)newMenuName);
+                UnicodeToAscii(menuNameW, menuNameA);
+        }
+        else {
+                strcpy((char *)menuNameA, newMenuName);
+                AsciiToUnicode(menuNameA, menuNameW);
+        }
   }
   else {//id
-	menuNameA = (PCHAR)newMenuName;
-	menuNameW = (WCHAR *)newMenuName;
+        menuNameA = (PCHAR)newMenuName;
+        menuNameW = (WCHAR *)newMenuName;
   }
 }
 //******************************************************************************
@@ -249,33 +253,33 @@ void Win32WndClass::setMenuName(LPSTR newMenuName)
 ULONG Win32WndClass::getClassLongA(int index, BOOL isUnicode)
 {
   switch(index) {
-	case GCL_CBCLSEXTRA:
-		return nrExtraClassWords;
-	case GCL_CBWNDEXTRA:
-		return nrExtraWindowWords;
-	case GCL_HBRBACKGROUND:
-		return backgroundBrush;
-	case GCL_HCURSOR:
-		return hCursor;
-	case GCL_HICON:
-		return hIcon;
-	case GCL_HMODULE:
-		return hInstance;
-	case GCL_MENUNAME:
-		return (isUnicode) ? (ULONG)menuNameW : (ULONG)menuNameA;
-	case GCL_STYLE:
-		return windowStyle;
-	case GCL_WNDPROC:
-		return (ULONG)windowProc;
-	case GCW_ATOM: //TODO: does this really happen in windows?
-		SetLastError(ERROR_INVALID_PARAMETER);
-		return 0;
-	default:
-		if(index > 0 && index < nrExtraClassWords - sizeof(ULONG)) {
-			return userClassLong[index];
-		}
-		SetLastError(ERROR_INVALID_PARAMETER);
-		return 0;
+        case GCL_CBCLSEXTRA:
+                return nrExtraClassWords;
+        case GCL_CBWNDEXTRA:
+                return nrExtraWindowWords;
+        case GCL_HBRBACKGROUND:
+                return backgroundBrush;
+        case GCL_HCURSOR:
+                return hCursor;
+        case GCL_HICON:
+                return hIcon;
+        case GCL_HMODULE:
+                return hInstance;
+        case GCL_MENUNAME:
+                return (isUnicode) ? (ULONG)menuNameW : (ULONG)menuNameA;
+        case GCL_STYLE:
+                return windowStyle;
+        case GCL_WNDPROC:
+                return (ULONG)windowProc;
+        case GCW_ATOM: //TODO: does this really happen in windows?
+                SetLastError(ERROR_INVALID_PARAMETER);
+                return 0;
+        default:
+                if(index > 0 && index < nrExtraClassWords - sizeof(ULONG)) {
+                        return userClassLong[index];
+                }
+                SetLastError(ERROR_INVALID_PARAMETER);
+                return 0;
   }
 }
 //******************************************************************************
@@ -283,14 +287,14 @@ ULONG Win32WndClass::getClassLongA(int index, BOOL isUnicode)
 WORD Win32WndClass::getClassWord(int index)
 {
   switch(index) {
-	case GCW_ATOM: 
-		return (WORD)classAtom;
-	default:
-		if(index > 0 && index < nrExtraClassWords - sizeof(WORD)) {
-			return ((WORD *)userClassLong)[index];
-		}
-		SetLastError(ERROR_INVALID_PARAMETER);
-		return 0;
+        case GCW_ATOM:
+                return (WORD)classAtom;
+        default:
+                if(index > 0 && index < nrExtraClassWords - sizeof(WORD)) {
+                        return ((WORD *)userClassLong)[index];
+                }
+                SetLastError(ERROR_INVALID_PARAMETER);
+                return 0;
   }
 }
 //******************************************************************************
@@ -301,53 +305,53 @@ ULONG Win32WndClass::setClassLongA(int index, LONG lNewVal, BOOL isUnicode)
  ULONG rc;
 
   switch(index) {
-	case GCL_CBCLSEXTRA: //TODO (doesn't affect allocated classes, so what does it do?)
-		rc = nrExtraClassWords;
-//		nrExtraClassWords = lNewVal;
-		break;
-	case GCL_CBWNDEXTRA:
-		rc = nrExtraWindowWords;
-		nrExtraWindowWords = lNewVal;
-		break;
-	case GCL_HBRBACKGROUND:
-		rc = backgroundBrush;
-		backgroundBrush = lNewVal;
-		break;
-	case GCL_HCURSOR:
-		rc = hCursor;
-		hCursor = lNewVal;
-		break;
-	case GCL_HICON:
-		rc = hIcon;
-		hIcon = lNewVal;
-		break;
-	case GCL_HMODULE:
-		rc = hInstance;
-		hInstance = lNewVal;
-		break;
-	case GCL_MENUNAME:
-		rc = 0;	//old value is meaningless (according to Wine)
-		setMenuName((LPSTR)lNewVal);
-		break;
-	case GCL_STYLE:
-		rc = windowStyle;
-		windowStyle = lNewVal;
-		break;
-	case GCL_WNDPROC:
-		rc = (ULONG)windowProc;
-		windowProc = (WNDPROC)lNewVal;
-		break;
-	case GCW_ATOM: //TODO: does this really happen in windows?
-		SetLastError(ERROR_INVALID_PARAMETER);
-		return 0;
-	default:
-		if(index > 0 && index < nrExtraClassWords - sizeof(ULONG)) {
-			rc = userClassLong[index];
-			userClassLong[index] = lNewVal;
-			return(rc);
-		}
-		SetLastError(ERROR_INVALID_PARAMETER);
-		return 0;
+        case GCL_CBCLSEXTRA: //TODO (doesn't affect allocated classes, so what does it do?)
+                rc = nrExtraClassWords;
+//              nrExtraClassWords = lNewVal;
+                break;
+        case GCL_CBWNDEXTRA:
+                rc = nrExtraWindowWords;
+                nrExtraWindowWords = lNewVal;
+                break;
+        case GCL_HBRBACKGROUND:
+                rc = backgroundBrush;
+                backgroundBrush = lNewVal;
+                break;
+        case GCL_HCURSOR:
+                rc = hCursor;
+                hCursor = lNewVal;
+                break;
+        case GCL_HICON:
+                rc = hIcon;
+                hIcon = lNewVal;
+                break;
+        case GCL_HMODULE:
+                rc = hInstance;
+                hInstance = lNewVal;
+                break;
+        case GCL_MENUNAME:
+                rc = 0; //old value is meaningless (according to Wine)
+                setMenuName((LPSTR)lNewVal);
+                break;
+        case GCL_STYLE:
+                rc = windowStyle;
+                windowStyle = lNewVal;
+                break;
+        case GCL_WNDPROC:
+                rc = (ULONG)windowProc;
+                windowProc = (WNDPROC)lNewVal;
+                break;
+        case GCW_ATOM: //TODO: does this really happen in windows?
+                SetLastError(ERROR_INVALID_PARAMETER);
+                return 0;
+        default:
+                if(index > 0 && index < nrExtraClassWords - sizeof(ULONG)) {
+                        rc = userClassLong[index];
+                        userClassLong[index] = lNewVal;
+                        return(rc);
+                }
+                SetLastError(ERROR_INVALID_PARAMETER);
+                return 0;
   }
   return(rc);
 }
@@ -358,18 +362,18 @@ WORD Win32WndClass::setClassWord(int index, WORD wNewVal)
  WORD rc;
 
   switch(index) {
-	case GCW_ATOM: 
-		rc = (WORD)classAtom;
-		classAtom = wNewVal;
-		return(rc);
-	default:
-		if(index > 0 && index < nrExtraClassWords - sizeof(WORD)) {
-			rc = ((WORD *)userClassLong)[index];
-			((WORD *)userClassLong)[index] = wNewVal;
-			return(rc);
-		}
-		SetLastError(ERROR_INVALID_PARAMETER);
-		return 0;
+        case GCW_ATOM:
+                rc = (WORD)classAtom;
+                classAtom = wNewVal;
+                return(rc);
+        default:
+                if(index > 0 && index < nrExtraClassWords - sizeof(WORD)) {
+                        rc = ((WORD *)userClassLong)[index];
+                        ((WORD *)userClassLong)[index] = wNewVal;
+                        return(rc);
+                }
+                SetLastError(ERROR_INVALID_PARAMETER);
+                return 0;
   }
 }
 //******************************************************************************
@@ -382,8 +386,8 @@ void Win32WndClass::UnregisterClassA(HINSTANCE hinst, LPSTR id)
   dprintf(("::UnregisterClass, destroy class %X!!\n", id));
   wndclass = FindClass(hinst, id);
   if(wndclass) {
-	delete wndclass;
-	return;
+        delete wndclass;
+        return;
   }
   dprintf(("::UnregisterClass, couldn't find class %X!!\n", id));
 }

@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.1 1999-07-14 08:35:34 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.2 1999-07-14 21:05:58 cbratschi Exp $ */
 
 /*
  * USER32 DLL entry point
@@ -26,7 +26,7 @@
 /* Include files */
 #define  INCL_DOSMODULEMGR
 #define  INCL_DOSPROCESS
-#include <os2wrap.h>	//Odin32 OS/2 api wrappers
+#include <os2wrap.h>    //Odin32 OS/2 api wrappers
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -94,7 +94,7 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
 
          if (CRT_init() == -1)
             return 0UL;
-     	 _ctordtorInit();
+         _ctordtorInit();
 
          CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
          /*******************************************************************/
@@ -104,22 +104,22 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
 
          rc = DosExitList(0x0000FF00|EXLST_ADD, cleanup);
          if(rc)
-        	return 0UL;
+                return 0UL;
 
          rc = DosExitList(0x00008000|EXLST_ADD, cleanupQueue);
          if(rc)
-        	return 0UL;
+                return 0UL;
 
          //SvL: 18-7-'98, Register system window classes (button, listbox etc etc)
-     	 RegisterSystemClasses(hModule);
+         RegisterSystemClasses(hModule);
 
-	 //SvL: Try to start communication with our message spy queue server
-	 InitSpyQueue();
+         //SvL: Try to start communication with our message spy queue server
+         InitSpyQueue();
 
-	 //SvL: Init win32 PM classes
-	 if(InitPM() == FALSE) {
-		return 0UL;
-	 }
+         //SvL: Init win32 PM classes
+         if(InitPM() == FALSE) {
+                return 0UL;
+         }
          break;
       case 1 :
          break;

@@ -1,4 +1,4 @@
-/* $Id: menu.cpp,v 1.1 1999-07-14 08:35:35 sandervl Exp $ */
+/* $Id: menu.cpp,v 1.2 1999-07-14 21:05:58 cbratschi Exp $ */
 
 /*
  * Win32 menu API functions for OS/2
@@ -16,6 +16,7 @@
  *
  */
 #include <os2win.h>
+#include <stdlib.h>
 
 //******************************************************************************
 //******************************************************************************
@@ -87,10 +88,10 @@ int WIN32API GetMenuStringW(HMENU hmenu, UINT idItem, LPWSTR lpsz, int cchMax, U
     rc = O32_GetMenuString(hmenu, idItem, astring, cchMax, fuFlags);
     free(astring);
     if(rc) {
-		dprintf(("USER32: OS2GetMenuStringW %s\n", astring));
-		AsciiToUnicode(astring, lpsz);
+                dprintf(("USER32: OS2GetMenuStringW %s\n", astring));
+                AsciiToUnicode(astring, lpsz);
     }
-    else	lpsz[0] = 0;
+    else        lpsz[0] = 0;
     return(rc);
 }
 //******************************************************************************
@@ -157,14 +158,14 @@ BOOL WIN32API TrackPopupMenuEx(HMENU hmenu, UINT flags, int X, int Y, HWND hwnd,
   WriteLog("USER32:  TrackPopupMenuEx, not completely implemented\n");
 #endif
   if(lpPM->cbSize != 0)
-	rect = &lpPM->rcExclude;
+        rect = &lpPM->rcExclude;
 
   return O32_TrackPopupMenu(hmenu, flags, X, Y, 0, hwnd, rect);
 }
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API AppendMenuA(HMENU hMenu, UINT uFlags, UINT ulDNewItem,
-			     LPCSTR lpNewItem)
+                             LPCSTR lpNewItem)
 {
 #ifdef DEBUG
 BOOL rc;
@@ -172,7 +173,7 @@ BOOL rc;
     WriteLog("USER32:  OS2AppendMenuA uFlags = %X\n", uFlags);
 
     if(uFlags & MF_STRING || uFlags == 0)
-	    WriteLog("USER32:  OS2AppendMenuA %s\n", lpNewItem);
+            WriteLog("USER32:  OS2AppendMenuA %s\n", lpNewItem);
 
     rc = O32_AppendMenu(hMenu, uFlags, ulDNewItem, lpNewItem);
     WriteLog("USER32:  OS2AppendMenuA returned %d\n", rc);
@@ -357,7 +358,7 @@ DWORD WIN32API GetMenuContextHelpId(HMENU hmenu)
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API CheckMenuRadioItem(HMENU hmenu, UINT idFirst, UINT idLast,
-				    UINT idCheck, UINT uFlags)
+                                    UINT idCheck, UINT uFlags)
 {
 #ifdef DEBUG
   WriteLog("USER32:  OS2CheckMenuRadioItem, not implemented\n");
@@ -406,7 +407,7 @@ BOOL WIN32API ChangeMenuW(HMENU hMenu, UINT pos, LPCWSTR data,
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API SetMenuItemInfoA(HMENU hmenu, UINT par1, BOOL par2,
-			       const MENUITEMINFOA * lpMenuItemInfo)
+                               const MENUITEMINFOA * lpMenuItemInfo)
 {
 #ifdef DEBUG
   WriteLog("USER32:  SetMenuItemInfoA, faked\n");
