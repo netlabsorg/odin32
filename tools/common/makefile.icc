@@ -1,4 +1,4 @@
-# $Id: makefile.icc,v 1.5 2000-02-11 18:35:53 bird Exp $
+# $Id: makefile.icc,v 1.6 2000-03-27 10:18:42 bird Exp $
 
 #
 # PD-Win32 API
@@ -22,9 +22,9 @@ CXXFLAGS = $(CXXFLAGS) -Ge+ -Gx- -Tx+ -Tm+ -I$(PDWIN32_INCLUDE) -Wall+ppt-ppc-in
 all: commonicc.lib
 
 
-commonicc.lib: kFilePe.obj kFileDef.obj
+commonicc.lib: kFilePe.obj kFileDef.obj kFileLx.obj kFileFormatBase.obj
     -$(RM) $@
-    $(AR) $@ -+kFilePe.obj -+kFileDef.obj, NUL;
+    $(AR) $@ -+kFilePe.obj -+kFileDef.obj -+kFileLx.obj -+kFileFormatBase.obj, NUL;
 
 
 dep:
