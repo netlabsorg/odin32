@@ -1,4 +1,4 @@
-# $Id: odin32.post.vac3.mk,v 1.21 2001-09-30 09:46:16 bird Exp $
+# $Id: odin32.post.vac3.mk,v 1.22 2001-10-01 01:29:15 bird Exp $
 
 #
 # Odin32 API
@@ -470,9 +470,9 @@ clean:  clean2
 !else
         $(CLEANEXTRAS)
 !endif
-!endif
 !ifdef SUBDIRS
     @$(DODIRS) "$(SUBDIRS)"  $(MAKE_CMD) clean
+!endif
 !endif
 
 
