@@ -1,4 +1,4 @@
-/* $Id: ole2nls.c,v 1.2 2002-02-09 12:45:13 sandervl Exp $
+/* $Id: ole2nls.c,v 1.3 2002-03-04 10:44:58 sandervl Exp $
  *
  *  National Language Support library
  *
@@ -543,12 +543,27 @@ INT WINAPI GetLocaleInfoA(LCID lcid,LCTYPE LCType,LPSTR buf,INT len)
     int res_size;
 
     /* check if language is registered in the kernel32 resources */
+#ifdef __WIN32OS2__
+    if((res_size = NLS_LoadStringExW(GetModuleHandleA("KERNEL32"), LANGIDFROMLCID(lcid),
+        LCType, wcBuffer, sizeof(wcBuffer)/sizeof(wcBuffer[0]))) > 1) {
+#else
     if((res_size = NLS_LoadStringExW(GetModuleHandleA("KERNEL32"), LANGIDFROMLCID(lcid),
         LCType, wcBuffer, sizeof(wcBuffer)/sizeof(wcBuffer[0])))) {
+#endif
         WideCharToMultiByte(CP_ACP, 0, wcBuffer, res_size, acBuffer, dwBufferSize, NULL, NULL);
         retString = acBuffer;
         found = 1;
     }
+
+#ifdef __WIN32OS2__
+    /* nls not found: try with English (United States) */
+    if(!found && (res_size = NLS_LoadStringExW(GetModuleHandleA("KERNEL32"), LANGIDFROMLCID(0x0409),
+        LCType, wcBuffer, sizeof(wcBuffer)/sizeof(wcBuffer[0])))>1) {
+        WideCharToMultiByte(CP_ACP, 0, wcBuffer, res_size, acBuffer, dwBufferSize, NULL, NULL);
+        retString = acBuffer;
+        found = 1;
+    }
+#endif
     }
 
     /* if not found report a most descriptive error */
