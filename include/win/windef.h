@@ -232,11 +232,13 @@ typedef double          DOUBLE;
 typedef double          LONGLONG;
 typedef double          ULONGLONG;
 typedef double          ULONGULONG;
+typedef double          DWORDLONG;
 #else
 #include <inttypes.h>
 typedef int64_t         LONGLONG;
 typedef uint64_t        ULONGLONG;
 typedef uint64_t        ULONGULONG;
+typedef uint64_t        DWORDLONG;
 #endif
 
 /* FIXME: Wine does not compile with strict on, therefore strict
