@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.207 2003-04-01 09:58:36 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.208 2003-04-11 10:55:02 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -1509,23 +1509,6 @@ adjustend:
             win32wnd->callVisibleRgnNotifyProc(FALSE);
         }
 
-        if ((pswp->fl & (SWP_SIZE | SWP_MOVE | SWP_ZORDER)) == 0)
-        {
-            if(pswp->fl & SWP_RESTORE && win32wnd->getStyle() & WS_MINIMIZE_W) {
-                dprintf(("Restoring minimized window %x", win32wnd->getWindowHandle()));
-                win32wnd->ShowWindow(SW_RESTORE_W);
-            }
-            if(pswp->fl & SWP_SHOW) {
-                WinShowWindow(win32wnd->getOS2WindowHandle(), 1);
-            }
-            else
-            if(pswp->fl & SWP_HIDE) {
-                WinShowWindow(win32wnd->getOS2WindowHandle(), 0);
-            }
-            //MUST call the old frame window proc!
-            goto RunDefFrameWndProc;
-        }
-
         if(pswp->fl & (SWP_MOVE | SWP_SIZE))
         {
             if(win32wnd->isChild())
@@ -1554,6 +1537,29 @@ adjustend:
                  RELEASE_WNDOBJ(wndAfter);
             }
             else wp.hwndInsertAfter = HWND_TOP_W;
+        }
+
+        if ((pswp->fl & (SWP_SIZE | SWP_MOVE | SWP_ZORDER)) == 0)
+        {
+            if(pswp->fl & SWP_RESTORE && win32wnd->getStyle() & WS_MINIMIZE_W) {
+                dprintf(("Restoring minimized window %x", win32wnd->getWindowHandle()));
+                win32wnd->ShowWindow(SW_RESTORE_W);
+            }
+            if(pswp->fl & SWP_SHOW) {
+                WinShowWindow(win32wnd->getOS2WindowHandle(), 1);
+            }
+            else
+            if(pswp->fl & SWP_HIDE) {
+                WinShowWindow(win32wnd->getOS2WindowHandle(), 0);
+            }
+            if(pswp->fl & (SWP_SHOW|SWP_HIDE)) 
+            {//TODO: necessary for more options? (activate?)
+                if(win32wnd->CanReceiveSizeMsgs())
+                    win32wnd->MsgPosChanged((LPARAM)&wp);
+            }
+
+            //MUST call the old frame window proc!
+            goto RunDefFrameWndProc;
         }
 
         if(pswp->fl & SWP_SHOW) {
