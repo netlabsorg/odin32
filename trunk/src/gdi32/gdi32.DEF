@@ -1,4 +1,4 @@
-; $Id: gdi32.DEF,v 1.6 2000-03-10 16:13:44 sandervl Exp $
+; $Id: gdi32.DEF,v 1.7 2000-04-03 18:30:47 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY GDI32 INITINSTANCE
@@ -10,6 +10,7 @@ IMPORTS
     _GpiQueryDCData            = PMGPI.665
     _PaxStrokeAndFillPath      = PMGPI.712
     _GpiEnableYInversion       = PMGPI.723
+    _GpiQueryYInversion        = PMGPI.726
 
 EXPORTS
     _GDI_CallDevInstall16@20                                 @100
