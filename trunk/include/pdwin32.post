@@ -1,4 +1,4 @@
-# $Id: pdwin32.post,v 1.3 2000-03-07 11:20:14 bird Exp $
+# $Id: pdwin32.post,v 1.4 2000-03-09 16:54:05 bird Exp $
 #
 # Odin32 API
 #
@@ -67,7 +67,10 @@ clean:
 !else
 clean:  clean2
 !endif
-    $(RM) $(OBJDIR)\* *.LIB *.res *.map *.pch \
+    $(RM) *.LIB *.res *.map *.pch \
+!if "$(OBJDIR)" != ""
+     $(OBJDIR)\* \
+!endif
 !ifndef LOCALCLEAN
         $(PDWIN32_LIB)\$(TARGET).LIB \
 !ifndef EXETARGET
