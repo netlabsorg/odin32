@@ -1,9 +1,10 @@
-/* $Id: win32wnd.cpp,v 1.24 1999-07-26 20:03:49 sandervl Exp $ */
+/* $Id: win32wnd.cpp,v 1.25 1999-08-16 15:54:11 dengert Exp $ */
 /*
  * Win32 Window Code for OS/2
  *
  *
  * Copyright 1998-1999 Sander van Leeuwen (sandervl@xs4all.nl)
+ * Copyright 1999      Daniela Engert (dani@ngrt.de)
  *
  * Parts based on Wine Windows code (windows\win.c)
  *
@@ -841,12 +842,12 @@ ULONG Win32Window::MsgKillFocus(HWND hwnd)
 }
 //******************************************************************************
 //******************************************************************************
-ULONG Win32Window::MsgButton(ULONG msg, ULONG x, ULONG y)
+ULONG Win32Window::MsgButton(ULONG msg, ULONG ncx, ULONG ncy, ULONG clx, ULONG cly)
 {
  ULONG win32msg;
  ULONG win32ncmsg;
 
-    dprintf(("MsgButton to (%d,%d)", x, y));
+    dprintf(("MsgButton to (%d,%d)", ncx, ncy));
     switch(msg) {
         case BUTTON_LEFTDOWN:
                 win32msg = WM_LBUTTONDOWN;
@@ -893,8 +894,8 @@ ULONG Win32Window::MsgButton(ULONG msg, ULONG x, ULONG y)
             return 1;
         }
     }
-    SendInternalMessageA(win32ncmsg, lastHitTestVal, MAKELONG(x, y)); //TODO:
-    return SendInternalMessageA(win32msg, 0, MAKELONG(x, y));
+    SendInternalMessageA(win32ncmsg, lastHitTestVal, MAKELONG(ncx, ncy)); //TODO:
+    return SendInternalMessageA(win32msg, 0, MAKELONG(clx, cly));
 }
 //******************************************************************************
 //******************************************************************************
