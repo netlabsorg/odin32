@@ -1,10 +1,12 @@
-/* $Id: changelog,v 1.1267 2001-02-18 14:22:08 sandervl Exp $ */
+/* $Id: changelog,v 1.1268 2001-02-18 17:04:05 sandervl Exp $ */
 
  2001-02-18: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Restore window origin in SetWindowPos for parent window with
                   CS_OWNDC style. 
                   Do the same thing in WM_VRNENABLED message handler.
                   (fixes paint offset problems in Opera windows)
+                o Bug in yesterday's ScrollWindowEx fix
+                  (fixes smooth scrolling of child windows in Opera html window)
 
  2000-02-17: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - Win32kCC: o Rewrote to notebook. (fixes size problem)
