@@ -1,4 +1,4 @@
-/* $Id: odinwrap.h,v 1.17 1999-12-03 01:20:02 phaller Exp $ */
+/* $Id: odinwrap.h,v 1.18 1999-12-29 08:32:00 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -338,6 +338,32 @@ extern int IsExeStarted(); //kernel32
   }                               \
                                   \
   cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6)
+
+// @@@PH 1999/12/28 the following macro is a workaround for WINMM:waveOutOpen
+// where the system needs to know about the win32 tib fs selector
+#define ODINFUNCTION6FS(cRet,cName,t1,a1,t2,a2,t3,a3,t4,a4,t5,a5,t6,a6)  \
+  cRet ODIN_INTERNAL ODIN_##cName (unsigned short selFS, t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6);      \
+  cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6)        \
+  {                               \
+    unsigned short sel = RestoreOS2FS();  \
+    dprintf(("%s: "#cRet" "#cName"(selFS=%04xh, "#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)" \
+             ", "#t4" "#a4"=%08xh, "#t5" "#a5"=%08xh, "#t6" "#a6"=%08xh) enter\n", \
+             pszOdinDebugChannel,             \
+             sel,                             \
+             a1,a2,a3,a4,a5,a6));             \
+    CheckFS(sel)                              \
+    _heap_check();                            \
+    cRet   rc  = ODIN_##cName(sel,a1,a2,a3,a4,a5,a6); \
+    _heap_check();                            \
+    dprintf(("%s: "#cRet" "#cName"() leave = %08xh\n", \
+             pszOdinDebugChannel,             \
+             rc));                            \
+    SetFS(sel);                   \
+    return rc;                    \
+  }                               \
+                                  \
+  cRet ODIN_INTERNAL ODIN_##cName (unsigned short selFS, t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6)
+
 
 #define ODINPROCEDURE6(cName,t1,a1,t2,a2,t3,a3,t4,a4,t5,a5,t6,a6)  \
   void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6);  \
@@ -901,6 +927,22 @@ extern int IsExeStarted(); //kernel32
   }                               \
                                   \
   cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6)
+
+
+// @@@PH 1999/12/28 the following macro is a workaround for WINMM:waveOutOpen
+// where the system needs to know about the win32 tib fs selector
+#define ODINFUNCTION6FS(cRet,cName,t1,a1,t2,a2,t3,a3,t4,a4,t5,a5,t6,a6)  \
+  cRet ODIN_INTERNAL ODIN_##cName (unsigned short selFS, t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6);      \
+  cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6)        \
+  {                               \
+    unsigned short sel = RestoreOS2FS();  \
+    cRet   rc  = ODIN_##cName(sel,a1,a2,a3,a4,a5,a6); \
+    SetFS(sel);                   \
+    return rc;                    \
+  }                               \
+                                  \
+  cRet ODIN_INTERNAL ODIN_##cName (unsigned short selFS, t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6)
+
 
 #define ODINPROCEDURE6(cName,t1,a1,t2,a2,t3,a3,t4,a4,t5,a5,t6,a6)  \
   void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6);  \
