@@ -1,4 +1,4 @@
-/* $Id: timer.cpp,v 1.16 2003-05-16 10:59:27 sandervl Exp $ */
+/* $Id: timer.cpp,v 1.17 2004-03-18 13:18:33 sandervl Exp $ */
 
 /*
  * timer functions for USER32
@@ -52,7 +52,7 @@ static CRITICAL_SECTION_OS2 timercritsect = {0};
 
 inline void EnterCriticalSection (void)
 {
-   if (timercritsect.hmtxLock == 0)
+   if (DosValidateCriticalSection (&timercritsect) != 0)
       DosInitializeCriticalSection(&timercritsect, NULL);
 
    DosEnterCriticalSection(&timercritsect);

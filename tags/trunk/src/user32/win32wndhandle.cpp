@@ -1,4 +1,4 @@
-/* $Id: win32wndhandle.cpp,v 1.19 2004-01-11 12:03:21 sandervl Exp $ */
+/* $Id: win32wndhandle.cpp,v 1.20 2004-03-18 13:18:33 sandervl Exp $ */
 /*
  * Win32 Handle Management Code for OS/2
  *
@@ -46,20 +46,18 @@ void WIN32API SetCustomWndHandleSemName(LPSTR pszSemName)
 //******************************************************************************
 void InitializeWindowHandles()
 {
-    if(globalwhandlecritsect.hmtxLock == 0) {
+    if(globalwhandlecritsect.hevLock == 0) {
          dprintf(("InitializeWindowHandles %x -> create shared critical section", &globalwhandlecritsect));
-         DosInitializeCriticalSection(&globalwhandlecritsect, pszWndHandleSemName);
     }
     else {
          dprintf(("InitializeWindowHandles %x -> access shared critical section", &globalwhandlecritsect));
-         DosAccessCriticalSection(&globalwhandlecritsect, pszWndHandleSemName);
     }
+    DosAccessCriticalSection(&globalwhandlecritsect, pszWndHandleSemName);
 }
 //******************************************************************************
 //******************************************************************************
 void FinalizeWindowHandles()
 {
-    dprintf(("FinalizeWindowHandles %x", &globalwhandlecritsect));
     DosDeleteCriticalSection(&globalwhandlecritsect);
 }
 //******************************************************************************
