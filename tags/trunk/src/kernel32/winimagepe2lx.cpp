@@ -1,4 +1,4 @@
-/* $Id: winimagepe2lx.cpp,v 1.21 2002-12-20 11:39:42 sandervl Exp $ */
+/* $Id: winimagepe2lx.cpp,v 1.22 2004-01-15 10:39:12 sandervl Exp $ */
 
 /*
  * Win32 PE2LX Image base class
@@ -34,7 +34,13 @@
 #include <win32type.h>
 #include <misc.h>
 #include "winimagebase.h"
+#include "windllbase.h"
+#include "winexebase.h"
 #include "winimagepe2lx.h"
+#include "winimagepeldr.h"
+#include "windllpeldr.h"
+#include "winimagelx.h"
+#include "windlllx.h"
 #include "Win32k.h"
 
 #define DBG_LOCALLOG    DBG_winimagepe2lx
@@ -258,6 +264,10 @@ DWORD Win32Pe2LxImage::init()
     /* Set instance handle to address of header. */
     hinstance = (HINSTANCE)paSections[0].ulAddress;
 
+    /* Set poh & pExportDir (base class stuff) */
+    poh = &pNtHdrs->OptionalHeader;
+    pExportDir = (PIMAGE_EXPORT_DIRECTORY)getPointerFromRVA(pNtHdrs->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress);
+
     /* Locate and set the entrypoint. */
     setEntryPoint((ULONG)getPointerFromRVA(pNtHdrs->OptionalHeader.AddressOfEntryPoint));
     if (entryPoint == 0UL &&
@@ -271,138 +281,27 @@ DWORD Win32Pe2LxImage::init()
     }
 
     /* Locate the resource directory (if any) */
-    if (pNtHdrs->OptionalHeader.NumberOfRvaAndSizes > IMAGE_DIRECTORY_ENTRY_RESOURCE
-        && pNtHdrs->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_RESOURCE].VirtualAddress > 0UL)
-    {
-        ulRVAResourceSection = pNtHdrs->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_RESOURCE].VirtualAddress;
-        pResRootDir = (PIMAGE_RESOURCE_DIRECTORY)getPointerFromRVA(ulRVAResourceSection);
-        /* _temporary_ fix:
-         *  We'll have to make the resource section writable.
-         *  And we'll have to make the pages before it readable.
-         */
-        LONG iSection = getSectionIndexFromRVA(ulRVAResourceSection);
-        if (iSection >= 0)
-        {
-            rc = DosSetMem((PVOID)paSections[iSection].ulAddress, paSections[iSection].cbVirtual, PAG_WRITE | PAG_READ);
+    rc = doResources();
+    if (rc)
+        return rc;
 
-            ULONG ulAddr = paSections[iSection].ulAddress - 0x10000; //64KB
-            while (ulAddr < paSections[iSection].ulAddress)
-            {
-                ULONG fl = ~0UL;
-                ULONG cb = ~0UL;
-                rc = DosQueryMem((PVOID)ulAddr, &cb, &fl);
-                if (rc == NO_ERROR)
-                {
-                    if (fl & PAG_GUARD)
-                        rc = -1;
-                    else if (fl & PAG_COMMIT)
-                        fl &= ~(PAG_COMMIT);
-                    else
-                        fl |= PAG_COMMIT;
-                    cb = (cb + 0xfffUL) & ~0xfffUL;
-                }
-                else
-                {
-                    fl = PAG_COMMIT;
-                    cb = 0x1000;
-                }
-                fl &= PAG_READ | PAG_COMMIT | PAG_WRITE | PAG_GUARD;
-                fl |= PAG_READ;
-                if (cb > paSections[iSection].ulAddress - ulAddr)
-                    cb = paSections[iSection].ulAddress - ulAddr;
-                if (rc == NO_ERROR)
-                    rc = DosSetMem((PVOID)ulAddr, cb, fl);
+    /*
+     * TLS - Thread Local Storage
+     */
+    rc = doTLS();
+    if (rc)
+        return rc;
 
-                ulAddr += cb;
-            }
-        }
-    }
 
-    /* TLS - Thread Local Storage */
-    if (pNtHdrs->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].VirtualAddress != 0UL
-        && pNtHdrs->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].Size != 0UL)
-    {
-        PIMAGE_TLS_DIRECTORY pTLSDir;
-        LONG                 iSection;
-        iSection = getSectionIndexFromRVA(pNtHdrs->OptionalHeader.
-                                          DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].
-                                          VirtualAddress);
-        pTLSDir = (PIMAGE_TLS_DIRECTORY)getPointerFromRVA(pNtHdrs->OptionalHeader.
-                                                          DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].
-                                                          VirtualAddress);
+    /*
+     * Process imports.
+     */
+    rc = doImports();
+    if (rc)
+        return rc;
 
-        if (pTLSDir != NULL && iSection != -1)
-        {
-            PVOID pv;
-
-            /*
-             * According to the docs StartAddressOfRawData and EndAddressOfRawData is
-             * real pointers with a baserelocs.
-             *
-             * The docs says nothing about the two AddressOf pointers. So, we'll assume that
-             * these also are real pointers. But, we'll try compensate if they should not have
-             * base realocations.
-             */
-            if (validateRealPointer((PVOID)pTLSDir->StartAddressOfRawData)
-                &&
-                validateRealPointer((PVOID)pTLSDir->EndAddressOfRawData)
-                )
-            {
-                setTLSAddress((PVOID)pTLSDir->StartAddressOfRawData);
-                setTLSInitSize(pTLSDir->EndAddressOfRawData - pTLSDir->StartAddressOfRawData);
-                setTLSTotalSize(pTLSDir->EndAddressOfRawData - pTLSDir->StartAddressOfRawData + pTLSDir->SizeOfZeroFill);
-
-                if (pTLSDir->AddressOfIndex)
-                {
-                    if (validateRealPointer(pTLSDir->AddressOfIndex))
-                        /* assume baserelocations for thepointer; use it without any change. */
-                        setTLSIndexAddr((LPDWORD)(void*)pTLSDir->AddressOfIndex);
-                    else
-                    {   /* assume no baserelocs for these pointers? Complain and debugint3 */
-                        eprintf(("Win32Pe2LxImage::init: TLS - AddressOfIndex(%#8x) is not a pointer with basereloc.\n",
-                                 pTLSDir->AddressOfIndex));
-                        pv = getPointerFromPointer(pTLSDir->AddressOfIndex);
-                        if (pv == NULL)
-                        {
-                            eprintf(("Win32Pe2LxImage::init: invalid RVA to TLS AddressOfIndex - %#8x.\n",
-                                     pTLSDir->AddressOfIndex));
-                            return LDRERROR_INVALID_HEADER;
-                        }
-                        setTLSIndexAddr((LPDWORD)pv);
-                    }
-                }
-
-                if (pTLSDir->AddressOfCallBacks)
-                {
-                    if (validateRealPointer(pTLSDir->AddressOfCallBacks))
-                        /* assume baserelocations for thepointer; use it without any change. */
-                        setTLSCallBackAddr(pTLSDir->AddressOfCallBacks);
-                    else
-                    {   /* assume no baserelocs for these pointers? Complain and debugint3 */
-                        eprintf(("Win32Pe2LxImage::init: Warning: TLS - AddressOfCallBacks(%#8x) is not a pointer with basereloc.\n",
-                                 pTLSDir->AddressOfCallBacks));
-                        pv = getPointerFromPointer(pTLSDir->AddressOfCallBacks);
-                        if (pv == NULL)
-                        {
-                            eprintf(("Win32Pe2LxImage::init: invalid pointer to TLS AddressOfCallBacks - %#8x.\n",
-                                     pTLSDir->AddressOfIndex));
-                            return LDRERROR_INVALID_HEADER;
-                        }
-                        setTLSCallBackAddr((PIMAGE_TLS_CALLBACK*)pv);
-                    }
-                }
-            }
-        }
-        else
-        {
-            eprintf(("Win32Pe2LxImage::init: invalid RVA to TLS Dir - %#8x. (getPointerFromRVA failed)\n",
-                     pNtHdrs->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].VirtualAddress));
-            return LDRERROR_INVALID_HEADER;
-        }
-    }
     return LDRERROR_SUCCESS;
 }
-
 
 
 /**
@@ -687,6 +586,466 @@ ULONG Win32Pe2LxImage::setSectionRVAs()
 
 
 /**
+ * Process resource section.
+ */
+ULONG Win32Pe2LxImage::doResources()
+{
+    ULONG   rc;
+
+    if (pNtHdrs->OptionalHeader.NumberOfRvaAndSizes > IMAGE_DIRECTORY_ENTRY_RESOURCE
+        && pNtHdrs->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_RESOURCE].VirtualAddress > 0UL)
+    {
+        ulRVAResourceSection = pNtHdrs->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_RESOURCE].VirtualAddress;
+        pResRootDir = (PIMAGE_RESOURCE_DIRECTORY)getPointerFromRVA(ulRVAResourceSection);
+        /* _temporary_ fix:
+         *  We'll have to make the resource section writable.
+         *  And we'll have to make the pages before it readable.
+         */
+        LONG iSection = getSectionIndexFromRVA(ulRVAResourceSection);
+        if (iSection >= 0)
+        {
+            rc = DosSetMem((PVOID)paSections[iSection].ulAddress, paSections[iSection].cbVirtual, PAG_WRITE | PAG_READ);
+
+            ULONG ulAddr = paSections[iSection].ulAddress - 0x10000; //64KB
+            while (ulAddr < paSections[iSection].ulAddress)
+            {
+                ULONG fl = ~0UL;
+                ULONG cb = ~0UL;
+                rc = DosQueryMem((PVOID)ulAddr, &cb, &fl);
+                if (rc == NO_ERROR)
+                {
+                    if (fl & PAG_GUARD)
+                        rc = -1;
+                    else if (fl & PAG_COMMIT)
+                        fl &= ~(PAG_COMMIT);
+                    else
+                        fl |= PAG_COMMIT;
+                    cb = (cb + 0xfffUL) & ~0xfffUL;
+                }
+                else
+                {
+                    fl = PAG_COMMIT;
+                    cb = 0x1000;
+                }
+                fl &= PAG_READ | PAG_COMMIT | PAG_WRITE | PAG_GUARD;
+                fl |= PAG_READ;
+                if (cb > paSections[iSection].ulAddress - ulAddr)
+                    cb = paSections[iSection].ulAddress - ulAddr;
+                if (rc == NO_ERROR)
+                    rc = DosSetMem((PVOID)ulAddr, cb, fl);
+
+                ulAddr += cb;
+            }
+        }
+    }
+
+    return 0;
+}
+
+
+/**
+ * Do TLS related matters.
+ */
+ULONG Win32Pe2LxImage::doTLS()
+{
+    if (pNtHdrs->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].VirtualAddress != 0UL
+        && pNtHdrs->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].Size != 0UL)
+    {
+        PIMAGE_TLS_DIRECTORY pTLSDir;
+        LONG                 iSection;
+        iSection = getSectionIndexFromRVA(pNtHdrs->OptionalHeader.
+                                          DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].
+                                          VirtualAddress);
+        pTLSDir = (PIMAGE_TLS_DIRECTORY)getPointerFromRVA(pNtHdrs->OptionalHeader.
+                                                          DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].
+                                                          VirtualAddress);
+
+        if (pTLSDir != NULL && iSection != -1)
+        {
+            PVOID pv;
+
+            /*
+             * According to the docs StartAddressOfRawData and EndAddressOfRawData is
+             * real pointers with a baserelocs.
+             *
+             * The docs says nothing about the two AddressOf pointers. So, we'll assume that
+             * these also are real pointers. But, we'll try compensate if they should not have
+             * base realocations.
+             */
+            if (validateRealPointer((PVOID)pTLSDir->StartAddressOfRawData)
+                &&
+                validateRealPointer((PVOID)pTLSDir->EndAddressOfRawData)
+                )
+            {
+                setTLSAddress((PVOID)pTLSDir->StartAddressOfRawData);
+                setTLSInitSize(pTLSDir->EndAddressOfRawData - pTLSDir->StartAddressOfRawData);
+                setTLSTotalSize(pTLSDir->EndAddressOfRawData - pTLSDir->StartAddressOfRawData + pTLSDir->SizeOfZeroFill);
+
+                if (pTLSDir->AddressOfIndex)
+                {
+                    if (validateRealPointer(pTLSDir->AddressOfIndex))
+                        /* assume baserelocations for thepointer; use it without any change. */
+                        setTLSIndexAddr((LPDWORD)(void*)pTLSDir->AddressOfIndex);
+                    else
+                    {   /* assume no baserelocs for these pointers? Complain and debugint3 */
+                        eprintf(("Win32Pe2LxImage::init: TLS - AddressOfIndex(%#8x) is not a pointer with basereloc.\n",
+                                 pTLSDir->AddressOfIndex));
+                        pv = getPointerFromPointer(pTLSDir->AddressOfIndex);
+                        if (pv == NULL)
+                        {
+                            eprintf(("Win32Pe2LxImage::init: invalid RVA to TLS AddressOfIndex - %#8x.\n",
+                                     pTLSDir->AddressOfIndex));
+                            return LDRERROR_INVALID_HEADER;
+                        }
+                        setTLSIndexAddr((LPDWORD)pv);
+                    }
+                }
+
+                if (pTLSDir->AddressOfCallBacks)
+                {
+                    if (validateRealPointer(pTLSDir->AddressOfCallBacks))
+                        /* assume baserelocations for thepointer; use it without any change. */
+                        setTLSCallBackAddr(pTLSDir->AddressOfCallBacks);
+                    else
+                    {   /* assume no baserelocs for these pointers? Complain and debugint3 */
+                        eprintf(("Win32Pe2LxImage::init: Warning: TLS - AddressOfCallBacks(%#8x) is not a pointer with basereloc.\n",
+                                 pTLSDir->AddressOfCallBacks));
+                        pv = getPointerFromPointer(pTLSDir->AddressOfCallBacks);
+                        if (pv == NULL)
+                        {
+                            eprintf(("Win32Pe2LxImage::init: invalid pointer to TLS AddressOfCallBacks - %#8x.\n",
+                                     pTLSDir->AddressOfIndex));
+                            return LDRERROR_INVALID_HEADER;
+                        }
+                        setTLSCallBackAddr((PIMAGE_TLS_CALLBACK*)pv);
+                    }
+                }
+            }
+        }
+        else
+        {
+            eprintf(("Win32Pe2LxImage::init: invalid RVA to TLS Dir - %#8x. (getPointerFromRVA failed)\n",
+                     pNtHdrs->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].VirtualAddress));
+            return LDRERROR_INVALID_HEADER;
+        }
+    }
+
+    return 0;
+}
+
+/**
+ * Processes the import directory of the image.
+ * @returns LDRERROR_*
+ * @remark  This could be in base class and shared with the peldr.
+ */
+ULONG   Win32Pe2LxImage::doImports()
+{
+    ULONG                       rc;
+    PIMAGE_IMPORT_DESCRIPTOR    pImps;
+
+    /*
+     * Check if there is actually anything to work on.
+     */
+    if (   !pNtHdrs->OptionalHeader.DataDirectory[IMAGE_FILE_IMPORT_DIRECTORY].VirtualAddress
+        || !pNtHdrs->OptionalHeader.DataDirectory[IMAGE_FILE_IMPORT_DIRECTORY].Size)
+    {
+        dprintf(("Win32Pe2LxImage::initImports: there are no imports\n"));
+        return 0;
+    }
+
+    /*
+     * Walk the IMAGE_IMPORT_DESCRIPTOR table.
+     */
+    for (rc = 0, pImps = (PIMAGE_IMPORT_DESCRIPTOR)getPointerFromRVA(pNtHdrs->OptionalHeader.DataDirectory[IMAGE_FILE_IMPORT_DIRECTORY].VirtualAddress);
+         !rc && pImps->Name != 0 && pImps->FirstThunk != 0;
+         pImps++)
+    {
+        const char *        pszName = (const char*)getPointerFromRVA(pImps->Name);
+        Win32ImageBase     *pModule;
+        dprintf(("Win32Pe2LxImage::initImports: DLL %s\n", pszName));
+
+        /*
+         * Try find the table.
+         */
+        pModule = importsGetModule(pszName);
+        if (pModule)
+        {
+            PIMAGE_THUNK_DATA   pFirstThunk;    /* update this. */
+            PIMAGE_THUNK_DATA   pThunk;         /* read from this. */
+
+            /*
+             * Walk the thunks table(s).
+             */
+            pFirstThunk = (PIMAGE_THUNK_DATA)getPointerFromRVA((ULONG)pImps->FirstThunk);
+            pThunk = pImps->u.OriginalFirstThunk == 0 ? pFirstThunk
+                : (PIMAGE_THUNK_DATA)getPointerFromRVA((ULONG)pImps->FirstThunk);
+            while (!rc && pThunk->u1.Ordinal != 0)
+            {
+                if (pThunk->u1.Ordinal & IMAGE_ORDINAL_FLAG)
+                    rc = importsByOrdinal(pModule, IMAGE_ORDINAL(pThunk->u1.Ordinal), (void**)&pFirstThunk->u1.Function);
+                else if (   pThunk->u1.Ordinal > 0
+                         && pThunk->u1.Ordinal < pNtHdrs->OptionalHeader.SizeOfImage)
+                    rc = importsByName(pModule, (const char*)getPointerFromRVA((ULONG)pThunk->u1.AddressOfData + 2), (void**)&pFirstThunk->u1.Function);
+                else
+                {
+                    dprintf(("Win32Pe2LxImage::initImports: bad import data thunk!\n"));
+                    DebugInt3();
+                    rc = LDRERROR_IMPORTS;
+                }
+
+                pThunk++;
+                pFirstThunk++;
+            }
+        }
+        else
+        {
+            dprintf(("Win32Pe2LxImage::initImports: cannot find module '%s'!!!\n", pszName));
+            DebugInt3();
+            rc = LDRERROR_IMPORTS;
+        }
+    }
+
+    return rc;
+}
+
+
+/**
+ * Find a module.
+ *
+ * @returns Pointer to module
+ * @returns NULL on failure.
+ * @param   pszModName  Pointer to module name.
+ * @remark  This should be in base class and shared with the peldr.
+ */
+Win32ImageBase * Win32Pe2LxImage::importsGetModule(const char *pszModName)
+{
+    Win32ImageBase *pMod;
+    Win32DllBase   *pDll;
+
+    /*
+     * Look if it's already loaded.
+     */
+    pDll = Win32DllBase::findModule((char*)pszModName);
+    if (pDll)
+    {
+        dprintf(("Win32Pe2LxImage::importGetModule(%s) already loaded\n", pszModName));
+        pDll->AddRef();
+    }
+    else if (WinExe != NULL && WinExe->matchModName(pszModName))
+    {
+        dprintf(("Win32Pe2LxImage::importGetModule(%s) already loaded (exe)\n", pszModName));
+        pMod = (Win32ImageBase *)WinExe;
+        pDll = NULL;
+    }
+    else
+    {
+        /*
+         * Load it (simplified).
+         */
+        pDll = importsLoadModule(pszModName);
+        if (!pDll)
+            return NULL;
+        dprintf(("Win32Pe2LxImage::importGetModule(%s) Loaded module\n", pszModName));
+    }
+
+    /*
+     * Update dependendcies.
+     */
+    if (pDll)
+    {
+        /*
+         * Add the dll we just loaded to dependency list for this image.
+         */
+        addDependency(pDll);
+
+        /*
+         * Make sure the dependency list is correct (already done in the ctor
+         * of Win32DllBase, but for LX dlls the parent is then set to NULL)
+         * so, change it here again
+         */
+        pDll->setUnloadOrder(this);
+        pMod = pDll;
+    }
+
+    return pMod;
+}
+
+/**
+ * Loads a module this module is depending on.
+ * @returns Pointer to loaded module.
+ * @returns NULL on failure.
+ * @param   pszModName  Name of the module to be loaded.
+ * @remark  This should be in base class and shared with the peldr.
+ */
+Win32DllBase *Win32Pe2LxImage::importsLoadModule(const char *pszModName)
+{
+    Win32DllBase   *pDll;
+    char            szRenamed[CCHMAXPATH];
+
+    /*
+     * Copy and rename the module name. (i.e. OLE32 -> OLE32OS2)
+     */
+    Win32DllBase::renameDll(strcpy(szRenamed, pszModName));
+
+    /*
+     * Find the filename (using the standard search stuff).
+     */
+    char            szFullname[CCHMAXPATH];
+    if (!Win32ImageBase::findDll(szRenamed, szFullname, sizeof(szFullname)))
+    {
+        dprintf(("Module %s not found!", szRenamed));
+        errorState = ERROR_FILE_NOT_FOUND;
+        return NULL;
+    }
+
+    /*
+     * Check which type of executable module this is.
+     */
+    if (isPEImage(szFullname, NULL, NULL) != ERROR_SUCCESS_W)
+    {
+        /*
+         * LX image: let OS/2 do all the work for us
+         */
+        char    szModuleFailure[CCHMAXPATH];
+        HMODULE hmodLXDll;
+        APIRET  rc;
+
+        rc = DosLoadModule(szModuleFailure, sizeof(szModuleFailure), szFullname, (HMODULE *)&hmodLXDll);
+        if (rc)
+        {
+            dprintf(("DosLoadModule returned %X for %s", rc, szModuleFailure));
+            errorState = rc;
+            return NULL;
+        }
+
+        pDll = Win32DllBase::findModuleByOS2Handle((HINSTANCE)hmodLXDll);
+        if (pDll == NULL)
+        {
+            dprintf(("Just loaded the dll, but can't find it anywhere?!!?"));
+            DebugInt3();
+            errorState = ERROR_INTERNAL;
+            return NULL;
+        }
+
+        /*
+         * For none Pe2Lx'ed LX modules we'll have to do a little work here.
+         */
+        if (pDll->isLxDll())
+        {
+            Win32LxDll *pLXDll = (Win32LxDll *)pDll;
+            pLXDll->setDllHandleOS2(hmodLXDll);
+            if (pLXDll->AddRef() == -1) //-1 -> load failed (attachProcess)
+            {
+                dprintf(("Dll %s refused to be loaded; aborting", szFullname));
+                delete pLXDll;
+                errorState = ERROR_INTERNAL;
+                return NULL;
+            }
+        }
+    }
+    else
+    {
+        /*
+         * PE image: use the peldr.
+         */
+        Win32PeLdrDll *pPEDll;
+
+        pPEDll = new Win32PeLdrDll(szFullname, this);
+        if (!pPEDll)
+        {
+            dprintf(("pedll: Error allocating memory" ));
+            errorState = ERROR_INTERNAL;
+            return NULL;
+        }
+        dprintf(("**********************************************************************"));
+        dprintf(("**********************     Loading Module        *********************"));
+        dprintf(("**********************************************************************"));
+        if (pPEDll->init(0) != LDRERROR_SUCCESS)
+        {
+            dprintf(("Internal WinDll error ", pPEDll->getError()));
+            delete pPEDll;
+            return NULL;
+        }
+
+#ifdef DEBUG
+        pPEDll->AddRef(getModuleName());
+#else
+        pPEDll->AddRef();
+#endif
+        if (pPEDll->attachProcess() == FALSE)
+        {
+            dprintf(("attachProcess failed!"));
+            delete pPEDll;
+            errorState = ERROR_INTERNAL;
+            return NULL;
+        }
+        pDll = (Win32DllBase*)pPEDll;
+    }
+
+    dprintf(("**********************************************************************"));
+    dprintf(("**********************  Finished Loading Module %s ", szFullname));
+    dprintf(("**********************************************************************"));
+    return pDll;
+}
+
+
+/**
+ * Resolve an import by symbol name.
+ *
+ * @returns 0 on success, error code on failure.
+ * @param   pModule     Pointer to module.
+ * @param   uOrdinal    Ordinal of the symbol to import.
+ * @param   ppvAddr     Where to store the symbol address.
+ * @remark  This should be in base class and shared with the peldr.
+ */
+ULONG Win32Pe2LxImage::importsByOrdinal(Win32ImageBase *pModule, unsigned uOrdinal, void **ppvAddr)
+{
+    void *pfn;
+    pfn = (void*)pModule->getApi(uOrdinal);
+    if (pfn)
+    {
+        dprintf(("Win32Pe2LxImage::importsByOrdinal: *%p=%p %s!%d\n", ppvAddr, pfn, pModule->getModuleName(), uOrdinal));
+        *ppvAddr = pfn;
+        return 0;
+    }
+
+    dprintf(("Win32Pe2LxImage::importsByOrdinal: %s!%u\n", pModule->getModuleName(), uOrdinal));
+    DebugInt3();
+    /** @todo: missing api */
+    *ppvAddr = NULL;
+    return LDRERROR_IMPORTS;
+}
+
+
+/**
+ * Resolve an import by symbol name.
+ *
+ * @returns 0 on success, error code on failure.
+ * @param   pModule     Pointer to module.
+ * @param   pszSymName  Name of symbol to import.
+ * @param   ppvAddr     Where to store the symbol address.
+ * @remark  This should be in base class and shared with the peldr.
+ */
+ULONG Win32Pe2LxImage::importsByName(Win32ImageBase *pModule, const char *pszSymName, void **ppvAddr)
+{
+    void *pfn;
+    pfn = (void*)pModule->getApi((char*)pszSymName);
+    if (pfn)
+    {
+        dprintf(("Win32Pe2LxImage::importsByName: *%p=%p %s!%s\n", ppvAddr, pfn, pModule->getModuleName(), pszSymName));
+        *ppvAddr = pfn;
+        return 0;
+    }
+
+    dprintf(("Win32Pe2LxImage::importsByName: %s!%s\n", pModule->getModuleName(), pszSymName));
+    DebugInt3();
+    /** @todo: missing api */
+    *ppvAddr = NULL;
+    return LDRERROR_IMPORTS;
+}
+
+
+/**
  * Frees memory used by this object.
  * When an exception is to be thrown, this function is called first to clean up
  * the object. Base class(es) are automatically clean up by theire destructor(s).
@@ -710,8 +1069,9 @@ VOID  Win32Pe2LxImage::cleanup()
 /**
  * Converts a RVA into a pointer.
  * @returns   Pointer matching the given RVA, NULL on error.
- * @param     ulRVA  An address relative to the imagebase of the original PE image.
- *                   If this is 0UL NULL is returned.
+ * @param     ulRVA     An address relative to the imagebase of the original PE image.
+ *                      If this is 0UL NULL is returned.
+ * @param     fOverride If set the ulRVA doesn't have to be inside the image.
  * @sketch    DEBUG: validate state, paSections != NULL
  *            IF ulRVA is 0 THEN return NULL
  *            LOOP while more section left and ulRVA is not within section
@@ -723,10 +1083,8 @@ VOID  Win32Pe2LxImage::cleanup()
  * @remark    Should not be called until getSections has returned successfully.
  *            RVA == 0 is ignored.
  */
-PVOID  Win32Pe2LxImage::getPointerFromRVA(ULONG ulRVA)
+void *  Win32Pe2LxImage::getPointerFromRVA(ULONG ulRVA, BOOL fOverride)
 {
-    int i;
-
     #ifdef DEBUG
     if (paSections == NULL)
     {
@@ -738,15 +1096,51 @@ PVOID  Win32Pe2LxImage::getPointerFromRVA(ULONG ulRVA)
     if (ulRVA == 0UL)
         return NULL;
 
-    i = 0;
+    int i = 0;
     while (i < cSections &&
            (paSections[i].ulRVA > ulRVA || paSections[i].ulRVA + paSections[i].cbVirtual <= ulRVA)) /* ALIGN on page too? */
         i++;
-
     if (i >= cSections)
+    {
+        /* This isn't good, but it's required to support api overrides. */
+        if (fOverride)
+            return (char*)hinstance + ulRVA;
         return NULL;
+    }
 
     return (PVOID)(ulRVA - paSections[i].ulRVA + paSections[i].ulAddress);
+}
+
+
+/** Converts a pointer to an RVA for the loaded image.
+ * @remark Because of export overriding addresses outside the image must be supported.
+ */
+ULONG Win32Pe2LxImage::getRVAFromPointer(void *pv, BOOL fOverride/* = FALSE*/)
+{
+    #ifdef DEBUG
+    if (paSections == NULL)
+    {
+        eprintf(("Win32Pe2LxImage::getPointerFromRVA: paSections is NULL!\n"));
+        return NULL;
+    }
+    #endif
+
+    if (pv == 0UL)
+        return NULL;
+
+    int i = 0;
+    while (i < cSections &&
+           (paSections[i].ulAddress > (ULONG)pv || paSections[i].ulAddress + paSections[i].cbVirtual <= (ULONG)pv)) /* ALIGN on page too? */
+        i++;
+    if (i >= cSections)
+    {
+        /* This isn't good, but it's required to support api overrides. */
+        if (fOverride)
+            return (ULONG)pv - (ULONG)hinstance;
+        return NULL;
+    }
+
+    return (ULONG)pv - paSections[i].ulAddress + paSections[i].ulRVA;
 }
 
 
@@ -842,41 +1236,3 @@ BOOL Win32Pe2LxImage::validateRealPointer(PVOID pv)
 }
 
 
-/**
- * Gets pointer to an exported procedure by procedure name.
- * @returns   Address of exported procedure. 0UL if not found.
- * @param     name  Exported procedure name.
- * @status    completely implemented.
- * @author    Sander van Leeuwen
- * @remark
- */
-ULONG Win32Pe2LxImage::getApi(char *name)
-{
-    APIRET      rc;
-    ULONG       ulApiAddr;
-
-    rc = DosQueryProcAddr(hmod, 0, name, (PFN *)&ulApiAddr);
-    return rc == NO_ERROR ? ulApiAddr : 0;
-}
-
-
-/**
- * Gets pointer to an exported procedure by ordinal.
- * @returns   Pointer to an exported procedure. 0UL if not found.
- * @param     ordinal  Export ordinal number.
- * @status    completely implemented.
- * @author    Sander van Leeuwen
- * @remark    FIXME:
- *            This function should be implemented for both Exe and Dll images!
- *            It could be done similar in both peldr image and pe2lx images by
- *            accessing PE structures.
- */
-ULONG Win32Pe2LxImage::getApi(int ordinal)
-{
-    APIRET      rc;
-    ULONG       ulApiAddr;
-
-    rc = DosQueryProcAddr(hmod, ordinal, NULL, (PFN *)&ulApiAddr);
-
-    return rc == NO_ERROR ? ulApiAddr : 0;
-}

@@ -1,12 +1,16 @@
-/* $Id: winimagelx.cpp,v 1.20 2003-04-02 11:03:33 sandervl Exp $ */
+/* $Id: winimagelx.cpp,v 1.21 2004-01-15 10:39:11 sandervl Exp $ */
 
 /*
  * Win32 LX Image base class
  *
  * Copyright 1999-2000 Sander van Leeuwen (sandervl@xs4all.nl)
+ * Copyright 2003 Innotek Systemberatung GmbH (sandervl@innotek.de)
+ *
+ * header adjustment & fixup_rva_ptrs borrowed from Wine (Rewind)
+ * Copyright 2000 Alexandre Julliard
  *
  * TODO: headers not complete
- * 
+ *
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
@@ -61,27 +65,49 @@ BYTE dosHeader[16*15] = {
 };
 
 //******************************************************************************
+/* adjust an array of pointers to make them into RVAs */
+//******************************************************************************
+static inline void fixup_rva_ptrs( void *array, void *base, int count )
+{
+    void **ptr = (void **)array;
+    while (count--)
+    {
+        if (*ptr) *ptr = (void *)((char *)*ptr - (char *)base);
+        ptr++;
+    }
+}
+//******************************************************************************
 //******************************************************************************
 Win32LxImage::Win32LxImage(HINSTANCE hInstance, PVOID pResData)
-               : Win32ImageBase(hInstance), header(0)
+               : Win32ImageBase(hInstance), header(0), pCustomPEHeader(0)
 {
     APIRET rc;
     char  *name;
 
     szFileName[0] = 0;
 
-    this->lpszExportPrefix = NULL;
-    if(lpszCustomDllName) {
-       name = lpszCustomDllName;
-       this->dwOrdinalBase    = ::dwOrdinalBase;
-      
-       if(lpszCustomExportPrefix) {
-           this->lpszExportPrefix = strdup(::lpszCustomExportPrefix);
-       }
+    if (lpszCustomDllName) {
+       name            = lpszCustomDllName;
+       pCustomPEHeader = lpCustomDllPEHdr;
+
+       hinstance = (DWORD)pCustomPEHeader;
+       if (pCustomPEHeader) {
+           //Calculate address of optional header
+           poh = (PIMAGE_OPTIONAL_HEADER)OPTHEADEROFF(pCustomPEHeader);
+
+           //Update the header data to reflect the new load address
+           poh->ImageBase = hinstance;
+
+           PIMAGE_EXPORT_DIRECTORY pExpDir;
+           pExpDir = (PIMAGE_EXPORT_DIRECTORY)((char*)hinstance
+                + poh->DataDirectory[IMAGE_FILE_EXPORT_DIRECTORY].VirtualAddress);
+           fixup_rva_ptrs((char*)hinstance + (unsigned)pExpDir->AddressOfFunctions,
+                          (LPVOID)hinstance,
+                          pExpDir->NumberOfFunctions );
+        }
     }
     else {
        name = OSLibGetDllName(hinstance);
-       this->dwOrdinalBase    = 0;
     }
 
     strcpy(szFileName, name);
@@ -101,8 +127,6 @@ Win32LxImage::Win32LxImage(HINSTANCE hInstance, PVOID pResData)
 //******************************************************************************
 Win32LxImage::~Win32LxImage()
 {
-    if(lpszExportPrefix) free(lpszExportPrefix);
-
     if(header) {
     	DosFreeMem(header);
     }
@@ -114,22 +138,8 @@ ULONG Win32LxImage::getApi(char *name)
     APIRET      rc;
     ULONG       apiaddr;
 
-    if(lpszExportPrefix) 
-    {//if this dll exports by name with a prefix, then concatenate the prefix
-     //with the export name to get the OS/2 export name
-        char *lpszNewName = (char *)alloca(strlen(name) + strlen(lpszExportPrefix)+1);
-        if(lpszNewName == NULL) {
-            DebugInt3();
-            return 0;
-        }
-        strcpy(lpszNewName, lpszExportPrefix);
-        strcat(lpszNewName, name);
-        rc = DosQueryProcAddr(hinstanceOS2, 0, lpszNewName, (PFN *)&apiaddr);
-        if(rc == NO_ERROR) {
-            return(apiaddr);
-        }
-        //else try with the normal name
-    }
+    if(pCustomPEHeader) return Win32ImageBase::getApi(name);
+
     rc = DosQueryProcAddr(hinstanceOS2, 0, name, (PFN *)&apiaddr);
     if(rc)
     {
@@ -145,7 +155,9 @@ ULONG Win32LxImage::getApi(int ordinal)
     APIRET      rc;
     ULONG       apiaddr;
 
-    rc = DosQueryProcAddr(hinstanceOS2, dwOrdinalBase+ordinal, NULL, (PFN *)&apiaddr);
+    if(pCustomPEHeader) return Win32ImageBase::getApi(ordinal);
+
+    rc = DosQueryProcAddr(hinstanceOS2, ordinal, NULL, (PFN *)&apiaddr);
     if(rc) {
     	dprintf(("Win32LxImage::getApi %x %d -> rc = %d", hinstanceOS2, ordinal, rc));
     	return(0);
@@ -154,13 +166,37 @@ ULONG Win32LxImage::getApi(int ordinal)
 }
 //******************************************************************************
 //******************************************************************************
+ULONG Win32LxImage::setApi(char *name, ULONG pfnNewProc)
+{
+    if(pCustomPEHeader) return Win32ImageBase::setApi(name, pfnNewProc);
+
+    return -1;
+}
+//******************************************************************************
+//******************************************************************************
+ULONG Win32LxImage::setApi(int ordinal, ULONG pfnNewProc)
+{
+    if(pCustomPEHeader) return Win32ImageBase::setApi(ordinal, pfnNewProc);
+
+    return -1;
+}
+//******************************************************************************
+//******************************************************************************
 LPVOID Win32LxImage::buildHeader(DWORD MajorImageVersion, DWORD MinorImageVersion,
-                                 DWORD Subsystem) 
+                                 DWORD Subsystem)
 {
     APIRET rc;
     IMAGE_DOS_HEADER *pdosheader;
-    PIMAGE_OPTIONAL_HEADER poh;
-    PIMAGE_FILE_HEADER     pfh;
+    PIMAGE_OPTIONAL_HEADER  poh;
+    PIMAGE_FILE_HEADER      pfh;
+    PIMAGE_SECTION_HEADER   psh;
+    PIMAGE_EXPORT_DIRECTORY ped;
+
+    if(pCustomPEHeader)
+    {
+        return (LPVOID)pCustomPEHeader;
+    }
+
     DWORD *ntsig;
 
     rc = DosAllocMem(&header, 4096, PAG_READ | PAG_WRITE | PAG_COMMIT | flAllocMem);
@@ -179,8 +215,8 @@ LPVOID Win32LxImage::buildHeader(DWORD MajorImageVersion, DWORD MinorImageVersio
     pfh->PointerToSymbolTable = 0;
     pfh->NumberOfSymbols      = 0;
     pfh->SizeOfOptionalHeader = sizeof(IMAGE_OPTIONAL_HEADER);
-    pfh->Characteristics      = IMAGE_FILE_DLL | IMAGE_FILE_32BIT_MACHINE | 
-                                IMAGE_FILE_DEBUG_STRIPPED | IMAGE_FILE_EXECUTABLE_IMAGE | 
+    pfh->Characteristics      = IMAGE_FILE_DLL | IMAGE_FILE_32BIT_MACHINE |
+                                IMAGE_FILE_DEBUG_STRIPPED | IMAGE_FILE_EXECUTABLE_IMAGE |
                                 IMAGE_FILE_RELOCS_STRIPPED;
     poh    = (PIMAGE_OPTIONAL_HEADER)(pfh+1);
     poh->Magic                       = IMAGE_NT_OPTIONAL_HDR_MAGIC;
@@ -213,7 +249,6 @@ LPVOID Win32LxImage::buildHeader(DWORD MajorImageVersion, DWORD MinorImageVersio
     poh->SizeOfHeapCommit            = 4096;
     poh->LoaderFlags                 = 0;
     poh->NumberOfRvaAndSizes         = 0;
-//  poh->DataDirectory[0]
 
     return header;
 }

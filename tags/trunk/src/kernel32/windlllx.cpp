@@ -1,9 +1,10 @@
-/* $Id: windlllx.cpp,v 1.28 2003-10-28 10:42:40 sandervl Exp $ */
+/* $Id: windlllx.cpp,v 1.29 2004-01-15 10:39:07 sandervl Exp $ */
 
 /*
  * Win32 LX Dll class (compiled in OS/2 using Odin32 api)
  *
  * Copyright 1999-2000 Sander van Leeuwen (sandervl@xs4all.nl)
+ * Copyright 2003 Innotek Systemberatung GmbH (sandervl@innotek.de)
  *
  * TODO: Unloading of dlls probably needs to be fixed due to OS/2 bug
  *       (wrong unload order of dlls)
@@ -44,8 +45,7 @@
 *   Global Variables                                                           *
 *******************************************************************************/
 char *lpszCustomDllName      = NULL;
-char *lpszCustomExportPrefix = NULL;
-ULONG dwOrdinalBase          = 0;
+PIMAGE_FILE_HEADER lpCustomDllPEHdr = NULL;
 
 /**
  * FreeLibrary callback for LX Dlls, it's call only when the library is actually
@@ -56,10 +56,10 @@ PFNLXDLLUNLOAD pfnLxDllUnLoadCallback = NULL;
 
 //******************************************************************************
 //******************************************************************************
-void WIN32API SetCustomBuildName(char *lpszName, PIMAGE_FILE_HEADER  pfh)
-
+void WIN32API SetCustomBuildName(char *lpszName, PIMAGE_FILE_HEADER pfh)
 {
     lpszCustomDllName      = lpszName;
+    lpCustomDllPEHdr       = pfh;
 }
 //******************************************************************************
 //Create LX Dll object and send process attach message
@@ -100,6 +100,14 @@ DWORD WIN32API RegisterLxDll(HINSTANCE hInstance, WIN32DLLENTRY EntryPoint,
            return 0;
        }
    }
+   else {
+       //make sure this dll hasn't already been loaded
+       if(Win32DllBase::findModule(lpszCustomDllName) != NULL) {
+           dprintf(("ERROR: RegisterLxDll: module %s already loaded!!", lpszCustomDllName));
+           DebugInt3();
+           return 0;
+       }
+   }
    windll = new Win32LxDll(hInstance, EntryPoint, pResData, MajorImageVersion,
                            MinorImageVersion, Subsystem);
    if(windll == NULL) {
@@ -108,6 +116,7 @@ DWORD WIN32API RegisterLxDll(HINSTANCE hInstance, WIN32DLLENTRY EntryPoint,
    }
    //clear name override in case dll init loads another dll
    lpszCustomDllName = NULL;
+   lpCustomDllPEHdr  = NULL;
 
    if(!fPeLoader) {
        windll->AddRef();

@@ -1,9 +1,10 @@
-/* $Id: windllbase.cpp,v 1.33 2003-04-30 11:04:07 sandervl Exp $ */
+/* $Id: windllbase.cpp,v 1.34 2004-01-15 10:39:06 sandervl Exp $ */
 
 /*
  * Win32 Dll base class
  *
  * Copyright 1998-2000 Sander van Leeuwen (sandervl@xs4all.nl)
+ * Copyright 2003 Innotek Systemberatung GmbH (sandervl@innotek.de)
  *
  * Unloading of a dll always happens in order of dependency (taking nr of
  * loads into account)
@@ -437,7 +438,7 @@ BOOL Win32DllBase::attachProcess()
 
 #ifdef DEBUG
     time2 = GetTickCount();
-    dprintf(("attachProcess to dll %s DONE in %x msec", szModule, time2-time1));
+    dprintf(("attachProcess to dll %s DONE in %x msec rc %d", szModule, time2-time1, rc));
 #endif
 
     if(fSetExceptionHandler) {
@@ -879,6 +880,29 @@ Win32DllBase *Win32DllBase::findModuleByOS2Handle(HINSTANCE hinstance)
 BOOL Win32DllBase::isDll()
 {
     return TRUE;
+}
+//******************************************************************************
+//******************************************************************************
+int Win32DllBase::enumDlls(HMODULE *lphModule, int countMax)
+{
+    int     count = 0;
+    HMODULE hModule;
+
+    dlllistmutex.enter();
+
+    Win32DllBase *mod = Win32DllBase::head;
+    while(mod != NULL) {
+        dbgCheckObj(mod);
+
+        hModule = mod->getInstanceHandle();
+        if ( count < countMax )
+            lphModule[count] = hModule;
+        count++;
+
+        mod = mod->next;
+    }
+    dlllistmutex.leave();
+    return count;
 }
 //******************************************************************************
 //******************************************************************************

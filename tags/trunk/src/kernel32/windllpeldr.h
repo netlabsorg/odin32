@@ -1,4 +1,4 @@
-/* $Id: windllpeldr.h,v 1.4 2003-04-02 12:58:31 sandervl Exp $ */
+/* $Id: windllpeldr.h,v 1.5 2004-01-15 10:39:09 sandervl Exp $ */
 
 /*
  * Win32 PE loader Dll class
