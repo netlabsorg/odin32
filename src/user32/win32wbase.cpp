@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.14 1999-09-26 10:10:01 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.15 1999-09-26 11:09:39 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -396,7 +396,7 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
 //          OSLibWinCreateWindow: perhaps problems
 //    shouldn't we always use a frame? -> no problems with scrollbars
 
-  if(cs->lpszName)
+  if(HIWORD(cs->lpszName))
   {
         if(isUnicode)
                 SetWindowTextW((LPWSTR)cs->lpszName);
