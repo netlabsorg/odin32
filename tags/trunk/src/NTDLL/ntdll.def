@@ -1,4 +1,4 @@
-; $Id: ntdll.def,v 1.14 1999-08-18 22:08:33 phaller Exp $
+; $Id: ntdll.def,v 1.15 1999-08-18 23:41:15 phaller Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is NT4.0's NTDLL.DLL
@@ -360,6 +360,10 @@ EXPORTS
     strrchr                       = _OS2strrchr                       @924
     strspn                        = _OS2strspn                        @925
     strstr                        = _OS2strstr                        @926
+    toupper                       = _OS2toupper                       @929
+    tolower                       = _OS2tolower                       @930
+    towlower                      = _OS2towlower                      @931
+    towupper                      = _OS2towupper                      @932
 
     wcscat                        = _OS2wcscat                        @934
     wcschr                        = _OS2wcschr                        @935
@@ -377,3 +381,5 @@ EXPORTS
 
     _stricmp                      = _OS2_stricmp
     _itoa                         = _OS2_itoa
+    _itow                         = _OS2_itow
+
