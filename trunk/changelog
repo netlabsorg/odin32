@@ -1,4 +1,14 @@
- /* $Id: changelog,v 1.18 1999-06-23 20:11:40 achimha Exp $ */
+ /* $Id: changelog,v 1.19 1999-06-23 22:55:41 phaller Exp $ */
+
+ 99-06-23: Patrick Haller
+        - Fixed date format in changlog .g.
+        - NTDLL:    a dozen c runtime functions added
+        - USER32:   IsHungAppWindow dummy added
+        - SHELL32:  few more APIs added
+        - KERNEL32: HandleManager, Console, fixes
+        - COMDLG32: basic unicode support added, thou broken somehow
+        - source code splitups and beautification ;-)
+
  99-23-06: Achim Hasenmueller
         - ported latest WINE fixes and additions for comctl32. Changes
           involve better undoc. DSA APIs, right colors for the tab control,
