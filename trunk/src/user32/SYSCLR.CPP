@@ -1,3 +1,5 @@
+/* $Id: SYSCLR.CPP,v 1.3 1999-06-10 16:50:36 phaller Exp $ */
+
 /*
  * Win32 system color API functions for OS/2
  *

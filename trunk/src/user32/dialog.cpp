@@ -1,3 +1,5 @@
+/* $Id: dialog.cpp,v 1.4 1999-06-10 16:50:35 phaller Exp $ */
+
 /*
  * Win32 dialog API functions for OS/2
  *

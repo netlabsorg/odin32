@@ -1,3 +1,5 @@
+/* $Id: she.cpp,v 1.2 1999-06-10 16:56:09 phaller Exp $ */
+
 /*
  * Win32 SHELL32 for OS/2
  * Copyright 1999 Patrick Haller

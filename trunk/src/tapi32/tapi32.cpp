@@ -1,3 +1,5 @@
+/* $Id: tapi32.cpp,v 1.3 1999-06-10 16:54:47 phaller Exp $ */
+
 /*
  *
  * Project Odin Software License can be found in LICENSE.TXT

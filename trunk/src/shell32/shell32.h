@@ -1,3 +1,5 @@
+/* $Id: shell32.h,v 1.3 1999-06-10 16:56:09 phaller Exp $ */
+
 #ifndef __shell32_H__
 #define __shell32_H__
 

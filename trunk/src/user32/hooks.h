@@ -1,13 +1,9 @@
+/* $Id: hooks.h,v 1.3 1999-06-10 16:50:39 phaller Exp $ */
+
 /*
- *
  * Project Odin Software License can be found in LICENSE.TXT
- *
- */
-/*
  * Win32 hook class for OS/2
- *
  * Copyright 1998 Sander van Leeuwen
- *
  */
 #ifndef __HOOKS_H__
 #define __HOOKS_H__
@@ -258,7 +254,7 @@ private:
 
  static	        HkShell  *hooks;
    	        HkShell  *next;
- 
+
  friend static LRESULT EXPENTRY_O32 OS2HkShellProc(int code, WPARAM wParam, LPARAM lParam);
 };
 
