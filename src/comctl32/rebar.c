@@ -3638,7 +3638,7 @@ REBAR_Destroy (REBAR_INFO *infoPtr, WPARAM wParam, LPARAM lParam)
 
 #ifdef __WIN32OS2__
     //NEVER delete the font object received by WM_SETFONT!
-    DeleteObject (infoPtr->hDefaultFont);
+    if(infoPtr->hDefaultFont) DeleteObject (infoPtr->hDefaultFont);
 #else
     DeleteObject (infoPtr->hFont);
 #endif
