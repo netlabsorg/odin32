@@ -84,6 +84,8 @@ void * ODINAPI  ODIN_debug_realloc( void *p1, size_t s1, const char *p2, size_t 
   ODIN_TEB_ON1(rc)
 
 
+
+
 /****************************************************************************
  * String operations                                                        *
  ****************************************************************************/
@@ -93,4 +95,15 @@ char* ODINAPI ODIN_strdup( const char *s1)
   char *rc = strdup(s1);
   ODIN_TEB_ON1(rc)
 
+
+/****************************************************************************
+ * C++ operator wrappers (experimental)                                     *
+ ****************************************************************************/
+
+// operator new()
+// @@@PH wrong calling convention
+//void* _Optlink __nw__FUi(void* p1)
+//  ODIN_TEB_OFF
+//  void *rc = __nw__FUi(p1);
+//  ODIN_TEB_ON1(rc)
 

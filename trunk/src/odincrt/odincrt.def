@@ -9,6 +9,10 @@ CODE LOADONCALL
 ; we could provide corresponding macros for that purpose.
 
 EXPORTS
+
+; -----------------
+; memory management
+; -----------------
        ODIN_calloc
        calloc                  = ODIN_calloc
 
@@ -32,6 +36,21 @@ EXPORTS
 
        ODIN_debug_free
        _debug_free             = ODIN_debug_free
+
+; -----------------
+; string management
+; -----------------
+
+       ODIN_strdup
+       strdup                  = ODIN_strdup
+
+; -----------------
+; C++ wrappers
+; -----------------
+       __nw__FUi               ; operator new()
+
+
+
 
 
 ; EXPORTS
@@ -295,7 +314,6 @@ EXPORTS
    log
    log10
    longjmp
-;  malloc                    ; ****
    mblen
    mbstowcs
    mbtowc
@@ -339,7 +357,6 @@ EXPORTS
    strcoll
    strcpy
    strcspn
-   strdup                    ; ****
    strerror
    strftime
    stricmp
@@ -559,7 +576,10 @@ EXPORTS
    __dl__FPv
    __dl__FPvPCcUi
 ;
-   __nw__FUi
+
+; operator new() void* __nw__FUi(void* p1)
+;   __nw__FUi
+
    __nw__FUiPv
    __nw__FUiPCcT1
    __nw__FUiPCcT1Pv
