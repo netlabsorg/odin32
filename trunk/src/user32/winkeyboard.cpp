@@ -1,4 +1,4 @@
-/* $Id: winkeyboard.cpp,v 1.16 2001-09-25 00:05:27 phaller Exp $ */
+/* $Id: winkeyboard.cpp,v 1.17 2001-10-09 05:18:05 phaller Exp $ */
 /*
  * Win32 <-> PM key translation
  *
@@ -1207,7 +1207,17 @@ ODINPROCEDURE4(keybd_event,
                DWORD, dwFlags,
                DWORD, dwExtraInfo)
 {
-  dprintf(("not implemented.\n"));
+  INPUT i;
+  
+  // format input packet
+  i.type           = INPUT_KEYBOARD;
+  i.ki.wVk         = bVk;
+  i.ki.wScan       = bScan;
+  i.ki.dwFlags     = dwFlags;
+  i.ki.dwExtraInfo = dwExtraInfo;
+  
+  // forward to more modern API
+  SendInput(1, &i, sizeof(i) );
 }
 /*****************************************************************************
  * Name      : HLK WIN32API LoadKeyboardLayoutA

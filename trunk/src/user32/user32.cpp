@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.115 2001-09-19 15:39:49 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.116 2001-10-09 05:18:02 phaller Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -1076,30 +1076,6 @@ BOOL WIN32API WinHelpW( HWND hwnd, LPCWSTR lpszHelp, UINT uCommand, DWORD  dwDat
 
 
 /* Window Functions */
-
-/*****************************************************************************
- * Name      : BOOL WIN32API AnyPopup
- * Purpose   : The AnyPopup function indicates whether an owned, visible,
- *             top-level pop-up, or overlapped window exists on the screen. The
- *             function searches the entire Windows screen, not just the calling
- *             application's client area.
- * Parameters: VOID
- * Variables :
- * Result    : If a pop-up window exists, the return value is TRUE even if the
- *             pop-up window is completely covered by other windows. Otherwise,
- *             it is FALSE.
- * Remark    : AnyPopup is a Windows version 1.x function and is retained for
- *             compatibility purposes. It is generally not useful.
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
- *****************************************************************************/
-BOOL WIN32API AnyPopup(VOID)
-{
-  dprintf(("USER32:AnyPopup() not implemented.\n"));
-
-  return (FALSE);
-}
 
 /*****************************************************************************
  * Name      : BOOL WIN32API PaintDesktop

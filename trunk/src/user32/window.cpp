@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.107 2001-09-22 18:21:01 sandervl Exp $ */
+/* $Id: window.cpp,v 1.108 2001-10-09 05:18:04 phaller Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -19,6 +19,10 @@
  *       GetLastActivePopup needs to be rewritten
  *
  */
+
+#include <odin.h>
+#include <odinwrap.h>
+#include <os2sel.h>
 
 #include <os2win.h>
 #include <misc.h>
@@ -42,13 +46,24 @@
 #define DBG_LOCALLOG    DBG_window
 #include "dbglocal.h"
 
+ODINDEBUGCHANNEL(USER32-WINDOW)
+
+
 //******************************************************************************
 //******************************************************************************
-HWND WIN32API CreateWindowExA(DWORD exStyle, LPCSTR className,
-                              LPCSTR windowName, DWORD style, INT x,
-                              INT y, INT width, INT height,
-                              HWND parent, HMENU menu,
-                              HINSTANCE instance, LPVOID data )
+ODINFUNCTION12(HWND,      CreateWindowExA,
+               DWORD,     exStyle,
+               LPCSTR,    className,
+               LPCSTR,    windowName,
+               DWORD,     style,
+               INT,       x,
+               INT,       y,
+               INT,       width,
+               INT,       height,
+               HWND,      parent,
+               HMENU,     menu,
+               HINSTANCE, instance,
+               LPVOID,    data )
 {
   Win32BaseWindow *window;
   ATOM classAtom;
@@ -132,16 +147,28 @@ HWND WIN32API CreateWindowExA(DWORD exStyle, LPCSTR className,
         return 0;
     }
     HWND hwnd = window->getWindowHandle();
+  
+    // set myself as last active popup / window
+    window->setLastActive( hwnd );
+  
     RELEASE_WNDOBJ(window);
     return hwnd;
 }
 //******************************************************************************
 //******************************************************************************
-HWND WIN32API CreateWindowExW(DWORD exStyle, LPCWSTR className,
-                              LPCWSTR windowName, DWORD style, INT x,
-                              INT y, INT width, INT height,
-                              HWND parent, HMENU menu,
-                              HINSTANCE instance, LPVOID data )
+ODINFUNCTION12(HWND,      CreateWindowExW,
+               DWORD,     exStyle,
+               LPCWSTR,   className,
+               LPCWSTR,   windowName,
+               DWORD,     style,
+               INT,       x,
+               INT,       y,
+               INT,       width,
+               INT,       height,
+               HWND,      parent,
+               HMENU,     menu,
+               HINSTANCE, instance,
+               LPVOID,    data )
 {
   Win32BaseWindow *window;
   ATOM classAtom;
@@ -226,12 +253,17 @@ HWND WIN32API CreateWindowExW(DWORD exStyle, LPCWSTR className,
         return 0;
     }
     HWND hwnd = window->getWindowHandle();
+  
+    // set myself as last active popup / window
+    window->setLastActive( hwnd );
+  
     RELEASE_WNDOBJ(window);
     return hwnd;
 }
 //******************************************************************************
 //******************************************************************************
-HWND WIN32API CreateFakeWindowEx(HWND hwndOS2)
+ODINFUNCTION1(HWND, CreateFakeWindowEx,
+              HWND, hwndOS2)
 {
  Win32BaseWindow *window;
 
@@ -242,12 +274,17 @@ HWND WIN32API CreateFakeWindowEx(HWND hwndOS2)
         return 0;
     }
     HWND hwnd = window->getWindowHandle();
+  
+    // set myself as last active popup / window
+    window->setLastActive( hwnd );
+  
     RELEASE_WNDOBJ(window);
     return hwnd;
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API DestroyWindow(HWND hwnd)
+ODINFUNCTION1(BOOL, DestroyWindow,
+              HWND, hwnd)
 {
   Win32BaseWindow *window;
   BOOL             ret;
@@ -264,7 +301,8 @@ BOOL WIN32API DestroyWindow(HWND hwnd)
 }
 //******************************************************************************
 //******************************************************************************
-HWND WIN32API SetActiveWindow( HWND hwnd)
+ODINFUNCTION1(HWND, SetActiveWindow,
+              HWND, hwnd)
 {
   Win32BaseWindow *window;
   HWND             hwndActive;
@@ -276,13 +314,23 @@ HWND WIN32API SetActiveWindow( HWND hwnd)
         return 0;
     }
     hwndActive = window->SetActiveWindow();
+  
+    // check last active popup window
+    if (hwndActive)
+    {
+      // TODO:
+      // set last active popup window to the ancestor window
+      dprintf(("support for last active popup incorrectly implemented"));
+    }
+  
     RELEASE_WNDOBJ(window);
     return hwndActive;
 }
 //******************************************************************************
 //Note: does not set last error if no parent (verified in NT4, SP6)
 //******************************************************************************
-HWND WIN32API GetParent( HWND hwnd)
+ODINFUNCTION1(HWND, GetParent,
+              HWND, hwnd)
 {
   Win32BaseWindow *window;
   HWND             hwndParent;
@@ -300,7 +348,9 @@ HWND WIN32API GetParent( HWND hwnd)
 }
 //******************************************************************************
 //******************************************************************************
-HWND WIN32API SetParent( HWND hwndChild, HWND hwndNewParent)
+ODINFUNCTION2(HWND, SetParent,
+              HWND, hwndChild,
+              HWND, hwndNewParent)
 {
   Win32BaseWindow *window;
   HWND             hwndOldParent;
@@ -329,7 +379,9 @@ HWND WIN32API SetParent( HWND hwndChild, HWND hwndNewParent)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API IsChild( HWND hwndParent, HWND hwnd)
+ODINFUNCTION2(BOOL, IsChild,
+              HWND, hwndParent,
+              HWND, hwnd)
 {
   Win32BaseWindow *window;
   BOOL             fIsChild;
@@ -347,7 +399,8 @@ BOOL WIN32API IsChild( HWND hwndParent, HWND hwnd)
 }
 //******************************************************************************
 //******************************************************************************
-HWND WIN32API GetTopWindow( HWND hwnd)
+ODINFUNCTION1(HWND, GetTopWindow,
+              HWND, hwnd)
 {
   Win32BaseWindow *window;
   HWND hwndTop;
@@ -371,7 +424,8 @@ HWND WIN32API GetTopWindow( HWND hwnd)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API IsIconic( HWND hwnd)
+ODINFUNCTION1(BOOL, IsIconic,
+              HWND, hwnd)
 {
   Win32BaseWindow *window;
   BOOL fIsIconic;
@@ -389,7 +443,9 @@ BOOL WIN32API IsIconic( HWND hwnd)
 }
 //******************************************************************************
 //******************************************************************************
-HWND WIN32API GetWindow(HWND hwnd, UINT uCmd)
+ODINFUNCTION2(HWND, GetWindow,
+              HWND, hwnd,
+              UINT, uCmd)
 {
   Win32BaseWindow *window;
   HWND hwndRelated;
@@ -406,7 +462,9 @@ HWND WIN32API GetWindow(HWND hwnd, UINT uCmd)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API EnableWindow( HWND hwnd, BOOL fEnable)
+ODINFUNCTION2(BOOL, EnableWindow,
+              HWND, hwnd,
+              BOOL, fEnable)
 {
   Win32BaseWindow *window;
   BOOL             fEnabled;
@@ -424,7 +482,8 @@ BOOL WIN32API EnableWindow( HWND hwnd, BOOL fEnable)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API BringWindowToTop(HWND hwnd)
+ODINFUNCTION1(BOOL, BringWindowToTop,
+              HWND, hwnd)
 {
     dprintf(("BringWindowToTop %x", hwnd));
     return SetWindowPos( hwnd, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE|SWP_NOSIZE );
@@ -432,14 +491,12 @@ BOOL WIN32API BringWindowToTop(HWND hwnd)
 /***********************************************************************
  *           SetInternalWindowPos   (USER32.483)
  */
-void WIN32API SetInternalWindowPos(HWND    hwnd,
-                                   UINT    showCmd,
-                                   LPRECT  lpRect,
-                                   LPPOINT lpPoint )
+ODINPROCEDURE4(SetInternalWindowPos,
+               HWND,    hwnd,
+               UINT,    showCmd,
+               LPRECT,  lpRect,
+               LPPOINT, lpPoint )
 {
-    dprintf(("USER32: SetInternalWindowPos(%08xh,%08xh,%08xh,%08xh)",
-           hwnd, showCmd, lpRect, lpPoint));
-
     if( IsWindow(hwnd) )
     {
         WINDOWPLACEMENT wndpl;
@@ -466,16 +523,12 @@ void WIN32API SetInternalWindowPos(HWND    hwnd,
 /***********************************************************************
  *           GetInternalWindowPos   (USER32.245)
  */
-UINT WIN32API GetInternalWindowPos(HWND    hwnd,
-                                   LPRECT  rectWnd,
-                                   LPPOINT ptIcon )
+ODINFUNCTION3(UINT,    GetInternalWindowPos,
+              HWND,    hwnd,
+              LPRECT,  rectWnd,
+              LPPOINT, ptIcon )
 {
     WINDOWPLACEMENT wndpl;
-
-    dprintf(("USER32: GetInternalWindowPos(%08xh,%08xh,%08xh)\n",
-             hwnd,
-             rectWnd,
-             ptIcon));
 
     if(GetWindowPlacement( hwnd, &wndpl ))
     {
@@ -487,13 +540,15 @@ UINT WIN32API GetInternalWindowPos(HWND    hwnd,
 }
 //******************************************************************************
 //******************************************************************************
-HWND WIN32API GetActiveWindow()
+ODINFUNCTION0(HWND, GetActiveWindow)
 {
     return Win32BaseWindow::GetActiveWindow();
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API ShowWindow(HWND hwnd, int nCmdShow)
+ODINFUNCTION2(BOOL, ShowWindow,
+              HWND, hwnd,
+              int,  nCmdShow)
 {
   Win32BaseWindow *window;
   BOOL             ret;
@@ -522,8 +577,9 @@ BOOL WIN32API ShowWindow(HWND hwnd, int nCmdShow)
  *
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
-BOOL WIN32API ShowWindowAsync (HWND hwnd,
-                               int  nCmdShow)
+ODINFUNCTION2(BOOL, ShowWindowAsync,
+              HWND, hwnd,
+              int,  nCmdShow)
 {
   dprintf(("USER32:ShowWindowAsync (%08xh,%08x) not correctly implemented.\n",
          hwnd,
@@ -533,7 +589,14 @@ BOOL WIN32API ShowWindowAsync (HWND hwnd,
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API SetWindowPos(HWND hwnd, HWND hwndInsertAfter, int x, int y, int cx, int cy, UINT fuFlags)
+ODINFUNCTION7(BOOL, SetWindowPos,
+              HWND, hwnd,
+              HWND, hwndInsertAfter,
+              int,  x,
+              int,  y,
+              int,  cx,
+              int,  cy,
+              UINT, fuFlags)
 {
   Win32BaseWindow *window;
 
@@ -556,7 +619,9 @@ BOOL WIN32API SetWindowPos(HWND hwnd, HWND hwndInsertAfter, int x, int y, int cx
 //******************************************************************************
 //NOTE: length must equal structure size or else api fails (verified in NT4, SP6)
 //******************************************************************************
-BOOL WIN32API SetWindowPlacement(HWND hwnd, const WINDOWPLACEMENT *winpos)
+ODINFUNCTION2(BOOL, SetWindowPlacement,
+              HWND, hwnd,
+              const WINDOWPLACEMENT *, winpos)
 {
   Win32BaseWindow *window;
 
@@ -580,7 +645,9 @@ BOOL WIN32API SetWindowPlacement(HWND hwnd, const WINDOWPLACEMENT *winpos)
 //NOTE: Length does not need to be correct (even though the SDK docs claim otherwise)
 //      (Verified in NT4, SP6)
 //******************************************************************************
-BOOL WIN32API GetWindowPlacement(HWND hwnd, LPWINDOWPLACEMENT winpos)
+ODINFUNCTION2(BOOL, GetWindowPlacement,
+              HWND, hwnd,
+              LPWINDOWPLACEMENT, winpos)
 {
   Win32BaseWindow *window;
 
@@ -602,7 +669,8 @@ BOOL WIN32API GetWindowPlacement(HWND hwnd, LPWINDOWPLACEMENT winpos)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API IsWindow( HWND hwnd)
+ODINFUNCTION1(BOOL, IsWindow,
+              HWND, hwnd)
 {
   Win32BaseWindow *window;
 
@@ -619,7 +687,8 @@ BOOL WIN32API IsWindow( HWND hwnd)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API IsWindowEnabled( HWND hwnd)
+ODINFUNCTION1(BOOL, IsWindowEnabled,
+              HWND, hwnd)
 {
   DWORD            dwStyle;
 
@@ -637,7 +706,8 @@ BOOL WIN32API IsWindowEnabled( HWND hwnd)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API IsWindowVisible(HWND hwnd)
+ODINFUNCTION1(BOOL, IsWindowVisible,
+              HWND, hwnd)
 {
   BOOL             ret;
   HWND             hwndParent;
@@ -680,7 +750,8 @@ end:
 }
 //******************************************************************************
 //******************************************************************************
-HWND WIN32API SetFocus(HWND hwnd)
+ODINFUNCTION1(HWND, SetFocus,
+              HWND, hwnd)
 {
  Win32BaseWindow *window;
  Win32BaseWindow *oldfocuswnd;
@@ -747,7 +818,7 @@ HWND WIN32API SetFocus(HWND hwnd)
 }
 //******************************************************************************
 //******************************************************************************
-HWND WIN32API GetFocus(void)
+ODINFUNCTION0(HWND, GetFocus)
 {
  TEB *teb;
  HWND hwnd;
@@ -773,7 +844,8 @@ HWND WIN32API GetFocus(void)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API IsZoomed(HWND hwnd)
+ODINFUNCTION1(BOOL, IsZoomed,
+              HWND, hwnd)
 {
  DWORD style;
 
@@ -784,14 +856,16 @@ BOOL WIN32API IsZoomed(HWND hwnd)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API LockWindowUpdate(HWND hwnd)
+ODINFUNCTION1(BOOL, LockWindowUpdate,
+              HWND, hwnd)
 {
-    dprintf(("USER32: LockWindowUpdate %x", hwnd));
-    return OSLibWinLockWindowUpdate(Win32ToOS2Handle(hwnd));
+  return OSLibWinLockWindowUpdate(Win32ToOS2Handle(hwnd));
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API GetWindowRect( HWND hwnd, PRECT pRect)
+ODINFUNCTION2(BOOL,  GetWindowRect,
+              HWND,  hwnd,
+              PRECT, pRect)
 {
   Win32BaseWindow *window;
 
@@ -824,7 +898,8 @@ BOOL WIN32API GetWindowRect( HWND hwnd, PRECT pRect)
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API GetWindowTextLengthA( HWND hwnd)
+ODINFUNCTION1(int,  GetWindowTextLengthA,
+              HWND, hwnd)
 {
    Win32BaseWindow *window;
 
@@ -1731,7 +1806,9 @@ BOOL WIN32API OpenIcon(HWND hwnd)
 //     hidden with the same api
 //TODO: -> needs testing
 //******************************************************************************
-BOOL WIN32API ShowOwnedPopups(HWND hwndOwner, BOOL fShow)
+ODINFUNCTION2(BOOL, ShowOwnedPopups,
+              HWND, hwndOwner,
+              BOOL, fShow)
 {
     Win32BaseWindow *window, *owner;
     HWND hwnd;
@@ -1785,38 +1862,59 @@ BOOL WIN32API ShowOwnedPopups(HWND hwndOwner, BOOL fShow)
 }
 //******************************************************************************
 //******************************************************************************
-HWND WIN32API GetForegroundWindow(void)
+ODINFUNCTION0(HWND, GetForegroundWindow)
 {
- HWND hwnd;
+  HWND hwnd;
 
-    hwnd = OS2ToWin32Handle(OSLibWinQueryActiveWindow());
-    dprintf(("USER32: GetForegroundWindow returned %x", hwnd));
-    return hwnd;
+  hwnd = OS2ToWin32Handle(OSLibWinQueryActiveWindow());
+  return hwnd;
 }
 //******************************************************************************
-//******************************************************************************
-HWND WIN32API GetLastActivePopup( HWND hWnd)
+
+/******************************************************************************
+ * The return value identifies the most recently active pop-up window.
+ * The return value is the same as the hWnd parameter, if any of the
+ * following conditions are met:
+ *
+ * - The window identified by hWnd was most recently active.
+ * - The window identified by hWnd does not own any pop-up windows.
+ * - The window identified by hWnd is not a top-level window or it is
+ *   owned by another window.
+ */
+ODINFUNCTION1(HWND, GetLastActivePopup,
+              HWND, hWnd)
 {
- HWND hwnd;
+  Win32BaseWindow *owner;
 
-    hwnd = Win32ToOS2Handle(hWnd);
-////    hwnd = OS2ToWin32Handle(O32_GetLastActivePopup(hwnd));
-
-    dprintf(("GetLastActivePopup %x returned %x NOT CORRECTLY IMPLEMENTED", hWnd, hwnd));
+  owner = Win32BaseWindow::GetWindowFromHandle(hWnd);
+  if(!owner) 
+  {
+    dprintf(("GetLastActivePopup, window %x not found", hWnd));
+    SetLastError(ERROR_INVALID_WINDOW_HANDLE);
     return hWnd;
-}
-//******************************************************************************
-//******************************************************************************
-DWORD WIN32API GetWindowThreadProcessId(HWND hWnd, PDWORD  lpdwProcessId)
-{
-    dprintf2(("USER32:  GetWindowThreadProcessId"));
-    hWnd = Win32ToOS2Handle(hWnd);
+  }
 
-    return O32_GetWindowThreadProcessId(hWnd,lpdwProcessId);
+  HWND hwndRetVal = owner->getLastActive();
+  if (!IsWindow( hwndRetVal ))
+    hwndRetVal = owner->getWindowHandle();
+  
+  RELEASE_WNDOBJ(owner);
+  
+  return hwndRetVal;
 }
 //******************************************************************************
 //******************************************************************************
-DWORD WIN32API GetWindowContextHelpId(HWND hwnd)
+ODINFUNCTION2(DWORD,   GetWindowThreadProcessId,
+              HWND,    hWnd,
+              PDWORD,  lpdwProcessId)
+{
+  hWnd = Win32ToOS2Handle(hWnd);
+  return O32_GetWindowThreadProcessId(hWnd,lpdwProcessId);
+}
+//******************************************************************************
+//******************************************************************************
+ODINFUNCTION1(DWORD, GetWindowContextHelpId,
+              HWND,  hwnd)
 {
   Win32BaseWindow *window;
 
@@ -1833,7 +1931,9 @@ DWORD WIN32API GetWindowContextHelpId(HWND hwnd)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API SetWindowContextHelpId(HWND hwnd, DWORD dwContextHelpId)
+ODINFUNCTION2(BOOL,  SetWindowContextHelpId,
+              HWND,  hwnd,
+              DWORD, dwContextHelpId)
 {
   Win32BaseWindow *window;
 
@@ -1850,7 +1950,9 @@ BOOL WIN32API SetWindowContextHelpId(HWND hwnd, DWORD dwContextHelpId)
 }
 //******************************************************************************
 //******************************************************************************
-HANDLE WINAPI GetPropA( HWND hwnd, LPCSTR str )
+ODINFUNCTION2(HANDLE, GetPropA,
+              HWND,   hwnd,
+              LPCSTR, str )
 {
   Win32BaseWindow *window;
 
@@ -1866,7 +1968,9 @@ HANDLE WINAPI GetPropA( HWND hwnd, LPCSTR str )
 }
 //******************************************************************************
 //******************************************************************************
-HANDLE WINAPI GetPropW( HWND hwnd, LPCWSTR str )
+ODINFUNCTION2(HANDLE,  GetPropW,
+              HWND,    hwnd,
+              LPCWSTR, str )
 {
     LPSTR strA;
     HANDLE ret;
@@ -1879,7 +1983,10 @@ HANDLE WINAPI GetPropW( HWND hwnd, LPCWSTR str )
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WINAPI SetPropA( HWND hwnd, LPCSTR str, HANDLE handle )
+ODINFUNCTION3(BOOL,   SetPropA,
+              HWND,   hwnd,
+              LPCSTR, str,
+              HANDLE, handle )
 {
   Win32BaseWindow *window;
 
@@ -1895,7 +2002,10 @@ BOOL WINAPI SetPropA( HWND hwnd, LPCSTR str, HANDLE handle )
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WINAPI SetPropW( HWND hwnd, LPCWSTR str, HANDLE handle )
+ODINFUNCTION3(BOOL,    SetPropW,
+              HWND,    hwnd,
+              LPCWSTR, str,
+              HANDLE,  handle )
 {
     BOOL ret;
     LPSTR strA;
@@ -1909,7 +2019,9 @@ BOOL WINAPI SetPropW( HWND hwnd, LPCWSTR str, HANDLE handle )
 }
 //******************************************************************************
 //******************************************************************************
-HANDLE WINAPI RemovePropA( HWND hwnd, LPCSTR str )
+ODINFUNCTION2(HANDLE, RemovePropA,
+              HWND,   hwnd,
+              LPCSTR, str )
 {
   Win32BaseWindow *window;
 
@@ -1925,7 +2037,9 @@ HANDLE WINAPI RemovePropA( HWND hwnd, LPCSTR str )
 }
 //******************************************************************************
 //******************************************************************************
-HANDLE WINAPI RemovePropW( HWND hwnd, LPCWSTR str )
+ODINFUNCTION2(HANDLE,  RemovePropW,
+              HWND,    hwnd,
+              LPCWSTR, str )
 {
     LPSTR strA;
     HANDLE ret;
@@ -1939,19 +2053,26 @@ HANDLE WINAPI RemovePropW( HWND hwnd, LPCWSTR str )
 }
 //******************************************************************************
 //******************************************************************************
-INT WINAPI EnumPropsA( HWND hwnd, PROPENUMPROCA func )
+ODINFUNCTION2(INT, EnumPropsA,
+              HWND, hwnd,
+              PROPENUMPROCA, func )
 {
     return EnumPropsExA( hwnd, (PROPENUMPROCEXA)func, 0 );
 }
 //******************************************************************************
 //******************************************************************************
-INT WINAPI EnumPropsW( HWND hwnd, PROPENUMPROCW func )
+ODINFUNCTION2(INT, EnumPropsW,
+              HWND, hwnd,
+              PROPENUMPROCW, func )
 {
     return EnumPropsExW( hwnd, (PROPENUMPROCEXW)func, 0 );
 }
 //******************************************************************************
 //******************************************************************************
-INT WINAPI EnumPropsExA(HWND hwnd, PROPENUMPROCEXA func, LPARAM lParam)
+ODINFUNCTION3(INT, EnumPropsExA,
+              HWND, hwnd,
+              PROPENUMPROCEXA, func,
+              LPARAM, lParam)
 {
   Win32BaseWindow *window;
 
@@ -1967,7 +2088,10 @@ INT WINAPI EnumPropsExA(HWND hwnd, PROPENUMPROCEXA func, LPARAM lParam)
 }
 //******************************************************************************
 //******************************************************************************
-INT WINAPI EnumPropsExW(HWND hwnd, PROPENUMPROCEXW func, LPARAM lParam)
+ODINFUNCTION3(INT, EnumPropsExW,
+              HWND, hwnd,
+              PROPENUMPROCEXW, func,
+              LPARAM, lParam)
 {
   Win32BaseWindow *window;
 
@@ -1983,3 +2107,28 @@ INT WINAPI EnumPropsExW(HWND hwnd, PROPENUMPROCEXW func, LPARAM lParam)
 }
 //******************************************************************************
 //******************************************************************************
+
+
+/*****************************************************************************
+ * Name      : BOOL WIN32API AnyPopup
+ * Purpose   : The AnyPopup function indicates whether an owned, visible,
+ *             top-level pop-up, or overlapped window exists on the screen. The
+ *             function searches the entire Windows screen, not just the calling
+ *             application's client area.
+ * Parameters: VOID
+ * Variables :
+ * Result    : If a pop-up window exists, the return value is TRUE even if the
+ *             pop-up window is completely covered by other windows. Otherwise,
+ *             it is FALSE.
+ * Remark    : AnyPopup is a Windows version 1.x function and is retained for
+ *             compatibility purposes. It is generally not useful.
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
+ *****************************************************************************/
+ODINFUNCTION0(BOOL, AnyPopup)
+{
+  dprintf(("USER32:AnyPopup() not implemented.\n"));
+
+  return (FALSE);
+}

@@ -1,4 +1,4 @@
-/* $Id: winmouse.cpp,v 1.17 2001-09-27 10:02:38 phaller Exp $ */
+/* $Id: winmouse.cpp,v 1.18 2001-10-09 05:18:05 phaller Exp $ */
 /*
  * Mouse handler for DINPUT
  *
@@ -247,7 +247,18 @@ ODINPROCEDURE5(mouse_event,
                DWORD, cButtons,
                DWORD, dwExtraInfo)
 {
-  dprintf(("not implemented"));
+  INPUT i;
+  
+  // format input packet
+  i.type           = INPUT_MOUSE;
+  i.mi.dx          = dx;
+  i.mi.dy          = dy;
+  i.mi.mouseData   = cButtons; // PH: is this really correct?
+  i.mi.dwFlags     = dwFlags;
+  i.mi.dwExtraInfo = dwExtraInfo;
+  
+  // forward to more modern API
+  SendInput(1, &i, sizeof(i) );
 }
 
 
@@ -355,9 +366,9 @@ ODINFUNCTION3(UINT,    SendInput,
         // unknown: do we have to post or to send the message?
         
         if (fUnicode)
-          SendMessageW(hwnd, msg.message, msg.wParam, msg.lParam);
+          PostMessageW(hwnd, msg.message, msg.wParam, msg.lParam);
         else
-          SendMessageA(hwnd, msg.message, msg.wParam, msg.lParam);
+          PostMessageA(hwnd, msg.message, msg.wParam, msg.lParam);
         
         SetMessageExtraInfo( (LPARAM)p->dwExtraInfo );
       }  
