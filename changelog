@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.681 2000-01-31 22:51:28 phaller Exp $ */
+ /* $Id: changelog,v 1.682 2000-02-01 07:30:17 bird Exp $ */
+
+ 2000-02-01: Knut Stange Osmundse <knut.stange.osmundsen>
+        - Pe2Lx: Makefile should be working again.
 
  2000-02-01: Patrick Haller <phaller@gmx.net>
         - SHELL32: Added PathSkipRootAW
@@ -7,7 +10,7 @@
 	- NTDLL: Updated .def file (similar to NT 4 SP6) + bugfix for impdef
 
  2000-01-31: Sander van Leeuwen <sandervl@xs4all.nl>
-	- USER32: GetDCEx with window handle 0 fails in Windows 98; now it also 
+	- USER32: GetDCEx with window handle 0 fails in Windows 98; now it also
                   returns an error in Odin.
                   GetWindowDC & GetDC use the desktop window handle if hwnd == 0
                   (before calling GetDCEx)
@@ -19,7 +22,7 @@
 	- GDI32: Removed wrong bugfix for GetDIBits (breaks Lotus Notes)
 	- USER32: Don't check for window visibility when calling SetWindowPos
                   in SetMenu. (fixes menu in standard minesweeper)
-                  (NOTE: May need to call SetWindowPos with SWP_FRAMECHANGED 
+                  (NOTE: May need to call SetWindowPos with SWP_FRAMECHANGED
                          when showing a window (see Wine code))
 		  Put back GetMenuStringA fix (return length of string if string pointer
                   or size parameter == 0) (almost fixes Realplayer 7 menu)
@@ -32,7 +35,7 @@
                   Fix for SetWindowPos for showing hidden windows
                   (call ShowWindow) -> fixed non-visible button bar in mIRC
                   Don't set WS_VISIBLE on by default. Windows are made visible
-                  during creation by calling ShowWindow.    
+                  during creation by calling ShowWindow.
                   Call UpdateWindow for client window, not the frame.
 	- INCLUDE\WIN\wingdi.h: Added GdiFlush declaration
 	- INCLUDE\makefiles: Added c/c++ definitions for win32 apps (without
