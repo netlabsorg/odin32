@@ -1,4 +1,4 @@
-/* $Id: windlg.cpp,v 1.28 2001-10-28 15:24:16 sandervl Exp $ */
+/* $Id: windlg.cpp,v 1.29 2001-11-30 18:45:51 sandervl Exp $ */
 /*
  * Win32 dialog apis for OS/2
  *
@@ -309,6 +309,24 @@ static HWND DIALOG_GetNextTabItem( HWND hwndMain, HWND hwndDlg, HWND hwndCtrl, B
         hChildFirst = GetWindow(hwndDlg,GW_CHILD);
         if(fPrevious) hChildFirst = GetWindow(hChildFirst,GW_HWNDLAST);
     }
+#if 1
+    else if (IsChild( hwndMain, hwndCtrl ))
+    {
+        hChildFirst = GetWindow(hwndCtrl,wndSearch);
+        if(!hChildFirst)
+        {
+            if(GetParent(hwndCtrl) != hwndMain)
+                hChildFirst = GetWindow(GetParent(hwndCtrl),wndSearch);
+            else
+            {
+                if(fPrevious)
+                    hChildFirst = GetWindow(hwndCtrl,GW_HWNDLAST);
+                else
+                    hChildFirst = GetWindow(hwndCtrl,GW_HWNDFIRST);
+            }
+        }
+    }
+#else
     else
     {
         HWND hParent = GetParent(hwndCtrl);
@@ -339,6 +357,7 @@ static HWND DIALOG_GetNextTabItem( HWND hwndMain, HWND hwndDlg, HWND hwndCtrl, B
             }
         }	
     }
+#endif
     while(hChildFirst)
     {
         BOOL bCtrl = FALSE;
