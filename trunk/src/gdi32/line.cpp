@@ -1,4 +1,4 @@
-/* $Id: line.cpp,v 1.14 2004-01-11 11:42:18 sandervl Exp $ */
+/* $Id: line.cpp,v 1.15 2004-03-25 14:52:32 sandervl Exp $ */
 /*
  * Line API's
  *
@@ -14,6 +14,7 @@
 #include "callback.h"
 #include "oslibgpi.h"
 #include <dcdata.h>
+#include "region.h"
 
 #define DBG_LOCALLOG	DBG_line
 #include "dbglocal.h"
@@ -22,8 +23,22 @@
 
 //******************************************************************************
 //******************************************************************************
-VOID toWin32LineEnd(PPOINTLOS2 startPt,INT nXEnd,INT nYEnd,PPOINTLOS2 pt)
+VOID toWin32LineEnd(pDCData pHps, PPOINTLOS2 startPt,INT nXEnd,INT nYEnd,PPOINTLOS2 pt)
 {
+// SvL: This breaks path creation when used as a clip region in a printer DC
+//      (offset by one for x coordinates make the rectangle not so rectangular anymore)
+//      Removing it alltogether causes nice drawing errors on the screen, so
+//      we'll simply ignore it when we're inside a path definition.
+  if(pHps->inPath) 
+  {
+      LONG vertRes = hdcHeight(pHps->hwnd, pHps);
+      LONG horzRes = hdcWidth(pHps->hwnd, pHps);
+
+      // LineTo will return an error if the coordinates are outside the DC
+      pt->x = (nXEnd >= vertRes) ? vertRes-1 : nXEnd;
+      pt->y = (nYEnd >= horzRes) ? horzRes-1 : nYEnd;
+  }
+  else 
   if ((startPt->x != nXEnd) || (startPt->y != nYEnd))
   {
     if (nXEnd == startPt->x)
@@ -112,7 +127,7 @@ BOOL WIN32API MoveToEx( HDC hdc, int X, int Y, LPPOINT lpPoint)
     }
 #endif
 
-    if (OSLibGpiMove(pHps,&newPoint))
+    if(OSLibGpiMove(pHps,&newPoint))
     {
       //CB: add metafile info
       return TRUE;
@@ -147,7 +162,7 @@ BOOL WIN32API LineTo( HDC hdc, int nXEnd, int  nYEnd)
     //CB: add metafile info
 
     OSLibGpiQueryCurrentPosition(pHps,&oldPoint);
-    toWin32LineEnd(&oldPoint,nXEnd,nYEnd,&newPoint);
+    toWin32LineEnd(pHps, &oldPoint,nXEnd,nYEnd,&newPoint);
 
     if ((oldPoint.x == newPoint.x) && (oldPoint.y == newPoint.y))
     {
@@ -166,8 +181,12 @@ BOOL WIN32API LineTo( HDC hdc, int nXEnd, int  nYEnd)
 
     newPoint.x = nXEnd;
     newPoint.y = nYEnd;
-    OSLibGpiMove(pHps,&newPoint);
-  } else
+    // Do not change the current position when we're defining a path.
+    // toWin32LineEnd can change the coordinates which would break up the path.
+    if (!pHps->inPath)
+        OSLibGpiMove(pHps,&newPoint);
+  } 
+  else
   {
     SetLastError(ERROR_INVALID_HANDLE);
     rc = FALSE;
@@ -225,7 +244,7 @@ BOOL WIN32API Polyline( HDC hdc, const POINT *lppt, int cPoints)
   POINT lastPt = lppt[cPoints-1];
   BOOL rc;
 
-  toWin32LineEnd((PPOINTLOS2)&lppt[cPoints-2],lastPt.x,lastPt.y,(PPOINTLOS2)&points[cPoints-1]);
+  toWin32LineEnd(pHps, (PPOINTLOS2)&lppt[cPoints-2],lastPt.x,lastPt.y,(PPOINTLOS2)&points[cPoints-1]);
   rc = O32_Polyline(hdc,lppt,cPoints);
   points[cPoints-1] = lastPt;
 
@@ -257,7 +276,7 @@ BOOL WIN32API PolylineTo( HDC hdc, const POINT * lppt, DWORD cCount)
   POINT lastPt = lppt[cCount-1];
   BOOL rc;
 
-  toWin32LineEnd((PPOINTLOS2)&lppt[cCount-2],lastPt.x,lastPt.y,(PPOINTLOS2)&points[cCount-1]);
+  toWin32LineEnd(pHps, (PPOINTLOS2)&lppt[cCount-2],lastPt.x,lastPt.y,(PPOINTLOS2)&points[cCount-1]);
   rc = O32_PolylineTo(hdc,lppt,cCount);
   points[cCount-1] = lastPt;
   OSLibGpiMove(pHps,(PPOINTLOS2)&lastPt);
