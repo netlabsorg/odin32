@@ -1,4 +1,4 @@
-/* $Id: dbglog.cpp,v 1.1 2002-07-26 10:46:14 sandervl Exp $ */
+/* $Id: dbglog.cpp,v 1.2 2002-10-03 12:49:50 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -269,6 +269,17 @@ int checkingheap = 0;
 
 //#define LOG_TIME
 //#define SHOW_FPU_CONTROLREG
+//#define WIN32_IP_LOGGING
+#define WIN32_IP_LOG_PORT	5001
+
+#ifdef WIN32_IP_LOGGING
+#include <types.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
+
+static int logSocket = -1;
+static char *logserver = NULL;
+#endif
 
 int SYSTEM WriteLog(char *tekst, ...)
 {
@@ -289,6 +300,15 @@ int SYSTEM WriteLog(char *tekst, ...)
     if(getenv("WIN32LOG_ENABLED")) {
 #else
     if(!getenv("NOWIN32LOG")) {
+#endif
+
+#ifdef WIN32_IP_LOGGING
+        logserver = getenv("WIN32LOG_IPSERVER");
+        if(logserver) {
+             sock_init();
+
+             logSocket = socket(PF_INET, SOCK_DGRAM, 0);
+        }
 #endif
         char logname[CCHMAXPATH];
 
@@ -336,6 +356,10 @@ int SYSTEM WriteLog(char *tekst, ...)
   if(fLogging && flog && (dwEnableLogging > 0))
   {
     va_start(argptr, tekst);
+
+#ifdef WIN32_IP_LOGGING
+    if(logSocket == -1) {
+#endif
     if(teb) 
     {
       ULONG ulCallDepth;
@@ -392,6 +416,58 @@ int SYSTEM WriteLog(char *tekst, ...)
         fprintf(flog, "tX: (%x) ", GetTickCount());
     }
 #endif
+#ifdef WIN32_IP_LOGGING
+    }
+#endif
+
+#ifdef WIN32_IP_LOGGING
+    if(logSocket != -1) {
+        char logbuffer[1024];
+        int  prefixlen = 0;
+
+        if(teb) 
+        {
+            ULONG ulCallDepth;
+#ifdef DEBUG
+            ulCallDepth = teb->o.odin.dbgCallDepth;
+#else
+            ulCallDepth = 0;
+#endif
+            if(sel == 0x150b && !fIsOS2Image) 
+                sprintf(logbuffer, "t%02d (%3d): (FS=150B) ",
+                        LOWORD(teb->o.odin.threadId), ulCallDepth);
+            else 
+                sprintf(logbuffer, "t%02d (%3d): ",
+                        LOWORD(teb->o.odin.threadId), ulCallDepth);
+            prefixlen = strlen(logbuffer);
+        }
+
+        vsprintf(&logbuffer[prefixlen], tekst, argptr);
+
+        struct sockaddr_in servername;
+        int rc;
+
+        memset(&servername, 0, sizeof(servername));
+        servername.sin_family      = AF_INET;
+        servername.sin_addr.s_addr = inet_addr(logserver);
+        servername.sin_port        = WIN32_IP_LOG_PORT;
+        rc = sendto(logSocket, logbuffer, strlen(logbuffer)+1, 0, (struct sockaddr *)&servername, sizeof(servername));
+
+        if(teb) teb->o.odin.logfile = 0;
+        va_end(argptr);
+    }
+    else {
+        vfprintf(flog, tekst, argptr);
+        if(teb) teb->o.odin.logfile = 0;
+        va_end(argptr);
+
+        if(tekst[strlen(tekst)-1] != '\n')
+            fprintf(flog, "\n");
+
+        if(fFlushLines)
+            fflush(flog);
+    }
+#else
     vfprintf(flog, tekst, argptr);
     if(teb) teb->o.odin.logfile = 0;
     va_end(argptr);
@@ -401,6 +477,7 @@ int SYSTEM WriteLog(char *tekst, ...)
 
     if(fFlushLines)
       fflush(flog);
+#endif
   }
   SetFS(sel);
   return 1;
@@ -572,6 +649,12 @@ void CloseLogFile()
 {
   if(oldcrtmsghandle)
     _set_crt_msg_handle(oldcrtmsghandle);
+
+#ifdef WIN32_IP_LOGGING
+  if(logSocket != -1) {
+      soclose(logSocket);
+  }
+#endif
 
   if(flog) fclose(flog);
   flog = 0;

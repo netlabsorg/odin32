@@ -1,4 +1,4 @@
-# $Id: kernel32.mak,v 1.35 2002-07-26 10:48:19 sandervl Exp $
+# $Id: kernel32.mak,v 1.36 2002-10-03 12:49:50 sandervl Exp $
 
 #
 # Odin32 API
@@ -162,6 +162,8 @@ $(ODIN32_LIB)/$(ODINCRT).lib \
 $(ODIN32_LIB)\wgss50.LIB \
 $(ODIN32_LIB)\WIN32K.LIB \
 $(ODIN32_LIB)\UNICODE.LIB \
+so32dll.lib \
+tcp32dll.lib \
 OS2386.LIB \
 $(RTLLIB_O)
 
