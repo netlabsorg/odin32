@@ -1,4 +1,4 @@
-/* $Id: mmsystem.h,v 1.9 2000-11-17 14:32:50 sandervl Exp $ */
+/* $Id: mmsystem.h,v 1.10 2000-12-24 12:28:19 sandervl Exp $ */
 /* 
  * MMSYSTEM - Multimedia Wine Extension ... :-)
  */
@@ -15,27 +15,6 @@ typedef LPSTR		HPSTR;          /* a huge version of LPSTR */
 typedef LPCSTR		HPCSTR;         /* a huge version of LPCSTR */
    
 #include "pshpack1.h"
-
-#if defined(__cplusplus) && !defined(NONAMELESSUNION)
-#define DUMMYUNIONNAME
-#define DUMMYUNIONNAME1
-#define DUMMYUNIONNAME2
-#define DUMMYUNIONNAME3
-#define DUMMYUNIONNAME4
-#define DUMMYUNIONNAME5
-#else
-#define DUMMYUNIONNAME   u
-#define DUMMYUNIONNAME1  u1
-#define DUMMYUNIONNAME2  u2
-#define DUMMYUNIONNAME3  u3
-#define DUMMYUNIONNAME4  u4
-#define DUMMYUNIONNAME5  u5
-#endif
-
-#define DUMMYSTRUCTNAME   s
-#define DUMMYSTRUCTNAME1  s1
-
-//#endif /* !defined(NONAMELESSSTRUCT) */
    
 #define MAXWAVEDRIVERS	10
 #define MAXMIDIDRIVERS	10

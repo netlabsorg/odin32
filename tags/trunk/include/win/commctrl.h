@@ -1,4 +1,4 @@
-/* $Id: commctrl.h,v 1.36 2000-11-17 14:32:48 sandervl Exp $ */
+/* $Id: commctrl.h,v 1.37 2000-12-24 12:28:19 sandervl Exp $ */
 /*
  * Common controls definitions
  */
@@ -13,24 +13,6 @@
 #include "winnls.h"
 //#include "prsht.h"
 
-/* c++ likes nameless unions whereas c doesnt */
-/* (used in property sheet structures)        */
-
-#if defined(__cplusplus) && !defined(NONAMELESSUNION)
-#define DUMMYUNIONNAME
-#define DUMMYUNIONNAME1
-#define DUMMYUNIONNAME2
-#define DUMMYUNIONNAME3
-#define DUMMYUNIONNAME4
-#define DUMMYUNIONNAME5
-#else
-#define DUMMYUNIONNAME   u
-#define DUMMYUNIONNAME1  u1
-#define DUMMYUNIONNAME2  u2
-#define DUMMYUNIONNAME3  u3
-#define DUMMYUNIONNAME4  u4
-#define DUMMYUNIONNAME5  u5
-#endif
 
 #ifdef __cplusplus
 extern "C" {

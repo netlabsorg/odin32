@@ -1,4 +1,4 @@
-/* $Id: mdi.h,v 1.1 1999-05-24 20:19:14 ktk Exp $ */
+/* $Id: mdi.h,v 1.2 2000-12-24 12:28:19 sandervl Exp $ */
 
 /* MDI.H
  *
@@ -21,6 +21,12 @@
 #define MDI_REPAINTFRAME	2
 
 #define WM_MDICALCCHILDSCROLL   0x10AC /* this is exactly what Windows uses */
+
+/* "More Windows..." definitions */
+#define MDI_MOREWINDOWSLIMIT    9       /* after this number of windows, a "More Windows..." 
+                                           option will appear under the Windows menu */
+#define MDI_IDC_LISTBOX         100
+#define MDI_IDS_MOREWINDOWS     13
 
 extern LRESULT WINAPI MDIClientWndProc( HWND hwnd, UINT message, 
                                         WPARAM wParam, LPARAM lParam );

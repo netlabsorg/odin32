@@ -1,11 +1,14 @@
-/* $Id: olectl.h,v 1.2 1999-11-14 21:01:22 davidr Exp $ */
-
 #ifndef __WINE_OLECTL_H
 #define __WINE_OLECTL_H
 
 #include "windef.h"
+#include "ocidl.h"
 
-#define WINOLECTLAPI INT WINAPI
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
 
 /*
  * Ole Control Interfaces
@@ -79,15 +82,6 @@ typedef struct tagFONTDESC {
 
 #define FONTSIZE(n) { n##0000, 0 }
 
-/* COREL MOD PQ mar 9 - redecl in mfc */
-/*WINOLECTLAPI OleCreateFontIndirect(LPFONTDESC lpFontDesc, REFIID riid, VOID** ppvObj);*/
-
-typedef enum tagPICTURE
-{
-    PICTURE_SCALEABLE 		= 0x00000001,
-    PICTURE_TRANSPARENT 	= 0x00000002
-} PICTURE;
-
 #define PICTYPE_UNINITIALIZED (-1)
 #define PICTYPE_NONE          0
 #define PICTYPE_BITMAP        1
@@ -95,27 +89,26 @@ typedef enum tagPICTURE
 #define PICTYPE_ICON          3
 #define PICTYPE_ENHMETAFILE   4
 
-// DjR - Removed DUMMY stuff as it seemed unworkable in ICC
 typedef struct tagPICTDESC {
-    UINT cbSizeofstruct;
-    UINT picType;
-    union {
-	struct {
-	    HBITMAP hbitmap;
-	    HPALETTE hpal;
-	} bmp;
-	struct {
-	    HMETAFILE hmeta;
-	    int xExt;
-	    int yExt;
-	} wmf;
-	struct {
-	    HICON hicon;
-	} icon;
-	struct {
-	    HENHMETAFILE hemf;
-	} emf;
-    } u;
+	UINT cbSizeofstruct;
+	UINT picType;
+	union {
+			struct {
+					HBITMAP hbitmap;
+					HPALETTE hpal;
+			} bmp;
+			struct {
+					HMETAFILE hmeta;
+					int xExt;
+					int yExt;
+			} wmf;
+			struct {
+					HICON hicon;
+			} icon;
+			struct {
+					HENHMETAFILE hemf;
+			} emf;
+	} DUMMYUNIONNAME;
 } PICTDESC, *LPPICTDESC;
 
 typedef long OLE_XPOS_PIXELS;
@@ -137,6 +130,28 @@ typedef enum
 typedef VARIANT_BOOL OLE_OPTEXCLUSIVE;
 typedef VARIANT_BOOL OLE_CANCELBOOL;
 typedef VARIANT_BOOL OLE_ENABLEDEFAULTBOOL;
+
+HCURSOR WINAPI OleIconToCursor( HINSTANCE hinstExe, HICON hicon);
+
+HRESULT WINAPI OleCreatePropertyFrameIndirect( LPOCPFIPARAMS lpParams);
+
+HRESULT WINAPI OleCreatePropertyFrame(
+	HWND hwndOwner, UINT x, UINT y, 
+	LPCOLESTR lpszCaption, ULONG cObjects, LPUNKNOWN* ppUnk, 
+	ULONG cPages, LPCLSID pPageClsID, LCID lcid, DWORD dwReserved, 
+	LPVOID pvReserved );
+
+HRESULT WINAPI OleLoadPicture(	LPSTREAM lpstream, LONG lSize, BOOL fRunmode, 
+		REFIID reed, LPVOID *lplpvObj );
+
+HRESULT WINAPI OleCreatePictureIndirect(LPPICTDESC lpPictDesc, REFIID riid, 
+		BOOL fOwn, LPVOID * lplpvObj );
+
+HRESULT WINAPI OleCreateFontIndirect(LPFONTDESC lpFontDesc, REFIID riid, 
+		LPVOID* lplpvObj);
+
+HRESULT WINAPI OleTranslateColor( OLE_COLOR clr, HPALETTE hpal,
+		COLORREF* lpcolorref);
 
 /* standard dispatch ID's */
 #define DISPID_AUTOSIZE                 (-500)
@@ -203,6 +218,15 @@ typedef VARIANT_BOOL OLE_ENABLEDEFAULTBOOL;
 #define DISPID_Delete                   (-801)
 #define DISPID_Object                   (-802)
 #define DISPID_Parent                   (-803)
+
+#define DISPID_FONT_NAME 0
+#define DISPID_FONT_SIZE 2
+#define DISPID_FONT_BOLD 3
+#define DISPID_FONT_ITALIC 4
+#define DISPID_FONT_UNDER 5
+#define DISPID_FONT_STRIKE 6
+#define DISPID_FONT_WEIGHT 7
+#define DISPID_FONT_CHARSET 8
  
 /* Reflected Window Message IDs */
 #define OCM__BASE           (WM_USER+0x1c00)
@@ -236,6 +260,13 @@ typedef VARIANT_BOOL OLE_ENABLEDEFAULTBOOL;
 #define CONNECT_E_ADVISELIMIT       (CONNECT_E_FIRST+1)
 #define CONNECT_E_CANNOTCONNECT     (CONNECT_E_FIRST+2)
 #define CONNECT_E_OVERRIDDEN        (CONNECT_E_FIRST+3)
+
+#define SELFREG_E_FIRST             MAKE_SCODE(SEVERITY_ERROR,   FACILITY_ITF, 0x0200)
+#define SELFREG_E_LAST              MAKE_SCODE(SEVERITY_ERROR,   FACILITY_ITF, 0x020F)
+#define SELFREG_S_FIRST             MAKE_SCODE(SEVERITY_SUCCESS, FACILITY_ITF, 0x0200)
+#define SELFREG_S_LAST              MAKE_SCODE(SEVERITY_SUCCESS, FACILITY_ITF, 0x020F)
+#define SELFREG_E_TYPELIB           (SELFREG_E_FIRST+0)
+#define SELFREG_E_CLASS             (SELFREG_E_FIRST+1)
 
 #ifndef FACILITY_CONTROL
 #define FACILITY_CONTROL 0xa
@@ -295,6 +326,11 @@ typedef VARIANT_BOOL OLE_ENABLEDEFAULTBOOL;
 #define PERPROP_S_LAST     MAKE_SCODE(SEVERITY_SUCCESS, FACILITY_ITF, 0x020F)
 
 #define PERPROP_E_NOPAGEAVAILABLE   (PERPROP_E_FIRST+0)
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /*  __WINE_OLECTL_H */
 
