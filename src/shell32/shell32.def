@@ -1,4 +1,4 @@
-; $Id: shell32.def,v 1.28 2000-08-24 09:35:07 sandervl Exp $
+; $Id: shell32.def,v 1.29 2000-08-24 12:01:09 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 ;based on Windows 95
@@ -374,9 +374,9 @@ EXPORTS
 ; version 5.00 (Win2K)
 ;_WIN32_IE >= 0x0500
 ;
-    SHGetFolderPathA                  = _SHGetFolderPathA@20
-    SHGetFolderPathW                  = _SHGetFolderPathW@20
-    SHGetFolderLocation               = _SHGetFolderLocation@20
+    SHGetFolderPathA                  = _SHGetFolderPathA@20                  @700
+    SHGetFolderPathW                  = _SHGetFolderPathW@20                  @701
+    SHGetFolderLocation               = _SHGetFolderLocation@20               @702
 
 ;   FOOBAR1217                        = _FOOBAR1217@?                         @1217
 
