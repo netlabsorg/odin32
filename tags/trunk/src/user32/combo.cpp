@@ -1,4 +1,4 @@
-/* $Id: combo.cpp,v 1.16 1999-11-19 21:22:01 cbratschi Exp $ */
+/* $Id: combo.cpp,v 1.17 1999-11-21 14:04:10 achimha Exp $ */
 /*
  * Combo controls
  *
@@ -21,6 +21,10 @@
 #include "controls.h"
 #include "combo.h"
 #include "initterm.h"
+
+#ifdef DEBUG
+char *GetMsgText(int Msg);
+#endif
 
   /* bits in the dwKeyData */
 #define KEYDATA_ALT             0x2000
@@ -2128,8 +2132,8 @@ static LRESULT COMBO_GetExtendedUI(HWND hwnd,WPARAM wParam,LPARAM lParam)
 LRESULT WINAPI ComboWndProc( HWND hwnd, UINT message,
                              WPARAM wParam, LPARAM lParam )
 {
-      //TRACE("[%04x]: msg %s wp %08x lp %08lx\n",
-      //             pWnd->hwndSelf, SPY_GetMsgName(message), wParam, lParam );
+//      dprintf(("ComboWndProc hwnd: %04x, msg %s, wp %08x lp %08lx\n",
+//               hwnd, GetMsgText(message), wParam, lParam));
 
       switch(message)
       {
