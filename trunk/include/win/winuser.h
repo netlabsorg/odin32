@@ -1,4 +1,4 @@
-/* $Id: winuser.h,v 1.43 2000-11-16 18:02:31 sandervl Exp $ */
+/* $Id: winuser.h,v 1.44 2001-03-30 11:13:35 sandervl Exp $ */
 
 #ifndef __INCLUDE_WINUSER_H
 #define __INCLUDE_WINUSER_H
@@ -2356,6 +2356,9 @@ DECL_WINELIB_TYPE_AW(LPICONMETRICS)
 
 #define WS_EX_OVERLAPPEDWINDOW (WS_EX_WINDOWEDGE|WS_EX_CLIENTEDGE)
 #define WS_EX_PALETTEWINDOW    (WS_EX_WINDOWEDGE|WS_EX_TOOLWINDOW|WS_EX_TOPMOST)
+
+/* New Win2000 styles */
+#define WS_EX_LAYERED          0x00080000L
 
 /* WINE internal... */
 #define WS_EX_TRAYWINDOW        0x80000000L
