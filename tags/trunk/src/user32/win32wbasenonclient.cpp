@@ -1,4 +1,4 @@
-/* $Id: win32wbasenonclient.cpp,v 1.10 2000-02-10 18:49:52 cbratschi Exp $ */
+/* $Id: win32wbasenonclient.cpp,v 1.11 2000-02-16 14:28:23 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (non-client methods)
  *
@@ -37,6 +37,9 @@
 #include "win32wdesktop.h"
 #include "controls.h"
 #include <menu.h>
+
+#define DBG_LOCALLOG	DBG_win32wbasenonclient
+#include "dbglocal.h"
 
 #define SC_ABOUTODIN            (SC_SCREENSAVE+1)
 #define SC_PUTMARK              (SC_SCREENSAVE+2)
@@ -956,6 +959,7 @@ VOID Win32BaseWindow::DoNCPaint(HRGN clip,BOOL suppress_menupaint)
    */
 
   dprintf(("DoNCPaint %x %x %d", getWindowHandle(), clip, suppress_menupaint));
+  DecreaseLogCount();
 
   if (!(hdc = GetDCEx( Win32Hwnd, (clip > 1) ? clip : 0, DCX_USESTYLE | DCX_WINDOW |
                       ((clip > 1) ?(DCX_INTERSECTRGN /*| DCX_KEEPCLIPRGN*/) : 0) ))) return;
@@ -1070,6 +1074,7 @@ VOID Win32BaseWindow::DoNCPaint(HRGN clip,BOOL suppress_menupaint)
   }
 
   ReleaseDC(Win32Hwnd,hdc);
+  IncreaseLogCount();
   dprintf(("**DoNCPaint %x DONE", getWindowHandle()));
 }
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.54 2000-01-29 14:23:33 sandervl Exp $ */
+/* $Id: window.cpp,v 1.55 2000-02-16 14:28:26 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -30,6 +30,9 @@
 #include "user32.h"
 #include "winicon.h"
 #include <win\winpos.h>
+
+#define DBG_LOCALLOG	DBG_window
+#include "dbglocal.h"
 
 //******************************************************************************
 //******************************************************************************

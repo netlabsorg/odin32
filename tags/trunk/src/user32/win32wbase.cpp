@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.162 2000-02-15 14:39:12 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.163 2000-02-16 14:28:22 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -48,6 +48,9 @@
 #include <menu.h>
 #define INCL_TIMERWIN32
 #include "timer.h"
+
+#define DBG_LOCALLOG	DBG_win32wbase
+#include "dbglocal.h"
 
 #define SC_ABOUTWINE            (SC_SCREENSAVE+1)
 #define SC_PUTMARK              (SC_SCREENSAVE+2)

@@ -1,3 +1,4 @@
+/* $Id: network.cpp,v 1.9 2000-02-16 14:27:08 sandervl Exp $ */
 /*
  * Win32 Network apis
  *

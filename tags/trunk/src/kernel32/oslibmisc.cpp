@@ -1,4 +1,4 @@
-/* $Id: oslibmisc.cpp,v 1.5 2000-01-03 21:36:11 sandervl Exp $ */
+/* $Id: oslibmisc.cpp,v 1.6 2000-02-16 14:25:45 sandervl Exp $ */
 
 /*
  * Misc OS/2 util. procedures
@@ -22,6 +22,9 @@
 #include <malloc.h>  /*PLF Wed  98-03-18 05:15:04*/
 #include "oslibmisc.h"
 #include <misc.h>
+
+#define DBG_LOCALLOG	DBG_oslibmisc
+#include "dbglocal.h"
 
 /***********************************
  * PH: fixups for missing os2win.h *

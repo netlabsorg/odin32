@@ -1,4 +1,4 @@
-/* $Id: stubs.cpp,v 1.18 2000-01-02 22:51:12 sandervl Exp $ */
+/* $Id: stubs.cpp,v 1.19 2000-02-16 14:25:45 sandervl Exp $ */
 
 /*
  * Win32 KERNEL32 Subsystem for OS/2
@@ -22,6 +22,9 @@
 #include <string.h>
 
 #include "stubs.h"
+
+#define DBG_LOCALLOG	DBG_stubs
+#include "dbglocal.h"
 
 
 /*****************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: windowword.cpp,v 1.7 2000-01-18 20:11:12 sandervl Exp $ */
+/* $Id: windowword.cpp,v 1.8 2000-02-16 14:28:27 sandervl Exp $ */
 
 /*
  * Win32 Get/SetWindowLong/Word user32 API functions for OS/2
@@ -13,6 +13,9 @@
 #include <misc.h>
 
 #include <win32wbase.h>
+
+#define DBG_LOCALLOG	DBG_windowword
+#include "dbglocal.h"
 
 //******************************************************************************
 //******************************************************************************

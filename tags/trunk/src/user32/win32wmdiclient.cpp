@@ -1,4 +1,4 @@
-/* $Id: win32wmdiclient.cpp,v 1.23 2000-01-18 20:11:00 sandervl Exp $ */
+/* $Id: win32wmdiclient.cpp,v 1.24 2000-02-16 14:28:24 sandervl Exp $ */
 /*
  * Win32 MDI Client Window Class for OS/2
  *
@@ -34,6 +34,9 @@
 #include <winres.h>
 #include "syscolor.h"
 #include "win32wndhandle.h"
+
+#define DBG_LOCALLOG	DBG_win32wmdiclient
+#include "dbglocal.h"
 
 
 //******************************************************************************

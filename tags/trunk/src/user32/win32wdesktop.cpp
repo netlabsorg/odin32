@@ -1,4 +1,4 @@
-/* $Id: win32wdesktop.cpp,v 1.11 2000-02-10 18:49:53 cbratschi Exp $ */
+/* $Id: win32wdesktop.cpp,v 1.12 2000-02-16 14:28:24 sandervl Exp $ */
 /*
  * Win32 Desktop Window for OS/2
  *
@@ -15,6 +15,9 @@
 #include <win32wdesktop.h>
 #include "oslibwin.h"
 #include "win32wndhandle.h"
+
+#define DBG_LOCALLOG	DBG_win32wdesktop
+#include "dbglocal.h"
 
 Win32Desktop *windowDesktop = 0;
 

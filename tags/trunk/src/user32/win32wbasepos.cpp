@@ -1,4 +1,4 @@
-/* $Id: win32wbasepos.cpp,v 1.12 2000-02-03 17:13:03 cbratschi Exp $ */
+/* $Id: win32wbasepos.cpp,v 1.13 2000-02-16 14:28:24 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (nonclient/position methods)
  *
@@ -37,6 +37,9 @@
 #include "dc.h"
 #include "pmframe.h"
 #include "win32wdesktop.h"
+
+#define DBG_LOCALLOG	DBG_win32wbasepos
+#include "dbglocal.h"
 
 /*******************************************************************
  *           GetMinMaxInfo
