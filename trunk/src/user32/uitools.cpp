@@ -1,4 +1,4 @@
-/* $Id: uitools.cpp,v 1.9 1999-10-03 20:38:54 sandervl Exp $ */
+/* $Id: uitools.cpp,v 1.10 1999-10-05 18:23:49 sandervl Exp $ */
 /*
  * User Interface Functions
  *
@@ -464,12 +464,12 @@ static BOOL UITOOLS95_DrawRectEdge(HDC hdc, LPRECT rc,
 
         /* Bertho Stultiens states above that this function exactly matches win95
          * In win98 BF_FLAT rectangels have an inner border same color as the
-	 * middle (COLOR_BTNFACE). I believe it's the same for win95 but since
-	 * I don't know I go with Bertho and just sets it for win98 until proven
-	 * otherwise.
-	 *                                          Dennis Björklund, 10 June, 99
-	 */
-	if(LTInnerI != -1 )	
+         * middle (COLOR_BTNFACE). I believe it's the same for win95 but since
+         * I don't know I go with Bertho and just sets it for win98 until proven
+         * otherwise.
+         *                                          Dennis Björklund, 10 June, 99
+         */
+        if(LTInnerI != -1 )
             LTInnerI = RBInnerI = COLOR_BTNFACE;
     }
     else if(uFlags & BF_SOFT)
@@ -559,13 +559,13 @@ static BOOL UITOOLS95_DrawRectEdge(HDC hdc, LPRECT rc,
         if(uFlags & BF_BOTTOM) InnerRect.bottom -= add;
 
         if((uFlags & BF_MIDDLE) && retval)
-	{
+        {
             FillRect(hdc, &InnerRect, GetSysColorBrush(uFlags & BF_MONO ?
-						       COLOR_WINDOW : COLOR_BTNFACE));
-	}
+                                                       COLOR_WINDOW : COLOR_BTNFACE));
+        }
 
-	if(uFlags & BF_ADJUST)
-	    *rc = InnerRect;
+        if(uFlags & BF_ADJUST)
+            *rc = InnerRect;
     }
 
     /* Cleanup */
@@ -1407,12 +1407,14 @@ BOOL WIN32API DrawFrameControl(HDC hdc, LPRECT rc, UINT uType,
  * Status    : PARTIALLY IMPLEMENTED AND TESTED
  *
  * Author    : Rene Pronk [Thu, 1999/07/29 15:03]
+ *             Christoph Bratschi: implemented DT_END_ELLIPSIS (Header control)
  *****************************************************************************/
 
 int WIN32API DrawTextExA (HDC hdc, LPCSTR lpchText, int cchText, LPRECT lprc,
                           UINT dwDTFormat, LPDRAWTEXTPARAMS lpDTParams) {
 
    int result;
+   UINT oldDTFormat;
 
    dprintf(("USER32:DrawTextExA (%08xh,%s,%08xh,%08xh,%08xh,%08xh).\n",
             hdc, lpchText, cchText, lprc, dwDTFormat, lpDTParams));
@@ -1434,7 +1436,42 @@ int WIN32API DrawTextExA (HDC hdc, LPCSTR lpchText, int cchText, LPRECT lprc,
            }
    }
 
-   result = DrawTextA (hdc, lpchText, cchText, lprc, dwDTFormat);
+   oldDTFormat = dwDTFormat & ~(DT_END_ELLIPSIS | DT_PATH_ELLIPSIS | DT_MODIFYSTRING | DT_EXPANDTABS);
+   if (dwDTFormat & DT_END_ELLIPSIS && lpchText && (cchText != 0))
+   {
+     int textWidth,width;
+     RECT rect;
+
+     if (cchText == -1) cchText = lstrlenA(lpchText);
+     SetRectEmpty(&rect);
+     DrawTextA(hdc,lpchText,cchText,&rect,oldDTFormat | DT_CALCRECT);
+     width = lprc->right-lprc->left;
+     textWidth = rect.right-rect.left;
+     if (textWidth > width && width > 0)
+     {
+       char* newText;
+       int endWidth,newTextLen;
+
+       DrawTextA(hdc,"...",3,&rect,DT_CALCRECT | DT_SINGLELINE | DT_LEFT);
+       endWidth = rect.right-rect.left;
+       newText = (char*)malloc(cchText+3);
+       lstrcpyA(newText,lpchText);
+       newTextLen = cchText+1;
+       do
+       {
+         newTextLen--;
+         DrawTextA(hdc,newText,newTextLen,&rect,oldDTFormat | DT_CALCRECT);
+         textWidth = rect.right-rect.left;
+       } while (textWidth+endWidth > width && newTextLen > 1);
+
+       lstrcpyA(&newText[newTextLen],"...");
+       result = DrawTextA(hdc,newText,-1,lprc,oldDTFormat);;
+
+       if (dwDTFormat & DT_MODIFYSTRING) lstrcpynA((LPSTR)lpchText,newText,cchText);
+       free(newText);
+     } else result = DrawTextA(hdc,lpchText,cchText,lprc,oldDTFormat);
+   } else
+     result = DrawTextA (hdc, lpchText, cchText, lprc, oldDTFormat);
 
    if (lpDTParams != NULL) {
            // don't forget to restore the margins
@@ -1471,6 +1508,7 @@ int WIN32API DrawTextExW (HDC hdc, LPWSTR lpchText, int cchText, LPRECT lprc,
             hdc, astring, cchText, lprc, dwDTFormat, lpDTParams));
 
    rc = DrawTextExA (hdc, astring, cchText, lprc, dwDTFormat, lpDTParams);
+   if (dwDTFormat & DT_MODIFYSTRING) AsciiToUnicode(astring,lpchText);
    FreeAsciiString(astring);
    return(rc);
 }
