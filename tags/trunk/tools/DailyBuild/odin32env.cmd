@@ -1,4 +1,4 @@
-/* $Id: odin32env.cmd,v 1.23 2002-02-26 17:26:37 bird Exp $
+/* $Id: odin32env.cmd,v 1.24 2002-04-11 16:27:03 bird Exp $
  *
  * Sets the build environment.
  *
@@ -19,61 +19,62 @@ parse arg sCompiler
      * In addition the CVSROOT, USER and HOME directories right below have to corrected.
      */
     call EnvVar_Set 0, 'CVSROOT',   ':pserver:bird@www.netlabs.org:/netlabs.cvs/odin32'
-    call EnvVar_Set 0, 'HOME',      'd:\knut\home'
+    call EnvVar_Set 0, 'HOME',      'e:/user/kso'
     call EnvVar_Set 0, 'USER',      'bird'
-    call EnvVar_Set 0, 'HOSTNAME',  'Univac-Job'
+    call EnvVar_Set 0, 'HOSTNAME',  'Eniac'
+    call EnvVar_Set 0, 'MULTIJOBS', '1'
 
 
     /*
      * Call the procedures which configure each tool.
      * (The order this is done is _very_ important!)
      */
-    call Jade 0;
-    call DocBookXML 0;
+    /*call Jade 0;
+    call DocBookXML 0;*/
     call WarpIn 0;
     call mySQL 0;
     call Perl 0;
     call CVS 0;
     call DDKBase 0;
-    call MSC60 0;
+    call MSCV6 0;
     call EMX 0;
     if (sCompiler = 'watcom') then
     do /* watcom */
         say 'Watcom';
-        call VAC30 1;
-        call VAC36 1;
+        call VAC308 1;
+        call VAC365 1;
         call VAC40 1;
-        call VAC36 0;
-        call Watcom 0;
+        call VAC365 0;
+        call WatComC11c 0;
         call Toolkit40 0;
     end
     else if ((sCompiler = 'vac36') | (sCompiler = 'vac365')) then
     do /* vac36 */
         say 'VAC36(5)';
-        call VAC30 1;
-        call Watcom 1;
+        call VAC308 1;
+        call WatComC11c 1;
         call NetQOS2 0;
         call VAC40 1;
-        call VAC36 0;
+        call VAC365 0;
         call Toolkit40 0;
     end
     else if (sCompiler = 'vac40') then
     do /* vac40 */
         say 'VAC40';
-        call VAC30 1;
-        call Watcom 1;
+        call VAC308 1;
+        call WatComC11c 1;
         call NetQOS2 0;
-        call VAC36 0;
+        call VAC365 0;
         call Toolkit40 0;
         call VAC40 0;
     end
     else
     do /* default is vac30 */
         say 'VAC30';
-        call VAC36 1;
-        call Watcom 1;
+        call VAC365 1;
+        call WatComC11c 1;
         call VAC40 1;
-        call VAC30 0;
+        call VAC308 0;
         call Toolkit40 0;
     end
 
@@ -84,10 +85,64 @@ parse arg sCompiler
     exit(0);
 
 
+/**
+ * The Directory Configuration Function.
+ *
+ * @returns Lower cased, absolute, backward slashed, path to program.
+ * @param   sProgram    Program identifier. (lowercase!)
+ *
+ * @remark
+ * Unless this causes a lot of trouble, we'll keep it in the script.
+ * Having this externaly will slow down the script execution
+ * somewhat I'm afraid. And the script is slow enought as it is.
+ *
+ */
+QueryPath: procedure
+    parse arg sProgram
+
+    select
+        when (sProgram = 'cvs') then        return 'f:\cvs';
+        when (sProgram = 'emx') then        return 'f:\emx';
+        when (sProgram = 'emxpgcc') then    return 'f:\emxpgcc';
+        when (sProgram = 'db2v52') then     return 'f:\sqllib52';
+        when (sProgram = 'icatgam') then    return 'f:\icatos2';
+        when (sProgram = 'icatgam406rc1') then return 'f:\icatos2.4.0.6.rc1';
+        when (sProgram = 'icatpe') then     return 'f:\icatpe';
+        when (sProgram = 'ida38') then      return 'f:\ida38';
+        when (sProgram = 'ida40') then      return 'f:\ida401';
+        when (sProgram = 'ida414') then     return 'f:\ida414';
+        when (sProgram = 'idasdk') then     return 'f:\idasdk';
+        when (sProgram = 'ddkbase') then    return 'f:\ddk\base';
+        when (sProgram = 'mscv6') then      return 'f:\ddktools\toolkits\msc60';
+        when (sProgram = 'mysql') then      return 'f:\mysql2';
+        when (sProgram = 'netqos2') then    return 'f:\netqos2';
+        when (sProgram = 'perl') then       return 'f:\perllib';
+        when (sProgram = 'python') then     return 'f:\python';
+        when (sProgram = 'toolkit40') then  return 'f:\toolkit';
+        when (sProgram = 'toolkit45') then  return 'f:\toolkit45';
+        when (sProgram = 'unixroot') then   return 'e:\unix';
+        when (sProgram = 'xfree86') then    return 'e:\xfree86';
+        when (sProgram = 'vac308') then     return 'f:\ibmcpp';
+        when (sProgram = 'vac365') then     return 'f:\ibmcxxo';
+        when (sProgram = 'vac40') then      return 'f:\ibmcpp40';
+        when (sProgram = 'warpin') then     return 'f:\warpin';
+        when (sProgram = 'watcom11') then   return 'f:\watcom';
+        when (sProgram = 'watcom11c') then  return 'f:\watcom11c';
+
+        otherwise
+        do
+            say 'Fatal error: Path information for program '''sProgram''' was not found.';
+            exit(16);
+        end
+    end
+
+    /* Should never get here */
+return '';
+
 
 
 /**
- * Individual tools configurations
+ * Environment procedures section
  **/
 
 
@@ -100,11 +155,11 @@ CVS: procedure
     /*
      * Concurrent Versions System (CVS) main directory.
      */
-    sCVSMain    = 'd:\knut\tools\cvs';
-    call EnvVar_Set      fRM, 'cvsmain',     sCVSMain;
-    call EnvVar_AddFront fRM, 'path',        sCVSMain'\bin;'
-    call EnvVar_AddFront fRM, 'bookshelf',   sCVSMain'\book;'
-    return 0;
+    sPathCVS    = QueryPath('cvs');
+    call EnvVar_Set      fRM, 'PATH_CVS',    sPathCVS;
+    call EnvVar_AddFront fRM, 'path',        sPathCVS'\bin;'
+    call EnvVar_AddFront fRM, 'bookshelf',   sPathCVS'\book;'
+return 0;
 
 
 /*
@@ -116,10 +171,13 @@ EMX: procedure
     /*
      * EMX/GCC main directory.
      */
-    sEMXBack    = 'c:\emx';
-    sEMXForw    = 'c:/emx';
-
-    call EnvVar_Set      fRM, 'emx', sEMXBack;
+    sEMX        = QueryPath('emx');
+    sEMXBack    = translate(sEMX, '\', '/');
+    sEMXForw    = translate(sEMX, '/', '\');
+    call EnvVar_Set      fRM, 'PATH_EMX', sEMXBack;
+    call EnvVar_Set      fRM, 'CCENV',      'EMX'
+    call EnvVar_Set      fRM, 'BUILD_ENV',  'EMX'
+    call EnvVar_Set      fRM, 'BUILD_PLATFORM', 'OS2'
 
     call EnvVar_AddFront fRM, 'BEGINLIBPATH',       sEMXBack'\dll;'
     call EnvVar_AddFront fRM, 'PATH',               sEMXBack'\bin;'
@@ -141,7 +199,171 @@ EMX: procedure
         call EnvVar_Set  fRM, 'TERM',               'ansi'
         call EnvVar_Set  fRM, 'TERMCAP',            sEMXForw'/etc/termcap.dat'
     end
-    return 0;
+
+return 0;
+
+
+/*
+ * EMX PGCC - must be installed on to the ordinar EMX.
+ */
+EMXPGCC: procedure
+    parse arg fRM
+
+    /*
+     * EMX/GCC main directory.
+     */
+    sEMXPGCC    = QueryPath('emxpgcc');
+    sEMXBack    = translate(sEMXPGCC, '\', '/');
+    sEMXForw    = translate(sEMXPGCC, '/', '\');
+    call EnvVar_Set      fRM, 'PATH_EMXPGCC',   sEMXBack;
+    call EnvVar_Set      fRM, 'CCENV',          'EMX'
+    call EnvVar_Set      fRM, 'BUILD_ENV',      'EMX'
+    call EnvVar_Set      fRM, 'BUILD_PLATFORM', 'OS2'
+
+    call EnvVar_AddFront fRM, 'BEGINLIBPATH',       sEMXBack'\dll;'
+    call EnvVar_AddFront fRM, 'PATH',               sEMXBack'\bin;'
+    call EnvVar_AddFront fRM, 'DPATH',              sEMXBack'\book;'
+    call EnvVar_AddFront fRM, 'BOOKSHELF',          sEMXBack'\book;'
+    call EnvVar_AddFront fRM, 'HELP',               sEMXBack'\help;'
+    call EnvVar_AddFront fRM, 'C_INCLUDE_PATH',     sEMXForw'/include'
+    call EnvVar_AddFront fRM, 'LIBRARY_PATH',       sEMXForw'/lib'
+    call EnvVar_AddFront fRM, 'CPLUS_INCLUDE_PATH', sEMXForw'/include/cpp;'sEMXForw'/include'
+    call EnvVar_Set      fRM, 'PROTODIR',           sEMXForw'/include/cpp/gen'
+    call EnvVar_Set      fRM, 'OBJC_INCLUDE_PATH',  sEMXForw'/include'
+    call EnvVar_AddFront fRM, 'INFOPATH',           sEMXForw'/info'
+    call EnvVar_Set      fRM, 'EMXBOOK',            'emxdev.inf+emxlib.inf+emxgnu.inf+emxbsd.inf'
+    call EnvVar_AddFront fRM, 'HELPNDX',            'emxbook.ndx', '+', 1
+
+return 0;
+
+/*
+ * IBM DB2 v5.2
+ */
+db2v52: procedure
+    parse arg fRM
+    sPathDB2   = QueryPath('db2v52');
+    call EnvVar_Set      fRm, 'PATH_DB2',    sPathDB2;
+    call EnvVar_Set      fRm, 'db2path',     sPathDB2;
+    call EnvVar_AddFront fRm, 'beginlibpath',sPathDB2'\dll;'sPathDB2'\alt;'
+    call EnvVar_AddFront fRm, 'path',        sPathDB2'\bin;'sPathDB2'\alt;'
+    call EnvVar_AddFront fRm, 'dpath',       sPathDB2'\bin;'sPathDB2';'
+    call EnvVar_AddFront fRm, 'help',        sPathDB2'\help;'
+    call EnvVar_AddEnd   fRm, 'classpath',   '.;'sPathDB2'\JAVA\DB2JAVA.ZIP;'sPathDB2'\JAVA\RUNTIME.ZIP;'sPathDB2'\JAVA\SQLJ.ZIP;'
+    call EnvVar_Set      fRM, 'db2instace',  'DB2'
+    /*call EnvVar_Set      fRM, 'odbc_path',   'f:\odbc' -- huh? what's this? */
+    call EnvVar_AddFront fRM, 'cobcpy',      sPathDB2'\include\cobol_mf'
+    call EnvVar_Set      fRM, 'finclude',    sPathDB2'\include'
+    call EnvVar_AddFront fRM, 'include',     sPathDB2'\include;'
+    call EnvVar_AddFront fRM, 'lib',         sPathDB2'\lib;'
+return 0;
+
+
+/*
+ * ICAT Debugger
+ */
+ICATGam: procedure
+    parse arg fRM
+    sPathICAT   = QueryPath('icatgam');
+    call EnvVar_Set      fRm, 'PATH_ICATGAM', sPathICAT;
+    call EnvVar_AddFront fRm, 'beginlibpath',sPathICAT'\dll;'
+    call EnvVar_AddFront fRm, 'path',        sPathICAT'\bin;'
+    call EnvVar_AddFront fRm, 'dpath',       sPathICAT'\help;'
+    call EnvVar_AddFront fRm, 'help',        sPathICAT'\help;'
+return 0;
+
+
+/*
+ * ICAT Debugger
+ */
+ICATGam406RC1: procedure
+    parse arg fRM
+    sPathICAT   = QueryPath('icatgam406rc1');
+    call EnvVar_Set      fRm, 'PATH_ICATGAM', sPathICAT;
+    call EnvVar_AddFront fRm, 'beginlibpath',sPathICAT'\dll;'
+    call EnvVar_AddFront fRm, 'path',        sPathICAT'\bin;'
+    call EnvVar_AddFront fRm, 'dpath',       sPathICAT'\help;'
+    call EnvVar_AddFront fRm, 'help',        sPathICAT'\help;'
+return 0;
+
+
+
+/*
+ * ICAT Debugger for PE images.
+ */
+ICATPe: procedure
+    parse arg fRM
+    sPathICAT   = QueryPath('icatgam');
+    sPathICATPe = QueryPath('icatpe');
+    call EnvVar_Set      fRm, 'PATH_ICATGAM',sPathICAT;
+    call EnvVar_Set      fRm, 'PATH_ICATPE', sPathICATPe;
+    call EnvVar_AddFront fRm, 'beginlibpath',sPathICATPe'\bin;'sPathICAT'\dll;'
+    call EnvVar_AddFront fRm, 'path',        sPathICATPe'\bin;'sPathICAT'\bin;'
+    call EnvVar_AddFront fRm, 'dpath',       sPathICATPe'\bin;'sPathICAT'\help;'
+    call EnvVar_AddFront fRm, 'help',        sPathICATPe'\bin;'sPathICAT'\help;'
+return 0;
+
+
+
+/*
+ * Interactive Disassembler (IDA) v3.80a
+ */
+IDA38: procedure
+    parse arg fRM
+    /*
+     * IDA main directory.
+     */
+    sPathIDA = QueryPath('ida38');
+    call EnvVar_Set      fRM, 'PATH_IDA',       sPathIDA
+    call EnvVar_AddFront fRM, 'path',           sPathIDA
+    call EnvVar_AddFront fRM, 'beginlibpath',   sPathIDA
+return 0;
+
+
+/*
+ * Interactive Disassembler (IDA) v4.01
+ */
+IDA40: procedure
+    parse arg fRM
+    /*
+     * IDA main directory.
+     */
+    sPathIDA = QueryPath('ida40');
+    call EnvVar_Set      fRM, 'PATH_IDA',       sPathIDA
+    call EnvVar_AddFront fRM, 'path',           sPathIDA
+    call EnvVar_AddFront fRM, 'beginlibpath',   sPathIDA
+return 0;
+
+
+/*
+ * Interactive Disassembler (IDA) v4.14
+ */
+IDA414: procedure
+    parse arg fRM
+    /*
+     * IDA main directory.
+     */
+    sPathIDA = QueryPath('ida414');
+    call EnvVar_Set      fRM, 'PATH_IDA',       sPathIDA
+    call EnvVar_AddFront fRM, 'path',           sPathIDA
+    call EnvVar_AddFront fRM, 'beginlibpath',   sPathIDA
+return 0;
+
+
+/*
+ * Interactive Disassembler (IDA) Plugin SDK (v5.0?)
+ */
+IDASDK: procedure
+    parse arg fRM
+    /*
+     * IDA main directory.
+     */
+    sPathIDASDK = QueryPath('idasdk');
+    call EnvVar_Set      fRM, 'PATH_IDASDK',    sPathIDASDK
+    call EnvVar_AddFront fRM, 'include',        sPathIDASDK'\include;'
+    call EnvVar_AddFront fRM, 'lib',            sPathIDASDK'\libwat.os2;'
+    call EnvVar_AddFront fRM, 'path',           sPathIDASDK'\bin\os2;'
+    call EnvVar_AddFront fRM, 'beginlibpath',   sPathIDASDK'\bin\os2;'
+return 0;
 
 
 /*
@@ -153,14 +375,699 @@ DDKBase: procedure
     /*
      * Device Driver Kit (DDK) (v4.0+) base (important not main) directory.
      */
-    sDDKBase    = 'd:\knut\ddk\base';
-    call EnvVar_Set      fRM, 'ddkbase', sDDKBase;
-    call EnvVar_AddFront fRM, 'path',        sDDKBase'\tools;'
-    call EnvVar_AddFront fRM, 'include',     sDDKBase'\h;'
-    call EnvVar_AddFront fRM, 'lib',         sDDKBase'\lib;'
-    call EnvVar_AddFront fRM, 'bookshelf',   sDDKBase'\..\docs;'
+    sPathDDKBase    = QueryPath('ddkbase');
+    call EnvVar_Set      fRM, 'PATH_DDKBASE',sPathDDKBase;
+    call EnvVar_AddFront fRM, 'path',        sPathDDKBase'\tools;'
+    call EnvVar_AddFront fRM, 'include',     sPathDDKBase'\h;'sPathDDKBase'\inc;'sPathDDKBase'\inc32;'
+    call EnvVar_AddFront fRM, 'include16',   sPathDDKBase'\h;'
+    call EnvVar_AddFront fRM, 'lib',         sPathDDKBase'\lib;'
+    call EnvVar_AddFront fRM, 'bookshelf',   sPathDDKBase'\..\docs;'
 
-    return 0;
+return 0;
+
+
+
+/*
+ * Microsoft C v6.0a
+ */
+MSCV6: procedure
+    parse arg fRM
+
+    /*
+     * Microsoft C v6.0a main directory.
+     */
+    sPathMSC    = QueryPath('mscv6');
+    call EnvVar_Set      fRM, 'BUILD_ENV',  'MSCV6'
+    call EnvVar_Set      fRM, 'BUILD_PLATFORM', 'OS2'
+    call EnvVar_Set      fRM, 'PATH_MSC',   sPathMSC;
+    call EnvVar_AddFront fRM, 'path',       sPathMSC'\binp;'
+    call EnvVar_AddFront fRM, 'include',    sPathMSC'\include;'
+    call EnvVar_AddFront fRM, 'include16',  sPathMSC'\include;'
+    call EnvVar_AddFront fRM, 'lib',        sPathMSC'\lib;'
+return 0;
+
+
+
+/*
+ * mySQL Database system
+ */
+mySQL: procedure
+    parse arg fRM
+
+    /*
+     * mySQL Database system main directory.
+     */
+    sPathMySQL    = QueryPath('mysql');
+    call EnvVar_Set      fRM, 'PATH_MYSQL',     sPathMySQL;
+    call EnvVar_AddFront fRM, 'path',           sPathMySQL'\bin;'
+    call EnvVar_AddFront fRM, 'beginlibpath',   sPathMySQL'\dll;'
+    call EnvVar_AddFront fRM, 'include',        sPathMySQL'\include;'
+    call EnvVar_AddFront fRM, 'bookshelf',      sPathMySQL'\doc;'sPathMySQL'\book';
+    /*call EnvVar_AddFront fRM, 'lib',            sPathMySQL'\lib;'*/
+return 0;
+
+
+
+/*
+ * NetQOS2 - help subsystem++ for VAC 3.6.5 and VAC 4.0
+ */
+NetQOS2: procedure
+    sPathNetQOS2 = QueryPath('netqos2');
+    call EnvVar_Set      fRM, 'PATH_NETQOS2',   sPathNetQOS2
+    call EnvVar_AddFront fRM, 'path',           sPathNetQOS2';'
+    call EnvVar_AddFront fRM, 'dpath',          sPathNetQOS2';'
+    call EnvVar_AddFront fRM, 'beginlibpath',   sPathNetQOS2';'
+    call EnvVar_Set      fRM, 'imndatasrv',     sPathNetQOS2'\DATA'
+    call EnvVar_Set      fRM, 'imndatacl',      sPathNetQOS2'\DATA'
+    call EnvVar_Set      fRM, 'imnworksrv',     sPathNetQOS2'\WORK'
+    call EnvVar_Set      fRM, 'imnworkcl',      sPathNetQOS2'\WORK'
+    call EnvVar_Set      fRM, 'imnnlpssrv',     sPathNetQOS2
+    call EnvVar_Set      fRM, 'imnnlpscl',      sPathNetQOS2
+    call EnvVar_Set      fRM, 'imncccfgfile',   'NETQ.CFG'
+    call EnvVar_Set      fRM, 'imncscfgfile',   'NETQ.CFG'
+    call EnvVar_Set      fRM, 'imqconfigsrv',   sPathNetQOS2'\instance'
+    call EnvVar_Set      fRM, 'imqconfigcl',    sPathNetQOS2'\instance\dbcshelp'
+return 0;
+
+
+
+/*
+ * PERL 5005_53
+ */
+Perl: procedure
+    parse arg fRM
+
+    /*
+     * Perl main directory.
+     */
+/* BAD
+    sPathPerl       = QueryPath('perl');
+    sPathPerlForw   = translate(sPathPerl, '/', '\');
+    call EnvVar_Set      fRM, 'PATH_PERL',      sPathPerl;
+    call EnvVar_AddFront fRM, 'path',           sPathPerl'\bin;'
+    call EnvVar_AddFront fRM, 'beginlibpath',   sPathPerl'\dll;'
+    call EnvVar_AddEnd   fRM, 'bookshelf',      sPathPerl'\book;'
+    call EnvVar_Set      fRM, 'perllib_prefix', sPathPerlForw'/lib;'sPathPerl'\lib'
+    call EnvVar_Set      fRM, 'perl5lib',       sPathPerlForw'/lib/site_perl/5.00553/os2;'sPathPerlForw'/lib/site_perl/5.00553'
+    call EnvVar_Set      fRM, 'perl5load',      '2'
+    call EnvVar_Set      fRM, 'perl_sh_dir',    sPathPerlForw'/bin_sh/sh.exe'
+    call EnvVar_Set      fRM, 'manpath',        sPathPerlForw'/man'
+    call EnvVar_Set      fRM, 'perl_badlang',   '0'
+/*    call EnvVar_Set      fRM, 'LANG',           'en_US' /* dirty fix... */*/
+*/
+/* seems ok */
+    sPathPerl       = QueryPath('perl');
+    sPathPerlForw   = translate(sPathPerl, '/', '\');
+    call EnvVar_Set      fRM, 'PATH_PERL',      sPathPerl;
+    call EnvVar_AddFront fRM, 'path',           sPathPerl'\bin;'
+    call EnvVar_AddFront fRM, 'beginlibpath',   sPathPerl'\dll;'
+    call EnvVar_AddEnd   fRM, 'bookshelf',      sPathPerl'\book;'
+    call EnvVar_Set      fRM, 'perllib_prefix', sPathPerlForw'/lib;'sPathPerlForw'/lib'
+    call EnvVar_Set      fRM, 'perl_sh_dir',    sPathPerlForw'/bin_sh'
+    call EnvVar_Set      fRM, 'manpath',        sPathPerlForw'/man'
+    call EnvVar_Set      fRM, 'perl5lib',       sPathPerlForw'/lib'
+    call EnvVar_Set      fRM, 'perl_badlang',   '0'
+return 0;
+
+
+/*
+ * Python/2 v1.5.2
+ */
+Python: procedure
+    parse arg fRM
+
+    /*
+     * The Python Home directory
+     */
+    sPythonHome = QueryPath('python');
+    call EnvVar_Set      fRM, 'PATH_PYTHON',    sPythonHome
+    call EnvVar_Set      fRM, 'pythonhome',     sPythonHome
+    call EnvVar_Set      fRM, 'pythonpath',     '.;'sPythonHome'\Lib;'sPythonHome'\Lib\plat-win;'sPythonHome'\Lib\lib-tk;'sPythonHome'\Lib\lib-dynload;'sPythonHome'\Lib\site-packages;'sPythonHome'\Lib\dos-8x3'
+    call EnvVar_AddFront fRM, 'beginlibpath',   sPythonHome
+    call EnvVar_AddFront fRM, 'path',           sPythonHome
+
+return 0;
+
+
+/*
+ * OS/2 Programmers Toolkit v4.0 (CSD1/4)
+ */
+Toolkit40: procedure
+    parse arg fRM
+
+    /*
+     * Toolkit (4.0) main directory.
+     */
+    sPathTK    = QueryPath('toolkit40');
+    call EnvVar_Set      fRM, 'PATH_TOOLKIT',  sPathTK;
+
+    call EnvVar_AddFront fRM, 'beginlibpath',   sPathTK'\BETA\DLL;'sPathTK'\SAMPLES\MM\DLL;'sPathTK'\SAMPLES\OPENDOC\PARTS\DLL;'sPathTK'\SOM\COMMON\DLL;'sPathTK'\SOM\LIB;'sPathTK'\OPENDOC\BASE\DLL;'sPathTK'\OPENDOC\BASE\LOCALE\EN_US;'sPathTK'\DLL;'
+    call EnvVar_AddFront fRM, 'path',           sPathTK'\BETA\BIN;'sPathTK'\SOM\COMMON;'sPathTK'\SOM\BIN;.;'sPathTK'\OPENDOC\BASE\BIN;'sPathTK'\BIN;'
+    call EnvVar_AddFront fRM, 'dpath',          sPathTK'\SOM\COMMON\SYSTEM;'sPathTK'\SOM\MSG;'sPathTK'\OPENDOC\BASE\MSG;'sPathTK'\BOOK;'sPathTK'\MSG;'
+    call EnvVar_AddFront fRM, 'help',           sPathTK'\BETA\HELP;'sPathTK'\OPENDOC\BASE\LOCALE\EN_US;'sPathTK'\HELP;'
+    call EnvVar_AddFront fRM, 'bookshelf',      sPathTK'\BETA\BOOK;'sPathTK'\BOOK;'sPathTK'\ARCHIVED;'
+    call EnvVar_AddFront fRM, 'somir',          sPathTK'\SOM\COMMON\ETC\214\SOM.IR;'sPathTK'\OPENDOC\BASE\AVLSHELL.IR;'
+    call EnvVar_AddEnd   fRM, 'somir',          sPathTK'\OPENDOC\CUSTOM\OD.IR;'sPathTK'\SAMPLES\REXX\SOM\ANIMAL\ORXSMP.IR;'
+    call EnvVar_AddFront fRM, 'include',        sPathTK'\SPEECH\H;'sPathTK'\BETA\H;'sPathTK'\SAMPLES\OPENDOC\PARTS\INCLUDE;'sPathTK'\SOM\INCLUDE;'sPathTK'\INC;'sPathTK'\H\GL;'sPathTK'\H;'
+    call EnvVar_AddEnd   fRM, 'include',        sPathTK'\H\LIBC;.;'
+    call EnvVar_AddFront fRM, 'lib',            sPathTK'\SPEECH\LIB;'sPathTK'\SAMPLES\MM\LIB;'sPathTK'\LIB;'sPathTK'\SOM\LIB;'sPathTK'\OPENDOC\BASE\LIB;'
+    call EnvVar_AddFront fRM, 'nlspath',        sPathTK'\OPENDOC\BASE\LOCALE\EN_US\%N;'sPathTK'\MSG\%N;C:\MPTN\MSG\NLS\%N;C:\TCPIP\msg\ENUS850\%N;'
+    call EnvVar_AddFront fRM, 'locpath',        sPathTK'\OPENDOC\BASE\LOCALE;'
+    call EnvVar_AddFront fRM, 'ipfc',           sPathTK'\IPFC;'
+    call EnvVar_Set      fRM, 'odbase',         sPathTK'\OPENDOC\BASE'
+    call EnvVar_Set      fRM, 'odlang',         'en_US'
+    call EnvVar_AddFront fRM, 'odbasepaths',    sPathTK'\OPENDOC\BASE;'
+    call EnvVar_Set      fRM, 'odcfg',          sPathTK'\OPENDOC\CUSTOM'
+    call EnvVar_Set      fRM, 'odtmp',          EnvVar_Get('tmp');
+    call EnvVar_Set      fRM, 'sombase',        sPathTK'\SOM'
+    call EnvVar_Set      fRM, 'somruntime',     sPathTK'\SOM\COMMON'
+
+    call EnvVar_Set      fRM, 'cpref',          'CP1.INF+CP2.INF+CP3.INF'
+    call EnvVar_Set      fRM, 'gpiref',         'GPI1.INF+GPI2.INF+GPI3.INF+GPI4.INF'
+    call EnvVar_Set      fRM, 'mmref',          'MMREF1.INF+MMREF2.INF+MMREF3.INF'
+    call EnvVar_Set      fRM, 'pmref',          'PM1.INF+PM2.INF+PM3.INF+PM4.INF+PM5.INF'
+    call EnvVar_Set      fRM, 'wpsref',         'WPS1.INF+WPS2.INF+WPS3.INF'
+    call EnvVar_AddFront fRM, 'sminclude',      sPathTK'\H;'sPathTK'\IDL;'sPathTK'\SOM\INCLUDE;.;'sPathTK'\OPENDOC\BASE\INCLUDE;'sPathTK'\SAMPLES\OPENDOC\PARTS\INCLUDE;'
+    call EnvVar_Set      fRM, 'smaddstar',      '1'
+    call EnvVar_Set      fRM, 'smemit',         'h;ih;c'
+    call EnvVar_Set      fRM, 'smtmp',          EnvVar_Get('tmp');
+    call EnvVar_Set      fRM, 'smclasses',      'WPTYPES.IDL'
+    call EnvVar_Set      fRM, 'odparts',        sPathTK'\SAMPLES\OPENDOC\PARTS'
+    call EnvVar_Set      fRM, 'odsrc',          sPathTK'\SAMPLES\OPENDOC\PARTS'
+    call EnvVar_AddFront fRM, 'odpartspaths',   sPathTK'\SAMPLES\OPENDOC\PARTS;'
+    call EnvVar_AddFront fRM, 'odsrcpaths',     sPathTK'\SAMPLES\OPENDOC\PARTS;'
+    /*
+    call EnvVar_Set      fRM, 'CAT_MACHINE=COM1:57600'
+    call EnvVar_Set      fRM, 'CAT_HOST_BIN_PATH='sPathTK'\BIN'
+    call EnvVar_Set      fRM, 'CAT_COMMUNICATION_TYPE=ASYNC_SIGBRK'
+    call EnvVar_AddFront fRM, 'CAT_HOST_SOURCE_PATH='sPathTK'\BIN;'
+    */
+return 0;
+
+
+
+/*
+ * OS/2 Programmers Toolkit v4.5
+ */
+Toolkit45: procedure
+    parse arg fRM
+
+    /*
+     * Toolkit (4.5) main directory.
+     */
+     sPathTK    = QueryPath('toolkit45');
+    call EnvVar_Set      fRM, 'PATH_TOOLKIT',  sPathTK;
+
+    call EnvVar_AddFront fRM, 'path',        sPathTK'\bin;'
+    call EnvVar_AddFront fRM, 'dpath',       sPathTK'\book;'
+    call EnvVar_AddFront fRM, 'dpath',       sPathTK'\msg;'
+    call EnvVar_AddFront fRM, 'beginlibpath', sPathTK'\dll;'
+    call EnvVar_AddFront fRM, 'help',        sPathTK'\help;'
+    call EnvVar_AddFront fRM, 'bookshelf',   sPathTK'\archived;'
+    call EnvVar_AddFront fRM, 'bookshelf',   sPathTK'\book;'
+    call EnvVar_AddFront fRM, 'nlspath',     sPathTK'\msg\%N;'
+    call EnvVar_AddEnd   fRM, 'ulspath',     sPathTK'\language;'
+    call EnvVar_AddFront fRM, 'include',     sPathTK'\H;'
+    call EnvVar_AddFront fRM, 'include',     sPathTK'\H\GL;'
+    call EnvVar_AddFront fRM, 'include',     sPathTK'\SPEECH\H;'
+    call EnvVar_AddFront fRM, 'include',     sPathTK'\H\RPC;'
+    call EnvVar_AddFront fRM, 'include',     sPathTK'\H\NETNB;'
+    call EnvVar_AddFront fRM, 'include',     sPathTK'\H\NETINET;'
+    call EnvVar_AddFront fRM, 'include',     sPathTK'\H\NET;'
+    call EnvVar_AddFront fRM, 'include',     sPathTK'\H\ARPA;'
+    call EnvVar_AddFront fRM, 'include',     sPathTK'\INC;'
+    call EnvVar_AddEnd   fRM, 'lib',         sPathTK'\SAMPLES\MM\LIB;'
+    call EnvVar_AddEnd   fRM, 'lib',         sPathTK'\SPEECH\LIB;'
+    call EnvVar_AddFront fRM, 'lib',         sPathTK'\lib;'
+    call EnvVar_AddFront fRM, 'helpndx',     'EPMKWHLP.NDX+', '+'
+    call EnvVar_AddFront fRM, 'ipfc',        sPathTK'\ipfc;'
+    call EnvVar_Set      fRM, 'LANG',        'en_us'
+    call EnvVar_Set      fRM, 'CPREF',       'CP1.INF+CP2.INF+CP3.INF'
+    call EnvVar_Set      fRM, 'GPIREF',      'GPI1.INF+GPI2.INF+GPI3.INF+GPI4.INF'
+    call EnvVar_Set      fRM, 'MMREF',       'MMREF1.INF+MMREF2.INF+MMREF3.INF'
+    call EnvVar_Set      fRM, 'PMREF',       'PM1.INF+PM2.INF+PM3.INF+PM4.INF+PM5.INF'
+    call EnvVar_Set      fRM, 'WPSREF',      'WPS1.INF+WPS2.INF+WPS3.INF'
+    /*
+    call EnvVar_Set      fRM, 'CAT_MACHINE', 'COM1:57600'
+    call EnvVar_Set      fRM, 'CAT_HOST_BIN_PATH', TKMAIN'\BIN'
+    call EnvVar_Set      fRM, 'CAT_COMMUNICATION_TYPE', 'ASYNC_SIGBRK'
+    call EnvVar_Set      fRM, 'CAT_HOST_SOURCE_PATH',TKMAIN'\BIN;'
+    */
+
+return 0;
+
+
+/**
+ * This will envolve into an full UNIX like environment some day perhaps...
+ */
+Unix: procedure
+    parse arg fRM
+
+    /*
+     * Unix root directory.
+     */
+    sUnixBack = QueryPath('unixroot');
+    sUnixForw = translate(sUnixBack, '/', '\');
+    call EnvVar_Set      fRM, 'PATH_UNIX',          sUnixBack
+    call EnvVar_Set      fRM, 'unixroot',           sUnixBack
+    call EnvVar_AddFront fRM, 'path',               sUnixBack'\bin;'sUnixBack'\usr\local\bin;'
+    call EnvVar_AddFront fRM, 'beginlibpath',       sUnixBack'\dll;'
+    call EnvVar_Set      fRM, 'groff_font_path',    sUnixForw'/lib/groff/font'
+    call EnvVar_Set      fRM, 'groff_tmac_path',    sUnixForw'/lib/groff/tmac'
+    call EnvVar_Set      fRM, 'refer',              sUnixForw'/lib/groff/dict/papers/ind'
+
+    call EnvVar_Set      fRM, 'editor',             'e:/verkty/boxer/b2.exe -Vr25'
+
+    /*
+     * XFree86 main directory.
+     */
+    sXF86Back = QueryPath('xfree86');
+    sXF86Forw = translate(sXF86Back, '/', '\');
+    call EnvVar_Set      fRM, 'PATH_XFREE86',       sXF86Back
+    call EnvVar_AddFront fRM, 'C_INCLUDE_PATH',     sXF86Forw'/include'
+    call EnvVar_AddFront fRM, 'CPLUS_INCLUDE_PATH', sXF86Forw'/include'
+    call EnvVar_Set      fRM, 'OBJC_INCLUDE_PATH',  sXF86Forw'/include'
+    call EnvVar_AddFront fRM, 'LIBRARY_PATH',       sXF86Forw'/lib'
+
+return EMX(fRM);
+
+
+
+/*
+ * IBM Visual Age for C++ v3.08 for OS/2
+ */
+VAC308: procedure
+    parse arg fRM
+
+    /*
+     * IBM Visual Age for C++ Version 3.08 main directory.
+     */
+    sPathCPP = QueryPath('vac308');
+    call EnvVar_Set      fRM, 'PATH_VAC308',    sPathCPP
+    call EnvVar_Set      fRM, 'CCENV',      'VAC3'
+    call EnvVar_Set      fRM, 'BUILD_ENV',  'VAC308'
+    call EnvVar_Set      fRM, 'BUILD_PLATFORM', 'OS2'
+
+    call EnvVar_AddFront fRM, 'beginlibpath',   sPathCPP'\DLL;'sPathCPP'\SAMPLES\TOOLKIT\DLL;'
+    call EnvVar_AddFront fRM, 'path',           sPathCPP'\BIN;'sPathCPP'\SMARTS\SCRIPTS;'sPathCPP'\HELP;'
+    call EnvVar_AddFront fRM, 'dpath',          sPathCPP'\HELP;'sPathCPP';'sPathCPP'\LOCALE;'sPathCPP'\MACROS;'sPathCPP'\BND;'
+    call EnvVar_AddFront fRM, 'help',           sPathCPP'\HELP;'sPathCPP'\SAMPLES\TOOLKIT\HELP;'
+    call EnvVar_AddFront fRM, 'bookshelf',      sPathCPP'\HELP;'
+    call EnvVar_AddFront fRM, 'somir',          sPathCPP'\ETC\SOM.IR;'
+    call EnvVar_AddFront fRM, 'cpphelp_ini',    'C:\OS2\SYSTEM'
+    call EnvVar_AddFront fRM, 'locpath',        sPathCPP'\LOCALE;%LOCPATH%;'
+    call EnvVar_AddFront fRM, 'include',        sPathCPP'\INCLUDE;'sPathCPP'\INCLUDE\OS2;'sPathCPP'\INC;'sPathCPP'\INCLUDE\SOM;'
+    call EnvVar_AddFront fRM, 'sminclude',      sPathCPP'\INCLUDE\OS2;'sPathCPP'\INCLUDE;'sPathCPP'\INCLUDE\SOM;'
+
+    call EnvVar_AddFront fRM, 'vbpath',         '.;'sPathCPP'\DDE4VB;'
+    call EnvVar_Set      fRM, 'tmpdir',         EnvVar_Get('tmp')
+    call EnvVar_Set      fRM, 'lxevfref',       'EVFELREF.INF+LPXCREF.INF'
+    call EnvVar_Set      fRM, 'lxevfhdi',       'EVFELHDI.INF+LPEXHDI.INF'
+    call EnvVar_AddFront fRM, 'lpath',          sPathCPP'\MACROS;'
+    call EnvVar_AddFront fRM, 'codelpath',      sPathCPP'\CODE\MACROS;'sPathCPP'\MACROS;'
+    call EnvVar_Set      fRM, 'clref',          'CPPCLRF.INF+CPPDAT.INF+CPPAPP.INF+CPPWIN.INF+CPPCTL.INF+CPPADV.INF+CPP2DG.INF+CPPDDE.INF+CPPDM.INF+CPPMM.INF+CPPCLRB.INF'
+    call EnvVar_AddFront fRM, 'ipfc',           sPathCPP'\IPFC'
+    call EnvVar_AddFront fRM, 'lib',            sPathCPP'\LIB;'sPathCPP'\DLL;'
+    call EnvVar_Set      fRM, 'cpplocal',       sPathCPP
+    call EnvVar_Set      fRM, 'cppmain',        sPathCPP
+    call EnvVar_Set      fRM, 'cppwork',        sPathCPP
+    call EnvVar_Set      fRM, 'iwf.default_prj','CPPDFTPRJ'
+
+    call EnvVar_Set      fRM, 'iwf.solution_lang_support', 'CPPIBS30;ENG'
+    call EnvVar_Set      fRM, 'vacpp_shared'    'FALSE'
+    call EnvVar_Set      fRM, 'iwfhelp',        'IWFHDI.INF'
+    call EnvVar_Set      fRM, 'iwfopt',         sPathCPP
+
+    call EnvVar_Set      fRM, 'somruntime',     sPathCPP'\DLL'
+    call EnvVar_Set      fRM, 'smaddstar',      '1'
+    call EnvVar_Set      fRM, 'smemit',         'h;ih;c'
+    call EnvVar_Set      fRM, 'sombase',        sPathCPP
+    call EnvVar_Set      fRM, 'smtmp',          EnvVar_Get('tmp')
+    call EnvVar_Set      fRM, 'smclasses',      'WPTYPES.IDL'
+
+    /* FIXME THESE USES '+' AS SEPERATOR NOT ';'!!! */
+    call EnvVar_AddFront fRM, 'helpndx',        'EPMKWHLP.NDX+CPP.NDX+CPPBRS.NDX', '+'
+    call EnvVar_AddFront fRM, 'ipf_keys',       'SHOWNAV'
+
+
+return 0;
+
+
+
+/*
+ * Visual Age / C and C++ tools v3.6.5 for OS/2
+ */
+VAC365: procedure
+    parse arg fRM
+
+    /*
+     * IBM C/C++ Compiler and Tools Version 3.6.5 main directory.
+     */
+    sPathCxx    = QueryPath('vac365');
+    call EnvVar_Set      fRM, 'PATH_VAC365', sPathCxx;
+    call EnvVar_Set      fRM, 'CCENV',      'VAC36'
+    call EnvVar_Set      fRM, 'BUILD_ENV',  'VAC365'
+    call EnvVar_Set      fRM, 'BUILD_PLATFORM', 'OS2'
+
+    call EnvVar_Set      fRM, 'cxxmain',     sPathCxx;
+    call EnvVar_AddFront fRM, 'path',        sPathCxx'\bin;'
+    call EnvVar_AddFront fRM, 'dpath',       sPathCxx'\local;'sPathCxx'\help;'
+    call EnvVar_AddFront fRM, 'beginlibpath',sPathCxx'\dll;'sPathCxx'\runtime;'
+    call EnvVar_AddFront fRM, 'nlspath',     sPathCxx'\msg\%N;'
+    call EnvVar_AddFront fRM, 'include',     sPathCxx'\include;'
+    call EnvVar_AddFront fRM, 'lib',         sPathCxx'\lib;'
+    call EnvVar_AddFront fRM, 'ipfc',        sPathCxx'\ipfc;'
+    call EnvVar_Set      fRM, 'LANG',        'en_us'
+    call EnvVar_Set      fRM, 'CPP_DBG_LANG', 'CPP'
+
+return 0;
+
+
+/*
+ * Visual Age for C++ v4.0 for OS/2
+ */
+VAC40: procedure
+    parse arg fRM
+
+    /*
+     * IBM VisualAge for C++ v4.0 main directory.
+     */
+    sPathCPP    = QueryPath('vac40');
+    call EnvVar_Set      fRM, 'PATH_VAC40',  sPathCPP;
+    call EnvVar_Set      fRM, 'CCENV',      'VAC40'
+    call EnvVar_Set      fRM, 'BUILD_ENV',  'VAC40'
+    call EnvVar_Set      fRM, 'BUILD_PLATFORM', 'OS2'
+
+    call EnvVar_AddFront fRM, 'path',        sPathCPP'\bin;'
+    call EnvVar_AddFront fRM, 'dpath',       sPathCPP'\etc;'sPathCPP'\help;'
+    call EnvVar_AddFront fRM, 'beginlibpath',sPathCPP'\dll;'sPathCPP'\runtime;'
+    call EnvVar_AddFront fRM, 'help',        sPathCPP'\help;'
+    call EnvVar_AddFront fRM, 'nlspath',     sPathCPP'\msg\%N;'
+    call EnvVar_AddFront fRM, 'locpath',     sPathCPP'\locale;'sPathCPP'\runtime\locale;'
+    call EnvVar_AddFront fRM, 'include',     sPathCPP'\ivb;'sPathCPP'\include;'
+    call EnvVar_AddFront fRM, 'lib',         sPathCPP'\lib;'
+    call EnvVar_AddFront fRM, 'ipfc',        sPathCPP'\bin;'
+    call EnvVar_AddFront fRM, 'cpplpath4',   sPathCPP'\macros;'
+    call EnvVar_Set      fRM, 'system_ice',  sPathCPP'\etc\system.ice'
+    call EnvVar_Set      fRM, 'vbpath',      sPathCPP'\ivb'
+    call EnvVar_Set      fRM, 'vacppmain',   sPathCPP;
+    call EnvVar_Set      fRM, 'os2',         '1'
+
+return 0;
+
+
+
+
+/*
+ * WarpIn
+ */
+WarpIn: procedure
+    parse arg fRM
+
+    /*
+     * WarpIn main directory.
+     */
+    sPathWarpIn = QueryPath('warpin');
+    call EnvVar_Set      fRM, 'PATH_WARPIN', sPathWarpIn;
+    call EnvVar_AddFront fRM, 'path',        sPathWarpIn';'
+    call EnvVar_AddFront fRM, 'bookshelf',   sPathWarpIn';'
+return 0;
+
+
+
+/*
+ * WatCom C/C++ v11.0
+ */
+WatComC11: procedure
+    parse arg fRM
+
+    /*
+     * Watcom C/C++ v11.0 main directory
+     */
+    sPathWatcom = QueryPath('watcom11');
+    call EnvVar_Set      fRM, 'PATH_WATCOM', sPathWatcom
+    call EnvVar_Set      fRM, 'CCENV',      'WAT'
+    call EnvVar_Set      fRM, 'BUILD_ENV',  'WAT11'
+    call EnvVar_Set      fRM, 'BUILD_PLATFORM', 'OS2'
+
+    call EnvVar_Set      fRM, 'watcom',      sPathWatcom
+    call EnvVar_AddFront fRM, 'path',        sPathWatcom'\binp;'sPathWatcom'\binw;'
+    call EnvVar_AddFront fRM, 'beginlibpath',sPathWatcom'\binp\dll;'
+    call EnvVar_AddFront fRM, 'help',        sPathWatcom'\binp\help;'
+    call EnvVar_AddEnd   fRM, 'bookshelf',   sPathWatcom'\binp\help;'
+    call EnvVar_AddFront fRM, 'include',     sPathWatcom'\h;'sPathWatcom'\h\os2;'sPathWatcom'\h\nt;'
+    call EnvVar_AddFront fRM, 'lib',         sPathWatcom'\lib386;'sPathWatcom'\lib386\os2;'sPathWatcom'\lib286;'sPathWatcom'\lib286\os2;'
+    call EnvVar_Set      fRM, 'edpath',      sPathWatcom'EDDAT;'
+    /*
+    rem detach %watcom%\BINP\BATSERV.EXE
+    rem detach %watcom%\BINP\NMPBIND.EXE
+    */
+
+return 0;
+
+/*
+ * WatCom C/C++ v11.0c
+ */
+WatComC11c: procedure
+    parse arg fRM
+
+    /*
+     * Watcom C/C++ v11.0c main directory
+     */
+    sPathWatcom = QueryPath('watcom11c');
+    call EnvVar_Set      fRM, 'PATH_WATCOM', sPathWatcom
+    call EnvVar_Set      fRM, 'CCENV',      'WAT'
+    call EnvVar_Set      fRM, 'BUILD_ENV',  'WAT11'
+    call EnvVar_Set      fRM, 'BUILD_PLATFORM', 'OS2'
+
+    call EnvVar_Set      fRM, 'watcom',      sPathWatcom
+    call EnvVar_AddFront fRM, 'path',        sPathWatcom'\binp;'sPathWatcom'\binw;'
+    call EnvVar_AddFront fRM, 'beginlibpath',sPathWatcom'\binp\dll;'
+    call EnvVar_AddFront fRM, 'help',        sPathWatcom'\binp\help;'
+    call EnvVar_AddEnd   fRM, 'bookshelf',   sPathWatcom'\binp\help;'
+    call EnvVar_AddFront fRM, 'include',     sPathWatcom'\h;'sPathWatcom'\h\os2;'sPathWatcom'\h\nt;'
+    call EnvVar_AddFront fRM, 'lib',         sPathWatcom'\lib386;'sPathWatcom'\lib386\os2;'sPathWatcom'\lib286;'sPathWatcom'\lib286\os2;'
+    call EnvVar_Set      fRM, 'edpath',      sPathWatcom'EDDAT;'
+    /*
+    rem detach %watcom%\BINP\BATSERV.EXE
+    rem detach %watcom%\BINP\NMPBIND.EXE
+    */
+
+return 0;
+
+
+
+
+
+
+
+
+
+
+
+
+
+/**
+ * Helper Procedure section
+ **/
+
+
+/**
+ * Add sToAdd in front of sEnvVar.
+ * Note: sToAdd now is allowed to be alist!
+ *
+ * Known features: Don't remove sToAdd from original value if sToAdd
+ *                 is at the end and don't end with a ';'.
+ */
+EnvVar_addFront: procedure
+    parse arg fRM, sEnvVar, sToAdd, sSeparator
+
+    /* sets default separator if not specified. */
+    if (sSeparator = '') then sSeparator = ';';
+
+    /* checks that sToAdd ends with an ';'. Adds one if not. */
+    if (substr(sToAdd, length(sToAdd), 1) <> sSeparator) then
+        sToAdd = sToAdd || sSeparator;
+
+    /* check and evt. remove ';' at start of sToAdd */
+    if (substr(sToAdd, 1, 1) = ';') then
+        sToAdd = substr(sToAdd, 2);
+
+    /* loop thru sToAdd */
+    rc = 0;
+    i = length(sToAdd);
+    do while i > 1 & rc = 0
+        j = lastpos(sSeparator, sToAdd, i-1);
+        rc = EnvVar_AddFront2(fRM, sEnvVar, substr(sToAdd, j+1, i - j), sSeparator);
+        i = j;
+    end
+
+return rc;
+
+/**
+ * Add sToAdd in front of sEnvVar.
+ *
+ * Known features: Don't remove sToAdd from original value if sToAdd
+ *                 is at the end and don't end with a ';'.
+ */
+EnvVar_AddFront2: procedure
+    parse arg fRM, sEnvVar, sToAdd, sSeparator
+
+    /* sets default separator if not specified. */
+    if (sSeparator = '') then sSeparator = ';';
+
+    /* checks that sToAdd ends with a separator. Adds one if not. */
+    if (substr(sToAdd, length(sToAdd), 1) <> sSeparator) then
+        sToAdd = sToAdd || sSeparator;
+
+    /* check and evt. remove the separator at start of sToAdd */
+    if (substr(sToAdd, 1, 1) = sSeparator) then
+        sToAdd = substr(sToAdd, 2);
+
+    /* Get original variable value */
+    sOrgEnvVar = EnvVar_Get(sEnvVar);
+
+    /* Remove previously sToAdd if exists. (Changing sOrgEnvVar). */
+    i = pos(translate(sToAdd), translate(sOrgEnvVar));
+    if (i > 0) then
+        sOrgEnvVar = substr(sOrgEnvVar, 1, i-1) || substr(sOrgEnvVar, i + length(sToAdd));
+
+    /* set environment */
+    if (fRM) then
+        return EnvVar_Set(0, sEnvVar, sOrgEnvVar);
+return EnvVar_Set(0, sEnvVar, sToAdd||sOrgEnvVar);
+
+
+/**
+ * Add sToAdd as the end of sEnvVar.
+ * Note: sToAdd now is allowed to be alist!
+ *
+ * Known features: Don't remove sToAdd from original value if sToAdd
+ *                 is at the end and don't end with a ';'.
+ */
+EnvVar_addEnd: procedure
+    parse arg fRM, sEnvVar, sToAdd, sSeparator
+
+    /* sets default separator if not specified. */
+    if (sSeparator = '') then sSeparator = ';';
+
+    /* checks that sToAdd ends with a separator. Adds one if not. */
+    if (substr(sToAdd, length(sToAdd), 1) <> sSeparator) then
+        sToAdd = sToAdd || sSeparator;
+
+    /* check and evt. remove ';' at start of sToAdd */
+    if (substr(sToAdd, 1, 1) = sSeparator) then
+        sToAdd = substr(sToAdd, 2);
+
+    /* loop thru sToAdd */
+    rc = 0;
+    i = length(sToAdd);
+    do while i > 1 & rc = 0
+        j = lastpos(sSeparator, sToAdd, i-1);
+        rc = EnvVar_AddEnd2(fRM, sEnvVar, substr(sToAdd, j+1, i - j), sSeparator);
+        i = j;
+    end
+
+return rc;
+
+/**
+ * Add sToAdd as the end of sEnvVar.
+ *
+ * Known features: Don't remove sToAdd from original value if sToAdd
+ *                 is at the end and don't end with a ';'.
+ */
+EnvVar_AddEnd2: procedure
+    parse arg fRM, sEnvVar, sToAdd, sSeparator
+
+    /* sets default separator if not specified. */
+    if (sSeparator = '') then sSeparator = ';';
+
+    /* checks that sToAdd ends with a separator. Adds one if not. */
+    if (substr(sToAdd, length(sToAdd), 1) <> sSeparator) then
+        sToAdd = sToAdd || sSeparator;
+
+    /* check and evt. remove separator at start of sToAdd */
+    if (substr(sToAdd, 1, 1) = sSeparator) then
+        sToAdd = substr(sToAdd, 2);
+
+    /* Get original variable value */
+    sOrgEnvVar = EnvVar_Get(sEnvVar);
+
+    /* Remove previously sToAdd if exists. (Changing sOrgEnvVar). */
+    i = pos(translate(sToAdd), translate(sOrgEnvVar));
+    if (i > 0) then
+        sOrgEnvVar = substr(sOrgEnvVar, 1, i-1) || substr(sOrgEnvVar, i + length(sToAdd));
+
+    /* checks that sOrgEnvVar ends with a separator. Adds one if not. */
+    if (substr(sOrgEnvVar, length(sOrgEnvVar), 1) <> sSeparator) then
+        sOrgEnvVar = sOrgEnvVar || sSeparator;
+
+    /* set environment */
+    if (fRM) then return EnvVar_Set(0, sEnvVar, sOrgEnvVar);
+return EnvVar_Set(0, sEnvVar, sOrgEnvVar||sToAdd);
+
+
+/**
+ * Sets sEnvVar to sValue.
+ */
+EnvVar_Set: procedure
+    parse arg fRM, sEnvVar, sValue
+
+    /* if we're to remove this, make valuestring empty! */
+    if (fRM) then
+        sValue = '';
+    sEnvVar = translate(sEnvVar);
+
+    /*
+     * Begin/EndLibpath fix:
+     *      We'll have to set internal these using both commandline 'SET'
+     *      and internal VALUE in order to export it and to be able to
+     *      get it (with EnvVar_Get) again.
+     */
+    if ((sEnvVar = 'BEGINLIBPATH') | (sEnvVar = 'ENDLIBPATH')) then
+    do
+        if (length(sValue) >= 1024) then
+            say 'Warning: 'sEnvVar' is too long,' length(sValue)' char.';
+        return SysSetExtLibPath(sValue, substr(sEnvVar, 1, 1));
+    end
+
+    if (length(sValue) >= 1024) then
+    do
+        say 'Warning: 'sEnvVar' is too long,' length(sValue)' char.';
+        say '    This may make CMD.EXE unstable after a SET operation to print the environment.';
+    end
+    sRc = VALUE(sEnvVar, sValue, 'OS2ENVIRONMENT');
+return 0;
+
+/**
+ * Gets the value of sEnvVar.
+ */
+EnvVar_Get: procedure
+    parse arg sEnvVar
+    if ((translate(sEnvVar) = 'BEGINLIBPATH') | (translate(sEnvVar) = 'ENDLIBPATH')) then
+        return SysQueryExtLibPath(substr(sEnvVar, 1, 1));
+return value(sEnvVar,, 'OS2ENVIRONMENT');
+
+
+/**
+ *  Workaround for bug in CMD.EXE.
+ *  It messes up when REXX have expanded the environment.
+ */
+FixCMDEnv: procedure
+    /* check for 4OS2 first */
+    Address CMD 'set 4os2test_env=%@eval[2 + 2]';
+    if (value('4os2test_env',, 'OS2ENVIRONMENT') = '4') then
+        return 0;
+
+    /* force environment expansion by setting a lot of variables and freeing them. */
+    do i = 1 to 100
+        Address CMD 'set dummyenvvar'||i'=abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    end
+    do i = 1 to 100
+        Address CMD 'set dummyenvvar'||i'=';
+    end
+return 0;
+
 
 
 /*
@@ -197,615 +1104,6 @@ Jade: procedure
     call EnvVar_AddEnd   fRM, 'SGML_CATALOG_FILES', '.\catalog;'
 
     return 0;
-
-
-/*
- * Microsoft C v6.0a
- */
-MSC60: procedure
-    parse arg fRM
-
-    /*
-     * Microsoft C v6.0a main directory.
-     */
-    sMSCMain    = 'd:\knut\ddk\ddktools\toolkits\msc60';
-    call EnvVar_Set      fRM, 'mscmain',    sMSCMain;
-    call EnvVar_AddFront fRM, 'path',       sMSCMain'\binp;'
-    call EnvVar_AddFront fRM, 'include',    sMSCMain'\include;'
-    call EnvVar_AddFront fRM, 'lib',        sMSCMain'\lib;'
-    return 0;
-
-
-
-/*
- * mySQL Database system
- */
-mySQL: procedure
-    parse arg fRM
-
-    /*
-     * mySQL Database system main directory.
-     */
-    sMySQLMain    = 'd:\knut\apps\MySql-3.23.42-rel3';
-    call EnvVar_Set      fRM, 'mysqlmain',      sMySQLMain;
-    call EnvVar_AddFront fRM, 'path',           sMySQLMain'\bin;'
-    call EnvVar_AddFront fRM, 'beginlibpath',   sMySQLMain'\dll;'
-    call EnvVar_AddFront fRM, 'include',        sMySQLMain'\include;'
-    call EnvVar_AddEnd   fRM, 'bookshelf',      sMySQLMain'\book;'
-    /*call EnvVar_AddFront fRM, 'lib',            sMySQLMain'\lib;'*/
-    return 0;
-
-
-
-/*
- * NetQOS2 - help subsystem++ for VAC 3.6.5 and VAC 4.0
- */
-NetQOS2: procedure
-    parse arg fRM
-    sNetQ11Main = 'e:\apps\imnnq';
-    call EnvVar_Set      fRM, 'netq11main',     sNetQ11Main
-    call EnvVar_AddFront fRM, 'beginlibpath',   sNetQ11Main';'
-    call EnvVar_AddFront fRM, 'path',           sNetQ11Main';'
-    call EnvVar_AddFront fRM, 'dpath',          sNetQ11Main';'
-    call EnvVar_AddEnd   fRM, 'nlspath',        sNetQ11Main'\%N;'
-    call EnvVar_Set      fRM, 'imndatasrv',     sNetQ11Main'\DATA'
-    call EnvVar_Set      fRM, 'imndatacl',      sNetQ11Main'\DATA'
-    call EnvVar_Set      fRM, 'imnworksrv',     sNetQ11Main'\WORK'
-    call EnvVar_Set      fRM, 'imnworkcl',      sNetQ11Main'\WORK'
-    call EnvVar_Set      fRM, 'imnnlpssrv',     sNetQ11Main
-    call EnvVar_Set      fRM, 'imnnlpscl',      sNetQ11Main
-    call EnvVar_Set      fRM, 'imncccfgfile',   'NETQ.CFG'
-    call EnvVar_Set      fRM, 'imncscfgfile',   'NETQ.CFG'
-    call EnvVar_Set      fRM, 'imqconfigsrv',   sNetQ11Main'\instance'
-    call EnvVar_Set      fRM, 'imqconfigcl',    sNetQ11Main'\instance\dbcshelp'
-    call EnvVar_Set      fRM, 'lite_locales',   sNetQ11Main
-    return 0;
-
-
-
-/*
- * PERL 5005_53
- */
-Perl: procedure
-    parse arg fRM
-
-    /*
-     * Perl main directory.
-     */
-    sPerlMain       = 'd:\perllib';
-    sPerlMainForw   = 'd:/perllib';
-    call EnvVar_Set      fRM, 'perlmain',       sPerlMain;
-    call EnvVar_AddFront fRM, 'path',           sPerlMain'\bin;'
-    call EnvVar_AddFront fRM, 'beginlibpath',   sPerlMain'\dll;'
-    call EnvVar_AddEnd   fRM, 'bookshelf',      sPerlMain'\book;'
-    call EnvVar_Set      fRM, 'perllib_prefix', sPerlMainForw'/lib;'sPerlMainForw'/lib'
-    call EnvVar_Set      fRM, 'perl_sh_dir',    sPerlMainForw'/bin_sh'
-    call EnvVar_Set      fRM, 'manpath',        sPerlMainForw'/man'
-    call EnvVar_Set      fRM, 'perl5lib',       sPerlMainForw'/lib'
-    return 0;
-
-
-
-/*
- * OS/2 Programmers Toolkit v4.0 (CSD1/4)
- */
-Toolkit40: procedure
-    parse arg fRM
-
-    /*
-     * Toolkit (4.0) main directory.
-     */
-     sTKMain    = 'c:\appl\os2\toolkt40';
-
-    call EnvVar_Set      fRM, 'tkmain',  sTkMain;
-
-    call EnvVar_AddFront fRM, 'beginlibpath',   sTkMain'\BETA\DLL;'sTkMain'\SAMPLES\MM\DLL;'sTkMain'\SAMPLES\OPENDOC\PARTS\DLL;'sTkMain'\SOM\COMMON\DLL;'sTkMain'\SOM\LIB;'sTkMain'\OPENDOC\BASE\DLL;'sTkMain'\OPENDOC\BASE\LOCALE\EN_US;'sTkMain'\DLL;'
-    call EnvVar_AddFront fRM, 'path',           sTkMain'\BETA\BIN;'sTkMain'\SOM\COMMON;'sTkMain'\SOM\BIN;.;'sTkMain'\OPENDOC\BASE\BIN;'sTkMain'\BIN;'
-    call EnvVar_AddFront fRM, 'dpath',          sTkMain'\SOM\COMMON\SYSTEM;'sTkMain'\SOM\MSG;'sTkMain'\OPENDOC\BASE\MSG;'sTkMain'\BOOK;'sTkMain'\MSG;'
-    call EnvVar_AddFront fRM, 'help',           sTkMain'\BETA\HELP;'sTkMain'\OPENDOC\BASE\LOCALE\EN_US;'sTkMain'\HELP;'
-    call EnvVar_AddFront fRM, 'bookshelf',      sTkMain'\BETA\BOOK;'sTkMain'\BOOK;'sTkMain'\ARCHIVED;'
-    call EnvVar_AddFront fRM, 'somir',          sTkMain'\SOM\COMMON\ETC\214\SOM.IR;'sTkMain'\OPENDOC\BASE\AVLSHELL.IR;'
-    call EnvVar_AddEnd   fRM, 'somir',          sTkMain'\OPENDOC\CUSTOM\OD.IR;'sTkMain'\SAMPLES\REXX\SOM\ANIMAL\ORXSMP.IR;'
-    call EnvVar_AddFront fRM, 'include',        sTkMain'\SPEECH\H;'sTkMain'\BETA\H;'sTkMain'\SAMPLES\OPENDOC\PARTS\INCLUDE;'sTkMain'\SOM\INCLUDE;'sTkMain'\INC;'sTkMain'\H\GL;'sTkMain'\H;'
-    call EnvVar_AddEnd   fRM, 'include',        sTkMain'\H\LIBC;.;'
-    call EnvVar_AddFront fRM, 'lib',            sTkMain'\SPEECH\LIB;'sTkMain'\SAMPLES\MM\LIB;'sTkMain'\LIB;'sTkMain'\SOM\LIB;'sTkMain'\OPENDOC\BASE\LIB;'
-    call EnvVar_AddFront fRM, 'nlspath',        sTkMain'\OPENDOC\BASE\LOCALE\EN_US\%N;'sTkMain'\MSG\%N;'
-    call EnvVar_AddFront fRM, 'locpath',        sTkMain'\OPENDOC\BASE\LOCALE;'
-    call EnvVar_AddFront fRM, 'ipfc',           sTkMain'\IPFC;'
-    call EnvVar_Set      fRM, 'odbase',         sTkMain'\OPENDOC\BASE'
-    call EnvVar_Set      fRM, 'odlang',         'en_US'
-    call EnvVar_AddFront fRM, 'odbasepaths',    sTkMain'\OPENDOC\BASE;'
-    call EnvVar_Set      fRM, 'odcfg',          sTkMain'\OPENDOC\CUSTOM'
-    call EnvVar_Set      fRM, 'odtmp',          EnvVar_Get('tmp');
-    call EnvVar_Set      fRM, 'sombase',        sTkMain'\SOM'
-    call EnvVar_Set      fRM, 'somruntime',     sTkMain'\SOM\COMMON'
-    call EnvVar_AddEnd   fRM, 'helpndx',        'EPMKWHLP.NDX+', '+', 1
-
-    call EnvVar_Set      fRM, 'cpref',          'CP1.INF+CP2.INF+CP3.INF'
-    call EnvVar_Set      fRM, 'gpiref',         'GPI1.INF+GPI2.INF+GPI3.INF+GPI4.INF'
-    call EnvVar_Set      fRM, 'mmref',          'MMREF1.INF+MMREF2.INF+MMREF3.INF'
-    call EnvVar_Set      fRM, 'pmref',          'PM1.INF+PM2.INF+PM3.INF+PM4.INF+PM5.INF'
-    call EnvVar_Set      fRM, 'wpsref',         'WPS1.INF+WPS2.INF+WPS3.INF'
-    call EnvVar_AddFront fRM, 'sminclude',      sTkMain'\H;'sTkMain'\IDL;'sTkMain'\SOM\INCLUDE;.;'sTkMain'\OPENDOC\BASE\INCLUDE;'sTkMain'\SAMPLES\OPENDOC\PARTS\INCLUDE;'
-    call EnvVar_Set      fRM, 'smaddstar',      '1'
-    call EnvVar_Set      fRM, 'smemit',         'h;ih;c'
-    call EnvVar_Set      fRM, 'smtmp',          EnvVar_Get('tmp');
-    call EnvVar_Set      fRM, 'smclasses',      'WPTYPES.IDL'
-    call EnvVar_Set      fRM, 'odparts',        sTkMain'\SAMPLES\OPENDOC\PARTS'
-    call EnvVar_Set      fRM, 'odsrc',          sTkMain'\SAMPLES\OPENDOC\PARTS'
-    call EnvVar_AddFront fRM, 'odpartspaths',   sTkMain'\SAMPLES\OPENDOC\PARTS;'
-    call EnvVar_AddFront fRM, 'odsrcpaths',     sTkMain'\SAMPLES\OPENDOC\PARTS;'
-    /*
-    call EnvVar_Set      fRM, 'CAT_MACHINE=COM1:57600'
-    call EnvVar_Set      fRM, 'CAT_HOST_BIN_PATH='sTkMain'\BIN'
-    call EnvVar_Set      fRM, 'CAT_COMMUNICATION_TYPE=ASYNC_SIGBRK'
-    call EnvVar_AddFront fRM, 'CAT_HOST_SOURCE_PATH='sTkMain'\BIN;'
-    */
-    return 0;
-
-
-
-/*
- * OS/2 Programmers Toolkit v4.5
- */
-Toolkit45: procedure
-    parse arg fRM
-
-    /*
-     * Toolkit (4.5) main directory.
-     */
-     sTKMain    = 'd:\knut\tools\toolkit45';
-
-    call EnvVar_Set      fRM, 'tkmain',  sTkMain;
-
-    call EnvVar_AddFront fRM, 'path',        sTkMain'\bin;'
-    call EnvVar_AddFront fRM, 'dpath',       sTkMain'\book;'
-    call EnvVar_AddFront fRM, 'dpath',       sTkMain'\msg;'
-    call EnvVar_AddFront fRM, 'beginlibpath', sTkMain'\dll;'
-    call EnvVar_AddFront fRM, 'help',        sTkMain'\help;'
-    call EnvVar_AddFront fRM, 'bookshelf',   sTkMain'\archived;'
-    call EnvVar_AddFront fRM, 'bookshelf',   sTkMain'\book;'
-    call EnvVar_AddFront fRM, 'nlspath',     sTkMain'\msg\%N;'
-    call EnvVar_AddEnd   fRM, 'ulspath',     sTkMain'\language;'
-    call EnvVar_AddFront fRM, 'include',     sTkMain'\H;'
-    call EnvVar_AddFront fRM, 'include',     sTkMain'\H\GL;'
-    call EnvVar_AddFront fRM, 'include',     sTkMain'\SPEECH\H;'
-    call EnvVar_AddFront fRM, 'include',     sTkMain'\H\RPC;'
-    call EnvVar_AddFront fRM, 'include',     sTkMain'\H\NETNB;'
-    call EnvVar_AddFront fRM, 'include',     sTkMain'\H\NETINET;'
-    call EnvVar_AddFront fRM, 'include',     sTkMain'\H\NET;'
-    call EnvVar_AddFront fRM, 'include',     sTkMain'\H\ARPA;'
-    call EnvVar_AddFront fRM, 'include',     sTkMain'\INC;'
-    call EnvVar_AddEnd   fRM, 'lib',         sTkMain'\SAMPLES\MM\LIB;'
-    call EnvVar_AddEnd   fRM, 'lib',         sTkMain'\SPEECH\LIB;'
-    call EnvVar_AddFront fRM, 'lib',         sTkMain'\lib;'
-    call EnvVar_AddEnd   fRM, 'helpndx',     'EPMKWHLP.NDX', '+', 1
-    call EnvVar_AddFront fRM, 'ipfc',        sTkMain'\ipfc;'
-    call EnvVar_Set      fRM, 'LANG',        'en_us'
-    call EnvVar_Set      fRM, 'CPREF',       'CP1.INF+CP2.INF+CP3.INF'
-    call EnvVar_Set      fRM, 'GPIREF',      'GPI1.INF+GPI2.INF+GPI3.INF+GPI4.INF'
-    call EnvVar_Set      fRM, 'MMREF',       'MMREF1.INF+MMREF2.INF+MMREF3.INF'
-    call EnvVar_Set      fRM, 'PMREF',       'PM1.INF+PM2.INF+PM3.INF+PM4.INF+PM5.INF'
-    call EnvVar_Set      fRM, 'WPSREF',      'WPS1.INF+WPS2.INF+WPS3.INF'
-    /*
-    call EnvVar_Set      fRM, 'CAT_MACHINE', 'COM1:57600'
-    call EnvVar_Set      fRM, 'CAT_HOST_BIN_PATH', TKMAIN'\BIN'
-    call EnvVar_Set      fRM, 'CAT_COMMUNICATION_TYPE', 'ASYNC_SIGBRK'
-    call EnvVar_Set      fRM, 'CAT_HOST_SOURCE_PATH',TKMAIN'\BIN;'
-    */
-
-    return 0;
-
-
-
-/*
- * IBM Visual Age for C++ v3.08 for OS/2
- */
-VAC30: procedure
-    parse arg fRM
-
-    /*
-     * IBM Visual Age for C++ Version 3.08 main directory.
-     */
-    sCPPMain = 'c:\appl\os2\ibmcpp30'
-    call EnvVar_Set      fRM, 'CCENV',      'VAC30'
-    call EnvVar_Set      fRM, 'build_env',  'VAC308'
-    call EnvVar_Set      fRM, 'CPPMAIN',        sCPPMain
-    call EnvVar_AddFront fRM, 'beginlibpath',   sCPPMain'\DLL;'sCPPMain'\SAMPLES\TOOLKIT\DLL;'
-    call EnvVar_AddFront fRM, 'path',           sCPPMain'\BIN;'sCPPMain'\SMARTS\SCRIPTS;'sCPPMain'\HELP;'
-    call EnvVar_AddFront fRM, 'dpath',          sCPPMain'\HELP;'sCPPMain';'sCPPMain'\LOCALE;'sCPPMain'\MACROS;'sCPPMain'\BND;'
-    call EnvVar_AddFront fRM, 'help',           sCPPMain'\HELP;'sCPPMain'\SAMPLES\TOOLKIT\HELP;'
-    call EnvVar_AddFront fRM, 'bookshelf',      sCPPMain'\HELP;'
-    call EnvVar_AddFront fRM, 'somir',          sCPPMain'\ETC\SOM.IR;'
-    call EnvVar_AddFront fRM, 'cpphelp_ini',    'C:\OS2\SYSTEM'
-    call EnvVar_AddFront fRM, 'locpath',        sCPPMain'\LOCALE;%LOCPATH%;'
-    call EnvVar_AddFront fRM, 'include',        sCPPMain'\INCLUDE;'sCPPMain'\INCLUDE\OS2;'sCPPMain'\INC;'sCPPMain'\INCLUDE\SOM;'
-    call EnvVar_AddFront fRM, 'sminclude',      sCPPMain'\INCLUDE\OS2;'sCPPMain'\INCLUDE;'sCPPMain'\INCLUDE\SOM;'
-
-    call EnvVar_AddFront fRM, 'vbpath',         '.;'sCPPMain'\DDE4VB;'
-    call EnvVar_Set      fRM, 'tmpdir',         EnvVar_Get('tmp')
-    call EnvVar_Set      fRM, 'lxevfref',       'EVFELREF.INF+LPXCREF.INF'
-    call EnvVar_Set      fRM, 'lxevfhdi',       'EVFELHDI.INF+LPEXHDI.INF'
-    call EnvVar_AddFront fRM, 'lpath',          sCPPMain'\MACROS;'
-    call EnvVar_AddFront fRM, 'codelpath',      sCPPMain'\CODE\MACROS;'sCPPMain'\MACROS;'
-    call EnvVar_Set      fRM, 'clref',          'CPPCLRF.INF+CPPDAT.INF+CPPAPP.INF+CPPWIN.INF+CPPCTL.INF+CPPADV.INF+CPP2DG.INF+CPPDDE.INF+CPPDM.INF+CPPMM.INF+CPPCLRB.INF'
-    call EnvVar_AddFront fRM, 'ipfc',           sCPPMain'\IPFC'
-    call EnvVar_AddFront fRM, 'lib',            sCPPMain'\LIB;'sCPPMain'\DLL;'
-    call EnvVar_Set      fRM, 'cpplocal',       sCPPMain
-    call EnvVar_Set      fRM, 'cppmain',        sCPPMain
-    call EnvVar_Set      fRM, 'cppwork',        sCPPMain
-    call EnvVar_Set      fRM, 'iwf.default_prj','CPPDFTPRJ'
-
-    call EnvVar_Set      fRM, 'iwf.solution_lang_support', 'CPPIBS30;ENG'
-    call EnvVar_Set      fRM, 'vacpp_shared'    'FALSE'
-    call EnvVar_Set      fRM, 'iwfhelp',        'IWFHDI.INF'
-    call EnvVar_Set      fRM, 'iwfopt',         sCPPMain
-
-    call EnvVar_Set      fRM, 'somruntime',     sCPPMain'\DLL'
-    call EnvVar_Set      fRM, 'smaddstar',      '1'
-    call EnvVar_Set      fRM, 'smemit',         'h;ih;c'
-    call EnvVar_Set      fRM, 'sombase',        sCPPMain
-    call EnvVar_Set      fRM, 'smtmp',          EnvVar_Get('tmp')
-    call EnvVar_Set      fRM, 'smclasses',      'WPTYPES.IDL'
-
-    /* FIXME THESE USES '+' AS SEPERATOR NOT ';'!!! */
-    call EnvVar_AddFront fRM, 'helpndx',        'CPP.NDX+CPPBRS.NDX', '+',1
-    call EnvVar_AddFront fRM, 'ipf_keys',       'SHOWNAV'
-    return 0;
-
-
-
-/*
- * Visual Age / C and C++ tools v3.6.5 for OS/2
- */
-VAC36: procedure
-    parse arg fRM
-
-    /*
-     * IBM C/C++ Compiler and Tools Version 3.6.5 main directory.
-     */
-    sCxxMain    = 'e:\apps\ibmcxxo';
-
-    call EnvVar_Set      fRM, 'CCENV',      'VAC36'
-    call EnvVar_Set      fRM, 'build_env',  'VAC365'
-    call EnvVar_Set      fRM, 'cxxmain', sCxxMain;
-    call EnvVar_AddFront fRM, 'beginlibpath', sCxxMain'\dll;'sCxxMain'\runtime;'
-    call EnvVar_AddFront fRM, 'dpath',       sCxxMain'\help;'sCxxMain'\local;'
-    call EnvVar_AddFront fRM, 'path',        sCxxMain'\bin;'
-    call EnvVar_AddFront fRM, 'help',        sCxxMain'\help;'
-    call EnvVar_AddFront fRM, 'locpath',     sCxxMain'\locale;'
-    call EnvVar_AddFront fRM, 'nlspath',     sCxxMain'\msg\%N;'
-    call EnvVar_AddFront fRM, 'include',     sCxxMain'\include;'
-    call EnvVar_AddFront fRM, 'lib',         sCxxMain'\lib;'
-    call EnvVar_AddFront fRM, 'ipfc',        sCxxMain'\bin;'
-    call EnvVar_Set      fRM, 'LANG',        'en_us'
-    call EnvVar_Set      fRM, 'CPP_DBG_LANG', 'CPP'
-    return 0;
-
-
-/*
- * Visual Age for C++ v4.0 for OS/2.
- */
-VAC40: procedure
-    parse arg fRM
-
-    /*
-     * IBM VisualAge for C++ v4.0 main directory.
-     */
-    sVACppMain    = 'e:\apps\ibmcpp40';
-
-    call EnvVar_Set      fRM, 'vacppmain',  sVACppMain;
-    call EnvVar_Set      fRM, 'build_env',  'VAC365' /* on purpose! */
-    call EnvVar_Set      fRM, 'CCENV',      'VAC36'
-
-    call EnvVar_AddFront fRM, 'beginlibpath', sVACppMain'\dll;'sVACppMain'\runtime;'
-    call EnvVar_AddFront fRM, 'dpath',       sVACppMain'\etc;'sVACppMain'\help;'sVACppMain'\runtime;'
-    call EnvVar_AddFront fRM, 'path',        sVACppMain'\bin;'
-    call EnvVar_AddFront fRM, 'help',        sVACppMain'\help;'
-    call EnvVar_AddFront fRM, 'locpath',     sVACppMain'\runtime\locale;'
-    call EnvVar_AddFront fRM, 'nlspath',     sVACppMain'\msg\%N;'
-    call EnvVar_AddFront fRM, 'include',     sVACppMain'\ivb;'sVACppMain'\include;'
-    call EnvVar_AddFront fRM, 'lib',         sVACppMain'\lib;'
-    call EnvVar_AddFront fRM, 'ipfc',        sVACppMain'\bin;'
-    call EnvVar_Set      fRM, 'cpplpath4',   sVACppMain'\macros'
-    call EnvVar_Set      fRM, 'system_ice',  sVACppMain'\etc\system.ice'
-    call EnvVar_Set      fRM, 'vbpath',      sVACppMain'\ivb'
-    call EnvVar_Set      fRM, 'os2',         '1'
-    call EnvVar_Set      fRM, 'LANG',        'en_us'
-    return 0;
-
-
-/*
- * Watcom C/C++ 11.0
- */
-Watcom: procedure
-    parse arg fRM
-
-    /*
-     * Watcom C/C++ 11.0 Main directory.
-     */
-    sWatcom = 'd:\knut\apps\Watcom';
-
-    call EnvVar_Set      fRM, 'CCENV',      'WAT'
-    call EnvVar_Set      fRM, 'build_env',  'WATCOM'
-    call EnvVar_Set      fRM, 'watcom', sWatcom;
-    call EnvVar_Set      fRM, 'edpath',      sWatcom'\eddat'
-    call EnvVar_AddFront fRM, 'beginlibpath', sWatcom'\binp\dll;'
-    call EnvVar_AddFront fRM, 'path',        sWatcom'\binp;'sWatcom'\binw;'
-    call EnvVar_AddFront fRM, 'help',        sWatcom'\binp\help;'
-    call EnvVar_AddFront fRM, 'bookshelf',   sWatcom'\binp\help;'
-    call EnvVar_AddFront fRM, 'include',     sWatcom'\h;'
-  /*call EnvVar_AddFront fRM, 'include',     sWatcom'\h\os2;'sWatcom'\h;'*/ /* h\os2 ? */
-/*
-    'detach' sWatcom'\binp\batserv.exe'
-    'detach' sWatcom'\binp\nmpbind.exe'
-*/
-    return 0;
-
-
-/*
- * WarpIn
- */
-WarpIn: procedure
-    parse arg fRM
-
-    /*
-     * Concurrent Versions System (CVS) main directory.
-     */
-    sWarpInMain = 'd:\knut\tools\WarpIn';
-    call EnvVar_Set      fRM, 'sWarpInMain', sWarpInMain;
-    call EnvVar_AddFront fRM, 'path',        sWarpInMain';'
-    call EnvVar_AddFront fRM, 'beginlibpath', sWarpInMain';'
-    call EnvVar_AddFront fRM, 'bookshelf',   sWarpInMain';'
-    return 0;
-
-
-
-/**
- * Helper Procedure section
- **/
-
-
-/*
- * Add sToAdd in front of sEnvVar.
- * Note: sToAdd now is allowed to be alist!
- *
- * Known features: Don't remove sToAdd from original value if sToAdd
- *                 is at the end and don't end with a ';'.
- */
-EnvVar_addFront: procedure
-    parse arg fRM, sEnvVar, sToAdd, sSeparator, fNoEnd
-
-    /* Sets default separator and fNoEnd if not specified. */
-    if (sSeparator = '') then sSeparator = ';';
-    if (fNoEnd = '')     then fNoEnd = 0;
-
-    /* Add evt. missing separator at end. */
-    if (substr(sToAdd, length(sToAdd), 1) <> sSeparator) then
-        sToAdd = sToAdd || sSeparator;
-
-    /* Check and evt. remove separator at start of sToAdd */
-    if (substr(sToAdd, 1, 1) = cSeparator) then
-        sToAdd = substr(sToAdd, 2);
-
-    /* Loop thru sToAdd */
-    rc = 0;
-    i = length(sToAdd);
-    do while i > 1 & rc = 0
-        j = lastpos(sSeparator, sToAdd, i-1);
-        rc = _EnvVar_AddFront2(fRM, sEnvVar, substr(sToAdd, j+1, i - j), sSeparator, fNoEnd);
-        i = j;
-    end
-return rc;
-
-
-/*
- * Add sToAdd in front of sEnvVar.
- *
- * Known features: Don't remove sToAdd from original value if sToAdd
- *                 is at the end and don't end with a ';'.
- */
-_EnvVar_AddFront2: procedure
-    parse arg fRM, sEnvVar, sToAdd, sSeparator, fNoEnd
-
-    /* Add evt. missing separator at end. */
-    if (substr(sToAdd, length(sToAdd), 1) <> sSeparator) then
-        sToAdd = sToAdd || sSeparator;
-
-    /* Check and evt. remove the separator at start of sToAdd */
-    if (substr(sToAdd, 1, 1) = sSeparator) then
-        sToAdd = substr(sToAdd, 2);
-
-    /* Get original variable without sToAdd. */
-    sOrgEnvVar = _EnvVar_RemoveFrom(EnvVar_Get(sEnvVar),,
-                                    sToAdd, sSeparator, fNoEnd);
-
-    /* If only removing - nothing more to do */
-    if (fRM) then
-        return EnvVar_Set(0, sEnvVar, sOrgEnvVar);
-
-    /* Create new value */
-    sNewValue = sToAdd || sOrgEnvVar;
-
-    /* Remove or add separator if necessary */
-    if (fNoEnd  & substr(sNewValue, length(sNewValue), 1) =  sSeparator) then
-        sNewValue = substr(sNewValue, 1, length(sNewValue) - 1);
-    if (\fNoEnd & substr(sNewValue, length(sNewValue), 1) <> sSeparator) then
-        sNewValue = sNewValue || sSeparator;
-
-    /* Set environment */
-    return EnvVar_Set(0, sEnvVar, sNewValue);
-
-
-/*
- * Add sToAdd as the end of sEnvVar.
- * Note: sToAdd now is allowed to be alist!
- *
- * Known features: Don't remove sToAdd from original value if sToAdd
- *                 is at the end and don't end with a ';'.
- */
-EnvVar_addEnd: procedure
-    parse arg fRM, sEnvVar, sToAdd, sSeparator, fNoEnd
-
-    /* Sets default separator and fNoEnd if not specified. */
-    if (sSeparator = '') then sSeparator = ';';
-    if (fNoEnd = '')     then fNoEnd = 0;
-
-    /* Add evt. missing separator at end. */
-    if (substr(sToAdd, length(sToAdd), 1) <> sSeparator) then
-        sToAdd = sToAdd || sSeparator;
-
-    /* Check and evt. remove separator at start of sToAdd */
-    if (substr(sToAdd, 1, 1) = sSeparator) then
-        sToAdd = substr(sToAdd, 2);
-
-    /* Loop thru sToAdd */
-    rc = 0;
-    i = length(sToAdd);
-    do while i > 1 & rc = 0
-        j = lastpos(sSeparator, sToAdd, i-1);
-        rc = _EnvVar_AddEnd2(fRM, sEnvVar, substr(sToAdd, j+1, i - j), sSeparator, fNoEnd);
-        i = j;
-    end
-
-    return rc;
-
-/*
- * Add sToAdd as the end of sEnvVar.
- *
- * Known features: Don't remove sToAdd from original value if sToAdd
- *                 is at the end and don't end with a ';'.
- */
-_EnvVar_AddEnd2: procedure
-    parse arg fRM, sEnvVar, sToAdd, sSeparator, fNoEnd
-
-    /* Check and evt. remove separator at start of sToAdd */
-    if (substr(sToAdd, 1, 1) = sSeparator) then
-        sToAdd = substr(sToAdd, 2);
-
-    /* Get original variable without sToAdd. */
-    sOrgEnvVar = _EnvVar_RemoveFrom(EnvVar_Get(sEnvVar),,
-                                    sToAdd, sSeparator, fNoEnd);
-
-    /* If we're only to remove the sToAdd value, we're finised now. */
-    if (fRM) then
-        return EnvVar_Set(0, sEnvVar, sOrgEnvVar);
-
-    /* fNoEnd: remove separator at end (if any) and remove previously sToAdd. */
-    if (fNoEnd & substr(sToAdd, length(sToAdd), 1) = sSeparator) then
-        sToAdd = substr(sToAdd, 1, length(sToAdd) - 1);
-
-    /* Add separator to sOrgEnvVar if fNoEnd and sOrgEnvVar is not empty */
-    if (fNoEnd & length(sOrgEnvVar) > 0) then
-        return EnvVar_Set(0, sEnvVar, sOrgEnvVar||sSeparator||sToAdd);
-    return EnvVar_Set(0, sEnvVar, sOrgEnvVar||sToAdd);
-
-
-/*
- * Removes a value for a separated enviroment string.
- */
-_EnvVar_RemoveFrom: procedure
-    parse arg sOrgValue, sValue, sSeparator, fNoEnd
-
-    /* test for empty org value */
-    if (sOrgValue = '') then
-        return '';
-
-    /* remove any separators in front or end of sValue. */
-    if (substr(sValue, 1, 1) = sSeparator) then
-        sValue = substr(sValue, 2);
-    if (substr(sValue, length(sValue), 1) = sSeparator) then
-        sValue = substr(sValue, 1, length(sValue) - 1);
-
-    /* look for sValue */
-    i = pos(translate(sValue), translate(sOrgValue));
-    do while (i > 0)
-        cch = length(sValue);
-        fEnd = length(sOrgValue) <= cch + i;
-
-        /* check if ok */
-        if (i <= 1) then fOkFront = 1;
-        else    fOkFront = (substr(sOrgValue, i - 1, 1) = sSeparator);
-        if (fOkFront & (fEnd | substr(sOrgValue, i + cch, 1) = sSeparator)) then
-        do
-            /* addjust length / index to remove separators */
-            if (i > 1)         then
-            do
-                cch = cch + 1;
-                i = i - 1;
-            end
-            if (\fEnd & i = 1) then
-                cch = cch + 1;
-
-            /* create new sOrgValue */
-            if (i > 1) then
-                sOrgValue = substr(sOrgValue, 1, i - 1) || substr(sOrgValue, i + cch);
-            else if (cch < length(sOrgValue)) then
-                sOrgValue = substr(sOrgValue, i + cch);
-            else
-                sOrgValue = '';
-        end
-        else
-            i = i + 1;
-
-        /* more occurences? */
-        j = i;
-        i = pos(translate(sValue), translate(sOrgValue), i);
-    end
-
-    /* remove any start separator */
-    do while (length(sOrgValue) > 0)
-        if (substr(sOrgValue, 1, 1) <> sSeparator) then
-            leave
-        sOrgValue = substr(sOrgValue, 2);
-    end
-
-    /* Remove all separators at end */
-    do while (length(sOrgValue) > 1)
-        if (substr(sOrgValue, length(sOrgValue), 1) <> sSeparator) then
-            leave;
-        sOrgValue = substr(sOrgValue, 1, length(sOrgValue) - 1);
-    end
-
-    /* Just in case fix for value with only separator. (paranoia) */
-    if (length(sOrgValue) = 1 & sOrgValue = sSeparator) then
-        sOrgValue = '';
-
-    /* Add end separator */
-    if (length(sOrgValue) > 0 & \fNoEnd) then
-        sOrgValue = sOrgValue || sSeparator;
-
-    return sOrgValue;
-
-
-/*
- * Sets sEnvVar to sValue.
- */
-EnvVar_Set: procedure
-    parse arg fRM, sEnvVar, sValue
-
-    /* if we're to remove this, make valuestring empty! */
-    if fRM then
-        sValue = '';
-    sEnvVar = translate(sEnvVar);
-
-    /*
-     * Begin/EndLibpath fix:
-     *      We'll have to set internal these using both commandline 'SET'
-     *      and internal VALUE in order to export it and to be able to
-     *      get it (with EnvVar_Get) again.
-     */
-    if sEnvVar = 'BEGINLIBPATH' | sEnvVar = 'ENDLIBPATH' then
-        'set' sEnvVar'='sValue;
-    sRc = VALUE(sEnvVar, sValue, 'OS2ENVIRONMENT');
-    return 0;
-
-/*
- * Gets the value of sEnvVar.
- */
-EnvVar_Get: procedure
-    parse arg sEnvVar
-    return value(sEnvVar,, 'OS2ENVIRONMENT');
 
 
 
