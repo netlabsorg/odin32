@@ -1,4 +1,4 @@
-; $Id: ntdll.def,v 1.19 1999-10-25 19:24:13 phaller Exp $
+; $Id: ntdll.def,v 1.20 1999-11-09 00:44:01 phaller Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is NT4.0's NTDLL.DLL
@@ -265,7 +265,7 @@ EXPORTS
     RtlInitString                 = _RtlInitString@8                  @402
     RtlInitUnicodeString          = _RtlInitUnicodeString@8           @403
     RtlFreeUnicodeString          = _RtlFreeUnicodeString@4           @377
-    RtlFreeAnsiString             = _RtlFreeAnsiString@4              @373
+    RtlFreeAnsiString             = _RtlFreeAnsiString@4              
     RtlFreeOemString              = _RtlFreeOemString@4
     RtlUnicodeStringToOemString   = _RtlUnicodeStringToOemString@12   @511
     RtlUnicodeToMultiByteN        = _RtlUnicodeToMultiByteN@20        @513
@@ -298,7 +298,7 @@ EXPORTS
     RtlRaiseException             = ___regs_RtlRaiseException@8
     DebugBreak                    = ___regs_DebugBreak@4
     RtlRaiseStatus                = _RtlRaiseStatus@4
-    RtlRandom                     = _RtlRandom@4                      @466
+    RtlRandom                     = _RtlRandom@4                      
 
     RtlAcquirePebLock             = _RtlAcquirePebLock@0
     RtlReleasePebLock             = _RtlReleasePebLock@0
@@ -308,11 +308,31 @@ EXPORTS
     RtlDeleteSecurityObject       = _RtlDeleteSecurityObject@4
     RtlNormalizeProcessParams     = _RtlNormalizeProcessParams@4      @441
     RtlNtStatusToDosError         = _RtlNtStatusToDosError@4          @442
-    RtlGetNtProductType           = _RtlGetNtProductType@4            @390
-    RtlEnlargedIntegerMultiply    = _RtlEnlargedIntegerMultiply@8     @341
-    RtlExtendedIntegerMultiply    = _RtlExtendedIntegerMultiply@12    @358
-    RtlExtendedLargeIntegerDivide = _RtlExtendedLargeIntegerDivide@16 @359
-    RtlFormatCurrentUserKeyPath   = _RtlFormatCurrentUserKeyPath@4    @371
+    RtlGetNtProductType           = _RtlGetNtProductType@4            
+
+ 
+; ------------------
+; Integer Arithmetic
+; ------------------
+
+    RtlLargeIntegerDivide         = _RtlLargeIntegerDivide@20         @462
+    RtlLargeIntegerAdd            = _RtlLargeIntegerAdd@16            @460
+    RtlEnlargedIntegerMultiply    = _RtlEnlargedIntegerMultiply@8     @371
+    RtlEnlargedUnsignedMultiply   = _RtlEnlargedUnsignedMultiply@8    @373
+    RtlEnlargedUnsignedDivide     = _RtlEnlargedUnsignedDivide@16     @372
+    RtlExtendedLargeIntegerDivide = _RtlExtendedLargeIntegerDivide@16 @390
+    RtlExtendedMagicDivide        = _RtlExtendedMagicDivide@20        @391
+    RtlExtendedIntegerMultiply    = _RtlExtendedIntegerMultiply@12    @389
+    RtlLargeIntegerShiftLeft      = _RtlLargeIntegerShiftLeft@12      @464
+    RtlLargeIntegerShiftRight     = _RtlLargeIntegerShiftRight@12     @465
+    RtlLargeIntegerArithmeticShift= _RtlLargeIntegerArithmeticShift@12 @461
+    RtlLargeIntegerNegate         = _RtlLargeIntegerNegate@8          @463
+    RtlLargeIntegerSubtract       = _RtlLargeIntegerSubtract@16       @466
+    RtlConvertLongToLargeInteger  = _RtlConvertLongToLargeInteger@4   @316
+    RtlConvertUlongToLargeInteger = _RtlConvertUlongToLargeInteger@4  @320
+
+
+    RtlFormatCurrentUserKeyPath   = _RtlFormatCurrentUserKeyPath@4    
     RtlOpenCurrentUser            = _RtlOpenCurrentUser@8
     RtlDosPathNameToNtPathName_U  = _RtlDosPathNameToNtPathName_U@16  @338
     RtlCreateEnvironment          = _RtlCreateEnvironment@8
@@ -324,7 +344,7 @@ EXPORTS
     RtlTimeToSecondsSince1980     = _RtlTimeToSecondsSince1980@8      @504
     RtlSecondsSince1970ToTime     = _RtlSecondsSince1970ToTime@8      @476
     RtlSecondsSince1980ToTime     = _RtlSecondsSince1980ToTime@8      @477
-    RtlQueryTimeZoneInformation   = _RtlQueryTimeZoneInformation@12   @463
+    RtlQueryTimeZoneInformation   = _RtlQueryTimeZoneInformation@12   
 
     RtlTimeToElapsedTimeFields    = _RtlTimeToElapsedTimeFields@8
 
