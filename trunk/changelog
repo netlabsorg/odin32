@@ -1,7 +1,9 @@
-/* $Id: changelog,v 1.2354 2002-11-12 15:13:00 sandervl Exp $ */
+/* $Id: changelog,v 1.2355 2002-11-12 17:03:54 sandervl Exp $ */
 
  2002-11-12: Sander van Leeuwen <sandervl@innotek   >
     - COMCTL32: o Wine resync (toolbar, propsheet, imagelist)
+    - OLE32, OLEAUT32: 
+                o Wine resync
 
  2001-11-12: Dietrich Teickner <Dietrich_Teickner@t-online   >
     - COMCTL32: o Wine resync (comboex)
