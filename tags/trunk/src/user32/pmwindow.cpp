@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.198 2003-02-12 09:39:44 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.199 2003-02-13 10:34:49 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -53,6 +53,7 @@
 #include <win\dbt.h>
 #include "dragdrop.h"
 #include "menu.h"
+#include "user32api.h"
 
 #define DBG_LOCALLOG    DBG_pmwindow
 #include "dbglocal.h"
@@ -256,7 +257,6 @@ BOOL InitPM()
     return TRUE;
 } /* End of main */
 //******************************************************************************
-#ifdef NEW_WGSS
 HBITMAP OPEN32API _O32_CreateBitmapFromPMHandle(HBITMAP hPMBitmap);
 
 inline HBITMAP O32_CreateBitmapFromPMHandle(HBITMAP hPMBitmap)
@@ -269,7 +269,6 @@ inline HBITMAP O32_CreateBitmapFromPMHandle(HBITMAP hPMBitmap)
 
     return yyrc;
 }
-#endif
 //******************************************************************************
 static void QueryPMMenuBitmaps()
 {
@@ -299,7 +298,6 @@ static void QueryPMMenuBitmaps()
         hbmFrameMenu[PMMENU_CLOSEBUTTON] = GpiLoadBitmap(hdc, hModDisplay, SBMP_CLOSE, 0, 0);
         hbmFrameMenu[PMMENU_CLOSEBUTTONDOWN] = GpiLoadBitmap(hdc, hModDisplay, SBMP_CLOSEDEP, 0, 0);
 
-#ifdef NEW_WGSS
         //Create win32 bitmap handles of the OS/2 min, max and restore buttons
         hBmpMinButton     = O32_CreateBitmapFromPMHandle(hbmFrameMenu[PMMENU_MINBUTTON]);
         hBmpMinButtonDown = O32_CreateBitmapFromPMHandle(hbmFrameMenu[PMMENU_MINBUTTONDOWN]);
@@ -309,7 +307,6 @@ static void QueryPMMenuBitmaps()
         hBmpRestoreButtonDown = O32_CreateBitmapFromPMHandle(hbmFrameMenu[PMMENU_RESTOREBUTTONDOWN]);
         hBmpCloseButton   = O32_CreateBitmapFromPMHandle(hbmFrameMenu[PMMENU_CLOSEBUTTON]);
         hBmpCloseButtonDown   = O32_CreateBitmapFromPMHandle(hbmFrameMenu[PMMENU_CLOSEBUTTONDOWN]);
-#endif
         DevCloseDC(hdc);
     }
 }
@@ -722,16 +719,23 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         teb->o.odin.hwndFocus    = 0;
         if(WinQueryWindowULong(hwndFocus, OFFSET_WIN32PM_MAGIC) != WIN32PM_MAGIC)
         {
-                //another (non-win32) application's window
-                //set to NULL (allowed according to win32 SDK) to avoid problems
-                hwndFocus = NULL;
+            //another (non-win32) application's window
+            //set to NULL (allowed according to win32 SDK) to avoid problems
+            hwndFocus = NULL;
         }
         if((ULONG)mp2 == TRUE) {
-                HWND hwndFocusWin32 = OS2ToWin32Handle(hwndFocus);
-                recreateCaret (hwndFocusWin32);
-                win32wnd->MsgSetFocus(hwndFocusWin32);
+            HWND hwndFocusWin32 = OS2ToWin32Handle(hwndFocus);
+            recreateCaret (hwndFocusWin32);
+            win32wnd->MsgSetFocus(hwndFocusWin32);
         }
-        else win32wnd->MsgKillFocus(OS2ToWin32Handle(hwndFocus));
+        else {
+            //If SetFocus(0) was called, then the window has already received
+            //a WM_KILLFOCUS; don't send another one
+            if(!fIgnoreKeystrokes) {
+                 win32wnd->MsgKillFocus(OS2ToWin32Handle(hwndFocus));
+            }
+            else dprintf(("Window has already received a WM_KILLFOCUS (SetFocus(0)); ignore"));
+        }
         teb->o.odin.fWM_SETFOCUS = FALSE;
 
         break;
