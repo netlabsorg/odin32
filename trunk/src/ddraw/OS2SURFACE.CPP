@@ -1,4 +1,4 @@
-/* $Id: OS2SURFACE.CPP,v 1.26 2000-06-29 21:28:36 mike Exp $ */
+/* $Id: OS2SURFACE.CPP,v 1.27 2000-09-02 08:27:05 sandervl Exp $ */
 
 /*
  * DirectDraw Surface class implementaion
@@ -1795,7 +1795,7 @@ inline  void OS2IDirectDrawSurface::SetFrontBuffer( OS2IDirectDrawSurface* NewFB
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall SurfQueryInterface(THIS This, REFIID riid, LPVOID FAR * ppvObj)
+HRESULT WIN32API SurfQueryInterface(THIS This, REFIID riid, LPVOID FAR * ppvObj)
 {
   // ToDo: Add Interface handling for D3D Textures
   HRESULT rc;
@@ -1847,7 +1847,7 @@ RetFn:
 }
 //******************************************************************************
 //******************************************************************************
-ULONG __stdcall SurfAddRef(THIS This)
+ULONG WIN32API SurfAddRef(THIS This)
 {
  OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
 
@@ -1857,7 +1857,7 @@ ULONG __stdcall SurfAddRef(THIS This)
 }
 //******************************************************************************
 //******************************************************************************
-ULONG __stdcall SurfRelease(THIS This)
+ULONG WIN32API SurfRelease(THIS This)
 {
  OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
 
@@ -1882,7 +1882,7 @@ ULONG __stdcall SurfRelease(THIS This)
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall SurfAddAttachedSurface(THIS This, LPDIRECTDRAWSURFACE2 lpDDSurface)
+HRESULT WIN32API SurfAddAttachedSurface(THIS This, LPDIRECTDRAWSURFACE2 lpDDSurface)
 {
 
   dprintf(("DDRAW: SurfAddAttachedSurface\n"));
@@ -1890,7 +1890,7 @@ HRESULT __stdcall SurfAddAttachedSurface(THIS This, LPDIRECTDRAWSURFACE2 lpDDSur
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall SurfAddAttachedSurface3(THIS This, LPDIRECTDRAWSURFACE3 lpDDSurface)
+HRESULT WIN32API SurfAddAttachedSurface3(THIS This, LPDIRECTDRAWSURFACE3 lpDDSurface)
 {
 
   dprintf(("DDRAW: SurfAddAttachedSurface\n"));
@@ -1898,7 +1898,7 @@ HRESULT __stdcall SurfAddAttachedSurface3(THIS This, LPDIRECTDRAWSURFACE3 lpDDSu
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall SurfAddAttachedSurface4(THIS This, LPDIRECTDRAWSURFACE4 lpDDSurface)
+HRESULT WIN32API SurfAddAttachedSurface4(THIS This, LPDIRECTDRAWSURFACE4 lpDDSurface)
 {
   OS2IDirectDrawSurface *AttachedSurface;
   OS2IDirectDrawSurface *BBCursor;
@@ -2074,7 +2074,7 @@ HRESULT __stdcall SurfAddAttachedSurface4(THIS This, LPDIRECTDRAWSURFACE4 lpDDSu
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall SurfAddOverlayDirtyRect(THIS, LPRECT)
+HRESULT WIN32API SurfAddOverlayDirtyRect(THIS, LPRECT)
 {
   dprintf(("DDRAW: SurfAddOverlayDirtyRect Not implemented by M$ in DX 6.0!\n"));
 
@@ -2082,7 +2082,7 @@ HRESULT __stdcall SurfAddOverlayDirtyRect(THIS, LPRECT)
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall SurfBlt(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE2 lpDDSrcSurface,
+HRESULT WIN32API SurfBlt(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE2 lpDDSrcSurface,
         LPRECT lpSrcRect, DWORD dwFlags, LPDDBLTFX lpDDBltFx)
 {
  return SurfBlt4( This,
@@ -2094,7 +2094,7 @@ HRESULT __stdcall SurfBlt(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE2 lpD
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall SurfBlt3(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE3 lpDDSrcSurface,
+HRESULT WIN32API SurfBlt3(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE3 lpDDSrcSurface,
         LPRECT lpSrcRect, DWORD dwFlags, LPDDBLTFX lpDDBltFx)
 {
  return SurfBlt4( This,
@@ -2106,7 +2106,7 @@ HRESULT __stdcall SurfBlt3(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE3 lp
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lpDDSrcSurface,
+HRESULT WIN32API SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lpDDSrcSurface,
         LPRECT lpSrcRect, DWORD dwFlags, LPDDBLTFX lpDDBltFx)
 {
    // We have determine between 3 different blit senarios.
@@ -3141,7 +3141,7 @@ HRESULT __stdcall SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lp
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall SurfBltBatch(THIS, LPDDBLTBATCH, DWORD, DWORD )
+HRESULT WIN32API SurfBltBatch(THIS, LPDDBLTBATCH, DWORD, DWORD )
 {
   dprintf(("DDRAW: SurfBltBatch Not implemented by M$\n"));
 
@@ -3149,7 +3149,7 @@ HRESULT __stdcall SurfBltBatch(THIS, LPDDBLTBATCH, DWORD, DWORD )
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall SurfBltFast( THIS This ,
+HRESULT WIN32API SurfBltFast( THIS This ,
                                DWORD dwX,
                                DWORD dwY,
                                LPDIRECTDRAWSURFACE2 lpDDSrcSurface,
@@ -3166,7 +3166,7 @@ HRESULT __stdcall SurfBltFast( THIS This ,
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall SurfBltFast3(THIS This ,
+HRESULT WIN32API SurfBltFast3(THIS This ,
                                DWORD dwX,
                                DWORD dwY,
                                LPDIRECTDRAWSURFACE3 lpDDSrcSurface,
@@ -3183,7 +3183,7 @@ HRESULT __stdcall SurfBltFast3(THIS This ,
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall SurfBltFast4( THIS This,
+HRESULT WIN32API SurfBltFast4( THIS This,
                                 DWORD dwX,
                                 DWORD dwY,
                                 LPDIRECTDRAWSURFACE4 lpDDSrcSurface,
@@ -3526,7 +3526,7 @@ HRESULT __stdcall SurfBltFast4( THIS This,
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall SurfDeleteAttachedSurface(THIS This, DWORD dwFlags, LPDIRECTDRAWSURFACE2 lpDDSurface)
+HRESULT WIN32API SurfDeleteAttachedSurface(THIS This, DWORD dwFlags, LPDIRECTDRAWSURFACE2 lpDDSurface)
 {
   OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
   dprintf(("DDRAW: SurfDeleteAttachedSurface\n"));
@@ -3535,7 +3535,7 @@ HRESULT __stdcall SurfDeleteAttachedSurface(THIS This, DWORD dwFlags, LPDIRECTDR
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall SurfDeleteAttachedSurface3(THIS This, DWORD dwFlags, LPDIRECTDRAWSURFACE3 lpDDSurface)
+HRESULT WIN32API SurfDeleteAttachedSurface3(THIS This, DWORD dwFlags, LPDIRECTDRAWSURFACE3 lpDDSurface)
 {
   OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
   dprintf(("DDRAW: SurfDeleteAttachedSurface\n"));
@@ -3544,7 +3544,7 @@ HRESULT __stdcall SurfDeleteAttachedSurface3(THIS This, DWORD dwFlags, LPDIRECTD
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall SurfDeleteAttachedSurface4(THIS This, DWORD dwFlags , LPDIRECTDRAWSURFACE4 lpDDSurface)
+HRESULT WIN32API SurfDeleteAttachedSurface4(THIS This, DWORD dwFlags , LPDIRECTDRAWSURFACE4 lpDDSurface)
 {
 
   OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
@@ -3690,7 +3690,7 @@ HRESULT __stdcall SurfDeleteAttachedSurface4(THIS This, DWORD dwFlags , LPDIRECT
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall SurfEnumAttachedSurfaces(THIS This, LPVOID lpContext, LPDDENUMSURFACESCALLBACK lpCallBack)
+HRESULT WIN32API SurfEnumAttachedSurfaces(THIS This, LPVOID lpContext, LPDDENUMSURFACESCALLBACK lpCallBack)
 {
   OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
   dprintf(("DDRAW: SurfEnumAttachedSurfaces\n"));
@@ -3699,7 +3699,7 @@ HRESULT __stdcall SurfEnumAttachedSurfaces(THIS This, LPVOID lpContext, LPDDENUM
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall SurfEnumAttachedSurfaces4(THIS This, LPVOID lpContext ,LPDDENUMSURFACESCALLBACK2 lpCallBack)
+HRESULT WIN32API SurfEnumAttachedSurfaces4(THIS This, LPVOID lpContext ,LPDDENUMSURFACESCALLBACK2 lpCallBack)
 {
   OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
   OS2IDirectDrawSurface *EnumSurface;
@@ -3757,7 +3757,7 @@ HRESULT __stdcall SurfEnumAttachedSurfaces4(THIS This, LPVOID lpContext ,LPDDENU
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall SurfEnumOverlayZOrders(THIS, DWORD,LPVOID,LPDDENUMSURFACESCALLBACK)
+HRESULT WIN32API SurfEnumOverlayZOrders(THIS, DWORD,LPVOID,LPDDENUMSURFACESCALLBACK)
 {
   dprintf(("DDRAW: SurfEnumOverlayZOrders\n"));
 
@@ -3765,7 +3765,7 @@ HRESULT __stdcall SurfEnumOverlayZOrders(THIS, DWORD,LPVOID,LPDDENUMSURFACESCALL
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall SurfEnumOverlayZOrders4(THIS, DWORD,LPVOID,LPDDENUMSURFACESCALLBACK2)
+HRESULT WIN32API SurfEnumOverlayZOrders4(THIS, DWORD,LPVOID,LPDDENUMSURFACESCALLBACK2)
 {
   dprintf(("DDRAW: SurfEnumOverlayZOrders\n"));
 
@@ -3773,7 +3773,7 @@ HRESULT __stdcall SurfEnumOverlayZOrders4(THIS, DWORD,LPVOID,LPDDENUMSURFACESCAL
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall SurfFlip(THIS This, LPDIRECTDRAWSURFACE2 lpDDSurf, DWORD dwFlags)
+HRESULT WIN32API SurfFlip(THIS This, LPDIRECTDRAWSURFACE2 lpDDSurf, DWORD dwFlags)
 {
   OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
 
@@ -3783,7 +3783,7 @@ HRESULT __stdcall SurfFlip(THIS This, LPDIRECTDRAWSURFACE2 lpDDSurf, DWORD dwFla
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall SurfFlip3(THIS This, LPDIRECTDRAWSURFACE3 lpDDSurf, DWORD dwFlags)
+HRESULT WIN32API SurfFlip3(THIS This, LPDIRECTDRAWSURFACE3 lpDDSurf, DWORD dwFlags)
 {
   OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
 
@@ -3793,7 +3793,7 @@ HRESULT __stdcall SurfFlip3(THIS This, LPDIRECTDRAWSURFACE3 lpDDSurf, DWORD dwFl
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall SurfFlip4(THIS This, LPDIRECTDRAWSURFACE4 lpDDSurf, DWORD dwFlags)
+HRESULT WIN32API SurfFlip4(THIS This, LPDIRECTDRAWSURFACE4 lpDDSurf, DWORD dwFlags)
 {
   OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
   OS2IDirectDrawSurface *FlipSurface;
@@ -3922,7 +3922,7 @@ HRESULT __stdcall SurfFlip4(THIS This, LPDIRECTDRAWSURFACE4 lpDDSurf, DWORD dwFl
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall SurfGetAttachedSurface(THIS This, LPDDSCAPS lpDDCaps,
+HRESULT WIN32API SurfGetAttachedSurface(THIS This, LPDDSCAPS lpDDCaps,
                                          LPDIRECTDRAWSURFACE2 FAR * lpDDSurf)
 {
   OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
@@ -3932,7 +3932,7 @@ HRESULT __stdcall SurfGetAttachedSurface(THIS This, LPDDSCAPS lpDDCaps,
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall SurfGetAttachedSurface3(THIS This, LPDDSCAPS lpDDCaps,
+HRESULT WIN32API SurfGetAttachedSurface3(THIS This, LPDDSCAPS lpDDCaps,
                                          LPDIRECTDRAWSURFACE3 FAR * lpDDSurf)
 {
   OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
@@ -3942,7 +3942,7 @@ HRESULT __stdcall SurfGetAttachedSurface3(THIS This, LPDDSCAPS lpDDCaps,
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall SurfGetAttachedSurface4(THIS This, LPDDSCAPS2 lpDDCaps,
+HRESULT WIN32API SurfGetAttachedSurface4(THIS This, LPDDSCAPS2 lpDDCaps,
                                           LPDIRECTDRAWSURFACE4 FAR * lpDDSurf)
 {
   OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
@@ -4029,7 +4029,7 @@ HRESULT __stdcall SurfGetAttachedSurface4(THIS This, LPDDSCAPS2 lpDDCaps,
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall SurfGetBltStatus(THIS This, DWORD)
+HRESULT WIN32API SurfGetBltStatus(THIS This, DWORD)
 {
   dprintf(("DDRAW: SurfGetBltStatus\n"));
 
@@ -4037,7 +4037,7 @@ HRESULT __stdcall SurfGetBltStatus(THIS This, DWORD)
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall SurfGetCaps(THIS This, LPDDSCAPS lpDDCaps)
+HRESULT WIN32API SurfGetCaps(THIS This, LPDDSCAPS lpDDCaps)
 {
   OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
 
@@ -4054,7 +4054,7 @@ HRESULT __stdcall SurfGetCaps(THIS This, LPDDSCAPS lpDDCaps)
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall SurfGetCaps4(THIS This, LPDDSCAPS2 lpDDCaps)
+HRESULT WIN32API SurfGetCaps4(THIS This, LPDDSCAPS2 lpDDCaps)
 {
   OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
   dprintf(("DDRAW: SurfGetCaps4\n"));
@@ -4072,7 +4072,7 @@ HRESULT __stdcall SurfGetCaps4(THIS This, LPDDSCAPS2 lpDDCaps)
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall SurfGetClipper(THIS This, LPDIRECTDRAWCLIPPER FAR *lplpClipper)
+HRESULT WIN32API SurfGetClipper(THIS This, LPDIRECTDRAWCLIPPER FAR *lplpClipper)
 {
   OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
 
@@ -4088,7 +4088,7 @@ HRESULT __stdcall SurfGetClipper(THIS This, LPDIRECTDRAWCLIPPER FAR *lplpClipper
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall SurfGetColorKey(THIS This, DWORD dwFlags, LPDDCOLORKEY lpDDColKey)
+HRESULT WIN32API SurfGetColorKey(THIS This, DWORD dwFlags, LPDDCOLORKEY lpDDColKey)
 {
   OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
   dprintf(("DDRAW: SurfGetColorKey\n"));
@@ -4116,7 +4116,7 @@ HRESULT __stdcall SurfGetColorKey(THIS This, DWORD dwFlags, LPDDCOLORKEY lpDDCol
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall SurfGetDC(THIS This, HDC FAR *hdc)
+HRESULT WIN32API SurfGetDC(THIS This, HDC FAR *hdc)
 {
  OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
  DDSURFACEDESC2        LockedSurfaceDesc;
@@ -4325,7 +4325,7 @@ HRESULT __stdcall SurfGetDC(THIS This, HDC FAR *hdc)
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall SurfGetFlipStatus(THIS This, DWORD dwFlags)
+HRESULT WIN32API SurfGetFlipStatus(THIS This, DWORD dwFlags)
 {
   dprintf(("DDRAW: SurfGetFlipStatus\n"));
 
@@ -4336,7 +4336,7 @@ HRESULT __stdcall SurfGetFlipStatus(THIS This, DWORD dwFlags)
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall SurfGetOverlayPosition(THIS This, LPLONG lplX, LPLONG lplY)
+HRESULT WIN32API SurfGetOverlayPosition(THIS This, LPLONG lplX, LPLONG lplY)
 {
   OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
   dprintf(("DDRAW: SurfGetOverlayPosition\n"));
@@ -4362,7 +4362,7 @@ HRESULT __stdcall SurfGetOverlayPosition(THIS This, LPLONG lplX, LPLONG lplY)
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall SurfGetPalette(THIS This, LPDIRECTDRAWPALETTE FAR *lplpPalette)
+HRESULT WIN32API SurfGetPalette(THIS This, LPDIRECTDRAWPALETTE FAR *lplpPalette)
 {
  OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
 
@@ -4378,11 +4378,11 @@ HRESULT __stdcall SurfGetPalette(THIS This, LPDIRECTDRAWPALETTE FAR *lplpPalette
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall SurfGetPixelFormat(THIS This, LPDDPIXELFORMAT lpPixelFormat)
+HRESULT WIN32API SurfGetPixelFormat(THIS This, LPDDPIXELFORMAT lpPixelFormat)
 {
   OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
 
-  dprintf(("DDRAW: SurfGetPixelFormat\n"));
+  dprintf(("DDRAW: SurfGetPixelFormat %x %x", This, lpPixelFormat));
 
   if(NULL==lpPixelFormat)
     return DDERR_INVALIDPARAMS;
@@ -4395,7 +4395,7 @@ HRESULT __stdcall SurfGetPixelFormat(THIS This, LPDDPIXELFORMAT lpPixelFormat)
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall SurfGetSurfaceDesc(THIS This, LPDDSURFACEDESC lpSurface)
+HRESULT WIN32API SurfGetSurfaceDesc(THIS This, LPDDSURFACEDESC lpSurface)
 {
   OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
 
@@ -4412,7 +4412,7 @@ HRESULT __stdcall SurfGetSurfaceDesc(THIS This, LPDDSURFACEDESC lpSurface)
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall SurfGetSurfaceDesc4(THIS This, LPDDSURFACEDESC2 lpSurface)
+HRESULT WIN32API SurfGetSurfaceDesc4(THIS This, LPDDSURFACEDESC2 lpSurface)
 {
   OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
 
@@ -4429,7 +4429,7 @@ HRESULT __stdcall SurfGetSurfaceDesc4(THIS This, LPDDSURFACEDESC2 lpSurface)
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall SurfInitialize(THIS, LPDIRECTDRAW, LPDDSURFACEDESC)
+HRESULT WIN32API SurfInitialize(THIS, LPDIRECTDRAW, LPDDSURFACEDESC)
 {
   dprintf(("DDRAW: SurfInitialize\n"));
 
@@ -4437,7 +4437,7 @@ HRESULT __stdcall SurfInitialize(THIS, LPDIRECTDRAW, LPDDSURFACEDESC)
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall SurfInitialize4(THIS, LPDIRECTDRAW, LPDDSURFACEDESC2)
+HRESULT WIN32API SurfInitialize4(THIS, LPDIRECTDRAW, LPDDSURFACEDESC2)
 {
   dprintf(("DDRAW: SurfInitialize\n"));
 
@@ -4445,7 +4445,7 @@ HRESULT __stdcall SurfInitialize4(THIS, LPDIRECTDRAW, LPDDSURFACEDESC2)
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall SurfIsLost(THIS)
+HRESULT WIN32API SurfIsLost(THIS)
 {
   // We don't loose any surface ;)
   // But we might shoud check for primary and/or Dive Buffers as I don't know
@@ -4457,7 +4457,7 @@ HRESULT __stdcall SurfIsLost(THIS)
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall SurfLock( THIS This,
+HRESULT WIN32API SurfLock( THIS This,
                             LPRECT lpRect,
                             LPDDSURFACEDESC lpSurfaceDesc,
                             DWORD dwFlags,
@@ -4492,7 +4492,7 @@ HRESULT __stdcall SurfLock( THIS This,
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall SurfLock4( THIS This,
+HRESULT WIN32API SurfLock4( THIS This,
                              LPRECT lpRect,
                              LPDDSURFACEDESC2 lpSurfaceDesc,
                              DWORD dwFlags,
@@ -4610,7 +4610,7 @@ HRESULT __stdcall SurfLock4( THIS This,
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall SurfReleaseDC(THIS This, HDC hdc)
+HRESULT WIN32API SurfReleaseDC(THIS This, HDC hdc)
 {
  OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
  struct
@@ -4715,7 +4715,7 @@ HRESULT __stdcall SurfReleaseDC(THIS This, HDC hdc)
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall SurfRestore(THIS)
+HRESULT WIN32API SurfRestore(THIS)
 {
   dprintf(("DDRAW: SurfRestore\n"));
 
@@ -4723,11 +4723,11 @@ HRESULT __stdcall SurfRestore(THIS)
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall SurfSetClipper(THIS This, LPDIRECTDRAWCLIPPER lpClipper)
+HRESULT WIN32API SurfSetClipper(THIS This, LPDIRECTDRAWCLIPPER lpClipper)
 {
  OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
 
-  dprintf(("DDRAW: SurfSetClipper\n"));
+  dprintf(("DDRAW: SurfSetClipper %x %x", This, lpClipper));
 
   if(lpClipper == NULL)
   {
@@ -4758,7 +4758,7 @@ HRESULT __stdcall SurfSetClipper(THIS This, LPDIRECTDRAWCLIPPER lpClipper)
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall SurfSetColorKey(THIS  This, DWORD dwFlags, LPDDCOLORKEY lpDDColKey)
+HRESULT WIN32API SurfSetColorKey(THIS  This, DWORD dwFlags, LPDDCOLORKEY lpDDColKey)
 {
   OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
   HRESULT rc;
@@ -4810,7 +4810,7 @@ HRESULT __stdcall SurfSetColorKey(THIS  This, DWORD dwFlags, LPDDCOLORKEY lpDDCo
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall SurfSetOverlayPosition(THIS This, LONG lX, LONG lY)
+HRESULT WIN32API SurfSetOverlayPosition(THIS This, LONG lX, LONG lY)
 {
   OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
 
@@ -4837,7 +4837,7 @@ HRESULT __stdcall SurfSetOverlayPosition(THIS This, LONG lX, LONG lY)
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall SurfSetPalette(THIS This, LPDIRECTDRAWPALETTE lpPalette)
+HRESULT WIN32API SurfSetPalette(THIS This, LPDIRECTDRAWPALETTE lpPalette)
 {
   OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
 
@@ -4892,7 +4892,7 @@ HRESULT __stdcall SurfSetPalette(THIS This, LPDIRECTDRAWPALETTE lpPalette)
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall SurfUnlock(THIS This, LPVOID lpSurfaceData)
+HRESULT WIN32API SurfUnlock(THIS This, LPVOID lpSurfaceData)
 {
 
   OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
@@ -5034,7 +5034,7 @@ HRESULT __stdcall SurfUnlock(THIS This, LPVOID lpSurfaceData)
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall SurfUnlock4(THIS This, LPRECT lpSurfaceRect)
+HRESULT WIN32API SurfUnlock4(THIS This, LPRECT lpSurfaceRect)
 {
   // MS changed the parameter from LPVOID to LPRECT with DX6
   // as DX-6 allways returns a DDSurface4 on create surface this
@@ -5143,56 +5143,56 @@ HRESULT __stdcall SurfUnlock4(THIS This, LPRECT lpSurfaceRect)
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall SurfUpdateOverlay(THIS This, LPRECT, LPDIRECTDRAWSURFACE2,LPRECT,DWORD, LPDDOVERLAYFX)
+HRESULT WIN32API SurfUpdateOverlay(THIS This, LPRECT, LPDIRECTDRAWSURFACE2,LPRECT,DWORD, LPDDOVERLAYFX)
 {
   dprintf(("DDRAW: SurfUpdateOverlay\n"));
   return(DD_OK);
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall SurfUpdateOverlay3(THIS This, LPRECT, LPDIRECTDRAWSURFACE3,LPRECT,DWORD, LPDDOVERLAYFX)
+HRESULT WIN32API SurfUpdateOverlay3(THIS This, LPRECT, LPDIRECTDRAWSURFACE3,LPRECT,DWORD, LPDDOVERLAYFX)
 {
   dprintf(("DDRAW: SurfUpdateOverlay\n"));
   return(DD_OK);
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall SurfUpdateOverlay4(THIS, LPRECT, LPDIRECTDRAWSURFACE4,LPRECT,DWORD, LPDDOVERLAYFX)
+HRESULT WIN32API SurfUpdateOverlay4(THIS, LPRECT, LPDIRECTDRAWSURFACE4,LPRECT,DWORD, LPDDOVERLAYFX)
 {
   dprintf(("DDRAW: SurfUpdateOverlay\n"));
   return(DD_OK);
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall SurfUpdateOverlayDisplay(THIS, DWORD)
+HRESULT WIN32API SurfUpdateOverlayDisplay(THIS, DWORD)
 {
   dprintf(("DDRAW: SurfUpdateOverlayDisplay\n"));
   return(DD_OK);
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall SurfUpdateOverlayZOrder(THIS, DWORD, LPDIRECTDRAWSURFACE2)
+HRESULT WIN32API SurfUpdateOverlayZOrder(THIS, DWORD, LPDIRECTDRAWSURFACE2)
 {
   dprintf(("DDRAW: SurfUpdateOverlayZOrder\n"));
   return(DD_OK);
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall SurfUpdateOverlayZOrder3(THIS, DWORD, LPDIRECTDRAWSURFACE3)
+HRESULT WIN32API SurfUpdateOverlayZOrder3(THIS, DWORD, LPDIRECTDRAWSURFACE3)
 {
   dprintf(("DDRAW: SurfUpdateOverlayZOrder\n"));
   return(DD_OK);
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall SurfUpdateOverlayZOrder4(THIS, DWORD, LPDIRECTDRAWSURFACE4)
+HRESULT WIN32API SurfUpdateOverlayZOrder4(THIS, DWORD, LPDIRECTDRAWSURFACE4)
 {
   dprintf(("DDRAW: SurfUpdateOverlayZOrder4\n"));
   return(DD_OK);
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall SurfGetDDInterface(THIS This, LPVOID FAR *lplpDirectDraw)
+HRESULT WIN32API SurfGetDDInterface(THIS This, LPVOID FAR *lplpDirectDraw)
 {
  OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
 
@@ -5202,7 +5202,7 @@ HRESULT __stdcall SurfGetDDInterface(THIS This, LPVOID FAR *lplpDirectDraw)
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall SurfPageLock(THIS, DWORD)
+HRESULT WIN32API SurfPageLock(THIS, DWORD)
 {
   // Only used for DMA memory access
   // If we implement this for the None dive buffers with a pdd the we must change
@@ -5212,7 +5212,7 @@ HRESULT __stdcall SurfPageLock(THIS, DWORD)
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall SurfPageUnlock(THIS, DWORD)
+HRESULT WIN32API SurfPageUnlock(THIS, DWORD)
 {
   dprintf(("DDRAW: SurfPageUnlock\n"));
   return(DD_OK);
@@ -5221,7 +5221,7 @@ HRESULT __stdcall SurfPageUnlock(THIS, DWORD)
 //******************************************************************************
 // V3 Interface Functions
 
-HRESULT __stdcall SurfSetSurfaceDesc(THIS This, LPDDSURFACEDESC lpSurfDesc, DWORD dwFlags)
+HRESULT WIN32API SurfSetSurfaceDesc(THIS This, LPDDSURFACEDESC lpSurfDesc, DWORD dwFlags)
 {
   dprintf(("DDRAW: SurfSetSurfaceDesc\n"));
 
@@ -5266,7 +5266,7 @@ HRESULT __stdcall SurfSetSurfaceDesc(THIS This, LPDDSURFACEDESC lpSurfDesc, DWOR
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall SurfSetSurfaceDesc4(THIS This, LPDDSURFACEDESC2 lpSurfDesc, DWORD dwFlags)
+HRESULT WIN32API SurfSetSurfaceDesc4(THIS This, LPDDSURFACEDESC2 lpSurfDesc, DWORD dwFlags)
 {
   dprintf(("DDRAW: SurfSetSurfaceDesc4\n"));
 
@@ -5314,7 +5314,7 @@ HRESULT __stdcall SurfSetSurfaceDesc4(THIS This, LPDDSURFACEDESC2 lpSurfDesc, DW
 //******************************************************************************
 // V4 Interface Functions
 
-HRESULT __stdcall SurfSetPrivateData(THIS This, REFGUID refGUID, LPVOID lpData,
+HRESULT WIN32API SurfSetPrivateData(THIS This, REFGUID refGUID, LPVOID lpData,
                                      DWORD dwDataSize, DWORD dwFlags)
 {
   OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
@@ -5497,7 +5497,7 @@ HRESULT __stdcall SurfSetPrivateData(THIS This, REFGUID refGUID, LPVOID lpData,
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall SurfGetPrivateData(THIS This, REFGUID refGUID, LPVOID lpData, LPDWORD lpDataSize)
+HRESULT WIN32API SurfGetPrivateData(THIS This, REFGUID refGUID, LPVOID lpData, LPDWORD lpDataSize)
 {
   OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
   int i;
@@ -5556,7 +5556,7 @@ HRESULT __stdcall SurfGetPrivateData(THIS This, REFGUID refGUID, LPVOID lpData, 
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall SurfFreePrivateData(THIS This, REFGUID refGUID)
+HRESULT WIN32API SurfFreePrivateData(THIS This, REFGUID refGUID)
 {
   OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
   int i;
@@ -5604,7 +5604,7 @@ HRESULT __stdcall SurfFreePrivateData(THIS This, REFGUID refGUID)
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall SurfGetUniquenessValue(THIS This, LPDWORD lpValue)
+HRESULT WIN32API SurfGetUniquenessValue(THIS This, LPDWORD lpValue)
 {
   dprintf(("DDRAW: SurfGetUniquenessValue\n"));
   OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
@@ -5616,7 +5616,7 @@ HRESULT __stdcall SurfGetUniquenessValue(THIS This, LPDWORD lpValue)
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall SurfChangeUniquenessValue(THIS This)
+HRESULT WIN32API SurfChangeUniquenessValue(THIS This)
 {
   OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
   int i;

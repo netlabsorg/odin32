@@ -1,4 +1,4 @@
-/* $Id: OS2CLIPPER.H,v 1.6 1999-12-21 01:28:19 hugh Exp $ */
+/* $Id: OS2CLIPPER.H,v 1.7 2000-09-02 08:27:05 sandervl Exp $ */
 
 /*
  * DX clipper class definition
@@ -30,10 +30,11 @@ class OS2IDirectDrawClipper
  private:
 
  protected:
-              HRESULT                lastError;
+        HRESULT                lastError;
         OS2IDirectDraw        *lpDraw;
         HDIVE                  hDive;
-        HWND         clipWindow;
+        HWND                   clipWindow;
+        RECT                   windowRect;
 
                               // Linked list management
               OS2IDirectDrawClipper* next;                   // Next OS2IDirectDraw

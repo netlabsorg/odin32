@@ -1,4 +1,4 @@
-/* $Id: OS2CLIPPER.CPP,v 1.9 1999-12-21 01:28:15 hugh Exp $ */
+/* $Id: OS2CLIPPER.CPP,v 1.10 2000-09-02 08:27:05 sandervl Exp $ */
 
 /*
  * DX clipper class routines
@@ -19,6 +19,7 @@
 #define FAR
 #include <misc.h>
 #include <winerror.h>
+#include <winuser.h>
 
 //******************************************************************************
 //******************************************************************************
@@ -40,6 +41,7 @@ OS2IDirectDrawClipper::OS2IDirectDrawClipper(OS2IDirectDraw *lpDirectDraw) :
   lpDraw                  = lpDirectDraw;
   lpDraw->Vtbl.AddRef(lpDraw);
   hDive                   = lpDirectDraw->GetDiveInstance();
+  windowRect.left = windowRect.right = windowRect.top = windowRect.bottom = 0;
 }
 //******************************************************************************
 //******************************************************************************
@@ -49,11 +51,9 @@ OS2IDirectDrawClipper::~OS2IDirectDrawClipper()
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall ClipQueryInterface(THIS This, REFIID riid, LPVOID FAR * ppvObj)
+HRESULT WIN32API ClipQueryInterface(THIS This, REFIID riid, LPVOID FAR * ppvObj)
 {
-  #ifdef DEBUG
-    dprintf(("DDRAW: ClipQueryInterface\n"));
-  #endif
+  dprintf(("DDRAW: ClipQueryInterface\n"));
 
   *ppvObj = NULL;
 
@@ -69,25 +69,21 @@ HRESULT __stdcall ClipQueryInterface(THIS This, REFIID riid, LPVOID FAR * ppvObj
 }
 //******************************************************************************
 //******************************************************************************
-ULONG   __stdcall ClipAddRef(THIS This)
+ULONG   WIN32API ClipAddRef(THIS This)
 {
  OS2IDirectDrawClipper *me = (OS2IDirectDrawClipper *)This;
 
-  #ifdef DEBUG
-    dprintf(("DDRAW: OS2IDirectDrawClipper::AddRef %d\n", me->Referenced+1));
-  #endif
+  dprintf(("DDRAW: OS2IDirectDrawClipper::AddRef %d\n", me->Referenced+1));
 
   return ++me->Referenced;
 }
 //******************************************************************************
 //******************************************************************************
-ULONG   __stdcall ClipRelease(THIS This)
+ULONG   WIN32API ClipRelease(THIS This)
 {
  OS2IDirectDrawClipper *me = (OS2IDirectDrawClipper *)This;
 
-  #ifdef DEBUG
-    dprintf(("DDRAW: OS2IDirectDrawClipper::Release %d\n", me->Referenced-1));
-  #endif
+  dprintf(("DDRAW: OS2IDirectDrawClipper::Release %d", me->Referenced-1));
 
   if(me->Referenced)
   {
@@ -105,69 +101,98 @@ ULONG   __stdcall ClipRelease(THIS This)
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall ClipGetClipList(THIS, LPRECT, LPRGNDATA, LPDWORD)
+HRESULT WIN32API ClipGetClipList(THIS This, LPRECT lpRect, LPRGNDATA lpClipList, 
+                                 LPDWORD lpdwSize)
 {
-  #ifdef DEBUG
-    dprintf(("DDRAW: ClipGetClipList\n"));
-  #endif
+ OS2IDirectDrawClipper *me = (OS2IDirectDrawClipper *)This;
+ HRESULT rc = DD_OK;
 
-  return(DD_OK);
+  dprintf(("DDRAW: ClipGetClipList %x %x %x %x", This, lpRect, lpClipList, lpdwSize));
+
+  if(!lpdwSize) {
+	return DDERR_INVALIDPARAMS;
+  }
+  if(me->clipWindow) 
+  {
+      HRGN hRgn, hRgn1;
+      HDC  hdc;
+      int  bufneeded;
+
+	hRgn = CreateRectRgn(0, 0, 1, 1);
+	hdc = GetDC(me->clipWindow);
+	if(GetClipRgn(hdc, hRgn)) {
+		if(lpRect) {
+			hRgn1 = CreateRectRgnIndirect(lpRect);
+			CombineRgn(hRgn, hRgn, hRgn1, RGN_AND);
+			DeleteObject(hRgn1);
+		}
+		bufneeded = GetRegionData(hRgn, *lpdwSize, lpClipList);
+		if(bufneeded > *lpdwSize) {
+			rc = DDERR_REGIONTOOSMALL;
+		}
+	}
+	else	rc = DDERR_NOCLIPLIST;
+	DeleteObject(hRgn);
+	ReleaseDC(me->clipWindow, hdc);	
+  }
+  else { //todo!!
+	dprintf(("ClipGetClipList not complete if not associated with window!"));
+	rc = DDERR_NOCLIPLIST;
+  }
+  return rc;
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall ClipGetHWnd(THIS This, HWND FAR *pHwnd)
+HRESULT WIN32API ClipGetHWnd(THIS This, HWND FAR *pHwnd)
 {
  OS2IDirectDrawClipper *me = (OS2IDirectDrawClipper *)This;
 
-  #ifdef DEBUG
-    dprintf(("DDRAW: ClipGetHWnd\n"));
-  #endif
+  dprintf(("DDRAW: ClipGetHWnd %x %x", This, me->clipWindow));
 
   *pHwnd = me->clipWindow;
   return(DD_OK);
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall ClipInitialize(THIS, LPDIRECTDRAW, DWORD)
+HRESULT WIN32API ClipInitialize(THIS This, LPDIRECTDRAW lpDD, DWORD dwFlags)
 {
-  #ifdef DEBUG
-    dprintf(("DDRAW: ClipInitialize\n"));
-  #endif
+  dprintf(("DDRAW: ClipInitialize %x %x %x", This, lpDD, dwFlags));
 
   return(DDERR_ALREADYINITIALIZED); // Init is done during creation see M$ Doc
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall ClipIsClipListChanged(THIS, BOOL FAR *)
+HRESULT WIN32API ClipIsClipListChanged(THIS This, BOOL *lpbChanged)
 {
-  #ifdef DEBUG
-    dprintf(("DDRAW: ClipIsClipListChanged\n"));
-  #endif
+  dprintf(("DDRAW: ClipIsClipListChanged %x %x", This, lpbChanged));
 
   return(DD_OK);
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall ClipSetClipList(THIS, LPRGNDATA,DWORD)
+HRESULT WIN32API ClipSetClipList(THIS This, LPRGNDATA lpClipList, DWORD lpdwSize)
 {
-  #ifdef DEBUG
-    dprintf(("DDRAW: ClipSetClipList\n"));
-  #endif
+ OS2IDirectDrawClipper *me = (OS2IDirectDrawClipper *)This;
 
+  dprintf(("DDRAW: ClipSetClipList %x %x %x", This, lpClipList, lpdwSize));
+
+  if(me->clipWindow) {
+	return DDERR_CLIPPERISUSINGHWND;
+  }
   return(DD_OK);
 }
 //******************************************************************************
 //DWORD param not used in DirectX 3
 //******************************************************************************
-HRESULT __stdcall ClipSetHWnd(THIS This, DWORD reserved, HWND hwnd)
+HRESULT WIN32API ClipSetHWnd(THIS This, DWORD reserved, HWND hwnd)
 {
  OS2IDirectDrawClipper *me = (OS2IDirectDrawClipper *)This;
 
-  #ifdef DEBUG
-    dprintf(("DDRAW: ClipSetHWnd\n"));
-  #endif
+  dprintf(("DDRAW: ClipSetHWnd %x %x %x", This, reserved, hwnd));
 
   me->clipWindow = hwnd;
+  GetClientRect(hwnd, &me->windowRect);
+
   return(DD_OK);
 }
 //******************************************************************************
