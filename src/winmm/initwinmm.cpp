@@ -1,4 +1,4 @@
-/* $Id: initwinmm.cpp,v 1.3 2001-09-05 10:30:21 bird Exp $
+/* $Id: initwinmm.cpp,v 1.4 2001-10-24 22:47:41 sandervl Exp $
  *
  * WINMM DLL entry point
  *
@@ -27,7 +27,10 @@
 #define  INCL_DOSMODULEMGR
 #define  INCL_DOSPROCESS
 #define  INCL_DOSSEMAPHORES
-#include <os2wrap.h>    //Odin32 OS/2 api wrappers
+#define  INCL_DOSERRORS
+#define  INCL_OS2MM
+#include <os2wrap.h>   //Odin32 OS/2 api wrappers
+#include <os2mewrap.h> //Odin32 OS/2 MMPM/2 api wrappers
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -42,6 +45,7 @@
 #include "winmmtype.h"
 #include "waveoutbase.h"
 #include <win\options.h>
+#include "initwinmm.h"
 
 #define DBG_LOCALLOG    DBG_initterm
 #include "dbglocal.h"
@@ -57,12 +61,25 @@ void IRTMidiShutdown();  // IRTMidi shutdown routine
  extern DWORD winmm_PEResTab;
 }
 static HMODULE dllHandle = 0;
+static HMODULE MMPMLibraryHandle = 0;
+
+BOOL fMMPMAvailable = FALSE;
+
+DWORD (APIENTRY *pfnmciSendCommand)(WORD   wDeviceID,
+                                   WORD   wMessage,
+                                   DWORD  dwParam1,
+                                   PVOID  dwParam2,
+                                   WORD   wUserParm) = NULL;
+DWORD (APIENTRY *pfnmciGetErrorString)(DWORD   dwError,
+                                      LPSTR   lpstrBuffer,
+                                      WORD    wLength) = NULL;
 
 //******************************************************************************
 //******************************************************************************
 BOOL WINAPI LibMainWinmm(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
 {
-  static BOOL           bInitDone = FALSE;
+  static BOOL bInitDone = FALSE;
+  char   szError[CCHMAXPATH];
 
   switch (fdwReason)
     {
@@ -84,6 +101,43 @@ BOOL WINAPI LibMainWinmm(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
         dwVolume = (dwVolume*0xFFFF)/100;
         dwVolume = (dwVolume << 16) | dwVolume;
         WaveOut::setDefaultVolume(dwVolume);
+
+        // try to load the MDM library, not MMPM directly!!!
+        if (DosLoadModule(szError, sizeof(szError),
+                          "MDM.DLL", &MMPMLibraryHandle) != NO_ERROR)
+        {
+            // this system has no MMPM :-(
+            fMMPMAvailable = FALSE;
+        } 
+        else
+        {
+            /* detect if MMPM is available */
+            if (DosQueryProcAddr(MMPMLibraryHandle,
+                                 1, /* ORD_MCISENDCOMMAND */
+                                 NULL,
+                                (PFN*)&pfnmciSendCommand) != NO_ERROR)
+            {
+                fMMPMAvailable = FALSE;
+            } 
+            else
+            {
+                fMMPMAvailable = TRUE;
+            }
+
+            /* see if we can get the address for the mciGetErrorString function */
+            if (fMMPMAvailable == TRUE)
+            {
+                if (DosQueryProcAddr(MMPMLibraryHandle,
+                                     3, /* ORD_MCIGETERRORSTRING */
+                                     NULL,
+                                     (PFN*)&pfnmciGetErrorString) != NO_ERROR)
+                    pfnmciGetErrorString = NULL;
+            }
+            dprintf(("MMPM/2 is available; hmod %x", MMPMLibraryHandle));
+            dprintf(("mciSendCommand    %x", pfnmciSendCommand));
+            dprintf(("mciGetErrorString %x", pfnmciGetErrorString));
+        }
+
         return TRUE;
    }
 
@@ -95,6 +149,8 @@ BOOL WINAPI LibMainWinmm(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
         MULTIMEDIA_DeleteIData();
         auxOS2Close(); /* SvL: Close aux device if necessary */
         IRTMidiShutdown;  /* JT: Shutdown RT Midi subsystem, if running. */
+
+        if(MMPMLibraryHandle) DosFreeModule(MMPMLibraryHandle);
         return TRUE;
    }
    return FALSE;
@@ -143,6 +199,35 @@ ULONG APIENTRY inittermWinmm(ULONG hModule, ULONG ulFlag)
 }
 //******************************************************************************
 //******************************************************************************
-
-
-
+DWORD APIENTRY mymciSendCommand(WORD   wDeviceID,
+                                WORD   wMessage,
+                                DWORD  dwParam1,
+                                PVOID  dwParam2,
+                                WORD   wUserParm)
+{
+    if(pfnmciSendCommand == NULL) {
+        DebugInt3();
+        return MCIERR_CANNOT_LOAD_DRIVER;
+    }
+    USHORT sel = GetFS();
+    DWORD ret = pfnmciSendCommand(wDeviceID, wMessage, dwParam1, dwParam2, wUserParm);
+    SetFS(sel);
+    return ret;
+}
+//******************************************************************************
+//******************************************************************************
+DWORD APIENTRY mymciGetErrorString(DWORD   dwError,
+                                   LPSTR   lpstrBuffer,
+                                   WORD    wLength)
+{
+    if(pfnmciGetErrorString == NULL) {
+        DebugInt3();
+        return MCIERR_CANNOT_LOAD_DRIVER;
+    }
+    USHORT sel = GetFS();
+    DWORD ret = pfnmciGetErrorString(dwError, lpstrBuffer, wLength);
+    SetFS(sel);
+    return ret;
+}
+//******************************************************************************
+//******************************************************************************
