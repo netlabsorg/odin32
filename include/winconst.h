@@ -1,4 +1,4 @@
-/* $Id: winconst.h,v 1.20 2000-01-02 22:52:49 sandervl Exp $ */
+/* $Id: winconst.h,v 1.21 2000-01-13 13:55:20 sandervl Exp $ */
 
 /*
  * Win32 constants
@@ -987,3 +987,6 @@
 #define ERROR_REC_NON_EXISTENT_W                4005L
 #define ERROR_RPL_NOT_ALLOWED_W                 4006L
 
+
+#define LOWORD(l)              ((WORD)(DWORD)(l))
+#define HIWORD(l)              ((WORD)((DWORD)(l) >> 16))
