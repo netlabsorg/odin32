@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.132 2004-03-15 16:10:33 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.133 2004-03-15 16:36:51 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -620,6 +620,7 @@ int WIN32API GetSystemMetrics(int nIndex)
 */
 static int  dwScreenSaveTimeout = 180;
 static BOOL fScreenSaveActive   = FALSE;
+static int  fDragFullWindows    = -1;
 //******************************************************************************
 BOOL WIN32API SystemParametersInfoA(UINT uiAction, UINT uiParam, PVOID pvParam, UINT fWinIni)
 {
@@ -715,7 +716,7 @@ BOOL WIN32API SystemParametersInfoA(UINT uiAction, UINT uiParam, PVOID pvParam, 
 
     case SPI_SETSCREENSAVETIMEOUT:
         if(pvParam) {
-            dwScreenSaveTimeout = *(DWORD *)pvParam;
+            dwScreenSaveTimeout = uiParam;
         }
         break;
 
@@ -727,15 +728,24 @@ BOOL WIN32API SystemParametersInfoA(UINT uiAction, UINT uiParam, PVOID pvParam, 
 
     case SPI_SETSCREENSAVEACTIVE:
         if(pvParam) {
-            fScreenSaveActive = *(BOOL *)pvParam;
+            fScreenSaveActive = uiParam;
         }
         break;
 
     case SPI_GETDRAGFULLWINDOWS:
-        *(BOOL *)pvParam = OSLibWinQuerySysValue(SVOS_DYNAMICDRAG);
+        if(fDragFullWindows == -1) 
+        {
+             *(BOOL *)pvParam = OSLibWinQuerySysValue(SVOS_DYNAMICDRAG);
+        }
+        else *(BOOL *)pvParam = fDragFullWindows;
+
         break;
 
-   case SPI_ICONHORIZONTALSPACING:
+    case SPI_SETDRAGFULLWINDOWS:
+        fDragFullWindows = uiParam;
+        break;
+
+    case SPI_ICONHORIZONTALSPACING:
         *(INT *)pvParam = 90; //GetSystemMetrics(SM_CXICONSPACING);
         break;
 
