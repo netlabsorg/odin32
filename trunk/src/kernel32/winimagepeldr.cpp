@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.57 2000-10-06 15:16:05 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.58 2000-10-09 17:27:47 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -322,6 +322,7 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
         }
 	if(IsSectionType(win32file, &psh[i], IMAGE_DIRECTORY_ENTRY_TLS))
 	{
+		dprintf((LOG, "TLS section"));
 		tlsDir = (IMAGE_TLS_DIRECTORY *)ImageDirectoryOffset(win32file, IMAGE_DIRECTORY_ENTRY_TLS);
 		if(tlsDir) {
 		        addSection(SECTION_TLS, psh[i].PointerToRawData,
@@ -883,7 +884,7 @@ BOOL Win32PeLdrImage::setMemFlags()
             	break;
         case SECTION_INITDATA:
         case SECTION_UNINITDATA:
-        case SECTION_IMPORT: //TODO: read only?
+        case SECTION_IMPORT:
             	section[i].pageflags = PAG_WRITE | PAG_READ;
             	break;
 
