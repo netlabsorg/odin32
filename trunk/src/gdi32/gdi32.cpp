@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.65 2001-01-18 18:13:17 sandervl Exp $ */
+/* $Id: gdi32.cpp,v 1.66 2001-02-01 18:01:52 sandervl Exp $ */
 
 /*
  * GDI32 apis
@@ -633,16 +633,10 @@ int WIN32API SetROP2( HDC hdc, int rop2)
 //******************************************************************************
 int WIN32API EnumObjects( HDC hdc, int objType, GOBJENUMPROC objFunc, LPARAM lParam)
 {
-#ifdef STDCALL_ENUMPROCS
-    dprintf(("GDI32: EnumObjects %x %d %x %x", hdc, objType, objFunc, lParam));
-    //should change os2win.h
-    return O32_EnumObjects(hdc, objType, (GOBJENUMPROC_O32)objFunc, lParam);
-#else
     //calling convention differences
-    dprintf(("GDI32: EnumObjects STUB"));
+    dprintf(("ERROR: GDI32: EnumObjects STUB"));
 //    return O32_EnumObjects(arg1, arg2, arg3, arg4);
     return 0;
-#endif
 }
 //******************************************************************************
 //******************************************************************************

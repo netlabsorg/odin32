@@ -1,4 +1,4 @@
-/* $Id: CALLBACK.CPP,v 1.6 2000-11-04 16:29:23 sandervl Exp $ */
+/* $Id: CALLBACK.CPP,v 1.7 2001-02-01 18:01:52 sandervl Exp $ */
 
 /*
  * GDI32 support code for Line DDA callbacks
@@ -16,8 +16,6 @@
 
 #define DBG_LOCALLOG	DBG_callback
 #include "dbglocal.h"
-
-#ifndef STDCALL_ENUMPROCS
 
 static VOID OPEN32API Callback(int X, int Y, LPARAM lpData);
 
@@ -54,4 +52,4 @@ static VOID OPEN32API Callback(int X, int Y, LPARAM lpData)
 //******************************************************************************
 //******************************************************************************
 
-#endif //#ifndef STDCALL_ENUMPROCS
+
