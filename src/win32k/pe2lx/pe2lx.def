@@ -1,4 +1,0 @@
-;$Id: pe2lx.def,v 1.1 2000-12-16 21:54:19 bird Exp $
-NAME pe2lx WINDOWCOMPAT
-DESCRIPTION 'Odin32 - Pe2Lx - The old converter.'
-
