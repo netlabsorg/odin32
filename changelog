@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.1645 2001-08-09 15:01:30 sandervl Exp $ */
+/* $Id: changelog,v 1.1646 2001-08-10 19:30:42 sandervl Exp $ */
 
  2001-08-09: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Rewrote PostThreadMessage
@@ -7,6 +7,7 @@
                 o Convert 32x32 icon to 40x40 by centering it instead of scaling
     - KERNEL32: o Use WinQueueFromID to query message queue handle of new thread
     - SHELL32:  o Fill in complete resource dir for icon conversion
+    - OLEAUT32: o Updated olepicture + typelib with latest Wine code
 
  2001-08-08: knut st. osmundsen <kosmunds@csc.com>
     - Win32k:   o Ignore ERROR_DRIVE_LOCKED (chkdsk/format) error in
