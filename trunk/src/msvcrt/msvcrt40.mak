@@ -1,4 +1,4 @@
-# $Id: msvcrt40.mak,v 1.2 2000-12-02 23:40:15 bird Exp $
+# $Id: msvcrt40.mak,v 1.3 2001-07-08 11:09:40 sandervl Exp $
 
 #
 # Odin32 API
@@ -35,7 +35,7 @@ $(DLLENTRY)
 #
 LIBS = \
 $(ODIN32_LIB)/kernel32.lib \
-$(ODIN32_LIB)/crtdll.lib \
+$(ODIN32_LIB)/crtdll32.lib \
 $(ODIN32_LIB)/$(ODINCRT).lib \
 OS2386.LIB \
 $(RTLLIB_O)
