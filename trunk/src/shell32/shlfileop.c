@@ -25,9 +25,6 @@
 #include "debugtools.h"
 #endif
 #include <string.h>
-#ifdef __WIN32OS2__
-#include "debugtools.h"
-#endif
 #include "winreg.h"
 #include "shellapi.h"
 #include "shlobj.h"
