@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.1359 2001-04-15 14:28:43 sandervl Exp $ */
+/* $Id: changelog,v 1.1360 2001-04-15 17:04:00 sandervl Exp $ */
 
  2001-04-15: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o RegQueryValueExA/W broken. Reserved & type parameters reversed.
@@ -8,6 +8,9 @@
                   (fixes high cpu load in PowerDVD when holding mouse cursor over
                    control window; PM kept sending WM_MOUSEMOVE messages)
                 o Rewrote ClipCursor & GetClipCursor
+                o Set PM style flags when WS_CLIPCHILDREN or WS_CLIPSIBLINGS
+                  flag is changed by the application using SetWindowLong.
+                  (fixes Lotus Notes size bar & upper left rectangle painting)
 
  2001-04-14: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - configure,win32k:
