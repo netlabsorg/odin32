@@ -1,4 +1,4 @@
-/* $Id: exceptutil.h,v 1.14 2002-06-02 12:42:09 sandervl Exp $ */
+/* $Id: exceptutil.h,v 1.15 2003-03-06 12:49:08 sandervl Exp $ */
 
 /*
  * Exception + misc functions for OS/2
@@ -31,7 +31,7 @@ void  PrintExceptionChain();
 #define PrintExceptionChain()
 #endif
 
-ULONG CDECL AsmCallThreadHandler(ULONG handler, LPVOID parameter);
+ULONG CDECL AsmCallThreadHandler(BOOL fAlignStack, ULONG handler, LPVOID parameter);
 
 DWORD CDECL CallEntryPoint(DWORD entryPoint, DWORD parameter);
 

@@ -1,4 +1,4 @@
-; $Id: exceptutil.asm,v 1.24 2003-02-18 11:38:30 sandervl Exp $
+; $Id: exceptutil.asm,v 1.25 2003-03-06 12:49:08 sandervl Exp $
 
 ;/*
 ; * Project Odin Software License can be found in LICENSE.TXT
@@ -154,10 +154,16 @@ _SetExceptionChain proc near
 _SetExceptionChain endp
 
 
+;;ULONG CDECL AsmCallThreadHandler(BOOL fAlignStack, ULONG handler, LPVOID parameter);
         PUBLIC  _AsmCallThreadHandler
 _AsmCallThreadHandler proc near
         push	ebp
         mov	ebp, esp
+
+;first check if we have 128kb stack or more; if not, then skip the stack alignment code
+        mov     eax, [ebp+8]
+        cmp     eax, 0
+        je      @goodthreadstack
 
 ;We're asking for problems if our stack start near a 64kb boundary
 ;Some OS/2 thunking procedures can choke if there's not enough stack left
@@ -191,8 +197,8 @@ _AsmCallThreadHandler proc near
 
 @goodthreadstack:
 
-        push    dword ptr [ebp+12]
-        mov     eax, dword ptr [ebp+8]
+        push    dword ptr [ebp+16]
+        mov     eax, dword ptr [ebp+12]
         call    eax
 
         mov     esp, ebp

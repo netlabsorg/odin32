@@ -1,4 +1,4 @@
-/* $Id: thread.cpp,v 1.51 2003-03-06 10:22:27 sandervl Exp $ */
+/* $Id: thread.cpp,v 1.52 2003-03-06 12:49:08 sandervl Exp $ */
 
 /*
  * Win32 Thread API functions
@@ -347,9 +347,11 @@ DWORD OPEN32API Win32ThreadProc(LPVOID lpData)
     Win32DllBase::tlsAttachThreadToAllDlls(); //setup TLS structures of all dlls
     Win32DllBase::attachThreadToAllDlls();    //send DLL_THREAD_ATTACH message to all dlls
 
+    BOOL fAlignStack = ((ULONG)winteb->stack_top - (ULONG)winteb->stack_low) >= 128*1024;
+
     //Set FPU control word to 0x27F (same as in NT)
     CONTROL87(0x27F, 0xFFF);
-    rc = AsmCallThreadHandler(threadCallback, userdata);
+    rc = AsmCallThreadHandler(fAlignStack, threadCallback, userdata);
 
     if(fExitProcess) {
         OSLibDosExitThread(rc);
