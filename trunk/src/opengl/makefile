@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.12 2000-03-01 14:26:49 sandervl Exp $
+# $Id: makefile,v 1.13 2000-03-01 14:50:16 sandervl Exp $
 #
 # PD-Win32 API
 #
@@ -32,12 +32,15 @@ TARGET3  = glut\glut32
 DTARGET3 = glut32
 TARGET4  = glide
 DTARGET4 = glide2x
+TARGET5  = mesa
+DTARGET5 = opengl32
+TARGET6  = 3dfxmesa
 
 OBJS1=  opengl32.obj initterm.obj resource.obj
 
-all: $(TARGET1).dll $(TARGET1).lib \
-     $(TARGET2).dll $(TARGET2).lib \
-     $(TARGET3).dll $(TARGET3).lib $(TARGET4)
+#all: $(TARGET1).dll $(TARGET1).lib \
+all: $(TARGET5) $(TARGET2).dll $(TARGET2).lib \
+     $(TARGET3).dll $(TARGET3).lib $(TARGET4) $(TARGET6)
 
 $(TARGET1).dll: $(OBJS1) $(TARGET1).def
     $(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS1) $(TARGET1).def \
@@ -87,10 +90,21 @@ $(TARGET4):
     $(MAKE_CMD)
     cd ..
 
+$(TARGET5):
+    cd mesa
+    $(MAKE_CMD)
+    cd ..
+
+$(TARGET6):
+    cd mesa\3dfx
+    $(MAKE_CMD)
+    cd ..\..
+
 lib: $(TARGET1).lib $(PDWIN32_LIB)\$(DTARGET1).lib \
      $(TARGET2).lib $(PDWIN32_LIB)\$(DTARGET2).lib \
      $(TARGET3).lib $(PDWIN32_LIB)\$(DTARGET3).lib \
-     $(PDWIN32_LIB)\$(DTARGET4).lib
+     $(PDWIN32_LIB)\$(DTARGET4).lib \
+     $(PDWIN32_LIB)\$(DTARGET5).lib 
 
 $(PDWIN32_LIB)\$(DTARGET1).lib: $(TARGET1).lib
     $(CP) $** $@
@@ -106,6 +120,11 @@ $(PDWIN32_LIB)\$(DTARGET4).lib:
     $(MAKE_CMD) lib
     cd ..
 
+$(PDWIN32_LIB)\$(DTARGET5).lib:
+    cd mesa
+    $(MAKE_CMD) lib
+    cd ..
+
 dep:
     $(DEPEND) -I$(PDWIN32_INCLUDE);$(PDWIN32_INCLUDE)\win \
         *.c *.cpp *.h *.asm *.inc $(PDWIN32_INCLUDE)\*.h
@@ -115,7 +134,11 @@ dep:
     $(MAKE_CMD) NODEP=1 dep
     cd ..\glide
     $(MAKE_CMD) NODEP=1 dep
-    cd ..
+    cd ..\mesa
+    $(MAKE_CMD) NODEP=1 dep
+    cd 3dfx
+    $(MAKE_CMD) NODEP=1 dep
+    cd ..\..
 
 !ifndef NODEP
 !include .depend
@@ -131,5 +154,9 @@ clean:
     $(MAKE_CMD) clean
     cd ..\glide
     $(MAKE_CMD) clean
-    cd ..
+    cd ..\mesa
+    $(MAKE_CMD) clean
+    cd 3dfx
+    $(MAKE_CMD) clean
+    cd ..\..
 

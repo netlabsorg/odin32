@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2000-03-01 10:44:25 bird Exp $
+# $Id: makefile,v 1.5 2000-03-01 14:50:16 sandervl Exp $
 #
 # PD-Win32 API
 #
@@ -27,8 +27,7 @@ all: $(OBJS)
 
 dep:
     $(DEPEND) $(CINCLUDE) *.c *.cpp *.h *.asm *.inc \
-        ..\internals\*.h ..\nurbtess\*.h
-# removed: ..\..\..\mesa\GL\*.h - cyclic dep: gl.h <-> mesa_wgl.h
+        ..\internals\*.h ..\nurbtess\*.h ..\..\..\mesa\GL\*.h
 
 !ifndef NODEP
 !include .depend

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2000-03-01 14:26:49 sandervl Exp $
+# $Id: makefile,v 1.3 2000-03-01 14:50:17 sandervl Exp $
 #
 # PD-Win32
 #
@@ -25,7 +25,7 @@ CXXFLAGS = -I.. -I..\GL $(CXXFLAGS_WIN32APP) -I$(PDWIN32_INCLUDE) -I..\..\glut -
 
 TARGET = OPENGL32
 
-all: $(TARGET).DLL $(TARGET).LIB
+all: $(TARGET).DLL
 
 OBJS = 	fxapi.obj \
 	fxcva.obj \
@@ -83,7 +83,11 @@ dep:
 !endif
 
 clean:
-        $(RM) *.obj *.dll *.lib *.lrf
+        $(RM) *.obj 
+        $(RM) *.dll 
+        $(RM) *.lib 
+        $(RM) *.lrf
+        $(RM) resource.asm
         $(RM) $(PDWIN32_BIN)\$(TARGET).dll
         $(RM) $(PDWIN32_LIB)\$(TARGET).lib
 
