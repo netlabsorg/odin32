@@ -1,4 +1,4 @@
-/* $Id: myldrOpen.cpp,v 1.10.4.5 2000-08-22 03:00:21 bird Exp $
+/* $Id: myldrOpen.cpp,v 1.10.4.6 2000-08-25 04:47:24 bird Exp $
  *
  * myldrOpen - ldrOpen.
  *
@@ -29,6 +29,7 @@
 #include <memory.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
 
 #include "log.h"
 #include "avl.h"

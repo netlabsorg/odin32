@@ -1,4 +1,4 @@
-/* $Id: ldr.h,v 1.5.4.5 2000-08-22 03:00:19 bird Exp $
+/* $Id: ldr.h,v 1.5.4.6 2000-08-25 04:47:22 bird Exp $
  *
  * ldr - Our loader "subsystem" public header file.
  *
@@ -228,7 +228,8 @@ ULONG _Optlink  tkExecPgmCopyEnv(char *pachBuffer, unsigned cchBuffer);
 /*
  * functions
  */
-ULONG ldrInit(void);
+PSZ         ldrGetExePath(PSZ pszPath, BOOL fExecChild);
+ULONG       ldrInit(void);
 
 #ifdef __cplusplus
 }

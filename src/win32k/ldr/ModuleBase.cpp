@@ -1,4 +1,4 @@
-/* $Id: ModuleBase.cpp,v 1.3.4.1 2000-07-16 22:43:33 bird Exp $
+/* $Id: ModuleBase.cpp,v 1.3.4.2 2000-08-25 04:47:23 bird Exp $
  *
  * ModuleBase - Implementetation.
  *
@@ -168,10 +168,10 @@ ULONG  ModuleBase::applyFixups(PMTE pMTE, ULONG iObject, ULONG iPageTable, PVOID
  *
  * @returns   OS2 return code.
  *            pLdrLv->lv_sfn  is set to filename handle.
- * @param     pachModname   Pointer to modulename. Not zero terminated!
- * @param     cchModname    Modulename length.
+ * @param     pachFilename  Pointer to filename. Not zero terminated!
+ * @param     cchFilename   Filename length.
  * @param     pLdrLv        Loader local variables? (Struct from KERNEL.SDF)
- * @param     pfl           Pointer to flags which are passed on to ldrOpen.
+ * @param     pful          Pointer to flags which are passed on to ldrOpen.
  * @sketch
  * This is roughly what the original ldrOpenPath does:
  *      if !CLASS_GLOBAL or miniifs then
@@ -184,16 +184,16 @@ ULONG  ModuleBase::applyFixups(PMTE pMTE, ULONG iObject, ULONG iPageTable, PVOID
  *          endloop
  *      endif
  */
-ULONG  ModuleBase::openPath(PCHAR pachModname, USHORT cchModname, ldrlv_t *pLdrLv, PULONG pfl) /* (ldrOpenPath) */
+ULONG  ModuleBase::openPath(PCHAR pachFilename, USHORT cchFilename, ldrlv_t *pLdrLv, PULONG pful) /* (ldrOpenPath) */
 {
     #ifdef RING0
     printf("ModuleBase::openPath:\n");
-    return ldrOpenPath(pachModname, cchModname, pLdrLv, pfl);
+    return ldrOpenPath(pachFilename, cchFilename, pLdrLv, pful);
     #else
-    NOREF(pachModname);
-    NOREF(cchModname);
+    NOREF(pachFilename);
+    NOREF(cchFilename);
     NOREF(pLdrLv);
-    NOREF(pfl);
+    NOREF(pful);
     return ERROR_NOT_SUPPORTED;
     #endif
 }
@@ -266,6 +266,29 @@ BOOL  ModuleBase::queryIsModuleName(PCSZ pszFilename)
 
     /* TODO: relative name vs fullname. */
     return stricmp(pszFilename, this->pszFilename) == 0;
+}
+
+
+/**
+ * Gets the fullpath filename.
+ * @returns     Const ("Readonly") pointer to the filename.
+ * @author      knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ */
+PCSZ ModuleBase::getFilename()
+{
+    return pszFilename;
+}
+
+
+/**
+ * Gets the modulename.
+ * @returns     Const ("Readonly") pointer to the module name.
+ * @author      knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @remark      Modulename is filename without path and extention.
+ */
+PCSZ ModuleBase::getModuleName()
+{
+    return pszModuleName;
 }
 
 

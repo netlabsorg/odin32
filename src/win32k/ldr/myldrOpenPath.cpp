@@ -1,4 +1,4 @@
-/* $Id: myldrOpenPath.cpp,v 1.1.2.2 2000-08-15 07:03:26 bird Exp $
+/* $Id: myldrOpenPath.cpp,v 1.1.2.3 2000-08-25 04:47:25 bird Exp $
  *
  * myldrOpenPath - ldrOpenPath used to open executables we'll override
  * this to altern the search path for DLLs.
@@ -139,7 +139,7 @@ ULONG LDRCALL myldrOpenPath( /* retd  0x10 */
             {
                 pExe = getModuleByhMTE(ptdaGet_ptda_module(pPTDA));
                 #ifdef DEBUG            /* While testing! */
-                kprintf(("myldrOpenPath: getModuleByhMTE returned 0x%x08 for hmod=0x%04\n",
+                kprintf(("myldrOpenPath: getModuleByhMTE returned 0x%08x for hmod=0x%04x\n",
                          pExe, ptdaGet_ptda_module(pPTDA)));
                 #endif
             }

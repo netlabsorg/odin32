@@ -1,4 +1,4 @@
-/* $Id: pe2lx.h,v 1.9.4.4 2000-08-22 03:00:19 bird Exp $
+/* $Id: pe2lx.h,v 1.9.4.5 2000-08-25 04:47:23 bird Exp $
  *
  * Pe2Lx class declarations. Ring 0 and Ring 3
  *
@@ -65,7 +65,8 @@ public:
     ULONG  read(ULONG offLXFile, PVOID pvBuffer, ULONG cbToRead, ULONG flFlags, PMTE pMTE);
     ULONG  applyFixups(PMTE pMTE, ULONG iObject, ULONG iPageTable, PVOID pvPage,
                        ULONG ulPageAddress, PVOID pvPTDA); /*(ldrEnum32bitRelRecs)*/
-    ULONG  openPath(PCHAR pachModname, USHORT cchModname, ldrlv_t *pLdrLv, PULONG pfl); /* (ldrOpenPath) */
+    ULONG  openPath(PCHAR pachFilename, USHORT cchFilename, ldrlv_t *pLdrLv, PULONG pful); /* (ldrOpenPath) */
+    static ULONG  openPath2(PCHAR pachFilename, USHORT cchFilename, ldrlv_t *pLdrLv, PULONG pful, BOOL fOdin32PathValid);
     #ifndef RING0
     ULONG  testApplyFixups();
     ULONG  writeFile(PCSZ pszLXFilename);
@@ -208,6 +209,7 @@ private:
 
     static LONG             cLoadedModules; /* Count of existing objects. Updated by constructor and destructor. */
     static const char *     pszOdin32Path;  /* Odin32 base path (include a slash). */
+    static ULONG            cchOdin32Path;  /* Odin32 base path length. */
     static SFN              sfnKernel32;    /* Odin32 Kernel32 filehandle. */
 };
 

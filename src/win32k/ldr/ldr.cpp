@@ -1,4 +1,4 @@
-/* $Id: ldr.cpp,v 1.7.4.3 2000-08-22 03:00:20 bird Exp $
+/* $Id: ldr.cpp,v 1.7.4.4 2000-08-25 04:47:24 bird Exp $
  *
  * ldr.cpp - Loader helpers.
  *
@@ -14,6 +14,7 @@
 #define INCL_DOSERRORS
 #define INCL_NOPMAPI
 #define INCL_OS2KRNL_SEM
+#define INCL_OS2KRNL_PTDA
 
 /*******************************************************************************
 *   Header Files                                                               *
@@ -25,6 +26,7 @@
 #include <memory.h>
 #include <stdlib.h>
 #include <stddef.h>
+#include <string.h>
 
 #include "log.h"
 #include "avl.h"
@@ -291,6 +293,121 @@ ULONG      removeModule(SFN hFile)
     free(pMod);
 
     return NO_ERROR;
+}
+
+
+/**
+ * Gets the path of the executable being executed.
+ * @returns     Pointer to pszPath on success. Path has _NOT_ a trailing slash.
+ *              NULL pointer on error.
+ * @param       pszPath     Pointer to path buffer. Expects CCHMAXPATH length.
+ * @param       fExecChild  Use hMTE of the PTDAExecChild if present.
+ * @sketch
+ * @status      completely implemented.
+ * @author      knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @remark      The path from the pExeModule might not be fully qualified.
+ */
+PSZ ldrGetExePath(PSZ pszPath, BOOL fExecChild)
+{
+    PCSZ    pszFilename;
+    PCSZ    psz;
+
+    #if 0 /* getFilename not implemented */
+    if (pExeModule != NULL)
+        /*
+         * We have the executable object pointer. Let's use it!
+         */
+        pszFilename = pExeModule->Data.pModule->getFilename();
+    else
+    #endif
+    {
+        /*
+         * Get the hMTE for the executable using the pPTDAExecChild
+         * Then get the pMTE, and access the smte_path to get a pointer to the executable path.
+         */
+        PPTDA   pPTDACur;               /* Pointer to the current (system context) PTDA */
+        PPTDA   pPTDA;                  /* PTDA in question. */
+        HMTE    hMTE = NULLHANDLE;      /* Modulehandle of the executable module. */
+        PMTE    pMTE;                   /* Pointer to ModuleTableEntry of the executable module. */
+
+        /*
+         *  Get the current PTDA. (Fail if this call failes.)
+         *  IF pPTDAExecChild isn't NULL THEN get hMTE for that.
+         *  IF no pPTDAExecChild THEN  get hMte for the current PTDA.
+         */
+        pPTDACur = ptdaGetCur();
+        if (pPTDACur != NULL)
+        {
+            pPTDA = ptdaGet_pPTDAExecChild(pPTDACur);
+            if (pPTDA != NULL && fExecChild)
+                hMTE = ptdaGet_ptda_module(pPTDA);
+            if (hMTE == NULLHANDLE)
+                hMTE = ptdaGet_ptda_module(pPTDACur);
+        }
+        else
+        {   /* Not called at task time? No current task! */
+            kprintf(("ldrGetExePath: Failed to get current PTDA.\n"));
+            return NULL;
+        }
+
+        /* fail if hMTE is NULLHANDLE ie. not found / invalid */
+        if (hMTE == NULLHANDLE)
+        {
+            kprintf(("ldrGetExePath: Failed to get hMTE from the PTDAs.\n"));
+            return NULL;
+        }
+
+        /* get the pMTE for this hMTE */
+        pMTE = ldrASMpMTEFromHandle(hMTE);
+        if (pMTE == NULL)
+        {
+            kprintf(("ldrGetExePath: ldrASMpMTEFromHandle failed for hMTE=0x%04.\n", hMTE));
+            return NULL;
+        }
+        if (pMTE->mte_swapmte == NULL) /* paranoia */
+        {
+            kprintf(("ldrGetExePath: mte_swapmte is NULL.\n"));
+            return NULL;
+        }
+
+        /* take the filename from the swappable MTE */
+        pszFilename = pMTE->mte_swapmte->smte_path;
+        if (pszFilename == NULL)
+        {
+            kprintf(("ldrGetExePath: smte_path is NULL.\n"));
+            return NULL;
+        }
+    }
+
+    /* paranoia... */
+    if (*pszFilename == '\0')
+    {
+        kprintf(("ldrGetExePath: pszFilename is empty!\n"));
+        return NULL;
+    }
+
+    /*
+     * Skip back over the filename. (stops pointing at the slash or ':')
+     */
+    psz = pszFilename + strlen(pszFilename)-1;
+    while (psz >= pszFilename && *psz != '\\' && *psz != '/' && *psz != ':')
+        psz--;
+
+    /*
+     * If no path the fail.
+     */
+    if (psz <= pszFilename)
+    {
+        kprintf(("ldrGetExePath: Exepath is empty.\n"));
+        return NULL;
+    }
+
+    /*
+     * Copy path and return.
+     */
+    memcpy(pszPath, pszFilename, psz - pszFilename);
+    pszPath[psz - pszFilename] = '\0';
+    return pszPath;
 }
 
 
