@@ -1,4 +1,4 @@
-# $Id: dev16.mak,v 1.1.2.1 2002-04-01 09:06:54 bird Exp $
+# $Id: dev16.mak,v 1.1.2.2 2002-04-01 12:50:00 bird Exp $
 
 #
 # kKrnlLib/dev16
@@ -33,9 +33,9 @@ CC_SEGS     = -NTCODE16 -NDDATA16
 # Targets.
 #
 TARGET_OBJS =\
-$(PATH_TARGET)\d16globl.$(EXT_OBJ)\
-$(PATH_TARGET)\d16init.$(EXT_OBJ)\
 $(PATH_TARGET)\d16strat.$(EXT_OBJ)\
+$(PATH_TARGET)\d16init.$(EXT_OBJ)\
+$(PATH_TARGET)\d16globl.$(EXT_OBJ)\
 
 
 #
