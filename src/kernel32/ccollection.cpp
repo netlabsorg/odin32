@@ -1,4 +1,4 @@
-/* $Id: ccollection.cpp,v 1.3 2001-05-30 03:28:02 phaller Exp $ */
+/* $Id: ccollection.cpp,v 1.4 2001-05-30 13:02:55 phaller Exp $ */
 
 /*
  * Collection class:
@@ -651,21 +651,25 @@ void* CHashtableLookup::removeElement(char *pszName)
     while(pLLE)
     {
         PHASHTABLEENTRY pHTE = (PHASHTABLEENTRY)pLLE->pObject;
-        if (strcmp(pHTE->pszName, pszName) == 0)
-        {
-            // save old object pointer
-            void* pTemp = pHTE->pObject;
-            free(pHTE);
 
-            // found the correct entry
-            parrLists[ulHash]->removeElement(pLLE);
+        // quickly compare 1st character for equality
+        // before doing the strcmp call
+        if (*pHTE->pszName == *pszName)
+            if (strcmp(pHTE->pszName, pszName) == 0)
+            {
+                // save old object pointer
+                void* pTemp = pHTE->pObject;
+                free(pHTE);
 
-            // count allocated elements
-            iElements--;
+                // found the correct entry
+                parrLists[ulHash]->removeElement(pLLE);
 
-            // return old object pointer to signal success
-            return pTemp;
-        }
+                // count allocated elements
+                iElements--;
+
+                // return old object pointer to signal success
+                return pTemp;
+            }
 
         pLLE = pLLE->pNext;
     }
@@ -701,11 +705,15 @@ void* CHashtableLookup::getElement(char *pszName)
     while(pLLE)
     {
         PHASHTABLEENTRY pHTE = (PHASHTABLEENTRY)pLLE->pObject;
-        if (strcmp(pHTE->pszName, pszName) == 0)
-        {
-            // return result
-            return pHTE->pObject;
-        }
+
+        // quickly compare 1st character for equality
+        // before doing the strcmp call
+        if (*pHTE->pszName == *pszName)
+            if (strcmp(pHTE->pszName, pszName) == 0)
+            {
+                // return result
+                return pHTE->pObject;
+            }
 
         pLLE = pLLE->pNext;
     }
@@ -734,16 +742,23 @@ void  CHashtableLookup::clear()
 
 void  CHashtableLookup::rehash()
 {
-    // determine number of allocated elements
-    // actually, we need the prime next to
-    // the given number.
-    int iNewSize = nextPrime(iElements);
-
-    setSize(iNewSize);
+    // if there are less slots than elements,
+    // the blocking factor is expected to be high
+    setSize(iElements);
 }
 
 
 void  CHashtableLookup::setSize(int iNewSize)
+{
+    // determine number of allocated elements
+    // actually, we need the prime next to
+    // the given number.
+    if (iSize < iNewSize)
+        setSize0(nextPrime(iNewSize));
+}
+
+
+void  CHashtableLookup::setSize0(int iNewSize)
 {
     // check if rehashing is necessary at all
     if (iSize == iNewSize)
