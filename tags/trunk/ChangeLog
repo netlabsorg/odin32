@@ -1,4 +1,8 @@
- /* $Id: ChangeLog,v 1.715 2000-02-09 15:55:34 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.716 2000-02-09 23:35:30 sandervl Exp $ */
+
+ 2000-02-10: Edgar Buerkle <Edgar.Buerkle@gmx.net>
+	- GDI32: Fix alignment for 1 & 4 bits bitmaps (dibsection)
+	- NTDLL: Pretend no debugger is active in NtQueryInformationProcess
 
  2000-02-09: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Implemented WaitForInputIdle
