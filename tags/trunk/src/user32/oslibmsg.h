@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.h,v 1.14 2001-02-15 00:33:01 sandervl Exp $ */
+/* $Id: oslibmsg.h,v 1.15 2001-10-03 18:37:52 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -164,7 +164,8 @@ BOOL OSLibPostMessageDirect(HWND hwnd, ULONG msg, ULONG wParam, ULONG lParam);
 #define WINWM_MBUTTONDOWN           0x0207
 #define WINWM_MBUTTONUP             0x0208
 #define WINWM_MBUTTONDBLCLK         0x0209
-#define WINWM_MOUSELAST             0x0209
+#define WINWM_MOUSEWHEEL            0x020A
+#define WINWM_MOUSELAST             0x020A
 #define WINWM_PARENTNOTIFY          0x0210
 #define WINWM_ENTERMENULOOP         0x0211
 #define WINWM_EXITMENULOOP          0x0212
