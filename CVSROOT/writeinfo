@@ -74,6 +74,6 @@
 /src/comctl32                              sandervl,achimha
 /src/opengl                                sandervl
 /src/opengl/glut                           sandervl
-/make                                      bird sandervl
-/make/testcase                             bird sandervl
+/make                                      bird,sandervl
+/make/testcase                             bird,sandervl
 
