@@ -19,7 +19,19 @@
 #ifndef _INC_SETUPAPI
 #define _INC_SETUPAPI
 
-#include "wtypes.h"
+#ifdef __WIN32OS2__
+#ifndef GUID_DEFINED
+#define GUID_DEFINED
+typedef struct _GUID
+{
+    unsigned long Data1;
+    unsigned short Data2;
+    unsigned short Data3;
+    unsigned char Data4[8];
+} GUID;
+#endif
+#endif
+
 #include "commctrl.h"
 
 /* Define type for handle to a loaded inf file */
@@ -117,7 +129,6 @@ typedef UINT (CALLBACK *PSP_FILE_CALLBACK_A)( PVOID Context, UINT Notification,
 typedef UINT (CALLBACK *PSP_FILE_CALLBACK_W)( PVOID Context, UINT Notification,
                                               UINT Param1, UINT Param2 );
 #endif
-
 #define PSP_FILE_CALLBACK WINELIB_NAME_AW(PSP_FILE_CALLBACK_)
 
 #define LINE_LEN                    256
@@ -138,6 +149,29 @@ typedef struct _SP_DEVINFO_DATA
    DWORD DevInst;   /* DEVINST handle */
    DWORD Reserved;
 } SP_DEVINFO_DATA, *PSP_DEVINFO_DATA;
+
+typedef struct _SP_DEVICE_INTERFACE_DATA
+{
+   DWORD      cbSize;
+   GUID       InterfaceClassGuid;
+   DWORD      Flags;
+   ULONG_PTR  Reserved;
+} SP_DEVICE_INTERFACE_DATA, *PSP_DEVICE_INTERFACE_DATA;
+
+typedef struct _SP_DEVICE_INTERFACE_DETAIL_DATAA
+{
+   DWORD      cbSize;
+   CHAR       DevicePath[ANYSIZE_ARRAY];
+} SP_DEVICE_INTERFACE_DETAIL_DATAA, *PSP_DEVICE_INTERFACE_DETAIL_DATAA;
+
+typedef struct _SP_DEVICE_INTERFACE_DETAIL_DATAW
+{
+   DWORD      cbSize;
+   WCHAR      DevicePath[ANYSIZE_ARRAY];
+} SP_DEVICE_INTERFACE_DETAIL_DATAW, *PSP_DEVICE_INTERFACE_DETAIL_DATAW;
+
+DECL_WINELIB_TYPE_AW(SP_DEVICE_INTERFACE_DETAIL_DATA)
+DECL_WINELIB_TYPE_AW(PSP_DEVICE_INTERFACE_DETAIL_DATA)
 
 #define INF_STYLE_NONE           0x00
 #define INF_STYLE_OLDNT          0x01
