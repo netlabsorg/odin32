@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.80 1999-08-13 18:40:02 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.81 1999-08-14 09:06:38 sandervl Exp $ */
+
+ 99-08-14: Sander van Leeuwen <sandervl@xs4all.nl>
+	- INCLUDE\win\windows.h: Include odin.h if __WIN32OS2__ is defined
 
  99-08-13: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Export heap functions by ordinal
