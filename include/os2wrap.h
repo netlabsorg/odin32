@@ -1,4 +1,4 @@
-/* $Id: os2wrap.h,v 1.3 1999-06-19 10:53:12 sandervl Exp $ */
+/* $Id: os2wrap.h,v 1.4 1999-06-21 17:45:38 sandervl Exp $ */
 #ifndef __OS2WRAP_H__
 #define __OS2WRAP_H__
 
@@ -7,7 +7,7 @@
 #include <os2newapi.h>
 
 #ifdef INCL_DOSMEMMGR
-inline ULONG  _DosAllocMem(PPVOID a, ULONG b, ULONG c)
+inline ULONG _DosAllocMem(PPVOID a, ULONG b, ULONG c)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -21,7 +21,7 @@ inline ULONG  _DosAllocMem(PPVOID a, ULONG b, ULONG c)
 #undef  DosAllocMem
 #define DosAllocMem _DosAllocMem
 
-inline ULONG APIENTRY _DosAllocSharedMem(PPVOID a, PCSZ b, ULONG c, ULONG d)
+inline ULONG _DosAllocSharedMem(PPVOID a, PCSZ b, ULONG c, ULONG d)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -35,7 +35,7 @@ inline ULONG APIENTRY _DosAllocSharedMem(PPVOID a, PCSZ b, ULONG c, ULONG d)
 #undef  DosAllocSharedMem
 #define DosAllocSharedMem _DosAllocSharedMem
 
-inline ULONG APIENTRY _DosFreeMem(PVOID a)
+inline ULONG _DosFreeMem(PVOID a)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -49,7 +49,7 @@ inline ULONG APIENTRY _DosFreeMem(PVOID a)
 #undef  DosFreeMem
 #define DosFreeMem _DosFreeMem
 
-inline ULONG APIENTRY _DosGetNamedSharedMem(PPVOID a, PCSZ b, ULONG c)
+inline ULONG _DosGetNamedSharedMem(PPVOID a, PCSZ b, ULONG c)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -63,7 +63,7 @@ inline ULONG APIENTRY _DosGetNamedSharedMem(PPVOID a, PCSZ b, ULONG c)
 #undef  DosGetNamedSharedMem
 #define DosGetNamedSharedMem _DosGetNamedSharedMem
 
-inline ULONG APIENTRY _DosGetSharedMem(PVOID a, ULONG b)
+inline ULONG _DosGetSharedMem(PVOID a, ULONG b)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -77,7 +77,7 @@ inline ULONG APIENTRY _DosGetSharedMem(PVOID a, ULONG b)
 #undef  DosGetSharedMem
 #define DosGetSharedMem _DosGetSharedMem
 
-inline ULONG APIENTRY _DosGiveSharedMem(PVOID a, PID b, ULONG c)
+inline ULONG _DosGiveSharedMem(PVOID a, PID b, ULONG c)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -91,7 +91,7 @@ inline ULONG APIENTRY _DosGiveSharedMem(PVOID a, PID b, ULONG c)
 #undef  DosGiveSharedMem
 #define DosGiveSharedMem _DosGiveSharedMem
 
-inline ULONG APIENTRY _DosQueryMem(PVOID a, PULONG b, PULONG c)
+inline ULONG _DosQueryMem(PVOID a, PULONG b, PULONG c)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -105,7 +105,7 @@ inline ULONG APIENTRY _DosQueryMem(PVOID a, PULONG b, PULONG c)
 #undef  DosQueryMem
 #define DosQueryMem _DosQueryMem
 
-inline ULONG APIENTRY _DosSetMem(PVOID a, ULONG b, ULONG c)
+inline ULONG _DosSetMem(PVOID a, ULONG b, ULONG c)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -119,7 +119,7 @@ inline ULONG APIENTRY _DosSetMem(PVOID a, ULONG b, ULONG c)
 #undef  DosSetMem
 #define DosSetMem _DosSetMem
 
-inline ULONG APIENTRY _DosSubAllocMem(PVOID a, PPVOID b, ULONG c)
+inline ULONG _DosSubAllocMem(PVOID a, PPVOID b, ULONG c)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -133,7 +133,7 @@ inline ULONG APIENTRY _DosSubAllocMem(PVOID a, PPVOID b, ULONG c)
 #undef  DosSubAllocMem
 #define DosSubAllocMem _DosSubAllocMem
 
-inline ULONG APIENTRY _DosSubFreeMem(PVOID a, PVOID b, ULONG c)
+inline ULONG _DosSubFreeMem(PVOID a, PVOID b, ULONG c)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -147,7 +147,7 @@ inline ULONG APIENTRY _DosSubFreeMem(PVOID a, PVOID b, ULONG c)
 #undef  DosSubFreeMem
 #define DosSubFreeMem _DosSubFreeMem
 
-inline ULONG APIENTRY _DosSubSetMem(PVOID a, ULONG b, ULONG c)
+inline ULONG _DosSubSetMem(PVOID a, ULONG b, ULONG c)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -161,7 +161,7 @@ inline ULONG APIENTRY _DosSubSetMem(PVOID a, ULONG b, ULONG c)
 #undef  DosSubSetMem
 #define DosSubSetMem _DosSubSetMem
 
-inline ULONG APIENTRY _DosSubUnsetMem(PVOID a)
+inline ULONG _DosSubUnsetMem(PVOID a)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -177,7 +177,7 @@ inline ULONG APIENTRY _DosSubUnsetMem(PVOID a)
 
 #endif
 #ifdef INCL_DOSFILEMGR
-inline ULONG APIENTRY _DosCancelLockRequest(HFILE a, PFILELOCK b)
+inline ULONG _DosCancelLockRequest(HFILE a, PFILELOCK b)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -191,7 +191,7 @@ inline ULONG APIENTRY _DosCancelLockRequest(HFILE a, PFILELOCK b)
 #undef  DosCancelLockRequest
 #define DosCancelLockRequest _DosCancelLockRequest
 
-inline ULONG APIENTRY _DosClose(HFILE a)
+inline ULONG _DosClose(HFILE a)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -205,7 +205,7 @@ inline ULONG APIENTRY _DosClose(HFILE a)
 #undef  DosClose
 #define DosClose _DosClose
 
-inline ULONG APIENTRY _DosCopy(PCSZ a, PCSZ b, ULONG c)
+inline ULONG _DosCopy(PCSZ a, PCSZ b, ULONG c)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -219,7 +219,7 @@ inline ULONG APIENTRY _DosCopy(PCSZ a, PCSZ b, ULONG c)
 #undef  DosCopy
 #define DosCopy _DosCopy
 
-inline ULONG APIENTRY _DosCreateDir(PCSZ a, PEAOP2 b)
+inline ULONG _DosCreateDir(PCSZ a, PEAOP2 b)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -233,7 +233,7 @@ inline ULONG APIENTRY _DosCreateDir(PCSZ a, PEAOP2 b)
 #undef  DosCreateDir
 #define DosCreateDir _DosCreateDir
 
-inline ULONG APIENTRY _DosDelete(PCSZ a)
+inline ULONG _DosDelete(PCSZ a)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -247,7 +247,7 @@ inline ULONG APIENTRY _DosDelete(PCSZ a)
 #undef  DosDelete
 #define DosDelete _DosDelete
 
-inline ULONG APIENTRY _DosDeleteDir(PCSZ a)
+inline ULONG _DosDeleteDir(PCSZ a)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -261,7 +261,7 @@ inline ULONG APIENTRY _DosDeleteDir(PCSZ a)
 #undef  DosDeleteDir
 #define DosDeleteDir _DosDeleteDir
 
-inline ULONG APIENTRY _DosDupHandle(HFILE a, PHFILE b)
+inline ULONG _DosDupHandle(HFILE a, PHFILE b)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -275,7 +275,7 @@ inline ULONG APIENTRY _DosDupHandle(HFILE a, PHFILE b)
 #undef  DosDupHandle
 #define DosDupHandle _DosDupHandle
 
-inline ULONG APIENTRY _DosEditName(ULONG a, PCSZ b, PCSZ c, PBYTE d, ULONG e)
+inline ULONG _DosEditName(ULONG a, PCSZ b, PCSZ c, PBYTE d, ULONG e)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -289,7 +289,7 @@ inline ULONG APIENTRY _DosEditName(ULONG a, PCSZ b, PCSZ c, PBYTE d, ULONG e)
 #undef  DosEditName
 #define DosEditName _DosEditName
 
-inline ULONG APIENTRY _DosEnumAttribute(ULONG a, PVOID b, ULONG c, PVOID d, ULONG e, PULONG f, ULONG g)
+inline ULONG _DosEnumAttribute(ULONG a, PVOID b, ULONG c, PVOID d, ULONG e, PULONG f, ULONG g)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -303,7 +303,7 @@ inline ULONG APIENTRY _DosEnumAttribute(ULONG a, PVOID b, ULONG c, PVOID d, ULON
 #undef  DosEnumAttribute
 #define DosEnumAttribute _DosEnumAttribute
 
-inline ULONG APIENTRY _DosFindClose(HDIR a)
+inline ULONG _DosFindClose(HDIR a)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -317,7 +317,7 @@ inline ULONG APIENTRY _DosFindClose(HDIR a)
 #undef  DosFindClose
 #define DosFindClose _DosFindClose
 
-inline ULONG APIENTRY _DosFindFirst(PCSZ a, PHDIR b, ULONG c, PVOID d, ULONG e, PULONG f, ULONG g)
+inline ULONG _DosFindFirst(PCSZ a, PHDIR b, ULONG c, PVOID d, ULONG e, PULONG f, ULONG g)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -331,7 +331,7 @@ inline ULONG APIENTRY _DosFindFirst(PCSZ a, PHDIR b, ULONG c, PVOID d, ULONG e, 
 #undef  DosFindFirst
 #define DosFindFirst _DosFindFirst
 
-inline ULONG APIENTRY _DosFindNext(HDIR a, PVOID b, ULONG c, PULONG d)
+inline ULONG _DosFindNext(HDIR a, PVOID b, ULONG c, PULONG d)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -345,7 +345,7 @@ inline ULONG APIENTRY _DosFindNext(HDIR a, PVOID b, ULONG c, PULONG d)
 #undef  DosFindNext
 #define DosFindNext _DosFindNext
 
-inline ULONG APIENTRY _DosForceDelete(PCSZ a)
+inline ULONG _DosForceDelete(PCSZ a)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -359,7 +359,7 @@ inline ULONG APIENTRY _DosForceDelete(PCSZ a)
 #undef  DosForceDelete
 #define DosForceDelete _DosForceDelete
 
-inline ULONG APIENTRY _DosFSAttach(PCSZ a, PCSZ b, PVOID c, ULONG d, ULONG e)
+inline ULONG _DosFSAttach(PCSZ a, PCSZ b, PVOID c, ULONG d, ULONG e)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -373,7 +373,7 @@ inline ULONG APIENTRY _DosFSAttach(PCSZ a, PCSZ b, PVOID c, ULONG d, ULONG e)
 #undef  DosFSAttach
 #define DosFSAttach _DosFSAttach
 
-inline ULONG APIENTRY _DosFSCtl(PVOID a, ULONG b, PULONG c, PVOID d, ULONG e, PULONG f, ULONG g, PCSZ h, HFILE i, ULONG j)
+inline ULONG _DosFSCtl(PVOID a, ULONG b, PULONG c, PVOID d, ULONG e, PULONG f, ULONG g, PCSZ h, HFILE i, ULONG j)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -387,7 +387,7 @@ inline ULONG APIENTRY _DosFSCtl(PVOID a, ULONG b, PULONG c, PVOID d, ULONG e, PU
 #undef  DosFSCtl
 #define DosFSCtl _DosFSCtl
 
-inline ULONG APIENTRY _DosMove(PCSZ a, PCSZ b)
+inline ULONG _DosMove(PCSZ a, PCSZ b)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -401,7 +401,7 @@ inline ULONG APIENTRY _DosMove(PCSZ a, PCSZ b)
 #undef  DosMove
 #define DosMove _DosMove
 
-inline ULONG APIENTRY _DosOpen(PCSZ a, PHFILE b, PULONG c, ULONG d, ULONG e, ULONG f, ULONG g, PEAOP2 h)
+inline ULONG _DosOpen(PCSZ a, PHFILE b, PULONG c, ULONG d, ULONG e, ULONG f, ULONG g, PEAOP2 h)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -415,7 +415,7 @@ inline ULONG APIENTRY _DosOpen(PCSZ a, PHFILE b, PULONG c, ULONG d, ULONG e, ULO
 #undef  DosOpen
 #define DosOpen _DosOpen
 
-inline ULONG APIENTRY _DosProtectClose(HFILE a, FHLOCK b)
+inline ULONG _DosProtectClose(HFILE a, FHLOCK b)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -429,7 +429,7 @@ inline ULONG APIENTRY _DosProtectClose(HFILE a, FHLOCK b)
 #undef  DosProtectClose
 #define DosProtectClose _DosProtectClose
 
-inline ULONG APIENTRY _DosProtectEnumAttribute(ULONG a, PVOID b, ULONG c, PVOID d, ULONG e, PULONG f, ULONG g, FHLOCK h)
+inline ULONG _DosProtectEnumAttribute(ULONG a, PVOID b, ULONG c, PVOID d, ULONG e, PULONG f, ULONG g, FHLOCK h)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -443,7 +443,7 @@ inline ULONG APIENTRY _DosProtectEnumAttribute(ULONG a, PVOID b, ULONG c, PVOID 
 #undef  DosProtectEnumAttribute
 #define DosProtectEnumAttribute _DosProtectEnumAttribute
 
-inline ULONG APIENTRY _DosProtectOpen(PCSZ a, PHFILE b, PULONG c, ULONG d, ULONG e, ULONG f, ULONG g, PEAOP2 h, PFHLOCK i)
+inline ULONG _DosProtectOpen(PCSZ a, PHFILE b, PULONG c, ULONG d, ULONG e, ULONG f, ULONG g, PEAOP2 h, PFHLOCK i)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -457,7 +457,7 @@ inline ULONG APIENTRY _DosProtectOpen(PCSZ a, PHFILE b, PULONG c, ULONG d, ULONG
 #undef  DosProtectOpen
 #define DosProtectOpen _DosProtectOpen
 
-inline ULONG APIENTRY _DosProtectQueryFHState(HFILE a, PULONG b, FHLOCK c)
+inline ULONG _DosProtectQueryFHState(HFILE a, PULONG b, FHLOCK c)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -471,7 +471,7 @@ inline ULONG APIENTRY _DosProtectQueryFHState(HFILE a, PULONG b, FHLOCK c)
 #undef  DosProtectQueryFHState
 #define DosProtectQueryFHState _DosProtectQueryFHState
 
-inline ULONG APIENTRY _DosProtectQueryFileInfo(HFILE a, ULONG b, PVOID c, ULONG d, FHLOCK e)
+inline ULONG _DosProtectQueryFileInfo(HFILE a, ULONG b, PVOID c, ULONG d, FHLOCK e)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -485,7 +485,7 @@ inline ULONG APIENTRY _DosProtectQueryFileInfo(HFILE a, ULONG b, PVOID c, ULONG 
 #undef  DosProtectQueryFileInfo
 #define DosProtectQueryFileInfo _DosProtectQueryFileInfo
 
-inline ULONG APIENTRY _DosProtectRead(HFILE a, PVOID b, ULONG c, PULONG d, FHLOCK e)
+inline ULONG _DosProtectRead(HFILE a, PVOID b, ULONG c, PULONG d, FHLOCK e)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -499,7 +499,7 @@ inline ULONG APIENTRY _DosProtectRead(HFILE a, PVOID b, ULONG c, PULONG d, FHLOC
 #undef  DosProtectRead
 #define DosProtectRead _DosProtectRead
 
-inline ULONG APIENTRY _DosProtectSetFHState(HFILE a, ULONG b, FHLOCK c)
+inline ULONG _DosProtectSetFHState(HFILE a, ULONG b, FHLOCK c)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -513,7 +513,7 @@ inline ULONG APIENTRY _DosProtectSetFHState(HFILE a, ULONG b, FHLOCK c)
 #undef  DosProtectSetFHState
 #define DosProtectSetFHState _DosProtectSetFHState
 
-inline ULONG APIENTRY _DosProtectSetFileInfo(HFILE a, ULONG b, PVOID c, ULONG d, FHLOCK e)
+inline ULONG _DosProtectSetFileInfo(HFILE a, ULONG b, PVOID c, ULONG d, FHLOCK e)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -527,7 +527,7 @@ inline ULONG APIENTRY _DosProtectSetFileInfo(HFILE a, ULONG b, PVOID c, ULONG d,
 #undef  DosProtectSetFileInfo
 #define DosProtectSetFileInfo _DosProtectSetFileInfo
 
-inline ULONG APIENTRY _DosProtectSetFileLocks(HFILE a, PFILELOCK b, PFILELOCK c, ULONG d, ULONG e, FHLOCK f)
+inline ULONG _DosProtectSetFileLocks(HFILE a, PFILELOCK b, PFILELOCK c, ULONG d, ULONG e, FHLOCK f)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -541,7 +541,7 @@ inline ULONG APIENTRY _DosProtectSetFileLocks(HFILE a, PFILELOCK b, PFILELOCK c,
 #undef  DosProtectSetFileLocks
 #define DosProtectSetFileLocks _DosProtectSetFileLocks
 
-inline ULONG APIENTRY _DosProtectSetFilePtr(HFILE a, LONG b, ULONG c, PULONG d, FHLOCK e)
+inline ULONG _DosProtectSetFilePtr(HFILE a, LONG b, ULONG c, PULONG d, FHLOCK e)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -555,7 +555,7 @@ inline ULONG APIENTRY _DosProtectSetFilePtr(HFILE a, LONG b, ULONG c, PULONG d, 
 #undef  DosProtectSetFilePtr
 #define DosProtectSetFilePtr _DosProtectSetFilePtr
 
-inline ULONG APIENTRY _DosProtectSetFileSize(HFILE a, ULONG b, FHLOCK c)
+inline ULONG _DosProtectSetFileSize(HFILE a, ULONG b, FHLOCK c)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -569,7 +569,7 @@ inline ULONG APIENTRY _DosProtectSetFileSize(HFILE a, ULONG b, FHLOCK c)
 #undef  DosProtectSetFileSize
 #define DosProtectSetFileSize _DosProtectSetFileSize
 
-inline ULONG APIENTRY _DosProtectWrite(HFILE a, PVOID b, ULONG c, PULONG d, FHLOCK e)
+inline ULONG _DosProtectWrite(HFILE a, PVOID b, ULONG c, PULONG d, FHLOCK e)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -583,7 +583,7 @@ inline ULONG APIENTRY _DosProtectWrite(HFILE a, PVOID b, ULONG c, PULONG d, FHLO
 #undef  DosProtectWrite
 #define DosProtectWrite _DosProtectWrite
 
-inline ULONG APIENTRY _DosQueryCurrentDir(ULONG a, PBYTE b, PULONG c)
+inline ULONG _DosQueryCurrentDir(ULONG a, PBYTE b, PULONG c)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -597,7 +597,7 @@ inline ULONG APIENTRY _DosQueryCurrentDir(ULONG a, PBYTE b, PULONG c)
 #undef  DosQueryCurrentDir
 #define DosQueryCurrentDir _DosQueryCurrentDir
 
-inline ULONG APIENTRY _DosQueryCurrentDisk(PULONG a, PULONG b)
+inline ULONG _DosQueryCurrentDisk(PULONG a, PULONG b)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -611,7 +611,7 @@ inline ULONG APIENTRY _DosQueryCurrentDisk(PULONG a, PULONG b)
 #undef  DosQueryCurrentDisk
 #define DosQueryCurrentDisk _DosQueryCurrentDisk
 
-inline ULONG APIENTRY _DosQueryFHState(HFILE a, PULONG b)
+inline ULONG _DosQueryFHState(HFILE a, PULONG b)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -625,7 +625,7 @@ inline ULONG APIENTRY _DosQueryFHState(HFILE a, PULONG b)
 #undef  DosQueryFHState
 #define DosQueryFHState _DosQueryFHState
 
-inline ULONG APIENTRY _DosQueryFileInfo(HFILE a, ULONG b, PVOID c, ULONG d)
+inline ULONG _DosQueryFileInfo(HFILE a, ULONG b, PVOID c, ULONG d)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -639,7 +639,7 @@ inline ULONG APIENTRY _DosQueryFileInfo(HFILE a, ULONG b, PVOID c, ULONG d)
 #undef  DosQueryFileInfo
 #define DosQueryFileInfo _DosQueryFileInfo
 
-inline ULONG APIENTRY _DosQueryFSAttach(PCSZ a, ULONG b, ULONG c, PFSQBUFFER2 d, PULONG e)
+inline ULONG _DosQueryFSAttach(PCSZ a, ULONG b, ULONG c, PFSQBUFFER2 d, PULONG e)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -653,7 +653,7 @@ inline ULONG APIENTRY _DosQueryFSAttach(PCSZ a, ULONG b, ULONG c, PFSQBUFFER2 d,
 #undef  DosQueryFSAttach
 #define DosQueryFSAttach _DosQueryFSAttach
 
-inline ULONG APIENTRY _DosQueryFSInfo(ULONG a, ULONG b, PVOID c, ULONG d)
+inline ULONG _DosQueryFSInfo(ULONG a, ULONG b, PVOID c, ULONG d)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -667,7 +667,7 @@ inline ULONG APIENTRY _DosQueryFSInfo(ULONG a, ULONG b, PVOID c, ULONG d)
 #undef  DosQueryFSInfo
 #define DosQueryFSInfo _DosQueryFSInfo
 
-inline ULONG APIENTRY _DosQueryHType(HFILE a, PULONG b, PULONG c)
+inline ULONG _DosQueryHType(HFILE a, PULONG b, PULONG c)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -681,7 +681,7 @@ inline ULONG APIENTRY _DosQueryHType(HFILE a, PULONG b, PULONG c)
 #undef  DosQueryHType
 #define DosQueryHType _DosQueryHType
 
-inline ULONG APIENTRY _DosQueryPathInfo(PCSZ a, ULONG b, PVOID c, ULONG d)
+inline ULONG _DosQueryPathInfo(PCSZ a, ULONG b, PVOID c, ULONG d)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -695,7 +695,7 @@ inline ULONG APIENTRY _DosQueryPathInfo(PCSZ a, ULONG b, PVOID c, ULONG d)
 #undef  DosQueryPathInfo
 #define DosQueryPathInfo _DosQueryPathInfo
 
-inline ULONG APIENTRY _DosQueryVerify(PBOOL32 a)
+inline ULONG _DosQueryVerify(PBOOL32 a)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -709,7 +709,7 @@ inline ULONG APIENTRY _DosQueryVerify(PBOOL32 a)
 #undef  DosQueryVerify
 #define DosQueryVerify _DosQueryVerify
 
-inline ULONG APIENTRY _DosRead(HFILE a, PVOID b, ULONG c, PULONG d)
+inline ULONG _DosRead(HFILE a, PVOID b, ULONG c, PULONG d)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -723,7 +723,7 @@ inline ULONG APIENTRY _DosRead(HFILE a, PVOID b, ULONG c, PULONG d)
 #undef  DosRead
 #define DosRead _DosRead
 
-inline ULONG APIENTRY _DosResetBuffer(HFILE a)
+inline ULONG _DosResetBuffer(HFILE a)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -737,7 +737,7 @@ inline ULONG APIENTRY _DosResetBuffer(HFILE a)
 #undef  DosResetBuffer
 #define DosResetBuffer _DosResetBuffer
 
-inline ULONG APIENTRY _DosSetCurrentDir(PCSZ a)
+inline ULONG _DosSetCurrentDir(PCSZ a)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -751,7 +751,7 @@ inline ULONG APIENTRY _DosSetCurrentDir(PCSZ a)
 #undef  DosSetCurrentDir
 #define DosSetCurrentDir _DosSetCurrentDir
 
-inline ULONG APIENTRY _DosSetDefaultDisk(ULONG a)
+inline ULONG _DosSetDefaultDisk(ULONG a)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -765,7 +765,7 @@ inline ULONG APIENTRY _DosSetDefaultDisk(ULONG a)
 #undef  DosSetDefaultDisk
 #define DosSetDefaultDisk _DosSetDefaultDisk
 
-inline ULONG APIENTRY _DosSetFHState(HFILE a, ULONG b)
+inline ULONG _DosSetFHState(HFILE a, ULONG b)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -779,7 +779,7 @@ inline ULONG APIENTRY _DosSetFHState(HFILE a, ULONG b)
 #undef  DosSetFHState
 #define DosSetFHState _DosSetFHState
 
-inline ULONG APIENTRY _DosSetFileInfo(HFILE a, ULONG b, PVOID c, ULONG d)
+inline ULONG _DosSetFileInfo(HFILE a, ULONG b, PVOID c, ULONG d)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -793,7 +793,7 @@ inline ULONG APIENTRY _DosSetFileInfo(HFILE a, ULONG b, PVOID c, ULONG d)
 #undef  DosSetFileInfo
 #define DosSetFileInfo _DosSetFileInfo
 
-inline ULONG APIENTRY _DosSetFileLocks(HFILE a, PFILELOCK b, PFILELOCK c, ULONG d, ULONG e)
+inline ULONG _DosSetFileLocks(HFILE a, PFILELOCK b, PFILELOCK c, ULONG d, ULONG e)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -807,7 +807,7 @@ inline ULONG APIENTRY _DosSetFileLocks(HFILE a, PFILELOCK b, PFILELOCK c, ULONG 
 #undef  DosSetFileLocks
 #define DosSetFileLocks _DosSetFileLocks
 
-inline ULONG APIENTRY _DosSetFilePtr(HFILE a, LONG b, ULONG c, PULONG d)
+inline ULONG _DosSetFilePtr(HFILE a, LONG b, ULONG c, PULONG d)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -821,7 +821,7 @@ inline ULONG APIENTRY _DosSetFilePtr(HFILE a, LONG b, ULONG c, PULONG d)
 #undef  DosSetFilePtr
 #define DosSetFilePtr _DosSetFilePtr
 
-inline ULONG APIENTRY _DosSetFileSize(HFILE a, ULONG b)
+inline ULONG _DosSetFileSize(HFILE a, ULONG b)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -835,7 +835,7 @@ inline ULONG APIENTRY _DosSetFileSize(HFILE a, ULONG b)
 #undef  DosSetFileSize
 #define DosSetFileSize _DosSetFileSize
 
-inline ULONG APIENTRY _DosSetFSInfo(ULONG a, ULONG b, PVOID c, ULONG d)
+inline ULONG _DosSetFSInfo(ULONG a, ULONG b, PVOID c, ULONG d)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -849,7 +849,7 @@ inline ULONG APIENTRY _DosSetFSInfo(ULONG a, ULONG b, PVOID c, ULONG d)
 #undef  DosSetFSInfo
 #define DosSetFSInfo _DosSetFSInfo
 
-inline ULONG APIENTRY _DosSetMaxFH(ULONG a)
+inline ULONG _DosSetMaxFH(ULONG a)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -863,7 +863,7 @@ inline ULONG APIENTRY _DosSetMaxFH(ULONG a)
 #undef  DosSetMaxFH
 #define DosSetMaxFH _DosSetMaxFH
 
-inline ULONG APIENTRY _DosSetPathInfo(PCSZ a, ULONG b, PVOID c, ULONG d, ULONG e)
+inline ULONG _DosSetPathInfo(PCSZ a, ULONG b, PVOID c, ULONG d, ULONG e)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -877,7 +877,7 @@ inline ULONG APIENTRY _DosSetPathInfo(PCSZ a, ULONG b, PVOID c, ULONG d, ULONG e
 #undef  DosSetPathInfo
 #define DosSetPathInfo _DosSetPathInfo
 
-inline ULONG APIENTRY _DosSetRelMaxFH(PLONG a, PULONG b)
+inline ULONG _DosSetRelMaxFH(PLONG a, PULONG b)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -891,7 +891,7 @@ inline ULONG APIENTRY _DosSetRelMaxFH(PLONG a, PULONG b)
 #undef  DosSetRelMaxFH
 #define DosSetRelMaxFH _DosSetRelMaxFH
 
-inline ULONG APIENTRY _DosSetVerify(BOOL32 a)
+inline ULONG _DosSetVerify(BOOL32 a)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -905,7 +905,7 @@ inline ULONG APIENTRY _DosSetVerify(BOOL32 a)
 #undef  DosSetVerify
 #define DosSetVerify _DosSetVerify
 
-inline ULONG APIENTRY _DosShutdown(ULONG a)
+inline ULONG _DosShutdown(ULONG a)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -919,7 +919,7 @@ inline ULONG APIENTRY _DosShutdown(ULONG a)
 #undef  DosShutdown
 #define DosShutdown _DosShutdown
 
-inline ULONG APIENTRY _DosWrite(HFILE a, PVOID b, ULONG c, PULONG d)
+inline ULONG _DosWrite(HFILE a, PVOID b, ULONG c, PULONG d)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -935,7 +935,7 @@ inline ULONG APIENTRY _DosWrite(HFILE a, PVOID b, ULONG c, PULONG d)
 
 #endif
 #ifdef INCL_DOSMISC
-inline ULONG APIENTRY _DosSearchPath(ULONG a, PCSZ b, PCSZ c, PBYTE d, ULONG e)
+inline ULONG _DosSearchPath(ULONG a, PCSZ b, PCSZ c, PBYTE d, ULONG e)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -951,7 +951,7 @@ inline ULONG APIENTRY _DosSearchPath(ULONG a, PCSZ b, PCSZ c, PBYTE d, ULONG e)
 
 #endif
 #ifdef INCL_DOSDEVICES
-inline ULONG APIENTRY _DosDevConfig(PVOID a, ULONG b)
+inline ULONG _DosDevConfig(PVOID a, ULONG b)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -965,7 +965,7 @@ inline ULONG APIENTRY _DosDevConfig(PVOID a, ULONG b)
 #undef  DosDevConfig
 #define DosDevConfig _DosDevConfig
 
-inline ULONG APIENTRY _DosDevIOCtl(HFILE a, ULONG b, ULONG c, PVOID d, ULONG e, PULONG f, PVOID g, ULONG h, PULONG i)
+inline ULONG _DosDevIOCtl(HFILE a, ULONG b, ULONG c, PVOID d, ULONG e, PULONG f, PVOID g, ULONG h, PULONG i)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -979,7 +979,7 @@ inline ULONG APIENTRY _DosDevIOCtl(HFILE a, ULONG b, ULONG c, PVOID d, ULONG e, 
 #undef  DosDevIOCtl
 #define DosDevIOCtl _DosDevIOCtl
 
-inline ULONG APIENTRY _DosPhysicalDisk(ULONG a, PVOID b, ULONG c, PVOID d, ULONG e)
+inline ULONG _DosPhysicalDisk(ULONG a, PVOID b, ULONG c, PVOID d, ULONG e)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -995,7 +995,7 @@ inline ULONG APIENTRY _DosPhysicalDisk(ULONG a, PVOID b, ULONG c, PVOID d, ULONG
 
 #endif
 #ifdef INCL_DOSNLS
-inline ULONG APIENTRY _DosMapCase(ULONG a, PCOUNTRYCODE b, PCHAR c)
+inline ULONG _DosMapCase(ULONG a, PCOUNTRYCODE b, PCHAR c)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -1009,7 +1009,7 @@ inline ULONG APIENTRY _DosMapCase(ULONG a, PCOUNTRYCODE b, PCHAR c)
 #undef  DosMapCase
 #define DosMapCase _DosMapCase
 
-inline ULONG APIENTRY _DosQueryCollate(ULONG a, PCOUNTRYCODE b, PCHAR c, PULONG d)
+inline ULONG _DosQueryCollate(ULONG a, PCOUNTRYCODE b, PCHAR c, PULONG d)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -1023,7 +1023,7 @@ inline ULONG APIENTRY _DosQueryCollate(ULONG a, PCOUNTRYCODE b, PCHAR c, PULONG 
 #undef  DosQueryCollate
 #define DosQueryCollate _DosQueryCollate
 
-inline ULONG APIENTRY _DosQueryCp(ULONG a, PULONG b, PULONG c)
+inline ULONG _DosQueryCp(ULONG a, PULONG b, PULONG c)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -1037,7 +1037,7 @@ inline ULONG APIENTRY _DosQueryCp(ULONG a, PULONG b, PULONG c)
 #undef  DosQueryCp
 #define DosQueryCp _DosQueryCp
 
-inline ULONG APIENTRY _DosQueryCtryInfo(ULONG a, PCOUNTRYCODE b, PCOUNTRYINFO c, PULONG d)
+inline ULONG _DosQueryCtryInfo(ULONG a, PCOUNTRYCODE b, PCOUNTRYINFO c, PULONG d)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -1051,7 +1051,7 @@ inline ULONG APIENTRY _DosQueryCtryInfo(ULONG a, PCOUNTRYCODE b, PCOUNTRYINFO c,
 #undef  DosQueryCtryInfo
 #define DosQueryCtryInfo _DosQueryCtryInfo
 
-inline ULONG APIENTRY _DosQueryDBCSEnv(ULONG a, PCOUNTRYCODE b, PCHAR c)
+inline ULONG _DosQueryDBCSEnv(ULONG a, PCOUNTRYCODE b, PCHAR c)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -1065,7 +1065,7 @@ inline ULONG APIENTRY _DosQueryDBCSEnv(ULONG a, PCOUNTRYCODE b, PCHAR c)
 #undef  DosQueryDBCSEnv
 #define DosQueryDBCSEnv _DosQueryDBCSEnv
 
-inline ULONG APIENTRY _DosSetProcessCp(ULONG a)
+inline ULONG _DosSetProcessCp(ULONG a)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -1081,7 +1081,7 @@ inline ULONG APIENTRY _DosSetProcessCp(ULONG a)
 
 #endif
 #ifdef INCL_DOSMODULEMGR
-inline ULONG APIENTRY _DosFreeModule(HMODULE a)
+inline ULONG _DosFreeModule(HMODULE a)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -1095,7 +1095,7 @@ inline ULONG APIENTRY _DosFreeModule(HMODULE a)
 #undef  DosFreeModule
 #define DosFreeModule _DosFreeModule
 
-inline ULONG APIENTRY _DosLoadModule(PSZ a, ULONG b, PCSZ c, PHMODULE d)
+inline ULONG _DosLoadModule(PSZ a, ULONG b, PCSZ c, PHMODULE d)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -1109,7 +1109,7 @@ inline ULONG APIENTRY _DosLoadModule(PSZ a, ULONG b, PCSZ c, PHMODULE d)
 #undef  DosLoadModule
 #define DosLoadModule _DosLoadModule
 
-inline ULONG APIENTRY _DosQueryModuleHandle(PCSZ a, PHMODULE b)
+inline ULONG _DosQueryModuleHandle(PCSZ a, PHMODULE b)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -1123,7 +1123,7 @@ inline ULONG APIENTRY _DosQueryModuleHandle(PCSZ a, PHMODULE b)
 #undef  DosQueryModuleHandle
 #define DosQueryModuleHandle _DosQueryModuleHandle
 
-inline ULONG APIENTRY _DosQueryModuleName(HMODULE a, ULONG b, PCHAR c)
+inline ULONG _DosQueryModuleName(HMODULE a, ULONG b, PCHAR c)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -1137,7 +1137,7 @@ inline ULONG APIENTRY _DosQueryModuleName(HMODULE a, ULONG b, PCHAR c)
 #undef  DosQueryModuleName
 #define DosQueryModuleName _DosQueryModuleName
 
-inline ULONG APIENTRY _DosQueryProcAddr(HMODULE a, ULONG b, PCSZ c, PFN *d)
+inline ULONG _DosQueryProcAddr(HMODULE a, ULONG b, PCSZ c, PFN *d)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -1151,7 +1151,7 @@ inline ULONG APIENTRY _DosQueryProcAddr(HMODULE a, ULONG b, PCSZ c, PFN *d)
 #undef  DosQueryProcAddr
 #define DosQueryProcAddr _DosQueryProcAddr
 
-inline ULONG APIENTRY _DosQueryProcType(HMODULE a, ULONG b, PCSZ c, PULONG d)
+inline ULONG _DosQueryProcType(HMODULE a, ULONG b, PCSZ c, PULONG d)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -1167,7 +1167,7 @@ inline ULONG APIENTRY _DosQueryProcType(HMODULE a, ULONG b, PCSZ c, PULONG d)
 
 #endif
 #ifdef INCL_DOSRESOURCES
-inline ULONG APIENTRY _DosFreeResource(PVOID a)
+inline ULONG _DosFreeResource(PVOID a)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -1181,7 +1181,7 @@ inline ULONG APIENTRY _DosFreeResource(PVOID a)
 #undef  DosFreeResource
 #define DosFreeResource _DosFreeResource
 
-inline ULONG APIENTRY _DosGetResource(HMODULE a, ULONG b, ULONG c, PPVOID d)
+inline ULONG _DosGetResource(HMODULE a, ULONG b, ULONG c, PPVOID d)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -1195,7 +1195,7 @@ inline ULONG APIENTRY _DosGetResource(HMODULE a, ULONG b, ULONG c, PPVOID d)
 #undef  DosGetResource
 #define DosGetResource _DosGetResource
 
-inline ULONG APIENTRY _DosQueryResourceSize(HMODULE a, ULONG b, ULONG c, PULONG d)
+inline ULONG _DosQueryResourceSize(HMODULE a, ULONG b, ULONG c, PULONG d)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -1211,7 +1211,7 @@ inline ULONG APIENTRY _DosQueryResourceSize(HMODULE a, ULONG b, ULONG c, PULONG 
 
 #endif
 #ifdef INCL_DOSPROCESS
-inline ULONG APIENTRY _DosBeep(ULONG a, ULONG b)
+inline ULONG _DosBeep(ULONG a, ULONG b)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -1225,7 +1225,7 @@ inline ULONG APIENTRY _DosBeep(ULONG a, ULONG b)
 #undef  DosBeep
 #define DosBeep _DosBeep
 
-inline VOID APIENTRY _DosExit(ULONG a, ULONG b)
+inline VOID _DosExit(ULONG a, ULONG b)
 {
  USHORT sel = GetFS();
 
@@ -1236,7 +1236,7 @@ inline VOID APIENTRY _DosExit(ULONG a, ULONG b)
 #undef  DosExit
 #define DosExit _DosExit
 
-inline ULONG APIENTRY _DosAllocThreadLocalMemory(ULONG a, PULONG *b)
+inline ULONG _DosAllocThreadLocalMemory(ULONG a, PULONG *b)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -1250,7 +1250,7 @@ inline ULONG APIENTRY _DosAllocThreadLocalMemory(ULONG a, PULONG *b)
 #undef  DosAllocThreadLocalMemory
 #define DosAllocThreadLocalMemory _DosAllocThreadLocalMemory
 
-inline ULONG APIENTRY _DosCreateThread(PTID a, PFNTHREAD b, ULONG c, ULONG d, ULONG e)
+inline ULONG _DosCreateThread(PTID a, PFNTHREAD b, ULONG c, ULONG d, ULONG e)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -1264,7 +1264,7 @@ inline ULONG APIENTRY _DosCreateThread(PTID a, PFNTHREAD b, ULONG c, ULONG d, UL
 #undef  DosCreateThread
 #define DosCreateThread _DosCreateThread
 
-inline ULONG APIENTRY _DosEnterCritSec()
+inline ULONG _DosEnterCritSec()
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -1278,7 +1278,7 @@ inline ULONG APIENTRY _DosEnterCritSec()
 #undef  DosEnterCritSec
 #define DosEnterCritSec _DosEnterCritSec
 
-inline ULONG APIENTRY _DosExecPgm(PCHAR a, LONG b, ULONG c, PCSZ d, PCSZ e, PRESULTCODES f, PCSZ g)
+inline ULONG _DosExecPgm(PCHAR a, LONG b, ULONG c, PCSZ d, PCSZ e, PRESULTCODES f, PCSZ g)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -1292,7 +1292,7 @@ inline ULONG APIENTRY _DosExecPgm(PCHAR a, LONG b, ULONG c, PCSZ d, PCSZ e, PRES
 #undef  DosExecPgm
 #define DosExecPgm _DosExecPgm
 
-inline ULONG APIENTRY _DosExitCritSec()
+inline ULONG _DosExitCritSec()
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -1306,7 +1306,7 @@ inline ULONG APIENTRY _DosExitCritSec()
 #undef  DosExitCritSec
 #define DosExitCritSec _DosExitCritSec
 
-inline ULONG APIENTRY _DosExitList(ULONG a, PFNEXITLIST b)
+inline ULONG _DosExitList(ULONG a, PFNEXITLIST b)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -1320,7 +1320,7 @@ inline ULONG APIENTRY _DosExitList(ULONG a, PFNEXITLIST b)
 #undef  DosExitList
 #define DosExitList _DosExitList
 
-inline ULONG APIENTRY _DosFreeThreadLocalMemory(ULONG *a)
+inline ULONG _DosFreeThreadLocalMemory(ULONG *a)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -1334,7 +1334,7 @@ inline ULONG APIENTRY _DosFreeThreadLocalMemory(ULONG *a)
 #undef  DosFreeThreadLocalMemory
 #define DosFreeThreadLocalMemory _DosFreeThreadLocalMemory
 
-inline ULONG APIENTRY _DosGetInfoBlocks(PTIB *a, PPIB *b)
+inline ULONG _DosGetInfoBlocks(PTIB *a, PPIB *b)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -1348,7 +1348,7 @@ inline ULONG APIENTRY _DosGetInfoBlocks(PTIB *a, PPIB *b)
 #undef  DosGetInfoBlocks
 #define DosGetInfoBlocks _DosGetInfoBlocks
 
-inline ULONG APIENTRY _DosKillProcess(ULONG a, PID b)
+inline ULONG _DosKillProcess(ULONG a, PID b)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -1362,7 +1362,7 @@ inline ULONG APIENTRY _DosKillProcess(ULONG a, PID b)
 #undef  DosKillProcess
 #define DosKillProcess _DosKillProcess
 
-inline ULONG APIENTRY _DosKillThread(TID a)
+inline ULONG _DosKillThread(TID a)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -1376,7 +1376,7 @@ inline ULONG APIENTRY _DosKillThread(TID a)
 #undef  DosKillThread
 #define DosKillThread _DosKillThread
 
-inline ULONG APIENTRY _DosResumeThread(TID a)
+inline ULONG _DosResumeThread(TID a)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -1390,7 +1390,7 @@ inline ULONG APIENTRY _DosResumeThread(TID a)
 #undef  DosResumeThread
 #define DosResumeThread _DosResumeThread
 
-inline ULONG APIENTRY _DosSetPriority(ULONG a, ULONG b, LONG c, ULONG d)
+inline ULONG _DosSetPriority(ULONG a, ULONG b, LONG c, ULONG d)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -1404,7 +1404,7 @@ inline ULONG APIENTRY _DosSetPriority(ULONG a, ULONG b, LONG c, ULONG d)
 #undef  DosSetPriority
 #define DosSetPriority _DosSetPriority
 
-inline ULONG APIENTRY _DosSleep(ULONG a)
+inline ULONG _DosSleep(ULONG a)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -1418,7 +1418,7 @@ inline ULONG APIENTRY _DosSleep(ULONG a)
 #undef  DosSleep
 #define DosSleep _DosSleep
 
-inline ULONG APIENTRY _DosSuspendThread(TID a)
+inline ULONG _DosSuspendThread(TID a)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -1432,7 +1432,7 @@ inline ULONG APIENTRY _DosSuspendThread(TID a)
 #undef  DosSuspendThread
 #define DosSuspendThread _DosSuspendThread
 
-inline ULONG APIENTRY _DosWaitChild(ULONG a, ULONG b, PRESULTCODES c, PPID d, PID e)
+inline ULONG _DosWaitChild(ULONG a, ULONG b, PRESULTCODES c, PPID d, PID e)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -1446,7 +1446,7 @@ inline ULONG APIENTRY _DosWaitChild(ULONG a, ULONG b, PRESULTCODES c, PPID d, PI
 #undef  DosWaitChild
 #define DosWaitChild _DosWaitChild
 
-inline ULONG APIENTRY _DosWaitThread(PTID a, ULONG b)
+inline ULONG _DosWaitThread(PTID a, ULONG b)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -1462,7 +1462,7 @@ inline ULONG APIENTRY _DosWaitThread(PTID a, ULONG b)
 
 #endif
 #ifdef INCL_DOSSESMGR
-inline ULONG APIENTRY _DosQueryAppType(PCSZ a, PULONG b)
+inline ULONG _DosQueryAppType(PCSZ a, PULONG b)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -1476,7 +1476,7 @@ inline ULONG APIENTRY _DosQueryAppType(PCSZ a, PULONG b)
 #undef  DosQueryAppType
 #define DosQueryAppType _DosQueryAppType
 
-inline ULONG APIENTRY _DosSelectSession(ULONG a)
+inline ULONG _DosSelectSession(ULONG a)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -1490,7 +1490,7 @@ inline ULONG APIENTRY _DosSelectSession(ULONG a)
 #undef  DosSelectSession
 #define DosSelectSession _DosSelectSession
 
-inline ULONG APIENTRY _DosSetSession(ULONG a, PSTATUSDATA b)
+inline ULONG _DosSetSession(ULONG a, PSTATUSDATA b)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -1504,7 +1504,7 @@ inline ULONG APIENTRY _DosSetSession(ULONG a, PSTATUSDATA b)
 #undef  DosSetSession
 #define DosSetSession _DosSetSession
 
-inline ULONG APIENTRY _DosStartSession(PSTARTDATA a, PULONG b, PPID c)
+inline ULONG _DosStartSession(PSTARTDATA a, PULONG b, PPID c)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -1518,7 +1518,7 @@ inline ULONG APIENTRY _DosStartSession(PSTARTDATA a, PULONG b, PPID c)
 #undef  DosStartSession
 #define DosStartSession _DosStartSession
 
-inline ULONG APIENTRY _DosStopSession(ULONG a, ULONG b)
+inline ULONG _DosStopSession(ULONG a, ULONG b)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -1534,7 +1534,7 @@ inline ULONG APIENTRY _DosStopSession(ULONG a, ULONG b)
 
 #endif
 #ifdef INCL_DOSSEMAPHORES
-inline ULONG APIENTRY _DosCloseEventSem(HEV a)
+inline ULONG _DosCloseEventSem(HEV a)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -1548,7 +1548,7 @@ inline ULONG APIENTRY _DosCloseEventSem(HEV a)
 #undef  DosCloseEventSem
 #define DosCloseEventSem _DosCloseEventSem
 
-inline ULONG APIENTRY _DosCreateEventSem(PCSZ a, PHEV b, ULONG c, BOOL32 d)
+inline ULONG _DosCreateEventSem(PCSZ a, PHEV b, ULONG c, BOOL32 d)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -1562,7 +1562,7 @@ inline ULONG APIENTRY _DosCreateEventSem(PCSZ a, PHEV b, ULONG c, BOOL32 d)
 #undef  DosCreateEventSem
 #define DosCreateEventSem _DosCreateEventSem
 
-inline ULONG APIENTRY _DosOpenEventSem(PCSZ a, PHEV b)
+inline ULONG _DosOpenEventSem(PCSZ a, PHEV b)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -1576,7 +1576,7 @@ inline ULONG APIENTRY _DosOpenEventSem(PCSZ a, PHEV b)
 #undef  DosOpenEventSem
 #define DosOpenEventSem _DosOpenEventSem
 
-inline ULONG APIENTRY _DosPostEventSem(HEV a)
+inline ULONG _DosPostEventSem(HEV a)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -1590,7 +1590,7 @@ inline ULONG APIENTRY _DosPostEventSem(HEV a)
 #undef  DosPostEventSem
 #define DosPostEventSem _DosPostEventSem
 
-inline ULONG APIENTRY _DosQueryEventSem(HEV a, PULONG b)
+inline ULONG _DosQueryEventSem(HEV a, PULONG b)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -1604,7 +1604,7 @@ inline ULONG APIENTRY _DosQueryEventSem(HEV a, PULONG b)
 #undef  DosQueryEventSem
 #define DosQueryEventSem _DosQueryEventSem
 
-inline ULONG APIENTRY _DosResetEventSem(HEV a, PULONG b)
+inline ULONG _DosResetEventSem(HEV a, PULONG b)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -1618,7 +1618,7 @@ inline ULONG APIENTRY _DosResetEventSem(HEV a, PULONG b)
 #undef  DosResetEventSem
 #define DosResetEventSem _DosResetEventSem
 
-inline ULONG APIENTRY _DosWaitEventSem(HEV a, ULONG b)
+inline ULONG _DosWaitEventSem(HEV a, ULONG b)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -1632,7 +1632,7 @@ inline ULONG APIENTRY _DosWaitEventSem(HEV a, ULONG b)
 #undef  DosWaitEventSem
 #define DosWaitEventSem _DosWaitEventSem
 
-inline ULONG APIENTRY _DosCloseMutexSem(HMTX a)
+inline ULONG _DosCloseMutexSem(HMTX a)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -1646,7 +1646,7 @@ inline ULONG APIENTRY _DosCloseMutexSem(HMTX a)
 #undef  DosCloseMutexSem
 #define DosCloseMutexSem _DosCloseMutexSem
 
-inline ULONG APIENTRY _DosCreateMutexSem(PCSZ a, PHMTX b, ULONG c, BOOL32 d)
+inline ULONG _DosCreateMutexSem(PCSZ a, PHMTX b, ULONG c, BOOL32 d)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -1660,7 +1660,7 @@ inline ULONG APIENTRY _DosCreateMutexSem(PCSZ a, PHMTX b, ULONG c, BOOL32 d)
 #undef  DosCreateMutexSem
 #define DosCreateMutexSem _DosCreateMutexSem
 
-inline ULONG APIENTRY _DosOpenMutexSem(PCSZ a, PHMTX b)
+inline ULONG _DosOpenMutexSem(PCSZ a, PHMTX b)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -1674,7 +1674,7 @@ inline ULONG APIENTRY _DosOpenMutexSem(PCSZ a, PHMTX b)
 #undef  DosOpenMutexSem
 #define DosOpenMutexSem _DosOpenMutexSem
 
-inline ULONG APIENTRY _DosQueryMutexSem(HMTX a, PPID b, PTID c, PULONG d)
+inline ULONG _DosQueryMutexSem(HMTX a, PPID b, PTID c, PULONG d)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -1688,7 +1688,7 @@ inline ULONG APIENTRY _DosQueryMutexSem(HMTX a, PPID b, PTID c, PULONG d)
 #undef  DosQueryMutexSem
 #define DosQueryMutexSem _DosQueryMutexSem
 
-inline ULONG APIENTRY _DosReleaseMutexSem(HMTX a)
+inline ULONG _DosReleaseMutexSem(HMTX a)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -1702,7 +1702,7 @@ inline ULONG APIENTRY _DosReleaseMutexSem(HMTX a)
 #undef  DosReleaseMutexSem
 #define DosReleaseMutexSem _DosReleaseMutexSem
 
-inline ULONG APIENTRY _DosRequestMutexSem(HMTX a, ULONG b)
+inline ULONG _DosRequestMutexSem(HMTX a, ULONG b)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -1716,7 +1716,7 @@ inline ULONG APIENTRY _DosRequestMutexSem(HMTX a, ULONG b)
 #undef  DosRequestMutexSem
 #define DosRequestMutexSem _DosRequestMutexSem
 
-inline ULONG APIENTRY _DosAddMuxWaitSem(HMUX a, PSEMRECORD b)
+inline ULONG _DosAddMuxWaitSem(HMUX a, PSEMRECORD b)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -1730,7 +1730,7 @@ inline ULONG APIENTRY _DosAddMuxWaitSem(HMUX a, PSEMRECORD b)
 #undef  DosAddMuxWaitSem
 #define DosAddMuxWaitSem _DosAddMuxWaitSem
 
-inline ULONG APIENTRY _DosCloseMuxWaitSem(HMUX a)
+inline ULONG _DosCloseMuxWaitSem(HMUX a)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -1744,7 +1744,7 @@ inline ULONG APIENTRY _DosCloseMuxWaitSem(HMUX a)
 #undef  DosCloseMuxWaitSem
 #define DosCloseMuxWaitSem _DosCloseMuxWaitSem
 
-inline ULONG APIENTRY _DosCreateMuxWaitSem(PCSZ a, PHMUX b, ULONG c, PSEMRECORD d, ULONG e)
+inline ULONG _DosCreateMuxWaitSem(PCSZ a, PHMUX b, ULONG c, PSEMRECORD d, ULONG e)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -1758,7 +1758,7 @@ inline ULONG APIENTRY _DosCreateMuxWaitSem(PCSZ a, PHMUX b, ULONG c, PSEMRECORD 
 #undef  DosCreateMuxWaitSem
 #define DosCreateMuxWaitSem _DosCreateMuxWaitSem
 
-inline ULONG APIENTRY _DosDeleteMuxWaitSem(HMUX a, HSEM b)
+inline ULONG _DosDeleteMuxWaitSem(HMUX a, HSEM b)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -1772,7 +1772,7 @@ inline ULONG APIENTRY _DosDeleteMuxWaitSem(HMUX a, HSEM b)
 #undef  DosDeleteMuxWaitSem
 #define DosDeleteMuxWaitSem _DosDeleteMuxWaitSem
 
-inline ULONG APIENTRY _DosOpenMuxWaitSem(PCSZ a, PHMUX b)
+inline ULONG _DosOpenMuxWaitSem(PCSZ a, PHMUX b)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -1786,7 +1786,7 @@ inline ULONG APIENTRY _DosOpenMuxWaitSem(PCSZ a, PHMUX b)
 #undef  DosOpenMuxWaitSem
 #define DosOpenMuxWaitSem _DosOpenMuxWaitSem
 
-inline ULONG APIENTRY _DosQueryMuxWaitSem(HMUX a, PULONG b, PSEMRECORD c, PULONG d)
+inline ULONG _DosQueryMuxWaitSem(HMUX a, PULONG b, PSEMRECORD c, PULONG d)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -1800,7 +1800,7 @@ inline ULONG APIENTRY _DosQueryMuxWaitSem(HMUX a, PULONG b, PSEMRECORD c, PULONG
 #undef  DosQueryMuxWaitSem
 #define DosQueryMuxWaitSem _DosQueryMuxWaitSem
 
-inline ULONG APIENTRY _DosWaitMuxWaitSem(HMUX a, ULONG b, PULONG c)
+inline ULONG _DosWaitMuxWaitSem(HMUX a, ULONG b, PULONG c)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -1816,7 +1816,7 @@ inline ULONG APIENTRY _DosWaitMuxWaitSem(HMUX a, ULONG b, PULONG c)
 
 #endif
 #ifdef INCL_DOSNMPIPES
-inline ULONG APIENTRY _DosCallNPipe(PCSZ a, PVOID b, ULONG c, PVOID d, ULONG e, PULONG f, ULONG g)
+inline ULONG _DosCallNPipe(PCSZ a, PVOID b, ULONG c, PVOID d, ULONG e, PULONG f, ULONG g)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -1830,7 +1830,7 @@ inline ULONG APIENTRY _DosCallNPipe(PCSZ a, PVOID b, ULONG c, PVOID d, ULONG e, 
 #undef  DosCallNPipe
 #define DosCallNPipe _DosCallNPipe
 
-inline ULONG APIENTRY _DosConnectNPipe(HPIPE a)
+inline ULONG _DosConnectNPipe(HPIPE a)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -1844,7 +1844,7 @@ inline ULONG APIENTRY _DosConnectNPipe(HPIPE a)
 #undef  DosConnectNPipe
 #define DosConnectNPipe _DosConnectNPipe
 
-inline ULONG APIENTRY _DosCreateNPipe(PCSZ a, PHPIPE b, ULONG c, ULONG d, ULONG e, ULONG f, ULONG g)
+inline ULONG _DosCreateNPipe(PCSZ a, PHPIPE b, ULONG c, ULONG d, ULONG e, ULONG f, ULONG g)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -1858,7 +1858,7 @@ inline ULONG APIENTRY _DosCreateNPipe(PCSZ a, PHPIPE b, ULONG c, ULONG d, ULONG 
 #undef  DosCreateNPipe
 #define DosCreateNPipe _DosCreateNPipe
 
-inline ULONG APIENTRY _DosDisConnectNPipe(HPIPE a)
+inline ULONG _DosDisConnectNPipe(HPIPE a)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -1872,7 +1872,7 @@ inline ULONG APIENTRY _DosDisConnectNPipe(HPIPE a)
 #undef  DosDisConnectNPipe
 #define DosDisConnectNPipe _DosDisConnectNPipe
 
-inline ULONG APIENTRY _DosPeekNPipe(HPIPE a, PVOID b, ULONG c, PULONG d, PAVAILDATA e, PULONG f)
+inline ULONG _DosPeekNPipe(HPIPE a, PVOID b, ULONG c, PULONG d, PAVAILDATA e, PULONG f)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -1886,7 +1886,7 @@ inline ULONG APIENTRY _DosPeekNPipe(HPIPE a, PVOID b, ULONG c, PULONG d, PAVAILD
 #undef  DosPeekNPipe
 #define DosPeekNPipe _DosPeekNPipe
 
-inline ULONG APIENTRY _DosQueryNPHState(HPIPE a, PULONG b)
+inline ULONG _DosQueryNPHState(HPIPE a, PULONG b)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -1900,7 +1900,7 @@ inline ULONG APIENTRY _DosQueryNPHState(HPIPE a, PULONG b)
 #undef  DosQueryNPHState
 #define DosQueryNPHState _DosQueryNPHState
 
-inline ULONG APIENTRY _DosQueryNPipeInfo(HPIPE a, ULONG b, PVOID c, ULONG d)
+inline ULONG _DosQueryNPipeInfo(HPIPE a, ULONG b, PVOID c, ULONG d)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -1914,7 +1914,7 @@ inline ULONG APIENTRY _DosQueryNPipeInfo(HPIPE a, ULONG b, PVOID c, ULONG d)
 #undef  DosQueryNPipeInfo
 #define DosQueryNPipeInfo _DosQueryNPipeInfo
 
-inline ULONG APIENTRY _DosQueryNPipeSemState(HSEM a, PPIPESEMSTATE b, ULONG c)
+inline ULONG _DosQueryNPipeSemState(HSEM a, PPIPESEMSTATE b, ULONG c)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -1928,7 +1928,7 @@ inline ULONG APIENTRY _DosQueryNPipeSemState(HSEM a, PPIPESEMSTATE b, ULONG c)
 #undef  DosQueryNPipeSemState
 #define DosQueryNPipeSemState _DosQueryNPipeSemState
 
-inline ULONG APIENTRY _DosRawReadNPipe(PCSZ a, ULONG b, PULONG c, PVOID d)
+inline ULONG _DosRawReadNPipe(PCSZ a, ULONG b, PULONG c, PVOID d)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -1942,7 +1942,7 @@ inline ULONG APIENTRY _DosRawReadNPipe(PCSZ a, ULONG b, PULONG c, PVOID d)
 #undef  DosRawReadNPipe
 #define DosRawReadNPipe _DosRawReadNPipe
 
-inline ULONG APIENTRY _DosRawWriteNPipe(PCSZ a, ULONG b)
+inline ULONG _DosRawWriteNPipe(PCSZ a, ULONG b)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -1956,7 +1956,7 @@ inline ULONG APIENTRY _DosRawWriteNPipe(PCSZ a, ULONG b)
 #undef  DosRawWriteNPipe
 #define DosRawWriteNPipe _DosRawWriteNPipe
 
-inline ULONG APIENTRY _DosSetNPHState(HPIPE a, ULONG b)
+inline ULONG _DosSetNPHState(HPIPE a, ULONG b)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -1970,7 +1970,7 @@ inline ULONG APIENTRY _DosSetNPHState(HPIPE a, ULONG b)
 #undef  DosSetNPHState
 #define DosSetNPHState _DosSetNPHState
 
-inline ULONG APIENTRY _DosSetNPipeSem(HPIPE a, HSEM b, ULONG c)
+inline ULONG _DosSetNPipeSem(HPIPE a, HSEM b, ULONG c)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -1984,7 +1984,7 @@ inline ULONG APIENTRY _DosSetNPipeSem(HPIPE a, HSEM b, ULONG c)
 #undef  DosSetNPipeSem
 #define DosSetNPipeSem _DosSetNPipeSem
 
-inline ULONG APIENTRY _DosTransactNPipe(HPIPE a, PVOID b, ULONG c, PVOID d, ULONG e, PULONG f)
+inline ULONG _DosTransactNPipe(HPIPE a, PVOID b, ULONG c, PVOID d, ULONG e, PULONG f)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -1998,7 +1998,7 @@ inline ULONG APIENTRY _DosTransactNPipe(HPIPE a, PVOID b, ULONG c, PVOID d, ULON
 #undef  DosTransactNPipe
 #define DosTransactNPipe _DosTransactNPipe
 
-inline ULONG APIENTRY _DosWaitNPipe(PCSZ a, ULONG b)
+inline ULONG _DosWaitNPipe(PCSZ a, ULONG b)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -2012,7 +2012,7 @@ inline ULONG APIENTRY _DosWaitNPipe(PCSZ a, ULONG b)
 #undef  DosWaitNPipe
 #define DosWaitNPipe _DosWaitNPipe
 
-inline ULONG APIENTRY _DosCreatePipe(PHFILE a, PHFILE b, ULONG c)
+inline ULONG _DosCreatePipe(PHFILE a, PHFILE b, ULONG c)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -2028,7 +2028,7 @@ inline ULONG APIENTRY _DosCreatePipe(PHFILE a, PHFILE b, ULONG c)
 
 #endif
 #ifdef INCL_DOSQUEUES
-inline ULONG APIENTRY _DosCloseQueue(HQUEUE a)
+inline ULONG _DosCloseQueue(HQUEUE a)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -2042,7 +2042,7 @@ inline ULONG APIENTRY _DosCloseQueue(HQUEUE a)
 #undef  DosCloseQueue
 #define DosCloseQueue _DosCloseQueue
 
-inline ULONG APIENTRY _DosCreateQueue(PHQUEUE a, ULONG b, PCSZ c)
+inline ULONG _DosCreateQueue(PHQUEUE a, ULONG b, PCSZ c)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -2056,7 +2056,7 @@ inline ULONG APIENTRY _DosCreateQueue(PHQUEUE a, ULONG b, PCSZ c)
 #undef  DosCreateQueue
 #define DosCreateQueue _DosCreateQueue
 
-inline ULONG APIENTRY _DosOpenQueue(PPID a, PHQUEUE b, PCSZ c)
+inline ULONG _DosOpenQueue(PPID a, PHQUEUE b, PCSZ c)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -2070,7 +2070,7 @@ inline ULONG APIENTRY _DosOpenQueue(PPID a, PHQUEUE b, PCSZ c)
 #undef  DosOpenQueue
 #define DosOpenQueue _DosOpenQueue
 
-inline ULONG APIENTRY _DosPeekQueue(HQUEUE a, PREQUESTDATA b, PULONG c, PPVOID d, PULONG e, BOOL32 f, PBYTE g, HEV h)
+inline ULONG _DosPeekQueue(HQUEUE a, PREQUESTDATA b, PULONG c, PPVOID d, PULONG e, BOOL32 f, PBYTE g, HEV h)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -2084,7 +2084,7 @@ inline ULONG APIENTRY _DosPeekQueue(HQUEUE a, PREQUESTDATA b, PULONG c, PPVOID d
 #undef  DosPeekQueue
 #define DosPeekQueue _DosPeekQueue
 
-inline ULONG APIENTRY _DosPurgeQueue(HQUEUE a)
+inline ULONG _DosPurgeQueue(HQUEUE a)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -2098,7 +2098,7 @@ inline ULONG APIENTRY _DosPurgeQueue(HQUEUE a)
 #undef  DosPurgeQueue
 #define DosPurgeQueue _DosPurgeQueue
 
-inline ULONG APIENTRY _DosQueryQueue(HQUEUE a, PULONG b)
+inline ULONG _DosQueryQueue(HQUEUE a, PULONG b)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -2112,7 +2112,7 @@ inline ULONG APIENTRY _DosQueryQueue(HQUEUE a, PULONG b)
 #undef  DosQueryQueue
 #define DosQueryQueue _DosQueryQueue
 
-inline ULONG APIENTRY _DosReadQueue(HQUEUE a, PREQUESTDATA b, PULONG c, PPVOID d, ULONG e, BOOL32 f, PBYTE g, HEV h)
+inline ULONG _DosReadQueue(HQUEUE a, PREQUESTDATA b, PULONG c, PPVOID d, ULONG e, BOOL32 f, PBYTE g, HEV h)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -2126,7 +2126,7 @@ inline ULONG APIENTRY _DosReadQueue(HQUEUE a, PREQUESTDATA b, PULONG c, PPVOID d
 #undef  DosReadQueue
 #define DosReadQueue _DosReadQueue
 
-inline ULONG APIENTRY _DosWriteQueue(HQUEUE a, ULONG b, ULONG c, PVOID d, ULONG e)
+inline ULONG _DosWriteQueue(HQUEUE a, ULONG b, ULONG c, PVOID d, ULONG e)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -2142,7 +2142,7 @@ inline ULONG APIENTRY _DosWriteQueue(HQUEUE a, ULONG b, ULONG c, PVOID d, ULONG 
 
 #endif
 #ifdef INCL_DOSEXCEPTIONS
-inline ULONG APIENTRY _DosAcknowledgeSignalException(ULONG a)
+inline ULONG _DosAcknowledgeSignalException(ULONG a)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -2156,7 +2156,7 @@ inline ULONG APIENTRY _DosAcknowledgeSignalException(ULONG a)
 #undef  DosAcknowledgeSignalException
 #define DosAcknowledgeSignalException _DosAcknowledgeSignalException
 
-inline ULONG APIENTRY _DosEnterMustComplete(PULONG a)
+inline ULONG _DosEnterMustComplete(PULONG a)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -2170,7 +2170,7 @@ inline ULONG APIENTRY _DosEnterMustComplete(PULONG a)
 #undef  DosEnterMustComplete
 #define DosEnterMustComplete _DosEnterMustComplete
 
-inline ULONG APIENTRY _DosExitMustComplete(PULONG a)
+inline ULONG _DosExitMustComplete(PULONG a)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -2184,7 +2184,7 @@ inline ULONG APIENTRY _DosExitMustComplete(PULONG a)
 #undef  DosExitMustComplete
 #define DosExitMustComplete _DosExitMustComplete
 
-inline ULONG APIENTRY _DosQueryThreadContext(TID a, ULONG b, PCONTEXTRECORD c)
+inline ULONG _DosQueryThreadContext(TID a, ULONG b, PCONTEXTRECORD c)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -2198,7 +2198,7 @@ inline ULONG APIENTRY _DosQueryThreadContext(TID a, ULONG b, PCONTEXTRECORD c)
 #undef  DosQueryThreadContext
 #define DosQueryThreadContext _DosQueryThreadContext
 
-inline ULONG APIENTRY _DosRaiseException(PEXCEPTIONREPORTRECORD a)
+inline ULONG _DosRaiseException(PEXCEPTIONREPORTRECORD a)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -2212,7 +2212,7 @@ inline ULONG APIENTRY _DosRaiseException(PEXCEPTIONREPORTRECORD a)
 #undef  DosRaiseException
 #define DosRaiseException _DosRaiseException
 
-inline ULONG APIENTRY _DosSendSignalException(PID a, ULONG b)
+inline ULONG _DosSendSignalException(PID a, ULONG b)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -2226,7 +2226,7 @@ inline ULONG APIENTRY _DosSendSignalException(PID a, ULONG b)
 #undef  DosSendSignalException
 #define DosSendSignalException _DosSendSignalException
 
-inline ULONG APIENTRY _DosSetExceptionHandler(PEXCEPTIONREGISTRATIONRECORD a)
+inline ULONG _DosSetExceptionHandler(PEXCEPTIONREGISTRATIONRECORD a)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -2240,7 +2240,7 @@ inline ULONG APIENTRY _DosSetExceptionHandler(PEXCEPTIONREGISTRATIONRECORD a)
 #undef  DosSetExceptionHandler
 #define DosSetExceptionHandler _DosSetExceptionHandler
 
-inline ULONG APIENTRY _DosSetSignalExceptionFocus(BOOL32 a, PULONG b)
+inline ULONG _DosSetSignalExceptionFocus(BOOL32 a, PULONG b)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -2254,7 +2254,7 @@ inline ULONG APIENTRY _DosSetSignalExceptionFocus(BOOL32 a, PULONG b)
 #undef  DosSetSignalExceptionFocus
 #define DosSetSignalExceptionFocus _DosSetSignalExceptionFocus
 
-inline ULONG APIENTRY _DosUnsetExceptionHandler(PEXCEPTIONREGISTRATIONRECORD a)
+inline ULONG _DosUnsetExceptionHandler(PEXCEPTIONREGISTRATIONRECORD a)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -2268,7 +2268,7 @@ inline ULONG APIENTRY _DosUnsetExceptionHandler(PEXCEPTIONREGISTRATIONRECORD a)
 #undef  DosUnsetExceptionHandler
 #define DosUnsetExceptionHandler _DosUnsetExceptionHandler
 
-inline ULONG APIENTRY _DosUnwindException(PEXCEPTIONREGISTRATIONRECORD a, PVOID b, PEXCEPTIONREPORTRECORD c)
+inline ULONG _DosUnwindException(PEXCEPTIONREGISTRATIONRECORD a, PVOID b, PEXCEPTIONREPORTRECORD c)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -2284,7 +2284,7 @@ inline ULONG APIENTRY _DosUnwindException(PEXCEPTIONREGISTRATIONRECORD a, PVOID 
 
 #endif
 #ifdef INCL_DOSMISC
-inline ULONG APIENTRY _DosQuerySysInfo(ULONG a, ULONG b, PVOID c, ULONG d)
+inline ULONG _DosQuerySysInfo(ULONG a, ULONG b, PVOID c, ULONG d)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -2298,7 +2298,7 @@ inline ULONG APIENTRY _DosQuerySysInfo(ULONG a, ULONG b, PVOID c, ULONG d)
 #undef  DosQuerySysInfo
 #define DosQuerySysInfo _DosQuerySysInfo
 
-inline ULONG APIENTRY _DosScanEnv(PCSZ a, PCSZ *b)
+inline ULONG _DosScanEnv(PCSZ a, PCSZ *b)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -2312,7 +2312,7 @@ inline ULONG APIENTRY _DosScanEnv(PCSZ a, PCSZ *b)
 #undef  DosScanEnv
 #define DosScanEnv _DosScanEnv
 
-inline ULONG APIENTRY _DosQueryRASInfo(ULONG a, PPVOID b)
+inline ULONG _DosQueryRASInfo(ULONG a, PPVOID b)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -2328,7 +2328,7 @@ inline ULONG APIENTRY _DosQueryRASInfo(ULONG a, PPVOID b)
 
 #endif
 #ifdef INCL_DOSDATETIME
-inline ULONG APIENTRY _DosGetDateTime(PDATETIME a)
+inline ULONG _DosGetDateTime(PDATETIME a)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -2342,7 +2342,7 @@ inline ULONG APIENTRY _DosGetDateTime(PDATETIME a)
 #undef  DosGetDateTime
 #define DosGetDateTime _DosGetDateTime
 
-inline ULONG APIENTRY _DosSetDateTime(PDATETIME a)
+inline ULONG _DosSetDateTime(PDATETIME a)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -2356,7 +2356,7 @@ inline ULONG APIENTRY _DosSetDateTime(PDATETIME a)
 #undef  DosSetDateTime
 #define DosSetDateTime _DosSetDateTime
 
-inline ULONG APIENTRY _DosAsyncTimer(ULONG a, HSEM b, PHTIMER c)
+inline ULONG _DosAsyncTimer(ULONG a, HSEM b, PHTIMER c)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -2370,7 +2370,7 @@ inline ULONG APIENTRY _DosAsyncTimer(ULONG a, HSEM b, PHTIMER c)
 #undef  DosAsyncTimer
 #define DosAsyncTimer _DosAsyncTimer
 
-inline ULONG APIENTRY _DosStartTimer(ULONG a, HSEM b, PHTIMER c)
+inline ULONG _DosStartTimer(ULONG a, HSEM b, PHTIMER c)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -2384,7 +2384,7 @@ inline ULONG APIENTRY _DosStartTimer(ULONG a, HSEM b, PHTIMER c)
 #undef  DosStartTimer
 #define DosStartTimer _DosStartTimer
 
-inline ULONG APIENTRY _DosStopTimer(HTIMER a)
+inline ULONG _DosStopTimer(HTIMER a)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -2400,7 +2400,7 @@ inline ULONG APIENTRY _DosStopTimer(HTIMER a)
 
 #endif
 #ifdef DosTmrQueryFreq
-inline ULONG APIENTRY _DosTmrQueryFreq(PULONG a)
+inline ULONG _DosTmrQueryFreq(PULONG a)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -2414,7 +2414,7 @@ inline ULONG APIENTRY _DosTmrQueryFreq(PULONG a)
 #undef  DosTmrQueryFreq
 #define DosTmrQueryFreq _DosTmrQueryFreq
 
-inline ULONG APIENTRY _DosTmrQueryTime(PQWORD a)
+inline ULONG _DosTmrQueryTime(PQWORD a)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -2430,7 +2430,7 @@ inline ULONG APIENTRY _DosTmrQueryTime(PQWORD a)
 
 #endif
 #ifdef INCL_DOSMVDM
-inline ULONG APIENTRY _DosCloseVDD(HVDD a)
+inline ULONG _DosCloseVDD(HVDD a)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -2444,7 +2444,7 @@ inline ULONG APIENTRY _DosCloseVDD(HVDD a)
 #undef  DosCloseVDD
 #define DosCloseVDD _DosCloseVDD
 
-inline ULONG APIENTRY _DosOpenVDD(PCSZ a, PHVDD b)
+inline ULONG _DosOpenVDD(PCSZ a, PHVDD b)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -2458,7 +2458,7 @@ inline ULONG APIENTRY _DosOpenVDD(PCSZ a, PHVDD b)
 #undef  DosOpenVDD
 #define DosOpenVDD _DosOpenVDD
 
-inline ULONG APIENTRY _DosQueryDOSProperty(SGID a, PCSZ b, ULONG c, PSZ d)
+inline ULONG _DosQueryDOSProperty(SGID a, PCSZ b, ULONG c, PSZ d)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -2472,7 +2472,7 @@ inline ULONG APIENTRY _DosQueryDOSProperty(SGID a, PCSZ b, ULONG c, PSZ d)
 #undef  DosQueryDOSProperty
 #define DosQueryDOSProperty _DosQueryDOSProperty
 
-inline ULONG APIENTRY _DosRequestVDD(HVDD a, SGID b, ULONG c, ULONG d, PVOID e, ULONG f, PVOID g)
+inline ULONG _DosRequestVDD(HVDD a, SGID b, ULONG c, ULONG d, PVOID e, ULONG f, PVOID g)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -2486,7 +2486,7 @@ inline ULONG APIENTRY _DosRequestVDD(HVDD a, SGID b, ULONG c, ULONG d, PVOID e, 
 #undef  DosRequestVDD
 #define DosRequestVDD _DosRequestVDD
 
-inline ULONG APIENTRY _DosSetDOSProperty(SGID a, PCSZ b, ULONG c, PCSZ d)
+inline ULONG _DosSetDOSProperty(SGID a, PCSZ b, ULONG c, PCSZ d)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -2502,7 +2502,7 @@ inline ULONG APIENTRY _DosSetDOSProperty(SGID a, PCSZ b, ULONG c, PCSZ d)
 
 #endif
 #ifdef INCL_DOSPROCESS
-inline ULONG APIENTRY _DosDebug(uDB_t *a)
+inline ULONG _DosDebug(uDB_t *a)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -2518,7 +2518,7 @@ inline ULONG APIENTRY _DosDebug(uDB_t *a)
 
 #endif
 #ifdef INCL_DOSMISC
-inline ULONG APIENTRY _DosGetMessage(PCHAR *a, ULONG b, PCHAR c, ULONG d, ULONG e, PCSZ f, PULONG g)
+inline ULONG _DosGetMessage(PCHAR *a, ULONG b, PCHAR c, ULONG d, ULONG e, PCSZ f, PULONG g)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -2532,7 +2532,7 @@ inline ULONG APIENTRY _DosGetMessage(PCHAR *a, ULONG b, PCHAR c, ULONG d, ULONG 
 #undef  DosGetMessage
 #define DosGetMessage _DosGetMessage
 
-inline ULONG APIENTRY _DosInsertMessage(PCHAR *a, ULONG b, PCSZ c, ULONG d, PCHAR e, ULONG f, PULONG g)
+inline ULONG _DosInsertMessage(PCHAR *a, ULONG b, PCSZ c, ULONG d, PCHAR e, ULONG f, PULONG g)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -2546,7 +2546,7 @@ inline ULONG APIENTRY _DosInsertMessage(PCHAR *a, ULONG b, PCSZ c, ULONG d, PCHA
 #undef  DosInsertMessage
 #define DosInsertMessage _DosInsertMessage
 
-inline ULONG APIENTRY _DosPutMessage(HFILE a, ULONG b, PCHAR c)
+inline ULONG _DosPutMessage(HFILE a, ULONG b, PCHAR c)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -2560,7 +2560,7 @@ inline ULONG APIENTRY _DosPutMessage(HFILE a, ULONG b, PCHAR c)
 #undef  DosPutMessage
 #define DosPutMessage _DosPutMessage
 
-inline ULONG APIENTRY _DosQueryMessageCP(PCHAR a, ULONG b, PCSZ c, PULONG d)
+inline ULONG _DosQueryMessageCP(PCHAR a, ULONG b, PCSZ c, PULONG d)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -2576,7 +2576,7 @@ inline ULONG APIENTRY _DosQueryMessageCP(PCHAR a, ULONG b, PCSZ c, PULONG d)
 
 #endif
 #ifdef INCL_DOSRAS
-inline ULONG APIENTRY _DosDumpProcess(ULONG a, ULONG b, PID c)
+inline ULONG _DosDumpProcess(ULONG a, ULONG b, PID c)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -2590,7 +2590,7 @@ inline ULONG APIENTRY _DosDumpProcess(ULONG a, ULONG b, PID c)
 #undef  DosDumpProcess
 #define DosDumpProcess _DosDumpProcess
 
-inline ULONG APIENTRY _DosForceSystemDump(ULONG a)
+inline ULONG _DosForceSystemDump(ULONG a)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -2604,7 +2604,7 @@ inline ULONG APIENTRY _DosForceSystemDump(ULONG a)
 #undef  DosForceSystemDump
 #define DosForceSystemDump _DosForceSystemDump
 
-inline ULONG APIENTRY _DosQueryRASInfo(ULONG a, PPVOID b)
+inline ULONG _DosQueryRASInfo(ULONG a, PPVOID b)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -2618,7 +2618,7 @@ inline ULONG APIENTRY _DosQueryRASInfo(ULONG a, PPVOID b)
 #undef  DosQueryRASInfo
 #define DosQueryRASInfo _DosQueryRASInfo
 
-inline ULONG APIENTRY _DosSuppressPopUps(ULONG a, ULONG b)
+inline ULONG _DosSuppressPopUps(ULONG a, ULONG b)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -2634,7 +2634,7 @@ inline ULONG APIENTRY _DosSuppressPopUps(ULONG a, ULONG b)
 
 #endif
 #ifdef INCL_RXSUBCOM
-inline ULONG APIENTRY _RexxDeregisterSubcom(PCSZ a, PCSZ b)
+inline ULONG _RexxDeregisterSubcom(PCSZ a, PCSZ b)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -2648,7 +2648,7 @@ inline ULONG APIENTRY _RexxDeregisterSubcom(PCSZ a, PCSZ b)
 #undef  RexxDeregisterSubcom
 #define RexxDeregisterSubcom _RexxDeregisterSubcom
 
-inline ULONG APIENTRY _RexxQuerySubcom(PCSZ a, PCSZ b, PUSHORT c, PUCHAR d)
+inline ULONG _RexxQuerySubcom(PCSZ a, PCSZ b, PUSHORT c, PUCHAR d)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -2662,7 +2662,7 @@ inline ULONG APIENTRY _RexxQuerySubcom(PCSZ a, PCSZ b, PUSHORT c, PUCHAR d)
 #undef  RexxQuerySubcom
 #define RexxQuerySubcom _RexxQuerySubcom
 
-inline ULONG APIENTRY _RexxRegisterSubcomDll(PCSZ a, PCSZ b, PCSZ c, PUCHAR d, ULONG e)
+inline ULONG _RexxRegisterSubcomDll(PCSZ a, PCSZ b, PCSZ c, PUCHAR d, ULONG e)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -2676,7 +2676,7 @@ inline ULONG APIENTRY _RexxRegisterSubcomDll(PCSZ a, PCSZ b, PCSZ c, PUCHAR d, U
 #undef  RexxRegisterSubcomDll
 #define RexxRegisterSubcomDll _RexxRegisterSubcomDll
 
-inline ULONG APIENTRY _RexxRegisterSubcomExe(PCSZ a, PFN b, PUCHAR c)
+inline ULONG _RexxRegisterSubcomExe(PCSZ a, PFN b, PUCHAR c)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -2692,7 +2692,7 @@ inline ULONG APIENTRY _RexxRegisterSubcomExe(PCSZ a, PFN b, PUCHAR c)
 
 #endif
 #ifdef INCL_RXSHV
-inline ULONG APIENTRY _RexxVariablePool(PSHVBLOCK a)
+inline ULONG _RexxVariablePool(PSHVBLOCK a)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -2708,7 +2708,7 @@ inline ULONG APIENTRY _RexxVariablePool(PSHVBLOCK a)
 
 #endif
 #ifdef INCL_RXFUNC
-inline ULONG APIENTRY _RexxDeregisterFunction(PCSZ a)
+inline ULONG _RexxDeregisterFunction(PCSZ a)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -2722,7 +2722,7 @@ inline ULONG APIENTRY _RexxDeregisterFunction(PCSZ a)
 #undef  RexxDeregisterFunction
 #define RexxDeregisterFunction _RexxDeregisterFunction
 
-inline ULONG APIENTRY _RexxQueryFunction(PCSZ a)
+inline ULONG _RexxQueryFunction(PCSZ a)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -2736,7 +2736,7 @@ inline ULONG APIENTRY _RexxQueryFunction(PCSZ a)
 #undef  RexxQueryFunction
 #define RexxQueryFunction _RexxQueryFunction
 
-inline ULONG APIENTRY _RexxRegisterFunctionDll(PCSZ a, PCSZ b, PCSZ c)
+inline ULONG _RexxRegisterFunctionDll(PCSZ a, PCSZ b, PCSZ c)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -2750,7 +2750,7 @@ inline ULONG APIENTRY _RexxRegisterFunctionDll(PCSZ a, PCSZ b, PCSZ c)
 #undef  RexxRegisterFunctionDll
 #define RexxRegisterFunctionDll _RexxRegisterFunctionDll
 
-inline ULONG APIENTRY _RexxRegisterFunctionExe(PCSZ a, RexxFunctionHandler *b)
+inline ULONG _RexxRegisterFunctionExe(PCSZ a, RexxFunctionHandler *b)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -2766,7 +2766,7 @@ inline ULONG APIENTRY _RexxRegisterFunctionExe(PCSZ a, RexxFunctionHandler *b)
 
 #endif
 #ifdef INCL_RXSYSEXIT
-inline ULONG APIENTRY _RexxDeregisterExit(PCSZ a, PCSZ b)
+inline ULONG _RexxDeregisterExit(PCSZ a, PCSZ b)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -2780,7 +2780,7 @@ inline ULONG APIENTRY _RexxDeregisterExit(PCSZ a, PCSZ b)
 #undef  RexxDeregisterExit
 #define RexxDeregisterExit _RexxDeregisterExit
 
-inline ULONG APIENTRY _RexxQueryExit(PCSZ a, PCSZ b, PUSHORT c, PUCHAR d)
+inline ULONG _RexxQueryExit(PCSZ a, PCSZ b, PUSHORT c, PUCHAR d)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -2794,7 +2794,7 @@ inline ULONG APIENTRY _RexxQueryExit(PCSZ a, PCSZ b, PUSHORT c, PUCHAR d)
 #undef  RexxQueryExit
 #define RexxQueryExit _RexxQueryExit
 
-inline ULONG APIENTRY _RexxRegisterExitDll(PCSZ a, PCSZ b, PCSZ c, PUCHAR d, ULONG e)
+inline ULONG _RexxRegisterExitDll(PCSZ a, PCSZ b, PCSZ c, PUCHAR d, ULONG e)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -2808,7 +2808,7 @@ inline ULONG APIENTRY _RexxRegisterExitDll(PCSZ a, PCSZ b, PCSZ c, PUCHAR d, ULO
 #undef  RexxRegisterExitDll
 #define RexxRegisterExitDll _RexxRegisterExitDll
 
-inline ULONG APIENTRY _RexxRegisterExitExe(PCSZ a, PFN b, PUCHAR c)
+inline ULONG _RexxRegisterExitExe(PCSZ a, PFN b, PUCHAR c)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -2824,7 +2824,7 @@ inline ULONG APIENTRY _RexxRegisterExitExe(PCSZ a, PFN b, PUCHAR c)
 
 #endif
 #ifdef INCL_RXARI
-inline ULONG APIENTRY _RexxResetTrace(PID a, TID b)
+inline ULONG _RexxResetTrace(PID a, TID b)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -2838,7 +2838,7 @@ inline ULONG APIENTRY _RexxResetTrace(PID a, TID b)
 #undef  RexxResetTrace
 #define RexxResetTrace _RexxResetTrace
 
-inline ULONG APIENTRY _RexxSetHalt(PID a, TID b)
+inline ULONG _RexxSetHalt(PID a, TID b)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -2852,7 +2852,7 @@ inline ULONG APIENTRY _RexxSetHalt(PID a, TID b)
 #undef  RexxSetHalt
 #define RexxSetHalt _RexxSetHalt
 
-inline ULONG APIENTRY _RexxSetTrace(PID a, TID b)
+inline ULONG _RexxSetTrace(PID a, TID b)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -2868,7 +2868,7 @@ inline ULONG APIENTRY _RexxSetTrace(PID a, TID b)
 
 #endif
 #ifdef INCL_RXMACRO
-inline ULONG APIENTRY _RexxAddMacro(PCSZ a, PCSZ b, ULONG c)
+inline ULONG _RexxAddMacro(PCSZ a, PCSZ b, ULONG c)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -2882,7 +2882,7 @@ inline ULONG APIENTRY _RexxAddMacro(PCSZ a, PCSZ b, ULONG c)
 #undef  RexxAddMacro
 #define RexxAddMacro _RexxAddMacro
 
-inline ULONG APIENTRY _RexxClearMacroSpace()
+inline ULONG _RexxClearMacroSpace()
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -2896,7 +2896,7 @@ inline ULONG APIENTRY _RexxClearMacroSpace()
 #undef  RexxClearMacroSpace
 #define RexxClearMacroSpace _RexxClearMacroSpace
 
-inline ULONG APIENTRY _RexxDropMacro(PCSZ a)
+inline ULONG _RexxDropMacro(PCSZ a)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -2910,7 +2910,7 @@ inline ULONG APIENTRY _RexxDropMacro(PCSZ a)
 #undef  RexxDropMacro
 #define RexxDropMacro _RexxDropMacro
 
-inline ULONG APIENTRY _RexxLoadMacroSpace(ULONG a, PCSZ *b, PCSZ c)
+inline ULONG _RexxLoadMacroSpace(ULONG a, PCSZ *b, PCSZ c)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -2924,7 +2924,7 @@ inline ULONG APIENTRY _RexxLoadMacroSpace(ULONG a, PCSZ *b, PCSZ c)
 #undef  RexxLoadMacroSpace
 #define RexxLoadMacroSpace _RexxLoadMacroSpace
 
-inline ULONG APIENTRY _RexxQueryMacro(PCSZ a, PUSHORT b)
+inline ULONG _RexxQueryMacro(PCSZ a, PUSHORT b)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -2938,7 +2938,7 @@ inline ULONG APIENTRY _RexxQueryMacro(PCSZ a, PUSHORT b)
 #undef  RexxQueryMacro
 #define RexxQueryMacro _RexxQueryMacro
 
-inline ULONG APIENTRY _RexxReorderMacro(PCSZ a, ULONG b)
+inline ULONG _RexxReorderMacro(PCSZ a, ULONG b)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -2952,7 +2952,7 @@ inline ULONG APIENTRY _RexxReorderMacro(PCSZ a, ULONG b)
 #undef  RexxReorderMacro
 #define RexxReorderMacro _RexxReorderMacro
 
-inline ULONG APIENTRY _RexxSaveMacroSpace(ULONG a, PCSZ *b, PCSZ c)
+inline ULONG _RexxSaveMacroSpace(ULONG a, PCSZ *b, PCSZ c)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -2966,7 +2966,7 @@ inline ULONG APIENTRY _RexxSaveMacroSpace(ULONG a, PCSZ *b, PCSZ c)
 #undef  RexxSaveMacroSpace
 #define RexxSaveMacroSpace _RexxSaveMacroSpace
 
-inline LONG APIENTRY _RexxStart(LONG a, PRXSTRING b, PCSZ c, PRXSTRING d, PCSZ e, LONG f, PRXSYSEXIT g, PSHORT h, PRXSTRING i)
+inline LONG _RexxStart(LONG a, PRXSTRING b, PCSZ c, PRXSTRING d, PCSZ e, LONG f, PRXSYSEXIT g, PSHORT h, PRXSTRING i)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -2983,7 +2983,7 @@ inline LONG APIENTRY _RexxStart(LONG a, PRXSTRING b, PCSZ c, PRXSTRING d, PCSZ e
 #endif
 #ifdef INCL_WIN
 #ifdef INCL_WINMESSAGEMGR
-inline BOOL APIENTRY _WinCancelShutdown(HMQ a, BOOL b)
+inline BOOL _WinCancelShutdown(HMQ a, BOOL b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -2997,7 +2997,7 @@ inline BOOL APIENTRY _WinCancelShutdown(HMQ a, BOOL b)
 #undef  WinCancelShutdown
 #define WinCancelShutdown _WinCancelShutdown
 
-inline HMQ APIENTRY _WinCreateMsgQueue(HAB a, LONG b)
+inline HMQ _WinCreateMsgQueue(HAB a, LONG b)
 {
  HMQ yyrc;
  USHORT sel = GetFS();
@@ -3011,7 +3011,7 @@ inline HMQ APIENTRY _WinCreateMsgQueue(HAB a, LONG b)
 #undef  WinCreateMsgQueue
 #define WinCreateMsgQueue _WinCreateMsgQueue
 
-inline BOOL APIENTRY _WinDestroyMsgQueue(HMQ a)
+inline BOOL _WinDestroyMsgQueue(HMQ a)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -3025,7 +3025,7 @@ inline BOOL APIENTRY _WinDestroyMsgQueue(HMQ a)
 #undef  WinDestroyMsgQueue
 #define WinDestroyMsgQueue _WinDestroyMsgQueue
 
-inline MRESULT APIENTRY _WinDispatchMsg(HAB a, PQMSG b)
+inline MRESULT _WinDispatchMsg(HAB a, PQMSG b)
 {
  MRESULT yyrc;
  USHORT sel = GetFS();
@@ -3039,7 +3039,7 @@ inline MRESULT APIENTRY _WinDispatchMsg(HAB a, PQMSG b)
 #undef  WinDispatchMsg
 #define WinDispatchMsg _WinDispatchMsg
 
-inline BOOL APIENTRY _WinGetMsg(HAB a, PQMSG b, HWND c, ULONG d, ULONG e)
+inline BOOL _WinGetMsg(HAB a, PQMSG b, HWND c, ULONG d, ULONG e)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -3053,7 +3053,7 @@ inline BOOL APIENTRY _WinGetMsg(HAB a, PQMSG b, HWND c, ULONG d, ULONG e)
 #undef  WinGetMsg
 #define WinGetMsg _WinGetMsg
 
-inline BOOL APIENTRY _WinLockInput(HMQ a, ULONG b)
+inline BOOL _WinLockInput(HMQ a, ULONG b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -3067,7 +3067,7 @@ inline BOOL APIENTRY _WinLockInput(HMQ a, ULONG b)
 #undef  WinLockInput
 #define WinLockInput _WinLockInput
 
-inline BOOL APIENTRY _WinPeekMsg(HAB a, PQMSG b, HWND c, ULONG d, ULONG e, ULONG f)
+inline BOOL _WinPeekMsg(HAB a, PQMSG b, HWND c, ULONG d, ULONG e, ULONG f)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -3081,7 +3081,7 @@ inline BOOL APIENTRY _WinPeekMsg(HAB a, PQMSG b, HWND c, ULONG d, ULONG e, ULONG
 #undef  WinPeekMsg
 #define WinPeekMsg _WinPeekMsg
 
-inline BOOL APIENTRY _WinPostMsg(HWND a, ULONG b, MPARAM c, MPARAM d)
+inline BOOL _WinPostMsg(HWND a, ULONG b, MPARAM c, MPARAM d)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -3095,7 +3095,7 @@ inline BOOL APIENTRY _WinPostMsg(HWND a, ULONG b, MPARAM c, MPARAM d)
 #undef  WinPostMsg
 #define WinPostMsg _WinPostMsg
 
-inline HMQ APIENTRY _WinQueueFromID(HAB a, PID b, TID c)
+inline HMQ _WinQueueFromID(HAB a, PID b, TID c)
 {
  HMQ yyrc;
  USHORT sel = GetFS();
@@ -3109,7 +3109,7 @@ inline HMQ APIENTRY _WinQueueFromID(HAB a, PID b, TID c)
 #undef  WinQueueFromID
 #define WinQueueFromID _WinQueueFromID
 
-inline BOOL APIENTRY _WinQueryQueueInfo(HMQ a, PMQINFO b, ULONG c)
+inline BOOL _WinQueryQueueInfo(HMQ a, PMQINFO b, ULONG c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -3123,7 +3123,7 @@ inline BOOL APIENTRY _WinQueryQueueInfo(HMQ a, PMQINFO b, ULONG c)
 #undef  WinQueryQueueInfo
 #define WinQueryQueueInfo _WinQueryQueueInfo
 
-inline HMQ APIENTRY _WinQuerySendMsg(HAB a, HMQ b, HMQ c, PQMSG d)
+inline HMQ _WinQuerySendMsg(HAB a, HMQ b, HMQ c, PQMSG d)
 {
  HMQ yyrc;
  USHORT sel = GetFS();
@@ -3137,7 +3137,7 @@ inline HMQ APIENTRY _WinQuerySendMsg(HAB a, HMQ b, HMQ c, PQMSG d)
 #undef  WinQuerySendMsg
 #define WinQuerySendMsg _WinQuerySendMsg
 
-inline BOOL APIENTRY _WinRegisterUserDatatype(HAB a, LONG b, LONG c, PLONG d)
+inline BOOL _WinRegisterUserDatatype(HAB a, LONG b, LONG c, PLONG d)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -3151,7 +3151,7 @@ inline BOOL APIENTRY _WinRegisterUserDatatype(HAB a, LONG b, LONG c, PLONG d)
 #undef  WinRegisterUserDatatype
 #define WinRegisterUserDatatype _WinRegisterUserDatatype
 
-inline BOOL APIENTRY _WinRegisterUserMsg(HAB a, ULONG b, LONG c, LONG d, LONG e, LONG f, LONG g)
+inline BOOL _WinRegisterUserMsg(HAB a, ULONG b, LONG c, LONG d, LONG e, LONG f, LONG g)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -3165,7 +3165,7 @@ inline BOOL APIENTRY _WinRegisterUserMsg(HAB a, ULONG b, LONG c, LONG d, LONG e,
 #undef  WinRegisterUserMsg
 #define WinRegisterUserMsg _WinRegisterUserMsg
 
-inline BOOL APIENTRY _WinReplyMsg(HAB a, HMQ b, HMQ c, MRESULT d)
+inline BOOL _WinReplyMsg(HAB a, HMQ b, HMQ c, MRESULT d)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -3179,7 +3179,7 @@ inline BOOL APIENTRY _WinReplyMsg(HAB a, HMQ b, HMQ c, MRESULT d)
 #undef  WinReplyMsg
 #define WinReplyMsg _WinReplyMsg
 
-inline MRESULT APIENTRY _WinSendMsg(HWND a, ULONG b, MPARAM c, MPARAM d)
+inline MRESULT _WinSendMsg(HWND a, ULONG b, MPARAM c, MPARAM d)
 {
  MRESULT yyrc;
  USHORT sel = GetFS();
@@ -3193,7 +3193,7 @@ inline MRESULT APIENTRY _WinSendMsg(HWND a, ULONG b, MPARAM c, MPARAM d)
 #undef  WinSendMsg
 #define WinSendMsg _WinSendMsg
 
-inline BOOL APIENTRY _WinSetMsgMode(HAB a, PCSZ b, LONG c)
+inline BOOL _WinSetMsgMode(HAB a, PCSZ b, LONG c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -3207,7 +3207,7 @@ inline BOOL APIENTRY _WinSetMsgMode(HAB a, PCSZ b, LONG c)
 #undef  WinSetMsgMode
 #define WinSetMsgMode _WinSetMsgMode
 
-inline BOOL APIENTRY _WinSetSynchroMode(HAB a, LONG b)
+inline BOOL _WinSetSynchroMode(HAB a, LONG b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -3221,7 +3221,7 @@ inline BOOL APIENTRY _WinSetSynchroMode(HAB a, LONG b)
 #undef  WinSetSynchroMode
 #define WinSetSynchroMode _WinSetSynchroMode
 
-inline BOOL APIENTRY _WinThreadAssocQueue(HAB a, HMQ b)
+inline BOOL _WinThreadAssocQueue(HAB a, HMQ b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -3235,7 +3235,7 @@ inline BOOL APIENTRY _WinThreadAssocQueue(HAB a, HMQ b)
 #undef  WinThreadAssocQueue
 #define WinThreadAssocQueue _WinThreadAssocQueue
 
-inline BOOL APIENTRY _WinWakeThread(HMQ a)
+inline BOOL _WinWakeThread(HMQ a)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -3250,7 +3250,7 @@ inline BOOL APIENTRY _WinWakeThread(HMQ a)
 #define WinWakeThread _WinWakeThread
 
 #endif
-inline HWND APIENTRY _WinCreateWindow(HWND a, PCSZ b, PCSZ c, ULONG d, LONG e, LONG f, LONG g, LONG h, HWND i, HWND j, ULONG k, PVOID l, PVOID m)
+inline HWND _WinCreateWindow(HWND a, PCSZ b, PCSZ c, ULONG d, LONG e, LONG f, LONG g, LONG h, HWND i, HWND j, ULONG k, PVOID l, PVOID m)
 {
  HWND yyrc;
  USHORT sel = GetFS();
@@ -3264,7 +3264,7 @@ inline HWND APIENTRY _WinCreateWindow(HWND a, PCSZ b, PCSZ c, ULONG d, LONG e, L
 #undef  WinCreateWindow
 #define WinCreateWindow _WinCreateWindow
 
-inline BOOL APIENTRY _WinDrawBitmap(HPS a, HBITMAP b, PRECTL c, PPOINTL d, LONG e, LONG f, ULONG g)
+inline BOOL _WinDrawBitmap(HPS a, HBITMAP b, PRECTL c, PPOINTL d, LONG e, LONG f, ULONG g)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -3278,7 +3278,7 @@ inline BOOL APIENTRY _WinDrawBitmap(HPS a, HBITMAP b, PRECTL c, PPOINTL d, LONG 
 #undef  WinDrawBitmap
 #define WinDrawBitmap _WinDrawBitmap
 
-inline BOOL APIENTRY _WinDrawBorder(HPS a, PRECTL b, LONG c, LONG d, LONG e, LONG f, ULONG g)
+inline BOOL _WinDrawBorder(HPS a, PRECTL b, LONG c, LONG d, LONG e, LONG f, ULONG g)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -3292,7 +3292,7 @@ inline BOOL APIENTRY _WinDrawBorder(HPS a, PRECTL b, LONG c, LONG d, LONG e, LON
 #undef  WinDrawBorder
 #define WinDrawBorder _WinDrawBorder
 
-inline LONG APIENTRY _WinDrawText(HPS a, LONG b, PCH c, PRECTL d, LONG e, LONG f, ULONG g)
+inline LONG _WinDrawText(HPS a, LONG b, PCH c, PRECTL d, LONG e, LONG f, ULONG g)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -3306,7 +3306,7 @@ inline LONG APIENTRY _WinDrawText(HPS a, LONG b, PCH c, PRECTL d, LONG e, LONG f
 #undef  WinDrawText
 #define WinDrawText _WinDrawText
 
-inline BOOL APIENTRY _WinEnableWindow(HWND a, BOOL b)
+inline BOOL _WinEnableWindow(HWND a, BOOL b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -3320,7 +3320,7 @@ inline BOOL APIENTRY _WinEnableWindow(HWND a, BOOL b)
 #undef  WinEnableWindow
 #define WinEnableWindow _WinEnableWindow
 
-inline BOOL APIENTRY _WinEnableWindowUpdate(HWND a, BOOL b)
+inline BOOL _WinEnableWindowUpdate(HWND a, BOOL b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -3334,7 +3334,7 @@ inline BOOL APIENTRY _WinEnableWindowUpdate(HWND a, BOOL b)
 #undef  WinEnableWindowUpdate
 #define WinEnableWindowUpdate _WinEnableWindowUpdate
 
-inline BOOL APIENTRY _WinInvalidateRect(HWND a, PRECTL b, BOOL c)
+inline BOOL _WinInvalidateRect(HWND a, PRECTL b, BOOL c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -3348,7 +3348,7 @@ inline BOOL APIENTRY _WinInvalidateRect(HWND a, PRECTL b, BOOL c)
 #undef  WinInvalidateRect
 #define WinInvalidateRect _WinInvalidateRect
 
-inline BOOL APIENTRY _WinInvalidateRegion(HWND a, HRGN b, BOOL c)
+inline BOOL _WinInvalidateRegion(HWND a, HRGN b, BOOL c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -3362,7 +3362,7 @@ inline BOOL APIENTRY _WinInvalidateRegion(HWND a, HRGN b, BOOL c)
 #undef  WinInvalidateRegion
 #define WinInvalidateRegion _WinInvalidateRegion
 
-inline BOOL APIENTRY _WinInvertRect(HPS a, PRECTL b)
+inline BOOL _WinInvertRect(HPS a, PRECTL b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -3376,7 +3376,7 @@ inline BOOL APIENTRY _WinInvertRect(HPS a, PRECTL b)
 #undef  WinInvertRect
 #define WinInvertRect _WinInvertRect
 
-inline BOOL APIENTRY _WinIsChild(HWND a, HWND b)
+inline BOOL _WinIsChild(HWND a, HWND b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -3390,7 +3390,7 @@ inline BOOL APIENTRY _WinIsChild(HWND a, HWND b)
 #undef  WinIsChild
 #define WinIsChild _WinIsChild
 
-inline BOOL APIENTRY _WinIsWindow(HAB a, HWND b)
+inline BOOL _WinIsWindow(HAB a, HWND b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -3404,7 +3404,7 @@ inline BOOL APIENTRY _WinIsWindow(HAB a, HWND b)
 #undef  WinIsWindow
 #define WinIsWindow _WinIsWindow
 
-inline BOOL APIENTRY _WinIsWindowEnabled(HWND a)
+inline BOOL _WinIsWindowEnabled(HWND a)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -3418,7 +3418,7 @@ inline BOOL APIENTRY _WinIsWindowEnabled(HWND a)
 #undef  WinIsWindowEnabled
 #define WinIsWindowEnabled _WinIsWindowEnabled
 
-inline BOOL APIENTRY _WinIsWindowVisible(HWND a)
+inline BOOL _WinIsWindowVisible(HWND a)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -3432,7 +3432,7 @@ inline BOOL APIENTRY _WinIsWindowVisible(HWND a)
 #undef  WinIsWindowVisible
 #define WinIsWindowVisible _WinIsWindowVisible
 
-inline LONG APIENTRY _WinLoadMessage(HAB a, HMODULE b, ULONG c, LONG d, PSZ e)
+inline LONG _WinLoadMessage(HAB a, HMODULE b, ULONG c, LONG d, PSZ e)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -3446,7 +3446,7 @@ inline LONG APIENTRY _WinLoadMessage(HAB a, HMODULE b, ULONG c, LONG d, PSZ e)
 #undef  WinLoadMessage
 #define WinLoadMessage _WinLoadMessage
 
-inline LONG APIENTRY _WinLoadString(HAB a, HMODULE b, ULONG c, LONG d, PSZ e)
+inline LONG _WinLoadString(HAB a, HMODULE b, ULONG c, LONG d, PSZ e)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -3460,7 +3460,7 @@ inline LONG APIENTRY _WinLoadString(HAB a, HMODULE b, ULONG c, LONG d, PSZ e)
 #undef  WinLoadString
 #define WinLoadString _WinLoadString
 
-inline LONG APIENTRY _WinMultWindowFromIDs(HWND a, PHWND b, ULONG c, ULONG d)
+inline LONG _WinMultWindowFromIDs(HWND a, PHWND b, ULONG c, ULONG d)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -3474,7 +3474,7 @@ inline LONG APIENTRY _WinMultWindowFromIDs(HWND a, PHWND b, ULONG c, ULONG d)
 #undef  WinMultWindowFromIDs
 #define WinMultWindowFromIDs _WinMultWindowFromIDs
 
-inline HWND APIENTRY _WinQueryDesktopWindow(HAB a, HDC b)
+inline HWND _WinQueryDesktopWindow(HAB a, HDC b)
 {
  HWND yyrc;
  USHORT sel = GetFS();
@@ -3488,7 +3488,7 @@ inline HWND APIENTRY _WinQueryDesktopWindow(HAB a, HDC b)
 #undef  WinQueryDesktopWindow
 #define WinQueryDesktopWindow _WinQueryDesktopWindow
 
-inline HWND APIENTRY _WinQueryObjectWindow(HWND a)
+inline HWND _WinQueryObjectWindow(HWND a)
 {
  HWND yyrc;
  USHORT sel = GetFS();
@@ -3502,7 +3502,7 @@ inline HWND APIENTRY _WinQueryObjectWindow(HWND a)
 #undef  WinQueryObjectWindow
 #define WinQueryObjectWindow _WinQueryObjectWindow
 
-inline HPOINTER APIENTRY _WinQueryPointer(HWND a)
+inline HPOINTER _WinQueryPointer(HWND a)
 {
  HPOINTER yyrc;
  USHORT sel = GetFS();
@@ -3516,7 +3516,7 @@ inline HPOINTER APIENTRY _WinQueryPointer(HWND a)
 #undef  WinQueryPointer
 #define WinQueryPointer _WinQueryPointer
 
-inline HWND APIENTRY _WinQueryWindow(HWND a, LONG b)
+inline HWND _WinQueryWindow(HWND a, LONG b)
 {
  HWND yyrc;
  USHORT sel = GetFS();
@@ -3530,7 +3530,7 @@ inline HWND APIENTRY _WinQueryWindow(HWND a, LONG b)
 #undef  WinQueryWindow
 #define WinQueryWindow _WinQueryWindow
 
-inline BOOL APIENTRY _WinQueryWindowPos(HWND a, PSWP b)
+inline BOOL _WinQueryWindowPos(HWND a, PSWP b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -3544,7 +3544,7 @@ inline BOOL APIENTRY _WinQueryWindowPos(HWND a, PSWP b)
 #undef  WinQueryWindowPos
 #define WinQueryWindowPos _WinQueryWindowPos
 
-inline BOOL APIENTRY _WinQueryWindowProcess(HWND a, PPID b, PTID c)
+inline BOOL _WinQueryWindowProcess(HWND a, PPID b, PTID c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -3558,7 +3558,7 @@ inline BOOL APIENTRY _WinQueryWindowProcess(HWND a, PPID b, PTID c)
 #undef  WinQueryWindowProcess
 #define WinQueryWindowProcess _WinQueryWindowProcess
 
-inline LONG APIENTRY _WinQueryWindowText(HWND a, LONG b, PCH c)
+inline LONG _WinQueryWindowText(HWND a, LONG b, PCH c)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -3572,7 +3572,7 @@ inline LONG APIENTRY _WinQueryWindowText(HWND a, LONG b, PCH c)
 #undef  WinQueryWindowText
 #define WinQueryWindowText _WinQueryWindowText
 
-inline LONG APIENTRY _WinQueryWindowTextLength(HWND a)
+inline LONG _WinQueryWindowTextLength(HWND a)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -3586,7 +3586,7 @@ inline LONG APIENTRY _WinQueryWindowTextLength(HWND a)
 #undef  WinQueryWindowTextLength
 #define WinQueryWindowTextLength _WinQueryWindowTextLength
 
-inline BOOL APIENTRY _WinSetMultWindowPos(HAB a, PSWP b, ULONG c)
+inline BOOL _WinSetMultWindowPos(HAB a, PSWP b, ULONG c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -3600,7 +3600,7 @@ inline BOOL APIENTRY _WinSetMultWindowPos(HAB a, PSWP b, ULONG c)
 #undef  WinSetMultWindowPos
 #define WinSetMultWindowPos _WinSetMultWindowPos
 
-inline BOOL APIENTRY _WinSetOwner(HWND a, HWND b)
+inline BOOL _WinSetOwner(HWND a, HWND b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -3614,7 +3614,7 @@ inline BOOL APIENTRY _WinSetOwner(HWND a, HWND b)
 #undef  WinSetOwner
 #define WinSetOwner _WinSetOwner
 
-inline BOOL APIENTRY _WinSetParent(HWND a, HWND b, BOOL c)
+inline BOOL _WinSetParent(HWND a, HWND b, BOOL c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -3628,7 +3628,7 @@ inline BOOL APIENTRY _WinSetParent(HWND a, HWND b, BOOL c)
 #undef  WinSetParent
 #define WinSetParent _WinSetParent
 
-inline BOOL APIENTRY _WinSetWindowPos(HWND a, HWND b, LONG c, LONG d, LONG e, LONG f, ULONG g)
+inline BOOL _WinSetWindowPos(HWND a, HWND b, LONG c, LONG d, LONG e, LONG f, ULONG g)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -3642,7 +3642,7 @@ inline BOOL APIENTRY _WinSetWindowPos(HWND a, HWND b, LONG c, LONG d, LONG e, LO
 #undef  WinSetWindowPos
 #define WinSetWindowPos _WinSetWindowPos
 
-inline BOOL APIENTRY _WinSetWindowText(HWND a, PCSZ b)
+inline BOOL _WinSetWindowText(HWND a, PCSZ b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -3656,7 +3656,7 @@ inline BOOL APIENTRY _WinSetWindowText(HWND a, PCSZ b)
 #undef  WinSetWindowText
 #define WinSetWindowText _WinSetWindowText
 
-inline BOOL APIENTRY _WinUpdateWindow(HWND a)
+inline BOOL _WinUpdateWindow(HWND a)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -3670,7 +3670,7 @@ inline BOOL APIENTRY _WinUpdateWindow(HWND a)
 #undef  WinUpdateWindow
 #define WinUpdateWindow _WinUpdateWindow
 
-inline HWND APIENTRY _WinWindowFromID(HWND a, ULONG b)
+inline HWND _WinWindowFromID(HWND a, ULONG b)
 {
  HWND yyrc;
  USHORT sel = GetFS();
@@ -3685,7 +3685,7 @@ inline HWND APIENTRY _WinWindowFromID(HWND a, ULONG b)
 #define WinWindowFromID _WinWindowFromID
 
 #ifdef INCL_WINFRAMEMGR
-inline HWND APIENTRY _WinCreateStdWindow(HWND a, ULONG b, PULONG c, PCSZ d, PCSZ e, ULONG f, HMODULE g, ULONG h, PHWND i)
+inline HWND _WinCreateStdWindow(HWND a, ULONG b, PULONG c, PCSZ d, PCSZ e, ULONG f, HMODULE g, ULONG h, PHWND i)
 {
  HWND yyrc;
  USHORT sel = GetFS();
@@ -3699,7 +3699,7 @@ inline HWND APIENTRY _WinCreateStdWindow(HWND a, ULONG b, PULONG c, PCSZ d, PCSZ
 #undef  WinCreateStdWindow
 #define WinCreateStdWindow _WinCreateStdWindow
 
-inline BOOL APIENTRY _WinCalcFrameRect(HWND a, PRECTL b, BOOL c)
+inline BOOL _WinCalcFrameRect(HWND a, PRECTL b, BOOL c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -3713,7 +3713,7 @@ inline BOOL APIENTRY _WinCalcFrameRect(HWND a, PRECTL b, BOOL c)
 #undef  WinCalcFrameRect
 #define WinCalcFrameRect _WinCalcFrameRect
 
-inline BOOL APIENTRY _WinCreateFrameControls(HWND a, PFRAMECDATA b, PCSZ c)
+inline BOOL _WinCreateFrameControls(HWND a, PFRAMECDATA b, PCSZ c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -3727,7 +3727,7 @@ inline BOOL APIENTRY _WinCreateFrameControls(HWND a, PFRAMECDATA b, PCSZ c)
 #undef  WinCreateFrameControls
 #define WinCreateFrameControls _WinCreateFrameControls
 
-inline BOOL APIENTRY _WinFlashWindow(HWND a, BOOL b)
+inline BOOL _WinFlashWindow(HWND a, BOOL b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -3741,7 +3741,7 @@ inline BOOL APIENTRY _WinFlashWindow(HWND a, BOOL b)
 #undef  WinFlashWindow
 #define WinFlashWindow _WinFlashWindow
 
-inline BOOL APIENTRY _WinGetMaxPosition(HWND a, PSWP b)
+inline BOOL _WinGetMaxPosition(HWND a, PSWP b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -3755,7 +3755,7 @@ inline BOOL APIENTRY _WinGetMaxPosition(HWND a, PSWP b)
 #undef  WinGetMaxPosition
 #define WinGetMaxPosition _WinGetMaxPosition
 
-inline BOOL APIENTRY _WinGetMinPosition(HWND a, PSWP b, PPOINTL c)
+inline BOOL _WinGetMinPosition(HWND a, PSWP b, PPOINTL c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -3769,7 +3769,7 @@ inline BOOL APIENTRY _WinGetMinPosition(HWND a, PSWP b, PPOINTL c)
 #undef  WinGetMinPosition
 #define WinGetMinPosition _WinGetMinPosition
 
-inline BOOL APIENTRY _WinSaveWindowPos(HSAVEWP a, PSWP b, ULONG c)
+inline BOOL _WinSaveWindowPos(HSAVEWP a, PSWP b, ULONG c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -3785,7 +3785,7 @@ inline BOOL APIENTRY _WinSaveWindowPos(HSAVEWP a, PSWP b, ULONG c)
 
 #endif
 #ifdef INCL_WINWINDOWMGR
-inline HPS APIENTRY _WinBeginPaint(HWND a, HPS b, PRECTL c)
+inline HPS _WinBeginPaint(HWND a, HPS b, PRECTL c)
 {
  HPS yyrc;
  USHORT sel = GetFS();
@@ -3799,7 +3799,7 @@ inline HPS APIENTRY _WinBeginPaint(HWND a, HPS b, PRECTL c)
 #undef  WinBeginPaint
 #define WinBeginPaint _WinBeginPaint
 
-inline MRESULT APIENTRY _WinDefWindowProc(HWND a, ULONG b, MPARAM c, MPARAM d)
+inline MRESULT _WinDefWindowProc(HWND a, ULONG b, MPARAM c, MPARAM d)
 {
  MRESULT yyrc;
  USHORT sel = GetFS();
@@ -3813,7 +3813,7 @@ inline MRESULT APIENTRY _WinDefWindowProc(HWND a, ULONG b, MPARAM c, MPARAM d)
 #undef  WinDefWindowProc
 #define WinDefWindowProc _WinDefWindowProc
 
-inline BOOL APIENTRY _WinDestroyWindow(HWND a)
+inline BOOL _WinDestroyWindow(HWND a)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -3827,7 +3827,7 @@ inline BOOL APIENTRY _WinDestroyWindow(HWND a)
 #undef  WinDestroyWindow
 #define WinDestroyWindow _WinDestroyWindow
 
-inline BOOL APIENTRY _WinEndPaint(HPS a)
+inline BOOL _WinEndPaint(HPS a)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -3841,7 +3841,7 @@ inline BOOL APIENTRY _WinEndPaint(HPS a)
 #undef  WinEndPaint
 #define WinEndPaint _WinEndPaint
 
-inline BOOL APIENTRY _WinFillRect(HPS a, PRECTL b, LONG c)
+inline BOOL _WinFillRect(HPS a, PRECTL b, LONG c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -3855,7 +3855,7 @@ inline BOOL APIENTRY _WinFillRect(HPS a, PRECTL b, LONG c)
 #undef  WinFillRect
 #define WinFillRect _WinFillRect
 
-inline HPS APIENTRY _WinGetClipPS(HWND a, HWND b, ULONG c)
+inline HPS _WinGetClipPS(HWND a, HWND b, ULONG c)
 {
  HPS yyrc;
  USHORT sel = GetFS();
@@ -3869,7 +3869,7 @@ inline HPS APIENTRY _WinGetClipPS(HWND a, HWND b, ULONG c)
 #undef  WinGetClipPS
 #define WinGetClipPS _WinGetClipPS
 
-inline HPS APIENTRY _WinGetPS(HWND a)
+inline HPS _WinGetPS(HWND a)
 {
  HPS yyrc;
  USHORT sel = GetFS();
@@ -3883,7 +3883,7 @@ inline HPS APIENTRY _WinGetPS(HWND a)
 #undef  WinGetPS
 #define WinGetPS _WinGetPS
 
-inline HAB APIENTRY _WinInitialize(ULONG a)
+inline HAB _WinInitialize(ULONG a)
 {
  HAB yyrc;
  USHORT sel = GetFS();
@@ -3897,7 +3897,7 @@ inline HAB APIENTRY _WinInitialize(ULONG a)
 #undef  WinInitialize
 #define WinInitialize _WinInitialize
 
-inline BOOL APIENTRY _WinIsWindowShowing(HWND a)
+inline BOOL _WinIsWindowShowing(HWND a)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -3911,7 +3911,7 @@ inline BOOL APIENTRY _WinIsWindowShowing(HWND a)
 #undef  WinIsWindowShowing
 #define WinIsWindowShowing _WinIsWindowShowing
 
-inline HDC APIENTRY _WinOpenWindowDC(HWND a)
+inline HDC _WinOpenWindowDC(HWND a)
 {
  HDC yyrc;
  USHORT sel = GetFS();
@@ -3925,7 +3925,7 @@ inline HDC APIENTRY _WinOpenWindowDC(HWND a)
 #undef  WinOpenWindowDC
 #define WinOpenWindowDC _WinOpenWindowDC
 
-inline HAB APIENTRY _WinQueryAnchorBlock(HWND a)
+inline HAB _WinQueryAnchorBlock(HWND a)
 {
  HAB yyrc;
  USHORT sel = GetFS();
@@ -3939,7 +3939,7 @@ inline HAB APIENTRY _WinQueryAnchorBlock(HWND a)
 #undef  WinQueryAnchorBlock
 #define WinQueryAnchorBlock _WinQueryAnchorBlock
 
-inline ULONG APIENTRY _WinQueryVersion(HAB a)
+inline ULONG _WinQueryVersion(HAB a)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -3953,7 +3953,7 @@ inline ULONG APIENTRY _WinQueryVersion(HAB a)
 #undef  WinQueryVersion
 #define WinQueryVersion _WinQueryVersion
 
-inline BOOL APIENTRY _WinQueryWindowRect(HWND a, PRECTL b)
+inline BOOL _WinQueryWindowRect(HWND a, PRECTL b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -3967,7 +3967,7 @@ inline BOOL APIENTRY _WinQueryWindowRect(HWND a, PRECTL b)
 #undef  WinQueryWindowRect
 #define WinQueryWindowRect _WinQueryWindowRect
 
-inline BOOL APIENTRY _WinRegisterClass(HAB a, PCSZ b, PFNWP c, ULONG d, ULONG e)
+inline BOOL _WinRegisterClass(HAB a, PCSZ b, PFNWP c, ULONG d, ULONG e)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -3981,7 +3981,7 @@ inline BOOL APIENTRY _WinRegisterClass(HAB a, PCSZ b, PFNWP c, ULONG d, ULONG e)
 #undef  WinRegisterClass
 #define WinRegisterClass _WinRegisterClass
 
-inline BOOL APIENTRY _WinReleasePS(HPS a)
+inline BOOL _WinReleasePS(HPS a)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -3995,7 +3995,7 @@ inline BOOL APIENTRY _WinReleasePS(HPS a)
 #undef  WinReleasePS
 #define WinReleasePS _WinReleasePS
 
-inline LONG APIENTRY _WinScrollWindow(HWND a, LONG b, LONG c, PRECTL d, PRECTL e, HRGN f, PRECTL g, ULONG h)
+inline LONG _WinScrollWindow(HWND a, LONG b, LONG c, PRECTL d, PRECTL e, HRGN f, PRECTL g, ULONG h)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -4009,7 +4009,7 @@ inline LONG APIENTRY _WinScrollWindow(HWND a, LONG b, LONG c, PRECTL d, PRECTL e
 #undef  WinScrollWindow
 #define WinScrollWindow _WinScrollWindow
 
-inline BOOL APIENTRY _WinSetActiveWindow(HWND a, HWND b)
+inline BOOL _WinSetActiveWindow(HWND a, HWND b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -4023,7 +4023,7 @@ inline BOOL APIENTRY _WinSetActiveWindow(HWND a, HWND b)
 #undef  WinSetActiveWindow
 #define WinSetActiveWindow _WinSetActiveWindow
 
-inline BOOL APIENTRY _WinShowWindow(HWND a, BOOL b)
+inline BOOL _WinShowWindow(HWND a, BOOL b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -4037,7 +4037,7 @@ inline BOOL APIENTRY _WinShowWindow(HWND a, BOOL b)
 #undef  WinShowWindow
 #define WinShowWindow _WinShowWindow
 
-inline BOOL APIENTRY _WinTerminate(HAB a)
+inline BOOL _WinTerminate(HAB a)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -4053,7 +4053,7 @@ inline BOOL APIENTRY _WinTerminate(HAB a)
 
 #endif
 #ifdef INCL_WINWINDOWMGR
-inline HENUM APIENTRY _WinBeginEnumWindows(HWND a)
+inline HENUM _WinBeginEnumWindows(HWND a)
 {
  HENUM yyrc;
  USHORT sel = GetFS();
@@ -4067,7 +4067,7 @@ inline HENUM APIENTRY _WinBeginEnumWindows(HWND a)
 #undef  WinBeginEnumWindows
 #define WinBeginEnumWindows _WinBeginEnumWindows
 
-inline BOOL APIENTRY _WinEndEnumWindows(HENUM a)
+inline BOOL _WinEndEnumWindows(HENUM a)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -4081,7 +4081,7 @@ inline BOOL APIENTRY _WinEndEnumWindows(HENUM a)
 #undef  WinEndEnumWindows
 #define WinEndEnumWindows _WinEndEnumWindows
 
-inline LONG APIENTRY _WinExcludeUpdateRegion(HPS a, HWND b)
+inline LONG _WinExcludeUpdateRegion(HPS a, HWND b)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -4095,7 +4095,7 @@ inline LONG APIENTRY _WinExcludeUpdateRegion(HPS a, HWND b)
 #undef  WinExcludeUpdateRegion
 #define WinExcludeUpdateRegion _WinExcludeUpdateRegion
 
-inline HWND APIENTRY _WinGetNextWindow(HENUM a)
+inline HWND _WinGetNextWindow(HENUM a)
 {
  HWND yyrc;
  USHORT sel = GetFS();
@@ -4109,7 +4109,7 @@ inline HWND APIENTRY _WinGetNextWindow(HENUM a)
 #undef  WinGetNextWindow
 #define WinGetNextWindow _WinGetNextWindow
 
-inline HPS APIENTRY _WinGetScreenPS(HWND a)
+inline HPS _WinGetScreenPS(HWND a)
 {
  HPS yyrc;
  USHORT sel = GetFS();
@@ -4123,7 +4123,7 @@ inline HPS APIENTRY _WinGetScreenPS(HWND a)
 #undef  WinGetScreenPS
 #define WinGetScreenPS _WinGetScreenPS
 
-inline BOOL APIENTRY _WinIsThreadActive(HAB a)
+inline BOOL _WinIsThreadActive(HAB a)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -4137,7 +4137,7 @@ inline BOOL APIENTRY _WinIsThreadActive(HAB a)
 #undef  WinIsThreadActive
 #define WinIsThreadActive _WinIsThreadActive
 
-inline BOOL APIENTRY _WinLockVisRegions(HWND a, BOOL b)
+inline BOOL _WinLockVisRegions(HWND a, BOOL b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -4151,7 +4151,7 @@ inline BOOL APIENTRY _WinLockVisRegions(HWND a, BOOL b)
 #undef  WinLockVisRegions
 #define WinLockVisRegions _WinLockVisRegions
 
-inline BOOL APIENTRY _WinLockWindowUpdate(HWND a, HWND b)
+inline BOOL _WinLockWindowUpdate(HWND a, HWND b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -4165,7 +4165,7 @@ inline BOOL APIENTRY _WinLockWindowUpdate(HWND a, HWND b)
 #undef  WinLockWindowUpdate
 #define WinLockWindowUpdate _WinLockWindowUpdate
 
-inline BOOL APIENTRY _WinMapWindowPoints(HWND a, HWND b, PPOINTL c, LONG d)
+inline BOOL _WinMapWindowPoints(HWND a, HWND b, PPOINTL c, LONG d)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -4179,7 +4179,7 @@ inline BOOL APIENTRY _WinMapWindowPoints(HWND a, HWND b, PPOINTL c, LONG d)
 #undef  WinMapWindowPoints
 #define WinMapWindowPoints _WinMapWindowPoints
 
-inline HWND APIENTRY _WinQueryActiveWindow(HWND a)
+inline HWND _WinQueryActiveWindow(HWND a)
 {
  HWND yyrc;
  USHORT sel = GetFS();
@@ -4193,7 +4193,7 @@ inline HWND APIENTRY _WinQueryActiveWindow(HWND a)
 #undef  WinQueryActiveWindow
 #define WinQueryActiveWindow _WinQueryActiveWindow
 
-inline BOOL APIENTRY _WinQueryClassInfo(HAB a, PCSZ b, PCLASSINFO c)
+inline BOOL _WinQueryClassInfo(HAB a, PCSZ b, PCLASSINFO c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -4207,7 +4207,7 @@ inline BOOL APIENTRY _WinQueryClassInfo(HAB a, PCSZ b, PCLASSINFO c)
 #undef  WinQueryClassInfo
 #define WinQueryClassInfo _WinQueryClassInfo
 
-inline LONG APIENTRY _WinQueryClassName(HWND a, LONG b, PCH c)
+inline LONG _WinQueryClassName(HWND a, LONG b, PCH c)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -4221,7 +4221,7 @@ inline LONG APIENTRY _WinQueryClassName(HWND a, LONG b, PCH c)
 #undef  WinQueryClassName
 #define WinQueryClassName _WinQueryClassName
 
-inline BOOL APIENTRY _WinQueryUpdateRect(HWND a, PRECTL b)
+inline BOOL _WinQueryUpdateRect(HWND a, PRECTL b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -4235,7 +4235,7 @@ inline BOOL APIENTRY _WinQueryUpdateRect(HWND a, PRECTL b)
 #undef  WinQueryUpdateRect
 #define WinQueryUpdateRect _WinQueryUpdateRect
 
-inline LONG APIENTRY _WinQueryUpdateRegion(HWND a, HRGN b)
+inline LONG _WinQueryUpdateRegion(HWND a, HRGN b)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -4249,7 +4249,7 @@ inline LONG APIENTRY _WinQueryUpdateRegion(HWND a, HRGN b)
 #undef  WinQueryUpdateRegion
 #define WinQueryUpdateRegion _WinQueryUpdateRegion
 
-inline HWND APIENTRY _WinQuerySysModalWindow(HWND a)
+inline HWND _WinQuerySysModalWindow(HWND a)
 {
  HWND yyrc;
  USHORT sel = GetFS();
@@ -4263,7 +4263,7 @@ inline HWND APIENTRY _WinQuerySysModalWindow(HWND a)
 #undef  WinQuerySysModalWindow
 #define WinQuerySysModalWindow _WinQuerySysModalWindow
 
-inline HDC APIENTRY _WinQueryWindowDC(HWND a)
+inline HDC _WinQueryWindowDC(HWND a)
 {
  HDC yyrc;
  USHORT sel = GetFS();
@@ -4277,7 +4277,7 @@ inline HDC APIENTRY _WinQueryWindowDC(HWND a)
 #undef  WinQueryWindowDC
 #define WinQueryWindowDC _WinQueryWindowDC
 
-inline PVOID APIENTRY _WinQueryWindowPtr(HWND a, LONG b)
+inline PVOID _WinQueryWindowPtr(HWND a, LONG b)
 {
  PVOID yyrc;
  USHORT sel = GetFS();
@@ -4291,7 +4291,7 @@ inline PVOID APIENTRY _WinQueryWindowPtr(HWND a, LONG b)
 #undef  WinQueryWindowPtr
 #define WinQueryWindowPtr _WinQueryWindowPtr
 
-inline ULONG APIENTRY _WinQueryWindowULong(HWND a, LONG b)
+inline ULONG _WinQueryWindowULong(HWND a, LONG b)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -4305,7 +4305,7 @@ inline ULONG APIENTRY _WinQueryWindowULong(HWND a, LONG b)
 #undef  WinQueryWindowULong
 #define WinQueryWindowULong _WinQueryWindowULong
 
-inline USHORT APIENTRY _WinQueryWindowUShort(HWND a, LONG b)
+inline USHORT _WinQueryWindowUShort(HWND a, LONG b)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -4319,7 +4319,7 @@ inline USHORT APIENTRY _WinQueryWindowUShort(HWND a, LONG b)
 #undef  WinQueryWindowUShort
 #define WinQueryWindowUShort _WinQueryWindowUShort
 
-inline BOOL APIENTRY _WinSetSysModalWindow(HWND a, HWND b)
+inline BOOL _WinSetSysModalWindow(HWND a, HWND b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -4333,7 +4333,7 @@ inline BOOL APIENTRY _WinSetSysModalWindow(HWND a, HWND b)
 #undef  WinSetSysModalWindow
 #define WinSetSysModalWindow _WinSetSysModalWindow
 
-inline BOOL APIENTRY _WinSetWindowBits(HWND a, LONG b, ULONG c, ULONG d)
+inline BOOL _WinSetWindowBits(HWND a, LONG b, ULONG c, ULONG d)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -4347,7 +4347,7 @@ inline BOOL APIENTRY _WinSetWindowBits(HWND a, LONG b, ULONG c, ULONG d)
 #undef  WinSetWindowBits
 #define WinSetWindowBits _WinSetWindowBits
 
-inline BOOL APIENTRY _WinSetWindowPtr(HWND a, LONG b, PVOID c)
+inline BOOL _WinSetWindowPtr(HWND a, LONG b, PVOID c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -4361,7 +4361,7 @@ inline BOOL APIENTRY _WinSetWindowPtr(HWND a, LONG b, PVOID c)
 #undef  WinSetWindowPtr
 #define WinSetWindowPtr _WinSetWindowPtr
 
-inline BOOL APIENTRY _WinSetWindowULong(HWND a, LONG b, ULONG c)
+inline BOOL _WinSetWindowULong(HWND a, LONG b, ULONG c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -4375,7 +4375,7 @@ inline BOOL APIENTRY _WinSetWindowULong(HWND a, LONG b, ULONG c)
 #undef  WinSetWindowULong
 #define WinSetWindowULong _WinSetWindowULong
 
-inline BOOL APIENTRY _WinSetWindowUShort(HWND a, LONG b, USHORT c)
+inline BOOL _WinSetWindowUShort(HWND a, LONG b, USHORT c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -4389,7 +4389,7 @@ inline BOOL APIENTRY _WinSetWindowUShort(HWND a, LONG b, USHORT c)
 #undef  WinSetWindowUShort
 #define WinSetWindowUShort _WinSetWindowUShort
 
-inline PFNWP APIENTRY _WinSubclassWindow(HWND a, PFNWP b)
+inline PFNWP _WinSubclassWindow(HWND a, PFNWP b)
 {
  PFNWP yyrc;
  USHORT sel = GetFS();
@@ -4403,7 +4403,7 @@ inline PFNWP APIENTRY _WinSubclassWindow(HWND a, PFNWP b)
 #undef  WinSubclassWindow
 #define WinSubclassWindow _WinSubclassWindow
 
-inline BOOL APIENTRY _WinValidateRect(HWND a, PRECTL b, BOOL c)
+inline BOOL _WinValidateRect(HWND a, PRECTL b, BOOL c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -4417,7 +4417,7 @@ inline BOOL APIENTRY _WinValidateRect(HWND a, PRECTL b, BOOL c)
 #undef  WinValidateRect
 #define WinValidateRect _WinValidateRect
 
-inline BOOL APIENTRY _WinValidateRegion(HWND a, HRGN b, BOOL c)
+inline BOOL _WinValidateRegion(HWND a, HRGN b, BOOL c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -4431,7 +4431,7 @@ inline BOOL APIENTRY _WinValidateRegion(HWND a, HRGN b, BOOL c)
 #undef  WinValidateRegion
 #define WinValidateRegion _WinValidateRegion
 
-inline HWND APIENTRY _WinWindowFromDC(HDC a)
+inline HWND _WinWindowFromDC(HDC a)
 {
  HWND yyrc;
  USHORT sel = GetFS();
@@ -4445,7 +4445,7 @@ inline HWND APIENTRY _WinWindowFromDC(HDC a)
 #undef  WinWindowFromDC
 #define WinWindowFromDC _WinWindowFromDC
 
-inline HWND APIENTRY _WinWindowFromPoint(HWND a, PPOINTL b, BOOL c)
+inline HWND _WinWindowFromPoint(HWND a, PPOINTL b, BOOL c)
 {
  HWND yyrc;
  USHORT sel = GetFS();
@@ -4461,7 +4461,7 @@ inline HWND APIENTRY _WinWindowFromPoint(HWND a, PPOINTL b, BOOL c)
 
 #endif
 #ifdef INCL_WINACCELERATORS
-inline ULONG APIENTRY _WinCopyAccelTable(HACCEL a, PACCELTABLE b, ULONG c)
+inline ULONG _WinCopyAccelTable(HACCEL a, PACCELTABLE b, ULONG c)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -4475,7 +4475,7 @@ inline ULONG APIENTRY _WinCopyAccelTable(HACCEL a, PACCELTABLE b, ULONG c)
 #undef  WinCopyAccelTable
 #define WinCopyAccelTable _WinCopyAccelTable
 
-inline HACCEL APIENTRY _WinCreateAccelTable(HAB a, PACCELTABLE b)
+inline HACCEL _WinCreateAccelTable(HAB a, PACCELTABLE b)
 {
  HACCEL yyrc;
  USHORT sel = GetFS();
@@ -4489,7 +4489,7 @@ inline HACCEL APIENTRY _WinCreateAccelTable(HAB a, PACCELTABLE b)
 #undef  WinCreateAccelTable
 #define WinCreateAccelTable _WinCreateAccelTable
 
-inline BOOL APIENTRY _WinDestroyAccelTable(HACCEL a)
+inline BOOL _WinDestroyAccelTable(HACCEL a)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -4503,7 +4503,7 @@ inline BOOL APIENTRY _WinDestroyAccelTable(HACCEL a)
 #undef  WinDestroyAccelTable
 #define WinDestroyAccelTable _WinDestroyAccelTable
 
-inline HACCEL APIENTRY _WinLoadAccelTable(HAB a, HMODULE b, ULONG c)
+inline HACCEL _WinLoadAccelTable(HAB a, HMODULE b, ULONG c)
 {
  HACCEL yyrc;
  USHORT sel = GetFS();
@@ -4517,7 +4517,7 @@ inline HACCEL APIENTRY _WinLoadAccelTable(HAB a, HMODULE b, ULONG c)
 #undef  WinLoadAccelTable
 #define WinLoadAccelTable _WinLoadAccelTable
 
-inline HACCEL APIENTRY _WinQueryAccelTable(HAB a, HWND b)
+inline HACCEL _WinQueryAccelTable(HAB a, HWND b)
 {
  HACCEL yyrc;
  USHORT sel = GetFS();
@@ -4531,7 +4531,7 @@ inline HACCEL APIENTRY _WinQueryAccelTable(HAB a, HWND b)
 #undef  WinQueryAccelTable
 #define WinQueryAccelTable _WinQueryAccelTable
 
-inline BOOL APIENTRY _WinSetAccelTable(HAB a, HACCEL b, HWND c)
+inline BOOL _WinSetAccelTable(HAB a, HACCEL b, HWND c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -4545,7 +4545,7 @@ inline BOOL APIENTRY _WinSetAccelTable(HAB a, HACCEL b, HWND c)
 #undef  WinSetAccelTable
 #define WinSetAccelTable _WinSetAccelTable
 
-inline BOOL APIENTRY _WinTranslateAccel(HAB a, HWND b, HACCEL c, PQMSG d)
+inline BOOL _WinTranslateAccel(HAB a, HWND b, HACCEL c, PQMSG d)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -4561,7 +4561,7 @@ inline BOOL APIENTRY _WinTranslateAccel(HAB a, HWND b, HACCEL c, PQMSG d)
 
 #endif
 #ifdef INCL_WINATOM
-inline ATOM APIENTRY _WinAddAtom(HATOMTBL a, PCSZ b)
+inline ATOM _WinAddAtom(HATOMTBL a, PCSZ b)
 {
  ATOM yyrc;
  USHORT sel = GetFS();
@@ -4575,7 +4575,7 @@ inline ATOM APIENTRY _WinAddAtom(HATOMTBL a, PCSZ b)
 #undef  WinAddAtom
 #define WinAddAtom _WinAddAtom
 
-inline HATOMTBL APIENTRY _WinCreateAtomTable(ULONG a, ULONG b)
+inline HATOMTBL _WinCreateAtomTable(ULONG a, ULONG b)
 {
  HATOMTBL yyrc;
  USHORT sel = GetFS();
@@ -4589,7 +4589,7 @@ inline HATOMTBL APIENTRY _WinCreateAtomTable(ULONG a, ULONG b)
 #undef  WinCreateAtomTable
 #define WinCreateAtomTable _WinCreateAtomTable
 
-inline ATOM APIENTRY _WinDeleteAtom(HATOMTBL a, ATOM b)
+inline ATOM _WinDeleteAtom(HATOMTBL a, ATOM b)
 {
  ATOM yyrc;
  USHORT sel = GetFS();
@@ -4603,7 +4603,7 @@ inline ATOM APIENTRY _WinDeleteAtom(HATOMTBL a, ATOM b)
 #undef  WinDeleteAtom
 #define WinDeleteAtom _WinDeleteAtom
 
-inline HATOMTBL APIENTRY _WinDestroyAtomTable(HATOMTBL a)
+inline HATOMTBL _WinDestroyAtomTable(HATOMTBL a)
 {
  HATOMTBL yyrc;
  USHORT sel = GetFS();
@@ -4617,7 +4617,7 @@ inline HATOMTBL APIENTRY _WinDestroyAtomTable(HATOMTBL a)
 #undef  WinDestroyAtomTable
 #define WinDestroyAtomTable _WinDestroyAtomTable
 
-inline ATOM APIENTRY _WinFindAtom(HATOMTBL a, PCSZ b)
+inline ATOM _WinFindAtom(HATOMTBL a, PCSZ b)
 {
  ATOM yyrc;
  USHORT sel = GetFS();
@@ -4631,7 +4631,7 @@ inline ATOM APIENTRY _WinFindAtom(HATOMTBL a, PCSZ b)
 #undef  WinFindAtom
 #define WinFindAtom _WinFindAtom
 
-inline ULONG APIENTRY _WinQueryAtomLength(HATOMTBL a, ATOM b)
+inline ULONG _WinQueryAtomLength(HATOMTBL a, ATOM b)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -4645,7 +4645,7 @@ inline ULONG APIENTRY _WinQueryAtomLength(HATOMTBL a, ATOM b)
 #undef  WinQueryAtomLength
 #define WinQueryAtomLength _WinQueryAtomLength
 
-inline ULONG APIENTRY _WinQueryAtomName(HATOMTBL a, ATOM b, PSZ c, ULONG d)
+inline ULONG _WinQueryAtomName(HATOMTBL a, ATOM b, PSZ c, ULONG d)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -4659,7 +4659,7 @@ inline ULONG APIENTRY _WinQueryAtomName(HATOMTBL a, ATOM b, PSZ c, ULONG d)
 #undef  WinQueryAtomName
 #define WinQueryAtomName _WinQueryAtomName
 
-inline ULONG APIENTRY _WinQueryAtomUsage(HATOMTBL a, ATOM b)
+inline ULONG _WinQueryAtomUsage(HATOMTBL a, ATOM b)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -4673,7 +4673,7 @@ inline ULONG APIENTRY _WinQueryAtomUsage(HATOMTBL a, ATOM b)
 #undef  WinQueryAtomUsage
 #define WinQueryAtomUsage _WinQueryAtomUsage
 
-inline HATOMTBL APIENTRY _WinQuerySystemAtomTable()
+inline HATOMTBL _WinQuerySystemAtomTable()
 {
  HATOMTBL yyrc;
  USHORT sel = GetFS();
@@ -4689,7 +4689,7 @@ inline HATOMTBL APIENTRY _WinQuerySystemAtomTable()
 
 #endif
 #ifdef INCL_WINCLIPBOARD
-inline BOOL APIENTRY _WinCloseClipbrd(HAB a)
+inline BOOL _WinCloseClipbrd(HAB a)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -4703,7 +4703,7 @@ inline BOOL APIENTRY _WinCloseClipbrd(HAB a)
 #undef  WinCloseClipbrd
 #define WinCloseClipbrd _WinCloseClipbrd
 
-inline BOOL APIENTRY _WinEmptyClipbrd(HAB a)
+inline BOOL _WinEmptyClipbrd(HAB a)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -4717,7 +4717,7 @@ inline BOOL APIENTRY _WinEmptyClipbrd(HAB a)
 #undef  WinEmptyClipbrd
 #define WinEmptyClipbrd _WinEmptyClipbrd
 
-inline ULONG APIENTRY _WinEnumClipbrdFmts(HAB a, ULONG b)
+inline ULONG _WinEnumClipbrdFmts(HAB a, ULONG b)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -4731,7 +4731,7 @@ inline ULONG APIENTRY _WinEnumClipbrdFmts(HAB a, ULONG b)
 #undef  WinEnumClipbrdFmts
 #define WinEnumClipbrdFmts _WinEnumClipbrdFmts
 
-inline BOOL APIENTRY _WinOpenClipbrd(HAB a)
+inline BOOL _WinOpenClipbrd(HAB a)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -4745,7 +4745,7 @@ inline BOOL APIENTRY _WinOpenClipbrd(HAB a)
 #undef  WinOpenClipbrd
 #define WinOpenClipbrd _WinOpenClipbrd
 
-inline ULONG APIENTRY _WinQueryClipbrdData(HAB a, ULONG b)
+inline ULONG _WinQueryClipbrdData(HAB a, ULONG b)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -4759,7 +4759,7 @@ inline ULONG APIENTRY _WinQueryClipbrdData(HAB a, ULONG b)
 #undef  WinQueryClipbrdData
 #define WinQueryClipbrdData _WinQueryClipbrdData
 
-inline BOOL APIENTRY _WinQueryClipbrdFmtInfo(HAB a, ULONG b, PULONG c)
+inline BOOL _WinQueryClipbrdFmtInfo(HAB a, ULONG b, PULONG c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -4773,7 +4773,7 @@ inline BOOL APIENTRY _WinQueryClipbrdFmtInfo(HAB a, ULONG b, PULONG c)
 #undef  WinQueryClipbrdFmtInfo
 #define WinQueryClipbrdFmtInfo _WinQueryClipbrdFmtInfo
 
-inline HWND APIENTRY _WinQueryClipbrdOwner(HAB a)
+inline HWND _WinQueryClipbrdOwner(HAB a)
 {
  HWND yyrc;
  USHORT sel = GetFS();
@@ -4787,7 +4787,7 @@ inline HWND APIENTRY _WinQueryClipbrdOwner(HAB a)
 #undef  WinQueryClipbrdOwner
 #define WinQueryClipbrdOwner _WinQueryClipbrdOwner
 
-inline HWND APIENTRY _WinQueryClipbrdViewer(HAB a)
+inline HWND _WinQueryClipbrdViewer(HAB a)
 {
  HWND yyrc;
  USHORT sel = GetFS();
@@ -4801,7 +4801,7 @@ inline HWND APIENTRY _WinQueryClipbrdViewer(HAB a)
 #undef  WinQueryClipbrdViewer
 #define WinQueryClipbrdViewer _WinQueryClipbrdViewer
 
-inline BOOL APIENTRY _WinSetClipbrdData(HAB a, ULONG b, ULONG c, ULONG d)
+inline BOOL _WinSetClipbrdData(HAB a, ULONG b, ULONG c, ULONG d)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -4815,7 +4815,7 @@ inline BOOL APIENTRY _WinSetClipbrdData(HAB a, ULONG b, ULONG c, ULONG d)
 #undef  WinSetClipbrdData
 #define WinSetClipbrdData _WinSetClipbrdData
 
-inline BOOL APIENTRY _WinSetClipbrdOwner(HAB a, HWND b)
+inline BOOL _WinSetClipbrdOwner(HAB a, HWND b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -4829,7 +4829,7 @@ inline BOOL APIENTRY _WinSetClipbrdOwner(HAB a, HWND b)
 #undef  WinSetClipbrdOwner
 #define WinSetClipbrdOwner _WinSetClipbrdOwner
 
-inline BOOL APIENTRY _WinSetClipbrdViewer(HAB a, HWND b)
+inline BOOL _WinSetClipbrdViewer(HAB a, HWND b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -4845,7 +4845,7 @@ inline BOOL APIENTRY _WinSetClipbrdViewer(HAB a, HWND b)
 
 #endif
 #ifdef INCL_WINDDE
-inline BOOL APIENTRY _WinDdeInitiate(HWND a, PCSZ b, PCSZ c, PCONVCONTEXT d)
+inline BOOL _WinDdeInitiate(HWND a, PCSZ b, PCSZ c, PCONVCONTEXT d)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -4859,7 +4859,7 @@ inline BOOL APIENTRY _WinDdeInitiate(HWND a, PCSZ b, PCSZ c, PCONVCONTEXT d)
 #undef  WinDdeInitiate
 #define WinDdeInitiate _WinDdeInitiate
 
-inline BOOL APIENTRY _WinDdePostMsg(HWND a, HWND b, ULONG c, PDDESTRUCT d, ULONG e)
+inline BOOL _WinDdePostMsg(HWND a, HWND b, ULONG c, PDDESTRUCT d, ULONG e)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -4873,7 +4873,7 @@ inline BOOL APIENTRY _WinDdePostMsg(HWND a, HWND b, ULONG c, PDDESTRUCT d, ULONG
 #undef  WinDdePostMsg
 #define WinDdePostMsg _WinDdePostMsg
 
-inline MRESULT APIENTRY _WinDdeRespond(HWND a, HWND b, PCSZ c, PCSZ d, PCONVCONTEXT e)
+inline MRESULT _WinDdeRespond(HWND a, HWND b, PCSZ c, PCSZ d, PCONVCONTEXT e)
 {
  MRESULT yyrc;
  USHORT sel = GetFS();
@@ -4889,7 +4889,7 @@ inline MRESULT APIENTRY _WinDdeRespond(HWND a, HWND b, PCSZ c, PCSZ d, PCONVCONT
 
 #endif
 #ifdef INCL_WINCOUNTRY
-inline ULONG APIENTRY _WinCompareStrings(HAB a, ULONG b, ULONG c, PCSZ d, PCSZ e, ULONG f)
+inline ULONG _WinCompareStrings(HAB a, ULONG b, ULONG c, PCSZ d, PCSZ e, ULONG f)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -4903,7 +4903,7 @@ inline ULONG APIENTRY _WinCompareStrings(HAB a, ULONG b, ULONG c, PCSZ d, PCSZ e
 #undef  WinCompareStrings
 #define WinCompareStrings _WinCompareStrings
 
-inline UCHAR APIENTRY _WinCpTranslateChar(HAB a, ULONG b, UCHAR c, ULONG d)
+inline UCHAR _WinCpTranslateChar(HAB a, ULONG b, UCHAR c, ULONG d)
 {
  UCHAR yyrc;
  USHORT sel = GetFS();
@@ -4917,7 +4917,7 @@ inline UCHAR APIENTRY _WinCpTranslateChar(HAB a, ULONG b, UCHAR c, ULONG d)
 #undef  WinCpTranslateChar
 #define WinCpTranslateChar _WinCpTranslateChar
 
-inline BOOL APIENTRY _WinCpTranslateString(HAB a, ULONG b, PCSZ c, ULONG d, ULONG e, PSZ f)
+inline BOOL _WinCpTranslateString(HAB a, ULONG b, PCSZ c, ULONG d, ULONG e, PSZ f)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -4931,7 +4931,7 @@ inline BOOL APIENTRY _WinCpTranslateString(HAB a, ULONG b, PCSZ c, ULONG d, ULON
 #undef  WinCpTranslateString
 #define WinCpTranslateString _WinCpTranslateString
 
-inline PCSZ APIENTRY _WinNextChar(HAB a, ULONG b, ULONG c, PCSZ d)
+inline PCSZ _WinNextChar(HAB a, ULONG b, ULONG c, PCSZ d)
 {
  PCSZ yyrc;
  USHORT sel = GetFS();
@@ -4945,7 +4945,7 @@ inline PCSZ APIENTRY _WinNextChar(HAB a, ULONG b, ULONG c, PCSZ d)
 #undef  WinNextChar
 #define WinNextChar _WinNextChar
 
-inline PCSZ APIENTRY _WinPrevChar(HAB a, ULONG b, ULONG c, PCSZ d, PCSZ e)
+inline PCSZ _WinPrevChar(HAB a, ULONG b, ULONG c, PCSZ d, PCSZ e)
 {
  PCSZ yyrc;
  USHORT sel = GetFS();
@@ -4959,7 +4959,7 @@ inline PCSZ APIENTRY _WinPrevChar(HAB a, ULONG b, ULONG c, PCSZ d, PCSZ e)
 #undef  WinPrevChar
 #define WinPrevChar _WinPrevChar
 
-inline ULONG APIENTRY _WinQueryCp(HMQ a)
+inline ULONG _WinQueryCp(HMQ a)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -4973,7 +4973,7 @@ inline ULONG APIENTRY _WinQueryCp(HMQ a)
 #undef  WinQueryCp
 #define WinQueryCp _WinQueryCp
 
-inline ULONG APIENTRY _WinQueryCpList(HAB a, ULONG b, PULONG c)
+inline ULONG _WinQueryCpList(HAB a, ULONG b, PULONG c)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -4987,7 +4987,7 @@ inline ULONG APIENTRY _WinQueryCpList(HAB a, ULONG b, PULONG c)
 #undef  WinQueryCpList
 #define WinQueryCpList _WinQueryCpList
 
-inline BOOL APIENTRY _WinSetCp(HMQ a, ULONG b)
+inline BOOL _WinSetCp(HMQ a, ULONG b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -5001,7 +5001,7 @@ inline BOOL APIENTRY _WinSetCp(HMQ a, ULONG b)
 #undef  WinSetCp
 #define WinSetCp _WinSetCp
 
-inline ULONG APIENTRY _WinUpper(HAB a, ULONG b, ULONG c, PSZ d)
+inline ULONG _WinUpper(HAB a, ULONG b, ULONG c, PSZ d)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -5015,7 +5015,7 @@ inline ULONG APIENTRY _WinUpper(HAB a, ULONG b, ULONG c, PSZ d)
 #undef  WinUpper
 #define WinUpper _WinUpper
 
-inline ULONG APIENTRY _WinUpperChar(HAB a, ULONG b, ULONG c, ULONG d)
+inline ULONG _WinUpperChar(HAB a, ULONG b, ULONG c, ULONG d)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -5031,7 +5031,7 @@ inline ULONG APIENTRY _WinUpperChar(HAB a, ULONG b, ULONG c, ULONG d)
 
 #endif
 #ifdef INCL_WINCURSORS
-inline BOOL APIENTRY _WinCreateCursor(HWND a, LONG b, LONG c, LONG d, LONG e, ULONG f, PRECTL g)
+inline BOOL _WinCreateCursor(HWND a, LONG b, LONG c, LONG d, LONG e, ULONG f, PRECTL g)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -5045,7 +5045,7 @@ inline BOOL APIENTRY _WinCreateCursor(HWND a, LONG b, LONG c, LONG d, LONG e, UL
 #undef  WinCreateCursor
 #define WinCreateCursor _WinCreateCursor
 
-inline BOOL APIENTRY _WinDestroyCursor(HWND a)
+inline BOOL _WinDestroyCursor(HWND a)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -5059,7 +5059,7 @@ inline BOOL APIENTRY _WinDestroyCursor(HWND a)
 #undef  WinDestroyCursor
 #define WinDestroyCursor _WinDestroyCursor
 
-inline BOOL APIENTRY _WinShowCursor(HWND a, BOOL b)
+inline BOOL _WinShowCursor(HWND a, BOOL b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -5073,7 +5073,7 @@ inline BOOL APIENTRY _WinShowCursor(HWND a, BOOL b)
 #undef  WinShowCursor
 #define WinShowCursor _WinShowCursor
 
-inline BOOL APIENTRY _WinQueryCursorInfo(HWND a, PCURSORINFO b)
+inline BOOL _WinQueryCursorInfo(HWND a, PCURSORINFO b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -5089,7 +5089,7 @@ inline BOOL APIENTRY _WinQueryCursorInfo(HWND a, PCURSORINFO b)
 
 #endif
 #ifdef INCL_WINDESKTOP
-inline BOOL APIENTRY _WinQueryDesktopBkgnd(HWND a, PDESKTOP b)
+inline BOOL _WinQueryDesktopBkgnd(HWND a, PDESKTOP b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -5103,7 +5103,7 @@ inline BOOL APIENTRY _WinQueryDesktopBkgnd(HWND a, PDESKTOP b)
 #undef  WinQueryDesktopBkgnd
 #define WinQueryDesktopBkgnd _WinQueryDesktopBkgnd
 
-inline HBITMAP APIENTRY _WinSetDesktopBkgnd(HWND a, PDESKTOP b)
+inline HBITMAP _WinSetDesktopBkgnd(HWND a, PDESKTOP b)
 {
  HBITMAP yyrc;
  USHORT sel = GetFS();
@@ -5119,7 +5119,7 @@ inline HBITMAP APIENTRY _WinSetDesktopBkgnd(HWND a, PDESKTOP b)
 
 #endif
 #ifdef INCL_WINDIALOGS
-inline BOOL APIENTRY _WinAlarm(HWND a, ULONG b)
+inline BOOL _WinAlarm(HWND a, ULONG b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -5133,7 +5133,7 @@ inline BOOL APIENTRY _WinAlarm(HWND a, ULONG b)
 #undef  WinAlarm
 #define WinAlarm _WinAlarm
 
-inline MRESULT APIENTRY _WinDefDlgProc(HWND a, ULONG b, MPARAM c, MPARAM d)
+inline MRESULT _WinDefDlgProc(HWND a, ULONG b, MPARAM c, MPARAM d)
 {
  MRESULT yyrc;
  USHORT sel = GetFS();
@@ -5147,7 +5147,7 @@ inline MRESULT APIENTRY _WinDefDlgProc(HWND a, ULONG b, MPARAM c, MPARAM d)
 #undef  WinDefDlgProc
 #define WinDefDlgProc _WinDefDlgProc
 
-inline BOOL APIENTRY _WinDismissDlg(HWND a, ULONG b)
+inline BOOL _WinDismissDlg(HWND a, ULONG b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -5161,7 +5161,7 @@ inline BOOL APIENTRY _WinDismissDlg(HWND a, ULONG b)
 #undef  WinDismissDlg
 #define WinDismissDlg _WinDismissDlg
 
-inline ULONG APIENTRY _WinDlgBox(HWND a, HWND b, PFNWP c, HMODULE d, ULONG e, PVOID f)
+inline ULONG _WinDlgBox(HWND a, HWND b, PFNWP c, HMODULE d, ULONG e, PVOID f)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -5175,7 +5175,7 @@ inline ULONG APIENTRY _WinDlgBox(HWND a, HWND b, PFNWP c, HMODULE d, ULONG e, PV
 #undef  WinDlgBox
 #define WinDlgBox _WinDlgBox
 
-inline BOOL APIENTRY _WinGetDlgMsg(HWND a, PQMSG b)
+inline BOOL _WinGetDlgMsg(HWND a, PQMSG b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -5189,7 +5189,7 @@ inline BOOL APIENTRY _WinGetDlgMsg(HWND a, PQMSG b)
 #undef  WinGetDlgMsg
 #define WinGetDlgMsg _WinGetDlgMsg
 
-inline HWND APIENTRY _WinLoadDlg(HWND a, HWND b, PFNWP c, HMODULE d, ULONG e, PVOID f)
+inline HWND _WinLoadDlg(HWND a, HWND b, PFNWP c, HMODULE d, ULONG e, PVOID f)
 {
  HWND yyrc;
  USHORT sel = GetFS();
@@ -5203,7 +5203,7 @@ inline HWND APIENTRY _WinLoadDlg(HWND a, HWND b, PFNWP c, HMODULE d, ULONG e, PV
 #undef  WinLoadDlg
 #define WinLoadDlg _WinLoadDlg
 
-inline ULONG APIENTRY _WinMessageBox(HWND a, HWND b, PCSZ c, PCSZ d, ULONG e, ULONG f)
+inline ULONG _WinMessageBox(HWND a, HWND b, PCSZ c, PCSZ d, ULONG e, ULONG f)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -5217,7 +5217,7 @@ inline ULONG APIENTRY _WinMessageBox(HWND a, HWND b, PCSZ c, PCSZ d, ULONG e, UL
 #undef  WinMessageBox
 #define WinMessageBox _WinMessageBox
 
-inline ULONG APIENTRY _WinMessageBox2(HWND a, HWND b, PSZ c, PSZ d, ULONG e, PMB2INFO f)
+inline ULONG _WinMessageBox2(HWND a, HWND b, PSZ c, PSZ d, ULONG e, PMB2INFO f)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -5231,7 +5231,7 @@ inline ULONG APIENTRY _WinMessageBox2(HWND a, HWND b, PSZ c, PSZ d, ULONG e, PMB
 #undef  WinMessageBox2
 #define WinMessageBox2 _WinMessageBox2
 
-inline BOOL APIENTRY _WinQueryDlgItemShort(HWND a, ULONG b, PSHORT c, BOOL d)
+inline BOOL _WinQueryDlgItemShort(HWND a, ULONG b, PSHORT c, BOOL d)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -5245,7 +5245,7 @@ inline BOOL APIENTRY _WinQueryDlgItemShort(HWND a, ULONG b, PSHORT c, BOOL d)
 #undef  WinQueryDlgItemShort
 #define WinQueryDlgItemShort _WinQueryDlgItemShort
 
-inline ULONG APIENTRY _WinQueryDlgItemText(HWND a, ULONG b, LONG c, PSZ d)
+inline ULONG _WinQueryDlgItemText(HWND a, ULONG b, LONG c, PSZ d)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -5259,7 +5259,7 @@ inline ULONG APIENTRY _WinQueryDlgItemText(HWND a, ULONG b, LONG c, PSZ d)
 #undef  WinQueryDlgItemText
 #define WinQueryDlgItemText _WinQueryDlgItemText
 
-inline LONG APIENTRY _WinQueryDlgItemTextLength(HWND a, ULONG b)
+inline LONG _WinQueryDlgItemTextLength(HWND a, ULONG b)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -5273,7 +5273,7 @@ inline LONG APIENTRY _WinQueryDlgItemTextLength(HWND a, ULONG b)
 #undef  WinQueryDlgItemTextLength
 #define WinQueryDlgItemTextLength _WinQueryDlgItemTextLength
 
-inline BOOL APIENTRY _WinSetDlgItemShort(HWND a, ULONG b, USHORT c, BOOL d)
+inline BOOL _WinSetDlgItemShort(HWND a, ULONG b, USHORT c, BOOL d)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -5287,7 +5287,7 @@ inline BOOL APIENTRY _WinSetDlgItemShort(HWND a, ULONG b, USHORT c, BOOL d)
 #undef  WinSetDlgItemShort
 #define WinSetDlgItemShort _WinSetDlgItemShort
 
-inline BOOL APIENTRY _WinSetDlgItemText(HWND a, ULONG b, PCSZ c)
+inline BOOL _WinSetDlgItemText(HWND a, ULONG b, PCSZ c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -5301,7 +5301,7 @@ inline BOOL APIENTRY _WinSetDlgItemText(HWND a, ULONG b, PCSZ c)
 #undef  WinSetDlgItemText
 #define WinSetDlgItemText _WinSetDlgItemText
 
-inline HWND APIENTRY _WinCreateDlg(HWND a, HWND b, PFNWP c, PDLGTEMPLATE d, PVOID e)
+inline HWND _WinCreateDlg(HWND a, HWND b, PFNWP c, PDLGTEMPLATE d, PVOID e)
 {
  HWND yyrc;
  USHORT sel = GetFS();
@@ -5315,7 +5315,7 @@ inline HWND APIENTRY _WinCreateDlg(HWND a, HWND b, PFNWP c, PDLGTEMPLATE d, PVOI
 #undef  WinCreateDlg
 #define WinCreateDlg _WinCreateDlg
 
-inline HWND APIENTRY _WinEnumDlgItem(HWND a, HWND b, ULONG c)
+inline HWND _WinEnumDlgItem(HWND a, HWND b, ULONG c)
 {
  HWND yyrc;
  USHORT sel = GetFS();
@@ -5329,7 +5329,7 @@ inline HWND APIENTRY _WinEnumDlgItem(HWND a, HWND b, ULONG c)
 #undef  WinEnumDlgItem
 #define WinEnumDlgItem _WinEnumDlgItem
 
-inline BOOL APIENTRY _WinMapDlgPoints(HWND a, PPOINTL b, ULONG c, BOOL d)
+inline BOOL _WinMapDlgPoints(HWND a, PPOINTL b, ULONG c, BOOL d)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -5343,7 +5343,7 @@ inline BOOL APIENTRY _WinMapDlgPoints(HWND a, PPOINTL b, ULONG c, BOOL d)
 #undef  WinMapDlgPoints
 #define WinMapDlgPoints _WinMapDlgPoints
 
-inline ULONG APIENTRY _WinProcessDlg(HWND a)
+inline ULONG _WinProcessDlg(HWND a)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -5357,7 +5357,7 @@ inline ULONG APIENTRY _WinProcessDlg(HWND a)
 #undef  WinProcessDlg
 #define WinProcessDlg _WinProcessDlg
 
-inline MRESULT APIENTRY _WinSendDlgItemMsg(HWND a, ULONG b, ULONG c, MPARAM d, MPARAM e)
+inline MRESULT _WinSendDlgItemMsg(HWND a, ULONG b, ULONG c, MPARAM d, MPARAM e)
 {
  MRESULT yyrc;
  USHORT sel = GetFS();
@@ -5371,7 +5371,7 @@ inline MRESULT APIENTRY _WinSendDlgItemMsg(HWND a, ULONG b, ULONG c, MPARAM d, M
 #undef  WinSendDlgItemMsg
 #define WinSendDlgItemMsg _WinSendDlgItemMsg
 
-inline LONG APIENTRY _WinSubstituteStrings(HWND a, PCSZ b, LONG c, PSZ d)
+inline LONG _WinSubstituteStrings(HWND a, PCSZ b, LONG c, PSZ d)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -5387,7 +5387,7 @@ inline LONG APIENTRY _WinSubstituteStrings(HWND a, PCSZ b, LONG c, PSZ d)
 
 #endif
 #ifdef INCL_WINERRORS
-inline ERRORID APIENTRY _WinGetLastError(HAB a)
+inline ERRORID _WinGetLastError(HAB a)
 {
  ERRORID yyrc;
  USHORT sel = GetFS();
@@ -5401,7 +5401,7 @@ inline ERRORID APIENTRY _WinGetLastError(HAB a)
 #undef  WinGetLastError
 #define WinGetLastError _WinGetLastError
 
-inline BOOL APIENTRY _WinFreeErrorInfo(PERRINFO a)
+inline BOOL _WinFreeErrorInfo(PERRINFO a)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -5415,7 +5415,7 @@ inline BOOL APIENTRY _WinFreeErrorInfo(PERRINFO a)
 #undef  WinFreeErrorInfo
 #define WinFreeErrorInfo _WinFreeErrorInfo
 
-inline PERRINFO APIENTRY _WinGetErrorInfo(HAB a)
+inline PERRINFO _WinGetErrorInfo(HAB a)
 {
  PERRINFO yyrc;
  USHORT sel = GetFS();
@@ -5431,7 +5431,7 @@ inline PERRINFO APIENTRY _WinGetErrorInfo(HAB a)
 
 #endif
 #ifdef INCL_WINHOOKS
-inline BOOL APIENTRY _WinCallMsgFilter(HAB a, PQMSG b, ULONG c)
+inline BOOL _WinCallMsgFilter(HAB a, PQMSG b, ULONG c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -5445,7 +5445,7 @@ inline BOOL APIENTRY _WinCallMsgFilter(HAB a, PQMSG b, ULONG c)
 #undef  WinCallMsgFilter
 #define WinCallMsgFilter _WinCallMsgFilter
 
-inline BOOL APIENTRY _WinReleaseHook(HAB a, HMQ b, LONG c, PFN d, HMODULE e)
+inline BOOL _WinReleaseHook(HAB a, HMQ b, LONG c, PFN d, HMODULE e)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -5459,7 +5459,7 @@ inline BOOL APIENTRY _WinReleaseHook(HAB a, HMQ b, LONG c, PFN d, HMODULE e)
 #undef  WinReleaseHook
 #define WinReleaseHook _WinReleaseHook
 
-inline BOOL APIENTRY _WinSetHook(HAB a, HMQ b, LONG c, PFN d, HMODULE e)
+inline BOOL _WinSetHook(HAB a, HMQ b, LONG c, PFN d, HMODULE e)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -5475,7 +5475,7 @@ inline BOOL APIENTRY _WinSetHook(HAB a, HMQ b, LONG c, PFN d, HMODULE e)
 
 #endif
 #ifdef INCL_WININPUT
-inline BOOL APIENTRY _WinFocusChange(HWND a, HWND b, ULONG c)
+inline BOOL _WinFocusChange(HWND a, HWND b, ULONG c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -5489,7 +5489,7 @@ inline BOOL APIENTRY _WinFocusChange(HWND a, HWND b, ULONG c)
 #undef  WinFocusChange
 #define WinFocusChange _WinFocusChange
 
-inline BOOL APIENTRY _WinLockupSystem(HAB a)
+inline BOOL _WinLockupSystem(HAB a)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -5503,7 +5503,7 @@ inline BOOL APIENTRY _WinLockupSystem(HAB a)
 #undef  WinLockupSystem
 #define WinLockupSystem _WinLockupSystem
 
-inline BOOL APIENTRY _WinSetFocus(HWND a, HWND b)
+inline BOOL _WinSetFocus(HWND a, HWND b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -5517,7 +5517,7 @@ inline BOOL APIENTRY _WinSetFocus(HWND a, HWND b)
 #undef  WinSetFocus
 #define WinSetFocus _WinSetFocus
 
-inline BOOL APIENTRY _WinUnlockSystem(HAB a, PSZ b)
+inline BOOL _WinUnlockSystem(HAB a, PSZ b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -5531,7 +5531,7 @@ inline BOOL APIENTRY _WinUnlockSystem(HAB a, PSZ b)
 #undef  WinUnlockSystem
 #define WinUnlockSystem _WinUnlockSystem
 
-inline BOOL APIENTRY _WinCheckInput(HAB a)
+inline BOOL _WinCheckInput(HAB a)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -5545,7 +5545,7 @@ inline BOOL APIENTRY _WinCheckInput(HAB a)
 #undef  WinCheckInput
 #define WinCheckInput _WinCheckInput
 
-inline BOOL APIENTRY _WinEnablePhysInput(HWND a, BOOL b)
+inline BOOL _WinEnablePhysInput(HWND a, BOOL b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -5559,7 +5559,7 @@ inline BOOL APIENTRY _WinEnablePhysInput(HWND a, BOOL b)
 #undef  WinEnablePhysInput
 #define WinEnablePhysInput _WinEnablePhysInput
 
-inline LONG APIENTRY _WinGetKeyState(HWND a, LONG b)
+inline LONG _WinGetKeyState(HWND a, LONG b)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -5573,7 +5573,7 @@ inline LONG APIENTRY _WinGetKeyState(HWND a, LONG b)
 #undef  WinGetKeyState
 #define WinGetKeyState _WinGetKeyState
 
-inline LONG APIENTRY _WinGetPhysKeyState(HWND a, LONG b)
+inline LONG _WinGetPhysKeyState(HWND a, LONG b)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -5587,7 +5587,7 @@ inline LONG APIENTRY _WinGetPhysKeyState(HWND a, LONG b)
 #undef  WinGetPhysKeyState
 #define WinGetPhysKeyState _WinGetPhysKeyState
 
-inline BOOL APIENTRY _WinIsPhysInputEnabled(HWND a)
+inline BOOL _WinIsPhysInputEnabled(HWND a)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -5601,7 +5601,7 @@ inline BOOL APIENTRY _WinIsPhysInputEnabled(HWND a)
 #undef  WinIsPhysInputEnabled
 #define WinIsPhysInputEnabled _WinIsPhysInputEnabled
 
-inline HWND APIENTRY _WinQueryCapture(HWND a)
+inline HWND _WinQueryCapture(HWND a)
 {
  HWND yyrc;
  USHORT sel = GetFS();
@@ -5615,7 +5615,7 @@ inline HWND APIENTRY _WinQueryCapture(HWND a)
 #undef  WinQueryCapture
 #define WinQueryCapture _WinQueryCapture
 
-inline HWND APIENTRY _WinQueryFocus(HWND a)
+inline HWND _WinQueryFocus(HWND a)
 {
  HWND yyrc;
  USHORT sel = GetFS();
@@ -5629,7 +5629,7 @@ inline HWND APIENTRY _WinQueryFocus(HWND a)
 #undef  WinQueryFocus
 #define WinQueryFocus _WinQueryFocus
 
-inline ULONG APIENTRY _WinQueryVisibleRegion(HWND a, HRGN b)
+inline ULONG _WinQueryVisibleRegion(HWND a, HRGN b)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -5643,7 +5643,7 @@ inline ULONG APIENTRY _WinQueryVisibleRegion(HWND a, HRGN b)
 #undef  WinQueryVisibleRegion
 #define WinQueryVisibleRegion _WinQueryVisibleRegion
 
-inline BOOL APIENTRY _WinSetCapture(HWND a, HWND b)
+inline BOOL _WinSetCapture(HWND a, HWND b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -5657,7 +5657,7 @@ inline BOOL APIENTRY _WinSetCapture(HWND a, HWND b)
 #undef  WinSetCapture
 #define WinSetCapture _WinSetCapture
 
-inline BOOL APIENTRY _WinSetKeyboardStateTable(HWND a, PBYTE b, BOOL c)
+inline BOOL _WinSetKeyboardStateTable(HWND a, PBYTE b, BOOL c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -5671,7 +5671,7 @@ inline BOOL APIENTRY _WinSetKeyboardStateTable(HWND a, PBYTE b, BOOL c)
 #undef  WinSetKeyboardStateTable
 #define WinSetKeyboardStateTable _WinSetKeyboardStateTable
 
-inline BOOL APIENTRY _WinSetVisibleRegionNotify(HWND a, BOOL b)
+inline BOOL _WinSetVisibleRegionNotify(HWND a, BOOL b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -5687,7 +5687,7 @@ inline BOOL APIENTRY _WinSetVisibleRegionNotify(HWND a, BOOL b)
 
 #endif
 #ifdef INCL_WINLOAD
-inline BOOL APIENTRY _WinDeleteLibrary(HAB a, HLIB b)
+inline BOOL _WinDeleteLibrary(HAB a, HLIB b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -5701,7 +5701,7 @@ inline BOOL APIENTRY _WinDeleteLibrary(HAB a, HLIB b)
 #undef  WinDeleteLibrary
 #define WinDeleteLibrary _WinDeleteLibrary
 
-inline BOOL APIENTRY _WinDeleteProcedure(HAB a, PFNWP b)
+inline BOOL _WinDeleteProcedure(HAB a, PFNWP b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -5715,7 +5715,7 @@ inline BOOL APIENTRY _WinDeleteProcedure(HAB a, PFNWP b)
 #undef  WinDeleteProcedure
 #define WinDeleteProcedure _WinDeleteProcedure
 
-inline HLIB APIENTRY _WinLoadLibrary(HAB a, PCSZ b)
+inline HLIB _WinLoadLibrary(HAB a, PCSZ b)
 {
  HLIB yyrc;
  USHORT sel = GetFS();
@@ -5729,7 +5729,7 @@ inline HLIB APIENTRY _WinLoadLibrary(HAB a, PCSZ b)
 #undef  WinLoadLibrary
 #define WinLoadLibrary _WinLoadLibrary
 
-inline PFNWP APIENTRY _WinLoadProcedure(HAB a, HLIB b, PSZ c)
+inline PFNWP _WinLoadProcedure(HAB a, HLIB b, PSZ c)
 {
  PFNWP yyrc;
  USHORT sel = GetFS();
@@ -5745,7 +5745,7 @@ inline PFNWP APIENTRY _WinLoadProcedure(HAB a, HLIB b, PSZ c)
 
 #endif
 #ifdef INCL_WINMENUS
-inline HWND APIENTRY _WinCreateMenu(HWND a, PVOID b)
+inline HWND _WinCreateMenu(HWND a, PVOID b)
 {
  HWND yyrc;
  USHORT sel = GetFS();
@@ -5759,7 +5759,7 @@ inline HWND APIENTRY _WinCreateMenu(HWND a, PVOID b)
 #undef  WinCreateMenu
 #define WinCreateMenu _WinCreateMenu
 
-inline HWND APIENTRY _WinLoadMenu(HWND a, HMODULE b, ULONG c)
+inline HWND _WinLoadMenu(HWND a, HMODULE b, ULONG c)
 {
  HWND yyrc;
  USHORT sel = GetFS();
@@ -5773,7 +5773,7 @@ inline HWND APIENTRY _WinLoadMenu(HWND a, HMODULE b, ULONG c)
 #undef  WinLoadMenu
 #define WinLoadMenu _WinLoadMenu
 
-inline BOOL APIENTRY _WinPopupMenu(HWND a, HWND b, HWND c, LONG d, LONG e, LONG f, ULONG g)
+inline BOOL _WinPopupMenu(HWND a, HWND b, HWND c, LONG d, LONG e, LONG f, ULONG g)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -5789,7 +5789,7 @@ inline BOOL APIENTRY _WinPopupMenu(HWND a, HWND b, HWND c, LONG d, LONG e, LONG 
 
 #endif
 #ifdef INCL_WINMESSAGEMGR
-inline BOOL APIENTRY _WinBroadcastMsg(HWND a, ULONG b, MPARAM c, MPARAM d, ULONG e)
+inline BOOL _WinBroadcastMsg(HWND a, ULONG b, MPARAM c, MPARAM d, ULONG e)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -5803,7 +5803,7 @@ inline BOOL APIENTRY _WinBroadcastMsg(HWND a, ULONG b, MPARAM c, MPARAM d, ULONG
 #undef  WinBroadcastMsg
 #define WinBroadcastMsg _WinBroadcastMsg
 
-inline BOOL APIENTRY _WinInSendMsg(HAB a)
+inline BOOL _WinInSendMsg(HAB a)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -5817,7 +5817,7 @@ inline BOOL APIENTRY _WinInSendMsg(HAB a)
 #undef  WinInSendMsg
 #define WinInSendMsg _WinInSendMsg
 
-inline BOOL APIENTRY _WinPostQueueMsg(HMQ a, ULONG b, MPARAM c, MPARAM d)
+inline BOOL _WinPostQueueMsg(HMQ a, ULONG b, MPARAM c, MPARAM d)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -5831,7 +5831,7 @@ inline BOOL APIENTRY _WinPostQueueMsg(HMQ a, ULONG b, MPARAM c, MPARAM d)
 #undef  WinPostQueueMsg
 #define WinPostQueueMsg _WinPostQueueMsg
 
-inline BOOL APIENTRY _WinQueryMsgPos(HAB a, PPOINTL b)
+inline BOOL _WinQueryMsgPos(HAB a, PPOINTL b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -5845,7 +5845,7 @@ inline BOOL APIENTRY _WinQueryMsgPos(HAB a, PPOINTL b)
 #undef  WinQueryMsgPos
 #define WinQueryMsgPos _WinQueryMsgPos
 
-inline ULONG APIENTRY _WinQueryMsgTime(HAB a)
+inline ULONG _WinQueryMsgTime(HAB a)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -5859,7 +5859,7 @@ inline ULONG APIENTRY _WinQueryMsgTime(HAB a)
 #undef  WinQueryMsgTime
 #define WinQueryMsgTime _WinQueryMsgTime
 
-inline ULONG APIENTRY _WinQueryQueueStatus(HWND a)
+inline ULONG _WinQueryQueueStatus(HWND a)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -5873,7 +5873,7 @@ inline ULONG APIENTRY _WinQueryQueueStatus(HWND a)
 #undef  WinQueryQueueStatus
 #define WinQueryQueueStatus _WinQueryQueueStatus
 
-inline ULONG APIENTRY _WinRequestMutexSem(HMTX a, ULONG b)
+inline ULONG _WinRequestMutexSem(HMTX a, ULONG b)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -5887,7 +5887,7 @@ inline ULONG APIENTRY _WinRequestMutexSem(HMTX a, ULONG b)
 #undef  WinRequestMutexSem
 #define WinRequestMutexSem _WinRequestMutexSem
 
-inline BOOL APIENTRY _WinSetClassMsgInterest(HAB a, PCSZ b, ULONG c, LONG d)
+inline BOOL _WinSetClassMsgInterest(HAB a, PCSZ b, ULONG c, LONG d)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -5901,7 +5901,7 @@ inline BOOL APIENTRY _WinSetClassMsgInterest(HAB a, PCSZ b, ULONG c, LONG d)
 #undef  WinSetClassMsgInterest
 #define WinSetClassMsgInterest _WinSetClassMsgInterest
 
-inline BOOL APIENTRY _WinSetMsgInterest(HWND a, ULONG b, LONG c)
+inline BOOL _WinSetMsgInterest(HWND a, ULONG b, LONG c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -5915,7 +5915,7 @@ inline BOOL APIENTRY _WinSetMsgInterest(HWND a, ULONG b, LONG c)
 #undef  WinSetMsgInterest
 #define WinSetMsgInterest _WinSetMsgInterest
 
-inline ULONG APIENTRY _WinWaitEventSem(HEV a, ULONG b)
+inline ULONG _WinWaitEventSem(HEV a, ULONG b)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -5929,7 +5929,7 @@ inline ULONG APIENTRY _WinWaitEventSem(HEV a, ULONG b)
 #undef  WinWaitEventSem
 #define WinWaitEventSem _WinWaitEventSem
 
-inline BOOL APIENTRY _WinWaitMsg(HAB a, ULONG b, ULONG c)
+inline BOOL _WinWaitMsg(HAB a, ULONG b, ULONG c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -5943,7 +5943,7 @@ inline BOOL APIENTRY _WinWaitMsg(HAB a, ULONG b, ULONG c)
 #undef  WinWaitMsg
 #define WinWaitMsg _WinWaitMsg
 
-inline ULONG APIENTRY _WinWaitMuxWaitSem(HMUX a, ULONG b, PULONG c)
+inline ULONG _WinWaitMuxWaitSem(HMUX a, ULONG b, PULONG c)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -5959,7 +5959,7 @@ inline ULONG APIENTRY _WinWaitMuxWaitSem(HMUX a, ULONG b, PULONG c)
 
 #endif
 #ifdef INCL_WINPALETTE
-inline LONG APIENTRY _WinRealizePalette(HWND a, HPS b, PULONG c)
+inline LONG _WinRealizePalette(HWND a, HPS b, PULONG c)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -5975,7 +5975,7 @@ inline LONG APIENTRY _WinRealizePalette(HWND a, HPS b, PULONG c)
 
 #endif
 #ifdef INCL_WINPOINTERS
-inline HPOINTER APIENTRY _WinCreatePointer(HWND a, HBITMAP b, BOOL c, LONG d, LONG e)
+inline HPOINTER _WinCreatePointer(HWND a, HBITMAP b, BOOL c, LONG d, LONG e)
 {
  HPOINTER yyrc;
  USHORT sel = GetFS();
@@ -5989,7 +5989,7 @@ inline HPOINTER APIENTRY _WinCreatePointer(HWND a, HBITMAP b, BOOL c, LONG d, LO
 #undef  WinCreatePointer
 #define WinCreatePointer _WinCreatePointer
 
-inline HPOINTER APIENTRY _WinCreatePointerIndirect(HWND a, PPOINTERINFO b)
+inline HPOINTER _WinCreatePointerIndirect(HWND a, PPOINTERINFO b)
 {
  HPOINTER yyrc;
  USHORT sel = GetFS();
@@ -6003,7 +6003,7 @@ inline HPOINTER APIENTRY _WinCreatePointerIndirect(HWND a, PPOINTERINFO b)
 #undef  WinCreatePointerIndirect
 #define WinCreatePointerIndirect _WinCreatePointerIndirect
 
-inline BOOL APIENTRY _WinDestroyPointer(HPOINTER a)
+inline BOOL _WinDestroyPointer(HPOINTER a)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -6017,7 +6017,7 @@ inline BOOL APIENTRY _WinDestroyPointer(HPOINTER a)
 #undef  WinDestroyPointer
 #define WinDestroyPointer _WinDestroyPointer
 
-inline BOOL APIENTRY _WinDrawPointer(HPS a, LONG b, LONG c, HPOINTER d, ULONG e)
+inline BOOL _WinDrawPointer(HPS a, LONG b, LONG c, HPOINTER d, ULONG e)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -6031,7 +6031,7 @@ inline BOOL APIENTRY _WinDrawPointer(HPS a, LONG b, LONG c, HPOINTER d, ULONG e)
 #undef  WinDrawPointer
 #define WinDrawPointer _WinDrawPointer
 
-inline HBITMAP APIENTRY _WinGetSysBitmap(HWND a, ULONG b)
+inline HBITMAP _WinGetSysBitmap(HWND a, ULONG b)
 {
  HBITMAP yyrc;
  USHORT sel = GetFS();
@@ -6045,7 +6045,7 @@ inline HBITMAP APIENTRY _WinGetSysBitmap(HWND a, ULONG b)
 #undef  WinGetSysBitmap
 #define WinGetSysBitmap _WinGetSysBitmap
 
-inline HPOINTER APIENTRY _WinLoadPointer(HWND a, HMODULE b, ULONG c)
+inline HPOINTER _WinLoadPointer(HWND a, HMODULE b, ULONG c)
 {
  HPOINTER yyrc;
  USHORT sel = GetFS();
@@ -6059,7 +6059,7 @@ inline HPOINTER APIENTRY _WinLoadPointer(HWND a, HMODULE b, ULONG c)
 #undef  WinLoadPointer
 #define WinLoadPointer _WinLoadPointer
 
-inline BOOL APIENTRY _WinLockPointerUpdate(HWND a, HPOINTER b, ULONG c)
+inline BOOL _WinLockPointerUpdate(HWND a, HPOINTER b, ULONG c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -6073,7 +6073,7 @@ inline BOOL APIENTRY _WinLockPointerUpdate(HWND a, HPOINTER b, ULONG c)
 #undef  WinLockPointerUpdate
 #define WinLockPointerUpdate _WinLockPointerUpdate
 
-inline BOOL APIENTRY _WinQueryPointerPos(HWND a, PPOINTL b)
+inline BOOL _WinQueryPointerPos(HWND a, PPOINTL b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -6087,7 +6087,7 @@ inline BOOL APIENTRY _WinQueryPointerPos(HWND a, PPOINTL b)
 #undef  WinQueryPointerPos
 #define WinQueryPointerPos _WinQueryPointerPos
 
-inline BOOL APIENTRY _WinQueryPointerInfo(HPOINTER a, PPOINTERINFO b)
+inline BOOL _WinQueryPointerInfo(HPOINTER a, PPOINTERINFO b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -6101,7 +6101,7 @@ inline BOOL APIENTRY _WinQueryPointerInfo(HPOINTER a, PPOINTERINFO b)
 #undef  WinQueryPointerInfo
 #define WinQueryPointerInfo _WinQueryPointerInfo
 
-inline HPOINTER APIENTRY _WinQuerySysPointer(HWND a, LONG b, BOOL c)
+inline HPOINTER _WinQuerySysPointer(HWND a, LONG b, BOOL c)
 {
  HPOINTER yyrc;
  USHORT sel = GetFS();
@@ -6115,7 +6115,7 @@ inline HPOINTER APIENTRY _WinQuerySysPointer(HWND a, LONG b, BOOL c)
 #undef  WinQuerySysPointer
 #define WinQuerySysPointer _WinQuerySysPointer
 
-inline BOOL APIENTRY _WinQuerySysPointerData(HWND a, ULONG b, PICONINFO c)
+inline BOOL _WinQuerySysPointerData(HWND a, ULONG b, PICONINFO c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -6129,7 +6129,7 @@ inline BOOL APIENTRY _WinQuerySysPointerData(HWND a, ULONG b, PICONINFO c)
 #undef  WinQuerySysPointerData
 #define WinQuerySysPointerData _WinQuerySysPointerData
 
-inline BOOL APIENTRY _WinSetPointer(HWND a, HPOINTER b)
+inline BOOL _WinSetPointer(HWND a, HPOINTER b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -6143,7 +6143,7 @@ inline BOOL APIENTRY _WinSetPointer(HWND a, HPOINTER b)
 #undef  WinSetPointer
 #define WinSetPointer _WinSetPointer
 
-inline BOOL APIENTRY _WinSetPointerOwner(HPOINTER a, PID b, BOOL c)
+inline BOOL _WinSetPointerOwner(HPOINTER a, PID b, BOOL c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -6157,7 +6157,7 @@ inline BOOL APIENTRY _WinSetPointerOwner(HPOINTER a, PID b, BOOL c)
 #undef  WinSetPointerOwner
 #define WinSetPointerOwner _WinSetPointerOwner
 
-inline BOOL APIENTRY _WinSetPointerPos(HWND a, LONG b, LONG c)
+inline BOOL _WinSetPointerPos(HWND a, LONG b, LONG c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -6171,7 +6171,7 @@ inline BOOL APIENTRY _WinSetPointerPos(HWND a, LONG b, LONG c)
 #undef  WinSetPointerPos
 #define WinSetPointerPos _WinSetPointerPos
 
-inline BOOL APIENTRY _WinSetSysPointerData(HWND a, ULONG b, PICONINFO c)
+inline BOOL _WinSetSysPointerData(HWND a, ULONG b, PICONINFO c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -6185,7 +6185,7 @@ inline BOOL APIENTRY _WinSetSysPointerData(HWND a, ULONG b, PICONINFO c)
 #undef  WinSetSysPointerData
 #define WinSetSysPointerData _WinSetSysPointerData
 
-inline BOOL APIENTRY _WinShowPointer(HWND a, BOOL b)
+inline BOOL _WinShowPointer(HWND a, BOOL b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -6201,7 +6201,7 @@ inline BOOL APIENTRY _WinShowPointer(HWND a, BOOL b)
 
 #endif
 #ifdef INCL_WINRECTANGLES
-inline BOOL APIENTRY _WinCopyRect(HAB a, PRECTL b, PRECTL c)
+inline BOOL _WinCopyRect(HAB a, PRECTL b, PRECTL c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -6215,7 +6215,7 @@ inline BOOL APIENTRY _WinCopyRect(HAB a, PRECTL b, PRECTL c)
 #undef  WinCopyRect
 #define WinCopyRect _WinCopyRect
 
-inline BOOL APIENTRY _WinEqualRect(HAB a, PRECTL b, PRECTL c)
+inline BOOL _WinEqualRect(HAB a, PRECTL b, PRECTL c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -6229,7 +6229,7 @@ inline BOOL APIENTRY _WinEqualRect(HAB a, PRECTL b, PRECTL c)
 #undef  WinEqualRect
 #define WinEqualRect _WinEqualRect
 
-inline BOOL APIENTRY _WinInflateRect(HAB a, PRECTL b, LONG c, LONG d)
+inline BOOL _WinInflateRect(HAB a, PRECTL b, LONG c, LONG d)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -6243,7 +6243,7 @@ inline BOOL APIENTRY _WinInflateRect(HAB a, PRECTL b, LONG c, LONG d)
 #undef  WinInflateRect
 #define WinInflateRect _WinInflateRect
 
-inline BOOL APIENTRY _WinIntersectRect(HAB a, PRECTL b, PRECTL c, PRECTL d)
+inline BOOL _WinIntersectRect(HAB a, PRECTL b, PRECTL c, PRECTL d)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -6257,7 +6257,7 @@ inline BOOL APIENTRY _WinIntersectRect(HAB a, PRECTL b, PRECTL c, PRECTL d)
 #undef  WinIntersectRect
 #define WinIntersectRect _WinIntersectRect
 
-inline BOOL APIENTRY _WinIsRectEmpty(HAB a, PRECTL b)
+inline BOOL _WinIsRectEmpty(HAB a, PRECTL b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -6271,7 +6271,7 @@ inline BOOL APIENTRY _WinIsRectEmpty(HAB a, PRECTL b)
 #undef  WinIsRectEmpty
 #define WinIsRectEmpty _WinIsRectEmpty
 
-inline BOOL APIENTRY _WinMakePoints(HAB a, PPOINTL b, ULONG c)
+inline BOOL _WinMakePoints(HAB a, PPOINTL b, ULONG c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -6285,7 +6285,7 @@ inline BOOL APIENTRY _WinMakePoints(HAB a, PPOINTL b, ULONG c)
 #undef  WinMakePoints
 #define WinMakePoints _WinMakePoints
 
-inline BOOL APIENTRY _WinMakeRect(HAB a, PRECTL b)
+inline BOOL _WinMakeRect(HAB a, PRECTL b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -6299,7 +6299,7 @@ inline BOOL APIENTRY _WinMakeRect(HAB a, PRECTL b)
 #undef  WinMakeRect
 #define WinMakeRect _WinMakeRect
 
-inline BOOL APIENTRY _WinOffsetRect(HAB a, PRECTL b, LONG c, LONG d)
+inline BOOL _WinOffsetRect(HAB a, PRECTL b, LONG c, LONG d)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -6313,7 +6313,7 @@ inline BOOL APIENTRY _WinOffsetRect(HAB a, PRECTL b, LONG c, LONG d)
 #undef  WinOffsetRect
 #define WinOffsetRect _WinOffsetRect
 
-inline BOOL APIENTRY _WinPtInRect(HAB a, PRECTL b, PPOINTL c)
+inline BOOL _WinPtInRect(HAB a, PRECTL b, PPOINTL c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -6327,7 +6327,7 @@ inline BOOL APIENTRY _WinPtInRect(HAB a, PRECTL b, PPOINTL c)
 #undef  WinPtInRect
 #define WinPtInRect _WinPtInRect
 
-inline BOOL APIENTRY _WinSetRect(HAB a, PRECTL b, LONG c, LONG d, LONG e, LONG f)
+inline BOOL _WinSetRect(HAB a, PRECTL b, LONG c, LONG d, LONG e, LONG f)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -6341,7 +6341,7 @@ inline BOOL APIENTRY _WinSetRect(HAB a, PRECTL b, LONG c, LONG d, LONG e, LONG f
 #undef  WinSetRect
 #define WinSetRect _WinSetRect
 
-inline BOOL APIENTRY _WinSetRectEmpty(HAB a, PRECTL b)
+inline BOOL _WinSetRectEmpty(HAB a, PRECTL b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -6355,7 +6355,7 @@ inline BOOL APIENTRY _WinSetRectEmpty(HAB a, PRECTL b)
 #undef  WinSetRectEmpty
 #define WinSetRectEmpty _WinSetRectEmpty
 
-inline BOOL APIENTRY _WinSubtractRect(HAB a, PRECTL b, PRECTL c, PRECTL d)
+inline BOOL _WinSubtractRect(HAB a, PRECTL b, PRECTL c, PRECTL d)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -6369,7 +6369,7 @@ inline BOOL APIENTRY _WinSubtractRect(HAB a, PRECTL b, PRECTL c, PRECTL d)
 #undef  WinSubtractRect
 #define WinSubtractRect _WinSubtractRect
 
-inline BOOL APIENTRY _WinUnionRect(HAB a, PRECTL b, PRECTL c, PRECTL d)
+inline BOOL _WinUnionRect(HAB a, PRECTL b, PRECTL c, PRECTL d)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -6385,7 +6385,7 @@ inline BOOL APIENTRY _WinUnionRect(HAB a, PRECTL b, PRECTL c, PRECTL d)
 
 #endif
 #ifdef INCL_WINSYS
-inline LONG APIENTRY _WinQueryControlColors(HWND a, LONG b, ULONG c, ULONG d, PCTLCOLOR e)
+inline LONG _WinQueryControlColors(HWND a, LONG b, ULONG c, ULONG d, PCTLCOLOR e)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -6399,7 +6399,7 @@ inline LONG APIENTRY _WinQueryControlColors(HWND a, LONG b, ULONG c, ULONG d, PC
 #undef  WinQueryControlColors
 #define WinQueryControlColors _WinQueryControlColors
 
-inline ULONG APIENTRY _WinQueryPresParam(HWND a, ULONG b, ULONG c, PULONG d, ULONG e, PVOID f, ULONG g)
+inline ULONG _WinQueryPresParam(HWND a, ULONG b, ULONG c, PULONG d, ULONG e, PVOID f, ULONG g)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -6413,7 +6413,7 @@ inline ULONG APIENTRY _WinQueryPresParam(HWND a, ULONG b, ULONG c, PULONG d, ULO
 #undef  WinQueryPresParam
 #define WinQueryPresParam _WinQueryPresParam
 
-inline LONG APIENTRY _WinQuerySysColor(HWND a, LONG b, LONG c)
+inline LONG _WinQuerySysColor(HWND a, LONG b, LONG c)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -6427,7 +6427,7 @@ inline LONG APIENTRY _WinQuerySysColor(HWND a, LONG b, LONG c)
 #undef  WinQuerySysColor
 #define WinQuerySysColor _WinQuerySysColor
 
-inline LONG APIENTRY _WinQuerySysValue(HWND a, LONG b)
+inline LONG _WinQuerySysValue(HWND a, LONG b)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -6441,7 +6441,7 @@ inline LONG APIENTRY _WinQuerySysValue(HWND a, LONG b)
 #undef  WinQuerySysValue
 #define WinQuerySysValue _WinQuerySysValue
 
-inline BOOL APIENTRY _WinRemovePresParam(HWND a, ULONG b)
+inline BOOL _WinRemovePresParam(HWND a, ULONG b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -6455,7 +6455,7 @@ inline BOOL APIENTRY _WinRemovePresParam(HWND a, ULONG b)
 #undef  WinRemovePresParam
 #define WinRemovePresParam _WinRemovePresParam
 
-inline LONG APIENTRY _WinSetControlColors(HWND a, LONG b, ULONG c, ULONG d, PCTLCOLOR e)
+inline LONG _WinSetControlColors(HWND a, LONG b, ULONG c, ULONG d, PCTLCOLOR e)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -6469,7 +6469,7 @@ inline LONG APIENTRY _WinSetControlColors(HWND a, LONG b, ULONG c, ULONG d, PCTL
 #undef  WinSetControlColors
 #define WinSetControlColors _WinSetControlColors
 
-inline BOOL APIENTRY _WinSetPresParam(HWND a, ULONG b, ULONG c, PVOID d)
+inline BOOL _WinSetPresParam(HWND a, ULONG b, ULONG c, PVOID d)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -6483,7 +6483,7 @@ inline BOOL APIENTRY _WinSetPresParam(HWND a, ULONG b, ULONG c, PVOID d)
 #undef  WinSetPresParam
 #define WinSetPresParam _WinSetPresParam
 
-inline BOOL APIENTRY _WinSetSysColors(HWND a, ULONG b, ULONG c, LONG d, ULONG e, PLONG f)
+inline BOOL _WinSetSysColors(HWND a, ULONG b, ULONG c, LONG d, ULONG e, PLONG f)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -6497,7 +6497,7 @@ inline BOOL APIENTRY _WinSetSysColors(HWND a, ULONG b, ULONG c, LONG d, ULONG e,
 #undef  WinSetSysColors
 #define WinSetSysColors _WinSetSysColors
 
-inline BOOL APIENTRY _WinSetSysValue(HWND a, LONG b, LONG c)
+inline BOOL _WinSetSysValue(HWND a, LONG b, LONG c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -6513,7 +6513,7 @@ inline BOOL APIENTRY _WinSetSysValue(HWND a, LONG b, LONG c)
 
 #endif
 #ifdef INCL_WINTHUNKAPI
-inline PFN APIENTRY _WinQueryClassThunkProc(PCSZ a)
+inline PFN _WinQueryClassThunkProc(PCSZ a)
 {
  PFN yyrc;
  USHORT sel = GetFS();
@@ -6527,7 +6527,7 @@ inline PFN APIENTRY _WinQueryClassThunkProc(PCSZ a)
 #undef  WinQueryClassThunkProc
 #define WinQueryClassThunkProc _WinQueryClassThunkProc
 
-inline LONG APIENTRY _WinQueryWindowModel(HWND a)
+inline LONG _WinQueryWindowModel(HWND a)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -6541,7 +6541,7 @@ inline LONG APIENTRY _WinQueryWindowModel(HWND a)
 #undef  WinQueryWindowModel
 #define WinQueryWindowModel _WinQueryWindowModel
 
-inline PFN APIENTRY _WinQueryWindowThunkProc(HWND a)
+inline PFN _WinQueryWindowThunkProc(HWND a)
 {
  PFN yyrc;
  USHORT sel = GetFS();
@@ -6555,7 +6555,7 @@ inline PFN APIENTRY _WinQueryWindowThunkProc(HWND a)
 #undef  WinQueryWindowThunkProc
 #define WinQueryWindowThunkProc _WinQueryWindowThunkProc
 
-inline BOOL APIENTRY _WinSetClassThunkProc(PCSZ a, PFN b)
+inline BOOL _WinSetClassThunkProc(PCSZ a, PFN b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -6569,7 +6569,7 @@ inline BOOL APIENTRY _WinSetClassThunkProc(PCSZ a, PFN b)
 #undef  WinSetClassThunkProc
 #define WinSetClassThunkProc _WinSetClassThunkProc
 
-inline BOOL APIENTRY _WinSetWindowThunkProc(HWND a, PFN b)
+inline BOOL _WinSetWindowThunkProc(HWND a, PFN b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -6585,7 +6585,7 @@ inline BOOL APIENTRY _WinSetWindowThunkProc(HWND a, PFN b)
 
 #endif
 #ifdef INCL_WINTIMER
-inline ULONG APIENTRY _WinGetCurrentTime(HAB a)
+inline ULONG _WinGetCurrentTime(HAB a)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -6599,7 +6599,7 @@ inline ULONG APIENTRY _WinGetCurrentTime(HAB a)
 #undef  WinGetCurrentTime
 #define WinGetCurrentTime _WinGetCurrentTime
 
-inline ULONG APIENTRY _WinStartTimer(HAB a, HWND b, ULONG c, ULONG d)
+inline ULONG _WinStartTimer(HAB a, HWND b, ULONG c, ULONG d)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -6613,7 +6613,7 @@ inline ULONG APIENTRY _WinStartTimer(HAB a, HWND b, ULONG c, ULONG d)
 #undef  WinStartTimer
 #define WinStartTimer _WinStartTimer
 
-inline BOOL APIENTRY _WinStopTimer(HAB a, HWND b, ULONG c)
+inline BOOL _WinStopTimer(HAB a, HWND b, ULONG c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -6629,7 +6629,7 @@ inline BOOL APIENTRY _WinStopTimer(HAB a, HWND b, ULONG c)
 
 #endif
 #ifdef INCL_WINTRACKRECT
-inline BOOL APIENTRY _WinShowTrackRect(HWND a, BOOL b)
+inline BOOL _WinShowTrackRect(HWND a, BOOL b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -6643,7 +6643,7 @@ inline BOOL APIENTRY _WinShowTrackRect(HWND a, BOOL b)
 #undef  WinShowTrackRect
 #define WinShowTrackRect _WinShowTrackRect
 
-inline BOOL APIENTRY _WinTrackRect(HWND a, HPS b, PTRACKINFO c)
+inline BOOL _WinTrackRect(HWND a, HPS b, PTRACKINFO c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -6660,7 +6660,7 @@ inline BOOL APIENTRY _WinTrackRect(HWND a, HPS b, PTRACKINFO c)
 #endif
 #endif
 #ifdef INCL_GPI
-inline LONG APIENTRY _GpiAnimatePalette(HPAL a, ULONG b, ULONG c, ULONG d, PULONG e)
+inline LONG _GpiAnimatePalette(HPAL a, ULONG b, ULONG c, ULONG d, PULONG e)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -6674,7 +6674,7 @@ inline LONG APIENTRY _GpiAnimatePalette(HPAL a, ULONG b, ULONG c, ULONG d, PULON
 #undef  GpiAnimatePalette
 #define GpiAnimatePalette _GpiAnimatePalette
 
-inline BOOL APIENTRY _GpiBeginArea(HPS a, ULONG b)
+inline BOOL _GpiBeginArea(HPS a, ULONG b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -6688,7 +6688,7 @@ inline BOOL APIENTRY _GpiBeginArea(HPS a, ULONG b)
 #undef  GpiBeginArea
 #define GpiBeginArea _GpiBeginArea
 
-inline BOOL APIENTRY _GpiBeginElement(HPS a, LONG b, PCSZ c)
+inline BOOL _GpiBeginElement(HPS a, LONG b, PCSZ c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -6702,7 +6702,7 @@ inline BOOL APIENTRY _GpiBeginElement(HPS a, LONG b, PCSZ c)
 #undef  GpiBeginElement
 #define GpiBeginElement _GpiBeginElement
 
-inline BOOL APIENTRY _GpiBeginPath(HPS a, LONG b)
+inline BOOL _GpiBeginPath(HPS a, LONG b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -6716,7 +6716,7 @@ inline BOOL APIENTRY _GpiBeginPath(HPS a, LONG b)
 #undef  GpiBeginPath
 #define GpiBeginPath _GpiBeginPath
 
-inline LONG APIENTRY _GpiBox(HPS a, LONG b, PPOINTL c, LONG d, LONG e)
+inline LONG _GpiBox(HPS a, LONG b, PPOINTL c, LONG d, LONG e)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -6730,7 +6730,7 @@ inline LONG APIENTRY _GpiBox(HPS a, LONG b, PPOINTL c, LONG d, LONG e)
 #undef  GpiBox
 #define GpiBox _GpiBox
 
-inline LONG APIENTRY _GpiCallSegmentMatrix(HPS a, LONG b, LONG c, PMATRIXLF d, LONG e)
+inline LONG _GpiCallSegmentMatrix(HPS a, LONG b, LONG c, PMATRIXLF d, LONG e)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -6744,7 +6744,7 @@ inline LONG APIENTRY _GpiCallSegmentMatrix(HPS a, LONG b, LONG c, PMATRIXLF d, L
 #undef  GpiCallSegmentMatrix
 #define GpiCallSegmentMatrix _GpiCallSegmentMatrix
 
-inline LONG APIENTRY _GpiCharString(HPS a, LONG b, PCH c)
+inline LONG _GpiCharString(HPS a, LONG b, PCH c)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -6758,7 +6758,7 @@ inline LONG APIENTRY _GpiCharString(HPS a, LONG b, PCH c)
 #undef  GpiCharString
 #define GpiCharString _GpiCharString
 
-inline LONG APIENTRY _GpiCharStringAt(HPS a, PPOINTL b, LONG c, PCH d)
+inline LONG _GpiCharStringAt(HPS a, PPOINTL b, LONG c, PCH d)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -6772,7 +6772,7 @@ inline LONG APIENTRY _GpiCharStringAt(HPS a, PPOINTL b, LONG c, PCH d)
 #undef  GpiCharStringAt
 #define GpiCharStringAt _GpiCharStringAt
 
-inline LONG APIENTRY _GpiCharStringPos(HPS a, PRECTL b, ULONG c, LONG d, PCH e, PLONG f)
+inline LONG _GpiCharStringPos(HPS a, PRECTL b, ULONG c, LONG d, PCH e, PLONG f)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -6786,7 +6786,7 @@ inline LONG APIENTRY _GpiCharStringPos(HPS a, PRECTL b, ULONG c, LONG d, PCH e, 
 #undef  GpiCharStringPos
 #define GpiCharStringPos _GpiCharStringPos
 
-inline LONG APIENTRY _GpiCharStringPosAt(HPS a, PPOINTL b, PRECTL c, ULONG d, LONG e, PCH f, PLONG g)
+inline LONG _GpiCharStringPosAt(HPS a, PPOINTL b, PRECTL c, ULONG d, LONG e, PCH f, PLONG g)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -6800,7 +6800,7 @@ inline LONG APIENTRY _GpiCharStringPosAt(HPS a, PPOINTL b, PRECTL c, ULONG d, LO
 #undef  GpiCharStringPosAt
 #define GpiCharStringPosAt _GpiCharStringPosAt
 
-inline BOOL APIENTRY _GpiCloseFigure(HPS a)
+inline BOOL _GpiCloseFigure(HPS a)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -6814,7 +6814,7 @@ inline BOOL APIENTRY _GpiCloseFigure(HPS a)
 #undef  GpiCloseFigure
 #define GpiCloseFigure _GpiCloseFigure
 
-inline LONG APIENTRY _GpiCombineRegion(HPS a, HRGN b, HRGN c, HRGN d, LONG e)
+inline LONG _GpiCombineRegion(HPS a, HRGN b, HRGN c, HRGN d, LONG e)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -6828,7 +6828,7 @@ inline LONG APIENTRY _GpiCombineRegion(HPS a, HRGN b, HRGN c, HRGN d, LONG e)
 #undef  GpiCombineRegion
 #define GpiCombineRegion _GpiCombineRegion
 
-inline BOOL APIENTRY _GpiComment(HPS a, LONG b, PBYTE c)
+inline BOOL _GpiComment(HPS a, LONG b, PBYTE c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -6842,7 +6842,7 @@ inline BOOL APIENTRY _GpiComment(HPS a, LONG b, PBYTE c)
 #undef  GpiComment
 #define GpiComment _GpiComment
 
-inline BOOL APIENTRY _GpiConvert(HPS a, LONG b, LONG c, LONG d, PPOINTL e)
+inline BOOL _GpiConvert(HPS a, LONG b, LONG c, LONG d, PPOINTL e)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -6856,7 +6856,7 @@ inline BOOL APIENTRY _GpiConvert(HPS a, LONG b, LONG c, LONG d, PPOINTL e)
 #undef  GpiConvert
 #define GpiConvert _GpiConvert
 
-inline BOOL APIENTRY _GpiConvertWithMatrix(HPS a, LONG b, PPOINTL c, LONG d, PMATRIXLF e)
+inline BOOL _GpiConvertWithMatrix(HPS a, LONG b, PPOINTL c, LONG d, PMATRIXLF e)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -6870,7 +6870,7 @@ inline BOOL APIENTRY _GpiConvertWithMatrix(HPS a, LONG b, PPOINTL c, LONG d, PMA
 #undef  GpiConvertWithMatrix
 #define GpiConvertWithMatrix _GpiConvertWithMatrix
 
-inline HMF APIENTRY _GpiCopyMetaFile(HMF a)
+inline HMF _GpiCopyMetaFile(HMF a)
 {
  HMF yyrc;
  USHORT sel = GetFS();
@@ -6884,7 +6884,7 @@ inline HMF APIENTRY _GpiCopyMetaFile(HMF a)
 #undef  GpiCopyMetaFile
 #define GpiCopyMetaFile _GpiCopyMetaFile
 
-inline BOOL APIENTRY _GpiCreateLogColorTable(HPS a, ULONG b, LONG c, LONG d, LONG e, PLONG f)
+inline BOOL _GpiCreateLogColorTable(HPS a, ULONG b, LONG c, LONG d, LONG e, PLONG f)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -6898,7 +6898,7 @@ inline BOOL APIENTRY _GpiCreateLogColorTable(HPS a, ULONG b, LONG c, LONG d, LON
 #undef  GpiCreateLogColorTable
 #define GpiCreateLogColorTable _GpiCreateLogColorTable
 
-inline LONG APIENTRY _GpiCreateLogFont(HPS a, STR8 *b, LONG c, PFATTRS d)
+inline LONG _GpiCreateLogFont(HPS a, STR8 *b, LONG c, PFATTRS d)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -6912,7 +6912,7 @@ inline LONG APIENTRY _GpiCreateLogFont(HPS a, STR8 *b, LONG c, PFATTRS d)
 #undef  GpiCreateLogFont
 #define GpiCreateLogFont _GpiCreateLogFont
 
-inline HPAL APIENTRY _GpiCreatePalette(HAB a, ULONG b, ULONG c, ULONG d, PULONG e)
+inline HPAL _GpiCreatePalette(HAB a, ULONG b, ULONG c, ULONG d, PULONG e)
 {
  HPAL yyrc;
  USHORT sel = GetFS();
@@ -6926,7 +6926,7 @@ inline HPAL APIENTRY _GpiCreatePalette(HAB a, ULONG b, ULONG c, ULONG d, PULONG 
 #undef  GpiCreatePalette
 #define GpiCreatePalette _GpiCreatePalette
 
-inline HRGN APIENTRY _GpiCreateRegion(HPS a, LONG b, PRECTL c)
+inline HRGN _GpiCreateRegion(HPS a, LONG b, PRECTL c)
 {
  HRGN yyrc;
  USHORT sel = GetFS();
@@ -6940,7 +6940,7 @@ inline HRGN APIENTRY _GpiCreateRegion(HPS a, LONG b, PRECTL c)
 #undef  GpiCreateRegion
 #define GpiCreateRegion _GpiCreateRegion
 
-inline BOOL APIENTRY _GpiDeleteElement(HPS a)
+inline BOOL _GpiDeleteElement(HPS a)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -6954,7 +6954,7 @@ inline BOOL APIENTRY _GpiDeleteElement(HPS a)
 #undef  GpiDeleteElement
 #define GpiDeleteElement _GpiDeleteElement
 
-inline BOOL APIENTRY _GpiDeleteElementRange(HPS a, LONG b, LONG c)
+inline BOOL _GpiDeleteElementRange(HPS a, LONG b, LONG c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -6968,7 +6968,7 @@ inline BOOL APIENTRY _GpiDeleteElementRange(HPS a, LONG b, LONG c)
 #undef  GpiDeleteElementRange
 #define GpiDeleteElementRange _GpiDeleteElementRange
 
-inline BOOL APIENTRY _GpiDeleteElementsBetweenLabels(HPS a, LONG b, LONG c)
+inline BOOL _GpiDeleteElementsBetweenLabels(HPS a, LONG b, LONG c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -6982,7 +6982,7 @@ inline BOOL APIENTRY _GpiDeleteElementsBetweenLabels(HPS a, LONG b, LONG c)
 #undef  GpiDeleteElementsBetweenLabels
 #define GpiDeleteElementsBetweenLabels _GpiDeleteElementsBetweenLabels
 
-inline BOOL APIENTRY _GpiDeleteMetaFile(HMF a)
+inline BOOL _GpiDeleteMetaFile(HMF a)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -6996,7 +6996,7 @@ inline BOOL APIENTRY _GpiDeleteMetaFile(HMF a)
 #undef  GpiDeleteMetaFile
 #define GpiDeleteMetaFile _GpiDeleteMetaFile
 
-inline BOOL APIENTRY _GpiDeletePalette(HPAL a)
+inline BOOL _GpiDeletePalette(HPAL a)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -7010,7 +7010,7 @@ inline BOOL APIENTRY _GpiDeletePalette(HPAL a)
 #undef  GpiDeletePalette
 #define GpiDeletePalette _GpiDeletePalette
 
-inline BOOL APIENTRY _GpiDeleteSetId(HPS a, LONG b)
+inline BOOL _GpiDeleteSetId(HPS a, LONG b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -7024,7 +7024,7 @@ inline BOOL APIENTRY _GpiDeleteSetId(HPS a, LONG b)
 #undef  GpiDeleteSetId
 #define GpiDeleteSetId _GpiDeleteSetId
 
-inline BOOL APIENTRY _GpiDestroyRegion(HPS a, HRGN b)
+inline BOOL _GpiDestroyRegion(HPS a, HRGN b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -7038,7 +7038,7 @@ inline BOOL APIENTRY _GpiDestroyRegion(HPS a, HRGN b)
 #undef  GpiDestroyRegion
 #define GpiDestroyRegion _GpiDestroyRegion
 
-inline LONG APIENTRY _GpiElement(HPS a, LONG b, PCSZ c, LONG d, PBYTE e)
+inline LONG _GpiElement(HPS a, LONG b, PCSZ c, LONG d, PBYTE e)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -7052,7 +7052,7 @@ inline LONG APIENTRY _GpiElement(HPS a, LONG b, PCSZ c, LONG d, PBYTE e)
 #undef  GpiElement
 #define GpiElement _GpiElement
 
-inline LONG APIENTRY _GpiEndArea(HPS a)
+inline LONG _GpiEndArea(HPS a)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -7066,7 +7066,7 @@ inline LONG APIENTRY _GpiEndArea(HPS a)
 #undef  GpiEndArea
 #define GpiEndArea _GpiEndArea
 
-inline BOOL APIENTRY _GpiEndElement(HPS a)
+inline BOOL _GpiEndElement(HPS a)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -7080,7 +7080,7 @@ inline BOOL APIENTRY _GpiEndElement(HPS a)
 #undef  GpiEndElement
 #define GpiEndElement _GpiEndElement
 
-inline BOOL APIENTRY _GpiEndPath(HPS a)
+inline BOOL _GpiEndPath(HPS a)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -7094,7 +7094,7 @@ inline BOOL APIENTRY _GpiEndPath(HPS a)
 #undef  GpiEndPath
 #define GpiEndPath _GpiEndPath
 
-inline LONG APIENTRY _GpiEqualRegion(HPS a, HRGN b, HRGN c)
+inline LONG _GpiEqualRegion(HPS a, HRGN b, HRGN c)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -7108,7 +7108,7 @@ inline LONG APIENTRY _GpiEqualRegion(HPS a, HRGN b, HRGN c)
 #undef  GpiEqualRegion
 #define GpiEqualRegion _GpiEqualRegion
 
-inline LONG APIENTRY _GpiExcludeClipRectangle(HPS a, PRECTL b)
+inline LONG _GpiExcludeClipRectangle(HPS a, PRECTL b)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -7122,7 +7122,7 @@ inline LONG APIENTRY _GpiExcludeClipRectangle(HPS a, PRECTL b)
 #undef  GpiExcludeClipRectangle
 #define GpiExcludeClipRectangle _GpiExcludeClipRectangle
 
-inline LONG APIENTRY _GpiFillPath(HPS a, LONG b, LONG c)
+inline LONG _GpiFillPath(HPS a, LONG b, LONG c)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -7136,7 +7136,7 @@ inline LONG APIENTRY _GpiFillPath(HPS a, LONG b, LONG c)
 #undef  GpiFillPath
 #define GpiFillPath _GpiFillPath
 
-inline LONG APIENTRY _GpiFrameRegion(HPS a, HRGN b, PSIZEL c)
+inline LONG _GpiFrameRegion(HPS a, HRGN b, PSIZEL c)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -7150,7 +7150,7 @@ inline LONG APIENTRY _GpiFrameRegion(HPS a, HRGN b, PSIZEL c)
 #undef  GpiFrameRegion
 #define GpiFrameRegion _GpiFrameRegion
 
-inline LONG APIENTRY _GpiFullArc(HPS a, LONG b, FIXED c)
+inline LONG _GpiFullArc(HPS a, LONG b, FIXED c)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -7164,7 +7164,7 @@ inline LONG APIENTRY _GpiFullArc(HPS a, LONG b, FIXED c)
 #undef  GpiFullArc
 #define GpiFullArc _GpiFullArc
 
-inline LONG APIENTRY _GpiImage(HPS a, LONG b, PSIZEL c, LONG d, PBYTE e)
+inline LONG _GpiImage(HPS a, LONG b, PSIZEL c, LONG d, PBYTE e)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -7178,7 +7178,7 @@ inline LONG APIENTRY _GpiImage(HPS a, LONG b, PSIZEL c, LONG d, PBYTE e)
 #undef  GpiImage
 #define GpiImage _GpiImage
 
-inline LONG APIENTRY _GpiIntersectClipRectangle(HPS a, PRECTL b)
+inline LONG _GpiIntersectClipRectangle(HPS a, PRECTL b)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -7192,7 +7192,7 @@ inline LONG APIENTRY _GpiIntersectClipRectangle(HPS a, PRECTL b)
 #undef  GpiIntersectClipRectangle
 #define GpiIntersectClipRectangle _GpiIntersectClipRectangle
 
-inline BOOL APIENTRY _GpiLabel(HPS a, LONG b)
+inline BOOL _GpiLabel(HPS a, LONG b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -7206,7 +7206,7 @@ inline BOOL APIENTRY _GpiLabel(HPS a, LONG b)
 #undef  GpiLabel
 #define GpiLabel _GpiLabel
 
-inline LONG APIENTRY _GpiLine(HPS a, PPOINTL b)
+inline LONG _GpiLine(HPS a, PPOINTL b)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -7220,7 +7220,7 @@ inline LONG APIENTRY _GpiLine(HPS a, PPOINTL b)
 #undef  GpiLine
 #define GpiLine _GpiLine
 
-inline BOOL APIENTRY _GpiLoadFonts(HAB a, PCSZ b)
+inline BOOL _GpiLoadFonts(HAB a, PCSZ b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -7234,7 +7234,7 @@ inline BOOL APIENTRY _GpiLoadFonts(HAB a, PCSZ b)
 #undef  GpiLoadFonts
 #define GpiLoadFonts _GpiLoadFonts
 
-inline HMF APIENTRY _GpiLoadMetaFile(HAB a, PCSZ b)
+inline HMF _GpiLoadMetaFile(HAB a, PCSZ b)
 {
  HMF yyrc;
  USHORT sel = GetFS();
@@ -7248,7 +7248,7 @@ inline HMF APIENTRY _GpiLoadMetaFile(HAB a, PCSZ b)
 #undef  GpiLoadMetaFile
 #define GpiLoadMetaFile _GpiLoadMetaFile
 
-inline BOOL APIENTRY _GpiLoadPublicFonts(HAB a, PCSZ b)
+inline BOOL _GpiLoadPublicFonts(HAB a, PCSZ b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -7262,7 +7262,7 @@ inline BOOL APIENTRY _GpiLoadPublicFonts(HAB a, PCSZ b)
 #undef  GpiLoadPublicFonts
 #define GpiLoadPublicFonts _GpiLoadPublicFonts
 
-inline LONG APIENTRY _GpiMarker(HPS a, PPOINTL b)
+inline LONG _GpiMarker(HPS a, PPOINTL b)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -7276,7 +7276,7 @@ inline LONG APIENTRY _GpiMarker(HPS a, PPOINTL b)
 #undef  GpiMarker
 #define GpiMarker _GpiMarker
 
-inline BOOL APIENTRY _GpiModifyPath(HPS a, LONG b, LONG c)
+inline BOOL _GpiModifyPath(HPS a, LONG b, LONG c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -7290,7 +7290,7 @@ inline BOOL APIENTRY _GpiModifyPath(HPS a, LONG b, LONG c)
 #undef  GpiModifyPath
 #define GpiModifyPath _GpiModifyPath
 
-inline BOOL APIENTRY _GpiMove(HPS a, PPOINTL b)
+inline BOOL _GpiMove(HPS a, PPOINTL b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -7304,7 +7304,7 @@ inline BOOL APIENTRY _GpiMove(HPS a, PPOINTL b)
 #undef  GpiMove
 #define GpiMove _GpiMove
 
-inline LONG APIENTRY _GpiOffsetClipRegion(HPS a, PPOINTL b)
+inline LONG _GpiOffsetClipRegion(HPS a, PPOINTL b)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -7318,7 +7318,7 @@ inline LONG APIENTRY _GpiOffsetClipRegion(HPS a, PPOINTL b)
 #undef  GpiOffsetClipRegion
 #define GpiOffsetClipRegion _GpiOffsetClipRegion
 
-inline BOOL APIENTRY _GpiOffsetElementPointer(HPS a, LONG b)
+inline BOOL _GpiOffsetElementPointer(HPS a, LONG b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -7332,7 +7332,7 @@ inline BOOL APIENTRY _GpiOffsetElementPointer(HPS a, LONG b)
 #undef  GpiOffsetElementPointer
 #define GpiOffsetElementPointer _GpiOffsetElementPointer
 
-inline BOOL APIENTRY _GpiOffsetRegion(HPS a, HRGN b, PPOINTL c)
+inline BOOL _GpiOffsetRegion(HPS a, HRGN b, PPOINTL c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -7346,7 +7346,7 @@ inline BOOL APIENTRY _GpiOffsetRegion(HPS a, HRGN b, PPOINTL c)
 #undef  GpiOffsetRegion
 #define GpiOffsetRegion _GpiOffsetRegion
 
-inline LONG APIENTRY _GpiOutlinePath(HPS a, LONG b, LONG c)
+inline LONG _GpiOutlinePath(HPS a, LONG b, LONG c)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -7360,7 +7360,7 @@ inline LONG APIENTRY _GpiOutlinePath(HPS a, LONG b, LONG c)
 #undef  GpiOutlinePath
 #define GpiOutlinePath _GpiOutlinePath
 
-inline LONG APIENTRY _GpiPaintRegion(HPS a, HRGN b)
+inline LONG _GpiPaintRegion(HPS a, HRGN b)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -7374,7 +7374,7 @@ inline LONG APIENTRY _GpiPaintRegion(HPS a, HRGN b)
 #undef  GpiPaintRegion
 #define GpiPaintRegion _GpiPaintRegion
 
-inline LONG APIENTRY _GpiPartialArc(HPS a, PPOINTL b, FIXED c, FIXED d, FIXED e)
+inline LONG _GpiPartialArc(HPS a, PPOINTL b, FIXED c, FIXED d, FIXED e)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -7388,7 +7388,7 @@ inline LONG APIENTRY _GpiPartialArc(HPS a, PPOINTL b, FIXED c, FIXED d, FIXED e)
 #undef  GpiPartialArc
 #define GpiPartialArc _GpiPartialArc
 
-inline HRGN APIENTRY _GpiPathToRegion(HPS a, LONG b, LONG c)
+inline HRGN _GpiPathToRegion(HPS a, LONG b, LONG c)
 {
  HRGN yyrc;
  USHORT sel = GetFS();
@@ -7402,7 +7402,7 @@ inline HRGN APIENTRY _GpiPathToRegion(HPS a, LONG b, LONG c)
 #undef  GpiPathToRegion
 #define GpiPathToRegion _GpiPathToRegion
 
-inline LONG APIENTRY _GpiPlayMetaFile(HPS a, HMF b, LONG c, PLONG d, PLONG e, LONG f, PSZ g)
+inline LONG _GpiPlayMetaFile(HPS a, HMF b, LONG c, PLONG d, PLONG e, LONG f, PSZ g)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -7416,7 +7416,7 @@ inline LONG APIENTRY _GpiPlayMetaFile(HPS a, HMF b, LONG c, PLONG d, PLONG e, LO
 #undef  GpiPlayMetaFile
 #define GpiPlayMetaFile _GpiPlayMetaFile
 
-inline LONG APIENTRY _GpiPointArc(HPS a, PPOINTL b)
+inline LONG _GpiPointArc(HPS a, PPOINTL b)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -7430,7 +7430,7 @@ inline LONG APIENTRY _GpiPointArc(HPS a, PPOINTL b)
 #undef  GpiPointArc
 #define GpiPointArc _GpiPointArc
 
-inline LONG APIENTRY _GpiPolyFillet(HPS a, LONG b, PPOINTL c)
+inline LONG _GpiPolyFillet(HPS a, LONG b, PPOINTL c)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -7444,7 +7444,7 @@ inline LONG APIENTRY _GpiPolyFillet(HPS a, LONG b, PPOINTL c)
 #undef  GpiPolyFillet
 #define GpiPolyFillet _GpiPolyFillet
 
-inline LONG APIENTRY _GpiPolyFilletSharp(HPS a, LONG b, PPOINTL c, PFIXED d)
+inline LONG _GpiPolyFilletSharp(HPS a, LONG b, PPOINTL c, PFIXED d)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -7458,7 +7458,7 @@ inline LONG APIENTRY _GpiPolyFilletSharp(HPS a, LONG b, PPOINTL c, PFIXED d)
 #undef  GpiPolyFilletSharp
 #define GpiPolyFilletSharp _GpiPolyFilletSharp
 
-inline LONG APIENTRY _GpiPolygons(HPS a, ULONG b, PPOLYGON c, ULONG d, ULONG e)
+inline LONG _GpiPolygons(HPS a, ULONG b, PPOLYGON c, ULONG d, ULONG e)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -7472,7 +7472,7 @@ inline LONG APIENTRY _GpiPolygons(HPS a, ULONG b, PPOLYGON c, ULONG d, ULONG e)
 #undef  GpiPolygons
 #define GpiPolygons _GpiPolygons
 
-inline LONG APIENTRY _GpiPolyLine(HPS a, LONG b, PPOINTL c)
+inline LONG _GpiPolyLine(HPS a, LONG b, PPOINTL c)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -7486,7 +7486,7 @@ inline LONG APIENTRY _GpiPolyLine(HPS a, LONG b, PPOINTL c)
 #undef  GpiPolyLine
 #define GpiPolyLine _GpiPolyLine
 
-inline LONG APIENTRY _GpiPolyLineDisjoint(HPS a, LONG b, PPOINTL c)
+inline LONG _GpiPolyLineDisjoint(HPS a, LONG b, PPOINTL c)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -7500,7 +7500,7 @@ inline LONG APIENTRY _GpiPolyLineDisjoint(HPS a, LONG b, PPOINTL c)
 #undef  GpiPolyLineDisjoint
 #define GpiPolyLineDisjoint _GpiPolyLineDisjoint
 
-inline LONG APIENTRY _GpiPolyMarker(HPS a, LONG b, PPOINTL c)
+inline LONG _GpiPolyMarker(HPS a, LONG b, PPOINTL c)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -7514,7 +7514,7 @@ inline LONG APIENTRY _GpiPolyMarker(HPS a, LONG b, PPOINTL c)
 #undef  GpiPolyMarker
 #define GpiPolyMarker _GpiPolyMarker
 
-inline LONG APIENTRY _GpiPolySpline(HPS a, LONG b, PPOINTL c)
+inline LONG _GpiPolySpline(HPS a, LONG b, PPOINTL c)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -7528,7 +7528,7 @@ inline LONG APIENTRY _GpiPolySpline(HPS a, LONG b, PPOINTL c)
 #undef  GpiPolySpline
 #define GpiPolySpline _GpiPolySpline
 
-inline BOOL APIENTRY _GpiPop(HPS a, LONG b)
+inline BOOL _GpiPop(HPS a, LONG b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -7542,7 +7542,7 @@ inline BOOL APIENTRY _GpiPop(HPS a, LONG b)
 #undef  GpiPop
 #define GpiPop _GpiPop
 
-inline LONG APIENTRY _GpiPtInRegion(HPS a, HRGN b, PPOINTL c)
+inline LONG _GpiPtInRegion(HPS a, HRGN b, PPOINTL c)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -7556,7 +7556,7 @@ inline LONG APIENTRY _GpiPtInRegion(HPS a, HRGN b, PPOINTL c)
 #undef  GpiPtInRegion
 #define GpiPtInRegion _GpiPtInRegion
 
-inline LONG APIENTRY _GpiPtVisible(HPS a, PPOINTL b)
+inline LONG _GpiPtVisible(HPS a, PPOINTL b)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -7570,7 +7570,7 @@ inline LONG APIENTRY _GpiPtVisible(HPS a, PPOINTL b)
 #undef  GpiPtVisible
 #define GpiPtVisible _GpiPtVisible
 
-inline BOOL APIENTRY _GpiQueryArcParams(HPS a, PARCPARAMS b)
+inline BOOL _GpiQueryArcParams(HPS a, PARCPARAMS b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -7584,7 +7584,7 @@ inline BOOL APIENTRY _GpiQueryArcParams(HPS a, PARCPARAMS b)
 #undef  GpiQueryArcParams
 #define GpiQueryArcParams _GpiQueryArcParams
 
-inline LONG APIENTRY _GpiQueryAttrMode(HPS a)
+inline LONG _GpiQueryAttrMode(HPS a)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -7598,7 +7598,7 @@ inline LONG APIENTRY _GpiQueryAttrMode(HPS a)
 #undef  GpiQueryAttrMode
 #define GpiQueryAttrMode _GpiQueryAttrMode
 
-inline LONG APIENTRY _GpiQueryAttrs(HPS a, LONG b, ULONG c, PBUNDLE d)
+inline LONG _GpiQueryAttrs(HPS a, LONG b, ULONG c, PBUNDLE d)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -7612,7 +7612,7 @@ inline LONG APIENTRY _GpiQueryAttrs(HPS a, LONG b, ULONG c, PBUNDLE d)
 #undef  GpiQueryAttrs
 #define GpiQueryAttrs _GpiQueryAttrs
 
-inline LONG APIENTRY _GpiQueryBackColor(HPS a)
+inline LONG _GpiQueryBackColor(HPS a)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -7626,7 +7626,7 @@ inline LONG APIENTRY _GpiQueryBackColor(HPS a)
 #undef  GpiQueryBackColor
 #define GpiQueryBackColor _GpiQueryBackColor
 
-inline LONG APIENTRY _GpiQueryBackMix(HPS a)
+inline LONG _GpiQueryBackMix(HPS a)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -7640,7 +7640,7 @@ inline LONG APIENTRY _GpiQueryBackMix(HPS a)
 #undef  GpiQueryBackMix
 #define GpiQueryBackMix _GpiQueryBackMix
 
-inline BOOL APIENTRY _GpiQueryCharAngle(HPS a, PGRADIENTL b)
+inline BOOL _GpiQueryCharAngle(HPS a, PGRADIENTL b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -7654,7 +7654,7 @@ inline BOOL APIENTRY _GpiQueryCharAngle(HPS a, PGRADIENTL b)
 #undef  GpiQueryCharAngle
 #define GpiQueryCharAngle _GpiQueryCharAngle
 
-inline BOOL APIENTRY _GpiQueryCharBox(HPS a, PSIZEF b)
+inline BOOL _GpiQueryCharBox(HPS a, PSIZEF b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -7668,7 +7668,7 @@ inline BOOL APIENTRY _GpiQueryCharBox(HPS a, PSIZEF b)
 #undef  GpiQueryCharBox
 #define GpiQueryCharBox _GpiQueryCharBox
 
-inline BOOL APIENTRY _GpiQueryCharBreakExtra(HPS a, PFIXED b)
+inline BOOL _GpiQueryCharBreakExtra(HPS a, PFIXED b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -7682,7 +7682,7 @@ inline BOOL APIENTRY _GpiQueryCharBreakExtra(HPS a, PFIXED b)
 #undef  GpiQueryCharBreakExtra
 #define GpiQueryCharBreakExtra _GpiQueryCharBreakExtra
 
-inline LONG APIENTRY _GpiQueryCharDirection(HPS a)
+inline LONG _GpiQueryCharDirection(HPS a)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -7696,7 +7696,7 @@ inline LONG APIENTRY _GpiQueryCharDirection(HPS a)
 #undef  GpiQueryCharDirection
 #define GpiQueryCharDirection _GpiQueryCharDirection
 
-inline BOOL APIENTRY _GpiQueryCharExtra(HPS a, PFIXED b)
+inline BOOL _GpiQueryCharExtra(HPS a, PFIXED b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -7710,7 +7710,7 @@ inline BOOL APIENTRY _GpiQueryCharExtra(HPS a, PFIXED b)
 #undef  GpiQueryCharExtra
 #define GpiQueryCharExtra _GpiQueryCharExtra
 
-inline LONG APIENTRY _GpiQueryCharMode(HPS a)
+inline LONG _GpiQueryCharMode(HPS a)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -7724,7 +7724,7 @@ inline LONG APIENTRY _GpiQueryCharMode(HPS a)
 #undef  GpiQueryCharMode
 #define GpiQueryCharMode _GpiQueryCharMode
 
-inline LONG APIENTRY _GpiQueryCharSet(HPS a)
+inline LONG _GpiQueryCharSet(HPS a)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -7738,7 +7738,7 @@ inline LONG APIENTRY _GpiQueryCharSet(HPS a)
 #undef  GpiQueryCharSet
 #define GpiQueryCharSet _GpiQueryCharSet
 
-inline BOOL APIENTRY _GpiQueryCharShear(HPS a, PPOINTL b)
+inline BOOL _GpiQueryCharShear(HPS a, PPOINTL b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -7752,7 +7752,7 @@ inline BOOL APIENTRY _GpiQueryCharShear(HPS a, PPOINTL b)
 #undef  GpiQueryCharShear
 #define GpiQueryCharShear _GpiQueryCharShear
 
-inline BOOL APIENTRY _GpiQueryCharStringPos(HPS a, ULONG b, LONG c, PCH d, PLONG e, PPOINTL f)
+inline BOOL _GpiQueryCharStringPos(HPS a, ULONG b, LONG c, PCH d, PLONG e, PPOINTL f)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -7766,7 +7766,7 @@ inline BOOL APIENTRY _GpiQueryCharStringPos(HPS a, ULONG b, LONG c, PCH d, PLONG
 #undef  GpiQueryCharStringPos
 #define GpiQueryCharStringPos _GpiQueryCharStringPos
 
-inline BOOL APIENTRY _GpiQueryCharStringPosAt(HPS a, PPOINTL b, ULONG c, LONG d, PCH e, PLONG f, PPOINTL g)
+inline BOOL _GpiQueryCharStringPosAt(HPS a, PPOINTL b, ULONG c, LONG d, PCH e, PLONG f, PPOINTL g)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -7780,7 +7780,7 @@ inline BOOL APIENTRY _GpiQueryCharStringPosAt(HPS a, PPOINTL b, ULONG c, LONG d,
 #undef  GpiQueryCharStringPosAt
 #define GpiQueryCharStringPosAt _GpiQueryCharStringPosAt
 
-inline LONG APIENTRY _GpiQueryClipBox(HPS a, PRECTL b)
+inline LONG _GpiQueryClipBox(HPS a, PRECTL b)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -7794,7 +7794,7 @@ inline LONG APIENTRY _GpiQueryClipBox(HPS a, PRECTL b)
 #undef  GpiQueryClipBox
 #define GpiQueryClipBox _GpiQueryClipBox
 
-inline HRGN APIENTRY _GpiQueryClipRegion(HPS a)
+inline HRGN _GpiQueryClipRegion(HPS a)
 {
  HRGN yyrc;
  USHORT sel = GetFS();
@@ -7808,7 +7808,7 @@ inline HRGN APIENTRY _GpiQueryClipRegion(HPS a)
 #undef  GpiQueryClipRegion
 #define GpiQueryClipRegion _GpiQueryClipRegion
 
-inline LONG APIENTRY _GpiQueryColor(HPS a)
+inline LONG _GpiQueryColor(HPS a)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -7822,7 +7822,7 @@ inline LONG APIENTRY _GpiQueryColor(HPS a)
 #undef  GpiQueryColor
 #define GpiQueryColor _GpiQueryColor
 
-inline BOOL APIENTRY _GpiQueryColorData(HPS a, LONG b, PLONG c)
+inline BOOL _GpiQueryColorData(HPS a, LONG b, PLONG c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -7836,7 +7836,7 @@ inline BOOL APIENTRY _GpiQueryColorData(HPS a, LONG b, PLONG c)
 #undef  GpiQueryColorData
 #define GpiQueryColorData _GpiQueryColorData
 
-inline LONG APIENTRY _GpiQueryColorIndex(HPS a, ULONG b, LONG c)
+inline LONG _GpiQueryColorIndex(HPS a, ULONG b, LONG c)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -7850,7 +7850,7 @@ inline LONG APIENTRY _GpiQueryColorIndex(HPS a, ULONG b, LONG c)
 #undef  GpiQueryColorIndex
 #define GpiQueryColorIndex _GpiQueryColorIndex
 
-inline ULONG APIENTRY _GpiQueryCp(HPS a)
+inline ULONG _GpiQueryCp(HPS a)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -7864,7 +7864,7 @@ inline ULONG APIENTRY _GpiQueryCp(HPS a)
 #undef  GpiQueryCp
 #define GpiQueryCp _GpiQueryCp
 
-inline BOOL APIENTRY _GpiQueryCurrentPosition(HPS a, PPOINTL b)
+inline BOOL _GpiQueryCurrentPosition(HPS a, PPOINTL b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -7878,7 +7878,7 @@ inline BOOL APIENTRY _GpiQueryCurrentPosition(HPS a, PPOINTL b)
 #undef  GpiQueryCurrentPosition
 #define GpiQueryCurrentPosition _GpiQueryCurrentPosition
 
-inline BOOL APIENTRY _GpiQueryDefArcParams(HPS a, PARCPARAMS b)
+inline BOOL _GpiQueryDefArcParams(HPS a, PARCPARAMS b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -7892,7 +7892,7 @@ inline BOOL APIENTRY _GpiQueryDefArcParams(HPS a, PARCPARAMS b)
 #undef  GpiQueryDefArcParams
 #define GpiQueryDefArcParams _GpiQueryDefArcParams
 
-inline BOOL APIENTRY _GpiQueryDefAttrs(HPS a, LONG b, ULONG c, PBUNDLE d)
+inline BOOL _GpiQueryDefAttrs(HPS a, LONG b, ULONG c, PBUNDLE d)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -7906,7 +7906,7 @@ inline BOOL APIENTRY _GpiQueryDefAttrs(HPS a, LONG b, ULONG c, PBUNDLE d)
 #undef  GpiQueryDefAttrs
 #define GpiQueryDefAttrs _GpiQueryDefAttrs
 
-inline BOOL APIENTRY _GpiQueryDefCharBox(HPS a, PSIZEL b)
+inline BOOL _GpiQueryDefCharBox(HPS a, PSIZEL b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -7920,7 +7920,7 @@ inline BOOL APIENTRY _GpiQueryDefCharBox(HPS a, PSIZEL b)
 #undef  GpiQueryDefCharBox
 #define GpiQueryDefCharBox _GpiQueryDefCharBox
 
-inline BOOL APIENTRY _GpiQueryDefTag(HPS a, PLONG b)
+inline BOOL _GpiQueryDefTag(HPS a, PLONG b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -7934,7 +7934,7 @@ inline BOOL APIENTRY _GpiQueryDefTag(HPS a, PLONG b)
 #undef  GpiQueryDefTag
 #define GpiQueryDefTag _GpiQueryDefTag
 
-inline BOOL APIENTRY _GpiQueryDefViewingLimits(HPS a, PRECTL b)
+inline BOOL _GpiQueryDefViewingLimits(HPS a, PRECTL b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -7948,7 +7948,7 @@ inline BOOL APIENTRY _GpiQueryDefViewingLimits(HPS a, PRECTL b)
 #undef  GpiQueryDefViewingLimits
 #define GpiQueryDefViewingLimits _GpiQueryDefViewingLimits
 
-inline BOOL APIENTRY _GpiQueryDefaultViewMatrix(HPS a, LONG b, PMATRIXLF c)
+inline BOOL _GpiQueryDefaultViewMatrix(HPS a, LONG b, PMATRIXLF c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -7962,7 +7962,7 @@ inline BOOL APIENTRY _GpiQueryDefaultViewMatrix(HPS a, LONG b, PMATRIXLF c)
 #undef  GpiQueryDefaultViewMatrix
 #define GpiQueryDefaultViewMatrix _GpiQueryDefaultViewMatrix
 
-inline LONG APIENTRY _GpiQueryEditMode(HPS a)
+inline LONG _GpiQueryEditMode(HPS a)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -7976,7 +7976,7 @@ inline LONG APIENTRY _GpiQueryEditMode(HPS a)
 #undef  GpiQueryEditMode
 #define GpiQueryEditMode _GpiQueryEditMode
 
-inline LONG APIENTRY _GpiQueryElement(HPS a, LONG b, LONG c, PBYTE d)
+inline LONG _GpiQueryElement(HPS a, LONG b, LONG c, PBYTE d)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -7990,7 +7990,7 @@ inline LONG APIENTRY _GpiQueryElement(HPS a, LONG b, LONG c, PBYTE d)
 #undef  GpiQueryElement
 #define GpiQueryElement _GpiQueryElement
 
-inline LONG APIENTRY _GpiQueryElementPointer(HPS a)
+inline LONG _GpiQueryElementPointer(HPS a)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -8004,7 +8004,7 @@ inline LONG APIENTRY _GpiQueryElementPointer(HPS a)
 #undef  GpiQueryElementPointer
 #define GpiQueryElementPointer _GpiQueryElementPointer
 
-inline LONG APIENTRY _GpiQueryElementType(HPS a, PLONG b, LONG c, PSZ d)
+inline LONG _GpiQueryElementType(HPS a, PLONG b, LONG c, PSZ d)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -8018,7 +8018,7 @@ inline LONG APIENTRY _GpiQueryElementType(HPS a, PLONG b, LONG c, PSZ d)
 #undef  GpiQueryElementType
 #define GpiQueryElementType _GpiQueryElementType
 
-inline ULONG APIENTRY _GpiQueryFaceString(HPS a, PCSZ b, PFACENAMEDESC c, LONG d, PSZ e)
+inline ULONG _GpiQueryFaceString(HPS a, PCSZ b, PFACENAMEDESC c, LONG d, PSZ e)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -8032,7 +8032,7 @@ inline ULONG APIENTRY _GpiQueryFaceString(HPS a, PCSZ b, PFACENAMEDESC c, LONG d
 #undef  GpiQueryFaceString
 #define GpiQueryFaceString _GpiQueryFaceString
 
-inline ULONG APIENTRY _GpiQueryFontAction(HAB a, ULONG b)
+inline ULONG _GpiQueryFontAction(HAB a, ULONG b)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -8046,7 +8046,7 @@ inline ULONG APIENTRY _GpiQueryFontAction(HAB a, ULONG b)
 #undef  GpiQueryFontAction
 #define GpiQueryFontAction _GpiQueryFontAction
 
-inline LONG APIENTRY _GpiQueryFontFileDescriptions(HAB a, PCSZ b, PLONG c, PFFDESCS d)
+inline LONG _GpiQueryFontFileDescriptions(HAB a, PCSZ b, PLONG c, PFFDESCS d)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -8060,7 +8060,7 @@ inline LONG APIENTRY _GpiQueryFontFileDescriptions(HAB a, PCSZ b, PLONG c, PFFDE
 #undef  GpiQueryFontFileDescriptions
 #define GpiQueryFontFileDescriptions _GpiQueryFontFileDescriptions
 
-inline BOOL APIENTRY _GpiQueryFontMetrics(HPS a, LONG b, PFONTMETRICS c)
+inline BOOL _GpiQueryFontMetrics(HPS a, LONG b, PFONTMETRICS c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -8074,7 +8074,7 @@ inline BOOL APIENTRY _GpiQueryFontMetrics(HPS a, LONG b, PFONTMETRICS c)
 #undef  GpiQueryFontMetrics
 #define GpiQueryFontMetrics _GpiQueryFontMetrics
 
-inline LONG APIENTRY _GpiQueryFonts(HPS a, ULONG b, PCSZ c, PLONG d, LONG e, PFONTMETRICS f)
+inline LONG _GpiQueryFonts(HPS a, ULONG b, PCSZ c, PLONG d, LONG e, PFONTMETRICS f)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -8088,7 +8088,7 @@ inline LONG APIENTRY _GpiQueryFonts(HPS a, ULONG b, PCSZ c, PLONG d, LONG e, PFO
 #undef  GpiQueryFonts
 #define GpiQueryFonts _GpiQueryFonts
 
-inline LONG APIENTRY _GpiQueryFullFontFileDescs(HAB a, PCSZ b, PLONG c, PVOID d, PLONG e)
+inline LONG _GpiQueryFullFontFileDescs(HAB a, PCSZ b, PLONG c, PVOID d, PLONG e)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -8102,7 +8102,7 @@ inline LONG APIENTRY _GpiQueryFullFontFileDescs(HAB a, PCSZ b, PLONG c, PVOID d,
 #undef  GpiQueryFullFontFileDescs
 #define GpiQueryFullFontFileDescs _GpiQueryFullFontFileDescs
 
-inline BOOL APIENTRY _GpiQueryGraphicsField(HPS a, PRECTL b)
+inline BOOL _GpiQueryGraphicsField(HPS a, PRECTL b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -8116,7 +8116,7 @@ inline BOOL APIENTRY _GpiQueryGraphicsField(HPS a, PRECTL b)
 #undef  GpiQueryGraphicsField
 #define GpiQueryGraphicsField _GpiQueryGraphicsField
 
-inline LONG APIENTRY _GpiQueryKerningPairs(HPS a, LONG b, PKERNINGPAIRS c)
+inline LONG _GpiQueryKerningPairs(HPS a, LONG b, PKERNINGPAIRS c)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -8130,7 +8130,7 @@ inline LONG APIENTRY _GpiQueryKerningPairs(HPS a, LONG b, PKERNINGPAIRS c)
 #undef  GpiQueryKerningPairs
 #define GpiQueryKerningPairs _GpiQueryKerningPairs
 
-inline LONG APIENTRY _GpiQueryLineEnd(HPS a)
+inline LONG _GpiQueryLineEnd(HPS a)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -8144,7 +8144,7 @@ inline LONG APIENTRY _GpiQueryLineEnd(HPS a)
 #undef  GpiQueryLineEnd
 #define GpiQueryLineEnd _GpiQueryLineEnd
 
-inline LONG APIENTRY _GpiQueryLineJoin(HPS a)
+inline LONG _GpiQueryLineJoin(HPS a)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -8158,7 +8158,7 @@ inline LONG APIENTRY _GpiQueryLineJoin(HPS a)
 #undef  GpiQueryLineJoin
 #define GpiQueryLineJoin _GpiQueryLineJoin
 
-inline LONG APIENTRY _GpiQueryLineType(HPS a)
+inline LONG _GpiQueryLineType(HPS a)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -8172,7 +8172,7 @@ inline LONG APIENTRY _GpiQueryLineType(HPS a)
 #undef  GpiQueryLineType
 #define GpiQueryLineType _GpiQueryLineType
 
-inline FIXED APIENTRY _GpiQueryLineWidth(HPS a)
+inline FIXED _GpiQueryLineWidth(HPS a)
 {
  FIXED yyrc;
  USHORT sel = GetFS();
@@ -8186,7 +8186,7 @@ inline FIXED APIENTRY _GpiQueryLineWidth(HPS a)
 #undef  GpiQueryLineWidth
 #define GpiQueryLineWidth _GpiQueryLineWidth
 
-inline LONG APIENTRY _GpiQueryLineWidthGeom(HPS a)
+inline LONG _GpiQueryLineWidthGeom(HPS a)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -8200,7 +8200,7 @@ inline LONG APIENTRY _GpiQueryLineWidthGeom(HPS a)
 #undef  GpiQueryLineWidthGeom
 #define GpiQueryLineWidthGeom _GpiQueryLineWidthGeom
 
-inline LONG APIENTRY _GpiQueryLogColorTable(HPS a, ULONG b, LONG c, LONG d, PLONG e)
+inline LONG _GpiQueryLogColorTable(HPS a, ULONG b, LONG c, LONG d, PLONG e)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -8214,7 +8214,7 @@ inline LONG APIENTRY _GpiQueryLogColorTable(HPS a, ULONG b, LONG c, LONG d, PLON
 #undef  GpiQueryLogColorTable
 #define GpiQueryLogColorTable _GpiQueryLogColorTable
 
-inline BOOL APIENTRY _GpiQueryLogicalFont(HPS a, LONG b, PSTR8 c, PFATTRS d, LONG e)
+inline BOOL _GpiQueryLogicalFont(HPS a, LONG b, PSTR8 c, PFATTRS d, LONG e)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -8228,7 +8228,7 @@ inline BOOL APIENTRY _GpiQueryLogicalFont(HPS a, LONG b, PSTR8 c, PFATTRS d, LON
 #undef  GpiQueryLogicalFont
 #define GpiQueryLogicalFont _GpiQueryLogicalFont
 
-inline LONG APIENTRY _GpiQueryMarker(HPS a)
+inline LONG _GpiQueryMarker(HPS a)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -8242,7 +8242,7 @@ inline LONG APIENTRY _GpiQueryMarker(HPS a)
 #undef  GpiQueryMarker
 #define GpiQueryMarker _GpiQueryMarker
 
-inline BOOL APIENTRY _GpiQueryMarkerBox(HPS a, PSIZEF b)
+inline BOOL _GpiQueryMarkerBox(HPS a, PSIZEF b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -8256,7 +8256,7 @@ inline BOOL APIENTRY _GpiQueryMarkerBox(HPS a, PSIZEF b)
 #undef  GpiQueryMarkerBox
 #define GpiQueryMarkerBox _GpiQueryMarkerBox
 
-inline LONG APIENTRY _GpiQueryMarkerSet(HPS a)
+inline LONG _GpiQueryMarkerSet(HPS a)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -8270,7 +8270,7 @@ inline LONG APIENTRY _GpiQueryMarkerSet(HPS a)
 #undef  GpiQueryMarkerSet
 #define GpiQueryMarkerSet _GpiQueryMarkerSet
 
-inline BOOL APIENTRY _GpiQueryMetaFileBits(HMF a, LONG b, LONG c, PBYTE d)
+inline BOOL _GpiQueryMetaFileBits(HMF a, LONG b, LONG c, PBYTE d)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -8284,7 +8284,7 @@ inline BOOL APIENTRY _GpiQueryMetaFileBits(HMF a, LONG b, LONG c, PBYTE d)
 #undef  GpiQueryMetaFileBits
 #define GpiQueryMetaFileBits _GpiQueryMetaFileBits
 
-inline LONG APIENTRY _GpiQueryMetaFileLength(HMF a)
+inline LONG _GpiQueryMetaFileLength(HMF a)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -8298,7 +8298,7 @@ inline LONG APIENTRY _GpiQueryMetaFileLength(HMF a)
 #undef  GpiQueryMetaFileLength
 #define GpiQueryMetaFileLength _GpiQueryMetaFileLength
 
-inline LONG APIENTRY _GpiQueryMix(HPS a)
+inline LONG _GpiQueryMix(HPS a)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -8312,7 +8312,7 @@ inline LONG APIENTRY _GpiQueryMix(HPS a)
 #undef  GpiQueryMix
 #define GpiQueryMix _GpiQueryMix
 
-inline BOOL APIENTRY _GpiQueryModelTransformMatrix(HPS a, LONG b, PMATRIXLF c)
+inline BOOL _GpiQueryModelTransformMatrix(HPS a, LONG b, PMATRIXLF c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -8326,7 +8326,7 @@ inline BOOL APIENTRY _GpiQueryModelTransformMatrix(HPS a, LONG b, PMATRIXLF c)
 #undef  GpiQueryModelTransformMatrix
 #define GpiQueryModelTransformMatrix _GpiQueryModelTransformMatrix
 
-inline LONG APIENTRY _GpiQueryNearestColor(HPS a, ULONG b, LONG c)
+inline LONG _GpiQueryNearestColor(HPS a, ULONG b, LONG c)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -8340,7 +8340,7 @@ inline LONG APIENTRY _GpiQueryNearestColor(HPS a, ULONG b, LONG c)
 #undef  GpiQueryNearestColor
 #define GpiQueryNearestColor _GpiQueryNearestColor
 
-inline LONG APIENTRY _GpiQueryNumberSetIds(HPS a)
+inline LONG _GpiQueryNumberSetIds(HPS a)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -8354,7 +8354,7 @@ inline LONG APIENTRY _GpiQueryNumberSetIds(HPS a)
 #undef  GpiQueryNumberSetIds
 #define GpiQueryNumberSetIds _GpiQueryNumberSetIds
 
-inline BOOL APIENTRY _GpiQueryPageViewport(HPS a, PRECTL b)
+inline BOOL _GpiQueryPageViewport(HPS a, PRECTL b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -8368,7 +8368,7 @@ inline BOOL APIENTRY _GpiQueryPageViewport(HPS a, PRECTL b)
 #undef  GpiQueryPageViewport
 #define GpiQueryPageViewport _GpiQueryPageViewport
 
-inline HPAL APIENTRY _GpiQueryPalette(HPS a)
+inline HPAL _GpiQueryPalette(HPS a)
 {
  HPAL yyrc;
  USHORT sel = GetFS();
@@ -8382,7 +8382,7 @@ inline HPAL APIENTRY _GpiQueryPalette(HPS a)
 #undef  GpiQueryPalette
 #define GpiQueryPalette _GpiQueryPalette
 
-inline LONG APIENTRY _GpiQueryPaletteInfo(HPAL a, HPS b, ULONG c, ULONG d, ULONG e, PULONG f)
+inline LONG _GpiQueryPaletteInfo(HPAL a, HPS b, ULONG c, ULONG d, ULONG e, PULONG f)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -8396,7 +8396,7 @@ inline LONG APIENTRY _GpiQueryPaletteInfo(HPAL a, HPS b, ULONG c, ULONG d, ULONG
 #undef  GpiQueryPaletteInfo
 #define GpiQueryPaletteInfo _GpiQueryPaletteInfo
 
-inline LONG APIENTRY _GpiQueryPattern(HPS a)
+inline LONG _GpiQueryPattern(HPS a)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -8410,7 +8410,7 @@ inline LONG APIENTRY _GpiQueryPattern(HPS a)
 #undef  GpiQueryPattern
 #define GpiQueryPattern _GpiQueryPattern
 
-inline BOOL APIENTRY _GpiQueryPatternRefPoint(HPS a, PPOINTL b)
+inline BOOL _GpiQueryPatternRefPoint(HPS a, PPOINTL b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -8424,7 +8424,7 @@ inline BOOL APIENTRY _GpiQueryPatternRefPoint(HPS a, PPOINTL b)
 #undef  GpiQueryPatternRefPoint
 #define GpiQueryPatternRefPoint _GpiQueryPatternRefPoint
 
-inline LONG APIENTRY _GpiQueryPatternSet(HPS a)
+inline LONG _GpiQueryPatternSet(HPS a)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -8438,7 +8438,7 @@ inline LONG APIENTRY _GpiQueryPatternSet(HPS a)
 #undef  GpiQueryPatternSet
 #define GpiQueryPatternSet _GpiQueryPatternSet
 
-inline LONG APIENTRY _GpiQueryRealColors(HPS a, ULONG b, LONG c, LONG d, PLONG e)
+inline LONG _GpiQueryRealColors(HPS a, ULONG b, LONG c, LONG d, PLONG e)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -8452,7 +8452,7 @@ inline LONG APIENTRY _GpiQueryRealColors(HPS a, ULONG b, LONG c, LONG d, PLONG e
 #undef  GpiQueryRealColors
 #define GpiQueryRealColors _GpiQueryRealColors
 
-inline LONG APIENTRY _GpiQueryRegionBox(HPS a, HRGN b, PRECTL c)
+inline LONG _GpiQueryRegionBox(HPS a, HRGN b, PRECTL c)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -8466,7 +8466,7 @@ inline LONG APIENTRY _GpiQueryRegionBox(HPS a, HRGN b, PRECTL c)
 #undef  GpiQueryRegionBox
 #define GpiQueryRegionBox _GpiQueryRegionBox
 
-inline BOOL APIENTRY _GpiQueryRegionRects(HPS a, HRGN b, PRECTL c, PRGNRECT d, PRECTL e)
+inline BOOL _GpiQueryRegionRects(HPS a, HRGN b, PRECTL c, PRGNRECT d, PRECTL e)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -8480,7 +8480,7 @@ inline BOOL APIENTRY _GpiQueryRegionRects(HPS a, HRGN b, PRECTL c, PRGNRECT d, P
 #undef  GpiQueryRegionRects
 #define GpiQueryRegionRects _GpiQueryRegionRects
 
-inline LONG APIENTRY _GpiQueryRGBColor(HPS a, ULONG b, LONG c)
+inline LONG _GpiQueryRGBColor(HPS a, ULONG b, LONG c)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -8494,7 +8494,7 @@ inline LONG APIENTRY _GpiQueryRGBColor(HPS a, ULONG b, LONG c)
 #undef  GpiQueryRGBColor
 #define GpiQueryRGBColor _GpiQueryRGBColor
 
-inline BOOL APIENTRY _GpiQuerySegmentTransformMatrix(HPS a, LONG b, LONG c, PMATRIXLF d)
+inline BOOL _GpiQuerySegmentTransformMatrix(HPS a, LONG b, LONG c, PMATRIXLF d)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -8508,7 +8508,7 @@ inline BOOL APIENTRY _GpiQuerySegmentTransformMatrix(HPS a, LONG b, LONG c, PMAT
 #undef  GpiQuerySegmentTransformMatrix
 #define GpiQuerySegmentTransformMatrix _GpiQuerySegmentTransformMatrix
 
-inline BOOL APIENTRY _GpiQuerySetIds(HPS a, LONG b, PLONG c, PSTR8 d, PLONG e)
+inline BOOL _GpiQuerySetIds(HPS a, LONG b, PLONG c, PSTR8 d, PLONG e)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -8522,7 +8522,7 @@ inline BOOL APIENTRY _GpiQuerySetIds(HPS a, LONG b, PLONG c, PSTR8 d, PLONG e)
 #undef  GpiQuerySetIds
 #define GpiQuerySetIds _GpiQuerySetIds
 
-inline BOOL APIENTRY _GpiQueryTextAlignment(HPS a, PLONG b, PLONG c)
+inline BOOL _GpiQueryTextAlignment(HPS a, PLONG b, PLONG c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -8536,7 +8536,7 @@ inline BOOL APIENTRY _GpiQueryTextAlignment(HPS a, PLONG b, PLONG c)
 #undef  GpiQueryTextAlignment
 #define GpiQueryTextAlignment _GpiQueryTextAlignment
 
-inline BOOL APIENTRY _GpiQueryTextBox(HPS a, LONG b, PCH c, LONG d, PPOINTL e)
+inline BOOL _GpiQueryTextBox(HPS a, LONG b, PCH c, LONG d, PPOINTL e)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -8550,7 +8550,7 @@ inline BOOL APIENTRY _GpiQueryTextBox(HPS a, LONG b, PCH c, LONG d, PPOINTL e)
 #undef  GpiQueryTextBox
 #define GpiQueryTextBox _GpiQueryTextBox
 
-inline BOOL APIENTRY _GpiQueryViewingLimits(HPS a, PRECTL b)
+inline BOOL _GpiQueryViewingLimits(HPS a, PRECTL b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -8564,7 +8564,7 @@ inline BOOL APIENTRY _GpiQueryViewingLimits(HPS a, PRECTL b)
 #undef  GpiQueryViewingLimits
 #define GpiQueryViewingLimits _GpiQueryViewingLimits
 
-inline BOOL APIENTRY _GpiQueryViewingTransformMatrix(HPS a, LONG b, PMATRIXLF c)
+inline BOOL _GpiQueryViewingTransformMatrix(HPS a, LONG b, PMATRIXLF c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -8578,7 +8578,7 @@ inline BOOL APIENTRY _GpiQueryViewingTransformMatrix(HPS a, LONG b, PMATRIXLF c)
 #undef  GpiQueryViewingTransformMatrix
 #define GpiQueryViewingTransformMatrix _GpiQueryViewingTransformMatrix
 
-inline BOOL APIENTRY _GpiQueryWidthTable(HPS a, LONG b, LONG c, PLONG d)
+inline BOOL _GpiQueryWidthTable(HPS a, LONG b, LONG c, PLONG d)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -8592,7 +8592,7 @@ inline BOOL APIENTRY _GpiQueryWidthTable(HPS a, LONG b, LONG c, PLONG d)
 #undef  GpiQueryWidthTable
 #define GpiQueryWidthTable _GpiQueryWidthTable
 
-inline LONG APIENTRY _GpiRectInRegion(HPS a, HRGN b, PRECTL c)
+inline LONG _GpiRectInRegion(HPS a, HRGN b, PRECTL c)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -8606,7 +8606,7 @@ inline LONG APIENTRY _GpiRectInRegion(HPS a, HRGN b, PRECTL c)
 #undef  GpiRectInRegion
 #define GpiRectInRegion _GpiRectInRegion
 
-inline LONG APIENTRY _GpiRectVisible(HPS a, PRECTL b)
+inline LONG _GpiRectVisible(HPS a, PRECTL b)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -8620,7 +8620,7 @@ inline LONG APIENTRY _GpiRectVisible(HPS a, PRECTL b)
 #undef  GpiRectVisible
 #define GpiRectVisible _GpiRectVisible
 
-inline BOOL APIENTRY _GpiRotate(HPS a, PMATRIXLF b, LONG c, FIXED d, PPOINTL e)
+inline BOOL _GpiRotate(HPS a, PMATRIXLF b, LONG c, FIXED d, PPOINTL e)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -8634,7 +8634,7 @@ inline BOOL APIENTRY _GpiRotate(HPS a, PMATRIXLF b, LONG c, FIXED d, PPOINTL e)
 #undef  GpiRotate
 #define GpiRotate _GpiRotate
 
-inline BOOL APIENTRY _GpiSaveMetaFile(HMF a, PCSZ b)
+inline BOOL _GpiSaveMetaFile(HMF a, PCSZ b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -8648,7 +8648,7 @@ inline BOOL APIENTRY _GpiSaveMetaFile(HMF a, PCSZ b)
 #undef  GpiSaveMetaFile
 #define GpiSaveMetaFile _GpiSaveMetaFile
 
-inline BOOL APIENTRY _GpiScale(HPS a, PMATRIXLF b, LONG c, PFIXED d, PPOINTL e)
+inline BOOL _GpiScale(HPS a, PMATRIXLF b, LONG c, PFIXED d, PPOINTL e)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -8662,7 +8662,7 @@ inline BOOL APIENTRY _GpiScale(HPS a, PMATRIXLF b, LONG c, PFIXED d, PPOINTL e)
 #undef  GpiScale
 #define GpiScale _GpiScale
 
-inline HPAL APIENTRY _GpiSelectPalette(HPS a, HPAL b)
+inline HPAL _GpiSelectPalette(HPS a, HPAL b)
 {
  HPAL yyrc;
  USHORT sel = GetFS();
@@ -8676,7 +8676,7 @@ inline HPAL APIENTRY _GpiSelectPalette(HPS a, HPAL b)
 #undef  GpiSelectPalette
 #define GpiSelectPalette _GpiSelectPalette
 
-inline BOOL APIENTRY _GpiSetArcParams(HPS a, PARCPARAMS b)
+inline BOOL _GpiSetArcParams(HPS a, PARCPARAMS b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -8690,7 +8690,7 @@ inline BOOL APIENTRY _GpiSetArcParams(HPS a, PARCPARAMS b)
 #undef  GpiSetArcParams
 #define GpiSetArcParams _GpiSetArcParams
 
-inline BOOL APIENTRY _GpiSetAttrMode(HPS a, LONG b)
+inline BOOL _GpiSetAttrMode(HPS a, LONG b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -8704,7 +8704,7 @@ inline BOOL APIENTRY _GpiSetAttrMode(HPS a, LONG b)
 #undef  GpiSetAttrMode
 #define GpiSetAttrMode _GpiSetAttrMode
 
-inline BOOL APIENTRY _GpiSetAttrs(HPS a, LONG b, ULONG c, ULONG d, PVOID e)
+inline BOOL _GpiSetAttrs(HPS a, LONG b, ULONG c, ULONG d, PVOID e)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -8718,7 +8718,7 @@ inline BOOL APIENTRY _GpiSetAttrs(HPS a, LONG b, ULONG c, ULONG d, PVOID e)
 #undef  GpiSetAttrs
 #define GpiSetAttrs _GpiSetAttrs
 
-inline BOOL APIENTRY _GpiSetBackColor(HPS a, LONG b)
+inline BOOL _GpiSetBackColor(HPS a, LONG b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -8732,7 +8732,7 @@ inline BOOL APIENTRY _GpiSetBackColor(HPS a, LONG b)
 #undef  GpiSetBackColor
 #define GpiSetBackColor _GpiSetBackColor
 
-inline BOOL APIENTRY _GpiSetBackMix(HPS a, LONG b)
+inline BOOL _GpiSetBackMix(HPS a, LONG b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -8746,7 +8746,7 @@ inline BOOL APIENTRY _GpiSetBackMix(HPS a, LONG b)
 #undef  GpiSetBackMix
 #define GpiSetBackMix _GpiSetBackMix
 
-inline BOOL APIENTRY _GpiSetCharAngle(HPS a, PGRADIENTL b)
+inline BOOL _GpiSetCharAngle(HPS a, PGRADIENTL b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -8760,7 +8760,7 @@ inline BOOL APIENTRY _GpiSetCharAngle(HPS a, PGRADIENTL b)
 #undef  GpiSetCharAngle
 #define GpiSetCharAngle _GpiSetCharAngle
 
-inline BOOL APIENTRY _GpiSetCharBox(HPS a, PSIZEF b)
+inline BOOL _GpiSetCharBox(HPS a, PSIZEF b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -8774,7 +8774,7 @@ inline BOOL APIENTRY _GpiSetCharBox(HPS a, PSIZEF b)
 #undef  GpiSetCharBox
 #define GpiSetCharBox _GpiSetCharBox
 
-inline BOOL APIENTRY _GpiSetCharBreakExtra(HPS a, FIXED b)
+inline BOOL _GpiSetCharBreakExtra(HPS a, FIXED b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -8788,7 +8788,7 @@ inline BOOL APIENTRY _GpiSetCharBreakExtra(HPS a, FIXED b)
 #undef  GpiSetCharBreakExtra
 #define GpiSetCharBreakExtra _GpiSetCharBreakExtra
 
-inline BOOL APIENTRY _GpiSetCharDirection(HPS a, LONG b)
+inline BOOL _GpiSetCharDirection(HPS a, LONG b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -8802,7 +8802,7 @@ inline BOOL APIENTRY _GpiSetCharDirection(HPS a, LONG b)
 #undef  GpiSetCharDirection
 #define GpiSetCharDirection _GpiSetCharDirection
 
-inline BOOL APIENTRY _GpiSetCharExtra(HPS a, FIXED b)
+inline BOOL _GpiSetCharExtra(HPS a, FIXED b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -8816,7 +8816,7 @@ inline BOOL APIENTRY _GpiSetCharExtra(HPS a, FIXED b)
 #undef  GpiSetCharExtra
 #define GpiSetCharExtra _GpiSetCharExtra
 
-inline BOOL APIENTRY _GpiSetCharMode(HPS a, LONG b)
+inline BOOL _GpiSetCharMode(HPS a, LONG b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -8830,7 +8830,7 @@ inline BOOL APIENTRY _GpiSetCharMode(HPS a, LONG b)
 #undef  GpiSetCharMode
 #define GpiSetCharMode _GpiSetCharMode
 
-inline BOOL APIENTRY _GpiSetCharSet(HPS a, LONG b)
+inline BOOL _GpiSetCharSet(HPS a, LONG b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -8844,7 +8844,7 @@ inline BOOL APIENTRY _GpiSetCharSet(HPS a, LONG b)
 #undef  GpiSetCharSet
 #define GpiSetCharSet _GpiSetCharSet
 
-inline BOOL APIENTRY _GpiSetCharShear(HPS a, PPOINTL b)
+inline BOOL _GpiSetCharShear(HPS a, PPOINTL b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -8858,7 +8858,7 @@ inline BOOL APIENTRY _GpiSetCharShear(HPS a, PPOINTL b)
 #undef  GpiSetCharShear
 #define GpiSetCharShear _GpiSetCharShear
 
-inline BOOL APIENTRY _GpiSetClipPath(HPS a, LONG b, LONG c)
+inline BOOL _GpiSetClipPath(HPS a, LONG b, LONG c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -8872,7 +8872,7 @@ inline BOOL APIENTRY _GpiSetClipPath(HPS a, LONG b, LONG c)
 #undef  GpiSetClipPath
 #define GpiSetClipPath _GpiSetClipPath
 
-inline LONG APIENTRY _GpiSetClipRegion(HPS a, HRGN b, PHRGN c)
+inline LONG _GpiSetClipRegion(HPS a, HRGN b, PHRGN c)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -8886,7 +8886,7 @@ inline LONG APIENTRY _GpiSetClipRegion(HPS a, HRGN b, PHRGN c)
 #undef  GpiSetClipRegion
 #define GpiSetClipRegion _GpiSetClipRegion
 
-inline BOOL APIENTRY _GpiSetColor(HPS a, LONG b)
+inline BOOL _GpiSetColor(HPS a, LONG b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -8900,7 +8900,7 @@ inline BOOL APIENTRY _GpiSetColor(HPS a, LONG b)
 #undef  GpiSetColor
 #define GpiSetColor _GpiSetColor
 
-inline BOOL APIENTRY _GpiSetCp(HPS a, ULONG b)
+inline BOOL _GpiSetCp(HPS a, ULONG b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -8914,7 +8914,7 @@ inline BOOL APIENTRY _GpiSetCp(HPS a, ULONG b)
 #undef  GpiSetCp
 #define GpiSetCp _GpiSetCp
 
-inline BOOL APIENTRY _GpiSetCurrentPosition(HPS a, PPOINTL b)
+inline BOOL _GpiSetCurrentPosition(HPS a, PPOINTL b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -8928,7 +8928,7 @@ inline BOOL APIENTRY _GpiSetCurrentPosition(HPS a, PPOINTL b)
 #undef  GpiSetCurrentPosition
 #define GpiSetCurrentPosition _GpiSetCurrentPosition
 
-inline BOOL APIENTRY _GpiSetDefArcParams(HPS a, PARCPARAMS b)
+inline BOOL _GpiSetDefArcParams(HPS a, PARCPARAMS b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -8942,7 +8942,7 @@ inline BOOL APIENTRY _GpiSetDefArcParams(HPS a, PARCPARAMS b)
 #undef  GpiSetDefArcParams
 #define GpiSetDefArcParams _GpiSetDefArcParams
 
-inline BOOL APIENTRY _GpiSetDefAttrs(HPS a, LONG b, ULONG c, PVOID d)
+inline BOOL _GpiSetDefAttrs(HPS a, LONG b, ULONG c, PVOID d)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -8956,7 +8956,7 @@ inline BOOL APIENTRY _GpiSetDefAttrs(HPS a, LONG b, ULONG c, PVOID d)
 #undef  GpiSetDefAttrs
 #define GpiSetDefAttrs _GpiSetDefAttrs
 
-inline BOOL APIENTRY _GpiSetDefaultViewMatrix(HPS a, LONG b, PMATRIXLF c, LONG d)
+inline BOOL _GpiSetDefaultViewMatrix(HPS a, LONG b, PMATRIXLF c, LONG d)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -8970,7 +8970,7 @@ inline BOOL APIENTRY _GpiSetDefaultViewMatrix(HPS a, LONG b, PMATRIXLF c, LONG d
 #undef  GpiSetDefaultViewMatrix
 #define GpiSetDefaultViewMatrix _GpiSetDefaultViewMatrix
 
-inline BOOL APIENTRY _GpiSetDefTag(HPS a, LONG b)
+inline BOOL _GpiSetDefTag(HPS a, LONG b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -8984,7 +8984,7 @@ inline BOOL APIENTRY _GpiSetDefTag(HPS a, LONG b)
 #undef  GpiSetDefTag
 #define GpiSetDefTag _GpiSetDefTag
 
-inline BOOL APIENTRY _GpiSetDefViewingLimits(HPS a, PRECTL b)
+inline BOOL _GpiSetDefViewingLimits(HPS a, PRECTL b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -8998,7 +8998,7 @@ inline BOOL APIENTRY _GpiSetDefViewingLimits(HPS a, PRECTL b)
 #undef  GpiSetDefViewingLimits
 #define GpiSetDefViewingLimits _GpiSetDefViewingLimits
 
-inline BOOL APIENTRY _GpiSetEditMode(HPS a, LONG b)
+inline BOOL _GpiSetEditMode(HPS a, LONG b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -9012,7 +9012,7 @@ inline BOOL APIENTRY _GpiSetEditMode(HPS a, LONG b)
 #undef  GpiSetEditMode
 #define GpiSetEditMode _GpiSetEditMode
 
-inline BOOL APIENTRY _GpiSetElementPointer(HPS a, LONG b)
+inline BOOL _GpiSetElementPointer(HPS a, LONG b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -9026,7 +9026,7 @@ inline BOOL APIENTRY _GpiSetElementPointer(HPS a, LONG b)
 #undef  GpiSetElementPointer
 #define GpiSetElementPointer _GpiSetElementPointer
 
-inline BOOL APIENTRY _GpiSetElementPointerAtLabel(HPS a, LONG b)
+inline BOOL _GpiSetElementPointerAtLabel(HPS a, LONG b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -9040,7 +9040,7 @@ inline BOOL APIENTRY _GpiSetElementPointerAtLabel(HPS a, LONG b)
 #undef  GpiSetElementPointerAtLabel
 #define GpiSetElementPointerAtLabel _GpiSetElementPointerAtLabel
 
-inline BOOL APIENTRY _GpiSetGraphicsField(HPS a, PRECTL b)
+inline BOOL _GpiSetGraphicsField(HPS a, PRECTL b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -9054,7 +9054,7 @@ inline BOOL APIENTRY _GpiSetGraphicsField(HPS a, PRECTL b)
 #undef  GpiSetGraphicsField
 #define GpiSetGraphicsField _GpiSetGraphicsField
 
-inline BOOL APIENTRY _GpiSetLineEnd(HPS a, LONG b)
+inline BOOL _GpiSetLineEnd(HPS a, LONG b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -9068,7 +9068,7 @@ inline BOOL APIENTRY _GpiSetLineEnd(HPS a, LONG b)
 #undef  GpiSetLineEnd
 #define GpiSetLineEnd _GpiSetLineEnd
 
-inline BOOL APIENTRY _GpiSetLineJoin(HPS a, LONG b)
+inline BOOL _GpiSetLineJoin(HPS a, LONG b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -9082,7 +9082,7 @@ inline BOOL APIENTRY _GpiSetLineJoin(HPS a, LONG b)
 #undef  GpiSetLineJoin
 #define GpiSetLineJoin _GpiSetLineJoin
 
-inline BOOL APIENTRY _GpiSetLineType(HPS a, LONG b)
+inline BOOL _GpiSetLineType(HPS a, LONG b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -9096,7 +9096,7 @@ inline BOOL APIENTRY _GpiSetLineType(HPS a, LONG b)
 #undef  GpiSetLineType
 #define GpiSetLineType _GpiSetLineType
 
-inline BOOL APIENTRY _GpiSetLineWidth(HPS a, FIXED b)
+inline BOOL _GpiSetLineWidth(HPS a, FIXED b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -9110,7 +9110,7 @@ inline BOOL APIENTRY _GpiSetLineWidth(HPS a, FIXED b)
 #undef  GpiSetLineWidth
 #define GpiSetLineWidth _GpiSetLineWidth
 
-inline BOOL APIENTRY _GpiSetLineWidthGeom(HPS a, LONG b)
+inline BOOL _GpiSetLineWidthGeom(HPS a, LONG b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -9124,7 +9124,7 @@ inline BOOL APIENTRY _GpiSetLineWidthGeom(HPS a, LONG b)
 #undef  GpiSetLineWidthGeom
 #define GpiSetLineWidthGeom _GpiSetLineWidthGeom
 
-inline BOOL APIENTRY _GpiSetMarker(HPS a, LONG b)
+inline BOOL _GpiSetMarker(HPS a, LONG b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -9138,7 +9138,7 @@ inline BOOL APIENTRY _GpiSetMarker(HPS a, LONG b)
 #undef  GpiSetMarker
 #define GpiSetMarker _GpiSetMarker
 
-inline BOOL APIENTRY _GpiSetMarkerBox(HPS a, PSIZEF b)
+inline BOOL _GpiSetMarkerBox(HPS a, PSIZEF b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -9152,7 +9152,7 @@ inline BOOL APIENTRY _GpiSetMarkerBox(HPS a, PSIZEF b)
 #undef  GpiSetMarkerBox
 #define GpiSetMarkerBox _GpiSetMarkerBox
 
-inline BOOL APIENTRY _GpiSetMarkerSet(HPS a, LONG b)
+inline BOOL _GpiSetMarkerSet(HPS a, LONG b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -9166,7 +9166,7 @@ inline BOOL APIENTRY _GpiSetMarkerSet(HPS a, LONG b)
 #undef  GpiSetMarkerSet
 #define GpiSetMarkerSet _GpiSetMarkerSet
 
-inline BOOL APIENTRY _GpiSetMetaFileBits(HMF a, LONG b, LONG c, PBYTE d)
+inline BOOL _GpiSetMetaFileBits(HMF a, LONG b, LONG c, PBYTE d)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -9180,7 +9180,7 @@ inline BOOL APIENTRY _GpiSetMetaFileBits(HMF a, LONG b, LONG c, PBYTE d)
 #undef  GpiSetMetaFileBits
 #define GpiSetMetaFileBits _GpiSetMetaFileBits
 
-inline BOOL APIENTRY _GpiSetMix(HPS a, LONG b)
+inline BOOL _GpiSetMix(HPS a, LONG b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -9194,7 +9194,7 @@ inline BOOL APIENTRY _GpiSetMix(HPS a, LONG b)
 #undef  GpiSetMix
 #define GpiSetMix _GpiSetMix
 
-inline BOOL APIENTRY _GpiSetModelTransformMatrix(HPS a, LONG b, PMATRIXLF c, LONG d)
+inline BOOL _GpiSetModelTransformMatrix(HPS a, LONG b, PMATRIXLF c, LONG d)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -9208,7 +9208,7 @@ inline BOOL APIENTRY _GpiSetModelTransformMatrix(HPS a, LONG b, PMATRIXLF c, LON
 #undef  GpiSetModelTransformMatrix
 #define GpiSetModelTransformMatrix _GpiSetModelTransformMatrix
 
-inline BOOL APIENTRY _GpiSetPageViewport(HPS a, PRECTL b)
+inline BOOL _GpiSetPageViewport(HPS a, PRECTL b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -9222,7 +9222,7 @@ inline BOOL APIENTRY _GpiSetPageViewport(HPS a, PRECTL b)
 #undef  GpiSetPageViewport
 #define GpiSetPageViewport _GpiSetPageViewport
 
-inline BOOL APIENTRY _GpiSetPaletteEntries(HPAL a, ULONG b, ULONG c, ULONG d, ULONG *e)
+inline BOOL _GpiSetPaletteEntries(HPAL a, ULONG b, ULONG c, ULONG d, ULONG *e)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -9236,7 +9236,7 @@ inline BOOL APIENTRY _GpiSetPaletteEntries(HPAL a, ULONG b, ULONG c, ULONG d, UL
 #undef  GpiSetPaletteEntries
 #define GpiSetPaletteEntries _GpiSetPaletteEntries
 
-inline BOOL APIENTRY _GpiSetPattern(HPS a, LONG b)
+inline BOOL _GpiSetPattern(HPS a, LONG b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -9250,7 +9250,7 @@ inline BOOL APIENTRY _GpiSetPattern(HPS a, LONG b)
 #undef  GpiSetPattern
 #define GpiSetPattern _GpiSetPattern
 
-inline BOOL APIENTRY _GpiSetPatternRefPoint(HPS a, PPOINTL b)
+inline BOOL _GpiSetPatternRefPoint(HPS a, PPOINTL b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -9264,7 +9264,7 @@ inline BOOL APIENTRY _GpiSetPatternRefPoint(HPS a, PPOINTL b)
 #undef  GpiSetPatternRefPoint
 #define GpiSetPatternRefPoint _GpiSetPatternRefPoint
 
-inline BOOL APIENTRY _GpiSetPatternSet(HPS a, LONG b)
+inline BOOL _GpiSetPatternSet(HPS a, LONG b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -9278,7 +9278,7 @@ inline BOOL APIENTRY _GpiSetPatternSet(HPS a, LONG b)
 #undef  GpiSetPatternSet
 #define GpiSetPatternSet _GpiSetPatternSet
 
-inline BOOL APIENTRY _GpiSetRegion(HPS a, HRGN b, LONG c, PRECTL d)
+inline BOOL _GpiSetRegion(HPS a, HRGN b, LONG c, PRECTL d)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -9292,7 +9292,7 @@ inline BOOL APIENTRY _GpiSetRegion(HPS a, HRGN b, LONG c, PRECTL d)
 #undef  GpiSetRegion
 #define GpiSetRegion _GpiSetRegion
 
-inline BOOL APIENTRY _GpiSetSegmentTransformMatrix(HPS a, LONG b, LONG c, MATRIXLF *d, LONG e)
+inline BOOL _GpiSetSegmentTransformMatrix(HPS a, LONG b, LONG c, MATRIXLF *d, LONG e)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -9306,7 +9306,7 @@ inline BOOL APIENTRY _GpiSetSegmentTransformMatrix(HPS a, LONG b, LONG c, MATRIX
 #undef  GpiSetSegmentTransformMatrix
 #define GpiSetSegmentTransformMatrix _GpiSetSegmentTransformMatrix
 
-inline BOOL APIENTRY _GpiSetTextAlignment(HPS a, LONG b, LONG c)
+inline BOOL _GpiSetTextAlignment(HPS a, LONG b, LONG c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -9320,7 +9320,7 @@ inline BOOL APIENTRY _GpiSetTextAlignment(HPS a, LONG b, LONG c)
 #undef  GpiSetTextAlignment
 #define GpiSetTextAlignment _GpiSetTextAlignment
 
-inline BOOL APIENTRY _GpiSetViewingLimits(HPS a, PRECTL b)
+inline BOOL _GpiSetViewingLimits(HPS a, PRECTL b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -9334,7 +9334,7 @@ inline BOOL APIENTRY _GpiSetViewingLimits(HPS a, PRECTL b)
 #undef  GpiSetViewingLimits
 #define GpiSetViewingLimits _GpiSetViewingLimits
 
-inline BOOL APIENTRY _GpiSetViewingTransformMatrix(HPS a, LONG b, MATRIXLF *c, LONG d)
+inline BOOL _GpiSetViewingTransformMatrix(HPS a, LONG b, MATRIXLF *c, LONG d)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -9348,7 +9348,7 @@ inline BOOL APIENTRY _GpiSetViewingTransformMatrix(HPS a, LONG b, MATRIXLF *c, L
 #undef  GpiSetViewingTransformMatrix
 #define GpiSetViewingTransformMatrix _GpiSetViewingTransformMatrix
 
-inline LONG APIENTRY _GpiStrokePath(HPS a, LONG b, ULONG c)
+inline LONG _GpiStrokePath(HPS a, LONG b, ULONG c)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -9362,7 +9362,7 @@ inline LONG APIENTRY _GpiStrokePath(HPS a, LONG b, ULONG c)
 #undef  GpiStrokePath
 #define GpiStrokePath _GpiStrokePath
 
-inline BOOL APIENTRY _GpiTranslate(HPS a, PMATRIXLF b, LONG c, PPOINTL d)
+inline BOOL _GpiTranslate(HPS a, PMATRIXLF b, LONG c, PPOINTL d)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -9376,7 +9376,7 @@ inline BOOL APIENTRY _GpiTranslate(HPS a, PMATRIXLF b, LONG c, PPOINTL d)
 #undef  GpiTranslate
 #define GpiTranslate _GpiTranslate
 
-inline BOOL APIENTRY _GpiUnloadFonts(HAB a, PCSZ b)
+inline BOOL _GpiUnloadFonts(HAB a, PCSZ b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -9390,7 +9390,7 @@ inline BOOL APIENTRY _GpiUnloadFonts(HAB a, PCSZ b)
 #undef  GpiUnloadFonts
 #define GpiUnloadFonts _GpiUnloadFonts
 
-inline BOOL APIENTRY _GpiUnloadPublicFonts(HAB a, PCSZ b)
+inline BOOL _GpiUnloadPublicFonts(HAB a, PCSZ b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -9405,7 +9405,7 @@ inline BOOL APIENTRY _GpiUnloadPublicFonts(HAB a, PCSZ b)
 #define GpiUnloadPublicFonts _GpiUnloadPublicFonts
 
 #ifdef INCL_GPIBITMAPS
-inline LONG APIENTRY _GpiBitBlt(HPS a, HPS b, LONG c, PPOINTL d, LONG e, ULONG f)
+inline LONG _GpiBitBlt(HPS a, HPS b, LONG c, PPOINTL d, LONG e, ULONG f)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -9419,7 +9419,7 @@ inline LONG APIENTRY _GpiBitBlt(HPS a, HPS b, LONG c, PPOINTL d, LONG e, ULONG f
 #undef  GpiBitBlt
 #define GpiBitBlt _GpiBitBlt
 
-inline BOOL APIENTRY _GpiDeleteBitmap(HBITMAP a)
+inline BOOL _GpiDeleteBitmap(HBITMAP a)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -9433,7 +9433,7 @@ inline BOOL APIENTRY _GpiDeleteBitmap(HBITMAP a)
 #undef  GpiDeleteBitmap
 #define GpiDeleteBitmap _GpiDeleteBitmap
 
-inline HBITMAP APIENTRY _GpiLoadBitmap(HPS a, HMODULE b, ULONG c, LONG d, LONG e)
+inline HBITMAP _GpiLoadBitmap(HPS a, HMODULE b, ULONG c, LONG d, LONG e)
 {
  HBITMAP yyrc;
  USHORT sel = GetFS();
@@ -9447,7 +9447,7 @@ inline HBITMAP APIENTRY _GpiLoadBitmap(HPS a, HMODULE b, ULONG c, LONG d, LONG e
 #undef  GpiLoadBitmap
 #define GpiLoadBitmap _GpiLoadBitmap
 
-inline HBITMAP APIENTRY _GpiSetBitmap(HPS a, HBITMAP b)
+inline HBITMAP _GpiSetBitmap(HPS a, HBITMAP b)
 {
  HBITMAP yyrc;
  USHORT sel = GetFS();
@@ -9461,7 +9461,7 @@ inline HBITMAP APIENTRY _GpiSetBitmap(HPS a, HBITMAP b)
 #undef  GpiSetBitmap
 #define GpiSetBitmap _GpiSetBitmap
 
-inline LONG APIENTRY _GpiWCBitBlt(HPS a, HBITMAP b, LONG c, PPOINTL d, LONG e, ULONG f)
+inline LONG _GpiWCBitBlt(HPS a, HBITMAP b, LONG c, PPOINTL d, LONG e, ULONG f)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -9475,7 +9475,7 @@ inline LONG APIENTRY _GpiWCBitBlt(HPS a, HBITMAP b, LONG c, PPOINTL d, LONG e, U
 #undef  GpiWCBitBlt
 #define GpiWCBitBlt _GpiWCBitBlt
 
-inline HBITMAP APIENTRY _GpiCreateBitmap(HPS a, BITMAPINFOHEADER2 *b, ULONG c, PBYTE d, BITMAPINFO2 *e)
+inline HBITMAP _GpiCreateBitmap(HPS a, BITMAPINFOHEADER2 *b, ULONG c, PBYTE d, BITMAPINFO2 *e)
 {
  HBITMAP yyrc;
  USHORT sel = GetFS();
@@ -9489,7 +9489,7 @@ inline HBITMAP APIENTRY _GpiCreateBitmap(HPS a, BITMAPINFOHEADER2 *b, ULONG c, P
 #undef  GpiCreateBitmap
 #define GpiCreateBitmap _GpiCreateBitmap
 
-inline LONG APIENTRY _GpiDrawBits(HPS a, PVOID b, BITMAPINFO2 *c, LONG d, PPOINTL e, LONG f, ULONG g)
+inline LONG _GpiDrawBits(HPS a, PVOID b, BITMAPINFO2 *c, LONG d, PPOINTL e, LONG f, ULONG g)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -9503,7 +9503,7 @@ inline LONG APIENTRY _GpiDrawBits(HPS a, PVOID b, BITMAPINFO2 *c, LONG d, PPOINT
 #undef  GpiDrawBits
 #define GpiDrawBits _GpiDrawBits
 
-inline LONG APIENTRY _GpiFloodFill(HPS a, LONG b, LONG c)
+inline LONG _GpiFloodFill(HPS a, LONG b, LONG c)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -9517,7 +9517,7 @@ inline LONG APIENTRY _GpiFloodFill(HPS a, LONG b, LONG c)
 #undef  GpiFloodFill
 #define GpiFloodFill _GpiFloodFill
 
-inline LONG APIENTRY _GpiQueryBitmapBits(HPS a, LONG b, LONG c, PBYTE d, PBITMAPINFO2 e)
+inline LONG _GpiQueryBitmapBits(HPS a, LONG b, LONG c, PBYTE d, PBITMAPINFO2 e)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -9531,7 +9531,7 @@ inline LONG APIENTRY _GpiQueryBitmapBits(HPS a, LONG b, LONG c, PBYTE d, PBITMAP
 #undef  GpiQueryBitmapBits
 #define GpiQueryBitmapBits _GpiQueryBitmapBits
 
-inline BOOL APIENTRY _GpiQueryBitmapDimension(HBITMAP a, PSIZEL b)
+inline BOOL _GpiQueryBitmapDimension(HBITMAP a, PSIZEL b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -9545,7 +9545,7 @@ inline BOOL APIENTRY _GpiQueryBitmapDimension(HBITMAP a, PSIZEL b)
 #undef  GpiQueryBitmapDimension
 #define GpiQueryBitmapDimension _GpiQueryBitmapDimension
 
-inline HBITMAP APIENTRY _GpiQueryBitmapHandle(HPS a, LONG b)
+inline HBITMAP _GpiQueryBitmapHandle(HPS a, LONG b)
 {
  HBITMAP yyrc;
  USHORT sel = GetFS();
@@ -9559,7 +9559,7 @@ inline HBITMAP APIENTRY _GpiQueryBitmapHandle(HPS a, LONG b)
 #undef  GpiQueryBitmapHandle
 #define GpiQueryBitmapHandle _GpiQueryBitmapHandle
 
-inline BOOL APIENTRY _GpiQueryBitmapInfoHeader(HBITMAP a, PBITMAPINFOHEADER2 b)
+inline BOOL _GpiQueryBitmapInfoHeader(HBITMAP a, PBITMAPINFOHEADER2 b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -9573,7 +9573,7 @@ inline BOOL APIENTRY _GpiQueryBitmapInfoHeader(HBITMAP a, PBITMAPINFOHEADER2 b)
 #undef  GpiQueryBitmapInfoHeader
 #define GpiQueryBitmapInfoHeader _GpiQueryBitmapInfoHeader
 
-inline BOOL APIENTRY _GpiQueryBitmapParameters(HBITMAP a, PBITMAPINFOHEADER b)
+inline BOOL _GpiQueryBitmapParameters(HBITMAP a, PBITMAPINFOHEADER b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -9587,7 +9587,7 @@ inline BOOL APIENTRY _GpiQueryBitmapParameters(HBITMAP a, PBITMAPINFOHEADER b)
 #undef  GpiQueryBitmapParameters
 #define GpiQueryBitmapParameters _GpiQueryBitmapParameters
 
-inline BOOL APIENTRY _GpiQueryDeviceBitmapFormats(HPS a, LONG b, PLONG c)
+inline BOOL _GpiQueryDeviceBitmapFormats(HPS a, LONG b, PLONG c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -9601,7 +9601,7 @@ inline BOOL APIENTRY _GpiQueryDeviceBitmapFormats(HPS a, LONG b, PLONG c)
 #undef  GpiQueryDeviceBitmapFormats
 #define GpiQueryDeviceBitmapFormats _GpiQueryDeviceBitmapFormats
 
-inline LONG APIENTRY _GpiSetBitmapBits(HPS a, LONG b, LONG c, PBYTE d, BITMAPINFO2 *e)
+inline LONG _GpiSetBitmapBits(HPS a, LONG b, LONG c, PBYTE d, BITMAPINFO2 *e)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -9615,7 +9615,7 @@ inline LONG APIENTRY _GpiSetBitmapBits(HPS a, LONG b, LONG c, PBYTE d, BITMAPINF
 #undef  GpiSetBitmapBits
 #define GpiSetBitmapBits _GpiSetBitmapBits
 
-inline LONG APIENTRY _GpiQueryPel(HPS a, PPOINTL b)
+inline LONG _GpiQueryPel(HPS a, PPOINTL b)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -9629,7 +9629,7 @@ inline LONG APIENTRY _GpiQueryPel(HPS a, PPOINTL b)
 #undef  GpiQueryPel
 #define GpiQueryPel _GpiQueryPel
 
-inline BOOL APIENTRY _GpiSetBitmapDimension(HBITMAP a, SIZEL *b)
+inline BOOL _GpiSetBitmapDimension(HBITMAP a, SIZEL *b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -9643,7 +9643,7 @@ inline BOOL APIENTRY _GpiSetBitmapDimension(HBITMAP a, SIZEL *b)
 #undef  GpiSetBitmapDimension
 #define GpiSetBitmapDimension _GpiSetBitmapDimension
 
-inline BOOL APIENTRY _GpiSetBitmapId(HPS a, HBITMAP b, LONG c)
+inline BOOL _GpiSetBitmapId(HPS a, HBITMAP b, LONG c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -9657,7 +9657,7 @@ inline BOOL APIENTRY _GpiSetBitmapId(HPS a, HBITMAP b, LONG c)
 #undef  GpiSetBitmapId
 #define GpiSetBitmapId _GpiSetBitmapId
 
-inline LONG APIENTRY _GpiSetPel(HPS a, PPOINTL b)
+inline LONG _GpiSetPel(HPS a, PPOINTL b)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -9673,7 +9673,7 @@ inline LONG APIENTRY _GpiSetPel(HPS a, PPOINTL b)
 
 #endif
 #ifdef INCL_GPICONTROL
-inline BOOL APIENTRY _GpiAssociate(HPS a, HDC b)
+inline BOOL _GpiAssociate(HPS a, HDC b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -9687,7 +9687,7 @@ inline BOOL APIENTRY _GpiAssociate(HPS a, HDC b)
 #undef  GpiAssociate
 #define GpiAssociate _GpiAssociate
 
-inline HPS APIENTRY _GpiCreatePS(HAB a, HDC b, PSIZEL c, ULONG d)
+inline HPS _GpiCreatePS(HAB a, HDC b, PSIZEL c, ULONG d)
 {
  HPS yyrc;
  USHORT sel = GetFS();
@@ -9701,7 +9701,7 @@ inline HPS APIENTRY _GpiCreatePS(HAB a, HDC b, PSIZEL c, ULONG d)
 #undef  GpiCreatePS
 #define GpiCreatePS _GpiCreatePS
 
-inline BOOL APIENTRY _GpiDestroyPS(HPS a)
+inline BOOL _GpiDestroyPS(HPS a)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -9715,7 +9715,7 @@ inline BOOL APIENTRY _GpiDestroyPS(HPS a)
 #undef  GpiDestroyPS
 #define GpiDestroyPS _GpiDestroyPS
 
-inline BOOL APIENTRY _GpiErase(HPS a)
+inline BOOL _GpiErase(HPS a)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -9729,7 +9729,7 @@ inline BOOL APIENTRY _GpiErase(HPS a)
 #undef  GpiErase
 #define GpiErase _GpiErase
 
-inline HDC APIENTRY _GpiQueryDevice(HPS a)
+inline HDC _GpiQueryDevice(HPS a)
 {
  HDC yyrc;
  USHORT sel = GetFS();
@@ -9743,7 +9743,7 @@ inline HDC APIENTRY _GpiQueryDevice(HPS a)
 #undef  GpiQueryDevice
 #define GpiQueryDevice _GpiQueryDevice
 
-inline BOOL APIENTRY _GpiRestorePS(HPS a, LONG b)
+inline BOOL _GpiRestorePS(HPS a, LONG b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -9757,7 +9757,7 @@ inline BOOL APIENTRY _GpiRestorePS(HPS a, LONG b)
 #undef  GpiRestorePS
 #define GpiRestorePS _GpiRestorePS
 
-inline LONG APIENTRY _GpiSavePS(HPS a)
+inline LONG _GpiSavePS(HPS a)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -9771,7 +9771,7 @@ inline LONG APIENTRY _GpiSavePS(HPS a)
 #undef  GpiSavePS
 #define GpiSavePS _GpiSavePS
 
-inline LONG APIENTRY _GpiErrorSegmentData(HPS a, PLONG b, PLONG c)
+inline LONG _GpiErrorSegmentData(HPS a, PLONG b, PLONG c)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -9785,7 +9785,7 @@ inline LONG APIENTRY _GpiErrorSegmentData(HPS a, PLONG b, PLONG c)
 #undef  GpiErrorSegmentData
 #define GpiErrorSegmentData _GpiErrorSegmentData
 
-inline LONG APIENTRY _GpiQueryDrawControl(HPS a, LONG b)
+inline LONG _GpiQueryDrawControl(HPS a, LONG b)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -9799,7 +9799,7 @@ inline LONG APIENTRY _GpiQueryDrawControl(HPS a, LONG b)
 #undef  GpiQueryDrawControl
 #define GpiQueryDrawControl _GpiQueryDrawControl
 
-inline LONG APIENTRY _GpiQueryDrawingMode(HPS a)
+inline LONG _GpiQueryDrawingMode(HPS a)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -9813,7 +9813,7 @@ inline LONG APIENTRY _GpiQueryDrawingMode(HPS a)
 #undef  GpiQueryDrawingMode
 #define GpiQueryDrawingMode _GpiQueryDrawingMode
 
-inline ULONG APIENTRY _GpiQueryPS(HPS a, PSIZEL b)
+inline ULONG _GpiQueryPS(HPS a, PSIZEL b)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -9827,7 +9827,7 @@ inline ULONG APIENTRY _GpiQueryPS(HPS a, PSIZEL b)
 #undef  GpiQueryPS
 #define GpiQueryPS _GpiQueryPS
 
-inline BOOL APIENTRY _GpiResetPS(HPS a, ULONG b)
+inline BOOL _GpiResetPS(HPS a, ULONG b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -9841,7 +9841,7 @@ inline BOOL APIENTRY _GpiResetPS(HPS a, ULONG b)
 #undef  GpiResetPS
 #define GpiResetPS _GpiResetPS
 
-inline LONG APIENTRY _GpiQueryStopDraw(HPS a)
+inline LONG _GpiQueryStopDraw(HPS a)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -9855,7 +9855,7 @@ inline LONG APIENTRY _GpiQueryStopDraw(HPS a)
 #undef  GpiQueryStopDraw
 #define GpiQueryStopDraw _GpiQueryStopDraw
 
-inline BOOL APIENTRY _GpiSetDrawControl(HPS a, LONG b, LONG c)
+inline BOOL _GpiSetDrawControl(HPS a, LONG b, LONG c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -9869,7 +9869,7 @@ inline BOOL APIENTRY _GpiSetDrawControl(HPS a, LONG b, LONG c)
 #undef  GpiSetDrawControl
 #define GpiSetDrawControl _GpiSetDrawControl
 
-inline BOOL APIENTRY _GpiSetDrawingMode(HPS a, LONG b)
+inline BOOL _GpiSetDrawingMode(HPS a, LONG b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -9883,7 +9883,7 @@ inline BOOL APIENTRY _GpiSetDrawingMode(HPS a, LONG b)
 #undef  GpiSetDrawingMode
 #define GpiSetDrawingMode _GpiSetDrawingMode
 
-inline BOOL APIENTRY _GpiSetPS(HPS a, SIZEL *b, ULONG c)
+inline BOOL _GpiSetPS(HPS a, SIZEL *b, ULONG c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -9897,7 +9897,7 @@ inline BOOL APIENTRY _GpiSetPS(HPS a, SIZEL *b, ULONG c)
 #undef  GpiSetPS
 #define GpiSetPS _GpiSetPS
 
-inline BOOL APIENTRY _GpiSetStopDraw(HPS a, LONG b)
+inline BOOL _GpiSetStopDraw(HPS a, LONG b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -9913,7 +9913,7 @@ inline BOOL APIENTRY _GpiSetStopDraw(HPS a, LONG b)
 
 #endif
 #ifdef INCL_GPICORRELATION
-inline LONG APIENTRY _GpiCorrelateChain(HPS a, LONG b, PPOINTL c, LONG d, LONG e, PLONG f)
+inline LONG _GpiCorrelateChain(HPS a, LONG b, PPOINTL c, LONG d, LONG e, PLONG f)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -9927,7 +9927,7 @@ inline LONG APIENTRY _GpiCorrelateChain(HPS a, LONG b, PPOINTL c, LONG d, LONG e
 #undef  GpiCorrelateChain
 #define GpiCorrelateChain _GpiCorrelateChain
 
-inline LONG APIENTRY _GpiCorrelateFrom(HPS a, LONG b, LONG c, LONG d, PPOINTL e, LONG f, LONG g, PLONG h)
+inline LONG _GpiCorrelateFrom(HPS a, LONG b, LONG c, LONG d, PPOINTL e, LONG f, LONG g, PLONG h)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -9941,7 +9941,7 @@ inline LONG APIENTRY _GpiCorrelateFrom(HPS a, LONG b, LONG c, LONG d, PPOINTL e,
 #undef  GpiCorrelateFrom
 #define GpiCorrelateFrom _GpiCorrelateFrom
 
-inline LONG APIENTRY _GpiCorrelateSegment(HPS a, LONG b, LONG c, PPOINTL d, LONG e, LONG f, PLONG g)
+inline LONG _GpiCorrelateSegment(HPS a, LONG b, LONG c, PPOINTL d, LONG e, LONG f, PLONG g)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -9955,7 +9955,7 @@ inline LONG APIENTRY _GpiCorrelateSegment(HPS a, LONG b, LONG c, PPOINTL d, LONG
 #undef  GpiCorrelateSegment
 #define GpiCorrelateSegment _GpiCorrelateSegment
 
-inline BOOL APIENTRY _GpiQueryBoundaryData(HPS a, PRECTL b)
+inline BOOL _GpiQueryBoundaryData(HPS a, PRECTL b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -9969,7 +9969,7 @@ inline BOOL APIENTRY _GpiQueryBoundaryData(HPS a, PRECTL b)
 #undef  GpiQueryBoundaryData
 #define GpiQueryBoundaryData _GpiQueryBoundaryData
 
-inline BOOL APIENTRY _GpiQueryPickAperturePosition(HPS a, PPOINTL b)
+inline BOOL _GpiQueryPickAperturePosition(HPS a, PPOINTL b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -9983,7 +9983,7 @@ inline BOOL APIENTRY _GpiQueryPickAperturePosition(HPS a, PPOINTL b)
 #undef  GpiQueryPickAperturePosition
 #define GpiQueryPickAperturePosition _GpiQueryPickAperturePosition
 
-inline BOOL APIENTRY _GpiQueryPickApertureSize(HPS a, PSIZEL b)
+inline BOOL _GpiQueryPickApertureSize(HPS a, PSIZEL b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -9997,7 +9997,7 @@ inline BOOL APIENTRY _GpiQueryPickApertureSize(HPS a, PSIZEL b)
 #undef  GpiQueryPickApertureSize
 #define GpiQueryPickApertureSize _GpiQueryPickApertureSize
 
-inline BOOL APIENTRY _GpiQueryTag(HPS a, PLONG b)
+inline BOOL _GpiQueryTag(HPS a, PLONG b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -10011,7 +10011,7 @@ inline BOOL APIENTRY _GpiQueryTag(HPS a, PLONG b)
 #undef  GpiQueryTag
 #define GpiQueryTag _GpiQueryTag
 
-inline BOOL APIENTRY _GpiResetBoundaryData(HPS a)
+inline BOOL _GpiResetBoundaryData(HPS a)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -10025,7 +10025,7 @@ inline BOOL APIENTRY _GpiResetBoundaryData(HPS a)
 #undef  GpiResetBoundaryData
 #define GpiResetBoundaryData _GpiResetBoundaryData
 
-inline BOOL APIENTRY _GpiSetPickAperturePosition(HPS a, PPOINTL b)
+inline BOOL _GpiSetPickAperturePosition(HPS a, PPOINTL b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -10039,7 +10039,7 @@ inline BOOL APIENTRY _GpiSetPickAperturePosition(HPS a, PPOINTL b)
 #undef  GpiSetPickAperturePosition
 #define GpiSetPickAperturePosition _GpiSetPickAperturePosition
 
-inline BOOL APIENTRY _GpiSetPickApertureSize(HPS a, LONG b, SIZEL *c)
+inline BOOL _GpiSetPickApertureSize(HPS a, LONG b, SIZEL *c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -10053,7 +10053,7 @@ inline BOOL APIENTRY _GpiSetPickApertureSize(HPS a, LONG b, SIZEL *c)
 #undef  GpiSetPickApertureSize
 #define GpiSetPickApertureSize _GpiSetPickApertureSize
 
-inline BOOL APIENTRY _GpiSetTag(HPS a, LONG b)
+inline BOOL _GpiSetTag(HPS a, LONG b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -10069,7 +10069,7 @@ inline BOOL APIENTRY _GpiSetTag(HPS a, LONG b)
 
 #endif
 #ifdef INCL_GPIINK
-inline BOOL APIENTRY _GpiBeginInkPath(HPS a, LONG b, ULONG c)
+inline BOOL _GpiBeginInkPath(HPS a, LONG b, ULONG c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -10083,7 +10083,7 @@ inline BOOL APIENTRY _GpiBeginInkPath(HPS a, LONG b, ULONG c)
 #undef  GpiBeginInkPath
 #define GpiBeginInkPath _GpiBeginInkPath
 
-inline BOOL APIENTRY _GpiEndInkPath(HPS a, ULONG b)
+inline BOOL _GpiEndInkPath(HPS a, ULONG b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -10097,7 +10097,7 @@ inline BOOL APIENTRY _GpiEndInkPath(HPS a, ULONG b)
 #undef  GpiEndInkPath
 #define GpiEndInkPath _GpiEndInkPath
 
-inline LONG APIENTRY _GpiStrokeInkPath(HPS a, LONG b, LONG c, PPOINTL d, ULONG e)
+inline LONG _GpiStrokeInkPath(HPS a, LONG b, LONG c, PPOINTL d, ULONG e)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -10113,7 +10113,7 @@ inline LONG APIENTRY _GpiStrokeInkPath(HPS a, LONG b, LONG c, PPOINTL d, ULONG e
 
 #endif
 #ifdef INCL_GPISEGMENTS
-inline BOOL APIENTRY _GpiCloseSegment(HPS a)
+inline BOOL _GpiCloseSegment(HPS a)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -10127,7 +10127,7 @@ inline BOOL APIENTRY _GpiCloseSegment(HPS a)
 #undef  GpiCloseSegment
 #define GpiCloseSegment _GpiCloseSegment
 
-inline BOOL APIENTRY _GpiDeleteSegment(HPS a, LONG b)
+inline BOOL _GpiDeleteSegment(HPS a, LONG b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -10141,7 +10141,7 @@ inline BOOL APIENTRY _GpiDeleteSegment(HPS a, LONG b)
 #undef  GpiDeleteSegment
 #define GpiDeleteSegment _GpiDeleteSegment
 
-inline BOOL APIENTRY _GpiDeleteSegments(HPS a, LONG b, LONG c)
+inline BOOL _GpiDeleteSegments(HPS a, LONG b, LONG c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -10155,7 +10155,7 @@ inline BOOL APIENTRY _GpiDeleteSegments(HPS a, LONG b, LONG c)
 #undef  GpiDeleteSegments
 #define GpiDeleteSegments _GpiDeleteSegments
 
-inline BOOL APIENTRY _GpiDrawChain(HPS a)
+inline BOOL _GpiDrawChain(HPS a)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -10169,7 +10169,7 @@ inline BOOL APIENTRY _GpiDrawChain(HPS a)
 #undef  GpiDrawChain
 #define GpiDrawChain _GpiDrawChain
 
-inline BOOL APIENTRY _GpiDrawDynamics(HPS a)
+inline BOOL _GpiDrawDynamics(HPS a)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -10183,7 +10183,7 @@ inline BOOL APIENTRY _GpiDrawDynamics(HPS a)
 #undef  GpiDrawDynamics
 #define GpiDrawDynamics _GpiDrawDynamics
 
-inline BOOL APIENTRY _GpiDrawFrom(HPS a, LONG b, LONG c)
+inline BOOL _GpiDrawFrom(HPS a, LONG b, LONG c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -10197,7 +10197,7 @@ inline BOOL APIENTRY _GpiDrawFrom(HPS a, LONG b, LONG c)
 #undef  GpiDrawFrom
 #define GpiDrawFrom _GpiDrawFrom
 
-inline BOOL APIENTRY _GpiDrawSegment(HPS a, LONG b)
+inline BOOL _GpiDrawSegment(HPS a, LONG b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -10211,7 +10211,7 @@ inline BOOL APIENTRY _GpiDrawSegment(HPS a, LONG b)
 #undef  GpiDrawSegment
 #define GpiDrawSegment _GpiDrawSegment
 
-inline LONG APIENTRY _GpiGetData(HPS a, LONG b, PLONG c, LONG d, LONG e, PBYTE f)
+inline LONG _GpiGetData(HPS a, LONG b, PLONG c, LONG d, LONG e, PBYTE f)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -10225,7 +10225,7 @@ inline LONG APIENTRY _GpiGetData(HPS a, LONG b, PLONG c, LONG d, LONG e, PBYTE f
 #undef  GpiGetData
 #define GpiGetData _GpiGetData
 
-inline BOOL APIENTRY _GpiOpenSegment(HPS a, LONG b)
+inline BOOL _GpiOpenSegment(HPS a, LONG b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -10239,7 +10239,7 @@ inline BOOL APIENTRY _GpiOpenSegment(HPS a, LONG b)
 #undef  GpiOpenSegment
 #define GpiOpenSegment _GpiOpenSegment
 
-inline LONG APIENTRY _GpiPutData(HPS a, LONG b, PLONG c, PBYTE d)
+inline LONG _GpiPutData(HPS a, LONG b, PLONG c, PBYTE d)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -10253,7 +10253,7 @@ inline LONG APIENTRY _GpiPutData(HPS a, LONG b, PLONG c, PBYTE d)
 #undef  GpiPutData
 #define GpiPutData _GpiPutData
 
-inline LONG APIENTRY _GpiQueryInitialSegmentAttrs(HPS a, LONG b)
+inline LONG _GpiQueryInitialSegmentAttrs(HPS a, LONG b)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -10267,7 +10267,7 @@ inline LONG APIENTRY _GpiQueryInitialSegmentAttrs(HPS a, LONG b)
 #undef  GpiQueryInitialSegmentAttrs
 #define GpiQueryInitialSegmentAttrs _GpiQueryInitialSegmentAttrs
 
-inline LONG APIENTRY _GpiQuerySegmentAttrs(HPS a, LONG b, LONG c)
+inline LONG _GpiQuerySegmentAttrs(HPS a, LONG b, LONG c)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -10281,7 +10281,7 @@ inline LONG APIENTRY _GpiQuerySegmentAttrs(HPS a, LONG b, LONG c)
 #undef  GpiQuerySegmentAttrs
 #define GpiQuerySegmentAttrs _GpiQuerySegmentAttrs
 
-inline LONG APIENTRY _GpiQuerySegmentNames(HPS a, LONG b, LONG c, LONG d, PLONG e)
+inline LONG _GpiQuerySegmentNames(HPS a, LONG b, LONG c, LONG d, PLONG e)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -10295,7 +10295,7 @@ inline LONG APIENTRY _GpiQuerySegmentNames(HPS a, LONG b, LONG c, LONG d, PLONG 
 #undef  GpiQuerySegmentNames
 #define GpiQuerySegmentNames _GpiQuerySegmentNames
 
-inline LONG APIENTRY _GpiQuerySegmentPriority(HPS a, LONG b, LONG c)
+inline LONG _GpiQuerySegmentPriority(HPS a, LONG b, LONG c)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -10309,7 +10309,7 @@ inline LONG APIENTRY _GpiQuerySegmentPriority(HPS a, LONG b, LONG c)
 #undef  GpiQuerySegmentPriority
 #define GpiQuerySegmentPriority _GpiQuerySegmentPriority
 
-inline BOOL APIENTRY _GpiRemoveDynamics(HPS a, LONG b, LONG c)
+inline BOOL _GpiRemoveDynamics(HPS a, LONG b, LONG c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -10323,7 +10323,7 @@ inline BOOL APIENTRY _GpiRemoveDynamics(HPS a, LONG b, LONG c)
 #undef  GpiRemoveDynamics
 #define GpiRemoveDynamics _GpiRemoveDynamics
 
-inline BOOL APIENTRY _GpiSetInitialSegmentAttrs(HPS a, LONG b, LONG c)
+inline BOOL _GpiSetInitialSegmentAttrs(HPS a, LONG b, LONG c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -10337,7 +10337,7 @@ inline BOOL APIENTRY _GpiSetInitialSegmentAttrs(HPS a, LONG b, LONG c)
 #undef  GpiSetInitialSegmentAttrs
 #define GpiSetInitialSegmentAttrs _GpiSetInitialSegmentAttrs
 
-inline BOOL APIENTRY _GpiSetSegmentAttrs(HPS a, LONG b, LONG c, LONG d)
+inline BOOL _GpiSetSegmentAttrs(HPS a, LONG b, LONG c, LONG d)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -10351,7 +10351,7 @@ inline BOOL APIENTRY _GpiSetSegmentAttrs(HPS a, LONG b, LONG c, LONG d)
 #undef  GpiSetSegmentAttrs
 #define GpiSetSegmentAttrs _GpiSetSegmentAttrs
 
-inline BOOL APIENTRY _GpiSetSegmentPriority(HPS a, LONG b, LONG c, LONG d)
+inline BOOL _GpiSetSegmentPriority(HPS a, LONG b, LONG c, LONG d)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -10367,7 +10367,7 @@ inline BOOL APIENTRY _GpiSetSegmentPriority(HPS a, LONG b, LONG c, LONG d)
 
 #endif
 #ifdef INCL_DEV
-inline LONG APIENTRY _DevEscape(HDC a, LONG b, LONG c, PBYTE d, PLONG e, PBYTE f)
+inline LONG _DevEscape(HDC a, LONG b, LONG c, PBYTE d, PLONG e, PBYTE f)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -10381,7 +10381,7 @@ inline LONG APIENTRY _DevEscape(HDC a, LONG b, LONG c, PBYTE d, PLONG e, PBYTE f
 #undef  DevEscape
 #define DevEscape _DevEscape
 
-inline LONG APIENTRY _DevPostEscape(PCSZ a, PCSZ b, PCSZ c, PCSZ d, ULONG e, ULONG f, PBYTE g, ULONG h, PBYTE i)
+inline LONG _DevPostEscape(PCSZ a, PCSZ b, PCSZ c, PCSZ d, ULONG e, ULONG f, PBYTE g, ULONG h, PBYTE i)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -10395,7 +10395,7 @@ inline LONG APIENTRY _DevPostEscape(PCSZ a, PCSZ b, PCSZ c, PCSZ d, ULONG e, ULO
 #undef  DevPostEscape
 #define DevPostEscape _DevPostEscape
 
-inline LONG APIENTRY _DevPostDeviceModes(HAB a, PDRIVDATA b, PCSZ c, PCSZ d, PCSZ e, ULONG f)
+inline LONG _DevPostDeviceModes(HAB a, PDRIVDATA b, PCSZ c, PCSZ d, PCSZ e, ULONG f)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -10409,7 +10409,7 @@ inline LONG APIENTRY _DevPostDeviceModes(HAB a, PDRIVDATA b, PCSZ c, PCSZ d, PCS
 #undef  DevPostDeviceModes
 #define DevPostDeviceModes _DevPostDeviceModes
 
-inline BOOL APIENTRY _DevQueryDeviceNames(HAB a, PCSZ b, PLONG c, PSTR32 d, PSTR64 e, PLONG f, PSTR16 g)
+inline BOOL _DevQueryDeviceNames(HAB a, PCSZ b, PLONG c, PSTR32 d, PSTR64 e, PLONG f, PSTR16 g)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -10423,7 +10423,7 @@ inline BOOL APIENTRY _DevQueryDeviceNames(HAB a, PCSZ b, PLONG c, PSTR32 d, PSTR
 #undef  DevQueryDeviceNames
 #define DevQueryDeviceNames _DevQueryDeviceNames
 
-inline LONG APIENTRY _DevQueryHardcopyCaps(HDC a, LONG b, LONG c, PHCINFO d)
+inline LONG _DevQueryHardcopyCaps(HDC a, LONG b, LONG c, PHCINFO d)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -10438,7 +10438,7 @@ inline LONG APIENTRY _DevQueryHardcopyCaps(HDC a, LONG b, LONG c, PHCINFO d)
 #define DevQueryHardcopyCaps _DevQueryHardcopyCaps
 
 #endif
-inline HMF APIENTRY _DevCloseDC(HDC a)
+inline HMF _DevCloseDC(HDC a)
 {
  HMF yyrc;
  USHORT sel = GetFS();
@@ -10452,7 +10452,7 @@ inline HMF APIENTRY _DevCloseDC(HDC a)
 #undef  DevCloseDC
 #define DevCloseDC _DevCloseDC
 
-inline HDC APIENTRY _DevOpenDC(HAB a, LONG b, PCSZ c, LONG d, PDEVOPENDATA e, HDC f)
+inline HDC _DevOpenDC(HAB a, LONG b, PCSZ c, LONG d, PDEVOPENDATA e, HDC f)
 {
  HDC yyrc;
  USHORT sel = GetFS();
@@ -10466,7 +10466,7 @@ inline HDC APIENTRY _DevOpenDC(HAB a, LONG b, PCSZ c, LONG d, PDEVOPENDATA e, HD
 #undef  DevOpenDC
 #define DevOpenDC _DevOpenDC
 
-inline BOOL APIENTRY _DevQueryCaps(HDC a, LONG b, LONG c, PLONG d)
+inline BOOL _DevQueryCaps(HDC a, LONG b, LONG c, PLONG d)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -10482,7 +10482,7 @@ inline BOOL APIENTRY _DevQueryCaps(HDC a, LONG b, LONG c, PLONG d)
 
 #endif
 #ifdef INCL_WINPROGRAMLIST
-inline HPROGRAM APIENTRY _PrfAddProgram(HINI a, PPROGDETAILS b, HPROGRAM c)
+inline HPROGRAM _PrfAddProgram(HINI a, PPROGDETAILS b, HPROGRAM c)
 {
  HPROGRAM yyrc;
  USHORT sel = GetFS();
@@ -10496,7 +10496,7 @@ inline HPROGRAM APIENTRY _PrfAddProgram(HINI a, PPROGDETAILS b, HPROGRAM c)
 #undef  PrfAddProgram
 #define PrfAddProgram _PrfAddProgram
 
-inline BOOL APIENTRY _PrfChangeProgram(HINI a, HPROGRAM b, PPROGDETAILS c)
+inline BOOL _PrfChangeProgram(HINI a, HPROGRAM b, PPROGDETAILS c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -10510,7 +10510,7 @@ inline BOOL APIENTRY _PrfChangeProgram(HINI a, HPROGRAM b, PPROGDETAILS c)
 #undef  PrfChangeProgram
 #define PrfChangeProgram _PrfChangeProgram
 
-inline HPROGRAM APIENTRY _PrfCreateGroup(HINI a, PCSZ b, UCHAR c)
+inline HPROGRAM _PrfCreateGroup(HINI a, PCSZ b, UCHAR c)
 {
  HPROGRAM yyrc;
  USHORT sel = GetFS();
@@ -10524,7 +10524,7 @@ inline HPROGRAM APIENTRY _PrfCreateGroup(HINI a, PCSZ b, UCHAR c)
 #undef  PrfCreateGroup
 #define PrfCreateGroup _PrfCreateGroup
 
-inline BOOL APIENTRY _PrfDestroyGroup(HINI a, HPROGRAM b)
+inline BOOL _PrfDestroyGroup(HINI a, HPROGRAM b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -10538,7 +10538,7 @@ inline BOOL APIENTRY _PrfDestroyGroup(HINI a, HPROGRAM b)
 #undef  PrfDestroyGroup
 #define PrfDestroyGroup _PrfDestroyGroup
 
-inline PROGCATEGORY APIENTRY _PrfQueryProgramCategory(HINI a, PCSZ b)
+inline PROGCATEGORY _PrfQueryProgramCategory(HINI a, PCSZ b)
 {
  PROGCATEGORY yyrc;
  USHORT sel = GetFS();
@@ -10552,7 +10552,7 @@ inline PROGCATEGORY APIENTRY _PrfQueryProgramCategory(HINI a, PCSZ b)
 #undef  PrfQueryProgramCategory
 #define PrfQueryProgramCategory _PrfQueryProgramCategory
 
-inline ULONG APIENTRY _PrfQueryProgramHandle(HINI a, PCSZ b, PHPROGARRAY c, ULONG d, PULONG e)
+inline ULONG _PrfQueryProgramHandle(HINI a, PCSZ b, PHPROGARRAY c, ULONG d, PULONG e)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -10566,7 +10566,7 @@ inline ULONG APIENTRY _PrfQueryProgramHandle(HINI a, PCSZ b, PHPROGARRAY c, ULON
 #undef  PrfQueryProgramHandle
 #define PrfQueryProgramHandle _PrfQueryProgramHandle
 
-inline ULONG APIENTRY _PrfQueryProgramTitles(HINI a, HPROGRAM b, PPROGTITLE c, ULONG d, PULONG e)
+inline ULONG _PrfQueryProgramTitles(HINI a, HPROGRAM b, PPROGTITLE c, ULONG d, PULONG e)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -10580,7 +10580,7 @@ inline ULONG APIENTRY _PrfQueryProgramTitles(HINI a, HPROGRAM b, PPROGTITLE c, U
 #undef  PrfQueryProgramTitles
 #define PrfQueryProgramTitles _PrfQueryProgramTitles
 
-inline ULONG APIENTRY _PrfQueryDefinition(HINI a, HPROGRAM b, PPROGDETAILS c, ULONG d)
+inline ULONG _PrfQueryDefinition(HINI a, HPROGRAM b, PPROGDETAILS c, ULONG d)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -10594,7 +10594,7 @@ inline ULONG APIENTRY _PrfQueryDefinition(HINI a, HPROGRAM b, PPROGDETAILS c, UL
 #undef  PrfQueryDefinition
 #define PrfQueryDefinition _PrfQueryDefinition
 
-inline BOOL APIENTRY _PrfRemoveProgram(HINI a, HPROGRAM b)
+inline BOOL _PrfRemoveProgram(HINI a, HPROGRAM b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -10608,7 +10608,7 @@ inline BOOL APIENTRY _PrfRemoveProgram(HINI a, HPROGRAM b)
 #undef  PrfRemoveProgram
 #define PrfRemoveProgram _PrfRemoveProgram
 
-inline HAPP APIENTRY _WinStartApp(HWND a, PPROGDETAILS b, PCSZ c, PVOID d, ULONG e)
+inline HAPP _WinStartApp(HWND a, PPROGDETAILS b, PCSZ c, PVOID d, ULONG e)
 {
  HAPP yyrc;
  USHORT sel = GetFS();
@@ -10622,7 +10622,7 @@ inline HAPP APIENTRY _WinStartApp(HWND a, PPROGDETAILS b, PCSZ c, PVOID d, ULONG
 #undef  WinStartApp
 #define WinStartApp _WinStartApp
 
-inline BOOL APIENTRY _WinTerminateApp(HAPP a)
+inline BOOL _WinTerminateApp(HAPP a)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -10638,7 +10638,7 @@ inline BOOL APIENTRY _WinTerminateApp(HAPP a)
 
 #endif
 #ifdef INCL_WINSWITCHLIST
-inline HSWITCH APIENTRY _WinAddSwitchEntry(PSWCNTRL a)
+inline HSWITCH _WinAddSwitchEntry(PSWCNTRL a)
 {
  HSWITCH yyrc;
  USHORT sel = GetFS();
@@ -10652,7 +10652,7 @@ inline HSWITCH APIENTRY _WinAddSwitchEntry(PSWCNTRL a)
 #undef  WinAddSwitchEntry
 #define WinAddSwitchEntry _WinAddSwitchEntry
 
-inline ULONG APIENTRY _WinRemoveSwitchEntry(HSWITCH a)
+inline ULONG _WinRemoveSwitchEntry(HSWITCH a)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -10666,7 +10666,7 @@ inline ULONG APIENTRY _WinRemoveSwitchEntry(HSWITCH a)
 #undef  WinRemoveSwitchEntry
 #define WinRemoveSwitchEntry _WinRemoveSwitchEntry
 
-inline ULONG APIENTRY _WinChangeSwitchEntry(HSWITCH a, PSWCNTRL b)
+inline ULONG _WinChangeSwitchEntry(HSWITCH a, PSWCNTRL b)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -10680,7 +10680,7 @@ inline ULONG APIENTRY _WinChangeSwitchEntry(HSWITCH a, PSWCNTRL b)
 #undef  WinChangeSwitchEntry
 #define WinChangeSwitchEntry _WinChangeSwitchEntry
 
-inline HSWITCH APIENTRY _WinCreateSwitchEntry(HAB a, PSWCNTRL b)
+inline HSWITCH _WinCreateSwitchEntry(HAB a, PSWCNTRL b)
 {
  HSWITCH yyrc;
  USHORT sel = GetFS();
@@ -10694,7 +10694,7 @@ inline HSWITCH APIENTRY _WinCreateSwitchEntry(HAB a, PSWCNTRL b)
 #undef  WinCreateSwitchEntry
 #define WinCreateSwitchEntry _WinCreateSwitchEntry
 
-inline ULONG APIENTRY _WinQuerySessionTitle(HAB a, ULONG b, PSZ c, ULONG d)
+inline ULONG _WinQuerySessionTitle(HAB a, ULONG b, PSZ c, ULONG d)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -10708,7 +10708,7 @@ inline ULONG APIENTRY _WinQuerySessionTitle(HAB a, ULONG b, PSZ c, ULONG d)
 #undef  WinQuerySessionTitle
 #define WinQuerySessionTitle _WinQuerySessionTitle
 
-inline ULONG APIENTRY _WinQuerySwitchEntry(HSWITCH a, PSWCNTRL b)
+inline ULONG _WinQuerySwitchEntry(HSWITCH a, PSWCNTRL b)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -10722,7 +10722,7 @@ inline ULONG APIENTRY _WinQuerySwitchEntry(HSWITCH a, PSWCNTRL b)
 #undef  WinQuerySwitchEntry
 #define WinQuerySwitchEntry _WinQuerySwitchEntry
 
-inline HSWITCH APIENTRY _WinQuerySwitchHandle(HWND a, PID b)
+inline HSWITCH _WinQuerySwitchHandle(HWND a, PID b)
 {
  HSWITCH yyrc;
  USHORT sel = GetFS();
@@ -10736,7 +10736,7 @@ inline HSWITCH APIENTRY _WinQuerySwitchHandle(HWND a, PID b)
 #undef  WinQuerySwitchHandle
 #define WinQuerySwitchHandle _WinQuerySwitchHandle
 
-inline ULONG APIENTRY _WinQuerySwitchList(HAB a, PSWBLOCK b, ULONG c)
+inline ULONG _WinQuerySwitchList(HAB a, PSWBLOCK b, ULONG c)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -10750,7 +10750,7 @@ inline ULONG APIENTRY _WinQuerySwitchList(HAB a, PSWBLOCK b, ULONG c)
 #undef  WinQuerySwitchList
 #define WinQuerySwitchList _WinQuerySwitchList
 
-inline ULONG APIENTRY _WinQueryTaskSizePos(HAB a, ULONG b, PSWP c)
+inline ULONG _WinQueryTaskSizePos(HAB a, ULONG b, PSWP c)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -10764,7 +10764,7 @@ inline ULONG APIENTRY _WinQueryTaskSizePos(HAB a, ULONG b, PSWP c)
 #undef  WinQueryTaskSizePos
 #define WinQueryTaskSizePos _WinQueryTaskSizePos
 
-inline ULONG APIENTRY _WinQueryTaskTitle(ULONG a, PSZ b, ULONG c)
+inline ULONG _WinQueryTaskTitle(ULONG a, PSZ b, ULONG c)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -10778,7 +10778,7 @@ inline ULONG APIENTRY _WinQueryTaskTitle(ULONG a, PSZ b, ULONG c)
 #undef  WinQueryTaskTitle
 #define WinQueryTaskTitle _WinQueryTaskTitle
 
-inline ULONG APIENTRY _WinSwitchToProgram(HSWITCH a)
+inline ULONG _WinSwitchToProgram(HSWITCH a)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -10794,7 +10794,7 @@ inline ULONG APIENTRY _WinSwitchToProgram(HSWITCH a)
 
 #endif
 #ifdef INCL_WINSHELLDATA
-inline BOOL APIENTRY _PrfCloseProfile(HINI a)
+inline BOOL _PrfCloseProfile(HINI a)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -10808,7 +10808,7 @@ inline BOOL APIENTRY _PrfCloseProfile(HINI a)
 #undef  PrfCloseProfile
 #define PrfCloseProfile _PrfCloseProfile
 
-inline HINI APIENTRY _PrfOpenProfile(HAB a, PCSZ b)
+inline HINI _PrfOpenProfile(HAB a, PCSZ b)
 {
  HINI yyrc;
  USHORT sel = GetFS();
@@ -10822,7 +10822,7 @@ inline HINI APIENTRY _PrfOpenProfile(HAB a, PCSZ b)
 #undef  PrfOpenProfile
 #define PrfOpenProfile _PrfOpenProfile
 
-inline BOOL APIENTRY _PrfQueryProfile(HAB a, PPRFPROFILE b)
+inline BOOL _PrfQueryProfile(HAB a, PPRFPROFILE b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -10836,7 +10836,7 @@ inline BOOL APIENTRY _PrfQueryProfile(HAB a, PPRFPROFILE b)
 #undef  PrfQueryProfile
 #define PrfQueryProfile _PrfQueryProfile
 
-inline BOOL APIENTRY _PrfQueryProfileData(HINI a, PCSZ b, PCSZ c, PVOID d, PULONG e)
+inline BOOL _PrfQueryProfileData(HINI a, PCSZ b, PCSZ c, PVOID d, PULONG e)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -10850,7 +10850,7 @@ inline BOOL APIENTRY _PrfQueryProfileData(HINI a, PCSZ b, PCSZ c, PVOID d, PULON
 #undef  PrfQueryProfileData
 #define PrfQueryProfileData _PrfQueryProfileData
 
-inline LONG APIENTRY _PrfQueryProfileInt(HINI a, PCSZ b, PCSZ c, LONG d)
+inline LONG _PrfQueryProfileInt(HINI a, PCSZ b, PCSZ c, LONG d)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -10864,7 +10864,7 @@ inline LONG APIENTRY _PrfQueryProfileInt(HINI a, PCSZ b, PCSZ c, LONG d)
 #undef  PrfQueryProfileInt
 #define PrfQueryProfileInt _PrfQueryProfileInt
 
-inline BOOL APIENTRY _PrfQueryProfileSize(HINI a, PCSZ b, PCSZ c, PULONG d)
+inline BOOL _PrfQueryProfileSize(HINI a, PCSZ b, PCSZ c, PULONG d)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -10878,7 +10878,7 @@ inline BOOL APIENTRY _PrfQueryProfileSize(HINI a, PCSZ b, PCSZ c, PULONG d)
 #undef  PrfQueryProfileSize
 #define PrfQueryProfileSize _PrfQueryProfileSize
 
-inline ULONG APIENTRY _PrfQueryProfileString(HINI a, PCSZ b, PCSZ c, PCSZ d, PVOID e, ULONG f)
+inline ULONG _PrfQueryProfileString(HINI a, PCSZ b, PCSZ c, PCSZ d, PVOID e, ULONG f)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -10892,7 +10892,7 @@ inline ULONG APIENTRY _PrfQueryProfileString(HINI a, PCSZ b, PCSZ c, PCSZ d, PVO
 #undef  PrfQueryProfileString
 #define PrfQueryProfileString _PrfQueryProfileString
 
-inline BOOL APIENTRY _PrfReset(HAB a, PPRFPROFILE b)
+inline BOOL _PrfReset(HAB a, PPRFPROFILE b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -10906,7 +10906,7 @@ inline BOOL APIENTRY _PrfReset(HAB a, PPRFPROFILE b)
 #undef  PrfReset
 #define PrfReset _PrfReset
 
-inline BOOL APIENTRY _PrfWriteProfileData(HINI a, PCSZ b, PCSZ c, PVOID d, ULONG e)
+inline BOOL _PrfWriteProfileData(HINI a, PCSZ b, PCSZ c, PVOID d, ULONG e)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -10920,7 +10920,7 @@ inline BOOL APIENTRY _PrfWriteProfileData(HINI a, PCSZ b, PCSZ c, PVOID d, ULONG
 #undef  PrfWriteProfileData
 #define PrfWriteProfileData _PrfWriteProfileData
 
-inline BOOL APIENTRY _PrfWriteProfileString(HINI a, PCSZ b, PCSZ c, PCSZ d)
+inline BOOL _PrfWriteProfileString(HINI a, PCSZ b, PCSZ c, PCSZ d)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -10936,7 +10936,7 @@ inline BOOL APIENTRY _PrfWriteProfileString(HINI a, PCSZ b, PCSZ c, PCSZ d)
 
 #endif
 #ifdef INCL_WINSTDFILE
-inline MRESULT APIENTRY _WinDefFileDlgProc(HWND a, ULONG b, MPARAM c, MPARAM d)
+inline MRESULT _WinDefFileDlgProc(HWND a, ULONG b, MPARAM c, MPARAM d)
 {
  MRESULT yyrc;
  USHORT sel = GetFS();
@@ -10950,7 +10950,7 @@ inline MRESULT APIENTRY _WinDefFileDlgProc(HWND a, ULONG b, MPARAM c, MPARAM d)
 #undef  WinDefFileDlgProc
 #define WinDefFileDlgProc _WinDefFileDlgProc
 
-inline HWND APIENTRY _WinFileDlg(HWND a, HWND b, PFILEDLG c)
+inline HWND _WinFileDlg(HWND a, HWND b, PFILEDLG c)
 {
  HWND yyrc;
  USHORT sel = GetFS();
@@ -10964,7 +10964,7 @@ inline HWND APIENTRY _WinFileDlg(HWND a, HWND b, PFILEDLG c)
 #undef  WinFileDlg
 #define WinFileDlg _WinFileDlg
 
-inline BOOL APIENTRY _WinFreeFileDlgList(PAPSZ a)
+inline BOOL _WinFreeFileDlgList(PAPSZ a)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -10980,7 +10980,7 @@ inline BOOL APIENTRY _WinFreeFileDlgList(PAPSZ a)
 
 #endif
 #ifdef INCL_WINSTDFONT
-inline HWND APIENTRY _WinFontDlg(HWND a, HWND b, PFONTDLG c)
+inline HWND _WinFontDlg(HWND a, HWND b, PFONTDLG c)
 {
  HWND yyrc;
  USHORT sel = GetFS();
@@ -10994,7 +10994,7 @@ inline HWND APIENTRY _WinFontDlg(HWND a, HWND b, PFONTDLG c)
 #undef  WinFontDlg
 #define WinFontDlg _WinFontDlg
 
-inline MRESULT APIENTRY _WinDefFontDlgProc(HWND a, ULONG b, MPARAM c, MPARAM d)
+inline MRESULT _WinDefFontDlgProc(HWND a, ULONG b, MPARAM c, MPARAM d)
 {
  MRESULT yyrc;
  USHORT sel = GetFS();
@@ -11010,7 +11010,7 @@ inline MRESULT APIENTRY _WinDefFontDlgProc(HWND a, ULONG b, MPARAM c, MPARAM d)
 
 #endif
 #ifdef INCL_WINSTDDRAG
-inline BOOL APIENTRY _DrgAcceptDroppedFiles(HWND a, PCSZ b, PCSZ c, ULONG d, ULONG e)
+inline BOOL _DrgAcceptDroppedFiles(HWND a, PCSZ b, PCSZ c, ULONG d, ULONG e)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -11024,7 +11024,7 @@ inline BOOL APIENTRY _DrgAcceptDroppedFiles(HWND a, PCSZ b, PCSZ c, ULONG d, ULO
 #undef  DrgAcceptDroppedFiles
 #define DrgAcceptDroppedFiles _DrgAcceptDroppedFiles
 
-inline BOOL APIENTRY _DrgAccessDraginfo(PDRAGINFO a)
+inline BOOL _DrgAccessDraginfo(PDRAGINFO a)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -11038,7 +11038,7 @@ inline BOOL APIENTRY _DrgAccessDraginfo(PDRAGINFO a)
 #undef  DrgAccessDraginfo
 #define DrgAccessDraginfo _DrgAccessDraginfo
 
-inline HSTR APIENTRY _DrgAddStrHandle(PCSZ a)
+inline HSTR _DrgAddStrHandle(PCSZ a)
 {
  HSTR yyrc;
  USHORT sel = GetFS();
@@ -11052,7 +11052,7 @@ inline HSTR APIENTRY _DrgAddStrHandle(PCSZ a)
 #undef  DrgAddStrHandle
 #define DrgAddStrHandle _DrgAddStrHandle
 
-inline PDRAGINFO APIENTRY _DrgAllocDraginfo(ULONG a)
+inline PDRAGINFO _DrgAllocDraginfo(ULONG a)
 {
  PDRAGINFO yyrc;
  USHORT sel = GetFS();
@@ -11066,7 +11066,7 @@ inline PDRAGINFO APIENTRY _DrgAllocDraginfo(ULONG a)
 #undef  DrgAllocDraginfo
 #define DrgAllocDraginfo _DrgAllocDraginfo
 
-inline PDRAGTRANSFER APIENTRY _DrgAllocDragtransfer(ULONG a)
+inline PDRAGTRANSFER _DrgAllocDragtransfer(ULONG a)
 {
  PDRAGTRANSFER yyrc;
  USHORT sel = GetFS();
@@ -11080,7 +11080,7 @@ inline PDRAGTRANSFER APIENTRY _DrgAllocDragtransfer(ULONG a)
 #undef  DrgAllocDragtransfer
 #define DrgAllocDragtransfer _DrgAllocDragtransfer
 
-inline BOOL APIENTRY _DrgCancelLazyDrag()
+inline BOOL _DrgCancelLazyDrag()
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -11094,7 +11094,7 @@ inline BOOL APIENTRY _DrgCancelLazyDrag()
 #undef  DrgCancelLazyDrag
 #define DrgCancelLazyDrag _DrgCancelLazyDrag
 
-inline BOOL APIENTRY _DrgDeleteDraginfoStrHandles(PDRAGINFO a)
+inline BOOL _DrgDeleteDraginfoStrHandles(PDRAGINFO a)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -11108,7 +11108,7 @@ inline BOOL APIENTRY _DrgDeleteDraginfoStrHandles(PDRAGINFO a)
 #undef  DrgDeleteDraginfoStrHandles
 #define DrgDeleteDraginfoStrHandles _DrgDeleteDraginfoStrHandles
 
-inline BOOL APIENTRY _DrgDeleteStrHandle(HSTR a)
+inline BOOL _DrgDeleteStrHandle(HSTR a)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -11122,7 +11122,7 @@ inline BOOL APIENTRY _DrgDeleteStrHandle(HSTR a)
 #undef  DrgDeleteStrHandle
 #define DrgDeleteStrHandle _DrgDeleteStrHandle
 
-inline HWND APIENTRY _DrgDrag(HWND a, PDRAGINFO b, PDRAGIMAGE c, ULONG d, LONG e, PVOID f)
+inline HWND _DrgDrag(HWND a, PDRAGINFO b, PDRAGIMAGE c, ULONG d, LONG e, PVOID f)
 {
  HWND yyrc;
  USHORT sel = GetFS();
@@ -11136,7 +11136,7 @@ inline HWND APIENTRY _DrgDrag(HWND a, PDRAGINFO b, PDRAGIMAGE c, ULONG d, LONG e
 #undef  DrgDrag
 #define DrgDrag _DrgDrag
 
-inline BOOL APIENTRY _DrgDragFiles(HWND a, PCSZ *b, PCSZ *c, PCSZ *d, ULONG e, HPOINTER f, ULONG g, BOOL h, ULONG i)
+inline BOOL _DrgDragFiles(HWND a, PCSZ *b, PCSZ *c, PCSZ *d, ULONG e, HPOINTER f, ULONG g, BOOL h, ULONG i)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -11150,7 +11150,7 @@ inline BOOL APIENTRY _DrgDragFiles(HWND a, PCSZ *b, PCSZ *c, PCSZ *d, ULONG e, H
 #undef  DrgDragFiles
 #define DrgDragFiles _DrgDragFiles
 
-inline BOOL APIENTRY _DrgFreeDraginfo(PDRAGINFO a)
+inline BOOL _DrgFreeDraginfo(PDRAGINFO a)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -11164,7 +11164,7 @@ inline BOOL APIENTRY _DrgFreeDraginfo(PDRAGINFO a)
 #undef  DrgFreeDraginfo
 #define DrgFreeDraginfo _DrgFreeDraginfo
 
-inline BOOL APIENTRY _DrgFreeDragtransfer(PDRAGTRANSFER a)
+inline BOOL _DrgFreeDragtransfer(PDRAGTRANSFER a)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -11178,7 +11178,7 @@ inline BOOL APIENTRY _DrgFreeDragtransfer(PDRAGTRANSFER a)
 #undef  DrgFreeDragtransfer
 #define DrgFreeDragtransfer _DrgFreeDragtransfer
 
-inline HPS APIENTRY _DrgGetPS(HWND a)
+inline HPS _DrgGetPS(HWND a)
 {
  HPS yyrc;
  USHORT sel = GetFS();
@@ -11192,7 +11192,7 @@ inline HPS APIENTRY _DrgGetPS(HWND a)
 #undef  DrgGetPS
 #define DrgGetPS _DrgGetPS
 
-inline BOOL APIENTRY _DrgLazyDrag(HWND a, PDRAGINFO b, PDRAGIMAGE c, ULONG d, PVOID e)
+inline BOOL _DrgLazyDrag(HWND a, PDRAGINFO b, PDRAGIMAGE c, ULONG d, PVOID e)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -11206,7 +11206,7 @@ inline BOOL APIENTRY _DrgLazyDrag(HWND a, PDRAGINFO b, PDRAGIMAGE c, ULONG d, PV
 #undef  DrgLazyDrag
 #define DrgLazyDrag _DrgLazyDrag
 
-inline BOOL APIENTRY _DrgLazyDrop(HWND a, ULONG b, PPOINTL c)
+inline BOOL _DrgLazyDrop(HWND a, ULONG b, PPOINTL c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -11220,7 +11220,7 @@ inline BOOL APIENTRY _DrgLazyDrop(HWND a, ULONG b, PPOINTL c)
 #undef  DrgLazyDrop
 #define DrgLazyDrop _DrgLazyDrop
 
-inline BOOL APIENTRY _DrgPostTransferMsg(HWND a, ULONG b, PDRAGTRANSFER c, ULONG d, ULONG e, BOOL f)
+inline BOOL _DrgPostTransferMsg(HWND a, ULONG b, PDRAGTRANSFER c, ULONG d, ULONG e, BOOL f)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -11234,7 +11234,7 @@ inline BOOL APIENTRY _DrgPostTransferMsg(HWND a, ULONG b, PDRAGTRANSFER c, ULONG
 #undef  DrgPostTransferMsg
 #define DrgPostTransferMsg _DrgPostTransferMsg
 
-inline BOOL APIENTRY _DrgPushDraginfo(PDRAGINFO a, HWND b)
+inline BOOL _DrgPushDraginfo(PDRAGINFO a, HWND b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -11248,7 +11248,7 @@ inline BOOL APIENTRY _DrgPushDraginfo(PDRAGINFO a, HWND b)
 #undef  DrgPushDraginfo
 #define DrgPushDraginfo _DrgPushDraginfo
 
-inline PDRAGINFO APIENTRY _DrgQueryDraginfoPtr(PDRAGINFO a)
+inline PDRAGINFO _DrgQueryDraginfoPtr(PDRAGINFO a)
 {
  PDRAGINFO yyrc;
  USHORT sel = GetFS();
@@ -11262,7 +11262,7 @@ inline PDRAGINFO APIENTRY _DrgQueryDraginfoPtr(PDRAGINFO a)
 #undef  DrgQueryDraginfoPtr
 #define DrgQueryDraginfoPtr _DrgQueryDraginfoPtr
 
-inline PDRAGINFO APIENTRY _DrgQueryDraginfoPtrFromHwnd(HWND a)
+inline PDRAGINFO _DrgQueryDraginfoPtrFromHwnd(HWND a)
 {
  PDRAGINFO yyrc;
  USHORT sel = GetFS();
@@ -11276,7 +11276,7 @@ inline PDRAGINFO APIENTRY _DrgQueryDraginfoPtrFromHwnd(HWND a)
 #undef  DrgQueryDraginfoPtrFromHwnd
 #define DrgQueryDraginfoPtrFromHwnd _DrgQueryDraginfoPtrFromHwnd
 
-inline PDRAGINFO APIENTRY _DrgQueryDraginfoPtrFromDragitem(PDRAGITEM a)
+inline PDRAGINFO _DrgQueryDraginfoPtrFromDragitem(PDRAGITEM a)
 {
  PDRAGINFO yyrc;
  USHORT sel = GetFS();
@@ -11290,7 +11290,7 @@ inline PDRAGINFO APIENTRY _DrgQueryDraginfoPtrFromDragitem(PDRAGITEM a)
 #undef  DrgQueryDraginfoPtrFromDragitem
 #define DrgQueryDraginfoPtrFromDragitem _DrgQueryDraginfoPtrFromDragitem
 
-inline BOOL APIENTRY _DrgQueryDragitem(PDRAGINFO a, ULONG b, PDRAGITEM c, ULONG d)
+inline BOOL _DrgQueryDragitem(PDRAGINFO a, ULONG b, PDRAGITEM c, ULONG d)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -11304,7 +11304,7 @@ inline BOOL APIENTRY _DrgQueryDragitem(PDRAGINFO a, ULONG b, PDRAGITEM c, ULONG 
 #undef  DrgQueryDragitem
 #define DrgQueryDragitem _DrgQueryDragitem
 
-inline ULONG APIENTRY _DrgQueryDragitemCount(PDRAGINFO a)
+inline ULONG _DrgQueryDragitemCount(PDRAGINFO a)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -11318,7 +11318,7 @@ inline ULONG APIENTRY _DrgQueryDragitemCount(PDRAGINFO a)
 #undef  DrgQueryDragitemCount
 #define DrgQueryDragitemCount _DrgQueryDragitemCount
 
-inline PDRAGITEM APIENTRY _DrgQueryDragitemPtr(PDRAGINFO a, ULONG b)
+inline PDRAGITEM _DrgQueryDragitemPtr(PDRAGINFO a, ULONG b)
 {
  PDRAGITEM yyrc;
  USHORT sel = GetFS();
@@ -11332,7 +11332,7 @@ inline PDRAGITEM APIENTRY _DrgQueryDragitemPtr(PDRAGINFO a, ULONG b)
 #undef  DrgQueryDragitemPtr
 #define DrgQueryDragitemPtr _DrgQueryDragitemPtr
 
-inline ULONG APIENTRY _DrgQueryDragStatus()
+inline ULONG _DrgQueryDragStatus()
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -11346,7 +11346,7 @@ inline ULONG APIENTRY _DrgQueryDragStatus()
 #undef  DrgQueryDragStatus
 #define DrgQueryDragStatus _DrgQueryDragStatus
 
-inline BOOL APIENTRY _DrgQueryNativeRMF(PDRAGITEM a, ULONG b, PCHAR c)
+inline BOOL _DrgQueryNativeRMF(PDRAGITEM a, ULONG b, PCHAR c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -11360,7 +11360,7 @@ inline BOOL APIENTRY _DrgQueryNativeRMF(PDRAGITEM a, ULONG b, PCHAR c)
 #undef  DrgQueryNativeRMF
 #define DrgQueryNativeRMF _DrgQueryNativeRMF
 
-inline ULONG APIENTRY _DrgQueryNativeRMFLen(PDRAGITEM a)
+inline ULONG _DrgQueryNativeRMFLen(PDRAGITEM a)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -11374,7 +11374,7 @@ inline ULONG APIENTRY _DrgQueryNativeRMFLen(PDRAGITEM a)
 #undef  DrgQueryNativeRMFLen
 #define DrgQueryNativeRMFLen _DrgQueryNativeRMFLen
 
-inline ULONG APIENTRY _DrgQueryStrName(HSTR a, ULONG b, PSZ c)
+inline ULONG _DrgQueryStrName(HSTR a, ULONG b, PSZ c)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -11388,7 +11388,7 @@ inline ULONG APIENTRY _DrgQueryStrName(HSTR a, ULONG b, PSZ c)
 #undef  DrgQueryStrName
 #define DrgQueryStrName _DrgQueryStrName
 
-inline ULONG APIENTRY _DrgQueryStrNameLen(HSTR a)
+inline ULONG _DrgQueryStrNameLen(HSTR a)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -11402,7 +11402,7 @@ inline ULONG APIENTRY _DrgQueryStrNameLen(HSTR a)
 #undef  DrgQueryStrNameLen
 #define DrgQueryStrNameLen _DrgQueryStrNameLen
 
-inline BOOL APIENTRY _DrgQueryTrueType(PDRAGITEM a, ULONG b, PSZ c)
+inline BOOL _DrgQueryTrueType(PDRAGITEM a, ULONG b, PSZ c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -11416,7 +11416,7 @@ inline BOOL APIENTRY _DrgQueryTrueType(PDRAGITEM a, ULONG b, PSZ c)
 #undef  DrgQueryTrueType
 #define DrgQueryTrueType _DrgQueryTrueType
 
-inline ULONG APIENTRY _DrgQueryTrueTypeLen(PDRAGITEM a)
+inline ULONG _DrgQueryTrueTypeLen(PDRAGITEM a)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -11430,7 +11430,7 @@ inline ULONG APIENTRY _DrgQueryTrueTypeLen(PDRAGITEM a)
 #undef  DrgQueryTrueTypeLen
 #define DrgQueryTrueTypeLen _DrgQueryTrueTypeLen
 
-inline PDRAGINFO APIENTRY _DrgReallocDraginfo(PDRAGINFO a, ULONG b)
+inline PDRAGINFO _DrgReallocDraginfo(PDRAGINFO a, ULONG b)
 {
  PDRAGINFO yyrc;
  USHORT sel = GetFS();
@@ -11444,7 +11444,7 @@ inline PDRAGINFO APIENTRY _DrgReallocDraginfo(PDRAGINFO a, ULONG b)
 #undef  DrgReallocDraginfo
 #define DrgReallocDraginfo _DrgReallocDraginfo
 
-inline BOOL APIENTRY _DrgReleasePS(HPS a)
+inline BOOL _DrgReleasePS(HPS a)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -11458,7 +11458,7 @@ inline BOOL APIENTRY _DrgReleasePS(HPS a)
 #undef  DrgReleasePS
 #define DrgReleasePS _DrgReleasePS
 
-inline MRESULT APIENTRY _DrgSendTransferMsg(HWND a, ULONG b, MPARAM c, MPARAM d)
+inline MRESULT _DrgSendTransferMsg(HWND a, ULONG b, MPARAM c, MPARAM d)
 {
  MRESULT yyrc;
  USHORT sel = GetFS();
@@ -11472,7 +11472,7 @@ inline MRESULT APIENTRY _DrgSendTransferMsg(HWND a, ULONG b, MPARAM c, MPARAM d)
 #undef  DrgSendTransferMsg
 #define DrgSendTransferMsg _DrgSendTransferMsg
 
-inline BOOL APIENTRY _DrgSetDragImage(PDRAGINFO a, PDRAGIMAGE b, ULONG c, PVOID d)
+inline BOOL _DrgSetDragImage(PDRAGINFO a, PDRAGIMAGE b, ULONG c, PVOID d)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -11486,7 +11486,7 @@ inline BOOL APIENTRY _DrgSetDragImage(PDRAGINFO a, PDRAGIMAGE b, ULONG c, PVOID 
 #undef  DrgSetDragImage
 #define DrgSetDragImage _DrgSetDragImage
 
-inline BOOL APIENTRY _DrgSetDragitem(PDRAGINFO a, PDRAGITEM b, ULONG c, ULONG d)
+inline BOOL _DrgSetDragitem(PDRAGINFO a, PDRAGITEM b, ULONG c, ULONG d)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -11500,7 +11500,7 @@ inline BOOL APIENTRY _DrgSetDragitem(PDRAGINFO a, PDRAGITEM b, ULONG c, ULONG d)
 #undef  DrgSetDragitem
 #define DrgSetDragitem _DrgSetDragitem
 
-inline BOOL APIENTRY _DrgSetDragPointer(PDRAGINFO a, HPOINTER b)
+inline BOOL _DrgSetDragPointer(PDRAGINFO a, HPOINTER b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -11514,7 +11514,7 @@ inline BOOL APIENTRY _DrgSetDragPointer(PDRAGINFO a, HPOINTER b)
 #undef  DrgSetDragPointer
 #define DrgSetDragPointer _DrgSetDragPointer
 
-inline BOOL APIENTRY _DrgVerifyNativeRMF(PDRAGITEM a, PCSZ b)
+inline BOOL _DrgVerifyNativeRMF(PDRAGITEM a, PCSZ b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -11528,7 +11528,7 @@ inline BOOL APIENTRY _DrgVerifyNativeRMF(PDRAGITEM a, PCSZ b)
 #undef  DrgVerifyNativeRMF
 #define DrgVerifyNativeRMF _DrgVerifyNativeRMF
 
-inline BOOL APIENTRY _DrgVerifyRMF(PDRAGITEM a, PCSZ b, PCSZ c)
+inline BOOL _DrgVerifyRMF(PDRAGITEM a, PCSZ b, PCSZ c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -11542,7 +11542,7 @@ inline BOOL APIENTRY _DrgVerifyRMF(PDRAGITEM a, PCSZ b, PCSZ c)
 #undef  DrgVerifyRMF
 #define DrgVerifyRMF _DrgVerifyRMF
 
-inline BOOL APIENTRY _DrgVerifyTrueType(PDRAGITEM a, PCSZ b)
+inline BOOL _DrgVerifyTrueType(PDRAGITEM a, PCSZ b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -11556,7 +11556,7 @@ inline BOOL APIENTRY _DrgVerifyTrueType(PDRAGITEM a, PCSZ b)
 #undef  DrgVerifyTrueType
 #define DrgVerifyTrueType _DrgVerifyTrueType
 
-inline BOOL APIENTRY _DrgVerifyType(PDRAGITEM a, PCSZ b)
+inline BOOL _DrgVerifyType(PDRAGITEM a, PCSZ b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -11570,7 +11570,7 @@ inline BOOL APIENTRY _DrgVerifyType(PDRAGITEM a, PCSZ b)
 #undef  DrgVerifyType
 #define DrgVerifyType _DrgVerifyType
 
-inline BOOL APIENTRY _DrgVerifyTypeSet(PDRAGITEM a, PCSZ b, ULONG c, PSZ d)
+inline BOOL _DrgVerifyTypeSet(PDRAGITEM a, PCSZ b, ULONG c, PSZ d)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -11586,7 +11586,7 @@ inline BOOL APIENTRY _DrgVerifyTypeSet(PDRAGITEM a, PCSZ b, ULONG c, PSZ d)
 
 #endif
 #ifdef INCL_WPCLASS
-inline HOBJECT APIENTRY _WinCopyObject(HOBJECT a, HOBJECT b, ULONG c)
+inline HOBJECT _WinCopyObject(HOBJECT a, HOBJECT b, ULONG c)
 {
  HOBJECT yyrc;
  USHORT sel = GetFS();
@@ -11600,7 +11600,7 @@ inline HOBJECT APIENTRY _WinCopyObject(HOBJECT a, HOBJECT b, ULONG c)
 #undef  WinCopyObject
 #define WinCopyObject _WinCopyObject
 
-inline HOBJECT APIENTRY _WinCreateObject(PCSZ a, PCSZ b, PCSZ c, PCSZ d, ULONG e)
+inline HOBJECT _WinCreateObject(PCSZ a, PCSZ b, PCSZ c, PCSZ d, ULONG e)
 {
  HOBJECT yyrc;
  USHORT sel = GetFS();
@@ -11614,7 +11614,7 @@ inline HOBJECT APIENTRY _WinCreateObject(PCSZ a, PCSZ b, PCSZ c, PCSZ d, ULONG e
 #undef  WinCreateObject
 #define WinCreateObject _WinCreateObject
 
-inline HOBJECT APIENTRY _WinCreateShadow(HOBJECT a, HOBJECT b, ULONG c)
+inline HOBJECT _WinCreateShadow(HOBJECT a, HOBJECT b, ULONG c)
 {
  HOBJECT yyrc;
  USHORT sel = GetFS();
@@ -11628,7 +11628,7 @@ inline HOBJECT APIENTRY _WinCreateShadow(HOBJECT a, HOBJECT b, ULONG c)
 #undef  WinCreateShadow
 #define WinCreateShadow _WinCreateShadow
 
-inline BOOL APIENTRY _WinDeregisterObjectClass(PCSZ a)
+inline BOOL _WinDeregisterObjectClass(PCSZ a)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -11642,7 +11642,7 @@ inline BOOL APIENTRY _WinDeregisterObjectClass(PCSZ a)
 #undef  WinDeregisterObjectClass
 #define WinDeregisterObjectClass _WinDeregisterObjectClass
 
-inline BOOL APIENTRY _WinDestroyObject(HOBJECT a)
+inline BOOL _WinDestroyObject(HOBJECT a)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -11656,7 +11656,7 @@ inline BOOL APIENTRY _WinDestroyObject(HOBJECT a)
 #undef  WinDestroyObject
 #define WinDestroyObject _WinDestroyObject
 
-inline BOOL APIENTRY _WinEnumObjectClasses(POBJCLASS a, PULONG b)
+inline BOOL _WinEnumObjectClasses(POBJCLASS a, PULONG b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -11670,7 +11670,7 @@ inline BOOL APIENTRY _WinEnumObjectClasses(POBJCLASS a, PULONG b)
 #undef  WinEnumObjectClasses
 #define WinEnumObjectClasses _WinEnumObjectClasses
 
-inline BOOL APIENTRY _WinIsSOMDDReady()
+inline BOOL _WinIsSOMDDReady()
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -11684,7 +11684,7 @@ inline BOOL APIENTRY _WinIsSOMDDReady()
 #undef  WinIsSOMDDReady
 #define WinIsSOMDDReady _WinIsSOMDDReady
 
-inline BOOL APIENTRY _WinIsWPDServerReady()
+inline BOOL _WinIsWPDServerReady()
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -11698,7 +11698,7 @@ inline BOOL APIENTRY _WinIsWPDServerReady()
 #undef  WinIsWPDServerReady
 #define WinIsWPDServerReady _WinIsWPDServerReady
 
-inline HOBJECT APIENTRY _WinMoveObject(HOBJECT a, HOBJECT b, ULONG c)
+inline HOBJECT _WinMoveObject(HOBJECT a, HOBJECT b, ULONG c)
 {
  HOBJECT yyrc;
  USHORT sel = GetFS();
@@ -11712,7 +11712,7 @@ inline HOBJECT APIENTRY _WinMoveObject(HOBJECT a, HOBJECT b, ULONG c)
 #undef  WinMoveObject
 #define WinMoveObject _WinMoveObject
 
-inline BOOL APIENTRY _WinOpenObject(HOBJECT a, ULONG b, BOOL c)
+inline BOOL _WinOpenObject(HOBJECT a, ULONG b, BOOL c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -11726,7 +11726,7 @@ inline BOOL APIENTRY _WinOpenObject(HOBJECT a, ULONG b, BOOL c)
 #undef  WinOpenObject
 #define WinOpenObject _WinOpenObject
 
-inline BOOL APIENTRY _WinQueryActiveDesktopPathname(PSZ a, ULONG b)
+inline BOOL _WinQueryActiveDesktopPathname(PSZ a, ULONG b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -11740,7 +11740,7 @@ inline BOOL APIENTRY _WinQueryActiveDesktopPathname(PSZ a, ULONG b)
 #undef  WinQueryActiveDesktopPathname
 #define WinQueryActiveDesktopPathname _WinQueryActiveDesktopPathname
 
-inline HOBJECT APIENTRY _WinQueryObject(PCSZ a)
+inline HOBJECT _WinQueryObject(PCSZ a)
 {
  HOBJECT yyrc;
  USHORT sel = GetFS();
@@ -11754,7 +11754,7 @@ inline HOBJECT APIENTRY _WinQueryObject(PCSZ a)
 #undef  WinQueryObject
 #define WinQueryObject _WinQueryObject
 
-inline BOOL APIENTRY _WinQueryObjectPath(HOBJECT a, PSZ b, ULONG c)
+inline BOOL _WinQueryObjectPath(HOBJECT a, PSZ b, ULONG c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -11768,7 +11768,7 @@ inline BOOL APIENTRY _WinQueryObjectPath(HOBJECT a, PSZ b, ULONG c)
 #undef  WinQueryObjectPath
 #define WinQueryObjectPath _WinQueryObjectPath
 
-inline BOOL APIENTRY _WinRegisterObjectClass(PCSZ a, PCSZ b)
+inline BOOL _WinRegisterObjectClass(PCSZ a, PCSZ b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -11782,7 +11782,7 @@ inline BOOL APIENTRY _WinRegisterObjectClass(PCSZ a, PCSZ b)
 #undef  WinRegisterObjectClass
 #define WinRegisterObjectClass _WinRegisterObjectClass
 
-inline BOOL APIENTRY _WinReplaceObjectClass(PCSZ a, PCSZ b, BOOL c)
+inline BOOL _WinReplaceObjectClass(PCSZ a, PCSZ b, BOOL c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -11796,7 +11796,7 @@ inline BOOL APIENTRY _WinReplaceObjectClass(PCSZ a, PCSZ b, BOOL c)
 #undef  WinReplaceObjectClass
 #define WinReplaceObjectClass _WinReplaceObjectClass
 
-inline ULONG APIENTRY _WinRestartSOMDD(BOOL a)
+inline ULONG _WinRestartSOMDD(BOOL a)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -11810,7 +11810,7 @@ inline ULONG APIENTRY _WinRestartSOMDD(BOOL a)
 #undef  WinRestartSOMDD
 #define WinRestartSOMDD _WinRestartSOMDD
 
-inline ULONG APIENTRY _WinRestartWPDServer(BOOL a)
+inline ULONG _WinRestartWPDServer(BOOL a)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -11824,7 +11824,7 @@ inline ULONG APIENTRY _WinRestartWPDServer(BOOL a)
 #undef  WinRestartWPDServer
 #define WinRestartWPDServer _WinRestartWPDServer
 
-inline BOOL APIENTRY _WinSaveObject(HOBJECT a, BOOL b)
+inline BOOL _WinSaveObject(HOBJECT a, BOOL b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -11838,7 +11838,7 @@ inline BOOL APIENTRY _WinSaveObject(HOBJECT a, BOOL b)
 #undef  WinSaveObject
 #define WinSaveObject _WinSaveObject
 
-inline BOOL APIENTRY _WinSetObjectData(HOBJECT a, PCSZ b)
+inline BOOL _WinSetObjectData(HOBJECT a, PCSZ b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -11852,7 +11852,7 @@ inline BOOL APIENTRY _WinSetObjectData(HOBJECT a, PCSZ b)
 #undef  WinSetObjectData
 #define WinSetObjectData _WinSetObjectData
 
-inline BOOL APIENTRY _WinFreeFileIcon(HPOINTER a)
+inline BOOL _WinFreeFileIcon(HPOINTER a)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -11866,7 +11866,7 @@ inline BOOL APIENTRY _WinFreeFileIcon(HPOINTER a)
 #undef  WinFreeFileIcon
 #define WinFreeFileIcon _WinFreeFileIcon
 
-inline HPOINTER APIENTRY _WinLoadFileIcon(PCSZ a, BOOL b)
+inline HPOINTER _WinLoadFileIcon(PCSZ a, BOOL b)
 {
  HPOINTER yyrc;
  USHORT sel = GetFS();
@@ -11880,7 +11880,7 @@ inline HPOINTER APIENTRY _WinLoadFileIcon(PCSZ a, BOOL b)
 #undef  WinLoadFileIcon
 #define WinLoadFileIcon _WinLoadFileIcon
 
-inline BOOL APIENTRY _WinRestoreWindowPos(PCSZ a, PCSZ b, HWND c)
+inline BOOL _WinRestoreWindowPos(PCSZ a, PCSZ b, HWND c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -11894,7 +11894,7 @@ inline BOOL APIENTRY _WinRestoreWindowPos(PCSZ a, PCSZ b, HWND c)
 #undef  WinRestoreWindowPos
 #define WinRestoreWindowPos _WinRestoreWindowPos
 
-inline BOOL APIENTRY _WinSetFileIcon(PCSZ a, PICONINFO b)
+inline BOOL _WinSetFileIcon(PCSZ a, PICONINFO b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -11908,7 +11908,7 @@ inline BOOL APIENTRY _WinSetFileIcon(PCSZ a, PICONINFO b)
 #undef  WinSetFileIcon
 #define WinSetFileIcon _WinSetFileIcon
 
-inline BOOL APIENTRY _WinShutdownSystem(HAB a, HMQ b)
+inline BOOL _WinShutdownSystem(HAB a, HMQ b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -11922,7 +11922,7 @@ inline BOOL APIENTRY _WinShutdownSystem(HAB a, HMQ b)
 #undef  WinShutdownSystem
 #define WinShutdownSystem _WinShutdownSystem
 
-inline BOOL APIENTRY _WinStoreWindowPos(PCSZ a, PCSZ b, HWND c)
+inline BOOL _WinStoreWindowPos(PCSZ a, PCSZ b, HWND c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -11938,7 +11938,7 @@ inline BOOL APIENTRY _WinStoreWindowPos(PCSZ a, PCSZ b, HWND c)
 
 #endif
 #ifdef INCL_SPL
-inline BOOL APIENTRY _SplStdClose(HDC a)
+inline BOOL _SplStdClose(HDC a)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -11952,7 +11952,7 @@ inline BOOL APIENTRY _SplStdClose(HDC a)
 #undef  SplStdClose
 #define SplStdClose _SplStdClose
 
-inline BOOL APIENTRY _SplStdDelete(HSTD a)
+inline BOOL _SplStdDelete(HSTD a)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -11966,7 +11966,7 @@ inline BOOL APIENTRY _SplStdDelete(HSTD a)
 #undef  SplStdDelete
 #define SplStdDelete _SplStdDelete
 
-inline BOOL APIENTRY _SplStdGetBits(HSTD a, LONG b, LONG c, PCH d)
+inline BOOL _SplStdGetBits(HSTD a, LONG b, LONG c, PCH d)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -11980,7 +11980,7 @@ inline BOOL APIENTRY _SplStdGetBits(HSTD a, LONG b, LONG c, PCH d)
 #undef  SplStdGetBits
 #define SplStdGetBits _SplStdGetBits
 
-inline BOOL APIENTRY _SplStdOpen(HDC a)
+inline BOOL _SplStdOpen(HDC a)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -11994,7 +11994,7 @@ inline BOOL APIENTRY _SplStdOpen(HDC a)
 #undef  SplStdOpen
 #define SplStdOpen _SplStdOpen
 
-inline LONG APIENTRY _SplStdQueryLength(HSTD a)
+inline LONG _SplStdQueryLength(HSTD a)
 {
  LONG yyrc;
  USHORT sel = GetFS();
@@ -12008,7 +12008,7 @@ inline LONG APIENTRY _SplStdQueryLength(HSTD a)
 #undef  SplStdQueryLength
 #define SplStdQueryLength _SplStdQueryLength
 
-inline BOOL APIENTRY _SplStdStart(HDC a)
+inline BOOL _SplStdStart(HDC a)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -12022,7 +12022,7 @@ inline BOOL APIENTRY _SplStdStart(HDC a)
 #undef  SplStdStart
 #define SplStdStart _SplStdStart
 
-inline HSTD APIENTRY _SplStdStop(HDC a)
+inline HSTD _SplStdStop(HDC a)
 {
  HSTD yyrc;
  USHORT sel = GetFS();
@@ -12036,7 +12036,7 @@ inline HSTD APIENTRY _SplStdStop(HDC a)
 #undef  SplStdStop
 #define SplStdStop _SplStdStop
 
-inline SPLERR APIENTRY _SplControlDevice(PSZ a, PSZ b, ULONG c)
+inline SPLERR _SplControlDevice(PSZ a, PSZ b, ULONG c)
 {
  SPLERR yyrc;
  USHORT sel = GetFS();
@@ -12050,7 +12050,7 @@ inline SPLERR APIENTRY _SplControlDevice(PSZ a, PSZ b, ULONG c)
 #undef  SplControlDevice
 #define SplControlDevice _SplControlDevice
 
-inline SPLERR APIENTRY _SplCopyJob(PCSZ a, PCSZ b, ULONG c, PCSZ d, PCSZ e, PULONG f)
+inline SPLERR _SplCopyJob(PCSZ a, PCSZ b, ULONG c, PCSZ d, PCSZ e, PULONG f)
 {
  SPLERR yyrc;
  USHORT sel = GetFS();
@@ -12064,7 +12064,7 @@ inline SPLERR APIENTRY _SplCopyJob(PCSZ a, PCSZ b, ULONG c, PCSZ d, PCSZ e, PULO
 #undef  SplCopyJob
 #define SplCopyJob _SplCopyJob
 
-inline SPLERR APIENTRY _SplCreateDevice(PSZ a, ULONG b, PVOID c, ULONG d)
+inline SPLERR _SplCreateDevice(PSZ a, ULONG b, PVOID c, ULONG d)
 {
  SPLERR yyrc;
  USHORT sel = GetFS();
@@ -12078,7 +12078,7 @@ inline SPLERR APIENTRY _SplCreateDevice(PSZ a, ULONG b, PVOID c, ULONG d)
 #undef  SplCreateDevice
 #define SplCreateDevice _SplCreateDevice
 
-inline SPLERR APIENTRY _SplCreatePort(PCSZ a, PCSZ b, PCSZ c, ULONG d, PVOID e, ULONG f)
+inline SPLERR _SplCreatePort(PCSZ a, PCSZ b, PCSZ c, ULONG d, PVOID e, ULONG f)
 {
  SPLERR yyrc;
  USHORT sel = GetFS();
@@ -12092,7 +12092,7 @@ inline SPLERR APIENTRY _SplCreatePort(PCSZ a, PCSZ b, PCSZ c, ULONG d, PVOID e, 
 #undef  SplCreatePort
 #define SplCreatePort _SplCreatePort
 
-inline SPLERR APIENTRY _SplCreateQueue(PSZ a, ULONG b, PVOID c, ULONG d)
+inline SPLERR _SplCreateQueue(PSZ a, ULONG b, PVOID c, ULONG d)
 {
  SPLERR yyrc;
  USHORT sel = GetFS();
@@ -12106,7 +12106,7 @@ inline SPLERR APIENTRY _SplCreateQueue(PSZ a, ULONG b, PVOID c, ULONG d)
 #undef  SplCreateQueue
 #define SplCreateQueue _SplCreateQueue
 
-inline SPLERR APIENTRY _SplDeleteDevice(PSZ a, PSZ b)
+inline SPLERR _SplDeleteDevice(PSZ a, PSZ b)
 {
  SPLERR yyrc;
  USHORT sel = GetFS();
@@ -12120,7 +12120,7 @@ inline SPLERR APIENTRY _SplDeleteDevice(PSZ a, PSZ b)
 #undef  SplDeleteDevice
 #define SplDeleteDevice _SplDeleteDevice
 
-inline SPLERR APIENTRY _SplDeleteJob(PSZ a, PSZ b, ULONG c)
+inline SPLERR _SplDeleteJob(PSZ a, PSZ b, ULONG c)
 {
  SPLERR yyrc;
  USHORT sel = GetFS();
@@ -12134,7 +12134,7 @@ inline SPLERR APIENTRY _SplDeleteJob(PSZ a, PSZ b, ULONG c)
 #undef  SplDeleteJob
 #define SplDeleteJob _SplDeleteJob
 
-inline SPLERR APIENTRY _SplDeletePort(PCSZ a, PCSZ b)
+inline SPLERR _SplDeletePort(PCSZ a, PCSZ b)
 {
  SPLERR yyrc;
  USHORT sel = GetFS();
@@ -12148,7 +12148,7 @@ inline SPLERR APIENTRY _SplDeletePort(PCSZ a, PCSZ b)
 #undef  SplDeletePort
 #define SplDeletePort _SplDeletePort
 
-inline SPLERR APIENTRY _SplDeleteQueue(PSZ a, PSZ b)
+inline SPLERR _SplDeleteQueue(PSZ a, PSZ b)
 {
  SPLERR yyrc;
  USHORT sel = GetFS();
@@ -12162,7 +12162,7 @@ inline SPLERR APIENTRY _SplDeleteQueue(PSZ a, PSZ b)
 #undef  SplDeleteQueue
 #define SplDeleteQueue _SplDeleteQueue
 
-inline SPLERR APIENTRY _SplEnumDevice(PSZ a, ULONG b, PVOID c, ULONG d, PULONG e, PULONG f, PULONG g, PVOID h)
+inline SPLERR _SplEnumDevice(PSZ a, ULONG b, PVOID c, ULONG d, PULONG e, PULONG f, PULONG g, PVOID h)
 {
  SPLERR yyrc;
  USHORT sel = GetFS();
@@ -12176,7 +12176,7 @@ inline SPLERR APIENTRY _SplEnumDevice(PSZ a, ULONG b, PVOID c, ULONG d, PULONG e
 #undef  SplEnumDevice
 #define SplEnumDevice _SplEnumDevice
 
-inline SPLERR APIENTRY _SplEnumDriver(PSZ a, ULONG b, PVOID c, ULONG d, PULONG e, PULONG f, PULONG g, PVOID h)
+inline SPLERR _SplEnumDriver(PSZ a, ULONG b, PVOID c, ULONG d, PULONG e, PULONG f, PULONG g, PVOID h)
 {
  SPLERR yyrc;
  USHORT sel = GetFS();
@@ -12190,7 +12190,7 @@ inline SPLERR APIENTRY _SplEnumDriver(PSZ a, ULONG b, PVOID c, ULONG d, PULONG e
 #undef  SplEnumDriver
 #define SplEnumDriver _SplEnumDriver
 
-inline SPLERR APIENTRY _SplEnumJob(PSZ a, PSZ b, ULONG c, PVOID d, ULONG e, PULONG f, PULONG g, PULONG h, PVOID i)
+inline SPLERR _SplEnumJob(PSZ a, PSZ b, ULONG c, PVOID d, ULONG e, PULONG f, PULONG g, PULONG h, PVOID i)
 {
  SPLERR yyrc;
  USHORT sel = GetFS();
@@ -12204,7 +12204,7 @@ inline SPLERR APIENTRY _SplEnumJob(PSZ a, PSZ b, ULONG c, PVOID d, ULONG e, PULO
 #undef  SplEnumJob
 #define SplEnumJob _SplEnumJob
 
-inline SPLERR APIENTRY _SplEnumPort(PCSZ a, ULONG b, PVOID c, ULONG d, PULONG e, PULONG f, PULONG g, PVOID h)
+inline SPLERR _SplEnumPort(PCSZ a, ULONG b, PVOID c, ULONG d, PULONG e, PULONG f, PULONG g, PVOID h)
 {
  SPLERR yyrc;
  USHORT sel = GetFS();
@@ -12218,7 +12218,7 @@ inline SPLERR APIENTRY _SplEnumPort(PCSZ a, ULONG b, PVOID c, ULONG d, PULONG e,
 #undef  SplEnumPort
 #define SplEnumPort _SplEnumPort
 
-inline SPLERR APIENTRY _SplEnumPrinter(PSZ a, ULONG b, ULONG c, PVOID d, ULONG e, PULONG f, PULONG g, PULONG h, PVOID i)
+inline SPLERR _SplEnumPrinter(PSZ a, ULONG b, ULONG c, PVOID d, ULONG e, PULONG f, PULONG g, PULONG h, PVOID i)
 {
  SPLERR yyrc;
  USHORT sel = GetFS();
@@ -12232,7 +12232,7 @@ inline SPLERR APIENTRY _SplEnumPrinter(PSZ a, ULONG b, ULONG c, PVOID d, ULONG e
 #undef  SplEnumPrinter
 #define SplEnumPrinter _SplEnumPrinter
 
-inline SPLERR APIENTRY _SplEnumQueue(PSZ a, ULONG b, PVOID c, ULONG d, PULONG e, PULONG f, PULONG g, PVOID h)
+inline SPLERR _SplEnumQueue(PSZ a, ULONG b, PVOID c, ULONG d, PULONG e, PULONG f, PULONG g, PVOID h)
 {
  SPLERR yyrc;
  USHORT sel = GetFS();
@@ -12246,7 +12246,7 @@ inline SPLERR APIENTRY _SplEnumQueue(PSZ a, ULONG b, PVOID c, ULONG d, PULONG e,
 #undef  SplEnumQueue
 #define SplEnumQueue _SplEnumQueue
 
-inline SPLERR APIENTRY _SplEnumQueueProcessor(PSZ a, ULONG b, PVOID c, ULONG d, PULONG e, PULONG f, PULONG g, PVOID h)
+inline SPLERR _SplEnumQueueProcessor(PSZ a, ULONG b, PVOID c, ULONG d, PULONG e, PULONG f, PULONG g, PVOID h)
 {
  SPLERR yyrc;
  USHORT sel = GetFS();
@@ -12260,7 +12260,7 @@ inline SPLERR APIENTRY _SplEnumQueueProcessor(PSZ a, ULONG b, PVOID c, ULONG d, 
 #undef  SplEnumQueueProcessor
 #define SplEnumQueueProcessor _SplEnumQueueProcessor
 
-inline SPLERR APIENTRY _SplHoldJob(PCSZ a, PCSZ b, ULONG c)
+inline SPLERR _SplHoldJob(PCSZ a, PCSZ b, ULONG c)
 {
  SPLERR yyrc;
  USHORT sel = GetFS();
@@ -12274,7 +12274,7 @@ inline SPLERR APIENTRY _SplHoldJob(PCSZ a, PCSZ b, ULONG c)
 #undef  SplHoldJob
 #define SplHoldJob _SplHoldJob
 
-inline SPLERR APIENTRY _SplHoldQueue(PSZ a, PSZ b)
+inline SPLERR _SplHoldQueue(PSZ a, PSZ b)
 {
  SPLERR yyrc;
  USHORT sel = GetFS();
@@ -12288,7 +12288,7 @@ inline SPLERR APIENTRY _SplHoldQueue(PSZ a, PSZ b)
 #undef  SplHoldQueue
 #define SplHoldQueue _SplHoldQueue
 
-inline SPLERR APIENTRY _SplPurgeQueue(PSZ a, PSZ b)
+inline SPLERR _SplPurgeQueue(PSZ a, PSZ b)
 {
  SPLERR yyrc;
  USHORT sel = GetFS();
@@ -12302,7 +12302,7 @@ inline SPLERR APIENTRY _SplPurgeQueue(PSZ a, PSZ b)
 #undef  SplPurgeQueue
 #define SplPurgeQueue _SplPurgeQueue
 
-inline SPLERR APIENTRY _SplQueryDevice(PSZ a, PSZ b, ULONG c, PVOID d, ULONG e, PULONG f)
+inline SPLERR _SplQueryDevice(PSZ a, PSZ b, ULONG c, PVOID d, ULONG e, PULONG f)
 {
  SPLERR yyrc;
  USHORT sel = GetFS();
@@ -12316,7 +12316,7 @@ inline SPLERR APIENTRY _SplQueryDevice(PSZ a, PSZ b, ULONG c, PVOID d, ULONG e, 
 #undef  SplQueryDevice
 #define SplQueryDevice _SplQueryDevice
 
-inline SPLERR APIENTRY _SplQueryDriver(PCSZ a, PCSZ b, PCSZ c, ULONG d, PVOID e, ULONG f, PULONG g)
+inline SPLERR _SplQueryDriver(PCSZ a, PCSZ b, PCSZ c, ULONG d, PVOID e, ULONG f, PULONG g)
 {
  SPLERR yyrc;
  USHORT sel = GetFS();
@@ -12330,7 +12330,7 @@ inline SPLERR APIENTRY _SplQueryDriver(PCSZ a, PCSZ b, PCSZ c, ULONG d, PVOID e,
 #undef  SplQueryDriver
 #define SplQueryDriver _SplQueryDriver
 
-inline SPLERR APIENTRY _SplQueryJob(PSZ a, PSZ b, ULONG c, ULONG d, PVOID e, ULONG f, PULONG g)
+inline SPLERR _SplQueryJob(PSZ a, PSZ b, ULONG c, ULONG d, PVOID e, ULONG f, PULONG g)
 {
  SPLERR yyrc;
  USHORT sel = GetFS();
@@ -12344,7 +12344,7 @@ inline SPLERR APIENTRY _SplQueryJob(PSZ a, PSZ b, ULONG c, ULONG d, PVOID e, ULO
 #undef  SplQueryJob
 #define SplQueryJob _SplQueryJob
 
-inline SPLERR APIENTRY _SplQueryPort(PCSZ a, PCSZ b, ULONG c, PVOID d, ULONG e, PULONG f)
+inline SPLERR _SplQueryPort(PCSZ a, PCSZ b, ULONG c, PVOID d, ULONG e, PULONG f)
 {
  SPLERR yyrc;
  USHORT sel = GetFS();
@@ -12358,7 +12358,7 @@ inline SPLERR APIENTRY _SplQueryPort(PCSZ a, PCSZ b, ULONG c, PVOID d, ULONG e, 
 #undef  SplQueryPort
 #define SplQueryPort _SplQueryPort
 
-inline SPLERR APIENTRY _SplQueryQueue(PSZ a, PSZ b, ULONG c, PVOID d, ULONG e, PULONG f)
+inline SPLERR _SplQueryQueue(PSZ a, PSZ b, ULONG c, PVOID d, ULONG e, PULONG f)
 {
  SPLERR yyrc;
  USHORT sel = GetFS();
@@ -12372,7 +12372,7 @@ inline SPLERR APIENTRY _SplQueryQueue(PSZ a, PSZ b, ULONG c, PVOID d, ULONG e, P
 #undef  SplQueryQueue
 #define SplQueryQueue _SplQueryQueue
 
-inline SPLERR APIENTRY _SplReleaseJob(PCSZ a, PCSZ b, ULONG c)
+inline SPLERR _SplReleaseJob(PCSZ a, PCSZ b, ULONG c)
 {
  SPLERR yyrc;
  USHORT sel = GetFS();
@@ -12386,7 +12386,7 @@ inline SPLERR APIENTRY _SplReleaseJob(PCSZ a, PCSZ b, ULONG c)
 #undef  SplReleaseJob
 #define SplReleaseJob _SplReleaseJob
 
-inline SPLERR APIENTRY _SplReleaseQueue(PSZ a, PSZ b)
+inline SPLERR _SplReleaseQueue(PSZ a, PSZ b)
 {
  SPLERR yyrc;
  USHORT sel = GetFS();
@@ -12400,7 +12400,7 @@ inline SPLERR APIENTRY _SplReleaseQueue(PSZ a, PSZ b)
 #undef  SplReleaseQueue
 #define SplReleaseQueue _SplReleaseQueue
 
-inline SPLERR APIENTRY _SplSetDevice(PSZ a, PSZ b, ULONG c, PVOID d, ULONG e, ULONG f)
+inline SPLERR _SplSetDevice(PSZ a, PSZ b, ULONG c, PVOID d, ULONG e, ULONG f)
 {
  SPLERR yyrc;
  USHORT sel = GetFS();
@@ -12414,7 +12414,7 @@ inline SPLERR APIENTRY _SplSetDevice(PSZ a, PSZ b, ULONG c, PVOID d, ULONG e, UL
 #undef  SplSetDevice
 #define SplSetDevice _SplSetDevice
 
-inline SPLERR APIENTRY _SplSetDriver(PCSZ a, PCSZ b, PCSZ c, ULONG d, PVOID e, ULONG f, ULONG g)
+inline SPLERR _SplSetDriver(PCSZ a, PCSZ b, PCSZ c, ULONG d, PVOID e, ULONG f, ULONG g)
 {
  SPLERR yyrc;
  USHORT sel = GetFS();
@@ -12428,7 +12428,7 @@ inline SPLERR APIENTRY _SplSetDriver(PCSZ a, PCSZ b, PCSZ c, ULONG d, PVOID e, U
 #undef  SplSetDriver
 #define SplSetDriver _SplSetDriver
 
-inline SPLERR APIENTRY _SplSetJob(PSZ a, PSZ b, ULONG c, ULONG d, PVOID e, ULONG f, ULONG g)
+inline SPLERR _SplSetJob(PSZ a, PSZ b, ULONG c, ULONG d, PVOID e, ULONG f, ULONG g)
 {
  SPLERR yyrc;
  USHORT sel = GetFS();
@@ -12442,7 +12442,7 @@ inline SPLERR APIENTRY _SplSetJob(PSZ a, PSZ b, ULONG c, ULONG d, PVOID e, ULONG
 #undef  SplSetJob
 #define SplSetJob _SplSetJob
 
-inline SPLERR APIENTRY _SplSetPort(PCSZ a, PCSZ b, ULONG c, PVOID d, ULONG e, ULONG f)
+inline SPLERR _SplSetPort(PCSZ a, PCSZ b, ULONG c, PVOID d, ULONG e, ULONG f)
 {
  SPLERR yyrc;
  USHORT sel = GetFS();
@@ -12456,7 +12456,7 @@ inline SPLERR APIENTRY _SplSetPort(PCSZ a, PCSZ b, ULONG c, PVOID d, ULONG e, UL
 #undef  SplSetPort
 #define SplSetPort _SplSetPort
 
-inline SPLERR APIENTRY _SplSetQueue(PSZ a, PSZ b, ULONG c, PVOID d, ULONG e, ULONG f)
+inline SPLERR _SplSetQueue(PSZ a, PSZ b, ULONG c, PVOID d, ULONG e, ULONG f)
 {
  SPLERR yyrc;
  USHORT sel = GetFS();
@@ -12470,7 +12470,7 @@ inline SPLERR APIENTRY _SplSetQueue(PSZ a, PSZ b, ULONG c, PVOID d, ULONG e, ULO
 #undef  SplSetQueue
 #define SplSetQueue _SplSetQueue
 
-inline ULONG APIENTRY _SplMessageBox(PSZ a, ULONG b, ULONG c, PSZ d, PSZ e, ULONG f, ULONG g)
+inline ULONG _SplMessageBox(PSZ a, ULONG b, ULONG c, PSZ d, PSZ e, ULONG f, ULONG g)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -12484,7 +12484,7 @@ inline ULONG APIENTRY _SplMessageBox(PSZ a, ULONG b, ULONG c, PSZ d, PSZ e, ULON
 #undef  SplMessageBox
 #define SplMessageBox _SplMessageBox
 
-inline BOOL APIENTRY _SplQmAbort(HSPL a)
+inline BOOL _SplQmAbort(HSPL a)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -12498,7 +12498,7 @@ inline BOOL APIENTRY _SplQmAbort(HSPL a)
 #undef  SplQmAbort
 #define SplQmAbort _SplQmAbort
 
-inline BOOL APIENTRY _SplQmAbortDoc(HSPL a)
+inline BOOL _SplQmAbortDoc(HSPL a)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -12512,7 +12512,7 @@ inline BOOL APIENTRY _SplQmAbortDoc(HSPL a)
 #undef  SplQmAbortDoc
 #define SplQmAbortDoc _SplQmAbortDoc
 
-inline BOOL APIENTRY _SplQmClose(HSPL a)
+inline BOOL _SplQmClose(HSPL a)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -12526,7 +12526,7 @@ inline BOOL APIENTRY _SplQmClose(HSPL a)
 #undef  SplQmClose
 #define SplQmClose _SplQmClose
 
-inline BOOL APIENTRY _SplQmEndDoc(HSPL a)
+inline BOOL _SplQmEndDoc(HSPL a)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -12540,7 +12540,7 @@ inline BOOL APIENTRY _SplQmEndDoc(HSPL a)
 #undef  SplQmEndDoc
 #define SplQmEndDoc _SplQmEndDoc
 
-inline ULONG APIENTRY _SplQmGetJobID(HSPL a, ULONG b, PVOID c, ULONG d, PULONG e)
+inline ULONG _SplQmGetJobID(HSPL a, ULONG b, PVOID c, ULONG d, PULONG e)
 {
  ULONG yyrc;
  USHORT sel = GetFS();
@@ -12554,7 +12554,7 @@ inline ULONG APIENTRY _SplQmGetJobID(HSPL a, ULONG b, PVOID c, ULONG d, PULONG e
 #undef  SplQmGetJobID
 #define SplQmGetJobID _SplQmGetJobID
 
-inline BOOL APIENTRY _SplQmNewPage(HSPL a, ULONG b)
+inline BOOL _SplQmNewPage(HSPL a, ULONG b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -12568,7 +12568,7 @@ inline BOOL APIENTRY _SplQmNewPage(HSPL a, ULONG b)
 #undef  SplQmNewPage
 #define SplQmNewPage _SplQmNewPage
 
-inline HSPL APIENTRY _SplQmOpen(PSZ a, LONG b, PQMOPENDATA c)
+inline HSPL _SplQmOpen(PSZ a, LONG b, PQMOPENDATA c)
 {
  HSPL yyrc;
  USHORT sel = GetFS();
@@ -12582,7 +12582,7 @@ inline HSPL APIENTRY _SplQmOpen(PSZ a, LONG b, PQMOPENDATA c)
 #undef  SplQmOpen
 #define SplQmOpen _SplQmOpen
 
-inline BOOL APIENTRY _SplQmStartDoc(HSPL a, PSZ b)
+inline BOOL _SplQmStartDoc(HSPL a, PSZ b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -12596,7 +12596,7 @@ inline BOOL APIENTRY _SplQmStartDoc(HSPL a, PSZ b)
 #undef  SplQmStartDoc
 #define SplQmStartDoc _SplQmStartDoc
 
-inline BOOL APIENTRY _SplQmWrite(HSPL a, LONG b, PVOID c)
+inline BOOL _SplQmWrite(HSPL a, LONG b, PVOID c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -12612,7 +12612,7 @@ inline BOOL APIENTRY _SplQmWrite(HSPL a, LONG b, PVOID c)
 
 #endif
 #ifdef INCL_WINHELP
-inline BOOL APIENTRY _WinAssociateHelpInstance(HWND a, HWND b)
+inline BOOL _WinAssociateHelpInstance(HWND a, HWND b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -12626,7 +12626,7 @@ inline BOOL APIENTRY _WinAssociateHelpInstance(HWND a, HWND b)
 #undef  WinAssociateHelpInstance
 #define WinAssociateHelpInstance _WinAssociateHelpInstance
 
-inline HWND APIENTRY _WinCreateHelpInstance(HAB a, PHELPINIT b)
+inline HWND _WinCreateHelpInstance(HAB a, PHELPINIT b)
 {
  HWND yyrc;
  USHORT sel = GetFS();
@@ -12640,7 +12640,7 @@ inline HWND APIENTRY _WinCreateHelpInstance(HAB a, PHELPINIT b)
 #undef  WinCreateHelpInstance
 #define WinCreateHelpInstance _WinCreateHelpInstance
 
-inline BOOL APIENTRY _WinCreateHelpTable(HWND a, PHELPTABLE b)
+inline BOOL _WinCreateHelpTable(HWND a, PHELPTABLE b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -12654,7 +12654,7 @@ inline BOOL APIENTRY _WinCreateHelpTable(HWND a, PHELPTABLE b)
 #undef  WinCreateHelpTable
 #define WinCreateHelpTable _WinCreateHelpTable
 
-inline BOOL APIENTRY _WinDestroyHelpInstance(HWND a)
+inline BOOL _WinDestroyHelpInstance(HWND a)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -12668,7 +12668,7 @@ inline BOOL APIENTRY _WinDestroyHelpInstance(HWND a)
 #undef  WinDestroyHelpInstance
 #define WinDestroyHelpInstance _WinDestroyHelpInstance
 
-inline BOOL APIENTRY _WinLoadHelpTable(HWND a, ULONG b, HMODULE c)
+inline BOOL _WinLoadHelpTable(HWND a, ULONG b, HMODULE c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -12682,7 +12682,7 @@ inline BOOL APIENTRY _WinLoadHelpTable(HWND a, ULONG b, HMODULE c)
 #undef  WinLoadHelpTable
 #define WinLoadHelpTable _WinLoadHelpTable
 
-inline HWND APIENTRY _WinQueryHelpInstance(HWND a)
+inline HWND _WinQueryHelpInstance(HWND a)
 {
  HWND yyrc;
  USHORT sel = GetFS();
@@ -12698,7 +12698,7 @@ inline HWND APIENTRY _WinQueryHelpInstance(HWND a)
 
 #endif
 #ifdef INCL_DDF
-inline BOOL APIENTRY _DdfBeginList(HDDF a, ULONG b, ULONG c, ULONG d)
+inline BOOL _DdfBeginList(HDDF a, ULONG b, ULONG c, ULONG d)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -12712,7 +12712,7 @@ inline BOOL APIENTRY _DdfBeginList(HDDF a, ULONG b, ULONG c, ULONG d)
 #undef  DdfBeginList
 #define DdfBeginList _DdfBeginList
 
-inline BOOL APIENTRY _DdfBitmap(HDDF a, HBITMAP b, ULONG c)
+inline BOOL _DdfBitmap(HDDF a, HBITMAP b, ULONG c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -12726,7 +12726,7 @@ inline BOOL APIENTRY _DdfBitmap(HDDF a, HBITMAP b, ULONG c)
 #undef  DdfBitmap
 #define DdfBitmap _DdfBitmap
 
-inline BOOL APIENTRY _DdfEndList(HDDF a)
+inline BOOL _DdfEndList(HDDF a)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -12740,7 +12740,7 @@ inline BOOL APIENTRY _DdfEndList(HDDF a)
 #undef  DdfEndList
 #define DdfEndList _DdfEndList
 
-inline BOOL APIENTRY _DdfHyperText(HDDF a, PCSZ b, PCSZ c, ULONG d)
+inline BOOL _DdfHyperText(HDDF a, PCSZ b, PCSZ c, ULONG d)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -12754,7 +12754,7 @@ inline BOOL APIENTRY _DdfHyperText(HDDF a, PCSZ b, PCSZ c, ULONG d)
 #undef  DdfHyperText
 #define DdfHyperText _DdfHyperText
 
-inline BOOL APIENTRY _DdfInform(HDDF a, PCSZ b, ULONG c)
+inline BOOL _DdfInform(HDDF a, PCSZ b, ULONG c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -12768,7 +12768,7 @@ inline BOOL APIENTRY _DdfInform(HDDF a, PCSZ b, ULONG c)
 #undef  DdfInform
 #define DdfInform _DdfInform
 
-inline HDDF APIENTRY _DdfInitialize(HWND a, ULONG b, ULONG c)
+inline HDDF _DdfInitialize(HWND a, ULONG b, ULONG c)
 {
  HDDF yyrc;
  USHORT sel = GetFS();
@@ -12782,7 +12782,7 @@ inline HDDF APIENTRY _DdfInitialize(HWND a, ULONG b, ULONG c)
 #undef  DdfInitialize
 #define DdfInitialize _DdfInitialize
 
-inline BOOL APIENTRY _DdfListItem(HDDF a, PCSZ b, PCSZ c)
+inline BOOL _DdfListItem(HDDF a, PCSZ b, PCSZ c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -12796,7 +12796,7 @@ inline BOOL APIENTRY _DdfListItem(HDDF a, PCSZ b, PCSZ c)
 #undef  DdfListItem
 #define DdfListItem _DdfListItem
 
-inline BOOL APIENTRY _DdfMetafile(HDDF a, HMF b, PRECTL c)
+inline BOOL _DdfMetafile(HDDF a, HMF b, PRECTL c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -12810,7 +12810,7 @@ inline BOOL APIENTRY _DdfMetafile(HDDF a, HMF b, PRECTL c)
 #undef  DdfMetafile
 #define DdfMetafile _DdfMetafile
 
-inline BOOL APIENTRY _DdfPara(HDDF a)
+inline BOOL _DdfPara(HDDF a)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -12824,7 +12824,7 @@ inline BOOL APIENTRY _DdfPara(HDDF a)
 #undef  DdfPara
 #define DdfPara _DdfPara
 
-inline BOOL APIENTRY _DdfSetColor(HDDF a, COLOR b, COLOR c)
+inline BOOL _DdfSetColor(HDDF a, COLOR b, COLOR c)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -12838,7 +12838,7 @@ inline BOOL APIENTRY _DdfSetColor(HDDF a, COLOR b, COLOR c)
 #undef  DdfSetColor
 #define DdfSetColor _DdfSetColor
 
-inline BOOL APIENTRY _DdfSetFont(HDDF a, PCSZ b, ULONG c, ULONG d)
+inline BOOL _DdfSetFont(HDDF a, PCSZ b, ULONG c, ULONG d)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -12852,7 +12852,7 @@ inline BOOL APIENTRY _DdfSetFont(HDDF a, PCSZ b, ULONG c, ULONG d)
 #undef  DdfSetFont
 #define DdfSetFont _DdfSetFont
 
-inline BOOL APIENTRY _DdfSetFontStyle(HDDF a, ULONG b)
+inline BOOL _DdfSetFontStyle(HDDF a, ULONG b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -12866,7 +12866,7 @@ inline BOOL APIENTRY _DdfSetFontStyle(HDDF a, ULONG b)
 #undef  DdfSetFontStyle
 #define DdfSetFontStyle _DdfSetFontStyle
 
-inline BOOL APIENTRY _DdfSetFormat(HDDF a, ULONG b)
+inline BOOL _DdfSetFormat(HDDF a, ULONG b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -12880,7 +12880,7 @@ inline BOOL APIENTRY _DdfSetFormat(HDDF a, ULONG b)
 #undef  DdfSetFormat
 #define DdfSetFormat _DdfSetFormat
 
-inline BOOL APIENTRY _DdfSetTextAlign(HDDF a, ULONG b)
+inline BOOL _DdfSetTextAlign(HDDF a, ULONG b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -12894,7 +12894,7 @@ inline BOOL APIENTRY _DdfSetTextAlign(HDDF a, ULONG b)
 #undef  DdfSetTextAlign
 #define DdfSetTextAlign _DdfSetTextAlign
 
-inline BOOL APIENTRY _DdfText(HDDF a, PCSZ b)
+inline BOOL _DdfText(HDDF a, PCSZ b)
 {
  BOOL yyrc;
  USHORT sel = GetFS();
@@ -12910,7 +12910,7 @@ inline BOOL APIENTRY _DdfText(HDDF a, PCSZ b)
 
 #endif
 #ifdef INCL_AVIO
-inline USHORT APIENTRY _VioAssociate(HDC a, HVPS b)
+inline USHORT _VioAssociate(HDC a, HVPS b)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -12924,7 +12924,7 @@ inline USHORT APIENTRY _VioAssociate(HDC a, HVPS b)
 #undef  VioAssociate
 #define VioAssociate _VioAssociate
 
-inline USHORT APIENTRY16 _VioCreateLogFont(PFATTRS a, LONG b, PSTR8 c, HVPS d)
+inline USHORT _VioCreateLogFont(PFATTRS a, LONG b, PSTR8 c, HVPS d)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -12938,7 +12938,7 @@ inline USHORT APIENTRY16 _VioCreateLogFont(PFATTRS a, LONG b, PSTR8 c, HVPS d)
 #undef  VioCreateLogFont
 #define VioCreateLogFont _VioCreateLogFont
 
-inline USHORT APIENTRY16 _VioCreatePS(PHVPS a, SHORT b, SHORT c, SHORT d, SHORT e, HVPS f)
+inline USHORT _VioCreatePS(PHVPS a, SHORT b, SHORT c, SHORT d, SHORT e, HVPS f)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -12952,7 +12952,7 @@ inline USHORT APIENTRY16 _VioCreatePS(PHVPS a, SHORT b, SHORT c, SHORT d, SHORT 
 #undef  VioCreatePS
 #define VioCreatePS _VioCreatePS
 
-inline USHORT APIENTRY16 _VioDeleteSetId(LONG a, HVPS b)
+inline USHORT _VioDeleteSetId(LONG a, HVPS b)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -12966,7 +12966,7 @@ inline USHORT APIENTRY16 _VioDeleteSetId(LONG a, HVPS b)
 #undef  VioDeleteSetId
 #define VioDeleteSetId _VioDeleteSetId
 
-inline USHORT APIENTRY16 _VioDestroyPS(HVPS a)
+inline USHORT _VioDestroyPS(HVPS a)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -12980,7 +12980,7 @@ inline USHORT APIENTRY16 _VioDestroyPS(HVPS a)
 #undef  VioDestroyPS
 #define VioDestroyPS _VioDestroyPS
 
-inline USHORT APIENTRY16 _VioGetDeviceCellSize(PSHORT a, PSHORT b, HVPS c)
+inline USHORT _VioGetDeviceCellSize(PSHORT a, PSHORT b, HVPS c)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -12994,7 +12994,7 @@ inline USHORT APIENTRY16 _VioGetDeviceCellSize(PSHORT a, PSHORT b, HVPS c)
 #undef  VioGetDeviceCellSize
 #define VioGetDeviceCellSize _VioGetDeviceCellSize
 
-inline USHORT APIENTRY16 _VioGetOrg(PSHORT a, PSHORT b, HVPS c)
+inline USHORT _VioGetOrg(PSHORT a, PSHORT b, HVPS c)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -13008,7 +13008,7 @@ inline USHORT APIENTRY16 _VioGetOrg(PSHORT a, PSHORT b, HVPS c)
 #undef  VioGetOrg
 #define VioGetOrg _VioGetOrg
 
-inline USHORT APIENTRY16 _VioQueryFonts(PLONG a, PFONTMETRICS b, LONG c, PLONG d, PSZ e, ULONG f, HVPS g)
+inline USHORT _VioQueryFonts(PLONG a, PFONTMETRICS b, LONG c, PLONG d, PSZ e, ULONG f, HVPS g)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -13022,7 +13022,7 @@ inline USHORT APIENTRY16 _VioQueryFonts(PLONG a, PFONTMETRICS b, LONG c, PLONG d
 #undef  VioQueryFonts
 #define VioQueryFonts _VioQueryFonts
 
-inline USHORT APIENTRY16 _VioQuerySetIds(PLONG a, PSTR8 b, PLONG c, LONG d, HVPS e)
+inline USHORT _VioQuerySetIds(PLONG a, PSTR8 b, PLONG c, LONG d, HVPS e)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -13036,7 +13036,7 @@ inline USHORT APIENTRY16 _VioQuerySetIds(PLONG a, PSTR8 b, PLONG c, LONG d, HVPS
 #undef  VioQuerySetIds
 #define VioQuerySetIds _VioQuerySetIds
 
-inline USHORT APIENTRY16 _VioSetDeviceCellSize(SHORT a, SHORT b, HVPS c)
+inline USHORT _VioSetDeviceCellSize(SHORT a, SHORT b, HVPS c)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -13050,7 +13050,7 @@ inline USHORT APIENTRY16 _VioSetDeviceCellSize(SHORT a, SHORT b, HVPS c)
 #undef  VioSetDeviceCellSize
 #define VioSetDeviceCellSize _VioSetDeviceCellSize
 
-inline USHORT APIENTRY16 _VioSetOrg(SHORT a, SHORT b, HVPS c)
+inline USHORT _VioSetOrg(SHORT a, SHORT b, HVPS c)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -13064,7 +13064,7 @@ inline USHORT APIENTRY16 _VioSetOrg(SHORT a, SHORT b, HVPS c)
 #undef  VioSetOrg
 #define VioSetOrg _VioSetOrg
 
-inline USHORT APIENTRY16 _VioShowPS(SHORT a, SHORT b, SHORT c, HVPS d)
+inline USHORT _VioShowPS(SHORT a, SHORT b, SHORT c, HVPS d)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -13078,7 +13078,7 @@ inline USHORT APIENTRY16 _VioShowPS(SHORT a, SHORT b, SHORT c, HVPS d)
 #undef  VioShowPS
 #define VioShowPS _VioShowPS
 
-inline MRESULT APIENTRY16 _WinDefAVioWindowProc(HWND a, USHORT b, ULONG c, ULONG d)
+inline MRESULT _WinDefAVioWindowProc(HWND a, USHORT b, ULONG c, ULONG d)
 {
  MRESULT yyrc;
  USHORT sel = GetFS();
@@ -13094,7 +13094,7 @@ inline MRESULT APIENTRY16 _WinDefAVioWindowProc(HWND a, USHORT b, ULONG c, ULONG
 
 #endif
 #ifdef INCL_KBD
-inline USHORT APIENTRY _KbdCharIn(PKBDKEYINFO a, USHORT b, HKBD c)
+inline USHORT _KbdCharIn(PKBDKEYINFO a, USHORT b, HKBD c)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -13108,7 +13108,7 @@ inline USHORT APIENTRY _KbdCharIn(PKBDKEYINFO a, USHORT b, HKBD c)
 #undef  KbdCharIn
 #define KbdCharIn _KbdCharIn
 
-inline USHORT APIENTRY16 _KbdClose(HKBD a)
+inline USHORT _KbdClose(HKBD a)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -13122,7 +13122,7 @@ inline USHORT APIENTRY16 _KbdClose(HKBD a)
 #undef  KbdClose
 #define KbdClose _KbdClose
 
-inline USHORT APIENTRY16 _KbdDeRegister()
+inline USHORT _KbdDeRegister()
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -13136,7 +13136,7 @@ inline USHORT APIENTRY16 _KbdDeRegister()
 #undef  KbdDeRegister
 #define KbdDeRegister _KbdDeRegister
 
-inline USHORT APIENTRY16 _KbdFlushBuffer(HKBD a)
+inline USHORT _KbdFlushBuffer(HKBD a)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -13150,7 +13150,7 @@ inline USHORT APIENTRY16 _KbdFlushBuffer(HKBD a)
 #undef  KbdFlushBuffer
 #define KbdFlushBuffer _KbdFlushBuffer
 
-inline USHORT APIENTRY16 _KbdFreeFocus(HKBD a)
+inline USHORT _KbdFreeFocus(HKBD a)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -13164,7 +13164,7 @@ inline USHORT APIENTRY16 _KbdFreeFocus(HKBD a)
 #undef  KbdFreeFocus
 #define KbdFreeFocus _KbdFreeFocus
 
-inline USHORT APIENTRY16 _KbdGetCp(ULONG a, PUSHORT b, HKBD c)
+inline USHORT _KbdGetCp(ULONG a, PUSHORT b, HKBD c)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -13178,7 +13178,7 @@ inline USHORT APIENTRY16 _KbdGetCp(ULONG a, PUSHORT b, HKBD c)
 #undef  KbdGetCp
 #define KbdGetCp _KbdGetCp
 
-inline USHORT APIENTRY16 _KbdGetFocus(USHORT a, HKBD b)
+inline USHORT _KbdGetFocus(USHORT a, HKBD b)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -13192,7 +13192,7 @@ inline USHORT APIENTRY16 _KbdGetFocus(USHORT a, HKBD b)
 #undef  KbdGetFocus
 #define KbdGetFocus _KbdGetFocus
 
-inline USHORT APIENTRY16 _KbdGetHWID(PKBDHWID a, HKBD b)
+inline USHORT _KbdGetHWID(PKBDHWID a, HKBD b)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -13206,7 +13206,7 @@ inline USHORT APIENTRY16 _KbdGetHWID(PKBDHWID a, HKBD b)
 #undef  KbdGetHWID
 #define KbdGetHWID _KbdGetHWID
 
-inline USHORT APIENTRY16 _KbdGetStatus(PKBDINFO a, HKBD b)
+inline USHORT _KbdGetStatus(PKBDINFO a, HKBD b)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -13220,7 +13220,7 @@ inline USHORT APIENTRY16 _KbdGetStatus(PKBDINFO a, HKBD b)
 #undef  KbdGetStatus
 #define KbdGetStatus _KbdGetStatus
 
-inline USHORT APIENTRY16 _KbdOpen(PHKBD a)
+inline USHORT _KbdOpen(PHKBD a)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -13234,7 +13234,7 @@ inline USHORT APIENTRY16 _KbdOpen(PHKBD a)
 #undef  KbdOpen
 #define KbdOpen _KbdOpen
 
-inline USHORT APIENTRY16 _KbdPeek(PKBDKEYINFO a, HKBD b)
+inline USHORT _KbdPeek(PKBDKEYINFO a, HKBD b)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -13248,7 +13248,7 @@ inline USHORT APIENTRY16 _KbdPeek(PKBDKEYINFO a, HKBD b)
 #undef  KbdPeek
 #define KbdPeek _KbdPeek
 
-inline USHORT APIENTRY16 _KbdRegister(PSZ a, PSZ b, ULONG c)
+inline USHORT _KbdRegister(PSZ a, PSZ b, ULONG c)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -13262,7 +13262,7 @@ inline USHORT APIENTRY16 _KbdRegister(PSZ a, PSZ b, ULONG c)
 #undef  KbdRegister
 #define KbdRegister _KbdRegister
 
-inline USHORT APIENTRY16 _KbdSetCp(USHORT a, USHORT b, HKBD c)
+inline USHORT _KbdSetCp(USHORT a, USHORT b, HKBD c)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -13276,7 +13276,7 @@ inline USHORT APIENTRY16 _KbdSetCp(USHORT a, USHORT b, HKBD c)
 #undef  KbdSetCp
 #define KbdSetCp _KbdSetCp
 
-inline USHORT APIENTRY16 _KbdSetCustXt(PUSHORT a, HKBD b)
+inline USHORT _KbdSetCustXt(PUSHORT a, HKBD b)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -13290,7 +13290,7 @@ inline USHORT APIENTRY16 _KbdSetCustXt(PUSHORT a, HKBD b)
 #undef  KbdSetCustXt
 #define KbdSetCustXt _KbdSetCustXt
 
-inline USHORT APIENTRY16 _KbdSetFgnd()
+inline USHORT _KbdSetFgnd()
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -13304,7 +13304,7 @@ inline USHORT APIENTRY16 _KbdSetFgnd()
 #undef  KbdSetFgnd
 #define KbdSetFgnd _KbdSetFgnd
 
-inline USHORT APIENTRY16 _KbdSetHWID(PKBDHWID a, HKBD b)
+inline USHORT _KbdSetHWID(PKBDHWID a, HKBD b)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -13318,7 +13318,7 @@ inline USHORT APIENTRY16 _KbdSetHWID(PKBDHWID a, HKBD b)
 #undef  KbdSetHWID
 #define KbdSetHWID _KbdSetHWID
 
-inline USHORT APIENTRY16 _KbdSetStatus(PKBDINFO a, HKBD b)
+inline USHORT _KbdSetStatus(PKBDINFO a, HKBD b)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -13332,7 +13332,7 @@ inline USHORT APIENTRY16 _KbdSetStatus(PKBDINFO a, HKBD b)
 #undef  KbdSetStatus
 #define KbdSetStatus _KbdSetStatus
 
-inline USHORT APIENTRY16 _KbdStringIn(PCH a, PSTRINGINBUF b, USHORT c, HKBD d)
+inline USHORT _KbdStringIn(PCH a, PSTRINGINBUF b, USHORT c, HKBD d)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -13346,7 +13346,7 @@ inline USHORT APIENTRY16 _KbdStringIn(PCH a, PSTRINGINBUF b, USHORT c, HKBD d)
 #undef  KbdStringIn
 #define KbdStringIn _KbdStringIn
 
-inline USHORT APIENTRY16 _KbdSynch(USHORT a)
+inline USHORT _KbdSynch(USHORT a)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -13360,7 +13360,7 @@ inline USHORT APIENTRY16 _KbdSynch(USHORT a)
 #undef  KbdSynch
 #define KbdSynch _KbdSynch
 
-inline USHORT APIENTRY16 _KbdXlate(PKBDTRANS a, HKBD b)
+inline USHORT _KbdXlate(PKBDTRANS a, HKBD b)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -13376,7 +13376,7 @@ inline USHORT APIENTRY16 _KbdXlate(PKBDTRANS a, HKBD b)
 
 #endif
 #ifdef INCL_VIO
-inline USHORT APIENTRY16 _VioCheckCharType(PUSHORT a, USHORT b, USHORT c, HVIO d)
+inline USHORT _VioCheckCharType(PUSHORT a, USHORT b, USHORT c, HVIO d)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -13390,7 +13390,7 @@ inline USHORT APIENTRY16 _VioCheckCharType(PUSHORT a, USHORT b, USHORT c, HVIO d
 #undef  VioCheckCharType
 #define VioCheckCharType _VioCheckCharType
 
-inline USHORT APIENTRY16 _VioDeRegister()
+inline USHORT _VioDeRegister()
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -13404,7 +13404,7 @@ inline USHORT APIENTRY16 _VioDeRegister()
 #undef  VioDeRegister
 #define VioDeRegister _VioDeRegister
 
-inline USHORT APIENTRY16 _VioEndPopUp(HVIO a)
+inline USHORT _VioEndPopUp(HVIO a)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -13418,7 +13418,7 @@ inline USHORT APIENTRY16 _VioEndPopUp(HVIO a)
 #undef  VioEndPopUp
 #define VioEndPopUp _VioEndPopUp
 
-inline USHORT APIENTRY16 _VioGetAnsi(PUSHORT a, HVIO b)
+inline USHORT _VioGetAnsi(PUSHORT a, HVIO b)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -13432,7 +13432,7 @@ inline USHORT APIENTRY16 _VioGetAnsi(PUSHORT a, HVIO b)
 #undef  VioGetAnsi
 #define VioGetAnsi _VioGetAnsi
 
-inline USHORT APIENTRY16 _VioGetBuf(PULONG a, PUSHORT b, HVIO c)
+inline USHORT _VioGetBuf(PULONG a, PUSHORT b, HVIO c)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -13446,7 +13446,7 @@ inline USHORT APIENTRY16 _VioGetBuf(PULONG a, PUSHORT b, HVIO c)
 #undef  VioGetBuf
 #define VioGetBuf _VioGetBuf
 
-inline USHORT APIENTRY16 _VioGetConfig(USHORT a, PVIOCONFIGINFO b, HVIO c)
+inline USHORT _VioGetConfig(USHORT a, PVIOCONFIGINFO b, HVIO c)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -13460,7 +13460,7 @@ inline USHORT APIENTRY16 _VioGetConfig(USHORT a, PVIOCONFIGINFO b, HVIO c)
 #undef  VioGetConfig
 #define VioGetConfig _VioGetConfig
 
-inline USHORT APIENTRY16 _VioGetCp(USHORT a, PUSHORT b, HVIO c)
+inline USHORT _VioGetCp(USHORT a, PUSHORT b, HVIO c)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -13474,7 +13474,7 @@ inline USHORT APIENTRY16 _VioGetCp(USHORT a, PUSHORT b, HVIO c)
 #undef  VioGetCp
 #define VioGetCp _VioGetCp
 
-inline USHORT APIENTRY16 _VioGetCurPos(PUSHORT a, PUSHORT b, HVIO c)
+inline USHORT _VioGetCurPos(PUSHORT a, PUSHORT b, HVIO c)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -13488,7 +13488,7 @@ inline USHORT APIENTRY16 _VioGetCurPos(PUSHORT a, PUSHORT b, HVIO c)
 #undef  VioGetCurPos
 #define VioGetCurPos _VioGetCurPos
 
-inline USHORT APIENTRY16 _VioGetCurType(PVIOCURSORINFO a, HVIO b)
+inline USHORT _VioGetCurType(PVIOCURSORINFO a, HVIO b)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -13502,7 +13502,7 @@ inline USHORT APIENTRY16 _VioGetCurType(PVIOCURSORINFO a, HVIO b)
 #undef  VioGetCurType
 #define VioGetCurType _VioGetCurType
 
-inline USHORT APIENTRY16 _VioGetFont(PVIOFONTINFO a, HVIO b)
+inline USHORT _VioGetFont(PVIOFONTINFO a, HVIO b)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -13516,7 +13516,7 @@ inline USHORT APIENTRY16 _VioGetFont(PVIOFONTINFO a, HVIO b)
 #undef  VioGetFont
 #define VioGetFont _VioGetFont
 
-inline USHORT APIENTRY16 _VioGetMode(PVIOMODEINFO a, HVIO b)
+inline USHORT _VioGetMode(PVIOMODEINFO a, HVIO b)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -13530,7 +13530,7 @@ inline USHORT APIENTRY16 _VioGetMode(PVIOMODEINFO a, HVIO b)
 #undef  VioGetMode
 #define VioGetMode _VioGetMode
 
-inline USHORT APIENTRY16 _VioGetPhysBuf(PVIOPHYSBUF a, USHORT b)
+inline USHORT _VioGetPhysBuf(PVIOPHYSBUF a, USHORT b)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -13544,7 +13544,7 @@ inline USHORT APIENTRY16 _VioGetPhysBuf(PVIOPHYSBUF a, USHORT b)
 #undef  VioGetPhysBuf
 #define VioGetPhysBuf _VioGetPhysBuf
 
-inline USHORT APIENTRY16 _VioGetState(PVOID a, HVIO b)
+inline USHORT _VioGetState(PVOID a, HVIO b)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -13558,7 +13558,7 @@ inline USHORT APIENTRY16 _VioGetState(PVOID a, HVIO b)
 #undef  VioGetState
 #define VioGetState _VioGetState
 
-inline USHORT APIENTRY16 _VioModeUndo(USHORT a, USHORT b, USHORT c)
+inline USHORT _VioModeUndo(USHORT a, USHORT b, USHORT c)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -13572,7 +13572,7 @@ inline USHORT APIENTRY16 _VioModeUndo(USHORT a, USHORT b, USHORT c)
 #undef  VioModeUndo
 #define VioModeUndo _VioModeUndo
 
-inline USHORT APIENTRY16 _VioModeWait(USHORT a, PUSHORT b, USHORT c)
+inline USHORT _VioModeWait(USHORT a, PUSHORT b, USHORT c)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -13586,7 +13586,7 @@ inline USHORT APIENTRY16 _VioModeWait(USHORT a, PUSHORT b, USHORT c)
 #undef  VioModeWait
 #define VioModeWait _VioModeWait
 
-inline USHORT APIENTRY16 _VioPopUp(PUSHORT a, HVIO b)
+inline USHORT _VioPopUp(PUSHORT a, HVIO b)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -13600,7 +13600,7 @@ inline USHORT APIENTRY16 _VioPopUp(PUSHORT a, HVIO b)
 #undef  VioPopUp
 #define VioPopUp _VioPopUp
 
-inline USHORT APIENTRY16 _VioPrtSc(HVIO a)
+inline USHORT _VioPrtSc(HVIO a)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -13614,7 +13614,7 @@ inline USHORT APIENTRY16 _VioPrtSc(HVIO a)
 #undef  VioPrtSc
 #define VioPrtSc _VioPrtSc
 
-inline USHORT APIENTRY16 _VioPrtScToggle(HVIO a)
+inline USHORT _VioPrtScToggle(HVIO a)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -13628,7 +13628,7 @@ inline USHORT APIENTRY16 _VioPrtScToggle(HVIO a)
 #undef  VioPrtScToggle
 #define VioPrtScToggle _VioPrtScToggle
 
-inline USHORT APIENTRY16 _VioReadCellStr(PCH a, PUSHORT b, USHORT c, USHORT d, HVIO e)
+inline USHORT _VioReadCellStr(PCH a, PUSHORT b, USHORT c, USHORT d, HVIO e)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -13642,7 +13642,7 @@ inline USHORT APIENTRY16 _VioReadCellStr(PCH a, PUSHORT b, USHORT c, USHORT d, H
 #undef  VioReadCellStr
 #define VioReadCellStr _VioReadCellStr
 
-inline USHORT APIENTRY16 _VioReadCharStr(PCH a, PUSHORT b, USHORT c, USHORT d, HVIO e)
+inline USHORT _VioReadCharStr(PCH a, PUSHORT b, USHORT c, USHORT d, HVIO e)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -13656,7 +13656,7 @@ inline USHORT APIENTRY16 _VioReadCharStr(PCH a, PUSHORT b, USHORT c, USHORT d, H
 #undef  VioReadCharStr
 #define VioReadCharStr _VioReadCharStr
 
-inline USHORT APIENTRY16 _VioRegister(PSZ a, PSZ b, ULONG c, ULONG d)
+inline USHORT _VioRegister(PSZ a, PSZ b, ULONG c, ULONG d)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -13670,7 +13670,7 @@ inline USHORT APIENTRY16 _VioRegister(PSZ a, PSZ b, ULONG c, ULONG d)
 #undef  VioRegister
 #define VioRegister _VioRegister
 
-inline USHORT APIENTRY16 _VioSavRedrawUndo(USHORT a, USHORT b, USHORT c)
+inline USHORT _VioSavRedrawUndo(USHORT a, USHORT b, USHORT c)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -13684,7 +13684,7 @@ inline USHORT APIENTRY16 _VioSavRedrawUndo(USHORT a, USHORT b, USHORT c)
 #undef  VioSavRedrawUndo
 #define VioSavRedrawUndo _VioSavRedrawUndo
 
-inline USHORT APIENTRY16 _VioSavRedrawWait(USHORT a, PUSHORT b, USHORT c)
+inline USHORT _VioSavRedrawWait(USHORT a, PUSHORT b, USHORT c)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -13698,7 +13698,7 @@ inline USHORT APIENTRY16 _VioSavRedrawWait(USHORT a, PUSHORT b, USHORT c)
 #undef  VioSavRedrawWait
 #define VioSavRedrawWait _VioSavRedrawWait
 
-inline USHORT APIENTRY16 _VioScrLock(USHORT a, PUCHAR b, HVIO c)
+inline USHORT _VioScrLock(USHORT a, PUCHAR b, HVIO c)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -13712,7 +13712,7 @@ inline USHORT APIENTRY16 _VioScrLock(USHORT a, PUCHAR b, HVIO c)
 #undef  VioScrLock
 #define VioScrLock _VioScrLock
 
-inline USHORT APIENTRY16 _VioScrollDn(USHORT a, USHORT b, USHORT c, USHORT d, USHORT e, PBYTE f, HVIO g)
+inline USHORT _VioScrollDn(USHORT a, USHORT b, USHORT c, USHORT d, USHORT e, PBYTE f, HVIO g)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -13726,7 +13726,7 @@ inline USHORT APIENTRY16 _VioScrollDn(USHORT a, USHORT b, USHORT c, USHORT d, US
 #undef  VioScrollDn
 #define VioScrollDn _VioScrollDn
 
-inline USHORT APIENTRY16 _VioScrollLf(USHORT a, USHORT b, USHORT c, USHORT d, USHORT e, PBYTE f, HVIO g)
+inline USHORT _VioScrollLf(USHORT a, USHORT b, USHORT c, USHORT d, USHORT e, PBYTE f, HVIO g)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -13740,7 +13740,7 @@ inline USHORT APIENTRY16 _VioScrollLf(USHORT a, USHORT b, USHORT c, USHORT d, US
 #undef  VioScrollLf
 #define VioScrollLf _VioScrollLf
 
-inline USHORT APIENTRY16 _VioScrollRt(USHORT a, USHORT b, USHORT c, USHORT d, USHORT e, PBYTE f, HVIO g)
+inline USHORT _VioScrollRt(USHORT a, USHORT b, USHORT c, USHORT d, USHORT e, PBYTE f, HVIO g)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -13754,7 +13754,7 @@ inline USHORT APIENTRY16 _VioScrollRt(USHORT a, USHORT b, USHORT c, USHORT d, US
 #undef  VioScrollRt
 #define VioScrollRt _VioScrollRt
 
-inline USHORT APIENTRY16 _VioScrollUp(USHORT a, USHORT b, USHORT c, USHORT d, USHORT e, PBYTE f, HVIO g)
+inline USHORT _VioScrollUp(USHORT a, USHORT b, USHORT c, USHORT d, USHORT e, PBYTE f, HVIO g)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -13768,7 +13768,7 @@ inline USHORT APIENTRY16 _VioScrollUp(USHORT a, USHORT b, USHORT c, USHORT d, US
 #undef  VioScrollUp
 #define VioScrollUp _VioScrollUp
 
-inline USHORT APIENTRY16 _VioScrUnLock(HVIO a)
+inline USHORT _VioScrUnLock(HVIO a)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -13782,7 +13782,7 @@ inline USHORT APIENTRY16 _VioScrUnLock(HVIO a)
 #undef  VioScrUnLock
 #define VioScrUnLock _VioScrUnLock
 
-inline USHORT APIENTRY16 _VioSetAnsi(USHORT a, HVIO b)
+inline USHORT _VioSetAnsi(USHORT a, HVIO b)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -13796,7 +13796,7 @@ inline USHORT APIENTRY16 _VioSetAnsi(USHORT a, HVIO b)
 #undef  VioSetAnsi
 #define VioSetAnsi _VioSetAnsi
 
-inline USHORT APIENTRY16 _VioSetCp(USHORT a, USHORT b, HVIO c)
+inline USHORT _VioSetCp(USHORT a, USHORT b, HVIO c)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -13810,7 +13810,7 @@ inline USHORT APIENTRY16 _VioSetCp(USHORT a, USHORT b, HVIO c)
 #undef  VioSetCp
 #define VioSetCp _VioSetCp
 
-inline USHORT APIENTRY16 _VioSetCurPos(USHORT a, USHORT b, HVIO c)
+inline USHORT _VioSetCurPos(USHORT a, USHORT b, HVIO c)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -13824,7 +13824,7 @@ inline USHORT APIENTRY16 _VioSetCurPos(USHORT a, USHORT b, HVIO c)
 #undef  VioSetCurPos
 #define VioSetCurPos _VioSetCurPos
 
-inline USHORT APIENTRY16 _VioSetCurType(PVIOCURSORINFO a, HVIO b)
+inline USHORT _VioSetCurType(PVIOCURSORINFO a, HVIO b)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -13838,7 +13838,7 @@ inline USHORT APIENTRY16 _VioSetCurType(PVIOCURSORINFO a, HVIO b)
 #undef  VioSetCurType
 #define VioSetCurType _VioSetCurType
 
-inline USHORT APIENTRY16 _VioSetFont(PVIOFONTINFO a, HVIO b)
+inline USHORT _VioSetFont(PVIOFONTINFO a, HVIO b)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -13852,7 +13852,7 @@ inline USHORT APIENTRY16 _VioSetFont(PVIOFONTINFO a, HVIO b)
 #undef  VioSetFont
 #define VioSetFont _VioSetFont
 
-inline USHORT APIENTRY16 _VioSetMode(PVIOMODEINFO a, HVIO b)
+inline USHORT _VioSetMode(PVIOMODEINFO a, HVIO b)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -13866,7 +13866,7 @@ inline USHORT APIENTRY16 _VioSetMode(PVIOMODEINFO a, HVIO b)
 #undef  VioSetMode
 #define VioSetMode _VioSetMode
 
-inline USHORT APIENTRY16 _VioSetState(PVOID a, HVIO b)
+inline USHORT _VioSetState(PVOID a, HVIO b)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -13880,7 +13880,7 @@ inline USHORT APIENTRY16 _VioSetState(PVOID a, HVIO b)
 #undef  VioSetState
 #define VioSetState _VioSetState
 
-inline USHORT APIENTRY16 _VioShowBuf(USHORT a, USHORT b, HVIO c)
+inline USHORT _VioShowBuf(USHORT a, USHORT b, HVIO c)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -13894,7 +13894,7 @@ inline USHORT APIENTRY16 _VioShowBuf(USHORT a, USHORT b, HVIO c)
 #undef  VioShowBuf
 #define VioShowBuf _VioShowBuf
 
-inline USHORT APIENTRY16 _VioWrtCellStr(PCH a, USHORT b, USHORT c, USHORT d, HVIO e)
+inline USHORT _VioWrtCellStr(PCH a, USHORT b, USHORT c, USHORT d, HVIO e)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -13908,7 +13908,7 @@ inline USHORT APIENTRY16 _VioWrtCellStr(PCH a, USHORT b, USHORT c, USHORT d, HVI
 #undef  VioWrtCellStr
 #define VioWrtCellStr _VioWrtCellStr
 
-inline USHORT APIENTRY16 _VioWrtCharStr(PCH a, USHORT b, USHORT c, USHORT d, HVIO e)
+inline USHORT _VioWrtCharStr(PCH a, USHORT b, USHORT c, USHORT d, HVIO e)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -13922,7 +13922,7 @@ inline USHORT APIENTRY16 _VioWrtCharStr(PCH a, USHORT b, USHORT c, USHORT d, HVI
 #undef  VioWrtCharStr
 #define VioWrtCharStr _VioWrtCharStr
 
-inline USHORT APIENTRY16 _VioWrtCharStrAtt(PCH a, USHORT b, USHORT c, USHORT d, PBYTE e, HVIO f)
+inline USHORT _VioWrtCharStrAtt(PCH a, USHORT b, USHORT c, USHORT d, PBYTE e, HVIO f)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -13936,7 +13936,7 @@ inline USHORT APIENTRY16 _VioWrtCharStrAtt(PCH a, USHORT b, USHORT c, USHORT d, 
 #undef  VioWrtCharStrAtt
 #define VioWrtCharStrAtt _VioWrtCharStrAtt
 
-inline USHORT APIENTRY16 _VioWrtNAttr(PBYTE a, USHORT b, USHORT c, USHORT d, HVIO e)
+inline USHORT _VioWrtNAttr(PBYTE a, USHORT b, USHORT c, USHORT d, HVIO e)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -13950,7 +13950,7 @@ inline USHORT APIENTRY16 _VioWrtNAttr(PBYTE a, USHORT b, USHORT c, USHORT d, HVI
 #undef  VioWrtNAttr
 #define VioWrtNAttr _VioWrtNAttr
 
-inline USHORT APIENTRY16 _VioWrtNCell(PBYTE a, USHORT b, USHORT c, USHORT d, HVIO e)
+inline USHORT _VioWrtNCell(PBYTE a, USHORT b, USHORT c, USHORT d, HVIO e)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -13964,7 +13964,7 @@ inline USHORT APIENTRY16 _VioWrtNCell(PBYTE a, USHORT b, USHORT c, USHORT d, HVI
 #undef  VioWrtNCell
 #define VioWrtNCell _VioWrtNCell
 
-inline USHORT APIENTRY16 _VioWrtNChar(PCH a, USHORT b, USHORT c, USHORT d, HVIO e)
+inline USHORT _VioWrtNChar(PCH a, USHORT b, USHORT c, USHORT d, HVIO e)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -13978,7 +13978,7 @@ inline USHORT APIENTRY16 _VioWrtNChar(PCH a, USHORT b, USHORT c, USHORT d, HVIO 
 #undef  VioWrtNChar
 #define VioWrtNChar _VioWrtNChar
 
-inline USHORT APIENTRY16 _VioWrtTTY(PCH a, USHORT b, HVIO c)
+inline USHORT _VioWrtTTY(PCH a, USHORT b, HVIO c)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -13994,7 +13994,7 @@ inline USHORT APIENTRY16 _VioWrtTTY(PCH a, USHORT b, HVIO c)
 
 #endif
 #ifdef INCL_MOU
-inline USHORT APIENTRY16 _MouClose(HMOU a)
+inline USHORT _MouClose(HMOU a)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -14008,7 +14008,7 @@ inline USHORT APIENTRY16 _MouClose(HMOU a)
 #undef  MouClose
 #define MouClose _MouClose
 
-inline USHORT APIENTRY16 _MouDeRegister()
+inline USHORT _MouDeRegister()
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -14022,7 +14022,7 @@ inline USHORT APIENTRY16 _MouDeRegister()
 #undef  MouDeRegister
 #define MouDeRegister _MouDeRegister
 
-inline USHORT APIENTRY16 _MouDrawPtr(HMOU a)
+inline USHORT _MouDrawPtr(HMOU a)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -14036,7 +14036,7 @@ inline USHORT APIENTRY16 _MouDrawPtr(HMOU a)
 #undef  MouDrawPtr
 #define MouDrawPtr _MouDrawPtr
 
-inline USHORT APIENTRY16 _MouFlushQue(HMOU a)
+inline USHORT _MouFlushQue(HMOU a)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -14050,7 +14050,7 @@ inline USHORT APIENTRY16 _MouFlushQue(HMOU a)
 #undef  MouFlushQue
 #define MouFlushQue _MouFlushQue
 
-inline USHORT APIENTRY16 _MouGetDevStatus(PUSHORT a, HMOU b)
+inline USHORT _MouGetDevStatus(PUSHORT a, HMOU b)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -14064,7 +14064,7 @@ inline USHORT APIENTRY16 _MouGetDevStatus(PUSHORT a, HMOU b)
 #undef  MouGetDevStatus
 #define MouGetDevStatus _MouGetDevStatus
 
-inline USHORT APIENTRY16 _MouGetEventMask(PUSHORT a, HMOU b)
+inline USHORT _MouGetEventMask(PUSHORT a, HMOU b)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -14078,7 +14078,7 @@ inline USHORT APIENTRY16 _MouGetEventMask(PUSHORT a, HMOU b)
 #undef  MouGetEventMask
 #define MouGetEventMask _MouGetEventMask
 
-inline USHORT APIENTRY16 _MouGetNumButtons(PUSHORT a, HMOU b)
+inline USHORT _MouGetNumButtons(PUSHORT a, HMOU b)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -14092,7 +14092,7 @@ inline USHORT APIENTRY16 _MouGetNumButtons(PUSHORT a, HMOU b)
 #undef  MouGetNumButtons
 #define MouGetNumButtons _MouGetNumButtons
 
-inline USHORT APIENTRY16 _MouGetNumMickeys(PUSHORT a, HMOU b)
+inline USHORT _MouGetNumMickeys(PUSHORT a, HMOU b)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -14106,7 +14106,7 @@ inline USHORT APIENTRY16 _MouGetNumMickeys(PUSHORT a, HMOU b)
 #undef  MouGetNumMickeys
 #define MouGetNumMickeys _MouGetNumMickeys
 
-inline USHORT APIENTRY16 _MouGetNumQueEl(PMOUQUEINFO a, HMOU b)
+inline USHORT _MouGetNumQueEl(PMOUQUEINFO a, HMOU b)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -14120,7 +14120,7 @@ inline USHORT APIENTRY16 _MouGetNumQueEl(PMOUQUEINFO a, HMOU b)
 #undef  MouGetNumQueEl
 #define MouGetNumQueEl _MouGetNumQueEl
 
-inline USHORT APIENTRY16 _MouGetPtrPos(PPTRLOC a, HMOU b)
+inline USHORT _MouGetPtrPos(PPTRLOC a, HMOU b)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -14134,7 +14134,7 @@ inline USHORT APIENTRY16 _MouGetPtrPos(PPTRLOC a, HMOU b)
 #undef  MouGetPtrPos
 #define MouGetPtrPos _MouGetPtrPos
 
-inline USHORT APIENTRY16 _MouGetPtrShape(PBYTE a, PPTRSHAPE b, HMOU c)
+inline USHORT _MouGetPtrShape(PBYTE a, PPTRSHAPE b, HMOU c)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -14148,7 +14148,7 @@ inline USHORT APIENTRY16 _MouGetPtrShape(PBYTE a, PPTRSHAPE b, HMOU c)
 #undef  MouGetPtrShape
 #define MouGetPtrShape _MouGetPtrShape
 
-inline USHORT APIENTRY16 _MouGetScaleFact(PSCALEFACT a, HMOU b)
+inline USHORT _MouGetScaleFact(PSCALEFACT a, HMOU b)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -14162,7 +14162,7 @@ inline USHORT APIENTRY16 _MouGetScaleFact(PSCALEFACT a, HMOU b)
 #undef  MouGetScaleFact
 #define MouGetScaleFact _MouGetScaleFact
 
-inline USHORT APIENTRY16 _MouGetThreshold(PTHRESHOLD a, HMOU b)
+inline USHORT _MouGetThreshold(PTHRESHOLD a, HMOU b)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -14176,7 +14176,7 @@ inline USHORT APIENTRY16 _MouGetThreshold(PTHRESHOLD a, HMOU b)
 #undef  MouGetThreshold
 #define MouGetThreshold _MouGetThreshold
 
-inline USHORT APIENTRY16 _MouInitReal(PSZ a)
+inline USHORT _MouInitReal(PSZ a)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -14190,7 +14190,7 @@ inline USHORT APIENTRY16 _MouInitReal(PSZ a)
 #undef  MouInitReal
 #define MouInitReal _MouInitReal
 
-inline USHORT APIENTRY16 _MouOpen(PSZ a, PHMOU b)
+inline USHORT _MouOpen(PSZ a, PHMOU b)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -14204,7 +14204,7 @@ inline USHORT APIENTRY16 _MouOpen(PSZ a, PHMOU b)
 #undef  MouOpen
 #define MouOpen _MouOpen
 
-inline USHORT APIENTRY16 _MouReadEventQue(PMOUEVENTINFO a, PUSHORT b, HMOU c)
+inline USHORT _MouReadEventQue(PMOUEVENTINFO a, PUSHORT b, HMOU c)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -14218,7 +14218,7 @@ inline USHORT APIENTRY16 _MouReadEventQue(PMOUEVENTINFO a, PUSHORT b, HMOU c)
 #undef  MouReadEventQue
 #define MouReadEventQue _MouReadEventQue
 
-inline USHORT APIENTRY16 _MouRegister(PSZ a, PSZ b, ULONG c)
+inline USHORT _MouRegister(PSZ a, PSZ b, ULONG c)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -14232,7 +14232,7 @@ inline USHORT APIENTRY16 _MouRegister(PSZ a, PSZ b, ULONG c)
 #undef  MouRegister
 #define MouRegister _MouRegister
 
-inline USHORT APIENTRY16 _MouRemovePtr(PNOPTRRECT a, HMOU b)
+inline USHORT _MouRemovePtr(PNOPTRRECT a, HMOU b)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -14246,7 +14246,7 @@ inline USHORT APIENTRY16 _MouRemovePtr(PNOPTRRECT a, HMOU b)
 #undef  MouRemovePtr
 #define MouRemovePtr _MouRemovePtr
 
-inline USHORT APIENTRY16 _MouSetDevStatus(PUSHORT a, HMOU b)
+inline USHORT _MouSetDevStatus(PUSHORT a, HMOU b)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -14260,7 +14260,7 @@ inline USHORT APIENTRY16 _MouSetDevStatus(PUSHORT a, HMOU b)
 #undef  MouSetDevStatus
 #define MouSetDevStatus _MouSetDevStatus
 
-inline USHORT APIENTRY16 _MouSetEventMask(PUSHORT a, HMOU b)
+inline USHORT _MouSetEventMask(PUSHORT a, HMOU b)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -14274,7 +14274,7 @@ inline USHORT APIENTRY16 _MouSetEventMask(PUSHORT a, HMOU b)
 #undef  MouSetEventMask
 #define MouSetEventMask _MouSetEventMask
 
-inline USHORT APIENTRY16 _MouSetPtrPos(PPTRLOC a, HMOU b)
+inline USHORT _MouSetPtrPos(PPTRLOC a, HMOU b)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -14288,7 +14288,7 @@ inline USHORT APIENTRY16 _MouSetPtrPos(PPTRLOC a, HMOU b)
 #undef  MouSetPtrPos
 #define MouSetPtrPos _MouSetPtrPos
 
-inline USHORT APIENTRY16 _MouSetPtrShape(PBYTE a, PPTRSHAPE b, HMOU c)
+inline USHORT _MouSetPtrShape(PBYTE a, PPTRSHAPE b, HMOU c)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -14302,7 +14302,7 @@ inline USHORT APIENTRY16 _MouSetPtrShape(PBYTE a, PPTRSHAPE b, HMOU c)
 #undef  MouSetPtrShape
 #define MouSetPtrShape _MouSetPtrShape
 
-inline USHORT APIENTRY16 _MouSetScaleFact(PSCALEFACT a, HMOU b)
+inline USHORT _MouSetScaleFact(PSCALEFACT a, HMOU b)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -14316,7 +14316,7 @@ inline USHORT APIENTRY16 _MouSetScaleFact(PSCALEFACT a, HMOU b)
 #undef  MouSetScaleFact
 #define MouSetScaleFact _MouSetScaleFact
 
-inline USHORT APIENTRY16 _MouSetThreshold(PTHRESHOLD a, HMOU b)
+inline USHORT _MouSetThreshold(PTHRESHOLD a, HMOU b)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
@@ -14330,7 +14330,7 @@ inline USHORT APIENTRY16 _MouSetThreshold(PTHRESHOLD a, HMOU b)
 #undef  MouSetThreshold
 #define MouSetThreshold _MouSetThreshold
 
-inline USHORT APIENTRY16 _MouSynch(USHORT a)
+inline USHORT _MouSynch(USHORT a)
 {
  USHORT yyrc;
  USHORT sel = GetFS();
