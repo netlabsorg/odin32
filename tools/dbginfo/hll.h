@@ -1,4 +1,4 @@
-/* $Id: hll.h,v 1.4 2000-03-27 12:36:17 bird Exp $
+/* $Id: hll.h,v 1.5 2000-03-31 15:35:09 bird Exp $
  *
  * HLL definitions.
  *
@@ -129,7 +129,83 @@ typedef struct _HLLPublicSymbol
 } HLLPUBLICSYM, *PHLLPUBLICSYM;
 
 
+/*
+ * HLL First entry of the IBMSRC data.
+ */
+typedef union _HLLFirstEntry
+{
+    struct
+    {
+        unsigned short  usLine;
+        unsigned char   uchType;
+        unsigned char   uchReserved;
+        unsigned short  cEntries;
+        union
+        {
+            unsigned short  cbFileNameTable;
+            unsigned short  cPathTableEntries;
+            unsigned short  offBase;
+        } u1;
+    } hll01;
+    struct
+    {
+        unsigned short  usLine;
+        unsigned char   uchType;
+        unsigned char   uchReserved;
+        unsigned short  cEntries;
+        unsigned short  iSeg;
+        union
+        {
+            unsigned long   cbFileNameTable;
+            unsigned long   cPathTableEntries;
+            unsigned long   offBase;
+        } u1;
+    } hll03, hll04;
+} HLLFIRSTENTRY, *PHLLFIRSTENTRY;
 
+
+/*
+ * HLL Source filename entry.
+ */
+typedef struct _HLLFilenameEntry
+{
+    unsigned long   offSource;
+    unsigned long   cSourceRecords;
+    unsigned long   cSourceFiles;
+    unsigned char   cchName;
+    unsigned char   achName[1];
+} HLLFILENAMEENTRY, *PHLLFILENAMEENTRY;
+
+
+/*
+ * HLL Linenumber entry.
+ */
+typedef union _HLLLinenumberEntry
+{
+    struct
+    {
+        unsigned short  usLine;
+        unsigned char   ichSourceFile;
+        unsigned char   chFlags;
+        unsigned long   off;
+    } hll01;
+    struct
+    {
+        unsigned short  usLine;
+        unsigned short  iusSourceFile;
+        unsigned long   off;
+    } hll03, hll04;
+} HLLLINENUMBERENTRY, *PHLLLINENUMBERENTRY;
+
+
+/*
+ * HLL Path entry (HLL 01)
+ */
+typedef struct _HLLPathEntry_HL01
+{
+    unsigned long   off;
+    unsigned short  usPathcode;
+} HLLPATHENTRY_HL01, *PHLLPATHENTRY_HL01;
 
 
 #pragma pack()
