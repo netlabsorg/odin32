@@ -80,6 +80,9 @@ extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
 // PH: this is for profiling cumulative method call times
 #ifdef PROFILE
 
+#include <perfview.h>
+
+
 #define FNINIT \
   LARGE_INTEGER liStart;       \
   LARGE_INTEGER liEnd;         \
@@ -96,6 +99,8 @@ extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
        ulElapsed = 0xFFFFFFFF - liStart.LowPart + liEnd.LowPart; \
      else                                           \
        ulElapsed = liEnd.LowPart - liStart.LowPart; \
+                                  \
+     PerfView_RegisterCall(a, ulElapsed); \
                                   \
      dprintf(("%s: %s %u ticks\n",\
               pszOdinDebugChannel,\
