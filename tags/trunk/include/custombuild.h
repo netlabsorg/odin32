@@ -133,5 +133,13 @@ void WIN32API EnablePhysicalDiskAccess(BOOL fEnable);
 BOOL WIN32API ODIN_SetSysColors(INT nChanges, const INT *lpSysColor,
                                 const COLORREF *lpColorValues);
 
+//Override loader names (PEC, PE, W16ODIN)
+//NOTE: String must be resident
+BOOL WIN32API ODIN_SetLoaders(LPCSTR pszPECmdLoader, LPCSTR pszPEGUILoader,
+                              LPCSTR pszNELoader);
+
+//Custom build function to disable loading of LX dlls
+void WIN32API ODIN_DisableLXDllLoading();
+
 #endif  /*__CUSTOMBUILD_H__*/
 
