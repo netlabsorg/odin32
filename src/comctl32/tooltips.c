@@ -1,4 +1,4 @@
-/* $Id: tooltips.c,v 1.18 1999-12-26 17:32:14 cbratschi Exp $ */
+/* $Id: tooltips.c,v 1.19 1999-12-27 17:13:40 cbratschi Exp $ */
 /*
  * Tool tip control
  *
