@@ -1,4 +1,4 @@
-; $Id: ntdll.def,v 1.11 1999-08-18 18:49:18 phaller Exp $
+; $Id: ntdll.def,v 1.12 1999-08-18 19:35:30 phaller Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is NT4.0's NTDLL.DLL
@@ -262,9 +262,12 @@ EXPORTS
     RtlDestroyHeap                = _RtlDestroyHeap@4
 ;   DbgPrint                      = _DbgPrint@8
 
-;   NtRaiseException              = _NtRaiseException@16
-;   ZwRaiseException              = _NtRaiseException@16
-;   RtlRaiseException             = _RtlRaiseException@4
+    NtRaiseException              = ___regs_NtRaiseException@16
+    ZwRaiseException              = ___regs_NtRaiseException@16
+    RtlRaiseException             = ___regs_RtlRaiseException@8
+    DebugBreak                    = ___regs_DebugBreak@4
+    RtlRaiseStatus                = _RtlRaiseStatus@4
+
     RtlAcquirePebLock             = _RtlAcquirePebLock@0
     RtlReleasePebLock             = _RtlReleasePebLock@0
     RtlIntegerToChar              = _RtlIntegerToChar@16
@@ -284,10 +287,12 @@ EXPORTS
     RtlDestroyEnvironment         = _RtlDestroyEnvironment@4
     RtlQueryEnvironmentVariable_U = _RtlQueryEnvironmentVariable_U@12
 
-    RtlSystemTimeToLocalTime      = _RtlSystemTimeToLocalTime@8
-    RtlTimeToSecondsSince1980     = _RtlTimeToSecondsSince1980@8
-    RtlTimeToSecondsSince1970     = _RtlTimeToSecondsSince1970@8
-    RtlSecondsSince1970ToTime     = _RtlSecondsSince1970ToTime@8
+    RtlSystemTimeToLocalTime      = _RtlSystemTimeToLocalTime@8       @500
+    RtlTimeToSecondsSince1970     = _RtlTimeToSecondsSince1970@8      @503
+    RtlTimeToSecondsSince1980     = _RtlTimeToSecondsSince1980@8      @504
+    RtlSecondsSince1970ToTime     = _RtlSecondsSince1970ToTime@8      @476
+    RtlSecondsSince1980ToTime     = _RtlSecondsSince1980ToTime@8      @477
+    RtlQueryTimeZoneInformation   = _RtlQueryTimeZoneInformation@12   @463
 
     RtlTimeToElapsedTimeFields    = _RtlTimeToElapsedTimeFields@8
 

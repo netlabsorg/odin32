@@ -1,4 +1,4 @@
-/* $Id: ntdll.h,v 1.5 1999-08-18 18:49:18 phaller Exp $ */
+/* $Id: ntdll.h,v 1.6 1999-08-18 19:35:30 phaller Exp $ */
 
 /*
    this file defines interfaces mainly exposed to device drivers and
@@ -19,10 +19,10 @@
 extern "C" {
 #endif
 
-/******************
- * asynchronous I/O
- */
-#undef Status  /* conflict with X11-includes*/
+
+/* Win32 register functions */
+// @@@PH what does GCC with this ?
+#define REGS_FUNC(name) __regs_##name
 
 
 /****************************************************************************
@@ -570,8 +570,8 @@ BOOLEAN WINAPI RtlTimeToSecondsSince1970(
    LPFILETIME ft,
    LPDWORD timeret);
 
-BOOLEAN WINAPI RtlSecondsSince1970ToTime(LPSYSTEMTIME st,
-                                         LPDWORD      timeret);
+BOOLEAN WINAPI RtlSecondsSince1970ToTime(LPFILETIME ft, LPDWORD    timeret);
+BOOLEAN WINAPI RtlSecondsSince1980ToTime(LPFILETIME ft, LPDWORD    timeret);
 
 
 /*
@@ -610,8 +610,12 @@ BOOLEAN WINAPI RtlFreeHeap(
  * misc
  */
 void __cdecl DbgPrint(LPCSTR fmt,LPVOID args);
-DWORD NtRaiseException ( DWORD dwExceptionCode, DWORD dwExceptionFlags, DWORD nNumberOfArguments,CONST ULONG_PTR *lpArguments);
-DWORD RtlRaiseException ( DWORD x);
+void WINAPI REGS_FUNC(DebugBreak)( CONTEXT *context );
+void WINAPI RtlRaiseStatus( NTSTATUS status );
+void WINAPI REGS_FUNC(NtRaiseException)( EXCEPTION_RECORD *rec, CONTEXT *ctx, BOOL first, CONTEXT *context );
+//void WINAPI REGS_FUNC(RtlUnwind)( PEXCEPTION_FRAME pEndFrame, LPVOID unusedEip, PEXCEPTION_RECORD pRecord, DWORD returnEax, CONTEXT *context );
+void WINAPI REGS_FUNC(RtlRaiseException)( EXCEPTION_RECORD *rec, CONTEXT *context );
+
 VOID WINAPI RtlAcquirePebLock(void);
 VOID WINAPI RtlReleasePebLock(void);
 DWORD WINAPI RtlAdjustPrivilege(DWORD x1,DWORD x2,DWORD x3,DWORD x4);
