@@ -1,4 +1,4 @@
-/* $Id: osmesa.c,v 1.1 2000-03-01 18:49:33 jeroen Exp $ */
+/* $Id: osmesa.c,v 1.2 2000-03-02 13:27:30 sandervl Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -81,7 +81,11 @@ static void osmesa_ctx_thread_init() {
 }
 
 static OSMesaContext osmesa_get_thread_context( void ) {
+#ifdef __WIN32OS2__
+  return (OSMesaContext) MesaGetTSD(&osmesa_ctx_tsd, osmesa_ctx_thread_init);
+#else
   return (OSMesaContext) MesaGetTSD(&osmesa_ctx_tsd);
+#endif
 }
 
 static void osmesa_set_thread_context( OSMesaContext ctx ) {
