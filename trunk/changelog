@@ -1,4 +1,9 @@
-/* $Id: changelog,v 1.1807 2001-10-29 02:28:21 bird Exp $ */
+/* $Id: changelog,v 1.1808 2001-10-29 10:02:32 achimha Exp $ */
+
+ 2001-10-29: Achim Hasenmueller <achimha@innotek.de>
+    - BUILD:    o strip EAs from binary before executing LXLITE on it to
+                  prevent errors in LXLITE if the file is on a LAN Server
+                  JFS volume
 
  2001-10-26: knut st. osmundsen <kosmunds@csc.com>
     - NTDLL:    o _ultow and RtlIntegerToUnicodeString.
