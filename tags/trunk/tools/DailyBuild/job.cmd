@@ -1,4 +1,4 @@
-/* $Id: job.cmd,v 1.8 2002-06-26 22:06:57 bird Exp $
+/* $Id: job.cmd,v 1.9 2003-02-06 21:05:37 bird Exp $
  *
  * Main job for building OS/2.
  *
@@ -55,6 +55,8 @@
     sScriptDir = filespec('drive', sScript) || filespec('path', sScript);
     sLogFile = sScriptDir || '\logs\' || sDate || '.log';
     sTree    = sScriptDir || '..\tree' || sDate;
+    'mkdir 'sScriptDir||'\logs'
+    'mkdir 'sScriptDir||'\DBBackup'
 
     /*
      * Clean tree, get it and build it.
