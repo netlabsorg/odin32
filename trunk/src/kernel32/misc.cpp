@@ -1,4 +1,4 @@
-/* $Id: misc.cpp,v 1.30 2001-02-11 10:34:44 sandervl Exp $ */
+/* $Id: misc.cpp,v 1.31 2001-02-22 18:12:06 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -528,7 +528,7 @@ void SYSTEM CheckVersion(ULONG version, char *modname)
         static char msg[300];
         int r;
         dprintf(("Version mismatch! %d, %d: %s\n", version, PE2LX_VERSION, modname));
-        sprintf(msg, "%s is intended for use with a different release of PE2LX.\n", modname);
+        sprintf(msg, "%s is intended for use with a different release of Odin.\n", modname);
         do{
             r = WinMessageBox(HWND_DESKTOP, NULLHANDLE, msg, "Version Mismatch!", 0, MB_ABORTRETRYIGNORE | MB_ICONEXCLAMATION | MB_MOVEABLE);
         }while(r == MBID_RETRY);   // giggle
