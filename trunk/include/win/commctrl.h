@@ -1,4 +1,4 @@
-/* $Id: commctrl.h,v 1.20 2000-02-14 17:27:54 cbratschi Exp $ */
+/* $Id: commctrl.h,v 1.21 2000-02-16 17:20:28 cbratschi Exp $ */
 /*
  * Common controls definitions
  */
@@ -1868,7 +1868,7 @@ typedef struct
 #define TVIF_SELECTEDIMAGE    0x0020
 #define TVIF_CHILDREN         0x0040
 #define TVIF_INTEGRAL         0x0080
-#define TVIF_DI_SETITEM           0x1000
+#define TVIF_DI_SETITEM       0x1000
 
 #define TVI_ROOT              ((HTREEITEM)0xffff0000)     /* -65536 */
 #define TVI_FIRST             ((HTREEITEM)0xffff0001)     /* -65535 */
@@ -1882,6 +1882,7 @@ typedef struct
 #define TVIS_BOLD             0x0010
 #define TVIS_EXPANDED         0x0020
 #define TVIS_EXPANDEDONCE     0x0040
+#define TVIS_EXPANDPARTIAL    0x0080
 #define TVIS_OVERLAYMASK      0x0f00
 #define TVIS_STATEIMAGEMASK   0xf000
 #define TVIS_USERMASK         0xf000
@@ -1973,6 +1974,7 @@ typedef struct {
 
 #define TVITEM     WINELIB_NAME_AW(TVITEM)
 #define LPTVITEM   WINELIB_NAME_AW(LPTVITEM)
+#define LPTV_ITEM   LPTVITEM
 #define TV_ITEM     TVITEM
 
 typedef struct {
@@ -2086,6 +2088,14 @@ typedef struct tagTVHITTESTINFO {
 } TVHITTESTINFO, *LPTVHITTESTINFO;
 
 #define TV_HITTESTINFO TVHITTESTINFO
+
+#define TV_KEYDOWN      NMTVKEYDOWN
+
+typedef struct tagTVKEYDOWN {
+    NMHDR hdr;
+    WORD wVKey;
+    UINT flags;
+} NMTVKEYDOWN, *LPNMTVKEYDOWN;
 
 
 /* Custom Draw Treeview */
@@ -2302,6 +2312,12 @@ typedef struct tagNMTVGETINFOTIPW
   _TVi.state = data; \
   SendMessageA((hwndTV), TVM_SETITEM, 0, (LPARAM)(TV_ITEM *)&_TVi); \
 }
+
+#define TreeView_SetUnicodeFormat(hwnd, fUnicode)  \
+    (BOOL)SendMessageA((hwnd), TVM_SETUNICODEFORMAT, (WPARAM)(fUnicode), 0)
+
+#define TreeView_GetUnicodeFormat(hwnd)  \
+    (BOOL)SendMessageA((hwnd), TVM_GETUNICODEFORMAT, 0, 0)
 
 /* Listview control */
 
