@@ -1,4 +1,4 @@
-/* $Id: icm.cpp,v 1.2 2001-09-09 12:24:13 sandervl Exp $ */
+/* $Id: icm.cpp,v 1.3 2002-11-26 10:53:09 sandervl Exp $ */
 
 /*
  * GDI32 Color Management apis
@@ -23,7 +23,7 @@
 #include <dcdata.h>
 #include <winuser32.h>
 
-#define DBG_LOCALLOG    DBG_gdi32
+#define DBG_LOCALLOG    DBG_icm
 #include "dbglocal.h"
 
 ODINDEBUGCHANNEL(GDI32-ICM)

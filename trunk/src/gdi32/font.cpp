@@ -1,4 +1,4 @@
-/* $Id: font.cpp,v 1.26 2002-07-15 10:02:28 sandervl Exp $ */
+/* $Id: font.cpp,v 1.27 2002-11-26 10:53:08 sandervl Exp $ */
 
 /*
  * GDI32 font apis
@@ -146,20 +146,20 @@ static void iFontRename(LPCSTR lpstrFaceOriginal,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTIONNODBG14(HFONT,  CreateFontA, int,    nHeight,
-                                    int,    nWidth,
-                                    int,    nEscapement,
-                                    int,    nOrientation,
-                                    int,    fnWeight,
-                                    DWORD,  fdwItalic,
-                                    DWORD,  fdwUnderline,
-                                    DWORD,  fdwStrikeOut,
-                                    DWORD,  fdwCharSet,
-                                    DWORD,  fdwOutputPrecision,
-                                    DWORD,  fdwClipPrecision,
-                                    DWORD,  fdwQuality,
-                                    DWORD,  fdwPitchAndFamily,
-                                    LPCSTR, lpszFace)
+HFONT WIN32API CreateFontA(int  nHeight,
+                           int    nWidth,
+                           int    nEscapement,
+                           int    nOrientation,
+                           int    fnWeight,
+                           DWORD  fdwItalic,
+                           DWORD  fdwUnderline,
+                           DWORD  fdwStrikeOut,
+                           DWORD  fdwCharSet,
+                           DWORD  fdwOutputPrecision,
+                           DWORD  fdwClipPrecision,
+                           DWORD  fdwQuality,
+                           DWORD  fdwPitchAndFamily,
+                           LPCSTR lpszFace)
 {
   CHAR  lpstrFaceNew[LF_FACESIZE];
   HFONT hFont;
@@ -200,21 +200,20 @@ ODINFUNCTIONNODBG14(HFONT,  CreateFontA, int,    nHeight,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTIONNODBG14(HFONT,  CreateFontW,
-               int,    nHeight,
-               int,    nWidth,
-               int,    nEscapement,
-               int,    nOrientation,
-               int,    fnWeight,
-               DWORD,  fdwItalic,
-               DWORD,  fdwUnderline,
-               DWORD,  fdwStrikeOut,
-               DWORD,  fdwCharSet,
-               DWORD,  fdwOutputPrecision,
-               DWORD,  fdwClipPrecision,
-               DWORD,  fdwQuality,
-               DWORD,  fdwPitchAndFamily,
-               LPCWSTR,lpszFace)
+HFONT WIN32API CreateFontW(int     nHeight,
+                           int     nWidth,
+                           int     nEscapement,
+                           int     nOrientation,
+                           int     fnWeight,
+                           DWORD   fdwItalic,
+                           DWORD   fdwUnderline,
+                           DWORD   fdwStrikeOut,
+                           DWORD   fdwCharSet,
+                           DWORD   fdwOutputPrecision,
+                           DWORD   fdwClipPrecision,
+                           DWORD   fdwQuality,
+                           DWORD   fdwPitchAndFamily,
+                           LPCWSTR lpszFace)
 {
   char *astring;
   HFONT hFont;
@@ -248,7 +247,7 @@ ODINFUNCTIONNODBG14(HFONT,  CreateFontW,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION1(HFONT,CreateFontIndirectA,const LOGFONTA*, lplf)
+HFONT WIN32API CreateFontIndirectA(const LOGFONTA* lplf)
 {
   HFONT    hFont;
   LOGFONTA afont;
@@ -283,7 +282,7 @@ ODINFUNCTION1(HFONT,CreateFontIndirectA,const LOGFONTA*, lplf)
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION1(HFONT, CreateFontIndirectW,const LOGFONTW *, lplf)
+HFONT WIN32API CreateFontIndirectW(const LOGFONTW * lplf)
 {
   LOGFONTA afont;
   HFONT    hfont;
@@ -432,33 +431,30 @@ int EXPENTRY_O32 EnumFontProcExW(LPENUMLOGFONTA lpLogFont, LPNEWTEXTMETRICA lpTe
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION4(int, EnumFontsA,
-              HDC, hdc, 
-              LPCSTR, arg2, 
-              FONTENUMPROCA, arg3, 
-              LPARAM,  arg4)
+int WIN32API EnumFontsA(HDC hdc, 
+                        LPCSTR arg2, 
+                        FONTENUMPROCA arg3, 
+                        LPARAM  arg4)
 {
   //@@@PH shouldn't this rather be O32_EnumFonts ?
   return EnumFontFamiliesA(hdc, arg2, arg3, arg4);
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION4(int, EnumFontsW,
-              HDC, hdc, 
-              LPCWSTR, arg2,
-              FONTENUMPROCW, arg3,
-              LPARAM,  arg4)
+int WIN32API EnumFontsW(HDC hdc, 
+                        LPCWSTR arg2,
+                        FONTENUMPROCW arg3,
+                        LPARAM  arg4)
 {
   //@@@PH shouldn't this rather be O32_EnumFonts ?
   return EnumFontFamiliesW(hdc, arg2, arg3, arg4);
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION4(int, EnumFontFamiliesA,
-              HDC, hdc,
-              LPCSTR, lpszFontFamily,
-              FONTENUMPROCA, arg3,
-              LPARAM, arg4)
+int WIN32API EnumFontFamiliesA(HDC hdc,
+                               LPCSTR lpszFontFamily,
+                               FONTENUMPROCA arg3,
+                               LPARAM arg4)
 {
   ENUMUSERDATA enumData;
   CHAR         lpstrFamilyNew[LF_FACESIZE] = "";
@@ -477,11 +473,10 @@ ODINFUNCTION4(int, EnumFontFamiliesA,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION4(int, EnumFontFamiliesW,
-              HDC, hdc,
-              LPCWSTR, lpszFontFamilyW,
-              FONTENUMPROCW, arg3,
-              LPARAM, arg4)
+int WIN32API EnumFontFamiliesW(HDC hdc,
+                               LPCWSTR lpszFontFamilyW,
+                               FONTENUMPROCW arg3,
+                               LPARAM arg4)
 {
   CHAR         lpstrFamilyNew[LF_FACESIZE] = "";
   ENUMUSERDATA enumData;
@@ -502,12 +497,11 @@ ODINFUNCTION4(int, EnumFontFamiliesW,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION5(INT, EnumFontFamiliesExA,
-              HDC, hdc, 
-              LPLOGFONTA, arg2, 
-              FONTENUMPROCEXA, arg3, 
-              LPARAM, arg4, 
-              DWORD, dwFlags)
+INT WIN32API EnumFontFamiliesExA(HDC hdc, 
+                                 LPLOGFONTA arg2, 
+                                 FONTENUMPROCEXA arg3, 
+                                 LPARAM arg4, 
+                                 DWORD dwFlags)
 {
   ENUMUSERDATA enumData;
   int rc;
@@ -524,12 +518,11 @@ ODINFUNCTION5(INT, EnumFontFamiliesExA,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION5(INT, EnumFontFamiliesExW,
-              HDC, hdc, 
-              LPLOGFONTW, arg2,
-              FONTENUMPROCEXW, arg3,
-              LPARAM, arg4, 
-              DWORD, dwFlags)
+INT WIN32API EnumFontFamiliesExW(HDC hdc, 
+                                 LPLOGFONTW arg2,
+                                 FONTENUMPROCEXW arg3,
+                                 LPARAM arg4, 
+                                 DWORD dwFlags)
 {
   ENUMUSERDATA enumData;
   int rc;
@@ -548,12 +541,10 @@ ODINFUNCTION5(INT, EnumFontFamiliesExW,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION5(DWORD, GetFontData,
-              HDC, hdc,
-              DWORD, dwTable,
-              DWORD, dwOffset,
-              LPVOID, lpvBuffer,
-              DWORD, dbData)
+DWORD WIN32API GetFontData(HDC hdc, DWORD dwTable,
+                           DWORD dwOffset,
+                           LPVOID lpvBuffer,
+                           DWORD dbData)
 {
   dprintf(("GDI32: GetFontData, not implemented (GDI_ERROR)\n"));
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
@@ -562,8 +553,7 @@ ODINFUNCTION5(DWORD, GetFontData,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION1(int, AddFontResourceA,
-              LPCSTR, szFont)
+int WIN32API AddFontResourceA(LPCSTR szFont)
 {
     HINSTANCE hInstance;
 
@@ -578,8 +568,7 @@ ODINFUNCTION1(int, AddFontResourceA,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION1(int, AddFontResourceW,
-              LPCWSTR, szFont)
+int WIN32API AddFontResourceW(LPCWSTR szFont)
 {
  char *astring = UnicodeToAsciiString((LPWSTR)szFont);
  BOOL  rc;
@@ -592,16 +581,14 @@ ODINFUNCTION1(int, AddFontResourceW,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION1(BOOL, RemoveFontResourceA,
-              LPCSTR, arg1)
+BOOL WIN32API RemoveFontResourceA(LPCSTR arg1)
 {
     dprintf(("GDI32: RemoveFontResourceA %s\n", arg1));
     return O32_RemoveFontResource(arg1);
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION1(BOOL, RemoveFontResourceW,
-              LPCWSTR, szFont)
+BOOL WIN32API RemoveFontResourceW(LPCWSTR szFont)
 {
  char *astring = UnicodeToAsciiString((LPWSTR)szFont);
  BOOL  rc;
@@ -627,11 +614,10 @@ ODINFUNCTION1(BOOL, RemoveFontResourceW,
  * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
  *****************************************************************************/
 
-ODINFUNCTION4(BOOL, CreateScalableFontResourceA,
-              DWORD, fdwHidden,
-              LPCSTR, lpszFontRes,
-              LPCSTR, lpszFontFile,
-              LPCSTR, lpszCurrentPath)
+BOOL WIN32API CreateScalableFontResourceA(DWORD fdwHidden,
+                                          LPCSTR lpszFontRes,
+                                          LPCSTR lpszFontFile,
+                                          LPCSTR lpszCurrentPath)
 {
   dprintf(("GDI32: CreateScalableFontResourceA not implemented.\n"));
 
@@ -655,11 +641,10 @@ ODINFUNCTION4(BOOL, CreateScalableFontResourceA,
  * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
  *****************************************************************************/
 
-ODINFUNCTION4(BOOL, CreateScalableFontResourceW,
-              DWORD, fdwHidden,
-              LPCWSTR, lpszFontRes,
-              LPCWSTR, lpszFontFile,
-              LPCWSTR, lpszCurrentPath)
+BOOL WIN32API CreateScalableFontResourceW(DWORD fdwHidden,
+                                          LPCWSTR lpszFontRes,
+                                          LPCWSTR lpszFontFile,
+                                          LPCWSTR lpszCurrentPath)
 {
   dprintf(("GDI32: CreateScalableFontResourceW not implemented.\n"));
 
@@ -682,8 +667,7 @@ ODINFUNCTION4(BOOL, CreateScalableFontResourceW,
  * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
  *****************************************************************************/
 
-ODINFUNCTION1(DWORD, GetFontLanguageInfo,
-              HDC, hdc)
+DWORD WIN32API GetFontLanguageInfo(HDC hdc)
 {
   dprintf(("GDI32: GetFontLanguageInfo(%08xh) not implemented.\n",
            hdc));
@@ -713,10 +697,8 @@ ODINFUNCTION1(DWORD, GetFontLanguageInfo,
  * LPCHARSETINFO lpCs, structure to receive charset information
  * DWORD flags  determines interpretation of lpSrc
  */
-ODINFUNCTION3(BOOL, TranslateCharsetInfo,
-              LPDWORD, lpSrc,
-              LPCHARSETINFO, lpCs,
-              DWORD, flags)
+BOOL WIN32API TranslateCharsetInfo(LPDWORD lpSrc, LPCHARSETINFO lpCs,
+                                   DWORD flags)
 {
     int index = 0;
     switch (flags) {

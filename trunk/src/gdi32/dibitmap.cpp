@@ -1,4 +1,4 @@
-/* $Id: dibitmap.cpp,v 1.34 2002-10-28 13:24:44 sandervl Exp $ */
+/* $Id: dibitmap.cpp,v 1.35 2002-11-26 10:53:07 sandervl Exp $ */
 
 /*
  * GDI32 dib & bitmap code
@@ -158,7 +158,6 @@ HBITMAP WIN32API CreateCompatibleBitmap( HDC hdc, int nWidth, int nHeight)
     }
 
     hBitmap = O32_CreateCompatibleBitmap(hdc, nWidth, nHeight);
-    dprintf(("GDI32: CreateCompatibleBitmap %x (%d,%d) returned %x", hdc, nWidth, nHeight, hBitmap));
     if(hBitmap) {
         STATS_CreateCompatibleBitmap(hBitmap,hdc, nWidth, nHeight);
         if(pHps->hwnd == 1) { //1 == HWND_DESKTOP
@@ -185,9 +184,7 @@ HBITMAP WIN32API CreateBitmap(int nWidth, int nHeight, UINT cPlanes,
     HBITMAP hBitmap;
 
     hBitmap = O32_CreateBitmap(nWidth, nHeight, cPlanes, cBitsPerPel, lpvBits);
-    dprintf(("GDI32: CreateBitmap (%d,%d) bps %d returned %x", nWidth, nHeight, cBitsPerPel, hBitmap));
     if(hBitmap) STATS_CreateBitmap(hBitmap,nWidth, nHeight, cPlanes, cBitsPerPel, lpvBits);
-
     return(hBitmap);
 }
 //******************************************************************************
@@ -199,8 +196,6 @@ HBITMAP WIN32API CreateBitmapIndirect( const BITMAP *pBitmap)
     dprintf(("GDI32: CreateBitmapIndirect (%d,%d) bpp %d bits %x", pBitmap->bmWidth, pBitmap->bmHeight, pBitmap->bmBitsPixel, pBitmap->bmBits));
     hBitmap = O32_CreateBitmapIndirect(pBitmap);
     if(hBitmap) STATS_CreateBitmapIndirect(hBitmap, pBitmap);
-
-    dprintf(("GDI32: CreateBitmapIndirect returned %x", hBitmap));
     return hBitmap;
 }
 //******************************************************************************
@@ -373,12 +368,23 @@ int WIN32API GetDIBits(HDC hdc, HBITMAP hBitmap, UINT uStartScan, UINT cScanLine
                        void *lpvBits, PBITMAPINFO lpbi, UINT uUsage)
 {
     int nrlines;
+    pDCData pHps;  
+    HDC hdcMem;
 
     dprintf(("GDI32: GetDIBits %x %x %d %d %x %x (biBitCount %d) %d", hdc, hBitmap, uStartScan, cScanLines, lpvBits, lpbi, lpbi->bmiHeader.biBitCount, uUsage));
 
     //SvL: WGSS screws up the DC if it's a memory DC
-    //     TODO: Fix in WGSS
-    HDC hdcMem = CreateCompatibleDC(0);
+    //     TODO: Fix in WGSS (tries to select another bitmap in the DC which fails)
+    pHps = (pDCData)OSLibGpiQueryDCData((HPS)hdc);
+    if(!pHps)
+    {
+        SetLastError(ERROR_INVALID_HANDLE);
+        return 0;
+    }
+    if(pHps->isMemoryPS) {
+          hdcMem = CreateCompatibleDC(0);
+    }
+    else  hdcMem = hdc;
 
     if(lpbi->bmiHeader.biHeight < 0) {
         //NOTE: workaround for WGSS bug; remove when fixed
@@ -393,7 +399,8 @@ int WIN32API GetDIBits(HDC hdc, HBITMAP hBitmap, UINT uStartScan, UINT cScanLine
         nrlines = O32_GetDIBits(hdcMem, hBitmap, uStartScan, cScanLines, lpvBits, lpbi, uUsage);
     }
 
-    DeleteDC(hdcMem);
+    if(pHps->isMemoryPS)
+        DeleteDC(hdcMem);
 
     if(lpvBits) {
         // set proper color masks (only if lpvBits not NULL)
@@ -446,7 +453,6 @@ int WIN32API GetDIBits(HDC hdc, HBITMAP hBitmap, UINT uStartScan, UINT cScanLine
     if(lpvBits == NULL) {
        nrlines = cScanLines;
     }
-    dprintf(("GDI32: GetDIBits returned %d", nrlines));
     return nrlines;
 }
 //******************************************************************************
