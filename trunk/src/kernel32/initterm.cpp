@@ -52,10 +52,12 @@
 #include <Win32k.h>
 #include <initdll.h>
 #include <codepage.h>
+#include <process.h>
 
 #define DBG_LOCALLOG    DBG_initterm
 #include "dbglocal.h"
 
+PVOID   SYSTEM _O32_GetEnvironmentStrings( VOID );
 
 /*-------------------------------------------------------------------*/
 /* A clean up routine registered with DosExitList must be used if    */
@@ -106,16 +108,30 @@ ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
     {
         case 0 :
         {
-            libWin32kInit();
-
             ParseLogStatus();
+
+            /*
+             * Init the win32k library.
+             * We will also need to tell win32k where the Odin32 environment is
+             * located. Currently that is within Open32. I'm quite sure that it's
+             * not relocated during run, so we're pretty well off.
+             */
+            if (!libWin32kInit())
+            {
+                rc = libWin32kSetEnvironment((PSZ)_O32_GetEnvironmentStrings(), 0, 0);
+                if (rc)
+                {
+                    dprintf(("KERNEL32: initterm: libWin32kSetEnvironment failed with rc=%d\n", rc));
+                }
+            }
 
             loadNr = globLoadNr++;
 
             strcpy(kernel32Path, OSLibGetDllName(hModule));
             char *endofpath = strrchr(kernel32Path, '\\');
             *(endofpath+1) = 0;
-            dprintf(("kernel32 init %s %s (%x)", __DATE__, __TIME__, DLLENTRYPOINT_NAME));
+            dprintf(("kernel32 init %s %s (%x) Win32k - %s", __DATE__, __TIME__, DLLENTRYPOINT_NAME,
+                     libWin32kInstalled() ? "Installed" : "Not Installed"));
             ctordtorInit();
 
             CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
@@ -158,7 +174,7 @@ ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
                 flAllocMem = PAG_ANY;      // high memory support. Let's use it!
                 ulMaxAddr = ulSysinfo * (1024*1024);
                 OSLibInitWSeBFileIO();
-    		if(PROFILE_GetOdinIniInt(ODINSYSTEM_SECTION, HIGHMEM_KEY, 1) == 0) {
+            if (PROFILE_GetOdinIniInt(ODINSYSTEM_SECTION, HIGHMEM_KEY, 1) == 0) {
                     dprintf(("WARNING: OS/2 kernel supports high memory, but support is DISABLED because of HIGHMEM odin.ini key"));
                     flAllocMem = 0;
                 }
@@ -171,7 +187,7 @@ ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
             //SvL: Do it here instead of during the exe object creation
             //(std handles can be used in win32 dll initialization routines
             HMInitialize();             /* store standard handles within HandleManager */
-            InitDirectories();		//Must be done before InitializeTIB (which loads NTDLL -> USER32)
+            InitDirectories();      //Must be done before InitializeTIB (which loads NTDLL -> USER32)
             InitializeTIB(TRUE);        //Must be done after HMInitialize!
             RegisterDevices();
             Win32DllBase::setDefaultRenaming();
