@@ -17,3 +17,6 @@ resource.asm
 *.vpj
 *.vtg
 bin
+*.sym
+*.err
+*.*obj
