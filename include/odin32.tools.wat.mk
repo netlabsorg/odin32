@@ -1,4 +1,4 @@
-# $Id: odin32.tools.wat.mk,v 1.1 2000-12-02 23:50:50 bird Exp $
+# $Id: odin32.tools.wat.mk,v 1.2 2000-12-09 16:04:23 phaller Exp $
 
 #
 # Odin32 API
@@ -23,6 +23,9 @@ DEBUG = 1
 !endif
 !ifdef DEBUG
 MAKE_CMDLINE= $(MAKE_CMDLINE) DEBUG=1
+!endif
+!ifdef PROFILE
+MAKE_CMDLINE= $(MAKE_CMDLINE) DEBUG=1 PROFILE=1
 !endif
 !if "$(%NODEBUGINFO)" != ""
 NODEBUGINFO = 1
