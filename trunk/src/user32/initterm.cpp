@@ -82,7 +82,7 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
 
    switch (ulFlag) {
       case 0 :
-         __ctordtorInit();
+         ctordtorInit();
          ParseLogStatus();
 
          CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
@@ -143,7 +143,7 @@ static void APIENTRY cleanup(ULONG ulReason)
    MONITOR_Finalize(&MONITOR_PrimaryMonitor);
    SYSCOLOR_Save();
    CloseSpyQueue();
-   __ctordtorTerm();
+   ctordtorTerm();
    dprintf(("user32 exit done\n"));
 
    DosExitList(EXLST_EXIT, cleanup);

@@ -7,7 +7,16 @@ extern "C" {
 #endif
 
 void _Optlink __ctordtorInit( void );
+#define ctordtorInit	__ctordtorInit
+
+#if (__IBMCPP__ == 300) || (__IBMC__ == 300)
 void _Optlink __ctordtorTerm( void );
+#define ctordtorTerm	__ctordtorTerm
+#else
+void CDECL _ctordtorTerm( int workaroundforstupidcompilerbug );
+#define ctordtorTerm()	_ctordtorTerm(1)
+#endif
+
 
 /*-------------------------------------------------------------------*/
 /* _CRT_init is the C run-time environment initialization function.  */

@@ -75,7 +75,7 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
 
          if (_CRT_init() == -1)
             return 0UL;
-         __ctordtorInit();
+         ctordtorInit();
 
          /*******************************************************************/
          /* A DosExitList routine must be used to clean up if runtime calls */
@@ -113,7 +113,7 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
 
 static void APIENTRY cleanup(ULONG ulReason)
 {
-   __ctordtorTerm();
+   ctordtorTerm();
    _CRT_term();
    DosExitList(EXLST_EXIT, cleanup);
    return ;

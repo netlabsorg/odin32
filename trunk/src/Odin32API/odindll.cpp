@@ -1,4 +1,4 @@
-/* $Id: odindll.cpp,v 1.3 2001-02-14 11:40:58 sandervl Exp $ */
+/* $Id: odindll.cpp,v 1.4 2001-02-14 15:14:41 sandervl Exp $ */
 
 /*
  * DLL entry point
@@ -76,7 +76,7 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
 
    switch (ulFlag) {
       case 0 :
-         __ctordtorInit();
+         ctordtorInit();
 
          CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
 
@@ -112,7 +112,7 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
 
 static void APIENTRY cleanup(ULONG ulReason)
 {
-   __ctordtorTerm();
+   ctordtorTerm();
    DosExitList(EXLST_EXIT, cleanup);
    return ;
 }
