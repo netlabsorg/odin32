@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.570 1999-12-21 20:41:44 sandervl Exp $ */
+ /* $Id: changelog,v 1.571 1999-12-22 18:08:28 cbratschi Exp $ */
+
+ 99-12-22: Christoph Bratschi <cbratschi@datacomm.ch>
+	- USER32: fixed WinGetKeyState in WM_MOUSEMOVE (WinAmp's equalizer works now fine)
 
  99-12-21: Jens Wiessner <wiessnej@rfi.de>
 	- MSVCRT: Updated msvcrt20 & msvcrt40 def files

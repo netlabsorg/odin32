@@ -1,4 +1,4 @@
-/* $Id: status.c,v 1.15 1999-11-21 18:13:44 cbratschi Exp $ */
+/* $Id: status.c,v 1.16 1999-12-22 18:10:09 cbratschi Exp $ */
 /*
  * Interface code to StatusWindow widget/control
  *
@@ -29,7 +29,7 @@
  */
 
 /* CB: Odin problems
- - DrawText: DT_VCENTER doesn't work
+ - DrawText: DT_VCENTER doesn't work (DT_SINGLELINE bug?)
 */
 
 #define _MAX(a,b) (((a)>(b))?(a):(b))
@@ -37,7 +37,7 @@
 
 #define HORZ_BORDER 0
 #define VERT_BORDER 2
-#define VERT_SPACE  2 //space between boder and text
+#define VERT_SPACE  2 //space between border and text
 #define HORZ_GAP    2
 #define TOP_MARGIN  2
 #define ICON_SPACE  2
@@ -496,26 +496,6 @@ STATUSBAR_GetUnicodeFormat (HWND hwnd)
 {
     STATUSWINDOWINFO *infoPtr = STATUSBAR_GetInfoPtr (hwnd);
     return infoPtr->bUnicode;
-}
-
-static LRESULT
-STATUSBAR_WMLButtonDown(HWND hwnd,WPARAM wParam,LPARAM lParam)
-{
-  DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
-
-  if (dwStyle & SBARS_SIZEGRIP && !(dwStyle & CCS_TOP))
-  {
-    RECT rect = STATUSBAR_GetSizeBox(hwnd);
-    POINT point;
-
-    point.x = (SHORT)LOWORD(lParam);
-    point.y = (SHORT)HIWORD(lParam);
-    if (PtInRect(&rect,point)) TrackWin32Window(GetParent(hwnd),FALSE);
-
-    return 0;
-  }
-
-  return DefWindowProcA(hwnd,WM_LBUTTONDOWN,wParam,lParam);
 }
 
 static LRESULT
@@ -1056,32 +1036,44 @@ STATUSBAR_WMMouseMove (HWND hwnd, WPARAM wParam, LPARAM lParam)
 static LRESULT
 STATUSBAR_WMNCHitTest (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
-    if (GetWindowLongA (hwnd, GWL_STYLE) & SBARS_SIZEGRIP) {
-        RECT  rect;
-        POINT pt;
+  if (GetWindowLongA (hwnd,GWL_STYLE) & SBARS_SIZEGRIP)
+  {
+    RECT rect = STATUSBAR_GetSizeBox(hwnd);
+    POINT pt;
 
-        GetClientRect (hwnd, &rect);
+    pt.x = (SHORT)LOWORD(lParam);
+    pt.y = (SHORT)HIWORD(lParam);
+    ScreenToClient(hwnd,&pt);
 
-        pt.x = (INT)LOWORD(lParam);
-        pt.y = (INT)HIWORD(lParam);
-        ScreenToClient (hwnd, &pt);
+    if (PtInRect(&rect,pt))
+      return HTBOTTOMRIGHT;
+  }
 
-        rect.left = rect.right - 13;
-        rect.top += 2;
-
-        if (PtInRect (&rect, pt))
-            return HTBOTTOMRIGHT;
-    }
-
-    return DefWindowProcA (hwnd, WM_NCHITTEST, wParam, lParam);
+  return DefWindowProcA (hwnd, WM_NCHITTEST, wParam, lParam);
 }
 
 
 static LRESULT
 STATUSBAR_WMNCLButtonDown (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
-    PostMessageA (GetParent (hwnd), WM_NCLBUTTONDOWN, wParam, lParam);
+  DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
+
+  if (dwStyle & SBARS_SIZEGRIP && !(dwStyle & CCS_TOP))
+  {
+    RECT rect = STATUSBAR_GetSizeBox(hwnd);
+    POINT point;
+
+    point.x = (SHORT)LOWORD(lParam);
+    point.y = (SHORT)HIWORD(lParam);
+    ScreenToClient(hwnd,&point);
+
+    if (PtInRect(&rect,point)) TrackWin32Window(GetParent(hwnd),FALSE);
+
     return 0;
+  }
+
+  PostMessageA (GetParent (hwnd), WM_NCLBUTTONDOWN, wParam, lParam);
+  return 0;
 }
 
 
@@ -1295,9 +1287,6 @@ StatusWindowProc (HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         case WM_LBUTTONDBLCLK:
             return STATUSBAR_SendNotify (hwnd, NM_DBLCLK);
 
-        case WM_LBUTTONDOWN:
-            return STATUSBAR_WMLButtonDown(hwnd,wParam,lParam);
-
         case WM_LBUTTONUP:
             return STATUSBAR_SendNotify (hwnd, NM_CLICK);
 
@@ -1359,7 +1348,7 @@ STATUS_Register (VOID)
 //    if (GlobalFindAtomA (STATUSCLASSNAMEA)) return;
 
     ZeroMemory (&wndClass, sizeof(WNDCLASSA));
-    wndClass.style         = CS_GLOBALCLASS | CS_DBLCLKS | CS_VREDRAW;
+    wndClass.style         = CS_GLOBALCLASS | CS_DBLCLKS | CS_HREDRAW;
     wndClass.lpfnWndProc   = (WNDPROC)StatusWindowProc;
     wndClass.cbClsExtra    = 0;
     wndClass.cbWndExtra    = sizeof(STATUSWINDOWINFO *);
