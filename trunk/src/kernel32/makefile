@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.71 1999-12-18 21:45:55 sandervl Exp $
+# $Id: makefile,v 1.72 1999-12-27 18:42:25 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -43,7 +43,7 @@ winexepe2lx.obj winexelx.obj winexepeldr.obj WINRES.OBJ critsection.obj \
 pefile.OBJ winimgres.OBJ wintls.obj async.OBJ fileio.obj hmtoken.obj \
 atom.obj disk.obj directory.obj cvtbitmap.obj hmmmap.obj winfakepeldr.obj \
 cvtaccel.obj cvticon.obj cvticongrp.obj oslibexcept.obj cpu.obj process.obj \
-cvtcursor.obj cvtcursorgrp.obj stubs.obj interlock.obj toolhelp.obj
+cvtcursor.obj cvtcursorgrp.obj stubs.obj interlock.obj toolhelp.obj codepage.obj
 
 
 TARGET = kernel32
@@ -399,6 +399,7 @@ heapcode.obj: heapcode.cpp $(PDWIN32_INCLUDE)\heapshared.h $(PDWIN32_INCLUDE)\he
 cpu.obj: cpu.cpp cpuhlp.h
 cpuhlp.obj: cpuhlp.asm
 environ.obj: environ.cpp $(PDWIN32_INCLUDE)\misc.h
+codepage.obj: codepage.cpp oslibdos.h profile.h $(PDWIN32_INCLUDE)\codepage.h
 
 clean:
         $(RM) *.OBJ *.LIB *.dll *.lrf *.res *.map *.pch

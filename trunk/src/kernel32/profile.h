@@ -1,4 +1,4 @@
-/* $Id: profile.h,v 1.5 1999-11-22 20:35:51 sandervl Exp $ */
+/* $Id: profile.h,v 1.6 1999-12-27 18:42:25 sandervl Exp $ */
 /*
  * Profile header for initterm
  * Copyright 1999 Christoph Bratschi
@@ -26,5 +26,8 @@ int ODIN_EXTERN(PROFILE_GetOdinIniString)(LPCSTR section, LPCSTR entry,
 
 int ODIN_EXTERN(PROFILE_SetOdinIniString)(LPCSTR section_name, LPCSTR key_name,
                                           LPCSTR value);
+
+int ODIN_EXTERN(PROFILE_GetOdinIniInt)(LPCSTR section_name, LPCSTR key_name,
+                                          int value);
 
 #endif
