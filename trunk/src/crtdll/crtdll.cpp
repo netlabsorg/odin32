@@ -1,9 +1,11 @@
-/* $Id: crtdll.cpp,v 1.18 1999-12-21 13:46:24 sandervl Exp $ */
+/* $Id: crtdll.cpp,v 1.19 1999-12-24 18:40:41 sandervl Exp $ */
 
 /*
  * The C RunTime DLL
  * 
  * Implements C run-time functionality as known from UNIX.
+ *
+ * TODO: Check setjmp(3) 
  *
  * Partialy based on Wine and ReactOS
  *
@@ -81,7 +83,7 @@ BOOL WINAPI CRTDLL_Init(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
  */
 VOID* CDECL CRTDLL_new(DWORD size)
 {
-    dprintf(("CRTDLL: ??2@YAPAXI@Z\n"));
+    dprintf2(("CRTDLL: ??2@YAPAXI@Z\n"));
     VOID* result;
     if(!(result = Heap_Alloc(size)) && new_handler)
 	(*new_handler)();
@@ -94,7 +96,7 @@ VOID* CDECL CRTDLL_new(DWORD size)
  */
 VOID CDECL CRTDLL_delete(VOID* ptr)
 {
-    dprintf(("CRTDLL: ??3@YAXPAX@Z\n"));
+    dprintf2(("CRTDLL: ??3@YAXPAX@Z\n"));
     Heap_Free(ptr);
 }
 
@@ -104,7 +106,7 @@ VOID CDECL CRTDLL_delete(VOID* ptr)
  */
 new_handler_type CDECL CRTDLL_set_new_handler(new_handler_type func)
 {
-    dprintf(("CRTDLL: ?_set_new_handler@@YAP6AHI@ZP6AHI@Z@Z\n"));
+    dprintf2(("CRTDLL: ?_set_new_handler@@YAP6AHI@ZP6AHI@Z@Z\n"));
     new_handler_type old_handler = new_handler;
     new_handler = func;
     return old_handler;
@@ -114,10 +116,10 @@ new_handler_type CDECL CRTDLL_set_new_handler(new_handler_type func)
 /*********************************************************************
  *                  _CIacos    (CRTDLL.004)
  */
-double CDECL CRTDLL__CIacos( double x )
+double CDECL CRTDLL__CIacos(double x)
 {
-  dprintf(("CRTDLL: _CIacos\n"));
-  dprintf(("should be register function\n"));
+  dprintf2(("CRTDLL: _CIacos\n"));
+  dprintf2(("should be register function\n"));
   return acos(x);
 }
 
@@ -127,8 +129,8 @@ double CDECL CRTDLL__CIacos( double x )
  */
 double CDECL CRTDLL__CIasin( double x )
 {
-  dprintf(("CRTDLL: _CIasin\n"));
-  dprintf(("should be register function\n"));
+  dprintf2(("CRTDLL: _CIasin\n"));
+  dprintf2(("should be register function\n"));
   return asin(x);
 }
 
@@ -138,8 +140,8 @@ double CDECL CRTDLL__CIasin( double x )
  */
 double CDECL CRTDLL__CIatan( double x )
 {
-  dprintf(("CRTDLL: _CIatan\n"));
-  dprintf(("should be register function\n"));
+  dprintf2(("CRTDLL: _CIatan\n"));
+  dprintf2(("should be register function\n"));
   return atan(x);
 }
 
@@ -149,8 +151,8 @@ double CDECL CRTDLL__CIatan( double x )
  */
 double CDECL CRTDLL__CIatan2( double x, double y )
 {
-  dprintf(("CRTDLL: _CIatan2\n"));
-  dprintf(("should be register function\n"));
+  dprintf2(("CRTDLL: _CIatan2\n"));
+  dprintf2(("should be register function\n"));
   return atan2(x,y);
 }
 
@@ -160,8 +162,8 @@ double CDECL CRTDLL__CIatan2( double x, double y )
  */
 double CDECL CRTDLL__CIcos( double x )
 {
-  dprintf(("CRTDLL: _CIcos\n"));
-  dprintf(("should be register function\n"));
+  dprintf2(("CRTDLL: _CIcos\n"));
+  dprintf2(("should be register function\n"));
   return cos(x);
 }
 
@@ -171,8 +173,8 @@ double CDECL CRTDLL__CIcos( double x )
  */
 double CDECL CRTDLL__CIcosh( double x )
 {
-  dprintf(("CRTDLL: _CIcosh\n"));
-  dprintf(("should be register function\n"));
+  dprintf2(("CRTDLL: _CIcosh\n"));
+  dprintf2(("should be register function\n"));
   return cosh(x);
 }
 
@@ -182,8 +184,8 @@ double CDECL CRTDLL__CIcosh( double x )
  */
 double CDECL CRTDLL__CIexp( double x )
 {
-  dprintf(("CRTDLL: _CIexp\n"));
-  dprintf(("should be register function\n"));
+  dprintf2(("CRTDLL: _CIexp\n"));
+  dprintf2(("should be register function\n"));
   return exp(x);
 }
 
@@ -193,8 +195,8 @@ double CDECL CRTDLL__CIexp( double x )
  */
 double CDECL CRTDLL__CIfmod( double x, double y )
 {
-  dprintf(("CRTDLL: _CIfmod\n"));
-  dprintf(("should be register function\n"));
+  dprintf2(("CRTDLL: _CIfmod\n"));
+  dprintf2(("should be register function\n"));
   return fmod(x,y);
 }
 
@@ -204,8 +206,8 @@ double CDECL CRTDLL__CIfmod( double x, double y )
  */
 double CDECL CRTDLL__CIlog( double x )
 {
-  dprintf(("CRTDLL: _CIlog\n"));
-  dprintf(("should be register function\n"));
+  dprintf2(("CRTDLL: _CIlog\n"));
+  dprintf2(("should be register function\n"));
   return log(x);
 }
 
@@ -215,8 +217,8 @@ double CDECL CRTDLL__CIlog( double x )
  */
 double CDECL CRTDLL__CIlog10( double x )
 {
-  dprintf(("CRTDLL: _CIlog10\n"));
-  dprintf(("should be register function\n"));
+  dprintf2(("CRTDLL: _CIlog10\n"));
+  dprintf2(("should be register function\n"));
   return log10(x);
 }
 
@@ -226,8 +228,8 @@ double CDECL CRTDLL__CIlog10( double x )
  */
 double CDECL CRTDLL__CIsin( double x )
 {
-  dprintf(("CRTDLL: _CIsin\n"));
-  dprintf(("should be register function\n"));
+  dprintf2(("CRTDLL: _CIsin\n"));
+  dprintf2(("should be register function\n"));
   return sin(x);
 }
 
@@ -237,8 +239,8 @@ double CDECL CRTDLL__CIsin( double x )
  */
 double CDECL CRTDLL__CIsinh( double x )
 {
-  dprintf(("CRTDLL: _CIsinh\n"));
-  dprintf(("should be register function\n"));
+  dprintf2(("CRTDLL: _CIsinh\n"));
+  dprintf2(("should be register function\n"));
   return sinh(x);
 }
 
@@ -248,8 +250,8 @@ double CDECL CRTDLL__CIsinh( double x )
  */
 double CDECL CRTDLL__CIsqrt( double x )
 {
-  dprintf(("CRTDLL: _CIsqrt\n"));
-  dprintf(("should be register function\n"));
+  dprintf2(("CRTDLL: _CIsqrt\n"));
+  dprintf2(("should be register function\n"));
   return acos(x);
 }
 
@@ -259,8 +261,8 @@ double CDECL CRTDLL__CIsqrt( double x )
  */
 double CDECL CRTDLL__CItan( double x )
 {
-  dprintf(("CRTDLL: _CItan\n"));
-  dprintf(("should be register function\n"));
+  dprintf2(("CRTDLL: _CItan\n"));
+  dprintf2(("should be register function\n"));
   return tan(x);
 }
 
@@ -270,8 +272,8 @@ double CDECL CRTDLL__CItan( double x )
  */
 double CDECL CRTDLL__CItanh( double x )
 {
-  dprintf(("CRTDLL: _CItanh\n"));
-  dprintf(("should be register function\n"));
+  dprintf2(("CRTDLL: _CItanh\n"));
+  dprintf2(("should be register function\n"));
   return tanh(x);
 }
 
@@ -281,7 +283,7 @@ double CDECL CRTDLL__CItanh( double x )
  */
 INT CDECL CRTDLL__XcptFilter(DWORD ret, struct _EXCEPTION_POINTERS *  ExceptionInfo )
 {
-  dprintf(("CRTDLL: _XcptFilter\n"));
+  dprintf2(("CRTDLL: _XcptFilter\n"));
   return UnhandledExceptionFilter(ExceptionInfo);
 }
 
@@ -297,7 +299,7 @@ DWORD CDECL CRTDLL__GetMainArgs(LPDWORD argc,LPSTR **argv,
 	int	xargc,i,afterlastspace;
 	DWORD	version;
 
-	dprintf(("CRTDLL: GetMainArgs\n"));
+	dprintf2(("CRTDLL: GetMainArgs\n"));
 
 	CRTDLL_acmdln_dll = cmdline = HEAP_strdupA( GetProcessHeap(), 0,
                                                     GetCommandLineA() );
@@ -347,7 +349,7 @@ DWORD CDECL CRTDLL__GetMainArgs(LPDWORD argc,LPSTR **argv,
 	CRTDLL_argv_dll	= xargv;
 	*argv		= xargv;
 	CRTDLL_environ_dll = *environ = GetEnvironmentStringsA();
-	dprintf(("CRTDLL: GetMainArgs end\n"));
+	dprintf2(("CRTDLL: GetMainArgs end\n"));
 	return 0;
 }
 
@@ -366,7 +368,7 @@ VOID CDECL CRTDLL___dllonexit ()
  */
 int * CDECL CRTDLL___doserrno()
 {	
-	dprintf(("__doserrno\n"));
+	dprintf2(("__doserrno\n"));
 	_doserrno = GetLastError();
 	return &_doserrno;
 }
@@ -379,7 +381,7 @@ int fpecode = 0;
 
 int * CDECL CRTDLL___fpecode ( void )
 {	
-	dprintf(("__fpecode\n"));
+	dprintf2(("__fpecode\n"));
         return &fpecode;
 }
 
@@ -389,7 +391,7 @@ int * CDECL CRTDLL___fpecode ( void )
  */
 int CDECL CRTDLL___isascii(int i)
 {
-  dprintf(("CRTDLL: __isascii\n"));
+  dprintf2(("CRTDLL: __isascii\n"));
   return  (!((i)&(~0x7f)));
 }
 
@@ -399,7 +401,7 @@ int CDECL CRTDLL___isascii(int i)
  */
 int CDECL CRTDLL___iscsym(int c)
 {
-  dprintf(("CRTDLL: __iscsym\n"));
+  dprintf2(("CRTDLL: __iscsym\n"));
   return (CRTDLL_isalnum(c) || ( c == '_' )) ;
 }
 
@@ -409,7 +411,7 @@ int CDECL CRTDLL___iscsym(int c)
  */
 int CDECL CRTDLL___iscsymf(int c)
 {
-  dprintf(("CRTDLL: __iscsymf\n"));
+  dprintf2(("CRTDLL: __iscsymf\n"));
   return (isalpha(c) || ( c == '_' )) ;
 }
 
@@ -430,7 +432,7 @@ void ** CDECL CRTDLL___pxcptinfoptrs (void)
  */
 unsigned long CDECL CRTDLL___threadhandle( void )
 {
-  dprintf(("CRTDLL: __threadhandle\n"));
+  dprintf2(("CRTDLL: __threadhandle\n"));
   return GetCurrentThread();
 }
 
@@ -440,7 +442,7 @@ unsigned long CDECL CRTDLL___threadhandle( void )
  */
 unsigned long CDECL CRTDLL___threadid(void)
 {
-  dprintf(("CRTDLL: __threadid\n"));
+  dprintf2(("CRTDLL: __threadid\n"));
   return GetCurrentThreadId();
 }
 
@@ -461,7 +463,7 @@ int CDECL CRTDLL__abnormal_termination(void)
  */
 int CDECL CRTDLL__access(const char *path,int mode)
 {
-  dprintf(("CRTDLL: _access\n"));
+  dprintf2(("CRTDLL: _access\n"));
   return (_access(path, mode));
 }
 
@@ -471,7 +473,7 @@ int CDECL CRTDLL__access(const char *path,int mode)
  */
 int CDECL CRTDLL___toascii(int c)
 {
-  dprintf(("CRTDLL: __toascii\n"));
+  dprintf2(("CRTDLL: __toascii\n"));
   return ((unsigned)(c) & 0x7F );
 }
 
@@ -481,7 +483,7 @@ int CDECL CRTDLL___toascii(int c)
  */
 VOID CDECL CRTDLL__aexit_rtn_dll(int exitcode)
 {
-  dprintf(("CRTDLL: _aexit_rtn_dll\n"));
+  dprintf2(("CRTDLL: _aexit_rtn_dll\n"));
   ExitProcess(exitcode);
 }
 
@@ -491,7 +493,7 @@ VOID CDECL CRTDLL__aexit_rtn_dll(int exitcode)
  */
 VOID CDECL CRTDLL__amsg_exit(int errnum)
 {
-  dprintf(("CRTDLL: _amsg_exit\n"));
+  dprintf2(("CRTDLL: _amsg_exit\n"));
   fprintf(stderr,strerror(errnum));
   ExitProcess(-1);
 }
@@ -502,7 +504,7 @@ VOID CDECL CRTDLL__amsg_exit(int errnum)
  */
 void CDECL CRTDLL__assert( char *s1, char *s2, int i)
 {
-  dprintf(("CRTDLL: _assert\n"));
+  dprintf2(("CRTDLL: _assert\n"));
   _assert(s1, s2, i);
 }
 
@@ -512,7 +514,7 @@ void CDECL CRTDLL__assert( char *s1, char *s2, int i)
  */
 void CDECL CRTDLL__beep(unsigned nFreq, unsigned nDur)
 {	
-	dprintf(("_beep\n"));
+	dprintf2(("_beep\n"));
 	Beep(nFreq,nDur);
 }
 
@@ -543,7 +545,7 @@ unsigned long CDECL CRTDLL__beginthread(void (*pfuncStart)(void *),
  */
 void CDECL CRTDLL__c_exit(INT ret)
 {
-        dprintf(("_c_exit(%d)\n",ret));
+        dprintf2(("_c_exit(%d)\n",ret));
 	ExitProcess(ret);
 }
 
@@ -553,7 +555,7 @@ void CDECL CRTDLL__c_exit(INT ret)
  */
 double CDECL CRTDLL__cabs(struct _complex z)
 {
-  dprintf(("CRTDLL: _cabs\n"));
+  dprintf2(("CRTDLL: _cabs\n"));
   return sqrt( z.x*z.x + z.y*z.y );
 }
 
@@ -563,7 +565,7 @@ double CDECL CRTDLL__cabs(struct _complex z)
  */
 void CDECL CRTDLL__cexit(INT ret)
 {
-        dprintf(("_cexit(%d)\n",ret));
+        dprintf2(("_cexit(%d)\n",ret));
 	ExitProcess(ret);
 }
 
@@ -573,7 +575,7 @@ void CDECL CRTDLL__cexit(INT ret)
  */
 char * CDECL CRTDLL__cgets( char *s )
 {
-  dprintf(("CRTDLL: _cgets\n"));
+  dprintf2(("CRTDLL: _cgets\n"));
   return (_cgets(s));
 }
 
@@ -583,7 +585,7 @@ char * CDECL CRTDLL__cgets( char *s )
  */
 INT CDECL CRTDLL__chdir(LPCSTR newdir)
 {
-	dprintf(("CRTDLL: chdir\n"));
+	dprintf2(("CRTDLL: chdir\n"));
 	if (!SetCurrentDirectoryA(newdir))
 		return 1;
 	return 0;
@@ -599,7 +601,7 @@ INT CDECL CRTDLL__chdir(LPCSTR newdir)
 BOOL CDECL CRTDLL__chdrive(INT newdrive)
 {
 	/* FIXME: generates errnos */
-	dprintf(("CRTDLL: _chdrive\n"));
+	dprintf2(("CRTDLL: _chdrive\n"));
 	return DRIVE_SetCurrentDrive(newdrive-1);
 }
 
@@ -609,7 +611,7 @@ BOOL CDECL CRTDLL__chdrive(INT newdrive)
  */
 double CDECL CRTDLL__chgsign(double __x)
 {
-  dprintf(("CRTDLL: _chgsign\n"));
+  dprintf2(("CRTDLL: _chgsign\n"));
   double_t *x = (double_t *)&x;
   if ( x->sign == 1 )
 	x->sign = 0;
@@ -625,7 +627,7 @@ double CDECL CRTDLL__chgsign(double __x)
  */
 int CDECL CRTDLL__chmod( const char *s, int i)
 {
-  dprintf(("CRTDLL: _chmod\n"));
+  dprintf2(("CRTDLL: _chmod\n"));
   return (_chmod(s, i));
 }
 
@@ -635,7 +637,7 @@ int CDECL CRTDLL__chmod( const char *s, int i)
  */
 int CDECL CRTDLL__chsize( int i, long l )
 {
-  dprintf(("CRTDLL: _chsize\n"));
+  dprintf2(("CRTDLL: _chsize\n"));
   return (_chsize(i, l));
 }
 
@@ -645,7 +647,7 @@ int CDECL CRTDLL__chsize( int i, long l )
  */
 unsigned int CDECL CRTDLL__clearfp( void )
 {
-  dprintf(("CRTDLL: _clearfp\n"));
+  dprintf2(("CRTDLL: _clearfp\n"));
   return (_clear87());
 }
 
@@ -655,7 +657,7 @@ unsigned int CDECL CRTDLL__clearfp( void )
  */
 int CDECL CRTDLL__close(int handle)
 {
-  dprintf(("CRTDLL: _close\n"));
+  dprintf2(("CRTDLL: _close\n"));
   return (_close(handle));
 }
 
@@ -665,7 +667,7 @@ int CDECL CRTDLL__close(int handle)
  */
 int CDECL CRTDLL__commit( int _fd )
 {
-  dprintf(("CRTDLL: _commit\n"));
+  dprintf2(("CRTDLL: _commit\n"));
   if (! FlushFileBuffers((HFILE)CRTDLL__get_osfhandle(_fd)) ) {
 	__set_errno(EBADF);
 	return -1;
@@ -679,7 +681,7 @@ int CDECL CRTDLL__commit( int _fd )
  */
 unsigned CDECL CRTDLL__control87(unsigned i1,unsigned i2)
 {
-  dprintf(("CRTDLL: _control87\n"));
+  dprintf2(("CRTDLL: _control87\n"));
   return (_control87(i1, i2));
 }
 
@@ -689,7 +691,7 @@ unsigned CDECL CRTDLL__control87(unsigned i1,unsigned i2)
  */
 unsigned CDECL CRTDLL__controlfp(unsigned i1,unsigned i2)
 {
-  dprintf(("CRTDLL: _controlfp\n"));
+  dprintf2(("CRTDLL: _controlfp\n"));
   return (_control87(i1, i2));
 }
 
@@ -699,7 +701,7 @@ unsigned CDECL CRTDLL__controlfp(unsigned i1,unsigned i2)
  */
 double CDECL CRTDLL__copysign( double __d, double __s )
 {
-  dprintf(("CRTDLL: _copysign\n"));
+  dprintf2(("CRTDLL: _copysign\n"));
   double_t *d = (double_t *)&__d;
   double_t *s = (double_t *)&__s;
 
@@ -714,7 +716,7 @@ double CDECL CRTDLL__copysign( double __d, double __s )
  */
 INT CDECL CRTDLL__cprintf( char *fmt, ... )
 {
-  dprintf(("CRTDLL: _cprintf.\n"));
+  dprintf2(("CRTDLL: _cprintf.\n"));
 
   int     cnt;
   char    buf[ 2048 ];		/* this is buggy, because buffer might be too small. */
@@ -734,7 +736,7 @@ INT CDECL CRTDLL__cprintf( char *fmt, ... )
  */
 INT CDECL CRTDLL__cputs( char * s )
 {
-  dprintf(("CRTDLL: _cputs\n"));
+  dprintf2(("CRTDLL: _cputs\n"));
   return (_cputs(s));
 }
 
@@ -744,7 +746,7 @@ INT CDECL CRTDLL__cputs( char * s )
  */
 INT CDECL CRTDLL__creat( const char *s, int i )
 {
-  dprintf(("CRTDLL: _creat\n"));
+  dprintf2(("CRTDLL: _creat\n"));
   return (_creat(s, i));
 }
 
@@ -765,7 +767,7 @@ INT CDECL CRTDLL__cscanf( char *s, ... )
  */
 int CDECL CRTDLL__cwait( int *status, int process_id, int action_code )
 {
-  dprintf(("CRTDLL: _cwait\n"));
+  dprintf2(("CRTDLL: _cwait\n"));
   return (_cwait(status, process_id, action_code));
 }
 
@@ -775,7 +777,7 @@ int CDECL CRTDLL__cwait( int *status, int process_id, int action_code )
  */
 int CDECL CRTDLL__dup(int handle)
 {
-  dprintf(("CRTDLL: _dup\n"));
+  dprintf2(("CRTDLL: _dup\n"));
   return (_dup(handle));
 }
 
@@ -785,7 +787,7 @@ int CDECL CRTDLL__dup(int handle)
  */
 int CDECL CRTDLL__dup2(int handle1,int handle2)
 {
-  dprintf(("CRTDLL: _dup2\n"));
+  dprintf2(("CRTDLL: _dup2\n"));
   return (_dup2(handle1, handle2));
 }
 
@@ -795,7 +797,7 @@ int CDECL CRTDLL__dup2(int handle1,int handle2)
  */
 char * CDECL CRTDLL__ecvt( double val, int ndig, int *dec, int *sign )
 {
-  dprintf(("CRTDLL: _ecvt\n"));
+  dprintf2(("CRTDLL: _ecvt\n"));
   return (_ecvt(val, ndig, dec, sign));
 }
 
@@ -805,7 +807,7 @@ char * CDECL CRTDLL__ecvt( double val, int ndig, int *dec, int *sign )
  */
 void CDECL CRTDLL__endthread(void)
 {
-  dprintf(("CRTDLL: _endthread\n"));
+  dprintf2(("CRTDLL: _endthread\n"));
   _endthread ();
 }
 
@@ -815,7 +817,7 @@ void CDECL CRTDLL__endthread(void)
  */
 int CDECL CRTDLL__eof( int _fd )
 {
-  dprintf(("CRTDLL: _eof\n"));
+  dprintf2(("CRTDLL: _eof\n"));
   int cur_pos = CRTDLL__lseek(_fd, 0, SEEK_CUR);
   int end_pos = CRTDLL__filelength( _fd );
   if ( cur_pos == -1 || end_pos == -1)
@@ -833,7 +835,7 @@ int CDECL CRTDLL__eof( int _fd )
  */
 int * CDECL CRTDLL__errno(void)
 {
-  dprintf(("CRTDLL: _errno\n"));
+  dprintf2(("CRTDLL: _errno\n"));
   return (_errno());
 }
 
@@ -845,7 +847,7 @@ INT CDECL CRTDLL__except_handler2 ( PEXCEPTION_RECORD rec,
 	PEXCEPTION_FRAME frame, PCONTEXT context, 
 	PEXCEPTION_FRAME  *dispatcher)
 {
-        dprintf(("CRTDLL: _except_handler2\n"));
+        dprintf2(("CRTDLL: _except_handler2\n"));
 	return 1;
 }
 
@@ -855,7 +857,7 @@ INT CDECL CRTDLL__except_handler2 ( PEXCEPTION_RECORD rec,
  */
 int CDECL CRTDLL__execl(const char* szPath, const char* szArgv0, ...)
 {
-  dprintf(("CRTDLL: _execl\n"));
+  dprintf2(("CRTDLL: _execl\n"));
 
   char *szArg[100];
   const char *a;
@@ -876,7 +878,7 @@ int CDECL CRTDLL__execl(const char* szPath, const char* szArgv0, ...)
  */
 int CDECL CRTDLL__execle(char *path, char *szArgv0, ...)
 {
-  dprintf(("CRTDLL: _execle not correct implemented.\n"));
+  dprintf2(("CRTDLL: _execle not correct implemented.\n"));
   char *szArg[100];
   const char *a;
   char *ptr;
@@ -907,7 +909,7 @@ int CDECL CRTDLL__execle(char *path, char *szArgv0, ...)
  */
 int CDECL CRTDLL__execlp( char *szPath, char *szArgv0, ...)
 {
-  dprintf(("CRTDLL: _execlp\n"));
+  dprintf2(("CRTDLL: _execlp\n"));
   char *szArg[100];
   const char *a;
   int i = 0;
@@ -926,7 +928,7 @@ int CDECL CRTDLL__execlp( char *szPath, char *szArgv0, ...)
  */
 int CDECL CRTDLL__execlpe( char *path, char *szArgv0, ...)
 {
-  dprintf(("CRTDLL: _execlpe not correct implemented.\n"));
+  dprintf2(("CRTDLL: _execlpe not correct implemented.\n"));
   char *szArg[100];
   const char *a;
   char *ptr;
@@ -956,7 +958,7 @@ int CDECL CRTDLL__execlpe( char *path, char *szArgv0, ...)
  */
 int CDECL CRTDLL__execv( char *s1, char **s2)
 {
-  dprintf(("CRTDLL: _execv\n"));
+  dprintf2(("CRTDLL: _execv\n"));
   return (_execv(s1, s2));
 }
 
@@ -966,7 +968,7 @@ int CDECL CRTDLL__execv( char *s1, char **s2)
  */
 int CDECL CRTDLL__execve( char *s1, char **s2, char **s3)
 {
-  dprintf(("CRTDLL: _execve\n"));
+  dprintf2(("CRTDLL: _execve\n"));
   return (_execve(s1, s2, s3));
 }
 
@@ -976,7 +978,7 @@ int CDECL CRTDLL__execve( char *s1, char **s2, char **s3)
  */
 int CDECL CRTDLL__execvp( char *s1, char **s2)
 {
-  dprintf(("CRTDLL: _execvp\n"));
+  dprintf2(("CRTDLL: _execvp\n"));
   return (_execvp(s1, s2));
 }
 
@@ -986,7 +988,7 @@ int CDECL CRTDLL__execvp( char *s1, char **s2)
  */
 int CDECL CRTDLL__execvpe( char *s1, char **s2, char **s3)
 {
-  dprintf(("CRTDLL: _execvpe\n"));
+  dprintf2(("CRTDLL: _execvpe\n"));
   return (_execvpe(s1, s2, s3));
 }
 
@@ -996,7 +998,7 @@ int CDECL CRTDLL__execvpe( char *s1, char **s2, char **s3)
  */
 VOID CDECL CRTDLL__exit(DWORD ret)
 {
-	dprintf(("CRTDLL: _exit\n"));
+	dprintf2(("CRTDLL: _exit\n"));
 	ExitProcess(ret);
 }
 
@@ -1017,7 +1019,7 @@ void * CDECL CRTDLL__expand( void *ptr, size_t size )
  */
 int CDECL CRTDLL__fcloseall( void )
 {
-  dprintf(("CRTDLL: _fcloseall\n"));
+  dprintf2(("CRTDLL: _fcloseall\n"));
   return (_fcloseall());
 }
 
@@ -1027,7 +1029,7 @@ int CDECL CRTDLL__fcloseall( void )
  */
 char * CDECL CRTDLL__fcvt( double val, int ndig, int *dec, int *sign )
 {
-  dprintf(("CRTDLL: _fcvt\n"));
+  dprintf2(("CRTDLL: _fcvt\n"));
   return (_fcvt(val, ndig, dec, sign));
 }
 
@@ -1037,7 +1039,7 @@ char * CDECL CRTDLL__fcvt( double val, int ndig, int *dec, int *sign )
  */
 CRTDLL_FILE * CDECL CRTDLL__fdopen(INT handle, LPCSTR mode)
 {
-    dprintf(("CRTDLL: fdopen\n"));
+    dprintf2(("CRTDLL: fdopen\n"));
     CRTDLL_FILE *file;
 
     switch (handle) 
@@ -1068,7 +1070,7 @@ CRTDLL_FILE * CDECL CRTDLL__fdopen(INT handle, LPCSTR mode)
  */
 int CDECL CRTDLL__fgetchar( void )
 {
-  dprintf(("CRTDLL: _fgetchar\n"));
+  dprintf2(("CRTDLL: _fgetchar\n"));
   return (_fgetchar());
 }
 
@@ -1078,7 +1080,7 @@ int CDECL CRTDLL__fgetchar( void )
  */
 wint_t CDECL CRTDLL__fgetwchar( void *i )
 {
-  dprintf(("CRTDLL: _fgetwchar\n"));
+  dprintf2(("CRTDLL: _fgetwchar\n"));
   return CRTDLL__getch();
 }
 
@@ -1099,7 +1101,7 @@ int CDECL CRTDLL__filbuf(FILE * f)
  */
 long CDECL CRTDLL__filelength( int i )
 {
-  dprintf(("CRTDLL: _filelength\n"));
+  dprintf2(("CRTDLL: _filelength\n"));
   return (_filelength(i));
 }
 
@@ -1109,7 +1111,7 @@ long CDECL CRTDLL__filelength( int i )
  */
 int CDECL CRTDLL__fileno(FILE * f)
 {
-  dprintf(("CRTDLL: _fileno\n"));
+  dprintf2(("CRTDLL: _fileno\n"));
   return (_fileno(f));
 }
 
@@ -1119,7 +1121,7 @@ int CDECL CRTDLL__fileno(FILE * f)
 */
 int CDECL CRTDLL__findclose( long handle )
 {
-  dprintf(("CRTDLL: _findclose\n"));
+  dprintf2(("CRTDLL: _findclose\n"));
   // check no wildcards or invalid handle
   if ( handle == 0 || handle == -1)
 	return 0;
@@ -1154,7 +1156,7 @@ INT CDECL CRTDLL__findnext(DWORD hand, struct find_t * x2)
  */
 INT CDECL CRTDLL__finite(double x)
 {
-  dprintf(("CRTDLL: _finite\n"));
+  dprintf2(("CRTDLL: _finite\n"));
   return !_isinf(x);
 }
 
@@ -1175,7 +1177,7 @@ INT CDECL CRTDLL__flsbuf(int i, FILE * f)
  */
 INT CDECL CRTDLL__flushall(void)
 {
-  dprintf(("CRTDLL: _flushall\n"));
+  dprintf2(("CRTDLL: _flushall\n"));
   return (_flushall());
 }
 
@@ -1185,7 +1187,7 @@ INT CDECL CRTDLL__flushall(void)
  */
 INT CDECL CRTDLL__fpclass( double __d )
 {
-  dprintf(("CRTDLL: _fpclass\n"));
+  dprintf2(("CRTDLL: _fpclass\n"));
 	double_t *d = (double_t *)&__d;
 
 	if ( d->exponent == 0 ) {
@@ -1248,7 +1250,7 @@ void CDECL CRTDLL__fpreset(void)
  */
 INT CDECL CRTDLL__fputchar( int c )
 {
-  dprintf(("CRTDLL: _fputchar\n"));
+  dprintf2(("CRTDLL: _fputchar\n"));
   return(_fputchar(c));
 }
 
@@ -1302,7 +1304,7 @@ int CDECL CRTDLL__ftime( struct timeb *timebuf )
  */
 char * CDECL CRTDLL__fullpath( char *buf, char *path, size_t size )
 {
-  dprintf(("CRTDLL: _fullpath\n"));
+  dprintf2(("CRTDLL: _fullpath\n"));
   return (_fullpath(buf, path, size));
 }
 
@@ -1323,7 +1325,7 @@ int CDECL CRTDLL__futime( int handle, struct _utimbuf *filetime )
  */
 char * CDECL CRTDLL__gcvt( double val, int ndig, char *buf )
 {
-  dprintf(("CRTDLL: _gcvt\n"));
+  dprintf2(("CRTDLL: _gcvt\n"));
   return (_gcvt(val, ndig, buf));
 }
 
@@ -1333,7 +1335,7 @@ char * CDECL CRTDLL__gcvt( double val, int ndig, char *buf )
  */
 void* CDECL CRTDLL__get_osfhandle( int fileno )
 {
-  dprintf(("CRTDLL: _get_osfhandle\n"));
+  dprintf2(("CRTDLL: _get_osfhandle\n"));
   return filehnd(fileno);
 }
 
@@ -1343,7 +1345,7 @@ void* CDECL CRTDLL__get_osfhandle( int fileno )
  */
 int CDECL CRTDLL__getch(void)
 {
-  dprintf(("CRTDLL: _getch\n"));
+  dprintf2(("CRTDLL: _getch\n"));
   return (_getch());
 }
 
@@ -1353,7 +1355,7 @@ int CDECL CRTDLL__getch(void)
  */
 int CDECL CRTDLL__getche(void)
 {
-  dprintf(("CRTDLL: _getche\n"));
+  dprintf2(("CRTDLL: _getche\n"));
   return (_getche());
 }
 
@@ -1363,7 +1365,7 @@ int CDECL CRTDLL__getche(void)
  */
 char * CDECL CRTDLL__getcwd( char *buf, size_t size )
 {
-  dprintf(("CRTDLL: _getcwd\n"));
+  dprintf2(("CRTDLL: _getcwd\n"));
   return (_getcwd(buf, size));
 }
 
@@ -1373,7 +1375,7 @@ char * CDECL CRTDLL__getcwd( char *buf, size_t size )
  */
 char * CDECL CRTDLL__getdcwd( int drive, char *buffer, size_t maxlen )
 {
-  dprintf(("CRTDLL: _getdcwd\n"));
+  dprintf2(("CRTDLL: _getdcwd\n"));
   return (_getdcwd(drive, buffer, maxlen));
 }
 
@@ -1383,7 +1385,7 @@ char * CDECL CRTDLL__getdcwd( int drive, char *buffer, size_t maxlen )
  */
 unsigned int CDECL CRTDLL__getdiskfree( unsigned int drive, struct _diskfree_t *diskspace)
 {
-  dprintf(("CRTDLL: _getdiskfree\n"));
+  dprintf2(("CRTDLL: _getdiskfree\n"));
   char RootPathName[10];
   RootPathName[0] = toupper(drive +'@');
   RootPathName[1] = ':';
@@ -1404,7 +1406,7 @@ unsigned int CDECL CRTDLL__getdiskfree( unsigned int drive, struct _diskfree_t *
  */
 FARPROC CDECL  CRTDLL__getdllprocaddr(HMODULE hModule,char * lpProcName, int iOrdinal)
 {
-  dprintf(("CRTDLL: _getdllprocaddr\n"));   
+  dprintf2(("CRTDLL: _getdllprocaddr\n"));   
   if ( lpProcName != NULL ) 
 	return GetProcAddress(hModule, lpProcName);
   else
@@ -1418,7 +1420,7 @@ FARPROC CDECL  CRTDLL__getdllprocaddr(HMODULE hModule,char * lpProcName, int iOr
  */
 unsigned CDECL CRTDLL__getdrive( void )
 {
-  dprintf(("CRTDLL: _getdrive\n"));
+  dprintf2(("CRTDLL: _getdrive\n"));
   return DRIVE_GetCurrentDrive() + 1;
 }
 
@@ -1428,7 +1430,7 @@ unsigned CDECL CRTDLL__getdrive( void )
  */
 unsigned long CDECL CRTDLL__getdrives(void)
 {
-  dprintf(("CRTDLL: _getdrives\n"));
+  dprintf2(("CRTDLL: _getdrives\n"));
   return GetLogicalDrives();
 }
 
@@ -1438,7 +1440,7 @@ unsigned long CDECL CRTDLL__getdrives(void)
  */
 int CDECL CRTDLL__getpid( void )
 {
-  dprintf(("CRTDLL: _getpid\n"));
+  dprintf2(("CRTDLL: _getpid\n"));
   return (_getpid());
 }
 
@@ -1459,7 +1461,7 @@ unsigned int CDECL CRTDLL__getsystime(struct tm *tp)
  */
 int CDECL CRTDLL__getw( FILE *stream )
 {
-  dprintf(("CRTDLL: _getw\n"));
+  dprintf2(("CRTDLL: _getw\n"));
   int w;
 
   /* Is there a better way?  */
@@ -1474,7 +1476,7 @@ int CDECL CRTDLL__getw( FILE *stream )
  */
 void CDECL CRTDLL__global_unwind2( PEXCEPTION_FRAME frame )
 {
-    dprintf(("CRTDLL: global_undwind2\n"));
+    dprintf2(("CRTDLL: global_undwind2\n"));
     RtlUnwind( frame, 0, NULL, 0 );
 }
 
@@ -1484,7 +1486,7 @@ void CDECL CRTDLL__global_unwind2( PEXCEPTION_FRAME frame )
  */
 int CDECL CRTDLL__heapchk( void )
 {
-  dprintf(("CRTDLL: _heapchk\n"));
+  dprintf2(("CRTDLL: _heapchk\n"));
   return (_heapchk());
 }
 
@@ -1494,7 +1496,7 @@ int CDECL CRTDLL__heapchk( void )
  */
 int CDECL CRTDLL__heapmin( void )
 {
-  dprintf(("CRTDLL: _heapmin\n"));
+  dprintf2(("CRTDLL: _heapmin\n"));
   return (_heapmin());
 }
 
@@ -1504,7 +1506,7 @@ int CDECL CRTDLL__heapmin( void )
  */
 int CDECL CRTDLL__heapset( unsigned int fill )
 {
-  dprintf(("CRTDLL: _heapset\n"));
+  dprintf2(("CRTDLL: _heapset\n"));
   return (_heapset(fill));
 }
 
@@ -1525,7 +1527,7 @@ int CDECL CRTDLL__heapwalk( struct _heapinfo *entry )
  */
 double CDECL CRTDLL__hypot(double x1, double x2)
 {
-  dprintf(("CRTDLL: _hypot\n"));
+  dprintf2(("CRTDLL: _hypot\n"));
   return (_hypot(x1, x2));
 }
 
@@ -1535,7 +1537,7 @@ double CDECL CRTDLL__hypot(double x1, double x2)
  */
 DWORD CDECL CRTDLL__initterm(_INITTERMFUN *start,_INITTERMFUN *end)
 {
-	dprintf(("CRTDLL: initterm\n"));
+	dprintf2(("CRTDLL: initterm\n"));
 	_INITTERMFUN	*current;
 
 	current=start;
@@ -1552,7 +1554,7 @@ DWORD CDECL CRTDLL__initterm(_INITTERMFUN *start,_INITTERMFUN *end)
  */
 BOOL CDECL CRTDLL__isatty(DWORD x)
 {
-   dprintf(("(%ld)\n",x));
+   dprintf2(("(%ld)\n",x));
    return TRUE;
 }
 
@@ -1562,7 +1564,7 @@ BOOL CDECL CRTDLL__isatty(DWORD x)
  */
 BOOL CDECL CRTDLL__isctype(CHAR x,CHAR type)
 {
-	dprintf(("CRTDLL: isctype\n"));
+	dprintf2(("CRTDLL: isctype\n"));
 	if ((type & CRTDLL_SPACE) && isspace(x))
 		return TRUE;
 	if ((type & CRTDLL_PUNCT) && ispunct(x))
@@ -1587,7 +1589,7 @@ BOOL CDECL CRTDLL__isctype(CHAR x,CHAR type)
  */
 int CDECL CRTDLL__ismbbalnum( unsigned int c )
 {
-  dprintf(("CRTDLL: _ismbbalnum\n"));
+  dprintf2(("CRTDLL: _ismbbalnum\n"));
   return (CRTDLL_isalnum(c) || CRTDLL__ismbbkalnum(c));
 }
 
@@ -1597,7 +1599,7 @@ int CDECL CRTDLL__ismbbalnum( unsigned int c )
  */
 int CDECL CRTDLL__ismbbalpha( unsigned int c )
 {
-  dprintf(("CRTDLL: _ismbbalpha\n"));
+  dprintf2(("CRTDLL: _ismbbalpha\n"));
   return (isalpha(c) || CRTDLL__ismbbkalnum(c));
 }
 
@@ -1607,7 +1609,7 @@ int CDECL CRTDLL__ismbbalpha( unsigned int c )
  */
 int CDECL CRTDLL__ismbbgraph( unsigned int c )
 {
-  dprintf(("CRTDLL: _ismbbgraph\n"));
+  dprintf2(("CRTDLL: _ismbbgraph\n"));
   return (CRTDLL_isgraph(c) || CRTDLL__ismbbkana(c));
 }
 
@@ -1617,7 +1619,7 @@ int CDECL CRTDLL__ismbbgraph( unsigned int c )
  */
 int CDECL CRTDLL__ismbbkalnum( unsigned int c )
 {
-  dprintf(("CRTDLL: _ismbbkalnum\n"));
+  dprintf2(("CRTDLL: _ismbbkalnum\n"));
   return  ((_jctype+1)[(unsigned char)(c)] & (_KNJ_P));
 }
 
@@ -1627,7 +1629,7 @@ int CDECL CRTDLL__ismbbkalnum( unsigned int c )
  */
 int CDECL CRTDLL__ismbbkana( unsigned int c )
 {
-  dprintf(("CRTDLL: _ismbbkana\n"));
+  dprintf2(("CRTDLL: _ismbbkana\n"));
   return ((_jctype+1)[(unsigned char)(c)] & (_KNJ_M|_KNJ_P));
 }
 
@@ -1637,7 +1639,7 @@ int CDECL CRTDLL__ismbbkana( unsigned int c )
  */
 int CDECL CRTDLL__ismbbkpunct( unsigned int c )
 {
-  dprintf(("CRTDLL: _ismbbkpunct\n"));
+  dprintf2(("CRTDLL: _ismbbkpunct\n"));
   return  ((_jctype+1)[(unsigned char)(c)] & (_KNJ_P));
 }
 
@@ -1647,7 +1649,7 @@ int CDECL CRTDLL__ismbbkpunct( unsigned int c )
  */
 int CDECL CRTDLL__ismbblead( unsigned int c )
 {
-  dprintf(("CRTDLL: _ismbblead\n"));
+  dprintf2(("CRTDLL: _ismbblead\n"));
   return ((_jctype+1)[(unsigned char)(c)] & _KNJ_1);
 }
 
@@ -1657,7 +1659,7 @@ int CDECL CRTDLL__ismbblead( unsigned int c )
  */
 int CDECL CRTDLL__ismbbprint( unsigned int c )
 {
-  dprintf(("CRTDLL: _ismbbprint\n"));
+  dprintf2(("CRTDLL: _ismbbprint\n"));
   return (isprint(c) || CRTDLL__ismbbkana(c));
 }
 
@@ -1667,7 +1669,7 @@ int CDECL CRTDLL__ismbbprint( unsigned int c )
  */
 int CDECL CRTDLL__ismbbpunct( unsigned int c )
 {
-  dprintf(("CRTDLL: _ismbbpunct\n"));
+  dprintf2(("CRTDLL: _ismbbpunct\n"));
   return (ispunct(c) ||  CRTDLL__ismbbkana(c));
 }
 
@@ -1677,7 +1679,7 @@ int CDECL CRTDLL__ismbbpunct( unsigned int c )
  */
 int CDECL CRTDLL__ismbbtrail( unsigned int c )
 {
-  dprintf(("CRTDLL: _ismbbtrail\n"));
+  dprintf2(("CRTDLL: _ismbbtrail\n"));
   return ((_jctype+1)[(unsigned char)(c)] & _KNJ_2);
 }
 
@@ -1687,7 +1689,7 @@ int CDECL CRTDLL__ismbbtrail( unsigned int c )
  */
 int CDECL CRTDLL__ismbcalpha( unsigned int c )
 {
-  dprintf(("CRTDLL: _ismbcalpha\n"));
+  dprintf2(("CRTDLL: _ismbcalpha\n"));
   if ((c & 0xFF00) != 0) {
 	// true multibyte character
 	return 0;
@@ -1704,7 +1706,7 @@ int CDECL CRTDLL__ismbcalpha( unsigned int c )
  */
 int CDECL CRTDLL__ismbcdigit( unsigned int c )
 {
-  dprintf(("CRTDLL: _ismbcdigit\n"));
+  dprintf2(("CRTDLL: _ismbcdigit\n"));
   if ((c & 0xFF00) != 0) {
 	// true multibyte character
 	return 0;
@@ -1722,7 +1724,7 @@ int CDECL CRTDLL__ismbcdigit( unsigned int c )
  */
 int CDECL CRTDLL__ismbchira( unsigned int c )
 {
-  dprintf(("CRTDLL: _ismbchira\n"));
+  dprintf2(("CRTDLL: _ismbchira\n"));
   return ((c>=0x829F) && (c<=0x82F1));
 }
 
@@ -1732,7 +1734,7 @@ int CDECL CRTDLL__ismbchira( unsigned int c )
  */
 int CDECL CRTDLL__ismbckata( unsigned int c )
 {
-  dprintf(("CRTDLL: _ismbckata\n"));
+  dprintf2(("CRTDLL: _ismbckata\n"));
   return ((c>=0x8340) && (c<=0x8396));
 }
 
@@ -1774,7 +1776,7 @@ int CDECL CRTDLL__ismbcl2( unsigned int ch )
  */
 int CDECL CRTDLL__ismbclegal( unsigned int c )
 {
-  dprintf(("CRTDLL: _ismbclegal\n"));
+  dprintf2(("CRTDLL: _ismbclegal\n"));
   if ((c & 0xFF00) != 0) {
 	return CRTDLL__ismbblead(c>>8) && CRTDLL__ismbbtrail(c&0xFF);
   }
@@ -1790,7 +1792,7 @@ int CDECL CRTDLL__ismbclegal( unsigned int c )
  */
 int CDECL CRTDLL__ismbclower( unsigned int c )
 {
-  dprintf(("CRTDLL: _ismbclower\n"));
+  dprintf2(("CRTDLL: _ismbclower\n"));
   if ((c & 0xFF00) != 0) {
 	if ( c >= 0x829A && c<= 0x829A )
 		return 1;
@@ -1805,7 +1807,7 @@ int CDECL CRTDLL__ismbclower( unsigned int c )
  */
 int CDECL CRTDLL__ismbcprint( unsigned int c )
 {
-  dprintf(("CRTDLL: _ismbcprint\n"));
+  dprintf2(("CRTDLL: _ismbcprint\n"));
   if ((c & 0xFF00) != 0) {
 	// true multibyte character
 	return 0;
@@ -1859,7 +1861,7 @@ int CDECL CRTDLL__ismbcsymbol( unsigned int c )
  */
 int CDECL CRTDLL__ismbcupper( unsigned int c )
 {
-  dprintf(("CRTDLL: _ismbcupper\n"));
+  dprintf2(("CRTDLL: _ismbcupper\n"));
   if ((c & 0xFF00) != 0) {
 	if ( c >= 0x8260 && c<= 0x8279 )
 		return 1;
@@ -1874,7 +1876,7 @@ int CDECL CRTDLL__ismbcupper( unsigned int c )
  */
 int CDECL CRTDLL__ismbslead(const unsigned char *str, const unsigned char *t)
 {
-  dprintf(("CRTDLL: _ismbslead\n"));
+  dprintf2(("CRTDLL: _ismbslead\n"));
   unsigned char *s = (unsigned char *)str;
   while(*s != 0 && s != t) 
   {  
@@ -1889,7 +1891,7 @@ int CDECL CRTDLL__ismbslead(const unsigned char *str, const unsigned char *t)
  */
 int CDECL CRTDLL__ismbstrail(const unsigned char *str, const unsigned char *t)
 {
-  dprintf(("CRTDLL: _ismbstrail\n"));
+  dprintf2(("CRTDLL: _ismbstrail\n"));
   unsigned char *s = (unsigned char *)str;
   while(*s != 0 && s != t) 
   {
@@ -1906,7 +1908,7 @@ int CDECL CRTDLL__ismbstrail(const unsigned char *str, const unsigned char *t)
  */
 int CDECL CRTDLL__isnan( double __x )
 {
-  dprintf(("CRTDLL: _isnan\n"));
+  dprintf2(("CRTDLL: _isnan\n"));
   double_t * x = (double_t *)&__x;
   return ( x->exponent == 0x7ff  && ( x->mantissah != 0 || x->mantissal != 0 ));
 }
@@ -1917,7 +1919,7 @@ int CDECL CRTDLL__isnan( double __x )
  */
 double CDECL CRTDLL__j0(double x)
 {
-  dprintf(("CRTDLL: _j0\n"));
+  dprintf2(("CRTDLL: _j0\n"));
   return (_j0(x));
 }
 
@@ -1927,7 +1929,7 @@ double CDECL CRTDLL__j0(double x)
  */
 double CDECL CRTDLL__j1(double x)
 {
-  dprintf(("CRTDLL: _j1\n"));
+  dprintf2(("CRTDLL: _j1\n"));
   return (_j1(x));}
 
 
@@ -1936,7 +1938,7 @@ double CDECL CRTDLL__j1(double x)
  */
 double CDECL CRTDLL__jn(int i, double x)
 {
-  dprintf(("CRTDLL: _jn\n"));
+  dprintf2(("CRTDLL: _jn\n"));
   return (_jn(i, x));
 }
 
@@ -1946,7 +1948,7 @@ double CDECL CRTDLL__jn(int i, double x)
  */
 int CDECL CRTDLL__kbhit( void )
 {
-  dprintf(("CRTDLL: _kbhit\n"));
+  dprintf2(("CRTDLL: _kbhit\n"));
   return (_kbhit());
 }
 
@@ -1957,7 +1959,7 @@ int CDECL CRTDLL__kbhit( void )
 void * CDECL CRTDLL__lfind(const void *key, const void *base, size_t *nelp,
          size_t width, int (*compar)(const void *, const void *))
 {
-  dprintf(("CRTDLL: _lfind\n"));
+  dprintf2(("CRTDLL: _lfind\n"));
   char *char_base = (char *)base;
   int i;
   for(i=0;i<*nelp;i++) {
@@ -1974,7 +1976,7 @@ void * CDECL CRTDLL__lfind(const void *key, const void *base, size_t *nelp,
  */
 void * CDECL CRTDLL__loaddll (char *name)
 {
-  dprintf(("CRTDLL: _loaddll\n"));
+  dprintf2(("CRTDLL: _loaddll\n"));
   return (void*)LoadLibraryA(name);
 }
 
@@ -1984,7 +1986,7 @@ void * CDECL CRTDLL__loaddll (char *name)
  */
 void CDECL CRTDLL__local_unwind2( PEXCEPTION_FRAME endframe, DWORD nr )
 {
-	dprintf(("CRTDLL: local_undwind2\n"));
+	dprintf2(("CRTDLL: local_undwind2\n"));
 }
 
 
@@ -2015,7 +2017,7 @@ double CDECL CRTDLL__logb( double x )
  */
 unsigned long CDECL CRTDLL__lrotl( unsigned long value, unsigned int shift )
 {
-  dprintf(("CRTDLL: _lrotl\n"));
+  dprintf2(("CRTDLL: _lrotl\n"));
   return (_lrotl(value, shift));
 }
 
@@ -2025,7 +2027,7 @@ unsigned long CDECL CRTDLL__lrotl( unsigned long value, unsigned int shift )
  */
 unsigned long CDECL CRTDLL__lrotr( unsigned long value, unsigned int shift )
 {
-  dprintf(("CRTDLL: _lrotr\n"));
+  dprintf2(("CRTDLL: _lrotr\n"));
   return (_lrotr(value, shift));
 }
 
@@ -2047,7 +2049,7 @@ void * CDECL CRTDLL__lsearch(const void *key, void *base, size_t *nelp, size_t w
  */
 long CDECL CRTDLL__lseek(int handle,long offset,int origin)
 {
-  dprintf(("CRTDLL: _lssek\n"));
+  dprintf2(("CRTDLL: _lssek\n"));
   return (_lseek(handle, offset, origin));
 }
 
@@ -2058,7 +2060,7 @@ long CDECL CRTDLL__lseek(int handle,long offset,int origin)
 void CDECL CRTDLL__makepath( char *path, char *drive,
                     char *dir, char *fname, char *ext )
 {
-  dprintf(("CRTDLL: _makepath\n"));
+  dprintf2(("CRTDLL: _makepath\n"));
   _makepath(path, drive, dir, fname, ext);
 }
 
@@ -2068,7 +2070,7 @@ void CDECL CRTDLL__makepath( char *path, char *drive,
  */
 double CDECL CRTDLL__matherr( struct exception * excep )
 {
-  dprintf(("CRTDLL: _matherr\n"));
+  dprintf2(("CRTDLL: _matherr\n"));
   return (_matherr(excep));
 }
 
@@ -2078,7 +2080,7 @@ double CDECL CRTDLL__matherr( struct exception * excep )
  */
 unsigned int CDECL CRTDLL__mbbtombc( unsigned int c )
 {
-  dprintf(("CRTDLL: _mbbtombc\n"));
+  dprintf2(("CRTDLL: _mbbtombc\n"));
   if (c >= 0x20 && c <= 0x7e) {
     return han_to_zen_ascii_table[c - 0x20];
   } else if (ISKANA(c)) {
@@ -2093,7 +2095,7 @@ unsigned int CDECL CRTDLL__mbbtombc( unsigned int c )
  */
 int CDECL CRTDLL__mbbtype( unsigned char c, int type )
 {
-  dprintf(("CRTDLL: _mbbtype\n"));
+  dprintf2(("CRTDLL: _mbbtype\n"));
 	if ( type == 1 ) {
 		if ((c >= 0x40 && c <= 0x7e ) || (c >= 0x80 && c <= 0xfc ) )
 		{
@@ -2130,7 +2132,7 @@ int CDECL CRTDLL__mbbtype( unsigned char c, int type )
  */
 void CDECL CRTDLL__mbccpy( unsigned char *dst, const unsigned char *src )
 {
-  dprintf(("CRTDLL: _mbccpy\n"));
+  dprintf2(("CRTDLL: _mbccpy\n"));
 
   if (!CRTDLL__ismbblead(*src) )
 	return;
@@ -2144,7 +2146,7 @@ void CDECL CRTDLL__mbccpy( unsigned char *dst, const unsigned char *src )
  */
 int CDECL CRTDLL__mbcjistojms( unsigned int c )
 {
-  dprintf(("CRTDLL: _mbcjistojms\n"));
+  dprintf2(("CRTDLL: _mbcjistojms\n"));
   int c1, c2;
 
   c2 = (unsigned char)c;
@@ -2172,7 +2174,7 @@ int CDECL CRTDLL__mbcjistojms( unsigned int c )
  */
 int CDECL CRTDLL__mbcjmstojis( unsigned int c )
 {
-  dprintf(("CRTDLL: _mbcjmstojis\n"));
+  dprintf2(("CRTDLL: _mbcjmstojis\n"));
   int c1, c2;
 
   c2 = (unsigned char)c;
@@ -2201,7 +2203,7 @@ int CDECL CRTDLL__mbcjmstojis( unsigned int c )
  */
 size_t CDECL CRTDLL__mbclen( const unsigned char *s )
 {
-  dprintf(("CRTDLL: _mbclen\n"));
+  dprintf2(("CRTDLL: _mbclen\n"));
   return (CRTDLL__ismbblead(*s>>8) && CRTDLL__ismbbtrail(*s&0x00FF)) ? 2 : 1;
 }
 
@@ -2211,7 +2213,7 @@ size_t CDECL CRTDLL__mbclen( const unsigned char *s )
  */
 int CDECL CRTDLL__mbctohira( unsigned int c )
 {
-  dprintf(("CRTDLL: _mbctohira\n"));
+  dprintf2(("CRTDLL: _mbctohira\n"));
   return c;
 }
 
@@ -2221,7 +2223,7 @@ int CDECL CRTDLL__mbctohira( unsigned int c )
  */
 int CDECL CRTDLL__mbctokata( unsigned int c )
 {
-  dprintf(("CRTDLL: _mbctokata\n"));
+  dprintf2(("CRTDLL: _mbctokata\n"));
   return c;
 }
 
@@ -2231,7 +2233,7 @@ int CDECL CRTDLL__mbctokata( unsigned int c )
  */
 unsigned int CDECL CRTDLL__mbctolower( unsigned int c )
 {
-  dprintf(("CRTDLL: _mbctolower\n"));
+  dprintf2(("CRTDLL: _mbctolower\n"));
         if ((c & 0xFF00) != 0) {
 // true multibyte case conversion needed
 		if ( CRTDLL__ismbclower(c) )
@@ -2249,7 +2251,7 @@ unsigned int CDECL CRTDLL__mbctolower( unsigned int c )
  */
 unsigned int CDECL CRTDLL__mbctombb( unsigned int c )
 {
-  dprintf(("CRTDLL: _mbctombb\n"));
+  dprintf2(("CRTDLL: _mbctombb\n"));
   int i;
   unsigned short *p;
 
@@ -2279,7 +2281,7 @@ unsigned int CDECL CRTDLL__mbctombb( unsigned int c )
  */
 unsigned int CDECL CRTDLL__mbctoupper( unsigned int c )
 {
-  dprintf(("CRTDLL: _mbctoupper\n"));
+  dprintf2(("CRTDLL: _mbctoupper\n"));
   if ((c & 0xFF00) != 0) {
 // true multibyte case conversion needed
   if ( CRTDLL__ismbcupper(c) )
@@ -2297,7 +2299,7 @@ unsigned int CDECL CRTDLL__mbctoupper( unsigned int c )
  */
 int CDECL CRTDLL__mbsbtype( const unsigned char *str, int n )
 {
-  dprintf(("CRTDLL: _mbsbtype\n"));
+  dprintf2(("CRTDLL: _mbsbtype\n"));
   if ( str == NULL )
 	return -1;
   return CRTDLL__mbbtype(*(str+n),1);
@@ -2309,7 +2311,7 @@ int CDECL CRTDLL__mbsbtype( const unsigned char *str, int n )
  */
 unsigned char * CDECL CRTDLL__mbscat( unsigned char *dst, const unsigned char *src )
 {
-  dprintf(("CRTDLL: _mbscat\n"));
+  dprintf2(("CRTDLL: _mbscat\n"));
   return (unsigned char*)strcat((char*)dst,(char*)src);
 }
 
@@ -2319,7 +2321,7 @@ unsigned char * CDECL CRTDLL__mbscat( unsigned char *dst, const unsigned char *s
  */
 unsigned char * CDECL CRTDLL__mbschr( const unsigned char *str, unsigned int c )
 {
-  dprintf(("CRTDLL: _mbschr\n"));
+  dprintf2(("CRTDLL: _mbschr\n"));
   return (unsigned char*)strchr((char*)str,c);
 }
 
@@ -2329,7 +2331,7 @@ unsigned char * CDECL CRTDLL__mbschr( const unsigned char *str, unsigned int c )
  */
 int CDECL CRTDLL__mbscmp( const unsigned char *s1, const unsigned char *s2 )
 {
-  dprintf(("CRTDLL: _mbscmp\n"));
+  dprintf2(("CRTDLL: _mbscmp\n"));
   return strcmp((char*)s1,(char*)s2);
 }
 
@@ -2339,7 +2341,7 @@ int CDECL CRTDLL__mbscmp( const unsigned char *s1, const unsigned char *s2 )
  */
 unsigned char * CDECL CRTDLL__mbscpy( unsigned char *s1, const unsigned char *s2 )
 {
-  dprintf(("CRTDLL: _mbscpy\n"));
+  dprintf2(("CRTDLL: _mbscpy\n"));
   return (unsigned char*)strcpy((char*)s1,(char*)s2);
 }
 
@@ -2349,7 +2351,7 @@ unsigned char * CDECL CRTDLL__mbscpy( unsigned char *s1, const unsigned char *s2
  */
 size_t CDECL CRTDLL__mbscspn( const unsigned char *s1, const unsigned char *s2 )
 {
-  dprintf(("CRTDLL: _mbscspn\n"));
+  dprintf2(("CRTDLL: _mbscspn\n"));
   const char *p, *spanp;
   char c, sc;
 
@@ -2371,7 +2373,7 @@ size_t CDECL CRTDLL__mbscspn( const unsigned char *s1, const unsigned char *s2 )
  */
 unsigned char * CDECL CRTDLL__mbsdec( const unsigned char *str, const unsigned char *cur )
 {
-  dprintf(("CRTDLL: _mbsdec\n"));
+  dprintf2(("CRTDLL: _mbsdec\n"));
   unsigned char *s = (unsigned char *)cur;
   if ( str >= cur )
 	return NULL;
@@ -2388,7 +2390,7 @@ unsigned char * CDECL CRTDLL__mbsdec( const unsigned char *str, const unsigned c
  */
 unsigned char * CDECL CRTDLL__mbsdup( unsigned char *_s )
 {
-  dprintf(("CRTDLL: _mbsdup\n"));
+  dprintf2(("CRTDLL: _mbsdup\n"));
   char *rv;
   if (_s == 0)
 	return 0;
@@ -2405,7 +2407,7 @@ unsigned char * CDECL CRTDLL__mbsdup( unsigned char *_s )
  */
 int CDECL CRTDLL__mbsicmp( const unsigned char *x, const unsigned char *y )
 {
-  dprintf(("CRTDLL: _mbsicmp\n"));
+  dprintf2(("CRTDLL: _mbsicmp\n"));
     do {
 	if (!*x)
 	    return !!*y;
@@ -2425,7 +2427,7 @@ int CDECL CRTDLL__mbsicmp( const unsigned char *x, const unsigned char *y )
  */
 LPSTR CDECL CRTDLL__mbsinc( LPCSTR str )
 {
-    dprintf(("CRTDLL: _mbsinc\n"));
+    dprintf2(("CRTDLL: _mbsinc\n"));
     int len = mblen( str, MB_LEN_MAX );
     if (len < 1) len = 1;
     return (LPSTR)(str + len);
@@ -2437,7 +2439,7 @@ LPSTR CDECL CRTDLL__mbsinc( LPCSTR str )
  */
 INT CDECL CRTDLL__mbslen( LPCSTR str )
 {
-    dprintf(("CRTDLL: _mbslen\n"));
+    dprintf2(("CRTDLL: _mbslen\n"));
     INT len, total = 0;
     while ((len = mblen( str, MB_LEN_MAX )) > 0)
     {
@@ -2453,7 +2455,7 @@ INT CDECL CRTDLL__mbslen( LPCSTR str )
  */
 unsigned char * CDECL CRTDLL__mbslwr( unsigned char *x )
 {
-  dprintf(("CRTDLL: _mbslwr\n"));
+  dprintf2(("CRTDLL: _mbslwr\n"));
   unsigned char  *y=x;
 
   while (*y) {
@@ -2473,7 +2475,7 @@ unsigned char * CDECL CRTDLL__mbslwr( unsigned char *x )
  */
 unsigned char * CDECL CRTDLL__mbsnbcat( unsigned char *dst, const unsigned char *src, size_t n )
 {
-  dprintf(("CRTDLL: _mbsnbcat\n"));
+  dprintf2(("CRTDLL: _mbsnbcat\n"));
 	char *d; 
     	char *s = (char *)src;	
     	if (n != 0) {
@@ -2500,7 +2502,7 @@ unsigned char * CDECL CRTDLL__mbsnbcat( unsigned char *dst, const unsigned char 
  */
 int CDECL CRTDLL__mbsnbcmp( const unsigned char *str1, const unsigned char *str2, size_t n )
 {
-  dprintf(("CRTDLL: _mbsnbcmp\n"));
+  dprintf2(("CRTDLL: _mbsnbcmp\n"));
 	unsigned char *s1 = (unsigned char *)str1;
 	unsigned char *s2 = (unsigned char *)str2;
 
@@ -2551,7 +2553,7 @@ int CDECL CRTDLL__mbsnbcmp( const unsigned char *str1, const unsigned char *str2
  */
 size_t CDECL CRTDLL__mbsnbcnt( const unsigned char *str, size_t n )
 {
-  dprintf(("CRTDLL: _mbsnbcnt\n"));
+  dprintf2(("CRTDLL: _mbsnbcnt\n"));
 	unsigned char *s = (unsigned char *)str;
 	while(*s != 0 && n > 0) {
 		if (!CRTDLL__ismbblead(*s) )
@@ -2568,7 +2570,7 @@ size_t CDECL CRTDLL__mbsnbcnt( const unsigned char *str, size_t n )
  */
 unsigned char * CDECL CRTDLL__mbsnbcpy( unsigned char *str1, const unsigned char *str2, size_t n )
 {
-  dprintf(("CRTDLL: _mbsnbcpy\n"));
+  dprintf2(("CRTDLL: _mbsnbcpy\n"));
 	unsigned char *s1 = (unsigned char *)str1;
 	unsigned char *s2 = (unsigned char *)str2;
 
@@ -2606,7 +2608,7 @@ unsigned char * CDECL CRTDLL__mbsnbcpy( unsigned char *str1, const unsigned char
  */
 int CDECL CRTDLL__mbsnbicmp( const unsigned char *s1, const unsigned char *s2, size_t n )
 {
-  dprintf(("CRTDLL: _mbsnbicmp\n"));
+  dprintf2(("CRTDLL: _mbsnbicmp\n"));
   if (n == 0)
     return 0;
   do {
@@ -2629,7 +2631,7 @@ int CDECL CRTDLL__mbsnbicmp( const unsigned char *s1, const unsigned char *s2, s
  */
 unsigned char * CDECL CRTDLL__mbsnbset( unsigned char *src, unsigned int val, size_t count )
 {
-  dprintf(("CRTDLL: _mbsnbset\n"));
+  dprintf2(("CRTDLL: _mbsnbset\n"));
 	unsigned char *char_src = (unsigned char *)src;
 	unsigned short *short_src = (unsigned short *)src;
        
@@ -2660,7 +2662,7 @@ unsigned char * CDECL CRTDLL__mbsnbset( unsigned char *src, unsigned int val, si
  */
 unsigned char * CDECL CRTDLL__mbsncat( unsigned char *dst, const unsigned char *src, size_t n )
 {
-  dprintf(("CRTDLL: _mbsncat\n"));
+  dprintf2(("CRTDLL: _mbsncat\n"));
 	char *d = (char *)dst; 
     	char *s = (char *)src;	
     	if (n != 0) {
@@ -2687,7 +2689,7 @@ unsigned char * CDECL CRTDLL__mbsncat( unsigned char *dst, const unsigned char *
  */
 size_t CDECL CRTDLL__mbsnccnt( const unsigned char *str, size_t n )
 {
-  dprintf(("CRTDLL: _mbsnccnt\n"));
+  dprintf2(("CRTDLL: _mbsnccnt\n"));
 	unsigned char *s = (unsigned char *)str;
 	size_t cnt = 0;
 	while(*s != 0 && n > 0) {
@@ -2708,7 +2710,7 @@ size_t CDECL CRTDLL__mbsnccnt( const unsigned char *str, size_t n )
  */
 int CDECL CRTDLL__mbsncmp( const unsigned char *str1, const unsigned char *str2, size_t n )
 {
-  dprintf(("CRTDLL: _mbsncmp\n"));
+  dprintf2(("CRTDLL: _mbsncmp\n"));
 	unsigned char *s1 = (unsigned char *)str1;
 	unsigned char *s2 = (unsigned char *)str2;
 
@@ -2759,7 +2761,7 @@ int CDECL CRTDLL__mbsncmp( const unsigned char *str1, const unsigned char *str2,
  */
 unsigned char * CDECL CRTDLL__mbsncpy( unsigned char *str1, const unsigned char *str2, size_t n )
 {
-  dprintf(("CRTDLL: _mbsncpy\n"));
+  dprintf2(("CRTDLL: _mbsncpy\n"));
 	unsigned char *s1 = (unsigned char *)str1;
 	unsigned char *s2 = (unsigned char *)str2;
 
@@ -2797,7 +2799,7 @@ unsigned char * CDECL CRTDLL__mbsncpy( unsigned char *str1, const unsigned char 
  */
 unsigned int CDECL CRTDLL__mbsnextc( const unsigned char *src )
 {
-  dprintf(("CRTDLL: _mbsnextc\n"));
+  dprintf2(("CRTDLL: _mbsnextc\n"));
 	unsigned char *char_src = (unsigned char *)src;
 	unsigned short *short_src = (unsigned short *)src;
 
@@ -2818,7 +2820,7 @@ unsigned int CDECL CRTDLL__mbsnextc( const unsigned char *src )
  */
 int CDECL CRTDLL__mbsnicmp( const unsigned char *s1, const unsigned char *s2, size_t n )
 {
-  dprintf(("CRTDLL: _mbsnicmp\n"));
+  dprintf2(("CRTDLL: _mbsnicmp\n"));
   if (n == 0)
     return 0;
   do {
@@ -2844,7 +2846,7 @@ int CDECL CRTDLL__mbsnicmp( const unsigned char *s1, const unsigned char *s2, si
  */
 unsigned char * CDECL CRTDLL__mbsninc( const unsigned char *str, size_t n )
 {
-  dprintf(("CRTDLL: _mbsninc\n"));
+  dprintf2(("CRTDLL: _mbsninc\n"));
 	unsigned char *s = (unsigned char *)str;
 	while(*s != 0 && n > 0) {
 		if (!CRTDLL__ismbblead(*s) )
@@ -2861,7 +2863,7 @@ unsigned char * CDECL CRTDLL__mbsninc( const unsigned char *str, size_t n )
  */
 unsigned char * CDECL CRTDLL__mbsnset( unsigned char *src, unsigned int val, size_t count )
 {
-  dprintf(("CRTDLL: _mbsnset\n"));
+  dprintf2(("CRTDLL: _mbsnset\n"));
 	unsigned char *char_src = (unsigned char *)src;
 	unsigned short *short_src = (unsigned short *)src;
        
@@ -2893,7 +2895,7 @@ unsigned char * CDECL CRTDLL__mbsnset( unsigned char *src, unsigned int val, siz
  */
 unsigned char * CDECL CRTDLL__mbspbrk( const unsigned char *s1, const unsigned char *s2 )
 {
-  dprintf(("CRTDLL: _mbspbrk\n"));
+  dprintf2(("CRTDLL: _mbspbrk\n"));
   const char *scanp;
   int c, sc;
 
@@ -2912,7 +2914,7 @@ unsigned char * CDECL CRTDLL__mbspbrk( const unsigned char *s1, const unsigned c
  */
 LPSTR CDECL CRTDLL__mbsrchr(LPSTR s,CHAR x)
 {
-  dprintf(("CRTDLL: _mbsrchr\n"));
+  dprintf2(("CRTDLL: _mbsrchr\n"));
 	/* FIXME: handle multibyte strings */
 	return strrchr(s,x);
 }
@@ -2923,7 +2925,7 @@ LPSTR CDECL CRTDLL__mbsrchr(LPSTR s,CHAR x)
  */
 unsigned char * CDECL CRTDLL__mbsrev( unsigned char *s )
 {
-  dprintf(("CRTDLL: _mbsrev\n"));
+  dprintf2(("CRTDLL: _mbsrev\n"));
 	unsigned char  *e;
 	unsigned char  a;
 	e=s;
@@ -2955,7 +2957,7 @@ unsigned char * CDECL CRTDLL__mbsrev( unsigned char *s )
  */
 unsigned char * CDECL CRTDLL__mbsset( unsigned char *src, unsigned int c )
 {
-  dprintf(("CRTDLL: _mbsset\n"));
+  dprintf2(("CRTDLL: _mbsset\n"));
 	unsigned char *char_src = src;
 	unsigned short *short_src = (unsigned short*)src;
        
@@ -2984,7 +2986,7 @@ unsigned char * CDECL CRTDLL__mbsset( unsigned char *src, unsigned int c )
  */
 size_t CDECL CRTDLL__mbsspn( const unsigned char *s1, const unsigned char *s2 )
 {
-  dprintf(("CRTDLL: _mbsspn\n"));
+  dprintf2(("CRTDLL: _mbsspn\n"));
   const char *p = (char*)s1, *spanp;
   char c, sc;
 
@@ -3002,7 +3004,7 @@ size_t CDECL CRTDLL__mbsspn( const unsigned char *s1, const unsigned char *s2 )
  */
 unsigned char * CDECL CRTDLL__mbsspnp( const unsigned char *s1, const unsigned char *s2 )
 {
-  dprintf(("CRTDLL: _mbsspnp\n"));
+  dprintf2(("CRTDLL: _mbsspnp\n"));
   const char *p = (char*)s1, *spanp;
   char c, sc;
 
@@ -3020,7 +3022,7 @@ unsigned char * CDECL CRTDLL__mbsspnp( const unsigned char *s1, const unsigned c
  */
 unsigned char * CDECL CRTDLL__mbsstr( const unsigned char *s1, const unsigned char *s2 )
 {
-  dprintf(("CRTDLL: _mbsstr\n"));
+  dprintf2(("CRTDLL: _mbsstr\n"));
   return (unsigned char*)strstr((const char*)s1,(const char*)s2);
 }
 
@@ -3030,7 +3032,7 @@ unsigned char * CDECL CRTDLL__mbsstr( const unsigned char *s1, const unsigned ch
  */
 unsigned char * CDECL CRTDLL__mbstok( unsigned char *s, const unsigned char *delim )
 {
-  dprintf(("CRTDLL: _mbstok\n"));
+  dprintf2(("CRTDLL: _mbstok\n"));
   const char *spanp;
   int c, sc;
   char *tok;
@@ -3087,7 +3089,7 @@ unsigned char * CDECL CRTDLL__mbstok( unsigned char *s, const unsigned char *del
  */
 size_t CDECL CRTDLL__mbstrlen(const char *string)
 {
-  dprintf(("CRTDLL: _mbstrlen\n"));
+  dprintf2(("CRTDLL: _mbstrlen\n"));
 	char *s = (char *)string;
 	size_t i;
 	while ( *s != 0 ) {
@@ -3105,7 +3107,7 @@ size_t CDECL CRTDLL__mbstrlen(const char *string)
  */
 unsigned char * CDECL CRTDLL__mbsupr( unsigned char *x )
 {
-  dprintf(("CRTDLL: _mbsupr\n"));
+  dprintf2(("CRTDLL: _mbsupr\n"));
 	unsigned char  *y=x;
         while (*y) {
 		if (!CRTDLL__ismbblead(*y) )
@@ -3124,7 +3126,7 @@ unsigned char * CDECL CRTDLL__mbsupr( unsigned char *x )
  */
 void * CDECL CRTDLL__memccpy(void *to, const void *from,int c,size_t count)
 {
-  dprintf(("CRTDLL: _memccpy\n"));
+  dprintf2(("CRTDLL: _memccpy\n"));
   memcpy(to,from,count);
   return memchr(to,c,count);
 }
@@ -3135,7 +3137,7 @@ void * CDECL CRTDLL__memccpy(void *to, const void *from,int c,size_t count)
  */
 INT CDECL CRTDLL__mkdir(LPCSTR newdir)
 {
-	dprintf(("CRTDLL: mkdir\n"));
+	dprintf2(("CRTDLL: mkdir\n"));
 	if (!CreateDirectoryA(newdir,NULL))
 		return -1;
 	return 0;
@@ -3147,7 +3149,7 @@ INT CDECL CRTDLL__mkdir(LPCSTR newdir)
  */
 char * CDECL CRTDLL__mktemp( char * _template )
 {
-  dprintf(("CRTDLL: _mktemp\n"));
+  dprintf2(("CRTDLL: _mktemp\n"));
   static int count = 0;
   char *cp, *dp;
   int i, len, xcount, loopcnt;
@@ -3204,7 +3206,7 @@ char * CDECL CRTDLL__mktemp( char * _template )
  */
 size_t CDECL CRTDLL__msize( void *ptr )
 {
-  dprintf(("CRTDLL: _msize\n"));
+  dprintf2(("CRTDLL: _msize\n"));
   return (_msize(ptr));
 }
 
@@ -3214,7 +3216,7 @@ size_t CDECL CRTDLL__msize( void *ptr )
  */
 double CDECL CRTDLL__nextafter( double x, double y )
 {
-  dprintf(("CRTDLL: _nextafter\n"));
+  dprintf2(("CRTDLL: _nextafter\n"));
   if ( x == y)
 	return x;
   if ( CRTDLL__isnan(x) || CRTDLL__isnan(y) )
@@ -3229,7 +3231,7 @@ double CDECL CRTDLL__nextafter( double x, double y )
  */
 onexit_t CDECL CRTDLL__onexit(onexit_t t)
 {
-  dprintf(("CRTDLL: _onexit\n"));
+  dprintf2(("CRTDLL: _onexit\n"));
   return (_onexit(t));
 }
 
@@ -3239,7 +3241,7 @@ onexit_t CDECL CRTDLL__onexit(onexit_t t)
  */
 HFILE CDECL CRTDLL__open(LPCSTR path,INT flags)
 {
-    dprintf(("CRTDLL: _open\n"));
+    dprintf2(("CRTDLL: _open\n"));
     DWORD access = 0, creation = 0;
     HFILE ret;
     
@@ -3267,14 +3269,14 @@ HFILE CDECL CRTDLL__open(LPCSTR path,INT flags)
             creation = OPEN_EXISTING;
     }
     if (flags & 0x0008) /* O_APPEND */
-        dprintf(("O_APPEND not supported\n" ));
+        dprintf2(("O_APPEND not supported\n" ));
     if (flags & 0xf0f4) 
-      dprintf(("CRTDLL_open file unsupported flags 0x%04x\n",flags));
+      dprintf2(("CRTDLL_open file unsupported flags 0x%04x\n",flags));
     /* End Fixme */
 
     ret = CreateFileA( path, access, FILE_SHARE_READ | FILE_SHARE_WRITE,
                          NULL, creation, FILE_ATTRIBUTE_NORMAL, -1 );
-    dprintf(("CRTDLL_open file %s mode 0x%04x got handle %d\n", path,flags,ret));
+    dprintf2(("CRTDLL_open file %s mode 0x%04x got handle %d\n", path,flags,ret));
     return ret;
 }
 
@@ -3284,7 +3286,7 @@ HFILE CDECL CRTDLL__open(LPCSTR path,INT flags)
  */
 INT CDECL CRTDLL__open_osfhandle( long osfhandle, int flags )
 {
-  dprintf(("CRTDLL: _open_osfhandle\n"));
+  dprintf2(("CRTDLL: _open_osfhandle\n"));
 HFILE handle;
  
 	switch (osfhandle) {
@@ -3303,7 +3305,7 @@ HFILE handle;
 	default:
 	  return (-1);
 	}
-	dprintf(("(handle %08lx,flags %d) return %d\n",
+	dprintf2(("(handle %08lx,flags %d) return %d\n",
 		     osfhandle,flags,handle));
 	return handle;
 }
@@ -3347,7 +3349,7 @@ FILE * CDECL CRTDLL__popen( const char *command, const char *mode )
  */
 void CDECL CRTDLL__purecall(void)
 {
-  dprintf(("CRTDLL: _purecall\n"));
+  dprintf2(("CRTDLL: _purecall\n"));
 }
 
 
@@ -3356,7 +3358,7 @@ void CDECL CRTDLL__purecall(void)
  */
 INT CDECL CRTDLL__putch( int i )
 {
-  dprintf(("CRTDLL: _putch\n"));
+  dprintf2(("CRTDLL: _putch\n"));
   return (_putch(i));
 }
 
@@ -3366,7 +3368,7 @@ INT CDECL CRTDLL__putch( int i )
  */
 INT CDECL CRTDLL__putenv(const char *s)
 {
-  dprintf(("CRTDLL: _putenv\n"));
+  dprintf2(("CRTDLL: _putenv\n"));
   return (_putenv(s));
 }
 
@@ -3376,7 +3378,7 @@ INT CDECL CRTDLL__putenv(const char *s)
  */
 INT CDECL CRTDLL__putw( int w, FILE *stream )
 {
-  dprintf(("CRTDLL: _putw\n"));
+  dprintf2(("CRTDLL: _putw\n"));
   if (fwrite( &w, sizeof(w), 1, stream) < 1)
     return(EOF);
   return(0);
@@ -3399,7 +3401,7 @@ INT CDECL CRTDLL__read(INT fd, LPVOID buf, UINT count)
  */
 INT CDECL CRTDLL__rmdir(const char *path)
 {
-  dprintf(("CRTDLL: _rmdir\n"));
+  dprintf2(("CRTDLL: _rmdir\n"));
   if (!RemoveDirectoryA(path))
 	return -1;
   return 0;
@@ -3411,7 +3413,7 @@ INT CDECL CRTDLL__rmdir(const char *path)
  */
 INT CDECL CRTDLL__rmtmp(void)
 {
-  dprintf(("CRTDLL: _rmtmp\n"));
+  dprintf2(("CRTDLL: _rmtmp\n"));
   return(_rmtmp());
 }
 
@@ -3421,7 +3423,7 @@ INT CDECL CRTDLL__rmtmp(void)
  */
 unsigned int CDECL CRTDLL__rotl( unsigned int value, unsigned int shift )
 {
-  dprintf(("CRTDLL: _rotl\n"));
+  dprintf2(("CRTDLL: _rotl\n"));
   return (_rotl(value, shift));
 }
 
@@ -3431,7 +3433,7 @@ unsigned int CDECL CRTDLL__rotl( unsigned int value, unsigned int shift )
  */
 unsigned int CDECL CRTDLL__rotr( unsigned int value, unsigned int shift )
 {
-  dprintf(("CRTDLL: _rotr\n"));
+  dprintf2(("CRTDLL: _rotr\n"));
   return (_rotr(value, shift));
 }
 
@@ -3441,7 +3443,7 @@ unsigned int CDECL CRTDLL__rotr( unsigned int value, unsigned int shift )
  */
 double CDECL CRTDLL__scalb( double __x, long e )
 {
-  dprintf(("CRTDLL: _scalb\n"));
+  dprintf2(("CRTDLL: _scalb\n"));
   double_t *x = (double_t *)&__x;
 	
   x->exponent += e;
@@ -3455,7 +3457,7 @@ double CDECL CRTDLL__scalb( double __x, long e )
  */
 void CDECL CRTDLL__searchenv(const char *file,const char *var,char *path )
 {
-  dprintf(("CRTDLL: _searchenv\n"));
+  dprintf2(("CRTDLL: _searchenv\n"));
   char *env = CRTDLL_getenv(var);
 
   char *x;
@@ -3484,7 +3486,7 @@ void CDECL CRTDLL__searchenv(const char *file,const char *var,char *path )
  */
 void CDECL CRTDLL__seterrormode(int i)
 {
-  dprintf(("CRTDLL: _seterrormode\n"));
+  dprintf2(("CRTDLL: _seterrormode\n"));
   SetErrorMode(i);
   return;
 }
@@ -3495,7 +3497,8 @@ void CDECL CRTDLL__seterrormode(int i)
  */
 int CDECL CRTDLL__setjmp( jmp_buf env )
 {
-  dprintf(("CRTDLL: _setjmp -> setjmp (NOT IDENTICAL!!!)\n"));
+  //TODO:
+  dprintf2(("CRTDLL: _setjmp -> setjmp (NOT IDENTICAL!!!)\n"));
   return(setjmp( env));
 }
 
@@ -3504,7 +3507,8 @@ int CDECL CRTDLL__setjmp( jmp_buf env )
  */
 int CDECL CRTDLL__setjmp3( jmp_buf env )
 {
-  dprintf(("CRTDLL: _setjmp3 -> setjmp (NOT IDENTICAL!!!)\n"));
+  //TODO:
+  dprintf2(("CRTDLL: _setjmp3 -> setjmp (NOT IDENTICAL!!!)\n"));
   return(setjmp( env));
 }
 
@@ -3514,7 +3518,7 @@ int CDECL CRTDLL__setjmp3( jmp_buf env )
  */
 INT CDECL CRTDLL__setmode( INT fh,INT mode)
 {
-	dprintf(("CRTDLL: _setmode\n"));
+	dprintf2(("CRTDLL: _setmode\n"));
 	return (_setmode(fh, mode));
 }
 
@@ -3535,7 +3539,7 @@ unsigned int CDECL CRTDLL__setsystime(struct tm *tp, unsigned int ms)
  */
 VOID CDECL CRTDLL__sleep(unsigned long timeout) 
 {
-  dprintf(("CRTDLL__sleep for %ld milliseconds\n",timeout));
+  dprintf2(("CRTDLL__sleep for %ld milliseconds\n",timeout));
   Sleep((timeout)?timeout:1);
 }
 
@@ -3556,7 +3560,7 @@ int CDECL CRTDLL__sopen( const char *s, int i1, int i2, ... )
  */
 int CDECL CRTDLL__spawnl(int nMode, const char* szPath, const char* szArgv0,...)
 {
-  dprintf(("CRTDLL: _spawnl\n"));
+  dprintf2(("CRTDLL: _spawnl\n"));
   char *szArg[100];
   const char *a;
   int i = 0;
@@ -3576,7 +3580,7 @@ int CDECL CRTDLL__spawnl(int nMode, const char* szPath, const char* szArgv0,...)
  */
 int CDECL CRTDLL__spawnle( int mode, char *path, char **szArgv0, ... )
 {
-  dprintf(("CRTDLL: _spawnle not correct implemented.\n"));
+  dprintf2(("CRTDLL: _spawnle not correct implemented.\n"));
   char *szArg[100];
   char *a;
   char *ptr;
@@ -3607,7 +3611,7 @@ int CDECL CRTDLL__spawnle( int mode, char *path, char **szArgv0, ... )
  */
 int CDECL CRTDLL__spawnlp(int nMode, const char* szPath, const char* szArgv0, ...)
 {
-  dprintf(("CRTDLL: _spawnlp\n"));
+  dprintf2(("CRTDLL: _spawnlp\n"));
   char *szArg[100];
   const char *a;
   int i = 0;
@@ -3626,7 +3630,7 @@ int CDECL CRTDLL__spawnlp(int nMode, const char* szPath, const char* szArgv0, ..
  */
 int CDECL CRTDLL__spawnlpe( int mode, char *path, char *szArgv0, ... )
 {
-  dprintf(("CRTDLL: _spawnlpe not correct implemented.\n"));
+  dprintf2(("CRTDLL: _spawnlpe not correct implemented.\n"));
   char *szArg[100];
   const char *a;
   char *ptr;
@@ -3657,7 +3661,7 @@ int CDECL CRTDLL__spawnlpe( int mode, char *path, char *szArgv0, ... )
  */
 int CDECL CRTDLL__spawnv( int i, char *s1, char ** s2 )
 {
-  dprintf(("CRTDLL: _spawnv\n"));
+  dprintf2(("CRTDLL: _spawnv\n"));
   return (_spawnv(i, s1, s2));
 }
 
@@ -3667,7 +3671,7 @@ int CDECL CRTDLL__spawnv( int i, char *s1, char ** s2 )
  */
 int CDECL CRTDLL__spawnve( int i, char *s1, char ** s2, char ** s3 )
 {
-  dprintf(("CRTDLL: _spawnve\n"));
+  dprintf2(("CRTDLL: _spawnve\n"));
   return (_spawnve(i, s1, s2, s3));
 }
 
@@ -3677,7 +3681,7 @@ int CDECL CRTDLL__spawnve( int i, char *s1, char ** s2, char ** s3 )
  */
 int CDECL CRTDLL__spawnvp( int i, char *s1, char ** s2 )
 {
-  dprintf(("CRTDLL: _spawnvp\n"));
+  dprintf2(("CRTDLL: _spawnvp\n"));
   return (_spawnvp(i, s1, s2));
 }
 
@@ -3686,7 +3690,7 @@ int CDECL CRTDLL__spawnvp( int i, char *s1, char ** s2 )
  */
 int CDECL CRTDLL__spawnvpe( int i, char *s1, char ** s2, char ** s3 )
 {
-  dprintf(("CRTDLL: _spawnvpe\n"));
+  dprintf2(("CRTDLL: _spawnvpe\n"));
   return (_spawnvpe(i, s1, s2, s3));
 }
 
@@ -3696,7 +3700,7 @@ int CDECL CRTDLL__spawnvpe( int i, char *s1, char ** s2, char ** s3 )
  */
 int CDECL CRTDLL__stat( const char *s1, struct stat * n )
 {
-  dprintf(("CRTDLL: _stat\n"));
+  dprintf2(("CRTDLL: _stat\n"));
   return(_stat(s1, n));
 }
 
@@ -3706,7 +3710,7 @@ int CDECL CRTDLL__stat( const char *s1, struct stat * n )
  */
 unsigned int CDECL CRTDLL__statusfp( void )
 {
-  dprintf(("CRTDLL: _statusfp\n"));
+  dprintf2(("CRTDLL: _statusfp\n"));
   return (_status87());
 }
 
@@ -3716,7 +3720,7 @@ unsigned int CDECL CRTDLL__statusfp( void )
  */
 char * CDECL CRTDLL__strdate( char *buf )
 {
-  dprintf(("CRTDLL: _strdate\n"));
+  dprintf2(("CRTDLL: _strdate\n"));
   return(_strdate(buf));
 }
 
@@ -3726,7 +3730,7 @@ char * CDECL CRTDLL__strdate( char *buf )
  */
 char * CDECL CRTDLL__strdec( const char *, const char *p ) 
 {
-  dprintf(("CRTDLL: _strdec\n"));
+  dprintf2(("CRTDLL: _strdec\n"));
   return( (char *)(p-1) );
 }
 
@@ -3736,7 +3740,7 @@ char * CDECL CRTDLL__strdec( const char *, const char *p )
  */
 LPSTR CDECL CRTDLL__strdup(LPCSTR ptr)
 {
-  dprintf(("CRTDLL: _strdup\n"));
+  dprintf2(("CRTDLL: _strdup\n"));
   return HEAP_strdupA(GetProcessHeap(),0,ptr);
 }
 
@@ -3758,7 +3762,7 @@ char * CDECL CRTDLL__strerror(const char *s)
  */
 int CDECL CRTDLL__stricoll( const char *s1, const char *s2 )
 {
-  dprintf(("CRTDLL: _stricoll\n"));
+  dprintf2(("CRTDLL: _stricoll\n"));
   return stricmp(s1,s2);
 }
 
@@ -3768,7 +3772,7 @@ int CDECL CRTDLL__stricoll( const char *s1, const char *s2 )
  */
 char * CDECL CRTDLL__strinc( const char *p )
 {
-    dprintf(("CRTDLL: _strinc\n"));
+    dprintf2(("CRTDLL: _strinc\n"));
     return( (char *)(p+1) );
 }
 
@@ -3778,7 +3782,7 @@ char * CDECL CRTDLL__strinc( const char *p )
  */
 size_t CDECL CRTDLL__strncnt( const char *p, size_t l ) 
 {
-    dprintf(("CRTDLL: _strncnt\n"));
+    dprintf2(("CRTDLL: _strncnt\n"));
     size_t i;
     i = strlen(p);
     return( (i>l) ? l : i );
@@ -3789,7 +3793,7 @@ size_t CDECL CRTDLL__strncnt( const char *p, size_t l )
  */
 unsigned int CDECL CRTDLL__strnextc( const char *p )
 {
-    dprintf(("CRTDLL: _strnextc\n"));
+    dprintf2(("CRTDLL: _strnextc\n"));
     return( (unsigned int)*p );
 }
 
@@ -3799,7 +3803,7 @@ unsigned int CDECL CRTDLL__strnextc( const char *p )
  */
 char * CDECL CRTDLL__strninc( const char *p, size_t l )
 {
-    dprintf(("CRTDLL: _strninc\n"));
+    dprintf2(("CRTDLL: _strninc\n"));
     return( (char *)(p+l) );
 }
 
@@ -3809,7 +3813,7 @@ char * CDECL CRTDLL__strninc( const char *p, size_t l )
  */
 char * CDECL CRTDLL__strnset(char* szToFill, int szFill, size_t sizeMaxFill)
 {
-  dprintf(("CRTDLL: _strnset\n"));
+  dprintf2(("CRTDLL: _strnset\n"));
   char *t = szToFill;
   int i = 0;
   while( *szToFill != 0 && i < sizeMaxFill)
@@ -3827,7 +3831,7 @@ char * CDECL CRTDLL__strnset(char* szToFill, int szFill, size_t sizeMaxFill)
  */
 char * CDECL CRTDLL__strrev( char *s )
 {
-  dprintf(("CRTDLL: _strrev\n"));
+  dprintf2(("CRTDLL: _strrev\n"));
   char  *e;
   char   a;
   e=s;
@@ -3849,7 +3853,7 @@ char * CDECL CRTDLL__strrev( char *s )
  */
 char * CDECL CRTDLL__strset(char* szToFill, int szFill)
 {
-  dprintf(("CRTDLL: _strset\n"));
+  dprintf2(("CRTDLL: _strset\n"));
   char *t = szToFill;
   while( *szToFill != 0 )
   {
@@ -3865,7 +3869,7 @@ char * CDECL CRTDLL__strset(char* szToFill, int szFill)
  */
 char * CDECL CRTDLL__strspnp( const char *p1, const char *p2 ) 
 {
-    dprintf(("CRTDLL: _strspnp\n"));
+    dprintf2(("CRTDLL: _strspnp\n"));
     return( (*(p1 += strspn(p1,p2))!='\0') ? (char*)p1 : NULL );
 }
 
@@ -3875,7 +3879,7 @@ char * CDECL CRTDLL__strspnp( const char *p1, const char *p2 )
  */
 char * CDECL CRTDLL__strtime( char *buf )
 {
-  dprintf(("CRTDLL: _strtime\n"));
+  dprintf2(("CRTDLL: _strtime\n"));
   return (_strtime(buf));
 }
 
@@ -3885,7 +3889,7 @@ char * CDECL CRTDLL__strtime( char *buf )
  */
 void CDECL CRTDLL__swab(char *s1, char *s2, int i)
 {
-  dprintf(("CRTDLL: _swab\n"));
+  dprintf2(("CRTDLL: _swab\n"));
   _swab(s1, s2, i);
 }
 
@@ -3895,7 +3899,7 @@ void CDECL CRTDLL__swab(char *s1, char *s2, int i)
  */
 long CDECL CRTDLL__tell( int i )
 {
-  dprintf(("CRTDLL: _tell\n"));
+  dprintf2(("CRTDLL: _tell\n"));
   return (_tell(i));
 }
 
@@ -3905,7 +3909,7 @@ long CDECL CRTDLL__tell( int i )
  */
 char * CDECL CRTDLL__tempnam( char *dir, char *prefix )
 {
-  dprintf(("CRTDLL: _tempnam\n"));
+  dprintf2(("CRTDLL: _tempnam\n"));
   return (_tempnam(dir, prefix));
 }
 	
@@ -3915,7 +3919,7 @@ char * CDECL CRTDLL__tempnam( char *dir, char *prefix )
  */
 int CDECL CRTDLL__tolower(int n)
 {
-  dprintf(("CRTDLL: _tolower\n"));
+  dprintf2(("CRTDLL: _tolower\n"));
   return (_tolower(n));
 }
 
@@ -3925,7 +3929,7 @@ int CDECL CRTDLL__tolower(int n)
  */
 int CDECL CRTDLL__toupper(int n)
 {
-  dprintf(("CRTDLL: _toupper\n"));
+  dprintf2(("CRTDLL: _toupper\n"));
   return (_toupper(n));
 }
 
@@ -3945,7 +3949,7 @@ void CDECL CRTDLL__tzset( void )
  */
 int CDECL CRTDLL__umask( int i )
 {
-  dprintf(("CRTDLL: _umask\n"));
+  dprintf2(("CRTDLL: _umask\n"));
   return (_umask(i));
 }
 
@@ -3955,7 +3959,7 @@ int CDECL CRTDLL__umask( int i )
  */
 int CDECL CRTDLL__ungetch( int i )
 {
-  dprintf(("CRTDLL: _ungetch\n"));
+  dprintf2(("CRTDLL: _ungetch\n"));
   return (_ungetch(i));
 }
 
@@ -3965,20 +3969,20 @@ int CDECL CRTDLL__ungetch( int i )
  */
 INT CDECL CRTDLL__unlink(LPCSTR pathname)
 {
-    dprintf(("CRTDLL: _unlink\n"));
+    dprintf2(("CRTDLL: _unlink\n"));
     int ret=0;
     DOS_FULL_NAME full_name;
 
     if (!DOSFS_GetFullName( pathname, FALSE, (CHAR*)&full_name )) {
-      dprintf(("CRTDLL_unlink file %s bad name\n",pathname));
+      dprintf2(("CRTDLL_unlink file %s bad name\n",pathname));
       return EOF;
     }
   
     ret=unlink(full_name.long_name);
-    dprintf(("(%s unix %s)\n",
+    dprintf2(("(%s unix %s)\n",
 		   pathname,full_name.long_name));
     if(ret)
-      dprintf((" Failed!\n"));
+      dprintf2((" Failed!\n"));
 
     return ret;
 }
@@ -3989,7 +3993,7 @@ INT CDECL CRTDLL__unlink(LPCSTR pathname)
  */
 int CDECL CRTDLL__unloaddll(void *handle)
 {
-  dprintf(("CRTDLL: _unloaddll\n"));
+  dprintf2(("CRTDLL: _unloaddll\n"));
   return FreeLibrary((HMODULE)handle);
 }
 
@@ -3999,7 +4003,7 @@ int CDECL CRTDLL__unloaddll(void *handle)
  */
 int CDECL CRTDLL__utime( char *path, struct utimbuf * times )
 {
-  dprintf(("CRTDLL: _utime\n"));
+  dprintf2(("CRTDLL: _utime\n"));
   return (_utime(path, times));
 }
 
@@ -4020,7 +4024,7 @@ int CDECL CRTDLL__vsnwprintf( wchar_t *s1, size_t n, const wchar_t *s2, va_list 
  */
 LPWSTR CDECL CRTDLL__wcsdup( LPCWSTR str )
 {
-  dprintf(("CRTDLL: _wcsdup\n"));
+  dprintf2(("CRTDLL: _wcsdup\n"));
   LPWSTR ret = NULL;
   if (str)
   {
@@ -4037,7 +4041,7 @@ LPWSTR CDECL CRTDLL__wcsdup( LPCWSTR str )
  */
 int CDECL CRTDLL__wcsicoll( LPCWSTR str1, LPCWSTR str2 )
 {
-  dprintf(("CRTDLL: _wcsicoll\n"));
+  dprintf2(("CRTDLL: _wcsicoll\n"));
   return CRTDLL__wcsicmp( str1, str2 );
 }
 
@@ -4047,7 +4051,7 @@ int CDECL CRTDLL__wcsicoll( LPCWSTR str1, LPCWSTR str2 )
  */
 LPWSTR CDECL CRTDLL__wcsnset( LPWSTR str, WCHAR c, INT n )
 {
-    dprintf(("CRTDLL: _wcsnset\n"));
+    dprintf2(("CRTDLL: _wcsnset\n"));
     LPWSTR ret = str;
     while ((n-- > 0) && *str) *str++ = c;
     return ret;
@@ -4059,7 +4063,7 @@ LPWSTR CDECL CRTDLL__wcsnset( LPWSTR str, WCHAR c, INT n )
  */
 LPWSTR CDECL CRTDLL__wcsrev( LPWSTR str )
 {
-  dprintf(("CRTDLL: _wcsrev\n"));
+  dprintf2(("CRTDLL: _wcsrev\n"));
   LPWSTR ret = str;
   LPWSTR end = str + wcslen((const wchar_t*)str) - 1;
   while (end > str)
@@ -4077,7 +4081,7 @@ LPWSTR CDECL CRTDLL__wcsrev( LPWSTR str )
  */
 LPWSTR CDECL CRTDLL__wcsset( LPWSTR str, WCHAR c )
 {
-    dprintf(("CRTDLL: _wcsset\n"));
+    dprintf2(("CRTDLL: _wcsset\n"));
     LPWSTR ret = str;
     while (*str) *str++ = c;
     return ret;
@@ -4089,7 +4093,7 @@ LPWSTR CDECL CRTDLL__wcsset( LPWSTR str, WCHAR c )
  */
 INT CDECL CRTDLL__write(INT fd,LPCVOID buf,UINT count)
 {
-        dprintf(("CRTDLL: _write\n"));
+        dprintf2(("CRTDLL: _write\n"));
         INT len=0;
 
 	if (fd == -1)
@@ -4098,7 +4102,7 @@ INT CDECL CRTDLL__write(INT fd,LPCVOID buf,UINT count)
 	  len = (UINT)write(fd,buf,(LONG)count);
 	else
 	  len = _lwrite(fd,(LPCSTR)buf,count);
-	dprintf(("%d/%d byte to dfh %d from %p,\n",
+	dprintf2(("%d/%d byte to dfh %d from %p,\n",
 		       len,count,fd,buf));
 	return len;
 }
@@ -4109,7 +4113,7 @@ INT CDECL CRTDLL__write(INT fd,LPCVOID buf,UINT count)
  */
 double CDECL CRTDLL__y0(double x)
 {
-  dprintf(("CRTDLL: _y0\n"));
+  dprintf2(("CRTDLL: _y0\n"));
   return (_y0(x));
 }
 
@@ -4119,7 +4123,7 @@ double CDECL CRTDLL__y0(double x)
  */
 double CDECL CRTDLL__y1(double x)
 {
-  dprintf(("CRTDLL: _y1\n"));
+  dprintf2(("CRTDLL: _y1\n"));
   return (_y1(x));
 }
 
@@ -4129,7 +4133,7 @@ double CDECL CRTDLL__y1(double x)
  */
 double CDECL CRTDLL__yn(int i, double x)
 {
-  dprintf(("CRTDLL: _yn\n"));
+  dprintf2(("CRTDLL: _yn\n"));
   return (_yn(i, x));
 }
 
@@ -4139,7 +4143,7 @@ double CDECL CRTDLL__yn(int i, double x)
  */
 void CDECL CRTDLL_abort( void )
 {
-  dprintf(("CRTDLL: abort\n"));
+  dprintf2(("CRTDLL: abort\n"));
   abort();
 }
 
@@ -4149,7 +4153,7 @@ void CDECL CRTDLL_abort( void )
  */
 double CDECL CRTDLL_acos( double x )
 {
-  dprintf(("CRTDLL: acos\n"));
+  dprintf2(("CRTDLL: acos\n"));
   return (acos(x));
 }
 
@@ -4159,7 +4163,7 @@ double CDECL CRTDLL_acos( double x )
  */
 char * CDECL CRTDLL_asctime( const struct tm *timeptr )
 {
-  dprintf(("CRTDLL: asctime\n"));
+  dprintf2(("CRTDLL: asctime\n"));
   return (asctime(timeptr));
 }
 
@@ -4169,7 +4173,7 @@ char * CDECL CRTDLL_asctime( const struct tm *timeptr )
  */
 double CDECL CRTDLL_asin( double x )
 {
-  dprintf(("CRTDLL: asin\n"));
+  dprintf2(("CRTDLL: asin\n"));
   return (asin(x));
 }
 
@@ -4179,7 +4183,7 @@ double CDECL CRTDLL_asin( double x )
  */
 double CDECL CRTDLL_atan2( double y, double x )
 {
-  dprintf(("CRTDLL: atan2\n"));
+  dprintf2(("CRTDLL: atan2\n"));
   return (atan2(y, x));
 }
 
@@ -4200,7 +4204,7 @@ int CDECL CRTDLL_atexit( register void ( *func )( void ) )
  */
 double CDECL CRTDLL_atof( const char *nptr )
 {
-  dprintf(("CRTDLL: atof\n"));
+  dprintf2(("CRTDLL: atof\n"));
   return (atof(nptr));
 }
 
@@ -4209,7 +4213,7 @@ double CDECL CRTDLL_atof( const char *nptr )
  */
 void * CDECL CRTDLL_calloc( size_t n, size_t size )
 {
-//  dprintf(("CRTDLL: calloc\n"));
+//  dprintf2(("CRTDLL: calloc\n"));
   return Heap_Alloc(size*n);
 }
 
@@ -4219,7 +4223,7 @@ void * CDECL CRTDLL_calloc( size_t n, size_t size )
  */
 void CDECL CRTDLL_clearerr( FILE *fp )
 {
-  dprintf(("CRTDLL: clearerr\n"));
+  dprintf2(("CRTDLL: clearerr\n"));
   clearerr(fp);
 }
 
@@ -4229,7 +4233,7 @@ void CDECL CRTDLL_clearerr( FILE *fp )
  */
 clock_t CDECL CRTDLL_clock( void )
 {
-  dprintf(("CRTDLL: clock\n"));
+  dprintf2(("CRTDLL: clock\n"));
   return (clock());
 }
 
@@ -4239,7 +4243,7 @@ clock_t CDECL CRTDLL_clock( void )
  */
 double CDECL CRTDLL_cosh( double x )
 {
-  dprintf(("CRTDLL: cosh\n"));
+  dprintf2(("CRTDLL: cosh\n"));
   return (cosh(x));
 }
 
@@ -4249,7 +4253,7 @@ double CDECL CRTDLL_cosh( double x )
  */
 char * CDECL CRTDLL_ctime( const time_t *timer )
 {
-  dprintf(("CRTDLL: ctime\n"));
+  dprintf2(("CRTDLL: ctime\n"));
   return (ctime(timer));
 }
 
@@ -4259,7 +4263,7 @@ char * CDECL CRTDLL_ctime( const time_t *timer )
  */
 double CDECL CRTDLL_difftime( time_t t1, time_t t0 )
 {
-  dprintf(("CRTDLL: difftime\n"));
+  dprintf2(("CRTDLL: difftime\n"));
   return (difftime(t1, t0));
 }
 
@@ -4269,7 +4273,7 @@ double CDECL CRTDLL_difftime( time_t t1, time_t t0 )
  */
 div_t CDECL CRTDLL_div( int numer, int denom )
 {
-  dprintf(("CRTDLL: div\n"));
+  dprintf2(("CRTDLL: div\n"));
   return (div(numer, denom));
 }
 
@@ -4279,7 +4283,7 @@ div_t CDECL CRTDLL_div( int numer, int denom )
  */
 void CDECL CRTDLL_exit(DWORD ret)
 {
-	dprintf(("CRTDLL: exit\n"));
+	dprintf2(("CRTDLL: exit\n"));
 	ExitProcess(ret);
 }
 
@@ -4289,7 +4293,7 @@ void CDECL CRTDLL_exit(DWORD ret)
  */
 double CDECL CRTDLL_exp( double x )
 {
-  dprintf(("CRTDLL: exp\n"));
+  dprintf2(("CRTDLL: exp\n"));
   return (exp(x));
 }
 
@@ -4299,7 +4303,7 @@ double CDECL CRTDLL_exp( double x )
  */
 int CDECL CRTDLL_fclose( FILE *fp )
 {
-  dprintf(("CRTDLL: fclose\n"));
+  dprintf2(("CRTDLL: fclose\n"));
   return (fclose(fp));
 }
 
@@ -4309,7 +4313,7 @@ int CDECL CRTDLL_fclose( FILE *fp )
  */
 int CDECL CRTDLL_feof( FILE *fp )
 {
-  dprintf(("CRTDLL: feof\n"));
+  dprintf2(("CRTDLL: feof\n"));
   return (feof(fp));
 }
 
@@ -4319,7 +4323,7 @@ int CDECL CRTDLL_feof( FILE *fp )
  */
 int CDECL CRTDLL_ferror( FILE *fp )
 {
-  dprintf(("CRTDLL: ferror\n"));
+  dprintf2(("CRTDLL: ferror\n"));
   return (ferror(fp));
 }
 
@@ -4329,7 +4333,7 @@ int CDECL CRTDLL_ferror( FILE *fp )
  */
 int CDECL CRTDLL_fflush( FILE *fp )
 {
-  dprintf(("CRTDLL: fflush\n"));
+  dprintf2(("CRTDLL: fflush\n"));
   return (fflush(fp));
 }
 
@@ -4339,7 +4343,7 @@ int CDECL CRTDLL_fflush( FILE *fp )
  */
 int CDECL CRTDLL_fgetc( FILE *fp )
 {
-  dprintf(("CRTDLL: fgetc\n"));
+  dprintf2(("CRTDLL: fgetc\n"));
   return (fgetc(fp));
 }
 
@@ -4349,7 +4353,7 @@ int CDECL CRTDLL_fgetc( FILE *fp )
  */
 int CDECL CRTDLL_fgetpos( FILE *fp, fpos_t *pos )
 {
-  dprintf(("CRTDLL: fgetpos\n"));
+  dprintf2(("CRTDLL: fgetpos\n"));
   return (fgetpos(fp, pos));
 }
 
@@ -4359,7 +4363,7 @@ int CDECL CRTDLL_fgetpos( FILE *fp, fpos_t *pos )
  */
 char * CDECL CRTDLL_fgets( char *s, int n, FILE *fp )
 {
-  dprintf(("CRTDLL: fgets\n"));
+  dprintf2(("CRTDLL: fgets\n"));
   return (fgets(s, n, fp));
 }
 
@@ -4369,7 +4373,7 @@ char * CDECL CRTDLL_fgets( char *s, int n, FILE *fp )
  */
 wint_t CDECL CRTDLL_fgetwc( FILE *f )
 {
-  dprintf(("CRTDLL: fgetwc\n"));
+  dprintf2(("CRTDLL: fgetwc\n"));
   return (fgetwc(f));
 }
 
@@ -4379,7 +4383,7 @@ wint_t CDECL CRTDLL_fgetwc( FILE *f )
  */
 double CDECL CRTDLL_fmod(double x, double y )
 {
-  dprintf(("CRTDLL: fmod\n"));
+  dprintf2(("CRTDLL: fmod\n"));
   return (fmod(x,y));
 }
 
@@ -4389,7 +4393,7 @@ double CDECL CRTDLL_fmod(double x, double y )
  */
 FILE * CDECL CRTDLL_fopen( const char *filename, const char *mode )
 {
-  dprintf(("CRTDLL: fopen\n"));
+  dprintf2(("CRTDLL: fopen\n"));
   return (fopen( filename, mode));
 }
 
@@ -4399,7 +4403,7 @@ FILE * CDECL CRTDLL_fopen( const char *filename, const char *mode )
  */
 INT CDECL CRTDLL_fprintf( CRTDLL_FILE *file, LPSTR format, ... )
 {
-    dprintf(("CRTDLL: fprintf\n"));
+    dprintf2(("CRTDLL: fprintf\n"));
     va_list valist;
     INT res;
 
@@ -4415,7 +4419,7 @@ INT CDECL CRTDLL_fprintf( CRTDLL_FILE *file, LPSTR format, ... )
  */
 int CDECL CRTDLL_fputc( int c, FILE *fp )
 {
-  dprintf(("CRTDLL: fputc\n"));
+  dprintf2(("CRTDLL: fputc\n"));
   return (fputc(c, fp));
 }
 
@@ -4425,7 +4429,7 @@ int CDECL CRTDLL_fputc( int c, FILE *fp )
  */
 int CDECL CRTDLL_fputs( const char *s, FILE *fp )
 {
-  dprintf(("CRTDLL: fputs\n"));
+  dprintf2(("CRTDLL: fputs\n"));
   return (fputs(s, fp));
 }
 
@@ -4435,7 +4439,7 @@ int CDECL CRTDLL_fputs( const char *s, FILE *fp )
  */
 wint_t CDECL CRTDLL_fputwc( wint_t wc, FILE *strm )
 {
-  dprintf(("CRTDLL: fputwc\n"));
+  dprintf2(("CRTDLL: fputwc\n"));
   return (fputwc(wc, strm));
 }
 
@@ -4445,7 +4449,7 @@ wint_t CDECL CRTDLL_fputwc( wint_t wc, FILE *strm )
  */
 size_t CDECL CRTDLL_fread( void *ptr, size_t size, size_t n, FILE *fp )
 {
-//  dprintf(("CRTDLL: fread\n"));
+//  dprintf2(("CRTDLL: fread\n"));
   return (fread(ptr, size, n, fp));
 }
 
@@ -4455,7 +4459,7 @@ size_t CDECL CRTDLL_fread( void *ptr, size_t size, size_t n, FILE *fp )
  */
 VOID CDECL CRTDLL_free(LPVOID ptr)
 {
-//    dprintf(("CRTDLL: free\n"));
+//    dprintf2(("CRTDLL: free\n"));
     Heap_Free(ptr);
 }
 
@@ -4465,7 +4469,7 @@ VOID CDECL CRTDLL_free(LPVOID ptr)
  */
 FILE * CDECL CRTDLL_freopen( const char *filename, const char *mode, FILE *fp )
 {
-  dprintf(("CRTDLL: freopen\n"));
+  dprintf2(("CRTDLL: freopen\n"));
   return (freopen(filename, mode, fp));
 }
 
@@ -4475,7 +4479,7 @@ FILE * CDECL CRTDLL_freopen( const char *filename, const char *mode, FILE *fp )
  */
 double CDECL CRTDLL_frexp( double value, int *exp )
 {
-  dprintf(("CRTDLL: frexp\n"));
+  dprintf2(("CRTDLL: frexp\n"));
   return (frexp(value, exp));
 }
 
@@ -4485,7 +4489,7 @@ double CDECL CRTDLL_frexp( double value, int *exp )
  */
 int CDECL CRTDLL_fscanf( FILE*fp, const char *format, ... )
 {
-  dprintf(("CRTDLL: fscanf\n"));
+  dprintf2(("CRTDLL: fscanf\n"));
 #if 0
     va_list valist;
     INT res;
@@ -4497,7 +4501,7 @@ int CDECL CRTDLL_fscanf( FILE*fp, const char *format, ... )
     va_end( valist );
     return res;
 #endif
-    dprintf(("broken\n"));
+    dprintf2(("broken\n"));
     return 0;
 }
 
@@ -4507,14 +4511,14 @@ int CDECL CRTDLL_fscanf( FILE*fp, const char *format, ... )
  */
 int CDECL CRTDLL_fseek( FILE *file, long int offset, int whence )
 {
-  dprintf(("CRTDLL: fseek\n"));
-  dprintf(("file %p to 0x%08lx pos %s\n",
+  dprintf2(("CRTDLL: fseek\n"));
+  dprintf2(("file %p to 0x%08lx pos %s\n",
         file,offset,(whence==SEEK_SET)?"SEEK_SET":
         (whence==SEEK_CUR)?"SEEK_CUR":
         (whence==SEEK_END)?"SEEK_END":"UNKNOWN"));
 // FIXME if (SetFilePointer( file->handle, offset, NULL, whence ) != 0xffffffff)
 // FIXME     return 0;
-  dprintf((" failed!\n"));
+  dprintf2((" failed!\n"));
   return -1;
 }
 
@@ -4524,7 +4528,7 @@ int CDECL CRTDLL_fseek( FILE *file, long int offset, int whence )
  */
 int CDECL CRTDLL_fsetpos( FILE *fp, const fpos_t *pos )
 {
-  dprintf(("CRTDLL: fsetpos\n"));
+  dprintf2(("CRTDLL: fsetpos\n"));
   return (fsetpos(fp, pos));
 }
 
@@ -4534,7 +4538,7 @@ int CDECL CRTDLL_fsetpos( FILE *fp, const fpos_t *pos )
  */
 long int CDECL CRTDLL_ftell( FILE *fp )
 {
-  dprintf(("CRTDLL: ftell\n"));
+  dprintf2(("CRTDLL: ftell\n"));
   return (ftell(fp));
 }
 
@@ -4557,9 +4561,9 @@ DWORD CDECL CRTDLL_fwrite( LPVOID ptr, INT size, INT nmemb, CRTDLL_FILE *file )
 {
     DWORD ret;
 
-    dprintf(("CRTDLL: fwrite\n"));
+    dprintf2(("CRTDLL: fwrite\n"));
     if (!WriteFile( file->handle, ptr, size * nmemb, &ret, NULL ))
-        dprintf((" failed!\n"));
+        dprintf2((" failed!\n"));
 
     return ret / size;
 }
@@ -4581,7 +4585,7 @@ int CDECL CRTDLL_fwscanf( FILE *strm, const wchar_t *format, ... )
  */
 int CDECL CRTDLL_getc( FILE *fp )
 {
-  dprintf(("CRTDLL: getc\n"));
+  dprintf2(("CRTDLL: getc\n"));
   return (getc(fp));
 }
 
@@ -4591,7 +4595,7 @@ int CDECL CRTDLL_getc( FILE *fp )
  */
 int CDECL CRTDLL_getchar( void )
 {
-  dprintf(("CRTDLL: getchar\n"));
+  dprintf2(("CRTDLL: getchar\n"));
   return (getchar());
 }
 
@@ -4601,7 +4605,7 @@ int CDECL CRTDLL_getchar( void )
  */
 char * CDECL CRTDLL_getenv( const char *name )
 {
-  dprintf(("CRTDLL: getenv\n"));
+  dprintf2(("CRTDLL: getenv\n"));
   return (getenv(name));
 }
 
@@ -4611,7 +4615,7 @@ char * CDECL CRTDLL_getenv( const char *name )
  */
 char * CDECL CRTDLL_gets( char *s )
 {
-  dprintf(("CRTDLL: gets\n"));
+  dprintf2(("CRTDLL: gets\n"));
   return (gets(s));
 }
 
@@ -4621,7 +4625,7 @@ char * CDECL CRTDLL_gets( char *s )
  */
 struct tm * CDECL CRTDLL_gmtime( const time_t *timer )
 {
-  dprintf(("CRTDLL: gmtime\n"));
+  dprintf2(("CRTDLL: gmtime\n"));
   return (gmtime(timer));
 }
 
@@ -4631,7 +4635,7 @@ struct tm * CDECL CRTDLL_gmtime( const time_t *timer )
  */
 INT CDECL CRTDLL_is_wctype(wint_t wc, wctype_t wctypeFlags)
 {
-        dprintf(("CRTDLL: is_wctype\n"));
+        dprintf2(("CRTDLL: is_wctype\n"));
 	return ((CRTDLL_pwctype_dll[(unsigned char)(wc & 0xFF)]&wctypeFlags) == wctypeFlags );
 }
 
@@ -4641,7 +4645,7 @@ INT CDECL CRTDLL_is_wctype(wint_t wc, wctype_t wctypeFlags)
  */
 int CDECL CRTDLL_isalnum(int i)
 {
-  dprintf(("CRTDLL: isalnum(%08xh)\n", i));
+  dprintf2(("CRTDLL: isalnum(%08xh)\n", i));
   return (isalnum(i));
 }
 
@@ -4651,7 +4655,7 @@ int CDECL CRTDLL_isalnum(int i)
  */
 int CDECL CRTDLL_iscntrl(int i)
 {
-  dprintf(("CRTDLL: iscntrl(%08xh)\n", i));
+  dprintf2(("CRTDLL: iscntrl(%08xh)\n", i));
   return (iscntrl(i));
 }
 
@@ -4661,7 +4665,7 @@ int CDECL CRTDLL_iscntrl(int i)
  */
 int CDECL CRTDLL_isgraph(int i)
 {
-  dprintf(("CRTDLL: isgraph(%08xh)\n", i));
+  dprintf2(("CRTDLL: isgraph(%08xh)\n", i));
   return (isgraph(i));
 }
 
@@ -4682,7 +4686,7 @@ int CDECL CRTDLL_isleadbyte(int i)
  */
 int CDECL CRTDLL_ispunct(int i)
 {
-  dprintf(("CRTDLL: ispunct(%08xh)\n", i));
+  dprintf2(("CRTDLL: ispunct(%08xh)\n", i));
   return (ispunct(i));
 }
 
@@ -4692,7 +4696,7 @@ int CDECL CRTDLL_ispunct(int i)
  */
 int CDECL CRTDLL_iswalnum(wint_t i)
 {
-  dprintf(("CRTDLL: iswalnum(%08xh)\n", i));
+  dprintf2(("CRTDLL: iswalnum(%08xh)\n", i));
   return (iswalnum(i));
 }
 
@@ -4702,7 +4706,7 @@ int CDECL CRTDLL_iswalnum(wint_t i)
  */
 int CDECL CRTDLL_iswascii(wint_t c)
 {
-  dprintf(("CRTDLL: iswascii\n", c));
+  dprintf2(("CRTDLL: iswascii\n", c));
   return  (!((c)&(~0x7f)));
 }
 
@@ -4712,7 +4716,7 @@ int CDECL CRTDLL_iswascii(wint_t c)
  */
 int CDECL CRTDLL_iswcntrl(wint_t i)
 {
-  dprintf(("CRTDLL: iswcntrl(%08xh)\n", i));
+  dprintf2(("CRTDLL: iswcntrl(%08xh)\n", i));
   return (iswcntrl(i));
 }
 
@@ -4722,7 +4726,7 @@ int CDECL CRTDLL_iswcntrl(wint_t i)
  */
 int CDECL CRTDLL_iswdigit(wint_t i)
 {
-  dprintf(("CRTDLL: iswdigit(%08xh)\n", i));
+  dprintf2(("CRTDLL: iswdigit(%08xh)\n", i));
   return (iswdigit(i));
 }
 
@@ -4732,7 +4736,7 @@ int CDECL CRTDLL_iswdigit(wint_t i)
  */
 int CDECL CRTDLL_iswgraph(wint_t i)
 {
-  dprintf(("CRTDLL: iswgraph(%08xh)\n", i));
+  dprintf2(("CRTDLL: iswgraph(%08xh)\n", i));
   return (iswgraph(i));
 }
 
@@ -4742,7 +4746,7 @@ int CDECL CRTDLL_iswgraph(wint_t i)
  */
 int CDECL CRTDLL_iswlower(wint_t i)
 {
-  dprintf(("CRTDLL: iswlower(%08xh)\n", i));
+  dprintf2(("CRTDLL: iswlower(%08xh)\n", i));
   return (iswlower(i));
 }
 
@@ -4752,7 +4756,7 @@ int CDECL CRTDLL_iswlower(wint_t i)
  */
 int CDECL CRTDLL_iswprint(wint_t i)
 {
-  dprintf(("CRTDLL: iswprint(%08xh)\n", i));
+  dprintf2(("CRTDLL: iswprint(%08xh)\n", i));
   return (iswprint(i));
 }
 
@@ -4762,7 +4766,7 @@ int CDECL CRTDLL_iswprint(wint_t i)
  */
 int CDECL CRTDLL_iswpunct(wint_t i)
 {
-  dprintf(("CRTDLL: iswpunct(%08xh)\n", i));
+  dprintf2(("CRTDLL: iswpunct(%08xh)\n", i));
   return (iswpunct(i));
 }
 
@@ -4772,7 +4776,7 @@ int CDECL CRTDLL_iswpunct(wint_t i)
  */
 int CDECL CRTDLL_iswspace(wint_t i)
 {
-  dprintf(("CRTDLL: iswspace(%08xh)\n", i));
+  dprintf2(("CRTDLL: iswspace(%08xh)\n", i));
   return (iswspace(i));
 }
 
@@ -4782,7 +4786,7 @@ int CDECL CRTDLL_iswspace(wint_t i)
  */
 int CDECL CRTDLL_iswupper(wint_t i)
 {
-  dprintf(("CRTDLL: iswupper(%08xh)\n", i));
+  dprintf2(("CRTDLL: iswupper(%08xh)\n", i));
   return (iswupper(i));
 }
 
@@ -4792,7 +4796,7 @@ int CDECL CRTDLL_iswupper(wint_t i)
  */
 int CDECL CRTDLL_iswxdigit(wint_t i)
 {
-  dprintf(("CRTDLL: iswxdigit(%08xh)\n", i));
+  dprintf2(("CRTDLL: iswxdigit(%08xh)\n", i));
   return (iswxdigit(i));
 }
 
@@ -4802,7 +4806,7 @@ int CDECL CRTDLL_iswxdigit(wint_t i)
  */
 double CDECL CRTDLL_ldexp( double x, int exp ) 
 {
-  dprintf(("CRTDLL: ldexp\n"));
+  dprintf2(("CRTDLL: ldexp\n"));
   return (ldexp(x, exp));
 }
 
@@ -4812,7 +4816,7 @@ double CDECL CRTDLL_ldexp( double x, int exp )
  */
 ldiv_t CDECL CRTDLL_ldiv( long int numer, long int denom ) 
 {
-  dprintf(("CRTDLL: ldiv\n"));
+  dprintf2(("CRTDLL: ldiv\n"));
   return (ldiv(numer, denom));
 }
 
@@ -4822,7 +4826,7 @@ ldiv_t CDECL CRTDLL_ldiv( long int numer, long int denom )
  */
 struct lconv * CDECL CRTDLL_localeconv(void)
 {
-  dprintf(("CRTDLL: localeconv\n"));
+  dprintf2(("CRTDLL: localeconv\n"));
   return (localeconv());
 }
 
@@ -4832,7 +4836,7 @@ struct lconv * CDECL CRTDLL_localeconv(void)
  */
 struct tm * CDECL CRTDLL_localtime( const time_t *timer )
 {
-  dprintf(("CRTDLL: localtime\n"));
+  dprintf2(("CRTDLL: localtime\n"));
   return (localtime(timer));
 }
 
@@ -4842,7 +4846,7 @@ struct tm * CDECL CRTDLL_localtime( const time_t *timer )
  */
 double CDECL CRTDLL_log10( double x )
 {
-  dprintf(("CRTDLL: log10\n"));
+  dprintf2(("CRTDLL: log10\n"));
   return (log10(x));
 }
 
@@ -4852,7 +4856,7 @@ double CDECL CRTDLL_log10( double x )
  */
 VOID CDECL CRTDLL_longjmp(jmp_buf env, int val)
 {
-    dprintf(("CRTDLL: longjmp\n"));
+    dprintf2(("CRTDLL: longjmp\n"));
     longjmp(env, val);
 }
 
@@ -4862,7 +4866,7 @@ VOID CDECL CRTDLL_longjmp(jmp_buf env, int val)
  */
 VOID* CDECL CRTDLL_malloc(DWORD size)
 {
-//      dprintf(("CRTDLL: malloc\n"));
+//      dprintf2(("CRTDLL: malloc\n"));
       return Heap_Alloc(size);
 }
 
@@ -4872,7 +4876,7 @@ VOID* CDECL CRTDLL_malloc(DWORD size)
  */
 INT CDECL CRTDLL_mblen( const char *s, size_t n )
 {
-      dprintf(("CRTDLL: mblen\n"));
+      dprintf2(("CRTDLL: mblen\n"));
       return (mblen(s, n));
 }
 
@@ -4882,7 +4886,7 @@ INT CDECL CRTDLL_mblen( const char *s, size_t n )
  */
 INT CDECL CRTDLL_mbtowc( WCHAR *dst, LPCSTR str, INT n )
 {
-    dprintf(("CRTDLL: _mbtowc\n"));
+    dprintf2(("CRTDLL: _mbtowc\n"));
     wchar_t res;
     int ret = mbtowc( &res, str, n );
     if (dst) *dst = (WCHAR)res;
@@ -4895,7 +4899,7 @@ INT CDECL CRTDLL_mbtowc( WCHAR *dst, LPCSTR str, INT n )
  */
 time_t CDECL CRTDLL_mktime( struct tm *timeptr )
 {
-    dprintf(("CRTDLL: mktime\n"));
+    dprintf2(("CRTDLL: mktime\n"));
     return mktime( timeptr );
 }
 
@@ -4905,7 +4909,7 @@ time_t CDECL CRTDLL_mktime( struct tm *timeptr )
  */
 double CDECL CRTDLL_modf( double value, double *iptr )
 {
-    dprintf(("CRTDLL: modf\n"));
+    dprintf2(("CRTDLL: modf\n"));
     return modf( value, iptr );
 }
 
@@ -4915,7 +4919,7 @@ double CDECL CRTDLL_modf( double value, double *iptr )
  */
 void CDECL CRTDLL_perror( const char *s )
 {
-    dprintf(("CRTDLL: perror\n"));
+    dprintf2(("CRTDLL: perror\n"));
     perror( s );
 }
 
@@ -4925,7 +4929,7 @@ void CDECL CRTDLL_perror( const char *s )
  */
 int CDECL CRTDLL_printf( const char *format, ... )
 {
-  dprintf(("CRTDLL: printf\n"));
+  dprintf2(("CRTDLL: printf\n"));
   va_list arg;
   int done;
 
@@ -4941,7 +4945,7 @@ int CDECL CRTDLL_printf( const char *format, ... )
  */
 int CDECL CRTDLL_putc( int c, FILE *fp )
 {
-    dprintf(("CRTDLL: putc\n"));
+    dprintf2(("CRTDLL: putc\n"));
     return putc( c, fp );
 }
 
@@ -4951,7 +4955,7 @@ int CDECL CRTDLL_putc( int c, FILE *fp )
  */
 int CDECL CRTDLL_putchar( int c )
 {
-    dprintf(("CRTDLL: putchar\n"));
+    dprintf2(("CRTDLL: putchar\n"));
     return putchar( c );
 }
 
@@ -4961,7 +4965,7 @@ int CDECL CRTDLL_putchar( int c )
  */
 int CDECL CRTDLL_puts( const char *s )
 {
-    dprintf(("CRTDLL: puts\n"));
+    dprintf2(("CRTDLL: puts\n"));
     return puts( s );
 }
 
@@ -4971,7 +4975,7 @@ int CDECL CRTDLL_puts( const char *s )
  */
 int CDECL CRTDLL_raise( int sig )
 {
-    dprintf(("CRTDLL: raise\n"));
+    dprintf2(("CRTDLL: raise\n"));
     return raise( sig );
 }
 
@@ -4981,7 +4985,7 @@ int CDECL CRTDLL_raise( int sig )
  */
 int CDECL CRTDLL_rand( void )
 {
-//    dprintf(("CRTDLL: rand\n"));
+//    dprintf2(("CRTDLL: rand\n"));
     return (rand());
 }
 
@@ -4991,7 +4995,7 @@ int CDECL CRTDLL_rand( void )
  */
 void * CDECL CRTDLL_realloc( void *ptr, size_t size )
 {
-    dprintf(("CRTDLL: realloc\n"));
+    dprintf2(("CRTDLL: realloc\n"));
     return HeapReAlloc( GetProcessHeap(), 0, ptr, size );
 }
 
@@ -5001,7 +5005,7 @@ void * CDECL CRTDLL_realloc( void *ptr, size_t size )
  */
 INT CDECL CRTDLL_remove(LPCSTR file)
 {
-        dprintf(("CRTDLL: remove\n"));
+        dprintf2(("CRTDLL: remove\n"));
 	if (!DeleteFileA(file))
 		return -1;
 	return 0;
@@ -5013,7 +5017,7 @@ INT CDECL CRTDLL_remove(LPCSTR file)
  */
 int CDECL CRTDLL_rename (const char *old, const char *new2)
 {
-  dprintf(("CRTDLL: rename\n"));
+  dprintf2(("CRTDLL: rename\n"));
   return (rename(old, new2));
 }
 
@@ -5023,7 +5027,7 @@ int CDECL CRTDLL_rename (const char *old, const char *new2)
  */
 void CDECL CRTDLL_rewind( FILE *fp )
 {
-  dprintf(("CRTDLL: rewind\n"));
+  dprintf2(("CRTDLL: rewind\n"));
   rewind(fp);
 }
 
@@ -5044,7 +5048,7 @@ int CDECL CRTDLL_scanf( const char *format, ... )
  */
 void CDECL CRTDLL_setbuf( FILE *fp, char *buf )	
 {
-  dprintf(("CRTDLL: setbuf\n"));
+  dprintf2(("CRTDLL: setbuf\n"));
   setbuf(fp, buf);
 }
 
@@ -5054,7 +5058,7 @@ void CDECL CRTDLL_setbuf( FILE *fp, char *buf )
  */
 char * CDECL CRTDLL_setlocale(int category,const char *locale)
 {
-  dprintf(("CRTDLL: setlocale\n"));
+  dprintf2(("CRTDLL: setlocale\n"));
   return (setlocale(category, locale));
 }
 
@@ -5064,7 +5068,7 @@ char * CDECL CRTDLL_setlocale(int category,const char *locale)
  */
 int CDECL CRTDLL_setvbuf( FILE *fp, char *buf, int mode, size_t size )
 {
-  dprintf(("CRTDLL: setvbuf\n"));
+  dprintf2(("CRTDLL: setvbuf\n"));
   return (setvbuf(fp, buf, mode, size));
 }
 
@@ -5084,7 +5088,7 @@ void CDECL CRTDLL_signal( int sig, void (*func)(int))
  */
 double CDECL CRTDLL_sinh( double x )
 {
-  dprintf(("CRTDLL: sinh\n"));
+  dprintf2(("CRTDLL: sinh\n"));
   return (sinh(x));
 }
 
@@ -5094,7 +5098,7 @@ double CDECL CRTDLL_sinh( double x )
  */
 void CDECL CRTDLL_srand( unsigned int seed )
 {
-  dprintf(("CRTDLL: srand\n"));
+  dprintf2(("CRTDLL: srand\n"));
   srand(seed);
 }
 
@@ -5104,7 +5108,7 @@ void CDECL CRTDLL_srand( unsigned int seed )
  */
 int CDECL CRTDLL_strcoll( const char *s1, const char *s2 )
 {
-  dprintf(("CRTDLL: strcoll\n"));
+  dprintf2(("CRTDLL: strcoll\n"));
   return strcoll(s1, s2);
 }
 
@@ -5114,7 +5118,7 @@ int CDECL CRTDLL_strcoll( const char *s1, const char *s2 )
  */
 char * CDECL CRTDLL_strerror( int errnum )
 {
-  dprintf(("CRTDLL: strerror\n"));
+  dprintf2(("CRTDLL: strerror\n"));
   return strerror(errnum);
 }
 
@@ -5124,7 +5128,7 @@ char * CDECL CRTDLL_strerror( int errnum )
  */
 size_t CDECL CRTDLL_strftime( char *s, size_t maxsiz, const char *fmt, const struct tm *tp )
 {
-  dprintf(("CRTDLL: strftime\n"));
+  dprintf2(("CRTDLL: strftime\n"));
   return strftime(s, maxsiz, fmt, tp);
 }
  
@@ -5134,7 +5138,7 @@ size_t CDECL CRTDLL_strftime( char *s, size_t maxsiz, const char *fmt, const str
  */
 double CDECL CRTDLL_strtod( const char *nptr, char **endptr )
 {
-  dprintf(("CRTDLL: strtod\n"));
+  dprintf2(("CRTDLL: strtod\n"));
   return strtod(nptr, endptr);
 }
 
@@ -5144,7 +5148,7 @@ double CDECL CRTDLL_strtod( const char *nptr, char **endptr )
  */
 char * CDECL CRTDLL_strtok( char *s1, const char *s2 )
 {
-  dprintf(("CRTDLL: strtok\n"));
+  dprintf2(("CRTDLL: strtok\n"));
   return strtok(s1, s2);
 }
 
@@ -5154,7 +5158,7 @@ char * CDECL CRTDLL_strtok( char *s1, const char *s2 )
  */
 long int CDECL CRTDLL_strtol( const char *nptr, char **endptr, int base )
 {
-  dprintf(("CRTDLL: strtol\n"));
+  dprintf2(("CRTDLL: strtol\n"));
   return strtol(nptr, endptr, base);
 }
 
@@ -5164,7 +5168,7 @@ long int CDECL CRTDLL_strtol( const char *nptr, char **endptr, int base )
  */
 unsigned long CDECL CRTDLL_strtoul( const char *nptr, char **endptr, int base )
 {
-  dprintf(("CRTDLL: strtoul\n"));
+  dprintf2(("CRTDLL: strtoul\n"));
   return strtoul(nptr, endptr, base);
 }
 
@@ -5174,7 +5178,7 @@ unsigned long CDECL CRTDLL_strtoul( const char *nptr, char **endptr, int base )
  */
 size_t CDECL CRTDLL_strxfrm( char *s1, const char *s2, size_t n )
 {
-  dprintf(("CRTDLL: strxfrm\n"));
+  dprintf2(("CRTDLL: strxfrm\n"));
   return strxfrm(s1, s2, n);
 }
 
@@ -5195,7 +5199,7 @@ int CDECL CRTDLL_swscanf( const wchar_t *s1, const wchar_t *s2, ... )
  */
 int CDECL CRTDLL_system( const char *string )
 {
-  dprintf(("CRTDLL: system\n"));
+  dprintf2(("CRTDLL: system\n"));
   return system(string);
 }
 
@@ -5205,7 +5209,7 @@ int CDECL CRTDLL_system( const char *string )
  */
 double CDECL CRTDLL_tanh( double x )
 {
-  dprintf(("CRTDLL: tanh\n"));
+  dprintf2(("CRTDLL: tanh\n"));
   return tanh(x);
 }
 
@@ -5215,7 +5219,7 @@ double CDECL CRTDLL_tanh( double x )
  */
 time_t CDECL CRTDLL_time( time_t *timer )
 {
-  dprintf(("CRTDLL: time\n"));
+  dprintf2(("CRTDLL: time\n"));
 
   return time(timer);
 }
@@ -5226,7 +5230,7 @@ time_t CDECL CRTDLL_time( time_t *timer )
  */
 FILE * CDECL CRTDLL_tmpfile( void )
 {
-  dprintf(("CRTDLL: tmpfile\n"));
+  dprintf2(("CRTDLL: tmpfile\n"));
   return (tmpfile());
 }
 
@@ -5236,7 +5240,7 @@ FILE * CDECL CRTDLL_tmpfile( void )
  */
 char * CDECL CRTDLL_tmpnam( char *s )
 {
-  dprintf(("CRTDLL: tmpnam\n"));
+  dprintf2(("CRTDLL: tmpnam\n"));
   return (tmpnam(s));
 }
 
@@ -5257,7 +5261,7 @@ INT CDECL CRTDLL_ungetc(int c, FILE *f)
  */
 wint_t CDECL CRTDLL_ungetwc( wint_t wc, FILE *strm )
 {
-  dprintf(("CRTDLL: ungetwc\n"));
+  dprintf2(("CRTDLL: ungetwc\n"));
   return (ungetwc(wc, strm));
 }
 
@@ -5266,7 +5270,7 @@ wint_t CDECL CRTDLL_ungetwc( wint_t wc, FILE *strm )
  */
 INT CDECL CRTDLL_vfprintf( CRTDLL_FILE *file, LPSTR format, va_list args )
 {
-    dprintf(("CRTDLL: vprintf\n"));
+    dprintf2(("CRTDLL: vprintf\n"));
     char buffer[2048];  /* FIXME... */
     vsprintf( buffer, format, args );
     return CRTDLL_fwrite( buffer, 1, strlen(buffer), file );
@@ -5289,7 +5293,7 @@ int CDECL CRTDLL_vfwprintf( FILE *F, const wchar_t *s, va_list arg )
  */
 int CDECL CRTDLL_vprintf( const char *format, __va_list arg )
 {
-  dprintf(("CRTDLL: vprintf\n"));
+  dprintf2(("CRTDLL: vprintf\n"));
   return (vprintf(format, arg));
 }
 
@@ -5299,7 +5303,7 @@ int CDECL CRTDLL_vprintf( const char *format, __va_list arg )
  */
 int CDECL CRTDLL_vswprintf( wchar_t *s , size_t t, const wchar_t *format, va_list arg )
 {
-  dprintf(("CRTDLL: vswprintf\n"));
+  dprintf2(("CRTDLL: vswprintf\n"));
   return (vswprintf(s, t, format, arg));
 }
 
@@ -5320,7 +5324,7 @@ int CDECL CRTDLL_vwprintf( const wchar_t *s, va_list arg)
  */
 int CDECL CRTDLL_wcscoll(const wchar_t *s1, const wchar_t *s2)
 {
-  dprintf(("CRTDLL: wcscoll\n"));
+  dprintf2(("CRTDLL: wcscoll\n"));
   return (wcscoll(s1, s2));
 }
 
@@ -5331,7 +5335,7 @@ int CDECL CRTDLL_wcscoll(const wchar_t *s1, const wchar_t *s2)
 size_t CDECL CRTDLL_wcsftime( wchar_t *s, size_t maxsize, 
 		const wchar_t *format, const struct tm *timeptr )
 {
-  dprintf(("CRTDLL: wcsftime\n"));
+  dprintf2(("CRTDLL: wcsftime\n"));
   return (wcsftime(s, maxsize, format, timeptr));
 }
 
@@ -5341,7 +5345,7 @@ size_t CDECL CRTDLL_wcsftime( wchar_t *s, size_t maxsize,
  */
 double CDECL CRTDLL_wcstod( const wchar_t *nptr, wchar_t **endptr )
 {
-  dprintf(("CRTDLL: wcstod\n"));
+  dprintf2(("CRTDLL: wcstod\n"));
   return (wcstod(nptr, endptr));
 }
 
@@ -5351,7 +5355,7 @@ double CDECL CRTDLL_wcstod( const wchar_t *nptr, wchar_t **endptr )
  */
 size_t CDECL CRTDLL_wcsxfrm( wchar_t *s1, const wchar_t *s2, size_t n )
 {
-  dprintf(("CRTDLL: wcsxfrm\n"));
+  dprintf2(("CRTDLL: wcsxfrm\n"));
   return (wcsxfrm(s1, s2, n));
 }
 
@@ -5361,7 +5365,7 @@ size_t CDECL CRTDLL_wcsxfrm( wchar_t *s1, const wchar_t *s2, size_t n )
  */
 int CDECL CRTDLL_wctomb( char *s, wchar_t wchar )
 {
-  dprintf(("CRTDLL: wctomb\n"));
+  dprintf2(("CRTDLL: wctomb\n"));
   return (wctomb(s,wchar));
 }
 
