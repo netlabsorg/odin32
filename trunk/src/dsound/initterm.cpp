@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.11 2000-08-11 10:56:15 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.12 2000-08-17 18:21:05 sandervl Exp $ */
 
 /*
  * DLL entry point
@@ -45,7 +45,7 @@ void CDECL _ctordtorTerm( void );
 }
 
 char dsoundPath[CCHMAXPATH] = "";
-static char dllHandle = 0;
+static HMODULE dllHandle = 0;
 
 //******************************************************************************
 //******************************************************************************
