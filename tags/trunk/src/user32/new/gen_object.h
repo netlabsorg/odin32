@@ -1,4 +1,4 @@
-/* $Id: gen_object.h,v 1.1 1999-07-14 08:35:34 sandervl Exp $ */
+/* $Id: gen_object.h,v 1.2 1999-08-24 09:20:30 sandervl Exp $ */
 /*
  * Generic Object Class for OS/2
  *
@@ -15,6 +15,8 @@
 #define OBJTYPE_ICON		4
 #define OBJTYPE_CURSOR		5
 #define OBJTYPE_MENU		6
+
+#define OBJTYPE_MAX             7
 //......
 
 class GenericObject
@@ -29,7 +31,12 @@ virtual ~GenericObject();
 GenericObject *GetHead()	{ return *head; };
 GenericObject *GetNext()	{ return next;  };
 
-	 
+	 void  enterMutex();
+	 void  leaveMutex();
+
+static	 void  enterMutex(DWORD objType);
+static	 void  leaveMutex(DWORD objType);
+
 private:
 
          DWORD objType;
