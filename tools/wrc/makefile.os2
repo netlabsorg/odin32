@@ -1,4 +1,4 @@
-# $Id: makefile.os2,v 1.10 2000-05-02 14:33:04 bird Exp $
+# $Id: makefile.os2,v 1.11 2000-09-28 03:06:28 bird Exp $
 
 
 PDWIN32_TOOLS = ..\bin
@@ -56,12 +56,21 @@ dep:
     $(DEPEND) -I../../include/win -I../../include -I$(C_INCLUDE_PATH) \
         *.h *.asm *.inc  $(PDWIN32_INCLUDE)\*.h *.c *.cpp -objo *.c *.cpp
 
-!ifndef NODEP
-!include .depend
-!endif
-
 
 clean:
     rm -f *.o *.exe
 #    $(RM) y.tab.c y.tab.h lexyy.c *.o *.exe
+
+#
+# Include the .depend file.
+#   If the depend file don't exists we'll complain about it.
+#
+!ifndef NODEP
+!   if [$(EXISTS) .depend] == 0
+!       include .depend
+!   else
+!       if [$(ECHO) .depend doesn't exist]
+!       endif
+!   endif
+!endif
 
