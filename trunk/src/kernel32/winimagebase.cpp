@@ -1,4 +1,4 @@
-/* $Id: winimagebase.cpp,v 1.6 1999-11-30 19:40:26 sandervl Exp $ */
+/* $Id: winimagebase.cpp,v 1.7 2000-02-15 00:14:27 sandervl Exp $ */
 
 /*
  * Win32 PE Image base class
@@ -127,9 +127,16 @@ BOOL Win32ImageBase::isPEImage(char *szFileName)
   }
   dllfile = OSLibDosOpen(filename, OSLIB_ACCESS_READONLY|OSLIB_ACCESS_SHAREDENYNONE);
   if(dllfile == NULL) {//search in libpath for dll
-    strcpy(modname, kernel32Path);
-    strcat(modname, filename);
-    strcpy(filename, modname);
+    	strcpy(modname, kernel32Path);
+    	strcat(modname, filename);
+	dllfile = OSLibDosOpen(modname, OSLIB_ACCESS_READONLY|OSLIB_ACCESS_SHAREDENYNONE);
+	if(dllfile == NULL) {
+		OSLibDosSearchPath(OSLIB_SEARCHENV, "PATH", filename, filename, sizeof(filename));
+	}
+    	else {
+		strcpy(filename, modname);
+		OSLibDosClose(dllfile);
+	}
   }
   else  OSLibDosClose(dllfile);
 
