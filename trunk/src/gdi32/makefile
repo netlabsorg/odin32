@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.23 2000-03-06 23:38:38 bird Exp $
+# $Id: makefile,v 1.24 2000-03-10 16:13:45 sandervl Exp $
 
 #
 # Odin32 API
@@ -24,6 +24,7 @@ CLEANEXTRAS = gdi32rsrc.asm
 # Object files. All objects should be prefixed with $(OBJDIR)!
 OBJS = \
 $(OBJDIR)\gdi32.obj \
+$(OBJDIR)\driver.obj \
 $(OBJDIR)\opengl.obj \
 $(OBJDIR)\callback.obj \
 $(OBJDIR)\dibsect.obj \
