@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.45 1999-09-05 15:53:08 sandervl Exp $
+# $Id: makefile,v 1.46 1999-09-06 01:56:21 bird Exp $
 
 #
 # PD-Win32 API
@@ -9,6 +9,7 @@
 PDWIN32_INCLUDE = ..\..\..\include
 PDWIN32_LIB = ..\..\..\lib
 PDWIN32_BIN = ..\..\..\bin
+PDWIN32_TOOLS = ..\..\..\tools\bin
 
 
 !include $(PDWIN32_INCLUDE)/pdwin32.mk
@@ -52,6 +53,9 @@ $(TARGET).res:
 $(TARGET).lib: $(TARGET)exp.def
         $(IMPLIB) $(IMPLIBFLAGS) $@ $(TARGET)exp.def
         $(CP) $@ $(PDWIN32_LIB)
+
+$(TARGET)exp.def: $(TARGET).def
+        $(IMPDEF) $** $@
 
 
 user32.obj: user32.cpp $(PDWIN32_INCLUDE)\wndproc.h \
@@ -100,7 +104,7 @@ win32wndhandle.obj: win32wndhandle.cpp win32wndhandle.h
 
 pmwindow.obj:   pmwindow.cpp win32class.h win32wbase.h win32dlg.h pmwindow.h win32wndchild.h $(PDWIN32_INCLUDE)\wprocess.h oslibgdi.h oslibwin.h
 win32class.obj: win32class.cpp win32class.h win32wbase.h win32dlg.h gen_object.h heapshared.h oslibwin.h win32wndchild.h
-win32wbase.obj:   win32wbase.cpp win32class.h win32wbase.h win32dlg.h gen_object.h heapshared.h oslibwin.h win32wndchild.h  $(PDWIN32_INCLUDE)\winres.h oslibres.h win32wndhandle.h oslibdos.h 
+win32wbase.obj:   win32wbase.cpp win32class.h win32wbase.h win32dlg.h gen_object.h heapshared.h oslibwin.h win32wndchild.h  $(PDWIN32_INCLUDE)\winres.h oslibres.h win32wndhandle.h oslibdos.h
 win32wnd.obj:   win32wnd.cpp win32class.h win32wbase.h win32wnd.h win32dlg.h gen_object.h heapshared.h oslibwin.h win32wndchild.h  $(PDWIN32_INCLUDE)\winres.h oslibres.h win32wndhandle.h oslibdos.h oslibmenu.h
 win32dlg.obj:   win32dlg.cpp win32class.h win32wbase.h win32dlg.h gen_object.h heapshared.h oslibwin.h win32wndchild.h oslibmsg.h
 win32wndchild.obj: win32wndchild.cpp win32wndchild.h
@@ -124,3 +128,4 @@ clean:
         $(RM) *.obj *.lib *.dll *~ *.map *.pch
         $(RM) $(PDWIN32_BIN)\$(TARGET).dll
         $(RM) $(PDWIN32_LIB)\$(TARGET).lib
+        $(RM) $(TARGET)exp.def

@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.15 1999-08-21 12:29:31 sandervl Exp $
+# $Id: Makefile,v 1.16 1999-09-06 01:49:54 bird Exp $
 
 #
 # PD-Win32 API
@@ -9,6 +9,7 @@
 PDWIN32_INCLUDE = ..\..\include
 PDWIN32_LIB = ..\..\lib
 PDWIN32_BIN = ..\..\bin
+PDWIN32_TOOLS = ..\..\tools\bin
 
 
 !include $(PDWIN32_INCLUDE)/pdwin32.mk
@@ -42,6 +43,8 @@ $(TARGET).lib: $(TARGET)exp.def
         $(IMPLIB) $(IMPLIBFLAGS) $@ $(TARGET)exp.def
         $(CP) $@ $(PDWIN32_LIB)
 
+$(TARGET)exp.def: $(TARGET).def
+        $(IMPDEF) $** $@
 
 user32.obj: user32.cpp $(PDWIN32_INCLUDE)\wndproc.h \
             $(PDWIN32_INCLUDE)\wndclass.h $(PDWIN32_INCLUDE)\winicon.h syscolor.h
@@ -57,7 +60,7 @@ dialog.obj: dialog.cpp \
             dlgconvert.h
 dde.obj: dde.cpp
 hook.obj: hook.cpp hooks.h
-defwndproc.obj: defwndproc.cpp syscolor.h $(PDWIN32_INCLUDE)\wndproc.h 
+defwndproc.obj: defwndproc.cpp syscolor.h $(PDWIN32_INCLUDE)\wndproc.h
 hooks.obj: hooks.cpp hooks.h
 dlgconvert.obj: dlgconvert.cpp \
                 $(PDWIN32_INCLUDE)\wndproc.h $(PDWIN32_INCLUDE)\wndclass.h \
@@ -80,3 +83,4 @@ clean:
         $(RM) *.obj *.lib *.dll *~ *.map *.pch
         $(RM) $(PDWIN32_BIN)\$(TARGET).dll
         $(RM) $(PDWIN32_LIB)\$(TARGET).lib
+        $(RM) $(TARGET)exp.def
