@@ -1,4 +1,4 @@
-/* $Id: hmopen32.cpp,v 1.11 1999-11-12 14:57:15 sandervl Exp $ */
+/* $Id: hmopen32.cpp,v 1.12 1999-11-13 14:21:30 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -28,7 +28,7 @@ inline void ignore_dprintf(...){}
 #include <string.h>
 #include "HandleManager.h"
 #include "HMOpen32.h"
-
+#include "mmap.h"
 
 /*****************************************************************************
  * Defines                                                                   *
@@ -272,6 +272,7 @@ DWORD HMDeviceOpen32Class::ReadFile(PHMHANDLEDATA pHMHandleData,
                                     LPOVERLAPPED  lpOverlapped)
 {
   BOOL bRC;
+  LPVOID lpRealBuf;
 
   dprintfl(("KERNEL32: HandleManager::Open32::ReadFile %s(%08x,%08x,%08x,%08x,%08x) - stub?\n",
            lpHMDeviceName,
@@ -282,14 +283,31 @@ DWORD HMDeviceOpen32Class::ReadFile(PHMHANDLEDATA pHMHandleData,
            lpOverlapped));
 
 #if 1
+  Win32MemMap *map;
+  DWORD offset;
+
+  //SvL: DosRead doesn't like writing to memory addresses returned by 
+  //     DosAliasMem -> search for original memory mapped pointer and use 
+  //     that one
+  map = Win32MemMapView::findMapByView((ULONG)lpBuffer, &offset, MEMMAP_ACCESS_READ);
+  if(map) {
+	lpRealBuf = (LPVOID)((ULONG)map->getMappingAddr() + offset);
+  }
+  else  lpRealBuf = (LPVOID)lpBuffer;
+  
   bRC = O32_ReadFile(pHMHandleData->hHMHandle,
-                     (PVOID)lpBuffer,
+                     (PVOID)lpRealBuf,
                      nNumberOfBytesToRead,
                      lpNumberOfBytesRead,
                      lpOverlapped);
 
-  dprintfl(("KERNEL32: HandleManager::Open32::ReadFile returned %08xh\n",
-           bRC));
+  if(bRC == 0) {
+     	dprintf(("KERNEL32: HandleManager::Open32::ReadFile returned %08xh %x\n",
+                  bRC, GetLastError()));
+	dprintf(("%x -> %d", lpBuffer, IsBadWritePtr((LPVOID)lpBuffer, nNumberOfBytesToRead)));
+  }
+  else 	dprintfl(("KERNEL32: HandleManager::Open32::ReadFile returned %08xh\n",
+                   bRC));
 
   return (DWORD)bRC;
 #else
@@ -496,20 +514,23 @@ BOOL HMDeviceOpen32Class::SetFileTime(PHMHANDLEDATA pHMHandleData,
  *****************************************************************************/
 
 DWORD HMDeviceOpen32Class::GetFileSize(PHMHANDLEDATA pHMHandleData,
-                                       PDWORD        pSize)
+                                       PDWORD        lpdwFileSizeHigh)
 {
   dprintfl(("KERNEL32: HandleManager::Open32::GetFileSize %s(%08xh,%08xh)\n",
            lpHMDeviceName,
            pHMHandleData,
-           pSize));
+           lpdwFileSizeHigh));
 
 #if 1
+  if(lpdwFileSizeHigh)
+    *lpdwFileSizeHigh = 0;
+
   return O32_GetFileSize(pHMHandleData->hHMHandle,
-                         pSize);
+                         lpdwFileSizeHigh);
 #else
   size = OSLibDosGetFileSize(pHMHandleData->hHMHandle);
   if(pSize)
-    *pSize = size;
+    *pSize = 0;
   return size;
 #endif
 }
@@ -543,6 +564,9 @@ DWORD HMDeviceOpen32Class::SetFilePointer(PHMHANDLEDATA pHMHandleData,
            dwMoveMethod));
 
 #if 1
+  if(lpDistanceToMoveHigh)
+    *lpDistanceToMoveHigh = 0;
+
   return O32_SetFilePointer(pHMHandleData->hHMHandle,
                             lDistanceToMove,
                             lpDistanceToMoveHigh,
