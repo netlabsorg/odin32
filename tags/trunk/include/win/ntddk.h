@@ -751,8 +751,6 @@ DWORD WINAPI RtlIsTextUnicode(
 	DWORD len,
 	DWORD *pf);
 
-INT __cdecl wcstol(LPCWSTR,LPWSTR*,INT);
-
 /*	resource functions */
 
 typedef struct _RTL_RWLOCK {
