@@ -1,13 +1,18 @@
-/* $Id: font.cpp,v 1.4 1999-11-10 23:30:45 phaller Exp $ */
+/* $Id: font.cpp,v 1.5 1999-11-11 13:16:40 sandervl Exp $ */
 
 /*
  * GDI32 font apis
  *
  * Copyright 1999 Edgar Buerkle (Edgar.Buerkle@gmx.ne)
- * Copyright 1998 Sander van Leeuwen (sandervl@xs4all.nl)
+ * Copyright 1999 Sander van Leeuwen (sandervl@xs4all.nl)
  * Copyright 1998 Patrick Haller
  *
- * TODO: EnumFontsA/W, EnumFontFamiliesExA/W + others
+ * TODO: EnumFontsA/W, EnumFontFamiliesExA/W not complete
+ *
+ * Parts based on Wine code (991031)
+ *
+ * Copyright 1993 Alexandre Julliard
+ *           1997 Alex Korobka
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -23,7 +28,6 @@
 #include <string.h>
 #include "misc.h"
 #include "unicode.h"
-#include <vmutex.h>
 #include <heapstring.h>
 #include <win\options.h>
 
@@ -31,11 +35,56 @@
 ODINDEBUGCHANNEL(GDI32-FONT)
 
 
-VMutex mutexProcWinA;
-VMutex mutexProcWinW;
-FONTENUMPROCA FontEnumProcWinA;
-FONTENUMPROCW FontEnumProcWinW;
+typedef struct {
+	DWORD userProc;
+	DWORD userData;
+	DWORD dwFlags;
+} ENUMUSERDATA;
 
+/*
+ *  For TranslateCharsetInfo
+ */
+#define FS(x) {{0,0,0,0},{0x1<<(x),0}}
+#define MAXTCIINDEX 32
+static CHARSETINFO FONT_tci[MAXTCIINDEX] = {
+  /* ANSI */
+  { ANSI_CHARSET, 1252, FS(0)},
+  { EASTEUROPE_CHARSET, 1250, FS(1)},
+  { RUSSIAN_CHARSET, 1251, FS(2)},
+  { GREEK_CHARSET, 1253, FS(3)},
+  { TURKISH_CHARSET, 1254, FS(4)},
+  { HEBREW_CHARSET, 1255, FS(5)},
+  { ARABIC_CHARSET, 1256, FS(6)},
+  { BALTIC_CHARSET, 1257, FS(7)},
+  /* reserved by ANSI */
+  { DEFAULT_CHARSET, 0, FS(0)},
+  { DEFAULT_CHARSET, 0, FS(0)},
+  { DEFAULT_CHARSET, 0, FS(0)},
+  { DEFAULT_CHARSET, 0, FS(0)},
+  { DEFAULT_CHARSET, 0, FS(0)},
+  { DEFAULT_CHARSET, 0, FS(0)},
+  { DEFAULT_CHARSET, 0, FS(0)},
+  { DEFAULT_CHARSET, 0, FS(0)},
+  /* ANSI and OEM */
+  { THAI_CHARSET,  874,  FS(16)},
+  { SHIFTJIS_CHARSET, 932, FS(17)},
+  { GB2312_CHARSET, 936, FS(18)},
+  { HANGEUL_CHARSET, 949, FS(19)},
+  { CHINESEBIG5_CHARSET, 950, FS(20)},
+  { JOHAB_CHARSET, 1361, FS(21)}, 
+  /* reserved for alternate ANSI and OEM */
+  { DEFAULT_CHARSET, 0, FS(0)},
+  { DEFAULT_CHARSET, 0, FS(0)},
+  { DEFAULT_CHARSET, 0, FS(0)},
+  { DEFAULT_CHARSET, 0, FS(0)},
+  { DEFAULT_CHARSET, 0, FS(0)},
+  { DEFAULT_CHARSET, 0, FS(0)},
+  { DEFAULT_CHARSET, 0, FS(0)},
+  { DEFAULT_CHARSET, 0, FS(0)},
+  /* reserved for system */
+  { DEFAULT_CHARSET, 0, FS(0)},
+  { DEFAULT_CHARSET, 0, FS(0)},
+};
 
 /*****************************************************************************
  * Name      : static void iFontRename
@@ -203,7 +252,7 @@ ODINFUNCTION1(HFONT, CreateFontIndirectW,const LOGFONTW *, lplf)
   LOGFONTA afont;
   HFONT    hfont;
 
-  //memcpy(&afont, lplf, ((int)&afont.lfFaceName - (int)&afont));
+  //memcpy(&afont, lplf, ((ULONG)&afont.lfFaceName - (ULONG)&afont));
   memcpy(&afont, lplf, sizeof(LOGFONTA));
   memset(afont.lfFaceName, 0, LF_FACESIZE);
   UnicodeToAsciiN((WCHAR *)lplf->lfFaceName, afont.lfFaceName, LF_FACESIZE-1);
@@ -213,44 +262,132 @@ ODINFUNCTION1(HFONT, CreateFontIndirectW,const LOGFONTW *, lplf)
 //******************************************************************************
 //******************************************************************************
 int  EXPENTRY_O32 EnumFontProcA(LPENUMLOGFONTA lpLogFont, LPNEWTEXTMETRICA
-                                lpTextM, DWORD arg3, LPARAM arg4)
+                                   lpTextM, DWORD arg3, LPARAM arg4)
 {
-  return FontEnumProcWinA(lpLogFont, lpTextM, arg3, arg4);
+ ENUMUSERDATA *lpEnumData = (ENUMUSERDATA *)arg4;
+ FONTENUMPROCA proc = (FONTENUMPROCA)lpEnumData->userProc; 
+
+  return proc(lpLogFont, lpTextM, arg3, lpEnumData->userData);
 }
 //******************************************************************************
 //******************************************************************************
 int  EXPENTRY_O32 EnumFontProcW(LPENUMLOGFONTA lpLogFont, LPNEWTEXTMETRICA lpTextM,
-                                DWORD arg3, LPARAM arg4)
+                                   DWORD arg3, LPARAM arg4)
 {
-  ENUMLOGFONTW LogFont;
-  int rc;
+ ENUMUSERDATA *lpEnumData = (ENUMUSERDATA *)arg4;
+ FONTENUMPROCW proc = (FONTENUMPROCW)lpEnumData->userProc; 
+ ENUMLOGFONTW LogFont;
+ NEWTEXTMETRICW textM;
+ int rc;
 
-  memcpy(&LogFont, lpLogFont, ((int)&LogFont.elfLogFont.lfFaceName -
-         (int)&LogFont));
+  memcpy(&LogFont, lpLogFont, ((ULONG)&LogFont.elfLogFont.lfFaceName -
+         (ULONG)&LogFont));
   AsciiToUnicodeN(lpLogFont->elfLogFont.lfFaceName, LogFont.elfLogFont.lfFaceName, LF_FACESIZE-1);
   AsciiToUnicodeN((char *) lpLogFont->elfFullName, LogFont.elfFullName, LF_FULLFACESIZE-1);
   AsciiToUnicodeN((char *) lpLogFont->elfStyle, LogFont.elfStyle, LF_FACESIZE-1);
 
-  rc = FontEnumProcWinW(&LogFont, (LPNEWTEXTMETRICW) lpTextM, arg3, arg4);
-  return rc;
+  textM.tmHeight = lpTextM->tmHeight;
+  textM.tmAscent = lpTextM->tmAscent;
+  textM.tmDescent = lpTextM->tmDescent;
+  textM.tmInternalLeading = lpTextM->tmInternalLeading;
+  textM.tmExternalLeading = lpTextM->tmExternalLeading;
+  textM.tmAveCharWidth = lpTextM->tmAveCharWidth;
+  textM.tmMaxCharWidth = lpTextM->tmMaxCharWidth;
+  textM.tmWeight = lpTextM->tmWeight;
+  textM.tmOverhang = lpTextM->tmOverhang;
+  textM.tmDigitizedAspectX = lpTextM->tmDigitizedAspectX;
+  textM.tmDigitizedAspectY = lpTextM->tmDigitizedAspectY;
+  textM.tmFirstChar = lpTextM->tmFirstChar;
+  textM.tmLastChar = lpTextM->tmLastChar;
+  textM.tmDefaultChar = lpTextM->tmDefaultChar;
+  textM.tmBreakChar = lpTextM->tmBreakChar;
+  textM.tmItalic = lpTextM->tmItalic;
+  textM.tmUnderlined = lpTextM->tmUnderlined;
+  textM.tmStruckOut = lpTextM->tmStruckOut;
+  textM.tmPitchAndFamily = lpTextM->tmPitchAndFamily;
+  textM.tmCharSet = lpTextM->tmCharSet;
+  textM.ntmFlags = 0;
+  textM.ntmSizeEM = 0;
+  textM.ntmCellHeight = 0;
+  textM.ntmAvgWidth = 0;
+
+  return proc(&LogFont, &textM, arg3, lpEnumData->userData);
+}
+//******************************************************************************
+//TODO: FontEnumdwFlagsEx, script, font signature & NEWTEXTMETRICEX (last part)
+//******************************************************************************
+int  EXPENTRY_O32 EnumFontProcExA(LPENUMLOGFONTA lpLogFont, LPNEWTEXTMETRICA
+                                     lpTextM, DWORD arg3, LPARAM arg4)
+{
+ ENUMUSERDATA *lpEnumData = (ENUMUSERDATA *)arg4;
+ FONTENUMPROCEXA proc = (FONTENUMPROCEXA)lpEnumData->userProc; 
+ ENUMLOGFONTEXA logFont;
+ NEWTEXTMETRICEXA textM;
+
+  memcpy(&logFont, lpLogFont, sizeof(ENUMLOGFONTA));
+  memset(logFont.elfScript, 0, sizeof(logFont.elfScript));
+  memcpy(&textM.ntmetm, lpTextM, sizeof(textM.ntmetm));
+  memset(&textM.ntmeFontSignature, 0, sizeof(textM.ntmeFontSignature));
+
+  return proc(&logFont, &textM, arg3, lpEnumData->userData);
+}
+//******************************************************************************
+//TODO: FontEnumdwFlagsEx, script, font signature & NEWTEXTMETRICEX (last part)
+//******************************************************************************
+int EXPENTRY_O32 EnumFontProcExW(LPENUMLOGFONTA lpLogFont, LPNEWTEXTMETRICA lpTextM,
+                                    DWORD arg3, LPARAM arg4)
+{
+ ENUMUSERDATA *lpEnumData = (ENUMUSERDATA *)arg4;
+ FONTENUMPROCEXW proc = (FONTENUMPROCEXW)lpEnumData->userProc; 
+ ENUMLOGFONTEXW LogFont;
+ NEWTEXTMETRICEXW textM;
+ int rc;
+
+  memcpy(&LogFont, lpLogFont, ((ULONG)&LogFont.elfLogFont.lfFaceName - (ULONG)&LogFont));
+  memset(LogFont.elfScript, 0, sizeof(LogFont.elfScript));
+  AsciiToUnicodeN(lpLogFont->elfLogFont.lfFaceName, LogFont.elfLogFont.lfFaceName, LF_FACESIZE-1);
+  AsciiToUnicodeN((char *) lpLogFont->elfFullName, LogFont.elfFullName, LF_FULLFACESIZE-1);
+  AsciiToUnicodeN((char *) lpLogFont->elfStyle, LogFont.elfStyle, LF_FACESIZE-1);
+
+  textM.ntmetm.tmHeight = lpTextM->tmHeight;
+  textM.ntmetm.tmAscent = lpTextM->tmAscent;
+  textM.ntmetm.tmDescent = lpTextM->tmDescent;
+  textM.ntmetm.tmInternalLeading = lpTextM->tmInternalLeading;
+  textM.ntmetm.tmExternalLeading = lpTextM->tmExternalLeading;
+  textM.ntmetm.tmAveCharWidth = lpTextM->tmAveCharWidth;
+  textM.ntmetm.tmMaxCharWidth = lpTextM->tmMaxCharWidth;
+  textM.ntmetm.tmWeight = lpTextM->tmWeight;
+  textM.ntmetm.tmOverhang = lpTextM->tmOverhang;
+  textM.ntmetm.tmDigitizedAspectX = lpTextM->tmDigitizedAspectX;
+  textM.ntmetm.tmDigitizedAspectY = lpTextM->tmDigitizedAspectY;
+  textM.ntmetm.tmFirstChar = lpTextM->tmFirstChar;
+  textM.ntmetm.tmLastChar = lpTextM->tmLastChar;
+  textM.ntmetm.tmDefaultChar = lpTextM->tmDefaultChar;
+  textM.ntmetm.tmBreakChar = lpTextM->tmBreakChar;
+  textM.ntmetm.tmItalic = lpTextM->tmItalic;
+  textM.ntmetm.tmUnderlined = lpTextM->tmUnderlined;
+  textM.ntmetm.tmStruckOut = lpTextM->tmStruckOut;
+  textM.ntmetm.tmPitchAndFamily = lpTextM->tmPitchAndFamily;
+  textM.ntmetm.tmCharSet = lpTextM->tmCharSet;
+  textM.ntmetm.ntmFlags = 0;
+  textM.ntmetm.ntmSizeEM = 0;
+  textM.ntmetm.ntmCellHeight = 0;
+  textM.ntmetm.ntmAvgWidth = 0;
+  memset(&textM.ntmeFontSignature, 0, sizeof(textM.ntmeFontSignature));
+
+  return proc(&LogFont, &textM, arg3, lpEnumData->userData);
 }
 //******************************************************************************
 //******************************************************************************
 int WIN32API EnumFontsA( HDC arg1, LPCSTR arg2, FONTENUMPROCA arg3, LPARAM  arg4)
 {
-    dprintf(("GDI32: OS2EnumFontsA"));
-//    return O32_EnumFonts(arg1, arg2, arg3, arg4);
-    return 1;
+  return EnumFontFamiliesA(arg1, arg2, arg3, arg4);
 }
 //******************************************************************************
-//TODO: Callback
 //******************************************************************************
 int WIN32API EnumFontsW( HDC arg1, LPCWSTR arg2, FONTENUMPROCW arg3, LPARAM  arg4)
 {
-    dprintf(("GDI32: OS2EnumFontsW - stub (1)"));
-    // NOTE: This will not work as is (needs UNICODE support)
-//    return O32_EnumFonts(arg1, arg2, arg3, arg4);
-    return 1;
+  return EnumFontFamiliesW(arg1, arg2, arg3, arg4);
 }
 //******************************************************************************
 //******************************************************************************
@@ -259,17 +396,16 @@ int WIN32API EnumFontFamiliesA(HDC          arg1,
                                FONTENUMPROCA arg3,
                                LPARAM       arg4)
 {
+  ENUMUSERDATA enumData;
   int rc;
 
-  dprintf(("GDI32: OS2EnumFontFamiliesA "));
+  dprintf(("GDI32: EnumFontFamiliesA %s", arg2));
 
-  mutexProcWinA.enter();
+  enumData.userProc = (DWORD)arg3;
+  enumData.userData = arg4;
 
-  FontEnumProcWinA = arg3;
+  rc = O32_EnumFontFamilies(arg1, arg2, &EnumFontProcA, (LPARAM)&enumData);
 
-  rc = O32_EnumFontFamilies(arg1, arg2, &EnumFontProcA, arg4);
-
-  mutexProcWinA.leave();
   return rc;
 }
 //******************************************************************************
@@ -279,18 +415,16 @@ int WIN32API EnumFontFamiliesW(HDC          arg1,
                                FONTENUMPROCW arg3,
                                LPARAM       arg4)
 {
+  ENUMUSERDATA enumData;
   int rc;
   char *astring = UnicodeToAsciiString((LPWSTR)arg2);
 
-  dprintf(("GDI32: OS2EnumFontFamiliesW "));
+  dprintf(("GDI32: EnumFontFamiliesW %s", astring));
 
-  mutexProcWinW.enter();
+  enumData.userProc = (DWORD)arg3;
+  enumData.userData = arg4;
 
-  FontEnumProcWinW = arg3;
-
-  rc = O32_EnumFontFamilies(arg1, astring, &EnumFontProcW, arg4);
-
-  mutexProcWinW.leave();
+  rc = O32_EnumFontFamilies(arg1, astring, &EnumFontProcW, (LPARAM)&enumData);
 
   FreeAsciiString(astring);
   return rc;
@@ -299,16 +433,37 @@ int WIN32API EnumFontFamiliesW(HDC          arg1,
 //******************************************************************************
 INT WIN32API EnumFontFamiliesExA( HDC arg1, LPLOGFONTA arg2, FONTENUMPROCEXA arg3, LPARAM  arg4, DWORD dwFlags)
 {
-    dprintf(("GDI32: OS2EnumFontFamiliesExA, not implemented\n"));
-    return 0;
+  ENUMUSERDATA enumData;
+  int rc;
+
+  dprintf(("GDI32: EnumFontFamiliesExA not complete %s", arg2->lfFaceName));
+
+  enumData.userProc = (DWORD)arg3;
+  enumData.userData = arg4;
+  enumData.dwFlags  = dwFlags;
+
+  rc = O32_EnumFontFamilies(arg1, arg2->lfFaceName, &EnumFontProcExA, (LPARAM)&enumData);
+
+  return rc;
 }
 //******************************************************************************
 //******************************************************************************
 INT WIN32API EnumFontFamiliesExW( HDC arg1, LPLOGFONTW arg2, FONTENUMPROCEXW arg3, LPARAM  arg4, DWORD dwFlags)
 {
-    dprintf(("GDI32: OS2EnumFontFamiliesW, not implemented\n"));
-    // NOTE: This will not work as is (needs UNICODE support)
-    return 0;
+  ENUMUSERDATA enumData;
+  int rc;
+  char *astring = UnicodeToAsciiString((LPWSTR)arg2->lfFaceName);
+
+  dprintf(("GDI32: EnumFontFamiliesExW not complete %s", astring));
+
+  enumData.userProc = (DWORD)arg3;
+  enumData.userData = arg4;
+  enumData.dwFlags  = dwFlags;
+
+  rc = O32_EnumFontFamilies(arg1, astring, &EnumFontProcExW, (LPARAM)&enumData);
+
+  FreeAsciiString(astring);
+  return rc;
 }
 //******************************************************************************
 //******************************************************************************
@@ -322,14 +477,14 @@ DWORD WIN32API GetFontData(HDC hdc, DWORD dwTable, DWORD dwOffset, LPVOID lpvBuf
 //******************************************************************************
 int WIN32API AddFontResourceA( LPCSTR arg1)
 {
-    dprintf(("GDI32: OS2AddFontResourceA"));
+    dprintf(("GDI32: AddFontResourceA"));
     return O32_AddFontResource(arg1);
 }
 //******************************************************************************
 //******************************************************************************
 int WIN32API AddFontResourceW( LPCWSTR arg1)
 {
-    dprintf(("GDI32: OS2AddFontResourceW STUB"));
+    dprintf(("GDI32: AddFontResourceW STUB"));
     // NOTE: This will not work as is (needs UNICODE support)
 //    return O32_AddFontResource(arg1);
     return 0;
@@ -338,7 +493,7 @@ int WIN32API AddFontResourceW( LPCWSTR arg1)
 //******************************************************************************
 BOOL WIN32API RemoveFontResourceA( LPCSTR arg1)
 {
-    dprintf(("GDI32: OS2RemoveFontResourceA %s\n", arg1));
+    dprintf(("GDI32: RemoveFontResourceA %s\n", arg1));
     return O32_RemoveFontResource(arg1);
 }
 //******************************************************************************
@@ -348,7 +503,7 @@ BOOL WIN32API RemoveFontResourceW(LPCWSTR arg1)
  char *astring = UnicodeToAsciiString((LPWSTR)arg1);
  BOOL  rc;
 
-    dprintf(("GDI32: OS2RemoveFontResourceW\n"));
+    dprintf(("GDI32: RemoveFontResourceW\n"));
     rc = O32_RemoveFontResource(astring);
     FreeAsciiString(astring);
     return(rc);
@@ -434,6 +589,48 @@ DWORD WIN32API GetFontLanguageInfo(HDC hdc)
            hdc));
 
   return (0);
+}
+/*************************************************************************
+ * TranslateCharsetInfo [GDI32.382]
+ *
+ * Fills a CHARSETINFO structure for a character set, code page, or
+ * font. This allows making the correspondance between different labelings
+ * (character set, Windows, ANSI, and OEM codepages, and Unicode ranges) 
+ * of the same encoding.
+ *
+ * Only one codepage will be set in lpCs->fs. If TCI_SRCFONTSIG is used,
+ * only one codepage should be set in *lpSrc.
+ *
+ * RETURNS
+ *   TRUE on success, FALSE on failure.
+ *
+ */
+BOOL WIN32API TranslateCharsetInfo(
+  LPDWORD lpSrc, /*
+       if flags == TCI_SRCFONTSIG: pointer to fsCsb of a FONTSIGNATURE
+       if flags == TCI_SRCCHARSET: a character set value
+       if flags == TCI_SRCCODEPAGE: a code page value
+		 */
+  LPCHARSETINFO lpCs, /* structure to receive charset information */
+  DWORD flags /* determines interpretation of lpSrc */
+) {
+    int index = 0;
+    switch (flags) {
+    case TCI_SRCFONTSIG:
+	while (!(*lpSrc>>index & 0x0001) && index<MAXTCIINDEX) index++;
+      break;
+    case TCI_SRCCODEPAGE:
+      while ((UINT) (lpSrc) != FONT_tci[index].ciACP && index < MAXTCIINDEX) index++;
+      break;
+    case TCI_SRCCHARSET:
+      while ((UINT) (lpSrc) != FONT_tci[index].ciCharset && index < MAXTCIINDEX) index++;
+      break;
+    default:
+      return FALSE;
+    }
+    if (index >= MAXTCIINDEX || FONT_tci[index].ciCharset == DEFAULT_CHARSET) return FALSE;
+    memcpy(lpCs, &FONT_tci[index], sizeof(CHARSETINFO));
+    return TRUE;
 }
 //******************************************************************************
 //******************************************************************************
