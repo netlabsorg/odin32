@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.1262 2001-02-17 17:11:46 sandervl Exp $ */
+/* $Id: changelog,v 1.1263 2001-02-17 19:25:43 sandervl Exp $ */
 
  2000-02-17: Yuri Dario <mc6530@mclink.it>
     - INCLUDE:  o Header changes for compiling Opera
@@ -16,8 +16,13 @@
                 o Ported latest GetNextDlgTabItem from Wine
                   (fixes TAB handling in Opera dialogs)
                 o WM_ADJUSTWINDOWPOS bugfix (if app changes size/position)
-                  OSLibMapWINDOWPOStoSWP can add flags, but we must not let it remove flags!
+                  OSLibMapWINDOWPOStoSWP can add flags, but we must not let 
+                  it remove flags.
                   (fixes resizing of Opera MDI windows)
+                o ScrollWindow(Ex) bugfixes
+                  Must scroll child windows manually
+                  (fixes scrolling of Opera html MDI windows)
+
 
  2001-02-15: Sander van Leeuwen <sandervl@xs4all.nl>
     - COMDLG32: o Ignore OFN_FILEMUSTEXIST flag in GetSaveFileNameA/W
