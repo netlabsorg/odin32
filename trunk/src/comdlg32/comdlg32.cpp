@@ -1,4 +1,4 @@
-/* $Id: comdlg32.cpp,v 1.19 1999-11-10 12:18:28 phaller Exp $ */
+/* $Id: comdlg32.cpp,v 1.20 2000-02-03 13:27:39 sandervl Exp $ */
 
 /*
  * COMDLG32 implementation
@@ -324,7 +324,9 @@ ODINFUNCTION1(BOOL, GetOpenFileNameA,
               LPOPENFILENAMEA, lpofn)
 {
   Win32WindowProc *wndproc;
+  BOOL rc;
 
+  CheckCurFS();
   if(lpofn->Flags & (OFN_ENABLETEMPLATE|OFN_ENABLETEMPLATEHANDLE))
   {
     return GetFileDialog95A(lpofn, OPEN_DIALOG);
@@ -335,7 +337,9 @@ ODINFUNCTION1(BOOL, GetOpenFileNameA,
   if (lpofn->lpstrFilter != NULL)
     iFileDlg_CleanFilterArray((LPSTR)lpofn->lpstrFilter);
 
-  return(O32_GetOpenFileName(lpofn));
+  rc = O32_GetOpenFileName(lpofn);
+  CheckCurFS();
+  return rc;
 }
 
 /*****************************************************************************

@@ -1,4 +1,3 @@
-/* $Id: filedlgbrowser.h,v 1.3 1999-11-28 12:32:28 sandervl Exp $ */
 /*
  *  Implementation of IShellBrowser for the File Open common dialog
  * 
@@ -86,6 +85,8 @@ typedef struct
 #define IDS_FILENOTFOUND                114
 #define IDS_VERIFYFILE                  115
 #define IDS_CREATEFILE                  116
+#define IDS_CREATEFOLDER_DENIED         117
+#define IDS_FILEOPEN_CAPTION            118
 
 #define IDC_OPENREADONLY                chx1
 
