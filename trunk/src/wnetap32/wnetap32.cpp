@@ -1,4 +1,4 @@
-/* $Id: wnetap32.cpp,v 1.3 1999-06-10 16:17:57 phaller Exp $ */
+/* $Id: wnetap32.cpp,v 1.4 1999-08-18 23:27:25 phaller Exp $ */
 
 /*
  *
@@ -24,8 +24,11 @@
  ****************************************************************************/
 
 #include <os2win.h>
+#include <odinwrap.h>
 #include "misc.h"
 
+
+ODINDEBUGCHANNEL(WNETAP32)
 
 /****************************************************************************
  * Module Global Variables                                                  *
@@ -330,6 +333,7 @@ NET_API_STATUS WIN32API OS2NetFileEnum(
   return (NERR_BASE);
 }
 
+
  /*****************************************************************************
  * Name      : NET_API_STATUS NetFileGetInfo
  * Purpose   :
@@ -346,18 +350,15 @@ NET_API_STATUS WIN32API OS2NetFileEnum(
  *
  * Author    : Markus Montkowski [09.07.98 21:28:38]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetFileGetInfo(
-                                           LPWSTR servername,
-                                           DWORD fileid,
-                                           DWORD level,
-                                           LPBYTE *bufptr
-                                           )
+
+ODINFUNCTION4(NET_API_STATUS,OS2NetFileGetInfo,LPWSTR,  servername,
+                                               DWORD,   fileid,
+                                               DWORD,   level,
+                                               LPBYTE*, bufptr)
 
 {
 
-  dprintf(("NETAPI32: NetFileGetInfo(%s, %d, %d, %08x) not implemented\n"
-           ,servername, fileid, level, *bufptr
-         ));
+  dprintf(("NETAPI32: NetFileGetInfo not implemented\n"));
 
   return (NERR_BASE);
 }
@@ -2359,7 +2360,9 @@ NET_API_STATUS WIN32API OS2NetShareCheck(
 
   return (NERR_BASE);
 }
- /*****************************************************************************
+
+
+/*****************************************************************************
  * Name      : NET_API_STATUS NetShareDel
  * Purpose   :
  * Parameters: LPWSTR servername
@@ -2388,6 +2391,8 @@ NET_API_STATUS WIN32API OS2NetShareDel(
 
   return (NERR_BASE);
 }
+
+
  /*****************************************************************************
  * Name      : NET_API_STATUS NetShareGetInfo
  * Purpose   :
@@ -3090,7 +3095,7 @@ NET_API_STATUS WIN32API OS2NetWkstaUserGetInfo(
   return (NERR_BASE);
 }
 
- /*****************************************************************************
+/*****************************************************************************
  * Name      : NET_API_STATUS NetWkstaUserSetInfo
  * Purpose   :
  * Parameters: LPWSTR reserved
@@ -3118,6 +3123,1165 @@ NET_API_STATUS WIN32API OS2NetWkstaUserSetInfo(
   dprintf(("NETAPI32: NetWkstaUserSetInfo(%08x, %d, %08x, %08x) not implemented\n"
            ,reserved, level, buf, parm_err
          ));
+
+  return (NERR_BASE);
+}
+
+
+
+/*****************************************************************************
+ * Name      : NET_API_STATUS NetConfigSet
+ * Purpose   : configure a network component
+ * Parameters: LPWSTR lpServer
+ *             LPWSTR lpReserved1
+ *             LPWSTR lpComponent
+ *             DWORD  dwLevel
+ *             DWORD  dwReserved2
+ *             LPBYTE lpBuf
+ *             DWORD  dwReserved3
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/08/18 00:15]
+ *****************************************************************************/
+
+ODINFUNCTION7(NET_API_STATUS,OS2NetConfigSet,LPWSTR, lpServer,
+                                             LPWSTR, lpReserved1,
+                                             LPWSTR, lpComponent,
+                                             DWORD,  dwLevel,
+                                             DWORD,  dwReserved2,
+                                             LPBYTE, lpBuf,
+                                             DWORD,  dwReserved3)
+{
+  dprintf(("NETAPI32: NetConfigSet not implemented\n"));
+
+  return (NERR_BASE);
+}
+
+
+/*****************************************************************************
+ * Name      : NET_API_STATUS NetConfigGet
+ * Purpose   : get configuration from a network component
+ * Parameters: LPWSTR lpServer
+ *             LPWSTR lpComponent
+ *             LPWSTR lpParameter
+ *             LPBYTE lpBuf
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/08/18 00:15]
+ *****************************************************************************/
+
+ODINFUNCTION4(NET_API_STATUS,OS2NetConfigGet,LPWSTR, lpServer,
+                                             LPWSTR, lpComponent,
+                                             LPWSTR, lpParameter,
+                                             LPBYTE, lpBuf)
+{
+  dprintf(("NETAPI32: NetConfigGet not implemented\n"));
+
+  return (NERR_BASE);
+}
+
+
+/*****************************************************************************
+ * Name      : NET_API_STATUS RxNetAccessSetInfo
+ * Purpose   :
+ * Parameters: wrong
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/08/18 00:15]
+ *****************************************************************************/
+
+NET_API_STATUS WIN32API OS2RxNetAccessSetInfo(DWORD x1,
+                                              DWORD x2,
+                                              DWORD x3,
+                                              DWORD x4,
+                                              DWORD x5,
+                                              DWORD x6)
+{
+  dprintf(("NETAPI32: RxNetAccessSetInfo(%08x, %08xh, %08xh, %08xh, %08xh, %08xh) not implemented\n",
+           x1,
+           x2,
+           x3,
+           x4,
+           x5,
+           x6));
+
+  return (NERR_BASE);
+}
+
+
+/*****************************************************************************
+ * Name      : NET_API_STATUS RxNetAccessGetInfo
+ * Purpose   :
+ * Parameters: wrong
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/08/18 00:15]
+ *****************************************************************************/
+
+NET_API_STATUS WIN32API OS2RxNetAccessGetInfo(DWORD x1,
+                                              DWORD x2,
+                                              DWORD x3,
+                                              DWORD x4,
+                                              DWORD x5,
+                                              DWORD x6)
+{
+  dprintf(("NETAPI32: RxNetAccessGetInfo(%08x, %08xh, %08xh, %08xh, %08xh, %08xh) not implemented\n",
+           x1,
+           x2,
+           x3,
+           x4,
+           x5,
+           x6));
+
+  return (NERR_BASE);
+}
+
+
+
+/*****************************************************************************
+ * Name      : NET_API_STATUS I_NetGetDCList
+ * Purpose   :
+ * Parameters: wrong
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/08/18 00:15]
+ *****************************************************************************/
+
+NET_API_STATUS WIN32API OS2I_NetGetDCList(DWORD x1,
+                                          DWORD x2,
+                                          DWORD x3,
+                                          DWORD x4,
+                                          DWORD x5,
+                                          DWORD x6)
+{
+  dprintf(("NETAPI32: I_NetGetDCList(%08x, %08xh, %08xh, %08xh, %08xh, %08xh) not implemented\n",
+           x1,
+           x2,
+           x3,
+           x4,
+           x5,
+           x6));
+
+  return (NERR_BASE);
+}
+
+
+/*****************************************************************************
+ * Name      : NET_API_STATUS I_NetNameCanonicalize
+ * Purpose   :
+ * Parameters: wrong
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/08/18 00:15]
+ *****************************************************************************/
+
+NET_API_STATUS WIN32API OS2I_NetNameCanonicalize(DWORD x1,
+                                                 DWORD x2,
+                                                 DWORD x3,
+                                                 DWORD x4)
+{
+  dprintf(("NETAPI32: I_NetNameCanonicalize(%08x, %08xh, %08xh, %08xh) not implemented\n",
+           x1,
+           x2,
+           x3,
+           x4));
+
+  return (NERR_BASE);
+}
+
+
+
+/*****************************************************************************
+ * Name      : NET_API_STATUS I_NetNameCompare
+ * Purpose   :
+ * Parameters: wrong
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/08/18 00:15]
+ *****************************************************************************/
+
+NET_API_STATUS WIN32API OS2I_NetNameCompare(DWORD x1,
+                                            DWORD x2,
+                                            DWORD x3,
+                                            DWORD x4)
+{
+  dprintf(("NETAPI32: I_NetNameCompare(%08x, %08xh, %08xh, %08xh) not implemented\n",
+           x1,
+           x2,
+           x3,
+           x4));
+
+  return (NERR_BASE);
+}
+
+
+/*****************************************************************************
+ * Name      : NET_API_STATUS I_NetNameValidate
+ * Purpose   :
+ * Parameters: wrong
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/08/18 00:15]
+ *****************************************************************************/
+
+NET_API_STATUS WIN32API OS2I_NetNameValidate(DWORD x1,
+                                             DWORD x2,
+                                             DWORD x3)
+{
+  dprintf(("NETAPI32: I_NetNameValidate(%08x, %08xh, %08xh) not implemented\n",
+           x1,
+           x2,
+           x3));
+
+  return (NERR_BASE);
+}
+
+
+/*****************************************************************************
+ * Name      : NET_API_STATUS I_NetPathCanonicalize
+ * Purpose   :
+ * Parameters: wrong
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/08/18 00:15]
+ *****************************************************************************/
+
+NET_API_STATUS WIN32API OS2I_NetPathCanonicalize(DWORD x1,
+                                                 DWORD x2,
+                                                 DWORD x3,
+                                                 DWORD x4)
+{
+  dprintf(("NETAPI32: I_NetPathCanonicalize(%08x, %08xh, %08xh, %08xh) not implemented\n",
+           x1,
+           x2,
+           x3,
+           x4));
+
+  return (NERR_BASE);
+}
+
+
+
+/*****************************************************************************
+ * Name      : NET_API_STATUS I_NetPathCompare
+ * Purpose   :
+ * Parameters: wrong
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/08/18 00:15]
+ *****************************************************************************/
+
+NET_API_STATUS WIN32API OS2I_NetPathCompare(DWORD x1,
+                                            DWORD x2,
+                                            DWORD x3,
+                                            DWORD x4)
+{
+  dprintf(("NETAPI32: I_NetPathCompare(%08x, %08xh, %08xh, %08xh) not implemented\n",
+           x1,
+           x2,
+           x3,
+           x4));
+
+  return (NERR_BASE);
+}
+
+
+/*****************************************************************************
+ * Name      : NET_API_STATUS I_NetPathType
+ * Purpose   :
+ * Parameters: wrong
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/08/18 00:15]
+ *****************************************************************************/
+
+NET_API_STATUS WIN32API OS2I_NetPathType(DWORD x1,
+                                         DWORD x2)
+{
+  dprintf(("NETAPI32: I_NetPathType(%08x, %08xh) not implemented\n",
+           x1,
+           x2));
+
+  return (NERR_BASE);
+}
+
+
+/*****************************************************************************
+ * Name      : NET_API_STATUS NetapipBufferAllocate
+ * Purpose   :
+ * Parameters: wrong
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/08/18 00:15]
+ *****************************************************************************/
+
+NET_API_STATUS WIN32API OS2NetapipBufferAllocate(DWORD x1,
+                                                 DWORD x2,
+                                                 DWORD x3)
+{
+  dprintf(("NETAPI32: NetapipBufferAllocate(%08x, %08xh, %08xh) not implemented\n",
+           x1,
+           x2,
+           x3));
+
+  return (NERR_BASE);
+}
+
+
+/*****************************************************************************
+ * Name      : NET_API_STATUS NetUseAdd
+ * Purpose   : add remote device association
+ * Parameters: LPWSTR  lpUncServerName
+ *             DWORD   dwLevel
+ *             LPBYTE  lpBuf
+ *             LPDWORD lpParmError
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/08/18 00:15]
+ *****************************************************************************/
+
+NET_API_STATUS WIN32API OS2NetUseAdd(LPWSTR  lpUncServerName,
+                                     DWORD   dwLevel,
+                                     LPBYTE  lpBuf,
+                                     LPDWORD lpParmError)
+{
+  dprintf(("NETAPI32: NetUseAdd(%08xh,%08xh,%08xh,%08xh) not implemented\n",
+           lpUncServerName,
+           dwLevel,
+           lpBuf,
+           lpParmError));
+
+  return (NERR_BASE);
+}
+
+
+/*****************************************************************************
+ * Name      : NET_API_STATUS NetUseDel
+ * Purpose   : remove remote device association
+ * Parameters: LPWSTR  lpUncServerName
+ *             LPWSTR  lpUseName
+ *             DWORD   dwForceCond
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/08/18 00:15]
+ *****************************************************************************/
+
+NET_API_STATUS WIN32API OS2NetUseDel(LPWSTR  lpUncServerName,
+                                     LPWSTR  lpUseName,
+                                     DWORD   dwForceCond)
+{
+  dprintf(("NETAPI32: NetUseDel(%08xh,%08xh,%08xh) not implemented\n",
+           lpUncServerName,
+           lpUseName,
+           dwForceCond));
+
+  return (NERR_BASE);
+}
+
+
+
+/*****************************************************************************
+ * Name      : NET_API_STATUS NetServiceControl
+ * Purpose   : controls operations of network services
+ * Parameters: LPWSTR  lpServerName
+ *             LPWSTR  lpService
+ *             DWORD   dwOpcode
+ *             DWORD   dwArgument
+ *             LPBYTE* bufptr
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/08/18 00:15]
+ *****************************************************************************/
+
+NET_API_STATUS WIN32API OS2NetServiceControl(LPWSTR  lpServerName,
+                                             LPWSTR  lpService,
+                                             DWORD   dwOpcode,
+                                             DWORD   dwArgument,
+                                             LPBYTE* bufptr)
+{
+  dprintf(("NETAPI32: NetServiceControl(%08xh,%08xh,%08xh,%08xh,%08xh) not implemented\n",
+           lpServerName,
+           lpService,
+           dwOpcode,
+           dwArgument,
+           bufptr));
+
+  return (NERR_BASE);
+}
+
+
+/*****************************************************************************
+ * Name      : NET_API_STATUS NetServiceEnum
+ * Purpose   : retrieves information about all started services
+ * Parameters: LPWSTR  lpServerName
+ *             DWORD   dwLevel
+ *             LPBYTE* bufptr
+ *             DWORD   dwPrefMaxLen
+ *             LPDWORD lpdEntriesRead
+ *             LPDWORD lpdTotalEntries
+ *             LPDWORD lpdResumeHandle
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/08/18 00:15]
+ *****************************************************************************/
+
+NET_API_STATUS WIN32API OS2NetServiceEnum(LPWSTR  lpServerName,
+                                          DWORD   dwLevel,
+                                          LPBYTE* bufptr,
+                                          DWORD   dwPrefMaxLen,
+                                          LPDWORD lpdEntriesRead,
+                                          LPDWORD lpdTotalEntries,
+                                          LPDWORD lpdResumeHandle)
+{
+  dprintf(("NETAPI32: NetServiceEnum(%08xh,%08xh,%08xh,%08xh,%08xh,%08xh,%08xh) not implemented\n",
+           lpServerName,
+           dwLevel,
+           bufptr,
+           dwPrefMaxLen,
+           lpdEntriesRead,
+           lpdTotalEntries,
+           lpdResumeHandle));
+
+  return (NERR_BASE);
+}
+
+
+/*****************************************************************************
+ * Name      : NET_API_STATUS NetServiceGetInfo
+ * Purpose   : retrieves information about a particular started service
+ * Parameters: LPWSTR  lpServerName
+ *             LPWSTR  lpService
+ *             DWORD   dwLevel
+ *             LPBYTE* bufptr
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/08/18 00:15]
+ *****************************************************************************/
+
+NET_API_STATUS WIN32API OS2NetServiceGetInfo(LPWSTR  lpServerName,
+                                             LPWSTR  lpService,
+                                             DWORD   dwLevel,
+                                             LPBYTE* bufptr)
+{
+  dprintf(("NETAPI32: NetServiceGetInfo(%08xh,%08xh,%08xh,%08xh) not implemented\n",
+           lpServerName,
+           lpService,
+           dwLevel,
+           bufptr));
+
+  return (NERR_BASE);
+}
+
+
+/*****************************************************************************
+ * Name      : NET_API_STATUS NetServiceInstall
+ * Purpose   : starts a network service
+ * Parameters: LPWSTR  lpServerName
+ *             LPWSTR  lpService
+ *             DWORD   argc
+ *             LPWSTR  argv[]
+ *             LPBYTE* bufptr
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/08/18 00:15]
+ *****************************************************************************/
+
+NET_API_STATUS WIN32API OS2NetServiceInstall(LPWSTR  lpServerName,
+                                             LPWSTR  lpService,
+                                             DWORD   argc,
+                                             LPWSTR  argv[],
+                                             LPBYTE* bufptr)
+{
+  dprintf(("NETAPI32: NetServiceInstall(%08xh,%08xh,%08xh,%08xh,%08xh) not implemented\n",
+           lpServerName,
+           lpService,
+           argc,
+           argv,
+           bufptr));
+
+  return (NERR_BASE);
+}
+
+
+/*****************************************************************************
+ * Name      : NET_API_STATUS I_NetLogonControl
+ * Purpose   :
+ * Parameters: wrong
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/08/18 00:15]
+ *****************************************************************************/
+
+NET_API_STATUS WIN32API OS2I_NetLogonControl(DWORD x1,
+                                             DWORD x2,
+                                             DWORD x3,
+                                             DWORD x4,
+                                             DWORD x5,
+                                             DWORD x6)
+{
+  dprintf(("NETAPI32: I_NetLogonControl(%08x, %08xh, %08xh, %08xh, %08xh, %08xh) not implemented\n",
+           x1,
+           x2,
+           x3,
+           x4,
+           x5,
+           x6));
+
+  return (NERR_BASE);
+}
+
+
+/*****************************************************************************
+ * Name      : NET_API_STATUS RxNetAccessAdd
+ * Purpose   :
+ * Parameters: wrong
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/08/18 00:15]
+ *****************************************************************************/
+
+NET_API_STATUS WIN32API OS2RxNetAccessAdd(DWORD x1,
+                                          DWORD x2,
+                                          DWORD x3,
+                                          DWORD x4,
+                                          DWORD x5,
+                                          DWORD x6)
+{
+  dprintf(("NETAPI32: RxNetAccessAdd(%08x, %08xh, %08xh, %08xh, %08xh, %08xh) not implemented\n",
+           x1,
+           x2,
+           x3,
+           x4,
+           x5,
+           x6));
+
+  return (NERR_BASE);
+}
+
+
+/*****************************************************************************
+ * Name      : NET_API_STATUS RxNetAccessDel
+ * Purpose   :
+ * Parameters: wrong
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/08/18 00:15]
+ *****************************************************************************/
+
+NET_API_STATUS WIN32API OS2RxNetAccessDel(DWORD x1,
+                                          DWORD x2,
+                                          DWORD x3,
+                                          DWORD x4,
+                                          DWORD x5,
+                                          DWORD x6)
+{
+  dprintf(("NETAPI32: RxNetAccessDel(%08x, %08xh, %08xh, %08xh, %08xh, %08xh) not implemented\n",
+           x1,
+           x2,
+           x3,
+           x4,
+           x5,
+           x6));
+
+  return (NERR_BASE);
+}
+
+
+
+/*****************************************************************************
+ * Name      : NET_API_STATUS RxNetAccessEnum
+ * Purpose   :
+ * Parameters: wrong
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/08/18 00:15]
+ *****************************************************************************/
+
+NET_API_STATUS WIN32API OS2RxNetAccessEnum(DWORD x1,
+                                           DWORD x2,
+                                           DWORD x3,
+                                           DWORD x4,
+                                           DWORD x5,
+                                           DWORD x6)
+{
+  dprintf(("NETAPI32: RxNetAccessEnum(%08x, %08xh, %08xh, %08xh, %08xh, %08xh) not implemented\n",
+           x1,
+           x2,
+           x3,
+           x4,
+           x5,
+           x6));
+
+  return (NERR_BASE);
+}
+
+
+
+/*****************************************************************************
+ * Name      : NET_API_STATUS RxNetAccessGetUserPerms
+ * Purpose   :
+ * Parameters: wrong
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/08/18 00:15]
+ *****************************************************************************/
+
+NET_API_STATUS WIN32API OS2RxNetAccessGetUserPerms(DWORD x1,
+                                                   DWORD x2,
+                                                   DWORD x3,
+                                                   DWORD x4,
+                                                   DWORD x5,
+                                                   DWORD x6)
+{
+  dprintf(("NETAPI32: RxNetAccessGetUserPerms(%08x, %08xh, %08xh, %08xh, %08xh, %08xh) not implemented\n",
+           x1,
+           x2,
+           x3,
+           x4,
+           x5,
+           x6));
+
+  return (NERR_BASE);
+}
+
+
+
+/*****************************************************************************
+ * Name      : NET_API_STATUS NetAuditClear
+ * Purpose   : clears the audit log on a server and, optionally, saves the
+ *             entrie sin a backup file
+ * Parameters: LPWSTR  lpServerName
+ *             LPWSTR  lpBackupFile
+ *             LPWSTR  lpService
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/08/18 00:15]
+ *****************************************************************************/
+
+ODINFUNCTION3(NET_API_STATUS,OS2NetAuditClear,LPWSTR,  lpServerName,
+                                              LPWSTR,  lpBackupFile,
+                                              LPWSTR,  lpService)
+{
+  dprintf(("NETAPI32: NetAuditClear not implemented\n"));
+
+  return (NERR_BASE);
+}
+
+
+/*****************************************************************************
+ * Name      : NET_API_STATUS NetAuditRead
+ * Purpose   : reads from the audit log on a server
+ * Parameters: LPWSTR  lpServerName
+ *             LPWSTR  lpService
+ *             LPHLOG  auditloghandle
+ *             DWORD   offset
+ *             LPDWORD reserved1
+ *             DWORD   reserved2
+ *             DWORD   offsetflag
+ *             LPBYTE* bufptr
+ *             DWORD   prefmaxlen
+ *             LPDWORD bytesread
+ *             LPDWORD totalavailable
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/08/18 00:15]
+ *****************************************************************************/
+
+typedef unsigned long LPHLOG;
+ODINFUNCTION11(NET_API_STATUS,OS2NetAuditRead,LPWSTR,  lpServerName,
+                                              LPWSTR,  lpService,
+                                              LPHLOG,  auditloghandle,
+                                              DWORD,   offset,
+                                              LPDWORD, reserved1,
+                                              DWORD,   reserved2,
+                                              DWORD,   offsetflag,
+                                              LPBYTE*, bufptr,
+                                              DWORD,   prefmaxlen,
+                                              LPDWORD, bytesread,
+                                              LPDWORD, totalavailable)
+{
+  dprintf(("NETAPI32: NetAuditRead not implemented\n"));
+
+  return (NERR_BASE);
+}
+
+
+/*****************************************************************************
+ * Name      : NET_API_STATUS NetAuditWrite
+ * Purpose   : write to the audit log on a server
+ * Parameters: LPWSTR  lpServerName
+ *             LPWSTR  lpService
+ *             LPHLOG  auditloghandle
+ *             DWORD   offset
+ *             LPDWORD reserved1
+ *             DWORD   reserved2
+ *             DWORD   offsetflag
+ *             LPBYTE* bufptr
+ *             DWORD   prefmaxlen
+ *             LPDWORD bytesread
+ *             LPDWORD totalavailable
+ * Variables :
+ * Result    : wrong
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/08/18 00:15]
+ *****************************************************************************/
+
+ODINFUNCTION11(NET_API_STATUS,OS2NetAuditWrite,LPWSTR,  lpServerName,
+                                               LPWSTR,  lpService,
+                                               LPHLOG,  auditloghandle,
+                                               DWORD,   offset,
+                                               LPDWORD, reserved1,
+                                               DWORD,   reserved2,
+                                               DWORD,   offsetflag,
+                                               LPBYTE*, bufptr,
+                                               DWORD,   prefmaxlen,
+                                               LPDWORD, byteswritten,
+                                               LPDWORD, totalavailable)
+{
+  dprintf(("NETAPI32: NetAuditWrite not implemented\n"));
+
+  return (NERR_BASE);
+}
+
+
+/*****************************************************************************
+ * Name      : NET_API_STATUS NetConfigGetAll
+ * Purpose   : retrieves all the configuration information for a given component
+ *             on a local or remote computer
+ * Parameters: LPWSTR  lpServerName
+ *             LPWSTR  lpComponent
+ *             LPBYTE* bufptr
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/08/18 00:15]
+ *****************************************************************************/
+
+ODINFUNCTION3(NET_API_STATUS,OS2NetConfigGetAll,LPWSTR,  lpServerName,
+                                                LPWSTR,  lpComponent,
+                                                LPBYTE*, bufptr)
+{
+  dprintf(("NETAPI32: NetConfigGetAll not implemented\n"));
+
+  return (NERR_BASE);
+}
+
+
+
+/*****************************************************************************
+ * Name      : NET_API_STATUS NetConnectionEnum
+ * Purpose   : lists all connections made to a shared resource
+ * Parameters: LPWSTR  lpServerName
+ *             LPWSTR  lpQualifier
+ *             DWORD   dwLevel
+ *             LPBYTE* bufptr
+ *             DWORD   dwPrefMaxLen
+ *             LPDWORD dwEntriesRead
+ *             LPDWORD dwTotalEntries
+ *             LPDWORD dwResumeHandle
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/08/18 00:15]
+ *****************************************************************************/
+
+ODINFUNCTION8(NET_API_STATUS,OS2NetConnectionEnum,LPWSTR,  lpServerName,
+                                                  LPWSTR,  lpQualifier,
+                                                  DWORD,   dwLevel,
+                                                  LPBYTE*, bufptr ,
+                                                  DWORD,   dwPrefMaxLen,
+                                                  LPDWORD, dwEntriesRead,
+                                                  LPDWORD, dwTotalEntries,
+                                                  LPDWORD, dwResumeHandle)
+{
+  dprintf(("NETAPI32: NetConnectionEnum not implemented\n"));
+
+  return (NERR_BASE);
+}
+
+
+/*****************************************************************************
+ * Name      : NET_API_STATUS NetErrorLogClear
+ * Purpose   : clears the error log and optionally saves the entires in a
+ *             backup file
+ * Parameters: LPWSTR  lpServerName
+ *             LPWSTR  lpBackupFile
+ *             LPBYTE* reserved
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/08/18 00:15]
+ *****************************************************************************/
+
+ODINFUNCTION3(NET_API_STATUS,OS2NetErrorLogClear,LPWSTR,  lpServerName,
+                                                 LPWSTR,  lpBackupFile,
+                                                 LPBYTE*, reserved)
+{
+  dprintf(("NETAPI32: NetErrorLogClear not implemented\n"));
+
+  return (NERR_BASE);
+}
+
+
+/*****************************************************************************
+ * Name      : NET_API_STATUS NetErrorLogRead
+ * Purpose   : reads from the error log on a server
+ * Parameters: LPWSTR  lpServerName
+ *             LPWSTR  reserved1
+ *             LPHLOG  errorloghandle
+ *             DWORD   offset
+ *             LPDWORD reserved2
+ *             DWORD   reserved3
+ *             DWORD   offsetflag
+ *             LPBYTE* bufptr
+ *             DWORD   prefmaxlen
+ *             LPDWORD bytesread
+ *             LPDWORD totalbytes
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/08/18 00:15]
+ *****************************************************************************/
+
+ODINFUNCTION11(NET_API_STATUS,OS2NetErrorLogRead,LPWSTR,  lpServerName,
+                                                 LPWSTR,  reserved1,
+                                                 LPHLOG,  errorloghandle,
+                                                 DWORD,   offset,
+                                                 LPDWORD, reserved2,
+                                                 DWORD,   reserved3,
+                                                 DWORD,   offsetflag,
+                                                 LPBYTE*, bufptr,
+                                                 DWORD,   prefmaxlen,
+                                                 LPDWORD, bytesread,
+                                                 LPDWORD, totalbytes)
+{
+  dprintf(("NETAPI32: NetErrorLogRead not implemented\n"));
+
+  return (NERR_BASE);
+}
+
+
+/*****************************************************************************
+ * Name      : NET_API_STATUS NetErrorLogWrite
+ * Purpose   : write to the error log on a server
+ * Parameters: LPWSTR  lpServerName
+ *             LPWSTR  reserved1
+ *             LPHLOG  auditloghandle
+ *             DWORD   offset
+ *             LPDWORD reserved2
+ *             DWORD   reserved3
+ *             DWORD   offsetflag
+ *             LPBYTE* bufptr
+ *             DWORD   prefmaxlen
+ *             LPDWORD byteswritten
+ *             LPDWORD totalavailable
+ * Variables :
+ * Result    : wrong
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/08/18 00:15]
+ *****************************************************************************/
+
+ODINFUNCTION11(NET_API_STATUS,OS2NetErrorLogWrite,LPWSTR,  lpServerName,
+                                                  LPWSTR,  reserved1,
+                                                  LPHLOG,  auditloghandle,
+                                                  DWORD,   offset,
+                                                  LPDWORD, reserved2,
+                                                  DWORD,   reserved3,
+                                                  DWORD,   offsetflag,
+                                                  LPBYTE*, bufptr,
+                                                  DWORD,   prefmaxlen,
+                                                  LPDWORD, byteswritten,
+                                                  LPDWORD, totalavailable)
+{
+  dprintf(("NETAPI32: NetErrorLogWrite not implemented\n"));
+
+  return (NERR_BASE);
+}
+
+
+/*****************************************************************************
+ * Name      : NET_API_STATUS NetFileClose
+ * Purpose   : forces a resource to close
+ * Parameters: LPWSTR  lpServerName
+ *             DWORD   fileid
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/08/18 00:15]
+ *****************************************************************************/
+
+ODINFUNCTION2(NET_API_STATUS,OS2NetFileClose,LPWSTR,  lpServerName,
+                                             DWORD,   fileid)
+{
+  dprintf(("NETAPI32: NetFileClose not implemented\n"));
+
+  return (NERR_BASE);
+}
+
+
+/*****************************************************************************
+ * Name      : NET_API_STATUS NetLocalGroupAddMember
+ * Purpose   : gives an existing user account or global group membership in
+ *             an existing local group
+ * Parameters: LPWSTR  lpServerName
+ *             LPWSTR  lpGroupName
+ *             PSID    membersid
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/08/18 00:15]
+ *****************************************************************************/
+
+ODINFUNCTION3(NET_API_STATUS,OS2NetLocalGroupAddMember,LPWSTR,  lpServerName,
+                                                       LPWSTR,  lpGroupName,
+                                                       PSID,    membersid)
+{
+  dprintf(("NETAPI32: NetLocalGroupAddMember not implemented\n"));
+
+  return (NERR_BASE);
+}
+
+
+/*****************************************************************************
+ * Name      : NET_API_STATUS NetShareDel
+ * Purpose   :
+ * Parameters: LPWSTR servername
+ *             LPWSTR netname
+ *             DWORD reserved
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Stub Generated through PE2LX Stubwizard 0.02 from Markus Montkowski
+ *
+ * Author    : Markus Montkowski [09.07.98 22:03:01]
+ *****************************************************************************/
+
+ODINFUNCTION3(NET_API_STATUS,OS2NetShareDelSticky,LPWSTR, servername,
+                                                  LPWSTR, netname,
+                                                  DWORD,  reserved)
+{
+
+  dprintf(("NETAPI32: NetShareDelSticky not implemented\n"));
+
+  return (NERR_BASE);
+}
+
+
+/*****************************************************************************
+ * Name      : NET_API_STATUS NetShareEnum
+ * Purpose   : retrieves information about all shared devices
+ * Parameters: LPWSTR  lpServerName
+ *             DWORD   dwLevel
+ *             LPBYTE* bufptr
+ *             DWORD   dwPrefMaxLen
+ *             LPDWORD lpdEntriesRead
+ *             LPDWORD lpdTotalEntries
+ *             LPDWORD lpdResumeHandle
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/08/18 00:15]
+ *****************************************************************************/
+
+ODINFUNCTION7(NET_API_STATUS,OS2NetShareEnum,LPWSTR,  lpServerName,
+                                             DWORD,   dwLevel,
+                                             LPBYTE*, bufptr,
+                                             DWORD,   dwPrefMaxLen,
+                                             LPDWORD, lpdEntriesRead,
+                                             LPDWORD, lpdTotalEntries,
+                                             LPDWORD, lpdResumeHandle)
+{
+  dprintf(("NETAPI32: NetShareEnum not implemented\n"));
+
+  return (NERR_BASE);
+}
+
+
+
+/*****************************************************************************
+ * Name      : NET_API_STATUS NetShareEnumSticky
+ * Purpose   : retrieves information about all sticky shared devices
+ * Parameters: LPWSTR  lpServerName
+ *             DWORD   dwLevel
+ *             LPBYTE* bufptr
+ *             DWORD   dwPrefMaxLen
+ *             LPDWORD lpdEntriesRead
+ *             LPDWORD lpdTotalEntries
+ *             LPDWORD lpdResumeHandle
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/08/18 00:15]
+ *****************************************************************************/
+
+ODINFUNCTION7(NET_API_STATUS,OS2NetShareEnumSticky,LPWSTR,  lpServerName,
+                                                   DWORD,   dwLevel,
+                                                   LPBYTE*, bufptr,
+                                                   DWORD,   dwPrefMaxLen,
+                                                   LPDWORD, lpdEntriesRead,
+                                                   LPDWORD, lpdTotalEntries,
+                                                   LPDWORD, lpdResumeHandle)
+{
+  dprintf(("NETAPI32: NetShareEnumSticky not implemented\n"));
+
+  return (NERR_BASE);
+}
+
+
+/*****************************************************************************
+ * Name      : NET_API_STATUS NetUseEnum
+ * Purpose   : retrieves information about all used devices
+ * Parameters: LPWSTR  lpServerName
+ *             DWORD   dwLevel
+ *             LPBYTE* bufptr
+ *             DWORD   dwPrefMaxLen
+ *             LPDWORD lpdEntriesRead
+ *             LPDWORD lpdTotalEntries
+ *             LPDWORD lpdResumeHandle
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/08/18 00:15]
+ *****************************************************************************/
+
+ODINFUNCTION7(NET_API_STATUS,OS2NetUseEnum,LPWSTR,  lpServerName,
+                                           DWORD,   dwLevel,
+                                           LPBYTE*, bufptr,
+                                           DWORD,   dwPrefMaxLen,
+                                           LPDWORD, lpdEntriesRead,
+                                           LPDWORD, lpdTotalEntries,
+                                           LPDWORD, lpdResumeHandle)
+{
+  dprintf(("NETAPI32: NetUseEnum not implemented\n"));
+
+  return (NERR_BASE);
+}
+
+
+/*****************************************************************************
+ * Name      : NET_API_STATUS NetUseGetInfo
+ * Purpose   :
+ * Parameters: LPWSTR lpServerName
+ *             LPWSTR lpUseName
+ *             DWORD  dwlevel
+ *             LPBYTE *bufptr
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Stub Generated through PE2LX Stubwizard 0.02 from Markus Montkowski
+ *
+ * Author    : Markus Montkowski [09.07.98 21:28:38]
+ *****************************************************************************/
+
+ODINFUNCTION4(NET_API_STATUS,OS2NetUseGetInfo,LPWSTR,  lpServerName,
+                                              LPWSTR,  lpUseName,
+                                              DWORD,   dwLevel,
+                                              LPBYTE*, bufptr)
+
+{
+
+  dprintf(("NETAPI32: NetUseGetInfo not implemented\n"));
 
   return (NERR_BASE);
 }
