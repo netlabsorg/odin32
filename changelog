@@ -1,4 +1,17 @@
-/* $Id: changelog,v 1.2242 2002-07-31 16:49:46 sandervl Exp $ */
+/* $Id: changelog,v 1.2243 2002-08-01 15:59:51 sandervl Exp $ */
+
+ 2002-08-01: Sander van Leeuwen <sandervl@innotek.de> 
+    - WINMM:    o Keep filling DART buffers during WaveOutWrite until there's
+                  no more room.
+                o Fill DART buffers during resume
+    - KERNEL32: o Create event semaphore during TEB setup. Used for 
+                  Post(Thread)Message in combination with MsgWaitForMultipleObjects
+    - USER32:   o MsgWaitForMultipleObjects; change for waiting for object &
+                  message (timeout != 0, fWaitAll == FALSE, nCount > 0)
+                  If dwWakeMsg & QS_POSTMESSAGE, also wait for post msg event 
+                  semaphore.
+                o Signal post message event semaphore in PostMessageA/W &
+                  PostThreadMessage
 
  2002-07-31: Sander van Leeuwen <sandervl@innotek.de> 
     - WINMM:    o Custom build function SetFixedWaveBufferSize added
