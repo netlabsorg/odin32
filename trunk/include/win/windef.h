@@ -1,4 +1,4 @@
-/* $Id: windef.h,v 1.20 2000-02-09 13:40:23 sandervl Exp $ */
+/* $Id: windef.h,v 1.21 2000-02-29 00:55:09 sandervl Exp $ */
 
 /*
  * Basic types definitions
@@ -315,6 +315,7 @@ DECLARE_HANDLE(HBRUSH);
 DECLARE_HANDLE(HCOLORSPACE);
 DECLARE_HANDLE(HCURSOR);
 DECLARE_HANDLE(HDC);
+DECLARE_HANDLE(HGLRC);          // OpenGL
 DECLARE_HANDLE(HDROP);
 DECLARE_HANDLE(HDRVR);
 DECLARE_HANDLE(HDWP);
