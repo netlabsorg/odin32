@@ -1,4 +1,8 @@
- /* $Id: changelog,v 1.95 1999-08-18 08:42:39 sandervl Exp $ */
+ /* $Id: changelog,v 1.96 1999-08-18 08:58:20 sandervl Exp $ */
+ 99-08-18: Sander van Leeuwen <sandervl@xs4all.nl>
+	- Put back version check in most dlls (except odincrt.dll & peldr.dll
+          we don't want a kernel32 dependency there)
+
  99-08-18: Przemyslaw Dobrowolski <dobrawka@asua.org.pl>
 	- KERNEL32: Removed redundant '\r' (except on line 199)
               
