@@ -1,4 +1,8 @@
-/* $Id: ChangeLog,v 1.2462 2003-01-29 13:06:41 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2463 2003-01-30 14:00:32 sandervl Exp $ */
+
+ 2003-01-30: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o CreateProcess changes for parsing the application name
+                  and command line strings
 
  2003-01-29: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o OS/2 Look & Feel is now default
