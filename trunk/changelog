@@ -1,4 +1,5 @@
- /* $Id: changelog,v 1.316 1999-10-14 09:26:20 sandervl Exp $ */
+ /* $Id: changelog,v 1.317 1999-10-14 09:27:24 sandervl Exp $ */
+
  99-10-14: knut st. osmundsen <knut.stange.osmundsen@pmsc.no>
     - PE2LX:      New implementation in src\win32k\pe2lx.
                   No resource conversion. I have tested it, but do expect to
@@ -27,7 +28,6 @@
                   control that received PM messages too early -> divide by 0)
                   -> Don't allow WM_WINDOWPOSCHANGED messages until after WM_NCCREATE.
                   Removed previous OSLibMapWINDOWPOStoSWP bugfix.
-<<<<<<< ChangeLog
                   Default dialog xBaseUnit = 10, yBaseUnit = 20.
                   Only set FCF_TASKLIST bit when parent == desktop & window
                   has titlebar. (too many Opera windows in tasklist)
@@ -35,13 +35,7 @@
 	- USER32: Rewrote window creation. All Odin windows are OS/2 frames.
                   2nd half of window/dialog creation carried out during OS/2
                   WM_CREATE message.
-          NOTE: This isn't working correctly yet! PM does some weird things with
-                frames that have negative coordinates.
 
-=======
-
-                  Default dialog xBaseUnit = 10, yBaseUnit = 20.
->>>>>>> 1.315
 	- COMCTL32: Check infoPtr in toolbar during WM_ERASEBKGND
 	- KERNEL32: Added wprocess.cpp dependency for include\win\thread.h
                     Bugfix for loading dlls in pe loader -> increase reference count
