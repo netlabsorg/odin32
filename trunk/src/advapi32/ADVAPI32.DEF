@@ -1,4 +1,4 @@
-; $Id: ADVAPI32.DEF,v 1.12 2000-03-02 23:08:22 sandervl Exp $
+; $Id: ADVAPI32.DEF,v 1.13 2000-03-03 11:14:58 sandervl Exp $
 
 ;
 ; Based on NT 4.0 SP6: ADVAPI32.DLL 
@@ -74,7 +74,7 @@ EXPORTS
 ; ----------------------------------------------------------------------------
 ; Registry
 ; ----------------------------------------------------------------------------
-
+   
      RegCloseKey                           = _RegCloseKey@4                     @280
      RegConnectRegistryA                   = _RegConnectRegistryA@12            @281
      RegConnectRegistryW                   = _RegConnectRegistryW@12            @282

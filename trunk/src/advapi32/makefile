@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.21 2000-02-09 23:46:52 bird Exp $
+# $Id: makefile,v 1.22 2000-03-03 11:14:58 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -20,7 +20,7 @@ CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
 
 TARGET = advapi32
 
-OBJS =  advapi32.obj resource.obj registry.obj lsa.obj security.obj service.obj eventlog.obj crypt.obj $(PDWIN32_LIB)/dllentry.obj
+OBJS =  advapi32.obj resource.obj lsa.obj security.obj service.obj eventlog.obj crypt.obj $(PDWIN32_LIB)/dllentry.obj
 
 
 all: $(TARGET).dll $(TARGET).lib
