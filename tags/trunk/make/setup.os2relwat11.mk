@@ -1,4 +1,4 @@
-# $Id: setup.os2relwat11.mk,v 1.6 2002-08-27 03:03:14 bird Exp $
+# $Id: setup.os2relwat11.mk,v 1.7 2002-08-27 03:58:03 bird Exp $
 
 #
 # Note! Watcom is unable to do debug info release builds.
@@ -23,6 +23,7 @@ ENV_ENVS_FORCE=vac308 watcomc11c
 #
 AS_DEBUG_TYPE = Codeview
 !include $(PATH_MAKE)\setup.os2relalp.mk
+!include $(PATH_MAKE)\setup.os2relrc.mk
 !include $(PATH_MAKE)\setup.os2relwrc.mk
 !include $(PATH_MAKE)\setup.optional.watcom11x.mk
 
@@ -35,8 +36,6 @@ CC=wcc386.exe
 CXX=wpp386.exe
 LINK=wlink.exe
 IMPLIB=implib.exe
-RC=rc.exe
-RL=rc.exe
 
 
 #
@@ -114,8 +113,6 @@ LINK_LNK3=option map=$(TARGET_MAP)
 LINK_LNK4=library    $(TARGET_LIBS: =^, )
 LINK_LNK5=name       $(PATH_TARGET)\$(TARGET_NAME).$(TARGET_EXT)
 
-RC_FLAGS=-r -n $(RC_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(RC_INCLUDES:-I=-i ) $(ALL_INCLUDES:-I=-i ) -i $(PATH_INCLUDES:;= -i )
-RL_FLAGS=-x2 -n
 
 
 #
