@@ -1,4 +1,4 @@
-; $Id: except.asm,v 1.5 1999-06-26 18:24:50 sandervl Exp $
+; $Id: except.asm,v 1.6 1999-07-07 08:11:09 sandervl Exp $
 
 ;/*
 ; * Project Odin Software License can be found in LICENSE.TXT
@@ -173,6 +173,15 @@ SetFS	proc near
 	mov	fs, eax
 	ret
 SetFS	endp
+
+	PUBLIC SetReturnFS
+SetReturnFS proc near
+	push	fs
+	mov  	eax, [esp+8]
+	mov	fs, eax
+	pop	eax
+	ret
+SetReturnFS endp
 
         PUBLIC getSS
 getSS	proc near

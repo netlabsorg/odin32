@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.11 1999-07-06 15:48:48 phaller Exp $
+# $Id: makefile,v 1.12 1999-07-07 08:11:10 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -68,7 +68,7 @@ OBJS = KERNEL32.OBJ \
        time.obj \
        pefile.OBJ \
        winimgres.OBJ \
-       tls.obj \
+       wintls.obj \
        async.OBJ \
        fileio.obj \
        atom.obj \
@@ -124,7 +124,7 @@ atom.obj: atom.cpp \
 time.obj: time.cpp \
     $(PDWIN32_INCLUDE)\unicode.h
 
-tls.obj: tls.cpp
+wintls.obj: wintls.cpp $(PDWIN32_INCLUDE)\winimage.h $(PDWIN32_INCLUDE)\winexe.h $(PDWIN32_INCLUDE)\windll.h
 
 fileio.obj: fileio.cpp \
     $(PDWIN32_INCLUDE)\unicode.h
@@ -132,6 +132,7 @@ fileio.obj: fileio.cpp \
 thread.OBJ: \
     .\thread.cpp \
     $(PDWIN32_INCLUDE)\wprocess.h \
+    $(PDWIN32_INCLUDE)\winimage.h $(PDWIN32_INCLUDE)\winexe.h $(PDWIN32_INCLUDE)\windll.h \
     thread.h
 
 heap.OBJ: \

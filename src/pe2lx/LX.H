@@ -1,4 +1,4 @@
-/* $Id: LX.H,v 1.3 1999-06-10 17:08:51 phaller Exp $ */
+/* $Id: LX.H,v 1.4 1999-07-07 08:11:11 sandervl Exp $ */
 
 /*
  * PE2LX LX
@@ -144,7 +144,10 @@ public:
         LXHeader();
                ~LXHeader();
 
-       void SetEntryAddress(int address);
+       void SetEntryAddress(int address);	//relative
+
+       void SetEntryPoint(int address) { EntryAddress = address; }; //absolute virtual address
+
        void SetExeType(BOOL IsEXE);
        void SetNoFixups();
        void SetStackSize(int size);
@@ -158,7 +161,7 @@ public:
            void SetNoNameImports();
        BOOL SaveNewExeFile(char *filename);
        void SetModuleType(int type);
-       void AddOff32Fixup(int address);
+       void AddOff32Fixup(int address, BOOL fLookatStartupCode = FALSE);
        void SetNrOff32Fixups(int nr);
        void AddNameExport(int address, char *name, int ordinal);
        void AddOrdExport(int address, int ordinal);
@@ -177,6 +180,14 @@ public:
 
        //SvL: 18-7-'98: Set version resource id
        void SetVersionResourceId(int id) { VersionResourceId = id; };
+
+       void SetTLSAddress(ULONG dwTlsAddress)     	{ tlsAddress = dwTlsAddress; };
+       void SetTLSIndexAddress(ULONG dwTlsIndexAddr)	{ tlsIndexAddr = dwTlsIndexAddr; };
+       void SetTLSInitSize(ULONG dwTlsSize)		{ tlsInitSize = dwTlsSize; };
+       void SetTLSTotalSize(ULONG dwTlsSize)		{ tlsTotalSize = dwTlsSize; };
+       void SetTLSCallBackAddr(ULONG dwTlsCallBackAddr)	{ tlsCallBackAddr = dwTlsCallBackAddr; };
+
+       void AddExtraFixups();
 
 private:
       BOOL  IsSystemModule(char *mod, int size);
@@ -239,15 +250,11 @@ private:
   //SvL: 18-7-'98: Version resource id
   ULONG          VersionResourceId;
 
-  unsigned char *szTIBFix;
-  int        TIBSize;
-  int        TIBOffEntry;
-  int        TIBOffCall;
-  int            TIBOffName;
-  int            TIBOffKerImport;
-  //SvL: 18-7-'98: Internal pe2lx version and version resource id offsets
-  int            TIBOffPe2lxVer;
-  int            TIBOffVerResId;
+  ULONG 	tlsAddress;		//address of TLS data
+  ULONG 	tlsIndexAddr;		//address of DWORD that receives the TLS index
+  ULONG 	tlsInitSize;		//size of initialized TLS memory block
+  ULONG 	tlsTotalSize;		//size of TLS memory block
+  ULONG 	tlsCallBackAddr;	//ptr to TLS callback array
 };
 
 extern LXHeader OS2Exe;

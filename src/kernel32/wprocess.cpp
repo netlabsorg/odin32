@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.12 1999-06-20 12:46:09 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.13 1999-07-07 08:11:10 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -44,7 +44,6 @@ extern "C" ULONG QueryExceptionChain();
 //******************************************************************************
 TEB *InitializeTIB(BOOL fMainThread)
 {
-#ifdef WIN32_TIBSEL
   TEB   *winteb;
   THDB  *thdb;
 
@@ -107,16 +106,12 @@ TEB *InitializeTIB(BOOL fMainThread)
    dprintf(("InitializeTIB setup TEB with selector %x", tibsel));
    dprintf(("InitializeTIB: FS(%x):[0] = %x", GetFS(), QueryExceptionChain()));
    return winteb;
-#else
-   return 0;
-#endif
 }
 //******************************************************************************
 // Destroy the TIB selector and memory for the current thread
 //******************************************************************************
 void DestroyTIB()
 {
-#ifdef WIN32_TIBSEL
  SHORT  orgtibsel;
  TEB   *winteb;
  THDB  *thdb;
@@ -140,13 +135,11 @@ void DestroyTIB()
    dprintf(("DestroyTIB: FS(%x):[0] = %x", GetFS(), QueryExceptionChain()));
    TIBFlatPtr = NULL;
    return;
-#endif
 }
 /******************************************************************************/
 /******************************************************************************/
 void WIN32API RestoreOS2TIB()
 {
-#ifdef WIN32_TIBSEL
  SHORT  orgtibsel;
  TEB   *winteb;
  THDB  *thdb;
@@ -159,13 +152,11 @@ void WIN32API RestoreOS2TIB()
 	//Restore our original FS selector
    	SetFS(orgtibsel);
    }
-#endif
 }
 /******************************************************************************/
 /******************************************************************************/
-void WIN32API SetWin32TIB()
+USHORT WIN32API SetWin32TIB()
 {
-#ifdef WIN32_TIBSEL
  SHORT  win32tibsel;
  TEB   *winteb;
  THDB  *thdb;
@@ -176,111 +167,123 @@ void WIN32API SetWin32TIB()
 	win32tibsel = thdb->teb_sel;
 
 	//Restore our win32 FS selector
-   	SetFS(win32tibsel);
+   	return SetReturnFS(win32tibsel);
    }
    else DebugInt3();
-#endif
+
+   return 0;
 }
 /******************************************************************************/
-//SvL: 4-10-'98: Put in separate procedure, as ICC changes FS:0 when there
-//               are new or delete calls present.
 //******************************************************************************
-void RegisterExe(LONG Win32TableId, LONG NameTableId, LONG VersionResId,
-                 LONG Pe2lxVersion, HINSTANCE hinstance)
+void WIN32API RegisterExe(WIN32EXEENTRY EntryPoint, PIMAGE_TLS_CALLBACK *TlsCallbackAddr, 
+			  LPDWORD TlsIndexAddr, ULONG TlsInitSize, 
+			  ULONG TlsTotalSize, LPVOID TlsAddress,
+	         	  LONG Win32TableId, LONG NameTableId, LONG VersionResId,
+                 	  LONG Pe2lxVersion, HINSTANCE hinstance, ULONG dwReserved)
 {
   if(WinExe != NULL) //should never happen
     delete(WinExe);
 
-  //SvL: Use 0 instead of the real instance handle (for resource lookup)
-  Win32Exe *winexe = new Win32Exe(0, NameTableId, Win32TableId);
-  if(winexe) {
-    winexe->setVersionId(VersionResId);
-    winexe->setOS2InstanceHandle(hinstance);
-  }
-  else {
-    eprintf(("Win32Exe creation failed!\n"));
-    DebugInt3();
-  }
-
-  char *modname = getenv("WIN32MODULE");
-
-  if(modname != NULL)
-  {
-    dprintf(("Set full path for exe to %s", modname));
-    winexe->setFullPath(modname);
-  }
-
-  fExeStarted  = TRUE;
-}
-//******************************************************************************
-//******************************************************************************
-VOID WIN32API RegisterResourceUsage(LONG Win32TableId, LONG NameTableId,
-                    LONG VersionResId, LONG Pe2lxVersion,
-                    HINSTANCE hinstance)
-{
-  SetWin32TIB();
-
-  if(getenv("WIN32_IOPL2")) {
-    io_init1();
-  }
-  dprintf(("RegisterResourceUsage %X resid = %d\n", hinstance, VersionResId));
-
   CheckVersion(Pe2lxVersion, OS2GetDllName(hinstance));
 
-  RegisterExe(Win32TableId, NameTableId, VersionResId, Pe2lxVersion, hinstance);
-
-  dprintf(("RegisterResourceUsage: FS(%x):[0] = %x", GetFS(), QueryExceptionChain()));
-}
-//******************************************************************************
-//******************************************************************************
-void CreateDll(LONG Win32TableId, LONG NameTableId, LONG VersionResId,
-               HINSTANCE hinstance, WIN32DLLENTRY pfnDllEntry)
-{
-  Win32Dll *winmod = Win32Dll::findModule(hinstance);
-
-  if(winmod != NULL) {
-    //dll manually loaded by PE loader (Win32Dll::init)
-    winmod->OS2DllInit(hinstance, NameTableId, Win32TableId, pfnDllEntry);
-    return;
-  }
-
-  //converted win32 dll loaded by OS/2 loader
-  winmod = new Win32Dll(hinstance, NameTableId, Win32TableId, pfnDllEntry);
-  if(winmod == NULL) {
-    eprintf(("Failed to allocate module object!\n"));
-    DebugInt3();
-    return;
-  }
-  //SvL: 19-8-'98
-  winmod->AddRef();
-  winmod->setVersionId(VersionResId);
-}
-//******************************************************************************
-//******************************************************************************
-VOID WIN32API RegisterDll(LONG Win32TableId, LONG NameTableId,
-                          LONG VersionResId, LONG Pe2lxVersion,
-                          HINSTANCE hinstance)
-{
- WIN32DLLENTRY  pfnDllEntry;
- char *name;
-
-  pfnDllEntry = (WIN32DLLENTRY)GetDllEntryPoint();  //== return address
-
   if(getenv("WIN32_IOPL2")) {
     io_init1();
   }
-  name = OS2GetDllName(hinstance);
-  CheckVersion(Pe2lxVersion, name);
 
-  dprintf(("RegisterDll %X %s\n", hinstance, name));
+  //SvL: Use 0 instead of the real instance handle (for resource lookup)
+  Win32Exe *winexe = new Win32Exe(0, NameTableId, Win32TableId);
 
-  CreateDll(Win32TableId, NameTableId, VersionResId, hinstance, pfnDllEntry);
+  if(winexe) {
+	dprintf(("RegisterExe Win32TableId = %x", Win32TableId));
+	dprintf(("RegisterExe NameTableId  = %x", NameTableId));
+	dprintf(("RegisterExe VersionResId = %x", VersionResId));
+	dprintf(("RegisterExe Pe2lxVersion = %x", Pe2lxVersion));
 
-  /* @@@PH 1998/03/17 console devices initialization */
-  iConsoleDevicesRegister();
+    	winexe->setVersionId(VersionResId);
+    	winexe->setOS2InstanceHandle(hinstance);
+	winexe->setEntryPoint((ULONG)EntryPoint);
+	winexe->setTLSAddress(TlsAddress);
+	winexe->setTLSInitSize(TlsInitSize);
+	winexe->setTLSTotalSize(TlsTotalSize);
+	winexe->setTLSIndexAddr(TlsIndexAddr);
+	winexe->setTLSCallBackAddr(TlsCallbackAddr);
 
-  SetWin32TIB();
-  dprintf(("RegisterDll: FS = %x", GetFS()));
+	char *modname = getenv("WIN32MODULE");
+
+  	if(modname != NULL)
+  	{
+    		dprintf(("Set full path for exe to %s", modname));
+    		winexe->setFullPath(modname);
+  	}
+	winexe->start();
+  }
+  else {
+    	eprintf(("Win32Exe creation failed!\n"));
+    	DebugInt3();
+	return;
+  }
+}
+//******************************************************************************
+//******************************************************************************
+ULONG WIN32API RegisterDll(WIN32DLLENTRY pfnDllEntry, PIMAGE_TLS_CALLBACK *TlsCallbackAddr, 
+			   LPDWORD TlsIndexAddr, ULONG TlsInitSize, 
+			   ULONG TlsTotalSize, LPVOID TlsAddress,
+	          	   LONG Win32TableId, LONG NameTableId, LONG VersionResId,
+                 	   LONG Pe2lxVersion, HINSTANCE hinstance, ULONG dwAttachType)
+{
+ char *name;
+
+  Win32Dll *winmod = Win32Dll::findModule(hinstance);
+  if(dwAttachType == 0) 
+  { //Process attach
+  	if(getenv("WIN32_IOPL2")) {
+    		io_init1();
+  	}
+  	name = OS2GetDllName(hinstance);
+  	CheckVersion(Pe2lxVersion, name);
+
+	dprintf(("RegisterDll %X %s reason %d\n", hinstance, name, dwAttachType));
+	dprintf(("RegisterDll Win32TableId = %x", Win32TableId));
+	dprintf(("RegisterDll NameTableId  = %x", NameTableId));
+	dprintf(("RegisterDll VersionResId = %x", VersionResId));
+	dprintf(("RegisterDll Pe2lxVersion = %x", Pe2lxVersion));
+
+  	if(winmod != NULL) {
+    		//dll manually loaded by PE loader (Win32Dll::init)
+    		winmod->OS2DllInit(hinstance, NameTableId, Win32TableId, pfnDllEntry);
+  	}
+	else {
+  		//converted win32 dll loaded by OS/2 loader
+  		winmod = new Win32Dll(hinstance, NameTableId, Win32TableId, pfnDllEntry);
+  		if(winmod == NULL) {
+    			eprintf(("Failed to allocate module object!\n"));
+    			DebugInt3();
+    			return 0;	//fail dll load
+  		}
+	}
+	winmod->setTLSAddress(TlsAddress);
+	winmod->setTLSInitSize(TlsInitSize);
+	winmod->setTLSTotalSize(TlsTotalSize);
+	winmod->setTLSIndexAddr(TlsIndexAddr);
+	winmod->setTLSCallBackAddr(TlsCallbackAddr);
+
+  	/* @@@PH 1998/03/17 console devices initialization */
+  	iConsoleDevicesRegister();
+
+  	//SvL: 19-8-'98
+  	winmod->AddRef();
+  	winmod->setVersionId(VersionResId);
+
+	winmod->attachProcess();
+   }
+   else {//process detach
+  	if(winmod != NULL && !fFreeLibrary) {
+		return 0;	//don't unload (OS/2 dll unload bug)
+	}
+//Runtime environment could already be gone, so don't do this
+//	dprintf(("KERNEL32: Dll Removed by FreeLibrary or ExitProcess\n"));
+   }
+   return 1;	//success
 }
 //******************************************************************************
 //******************************************************************************
@@ -293,26 +296,6 @@ void _System Win32DllExitList(ULONG reason)
     WinExe = NULL;
   }
   return;
-}
-//******************************************************************************
-//Called when a dll is detached (either at process exit or when FreeLibrary is called)
-//******************************************************************************
-BOOL WIN32API DLLExitList(HINSTANCE hInstance)
-{
-//  dprintf(("DLLExitList"));
-  Win32Dll *winmod = Win32Dll::findModule(hInstance);
-
-  if(winmod == NULL) {//probably called after we manually unloaded it in ExitProcess
-    return(1);  //remove it from memory
-  }
-  dprintf(("DllExitList for %s (%X)\n", OS2GetDllName(winmod->getInstanceHandle()), winmod->getInstanceHandle()));
-  delete(winmod);
-
-  if(fFreeLibrary) {
-    dprintf(("KERNEL32: DLLExitList Ditched by FreeLibrary\n"));
-    return(1);  //remove it as we no longer need it
-  }
-  return(0);    //don't remove it (OS/2 can unload them at process exit in the wrong order!)
 }
 //******************************************************************************
 //******************************************************************************
@@ -512,12 +495,7 @@ LPCSTR WIN32API GetCommandLineA()
     cmdline = O32_GetCommandLine();
 
   dprintf(("KERNEL32:  GetCommandLine %s\n", cmdline));
-#ifdef WIN32_TIBSEL
   dprintf(("KERNEL32:  FS = %x\n", GetFS()));
-#else
-  //SvL: Replace original startup code exception handler
-  ReplaceExceptionHandler();
-#endif
   return(cmdline);
 }
 //******************************************************************************
@@ -527,12 +505,7 @@ LPCWSTR WIN32API GetCommandLineW(void)
  static WCHAR *UnicodeCmdLine = NULL;
          char *asciicmdline = NULL;
 
-#ifdef WIN32_TIBSEL
     dprintf(("KERNEL32:  FS = %x\n", GetFS()));
-#else
-    //SvL: Replace original startup code exception handler
-    ReplaceExceptionHandler();
-#endif
 
     if(UnicodeCmdLine)
         return(UnicodeCmdLine); //already called before

@@ -1,4 +1,4 @@
-/* $Id: LX.CPP,v 1.3 1999-06-10 17:08:51 phaller Exp $ */
+/* $Id: LX.CPP,v 1.4 1999-07-07 08:11:10 sandervl Exp $ */
 
 /*
  * PE2LX LX code
@@ -58,124 +58,85 @@ static unsigned char szDosHeader[128] = {
 
 //Register module in kernel32 (resource managment)
 // EXE:
-//push  [esp+4]                 ;instance handle
+//push  [esp+8]			;reserved (to use same startup code as dll)
+//push  [esp+8]                 ;instance handle
 //push  internal pe2lx version
 //push  version resource id
 //push  name_lookup_tableid
 //push  orgres_lookup_tableid
+//push  tib_object_address
+//push  tib_object_size
+//push  tib_index_address
+//push  tib_callback_address
+//push  original_entrypoint
 //mov   ecx, KERNEL32:RegisterResourceInfo (stdcall)
 //call  ecx
-//
-//call  original_entrypoint
 //ret
 //
 // DLL:
-//cmp   [esp+8], 1
-//je    detach
-//push  [esp+4]                 ;instance handle
+//push  [esp+8]			;attach or detach
+//push  [esp+8]                 ;instance handle
 //push  internal pe2lx version
 //push  version resource id
 //push  name_lookup_tableid
 //push  orgres_lookup_tableid
+//push  tib_object_address
+//push  tib_index_address
+//push  tib_callback_address
 //mov   ecx, KERNEL32:RegisterDll (stdcall)
+//push  original_entrypoint
 //call  ecx
-///DLL entrypoint:
-/// BOOL WINAPI DllMain(HINSTANCE hDLLInst, DWORD fdwReason, LPVOID lpvReserved)
-//push  0
-//mov   ecx, [esp+12]
-//xor   ecx, 1          //0 -> 1, 1 -> 0
-//push  ecx             //push entry type (1 = attach process, 0 = detach process)
-//push  [esp+12]        //push module handle
-//call  testje
-//ret
-//detach:
-//push  [esp+4]         //instance handle
-//call  KERNEL32:DllExitList
 //ret
 
-#define EXE_OFF_ENTRYFIX    (1+19+2+10)
-#define EXE_OFF_TIBCALL     (EXE_OFF_ENTRYFIX-1)
-#define EXE_OFF_NAMETABLE   (3+2+10)
 //SvL: 18-7-'98: offsets for internal pe2lx version & version resource id
-#define EXE_OFF_PE2LXVER    (5)
-#define EXE_OFF_VERRESID    (10)
-#define EXE_TIBSIZE         sizeof(szEXETIBFix)
-#define EXE_OFF_KERIMP      (EXE_OFF_NAMETABLE+10)
-
-#define DLL_OFF_ENTRYFIX    (15+28+10)
-//#define DLL_OFF_ENTRYFIX   (16+28+10)
-#define DLL_OFF_TIBCALL     (DLL_OFF_ENTRYFIX-1)
-//SvL: 18-7-'98: offsets for internal pe2lx version & version resource id
-#define DLL_OFF_PE2LXVER    (12)
-#define DLL_OFF_VERRESID    (17)
-#define DLL_OFF_NAMETABLE   (12+10)
-//#define DLL_OFF_NAMETABLE   12+1+10
-#define DLL_TIBSIZE         sizeof(szDLLTIBFix)
-#define DLL_OFF_KERIMP      (DLL_OFF_NAMETABLE+10)
-#define DLL_OFF_KERIMP2     (sizeof(szDLLTIBFix)-5)
+#define EXE_OFF_PE2LXVER     (9)
+#define EXE_OFF_VERRESID     (14)
+#define EXE_OFF_NAMETABLE    (19)
+#define EXE_OFF_ORGRESTABLE  (24)
+#define EXE_OFF_TIBOBJ_ADDR  (29)
+#define EXE_OFF_TIBINIT_SIZE (34)
+#define EXE_OFF_TIBOBJ_SIZE  (39)
+#define EXE_OFF_TIB_INDEX    (44)
+#define EXE_OFF_TIB_CALLBACK_ADDR  (49)
+#define EXE_OFF_ENTRYPOINT   (54)
+#define EXE_OFF_ENTRYFIX     (59)
+#define EXE_TIB_SIZE         sizeof(szEXETIBFix)
 
 #define SIZE_TIBCALL         5
 
-#define EXTRA_FIXUPS         2  //extra kernel32 imports
+#define EXTRA_FIXUPS         1  //extra kernel32 import
+#define EXTRA_TLS_FIXUPS     3  //3 data fixups for TLS support (start, index & callback)
 
 static unsigned char szEXETIBFix[] = {
-//push [esp+4]
-        0xFF, 0x74, 0x24, 0x04,
+//push  [esp+8]
+        0xFF, 0x74, 0x24, 0x08,
+//push  [esp+4]
+        0xFF, 0x74, 0x24, 0x08,
 //SvL: 18-7-'98: push internal pe2lx version
         0x68, 0x00, 0x00, 0x00, 0x00,
 //SvL: 18-7-'98: push version resource id (-1 = no version resource present)
         0x68, 0xFF, 0xFF, 0xFF, 0xFF,
-//push [table id1] (kernel32 proc depends on 0x77777777 & 0x88888888!!)
+//push  [table id1] (kernel32 proc depends on 0x77777777 & 0x88888888!!)
 //Svl: So does void LXHeader::SaveConvertedNames()!
         0x68, 0x77, 0x77, 0x77, 0x77,
-//push [table id1]
+//push  [table id1]
         0x68, 0x88, 0x88, 0x88, 0x88,
-//mov  ecx, KERNEL32:RegisterResourceInfo (stdcall)
-        0xB9, 0x99, 0x99, 0x99, 0x99,
-//call ecx
-        0xFF, 0xD1,
-//call entrypoint
-        0xE8, 0x8C, 0xFF, 0xFF, 0xFF,
-//ret
-        0xC3};
-
-//WARNING: Kernel32.dll depends on this layout (offsets of dllexitlist &
-//         entry point call are hardcoded! (both calculated in RegisterDll)
-static unsigned char szDLLTIBFix[] = {
-//cmp [esp+8], 1
-//      0xCC, 0x80, 0x7C, 0x24, 0x08, 0x01,
-        0x80, 0x7C, 0x24, 0x08, 0x01,
-//je detach
-        0x74, 0x33,
-//push [esp+4]
-        0xFF, 0x74, 0x24, 0x04,
-//SvL: 18-7-'98: push internal pe2lx version
+//push  tib_object_address
         0x68, 0x00, 0x00, 0x00, 0x00,
-//SvL: 18-7-'98: push version resource id (-1 = no version resource present)
-        0x68, 0xFF, 0xFF, 0xFF, 0xFF,
-//push [table id1] (kernel32 proc depends on 0x77777777 & 0x88888888!!)
-//Svl: So does void LXHeader::SaveConvertedNames()!
-        0x68, 0x77, 0x77, 0x77, 0x77,
-//push [table id1]
-        0x68, 0x88, 0x88, 0x88, 0x88,
-//mov  ecx, KERNEL32:RegisterDll (stdcall)
+//push  tib_initialized_size
+        0x68, 0x00, 0x00, 0x00, 0x00,
+//push  tib_object_size
+        0x68, 0x00, 0x00, 0x00, 0x00,
+//push  tib_index_address
+        0x68, 0x00, 0x00, 0x00, 0x00,
+//push  tib_callback_address
+        0x68, 0x00, 0x00, 0x00, 0x00,
+//push  original_entrypoint
+        0x68, 0x00, 0x00, 0x00, 0x00,
+//mov   ecx, KERNEL32:RegisterResourceInfo (stdcall)
         0xB9, 0x99, 0x99, 0x99, 0x99,
-//call ecx
+//call  ecx
         0xFF, 0xD1,
-//push 0
-        0x6A, 0x00,
-        0x8B, 0x4C, 0x24, 0x0C,
-        0x83, 0xF1, 0x01,
-        0x51, 0xFF, 0x74, 0x24, 0x0C,
-//call entrypoint
-        0xE8, 0x80, 0xFF, 0xFF, 0xFF,
-//ret
-        0xC3,
-//detach:
-//push [esp+4]
-        0xFF, 0x74, 0x24, 0x04,
-//call KERNEL32:DllExitList (stdcall)
-        0xE8, 0x00, 0x00, 0x00, 0x00,
 //ret
         0xC3};
 
@@ -190,7 +151,8 @@ LXHeader::LXHeader() : fFlags(0), EntryAddress(0), IsEXE(TRUE),
                        nrexports(0), curexport(0), expbundle(NULL), curexpb(NULL),
                        cvtname(NULL), curcvtname(0), nrcvtnames(0), datapage(NULL),
                        cvtnametableid(0), orgrestableid(0), orgrestable(NULL), nrorgres(0),
-                       kernel32Object(-1), TIBOffKerImport(0), fConsole(FALSE),
+                       kernel32Object(-1), fConsole(FALSE), 
+		       tlsAddress(0), tlsIndexAddr(0), tlsInitSize(0), tlsTotalSize(0), tlsCallBackAddr(0),
                        VersionResourceId(-1), impnamesize(0), impmodulesize(0)
 {
   ZERO(LXHdr);
@@ -213,15 +175,6 @@ LXHeader::LXHeader() : fFlags(0), EntryAddress(0), IsEXE(TRUE),
   LXHdr.e32_objtab   = sizeof(LXHdr);   //begin hiermee vlak na exe hdr
   ZERO(ResSection);
   memset(&PESection[0], 0, sizeof(PESection));
-
-  szTIBFix    = &szEXETIBFix[0];
-  TIBSize     = EXE_TIBSIZE;
-  TIBOffEntry = EXE_OFF_ENTRYFIX;
-  TIBOffCall  = EXE_OFF_TIBCALL;
-  TIBOffName  = EXE_OFF_NAMETABLE;
-  //SvL: 18-7-'98: Internal pe2lx version and version resource id offsets
-  TIBOffPe2lxVer = EXE_OFF_PE2LXVER;
-  TIBOffVerResId = EXE_OFF_VERRESID;
 }
 //******************************************************************************
 //******************************************************************************
@@ -251,27 +204,9 @@ void LXHeader::SetExeType(BOOL IsEXE)
 {
   this->IsEXE = IsEXE;
   if(IsEXE) {
-        szTIBFix          = &szEXETIBFix[0];
-        TIBSize           = EXE_TIBSIZE;
-        TIBOffEntry       = EXE_OFF_ENTRYFIX;
-        TIBOffCall        = EXE_OFF_TIBCALL;
-        TIBOffName        = EXE_OFF_NAMETABLE;
-        TIBOffKerImport   = EXE_OFF_KERIMP;
-        //SvL: 18-7-'98: Internal pe2lx version and version resource id offsets
-        TIBOffPe2lxVer    = EXE_OFF_PE2LXVER;
-        TIBOffVerResId    = EXE_OFF_VERRESID;
-        LXHdr.e32_mflags |= E32MODEXE;
+  	LXHdr.e32_mflags |= E32MODEXE;
   }
   else {//Assuming per process initialization/termination...
-        szTIBFix          = &szDLLTIBFix[0];
-        TIBSize           = DLL_TIBSIZE;
-        TIBOffEntry       = DLL_OFF_ENTRYFIX;
-        TIBOffCall        = DLL_OFF_TIBCALL;
-        TIBOffName        = DLL_OFF_NAMETABLE;
-        TIBOffKerImport   = DLL_OFF_KERIMP;
-        //SvL: 18-7-'98: Internal pe2lx version and version resource id offsets
-        TIBOffPe2lxVer    = DLL_OFF_PE2LXVER;
-        TIBOffVerResId    = DLL_OFF_VERRESID;
         LXHdr.e32_mflags |= E32LIBINIT | E32LIBTERM | E32MODDLL;
   }
 }
@@ -436,7 +371,7 @@ Section CombinedData;
   //process pages of first section (code)
   rawsize = CombinedData.rawsize;
 
-  datapage[0].size  = TIBSize;
+  datapage[0].size  = EXE_TIB_SIZE;
   datapage[0].flags = 0;
   idx               = 1;
   for(j=1;j<CombinedData.nrpages;j++) {
@@ -615,12 +550,44 @@ void LXHeader::AddForwarder(char *name, int ordinal, char *forward)
 //******************************************************************************
 void LXHeader::SetNrOff32Fixups(int nr)
 {
-  intfixuprec = (intfixup *)malloc(nr*sizeof(intfixup));
-  memset(intfixuprec, 0, nr*sizeof(intfixup));
+  intfixuprec = (intfixup *)malloc((nr+EXTRA_TLS_FIXUPS)*sizeof(intfixup));
+  memset(intfixuprec, 0, (nr+EXTRA_TLS_FIXUPS)*sizeof(intfixup));
 }
 //******************************************************************************
+//SvL: TLS Section support
+//Add three interal fixups. One for start of TLS section, one for DWORD that
+//receives the TLS index and one for the array of TLS callbacks
+//Also one for the entrypoint address.
 //******************************************************************************
-void LXHeader::AddOff32Fixup(int address)
+void LXHeader::AddExtraFixups()
+{
+  *(ULONG *)&szEXETIBFix[EXE_OFF_TIBOBJ_ADDR] = tlsAddress;
+  *(ULONG *)&szEXETIBFix[EXE_OFF_TIBINIT_SIZE] = tlsInitSize;
+  *(ULONG *)&szEXETIBFix[EXE_OFF_TIBOBJ_SIZE] = tlsTotalSize;
+  *(ULONG *)&szEXETIBFix[EXE_OFF_TIB_INDEX]   = tlsIndexAddr;
+  *(ULONG *)&szEXETIBFix[EXE_OFF_TIB_CALLBACK_ADDR] = tlsCallBackAddr;
+  *(ULONG *)&szEXETIBFix[EXE_OFF_ENTRYPOINT] = EntryAddress;
+
+  if(LXHdr.e32_mflags & E32NOINTFIX)
+	return;		//no internal fixups, so we don't have to add them either
+
+  AddOff32Fixup(PESection[0].address + EXE_OFF_ENTRYPOINT, TRUE);
+
+  if(tlsAddress == 0)
+	return;	//no TLS section in this image
+
+  AddOff32Fixup(PESection[0].address + EXE_OFF_TIBOBJ_ADDR, TRUE);
+  AddOff32Fixup(PESection[0].address + EXE_OFF_TIB_INDEX, TRUE);
+  AddOff32Fixup(PESection[0].address + EXE_OFF_TIB_CALLBACK_ADDR, TRUE);
+
+  return;  
+}
+//******************************************************************************
+//SvL: if fLookatStartupCode is set to true, we'll read the szEXETIBFix
+//     fixup addresses instead of those in the section
+//     (section 0 is main code section which doesn't include szEXETIBFix)
+//******************************************************************************
+void LXHeader::AddOff32Fixup(int address, BOOL fLookatStartupCode)
 {
  static intfixup  crossedpage;
  static BOOL      fCrossed = FALSE;
@@ -653,7 +620,13 @@ void LXHeader::AddOff32Fixup(int address)
   //SvL: address could be aligned at 64 kb boundary, so correct address calculation
   if(type == 0) { // +1 for tibfix page
         assert(PESection[type].type & SECTION_CODE);
-        targetaddr = *(int *)(PESection[type].rawdata + (address - (PESection[type].address + (PESection[type].nrinvalidpages+1)*PAGE_SIZE)));
+	if(fLookatStartupCode)
+	{
+		targetaddr = *(int *)(&szEXETIBFix[0] + (address & 0xFF));
+	}
+	else {
+        	targetaddr = *(int *)(PESection[type].rawdata + (address - (PESection[type].address + (PESection[type].nrinvalidpages+1)*PAGE_SIZE)));
+	}
   }
   else  targetaddr = *(int *)(PESection[type].rawdata + (address - (PESection[type].address + PESection[type].nrinvalidpages*PAGE_SIZE)));
 
@@ -835,6 +808,14 @@ char *src, *dest;
                 strcpy(dest, "WNETAP32");
                 dest += size-4;
         }
+#if 0
+	else
+        if(strcmp(dest, "OLE32") == 0) {//SvL: Name conflict with Lotus OLE32 dll
+              strcpy(dest, "OLE32OS2");
+              dest[-1] = 8;   //change module name length
+              dest    += 8;
+        }
+#endif
         else {
                 if(strcmp(dest, "KERNEL32") == 0) {
                         kernel32Object = i;
@@ -1017,12 +998,10 @@ BOOL LXHeader::SaveNewExeFile(char *filename)
                 else {
                         if(PESection[i].type == SECTION_COMBINEDDATA) {
                                 if(j == PESection[i].nrinvalidpages) {
-                                        objpage[idx].o32_pagesize        = (USHORT)(TIBSize);
+                                        objpage[idx].o32_pagesize        = (USHORT)(EXE_TIB_SIZE);
                                         objpage[idx].o32_pageflags       = 0;
-                                        pagedataoffset                  += TIBSize;
+                                        pagedataoffset                  += EXE_TIB_SIZE;
                                         LXHdr.e32_mpages++;
-                                        //Modify entry point address, and write original to TIBFix code
-                                        *(LONG *)&szTIBFix[TIBOffEntry]  = LXHdr.e32_eip + PAGE_SIZE - TIBOffCall - SIZE_TIBCALL;
                                         LXHdr.e32_eip                    = PAGE_SIZE*PESection[i].nrinvalidpages;
                                         objtable.o32_size                = objtable.o32_mapsize*PAGE_SIZE;
                                 }
@@ -1043,12 +1022,10 @@ BOOL LXHeader::SaveNewExeFile(char *filename)
                         }
                         else //take care of TIBFix code!
                         if(fFirstCode == FALSE && PESection[i].type & SECTION_CODE && j == PESection[i].nrinvalidpages) {
-                                objpage[idx].o32_pagesize        = (USHORT)TIBSize;
+                                objpage[idx].o32_pagesize        = (USHORT)EXE_TIB_SIZE;
                                 objpage[idx].o32_pageflags       = 0;
-                                pagedataoffset                  += TIBSize;
+                                pagedataoffset                  += EXE_TIB_SIZE;
                                 LXHdr.e32_mpages++;
-                                //Modify entry point address, and write original to TIBFix code
-                                *(LONG *)&szTIBFix[TIBOffEntry]  = LXHdr.e32_eip + PAGE_SIZE - TIBOffCall - SIZE_TIBCALL;
 
                                 LXHdr.e32_eip                    = PAGE_SIZE*PESection[i].nrinvalidpages;
                         }
@@ -1196,22 +1173,13 @@ BOOL LXHeader::SaveNewExeFile(char *filename)
           realordfixup *kerord = (realordfixup *)currealrec;
                 kerord->nr_stype   = 0x07;              //32 bits offset
                 kerord->nr_flags   = 0x01 | 0x40;       //import by ordinal + mod offset = 16 bits
-                kerord->r32_soff   = TIBOffKerImport;
+                kerord->r32_soff   = EXE_OFF_ENTRYFIX;
                 kerord->r32_objmod = kernel32Object + 1;
                 if(IsEXE)
                         kerord->ord        = ORD_REGISTERRESOURCEINFO;
                 else    kerord->ord        = ORD_REGISTERDLL;
 
                 currealrec = (realintfixup *)((int)currealrec + sizeof(realnamefixup));
-                if(!IsEXE) {
-                        kerord = (realordfixup *)currealrec;
-                        kerord->nr_stype   = 0x08;              //32 bits self referencing offset
-                        kerord->nr_flags   = 0x01 | 0x40;       //import by ordinal + mod offset = 16 bits
-                        kerord->r32_soff   = DLL_OFF_KERIMP2;
-                        kerord->r32_objmod = kernel32Object + 1;
-                        kerord->ord        = ORD_KERNEL32DLLEXITLIST;
-                        currealrec = (realintfixup *)((int)currealrec + sizeof(realnamefixup));
-                }
         }
         //SvL: 16-9-'97, for multiple import pages
         while(k < nrimpfixups && imprec->srcpage == i) {
@@ -1232,9 +1200,7 @@ BOOL LXHeader::SaveNewExeFile(char *filename)
   fixuptable[nrpages] = (int)currealrec - (int)frealrec;
 
   //Add extra kernel32 imports
-  if(IsEXE)
-        nrimpfixups++;
-  else  nrimpfixups += EXTRA_FIXUPS;
+  nrimpfixups += EXTRA_FIXUPS;
 
   //Write fixup page table
   DosWrite(win32handle, fixuptable, (nrpages+1)*sizeof(int), &ulWrite);
@@ -1257,7 +1223,7 @@ BOOL LXHeader::SaveNewExeFile(char *filename)
   DosWrite(win32handle, impmodules, impmodulesize, &ulWrite);
   //Write Import Procedure Name array
   if(impnamesize) {
-  DosWrite(win32handle, impnames, impnamesize, &ulWrite);
+  	DosWrite(win32handle, impnames, impnamesize, &ulWrite);
   }
 
   //pointer naar begin code/data
@@ -1269,7 +1235,7 @@ BOOL LXHeader::SaveNewExeFile(char *filename)
         if(PESection[i].type != SECTION_UNINITDATA && PESection[i].rawdata) {
                 //Put our special TIB fix to code section first! (SvL: 30-7-'97)
                 if(PESection[i].type & SECTION_CODE && fFirstCode == FALSE) {
-                        DosWrite(win32handle, szTIBFix, TIBSize, &ulWrite);
+                        DosWrite(win32handle, szEXETIBFix, EXE_TIB_SIZE, &ulWrite);
                         fFirstCode = TRUE;
                 }
                 DosWrite(win32handle, PESection[i].rawdata, PESection[i].rawsize, &ulWrite);
@@ -1595,7 +1561,7 @@ void LXHeader::SaveConvertedNames()
         cvtnametableid = GetUniqueId();
 
         //fill in parameter for RegisterResourceInfo
-        *(LONG *)&szTIBFix[TIBOffName] = cvtnametableid;
+        *(LONG *)&szEXETIBFix[EXE_OFF_NAMETABLE] = cvtnametableid;
 
         StoreResource(cvtnametableid, RT_RCDATA, (int)curcvtname - (int)cvtname, (char *)cvtname);
   }
@@ -1605,16 +1571,16 @@ void LXHeader::SaveConvertedNames()
         orgrestableid = GetUniqueId();
 
         //fill in parameter for RegisterResourceInfo
-        *(LONG *)&szTIBFix[TIBOffName+5] = (fConsole << 24) | orgrestableid;
+        *(LONG *)&szEXETIBFix[EXE_OFF_ORGRESTABLE] = (fConsole << 24) | orgrestableid;
 
         StoreResource(orgrestableid, RT_RCDATA, (nrorgres+1)*sizeof(ULONG), (char *)orgrestable);
   }
   else {
-        *(LONG *)&szTIBFix[TIBOffName+5] = (fConsole << 24) | 0x888888;
+        *(LONG *)&szEXETIBFix[EXE_OFF_ORGRESTABLE] = (fConsole << 24) | 0x888888;
   }
   //SvL: 18-7-'98: Store internal pe2lx version and version resource id
-  *(LONG *)&szTIBFix[TIBOffPe2lxVer] = PE2LX_VERSION;
-  *(LONG *)&szTIBFix[TIBOffVerResId] = VersionResourceId;
+  *(LONG *)&szEXETIBFix[EXE_OFF_PE2LXVER] = PE2LX_VERSION;
+  *(LONG *)&szEXETIBFix[EXE_OFF_VERRESID] = VersionResourceId;
 }
 /******************************************************************************/
 /******************************************************************************/

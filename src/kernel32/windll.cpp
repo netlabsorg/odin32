@@ -1,4 +1,4 @@
-/* $Id: windll.cpp,v 1.6 1999-06-20 17:54:53 sandervl Exp $ */
+/* $Id: windll.cpp,v 1.7 1999-07-07 08:11:10 sandervl Exp $ */
 
 /*
  * Win32 DLL class
@@ -21,11 +21,12 @@
 #include <stdlib.h>
 #include <iostream.h>
 #include <fstream.h>
-#include "misc.h"
-#include "nameid.h"
-#include "win32type.h"
-#include "pefile.h"
-#include "windll.h"
+#include <misc.h>
+#include <nameid.h>
+#include <win32type.h>
+#include <pefile.h>
+#include <windll.h>
+#include <wprocess.h>
 #include "cio.h"
 #include "os2util.h"
 
@@ -130,9 +131,7 @@ Win32Dll::~Win32Dll()
   }
   if(errorState == NO_ERROR && !fUnloaded) 
   {
-	if(!fSystemDll) {
-		detachProcess();
-	}	
+	detachProcess();
   }
 }
 //******************************************************************************
@@ -303,24 +302,45 @@ ULONG Win32Dll::getApi(int ordinal)
 //******************************************************************************
 BOOL Win32Dll::attachProcess()
 {
-  if(fSystemDll || fSkipEntryCalls || !fNativePEImage)
-	return(TRUE);
+ BOOL rc;
+ USHORT sel;
 
-  if(getenv("WIN32_IOPL2")) {
-	io_init1();
+  //Allocate TLS index for this module
+  tlsAlloc();
+  tlsAttachThread();	//setup TLS (main thread)
+
+  if(fSystemDll || fSkipEntryCalls) {
+        dprintf(("attachProcess not required for dll %s", szModule));
+	return(TRUE);
   }
-  return dllEntryPoint((ULONG)this, DLL_PROCESS_ATTACH, 0);
+
+  dprintf(("attachProcess to dll %s", szModule));
+
+  sel = SetWin32TIB();
+  rc = dllEntryPoint(hinstance, DLL_PROCESS_ATTACH, 0);
+  SetFS(sel);
+  return rc;
 }
 //******************************************************************************
 //******************************************************************************
 BOOL Win32Dll::detachProcess()
 {
-  if(fSystemDll || fSkipEntryCalls)
-	return(TRUE);
+ BOOL   rc;
+ USHORT sel;
 
-  if(fNativePEImage)
-	return dllEntryPoint((ULONG)this, DLL_PROCESS_DETACH, 0);
-  else  return dllEntryPoint((ULONG)this, DLL_PROCESS_ATTACH, 0);  //reversed in converted code
+  if(fSystemDll || fSkipEntryCalls) {
+        tlsDetachThread();	//destroy TLS (main thread)
+	return(TRUE);
+  }
+
+  dprintf(("detachProcess from dll %s", szModule));
+
+  fUnloaded = TRUE;
+  sel = SetWin32TIB();
+  rc = dllEntryPoint(hinstance, DLL_PROCESS_DETACH, 0);
+  SetFS(sel);
+  tlsDetachThread();	//destroy TLS (main thread)
+  return rc;
 }
 //******************************************************************************
 //******************************************************************************
@@ -329,7 +349,8 @@ BOOL Win32Dll::attachThread()
   if(fSystemDll || fSkipEntryCalls)
 	return(TRUE);
 
-  return dllEntryPoint((ULONG)this, DLL_THREAD_ATTACH, 0);
+  dprintf(("attachThread to dll %s", szModule));
+  return dllEntryPoint(hinstance, DLL_THREAD_ATTACH, 0);
 }
 //******************************************************************************
 //******************************************************************************
@@ -338,7 +359,56 @@ BOOL Win32Dll::detachThread()
   if(fSystemDll || fSkipEntryCalls)
 	return(TRUE);
 
-  return dllEntryPoint((ULONG)this, DLL_THREAD_DETACH, 0);
+  dprintf(("attachThread from dll %s", szModule));
+  return dllEntryPoint(hinstance, DLL_THREAD_DETACH, 0);
+}
+//******************************************************************************
+//Send DLL_THREAD_ATTACH message to all dlls for a new thread
+//******************************************************************************
+void Win32Dll::attachThreadToAllDlls()
+{
+ Win32Dll *dll = Win32Dll::head;
+
+  while(dll) {
+	dll->attachThread();
+	dll = dll->getNext();
+  }
+}
+//******************************************************************************
+//Send DLL_THREAD_DETACH message to all dlls for thread that's about to die
+//******************************************************************************
+void Win32Dll::detachThreadFromAllDlls()
+{
+ Win32Dll *dll = Win32Dll::head;
+
+  while(dll) {
+	dll->detachThread();
+	dll = dll->getNext();
+  }
+}
+//******************************************************************************
+//Setup TLS structure for all dlls for a new thread
+//******************************************************************************
+void Win32Dll::tlsAttachThreadToAllDlls()
+{
+ Win32Dll *dll = Win32Dll::head;
+
+  while(dll) {
+	dll->tlsAttachThread();
+	dll = dll->getNext();
+  }
+}
+//******************************************************************************
+//Destroy TLS structure for all dlls for a thread that's about to die
+//******************************************************************************
+void Win32Dll::tlsDetachThreadFromAllDlls()
+{
+ Win32Dll *dll = Win32Dll::head;
+
+  while(dll) {
+	dll->tlsDetachThread();
+	dll = dll->getNext();
+  }
 }
 //******************************************************************************
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: winimage.h,v 1.2 1999-05-27 15:17:59 phaller Exp $ */
+/* $Id: winimage.h,v 1.3 1999-07-07 08:11:09 sandervl Exp $ */
 
 /*
  *
@@ -123,7 +123,24 @@ static  BOOL  isPEImage(char *szFileName);
         void  setVersionId(int id) { VersionId = id;   };
         int   getVersionId()       { return VersionId; };
 
+	void  setEntryPoint(ULONG startAddress) { entryPoint = startAddress; };
+
+        void  setTLSAddress(LPVOID dwTlsAddress)     	{ tlsAddress = dwTlsAddress; };
+        void  setTLSIndexAddr(LPDWORD dwTlsIndexAddr)	{ tlsIndexAddr = dwTlsIndexAddr; };
+        void  setTLSInitSize(ULONG dwTlsSize)		{ tlsInitSize = dwTlsSize; };
+        void  setTLSTotalSize(ULONG dwTlsSize)		{ tlsTotalSize = dwTlsSize; };
+        void  setTLSCallBackAddr(PIMAGE_TLS_CALLBACK *dwTlsCallBackAddr)	
+	{ 
+	   tlsCallBackAddr = dwTlsCallBackAddr; 
+	};
+
+	void  tlsAttachThread();	//setup TLS structures for new thread
+	void  tlsDetachThread();	//destroy TLS structures
+
 protected:
+	void tlsAlloc();		//Allocate TLS index for this module
+	void tlsDelete();		//Destroy TLS index for this module
+
         void StoreImportByOrd(Win32Dll *WinDll, ULONG ordinal, ULONG impaddr);
         void StoreImportByName(Win32Dll *WinDll, char *impname, ULONG impaddr);
 
@@ -176,6 +193,14 @@ protected:
         NameId               *NameTable;
 
         BOOL                  fNativePEImage;
+
+  	LPVOID 			tlsAddress;		//address of TLS data
+  	LPDWORD			tlsIndexAddr;		//address of DWORD that receives the TLS index
+  	ULONG 			tlsInitSize;		//size of initialized TLS memory block
+  	ULONG 			tlsTotalSize;		//size of TLS memory block
+  	PIMAGE_TLS_CALLBACK    *tlsCallBackAddr;	//ptr to TLS callback array
+	ULONG                   tlsIndex;		//module TLS index 
+
 private:
 
         friend class Win32Resource;
