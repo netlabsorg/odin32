@@ -1,7 +1,8 @@
-/* $Id: changelog,v 1.1676 2001-09-09 13:33:52 sandervl Exp $ */
+/* $Id: changelog,v 1.1677 2001-09-09 20:43:12 sandervl Exp $ */
 
  2001-09-09: Sander van Leeuwen <sandervl@xs4all.nl>
     - TAPI32:   o Some updates
+    - OLEAUT32: o Wine typelib updates
 
  2001-09-07: Patrick Haller <patrick.haller@innotek.de>
     - include:  o removed ./include/wine/server.h (Wine Server)
