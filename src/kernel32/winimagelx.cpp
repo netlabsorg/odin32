@@ -1,4 +1,4 @@
-/* $Id: winimagelx.cpp,v 1.15 2002-07-15 14:28:53 sandervl Exp $ */
+/* $Id: winimagelx.cpp,v 1.16 2002-07-17 21:09:20 achimha Exp $ */
 
 /*
  * Win32 LX Image base class
@@ -122,7 +122,7 @@ ULONG Win32LxImage::getApi(int ordinal)
     APIRET      rc;
     ULONG       apiaddr;
 
-    rc = DosQueryProcAddr(hinstanceOS2, dwOrdinalBase+ordinal, NULL, (PFN *)&apiaddr);
+    rc = DosQueryProcAddr(hinstanceOS2, dwOrdinalBase + ordinal, NULL, (PFN *)&apiaddr);
     if(rc) {
     	dprintf(("Win32LxImage::getApi %x %d -> rc = %d", hinstanceOS2, ordinal, rc));
     	return(0);
@@ -130,6 +130,9 @@ ULONG Win32LxImage::getApi(int ordinal)
     return(apiaddr);
 }
 //******************************************************************************
+// here we build a fake PE header for an LX module. In Windows, HINSTANCE handles
+// actually contain the virtual address of of the PE header. We try to fill in
+// sensible values as much as possible...
 //******************************************************************************
 LPVOID Win32LxImage::buildHeader(DWORD MajorImageVersion, DWORD MinorImageVersion,
                                  DWORD Subsystem) 
@@ -140,6 +143,7 @@ LPVOID Win32LxImage::buildHeader(DWORD MajorImageVersion, DWORD MinorImageVersio
     PIMAGE_FILE_HEADER     pfh;
     DWORD *ntsig;
 
+    // AH TODO: we are wasting 60k address space here!!!! (at least without PAG_ANY)
     rc = DosAllocMem(&header, 4096, PAG_READ | PAG_WRITE | PAG_COMMIT | flAllocMem);
     if(rc) {
     	dprintf(("ERROR: buildHeader DosAllocMem failed!! (rc=%x)", rc));
