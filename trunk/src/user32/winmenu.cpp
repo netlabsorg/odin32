@@ -1,4 +1,4 @@
-/* $Id: winmenu.cpp,v 1.19 1999-12-18 14:31:15 sandervl Exp $ */
+/* $Id: winmenu.cpp,v 1.20 2000-01-04 19:50:51 sandervl Exp $ */
 
 /*
  * Win32 menu API functions for OS/2
@@ -737,6 +737,10 @@ ODINFUNCTION5(BOOL, InsertMenuA,
     if(IS_STRING_ITEM(flags) && (!str || *str == NULL)) {
         flags |= MF_SEPARATOR;
     }
+    //SvL: RealPlayer calls InsertMenu with flag 0 & pos -1
+    if((flags & (MF_BYCOMMAND|MF_BYPOSITION)) == 0 && (pos == 0xffffffff))
+    	flags |= MF_BYPOSITION;
+
     return O32_InsertMenu(hMenu, pos, flags, id, str);
 }
 //******************************************************************************
@@ -1076,13 +1080,13 @@ ODINFUNCTION4(BOOL, GetMenuItemInfoW,
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
 
-ODINFUNCTION4(BOOL, GetMenuItemRect,
-              HWND, hWnd,
-              HMENU, hMenu,
-              UINT, uItem,
-              LPRECT, lprcItem)
+BOOL GetMenuItemRect(HWND hwnd, HMENU hMenu, UINT uItem, LPRECT lprcItem)
 {
-    return OSLibGetMenuItemRect(hMenu, uItem, lprcItem);
+ BOOL rc;
+
+    rc = OSLibGetMenuItemRect(hMenu, uItem, lprcItem);
+    dprintf(("GetMenuItemRect %x %x %x (%d,%d)(%d,%d)", hwnd, hMenu, uItem, lprcItem->top, lprcItem->left, lprcItem->bottom, lprcItem->right));
+    return rc;
 }
 /*****************************************************************************
  * Function  : InsertMenuItemA
