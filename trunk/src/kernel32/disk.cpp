@@ -1,4 +1,4 @@
-/* $Id: disk.cpp,v 1.37 2002-05-14 09:28:19 sandervl Exp $ */
+/* $Id: disk.cpp,v 1.38 2002-09-26 16:06:06 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -569,11 +569,6 @@ BOOL WIN32API FindNextVolumeA(HANDLE hFindVolume, LPTSTR lpszVolumeName,
     DWORD    DeviceType;
     char     szVolume[256];
 
-    //tetsetsetetsetsetset
-    SetLastError(ERROR_NO_MORE_FILES);
-    return FALSE;
-    //tetsetsetetsetsetset
-
     if(!VERSION_IS_WIN2000_OR_HIGHER()) {
         SetLastError(ERROR_NOT_SUPPORTED);
         return FALSE;
@@ -653,11 +648,11 @@ HANDLE WIN32API FindFirstVolumeMountPointA(LPTSTR lpszRootPathName,
 {
     if(!VERSION_IS_WIN2000_OR_HIGHER()) {
         SetLastError(ERROR_NOT_SUPPORTED);
-        return FALSE;
+        return INVALID_HANDLE_VALUE;
     }
     
     SetLastError(ERROR_NO_MORE_FILES);
-    return 0;
+    return INVALID_HANDLE_VALUE;
 }
 //******************************************************************************
 //******************************************************************************
@@ -671,7 +666,7 @@ HANDLE WIN32API FindFirstVolumeMountPointW(LPWSTR lpszRootPathName,
 
     if(!VERSION_IS_WIN2000_OR_HIGHER()) {
         SetLastError(ERROR_NOT_SUPPORTED);
-        return FALSE;
+        return INVALID_HANDLE_VALUE;
     }
 
     if(cchBufferLength) {

@@ -1,4 +1,4 @@
-/* $Id: hmdisk.cpp,v 1.52 2002-08-09 13:17:22 sandervl Exp $ */
+/* $Id: hmdisk.cpp,v 1.53 2002-09-26 16:06:06 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -51,6 +51,7 @@ typedef struct
     LPSECURITY_ATTRIBUTES lpSecurityAttributes;
     HFILE     hTemplate;
     BOOL      fPhysicalDisk;
+    DWORD     dwPhysicalDiskNr;
     BOOL      fCDPlaying;
     BOOL      fShareViolation;
     DWORD     fLocked;
@@ -133,6 +134,7 @@ DWORD HMDeviceDiskClass::CreateFile (LPCSTR        lpFileName,
     CHAR                szVolumeName[256] = "";
     VOLUME_DISK_EXTENTS volext = {0};
     BOOL                fPhysicalDisk = FALSE;
+    DWORD               dwPhysicalDiskNr = 0;
 
     dprintf2(("KERNEL32: HMDeviceDiskClass::CreateFile %s(%s,%08x,%08x,%08x)\n",
              lpHMDeviceName, lpFileName, pHMHandleData, lpSecurityAttributes, pHMHandleDataTemplate));
@@ -173,8 +175,9 @@ DWORD HMDeviceDiskClass::CreateFile (LPCSTR        lpFileName,
                 //volume isn't mounted
                 
                 //Note: this only works on Warp 4.5 and up
-                sprintf(szDiskName, "\\\\.\\Physical_Disk%d", volext.Extents[0].DiskNumber); 
-                fPhysicalDisk = TRUE;
+                sprintf(szDiskName, "\\\\.\\Physical_Disk%d", volext.Extents[0].DiskNumber+1); 
+                fPhysicalDisk    = TRUE;
+                dwPhysicalDiskNr = volext.Extents[0].DiskNumber + 1;
 
                 if(fLVMVolume && (pHMHandleData->dwAccess & GENERIC_WRITE)) {
                     //no write access allowed for LVM volumes
@@ -198,8 +201,9 @@ DWORD HMDeviceDiskClass::CreateFile (LPCSTR        lpFileName,
     if(strncmp(lpFileName, "\\\\.\\PHYSICALDRIVE", 17) == 0) 
     {
         //Note: this only works on Warp 4.5 and up
-        sprintf(szDiskName, "\\\\.\\Physical_Disk%c", lpFileName[17]);
-        fPhysicalDisk = TRUE;
+        sprintf(szDiskName, "\\\\.\\Physical_Disk%c", lpFileName[17]+1);
+        fPhysicalDisk    = TRUE;
+        dwPhysicalDiskNr = (DWORD)(lpFileName[17] - '0')+1;
 
         //TODO: could be removable in theory
         dwDriveType = DRIVE_FIXED;
@@ -284,9 +288,10 @@ DWORD HMDeviceDiskClass::CreateFile (LPCSTR        lpFileName,
 
         //save volume start & length if volume must be accessed through the physical disk 
         //(no other choice for unmounted volumes)
-        drvInfo->fPhysicalDisk  = fPhysicalDisk;
-        drvInfo->StartingOffset = volext.Extents[0].StartingOffset;
-        drvInfo->PartitionSize  = volext.Extents[0].ExtentLength;
+        drvInfo->fPhysicalDisk    = fPhysicalDisk;
+        drvInfo->dwPhysicalDiskNr = dwPhysicalDiskNr;
+        drvInfo->StartingOffset   = volext.Extents[0].StartingOffset;
+        drvInfo->PartitionSize    = volext.Extents[0].ExtentLength;
 
         //save volume name for later (IOCtls)
         strncpy(drvInfo->szVolumeName, szVolumeName, sizeof(drvInfo->szVolumeName)-1);
@@ -890,9 +895,17 @@ writecheckfail:
             }
         }
 
-        if(OSLibDosGetDiskGeometry(pHMHandleData->hHMHandle, drvInfo->driveLetter, pGeom) == FALSE) {
-            dprintf(("!ERROR!: IOCTL_DISK_GET_DRIVE_GEOMETRY: OSLibDosGetDiskGeometry failed!!"));
-            return FALSE;
+        if(drvInfo->fPhysicalDisk) {
+            if(OSLibLVMGetDiskGeometry(drvInfo->dwPhysicalDiskNr, pGeom) == FALSE) {
+                dprintf(("!ERROR!: IOCTL_DISK_GET_DRIVE_GEOMETRY: OSLibDosGetDiskGeometry failed!!"));
+                return FALSE;
+            }
+        }
+        else {
+            if(OSLibDosGetDiskGeometry(pHMHandleData->hHMHandle, drvInfo->driveLetter, pGeom) == FALSE) {
+                dprintf(("!ERROR!: IOCTL_DISK_GET_DRIVE_GEOMETRY: OSLibDosGetDiskGeometry failed!!"));
+                return FALSE;
+            }
         }
         dprintf(("Cylinders         %d", pGeom->Cylinders));
         dprintf(("TracksPerCylinder %d", pGeom->TracksPerCylinder));
@@ -1648,6 +1661,7 @@ BOOL HMDeviceDiskClass::ReadFile(PHMHANDLEDATA pHMHandleData,
     Win32MemMap *map;
     DWORD        offset, bytesread;
     BOOL         bRC;
+    DRIVE_INFO *drvInfo = (DRIVE_INFO*)pHMHandleData->dwUserData;
 
     dprintf2(("KERNEL32: HMDeviceDiskClass::ReadFile %s(%08x,%08x,%08x,%08x,%08x)",
                lpHMDeviceName, pHMHandleData, lpBuffer, nNumberOfBytesToRead, lpNumberOfBytesRead, lpOverlapped));
@@ -1670,7 +1684,6 @@ BOOL HMDeviceDiskClass::ReadFile(PHMHANDLEDATA pHMHandleData,
 
     //If we didn't get an OS/2 handle for the disk before, get one now
     if(!pHMHandleData->hHMHandle) {
-        DRIVE_INFO *drvInfo = (DRIVE_INFO*)pHMHandleData->dwUserData;
         pHMHandleData->hHMHandle = OpenDisk(drvInfo);
         if(!pHMHandleData->hHMHandle) {
             dprintf(("No disk inserted; aborting"));
@@ -1699,6 +1712,31 @@ BOOL HMDeviceDiskClass::ReadFile(PHMHANDLEDATA pHMHandleData,
     }
     else  lpRealBuf = (LPVOID)lpBuffer;
 
+    //if unmounted volume, check upper boundary as we're accessing the entire physical drive
+    //instead of just the volume
+    if(drvInfo->fPhysicalDisk && (drvInfo->StartingOffset.HighPart != 0 ||
+       drvInfo->StartingOffset.LowPart != 0))
+    {
+        LARGE_INTEGER distance, result, endpos;
+
+        //calculate end position in partition
+        Add64(&drvInfo->StartingOffset, &drvInfo->PartitionSize, &endpos);
+
+        distance.HighPart = 0;
+        distance.LowPart  = nNumberOfBytesToRead;
+        Add64(&distance, &drvInfo->CurrentFilePointer, &result);
+
+        //check upper boundary
+        if(result.HighPart > endpos.HighPart ||
+           (result.HighPart == endpos.HighPart && result.LowPart > endpos.LowPart) )
+        {
+            Sub64(&endpos, &drvInfo->CurrentFilePointer, &result);
+            nNumberOfBytesToRead = result.LowPart;
+            dprintf(("Read past end of volume; nNumberOfBytesToRead reduced to %d", nNumberOfBytesToRead));
+            DebugInt3();
+        }
+    }
+
     if(pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED) {
         dprintf(("ERROR: Overlapped IO not yet implememented!!"));
     }
@@ -1714,6 +1752,21 @@ BOOL HMDeviceDiskClass::ReadFile(PHMHANDLEDATA pHMHandleData,
         dprintf(("%x -> %d", lpBuffer, IsBadWritePtr((LPVOID)lpBuffer, nNumberOfBytesToRead)));
     }
     else dprintf2(("KERNEL32: HMDeviceDiskClass::ReadFile read %x bytes pos %x", *lpNumberOfBytesRead, SetFilePointer(pHMHandleData, 0, NULL, FILE_CURRENT)));
+
+    //if unmounted volume, add starting offset to position as we're accessing the entire physical drive
+    //instead of just the volume
+    if(drvInfo->fPhysicalDisk && (drvInfo->StartingOffset.HighPart != 0 ||
+       drvInfo->StartingOffset.LowPart != 0) && bRC == TRUE)
+    {
+        LARGE_INTEGER distance, result;
+
+        distance.HighPart = 0;
+        distance.LowPart  = *lpNumberOfBytesRead;
+        Add64(&distance, &drvInfo->CurrentFilePointer, &result);
+        drvInfo->CurrentFilePointer = result;
+
+        dprintf(("New unmounted volume current file pointer %08x%08x", drvInfo->CurrentFilePointer.HighPart, drvInfo->CurrentFilePointer.LowPart));
+    }
 
     return bRC;
 }
@@ -1926,6 +1979,31 @@ BOOL HMDeviceDiskClass::WriteFile(PHMHANDLEDATA pHMHandleData,
     }
     else  lpRealBuf = (LPVOID)lpBuffer;
 
+    //if unmounted volume, check upper boundary as we're accessing the entire physical drive
+    //instead of just the volume
+    if(drvInfo->fPhysicalDisk && (drvInfo->StartingOffset.HighPart != 0 ||
+       drvInfo->StartingOffset.LowPart != 0))
+    {
+        LARGE_INTEGER distance, result, endpos;
+
+        //calculate end position in partition
+        Add64(&drvInfo->StartingOffset, &drvInfo->PartitionSize, &endpos);
+
+        distance.HighPart = 0;
+        distance.LowPart  = nNumberOfBytesToWrite;
+        Add64(&distance, &drvInfo->CurrentFilePointer, &result);
+
+        //check upper boundary
+        if(result.HighPart > endpos.HighPart ||
+           (result.HighPart == endpos.HighPart && result.LowPart > endpos.LowPart) )
+        {
+            Sub64(&endpos, &drvInfo->CurrentFilePointer, &result);
+            nNumberOfBytesToWrite = result.LowPart;
+            dprintf(("Write past end of volume; nNumberOfBytesToWrite reduced to %d", nNumberOfBytesToWrite));
+            DebugInt3();
+        }
+    }
+
     if(pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED) {
         dprintf(("ERROR: Overlapped IO not yet implememented!!"));
     }
@@ -1935,6 +2013,21 @@ BOOL HMDeviceDiskClass::WriteFile(PHMHANDLEDATA pHMHandleData,
                             nNumberOfBytesToWrite,
                             lpNumberOfBytesWritten);
 //  }
+
+    //if unmounted volume, add starting offset to position as we're accessing the entire physical drive
+    //instead of just the volume
+    if(drvInfo->fPhysicalDisk && (drvInfo->StartingOffset.HighPart != 0 ||
+       drvInfo->StartingOffset.LowPart != 0) && bRC == TRUE)
+    {
+        LARGE_INTEGER distance, result;
+
+        distance.HighPart = 0;
+        distance.LowPart  = *lpNumberOfBytesWritten;
+        Add64(&distance, &drvInfo->CurrentFilePointer, &result);
+        drvInfo->CurrentFilePointer = result;
+
+        dprintf(("New unmounted volume current file pointer %08x%08x", drvInfo->CurrentFilePointer.HighPart, drvInfo->CurrentFilePointer.LowPart));
+    }
 
     dprintf2(("KERNEL32: HMDeviceDiskClass::WriteFile returned %08xh\n",
                bRC));
