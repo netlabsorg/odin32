@@ -1,4 +1,4 @@
-/* $Id: winres.cpp,v 1.6 1999-08-05 11:44:35 sandervl Exp $ */
+/* $Id: winres.cpp,v 1.7 1999-08-19 12:53:19 sandervl Exp $ */
 
 /*
  * Win32 resource class
@@ -82,7 +82,7 @@ static ULONG CalcBitmapSize(ULONG cBits, LONG cx, LONG cy)
 //******************************************************************************
 //******************************************************************************
 Win32Resource::Win32Resource(Win32Image *module, HRSRC hRes, ULONG id, ULONG type) :
-        os2resdata(NULL), winresdata(NULL)
+        os2resdata(NULL), winresdata(NULL), resType(RSRC_PE2LX)
 {
  APIRET rc;
 
@@ -138,7 +138,7 @@ Win32Resource::Win32Resource(Win32Image *module, HRSRC hRes, ULONG id, ULONG typ
 //******************************************************************************
 Win32Resource::Win32Resource(Win32Image *module, ULONG id, ULONG type,
                  ULONG size, char *resdata) : hres(NULL),
-        os2resdata(NULL), winresdata(NULL)
+        os2resdata(NULL), winresdata(NULL), resType(RSRC_PELOADER)
 {
   next           = module->winres;
   module->winres = this;
@@ -161,10 +161,10 @@ Win32Resource::~Win32Resource()
 {
  Win32Resource *res = module->winres;
 
-#if 0
   //returned by DosGetResource, so we don't (and mustn't) free it
-  if(os2resdata)    free(os2resdata);
-#endif
+  if(os2resdata && resType == RSRC_PELOADER)    
+	free(os2resdata);
+
   if(winresdata)    free(winresdata);
 
   if(res == this) {

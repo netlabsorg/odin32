@@ -1,4 +1,4 @@
-/* $Id: winimgres.cpp,v 1.8 1999-08-19 10:25:27 sandervl Exp $ */
+/* $Id: winimgres.cpp,v 1.9 1999-08-19 12:53:18 sandervl Exp $ */
 
 /*
  * Win32 PE Image class (resource methods)
@@ -128,22 +128,22 @@ Win32Resource *Win32Image::getPEResource(ULONG id, ULONG type, ULONG lang)
     prde++;
   }
   if(pData == NULL) {
-    dprintf(("getResource: res not found!\n"));
-    return(NULL);
+    	dprintf(("getResource: res not found!\n"));
+    	return(NULL);
   }
 
   char *resdata = (char *)((char *)pResDir + pData->OffsetToData - pResSection->virtaddr);
   if(stringid != -1) {//search for string in table
-    USHORT *unicodestr = (USHORT *)resdata;
+    	USHORT *unicodestr = (USHORT *)resdata;
 
-    for(i=0;i<stringid;i++) {
-        unicodestr += *unicodestr;
-    }
-    res = new Win32Resource(this, id, NTRT_STRING, (ULONG)*unicodestr, (char *)unicodestr);
-    if(res == NULL) {
-        dprintf(("new Win32Resource failed!\n"));
-        return(NULL);
-    }
+    	for(i=0;i<stringid;i++) {
+        	unicodestr += *unicodestr;
+    	}
+    	res = new Win32Resource(this, id, NTRT_STRING, (ULONG)*unicodestr, (char *)unicodestr);
+    	if(res == NULL) {
+        	dprintf(("new Win32Resource failed!\n"));
+        	return(NULL);
+    	}
   }
   else  res = new Win32Resource(this, id, type, pData->Size, resdata);
 
