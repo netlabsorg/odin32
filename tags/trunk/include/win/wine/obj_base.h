@@ -1,4 +1,4 @@
-/* $Id: obj_base.h,v 1.4 1999-06-24 21:48:07 phaller Exp $ */
+/* $Id: obj_base.h,v 1.5 1999-06-24 22:11:39 phaller Exp $ */
 /*
  * This file defines the macros and types necessary to define COM interfaces,
  * and the three most basic COM interfaces: IUnknown, IMalloc and IClassFactory.
@@ -991,7 +991,6 @@ HRESULT WINAPI CoRegisterClassObject16(REFCLSID rclsid, LPUNKNOWN pUnk, DWORD dw
 HRESULT WINAPI CoRegisterClassObject(REFCLSID rclsid,LPUNKNOWN pUnk,DWORD dwClsContext,DWORD flags,LPDWORD lpdwRegister);
 
 HRESULT WINAPI CoRevokeClassObject(DWORD dwRegister);
-HRESULT WINAPI CoRegisterSurrogate(LPSURROGATE pSurrogate);
 
 /*****************************************************************************
  * COM Server dll - exports
