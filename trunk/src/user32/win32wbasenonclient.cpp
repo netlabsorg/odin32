@@ -1,4 +1,4 @@
-/* $Id: win32wbasenonclient.cpp,v 1.20 2000-04-07 10:01:18 sandervl Exp $ */
+/* $Id: win32wbasenonclient.cpp,v 1.21 2000-04-07 12:55:16 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (non-client methods)
  *
@@ -971,6 +971,9 @@ VOID Win32BaseWindow::DrawCaption(HDC hdc,RECT *rect,BOOL active)
     r.left += 2;
     DrawTextExA(memDC,buffer,-1,&r,DT_SINGLELINE | DT_VCENTER | DT_NOPREFIX | DT_LEFT | DT_END_ELLIPSIS,NULL);
     DeleteObject (SelectObject (memDC, hOldFont));
+    IncreaseLogCount();
+    dprintf(("DrawCaption %s %d", buffer, active));
+    DecreaseLogCount();
   }
 
   BitBlt(hdc,rect->left,rect->top,rect->right-rect->left,rect->bottom-rect->top,memDC,0,0,SRCCOPY);
@@ -996,10 +999,7 @@ VOID Win32BaseWindow::DoNCPaint(HRGN clip,BOOL suppress_menupaint)
   dprintf(("DoNCPaint %x %x %d", getWindowHandle(), clip, suppress_menupaint));
   DecreaseLogCount();
 
-  if (!(hdc = GetDCEx( Win32Hwnd, (clip > 1) ? clip : 0, DCX_USESTYLE | DCX_WINDOW |
-                      ((clip > 1) ?(DCX_INTERSECTRGN /*| DCX_KEEPCLIPRGN*/) : 0) ))) return;
-
-  rect.top = rect.left = 0;
+  rect.top    = rect.left = 0;
   rect.right  = rectWindow.right - rectWindow.left;
   rect.bottom = rectWindow.bottom - rectWindow.top;
 
@@ -1007,12 +1007,24 @@ VOID Win32BaseWindow::DoNCPaint(HRGN clip,BOOL suppress_menupaint)
   {
     //only redraw caption
     GetRgnBox(clip,&rectClip);
+    //SvL: I'm getting paint problems when clipping a dc created in GetDCEx
+    //     with a region that covers the entire window (RealPlayer 7 Update 1)
+    //     As we don't need to clip anything when that occurs, this workaround
+    //     solves the problem.
+    if(rectClip.right == getWindowWidth() && rectClip.bottom == getWindowHeight()) 
+    {
+    	clip = 0;
+    	rectClip = rect;
+    }
   }
   else
   {
     clip = 0;
     rectClip = rect;
   }
+
+  if (!(hdc = GetDCEx( Win32Hwnd, (clip > 1) ? clip : 0, DCX_USESTYLE | DCX_WINDOW |
+                      ((clip > 1) ?(DCX_INTERSECTRGN /*| DCX_KEEPCLIPRGN*/) : 0) ))) return;
 
   SelectObject( hdc, GetSysColorPen(COLOR_WINDOWFRAME) );
 
@@ -1043,7 +1055,7 @@ VOID Win32BaseWindow::DoNCPaint(HRGN clip,BOOL suppress_menupaint)
       r.bottom = rect.top + GetSystemMetrics(SM_CYCAPTION);
       rect.top += GetSystemMetrics(SM_CYCAPTION);
     }
-    if( !clip || IntersectRect( &rfuzz, &r, &rectClip ) )
+    if( !clip || IntersectRect( &rfuzz, &r, &rectClip ) ) 
       DrawCaption(hdc,&r,active);
   }
 

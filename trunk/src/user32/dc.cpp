@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.53 2000-04-02 09:27:22 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.54 2000-04-07 12:55:15 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -935,6 +935,9 @@ HDC WIN32API GetDCEx (HWND hwnd, HRGN hrgn, ULONG flags)
       }
       else //DCX_INTERSECTRGN_W
       {
+         //SvL: I'm getting paint problems when clipping a dc created in GetDCEx
+         //     with a region that covers the entire window (RealPlayer 7 Update 1)
+         //     Using SelectClipRgn here doesn't make any difference.
          if(ExtSelectClipRgn(pHps->hps, hrgn, RGN_AND_W) == ERROR_W) {
                 dprintf(("ExtSelectClipRgn failed!!"));
          }
