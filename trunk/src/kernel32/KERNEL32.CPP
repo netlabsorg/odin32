@@ -1,4 +1,4 @@
-/* $Id: KERNEL32.CPP,v 1.40 1999-12-28 19:16:34 sandervl Exp $ */
+/* $Id: KERNEL32.CPP,v 1.41 2000-01-21 22:38:52 sandervl Exp $ */
 
 /*
  * Win32 compatibility file functions for OS/2
@@ -400,7 +400,7 @@ DWORD WIN32API LoadModule( LPCSTR arg1, PVOID  arg2)
 //******************************************************************************
 int WIN32API MulDiv(int arg1, int arg2, int  arg3)
 {
-    dprintf(("KERNEL32:  OS2MulDiv %d*%d/%d\n", arg1, arg2, arg3));
+    dprintf2(("KERNEL32:  MulDiv %d*%d/%d\n", arg1, arg2, arg3));
     if(arg3 == 0)
 	return 0;
 

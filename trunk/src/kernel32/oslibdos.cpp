@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.15 2000-01-03 21:36:11 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.16 2000-01-21 22:38:53 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -71,7 +71,7 @@ DWORD OSLibDosAliasMem(LPVOID pb, ULONG cb, LPVOID *ppbAlias, ULONG fl)
   }
   rc = DosAliasMem(pb, cb, ppbAlias, 2);
   if(rc) {
-	dprintf(("OSLibDosAliasMem: DosAliasMem %x %x return %d", pb, cb, rc));
+	dprintf(("OSLibDosAliasMem: DosAliasMem %x %x returned %d", pb, cb, rc));
 	return rc;
   }
   if(attr != fl) {

@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.27 1999-12-29 12:39:09 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.28 2000-01-21 22:38:53 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -687,7 +687,8 @@ BOOL Win32PeLdrImage::allocSections(ULONG reservedMem)
  APIRET rc;
  ULONG  baseAddress;
 
-  if(fh.Characteristics & IMAGE_FILE_RELOCS_STRIPPED) {
+  //SvL: We don't care where the image is loaded for resource lookup
+  if(fh.Characteristics & IMAGE_FILE_RELOCS_STRIPPED && loadType == REAL_LOAD) {
     	return allocFixedMem(reservedMem);
   }
   rc = DosAllocMem((PPVOID)&baseAddress, imageSize, PAG_READ | PAG_WRITE | flAllocMem);
