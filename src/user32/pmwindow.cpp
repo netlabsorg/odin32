@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.123 2001-04-27 17:36:37 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.124 2001-05-04 17:02:51 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -1374,6 +1374,7 @@ VOID FrameTrackFrame(Win32BaseWindow *win32wnd,DWORD flags)
   HWND      hwndTracking;
   HPS       hpsTrack;
   LONG      parentHeight, parentWidth;
+  LONG      clientOrgX, clientOrgY;
 
     dprintf(("FrameTrackFrame: %x %x", win32wnd->getWindowHandle(), flags));
     track.cxBorder = 4;
@@ -1389,15 +1390,22 @@ VOID FrameTrackFrame(Win32BaseWindow *win32wnd,DWORD flags)
         parentWidth  = win32wnd->getParent()->getWindowWidth();
         hwndTracking = win32wnd->getParent()->getOS2WindowHandle();
         hpsTrack     = WinGetPS(hwndTracking);
+        clientOrgX   = win32wnd->getParent()->getClientRectPtr()->left;
+        clientOrgY   = win32wnd->getParent()->getClientRectPtr()->top;
     }
     else {
         parentHeight = OSLibQueryScreenHeight();
         parentWidth  = OSLibQueryScreenWidth();
         hwndTracking = HWND_DESKTOP;
         hpsTrack     = NULL;
+        clientOrgX   = 0;
+        clientOrgY   = 0;
     }
 
     mapWin32ToOS2Rect(parentHeight, pWindowRect, (PRECTLOS2)&track.rclTrack);
+    track.rclTrack.xLeft += clientOrgX;
+    track.rclTrack.yTop  -= clientOrgY;
+    rcl = track.rclTrack;
     WinQueryWindowRect(hwndTracking, &track.rclBoundary);
 
     track.ptlMinTrackSize.x = 10;
@@ -1422,16 +1430,16 @@ VOID FrameTrackFrame(Win32BaseWindow *win32wnd,DWORD flags)
                                 0, 0, SWP_MOVE);
             }
             else {
-              SetWindowPos(win32wnd->getWindowHandle(), 0, track.rclTrack.xLeft,
-                           parentHeight - track.rclTrack.yTop,
-                           track.rclTrack.xRight - track.rclTrack.xLeft,
-                           track.rclTrack.yTop - track.rclTrack.yBottom,
-                           SWP_NOACTIVATE_W | SWP_NOZORDER_W | SWP_NOACTIVATE_W);
-//                WinSetWindowPos(win32wnd->getOS2WindowHandle(),
-//                                0, track.rclTrack.xLeft, track.rclTrack.yBottom,
-//                               track.rclTrack.xRight - track.rclTrack.xLeft,
-//                                track.rclTrack.yTop - track.rclTrack.yBottom,
-//                                SWP_SIZE|SWP_MOVE);
+////              SetWindowPos(win32wnd->getWindowHandle(), 0, track.rclTrack.xLeft,
+////                           parentHeight - track.rclTrack.yTop,
+////                           track.rclTrack.xRight - track.rclTrack.xLeft,
+////                           track.rclTrack.yTop - track.rclTrack.yBottom,
+////                           SWP_NOACTIVATE_W | SWP_NOZORDER_W | SWP_NOACTIVATE_W);
+                WinSetWindowPos(win32wnd->getOS2WindowHandle(),
+                                0, track.rclTrack.xLeft, track.rclTrack.yBottom,
+                                track.rclTrack.xRight - track.rclTrack.xLeft,
+                                track.rclTrack.yTop - track.rclTrack.yBottom,
+                                SWP_SIZE|SWP_MOVE);
             }
         }
         return;
