@@ -1,4 +1,4 @@
-/* $Id: win32class.cpp,v 1.8 1999-08-28 14:09:30 sandervl Exp $ */
+/* $Id: win32class.cpp,v 1.9 1999-08-28 17:24:45 dengert Exp $ */
 /*
  * Win32 Window Class Managment Code for OS/2
  *
@@ -79,7 +79,7 @@ Win32WndClass::Win32WndClass(WNDCLASSEXA *wndclass, BOOL isUnicode) : GenericObj
 
   nrExtraClassWords     = wndclass->cbClsExtra;
   nrExtraWindowWords    = wndclass->cbWndExtra;
-  backgroundBrush       = wndclass->hbrBackground;      //TODO: fErase of PAINSTRUCT in WM_PAINT if == NULL
+  backgroundBrush       = wndclass->hbrBackground;
   hCursor               = wndclass->hCursor;
   hIcon                 = wndclass->hIcon;
   hInstance             = wndclass->hInstance;
@@ -136,21 +136,21 @@ Win32WndClass *Win32WndClass::FindClass(HINSTANCE hInstance, LPSTR id)
   Win32WndClass *wndclass = (Win32WndClass *)wndclasses;
 
   if(wndclass == NULL) {
-	leaveMutex(OBJTYPE_CLASS);
-	return(NULL);
+        leaveMutex(OBJTYPE_CLASS);
+        return(NULL);
   }
 
   if(HIWORD(id) != 0) {
 //CB: read comment below!
         if(stricmp(wndclass->classNameA, id) == 0 && wndclass->hInstance == hInstance) {
-		leaveMutex(OBJTYPE_CLASS);
+                leaveMutex(OBJTYPE_CLASS);
                 return(wndclass);
         }
         else {
                 wndclass = (Win32WndClass *)wndclass->GetNext();
                 while(wndclass != NULL) {
                         if(stricmp(wndclass->classNameA, id) == 0 && wndclass->hInstance == hInstance) {
-				leaveMutex(OBJTYPE_CLASS);
+                                leaveMutex(OBJTYPE_CLASS);
                                 return(wndclass);
                         }
                         wndclass = (Win32WndClass *)wndclass->GetNext();
@@ -161,15 +161,15 @@ Win32WndClass *Win32WndClass::FindClass(HINSTANCE hInstance, LPSTR id)
 //CB: without HInstance check, test program finds class
 //CB: need more code to compare instance; convert 0 to exe module handle
         if(wndclass->classAtom == (DWORD)id /*&& wndclass->hInstance == hInstance*/) {
-		leaveMutex(OBJTYPE_CLASS);
+                leaveMutex(OBJTYPE_CLASS);
                 return(wndclass);
         }
         else {
                 wndclass = (Win32WndClass *)wndclass->GetNext();
                 while(wndclass != NULL) {
                         if(wndclass->classAtom == (DWORD)id/* && wndclass->hInstance == hInstance*/) {
-				leaveMutex(OBJTYPE_CLASS);
-	        	        return(wndclass);
+                                leaveMutex(OBJTYPE_CLASS);
+                                return(wndclass);
                         }
                         wndclass = (Win32WndClass *)wndclass->GetNext();
                 }
