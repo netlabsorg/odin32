@@ -18,6 +18,15 @@ class OS2IDirectDraw
   public:
     //this one has to go first!
     IDirectDraw4Vtbl *lpVtbl;
+    IDirectDraw4Vtbl *lpVtbl2;         // 2nd Vtable pointer An other MS assumtion see below
+    DWORD            *pdwUnknownData;  // MS DDCAPS (DX6 SDK bin\tools )program makes an assumtion that after the
+                                       // VTable comes a pointer to some data
+                                       // to avoid crashes we do it a favor and alloc a buffer
+                                       // with 255 DWORDS
+                                       // Known data in the buffer Height(offset 235),
+                                       // Height (236),  Bits (241)
+                                       // ToDO :
+                                       // debug into DirectDrawCreate and se what MS is doing !
     IDirectDraw2Vtbl  Vtbl;
     // MS did it again with direct/X 6 they changed the behavior of the directdraw component
     // So we now need 2 Virt. Tables one for the old and one for the new so we return the
