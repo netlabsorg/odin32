@@ -1,4 +1,4 @@
-/* $Id: pe2lxmain.cpp,v 1.1 1999-10-14 01:15:14 bird Exp $
+/* $Id: pe2lxmain.cpp,v 1.2 1999-10-14 13:27:02 bird Exp $
  *
  * Pe2Lx main program. (Ring 3 only!)
  *
@@ -199,13 +199,6 @@ int main(int argc, char **argv)
             if (rc != NO_ERROR)
             {
                 printf("Fatal error: Failed to write the Lx-file. rc=%d\n", rc);
-                rc = 84;
-            }
-            pe2lx.dumpVirtualLxFile();
-            rc = pe2lx.writeLxFile("2nd.dll");
-            if (rc != NO_ERROR)
-            {
-                printf("Fatal error: Failed to write the 2nd Lx-file. rc=%d\n", rc);
                 rc = 84;
             }
             pe2lx.dumpVirtualLxFile();
