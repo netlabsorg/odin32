@@ -1,4 +1,4 @@
-/* $Id: wsock32.cpp,v 1.44 2001-10-16 07:26:43 phaller Exp $ */
+/* $Id: wsock32.cpp,v 1.45 2001-11-27 11:13:03 sandervl Exp $ */
 
 /*
  *
@@ -204,6 +204,9 @@ void WIN32API WSASetLastError(int iError)
             break;
         case WSAEALREADY:
             strcpy(msg, "WSAEALREADY");
+            break;
+        case WSAHOST_NOT_FOUND:
+            strcpy(msg, "WSAHOST_NOT_FOUND");
             break;
         default:
             strcpy(msg, "unknown");
@@ -1379,6 +1382,7 @@ ODINFUNCTION2(int,OS2gethostname,
 
    ret = gethostname(name, namelen);
    if(ret == NULL) {
+        dprintf(("gethostname returned %s", name));
    	WSASetLastError(NO_ERROR);
 	return 0;
    }
@@ -1410,6 +1414,9 @@ ODINFUNCTION3(ws_hostent *,OS2gethostbyaddr,
     return NULL;
 }
 //******************************************************************************
+//NOTE: This function can possibly block for a very long time
+//      I.e. start ISDNPM without dialing in. gethostbyname will query
+//      each name server and retry several times (60+ seconds per name server)
 //******************************************************************************
 ODINFUNCTION1(ws_hostent *,OS2gethostbyname,
               const char *,name)
@@ -1420,9 +1427,9 @@ ODINFUNCTION1(ws_hostent *,OS2gethostbyname,
   {
     struct hostent*     host;
     
-    USHORT sel = RestoreOS2FS();
+    dprintf(("gethostbyname %s", name));
+
     host = gethostbyname( (char*) name);
-    SetFS(sel);
     
     if( host != NULL )
     {
