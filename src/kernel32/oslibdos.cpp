@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.69 2001-06-23 19:43:50 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.70 2001-06-24 14:13:04 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -520,6 +520,36 @@ BOOL OSLibDosClose(DWORD hFile)
  APIRET rc;
 
   rc = DosClose(hFile);
+  SetLastError(error2WinError(rc));
+  return (rc == NO_ERROR);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibDosCopyFile(LPCSTR lpszOldFile, LPCSTR lpszNewFile, BOOL fFailIfExist)
+{
+ APIRET rc;
+
+  rc = DosCopy((PSZ)lpszOldFile, (PSZ)lpszNewFile, fFailIfExist ? 0: DCPY_EXISTING);
+  SetLastError(error2WinError(rc));
+  return (rc == NO_ERROR);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibDosMoveFile(LPCSTR lpszOldFile, LPCSTR lpszNewFile)
+{
+ APIRET rc;
+
+  rc = DosMove((PSZ)lpszOldFile, (PSZ)lpszNewFile);
+  SetLastError(error2WinError(rc));
+  return (rc == NO_ERROR);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibDosRemoveDir(LPCSTR lpszDir)
+{
+ APIRET rc;
+
+  rc = DosDeleteDir((PSZ)lpszDir);
   SetLastError(error2WinError(rc));
   return (rc == NO_ERROR);
 }
