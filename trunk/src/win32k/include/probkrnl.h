@@ -1,4 +1,4 @@
-/* $Id: probkrnl.h,v 1.18 2001-02-11 15:12:23 bird Exp $
+/* $Id: probkrnl.h,v 1.19 2001-02-19 05:51:37 bird Exp $
  *
  * Include file for ProbKrnl.
  *
@@ -48,7 +48,7 @@
 #define EPT32VarImportNR(a)     (((a).fType & ~(EPT_WRAPPED)) == EPT_VARIMPORTNR32)
 
 /* 16bit types */
-#define EPT_PROC16              (EPT_PROC | EPT_16BIT)        /* no implemented yet! */
+#define EPT_PROC16              (EPT_PROC | EPT_16BIT)
 #define EPT_PROCIMPORT16        (EPT_PROCIMPORT | EPT_16BIT)  /* far proc in calltab with a far jmp. */
 #define EPT_PROCIMPORTNR16      (EPT_PROCIMPORT | EPT_16BIT | EPT_NOT_REQ)
 #define EPT_VARIMPORT16         (EPT_VARIMPORT | EPT_16BIT)
