@@ -1,4 +1,4 @@
-/* $Id: OS2UTIL.CPP,v 1.6 1999-10-28 22:39:28 hugh Exp $ */
+/* $Id: OS2UTIL.CPP,v 1.7 1999-11-02 22:41:23 hugh Exp $ */
 
 /*
  * OS/2 Utility functions
@@ -23,7 +23,7 @@ char *OS2AllocMem(ULONG size)
 
   rc = DosAllocMem(&lpMem, size, PAG_READ|PAG_WRITE|PAG_COMMIT);
   if(rc) {
-    dprintf(("DosAllocMem returned %d", rc));
+    dprintf(("DDRAW: DosAllocMem returned %d", rc));
     return(NULL);
   }
   return((char *)lpMem);
@@ -36,7 +36,7 @@ void OS2FreeMem(char *lpMem)
 
   rc = DosFreeMem(lpMem);
   if(rc) {
-    dprintf(("DosFreeMem returned %d", rc));
+    dprintf(("DDRAW: DosFreeMem returned %d", rc));
   }
 }//******************************************************************************
 //******************************************************************************
