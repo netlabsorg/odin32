@@ -1,4 +1,4 @@
-/* $Id: hotkey.c,v 1.8 1999-09-23 15:50:21 cbratschi Exp $ */
+/* $Id: hotkey.c,v 1.9 1999-09-23 17:26:29 cbratschi Exp $ */
 /*
  * Hotkey control
  *
@@ -23,7 +23,7 @@ HOTKEY_Refresh(HWND hwnd)
   RECT rect;
 
   GetClientRect(hwnd,&rect);
-  InflateRect(&rect,-2,-2);
+  InflateRect(&rect,-1,-2); //CB: x only -1 -> bug!
   InvalidateRect(hwnd,&rect,FALSE);
 }
 

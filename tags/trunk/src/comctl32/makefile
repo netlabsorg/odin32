@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.14 1999-08-21 12:29:29 sandervl Exp $
+# $Id: makefile,v 1.15 1999-09-23 17:26:29 cbratschi Exp $
 #
 # PD-Win32 API
 #
@@ -8,6 +8,7 @@
 PDWIN32_INCLUDE = ..\..\include
 PDWIN32_LIB = ..\..\lib
 PDWIN32_BIN = ..\..\bin
+PDWIN32_TOOLS = ..\..\tools\bin
 
 
 !include $(PDWIN32_INCLUDE)/pdwin32.mk
@@ -37,7 +38,7 @@ $(TARGET).dll: $(OBJS) $(TARGET).def rsrc.res
               $(PDWIN32_LIB)/gdi32.lib \
               $(PDWIN32_LIB)/user32.lib  $(PDWIN32_LIB)/odincrt.lib \
               OS2386.LIB  $(RTLLIB_O)
-              rc rsrc.res comctl32.dll
+              rc rsrc.res $(TARGET).dll
         $(CP) $@ $(PDWIN32_BIN)
 
 
