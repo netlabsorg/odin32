@@ -1,4 +1,4 @@
-/* $Id: mmap.h,v 1.21 2002-04-07 15:44:11 sandervl Exp $ */
+/* $Id: mmap.h,v 1.22 2002-05-20 13:47:59 sandervl Exp $ */
 
 /*
  * Memory mapped class
@@ -44,7 +44,7 @@ public:
    Win32MemMap(Win32PeLdrImage *pImage, ULONG lpImageMem, ULONG size);
   ~Win32MemMap();
 
-   BOOL   Init();
+   BOOL   Init(DWORD aMSize=0);
    BOOL   flushView(ULONG offset, ULONG cbFlush);
    LPVOID mapViewOfFile(ULONG size, ULONG offset, ULONG fdwAccess);
    BOOL   unmapViewOfFile(Win32MemMapView *view);
