@@ -1,4 +1,11 @@
- /* $Id: changelog,v 1.1040 2000-07-20 18:03:39 sandervl Exp $ */
+ /* $Id: changelog,v 1.1041 2000-07-21 18:31:42 sandervl Exp $ */
+
+ 2000-07-21: Sander van Leeuwen <sandervl@xs4all.nl>
+    - SHLWAPI:  SHGetSpecialFolderPathA: StartMenu changed in 'Start Menu'
+                (now identical to Windows 98/NT)
+    - TOOLS\install: 
+                Changed makefile for odininst; standard odin makefile now
+                Changed warpin script for new odininst location
 
  2000-07-20: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   SetWindowPlacement bugfix for Papyrus (do not change the
