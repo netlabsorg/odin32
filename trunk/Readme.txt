@@ -1,7 +1,9 @@
-/* $Id: Readme.txt,v 1.11 1999-11-14 16:37:59 sandervl Exp $ */
 
-NOTE: We are still looking for talented developers that want to
-      contribute! Please take a look at the last section!
+                O D I N  Public Alpha 5 - 1999/11/16
+                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+WANTED: We are still looking for talented developers that want to
+        contribute! Please take a look at the last section!
 
 
 Project Odin Information
@@ -269,5 +271,4 @@ on http://www.egroups.com.
 In case you are interested in participating, every member of the project will 
 be happy to give you direction to the right places and to give a personal 
 introduction to further development of the particular modules.
-
 
