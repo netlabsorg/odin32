@@ -1,6 +1,6 @@
-/* $Id: env.h,v 1.1 2000-04-17 01:56:49 bird Exp $
+/* $Id: env.h,v 1.2 2000-04-17 02:26:04 bird Exp $
  *
- * Enviroment access functions
+ * Environment access functions
  *
  * Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
  *
@@ -20,6 +20,7 @@ extern "C" {
 *   Prototypes                                                                 *
 *******************************************************************************/
 const char *ScanEnv(const char *paszEnv, const char *pszVar);
+const char *GetEnv(void);
 
 
 #ifdef __cplusplus
