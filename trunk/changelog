@@ -1,4 +1,4 @@
- /* $Id: changelog,v 1.247 1999-09-26 16:09:02 dengert Exp $ */
+ /* $Id: changelog,v 1.248 1999-09-26 22:25:14 sandervl Exp $ */
 
  99-09-25: Daniela Engert <dani@ngrt.de>
 	- USER32: SetTimer/KillTimer work now.
@@ -14,6 +14,9 @@
 		    Send WM_INITDLG after creation of dialog controls.
 		    Set last error to 0 at end of BeginPaint/EndPaint.
 		    Set last error when window not found (window.cpp/windlg.cpp)
+                    WM_(SYS)KEYUP/DOWN bugfix (repeat cnt & scancode reversed)
+                    Generate WM_CHAR message when TranslateMessage is called for
+                    WM_CHAR (PM) message. (sent after WM_(SYS)KEYUP/DOWN)
 
  99-09-25: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: WS_EX_* 3D frame support for child windows
