@@ -1,4 +1,4 @@
-/* $Id: cctl_xx.orc,v 1.1 2000-08-09 15:57:55 cbratschi Exp $ */
+/* $Id: cctl_xx.orc,v 1.2 2000-08-19 18:35:56 sandervl Exp $ */
 /*
  * Language neutral resources for Common Controls
  */
@@ -1096,14 +1096,14 @@ IDC_COMCTL32_SPLITHLINE CURSOR LOADONCALL DISCARDABLE
 //   ProductVersion: 4.72.3110.1
 //   FileVersion:    4.72
 //
-// Windows 2000 (or IE 5 on any system):
-//   ProductVersion: 5.00.2014.216
-//   FileVersion:    5.80
+// Windows 2000 (or IE 5.01 on any system):
+//   ProductVersion: 5.00.2919.6304
+//   FileVersion:    5.81
 //
 
 1 VERSIONINFO
- FILEVERSION ODIN_FILEVERSION
- PRODUCTVERSION ODIN_PRODUCTVERSION
+ FILEVERSION 0x05, 0x51, 0x0B67, 0x18A0
+ PRODUCTVERSION 0x05, 0x00, 0x0B67, 0x18A0
  FILEFLAGSMASK 0x3fL
  FILEFLAGS 0xaL
  FILEOS 0x10001L
@@ -1117,13 +1117,13 @@ BEGIN
             VALUE "Comments", "Odin32 System Dll\0"
             VALUE "CompanyName", "Odin Team\0"
             VALUE "FileDescription", "Common Controls Library\0"
-            VALUE "FileVersion", "5.80\0"
+            VALUE "FileVersion", "5.81\0"
             VALUE "InternalName", "COMCTL32\0"
             VALUE "LegalCopyright", "Copyright (C) 1999-2000\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "COMCTL32.DLL\0"
             VALUE "ProductName", "Odin32 - COMCTL32\0"
-            VALUE "ProductVersion", "5.00.2014.216\0"
+            VALUE "ProductVersion", "5.00.2919.6304\0"
         END
     END
     BLOCK "VarFileInfo"

@@ -1,4 +1,4 @@
-/* $Id: cdlg_xx.orc,v 1.2 2000-03-26 16:31:40 cbratschi Exp $*/
+/* $Id: cdlg_xx.orc,v 1.3 2000-08-19 18:36:16 sandervl Exp $*/
 /*
  * Language neutral resources for Common Dialogs
  *
@@ -10,11 +10,13 @@
 LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
 
 1 VERSIONINFO
-FILEVERSION     4, 0, 0, 950    /* Maybe 4.1.0.980 for win98?? */
-PRODUCTVERSION  4, 0, 0, 950    /* id. */
-FILEFLAGSMASK   VS_FFI_FILEFLAGSMASK
-FILEOS          VOS_DOS_WINDOWS16
-FILETYPE        VFT_DLL
+FILEVERSION     0x04, 0x00, 0x0565, 0x013F
+PRODUCTVERSION  0x04, 0x00, 0x0565, 0x013F
+FILEFLAGSMASK 0x3fL
+FILEFLAGS 0xaL
+FILEOS 0x10001L
+FILETYPE 0x1L
+FILESUBTYPE 0x0L
 {
         BLOCK "StringFileInfo"
         {
