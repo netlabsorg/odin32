@@ -1,4 +1,4 @@
-/* $Id: pe.cpp,v 1.33 2002-02-23 10:48:19 sandervl Exp $ */
+/* $Id: pe.cpp,v 1.34 2002-07-23 13:26:10 sandervl Exp $ */
 
 /*
  * PELDR main exe loader code
@@ -69,7 +69,7 @@ KRNL32EXCEPTPROC       Krnl32SetExceptionHandler = 0;
 KRNL32EXCEPTPROC       Krnl32UnsetExceptionHandler = 0;
 
 //should be the same as in ..\kernel32\winexepeldr.h
-typedef BOOL (* WIN32API WIN32CTOR)(char *, char *, char *, ULONG, BOOL, BOOL);
+typedef BOOL (* WIN32API WIN32CTOR)(char *, char *, char *, ULONG, ULONG, BOOL, BOOL);
 
 WIN32CTOR   CreateWin32Exe       = 0;
 ULONG       reservedMemory       = 0;
@@ -257,14 +257,14 @@ tryagain:
 	MyWinMessageBox(HWND_DESKTOP, NULL, fullpath, szErrorTitle, 0, MB_OK | MB_ERROR | MB_MOVEABLE);
         goto fail;
   }
-  rc = DosQueryProcAddr(hmodKernel32, 0, "_CreateWin32PeLdrExe@24", (PFN *)&CreateWin32Exe);
+  rc = DosQueryProcAddr(hmodKernel32, 0, "_CreateWin32PeLdrExe@28", (PFN *)&CreateWin32Exe);
 
 #ifdef COMMAND_LINE_VERSION
   fVioConsole = TRUE;
 #else
   fVioConsole = FALSE;
 #endif
-  if(CreateWin32Exe(exeName, win32cmdline, peoptions, reservedMemory, fConsoleApp, fVioConsole) == FALSE) {
+  if(CreateWin32Exe(exeName, win32cmdline, peoptions, reservedMemory, 0, fConsoleApp, fVioConsole) == FALSE) {
         goto fail;
   }
 
