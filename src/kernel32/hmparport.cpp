@@ -1,4 +1,4 @@
-/* $Id: hmparport.cpp,v 1.8 2001-11-26 14:54:03 sandervl Exp $ */
+/* $Id: hmparport.cpp,v 1.9 2001-11-28 23:33:37 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -151,9 +151,19 @@ HMDeviceParPortClass::HMDeviceParPortClass(LPCSTR lpDeviceName) : HMDeviceHandle
     HMDeviceRegisterEx("LPT1", this, pData);
   
   // add symbolic links to the "real name" of the device
-  HandleNamesAddSymbolicLink("\\Device\\ParallelPort1", "LPT1");
-  HandleNamesAddSymbolicLink("\\Device\\ParallelPort2", "LPT2");
-  HandleNamesAddSymbolicLink("\\Device\\ParallelPort3", "LPT3");
+  {
+    PSZ pszLPT = strdup("\\\\.\\LPTx");
+    PSZ pszLPT2 = strdup("\\Device\\ParallelPort1");
+    for (char ch = '1'; ch <= '3'; ch++)
+    {
+      pszLPT[7] = ch;
+      pszLPT2[20] = ch;
+      HandleNamesAddSymbolicLink(pszLPT, pszLPT+4);
+      HandleNamesAddSymbolicLink(pszLPT2, pszLPT+4);
+    }
+    free(pszLPT);
+    free(pszLPT2);
+  }
 }
 
 /*****************************************************************************
@@ -171,10 +181,7 @@ HMDeviceParPortClass::HMDeviceParPortClass(LPCSTR lpDeviceName) : HMDeviceHandle
  *****************************************************************************/
 BOOL HMDeviceParPortClass::FindDevice(LPCSTR lpClassDevName, LPCSTR lpDeviceName, int namelength)
 {
-  dprintf(("HMDeviceParPortClass::FindDevice(%s,%s)\n",
-           lpClassDevName,
-           lpDeviceName));
-  
+  // can be both, "LPT1" and "LPT1:"
     if(namelength > 5)
         return FALSE;  //can't be lpt name
 
@@ -207,26 +214,29 @@ DWORD HMDeviceParPortClass::CreateFile(HANDLE        hHandle,
            lpSecurityAttributes,
            pHMHandleDataTemplate));
   
- char comname[6];
+ char lptname[6];
 
   dprintf(("HMDeviceParPortClass: Parallel port %s open request\n", lpFileName));
 
-  if(strlen(lpFileName) > 5) {
-    return -1;  //safety check (unnecessary..)
-  }
-  pHMHandleData->hHMHandle = 0;
-
-  strcpy(comname, lpFileName);
-  comname[4] = 0;   //get rid of : (if present) (eg LPT1:)
+  strcpy(lptname, lpFileName);
+  lptname[4] = 0;   //get rid of : (if present) (eg LPT1:)
 
   //AH: TODO parse Win32 security handles
   ULONG oldmode = SetErrorMode(SEM_FAILCRITICALERRORS);
-  pHMHandleData->hHMHandle = OSLibDosOpen(comname,
+  pHMHandleData->hHMHandle = OSLibDosOpen(lptname,
                                           OSLIB_ACCESS_READWRITE |
                                           OSLIB_ACCESS_SHAREDENYREAD |
                                           OSLIB_ACCESS_SHAREDENYWRITE);
   SetErrorMode(oldmode);
-
+  
+  // check if handle could be opened properly
+  if (0 == pHMHandleData->hHMHandle)
+  {
+    // @@@PH we need to get an OS/2 return code from OSLibDosOpen!
+    // and translate it via error2WinError
+    return ERROR_ACCESS_DENIED; // signal failure
+  }
+  
 #if 0
   if (pHMHandleData->hHMHandle != 0)
   {
@@ -255,7 +265,7 @@ DWORD HMDeviceParPortClass::CreateFile(HANDLE        hHandle,
              " Break replacement Char : 0x%x\n"
              " XON Char               : 0x%x\n"
              " XOFF Char              : 0x%x\n",
-             comname,
+             lptname,
              ((PHMDEVCOMDATA)pHMHandleData->lpHandlerData)->dcbOS2.usWriteTimeout,
              ((PHMDEVCOMDATA)pHMHandleData->lpHandlerData)->dcbOS2.usReadTimeout,
              ((PHMDEVCOMDATA)pHMHandleData->lpHandlerData)->dcbOS2.fbCtlHndShake,
@@ -609,7 +619,7 @@ BOOL HMDeviceParPortClass::ClearCommError( PHMHANDLEDATA pHMHandleData,
   }
 #endif
   
-  return(rc==0);
+  return(rc==NO_ERROR);
 }
 
 
