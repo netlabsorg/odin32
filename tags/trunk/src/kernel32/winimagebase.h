@@ -1,4 +1,4 @@
-/* $Id: winimagebase.h,v 1.13 2000-06-28 18:08:35 sandervl Exp $ */
+/* $Id: winimagebase.h,v 1.14 2000-08-16 08:04:44 sandervl Exp $ */
 
 /*
  * Win32 PE Image base class
@@ -14,6 +14,11 @@
 
 #include <peexe.h>
 #include "queue.h"
+#ifdef OS2_INCLUDED
+#include <winconst.h>
+#else
+#include <win\winnls.h>
+#endif
 
 #define MAGIC_WINIMAGE          0x11223344
 
@@ -21,7 +26,6 @@
 #define CCHMAXPATH 260
 #endif
 
-#define LANG_GETFIRST           0xF0000000
 #define ID_GETFIRST             0xF0000000
 
 #ifndef ENUMRESNAMEPROC
@@ -66,11 +70,11 @@ virtual void  setFullPath(char *name);
 	char *getModuleName()	      { return szModule; };
 
         //findResource returns the pointer of the resource's IMAGE_RESOURCE_DATA_ENTRY structure
-	HRSRC findResourceA(LPCSTR lpszName, LPSTR lpszType, ULONG lang = LANG_GETFIRST);
-	HRSRC findResourceW(LPWSTR lpszName, LPWSTR lpszType, ULONG lang = LANG_GETFIRST);
+	HRSRC findResourceA(LPCSTR lpszName, LPSTR lpszType, ULONG lang = MAKELANGID(LANG_NEUTRAL, SUBLANG_NEUTRAL));
+	HRSRC findResourceW(LPWSTR lpszName, LPWSTR lpszType, ULONG lang = MAKELANGID(LANG_NEUTRAL, SUBLANG_NEUTRAL));
 
-	ULONG getResourceSizeA(LPSTR lpszName, LPSTR lpszType, ULONG lang = LANG_GETFIRST);
-        ULONG getResourceSizeW(LPWSTR lpszName, LPWSTR lpszType, ULONG lang = LANG_GETFIRST);
+	ULONG getResourceSizeA(LPSTR lpszName, LPSTR lpszType, ULONG lang = MAKELANGID(LANG_NEUTRAL, SUBLANG_NEUTRAL));
+        ULONG getResourceSizeW(LPWSTR lpszName, LPWSTR lpszType, ULONG lang = MAKELANGID(LANG_NEUTRAL, SUBLANG_NEUTRAL));
 	BOOL  enumResourceNamesA(HMODULE hmod, LPCTSTR  lpszType, ENUMRESNAMEPROCA lpEnumFunc, LONG lParam);
 	BOOL  enumResourceNamesW(HMODULE hmod, LPCWSTR  lpszType, ENUMRESNAMEPROCW lpEnumFunc, LONG lParam);
 	BOOL  enumResourceTypesA(HMODULE hmod, ENUMRESTYPEPROCA lpEnumFunc, 
@@ -143,6 +147,10 @@ protected:
         PIMAGE_RESOURCE_DIRECTORY  getResSubDirA(PIMAGE_RESOURCE_DIRECTORY pResDir, LPCTSTR lpszName);
 
 	PIMAGE_RESOURCE_DATA_ENTRY getResDataLang(PIMAGE_RESOURCE_DIRECTORY pResDir, ULONG language, BOOL fGetDefault = FALSE);
+
+        HRSRC                      getResourceLang(PIMAGE_RESOURCE_DIRECTORY pResDirToSearch);
+        HRSRC                      getResourceLangEx(PIMAGE_RESOURCE_DIRECTORY pResDirToSearch,
+                                                     DWORD lang);
 
         PIMAGE_RESOURCE_DIRECTORY pResRootDir;
 
