@@ -805,7 +805,7 @@ static HRESULT WINAPI IShellFolder_fnBindToObject( IShellFolder2 * iface, LPCITE
 	}
 	else
 	{
-	  IShellFolder_BindToObject(pShellFolder, ILGetNext(pidl), NULL, &IID_IShellFolder, (LPVOID)&pSubFolder);
+	  IShellFolder_BindToObject(pShellFolder, ODIN_ILGetNext(pidl), NULL, &IID_IShellFolder, (LPVOID)&pSubFolder);
 	  IShellFolder_Release(pShellFolder);
 	  *ppvOut = pSubFolder;
 	}
@@ -908,12 +908,12 @@ static ODINFUNCTION4(HRESULT, IShellFolder_fnCompareIDs,
             
 	    if (nReturn == 0)				/* first pidl different ? */
 	    {
-	      pidl1 = ILGetNext(pidl1);
+	      pidl1 = ODIN_ILGetNext(pidl1);
 
 	      if (pidl1 && pidl1->mkid.cb)		/* go deeper? */	
 	      {
 	        pidlTemp = ODIN_ILCloneFirst(pidl1);
-	        pidl2 = ILGetNext(pidl2);
+	        pidl2 = ODIN_ILGetNext(pidl2);
 	
 	        hr = IShellFolder_BindToObject(iface, pidlTemp, NULL, &IID_IShellFolder, (LPVOID*)&psf);
 	        if (SUCCEEDED(hr))
@@ -926,7 +926,7 @@ static ODINFUNCTION4(HRESULT, IShellFolder_fnCompareIDs,
 	      }
 	      else
 	      {
-	        pidl2 = ILGetNext(pidl2);
+	        pidl2 = ODIN_ILGetNext(pidl2);
 		if (pidl2 && pidl2->mkid.cb)		/* go deeper on #2 ? */
 		    hr = ResultFromShort(-1);           /* two different */
 		else
@@ -1840,7 +1840,7 @@ static HRESULT WINAPI ISF_Desktop_fnBindToObject( IShellFolder2 * iface, LPCITEM
 	}
 	else				/* go deeper */
 	{
-	  IShellFolder_BindToObject(pShellFolder, ILGetNext(pidl), NULL, riid, (LPVOID)&pSubFolder);
+	  IShellFolder_BindToObject(pShellFolder, ODIN_ILGetNext(pidl), NULL, riid, (LPVOID)&pSubFolder);
 	  IShellFolder_Release(pShellFolder);
 	  *ppvOut = pSubFolder;
 	}
@@ -2263,7 +2263,7 @@ static HRESULT WINAPI ISF_MyComputer_fnBindToObject( IShellFolder2 * iface, LPCI
 	}
 	else				/* go deeper */
 	{
-	  IShellFolder_BindToObject(pShellFolder, ILGetNext(pidl), NULL, &IID_IShellFolder, (LPVOID)&pSubFolder);
+	  IShellFolder_BindToObject(pShellFolder, ODIN_ILGetNext(pidl), NULL, &IID_IShellFolder, (LPVOID)&pSubFolder);
 	  IShellFolder_Release(pShellFolder);
 	  *ppvOut = pSubFolder;
 	}
