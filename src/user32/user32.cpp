@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.6 1999-06-09 20:53:30 phaller Exp $ */
+/* $Id: user32.cpp,v 1.7 1999-06-12 20:44:07 cbratschi Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -564,6 +564,15 @@ HWND WIN32API CreateWindowExA(DWORD     dwExStyle,
   if (nHeight< 0) nHeight = 0;
   if (y      < 0) y       = 0;
 #endif
+
+// 6-12-99 CB: WS_CLIPCHILDREN not set -> controls not redrawn
+// Problems with group boxes
+
+#ifndef WS_CLIPCHILDREN
+  #define WS_CLIPCHILDREN            0x20000000L
+#endif
+
+  dwStyle |= WS_CLIPCHILDREN;
 
 //SvL: Breaks applications
 #if 0
@@ -1288,7 +1297,6 @@ UINT WIN32API ArrangeIconicWindows( HWND arg1)
 }
 //******************************************************************************
 // Not implemented by Open32 (5-31-99 Christoph Bratschi)
-// Quick and dirty implementation
 //******************************************************************************
 BOOL WIN32API CheckRadioButton( HWND arg1, UINT arg2, UINT arg3, UINT  arg4)
 {
