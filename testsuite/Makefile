@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.2 2002-06-19 02:11:53 bird Exp $
+# $Id: Makefile,v 1.3 2002-06-19 02:29:51 bird Exp $
 
 #
 # Main testsuite make script.
@@ -23,6 +23,8 @@
 #   that. Should *not* fail in such situation.
 # - Output should whenever possibly be generated on the fly in for doing
 #   compares. Ie. Use inline files in the makescript.
+# - Currently you need to have the Odin release to be tested installed and
+#   in the PATH. (This will be changed!)
 #
 
 # Include the setup.mak
