@@ -1,6 +1,9 @@
 /*
  *	SHRegOpenStream
  */
+#ifdef __WIN32OS2__
+#define SHLWAPI_STREAM
+#endif
 #include <string.h>
 
 #include "winerror.h"
