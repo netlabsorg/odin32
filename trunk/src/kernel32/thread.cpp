@@ -1,4 +1,4 @@
-/* $Id: thread.cpp,v 1.30 2001-06-27 15:34:41 sandervl Exp $ */
+/* $Id: thread.cpp,v 1.31 2001-06-27 19:09:35 sandervl Exp $ */
 
 /*
  * Win32 Thread API functions
@@ -131,9 +131,6 @@ DWORD OPEN32API Win32ThreadProc(LPVOID lpData)
   Win32DllBase::tlsAttachThreadToAllDlls(); //setup TLS structures of all dlls
   Win32DllBase::attachThreadToAllDlls();	  //send DLL_THREAD_ATTACH message to all dlls
 
-  //SvL: Leave this here. For some weird reason this affects performance
-  //     of floating point apps. (at least for one fortan benchmark)
-  double tmp;
   //Set FPU control word to 0x27F (same as in NT)
   CONTROL87(0x27F, 0xFFF);
   rc = AsmCallThreadHandler(winthread, userdata);

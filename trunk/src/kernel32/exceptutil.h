@@ -1,4 +1,4 @@
-/* $Id: exceptutil.h,v 1.11 2001-03-22 18:16:41 sandervl Exp $ */
+/* $Id: exceptutil.h,v 1.12 2001-06-27 19:09:35 sandervl Exp $ */
 
 /*
  * Exception + misc functions for OS/2
@@ -45,6 +45,8 @@ USHORT getGS();
 void CDECL Mul32x32to64(PVOID result, DWORD op1, DWORD op2);
 
 ULONG CDECL AsmCallThreadHandler(ULONG handler, LPVOID parameter);
+
+DWORD CDECL CallEntryPoint(DWORD entryPoint, DWORD parameter);
 
 #ifdef __cplusplus
 }
