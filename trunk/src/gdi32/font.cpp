@@ -1,4 +1,4 @@
-/* $Id: font.cpp,v 1.10 2000-05-02 20:49:58 sandervl Exp $ */
+/* $Id: font.cpp,v 1.11 2000-05-16 07:13:19 jeroen Exp $ */
 
 /*
  * GDI32 font apis
@@ -31,7 +31,7 @@
 #include <heapstring.h>
 #include <win\options.h>
 
-#define DBG_LOCALLOG	DBG_font
+#define DBG_LOCALLOG    DBG_font
 #include "dbglocal.h"
 
 ODINDEBUGCHANNEL(GDI32-FONT)
@@ -113,7 +113,7 @@ static void iFontRename(LPCSTR lpstrFaceOriginal,
   if (lpstrFaceOriginal == NULL)
      return;
 
-  memcpy(lpstrFaceTemp, lpstrFaceOriginal, LF_FACESIZE);
+  strncpy(lpstrFaceTemp, lpstrFaceOriginal, LF_FACESIZE);
   strupr(lpstrFaceTemp);
 
   //lookup table
