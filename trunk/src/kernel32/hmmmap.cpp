@@ -1,4 +1,4 @@
-/* $Id: hmmmap.cpp,v 1.18 2001-08-06 16:01:10 sandervl Exp $ */
+/* $Id: hmmmap.cpp,v 1.19 2002-03-24 11:59:45 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -143,7 +143,7 @@ DWORD HMDeviceMemMapClass::OpenFileMapping(PHMHANDLEDATA         pHMHandleData,
   switch(access) {
   case FILE_MAP_WRITE:
   case FILE_MAP_ALL_ACCESS:
-	if(!(protflags & PAGE_WRITECOPY))
+	if(!(protflags & (PAGE_WRITECOPY|PAGE_READWRITE)))
 		return ERROR_INVALID_PARAMETER;
 	break;
   case FILE_MAP_READ:
