@@ -1,7 +1,8 @@
- /* $Id: ChangeLog,v 1.205 1999-09-16 14:58:33 phaller Exp $ */
+ /* $Id: ChangeLog,v 1.206 1999-09-16 15:14:59 phaller Exp $ */
 
  99-09-16: Patrick Haller <phaller@gmx.net>
 	- USER32:   Fix: DIB_FixColorsToLoadflags - incr was not initialized
+		    Fix: WINMENU::GetSystemMenu() was broken.
 
  99-09-15: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Moved old kernel32 code to kernel32\old
