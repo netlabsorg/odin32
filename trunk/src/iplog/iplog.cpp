@@ -114,7 +114,10 @@ void main(void)
            fwrite("\n", 1, 1, logfile);
        }
 
-       if(ftell(logfile) > 250*1024*1024) fseek(logfile, 0, SEEK_SET);
+       if(ftell(logfile) > 250*1024) {
+           fclose(logfile);
+           logfile = fopen("odin32.log", "wb");
+       }
    }
     
    /*
