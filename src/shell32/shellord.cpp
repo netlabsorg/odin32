@@ -1,4 +1,4 @@
-/* $Id: shellord.cpp,v 1.3 1999-11-02 19:17:15 phaller Exp $ */
+/* $Id: shellord.cpp,v 1.4 1999-12-28 23:16:33 sandervl Exp $ */
 /*
  * The parameters of many functions changes between different OS versions
  * (NT uses Unicode strings, 95 uses ASCII strings)
@@ -45,7 +45,8 @@ SHChangeNotifyRegister(
     DWORD msg,
     int count,
     IDSTRUCT *idlist)
-{	FIXME("(0x%04x,0x%08lx,0x%08lx,0x%08lx,0x%08x,%p):stub.\n",
+{	
+	FIXME("SHChangeNotifyRegister: (0x%04x,0x%08lx,0x%08lx,0x%08lx,0x%08x,%p):stub.\n",
 		hwnd,events1,events2,msg,count,idlist);
 	return 0;
 }
@@ -114,7 +115,7 @@ DWORD WINAPI ParseFieldA(LPCSTR src, DWORD field, LPSTR dst, DWORD len)
  *
  */
 DWORD WINAPI PickIconDlg(DWORD x,DWORD y,DWORD z,DWORD a)
-{	FIXME("(%08lx,%08lx,%08lx,%08lx):stub.\n",x,y,z,a);
+{	FIXME("PickIconDlg(%08lx,%08lx,%08lx,%08lx):stub.\n",x,y,z,a);
 	return 0xffffffff;
 }
 
@@ -1104,6 +1105,22 @@ HRESULT WINAPI StrRetToStrNAW (LPVOID dest, DWORD len, LPSTRRET src, LPITEMIDLIS
 }
 
 /*************************************************************************
+ * StrChrA					[NT 4.0:SHELL32.651]
+ *
+ */
+LPSTR WINAPI StrChrA (LPSTR str, CHAR x )
+{	LPSTR ptr=str;
+	
+	do
+	{  if (*ptr==x)
+	   { return ptr;
+	   }
+	   ptr++;
+	} while (*ptr);
+	return NULL;
+}
+
+/*************************************************************************
  * StrChrW					[NT 4.0:SHELL32.651]
  *
  */
@@ -1126,6 +1143,15 @@ LPWSTR WINAPI StrChrW (LPWSTR str, WCHAR x )
  */
 INT WINAPI StrCmpNIW ( LPWSTR wstr1, LPWSTR wstr2, INT len)
 {	FIXME("%s %s %i stub\n", debugstr_w(wstr1),debugstr_w(wstr2),len);
+	return 0;
+}
+
+/*************************************************************************
+ * StrCmpNIA					[NT 4.0:SHELL32.*]
+ *
+ */
+INT WINAPI StrCmpNIA ( LPSTR wstr1, LPSTR wstr2, INT len)
+{	FIXME("%s %s %i stub\n", wstr1,wstr2,len);
 	return 0;
 }
 
