@@ -1,4 +1,4 @@
-# $Id: process.mak,v 1.6 2002-04-22 00:27:54 bird Exp $
+# $Id: process.mak,v 1.7 2002-04-22 02:22:18 bird Exp $
 
 #
 # Unix-like tools for OS/2
@@ -572,6 +572,18 @@ testcase:
     @$(TOOL_DOMAKES) "$(POSTMAKEFILES)" $(TOOL_MAKE) $@
 !endif
 !endif
+
+
+
+# -----------------------------------------------------------------------------
+# The shell rule - Setup the correcte shell environment and start a shell.
+# -----------------------------------------------------------------------------
+shell:
+!ifndef BUILD_VERBOSE
+    @ \
+!endif
+    -$(TOOL_BUILDENV) $(BUILD_ENVS_BASE_PRE) $(BUILD_ENVS_PRE) $(ENV_ENVS) \
+        $(BUILD_ENVS_BASE_POST) $(BUILD_ENVS_POST) * $(COMSPEC)
 
 
 
