@@ -697,11 +697,7 @@ DWORD WINAPI SHFileOperationA (LPSHFILEOPSTRUCTA lpFileOp)
  */
 DWORD WINAPI SHFileOperationW (LPSHFILEOPSTRUCTW lpFileOp)   
 {
-#ifdef __WIN32OS2__
-	FIXME(__FUNCTION__"(%p) ,stub\n", lpFileOp);
-#else
 	FIXME("(%p):stub.\n", lpFileOp);
-#endif
 	return 1;
 }
 
@@ -721,11 +717,7 @@ DWORD WINAPI SHFileOperationAW(LPVOID lpFileOp)
  *
  */
 HRESULT WINAPI SheGetDirW(LPWSTR u, LPWSTR v)
-#ifdef __WIN32OS2__
-{	FIXME(__FUNCTION__"(%p, %p) ,stub\n",u,v);
-#else
 {	FIXME("%p %p stub\n",u,v);
-#endif
 	return 0;
 }
 
@@ -734,11 +726,7 @@ HRESULT WINAPI SheGetDirW(LPWSTR u, LPWSTR v)
  *
  */
 HRESULT WINAPI SheChangeDirW(LPWSTR u)
-#ifdef __WIN32OS2__
-{	FIXME(__FUNCTION__"(%s),stub\n",debugstr_w(u));
-#else
 {	FIXME("(%s),stub\n",debugstr_w(u));
-#endif
 	return 0;
 }
 

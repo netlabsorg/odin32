@@ -1,4 +1,4 @@
-/* $Id: misc.cpp,v 1.11 2001-04-04 09:02:15 sandervl Exp $ */
+/* $Id: misc.cpp,v 1.12 2002-02-14 12:10:08 sandervl Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -75,10 +75,8 @@ BOOL SHELL_OsIsUnicode(void)
  * Author    : Christoph Bratschi [Fri, 1999/08/6 20:00]
  *****************************************************************************/
 
-ODINFUNCTION3(HICON,     ExtractAssociatedIconExA,
-              HINSTANCE, hInst,
-              LPSTR,     lpIconPath,
-              LPWORD,    lpiIcon)
+HICON WIN32API ExtractAssociatedIconExA(HINSTANCE hInst, LPSTR lpIconPath,
+                                        LPWORD lpiIcon)
 {
   dprintf(("SHELL32: undoc ExtractAssociatedIconExA\n"));
 
@@ -98,10 +96,8 @@ ODINFUNCTION3(HICON,     ExtractAssociatedIconExA,
  * Author    : Patrick Haller [Sat, 1998/07/11 11:55]
  *****************************************************************************/
 
-ODINFUNCTION3(HICON,     ExtractAssociatedIconW,
-              HINSTANCE, hInst,
-              LPWSTR,    lpIconPath,
-              LPWORD,    lpiIcon)
+HICON WIN32API ExtractAssociatedIconW(HINSTANCE hInst, LPWSTR lpIconPath,
+                                      LPWORD lpiIcon)
 {
   LPSTR lpIconPathAscii = UnicodeToAsciiString(lpIconPath);
   HICON hIcon;
@@ -128,10 +124,8 @@ ODINFUNCTION3(HICON,     ExtractAssociatedIconW,
  * Author    : Christoph Bratschi [Fri, 1999/08/6 20:00]
  *****************************************************************************/
 
-ODINFUNCTION3(HICON,     ExtractAssociatedIconExW,
-              HINSTANCE, hInst,
-              LPWSTR,    lpIconPath,
-              LPWORD,    lpiIcon)
+HICON WIN32API ExtractAssociatedIconExW(HINSTANCE hInst, LPWSTR lpIconPath,
+                                        LPWORD lpiIcon)
 {
   dprintf(("SHELL32: undoc ExtractAssociatedIconExW\n"));
 
@@ -151,11 +145,8 @@ ODINFUNCTION3(HICON,     ExtractAssociatedIconExW,
  * Author    : Patrick Haller [Tue, 1998/06/15 03:00]
  *****************************************************************************/
 
-ODINFUNCTION4(BOOL,    OleStrToStrN,
-              LPSTR,   lpMulti,
-              INT,     nMulti,
-              LPCWSTR, lpWide,
-              INT,     nWide)
+BOOL WIN32API OleStrToStrN(LPSTR lpMulti, INT nMulti, LPCWSTR lpWide,
+                           INT nWide)
 {
   return WideCharToMultiByte (0,
                               0,
@@ -180,11 +171,8 @@ ODINFUNCTION4(BOOL,    OleStrToStrN,
  * Author    : Patrick Haller [Tue, 1998/06/15 03:00]
  *****************************************************************************/
 
-ODINFUNCTION4(BOOL,   StrToOleStrN,
-              LPWSTR, lpWide,
-              INT,    nWide,
-              LPCSTR, lpMulti,
-              INT,    nMulti)
+BOOL WIN32API StrToOleStrN(LPWSTR lpWide, INT nWide, LPCSTR lpMulti,
+                           INT nMulti)
 {
   return MultiByteToWideChar (0,
                               0,
@@ -207,9 +195,7 @@ ODINFUNCTION4(BOOL,   StrToOleStrN,
  * Author    : Patrick Haller [Tue, 1998/06/15 03:00]
  *****************************************************************************/
 
-ODINFUNCTION2(HRESULT, SHELL32_654,
-              DWORD,   x,
-              DWORD,   y)
+HRESULT WIN32API SHELL32_654(DWORD x, DWORD y)
 {
   dprintf(("SHELL32: SHELL32_654(%08xh,%08xh) not implemented.\n",
            x,
@@ -230,9 +216,7 @@ ODINFUNCTION2(HRESULT, SHELL32_654,
  * Author    : Patrick Haller [Tue, 1998/06/15 03:00]
  *****************************************************************************/
 
-ODINFUNCTION2(int,    StrToOleStr,
-              LPWSTR, lpWideCharStr,
-              LPCSTR, lpMultiByteString)
+int WIN32API StrToOleStr(LPWSTR lpWideCharStr, LPCSTR lpMultiByteString)
 {
   return MultiByteToWideChar(0,
                              0,
@@ -254,7 +238,7 @@ ODINFUNCTION2(int,    StrToOleStr,
  * Author    : Christoph Bratschi [Fri, 1999/08/6 19:00]
  *****************************************************************************/
 
-ODINFUNCTION1(DWORD, InternalExtractIconListA, DWORD, dwArg1)
+DWORD WIN32API InternalExtractIconListA(DWORD dwArg1)
 {
   dprintf(("SHELL32: undoc InternalExtractIconListA \n"));
   return 0;
@@ -272,7 +256,7 @@ ODINFUNCTION1(DWORD, InternalExtractIconListA, DWORD, dwArg1)
  * Author    : Christoph Bratschi [Fri, 1999/08/6 19:00]
  *****************************************************************************/
 
-ODINFUNCTION1(DWORD, InternalExtractIconListW, DWORD, dwArg1)
+DWORD WIN32API InternalExtractIconListW(DWORD dwArg1)
 {
   dprintf(("SHELL32: undoc InternalExtractIconListW\n"));
   return 0;
@@ -290,7 +274,7 @@ ODINFUNCTION1(DWORD, InternalExtractIconListW, DWORD, dwArg1)
  * Author    : Christoph Bratschi [Fri, 1999/08/6 19:00]
  *****************************************************************************/
 
-ODINFUNCTION1(DWORD, ExtractIconResInfoA, DWORD, dwArg1)
+DWORD WIN32API ExtractIconResInfoA(DWORD dwArg1)
 {
   dprintf(("SHELL32: undoc ExtractIconResInfoA\n"));
   return 0;
@@ -308,7 +292,7 @@ ODINFUNCTION1(DWORD, ExtractIconResInfoA, DWORD, dwArg1)
  * Author    : Christoph Bratschi [Fri, 1999/08/6 19:00]
  *****************************************************************************/
 
-ODINFUNCTION1(DWORD, ExtractIconResInfoW, DWORD, dwArg1)
+DWORD WIN32API ExtractIconResInfoW( DWORD dwArg1)
 {
   dprintf(("SHELL32: undoc ExtractIconResInfoW\n"));
   return 0;
@@ -326,9 +310,7 @@ ODINFUNCTION1(DWORD, ExtractIconResInfoW, DWORD, dwArg1)
  * Author    : Christoph Bratschi [Fri, 1999/08/6 19:00]
  *****************************************************************************/
 
-ODINPROCEDURE2(CheckEscapesA,
-               DWORD, x1,
-               DWORD, x2)
+void WIN32API CheckEscapesA(DWORD x1, DWORD x2)
 {
   dprintf(("SHELL32: undoc CheckEscapesA\n"));
 }
@@ -345,9 +327,7 @@ ODINPROCEDURE2(CheckEscapesA,
  * Author    : Christoph Bratschi [Fri, 1999/08/6 19:00]
  *****************************************************************************/
 
-ODINPROCEDURE2(CheckEscapesW,
-               DWORD, x1,
-               DWORD, x2)
+void WIN32API CheckEscapesW(DWORD x1, DWORD x2)
 {
   dprintf(("SHELL32: undoc CheckEscapesW\n"));
 }
@@ -364,8 +344,7 @@ ODINPROCEDURE2(CheckEscapesW,
  * Author    : Christoph Bratschi [Fri, 1999/08/6 19:00]
  *****************************************************************************/
 
-ODINFUNCTION1(DWORD, DuplicateIcon,
-              DWORD, x1)
+DWORD WIN32API DuplicateIcon(DWORD x1)
 {
   dprintf(("SHELL32: undoc DuplicateIcon\n"));
 

@@ -1,4 +1,4 @@
-/* $Id: unknown.cpp,v 1.10 2001-04-04 09:02:15 sandervl Exp $ */
+/* $Id: unknown.cpp,v 1.11 2002-02-14 12:10:12 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -52,13 +52,9 @@ ODINDEBUGCHANNEL(SHELL32-UNKNOWN)
  * Author    : Patrick Haller [Tue, 1999/06/01 09:00]
  *****************************************************************************/
 
-ODINFUNCTION6(HINSTANCE, RealShellExecuteA,
-              HWND,      hwnd,
-              LPCTSTR,   lpOperation,
-              LPCTSTR,   lpFile,
-              LPCTSTR,   lpParameters,
-              LPCTSTR,   lpDirectory,
-              INT,       nShowCmd)
+HINSTANCE WIN32API RealShellExecuteA(HWND hwnd, LPCTSTR lpOperation,
+                                     LPCTSTR lpFile, LPCTSTR lpParameters,
+                                     LPCTSTR lpDirectory, INT nShowCmd)
 {
   dprintf (("SHELL32: RealShellExecuteA not implemented.\n"));
 
@@ -83,13 +79,9 @@ ODINFUNCTION6(HINSTANCE, RealShellExecuteA,
  * Author    : Patrick Haller [Tue, 1999/06/01 09:00]
  *****************************************************************************/
 
-ODINFUNCTION6(HINSTANCE, RealShellExecuteW,
-              HWND,      hwnd,
-              LPCWSTR,   lpOperation,
-              LPCWSTR,   lpFile,
-              LPCWSTR,   lpParameters,
-              LPCWSTR,   lpDirectory,
-              INT,       nShowCmd)
+HINSTANCE WIN32API RealShellExecuteW(HWND hwnd, LPCTSTR lpOperation,
+                                     LPCWSTR lpFile, LPCWSTR lpParameters,
+                                     LPCWSTR lpDirectory, INT nShowCmd)
 {
   HINSTANCE hInstance;
   LPSTR     lpOperationA  = UnicodeToAsciiString((LPWSTR)lpOperation);
@@ -133,8 +125,7 @@ ODINFUNCTION6(HINSTANCE, RealShellExecuteW,
  * Author    : Patrick Haller [Tue, 1998/06/15 03:00]
  *****************************************************************************/
 
-ODINFUNCTION1(BOOL,                RealShellExecuteExA,
-              LPSHELLEXECUTEINFOA, lpExecInfo)
+BOOL WIN32API RealShellExecuteExA(LPSHELLEXECUTEINFOA lpExecInfo)
 {
   dprintf(("SHELL32: RealShellExecuteExA not implemented.\n"));
 
@@ -154,8 +145,7 @@ ODINFUNCTION1(BOOL,                RealShellExecuteExA,
  * Author    : Patrick Haller [Tue, 1998/06/15 03:00]
  *****************************************************************************/
 
-ODINFUNCTION1(BOOL,                RealShellExecuteExW,
-              LPSHELLEXECUTEINFOW, lpExecInfo)
+BOOL WIN32API RealShellExecuteExW(LPSHELLEXECUTEINFOW lpExecInfo)
 {
   dprintf(("SHELL32: RealShellExecuteExW not implemented.\n"));
 
@@ -175,9 +165,7 @@ ODINFUNCTION1(BOOL,                RealShellExecuteExW,
  * Author    : Patrick Haller [Tue, 1998/06/15 03:00]
  *****************************************************************************/
 
-ODINFUNCTION2(DWORD, RegenerateUserEnvironment,
-              DWORD, x1,
-              DWORD, x2)
+DWORD WIN32API RegenerateUserEnvironment(DWORD x1, DWORD x2)
 {
   dprintf(("SHELL32: RegenerateUserEnvironment not implemented.\n"));
 
@@ -197,10 +185,7 @@ ODINFUNCTION2(DWORD, RegenerateUserEnvironment,
  * Author    : Patrick Haller [Tue, 1998/06/15 03:00]
  *****************************************************************************/
 
-ODINFUNCTION3(DWORD, RestartDialog,
-              DWORD, x1,
-              DWORD, x2,
-              DWORD, x3)
+DWORD WIN32API RestartDialog(DWORD x1, DWORD x2, DWORD x3)
 {
   dprintf(("SHELL32: RestartDialog not implemented.\n"));
 
@@ -220,9 +205,7 @@ ODINFUNCTION3(DWORD, RestartDialog,
  * Author    : Patrick Haller [Tue, 1998/06/15 03:00]
  *****************************************************************************/
 
-ODINFUNCTION2(DWORD, SheConvertPathW,
-              DWORD, x1,
-              DWORD, x2)
+DWORD WIN32API SheConvertPathW(DWORD x1, DWORD x2)
 {
   dprintf(("SHELL32: SheConvertPathW not implemented.\n"));
 
@@ -242,9 +225,7 @@ ODINFUNCTION2(DWORD, SheConvertPathW,
  * Author    : Patrick Haller [Tue, 1998/06/15 03:00]
  *****************************************************************************/
 
-ODINFUNCTION2(DWORD, SheShortenPathW,
-              DWORD, x1,
-              DWORD, x2)
+DWORD WIN32API SheShortenPathW(DWORD x1, DWORD x2)
 {
   dprintf(("SHELL32: SheShortenPathW not implemented.\n"));
 
@@ -264,9 +245,7 @@ ODINFUNCTION2(DWORD, SheShortenPathW,
  * Author    : Patrick Haller [Tue, 1998/06/15 03:00]
  *****************************************************************************/
 
-ODINFUNCTION2(DWORD, SheShortenPathA,
-              DWORD, x1,
-              DWORD, x2)
+DWORD WIN32API SheShortenPathA(DWORD x1, DWORD x2)
 {
   dprintf(("SHELL32: SheShortenPathA not implemented.\n"));
 
@@ -278,10 +257,8 @@ ODINFUNCTION2(DWORD, SheShortenPathA,
  * SHRegQueryValueA				[NT4.0:SHELL32.?]
  *
  */
-ODINFUNCTION4(HRESULT,SHRegQueryValueA,HKEY,   hkey,
-                                       LPSTR,  lpszSubKey,
-                                       LPSTR,  lpszData,
-                                       LPDWORD,lpcbData )
+HRESULT WIN32API SHRegQueryValueA(HKEY hkey, LPSTR lpszSubKey,
+                                  LPSTR lpszData, LPDWORD lpcbData )
 {	dprintf(("SHELL32:UNKNOWN:SHRegQueryValueA(0x%04x %s %p %p semi-stub\n",
 		hkey, lpszSubKey, lpszData, lpcbData));
 	return RegQueryValueA( hkey, lpszSubKey, lpszData, (LPLONG)lpcbData );

@@ -1,4 +1,4 @@
-; $Id: shell32.def,v 1.35 2001-04-28 13:33:45 sandervl Exp $
+; $Id: shell32.def,v 1.36 2002-02-14 12:10:10 sandervl Exp $
 
 ; Based on Windows 95
 LIBRARY SHELL32 INITINSTANCE
@@ -309,6 +309,7 @@ EXPORTS
     Shell_NotifyIconW                 = _Shell_NotifyIconW@8                  @298
 ;   Shl1632_ThunkData32               = _Shl1632_ThunkData32@?                @299
 ;   Shl3216_ThunkData32               = _Shl3216_ThunkData32@?                @300
+;;SHLWAPI forwarders
     StrChrA                           = _StrChrA@8                            @301
     StrChrIA                          = _StrChrIA@8                           @302
     StrChrIW                          = _StrChrIW@8                           @303
@@ -326,17 +327,18 @@ EXPORTS
     StrNCpyA                          = _lstrcpynA@12                         @315
     StrNCpyW                          = _lstrcpynW@12                         @316
     StrRChrA                          = _StrRChrA@12                          @317
-;    StrRChrIA                         = _StrRChrIA@8                          @318
-;    StrRChrIW                         = _StrRChrIW@8                          @319
+    StrRChrIA                         = _StrRChrIA@12                         @318
+    StrRChrIW                         = _StrRChrIW@12                         @319
     StrRChrW                          = _StrRChrW@12                          @320
 ;   StrRStrA                          = _StrRStrA@?                           @321
-;    StrRStrIA                         = _StrRStrIA@8                          @322
-;    StrRStrIW                         = _StrRStrIW@8                          @323
+    StrRStrIA                         = _StrRStrIA@12                         @322
+    StrRStrIW                         = _StrRStrIW@12                         @323
 ;   StrRStrW                          = _StrRStrW@?                           @324
     StrStrA                           = _StrStrA@8                            @325
     StrStrIA                          = _StrStrIA@8                           @326
     StrStrIW                          = _StrStrIW@8                           @327
     StrStrW                           = _StrStrW@8                            @328
+;;SHLWAPI forwarders end
 ;   WOWShellExecute                   = _WOWShellExecute@?                    @329
     SHRegCloseKey                     = _SHRegCloseKey@4                      @505
     SHRegOpenKeyA                     = _SHRegOpenKeyA@12                     @506

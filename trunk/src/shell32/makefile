@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.37 2001-11-19 12:34:04 sandervl Exp $
+# $Id: makefile,v 1.38 2002-02-14 12:10:08 sandervl Exp $
 
 #
 # Odin32 API
@@ -10,6 +10,11 @@
 #
 # Compiler, tools, and interference rules.
 #
+!if "$(DEBUG)" == "1"
+DEFFILE    = shell32dbg.def
+ORGDEFFILE = shell32.def
+!endif
+
 WRC_PREFIX_RESOURCE=1
 !include ../../makefile.inc
 
@@ -60,6 +65,9 @@ $(OBJDIR)\she.obj \
 $(OBJDIR)\sh.obj \
 $(OBJDIR)\shpolicy.obj \
 $(OBJDIR)\systray.obj \
+!if "$(DEBUG)" == "1"
+$(OBJDIR)\dbgwrap.obj \
+!endif
 $(OBJDIR)\shres.obj
 
 
