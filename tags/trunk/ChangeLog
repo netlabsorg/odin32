@@ -1,4 +1,4 @@
-/* $Id: ChangeLog,v 1.1511 2001-06-13 14:46:03 bird Exp $ */
+/* $Id: ChangeLog,v 1.1512 2001-06-13 17:26:51 sandervl Exp $ */
 
  2001-06-13: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Corrected position of PM titlebar control
@@ -8,6 +8,7 @@
                 o Changed menu font for OS/2 appearance (bold)
                 o Draw system menu icon ourselves (OS/2 appearance)
                 o SetWindowText fix (OS/2 appearance)
+                o WM_ERASEBKGND handling changes for dialogs
     - GDI32:    o CreateDIBSection bugfix (wrong ReleaseDC call)
 
  2001-06-13: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
