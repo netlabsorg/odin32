@@ -1,4 +1,4 @@
-/* $Id: directory.cpp,v 1.34 2000-12-28 18:17:56 sandervl Exp $ */
+/* $Id: directory.cpp,v 1.35 2001-03-12 14:16:33 sandervl Exp $ */
 
 /*
  * Win32 Directory functions for OS/2
@@ -690,7 +690,7 @@ DWORD WINAPI SearchPathA(LPCSTR path, LPCSTR name, LPCSTR ext, DWORD buflen,
     if (!DIR_SearchPath( path, name, ext, (LPSTR)full_name )) return 0;
     lstrcpynA( buffer, (LPSTR)full_name, buflen);
     SetLastError(0);
-    return strlen(buffer);
+    return strlen(full_name);
 }
 
 
@@ -713,5 +713,5 @@ DWORD WINAPI SearchPathW(LPCWSTR path, LPCWSTR name, LPCWSTR ext,
 
     lstrcpynAtoW( buffer, full_name, buflen);
     SetLastError(0);
-    return strlen(full_name);
+    return ret;
 }
