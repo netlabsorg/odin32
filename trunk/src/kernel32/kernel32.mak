@@ -1,4 +1,4 @@
-# $Id: kernel32.mak,v 1.23 2002-02-08 15:09:30 sandervl Exp $
+# $Id: kernel32.mak,v 1.24 2002-02-09 17:27:31 sandervl Exp $
 
 #
 # Odin32 API
@@ -15,7 +15,8 @@ MAKEFILE=kernel32.mak
 # Compiler, tools, and interference rules.
 #
 !if "$(DEBUG)" == "1"
-DEFFILE = kernel32dbg.def
+DEFFILE    = kernel32dbg.def
+ORGDEFFILE = kernel32.def
 !endif
 
 WRC_PREFIX_RESOURCE=1

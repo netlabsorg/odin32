@@ -1,4 +1,4 @@
-/* $Id: kobjects.cpp,v 1.14 2001-12-06 15:57:51 sandervl Exp $ */
+/* $Id: kobjects.cpp,v 1.15 2002-02-09 17:27:32 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -75,11 +75,9 @@ ODINDEBUGCHANNEL(KERNEL32-KOBJECTS)
  * Author    : Patrick Haller [Fri, 1998/06/12 03:44]
  *****************************************************************************/
 
-ODINFUNCTION4(HANDLE, CreateEventA,
-              LPSECURITY_ATTRIBUTES, lpsa,
-              BOOL, fManualReset,
-              BOOL, fInitialState,
-              LPCTSTR, lpszEventName)
+HANDLE WIN32API CreateEventA(LPSECURITY_ATTRIBUTES lpsa, BOOL fManualReset,
+                             BOOL fInitialState,
+                             LPCTSTR lpszEventName)
 {
   return(HMCreateEvent(lpsa,                         /* create event semaphore */
                        fManualReset,
@@ -100,11 +98,9 @@ ODINFUNCTION4(HANDLE, CreateEventA,
  * Author    : Patrick Haller [Fri, 1998/06/12 03:44]
  *****************************************************************************/
 
-ODINFUNCTION4(HANDLE, CreateEventW,
-              LPSECURITY_ATTRIBUTES, arg1,
-              BOOL, arg2,
-              BOOL, arg3,
-              LPCWSTR, arg4)
+HANDLE WIN32API CreateEventW(LPSECURITY_ATTRIBUTES arg1,
+                             BOOL arg2, BOOL arg3,
+                             LPCWSTR arg4)
 {
   HANDLE rc;
   char  *astring;
@@ -141,10 +137,9 @@ ODINFUNCTION4(HANDLE, CreateEventW,
  * Author    : Patrick Haller [Fri, 1999/06/18 03:44]
  *****************************************************************************/
 
-ODINFUNCTION3(HANDLE, CreateMutexA,
-              LPSECURITY_ATTRIBUTES, lpsa,
-              BOOL, fInitialOwner,
-              LPCTSTR, lpszMutexName)
+HANDLE WIN32API CreateMutexA(LPSECURITY_ATTRIBUTES lpsa,
+                             BOOL fInitialOwner,
+                             LPCTSTR lpszMutexName)
 {
   dprintf(("KERNEL32: CreateMutexA(%s)\n",
            lpszMutexName));
@@ -167,10 +162,8 @@ ODINFUNCTION3(HANDLE, CreateMutexA,
  * Author    : Patrick Haller [Fri, 1999/06/18 03:44]
  *****************************************************************************/
 
-ODINFUNCTION3(HANDLE, CreateMutexW,
-              PSECURITY_ATTRIBUTES, arg1,
-              BOOL, arg2,
-              LPCWSTR, arg3)
+HANDLE WIN32API CreateMutexW(LPSECURITY_ATTRIBUTES arg1, BOOL arg2,
+                             LPCWSTR arg3)
 {
   HANDLE rc;
   char  *astring;
@@ -206,8 +199,7 @@ ODINFUNCTION3(HANDLE, CreateMutexW,
  * Author    : Patrick Haller [Fri, 1999/06/18 03:44]
  *****************************************************************************/
 
-ODINFUNCTION1(BOOL, ReleaseMutex,
-              HANDLE, mutex)
+BOOL WIN32API ReleaseMutex(HANDLE mutex)
 {
   return(HMReleaseMutex(mutex));
 }
@@ -225,8 +217,7 @@ ODINFUNCTION1(BOOL, ReleaseMutex,
  * Author    : Patrick Haller [Fri, 1999/06/18 03:44]
  *****************************************************************************/
 
-ODINFUNCTION1(BOOL, SetEvent,
-              HANDLE, hEvent)
+BOOL WIN32API SetEvent(HANDLE hEvent)
 {
   return(HMSetEvent(hEvent));
 }
@@ -244,9 +235,7 @@ ODINFUNCTION1(BOOL, SetEvent,
  * Author    : Patrick Haller [Fri, 1999/06/18 03:44]
  *****************************************************************************/
 
-ODINFUNCTION2(DWORD, WaitForSingleObject,
-              HANDLE, hObject,
-              DWORD, timeout)
+DWORD WIN32API WaitForSingleObject(HANDLE hObject, DWORD timeout)
 {
   return(HMWaitForSingleObject(hObject,
                                timeout));
@@ -272,10 +261,7 @@ ODINFUNCTION2(DWORD, WaitForSingleObject,
  * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
  *****************************************************************************/
 
-ODINFUNCTION3(DWORD, WaitForSingleObjectEx,
-              HANDLE, hObject,
-              DWORD, dwTimeout,
-              BOOL, fAlertable)
+DWORD WIN32API WaitForSingleObjectEx(HANDLE hObject, DWORD dwTimeout, BOOL fAlertable)
 {
   dprintf(("Kernel32: WaitForSingleObjectEx(%08xh,%08xh,%08xh) not implemented correctly.\n",
            hObject,
@@ -300,8 +286,7 @@ ODINFUNCTION3(DWORD, WaitForSingleObjectEx,
  * Author    : Patrick Haller [Fri, 1999/06/18 03:44]
  *****************************************************************************/
 
-ODINFUNCTION1(BOOL, FlushFileBuffers,
-              HANDLE, hFile)
+BOOL WIN32API FlushFileBuffers(HANDLE hFile)
 {
   return(HMFlushFileBuffers(hFile));
 }
@@ -319,8 +304,7 @@ ODINFUNCTION1(BOOL, FlushFileBuffers,
  * Author    : Patrick Haller [Fri, 1999/06/18 03:44]
  *****************************************************************************/
 
-ODINFUNCTION1(UINT, SetHandleCount,
-              UINT, cHandles)
+UINT WIN32API SetHandleCount(UINT cHandles)
 {
   //SvL: Has no effect in NT; also ignore it
   return cHandles;
@@ -339,18 +323,9 @@ ODINFUNCTION1(UINT, SetHandleCount,
  * Author    : Patrick Haller [Fri, 1999/06/18 03:44]
  *****************************************************************************/
 
-//******************************************************************************
-//SvL: 24-6-'97 - Added
-//SvL: 28-6-'97: Fix for timeSetEvent in Red Alert Map Editor
-//******************************************************************************
-ODINFUNCTION7(BOOL, DuplicateHandle,
-              HANDLE, srcprocess,
-              HANDLE, srchandle,
-              HANDLE, destprocess,
-              PHANDLE, desthandle,
-              DWORD, arg5,
-              BOOL, arg6,
-              DWORD, arg7)
+BOOL WIN32API DuplicateHandle(HANDLE srcprocess, HANDLE srchandle,
+                              HANDLE destprocess, PHANDLE desthandle,
+                              DWORD arg5, BOOL arg6, DWORD arg7)
 {
   BOOL rc;
 
@@ -387,11 +362,8 @@ ODINFUNCTION7(BOOL, DuplicateHandle,
  * Author    : Patrick Haller [Fri, 1999/06/18 03:44]
  *****************************************************************************/
 
-ODINFUNCTION4(HANDLE, CreateSemaphoreA,
-              LPSECURITY_ATTRIBUTES, arg1,
-              LONG, arg2,
-              LONG, arg3,
-              LPCSTR, arg4)
+HANDLE WIN32API CreateSemaphoreA(LPSECURITY_ATTRIBUTES arg1,
+                                 LONG arg2, LONG arg3, LPCSTR arg4)
 {
   return HMCreateSemaphore(arg1,
                            arg2,
@@ -412,11 +384,8 @@ ODINFUNCTION4(HANDLE, CreateSemaphoreA,
  * Author    : Patrick Haller [Fri, 1999/06/18 03:44]
  *****************************************************************************/
 
-ODINFUNCTION4(HANDLE, CreateSemaphoreW,
-              PSECURITY_ATTRIBUTES, arg1,
-              LONG, arg2,
-              LONG, arg3,
-              LPCWSTR, arg4)
+HANDLE WIN32API CreateSemaphoreW(LPSECURITY_ATTRIBUTES arg1, LONG arg2,
+                                 LONG arg3, LPCWSTR arg4)
 {
   HANDLE rc;
   char   *astring;
@@ -451,10 +420,7 @@ ODINFUNCTION4(HANDLE, CreateSemaphoreW,
  * Author    : Patrick Haller [Fri, 1999/06/18 03:44]
  *****************************************************************************/
 
-ODINFUNCTION3(HANDLE, OpenEventA,
-              DWORD,  arg1,
-              BOOL,   arg2,
-              LPCSTR, arg3)
+HANDLE WIN32API OpenEventA(DWORD  arg1, BOOL arg2, LPCSTR arg3)
 {
   dprintf(("KERNEL32: OpenEventA(%s)\n",
            arg3));
@@ -477,10 +443,8 @@ ODINFUNCTION3(HANDLE, OpenEventA,
  * Author    : Patrick Haller [Fri, 1999/06/18 03:44]
  *****************************************************************************/
 
-ODINFUNCTION3(HANDLE,  OpenEventW,
-              DWORD,   dwDesiredAccess,
-              BOOL,    bInheritHandle,
-              LPCWSTR, lpName)
+HANDLE WIN32API  OpenEventW(DWORD dwDesiredAccess, BOOL bInheritHandle,
+                            LPCWSTR lpName)
 {
   char  *asciiname;
   HANDLE rc;
@@ -510,10 +474,7 @@ ODINFUNCTION3(HANDLE,  OpenEventW,
  * Author    : Patrick Haller [Fri, 1999/06/18 03:44]
  *****************************************************************************/
 
-ODINFUNCTION3(HANDLE, OpenMutexA,
-              DWORD,  arg1,
-              BOOL,   arg2,
-              LPCSTR, arg3)
+HANDLE WIN32API OpenMutexA(DWORD arg1, BOOL arg2, LPCSTR arg3)
 {
   dprintf(("KERNEL32: OpenMutexA(%s)\n",
            arg3));
@@ -536,10 +497,8 @@ ODINFUNCTION3(HANDLE, OpenMutexA,
  * Author    : Patrick Haller [Fri, 1999/06/18 03:44]
  *****************************************************************************/
 
-ODINFUNCTION3(HANDLE,  OpenMutexW,
-              DWORD,   dwDesiredAccess,
-              BOOL,    bInheritHandle,
-              LPCWSTR, lpName)
+HANDLE WIN32API OpenMutexW(DWORD dwDesiredAccess, BOOL bInheritHandle,
+                           LPCWSTR lpName)
 {
   char  *asciiname;
   HANDLE rc;
@@ -569,10 +528,7 @@ ODINFUNCTION3(HANDLE,  OpenMutexW,
  * Author    : Patrick Haller [Fri, 1999/06/18 03:44]
  *****************************************************************************/
 
-ODINFUNCTION3(HANDLE, OpenSemaphoreA,
-              DWORD,  arg1,
-              BOOL,   arg2,
-              LPCSTR, arg3)
+HANDLE WIN32API OpenSemaphoreA(DWORD arg1, BOOL arg2, LPCSTR arg3)
 {
   dprintf(("KERNEL32: OpenSemaphoreA(%s)\n",
            arg3));
@@ -595,10 +551,8 @@ ODINFUNCTION3(HANDLE, OpenSemaphoreA,
  * Author    : Patrick Haller [Fri, 1999/06/18 03:44]
  *****************************************************************************/
 
-ODINFUNCTION3(HANDLE,  OpenSemaphoreW,
-              DWORD,   dwDesiredAccess,
-              BOOL,    bInheritHandle,
-              LPCWSTR, lpName)
+HANDLE WIN32API OpenSemaphoreW(DWORD dwDesiredAccess, BOOL bInheritHandle,
+                               LPCWSTR lpName)
 {
   char  *asciiname;
   HANDLE rc;
@@ -628,8 +582,7 @@ ODINFUNCTION3(HANDLE,  OpenSemaphoreW,
  * Author    : Patrick Haller [Fri, 1999/06/18 03:44]
  *****************************************************************************/
 
-ODINFUNCTION1(BOOL, PulseEvent,
-              HANDLE, arg1)
+BOOL WIN32API PulseEvent(HANDLE arg1)
 {
   return HMPulseEvent(arg1);
 }
@@ -647,10 +600,7 @@ ODINFUNCTION1(BOOL, PulseEvent,
  * Author    : Patrick Haller [Fri, 1999/06/18 03:44]
  *****************************************************************************/
 
-ODINFUNCTION3(BOOL,   ReleaseSemaphore,
-              HANDLE, arg1,
-              LONG,   arg2,
-              PLONG,  arg3)
+BOOL WIN32API ReleaseSemaphore(HANDLE arg1, LONG arg2, PLONG arg3)
 {
   return HMReleaseSemaphore(arg1,
                             arg2,
@@ -670,8 +620,7 @@ ODINFUNCTION3(BOOL,   ReleaseSemaphore,
  * Author    : Patrick Haller [Fri, 1999/06/18 03:44]
  *****************************************************************************/
 
-ODINFUNCTION1(BOOL,   ResetEvent,
-              HANDLE, arg1)
+BOOL WIN32API ResetEvent(HANDLE arg1)
 {
   return HMResetEvent(arg1);
 }
@@ -689,11 +638,8 @@ ODINFUNCTION1(BOOL,   ResetEvent,
  * Author    : Patrick Haller [Fri, 1999/06/18 03:44]
  *****************************************************************************/
 
-ODINFUNCTION4(DWORD,          WaitForMultipleObjects,
-              DWORD,          arg1,
-              const HANDLE *, arg2,
-              BOOL,           arg3,
-              DWORD,          arg4)
+DWORD WIN32API WaitForMultipleObjects(DWORD arg1, const HANDLE * arg2,
+                                      BOOL arg3, DWORD arg4)
 {
   return HMWaitForMultipleObjects(arg1,
                                   (PHANDLE)arg2,
@@ -724,12 +670,9 @@ ODINFUNCTION4(DWORD,          WaitForMultipleObjects,
  * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
  *****************************************************************************/
 
-ODINFUNCTION5(DWORD, WaitForMultipleObjectsEx,
-              DWORD, cObjects,
-              CONST HANDLE *, lphObjects,
-              BOOL, fWaitAll,
-              DWORD, dwTimeout,
-              BOOL, fAlertable)
+DWORD WIN32API WaitForMultipleObjectsEx(DWORD cObjects, CONST HANDLE *lphObjects,
+                                        BOOL fWaitAll, DWORD dwTimeout,
+                                        BOOL fAlertable)
 {
   return(HMWaitForMultipleObjectsEx(cObjects,
                                     (PHANDLE)lphObjects,
@@ -751,24 +694,23 @@ ODINFUNCTION5(DWORD, WaitForMultipleObjectsEx,
  * Author    : Patrick Haller [Fri, 1999/06/18 03:44]
  *****************************************************************************/
 
-ODINFUNCTION1(HANDLE, ConvertToGlobalHandle,
-              HANDLE, hHandle)
+HANDLE WIN32API ConvertToGlobalHandle(HANDLE hHandle)
 
-//ODINFUNCTION2(HANDLE, ConvertToGlobalHandle,
-//              HANDLE, hHandle,
-//              BOOL,   fInherit)
+//ODINFUNCTION2(HANDLE ConvertToGlobalHandle,
+//              HANDLE hHandle,
+//              BOOL   fInherit)
 {
   return (hHandle);
 }
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION6(HANDLE,CreateThread,LPSECURITY_ATTRIBUTES,  lpsa,
-                                  DWORD,                  cbStack,
-                                  LPTHREAD_START_ROUTINE, lpStartAddr,
-                                  LPVOID,                 lpvThreadParm,
-                                  DWORD,                  fdwCreate,
-                                  LPDWORD,                lpIDThread)
+HANDLE WIN32API CreateThread(LPSECURITY_ATTRIBUTES  lpsa,
+                             DWORD                  cbStack,
+                             LPTHREAD_START_ROUTINE lpStartAddr,
+                             LPVOID                 lpvThreadParm,
+                             DWORD                  fdwCreate,
+                             LPDWORD                lpIDThread)
 {
     return HMCreateThread(lpsa, cbStack, lpStartAddr, lpvThreadParm, fdwCreate, lpIDThread);
 }

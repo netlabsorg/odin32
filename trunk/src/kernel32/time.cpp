@@ -1,4 +1,4 @@
-/* $Id: time.cpp,v 1.16 2001-07-20 15:33:30 sandervl Exp $ */
+/* $Id: time.cpp,v 1.17 2002-02-09 17:27:32 sandervl Exp $ */
 
 /*
  * Win32 time/date API functions
@@ -86,24 +86,20 @@ static const WCHAR null_stringW[] = { '(', 'n', 'u', 'l', 'l', ')', 0 };
 
 //******************************************************************************
 //******************************************************************************
-ODINPROCEDURE1(GetLocalTime,
-               LPSYSTEMTIME, arg1)
+void WIN32API GetLocalTime(LPSYSTEMTIME arg1)
 {
   O32_GetLocalTime(arg1);
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION1(BOOL, SetLocalTime,
-              const SYSTEMTIME *, arg1)
+BOOL WIN32API SetLocalTime(const SYSTEMTIME * arg1)
 {
   return O32_SetLocalTime(arg1);
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION3(BOOL,FileTimeToDosDateTime,
-              const FILETIME *, arg1, 
-              LPWORD, arg2, 
-              LPWORD,  arg3)
+BOOL WIN32API FileTimeToDosDateTime(const FILETIME * arg1,  LPWORD arg2, 
+                                    LPWORD arg3)
 {
     return O32_FileTimeToDosDateTime(arg1, arg2, arg3);
 }
@@ -123,25 +119,19 @@ BOOL WIN32API LocalFileTimeToFileTime(const FILETIME * arg1, LPFILETIME arg2)
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION2(BOOL, FileTimeToSystemTime,
-              const FILETIME *, arg1, 
-              LPSYSTEMTIME, arg2)
+BOOL WIN32API FileTimeToSystemTime(const FILETIME * arg1, LPSYSTEMTIME arg2)
 {
   return O32_FileTimeToSystemTime(arg1, arg2);
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION3(BOOL,DosDateTimeToFileTime,
-              WORD, arg1, 
-              WORD, arg2, 
-              LPFILETIME, arg3)
+BOOL WIN32API DosDateTimeToFileTime(WORD arg1, WORD arg2, LPFILETIME arg3)
 {
     return O32_DosDateTimeToFileTime(arg1, arg2, arg3);
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION1(DWORD, GetTimeZoneInformation,
-              LPTIME_ZONE_INFORMATION, arg1)
+DWORD WIN32API GetTimeZoneInformation(LPTIME_ZONE_INFORMATION arg1)
 {
     return O32_GetTimeZoneInformation(arg1);
 }
@@ -154,39 +144,34 @@ DWORD WIN32API GetTickCount(void)
 }
 //******************************************************************************
 //******************************************************************************
-ODINPROCEDURE1(GetSystemTime,
-               LPSYSTEMTIME, arg1)
+void WIN32API GetSystemTime(LPSYSTEMTIME arg1)
 {
     O32_GetSystemTime(arg1);
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION2(BOOL, SystemTimeToFileTime,
-              const SYSTEMTIME *, arg1, 
-              LPFILETIME,  arg2)
+BOOL WIN32API SystemTimeToFileTime(const SYSTEMTIME * arg1, 
+                                   LPFILETIME arg2)
 {
   return O32_SystemTimeToFileTime(arg1, arg2);
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION3(BOOL, SystemTimeToTzSpecificLocalTime,
-              LPTIME_ZONE_INFORMATION, arg1,
-              LPSYSTEMTIME, arg2,
-              LPSYSTEMTIME, arg3)
+BOOL WIN32API SystemTimeToTzSpecificLocalTime(LPTIME_ZONE_INFORMATION arg1,
+                                              LPSYSTEMTIME arg2,
+                                              LPSYSTEMTIME arg3)
 {
   return O32_SystemTimeToTzSpecificLocalTime(arg1, arg2, arg3);
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION1(BOOL, SetTimeZoneInformation,
-              const LPTIME_ZONE_INFORMATION, arg1)
+BOOL WIN32API SetTimeZoneInformation(const LPTIME_ZONE_INFORMATION arg1)
 {
   return O32_SetTimeZoneInformation(arg1);
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION1(BOOL,SetSystemTime,
-              const SYSTEMTIME *, arg1)
+BOOL WIN32API SetSystemTime(const SYSTEMTIME * arg1)
 {
   return O32_SetSystemTime(arg1);
 }

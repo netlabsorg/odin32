@@ -5,6 +5,7 @@
 
 typedef DWORD (* WIN32API DBG_WINPROC0)();
 typedef DWORD (* WIN32API DBG_WINPROC4)(DWORD);
+typedef DWORD (* WIN32API DBG_WINPROC4_NORET)(DWORD);
 typedef DWORD (* WIN32API DBG_WINPROC8)(DWORD, DWORD);
 typedef DWORD (* WIN32API DBG_WINPROC12)(DWORD, DWORD, DWORD);
 typedef DWORD (* WIN32API DBG_WINPROC16)(DWORD, DWORD, DWORD, DWORD);
@@ -49,6 +50,15 @@ DWORD WIN32API Dbg##a(DWORD arg1)             \
     dbg_ThreadPopCall(); \
     dprintf((DBGWRAP_MODULE": %s returned %x", #a, ret)); \
     return ret;                            \
+}
+
+#define DEBUGWRAP4_NORET(a) \
+void WIN32API Dbg##a(DWORD arg1)             \
+{                                          \
+    dprintf((DBGWRAP_MODULE": %s %x", #a, arg1));         \
+    dbg_ThreadPushCall(#a); \
+    ((DBG_WINPROC4_NORET)a)(arg1);         \
+    dbg_ThreadPopCall(); \
 }
 
 #define DEBUGWRAP8(a) \
