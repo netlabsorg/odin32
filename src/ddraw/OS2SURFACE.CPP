@@ -1,4 +1,4 @@
-/* $Id: OS2SURFACE.CPP,v 1.40 2002-02-17 20:40:05 sandervl Exp $ */
+/* $Id: OS2SURFACE.CPP,v 1.41 2002-06-08 11:45:19 sandervl Exp $ */
 
 /*
  * DirectDraw Surface class implementaion
@@ -2475,16 +2475,19 @@ HRESULT WIN32API SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lpD
                           dprintf(("empty cliplist, return"));
                           return DD_OK;
                       }
+                      dprintf(("visible region"));
                       for(i=0;i<lpRgnData->rdh.nCount;i++) 
                       {
                           temp               = pRectl[i].yTop;
                           pRectl[i].yTop     = dest->DDSurfaceDesc.dwHeight - pRectl[i].yBottom;
                           pRectl[i].yBottom  = dest->DDSurfaceDesc.dwHeight - temp;
+                          dprintf(("(%d,%d)(%d,%d)", pRectl[i].xLeft, pRectl[i].yBottom, pRectl[i].xRight, pRectl[i].yTop));
                           //clip rectangle must be relative to lScreenPos
                           pRectl[i].xLeft   -= sBlt.lScreenPosX;
                           pRectl[i].xRight  -= sBlt.lScreenPosX;
                           pRectl[i].yTop    -= sBlt.lScreenPosY;
                           pRectl[i].yBottom -= sBlt.lScreenPosY;
+                          dprintf(("(%d,%d)(%d,%d)", pRectl[i].xLeft, pRectl[i].yBottom, pRectl[i].xRight, pRectl[i].yTop));
                       }
                       fChanged = TRUE;
                       sBlt.ulNumDstRects = lpRgnData->rdh.nCount;
