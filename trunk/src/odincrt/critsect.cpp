@@ -1,4 +1,4 @@
-/* $Id: critsect.cpp,v 1.9 2003-07-28 11:30:17 sandervl Exp $ */
+/* $Id: critsect.cpp,v 1.10 2003-07-28 17:32:58 sandervl Exp $ */
 /*
  * Critical sections in the Win32 sense
  *
@@ -12,6 +12,8 @@
 #include <win32type.h>
 #include <win32api.h>
 #include <FastInfoBlocks.h>
+
+#undef fibGetPid
 
 #include <assert.h>
 #include <stdio.h>
