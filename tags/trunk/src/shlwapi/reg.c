@@ -1,4 +1,3 @@
-/* $Id: reg.c,v 1.5 2001-09-05 13:48:38 bird Exp $ */
 /*
  * SHLWAPI registry functions
  */
@@ -32,45 +31,45 @@ static const char *lpszContentTypeA = "Content Type";
 static const WCHAR lpszContentTypeW[] = { 'C','o','n','t','e','n','t',' ','T','y','p','e','\0'};
 
 /*************************************************************************
- * SHRegGetUSValueA [SHLWAPI.@]
+ * SHRegGetUSValueA	[SHLWAPI.@]
  *
  * Gets a user-specific registry value
  */
 LONG WINAPI SHRegGetUSValueA(
-    LPCSTR   pSubKey,
-    LPCSTR   pValue,
-    LPDWORD  pwType,
-    LPVOID   pvData,
-    LPDWORD  pbData,
-    BOOL     fIgnoreHKCU,
-    LPVOID   pDefaultData,
-    DWORD    wDefaultDataSize)
+	LPCSTR   pSubKey,
+	LPCSTR   pValue,
+	LPDWORD  pwType,
+	LPVOID   pvData,
+	LPDWORD  pbData,
+	BOOL     fIgnoreHKCU,
+	LPVOID   pDefaultData,
+	DWORD    wDefaultDataSize)
 {
-    FIXME("(%p),stub!\n", pSubKey);
-    return ERROR_SUCCESS;  /* return success */
+	FIXME("(%p),stub!\n", pSubKey);
+	return ERROR_SUCCESS;  /* return success */
 }
 
 /*************************************************************************
- * SHRegGetUSValueW [SHLWAPI.@]
+ * SHRegGetUSValueW	[SHLWAPI.@]
  *
  * Gets a user-specific registry value
  */
 LONG WINAPI SHRegGetUSValueW(
-    LPCWSTR  pSubKey,
-    LPCWSTR  pValue,
-    LPDWORD  pwType,
-    LPVOID   pvData,
-    LPDWORD  pbData,
-    BOOL     flagIgnoreHKCU,
-    LPVOID   pDefaultData,
-    DWORD    wDefaultDataSize)
+	LPCWSTR  pSubKey,
+	LPCWSTR  pValue,
+	LPDWORD  pwType,
+	LPVOID   pvData,
+	LPDWORD  pbData,
+	BOOL     flagIgnoreHKCU,
+	LPVOID   pDefaultData,
+	DWORD    wDefaultDataSize)
 {
-    FIXME("(%p),stub!\n", pSubKey);
-    return ERROR_SUCCESS;  /* return success */
+	FIXME("(%p),stub!\n", pSubKey);
+	return ERROR_SUCCESS;  /* return success */
 }
 
 /*************************************************************************
- * SHRegOpenUSKeyA  [SHLWAPI.@]
+ * SHRegOpenUSKeyA	[SHLWAPI.@]
  *
  * Openss a user-specific registry key
  */
@@ -81,12 +80,12 @@ LONG WINAPI SHRegOpenUSKeyA(
         PHUSKEY phNewUSKey,
         BOOL fIgnoreHKCU)
 {
-    FIXME("stub!\n");
-    return ERROR_SUCCESS;  /* return success */
+	FIXME("stub!\n");
+	return ERROR_SUCCESS;  /* return success */
 }
 
 /*************************************************************************
- * SHRegOpenUSKeyW  [SHLWAPI.@]
+ * SHRegOpenUSKeyW	[SHLWAPI.@]
  *
  * Openss a user-specific registry key
  */
@@ -97,8 +96,8 @@ LONG WINAPI SHRegOpenUSKeyW(
         HUSKEY hNewUSKey,
         BOOL fIgnoreHKCU)
 {
-    FIXME("stub!\n");
-    return ERROR_SUCCESS;  /* return success */
+	FIXME("stub!\n");
+	return ERROR_SUCCESS;  /* return success */
 }
 
 #ifndef __WIN32OS2__
@@ -106,89 +105,89 @@ LONG WINAPI SHRegOpenUSKeyW(
  * SHRegGetBoolUSValueA   [SHLWAPI.@]
  */
 BOOL WINAPI SHRegGetBoolUSValueA(
-    LPCSTR pszSubKey,
-    LPCSTR pszValue,
-    BOOL fIgnoreHKCU,
-    BOOL fDefault)
+	LPCSTR pszSubKey,
+	LPCSTR pszValue,
+	BOOL fIgnoreHKCU,
+	BOOL fDefault)
 {
-    FIXME("%s %s\n", pszSubKey,pszValue);
-    return fDefault;
+	FIXME("%s %s\n", pszSubKey,pszValue);
+	return fDefault;
 }
 
 /*************************************************************************
- * SHRegGetBoolUSValueW   [SHLWAPI.@]
+ * SHRegGetBoolUSValueW	  [SHLWAPI.@]
  */
 BOOL WINAPI SHRegGetBoolUSValueW(
-    LPCWSTR pszSubKey,
-    LPCWSTR pszValue,
-    BOOL fIgnoreHKCU,
-    BOOL fDefault)
+	LPCWSTR pszSubKey,
+	LPCWSTR pszValue,
+	BOOL fIgnoreHKCU,
+	BOOL fDefault)
 {
-    FIXME("%s %s\n", debugstr_w(pszSubKey),debugstr_w(pszValue));
-    return fDefault;
+	FIXME("%s %s\n", debugstr_w(pszSubKey),debugstr_w(pszValue));
+	return fDefault;
 }
 #endif
 
 /*************************************************************************
- *      SHRegQueryUSValueA  [SHLWAPI]
+ *      SHRegQueryUSValueA	[SHLWAPI]
  */
 LONG WINAPI SHRegQueryUSValueA(
-    HUSKEY hUSKey,             /* [in] FIXME: HUSKEY */
-    LPCSTR pszValue,
-    LPDWORD pdwType,
-    LPVOID pvData,
-    LPDWORD pcbData,
-    BOOL fIgnoreHKCU,
-    LPVOID pvDefaultData,
-    DWORD dwDefaultDataSize)
+	HUSKEY hUSKey,             /* [in] FIXME: HUSKEY */
+	LPCSTR pszValue,
+	LPDWORD pdwType,
+	LPVOID pvData,
+	LPDWORD pcbData,
+	BOOL fIgnoreHKCU,
+	LPVOID pvDefaultData,
+	DWORD dwDefaultDataSize)
 {
-    FIXME("%s stub\n",pszValue);
-    return 1;
+	FIXME("%s stub\n",pszValue);
+	return 1;
 }
 
 /*************************************************************************
- *      SHRegQueryUSValueA  [SHLWAPI]
+ *      SHRegQueryUSValueA	[SHLWAPI]
  */
 LONG WINAPI SHRegQueryUSValueW(
-    HUSKEY hUSKey,             /* [in] FIXME: HUSKEY */
-    LPCSTR pszValue,
-    LPDWORD pdwType,
-    void *pvData,
-    LPDWORD pcbData,
-    BOOL fIgnoreHKCU,
-    void *pvDefaultData,
-    DWORD dwDefaultDataSize)
+	HUSKEY hUSKey,             /* [in] FIXME: HUSKEY */
+	LPCSTR pszValue,
+	LPDWORD pdwType,
+	void *pvData,
+	LPDWORD pcbData,
+	BOOL fIgnoreHKCU,
+	void *pvDefaultData,
+	DWORD dwDefaultDataSize)
 {
-    FIXME("%s stub\n",pszValue);
-    return 1;
+	FIXME("%s stub\n",pszValue);
+	return 1;
 }
 
 /*************************************************************************
  * SHRegGetPathA   [SHLWAPI.@]
  */
 DWORD WINAPI SHRegGetPathA(
-    HKEY hKey,
-    LPCSTR pcszSubKey,
-    LPCSTR pcszValue,
-    LPSTR pszPath,
-    DWORD dwFlags)
+	HKEY hKey,
+	LPCSTR pcszSubKey,
+	LPCSTR pcszValue,
+	LPSTR pszPath,
+	DWORD dwFlags)
 {
-    FIXME("%s %s\n", pcszSubKey, pcszValue);
-    return 0;
+	FIXME("%s %s\n", pcszSubKey, pcszValue);
+	return 0;
 }
 
 /*************************************************************************
  * SHRegGetPathW   [SHLWAPI.@]
  */
 DWORD WINAPI SHRegGetPathW(
-    HKEY hKey,
-    LPCWSTR pcszSubKey,
-    LPCWSTR pcszValue,
-    LPWSTR pszPath,
-    DWORD dwFlags)
+	HKEY hKey,
+	LPCWSTR pcszSubKey,
+	LPCWSTR pcszValue,
+	LPWSTR pszPath,
+	DWORD dwFlags)
 {
-    FIXME("%s %s\n", debugstr_w(pcszSubKey), debugstr_w(pcszValue));
-    return 0;
+	FIXME("%s %s\n", debugstr_w(pcszSubKey), debugstr_w(pcszValue));
+	return 0;
 }
 
 /*************************************************************************
@@ -197,23 +196,23 @@ DWORD WINAPI SHRegGetPathW(
  * Gets a value from the registry
  */
 DWORD WINAPI SHGetValueA(
-    HKEY     hkey,
-    LPCSTR   pSubKey,
-    LPCSTR   pValue,
-    LPDWORD  pwType,
-    LPVOID   pvData,
-    LPDWORD  pbData)
+	HKEY     hkey,
+	LPCSTR   pSubKey,
+	LPCSTR   pValue,
+	LPDWORD  pwType,
+	LPVOID   pvData,
+	LPDWORD  pbData)
 {
-    HKEY hSubKey;
-    DWORD res;
+	HKEY hSubKey;
+	DWORD res;
 
-    TRACE("(%s %s)\n", pSubKey, pValue);
+	TRACE("(%s %s)\n", pSubKey, pValue);
 
-    if((res = RegOpenKeyA(hkey, pSubKey, &hSubKey))) return res;
-    res = RegQueryValueExA(hSubKey, pValue, 0, pwType, pvData, pbData);
-    RegCloseKey( hSubKey );
+	if((res = RegOpenKeyA(hkey, pSubKey, &hSubKey))) return res;
+	res = RegQueryValueExA(hSubKey, pValue, 0, pwType, pvData, pbData);
+	RegCloseKey( hSubKey );
 
-    return res;
+	return res;
 }
 
 /*************************************************************************
@@ -222,42 +221,42 @@ DWORD WINAPI SHGetValueA(
  * Gets a value from the registry
  */
 DWORD WINAPI SHGetValueW(
-    HKEY     hkey,
-    LPCWSTR  pSubKey,
-    LPCWSTR  pValue,
-    LPDWORD  pwType,
-    LPVOID   pvData,
-    LPDWORD  pbData)
+	HKEY     hkey,
+	LPCWSTR  pSubKey,
+	LPCWSTR  pValue,
+	LPDWORD  pwType,
+	LPVOID   pvData,
+	LPDWORD  pbData)
 {
-    HKEY hSubKey;
-    DWORD res;
+	HKEY hSubKey;
+	DWORD res;
 
-    TRACE("(%s %s)\n", debugstr_w(pSubKey), debugstr_w(pValue));
+	TRACE("(%s %s)\n", debugstr_w(pSubKey), debugstr_w(pValue));
 
-    if((res = RegOpenKeyW(hkey, pSubKey, &hSubKey))) return res;
-    res = RegQueryValueExW(hSubKey, pValue, 0, pwType, pvData, pbData);
-    RegCloseKey( hSubKey );
+	if((res = RegOpenKeyW(hkey, pSubKey, &hSubKey))) return res;
+	res = RegQueryValueExW(hSubKey, pValue, 0, pwType, pvData, pbData);
+	RegCloseKey( hSubKey );
 
-    return res;
+	return res;
 }
 
 /*************************************************************************
  *      SHSetValueA   [SHLWAPI.@]
  */
 HRESULT WINAPI SHSetValueA(
-    HKEY hkey,
-    LPCSTR pszSubKey,
-    LPCSTR pszValue,
-    DWORD dwType,
-    LPCVOID pvData,
-    DWORD cbData)
+	HKEY hkey,
+	LPCSTR pszSubKey,
+	LPCSTR pszValue,
+	DWORD dwType,
+	LPCVOID pvData,
+	DWORD cbData)
 {
-    HKEY    subkey;
-    HRESULT hres;
+    HKEY	subkey;
+    HRESULT	hres;
 
     hres = RegCreateKeyA(hkey,pszSubKey,&subkey);
     if (!hres)
-    return hres;
+	return hres;
     hres = RegSetValueExA(subkey,pszValue,0,dwType,pvData,cbData);
     RegCloseKey(subkey);
     return hres;
@@ -267,59 +266,59 @@ HRESULT WINAPI SHSetValueA(
  *      SHSetValueW   [SHLWAPI.@]
  */
 HRESULT WINAPI SHSetValueW(
-    HKEY hkey,
-    LPCWSTR pszSubKey,
-    LPCWSTR pszValue,
-    DWORD dwType,
-    LPCVOID pvData,
-    DWORD cbData)
+	HKEY hkey,
+	LPCWSTR pszSubKey,
+	LPCWSTR pszValue,
+	DWORD dwType,
+	LPCVOID pvData,
+	DWORD cbData)
 {
-    HKEY    subkey;
-    HRESULT hres;
+    HKEY	subkey;
+    HRESULT	hres;
 
     hres = RegCreateKeyW(hkey,pszSubKey,&subkey);
     if (!hres)
-    return hres;
+	return hres;
     hres = RegSetValueExW(subkey,pszValue,0,dwType,pvData,cbData);
     RegCloseKey(subkey);
     return hres;
 }
 
 /*************************************************************************
- * SHQueryValueExA      [SHLWAPI.@]
+ * SHQueryValueExA		[SHLWAPI.@]
  *
  */
 HRESULT WINAPI SHQueryValueExA(
-    HKEY hkey,
-    LPSTR lpValueName,
-    LPDWORD lpReserved,
-    LPDWORD lpType,
-    LPBYTE lpData,
-    LPDWORD lpcbData)
+	HKEY hkey,
+	LPSTR lpValueName,
+	LPDWORD lpReserved,
+	LPDWORD lpType,
+	LPBYTE lpData,
+	LPDWORD lpcbData)
 {
-    TRACE("0x%04x %s %p %p %p %p\n", hkey, lpValueName, lpReserved, lpType, lpData, lpcbData);
-    return RegQueryValueExA (hkey, lpValueName, lpReserved, lpType, lpData, lpcbData);
+	TRACE("0x%04x %s %p %p %p %p\n", hkey, lpValueName, lpReserved, lpType, lpData, lpcbData);
+	return RegQueryValueExA (hkey, lpValueName, lpReserved, lpType, lpData, lpcbData);
 }
 
 
 /*************************************************************************
  * SHQueryValueExW   [SHLWAPI.@]
  *
- * FIXME
+ * FIXME 
  *  if the datatype REG_EXPAND_SZ then expand the string and change
  *  *pdwType to REG_SZ.
  */
 HRESULT WINAPI SHQueryValueExW (
-    HKEY hkey,
-    LPWSTR pszValue,
-    LPDWORD pdwReserved,
-    LPDWORD pdwType,
-    LPVOID pvData,
-    LPDWORD pcbData)
+	HKEY hkey,
+	LPWSTR pszValue,
+	LPDWORD pdwReserved,
+	LPDWORD pdwType,
+	LPVOID pvData,
+	LPDWORD pcbData)
 {
-    WARN("0x%04x %s %p %p %p %p semi-stub\n",
+	WARN("0x%04x %s %p %p %p %p semi-stub\n",
              hkey, debugstr_w(pszValue), pdwReserved, pdwType, pvData, pcbData);
-    return RegQueryValueExW ( hkey, pszValue, pdwReserved, pdwType, pvData, pcbData);
+	return RegQueryValueExW ( hkey, pszValue, pdwReserved, pdwType, pvData, pcbData);
 }
 
 /*************************************************************************
@@ -332,8 +331,8 @@ HRESULT WINAPI SHQueryValueExW (
  * WinNt/2k will only delete the key if empty.
  */
 HRESULT WINAPI SHDeleteKeyA(
-    HKEY hKey,
-    LPCSTR lpszSubKey)
+	HKEY hKey,
+	LPCSTR lpszSubKey)
 {
     DWORD r, dwKeyCount, dwSize, i, dwMaxSubkeyLen;
     HKEY hSubKey;
@@ -398,11 +397,11 @@ HRESULT WINAPI SHDeleteKeyA(
  * WinNt/2k will only delete the key if empty.
  */
 HRESULT WINAPI SHDeleteKeyW(
-    HKEY hkey,
-    LPCWSTR pszSubKey)
+	HKEY hkey,
+	LPCWSTR pszSubKey)
 {
-    FIXME("hkey=0x%08x, %s\n", hkey, debugstr_w(pszSubKey));
-    return 0;
+	FIXME("hkey=0x%08x, %s\n", hkey, debugstr_w(pszSubKey));
+	return 0;
 }
 
 /*************************************************************************
@@ -411,12 +410,12 @@ HRESULT WINAPI SHDeleteKeyW(
  * Function opens the key, get/set/delete the value, then close the key.
  */
 HRESULT WINAPI SHDeleteValueA(HKEY hkey, LPCSTR pszSubKey, LPCSTR pszValue) {
-    HKEY    subkey;
-    HRESULT hres;
+    HKEY	subkey;
+    HRESULT	hres;
 
     hres = RegOpenKeyA(hkey,pszSubKey,&subkey);
     if (hres)
-    return hres;
+	return hres;
     hres = RegDeleteValueA(subkey,pszValue);
     RegCloseKey(subkey);
     return hres;
@@ -428,12 +427,12 @@ HRESULT WINAPI SHDeleteValueA(HKEY hkey, LPCSTR pszSubKey, LPCSTR pszValue) {
  * Function opens the key, get/set/delete the value, then close the key.
  */
 HRESULT WINAPI SHDeleteValueW(HKEY hkey, LPCWSTR pszSubKey, LPCWSTR pszValue) {
-    HKEY    subkey;
-    HRESULT hres;
+    HKEY	subkey;
+    HRESULT	hres;
 
     hres = RegOpenKeyW(hkey,pszSubKey,&subkey);
     if (hres)
-    return hres;
+	return hres;
     hres = RegDeleteValueW(subkey,pszValue);
     RegCloseKey(subkey);
     return hres;

@@ -1,15 +1,14 @@
-/* $Id: file.c,v 1.3 2001-09-05 12:14:24 bird Exp $ */
 /*
  * CRTDLL file functions
- *
+ * 
  * Copyright 1996,1998 Marcus Meissner
  * Copyright 1996 Jukka Iivonen
  * Copyright 1997,2000 Uwe Bonnes
  * Copyright 2000 Jon Griffiths
  *
  * Implementation Notes:
- * Mapping is performed between FILE*, fd and HANDLE's. This allows us to
- * implement all calls using the Win32 API, support remapping fd's to
+ * Mapping is performed between FILE*, fd and HANDLE's. This allows us to 
+ * implement all calls using the Win32 API, support remapping fd's to 
  * FILES and do some other tricks as well (like closeall, _get_osfhandle).
  * For mix and matching with the host libc, processes can use the Win32 HANDLE
  * to get a real unix fd from the wineserver. Or we could do this once
@@ -128,7 +127,7 @@ static INT __CRTDLL__alloc_fd(HANDLE hand, INT flag)
     __CRTDLL_fdstart = ++__CRTDLL_fdend;
   else
     while(__CRTDLL_fdstart < __CRTDLL_fdend &&
-      __CRTDLL_handles[__CRTDLL_fdstart] != INVALID_HANDLE_VALUE)
+	  __CRTDLL_handles[__CRTDLL_fdstart] != INVALID_HANDLE_VALUE)
       __CRTDLL_fdstart++;
 
   return fd;
@@ -143,7 +142,7 @@ static CRTDLL_FILE* __CRTDLL__alloc_fp(INT fd);
 static CRTDLL_FILE* __CRTDLL__alloc_fp(INT fd)
 {
   TRACE(":fd (%d) allocating FILE*\n",fd);
-  if (fd < 0 || fd >= __CRTDLL_fdend ||
+  if (fd < 0 || fd >= __CRTDLL_fdend || 
       __CRTDLL_handles[fd] == INVALID_HANDLE_VALUE)
   {
     WARN(":invalid fd %d\n",fd);
@@ -178,7 +177,7 @@ VOID __CRTDLL__init_io(VOID)
   __CRTDLL_flags[2] = __CRTDLL_iob[2]._flag = _IOWRT;
 
   TRACE(":handles (%d)(%d)(%d)\n",__CRTDLL_handles[0],
-    __CRTDLL_handles[1],__CRTDLL_handles[2]);
+	__CRTDLL_handles[1],__CRTDLL_handles[2]);
 
   for (i = 0; i < 3; i++)
   {
@@ -195,14 +194,14 @@ VOID __CRTDLL__init_io(VOID)
 INT CDECL CRTDLL__access(LPCSTR filename, INT mode)
 {
   // return (_access(path, mode));
-
+  
   DWORD attr = GetFileAttributesA(filename);
 
   if (attr == -1)
   {
     if (!filename)
     {
-    /* FIXME: Should GetFileAttributesA() return this? */
+	/* FIXME: Should GetFileAttributesA() return this? */
       __CRTDLL__set_errno(ERROR_INVALID_DATA);
       return -1;
     }
@@ -303,7 +302,7 @@ INT CDECL CRTDLL__creat(LPCSTR path, INT flags)
 INT CDECL CRTDLL__eof( INT fd )
 {
   // return (__eof(_fd));
-
+  
   DWORD curpos,endpos;
   HANDLE hand = __CRTDLL__fdtoh(fd);
 
@@ -338,7 +337,7 @@ INT CDECL CRTDLL__eof( INT fd )
 INT CDECL CRTDLL__fcloseall(VOID)
 {
   // return (_fcloseall());
-
+  
   int num_closed = 0, i = 3;
 
   while(i < __CRTDLL_fdend)
@@ -361,7 +360,7 @@ INT CDECL CRTDLL__fcloseall(VOID)
 CRTDLL_FILE* CDECL CRTDLL__fdopen(INT fd, LPCSTR mode)
 {
   // return (_fdopen(handle, mode));
-
+  
   CRTDLL_FILE* file = __CRTDLL__alloc_fp(fd);
 
   TRACE(":fd (%d) mode (%s) FILE* (%p)\n",fd,mode,file);
@@ -378,7 +377,7 @@ CRTDLL_FILE* CDECL CRTDLL__fdopen(INT fd, LPCSTR mode)
 INT CDECL CRTDLL__fgetchar( VOID )
 {
   // return (_fgetchar());
-
+  
   return CRTDLL_fgetc(CRTDLL_stdin);
 }
 
@@ -390,7 +389,7 @@ INT CDECL CRTDLL__fgetchar( VOID )
  * The macro version of getc calls this function whenever FILE->_cnt
  * becomes negative. We ensure that _cnt is always 0 after any read
  * so this function is always called. Our implementation simply calls
- * fgetc as all the underlying buffering is handled by Wines
+ * fgetc as all the underlying buffering is handled by Wines 
  * implementation of the Win32 file I/O calls.
  */
 INT CDECL CRTDLL__filbuf(CRTDLL_FILE* file)
@@ -410,7 +409,7 @@ INT CDECL CRTDLL__filbuf(CRTDLL_FILE* file)
 INT CDECL CRTDLL__fileno(CRTDLL_FILE* file)
 {
   // return (_fileno(f));
-
+  
   TRACE(":FILE* (%p) fd (%d)\n",file,file->_file);
   return file->_file;
 }
@@ -440,15 +439,15 @@ INT CDECL CRTDLL__flsbuf(INT c, CRTDLL_FILE* file)
 INT CDECL CRTDLL__flushall(VOID)
 {
   // return (_flushall());
-
+  
   int num_flushed = 0, i = 3;
 
   while(i < __CRTDLL_fdend)
     if (__CRTDLL_handles[i] != INVALID_HANDLE_VALUE)
     {
       if (CRTDLL__commit(i) == -1)
-    if (__CRTDLL_files[i])
-      __CRTDLL_files[i]->_flag |= _IOERR;
+	if (__CRTDLL_files[i])
+	  __CRTDLL_files[i]->_flag |= _IOERR;
       num_flushed++;
     }
 
@@ -465,7 +464,7 @@ INT CDECL CRTDLL__flushall(VOID)
 INT CDECL CRTDLL__fputchar(INT c)
 {
   // return(_fputchar(c));
-
+  
   return CRTDLL_fputc(c, CRTDLL_stdout);
 }
 
@@ -484,13 +483,13 @@ CRTDLL_FILE*  CDECL CRTDLL__fsopen(LPCSTR path, LPCSTR mode, INT share)
 
 /*********************************************************************
  *                  _fstat        (CRTDLL.111)
- *
+ * 
  * Get information about an open file.
  */
 int CDECL CRTDLL__fstat(int fd, struct _stat* buf)
 {
   // return (_fstat(file, buf));
-
+  
   DWORD dw;
   BY_HANDLE_FILE_INFORMATION hfi;
   HANDLE hand = __CRTDLL__fdtoh(fd);
@@ -548,7 +547,7 @@ HANDLE CRTDLL__get_osfhandle(INT fd)
   if (hand != INVALID_HANDLE_VALUE)
   {
     /* FIXME: I'm not convinced that I should be copying the
-     * handle here - it may be leaked if the app doesn't
+     * handle here - it may be leaked if the app doesn't 
      * close it (and the API docs dont say that it should)
      * Not duplicating it means that it can't be inherited
      * and so lcc's wedit doesn't cope when it passes it to
@@ -557,7 +556,7 @@ HANDLE CRTDLL__get_osfhandle(INT fd)
      * when initialised, or maybe both? JG 21-9-00.
      */
     DuplicateHandle(GetCurrentProcess(),hand,GetCurrentProcess(),
-            &newhand,0,TRUE,DUPLICATE_SAME_ACCESS );
+		    &newhand,0,TRUE,DUPLICATE_SAME_ACCESS );
   }
   return newhand;
 }
@@ -588,7 +587,7 @@ INT CDECL CRTDLL__isatty(INT fd)
 LONG CDECL CRTDLL__lseek( INT fd, LONG offset, INT whence)
 {
   // return (_lseek(handle, offset, origin));
-
+  
   LONG ret;
   HANDLE hand = __CRTDLL__fdtoh(fd);
 
@@ -777,7 +776,7 @@ INT CDECL CRTDLL__read(INT fd, LPVOID buf, UINT count)
 INT CDECL CRTDLL__setmode(INT fd,INT mode)
 {
   // return (_setmode(fh, mode));
-
+  
   if (mode & _O_TEXT)
     FIXME("fd (%d) mode (%d) TEXT not implemented\n",fd,mode);
   return 0;
@@ -790,7 +789,7 @@ INT CDECL CRTDLL__setmode(INT fd,INT mode)
 INT CDECL CRTDLL__stat(const char* path, struct _stat * buf)
 {
   // return(_stat(s1, n));
-
+  
   DWORD dw;
   WIN32_FILE_ATTRIBUTE_DATA hfi;
   unsigned short mode = CRTDLL_S_IREAD;
@@ -826,9 +825,9 @@ INT CDECL CRTDLL__stat(const char* path, struct _stat * buf)
     if (plen > 6 && path[plen-4] == '.')  /* shortest exe: "\x.exe" */
     {
       unsigned int ext = tolower(path[plen-1]) | (tolower(path[plen-2]) << 8)
-    | (tolower(path[plen-3]) << 16);
+	| (tolower(path[plen-3]) << 16);
       if (ext == EXE || ext == BAT || ext == CMD || ext == COM)
-    mode |= CRTDLL_S_IEXEC;
+	mode |= CRTDLL_S_IEXEC;
     }
   }
 
@@ -843,7 +842,7 @@ INT CDECL CRTDLL__stat(const char* path, struct _stat * buf)
   RtlTimeToSecondsSince1970( &hfi.ftLastWriteTime, &dw );
   buf->st_mtime = buf->st_ctime = dw;
   TRACE("\n%d %d %d %d %d %d\n", buf->st_mode,buf->st_nlink,buf->st_size,
-    buf->st_atime,buf->st_mtime, buf->st_ctime);
+	buf->st_atime,buf->st_mtime, buf->st_ctime);
   return 0;
 }
 
@@ -856,19 +855,19 @@ INT CDECL CRTDLL__stat(const char* path, struct _stat * buf)
 LONG CDECL CRTDLL__tell(INT fd)
 {
   // return (_tell(i));
-
+  
   return CRTDLL__lseek(fd, 0, SEEK_CUR);
 }
 
 
 /*********************************************************************
  *                  _tempnam           (CRTDLL.305)
- *
+ * 
  */
 LPSTR CDECL CRTDLL__tempnam(LPCSTR dir, LPCSTR prefix)
 {
   // return (_tempnam(dir, prefix));
-
+  
   char tmpbuf[MAX_PATH];
 
   TRACE("dir (%s) prefix (%s)\n",dir,prefix);
@@ -890,7 +889,7 @@ LPSTR CDECL CRTDLL__tempnam(LPCSTR dir, LPCSTR prefix)
 INT CDECL CRTDLL__umask(INT umask)
 {
   // return (_umask(i));
-
+  
   INT old_umask = __CRTDLL_umask;
   TRACE("umask (%d)\n",umask);
   __CRTDLL_umask = umask;
@@ -976,7 +975,7 @@ VOID CDECL CRTDLL_clearerr(CRTDLL_FILE* file)
 INT CDECL CRTDLL_fclose( CRTDLL_FILE* file )
 {
   // return (fclose(fp));
-
+  
   return CRTDLL__close(file->_file);
 }
 
@@ -989,7 +988,7 @@ INT CDECL CRTDLL_fclose( CRTDLL_FILE* file )
 INT CDECL CRTDLL_feof( CRTDLL_FILE* file )
 {
   // return (feof(fp));
-
+  
   return file->_flag & _IOEOF;
 }
 
@@ -1002,7 +1001,7 @@ INT CDECL CRTDLL_feof( CRTDLL_FILE* file )
 INT CDECL CRTDLL_ferror( CRTDLL_FILE* file )
 {
   // return (ferror(fp));
-
+  
   return file->_flag & _IOERR;
 }
 
@@ -1024,7 +1023,7 @@ INT CDECL CRTDLL_fflush( CRTDLL_FILE* file )
 INT CDECL CRTDLL_fgetc( CRTDLL_FILE* file )
 {
   // return (fgetc(fp));
-
+  
   char c;
   if (CRTDLL__read(file->_file,&c,1) != 1)
     return EOF;
@@ -1050,12 +1049,12 @@ INT CDECL CRTDLL_fgetpos( CRTDLL_FILE* file, __CRTDLL_fpos_t *pos)
 CHAR* CDECL CRTDLL_fgets(LPSTR s, INT size, CRTDLL_FILE* file)
 {
   // return (fgets(s, n, fp));
-
+  
   int    cc;
   LPSTR  buf_start = s;
 
   TRACE(":file(%p) fd (%d) str (%p) len (%d)\n",
-    file,file->_file,s,size);
+	file,file->_file,s,size);
 
   /* BAD, for the whole WINE process blocks... just done this way to test
    * windows95's ftp.exe.
@@ -1088,7 +1087,7 @@ CHAR* CDECL CRTDLL_fgets(LPSTR s, INT size, CRTDLL_FILE* file)
 INT CDECL CRTDLL_fputs( LPCSTR s, CRTDLL_FILE* file )
 {
   // return (fputs(s, fp));
-
+  
   return CRTDLL_fwrite(s,strlen(s),1,file);
 }
 
@@ -1099,7 +1098,7 @@ INT CDECL CRTDLL_fputs( LPCSTR s, CRTDLL_FILE* file )
 INT CDECL CRTDLL_fprintf( CRTDLL_FILE* file, LPCSTR format, ... )
 {
     // return (fprintf(file, format, arg));
-
+  
     va_list valist;
     INT res;
 
@@ -1118,7 +1117,7 @@ INT CDECL CRTDLL_fprintf( CRTDLL_FILE* file, LPCSTR format, ... )
 CRTDLL_FILE* CDECL CRTDLL_fopen(LPCSTR path, LPCSTR mode)
 {
   // return (fopen( filename, mode));
-
+  
   CRTDLL_FILE* file;
   INT flags = 0, plus = 0, fd;
   const char* search = mode;
@@ -1182,7 +1181,7 @@ CRTDLL_FILE* CDECL CRTDLL_fopen(LPCSTR path, LPCSTR mode)
 INT CDECL CRTDLL_fputc( INT c, CRTDLL_FILE* file )
 {
   // return (fputc(c, fp));
-
+  
   return CRTDLL__write(file->_file, &c, 1) == 1? c : EOF;
 }
 
@@ -1193,7 +1192,7 @@ INT CDECL CRTDLL_fputc( INT c, CRTDLL_FILE* file )
 DWORD CDECL CRTDLL_fread(LPVOID ptr, INT size, INT nmemb, CRTDLL_FILE* file)
 {
   // return (fread(ptr, size, n, fp));
-
+  
   DWORD read = CRTDLL__read(file->_file,ptr, size * nmemb);
   if (read <= 0)
     return 0;
@@ -1203,12 +1202,12 @@ DWORD CDECL CRTDLL_fread(LPVOID ptr, INT size, INT nmemb, CRTDLL_FILE* file)
 
 /*********************************************************************
  *                  freopen    (CRTDLL.379)
- *
+ * 
  */
 CRTDLL_FILE* CDECL CRTDLL_freopen(LPCSTR path, LPCSTR mode,CRTDLL_FILE* file)
 {
   // return (freopen(filename, mode, fp));
-
+  
   CRTDLL_FILE* newfile;
   INT fd;
 
@@ -1256,7 +1255,7 @@ CRTDLL_FILE* CDECL CRTDLL_freopen(LPCSTR path, LPCSTR mode,CRTDLL_FILE* file)
 INT CDECL CRTDLL_fsetpos( CRTDLL_FILE* file, __CRTDLL_fpos_t *pos)
 {
   // return (fsetpos(fp, pos));
-
+  
   return CRTDLL__lseek(file->_file,*pos,SEEK_SET);
 }
 
@@ -1392,7 +1391,7 @@ INT CDECL CRTDLL_fscanf( CRTDLL_FILE* file, LPSTR format, ... )
 LONG CDECL CRTDLL_fseek( CRTDLL_FILE* file, LONG offset, INT whence)
 {
   // return (fseek(file, offset, whence));
-
+  
   return CRTDLL__lseek(file->_file,offset,whence);
 }
 
@@ -1403,7 +1402,7 @@ LONG CDECL CRTDLL_fseek( CRTDLL_FILE* file, LONG offset, INT whence)
 LONG CDECL CRTDLL_ftell( CRTDLL_FILE* file )
 {
   // return (ftell(fp));
-
+  
   return CRTDLL__tell(file->_file);
 }
 
@@ -1428,7 +1427,7 @@ UINT CDECL CRTDLL_fwrite( LPCVOID ptr, INT size, INT nmemb, CRTDLL_FILE* file )
 INT CDECL CRTDLL_getchar( VOID )
 {
   // return (getchar());
-
+  
   return CRTDLL_fgetc(CRTDLL_stdin);
 }
 
@@ -1459,8 +1458,8 @@ LPSTR CDECL CRTDLL_gets(LPSTR buf)
      * JG 19/9/00: Is this still true, now we are using ReadFile?
      */
     for(cc = CRTDLL_fgetc(CRTDLL_stdin); cc != EOF && cc != '\n';
-    cc = CRTDLL_fgetc(CRTDLL_stdin))
-    if(cc != '\r') *buf++ = (char)cc;
+	cc = CRTDLL_fgetc(CRTDLL_stdin))
+	if(cc != '\r') *buf++ = (char)cc;
 
     *buf = '\0';
 
@@ -1497,7 +1496,7 @@ void CDECL CRTDLL_putchar( INT c )
 INT CDECL CRTDLL_puts(LPCSTR s)
 {
   // return puts( s );
-
+  
   return CRTDLL_fputs(s, CRTDLL_stdout);
 }
 
@@ -1511,7 +1510,7 @@ INT CDECL CRTDLL_puts(LPCSTR s)
 VOID CDECL CRTDLL_rewind(CRTDLL_FILE* file)
 {
   // rewind(fp);
-
+  
   TRACE(":file (%p) fd (%d)\n",file,file->_file);
   CRTDLL__lseek(file->_file,0,SEEK_SET);
   file->_flag &= ~(_IOEOF | _IOERR);
@@ -1524,7 +1523,7 @@ VOID CDECL CRTDLL_rewind(CRTDLL_FILE* file)
 INT CDECL CRTDLL_remove(LPCSTR path)
 {
   // return (remove(file));
-
+  
   TRACE(":path (%s)\n",path);
   if (DeleteFileA(path))
     return 0;
@@ -1540,7 +1539,7 @@ INT CDECL CRTDLL_remove(LPCSTR path)
 INT CDECL CRTDLL_rename(LPCSTR oldpath,LPCSTR newpath)
 {
   // return (rename(old, new2));
-
+  
   TRACE(":from %s to %s\n",oldpath,newpath);
   if (MoveFileExA( oldpath, newpath, MOVEFILE_REPLACE_EXISTING))
     return 0;
@@ -1556,7 +1555,7 @@ INT CDECL CRTDLL_rename(LPCSTR oldpath,LPCSTR newpath)
 INT CDECL CRTDLL_setbuf(CRTDLL_FILE* file, LPSTR buf)
 {
   // setbuf(fp, buf);
-
+  
   TRACE(":file (%p) fd (%d) buf (%p)\n", file, file->_file,buf);
   if (buf)
     WARN(":user buffer will not be used!\n");
@@ -1569,12 +1568,12 @@ INT CDECL CRTDLL_setbuf(CRTDLL_FILE* file, LPSTR buf)
  *                  tmpnam           (CRTDLL.490)
  *
  * lcclnk from lcc-win32 relies on a terminating dot in the name returned
- *
+ * 
  */
 LPSTR CDECL CRTDLL_tmpnam(LPSTR s)
 {
   // return (tmpnam(s));
-
+  
   char tmpbuf[MAX_PATH];
   char* prefix = "TMP";
   if (!GetTempPathA(MAX_PATH,tmpbuf) ||
@@ -1599,7 +1598,7 @@ LPSTR CDECL CRTDLL_tmpnam(LPSTR s)
 INT CDECL CRTDLL_vfprintf( CRTDLL_FILE* file, LPCSTR format, va_list args )
 {
   // return (vfprintf(file, format, args));
-
+  
   /* FIXME: We should parse the format string, calculate the maximum,
    * length of each arg, malloc a buffer, print to it, and fwrite that.
    * Yes this sucks, but not as much as crashing 1/2 way through an

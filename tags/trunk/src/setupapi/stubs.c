@@ -1,5 +1,4 @@
 /* -*- tab-width: 8; c-basic-offset: 8 -*- */
-/* $Id: stubs.c,v 1.2 2001-09-05 13:38:24 bird Exp $ */
 /*
  * SetupAPI stubs
  *
@@ -16,143 +15,143 @@ DEFAULT_DEBUG_CHANNEL(setupapi);
 
 
 /***********************************************************************
- *      SetupCloseFileQueue
+ *		SetupCloseFileQueue
  */
 VOID WINAPI SetupCloseFileQueue(HSPFILEQ QueueHandle)
 {
-    FIXME("not implemented (setupapi.dll) \n");
+	FIXME("not implemented (setupapi.dll) \n");
 }
 
 /***********************************************************************
- *      SetupCommitFileQueueA
+ *		SetupCommitFileQueueA
  */
 BOOL WINAPI SetupCommitFileQueueA(HWND Owner, HSPFILEQ QueueHandle,
-                  PSP_FILE_CALLBACK_A MsgHandler,
-                  PVOID Context)
+				  PSP_FILE_CALLBACK_A MsgHandler,
+				  PVOID Context)
 {
-    FIXME("not implemented (setupapi.dll) \n");
-    return FALSE;
+	FIXME("not implemented (setupapi.dll) \n");
+	return FALSE;
 }
 
 /***********************************************************************
- *      SetupIterateCabinetA
+ *		SetupIterateCabinetA
  */
 BOOL WINAPI SetupIterateCabinetA(PCSTR CabinetFile, DWORD Reserved,
                                  PSP_FILE_CALLBACK_A MsgHandler, PVOID Context)
 {
-    FIXME("not implemented (setupapi.dll) \n");
-    return 0;
+	FIXME("not implemented (setupapi.dll) \n");
+	return 0;
 }
 
 /***********************************************************************
- *      SetupIterateCabinetW
+ *		SetupIterateCabinetW
  */
 BOOL WINAPI SetupIterateCabinetW(PWSTR CabinetFile, DWORD Reserved,
-                                 PSP_FILE_CALLBACK_W MsgHandler, PVOID Context)
+                                 PSP_FILE_CALLBACK_W MsgHandler, PVOID Context) 
 {
-    FIXME("not implemented (setupapi.dll) \n");
-    return 0;
+	FIXME("not implemented (setupapi.dll) \n");
+	return 0;
 }
 
 
 /***********************************************************************
- *      SetupGetLineTextA
+ *		SetupGetLineTextA
  */
 BOOL WINAPI SetupGetLineTextA (PINFCONTEXT Context, HINF InfHandle,
                         PCSTR Section, PCSTR Key, LPSTR ReturnBuffer,
                         DWORD ReturnBufferSize, PDWORD RequiredSize)
 {
-    FIXME("not implemented (setupapi.dll) \n");
-    return 0;
+	FIXME("not implemented (setupapi.dll) \n");
+	return 0;
 }
 
 /***********************************************************************
- *      SetupGetStringFieldA
+ *		SetupGetStringFieldA
  */
-BOOL WINAPI SetupGetStringFieldA(PINFCONTEXT Context, DWORD FieldIndex,
+BOOL WINAPI SetupGetStringFieldA(PINFCONTEXT Context, DWORD FieldIndex, 
                                  LPSTR ReturnBuffer, DWORD ReturnBufferSize,
                                  PDWORD RequiredSize)
 {
-    FIXME("not implemented (setupapi.dll) \n");
-    return 0;
+	FIXME("not implemented (setupapi.dll) \n");
+	return 0;
 }
 
 
 /***********************************************************************
- *      SetupFindNextLine
+ *		SetupFindNextLine
  */
 BOOL WINAPI SetupFindNextLine (PINFCONTEXT ContextIn, PINFCONTEXT ContextOut)
 {
-    FIXME("not implemented (setupapi.dll) \n");
-    return 0;
+	FIXME("not implemented (setupapi.dll) \n");
+	return 0;
 }
 
 
 /***********************************************************************
- *      SetupInitDefaultQueueCallback
+ *		SetupInitDefaultQueueCallback
  */
 PVOID WINAPI SetupInitDefaultQueueCallback(HWND OwnerWindow)
 {
-    FIXME("not implemented (setupapi.dll) \n");
-    return 0;
+	FIXME("not implemented (setupapi.dll) \n");
+	return 0;
 }
 
 /***********************************************************************
- *      SetupInitDefaultQueueCallbackEx
+ *		SetupInitDefaultQueueCallbackEx
  */
 PVOID WINAPI SetupInitDefaultQueueCallbackEx(HWND OwnerWindow,
-                         HWND AlternativeProgressWindow,
-                         UINT ProgressMessage,
-                         DWORD res1,
-                         PVOID res2)
+					     HWND AlternativeProgressWindow,
+					     UINT ProgressMessage,
+					     DWORD res1,
+					     PVOID res2)
 {
-    FIXME("not implemented (setupapi.dll) \n");
-    return 0;
+	FIXME("not implemented (setupapi.dll) \n");
+	return 0;
 }
 
 /***********************************************************************
- *      SetupCloseInfFile
+ *		SetupCloseInfFile
  */
 VOID WINAPI SetupCloseInfFile (HINF InfHandle)
 {
-    FIXME("not implemented (setupapi.dll) \n");
+	FIXME("not implemented (setupapi.dll) \n");
 }
 
 
 /***********************************************************************
- *      SetupDefaultQueueCallbackA
+ *		SetupDefaultQueueCallbackA
  */
 UINT WINAPI SetupDefaultQueueCallbackA (PVOID Context, UINT Notification,
                                         UINT Param1, UINT Param2)
 {
-    FIXME("not implemented (setupapi.dll) \n");
-    return 0;
+	FIXME("not implemented (setupapi.dll) \n");
+	return 0;
 }
 
 
 /***********************************************************************
- *      SetupFindFirstLineA
+ *		SetupFindFirstLineA
  */
 BOOL WINAPI SetupFindFirstLineA (HINF InfHandle, PCSTR Section, PCSTR Key,
                                  PINFCONTEXT Context)
 {
-    FIXME("not implemented (setupapi.dll) \n");
-    return 0;
+	FIXME("not implemented (setupapi.dll) \n");
+	return 0;
 }
 
 /***********************************************************************
- *      SetupGetLineByIndexA
+ *		SetupGetLineByIndexA
  */
 BOOL WINAPI SetupGetLineByIndexA (HINF InfHandle, PCSTR Section, DWORD Index,
                                  PINFCONTEXT Context)
 {
-    FIXME("not implemented (setupapi.dll) \n");
-    return FALSE;
+	FIXME("not implemented (setupapi.dll) \n");
+	return FALSE;
 }
 
 
 /***********************************************************************
- *      SetupInstallFromInfSectionA
+ *		SetupInstallFromInfSectionA
  */
 BOOL WINAPI SetupInstallFromInfSectionA (HWND Owner, HINF InfHandle, PCSTR SectionName,
                                          UINT Flags, HKEY RelativeKeyRoot, PCSTR SourceRootPath,
@@ -160,67 +159,67 @@ BOOL WINAPI SetupInstallFromInfSectionA (HWND Owner, HINF InfHandle, PCSTR Secti
                                          PVOID Context, HDEVINFO DeviceInfoSet,
                                          PSP_DEVINFO_DATA DeviceInfoData)
 {
-    FIXME("not implemented (setupapi.dll) \n");
-    return 0;
+	FIXME("not implemented (setupapi.dll) \n");
+	return 0;
 }
 
 /***********************************************************************
- *      SetupOpenAppendInfFileA
+ *		SetupOpenAppendInfFileA
  */
 BOOL WINAPI SetupOpenAppendInfFileA (PCSTR FileName, HINF InfHandle,
-                    PUINT ErrorLine)
+				    PUINT ErrorLine)
 {
-    FIXME("not implemented (setupapi.dll) \n");
-    return FALSE;
+	FIXME("not implemented (setupapi.dll) \n");
+	return FALSE;
 }
 
 /***********************************************************************
- *      SetupOpenFileQueue
+ *		SetupOpenFileQueue
  */
 HSPFILEQ WINAPI SetupOpenFileQueue (VOID)
 {
-    FIXME("not implemented (setupapi.dll) \n");
-    return (HSPFILEQ) INVALID_HANDLE_VALUE;
+	FIXME("not implemented (setupapi.dll) \n");
+	return (HSPFILEQ) INVALID_HANDLE_VALUE;
 }
 
 /***********************************************************************
- *      SetupOpenInfFileA
+ *		SetupOpenInfFileA
  */
 HINF WINAPI SetupOpenInfFileA (PCSTR FileName, PCSTR InfClass, DWORD InfStyle,
                                PUINT ErrorLine)
 {
-    FIXME("not implemented (setupapi.dll) \n");
-    return 0;
+	FIXME("not implemented (setupapi.dll) \n");
+	return 0;
 }
 
 /***********************************************************************
- *      SetupQueueCopyA
+ *		SetupQueueCopyA
  */
 BOOL WINAPI SetupQueueCopyA (HSPFILEQ QueueHandle, PCSTR SourceRootPath, PCSTR SourcePath,
-                 PCSTR SourceFileName, PCSTR SourceDescription, PCSTR SourceTagFile,
-                 PCSTR TargetDirectory, PCSTR TargetFileName, DWORD CopyStyle)
+			     PCSTR SourceFileName, PCSTR SourceDescription, PCSTR SourceTagFile,
+			     PCSTR TargetDirectory, PCSTR TargetFileName, DWORD CopyStyle)
 {
-    FIXME("not implemented (setupapi.dll) \n");
-    return FALSE;
+	FIXME("not implemented (setupapi.dll) \n");
+	return FALSE;
 }
 
 /***********************************************************************
- *      SetupSetDirectoryIdA
+ *		SetupSetDirectoryIdA
  */
 BOOL WINAPI SetupSetDirectoryIdA (HINF InfHandle,
-                  DWORD Id,
-                  PCSTR Directory)
+				  DWORD Id,
+				  PCSTR Directory)
 {
-    FIXME("not implemented (setupapi.dll) \n");
-    return FALSE;
+	FIXME("not implemented (setupapi.dll) \n");
+	return FALSE;
 }
 
 
 /***********************************************************************
- *      SetupTermDefaultQueueCallback
+ *		SetupTermDefaultQueueCallback
  */
 VOID WINAPI SetupTermDefaultQueueCallback (PVOID Callback)
 {
-    FIXME("not implemented (setupapi.dll) \n");
+	FIXME("not implemented (setupapi.dll) \n");
 }
 
