@@ -1,3 +1,5 @@
+!include ..\..\include\pdwin32.tools
+
 DEFS      = -D__WINE__ -D__WIN32OS2__ -idirafter ../../include/win -idirafter ../../include
 
 PROGRAMS = wrc.exe
@@ -42,7 +44,7 @@ y.tab.c y.tab.h: parser.y
 lexyy.c: parser.l
 	$(LEX) -8 parser.l
 
-clean::
+clean:
 	$(RM) *.o *.exe
 #	$(RM) y.tab.c y.tab.h lexyy.c *.o *.exe
 
