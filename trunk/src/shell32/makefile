@@ -18,7 +18,7 @@ CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
 
 TARGET = shell32
 
-OBJS =  shell32.obj initterm.obj
+OBJS =  shell32.obj sh.obj she.obj drag.obj initterm.obj
 
 all: $(TARGET).dll $(TARGET).lib
 
@@ -37,7 +37,15 @@ $(TARGET).lib: $(TARGET).dll
 
 
 shell32.obj: shell32.cpp shell32.h
+
+drag.obj: drag.cpp shell32.h
+
+sh.obj: sh.cpp shell32.h
+
+she.obj: she.cpp shell32.h
+
 initterm.obj: initterm.cpp
+
 
 clean:
         $(RM) *.obj *.lib *.dll *~ *.map *.pch
