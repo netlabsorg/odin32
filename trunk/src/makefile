@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.85 2002-04-10 19:16:03 bird Exp $
+# $Id: makefile,v 1.86 2003-01-15 10:41:46 sandervl Exp $
 
 #
 # Odin32 API
@@ -26,9 +26,9 @@
 #
 # Exclude lists which is to be passed in to DOWITHDIRS
 #
-NOTTOBEMADE = CVS;pe2lx;odin32api;odinwps;spy;odinldr;msvcrt;ws2help;win16ldr;oslib;custombuild   # generally not made
+NOTTOBEMADE = CVS;pe2lx;odin32api;odinwps;spy;odinldr;ws2help;win16ldr;oslib;custombuild;opengl   # generally not made
 NOTDLLS     = $(NOTTOBEMADE);peldr;dllentry;guidlib     # not dlls
-NOTHAVELIBS = $(NOTTOBEMADE);peldr                      # don't generate libs
+NOTHAVELIBS = $(NOTTOBEMADE);peldr;crtdll;              # don't generate libs
 NOTWIN32DLLS= $(NOTDLLS);win32k;odincrt;dllentry        # not win32 dlls.
 
 
@@ -97,14 +97,13 @@ $(COMMONRULES:clean dep lib all=):
     @$(DOWITHDIRS) -e$(NOTTOBEMADE) -c -l$@$(CCENV)$(DEBUG) $(EXTRA) \
         $(MAKE_CMD) $@
 
-
 #
 # Custom rules
 #
 CUSTOMBUILD = kernel32 user32 advapi32 comctl32 comdlg32 ctl3d32 ddraw ddraw \
     dinput gdi32 icmp imagehlp iphlpapi lz32 msvfw32 ntdll ole32 riched32 \
     rpcrt4 shell32 shlwapi version wininet winmm winspool wnaspi32 ws2_32 \
-    wsock32 uxtheme
+    wsock32 uxtheme imm32
 
 custombuild:
     @$(DODIRS) "$(CUSTOMBUILD)" $(MAKE_CMD) all CUSTOMBUILD=1
