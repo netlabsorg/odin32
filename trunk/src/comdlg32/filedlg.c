@@ -1156,7 +1156,7 @@ LPWSTR FILEDLG_MapStringPairsToW(LPCSTR strA, UINT size)
     while (*s)
         s = s+strlen(s)+1;
     s++;
-    n = s - strA;
+    n = s + 1 - strA; /* Don't forget the other \0 */
     if (n < size) n = size;
 
     len = MultiByteToWideChar( CP_ACP, 0, strA, n, NULL, 0 );
