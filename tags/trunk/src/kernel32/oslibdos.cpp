@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.74 2001-10-08 17:24:47 phaller Exp $ */
+/* $Id: oslibdos.cpp,v 1.75 2001-10-08 20:47:44 phaller Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -143,7 +143,10 @@ DWORD error2WinError(APIRET rc,DWORD defaultCode)
 
     case ERROR_NOT_READY: //21
         return ERROR_NOT_READY_W;
-
+    
+    case ERROR_CRC: //23
+        return ERROR_CRC_W;
+    
     case ERROR_NOT_DOS_DISK: //26
         return ERROR_NOT_DOS_DISK_W;
 
