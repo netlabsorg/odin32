@@ -1,4 +1,4 @@
-; $Id: ADVAPI32.DEF,v 1.11 2000-01-06 20:05:00 sandervl Exp $
+; $Id: ADVAPI32.DEF,v 1.12 2000-03-02 23:08:22 sandervl Exp $
 
 ;
 ; Based on NT 4.0 SP6: ADVAPI32.DLL 
@@ -176,34 +176,34 @@ EXPORTS
      CreateProcessAsUserW       = _CreateProcessAsUserW@44           @47
      CreateServiceA             = _CreateServiceA@52                 @48
      CreateServiceW             = _CreateServiceW@52                 @49
-;    CryptAcquireContextA					@50
-;    CryptAcquireContextW					@51
-;    CryptCreateHash						@52
-;    CryptDecrypt						@53
-;    CryptDeriveKey						@54
-;    CryptDestroyHash						@55
-;    CryptDestroyKey						@56
-;    CryptEncrypt						@57
-;    CryptExportKey						@58
-;    CryptGenKey						@59
-;    CryptGenRandom						@60
-;    CryptGetHashParam						@61
-;    CryptGetKeyParam						@62
-;    CryptGetProvParam						@63
-;    CryptGetUserKey						@64
-;    CryptHashData						@65
-;    CryptHashSessionKey					@66
-;    CryptImportKey						@67
-;    CryptReleaseContext					@68
-;    CryptSetHashParam						@69
-;    CryptSetKeyParam						@70
-;    CryptSetProvParam						@71
-;    CryptSetProviderA						@72
-;    CryptSetProviderW						@73
-;    CryptSignHashA						@74
-;    CryptSignHashW						@75
-;    CryptVerifySignatureA					@76
-;    CryptVerifySignatureW					@77
+     CryptAcquireContextA       = _CryptAcquireContextA@20   	     @50
+     CryptAcquireContextW       = _CryptAcquireContextW@20           @51
+     CryptCreateHash            = _CryptCreateHash@20  	  	     @52
+     CryptDecrypt               = _CryptDecrypt@24    	  	     @53
+     CryptDeriveKey             = _CryptDeriveKey@20 	  	     @54
+     CryptDestroyHash           = _CryptDestroyHash@4		     @55
+     CryptDestroyKey            = _CryptDestroyKey@4	             @56
+     CryptEncrypt               = _CryptEncrypt@28                   @57
+     CryptExportKey             = _CryptExportKey@24		     @58
+     CryptGenKey                = _CryptGenKey@16		     @59
+     CryptGenRandom             = _CryptGenRandom@12		     @60
+     CryptGetHashParam          = _CryptGetHashParam@20		     @61
+     CryptGetKeyParam           = _CryptGetKeyParam@20		     @62
+     CryptGetProvParam          = _CryptGetProvParam@20		     @63
+     CryptGetUserKey            = _CryptGetUserKey@12		     @64
+     CryptHashData              = _CryptHashData@16		     @65
+     CryptHashSessionKey        = _CryptHashSessionKey@12	     @66
+     CryptImportKey             = _CryptImportKey@24		     @67
+     CryptReleaseContext        = _CryptReleaseContext@8	     @68
+     CryptSetHashParam          = _CryptSetHashParam@16		     @69
+     CryptSetKeyParam           = _CryptSetKeyParam@16		     @70
+     CryptSetProvParam          = _CryptSetProvParam@16		     @71
+     CryptSetProviderA          = _CryptSetProviderA@8		     @72
+     CryptSetProviderW          = _CryptSetProviderW@8		     @73
+     CryptSignHashA             = _CryptSignHashA@24		     @74
+     CryptSignHashW             = _CryptSignHashW@24		     @75
+     CryptVerifySignatureA      = _CryptVerifySignatureA@24	     @76
+     CryptVerifySignatureW      = _CryptVerifySignatureW@24	     @77
      DeleteAce                  = _DeleteAce@8                       @78
      DeleteService              = _DeleteService@4                   @79
      DeregisterEventSource      = _DeregisterEventSource@4           @80
