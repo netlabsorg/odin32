@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 1999-08-09 22:10:09 phaller Exp $
+# $Id: makefile,v 1.4 1999-08-10 11:29:43 phaller Exp $
 
 #
 # PD-Win32 API
@@ -27,6 +27,7 @@ all: $(TARGET).dll $(TARGET).lib
 
 $(TARGET).dll: $(OBJS) $(TARGET).def
         $(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) CPPOM30.LIB CPPOM30O.LIB \
+        $(PDWIN32_LIB)\LIBULS.LIB $(PDWIN32_LIB)\LIBCONV.LIB \
         OS2386.LIB SOMTK.LIB $(TARGET).def
         $(CP) $@ $(PDWIN32_BIN)
 
@@ -37,7 +38,9 @@ $(TARGET).lib: $(TARGET).dll
 
 
 odincrt.obj: odincrt.cpp $(PDWIN32_INCLUDE)\odincrt.h
+
 initterm.obj: initterm.cpp
+
 odinfs.obj: odinfs.asm
 
 clean:
