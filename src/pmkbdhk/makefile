@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2001-10-22 23:13:39 phaller Exp $
+# $Id: makefile,v 1.2 2001-10-24 10:55:36 achimha Exp $
 
 #
 # InnoTek OS/2 Presentation Manager Keyboard Hook
@@ -29,10 +29,8 @@ $(OBJDIR)\pmkbdhk.obj
 # Libraries. One space before the '\'.
 #
 LIBS = \
-$(ODIN32_LIB)/$(ODINCRT).lib \
 OS2386.LIB \
-$(RTLLIB_O)
-
+$(RTLLIB)
 
 #
 # Target name - name of the dll without extention and path.
