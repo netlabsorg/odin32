@@ -1,4 +1,4 @@
-/* $Id: waveoutdart.cpp,v 1.17 2003-03-05 14:49:56 sandervl Exp $ */
+/* $Id: waveoutdart.cpp,v 1.18 2003-03-05 16:45:10 sandervl Exp $ */
 
 /*
  * Wave playback class (DART)
@@ -620,14 +620,8 @@ void DartWaveOut::handler(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer, ULONG ulFlags
     }
 
     if(wavehdr == NULL) {
-        //last buffer played -> no new ones -> silence buffer & continue
+        //last buffer played -> no new ones -> return now
         dprintf(("WINMM: WaveOut handler LAST BUFFER PLAYED! state %s (play %d (%d), cop %d, ret %d)", (State == STATE_PLAYING) ? "playing" : "stopped", bytesPlayed, getPosition(), bytesCopied, bytesReturned));
-        if(State == STATE_PLAYING) {
-            fUnderrun = TRUE;
-            pause();
-////            memset(MixBuffer[curPlayBuf].pBuffer, 0, MixBuffer[curPlayBuf].ulBufferLength);
-////            goto sendbuffer;
-        }
         wmutex.leave();
         return;
     }
