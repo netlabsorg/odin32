@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.88 2000-03-13 13:10:48 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.89 2000-03-16 19:19:11 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -300,7 +300,6 @@ protected:
        LRESULT  SendInternalMessageA(ULONG msg, WPARAM wParam, LPARAM lParam);
        LRESULT  SendInternalMessageW(ULONG msg, WPARAM wParam, LPARAM lParam);
         void    Init();
-        void    setExtendedKey(ULONG virtualkey, ULONG *lParam);
 
         HWND    OS2Hwnd;
         HWND    OS2HwndFrame;

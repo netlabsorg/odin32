@@ -1,4 +1,4 @@
-/* $Id: win32wndhandle.cpp,v 1.5 2000-02-16 14:28:25 sandervl Exp $ */
+/* $Id: win32wndhandle.cpp,v 1.6 2000-03-16 19:19:11 sandervl Exp $ */
 /*
  * Win32 Handle Management Code for OS/2
  *
@@ -39,8 +39,8 @@ BOOL HwAllocateWindowHandle(HWND *hwnd, DWORD dwUserData)
   if(lowestFreeIndex == -1) {
 	//oops, out of handles
 	dprintf(("USER32: HwAllocateWindowHandle OUT OF WINDOW HANDLES!!"));
-	DebugInt3();
 	tableMutex.leave();
+	DebugInt3();
 	return FALSE;
   }
   *hwnd           = lowestFreeIndex;
