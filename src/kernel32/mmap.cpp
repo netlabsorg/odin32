@@ -1,4 +1,4 @@
-/* $Id: mmap.cpp,v 1.53 2001-10-30 00:46:17 sandervl Exp $ */
+/* $Id: mmap.cpp,v 1.54 2002-03-24 13:10:30 sandervl Exp $ */
 
 /*
  * Win32 Memory mapped file & view classes
@@ -381,7 +381,8 @@ LPVOID Win32MemMap::mapViewOfFile(ULONG size, ULONG offset, ULONG fdwAccess)
         //     This is most likely an OS/2 bug and doesn't happen in Aurora
         //     when allocating memory with the PAG_ANY bit set. (without this
         //     flag it will also crash)
-        if(hMemFile == -1 && lpszMapName) {
+        //All named file mappings are shared (files & memory only)
+        if(lpszMapName) {
             pMapping = VirtualAllocShared(mSize, fAlloc, PAGE_READWRITE, lpszMapName);
         }
         else {
@@ -600,8 +601,9 @@ Win32MemMapView::Win32MemMapView(Win32MemMap *map, ULONG offset, ULONG size,
         mfAccess   = MEMMAP_ACCESS_READ | MEMMAP_ACCESS_WRITE;
         break;
     }
-    if(map->getMemName() != NULL && map->getFileHandle() == -1 && 
-       map->getProcessId() != mProcessId) 
+    //Named file mappings from other processes are always shared;
+    //map into our address space
+    if(map->getMemName() != NULL && map->getProcessId() != mProcessId) 
     {
         //shared memory map, so map it into our address space
         if(OSLibDosGetNamedSharedMem((LPVOID *)&viewaddr, map->getMemName()) != OSLIB_NOERROR) {

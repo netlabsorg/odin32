@@ -1,4 +1,4 @@
-/* $Id: hmfile.cpp,v 1.33 2001-12-05 18:06:01 sandervl Exp $ */
+/* $Id: hmfile.cpp,v 1.34 2002-03-24 13:10:30 sandervl Exp $ */
 
 /*
  * File IO win32 apis
@@ -472,16 +472,16 @@ BOOL HMDeviceFileClass::ReadFile(PHMHANDLEDATA pHMHandleData,
   //     that one + commit pages if not already present
   map = Win32MemMapView::findMapByView((ULONG)lpBuffer, &offset, MEMMAP_ACCESS_WRITE);
   if(map) {
-    lpRealBuf = (LPVOID)((ULONG)map->getMappingAddr() + offset);
-    DWORD nrpages = nNumberOfBytesToRead/4096;
-    if(offset & 0xfff)
-        nrpages++;
-    if(nNumberOfBytesToRead & 0xfff)
-        nrpages++;
+       lpRealBuf = (LPVOID)((ULONG)map->getMappingAddr() + offset);
+       DWORD nrpages = nNumberOfBytesToRead/4096;
+       if(offset & 0xfff)
+           nrpages++;
+       if(nNumberOfBytesToRead & 0xfff)
+           nrpages++;
 
-    map->commitPage(offset & ~0xfff, TRUE, nrpages);
+       map->commitPage(offset & ~0xfff, TRUE, nrpages);
   }
-  else  lpRealBuf = (LPVOID)lpBuffer;
+  else lpRealBuf = (LPVOID)lpBuffer;
 
   if(pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED) {
     dprintf(("ERROR: Overlapped IO not yet implememented!!"));
@@ -559,16 +559,16 @@ BOOL HMDeviceFileClass::WriteFile(PHMHANDLEDATA pHMHandleData,
   //     that one + commit pages if not already present
   map = Win32MemMapView::findMapByView((ULONG)lpBuffer, &offset, MEMMAP_ACCESS_READ);
   if(map) {
-    lpRealBuf = (LPVOID)((ULONG)map->getMappingAddr() + offset);
-    DWORD nrpages = nNumberOfBytesToWrite/4096;
-    if(offset & 0xfff)
-        nrpages++;
-    if(nNumberOfBytesToWrite & 0xfff)
-        nrpages++;
-
-    map->commitPage(offset & ~0xfff, TRUE, nrpages);
+       lpRealBuf = (LPVOID)((ULONG)map->getMappingAddr() + offset);
+       DWORD nrpages = nNumberOfBytesToWrite/4096;
+       if(offset & 0xfff)
+           nrpages++;
+       if(nNumberOfBytesToWrite & 0xfff)
+           nrpages++;
+ 
+       map->commitPage(offset & ~0xfff, TRUE, nrpages);
   }
-  else  lpRealBuf = (LPVOID)lpBuffer;
+  else lpRealBuf = (LPVOID)lpBuffer;
 
   if(pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED) {
     dprintf(("ERROR: Overlapped IO not yet implememented!!"));
