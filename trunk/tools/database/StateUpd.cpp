@@ -1,4 +1,4 @@
-/* $Id: StateUpd.cpp,v 1.5 1999-12-06 23:52:42 bird Exp $
+/* $Id: StateUpd.cpp,v 1.6 2000-02-10 22:10:38 bird Exp $
  *
  * StateUpd - Scans source files for API functions and imports data on them.
  *
@@ -11,6 +11,7 @@
 *******************************************************************************/
 #define INCL_DOSFILEMGR
 #define INCL_DOSERRORS
+#define INCL_DOSMISC
 #include <os2.h>
 #include <stdio.h>
 #include <string.h>
@@ -40,6 +41,7 @@ static unsigned long processFile(const char *pszFilename, POPTIONS pOptions);
 static unsigned long processAPI(char **papszLines, int i, int &iRet, const char *pszFilename, POPTIONS pOptions);
 static unsigned long analyseFnHdr(PFNDESC pFnDesc, char **papszLines, int i, const char *pszFilename, POPTIONS pOptions);
 static unsigned long analyseFnDcl(PFNDESC pFnDesc, char **papszLines, int i, int &iRet, const char *pszFilename, POPTIONS pOptions);
+static unsigned long analyseFnDcl2(PFNDESC pFnDesc, char **papszLines, int i, int &iRet, const char *pszFilename, POPTIONS pOptions);
 static BOOL  isFunction(char **papszLines, int i, POPTIONS pOptions);
 static char *skipInsignificantChars(char **papszLines, int &i, char *psz);
 static char *readFileIntoMemory(const char *pszFilename);
@@ -70,6 +72,8 @@ int main(int argc, char **argv)
     char          *pszDatabase = "Odin32";
     char          *pszUser     = "root";
     char          *pszPasswd   = "";
+
+    DosError(0x3);
 
     /**************************************************************************
     * parse arguments.
@@ -592,101 +596,34 @@ static unsigned long processAPI(char **papszLines, int i, int &iRet, const char 
 static unsigned long analyseFnDcl(PFNDESC pFnDesc, char **papszLines, int i, int &iRet,
                                   const char *pszFilename, POPTIONS pOptions)
 {
-    static long lPrevFnDll = -1L; /* fix for duplicate dlls */
-    FNFINDBUF FnFindBuf;
-    char *pszOS2;
-    char *pszP1;
-    int   iP1;
-    char *pszP2;
-    int   iP2;
-    char *psz;
-    unsigned long ulRc = 0x000000001;
-    int   iFn = 0;
-
-    iRet = i+1;
+    static long     lPrevFnDll = -1L; /* fix for duplicate dlls */
+    unsigned long   ulRc;
+    FNFINDBUF       FnFindBuf;
+    long            lFn = 0;
 
     /* brief algorithm:
-     *  1. find function name and start and end parentese. (evt. return type.)
-     *  2. copy to szFnDclBuffer.
-     *  3. extract name, and do a database lookup on the name.
-     *   3b. if more that one match, write a signal. (TODO: a simple fix is done, but there are holes.)
-     *  4. analyse parameters. (evt. return type)
+     * 1. read function declaration using analyseFnDcl2.
+     * 2. apply name rules.
+     * 3. do a database lookup on the name.
+     *  3b. if more that one match, write a signal. (TODO: a simple fix is done, but there are holes.)
      */
 
-    /* 1.*/
-    if (!pOptions->fOld)
-    {   /* new API naming convention */
-        pszP1 = strchr(papszLines[i], '(');
-        iP1 = i;
-        pszOS2 = pszP1 - 1;
-        while (pszOS2 > papszLines[i] && *pszOS2 == ' ')
-            pszOS2--;
-        pszOS2 = findStartOfWord(pszOS2, papszLines[i]);
-    }
-    else
-    {   /* old API naming convention */
-        pszOS2 = strstr(papszLines[i], "OS2");
-        iP1 = i;
-        pszP1 = findEndOfWord(pszOS2);
-        pszP1 = skipInsignificantChars(papszLines, iP1, pszP1);
-    }
-    iP2 = iP1;
-    pszP2 = pszP1 + 1;
-    while (*pszP2 != ')')
-        if (*pszP2++ == '\0')
-            if ((pszP2 = papszLines[++iP2]) == NULL)
-                break;
-
-    iRet = iP2 + 1; //assumes: only one function on a single line!
+    /* 1. */
+    ulRc = analyseFnDcl2(pFnDesc, papszLines, i, iRet, pszFilename, pOptions);
+    if (ulRc != 1)
+        return ulRc;
 
     /* 2. */
-    psz = &pFnDesc->szFnDclBuffer[0];
-    /* copy name */
-    if (pOptions->fOS2 && strncmp(pszOS2, "OS2", 3) == 0)
-    {
-        if (iP1 == i)
-            strncpy(psz, pszOS2+3, pszP1 - (pszOS2+3));
-        else
-            strcpy(psz, pszOS2+3);
-    }
-    else if (pOptions->fCOMCTL32 && strncmp(pszOS2, "COMCTL32", 8) == 0)
-    {
-        if (iP1 == i)
-            strncpy(psz, pszOS2+8, pszP1 - (pszOS2+8));
-        else
-            strcpy(psz, pszOS2+8);
-    }
-    else if (pOptions->fVERSION && strncmp(pszOS2, "VERSION", 7) == 0)
-    {
-        if (iP1 == i)
-            strncpy(psz, pszOS2+7, pszP1 - (pszOS2+7));
-        else
-            strcpy(psz, pszOS2+7);
-    }
-    else
-    {
-        if (!pOptions->fOld)
-        {   /* new API naming convention */
-            if (iP1 == i)
-                strncpy(psz, pszOS2, pszP1 - pszOS2);
-            else
-                strcpy(psz, pszOS2);
-        }
-        else
-        {   /* old API naming convention */
-            if (iP1 == i)
-                strncpy(psz, pszOS2+3, pszP1 - (pszOS2+3));
-            else
-                strcpy(psz, pszOS2+3);
-        }
-    }
-    trim(psz);
-    pFnDesc->pszName = psz;
-    psz += strlen(psz) + 1;
+    if (pOptions->fOS2 && strncmp(pFnDesc->pszName, "OS2", 3) == 0)
+        pFnDesc->pszName += 3;
+    else if (pOptions->fCOMCTL32 && strncmp(pFnDesc->pszName, "COMCTL32", 8) == 0)
+        pFnDesc->pszName += 8;
+    else if (pOptions->fVERSION && strncmp(pFnDesc->pszName, "VERSION", 7) == 0)
+        pFnDesc->pszName += 7;
+    else if (pOptions->fOld)
+        pFnDesc->pszName += 3;
 
-    copy(psz, pszP1, iP1, pszP2, iP2, papszLines);
-
-    /* 3.*/
+    /* 3. */
     if (!dbFindFunction(pFnDesc->pszName, &FnFindBuf))
     {
         fprintf(phSignal, "%s, %s: error occured while reading from database, %s\n",
@@ -701,63 +638,171 @@ static unsigned long analyseFnDcl(PFNDESC pFnDesc, char **papszLines, int i, int
     }
     else if (FnFindBuf.cFns > 1)
     {   /* 3b.*/
-        while (iFn < (int)FnFindBuf.cFns && FnFindBuf.alDllRefCode[iFn] != lPrevFnDll)
-            iFn++;
-        if (lPrevFnDll == -1L && iFn >= (int)FnFindBuf.cFns)
+        while (lFn < (int)FnFindBuf.cFns && FnFindBuf.alDllRefCode[lFn] != lPrevFnDll)
+            lFn++;
+        if (lPrevFnDll == -1L && lFn >= (int)FnFindBuf.cFns)
         {
             fprintf(phSignal, "%s, %s: error - more than one function by the name '%s'\n",
                     pszFilename, pFnDesc->pszName, pFnDesc->pszName);
             return 0x00010000;
         }
     }
-    pFnDesc->lRefCode = FnFindBuf.alRefCode[iFn];
-    lPrevFnDll = FnFindBuf.alDllRefCode[iFn];
+    pFnDesc->lRefCode = FnFindBuf.alRefCode[lFn];
+    lPrevFnDll = FnFindBuf.alDllRefCode[lFn];
 
-    /* 4.*/
-    pFnDesc->cParams = 0;
+    return ulRc;
+}
+
+
+
+/**
+ * Analyses the function declaration.
+ * No DB lockup or special function type stuff, only ODINFUNCTION is processed.
+ * @returns   high word = number of signals
+ *            low  word = number of APIs processed. (1 or 0).
+ * @param     papszLines   Array of lines in the file.
+ * @param     i            Index into papszLines.
+ * @param     iRet         Index into papszLines. Where to start searching again.
+ * @param     pszFilename  Filename used in the signal log.
+ * @param     pOptions     Pointer to options.
+ */
+static unsigned long analyseFnDcl2(PFNDESC pFnDesc, char **papszLines, int i, int &iRet,
+                                   const char *pszFilename, POPTIONS pOptions)
+{
+    /** @sketch
+     * 1. find the '('
+     * 2. find the word ahead of the '(', this is the function name.
+     * 3. find the closing ')'
+     * 4. copy the parameters, which is between the two '()'
+     * 5. format the parameters
+     */
+
+    int     iFn, iP1, iP2, j;
+    char *  pszFn, *pszP1, *pszP2;
+    char *  psz, *pszEnd;
+    int     cArgs;
+    char *  apszArgs[30];
+
+    /* 1.*/
+    iP1 = i;
+    while (papszLines[iP1] != NULL
+           && (pszP1 = strchr(papszLines[iP1], '(')) == NULL)
+        iP1++;
+    if (papszLines[iP1] == NULL)
+    {
+        fprintf(phSignal, "%d: oops! didn't find end of function!, %d\n", pszFilename, __LINE__);
+        iRet = iP1;
+        return 0x00010000;
+    }
+
+    /* 2. */
+    iFn = iP1;
+    if (papszLines[iFn] != pszP1)
+        pszFn = pszP1 - 1;
+    else
+    {
+        pszFn = papszLines[--iFn];
+        pszFn += strlen(pszFn);
+    }
+    while (iFn >= i && *pszFn == ' ')
+    {
+        if (pszFn != papszLines[iFn])
+            pszFn--;
+        else
+        {
+            pszFn = papszLines[--iFn];
+            pszFn += strlen(pszFn);
+        }
+    }
+    if (*pszFn == ' ' || *pszFn == '\0')
+    {
+        fprintf(phSignal, "%s: internal error!, %d\n", pszFilename, __LINE__);
+        iRet = iP1;
+        return 0x00010000;
+    }
+    pszFn = findStartOfWord(pszFn, papszLines[i]);
+
+    /* 3. */
+    iP2 = iP1;
+    pszP2 = pszP1 + 1;
+    while (*pszP2 != ')')
+        if (*pszP2++ == '\0')
+            if ((pszP2 = papszLines[++iP2]) == NULL)
+                break;
+
+    iRet = iP2 + 1; //assumes: only one function on a single line!
+
+    /* 4. */
+    psz = pFnDesc->szFnDclBuffer;
+    copy(pFnDesc->szFnDclBuffer, pszP1, iP1, pszP2, iP2, papszLines);
+    pszEnd = psz + strlen(psz) + 1;
+
+    /* 5.*/
+    cArgs = 0;
     if (stricmp(psz, "(void)") != 0 && strcmp(psz, "()") != 0 && strcmp(psz, "( )"))
     {
-        psz++; /* skip '(' */
-        while (*psz != '\0' && *psz != ')')
+        char *pszC;
+        pszC = trim(psz+1);
+        while (*pszC != '\0')
         {
-            char *pszName;
-            char *pszEnd = psz;
-
-            while (*pszEnd != '\0' && *pszEnd != ',' && *pszEnd != ')')
-                pszEnd++;
-
-            /* fix - if pszEnd == '\0' then there is something wrong */
-            if (*pszEnd == '\0')
-            {
-                fprintf(phLog, "internal error (not fatal): pszEnd = '\\0' when it shouldn't, %d\n", __LINE__);
-                break;
-            }
-            *pszEnd = '\0';
-
-            /* paranoia test */
-            if (pszEnd <= psz)
-            {
-                fprintf(phSignal, "%s: error - pszEnd <= psz\n", pszFilename);
-                return 0x00010000;
-            }
-
-            pszName = findStartOfWord(pszEnd - 1, psz);
-            if (pszName > psz)
-            {
-                pszName[-1] = '\0'; /* this is required to be space! */
-                pFnDesc->apszParamType[pFnDesc->cParams] = trim(psz);
-            }
-            else
-                pFnDesc->apszParamType[pFnDesc->cParams] = ""; /* no parameter type (parameter is usualy a define) */
-            pFnDesc->apszParamName[pFnDesc->cParams] = trim(pszName);
+            apszArgs[cArgs] = pszC;
+            while (*pszC != ',' && *pszC != ')' && *pszC != '\0')
+                pszC++;
+            *pszC = '\0';
+            trim(apszArgs[cArgs++]);
 
             /* next */
-            pFnDesc->cParams++;
-            psz = pszEnd + 1;
+            pszC = trim(pszC + 1);
         }
     }
 
-    return ulRc;
+    /* 6. */
+    if (strnicmp(pszFn, "ODINFUNCTION", 12) == 0)
+    {
+        if (cArgs < 2)
+        {
+            fprintf(phSignal, "%s: Invalid ODINFUNCTION function too few parameters!\n", pszFilename);
+            return 0x00010000;
+        }
+        /* return type */
+        pFnDesc->pszReturnType = apszArgs[0];
+
+        /* function name */
+        pFnDesc->pszName = apszArgs[1];
+
+        /* arguments */
+        j = 2;
+        pFnDesc->cParams = 0;
+        while (j+1 < cArgs)
+        {
+            pFnDesc->apszParamType[pFnDesc->cParams] = apszArgs[j];
+            pFnDesc->apszParamName[pFnDesc->cParams] = apszArgs[j+1];
+            pFnDesc->cParams++;
+            j += 2;
+        }
+    }
+    else
+    {
+        /* function name */
+        *pszEnd = '\0';
+        strncat(pszEnd, pszFn, findEndOfWord(pszFn) - pszFn);
+        pFnDesc->pszName = pszEnd;
+
+        /* return type - not implemented TODO/FIXME! */
+        pFnDesc->pszReturnType = NULL;
+
+        /* arguments */
+        pFnDesc->cParams = cArgs;
+        for (j = 0; j < cArgs; j++)
+        {
+            pFnDesc->apszParamName[j] = findStartOfWord(apszArgs[j] + strlen(apszArgs[j]) - 1,
+                                                        apszArgs[j]);
+            pFnDesc->apszParamName[j][-1] = '\0';
+            pFnDesc->apszParamType[j] = trim(apszArgs[j]);
+        }
+    }
+    pOptions = pOptions;
+    return 0x00000001;
 }
 
 
@@ -1347,14 +1392,13 @@ static char *findEndOfWord(char *psz)
 static char *findStartOfWord(char *psz, const char *pszStart)
 {
     char *pszR = psz;
-    while (psz > pszStart &&
+    while (psz >= pszStart &&
             (
-              (*psz >= 'A' && *psz <= 'Z') || (*psz >= 'a' && *psz <= 'z')
-              ||
-              (*psz >= '0' && *psz <= '9')
-              ||
-              *psz == '_'
-            )
+                 (*psz >= 'A' && *psz <= 'Z')
+              || (*psz >= 'a' && *psz <= 'z')
+              || (*psz >= '0' && *psz <= '9')
+              || *psz == '_'
+             )
           )
         pszR = psz--;
     return pszR;
@@ -1366,14 +1410,15 @@ static char *trim(char *psz)
     int i;
     if (psz == NULL)
         return NULL;
-    while (*psz == ' ')
+    while (*psz == ' ' || *psz == '\t')
         psz++;
     i = strlen(psz) - 1;
-    while (i >= 0 && psz[i] == ' ')
+    while (i >= 0 && (psz[i] == ' ' || *psz == '\t'))
         i--;
     psz[i+1] = '\0';
     return psz;
 }
+
 
 /* copy: remove remarks, and unneeded spaces, ensuring no space after '(',
  *       ensuring space after '*', ensuring no space before ',' and ')'.

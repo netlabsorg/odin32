@@ -1,4 +1,4 @@
-/* $Id: db.cpp,v 1.3 1999-12-06 23:52:43 bird Exp $ */
+/* $Id: db.cpp,v 1.4 2000-02-10 22:10:40 bird Exp $ */
 /*
  * DB - contains all database routines.
  *
@@ -431,21 +431,21 @@ unsigned long _System dbUpdateFunction(PFNDESC pFnDesc, char *pszError)
     pszQuery += strlen(pszQuery);
     if (pFnDesc->lStatus != 99 || lCurrentState == 0)
     {
-        f = TRUE;
         sprintf(pszQuery, "state = %ld ", pFnDesc->lStatus);
+        f = TRUE;
     }
     pszQuery += strlen(pszQuery);
 
     if (pFnDesc->pszReturnType != NULL)
     {
-        f = TRUE;
-        if (pszQuery[-1] != ' ')
+        if (f)
         {
             strcat(pszQuery, ", ");
             pszQuery += strlen(pszQuery);
         }
-        sprintf(pszQuery, ", return = '%s' ", pFnDesc->pszReturnType);
+        sprintf(pszQuery, "return = '%s' ", pFnDesc->pszReturnType);
         pszQuery += strlen(pszQuery);
+        f = TRUE;
     }
 
     if (f)
