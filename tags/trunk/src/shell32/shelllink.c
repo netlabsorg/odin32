@@ -231,11 +231,7 @@ static HRESULT WINAPI IPersistFile_fnLoad(IPersistFile* iface, LPCOLESTR pszFile
         _ICOM_THIS_From_IPersistFile(IShellLinkImpl, iface)
 	_IPersistStream_From_ICOM_THIS(IPersistStream, This)
 
-#ifdef __WIN32OS2__
-        STACK_strdupWtoA(pszFileName, sFile)
-#else
 	sFile = HEAP_strdupWtoA ( GetProcessHeap(), 0, pszFileName);
-#endif
 
 	TRACE("(%p, %s)\n",This, sFile);
 	
@@ -251,7 +247,7 @@ static HRESULT WINAPI IPersistFile_fnLoad(IPersistFile* iface, LPCOLESTR pszFile
 	  }
 	}
 	
-#ifndef __WIN32OS2__
+#ifdef __WIN32OS2__
        // PH 2001-11-13 memory leak in WINE?
        HeapFree( GetProcessHeap(), 0, sFile);
 #endif
