@@ -1,4 +1,4 @@
-/* $Id: mmap.cpp,v 1.12 1999-08-25 15:27:19 sandervl Exp $ */
+/* $Id: mmap.cpp,v 1.13 1999-08-25 17:05:57 sandervl Exp $ */
 
 /*
  * Win32 Memory mapped file class
@@ -9,9 +9,6 @@
  *       a pagefault in the memory mapped object. (exceptions aren't
  *       dispatched to our exception handler until after the kernel mode
  *       call returns (too late))
- *
- * NOTE: There's no easy way to determine which pages were modified. Temporary
- *       solution is to write all paged-in memory to disk.
  *
  * NOTE: Are apps allowed to change the protection flags of memory mapped pages?
  *       I'm assuming they aren't for now.
@@ -139,9 +136,13 @@ BOOL Win32MemMap::hasExecuteAccess()
   return FALSE;
 }
 //******************************************************************************
+//We determine whether a page has been modified by checking it's protection flags
+//If the write flag is set, this means commitPage had to enable this due to a pagefault
+//(all pages are readonly until the app tries to write to it)
 //******************************************************************************
-BOOL Win32MemMap::commitPage(LPVOID lpPageFaultAddr, ULONG nrpages)
+BOOL Win32MemMap::commitPage(LPVOID lpPageFaultAddr, ULONG nrpages, BOOL fWriteAccess)
 {
+ MEMORY_BASIC_INFORMATION memInfo;
  DWORD pageAddr = (DWORD)lpPageFaultAddr & ~0xFFF;
  DWORD oldProt, newProt, nrBytesRead, offset, size;
  
@@ -150,33 +151,50 @@ BOOL Win32MemMap::commitPage(LPVOID lpPageFaultAddr, ULONG nrpages)
 
   dprintf(("Win32MemMap::commitPage %x (faultaddr %x), nr of pages %d", pageAddr, lpPageFaultAddr, nrpages));
   if(hMemFile != -1) {
-  	if(VirtualAlloc((LPVOID)pageAddr, nrpages*PAGE_SIZE, MEM_COMMIT, PAGE_READWRITE) == FALSE) {
-		goto fail;
-  	}
-	offset = pageAddr - (ULONG)pMapping;
-	size   = nrpages*PAGE_SIZE;
-	if(offset + size > mSize) {
-		size = mSize - offset;
-	}
-	if(SetFilePointer(hMemFile, offset, NULL, FILE_BEGIN) != offset) {
-		dprintf(("Win32MemMap::commitPage: SetFilePointer failed to set pos to %x", offset));
+	if(VirtualQuery((LPSTR)pageAddr, &memInfo, nrpages*PAGE_SIZE) == 0) {
+		dprintf(("Win32MemMap::commitPage: VirtualQuery (%x,%x) failed for %x", pageAddr, nrpages*PAGE_SIZE));
 		goto fail;
 	}
-	if(ReadFile(hMemFile, (LPSTR)pageAddr, size, &nrBytesRead, NULL) == FALSE) {
-		dprintf(("Win32MemMap::commitPage: ReadFile failed for %x", pageAddr));
-		goto fail;
+	if(memInfo.State & MEM_COMMIT)
+        {//if it's already committed, then the app tried to write to it
+		if(!fWriteAccess) {
+			dprintf(("Win32MemMap::commitPage: Huh? Already committed and not trying to write (%x,%x) failed for %x", pageAddr, nrpages*PAGE_SIZE));
+			goto fail;
+		}
+		if(VirtualProtect((LPVOID)pageAddr, nrpages*PAGE_SIZE, newProt, &oldProt) == FALSE) {
+			dprintf(("Win32MemMap::commitPage: Failed to set write flag on page (%x,%x) failed for %x", pageAddr, nrpages*PAGE_SIZE));
+			goto fail;
+		}
 	}
-	if(nrBytesRead != size) {
-		dprintf(("Win32MemMap::commitPage: ReadFile didn't read all bytes for %x", pageAddr));
-		goto fail;
-	}
-	if(mProtFlags & PAGE_READONLY) {
+	else {
+  		if(VirtualAlloc((LPVOID)pageAddr, nrpages*PAGE_SIZE, MEM_COMMIT, PAGE_READWRITE) == FALSE) {
+			goto fail;
+  		}
+		offset = pageAddr - (ULONG)pMapping;
+		size   = nrpages*PAGE_SIZE;
+		if(offset + size > mSize) {
+			size = mSize - offset;
+		}
+		if(SetFilePointer(hMemFile, offset, NULL, FILE_BEGIN) != offset) {
+			dprintf(("Win32MemMap::commitPage: SetFilePointer failed to set pos to %x", offset));
+			goto fail;
+		}
+		if(ReadFile(hMemFile, (LPSTR)pageAddr, size, &nrBytesRead, NULL) == FALSE) {
+			dprintf(("Win32MemMap::commitPage: ReadFile failed for %x", pageAddr));
+			goto fail;
+		}
+		if(nrBytesRead != size) {
+			dprintf(("Win32MemMap::commitPage: ReadFile didn't read all bytes for %x", pageAddr));
+			goto fail;
+		}
+		if(mProtFlags & PAGE_READONLY) {
 //DosSetMem returns flags with EXECUTE bit set, even though the initial allocation is without this bit set!
 //Also returns access denied when trying to set it back to READONLY
-  		VirtualProtect((LPVOID)pageAddr, nrpages*PAGE_SIZE, newProt, &oldProt);
-//  		if(VirtualProtect((LPVOID)pageAddr, nrpages*PAGE_SIZE, newProt, &oldProt) == FALSE) {
-//			goto fail;
-//		}
+  			VirtualProtect((LPVOID)pageAddr, nrpages*PAGE_SIZE, newProt, &oldProt);
+//  			if(VirtualProtect((LPVOID)pageAddr, nrpages*PAGE_SIZE, newProt, &oldProt) == FALSE) {
+//				goto fail;
+//			}
+		}
 	}
   }
   else {
@@ -255,8 +273,10 @@ fail:
   return 0;
 }
 //******************************************************************************
-// NOTE: There's no easy way to determine which pages were modified. Temporary
-//       solution is to write all paged-in memory to disk.
+//We determine whether a page has been modified by checking it's protection flags
+//If the write flag is set, this means commitPage had to enable this due to a pagefault
+//(all pages are readonly until the app tries to modify it)
+//
 //TODO: Are apps allowed to change the protection flags of memory mapped pages?
 //      I'm assuming they aren't for now.
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: mmap.h,v 1.7 1999-08-25 10:28:41 sandervl Exp $ */
+/* $Id: mmap.h,v 1.8 1999-08-25 17:05:57 sandervl Exp $ */
 
 /*
  * Memory mapped class
@@ -40,7 +40,7 @@ public:
    BOOL   hasWriteAccess();
    BOOL   hasExecuteAccess();
  
-   BOOL   commitPage(LPVOID lpPageFaultAddr, ULONG nrpages);
+   BOOL   commitPage(LPVOID lpPageFaultAddr, ULONG nrpages, BOOL fWriteAccess);
 
 static Win32MemMap *findMap(LPSTR lpszName);
 static Win32MemMap *findMap(ULONG address);
