@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.15 1999-08-22 16:38:01 sandervl Exp $ */
+/* $Id: window.cpp,v 1.16 1999-08-27 16:52:09 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -642,21 +642,22 @@ HWND WIN32API GetDesktopWindow(void)
 }
 //******************************************************************************
 //******************************************************************************
-HWND WIN32API FindWindowA(LPCSTR arg1, LPCSTR arg2)
+HWND WIN32API FindWindowA(LPCSTR lpszClass, LPCSTR lpszWindow)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  FindWindow\n");
-#endif
-    return O32_FindWindow(arg1, arg2);
+    if(HIWORD(lpszClass)) {
+    	 dprintf(("USER32:  FindWindow %s %s\n", lpszClass, lpszWindow));
+    }
+    else dprintf(("USER32:  FindWindow %x %s\n", lpszClass, lpszWindow));
+    return O32_FindWindow(lpszClass, lpszWindow);
 }
 //******************************************************************************
 //******************************************************************************
-HWND WIN32API FindWindowExA(HWND arg1, HWND arg2, LPCSTR arg3, LPCSTR arg4)
+HWND WIN32API FindWindowExA(HWND hwnd1, HWND hwnd2, LPCSTR lpszClass, LPCSTR lpszWindow)
 {
 #ifdef DEBUG
     WriteLog("USER32:  FindWindowExA, not completely implemented\n");
 #endif
-    return O32_FindWindow(arg3, arg4);
+    return FindWindowA(lpszClass, lpszWindow);
 }
 /*****************************************************************************
  * Name      : HWND WIN32API FindWindowExW
