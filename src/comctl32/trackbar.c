@@ -1,4 +1,4 @@
-/* $Id: trackbar.c,v 1.10 1999-06-30 15:52:18 cbratschi Exp $ */
+/* $Id: trackbar.c,v 1.11 1999-07-04 21:06:00 cbratschi Exp $ */
 /*
  * Trackbar control
  *
@@ -1158,7 +1158,15 @@ TRACKBAR_SetRange (HWND hwnd, WPARAM wParam, LPARAM lParam)
     newMin = (INT)LOWORD(lParam);
     newMax = (INT)HIWORD(lParam);
 
-    if (newMin >= newMax) return 0;
+    if (newMin == newMax) return 0;
+    if (newMin > newMax)
+    { //exchange
+      int x;
+
+      x = newMin;
+      newMin = newMax;
+      newMax = x;
+    }
     if (newMin == infoPtr->nRangeMin && newMax == infoPtr->nRangeMax) return 0;
 
     infoPtr->nRangeMin = newMin;
