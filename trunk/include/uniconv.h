@@ -1,4 +1,4 @@
-/* $Id: uniconv.h,v 1.5 1999-07-22 15:41:33 sandervl Exp $ */
+/* $Id: uniconv.h,v 1.6 2000-04-28 15:15:18 achimha Exp $ */
 /*
  * OS/2 Unicode API definitions
  *
@@ -13,8 +13,11 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+//@@@AH workaround for wrc bug
+#ifndef RC_INVOKED
 #include <stddef.h>
 #include <time.h>
+#endif
 #define ULS_API_ERROR_BASE 0x00020400
 #define ULS_API_ERROR(x)   (ULS_API_ERROR_BASE | (x))
 typedef enum _uls_return_codes {
