@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.7 1999-09-25 14:18:11 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.8 1999-09-25 17:34:36 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -716,7 +716,7 @@ VirtualKeyFound:
     case WM_MENUSELECT:
     case WM_MENUEND:
     case WM_NEXTMENU:
-	break;
+        goto RunDefWndProc;
 
     case WM_TIMER:
         win32wnd->MsgTimer((ULONG)mp1);
