@@ -1,4 +1,4 @@
-/* $Id: configure.cmd,v 1.17 2001-03-11 16:45:28 bird Exp $
+/* $Id: configure.cmd,v 1.18 2001-04-14 07:22:12 bird Exp $
  *
  * Configuration script.
  * Generates makefile.inc and an empty .depend file.
@@ -11,12 +11,44 @@
     call RxFuncAdd 'SysLoadFuncs', 'RexxUtil', 'SysLoadFuncs';
     call SysLoadFuncs;
 
-    /* check for silent argument */
-    parse arg fNonInteractive
-    if (fNonInteractive <> '') then
-        fInteractive = 0;
-    else
-        fInteractive = 1;
+    /* Argument defaults */
+    fInteractive    = 1;
+    fWin32k         = 1;
+
+    /* parse arguments */
+    parse arg asArgs.1 asArgs.2 asArgs.3 asArgs.4 asArgs.5 asArgs.6 asArgs.7 asArgs.8 asArgs.9
+    asArgs.0 = 0;
+    do i = 1 to 9
+        if (asArgs.i <> '') then
+            asArgs.0 = i;
+    end
+    do i = 1 to asArgs.0
+        if (substr(asArgs.i, 1, 1) = '-' | substr(asArgs.i, 1, 1) = '/')  then
+        do
+            sArg = translate(substr(asArgs.i, 2));
+            ch = substr(sArg, 1, 1);
+            select
+                when (ch = 'N') then
+                    fInteractive = 0;
+                when (ch = 'I') then
+                    fInteractive = 1;
+                when (ch = 'W') then
+                    fWin32k = 0;
+                when (ch = '?' | ch = 'H' | substr(sArg, 1, 2) = '-H') then
+                do
+                    say 'Odin32 Configure.cmd. $Revision: 1.18 $.'
+                    say 'syntax: Configure.cmd [-n] [-w]'
+                    say '  -n   Noninteractive.'
+                    say '  -w   Don''t build Win32k.'
+                    say '  -h   This text.'
+                    exit(1);
+                end
+                otherwise
+                    say 'syntax error ('asArgs.i')';
+                    exit(2);
+            end
+        end
+    end
 
     /* strings */
     sIncFile='Makefile.inc';
@@ -148,7 +180,13 @@
  * Returns:
  *   sPath-sFile ignoring '..\'s in sFile.
  */
-SearchPaths: procedure expose fInteractive;
+SearchPaths: procedure expose fInteractive fWin32k;
+    /*
+     * Check if there is need to waste time searching.
+     * Init local variables.
+     */
+    if (\fWin32k) then
+        return '';
     i = 1;
     sPath = '';
 
