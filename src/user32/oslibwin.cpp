@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.89 2001-03-27 16:17:52 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.90 2001-04-05 09:31:27 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -842,6 +842,12 @@ BOOL OSLibWinGetMaxPosition(HWND hwndOS2, RECT *rect)
   rect->top    = ScreenHeight - (swp.y + swp.cy);
   rect->bottom = ScreenHeight - swp.y;
   return TRUE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibWinShowPointer(BOOL fShow)
+{
+  return WinShowPointer(HWND_DESKTOP, fShow);
 }
 //******************************************************************************
 //******************************************************************************
