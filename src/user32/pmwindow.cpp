@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.160 2001-10-26 12:46:16 phaller Exp $ */
+/* $Id: pmwindow.cpp,v 1.161 2001-10-29 13:37:01 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -15,6 +15,8 @@
 #define INCL_GPICONTROL         /* GPI control Functions        */
 #define INCL_DOSPROCESS
 #define INCL_DOSMODULEMGR
+#define INCL_DOSDEVICES
+#define INCL_DOSDEVIOCTL
 #define INCL_WINTRACKRECT
 
 #include <os2wrap.h>
@@ -47,6 +49,7 @@
 #include <pmkbdhk.h>
 #include <pmscan.h>
 #include <winscan.h>
+#include <win\dbt.h>
 
 #define DBG_LOCALLOG    DBG_pmwindow
 #include "dbglocal.h"
@@ -65,6 +68,7 @@ HBITMAP hbmFrameMenu[3] = {0};
 
 static PFNWP pfnFrameWndProc = NULL;
 static HWND  hwndFocusChange = 0;
+static HWND  hwndCD = 0;
 
 // Note:
 // For a "lonekey"-press of AltGr, we only receive WM_KEYUP
@@ -75,6 +79,7 @@ static BOOL fKeyAltGrDown = FALSE;
 
 
 MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2);
+MRESULT EXPENTRY Win32CDWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2);
 MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2);
 void FrameReplaceMenuItem(HWND hwndMenu, ULONG nIndex, ULONG idOld, ULONG   idNew,
                           HBITMAP hbmNew);
@@ -125,6 +130,19 @@ BOOL InitPM()
     BOOL rc = WinSetCp(hmq, GetDisplayCodepage());
     dprintf(("InitPM: WinSetCP was %sOK", rc ? "" : "not "));
 
+    //CD polling window class
+    if(!WinRegisterClass(                    /* Register window class        */
+        hab,                                 /* Anchor block handle          */
+        (PSZ)WIN32_CDCLASS,                  /* Window class name            */
+        (PFNWP)Win32CDWindowProc,            /* Address of window procedure  */
+        0,
+        0))
+    {
+            dprintf(("WinRegisterClass Win32BaseWindow failed"));
+            return(FALSE);
+    }
+
+    //Standard Odin window class
     if(!WinRegisterClass(                 /* Register window class        */
         hab,                               /* Anchor block handle          */
         (PSZ)WIN32_STDCLASS,               /* Window class name            */
@@ -227,6 +245,138 @@ void WIN32API SetWindowAppearance(int fLooks)
     MENU_Init();
 }
 //******************************************************************************
+//CD notification window class
+//******************************************************************************
+MRESULT EXPENTRY Win32CDWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
+{
+#pragma pack(1)
+ typedef struct
+ {
+   BYTE  ucCommandInfo;
+   WORD  usDriveUnit;
+ } ParameterBlock;
+#pragma pack()
+
+ MRESULT      rc              = 0;
+ static ULONG drives[26]      = {0};
+ static int   drivestatus[26] = {0};
+
+    switch( msg )
+    {
+    //OS/2 msgs
+    case WM_CREATE:
+    {
+        char drive[2];
+
+        //skip floppy drives
+        drive[0] = 'C';
+        drive[1] = 0;
+
+        for(int i=2;i<26;i++) {
+           drives[i] = GetDriveTypeA(drive);
+           if(drives[i] == DRIVE_CDROM_W) 
+           {
+                DWORD parsize = sizeof(ParameterBlock);
+                DWORD datasize = 2;
+                WORD status = 0;
+                DWORD rc;
+                ParameterBlock parm;
+
+                parm.ucCommandInfo = 0;
+                parm.usDriveUnit   = i;
+                rc = DosDevIOCtl(-1, IOCTL_DISK, DSK_GETLOCKSTATUS, &parm, sizeof(parm), &parsize,
+                                      &status, sizeof(status), &datasize);
+                if(rc != NO_ERROR) {
+                    dprintf(("DosDevIOCtl failed with rc %d", rc));
+                    drives[i] = 0;
+                    continue;
+                }
+                //if no disk present, return FALSE
+                if(status & 4) {
+                    drivestatus[i] = status & 4;
+                }
+           }
+           drive[0]++;
+        }
+        WinStartTimer(hab, hwnd, 17, 32*3);
+////        WinStartTimer(hab, hwnd, 17, 5000);
+        rc = (MRESULT)FALSE;
+        break;
+    }
+    case WM_TIMER:
+    {
+        for(int i=0;i<26;i++) 
+        {
+            //for now only cdrom/dvd drives
+            if(drives[i] == DRIVE_CDROM_W) 
+            {
+                DWORD parsize = sizeof(ParameterBlock);
+                DWORD datasize = 2;
+                WORD status = 0;
+                DWORD rc;
+                ParameterBlock parm;
+
+                parm.ucCommandInfo = 0;
+                parm.usDriveUnit   = i;
+                rc = DosDevIOCtl(-1, IOCTL_DISK, DSK_GETLOCKSTATUS, &parm, sizeof(parm), &parsize,
+                                      &status, sizeof(status), &datasize);
+                if(rc != NO_ERROR) {
+                    dprintf(("DosDevIOCtl failed with rc %d", rc));
+                    return FALSE;
+                }
+                dprintf(("Disk status 0x%x", status));
+                //Send WM_DEVICECHANGE message when CD status changes
+                if((status & 4) != drivestatus[i]) 
+                {
+                    PID pidThis, pidTemp;
+                    HENUM henum;
+                    HWND  hwndEnum;
+                    DEV_BROADCAST_VOLUME volchange;
+
+                    volchange.dbcv_size       = sizeof(volchange);
+                    volchange.dbcv_devicetype = DBT_DEVTYP_VOLUME;
+                    volchange.dbcv_reserved   = 0;
+                    volchange.dbcv_unitmask   = (1 << i);
+                    volchange.dbcv_flags      = DBTF_MEDIA;
+
+                    WinQueryWindowProcess(hwnd, &pidThis, NULL);
+  
+                    //Iterate over all child windows of the desktop
+                    henum = WinBeginEnumWindows(HWND_DESKTOP);
+    
+                    while(hwndEnum = WinGetNextWindow(henum))
+                    {
+                        WinQueryWindowProcess(hwndEnum, &pidTemp, NULL);
+                        if(pidTemp == pidThis)
+                        {
+                            HWND hwndWin32 = OS2ToWin32Handle(hwndEnum);
+                            if(hwndWin32) {
+                                SendMessageA(hwndWin32, 
+                                             WM_DEVICECHANGE_W, 
+                                             (status & 4) ? DBT_DEVICEARRIVAL : DBT_DEVICEREMOVECOMPLETE, 
+                                             (LPARAM)&volchange);
+                            }
+                        }
+                    }
+                    WinEndEnumWindows(henum);
+
+                    drivestatus[i] = (status & 4);
+                }
+            }
+        }
+        break;
+    }
+
+    case WM_DESTROY:
+        WinStopTimer(hab, hwnd, 17);
+        break;
+
+    default:
+        return WinDefWindowProc( hwnd, msg, mp1, mp2 );
+    }
+    return (MRESULT)rc;
+}
+//******************************************************************************
 //Win32 window message handler
 //******************************************************************************
 MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
@@ -315,6 +465,14 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
             rc = (MRESULT)TRUE; //discontinue window creation
             break;
         }
+
+        //Create CD notification window
+        if(hwndCD == 0) {
+            hwndCD = WinCreateWindow(HWND_DESKTOP, WIN32_CDCLASS,
+                                     NULL, 0, 0, 0, 0, 0,
+                                     HWND_DESKTOP, HWND_TOP, 0, NULL, NULL);
+        }
+
     createfail:
         rc = (MRESULT)FALSE;
         break;
