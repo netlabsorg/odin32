@@ -1,4 +1,4 @@
-/* $Id: fake.c,v 1.3 2000-09-08 21:34:12 bird Exp $
+/* $Id: fake.c,v 1.4 2000-10-01 02:58:21 bird Exp $
  *
  * Fake stubs for the ldr and kernel functions we imports or overloads.
  *
@@ -61,7 +61,7 @@ typedef struct ldrrei_s /* #memb 7 size 20 (0x014) - from 14040W4 kernel.sdf */
 /*
  * Pointer to the loader semaphore.
  */
-KSEMMTX         fakeLDRSem;
+KSEMMTX         fakeLdrSem;
 
 CHAR            szBeginLibPath[1024];
 CHAR            szEndLibPath[1024];
@@ -143,7 +143,7 @@ void  workersinit(void)
     /*
      * Loader semaphore
      */
-    fakeKSEMInit((PKSEM)(void*)&fakeLDRSem, KSEM_MUTEX, KSEM_DEFAULT);
+    fakeKSEMInit((PKSEM)(void*)&fakeLdrSem, KSEM_MUTEX, KSEM_DEFAULT);
 
     /*
      * Intra process semaphore.
@@ -334,6 +334,7 @@ ULONG LDRCALL fakeldrSetVMflags(
     *pflFlags2 = 0;
     flObj = flObj;
     pMTE = pMTE;
+    return 0;
 }
 
 /**
@@ -582,7 +583,24 @@ APIRET KRNLCALL fakeVMAllocMem(
 {
     DUMMY();
     printf("fakeVMAllocMem:                 cbSize = 0x%08x, cbCommit = 0x%08x, flFlags1 = 0x%08x, hPTDA = 0x%04x, usVMOwnerId = 0x%04x, hMTE = 0x%04x, flFlags2 = 0x%08x, SomeArg2 = 0x%08x, pvmac = %p, rc = %d\n",
-           cbSize, cbCommit, flFlags1, hPTDA, usVMOwnerId, hMTE, flFlags2, SomeArg2, pvmac, 0);
+           cbSize, cbCommit, flFlags1, hPTDA, usVMOwnerId, hMTE, flFlags2, SomeArg2, pvmac, ERROR_NOT_SUPPORTED);
+
+    return ERROR_NOT_SUPPORTED;
+}
+
+
+/**
+ * @status    stub
+ */
+APIRET KRNLCALL fakeVMFreeMem(
+    PVOID   pv,
+    USHORT  hPTDA,
+    ULONG   flFlags
+    )
+{
+    DUMMY();
+    printf("fakeVMFreeMem:                  pv = %p, hPTDA = 0x%04x, flFlags = %08x, rc = %d\n",
+           pv, hPTDA, flFlags, ERROR_NOT_SUPPORTED);
 
     return ERROR_NOT_SUPPORTED;
 }
@@ -627,8 +645,63 @@ APIRET KRNLCALL fakeVMObjHandleInfo(
 }
 
 
+APIRET KRNLCALL fakeVMMapDebugAlias(
+    ULONG   flVMFlags,
+    ULONG   ulAddress,
+    ULONG   cbSize,
+    HPTDA   hPTDA,
+    PVMAC   pvmac)
+{
+    printf("fakeVMMapDebugAlias:            flVMFlags = 0x%08x, ulAddress = 0x%08, cbSize = 0x%08x, hPTDA = 0x%04x, pvmac = %p - not implemented\n",
+           flVMFlags,
+           ulAddress,
+           cbSize,
+           hPTDA,
+           pvmac);
+
+    return ERROR_NOT_SUPPORTED;
+}
+
+
+
+/**
+ * ldrOpenPath - ldrOpenPath for build 14053 and above.
+ * kernel 14053 and above.
+ *
+ * @returns   OS2 return code.
+ *            plv->lv_sfn  is set to filename handle.
+ * @param     pachFilename  Pointer to modulename. Not zero terminated!
+ * @param     cchFilename   Modulename length.
+ * @param     plv           Loader local variables? (Struct from KERNEL.SDF)
+ * @param     pful          Pointer to flags which are passed on to ldrOpen.
+ * @param     lLibPath      New parameter in build 14053.
+ *                          ldrGetMte calls with 1
+ *                          ldrOpenNewExe calls with 3
+ *                          This is compared to the initial libpath index.
+ *                              The libpath index is:
+ *                                  BEGINLIBPATH    1
+ *                                  LIBPATH         2
+ *                                  ENDLIBPATH      3
+ *                              The initial libpath index is either 1 or 2.
+ *                          - ignored -
+ *
+ */
+ULONG LDRCALL fakeldrOpenPath_new( /* retd  0x14 */
+    PCHAR       pachFilename,      /* ebp + 0x08 */
+    USHORT      cchFilename,       /* ebp + 0x0c */
+    ldrlv_t *   plv,               /* ebp + 0x10 */
+    PULONG      pful,              /* ebp + 0x14 */
+    ULONG       lLibPath           /* ebp + 0x18 */
+    )
+ {
+     NOREF(lLibPath);
+     return fakeldrOpenPath_old(pachFilename, cchFilename, plv, pful);
+ }
+
+
 /**
  * myldrOpenPath - opens file eventually searching loader specific paths
+ * Pre kernel 14053.
  *
  * @returns   OS2 return code.
  *            pLdrLv->lv_sfn  is set to filename handle.
@@ -638,7 +711,7 @@ APIRET KRNLCALL fakeVMObjHandleInfo(
  * @param     pful          Pointer to flags which are passed on to ldrOpen.
  * @status    stub
  */
-ULONG LDRCALL fakeldrOpenPath(PCHAR pachFilename, USHORT cchFilename, ldrlv_t *plv, PULONG pful)
+ULONG LDRCALL fakeldrOpenPath_old(PCHAR pachFilename, USHORT cchFilename, ldrlv_t *plv, PULONG pful)
 {
     static char     szPath[1024];       /* Path buffer. Used to store pathlists. 1024 should be enough */
                                         /* for LIBPATH (which at had a limit of ca. 750 chars). */
@@ -783,7 +856,7 @@ ULONG LDRCALL fakeldrOpenPath(PCHAR pachFilename, USHORT cchFilename, ldrlv_t *p
  */
 ULONG LDRCALL fakeLDRClearSem(void)
 {
-    return fakeKSEMReleaseMutex(&fakeLDRSem);
+    return fakeKSEMReleaseMutex(&fakeLdrSem);
 }
 
 /**
@@ -1032,6 +1105,27 @@ ULONG KRNLCALL   fakeTKFuBufLen(PLONG pcch, PVOID pvUsr, ULONG cchMax, ULONG fl,
 
 
 /**
+ * Copy user memory to user memory.
+ * @returns   OS/2 return code. (NO_ERROR is success)
+ * @param     pvUsr  Pointer to target (user) data area.
+ * @param     pv     Pointer to source (user) data area.
+ * @param     cb     Count of bytes to copy.
+ * @param     fl     Flags.
+ * @status  Partially implemented.
+ * @remark  Ignores fl. Crashes on error.
+ */
+ULONG KRNLCALL   fakeTKSuFuBuff(PVOID pvTarget, PVOID pvSource, ULONG cb, ULONG fl)
+{
+    memcpy(pvTarget, pvSource, cb);
+
+    printf("fakeTKSuFuBuff:                   pvTarget = %p, pvSource = %p, cb = 0x%08x, fl = 0x%08x, rc = %d\n",
+           pvTarget, pvSource, cb, fl, NO_ERROR);
+
+    return NO_ERROR;
+}
+
+
+/**
  * Validates an hMTE and gets the MTE pointer - FAKE.
  * @returns Pointer to MTE on success.
  *          NULL on error.
@@ -1073,7 +1167,7 @@ ULONG _Optlink tkExecPgmWorker(ULONG execFlag, PSZ pArg, PSZ pEnv, PSZ pszFilena
     /*
      * Take loader semaphore.
      */
-    rc = KSEMRequestMutex(&fakeLDRSem, KSEM_INDEFINITE_WAIT);
+    rc = KSEMRequestMutex(&fakeLdrSem, KSEM_INDEFINITE_WAIT);
     if (rc != NO_ERROR)
     {
         return rc;
@@ -1389,7 +1483,7 @@ ULONG LDRCALL   fakeldrOpenNewExe(PCHAR pachFilename, USHORT cchFilename, ldrlv_
     printf("fakeldrOpenNewExe:      *entry* pachFilename = %.*s, cchFilename = %#2, plv = %p, pus = %p\n",
            cchFilename, pachFilename, cchFilename, plv, pus);
 
-    rc = fakeldrOpenPath(pachFilename, cchFilename, plv, SSToDS(&ful));
+    rc = fakeldrOpenPath(pachFilename, cchFilename, plv, SSToDS(&ful), 1);
     if (rc != NO_ERROR)
     {
         plv->lv_sfn = 0xffff;
@@ -1806,17 +1900,29 @@ ULONG LDRCALL   fakeldrFindModule(PCHAR pachFilename, USHORT cchFilename, USHORT
  */
 PSZ SECCALL fakeSecPathFromSFN(SFN hFile)
 {
-    APIRET  rc;
     BOOL    f32Stack = ((int)&hFile > 0x10000);
 
     if (!f32Stack) ThunkStack16To32();
 
-    rc = ERROR_NOT_SUPPORTED;
 
     if (!f32Stack) ThunkStack32To16();
 
-    printf("fakeSecPathFromSFN:                    - not implemented - hFile = 0x%04x, rc = %d\n", hFile, rc);
+    printf("fakeSecPathFromSFN:                    - not implemented - hFile = 0x%04x\n", hFile);
 
-    return rc;
+    return NULL;
+}
+
+/**
+ * PID to PTDA pointer.
+ * @returns     OS/2 return code.
+ * @param       pid     Process Identifier.
+ * @param       ppPTDA  Pointer to the PTDA-pointer variabel which is to receive
+ *                      the PTDA pointer on successful return.
+ */
+ULONG KRNLCALL  fakeTKPidToPTDA(PID pid, PPPTDA ppPTDA)
+{
+    DUMMY();
+    printf("fakeTKPidToPTDA:                       - not implemented - pid = 0x%04x, ppPTDA=%p\n", pid, ppPTDA);
+    return ERROR_NOT_SUPPORTED;
 }
 

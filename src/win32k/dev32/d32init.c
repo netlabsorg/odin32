@@ -1,4 +1,4 @@
-/* $Id: d32init.c,v 1.24 2000-09-22 09:22:35 bird Exp $
+/* $Id: d32init.c,v 1.25 2000-10-01 02:58:15 bird Exp $
  *
  * d32init.c - 32-bits init routines.
  *
@@ -11,12 +11,19 @@
 /*******************************************************************************
 *   Defined Constants                                                          *
 *******************************************************************************/
-#define MAXSIZE_PROLOG 0x18             /* Note that this must be synced with */
-                                        /* the one used in calltab.asm.       */
-#if  0                                  /* Enable this to have extra debug logging. */
+/*
+ * Calltab entry sizes.
+ */
+#define OVERLOAD16_ENTRY    0x18
+#define OVERLOAD32_ENTRY    0x14
+#define IMPORT16_ENTRY      0x08
+#define IMPORT32_ENTRY      0x08
+#define VARIMPORT_ENTRY     0x10
+
+#if  0
     #define kprintf2(a) kprintf
 #else
-    #define kprintf2(a) (void)0
+    #define kprintf2(a) {}//
 #endif
 
 #define INCL_DOSERRORS
@@ -86,11 +93,8 @@ extern USHORT   _R0FlatCS16;
 extern USHORT   _R0FlatDS16;
 
 /* extern(s) located in calltab.asm */
-extern char     callTab[NBR_OF_KRNLIMPORTS][MAXSIZE_PROLOG];
-
-/* extern(s) located in mytkExecPgm.asm  */
-extern char     mytkExecPgm;
-extern char     mytkStartProcess;
+extern char     callTab[1];
+extern unsigned auFuncs[NBR_OF_KRNLIMPORTS];
 
 
 /**
@@ -1058,7 +1062,7 @@ USHORT _loadds _Far32 _Pascal VerifyImportTab32(void)
     USHORT  usRc;
     int     i;
     int     cb;
-    int     cbmin;
+    int     cbmax;
 
     /* VerifyImporTab32 is called before the initroutine! */
     pulTKSSBase32 = (PULONG)_TKSSBase16;
@@ -1083,7 +1087,7 @@ USHORT _loadds _Far32 _Pascal VerifyImportTab32(void)
         /* Verify that it is found */
         if (!aImportTab[i].fFound)
         {
-            if (aImportTab[i].fType & EPT_NOT_REQ)
+            if (EPTNotReq(aImportTab[i]))
                 continue;
             else
             {
@@ -1118,7 +1122,7 @@ USHORT _loadds _Far32 _Pascal VerifyImportTab32(void)
         }
         #endif
 
-        switch (aImportTab[i].fType & ~(EPT_BIT_MASK | EPT_NOT_REQ))
+        switch (aImportTab[i].fType & ~(EPT_BIT_MASK | EPT_NOT_REQ | EPT_WRAPPED))
         {
             case EPT_PROC:
             case EPT_PROCIMPORT:
@@ -1127,23 +1131,21 @@ USHORT _loadds _Far32 _Pascal VerifyImportTab32(void)
                  */
                 if (EPT32BitEntry(aImportTab[i]))
                 {
-                    cb = interpretFunctionProlog32((char*)aImportTab[i].ulAddress,
-                                                   aImportTab[i].fType == EPT_PROC32);
-                    cbmin = 5; /* Size of the jump instruction */
+                    cb = interpretFunctionProlog32((char*)aImportTab[i].ulAddress, EPT32Proc(aImportTab[i]));
+                    cbmax = OVERLOAD32_ENTRY - 5; /* 5 = Size of the jump instruction */
                 }
                 else
                 {
-                    cb = interpretFunctionProlog16((char*)aImportTab[i].ulAddress,
-                                                   aImportTab[i].fType == EPT_PROC16);
-                    cbmin = 7; /* Size of the far jump instruction */
+                    cb = interpretFunctionProlog16((char*)aImportTab[i].ulAddress, EPT16Proc(aImportTab[i]));
+                    cbmax = OVERLOAD16_ENTRY - 7; /* 7 = Size of the far jump instruction */
                 }
 
                 /*
                  * Check result of the function prolog interpretations.
                  */
-                if (cb <= 0 || cb + cbmin >= MAXSIZE_PROLOG)
+                if (cb <= 0 || cb > cbmax)
                 {   /* failed, too small or too large. */
-                    kprintf(("VerifyImportTab32: verify failed for procedure no.%d (cb=%d)\n", i, cb));
+                    kprintf(("VerifyImportTab32: verify failed for procedure no.%d (cb=%d), %s\n", i, cb, aImportTab[i].achName));
                     return (USHORT)(ERROR_D32_TOO_INVALID_PROLOG | (i << ERROR_D32_PROC_SHIFT) | ERROR_D32_PROC_FLAG);
                 }
                 break;
@@ -1153,7 +1155,7 @@ USHORT _loadds _Far32 _Pascal VerifyImportTab32(void)
                 break;
 
             default:
-                kprintf(("VerifyImportTab32: invalid type/type not implemented\n",i));
+                kprintf(("VerifyImportTab32: invalid type/type not implemented. Proc no.%d, %s\n",i, aImportTab[i].achName));
                 Int3(); /* temporary fix! */
                 return (USHORT)(ERROR_D32_NOT_IMPLEMENTED | (i << ERROR_D32_PROC_SHIFT) | ERROR_D32_PROC_FLAG);
         }
@@ -1170,78 +1172,25 @@ USHORT _loadds _Far32 _Pascal VerifyImportTab32(void)
  */
 int importTabInit(void)
 {
-    /* This table must be updated with the overloading functions.
-     * It should also hold NOP functions for functions which are of the
-     * not required type.
-     */
-    static unsigned auFuncs[NBR_OF_KRNLIMPORTS] =
-    {
-        (unsigned)myldrRead,            /* 0 */
-        (unsigned)myldrOpen,            /* 1 */
-        (unsigned)myldrClose,           /* 2 */
-        (unsigned)myLDRQAppType,        /* 3 */
-        (unsigned)myldrEnum32bitRelRecs,/* 4 */
-        0,                              /* 5 */
-        0,                              /* 6 */
-        0,                              /* 7 */
-        0,                              /* 8 */
-        0,                              /* 9 */
-        0,                              /* 10 */
-        0,                              /* 11 */
-        0,                              /* 12 */
-        (unsigned)&mytkExecPgm,         /* 13 */
-        (unsigned)&mytkStartProcess,    /* 14 */
-        0,                              /* 15 */
-        0,                              /* 16 */
-        0,                              /* 17 */
-        0,                              /* 18 */
-        0,                              /* 19 */
-        (unsigned)myldrOpenPath_old,    /* 20 */
-        0,                              /* 21 */
-        0,                              /* 22 */
-        0,                              /* 23 */
-        0,                              /* 24 */
-        0,                              /* 25 */
-        0,                              /* 26 */
-        0,                              /* 27 */
-        0,                              /* 28 */
-        0,                              /* 29 */
-        0,                              /* 30 */
-        0,                              /* 31 */
-        0,                              /* 32 */
-        0,                              /* 33 */
-        0,                              /* 34 */
-        0,                              /* 35 */
-        0,                              /* 36 */
-        0,                              /* 37 */
-        0,                              /* 38 */
-        0,                              /* 39 */
-        0,                              /* 40 */
-        (unsigned)nopSecPathFromSFN     /* 41 */
-        #if 0 /* experimenting */
-        ,(unsigned)myldrSetVMflags,     /* 42 */
-        #endif
-    };
-    int i;
-    int cb;
-    int cbmin;
+    int     i;
+    int     cb;
+    int     cbmax;
+    char *  pchCTEntry;                 /* Pointer to current calltab entry. */
 
-#ifndef R3TST //New function not currently not implemented by fake.c
     /*
-     * Build specific changes to the auFuncs table
+     * Apply build specific changes to the auFuncs table
      */
-    if (options.ulBuild >= 14053)
+    if (options.ulBuild < 14053)
     {
         #ifdef DEBUG
-        if (auFuncs[20] != (unsigned)myldrOpenPath_old)
+        if (auFuncs[0] != (unsigned)myldrOpenPath)
         {
             kprintf(("importTabInit: ASSERTION FAILED auFuncs don't point at myldrOpenPath\n"));
             Int3();
         }
         #endif
-        auFuncs[20] = (unsigned)myldrOpenPath;
+        auFuncs[0] = (unsigned)myldrOpenPath_old;
     }
-#endif
 
 #ifdef R3TST
     R3TstFixImportTab();
@@ -1253,26 +1202,24 @@ int importTabInit(void)
     for (i = 0; i < NBR_OF_KRNLIMPORTS; i++)
     {
         /* EPT_VARIMPORTs are skipped */
-        if ((aImportTab[i].fType & ~EPT_BIT_MASK) == EPT_VARIMPORT)
+        if ((aImportTab[i].fType & ~(EPT_BIT_MASK | EPT_NOT_REQ)) == EPT_VARIMPORT)
             continue;
         /* EPT_NOT_REQ which is not found are set pointing to the nop function provided. */
-        if (!aImportTab[i].fFound && (aImportTab[i].fType & EPT_NOT_REQ))
-        {
-            aImportTab[i].ulAddress = auFuncs[i];
+        if (!aImportTab[i].fFound && EPTNotReq(aImportTab[i]))
             continue;
-        }
 
         if (EPT32BitEntry(aImportTab[i]))
         {
-            cb = interpretFunctionProlog32((char*)aImportTab[i].ulAddress, aImportTab[i].fType == EPT_PROC32);
-            cbmin = 5; /* Size of the jump instruction */
+            cb = interpretFunctionProlog32((char*)aImportTab[i].ulAddress, EPT32Proc(aImportTab[i]));
+
+            cbmax = OVERLOAD16_ENTRY - 5; /* 5 = Size of the jump instruction */
         }
         else
         {
-            cb = interpretFunctionProlog16((char*)aImportTab[i].ulAddress, aImportTab[i].fType == EPT_PROC16);
-            cbmin = 7; /* Size of the far jump instruction */
+            cb = interpretFunctionProlog16((char*)aImportTab[i].ulAddress, EPT16Proc(aImportTab[i]));
+            cbmax = OVERLOAD16_ENTRY - 7; /* 7 = Size of the far jump instruction */
         }
-        if (cb <= 0 || cb + cbmin >= MAXSIZE_PROLOG)
+        if (cb <= 0 || cb > cbmax)
         {
             kprintf(("ImportTabInit: Verify failed for procedure no.%d, cb=%d\n", i, cb));
             return ERROR_D32_VERIFY_FAILED | (i << ERROR_D32_PROC_SHIFT) | ERROR_D32_PROC_FLAG;
@@ -1282,9 +1229,10 @@ int importTabInit(void)
     /*
      * rehook / import
      */
+    pchCTEntry = &callTab[0];
     for (i = 0; i < NBR_OF_KRNLIMPORTS; i++)
     {
-        switch (aImportTab[i].fType & ~EPT_NOT_REQ)
+        switch (aImportTab[i].fType & ~EPT_WRAPPED)
         {
             /*
              * 32-bit procedure overload.
@@ -1296,20 +1244,20 @@ int importTabInit(void)
             {
                 cb = interpretFunctionProlog32((char*)aImportTab[i].ulAddress, TRUE);
                 aImportTab[i].cbProlog = (char)cb;
-                if (cb >= 5 && cb + 5 < MAXSIZE_PROLOG) /* 5(1st): size of jump instruction in the function prolog which jumps to my overloading function */
-                {                                       /* 5(2nd): size of jump instruction which jumps back to the original function after executing the prolog copied to the callTab entry for this function. */
+                if (cb >= 5 && cb + 5 < OVERLOAD32_ENTRY) /* 5(1st): size of jump instruction in the function prolog which jumps to my overloading function */
+                {                                         /* 5(2nd): size of jump instruction which jumps back to the original function after executing the prolog copied to the callTab entry for this function. */
                     /*
                      * Copy function prolog which will be overwritten by the jmp to calltabl.
                      */
-                    memcpy(callTab[i], (void*)aImportTab[i].ulAddress, (size_t)cb);
+                    memcpy(pchCTEntry, (void*)aImportTab[i].ulAddress, (size_t)cb);
 
                     /*
                      * Make jump instruction which jumps from calltab to original function.
                      * 0xE9 <four bytes displacement>
                      * Note: the displacement is relative to the next instruction
                      */
-                    callTab[i][cb] = 0xE9; /* jmp */
-                    *(unsigned long*)(void*)&callTab[i][cb+1] = aImportTab[i].ulAddress + cb - (unsigned long)&callTab[i][cb+5];
+                    pchCTEntry[cb] = 0xE9; /* jmp */
+                    *(unsigned long*)(void*)&pchCTEntry[cb+1] = aImportTab[i].ulAddress + cb - (unsigned long)&pchCTEntry[cb+5];
 
                     /*
                      * Jump from original function to my function - an cli(?) could be needed here
@@ -1323,6 +1271,7 @@ int importTabInit(void)
                     Int3(); /* ipe - later! */
                     return ERROR_D32_IPE | (i << ERROR_D32_PROC_SHIFT) | ERROR_D32_PROC_FLAG;
                 }
+                pchCTEntry += OVERLOAD32_ENTRY;
                 break;
             }
 
@@ -1338,20 +1287,20 @@ int importTabInit(void)
 
                 cb = interpretFunctionProlog16((char*)aImportTab[i].ulAddress, TRUE);
                 aImportTab[i].cbProlog = (char)cb;
-                if (cb >= 8 && cb + 7 < MAXSIZE_PROLOG) /* 8: size of a 16:32 jump which jumps to my overloading function (prefixed with 66h in a 16-bit segment) */
-                {                                       /* 7: size of a 16:32 jump which is added to the call tab */
+                if (cb >= 8 && cb + 7 < OVERLOAD16_ENTRY) /* 8: size of a 16:32 jump which jumps to my overloading function (prefixed with 66h in a 16-bit segment) */
+                {                                         /* 7: size of a 16:32 jump which is added to the call tab */
                     /*
                      * Copy function prolog which is to be overwritten.
                      */
-                    memcpy(callTab[i], (void*)aImportTab[i].ulAddress, (size_t)cb);
+                    memcpy(pchCTEntry, (void*)aImportTab[i].ulAddress, (size_t)cb);
 
                     /*
                      * Create far jump from calltab to original function.
                      * 0xEA <four byte target address> <two byte target selector>
                      */
-                    callTab[i][cb] = 0xEA; /* jmp far ptr */
-                    *(unsigned long*)(void*)&callTab[i][cb+1] = aImportTab[i].offObject;
-                    *(unsigned short*)(void*)&callTab[i][cb+5] = aImportTab[i].usSel;
+                    pchCTEntry[cb] = 0xEA; /* jmp far ptr */
+                    *(unsigned long*)(void*)&pchCTEntry[cb+1] = aImportTab[i].offObject;
+                    *(unsigned short*)(void*)&pchCTEntry[cb+5] = aImportTab[i].usSel;
 
                     /*
                      * jump from original function to my function - an cli(?) could be needed here
@@ -1368,14 +1317,18 @@ int importTabInit(void)
                     Int3(); /* ipe - later! */
                     return ERROR_D32_IPE | (i << ERROR_D32_PROC_SHIFT) | ERROR_D32_PROC_FLAG;
                 }
+                pchCTEntry += OVERLOAD16_ENTRY;
                 break;
             }
 
 
             /*
-             * 32-bit imported procedure
+             * 32-bit imported procedure.
              * This is called by issuing a near call to the callTab entry.
              */
+            case EPT_PROCIMPORTNR32:     /* Not required */
+                if (!(pchCTEntry[6] = aImportTab[i].fFound))
+                    aImportTab[i].ulAddress = auFuncs[i];
             case EPT_PROCIMPORT32:
             {
                 cb = interpretFunctionProlog32((char*)aImportTab[i].ulAddress, FALSE);
@@ -1387,8 +1340,8 @@ int importTabInit(void)
                      * 0xE9 <four bytes displacement>
                      * Note: the displacement is relative to the next instruction
                      */
-                    callTab[i][0] = 0xE9; /* jmp */
-                    *(unsigned*)(void*)&callTab[i][1] = aImportTab[i].ulAddress - (unsigned)&callTab[i][5];
+                    pchCTEntry[0] = 0xE9; /* jmp */
+                    *(unsigned*)(void*)&pchCTEntry[1] = aImportTab[i].ulAddress - (unsigned)&pchCTEntry[5];
                 }
                 else
                 {   /* !fatal! - this should never really happen... */
@@ -1396,6 +1349,7 @@ int importTabInit(void)
                     Int3(); /* ipe - later! */
                     return ERROR_D32_IPE | (i << ERROR_D32_PROC_SHIFT) | ERROR_D32_PROC_FLAG;
                 }
+                pchCTEntry += IMPORT32_ENTRY;
                 break;
             }
 
@@ -1404,6 +1358,13 @@ int importTabInit(void)
              * 16-bit imported procedure.
              * This is called by issuing a far call to the calltab entry.
              */
+            case EPT_PROCIMPORTNR16:    /* Not required */
+                if (!(pchCTEntry[7] = aImportTab[i].fFound))
+                {
+                    aImportTab[i].ulAddress = auFuncs[i];
+                    Int3();
+                    break;
+                }
             case EPT_PROCIMPORT16:
             {
                 cb = interpretFunctionProlog16((char*)aImportTab[i].ulAddress, FALSE);
@@ -1414,9 +1375,9 @@ int importTabInit(void)
                      * Create far jump from calltab to original function.
                      * 0xEA <four byte target address> <two byte target selector>
                      */
-                    callTab[i][0] = 0xEA; /* jmp far ptr */
-                    *(unsigned long*)(void*)&callTab[i][1] = aImportTab[i].offObject;
-                    *(unsigned short*)(void*)&callTab[i][5] = aImportTab[i].usSel;
+                    pchCTEntry[0] = 0xEA; /* jmp far ptr */
+                    *(unsigned long*)(void*)&pchCTEntry[1] = aImportTab[i].offObject;
+                    *(unsigned short*)(void*)&pchCTEntry[5] = aImportTab[i].usSel;
                 }
                 else
                 {   /* !fatal! - this should never really happen... */
@@ -1424,6 +1385,7 @@ int importTabInit(void)
                     Int3(); /* ipe - later! */
                     return ERROR_D32_IPE | (i << ERROR_D32_PROC_SHIFT) | ERROR_D32_PROC_FLAG;
                 }
+                pchCTEntry += IMPORT16_ENTRY;
                 break;
             }
 
@@ -1439,11 +1401,12 @@ int importTabInit(void)
             case EPT_VARIMPORT32:
             case EPT_VARIMPORT16:
                 aImportTab[i].cbProlog = (char)0;
-                *(unsigned long*)(void*)&callTab[i][0] = aImportTab[i].ulAddress;
-                *(unsigned long*)(void*)&callTab[i][4] = aImportTab[i].offObject;
-                *(unsigned short*)(void*)&callTab[i][8] = aImportTab[i].usSel;
-                *(unsigned short*)(void*)&callTab[i][0xa] = (unsigned short)aImportTab[i].offObject;
-                *(unsigned short*)(void*)&callTab[i][0xc] = aImportTab[i].usSel;
+                *(unsigned long*)(void*)&pchCTEntry[0] = aImportTab[i].ulAddress;
+                *(unsigned long*)(void*)&pchCTEntry[4] = aImportTab[i].offObject;
+                *(unsigned short*)(void*)&pchCTEntry[8] = aImportTab[i].usSel;
+                *(unsigned short*)(void*)&pchCTEntry[0xa] = (unsigned short)aImportTab[i].offObject;
+                *(unsigned short*)(void*)&pchCTEntry[0xc] = aImportTab[i].usSel;
+                pchCTEntry += VARIMPORT_ENTRY;
                 break;
 
             default:
@@ -1487,64 +1450,11 @@ PMTE GetOS2KrnlMTETst(void)
  */
 VOID R3TstFixImportTab(VOID)
 {
-    struct _TstFaker
-    {
-        unsigned   uAddress;
-        int        fObj;                   /* 1 = CODE32, 2 = CODE16, 3 = DATA32, 4 = DATA16 */
-    }
-    aTstFakers[NBR_OF_KRNLIMPORTS] =
-    {
-        {(unsigned)fakeldrRead,             1},
-        {(unsigned)fakeldrOpen,             1},
-        {(unsigned)fakeldrClose,            1},
-        {(unsigned)fakeLDRQAppType,         1},
-        {(unsigned)fakeldrEnum32bitRelRecs, 1},
-        {(unsigned)fakeIOSftOpen,           1},
-        {(unsigned)fakeIOSftClose,          1},
-        {(unsigned)fakeIOSftTransPath,      1},
-        {(unsigned)fakeIOSftReadAt,         1},
-        {(unsigned)fakeIOSftWriteAt,        1},
-        {(unsigned)fakeSftFileSize,         1},
-        {(unsigned)fakeVMAllocMem,          1},
-        {(unsigned)fakeVMGetOwner,          1},
-        {(unsigned)fakeg_tkExecPgm,         1},
-        {(unsigned)fake_tkStartProcess,     1},
-        {(unsigned)fakef_FuStrLenZ,         2},
-        {(unsigned)fakef_FuStrLen,          2},
-        {(unsigned)fakef_FuBuff,            2},
-        {(unsigned)fakeVMObjHandleInfo,     1},
-        {(unsigned)fakeldrASMpMTEFromHandle,1},
-        {(unsigned)fakeldrOpenPath,         1},
-        {(unsigned)fakeLDRClearSem,         1},
-        {(unsigned)fakeldrFindModule,       1},
-        {(unsigned)fakeKSEMRequestMutex,    1},
-        {(unsigned)fakeKSEMReleaseMutex,    1},
-        {(unsigned)fakeKSEMQueryMutex,      1},
-        {(unsigned)fakeKSEMInit,            1},
-        {(unsigned)&fakeLDRSem,             3},
-        {(unsigned)&fakeLDRLibPath,         3},
-        {(unsigned)fakeTKSuBuff,            1},
-        {(unsigned)fakeTKFuBuff,            1},
-        {(unsigned)fakeTKFuBufLen,          1},
-        {(unsigned)fakeldrValidateMteHandle,1},
-        {(unsigned)&fakepTCBCur,            4},
-        {(unsigned)&fakepPTDACur,           4},
-        {(unsigned)&fakeptda_start,         4},
-        {(unsigned)&fakeptda_environ,       4},
-        {(unsigned)&fakeptda_ptdasem,       4},
-        {(unsigned)&fakeptda_module,        4},
-        {(unsigned)&fakeptda_pBeginLIBPATH, 4},
-        {(unsigned)&fakeldrpFileNameBuf,    3},
-        {(unsigned)&fakeSecPathFromSFN,     3}
-        #if 0 /* experimenting */
-        ,{(unsigned)&fakeldrSetVMflags,      1}
-        #endif
-    };
     int i;
 
     for (i = 0; i < NBR_OF_KRNLIMPORTS; i++)
     {
-        switch (aImportTab[i].fType)
+        switch (aImportTab[i].fType & ~EPT_NOT_REQ)
         {
             case EPT_PROC32:
                 if (aTstFakers[i].fObj != 1)

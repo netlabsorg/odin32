@@ -1,5 +1,5 @@
 ################################################################################
-# $Id: Makefile,v 1.55 2000-09-27 15:23:58 bird Exp $
+# $Id: Makefile,v 1.56 2000-10-01 02:58:11 bird Exp $
 #
 # Win32k makefile.
 #
@@ -47,10 +47,10 @@ LD          = ilink
 AS          = alp
 H2INC       = $(DDKPATH)\tools\h2inc.exe
 
-CFLAGS      = -q -Ge -Gs- -Gr+ -Rn -Ss+ -Mp -Wall+ppt-ppc-inl-cnv-gnr-vft-gen-uni-ext-
 CFLAGS16    = -c -W3 -Asfw /NTCODE16 /NDDATA16 -G2s -Zp -Zl -nologo
-CPPFLAGS    = -q -Ge -Gs- -Gr+ -Rn -Ss+ -Mp -Gx -Wall+ppt-ppc-inl-cnv-gnr-vft-
-ASFLAGS     = -Sv:ALP -Mb -Li
+CFLAGS      = -q -Ge -Gs- -Gr+ -Rn -Ss+ -Mp -Wall+ppt-ppc-inl-cnv-gnr-vft-gen-uni-ext- -Ti+
+CPPFLAGS    = -q -Ge -Gs- -Gr+ -Rn -Ss+ -Mp -Gx -Wall+ppt-ppc-inl-cnv-gnr-vft- -Ti+
+ASFLAGS     = -Sv:ALP -Mb -Li +Od
 LFLAGS      = /nologo /MAP /NOI /NOE /NOD /A:16 /PACKCODE /PACKDATA
 CDEFINESB   = -DWIN32K -DRING0 -D__WIN32OS2__ -D__WINE__
 CDEFINESB16 = -DRING0
@@ -67,8 +67,8 @@ VACLIB      = $(VACPATH)\lib\cppon30.lib
 
 !ifndef DEBUG
 # RELEASE
-CFLAGS      = $(CFLAGS)     -G4 -Oc+
 CFLAGS16    = $(CFLAGS16)   -Ogeitln -Gs
+CFLAGS      = $(CFLAGS)     -G4 -Oc+
 CPPFLAGS    = $(CPPFLAGS)   -G4 -Oc+
 LFLAGS      = $(LFLAGS)     /EXEPACK:2 /NODEBUG
 CDEFINES    = $(CDEFINESB)  -DRELEASE
@@ -78,11 +78,11 @@ ASDEFINES   = $(ASDEFINES)  -D:RELEASE
 !else
 
 # DEBUG
-CFLAGS      = $(CFLAGS)     -Oc+ -Os- -Ti+
 CFLAGS16    = $(CFLAGS16)   -Zi -Owis
-CPPFLAGS    = $(CPPFLAGS)   -Oc+ -Os- -Ti+
+CFLAGS      = $(CFLAGS)     -Oc+ -Os-
+CPPFLAGS    = $(CPPFLAGS)   -Oc+ -Os-
 LFLAGS      = $(LFLAGS)     /NOEXEPACK /DEBUG
-ASFLAGS     = $(ASFLAGS)    -Od+
+ASFLAGS     = $(ASFLAGS)
 CDEFINES    = $(CDEFINESB)  -DDEBUG
 CDEFINES16  = $(CDEFINESB16) -DDEBUG
 ASDEFINES   = $(ASDEFINES)  -D:DEBUG
@@ -125,21 +125,21 @@ AINCLUDES  = -Fdi:$(WIN32KINCLUDE) \
 
 {dev16}.c.obj:
     @$(ECHO) compiling 16bit: $<
-    $(CC16) -c $(CFLAGS16) $(CDEFINES16) $(CINCLUDES16) -Fo$(WIN32KOBJ)\$(*B).obj -Fa$(WIN32KLIST)\$(*B).s $<
+    @$(CC16) -c $(CFLAGS16) $(CDEFINES16) $(CINCLUDES16) -Fo$(WIN32KOBJ)\$(*B).obj -Fa$(WIN32KLIST)\$(*B).s $<
 
 {dev16}.c.obj_init:
     @$(ECHO) compiling 16bit: $<
-    $(CC16) -c $(CFLAGS16) $(CDEFINES16) $(CINCLUDES16) /NTCODE16_INIT /NDDATA16_INIT -Fo$(WIN32KOBJ)\$(*B).obj_init -Fa$(WIN32KLIST)\$(*B).s $<
-    $(CP) $@ $@.obj
+    @$(CC16) -c $(CFLAGS16) $(CDEFINES16) $(CINCLUDES16) /NTCODE16_INIT /NDDATA16_INIT -Fo$(WIN32KOBJ)\$(*B).obj_init -Fa$(WIN32KLIST)\$(*B).s $<
+    @$(CP) $@ $@.obj
 
 {dev16}.c.obj_tst:
     @$(ECHO) compiling 16bit: $<
-    $(CC16) -c $(CFLAGS16) $(CDEFINES16_TST) $(CINCLUDES16) -Fa$(WIN32KLIST)\$(*B).s -Fo$(WIN32KOBJ)\$(@B).obj_tst $<
-    $(CP) $@ $@.obj
+    @$(CC16) -c $(CFLAGS16) $(CDEFINES16_TST) $(CINCLUDES16) -Fa$(WIN32KLIST)\$(*B).s -Fo$(WIN32KOBJ)\$(@B).obj_tst $<
+    @$(CP) $@ $@.obj
 {dev16}.c.obj_tst_init:
     @$(ECHO) compiling 16bit: $<
-    $(CC16) -c $(CFLAGS16) $(CDEFINES16_TST) $(CINCLUDES16) /NDDATA16_INIT /NTCODE16_INIT -Fa$(WIN32KLIST)\$(*B).s -Fo$(WIN32KOBJ)\$(@B).obj_tst_init $<
-    $(CP) $@ $@.obj
+    @$(CC16) -c $(CFLAGS16) $(CDEFINES16_TST) $(CINCLUDES16) /NDDATA16_INIT /NTCODE16_INIT -Fa$(WIN32KLIST)\$(*B).s -Fo$(WIN32KOBJ)\$(@B).obj_tst_init $<
+    @$(CP) $@ $@.obj
 
 
 {dev32}.asm{$(WIN32KOBJ)}.obj:
@@ -241,10 +241,10 @@ AINCLUDES  = -Fdi:$(WIN32KINCLUDE) \
 
 {misc}.asm{$(WIN32KOBJ)}.obj:
     @$(ECHO) assembling:      $<
-    $(AS) $(ASFLAGS) $(ADEFINES) $(AINCLUDES) $< -Fo:$@ -Fl:$(WIN32KLIST)\$(*B).lst
+    @$(AS) $(ASFLAGS) $(ADEFINES) $(AINCLUDES) $< -Fo:$@ -Fl:$(WIN32KLIST)\$(*B).lst
 {misc}.asm.obj:
     @$(ECHO) assembling:      $<
-    $(AS) $(ASFLAGS) $(ADEFINES) $(AINCLUDES) $< -Fo:$(WIN32KOBJ)\$(@F) -Fl:$(WIN32KLIST)\$(*B).lst
+    @$(AS) $(ASFLAGS) $(ADEFINES) $(AINCLUDES) $< -Fo:$(WIN32KOBJ)\$(@F) -Fl:$(WIN32KLIST)\$(*B).lst
 
 {misc}.c{$(WIN32KOBJ)}.obj:
     @$(ECHO) compiling 32bit: $<
@@ -255,11 +255,11 @@ AINCLUDES  = -Fdi:$(WIN32KINCLUDE) \
 
 {misc}.c{$(WIN32KOBJ)}.obj_tst:
     @$(ECHO) compiling 32bit: $<
-    $(CC) -c $(CFLAGS) $(CDEFINES_TST) -Fa$(WIN32KLIST)\$(*B).s -Fo$@ $(CINCLUDES) $<
+    @$(CC) -c $(CFLAGS) $(CDEFINES_TST) -Fa$(WIN32KLIST)\$(*B).s -Fo$@ $(CINCLUDES) $<
     @$(CP) $@ $@.obj
 {misc}.c.obj_tst:
     @$(ECHO) compiling 32bit: $<
-    $(CC) -c $(CFLAGS) $(CDEFINES_TST) -Fa$(WIN32KLIST)\$(*B).s -Fo$(WIN32KOBJ)\$(@F) $(CINCLUDES) $<
+    @$(CC) -c $(CFLAGS) $(CDEFINES_TST) -Fa$(WIN32KLIST)\$(*B).s -Fo$(WIN32KOBJ)\$(@F) $(CINCLUDES) $<
     @$(CP) $@ $@.obj
 
 {misc}.cpp{$(WIN32KOBJ)}.obj:
@@ -328,7 +328,7 @@ OBJS  =\
     $(WIN32KOBJ)\d32globals.obj \
     $(WIN32KOBJ)\d16globl.obj \
     $(WIN32KOBJ)\asmutils.obj \
-    $(WIN32KOBJ)\calltab.obj \
+    $(WIN32KOBJ)\calltaba.obj \
     $(WIN32KOBJ)\malloc.obj \
     $(WIN32KOBJ)\smalloc_avl.obj \
     $(WIN32KOBJ)\avl.obj \
@@ -354,6 +354,7 @@ OBJS  =\
     $(WIN32KOBJ)\d32ElfIOCtl.obj \
     $(WIN32KOBJ)\d32Win32kIOCtl.obj \
     $(WIN32KOBJ)\k32AllocMemEx.obj \
+    $(WIN32KOBJ)\k32ProcessReadWrite.obj \
     $(WIN32KOBJ)\k32QueryOTEs.obj \
     $(WIN32KOBJ)\k32QueryOptionsStatus.obj \
     $(WIN32KOBJ)\k32SetOptions.obj \
@@ -386,12 +387,13 @@ TSTOBJS =\
     $(WIN32KOBJ)\init.obj \
     $(WIN32KOBJ)\fake.obj \
     $(WIN32KOBJ)\fakea.obj \
+    $(WIN32KOBJ)\TstFakers.obj \
     $(WIN32KOBJ)\d16strat.obj \
     $(WIN32KOBJ)\d32hlp.obj \
     $(WIN32KOBJ)\d32globals.obj \
     $(WIN32KOBJ)\d16globl.obj \
     $(WIN32KOBJ)\asmutils.obj \
-    $(WIN32KOBJ)\calltab.obj \
+    $(WIN32KOBJ)\calltaba.obj \
     $(WIN32KOBJ)\malloc.obj_tst \
     $(WIN32KOBJ)\smalloc_avl.obj \
     $(WIN32KOBJ)\avl.obj \
@@ -409,6 +411,7 @@ TSTOBJS =\
     $(WIN32KOBJ)\myLDRQAppType.obj \
     $(WIN32KOBJ)\myldrEnum32bitRelRecs.obj \
     $(WIN32KOBJ)\myldrOpenPath.obj \
+    $(WIN32KOBJ)\myldrOpenPatha.obj \
     $(WIN32KOBJ)\OS2KTCB.obj \
     $(WIN32KOBJ)\OS2KPTDA.obj \
     $(WIN32KOBJ)\pe2lx.obj \
@@ -416,6 +419,7 @@ TSTOBJS =\
     $(WIN32KOBJ)\d32ElfIOCtl.obj \
     $(WIN32KOBJ)\d32Win32kIOCtl.obj \
     $(WIN32KOBJ)\k32AllocMemEx.obj \
+    $(WIN32KOBJ)\k32ProcessReadWrite.obj \
     $(WIN32KOBJ)\k32QueryOTEs.obj \
     $(WIN32KOBJ)\k32QueryOptionsStatus.obj \
     $(WIN32KOBJ)\k32SetOptions.obj \
@@ -458,10 +462,10 @@ $(WIN32KOBJ)\vprntf16.obj_e
 
 {dev16}.c.obj_e:
     @$(ECHO) compiling 16bit (extract): $<
-    $(CC16) -c -W3 -Asfw -G2s -Zp -Zl -nologo -Fo$@ -Fa -Zi -Od -Lp -DDEBUG -DEXTRACT \
+    @$(CC16) -c -W3 -Asfw -G2s -Zp -Zl -nologo -Fo$@ -Fa -Zi -Od -Lp -DDEBUG -DEXTRACT \
         -Fa$(WIN32KLIST)\$(*B)_e.s -Fo$(WIN32KOBJ)\$(@B).obj_e $(CINCLUDES16) $<
 
-$(WIN32KBIN)\extract.exe: $(EXTRACTOBJS)
+$(WIN32KBIN)\extract.exe: clfix.exe $(EXTRACTOBJS)
     $(LD) $(LFLAGS) /pmtype:vio @<<$(WIN32KOBJ)\$(@B).lnk
         /OUT:$@
         /MAP:$(WIN32KBIN)\$(@B).map
@@ -475,10 +479,34 @@ extract.exe: $(WIN32KBIN)\extract.exe
 
 
 ################################################################################
+# mkcalltab.exe rule.
+################################################################################
+MKCALLTABOBJS = \
+$(WIN32KOBJ)\mkcalltab.obj_c \
+$(WIN32KOBJ)\probkrnl.obj_c \
+$(WIN32KOBJ)\d16globl.obj_c \
+$(WIN32KOBJ)\vprntf16.obj_c
+
+{dev16}.c.obj_c:
+    @$(ECHO) compiling 16bit (mkcalltab): $<
+    @$(CC16) -c -W3 -Asfw -G2s -Zp -Zl -nologo -Fo$@ -Fa -Zi -Od -Lp -DDEBUG -DEXTRACT \
+        -Fa$(WIN32KLIST)\$(*B)_c.s -Fo$(WIN32KOBJ)\$(@B).obj_c $(CINCLUDES16) $<
+
+$(WIN32KBIN)\mkcalltab.exe: clfix.exe $(MKCALLTABOBJS)
+    $(LD) $(LFLAGS) /pmtype:vio @<<$(WIN32KOBJ)\$(@B).lnk
+        /OUT:$@
+        /MAP:$(WIN32KBIN)\$(@B).map
+        $(MKCALLTABOBJS)
+        $(TOOLKIT)\lib\os2286.lib
+        $(MSCPATH)\lib\clibcep.lib
+<<keep
+
+
+################################################################################
 # Win32k.sys rule. (Don't mess with the order or objects and libraries!)
 ################################################################################
 $(NAME).sys: $(WIN32KBIN)\$(NAME).sys
-$(WIN32KBIN)\$(NAME).sys: $(OBJS) $(LIBS) $(NAME).def $(LASTOBJ) $(LIBSINIT) makefile
+$(WIN32KBIN)\$(NAME).sys: clfix.exe $(OBJS) $(LIBS) $(NAME).def $(LASTOBJ) $(LIBSINIT) makefile
     -@$(ECHO) recompiling d16globl to get correct build time and date:
     $(CC16) -c $(CFLAGS16) $(CDEFINES16) $(CINCLUDES16) -Fo$(WIN32KOBJ)\d16globl.obj \
         -Fa$(WIN32KLIST)\d16globl.s dev16\d16globl.c
@@ -508,7 +536,7 @@ $(NAME).def
 $(NAME)tst.exe: $(WIN32KBIN)\$(NAME)tst.exe
     $(CP) $(WIN32KBIN)\$@ $@
 
-$(WIN32KBIN)\$(NAME)tst.exe: $(NAME)tst.def $(TSTOBJS) $(TSTLIBS) $(LASTOBJS) makefile
+$(WIN32KBIN)\$(NAME)tst.exe: clfix.exe Test\TstFakers.c $(NAME)tst.def $(TSTOBJS) $(TSTLIBS) $(LASTOBJS) makefile
     -@$(ECHO) linking: $@
     -4 $(LD) $(LFLAGS) @<<$(WIN32KOBJ)\$(@B).lnk
 /DEBUG
@@ -532,6 +560,7 @@ pe2lx.exe:
     $(MAKE_CMD)
     cd ..
 
+
 ################################################################################
 # Libraries - global libraries
 ################################################################################
@@ -539,6 +568,7 @@ lib:
     cd lib
     $(MAKE_CMD)
     cd ..
+
 
 ################################################################################
 # Win32k Control Center Rule.
@@ -548,6 +578,7 @@ Win32kCC.exe:
     $(MAKE_CMD)
     cd ..
 
+
 ################################################################################
 # kRx.EXE - Pure Rexx interpreter
 ################################################################################
@@ -555,6 +586,7 @@ kRx.exe:
     cd rexx
     $(MAKE_CMD)
     cd ..
+
 
 ################################################################################
 # Libraries - segments are renamed for the 16-bit libraries.
@@ -612,6 +644,20 @@ $(WIN32KBIN)\libconv.exe: libconv.c
 
 
 #################################################################################
+# Generate calltaba.asm
+################################################################################
+ldr\calltaba.asm: dev16\probkrnl.c $(WIN32KBIN)\mkcalltab.exe
+    $(WIN32KBIN)\mkcalltab.exe calltab > $@
+
+
+#################################################################################
+# Generate TstFakers.c
+################################################################################
+test\TstFakers.c: dev16\probkrnl.c include\probkrnl.h $(WIN32KBIN)\mkcalltab.exe
+    $(WIN32KBIN)\mkcalltab.exe tstfakers > $@
+
+
+#################################################################################
 # Documentation generation - require SDS - http://www.ii.uib.no/~stig/
 ################################################################################
 lxdoc:
@@ -625,11 +671,13 @@ fulldoc:
     cd DocsA
     exp sds2doc -ai *.sds
 
+
 #################################################################################
 # Visual SlickEdit project file
 ################################################################################
 win32k.vpj:
     genproject.cmd $@ $(CINCLUDES)
+
 
 ################################################################################
 # Cleanup
@@ -654,6 +702,9 @@ clean:
         $(WIN32KLIST)\*.s* \
         $(WIN32KLIST)\*as*
 !endif
+!if "$(WIN32KBASE)" != ""
+    $(RM) $(WIN32KBASE)\ldr\calltaba.asm $(WIN32KBASE)\test\TstFakers.c
+!endif
     cd pe2lx
     $(MAKE_CMD) clean
     cd ..\lib
@@ -673,7 +724,13 @@ dep:
         dev32\*.c* pe2lx\*.c* k32\*.c* lib\*.c elf2lx\*.c* test\*.c*
     $(PDWIN32_TOOLS)\fastdep -a+ -o$$(WIN32KOBJ) -I$(WIN32KINCLUDE) \
         -I$(DDKPATH)\inc dev32\*.asm ldr\*.asm misc\*.asm test\*.asm include\*.inc
-    $(PDWIN32_TOOLS)\fastdep -a+ -obr- $(CINCLUDES16) dev16\*.c*
+    $(PDWIN32_TOOLS)\fastdep -a+ -o$$(WIN32KOBJ) \
+        $(CINCLUDES16) dev16\*.c* \
+        -objobj_e $(CINCLUDES16) dev16\*.c* \
+        -objobj_c $(CINCLUDES16) dev16\*.c*
+        -objobj_tst $(CINCLUDES16) dev16\*.c*
+        -objobj_init $(CINCLUDES16) dev16\*.c*
+        -objobj_tst_init $(CINCLUDES16) dev16\*.c*
     cd pe2lx
     $(MAKE_CMD) dep
     cd ..\lib
