@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.44 1999-10-24 12:30:28 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.45 1999-10-25 20:17:20 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -50,7 +50,7 @@ USHORT virtualKeyTable [66] = {
                0x08,    // VK_BACKSPACE     VK_BACK
                0x09,    // VK_TAB           VK_TAB
                0x00,    // VK_BACKTAB       No equivalent!
-               0x0D,    // VK_NEWLINE       VK_RETURN
+               0x0A,    // VK_NEWLINE       0x0A (no VK_* def)
                0x10,    // VK_SHIFT         VK_SHIFT
                0x11,    // VK_CTRL          VK_CONTROL
                0x12,    // VK_ALT           VK_MENU, best match I guess
@@ -72,7 +72,7 @@ USHORT virtualKeyTable [66] = {
                0x2E,    // VK_DELETE        VK_DELETE
                0x91,    // VK_SCRLLOCK      VK_SCROLL
                0x90,    // VK_NUMLOCK       VK_NUMLOCK
-               0x2B,    // VK_ENTER         VK_EXECUTE, best match I guess
+               0x0D,    // VK_ENTER         VK_RETURN
                0x00,    // VK_SYSRQ         No equivalent!
                0x70,    // VK_F1            VK_F1
                0x71,    // VK_F2            VK_F2
@@ -447,7 +447,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
     {
       HWND hwndFocus = (HWND)mp1;
 
-        dprintf(("OS2: WM_SETFOCUS %x %d", win32wnd->getWindowHandle(), mp2));
+        dprintf(("OS2: WM_SETFOCUS %x %x %d", win32wnd->getWindowHandle(), mp1, mp2));
         if(WinQueryWindowULong(hwndFocus, OFFSET_WIN32PM_MAGIC) != WIN32PM_MAGIC) {
                 //another (non-win32) application's window
                 //set to NULL (allowed according to win32 SDK) to avoid problems
@@ -663,6 +663,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         scanCode = CHAR4FROMMP(mp1);
         keyWasPressed = ((SHORT1FROMMP (mp1) & KC_PREVDOWN) == KC_PREVDOWN);
 
+	dprintf(("PM: WM_CHAR: %x %x %d %x", SHORT1FROMMP(mp2), SHORT2FROMMP(mp2), repeatCount, scanCode));
         // both WM_KEYUP & WM_KEYDOWN want a virtual key, find the right Win32 virtual key
         // given the OS/2 virtual key and OS/2 character
 
@@ -736,12 +737,18 @@ VirtualKeyFound:
         if(fTranslated && !((flags & KC_KEYUP) == KC_KEYUP)) {//TranslatedMessage was called before DispatchMessage, so send WM_CHAR messages
             ULONG keyflags = 0, vkey = 0;
             ULONG fl = SHORT1FROMMP(mp1);
+	    ULONG chCode = SHORT1FROMMP(mp2);
 
             if(!(fl & KC_CHAR)) {
-                goto RunDefWndProc;
+//SvL: Test
+		break;
+//                goto RunDefWndProc;
             }
             if(fl & KC_VIRTUALKEY) {
-                vkey = SHORT2FROMMP(mp2);
+		if(virtualKey)
+			vkey = virtualKey;
+	        else    vkey = SHORT2FROMMP(mp2);
+		chCode = vkey;
             }
             if(fl & KC_KEYUP) {
                 keyflags |= KEY_UP;
@@ -755,11 +762,14 @@ VirtualKeyFound:
             if(fl & KC_DEADKEY) {
                 keyflags |= KEY_DEADKEY;
             }
-            if(win32wnd->MsgChar(SHORT1FROMMP(mp2), CHAR3FROMMP(mp1), CHAR4FROMMP(mp1), virtualKey, keyflags)) {
-                goto RunDefWndProc;
+            if(win32wnd->MsgChar(chCode, CHAR3FROMMP(mp1), CHAR4FROMMP(mp1), virtualKey, keyflags)) {
+//SvL: Test
+//                goto RunDefWndProc;
+
             }
         }
-        if(fRunDefWndProc) goto RunDefWndProc;
+//SvL: Test
+//        if(fRunDefWndProc) goto RunDefWndProc;
         break;
     }
 

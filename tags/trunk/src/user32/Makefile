@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.35 1999-10-23 23:04:31 sandervl Exp $
+# $Id: Makefile,v 1.36 1999-10-25 20:17:16 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -84,7 +84,7 @@ dummy.obj: dummy.cpp
 char.obj: char.cpp user32.h
 loadres.obj: loadres.cpp user32.h dib.h
 icon.obj: icon.cpp $(PDWIN32_INCLUDE)\winicon.h
-winmenu.obj: winmenu.cpp user32.h $(PDWIN32_INCLUDE)\winres.h $(PDWIN32_INCLUDE)\winresmenu.h win32wbase.h
+winmenu.obj: winmenu.cpp user32.h $(PDWIN32_INCLUDE)\winres.h $(PDWIN32_INCLUDE)\winresmenu.h win32wbase.h winmenudef.h oslibwin.h oslibmenu.h
 syscolor.obj: syscolor.cpp syscolor.h
 dde.obj: dde.cpp
 hook.obj: hook.cpp hooks.h

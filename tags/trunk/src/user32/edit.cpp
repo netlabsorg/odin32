@@ -1,4 +1,4 @@
-/* $Id: edit.cpp,v 1.8 1999-10-24 22:56:03 sandervl Exp $ */
+/* $Id: edit.cpp,v 1.9 1999-10-25 20:17:17 sandervl Exp $ */
 /*
  *      Edit control
  *
@@ -3174,7 +3174,7 @@ static LRESULT EDIT_WM_LButtonDown(HWND hwnd, EDITSTATE *es, DWORD keys, INT x, 
         BOOL after_wrap;
 
         //SvL: Set focus
-        SetFocus(hwnd);
+//        SetFocus(hwnd);
 
         if (!(es->flags & EF_FOCUSED))
                 return 0;
