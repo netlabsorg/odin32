@@ -8,8 +8,13 @@ UINT FAR _loadds PASCAL MyWinExec(LPCSTR lpszCmdLine, UINT fuShowCmd);
 BOOL GetPEFileHeader (LPVOID lpFile, PIMAGE_FILE_HEADER pHeader);
 BOOL GetPEOptionalHeader (LPVOID lpFile, PIMAGE_OPTIONAL_HEADER pHeader);
 
+#ifdef __WATCOMC__
+typedef DWORD (FAR * WINAPI * FUNC_GetVersion)(void);
+typedef UINT  (FAR * WINAPI * FUNC_WinExec)(LPCSTR, UINT);
+#else
 typedef DWORD (FAR * WINAPI FUNC_GetVersion)(void);
-typedef UINT (FAR *WINAPI FUNC_WinExec)(LPCSTR, UINT);
+typedef UINT  (FAR * WINAPI FUNC_WinExec)(LPCSTR, UINT);
+#endif
 
 BYTE  oldcodeVER;
 DWORD olddataVER;
@@ -25,8 +30,8 @@ BOOL fInit     = FALSE;
 
 char szPEPath[256] = {0};
 
-//*****************************************************************************************            
-//*****************************************************************************************            
+//*****************************************************************************************
+//*****************************************************************************************
 int FAR _loadds CALLBACK LibMain(HINSTANCE hinst, WORD wDataSeg, WORD cbHeap, LPSTR lpszCmdLine)
 {
 	FUNC_GetVersion getver;
@@ -45,7 +50,7 @@ int FAR _loadds CALLBACK LibMain(HINSTANCE hinst, WORD wDataSeg, WORD cbHeap, LP
 		addr        = (DWORD FAR *)(jumpVER+1);
 		oldcodeVER  = *jumpVER;
 		olddataVER  = *addr;
-		*jumpVER    = 0xEA;	//jmp 
+		*jumpVER    = 0xEA;	//jmp
 		*addr       = (DWORD)&MyGetVersion;
 
 		winexec     = (FUNC_WinExec)&WinExec;	
@@ -56,13 +61,13 @@ int FAR _loadds CALLBACK LibMain(HINSTANCE hinst, WORD wDataSeg, WORD cbHeap, LP
 		addr        = (DWORD FAR *)(jumpEXEC+1);
 		oldcodeEXEC = *jumpEXEC;
 		olddataEXEC = *addr;
-		*jumpEXEC   = 0xEA;	//jmp 
+		*jumpEXEC   = 0xEA;	//jmp
 		*addr       = (DWORD)&MyWinExec;
     }
     return 1;
 }
-//*****************************************************************************************            
-//*****************************************************************************************            
+//*****************************************************************************************
+//*****************************************************************************************
 int FAR _loadds PASCAL WEP(int entry)
 {
 	DWORD FAR *addr;
@@ -82,14 +87,14 @@ int FAR _loadds PASCAL WEP(int entry)
     }
   	return 1;
 }
-//*****************************************************************************************            
-//*****************************************************************************************            
+//*****************************************************************************************
+//*****************************************************************************************
 DWORD FAR PASCAL MyGetVersion()
 {
  	return 0x00005F0C;
 }
-//*****************************************************************************************            
-//*****************************************************************************************            
+//*****************************************************************************************
+//*****************************************************************************************
 UINT FAR _loadds PASCAL MyWinExec(LPCSTR lpszCmdLine, UINT fuShowCmd)
 {
 	LPSTR cmdline, tmp;
@@ -105,7 +110,7 @@ UINT FAR _loadds PASCAL MyWinExec(LPCSTR lpszCmdLine, UINT fuShowCmd)
 	char FAR *header;
 	HGLOBAL hMem1 = 0, hMem2 = 0, hMem3 = 0, hMem4 = 0;
 	BOOL fFail = TRUE;
-    
+
 	of.cBytes = sizeof(OFSTRUCT);
 	
 	hMem1 = GlobalAlloc(GPTR, strlen(lpszCmdLine)+1);
@@ -169,20 +174,20 @@ UINT FAR _loadds PASCAL MyWinExec(LPCSTR lpszCmdLine, UINT fuShowCmd)
 	fFail = FALSE;
 	
 calloldfunc:			
-	if(hMem4) {    
+	if(hMem4) {
 		GlobalUnlock(hMem4);
 		GlobalFree(hMem4);
 	}		
-	if(hMem3) {    
+	if(hMem3) {
 		GlobalUnlock(hMem3);
 		GlobalFree(hMem3);
 	}		
-	if(hMem2) {    
+	if(hMem2) {
 		GlobalUnlock(hMem2);
 		GlobalFree(hMem2);
 	}		
 	if(hFile)	
-		_lclose(hFile);      
+		_lclose(hFile);
 
     addr      = (DWORD FAR *)(jumpEXEC + 1);
     *jumpEXEC = oldcodeEXEC;
@@ -201,12 +206,12 @@ calloldfunc:
 			do {
 				Yield();
 				tickcount2 = GetTickCount();
-			}                               
+			}
 			while(tickcount2 - tickcount1 < 2000UL);
 		}
 	}
 	
-	*jumpEXEC   = 0xEA;	//jmp 
+	*jumpEXEC   = 0xEA;	//jmp
 	*addr       = (DWORD)&MyWinExec;
 	
 	if(hMem1) {	
@@ -220,7 +225,7 @@ calloldfunc:
 BOOL GetPEFileHeader (LPVOID lpFile, PIMAGE_FILE_HEADER pHeader)
 {
     if(*(WORD *)lpFile == IMAGE_DOS_SIGNATURE &&
-       *(DWORD *)PE_HEADER (lpFile) == IMAGE_NT_SIGNATURE) 
+       *(DWORD *)PE_HEADER (lpFile) == IMAGE_NT_SIGNATURE)
     {
 	 	 memcpy ((LPVOID)pHeader, PEHEADEROFF (lpFile), sizeof (IMAGE_FILE_HEADER));
 	 	 return TRUE;
@@ -232,12 +237,12 @@ BOOL GetPEFileHeader (LPVOID lpFile, PIMAGE_FILE_HEADER pHeader)
 BOOL GetPEOptionalHeader (LPVOID lpFile, PIMAGE_OPTIONAL_HEADER pHeader)
 {
     if(*(WORD *)lpFile == IMAGE_DOS_SIGNATURE &&
-       *(DWORD *)PE_HEADER (lpFile) == IMAGE_NT_SIGNATURE) 
+       *(DWORD *)PE_HEADER (lpFile) == IMAGE_NT_SIGNATURE)
     {
 	 	 memcpy ((LPVOID)pHeader, OPTHEADEROFF (lpFile), sizeof (IMAGE_OPTIONAL_HEADER));
 	 	 return TRUE;
     }
     else return FALSE;
 }
-//*****************************************************************************************            
-//*****************************************************************************************            
+//*****************************************************************************************
+//*****************************************************************************************
