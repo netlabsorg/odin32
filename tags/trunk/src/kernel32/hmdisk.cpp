@@ -1,4 +1,4 @@
-/* $Id: hmdisk.cpp,v 1.7 2001-05-23 17:00:44 sandervl Exp $ */
+/* $Id: hmdisk.cpp,v 1.8 2001-06-16 16:10:12 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -14,6 +14,7 @@
 
 #include <misc.h>
 #include "hmdisk.h"
+#include "mmap.h"
 #include "oslibdos.h"
 #include <win\winioctl.h>
 #include <win\ntddscsi.h>
@@ -110,8 +111,11 @@ DWORD HMDeviceDiskClass::CreateFile (LPCSTR        lpFileName,
              pHMHandleData->hHMHandle  = 0; //handle lookup fails if this is set to -1
         }
         else pHMHandleData->hHMHandle  = hFile;
-        
-        pHMHandleData->dwUserData = GetDriveTypeA(lpFileName);
+
+        pHMHandleData->dwUserData = *lpFileName; //save drive letter
+        if(pHMHandleData->dwUserData >= 'a') {
+            pHMHandleData->dwUserData = pHMHandleData->dwUserData - ((int)'a' - (int)'A');
+        }
         return (NO_ERROR);
     }
     else {
@@ -287,9 +291,29 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
     case IOCTL_DISK_CHECK_VERIFY:
     case IOCTL_DISK_EJECT_MEDIA:
     case IOCTL_DISK_FORMAT_TRACKS:
-    case IOCTL_DISK_GET_DRIVE_GEOMETRY:
     case IOCTL_DISK_GET_DRIVE_LAYOUT:
+        break;
+
+    case IOCTL_DISK_GET_DRIVE_GEOMETRY:
     case IOCTL_DISK_GET_MEDIA_TYPES:
+    {
+        PDISK_GEOMETRY pGeom = (PDISK_GEOMETRY)lpOutBuffer;
+        if(nOutBufferSize < sizeof(DISK_GEOMETRY)) {
+            SetLastError(ERROR_INSUFFICIENT_BUFFER);
+            return FALSE;
+        }
+        if(lpBytesReturned) {
+            *lpBytesReturned = 0;
+        }
+        if(OSLibDosGetDiskGeometry(pHMHandleData->dwUserData, pGeom) == FALSE) {
+            return FALSE;
+        }
+        if(lpBytesReturned) {
+            *lpBytesReturned = sizeof(DISK_GEOMETRY);
+        }
+        return TRUE;
+    }
+
     case IOCTL_DISK_GET_PARTITION_INFO:
     case IOCTL_DISK_LOAD_MEDIA:
     case IOCTL_DISK_MEDIA_REMOVAL:
@@ -356,6 +380,11 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
         srb.common.SRB_Cmd = SC_HA_INQUIRY;
         rc = SendASPI32Command(&srb);
 
+        char drivename[3];
+        drivename[0] = (char)pHMHandleData->dwUserData;
+        drivename[1] = ':';
+        drivename[2] = 0;
+
         for(i=0;i<LOBYTE(numAdapters);i++) {
             for(j=0;j<8;j++) {
                 for(k=0;k<16;k++) {
@@ -367,7 +396,7 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
                     rc = SendASPI32Command(&srb);
                     if(rc == SS_COMP) {
                         if(srb.devtype.SRB_DeviceType == SS_DEVTYPE_CDROM &&
-                                                   pHMHandleData->dwUserData == DRIVE_CDROM)
+                           GetDriveTypeA(drivename) == DRIVE_CDROM)
                         {
                             goto done;
                         }
@@ -400,6 +429,128 @@ failure:
     dprintf(("HMDeviceDiskClass::DeviceIoControl: unimplemented dwIoControlCode=%08lx\n", dwIoControlCode));
     SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
     return FALSE;
+}
+/*****************************************************************************
+ * Name      : BOOL HMDeviceDiskClass::ReadFile
+ * Purpose   : read data from handle / device
+ * Parameters: PHMHANDLEDATA pHMHandleData,
+ *             LPCVOID       lpBuffer,
+ *             DWORD         nNumberOfBytesToRead,
+ *             LPDWORD       lpNumberOfBytesRead,
+ *             LPOVERLAPPED  lpOverlapped
+ * Variables :
+ * Result    : Boolean
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
+ *****************************************************************************/
+
+BOOL HMDeviceDiskClass::ReadFile(PHMHANDLEDATA pHMHandleData,
+                                 LPCVOID       lpBuffer,
+                                 DWORD         nNumberOfBytesToRead,
+                                 LPDWORD       lpNumberOfBytesRead,
+                                 LPOVERLAPPED  lpOverlapped)
+{
+  LPVOID       lpRealBuf;
+  Win32MemMap *map;
+  DWORD        offset, bytesread;
+  BOOL         bRC;
+
+  dprintf2(("KERNEL32: HMDeviceDiskClass::ReadFile %s(%08x,%08x,%08x,%08x,%08x) - stub?\n",
+           lpHMDeviceName,
+           pHMHandleData,
+           lpBuffer,
+           nNumberOfBytesToRead,
+           lpNumberOfBytesRead,
+           lpOverlapped));
+
+  //SvL: It's legal for this pointer to be NULL
+  if(lpNumberOfBytesRead)
+    *lpNumberOfBytesRead = 0;
+  else
+    lpNumberOfBytesRead = &bytesread;
+
+  if((pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED) && !lpOverlapped) {
+    dprintf(("FILE_FLAG_OVERLAPPED flag set, but lpOverlapped NULL!!"));
+    SetLastError(ERROR_INVALID_PARAMETER);
+    return FALSE;
+  }
+  if(!(pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED) && lpOverlapped) {
+    dprintf(("Warning: lpOverlapped != NULL & !FILE_FLAG_OVERLAPPED; sync operation"));
+  }
+
+  //SvL: DosRead doesn't like writing to memory addresses returned by
+  //     DosAliasMem -> search for original memory mapped pointer and use
+  //     that one + commit pages if not already present
+  map = Win32MemMapView::findMapByView((ULONG)lpBuffer, &offset, MEMMAP_ACCESS_WRITE);
+  if(map) {
+    lpRealBuf = (LPVOID)((ULONG)map->getMappingAddr() + offset);
+    DWORD nrpages = nNumberOfBytesToRead/4096;
+    if(offset & 0xfff)
+        nrpages++;
+    if(nNumberOfBytesToRead & 0xfff)
+        nrpages++;
+
+    map->commitPage(offset & ~0xfff, TRUE, nrpages);
+  }
+  else  lpRealBuf = (LPVOID)lpBuffer;
+
+  if(pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED) {
+    dprintf(("ERROR: Overlapped IO not yet implememented!!"));
+  }
+//  else {
+    bRC = OSLibDosRead(pHMHandleData->hHMHandle,
+                           (PVOID)lpRealBuf,
+                           nNumberOfBytesToRead,
+                           lpNumberOfBytesRead);
+//  }
+
+  if(bRC == 0) {
+      dprintf(("KERNEL32: HMDeviceDiskClass::ReadFile returned %08xh %x", bRC, GetLastError()));
+      dprintf(("%x -> %d", lpBuffer, IsBadWritePtr((LPVOID)lpBuffer, nNumberOfBytesToRead)));
+  }
+
+  return bRC;
+}
+/*****************************************************************************
+ * Name      : DWORD HMDeviceDiskClass::SetFilePointer
+ * Purpose   : set file pointer
+ * Parameters: PHMHANDLEDATA pHMHandleData
+ *             LONG          lDistanceToMove
+ *             PLONG         lpDistanceToMoveHigh
+ *             DWORD         dwMoveMethod
+ * Variables :
+ * Result    : API returncode
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Wed, 1999/06/17 20:44]
+ *****************************************************************************/
+
+DWORD HMDeviceDiskClass::SetFilePointer(PHMHANDLEDATA pHMHandleData,
+                                        LONG          lDistanceToMove,
+                                        PLONG         lpDistanceToMoveHigh,
+                                        DWORD         dwMoveMethod)
+{
+  DWORD ret;
+
+  dprintf2(("KERNEL32: HMDeviceDiskClass::SetFilePointer %s(%08xh,%08xh,%08xh,%08xh)\n",
+           lpHMDeviceName,
+           pHMHandleData,
+           lDistanceToMove,
+           lpDistanceToMoveHigh,
+           dwMoveMethod));
+
+  ret = OSLibDosSetFilePointer(pHMHandleData->hHMHandle,
+                               lDistanceToMove,
+                               (DWORD *)lpDistanceToMoveHigh,
+                               dwMoveMethod);
+
+  if(ret == -1) {
+    dprintf(("SetFilePointer failed (error = %d)", GetLastError()));
+  }
+  return ret;
 }
 //******************************************************************************
 //******************************************************************************
