@@ -1,4 +1,4 @@
-/* $Id: header.h,v 1.5 1999-10-06 15:40:19 cbratschi Exp $ */
+/* $Id: header.h,v 1.6 1999-10-07 15:45:41 cbratschi Exp $ */
 
 /*
  * Header window definitions
@@ -53,6 +53,9 @@ typedef struct
 
     HIMAGELIST  himl;           /* handle to a image list (may be 0) */
     HIMAGELIST  dragImage;
+    POINT       dragStart;
+    POINT       dragPos;
+    INT         iDragItem;
     HEADER_ITEM *items;         /* pointer to array of HEADER_ITEM's */
     LPINT       pOrder;         /* pointer to order array */
 } HEADER_INFO;
