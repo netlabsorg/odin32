@@ -5,3 +5,4 @@ makefile.inc
 *.vpj
 *.vtg
 *.v*
+win32knew.def
