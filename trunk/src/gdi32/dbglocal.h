@@ -1,4 +1,4 @@
-/* $Id: dbglocal.h,v 1.8 2002-11-26 10:53:07 sandervl Exp $ */
+/* $Id: dbglocal.h,v 1.9 2004-01-11 11:42:09 sandervl Exp $ */
 
 /*
  * debug logging functions for OS/2
@@ -41,7 +41,9 @@ void ParseLogStatusGDI32();
 #define DBG_printer         19
 #define DBG_icm             20
 #define DBG_trace           21
-#define DBG_MAXFILES        22
+#define DBG_fontres         22
+#define DBG_devcontext      23
+#define DBG_MAXFILES        24
 
 extern USHORT DbgEnabledGDI32[DBG_MAXFILES];
 extern USHORT DbgEnabledLvl2GDI32[DBG_MAXFILES];

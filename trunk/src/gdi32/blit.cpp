@@ -1,4 +1,4 @@
-/* $Id: blit.cpp,v 1.45 2003-07-16 10:46:16 sandervl Exp $ */
+/* $Id: blit.cpp,v 1.46 2004-01-11 11:42:08 sandervl Exp $ */
 
 /*
  * GDI32 blit code
@@ -16,6 +16,8 @@
 #include <cpuhlp.h>
 #include <winuser32.h>
 #include <dbglog.h>
+#include "oslibgpi.h"
+#include <dcdata.h>
 #include "dibsect.h"
 #include "rgbcvt.h"
 
@@ -47,16 +49,14 @@ BOOL WIN32API StretchBlt(HDC hdcDest, int nXOriginDest, int nYOriginDest,
         {
             rc  = dsect->BitBlt(hdcDest, nXOriginDest, nYOriginDest, nWidthDest, nHeightDest,
                                 nXOriginSrc, nYOriginSrc, nWidthSrc, nHeightSrc, dwRop);
-            return rc;
+            goto blitdone;
         }
     }
     rc = O32_StretchBlt(hdcDest, nXOriginDest, nYOriginDest, nWidthDest, nHeightDest, hdcSrc, nXOriginSrc, nYOriginSrc, nWidthSrc, nHeightSrc, dwRop);
-    if(DIBSection::getSection() != NULL) {
-        DIBSection *destdib = DIBSection::findHDC(hdcDest);
-        if(destdib) {
-            destdib->sync(hdcDest, nYOriginDest, nHeightDest);
-        }
-    }
+
+blitdone:
+    DIBSECTION_MARK_INVALID(hdcDest);
+
     if(rc == FALSE) {
         dprintf(("!WARNING!: GDI32: StretchBlt returned FALSE; last error %x", rc, GetLastError()));
     }
@@ -77,7 +77,7 @@ BOOL WIN32API BitBlt(HDC hdcDest,
     BOOL rc;
 
 #ifdef DEBUG
-      POINT point1, point2;
+    POINT point1, point2;
     GetViewportOrgEx(hdcDest, &point1);
     GetViewportOrgEx(hdcSrc, &point2);
     dprintf(("BitBlt: Viewport origin dest (%d,%d) src (%d,%d)", point1.x, point1.y, point2.x, point2.y));
@@ -89,7 +89,8 @@ BOOL WIN32API BitBlt(HDC hdcDest,
         DIBSection *dsect = DIBSection::findHDC(hdcSrc);
         if(dsect) 
         {
-            return dsect->BitBlt(hdcDest, nXDest, nYDest, nWidth, nHeight, nXSrc, nYSrc, nWidth, nHeight, dwRop);
+            rc = dsect->BitBlt(hdcDest, nXDest, nYDest, nWidth, nHeight, nXSrc, nYSrc, nWidth, nHeight, dwRop);
+            goto blitdone;
         }
     }
     dprintf(("GDI32: BitBlt to hdc %X from hdc %x (%d,%d) to (%d,%d), (%d,%d) rop %X\n", 
@@ -97,12 +98,8 @@ BOOL WIN32API BitBlt(HDC hdcDest,
 
     rc = O32_BitBlt(hdcDest, nXDest, nYDest, nWidth, nHeight, hdcSrc, nXSrc, nYSrc, dwRop);
 
-    if(DIBSection::getSection() != NULL) {
-        DIBSection *destdib = DIBSection::findHDC(hdcDest);
-        if(destdib) {
-            destdib->sync(hdcDest, nYDest, nHeight);
-        }
-    }
+blitdone:
+    DIBSECTION_MARK_INVALID(hdcDest);
     return rc;
 }
 //******************************************************************************
@@ -192,7 +189,7 @@ static INT SetDIBitsToDevice_(HDC hdc, INT xDest, INT yDest, DWORD cx,
         compression = BI_BITFIELDS;
     }
     if(startscan != 0 || lines != info->bmiHeader.biHeight) {
-	    dprintf(("WARNING: SetDIBitsToDevice startscan != 0 || lines != info->bmiHeader.biHeight"));
+        dprintf(("WARNING: SetDIBitsToDevice startscan != 0 || lines != info->bmiHeader.biHeight"));
         dprintf(("info bmp (%d,%d)", info->bmiHeader.biWidth, info->bmiHeader.biHeight));
     }
 
@@ -208,19 +205,10 @@ static INT SetDIBitsToDevice_(HDC hdc, INT xDest, INT yDest, DWORD cx,
     {
 	result = info->bmiHeader.biHeight;
 
-  	DIBSection *destdib = DIBSection::findHDC(hdc);
- 	if(destdib) {
-		if(cx == info->bmiHeader.biWidth && cy == info->bmiHeader.biHeight &&
-                   destdib->GetBitCount() == info->bmiHeader.biBitCount &&
-                   destdib->GetBitCount() == 8) 
-                {
-			destdib->sync(xDest, yDest, cx, cy, (PVOID)bits);
-		}
-		else	destdib->sync(hdc, yDest, cy);
-	}
+        DIBSECTION_MARK_INVALID(hdc);
     }
     dprintf(("GDI32: SetDIBitsToDevice hdc:%X xDest:%d yDest:%d, cx:%d, cy:%d, xSrc:%d, ySrc:%d, startscan:%d, lines:%d \nGDI32: bits 0x%X, info 0x%X, coloruse %d returned %d",
-                 hdc, xDest, yDest, cx, cy, xSrc, ySrc, startscan, lines, (LPVOID) bits, (PBITMAPINFO)info, coloruse, result));
+              hdc, xDest, yDest, cx, cy, xSrc, ySrc, startscan, lines, (LPVOID) bits, (PBITMAPINFO)info, coloruse, result));
     dprintf(("GDI32: SetDIBitsToDevice %d %d %d %d %x %d", info->bmiHeader.biWidth, info->bmiHeader.biHeight, info->bmiHeader.biPlanes, info->bmiHeader.biBitCount, info->bmiHeader.biCompression, info->bmiHeader.biSizeImage));
 
     if(compression == BI_BITFIELDS) {
@@ -357,18 +345,23 @@ BOOL WIN32API PatBlt(HDC hdc,int nXLeft,int nYLeft,int nWidth,int nHeight,DWORD 
     }
     rc = O32_PatBlt(hdc,nXLeft,nYLeft,nWidth,nHeight,dwRop);
     if(rc) {
-      	DIBSection *destdib = DIBSection::findHDC(hdc);
-      	if(destdib) {
-		    destdib->sync(hdc, nYLeft, nHeight);
-  	    }
+        DIBSECTION_MARK_INVALID(hdc);
     }
     return(rc);
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API MaskBlt( HDC arg1, int arg2, int arg3, int arg4, int arg5, HDC   arg6, int arg7, int arg8, HBITMAP arg9, int arg10, int arg11, DWORD  arg12)
+BOOL WIN32API MaskBlt( HDC hdcDest, int arg2, int arg3, int arg4, int arg5, HDC hdcSrc, int arg7, int arg8, HBITMAP arg9, int arg10, int arg11, DWORD  arg12)
 {
-    return O32_MaskBlt(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12);
+    BOOL ret;
+
+    DIBSECTION_CHECK_IF_DIRTY(hdcSrc);
+
+    ret = O32_MaskBlt(hdcDest, arg2, arg3, arg4, arg5, hdcSrc, arg7, arg8, arg9, arg10, arg11, arg12);
+    if(ret) {
+        DIBSECTION_MARK_INVALID(hdcDest);
+    }
+    return ret;
 }
 //******************************************************************************
 //******************************************************************************
@@ -425,22 +418,13 @@ static INT StretchDIBits_(HDC hdc, INT xDst, INT yDst, INT widthDst,
 
         //Open32 always returns height of bitmap (regardless of how many scanlines were copied)
       	if(rc != heightSrc && rc != infoLoc->bmiHeader.biHeight) {
-		    dprintf(("StretchDIBits failed with rc %x", rc));
+	    dprintf(("StretchDIBits failed with rc %x", rc));
       	}
-	    else {
-		    rc = heightSrc;
+        else {
+	    rc = heightSrc;
 
-  		    DIBSection *destdib = DIBSection::findHDC(hdc);
-  		    if(destdib) {
-    			if(widthDst == widthSrc && heightDst == heightSrc &&
-                            destdib->GetBitCount() == infoLoc->bmiHeader.biBitCount &&
-                            destdib->GetBitCount() == 8) 
-                {
-				    destdib->sync(xDst, yDst, widthDst, heightDst, (PVOID)bits);
- 			    }
-			    else	destdib->sync(hdc, yDst, heightDst);
-  		    }
-	    }
+            DIBSECTION_MARK_INVALID(hdc);
+        }
     
     	return rc;
     }
@@ -488,8 +472,8 @@ static INT StretchDIBits_(HDC hdc, INT xDst, INT yDst, INT widthDst,
     }
 
     rc = O32_StretchDIBits(hdc, xDst, yDst, widthDst, heightDst, xSrc, ySrc,
-                             widthSrc, heightSrc, (void *)bits,
-                             (PBITMAPINFO)info, wUsage, dwRop);
+                           widthSrc, heightSrc, (void *)bits,
+                           (PBITMAPINFO)info, wUsage, dwRop);
 
     if(compression == BI_BITFIELDS) {
         ((BITMAPINFO *)info)->bmiHeader.biCompression = BI_BITFIELDS;
@@ -504,16 +488,7 @@ static INT StretchDIBits_(HDC hdc, INT xDst, INT yDst, INT widthDst,
     {
 	    rc = heightSrc;
 
-  	    DIBSection *destdib = DIBSection::findHDC(hdc);
- 	    if(destdib) {
-    		if(widthDst == widthSrc && heightDst == heightSrc &&
-                    destdib->GetBitCount() == info->bmiHeader.biBitCount &&
-                    destdib->GetBitCount() == 8) 
-            {
-			     destdib->sync(xDst, yDst, widthDst, heightDst, (PVOID)bits);
-		    }
-		    else destdib->sync(hdc, yDst, heightDst);
-	    }
+            DIBSECTION_MARK_INVALID(hdc);
     }
 
     return rc;
@@ -525,7 +500,6 @@ INT WIN32API StretchDIBits(HDC hdc, INT xDst, INT yDst, INT widthDst,
                            INT heightSrc, const void *bits,
                            const BITMAPINFO *info, UINT wUsage, DWORD dwRop )
 {
-
     if(info->bmiHeader.biHeight < 0) {
         // upside down
         INT rc = 0;
@@ -562,6 +536,7 @@ INT WIN32API StretchDIBits(HDC hdc, INT xDst, INT yDst, INT widthDst,
 //******************************************************************************
 int WIN32API SetStretchBltMode( HDC arg1, int  arg2)
 {
+#ifdef DEBUG
     if(DIBSection::getSection() != NULL)
     {
         DIBSection *dsect = DIBSection::findHDC(arg1);
@@ -570,6 +545,7 @@ int WIN32API SetStretchBltMode( HDC arg1, int  arg2)
             dprintf(("       - DC is DIBSection\n"));
         }
     }
+#endif
     return O32_SetStretchBltMode(arg1, arg2);
 }
 //******************************************************************************

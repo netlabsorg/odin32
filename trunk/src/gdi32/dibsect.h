@@ -1,4 +1,4 @@
-/* $Id: dibsect.h,v 1.27 2003-11-14 17:31:47 sandervl Exp $ */
+/* $Id: dibsect.h,v 1.28 2004-01-11 11:42:11 sandervl Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -74,10 +74,55 @@ typedef struct
 } DIBSECTION,*LPDIBSECTION;
 #endif
 
+//
+//Mark DIB section as invalid (dib section memory is out of sync with
+//GDI bitmap).
+//
+//This must be done for any GDI function that modifies the bitmap
+//
+#define DIBSECTION_MARK_INVALID(hdc)                              \
+    if(DIBSection::getSection() != NULL) {                        \
+        DIBSection *dib = DIBSection::findHDC(hdc);               \
+        if(dib) {                                                 \
+            dib->setInvalid();                                    \
+        }                                                         \
+    }
+
+#define DIBSECTION_MARK_INVALID_BMP(hBitmap)                      \
+    if(DIBSection::getSection() != NULL) {                        \
+        DIBSection *dib = DIBSection::findObj(hBitmap);           \
+        if(dib) {                                                 \
+            dib->setInvalid();                                    \
+        }                                                         \
+    }
+
+//
+//Check if DIB section is marked dirty (bitmap data modified by application)
+//If true, then update the GDI bitmap
+//
+//This must be done for any GDI function that accesses the bitmap
+//
+#define DIBSECTION_CHECK_IF_DIRTY(hdc)                            \
+    if(DIBSection::getSection() != NULL) {                        \
+        DIBSection *dib = DIBSection::findHDC(hdc);               \
+        if(dib && dib->isDirty()) {                               \
+            dib->flush();                                         \
+        }                                                         \
+    }
+
+#define DIBSECTION_CHECK_IF_DIRTY_BMP(hBitmap)                    \
+    if(DIBSection::getSection() != NULL) {                        \
+        DIBSection *dib = DIBSection::findObj(hBitmap);           \
+        if(dib && dib->isDirty()) {                               \
+            dib->flush();                                         \
+        }                                                         \
+    }
+
+
 class DIBSection
 {
 public:
-              DIBSection(BITMAPINFOHEADER_W *pbmi, char *pColors, DWORD iUsage, DWORD hSection, DWORD dwOffset, DWORD handle, int fFlip);
+              DIBSection(BITMAPINFOHEADER_W *pbmi, char *pColors, DWORD iUsage, DWORD hSection, DWORD dwOffset, HBITMAP hBitmap, int fFlip);
              ~DIBSection();
 
               char *GetDIBObject()           { return bmpBits;  };
@@ -87,8 +132,13 @@ public:
               int   GetWidth();
               void  UnSelectDIBObject()      { this->hdc = 0;   };
 
-        DWORD GetBitmapHandle()      { return handle; };
-              void  SetBitmapHandle(DWORD bmphandle) { handle = bmphandle; };
+              void  setDirty()               { fDirty = TRUE;   };
+              BOOL  isDirty()                { return fDirty;   }
+              void  setInvalid();
+              BOOL  isInvalid()              { return fInvalid; };
+
+        DWORD GetBitmapHandle()              { return hBitmap; };
+              void  SetBitmapHandle(DWORD bmphandle) { hBitmap = bmphandle; };
         DWORD GetRGBUsage()            { return iUsage; };
 
               BOOL  BitBlt(HDC hdcDest, int nXdest, int nYDest,
@@ -96,39 +146,47 @@ public:
                            int nXsrc, int nYSrc,
                            int nSrcWidth, int nSrcHeight,
                            DWORD Rop);
+
+              void  flush();
+              void  sync();
+
               void  sync(HDC hdc, DWORD nYdest, DWORD nDestHeight, BOOL orgYInversion = TRUE);
+              void  flush(HDC hdc, DWORD nYdest, DWORD nDestHeight, BOOL orgYInversion = TRUE);
               void  sync(DWORD xDst, DWORD yDst, DWORD widthDst, DWORD heightDst, PVOID bits);
+
                int  SetDIBColorTable(int startIdx, int cEntries, RGBQUAD *rgb);
                int  GetDIBColorTable(int startIdx, int cEntries, RGBQUAD *rgb);
                int  SetDIBColorTable(int startIdx, int cEntries, PALETTEENTRY *rgb);
 
-               int  SetDIBits(HDC hdc, HBITMAP hbitmap, UINT startscan, UINT
-                              lines, const VOID *bits, BITMAPINFOHEADER_W *pbmi,
-                              UINT coloruse);
-
                int  GetDIBSection(int iSize , void *lpBuffer);
 
  static DIBSection *getSection() { return section; } ;
- static DIBSection *findObj(HANDLE handle);
+ static DIBSection *findObj(HBITMAP hBitmap);
  static DIBSection *findHDC(HDC hdc);
- static       void  deleteSection(HANDLE handle);
+ static       void  deleteSection(HBITMAP hBitmap);
 
  static       void  initDIBSection();
 
  static       void  lock()   { EnterCriticalSection(&dibcritsect); };
  static       void  unlock() { LeaveCriticalSection(&dibcritsect); };
 
+ static       void  syncAll();
+
 protected:
 
 private:
-          DWORD handle, iUsage;
-          DWORD hSection, dwOffset;
+          HBITMAP hBitmap;
+ 
+          DWORD hSection, dwOffset, iUsage, dwSize;
           HWND  hwndParent;
           HDC   hdc;
           char *bmpBits, *bmpBitsDblBuffer;
           BOOL  fFlip;
           int   bmpsize, os2bmphdrsize;
     DIBSECTION  dibinfo;
+
+          BOOL  fDirty;		//bitmap is out of sync with dib memory
+          BOOL  fInvalid;	//dib memory is out of sync with bitmap
 
     BITMAPINFO2 *pOS2bmp;
                              // Linked list management
@@ -137,9 +195,6 @@ private:
 
     static    CRITICAL_SECTION dibcritsect;
 };
-
-#define DIBSECTION_MARK_INVALID(a)
-#define DIBSECTION_CHECK_IF_DIRTY(a)
 
 #endif
 
