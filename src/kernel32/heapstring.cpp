@@ -1,4 +1,4 @@
-/* $Id: heapstring.cpp,v 1.17 1999-11-05 09:16:57 sandervl Exp $ */
+/* $Id: heapstring.cpp,v 1.18 1999-11-09 14:19:46 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -538,7 +538,11 @@ int WIN32API lstrcpynWtoA(LPSTR  astring,
       return 0; //no data
     }
 
-    uni_chars_left = unilen-1; //elements
+    //SvL: Determine length of unicode string
+    uni_chars_left = UniStrlen((UniChar*)ustring)+1;
+    uni_chars_left = min(uni_chars_left, unilen);
+    unilen = uni_chars_left;
+
     out_bytes_left = uni_chars_left; //size in bytes == elements
     in_buf  = (UniChar*)ustring;
     out_buf = astring;
@@ -624,7 +628,10 @@ int WIN32API lstrcpynAtoW(LPWSTR unicode,
     //@@@PH what's this?
     //in_bytes_left = asciilen-1; //buffer size in bytes
 
-    in_bytes_left = asciilen; //buffer size in bytes
+    //SvL: Determine length of ascii string
+    in_bytes_left = strlen(in_buf)+1;
+    in_bytes_left = min(in_bytes_left, asciilen); //buffer size in bytes
+    
     out_buf = (UniChar*)unicode;
 
     uni_chars_left = in_bytes_left; //elements
@@ -636,9 +643,6 @@ int WIN32API lstrcpynAtoW(LPWSTR unicode,
 
     //@@@PH what's this?
     //unicode[asciilen-1-in_bytes_left] = 0;
-
-    //if (rc != ULS_SUCCESS && in_bytes_left > 0) //CB: never the case during my tests
-    //   dprintf(("KERNEL32: AsciiToUnicode failed, %d bytes left!\n",in_bytes_left));
 
     //@@@PH what's this?
     //return asciilen - 1;

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.53 1999-11-08 20:53:24 sandervl Exp $
+# $Id: makefile,v 1.54 1999-11-09 14:19:46 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -333,11 +333,11 @@ mmap.obj:      mmap.cpp mmap.h $(PDWIN32_INCLUDE)\vmutex.h oslibdos.h $(PDWIN32_
 
 pefile.OBJ:    pefile.cpp $(PDWIN32_INCLUDE)\pefile.h $(PDWIN32_INCLUDE)\winres.h
 
-winimagebase.obj:  winimagebase.cpp $(PDWIN32_INCLUDE)\winimagebase.h
-winimagepe2lx.obj: winimagepe2lx.cpp $(PDWIN32_INCLUDE)\winimagebase.h $(PDWIN32_INCLUDE)\winimagepe2lx.h
-winimagepeldr.obj: winimagepeldr.cpp $(PDWIN32_INCLUDE)\winimagebase.h $(PDWIN32_INCLUDE)\winimagepeldr.h
+winimagebase.obj:  winimagebase.cpp $(PDWIN32_INCLUDE)\winimagebase.h $(PDWIN32_INCLUDE)\windllbase.h
+winimagepe2lx.obj: winimagepe2lx.cpp $(PDWIN32_INCLUDE)\winimagebase.h $(PDWIN32_INCLUDE)\winimagepe2lx.h $(PDWIN32_INCLUDE)\windllbase.h
+winimagepeldr.obj: winimagepeldr.cpp $(PDWIN32_INCLUDE)\winimagebase.h $(PDWIN32_INCLUDE)\winimagepeldr.h $(PDWIN32_INCLUDE)\windllbase.h
 winimagelx.obj:    winimagelx.cpp $(PDWIN32_INCLUDE)\winimagebase.h $(PDWIN32_INCLUDE)\winimagelx.h
-windllbase.obj:    windllbase.cpp $(PDWIN32_INCLUDE)\windllbase.h $(PDWIN32_INCLUDE)\winimagebase.h
+windllbase.obj:    windllbase.cpp $(PDWIN32_INCLUDE)\windllbase.h $(PDWIN32_INCLUDE)\winimagebase.h profile.h
 windllpe2lx.obj:   windllpe2lx.cpp $(PDWIN32_INCLUDE)\windllbase.h $(PDWIN32_INCLUDE)\windllpe2lx.h \
                    $(PDWIN32_INCLUDE)\winimagepe2lx.h $(PDWIN32_INCLUDE)\winimagebase.h
 windlllx.obj:      windlllx.cpp $(PDWIN32_INCLUDE)\windllbase.h $(PDWIN32_INCLUDE)\windlllx.h \

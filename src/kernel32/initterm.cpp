@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.22 1999-11-08 15:45:19 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.23 1999-11-09 14:19:46 sandervl Exp $ */
 
 /*
  * KERNEL32 DLL entry point
@@ -107,6 +107,7 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
             if(InitializeSharedHeap() == FALSE)
                 return 0UL;
 
+            PROFILE_LoadOdinIni();
             if(RegisterLxDll(hModule, 0, 0) == FALSE)
                 return 0UL;
 
@@ -130,7 +131,6 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
             //SvL: Do it here instead of during the exe object creation
             //(std handles can be used in win32 dll initialization routines
             HMInitialize();             /* store standard handles within HandleManager */
-            PROFILE_LoadOdinIni();
             InitDirectories();
             break;
 	}

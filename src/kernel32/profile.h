@@ -1,4 +1,4 @@
-/* $Id: profile.h,v 1.3 1999-10-20 08:09:05 sandervl Exp $ */
+/* $Id: profile.h,v 1.4 1999-11-09 14:19:46 sandervl Exp $ */
 /*
  * Profile header for initterm
  * Copyright 1999 Christoph Bratschi
@@ -8,7 +8,19 @@
 #ifndef __PROFILE_H__
 #define __PROFILE_H__
 
-void WINAPI WriteOutProfiles(void);
-void WINAPI PROFILE_LoadOdinIni(void);
+#include <odinwrap.h>
 
+/* Odin profile name in KERNEL32.DLL directory */
+#define ODINININAME "ODIN.INI"
+
+void WINAPI WriteOutProfiles(void);
+int WINAPI PROFILE_LoadOdinIni(void);
+
+INT ODIN_EXTERN(GetPrivateProfileStringA)(LPCSTR section, LPCSTR entry,
+                                          LPCSTR def_val, LPSTR buffer,
+                                          UINT len, LPCSTR filename);
+
+int ODIN_EXTERN(PROFILE_GetOdinIniString)(LPCSTR section, LPCSTR entry,
+                                          LPCSTR def_val, LPSTR buffer,
+                                          UINT len);
 #endif

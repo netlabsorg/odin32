@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.44 1999-11-05 14:06:44 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.45 1999-11-09 14:19:47 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -310,7 +310,12 @@ static HINSTANCE iLoadLibraryA(LPCTSTR lpszLibFile, DWORD dwFlags)
     	return module->getInstanceHandle();
   }
 
-  hDll = O32_LoadLibrary(lpszLibFile);
+  strcpy(modname, lpszLibFile);
+  strupr(modname);
+  //rename dll if necessary (i.e. OLE32 -> OLE32OS2)
+  Win32DllBase::renameDll(modname);
+
+  hDll = O32_LoadLibrary(modname);
   dprintf(("KERNEL32:  iLoadLibraryA %s returned %X (%d)\n",
            lpszLibFile,
            hDll,
@@ -320,8 +325,6 @@ static HINSTANCE iLoadLibraryA(LPCTSTR lpszLibFile, DWORD dwFlags)
     return hDll;    //converted dll or win32k took care of it
   }
 
-  strcpy(modname, lpszLibFile);
-  strupr(modname);
   if(!strstr(modname, ".")) {
 	strcat(modname,".DLL");
   }
@@ -695,19 +698,25 @@ FARPROC WIN32API GetProcAddress(HMODULE hModule, LPCSTR lpszProc)
 //******************************************************************************
 //Retrieve the version
 //******************************************************************************
-BOOL SYSTEM GetVersionStruct(char *modname, char *verstruct, ULONG bufLength)
+BOOL SYSTEM GetVersionStruct(char *lpszModName, char *verstruct, ULONG bufLength)
 {
  Win32ImageBase *winimage;
  Win32PeLdrRsrcImg *rsrcimg;
 
-  dprintf(("GetVersionStruct"));
-  if(WinExe && !stricmp(WinExe->getFullPath(), modname)) {
+  dprintf(("GetVersionStruct of module %s", lpszModName));
+  if(WinExe && !stricmp(WinExe->getFullPath(), lpszModName)) {
     	winimage = (Win32ImageBase *)WinExe;
   }
   else {
-    	winimage = (Win32ImageBase *)Win32DllBase::findModule(modname);
+    	winimage = (Win32ImageBase *)Win32DllBase::findModule(lpszModName);
     	if(winimage == NULL) 
         {
+	 char modname[CCHMAXPATH];
+
+		strcpy(modname, lpszModName);
+  		//rename dll if necessary (i.e. OLE32 -> OLE32OS2)
+  		Win32DllBase::renameDll(modname);
+		
 		if(Win32ImageBase::isPEImage(modname) == FALSE) 
                 {
 		 HINSTANCE hInstance;
@@ -743,20 +752,26 @@ BOOL SYSTEM GetVersionStruct(char *modname, char *verstruct, ULONG bufLength)
 }
 //******************************************************************************
 //******************************************************************************
-ULONG SYSTEM GetVersionSize(char *modname)
+ULONG SYSTEM GetVersionSize(char *lpszModName)
 {
  Win32ImageBase *winimage;
  Win32PeLdrRsrcImg *rsrcimg;
 
-  dprintf(("GetVersionSize of %s\n", modname));
+  dprintf(("GetVersionSize of %s\n", lpszModName));
 
-  if(WinExe && !stricmp(WinExe->getFullPath(), modname)) {
+  if(WinExe && !stricmp(WinExe->getFullPath(), lpszModName)) {
     	winimage = (Win32ImageBase *)WinExe;
   }
   else {
-    	winimage = (Win32ImageBase *)Win32DllBase::findModule(modname);
+    	winimage = (Win32ImageBase *)Win32DllBase::findModule(lpszModName);
     	if(winimage == NULL) 
         {
+	 char modname[CCHMAXPATH];
+
+		strcpy(modname, lpszModName);
+  		//rename dll if necessary (i.e. OLE32 -> OLE32OS2)
+  		Win32DllBase::renameDll(modname);
+
 		if(Win32ImageBase::isPEImage(modname) == FALSE) 
                 {
 		 HINSTANCE hInstance;
