@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.4 1999-09-20 19:17:58 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.5 1999-09-21 08:24:05 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -803,6 +803,13 @@ ULONG Win32BaseWindow::MsgMove(ULONG x, ULONG y)
 }
 //******************************************************************************
 //******************************************************************************
+ULONG Win32BaseWindow::MsgTimer(ULONG TimerID)
+{
+  // TODO: call TIMERPROC if not NULL
+  return SendInternalMessageA(WM_TIMER, TimerID, 0);
+}
+//******************************************************************************
+//******************************************************************************
 ULONG Win32BaseWindow::MsgCommand(ULONG cmd, ULONG Id, HWND hwnd)
 {
   switch(cmd) {
@@ -1088,16 +1095,16 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
          SetBkColor((HDC)wParam, GetSysColor(COLOR_BTNFACE));
          SetTextColor((HDC)wParam, GetSysColor(COLOR_WINDOWTEXT));
          return GetSysColorBrush(COLOR_BTNFACE);
-	
+
     //SvL: Set background color to default dialog color if window is dialog
     case WM_CTLCOLORDLG:
     case WM_CTLCOLORSTATIC:
-	 if(IsDialog()) {
-         	SetBkColor((HDC)wParam, GetSysColor(COLOR_BTNFACE));
-         	SetTextColor((HDC)wParam, GetSysColor(COLOR_WINDOWTEXT));
-         	return GetSysColorBrush(COLOR_BTNFACE);
-	 }
-	 //no break
+     if(IsDialog()) {
+            SetBkColor((HDC)wParam, GetSysColor(COLOR_BTNFACE));
+            SetTextColor((HDC)wParam, GetSysColor(COLOR_WINDOWTEXT));
+            return GetSysColorBrush(COLOR_BTNFACE);
+     }
+     //no break
 
     case WM_CTLCOLORMSGBOX:
     case WM_CTLCOLOREDIT:
@@ -1478,8 +1485,8 @@ BOOL Win32BaseWindow::SetIcon(HICON hIcon)
 {
     dprintf(("Win32BaseWindow::SetIcon %x", hIcon));
     if(OSLibWinSetIcon(OS2HwndFrame, hIcon) == TRUE) {
-	SendInternalMessageA(WM_SETICON, hIcon, 0);
-	return TRUE;
+    SendInternalMessageA(WM_SETICON, hIcon, 0);
+    return TRUE;
     }
     return FALSE;
 }
