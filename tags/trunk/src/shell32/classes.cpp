@@ -1,4 +1,4 @@
-/* $Id: classes.cpp,v 1.1 1999-10-09 11:13:18 sandervl Exp $ */
+/* $Id: classes.cpp,v 1.2 1999-11-02 18:50:15 phaller Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -53,7 +53,7 @@ ODINDEBUGCHANNEL(shell32-classes)
  * Implementation                                                            *
  *****************************************************************************/
 
-BOOL HCR_MapTypeToValue ( LPCSTR szExtension, LPSTR szFileType, LONG len, BOOL bPrependDot)
+BOOL HCR_MapTypeToValue ( LPCSTR szExtension, LPSTR szFileType, DWORD len, BOOL bPrependDot)
 {
         HKEY    hkey;
         char    szTemp[MAX_EXTENSION_LENGTH + 2];
@@ -73,7 +73,7 @@ BOOL HCR_MapTypeToValue ( LPCSTR szExtension, LPSTR szFileType, LONG len, BOOL b
         { return FALSE;
         }
 
-        if (RegQueryValueA(hkey,NULL,szFileType,&len))
+        if (RegQueryValueA(hkey,NULL,szFileType,(LPLONG)&len))
         { RegCloseKey(hkey);
           return FALSE;
         }
@@ -85,8 +85,7 @@ BOOL HCR_MapTypeToValue ( LPCSTR szExtension, LPSTR szFileType, LONG len, BOOL b
         return TRUE;
 }
 
-
-BOOL HCR_GetExecuteCommand ( LPCSTR szClass, LPCSTR szVerb, LPSTR szDest, LONG len )
+BOOL HCR_GetExecuteCommand ( LPCSTR szClass, LPCSTR szVerb, LPSTR szDest, DWORD len )
 {
         HKEY    hkey;
         char    sTemp[256];
@@ -103,7 +102,7 @@ BOOL HCR_GetExecuteCommand ( LPCSTR szClass, LPCSTR szVerb, LPSTR szDest, LONG l
         { return FALSE;
         }
 
-        if (RegQueryValueA(hkey,NULL,szDest,&len))
+        if (RegQueryValueA(hkey,NULL,szDest,(LPLONG)&len))
         { RegCloseKey(hkey);
           return FALSE;
         }
@@ -119,7 +118,7 @@ BOOL HCR_GetExecuteCommand ( LPCSTR szClass, LPCSTR szVerb, LPSTR szDest, LONG l
 *
 * Gets the icon for a filetype
 */
-BOOL HCR_GetDefaultIcon (LPCSTR szClass, LPSTR szDest, LONG len, LPDWORD dwNr)
+BOOL HCR_GetDefaultIcon (LPCSTR szClass, LPSTR szDest, DWORD len, LPDWORD dwNr)
 {
         HKEY    hkey;
         char    sTemp[256];
@@ -137,7 +136,7 @@ BOOL HCR_GetDefaultIcon (LPCSTR szClass, LPSTR szDest, LONG len, LPDWORD dwNr)
         { return FALSE;
         }
 
-        if (RegQueryValueA(hkey,NULL,szDest,&len))
+        if (RegQueryValueA(hkey,NULL,szDest,(LPLONG)&len))
         { RegCloseKey(hkey);
           return FALSE;
         }
