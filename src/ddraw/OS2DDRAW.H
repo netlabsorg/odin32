@@ -5,7 +5,7 @@
 #include <d3d.h>
 #undef APIENTRY
 #define APIENTRY _System
-#include <dive.h>
+#include "divewrap.h"
 
 #define DEBUG 1
 #define mmioFOURCC( ch0, ch1, ch2, ch3 )                         \
