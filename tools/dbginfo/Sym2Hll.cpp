@@ -1,4 +1,4 @@
-/* $Id: Sym2Hll.cpp,v 1.6 2000-05-27 02:15:41 bird Exp $
+/* $Id: Sym2Hll.cpp,v 1.7 2000-08-31 03:02:27 bird Exp $
  *
  * Sym2Hll - Symbol file to HLL debuginfo converter.
  *
@@ -33,8 +33,8 @@
 #include <kFileLX.h>
 
 #include "hll.h"
-#include "kHll.h"
 #include "sym.h"
+#include "kHll.h"
 
 /*******************************************************************************
 *   Internal Functions                                                         *
@@ -158,7 +158,7 @@ int main(int argc, char **argv)
                        "      ppNextSeg   0x%04x  paragraph pointer to next segment\n"
                        "      cSymbols    0x%04x  count of symbols in list\n"
                        "      pSymDef     0x%04x  offset of symbol chain\n"
-                       "      wReserved1  0x%04x  reserved\n"
+                       "      wSegNum     0x%04x  segment number (1 based)\n"
                        "      wReserved2  0x%04x  reserved\n"
                        "      wReserved3  0x%04x  reserved\n"
                        "      wReserved4  0x%04x  reserved\n"
@@ -172,7 +172,7 @@ int main(int argc, char **argv)
                        pSegDef->ppNextSeg,
                        pSegDef->cSymbols,
                        pSegDef->pSymDef,
-                       pSegDef->wReserved1,
+                       pSegDef->wSegNum,
                        pSegDef->wReserved2,
                        pSegDef->wReserved3,
                        pSegDef->wReserved4,

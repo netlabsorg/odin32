@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2000-05-27 02:15:42 bird Exp $
+# $Id: makefile,v 1.5 2000-08-31 03:02:28 bird Exp $
 #
 # Makefile for debug info convertes - experimental.
 #
@@ -32,7 +32,7 @@ CXXFLAGS   = $(CINCLUDES) $(CXXFLAGS) -DRING3 \
 
 
 # All rule - build objs, target dll, copies dll to bin and makes libs.
-all: kHll.exe # Sym2Hll.exe dbgLXDumper.exe
+all: kHll5.exe Sym2Hll.exe dbgLXDumper.exe
 
 
 #
@@ -40,19 +40,19 @@ all: kHll.exe # Sym2Hll.exe dbgLXDumper.exe
 #
 Sym2Hll:
 Sym2Hll.exe: Sym2Hll.obj kHll.obj $(COMMONLIB)
-    $(LD2) $(LD2FLAGS) /PMTYPE:vio /EXEC:$@ $** $(RTLLIB) os2386.lib
+    $(LD2) $(LD2FLAGS) /PMTYPE:vio /EXEC /OUT:$@ $** $(RTLLIB) os2386.lib
 
 #
 # New LX debug info dumper.
 #
-kHll.exe: kHll.obj $(COMMONLIB)
-    $(LD2) $(LD2FLAGS) /PMTYPE:vio /EXEC:$@ $** $(RTLLIB) os2386.lib
+kHll5.exe: kHll.obj kHllMain.obj $(COMMONLIB)
+    $(LD2) $(LD2FLAGS) /PMTYPE:vio /EXEC /OUT:$@ $** $(RTLLIB) os2386.lib
 
 #
 # LX debug info dumper (HLL only) executable rule.
 #
 dbgLXDumper.exe: dbgLXDumper.obj dummy.obj
-    $(LD2) $(LD2FLAGS) /PMTYPE:vio /EXEC:$@ $** $(RTLLIB) os2386.lib
+    $(LD2) $(LD2FLAGS) /PMTYPE:vio /EXEC /OUT:$@ $** $(RTLLIB) os2386.lib
 
 # Dummy source file rule
 dummy.c:
