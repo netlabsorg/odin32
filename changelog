@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2267 2002-08-16 09:55:57 sandervl Exp $ */
+/* $Id: changelog,v 1.2268 2002-08-16 10:10:24 sandervl Exp $ */
+
+ 2002-08-16: Sander van Leeuwen <sandervl@innotek   >
+    - WINMM:    o Put back old wave playback resume code
 
  2002-08-16: Platon Fomichev <platon@innotek   >
     - KERNEL32: o Fully implemented GetShortPathNameA/W & GetLongPathNameA/W
