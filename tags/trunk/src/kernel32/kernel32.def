@@ -1,4 +1,4 @@
-; $Id: kernel32.def,v 1.108 2001-05-30 01:35:57 phaller Exp $
+; $Id: kernel32.def,v 1.109 2001-06-10 21:59:30 sandervl Exp $
 
 ;Basis is Windows95 KERNEL32
 LIBRARY KERNEL32 INITINSTANCE TERMINSTANCE
@@ -184,7 +184,7 @@ EXPORTS
      ClearCommError             = _ClearCommError@12               @136
      CloseHandle                = _CloseHandle@4                   @137
 ;    CloseConsoleHandle         = _CloseConsoleHandle@??           @22   ;NT
-;    CloseProfileUserMapping    = _CloseProfileUserMapping@??      @138
+     CloseProfileUserMapping    = _CloseProfileUserMapping@0       @138
 ;    CloseSystemHandle          = _CloseSystemHandle@??            @139  ;W95
      CmdBatNotification         = _CmdBatNotification@4            @26   ;NT
      CommConfigDialogA          = _CommConfigDialogA@12            @140
@@ -651,7 +651,7 @@ EXPORTS
     OpenMutexA                 = _OpenMutexA@12              @541
     OpenMutexW                 = _OpenMutexW@12              @542
     OpenProcess                = _OpenProcess@12             @543
-;   OpenProfileUserMapping     = _OpenProfileUserMapping@??  @544
+    OpenProfileUserMapping     = _OpenProfileUserMapping@0   @544
     OpenSemaphoreA             = _OpenSemaphoreA@12          @545
     OpenSemaphoreW             = _OpenSemaphoreW@12          @546
 ;   OpenVxDHandle              = _OpenVxDHandle@??           @547       ;W95
