@@ -1,4 +1,4 @@
-/* $Id: d32init.c,v 1.9 2000-02-18 19:27:29 bird Exp $
+/* $Id: d32init.c,v 1.10 2000-02-19 08:40:29 bird Exp $
  *
  * d32init.c - 32-bits init routines.
  *
@@ -565,8 +565,9 @@ static int procInit(void)
                         (unsigned)myldrRead,
                         (unsigned)myldrOpen,
                         (unsigned)myldrClose,
-                        (unsigned)myLDRQAppType,
+                        0,//(unsigned)myLDRQAppType,
                         (unsigned)myldrEnum32bitRelRecs,
+                        0,
                         0,
                         0,
                         0,

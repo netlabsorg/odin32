@@ -16,6 +16,7 @@ SEGMENTS
     CODE16          class 'CODE'
     CODE32          class 'CODE'
     CALLTAB         class 'DATA'
+;    CALLTAB         class 'CODE' WRITABLE
     DATA32          class 'DATA'
     c_common        class 'DATA'
     BSS32           class 'BSS'

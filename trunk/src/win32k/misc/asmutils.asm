@@ -1,4 +1,4 @@
-; $Id: asmutils.asm,v 1.3 1999-10-27 02:02:59 bird Exp $
+; $Id: asmutils.asm,v 1.4 2000-02-19 08:40:31 bird Exp $
 ;
 ; asmutils - assembly utility functions
 ;
@@ -23,8 +23,8 @@
     public GetGS
     public GetSS
     public Int3
-    public _memrevmov@12
-    public _memmov@12
+;    public _memrevmov@12
+;    public _memmov@12
 ;    public DisableInterrupts
 ;    public EnableInterrupts
 
@@ -93,7 +93,7 @@ Int3 ENDP
 ;        ret
 ;EnableInterrupts ENDP
 
-
+if 0
 ;void __stdcall memrevmov(void *pTo, void* pFrom, unsigned int Len);
 pTo     EQU dword ptr [ebp+08]
 pFrom   EQU dword ptr [ebp+12]
@@ -192,7 +192,7 @@ _memmov@12 PROC NEAR
 
     jmp memmov_end
 _memmov@12 ENDP
-
+endif
 
 CODE32 ends
 end

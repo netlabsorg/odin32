@@ -1,4 +1,4 @@
-/* $Id: probkrnl.h,v 1.6 2000-02-18 19:27:29 bird Exp $
+/* $Id: probkrnl.h,v 1.7 2000-02-19 08:40:30 bird Exp $
  *
  * Include file for ProbKrnl.
  *
@@ -15,7 +15,7 @@
 /*******************************************************************************
 *   Defined Constants And Macros                                               *
 *******************************************************************************/
-#define NUMBER_OF_PROCS      13
+#define NUMBER_OF_PROCS      14
 #define MAX_LENGTH_NAME      32
 
 /* entry-point type flag */
