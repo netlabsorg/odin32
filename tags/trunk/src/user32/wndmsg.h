@@ -1,4 +1,4 @@
-/* $Id: wndmsg.h,v 1.7 2002-12-18 12:28:08 sandervl Exp $ */
+/* $Id: wndmsg.h,v 1.8 2004-01-30 22:10:24 bird Exp $ */
 /*
  * Win32 window message text function for OS/2
  *
@@ -15,7 +15,7 @@
 extern "C" {
 #endif
 
-#ifdef DEBUG
+#ifdef DEBUG_LOGGING
 char *GetMsgText(int Msg);
 
 void DebugPrintMessage(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam, BOOL fUnicode, BOOL fInternalMsg);
