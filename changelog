@@ -1,11 +1,16 @@
- /* $Id: changelog,v 1.775 2000-03-03 21:21:30 hugh Exp $ */
+ /* $Id: changelog,v 1.776 2000-03-04 12:31:18 sandervl Exp $ */
+
+ 2000-03-04: Sander van Leeuwen <sandervl@xs4all.nl>
+	- WINMM: Fixed bug in setsockopt for SO_LINGER (options size wasn't 
+                 adjusted)
 
  2000-03-03: Markus Montkowski <mmontkowski@gmx.de>
         - DDRAW:  Fixed bug in CreateSurface and QueryInterface
                   (Moorhuhn now starts fine with ddraw)
         - USER32: Changed VirtualKey for VK_NEWLINE from 0x0A to 0x0D
                   in the virtualKeyTable
- 2000-03-02: Sander van Leeuwen <sandervl@xs4all.nl>
+
+ 2000-03-03: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Create shell dirs in odin\bin directory
                     Cleanup (never call Open32 apis directly if the proc
                     isn't a wrapper; include win32api.h and call Odin api)
