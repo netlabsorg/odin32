@@ -1,14 +1,12 @@
-/* $Id: icon.cpp,v 1.1 1999-07-14 08:35:34 sandervl Exp $ */
+/* $Id: icon.cpp,v 1.2 1999-07-20 15:46:53 sandervl Exp $ */
 
-/*
- *
- * Project Odin Software License can be found in LICENSE.TXT
- *
- */
 /*
  * Win32 icon conversion functions for OS/2
  *
  * Copyright 1998 Sander van Leeuwen
+ *
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
  *
  */
 #define INCL_GPIBITMAPS

@@ -1,4 +1,4 @@
-/* $Id: win32wnd.cpp,v 1.17 1999-07-20 07:42:36 sandervl Exp $ */
+/* $Id: win32wnd.cpp,v 1.18 1999-07-20 15:46:54 sandervl Exp $ */
 /*
  * Win32 Window Code for OS/2
  *
@@ -28,6 +28,7 @@
 #include <oslibwin.h>
 #include <oslibutil.h>
 #include <oslibgdi.h>
+#include <oslibres.h>
 #include <winres.h>
 
 #define HAS_DLGFRAME(style,exStyle) \
@@ -101,8 +102,10 @@ void Win32Window::Init()
 
   acceltableResource = NULL;
   menuResource       = NULL;
+  iconResource       = NULL;
 }
 //******************************************************************************
+//todo get rid of resources (menu, accel, icon etc)
 //******************************************************************************
 Win32Window::~Win32Window()
 {
@@ -388,6 +391,10 @@ BOOL Win32Window::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
   }
   else  windowId = (UINT)cs->hMenu;
 
+  //Set icon from class
+  if(windowClass->getIcon())
+	SetIcon(windowClass->getIcon());
+
   /* Send the WM_CREATE message
    * Perhaps we shouldn't allow width/height changes as well.
    * See p327 in "Internals".
@@ -415,6 +422,7 @@ BOOL Win32Window::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
             if (!(dwStyle & WS_CHILD) && !owner)
                 HOOK_CallHooks16( WH_SHELL, HSHELL_WINDOWCREATED, hwnd, 0 );
 #endif
+	SetLastError(0);
         return TRUE;
         }
   }
@@ -1055,7 +1063,7 @@ void Win32Window::NotifyParent(UINT Msg, WPARAM wParam, LPARAM lParam)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL Win32Window::SetMenu(ULONG hMenu)
+BOOL Win32Window::SetMenu(HMENU hMenu)
 {
  PVOID          menutemplate;
  Win32Resource *winres = (Win32Resource *)hMenu;
@@ -1081,17 +1089,38 @@ BOOL Win32Window::SetMenu(ULONG hMenu)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL Win32Window::SetAccelTable(ULONG hAccel)
+BOOL Win32Window::SetAccelTable(HACCEL hAccel)
 {
  Win32Resource *winres = (Win32Resource *)hAccel;
+ HANDLE         accelhandle;
 
     if(HIWORD(hAccel) == 0) {
         dprintf(("SetAccelTable: hAccel %x invalid", hAccel));
-	    SetLastError(ERROR_INVALID_PARAMETER);
-	    return FALSE;
+        SetLastError(ERROR_INVALID_PARAMETER);
+        return FALSE;
     }
     acceltableResource = winres;
- 	return OSLibWinSetAccelTable(OS2HwndFrame, winres->lockOS2Resource());
+    accelhandle = OSLibWinSetAccelTable(OS2HwndFrame, winres->getOS2Handle(), winres->lockOS2Resource());
+    winres->setOS2Handle(accelhandle);
+    return(accelhandle != 0);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL Win32Window::SetIcon(HICON hIcon)
+{
+ Win32Resource *winres = (Win32Resource *)hIcon;
+ HANDLE         iconhandle;
+
+    if(HIWORD(hIcon) == 0) {
+        dprintf(("SetIcon: hIcon %x invalid", hIcon));
+        SetLastError(ERROR_INVALID_PARAMETER);
+        return FALSE;
+    }
+    dprintf(("Win32Window::SetIcon %x", hIcon));
+    iconResource = winres;
+    iconhandle = OSLibWinSetIcon(OS2HwndFrame, winres->getOS2Handle(), winres->lockOS2Resource());
+    winres->setOS2Handle(iconhandle);
+    return(iconhandle != 0);
 }
 //******************************************************************************
 //******************************************************************************
