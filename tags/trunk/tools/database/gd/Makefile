@@ -9,14 +9,17 @@
 
 all: gdgcc.a gdgcc.lib gdicc.lib
 
-gdgcc.a: NUL
+gdgcc.a: force
    @nmake /nologo OMF=0 -f makefile.gcc $@
 
-gdgcc.lib: NUL
+gdgcc.lib: force
    @nmake /nologo OMF=1 -f makefile.gcc $@
 
-gdicc.lib: NUL
+gdicc.lib: force
    @nmake /nologo -f makefile.icc $@
+
+force:
+    @echo -
 
 clean:
    @nmake /nologo -f makefile.icc clean

@@ -1,4 +1,4 @@
-/* $Id: db.h,v 1.1 1999-09-05 02:53:05 bird Exp $ */
+/* $Id: db.h,v 1.2 1999-12-06 18:11:50 bird Exp $ */
 /*
  * DB - contains all database routines
  *
@@ -56,7 +56,7 @@ extern "C" {
 /*******************************************************************************
 *   Exported Functions                                                         *
 *******************************************************************************/
-    char *dbGetLastErrorDesc(void);
+    char *          _System dbGetLastErrorDesc(void);
 
     BOOL            _System dbConnect(const char *pszHost, const char *pszUser, const char *pszPassword, const char *pszDatabase);
     BOOL            _System dbDisconnect();

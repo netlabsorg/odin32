@@ -1,4 +1,4 @@
-/* $Id: db.cpp,v 1.1 1999-09-05 02:53:05 bird Exp $ */
+/* $Id: db.cpp,v 1.2 1999-12-06 18:11:49 bird Exp $ */
 /*
  * DB - contains all database routines.
  *
@@ -21,7 +21,8 @@
         ulRc++;                       \
         pszError += strlen(pszError); \
         pszError[1] = '\xFE';         \
-    }
+    }                                 \
+    rc=rc
 
 
 #define CheckFKError(table, msg)       \
@@ -45,7 +46,7 @@
         pszError[1] = '\xFE';          \
     }                                  \
     if (pres2 != NULL)                 \
-        mysql_free_result(pres2);
+        mysql_free_result(pres2)
 
 
 /*******************************************************************************
@@ -159,7 +160,7 @@ BOOL _System dbDisconnect(void)
  */
 signed short _System dbCheckInsertDll(const char *pszDll)
 {
-    signed short rc;
+    int  rc;
     char szQuery[256];
     MYSQL_RES *pres;
 
@@ -183,12 +184,12 @@ signed short _System dbCheckInsertDll(const char *pszDll)
     }
 
     if (rc >= 0 && pres != NULL && mysql_num_rows(pres) == 1)
-        rc = getvalue(0, mysql_fetch_row(pres));
+        rc = (int)getvalue(0, mysql_fetch_row(pres));
     else
         rc = -1;
     mysql_free_result(pres);
 
-    return rc;
+    return (short)rc;
 }
 
 
@@ -204,7 +205,7 @@ signed short _System dbCheckInsertDll(const char *pszDll)
 unsigned short _System dbGet(const char *pszTable, const char *pszGetColumn,
                              const char *pszMatch1, const char *pszMatchValue1)
 {
-    signed short rc;
+    int  rc;
     char szQuery[256];
     MYSQL_RES *pres;
 
@@ -215,12 +216,12 @@ unsigned short _System dbGet(const char *pszTable, const char *pszGetColumn,
     pres = mysql_store_result(pmysql);
 
     if (rc >= 0 && pres != NULL && mysql_num_rows(pres) == 1)
-        rc = getvalue(0, mysql_fetch_row(pres));
+        rc = (int)getvalue(0, mysql_fetch_row(pres));
     else
         rc = -1;
     mysql_free_result(pres);
 
-    return rc;
+    return (short)rc;
 }
 
 
@@ -550,7 +551,7 @@ unsigned long _System dbCreateHistory(char *pszError)
         {
             strcpy(&szCurDt[0], row[0]);
             while (mysql_fetch_row(pres) != NULL)
-                (void)0;
+                pres=pres;
 
             /* delete - all rows on this date in the history tables */
             sprintf(pszQuery, "DELETE FROM historydll WHERE date = '%s'", &szCurDt[0]);

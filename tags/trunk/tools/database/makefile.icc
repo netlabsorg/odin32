@@ -1,7 +1,7 @@
-# $Id: makefile.icc,v 1.1 1999-09-05 02:56:39 bird Exp $
+# $Id: makefile.icc,v 1.2 1999-12-06 18:11:50 bird Exp $
 
 #
-# Common makefile for database utils. ICC and GCC(DB.DLL only)
+# Common makefile for database utils. ICC edition
 #
 
 # include common definitions
@@ -10,60 +10,35 @@ PDWIN32_INCLUDE = ..\..\include
 
 # Addjust common definitions
 !ifdef DEBUG
-CFLAGS   = $(CFLAGS)   -Ge+ -Tx+ -I$(PDWIN32_INCLUDE)      -Igd -Imysql -I..\common -Wall+ppt-ppc-inl-cnv-gnr-vft-
-CXXFLAGS = $(CXXFLAGS) -Ge+ -Gx- -Tx+ -I$(PDWIN32_INCLUDE) -Igd -Imysql -I..\common -Wall+ppt-ppc-inl-cnv-gnr-vft-
-LDFLAGS  = $(LDFLAGS)  -Ge+ -Fe$@ /B"/MAP:full"
+CFLAGS   = $(CFLAGS)   -Ge+ -Tx+ -I$(PDWIN32_INCLUDE)      -Igd -Imysql -I..\common -DNO_CLIENT_LONG_LONG -Wall+ppt-ppc-inl-cnv-gnr-vft-
+CXXFLAGS = $(CXXFLAGS) -Ge+ -Gx- -Tx+ -I$(PDWIN32_INCLUDE) -Igd -Imysql -I..\common -DNO_CLIENT_LONG_LONG -Wall+ppt-ppc-inl-cnv-gnr-vft-
+LDFLAGS  = $(LDFLAGS)  -Ge+ -Fe$@ /B"/MAP:full" $(RTLLIB) os2386.lib
 !else
-CFLAGS   = $(CFLAGS)   -Ge+ -Tx+ -I$(PDWIN32_INCLUDE)      -Igd -Imysql -I..\common -Wall+ppt-ppc-inl-cnv-gnr-vft-
-CXXFLAGS = $(CXXFLAGS) -Ge+ -Gx- -Tx+ -I$(PDWIN32_INCLUDE) -Igd -Imysql -I..\common -Wall+ppt-ppc-inl-cnv-gnr-vft-
-LDFLAGS  = $(LDFLAGS)  -Ge+ -Fe$@ /B"/MAP:full"
+CFLAGS   = $(CFLAGS)   -Ge+ -Tx+ -I$(PDWIN32_INCLUDE)      -Igd -Imysql -I..\common -DNO_CLIENT_LONG_LONG -Wall+ppt-ppc-inl-cnv-gnr-vft-
+CXXFLAGS = $(CXXFLAGS) -Ge+ -Gx- -Tx+ -I$(PDWIN32_INCLUDE) -Igd -Imysql -I..\common -DNO_CLIENT_LONG_LONG -Wall+ppt-ppc-inl-cnv-gnr-vft-
+LDFLAGS  = $(LDFLAGS)  -Ge+ -Fe$@ /B"/MAP:full" $(RTLLIB) os2386.lib
 !endif
-
-#
-# gcc defines
-#
-GCC       = gcc
-# Note: old versions of GCC (< 2.8.x) may need the -fhandle-exceptions
-!ifdef DEBUG
-GCCFLAGS  = -Zmt -Zdll -Zomf -mprobe -Imysql -g
-!else
-GCCFLAGS  = -Zmt -Zdll -Zomf -mprobe -Imysql -s
-!endif
-
 
 
 #
 # All roule
 #
-all: db.dll db.lib APIImport.exe StateUpd.exe kHTMLPC.exe   \
-     ..\bin\db.dll ..\bin\APIImport.exe ..\bin\StateUpd.exe \
+all: APIImport.exe StateUpd.exe kHTMLPC.exe   \
+     ..\bin\APIImport.exe ..\bin\StateUpd.exe \
      ..\bin\kHTMLPC.exe
 
 
 #
-# Database DLL
+# Database Access Module
 #
-db.dll: db.obj db.def
-   $(GCC) $** $(GCCFLAGS) -lmysql\libmysqlclient -lsocket
-
-..\bin\db.dll: db.dll
-    $(CP) $** $@
-
-db.lib: db.def
-   $(IMPLIB) $(IMPLIBFLAGS) $@ $**
-
-db.o:   db.cpp
-   $(GCC) -c $(GCCFLAGS) $**
-
 db.obj: db.cpp
-    $(GCC) -c $(GCCFLAGS) $**
 
 
 
 #
 # APIImport
 #
-APIImport.exe: APIImport.obj ..\common\commonicc.lib db.lib
+APIImport.exe: APIImport.obj db.obj ..\common\commonicc.lib mysql\libmysqlclient.lib
    $(LD) $(LDFLAGS) $**
 
 APIImport.obj:    APIImport.cpp APIImport.h db.h ..\common\kFileFormatBase.h \
@@ -82,7 +57,7 @@ APIImport.obj:    APIImport.cpp APIImport.h db.h ..\common\kFileFormatBase.h \
 #
 # StateUpd
 #
-StateUpd.exe: StateUpd.obj db.lib
+StateUpd.exe: StateUpd.obj db.obj mysql\libmysqlclient.lib
    $(LD) $(LDFLAGS) $**
 
 ..\bin\StateUpd.exe: StateUpd.exe
@@ -95,7 +70,7 @@ StateUpd.obj:     StateUpd.cpp db.h
 #
 # kHTMLPC - HTML/Sql PreCompiler.
 #
-kHTMLPC.exe: kHTMLPC.obj db.lib gd/gdicc.lib
+kHTMLPC.exe: kHTMLPC.obj db.obj gd/gdicc.lib mysql\libmysqlclient.lib
    $(LD) $(LDFLAGS) $**
 
 kHTMLPC.obj:      kHTMLPC.cpp kHTMLPC.h db.h ..\common\kLIFO.cpp \
@@ -106,7 +81,7 @@ kHTMLPC.obj:      kHTMLPC.cpp kHTMLPC.h db.h ..\common\kLIFO.cpp \
 ..\bin\kHTMLPC.exe: kHTMLPC.exe
    $(CP) $** $@
 
-gd/gdicc.lib: NUL
+gd\gdicc.lib: force
    @cd gd
    @nmake /nologo gdicc.lib
    @cd ..
@@ -159,4 +134,5 @@ clean:
    @cd gd
    @nmake /nologo clean
 
-
+force:
+    @$(ECHO) -
