@@ -1,4 +1,4 @@
-/* $Id: kdev.e,v 1.2 2002-09-11 02:53:32 bird Exp $
+/* $Id: kdev.e,v 1.3 2002-09-11 22:31:01 bird Exp $
  *
  * Visual SlickEdit Documentation Macros.
  *
@@ -122,6 +122,11 @@ static _str k_year()
  */
 static int k_alignup(int iValue, iAlign)
 {
+    if (iAlign <= 0)
+    {
+        message('k_alignup: iValue='iValue ' iAlign='iAlign);
+        iAlign = 4;
+    }
     return ((iValue intdiv iAlign) + 1) * iAlign;
 }
 
@@ -153,8 +158,8 @@ static boolean k_readboxconfig(_str &sLeft, _str &sRight, int &iColumn, _str sEx
     {   /*
          * Found extension.
          */
-        sLeft = eq_name2value('left',sLine);
-        sRight = eq_name2value('right',sLine);
+        sLeft = strip(eq_name2value('left',sLine));
+        sRight = strip(eq_name2value('right',sLine));
 
         /* Read comment column too */
         frc = _ini_get_value(sFile, sExt, 'comment_col', sLine);
@@ -180,8 +185,8 @@ static boolean k_readboxconfig(_str &sLeft, _str &sRight, int &iColumn, _str sEx
  */
 static boolean k_line_comment()
 {
-    boolean fLineComment;
-    fLineComment = 0;
+    _str    sRight = '';
+    boolean fLineComment = false;
     if (k_readboxconfig(sLeft, sRight, iColumn))
         fLineComment = (sRight == '' || iColumn > 0);
     return fLineComment;
@@ -855,10 +860,9 @@ static void k_javadoc_box_line(_str sStr = '', int iPadd = 0, _str sStr2 = '', i
     else
     {
         sText = k_comment();
-        sText = substr(sText, length(sText));
+        sText = ' ':+substr(sText, length(sText));
     }
-    if (length(sText) == 1)
-        sText = ' ':+sText;
+
     if (sStr != '')
         sText = sText:+' ':+sStr;
     if (iPadd > 0)
@@ -888,11 +892,7 @@ static void k_javadoc_box_line(_str sStr = '', int iPadd = 0, _str sStr2 = '', i
 static void k_javadoc_box_end()
 {
     if (k_line_comment())
-    {
         sText = k_comment();
-        if (length(sText) == 1)
-            sText = ' ':+sText;
-    }
     else
     {
         sText = k_comment(true);
@@ -944,7 +944,6 @@ void k_javadoc_funcbox()
     _str    sArgs = "";
     int     iCursorLine;
     int     iPadd = k_alignup(11, p_SyntaxIndent);
-
     /* look for parameters */
     boolean fFoundFn = !k_func_goto_nearest_function();
     if (fFoundFn)
@@ -1049,6 +1048,7 @@ void k_javadoc_moduleheader()
 
         case 'GPL':
             sProg = skProgram;
+            k_javadoc_box_line()
             if (sProg == '')
                 sProg = 'This program';
             else
@@ -1073,6 +1073,7 @@ void k_javadoc_moduleheader()
 
         case 'LGPL':
             sProg = skProgram;
+            k_javadoc_box_line()
             if (sProg == '')
                 sProg = 'This program';
             else
