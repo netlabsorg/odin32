@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.89 2000-03-07 11:08:01 bird Exp $
+# $Id: makefile,v 1.90 2000-03-09 19:03:19 sandervl Exp $
 
 #
 # Odin32 API
@@ -116,6 +116,7 @@ $(OBJDIR)\debug.obj \
 $(OBJDIR)\oslibdebug.obj \
 $(OBJDIR)\dbglocal.obj \
 $(OBJDIR)\registry.obj \
+$(OBJDIR)\queue.obj \
 $(OBJDIR)\kernelrsrc.obj
 
 
@@ -159,7 +160,7 @@ $(TARGET).def
 
 # Dep rule - makes depenencies for C, C++ and Asm files.
 dep:
-    $(DEPEND) -I$(PDWIN32_INCLUDE);$(PDWIN32_INCLUDE)\win \
+    $(DEPEND) -I. -I$(PDWIN32_INCLUDE);$(PDWIN32_INCLUDE)\win \
         *.c *.cpp *.h *.asm *.inc $(PDWIN32_INCLUDE)\*.h
 
 

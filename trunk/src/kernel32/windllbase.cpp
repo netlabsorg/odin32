@@ -1,13 +1,16 @@
-/* $Id: windllbase.cpp,v 1.10 2000-03-04 19:52:36 sandervl Exp $ */
+/* $Id: windllbase.cpp,v 1.11 2000-03-09 19:03:20 sandervl Exp $ */
 
 /*
  * Win32 Dll base class
  *
  * Copyright 1998-1999 Sander van Leeuwen (sandervl@xs4all.nl)
  *
- * TODO: Unloading of system dlls is not correct for the PE loader
- *       (they're always put at the head of the list even though there
- *        might be a dependency with a win32 dll)
+ * Unloading of a dll always happens in order of dependency (taking nr of
+ * loads into account)
+ * Unloading of dynamically loaded dll (with LoadLibrary) in deleteAll
+ * is done in LIFO order (NT exhibits the same behaviour)
+ *           
+ * RemoveCircularDependency: TODO: Send process detach message here??
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -25,7 +28,7 @@
 #include <iostream.h>
 #include <fstream.h>
 #include <misc.h>
-#include <win32type.h>
+#include <win32api.h>
 #include <pefile.h>
 #include <windllbase.h>
 #include <wprocess.h>
@@ -47,48 +50,14 @@ VMutex dlllistmutex;   //protects linked lists of heaps
 Win32DllBase::Win32DllBase(HINSTANCE hinstance, WIN32DLLENTRY DllEntryPoint, 
                            Win32ImageBase *parent)
                  : Win32ImageBase(hinstance),
-  	           referenced(0), fSkipEntryCalls(FALSE),
-                   fAttachedToProcess(FALSE), fUnloaded(FALSE), fDynamicLoad(FALSE)
+  	           referenced(0), fSkipEntryCalls(FALSE), next(NULL), fInserted(FALSE),
+                   fAttachedToProcess(FALSE), fUnloaded(FALSE), 
+                   nrDynamicLibRef(0), fLoadLibrary(FALSE), fDisableUnload(FALSE)
 {
   dllEntryPoint = DllEntryPoint;
 
-  dlllistmutex.enter();
-  //unload of dlls needs to be done in reverse order of dependencies
-  //Note: Only necessary for pe loader; the OS/2 loader takes care of this 
-  //for win32k/pe2lx 
-  if(parent && parent->isDll()) {
-	Win32DllBase *dll = head;
-	while(dll) {
-		if(dll->getInstanceHandle() == parent->getInstanceHandle()) {
-			break;
-		}
-		dll = dll->next;
-	}
-	if(dll) {
-		//insert this dll in list after it's parent
-		next = dll->next;
-		dll->next = this;
-	}
-	else 	DebugInt3();
-  }
-  else {
-  	next = head;
-  	head = this;
-  }
-  dlllistmutex.leave();
-
-#ifdef DEBUG_ENABLELOG_LEVEL2
-  dlllistmutex.enter();
-  Win32DllBase *dll = head;
-
-  dprintf2(("Win32DllBase::Win32DllBase: List of loaded dlls:"));
-  while(dll) {
-	dprintf2(("DLL %s", dll->szModule));
-	dll = dll->next;
-  }
-  dlllistmutex.leave();
-#endif
-
+  setUnloadOrder(parent);
+  
   dprintf(("Win32DllBase::Win32DllBase %x %s", hinstance, szModule));
 }
 //******************************************************************************
@@ -121,18 +90,298 @@ Win32DllBase::~Win32DllBase()
   dlllistmutex.leave();
 }
 //******************************************************************************
-//ASSUMPTION: called by FreeLibrary
+//******************************************************************************
+void Win32DllBase::loadLibrary()
+{
+  //dummy
+}
+//******************************************************************************
+//******************************************************************************
+void Win32DllBase::incDynamicLib()
+{ 
+  if(nrDynamicLibRef == 0) {
+  	dlllistmutex.enter();
+	loadLibDlls.Push((ULONG)this);
+	dlllistmutex.leave();
+  }
+  nrDynamicLibRef++; 
+}
+//******************************************************************************
+//******************************************************************************
+void Win32DllBase::decDynamicLib()
+{ 
+  nrDynamicLibRef--; 
+  if(nrDynamicLibRef == 0) {
+  	dlllistmutex.enter();
+	loadLibDlls.Remove((ULONG)this);
+	dlllistmutex.leave();
+  }
+}
+//******************************************************************************
+//unload of dlls needs to be done in reverse order of dependencies
+//Note: Only necessary for pe loader; the OS/2 loader takes care of this 
+//for win32k/pe2lx 
+//******************************************************************************
+void Win32DllBase::setUnloadOrder(Win32ImageBase *parent)
+{
+ Win32DllBase *dll;
+ Win32DllBase *parentdll = NULL;
+
+  dlllistmutex.enter();
+  if(parent) {
+  	dll = head;
+	while(dll) {
+		if(dll->getInstanceHandle() == parent->getInstanceHandle()) {
+			parentdll = dll;
+			break;
+		}
+		dll = dll->next;
+	}
+  }
+
+  //first check if this dll is already at a lower position (further down the list)
+  //than the parent
+  if(parentdll && fInserted) {//already in the list?
+  	dll = parentdll->next;
+  	while(dll) {
+		if(dll->getInstanceHandle() == getInstanceHandle()) {
+  			dlllistmutex.leave();
+			return; //it's at a lower position, so no need to change anything
+		}
+		dll = dll->next;
+  	}
+
+	//it's already in the list but not at the right position; remove it now
+	if(head == this) {
+		head = next;
+	}
+	else {
+		dll = head;
+		while(dll->next) {
+			if(dll->next == this) {
+				dll->next = next;
+				break;
+			}
+			dll = dll->next;
+		}
+	}
+  }
+  else 
+  if(fInserted) {//already in the list?
+  	dlllistmutex.leave();
+	return;
+  }
+  //(re)insert it in the list after it's parent
+  if(parentdll) {
+	next = parentdll->next;
+	parentdll->next = this;
+  }
+  else {//no parent or exe, just add it at the start of the list
+  	next = head;
+  	head = this;
+  }
+  fInserted = TRUE;
+
+  //Now do the same thing for the child dependencies
+  QueueItem *item;
+
+  item = loadedDlls.Head();
+  while(item) {
+	dll = (Win32DllBase *)loadedDlls.getItem(item);
+	//Check for circular dependencies (i.e. in Lotus Notes)
+	if(dll != parentdll) {
+  		dll->setUnloadOrder(this);
+	}
+
+	item  = loadedDlls.getNext(item);
+  }
+
+  dlllistmutex.leave();
+}
+//******************************************************************************
+//******************************************************************************
+#ifdef DEBUG
+ULONG Win32DllBase::AddRef(char *parentname)
+#else
+ULONG Win32DllBase::AddRef()
+#endif
+{ 
+ Win32DllBase *dll;
+
+  dprintf(("Win32DllBase::AddRef %s->%s %d", parentname, getModuleName(), referenced+1));
+  ++referenced;
+#ifdef DEBUG
+  if(referenced == 1) {
+#ifdef DEBUG_ENABLELOG_LEVEL2
+	printListOfDlls();
+#endif
+	//printDependencies(NULL);
+  }
+#endif
+
+  return referenced; 
+}
+//******************************************************************************
 //******************************************************************************
 ULONG Win32DllBase::Release()
 {
- ULONG ret = --referenced;
+ Queue         queue;
+ QueueItem    *item;
+ Win32DllBase *dll;
+ LONG          ret;
 
-  if(ret == 0) {
-	dprintf(("Win32DllBase::Release, referenced == 0\n"));
+  dprintf(("Win32DllBase::Release %s %d", getModuleName(), referenced-1));
+
+  ret = --referenced;
+  if(ret <= 0) {
+	//make copy of linked list of dependencies
+	queue = loadedDlls;
+
+	//remove any circular dependencies on this dll that might be present
+  	item = queue.Head();
+  	while(item) {
+		dll = (Win32DllBase *)queue.getItem(item);
+		if(dll == NULL) {
+			dprintf(("ERROR: Win32DllBase::Release: dll item == NULL!!"));
+			DebugInt3();
+			return -1;
+		}
+		dll->RemoveCircularDependency(this);
+		item = queue.getNext(item);
+	}
+#ifdef DEBUG
+	//printDependencies(NULL);
+#endif
+	dprintf(("Win32DllBase::Release %s referenced == 0", getModuleName()));
+
+	//delete dll object
 	delete this;
+
+	//unreference all of it's dependencies
+  	item = queue.Head();
+  	while(item) {
+		dll = (Win32DllBase *)queue.getItem(item);
+		if(dll == NULL) {
+			dprintf(("ERROR: Win32DllBase::Release: dll item == NULL!!"));
+			DebugInt3();
+			return -1;
+		}
+		dll->Release();
+		item = queue.getNext(item);
+	}
   }
   return(ret);
 }
+//******************************************************************************
+//Lotus Notes has several ugly circular dependencies in it's dlls.
+//Remove them before they cause problems.
+//******************************************************************************
+BOOL Win32DllBase::RemoveCircularDependency(Win32DllBase *parent)
+{
+ QueueItem    *item, *tmp;
+ Win32DllBase *dll;
+ BOOL          ret = FALSE;
+
+  //remove any circular dependencies on this dll that might be present
+  item = loadedDlls.Head();
+  while(item) {
+	dll = (Win32DllBase *)loadedDlls.getItem(item);
+	if(dll == NULL) {
+		dprintf(("ERROR: Win32DllBase::Release: dll item == NULL!!"));
+		DebugInt3();
+		return FALSE;
+	}
+	tmp = loadedDlls.getNext(item);
+	if(dll == parent) {
+		dprintf(("Removing CIRCULAR dependency %s->%s", parent->getModuleName(), dll->getModuleName()));
+		loadedDlls.Remove(item);
+		ret = TRUE;
+	}
+////	else	ret |= dll->RemoveCircularDependency(parent);
+	item = tmp;
+  }
+  //TODO: Send process detach message here??
+  return ret;
+}
+//******************************************************************************
+//There's a slight problem with our dependency procedure. 
+//example: gdi32 is loaded -> depends on kernel32 (which is already loaded)
+//         kernel32's reference count isn't updated
+//         (when we load gdi32, we don't know which dlls it depends on and which
+//          of those are already loaded and which aren't)
+//-> solution: Determine reference counts of dependant lx dlls and update those
+//             reference counts
+//******************************************************************************
+void Win32DllBase::updateDependencies()
+{
+ QueueItem    *item;
+ Win32DllBase *dll, *depdll;
+ ULONG         refcount;
+ 
+  dlllistmutex.enter();
+  item = loadedDlls.Head();
+  while(item) {
+	depdll   = (Win32DllBase *)loadedDlls.getItem(item);
+	if(depdll == NULL) {
+		dprintf(("updateDependencies: depdll == NULL!!"));
+		DebugInt3();	
+		return;
+	}
+	refcount = 0;
+  	dll      = head;
+
+  	while(dll) {
+		if(dll->dependsOn(depdll)) {
+			refcount++;
+		}
+		dll = dll->getNext();
+	}
+	if(refcount > depdll->referenced) {
+		dprintf(("Win32DllBase::updateDependencies changing refcount of %s to %d (old=%d)", depdll->getModuleName(), refcount, depdll->referenced));
+		depdll->referenced = refcount;
+	}
+
+	item = loadedDlls.getNext(item);
+  }
+  dlllistmutex.leave();
+}
+//******************************************************************************
+//******************************************************************************
+#ifdef DEBUG
+void Win32DllBase::printDependencies(char *parent)
+{
+ QueueItem    *item;
+ Win32DllBase *dll;
+ ULONG         ret;
+
+  dprintf(("Dependency list: %s->%s %d", parent, getModuleName(), referenced));
+  item = loadedDlls.Head();
+  while(item) {
+	dll = (Win32DllBase *)loadedDlls.getItem(item);
+	if(dll == NULL) {
+		return;
+	}
+	dll->printDependencies(getModuleName());
+	item = loadedDlls.getNext(item);
+  }
+}
+//******************************************************************************
+//******************************************************************************
+#ifdef DEBUG_ENABLELOG_LEVEL2
+void Win32DllBase::printListOfDlls()
+{
+ Win32DllBase *dll;
+
+  dll = head;
+
+  dprintf2(("Win32DllBase::Win32DllBase: List of loaded dlls:"));
+  while(dll) {
+	dprintf2(("DLL %s %d", dll->szModule, dll->referenced));
+	dll = dll->next;
+  }
+}
+#endif
+#endif
 //******************************************************************************
 //******************************************************************************
 BOOL Win32DllBase::attachProcess()
@@ -251,71 +500,110 @@ BOOL Win32DllBase::detachThread()
 //******************************************************************************
 void Win32DllBase::attachThreadToAllDlls()
 {
+  dlllistmutex.enter();
   Win32DllBase *dll = Win32DllBase::head;
   while(dll) {
 	dll->attachThread();
 	dll = dll->getNext();
   }
+  dlllistmutex.leave();
 }
 //******************************************************************************
 //Send DLL_THREAD_DETACH message to all dlls for thread that's about to die
 //******************************************************************************
 void Win32DllBase::detachThreadFromAllDlls()
 {
+  dlllistmutex.enter();
   Win32DllBase *dll = Win32DllBase::head;
   while(dll) {
 	dll->detachThread();
 	dll = dll->getNext();
   }
+  dlllistmutex.leave();
 }
 //******************************************************************************
 //Setup TLS structure for all dlls for a new thread
 //******************************************************************************
 void Win32DllBase::tlsAttachThreadToAllDlls()
 {
+  dlllistmutex.enter();
   Win32DllBase *dll = Win32DllBase::head;
   while(dll) {
 	dll->tlsAttachThread();
 	dll = dll->getNext();
   }
+  dlllistmutex.leave();
 }
 //******************************************************************************
 //Destroy TLS structure for all dlls for a thread that's about to die
 //******************************************************************************
 void Win32DllBase::tlsDetachThreadFromAllDlls()
 {
+  dlllistmutex.enter();
   Win32DllBase *dll = Win32DllBase::head;
   while(dll) {
 	dll->tlsDetachThread();
 	dll = dll->getNext();
   }
+  dlllistmutex.leave();
 }
 //******************************************************************************
 //******************************************************************************
-void Win32DllBase::deleteAll(BOOL fDynamicLoad)
+void Win32DllBase::deleteAll()
 {
- Win32DllBase *dll = Win32DllBase::head, *tmp;
+ Win32DllBase *dll = Win32DllBase::head;
 
-#ifdef DEBUG
-  dlllistmutex.enter();
+  dprintf(("Win32DllBase::deleteAll"));
 
-  dprintf(("Win32DllBase::deleteAll: List of loaded dlls:"));
-  while(dll) {
-	dprintf(("DLL %s", dll->szModule));
-	dll = dll->next;
-  }
-  dlllistmutex.leave();
-  dll = Win32DllBase::head;
+#ifdef DEBUG_ENABLELOG_LEVEL2
+  if(dll) dll->printListOfDlls();
 #endif
 
+  dlllistmutex.enter();
   while(dll) {
-	if(fDynamicLoad || !dll->fDynamicLoad) {
-		tmp = dll->next;
-		dll->Release();
-		dll = tmp;
-	}
-	else	dll = dll->next;
+	dll->Release();
+	dll = Win32DllBase::head;
   }
+  dlllistmutex.leave();
+  dprintf(("Win32DllBase::deleteAll Done!"));
+}
+//******************************************************************************
+//Delete dlls loaded by LoadLibrary(Ex) in LIFO order
+//******************************************************************************
+void Win32DllBase::deleteDynamicLibs()
+{
+ Win32DllBase *dll = head;
+ QueueItem    *item;
+
+  dprintf(("Win32DllBase::deleteDynamicLibs"));
+#ifdef DEBUG_ENABLELOG_LEVEL2
+  if(dll) dll->printListOfDlls();
+#endif
+
+  dlllistmutex.enter();
+
+  item = loadLibDlls.Head();
+  while(item) {
+	dll = (Win32DllBase *)loadLibDlls.getItem(item);
+	int dynref = dll->nrDynamicLibRef;
+	if(dynref) {
+  		while(dynref) {
+			dynref--;
+        		dll->decDynamicLib();
+			dll->Release();
+		}
+	}
+	else	DebugInt3();
+  	item = loadLibDlls.Head(); //queue could have been changed, so start from the beginning
+  }
+
+  dlllistmutex.leave();
+}
+//******************************************************************************
+//******************************************************************************
+Win32DllBase *Win32DllBase::getFirst()
+{
+  return head;
 }
 //******************************************************************************
 //Add renaming profile strings for ole32 & netapi32 to odin.ini if they aren't
@@ -385,16 +673,21 @@ void Win32DllBase::renameDll(char *dllname, BOOL fWinToOS2)
 }
 //******************************************************************************
 //******************************************************************************
-Win32DllBase *Win32DllBase::findModule(char *dllname)
+Win32DllBase *Win32DllBase::findModule(char *dllname, BOOL fRenameFirst)
 {
  Win32DllBase *dll;
  char szDllName[CCHMAXPATH];
  char *dot, *temp;
 
-  dprintf(("findModule %s", dllname));
+////  dprintf2(("findModule %s", dllname));
 
   strcpy(szDllName, OSLibStripPath(dllname));
   strupr(szDllName);
+
+  if(fRenameFirst) {
+	renameDll(szDllName, FALSE);
+  }
+
   dot = strstr(szDllName, ".");
   if(dot)
 	*dot = 0;
@@ -416,7 +709,7 @@ Win32DllBase *Win32DllBase::findModule(char *dllname)
 //******************************************************************************
 Win32DllBase *Win32DllBase::findModule(WIN32DLLENTRY DllEntryPoint)
 {
-   dprintf(("findModule %X", DllEntryPoint));
+   dprintf2(("findModule %X", DllEntryPoint));
 
    dlllistmutex.enter();
    Win32DllBase *mod = Win32DllBase::head;
@@ -467,3 +760,4 @@ void Win32DllBase::setThreadLibraryCalls(BOOL fEnable)
 //******************************************************************************
 //******************************************************************************
 Win32DllBase *Win32DllBase::head = NULL;
+Queue         Win32DllBase::loadLibDlls;

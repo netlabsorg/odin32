@@ -1,4 +1,4 @@
-/* $Id: winexebase.cpp,v 1.6 2000-03-04 19:52:36 sandervl Exp $ */
+/* $Id: winexebase.cpp,v 1.7 2000-03-09 19:03:21 sandervl Exp $ */
 
 /*
  * Win32 exe base class
@@ -58,11 +58,35 @@ Win32ExeBase::Win32ExeBase(HINSTANCE hInstance)
 //******************************************************************************
 Win32ExeBase::~Win32ExeBase()
 {
-  //First delete all dlls that were loaded by the exe or dlls
-  //Then delete all dlls loaded by LoadLibrary (to avoid that we
-  //delete some dlls before the dll, that loaded it, is destroyed)
+ QueueItem    *item;
+ Win32DllBase *dll;
+
+  //First delete all dlls loaded by LoadLibrary 
+  //Then delete all dlls that were loaded by the exe
+  //(NOTE: This is what NT does; first delete loadlib dlls in LIFO order and
+  //       then the exe dlls)
+  Win32DllBase::deleteDynamicLibs();
+
+  dprintf(("Win32ExeBase::~Win32ExeBase"));
+#ifdef DEBUG_ENABLELOG_LEVEL2
+  item = loadedDlls.Head();
+  dll = (Win32DllBase *)loadedDlls.getItem(item);
+  dll->printListOfDlls();
+#endif
+
+  item = loadedDlls.Head();
+  while(item) {
+	dll = (Win32DllBase *)loadedDlls.getItem(item);
+	if(dll == NULL) {
+		dprintf(("ERROR: Win32ExeBase::~Win32ExeBase: dll item == NULL!!"));
+		DebugInt3();
+		break;
+	}
+	dll->Release();
+	item = loadedDlls.getNext(item);
+  }
+
   Win32DllBase::deleteAll();
-  Win32DllBase::deleteAll(TRUE);
 
   WinExe = NULL;
   if(cmdLineA)
