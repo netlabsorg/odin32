@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.266 1999-10-04 12:47:09 phaller Exp $ */
+ /* $Id: ChangeLog,v 1.267 1999-10-04 18:35:56 sandervl Exp $ */
 
  99-10-04: Patrick Haller <phaller@gmx.net>
 	- SHELL32\NEW: Compilation fix (indirectly included win32type.h)
@@ -11,6 +11,7 @@
 
  99-10-04: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Deleted dialog.cpp
+                  Set last error to 0 if dialog creation succeeds.
 	- DPLAY, MSACM32: Compilation fix (indirectly included win32type.h)
 	- KERNEL32: Fixed getVersionStruct for PE & LX images (didn't copy
                     version data before)
