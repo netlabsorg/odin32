@@ -1,4 +1,4 @@
-/* $Id: button.cpp,v 1.45 2001-12-26 11:35:38 sandervl Exp $ */
+/* $Id: button.cpp,v 1.46 2002-06-10 09:12:35 sandervl Exp $ */
 /* File: button.cpp -- Button type widgets
  *
  * Copyright (C) 1993 Johannes Ruscheinski
@@ -375,7 +375,7 @@ static LRESULT BUTTON_SetFont(HWND hwnd,WPARAM wParam,LPARAM lParam)
   DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
 
 #ifdef __WIN32OS2__
-  if ((dwStyle & 0x0f) == BS_GROUPBOX) {
+  if ((dwStyle & 0x0f) == BS_GROUPBOX && IsWindowVisible(hwnd)) {
     RECT rc;
     TEXTMETRICA tm;
     HDC  hdc = GetDC(hwnd);
@@ -1128,7 +1128,7 @@ static void BUTTON_CheckAutoRadioButton(HWND hwnd)
     //start = sibling = GetNextDlgGroupItem( parent, hwnd, TRUE );
     //@YD: bugfix
     //CB: doesn't work!
-    start = sibling = GetNextDlgGroupItem( parent, hwnd, FALSE );
+    start = sibling = GetNextDlgGroupItem( parent, hwnd, TRUE );
     do
     {
         if (!sibling) break;
