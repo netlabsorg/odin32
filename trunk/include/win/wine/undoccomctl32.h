@@ -1,4 +1,4 @@
-/* $Id: undoccomctl32.h,v 1.1 2001-09-25 10:54:16 sandervl Exp $ */
+/* $Id: undoccomctl32.h,v 1.2 2002-02-06 16:58:45 sandervl Exp $ */
 #ifndef __WINE_WINE_UNDOCCOMCTL32_H__
 #define __WINE_WINE_UNDOCCOMCTL32_H__
 
@@ -59,7 +59,7 @@ typedef struct tagWINEMRULIST
 #define WMRUF_CHANGED  0x0001   /* MRU list has changed              */
 
 HANDLE WINAPI CreateMRUListA (LPCREATEMRULIST lpcml);
-DWORD  WINAPI FreeMRUListA (HANDLE hMRUList);
+DWORD  WINAPI FreeMRUList (HANDLE hMRUList);
 INT    WINAPI AddMRUData (HANDLE hList, LPCVOID lpData, DWORD cbData);
 INT    WINAPI AddMRUStringA(HANDLE hList, LPCSTR lpszString);
 BOOL   WINAPI DelMRUString(HANDLE hList, INT nItemPos);
