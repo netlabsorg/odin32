@@ -1,9 +1,13 @@
- /* $Id: ChangeLog,v 1.996 2000-06-17 09:47:10 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.997 2000-06-17 12:31:02 sandervl Exp $ */
 
  2000-06-17: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32:    Bugfix in resource handling (due to yesterday's change)
                    DuplicateHandle fix
     - USER32:      Region fixes (RedrawWindow)
+                   Get/SetWindowRgn fixes
+    - INCLUDE\OS2WRAP.H: 
+                   Added missing wrappers for GpiCreatePolygonRegion,
+                   GpiCreateEllipticRegion & GpiCreateRoundRectRegion
 
  2000-06-16: Sander van Leeuwen <sandervl@xs4all.nl>
     - GDI32:       Put back region 'bugfix' as it's completely wrong and breaks
