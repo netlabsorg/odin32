@@ -1,7 +1,8 @@
- /* $Id: ChangeLog,v 1.910 2000-04-25 22:54:21 davidr Exp $ */
+ /* $Id: ChangeLog,v 1.911 2000-04-25 22:56:11 davidr Exp $ */
 
  2000-04-10: David Raison <djr@lemur.co.uk>
         - INCLUDE/WIN: Added RPC_E_* codes to winerror.h
+        - OLE32: Fixed StringFromGUID2
 
  2000-04-25: Achim Hasenmueller <achimha@innotek.de>
 	- TOOLS/BIN: put back old wrc.exe from Oct. 99 because the

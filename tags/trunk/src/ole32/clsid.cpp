@@ -1,4 +1,4 @@
-/* $Id: clsid.cpp,v 1.12 2000-04-02 22:07:34 davidr Exp $ */
+/* $Id: clsid.cpp,v 1.13 2000-04-25 22:57:00 davidr Exp $ */
 /*
  *
  * Project Odin Software License can be found in LICENSE.TXT
@@ -36,13 +36,8 @@ HRESULT WINAPI CoCreateGuid(
     HRESULT		hr;
 
     dprintf(("OLE32: CoCreateGuid"));
-
     hr = UuidCreate(pguid);
 
-#if defined(DEBUG)
-    oStringA		tGUID(pguid);
-    dprintf(("       guid = %s", (char *)tGUID));
-#endif
     return hr;
 }
 
@@ -53,7 +48,7 @@ HRESULT WIN32API CLSIDFromProgID16(
     LPCOLESTR16		lpszProgID,	// [in] - UNICODE program id as found in registry
     LPCLSID		pclsid)		// [out] - CLSID
 {
-    dprintf(("OLE32: CLSIDFromProgID16"));
+//    dprintf(("OLE32: CLSIDFromProgID16"));
 
     LONG		lDataLen = 80;
     oStringA		szKey(lpszProgID);
@@ -86,7 +81,7 @@ HRESULT WIN32API CLSIDFromProgID(
     LPCOLESTR		lpszProgID,	// [in] - UNICODE program id as found in registry
     LPCLSID		pclsid)		// [out] - CLSID
 {
-    dprintf(("OLE32: CLSIDFromProgID"));
+//    dprintf(("OLE32: CLSIDFromProgID"));
 
     LONG		lDataLen = 80;
     oStringW		szKey(lpszProgID);
@@ -117,7 +112,7 @@ HRESULT WIN32API CLSIDFromProgID(
 // ----------------------------------------------------------------------
 HRESULT WIN32API IIDFromString(LPSTR lpsz, LPIID lpiid)
 {
-    dprintf(("OLE32: IIDFromString"));
+//    dprintf(("OLE32: IIDFromString"));
     return CLSIDFromString((LPCOLESTR)lpsz, (LPCLSID)lpiid);
 }
 
@@ -143,7 +138,7 @@ HRESULT WIN32API CLSIDFromString16(
     LPCOLESTR16		lpsz,		// [in] - Unicode string CLSID
     LPCLSID		pclsid)		// [out] - Binary CLSID
 {
-    dprintf(("OLE32: CLSIDFromString16"));
+//    dprintf(("OLE32: CLSIDFromString16"));
 
     // Convert to binary CLSID
     char *s = (char *) lpsz;
@@ -220,7 +215,7 @@ HRESULT WIN32API CLSIDFromString(
     LPCOLESTR		lpsz,		// [in] - Unicode string CLSID
     LPCLSID		pclsid)		// [out] - Binary CLSID
 {
-    dprintf(("OLE32: CLSIDFromString"));
+//    dprintf(("OLE32: CLSIDFromString"));
 
     oStringA		tClsId(lpsz);
 
@@ -232,7 +227,7 @@ HRESULT WIN32API CLSIDFromString(
 // ----------------------------------------------------------------------
 HRESULT WIN32API WINE_StringFromCLSID(const CLSID *rclsid, LPSTR idstr)
 {
-    dprintf(("OLE32: WINE_StringFromCLSID"));
+//    dprintf(("OLE32: WINE_StringFromCLSID"));
 
     if (rclsid == NULL)
     {
@@ -255,7 +250,7 @@ HRESULT WIN32API WINE_StringFromCLSID(const CLSID *rclsid, LPSTR idstr)
 	    rclsid->Data4[6],
 	    rclsid->Data4[7]);
 
-    dprintf(("       clsid: %s", idstr));
+//    dprintf(("       clsid: %s", idstr));
 
     return OLE_OK;
 }
@@ -270,7 +265,7 @@ HRESULT WIN32API StringFromCLSID(REFCLSID rclsid, LPOLESTR *ppsz)
     LPWSTR	szclsid;
     size_t	strLen;
 
-    dprintf(("OLE32: StringFromCLSID"));
+//    dprintf(("OLE32: StringFromCLSID"));
 
     // Setup new string...
     WINE_StringFromCLSID(rclsid, tmp);
@@ -297,7 +292,7 @@ HRESULT WIN32API StringFromIID(REFIID riid, LPOLESTR *ppsz)
     LPWSTR	sziid;
     size_t	strLen;
 
-    dprintf(("OLE32: StringFromIID"));
+//    dprintf(("OLE32: StringFromIID"));
 
     // Setup new string...
     WINE_StringFromCLSID(riid, tmp);
@@ -319,22 +314,20 @@ HRESULT WIN32API StringFromIID(REFIID riid, LPOLESTR *ppsz)
 // ----------------------------------------------------------------------
 int WIN32API StringFromGUID2(REFGUID rguid, LPOLESTR lpsz, int cbMax)
 {
+// NB cbMax is a CHARACTER count not a BYTE count... :-)
     char 	tmp[50];
     size_t	strLen;
-
-    dprintf(("OLE32: StringFromGUID2"));
 
     // Setup new string...
     WINE_StringFromCLSID(rguid, tmp);
 
-    strLen = strlen(tmp);
+    strLen = (strlen(tmp) + 1);
+    if (strLen > cbMax)
+	strLen = cbMax;
 
-    if ( (strLen / 2) + 1  > cbMax )
-	return 0;
+    AsciiToUnicodeN(tmp, lpsz, strLen);
 
-    AsciiToUnicode(tmp, lpsz);
-
-    return (strLen / 2) + 1;  // including 0 terminator
+    return strLen;  // Num CHARACTERS including 0 terminator
 }
 
 // ----------------------------------------------------------------------
@@ -396,8 +389,8 @@ HRESULT WIN32API ProgIDFromCLSID(REFCLSID clsid, LPOLESTR *lplpszProgID)
     LPOLESTR		tmp;
     LPMALLOC		pMllc;
 
-    dprintf(("OLE32: ProgIDFromCLSID"));
-    dprintf(("       clsid = %s", (char *)tClsId));
+//    dprintf(("OLE32: ProgIDFromCLSID"));
+//    dprintf(("       clsid = %s", (char *)tClsId));
 
     szKey += tClsId + "\\ProgID";
 
