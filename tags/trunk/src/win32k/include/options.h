@@ -1,4 +1,4 @@
-/* $Id: options.h,v 1.13 2000-12-11 06:22:14 bird Exp $
+/* $Id: options.h,v 1.14 2000-12-17 22:45:52 bird Exp $
  *
  * Options.
  *
@@ -62,6 +62,7 @@
             TRUE,                   /* fJava         */     \
             FALSE,                  /* fNoLoader     */     \
             TRUE,                   /* fDllFixes     */     \
+            TRUE,                   /* fExeFixes     */     \
             CB_SWP_INIT,            /* cbSwpHeapInit */     \
             CB_SWP_MAX,             /* cbSwpHeapMax  */     \
             CB_RES_INIT,            /* cbResHeapInit */     \
@@ -88,6 +89,9 @@
 
 #define isDllFixesEnabled()         (options.fDllFixes)
 #define isDllFixesDisabled()        (!options.fDllFixes)
+
+#define isExeFixesEnabled()         (options.fExeFixes)
+#define isExeFixesDisabled()        (!options.fExeFixes)
 
 /* INC */
 
@@ -132,6 +136,7 @@ struct options
 
     /** @cat Options affecting the behaviour changes in the OS/2 loader */
     ULONG       fDllFixes;              /* Enables the long DLL name and non .DLL extention fixes. */
+    ULONG       fExeFixes;              /* Enables EXE files to export entry points. */
 
     /** @cat Options affecting the heap. */
     ULONG       cbSwpHeapInit;          /* Initial heapsize. */
