@@ -1,4 +1,4 @@
-# $Id: process.mak,v 1.25 2002-08-29 10:01:40 bird Exp $
+# $Id: process.mak,v 1.26 2002-08-30 19:45:29 bird Exp $
 
 #
 # Unix-like tools for OS/2
@@ -976,7 +976,7 @@ executable: \
 # -----------------------------------------------------------------------------
 !ifdef SUBDIRS_MISC
 _SUBDIRS_MISC = _subdir_misc
-$(SUBDIRS_MISC):
+$(_SUBDIRS_MISC):
     @$(TOOL_DODIRS) "$(SUBDIRS_MISC)" $(TOOL_MAKE) -f $(BUILD_MAKEFILE) miscellaneous
 !else
 ! ifdef SUBDIRS
@@ -1123,6 +1123,49 @@ testcase:
 !endif #!TESTCASE
 
 
+# -----------------------------------------------------------------------------
+# Pass x - The packing rule - traverse subdirs etc.
+# -----------------------------------------------------------------------------
+!ifdef SUBDIRS_PACKING
+_SUBDIRS_PACKING = _subdir_packing
+$(_SUBDIRS_PACKING):
+    @$(TOOL_DODIRS) "$(SUBDIRS_PACKING)" $(TOOL_MAKE) -f $(BUILD_MAKEFILE) packing
+!else
+! ifdef SUBDIRS
+_SUBDIRS_PACKING = _subdir_packing
+$(_SUBDIRS_PACKING):
+    @$(TOOL_DODIRS) "$(SUBDIRS)" $(TOOL_MAKE) -f $(BUILD_MAKEFILE) packing
+! endif
+!endif
+
+!ifdef PREMAKEFILES_PACKING
+_PREMAKEFILES_PACKING = _premakefiles_packing
+$(PREMAKEFILES_PACKING):
+    @$(TOOL_DOMAKES) "$(PREMAKEFILES_PACKING)" $(TOOL_MAKE) packing
+!else
+! ifdef PREMAKEFILES
+_PREMAKEFILES_PACKING = _premakefiles_packing
+$(_PREMAKEFILES_PACKING):
+    @$(TOOL_DOMAKES) "$(PREMAKEFILES)" $(TOOL_MAKE) packing
+! endif
+!endif
+
+!if "$(RULE_PACKING)" == "packing"
+_packing: \
+!else
+packing: \
+!endif
+        $(_SUBDIRS_PACKING) $(_PREMAKEFILES_PACKING) $(RULE_PACKING)
+!ifdef POSTMAKEFILES_PACKING
+    @$(TOOL_DOMAKES) "$(POSTMAKEFILES_PACKING)" $(TOOL_MAKE) $@
+!else
+! ifdef POSTMAKEFILES
+    @$(TOOL_DOMAKES) "$(POSTMAKEFILES)" $(TOOL_MAKE) $@
+! endif
+!endif
+    $(ECHO) .$(CLRRST)
+
+
 
 # -----------------------------------------------------------------------------
 # The target rule - Build the target.
@@ -1173,7 +1216,7 @@ nothing:
 # The $(TARGET) rule - For EXE, DLL, SYS and IFS targets
 # -----------------------------------------------------------------------------
 !if "$(TARGET_MODE)" == "EXE" || "$(TARGET_MODE)" == "DLL" || "$(TARGET_MODE)" == "SYS" || "$(TARGET_MODE)" == "IFS" || "$(TARGET_MODE)" == "VDD"
-$(TARGET): $(TARGET_OBJS) $(TARGET_RES) $(TARGET_DEF_LINK) $(TARGET_LNK) $(TARGET_DEPS)
+$(TARGET): $(TARGET_OBJS) $(TARGET_RES) $(TARGET_DEF_LINK) $(TARGET_LNK) $(TARGET_DEPS) $(TARGET_LIBS)
 !if "$(TOOL_JOB_WAIT)" != ""
 ! ifndef BUILD_QUIET
     @$(ECHO) Waiting for jobs to complete $(CLRRST)
@@ -1558,3 +1601,23 @@ $(ECHO) Starting Job Daemon With $(TOOL_JOB_WORKERS) Workers...$(CLRRST)
 !endif
 
 !endif #!TESTCASE
+
+
+#
+# Include system library dependency stubs.
+#
+!include $(PATH_MAKE)\setup.$(SHT_TRGPLTFRM)libs.mk
+
+
+#
+# Check if TARGET_ALWAYS needs to be forced built.
+#
+!if "$(TARGET_ALWAYS)" != ""
+! ifndef BUILD_FORCED_BUILD_TEST
+!  if [$(TOOL_MAKE) BUILD_FORCED_BUILD_TEST=1 -f $(MAKEFILE) -q $(TARGET) $(TARGET_ILIB)] != 0
+$(TARGET_ALWAYS): .force
+!  endif
+! endif
+!endif
+
+
