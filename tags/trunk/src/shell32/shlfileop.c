@@ -1,5 +1,22 @@
 /*
  * SHFileOperation
+ * Copyright 2000 Juergen Schmied
+ * Copyright 2002 Andriy Palamarchuk
+ * Copyright 2002 Dietrich Teickner (from Odin)
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 #ifdef __WIN32OS2__
 #define ICOM_CINTERFACE 1
@@ -194,17 +211,17 @@ DWORD WINAPI SHFileOperationA (LPSHFILEOPSTRUCTA lpFileOp)
 {
 	LPSTR pFrom = (LPSTR)lpFileOp->pFrom;
 	LPSTR pTo = (LPSTR)lpFileOp->pTo;
+	LPSTR pTempTo;
 #ifdef __WIN32OS2__
 		DWORD FromAttr;
 		DWORD ToAttr;
 		LPSTR pTempFrom = NULL;
-		LPSTR pTempTo;
 		LPSTR pFromFile;
 		LPSTR pToFile;
 
 		FILEOP_FLAGS OFl = ((FILEOP_FLAGS)lpFileOp->fFlags & 0x7ff);
 		BOOL Multi = TRUE;
-		BOOL withFileName;
+		BOOL withFileName = TRUE;
 		BOOL not_overwrite;
 		BOOL ToSingle;
 		BOOL BothDir;
@@ -227,15 +244,43 @@ DWORD WINAPI SHFileOperationA (LPSHFILEOPSTRUCTA lpFileOp)
 	nlpFileOp.fAnyOperationsAborted=FALSE;
 	level++;
 	nlpFileOp.wFunc =  (level<<4) + (lpFileOp->wFunc & 15);
-#else
-	LPSTR pTempTo;
+	if (level == 1)
 #endif
+        TRACE("flags (0x%04x) : %s%s%s%s%s%s%s%s%s%s%s%s \n", lpFileOp->fFlags, 
+                lpFileOp->fFlags & FOF_MULTIDESTFILES ? "FOF_MULTIDESTFILES " : "",
+                lpFileOp->fFlags & FOF_CONFIRMMOUSE ? "FOF_CONFIRMMOUSE " : "",
+                lpFileOp->fFlags & FOF_SILENT ? "FOF_SILENT " : "",
+                lpFileOp->fFlags & FOF_RENAMEONCOLLISION ? "FOF_RENAMEONCOLLISION " : "",
+                lpFileOp->fFlags & FOF_NOCONFIRMATION ? "FOF_NOCONFIRMATION " : "",
+                lpFileOp->fFlags & FOF_WANTMAPPINGHANDLE ? "FOF_WANTMAPPINGHANDLE " : "",
+                lpFileOp->fFlags & FOF_ALLOWUNDO ? "FOF_ALLOWUNDO " : "",
+                lpFileOp->fFlags & FOF_FILESONLY ? "FOF_FILESONLY " : "",
+                lpFileOp->fFlags & FOF_SIMPLEPROGRESS ? "FOF_SIMPLEPROGRESS " : "",
+                lpFileOp->fFlags & FOF_NOCONFIRMMKDIR ? "FOF_NOCONFIRMMKDIR " : "",
+                lpFileOp->fFlags & FOF_NOERRORUI ? "FOF_NOERRORUI " : "",
+                lpFileOp->fFlags & 0xf800 ? "MORE-UNKNOWN-Flags" : "");
 #ifdef __WIN32OS2__
 	switch(lpFileOp->wFunc & 15) {
 #else
 	switch(lpFileOp->wFunc) {
 #endif
 	case FO_COPY:
+                /* establish when pTo is interpreted as the name of the destination file
+                 * or the directory where the Fromfile should be copied to.
+                 * This depends on:
+                 * (1) pTo points to the name of an existing directory;
+                 * (2) the flag FOF_MULTIDESTFILES is present;
+                 * (3) whether pFrom point to multiple filenames.
+                 *
+                 * Some experiments:
+                 *
+                 * destisdir               1 1 1 1 0 0 0 0
+                 * FOF_MULTIDESTFILES      1 1 0 0 1 1 0 0
+                 * multiple from filenames 1 0 1 0 1 0 1 0
+                 *                         ---------------
+                 * copy files to dir       1 0 1 1 0 0 1 0
+                 * create dir              0 0 0 0 0 0 1 0 
+                 */
 #ifdef __WIN32OS2__
 			pTempFrom = HeapAlloc(GetProcessHeap(), 0, 3 * MAX_PATH+6);
 			pTempTo = &pTempFrom[MAX_PATH+4];
@@ -740,5 +785,6 @@ BOOL WINAPI IsNetDrive(DWORD drive)
 	root[0] += drive;
 	return (GetDriveTypeA(root) == DRIVE_REMOTE);
 }
+
 
 
