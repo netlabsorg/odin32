@@ -1,4 +1,4 @@
-/* $Id: mymath.h,v 1.1 2000-02-09 08:49:53 jeroen Exp $ */
+/* $Id: mymath.h,v 1.2 2001-02-11 10:33:55 sandervl Exp $ */
 /*
 ** License Applicability. Except to the extent portions of this file are
 ** made subject to an alternative license as permitted in the SGI Free
@@ -36,8 +36,8 @@
 /*
  * mymath.h
  *
- * $Date: 2000-02-09 08:49:53 $ $Revision: 1.1 $
- * $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glu/nurbs/internals/mymath.h,v 1.1 2000-02-09 08:49:53 jeroen Exp $
+ * $Date: 2001-02-11 10:33:55 $ $Revision: 1.2 $
+ * $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glu/nurbs/internals/mymath.h,v 1.2 2001-02-11 10:33:55 sandervl Exp $
  */
 
 #ifndef __glumymath_h_
@@ -45,6 +45,10 @@
 
 #ifdef GLBUILD
 #define sqrtf		gl_fsqrt
+#endif
+
+#ifdef LIBRARYBUILD
+#include <math.h>
 #endif
 
 #if GLBUILD | STANDALONE
@@ -56,10 +60,6 @@ extern "C" double	sqrt(double);
 extern "C" float	ceilf(float);
 extern "C" float	floorf(float);
 #define NEEDCEILF
-#endif
-
-#ifdef LIBRARYBUILD
-#include <math.h>
 #endif
 
 #endif /* __glumymath_h_ */

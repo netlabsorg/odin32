@@ -1,4 +1,4 @@
-/* $Id: cpuhlp.h,v 1.4 2000-10-03 17:26:03 sandervl Exp $ */
+/* $Id: cpuhlp.h,v 1.5 2001-02-11 10:35:29 sandervl Exp $ */
 
 #ifndef _CPUHLP_H_
 #define _CPUHLP_H_
@@ -33,6 +33,16 @@ void  CDECL GetTSC(LONG *high, LONG *low);
 void  InitSystemInfo(int nrcpus);
 
 extern DWORD CPUFeatures;
+
+#if (__IBMC__ >= 360) || (__IBMCPP__ >= 360)
+#define CONTROL87(a,b)  __control87(a, b)
+#else
+#if (__IBMCPP__ == 300) || (__IBMC__ == 300)
+#define CONTROL87(a,b)  _control87(a, b)
+#else
+#error  CONTROL87 undefined
+#endif
+#endif
 
 #ifdef __cplusplus
 }

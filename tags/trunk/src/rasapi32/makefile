@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.12 2000-12-02 23:57:41 bird Exp $
+# $Id: makefile,v 1.13 2001-02-11 10:35:15 sandervl Exp $
 
 #
 # Odin32 API
@@ -6,6 +6,8 @@
 #       rasapi32.dll makefile
 #
 
+# lxlite crashes on this binary
+NO_LXLITE=1
 
 #
 # Compiler, tools, and interference rules.
