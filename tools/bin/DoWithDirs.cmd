@@ -1,4 +1,4 @@
-/* $Id: DoWithDirs.cmd,v 1.2 2000-02-11 15:04:26 bird Exp $
+/* $Id: DoWithDirs.cmd,v 1.3 2000-02-27 00:40:21 bird Exp $
  *
  * Syntax: dowithdirs.cmd [-e<list of excludes>] [-cp] [-i] <cmd with args...>
  *    -e      Exclude directories.
@@ -6,7 +6,7 @@
  *    -cp     CD into the directory and execute the command.
  *            Default action is to pass the directory name as last argument.
  *    -i      Ignore command failure (rc=0)
- *
+ *    -r      Process diretories in reverse order.
  */
 
     call RxFuncAdd 'SysLoadFuncs', 'RexxUtil', 'SysLoadFuncs'
@@ -16,6 +16,7 @@
     fIgnoreFailure = 0;
     asIgnore.0 = 0;
     fCD = 0;
+    fReverse = 0;
 
     /* parse arguments */
     parse arg sArg.1 sArg.2 sArg.3 sArg.4 sArg.5 sArg.6
@@ -61,6 +62,11 @@
                         fIgnoreFailure = 1;
                     end
 
+                    when ch = 'R' then
+                    do
+                        fReverse = 1;
+                    end
+
                     otherwise
                         say 'unknown argument:' sArg.i;
                         call syntax;
@@ -91,7 +97,13 @@
     end
 
     sArgDirs = ' ';
-    do i = 1 to asDirs.0
+    do ii = 1 to asDirs.0
+        /* calculate index */
+        if (fReverse) then
+            i = asDirs.0 - ii + 1;
+        else
+            i = ii;
+
         /* ignore the directory? */
         fFound = 0;
         do j = 1 to asIgnore.0
@@ -136,3 +148,4 @@ syntax:
     say '   -cp     CD into the directory and execute the command.';
     say '           Default action is to pass the directory name as last argument.';
     say '   -i      Ignore command failure (rc=0)';
+    say '   -r      Process diretories in reverse order.';
