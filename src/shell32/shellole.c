@@ -4,24 +4,41 @@
  *	Copyright 1997	Marcus Meissner
  *	Copyright 1998	Juergen Schmied  <juergen.schmied@metronet.de>
  *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
+
+#include "config.h"
 
 #include <stdlib.h>
 #include <string.h>
 
-#include "shlobj.h"
 #include "shellapi.h"
+#include "shlobj.h"
 #include "shlguid.h"
 #include "winreg.h"
-#include "wine/unicode.h"
 #include "winerror.h"
-#include "debugtools.h"
 
+#include "undocshell.h"
+#include "wine/unicode.h"
 #include "shell32_main.h"
 
-DEFAULT_DEBUG_CHANNEL(shell);
+#include "wine/debug.h"
 
-DWORD WINAPI SHCLSIDFromStringA (LPSTR clsid, CLSID *id);
+WINE_DEFAULT_DEBUG_CHANNEL(shell);
+
+DWORD WINAPI SHCLSIDFromStringA (LPCSTR clsid, CLSID *id);
 extern IShellFolder * IShellFolder_Constructor(
 	IShellFolder * psf,
 	LPITEMIDLIST pidl);
@@ -32,12 +49,12 @@ extern HRESULT IFSFolder_Constructor(
 
 /*************************************************************************
  * SHCoCreateInstance [SHELL32.102]
- * 
+ *
  * NOTES
  *     exported by ordinal
  */
 LRESULT WINAPI SHCoCreateInstance(
-	LPSTR aclsid,
+	LPCSTR aclsid,
 	REFCLSID clsid,
 	LPUNKNOWN unknownouter,
 	REFIID refiid,
@@ -46,7 +63,7 @@ LRESULT WINAPI SHCoCreateInstance(
 	DWORD	hres;
 	IID	iid;
 	CLSID * myclsid = (CLSID*)clsid;
-	
+
 	if (!clsid)
 	{
 	  if (!aclsid) return REGDB_E_CLASSNOTREG;
@@ -62,11 +79,11 @@ LRESULT WINAPI SHCoCreateInstance(
 	  hres = IFSFolder_Constructor(unknownouter, refiid, ppv);
 	}
 	else
-        {
-          CoInitialize(NULL);
+	{
+	  CoInitialize(NULL);
 	  hres = CoCreateInstance(myclsid, unknownouter, CLSCTX_INPROC_SERVER, refiid, ppv);
 	}
-	
+
 	if(hres!=S_OK)
 	{
 	  ERR("failed (0x%08lx) to create \n\tCLSID:\t%s\n\tIID:\t%s\n",
@@ -79,22 +96,22 @@ LRESULT WINAPI SHCoCreateInstance(
 }
 
 /*************************************************************************
- * SHELL32_DllGetClassObject   [SHELL32.128]
+ * DllGetClassObject   [SHELL32.128]
  */
 HRESULT WINAPI SHELL32_DllGetClassObject(REFCLSID rclsid, REFIID iid,LPVOID *ppv)
 {	HRESULT	hres = E_OUTOFMEMORY;
 	LPCLASSFACTORY lpclf;
 
 	TRACE("\n\tCLSID:\t%s,\n\tIID:\t%s\n",debugstr_guid(rclsid),debugstr_guid(iid));
-	
+
 	*ppv = NULL;
 
-	if(IsEqualCLSID(rclsid, &CLSID_ShellDesktop)|| 
+	if(IsEqualCLSID(rclsid, &CLSID_ShellDesktop)||
 	   IsEqualCLSID(rclsid, &CLSID_ShellLink))
 	{
 	  lpclf = IClassFactory_Constructor( rclsid );
 
-	  if(lpclf) 
+	  if(lpclf)
 	  {
 	    hres = IClassFactory_QueryInterface(lpclf,iid, ppv);
 	    IClassFactory_Release(lpclf);
@@ -115,7 +132,7 @@ HRESULT WINAPI SHELL32_DllGetClassObject(REFCLSID rclsid, REFIID iid,LPVOID *ppv
  * NOTES
  *     exported by ordinal
  */
-DWORD WINAPI SHCLSIDFromStringA (LPSTR clsid, CLSID *id)
+DWORD WINAPI SHCLSIDFromStringA (LPCSTR clsid, CLSID *id)
 {
     WCHAR buffer[40];
     TRACE("(%p(%s) %p)\n", clsid, clsid, id);
@@ -126,7 +143,7 @@ DWORD WINAPI SHCLSIDFromStringA (LPSTR clsid, CLSID *id)
 DWORD WINAPI SHCLSIDFromStringW (LPWSTR clsid, CLSID *id)
 {
 	TRACE("(%p(%s) %p)\n", clsid, debugstr_w(clsid), id);
-	return CLSIDFromString(clsid, id); 
+	return CLSIDFromString(clsid, id);
 }
 DWORD WINAPI SHCLSIDFromStringAW (LPVOID clsid, CLSID *id)
 {
@@ -136,7 +153,7 @@ DWORD WINAPI SHCLSIDFromStringAW (LPVOID clsid, CLSID *id)
 }
 
 /*************************************************************************
- *			 SHGetMalloc			[SHELL32.220]
+ *			 SHGetMalloc			[SHELL32.@]
  * returns the interface to shell malloc.
  *
  * [SDK header win95/shlobj.h:
@@ -145,14 +162,14 @@ DWORD WINAPI SHCLSIDFromStringAW (LPVOID clsid, CLSID *id)
  * What we are currently doing is not very wrong, since we always use the same
  * heap (ProcessHeap).
  */
-DWORD WINAPI SHGetMalloc(LPMALLOC *lpmal) 
+DWORD WINAPI SHGetMalloc(LPMALLOC *lpmal)
 {
 	TRACE("(%p)\n", lpmal);
 	return CoGetMalloc(MEMCTX_TASK, lpmal);
 }
 
 /*************************************************************************
- * SHGetDesktopFolder			[SHELL32.216]
+ * SHGetDesktopFolder			[SHELL32.@]
  */
 LPSHELLFOLDER pdesktopfolder=NULL;
 
@@ -164,17 +181,17 @@ DWORD WINAPI SHGetDesktopFolder(IShellFolder **psf)
 
 	*psf=NULL;
 
-	if (!pdesktopfolder) 
+	if (!pdesktopfolder)
 	{
 	  lpclf = IClassFactory_Constructor(&CLSID_ShellDesktop);
-	  if(lpclf) 
+	  if(lpclf)
 	  {
 	    hres = IClassFactory_CreateInstance(lpclf,NULL,(REFIID)&IID_IShellFolder, (void*)&pdesktopfolder);
 	    IClassFactory_Release(lpclf);
-	  }  
+	  }
 	}
-	
-	if (pdesktopfolder) 
+
+	if (pdesktopfolder)
 	{
 	  /* even if we create the folder, add a ref so the application can´t destroy the folder*/
 	  IShellFolder_AddRef(pdesktopfolder);
@@ -228,20 +245,20 @@ static HRESULT WINAPI IClassFactory_fnQueryInterface(
 	*ppvObj = NULL;
 
 	if(IsEqualIID(riid, &IID_IUnknown))          /*IUnknown*/
-	{ *ppvObj = This; 
+	{ *ppvObj = This;
 	}
 	else if(IsEqualIID(riid, &IID_IClassFactory))  /*IClassFactory*/
 	{ *ppvObj = (IClassFactory*)This;
-	}   
+	}
 
 	if(*ppvObj)
-	{ IUnknown_AddRef((LPUNKNOWN)*ppvObj);  	
+	{ IUnknown_AddRef((LPUNKNOWN)*ppvObj);
 	  TRACE("-- Interface: (%p)->(%p)\n",ppvObj,*ppvObj);
 	  return S_OK;
 	}
 	TRACE("-- Interface: %s E_NOINTERFACE\n", debugstr_guid(riid));
 	return E_NOINTERFACE;
-}  
+}
 /******************************************************************************
  * IClassFactory_AddRef
  */
@@ -262,7 +279,7 @@ static ULONG WINAPI IClassFactory_fnRelease(LPCLASSFACTORY iface)
 	TRACE("(%p)->(count=%lu)\n",This,This->ref);
 
 	InterlockedDecrement(&shell32_ObjCount);
-	if (!InterlockedDecrement(&This->ref)) 
+	if (!InterlockedDecrement(&This->ref))
 	{
 	  TRACE("-- destroying IClassFactory(%p)\n",This);
 	  HeapFree(GetProcessHeap(),0,This);
@@ -283,7 +300,7 @@ static HRESULT WINAPI IClassFactory_fnCreateInstance(
 	TRACE("%p->(%p,\n\tIID:\t%s,%p)\n",This,pUnknown,debugstr_guid(riid),ppObject);
 
 	*ppObject = NULL;
-		
+
 	if(pUnknown)
 	{
 	  return(CLASS_E_NOAGGREGATION);
@@ -296,18 +313,18 @@ static HRESULT WINAPI IClassFactory_fnCreateInstance(
 	else if (IsEqualCLSID(This->rclsid, &CLSID_ShellLink))
 	{
 	  pObj = (IUnknown *)IShellLink_Constructor(FALSE);
-	} 
+	}
 	else
 	{
 	  ERR("unknown IID requested\n\tIID:\t%s\n",debugstr_guid(riid));
 	  return(E_NOINTERFACE);
 	}
-	
+
 	if (!pObj)
 	{
 	  return(E_OUTOFMEMORY);
 	}
-	 
+
 	hres = IUnknown_QueryInterface(pObj,riid, ppObject);
 	IUnknown_Release(pObj);
 
@@ -325,7 +342,7 @@ static HRESULT WINAPI IClassFactory_fnLockServer(LPCLASSFACTORY iface, BOOL fLoc
 	return E_NOTIMPL;
 }
 
-static ICOM_VTABLE(IClassFactory) clfvt = 
+static ICOM_VTABLE(IClassFactory) clfvt =
 {
     ICOM_MSVTABLE_COMPAT_DummyRTTIVALUE
     IClassFactory_fnQueryInterface,
@@ -348,7 +365,7 @@ static ICOM_VTABLE(IClassFactory) clfvt =
 #ifdef __WIN32OS2__
 typedef HRESULT (* CALLBACK LPFNCREATEINSTANCE)(IUnknown* pUnkOuter, REFIID riid, LPVOID* ppvObject);
 #else
-typedef HRESULT CALLBACK (*LPFNCREATEINSTANCE)(IUnknown* pUnkOuter, REFIID riid, LPVOID* ppvObject);
+typedef HRESULT (CALLBACK *LPFNCREATEINSTANCE)(IUnknown* pUnkOuter, REFIID riid, LPVOID* ppvObject);
 #endif
 
 typedef struct
@@ -397,20 +414,20 @@ static HRESULT WINAPI IDefClF_fnQueryInterface(
 	*ppvObj = NULL;
 
 	if(IsEqualIID(riid, &IID_IUnknown))          /*IUnknown*/
-	{ *ppvObj = This; 
+	{ *ppvObj = This;
 	}
 	else if(IsEqualIID(riid, &IID_IClassFactory))  /*IClassFactory*/
 	{ *ppvObj = (IClassFactory*)This;
-	}   
+	}
 
 	if(*ppvObj)
-	{ IUnknown_AddRef((LPUNKNOWN)*ppvObj);  	
+	{ IUnknown_AddRef((LPUNKNOWN)*ppvObj);
 	  TRACE("-- Interface: (%p)->(%p)\n",ppvObj,*ppvObj);
 	  return S_OK;
 	}
 	TRACE("-- Interface: %s E_NOINTERFACE\n", debugstr_guid(riid));
 	return E_NOINTERFACE;
-}  
+}
 /******************************************************************************
  * IDefClF_fnAddRef
  */
@@ -432,8 +449,8 @@ static ULONG WINAPI IDefClF_fnRelease(LPCLASSFACTORY iface)
 
 	InterlockedDecrement(&shell32_ObjCount);
 
-	if (!InterlockedDecrement(&This->ref)) 
-	{ 
+	if (!InterlockedDecrement(&This->ref))
+	{
 	  if (This->pcRefDll) InterlockedDecrement(This->pcRefDll);
 
 	  TRACE("-- destroying IClassFactory(%p)\n",This);
@@ -453,7 +470,7 @@ static HRESULT WINAPI IDefClF_fnCreateInstance(
 	TRACE("%p->(%p,\n\tIID:\t%s,%p)\n",This,pUnkOuter,debugstr_guid(riid),ppvObject);
 
 	*ppvObject = NULL;
-		
+
 	if(pUnkOuter)
 	  return(CLASS_E_NOAGGREGATION);
 
@@ -477,7 +494,7 @@ static HRESULT WINAPI IDefClF_fnLockServer(LPCLASSFACTORY iface, BOOL fLock)
 	return E_NOTIMPL;
 }
 
-static ICOM_VTABLE(IClassFactory) dclfvt = 
+static ICOM_VTABLE(IClassFactory) dclfvt =
 {
     ICOM_MSVTABLE_COMPAT_DummyRTTIVALUE
     IDefClF_fnQueryInterface,
@@ -491,10 +508,10 @@ static ICOM_VTABLE(IClassFactory) dclfvt =
  * SHCreateDefClassObject			[SHELL32.70]
  */
 HRESULT WINAPI SHCreateDefClassObject(
-	REFIID	riid,				
-	LPVOID*	ppv,	
+	REFIID	riid,
+	LPVOID*	ppv,
 	LPFNCREATEINSTANCE lpfnCI,	/* [in] create instance callback entry */
-	PLONG	pcRefDll,		/* [in/out] ref count of the dll */
+	LPDWORD	pcRefDll,		/* [in/out] ref count of the dll */
 	REFIID	riidInst)		/* [in] optional interface to the instance */
 {
 	TRACE("\n\tIID:\t%s %p %p %p \n\tIIDIns:\t%s\n",
@@ -519,7 +536,7 @@ HRESULT WINAPI SHCreateDefClassObject(
 void WINAPI DragAcceptFiles(HWND hWnd, BOOL b)
 {
 	LONG exstyle;
-  
+
 	if( !IsWindow(hWnd) ) return;
 	exstyle = GetWindowLongA(hWnd,GWL_EXSTYLE);
 	if (b)
@@ -552,13 +569,14 @@ BOOL WINAPI DragQueryPoint(HDROP hDrop, POINT *p)
 
         *p = lpDropFileStruct->pt;
 	bRet = lpDropFileStruct->fNC;
-  
+
 	GlobalUnlock(hDrop);
 	return bRet;
 }
 
 /*************************************************************************
- *  DragQueryFileA		[SHELL32.81] [shell32.82]
+ *  DragQueryFile 		[SHELL32.81]
+ *  DragQueryFileA		[SHELL32.82]
  */
 UINT WINAPI DragQueryFileA(
 	HDROP hDrop,
@@ -569,41 +587,41 @@ UINT WINAPI DragQueryFileA(
 	LPSTR lpDrop;
 	UINT i = 0;
 	DROPFILES *lpDropFileStruct = (DROPFILES *) GlobalLock(hDrop);
-    
+
 	TRACE("(%08x, %x, %p, %u)\n",	hDrop,lFile,lpszFile,lLength);
-    
+
 	if(!lpDropFileStruct) goto end;
 
 	lpDrop = (LPSTR) lpDropFileStruct + lpDropFileStruct->pFiles;
 
-    if(lpDropFileStruct->fWide == TRUE) {
-        LPWSTR lpszFileW = NULL;
+        if(lpDropFileStruct->fWide == TRUE) {
+            LPWSTR lpszFileW = NULL;
 
-        if(lpszFile) {
-            lpszFileW = (LPWSTR) HeapAlloc(GetProcessHeap(), 0, lLength*sizeof(WCHAR));
-            if(lpszFileW == NULL) {
-                goto end;
+            if(lpszFile) {
+                lpszFileW = (LPWSTR) HeapAlloc(GetProcessHeap(), 0, lLength*sizeof(WCHAR));
+                if(lpszFileW == NULL) {
+                    goto end;
+                }
             }
-        }
-        i = DragQueryFileW(hDrop, lFile, lpszFileW, lLength);
+            i = DragQueryFileW(hDrop, lFile, lpszFileW, lLength);
 
-        if(lpszFileW) {
-            WideCharToMultiByte(CP_ACP, 0, lpszFileW, -1, lpszFile, lLength, 0, NULL);
-            HeapFree(GetProcessHeap(), 0, lpszFileW);
+            if(lpszFileW) {
+                WideCharToMultiByte(CP_ACP, 0, lpszFileW, -1, lpszFile, lLength, 0, NULL);
+                HeapFree(GetProcessHeap(), 0, lpszFileW);
+            }
+            goto end;
         }
-        goto end;
-    }
 
 	while (i++ < lFile)
 	{
 	  while (*lpDrop++); /* skip filename */
-	  if (!*lpDrop) 
+	  if (!*lpDrop)
 	  {
-	    i = (lFile == 0xFFFFFFFF) ? i : 0; 
+	    i = (lFile == 0xFFFFFFFF) ? i : 0;
 	    goto end;
 	  }
 	}
-    
+
 	i = strlen(lpDrop);
 	i++;
 	if (!lpszFile ) goto end;   /* needed buffer size */
@@ -615,7 +633,7 @@ end:
 }
 
 /*************************************************************************
- *  DragQueryFileW		[shell32.133]
+ *  DragQueryFileW		[SHELL32.133]
  */
 UINT WINAPI DragQueryFileW(
 	HDROP hDrop,
@@ -626,42 +644,42 @@ UINT WINAPI DragQueryFileW(
 	LPWSTR lpwDrop;
 	UINT i = 0;
 	DROPFILES *lpDropFileStruct = (DROPFILES *) GlobalLock(hDrop);
-    
+
 	TRACE("(%08x, %x, %p, %u)\n", hDrop,lFile,lpszwFile,lLength);
-    
+
 	if(!lpDropFileStruct) goto end;
 
-    if(lpDropFileStruct->fWide == FALSE) {
-        LPSTR lpszFileA = NULL;
-
-        if(lpszwFile) {
-            lpszFileA = (LPSTR) HeapAlloc(GetProcessHeap(), 0, lLength);
-            if(lpszFileA == NULL) {
-                goto end;
-            }
-        }
-        i = DragQueryFileA(hDrop, lFile, lpszFileA, lLength);
-
-        if(lpszFileA) {
-            MultiByteToWideChar(CP_ACP, 0, lpszFileA, -1, lpszwFile, lLength);
-            HeapFree(GetProcessHeap(), 0, lpszFileA);
-        }
-        goto end;
-    }
-
 	lpwDrop = (LPWSTR) ((LPSTR)lpDropFileStruct + lpDropFileStruct->pFiles);
+
+        if(lpDropFileStruct->fWide == FALSE) {
+            LPSTR lpszFileA = NULL;
+ 
+            if(lpszwFile) {
+                lpszFileA = (LPSTR) HeapAlloc(GetProcessHeap(), 0, lLength);
+                if(lpszFileA == NULL) {
+                    goto end;
+                }
+            }
+            i = DragQueryFileA(hDrop, lFile, lpszFileA, lLength);
+
+            if(lpszFileA) {
+                MultiByteToWideChar(CP_ACP, 0, lpszFileA, -1, lpszwFile, lLength);
+                HeapFree(GetProcessHeap(), 0, lpszFileA);
+            }
+            goto end;
+        }
 
 	i = 0;
 	while (i++ < lFile)
 	{
 	  while (*lpwDrop++); /* skip filename */
-	  if (!*lpwDrop) 
+	  if (!*lpwDrop)
 	  {
-	    i = (lFile == 0xFFFFFFFF) ? i : 0; 
+	    i = (lFile == 0xFFFFFFFF) ? i : 0;
 	    goto end;
 	  }
 	}
-    
+
 	i = strlenW(lpwDrop);
 	i++;
 	if ( !lpszwFile) goto end;   /* needed buffer size */

@@ -1,4 +1,4 @@
-/* $Id: misc.cpp,v 1.12 2002-02-14 12:10:08 sandervl Exp $ */
+/* $Id: misc.cpp,v 1.13 2002-06-09 12:41:21 sandervl Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -27,7 +27,7 @@
 #include <shellapi.h>
 #include <winnls.h>
 #include "shell32_main.h"
-#include "wine/undocshell.h"
+#include "undocshell.h"
 #include <misc.h>
 #include <unicode.h>
 //#include <string.h>

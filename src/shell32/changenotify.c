@@ -1,4 +1,4 @@
-/* $Id: changenotify.c,v 1.2 2002-03-08 11:00:58 sandervl Exp $ */
+/* $Id: changenotify.c,v 1.3 2002-06-09 12:41:20 sandervl Exp $ */
 /*
  *	shell change notification
  *
@@ -15,7 +15,7 @@
 #include "debugtools.h"
 #include "pidl.h"
 #include "shell32_main.h"
-#include "wine/undocshell.h"
+#include "undocshell.h"
 
 DEFAULT_DEBUG_CHANNEL(shell);
 
