@@ -1,4 +1,4 @@
-/* $Id: thread.cpp,v 1.48 2003-01-13 16:51:40 sandervl Exp $ */
+/* $Id: thread.cpp,v 1.49 2003-01-20 10:46:28 sandervl Exp $ */
 
 /*
  * Win32 Thread API functions
@@ -309,6 +309,7 @@ DWORD OPEN32API Win32ThreadProc(LPVOID lpData)
     winteb->entry_arg   = (void *)userdata;
 
     winteb->o.odin.hab = OSLibWinInitialize();
+    dprintf(("Thread HAB %x", winteb->o.odin.hab));
     winteb->o.odin.hmq = OSLibWinQueryMsgQueue(winteb->o.odin.hab);
     rc = OSLibWinSetCp(winteb->o.odin.hmq, GetDisplayCodepage());
     dprintf(("WinSetCP was %sOK", rc ? "" : "not "));

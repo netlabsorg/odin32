@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.113 2003-01-18 20:11:46 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.114 2003-01-20 10:46:27 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -1004,7 +1004,13 @@ DWORD OSLibDosCreateFile(CHAR *lpszFile,
       // @@@AH 2001-06-02 Win2k SP2 returns error 2 in this case
       int winError = error2WinError(rc);
       if (winError == ERROR_OPEN_FAILED_W || winError == ERROR_PATH_NOT_FOUND_W)
-        winError = ERROR_FILE_NOT_FOUND_W;
+      {
+          //Windows returns ERROR_FILE_EXISTS if create new & file exists
+          if(fuCreate == CREATE_NEW_W) {
+                winError = ERROR_FILE_EXISTS_W;
+          }
+          else  winError = ERROR_FILE_NOT_FOUND_W;
+      }
       SetLastError(winError);
       return INVALID_HANDLE_VALUE_W;
    }
