@@ -1,4 +1,9 @@
-/* $Id: ChangeLog,v 1.1629 2001-08-02 14:48:46 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1630 2001-08-03 17:44:12 sandervl Exp $ */
+
+ 2001-08-03: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Temporarily disabled new name lookup (resources) until
+                  the real problem is located (wrc).
+                  (fixes preference page in Opera)
 
  2001-08-02: Sander van Leeuwen <sandervl@xs4all.nl>
     - GDI32:    o Set codepage of HDC returned by CreateDCA
