@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.126 2002-07-30 17:46:33 achimha Exp $ */
+/* $Id: window.cpp,v 1.127 2002-07-30 17:46:58 achimha Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -195,6 +195,8 @@ HWND WIN32API CreateWindowExW(DWORD     exStyle,
     }
     else dprintf(("CreateWindowExW: class %d name %ls parent %x (%d,%d) (%d,%d), %x %x menu=%x", className, HIWORD(windowName) ? windowName : NULL, parent, x, y, width, height, style, exStyle, menu));
 #endif
+    // if the pointer to the classname string has the high word cleared,
+    // then it's not a pointer but a number for one of the builtin classes
     if (!HIWORD(className))
     {
       wsprintfW(tmpClassW, (LPCWSTR)L"#%d", (int) className);
