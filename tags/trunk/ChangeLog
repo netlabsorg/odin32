@@ -1,9 +1,10 @@
-/* $Id: ChangeLog,v 1.2652 2003-12-01 13:28:50 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2653 2003-12-01 13:33:09 sandervl Exp $ */
 
  2003-12-01: KO Myung-Hun <komh@chollian    >
     - GDI32:    o Use Warpsans Combined in DBCS environments
     - SHLWAPI:  o Forward wvnsprintfA/W to user32
     - USER32:   o wvsnprintfA/W: fixed ascii and unicode conversion
+                o Listbox: added index and length conversion between ANSI and UNICODE
 
  2003-12-01: Dietrich Teickner <Dietrich_Teickner@t-online   >
     - SHELL32:  o Fixed memory leak
