@@ -1,4 +1,4 @@
-/* $Id: CmdQd.c,v 1.17 2002-05-24 02:41:30 bird Exp $
+/* $Id: CmdQd.c,v 1.18 2002-05-24 03:39:08 bird Exp $
  *
  * Command Queue Daemon / Client.
  *
@@ -1458,9 +1458,10 @@ void Worker(void * iWorkerId)
          */
         if (pJob)
         {
-            static BOOL  fStdClosed = FALSE;
-            static HFILE hStdOutSaved = -1;
+            static HFILE hDummy;
+            static BOOL fStdClosed = FALSE;
             int         rc;
+            int         rcDbg;
             char        szArg[4096];
             char        szObj[256];
             PJOBOUTPUT  pJobOutput = NULL;
@@ -1491,18 +1492,21 @@ void Worker(void * iWorkerId)
 
             if (!fStdClosed)
             {   /* only do this once! */
-                DosDupHandle(HF_STDOUT, &hStdOutSaved);
-                DosSetFHState(hStdOutSaved, OPEN_FLAGS_NOINHERIT); /* child shall not see this handle! */
+                HFILE   hf;
                 fclose(stdin);
                 DosClose(HF_STDIN);
-                fclose(stdout);
-                DosClose(HF_STDOUT);
-                fclose(stderr);
-                DosClose(HF_STDERR);
-                hStdOut = HF_STDOUT;
-                DosDupHandle(hStdOutSaved, &hStdOut);
-                hStdErr = HF_STDERR;
-                DosDupHandle(hStdOutSaved, &hStdErr);
+                hDummy = HF_STDIN;
+                for (hf = 1; hf < 20; hf++)
+                    if (!(rcDbg = DosDupHandle(hf, &hDummy)))
+                        break;
+                assert(!rcDbg);
+                rcDbg = DosSetFHState(hDummy, OPEN_FLAGS_NOINHERIT);        assert(!rcDbg);
+                fclose(stdout); DosClose(HF_STDOUT);
+                fclose(stderr); DosClose(HF_STDERR);
+                hStdOut = HF_STDOUT; rcDbg = DosDupHandle(hDummy, &hStdOut);assert(!rcDbg);
+                assert(hStdOut == HF_STDOUT);
+                hStdErr = HF_STDERR; rcDbg = DosDupHandle(hDummy, &hStdErr);assert(!rcDbg);
+                assert(hStdErr == HF_STDERR);
                 fStdClosed = TRUE;
             }
 
@@ -1513,7 +1517,8 @@ void Worker(void * iWorkerId)
                 Error("Internal Error: Failed to create pipe! rc=%d\n", rc);
                 return;
             }
-            assert(hPipeW != HF_STDOUT && hPipeR != HF_STDERR);
+            assert(hPipeW != HF_STDOUT && hPipeW != HF_STDERR);
+            assert(hPipeR != HF_STDOUT && hPipeR != HF_STDERR);
 
             rc = DosSetDefaultDisk(  pJob->JobInfo.szCurrentDir[0] >= 'a'
                                    ? pJob->JobInfo.szCurrentDir[0] - 'a' + 1
@@ -1525,17 +1530,17 @@ void Worker(void * iWorkerId)
                 hStdOut = HF_STDOUT;
                 assert(   pJob->JobInfo.szzEnv[pJob->JobInfo.cchEnv-1] == '\0'
                        && pJob->JobInfo.szzEnv[pJob->JobInfo.cchEnv-2] == '\0');
-                DosDupHandle(hPipeW, &hStdOut);
-                DosDupHandle(hPipeW, &hStdErr);
-                DosClose(hPipeW);
-                DosSetFHState(hPipeR, OPEN_FLAGS_NOINHERIT); /* child shall not see this handle... */
+                rcDbg = DosDupHandle(hPipeW, &hStdOut);                     assert(!rcDbg);
+                rcDbg = DosDupHandle(hPipeW, &hStdErr);                     assert(!rcDbg);
+                rcDbg = DosClose(hPipeW);                                   assert(!rcDbg);
+                rcDbg = DosSetFHState(hPipeR, OPEN_FLAGS_NOINHERIT);        assert(!rcDbg);
                 rc = DosExecPgm(szObj, sizeof(szObj), EXEC_ASYNCRESULT,
                                 szArg, pJob->JobInfo.szzEnv, &Res, szArg);
                 /* Placeholders, prevents clashes... */
                 hStdOut = HF_STDOUT;
-                DosDupHandle(hStdOutSaved, &hStdOut);
+                rcDbg = DosDupHandle(hDummy, &hStdOut);                     assert(!rcDbg);
                 hStdErr = HF_STDERR;
-                DosDupHandle(hStdOutSaved, &hStdErr);
+                rcDbg = DosDupHandle(hDummy, &hStdErr);                     assert(!rcDbg);
                 DosReleaseMutexSem(hmtxExec);
 
 
@@ -1617,6 +1622,7 @@ void Worker(void * iWorkerId)
                                                  pJob->JobInfo.szCurrentDir, rc);
                 pJob->rc = -1;
                 DosClose(hPipeR);
+                DosClose(hPipeW);
             }
 
 
@@ -2599,7 +2605,7 @@ int  shrmemSendDaemon(BOOL fWait)
         if (rc && rc != ERROR_INTERRUPT)
             Error("Internal error: failed to get next message from daemon, rc=%d\n", rc);
     }
-    else
+    else if (!fWait)
         Error("Internal error: failed to send message from daemon, rc=%d\n", rc);
     return rc;
 }
