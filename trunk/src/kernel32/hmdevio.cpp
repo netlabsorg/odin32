@@ -1,4 +1,4 @@
-/* $Id: hmdevio.cpp,v 1.6 2000-09-21 20:03:00 sandervl Exp $ */
+/* $Id: hmdevio.cpp,v 1.7 2000-10-05 13:48:09 sandervl Exp $ */
 
 /*
  * Win32 Device IOCTL API functions for OS/2
@@ -148,7 +148,13 @@ tryopen:
 //******************************************************************************
 DWORD HMDeviceDriver::CloseHandle(PHMHANDLEDATA pHMHandleData)
 {
-   return DosClose(pHMHandleData->hHMHandle);
+ DWORD rc = 0;
+
+   if(pHMHandleData->hHMHandle) {
+	rc = DosClose(pHMHandleData->hHMHandle);
+   }
+   pHMHandleData->hHMHandle = 0;
+   return rc;
 }
 //******************************************************************************
 //******************************************************************************
