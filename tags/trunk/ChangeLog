@@ -1,4 +1,18 @@
-/* $Id: ChangeLog,v 1.1212 2001-01-09 19:17:21 bird Exp $ */
+/* $Id: ChangeLog,v 1.1213 2001-01-09 20:53:43 sandervl Exp $ */
+
+ 2001-01-09: Sander van Leeuwen <sandervl@xs4all.nl>
+    - INCLUDE\dcdata:
+      GDI32:
+      USER32:   o Updates for WGSS50.
+
+    - LIB\WGSS50.lib
+    - BIN\WGSS50.dll
+                o Binary distribution of WGSS50 added
+
+ 2001-01-08: Sander van Leeuwen <sandervl@xs4all.nl>
+    - ReportingBugs.txt:
+                o Specify windows & system32 directory in bug reports
+                  (description included on how to determine this)
 
  2001-01-09: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - tools\dailybuild:
@@ -34,6 +48,8 @@
  2001-01-06: Sander van Leeuwen <sandervl@xs4all.nl>
     - install:  o Win32k installation temporarily disabled due to a WarpIn bug
                   (config.sys lines removed)
+                o Update: This is NOT a WarpIn bug, but an error in the script.
+                          Now fixed.
                 o Added check for WarpIn 0.9.6 or higher
                 o Added check for OS/2 3.x or higher
     - src\makefile:
