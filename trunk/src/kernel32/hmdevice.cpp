@@ -1,4 +1,4 @@
-/* $Id: hmdevice.cpp,v 1.22 2000-08-04 21:12:06 sandervl Exp $ */
+/* $Id: hmdevice.cpp,v 1.23 2000-09-20 21:32:52 hugh Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -23,7 +23,7 @@
 #include "HandleManager.h"
 #include "HMDevice.h"
 
-#define DBG_LOCALLOG	DBG_hmdevice
+#define DBG_LOCALLOG  DBG_hmdevice
 #include "dbglocal.h"
 
 
@@ -116,8 +116,8 @@ BOOL HMDeviceHandler::DuplicateHandle(PHMHANDLEDATA pHMHandleData, HANDLE  srcpr
                                PHMHANDLEDATA pHMSrcHandle,
                                HANDLE  destprocess,
                                PHANDLE desthandle,
-                      	       DWORD   fdwAccess,
-                      	       BOOL    fInherit,
+                               DWORD   fdwAccess,
+                               BOOL    fInherit,
                                DWORD   fdwOptions,
                                DWORD   fdwOdinOptions)
 {
@@ -1084,8 +1084,8 @@ DWORD HMDeviceHandler::CreateFileMapping(PHMHANDLEDATA              pHMHandleDat
                                          DWORD                      flProtect,
                                          DWORD                      dwMaximumSizeHigh,
                                          DWORD                      dwMaximumSizeLow,
-               		     	         LPCSTR lpName,   
-				         HFILE *hOldMap)  // if create an existing memmap, return handle of old one
+                                 LPCSTR lpName,
+                 HFILE *hOldMap)  // if create an existing memmap, return handle of old one
 {
   dprintf(("KERNEL32: HandleManager::DeviceHandler::CreateFileMapping(%08xh,%08xh,%08xh,%08xh,%08xh,%08xh,%s)\n",
            pHMHandleData->hHMHandle,
@@ -1122,7 +1122,7 @@ DWORD HMDeviceHandler::OpenFileMapping(PHMHANDLEDATA pHMHandleData,
 {
   dprintf(("KERNEL32: HandleManager::DeviceHandler::OpenFileMapping(%08xh,%08xh,%08xh,%08xh)\n",
            pHMHandleData->hHMHandle,
-	   fdwAccess,
+     fdwAccess,
            fInherit,
            lpName));
 
@@ -1150,7 +1150,7 @@ LPVOID HMDeviceHandler::MapViewOfFileEx(PHMHANDLEDATA pHMHandleData,
                                       DWORD         dwFileOffsetHigh,
                                       DWORD         dwFileOffsetLow,
                                       DWORD         dwNumberOfBytesToMap,
-			              LPVOID        lpBaseAddress)
+                    LPVOID        lpBaseAddress)
 {
   dprintf(("KERNEL32: HandleManager::DeviceHandler::MapViewOfFileEx(%08xh,%08xh,%08xh,%08xh,%08xh,%08xh)\n",
            pHMHandleData->hHMHandle,
@@ -1166,7 +1166,7 @@ LPVOID HMDeviceHandler::MapViewOfFileEx(PHMHANDLEDATA pHMHandleData,
  * Name      : DWORD HMDeviceHandler::DeviceIoControl
  * Purpose   : send command to device driver
  * Variables :
- * Result    : 
+ * Result    :
  * Remark    :
  * Status    :
  *
@@ -1190,10 +1190,10 @@ BOOL HMDeviceHandler::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoCon
 
 
 /*****************************************************************************
- * Name      : DWORD HMDeviceHandler::SetupComm      
+ * Name      : DWORD HMDeviceHandler::SetupComm
  * Purpose   : set com port parameters (queue)
  * Variables :
- * Result    : 
+ * Result    :
  * Remark    :
  * Status    :
  *
@@ -1205,16 +1205,16 @@ BOOL HMDeviceHandler::SetupComm(PHMHANDLEDATA pHMHandleData, DWORD dwInQueue, DW
   dprintf(("KERNEL32: HandleManager::DeviceHandler::SetupComm(%08xh,%08xh,%08xh)\n",
            pHMHandleData->hHMHandle,
            dwInQueue, dwOutQueue));
-
+  SetLastError(ERROR_INVALID_HANDLE);
   return(FALSE);
 }
 
 
 /*****************************************************************************
- * Name      : DWORD HMDeviceHandler::GetCommState   
- * Purpose   : query com port control block   
+ * Name      : DWORD HMDeviceHandler::GetCommState
+ * Purpose   : query com port control block
  * Variables :
- * Result    : 
+ * Result    :
  * Remark    :
  * Status    :
  *
@@ -1225,22 +1225,209 @@ BOOL HMDeviceHandler::GetCommState(PHMHANDLEDATA pHMHandleData, LPDCB lpdcb)
   dprintf(("KERNEL32: HandleManager::DeviceHandler::GetCommState(%08xh,%08xh)\n",
            pHMHandleData->hHMHandle,
            lpdcb));
+  SetLastError(ERROR_INVALID_HANDLE);
+  return(FALSE);
+}
 
+BOOL HMDeviceHandler::WaitCommEvent( PHMHANDLEDATA pHMHandleData,
+                                     LPDWORD lpfdwEvtMask,
+                                     LPOVERLAPPED lpo)
+{
+  dprintf(("KERNEL32: HandleManager::DeviceHandler::WaitCommEvent(%08xh,%08xh,%08xh)\n",
+           pHMHandleData->hHMHandle,
+           lpfdwEvtMask,
+           lpo));
+  SetLastError(ERROR_INVALID_HANDLE);
+  return(FALSE);
+}
+
+BOOL HMDeviceHandler::GetCommProperties( PHMHANDLEDATA pHMHandleData,
+                                         LPCOMMPROP lpcmmp)
+{
+  dprintf(("KERNEL32: HandleManager::DeviceHandler::GetCommProperties(%08xh,%08xh)\n",
+           pHMHandleData->hHMHandle,
+           lpcmmp));
+  SetLastError(ERROR_INVALID_HANDLE);
+  return(FALSE);
+}
+
+BOOL HMDeviceHandler::GetCommMask( PHMHANDLEDATA pHMHandleData,
+                                   LPDWORD lpfdwEvtMask)
+{
+  dprintf(("KERNEL32: HandleManager::DeviceHandler::GetCommMask(%08xh,%08xh)\n",
+           pHMHandleData->hHMHandle,
+           lpfdwEvtMask));
+  SetLastError(ERROR_INVALID_HANDLE);
+  return(FALSE);
+}
+
+BOOL HMDeviceHandler::SetCommMask( PHMHANDLEDATA pHMHandleData,
+                                   DWORD fdwEvtMask)
+{
+  dprintf(("KERNEL32: HandleManager::DeviceHandler::SetCommMask(%08xh,%08xh)\n",
+           pHMHandleData->hHMHandle,
+           fdwEvtMask));
+  SetLastError(ERROR_INVALID_HANDLE);
+  return(FALSE);
+}
+
+BOOL HMDeviceHandler::PurgeComm( PHMHANDLEDATA pHMHandleData,
+                                 DWORD fdwAction)
+{
+  dprintf(("KERNEL32: HandleManager::DeviceHandler::PurgeComm(%08xh,%08xh)\n",
+           pHMHandleData->hHMHandle,
+           fdwAction));
+  SetLastError(ERROR_INVALID_HANDLE);
+  return(FALSE);
+}
+
+BOOL HMDeviceHandler::ClearCommError( PHMHANDLEDATA pHMHandleData,
+                                      LPDWORD lpdwErrors,
+                                      LPCOMSTAT lpcst)
+{
+  dprintf(("KERNEL32: HandleManager::DeviceHandler::ClearCommError(%08xh,%08xh,%08xh)\n",
+           pHMHandleData->hHMHandle,
+           lpdwErrors,
+           lpcst));
+  SetLastError(ERROR_INVALID_HANDLE);
+  return(FALSE);
+}
+
+BOOL HMDeviceHandler::SetCommState( PHMHANDLEDATA pHMHandleData,
+                                    LPDCB lpdcb)
+{
+  dprintf(("KERNEL32: HandleManager::DeviceHandler::SetCommState(%08xh,%08xh)\n",
+           pHMHandleData->hHMHandle,
+           lpdcb));
+  SetLastError(ERROR_INVALID_HANDLE);
+  return(FALSE);
+}
+
+BOOL HMDeviceHandler::GetCommTimeouts( PHMHANDLEDATA pHMHandleData,
+                                       LPCOMMTIMEOUTS lpctmo)
+{
+  dprintf(("KERNEL32: HandleManager::DeviceHandler::GetCommTimeouts(%08xh,%08xh)\n",
+           pHMHandleData->hHMHandle,
+           lpctmo));
+  SetLastError(ERROR_INVALID_HANDLE);
+  return(FALSE);
+}
+BOOL HMDeviceHandler::GetCommModemStatus( PHMHANDLEDATA pHMHandleData,
+                                          LPDWORD lpModemStat )
+{
+  dprintf(("KERNEL32: HandleManager::DeviceHandler::GetCommModemStatus(%08xh,%08xh)\n",
+           pHMHandleData->hHMHandle,
+           lpModemStat));
+  SetLastError(ERROR_INVALID_HANDLE);
+  return(FALSE);
+}
+
+BOOL HMDeviceHandler::SetCommTimeouts( PHMHANDLEDATA pHMHandleData,
+                                       LPCOMMTIMEOUTS lpctmo)
+{
+  dprintf(("KERNEL32: HandleManager::DeviceHandler::SetCommTimeouts(%08xh,%08xh)\n",
+           pHMHandleData->hHMHandle,
+           lpctmo));
+  SetLastError(ERROR_INVALID_HANDLE);
+  return(FALSE);
+}
+
+BOOL HMDeviceHandler::TransmitCommChar( PHMHANDLEDATA pHMHandleData,
+                                        CHAR cChar )
+{
+  dprintf(("KERNEL32: HandleManager::DeviceHandler::TransmitCommChar(%08xh,%02xh)\n",
+           pHMHandleData->hHMHandle,
+           cChar));
+  SetLastError(ERROR_INVALID_HANDLE);
+  return(FALSE);
+}
+
+BOOL HMDeviceHandler::SetCommConfig( PHMHANDLEDATA pHMHandleData,
+                                     LPCOMMCONFIG lpCC,
+                                     DWORD dwSize )
+{
+  dprintf(("KERNEL32: HandleManager::DeviceHandler::SetCommConfig(%08xh,%08xh,%08xh)\n",
+           pHMHandleData->hHMHandle,
+           lpCC,
+           dwSize));
+  SetLastError(ERROR_INVALID_HANDLE);
+  return(FALSE);
+}
+
+BOOL HMDeviceHandler::SetCommBreak( PHMHANDLEDATA pHMHandleData )
+{
+  dprintf(("KERNEL32: HandleManager::DeviceHandler::SetCommBreak(%08xh)\n",
+           pHMHandleData->hHMHandle));
+  SetLastError(ERROR_INVALID_HANDLE);
+  return(FALSE);
+}
+
+BOOL HMDeviceHandler::GetCommConfig( PHMHANDLEDATA pHMHandleData,
+                                     LPCOMMCONFIG lpCC,
+                                     LPDWORD lpdwSize )
+{
+  dprintf(("KERNEL32: HandleManager::DeviceHandler::GetCommConfig(%08xh,%08xh,%08xh)\n",
+           pHMHandleData->hHMHandle,
+           lpCC,
+           lpdwSize));
+  SetLastError(ERROR_INVALID_HANDLE);
+  return(FALSE);
+}
+
+BOOL HMDeviceHandler::EscapeCommFunction( PHMHANDLEDATA pHMHandleData,
+                                          UINT dwFunc )
+{
+  dprintf(("KERNEL32: HandleManager::DeviceHandler::EscapeCommFunction(%08xh,%08xh)\n",
+           pHMHandleData->hHMHandle,
+           dwFunc));
+  SetLastError(ERROR_INVALID_HANDLE);
+  return(FALSE);
+}
+
+BOOL HMDeviceHandler::ClearCommBreak( PHMHANDLEDATA pHMHandleData)
+{
+  dprintf(("KERNEL32: HandleManager::DeviceHandler::ClearCommBreak(%08xh)\n",
+           pHMHandleData->hHMHandle));
+  SetLastError(ERROR_INVALID_HANDLE);
+  return(FALSE);
+}
+
+BOOL HMDeviceHandler::SetDefaultCommConfig( PHMHANDLEDATA pHMHandleData,
+                                            LPCOMMCONFIG lpCC,
+                                            DWORD dwSize)
+{
+  dprintf(("KERNEL32: HandleManager::DeviceHandler::SetDefaultCommConfig(%08xh,%08xh,%08xh)\n",
+           pHMHandleData->hHMHandle,
+           lpCC,
+           dwSize));
+  SetLastError(ERROR_INVALID_HANDLE);
+  return(FALSE);
+}
+
+BOOL HMDeviceHandler::GetDefaultCommConfig( PHMHANDLEDATA pHMHandleData,
+                                            LPCOMMCONFIG lpCC,
+                                            LPDWORD lpdwSize)
+{
+  dprintf(("KERNEL32: HandleManager::DeviceHandler::GetDefaultCommConfig(%08xh,%08xh,%08xh)\n",
+           pHMHandleData->hHMHandle,
+           lpCC,
+           lpdwSize));
+  SetLastError(ERROR_INVALID_HANDLE);
   return(FALSE);
 }
 
 /*****************************************************************************
  * Name      : DWORD HMDeviceHandler::OpenThreadToken
- * Purpose   : 
+ * Purpose   :
  * Variables :
- * Result    : 
+ * Result    :
  * Remark    :
  * Status    :
  *
  * Author    : SvL
  *****************************************************************************/
 
-DWORD HMDeviceHandler::OpenThreadToken(PHMHANDLEDATA pHMHandleData, 
+DWORD HMDeviceHandler::OpenThreadToken(PHMHANDLEDATA pHMHandleData,
                                        HANDLE  ThreadHandle,
                                        BOOL    OpenAsSelf)
 {
@@ -1253,16 +1440,16 @@ DWORD HMDeviceHandler::OpenThreadToken(PHMHANDLEDATA pHMHandleData,
 
 /*****************************************************************************
  * Name      : DWORD HMDeviceHandler::OpenThreadToken
- * Purpose   : 
+ * Purpose   :
  * Variables :
- * Result    : 
+ * Result    :
  * Remark    :
  * Status    :
  *
  * Author    : SvL
  *****************************************************************************/
 
-DWORD HMDeviceHandler::OpenProcessToken(PHMHANDLEDATA pHMHandleData, 
+DWORD HMDeviceHandler::OpenProcessToken(PHMHANDLEDATA pHMHandleData,
                                         DWORD dwUserData,
                                         HANDLE  ProcessHandle)
 {
@@ -1274,9 +1461,9 @@ DWORD HMDeviceHandler::OpenProcessToken(PHMHANDLEDATA pHMHandleData,
 }
 /*****************************************************************************
  * Name      : DWORD HMDeviceHandler::CreateThread
- * Purpose   : 
+ * Purpose   :
  * Variables :
- * Result    : 
+ * Result    :
  * Remark    :
  * Status    :
  *
@@ -1288,7 +1475,7 @@ HANDLE HMDeviceHandler::CreateThread(PHMHANDLEDATA pHMHandleData,
                                      LPTHREAD_START_ROUTINE lpStartAddr,
                                      LPVOID                 lpvThreadParm,
                                      DWORD                  fdwCreate,
-                                     LPDWORD                lpIDThread, 
+                                     LPDWORD                lpIDThread,
                                      BOOL                   fFirstThread)
 {
   dprintf(("KERNEL32: ERROR: HandleManager::DeviceHandler::CreateThread %08xh",
@@ -1298,9 +1485,9 @@ HANDLE HMDeviceHandler::CreateThread(PHMHANDLEDATA pHMHandleData,
 }
 /*****************************************************************************
  * Name      : DWORD HMDeviceHandler::GetThreadPriority
- * Purpose   : 
+ * Purpose   :
  * Variables :
- * Result    : 
+ * Result    :
  * Remark    :
  * Status    :
  *
@@ -1315,9 +1502,9 @@ INT HMDeviceHandler::GetThreadPriority(PHMHANDLEDATA pHMHandleData)
 }
 /*****************************************************************************
  * Name      : DWORD HMDeviceHandler::SuspendThread
- * Purpose   : 
+ * Purpose   :
  * Variables :
- * Result    : 
+ * Result    :
  * Remark    :
  * Status    :
  *
@@ -1332,9 +1519,9 @@ DWORD HMDeviceHandler::SuspendThread(PHMHANDLEDATA pHMHandleData)
 }
 /*****************************************************************************
  * Name      : DWORD HMDeviceHandler::SetThreadPriority
- * Purpose   : 
+ * Purpose   :
  * Variables :
- * Result    : 
+ * Result    :
  * Remark    :
  * Status    :
  *
@@ -1349,9 +1536,9 @@ BOOL HMDeviceHandler::SetThreadPriority(PHMHANDLEDATA pHMHandleData, int priorit
 }
 /*****************************************************************************
  * Name      : DWORD HMDeviceHandler::GetThreadContext
- * Purpose   : 
+ * Purpose   :
  * Variables :
- * Result    : 
+ * Result    :
  * Remark    :
  * Status    :
  *
@@ -1366,9 +1553,9 @@ BOOL HMDeviceHandler::GetThreadContext(PHMHANDLEDATA pHMHandleData, PCONTEXT lpC
 }
 /*****************************************************************************
  * Name      : DWORD HMDeviceHandler::SetThreadContext
- * Purpose   : 
+ * Purpose   :
  * Variables :
- * Result    : 
+ * Result    :
  * Remark    :
  * Status    :
  *
@@ -1383,9 +1570,9 @@ BOOL HMDeviceHandler::SetThreadContext(PHMHANDLEDATA pHMHandleData, const CONTEX
 }
 /*****************************************************************************
  * Name      : DWORD HMDeviceHandler::TerminateThread
- * Purpose   : 
+ * Purpose   :
  * Variables :
- * Result    : 
+ * Result    :
  * Remark    :
  * Status    :
  *
@@ -1400,9 +1587,9 @@ BOOL HMDeviceHandler::TerminateThread(PHMHANDLEDATA pHMHandleData, DWORD exitcod
 }
 /*****************************************************************************
  * Name      : DWORD HMDeviceHandler::ResumeThread
- * Purpose   : 
+ * Purpose   :
  * Variables :
- * Result    : 
+ * Result    :
  * Remark    :
  * Status    :
  *
@@ -1417,9 +1604,9 @@ DWORD  HMDeviceHandler::ResumeThread(PHMHANDLEDATA pHMHandleData)
 }
 /*****************************************************************************
  * Name      : DWORD HMDeviceHandler::GetExitCodeThread
- * Purpose   : 
+ * Purpose   :
  * Variables :
- * Result    : 
+ * Result    :
  * Remark    :
  * Status    :
  *
@@ -1434,9 +1621,9 @@ BOOL HMDeviceHandler::GetExitCodeThread(PHMHANDLEDATA pHMHandleData, LPDWORD lpE
 }
 /*****************************************************************************
  * Name      : DWORD HMDeviceHandler::SetThreadTerminated
- * Purpose   : 
+ * Purpose   :
  * Variables :
- * Result    : 
+ * Result    :
  * Remark    :
  * Status    :
  *
@@ -1449,9 +1636,9 @@ BOOL HMDeviceHandler::SetThreadTerminated(PHMHANDLEDATA pHMHandleData)
 
 /*****************************************************************************
  * Name      : DWORD HMDeviceHandler::PeekNamedPipe
- * Purpose   : 
+ * Purpose   :
  * Variables :
- * Result    : 
+ * Result    :
  * Remark    :
  * Status    :
  *
@@ -1472,21 +1659,21 @@ BOOL HMDeviceHandler::PeekNamedPipe(PHMHANDLEDATA pHMHandleData,
 
 /*****************************************************************************
  * Name      : DWORD HMDeviceHandler::CreateNamedPipe
- * Purpose   : 
+ * Purpose   :
  * Variables :
- * Result    : 
+ * Result    :
  * Remark    :
  * Status    :
  *
  * Author    : Przemyslaw Dobrowolski
  *****************************************************************************/
 DWORD HMDeviceHandler::CreateNamedPipe(PHMHANDLEDATA pHMHandleData,
-                                         LPCTSTR lpName, 
-                                         DWORD  dwOpenMode, 
+                                         LPCTSTR lpName,
+                                         DWORD  dwOpenMode,
                                          DWORD  dwPipeMode,
-                                         DWORD  nMaxInstances, 
+                                         DWORD  nMaxInstances,
                                          DWORD  nOutBufferSize,
-                                         DWORD  nInBufferSize,  
+                                         DWORD  nInBufferSize,
                                          DWORD  nDefaultTimeOut,
                                          LPSECURITY_ATTRIBUTES lpSecurityAttributes)
 {
@@ -1498,15 +1685,15 @@ DWORD HMDeviceHandler::CreateNamedPipe(PHMHANDLEDATA pHMHandleData,
 
 /*****************************************************************************
  * Name      : BOOL HMDeviceHandler::ConnectNamedPipe
- * Purpose   : 
+ * Purpose   :
  * Variables :
- * Result    : 
+ * Result    :
  * Remark    :
  * Status    :
  *
  * Author    : Przemyslaw Dobrowolski
  *****************************************************************************/
-BOOL HMDeviceHandler::ConnectNamedPipe( PHMHANDLEDATA pHMHandleData, 
+BOOL HMDeviceHandler::ConnectNamedPipe( PHMHANDLEDATA pHMHandleData,
                                           LPOVERLAPPED lpOverlapped)
 {
   dprintf(("KERNEL32: ERROR: HandleManager::DeviceHandler::ConnectNamedPipe (%08x)\n",
@@ -1517,9 +1704,9 @@ BOOL HMDeviceHandler::ConnectNamedPipe( PHMHANDLEDATA pHMHandleData,
 
 /*****************************************************************************
  * Name      : BOOL HMDeviceHandler::DisconnectNamedPipe
- * Purpose   : 
+ * Purpose   :
  * Variables :
- * Result    : 
+ * Result    :
  * Remark    :
  * Status    :
  *
@@ -1535,9 +1722,9 @@ BOOL HMDeviceHandler::DisconnectNamedPipe(PHMHANDLEDATA pHMHandleData)
 
 /*****************************************************************************
  * Name      : BOOL HMDeviceHandler::GetNamedPipeHandleState
- * Purpose   : 
+ * Purpose   :
  * Variables :
- * Result    : 
+ * Result    :
  * Remark    :
  * Status    :
  *
@@ -1559,9 +1746,9 @@ BOOL HMDeviceHandler::GetNamedPipeHandleState(PHMHANDLEDATA pHMHandleData,
 
 /*****************************************************************************
  * Name      : BOOL HMDeviceHandler::GetNamedPipeInfo
- * Purpose   : 
+ * Purpose   :
  * Variables :
- * Result    : 
+ * Result    :
  * Remark    :
  * Status    :
  *
@@ -1581,9 +1768,9 @@ BOOL HMDeviceHandler::GetNamedPipeInfo(PHMHANDLEDATA pHMHandleData,
 
 /*****************************************************************************
  * Name      : DWORD HMDeviceHandler::TransactNamedPipe
- * Purpose   : 
+ * Purpose   :
  * Variables :
- * Result    : 
+ * Result    :
  * Remark    :
  * Status    :
  *
@@ -1605,9 +1792,9 @@ DWORD HMDeviceHandler::TransactNamedPipe(PHMHANDLEDATA pHMHandleData,
 
 /*****************************************************************************
  * Name      : BOOL HMDeviceHandler::SetNamedPipeHandleState
- * Purpose   : 
+ * Purpose   :
  * Variables :
- * Result    : 
+ * Result    :
  * Remark    :
  * Status    :
  *
@@ -1626,9 +1813,9 @@ BOOL HMDeviceHandler::SetNamedPipeHandleState(PHMHANDLEDATA pHMHandleData,
 
 /*****************************************************************************
  * Name      : BOOL HMDeviceHandler::CreatePipe
- * Purpose   : 
+ * Purpose   :
  * Variables :
- * Result    : 
+ * Result    :
  * Remark    :
  * Status    :
  *
@@ -1636,9 +1823,9 @@ BOOL HMDeviceHandler::SetNamedPipeHandleState(PHMHANDLEDATA pHMHandleData,
  *****************************************************************************/
 BOOL HMDeviceHandler::CreatePipe(PHMHANDLEDATA pHMHandleDataRead,
                                  PHMHANDLEDATA pHMHandleDataWrite,
-                                 LPSECURITY_ATTRIBUTES lpsa, 
+                                 LPSECURITY_ATTRIBUTES lpsa,
                                  DWORD         cbPipe)
-{ 
+{
   dprintf(("KERNEL32: ERROR: HandleManager::DeviceHandler::CreatePipe (%08x,%08x)\n",
            pHMHandleDataRead->hHMHandle,pHMHandleDataWrite->hHMHandle));
 

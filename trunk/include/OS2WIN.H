@@ -1,20 +1,20 @@
-/* $Id: OS2WIN.H,v 1.8 2000-02-09 13:40:21 sandervl Exp $ */
+/* $Id: OS2WIN.H,v 1.9 2000-09-20 21:32:56 hugh Exp $ */
 #ifndef _OS2WIN_H
-#define _OS2WIN_H
+  #define _OS2WIN_H
 
 #ifdef OS2_INCLUDED
-#include <win32type.h>
+  #include <win32type.h>
 #else
-#include <odin.h>
+  #include <odin.h>
 
-#include <windef.h>
-#include <winbase.h>
-#include <wingdi.h>
-#include <winuser.h>
-#include <winerror.h>
-#include <commdlg.h>
-#include <ddeml.h>
-#include <mmsystem.h>
+  #include <windef.h>
+  #include <winbase.h>
+  #include <wingdi.h>
+  #include <winuser.h>
+  #include <winerror.h>
+  #include <commdlg.h>
+  #include <ddeml.h>
+  #include <mmsystem.h>
 #endif
 
 #include <os2sel.h>

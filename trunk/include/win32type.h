@@ -1,4 +1,4 @@
-/* $Id: win32type.h,v 1.40 2000-06-14 13:19:44 sandervl Exp $ */
+/* $Id: win32type.h,v 1.41 2000-09-20 21:32:58 hugh Exp $ */
 
 /*
  * Win32 type definitions for OS/2
@@ -569,20 +569,23 @@ typedef struct tagRECT
     INT  bottom;
 } RECT, *PRECT, *LPRECT;
 typedef const RECT *LPCRECT;
+#else
+typedef RECT *PRECT;
+typedef const RECT *LPCRECT;
 #endif
 
 
 typedef struct _RGNDATAHEADER {
-    DWORD	dwSize;
-    DWORD	iType;
-    DWORD	nCount;
-    DWORD	nRgnSize;
-    RECT	rcBound;
+    DWORD dwSize;
+    DWORD iType;
+    DWORD nCount;
+    DWORD nRgnSize;
+    RECT  rcBound;
 } RGNDATAHEADER,*LPRGNDATAHEADER;
 
 typedef struct _RGNDATA {
-    RGNDATAHEADER	rdh;
-    char		Buffer[1];
+    RGNDATAHEADER rdh;
+    char    Buffer[1];
 } RGNDATA,*PRGNDATA,*LPRGNDATA;
 
 /* WM_WINDOWPOSCHANGING/CHANGED struct */
@@ -700,6 +703,314 @@ typedef VOID (WIN32API *LPOVERLAPPED_COMPLETION_ROUTINE)(DWORD dwErrorCode,
                                                          DWORD dwNumberOfBytesTransfered,
                                                          LPOVERLAPPED lpOverlapped);
 
+#endif
+
+// COMport defines
+
+#ifndef __WINE_WINBASE_H
+/*
+ Serial provider type
+ */
+#define SP_SERIALCOMM ((DWORD)0x00000001)
+/*
+ Provider SubTypes
+ */
+#define PST_UNSPECIFIED     ((DWORD)0x00000000)
+#define PST_RS232           ((DWORD)0x00000001)
+#define PST_PARALLELPORT    ((DWORD)0x00000002)
+#define PST_RS422           ((DWORD)0x00000003)
+#define PST_RS423           ((DWORD)0x00000004)
+#define PST_RS449           ((DWORD)0x00000005)
+#define PST_MODEM           ((DWORD)0x00000006)
+#define PST_FAX             ((DWORD)0x00000021)
+#define PST_SCANNER         ((DWORD)0x00000022)
+#define PST_NETWORK_BRIDGE  ((DWORD)0x00000100)
+#define PST_LAT             ((DWORD)0x00000101)
+#define PST_TCPIP_TELNET    ((DWORD)0x00000102)
+#define PST_X25             ((DWORD)0x00000103)
+/*
+ Provider Caps
+ */
+#define PCF_DTRDSR          ((DWORD)0x00000001)
+#define PCF_RTSCTS          ((DWORD)0x00000002)
+#define PCF_RLSD            ((DWORD)0x00000004)
+#define PCF_PARITY_CHECK    ((DWORD)0x00000008)
+#define PCF_XONXOFF         ((DWORD)0x00000010)
+#define PCF_SETXCHAR        ((DWORD)0x00000020)
+#define PCF_TOTALTIMEOUTS   ((DWORD)0x00000040)
+#define PCF_INITTIMEOUTS    ((DWORD)0x00000080)
+#define PCF_SPECIALCHARS    ((DWORD)0x00000100)
+#define PCF_16BITMODE       ((DWORD)0x00000200)
+
+/*
+ Provider setable parameters
+ */
+#define SP_PARITY          ((DWORD)0x00000001)
+#define SP_BAUD            ((DWORD)0x00000002)
+#define SP_DATABITS        ((DWORD)0x00000004)
+#define SP_STOPBIT         ((DWORD)0x00000008)
+#define SP_HANDSHAKEING    ((DWORD)0x00000010)
+#define SP_PARITY_CHECK    ((DWORD)0x00000020)
+#define SP_RLSD            ((DWORD)0x00000040)
+/*
+ Settable baudrates in the provider
+*/
+#define BAUD_075           ((DWORD)0x00000001)
+#define BAUD_110           ((DWORD)0x00000002)
+#define BAUD_134_5         ((DWORD)0x00000004)
+#define BAUD_150           ((DWORD)0x00000008)
+#define BAUD_300           ((DWORD)0x00000010)
+#define BAUD_600           ((DWORD)0x00000020)
+#define BAUD_1200          ((DWORD)0x00000040)
+#define BAUD_1800          ((DWORD)0x00000080)
+#define BAUD_2400          ((DWORD)0x00000100)
+#define BAUD_4800          ((DWORD)0x00000200)
+#define BAUD_7200          ((DWORD)0x00000400)
+#define BAUD_9600          ((DWORD)0x00000800)
+#define BAUD_14400         ((DWORD)0x00001000)
+#define BAUD_19200         ((DWORD)0x00002000)
+#define BAUD_38400         ((DWORD)0x00004000)
+#define BAUD_56K           ((DWORD)0x00008000)
+#define BAUD_128K          ((DWORD)0x00010000)
+#define BAUD_115200        ((DWORD)0x00020000)
+#define BAUD_57600         ((DWORD)0x00040000)
+#define BAUD_USER          ((DWORD)0x10000000)
+
+#define CBR_110 0xFF10
+#define CBR_300 0xFF11
+#define CBR_600 0xFF12
+#define CBR_1200        0xFF13
+#define CBR_2400        0xFF14
+#define CBR_4800        0xFF15
+#define CBR_9600        0xFF16
+#define CBR_14400       0xFF17
+#define CBR_19200       0xFF18
+#define CBR_38400       0xFF1B
+#define CBR_56000       0xFF1F
+#define CBR_128000      0xFF23
+#define CBR_256000      0xFF27
+
+/*
+ Setable Databits
+ */
+#define DATABITS_5         ((DWORD)0x00000001)
+#define DATABITS_6         ((DWORD)0x00000002)
+#define DATABITS_7         ((DWORD)0x00000004)
+#define DATABITS_8         ((DWORD)0x00000008)
+#define DATABITS_16        ((DWORD)0x00000010)
+#define DATABITS_16X       ((DWORD)0x00000020)
+
+/*
+ Setable Stop and Parity Bits
+ */
+
+#define STOPBITS_10       ((DWORD)0x00000001)
+#define STOPBITS_15       ((DWORD)0x00000002)
+#define STOPBITS_20       ((DWORD)0x00000004)
+#define PARITY_NONE       ((DWORD)0x00000100)
+#define PARITY_ODD        ((DWORD)0x00000200)
+#define PARITY_EVEN       ((DWORD)0x00000400)
+#define PARITY_MARK       ((DWORD)0x00000800)
+#define PARITY_SPACE      ((DWORD)0x00001000)
+
+#define STOPBITS_10       ((DWORD)0x00000001)
+#define STOPBITS_15       ((DWORD)0x00000002)
+#define STOPBITS_20       ((DWORD)0x00000004)
+#define PARITY_NONE       ((DWORD)0x00000100)
+#define PARITY_ODD        ((DWORD)0x00000200)
+#define PARITY_EVEN       ((DWORD)0x00000400)
+#define PARITY_MARK       ((DWORD)0x00000800)
+#define PARITY_SPACE      ((DWORD)0x00001000)
+
+#define NOPARITY        0
+#define ODDPARITY       1
+#define EVENPARITY      2
+#define MARKPARITY      3
+#define SPACEPARITY     4
+#define ONESTOPBIT      0
+#define ONE5STOPBITS    1
+#define TWOSTOPBITS     2
+
+/* Modem Status Flags */
+#define MS_CTS_ON           ((DWORD)0x0010)
+#define MS_DSR_ON           ((DWORD)0x0020)
+#define MS_RING_ON          ((DWORD)0x0040)
+#define MS_RLSD_ON          ((DWORD)0x0080)
+
+#define RTS_CONTROL_DISABLE     0
+#define RTS_CONTROL_ENABLE      1
+#define RTS_CONTROL_HANDSHAKE   2
+#define RTS_CONTROL_TOGGLE      3
+
+#define DTR_CONTROL_DISABLE     0
+#define DTR_CONTROL_ENABLE      1
+#define DTR_CONTROL_HANDSHAKE   2
+
+#define CSTF_CTSHOLD    0x01
+#define CSTF_DSRHOLD    0x02
+#define CSTF_RLSDHOLD   0x04
+#define CSTF_XOFFHOLD   0x08
+#define CSTF_XOFFSENT   0x10
+#define CSTF_EOF        0x20
+#define CSTF_TXIM       0x40
+
+
+#define IGNORE          0
+#define INFINITE16      0xFFFF
+#define INFINITE      0xFFFFFFFF
+
+#define CE_RXOVER       0x0001
+#define CE_OVERRUN      0x0002
+#define CE_RXPARITY     0x0004
+#define CE_FRAME        0x0008
+#define CE_BREAK        0x0010
+#define CE_CTSTO        0x0020
+#define CE_DSRTO        0x0040
+#define CE_RLSDTO       0x0080
+#define CE_TXFULL       0x0100
+#define CE_PTO          0x0200
+#define CE_IOE          0x0400
+#define CE_DNS          0x0800
+#define CE_OOP          0x1000
+#define CE_MODE 0x8000
+
+#define IE_BADID        -1
+#define IE_OPEN -2
+#define IE_NOPEN        -3
+#define IE_MEMORY       -4
+#define IE_DEFAULT      -5
+#define IE_HARDWARE     -10
+#define IE_BYTESIZE     -11
+#define IE_BAUDRATE     -12
+
+#define EV_RXCHAR       0x0001
+#define EV_RXFLAG       0x0002
+#define EV_TXEMPTY      0x0004
+#define EV_CTS          0x0008
+#define EV_DSR          0x0010
+#define EV_RLSD 0x0020
+#define EV_BREAK        0x0040
+#define EV_ERR          0x0080
+#define EV_RING 0x0100
+#define EV_PERR 0x0200
+#define EV_CTSS 0x0400
+#define EV_DSRS 0x0800
+#define EV_RLSDS        0x1000
+#define EV_RINGTE       0x2000
+#define EV_RingTe       EV_RINGTE
+
+#define SETXOFF 1
+#define SETXON          2
+#define SETRTS          3
+#define CLRRTS          4
+#define SETDTR          5
+#define CLRDTR          6
+#define RESETDEV        7
+#define SETBREAK        8
+#define CLRBREAK        9
+
+#define GETBASEIRQ      10
+
+/* Purge functions for Comm Port */
+#define PURGE_TXABORT       0x0001  /* Kill the pending/current writes to the
+                                       comm port */
+#define PURGE_RXABORT       0x0002  /*Kill the pending/current reads to
+                                     the comm port */
+#define PURGE_TXCLEAR       0x0004  /* Kill the transmit queue if there*/
+#define PURGE_RXCLEAR       0x0008  /* Kill the typeahead buffer if there*/
+
+
+
+typedef struct _COMMPROP {
+    WORD wPacketLength;
+    WORD wPacketVersion;
+    DWORD dwServiceMask;
+    DWORD dwReserved1;
+    DWORD dwMaxTxQueue;
+    DWORD dwMaxRxQueue;
+    DWORD dwMaxBaud;
+    DWORD dwProvSubType;
+    DWORD dwProvCapabilities;
+    DWORD dwSettableParams;
+    DWORD dwSettableBaud;
+    WORD wSettableData;
+    WORD wSettableStopParity;
+    DWORD dwCurrentTxQueue;
+    DWORD dwCurrentRxQueue;
+    DWORD dwProvSpec1;
+    DWORD dwProvSpec2;
+    WCHAR wcProvChar[1];
+} COMMPROP,*LPCOMMPROP;
+
+#ifndef INCL_OS2MM
+
+typedef struct tagCOMSTAT
+{
+    // DWORD status;
+    unsigned fCtsHold:1;
+    unsigned fDsrHold:1;
+    unsigned fRlsdHold:1;
+    unsigned fXoffHold:1;
+    unsigned fXoffSend:1;
+    unsigned fEof:1;
+    unsigned fTxim:1;
+    unsigned fReserved:25;
+    DWORD cbInQue;
+    DWORD cbOutQue;
+} COMSTAT,*LPCOMSTAT;
+
+typedef struct tagDCB
+{
+    DWORD DCBlength;
+    DWORD BaudRate;
+    unsigned fBinary               :1;
+    unsigned fParity               :1;
+    unsigned fOutxCtsFlow          :1;
+    unsigned fOutxDsrFlow          :1;
+    unsigned fDtrControl           :2;
+    unsigned fDsrSensitivity       :1;
+    unsigned fTXContinueOnXoff     :1;
+    unsigned fOutX                 :1;
+    unsigned fInX                  :1;
+    unsigned fErrorChar            :1;
+    unsigned fNull                 :1;
+    unsigned fRtsControl           :2;
+    unsigned fAbortOnError         :1;
+    unsigned fDummy2               :17;
+    WORD wReserved;
+    WORD XonLim;
+    WORD XoffLim;
+    BYTE ByteSize;
+    BYTE Parity;
+    BYTE StopBits;
+    char XonChar;
+    char XoffChar;
+    char ErrorChar;
+    char EofChar;
+    char EvtChar;
+} DCB, *LPDCB;
+
+
+
+typedef struct tagCOMMTIMEOUTS {
+        DWORD   ReadIntervalTimeout;
+        DWORD   ReadTotalTimeoutMultiplier;
+        DWORD   ReadTotalTimeoutConstant;
+        DWORD   WriteTotalTimeoutMultiplier;
+        DWORD   WriteTotalTimeoutConstant;
+} COMMTIMEOUTS,*LPCOMMTIMEOUTS;
+
+typedef struct _COMMCONFIG {
+    DWORD dwSize;
+    WORD wVersion;
+    WORD wReserved;
+    DCB dcb;
+    DWORD dwProviderSubType;
+    DWORD dwProviderOffset;
+    DWORD dwProviderSize;
+    WCHAR wcProviderData[1];
+} COMMCONFIG,*LPCOMMCONFIG;
+#endif // INCL_OS2MM
 #endif
 
 /* Scrollbar info */
