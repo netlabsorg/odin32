@@ -1,9 +1,9 @@
-/* $Id: configure.cmd,v 1.16 2001-02-21 07:57:09 bird Exp $
+/* $Id: configure.cmd,v 1.17 2001-03-11 16:45:28 bird Exp $
  *
  * Configuration script.
  * Generates makefile.inc and an empty .depend file.
  *
- * Copyright (c) 1999-2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * Copyright (c) 1999-2001 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -22,15 +22,7 @@
     sIncFile='Makefile.inc';
 
     /* delete old target files */
-/* This keeps spoiling things!
-    call SysFileDelete '.depend'; */
     call SysFileDelete sIncFile;
-
-    /* create empty .depend file */
-/* This keeps spoiling things!
-    call lineout '.depend', '# Run nmake dep'
-    call lineout '.depend'
-*/
 
     /* open target file */
     if (stream(sIncFile, 'c', 'open write' ) <> '') then
@@ -84,7 +76,7 @@
         call lineout sIncFile, '# IBM VisualAge for C++ base path'
         call lineout sIncFile, '################################################################################'
         sVA = Value('CPPMAIN',, 'OS2ENVIRONMENT'); /* no sure if CPPMAIN or CPPLOCAL is the one to search... */
-        if sVA = '' then
+        if (sVA = '') then
             sVA = SearchPaths('PATH', 'icc.exe', 'BOOKSHELF', '..\bin\icc.exe', 'Path to IBM VisualAge for C++ or IBM C and C++ Compilers, and set its environment you compile:');
         call lineout sIncFile, 'VACPATH          =' sVA
         call lineout sIncFile, ''
@@ -109,22 +101,22 @@
         /*
          * Create output directories.
          */
-        'mkdir Bin > nul 2> nul'
-        'mkdir Bin\Release > nul 2> nul'
-        'mkdir Bin\Debug > nul 2> nul'
+        '@mkdir Bin > nul 2> nul'
+        '@mkdir Bin\Release > nul 2> nul'
+        '@mkdir Bin\Debug > nul 2> nul'
 
-        'mkdir List > nul 2> nul'
-        'mkdir List\Release > nul 2> nul'
-        'mkdir List\Debug > nul 2> nul'
+        '@mkdir List > nul 2> nul'
+        '@mkdir List\Release > nul 2> nul'
+        '@mkdir List\Debug > nul 2> nul'
 
-        'mkdir Object > nul 2> nul'
-        'mkdir Object\Debug > nul 2> nul'
-        'mkdir Object\Release > nul 2> nul'
+        '@mkdir Object > nul 2> nul'
+        '@mkdir Object\Debug > nul 2> nul'
+        '@mkdir Object\Release > nul 2> nul'
 
         /*
          * Display output.
          */
-        if (fInteractive = 1) then
+        if (0 /*fInteractive = 1*/) then /* currently disabled since we're now called from mail config. */
         do
             say 'Configuration completed!'
             say ''
