@@ -1,8 +1,9 @@
-/* $Id: changelog,v 1.2077 2002-05-15 11:42:28 sandervl Exp $ */
+/* $Id: changelog,v 1.2078 2002-05-15 12:35:28 sandervl Exp $ */
 
  2002-05-15: Sander van Leeuwen <sandervl@xs4all.nl>
     - DINPUT:   o Made mouse code reentrant
     - GDI32:    o Fix for EnumFontFamiliesA/W
+    - SETUPAPI: o Resync with latest Wine
 
  2002-05-14: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o CustForce2GBFileSize function added to force 
