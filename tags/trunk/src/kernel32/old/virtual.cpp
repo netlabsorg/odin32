@@ -1,4 +1,4 @@
-/* $Id: virtual.cpp,v 1.1 1999-09-15 23:33:01 sandervl Exp $ */
+/* $Id: virtual.cpp,v 1.2 1999-09-25 19:06:17 sandervl Exp $ */
 
 /*
  * Win32 virtual memory functions
@@ -18,7 +18,7 @@
 #include <os2win.h>
 #include <stdlib.h>
 #include <string.h>
-#include <win\virtual.h>
+#include <virtual.h>
 #include <heapstring.h>
 #include <handlemanager.h>
 #include "mmap.h"

@@ -1,4 +1,4 @@
-/* $Id: wndproc.cpp,v 1.3 1999-09-15 23:20:42 sandervl Exp $ */
+/* $Id: wndproc.cpp,v 1.4 1999-09-25 19:07:34 sandervl Exp $ */
 
 /*
  * Win32 window procedure class for OS/2
@@ -24,6 +24,11 @@
 #include "dlgconvert.h"
 #include "hooks.h"
 #include "wndmsg.h"
+
+HWND Win32ToOS2Handle(HWND hwndWin32)
+{
+  return hwndWin32;
+}
 
 void NotifyParent(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {

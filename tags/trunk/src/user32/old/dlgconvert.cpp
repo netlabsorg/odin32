@@ -1,4 +1,4 @@
-/* $Id: dlgconvert.cpp,v 1.3 1999-09-15 23:20:38 sandervl Exp $ */
+/* $Id: dlgconvert.cpp,v 1.4 1999-09-25 19:07:33 sandervl Exp $ */
 
 /*
  * Win32 runtime dialog conversion functions for OS/2
@@ -43,7 +43,7 @@
 #include "unicode.h"
 #include "nameid.h"
 #include "dlgconvert.h"
-#include "..\pe2lx\dialog.h"
+#include "..\..\pe2lx\dialog.h"
 
 #ifndef BS_TEXT /*PLF Sun  97-06-22 03:07:13  not in watcom's os/2 header */
    #define BS_TEXT                 0x0010

@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.3 1999-09-15 23:20:40 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.4 1999-09-25 19:07:33 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -70,6 +70,101 @@
 // WIN32API YieldTask
 
 
+
+//******************************************************************************
+//******************************************************************************
+#ifdef DEBUG
+void PrintWindowStyle(DWORD dwStyle, DWORD dwExStyle)
+{
+ char style[256] = "";
+ char exstyle[256] = "";
+
+  /* Window styles */
+  if(dwStyle & WS_CHILD)
+        strcat(style, "WS_CHILD ");
+  if(dwStyle & WS_POPUP)
+        strcat(style, "WS_POPUP ");
+  if(dwStyle & WS_VISIBLE)
+        strcat(style, "WS_VISIBLE ");
+  if(dwStyle & WS_DISABLED)
+        strcat(style, "WS_DISABLED ");
+  if(dwStyle & WS_CLIPSIBLINGS)
+        strcat(style, "WS_CLIPSIBLINGS ");
+  if(dwStyle & WS_CLIPCHILDREN)
+        strcat(style, "WS_CLIPCHILDREN ");
+  if(dwStyle & WS_MAXIMIZE)
+        strcat(style, "WS_MAXIMIZE ");
+  if(dwStyle & WS_MINIMIZE)
+        strcat(style, "WS_MINIMIZE ");
+  if(dwStyle & WS_GROUP)
+        strcat(style, "WS_GROUP ");
+  if(dwStyle & WS_TABSTOP)
+        strcat(style, "WS_TABSTOP ");
+
+  if(dwStyle & WS_CAPTION)
+        strcat(style, "WS_CAPTION ");
+  if(dwStyle & WS_DLGFRAME)
+        strcat(style, "WS_DLGFRAME ");
+  if(dwStyle & WS_BORDER)
+        strcat(style, "WS_BORDER ");
+
+  if(dwStyle & WS_VSCROLL)
+        strcat(style, "WS_VSCROLL ");
+  if(dwStyle & WS_HSCROLL)
+        strcat(style, "WS_HSCROLL ");
+  if(dwStyle & WS_SYSMENU)
+        strcat(style, "WS_SYSMENU ");
+  if(dwStyle & WS_THICKFRAME)
+        strcat(style, "WS_THICKFRAME ");
+  if(dwStyle & WS_MINIMIZEBOX)
+        strcat(style, "WS_MINIMIZEBOX ");
+  if(dwStyle & WS_MAXIMIZEBOX)
+        strcat(style, "WS_MAXIMIZEBOX ");
+
+  if(dwExStyle & WS_EX_DLGMODALFRAME)
+        strcat(exstyle, "WS_EX_DLGMODALFRAME ");
+  if(dwExStyle & WS_EX_ACCEPTFILES)
+        strcat(exstyle, "WS_EX_ACCEPTFILES ");
+  if(dwExStyle & WS_EX_NOPARENTNOTIFY)
+        strcat(exstyle, "WS_EX_NOPARENTNOTIFY ");
+  if(dwExStyle & WS_EX_TOPMOST)
+        strcat(exstyle, "WS_EX_TOPMOST ");
+  if(dwExStyle & WS_EX_TRANSPARENT)
+        strcat(exstyle, "WS_EX_TRANSPARENT ");
+
+  if(dwExStyle & WS_EX_MDICHILD)
+        strcat(exstyle, "WS_EX_MDICHILD ");
+  if(dwExStyle & WS_EX_TOOLWINDOW)
+        strcat(exstyle, "WS_EX_TOOLWINDOW ");
+  if(dwExStyle & WS_EX_WINDOWEDGE)
+        strcat(exstyle, "WS_EX_WINDOWEDGE ");
+  if(dwExStyle & WS_EX_CLIENTEDGE)
+        strcat(exstyle, "WS_EX_CLIENTEDGE ");
+  if(dwExStyle & WS_EX_CONTEXTHELP)
+        strcat(exstyle, "WS_EX_CONTEXTHELP ");
+  if(dwExStyle & WS_EX_RIGHT)
+        strcat(exstyle, "WS_EX_RIGHT ");
+  if(dwExStyle & WS_EX_LEFT)
+        strcat(exstyle, "WS_EX_LEFT ");
+  if(dwExStyle & WS_EX_RTLREADING)
+        strcat(exstyle, "WS_EX_RTLREADING ");
+  if(dwExStyle & WS_EX_LTRREADING)
+        strcat(exstyle, "WS_EX_LTRREADING ");
+  if(dwExStyle & WS_EX_LEFTSCROLLBAR)
+        strcat(exstyle, "WS_EX_LEFTSCROLLBAR ");
+  if(dwExStyle & WS_EX_RIGHTSCROLLBAR)
+        strcat(exstyle, "WS_EX_RIGHTSCROLLBAR ");
+  if(dwExStyle & WS_EX_CONTROLPARENT)
+        strcat(exstyle, "WS_EX_CONTROLPARENT ");
+  if(dwExStyle & WS_EX_STATICEDGE)
+        strcat(exstyle, "WS_EX_STATICEDGE ");
+  if(dwExStyle & WS_EX_APPWINDOW)
+        strcat(exstyle, "WS_EX_APPWINDOW ");
+
+  dprintf(("Window style:   %x %s", dwStyle, style));
+  dprintf(("Window exStyle: %x %s", dwExStyle, exstyle));
+}
+#endif
 
 
 //******************************************************************************
@@ -550,6 +645,10 @@ HWND WIN32API CreateWindowExA(DWORD     dwExStyle,
 {
  HWND hwnd;
  Win32WindowProc *window = NULL;
+
+#ifdef DEBUG
+    PrintWindowStyle(dwStyle, dwExStyle);
+#endif
 
   /* @@@PH 98/06/12 CreateWindow crashes somewhere in Open32 */
   if(arg3 == NULL)
@@ -1089,12 +1188,13 @@ SHORT WIN32API GetKeyState( int arg1)
 }
 //******************************************************************************
 //******************************************************************************
-HCURSOR WIN32API SetCursor( HCURSOR arg1)
+HCURSOR WIN32API SetCursor( HCURSOR hcur)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  SetCursor\n");
-#endif
-    return O32_SetCursor(arg1);
+ HCURSOR rc;
+
+    rc = O32_SetCursor(hcur);
+    dprintf(("USER32: SetCursor %x (prev %x (%x))\n", hcur, rc, O32_GetCursor()));
+    return rc;
 }
 //******************************************************************************
 //******************************************************************************
@@ -1260,10 +1360,13 @@ BOOL WIN32API CheckRadioButton( HWND arg1, UINT arg2, UINT arg3, UINT  arg4)
 //******************************************************************************
 HWND WIN32API ChildWindowFromPoint( HWND arg1, POINT  arg2)
 {
+ HWND rc;
+
+    rc = O32_ChildWindowFromPoint(arg1, arg2);
 #ifdef DEBUG
-    WriteLog("USER32:  ChildWindowFromPoint\n");
+    WriteLog("USER32:  ChildWindowFromPoint %x returned %x\n", arg1, rc);
 #endif
-    return O32_ChildWindowFromPoint(arg1, arg2);
+    return rc;
 }
 /*****************************************************************************
  * Name      : HWND WIN32API ChildWindowFromPointEx

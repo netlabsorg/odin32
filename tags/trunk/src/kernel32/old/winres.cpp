@@ -1,4 +1,4 @@
-/* $Id: winres.cpp,v 1.1 1999-09-15 23:33:02 sandervl Exp $ */
+/* $Id: winres.cpp,v 1.2 1999-09-25 19:06:17 sandervl Exp $ */
 
 /*
  * Win32 resource class
@@ -443,6 +443,40 @@ void Win32Resource::destroyAll(Win32Image *module)
     delete(res);
     res  = next;
    }
+}
+//******************************************************************************
+//******************************************************************************
+ULONG Win32Resource::getOS2Size()
+{
+  switch(type) {
+    case NTRT_NEWBITMAP:
+    case NTRT_BITMAP:
+	return QueryConvertedBitmapSize((WINBITMAPINFOHEADER *)winresdata, ressize);
+
+    case NTRT_CURSOR:
+	return QueryConvertedCursorSize((CursorComponent *)winresdata, ressize);
+
+    case NTRT_ICON:
+	return QueryConvertedIconSize((WINBITMAPINFOHEADER *)winresdata, ressize);
+
+    case NTRT_GROUP_ICON:
+    case NTRT_GROUP_CURSOR:
+    case NTRT_ACCELERATORS:
+    case NTRT_NEWMENU:
+    case NTRT_MENU:
+    case NTRT_NEWDIALOG:
+    case NTRT_DIALOG:
+    case NTRT_FONTDIR:
+    case NTRT_FONT:
+    case NTRT_MESSAGETABLE:
+    case NTRT_RCDATA:
+    case NTRT_VERSION:
+    case NTRT_STRING:
+    default:
+	dprintf(("Win32Resource::getOS2Size SHOULDN'T BE CALLED for this resource type (%d) (NOT IMPLEMENTED)!!", type));
+	break;
+  }
+  return 0;
 }
 //******************************************************************************
 //******************************************************************************

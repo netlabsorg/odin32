@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.3 1999-09-15 23:20:36 sandervl Exp $
+# $Id: Makefile,v 1.4 1999-09-25 19:07:32 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -6,17 +6,17 @@
 #       user32.dll makefile
 #
 
-PDWIN32_INCLUDE = ..\..\include
-PDWIN32_LIB = ..\..\lib
-PDWIN32_BIN = ..\..\bin
-PDWIN32_TOOLS = ..\..\tools\bin
+PDWIN32_INCLUDE = ..\..\..\include\old
+PDWIN32_LIB = ..\..\..\lib
+PDWIN32_BIN = .
+PDWIN32_TOOLS = ..\..\..\tools\bin
 
 
 !include $(PDWIN32_INCLUDE)/pdwin32.mk
 
 
-CFLAGS = $(CFLAGS) -I$(PDWIN32_INCLUDE)
-CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
+CFLAGS = $(CFLAGS) -I$(PDWIN32_INCLUDE) -I$(PDWIN32_INCLUDE)\..\win
+CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE) -I$(PDWIN32_INCLUDE)\..\win
 
 
 TARGET = user32
@@ -34,14 +34,12 @@ all: $(TARGET).dll $(TARGET).lib
 $(TARGET).dll: $(OBJS) $(TARGET).def
         $(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) $(TARGET).def \
               $(PDWIN32_LIB)/pmwinx.lib $(PDWIN32_LIB)/gdi32.lib \
-              $(PDWIN32_LIB)/kernel32.lib $(PDWIN32_LIB)/libuls.lib \
+              ..\..\kernel32\old\kernel32.lib $(PDWIN32_LIB)/libuls.lib \
               $(PDWIN32_LIB)/odincrt.lib OS2386.LIB $(RTLLIB_O)
-        $(CP) $@ $(PDWIN32_BIN)
 
 
 $(TARGET).lib: $(TARGET)exp.def
         $(IMPLIB) $(IMPLIBFLAGS) $@ $(TARGET)exp.def
-        $(CP) $@ $(PDWIN32_LIB)
 
 $(TARGET)exp.def: $(TARGET).def
         $(IMPDEF) $** $@

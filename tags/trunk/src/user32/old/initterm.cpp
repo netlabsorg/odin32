@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.3 1999-09-15 23:20:38 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.4 1999-09-25 19:07:33 sandervl Exp $ */
 
 /*
  * USER32 DLL entry point
@@ -33,7 +33,6 @@
 #include <odin.h>
 #include <misc.h>       /*PLF Wed  98-03-18 23:18:29*/
 #include <win32type.h>
-#include <odinlx.h>
 #include <wndclass.h>
 #include <spy.h>
 
@@ -77,9 +76,6 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
 
          CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
 
-	 if(RegisterLxDll(hModule, 0, 0) == FALSE) 
-		return 0UL;
-
          /*******************************************************************/
          /* A DosExitList routine must be used to clean up if runtime calls */
          /* are required and the runtime is dynamically linked.             */
@@ -100,7 +96,6 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
 	 InitSpyQueue();
          break;
       case 1 :
-	 UnregisterLxDll(hModule);
          break;
       default  :
          return 0UL;
