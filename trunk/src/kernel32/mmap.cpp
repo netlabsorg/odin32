@@ -1,4 +1,4 @@
-/* $Id: mmap.cpp,v 1.43 2000-08-04 21:12:08 sandervl Exp $ */
+/* $Id: mmap.cpp,v 1.44 2000-09-10 21:54:07 sandervl Exp $ */
 
 /*
  * Win32 Memory mapped file & view classes
@@ -121,6 +121,7 @@ BOOL Win32MemMap::Init(HANDLE hMemMap)
 		dprintf(("Win32MemMap::Init: DuplicateHandle failed!"));
 		goto fail;
      	}
+	mSize = SetFilePointer(hMemFile, 0, NULL, FILE_BEGIN);
 	mSize = SetFilePointer(hMemFile, 0, NULL, FILE_END);
 	if(mSize == -1) {
 		dprintf(("Win32MemMap::init: SetFilePointer failed to set pos end"));

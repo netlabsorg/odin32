@@ -1,4 +1,4 @@
-/* $Id: initsystem.cpp,v 1.14 2000-08-31 12:47:51 sandervl Exp $ */
+/* $Id: initsystem.cpp,v 1.15 2000-09-10 21:54:06 sandervl Exp $ */
 /*
  * Odin system initialization (registry, directories & environment)
  *
@@ -98,6 +98,7 @@ BOOL InitSystemAndRegistry()
  char *buf;
  DWORD val;
  char  digbuf[16];
+ char  shellpath[260];
 
    if(RegCreateKeyA(HKEY_LOCAL_MACHINE,"SYSTEM\\CurrentControlSet\\Control\\Windows",&hkey)!=ERROR_SUCCESS) {
       	dprintf(("InitRegistry: Unable to register system information\n"));
@@ -115,6 +116,30 @@ BOOL InitSystemAndRegistry()
    RegSetValueExA(hkey,"CSDVersion",0,REG_DWORD, (LPBYTE)&val, sizeof(DWORD));
    RegSetValueExA(hkey,"ShutdownTime",0,REG_DWORD, (LPBYTE)ShutdownTime, sizeof(ShutdownTime));
    RegCloseKey(hkey);
+
+   //CurrentVersion\RunOnce
+   if(RegCreateKeyA(HKEY_LOCAL_MACHINE,"Software\\Microsoft\\Windows\\CurrentVersion\\RunOnce",&hkey)!=ERROR_SUCCESS) {
+      	dprintf(("InitRegistry: Unable to register system information (2)"));
+	return FALSE;
+   }
+   RegCloseKey(hkey);
+
+   //System\CurrentControlSet\Control\Session Manager
+   if(RegCreateKeyA(HKEY_LOCAL_MACHINE,"System\\CurrentControlSet\\Control\\Session Manager",&hkey)!=ERROR_SUCCESS) {
+      	dprintf(("InitRegistry: Unable to register system information (2)"));
+	return FALSE;
+   }
+   RegCloseKey(hkey);
+
+   if(RegCreateKeyA(HKEY_LOCAL_MACHINE,"Software\\Microsoft\\Windows\\CurrentVersion\\App Paths\\iexplore.exe",&hkey)!=ERROR_SUCCESS) {
+      	dprintf(("InitRegistry: Unable to register system information (2)"));
+	return FALSE;
+   }
+   strcpy(shellpath, InternalGetWindowsDirectoryA());
+   strcat(shellpath, "\\IEXPLORE.EXE");
+   RegSetValueExA(hkey, "", 0, REG_SZ, (LPBYTE)shellpath, strlen(shellpath)+1);
+   RegCloseKey(hkey);
+
 
    if(RegCreateKeyA(HKEY_LOCAL_MACHINE,"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion",&hkey)!=ERROR_SUCCESS) {
       	dprintf(("InitRegistry: Unable to register system information (2)"));
@@ -150,8 +175,6 @@ BOOL InitSystemAndRegistry()
    //"Recent"="C:\WINDOWS\Recent"
    //"NetHood"="C:\WINDOWS\NetHood"
    //"Personal"="C:\My Documents"
-
-   char shellpath[260];
 
    if(RegCreateKeyA(HKEY_CURRENT_USER,"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders",&hkey)!=ERROR_SUCCESS) {
    	dprintf(("InitRegistry: Unable to register system information (3)"));
