@@ -1,4 +1,3 @@
-/* $Id: obj_shellfolder.h,v 1.9 2002-02-06 23:54:01 sandervl Exp $ */
 /*
  * Defines the COM interfaces and APIs related to IShellFolder
  *
