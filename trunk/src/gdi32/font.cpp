@@ -1,4 +1,4 @@
-/* $Id: font.cpp,v 1.15 2000-12-06 15:39:56 phaller Exp $ */
+/* $Id: font.cpp,v 1.16 2000-12-30 10:17:23 sandervl Exp $ */
 
 /*
  * GDI32 font apis
@@ -35,6 +35,7 @@
 #include <heapstring.h>
 #include <win\options.h>
 #include <wprocess.h>
+#include <odininst.h>
 
 #define DBG_LOCALLOG    DBG_font
 #include "dbglocal.h"
@@ -108,7 +109,6 @@ static CHARSETINFO FONT_tci[MAXTCIINDEX] = {
  * Author    : Patrick Haller [Fri, 1998/06/12 03:44]
  *****************************************************************************/
 
-#define ODINFONTSECTION "Font Mapping"
 static void iFontRename(LPCSTR lpstrFaceOriginal,
                         LPSTR  lpstrFaceTemp)
 {
