@@ -1,4 +1,4 @@
-/* $Id: combo.cpp,v 1.20 1999-12-21 17:03:43 cbratschi Exp $ */
+/* $Id: combo.cpp,v 1.21 1999-12-27 18:43:41 sandervl Exp $ */
 /*
  * Combo controls
  *
@@ -1271,7 +1271,7 @@ static LRESULT COMBO_Command(HWND hwnd,WPARAM wParam,LPARAM lParam)
 {
    LPHEADCOMBO lphc = (LPHEADCOMBO)GetInfoPtr(hwnd);
 
-   if ( lphc->wState & CBF_EDIT && lphc->hWndEdit == hwnd )
+   if ( lphc->wState & CBF_EDIT && lphc->hWndEdit == lParam )
    {
        /* ">> 8" makes gcc generate jump-table instead of cmp ladder */
 
@@ -1328,7 +1328,7 @@ static LRESULT COMBO_Command(HWND hwnd,WPARAM wParam,LPARAM lParam)
                 CB_NOTIFY( lphc, CBN_ERRSPACE );
        }
    }
-   else if( lphc->hWndLBox == hwnd )
+   else if( lphc->hWndLBox == lParam )
    {
        switch( HIWORD(wParam) )
        {

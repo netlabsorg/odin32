@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.71 1999-12-27 14:41:42 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.72 1999-12-27 18:43:42 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -35,6 +35,7 @@
 #include <wprocess.h>
 #include "caret.h"
 #include "timer.h"
+#include <codepage.h>
 
 HMQ  hmq = 0;                             /* Message queue handle         */
 HAB  hab = 0;
@@ -83,6 +84,9 @@ BOOL InitPM()
   SetThreadHAB(hab);
   dprintf(("InitPM: hmq = %x", hmq));
   SetThreadMessageQueue(hmq);
+
+  BOOL rc = WinSetCp(hmq, GetDisplayCodepage());
+  dprintf(("InitPM: WinSetCP was %sOK", rc ? "" : "not "));
 
   if(!WinRegisterClass(                 /* Register window class        */
      hab,                               /* Anchor block handle          */
