@@ -1,4 +1,8 @@
-/* $Id: ChangeLog,v 1.2591 2003-05-30 11:37:00 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2592 2003-06-02 16:25:52 sandervl Exp $ */
+
+ 2003-06-02: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o CreatePipe: create unique named pipe
+                o CreateNamedPipe: fixed return value + wrong check for duplex pipe
 
  2003-05-29: Platon Fomichev <stauff@innotek   >
     - COMCTL32: o Listview selection draw code was not ok with OS/2 look
