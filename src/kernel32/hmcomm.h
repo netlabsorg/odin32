@@ -1,4 +1,4 @@
-/* $Id: hmcomm.h,v 1.5 2000-09-20 21:32:54 hugh Exp $ */
+/* $Id: hmcomm.h,v 1.6 2000-11-14 14:26:59 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -22,6 +22,9 @@ class HMDeviceCommClass : public HMDeviceHandler
   public:
 
   HMDeviceCommClass(LPCSTR lpDeviceName);
+
+  //checks if device name belongs to this class
+  virtual BOOL FindDevice(LPCSTR lpClassDevName, LPCSTR lpDeviceName, int namelength);
 
   /* this is the handler method for calls to CreateFile() */
   virtual DWORD  CreateFile (LPCSTR        lpFileName,

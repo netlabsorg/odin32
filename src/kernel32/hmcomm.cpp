@@ -1,4 +1,4 @@
-/* $Id: hmcomm.cpp,v 1.5 2000-09-20 21:32:51 hugh Exp $ */
+/* $Id: hmcomm.cpp,v 1.6 2000-11-14 14:26:59 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -13,7 +13,8 @@
 
 #include <os2win.h>
 #include <string.h>
-#include "handlemanager.h"
+#include <handlemanager.h>
+#include <heapstring.h>
 #include "hmdevice.h"
 #include "hmcomm.h"
 #include "oslibdos.h"
@@ -96,7 +97,7 @@ typedef struct _HMDEVCOMDATA
   DCBINFO dcbOS2;
 } HMDEVCOMDATA, *PHMDEVCOMDATA;
 
-VOID * CreateDevData()
+VOID *CreateDevData()
 {
   PHMDEVCOMDATA pData;
   pData = new HMDEVCOMDATA();
@@ -125,27 +126,46 @@ HMDeviceCommClass::HMDeviceCommClass(LPCSTR lpDeviceName) : HMDeviceHandler(lpDe
   pData = CreateDevData();
   if(pData!= NULL)
     HMDeviceRegisterEx("COM1", this, pData);
-  pData = CreateDevData();
-  if(pData!= NULL)
-    HMDeviceRegisterEx("COM2", this, pData);
-  pData = CreateDevData();
-  if(pData!= NULL)
-    HMDeviceRegisterEx("COM3", this, pData);
-  pData = CreateDevData();
-  if(pData!= NULL)
-    HMDeviceRegisterEx("COM4", this, pData);
-  pData = CreateDevData();
-  if(pData!= NULL)
-    HMDeviceRegisterEx("COM5", this, pData);
-  pData = CreateDevData();
-  if(pData!= NULL)
-    HMDeviceRegisterEx("COM6", this, pData);
-  pData = CreateDevData();
-  if(pData!= NULL)
-    HMDeviceRegisterEx("COM7", this, pData);
-  pData = CreateDevData();
-  if(pData!= NULL)
-    HMDeviceRegisterEx("COM8", this, pData);
+}
+
+/*****************************************************************************
+ * Name      : HMDeviceCommClass::FindDevice
+ * Purpose   : Checks if lpDeviceName belongs to this device class
+ * Parameters: LPCSTR lpClassDevName
+ *             LPCSTR lpDeviceName
+ *             int namelength
+ * Variables :
+ * Result    : checks if name is COMx or COMx: (x=1..8)
+ * Remark    :
+ * Status    :
+ *
+ * Author    : SvL
+ *****************************************************************************/
+BOOL HMDeviceCommClass::FindDevice(LPCSTR lpClassDevName, LPCSTR lpDeviceName, int namelength)
+{
+    if(namelength > 5)
+        return FALSE;  //can't be com name
+
+    //first 3 letters 'COM'?
+    if(lstrncmpiA(lpDeviceName, lpClassDevName, 3) != 0) {
+        return FALSE;
+    }
+
+    if(namelength == 5 && lpDeviceName[4] != ':') {
+        return FALSE;
+    }
+    switch(lpDeviceName[3]) {
+    case '1':
+    case '2':
+    case '3':
+    case '4':
+    case '5':
+    case '6':
+    case '7':
+    case '8':
+        return TRUE;    //we support up to COM8
+    }
+    return FALSE;
 }
 
 DWORD HMDeviceCommClass::CreateFile(LPCSTR lpFileName,
@@ -153,13 +173,21 @@ DWORD HMDeviceCommClass::CreateFile(LPCSTR lpFileName,
                                     PVOID lpSecurityAttributes,
                                     PHMHANDLEDATA pHMHandleDataTemplate)
 {
+ char comname[6];
+
   dprintf(("HMComm: Serial communication port %s open request\n", lpFileName));
 
+  if(strlen(lpFileName) > 5) {
+    return -1;  //safety check (unnecessary..)
+  }
   pHMHandleData->hHMHandle = 0;
+
+  strcpy(comname, lpFileName);
+  comname[4] = 0;   //get rid of : (if present) (eg COM1:)
 
   //AH: TODO parse Win32 security handles
   OSLibDosDisableHardError(TRUE);
-  pHMHandleData->hHMHandle = OSLibDosOpen((char*)lpFileName,
+  pHMHandleData->hHMHandle = OSLibDosOpen(comname,
                                           OSLIB_ACCESS_READWRITE |
                                           OSLIB_ACCESS_SHAREDENYREAD |
                                           OSLIB_ACCESS_SHAREDENYWRITE);
@@ -183,7 +211,7 @@ DWORD HMDeviceCommClass::CreateFile(LPCSTR lpFileName,
                       0,0,0,
                       &((PHMDEVCOMDATA)pHMHandleData->lpHandlerData)->dcbOS2,ulLen,&ulLen);
 
-    if(!rc)
+    if(rc)
     {
       return -1;
     }

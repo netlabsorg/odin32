@@ -1,4 +1,4 @@
-/* $Id: hmdevice.h,v 1.23 2000-09-20 21:32:54 hugh Exp $ */
+/* $Id: hmdevice.h,v 1.24 2000-11-14 14:27:01 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -68,6 +68,9 @@ public:
   LPCSTR lpHMDeviceName;                   /* a reference to the device name */
 
   HMDeviceHandler(LPCSTR lpDeviceName);      /* constructor with device name */
+
+  //checks if device name belongs to this class
+  virtual BOOL FindDevice(LPCSTR lpClassDevName, LPCSTR lpDeviceName, int namelength);
 
   /***********************************
    * handle generic standard methods *

@@ -1,4 +1,4 @@
-/* $Id: hmdisk.h,v 1.1 2000-09-13 21:10:58 sandervl Exp $ */
+/* $Id: hmdisk.h,v 1.2 2000-11-14 14:27:04 sandervl Exp $ */
 
 #ifndef __HMDISK_H__
 #define __HMDISK_H__
@@ -18,7 +18,10 @@
 class HMDeviceDiskClass : public HMDeviceKernelObjectClass
 {
 public:
-  HMDeviceDiskClass(LPCSTR lpDeviceName) : HMDeviceKernelObjectClass(lpDeviceName) {};
+  HMDeviceDiskClass(LPCSTR lpDeviceName);
+
+  //checks if device name belongs to this class
+  virtual BOOL FindDevice(LPCSTR lpClassDevName, LPCSTR lpDeviceName, int namelength);
 
   /* this is a handler method for calls to CreateFile() */
   virtual DWORD  CreateFile (LPCSTR        lpFileName,
