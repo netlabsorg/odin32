@@ -1,4 +1,4 @@
-/* $Id: waveoutdart.cpp,v 1.1 2001-03-23 16:23:46 sandervl Exp $ */
+/* $Id: waveoutdart.cpp,v 1.2 2001-04-01 12:31:01 sandervl Exp $ */
 
 /*
  * Wave playback class (DART)
@@ -638,7 +638,7 @@ void DartWaveOut::writeBuffer()
     while(curhdr) {
         buflength = min((ULONG)MixBuffer[curFillBuf].ulBufferLength - curPlayPos,
                         (ULONG)curhdr->dwBufferLength - curFillPos);
-        dprintf2(("WINMM: copied %d bytes, cufFillPos = %d, dwBufferLength = %d\n", buflength, curFillPos, curhdr->dwBufferLength));
+        dprintf2(("WINMM: copied %d bytes, cufFillPos = %d, curPlayPos = %d, dwBufferLength = %d\n", buflength, curFillPos, curPlayPos, curhdr->dwBufferLength));
 
         memcpy((char *)MixBuffer[curFillBuf].pBuffer + curPlayPos,
                curhdr->lpData + curFillPos,  buflength);
