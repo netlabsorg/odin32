@@ -1,4 +1,4 @@
-/* $Id: codepage.cpp,v 1.7 2001-01-24 20:33:37 sandervl Exp $
+/* $Id: codepage.cpp,v 1.8 2001-03-31 10:39:01 sandervl Exp $
 **
 ** Module   :CODEPAGE.CPP
 ** Abstract :
@@ -23,26 +23,35 @@
 static UconvObject DisplayUconv = NULL;
 static UconvObject WindowsUconv = NULL;
 
+static ULONG windowCodePage = -1;
+static ULONG displayCodePage = -1;
+
 ULONG GetDisplayCodepage()
 {
- static ULONG codepage = -1;
-
-    if(codepage == -1) {
+    if(displayCodePage == -1) {
         //default codepage is 1252 (same as default Windows codepage)
-    	codepage = PROFILE_GetOdinIniInt(CODEPAGE_SECTION, "DISPLAY", 1252);
+//    	displayCodePage = PROFILE_GetOdinIniInt(CODEPAGE_SECTION, "DISPLAY", 1252);
+    	displayCodePage = PROFILE_GetOdinIniInt(CODEPAGE_SECTION, "DISPLAY", 0);
     }
-    return codepage;
+    return displayCodePage;
 }
 
 ULONG GetWindowsCodepage()
 {
- static ULONG codepage = -1;
-
-    if(codepage == -1) {
+    if(windowCodePage == -1) {
         //default codepage is 1252 (same as default Windows codepage)
-    	codepage = PROFILE_GetOdinIniInt(CODEPAGE_SECTION, "WINDOWS", 1252);
+//    	windowCodePage = PROFILE_GetOdinIniInt(CODEPAGE_SECTION, "WINDOWS", 1252);
+    	windowCodePage = PROFILE_GetOdinIniInt(CODEPAGE_SECTION, "WINDOWS", 0);
     }
-    return codepage;
+    return windowCodePage;
+}
+
+UINT WIN32API GetACP()
+{
+    UINT codepage = GetDisplayCodepage();
+    dprintf(("GetACP -> %d", codepage));
+
+    return(codepage);
 }
 
 static UconvObject GetObjectByCP(ULONG codepage)
