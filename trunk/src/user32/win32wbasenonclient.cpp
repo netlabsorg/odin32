@@ -1,4 +1,4 @@
-/* $Id: win32wbasenonclient.cpp,v 1.42 2002-08-14 10:37:45 sandervl Exp $ */
+/* $Id: win32wbasenonclient.cpp,v 1.43 2002-08-15 15:45:46 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (non-client methods)
  *
@@ -1261,6 +1261,12 @@ LONG Win32BaseWindow::HandleNCRButtonUp(WPARAM wParam,LPARAM lParam)
   switch(wParam)
   {
     case HTCAPTION:
+      //we receive a HTCAPTION rbuttonup for RMB clicks on icon of minimized mdi windows
+      if (fOS2Look && ((dwStyle & (WS_SYSMENU | WS_MINIMIZE)) == (WS_SYSMENU | WS_MINIMIZE)) )
+      {
+          return HandleNCRButtonUp(HTSYSMENU, lParam);
+      }
+
       if (GetActiveWindow() != Win32Hwnd)
         SetActiveWindow();
 
@@ -1273,7 +1279,11 @@ LONG Win32BaseWindow::HandleNCRButtonUp(WPARAM wParam,LPARAM lParam)
     case HTSYSMENU:
       if (fOS2Look && (dwStyle & WS_SYSMENU))
       {
-        SendMessageA( getWindowHandle(), WM_SYSCOMMAND,SC_MOUSEMENU+HTSYSMENU,lParam);
+        if (fOS2Look == OS2_APPEARANCE)
+          SendMessageA( getWindowHandle(), WM_SYSCOMMAND,SC_MOUSEMENU+HTSYSMENU,lParam);
+        else
+        if (fOS2Look == OS2_APPEARANCE_SYSMENU)
+          OSLibPostMessageDirect( getOS2FrameWindowHandle(), OSWM_SYSCOMMAND, OSSC_SYSMENU,0);
       }
       break;
 
