@@ -1,4 +1,4 @@
-/* $Id: oslibdos.h,v 1.9 1999-12-01 18:40:48 sandervl Exp $ */
+/* $Id: oslibdos.h,v 1.10 2000-01-02 22:51:12 sandervl Exp $ */
 
 /*
  * Wrappers for OS/2 Dos* API
@@ -99,5 +99,31 @@ DWORD OSLibDosSetFilePtr2(DWORD hFile, DWORD offset, DWORD method);
 
 void OSLibDosDisableHardError(BOOL fTurnOff);
 BOOL OSLibDosQueryProcTimes(DWORD procid, ULONG *kerneltime, ULONG *usertime);
+
+BOOL OSLibDosTransactNamedPipe( DWORD  hNamedPipe,
+                                LPVOID lpInBuffer,
+                                DWORD nInBufferSize,
+                                LPVOID lpOutBuffer,
+                                DWORD nOutBufferSize,
+                                LPOVERLAPPED lpOverlapped );
+BOOL OSLibDosCallNamedPipe( LPCTSTR lpNamedPipeName,
+                         LPVOID  lpInBuffer,
+                         DWORD   nInBufferSize,
+                         LPVOID  lpOutBuffer,
+                         DWORD   nOutBufferSize,
+                         LPDWORD lpBytesRead,
+                         DWORD   nTimeOut );
+
+BOOL OSLibDosConnectNamedPipe(DWORD hNamedPipe, LPOVERLAPPED lpOverlapped);
+
+DWORD OSLibDosCreateNamedPipe(LPCTSTR lpName, 
+                              DWORD   dwOpenMode, 
+                              DWORD   dwPipeMode,
+                              DWORD   nMaxInstances, 
+                              DWORD   nOutBufferSize,
+                              DWORD   nInBufferSize, 
+                              DWORD   nDefaultTimeOut,
+                              void* lpSecurityAttributes);
+
 
 #endif

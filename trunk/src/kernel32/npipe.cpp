@@ -1,3 +1,4 @@
+/* $Id: npipe.cpp,v 1.4 2000-01-02 22:51:58 sandervl Exp $ */
 /*
  * Win32 Named pipes API 
  *
