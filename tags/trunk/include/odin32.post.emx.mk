@@ -1,4 +1,4 @@
-# $Id: odin32.post.emx.mk,v 1.4 2000-12-03 01:23:00 bird Exp $
+# $Id: odin32.post.emx.mk,v 1.5 2000-12-03 01:34:29 bird Exp $
 
 #
 # Odin32 API
@@ -122,7 +122,8 @@ all:    $(OBJDIR) \
 # Dll: Lib rule - build importlibrary (and evt. other libs)
 #
 !ifndef NO_LIB_RULE
-lib:    $(OBJDIR)\$(ORGTARGET).lib \
+lib:    $(OBJDIR) \
+        $(OBJDIR)\$(ORGTARGET).lib \
         $(ODIN32_LIB)\$(ORGTARGET).lib
 !endif
 
@@ -354,11 +355,11 @@ $(OBJDIR)\$(TARGET).sym: $(OBJDIR)\$(TARGET).map
 #
 !ifndef LIBTARGET
 !ifndef NOTEXPDEF
-$(OBJDIR)\$(ORGTARGET).lib: $(OBJDIR) $(OBJDIR)\$(ORGTARGET)exp.def
-    $(IMPLIB) $(IMPLIBFLAGS) $@ $(OBJDIR)\$(ORGTARGET)exp.def
+$(OBJDIR)\$(ORGTARGET).lib: $(OBJDIR)\$(ORGTARGET)exp.def
+    $(IMPLIB) $(IMPLIBFLAGS) $@ $**
 !else
-$(OBJDIR)\$(TARGET).lib: $(OBJDIR) $(DEFFILE)
-    $(IMPLIB) $(IMPLIBFLAGS) $@ $(DEFFILE)
+$(OBJDIR)\$(TARGET).lib: $(DEFFILE)
+    $(IMPLIB) $(IMPLIBFLAGS) $@ $**
 !endif
 !endif
 
@@ -368,8 +369,8 @@ $(OBJDIR)\$(TARGET).lib: $(OBJDIR) $(DEFFILE)
 #
 !ifndef LIBTARGET
 !ifndef NOTEXPDEF
-$(OBJDIR)\$(ORGTARGET)exp.def: $(OBJDIR) $(DEFFILE)
-    $(IMPDEF) $(DEFFILE) $@
+$(OBJDIR)\$(ORGTARGET)exp.def: $(DEFFILE)
+    $(IMPDEF) $** $@
 !endif
 !endif
 
