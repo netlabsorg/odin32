@@ -1,14 +1,17 @@
-/* $Id: obj_contextmenu.h,v 1.3 1999-06-10 16:21:54 achimha Exp $ */
 /************************************************************
  *    IContextMenu
  */
 
-#ifndef __WINE_WINE_OBJ_ICONTEXTMENU_H
-#define __WINE_WINE_OBJ_ICONTEXTMENU_H
+#ifndef __WINE_WINE_OBJ_CONTEXTMENU_H
+#define __WINE_WINE_OBJ_CONTEXTMENU_H
 
 #include "winbase.h"
 #include "winuser.h"
 #include "wine/obj_base.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* defined(__cplusplus) */
 
 DEFINE_SHLGUID(IID_IContextMenu,        0x000214E4L, 0, 0);
 DEFINE_SHLGUID(IID_IContextMenu2,       0x000214F4L, 0, 0);
@@ -125,5 +128,8 @@ ICOM_DEFINE(IContextMenu,IUnknown)
 #define IContextMenu_HandleMenuMsg(p,a,b,c)		ICOM_CALL3(HandleMenuMsg,p,a,b,c)
 #endif
 
+#ifdef __cplusplus
+} /* extern "C" */
+#endif /* defined(__cplusplus) */
 
-#endif /* __WINE_WINE_OBJ_ICONTEXTMENU_H */
+#endif /* __WINE_WINE_OBJ_CONTEXTMENU_H */

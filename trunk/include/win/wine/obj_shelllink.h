@@ -1,4 +1,3 @@
-/* $Id: obj_shelllink.h,v 1.3 1999-06-10 16:21:56 achimha Exp $ */
 /*
  * Defines the COM interfaces and APIs related to IShellLink.
  *
@@ -11,6 +10,10 @@
 #include "wine/obj_base.h"
 #include "winbase.h"
 #include "shell.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* defined(__cplusplus) */
 
 /*****************************************************************************
  * Predeclare the interfaces
@@ -147,5 +150,9 @@ ICOM_DEFINE(IShellLinkW,IUnknown)
 #define IShellLinkW_Resolve(p,a,b)		ICOM_CALL2(Resolve,p,a,b)
 #define IShellLinkW_SetPath(p,a)			ICOM_CALL1(SetPath,p,a)
 #endif
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif /* defined(__cplusplus) */
 
 #endif /* __WINE_WINE_OBJ_SHELLLINK_H */

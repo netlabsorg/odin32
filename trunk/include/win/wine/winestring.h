@@ -1,19 +1,12 @@
-/* $Id: winestring.h,v 1.4 1999-06-10 16:21:57 achimha Exp $ */
-#ifndef _INCLUDE_WINE_STRINGS_H
-#define _INCLUDE_WINE_STRINGS_H
+#ifndef __WINE_WINE_WINESTRING_H
+#define __WINE_WINE_WINESTRING_H
 
 #include "windef.h"
 
 INT16       WINAPI WideCharToLocal16(LPSTR,LPWSTR,INT16);
-INT       WINAPI WideCharToLocal(LPSTR,LPWSTR,INT);
+INT         WINAPI WideCharToLocal(LPSTR,LPWSTR,INT);
 INT16       WINAPI LocalToWideChar16(LPWSTR,LPSTR,INT16);
-INT       WINAPI LocalToWideChar(LPWSTR,LPSTR,INT);
-INT       WINAPI lstrncmpA(LPCSTR,LPCSTR,INT);
-INT       WINAPI lstrncmpW(LPCWSTR,LPCWSTR,INT);
-INT       WINAPI lstrncmpiA(LPCSTR,LPCSTR,INT);
-INT       WINAPI lstrncmpiW(LPCWSTR,LPCWSTR,INT);
-//LPWSTR      WINAPI lstrcpyAtoW(LPWSTR,LPCSTR);
-//LPSTR       WINAPI lstrcpyWtoA(LPSTR,LPCWSTR);
-//LPWSTR      WINAPI lstrcpynAtoW(LPWSTR,LPCSTR,INT);
-//LPSTR       WINAPI lstrcpynWtoA(LPSTR,LPCWSTR,INT);
-#endif /* _INCLUDE_WINE_STRINGS_H */
+INT         WINAPI LocalToWideChar(LPWSTR,LPSTR,INT);
+#include <heapstring.h>
+
+#endif /* __WINE_WINE_WINESTRING_H */

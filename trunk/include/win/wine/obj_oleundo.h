@@ -1,4 +1,3 @@
-/* $Id: obj_oleundo.h,v 1.3 1999-06-10 16:21:55 achimha Exp $ */
 /*
  * Defines the COM interfaces and APIs from ocidl.h which pertain to Undo/Redo
  *
@@ -10,6 +9,10 @@
 
 
 #include "winbase.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* defined(__cplusplus) */
 
 /*****************************************************************************
  * Predeclare the interfaces
@@ -112,7 +115,7 @@ ICOM_DEFINE(IQuickActivate,IUnknown)
 #define ICOM_INTERFACE IPointerInactive
 #define IPointerInactive_METHODS \
 	ICOM_METHOD1(HRESULT,GetActivationPolicy, DWORD*,pdwPolicy) \
-	ICOM_METHOD4(HRESULT,OnInactiveMoveMouse, LPCRECT,pRectBounds, LONG,x, LONG,y, DWORD,grfKeyState) \
+	ICOM_METHOD4(HRESULT,OnInactiveMouseMove, LPCRECT,pRectBounds, LONG,x, LONG,y, DWORD,grfKeyState) \
 	ICOM_METHOD5(HRESULT,OnInactiveSetCursor, LPCRECT,pRectBounds, LONG,x, LONG,y, DWORD,dwMouseMsg, BOOL,fSetAlways) 
 #define IPointerInactive_IMETHODS \
 	IUnknown_IMETHODS \
@@ -295,7 +298,9 @@ ICOM_DEFINE(IEnumOleUndoUnits,IUnknown)
 #define IEnumOleUndoUnits_Clone(p,a)            ICOM_CALL1(Clone,p,a)
 #endif
 
-
+#ifdef __cplusplus
+} /* extern "C" */
+#endif /* defined(__cplusplus) */
 
 #endif /* __WINE_WINE_OBJ_OLEUNDO_H */
 

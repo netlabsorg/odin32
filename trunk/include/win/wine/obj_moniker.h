@@ -1,4 +1,3 @@
-/* $Id: obj_moniker.h,v 1.3 1999-06-10 16:21:55 achimha Exp $ */
 /*
  * Defines the COM interfaces and APIs related to the moniker functionality.
  */
@@ -8,6 +7,10 @@
 #include "wine/obj_base.h"
 #include "wine/obj_storage.h"
 #include "wine/obj_misc.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* defined(__cplusplus) */
 
 /*****************************************************************************
  * Predeclare the interfaces
@@ -341,8 +344,8 @@ ICOM_DEFINE(IRunningObjectTable,IUnknown)
 #define IRunningObjectTable_EnumRunning(p,a)           ICOM_CALL1(EnumRunning,p,a)
 #endif
 
-HRESULT WINAPI GetRunningObjectTable(DWORD reserved, LPVOID *pprot);
-HRESULT WINAPI GetRunningObjectTable16(DWORD reserved, LPVOID *pprot);
+HRESULT WINAPI GetRunningObjectTable(DWORD reserved, LPRUNNINGOBJECTTABLE *pprot);
+HRESULT WINAPI GetRunningObjectTable16(DWORD reserved, LPRUNNINGOBJECTTABLE *pprot);
 
 /*****************************************************************************
  * Additional API
@@ -354,5 +357,8 @@ HRESULT WINAPI CoGetInstanceFromFile(COSERVERINFO* pServerInfo, CLSID* pClsid, I
 /* FIXME: not implemented */
 HRESULT WINAPI CoGetInstanceFromIStorage(COSERVERINFO* pServerInfo, CLSID* pClsid, IUnknown* punkOuter, DWORD dwClsCtx, IStorage* pstg, DWORD dwCount, MULTI_QI* pResults);
 
+#ifdef __cplusplus
+} /* extern "C" */
+#endif /* defined(__cplusplus) */
 
 #endif /* __WINE_WINE_OBJ_MONIKER_H */

@@ -1,6 +1,5 @@
-/* $Id: winesound.h,v 1.3 1999-06-10 16:21:57 achimha Exp $ */
-#ifndef _WINE_SOUND_H
-#define _WINE_SOUND_H
+#ifndef __WINE_WINE_WINESOUND_H
+#define __WINE_WINE_WINESOUND_H
 
 #include "windef.h"
 
@@ -36,4 +35,4 @@ DWORD       WINAPI SyncAllVoices(void);
 INT16       WINAPI WaitSoundState16(INT16);
 DWORD       WINAPI WaitSoundState(DWORD);
 
-#endif /* _WINE_SOUND_H */
+#endif /* __WINE_WINE_WINESOUND_H */

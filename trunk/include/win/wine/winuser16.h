@@ -1,12 +1,58 @@
-/* $Id: winuser16.h,v 1.3 1999-06-10 16:21:57 achimha Exp $ */
-#ifndef __WINE_WINUSER16_H
-#define __WINE_WINUSER16_H
+#ifndef __WINE_WINE_WINUSER16_H
+#define __WINE_WINE_WINUSER16_H
 
-#include "windef.h"
-#include "winbase.h"
-#include "winuser.h"
+#include "winuser.h" /* winuser.h needed for MSGBOXCALLBACK */
+                     /* wingdi.h needed for COLORREF */
+#include "wine/wingdi16.h"
+
 
 #include "pshpack1.h"
+
+typedef struct tagCOMSTAT16
+{
+    BYTE   status;
+    UINT16 cbInQue WINE_PACKED;
+    UINT16 cbOutQue WINE_PACKED;
+} COMSTAT16,*LPCOMSTAT16;
+
+typedef struct tagDCB16
+{
+    BYTE   Id;
+    UINT16 BaudRate WINE_PACKED;
+    BYTE   ByteSize;
+    BYTE   Parity;
+    BYTE   StopBits;
+    UINT16 RlsTimeout;
+    UINT16 CtsTimeout;
+    UINT16 DsrTimeout;
+
+    unsigned fBinary        :1;
+    unsigned fRtsDisable    :1;
+    unsigned fParity        :1;
+    unsigned fOutxCtsFlow   :1;
+    unsigned fOutxDsrFlow   :1;
+    unsigned fDummy         :2;
+    unsigned fDtrDisable    :1;
+
+    unsigned fOutX          :1;
+    unsigned fInX           :1;
+    unsigned fPeChar        :1;
+    unsigned fNull          :1;
+    unsigned fChEvt         :1;
+    unsigned fDtrflow       :1;
+    unsigned fRtsflow       :1;
+    unsigned fDummy2        :1;
+
+    CHAR   XonChar;
+    CHAR   XoffChar;
+    UINT16 XonLim;
+    UINT16 XoffLim;
+    CHAR   PeChar;
+    CHAR   EofChar;
+    CHAR   EvtChar;
+    UINT16 TxDelay WINE_PACKED;
+} DCB16, *LPDCB16;
+
 
   /* SetWindowPlacement() struct */
 typedef struct
@@ -210,6 +256,16 @@ typedef struct
     DWORD       dwExStyle WINE_PACKED;
 } CREATESTRUCT16, *LPCREATESTRUCT16;
 
+typedef struct
+{
+    HDC16   hdc;
+    BOOL16  fErase;
+    RECT16  rcPaint;
+    BOOL16  fRestore;
+    BOOL16  fIncUpdate;
+    BYTE    rgbReserved[16];
+} PAINTSTRUCT16, *LPPAINTSTRUCT16;
+
 typedef struct 
 {
     HMENU16   hWindowMenu;
@@ -257,6 +313,24 @@ typedef struct
     RECT16  rgrc[3];
     SEGPTR  lppos;
 } NCCALCSIZE_PARAMS16, *LPNCCALCSIZE_PARAMS16;
+
+typedef struct {
+	UINT16		cbSize;
+	INT16		iBorderWidth;
+	INT16		iScrollWidth;
+	INT16		iScrollHeight;
+	INT16		iCaptionWidth;
+	INT16		iCaptionHeight;
+	LOGFONT16	lfCaptionFont;
+	INT16		iSmCaptionWidth;
+	INT16		iSmCaptionHeight;
+	LOGFONT16	lfSmCaptionFont;
+	INT16		iMenuWidth;
+	INT16		iMenuHeight;
+	LOGFONT16	lfMenuFont;
+	LOGFONT16	lfStatusFont;
+	LOGFONT16	lfMessageFont;
+} NONCLIENTMETRICS16,*LPNONCLIENTMETRICS16;
 
   /* Journalling hook structure */
 
@@ -676,6 +750,7 @@ INT16       WINAPI GetKeyboardLayoutName16(LPSTR);
 INT16       WINAPI GetKeyState16(INT16);
 HWND16      WINAPI GetLastActivePopup16(HWND16);
 HMENU16     WINAPI GetMenu16(HWND16);
+DWORD       WINAPI GetMenuContextHelpId16(HMENU16);
 INT16       WINAPI GetMenuItemCount16(HMENU16);
 UINT16      WINAPI GetMenuItemID16(HMENU16,INT16);
 BOOL16      WINAPI GetMenuItemRect16(HWND16,HMENU16,UINT16,LPRECT16);
@@ -876,4 +951,4 @@ BOOL16      WINAPI GrayString16(HDC16,HBRUSH16,GRAYSTRINGPROC16,LPARAM,
 BOOL16      WINAPI EnumTaskWindows16(HTASK16,WNDENUMPROC16,LPARAM);
 
 
-#endif /* __WINE_WINUSER16_H */
+#endif /* __WINE_WINE_WINUSER16_H */

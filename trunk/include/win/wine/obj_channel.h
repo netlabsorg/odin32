@@ -1,4 +1,3 @@
-/* $Id: obj_channel.h,v 1.3 1999-06-10 16:21:53 achimha Exp $ */
 /*
  * Defines undocumented Microsoft COM interfaces and APIs seemingly related to some 'channel' notion.
  */
@@ -7,6 +6,10 @@
 #define __WINE_WINE_OBJ_CHANNEL_H
 
 #include "wine/obj_base.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* defined(__cplusplus) */
 
 /*****************************************************************************
  * Predeclare the interfaces
@@ -183,5 +186,8 @@ ICOM_DEFINE(IRpcStubBuffer,IUnknown)
 #define IRpcStubBuffer_DebugServerRelease(p,a)        ICOM_CALL1(DebugServerRelease,p,a)
 #endif
 
+#ifdef __cplusplus
+} /* extern "C" */
+#endif /* defined(__cplusplus) */
 
 #endif /* __WINE_WINE_OBJ_CHANNEL_H */

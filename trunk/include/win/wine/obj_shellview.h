@@ -1,10 +1,9 @@
-/* $Id: obj_shellview.h,v 1.3 1999-06-10 16:21:56 achimha Exp $ */
 /************************************************************
  *    IShellView
  */
 
-#ifndef __WINE_WINE_OBJ_ISHELLVIEW_H
-#define __WINE_WINE_OBJ_ISHELLVIEW_H
+#ifndef __WINE_WINE_OBJ_SHELLVIEW_H
+#define __WINE_WINE_OBJ_SHELLVIEW_H
 
 #include "winbase.h"
 #include "winuser.h"
@@ -12,6 +11,10 @@
 #include "wine/obj_inplace.h"
 #include "wine/obj_shellfolder.h"
 #include "prsht.h"	/* LPFNADDPROPSHEETPAGE */
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* defined(__cplusplus) */
 
 /****************************************************************************
  * IShellBrowser is here defined because of a cyclic dependance between 
@@ -140,5 +143,8 @@ ICOM_DEFINE(IShellView,IOleWindow)
 #define IShellView_GetItemObject(p,a,b,c)	ICOM_CALL3(GetItemObject,p,a,b,c)
 #endif
 
+#ifdef __cplusplus
+} /* extern "C" */
+#endif /* defined(__cplusplus) */
 
-#endif /* __WINE_WINE_OBJ_ISHELLVIEW_H */
+#endif /* __WINE_WINE_OBJ_SHELLVIEW_H */
