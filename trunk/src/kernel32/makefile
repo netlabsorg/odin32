@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.104 2000-10-20 11:46:47 sandervl Exp $
+# $Id: makefile,v 1.105 2000-11-09 18:18:11 sandervl Exp $
 
 #
 # Odin32 API
@@ -105,11 +105,7 @@ $(OBJDIR)\hmtoken.obj \
 $(OBJDIR)\atom.obj \
 $(OBJDIR)\disk.obj \
 $(OBJDIR)\directory.obj \
-$(OBJDIR)\cvtbitmap.obj \
 $(OBJDIR)\hmmmap.obj \
-$(OBJDIR)\cvtaccel.obj \
-$(OBJDIR)\cvticon.obj \
-$(OBJDIR)\cvticongrp.obj \
 $(OBJDIR)\oslibexcept.obj \
 $(OBJDIR)\cpu.obj \
 $(OBJDIR)\process.obj \
