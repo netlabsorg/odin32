@@ -1,9 +1,12 @@
-/* $Id: heap.cpp,v 1.27 2001-06-24 15:45:36 sandervl Exp $ */
+/* $Id: heap.cpp,v 1.28 2001-07-05 18:10:08 sandervl Exp $ */
 
 /*
  * Win32 heap API functions for OS/2
  *
- * Copyright 1999 Sander van Leeuwen
+ * Copyright 1999-2001 Sander van Leeuwen
+ *
+ * Global memory functions ported from Wine
+ * Copyright 1995 Alexandre Julliard
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -113,14 +116,14 @@ ODINFUNCTIONNODBG1(BOOL, HeapDestroy, HANDLE, hHeap)
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTIONNODBG3(DWORD, HeapSize, HANDLE, hHeap, DWORD, arg2, PVOID, arg3)
+ODINFUNCTIONNODBG3(DWORD, HeapSize, HANDLE, hHeap, DWORD, arg2, PVOID, lpMem)
 {
  OS2Heap *curheap = OS2Heap::find(hHeap);
 
-  dprintf2(("HeapSize %X %x", hHeap, arg2));
+  dprintf2(("HeapSize %X %x %x", hHeap, arg2, lpMem));
   if(curheap == NULL)
         return(0);
-  return curheap->Size(arg2, arg3);
+  return curheap->Size(arg2, lpMem);
 }
 //******************************************************************************
 //TODO: Check this!!!
@@ -181,147 +184,547 @@ ODINFUNCTIONNODBG0(HANDLE, GetProcessHeap)
     }
     return(processheap);
 }
-//******************************************************************************
-//******************************************************************************
-HLOCAL WIN32API LocalAlloc(UINT fuFlags, DWORD cbBytes)
+#if 1
+/*
+ * Win32 Global heap functions (GlobalXXX).
+ * These functions included in Win32 for compatibility with 16 bit Windows
+ * Especially the moveable blocks and handles are oldish. 
+ * But the ability to directly allocate memory with GPTR and LPTR is widely
+ * used.
+ *
+ * The handle stuff looks horrible, but it's implemented almost like Win95
+ * does it. 
+ *
+ */
+
+#define MAGIC_GLOBAL_USED 0x5342
+#define GLOBAL_LOCK_MAX   0xFF
+#define HANDLE_TO_INTERN(h)  ((PGLOBAL32_INTERN)(((char *)(h))-2))
+#define INTERN_TO_HANDLE(i)  ((HGLOBAL) &((i)->Pointer))
+#define POINTER_TO_HANDLE(p) (*(((HGLOBAL *)(p))-1))
+#define ISHANDLE(h)          (((DWORD)(h)&2)!=0)
+#define ISPOINTER(h)         (((DWORD)(h)&2)==0)
+
+#pragma pack(1)
+
+typedef struct __GLOBAL32_INTERN
 {
- HLOCAL lmem;
- DWORD  dwFlags = 0;
+   WORD         Magic;
+   LPVOID       Pointer;
+   BYTE         Flags;
+   BYTE         LockCount;
+} GLOBAL32_INTERN, *PGLOBAL32_INTERN;
 
-  if(processheap == NULL) {
-      if(GetProcessHeap() == NULL)
-         return(NULL);
-  }
-  if(fuFlags & LMEM_ZEROINIT)
-    dwFlags = HEAP_ZERO_MEMORY;
+#pragma pack()
 
-  lmem = (HLOCAL)OS2ProcessHeap->Alloc(dwFlags, cbBytes, fuFlags);
+/***********************************************************************
+ *           GlobalAlloc   (KERNEL32.@)
+ * RETURNS
+ *	Handle: Success
+ *	NULL: Failure
+ */
+HGLOBAL WINAPI GlobalAlloc(
+                 UINT flags, /* [in] Object allocation attributes */
+                 DWORD size    /* [in] Number of bytes to allocate */
+) {
+   PGLOBAL32_INTERN     pintern;
+   DWORD		hpflags;
+   LPVOID               palloc;
 
-  dprintf(("KERNEL32:  LocalAlloc flags %X, size %d returned %X\n", dwFlags, cbBytes, lmem));
+   if(flags&GMEM_ZEROINIT)
+      hpflags=HEAP_ZERO_MEMORY;
+   else
+      hpflags=0;
+    
+   if((flags & GMEM_MOVEABLE)==0) /* POINTER */
+   {
+      palloc=HeapAlloc(GetProcessHeap(), hpflags, size);
+      dprintf(("KERNEL32: GlobalAlloc %x %d returned %x", flags, size, palloc));
+      return (HGLOBAL) palloc;
+   }
+   else  /* HANDLE */
+   {
+      /* HeapLock(heap); */
 
-  return(lmem);
+      pintern=(PGLOBAL32_INTERN)HeapAlloc(GetProcessHeap(), 0,  sizeof(GLOBAL32_INTERN));
+      if (!pintern) return 0;
+      if(size)
+      {
+	 if (!(palloc=HeapAlloc(GetProcessHeap(), hpflags, size+sizeof(HGLOBAL)))) {
+	    HeapFree(GetProcessHeap(), 0, pintern);
+	    return 0;
+	 }
+	 *(HGLOBAL *)palloc=INTERN_TO_HANDLE(pintern);
+	 pintern->Pointer=(char *) palloc+sizeof(HGLOBAL);
+      }
+      else
+	 pintern->Pointer=NULL;
+      pintern->Magic=MAGIC_GLOBAL_USED;
+      pintern->Flags=flags>>8;
+      pintern->LockCount=0;
+      
+      /* HeapUnlock(heap); */
+       
+      dprintf(("KERNEL32: GlobalAlloc %x %d returned %x", flags, size, INTERN_TO_HANDLE(pintern)));
+      return INTERN_TO_HANDLE(pintern);
+   }
 }
-//******************************************************************************
-//******************************************************************************
-HLOCAL WIN32API LocalDiscard(HLOCAL hMem)
-{
-    dprintf(("KERNEL32:  LocalDiscard NOT IMPLEMENTED\n"));
+/***********************************************************************
+ *           GlobalLock   (KERNEL32.@)
+ * RETURNS
+ *	Pointer to first byte of block
+ *	NULL: Failure
+ */
+LPVOID WINAPI GlobalLock(
+              HGLOBAL hmem /* [in] Handle of global memory object */
+) {
+   PGLOBAL32_INTERN pintern;
+   LPVOID           palloc;
 
-//    return O32_LocalDiscard(arg1);
-    return(hMem);   //TODO: Possible memory leak
+
+   if(ISPOINTER(hmem)) {
+      dprintf(("KERNEL32: GlobalLock %x returned %x", hmem, hmem));
+      return (LPVOID) hmem;
+   }
+
+   /* HeapLock(GetProcessHeap()); */
+   
+   pintern=HANDLE_TO_INTERN(hmem);
+   if(pintern->Magic==MAGIC_GLOBAL_USED)
+   {
+      if(pintern->LockCount<GLOBAL_LOCK_MAX)
+	 pintern->LockCount++;
+      palloc=pintern->Pointer;
+   }
+   else
+   {
+      dprintf(("ERROR: GlobalLock invalid handle %x", hmem));
+      palloc=(LPVOID) NULL;
+      SetLastError(ERROR_INVALID_HANDLE);
+   }
+   /* HeapUnlock(GetProcessHeap()); */;
+
+   dprintf(("KERNEL32: GlobalLock %x returned %x", hmem, palloc));
+   return palloc;
 }
-//******************************************************************************
-//******************************************************************************
-UINT WIN32API LocalFlags(HLOCAL hMem)
-{
-    dprintf(("KERNEL32: LocalFlags %X\n", hMem));
 
-    return OS2ProcessHeap->GetFlags((LPVOID)hMem);
+
+/***********************************************************************
+ *           GlobalUnlock   (KERNEL32.@)
+ * RETURNS
+ *	TRUE: Object is still locked
+ *	FALSE: Object is unlocked
+ */
+BOOL WINAPI GlobalUnlock(
+              HGLOBAL hmem /* [in] Handle of global memory object */
+) {
+   PGLOBAL32_INTERN       pintern;
+   BOOL                 locked;
+
+   dprintf(("KERNEL32: GlobalUnlock %x", hmem));
+
+   if(ISPOINTER(hmem))
+      return FALSE;
+
+   /* HeapLock(GetProcessHeap()); */
+   pintern=HANDLE_TO_INTERN(hmem);
+   
+   if(pintern->Magic==MAGIC_GLOBAL_USED)
+   {
+      if((pintern->LockCount<GLOBAL_LOCK_MAX)&&(pintern->LockCount>0))
+	 pintern->LockCount--;
+
+      locked = (pintern->LockCount != 0);
+      if (!locked) SetLastError(NO_ERROR);
+   }
+   else
+   {
+      dprintf(("ERROR: GlobalUnlock invalid handle %x", hmem));
+      SetLastError(ERROR_INVALID_HANDLE);
+      locked=FALSE;
+   }
+   /* HeapUnlock(GetProcessHeap()); */
+   return locked;
 }
-//******************************************************************************
-//******************************************************************************
-HLOCAL WIN32API LocalFree(HLOCAL hMem)
-{
-  dprintf(("KERNEL32: LocalFree %X\n", hMem));
 
-  if(OS2ProcessHeap->GetLockCnt((LPVOID)hMem) != 0) {
-      	dprintf(("LocalFree, lock count != 0\n"));
-      	return(hMem);   //TODO: SetLastError
-  }
-  if(OS2ProcessHeap->Free(0, (LPVOID)hMem) == FALSE) {
-      	return(hMem);   //TODO: SetLastError
-  }
-  return NULL; //success
-}
-//******************************************************************************
-//******************************************************************************
-HLOCAL WIN32API LocalHandle(PCVOID lpMem)
-{
-    dprintf(("KERNEL32:  LocalHandle\n"));
 
-    return (HLOCAL)lpMem;
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API LocalUnlock(HLOCAL hMem)
-{
-    dprintf(("KERNEL32: LocalUnlock %X\n", hMem));
+/***********************************************************************
+ *           GlobalHandle   (KERNEL32.@)
+ * Returns the handle associated with the specified pointer.
+ *
+ * RETURNS
+ *	Handle: Success
+ *	NULL: Failure
+ */
+HGLOBAL WINAPI GlobalHandle(
+                 LPCVOID pmem /* [in] Pointer to global memory block */
+) {
+    HGLOBAL handle;
+    PGLOBAL32_INTERN  maybe_intern;
+    LPCVOID test;
 
-    return OS2ProcessHeap->Unlock((LPVOID)hMem);
-}
-//******************************************************************************
-//TODO: cbBytes==0 && fuFlags & LMEM_MOVEABLE not handled!!
-//******************************************************************************
-HLOCAL WIN32API LocalReAlloc(HLOCAL hMem, DWORD cbBytes, UINT fuFlags)
-{
-  HLOCAL hLocalNew;
-  LPVOID lpMem;
+    dprintf(("KERNEL32: GlobalHandle %x", pmem));
 
-  dprintf(("KERNEL32: LocalReAlloc %X %d %X\n", hMem, cbBytes, fuFlags));
-
-  //SvL: 8-8-'98: Notepad bugfix (assumes address is identical when new size < old size)
-  if(OS2ProcessHeap->Size(0, (LPVOID)hMem) > cbBytes)
-    return hMem;
-
-  hLocalNew = LocalAlloc(fuFlags, cbBytes);
-  if (hLocalNew != 0)
-  {
-    lpMem = LocalLock(hLocalNew);
-
-    if (lpMem != NULL) /* copy memory if successful */
-      memcpy(lpMem,
-             (LPVOID)hMem,
-             min(cbBytes, OS2ProcessHeap->Size(0, (LPVOID)hMem))
-            );
-
-    LocalUnlock(hLocalNew);
-    OS2ProcessHeap->Free(0, (LPVOID)hMem);
-  }
-  return(hLocalNew);
-}
-//******************************************************************************
-//******************************************************************************
-UINT WIN32API LocalSize(HLOCAL hMem)
-{
-    dprintf(("KERNEL32: LocalSize %X\n", hMem));
-
-    return OS2ProcessHeap->Size(0, (PVOID)hMem);
-}
-//******************************************************************************
-//******************************************************************************
-PVOID WIN32API LocalLock(HLOCAL hMem)
-{
-    dprintf(("KERNEL32:  LocalLock %X\n", hMem));
-
-    if(OS2ProcessHeap->Lock((LPVOID)hMem) == FALSE) {
-        return NULL;
+    if (!pmem)
+    {
+        SetLastError( ERROR_INVALID_PARAMETER );
+        return 0;
     }
-    return (PVOID)hMem;
-}
-//******************************************************************************
 
-//******************************************************************************
-//* this function is here for completeness, some stupid software requires it.
-UINT WIN32API LocalShrink(HLOCAL hMem,
-                             UINT   cbNewSize)
+#ifdef __WIN32OS2__
+        handle = 0;
+
+        /* note that if pmem is a pointer to a a block allocated by        */
+        /* GlobalAlloc with GMEM_MOVEABLE then magic test in HeapValidate  */
+        /* will fail.                                                      */
+        if (ISPOINTER(pmem)) {
+            if (HeapValidate( GetProcessHeap(), 0, pmem )) {
+                handle = (HGLOBAL)pmem;  /* valid fixed block */
+                return handle;
+            }
+            handle = POINTER_TO_HANDLE(pmem);
+        } else
+            handle = (HGLOBAL)pmem;
+
+        /* Now test handle either passed in or retrieved from pointer */
+        maybe_intern = HANDLE_TO_INTERN( handle );
+        if(IsBadReadPtr(maybe_intern, sizeof(GLOBAL32_INTERN))) {
+            SetLastError( ERROR_INVALID_HANDLE );
+            return 0;
+        }
+
+        if (maybe_intern->Magic == MAGIC_GLOBAL_USED) {
+            test = maybe_intern->Pointer;
+            if (HeapValidate( GetProcessHeap(), 0, ((HGLOBAL *)test)-1 ) && /* obj(-handle) valid arena? */
+                HeapValidate( GetProcessHeap(), 0, maybe_intern ))  /* intern valid arena? */
+            {
+                return handle;
+            }
+        }
+        handle = 0;
+        SetLastError( ERROR_INVALID_HANDLE );
+#else
+    __TRY
+    {
+        handle = 0;
+
+        /* note that if pmem is a pointer to a a block allocated by        */
+        /* GlobalAlloc with GMEM_MOVEABLE then magic test in HeapValidate  */
+        /* will fail.                                                      */
+        if (ISPOINTER(pmem)) {
+            if (HeapValidate( GetProcessHeap(), 0, pmem )) {
+                handle = (HGLOBAL)pmem;  /* valid fixed block */
+                break;
+            }
+            handle = POINTER_TO_HANDLE(pmem);
+        } else
+            handle = (HGLOBAL)pmem;
+
+        /* Now test handle either passed in or retrieved from pointer */
+        maybe_intern = HANDLE_TO_INTERN( handle );
+        if (maybe_intern->Magic == MAGIC_GLOBAL_USED) {
+            test = maybe_intern->Pointer;
+            if (HeapValidate( GetProcessHeap(), 0, ((HGLOBAL *)test)-1 ) && /* obj(-handle) valid arena? */
+                HeapValidate( GetProcessHeap(), 0, maybe_intern ))  /* intern valid arena? */
+                break;  /* valid moveable block */
+        }
+        handle = 0;
+        SetLastError( ERROR_INVALID_HANDLE );
+    }
+    __EXCEPT(page_fault)
+    {
+        SetLastError( ERROR_INVALID_HANDLE );
+        return 0;
+    }
+    __ENDTRY
+#endif
+    return handle;
+}
+
+
+/***********************************************************************
+ *           GlobalReAlloc   (KERNEL32.@)
+ * RETURNS
+ *	Handle: Success
+ *	NULL: Failure
+ */
+HGLOBAL WINAPI GlobalReAlloc(
+                 HGLOBAL hmem, /* [in] Handle of global memory object */
+                 DWORD size,     /* [in] New size of block */
+                 UINT flags    /* [in] How to reallocate object */
+) {
+   LPVOID               palloc;
+   HGLOBAL            hnew;
+   PGLOBAL32_INTERN     pintern;
+   DWORD heap_flags = (flags & GMEM_ZEROINIT) ? HEAP_ZERO_MEMORY : 0;
+
+   hnew = 0;
+   /* HeapLock(heap); */
+   if(flags & GMEM_MODIFY) /* modify flags */
+   {
+      if( ISPOINTER(hmem) && (flags & GMEM_MOVEABLE))
+      {
+	 /* make a fixed block moveable
+	  * actually only NT is able to do this. But it's soo simple
+	  */
+         if (hmem == 0)
+         {
+	     dprintf(("ERROR: GlobalReAlloc32 with null handle!\n"));
+             SetLastError( ERROR_NOACCESS );
+    	     return 0;
+         }
+	 size=HeapSize(GetProcessHeap(), 0, (LPVOID) hmem);
+	 hnew=GlobalAlloc( flags, size);
+	 palloc=GlobalLock(hnew);
+	 memcpy(palloc, (LPVOID) hmem, size);
+	 GlobalUnlock(hnew);
+	 GlobalFree(hmem);
+      }
+      else if( ISPOINTER(hmem) &&(flags & GMEM_DISCARDABLE))
+      {
+	 /* change the flags to make our block "discardable" */
+	 pintern=HANDLE_TO_INTERN(hmem);
+	 pintern->Flags = pintern->Flags | (GMEM_DISCARDABLE >> 8);
+	 hnew=hmem;
+      }
+      else
+      {
+	 SetLastError(ERROR_INVALID_PARAMETER);
+	 hnew = 0;
+      }
+   }
+   else
+   {
+      if(ISPOINTER(hmem))
+      {
+	 /* reallocate fixed memory */
+	 hnew=(HGLOBAL)HeapReAlloc(GetProcessHeap(), heap_flags, (LPVOID) hmem, size);
+      }
+      else
+      {
+	 /* reallocate a moveable block */
+	 pintern=HANDLE_TO_INTERN(hmem);
+
+#if 0
+/* Apparently Windows doesn't care whether the handle is locked at this point */
+/* See also the same comment in GlobalFree() */
+	 if(pintern->LockCount>1) {
+	    ERR("handle 0x%08lx is still locked, cannot realloc!\n",(DWORD)hmem);
+	    SetLastError(ERROR_INVALID_HANDLE);
+	 } else
+#endif
+         if(size!=0)
+	 {
+	    hnew=hmem;
+	    if(pintern->Pointer)
+	    {
+	       if((palloc = HeapReAlloc(GetProcessHeap(), heap_flags,
+				   (char *) pintern->Pointer-sizeof(HGLOBAL),
+				   size+sizeof(HGLOBAL))) == NULL)
+		   return 0; /* Block still valid */
+	       pintern->Pointer=(char *) palloc+sizeof(HGLOBAL);
+	    }
+	    else
+	    {
+	        if((palloc=HeapAlloc(GetProcessHeap(), heap_flags, size+sizeof(HGLOBAL)))
+		   == NULL)
+		    return 0;
+	       *(HGLOBAL *)palloc=hmem;
+	       pintern->Pointer=(char *) palloc+sizeof(HGLOBAL);
+	    }
+	 }
+	 else
+	 {
+	    if(pintern->Pointer)
+	    {
+	       HeapFree(GetProcessHeap(), 0, (char *) pintern->Pointer-sizeof(HGLOBAL));
+	       pintern->Pointer=NULL;
+	    }
+	 }
+      }
+   }
+   /* HeapUnlock(heap); */
+   return hnew;
+}
+
+
+/***********************************************************************
+ *           GlobalFree   (KERNEL32.@)
+ * RETURNS
+ *	NULL: Success
+ *	Handle: Failure
+ */
+HGLOBAL WINAPI GlobalFree(
+                 HGLOBAL hmem /* [in] Handle of global memory object */
+) {
+   PGLOBAL32_INTERN pintern;
+   HGLOBAL        hreturned = 0;
+
+   dprintf(("KERNEL32: GlobalFree %x", hmem));
+
+   if(ISPOINTER(hmem)) /* POINTER */
+   {
+      if(!HeapFree(GetProcessHeap(), 0, (LPVOID) hmem)) hmem = 0;
+   }
+   else  /* HANDLE */
+   {
+      /* HeapLock(heap); */
+      pintern=HANDLE_TO_INTERN(hmem);
+      
+      if(pintern->Magic==MAGIC_GLOBAL_USED)
+      {	 
+
+/* WIN98 does not make this test. That is you can free a */
+/* block you have not unlocked. Go figure!!              */
+      /* if(pintern->LockCount!=0)  */
+      /*    SetLastError(ERROR_INVALID_HANDLE);  */
+
+	 if(pintern->Pointer)
+	    if(!HeapFree(GetProcessHeap(), 0, (char *)(pintern->Pointer)-sizeof(HGLOBAL)))
+	       hreturned=hmem;
+	 if(!HeapFree(GetProcessHeap(), 0, pintern))
+	    hreturned=hmem;
+      }      
+      /* HeapUnlock(heap); */
+   }
+   return hreturned;
+}
+
+
+/***********************************************************************
+ *           GlobalSize   (KERNEL32.@)
+ * RETURNS
+ *	Size in bytes of the global memory object
+ *	0: Failure
+ */
+DWORD WINAPI GlobalSize(
+             HGLOBAL hmem /* [in] Handle of global memory object */
+) {
+   DWORD                retval;
+   PGLOBAL32_INTERN     pintern;
+
+   dprintf(("KERNEL32: GlobalSize %x", hmem));
+
+   if(ISPOINTER(hmem)) 
+   {
+      retval=HeapSize(GetProcessHeap(), 0,  (LPVOID) hmem);
+   }
+   else
+   {
+      /* HeapLock(heap); */
+      pintern=HANDLE_TO_INTERN(hmem);
+      
+      if(pintern->Magic==MAGIC_GLOBAL_USED)
+      {
+        if (!pintern->Pointer) /* handle case of GlobalAlloc( ??,0) */
+            return 0;
+	 retval=HeapSize(GetProcessHeap(), 0,
+	                 (char *)(pintern->Pointer)-sizeof(HGLOBAL))-4;
+	 if (retval == 0xffffffff-4) retval = 0;
+      }
+      else
+      {
+         dprintf(("ERROR: GlobalSize invalid handle %x", hmem));
+	 retval=0;
+      }
+      /* HeapUnlock(heap); */
+   }
+   /* HeapSize returns 0xffffffff on failure */
+   if (retval == 0xffffffff) retval = 0;
+   return retval;
+}
+
+
+/***********************************************************************
+ *           GlobalWire   (KERNEL32.@)
+ */
+LPVOID WINAPI GlobalWire(HGLOBAL hmem)
 {
-    dprintf(("KERNEL32:  LocalShrink %X, %08xh - stub (cbNewSize)\n",
-             hMem,
-             cbNewSize));
-
-    return cbNewSize;
+   return GlobalLock( hmem );
 }
-//******************************************************************************
 
-//******************************************************************************
-//* this function is here for completeness, mIRC/32 requires it.
-UINT WIN32API LocalCompact(UINT cbNewSize)
+
+/***********************************************************************
+ *           GlobalUnWire   (KERNEL32.@)
+ */
+BOOL WINAPI GlobalUnWire(HGLOBAL hmem)
 {
-    dprintf(("KERNEL32:  LocalCompact %08xh - stub (cbNewSize)\n",
-             cbNewSize));
-
-    return cbNewSize;
+   return GlobalUnlock( hmem);
 }
+
+
+/***********************************************************************
+ *           GlobalFix   (KERNEL32.@)
+ */
+VOID WINAPI GlobalFix(HGLOBAL hmem)
+{
+    GlobalLock( hmem );
+}
+
+
+/***********************************************************************
+ *           GlobalUnfix   (KERNEL32.@)
+ */
+VOID WINAPI GlobalUnfix(HGLOBAL hmem)
+{
+   GlobalUnlock( hmem);
+}
+
+
+/***********************************************************************
+ *           GlobalFlags   (KERNEL32.@)
+ * Returns information about the specified global memory object
+ *
+ * NOTES
+ *	Should this return GMEM_INVALID_HANDLE on invalid handle?
+ *
+ * RETURNS
+ *	Value specifying allocation flags and lock count
+ *	GMEM_INVALID_HANDLE: Failure
+ */
+UINT WINAPI GlobalFlags(
+              HGLOBAL hmem /* [in] Handle to global memory object */
+) {
+   DWORD                retval;
+   PGLOBAL32_INTERN     pintern;
+
+   dprintf(("KERNEL32: GlobalFlags %x", hmem));
+   
+   if(ISPOINTER(hmem))
+   {
+      retval=0;
+   }
+   else
+   {
+      /* HeapLock(GetProcessHeap()); */
+      pintern=HANDLE_TO_INTERN(hmem);
+      if(pintern->Magic==MAGIC_GLOBAL_USED)
+      {               
+	 retval=pintern->LockCount + (pintern->Flags<<8);
+	 if(pintern->Pointer==0)
+	    retval|= GMEM_DISCARDED;
+      }
+      else
+      {
+         dprintf(("ERROR: GlobalFlags invalid handle %x", hmem));
+	 retval=0;
+      }
+      /* HeapUnlock(GetProcessHeap()); */
+   }
+   return retval;
+}
+
+
+/***********************************************************************
+ *           GlobalCompact   (KERNEL32.@)
+ */
+DWORD WINAPI GlobalCompact( DWORD minfree )
+{
+    dprintf(("KERNEL32:  GlobalCompact %d OBSOLETE", minfree));
+
+    return 0;  /* GlobalCompact does nothing in Win32 */
+}
+#else
 //******************************************************************************
 #ifdef DEBUG
 static ULONG totalGlobalAlloc = 0;
@@ -353,19 +756,19 @@ HGLOBAL WIN32API GlobalFree( HGLOBAL arg1)
 }
 //******************************************************************************
 //******************************************************************************
-HGLOBAL WIN32API GlobalHandle( LPCVOID arg1)
+HGLOBAL WIN32API GlobalHandle( LPCVOID lpMem)
 {
-    dprintf(("KERNEL32:  OS2GlobalHandle\n"));
+    dprintf(("KERNEL32: GlobalHandle %x", lpMem));
 
-    return O32_GlobalHandle((LPVOID)arg1);
+    return O32_GlobalHandle((LPVOID)lpMem);
 }
 //******************************************************************************
 //******************************************************************************
-UINT WIN32API GlobalFlags(HGLOBAL arg1)
+UINT WIN32API GlobalFlags(HGLOBAL hMem)
 {
-    dprintf(("KERNEL32:  OS2GlobalFlags\n"));
+    dprintf(("KERNEL32: GlobalFlags %x", hMem));
 
-    return O32_GlobalFlags(arg1);
+    return O32_GlobalFlags(hMem);
 }
 //******************************************************************************
 //******************************************************************************
@@ -377,12 +780,12 @@ DWORD WIN32API GlobalCompact(DWORD dwMinFree)
 }
 //******************************************************************************
 //******************************************************************************
-PVOID WIN32API GlobalLock(HGLOBAL arg1)
+PVOID WIN32API GlobalLock(HGLOBAL hMem)
 {
  PVOID ret;
 
-    ret = O32_GlobalLock(arg1);
-    dprintf(("KERNEL32: GlobalLock %x returned %x", arg1, ret));
+    ret = O32_GlobalLock(hMem);
+    dprintf(("KERNEL32: GlobalLock %x returned %x", hMem, ret));
     return ret;
 }
 //******************************************************************************
@@ -421,8 +824,6 @@ LPVOID WIN32API GlobalWire(HGLOBAL hmem)
 {
    return GlobalLock( hmem );
 }
-
-
 /***********************************************************************
  *           GlobalUnWire
  *
@@ -434,6 +835,165 @@ LPVOID WIN32API GlobalWire(HGLOBAL hmem)
 BOOL WIN32API GlobalUnWire(HGLOBAL hmem)
 {
    return GlobalUnlock( hmem);
+}
+//******************************************************************************
+//******************************************************************************
+HGLOBAL WIN32API GlobalDiscard(HGLOBAL hGlobal)
+{
+    dprintf(("KERNEL32: GlobalDiscard %x", hGlobal));
+
+    return O32_GlobalDiscard(hGlobal);
+}
+/***********************************************************************
+ *           GlobalFix   (KERNEL32.@)
+ */
+VOID WINAPI GlobalFix(HGLOBAL hmem)
+{
+    GlobalLock( hmem );
+}
+/***********************************************************************
+ *           GlobalUnfix   (KERNEL32.@)
+ */
+VOID WINAPI GlobalUnfix(HGLOBAL hmem)
+{
+   GlobalUnlock( hmem);
+}
+#endif
+//******************************************************************************
+//******************************************************************************
+HLOCAL WIN32API LocalAlloc(UINT fuFlags, DWORD cbBytes)
+{
+    HLOCAL hLocal;
+
+    // Check flags
+    if(fuFlags & (~(LMEM_MOVEABLE | LMEM_DISCARDABLE | LMEM_NOCOMPACT |
+                    LMEM_NODISCARD | LMEM_ZEROINIT)))
+    {
+       dprintf(("LocalAlloc %x %x: INVALID flags!", fuFlags, cbBytes));
+       SetLastError(ERROR_INVALID_PARAMETER);
+       return 0;
+    }
+    // Note: local & global flags are the same (the ones used here), so no need for conversion
+    hLocal = GlobalAlloc(fuFlags, cbBytes);
+    dprintf(("KERNEL32: LocalAlloc flags %X, size %d returned %X", fuFlags, cbBytes, hLocal));
+    return hLocal;
+}
+//******************************************************************************
+//******************************************************************************
+UINT WIN32API LocalFlags(HLOCAL hMem)
+{
+    UINT ret, retG;
+    dprintf(("KERNEL32: LocalFlags %X\n", hMem));
+
+    retG = GlobalFlags(hMem);
+
+    if(retG == GMEM_INVALID_HANDLE)
+    {
+       return LMEM_INVALID_HANDLE;
+    }
+    // Low byte holds lock count.
+    // Hi byte of low word contains some flags.
+    ret = retG & 0xff; // Keep lock count.
+    if (retG & GMEM_DISCARDABLE)  ret |= LMEM_DISCARDABLE;
+    if (retG & GMEM_DISCARDED)    ret |= LMEM_DISCARDED;
+
+    return ret;
+}
+//******************************************************************************
+//******************************************************************************
+HLOCAL WIN32API LocalFree(HLOCAL hMem)
+{
+  dprintf(("KERNEL32: LocalFree %X", hMem));
+
+  return GlobalFree(hMem);
+}
+//******************************************************************************
+//******************************************************************************
+HLOCAL WIN32API LocalHandle(PCVOID lpMem)
+{
+    dprintf(("KERNEL32: LocalHandle %x", lpMem));
+
+    return GlobalHandle(lpMem);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API LocalUnlock(HLOCAL hMem)
+{
+    dprintf(("KERNEL32: LocalUnlock %X", hMem));
+
+    return GlobalUnlock(hMem);
+}
+//******************************************************************************
+//TODO: cbBytes==0 && fuFlags & LMEM_MOVEABLE not handled!!
+//******************************************************************************
+HLOCAL WIN32API LocalReAlloc(HLOCAL hMem, DWORD cbBytes, UINT fuFlags)
+{
+  HLOCAL hLocalNew;
+  LPVOID lpMem;
+  DWORD  cbOldSize;
+
+  dprintf(("KERNEL32: LocalReAlloc %X %d %X\n", hMem, cbBytes, fuFlags));
+
+    // Check flags
+    if(fuFlags & (~(LMEM_MOVEABLE | LMEM_DISCARDABLE | LMEM_NOCOMPACT |
+                    LMEM_MODIFY | LMEM_ZEROINIT)))
+    {
+       dprintf(("LocalAlloc %x %x: INVALID flags!", fuFlags, cbBytes));
+       SetLastError(ERROR_INVALID_PARAMETER);
+       return 0;
+    }
+
+    //SvL: 8-8-'98: Notepad bugfix (assumes address is identical when new size < old size)
+    cbOldSize = LocalSize(hMem);
+    if(cbOldSize > cbBytes)
+        return hMem;
+
+    hLocalNew = LocalAlloc(fuFlags, cbBytes);
+    if(hLocalNew != 0)
+    {
+        lpMem = LocalLock(hLocalNew);
+
+        if (lpMem != NULL) /* copy memory if successful */
+            memcpy(lpMem, (LPVOID)hMem, min(cbBytes, cbOldSize));
+
+        LocalUnlock(hLocalNew);
+        LocalFree(hMem);
+    }
+    return(hLocalNew);
+}
+//******************************************************************************
+//******************************************************************************
+UINT WIN32API LocalSize(HLOCAL hMem)
+{
+    dprintf(("KERNEL32: LocalSize %X", hMem));
+
+    return GlobalSize(hMem);
+}
+//******************************************************************************
+//******************************************************************************
+PVOID WIN32API LocalLock(HLOCAL hMem)
+{
+    dprintf(("KERNEL32:  LocalLock %X\n", hMem));
+
+    return GlobalLock(hMem);
+}
+//******************************************************************************
+//* this function is here for completeness, some stupid software requires it.
+//******************************************************************************
+UINT WIN32API LocalShrink(HLOCAL hMem, UINT cbNewSize)
+{
+    dprintf(("KERNEL32:  LocalShrink %X, %08xh - OBSOLETE", hMem, cbNewSize));
+
+    return cbNewSize;
+}
+//******************************************************************************
+//* this function is here for completeness, mIRC/32 requires it.
+//******************************************************************************
+UINT WIN32API LocalCompact(UINT cbNewSize)
+{
+    dprintf(("KERNEL32:  LocalCompact %08xh - OBSOLETE", cbNewSize));
+
+    return cbNewSize;
 }
 //******************************************************************************
 //******************************************************************************
