@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.h,v 1.17 2002-08-01 16:04:19 sandervl Exp $ */
+/* $Id: oslibmsg.h,v 1.18 2002-08-15 15:45:45 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -371,5 +371,8 @@ BOOL OSLibPostMessageDirect(HWND hwnd, ULONG msg, ULONG wParam, ULONG lParam);
 #define OSWM_BIDI_LAST               0x0BFF
 #define OSWM_USER                    0x1000
 ************/
+
+#define OSWM_SYSCOMMAND              0x0021
+#define OSSC_SYSMENU                 0x8007
 
 #endif //__OSLIBMSG_H__

@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.123 2002-08-09 11:19:56 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.124 2002-08-15 15:45:46 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -736,7 +736,7 @@ BOOL WIN32API SystemParametersInfoA(UINT uiAction, UINT uiParam, PVOID pvParam, 
     {
 	LPNONCLIENTMETRICSA lpnm = (LPNONCLIENTMETRICSA)pvParam;
 		
- 	if (lpnm->cbSize == sizeof(NONCLIENTMETRICSA))
+ 	if (lpnm->cbSize == sizeof(NONCLIENTMETRICSA) || uiParam == sizeof(NONCLIENTMETRICSA))
 	{
             memset(lpnm, 0, sizeof(NONCLIENTMETRICSA));
             lpnm->cbSize = sizeof(NONCLIENTMETRICSA);

@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.186 2002-08-14 10:37:43 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.187 2002-08-15 15:45:45 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -1861,6 +1861,9 @@ PosChangedEnd:
 
     case WM_SYSCOMMAND:
         dprintf(("PMFRAME: WM_SYSCOMMAND %x %x %x", win32wnd->getWindowHandle(), mp1, mp2));
+        if (fOS2Look == OS2_APPEARANCE_SYSMENU && mp1 == (MPARAM)OSSC_SYSMENU)
+            goto RunDefFrameWndProc;
+
         if(win32wnd->getWindowHandle() != pWinMsg->hwnd) {
             RELEASE_WNDOBJ(win32wnd);
             win32wnd = Win32BaseWindow::GetWindowFromHandle(pWinMsg->hwnd);
