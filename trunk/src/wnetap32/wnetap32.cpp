@@ -1,4 +1,4 @@
-/* $Id: wnetap32.cpp,v 1.5 1999-08-18 23:32:02 phaller Exp $ */
+/* $Id: wnetap32.cpp,v 1.6 1999-08-19 13:13:24 phaller Exp $ */
 
 /*
  *
@@ -104,7 +104,8 @@ typedef struct _NCB {
 
 //******************************************************************************
 //******************************************************************************
-UCHAR WIN32API OS2Netbios(PNCB pncb)
+ODINFUNCTION1(UCHAR, OS2Netbios,
+              PNCB, pncb)
 {
 #ifdef DEBUG
   WriteLog("OS2Netbios; pretend no network available\n");
@@ -114,7 +115,7 @@ UCHAR WIN32API OS2Netbios(PNCB pncb)
 //******************************************************************************
 //******************************************************************************
 
- /*****************************************************************************
+/*****************************************************************************
  * Name      : NET_API_STATUS NetAlertRaise
  * Purpose   :
  * Parameters: LPWSTR AlertEventName Pointer to a Unicode string that specifies
@@ -131,22 +132,20 @@ UCHAR WIN32API OS2Netbios(PNCB pncb)
  *
  * Author    : Markus Montkowski [09.07.98 19:40:30]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetAlertRaise(
-                                          LPWSTR AlertEventName,
-                                          LPVOID Buffer,
-                                          DWORD BufferSize
-                                          )
 
+ODINFUNCTION3(NET_API_STATUS, OS2NetAlertRaise,
+              LPWSTR, AlertEventName,
+              LPVOID, Buffer,
+              DWORD, BufferSize)
 {
 
-  dprintf(("NETAPI32: NetAlertRaise(%s, %08x, %d) not implemented\n"
-           ,AlertEventName, Buffer, BufferSize
-         ));
+  dprintf(("NETAPI32: NetAlertRaise not implemented\n"));
 
   return (NERR_BASE);
 }
 
- /*****************************************************************************
+
+/*****************************************************************************
  * Name      : NET_API_STATUS NetAlertRaiseEx
  * Purpose   :
  * Parameters: LPWSTR AlertEventName
@@ -162,24 +161,22 @@ NET_API_STATUS WIN32API OS2NetAlertRaise(
  *
  * Author    : Markus Montkowski [09.07.98 19:44:43]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetAlertRaiseEx(
-                                            LPWSTR AlertEventName,
-                                            LPVOID VariableInfo,
-                                            DWORD VariableInfoSize,
-                                            LPWSTR ServiceName
-                                            )
+
+ODINFUNCTION4(NET_API_STATUS, OS2NetAlertRaiseEx,
+              LPWSTR, AlertEventName,
+              LPVOID, VariableInfo,
+              DWORD, VariableInfoSize,
+              LPWSTR, ServiceName)
 
 {
 
-  dprintf(("NETAPI32: NetAlertRaiseEx(%s, %08x, %d, %s) not implemented\n"
-           ,AlertEventName, VariableInfo, VariableInfoSize, ServiceName
-         ));
+  dprintf(("NETAPI32: NetAlertRaiseEx not implemented\n"));
 
   return (NERR_BASE);
 }
 
 
- /*****************************************************************************
+/*****************************************************************************
  * Name      : NET_API_STATUS NetApiBufferAllocate
  * Purpose   :
  * Parameters: DWORD ByteCount
@@ -193,21 +190,19 @@ NET_API_STATUS WIN32API OS2NetAlertRaiseEx(
  *
  * Author    : Markus Montkowski [09.07.98 19:46:46]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetApiBufferAllocate(
-                                                DWORD ByteCount,
-                                                LPVOID *Buffer
-                                                )
+
+ODINFUNCTION2(NET_API_STATUS, OS2NetApiBufferAllocate,
+              DWORD, ByteCount,
+              LPVOID *, Buffer)
 
 {
-
-  dprintf(("NETAPI32: NetApiBufferAllocate(%d, %08x) not implemented\n"
-           ,ByteCount, *Buffer
-         ));
+  dprintf(("NETAPI32: NetApiBufferAllocate not implemented\n"));
 
   return (NERR_BASE);
 }
 
- /*****************************************************************************
+
+/*****************************************************************************
  * Name      : NET_API_STATUS NetApiBufferFree
  * Purpose   :
  * Parameters: LPVOID Buffer
@@ -220,20 +215,18 @@ NET_API_STATUS WIN32API OS2NetApiBufferAllocate(
  *
  * Author    : Markus Montkowski [09.07.98 19:47:21]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetApiBufferFree(
-                                            LPVOID Buffer
-                                            )
+
+ODINFUNCTION1(NET_API_STATUS, OS2NetApiBufferFree,
+              LPVOID, Buffer)
 
 {
-
-  dprintf(("NETAPI32: NetApiBufferFree(%08x) not implemented\n"
-           ,Buffer
-         ));
+  dprintf(("NETAPI32: NetApiBufferFree not implemented\n"));
 
   return (NERR_BASE);
 }
 
- /*****************************************************************************
+
+/*****************************************************************************
  * Name      : NET_API_STATUS NetApiBufferReallocate
  * Purpose   :
  * Parameters: LPVOID OldBuffer
@@ -248,22 +241,20 @@ NET_API_STATUS WIN32API OS2NetApiBufferFree(
  *
  * Author    : Markus Montkowski [09.07.98 21:25:21]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetApiBufferReallocate(
-                                                  LPVOID OldBuffer,
-                                                  DWORD NewByteCount,
-                                                  LPVOID NewBuffer
-                                                  )
 
+ODINFUNCTION3(NET_API_STATUS, OS2NetApiBufferReallocate,
+              LPVOID, OldBuffer,
+              DWORD, NewByteCount,
+              LPVOID, NewBuffer)
 {
 
-  dprintf(("NETAPI32: NetApiBufferReallocate(%08x, %d, %08x) not implemented\n"
-           ,OldBuffer, NewByteCount, NewBuffer
-         ));
+  dprintf(("NETAPI32: NetApiBufferReallocate not implemented\n"));
 
   return (NERR_BASE);
 }
 
- /*****************************************************************************
+
+/*****************************************************************************
  * Name      : NET_API_STATUS NetApiBufferSize
  * Purpose   :
  * Parameters: LPVOID buffer
@@ -277,21 +268,19 @@ NET_API_STATUS WIN32API OS2NetApiBufferReallocate(
  *
  * Author    : Markus Montkowski [09.07.98 21:25:44]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetApiBufferSize(
-                                            LPVOID buffer,
-                                            DWORD ByteCount
-                                            )
 
+ODINFUNCTION2(NET_API_STATUS, OS2NetApiBufferSize,
+              LPVOID, buffer,
+              DWORD, ByteCount)
 {
 
-  dprintf(("NETAPI32: NetApiBufferSize(%08x, %d) not implemented\n"
-           ,buffer, ByteCount
-         ));
+  dprintf(("NETAPI32: NetApiBufferSize not implemented\n"));
 
   return (NERR_BASE);
 }
 
- /*****************************************************************************
+
+/*****************************************************************************
  * Name      : NET_API_STATUS NetFileEnum
  * Purpose   :
  * Parameters: LPWSTR servername
@@ -312,29 +301,25 @@ NET_API_STATUS WIN32API OS2NetApiBufferSize(
  *
  * Author    : Markus Montkowski [09.07.98 21:27:44]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetFileEnum(
-                                        LPWSTR servername,
-                                        LPWSTR basepath,
-                                        LPWSTR username,
-                                        DWORD level,
-                                        LPBYTE *bufptr,
-                                        DWORD prefmaxlen,
-                                        LPDWORD entriesread,
-                                        LPDWORD totalentries,
-                                        LPDWORD resume_handle
-                                        )
 
+ODINFUNCTION9(NET_API_STATUS, OS2NetFileEnum,
+              LPWSTR, servername,
+              LPWSTR, basepath,
+              LPWSTR, username,
+              DWORD, level,
+              LPBYTE *, bufptr,
+              DWORD, prefmaxlen,
+              LPDWORD, entriesread,
+              LPDWORD, totalentries,
+              LPDWORD, resume_handle)
 {
-
-  dprintf(("NETAPI32: NetFileEnum(%s, %s, %s, %d, %08x, %d, %08x, %08x, %08x) not implemented\n"
-           ,servername, basepath, username, level, *bufptr, prefmaxlen, entriesread, totalentries, resume_handle
-         ));
+  dprintf(("NETAPI32: NetFileEnum not implemented\n"));
 
   return (NERR_BASE);
 }
 
 
- /*****************************************************************************
+/*****************************************************************************
  * Name      : NET_API_STATUS NetFileGetInfo
  * Purpose   :
  * Parameters: LPWSTR servername
@@ -355,16 +340,14 @@ ODINFUNCTION4(NET_API_STATUS,OS2NetFileGetInfo,LPWSTR,  servername,
                                                DWORD,   fileid,
                                                DWORD,   level,
                                                LPBYTE*, bufptr)
-
 {
-
   dprintf(("NETAPI32: NetFileGetInfo not implemented\n"));
 
   return (NERR_BASE);
 }
 
 
- /*****************************************************************************
+/*****************************************************************************
  * Name      : NET_API_STATUS NetGetAnyDCName
  * Purpose   :
  * Parameters: LPCWSTR ServerName
@@ -379,22 +362,19 @@ ODINFUNCTION4(NET_API_STATUS,OS2NetFileGetInfo,LPWSTR,  servername,
  *
  * Author    : Markus Montkowski [09.07.98 21:29:52]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetGetAnyDCName(
-                                           LPCWSTR ServerName,
-                                           LPCWSTR DomainName,
-                                           LPBYTE *Buffer
-                                           )
 
+ODINFUNCTION3(NET_API_STATUS, OS2NetGetAnyDCName,
+              LPCWSTR, ServerName,
+              LPCWSTR, DomainName,
+              LPBYTE *, Buffer)
 {
-
-  dprintf(("NETAPI32: NetGetAnyDCName(%08x, %08x, %08x) not implemented\n"
-           ,ServerName, DomainName, *Buffer
-         ));
+  dprintf(("NETAPI32: NetGetAnyDCName not implemented\n"));
 
   return (NERR_BASE);
 }
 
- /*****************************************************************************
+
+/*****************************************************************************
  * Name      : NET_API_STATUS NetGetDCName
  * Purpose   :
  * Parameters: LPWSTR servername
@@ -409,22 +389,20 @@ NET_API_STATUS WIN32API OS2NetGetAnyDCName(
  *
  * Author    : Markus Montkowski [09.07.98 21:30:29]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetGetDCName(
-                                        LPWSTR servername,
-                                        LPWSTR domainname,
-                                        LPBYTE *bufptr
-                                        )
 
+ODINFUNCTION3(NET_API_STATUS, OS2NetGetDCName,
+              LPWSTR, servername,
+              LPWSTR, domainname,
+              LPBYTE *, bufptr)
 {
 
-  dprintf(("NETAPI32: NetGetDCName(%08x, %08x, %08x) not implemented\n"
-           ,servername, domainname, *bufptr
-         ));
+  dprintf(("NETAPI32: NetGetDCName not implemented\n"));
 
   return (NERR_BASE);
 }
 
- /*****************************************************************************
+
+/*****************************************************************************
  * Name      : NET_API_STATUS NetGetDisplayInformationIndex
  * Purpose   :
  * Parameters: LPWSTR ServerName  pointer to server to get information from
@@ -440,23 +418,20 @@ NET_API_STATUS WIN32API OS2NetGetDCName(
  *
  * Author    : Markus Montkowski [09.07.98 21:30:53]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetGetDisplayInformationIndex(
-                                                         LPWSTR ServerName,
-                                                         DWORD Level,
-                                                         LPWSTR Prefix,
-                                                         LPDWORD Index
-                                                         )
 
+ODINFUNCTION4(NET_API_STATUS, OS2NetGetDisplayInformationIndex,
+              LPWSTR, ServerName,
+              DWORD, Level,
+              LPWSTR, Prefix,
+              LPDWORD, Index)
 {
-
-  dprintf(("NETAPI32: NetGetDisplayInformationIndex(%08x, %d, %08x, %08x) not implemented\n"
-           ,ServerName, Level, Prefix, Index
-         ));
+  dprintf(("NETAPI32: NetGetDisplayInformationIndex not implemented\n"));
 
   return (NERR_BASE);
 }
 
- /*****************************************************************************
+
+/*****************************************************************************
  * Name      : NET_API_STATUS NetGroupAdd
  * Purpose   :
  * Parameters: LPWSTR servername
@@ -472,23 +447,20 @@ NET_API_STATUS WIN32API OS2NetGetDisplayInformationIndex(
  *
  * Author    : Markus Montkowski [09.07.98 21:31:17]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetGroupAdd(
-                                       LPWSTR servername,
-                                       DWORD level,
-                                       LPBYTE buf,
-                                       LPDWORD parm_err
-                                       )
 
+ODINFUNCTION4(NET_API_STATUS, OS2NetGroupAdd,
+              LPWSTR, servername,
+              DWORD, level,
+              LPBYTE, buf,
+              LPDWORD, parm_err)
 {
-
-  dprintf(("NETAPI32: NetGroupAdd(%08x, %d, %08x, %08x) not implemented\n"
-           ,servername, level, buf, parm_err
-         ));
+  dprintf(("NETAPI32: NetGroupAdd not implemented\n"));
 
   return (NERR_BASE);
 }
 
- /*****************************************************************************
+
+/*****************************************************************************
  * Name      : NET_API_STATUS NetGroupAddUser
  * Purpose   :
  * Parameters: LPWSTR servername
@@ -503,22 +475,19 @@ NET_API_STATUS WIN32API OS2NetGroupAdd(
  *
  * Author    : Markus Montkowski [09.07.98 21:31:38]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetGroupAddUser(
-                                           LPWSTR servername,
-                                           LPWSTR GroupName,
-                                           LPWSTR username
-                                           )
 
+ODINFUNCTION3(NET_API_STATUS, OS2NetGroupAddUser,
+              LPWSTR, servername,
+              LPWSTR, GroupName,
+              LPWSTR, username)
 {
-
-  dprintf(("NETAPI32: NetGroupAddUser(%08x, %08x, %08x) not implemented\n"
-           ,servername, GroupName, username
-         ));
+  dprintf(("NETAPI32: NetGroupAddUser not implemented\n"));
 
   return (NERR_BASE);
 }
 
- /*****************************************************************************
+
+/*****************************************************************************
  * Name      : NET_API_STATUS NetGroupDel
  * Purpose   :
  * Parameters: LPWSTR servername
@@ -532,21 +501,18 @@ NET_API_STATUS WIN32API OS2NetGroupAddUser(
  *
  * Author    : Markus Montkowski [09.07.98 21:31:53]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetGroupDel(
-                                       LPWSTR servername,
-                                       LPWSTR groupname
-                                       )
 
+ODINFUNCTION2(NET_API_STATUS, OS2NetGroupDel,
+              LPWSTR, servername,
+              LPWSTR, groupname)
 {
-
-  dprintf(("NETAPI32: NetGroupDel(%08x, %08x) not implemented\n"
-           ,servername, groupname
-         ));
+  dprintf(("NETAPI32: NetGroupDel not implemented\n"));
 
   return (NERR_BASE);
 }
 
- /*****************************************************************************
+
+/*****************************************************************************
  * Name      : NET_API_STATUS NetGroupDelUser
  * Purpose   :
  * Parameters: LPWSTR servername
@@ -561,22 +527,19 @@ NET_API_STATUS WIN32API OS2NetGroupDel(
  *
  * Author    : Markus Montkowski [09.07.98 21:32:05]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetGroupDelUser(
-                                           LPWSTR servername,
-                                           LPWSTR GroupName,
-                                           LPWSTR Username
-                                           )
 
+ODINFUNCTION3(NET_API_STATUS, OS2NetGroupDelUser,
+              LPWSTR, servername,
+              LPWSTR, GroupName,
+              LPWSTR, Username)
 {
-
-  dprintf(("NETAPI32: NetGroupDelUser(%08x, %08x, %08x) not implemented\n"
-           ,servername, GroupName, Username
-         ));
+  dprintf(("NETAPI32: NetGroupDelUser not implemented\n"));
 
   return (NERR_BASE);
 }
 
- /*****************************************************************************
+
+/*****************************************************************************
  * Name      : NET_API_STATUS NetGroupEnum
  * Purpose   :
  * Parameters: LPWSTR servername
@@ -595,26 +558,23 @@ NET_API_STATUS WIN32API OS2NetGroupDelUser(
  *
  * Author    : Markus Montkowski [09.07.98 21:32:38]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetGroupEnum(
-                                        LPWSTR servername,
-                                        DWORD level,
-                                        LPBYTE *bufptr,
-                                        DWORD prefmaxlen,
-                                        LPDWORD entriesread,
-                                        LPDWORD totalentries,
-                                        LPDWORD resume_handle
-                                        )
 
+ODINFUNCTION7(NET_API_STATUS, OS2NetGroupEnum,
+              LPWSTR, servername,
+              DWORD, level,
+              LPBYTE *, bufptr,
+              DWORD, prefmaxlen,
+              LPDWORD, entriesread,
+              LPDWORD, totalentries,
+              LPDWORD, resume_handle)
 {
-
-  dprintf(("NETAPI32: NetGroupEnum(%08x, %d, %08x, %d, %08x, %08x, %08x) not implemented\n"
-           ,servername, level, *bufptr, prefmaxlen, entriesread, totalentries, resume_handle
-         ));
+  dprintf(("NETAPI32: NetGroupEnum not implemented\n"));
 
   return (NERR_BASE);
 }
 
- /*****************************************************************************
+
+/*****************************************************************************
  * Name      : NET_API_STATUS NetGroupGetInfo
  * Purpose   :
  * Parameters: LPWSTR servername
@@ -630,23 +590,20 @@ NET_API_STATUS WIN32API OS2NetGroupEnum(
  *
  * Author    : Markus Montkowski [09.07.98 21:33:13]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetGroupGetInfo(
-                                           LPWSTR servername,
-                                           LPWSTR groupname,
-                                           DWORD level,
-                                           LPBYTE *bufptr
-                                           )
 
+ODINFUNCTION4(NET_API_STATUS, OS2NetGroupGetInfo,
+              LPWSTR, servername,
+              LPWSTR, groupname,
+              DWORD, level,
+              LPBYTE *, bufptr)
 {
-
-  dprintf(("NETAPI32: NetGroupGetInfo(%08x, %08x, %d, %08x) not implemented\n"
-           ,servername, groupname, level, *bufptr
-         ));
+  dprintf(("NETAPI32: NetGroupGetInfo not implemented\n"));
 
   return (NERR_BASE);
 }
 
- /*****************************************************************************
+
+/*****************************************************************************
  * Name      : NET_API_STATUS NetGroupGetUsers
  * Purpose   :
  * Parameters: LPWSTR servername
@@ -666,27 +623,24 @@ NET_API_STATUS WIN32API OS2NetGroupGetInfo(
  *
  * Author    : Markus Montkowski [09.07.98 21:33:24]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetGroupGetUsers(
-                                            LPWSTR servername,
-                                            LPWSTR groupname,
-                                            DWORD level,
-                                            LPBYTE *bufptr,
-                                            DWORD prefmaxlen,
-                                            LPDWORD entriesread,
-                                            LPDWORD totalentries,
-                                            LPDWORD resumeHandle
-                                            )
 
+ODINFUNCTION8(NET_API_STATUS, OS2NetGroupGetUsers,
+              LPWSTR, servername,
+              LPWSTR, groupname,
+              DWORD, level,
+              LPBYTE *, bufptr,
+              DWORD, prefmaxlen,
+              LPDWORD, entriesread,
+              LPDWORD, totalentries,
+              LPDWORD, resumeHandle)
 {
-
-  dprintf(("NETAPI32: NetGroupGetUsers(%08x, %08x, %d, %08x, %d, %08x, %08x, %08x) not implemented\n"
-           ,servername, groupname, level, *bufptr, prefmaxlen, entriesread, totalentries, resumeHandle
-         ));
+  dprintf(("NETAPI32: NetGroupGetUsers not implemented\n"));
 
   return (NERR_BASE);
 }
 
- /*****************************************************************************
+
+/*****************************************************************************
  * Name      : NET_API_STATUS NetGroupSetInfo
  * Purpose   :
  * Parameters: LPWSTR servername
@@ -703,24 +657,21 @@ NET_API_STATUS WIN32API OS2NetGroupGetUsers(
  *
  * Author    : Markus Montkowski [09.07.98 21:33:39]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetGroupSetInfo(
-                                           LPWSTR servername,
-                                           LPWSTR groupname,
-                                           DWORD level,
-                                           LPBYTE buf,
-                                           LPDWORD parm_err
-                                           )
 
+ODINFUNCTION5(NET_API_STATUS, OS2NetGroupSetInfo,
+              LPWSTR, servername,
+              LPWSTR, groupname,
+              DWORD, level,
+              LPBYTE, buf,
+              LPDWORD, parm_err)
 {
-
-  dprintf(("NETAPI32: NetGroupSetInfo(%08x, %08x, %d, %08x, %08x) not implemented\n"
-           ,servername, groupname, level, buf, parm_err
-         ));
+  dprintf(("NETAPI32: NetGroupSetInfo not implemented\n"));
 
   return (NERR_BASE);
 }
 
- /*****************************************************************************
+
+/*****************************************************************************
  * Name      : NET_API_STATUS NetGroupSetUsers
  * Purpose   :
  * Parameters: LPWSTR servername
@@ -737,24 +688,21 @@ NET_API_STATUS WIN32API OS2NetGroupSetInfo(
  *
  * Author    : Markus Montkowski [09.07.98 21:34:02]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetGroupSetUsers(
-                                            LPWSTR servername,
-                                            LPWSTR groupname,
-                                            DWORD level,
-                                            LPBYTE buf,
-                                            DWORD NewMemberCount
-                                            )
 
+ODINFUNCTION5(NET_API_STATUS, OS2NetGroupSetUsers,
+              LPWSTR, servername,
+              LPWSTR, groupname,
+              DWORD, level,
+              LPBYTE, buf,
+              DWORD, NewMemberCount)
 {
-
-  dprintf(("NETAPI32: NetGroupSetUsers(%08x, %08x, %d, %08x, %d) not implemented\n"
-           ,servername, groupname, level, buf, NewMemberCount
-         ));
+  dprintf(("NETAPI32: NetGroupSetUsers not implemented\n"));
 
   return (NERR_BASE);
 }
 
- /*****************************************************************************
+
+/*****************************************************************************
  * Name      : NET_API_STATUS NetHandleGetInfo
  * Purpose   :
  * Parameters: UNSIGNED SHORT hHandle
@@ -772,11 +720,12 @@ NET_API_STATUS WIN32API OS2NetGroupSetUsers(
  * Author    : Markus Montkowski [09.07.98 21:35:03]
  *****************************************************************************/
 /*  NOT in DLL but in SDK Documentation
-NET_API_STATUS WIN32API OS2NetHandleGetInfo(
-                                            UNSIGNED SHORT hHandle,
-                                            SHORT sLevel,
-                                            CHAR FAR *pbBuffer,
-                                            UNSIGNED SHORT cbBuffer,
+ODINFUNCTION5(NET_API_STATUS, OS2NetHandleGetInfo,
+              UNSIGNED, SHORT,
+              hHandle,, SHORT,
+              sLevel,, CHAR,
+              FAR *, pbBuffer,
+              UNSIGNED, SHORTcbBuffer,
                                             UNSIGNED SHORT FAR *pcbTotalAvail
                                             )
 
@@ -790,7 +739,7 @@ NET_API_STATUS WIN32API OS2NetHandleGetInfo(
 }
 */
 
- /*****************************************************************************
+/*****************************************************************************
  * Name      : NET_API_STATUS NetHandleSetInfo
  * Purpose   :
  * Parameters: UNSIGNED SHORT hHandle
@@ -808,11 +757,12 @@ NET_API_STATUS WIN32API OS2NetHandleGetInfo(
  * Author    : Markus Montkowski [09.07.98 21:39:08]
  *****************************************************************************/
 /* Not in DLL but in SDK Documentation
-NET_API_STATUS WIN32API OS2NetHandleSetInfo(
-                                            UNSIGNED SHORT hHandle,
-                                            SHORT sLevel,
-                                            CHAR FAR *pbBuffer,
-                                            UNSIGNED SHORT cbBuffer,
+ODINFUNCTION5(NET_API_STATUS, OS2NetHandleSetInfo,
+              UNSIGNED, SHORT,
+              hHandle,, SHORT,
+              sLevel,, CHAR,
+              FAR *, pbBuffer,
+              UNSIGNED, SHORTcbBuffer,
                                             UNSIGNED SHORT FAR *sParmNum
                                             )
 
@@ -826,7 +776,7 @@ NET_API_STATUS WIN32API OS2NetHandleSetInfo(
 }
 
 */
- /*****************************************************************************
+/*****************************************************************************
  * Name      : NET_API_STATUS NetLocalGroupAdd
  * Purpose   :
  * Parameters: LPWSTR servername
@@ -842,12 +792,11 @@ NET_API_STATUS WIN32API OS2NetHandleSetInfo(
  *
  * Author    : Markus Montkowski [09.07.98 21:40:13]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetLocalGroupAdd(
-                                            LPWSTR servername,
-                                            DWORD level,
-                                            LPBYTE buf,
-                                            LPDWORD parm_err
-                                            )
+ODINFUNCTION4(NET_API_STATUS, OS2NetLocalGroupAdd,
+              LPWSTR, servername,
+              DWORD, level,
+              LPBYTE, buf,
+              LPDWORD, parm_err)
 {
 
   dprintf(("NETAPI32: NetLocalGroupAdd(%08x, %d, %08x, %08x) not implemented\n"
@@ -857,7 +806,7 @@ NET_API_STATUS WIN32API OS2NetLocalGroupAdd(
   return (NERR_BASE);
 }
 
- /*****************************************************************************
+/*****************************************************************************
  * Name      : NET_API_STATUS NetLocalGroupAddMembers
  * Purpose   :
  * Parameters: LPWSTR servername
@@ -874,13 +823,12 @@ NET_API_STATUS WIN32API OS2NetLocalGroupAdd(
  *
  * Author    : Markus Montkowski [09.07.98 21:40:51]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetLocalGroupAddMembers(
-                                                   LPWSTR servername,
-                                                   LPWSTR LocalGroupName,
-                                                   DWORD level,
-                                                   LPBYTE buf,
-                                                   DWORD membercount
-                                                   )
+ODINFUNCTION5(NET_API_STATUS, OS2NetLocalGroupAddMembers,
+              LPWSTR, servername,
+              LPWSTR, LocalGroupName,
+              DWORD, level,
+              LPBYTE, buf,
+              DWORD, membercount)
 
 {
 
@@ -891,7 +839,7 @@ NET_API_STATUS WIN32API OS2NetLocalGroupAddMembers(
   return (NERR_BASE);
 }
 
- /*****************************************************************************
+/*****************************************************************************
  * Name      : NET_API_STATUS NetLocalGroupDel
  * Purpose   :
  * Parameters: LPWSTR servername
@@ -905,10 +853,9 @@ NET_API_STATUS WIN32API OS2NetLocalGroupAddMembers(
  *
  * Author    : Markus Montkowski [09.07.98 21:41:03]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetLocalGroupDel(
-                                            LPWSTR servername,
-                                            LPWSTR LocalGroupName
-                                            )
+ODINFUNCTION2(NET_API_STATUS, OS2NetLocalGroupDel,
+              LPWSTR, servername,
+              LPWSTR, LocalGroupName)
 
 {
 
@@ -919,7 +866,7 @@ NET_API_STATUS WIN32API OS2NetLocalGroupDel(
   return (NERR_BASE);
 }
 
- /*****************************************************************************
+/*****************************************************************************
  * Name      : NET_API_STATUS NetLocalGroupDelMembers
  * Purpose   :
  * Parameters: LPWSTR servername
@@ -936,13 +883,12 @@ NET_API_STATUS WIN32API OS2NetLocalGroupDel(
  *
  * Author    : Markus Montkowski [09.07.98 21:41:33]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetLocalGroupDelMembers(
-                                                   LPWSTR servername,
-                                                   LPWSTR LocalGroupName,
-                                                   DWORD level,
-                                                   LPBYTE buf,
-                                                   DWORD membercount
-                                                   )
+ODINFUNCTION5(NET_API_STATUS, OS2NetLocalGroupDelMembers,
+              LPWSTR, servername,
+              LPWSTR, LocalGroupName,
+              DWORD, level,
+              LPBYTE, buf,
+              DWORD, membercount)
 
 {
 
@@ -953,7 +899,7 @@ NET_API_STATUS WIN32API OS2NetLocalGroupDelMembers(
   return (NERR_BASE);
 }
 
- /*****************************************************************************
+/*****************************************************************************
  * Name      : NET_API_STATUS NetLocalGroupEnum
  * Purpose   :
  * Parameters: LPWSTR servername
@@ -972,15 +918,14 @@ NET_API_STATUS WIN32API OS2NetLocalGroupDelMembers(
  *
  * Author    : Markus Montkowski [09.07.98 21:41:49]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetLocalGroupEnum(
-                                             LPWSTR servername,
-                                             DWORD level,
-                                             LPBYTE *bufptr,
-                                             DWORD prefmaxlen,
-                                             LPDWORD entriesread,
-                                             LPDWORD totalentries,
-                                             LPDWORD resumehandle
-                                             )
+ODINFUNCTION7(NET_API_STATUS, OS2NetLocalGroupEnum,
+              LPWSTR, servername,
+              DWORD, level,
+              LPBYTE *, bufptr,
+              DWORD, prefmaxlen,
+              LPDWORD, entriesread,
+              LPDWORD, totalentries,
+              LPDWORD, resumehandle)
 
 {
 
@@ -991,7 +936,7 @@ NET_API_STATUS WIN32API OS2NetLocalGroupEnum(
   return (NERR_BASE);
 }
 
- /*****************************************************************************
+/*****************************************************************************
  * Name      : NET_API_STATUS NetLocalGroupGetInfo
  * Purpose   :
  * Parameters: LPWSTR servername
@@ -1007,12 +952,11 @@ NET_API_STATUS WIN32API OS2NetLocalGroupEnum(
  *
  * Author    : Markus Montkowski [09.07.98 21:42:02]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetLocalGroupGetInfo(
-                                                LPWSTR servername,
-                                                LPWSTR LocalGroupName,
-                                                DWORD level,
-                                                LPBYTE *bufptr
-                                                )
+ODINFUNCTION4(NET_API_STATUS, OS2NetLocalGroupGetInfo,
+              LPWSTR, servername,
+              LPWSTR, LocalGroupName,
+              DWORD, level,
+              LPBYTE *, bufptr)
 
 {
 
@@ -1023,7 +967,7 @@ NET_API_STATUS WIN32API OS2NetLocalGroupGetInfo(
   return (NERR_BASE);
 }
 
- /*****************************************************************************
+/*****************************************************************************
  * Name      : NET_API_STATUS NetLocalGroupGetMembers
  * Purpose   :
  * Parameters: LPWSTR servername
@@ -1043,16 +987,15 @@ NET_API_STATUS WIN32API OS2NetLocalGroupGetInfo(
  *
  * Author    : Markus Montkowski [09.07.98 21:42:16]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetLocalGroupGetMembers(
-                                                   LPWSTR servername,
-                                                   LPWSTR localgroupname,
-                                                   DWORD level,
-                                                   LPBYTE *bufptr,
-                                                   DWORD prefmaxlen,
-                                                   LPDWORD entriesread,
-                                                   LPDWORD totalentries,
-                                                   LPDWORD resumehandle
-                                                   )
+ODINFUNCTION8(NET_API_STATUS, OS2NetLocalGroupGetMembers,
+              LPWSTR, servername,
+              LPWSTR, localgroupname,
+              DWORD, level,
+              LPBYTE *, bufptr,
+              DWORD, prefmaxlen,
+              LPDWORD, entriesread,
+              LPDWORD, totalentries,
+              LPDWORD, resumehandle)
 
 {
 
@@ -1063,7 +1006,7 @@ NET_API_STATUS WIN32API OS2NetLocalGroupGetMembers(
   return (NERR_BASE);
 }
 
- /*****************************************************************************
+/*****************************************************************************
  * Name      : NET_API_STATUS NetLocalGroupSetInfo
  * Purpose   :
  * Parameters: LPWSTR servername
@@ -1080,13 +1023,12 @@ NET_API_STATUS WIN32API OS2NetLocalGroupGetMembers(
  *
  * Author    : Markus Montkowski [09.07.98 21:42:27]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetLocalGroupSetInfo(
-                                                LPWSTR servername,
-                                                LPWSTR LocalGroupName,
-                                                DWORD level,
-                                                LPBYTE buf,
-                                                LPDWORD parm_err
-                                                )
+ODINFUNCTION5(NET_API_STATUS, OS2NetLocalGroupSetInfo,
+              LPWSTR, servername,
+              LPWSTR, LocalGroupName,
+              DWORD, level,
+              LPBYTE, buf,
+              LPDWORD, parm_err)
 
 {
 
@@ -1097,7 +1039,7 @@ NET_API_STATUS WIN32API OS2NetLocalGroupSetInfo(
   return (NERR_BASE);
 }
 
- /*****************************************************************************
+/*****************************************************************************
  * Name      : NET_API_STATUS NetLocalGroupSetMembers
  * Purpose   :
  * Parameters: LPWSTR servername
@@ -1114,13 +1056,12 @@ NET_API_STATUS WIN32API OS2NetLocalGroupSetInfo(
  *
  * Author    : Markus Montkowski [09.07.98 21:42:49]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetLocalGroupSetMembers(
-                                                   LPWSTR servername,
-                                                   LPWSTR LocalGroupName,
-                                                   DWORD level,
-                                                   LPBYTE buf,
-                                                   DWORD totalentries
-                                                   )
+ODINFUNCTION5(NET_API_STATUS, OS2NetLocalGroupSetMembers,
+              LPWSTR, servername,
+              LPWSTR, LocalGroupName,
+              DWORD, level,
+              LPBYTE, buf,
+              DWORD, totalentries)
 
 {
 
@@ -1131,7 +1072,7 @@ NET_API_STATUS WIN32API OS2NetLocalGroupSetMembers(
   return (NERR_BASE);
 }
 
- /*****************************************************************************
+/*****************************************************************************
  * Name      : NET_API_STATUS NetMessageBufferSend
  * Purpose   :
  * Parameters: LPWSTR servername
@@ -1148,13 +1089,12 @@ NET_API_STATUS WIN32API OS2NetLocalGroupSetMembers(
  *
  * Author    : Markus Montkowski [09.07.98 21:43:01]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetMessageBufferSend(
-                                                 LPWSTR servername,
-                                                 LPWSTR msgname,
-                                                 LPWSTR fromname,
-                                                 LPBYTE buf,
-                                                 DWORD buflen
-                                                 )
+ODINFUNCTION5(NET_API_STATUS, OS2NetMessageBufferSend,
+              LPWSTR, servername,
+              LPWSTR, msgname,
+              LPWSTR, fromname,
+              LPBYTE, buf,
+              DWORD, buflen)
 
 {
 
@@ -1167,7 +1107,7 @@ NET_API_STATUS WIN32API OS2NetMessageBufferSend(
 
 
 
- /*****************************************************************************
+/*****************************************************************************
  * Name      : NET_API_STATUS NetMessageNameAdd
  * Purpose   :
  * Parameters: LPWSTR servername
@@ -1181,10 +1121,9 @@ NET_API_STATUS WIN32API OS2NetMessageBufferSend(
  *
  * Author    : Markus Montkowski [09.07.98 21:43:41]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetMessageNameAdd(
-                                              LPWSTR servername,
-                                              LPWSTR msgname
-                                              )
+ODINFUNCTION2(NET_API_STATUS, OS2NetMessageNameAdd,
+              LPWSTR, servername,
+              LPWSTR, msgname)
 
 {
 
@@ -1195,7 +1134,7 @@ NET_API_STATUS WIN32API OS2NetMessageNameAdd(
   return (NERR_BASE);
 }
 
- /*****************************************************************************
+/*****************************************************************************
  * Name      : NET_API_STATUS NetMessageNameDel
  * Purpose   :
  * Parameters: LPWSTR servername
@@ -1209,10 +1148,9 @@ NET_API_STATUS WIN32API OS2NetMessageNameAdd(
  *
  * Author    : Markus Montkowski [09.07.98 21:44:12]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetMessageNameDel(
-                                              LPWSTR servername,
-                                              LPWSTR msgname
-                                              )
+ODINFUNCTION2(NET_API_STATUS, OS2NetMessageNameDel,
+              LPWSTR, servername,
+              LPWSTR, msgname)
 
 {
 
@@ -1223,7 +1161,7 @@ NET_API_STATUS WIN32API OS2NetMessageNameDel(
   return (NERR_BASE);
 }
 
- /*****************************************************************************
+/*****************************************************************************
  * Name      : NET_API_STATUS NetMessageNameEnum
  * Purpose   :
  * Parameters: LPWSTR servername
@@ -1242,15 +1180,14 @@ NET_API_STATUS WIN32API OS2NetMessageNameDel(
  *
  * Author    : Markus Montkowski [09.07.98 21:45:05]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetMessageNameEnum(
-                                               LPWSTR servername,
-                                               DWORD level,
-                                               LPBYTE *bufptr,
-                                               DWORD prefmaxlen,
-                                               LPDWORD entriesread,
-                                               LPDWORD totalentries,
-                                               LPDWORD resume_handle
-                                               )
+ODINFUNCTION7(NET_API_STATUS, OS2NetMessageNameEnum,
+              LPWSTR, servername,
+              DWORD, level,
+              LPBYTE *, bufptr,
+              DWORD, prefmaxlen,
+              LPDWORD, entriesread,
+              LPDWORD, totalentries,
+              LPDWORD, resume_handle)
 
 {
 
@@ -1262,7 +1199,7 @@ NET_API_STATUS WIN32API OS2NetMessageNameEnum(
 }
 
 
- /*****************************************************************************
+/*****************************************************************************
  * Name      : NET_API_STATUS NetMessageNameGetInfo
  * Purpose   :
  * Parameters: LPWSTR servername
@@ -1278,12 +1215,11 @@ NET_API_STATUS WIN32API OS2NetMessageNameEnum(
  *
  * Author    : Markus Montkowski [09.07.98 21:45:40]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetMessageNameGetInfo(
-                                                  LPWSTR servername,
-                                                  LPWSTR msgname,
-                                                  DWORD level,
-                                                  LPBYTE *bufptr
-                                                  )
+ODINFUNCTION4(NET_API_STATUS, OS2NetMessageNameGetInfo,
+              LPWSTR, servername,
+              LPWSTR, msgname,
+              DWORD, level,
+              LPBYTE *, bufptr)
 
 {
 
@@ -1293,7 +1229,7 @@ NET_API_STATUS WIN32API OS2NetMessageNameGetInfo(
 
   return (NERR_BASE);
 }
- /*****************************************************************************
+/*****************************************************************************
  * Name      : NET_API_STATUS NetQueryDisplayInformation
  * Purpose   :
  * Parameters: LPWSTR ServerName
@@ -1312,15 +1248,14 @@ NET_API_STATUS WIN32API OS2NetMessageNameGetInfo(
  *
  * Author    : Markus Montkowski [09.07.98 21:46:40]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetQueryDisplayInformation(
-                                                      LPWSTR ServerName,
-                                                      DWORD Level,
-                                                      DWORD Index,
-                                                      DWORD EntriesRequested,
-                                                      DWORD PreferredMaximumLength,
-                                                      LPDWORD ReturnedEntryCount,
-                                                      PVOID *SortedBuffer
-                                                      )
+ODINFUNCTION7(NET_API_STATUS, OS2NetQueryDisplayInformation,
+              LPWSTR, ServerName,
+              DWORD, Level,
+              DWORD, Index,
+              DWORD, EntriesRequested,
+              DWORD, PreferredMaximumLength,
+              LPDWORD, ReturnedEntryCount,
+              PVOID *, SortedBuffer)
 
 {
 
@@ -1331,7 +1266,7 @@ NET_API_STATUS WIN32API OS2NetQueryDisplayInformation(
   return (NERR_BASE);
 }
 
- /*****************************************************************************
+/*****************************************************************************
  * Name      : NET_API_STATUS NetRemoteTOD
  * Purpose   :
  * Parameters: LPWSTR UncServerName
@@ -1345,10 +1280,9 @@ NET_API_STATUS WIN32API OS2NetQueryDisplayInformation(
  *
  * Author    : Markus Montkowski [09.07.98 21:47:20]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetRemoteTOD(
-                                         LPWSTR UncServerName,
-                                         LPBYTE *BufferPtr
-                                         )
+ODINFUNCTION2(NET_API_STATUS, OS2NetRemoteTOD,
+              LPWSTR, UncServerName,
+              LPBYTE *, BufferPtr)
 
 {
 
@@ -1359,7 +1293,7 @@ NET_API_STATUS WIN32API OS2NetRemoteTOD(
   return (NERR_BASE);
 }
 
- /*****************************************************************************
+/*****************************************************************************
  * Name      : NET_API_STATUS NetReplExportDirAdd
  * Purpose   :
  * Parameters: LPWSTR servername
@@ -1375,12 +1309,11 @@ NET_API_STATUS WIN32API OS2NetRemoteTOD(
  *
  * Author    : Markus Montkowski [09.07.98 21:47:52]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetReplExportDirAdd(
-                                                LPWSTR servername,
-                                                DWORD level,
-                                                LPBYTE buf,
-                                                LPDWORD parm_err
-                                                )
+ODINFUNCTION4(NET_API_STATUS, OS2NetReplExportDirAdd,
+              LPWSTR, servername,
+              DWORD, level,
+              LPBYTE, buf,
+              LPDWORD, parm_err)
 
 {
 
@@ -1391,7 +1324,7 @@ NET_API_STATUS WIN32API OS2NetReplExportDirAdd(
   return (NERR_BASE);
 }
 
- /*****************************************************************************
+/*****************************************************************************
  * Name      : NET_API_STATUS NetReplExportDirDel
  * Purpose   :
  * Parameters: LPWSTR servername
@@ -1405,10 +1338,9 @@ NET_API_STATUS WIN32API OS2NetReplExportDirAdd(
  *
  * Author    : Markus Montkowski [09.07.98 21:48:42]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetReplExportDirDel(
-                                                LPWSTR servername,
-                                                LPWSTR dirname
-                                                )
+ODINFUNCTION2(NET_API_STATUS, OS2NetReplExportDirDel,
+              LPWSTR, servername,
+              LPWSTR, dirname)
 
 {
 
@@ -1421,7 +1353,7 @@ NET_API_STATUS WIN32API OS2NetReplExportDirDel(
 
 
 
- /*****************************************************************************
+/*****************************************************************************
  * Name      : NET_API_STATUS NetReplExportDirEnum
  * Purpose   :
  * Parameters: LPWSTR servername
@@ -1440,15 +1372,14 @@ NET_API_STATUS WIN32API OS2NetReplExportDirDel(
  *
  * Author    : Markus Montkowski [09.07.98 21:49:05]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetReplExportDirEnum(
-                                                 LPWSTR servername,
-                                                 DWORD level,
-                                                 LPBYTE *bufptr,
-                                                 DWORD prefmaxlen,
-                                                 LPDWORD entriesread,
-                                                 LPDWORD totalentries,
-                                                 LPDWORD resumehandle
-                                                 )
+ODINFUNCTION7(NET_API_STATUS, OS2NetReplExportDirEnum,
+              LPWSTR, servername,
+              DWORD, level,
+              LPBYTE *, bufptr,
+              DWORD, prefmaxlen,
+              LPDWORD, entriesread,
+              LPDWORD, totalentries,
+              LPDWORD, resumehandle)
 
 {
 
@@ -1458,7 +1389,7 @@ NET_API_STATUS WIN32API OS2NetReplExportDirEnum(
 
   return (NERR_BASE);
 }
- /*****************************************************************************
+/*****************************************************************************
  * Name      : NET_API_STATUS NetReplExportDirGetInfo
  * Purpose   :
  * Parameters: LPWSTR servername
@@ -1474,12 +1405,11 @@ NET_API_STATUS WIN32API OS2NetReplExportDirEnum(
  *
  * Author    : Markus Montkowski [09.07.98 21:49:34]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetReplExportDirGetInfo(
-                                                    LPWSTR servername,
-                                                    LPWSTR dirname,
-                                                    DWORD level,
-                                                    LPBYTE *bufptr
-                                                    )
+ODINFUNCTION4(NET_API_STATUS, OS2NetReplExportDirGetInfo,
+              LPWSTR, servername,
+              LPWSTR, dirname,
+              DWORD, level,
+              LPBYTE *, bufptr)
 
 {
 
@@ -1489,7 +1419,7 @@ NET_API_STATUS WIN32API OS2NetReplExportDirGetInfo(
 
   return (NERR_BASE);
 }
- /*****************************************************************************
+/*****************************************************************************
  * Name      : NET_API_STATUS NetReplExportDirLock
  * Purpose   :
  * Parameters: LPWSTR servername
@@ -1503,10 +1433,9 @@ NET_API_STATUS WIN32API OS2NetReplExportDirGetInfo(
  *
  * Author    : Markus Montkowski [09.07.98 21:49:58]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetReplExportDirLock(
-                                                 LPWSTR servername,
-                                                 LPWSTR dirname
-                                                 )
+ODINFUNCTION2(NET_API_STATUS, OS2NetReplExportDirLock,
+              LPWSTR, servername,
+              LPWSTR, dirname)
 
 {
 
@@ -1517,7 +1446,7 @@ NET_API_STATUS WIN32API OS2NetReplExportDirLock(
   return (NERR_BASE);
 }
 
- /*****************************************************************************
+/*****************************************************************************
  * Name      : NET_API_STATUS NetReplExportDirSetInfo
  * Purpose   :
  * Parameters: LPWSTR servername
@@ -1534,13 +1463,12 @@ NET_API_STATUS WIN32API OS2NetReplExportDirLock(
  *
  * Author    : Markus Montkowski [09.07.98 21:50:31]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetReplExportDirSetInfo(
-                                                    LPWSTR servername,
-                                                    LPWSTR dirname,
-                                                    DWORD level,
-                                                    LPBYTE buf,
-                                                    LPDWORD parm_err
-                                                    )
+ODINFUNCTION5(NET_API_STATUS, OS2NetReplExportDirSetInfo,
+              LPWSTR, servername,
+              LPWSTR, dirname,
+              DWORD, level,
+              LPBYTE, buf,
+              LPDWORD, parm_err)
 
 {
 
@@ -1550,7 +1478,7 @@ NET_API_STATUS WIN32API OS2NetReplExportDirSetInfo(
 
   return (NERR_BASE);
 }
- /*****************************************************************************
+/*****************************************************************************
  * Name      : NET_API_STATUS NetReplExportDirUnlock
  * Purpose   :
  * Parameters: LPWSTR servername
@@ -1565,11 +1493,10 @@ NET_API_STATUS WIN32API OS2NetReplExportDirSetInfo(
  *
  * Author    : Markus Montkowski [09.07.98 21:51:12]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetReplExportDirUnlock(
-                                                   LPWSTR servername,
-                                                   LPWSTR dirname,
-                                                   DWORD unlockforce
-                                                   )
+ODINFUNCTION3(NET_API_STATUS, OS2NetReplExportDirUnlock,
+              LPWSTR, servername,
+              LPWSTR, dirname,
+              DWORD, unlockforce)
 
 {
 
@@ -1581,7 +1508,7 @@ NET_API_STATUS WIN32API OS2NetReplExportDirUnlock(
 }
 
 
- /*****************************************************************************
+/*****************************************************************************
  * Name      : NET_API_STATUS NetReplGetInfo
  * Purpose   :
  * Parameters: LPWSTR servername
@@ -1596,11 +1523,10 @@ NET_API_STATUS WIN32API OS2NetReplExportDirUnlock(
  *
  * Author    : Markus Montkowski [09.07.98 21:51:37]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetReplGetInfo(
-                                           LPWSTR servername,
-                                           DWORD level,
-                                           LPBYTE *bufptr
-                                           )
+ODINFUNCTION3(NET_API_STATUS, OS2NetReplGetInfo,
+              LPWSTR, servername,
+              DWORD, level,
+              LPBYTE *, bufptr)
 
 {
 
@@ -1610,7 +1536,7 @@ NET_API_STATUS WIN32API OS2NetReplGetInfo(
 
   return (NERR_BASE);
 }
- /*****************************************************************************
+/*****************************************************************************
  * Name      : NET_API_STATUS NetReplImportDirAdd
  * Purpose   :
  * Parameters: LPWSTR servername
@@ -1626,12 +1552,11 @@ NET_API_STATUS WIN32API OS2NetReplGetInfo(
  *
  * Author    : Markus Montkowski [09.07.98 21:52:11]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetReplImportDirAdd(
-                                                LPWSTR servername,
-                                                DWORD level,
-                                                LPBYTE buf,
-                                                LPDWORD parm_err
-                                                )
+ODINFUNCTION4(NET_API_STATUS, OS2NetReplImportDirAdd,
+              LPWSTR, servername,
+              DWORD, level,
+              LPBYTE, buf,
+              LPDWORD, parm_err)
 
 {
 
@@ -1642,7 +1567,7 @@ NET_API_STATUS WIN32API OS2NetReplImportDirAdd(
   return (NERR_BASE);
 }
 
- /*****************************************************************************
+/*****************************************************************************
  * Name      : NET_API_STATUS NetReplImportDirDel
  * Purpose   :
  * Parameters: LPWSTR servername
@@ -1656,10 +1581,9 @@ NET_API_STATUS WIN32API OS2NetReplImportDirAdd(
  *
  * Author    : Markus Montkowski [09.07.98 21:52:36]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetReplImportDirDel(
-                                                LPWSTR servername,
-                                                LPWSTR dirname
-                                                )
+ODINFUNCTION2(NET_API_STATUS, OS2NetReplImportDirDel,
+              LPWSTR, servername,
+              LPWSTR, dirname)
 
 {
 
@@ -1670,7 +1594,7 @@ NET_API_STATUS WIN32API OS2NetReplImportDirDel(
   return (NERR_BASE);
 }
 
- /*****************************************************************************
+/*****************************************************************************
  * Name      : NET_API_STATUS NetReplImportDirEnum
  * Purpose   :
  * Parameters: LPWSTR servername
@@ -1689,15 +1613,14 @@ NET_API_STATUS WIN32API OS2NetReplImportDirDel(
  *
  * Author    : Markus Montkowski [09.07.98 21:52:56]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetReplImportDirEnum(
-                                                 LPWSTR servername,
-                                                 DWORD level,
-                                                 LPBYTE *bufptr,
-                                                 DWORD prefmaxlen,
-                                                 LPDWORD entriesread,
-                                                 LPDWORD totalentries,
-                                                 LPDWORD resumehandle
-                                                 )
+ODINFUNCTION7(NET_API_STATUS, OS2NetReplImportDirEnum,
+              LPWSTR, servername,
+              DWORD, level,
+              LPBYTE *, bufptr,
+              DWORD, prefmaxlen,
+              LPDWORD, entriesread,
+              LPDWORD, totalentries,
+              LPDWORD, resumehandle)
 
 {
 
@@ -1707,7 +1630,7 @@ NET_API_STATUS WIN32API OS2NetReplImportDirEnum(
 
   return (NERR_BASE);
 }
- /*****************************************************************************
+/*****************************************************************************
  * Name      : NET_API_STATUS NetReplImportDirGetInfo
  * Purpose   :
  * Parameters: LPWSTR servername
@@ -1723,12 +1646,11 @@ NET_API_STATUS WIN32API OS2NetReplImportDirEnum(
  *
  * Author    : Markus Montkowski [09.07.98 21:53:24]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetReplImportDirGetInfo(
-                                                    LPWSTR servername,
-                                                    LPWSTR dirname,
-                                                    DWORD level,
-                                                    LPBYTE *bufptr
-                                                    )
+ODINFUNCTION4(NET_API_STATUS, OS2NetReplImportDirGetInfo,
+              LPWSTR, servername,
+              LPWSTR, dirname,
+              DWORD, level,
+              LPBYTE *, bufptr)
 
 {
 
@@ -1739,7 +1661,7 @@ NET_API_STATUS WIN32API OS2NetReplImportDirGetInfo(
   return (NERR_BASE);
 }
 
- /*****************************************************************************
+/*****************************************************************************
  * Name      : NET_API_STATUS NetReplImportDirLock
  * Purpose   :
  * Parameters: LPWSTR servername
@@ -1753,10 +1675,9 @@ NET_API_STATUS WIN32API OS2NetReplImportDirGetInfo(
  *
  * Author    : Markus Montkowski [09.07.98 21:53:45]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetReplImportDirLock(
-                                                 LPWSTR servername,
-                                                 LPWSTR dirname
-                                                 )
+ODINFUNCTION2(NET_API_STATUS, OS2NetReplImportDirLock,
+              LPWSTR, servername,
+              LPWSTR, dirname)
 
 {
 
@@ -1768,7 +1689,7 @@ NET_API_STATUS WIN32API OS2NetReplImportDirLock(
 }
 
 
- /*****************************************************************************
+/*****************************************************************************
  * Name      : NET_API_STATUS NetReplImportDirUnlock
  * Purpose   :
  * Parameters: LPWSTR servername
@@ -1783,11 +1704,10 @@ NET_API_STATUS WIN32API OS2NetReplImportDirLock(
  *
  * Author    : Markus Montkowski [09.07.98 21:54:16]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetReplImportDirUnlock(
-                                                   LPWSTR servername,
-                                                   LPWSTR dirname,
-                                                   DWORD unlockforce
-                                                   )
+ODINFUNCTION3(NET_API_STATUS, OS2NetReplImportDirUnlock,
+              LPWSTR, servername,
+              LPWSTR, dirname,
+              DWORD, unlockforce)
 
 {
 
@@ -1797,7 +1717,7 @@ NET_API_STATUS WIN32API OS2NetReplImportDirUnlock(
 
   return (NERR_BASE);
 }
- /*****************************************************************************
+/*****************************************************************************
  * Name      : NET_API_STATUS NetReplSetInfo
  * Purpose   :
  * Parameters: LPWSTR servername
@@ -1813,12 +1733,11 @@ NET_API_STATUS WIN32API OS2NetReplImportDirUnlock(
  *
  * Author    : Markus Montkowski [09.07.98 21:54:38]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetReplSetInfo(
-                                           LPWSTR servername,
-                                           DWORD level,
-                                           LPBYTE buf,
-                                           LPDWORD parm_err
-                                           )
+ODINFUNCTION4(NET_API_STATUS, OS2NetReplSetInfo,
+              LPWSTR, servername,
+              DWORD, level,
+              LPBYTE, buf,
+              LPDWORD, parm_err)
 
 {
 
@@ -1830,7 +1749,7 @@ NET_API_STATUS WIN32API OS2NetReplSetInfo(
 }
 
 
- /*****************************************************************************
+/*****************************************************************************
  * Name      : NET_API_STATUS NetScheduleJobAdd
  * Purpose   :
  * Parameters: LPWSTR Servername
@@ -1845,11 +1764,10 @@ NET_API_STATUS WIN32API OS2NetReplSetInfo(
  *
  * Author    : Markus Montkowski [09.07.98 21:55:41]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetScheduleJobAdd(
-                                             LPWSTR Servername,
-                                             LPBYTE Buffer,
-                                             LPDWORD JobId
-                                             )
+ODINFUNCTION3(NET_API_STATUS, OS2NetScheduleJobAdd,
+              LPWSTR, Servername,
+              LPBYTE, Buffer,
+              LPDWORD, JobId)
 
 {
 
@@ -1860,7 +1778,7 @@ NET_API_STATUS WIN32API OS2NetScheduleJobAdd(
   return (NERR_BASE);
 }
 
- /*****************************************************************************
+/*****************************************************************************
  * Name      : NET_API_STATUS NetScheduleJobDel
  * Purpose   :
  * Parameters: LPWSTR Servername
@@ -1875,11 +1793,10 @@ NET_API_STATUS WIN32API OS2NetScheduleJobAdd(
  *
  * Author    : Markus Montkowski [09.07.98 21:55:50]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetScheduleJobDel(
-                                             LPWSTR Servername,
-                                             DWORD MinJobId,
-                                             DWORD MaxJobId
-                                             )
+ODINFUNCTION3(NET_API_STATUS, OS2NetScheduleJobDel,
+              LPWSTR, Servername,
+              DWORD, MinJobId,
+              DWORD, MaxJobId)
 
 {
 
@@ -1890,7 +1807,7 @@ NET_API_STATUS WIN32API OS2NetScheduleJobDel(
   return (NERR_BASE);
 }
 
- /*****************************************************************************
+/*****************************************************************************
  * Name      : NET_API_STATUS NetScheduleJobEnum
  * Purpose   :
  * Parameters: LPWSTR Servername
@@ -1908,14 +1825,13 @@ NET_API_STATUS WIN32API OS2NetScheduleJobDel(
  *
  * Author    : Markus Montkowski [09.07.98 21:56:02]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetScheduleJobEnum(
-                                              LPWSTR Servername,
-                                              LPBYTE *PointerToBuffer,
-                                              DWORD PreferredMaximumLength,
-                                              LPDWORD EntriesRead,
-                                              LPDWORD TotalEntries,
-                                              LPDWORD ResumeHandle
-                                              )
+ODINFUNCTION6(NET_API_STATUS, OS2NetScheduleJobEnum,
+              LPWSTR, Servername,
+              LPBYTE *, PointerToBuffer,
+              DWORD, PreferredMaximumLength,
+              LPDWORD, EntriesRead,
+              LPDWORD, TotalEntries,
+              LPDWORD, ResumeHandle)
 
 {
 
@@ -1926,7 +1842,7 @@ NET_API_STATUS WIN32API OS2NetScheduleJobEnum(
   return (NERR_BASE);
 }
 
- /*****************************************************************************
+/*****************************************************************************
  * Name      : NET_API_STATUS NetScheduleJobGetInfo
  * Purpose   :
  * Parameters: LPWSTR Servername
@@ -1941,11 +1857,10 @@ NET_API_STATUS WIN32API OS2NetScheduleJobEnum(
  *
  * Author    : Markus Montkowski [09.07.98 21:56:23]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetScheduleJobGetInfo(
-                                                 LPWSTR Servername,
-                                                 DWORD JobId,
-                                                 LPBYTE *PointerToBuffer
-                                                 )
+ODINFUNCTION3(NET_API_STATUS, OS2NetScheduleJobGetInfo,
+              LPWSTR, Servername,
+              DWORD, JobId,
+              LPBYTE *, PointerToBuffer)
 
 {
 
@@ -1956,7 +1871,7 @@ NET_API_STATUS WIN32API OS2NetScheduleJobGetInfo(
   return (NERR_BASE);
 }
 
- /*****************************************************************************
+/*****************************************************************************
  * Name      : NET_API_STATUS NetServerDiskEnum
  * Purpose   :
  * Parameters: LPWSTR servername
@@ -1975,15 +1890,14 @@ NET_API_STATUS WIN32API OS2NetScheduleJobGetInfo(
  *
  * Author    : Markus Montkowski [09.07.98 21:56:38]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetServerDiskEnum(
-                                              LPWSTR servername,
-                                              DWORD level,
-                                              LPBYTE *bufptr,
-                                              DWORD prefmaxlen,
-                                              LPDWORD entriesread,
-                                              LPDWORD totalentries,
-                                              LPDWORD resume_handle
-                                              )
+ODINFUNCTION7(NET_API_STATUS, OS2NetServerDiskEnum,
+              LPWSTR, servername,
+              DWORD, level,
+              LPBYTE *, bufptr,
+              DWORD, prefmaxlen,
+              LPDWORD, entriesread,
+              LPDWORD, totalentries,
+              LPDWORD, resume_handle)
 
 {
 
@@ -1993,7 +1907,7 @@ NET_API_STATUS WIN32API OS2NetServerDiskEnum(
 
   return (NERR_BASE);
 }
- /*****************************************************************************
+/*****************************************************************************
  * Name      : NET_API_STATUS NetServerEnum
  * Purpose   :
  * Parameters: LPWSTR servername
@@ -2014,17 +1928,16 @@ NET_API_STATUS WIN32API OS2NetServerDiskEnum(
  *
  * Author    : Markus Montkowski [09.07.98 21:57:09]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetServerEnum(
-                                          LPWSTR servername,
-                                          DWORD level,
-                                          LPBYTE *bufptr,
-                                          DWORD prefmaxlen,
-                                          LPDWORD entriesread,
-                                          LPDWORD totalentries,
-                                          DWORD servertype,
-                                          LPWSTR domain,
-                                          LPDWORD resume_handle
-                                          )
+ODINFUNCTION9(NET_API_STATUS, OS2NetServerEnum,
+              LPWSTR, servername,
+              DWORD, level,
+              LPBYTE *, bufptr,
+              DWORD, prefmaxlen,
+              LPDWORD, entriesread,
+              LPDWORD, totalentries,
+              DWORD, servertype,
+              LPWSTR, domain,
+              LPDWORD, resume_handle)
 
 {
 
@@ -2034,7 +1947,7 @@ NET_API_STATUS WIN32API OS2NetServerEnum(
 
   return (NERR_BASE);
 }
- /*****************************************************************************
+/*****************************************************************************
  * Name      : NET_API_STATUS NetServerGetInfo
  * Purpose   :
  * Parameters: LPWSTR servername
@@ -2049,11 +1962,10 @@ NET_API_STATUS WIN32API OS2NetServerEnum(
  *
  * Author    : Markus Montkowski [09.07.98 21:57:43]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetServerGetInfo(
-                                             LPWSTR servername,
-                                             DWORD level,
-                                             LPBYTE *bufptr
-                                             )
+ODINFUNCTION3(NET_API_STATUS, OS2NetServerGetInfo,
+              LPWSTR, servername,
+              DWORD, level,
+              LPBYTE *, bufptr)
 
 {
 
@@ -2064,7 +1976,7 @@ NET_API_STATUS WIN32API OS2NetServerGetInfo(
   return (NERR_BASE);
 }
 
- /*****************************************************************************
+/*****************************************************************************
  * Name      : NET_API_STATUS NetServerSetInfo
  * Purpose   :
  * Parameters: LPWSTR servername
@@ -2080,12 +1992,11 @@ NET_API_STATUS WIN32API OS2NetServerGetInfo(
  *
  * Author    : Markus Montkowski [09.07.98 21:58:14]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetServerSetInfo(
-                                             LPWSTR servername,
-                                             DWORD level,
-                                             LPBYTE buf,
-                                             LPDWORD ParmError
-                                             )
+ODINFUNCTION4(NET_API_STATUS, OS2NetServerSetInfo,
+              LPWSTR, servername,
+              DWORD, level,
+              LPBYTE, buf,
+              LPDWORD, ParmError)
 
 {
 
@@ -2097,7 +2008,7 @@ NET_API_STATUS WIN32API OS2NetServerSetInfo(
 }
 
 
- /*****************************************************************************
+/*****************************************************************************
  * Name      : NET_API_STATUS NetServerTransportAdd
  * Purpose   :
  * Parameters: LPWSTR servername
@@ -2112,11 +2023,10 @@ NET_API_STATUS WIN32API OS2NetServerSetInfo(
  *
  * Author    : Markus Montkowski [09.07.98 21:58:34]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetServerTransportAdd(
-                                                  LPWSTR servername,
-                                                  DWORD level,
-                                                  LPBYTE bufptr
-                                                  )
+ODINFUNCTION3(NET_API_STATUS, OS2NetServerTransportAdd,
+              LPWSTR, servername,
+              DWORD, level,
+              LPBYTE, bufptr)
 
 {
 
@@ -2127,7 +2037,7 @@ NET_API_STATUS WIN32API OS2NetServerTransportAdd(
   return (NERR_BASE);
 }
 
- /*****************************************************************************
+/*****************************************************************************
  * Name      : NET_API_STATUS NetServerTransportDel
  * Purpose   :
  * Parameters: LPWSTR servername
@@ -2141,10 +2051,9 @@ NET_API_STATUS WIN32API OS2NetServerTransportAdd(
  *
  * Author    : Markus Montkowski [09.07.98 21:59:12]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetServerTransportDel(
-                                                 LPWSTR servername,
-                                                 LPWSTR transportname
-                                                 )
+ODINFUNCTION2(NET_API_STATUS, OS2NetServerTransportDel,
+              LPWSTR, servername,
+              LPWSTR, transportname)
 
 {
 
@@ -2155,7 +2064,7 @@ NET_API_STATUS WIN32API OS2NetServerTransportDel(
   return (NERR_BASE);
 }
 
- /*****************************************************************************
+/*****************************************************************************
  * Name      : NET_API_STATUS NetServerTransportEnum
  * Purpose   :
  * Parameters: LPWSTR servername
@@ -2174,15 +2083,14 @@ NET_API_STATUS WIN32API OS2NetServerTransportDel(
  *
  * Author    : Markus Montkowski [09.07.98 21:59:37]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetServerTransportEnum(
-                                                   LPWSTR servername,
-                                                   DWORD level,
-                                                   LPBYTE *bufptr,
-                                                   DWORD prefmaxlen,
-                                                   LPDWORD entriesread,
-                                                   LPDWORD totalentries,
-                                                   LPDWORD resumehandle
-                                                   )
+ODINFUNCTION7(NET_API_STATUS, OS2NetServerTransportEnum,
+              LPWSTR, servername,
+              DWORD, level,
+              LPBYTE *, bufptr,
+              DWORD, prefmaxlen,
+              LPDWORD, entriesread,
+              LPDWORD, totalentries,
+              LPDWORD, resumehandle)
 
 {
 
@@ -2192,7 +2100,7 @@ NET_API_STATUS WIN32API OS2NetServerTransportEnum(
 
   return (NERR_BASE);
 }
- /*****************************************************************************
+/*****************************************************************************
  * Name      : NET_API_STATUS NetSessionDel
  * Purpose   :
  * Parameters: LPWSTR servername
@@ -2207,11 +2115,10 @@ NET_API_STATUS WIN32API OS2NetServerTransportEnum(
  *
  * Author    : Markus Montkowski [09.07.98 22:00:15]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetSessionDel(
-                                          LPWSTR servername,
-                                          LPWSTR UncClientName,
-                                          LPWSTR username
-                                          )
+ODINFUNCTION3(NET_API_STATUS, OS2NetSessionDel,
+              LPWSTR, servername,
+              LPWSTR, UncClientName,
+              LPWSTR, username)
 
 {
 
@@ -2223,7 +2130,7 @@ NET_API_STATUS WIN32API OS2NetSessionDel(
 }
 
 
- /*****************************************************************************
+/*****************************************************************************
  * Name      : NET_API_STATUS NetSessionEnum
  * Purpose   :
  * Parameters: LPWSTR servername
@@ -2244,17 +2151,16 @@ NET_API_STATUS WIN32API OS2NetSessionDel(
  *
  * Author    : Markus Montkowski [09.07.98 22:00:46]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetSessionEnum(
-                                           LPWSTR servername,
-                                           LPWSTR UncClientName,
-                                           LPWSTR username,
-                                           DWORD level,
-                                           LPBYTE *bufptr,
-                                           DWORD prefmaxlen,
-                                           LPDWORD entriesread,
-                                           LPDWORD totalentries,
-                                           LPDWORD resume_handle
-                                           )
+ODINFUNCTION9(NET_API_STATUS, OS2NetSessionEnum,
+              LPWSTR, servername,
+              LPWSTR, UncClientName,
+              LPWSTR, username,
+              DWORD, level,
+              LPBYTE *, bufptr,
+              DWORD, prefmaxlen,
+              LPDWORD, entriesread,
+              LPDWORD, totalentries,
+              LPDWORD, resume_handle)
 
 {
 
@@ -2265,7 +2171,7 @@ NET_API_STATUS WIN32API OS2NetSessionEnum(
   return (NERR_BASE);
 }
 
- /*****************************************************************************
+/*****************************************************************************
  * Name      : NET_API_STATUS NetSessionGetInfo
  * Purpose   :
  * Parameters: LPWSTR servername
@@ -2282,13 +2188,12 @@ NET_API_STATUS WIN32API OS2NetSessionEnum(
  *
  * Author    : Markus Montkowski [09.07.98 22:01:17]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetSessionGetInfo(
-                                              LPWSTR servername,
-                                              LPWSTR UncClientName,
-                                              LPWSTR username,
-                                              DWORD level,
-                                              LPBYTE *bufptr
-                                              )
+ODINFUNCTION5(NET_API_STATUS, OS2NetSessionGetInfo,
+              LPWSTR, servername,
+              LPWSTR, UncClientName,
+              LPWSTR, username,
+              DWORD, level,
+              LPBYTE *, bufptr)
 
 {
 
@@ -2298,7 +2203,7 @@ NET_API_STATUS WIN32API OS2NetSessionGetInfo(
 
   return (NERR_BASE);
 }
- /*****************************************************************************
+/*****************************************************************************
  * Name      : NET_API_STATUS NetShareAdd
  * Purpose   :
  * Parameters: LPWSTR servername
@@ -2314,12 +2219,11 @@ NET_API_STATUS WIN32API OS2NetSessionGetInfo(
  *
  * Author    : Markus Montkowski [09.07.98 22:01:48]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetShareAdd(
-                                        LPWSTR servername,
-                                        DWORD level,
-                                        LPBYTE buf,
-                                        LPDWORD parm_err
-                                        )
+ODINFUNCTION4(NET_API_STATUS, OS2NetShareAdd,
+              LPWSTR, servername,
+              DWORD, level,
+              LPBYTE, buf,
+              LPDWORD, parm_err)
 
 {
 
@@ -2331,7 +2235,7 @@ NET_API_STATUS WIN32API OS2NetShareAdd(
 }
 
 
- /*****************************************************************************
+/*****************************************************************************
  * Name      : NET_API_STATUS NetShareCheck
  * Purpose   :
  * Parameters: LPWSTR servername
@@ -2346,11 +2250,10 @@ NET_API_STATUS WIN32API OS2NetShareAdd(
  *
  * Author    : Markus Montkowski [09.07.98 22:02:16]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetShareCheck(
-                                          LPWSTR servername,
-                                          LPWSTR device,
-                                          LPDWORD type
-                                          )
+ODINFUNCTION3(NET_API_STATUS, OS2NetShareCheck,
+              LPWSTR, servername,
+              LPWSTR, device,
+              LPDWORD, type)
 
 {
 
@@ -2377,11 +2280,10 @@ NET_API_STATUS WIN32API OS2NetShareCheck(
  *
  * Author    : Markus Montkowski [09.07.98 22:03:01]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetShareDel(
-                                        LPWSTR servername,
-                                        LPWSTR netname,
-                                        DWORD reserved
-                                        )
+ODINFUNCTION3(NET_API_STATUS, OS2NetShareDel,
+              LPWSTR, servername,
+              LPWSTR, netname,
+              DWORD, reserved)
 
 {
 
@@ -2393,7 +2295,7 @@ NET_API_STATUS WIN32API OS2NetShareDel(
 }
 
 
- /*****************************************************************************
+/*****************************************************************************
  * Name      : NET_API_STATUS NetShareGetInfo
  * Purpose   :
  * Parameters: LPWSTR servername
@@ -2409,12 +2311,11 @@ NET_API_STATUS WIN32API OS2NetShareDel(
  *
  * Author    : Markus Montkowski [09.07.98 22:03:39]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetShareGetInfo(
-                                            LPWSTR servername,
-                                            LPWSTR netname,
-                                            DWORD level,
-                                            LPBYTE *bufptr
-                                            )
+ODINFUNCTION4(NET_API_STATUS, OS2NetShareGetInfo,
+              LPWSTR, servername,
+              LPWSTR, netname,
+              DWORD, level,
+              LPBYTE *, bufptr)
 
 {
 
@@ -2424,7 +2325,7 @@ NET_API_STATUS WIN32API OS2NetShareGetInfo(
 
   return (NERR_BASE);
 }
- /*****************************************************************************
+/*****************************************************************************
  * Name      : NET_API_STATUS NetShareSetInfo
  * Purpose   :
  * Parameters: LPWSTR servername
@@ -2441,13 +2342,12 @@ NET_API_STATUS WIN32API OS2NetShareGetInfo(
  *
  * Author    : Markus Montkowski [09.07.98 22:04:00]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetShareSetInfo(
-                                            LPWSTR servername,
-                                            LPWSTR netname,
-                                            DWORD level,
-                                            LPBYTE buf,
-                                            LPDWORD parm_err
-                                            )
+ODINFUNCTION5(NET_API_STATUS, OS2NetShareSetInfo,
+              LPWSTR, servername,
+              LPWSTR, netname,
+              DWORD, level,
+              LPBYTE, buf,
+              LPDWORD, parm_err)
 
 {
 
@@ -2458,7 +2358,7 @@ NET_API_STATUS WIN32API OS2NetShareSetInfo(
   return (NERR_BASE);
 }
 
- /*****************************************************************************
+/*****************************************************************************
  * Name      : NET_API_STATUS NetStatisticsGet2
  * Purpose   :
  * Parameters: LPWSTR server
@@ -2476,13 +2376,12 @@ NET_API_STATUS WIN32API OS2NetShareSetInfo(
  * Author    : Markus Montkowski [09.07.98 22:04:44]
  *****************************************************************************/
 /* Not in DLL but in SDK doc
-NET_API_STATUS WIN32API OS2NetStatisticsGet2(
-                                              LPWSTR server,
-                                              LPWSTR service,
-                                              DWORD level,
-                                              DWORD options,
-                                              LPBYTE *bufptr
-                                              )
+ODINFUNCTION5(NET_API_STATUS, OS2NetStatisticsGet2,
+              LPWSTR, server,
+              LPWSTR, service,
+              DWORD, level,
+              DWORD, options,
+              LPBYTE *, bufptr)
 
 {
 
@@ -2494,7 +2393,7 @@ NET_API_STATUS WIN32API OS2NetStatisticsGet2(
 }
 */
 
- /*****************************************************************************
+/*****************************************************************************
  * Name      : NET_API_STATUS NetUserAdd
  * Purpose   :
  * Parameters: LPWSTR servername
@@ -2510,12 +2409,11 @@ NET_API_STATUS WIN32API OS2NetStatisticsGet2(
  *
  * Author    : Markus Montkowski [09.07.98 22:06:02]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetUserAdd(
-                                      LPWSTR servername,
-                                      DWORD level,
-                                      LPBYTE buf,
-                                      LPDWORD parm_err
-                                      )
+ODINFUNCTION4(NET_API_STATUS, OS2NetUserAdd,
+              LPWSTR, servername,
+              DWORD, level,
+              LPBYTE, buf,
+              LPDWORD, parm_err)
 
 {
 
@@ -2526,7 +2424,7 @@ NET_API_STATUS WIN32API OS2NetUserAdd(
   return (NERR_BASE);
 }
 
- /*****************************************************************************
+/*****************************************************************************
  * Name      : NET_API_STATUS NetUserChangePassword
  * Purpose   :
  * Parameters: LPWSTR domainname
@@ -2542,12 +2440,11 @@ NET_API_STATUS WIN32API OS2NetUserAdd(
  *
  * Author    : Markus Montkowski [09.07.98 22:06:12]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetUserChangePassword(
-                                                 LPWSTR domainname,
-                                                 LPWSTR username,
-                                                 LPWSTR oldpassword,
-                                                 LPWSTR newpassword
-                                                 )
+ODINFUNCTION4(NET_API_STATUS, OS2NetUserChangePassword,
+              LPWSTR, domainname,
+              LPWSTR, username,
+              LPWSTR, oldpassword,
+              LPWSTR, newpassword)
 
 {
 
@@ -2558,7 +2455,7 @@ NET_API_STATUS WIN32API OS2NetUserChangePassword(
   return (NERR_BASE);
 }
 
- /*****************************************************************************
+/*****************************************************************************
  * Name      : NET_API_STATUS NetUserDel
  * Purpose   :
  * Parameters: LPWSTR servername
@@ -2572,10 +2469,9 @@ NET_API_STATUS WIN32API OS2NetUserChangePassword(
  *
  * Author    : Markus Montkowski [09.07.98 22:06:25]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetUserDel(
-                                      LPWSTR servername,
-                                      LPWSTR username
-                                      )
+ODINFUNCTION2(NET_API_STATUS, OS2NetUserDel,
+              LPWSTR, servername,
+              LPWSTR, username)
 
 {
 
@@ -2586,7 +2482,7 @@ NET_API_STATUS WIN32API OS2NetUserDel(
   return (NERR_BASE);
 }
 
- /*****************************************************************************
+/*****************************************************************************
  * Name      : NET_API_STATUS NetUserEnum
  * Purpose   :
  * Parameters: LPWSTR servername
@@ -2606,16 +2502,15 @@ NET_API_STATUS WIN32API OS2NetUserDel(
  *
  * Author    : Markus Montkowski [09.07.98 22:06:36]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetUserEnum(
-                                       LPWSTR servername,
-                                       DWORD level,
-                                       DWORD filter,
-                                       LPBYTE *bufptr,
-                                       DWORD prefmaxlen,
-                                       LPDWORD entriesread,
-                                       LPDWORD totalentries,
-                                       LPDWORD resume_handle
-                                       )
+ODINFUNCTION8(NET_API_STATUS, OS2NetUserEnum,
+              LPWSTR, servername,
+              DWORD, level,
+              DWORD, filter,
+              LPBYTE *, bufptr,
+              DWORD, prefmaxlen,
+              LPDWORD, entriesread,
+              LPDWORD, totalentries,
+              LPDWORD, resume_handle)
 
 {
 
@@ -2626,7 +2521,7 @@ NET_API_STATUS WIN32API OS2NetUserEnum(
   return (NERR_BASE);
 }
 
- /*****************************************************************************
+/*****************************************************************************
  * Name      : NET_API_STATUS NetUserGetGroups
  * Purpose   :
  * Parameters: LPWSTR servername
@@ -2645,15 +2540,14 @@ NET_API_STATUS WIN32API OS2NetUserEnum(
  *
  * Author    : Markus Montkowski [09.07.98 22:06:50]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetUserGetGroups(
-                                            LPWSTR servername,
-                                            LPWSTR username,
-                                            DWORD level,
-                                            LPBYTE *bufptr,
-                                            DWORD prefmaxlen,
-                                            LPDWORD entriesread,
-                                            LPDWORD totalentries
-                                            )
+ODINFUNCTION7(NET_API_STATUS, OS2NetUserGetGroups,
+              LPWSTR, servername,
+              LPWSTR, username,
+              DWORD, level,
+              LPBYTE *, bufptr,
+              DWORD, prefmaxlen,
+              LPDWORD, entriesread,
+              LPDWORD, totalentries)
 
 {
 
@@ -2664,7 +2558,7 @@ NET_API_STATUS WIN32API OS2NetUserGetGroups(
   return (NERR_BASE);
 }
 
- /*****************************************************************************
+/*****************************************************************************
  * Name      : NET_API_STATUS NetUserGetInfo
  * Purpose   :
  * Parameters: LPWSTR servername
@@ -2680,12 +2574,11 @@ NET_API_STATUS WIN32API OS2NetUserGetGroups(
  *
  * Author    : Markus Montkowski [09.07.98 22:09:52]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetUserGetInfo(
-                                          LPWSTR servername,
-                                          LPWSTR username,
-                                          DWORD level,
-                                          LPBYTE *bufptr
-                                          )
+ODINFUNCTION4(NET_API_STATUS, OS2NetUserGetInfo,
+              LPWSTR, servername,
+              LPWSTR, username,
+              DWORD, level,
+              LPBYTE *, bufptr)
 
 {
 
@@ -2696,7 +2589,7 @@ NET_API_STATUS WIN32API OS2NetUserGetInfo(
   return (NERR_BASE);
 }
 
- /*****************************************************************************
+/*****************************************************************************
  * Name      : NET_API_STATUS NetUserGetLocalGroups
  * Purpose   :
  * Parameters: LPWSTR servername
@@ -2716,16 +2609,15 @@ NET_API_STATUS WIN32API OS2NetUserGetInfo(
  *
  * Author    : Markus Montkowski [09.07.98 22:10:01]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetUserGetLocalGroups(
-                                                 LPWSTR servername,
-                                                 LPWSTR username,
-                                                 DWORD level,
-                                                 DWORD flags,
-                                                 LPBYTE *bufptr,
-                                                 DWORD prefmaxlen,
-                                                 LPDWORD entriesread,
-                                                 LPDWORD totalentries
-                                                 )
+ODINFUNCTION8(NET_API_STATUS, OS2NetUserGetLocalGroups,
+              LPWSTR, servername,
+              LPWSTR, username,
+              DWORD, level,
+              DWORD, flags,
+              LPBYTE *, bufptr,
+              DWORD, prefmaxlen,
+              LPDWORD, entriesread,
+              LPDWORD, totalentries)
 
 {
 
@@ -2736,7 +2628,7 @@ NET_API_STATUS WIN32API OS2NetUserGetLocalGroups(
   return (NERR_BASE);
 }
 
- /*****************************************************************************
+/*****************************************************************************
  * Name      : NET_API_STATUS NetUserModalsGet
  * Purpose   :
  * Parameters: LPWSTR servername
@@ -2751,11 +2643,10 @@ NET_API_STATUS WIN32API OS2NetUserGetLocalGroups(
  *
  * Author    : Markus Montkowski [09.07.98 22:10:22]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetUserModalsGet(
-                                            LPWSTR servername,
-                                            DWORD level,
-                                            LPBYTE *bufptr
-                                            )
+ODINFUNCTION3(NET_API_STATUS, OS2NetUserModalsGet,
+              LPWSTR, servername,
+              DWORD, level,
+              LPBYTE *, bufptr)
 
 {
 
@@ -2766,7 +2657,7 @@ NET_API_STATUS WIN32API OS2NetUserModalsGet(
   return (NERR_BASE);
 }
 
- /*****************************************************************************
+/*****************************************************************************
  * Name      : NET_API_STATUS NetUserModalsSet
  * Purpose   :
  * Parameters: LPWSTR servername
@@ -2782,12 +2673,11 @@ NET_API_STATUS WIN32API OS2NetUserModalsGet(
  *
  * Author    : Markus Montkowski [09.07.98 22:10:31]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetUserModalsSet(
-                                            LPWSTR servername,
-                                            DWORD level,
-                                            LPBYTE buf,
-                                            LPDWORD parm_err
-                                            )
+ODINFUNCTION4(NET_API_STATUS, OS2NetUserModalsSet,
+              LPWSTR, servername,
+              DWORD, level,
+              LPBYTE, buf,
+              LPDWORD, parm_err)
 
 {
 
@@ -2798,7 +2688,7 @@ NET_API_STATUS WIN32API OS2NetUserModalsSet(
   return (NERR_BASE);
 }
 
- /*****************************************************************************
+/*****************************************************************************
  * Name      : NET_API_STATUS NetUserSetGroups
  * Purpose   :
  * Parameters: LPWSTR servername
@@ -2815,13 +2705,12 @@ NET_API_STATUS WIN32API OS2NetUserModalsSet(
  *
  * Author    : Markus Montkowski [09.07.98 22:10:44]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetUserSetGroups(
-                                            LPWSTR servername,
-                                            LPWSTR username,
-                                            DWORD level,
-                                            LPBYTE buf,
-                                            DWORD num_entries
-                                            )
+ODINFUNCTION5(NET_API_STATUS, OS2NetUserSetGroups,
+              LPWSTR, servername,
+              LPWSTR, username,
+              DWORD, level,
+              LPBYTE, buf,
+              DWORD, num_entries)
 
 {
 
@@ -2832,7 +2721,7 @@ NET_API_STATUS WIN32API OS2NetUserSetGroups(
   return (NERR_BASE);
 }
 
- /*****************************************************************************
+/*****************************************************************************
  * Name      : NET_API_STATUS NetUserSetInfo
  * Purpose   :
  * Parameters: LPWSTR servername
@@ -2849,13 +2738,12 @@ NET_API_STATUS WIN32API OS2NetUserSetGroups(
  *
  * Author    : Markus Montkowski [09.07.98 22:11:04]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetUserSetInfo(
-                                          LPWSTR servername,
-                                          LPWSTR username,
-                                          DWORD level,
-                                          LPBYTE buf,
-                                          LPDWORD parm_err
-                                          )
+ODINFUNCTION5(NET_API_STATUS, OS2NetUserSetInfo,
+              LPWSTR, servername,
+              LPWSTR, username,
+              DWORD, level,
+              LPBYTE, buf,
+              LPDWORD, parm_err)
 
 {
 
@@ -2866,7 +2754,7 @@ NET_API_STATUS WIN32API OS2NetUserSetInfo(
   return (NERR_BASE);
 }
 
- /*****************************************************************************
+/*****************************************************************************
  * Name      : NET_API_STATUS NetWkstaGetInfo
  * Purpose   :
  * Parameters: LPWSTR servername
@@ -2881,11 +2769,10 @@ NET_API_STATUS WIN32API OS2NetUserSetInfo(
  *
  * Author    : Markus Montkowski [09.07.98 22:11:21]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetWkstaGetInfo(
-                                            LPWSTR servername,
-                                            DWORD level,
-                                            LPBYTE *bufptr
-                                            )
+ODINFUNCTION3(NET_API_STATUS, OS2NetWkstaGetInfo,
+              LPWSTR, servername,
+              DWORD, level,
+              LPBYTE *, bufptr)
 
 {
 
@@ -2897,7 +2784,7 @@ NET_API_STATUS WIN32API OS2NetWkstaGetInfo(
 }
 
 
- /*****************************************************************************
+/*****************************************************************************
  * Name      : NET_API_STATUS NetWkstaSetInfo
  * Purpose   :
  * Parameters: LPWSTR servername
@@ -2913,12 +2800,11 @@ NET_API_STATUS WIN32API OS2NetWkstaGetInfo(
  *
  * Author    : Markus Montkowski [09.07.98 22:11:39]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetWkstaSetInfo(
-                                            LPWSTR servername,
-                                            DWORD level,
-                                            LPBYTE buffer,
-                                            LPDWORD parm_err
-                                            )
+ODINFUNCTION4(NET_API_STATUS, OS2NetWkstaSetInfo,
+              LPWSTR, servername,
+              DWORD, level,
+              LPBYTE, buffer,
+              LPDWORD, parm_err)
 
 {
 
@@ -2929,7 +2815,7 @@ NET_API_STATUS WIN32API OS2NetWkstaSetInfo(
   return (NERR_BASE);
 }
 
- /*****************************************************************************
+/*****************************************************************************
  * Name      : NET_API_STATUS NetWkstaTransportAdd
  * Purpose   :
  * Parameters: LPWSTR servername
@@ -2944,11 +2830,10 @@ NET_API_STATUS WIN32API OS2NetWkstaSetInfo(
  *
  * Author    : Markus Montkowski [09.07.98 22:12:18]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetWkstaTransportAdd(
-                                                 LPWSTR servername,
-                                                 DWORD level,
-                                                 LPBYTE buf
-                                                 )
+ODINFUNCTION3(NET_API_STATUS, OS2NetWkstaTransportAdd,
+              LPWSTR, servername,
+              DWORD, level,
+              LPBYTE, buf)
 
 {
 
@@ -2959,7 +2844,7 @@ NET_API_STATUS WIN32API OS2NetWkstaTransportAdd(
   return (NERR_BASE);
 }
 
- /*****************************************************************************
+/*****************************************************************************
  * Name      : NET_API_STATUS NetWkstaTransportDel
  * Purpose   :
  * Parameters: LPWSTR servername
@@ -2974,11 +2859,10 @@ NET_API_STATUS WIN32API OS2NetWkstaTransportAdd(
  *
  * Author    : Markus Montkowski [09.07.98 22:13:11]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetWkstaTransportDel(
-                                                LPWSTR servername,
-                                                LPWSTR transportname,
-                                                DWORD ucond
-                                                )
+ODINFUNCTION3(NET_API_STATUS, OS2NetWkstaTransportDel,
+              LPWSTR, servername,
+              LPWSTR, transportname,
+              DWORD, ucond)
 
 {
 
@@ -2989,7 +2873,7 @@ NET_API_STATUS WIN32API OS2NetWkstaTransportDel(
   return (NERR_BASE);
 }
 
- /*****************************************************************************
+/*****************************************************************************
  * Name      : NET_API_STATUS NetWkstaTransportEnum
  * Purpose   :
  * Parameters: LPWSTR servername
@@ -3008,15 +2892,14 @@ NET_API_STATUS WIN32API OS2NetWkstaTransportDel(
  *
  * Author    : Markus Montkowski [09.07.98 22:13:44]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetWkstaTransportEnum(
-                                                 LPWSTR servername,
-                                                 DWORD level,
-                                                 LPBYTE *bufptr,
-                                                 DWORD prefmaxlen,
-                                                 LPDWORD entriesread,
-                                                 LPDWORD totalentries,
-                                                 LPDWORD resumehandle
-                                                 )
+ODINFUNCTION7(NET_API_STATUS, OS2NetWkstaTransportEnum,
+              LPWSTR, servername,
+              DWORD, level,
+              LPBYTE *, bufptr,
+              DWORD, prefmaxlen,
+              LPDWORD, entriesread,
+              LPDWORD, totalentries,
+              LPDWORD, resumehandle)
 
 {
 
@@ -3027,7 +2910,7 @@ NET_API_STATUS WIN32API OS2NetWkstaTransportEnum(
   return (NERR_BASE);
 }
 
- /*****************************************************************************
+/*****************************************************************************
  * Name      : NET_API_STATUS NetWkstaUserEnum
  * Purpose   :
  * Parameters: LPWSTR servername
@@ -3046,15 +2929,14 @@ NET_API_STATUS WIN32API OS2NetWkstaTransportEnum(
  *
  * Author    : Markus Montkowski [09.07.98 22:14:05]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetWkstaUserEnum(
-                                            LPWSTR servername,
-                                            DWORD level,
-                                            LPBYTE *bufptr,
-                                            DWORD prefmaxlen,
-                                            LPDWORD entriesread,
-                                            LPDWORD totalentries,
-                                            LPDWORD resumehandle
-                                            )
+ODINFUNCTION7(NET_API_STATUS, OS2NetWkstaUserEnum,
+              LPWSTR, servername,
+              DWORD, level,
+              LPBYTE *, bufptr,
+              DWORD, prefmaxlen,
+              LPDWORD, entriesread,
+              LPDWORD, totalentries,
+              LPDWORD, resumehandle)
 
 {
 
@@ -3065,7 +2947,7 @@ NET_API_STATUS WIN32API OS2NetWkstaUserEnum(
   return (NERR_BASE);
 }
 
- /*****************************************************************************
+/*****************************************************************************
  * Name      : NET_API_STATUS NetWkstaUserGetInfo
  * Purpose   :
  * Parameters: LPWSTR reserved
@@ -3080,11 +2962,10 @@ NET_API_STATUS WIN32API OS2NetWkstaUserEnum(
  *
  * Author    : Markus Montkowski [09.07.98 22:14:17]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetWkstaUserGetInfo(
-                                               LPWSTR reserved,
-                                               DWORD level,
-                                               LPBYTE *bufptr
-                                               )
+ODINFUNCTION3(NET_API_STATUS, OS2NetWkstaUserGetInfo,
+              LPWSTR, reserved,
+              DWORD, level,
+              LPBYTE *, bufptr)
 
 {
 
@@ -3111,12 +2992,11 @@ NET_API_STATUS WIN32API OS2NetWkstaUserGetInfo(
  *
  * Author    : Markus Montkowski [09.07.98 22:16:08]
  *****************************************************************************/
-NET_API_STATUS WIN32API OS2NetWkstaUserSetInfo(
-                                               LPWSTR reserved,
-                                               DWORD level,
-                                               LPBYTE buf,
-                                               LPDWORD parm_err
-                                               )
+ODINFUNCTION4(NET_API_STATUS, OS2NetWkstaUserSetInfo,
+              LPWSTR, reserved,
+              DWORD, level,
+              LPBYTE, buf,
+              LPDWORD, parm_err)
 
 {
 
@@ -3199,12 +3079,13 @@ ODINFUNCTION4(NET_API_STATUS,OS2NetConfigGet,LPWSTR, lpServer,
  * Author    : Patrick Haller [Thu, 1999/08/18 00:15]
  *****************************************************************************/
 
-NET_API_STATUS WIN32API OS2RxNetAccessSetInfo(DWORD x1,
-                                              DWORD x2,
-                                              DWORD x3,
-                                              DWORD x4,
-                                              DWORD x5,
-                                              DWORD x6)
+ODINFUNCTION6(NET_API_STATUS, OS2RxNetAccessSetInfo,
+              DWORD, x1,
+              DWORD, x2,
+              DWORD, x3,
+              DWORD, x4,
+              DWORD, x5,
+              DWORD, x6)
 {
   dprintf(("NETAPI32: RxNetAccessSetInfo(%08x, %08xh, %08xh, %08xh, %08xh, %08xh) not implemented\n",
            x1,
@@ -3230,12 +3111,13 @@ NET_API_STATUS WIN32API OS2RxNetAccessSetInfo(DWORD x1,
  * Author    : Patrick Haller [Thu, 1999/08/18 00:15]
  *****************************************************************************/
 
-NET_API_STATUS WIN32API OS2RxNetAccessGetInfo(DWORD x1,
-                                              DWORD x2,
-                                              DWORD x3,
-                                              DWORD x4,
-                                              DWORD x5,
-                                              DWORD x6)
+ODINFUNCTION6(NET_API_STATUS, OS2RxNetAccessGetInfo,
+              DWORD, x1,
+              DWORD, x2,
+              DWORD, x3,
+              DWORD, x4,
+              DWORD, x5,
+              DWORD, x6)
 {
   dprintf(("NETAPI32: RxNetAccessGetInfo(%08x, %08xh, %08xh, %08xh, %08xh, %08xh) not implemented\n",
            x1,
@@ -3262,12 +3144,13 @@ NET_API_STATUS WIN32API OS2RxNetAccessGetInfo(DWORD x1,
  * Author    : Patrick Haller [Thu, 1999/08/18 00:15]
  *****************************************************************************/
 
-NET_API_STATUS WIN32API OS2I_NetGetDCList(DWORD x1,
-                                          DWORD x2,
-                                          DWORD x3,
-                                          DWORD x4,
-                                          DWORD x5,
-                                          DWORD x6)
+ODINFUNCTION6(NET_API_STATUS, OS2I_NetGetDCList,
+              DWORD, x1,
+              DWORD, x2,
+              DWORD, x3,
+              DWORD, x4,
+              DWORD, x5,
+              DWORD, x6)
 {
   dprintf(("NETAPI32: I_NetGetDCList(%08x, %08xh, %08xh, %08xh, %08xh, %08xh) not implemented\n",
            x1,
@@ -3293,10 +3176,11 @@ NET_API_STATUS WIN32API OS2I_NetGetDCList(DWORD x1,
  * Author    : Patrick Haller [Thu, 1999/08/18 00:15]
  *****************************************************************************/
 
-NET_API_STATUS WIN32API OS2I_NetNameCanonicalize(DWORD x1,
-                                                 DWORD x2,
-                                                 DWORD x3,
-                                                 DWORD x4)
+ODINFUNCTION4(NET_API_STATUS, OS2I_NetNameCanonicalize,
+              DWORD, x1,
+              DWORD, x2,
+              DWORD, x3,
+              DWORD, x4)
 {
   dprintf(("NETAPI32: I_NetNameCanonicalize(%08x, %08xh, %08xh, %08xh) not implemented\n",
            x1,
@@ -3321,10 +3205,11 @@ NET_API_STATUS WIN32API OS2I_NetNameCanonicalize(DWORD x1,
  * Author    : Patrick Haller [Thu, 1999/08/18 00:15]
  *****************************************************************************/
 
-NET_API_STATUS WIN32API OS2I_NetNameCompare(DWORD x1,
-                                            DWORD x2,
-                                            DWORD x3,
-                                            DWORD x4)
+ODINFUNCTION4(NET_API_STATUS, OS2I_NetNameCompare,
+              DWORD, x1,
+              DWORD, x2,
+              DWORD, x3,
+              DWORD, x4)
 {
   dprintf(("NETAPI32: I_NetNameCompare(%08x, %08xh, %08xh, %08xh) not implemented\n",
            x1,
@@ -3348,9 +3233,10 @@ NET_API_STATUS WIN32API OS2I_NetNameCompare(DWORD x1,
  * Author    : Patrick Haller [Thu, 1999/08/18 00:15]
  *****************************************************************************/
 
-NET_API_STATUS WIN32API OS2I_NetNameValidate(DWORD x1,
-                                             DWORD x2,
-                                             DWORD x3)
+ODINFUNCTION3(NET_API_STATUS, OS2I_NetNameValidate,
+              DWORD, x1,
+              DWORD, x2,
+              DWORD, x3)
 {
   dprintf(("NETAPI32: I_NetNameValidate(%08x, %08xh, %08xh) not implemented\n",
            x1,
@@ -3373,10 +3259,11 @@ NET_API_STATUS WIN32API OS2I_NetNameValidate(DWORD x1,
  * Author    : Patrick Haller [Thu, 1999/08/18 00:15]
  *****************************************************************************/
 
-NET_API_STATUS WIN32API OS2I_NetPathCanonicalize(DWORD x1,
-                                                 DWORD x2,
-                                                 DWORD x3,
-                                                 DWORD x4)
+ODINFUNCTION4(NET_API_STATUS, OS2I_NetPathCanonicalize,
+              DWORD, x1,
+              DWORD, x2,
+              DWORD, x3,
+              DWORD, x4)
 {
   dprintf(("NETAPI32: I_NetPathCanonicalize(%08x, %08xh, %08xh, %08xh) not implemented\n",
            x1,
@@ -3401,10 +3288,11 @@ NET_API_STATUS WIN32API OS2I_NetPathCanonicalize(DWORD x1,
  * Author    : Patrick Haller [Thu, 1999/08/18 00:15]
  *****************************************************************************/
 
-NET_API_STATUS WIN32API OS2I_NetPathCompare(DWORD x1,
-                                            DWORD x2,
-                                            DWORD x3,
-                                            DWORD x4)
+ODINFUNCTION4(NET_API_STATUS, OS2I_NetPathCompare,
+              DWORD, x1,
+              DWORD, x2,
+              DWORD, x3,
+              DWORD, x4)
 {
   dprintf(("NETAPI32: I_NetPathCompare(%08x, %08xh, %08xh, %08xh) not implemented\n",
            x1,
@@ -3428,8 +3316,9 @@ NET_API_STATUS WIN32API OS2I_NetPathCompare(DWORD x1,
  * Author    : Patrick Haller [Thu, 1999/08/18 00:15]
  *****************************************************************************/
 
-NET_API_STATUS WIN32API OS2I_NetPathType(DWORD x1,
-                                         DWORD x2)
+ODINFUNCTION2(NET_API_STATUS, OS2I_NetPathType,
+              DWORD, x1,
+              DWORD, x2)
 {
   dprintf(("NETAPI32: I_NetPathType(%08x, %08xh) not implemented\n",
            x1,
@@ -3451,9 +3340,10 @@ NET_API_STATUS WIN32API OS2I_NetPathType(DWORD x1,
  * Author    : Patrick Haller [Thu, 1999/08/18 00:15]
  *****************************************************************************/
 
-NET_API_STATUS WIN32API OS2NetapipBufferAllocate(DWORD x1,
-                                                 DWORD x2,
-                                                 DWORD x3)
+ODINFUNCTION3(NET_API_STATUS, OS2NetapipBufferAllocate,
+              DWORD, x1,
+              DWORD, x2,
+              DWORD, x3)
 {
   dprintf(("NETAPI32: NetapipBufferAllocate(%08x, %08xh, %08xh) not implemented\n",
            x1,
@@ -3479,10 +3369,11 @@ NET_API_STATUS WIN32API OS2NetapipBufferAllocate(DWORD x1,
  * Author    : Patrick Haller [Thu, 1999/08/18 00:15]
  *****************************************************************************/
 
-NET_API_STATUS WIN32API OS2NetUseAdd(LPWSTR  lpUncServerName,
-                                     DWORD   dwLevel,
-                                     LPBYTE  lpBuf,
-                                     LPDWORD lpParmError)
+ODINFUNCTION4(NET_API_STATUS, OS2NetUseAdd,
+              LPWSTR, lpUncServerName,
+              DWORD, dwLevel,
+              LPBYTE, lpBuf,
+              LPDWORD, lpParmError)
 {
   dprintf(("NETAPI32: NetUseAdd(%08xh,%08xh,%08xh,%08xh) not implemented\n",
            lpUncServerName,
@@ -3508,9 +3399,10 @@ NET_API_STATUS WIN32API OS2NetUseAdd(LPWSTR  lpUncServerName,
  * Author    : Patrick Haller [Thu, 1999/08/18 00:15]
  *****************************************************************************/
 
-NET_API_STATUS WIN32API OS2NetUseDel(LPWSTR  lpUncServerName,
-                                     LPWSTR  lpUseName,
-                                     DWORD   dwForceCond)
+ODINFUNCTION3(NET_API_STATUS, OS2NetUseDel,
+              LPWSTR, lpUncServerName,
+              LPWSTR, lpUseName,
+              DWORD, dwForceCond)
 {
   dprintf(("NETAPI32: NetUseDel(%08xh,%08xh,%08xh) not implemented\n",
            lpUncServerName,
@@ -3538,11 +3430,12 @@ NET_API_STATUS WIN32API OS2NetUseDel(LPWSTR  lpUncServerName,
  * Author    : Patrick Haller [Thu, 1999/08/18 00:15]
  *****************************************************************************/
 
-NET_API_STATUS WIN32API OS2NetServiceControl(LPWSTR  lpServerName,
-                                             LPWSTR  lpService,
-                                             DWORD   dwOpcode,
-                                             DWORD   dwArgument,
-                                             LPBYTE* bufptr)
+ODINFUNCTION5(NET_API_STATUS, OS2NetServiceControl,
+              LPWSTR, lpServerName,
+              LPWSTR, lpService,
+              DWORD, dwOpcode,
+              DWORD, dwArgument,
+              LPBYTE*, bufptr)
 {
   dprintf(("NETAPI32: NetServiceControl(%08xh,%08xh,%08xh,%08xh,%08xh) not implemented\n",
            lpServerName,
@@ -3573,13 +3466,14 @@ NET_API_STATUS WIN32API OS2NetServiceControl(LPWSTR  lpServerName,
  * Author    : Patrick Haller [Thu, 1999/08/18 00:15]
  *****************************************************************************/
 
-NET_API_STATUS WIN32API OS2NetServiceEnum(LPWSTR  lpServerName,
-                                          DWORD   dwLevel,
-                                          LPBYTE* bufptr,
-                                          DWORD   dwPrefMaxLen,
-                                          LPDWORD lpdEntriesRead,
-                                          LPDWORD lpdTotalEntries,
-                                          LPDWORD lpdResumeHandle)
+ODINFUNCTION7(NET_API_STATUS, OS2NetServiceEnum,
+              LPWSTR, lpServerName,
+              DWORD, dwLevel,
+              LPBYTE*, bufptr,
+              DWORD, dwPrefMaxLen,
+              LPDWORD, lpdEntriesRead,
+              LPDWORD, lpdTotalEntries,
+              LPDWORD, lpdResumeHandle)
 {
   dprintf(("NETAPI32: NetServiceEnum(%08xh,%08xh,%08xh,%08xh,%08xh,%08xh,%08xh) not implemented\n",
            lpServerName,
@@ -3609,10 +3503,11 @@ NET_API_STATUS WIN32API OS2NetServiceEnum(LPWSTR  lpServerName,
  * Author    : Patrick Haller [Thu, 1999/08/18 00:15]
  *****************************************************************************/
 
-NET_API_STATUS WIN32API OS2NetServiceGetInfo(LPWSTR  lpServerName,
-                                             LPWSTR  lpService,
-                                             DWORD   dwLevel,
-                                             LPBYTE* bufptr)
+ODINFUNCTION4(NET_API_STATUS, OS2NetServiceGetInfo,
+              LPWSTR, lpServerName,
+              LPWSTR, lpService,
+              DWORD, dwLevel,
+              LPBYTE*, bufptr)
 {
   dprintf(("NETAPI32: NetServiceGetInfo(%08xh,%08xh,%08xh,%08xh) not implemented\n",
            lpServerName,
@@ -3640,18 +3535,14 @@ NET_API_STATUS WIN32API OS2NetServiceGetInfo(LPWSTR  lpServerName,
  * Author    : Patrick Haller [Thu, 1999/08/18 00:15]
  *****************************************************************************/
 
-NET_API_STATUS WIN32API OS2NetServiceInstall(LPWSTR  lpServerName,
-                                             LPWSTR  lpService,
-                                             DWORD   argc,
-                                             LPWSTR  argv[],
-                                             LPBYTE* bufptr)
+ODINFUNCTION5(NET_API_STATUS, OS2NetServiceInstall,
+              LPWSTR, lpServerName,
+              LPWSTR, lpService,
+              DWORD, argc,
+              LPWSTR*, argv,
+              LPBYTE*, bufptr)
 {
-  dprintf(("NETAPI32: NetServiceInstall(%08xh,%08xh,%08xh,%08xh,%08xh) not implemented\n",
-           lpServerName,
-           lpService,
-           argc,
-           argv,
-           bufptr));
+  dprintf(("NETAPI32: NetServiceInstall not implemented\n"));
 
   return (NERR_BASE);
 }
@@ -3669,12 +3560,13 @@ NET_API_STATUS WIN32API OS2NetServiceInstall(LPWSTR  lpServerName,
  * Author    : Patrick Haller [Thu, 1999/08/18 00:15]
  *****************************************************************************/
 
-NET_API_STATUS WIN32API OS2I_NetLogonControl(DWORD x1,
-                                             DWORD x2,
-                                             DWORD x3,
-                                             DWORD x4,
-                                             DWORD x5,
-                                             DWORD x6)
+ODINFUNCTION6(NET_API_STATUS, OS2I_NetLogonControl,
+              DWORD, x1,
+              DWORD, x2,
+              DWORD, x3,
+              DWORD, x4,
+              DWORD, x5,
+              DWORD, x6)
 {
   dprintf(("NETAPI32: I_NetLogonControl(%08x, %08xh, %08xh, %08xh, %08xh, %08xh) not implemented\n",
            x1,
@@ -3700,12 +3592,13 @@ NET_API_STATUS WIN32API OS2I_NetLogonControl(DWORD x1,
  * Author    : Patrick Haller [Thu, 1999/08/18 00:15]
  *****************************************************************************/
 
-NET_API_STATUS WIN32API OS2RxNetAccessAdd(DWORD x1,
-                                          DWORD x2,
-                                          DWORD x3,
-                                          DWORD x4,
-                                          DWORD x5,
-                                          DWORD x6)
+ODINFUNCTION6(NET_API_STATUS, OS2RxNetAccessAdd,
+              DWORD, x1,
+              DWORD, x2,
+              DWORD, x3,
+              DWORD, x4,
+              DWORD, x5,
+              DWORD, x6)
 {
   dprintf(("NETAPI32: RxNetAccessAdd(%08x, %08xh, %08xh, %08xh, %08xh, %08xh) not implemented\n",
            x1,
@@ -3731,12 +3624,13 @@ NET_API_STATUS WIN32API OS2RxNetAccessAdd(DWORD x1,
  * Author    : Patrick Haller [Thu, 1999/08/18 00:15]
  *****************************************************************************/
 
-NET_API_STATUS WIN32API OS2RxNetAccessDel(DWORD x1,
-                                          DWORD x2,
-                                          DWORD x3,
-                                          DWORD x4,
-                                          DWORD x5,
-                                          DWORD x6)
+ODINFUNCTION6(NET_API_STATUS, OS2RxNetAccessDel,
+              DWORD, x1,
+              DWORD, x2,
+              DWORD, x3,
+              DWORD, x4,
+              DWORD, x5,
+              DWORD, x6)
 {
   dprintf(("NETAPI32: RxNetAccessDel(%08x, %08xh, %08xh, %08xh, %08xh, %08xh) not implemented\n",
            x1,
@@ -3763,12 +3657,13 @@ NET_API_STATUS WIN32API OS2RxNetAccessDel(DWORD x1,
  * Author    : Patrick Haller [Thu, 1999/08/18 00:15]
  *****************************************************************************/
 
-NET_API_STATUS WIN32API OS2RxNetAccessEnum(DWORD x1,
-                                           DWORD x2,
-                                           DWORD x3,
-                                           DWORD x4,
-                                           DWORD x5,
-                                           DWORD x6)
+ODINFUNCTION6(NET_API_STATUS, OS2RxNetAccessEnum,
+              DWORD, x1,
+              DWORD, x2,
+              DWORD, x3,
+              DWORD, x4,
+              DWORD, x5,
+              DWORD, x6)
 {
   dprintf(("NETAPI32: RxNetAccessEnum(%08x, %08xh, %08xh, %08xh, %08xh, %08xh) not implemented\n",
            x1,
@@ -3795,12 +3690,13 @@ NET_API_STATUS WIN32API OS2RxNetAccessEnum(DWORD x1,
  * Author    : Patrick Haller [Thu, 1999/08/18 00:15]
  *****************************************************************************/
 
-NET_API_STATUS WIN32API OS2RxNetAccessGetUserPerms(DWORD x1,
-                                                   DWORD x2,
-                                                   DWORD x3,
-                                                   DWORD x4,
-                                                   DWORD x5,
-                                                   DWORD x6)
+ODINFUNCTION6(NET_API_STATUS, OS2RxNetAccessGetUserPerms,
+              DWORD, x1,
+              DWORD, x2,
+              DWORD, x3,
+              DWORD, x4,
+              DWORD, x5,
+              DWORD, x6)
 {
   dprintf(("NETAPI32: RxNetAccessGetUserPerms(%08x, %08xh, %08xh, %08xh, %08xh, %08xh) not implemented\n",
            x1,
@@ -4313,4 +4209,5 @@ ODINFUNCTION5(NET_API_STATUS,OS2NetStatisticsGet,LPWSTR,  lpServerName,
 
   return (NERR_BASE);
 }
+
 
