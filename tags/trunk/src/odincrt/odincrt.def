@@ -1,3 +1,4 @@
+; $Id: odincrt.def,v 1.15 1999-08-16 20:15:54 achimha Exp $
 ; Odin VAC++ 3.08 shared multithreaded runtime
 LIBRARY ODINCRT INITINSTANCE TERMINSTANCE
 PROTMODE
