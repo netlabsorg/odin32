@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.21 2001-11-20 03:41:29 bird Exp $
+# $Id: Makefile,v 1.22 2002-01-09 00:42:54 bird Exp $
 
 #
 # kKrnlLib.sys makefile.
@@ -112,6 +112,7 @@ $(WIN32KBIN)\$(TARGET).sys: $(WIN32KBIN)\ignore.exe \
                             $(LIBSINIT) \
                             $(WIN32KOBJ)\$(@B).lnk \
                             Makefile makefile.inc ..\..\..\makefile.inc
+    @$(CMDQD_WAIT)
     -@$(ECHO) recompiling d16globl to get correct build time and date:
     $(CC16) -c $(CFLAGS16) $(CDEFINES16) $(CINCLUDES16) -Fo$(WIN32KOBJ)\d16globl.obj \
         -Fa$(WIN32KLIST)\d16globl.s dev16\d16globl.c
@@ -148,6 +149,7 @@ $(WIN32KOBJ)\$(TARGET)bldlevel.def: $(TARGET).def Makefile
 # Last lib - needed to get LASTOBJ in after the importlibraries.
 $(LASTLIB): $(LASTOBJ)
     -@$(RM) $@ > nul 2> nul
+    $(CMDQD_WAIT)
     $(ILIB) $@ $**;
 
 #
@@ -243,6 +245,7 @@ $(WIN32KBIN)\$(TARGET)tst.exe:  $(WIN32KBIN)\clfix.exe \
                                 $(TSTLASTLIB) \
                                 $(WIN32KOBJ)\$(@B).lnk \
                                 Makefile makefile.inc ..\..\..\makefile.inc
+    @$(CMDQD_WAIT)
     -@$(ECHO) linking: $@
     -4 $(WIN32KBIN)\ignore.exe -LNK4001 -LNK4031 $(LD) $(LFLAGS) @$(WIN32KOBJ)\$(@B).lnk
 
@@ -263,6 +266,7 @@ $(TARGET)tst.def
 # Last lib - needed to get LASTOBJ in after the importlibraries.
 $(TSTLASTLIB): $(TSTLASTOBJ)
     -@$(RM) $@ > nul 2> nul
+    $(CMDQD_WAIT)
     $(ILIB) $@ $**;
 
 
@@ -346,6 +350,7 @@ $(CLIBOBJS:+=): $(WIN32KOBJ)\..\clib_.lib
 #
 $(WIN32KOBJ)\last.lib: $(WIN32KOBJ)\devlast.obj
     -@$(RM) $@ > nul 2> nul
+    $(CMDQD_WAIT)
     $(ILIB) $@ $**;
 
 
@@ -407,6 +412,7 @@ MKCALLTABOBJS = \
 # Rule to build MkCallTab.exe
 MkCallTab.exe MkCallTab: $(WIN32KBIN)\MkCallTab.exe
 $(WIN32KBIN)\MkCallTab.exe: $(WIN32KBIN)\clfix.exe $(WIN32KBIN)\ignore.exe $(MKCALLTABOBJS)
+    @$(CMDQD_WAIT)
     $(LD) $(LFLAGS) /pmtype:vio @<<$(WIN32KOBJ)\$(@B).lnk
         /OUT:$@
         /MAP:$(WIN32KBIN)\$(@B).map
@@ -456,6 +462,7 @@ EXTRACTOBJS = \
 
 # Rules to build Extract.exe.
 $(WIN32KBIN)\Extract.exe: $(WIN32KBIN)\clfix.exe $(WIN32KBIN)\ignore.exe $(EXTRACTOBJS) Extract.def Makefile
+    $(CMDQD_WAIT)
     $(LD) $(LFLAGS) /pmtype:vio @<<$(WIN32KOBJ)\$(@B).lnk
         /OUT:$@
         /MAP:$(WIN32KBIN)\$(@B).map
@@ -478,13 +485,23 @@ Extract.exe: $(WIN32KBIN)\Extract.exe
         -Fa$(WIN32KLIST)\$(*B)_e.s -Fo$(WIN32KOBJ)\$(@B).obj_e $(CINCLUDES16) $<
 
 {dev32}.c.obj_e:
+!ifndef MULTIJOBS
     @$(ECHO) compiling 32bit (extract): $<
-    $(CC) -c $(CFLAGS) -DLOGGING_DISABLED -Gr -Rn -Ti- -ndBIG_ $(CDEFINES) $(CINCLUDES) -Fa$(WIN32KLIST)\$(@B)_e.s \
+    @$(CC) \
+!else
+    $(CMDQD_SUB) $(CC) \
+!endif
+        -c $(CFLAGS) -DLOGGING_DISABLED -Gr -Rn -Ti- -ndBIG_ $(CDEFINES) $(CINCLUDES) -Fa$(WIN32KLIST)\$(@B)_e.s \
         -Fo$(WIN32KOBJ)\$(@F) $<
 
 {krnl}.c.obj_e:
+!ifndef MULTIJOBS
     @$(ECHO) compiling 32bit (extract): $<
-    $(CC) -c $(CFLAGS) -DLOGGING_DISABLED -Gr -Rn -Ti- -ndBIG_ $(CDEFINES) $(CINCLUDES) -Fa$(WIN32KLIST)\$(@B)_e.s \
+    @$(CC) \
+!else
+    $(CMDQD_SUB) $(CC) \
+!endif
+        -c $(CFLAGS) -DLOGGING_DISABLED -Gr -Rn -Ti- -ndBIG_ $(CDEFINES) $(CINCLUDES) -Fa$(WIN32KLIST)\$(@B)_e.s \
         -Fo$(WIN32KOBJ)\$(@F) $<
 
 
