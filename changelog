@@ -1,7 +1,9 @@
-/* $Id: changelog,v 1.1981 2002-02-15 20:16:40 sandervl Exp $ */
+/* $Id: changelog,v 1.1982 2002-02-15 20:17:11 sandervl Exp $ */
 
  2002-02-14: Sander van Leeuwen <sandervl@xs4all.nl>
     - OLE32:    o Extended logging added
+                o Resync with Wine (20020215) 
+                  (Out of process COM objects; InstallShield 6)
     - OLEAUT32: o Partial resync with Wine (20020215)
                 o Extended logging added
     - COMCTL32: o Extended logging added
