@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.14 1999-07-18 17:12:02 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.15 1999-07-18 18:04:29 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -371,3 +371,16 @@ BOOL OSLibWinFlashWindow(HWND hwnd, BOOL fFlash)
 }
 //******************************************************************************
 //******************************************************************************
+HWND OSLibWinWindowFromPoint(HWND hwnd, PVOID ppoint)
+{
+  return WinWindowFromPoint((hwnd == OSLIB_HWND_DESKTOP) ? HWND_DESKTOP : hwnd, (PPOINTL)ppoint, TRUE);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibWinMinimizeWindow(HWND hwnd)
+{
+  return WinSetWindowPos(hwnd, 0, 0, 0, 0, 0, SWP_MINIMIZE);
+}
+//******************************************************************************
+//******************************************************************************
+
