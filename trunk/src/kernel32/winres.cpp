@@ -1,4 +1,4 @@
-/* $Id: winres.cpp,v 1.19 1999-09-15 23:38:02 sandervl Exp $ */
+/* $Id: winres.cpp,v 1.20 1999-10-19 12:51:25 sandervl Exp $ */
 
 /*
  * Win32 resource class
@@ -15,7 +15,7 @@
 #define INCL_GPIBITMAPS
 #define INCL_BITMAPFILEFORMAT
 #define INCL_DOSMODULEMGR
-#include <os2wrap.h>	//Odin32 OS/2 api wrappers
+#include <os2wrap.h>    //Odin32 OS/2 api wrappers
 #include <stdarg.h>
 #ifdef __IBMCPP__
 #include <builtin.h>
@@ -106,7 +106,7 @@ Win32Resource::Win32Resource() :
   OS2ResHandle = 0;
   //resources are in Unicode format by default; indirectly created resources
   //can also be in ascii format
-  isUnicode  = TRUE; 
+  isUnicode  = TRUE;
 }
 //******************************************************************************
 //******************************************************************************
@@ -128,25 +128,25 @@ Win32Resource::Win32Resource(Win32ImageBase *module, HRSRC hRes, ULONG id, ULONG
   switch(type) {
     case NTRT_NEWBITMAP:
     case NTRT_BITMAP:
-	orgos2type = RT_BITMAP;
+        orgos2type = RT_BITMAP;
         break;
     case NTRT_CURSOR:
     case NTRT_GROUP_CURSOR:
     case NTRT_GROUP_ICON:
     case NTRT_ICON:
-	orgos2type = RT_POINTER;
-	break;
+        orgos2type = RT_POINTER;
+        break;
     case NTRT_ACCELERATORS:
-	orgos2type = RT_ACCELTABLE;
-	break;
+        orgos2type = RT_ACCELTABLE;
+    break;
     case NTRT_NEWMENU:
     case NTRT_MENU:
-	orgos2type = RT_MENU;
-	break;
+        orgos2type = RT_MENU;
+        break;
     case NTRT_NEWDIALOG:
     case NTRT_DIALOG:
-	orgos2type = RT_DIALOG;
-	break;
+        orgos2type = RT_DIALOG;
+        break;
     case NTRT_FONTDIR:
     case NTRT_FONT:
     case NTRT_MESSAGETABLE:
@@ -165,7 +165,7 @@ Win32Resource::Win32Resource(Win32ImageBase *module, HRSRC hRes, ULONG id, ULONG
     ressize = 0;
   }
   //resources are in Unicode format by default
-  isUnicode  = TRUE; 
+  isUnicode  = TRUE;
 }
 //******************************************************************************
 //******************************************************************************
@@ -191,13 +191,13 @@ Win32Resource::Win32Resource(Win32ImageBase *module, ULONG id, ULONG type,
   OS2ResHandle = 0;
 
   if(type == NTRT_STRING) {
-	memcpy(winresdata, resdata, size-sizeof(WCHAR));
-	((USHORT *)winresdata)[size/sizeof(WCHAR)-1] = 0;
+    memcpy(winresdata, resdata, size-sizeof(WCHAR));
+    ((USHORT *)winresdata)[size/sizeof(WCHAR)-1] = 0;
   }
-  else	memcpy(winresdata, resdata, size);
+  else  memcpy(winresdata, resdata, size);
 
   //resources are in Unicode format by default
-  isUnicode  = TRUE; 
+  isUnicode  = TRUE;
 }
 //******************************************************************************
 //******************************************************************************
@@ -207,7 +207,7 @@ Win32Resource::~Win32Resource()
 
   //returned by DosGetResource, so we don't (and mustn't) free it
   if(os2resdata && (resType == RSRC_PELOADER || resType == RSRC_CUSTOMINDIRECT))
-	free(os2resdata);
+    free(os2resdata);
 
   if(winresdata)    free(winresdata);
 
@@ -234,6 +234,7 @@ PVOID Win32Resource::lockResource()
  ULONG          os2type = RT_RCDATA;
 
   dprintf(("Win32Resource::lockResource %d\n", id));
+
   if(winresdata)
     return(winresdata);
 
@@ -289,7 +290,7 @@ PVOID Win32Resource::lockResource()
         }
         winresdata = malloc(ressize+sizeof(WCHAR));
         memcpy(winresdata, resdata, ressize);
-	*(USHORT *)(&((char *)winresdata)[ressize]) = 0;
+    *(USHORT *)(&((char *)winresdata)[ressize]) = 0;
         DosFreeResource(resdata);
         return((PVOID)((ULONG)winresdata+2));   //skip length word
 
@@ -302,16 +303,16 @@ PVOID Win32Resource::lockResource()
   }
 
   if(winresdata == NULL) {
-    	rc = DosGetResource((HMODULE)module->hinstance, os2type, id, (PPVOID)&resdata);
-    	if(rc) {
-        	dprintf(("Can't find original resource!!!\n"));
-        	return(NULL);
-    	}
-    	winresdata = (char *)malloc(ressize);
-    	memcpy(winresdata, resdata, ressize);
+        rc = DosGetResource((HMODULE)module->hinstance, os2type, id, (PPVOID)&resdata);
+        if(rc) {
+            dprintf(("Can't find original resource!!!\n"));
+            return(NULL);
+        }
+        winresdata = (char *)malloc(ressize);
+        memcpy(winresdata, resdata, ressize);
   }
   if(resdata)
-    	DosFreeResource(resdata);
+        DosFreeResource(resdata);
 
   return winresdata;
 }
@@ -324,14 +325,14 @@ PVOID Win32Resource::lockOS2Resource()
 
    dprintf(("Win32Resource::lockOS2Resource %d\n", id));
    if(os2resdata == NULL) {
-	if(resType == RSRC_PELOADER || resType == RSRC_CUSTOMINDIRECT) {
-		os2resdata = convertResource(winresdata);
-	}
-	else {
-		rc = DosGetResource((HMODULE)module->hinstance, orgos2type, id, (PPVOID)&resdata);
-		if(rc)  return(NULL);
-		os2resdata = resdata;
-	}
+    if(resType == RSRC_PELOADER || resType == RSRC_CUSTOMINDIRECT) {
+        os2resdata = convertResource(winresdata);
+    }
+    else {
+        rc = DosGetResource((HMODULE)module->hinstance, orgos2type, id, (PPVOID)&resdata);
+        if(rc)  return(NULL);
+        os2resdata = resdata;
+    }
    }
    return os2resdata;
 }
@@ -343,13 +344,13 @@ ULONG Win32Resource::getOS2Size()
   switch(type) {
     case NTRT_NEWBITMAP:
     case NTRT_BITMAP:
-	return QueryConvertedBitmapSize((WINBITMAPINFOHEADER *)winresdata, ressize);
+    return QueryConvertedBitmapSize((WINBITMAPINFOHEADER *)winresdata, ressize);
 
     case NTRT_CURSOR:
-	return QueryConvertedCursorSize((CursorComponent *)winresdata, ressize);
+    return QueryConvertedCursorSize((CursorComponent *)winresdata, ressize);
 
     case NTRT_ICON:
-	return QueryConvertedIconSize((WINBITMAPINFOHEADER *)winresdata, ressize);
+    return QueryConvertedIconSize((WINBITMAPINFOHEADER *)winresdata, ressize);
 
     case NTRT_GROUP_ICON:
     case NTRT_GROUP_CURSOR:
@@ -365,8 +366,8 @@ ULONG Win32Resource::getOS2Size()
     case NTRT_VERSION:
     case NTRT_STRING:
     default:
-	dprintf(("Win32Resource::getOS2Size SHOULDN'T BE CALLED for this resource type (%d) (NOT IMPLEMENTED)!!", type));
-	break;
+    dprintf(("Win32Resource::getOS2Size SHOULDN'T BE CALLED for this resource type (%d) (NOT IMPLEMENTED)!!", type));
+    break;
   }
   return 0;
 }
@@ -379,37 +380,37 @@ PVOID Win32Resource::convertResource(void *win32res)
   switch(type) {
     case NTRT_NEWBITMAP:
     case NTRT_BITMAP:
-	return ConvertBitmap((WINBITMAPINFOHEADER *)win32res, ressize, &ressize);
+    return ConvertBitmap((WINBITMAPINFOHEADER *)win32res, ressize, &ressize);
 
     case NTRT_CURSOR:
-	return ConvertCursor((CursorComponent *)win32res, ressize, &cvtressize);
+    return ConvertCursor((CursorComponent *)win32res, ressize, &cvtressize);
 
     case NTRT_GROUP_CURSOR:
-	return ConvertCursorGroup((CursorHeader *)win32res, ressize, module);
+    return ConvertCursorGroup((CursorHeader *)win32res, ressize, module);
 
     case NTRT_GROUP_ICON:
-	return ConvertIconGroup((IconHeader *)win32res, ressize, module);
+    return ConvertIconGroup((IconHeader *)win32res, ressize, module);
 
     case NTRT_ICON:
-	return ConvertIcon((WINBITMAPINFOHEADER *)win32res, ressize, &cvtressize);
+    return ConvertIcon((WINBITMAPINFOHEADER *)win32res, ressize, &cvtressize);
 
     case NTRT_ACCELERATORS:
-	return ConvertAccelerator((WINACCEL *)win32res, ressize);
+    return ConvertAccelerator((WINACCEL *)win32res, ressize);
 
     case NTRT_NEWMENU:
     case NTRT_MENU:
-	return ConvertMenu((MenuHeader *)win32res, ressize, isUnicode);
+    return ConvertMenu((MenuHeader *)win32res, ressize, isUnicode);
 
     case NTRT_NEWDIALOG:
     case NTRT_DIALOG:
-	break;
+    break;
     case NTRT_FONTDIR:
     case NTRT_FONT:
     case NTRT_MESSAGETABLE:
     case NTRT_RCDATA:
     case NTRT_VERSION:
     case NTRT_STRING:
-	break;
+    break;
 
     default:
         break;
