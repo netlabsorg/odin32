@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.10 2000-05-02 11:24:53 bird Exp $
+# $Id: makefile,v 1.11 2000-05-13 17:15:24 bird Exp $
 
 #
 # PD-Win32 API
@@ -18,9 +18,9 @@
 !include ..\include\pdwin32.tools
 
 !ifdef DEBUG
-MAKE_CMD = nmake -nologo DEBUG=1
+MAKE_CMD = $(MAKE) -nologo DEBUG=1
 !else
-MAKE_CMD = nmake -nologo
+MAKE_CMD = $(MAKE) -nologo
 !endif
 
 
@@ -87,9 +87,5 @@ clean:
     $(MAKE_CMD) NODEP=1 clean
     cd ..\sdf
     $(MAKE_CMD) NODEP=1 clean
-
-    cd ..\bin
-# wrc.exe requires lots of tools so better not remove it...
-#    $(RM) *.exe *.dll
-    cd ..\..
+    cd ..
 
