@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.54 1999-12-16 00:11:47 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.55 1999-12-19 17:46:26 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -46,11 +46,11 @@ typedef struct
         ULONG           Msg;
         ULONG           wParam;
         ULONG           lParam;
-	ULONG           fUnicode;
+        ULONG           fUnicode;
 } POSTMSG_PACKET;
 
-#define BROADCAST_SEND		0
-#define BROADCAST_POST		1
+#define BROADCAST_SEND          0
+#define BROADCAST_POST          1
 
 class Win32BaseWindow : public GenericObject, public ChildWindow
 {
@@ -94,7 +94,7 @@ virtual  ULONG  MsgActivate(BOOL fActivate, BOOL fMinimized, HWND hwnd);
          ULONG  MsgGetTextLength();
          char  *MsgGetText();
          ULONG  MsgContextMenu(ULONG x,ULONG y);
-	 void   MsgInitMenu(HWND hMenu);
+         void   MsgInitMenu(HWND hMenu);
          VOID   updateWindowStyle(DWORD oldExStyle,DWORD oldStyle);
 
 virtual  LONG   SetWindowLongA(int index, ULONG value, BOOL fUnicode = FALSE);
@@ -118,7 +118,7 @@ virtual  WORD   GetWindowWord(int index);
 virtual  BOOL   isMDIClient();
 virtual  BOOL   isMDIChild();
 
-	 BOOL   fHasParentDC()                  { return fParentDC; };
+         BOOL   fHasParentDC()                  { return fParentDC; };
 
 Win32BaseWindow *getParent();
          void   setParent(Win32BaseWindow *pwindow) { ChildWindow::SetParent((ChildWindow *)pwindow); };
@@ -180,13 +180,15 @@ Win32BaseWindow *GetTopParent();
          VOID   setOS2HwndModalDialog(HWND aHwnd) { OS2HwndModalDialog = aHwnd; };
          HWND   getOS2HwndModalDialog()       { return OS2HwndModalDialog; };
          BOOL   CanReceiveSizeMsgs()          { return !fNoSizeMsg; };
+         BOOL   InMovingChildren()            { return fMovingChildren; };
+         VOID   setMovingChildren(BOOL fMC)   { fMovingChildren = fMC; };
          BOOL   IsWindowDestroyed()           { return fIsDestroyed; };
          BOOL   IsWindowEnabled();
          BOOL   IsWindowVisible();
-	 //Created with CreateWindowExA or ExW
-//         BOOL   IsUnicode() 			{ return isUnicode; };
-	 //Window procedure type
-         BOOL   IsWindowUnicode();	
+         //Created with CreateWindowExA or ExW
+//         BOOL   IsUnicode()                   { return isUnicode; };
+         //Window procedure type
+         BOOL   IsWindowUnicode();
 
          BOOL   GetWindowRect(PRECT pRect);
          int    GetWindowTextLength();
@@ -231,8 +233,8 @@ Win32BaseWindow *FindWindowById(int id);
                              BOOL fUnicode = 0);
 
            BOOL EnumChildWindows(WNDENUMPROC lpfn, LPARAM lParam);
-	   BOOL EnumThreadWindows(DWORD dwThreadId, WNDENUMPROC lpfn, LPARAM lParam);
-	   BOOL EnumWindows(WNDENUMPROC lpfn, LPARAM lParam);
+           BOOL EnumThreadWindows(DWORD dwThreadId, WNDENUMPROC lpfn, LPARAM lParam);
+           BOOL EnumWindows(WNDENUMPROC lpfn, LPARAM lParam);
 
          HWND   getNextDlgTabItem(HWND hwndCtrl, BOOL fPrevious);
          HWND   getNextDlgGroupItem(HWND hwndCtrl, BOOL fPrevious);
@@ -301,14 +303,15 @@ protected:
         BOOL    fInternalMsg;           //Used to distinguish between messages
                                         //sent by PM and those sent by apps
         BOOL    fNoSizeMsg;
+        BOOL    fMovingChildren;
         BOOL    fIsDestroyed;
         BOOL    fDestroyWindowCalled;   //DestroyWindow was called for this window
         BOOL    fCreated;
-	BOOL    fTaskList;		//should be listed in PM tasklist or not
-	BOOL    fParentDC;
+        BOOL    fTaskList;              //should be listed in PM tasklist or not
+        BOOL    fParentDC;
 
-	DWORD   dwThreadId;		//id of thread that created this window
-	DWORD   dwProcessId;		//id of process that created this window
+        DWORD   dwThreadId;             //id of thread that created this window
+        DWORD   dwProcessId;            //id of process that created this window
         PVOID   pOldFrameProc;
         ULONG   borderWidth;
         ULONG   borderHeight;

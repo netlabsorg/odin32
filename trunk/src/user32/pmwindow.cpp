@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.65 1999-12-16 00:11:45 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.66 1999-12-19 17:46:25 cbratschi Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -155,7 +155,8 @@ BOOL InitPM()
      (PSZ)WIN32_STDCLASS,               /* Window class name            */
      (PFNWP)Win32WindowProc,            /* Address of window procedure  */
 //     CS_SIZEREDRAW | CS_HITTEST | CS_MOVENOTIFY,
-     CS_SIZEREDRAW | CS_HITTEST,
+     //CS_SIZEREDRAW | CS_HITTEST,
+     CS_HITTEST,
      NROF_WIN32WNDBYTES)) {
         dprintf(("WinRegisterClass Win32BaseWindow failed"));
         return(FALSE);
@@ -375,14 +376,14 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
            wp.hwndInsertAfter = wndAfter->getWindowHandle();
         }
 
-	PRECT lpRect = win32wnd->getWindowRect();
+        PRECT lpRect = win32wnd->getWindowRect();
         //SvL: Only send it when the client has changed & the frame hasn't
         //     If the frame size/position has changed, pmframe.cpp will send
         //     this message
-	if(lpRect->right == wp.x+wp.cx && lpRect->bottom == wp.y+wp.cy) {
-	        win32wnd->MsgPosChanged((LPARAM)&wp);
-	}
- 	else	win32wnd->setWindowRect(wp.x, wp.y, wp.x+wp.cx, wp.y+wp.cy);
+        if(lpRect->right == wp.x+wp.cx && lpRect->bottom == wp.y+wp.cy) {
+                win32wnd->MsgPosChanged((LPARAM)&wp);
+        }
+        else    win32wnd->setWindowRect(wp.x, wp.y, wp.x+wp.cx, wp.y+wp.cy);
 
         goto RunDefWndProc;
     }
@@ -418,7 +419,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
     case WM_MINMAXFRAME:
     {
         dprintf(("OS2: WM_MINMAXFRAME"));
-	break;
+        break;
     }
     case WM_OWNERPOSCHANGE:
     {
@@ -783,8 +784,8 @@ VirtualKeyFound:
     }
 
     case WM_INITMENU:
-	win32wnd->MsgInitMenu((HWND)mp2);
-	break;
+        win32wnd->MsgInitMenu((HWND)mp2);
+        break;
 
     case WM_MENUSELECT:
     case WM_MENUEND:

@@ -1,4 +1,4 @@
-/* $Id: button.cpp,v 1.21 1999-12-02 16:34:42 cbratschi Exp $ */
+/* $Id: button.cpp,v 1.22 1999-12-19 17:46:24 cbratschi Exp $ */
 /* File: button.cpp -- Button type widgets
  *
  * Copyright (C) 1993 Johannes Ruscheinski
@@ -942,6 +942,9 @@ static void CB_Paint(HWND hwnd,HDC hDC,WORD action)
         /* magic +4 is what CTL3D expects */
 
         rtext.right -= checkBoxWidth + 4;
+        //CB: space for focus rect
+        rtext.left++;
+        rtext.right++;
         rbox.left = rbox.right - checkBoxWidth;
     }
     else

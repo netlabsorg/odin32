@@ -1,4 +1,4 @@
-/* $Id: pmframe.cpp,v 1.27 1999-12-18 16:31:49 cbratschi Exp $ */
+/* $Id: pmframe.cpp,v 1.28 1999-12-19 17:46:24 cbratschi Exp $ */
 /*
  * Win32 Frame Managment Code for OS/2
  *
@@ -25,6 +25,10 @@
 #include "caret.h"
 
 #define PMFRAMELOG
+
+#define GCL_STYLE_W           (-26)
+#define CS_VREDRAW_W          0x0001
+#define CS_HREDRAW_W          0x0002
 
 //******************************************************************************
 //******************************************************************************
@@ -332,6 +336,9 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
         rc = OldFrameProc(hwnd,msg,mp1,mp2);
         SetWin32TIB();
 
+        if (win32wnd->getParent() && win32wnd->getParent()->InMovingChildren())
+          goto PosChangedEnd; //same Win32 pos, only OS/2 pos changed
+
         if ((pswp->fl & (SWP_SIZE | SWP_MOVE | SWP_ZORDER)) == 0)
             goto PosChangedEnd;
 
@@ -351,9 +358,6 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
         win32wnd->setWindowRect(wp.x, wp.y, wp.x+wp.cx, wp.y+wp.cy);
         win32wnd->setClientRect(swpOld.x, swpOld.y, swpOld.x + swpOld.cx, swpOld.y + swpOld.cy);
 
-        if(!win32wnd->CanReceiveSizeMsgs())
-            goto PosChangedEnd;
-
         wp.hwnd = win32wnd->getWindowHandle();
         if ((pswp->fl & SWP_ZORDER) && (pswp->hwndInsertBehind > HWND_BOTTOM))
         {
@@ -361,21 +365,18 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
            if(wndAfter) wp.hwndInsertAfter = wndAfter->getWindowHandle();
         }
 
+#if 0 //CB: PM does it now for us (-> WM_CALVALIDRECTS)
+      //    if you remove this code, delete *MovingChildren in Win32BaseWindow class
         if (yDelta != 0 || xDelta != 0)
         {
-            HENUM henum = WinBeginEnumWindows(WinWindowFromID(pswp->hwnd, FID_CLIENT));
+            HENUM henum = WinBeginEnumWindows(WinWindowFromID(hwnd,FID_CLIENT));
             SWP swp[10];
             int i = 0;
             HWND hwnd;
 
+            win32wnd->setMovingChildren(TRUE);
             while ((hwnd = WinGetNextWindow(henum)) != NULLHANDLE)
             {
-#if 0
-                if (mdiClient )
-                {
-                  continue;
-                }
-#endif
                 WinQueryWindowPos(hwnd, &(swp[i]));
 
 #ifdef DEBUG
@@ -384,11 +385,11 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
                          yDelta, swp[i].x, swp[i].y, swp[i].cx, swp[i].cy, swp[i].fl));
 #endif
 
-                if(swp[i].y != 0) //CB: y value of 0 is valid!
+                //if(swp[i].y != 0) //CB: y value of 0 is valid!
                 {
                     //child window at offset <> 0 from client area -> offset now changes
                     swp[i].y  += yDelta;
-                    swp[i].fl &= ~(SWP_NOREDRAW);
+                    swp[i].fl = SWP_MOVE | SWP_NOADJUST;
                 }
                 //else child window with the same start coordinates as the client area
                 //The app should resize it.
@@ -408,6 +409,7 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
 
             if (i)
                WinSetMultWindowPos(GetThreadHAB(), swp, i);
+            win32wnd->setMovingChildren(FALSE);
         }
         if (yDelta != 0)
         {
@@ -418,11 +420,41 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
                 SetCaretPos (pt.x, pt.y);
             }
         }
+#endif
+        if(!win32wnd->CanReceiveSizeMsgs())
+            goto PosChangedEnd;
+
         win32wnd->MsgPosChanged((LPARAM)&wp);
 
 PosChangedEnd:
         RestoreOS2TIB();
         return rc;
+    }
+
+    case WM_CALCVALIDRECTS:
+    {
+      PRECTL oldRect = (PRECTL)mp1,newRect = oldRect+1;
+      UINT res = CVR_ALIGNLEFT | CVR_ALIGNTOP;
+
+      //CB: only used if CS_SIZEDRAW isn't set
+      //    PM moves children -> fast, no flickering (if redraw flags not set)
+      if (win32wnd->getWindowClass())
+      {
+        DWORD dwStyle = win32wnd->getWindowClass()->getClassLongA(GCL_STYLE_W);
+
+        if (dwStyle & CS_HREDRAW_W && newRect->xRight-newRect->xLeft != oldRect->xRight-oldRect->xLeft)
+          res |= CVR_REDRAW;
+        else if (dwStyle & CS_VREDRAW_W && newRect->yTop-newRect->yBottom != oldRect->yTop-oldRect->yBottom)
+          res |= CVR_REDRAW;
+      } else res |= CVR_REDRAW;
+
+      //CB: PM updates window frame (and unfortunately all other frame controls)
+      RestoreOS2TIB();
+      OldFrameProc(hwnd,msg,mp1,mp2);
+      SetWin32TIB();
+
+      RestoreOS2TIB();
+      return (MRESULT)res;
     }
 
     case WM_ACTIVATE:
