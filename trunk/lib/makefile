@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.8 2001-09-30 04:59:29 bird Exp $
+# $Id: makefile,v 1.9 2003-02-28 10:27:00 sandervl Exp $
 
 #
 # Odin32 API
@@ -20,8 +20,19 @@ all:    $(ODIN32_LIB) \
         $(ODIN32_LIB)\pmwinx.lib \
         $(ODIN32_LIB)\libconv.lib \
         $(ODIN32_LIB)\libuls.lib \
+!if !defined(DEBUG) && defined(PROFILE)
+        $(ODIN32_LIB)\kProfile.lib \
+!endif
         $(ODIN32_LIB)\wgss50.lib
 
+#
+# Clean all rule.
+#		
+cleanall:
+	$(RM) -Rf 	Debug Release Profile \
+				Debug.vac36 Release.vac36 Profile.vac36 \
+				Debug.wat Release.wat Profile.wat \
+				Debug.emx Release.emx Profile.emx
 
 #
 # Make output director.
@@ -56,6 +67,13 @@ $(ODIN32_LIB)\libconv.lib: libconv.def
 #
 $(ODIN32_LIB)\libuls.lib: libuls.def
     $(IMPLIB) $(IMPLIBFLAGS) $(ODIN32_LIB)\libuls.lib libuls.def
+
+
+#
+# Make our profiler import library.
+#
+$(ODIN32_LIB)\kProfile.lib: kProfile.def
+    $(IMPLIB) $(IMPLIBFLAGS) $(ODIN32_LIB)\kProfile.lib kProfile.def
 
 
 #
