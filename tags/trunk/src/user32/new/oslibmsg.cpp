@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.cpp,v 1.9 2000-01-05 21:25:03 cbratschi Exp $ */
+/* $Id: oslibmsg.cpp,v 1.10 2000-01-08 17:08:55 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -150,7 +150,7 @@ void OSLibWinPostQuitMessage(ULONG nExitCode)
 {
  APIRET rc;
 
-  rc = WinPostQueueMsg(NULLHANDLE, WM_QUIT, (MPARAM)nExitCode, 0);
+  rc = WinPostQueueMsg(NULLHANDLE, WM_QUIT, MPFROMLONG(nExitCode), 0);
   dprintf(("WinPostQueueMsg %d returned %d", nExitCode, rc));
 }
 //******************************************************************************
@@ -178,7 +178,12 @@ LONG OSLibWinDispatchMsg(MSG *msg, BOOL isUnicode)
             thdb->msgstate++; //odd -> next call to our PM window handler should dispatch the translated msg
             memcpy(&thdb->msg, msg, sizeof(MSG));
         }
-        return (LONG)WinDispatchMsg(thdb->hab, &os2msg);
+        if(os2msg.hwnd || os2msg.msg == WM_QUIT) {
+            return (LONG)WinDispatchMsg(thdb->hab, &os2msg);
+        }
+        //SvL: Don't dispatch messages sent by PostThreadMessage (correct??)
+        return 0;
+
   }
   else {//is this allowed?
 //        dprintf(("WARNING: OSLibWinDispatchMsg: called with own message!"));
@@ -224,7 +229,7 @@ continuegetmsg:
         }
         while(rc == FALSE);
 
-        return rc;
+    return (pMsg->message == WINWM_QUIT);
   }
   else
   {
@@ -235,10 +240,8 @@ continuegetmsg:
             eaten = TIMER_HandleTimer(&os2msg);
     } while (eaten);
   }
-  if(rc) {
-        OS2ToWinMsgTranslate((PVOID)thdb, &os2msg, pMsg, isUnicode, MSG_REMOVE);
-        memcpy(MsgThreadPtr, &os2msg, sizeof(QMSG));
-  }
+  OS2ToWinMsgTranslate((PVOID)thdb, &os2msg, pMsg, isUnicode, MSG_REMOVE);
+  memcpy(MsgThreadPtr, &os2msg, sizeof(QMSG));
   return rc;
 }
 //******************************************************************************
