@@ -1,4 +1,4 @@
-/* $Id: toolbar.cpp,v 1.3 2000-03-18 16:17:31 cbratschi Exp $ */
+/* $Id: toolbar.cpp,v 1.4 2000-03-21 17:30:44 cbratschi Exp $ */
 /*
  * Toolbar control
  *
@@ -758,7 +758,13 @@ static void TBCUSTOMIZE_GetToolName(TOOLBAR_INFO* infoPtr,TBUTTON_INFO* btnPtr,I
     BOOL unicode = isUnicodeNotify(&infoPtr->header);
 
     tbNotify.iItem    = pos;
-    tbNotify.tbButton = (TBBUTTON*)btnPtr;
+    tbNotify.tbButton.iBitmap   = btnPtr->iBitmap;
+    tbNotify.tbButton.idCommand = btnPtr->idCommand;
+    tbNotify.tbButton.fsState   = btnPtr->fsState;
+    tbNotify.tbButton.fsStyle   = btnPtr->fsStyle;
+    tbNotify.tbButton.dwData    = btnPtr->dwData;
+    tbNotify.tbButton.iString   = btnPtr->iString;
+
     tbNotify.cchText  = MAXTOOLNAME;
     if (unicode)
     {
@@ -842,7 +848,12 @@ static BOOL TBCUSTOMIZE_FillData(HWND hwnd,TOOLBAR_INFO* infoPtr)
     TBNOTIFYW tbNotify;
 
     tbNotify.iItem    = i;
-    tbNotify.tbButton = (TBBUTTON*)btnPtr;
+    tbNotify.tbButton.iBitmap   = btnPtr->iBitmap;
+    tbNotify.tbButton.idCommand = btnPtr->idCommand;
+    tbNotify.tbButton.fsState   = btnPtr->fsState;
+    tbNotify.tbButton.fsStyle   = btnPtr->fsStyle;
+    tbNotify.tbButton.dwData    = btnPtr->dwData;
+    tbNotify.tbButton.iString   = btnPtr->iString;
     tbNotify.cchText  = 0;
     tbNotify.pszText  = NULL;
 

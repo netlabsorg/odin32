@@ -1,3 +1,4 @@
+/* $Id: rsrc.orc,v 1.3 2000-03-21 17:30:44 cbratschi Exp $ */
 #include "winuser.h"
 #include "comctl32.h"
 #include "odinrsrc.h"
@@ -949,7 +950,7 @@ BEGIN
             VALUE "FileDescription", "COMCTL32 System Dll\0"
             VALUE "FileVersion", "4.72.3110.1\0"
             VALUE "InternalName", "COMCTL32\0"
-            VALUE "LegalCopyright", "Copyright (C) 1999\0"
+            VALUE "LegalCopyright", "Copyright (C) 1999-2000\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "COMCTL32.DLL\0"
             VALUE "ProductName", "Odin32 - COMCTL32\0"

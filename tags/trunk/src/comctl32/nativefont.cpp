@@ -1,9 +1,10 @@
-/* $Id: nativefont.cpp,v 1.2 2000-03-17 17:13:23 cbratschi Exp $ */
+/* $Id: nativefont.cpp,v 1.3 2000-03-21 17:30:43 cbratschi Exp $ */
 /*
  * Native Font control
  *
  * Copyright 1998, 1999 Eric Kohl
  * Copyright 1999 Achim Hasenmueller
+ * Copyright 2000 Christoph Bratschi
  *
  * NOTES
  *   This is just a dummy control. An author is needed! Any volunteers?
@@ -52,26 +53,45 @@ NATIVEFONT_Destroy (HWND hwnd, WPARAM wParam, LPARAM lParam)
     return 0;
 }
 
-
-
-static LRESULT WINAPI
-NATIVEFONT_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+static VOID NATIVEFONT_Draw(HWND hwnd,HDC hdc,RECT *updateRect)
 {
-    switch (uMsg)
-    {
+  drawStubControl(hwnd,hdc);
+}
 
-        case WM_CREATE:
-            return NATIVEFONT_Create (hwnd, wParam, lParam);
+static LRESULT NATIVEFONT_Paint(HWND hwnd,WPARAM wParam,LPARAM lParam)
+{
+  HDC hdc = (HDC)wParam;
 
-        case WM_DESTROY:
-            return NATIVEFONT_Destroy (hwnd, wParam, lParam);
+  if (!hdc)
+  {
+    PAINTSTRUCT ps;
 
-        default:
-//          ERR (nativefont, "unknown msg %04x wp=%08x lp=%08lx\n",
-//                   uMsg, wParam, lParam);
-            return defComCtl32ProcA (hwnd, uMsg, wParam, lParam);
-    }
-    return 0;
+    hdc = BeginPaint(hwnd,&ps);
+    NATIVEFONT_Draw(hwnd, hdc,&ps.rcPaint);
+    EndPaint(hwnd,&ps);
+  } else
+      NATIVEFONT_Draw(hwnd,hdc,NULL);
+
+  return 0;
+}
+
+static LRESULT WINAPI NATIVEFONT_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+  switch (uMsg)
+  {
+    case WM_CREATE:
+      return NATIVEFONT_Create(hwnd,wParam,lParam);
+
+    case WM_DESTROY:
+      return NATIVEFONT_Destroy(hwnd,wParam,lParam);
+
+    case WM_PAINT:
+      return NATIVEFONT_Paint(hwnd,wParam,lParam);
+
+    default:
+      return defComCtl32ProcA (hwnd, uMsg, wParam, lParam);
+  }
+  return 0;
 }
 
 
