@@ -1,4 +1,9 @@
- /* $Id: ChangeLog,v 1.1154 2000-10-01 12:04:46 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.1155 2000-10-01 21:19:41 phaller Exp $ */
+
+ 2000-10-01: Patrick Haller <phaller@gmx.net>
+    - KERNEL32: Optimization of PROFILE calls
+    - GDI32:    Fix for uncompressed/RGB bitmaps (biSizeImage == 0)
+    - WINMM:    Fix for timer logic - timers still quite untested
 
  2000-10-01: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: Fixed bug introduced by recent command line changes
