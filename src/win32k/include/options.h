@@ -1,4 +1,4 @@
-/* $Id: options.h,v 1.17 2001-01-20 23:50:45 bird Exp $
+/* $Id: options.h,v 1.18 2001-01-21 07:54:37 bird Exp $
  *
  * Options.
  *
@@ -163,7 +163,7 @@ struct options
 *******************************************************************************/
 /* NOINC */
 extern struct options DATA16_GLOBAL options;    /* defined in d16globals.c */
-extern char   szWin32kIni[CCHMAXPATH];          /* defined in d16globals.c */
+extern char   szWin32kIni[160];                 /* defined in d16globals.c */
 #if defined(__IBMC__) || defined(__IBMCPP__)
     #pragma map( options , "_options"  )
     #pragma map( szWin32kIni, "_szWin32kIni" )
