@@ -1,4 +1,4 @@
-/* $Id: OS2Krnl.h,v 1.3 1999-11-10 01:45:31 bird Exp $
+/* $Id: OS2Krnl.h,v 1.4 2000-01-14 19:21:12 bird Exp $
  *
  * OS/2 kernel structures, typedefs and macros.
  *
@@ -208,4 +208,23 @@ typedef struct MTE
 
 
 #pragma pack()
+
+/*
+ * Calling convention for 32-bit OS/2 Kernel functions.
+ */
+#define KRNLCALL __stdcall
+
+/*
+ *
+ * Other Kernel Parts
+ *
+ */
+#ifdef INCL_OS2KRNL_ALL
+    #define INCL_OS2KRNL_IO
+#endif
+
+#ifdef INCL_OS2KRNL_IO
+    #include <OS2KIO.h>
+#endif
+
 #endif
