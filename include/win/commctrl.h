@@ -546,10 +546,7 @@ typedef struct tagTRACKMOUSEEVENT {
 
 #endif
 
-BOOL
-WINAPI
-_TrackMouseEvent(
-    LPTRACKMOUSEEVENT lpEventTrack);
+BOOL WINAPI _TrackMouseEvent(LPTRACKMOUSEEVENT lpEventTrack);
 
 /* Flat Scrollbar control */
 
