@@ -1,4 +1,4 @@
-/* $Id: cpu.cpp,v 1.14 2003-02-28 15:37:21 sandervl Exp $ */
+/* $Id: cpu.cpp,v 1.15 2004-02-20 10:05:39 sandervl Exp $ */
 /*
  * Odin win32 CPU apis
  *
@@ -125,6 +125,7 @@ VOID WINAPI GetSystemInfo(LPSYSTEM_INFO si)	/* [out] system information */
 		case 6: cachedsi.dwProcessorType = PROCESSOR_INTEL_PENTIUM;
 			break;
 		default:
+                        cachedsi.dwProcessorType = PROCESSOR_INTEL_PENTIUM;
 			break;
 		}
 		cachedsi.wProcessorRevision = signature & 0xff;
