@@ -1,4 +1,4 @@
-/* $Id: initterm.h,v 1.2 1999-10-23 12:34:47 sandervl Exp $ */
+/* $Id: initterm.h,v 1.3 1999-11-18 09:20:09 bird Exp $ */
 /*
  * KERNEL32 DLL entry point header
  *
@@ -28,8 +28,9 @@ extern int globLoadNr; //global data
 extern int loadNr;
 
 /* Tue 03.03.1998: knut */
-/* flag to optimize DosAllocMem to use all the memory on SMP machines */
-extern ULONG flAllocMem;
+
+extern ULONG flAllocMem; /* flag to optimize DosAllocMem to use all the memory on SMP machines */
+extern ULONG ulMaxAddr; /* end of user address space */
 extern char  kernel32Path[];
 
 #endif
