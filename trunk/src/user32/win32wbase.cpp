@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.6 1999-09-21 17:05:36 dengert Exp $ */
+/* $Id: win32wbase.cpp,v 1.7 1999-09-22 08:58:35 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -897,6 +897,80 @@ ULONG Win32BaseWindow::MsgChar(ULONG cmd, ULONG repeatcnt, ULONG scancode, ULONG
         dprintf(("WM_CHAR: %x %x %08x", OS2Hwnd, cmd, lParam));
         return SendInternalMessageA(WM_CHAR, cmd, lParam);
     }
+}
+//******************************************************************************
+//******************************************************************************
+ULONG Win32BaseWindow::MsgKeyUp (ULONG repeatCount, ULONG scancode, ULONG virtualKey)
+{
+  ULONG lParam=0;
+
+    lParam = repeatCount & 0x0FFFF;                 // bit 0-15, repeatcount
+    lParam |= (scancode & 0x0FF) << 16;             // bit 16-23, scancode
+                                                    // bit 24, 1=extended key
+                                                    // bit 25-28, reserved
+    lParam |= 0 << 29;                              // bit 29, key is released, always 0 for WM_KEYUP ?? <- conflict according to the MS docs
+    lParam |= 1 << 30;                              // bit 30, previous state, always 1 for a WM_KEYUP message
+    lParam |= 1 << 31;                              // bit 31, transition state, always 1 for WM_KEYUP
+
+    dprintf(("WM_KEYUP: vkey:(%x) param:(%x)", virtualKey, lParam));
+
+    return SendInternalMessageA (WM_KEYUP, virtualKey, lParam);
+}
+//******************************************************************************
+//******************************************************************************
+ULONG Win32BaseWindow::MsgKeyDown (ULONG repeatCount, ULONG scancode, ULONG virtualKey, BOOL keyWasPressed)
+{
+  ULONG lParam=0;
+
+    lParam = repeatCount & 0x0FFFF;                 // bit 0-15, repeatcount
+    lParam |= (scancode & 0x0FF) << 16;             // bit 16-23, scancode
+                                                    // bit 24, 1=extended key
+                                                    // bit 25-28, reserved
+                                                    // bit 29, key is pressed, always 0 for WM_KEYDOWN ?? <- conflict according to the MS docs
+    if (keyWasPressed)
+        lParam |= 1 << 30;                          // bit 30, previous state, 1 means key was pressed
+                                                    // bit 31, transition state, always 0 for WM_KEYDOWN
+
+    dprintf(("WM_KEYDOWN: vkey:(%x) param:(%x)", virtualKey, lParam));
+
+    return SendInternalMessageA (WM_KEYDOWN, virtualKey, lParam);
+}
+//******************************************************************************
+//******************************************************************************
+ULONG Win32BaseWindow::MsgSysKeyUp (ULONG repeatCount, ULONG scancode, ULONG virtualKey)
+{
+  ULONG lParam=0;
+
+    lParam = repeatCount & 0x0FFFF;                 // bit 0-15,repeatcount
+    lParam |= (scancode & 0x0FF) << 16;             // bit 16-23, scancode
+                                                    // bit 24, 1=extended key
+                                                    // bit 25-28, reserved
+    lParam |= 0 << 29;                              // bit 29, key is released, always 0 for WM_KEYUP ?? <- conflict according to the MS docs
+    lParam |= 1 << 30;                              // bit 30, previous state, always 1 for a WM_KEYUP message
+    lParam |= 1 << 31;                              // bit 31, transition state, always 1 for WM_KEYUP
+
+    dprintf(("WM_SYSKEYUP: vkey:(%x) param:(%x)", virtualKey, lParam));
+
+    return SendInternalMessageA (WM_SYSKEYUP, virtualKey, lParam);
+}
+//******************************************************************************
+//******************************************************************************
+ULONG Win32BaseWindow::MsgSysKeyDown (ULONG repeatCount, ULONG scancode, ULONG virtualKey, BOOL keyWasPressed)
+{
+ ULONG lParam=0;
+
+    lParam = repeatCount & 0x0FFFF;                 // bit 0-15, repeatcount
+    lParam |= (scancode & 0x0FF) << 16;             // bit 16-23, scancode
+                                                    // bit 24, 1=extended key
+                                                    // bit 25-28, reserved
+                                                    // bit 29, key is pressed, always 0 for WM_KEYDOWN ?? <- conflict according to the MS docs
+    if (keyWasPressed)
+        lParam |= 1 << 30;                          // bit 30, previous state, 1 means key was pressed
+                                                    // bit 31, transition state, always 0 for WM_KEYDOWN
+
+    dprintf(("WM_SYSKEYDOWN: vkey:(%x) param:(%x)", virtualKey, lParam));
+
+    return SendInternalMessageA (WM_SYSKEYDOWN, virtualKey, lParam);
 }
 //******************************************************************************
 //******************************************************************************
