@@ -1021,6 +1021,11 @@ typedef struct {
 #define GW_OWNER        4
 #define GW_CHILD        5
 
+/* GetAncestor() constants */
+#define GA_PARENT       1
+#define GA_ROOT         2
+#define GA_ROOTOWNER    3
+
   /* WM_GETMINMAXINFO struct */
 typedef struct
 {
