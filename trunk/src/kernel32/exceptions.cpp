@@ -1,4 +1,4 @@
-/* $Id: exceptions.cpp,v 1.40 2000-05-02 20:53:12 sandervl Exp $ */
+/* $Id: exceptions.cpp,v 1.41 2000-05-18 09:08:37 sandervl Exp $ */
 
 /*
  * Win32 Exception functions for OS/2
@@ -935,6 +935,10 @@ ULONG APIENTRY OS2ExceptionHandler(PEXCEPTIONREPORTRECORD       pERepRec,
                                    PCONTEXTRECORD               pCtxRec,
                                    PVOID                        p)
 {
+  //SvL: Check if exception inside debug fprintf -> if so, clear lock so
+  //     next dprintf won't wait forever
+  CheckLogException();
+
   /* Access violation at a known location */
   switch(pERepRec->ExceptionNum)
   {
@@ -1046,7 +1050,6 @@ continueFail:
   case XCPT_UNABLE_TO_GROW_STACK:
   case XCPT_IN_PAGE_ERROR:
 CrashAndBurn:
-	CheckLogException();
 #ifdef DEBUG
 	dprintfException(pERepRec, pERegRec, pCtxRec, p);
   	if(pCtxRec->ContextFlags & CONTEXT_CONTROL) {
