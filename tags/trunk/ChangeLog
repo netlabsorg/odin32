@@ -1,4 +1,15 @@
-/* $Id: ChangeLog,v 1.1402 2001-05-09 03:52:47 bird Exp $ */
+/* $Id: ChangeLog,v 1.1403 2001-05-10 17:04:50 sandervl Exp $ */
+
+ 2001-05-10: Shingo Tsuda <sofiya@din.or.jp>
+    - GDI32:    o Rop conversion for DIB Section blits
+                o Support for negative height (origin top left) in
+                  SetDIBitsToDevice
+
+ 2001-05-10: Sander van Leeuwen <sandervl@xs4all.nl>
+    - GDI32:    o includeBottomRightPoint bugfix; if left == right or top == bottom
+                  then the rectangle isn't empty. (include/include input)
+                  (fixes e.g. missing erase background when slowly moving window
+                   over Odin window (full window dragging enabled))
 
  2001-05-09: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - src/ws2help, bin/debug, bin/release, src/win32k/list,
