@@ -29,6 +29,8 @@ class OS2IDirectDrawSurface
  public:
   //this one has to go first!
   IDirectDrawSurface4Vtbl *lpVtbl;
+  IDirectDrawSurface4Vtbl *lpVtbl2;         // 2nd Vtable pointer An other MS assumtion see below
+  DWORD                    dwUnknownData;   // Pointer to unknown data set to DEADDEAD to indicate that we can't handle this
   IDirectDrawSurface2Vtbl  Vtbl2;
   IDirectDrawSurface3Vtbl  Vtbl3;
   IDirectDrawSurface4Vtbl  Vtbl; // With Dx6 CreateSurface creates per default one with Interface 4 !

@@ -445,7 +445,7 @@ HRESULT __stdcall DrawCreateSurface4(THIS This, LPDDSURFACEDESC2 lpDDSurfaceDesc
 
   if(newsurf == NULL)
   {
-    rc =DDERR_OUTOFMEMORY;
+    rc = DDERR_OUTOFMEMORY;
   }
   else
   {

@@ -531,6 +531,8 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
   OS2IDirectDrawSurface *MipMapSurface;
 
   lpVtbl                     = &Vtbl;
+  lpVtbl2                    = &Vtbl;
+  dwUnknownData              = 0xDEADDEAD;
   Vtbl.AddRef                = SurfAddRef;
   Vtbl.Release               = SurfRelease;
   Vtbl.QueryInterface        = SurfQueryInterface;
@@ -817,6 +819,7 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
           }
 
           BackBuffer = new OS2IDirectDrawSurface(lpDraw, &ComplexSurfaceDesc, TRUE, TRUE);
+          BackBuffer->Vtbl.AddRef((IDirectDrawSurface *)BackBuffer);
 
           if (BackBuffer->GetLastError()==DD_OK)
           {
@@ -1139,6 +1142,8 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
           }
 
           BackBuffer = new OS2IDirectDrawSurface(lpDraw, &ComplexSurfaceDesc, TRUE, Mainchain);
+          BackBuffer->Vtbl.AddRef((IDirectDrawSurface *)BackBuffer);
+
           if (BackBuffer->GetLastError()==DD_OK)
           {
             DDSurfaceDesc.dwFlags |= DDSCAPS_FLIP;
@@ -1171,6 +1176,7 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
             ComplexSurfaceDesc.dwHeight /= 2;
 
             MipMapSurface = new OS2IDirectDrawSurface(lpDraw, &ComplexSurfaceDesc, TRUE);
+            MipMapSurface->Vtbl.AddRef((IDirectDrawSurface *)MipMapSurface);
 
             DPA_InsertPtr( DPA_SurfaceMipMaps,
                            DPA_GetPtrCount(DPA_SurfaceMipMaps),
@@ -1583,7 +1589,8 @@ void OS2IDirectDrawSurface::ColorConversion(LPRECT lpRect)
         {
           for(x=0;x<width;x++)
           {
-            *((WORD*)pDLine) = pPal16[pSLine[x]];
+            *(((WORD*)pDLine)+x) = pPal16[pSLine[x]];
+
           }
           pSLine += dwPitchFB;
           pDLine += dwPitchDB;
@@ -4472,11 +4479,12 @@ HRESULT __stdcall SurfReleaseDC(THIS This, HDC hdc)
   SelectObject(me->hdcImage, me->hgdiOld);
   memset(&BitmapInfo,0, sizeof(BitmapInfo));
   BitmapInfo.bmiHead.biSize     = sizeof(BITMAPINFOHEADER);
+  /*
   BitmapInfo.bmiHead.biWidth    = me->DDSurfaceDesc.lPitch/ (me->DDSurfaceDesc.ddpfPixelFormat.dwRGBBitCount>>3);
   BitmapInfo.bmiHead.biHeight   = me->DDSurfaceDesc.dwHeight;
   BitmapInfo.bmiHead.biPlanes   = 1;
   BitmapInfo.bmiHead.biBitCount = 0; // me->DDSurfaceDesc.ddpfPixelFormat.dwRGBBitCount;
-
+  */
   switch(me->DDSurfaceDesc.ddpfPixelFormat.dwRGBBitCount)
   {
     case 1:
@@ -4484,26 +4492,34 @@ HRESULT __stdcall SurfReleaseDC(THIS This, HDC hdc)
     case 8:
       BitmapInfo.bmiHead.biCompression = BI_RGB;
       //GetSystemPaletteEntries(me->hdcImage,0,255,(PPALETTEENTRY)&BitmapInfo.bmiCols[0]);
-      rc = GetDIBits(hdc, me->hbmImage, 0, me->DDSurfaceDesc.dwHeight,
-                NULL,(PBITMAPINFO)&BitmapInfo,DIB_PAL_COLORS);
+      rc = GetDIBits( hdc,
+                      me->hbmImage,
+                      0,
+                      me->DDSurfaceDesc.dwHeight,
+                      NULL,
+                      (PBITMAPINFO)&BitmapInfo,
+                      DIB_RGB_COLORS);
       WriteLog( "GetDIBits rc=%d\n Size   :%d\n Width  :%d\n Height :%d\n"
-                " Planes :%d\n BitCount :%d\nLastEror = %d\n",
+                " Planes :%d\n BitCount :%d\nLastEror = %d\nPixel[0,0] = 0x%02X\n",
                 rc,
                 BitmapInfo.bmiHead.biSize,
                 BitmapInfo.bmiHead.biWidth,
                 BitmapInfo.bmiHead.biHeight,
                 BitmapInfo.bmiHead.biPlanes,
                 BitmapInfo.bmiHead.biBitCount,
-                GetLastError());
+                GetLastError(),
+                ((char*)me->DDSurfaceDesc.lpSurface)[0]);
       rc = GetDIBits( hdc,
-                      me->hbmImage, 0,
+                      me->hbmImage,
+                      0,
                       me->DDSurfaceDesc.dwHeight,
                       me->DDSurfaceDesc.lpSurface,
                       (PBITMAPINFO)&BitmapInfo,
-                      DIB_PAL_COLORS);
-      WriteLog( "GetDIBits rc=%d\n LastEror = %d\n",
+                      DIB_RGB_COLORS);
+      WriteLog( "GetDIBits rc=%d\n LastEror = %d\nPixel[0,0] = 0x%02X\n",
                 rc,
-                GetLastError());
+                GetLastError(),
+                ((char*)me->DDSurfaceDesc.lpSurface)[0]);
       break;
     case 16:
     case 32:
