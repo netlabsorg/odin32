@@ -1,5 +1,5 @@
 ################################################################################
-# $Id: Makefile,v 1.48 2000-09-08 15:28:59 bird Exp $
+# $Id: Makefile,v 1.49 2000-09-12 21:40:15 bird Exp $
 #
 # Win32k makefile.
 #
@@ -463,6 +463,9 @@ extract.exe: $(WIN32KBIN)\extract.exe
 ################################################################################
 $(NAME).sys: $(WIN32KBIN)\$(NAME).sys
 $(WIN32KBIN)\$(NAME).sys: $(OBJS) $(LIBS) $(NAME).def $(LASTOBJ) $(LIBSINIT) makefile
+    -@$(ECHO) recompiling d16globl to get correct build time and date:
+    $(CC16) -c $(CFLAGS16) $(CDEFINES16) $(CINCLUDES16) -Fo$(WIN32KOBJ)\d16globl.obj \
+        -Fa$(WIN32KLIST)\d16globl.s dev16\d16globl.c
     -@$(ECHO) linking: $@
     -4 $(LD) $(LFLAGS) @<<$(WIN32KOBJ)\$(@B).lnk
 /OUT:$@
