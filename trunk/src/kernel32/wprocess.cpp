@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.62 1999-12-30 11:19:54 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.63 1999-12-31 10:47:12 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -31,6 +31,7 @@
 
 #include "exceptutil.h"
 #include "oslibmisc.h"
+#include "oslibdebug.h"
 
 #include "console.h"
 #include "cio.h"
@@ -706,8 +707,9 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
                             LPSTARTUPINFOA lpStartupInfo,
                             LPPROCESS_INFORMATION lpProcessInfo )
 {
- BOOL  rc;
+ THDB *pThreadDB = (THDB*)GetThreadTHDB();
  char *cmdline = NULL;
+ BOOL  rc;
 
     dprintf(("KERNEL32: CreateProcessA %s cline:%s inherit:%d cFlags:%x Env:%x CurDir:%s StartupFlags:%x\n",
             lpApplicationName, lpCommandLine, bInheritHandles, dwCreationFlags,
@@ -721,8 +723,24 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
                          lpThreadAttributes, bInheritHandles, dwCreationFlags,
                          lpEnvironment, lpCurrentDirectory, lpStartupInfo,
                          lpProcessInfo) == TRUE)
-        return(TRUE);
+    {
+      if (dwCreationFlags & DEBUG_PROCESS && pThreadDB != NULL)
+      {
+        if(pThreadDB->pidDebuggee != 0)
+        {
+          // TODO: handle this
+          dprintf(("KERNEL32: CreateProcess ERROR: This thread is already a debugger\n"));
+        }
+        else
+        {
+          pThreadDB->pidDebuggee = lpProcessInfo->dwProcessId;
+          OSLibStartDebugger((ULONG*)&pThreadDB->pidDebuggee);
+        }
+      }
+      else pThreadDB->pidDebuggee = 0;
 
+      return(TRUE);
+    }
     //probably a win32 exe, so run it in the pe loader
     if(lpApplicationName) {
         if(lpCommandLine) {
@@ -750,6 +768,23 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
                          lpThreadAttributes, bInheritHandles, dwCreationFlags,
                          lpEnvironment, lpCurrentDirectory, lpStartupInfo,
                          lpProcessInfo);
+    if(rc == TRUE) {
+      if (dwCreationFlags & DEBUG_PROCESS && pThreadDB != NULL)
+      {
+        if(pThreadDB->pidDebuggee != 0)
+        {
+          // TODO: handle this
+          dprintf(("KERNEL32: CreateProcess ERROR: This thread is already a debugger\n"));
+        }
+        else
+        {
+          pThreadDB->pidDebuggee = lpProcessInfo->dwProcessId;
+          OSLibStartDebugger((ULONG*)&pThreadDB->pidDebuggee);
+        }
+      }
+      else
+        pThreadDB->pidDebuggee = 0;
+    }
     if(cmdline)
         free(cmdline);
 
