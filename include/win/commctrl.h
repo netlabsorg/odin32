@@ -1,4 +1,4 @@
-/* $Id: commctrl.h,v 1.16 1999-12-18 20:05:39 achimha Exp $ */
+/* $Id: commctrl.h,v 1.17 2000-02-04 17:00:22 cbratschi Exp $ */
 /*
  * Common controls definitions
  */
@@ -494,6 +494,34 @@ BOOL     WINAPI ImageList_Write(HIMAGELIST, LPSTREAM);
   ImageList_LoadImage(hi,lpbmp,cx,cGrow,crMask,IMAGE_BITMAP,0)
 #define ImageList_RemoveAll(himl) ImageList_Remove(himl,-1)
 
+#ifndef WM_MOUSEHOVER
+#define WM_MOUSEHOVER                   0x02A1
+#define WM_MOUSELEAVE                   0x02A3
+#endif
+
+#ifndef TME_HOVER
+
+#define TME_HOVER       0x00000001
+#define TME_LEAVE       0x00000002
+#define TME_QUERY       0x40000000
+#define TME_CANCEL      0x80000000
+
+
+#define HOVER_DEFAULT   0xFFFFFFFF
+
+typedef struct tagTRACKMOUSEEVENT {
+    DWORD cbSize;
+    DWORD dwFlags;
+    HWND  hwndTrack;
+    DWORD dwHoverTime;
+} TRACKMOUSEEVENT, *LPTRACKMOUSEEVENT;
+
+#endif
+
+BOOL
+WINAPI
+_TrackMouseEvent(
+    LPTRACKMOUSEEVENT lpEventTrack);
 
 /* Flat Scrollbar control */
 
@@ -2177,7 +2205,7 @@ typedef struct tagNMTVGETINFOTIPW
 #define TreeView_SetItemA(hwnd, pitem) \
  (BOOL)SendMessageA((hwnd), TVM_SETITEMA, 0, (LPARAM)(const TVITEMA *)(pitem))
 #define TreeView_SetItemW(hwnd, pitem) \
- (BOOL)SendMessageW((hwnd), TVM_SETITEMA, 0, (LPARAM)(const TVITEMA *)(pitem)) 
+ (BOOL)SendMessageW((hwnd), TVM_SETITEMA, 0, (LPARAM)(const TVITEMA *)(pitem))
 
 #define TreeView_EditLabel(hwnd, hitem) \
     (HWND)SendMessageA((hwnd), TVM_EDITLABEL, 0, (LPARAM)(HTREEITEM)(hitem))
@@ -2213,7 +2241,7 @@ typedef struct tagNMTVGETINFOTIPW
 
 #define TreeView_GetISearchString(hwnd, lpsz) \
     (BOOL)SendMessageA((hwnd), TVM_GETISEARCHSTRING, 0, \
-							(LPARAM)(LPTSTR)lpsz)
+                                                        (LPARAM)(LPTSTR)lpsz)
 
 #define TreeView_SetToolTips(hwnd,  hwndTT) \
     (BOOL)SendMessageA((hwnd), TVM_SETTOOLTIPS, (WPARAM)(hwndTT), 0)
@@ -2668,9 +2696,9 @@ typedef INT (* CALLBACK PFNLVCOMPARE)(LPARAM, LPARAM, LPARAM);
 
 typedef struct tagNMLVCACHEHINT
 {
-	NMHDR	hdr;
-	INT	iFrom;
-	INT	iTo;
+        NMHDR   hdr;
+        INT     iFrom;
+        INT     iTo;
 } NMLVCACHEHINT, *LPNMLVCACHEHINT;
 
 #define LPNM_CACHEHINT LPNMLVCACHEHINT
