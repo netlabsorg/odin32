@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.102 2000-12-29 18:40:00 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.103 2001-01-10 20:39:15 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -68,8 +68,12 @@ typedef struct
 
 #define HAS_THICKFRAME(style,exStyle) \
     (((style) & WS_THICKFRAME) && \
+     !(((style) & (WS_DLGFRAME|WS_BORDER)) == WS_DLGFRAME))
+#if 0
+    (((style) & WS_THICKFRAME) && \
      !((exStyle) & WS_EX_DLGMODALFRAME) && \
      !((style) & WS_CHILD))
+#endif
 
 #define HAS_THINFRAME(style) \
     (((style) & WS_BORDER) || !((style) & (WS_CHILD | WS_POPUP)))
