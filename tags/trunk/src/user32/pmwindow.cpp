@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.22 1999-10-08 14:57:17 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.23 1999-10-09 11:03:23 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -219,7 +219,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 
     case WM_ENABLE:
         dprintf(("OS2: WM_ENABLE %x", hwnd));
-        if(win32wnd->MsgEnable((ULONG)mp1)) {
+        if(win32wnd->MsgEnable(SHORT1FROMMP(mp1))) {
                 goto RunDefWndProc;
         }
         break;

@@ -1,4 +1,4 @@
-/* $Id: syscolor.cpp,v 1.8 1999-10-05 16:53:49 cbratschi Exp $ */
+/* $Id: syscolor.cpp,v 1.9 1999-10-09 11:03:23 sandervl Exp $ */
 
 /*
  * Win32 system color API functions for OS/2
@@ -20,6 +20,9 @@
 #include <stdlib.h>
 #include "user32.h"
 #include "syscolor.h"
+
+//SvL: Open32 colors are much better than those in the table below
+#define NUM_OPEN32_SYSCOLORS 21
 
 #define NUM_SYS_COLORS     (COLOR_GRADIENTINACTIVECAPTION+1)
 
@@ -106,7 +109,11 @@ void SYSCOLOR_Init(void)
   INT x;
 
   SYSCOLOR_Load();
-  for (x = 0;x < NUM_SYS_COLORS;x++) SYSCOLOR_SetColor(x,SysColors[x]);
+  for (x = 0;x < NUM_SYS_COLORS;x++) {
+	if(x < NUM_OPEN32_SYSCOLORS)
+		SYSCOLOR_SetColor(x,O32_GetSysColor(x));
+	else	SYSCOLOR_SetColor(x,SysColors[x]);
+  }
 }
 //******************************************************************************
 //******************************************************************************
@@ -118,7 +125,12 @@ COLORREF WIN32API GetSysColor(INT nIndex)
     fColorInit = TRUE;
   }
 
-  if (nIndex >= 0 && nIndex < NUM_SYS_COLORS) return SysColors[nIndex];
+  if (nIndex >= 0 && nIndex < NUM_SYS_COLORS) 
+  {
+	if(nIndex < NUM_OPEN32_SYSCOLORS)
+		return O32_GetSysColor(nIndex);
+	else	return SysColors[nIndex];
+  }
   else return 0;
 }
 //******************************************************************************
@@ -137,6 +149,8 @@ BOOL WIN32API SetSysColors(INT nChanges, const INT *lpSysColor,
 #ifdef DEBUG
     WriteLog("OS2SetSysColors\n");
 #endif
+    
+    O32_SetSysColors(nChanges, lpSysColor, lpColorValues);
 
     for(i=0;i<nChanges;i++) {
         SYSCOLOR_SetColor(lpSysColor[i], lpColorValues[i]);
