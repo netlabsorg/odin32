@@ -1,4 +1,4 @@
-/* $Id: treeview.c,v 1.16 1999-11-19 16:22:01 achimha Exp $ */
+/* $Id: treeview.c,v 1.17 1999-11-19 17:13:32 achimha Exp $ */
 /* Treeview control
  *
  * Copyright 1998 Eric Kohl <ekohl@abo.rhein-zeitung.de>
@@ -1707,6 +1707,13 @@ TREEVIEW_InsertItemA (HWND hwnd, WPARAM wParam, LPARAM lParam)
     {
 //      TRACE (treeview,"(%p,%s)\n", &tvItem->pszText, tvItem->pszText);
       len = lstrlenA (tvItem->pszText)+1;
+      // AH: Win95 regedit creates items with 10 as the last character
+      // we don't want that to appear...
+      if (*(tvItem->pszText + len - 2) == 10)
+      {
+        *(tvItem->pszText + len - 2) = 0;
+        dprintf(("item has character 10 at end, removed: %s\n", tvItem->pszText));
+      }
       wineItem->pszText= COMCTL32_Alloc (len+1);
       lstrcpyA (wineItem->pszText, tvItem->pszText);
       wineItem->cchTextMax=len;
