@@ -1,4 +1,4 @@
-/* $Id: kHll.cpp,v 1.11 2000-04-07 17:20:24 bird Exp $
+/* $Id: kHll.cpp,v 1.12 2000-04-24 21:38:12 bird Exp $
  *
  * kHll - Implementation of the class kHll.
  *        That class is used to create HLL debuginfo.
@@ -121,7 +121,7 @@ kHllPubSymEntry::kHllPubSymEntry(
     pPubSym = (PHLLPUBLICSYM)malloc(cchName + sizeof(HLLPUBLICSYM));
     assert(pPubSym != NULL);
 
-    pPubSym->cchName = cchName;
+    pPubSym->cchName = (unsigned char)cchName;
     pPubSym->achName[0] = '\0';
     strncat((char*)&pPubSym->achName[0], pachName, cchName);
     pPubSym->off = off;
@@ -401,7 +401,7 @@ unsigned short      kHllSrcEntry::addFile(
      */
     if ((cbFilenames + cchFilename + 1) >= cbFilenamesAllocated)
     {
-        void *pv = realloc(pachFilenames, cbFilenamesAllocated + 256);
+        void *pv = realloc(pachFilenames, (size_t)cbFilenamesAllocated + 256);
         assert(pv != NULL);
         if (pv == NULL)
             return 0;
@@ -413,11 +413,11 @@ unsigned short      kHllSrcEntry::addFile(
     /*
      * Add filename
      */
-    pachFilenames[cbFilenames++] = cchFilename;
+    pachFilenames[cbFilenames++] = (char)cchFilename;
     memcpy(&pachFilenames[cbFilenames], pachFilename, cchFilename);
     cbFilenames += cchFilename;
 
-    return ++cFilenames;
+    return (unsigned short)++cFilenames;
 }
 
 
@@ -448,9 +448,9 @@ int                 kHllSrcEntry::write(FILE *phFile)
     FirstEntry.hll04.usLine = 0;
     FirstEntry.hll04.uchType = 3;       /* filename */
     FirstEntry.hll04.uchReserved = 0;
-    FirstEntry.hll04.cEntries = max(cFilenames, 1);
+    FirstEntry.hll04.cEntries = (unsigned short)max(cFilenames, 1);
     FirstEntry.hll04.iSeg = 0;
-    FirstEntry.hll04.u1.cbFileNameTable = cbFilenames > 0 ? cbFilenames : 8;
+    FirstEntry.hll04.u1.cbFileNameTable = cbFilenames != 0 ? cbFilenames : 8;
     cb = sizeof(FirstEntry.hll04);
     cbWritten = cbWrote = fwrite(&FirstEntry, 1, cb, phFile);
     if (cb != cbWrote)
@@ -464,7 +464,7 @@ int                 kHllSrcEntry::write(FILE *phFile)
     if (cbWrote != cb)
         return -1;
 
-    if (cbFilenames > 0)
+    if (cbFilenames != 0)
     {
         cbWritten += cbWrote = fwrite(pachFilenames, 1, cbFilenames, phFile);
         if (cbWrote != cbFilenames)
@@ -542,7 +542,7 @@ kHllModuleEntry::kHllModuleEntry(
                                  sizeof(HLLSEGINFO) * max((cSegInfo - 1), 3));
     assert(pModule != NULL);
     memset(pModule, 0, sizeof(*pModule));
-    pModule->cchName = cchName;
+    pModule->cchName = (unsigned char)cchName;
     strcpy((char*)&pModule->achName[0], pszName);
     pModule->chVerMajor = 4;
     pModule->chVerMinor = 0;
@@ -553,7 +553,7 @@ kHllModuleEntry::kHllModuleEntry(
     pModule->pad = 0;
 
     /* objects */
-    if (cSegInfo > 0)
+    if (cSegInfo != 0)
     {
         pModule->SegInfo0.iObject = paSegInfo->iObject;
         pModule->SegInfo0.cb      = paSegInfo->cb;
@@ -687,7 +687,7 @@ const void *    kHllModuleEntry::addPublicSymbol(
         cchName,
         off,
         iObject,
-        pvType == NULL ? 0 : -1 //FIXME/TODO: Types->getIndex(pvType); check if 0 or -1.
+        (unsigned short)(pvType == NULL ? 0 : -1) //FIXME/TODO: Types->getIndex(pvType); check if 0 or -1.
         );
 
     PublicSymbols.insert(pEntry);
@@ -819,7 +819,7 @@ int         kHllModuleEntry::writeDirEntries(FILE *phFile, unsigned short iMod)
         return -1;
     cchWritten += cch;
 
-    if (cbPublicSymbols > 0)
+    if (cbPublicSymbols != 0)
     {
         hllDirEntry.usType  = HLL_DE_PUBLICS;
         hllDirEntry.cb      = cbPublicSymbols;
@@ -857,7 +857,7 @@ int         kHllModuleEntry::writeDirEntries(FILE *phFile, unsigned short iMod)
     }
     */
 
-    if (cbSource > 0)
+    if (cbSource != 0)
     {
         hllDirEntry.usType  = HLL_DE_IBMSRC;
         hllDirEntry.cb      = cbSource;
@@ -964,7 +964,7 @@ int         kHll::write(FILE *phFile)
     pModule = (kHllModuleEntry*)Modules.getFirst();
     while (pModule != NULL)
     {
-        cch = pModule->writeDirEntries(phFile, iMod);
+        cch = pModule->writeDirEntries(phFile, (unsigned short)iMod);
         if (cch == -1)
             return -1;
         cchWritten += cch;
@@ -1048,8 +1048,8 @@ kHllModuleEntry *   kHll::addModule(
 
     pEntry = new kHllModuleEntry(
         pszName,
-        pvLib == NULL ? 0 : -1, //FIXME/TODO: Libs->getIndex(pvLib); check if 0 or -1;
-        cSegInfo,
+        (unsigned short)(pvLib == NULL ? 0 : -1), //FIXME/TODO: Libs->getIndex(pvLib); check if 0 or -1;
+        (unsigned char) cSegInfo,
         paSegInfo);
 
     Modules.insert(pEntry);
@@ -1076,14 +1076,14 @@ kHllModuleEntry *   kHll::addModule(
 {
     char szModName[256];
     kHllModuleEntry *   pEntry;
-    assert(pachName != NULL && cchName > 0);
+    assert(pachName != NULL && cchName != 0);
 
     szModName[0] = '\0';
     strncat(szModName, pachName, min(cchName, 255));
     pEntry = new kHllModuleEntry(
         szModName,
-        pvLib == NULL ? 0 : -1, //FIXME/TODO: Libs->getIndex(pvLib); check if 0 or -1;
-        cSegInfo,
+        (unsigned short)(pvLib == NULL ? 0 : -1), //FIXME/TODO: Libs->getIndex(pvLib); check if 0 or -1;
+        (unsigned char)cSegInfo,
         paSegInfo);
 
     Modules.insert(pEntry);
@@ -1255,7 +1255,7 @@ APIRET          kHll::writeToLX(
  */
 signed long fsize(FILE *phFile)
 {
-    int ipos;
+    long ipos;
     signed long cb;
 
     if ((ipos = ftell(phFile)) < 0
