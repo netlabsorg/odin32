@@ -1,4 +1,4 @@
-/* $Id: mmap.cpp,v 1.61 2003-02-18 18:48:55 sandervl Exp $ */
+/* $Id: mmap.cpp,v 1.62 2003-02-18 18:58:47 sandervl Exp $ */
 
 /*
  * Win32 Memory mapped file & view classes
@@ -89,6 +89,7 @@ Win32MemMap::Win32MemMap(HFILE hfile, ULONG size, ULONG fdwProtect, LPSTR lpszNa
         strcpy(lpszMapName, lpszName);
     }
     else  lpszMapName = NULL;
+    AddRef();
 }
 //******************************************************************************
 //Map constructor used for executable image maps (only used internally)
@@ -111,6 +112,7 @@ Win32MemMap::Win32MemMap(Win32PeLdrImage *pImage, ULONG baseAddress, ULONG size)
 
     image      = pImage;
     lpszMapName= NULL;
+    AddRef();
 }
 //******************************************************************************
 //******************************************************************************
