@@ -1,4 +1,12 @@
- /* $Id: changelog,v 1.331 1999-10-17 01:55:08 bird Exp $ */
+ /* $Id: changelog,v 1.332 1999-10-17 12:19:13 cbratschi Exp $ */
+
+ 99-10-17: Christoph Bratschi <cbratschi@datacomm.ch>
+	- USER32: replaced OS/2 scrollbars by WINE scrollbars
+		  BUG: SCROLL_RefreshScrollBar doesn't work
+		       GetDC returns a wrong DC, BeginPaint works as it should
+		  Send as few WM_ENTERIDLE messages as possible -> low CPU usage
+		  pmframe: removed WinFillRect
+
  99-10-17: knut st. osmundsen <knut.stange.osmundsen@pmsc.no>
     - KERNEL32: Removed exception throwing from Pe2Lx classes.
                 Implemented TLS support in Pe2Lx classes.
