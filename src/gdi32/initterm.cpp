@@ -97,6 +97,8 @@ ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
          if(dllHandle == 0) 
 		return 0UL;
 
+         dprintf(("gdi32 init %s %s (%x)", __DATE__, __TIME__, DLLENTRYPOINT_NAME));
+
          break;
       case 1 :
          if(dllHandle) {
