@@ -138,7 +138,8 @@ ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
 static void APIENTRY cleanup(ULONG ulReason)
 {
    dprintf(("user32 exit\n"));
-   RestoreCursor();
+//SvL: Causes PM hangs on some (a lot?) machines. Reason unknown.
+////   RestoreCursor();
    DestroyDesktopWindow();
    Win32BaseWindow::DestroyAll();
    UnregisterSystemClasses();
