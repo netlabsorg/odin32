@@ -1,4 +1,4 @@
-/* $Id: HandleManager.h,v 1.24 2000-09-20 21:32:56 hugh Exp $ */
+/* $Id: HandleManager.h,v 1.25 2001-04-26 13:27:58 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -521,6 +521,19 @@ BOOL HMCreatePipe(PHANDLE phRead,
                 PHANDLE phWrite,
                 LPSECURITY_ATTRIBUTES lpsa,
                 DWORD                 cbPipe);
+
+
+//Mailslot API
+HANDLE HMCreateMailslotA(LPCSTR lpName, DWORD nMaxMessageSize,
+                         DWORD lReadTimeout,
+                         LPSECURITY_ATTRIBUTES lpSecurityAttributes);
+BOOL HMGetMailslotInfo(HANDLE  hMailslot,
+                       LPDWORD lpMaxMessageSize,
+                       LPDWORD lpNextSize,
+                       LPDWORD lpMessageCount,
+                       LPDWORD lpReadTimeout);
+BOOL HMSetMailslotInfo(HANDLE hMailslot,
+                       DWORD  dwReadTimeout);
 
 #ifdef __cplusplus__
   }
