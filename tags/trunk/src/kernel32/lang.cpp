@@ -1,4 +1,4 @@
-/* $Id: lang.cpp,v 1.37 2001-08-10 19:32:30 sandervl Exp $ */
+/* $Id: lang.cpp,v 1.38 2001-10-28 17:15:33 sandervl Exp $ */
 /*
  * Win32 language API functions for OS/2
  *
@@ -30,6 +30,13 @@
 ODINDEBUGCHANNEL(KERNEL32-LANG)
 
 static ULONG defaultLanguage = 0;
+
+//******************************************************************************
+//******************************************************************************
+void WIN32API SetDefaultLanguage(DWORD deflang)
+{
+  defaultLanguage = deflang;
+}
 //******************************************************************************
 //******************************************************************************
 ULONG GetLanguageId()
