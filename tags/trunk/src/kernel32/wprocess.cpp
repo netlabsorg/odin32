@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.159 2002-09-18 10:58:48 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.160 2002-12-02 09:34:46 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -1397,14 +1397,24 @@ ULONG InitCommandLine(const char *pszPeExe)
      */
     if (rc == NO_ERROR)
     {
-      // PH 2002-04-11
-      // Note: intentional memory leak, pszCmdLineW will not be freed
-      // or allocated after process startup
+        // PH 2002-04-11
+        // Note: intentional memory leak, pszCmdLineW will not be freed
+        // or allocated after process startup
+        cch = strlen(pszCmdLineA) + 1;
+
         pszCmdLineW = (WCHAR*)malloc(cch * 2);
-        if (pszCmdLineW != NULL)
-            AsciiToUnicode(pszCmdLineA, (WCHAR*)pszCmdLineW);
+        if (pszCmdLineW != NULL) {
+            //Translate from OS/2 to Windows codepage & ascii to unicode
+            MultiByteToWideChar(CP_OEMCP, 0, pszCmdLineA, -1, (LPWSTR)pszCmdLineW, cch-1);
+            ((LPWSTR)pszCmdLineW)[cch-1] = 0;
+
+            //ascii command line is still in OS/2 codepage, so convert it
+            WideCharToMultiByte(CP_ACP, 0, pszCmdLineW, -1, (LPSTR)pszCmdLineA, cch-1, 0, NULL);
+            ((LPSTR)pszCmdLineA)[cch-1] = 0;
+        }
         else
         {
+            DebugInt3();
             dprintf(("KERNEL32: InitCommandLine(%p): malloc(%d) failed (2)\n", pszPeExe, cch));
             rc = ERROR_NOT_ENOUGH_MEMORY;
         }
