@@ -1,11 +1,28 @@
-/* $Id: ChangeLog,v 1.1364 2001-04-16 17:04:27 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1365 2001-04-17 04:37:58 bird Exp $ */
+
+ 2001-04-17: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - Unicode:  o Minor addjustments to makefile. CFLAGS is the correct
+                  place to addjust flags for C compilation. And flags
+                  are compiler specific.. wrapped it in CCENV checks.
+    - Tools\Common:
+                o Revamped a couple of things - introduced interface classes.
+                  Not quite statisfied yet, but it's working.
+                o Starting to make an kFileSDF class to access .SDF files
+                  SDF = Structure Definition Files - used by PMDF. Contains
+                  information about structures (struct _somthing_s).
+                  Needs this information for win32k.
+    - Tools\Database:
+                o Recreate makefiles, new style. GD is not compiled any longer.
+                o Addjusted APIImport to fit changes in Tools\Common.
+    - Tools\ImpLib:
+                o Addjusted code to fit changes in Tools\Common.
 
  2001-04-16: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Fix for LoadLibrary(Ex)W. (free must not be called for
                   converted strings; use FreeAsciiString instead)
     - TOOLS\WRC:o Ported latest wrc. (has proper ascii -> unicode conversion
                   and more features)
-                o Open files in binary mode only; fixes load failures for 
+                o Open files in binary mode only; fixes load failures for
                   shell32 icons (newlines were translated; bytes removed from
                   icon data)
     - DPLAYX:   o Compile fixes for header changes.
