@@ -1,4 +1,4 @@
-/* $Id: asyncapi.cpp,v 1.18 2001-10-21 13:43:51 sandervl Exp $ */
+/* $Id: asyncapi.cpp,v 1.19 2002-02-20 15:07:13 sandervl Exp $ */
 
 /*
  *
@@ -674,7 +674,7 @@ ODINFUNCTION4(int,WSAAsyncSelect,
 }
 //******************************************************************************
 //******************************************************************************
-int WSAAsyncSelectWorker(SOCKET s, int mode, int notifyHandle, int notifyData, long lEventMask)
+int WSAAsyncSelectWorker(SOCKET s, int mode, DWORD notifyHandle, DWORD notifyData, DWORD lEventMask)
 {
   PASYNCTHREADPARM pThreadParm;
   int              nonblock = 1;

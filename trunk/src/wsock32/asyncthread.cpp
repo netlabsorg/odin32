@@ -1,4 +1,4 @@
-/* $Id: asyncthread.cpp,v 1.13 2001-10-21 13:43:51 sandervl Exp $ */
+/* $Id: asyncthread.cpp,v 1.14 2002-02-20 15:07:13 sandervl Exp $ */
 
 /*
  * Async thread help functions
@@ -32,6 +32,10 @@ static void AddToQueue(PASYNCTHREADPARM pThreadParm);
 static void _Optlink AsyncThread(void *arg)
 {
  PASYNCTHREADPARM pThreadParm = (PASYNCTHREADPARM)arg;
+#ifdef DEBUG
+ ULONG ulSocket    = pThreadParm->u.asyncselect.s;
+ ULONG hTaskHandle = pThreadParm->hAsyncTaskHandle;
+#endif
 
   pThreadParm->asyncProc((PVOID)arg);
 
@@ -39,7 +43,7 @@ static void _Optlink AsyncThread(void *arg)
 ////  if(pThreadParm->request == ASYNC_BLOCKHOOK)
 ////	WSASetBlocking(FALSE, pThreadParm->hThread);
 
-  dprintf(("AsyncThread %x socket %x exit", pThreadParm->hAsyncTaskHandle, pThreadParm->u.asyncselect.s));
+  dprintf(("AsyncThread %x socket %x exit", hTaskHandle, ulSocket));
   free((PVOID)pThreadParm);
 }
 //******************************************************************************
@@ -280,16 +284,18 @@ void EnableAsyncEvent(SOCKET s, ULONG flags)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL QueryAsyncEvent(SOCKET s, HWND *pHwnd, int *pMsg, ULONG *plEvent)
+BOOL QueryAsyncEvent(SOCKET s, int *pMode, ULONG *pNofityHandle, ULONG *pNofityData, 
+                     ULONG *plEvent)
 {
  PASYNCTHREADPARM pThreadInfo;
 
    asyncThreadMutex.enter();
    pThreadInfo = FindAsyncEvent(s);
    if(pThreadInfo) {
-	*pHwnd   = (HWND)pThreadInfo->notifyHandle;
-	*pMsg    = pThreadInfo->notifyData;
-	*plEvent = pThreadInfo->u.asyncselect.lEvents;
+        *pMode         = pThreadInfo->u.asyncselect.mode;
+	*pNofityHandle = pThreadInfo->notifyHandle;
+	*pNofityData   = pThreadInfo->notifyData;
+	*plEvent       = pThreadInfo->u.asyncselect.lEvents;
    }
    asyncThreadMutex.leave();
    return(pThreadInfo != NULL);
