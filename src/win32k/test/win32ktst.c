@@ -1,4 +1,4 @@
-/* $Id: win32ktst.c,v 1.1.4.3 2000-08-15 06:16:09 bird Exp $
+/* $Id: win32ktst.c,v 1.1.4.4 2000-08-17 08:23:35 bird Exp $
  *
  * Win32k test module.
  *
@@ -581,6 +581,7 @@ int tests(int iTest, int argc, char **argv)
     {
         case 1:     rc = TestCase1(argc, argv);   break;
         case 2:     rc = TestCase2();   break;
+        case 3:     rc = TestCase3();   break;
 
         default:
             printf("testcase no. %d is not found\n", iTest);
@@ -680,7 +681,7 @@ int TestCase2(void)
 {
     int         rc = 1;
     RP32INIT    rpinit;
-    char *      pszInitArgs = "-C1 -L:N -Verbose -Quiet -Elf:Yes -Pe:Mixed -Script:No -W4 -Heap:512000 -ResHeap:0256000 -HeapMax:4096000 -ResHeapMax:0x100000";
+    char *      pszInitArgs = "-C1 -L:N -Verbose -Quiet -Elf:Yes -Pe:Mixed -Script:Yes -W4 -Heap:512000 -ResHeap:0256000 -HeapMax:4096000 -ResHeapMax:0x100000";
 
     /* $elf */
     initRPInit(SSToDS(&rpinit), pszInitArgs);
@@ -700,7 +701,7 @@ int TestCase2(void)
             opt.cbResHeapInit   = 0256000;
             opt.cbResHeapMax    = 0x100000;
             opt.fElf            = TRUE;
-            opt.fUNIXScript     = FALSE;
+            opt.fUNIXScript     = TRUE;
             opt.fPE             = FLAGS_PE_MIXED;
             opt.fQuiet          = TRUE;
             opt.fLogging        = FALSE;
@@ -708,6 +709,10 @@ int TestCase2(void)
             opt.ulInfoLevel     = INFOLEVEL_INFOALL;
 
             rc = CompareOptions(SSToDS(&opt));
+            if (rc == NO_ERROR)
+            {
+                 rc = TestCaseExeLoad2();
+            }
         }
         else
             printf("!failed!\n");
@@ -717,6 +722,66 @@ int TestCase2(void)
 
     return rc;
 }
+
+/**
+ * Test case 3.
+ * Checks that all parameters are read correctly (1).
+ *
+ * @sketch  Create init packet with no arguments.
+ *          Initiate elf$
+ *          Create init packet with no arguments.
+ *          Initiate win32k$
+ * @returns 0 on success.
+ *          1 on failure.
+ * @status  completely implemented.
+ * @author  knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ */
+int TestCase3(void)
+{
+    int         rc = 1;
+    RP32INIT    rpinit;
+    char *      pszInitArgs = "-C1 -L:N -Verbose -Quiet -Elf:Yes -Pe:PE -Script:Yes -W4 -Heap:512000 -ResHeap:0256000 -HeapMax:4096000 -ResHeapMax:0x100000";
+
+    /* $elf */
+    initRPInit(SSToDS(&rpinit), pszInitArgs);
+    rc = InitElf(&rpinit);              /* no SSToDS! */
+    printf("InitElf returned status=0x%04x\n", rpinit.rph.Status);
+    if ((rpinit.rph.Status & (STDON | STERR)) == STDON)
+    {
+        /* $win32k */
+        initRPInit(SSToDS(&rpinit), pszInitArgs);
+        rc = InitWin32k(&rpinit);       /* no SSToDS! */
+        printf("InitWin32k returned status=0x%04x\n", rpinit.rph.Status);
+        if ((rpinit.rph.Status & (STDON | STERR)) == STDON)
+        {
+            struct options opt = DEFAULT_OPTION_ASSIGMENTS;
+            opt.cbSwpHeapInit   = 512000;
+            opt.cbSwpHeapMax    = 4096000;
+            opt.cbResHeapInit   = 0256000;
+            opt.cbResHeapMax    = 0x100000;
+            opt.fElf            = TRUE;
+            opt.fUNIXScript     = TRUE;
+            opt.fPE             = FLAGS_PE_PE;
+            opt.fQuiet          = TRUE;
+            opt.fLogging        = FALSE;
+            opt.usCom           = OUTPUT_COM1;
+            opt.ulInfoLevel     = INFOLEVEL_INFOALL;
+
+            rc = CompareOptions(SSToDS(&opt));
+            if (rc == NO_ERROR)
+            {
+                 rc = TestCaseExeLoad2();
+            }
+        }
+        else
+            printf("!failed!\n");
+    }
+    else
+        printf("!failed!\n");
+
+    return rc;
+}
+
 
 /**
  * Compares the options with the option struct passed in.
@@ -738,7 +803,7 @@ int CompareOptions(struct options *pOpt)
         printf("usCom = %d - should be %d\n", options.usCom, pOpt->usCom, rc++);
     if (options.fLogging != pOpt->fLogging)
         printf("fLogging = %d - should be %d\n", options.fLogging, pOpt->fLogging, rc++);
-    if (options.ulBuild != ~0UL)
+    if (pOpt->ulBuild != ~0UL)
     {
         if (options.fKernel != pOpt->fKernel)
             printf("fKernel = %d - should be %d\n", options.fKernel, pOpt->fKernel, rc++);
@@ -776,8 +841,6 @@ int CompareOptions(struct options *pOpt)
 }
 
 
-
-
 /**
  * Simulates a executable loading (no errors).
  * This test requires a PE executable file named ExecLoad1.exe which
@@ -803,66 +866,97 @@ int TestCaseExeLoad2(void)
     /*
      * Do the real execution.
      */
-    printf("--- TestcaseExeLoad1 - loading win32ktst.exe (LX image) ----\n");
+    printf("--- TestcaseExeLoad3 - loading win32ktst.exe (LX image) ----\n");
     rc = CalltkExecPgm(EXEC_LOAD, NULL, NULL, "win32ktst.exe");
     if (rc == NO_ERROR)
     {
         psz = "BIN\\DEBUG\\LIBCONV.EXE\0";
-        printf("--- TestcaseExeLoad1 - loading libconv.exe (LX image) ----\n");
+        printf("--- TestcaseExeLoad3 - loading libconv.exe (LX image) ----\n");
         rc = CalltkExecPgm(EXEC_LOAD, NULL, NULL, "bin\\debug\\libconv.exe");
-        #if 0 //not implemented by CalltkExecPgm...???
-        /* check result */
-        if (memcmp(achTkExecPgmArguments, psz, strlen(psz) + 1) != 0)
+        if (rc == NO_ERROR)
         {
-            rc  = ERROR_BAD_ARGUMENTS;
-            printf("Bad Arguments! (%s)\n", achTkExecPgmArguments);
+            #if 0 //not implemented by CalltkExecPgm...???
+            /* check result */
+            if (memcmp(achTkExecPgmArguments, psz, strlen(psz) + 1) != 0)
+            {
+                rc  = ERROR_BAD_ARGUMENTS;
+                printf("Bad Arguments! (%s)\n", achTkExecPgmArguments);
+            }
+            #else
+            psz = psz;
+            #endif
         }
-        #else
-        psz = psz;
-        #endif
     }
 
     if (rc == NO_ERROR)
     {
         psz = "REXX\\TST.CMD\0OriginalArgument1 OriginalArgument2\0OriginalArgument3\0";
-        printf("--- TestcaseExeLoad1 - loading rexx\\tst.cmd (REXX script) ----\n");
+        printf("--- TestcaseExeLoad3 - loading rexx\\tst.cmd (REXX script) ----\n");
         rc = CalltkExecPgm(EXEC_LOAD, psz, NULL, "rexx\\tst.cmd");
-
-        /* check result */
-        psz[strlen(psz)] = ' ';
-        for (cch = 0; psz[cch] != '\0';)
-            cch += strlen(psz + cch) + 1;
-        cch++;
-        if (memcmp(achTkExecPgmArguments + strlen(achTkExecPgmArguments) + 1, psz, cch) != 0)
+        if (rc == NO_ERROR)
         {
-            rc  = ERROR_BAD_ARGUMENTS;
-            printf("Bad Arguments! (achTkExecPgmArguments=%s).\n", achTkExecPgmArguments + strlen(achTkExecPgmArguments) + 1);
+            /* check result */
+            psz = "REXX\\TST.CMD OriginalArgument1 OriginalArgument2\0OriginalArgument3\0";
+            cch = strlen(psz);
+            if (memcmp(achTkExecPgmArguments + strlen(achTkExecPgmArguments) + 1, psz, cch) != 0)
+            {
+                rc  = ERROR_BAD_ARGUMENTS;
+                printf("Bad Arguments! (achTkExecPgmArguments=%s).\n", achTkExecPgmArguments + strlen(achTkExecPgmArguments) + 1);
+            }
         }
     }
 
     if (rc == NO_ERROR)
     {
         psz = "TEST\\TST.SH\0OrgArg1 OrgArg2\0OrgArg3\0";
-        printf("--- TestcaseExeLoad1 - loading test\\testscript.sh (UNIX shell script) ----\n");
+        printf("--- TestcaseExeLoad3 - loading test\\tst.sh (UNIX shell script) ----\n");
         rc = CalltkExecPgm(EXEC_LOAD, psz, NULL, "test\\tst.sh");
-
-        /* check result */
-        psz[strlen(psz)] = ' ';
-        for (cch = 0; psz[cch] != '\0';)
-            cch += strlen(psz + cch) + 1;
-        cch++;
-        if (memcmp(achTkExecPgmArguments + strlen(achTkExecPgmArguments) + 1, psz, cch) != 0)
+        if (rc == NO_ERROR)
         {
-            rc  = ERROR_BAD_ARGUMENTS;
-            printf("Bad Arguments! (achTkExecPgmArguments=%s).\n", achTkExecPgmArguments + strlen(achTkExecPgmArguments) + 1);
+            /* check result */
+            psz = "TEST\\TST.SH OrgArg1 OrgArg2\0OrgArg3\0";
+            cch = strlen(psz);
+            if (memcmp(achTkExecPgmArguments + strlen(achTkExecPgmArguments) + 1, psz, cch) != 0)
+            {
+                rc  = ERROR_BAD_ARGUMENTS;
+                printf("Bad Arguments! (achTkExecPgmArguments=%s).\n", achTkExecPgmArguments + strlen(achTkExecPgmArguments) + 1);
+            }
         }
     }
 
+    if (rc == NO_ERROR)
+    {
+        psz = "TEST\\TST2.SH\0OrgArg1 OrgArg2\0OrgArg3\0";
+        printf("--- TestcaseExeLoad3 - loading test\\tst2.sh (UNIX shell script) ----\n");
+        rc = CalltkExecPgm(EXEC_LOAD, psz, NULL, "test\\tst2.sh");
+        if (rc == NO_ERROR)
+        {
+            /* check result */
+            psz = "-arg1 -arg2 -arg3 TEST\\TST2.SH OrgArg1 OrgArg2\0OrgArg3\0";
+            cch = strlen(psz) + 1;
+            if (memcmp(achTkExecPgmArguments + strlen(achTkExecPgmArguments) + 1, psz, cch) != 0)
+            {
+                rc  = ERROR_BAD_ARGUMENTS;
+                printf("Bad Arguments! (achTkExecPgmArguments=%s).\n", achTkExecPgmArguments + strlen(achTkExecPgmArguments) + 1);
+            }
+        }
+    }
 
     if (rc == NO_ERROR)
     {
-        printf("--- TestcaseExeLoad1 - loading SOL.EXE (PE image) ----\n");
+        printf("--- TestcaseExeLoad3 - loading SOL.EXE (PE image) ----\n");
         rc = CalltkExecPgm(EXEC_LOAD, NULL, NULL, "e:\\Win32Prog\\Sol\\Sol.exe");
+        if (rc == NO_ERROR)
+        {
+            /* check result */
+            psz = "E:\\WIN32PROG\\SOL\\SOL.EXE\0";
+            cch = strlen(psz) + 1 + 1;
+            if (memcmp(achTkExecPgmArguments + strlen(achTkExecPgmArguments) + 1, psz, cch) != 0)
+            {
+                rc  = ERROR_BAD_ARGUMENTS;
+                printf("Bad Arguments! (achTkExecPgmArguments=%s).\n", achTkExecPgmArguments + strlen(achTkExecPgmArguments) + 1);
+            }
+        }
     }
 
     /*
@@ -870,3 +964,4 @@ int TestCaseExeLoad2(void)
      */
     return rc;
 }
+

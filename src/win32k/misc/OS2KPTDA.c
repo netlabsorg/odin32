@@ -1,4 +1,4 @@
-/* $Id: OS2KPTDA.c,v 1.1.2.1 2000-08-15 07:03:27 bird Exp $
+/* $Id: OS2KPTDA.c,v 1.1.2.2 2000-08-17 08:23:35 bird Exp $
  *
  * PTDA access functions.
  *
@@ -52,4 +52,8 @@ USHORT  ptdaGet_ptda_module(PPTDA pPTDA)
 {
     return *(PUSHORT)(void*)(((char*)(void*)pPTDA) + (pptda_module - pptda_start));
 }
+
+
+
+
 

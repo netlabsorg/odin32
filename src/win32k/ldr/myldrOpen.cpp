@@ -1,4 +1,4 @@
-/* $Id: myldrOpen.cpp,v 1.10.4.2 2000-08-11 02:23:19 bird Exp $
+/* $Id: myldrOpen.cpp,v 1.10.4.3 2000-08-17 08:23:33 bird Exp $
  *
  * myldrOpen - ldrOpen.
  *
@@ -264,7 +264,7 @@ ULONG LDRCALL myldrOpen(PSFN phFile, PSZ pszFilename, PULONG pfl)
                  *  Using PE.EXE to start EXE?
                  *      - When the file is an EXE file and PE.EXE is enabled.
                  */
-                if ((u1.pNtHdrs->FileHeader.Characteristics & IMAGE_FILE_DLL == 0UL)
+                if ((u1.pNtHdrs->FileHeader.Characteristics & IMAGE_FILE_DLL) == 0UL
                     && (options.fPE == FLAGS_PE_PE || options.fPE == FLAGS_PE_MIXED)
                     && (isLdrStateExecPgm() || isLdrStateQAppType())
                     )
@@ -292,7 +292,7 @@ ULONG LDRCALL myldrOpen(PSFN phFile, PSZ pszFilename, PULONG pfl)
                         kprintf(("myldrOpen-%d: pe.exe - %s\n", cNesting, u1.pach));
                         if (isLdrStateExecPgm() && fTkExecPgm)
                         {
-                            rc = AddArgsToFront(1, achTkExecPgmFilename);
+                            rc = AddArgsToFront(2, u1.pach, achTkExecPgmFilename);
                             if (rc == NO_ERROR)
                             {
                                 rc = SetExecName(u1.pach);

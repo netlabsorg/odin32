@@ -1,4 +1,4 @@
-/* $Id: d32init.c,v 1.19.4.4 2000-08-15 07:03:25 bird Exp $
+/* $Id: d32init.c,v 1.19.4.5 2000-08-17 08:23:32 bird Exp $
  *
  * d32init.c - 32-bits init routines.
  *
@@ -1434,7 +1434,8 @@ VOID R3TstFixImportTab(VOID)
         {(unsigned)&fakepTCBCur,            4},
         {(unsigned)&fakepPTDACur,           4},
         {(unsigned)&fakeptda_start,         4},
-        {(unsigned)&fakeptda_environ,       4}
+        {(unsigned)&fakeptda_environ,       4},
+        {(unsigned)&fakeptda_module,        4}
     };
     int i;
 

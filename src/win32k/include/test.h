@@ -1,4 +1,4 @@
-/* $Id: test.h,v 1.1.4.1 2000-08-14 08:57:07 bird Exp $
+/* $Id: test.h,v 1.1.4.2 2000-08-17 08:23:33 bird Exp $
  *
  * Definitions and declarations for test moduls.
  *
@@ -108,6 +108,7 @@ extern PTCB     fakepTCBCur;
 extern PPTDA    fakepPTDACur;
 extern char     fakeptda_start;
 extern USHORT   fakeptda_environ;
+extern HMTE     fakeptda_module;
 
 #endif /* INCL_NO_FAKE */
 
