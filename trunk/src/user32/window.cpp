@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.122 2002-02-27 15:23:38 sandervl Exp $ */
+/* $Id: window.cpp,v 1.123 2002-07-05 18:15:11 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -733,10 +733,17 @@ HWND WIN32API SetFocus(HWND hwnd)
  HWND lastFocus, lastFocus_W, hwnd_O, hwndTopParent;
  BOOL activate, ret;
  TEB *teb;
-
+    
     teb = GetThreadTEB();
     if(teb == NULL) {
         DebugInt3();
+        return 0;
+    }
+   
+    if (!IsWindowVisible(hwnd)) 
+    {
+        dprintf(("SetFocus, %x not allowed on invisible window", hwnd));
+        SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
 
