@@ -1,4 +1,9 @@
-/* $Id: changelog,v 1.2034 2002-03-28 16:54:26 sandervl Exp $ */
+/* $Id: changelog,v 1.2035 2002-03-31 19:23:00 bird Exp $ */
+
+ 2002-03-31: knut st. osmundsen <bird@anduin.net>
+    - Include:  o Removed blank lines from odinbuild.h and wrapped
+                  the prototype in ifdefs so WIN32API doesn't need
+                  to be defined to include the file.
 
  2002-03-28: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Customization changes
@@ -28,7 +33,7 @@
  2002-03-20: Platon Fomichev <platon@innotek.de>
     - USER32:   o Fixes and changes for minimizing windows (minimized window
                   list; restore; icon paint)
- 
+
  2002-03-20: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o BeginPaint change; use entire window if window is minimized
 
