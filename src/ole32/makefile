@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.20 2000-02-10 00:40:06 bird Exp $
+# $Id: makefile,v 1.21 2000-02-10 00:54:51 bird Exp $
 
 #
 # PD-Win32 API
@@ -83,7 +83,7 @@ resource.asm: $(ORGTARGET).rc
 
 
 regsvr32.obj:   regsvr32.cpp
-    $(CC) -C $(CXXFLAGS) -Ge+ -Tm+ $**
+    $(CC) -C $(CXXFLAGS) -Ge+ -Tm+ regsvr32.cpp
 
 regsvr32.exe:   regsvr32.obj regsvr32.def \
                 $(PDWIN32_LIB)/user32.lib \
