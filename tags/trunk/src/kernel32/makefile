@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.28 1999-08-24 14:36:05 phaller Exp $
+# $Id: makefile,v 1.29 1999-08-24 18:46:39 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -26,13 +26,13 @@ OBJS = KERNEL32.OBJ KOBJECTS.OBJ CONSOLE.OBJ CONIN.OBJ CONBUFFER.OBJ \
  MISC.OBJ EXCEPTUTIL.OBJ LANG.OBJ ICCIO.OBJ MAP.OBJ \
  WIN32UTIL.OBJ heap.OBJ heapstring.obj os2heap.OBJ \
  vmutex.OBJ initterm.OBJ os2util.OBJ handlemanager.OBJ \
- hmdevice.obj hmopen32.obj hmobjects.obj hmevent.obj hmfilemapping.obj \
+ hmdevice.obj hmopen32.obj hmobjects.obj hmevent.obj \
  hmmutex.obj hmsemaphore.obj wprocess.OBJ conprop.OBJ \
  winimage.OBJ windll.OBJ winexe.OBJ time.obj mmap.obj \
  pefile.OBJ winimgres.OBJ wintls.obj async.OBJ fileio.obj \
- atom.obj disk.obj directory.obj cvtbitmap.obj \
+ atom.obj disk.obj directory.obj cvtbitmap.obj hmmmap.obj \
  cvtmenu.obj cvtaccel.obj cvticon.obj cvticongrp.obj \
- cvtcursor.obj cvtcursorgrp.obj stubs.obj
+ cvtcursor.obj cvtcursorgrp.obj stubs.obj 
 
 
 TARGET = kernel32
@@ -250,6 +250,11 @@ os2util.OBJ: .\os2util.cpp
 
 handlemanager.OBJ: \
         .\handlemanager.cpp \
+        .\hmevent.h \
+        .\hmmutex.h \
+        .\hmopen32.h \
+        .\hmsemaphore.h \
+        .\hmmmap.h \
         $(PDWIN32_INCLUDE)\handlemanager.h
 
 hmdevice.OBJ: \
@@ -285,10 +290,7 @@ hmsemaphore.obj: \
         .\hmdevice.h \
         .\hmopen32.h
 
-hmfilemapping.obj: \
-        .\hmfilemapping.cpp \
-        .\hmfilemapping.h \
-        .\hmdevice.h
+hmmmap.obj: hmmmap.cpp hmdevice.h hmopen32.h mmap.h
 
 conprop.OBJ: \
         .\conprop.h \
@@ -300,7 +302,7 @@ async.OBJ: \
         $(PDWIN32_INCLUDE)\misc.h \
         $(PDWIN32_INCLUDE)\unicode.h
 
-virtual.obj:   virtual.cpp $(PDWIN32_INCLUDE)\win\virtual.h mmap.h
+virtual.obj:   virtual.cpp $(PDWIN32_INCLUDE)\win\virtual.h $(PDWIN32_INCLUDE)\handlemanager.h
 mmap.obj:      mmap.cpp mmap.h $(PDWIN32_INCLUDE)\vmutex.h
 
 pefile.OBJ:    pefile.cpp $(PDWIN32_INCLUDE)\pefile.h

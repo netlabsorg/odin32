@@ -1,4 +1,4 @@
-/* $Id: mmap.cpp,v 1.7 1999-08-24 12:23:54 sandervl Exp $ */
+/* $Id: mmap.cpp,v 1.8 1999-08-24 18:46:40 sandervl Exp $ */
 
 /*
  * Win32 Memory mapped file class
@@ -35,7 +35,7 @@ VMutex globalmapMutex;
 //TODO: sharing between processes
 //******************************************************************************
 Win32MemMap::Win32MemMap(HFILE hfile, ULONG size, ULONG fdwProtect, LPSTR lpszName)
-               : fMapped(FALSE), pMapping(NULL), mMapAccess(0)
+               : fMapped(FALSE), pMapping(NULL), mMapAccess(0), referenced(0)
 {
   globalmapMutex.enter();
   memmaps = this;
@@ -55,7 +55,7 @@ Win32MemMap::Win32MemMap(HFILE hfile, ULONG size, ULONG fdwProtect, LPSTR lpszNa
 }
 //******************************************************************************
 //******************************************************************************
-HANDLE Win32MemMap::Init()
+BOOL Win32MemMap::Init(HANDLE hMemMap)
 {
   mapMutex.enter();
   if(hMemFile != -1) 
@@ -67,23 +67,18 @@ HANDLE Win32MemMap::Init()
 		goto fail;
      	}
   }
-  if(HMHandleAllocate(&hMemMap, (ULONG)this) != 0)
-  {
-	dprintf(("Win32MemMap::Init HMHandleAllocate failed!!"));
-	DebugInt3();
-	goto fail;
-  }
+  this->hMemMap = hMemMap;
   mapMutex.leave();
-  return hMemMap;
+  return TRUE;
 fail:
   mapMutex.leave();
-  return 0;
+  return FALSE;
 }
 //******************************************************************************
 //******************************************************************************
 Win32MemMap::~Win32MemMap()
 {
-  unmapFileView();
+  unmapViewOfFile();
   if(lpszMapName) {
 	free(lpszMapName);
   }
@@ -119,7 +114,7 @@ Win32MemMap::~Win32MemMap()
 }
 //******************************************************************************
 //******************************************************************************
-BOOL Win32MemMap::unmapFileView()
+BOOL Win32MemMap::unmapViewOfFile()
 {
   if(fMapped == FALSE)
 	return FALSE;
@@ -136,19 +131,18 @@ BOOL Win32MemMap::unmapFileView()
 }
 //******************************************************************************
 //******************************************************************************
-LPVOID Win32MemMap::mapFileView(ULONG size, ULONG offset, ULONG fdwAccess)
+LPVOID Win32MemMap::mapViewOfFile(ULONG size, ULONG offset, ULONG fdwAccess)
 {
   mapMutex.enter();
   ULONG memFlags = (mProtFlags & (PAGE_READONLY | PAGE_READWRITE | PAGE_WRITECOPY));
   ULONG fAlloc   = 0;
+  LPVOID mapview;
 
-  if(fdwAccess & FILE_MAP_WRITE && mProtFlags & (PAGE_READONLY|PAGE_WRITECOPY)) 
+  if(fdwAccess & (FILE_MAP_WRITE|FILE_MAP_ALL_ACCESS) && !(mProtFlags & PAGE_READWRITE)) 
 	goto parmfail;
-  if(fdwAccess & FILE_MAP_READ && mProtFlags & PAGE_WRITECOPY) 
+  if(fdwAccess & FILE_MAP_READ && !(mProtFlags & (PAGE_READWRITE|PAGE_READONLY))) 
 	goto parmfail;
-  if(fdwAccess & FILE_MAP_ALL_ACCESS && mProtFlags & (PAGE_READONLY|PAGE_WRITECOPY)) 
-	goto parmfail;
-  if(fdwAccess & FILE_MAP_COPY && mProtFlags & PAGE_WRITECOPY) 
+  if(fdwAccess & FILE_MAP_COPY && !(mProtFlags & PAGE_WRITECOPY)) 
 	goto parmfail;
   
   if(mProtFlags & SEC_COMMIT)
@@ -156,13 +150,17 @@ LPVOID Win32MemMap::mapFileView(ULONG size, ULONG offset, ULONG fdwAccess)
   if(mProtFlags & SEC_RESERVE)
  	fAlloc |= MEM_RESERVE;
 
-  pMapping = VirtualAlloc(0, mSize, fAlloc, memFlags);
-  if(pMapping == NULL) {
-	dprintf(("Win32MemMap::mapFileView: VirtualAlloc %x %x %x failed!", mSize, fAlloc, memFlags));
-	goto fail;
+  if(fMapped == FALSE) {//if not mapped, reserve/commit entire view
+  	pMapping = VirtualAlloc(0, mSize, fAlloc, mProtFlags);
+  	if(pMapping == NULL) {
+		dprintf(("Win32MemMap::mapFileView: VirtualAlloc %x %x %x failed!", mSize, fAlloc, memFlags));
+		goto fail;
+  	}
+	fMapped = TRUE;
   }
+  mapview = (LPVOID)((ULONG)pMapping + offset);
   mapMutex.leave();
-  return pMapping;
+  return mapview;
 
 parmfail:
   dprintf(("Win32MemMap::mapFileView: ERROR_INVALID_PARAMETER"));

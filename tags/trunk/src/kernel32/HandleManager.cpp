@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.12 1999-08-24 14:36:04 phaller Exp $ */
+/* $Id: HandleManager.cpp,v 1.13 1999-08-24 18:46:38 sandervl Exp $ */
 
 /*
  *
@@ -55,8 +55,7 @@
 #include "HMEvent.h"
 #include "HMMutex.h"
 #include "HMSemaphore.h"
-#include "HMFileMapping.h"
-
+#include "HMMMap.h"
 
 /*****************************************************************************
  * Defines                                                                   *
@@ -121,7 +120,7 @@ struct _HMGlobals
   HMDeviceHandler        *pHMEvent;        /* static instances of subsystems */
   HMDeviceHandler        *pHMMutex;
   HMDeviceHandler        *pHMSemaphore;
-  HMDeviceHandler        *pHMFileMapping;
+  HMDeviceHandler        *pHMFileMapping;        /* static instances of subsystems */
 
   ULONG         ulHandleLast;                   /* index of last used handle */
 } HMGlobals;
@@ -196,8 +195,11 @@ static ULONG _HMHandleGetFree(void)
        ulLoop++)
   {
                                                        /* free handle found ? */
-    if (INVALID_HANDLE_VALUE == TabWin32Handles[ulLoop].hmHandleData.hHMHandle)
-      return (ulLoop);                    /* OK, then return it to the caller */
+    if (INVALID_HANDLE_VALUE == TabWin32Handles[ulLoop].hmHandleData.hHMHandle) {
+	TabWin32Handles[ulLoop].hmHandleData.dwUserData     = 0;
+	TabWin32Handles[ulLoop].hmHandleData.dwInternalType = HMTYPE_UNKNOWN;
+      	return (ulLoop);                    /* OK, then return it to the caller */
+    }
   }
 
   return (INVALID_HANDLE_VALUE);             /* haven't found any free handle */
@@ -312,11 +314,11 @@ DWORD HMInitialize(void)
     HMSetStdHandle(STD_ERROR_HANDLE,  GetStdHandle(STD_ERROR_HANDLE));
 
                         /* create handle manager instance for Open32 handles */
-    HMGlobals.pHMOpen32       = new HMDeviceOpen32Class("\\\\.\\");
-    HMGlobals.pHMEvent        = new HMDeviceEventClass("\\\\EVENT\\");
-    HMGlobals.pHMMutex        = new HMDeviceMutexClass("\\\\MUTEX\\");
-    HMGlobals.pHMSemaphore    = new HMDeviceSemaphoreClass("\\\\SEM\\");
-    HMGlobals.pHMFileMapping  = new HMDeviceFileMappingClass("\\\\FILEMAPPING\\");
+    HMGlobals.pHMOpen32     = new HMDeviceOpen32Class("\\\\.\\");
+    HMGlobals.pHMEvent      = new HMDeviceEventClass("\\\\EVENT\\");
+    HMGlobals.pHMMutex      = new HMDeviceMutexClass("\\\\MUTEX\\");
+    HMGlobals.pHMSemaphore  = new HMDeviceSemaphoreClass("\\\\SEM\\");
+    HMGlobals.pHMFileMapping = new HMDeviceMemMapClass("\\\\MEMMAP\\");
   }
   return (NO_ERROR);
 }
@@ -2150,98 +2152,6 @@ BOOL HMReleaseSemaphore(HANDLE hEvent,
 
 
 /*****************************************************************************
- * Name      : HMWaitForMultipleObjects
- * Purpose   : router function for WaitForMultipleObjects
- * Parameters:
- * Variables :
- * Result    :
- * Remark    :
- * Status    :
- *
- * Author    : Patrick Haller [Wed, 1999/06/17 20:44]
- *****************************************************************************/
-
-DWORD HMWaitForMultipleObjects (DWORD   cObjects,
-                                PHANDLE lphObjects,
-                                BOOL    fWaitAll,
-                                DWORD   dwTimeout)
-{
-  ULONG   ulIndex;
-  PHANDLE pArrayOfHandles;
-  PHANDLE pLoop1 = lphObjects;
-  PHANDLE pLoop2;
-  DWORD   rc;
-
-  // allocate array for handle table
-  pArrayOfHandles = (PHANDLE)malloc(cObjects * sizeof(HANDLE));
-  if (pArrayOfHandles == NULL)
-  {
-    O32_SetLastError(ERROR_NOT_ENOUGH_MEMORY);
-    return WAIT_FAILED;
-  }
-  else
-    pLoop2 = pArrayOfHandles;
-
-  // convert array to odin handles
-  for (ulIndex = 0;
-
-       ulIndex < cObjects;
-
-       ulIndex++,
-       pLoop1++,
-       pLoop2++)
-  {
-    rc = HMHandleTranslateToOS2 (*pLoop1, // translate handle
-                                 pLoop2);
-
-    if (rc != NO_ERROR)
-    {
-      free (pArrayOfHandles);             // free memory
-      O32_SetLastError(ERROR_INVALID_HANDLE);
-      return (WAIT_FAILED);
-    }
-  }
-
-  // OK, now forward to Open32.
-  // @@@PH: Note this will fail on handles that do NOT belong to Open32
-  //        but to i.e. the console subsystem!
-  rc = O32_WaitForMultipleObjects(cObjects,
-                                  pArrayOfHandles,
-                                  fWaitAll,
-                                  dwTimeout);
-
-  free(pArrayOfHandles);                  // free memory
-  return (rc);                            // OK, done
-}
-
-
-/*****************************************************************************
- * Name      : HMWaitForMultipleObjectsEx
- * Purpose   : router function for WaitForMultipleObjectsEx
- * Parameters:
- * Variables :
- * Result    :
- * Remark    :
- * Status    :
- *
- * Author    : Patrick Haller [Wed, 1999/06/17 20:44]
- *****************************************************************************/
-
-DWORD HMWaitForMultipleObjectsEx (DWORD   cObjects,
-                                  PHANDLE lphObjects,
-                                  BOOL    fWaitAll,
-                                  DWORD   dwTimeout,
-                                  BOOL    fAlertable)
-{
-  // @@@PH: Note: fAlertable is ignored !
-  return (HMWaitForMultipleObjects(cObjects,
-                                   lphObjects,
-                                   fWaitAll,
-                                   dwTimeout));
-}
-
-
-/*****************************************************************************
  * Name      : HANDLE  HMCreateFileMapping
  * Purpose   : Wrapper for the CreateFileMapping() API
  * Parameters:
@@ -2349,8 +2259,7 @@ HANDLE HMOpenFileMapping(DWORD   fdwAccess,
     return (INVALID_HANDLE_VALUE);                           /* signal error */
   }
 
-
-                           /* initialize the complete HMHANDLEDATA structure */
+  /* initialize the complete HMHANDLEDATA structure */
   pHMHandleData = &TabWin32Handles[iIndexNew].hmHandleData;
   pHMHandleData->dwType     = FILE_TYPE_UNKNOWN;      /* unknown handle type */
   pHMHandleData->dwAccess   = fdwAccess;
@@ -2360,15 +2269,16 @@ HANDLE HMOpenFileMapping(DWORD   fdwAccess,
   pHMHandleData->lpHandlerData = NULL;
 
 
-      /* we've got to mark the handle as occupied here, since another device */
-                   /* could be created within the device handler -> deadlock */
+  /* we've got to mark the handle as occupied here, since another device */
+  /* could be created within the device handler -> deadlock */
 
-          /* write appropriate entry into the handle table if open succeeded */
+  /* write appropriate entry into the handle table if open succeeded */
   TabWin32Handles[iIndexNew].hmHandleData.hHMHandle = iIndexNew;
   TabWin32Handles[iIndexNew].pDeviceHandler         = pDeviceHandler;
 
                                                   /* call the device handler */
   rc = pDeviceHandler->OpenFileMapping(&TabWin32Handles[iIndexNew].hmHandleData,
+				       fdwAccess,
                                        fInherit,
                                        lpName);
   if (rc != NO_ERROR)     /* oops, creation failed within the device handler */
@@ -2380,48 +2290,6 @@ HANDLE HMOpenFileMapping(DWORD   fdwAccess,
 
   return iIndexNew;                                   /* return valid handle */
 }
-
-
-/*****************************************************************************
- * Name      : HMMapViewOfFile
- * Purpose   : router function for MapViewOfFile
- * Parameters:
- * Variables :
- * Result    :
- * Remark    :
- * Status    :
- *
- * Author    : Patrick Haller [Wed, 1999/06/17 20:44]
- *****************************************************************************/
-
-LPVOID HMMapViewOfFile(HANDLE hFileMappingObject,
-                       DWORD  dwDesiredAccess,
-                       DWORD  dwFileOffsetHigh,
-                       DWORD  dwFileOffsetLow,
-                       DWORD  dwNumberOfBytesToMap)
-{
-  int       iIndex;                           /* index into the handle table */
-  LPVOID    lpResult;                /* result from the device handler's API */
-  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
-
-                                                          /* validate handle */
-  iIndex = _HMHandleQuery(hFileMappingObject);              /* get the index */
-  if (-1 == iIndex)                                               /* error ? */
-  {
-    SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
-    return (NULL);                                         /* signal failure */
-  }
-
-  pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
-  lpResult = pHMHandle->pDeviceHandler->MapViewOfFile(&pHMHandle->hmHandleData,
-                                                      dwDesiredAccess,
-                                                      dwFileOffsetHigh,
-                                                      dwFileOffsetLow,
-                                                      dwNumberOfBytesToMap);
-
-  return (lpResult);                                  /* deliver return code */
-}
-
 
 
 /*****************************************************************************
@@ -2457,88 +2325,103 @@ LPVOID HMMapViewOfFileEx(HANDLE hFileMappingObject,
 
   pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
   lpResult = pHMHandle->pDeviceHandler->MapViewOfFileEx(&pHMHandle->hmHandleData,
-                                                        dwDesiredAccess,
-                                                        dwFileOffsetHigh,
-                                                        dwFileOffsetLow,
-                                                        dwNumberOfBytesToMap,
-                                                        lpBaseAddress);
+                                                      dwDesiredAccess,
+                                                      dwFileOffsetHigh,
+                                                      dwFileOffsetLow,
+                                                      dwNumberOfBytesToMap,
+                                                      lpBaseAddress);
 
   return (lpResult);                                  /* deliver return code */
 }
 
-
 /*****************************************************************************
- * Name      : HMUnmapViewOfFile
- * Purpose   : router function for UnmapViewOfFile
+ * Name      : HMWaitForMultipleObjects
+ * Purpose   : router function for WaitForMultipleObjects
  * Parameters:
  * Variables :
  * Result    :
- * Remark    : No handle is specified, that makes things a bit more difficult!
- *             We've got to identify the object by the base address and check
- *             back with HandleManager manually!
+ * Remark    :
  * Status    :
  *
  * Author    : Patrick Haller [Wed, 1999/06/17 20:44]
  *****************************************************************************/
 
-BOOL HMUnmapViewOfFile(LPVOID lpBaseAddress)
+DWORD HMWaitForMultipleObjects (DWORD   cObjects,
+                                PHANDLE lphObjects,
+                                BOOL    fWaitAll,
+                                DWORD   dwTimeout)
 {
-  int       iIndex;                           /* index into the handle table */
-  BOOL      flResult;                /* result from the device handler's API */
-  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+  ULONG   ulIndex;
+  PHANDLE pArrayOfHandles;
+  PHANDLE pLoop1 = lphObjects;
+  PHANDLE pLoop2;
+  DWORD   rc;
 
-  // Identify the correct handle by the base address. Thus call a special
-  // static function within the FileMapping class.
-  iIndex = HMDeviceFileMappingClass::findByBaseAddress(lpBaseAddress);                                                          /* validate handle */
-  if (-1 == iIndex)                                               /* error ? */
+  // allocate array for handle table
+  pArrayOfHandles = (PHANDLE)malloc(cObjects * sizeof(HANDLE));
+  if (pArrayOfHandles == NULL)
   {
-    SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
-    return (FALSE);                                        /* signal failure */
+    O32_SetLastError(ERROR_NOT_ENOUGH_MEMORY);
+    return WAIT_FAILED;
+  }
+  else
+    pLoop2 = pArrayOfHandles;
+
+  // convert array to odin handles
+  for (ulIndex = 0;
+
+       ulIndex < cObjects;
+
+       ulIndex++,
+       pLoop1++,
+       pLoop2++)
+  {
+    rc = HMHandleTranslateToOS2 (*pLoop1, // translate handle
+                                 pLoop2);
+
+    if (rc != NO_ERROR)
+    {
+      free (pArrayOfHandles);             // free memory
+      O32_SetLastError(ERROR_INVALID_HANDLE);
+      return (WAIT_FAILED);
+    }
   }
 
-  flResult = pHMHandle->pDeviceHandler->UnmapViewOfFile(&pHMHandle->hmHandleData,
-                                                        lpBaseAddress);
+  // OK, now forward to Open32.
+  // @@@PH: Note this will fail on handles that do NOT belong to Open32
+  //        but to i.e. the console subsystem!
+  rc = O32_WaitForMultipleObjects(cObjects,
+                                  pArrayOfHandles,
+                                  fWaitAll,
+                                  dwTimeout);
 
-  // @@@PH automatically call CloseHandle of no more references to the object
-  //       are active.
-
-  return (flResult);                                  /* deliver return code */
+  free(pArrayOfHandles);                  // free memory
+  return (rc);                            // OK, done
 }
 
 
 /*****************************************************************************
- * Name      : HMFlushViewOfFile
- * Purpose   : router function for FlushViewOfFile
+ * Name      : HMWaitForMultipleObjectsEx
+ * Purpose   : router function for WaitForMultipleObjectsEx
  * Parameters:
  * Variables :
  * Result    :
- * Remark    : No handle is specified, that makes things a bit more difficult!
- *             We've got to identify the object by the base address and check
- *             back with HandleManager manually!
+ * Remark    :
  * Status    :
  *
  * Author    : Patrick Haller [Wed, 1999/06/17 20:44]
  *****************************************************************************/
 
-BOOL HMFlushViewOfFile(LPVOID lpBaseAddress,
-                       DWORD  dwNumberOfBytesToFlush)
+DWORD HMWaitForMultipleObjectsEx (DWORD   cObjects,
+                                  PHANDLE lphObjects,
+                                  BOOL    fWaitAll,
+                                  DWORD   dwTimeout,
+                                  BOOL    fAlertable)
 {
-  int       iIndex;                           /* index into the handle table */
-  BOOL      flResult;                /* result from the device handler's API */
-  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
-
-  // Identify the correct handle by the base address. Thus call a special
-  // static function within the FileMapping class.
-  iIndex = HMDeviceFileMappingClass::findByBaseAddress(lpBaseAddress);                                                          /* validate handle */
-  if (-1 == iIndex)                                               /* error ? */
-  {
-    SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
-    return (FALSE);                                        /* signal failure */
-  }
-
-  flResult = pHMHandle->pDeviceHandler->FlushViewOfFile(&pHMHandle->hmHandleData,
-                                                        lpBaseAddress,
-                                                        dwNumberOfBytesToFlush);
-
-  return (flResult);                                  /* deliver return code */
+  // @@@PH: Note: fAlertable is ignored !
+  return (HMWaitForMultipleObjects(cObjects,
+                                   lphObjects,
+                                   fWaitAll,
+                                   dwTimeout));
 }
+
