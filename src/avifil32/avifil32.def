@@ -4,6 +4,13 @@ PROTMODE
 DATA MULTIPLE NONSHARED READWRITE LOADONCALL
 CODE LOADONCALL
 
+IMPORTS
+  _ICGetInfo@12              = MSVFW32.ICGetInfo
+  _ICCompress                = MSVFW32.ICCompress
+  _ICDecompress              = MSVFW32.ICDecompress
+  _ICSendMessage@16          = MSVFW32.ICSendMessage
+  _ICOpen@12                 = MSVFW32.ICOpen
+
 EXPORTS
 ; AVIBuildFilter             = _AVIBuildFilter@?               @? ;0 not good
 ; AVIBuildFilterA            = _AVIBuildFilterA@?              @1
@@ -16,7 +23,7 @@ EXPORTS
 ; AVIFileEndRecord           = _AVIFileEndRecord@?             @8
   AVIFileExit                = _AVIFileExit@0                  @9
 ; AVIFileGetStream           = _AVIFileGetStream@?             @10
-  AVIFileInfo                = _AVIFileInfo@12                 @11
+  AVIFileInfo                = _AVIFileInfoA@12                @11
   AVIFileInfoA               = _AVIFileInfoA@12                @12
   AVIFileInfoW               = _AVIFileInfoW@12                @13
   AVIFileInit                = _AVIFileInit@0                  @14
@@ -82,4 +89,3 @@ EXPORTS
 ; IID_IAVIFile               = _IID_IAVIFile@?                 @74
 ; IID_IAVIStream             = _IID_IAVIStream@?               @75
 ; IID_IGetFrame              = _IID_IGetFrame@?                @76
-
