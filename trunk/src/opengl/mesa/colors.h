@@ -1,4 +1,4 @@
-/* $Id: colors.h,v 1.2 2000-03-01 18:49:24 jeroen Exp $ */
+/* $Id: colors.h,v 1.3 2000-03-01 21:55:42 sandervl Exp $ */
 
 /*      File name       :       colors.h
  *  Version             :       2.3
@@ -26,7 +26,10 @@
 
 /*
  * $Log: colors.h,v $
- * Revision 1.2  2000-03-01 18:49:24  jeroen
+ * Revision 1.3  2000-03-01 21:55:42  sandervl
+ * color conversion bugfix for 16 bpp
+ *
+ * Revision 1.2  2000/03/01 18:49:24  jeroen
  * *** empty log message ***
  *
  * Revision 1.1.1.1  1999/08/19 00:55:42  jtg
@@ -44,7 +47,10 @@
 
 /*
  * $Log: colors.h,v $
- * Revision 1.2  2000-03-01 18:49:24  jeroen
+ * Revision 1.3  2000-03-01 21:55:42  sandervl
+ * color conversion bugfix for 16 bpp
+ *
+ * Revision 1.2  2000/03/01 18:49:24  jeroen
  * *** empty log message ***
  *
  * Revision 1.1.1.1  1999/08/19 00:55:42  jtg
@@ -62,7 +68,10 @@
 
 /*
  * $Log: colors.h,v $
- * Revision 1.2  2000-03-01 18:49:24  jeroen
+ * Revision 1.3  2000-03-01 21:55:42  sandervl
+ * color conversion bugfix for 16 bpp
+ *
+ * Revision 1.2  2000/03/01 18:49:24  jeroen
  * *** empty log message ***
  *
  * Revision 1.1.1.1  1999/08/19 00:55:42  jtg
@@ -126,7 +135,11 @@ static char ColorMap16[] = {
 #ifdef DDRAW
 #define BGR16(r,g,b)    ((WORD)(((BYTE)(ColorMap16[b]) | ((BYTE)(g&0xfc) << 3)) | (((WORD)(BYTE)(ColorMap16[r])) << 11)))
 #else
-#define BGR16(r,g,b)    ((WORD)(((BYTE)(ColorMap16[b]) | ((BYTE)(ColorMap16[g]) << 5)) | (((WORD)(BYTE)(ColorMap16[r])) << 10)))
+#ifdef __WIN32OS2__
+#define BGR16(r,g,b)	((WORD)(((BYTE)(ColorMap16[b]) | ((BYTE)(ColorMap16[g]*2) << 5)) | (((WORD)(BYTE)(ColorMap16[r])) << 11)))
+#else
+#define BGR16(r,g,b)	((WORD)(((BYTE)(ColorMap16[b]) | ((BYTE)(ColorMap16[g]) << 5)) | (((WORD)(BYTE)(ColorMap16[r])) << 10)))
+#endif
 #endif
 /* JvdH -- FIX! In BGR24 don't shift another 8 bits (was <<8) */
 #define BGR24(r,g,b)    (unsigned long)(((DWORD)(((BYTE)(b)|((WORD)((BYTE)(g))<<8))|(((DWORD)(BYTE)(r))<<16))))
