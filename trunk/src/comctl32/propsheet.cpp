@@ -1,4 +1,4 @@
-/* $Id: propsheet.cpp,v 1.8 2000-08-17 17:08:15 cbratschi Exp $ */
+/* $Id: propsheet.cpp,v 1.9 2001-04-03 18:54:35 sandervl Exp $ */
 /*
  * Property Sheets
  *
@@ -25,7 +25,7 @@
 #include "dialog.h"
 #include "winnls.h"
 #include "comctl32.h"
-#include "heap.h"
+#include "heapstring.h"
 
 /******************************************************************************
  * Data structures
