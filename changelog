@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.2519 2003-03-06 18:19:11 sandervl Exp $ */
+/* $Id: changelog,v 1.2520 2003-03-17 17:58:30 sandervl Exp $ */
+
+ 2003-03-12: Platon Fomichev <stauff@innotek   >
+    - USER32:   o GetKeyState and GetAsyncKeyState fixes for numpad keyboard
+                  (Java2 defect 284)
 
  2003-03-06: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o Don't change the stack alignment if the thread has less than
