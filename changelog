@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.1680 2001-09-15 09:56:25 sandervl Exp $ */
+/* $Id: changelog,v 1.1681 2001-09-15 09:57:51 sandervl Exp $ */
 
  2001-09-15: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Some focus/activation changes
@@ -8,6 +8,8 @@
     - COMCTL32: o Wine updates for toolbar, pager & rebar controls
                 o Treeview bugfix when deleting the selected item
                   (fixes crash in UltraEdit when opening files)
+    - *         o Put back original sources. Extremely annoying to
+                  add tags and change tabs in files (thanks knut).
 
  2001-09-11: knut st. osmundsen <kosmunds@csc.com>
     - kKrnlLib: o FYI: Win32k revamp/split-up. Not yet completed.
