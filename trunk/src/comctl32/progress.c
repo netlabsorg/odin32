@@ -1,4 +1,4 @@
-/*		
+/*
  * Progress control
  *
  * Copyright 1997, 2002 Dimitrie O. Paun
@@ -17,6 +17,19 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * NOTE
+ * 
+ * This code was audited for completeness against the documented features
+ * of Comctl32.dll version 6.0 on Sep. 9, 2002, by Dimitrie O. Paun.
+ * 
+ * Unless otherwise noted, we belive this code to be complete, as per
+ * the specification mentioned above.
+ * If you discover missing features, or bugs, please note them below.
+ * 
+ * TODO
+ *   --support PBS_MARQUE
+ *
  */
 
 #include <string.h>
@@ -42,37 +55,46 @@ typedef struct
 
 #define LED_GAP    2
 
-#define UNKNOWN_PARAM(msg, wParam, lParam) WARN(       \
-   "Unknown parameter(s) for message " #msg            \
-   "(%04x): wp=%04x lp=%08lx\n", msg, wParam, lParam); 
-
 /***********************************************************************
- * PROGRESS_EraseBackground
+ * PROGRESS_Invalidate
+ *
+ * Invalide the range between old and new pos.
  */
-static void PROGRESS_EraseBackground(PROGRESS_INFO *infoPtr, WPARAM wParam)
+static void PROGRESS_Invalidate( PROGRESS_INFO *infoPtr, INT old, INT new )
 {
+    LONG style = GetWindowLongW (infoPtr->Self, GWL_STYLE);
     RECT rect;
-    HBRUSH hbrBk;
-    HDC hdc = wParam ? (HDC)wParam : GetDC(infoPtr->Self);
+    int oldPos, newPos, ledWidth;
 
-    /* get the required background brush */
-    if(infoPtr->ColorBk == CLR_DEFAULT)
-	hbrBk = GetSysColorBrush(COLOR_3DFACE);
+    GetClientRect (infoPtr->Self, &rect);
+    InflateRect(&rect, -1, -1);
+
+    if (style & PBS_VERTICAL)
+    {
+        oldPos = rect.bottom - MulDiv (old - infoPtr->MinVal, rect.bottom - rect.top,
+                                       infoPtr->MaxVal - infoPtr->MinVal);
+        newPos = rect.bottom - MulDiv (new - infoPtr->MinVal, rect.bottom - rect.top,
+                                       infoPtr->MaxVal - infoPtr->MinVal);
+        ledWidth = MulDiv (rect.right - rect.left, 2, 3);
+        rect.top = min( oldPos, newPos );
+        rect.bottom = max( oldPos, newPos );
+        if (!(style & PBS_SMOOTH)) rect.top -= ledWidth;
+        InvalidateRect( infoPtr->Self, &rect, oldPos < newPos );
+    }
     else
-	hbrBk = CreateSolidBrush(infoPtr->ColorBk);
-
-    /* get client rectangle */
-    GetClientRect(infoPtr->Self, &rect);
-
-    /* draw the background */
-    FillRect(hdc, &rect, hbrBk);
-
-    /* delete background brush */
-    if(infoPtr->ColorBk != CLR_DEFAULT)
-	DeleteObject (hbrBk);
-
-    if(!wParam) ReleaseDC(infoPtr->Self, hdc);
+    {
+        oldPos = rect.left + MulDiv (old - infoPtr->MinVal, rect.right - rect.left,
+                                     infoPtr->MaxVal - infoPtr->MinVal);
+        newPos = rect.left + MulDiv (new - infoPtr->MinVal, rect.right - rect.left,
+                                     infoPtr->MaxVal - infoPtr->MinVal);
+        ledWidth = MulDiv (rect.bottom - rect.top, 2, 3);
+        rect.left = min( oldPos, newPos );
+        rect.right = max( oldPos, newPos );
+        if (!(style & PBS_SMOOTH)) rect.right += ledWidth;
+        InvalidateRect( infoPtr->Self, &rect, oldPos > newPos );
+    }
 }
+
 
 /***********************************************************************
  * PROGRESS_Draw
@@ -80,12 +102,12 @@ static void PROGRESS_EraseBackground(PROGRESS_INFO *infoPtr, WPARAM wParam)
  */
 static LRESULT PROGRESS_Draw (PROGRESS_INFO *infoPtr, HDC hdc)
 {
-    HBRUSH hbrBar;
+    HBRUSH hbrBar, hbrBk;
     int rightBar, rightMost, ledWidth;
     RECT rect;
     DWORD dwStyle;
 
-    TRACE("(infoPtr=%p, hdc=%x)\n", infoPtr, hdc);
+    TRACE("(infoPtr=%p, hdc=%p)\n", infoPtr, hdc);
 
     /* get the required bar brush */
     if (infoPtr->ColorBar == CLR_DEFAULT)
@@ -93,9 +115,14 @@ static LRESULT PROGRESS_Draw (PROGRESS_INFO *infoPtr, HDC hdc)
     else
         hbrBar = CreateSolidBrush (infoPtr->ColorBar);
 
+    if (infoPtr->ColorBk == CLR_DEFAULT)
+        hbrBk = GetSysColorBrush(COLOR_3DFACE);
+    else
+        hbrBk = CreateSolidBrush(infoPtr->ColorBk);
+
     /* get client rectangle */
     GetClientRect (infoPtr->Self, &rect);
-
+    FrameRect( hdc, &rect, hbrBk );
     InflateRect(&rect, -1, -1);
 
     /* get the window style */
@@ -103,14 +130,14 @@ static LRESULT PROGRESS_Draw (PROGRESS_INFO *infoPtr, HDC hdc)
 
     /* compute extent of progress bar */
     if (dwStyle & PBS_VERTICAL) {
-        rightBar  = rect.bottom - 
+        rightBar  = rect.bottom -
                     MulDiv (infoPtr->CurVal - infoPtr->MinVal,
 	                    rect.bottom - rect.top,
 	                    infoPtr->MaxVal - infoPtr->MinVal);
         ledWidth  = MulDiv (rect.right - rect.left, 2, 3);
         rightMost = rect.top;
     } else {
-        rightBar = rect.left + 
+        rightBar = rect.left +
                    MulDiv (infoPtr->CurVal - infoPtr->MinVal,
 	                   rect.right - rect.left,
 	                   infoPtr->MaxVal - infoPtr->MinVal);
@@ -119,35 +146,61 @@ static LRESULT PROGRESS_Draw (PROGRESS_INFO *infoPtr, HDC hdc)
     }
 
     /* now draw the bar */
-    if (dwStyle & PBS_SMOOTH) {
-        if (dwStyle & PBS_VERTICAL) 
-	    rect.top = rightBar;
-        else 
-	    rect.right = rightBar;
-        FillRect(hdc, &rect, hbrBar);
+    if (dwStyle & PBS_SMOOTH)
+    {
+        if (dwStyle & PBS_VERTICAL)
+        {
+            INT old_top = rect.top;
+            rect.top = rightBar;
+            FillRect(hdc, &rect, hbrBar);
+            rect.bottom = rect.top;
+            rect.top = old_top;
+            FillRect(hdc, &rect, hbrBk);
+        }
+        else
+        {
+            INT old_right = rect.right;
+            rect.right = rightBar;
+            FillRect(hdc, &rect, hbrBar);
+            rect.left = rect.right;
+            rect.right = old_right;
+            FillRect(hdc, &rect, hbrBk);
+        }
     } else {
         if (dwStyle & PBS_VERTICAL) {
-            while(rect.bottom > rightBar) { 
+            while(rect.bottom > rightBar) {
                 rect.top = rect.bottom - ledWidth;
                 if (rect.top < rightMost)
                     rect.top = rightMost;
                 FillRect(hdc, &rect, hbrBar);
-                rect.bottom = rect.top - LED_GAP;
+                rect.bottom = rect.top;
+                rect.top -= LED_GAP;
+                if (rect.top <= rightBar) break;
+                FillRect(hdc, &rect, hbrBk);
+                rect.bottom = rect.top;
             }
+            rect.top = rightMost;
+            FillRect(hdc, &rect, hbrBk);
         } else {
-            while(rect.left < rightBar) { 
+            while(rect.left < rightBar) {
                 rect.right = rect.left + ledWidth;
                 if (rect.right > rightMost)
                     rect.right = rightMost;
                 FillRect(hdc, &rect, hbrBar);
-                rect.left  = rect.right + LED_GAP;
+                rect.left = rect.right;
+                rect.right += LED_GAP;
+                if (rect.right >= rightBar) break;
+                FillRect(hdc, &rect, hbrBk);
+                rect.left = rect.right;
             }
+            rect.right = rightMost;
+            FillRect(hdc, &rect, hbrBk);
         }
     }
 
     /* delete bar brush */
-    if (infoPtr->ColorBar != CLR_DEFAULT)
-        DeleteObject (hbrBar);
+    if (infoPtr->ColorBar != CLR_DEFAULT) DeleteObject (hbrBar);
+    if (infoPtr->ColorBk != CLR_DEFAULT) DeleteObject (hbrBk);
 
     return 0;
 }
@@ -200,7 +253,7 @@ static DWORD PROGRESS_SetRange (PROGRESS_INFO *infoPtr, int low, int high)
 
     /* if nothing changes, simply return */
     if(infoPtr->MinVal == low && infoPtr->MaxVal == high) return res;
-    
+
     infoPtr->MinVal = low;
     infoPtr->MaxVal = high;
     PROGRESS_CoercePos(infoPtr);
@@ -210,17 +263,17 @@ static DWORD PROGRESS_SetRange (PROGRESS_INFO *infoPtr, int low, int high)
 /***********************************************************************
  *           ProgressWindowProc
  */
-static LRESULT WINAPI ProgressWindowProc(HWND hwnd, UINT message, 
+static LRESULT WINAPI ProgressWindowProc(HWND hwnd, UINT message,
                                   WPARAM wParam, LPARAM lParam)
 {
     PROGRESS_INFO *infoPtr;
 
-    TRACE("hwnd=%x msg=%04x wparam=%x lParam=%lx\n", hwnd, message, wParam, lParam);
+    TRACE("hwnd=%p msg=%04x wparam=%x lParam=%lx\n", hwnd, message, wParam, lParam);
 
     infoPtr = (PROGRESS_INFO *)GetWindowLongW(hwnd, 0);
 
     if (!infoPtr && message != WM_CREATE)
-        return DefWindowProcW( hwnd, message, wParam, lParam ); 
+        return DefWindowProcW( hwnd, message, wParam, lParam );
 
     switch(message) {
     case WM_CREATE:
@@ -228,7 +281,7 @@ static LRESULT WINAPI ProgressWindowProc(HWND hwnd, UINT message,
 	DWORD dwExStyle = GetWindowLongW (hwnd, GWL_EXSTYLE);
 	dwExStyle &= ~(WS_EX_CLIENTEDGE | WS_EX_WINDOWEDGE);
 	dwExStyle |= WS_EX_STATICEDGE;
-        SetWindowLongW (hwnd, GWL_EXSTYLE, dwExStyle | WS_EX_STATICEDGE);
+        SetWindowLongW (hwnd, GWL_EXSTYLE, dwExStyle);
 	/* Force recalculation of a non-client area */
 	SetWindowPos(hwnd, 0, 0, 0, 0, 0,
 	    SWP_FRAMECHANGED | SWP_NOSIZE | SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
@@ -240,48 +293,41 @@ static LRESULT WINAPI ProgressWindowProc(HWND hwnd, UINT message,
 
         /* initialize the info struct */
         infoPtr->Self = hwnd;
-        infoPtr->MinVal = 0; 
+        infoPtr->MinVal = 0;
         infoPtr->MaxVal = 100;
-        infoPtr->CurVal = 0; 
+        infoPtr->CurVal = 0;
         infoPtr->Step = 10;
         infoPtr->ColorBar = CLR_DEFAULT;
         infoPtr->ColorBk = CLR_DEFAULT;
         infoPtr->Font = 0;
-        TRACE("Progress Ctrl creation, hwnd=%04x\n", hwnd);
+        TRACE("Progress Ctrl creation, hwnd=%p\n", hwnd);
         return 0;
     }
-    
+
     case WM_DESTROY:
-        TRACE("Progress Ctrl destruction, hwnd=%04x\n", hwnd);
+        TRACE("Progress Ctrl destruction, hwnd=%p\n", hwnd);
         COMCTL32_Free (infoPtr);
         SetWindowLongW(hwnd, 0, 0);
         return 0;
 
-    case WM_ERASEBKGND:
-	PROGRESS_EraseBackground(infoPtr, wParam);
-        return TRUE;
-	
     case WM_GETFONT:
         return (LRESULT)infoPtr->Font;
 
     case WM_SETFONT:
-        return PROGRESS_SetFont (infoPtr, (HFONT)wParam, (BOOL)lParam);
+        return (LRESULT)PROGRESS_SetFont(infoPtr, (HFONT)wParam, (BOOL)lParam);
 
     case WM_PAINT:
         return PROGRESS_Paint (infoPtr, (HDC)wParam);
-    
+
     case PBM_DELTAPOS:
     {
 	INT oldVal;
-        if(lParam) UNKNOWN_PARAM(PBM_DELTAPOS, wParam, lParam);
         oldVal = infoPtr->CurVal;
         if(wParam != 0) {
-	    BOOL bErase;
 	    infoPtr->CurVal += (INT)wParam;
 	    PROGRESS_CoercePos (infoPtr);
 	    TRACE("PBM_DELTAPOS: current pos changed from %d to %d\n", oldVal, infoPtr->CurVal);
-	    bErase = (oldVal > infoPtr->CurVal);
-	    InvalidateRect(hwnd, NULL, bErase);
+            PROGRESS_Invalidate( infoPtr, oldVal, infoPtr->CurVal );
         }
         return oldVal;
     }
@@ -289,27 +335,22 @@ static LRESULT WINAPI ProgressWindowProc(HWND hwnd, UINT message,
     case PBM_SETPOS:
     {
 	INT oldVal;
-        if (lParam) UNKNOWN_PARAM(PBM_SETPOS, wParam, lParam);
         oldVal = infoPtr->CurVal;
         if(oldVal != wParam) {
-	    BOOL bErase;
 	    infoPtr->CurVal = (INT)wParam;
 	    PROGRESS_CoercePos(infoPtr);
 	    TRACE("PBM_SETPOS: current pos changed from %d to %d\n", oldVal, infoPtr->CurVal);
-	    bErase = (oldVal > infoPtr->CurVal);
-	    InvalidateRect(hwnd, NULL, bErase);
+            PROGRESS_Invalidate( infoPtr, oldVal, infoPtr->CurVal );
         }
         return oldVal;
     }
-      
+
     case PBM_SETRANGE:
-        if (wParam) UNKNOWN_PARAM(PBM_SETRANGE, wParam, lParam);
         return PROGRESS_SetRange (infoPtr, (int)LOWORD(lParam), (int)HIWORD(lParam));
 
     case PBM_SETSTEP:
     {
 	INT oldStep;
-        if (lParam) UNKNOWN_PARAM(PBM_SETSTEP, wParam, lParam);
         oldStep = infoPtr->Step;
         infoPtr->Step = (INT)wParam;
         return oldStep;
@@ -318,24 +359,21 @@ static LRESULT WINAPI ProgressWindowProc(HWND hwnd, UINT message,
     case PBM_STEPIT:
     {
 	INT oldVal;
-        if (wParam || lParam) UNKNOWN_PARAM(PBM_STEPIT, wParam, lParam);
-        oldVal = infoPtr->CurVal;   
+        oldVal = infoPtr->CurVal;
         infoPtr->CurVal += infoPtr->Step;
         if(infoPtr->CurVal > infoPtr->MaxVal)
 	    infoPtr->CurVal = infoPtr->MinVal;
         if(oldVal != infoPtr->CurVal)
 	{
-	    BOOL bErase;
 	    TRACE("PBM_STEPIT: current pos changed from %d to %d\n", oldVal, infoPtr->CurVal);
-	    bErase = (oldVal > infoPtr->CurVal);
-	    InvalidateRect(hwnd, NULL, bErase);
+            PROGRESS_Invalidate( infoPtr, oldVal, infoPtr->CurVal );
 	}
         return oldVal;
     }
 
     case PBM_SETRANGE32:
         return PROGRESS_SetRange (infoPtr, (int)wParam, (int)lParam);
-    
+
     case PBM_GETRANGE:
         if (lParam) {
             ((PPBRANGE)lParam)->iLow = infoPtr->MinVal;
@@ -344,26 +382,23 @@ static LRESULT WINAPI ProgressWindowProc(HWND hwnd, UINT message,
         return wParam ? infoPtr->MinVal : infoPtr->MaxVal;
 
     case PBM_GETPOS:
-        if (wParam || lParam) UNKNOWN_PARAM(PBM_STEPIT, wParam, lParam);
         return infoPtr->CurVal;
 
     case PBM_SETBARCOLOR:
-        if (wParam) UNKNOWN_PARAM(PBM_SETBARCOLOR, wParam, lParam);
         infoPtr->ColorBar = (COLORREF)lParam;
 	InvalidateRect(hwnd, NULL, TRUE);
 	return 0;
 
     case PBM_SETBKCOLOR:
-        if (wParam) UNKNOWN_PARAM(PBM_SETBKCOLOR, wParam, lParam);
         infoPtr->ColorBk = (COLORREF)lParam;
 	InvalidateRect(hwnd, NULL, TRUE);
 	return 0;
 
-    default: 
-        if (message >= WM_USER) 
+    default:
+        if ((message >= WM_USER) && (message < WM_APP))
 	    ERR("unknown msg %04x wp=%04x lp=%08lx\n", message, wParam, lParam );
-        return DefWindowProcW( hwnd, message, wParam, lParam ); 
-    } 
+        return DefWindowProcW( hwnd, message, wParam, lParam );
+    }
 }
 
 
@@ -397,4 +432,3 @@ VOID PROGRESS_Unregister (void)
 {
     UnregisterClassW (PROGRESS_CLASSW, (HINSTANCE)NULL);
 }
-

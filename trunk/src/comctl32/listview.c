@@ -75,7 +75,6 @@ WINE_DEFAULT_DEBUG_CHANNEL(listview);
 #ifdef __WIN32OS2__
 #include <heapstring.h>
 #include "ccbase.h"
-#include "header.h"
 
 typedef struct
 {
@@ -10107,7 +10106,7 @@ static BOOL LISTVIEW_GetSubItemPosition(HWND hwnd, LISTVIEW_INFO *infoPtr,INT nI
 {
   RECT rect;
 
-  if (HEADER_GetItemRect(infoPtr->hwndHeader,(WPARAM)nSubItem,(LPARAM)&rect))
+  if (Header_GetItemRect(infoPtr->hwndHeader,(WPARAM)nSubItem,(LPARAM)&rect))
   {
     lpptPosition->x = rect.left+REPORT_MARGINX;
     lpptPosition->y = ((nItem-LISTVIEW_GetTopIndex(hwnd))*infoPtr->nItemHeight)+infoPtr->rcList.top;
@@ -10147,7 +10146,7 @@ static LRESULT LISTVIEW_GetSubItemRect(HWND hwnd,INT nItem,LPRECT lprc)
   if (!lprc || (uView != LVS_REPORT) || (nItem < 0) || (nItem >= GETITEMCOUNT(infoPtr))) return FALSE;
 
   nSubItem = lprc->top;
-  if ((nSubItem < 0) || (nSubItem >= HEADER_GetItemCount(infoPtr->hwndHeader))) return FALSE;
+  if ((nSubItem < 0) || (nSubItem >= Header_GetItemCount(infoPtr->hwndHeader))) return FALSE;
   if (!LISTVIEW_GetSubItemPosition(hwnd, infoPtr,nItem,nSubItem,&ptItem)) return FALSE;
 
   code = lprc->left;
@@ -10346,7 +10345,7 @@ static BOOL LISTVIEW_InternalHitTestItem(HWND hwnd,LISTVIEW_INFO *infoPtr, UINT 
 
   if (checkSubItems && (uView == LVS_REPORT))
   {
-    INT nColumnCount = HEADER_GetItemCount(infoPtr->hwndHeader);
+    INT nColumnCount = Header_GetItemCount(infoPtr->hwndHeader);
     INT xDiff = -infoPtr->lefttop.x*infoPtr->scrollStep.x;
 
     rcItem.top = infoPtr->rcList.top+(nItem-LISTVIEW_GetTopIndex(hwnd))*infoPtr->nItemHeight;
@@ -10355,7 +10354,7 @@ static BOOL LISTVIEW_InternalHitTestItem(HWND hwnd,LISTVIEW_INFO *infoPtr, UINT 
     {
       RECT rcColumn;
 
-      HEADER_GetItemRect(infoPtr->hwndHeader,(WPARAM)x,(LPARAM)&rcColumn);
+      Header_GetItemRect(infoPtr->hwndHeader,(WPARAM)x,(LPARAM)&rcColumn);
       rcItem.left = xDiff+REPORT_MARGINX+rcColumn.left;
       rcItem.right = xDiff+rcColumn.right-REPORT_MARGINX;
       if (PtInRect(&rcItem,lpHitTestInfo->pt))

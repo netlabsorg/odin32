@@ -45,9 +45,9 @@ typedef struct
   INT    iImage;
   LPARAM lParam;
   RECT   rect;    /* bounding rectangle of the item relative to the
-		   * leftmost item (the leftmost item, 0, would have a 
-		   * "left" member of 0 in this rectangle) 
-                   *  
+		   * leftmost item (the leftmost item, 0, would have a
+		   * "left" member of 0 in this rectangle)
+                   *
                    * additionally the top member hold the row number
                    * and bottom is unused and should be 0 */
 } TAB_ITEM;
@@ -69,7 +69,7 @@ typedef struct
   INT        uFocus;          /* item which has the focus */
   TAB_ITEM*  items;           /* pointer to an array of TAB_ITEM's */
   BOOL       DoRedraw;        /* flag for redrawing when tab contents is changed*/
-  BOOL       needsScrolling;  /* TRUE if the size of the tabs is greater than 
+  BOOL       needsScrolling;  /* TRUE if the size of the tabs is greater than
 			       * the size of the control */
   BOOL	     fSizeSet;	      /* was the size of the tabs explicitly set? */
   BOOL       bUnicode;        /* Unicode control? */
@@ -80,14 +80,14 @@ typedef struct
  * Positioning constants
  */
 #define SELECTED_TAB_OFFSET     2
-#define HORIZONTAL_ITEM_PADDING 5
+#define HORIZONTAL_ITEM_PADDING 6
 #define VERTICAL_ITEM_PADDING   3
 #define ROUND_CORNER_SIZE       2
 #define DISPLAY_AREA_PADDINGX   2
 #define DISPLAY_AREA_PADDINGY   2
 #define CONTROL_BORDER_SIZEX    2
 #define CONTROL_BORDER_SIZEY    2
-#define BUTTON_SPACINGX         4 
+#define BUTTON_SPACINGX         4
 #define BUTTON_SPACINGY         4
 #define FLAT_BTN_SPACINGX       8
 #define DEFAULT_TAB_WIDTH       96
@@ -139,11 +139,49 @@ TAB_RelayEvent (HWND hwndTip, HWND hwndMsg, UINT uMsg,
     SendMessageA (hwndTip, TTM_RELAYEVENT, 0, (LPARAM)&msg);
 }
 
+static void
+TAB_DumpItemExternalA(TCITEMA *pti, UINT iItem)
+{
+    if (TRACE_ON(tab)) {
+	TRACE("external tab %d, mask=0x%08x, dwState=0x%08x, dwStateMask=0x%08x, cchTextMax=0x%08x\n",
+	      iItem, pti->mask, pti->dwState, pti->dwStateMask, pti->cchTextMax);
+	TRACE("external tab %d,   iImage=%d, lParam=0x%08lx, pszTextA=%s\n",
+	      iItem, pti->iImage, pti->lParam, debugstr_a(pti->pszText));
+    }
+}
+
+
+static void
+TAB_DumpItemExternalW(TCITEMW *pti, UINT iItem)
+{
+    if (TRACE_ON(tab)) {
+	TRACE("external tab %d, mask=0x%08x, dwState=0x%08lx, dwStateMask=0x%08lx, cchTextMax=0x%08x\n",
+	      iItem, pti->mask, pti->dwState, pti->dwStateMask, pti->cchTextMax);
+	TRACE("external tab %d,   iImage=%d, lParam=0x%08lx, pszTextW=%s\n",
+	      iItem, pti->iImage, pti->lParam, debugstr_w(pti->pszText));
+    }
+}
+
+static void
+TAB_DumpItemInternal(TAB_INFO *infoPtr, UINT iItem)
+{
+    if (TRACE_ON(tab)) {
+	TAB_ITEM *ti;
+
+	ti = &infoPtr->items[iItem];
+	TRACE("tab %d, mask=0x%08x, dwState=0x%08lx, pszText=%s, iImage=%d\n",
+	      iItem, ti->mask, ti->dwState, debugstr_w(ti->pszText),
+	      ti->iImage);
+	TRACE("tab %d, lParam=0x%08lx, rect.left=%d, rect.top(row)=%d\n",
+	      iItem, ti->lParam, ti->rect.left, ti->rect.top);
+    }
+}
+
 static LRESULT
 TAB_GetCurSel (HWND hwnd)
 {
     TAB_INFO *infoPtr = TAB_GetInfoPtr(hwnd);
- 
+
     return infoPtr->iSelected;
 }
 
@@ -151,7 +189,7 @@ static LRESULT
 TAB_GetCurFocus (HWND hwnd)
 {
     TAB_INFO *infoPtr = TAB_GetInfoPtr(hwnd);
- 
+
     return infoPtr->uFocus;
 }
 
@@ -161,7 +199,7 @@ TAB_GetToolTips (HWND hwnd, WPARAM wParam, LPARAM lParam)
     TAB_INFO *infoPtr = TAB_GetInfoPtr(hwnd);
 
     if (infoPtr == NULL) return 0;
-    return infoPtr->hwndToolTip;
+    return (LRESULT)infoPtr->hwndToolTip;
 }
 
 static LRESULT
@@ -170,7 +208,7 @@ TAB_SetCurSel (HWND hwnd,WPARAM wParam)
     TAB_INFO *infoPtr = TAB_GetInfoPtr(hwnd);
   INT iItem = (INT)wParam;
   INT prevItem;
- 
+
   prevItem = -1;
   if ((iItem >= 0) && (iItem < infoPtr->uNumItem)) {
     prevItem=infoPtr->iSelected;
@@ -186,12 +224,12 @@ TAB_SetCurFocus (HWND hwnd,WPARAM wParam)
 {
   TAB_INFO *infoPtr = TAB_GetInfoPtr(hwnd);
   INT iItem=(INT) wParam;
- 
+
   if ((iItem < 0) || (iItem >= infoPtr->uNumItem)) return 0;
 
   if (GetWindowLongA(hwnd, GWL_STYLE) & TCS_BUTTONS) {
     FIXME("Should set input focus\n");
-  } else { 
+  } else {
     int oldFocus = infoPtr->uFocus;
     if (infoPtr->iSelected != iItem || infoPtr->uFocus == -1 ) {
       infoPtr->uFocus = iItem;
@@ -238,7 +276,7 @@ static BOOL TAB_InternalGetItemRect(
 {
   RECT tmpItemRect,clientRect;
   LONG        lStyle  = GetWindowLongA(hwnd, GWL_STYLE);
-  
+
   /* Perform a sanity check and a trivial visibility check. */
   if ( (infoPtr->uNumItem <= 0) ||
        (itemIndex >= infoPtr->uNumItem) ||
@@ -251,7 +289,7 @@ static BOOL TAB_InternalGetItemRect(
    */
   if (itemRect == NULL)
     itemRect = &tmpItemRect;
-  
+
   /* Retrieve the unmodified item rect. */
   *itemRect = infoPtr->items[itemIndex].rect;
 
@@ -286,18 +324,18 @@ static BOOL TAB_InternalGetItemRect(
   }
   else if(!(lStyle & TCS_VERTICAL) && !(lStyle & TCS_BOTTOM)) /* not TCS_BOTTOM and not TCS_VERTICAL */
   {
-    itemRect->bottom = clientRect.top + 
+    itemRect->bottom = clientRect.top +
                       infoPtr->tabHeight +
                       itemRect->top * (infoPtr->tabHeight - 2) +
                       ((lStyle & TCS_BUTTONS) ? itemRect->top * BUTTON_SPACINGY : 0);
-    itemRect->top = clientRect.top + 
+    itemRect->top = clientRect.top +
                    SELECTED_TAB_OFFSET +
                    itemRect->top * (infoPtr->tabHeight - 2) +
                    ((lStyle & TCS_BUTTONS) ? itemRect->top * BUTTON_SPACINGY : 0);
  }
 
   /*
-   * "scroll" it to make sure the item at the very left of the 
+   * "scroll" it to make sure the item at the very left of the
    * tab control is the leftmost visible tab.
    */
   if(lStyle & TCS_VERTICAL)
@@ -317,7 +355,7 @@ static BOOL TAB_InternalGetItemRect(
   } else
   {
     OffsetRect(itemRect,
-	     -infoPtr->items[infoPtr->leftmostVisible].rect.left, 
+	     -infoPtr->items[infoPtr->leftmostVisible].rect.left,
 	     0);
 
     /*
@@ -328,6 +366,9 @@ static BOOL TAB_InternalGetItemRect(
 	     SELECTED_TAB_OFFSET,
 	     0);
   }
+  TRACE("item %d tab h=%d, rect=(%d,%d)-(%d,%d)\n",
+	itemIndex, infoPtr->tabHeight,
+	itemRect->left, itemRect->top, itemRect->right, itemRect->bottom);
 
   /* Now, calculate the position of the item as if it were selected. */
   if (selectedRect!=NULL)
@@ -342,7 +383,7 @@ static BOOL TAB_InternalGetItemRect(
 
     /* If it also a bit higher. */
     if ((lStyle & TCS_BOTTOM) && !(lStyle & TCS_VERTICAL))
-    {      
+    {
       selectedRect->top -= 2; /* the border is thicker on the bottom */
       selectedRect->bottom += SELECTED_TAB_OFFSET;
     }
@@ -368,7 +409,7 @@ static BOOL TAB_InternalGetItemRect(
 
 static BOOL TAB_GetItemRect(HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
-  return TAB_InternalGetItemRect(hwnd, TAB_GetInfoPtr(hwnd), (INT)wParam, 
+  return TAB_InternalGetItemRect(hwnd, TAB_GetInfoPtr(hwnd), (INT)wParam,
                                  (LPRECT)lParam, (LPRECT)NULL);
 }
 
@@ -378,7 +419,7 @@ static BOOL TAB_GetItemRect(HWND hwnd, WPARAM wParam, LPARAM lParam)
  * This method is called to handle keyboard input
  */
 static LRESULT TAB_KeyUp(
-  HWND   hwnd, 
+  HWND   hwnd,
   WPARAM keyCode)
 {
   TAB_INFO* infoPtr = TAB_GetInfoPtr(hwnd);
@@ -393,7 +434,7 @@ static LRESULT TAB_KeyUp(
       newItem = infoPtr->uFocus + 1;
       break;
   }
-  
+
   /*
    * If we changed to a valid item, change the selection
    */
@@ -422,9 +463,9 @@ static LRESULT TAB_KeyUp(
  * it is used to update the visual state of the control.
  */
 static LRESULT TAB_FocusChanging(
-  HWND   hwnd, 
-  UINT   uMsg, 
-  WPARAM wParam, 
+  HWND   hwnd,
+  UINT   uMsg,
+  WPARAM wParam,
   LPARAM lParam)
 {
   TAB_INFO *infoPtr = TAB_GetInfoPtr(hwnd);
@@ -439,13 +480,16 @@ static LRESULT TAB_FocusChanging(
 				      infoPtr->uFocus,
 				      NULL,
 				      &selectedRect);
-  
+
   /*
    * If the rectangle is not completely invisible, invalidate that
    * portion of the window.
    */
   if (isVisible)
   {
+      TRACE("invalidate (%d,%d)-(%d,%d)\n",
+	    selectedRect.left,selectedRect.top,
+	    selectedRect.right,selectedRect.bottom);
     InvalidateRect(hwnd, &selectedRect, TRUE);
   }
 
@@ -455,16 +499,16 @@ static LRESULT TAB_FocusChanging(
   return DefWindowProcA (hwnd, uMsg, wParam, lParam);
 }
 
-static HWND TAB_InternalHitTest (
+static INT TAB_InternalHitTest (
   HWND      hwnd,
-  TAB_INFO* infoPtr, 
-  POINT     pt, 
+  TAB_INFO* infoPtr,
+  POINT     pt,
   UINT*     flags)
 
 {
   RECT rect;
-  int iCount; 
-  
+  INT iCount;
+
   for (iCount = 0; iCount < infoPtr->uNumItem; iCount++)
   {
     TAB_InternalGetItemRect(hwnd, infoPtr, iCount, &rect, NULL);
@@ -485,7 +529,7 @@ TAB_HitTest (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
   TAB_INFO *infoPtr = TAB_GetInfoPtr(hwnd);
   LPTCHITTESTINFO lptest = (LPTCHITTESTINFO) lParam;
-  
+
   return TAB_InternalHitTest (hwnd, infoPtr, lptest->pt, &lptest->flags);
 }
 
@@ -536,12 +580,12 @@ TAB_LButtonDown (HWND hwnd, WPARAM wParam, LPARAM lParam)
   if (infoPtr->hwndToolTip)
     TAB_RelayEvent (infoPtr->hwndToolTip, hwnd,
 		    WM_LBUTTONDOWN, wParam, lParam);
-  
+
   pt.x = (INT)LOWORD(lParam);
   pt.y = (INT)HIWORD(lParam);
-  
+
   newItem = TAB_InternalHitTest (hwnd, infoPtr, pt, &dummy);
-  
+
   TRACE("On Tab, item %d\n", newItem);
 
   if ((newItem != -1) && (infoPtr->iSelected != newItem))
@@ -625,7 +669,7 @@ TAB_HotTrackTimerProc
     ** "outside" even if it is within our bounding rect if another window
     ** overlaps.  Note also that the case where the cursor stayed within our
     ** window but has moved off the hot-tracked tab will be handled by the
-    ** WM_MOUSEMOVE event. 
+    ** WM_MOUSEMOVE event.
     */
     if (!GetCursorPos(&pt) || WindowFromPoint(pt) != hwnd)
     {
@@ -770,8 +814,8 @@ TAB_MouseMove (HWND hwnd, WPARAM wParam, LPARAM lParam)
  * the window rectangle given the requested display rectangle.
  */
 static LRESULT TAB_AdjustRect(
-  HWND   hwnd, 
-  WPARAM fLarger, 
+  HWND   hwnd,
+  WPARAM fLarger,
   LPRECT prc)
 {
   TAB_INFO *infoPtr = TAB_GetInfoPtr(hwnd);
@@ -851,7 +895,7 @@ static LRESULT TAB_AdjustRect(
  * perform the scrolling operation on the tab control.
  */
 static LRESULT TAB_OnHScroll(
-  HWND    hwnd, 
+  HWND    hwnd,
   int     nScrollCode,
   int     nPos,
   HWND    hwndScroll)
@@ -877,7 +921,7 @@ static LRESULT TAB_OnHScroll(
 /******************************************************************************
  * TAB_SetupScrolling
  *
- * This method will check the current scrolling state and make sure the 
+ * This method will check the current scrolling state and make sure the
  * scrolling control is displayed (or not).
  */
 static void TAB_SetupScrolling(
@@ -942,18 +986,18 @@ static void TAB_SetupScrolling(
 					  controlPos.right - controlPos.left,
 					  controlPos.bottom - controlPos.top,
 					  hwnd,
-					  (HMENU)NULL, 
-					  (HINSTANCE)NULL, 
-					  NULL);	
+					  (HMENU)NULL,
+					  (HINSTANCE)NULL,
+					  NULL);
     }
     else
     {
-      SetWindowPos(infoPtr->hwndUpDown, 
+      SetWindowPos(infoPtr->hwndUpDown,
 		   (HWND)NULL,
 		   controlPos.left, controlPos.top,
 		   controlPos.right - controlPos.left,
 		   controlPos.bottom - controlPos.top,
-		   SWP_SHOWWINDOW | SWP_NOZORDER);		   
+		   SWP_SHOWWINDOW | SWP_NOZORDER);
     }
 
     /* Now calculate upper limit of the updown control range.
@@ -1016,8 +1060,8 @@ static void TAB_SetItemBounds (HWND hwnd)
    * We need to get text information so we need a DC and we need to select
    * a font.
    */
-  hdc = GetDC(hwnd); 
-    
+  hdc = GetDC(hwnd);
+
   hFont = infoPtr->hFont ? infoPtr->hFont : GetStockObject (SYSTEM_FONT);
   hOldFont = SelectObject (hdc, hFont);
 
@@ -1028,7 +1072,7 @@ static void TAB_SetItemBounds (HWND hwnd)
   GetClientRect(hwnd, &clientRect);
 
   /* if TCS_VERTICAL then swap the height and width so this code places the
-     tabs along the top of the rectangle and we can just rotate them after 
+     tabs along the top of the rectangle and we can just rotate them after
      rather than duplicate all of the below code */
   if(lStyle & TCS_VERTICAL)
   {
@@ -1060,13 +1104,18 @@ static void TAB_SetItemBounds (HWND hwnd)
       item_height = icon_height;
 
     /*
-     * Make sure there is enough space for the letters + icon + growing the 
-     * selected item + extra space for the selected item.   
+     * Make sure there is enough space for the letters + icon + growing the
+     * selected item + extra space for the selected item.
      */
-    infoPtr->tabHeight = item_height + 2 * VERTICAL_ITEM_PADDING +
-        SELECTED_TAB_OFFSET;
+    infoPtr->tabHeight = item_height + SELECTED_TAB_OFFSET +
+	                 ((lStyle & TCS_BUTTONS) ? 2 : 1) *
+                          VERTICAL_ITEM_PADDING;
 
+    TRACE("tabH=%d, tmH=%ld, iconh=%d\n",
+	  infoPtr->tabHeight, fontMetrics.tmHeight, icon_height);
   }
+
+  TRACE("client right=%d\n", clientRect.right);
 
   for (curItem = 0; curItem < infoPtr->uNumItem; curItem++)
   {
@@ -1101,8 +1150,13 @@ static void TAB_SetItemBounds (HWND hwnd)
       }
 
       infoPtr->items[curItem].rect.right = infoPtr->items[curItem].rect.left +
-                                           size.cx + icon_width + 
+                                           size.cx + icon_width +
                                            num * HORIZONTAL_ITEM_PADDING;
+      TRACE("for <%s>, l,r=%d,%d, num=%d\n",
+	  debugstr_w(infoPtr->items[curItem].pszText),
+	  infoPtr->items[curItem].rect.left,
+	  infoPtr->items[curItem].rect.right,
+	  num);
     }
 
     /*
@@ -1122,17 +1176,21 @@ static void TAB_SetItemBounds (HWND hwnd)
 
 	infoPtr->items[curItem].rect.left = 0;
         curItemRowCount++;
+	TRACE("wrapping <%s>, l,r=%d,%d\n",
+	    debugstr_w(infoPtr->items[curItem].pszText),
+	    infoPtr->items[curItem].rect.left,
+	    infoPtr->items[curItem].rect.right);
     }
 
     infoPtr->items[curItem].rect.bottom = 0;
     infoPtr->items[curItem].rect.top = curItemRowCount - 1;
 
     TRACE("TextSize: %li\n", size.cx);
-    TRACE("Rect: T %i, L %i, B %i, R %i\n", 
+    TRACE("Rect: T %i, L %i, B %i, R %i\n",
 	  infoPtr->items[curItem].rect.top,
 	  infoPtr->items[curItem].rect.left,
 	  infoPtr->items[curItem].rect.bottom,
-	  infoPtr->items[curItem].rect.right);  
+	  infoPtr->items[curItem].rect.right);
 
     /*
      * The leftmost position of the next item is the rightmost position
@@ -1158,7 +1216,7 @@ static void TAB_SetItemBounds (HWND hwnd)
 
     /* Don't need scrolling, then update infoPtr->leftmostVisible */
     if(!infoPtr->needsScrolling)
-      infoPtr->leftmostVisible = 0; 
+      infoPtr->leftmostVisible = 0;
 
     TAB_SetupScrolling(hwnd, infoPtr, &clientRect);
   }
@@ -1185,22 +1243,48 @@ static void TAB_SetItemBounds (HWND hwnd)
            iItm<infoPtr->uNumItem;
            iItm++,iCount++)
       {
-          /* if we have reached the maximum number of tabs on this row */
-          /* move to the next row, reset our current item left position and */
-          /* the count of items on this row */
-          if (iCount >= ((iRow<remTab)?tabPerRow + 1:tabPerRow))
-          {
-              iRow++;
-              curItemLeftPos = 0;
-              iCount = 0;
-          }
-
           /* normalize the current rect */
 
           /* shift the item to the left side of the clientRect */
-          infoPtr->items[iItm].rect.right -= 
+          infoPtr->items[iItm].rect.right -=
             infoPtr->items[iItm].rect.left;
           infoPtr->items[iItm].rect.left = 0;
+
+	  TRACE("r=%d, cl=%d, cl.r=%d, iCount=%d, iRow=%d, uNumRows=%d, remTab=%d, tabPerRow=%d\n",
+	      infoPtr->items[iItm].rect.right,
+	      curItemLeftPos, clientRect.right,
+	      iCount, iRow, infoPtr->uNumRows, remTab, tabPerRow);
+
+          /* if we have reached the maximum number of tabs on this row */
+          /* move to the next row, reset our current item left position and */
+          /* the count of items on this row */
+
+	  /* ************  FIXME FIXME FIXME  *************** */
+	  /*                                                  */
+	  /* FIXME:                                           */
+	  /* if vertical,                                     */
+	  /*   if item n and n+1 are in the same row,         */
+	  /*      then the display has n+1 lower (toward the  */
+	  /*      bottom) than n. We do it just the           */
+	  /*      opposite!!!                                 */
+	  /*                                                  */
+	  /* ************  FIXME FIXME FIXME  *************** */
+
+	  if (lStyle & TCS_VERTICAL) {
+	      /* Vert: Add the remaining tabs in the *last* remainder rows */
+	      if (iCount >= ((iRow>=(INT)infoPtr->uNumRows - remTab)?tabPerRow + 1:tabPerRow)) {
+		  iRow++;
+		  curItemLeftPos = 0;
+		  iCount = 0;
+	      }
+	  } else {
+	      /* Horz: Add the remaining tabs in the *first* remainder rows */
+	      if (iCount >= ((iRow<remTab)?tabPerRow + 1:tabPerRow)) {
+		  iRow++;
+		  curItemLeftPos = 0;
+		  iCount = 0;
+	      }
+	  }
 
           /* shift the item to the right to place it as the next item in this row */
           infoPtr->items[iItm].rect.left += curItemLeftPos;
@@ -1214,26 +1298,32 @@ static void TAB_SetItemBounds (HWND hwnd)
 	  }
           else
             curItemLeftPos = infoPtr->items[iItm].rect.right;
+
+	  TRACE("arranging <%s>, l,r=%d,%d, row=%d\n",
+	      debugstr_w(infoPtr->items[iItm].pszText),
+	      infoPtr->items[iItm].rect.left,
+	      infoPtr->items[iItm].rect.right,
+	      infoPtr->items[iItm].rect.top);
       }
-          
+
       /*
        * Justify the rows
        */
       {
          while(iIndexStart < infoPtr->uNumItem)
         {
-        /* 
+        /*
          * find the indexs of the row
          */
         /* find the first item on the next row */
         for (iIndexEnd=iIndexStart;
-             (iIndexEnd < infoPtr->uNumItem) && 
+             (iIndexEnd < infoPtr->uNumItem) &&
  	       (infoPtr->items[iIndexEnd].rect.top ==
                 infoPtr->items[iIndexStart].rect.top) ;
             iIndexEnd++)
         /* intentionally blank */;
 
-        /* 
+        /*
          * we need to justify these tabs so they fill the whole given
          * client area
          *
@@ -1251,11 +1341,17 @@ static void TAB_SetItemBounds (HWND hwnd)
            remainder = widthDiff % iCount;
            widthDiff = widthDiff / iCount;
            /* add widthDiff/iCount, or extra space/items on row, to each item on this row */
-           for (iIndex=iIndexStart,iCount=0; iIndex < iIndexEnd; 
+           for (iIndex=iIndexStart,iCount=0; iIndex < iIndexEnd;
                 iIndex++,iCount++)
            {
               infoPtr->items[iIndex].rect.left += iCount * widthDiff;
               infoPtr->items[iIndex].rect.right += (iCount + 1) * widthDiff;
+
+	      TRACE("adjusting 1 <%s>, l,r=%d,%d\n",
+		  debugstr_w(infoPtr->items[iIndex].pszText),
+		  infoPtr->items[iIndex].rect.left,
+		  infoPtr->items[iIndex].rect.right);
+
            }
            infoPtr->items[iIndex - 1].rect.right += remainder;
         }
@@ -1263,6 +1359,12 @@ static void TAB_SetItemBounds (HWND hwnd)
         {
           infoPtr->items[iIndexStart].rect.left = clientRect.left;
           infoPtr->items[iIndexStart].rect.right = clientRect.right - 4;
+
+	  TRACE("adjusting 2 <%s>, l,r=%d,%d\n",
+	      debugstr_w(infoPtr->items[iIndexStart].pszText),
+	      infoPtr->items[iIndexStart].rect.left,
+	      infoPtr->items[iIndexStart].rect.right);
+
         }
 
 
@@ -1302,7 +1404,7 @@ static void TAB_SetItemBounds (HWND hwnd)
  *
  * This method is used to draw the interior (text and icon) of a single tab
  * into the tab control.
- */         
+ */
 static void
 TAB_DrawItemInterior
   (
@@ -1317,7 +1419,7 @@ TAB_DrawItemInterior
 
   RECT localRect;
 
-  HPEN   htextPen   = GetSysColorPen (COLOR_BTNTEXT);
+  HPEN   htextPen;
   HPEN   holdPen;
   INT    oldBkMode;
 
@@ -1368,10 +1470,12 @@ TAB_DrawItemInterior
   /*
    * Text pen
    */
+  htextPen = CreatePen( PS_SOLID, 1, GetSysColor(COLOR_BTNTEXT) );
   holdPen = SelectObject(hdc, htextPen);
 
   oldBkMode = SetBkMode(hdc, TRANSPARENT);
-  SetTextColor(hdc, GetSysColor((iItem == infoPtr->iHotTracked) ? COLOR_HIGHLIGHT : COLOR_BTNTEXT));
+  SetTextColor(hdc, (iItem == infoPtr->iHotTracked) ?
+                     comctl32_color.clrHighlight : comctl32_color.clrBtnText);
 
   /*
    * Deflate the rectangle to acount for the padding
@@ -1395,19 +1499,19 @@ TAB_DrawItemInterior
      */
     id = GetWindowLongA( hwnd, GWL_ID );
 
-    /* 
+    /*
      * put together the DRAWITEMSTRUCT
      */
-    dis.CtlType    = ODT_TAB;	
-    dis.CtlID      = id;		
-    dis.itemID     = iItem;		
-    dis.itemAction = ODA_DRAWENTIRE;	
+    dis.CtlType    = ODT_TAB;
+    dis.CtlID      = id;
+    dis.itemID     = iItem;
+    dis.itemAction = ODA_DRAWENTIRE;
     if ( iItem == infoPtr->iSelected )
-      dis.itemState = ODS_SELECTED;	
-    else				
-      dis.itemState = 0;		
+      dis.itemState = ODS_SELECTED;
+    else
+      dis.itemState = 0;
     dis.hwndItem = hwnd;		/* */
-    dis.hDC      = hdc;		
+    dis.hDC      = hdc;
     dis.rcItem   = *drawRect;		/* */
     dis.itemData = infoPtr->items[iItem].lParam;
 
@@ -1440,11 +1544,14 @@ TAB_DrawItemInterior
 
     rcTemp = *drawRect;
 
+    rcText.left = rcText.top = rcText.right = rcText.bottom = 0;
+
     /*
      * Setup for text output
      */
     oldBkMode = SetBkMode(hdc, TRANSPARENT);
-    SetTextColor(hdc, GetSysColor((iItem == infoPtr->iHotTracked) ? COLOR_HIGHLIGHT : COLOR_BTNTEXT));
+    SetTextColor(hdc, (iItem == infoPtr->iHotTracked) ?
+		 comctl32_color.clrHighlight : comctl32_color.clrBtnText);
 
     /* get the rectangle that the text fits in */
     DrawTextW(hdc, infoPtr->items[iItem].pszText, -1,
@@ -1460,41 +1567,45 @@ TAB_DrawItemInterior
       ImageList_GetIconSize(infoPtr->himl, &cx, &cy);
 
       if(lStyle & TCS_VERTICAL)
-        center_offset = ((drawRect->bottom - drawRect->top) - (cy + VERTICAL_ITEM_PADDING + (rcText.right - rcText.left))) / 2;
+        center_offset = ((drawRect->bottom - drawRect->top) - (cy + HORIZONTAL_ITEM_PADDING + (rcText.right - rcText.left))) / 2;
       else
         center_offset = ((drawRect->right - drawRect->left) - (cx + HORIZONTAL_ITEM_PADDING + (rcText.right - rcText.left))) / 2;
 
+      TRACE("for <%s>, c_o=%d, draw=(%d,%d)-(%d,%d), textlen=%d\n",
+	  debugstr_w(infoPtr->items[iItem].pszText), center_offset,
+	  drawRect->left, drawRect->top, drawRect->right, drawRect->bottom,
+	  (rcText.right-rcText.left));
+
       if((lStyle & TCS_VERTICAL) && (lStyle & TCS_BOTTOM))
       {
-        /* rcImage.left = drawRect->left; */ /* explicit from above rcImage = *drawRect */
         rcImage.top = drawRect->top + center_offset;
         rcImage.left = drawRect->right - cx; /* if tab is TCS_VERTICAL and TCS_BOTTOM, the text is drawn from the */
                                              /* right side of the tab, but the image still uses the left as its x position */
                                              /* this keeps the image always drawn off of the same side of the tab */
-        drawRect->top = rcImage.top + (cx + VERTICAL_ITEM_PADDING);
+        drawRect->top = rcImage.top + (cx + HORIZONTAL_ITEM_PADDING);
       }
       else if(lStyle & TCS_VERTICAL)
       {
-        /* rcImage.left = drawRect->left; */ /* explicit from above rcImage = *drawRect */
         rcImage.top = drawRect->bottom - cy - center_offset;
-
-        drawRect->bottom = rcImage.top - VERTICAL_ITEM_PADDING;
+	rcImage.left--;
+        drawRect->bottom = rcImage.top - HORIZONTAL_ITEM_PADDING;
       }
       else /* normal style, whether TCS_BOTTOM or not */
       {
-        rcImage.left = drawRect->left + center_offset;
-        /* rcImage.top = drawRect->top; */ /* explicit from above rcImage = *drawRect */
-
+        rcImage.left = drawRect->left + center_offset + 3;
         drawRect->left = rcImage.left + cx + HORIZONTAL_ITEM_PADDING;
+	rcImage.top -= (lStyle & TCS_BOTTOM) ? 2 : 1;
       }
 
+      TRACE("drawing image=%d, left=%d, top=%d\n",
+	    infoPtr->items[iItem].iImage, rcImage.left, rcImage.top-1);
       ImageList_Draw
         (
         infoPtr->himl,
         infoPtr->items[iItem].iImage,
         hdc,
         rcImage.left,
-        rcImage.top + 1,
+        rcImage.top,
         ILD_NORMAL
         );
     } else /* no image, so just shift the drawRect borders around */
@@ -1543,14 +1654,14 @@ TAB_DrawItemInterior
     /* call CreateFontIndirectA, which requires us to set the values of the logfont we pass in */
     if(lStyle & TCS_VERTICAL)
     {
-      if (!GetObjectA((infoPtr->hFont) ? 
+      if (!GetObjectA((infoPtr->hFont) ?
                 infoPtr->hFont : GetStockObject(SYSTEM_FONT),
                 sizeof(LOGFONTA),&logfont))
       {
         iPointSize = 9;
 
         lstrcpyA(logfont.lfFaceName, "Arial");
-        logfont.lfHeight = -MulDiv(iPointSize, GetDeviceCaps(hdc, LOGPIXELSY), 
+        logfont.lfHeight = -MulDiv(iPointSize, GetDeviceCaps(hdc, LOGPIXELSY),
                                     72);
         logfont.lfWeight = FW_NORMAL;
         logfont.lfItalic = 0;
@@ -1603,16 +1714,17 @@ TAB_DrawItemInterior
   */
   SetBkMode(hdc, oldBkMode);
   SelectObject(hdc, holdPen);
+  DeleteObject( htextPen );
 }
 
 /******************************************************************************
  * TAB_DrawItem
  *
  * This method is used to draw a single tab into the tab control.
- */         
+ */
 static void TAB_DrawItem(
-  HWND hwnd, 
-  HDC  hdc, 
+  HWND hwnd,
+  HDC  hdc,
   INT  iItem)
 {
   TAB_INFO *infoPtr = TAB_GetInfoPtr(hwnd);
@@ -1620,7 +1732,10 @@ static void TAB_DrawItem(
   RECT      itemRect;
   RECT      selectedRect;
   BOOL      isVisible;
-  RECT      r;
+  RECT      r, fillRect, r1;
+  INT       clRight = 0;
+  INT       clBottom = 0;
+  COLORREF  bkgnd, corner;
 
   /*
    * Get the rectangle for the item.
@@ -1633,41 +1748,28 @@ static void TAB_DrawItem(
 
   if (isVisible)
   {
-    HBRUSH hbr       = CreateSolidBrush (GetSysColor(COLOR_BTNFACE));    
-    HPEN   hwPen     = GetSysColorPen (COLOR_3DHILIGHT);
-    HPEN hbPen  = GetSysColorPen (COLOR_3DDKSHADOW);
-    HPEN hShade = GetSysColorPen (COLOR_BTNSHADOW);
-
-    HPEN   holdPen;
-    BOOL   deleteBrush = TRUE;
+    /* If you need to see what the control is doing,
+     * then override these variables. They will change what
+     * fill colors are used for filling the tabs, and the
+     * corners when drawing the edge.
+     */
+    bkgnd = comctl32_color.clrBtnFace;
+    corner = comctl32_color.clrBtnFace;
 
     if (lStyle & TCS_BUTTONS)
     {
+      HBRUSH hbr       = CreateSolidBrush (bkgnd);
+      BOOL   deleteBrush = TRUE;
+
       /* Get item rectangle */
       r = itemRect;
 
-      holdPen = SelectObject (hdc, hwPen);
-
       /* Separators between flat buttons */
-      /* FIXME: test and correct this if necessary for TCS_FLATBUTTONS style */
-      if (lStyle & TCS_FLATBUTTONS) 
+      if (lStyle & TCS_FLATBUTTONS)
       {
-        int x = r.right + FLAT_BTN_SPACINGX - 2;
-
-        /* highlight */
-        MoveToEx (hdc, x, r.bottom - 1, NULL);
-        LineTo   (hdc, x, r.top - 1);
-        x--;
-
-        /* shadow */
-        SelectObject(hdc, hbPen);
-        MoveToEx (hdc, x, r.bottom - 1, NULL);
-        LineTo   (hdc, x, r.top - 1);
-
-        /* shade */
-        SelectObject (hdc, hShade );
-        MoveToEx (hdc, x - 1, r.bottom - 1, NULL);
-        LineTo   (hdc, x - 1, r.top - 1);
+	r1 = r;
+	r1.right += (FLAT_BTN_SPACINGX -2);
+	DrawEdge(hdc, &r1, EDGE_ETCHED, BF_RIGHT);
       }
 
       if (iItem == infoPtr->iSelected)
@@ -1675,196 +1777,267 @@ static void TAB_DrawItem(
         /* Background color */
         if (!((lStyle & TCS_OWNERDRAWFIXED) && infoPtr->fSizeSet))
 	{
-              COLORREF bk = GetSysColor(COLOR_3DHILIGHT);
               DeleteObject(hbr);
               hbr = GetSysColorBrush(COLOR_SCROLLBAR);
 
-              SetTextColor(hdc, GetSysColor(COLOR_3DFACE));
-              SetBkColor(hdc, bk);
+              SetTextColor(hdc, comctl32_color.clr3dFace);
+              SetBkColor(hdc, comctl32_color.clr3dHilight);
 
               /* if COLOR_WINDOW happens to be the same as COLOR_3DHILIGHT
                * we better use 0x55aa bitmap brush to make scrollbar's background
                * look different from the window background.
                */
-               if (bk == GetSysColor(COLOR_WINDOW))
+               if (comctl32_color.clr3dHilight == comctl32_color.clrWindow)
                   hbr = COMCTL32_hPattern55AABrush;
 
               deleteBrush = FALSE;
 	}
 
-        /* Erase the background */
+	/* Clear interior */
         FillRect(hdc, &r, hbr);
 
-        /*
-         * Draw the tab now.
-         * The rectangles calculated exclude the right and bottom
-         * borders of the rectangle. To simplify the following code, those
-         * borders are shaved-off beforehand.
-         */
-        r.right--;
-        r.bottom--;
-
-        /* highlight */
-        SelectObject(hdc, hwPen);
-        MoveToEx (hdc, r.left, r.bottom, NULL);
-        LineTo   (hdc, r.right, r.bottom);
-        LineTo   (hdc, r.right, r.top + 1);
-        
-        /* shadow */
-        SelectObject(hdc, hbPen);
-        LineTo  (hdc, r.left + 1, r.top + 1);
-        LineTo  (hdc, r.left + 1, r.bottom);
-
-        /* shade */
-        SelectObject (hdc, hShade );
-        MoveToEx (hdc, r.right, r.top, NULL);
-        LineTo   (hdc, r.left, r.top);
-        LineTo   (hdc, r.left, r.bottom);
+	DrawEdge(hdc, &r, EDGE_SUNKEN, BF_SOFT|BF_RECT);
       }
-      else
+      else  /* ! selected */
       {
-        /* Erase the background */
-        FillRect(hdc, &r, hbr);
-
 	if (!(lStyle & TCS_FLATBUTTONS))
 	{
-          /* highlight */
-          MoveToEx (hdc, r.left, r.bottom, NULL);
-          LineTo   (hdc, r.left, r.top);
-          LineTo   (hdc, r.right, r.top);
-         
-          /* shadow */
-          SelectObject(hdc, hbPen);
-          LineTo  (hdc, r.right, r.bottom);
-          LineTo  (hdc, r.left, r.bottom);
+	  /* Clear interior */
+          FillRect(hdc, &r, hbr);
 
-          /* shade */
-          SelectObject (hdc, hShade );
-          MoveToEx (hdc, r.right - 1, r.top, NULL);
-          LineTo   (hdc, r.right - 1, r.bottom - 1);
-          LineTo   (hdc, r.left + 1, r.bottom - 1);
+	  DrawEdge(hdc, &r, EDGE_RAISED, BF_SOFT|BF_RECT);
 	}
       }
+
+      /* Cleanup */
+      if (deleteBrush) DeleteObject(hbr);
     }
     else /* !TCS_BUTTONS */
     {
-      /* Background color */
-      DeleteObject(hbr);
-      hbr = CreateSolidBrush(GetSysColor(COLOR_BTNFACE));    
-
       /* We draw a rectangle of different sizes depending on the selection
        * state. */
-      if (iItem == infoPtr->iSelected)
+      if (iItem == infoPtr->iSelected) {
+	RECT rect;
+	GetClientRect (hwnd, &rect);
+	clRight = rect.right;
+	clBottom = rect.bottom;
         r = selectedRect;
+      }
       else
         r = itemRect;
 
       /*
-       * Erase the background.
-       * This is necessary when drawing the selected item since it is larger 
-       * than the others, it might overlap with stuff already drawn by the 
+       * Erase the background. (Delay it but setup rectangle.)
+       * This is necessary when drawing the selected item since it is larger
+       * than the others, it might overlap with stuff already drawn by the
        * other tabs
-       */     
-      FillRect(hdc, &r, hbr);
-
-      /*
-       * Draw the tab now.
-       * The rectangles calculated exclude the right and bottom
-       * borders of the rectangle. To simplify the following code, those
-       * borders are shaved-off beforehand.
        */
-      r.right--;
-      r.bottom--;
-      
-      holdPen = SelectObject (hdc, hwPen);
+      fillRect = r;
+
       if(lStyle & TCS_VERTICAL)
       {
+	/* These are for adjusting the drawing of a Selected tab      */
+	/* The initial values are for the normal case of non-Selected */
+	int ZZ = 1;   /* Do not strech if selected */
+	if (iItem == infoPtr->iSelected) {
+	    ZZ = 0;
+
+	    /* if leftmost draw the line longer */
+	    if(selectedRect.top == 0)
+		fillRect.top += 2;
+	    /* if rightmost draw the line longer */
+	    if(selectedRect.bottom == clBottom)
+		fillRect.bottom -= 2;
+	}
+
         if (lStyle & TCS_BOTTOM)
         {
-          /* highlight */
-          MoveToEx (hdc, r.left, r.top, NULL);
-          LineTo   (hdc, r.right - ROUND_CORNER_SIZE, r.top);
-          LineTo   (hdc, r.right, r.top + ROUND_CORNER_SIZE);
+	  /* Adjust both rectangles to match native */
+	  r.left += (1-ZZ);
 
-          /* shadow */
-          SelectObject(hdc, hbPen);
-          LineTo  (hdc, r.right, r.bottom - ROUND_CORNER_SIZE);
-          LineTo  (hdc, r.right - ROUND_CORNER_SIZE, r.bottom);
-          LineTo  (hdc, r.left - 1, r.bottom);
+	  TRACE("<left> item=%d, fill=(%d,%d)-(%d,%d), edge=(%d,%d)-(%d,%d)\n",
+		iItem,
+		fillRect.left,fillRect.top,fillRect.right,fillRect.bottom,
+		r.left,r.top,r.right,r.bottom);
 
-          /* shade */
-          SelectObject (hdc, hShade );
-          MoveToEx (hdc, r.right - 1, r.top, NULL);
-          LineTo   (hdc, r.right - 1, r.bottom - 1);
-          LineTo   (hdc, r.left - 1,    r.bottom - 1);
+	  /* Clear interior */
+	  SetBkColor(hdc, bkgnd);
+	  ExtTextOutA(hdc, 0, 0, 2, &fillRect, NULL, 0, 0);
+
+	  /* Draw rectangular edge around tab */
+	  DrawEdge(hdc, &r, EDGE_RAISED, BF_SOFT|BF_RIGHT|BF_TOP|BF_BOTTOM);
+
+	  /* Now erase the top corner and draw diagonal edge */
+	  SetBkColor(hdc, corner);
+	  r1.left = r.right - ROUND_CORNER_SIZE - 1;
+	  r1.top = r.top;
+	  r1.right = r.right;
+	  r1.bottom = r1.top + ROUND_CORNER_SIZE;
+	  ExtTextOutA(hdc, 0, 0, 2, &r1, NULL, 0, 0);
+	  r1.right--;
+	  DrawEdge(hdc, &r1, EDGE_RAISED, BF_SOFT|BF_DIAGONAL_ENDTOPLEFT);
+
+	  /* Now erase the bottom corner and draw diagonal edge */
+	  r1.left = r.right - ROUND_CORNER_SIZE - 1;
+	  r1.bottom = r.bottom;
+	  r1.right = r.right;
+	  r1.top = r1.bottom - ROUND_CORNER_SIZE;
+	  ExtTextOutA(hdc, 0, 0, 2, &r1, NULL, 0, 0);
+	  r1.right--;
+	  DrawEdge(hdc, &r1, EDGE_RAISED, BF_SOFT|BF_DIAGONAL_ENDBOTTOMLEFT);
+
+	  if ((iItem == infoPtr->iSelected) && (selectedRect.top == 0)) {
+	      r1 = r;
+	      r1.right = r1.left;
+	      r1.left--;
+	      DrawEdge(hdc, &r1, EDGE_RAISED, BF_SOFT|BF_TOP);
+	  }
+
         }
         else
         {
-          /* highlight */
-          MoveToEx (hdc, r.right, r.top, NULL);
-          LineTo   (hdc, r.left + ROUND_CORNER_SIZE, r.top);
-          LineTo   (hdc, r.left, r.top + ROUND_CORNER_SIZE);
-          LineTo   (hdc, r.left, r.bottom - ROUND_CORNER_SIZE);
+	  /* Adjust both rectangles to match native */
+	  fillRect.right += (1-ZZ);
 
-          /* shadow */
-          SelectObject(hdc, hbPen);
-          LineTo (hdc, r.left + ROUND_CORNER_SIZE,  r.bottom);
-          LineTo (hdc, r.right + 1, r.bottom);
+	  TRACE("<left> item=%d, fill=(%d,%d)-(%d,%d), edge=(%d,%d)-(%d,%d)\n",
+		iItem,
+		fillRect.left,fillRect.top,fillRect.right,fillRect.bottom,
+		r.left,r.top,r.right,r.bottom);
 
-          /* shade */
-          SelectObject (hdc, hShade );
-          MoveToEx (hdc, r.left + ROUND_CORNER_SIZE - 1, r.bottom - 1, NULL);
-          LineTo   (hdc, r.right + 1, r.bottom - 1);
+	  /* Clear interior */
+	  SetBkColor(hdc, bkgnd);
+	  ExtTextOutA(hdc, 0, 0, 2, &fillRect, NULL, 0, 0);
+
+	  /* Draw rectangular edge around tab */
+	  DrawEdge(hdc, &r, EDGE_RAISED, BF_SOFT|BF_LEFT|BF_TOP|BF_BOTTOM);
+
+	  /* Now erase the top corner and draw diagonal edge */
+	  SetBkColor(hdc, corner);
+	  r1.left = r.left;
+	  r1.top = r.top;
+	  r1.right = r1.left + ROUND_CORNER_SIZE + 1;
+	  r1.bottom = r1.top + ROUND_CORNER_SIZE;
+	  ExtTextOutA(hdc, 0, 0, 2, &r1, NULL, 0, 0);
+	  r1.left++;
+	  DrawEdge(hdc, &r1, EDGE_RAISED, BF_SOFT|BF_DIAGONAL_ENDTOPRIGHT);
+
+	  /* Now erase the bottom corner and draw diagonal edge */
+	  r1.left = r.left;
+	  r1.bottom = r.bottom;
+	  r1.right = r1.left + ROUND_CORNER_SIZE + 1;
+	  r1.top = r1.bottom - ROUND_CORNER_SIZE;
+	  ExtTextOutA(hdc, 0, 0, 2, &r1, NULL, 0, 0);
+	  r1.left++;
+	  DrawEdge(hdc, &r1, EDGE_SUNKEN, BF_DIAGONAL_ENDTOPLEFT);
         }
       }
-      else
+      else  /* ! TCS_VERTICAL */
       {
+	/* These are for adjusting the drawing of a Selected tab      */
+	/* The initial values are for the normal case of non-Selected */
+	int ZZ = 1;   /* Do not strech if selected */
+	if (iItem == infoPtr->iSelected) {
+	    ZZ = 0;
+
+	    /* if leftmost draw the line longer */
+	    if(selectedRect.left == 0)
+		fillRect.left += 2;
+	    /* if rightmost draw the line longer */
+	    if(selectedRect.right == clRight)
+		fillRect.right -= 2;
+	}
+
         if (lStyle & TCS_BOTTOM)
         {
-          /* highlight */
-          MoveToEx (hdc, r.left, r.top, NULL);
-          LineTo   (hdc, r.left, r.bottom - ROUND_CORNER_SIZE);
-          LineTo   (hdc, r.left + ROUND_CORNER_SIZE, r.bottom);
 
-          /* shadow */
-          SelectObject(hdc, hbPen);
-          LineTo  (hdc, r.right - ROUND_CORNER_SIZE, r.bottom);
-          LineTo  (hdc, r.right, r.bottom - ROUND_CORNER_SIZE);
-          LineTo  (hdc, r.right, r.top - 1);
+	  /* Adjust both rectangles to match native */
+	  fillRect.top--;
+	  fillRect.bottom--;
+	  r.bottom--;
+	  r.top -= ZZ;
 
-          /* shade */
-          SelectObject (hdc, hShade );
-          MoveToEx   (hdc, r.left, r.bottom - 1, NULL);
-          LineTo   (hdc, r.right - ROUND_CORNER_SIZE - 1, r.bottom - 1);
-          LineTo   (hdc, r.right - 1, r.bottom - ROUND_CORNER_SIZE - 1);
-          LineTo  (hdc, r.right - 1, r.top - 1);
+	  TRACE("<bottom> item=%d, fill=(%d,%d)-(%d,%d), edge=(%d,%d)-(%d,%d)\n",
+		iItem,
+		fillRect.left,fillRect.top,fillRect.right,fillRect.bottom,
+		r.left,r.top,r.right,r.bottom);
+
+	  /* Clear interior */
+	  SetBkColor(hdc, bkgnd);
+	  ExtTextOutA(hdc, 0, 0, 2, &fillRect, NULL, 0, 0);
+
+	  /* Draw rectangular edge around tab */
+	  DrawEdge(hdc, &r, EDGE_RAISED, BF_SOFT|BF_LEFT|BF_BOTTOM|BF_RIGHT);
+
+	  /* Now erase the righthand corner and draw diagonal edge */
+	  SetBkColor(hdc, corner);
+	  r1.left = r.right - ROUND_CORNER_SIZE;
+	  r1.bottom = r.bottom;
+	  r1.right = r.right;
+	  r1.top = r1.bottom - ROUND_CORNER_SIZE - 1;
+	  ExtTextOutA(hdc, 0, 0, 2, &r1, NULL, 0, 0);
+	  r1.bottom--;
+	  DrawEdge(hdc, &r1, EDGE_RAISED, BF_SOFT|BF_DIAGONAL_ENDBOTTOMLEFT);
+
+	  /* Now erase the lefthand corner and draw diagonal edge */
+	  r1.left = r.left;
+	  r1.bottom = r.bottom;
+	  r1.right = r1.left + ROUND_CORNER_SIZE;
+	  r1.top = r1.bottom - ROUND_CORNER_SIZE - 1;
+	  ExtTextOutA(hdc, 0, 0, 2, &r1, NULL, 0, 0);
+	  r1.bottom--;
+	  DrawEdge(hdc, &r1, EDGE_RAISED, BF_SOFT|BF_DIAGONAL_ENDTOPLEFT);
+
+	  if ((iItem == infoPtr->iSelected) && (selectedRect.left == 0)) {
+	      r1 = r;
+	      r1.bottom = r1.top;
+	      r1.top--;
+	      DrawEdge(hdc, &r1, EDGE_RAISED, BF_SOFT|BF_LEFT);
+	  }
+
         }
         else
         {
-          /* highlight */
-          if(infoPtr->items[iItem].rect.left == 0) /* if leftmost draw the line longer */
-            MoveToEx (hdc, r.left, r.bottom, NULL);
-          else
-            MoveToEx (hdc, r.left, r.bottom - 1, NULL);
 
-          LineTo   (hdc, r.left, r.top + ROUND_CORNER_SIZE);
-          LineTo   (hdc, r.left + ROUND_CORNER_SIZE, r.top);
-          LineTo   (hdc, r.right - ROUND_CORNER_SIZE, r.top);
+	  /* Adjust both rectangles to match native */
+	  fillRect.bottom += (1-ZZ);
 
-          /* shadow */
-          SelectObject(hdc, hbPen);
-          LineTo (hdc, r.right,  r.top + ROUND_CORNER_SIZE);
-          LineTo (hdc, r.right,  r.bottom + 1);
+	  TRACE("<top> item=%d, fill=(%d,%d)-(%d,%d), edge=(%d,%d)-(%d,%d)\n",
+		iItem,
+		fillRect.left,fillRect.top,fillRect.right,fillRect.bottom,
+		r.left,r.top,r.right,r.bottom);
 
+	  /* Clear interior */
+	  SetBkColor(hdc, bkgnd);
+	  ExtTextOutA(hdc, 0, 0, 2, &fillRect, NULL, 0, 0);
 
-          /* shade */
-          SelectObject (hdc, hShade );
-          MoveToEx (hdc, r.right - 1, r.top + ROUND_CORNER_SIZE, NULL);
-          LineTo   (hdc, r.right - 1, r.bottom + 1);
+	  /* Draw rectangular edge around tab */
+	  DrawEdge(hdc, &r, EDGE_RAISED, BF_SOFT|BF_LEFT|BF_TOP|BF_RIGHT);
+
+	  /* Now erase the righthand corner and draw diagonal edge */
+	  SetBkColor(hdc, corner);
+	  r1.left = r.right - ROUND_CORNER_SIZE;
+	  r1.top = r.top;
+	  r1.right = r.right;
+	  r1.bottom = r1.top + ROUND_CORNER_SIZE + 1;
+	  ExtTextOutA(hdc, 0, 0, 2, &r1, NULL, 0, 0);
+	  r1.top++;
+	  DrawEdge(hdc, &r1, EDGE_RAISED, BF_SOFT|BF_DIAGONAL_ENDBOTTOMRIGHT);
+
+	  /* Now erase the lefthand corner and draw diagonal edge */
+	  r1.left = r.left;
+	  r1.top = r.top;
+	  r1.right = r1.left + ROUND_CORNER_SIZE;
+	  r1.bottom = r1.top + ROUND_CORNER_SIZE + 1;
+	  ExtTextOutA(hdc, 0, 0, 2, &r1, NULL, 0, 0);
+	  r1.top++;
+	  DrawEdge(hdc, &r1, EDGE_RAISED, BF_SOFT|BF_DIAGONAL_ENDTOPRIGHT);
+
         }
       }
     }
-  
+
+    TAB_DumpItemInternal(infoPtr, iItem);
+
     /* This modifies r to be the text rectangle. */
     {
       HFONT hOldFont = SelectObject(hdc, infoPtr->hFont);
@@ -1882,10 +2055,6 @@ static void TAB_DrawItem(
 
       DrawFocusRect(hdc, &r);
     }
-
-    /* Cleanup */
-    SelectObject(hdc, holdPen);
-    if (deleteBrush) DeleteObject(hbr);
   }
 }
 
@@ -1894,14 +2063,10 @@ static void TAB_DrawItem(
  *
  * This method is used to draw the raised border around the tab control
  * "content" area.
- */         
+ */
 static void TAB_DrawBorder (HWND hwnd, HDC hdc)
 {
   TAB_INFO *infoPtr = TAB_GetInfoPtr(hwnd);
-  HPEN htmPen;
-  HPEN hwPen  = GetSysColorPen (COLOR_3DHILIGHT);
-  HPEN hbPen  = GetSysColorPen (COLOR_3DDKSHADOW);
-  HPEN hShade = GetSysColorPen (COLOR_BTNSHADOW);
   RECT rect;
   DWORD lStyle = GetWindowLongA(hwnd, GWL_STYLE);
 
@@ -1915,7 +2080,7 @@ static void TAB_DrawBorder (HWND hwnd, HDC hdc)
   {
     if ((lStyle & TCS_BOTTOM) && !(lStyle & TCS_VERTICAL))
     {
-      rect.bottom -= (infoPtr->tabHeight - 2) * infoPtr->uNumRows + 2;
+      rect.bottom -= (infoPtr->tabHeight - 2) * infoPtr->uNumRows + 3;
     }
     else if((lStyle & TCS_BOTTOM) && (lStyle & TCS_VERTICAL))
     {
@@ -1927,43 +2092,21 @@ static void TAB_DrawBorder (HWND hwnd, HDC hdc)
     }
     else /* not TCS_VERTICAL and not TCS_BOTTOM */
     {
-      rect.top += (infoPtr->tabHeight - 2) * infoPtr->uNumRows + 1;
+      rect.top += (infoPtr->tabHeight - 2) * infoPtr->uNumRows + 2;
     }
   }
 
-  /*
-   * Shave-off the right and bottom margins (exluded in the
-   * rect)
-   */
-  rect.right--;
-  rect.bottom--;
+  TRACE("border=(%d,%d)-(%d,%d)\n",
+	rect.left, rect.top, rect.right, rect.bottom);
 
-  /* highlight */
-  htmPen = SelectObject (hdc, hwPen);
-
-  MoveToEx (hdc, rect.left, rect.bottom, NULL);
-  LineTo (hdc, rect.left, rect.top);
-  LineTo (hdc, rect.right, rect.top);
-
-  /* Dark Shadow */
-  SelectObject (hdc, hbPen);
-  LineTo (hdc, rect.right, rect.bottom );
-  LineTo (hdc, rect.left, rect.bottom);
-
-  /* shade */
-  SelectObject (hdc, hShade );
-  MoveToEx (hdc, rect.right - 1, rect.top, NULL);
-  LineTo   (hdc, rect.right - 1, rect.bottom - 1);
-  LineTo   (hdc, rect.left,    rect.bottom - 1);
-
-  SelectObject(hdc, htmPen);
+  DrawEdge(hdc, &rect, EDGE_RAISED, BF_SOFT|BF_RECT);
 }
 
 /******************************************************************************
  * TAB_Refresh
  *
  * This method repaints the tab control..
- */             
+ */
 static void TAB_Refresh (HWND hwnd, HDC hdc)
 {
   TAB_INFO *infoPtr = TAB_GetInfoPtr(hwnd);
@@ -1977,13 +2120,13 @@ static void TAB_Refresh (HWND hwnd, HDC hdc)
 
   if (GetWindowLongA(hwnd, GWL_STYLE) & TCS_BUTTONS)
   {
-    for (i = 0; i < infoPtr->uNumItem; i++) 
+    for (i = 0; i < infoPtr->uNumItem; i++)
       TAB_DrawItem (hwnd, hdc, i);
   }
   else
   {
     /* Draw all the non selected item first */
-    for (i = 0; i < infoPtr->uNumItem; i++) 
+    for (i = 0; i < infoPtr->uNumItem; i++)
     {
       if (i != infoPtr->iSelected)
 	TAB_DrawItem (hwnd, hdc, i);
@@ -2017,19 +2160,19 @@ static LRESULT
 TAB_SetRedraw (HWND hwnd, WPARAM wParam)
 {
     TAB_INFO *infoPtr = TAB_GetInfoPtr(hwnd);
-  
+
   infoPtr->DoRedraw=(BOOL) wParam;
   return 0;
 }
 
 static LRESULT TAB_EraseBackground(
-  HWND hwnd, 
+  HWND hwnd,
   HDC  givenDC)
 {
   HDC  hdc;
   RECT clientRect;
 
-  HBRUSH brush = CreateSolidBrush(GetSysColor(COLOR_BTNFACE));
+  HBRUSH brush = CreateSolidBrush(comctl32_color.clrBtnFace);
 
   hdc = givenDC ? givenDC : GetDC(hwnd);
 
@@ -2183,7 +2326,7 @@ static void TAB_InvalidateTabArea(
     clientRect.top = clientRect.bottom -
                    infoPtr->tabHeight -
                    lastRow * (infoPtr->tabHeight - 2) -
-                   ((lStyle & TCS_BUTTONS) ? lastRow * BUTTON_SPACINGY : 0) - 2;
+                   ((lStyle & TCS_BUTTONS) ? lastRow * BUTTON_SPACINGY : 0) - 3;
   }
   else if((lStyle & TCS_BOTTOM) && (lStyle & TCS_VERTICAL))
   {
@@ -2195,16 +2338,19 @@ static void TAB_InvalidateTabArea(
   {
     clientRect.right = clientRect.left + infoPtr->tabHeight +
                        lastRow * (infoPtr->tabHeight - 2) -
-                      ((lStyle & TCS_BUTTONS) ? lastRow * BUTTON_SPACINGY : 0) + 1;
+                      ((lStyle & TCS_BUTTONS) ? lastRow * BUTTON_SPACINGY : 0) + 2;
 
   }
   else
   {
     clientRect.bottom = clientRect.top + infoPtr->tabHeight +
                       lastRow * (infoPtr->tabHeight - 2) +
-                      ((lStyle & TCS_BUTTONS) ? lastRow * BUTTON_SPACINGY : 0) + 1;
+                      ((lStyle & TCS_BUTTONS) ? lastRow * BUTTON_SPACINGY : 0) + 2;
   }
 
+  TRACE("invalidate (%d,%d)-(%d,%d)\n",
+	clientRect.left,clientRect.top,
+	clientRect.right,clientRect.bottom);
   InvalidateRect(hwnd, &clientRect, TRUE);
 }
 
@@ -2213,10 +2359,18 @@ TAB_Paint (HWND hwnd, WPARAM wParam)
 {
   HDC hdc;
   PAINTSTRUCT ps;
-    
+
   hdc = wParam== 0 ? BeginPaint (hwnd, &ps) : (HDC)wParam;
+
+  TRACE("erase %d, rect=(%d,%d)-(%d,%d)\n",
+	ps.fErase,
+	ps.rcPaint.left,ps.rcPaint.top,ps.rcPaint.right,ps.rcPaint.bottom);
+
+  if (ps.fErase)
+      TAB_EraseBackground (hwnd, hdc);
+
   TAB_Refresh (hwnd, hdc);
-    
+
   if(!wParam)
     EndPaint (hwnd, &ps);
 
@@ -2225,23 +2379,26 @@ TAB_Paint (HWND hwnd, WPARAM wParam)
 
 static LRESULT
 TAB_InsertItemA (HWND hwnd, WPARAM wParam, LPARAM lParam)
-{    
+{
   TAB_INFO *infoPtr = TAB_GetInfoPtr(hwnd);
   TCITEMA *pti;
   INT iItem;
   RECT rect;
-  
+
   GetClientRect (hwnd, &rect);
-  TRACE("Rect: %x T %i, L %i, B %i, R %i\n", hwnd,
-        rect.top, rect.left, rect.bottom, rect.right);  
-  
+  TRACE("Rect: %p T %i, L %i, B %i, R %i\n", hwnd,
+        rect.top, rect.left, rect.bottom, rect.right);
+
   pti = (TCITEMA *)lParam;
   iItem = (INT)wParam;
-  
+
   if (iItem < 0) return -1;
   if (iItem > infoPtr->uNumItem)
     iItem = infoPtr->uNumItem;
-  
+
+  TAB_DumpItemExternalA(pti, iItem);
+
+
   if (infoPtr->uNumItem == 0) {
     infoPtr->items = COMCTL32_Alloc (sizeof (TAB_ITEM));
     infoPtr->uNumItem++;
@@ -2249,21 +2406,21 @@ TAB_InsertItemA (HWND hwnd, WPARAM wParam, LPARAM lParam)
   }
   else {
     TAB_ITEM *oldItems = infoPtr->items;
-    
+
     infoPtr->uNumItem++;
     infoPtr->items = COMCTL32_Alloc (sizeof (TAB_ITEM) * infoPtr->uNumItem);
-    
+
     /* pre insert copy */
     if (iItem > 0) {
       memcpy (&infoPtr->items[0], &oldItems[0],
 	      iItem * sizeof(TAB_ITEM));
     }
-    
+
     /* post insert copy */
     if (iItem < infoPtr->uNumItem - 1) {
       memcpy (&infoPtr->items[iItem+1], &oldItems[iItem],
 	      (infoPtr->uNumItem - iItem - 1) * sizeof(TAB_ITEM));
-      
+
     }
 
     if (iItem <= infoPtr->iSelected)
@@ -2271,21 +2428,24 @@ TAB_InsertItemA (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
     COMCTL32_Free (oldItems);
   }
-  
+
   infoPtr->items[iItem].mask = pti->mask;
   if (pti->mask & TCIF_TEXT)
     Str_SetPtrAtoW (&infoPtr->items[iItem].pszText, pti->pszText);
 
   if (pti->mask & TCIF_IMAGE)
     infoPtr->items[iItem].iImage = pti->iImage;
-  
+
   if (pti->mask & TCIF_PARAM)
     infoPtr->items[iItem].lParam = pti->lParam;
-  
+
   TAB_SetItemBounds(hwnd);
-  TAB_InvalidateTabArea(hwnd, infoPtr);
-  
-  TRACE("[%04x]: added item %d %s\n",
+  if (infoPtr->uNumItem > 1)
+    TAB_InvalidateTabArea(hwnd, infoPtr);
+  else
+    InvalidateRect(hwnd, NULL, TRUE);
+
+  TRACE("[%p]: added item %d %s\n",
 	hwnd, iItem, debugstr_w(infoPtr->items[iItem].pszText));
 
   return iItem;
@@ -2301,7 +2461,7 @@ TAB_InsertItemW (HWND hwnd, WPARAM wParam, LPARAM lParam)
   RECT rect;
 
   GetClientRect (hwnd, &rect);
-  TRACE("Rect: %x T %i, L %i, B %i, R %i\n", hwnd,
+  TRACE("Rect: %p T %i, L %i, B %i, R %i\n", hwnd,
         rect.top, rect.left, rect.bottom, rect.right);
 
   pti = (TCITEMW *)lParam;
@@ -2310,6 +2470,8 @@ TAB_InsertItemW (HWND hwnd, WPARAM wParam, LPARAM lParam)
   if (iItem < 0) return -1;
   if (iItem > infoPtr->uNumItem)
     iItem = infoPtr->uNumItem;
+
+  TAB_DumpItemExternalW(pti, iItem);
 
   if (infoPtr->uNumItem == 0) {
     infoPtr->items = COMCTL32_Alloc (sizeof (TAB_ITEM));
@@ -2334,7 +2496,7 @@ TAB_InsertItemW (HWND hwnd, WPARAM wParam, LPARAM lParam)
 	      (infoPtr->uNumItem - iItem - 1) * sizeof(TAB_ITEM));
 
   }
-  
+
     if (iItem <= infoPtr->iSelected)
       infoPtr->iSelected++;
 
@@ -2347,43 +2509,50 @@ TAB_InsertItemW (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
   if (pti->mask & TCIF_IMAGE)
     infoPtr->items[iItem].iImage = pti->iImage;
-  
+
   if (pti->mask & TCIF_PARAM)
     infoPtr->items[iItem].lParam = pti->lParam;
-  
+
   TAB_SetItemBounds(hwnd);
-  TAB_InvalidateTabArea(hwnd, infoPtr);
-  
-  TRACE("[%04x]: added item %d %s\n",
+  if (infoPtr->uNumItem > 1)
+    TAB_InvalidateTabArea(hwnd, infoPtr);
+  else
+    InvalidateRect(hwnd, NULL, TRUE);
+
+  TRACE("[%p]: added item %d %s\n",
 	hwnd, iItem, debugstr_w(infoPtr->items[iItem].pszText));
 
   return iItem;
 }
 
 
-static LRESULT 
+static LRESULT
 TAB_SetItemSize (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
   TAB_INFO *infoPtr = TAB_GetInfoPtr(hwnd);
   LONG lStyle = GetWindowLongA(hwnd, GWL_STYLE);
   LONG lResult = 0;
 
+  TRACE("\n");
   if ((lStyle & TCS_FIXEDWIDTH) || (lStyle & TCS_OWNERDRAWFIXED))
   {
     lResult = MAKELONG(infoPtr->tabWidth, infoPtr->tabHeight);
     infoPtr->tabWidth = (INT)LOWORD(lParam);
     infoPtr->tabHeight = (INT)HIWORD(lParam);
+    TRACE("was h=%d,w=%d, now h=%d,w=%d\n",
+	  HIWORD(lResult), LOWORD(lResult),
+	  infoPtr->tabHeight, infoPtr->tabWidth);
   }
   infoPtr->fSizeSet = TRUE;
 
   return lResult;
 }
 
-static LRESULT 
+static LRESULT
 TAB_SetItemA (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
   TAB_INFO *infoPtr = TAB_GetInfoPtr(hwnd);
-  TCITEMA *tabItem; 
+  TCITEMA *tabItem;
   TAB_ITEM *wineItem;
   INT    iItem;
 
@@ -2393,6 +2562,8 @@ TAB_SetItemA (HWND hwnd, WPARAM wParam, LPARAM lParam)
   TRACE("%d %p\n", iItem, tabItem);
   if ((iItem<0) || (iItem>=infoPtr->uNumItem)) return FALSE;
 
+  TAB_DumpItemExternalA(tabItem, iItem);
+
   wineItem = &infoPtr->items[iItem];
 
   if (tabItem->mask & TCIF_IMAGE)
@@ -2401,10 +2572,10 @@ TAB_SetItemA (HWND hwnd, WPARAM wParam, LPARAM lParam)
   if (tabItem->mask & TCIF_PARAM)
     wineItem->lParam = tabItem->lParam;
 
-  if (tabItem->mask & TCIF_RTLREADING) 
+  if (tabItem->mask & TCIF_RTLREADING)
     FIXME("TCIF_RTLREADING\n");
 
-  if (tabItem->mask & TCIF_STATE) 
+  if (tabItem->mask & TCIF_STATE)
     wineItem->dwState = tabItem->dwState;
 
   if (tabItem->mask & TCIF_TEXT)
@@ -2432,6 +2603,8 @@ TAB_SetItemW (HWND hwnd, WPARAM wParam, LPARAM lParam)
   TRACE("%d %p\n", iItem, tabItem);
   if ((iItem<0) || (iItem>=infoPtr->uNumItem)) return FALSE;
 
+  TAB_DumpItemExternalW(tabItem, iItem);
+
   wineItem = &infoPtr->items[iItem];
 
   if (tabItem->mask & TCIF_IMAGE)
@@ -2457,7 +2630,7 @@ TAB_SetItemW (HWND hwnd, WPARAM wParam, LPARAM lParam)
 }
 
 
-static LRESULT 
+static LRESULT
 TAB_GetItemCount (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
    TAB_INFO *infoPtr = TAB_GetInfoPtr(hwnd);
@@ -2466,7 +2639,7 @@ TAB_GetItemCount (HWND hwnd, WPARAM wParam, LPARAM lParam)
 }
 
 
-static LRESULT 
+static LRESULT
 TAB_GetItemA (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
    TAB_INFO *infoPtr = TAB_GetInfoPtr(hwnd);
@@ -2482,26 +2655,28 @@ TAB_GetItemA (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
   wineItem = &infoPtr->items[iItem];
 
-  if (tabItem->mask & TCIF_IMAGE) 
+  if (tabItem->mask & TCIF_IMAGE)
     tabItem->iImage = wineItem->iImage;
 
-  if (tabItem->mask & TCIF_PARAM) 
+  if (tabItem->mask & TCIF_PARAM)
     tabItem->lParam = wineItem->lParam;
 
-  if (tabItem->mask & TCIF_RTLREADING) 
+  if (tabItem->mask & TCIF_RTLREADING)
     FIXME("TCIF_RTLREADING\n");
 
-  if (tabItem->mask & TCIF_STATE) 
+  if (tabItem->mask & TCIF_STATE)
     tabItem->dwState = wineItem->dwState;
 
-  if (tabItem->mask & TCIF_TEXT) 
+  if (tabItem->mask & TCIF_TEXT)
    Str_GetPtrWtoA (wineItem->pszText, tabItem->pszText, tabItem->cchTextMax);
+
+  TAB_DumpItemExternalA(tabItem, iItem);
 
   return TRUE;
 }
 
 
-static LRESULT 
+static LRESULT
 TAB_GetItemW (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
   TAB_INFO *infoPtr = TAB_GetInfoPtr(hwnd);
@@ -2532,11 +2707,13 @@ TAB_GetItemW (HWND hwnd, WPARAM wParam, LPARAM lParam)
   if (tabItem->mask & TCIF_TEXT)
    Str_GetPtrW (wineItem->pszText, tabItem->pszText, tabItem->cchTextMax);
 
+  TAB_DumpItemExternalW(tabItem, iItem);
+
   return TRUE;
 }
 
 
-static LRESULT 
+static LRESULT
 TAB_DeleteItem (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
   TAB_INFO *infoPtr = TAB_GetInfoPtr(hwnd);
@@ -2546,23 +2723,23 @@ TAB_DeleteItem (HWND hwnd, WPARAM wParam, LPARAM lParam)
   if ((iItem >= 0) && (iItem < infoPtr->uNumItem))
   {
     TAB_ITEM *oldItems = infoPtr->items;
-    
+
     infoPtr->uNumItem--;
     infoPtr->items = COMCTL32_Alloc(sizeof (TAB_ITEM) * infoPtr->uNumItem);
-    
-    if (iItem > 0) 
+
+    if (iItem > 0)
       memcpy(&infoPtr->items[0], &oldItems[0], iItem * sizeof(TAB_ITEM));
-    
-    if (iItem < infoPtr->uNumItem) 
+
+    if (iItem < infoPtr->uNumItem)
       memcpy(&infoPtr->items[iItem], &oldItems[iItem + 1],
               (infoPtr->uNumItem - iItem) * sizeof(TAB_ITEM));
-    
+
     COMCTL32_Free(oldItems);
 
     /* Readjust the selected index */
     if ((iItem == infoPtr->iSelected) && (iItem > 0))
       infoPtr->iSelected--;
-      
+
     if (iItem < infoPtr->iSelected)
       infoPtr->iSelected--;
 
@@ -2579,7 +2756,7 @@ TAB_DeleteItem (HWND hwnd, WPARAM wParam, LPARAM lParam)
   return bResult;
 }
 
-static LRESULT 
+static LRESULT
 TAB_DeleteAllItems (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
    TAB_INFO *infoPtr = TAB_GetInfoPtr(hwnd);
@@ -2590,7 +2767,7 @@ TAB_DeleteAllItems (HWND hwnd, WPARAM wParam, LPARAM lParam)
   if (infoPtr->iHotTracked >= 0)
     KillTimer(hwnd, TAB_HOTTRACK_TIMER);
   infoPtr->iHotTracked = -1;
- 
+
   TAB_SetItemBounds(hwnd);
   TAB_InvalidateTabArea(hwnd,infoPtr);
   return TRUE;
@@ -2611,11 +2788,11 @@ TAB_SetFont (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
 {
   TAB_INFO *infoPtr = TAB_GetInfoPtr(hwnd);
-  
+
   TRACE("%x %lx\n",wParam, lParam);
-  
+
   infoPtr->hFont = (HFONT)wParam;
-  
+
   TAB_SetItemBounds(hwnd);
 
   TAB_InvalidateTabArea(hwnd, infoPtr);
@@ -2682,7 +2859,7 @@ TAB_Size (HWND hwnd, WPARAM wParam, LPARAM lParam)
     GetClientRect(parent, &parent_rect);
     cx=LOWORD (lParam);
     cy=HIWORD (lParam);
-    if (GetWindowLongA(hwnd, GWL_STYLE) & CCS_NORESIZE) 
+    if (GetWindowLongA(hwnd, GWL_STYLE) & CCS_NORESIZE)
         uPosFlags |= (SWP_NOSIZE | SWP_NOMOVE);
 
     SetWindowPos (hwnd, 0, parent_rect.left, parent_rect.top,
@@ -2701,7 +2878,7 @@ TAB_Size (HWND hwnd, WPARAM wParam, LPARAM lParam)
 }
 
 
-static LRESULT 
+static LRESULT
 TAB_Create (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
   TAB_INFO *infoPtr;
@@ -2713,7 +2890,7 @@ TAB_Create (HWND hwnd, WPARAM wParam, LPARAM lParam)
   infoPtr = (TAB_INFO *)COMCTL32_Alloc (sizeof(TAB_INFO));
 
   SetWindowLongA(hwnd, 0, (DWORD)infoPtr);
-   
+
   infoPtr->uNumItem        = 0;
   infoPtr->uNumRows        = 0;
   infoPtr->hFont           = 0;
@@ -2721,7 +2898,7 @@ TAB_Create (HWND hwnd, WPARAM wParam, LPARAM lParam)
   infoPtr->hcurArrow       = LoadCursorA (0, IDC_ARROWA);
   infoPtr->iSelected       = -1;
   infoPtr->iHotTracked     = -1;
-  infoPtr->uFocus          = -1;  
+  infoPtr->uFocus          = -1;
   infoPtr->hwndToolTip     = 0;
   infoPtr->DoRedraw        = TRUE;
   infoPtr->needsScrolling  = FALSE;
@@ -2729,11 +2906,11 @@ TAB_Create (HWND hwnd, WPARAM wParam, LPARAM lParam)
   infoPtr->leftmostVisible = 0;
   infoPtr->fSizeSet	   = FALSE;
   infoPtr->bUnicode	   = IsWindowUnicode (hwnd);
-  
-  TRACE("Created tab control, hwnd [%04x]\n", hwnd); 
 
-  /* The tab control always has the WS_CLIPSIBLINGS style. Even 
-     if you don't specify it in CreateWindow. This is necessary in 
+  TRACE("Created tab control, hwnd [%p]\n", hwnd);
+
+  /* The tab control always has the WS_CLIPSIBLINGS style. Even
+     if you don't specify it in CreateWindow. This is necessary in
      order for paint to work correctly. This follows windows behaviour. */
   dwStyle = GetWindowLongA(hwnd, GWL_STYLE);
   SetWindowLongA(hwnd, GWL_STYLE, dwStyle|WS_CLIPSIBLINGS);
@@ -2745,40 +2922,43 @@ TAB_Create (HWND hwnd, WPARAM wParam, LPARAM lParam)
 		       CW_USEDEFAULT, CW_USEDEFAULT,
 		       CW_USEDEFAULT, CW_USEDEFAULT,
 		       hwnd, 0, 0, 0);
-    
+
     /* Send NM_TOOLTIPSCREATED notification */
     if (infoPtr->hwndToolTip) {
       NMTOOLTIPSCREATED nmttc;
-      
+
       nmttc.hdr.hwndFrom = hwnd;
       nmttc.hdr.idFrom = GetWindowLongA(hwnd, GWL_ID);
       nmttc.hdr.code = NM_TOOLTIPSCREATED;
       nmttc.hwndToolTips = infoPtr->hwndToolTip;
-      
+
       SendMessageA (GetParent (hwnd), WM_NOTIFY,
 		    (WPARAM)GetWindowLongA(hwnd, GWL_ID), (LPARAM)&nmttc);
     }
-  }  
-    
+  }
+
   /*
    * We need to get text information so we need a DC and we need to select
    * a font.
    */
-  hdc = GetDC(hwnd); 
+  hdc = GetDC(hwnd);
   hOldFont = SelectObject (hdc, GetStockObject (SYSTEM_FONT));
 
   /* Use the system font to determine the initial height of a tab. */
   GetTextMetricsA(hdc, &fontMetrics);
 
   /*
-   * Make sure there is enough space for the letters + growing the 
-   * selected item + extra space for the selected item.   
+   * Make sure there is enough space for the letters + growing the
+   * selected item + extra space for the selected item.
    */
-  infoPtr->tabHeight = fontMetrics.tmHeight + 2 * VERTICAL_ITEM_PADDING +
-                       SELECTED_TAB_OFFSET;
+  infoPtr->tabHeight = fontMetrics.tmHeight + SELECTED_TAB_OFFSET +
+	               ((dwStyle & TCS_BUTTONS) ? 2 : 1) *
+                        VERTICAL_ITEM_PADDING;
 
   /* Initialize the width of a tab. */
   infoPtr->tabWidth = DEFAULT_TAB_WIDTH;
+
+  TRACE("tabH=%d, tabW=%d\n", infoPtr->tabHeight, infoPtr->tabWidth);
 
   SelectObject (hdc, hOldFont);
   ReleaseDC(hwnd, hdc);
@@ -2802,10 +2982,10 @@ TAB_Destroy (HWND hwnd, WPARAM wParam, LPARAM lParam)
     }
     COMCTL32_Free (infoPtr->items);
   }
-  
-  if (infoPtr->hwndToolTip) 
+
+  if (infoPtr->hwndToolTip)
     DestroyWindow (infoPtr->hwndToolTip);
- 
+
   if (infoPtr->hwndUpDown)
     DestroyWindow(infoPtr->hwndUpDown);
 
@@ -2821,7 +3001,7 @@ static LRESULT WINAPI
 TAB_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 
-    TRACE("hwnd=%x msg=%x wParam=%x lParam=%lx\n", hwnd, uMsg, wParam, lParam);
+    TRACE("hwnd=%p msg=%x wParam=%x lParam=%lx\n", hwnd, uMsg, wParam, lParam);
     if (!TAB_GetInfoPtr(hwnd) && (uMsg != WM_CREATE))
       return DefWindowProcA (hwnd, uMsg, wParam, lParam);
 
@@ -2829,67 +3009,67 @@ TAB_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     {
     case TCM_GETIMAGELIST:
       return TAB_GetImageList (hwnd, wParam, lParam);
-      
+
     case TCM_SETIMAGELIST:
       return TAB_SetImageList (hwnd, wParam, lParam);
-      
+
     case TCM_GETITEMCOUNT:
       return TAB_GetItemCount (hwnd, wParam, lParam);
-      
+
     case TCM_GETITEMA:
       return TAB_GetItemA (hwnd, wParam, lParam);
-      
+
     case TCM_GETITEMW:
       return TAB_GetItemW (hwnd, wParam, lParam);
-      
+
     case TCM_SETITEMA:
       return TAB_SetItemA (hwnd, wParam, lParam);
-      
+
     case TCM_SETITEMW:
       return TAB_SetItemW (hwnd, wParam, lParam);
-      
+
     case TCM_DELETEITEM:
       return TAB_DeleteItem (hwnd, wParam, lParam);
-      
+
     case TCM_DELETEALLITEMS:
      return TAB_DeleteAllItems (hwnd, wParam, lParam);
-     
+
     case TCM_GETITEMRECT:
      return TAB_GetItemRect (hwnd, wParam, lParam);
-      
+
     case TCM_GETCURSEL:
       return TAB_GetCurSel (hwnd);
-      
+
     case TCM_HITTEST:
       return TAB_HitTest (hwnd, wParam, lParam);
-      
+
     case TCM_SETCURSEL:
       return TAB_SetCurSel (hwnd, wParam);
-      
+
     case TCM_INSERTITEMA:
       return TAB_InsertItemA (hwnd, wParam, lParam);
-      
+
     case TCM_INSERTITEMW:
       return TAB_InsertItemW (hwnd, wParam, lParam);
-      
+
     case TCM_SETITEMEXTRA:
       FIXME("Unimplemented msg TCM_SETITEMEXTRA\n");
       return 0;
-      
+
     case TCM_ADJUSTRECT:
       return TAB_AdjustRect (hwnd, (BOOL)wParam, (LPRECT)lParam);
-      
+
     case TCM_SETITEMSIZE:
       return TAB_SetItemSize (hwnd, wParam, lParam);
-      
+
     case TCM_REMOVEIMAGE:
       FIXME("Unimplemented msg TCM_REMOVEIMAGE\n");
       return 0;
-      
+
     case TCM_SETPADDING:
       FIXME("Unimplemented msg TCM_SETPADDING\n");
       return 0;
-      
+
     case TCM_GETROWCOUNT:
       return TAB_GetRowCount(hwnd);
 
@@ -2902,27 +3082,27 @@ TAB_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     case TCM_HIGHLIGHTITEM:
       FIXME("Unimplemented msg TCM_HIGHLIGHTITEM\n");
       return 0;
-      
+
     case TCM_GETTOOLTIPS:
       return TAB_GetToolTips (hwnd, wParam, lParam);
-      
+
     case TCM_SETTOOLTIPS:
       return TAB_SetToolTips (hwnd, wParam, lParam);
-      
+
     case TCM_GETCURFOCUS:
       return TAB_GetCurFocus (hwnd);
-      
+
     case TCM_SETCURFOCUS:
       return TAB_SetCurFocus (hwnd, wParam);
-      
+
     case TCM_SETMINTABWIDTH:
       FIXME("Unimplemented msg TCM_SETMINTABWIDTH\n");
       return 0;
-      
+
     case TCM_DESELECTALL:
       FIXME("Unimplemented msg TCM_DESELECTALL\n");
       return 0;
-      
+
     case TCM_GETEXTENDEDSTYLE:
       FIXME("Unimplemented msg TCM_GETEXTENDEDSTYLE\n");
       return 0;
@@ -2933,34 +3113,34 @@ TAB_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
     case WM_GETFONT:
       return TAB_GetFont (hwnd, wParam, lParam);
-      
+
     case WM_SETFONT:
       return TAB_SetFont (hwnd, wParam, lParam);
-      
+
     case WM_CREATE:
       return TAB_Create (hwnd, wParam, lParam);
-      
+
     case WM_NCDESTROY:
       return TAB_Destroy (hwnd, wParam, lParam);
-      
+
     case WM_GETDLGCODE:
       return DLGC_WANTARROWS | DLGC_WANTCHARS;
-      
+
     case WM_LBUTTONDOWN:
       return TAB_LButtonDown (hwnd, wParam, lParam);
-      
+
     case WM_LBUTTONUP:
       return TAB_LButtonUp (hwnd, wParam, lParam);
-     
+
     case WM_NOTIFY:
       return SendMessageA(GetParent(hwnd), WM_NOTIFY, wParam, lParam);
- 
+
     case WM_RBUTTONDOWN:
       return TAB_RButtonDown (hwnd, wParam, lParam);
-      
+
     case WM_MOUSEMOVE:
       return TAB_MouseMove (hwnd, wParam, lParam);
-      
+
     case WM_ERASEBKGND:
       return TAB_EraseBackground (hwnd, (HDC)wParam);
 
@@ -2969,7 +3149,7 @@ TAB_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
     case WM_SIZE:
       return TAB_Size (hwnd, wParam, lParam);
-      
+
     case WM_SETREDRAW:
       return TAB_SetRedraw (hwnd, wParam);
 
@@ -2980,7 +3160,11 @@ TAB_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
       TAB_SetItemBounds (hwnd);
       InvalidateRect(hwnd, NULL, TRUE);
       return 0;
-      
+
+    case WM_SYSCOLORCHANGE:
+      COMCTL32_RefreshSysColors();
+      return 0;
+
     case WM_KILLFOCUS:
     case WM_SETFOCUS:
       return TAB_FocusChanging(hwnd, uMsg, wParam, lParam);
@@ -2991,7 +3175,7 @@ TAB_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
       return TAB_NCHitTest(hwnd, lParam);
 
     default:
-      if (uMsg >= WM_USER)
+      if ((uMsg >= WM_USER) && (uMsg < WM_APP))
 	WARN("unknown msg %04x wp=%08x lp=%08lx\n",
 	     uMsg, wParam, lParam);
       return DefWindowProcA(hwnd, uMsg, wParam, lParam);
@@ -3014,7 +3198,7 @@ TAB_Register (void)
   wndClass.hCursor       = LoadCursorA (0, IDC_ARROWA);
   wndClass.hbrBackground = (HBRUSH)NULL;
   wndClass.lpszClassName = WC_TABCONTROLA;
-  
+
   RegisterClassA (&wndClass);
 }
 

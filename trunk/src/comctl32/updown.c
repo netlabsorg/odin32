@@ -1,4 +1,4 @@
-/*		
+/*
  * Updown control
  *
  * Copyright 1997, 2002 Dimitrie O. Paun
@@ -17,6 +17,15 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
+ * NOTE
+ * 
+ * This code was audited for completeness against the documented features
+ * of Comctl32.dll version 6.0 on Sep. 9, 2002, by Dimitrie O. Paun.
+ * 
+ * Unless otherwise noted, we believe this code to be complete, as per
+ * the specification mentioned above.
+ * If you discover missing features, or bugs, please note them below.
+ * 
  */
 
 #include <stdlib.h>
@@ -29,11 +38,8 @@
 #include "winuser.h"
 #include "commctrl.h"
 #include "winnls.h"
-#include "ntddk.h"
+#include "wine/unicode.h"
 #include "wine/debug.h"
-#ifdef __WIN32OS2__
-#include "comctl32.h"
-#endif
 
 WINE_DEFAULT_DEBUG_CHANNEL(updown);
 
@@ -85,10 +91,6 @@ typedef struct
 
 #define BUDDY_UPDOWN_HWND        "buddyUpDownHWND"
 #define BUDDY_SUPERCLASS_WNDPROC "buddySupperClassWndProc"
-
-#define UNKNOWN_PARAM(msg, wParam, lParam) WARN(\
-        "Unknown parameter(s) for message " #msg \
-	"(%04x): wp=%04x lp=%08lx\n", msg, wParam, lParam);
 
 #define UPDOWN_GetInfoPtr(hwnd) ((UPDOWN_INFO *)GetWindowLongA (hwnd,0))
 #define COUNT_OF(a) (sizeof(a)/sizeof(a[0]))
@@ -154,7 +156,7 @@ static BOOL UPDOWN_OffsetVal(UPDOWN_INFO *infoPtr, int delta)
  * want to draw a sunken edge to make like we are part of that control.
  */
 static BOOL UPDOWN_HasBuddyBorder(UPDOWN_INFO* infoPtr)
-{  
+{
     DWORD dwStyle = GetWindowLongW (infoPtr->Self, GWL_STYLE);
 
     return  ( ((dwStyle & (UDS_ALIGNLEFT | UDS_ALIGNRIGHT)) != 0) &&
@@ -184,7 +186,7 @@ static void UPDOWN_GetArrowRect (UPDOWN_INFO* infoPtr, RECT *rect, int arrow)
             rect->left += DEFAULT_BUDDYBORDER;
         else
             rect->right -= DEFAULT_BUDDYBORDER;
-    
+
         InflateRect(rect, 0, -DEFAULT_BUDDYBORDER);
     }
 
@@ -193,7 +195,7 @@ static void UPDOWN_GetArrowRect (UPDOWN_INFO* infoPtr, RECT *rect, int arrow)
 	if (dwStyle & UDS_ALIGNLEFT) rect->right -= DEFAULT_BUDDYSPACER;
 	else rect->left += DEFAULT_BUDDYSPACER;
     }
-    
+
     /*
      * We're calculating the midpoint to figure-out where the
      * separation between the buttons will lay. We make sure that we
@@ -202,7 +204,7 @@ static void UPDOWN_GetArrowRect (UPDOWN_INFO* infoPtr, RECT *rect, int arrow)
     if (dwStyle & UDS_HORZ) {
         int len = rect->right - rect->left + 1; /* compute the width */
         if (arrow & FLAG_INCR)
-            rect->left = rect->left + len/2; 
+            rect->left = rect->left + len/2;
         if (arrow & FLAG_DECR)
             rect->right =  rect->left + len/2 - 1;
     } else {
@@ -270,7 +272,7 @@ static BOOL UPDOWN_GetBuddyInt (UPDOWN_INFO *infoPtr)
         /* we have a regular window, so will get the text */
         if (!GetWindowTextW(infoPtr->Buddy, txt, COUNT_OF(txt))) return FALSE;
 
-        sep = UPDOWN_GetThousandSep(); 
+        sep = UPDOWN_GetThousandSep();
 
         /* now get rid of the separators */
         for(src = dst = txt; *src; src++)
@@ -278,10 +280,10 @@ static BOOL UPDOWN_GetBuddyInt (UPDOWN_INFO *infoPtr)
         *dst = 0;
 
         /* try to convert the number and validate it */
-        newVal = wcstol(txt, &src, infoPtr->Base);
+        newVal = strtolW(txt, &src, infoPtr->Base);
         if(*src || !UPDOWN_InBounds (infoPtr, newVal)) return FALSE;
     }
-  
+
     TRACE("new value(%d) from buddy (old=%d)\n", newVal, infoPtr->CurVal);
     infoPtr->CurVal = newVal;
     return TRUE;
@@ -309,10 +311,10 @@ static BOOL UPDOWN_SetBuddyInt (UPDOWN_INFO *infoPtr)
     if (UPDOWN_IsBuddyListbox(infoPtr)) {
         return SendMessageW(infoPtr->Buddy, LB_SETCURSEL, infoPtr->CurVal, 0) != LB_ERR;
     }
-   
+
     /* Regular window, so set caption to the number */
     if (infoPtr->Base == 16) fmt[1] = 'X';
-    len = swprintf(txt, fmt, infoPtr->CurVal);
+    len = wsprintfW(txt, fmt, infoPtr->CurVal);
 
 
     /* Do thousands seperation if necessary */
@@ -320,7 +322,7 @@ static BOOL UPDOWN_SetBuddyInt (UPDOWN_INFO *infoPtr)
         WCHAR tmp[COUNT_OF(txt)], *src = tmp, *dst = txt;
         WCHAR sep = UPDOWN_GetThousandSep();
 	int start = len % 3;
-	
+
 	memcpy(tmp, txt, sizeof(txt));
 	if (start == 0) start = 3;
 	dst += start;
@@ -331,9 +333,9 @@ static BOOL UPDOWN_SetBuddyInt (UPDOWN_INFO *infoPtr)
         }
         *dst = 0;
     }
-    
+
     return SetWindowTextW(infoPtr->Buddy, txt);
-} 
+}
 
 /***********************************************************************
  * UPDOWN_Draw
@@ -349,16 +351,16 @@ static LRESULT UPDOWN_Draw (UPDOWN_INFO *infoPtr, HDC hdc)
     /* Draw the common border between ourselves and our buddy */
     if (UPDOWN_HasBuddyBorder(infoPtr)) {
 	GetClientRect(infoPtr->Self, &rect);
-	DrawEdge(hdc, &rect, EDGE_SUNKEN, 
-		 BF_BOTTOM | BF_TOP | 
+	DrawEdge(hdc, &rect, EDGE_SUNKEN,
+		 BF_BOTTOM | BF_TOP |
 		 (dwStyle & UDS_ALIGNLEFT ? BF_LEFT : BF_RIGHT));
     }
-  
+
     /* Draw the incr button */
     UPDOWN_GetArrowRect (infoPtr, &rect, FLAG_INCR);
     pressed = (infoPtr->Flags & FLAG_PRESSED) && (infoPtr->Flags & FLAG_INCR);
     hot = (infoPtr->Flags & FLAG_INCR) && (infoPtr->Flags & FLAG_MOUSEIN);
-    DrawFrameControl(hdc, &rect, DFC_SCROLL, 
+    DrawFrameControl(hdc, &rect, DFC_SCROLL,
 	(dwStyle & UDS_HORZ ? DFCS_SCROLLRIGHT : DFCS_SCROLLUP) |
         ((dwStyle & UDS_HOTTRACK) && hot ? DFCS_HOT : 0) |
 	(pressed ? DFCS_PUSHED : 0) |
@@ -368,7 +370,7 @@ static LRESULT UPDOWN_Draw (UPDOWN_INFO *infoPtr, HDC hdc)
     UPDOWN_GetArrowRect(infoPtr, &rect, FLAG_DECR);
     pressed = (infoPtr->Flags & FLAG_PRESSED) && (infoPtr->Flags & FLAG_DECR);
     hot = (infoPtr->Flags & FLAG_DECR) && (infoPtr->Flags & FLAG_MOUSEIN);
-    DrawFrameControl(hdc, &rect, DFC_SCROLL, 
+    DrawFrameControl(hdc, &rect, DFC_SCROLL,
 	(dwStyle & UDS_HORZ ? DFCS_SCROLLLEFT : DFCS_SCROLLDOWN) |
         ((dwStyle & UDS_HOTTRACK) && hot ? DFCS_HOT : 0) |
 	(pressed ? DFCS_PUSHED : 0) |
@@ -401,11 +403,11 @@ static LRESULT UPDOWN_Paint (UPDOWN_INFO *infoPtr, HDC hdc)
 static LRESULT UPDOWN_KeyPressed(UPDOWN_INFO *infoPtr, int key)
 {
     int arrow;
-    
+
     if (key == VK_UP) arrow = FLAG_INCR;
     else if (key == VK_DOWN) arrow = FLAG_DECR;
     else return 1;
-    
+
     UPDOWN_GetBuddyInt (infoPtr);
     infoPtr->Flags &= ~FLAG_ARROW;
     infoPtr->Flags |= FLAG_PRESSED | arrow;
@@ -416,19 +418,19 @@ static LRESULT UPDOWN_KeyPressed(UPDOWN_INFO *infoPtr, int key)
 }
 
 /***********************************************************************
- * UPDOWN_Buddy_SubclassProc used to handle messages sent to the buddy 
+ * UPDOWN_Buddy_SubclassProc used to handle messages sent to the buddy
  *                           control.
  */
-static LRESULT CALLBACK 
+static LRESULT CALLBACK
 UPDOWN_Buddy_SubclassProc(HWND  hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     WNDPROC superClassWndProc = (WNDPROC)GetPropA(hwnd, BUDDY_SUPERCLASS_WNDPROC);
-    TRACE("hwnd=%04x, wndProc=%d, uMsg=%04x, wParam=%d, lParam=%d\n", 
+    TRACE("hwnd=%p, wndProc=%d, uMsg=%04x, wParam=%d, lParam=%d\n",
 	  hwnd, (INT)superClassWndProc, uMsg, wParam, (UINT)lParam);
 
     if (uMsg == WM_KEYDOWN) {
         HWND upDownHwnd = GetPropA(hwnd, BUDDY_UPDOWN_HWND);
-      
+
 	UPDOWN_KeyPressed(UPDOWN_GetInfoPtr(upDownHwnd), (int)wParam);
     }
 
@@ -439,7 +441,7 @@ UPDOWN_Buddy_SubclassProc(HWND  hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
  *           UPDOWN_SetBuddy
  * Tests if 'bud' is a valid window handle. If not, returns FALSE.
  * Else, sets it as a new Buddy.
- * Then, it should subclass the buddy 
+ * Then, it should subclass the buddy
  * If window has the UDS_ARROWKEYS, it subcalsses the buddy window to
  * process the UP/DOWN arrow keys.
  * If window has the UDS_ALIGNLEFT or UDS_ALIGNRIGHT style
@@ -450,22 +452,22 @@ static BOOL UPDOWN_SetBuddy (UPDOWN_INFO* infoPtr, HWND bud)
     DWORD dwStyle = GetWindowLongW (infoPtr->Self, GWL_STYLE);
     RECT  budRect;  /* new coord for the buddy */
     int   x, width;  /* new x position and width for the up-down */
-    WNDPROC baseWndProc, currWndProc;
+    WNDPROC baseWndProc;
     CHAR buddyClass[40];
- 	  
+
     /* Is it a valid bud? */
     if(!IsWindow(bud)) return FALSE;
 
-    TRACE("(hwnd=%04x, bud=%04x)\n", infoPtr->Self, bud);
-    
+    TRACE("(hwnd=%p, bud=%p)\n", infoPtr->Self, bud);
+
     /* there is already a body assigned */
     if (infoPtr->Buddy)  RemovePropA(infoPtr->Buddy, BUDDY_UPDOWN_HWND);
 
     /* Store buddy window handle */
-    infoPtr->Buddy = bud;   
+    infoPtr->Buddy = bud;
 
-    /* keep upDown ctrl hwnd in a buddy property */            
-    SetPropA( bud, BUDDY_UPDOWN_HWND, infoPtr->Self); 
+    /* keep upDown ctrl hwnd in a buddy property */
+    SetPropA( bud, BUDDY_UPDOWN_HWND, infoPtr->Self);
 
     /* Store buddy window class type */
     infoPtr->BuddyType = BUDDY_TYPE_UNKNOWN;
@@ -477,12 +479,11 @@ static BOOL UPDOWN_SetBuddy (UPDOWN_INFO* infoPtr, HWND bud)
     }
 
     if(dwStyle & UDS_ARROWKEYS){
-        /* Note that I don't clear the BUDDY_SUPERCLASS_WNDPROC property 
-           when we reset the upDown ctrl buddy to another buddy because it is not 
+        /* Note that I don't clear the BUDDY_SUPERCLASS_WNDPROC property
+           when we reset the upDown ctrl buddy to another buddy because it is not
            good to break the window proc chain. */
-	currWndProc = (WNDPROC) GetWindowLongW(bud, GWL_WNDPROC);
-	if (currWndProc != UPDOWN_Buddy_SubclassProc) {
-	    baseWndProc = (WNDPROC)SetWindowLongW(bud, GWL_WNDPROC, (LPARAM)UPDOWN_Buddy_SubclassProc); 
+	if (!GetPropA(bud, BUDDY_SUPERCLASS_WNDPROC)) {
+	    baseWndProc = (WNDPROC)SetWindowLongW(bud, GWL_WNDPROC, (LPARAM)UPDOWN_Buddy_SubclassProc);
  	    SetPropA(bud, BUDDY_SUPERCLASS_WNDPROC, (HANDLE)baseWndProc);
 	}
     }
@@ -504,7 +505,7 @@ static BOOL UPDOWN_SetBuddy (UPDOWN_INFO* infoPtr, HWND bud)
 
     /* first adjust the buddy to accomodate the up/down */
     SetWindowPos(infoPtr->Buddy, 0, budRect.left, budRect.top,
-	         budRect.right  - budRect.left, budRect.bottom - budRect.top, 
+	         budRect.right  - budRect.left, budRect.bottom - budRect.top,
 	         SWP_NOACTIVATE|SWP_NOZORDER);
 
     /* now position the up/down */
@@ -514,7 +515,7 @@ static BOOL UPDOWN_SetBuddy (UPDOWN_INFO* infoPtr, HWND bud)
 
     /*
      * If the updown has a buddy border, it has to overlap with the buddy
-     * to look as if it is integrated with the buddy control. 
+     * to look as if it is integrated with the buddy control.
      * We nudge the control or change it size to overlap.
      */
     if (UPDOWN_HasBuddyBorder(infoPtr)) {
@@ -524,18 +525,18 @@ static BOOL UPDOWN_SetBuddy (UPDOWN_INFO* infoPtr, HWND bud)
             x -= DEFAULT_BUDDYBORDER;
     }
 
-    SetWindowPos(infoPtr->Self, infoPtr->Buddy, x, 
-		 budRect.top - DEFAULT_ADDTOP, width, 
+    SetWindowPos(infoPtr->Self, infoPtr->Buddy, x,
+		 budRect.top - DEFAULT_ADDTOP, width,
 		 budRect.bottom - budRect.top + DEFAULT_ADDTOP + DEFAULT_ADDBOT,
 		 SWP_NOACTIVATE);
 
     return TRUE;
-}	  
+}
 
 /***********************************************************************
  *           UPDOWN_DoAction
  *
- * This function increments/decrements the CurVal by the 
+ * This function increments/decrements the CurVal by the
  * 'delta' amount according to the 'action' flag which can be a
  * combination of FLAG_INCR and FLAG_DECR
  * It notifies the parent as required.
@@ -558,7 +559,7 @@ static void UPDOWN_DoAction (UPDOWN_INFO *infoPtr, int delta, int action)
     ni.iDelta = delta;
     ni.hdr.hwndFrom = infoPtr->Self;
     ni.hdr.idFrom   = GetWindowLongW (infoPtr->Self, GWL_ID);
-    ni.hdr.code = UDN_DELTAPOS; 
+    ni.hdr.code = UDN_DELTAPOS;
     if (!SendMessageW(GetParent (infoPtr->Self), WM_NOTIFY,
 		   (WPARAM)ni.hdr.idFrom, (LPARAM)&ni)) {
         /* Parent said: OK to adjust */
@@ -569,11 +570,12 @@ static void UPDOWN_DoAction (UPDOWN_INFO *infoPtr, int delta, int action)
             if (dwStyle & UDS_SETBUDDYINT) UPDOWN_SetBuddyInt (infoPtr);
         }
     }
-  
+
     /* Also, notify it. This message is sent in any case. */
-    SendMessageW( GetParent(infoPtr->Self), 
-		  dwStyle & UDS_HORZ ? WM_HSCROLL : WM_VSCROLL, 
-		  MAKELONG(SB_THUMBPOSITION, infoPtr->CurVal), infoPtr->Self);
+    SendMessageW( GetParent(infoPtr->Self),
+		  dwStyle & UDS_HORZ ? WM_HSCROLL : WM_VSCROLL,
+		  MAKELONG(SB_THUMBPOSITION, infoPtr->CurVal),
+		  (LPARAM)infoPtr->Self);
 }
 
 /***********************************************************************
@@ -596,17 +598,17 @@ static BOOL UPDOWN_IsEnabled (UPDOWN_INFO *infoPtr)
  *
  * Deletes any timers, releases the mouse and does  redraw if necessary.
  * If the control is not in "capture" mode, it does nothing.
- * If the control was not in cancel mode, it returns FALSE. 
+ * If the control was not in cancel mode, it returns FALSE.
  * If the control was in cancel mode, it returns TRUE.
  */
 static BOOL UPDOWN_CancelMode (UPDOWN_INFO *infoPtr)
 {
     if (!(infoPtr->Flags & FLAG_PRESSED)) return FALSE;
-    
+
     KillTimer (infoPtr->Self, TIMER_AUTOREPEAT);
     KillTimer (infoPtr->Self, TIMER_ACCEL);
     KillTimer (infoPtr->Self, TIMER_AUTOPRESS);
-  
+
     if (GetCapture() == infoPtr->Self) {
 	NMHDR hdr;
 	hdr.hwndFrom = infoPtr->Self;
@@ -615,10 +617,10 @@ static BOOL UPDOWN_CancelMode (UPDOWN_INFO *infoPtr)
 	SendMessageW(GetParent (infoPtr->Self), WM_NOTIFY, hdr.idFrom, (LPARAM)&hdr);
 	ReleaseCapture();
     }
-    
+
     infoPtr->Flags &= ~FLAG_PRESSED;
     InvalidateRect (infoPtr->Self, NULL, FALSE);
-  
+
     return TRUE;
 }
 
@@ -627,11 +629,12 @@ static BOOL UPDOWN_CancelMode (UPDOWN_INFO *infoPtr)
  *
  * Handle a mouse event for the updown.
  * 'pt' is the location of the mouse event in client or
- * windows coordinates. 
+ * windows coordinates.
  */
-static void UPDOWN_HandleMouseEvent (UPDOWN_INFO *infoPtr, UINT msg, POINT pt)
+static void UPDOWN_HandleMouseEvent (UPDOWN_INFO *infoPtr, UINT msg, POINTS pts)
 {
     DWORD dwStyle = GetWindowLongW (infoPtr->Self, GWL_STYLE);
+    POINT pt = { pts.x, pts.y };
     RECT rect;
     int temp, arrow;
 
@@ -649,10 +652,10 @@ static void UPDOWN_HandleMouseEvent (UPDOWN_INFO *infoPtr, UINT msg, POINT pt)
 
             	/* Update the CurVal if necessary */
             	if (dwStyle & UDS_SETBUDDYINT) UPDOWN_GetBuddyInt (infoPtr);
-	
+
             	/* Set up the correct flags */
-            	infoPtr->Flags |= FLAG_PRESSED; 
-      
+            	infoPtr->Flags |= FLAG_PRESSED;
+
             	/* repaint the control */
 	    	InvalidateRect (infoPtr->Self, NULL, FALSE);
 
@@ -681,7 +684,7 @@ static void UPDOWN_HandleMouseEvent (UPDOWN_INFO *infoPtr, UINT msg, POINT pt)
             } else {
 	        if(infoPtr->AccelIndex != -1) infoPtr->AccelIndex = 0;
             }
-	    
+
             /* If state changed, redraw the control */
             if(temp != infoPtr->Flags)
 		 InvalidateRect (infoPtr->Self, &rect, FALSE);
@@ -702,9 +705,9 @@ static LRESULT WINAPI UpDownWindowProc(HWND hwnd, UINT message, WPARAM wParam,
     UPDOWN_INFO *infoPtr = UPDOWN_GetInfoPtr (hwnd);
     DWORD dwStyle = GetWindowLongW (hwnd, GWL_STYLE);
     int temp;
-    
+
     if (!infoPtr && (message != WM_CREATE))
-        return DefWindowProcW (hwnd, message, wParam, lParam); 
+        return DefWindowProcW (hwnd, message, wParam, lParam);
 
     switch(message)
     {
@@ -718,8 +721,8 @@ static LRESULT WINAPI UpDownWindowProc(HWND hwnd, UINT message, WPARAM wParam,
 	    infoPtr->AccelCount = 0;
 	    infoPtr->AccelVect = 0;
 	    infoPtr->AccelIndex = -1;
-	    infoPtr->CurVal = 0; 
-	    infoPtr->MinVal = 0; 
+	    infoPtr->CurVal = 0;
+	    infoPtr->MinVal = 0;
 	    infoPtr->MaxVal = 9999;
 	    infoPtr->Base  = 10; /* Default to base 10  */
 	    infoPtr->Buddy = 0;  /* No buddy window yet */
@@ -728,10 +731,10 @@ static LRESULT WINAPI UpDownWindowProc(HWND hwnd, UINT message, WPARAM wParam,
             /* Do we pick the buddy win ourselves? */
 	    if (dwStyle & UDS_AUTOBUDDY)
 		UPDOWN_SetBuddy (infoPtr, GetWindow (hwnd, GW_HWNDPREV));
-	
-	    TRACE("UpDown Ctrl creation, hwnd=%04x\n", hwnd);
+
+	    TRACE("UpDown Ctrl creation, hwnd=%p\n", hwnd);
 	    break;
-    
+
 	case WM_DESTROY:
 	    if(infoPtr->AccelVect) COMCTL32_Free (infoPtr->AccelVect);
 
@@ -739,9 +742,9 @@ static LRESULT WINAPI UpDownWindowProc(HWND hwnd, UINT message, WPARAM wParam,
 
 	    COMCTL32_Free (infoPtr);
 	    SetWindowLongW (hwnd, 0, 0);
-	    TRACE("UpDown Ctrl destruction, hwnd=%04x\n", hwnd);
+	    TRACE("UpDown Ctrl destruction, hwnd=%p\n", hwnd);
 	    break;
-	
+
 	case WM_ENABLE:
 	    if (dwStyle & WS_DISABLED) UPDOWN_CancelMode (infoPtr);
 	    InvalidateRect (infoPtr->Self, NULL, FALSE);
@@ -773,13 +776,13 @@ static LRESULT WINAPI UpDownWindowProc(HWND hwnd, UINT message, WPARAM wParam,
 	    if(infoPtr->Flags & FLAG_MOUSEIN) {
 		temp = infoPtr->AccelIndex == -1 ? 1 : infoPtr->AccelVect[infoPtr->AccelIndex].nInc;
 		UPDOWN_DoAction(infoPtr, temp, infoPtr->Flags & FLAG_ARROW);
-	
+
 		if(infoPtr->AccelIndex != -1 && infoPtr->AccelIndex < infoPtr->AccelCount-1) {
 		    KillTimer(hwnd, TIMER_ACCEL);
 		    infoPtr->AccelIndex++; /* move to the next accel info */
 		    temp = infoPtr->AccelVect[infoPtr->AccelIndex].nSec * 1000 + 1;
 	  	    /* make sure we have at least 1ms intervals */
-		    SetTimer(hwnd, TIMER_ACCEL, temp, 0);	    
+		    SetTimer(hwnd, TIMER_ACCEL, temp, 0);
 		}
 	    }
 	    break;
@@ -789,38 +792,34 @@ static LRESULT WINAPI UpDownWindowProc(HWND hwnd, UINT message, WPARAM wParam,
 
 	case WM_LBUTTONUP:
 	    if (GetCapture() != infoPtr->Self) break;
-	    
+
 	    if ( (infoPtr->Flags & FLAG_MOUSEIN) &&
 		 (infoPtr->Flags & FLAG_ARROW) ) {
-		    
-	    	SendMessageW( GetParent(hwnd), 
+
+	    	SendMessageW( GetParent(hwnd),
 			      dwStyle & UDS_HORZ ? WM_HSCROLL : WM_VSCROLL,
-                  	      MAKELONG(SB_ENDSCROLL, infoPtr->CurVal), hwnd);
+                  	      MAKELONG(SB_ENDSCROLL, infoPtr->CurVal),
+			      (LPARAM)hwnd);
 		if (UPDOWN_IsBuddyEdit(infoPtr))
 		    SendMessageW(infoPtr->Buddy, EM_SETSEL, 0, MAKELONG(0, -1));
 	    }
 	    UPDOWN_CancelMode(infoPtr);
 	    break;
-      
+
 	case WM_LBUTTONDOWN:
 	case WM_MOUSEMOVE:
-	    if(UPDOWN_IsEnabled(infoPtr)){
-		POINT pt;
-		pt.x = SLOWORD(lParam);
-		pt.y = SHIWORD(lParam);
-		UPDOWN_HandleMouseEvent (infoPtr, message, pt );
-	    }
+	    if(UPDOWN_IsEnabled(infoPtr))
+		UPDOWN_HandleMouseEvent (infoPtr, message, MAKEPOINTS(lParam));
 	    break;
 
 	case WM_KEYDOWN:
-	    if((dwStyle & UDS_ARROWKEYS) && UPDOWN_IsEnabled(infoPtr)) {
+	    if((dwStyle & UDS_ARROWKEYS) && UPDOWN_IsEnabled(infoPtr))
 		return UPDOWN_KeyPressed(infoPtr, (int)wParam);
-	    }
 	    break;
-      
+
 	case WM_PAINT:
 	    return UPDOWN_Paint (infoPtr, (HDC)wParam);
-    
+
 	case UDM_GETACCEL:
 	    if (wParam==0 && lParam==0) return infoPtr->AccelCount;
 	    if (wParam && lParam) {
@@ -828,11 +827,10 @@ static LRESULT WINAPI UpDownWindowProc(HWND hwnd, UINT message, WPARAM wParam,
 	        memcpy((void *)lParam, infoPtr->AccelVect, temp*sizeof(UDACCEL));
 	        return temp;
       	    }
-	    UNKNOWN_PARAM(UDM_GETACCEL, wParam, lParam);
 	    return 0;
 
 	case UDM_SETACCEL:
-	    TRACE("UpDown Ctrl new accel info, hwnd=%04x\n", hwnd);
+	    TRACE("UpDown Ctrl new accel info, hwnd=%p\n", hwnd);
 	    if(infoPtr->AccelVect) {
 		COMCTL32_Free (infoPtr->AccelVect);
 		infoPtr->AccelCount = 0;
@@ -845,13 +843,10 @@ static LRESULT WINAPI UpDownWindowProc(HWND hwnd, UINT message, WPARAM wParam,
     	    return TRUE;
 
 	case UDM_GETBASE:
-	    if (wParam || lParam) UNKNOWN_PARAM(UDM_GETBASE, wParam, lParam);
 	    return infoPtr->Base;
 
 	case UDM_SETBASE:
-	    TRACE("UpDown Ctrl new base(%d), hwnd=%04x\n", wParam, hwnd);
-	    if ( !(wParam==10 || wParam==16) || lParam)
-		UNKNOWN_PARAM(UDM_SETBASE, wParam, lParam);
+	    TRACE("UpDown Ctrl new base(%d), hwnd=%p\n", wParam, hwnd);
 	    if (wParam==10 || wParam==16) {
 		temp = infoPtr->Base;
 		infoPtr->Base = wParam;
@@ -860,24 +855,20 @@ static LRESULT WINAPI UpDownWindowProc(HWND hwnd, UINT message, WPARAM wParam,
 	    break;
 
 	case UDM_GETBUDDY:
-	    if (wParam || lParam) UNKNOWN_PARAM(UDM_GETBUDDY, wParam, lParam);
-	    return infoPtr->Buddy;
+	    return (LRESULT)infoPtr->Buddy;
 
 	case UDM_SETBUDDY:
-	    if (lParam) UNKNOWN_PARAM(UDM_SETBUDDY, wParam, lParam);
-	    temp = infoPtr->Buddy;
-	    UPDOWN_SetBuddy (infoPtr, wParam);
+	    temp = (int)infoPtr->Buddy;
+	    UPDOWN_SetBuddy (infoPtr, (HWND)wParam);
 	    return temp;
 
 	case UDM_GETPOS:
-	    if (wParam || lParam) UNKNOWN_PARAM(UDM_GETPOS, wParam, lParam);
 	    temp = UPDOWN_GetBuddyInt (infoPtr);
 	    return MAKELONG(infoPtr->CurVal, temp ? 0 : 1);
 
 	case UDM_SETPOS:
-	    if (wParam || HIWORD(lParam)) UNKNOWN_PARAM(UDM_GETPOS, wParam, lParam);
 	    temp = SLOWORD(lParam);
-	    TRACE("UpDown Ctrl new value(%d), hwnd=%04x\n", temp, hwnd);
+	    TRACE("UpDown Ctrl new value(%d), hwnd=%p\n", temp, hwnd);
 	    if(!UPDOWN_InBounds(infoPtr, temp)) {
 		if(temp < infoPtr->MinVal) temp = infoPtr->MinVal;
 		if(temp > infoPtr->MaxVal) temp = infoPtr->MaxVal;
@@ -886,20 +877,18 @@ static LRESULT WINAPI UpDownWindowProc(HWND hwnd, UINT message, WPARAM wParam,
 	    infoPtr->CurVal = temp;
 	    if(dwStyle & UDS_SETBUDDYINT) UPDOWN_SetBuddyInt (infoPtr);
 	    return wParam;            /* return prev value */
-      
+
 	case UDM_GETRANGE:
-	    if (wParam || lParam) UNKNOWN_PARAM(UDM_GETRANGE, wParam, lParam);
 	    return MAKELONG(infoPtr->MaxVal, infoPtr->MinVal);
 
 	case UDM_SETRANGE:
-	    if (wParam) UNKNOWN_PARAM(UDM_SETRANGE, wParam, lParam); 
 		                               /* we must have:     */
 	    infoPtr->MaxVal = SLOWORD(lParam); /* UD_MINVAL <= Max <= UD_MAXVAL */
 	    infoPtr->MinVal = SHIWORD(lParam); /* UD_MINVAL <= Min <= UD_MAXVAL */
                 	                       /* |Max-Min| <= UD_MAXVAL        */
-	    TRACE("UpDown Ctrl new range(%d to %d), hwnd=%04x\n", 
+	    TRACE("UpDown Ctrl new range(%d to %d), hwnd=%p\n",
 		  infoPtr->MinVal, infoPtr->MaxVal, hwnd);
-	    break;                             
+	    break;
 
 	case UDM_GETRANGE32:
 	    if (wParam) *(LPINT)wParam = infoPtr->MinVal;
@@ -911,7 +900,7 @@ static LRESULT WINAPI UpDownWindowProc(HWND hwnd, UINT message, WPARAM wParam,
 	    infoPtr->MaxVal = (INT)lParam;
 	    if (infoPtr->MaxVal <= infoPtr->MinVal)
 		infoPtr->MaxVal = infoPtr->MinVal + 1;
-	    TRACE("UpDown Ctrl new range(%d to %d), hwnd=%04x\n", 
+	    TRACE("UpDown Ctrl new range(%d to %d), hwnd=%p\n",
 		  infoPtr->MinVal, infoPtr->MaxVal, hwnd);
 	    break;
 
@@ -930,22 +919,20 @@ static LRESULT WINAPI UpDownWindowProc(HWND hwnd, UINT message, WPARAM wParam,
 	    return temp;                    /* return prev value */
 
 	case UDM_GETUNICODEFORMAT:
-	    if (wParam || lParam) UNKNOWN_PARAM(UDM_GETUNICODEFORMAT, wParam, lParam);
 	    /* we lie a bit here, we're always using Unicode internally */
 	    return infoPtr->UnicodeFormat;
 
 	case UDM_SETUNICODEFORMAT:
-	    if (lParam) UNKNOWN_PARAM(UDM_SETUNICODEFORMAT, wParam, lParam);
 	    /* do we really need to honour this flag? */
 	    temp = infoPtr->UnicodeFormat;
 	    infoPtr->UnicodeFormat = (BOOL)wParam;
 	    return temp;
-	    
-	default: 
-	    if (message >= WM_USER) 
+
+	default:
+	    if ((message >= WM_USER) && (message < WM_APP))
 	     	ERR("unknown msg %04x wp=%04x lp=%08lx\n", message, wParam, lParam);
-	    return DefWindowProcW (hwnd, message, wParam, lParam); 
-    } 
+	    return DefWindowProcW (hwnd, message, wParam, lParam);
+    }
 
     return 0;
 }
@@ -955,9 +942,7 @@ static LRESULT WINAPI UpDownWindowProc(HWND hwnd, UINT message, WPARAM wParam,
  *
  * Registers the updown window class.
  */
-
-VOID
-UPDOWN_Register(void)
+void UPDOWN_Register(void)
 {
     WNDCLASSW wndClass;
 
@@ -969,7 +954,7 @@ UPDOWN_Register(void)
     wndClass.hCursor       = LoadCursorW( 0, IDC_ARROWW );
     wndClass.hbrBackground = (HBRUSH)(COLOR_3DFACE + 1);
     wndClass.lpszClassName = UPDOWN_CLASSW;
- 
+
     RegisterClassW( &wndClass );
 }
 
@@ -979,10 +964,7 @@ UPDOWN_Register(void)
  *
  * Unregisters the updown window class.
  */
-
-VOID
-UPDOWN_Unregister (void)
+void UPDOWN_Unregister (void)
 {
     UnregisterClassW (UPDOWN_CLASSW, (HINSTANCE)NULL);
 }
-
