@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.1579 2001-07-08 15:52:57 sandervl Exp $ */
+/* $Id: changelog,v 1.1580 2001-07-08 15:53:29 sandervl Exp $ */
 
  2001-07-08: Achim Hasenmueller <achimha@innotek.de>
     - WSOCK32:  o error message to human readable text translation
@@ -19,7 +19,7 @@
                   api rewrite)
                 o Key translation for arrow keys and insert/del, home/end, page up/down
                   added (WM_CHAR message translation)
-                o Edit control bugfix for draw selected text
+                o Edit control bugfix for drawing selected text
     - KERNEL32: o More pointer checks added to GlobalLock/Unlock
                 o Add default rename entry for crtdll
                 o Fixed FS corruption in atom functions (wrapper for LookupAtom)
