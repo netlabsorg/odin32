@@ -1,4 +1,4 @@
-/* $Id: heapstring.cpp,v 1.42 2001-07-19 20:00:56 sandervl Exp $ */
+/* $Id: heapstring.cpp,v 1.43 2001-08-03 10:53:49 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -218,7 +218,7 @@ INT WINAPI lstrncmpiA( LPCSTR str1, LPCSTR str2, INT n )
       lastch = toupper(*str2);
       str1++;
       str2++;
-    } while (--n && str1 && str2 && firstch == lastch);
+    } while (--n && *str1 && *str2 && firstch == lastch);
 
     result = firstch - lastch;
   }
@@ -239,7 +239,7 @@ int WIN32API lstrncmpiW(LPCWSTR str1, LPCWSTR str2, int n)
       lastch = toupperW(*str2);
       str1++;
       str2++;
-    } while (--n && str1 && str2 && firstch == lastch);
+    } while (--n && *str1 && *str2 && firstch == lastch);
 
     result = firstch - lastch;
   }
