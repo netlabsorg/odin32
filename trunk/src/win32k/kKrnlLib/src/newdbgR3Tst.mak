@@ -1,4 +1,4 @@
-# $Id: newdbgR3Tst.mak,v 1.2 2002-04-07 22:39:45 bird Exp $
+# $Id: newdbgR3Tst.mak,v 1.3 2002-08-20 04:38:00 bird Exp $
 
 #
 # newdbgR3Tst - separate make file for the debug new (R3Tst build).
@@ -12,7 +12,7 @@
 #
 # Setup.
 #
-ALL_INCLUDES= -I../include
+ALL_INCLUDES= -I../include -I../kLib/include
 ALL_DEFINES = -DKKRNLLIB -DR3TST
 PATH_ROOT   = ..\..\..\..
 !include $(PATH_ROOT)\make\setup.mak

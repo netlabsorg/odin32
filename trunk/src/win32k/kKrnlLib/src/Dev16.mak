@@ -1,4 +1,4 @@
-# $Id: Dev16.mak,v 1.4 2002-04-07 22:39:43 bird Exp $
+# $Id: Dev16.mak,v 1.5 2002-08-20 04:37:58 bird Exp $
 
 #
 # kKrnlLib/dev16
@@ -24,7 +24,7 @@ PATH_ROOT  = ..\..\..\..
 TARGET_MODE = SYSLIB
 TARGET_NAME = kKrnlLib_dev16
 MAKEFILE    = Dev16.mak
-CC_INCLUDES = -I../include -I$(PATH_DDKBASE)/h -I$(PATH_MSC)/include -I$(PATH_TOOLKIT)/h
+CC_INCLUDES = -I../include -I../kLib/include -I$(PATH_DDKBASE)/h -I$(PATH_MSC)/include -I$(PATH_TOOLKIT)/h
 ALL_DEFINES = -DKKRNLLIB
 CC_SEGS     = -NTCODE16 -NDDATA16
 
