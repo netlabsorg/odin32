@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.107 2003-04-09 10:39:40 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.108 2003-04-09 12:24:45 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -154,15 +154,16 @@ Win32PeLdrImage::~Win32PeLdrImage()
         }
         memmap->Release();
         memmap = NULL;
+        realBaseAddress = NULL;
     }
+    else
+    if(realBaseAddress)
+        OSLibDosFreeMem((PVOID)realBaseAddress);
 
     if(hFile) {
         OSLibDosClose(hFile);
         hFile = 0;
     }
-
-    if(realBaseAddress)
-        OSLibDosFreeMem((PVOID)realBaseAddress);
 
     if(nameexports)
         free(nameexports);
