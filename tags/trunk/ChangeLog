@@ -1,4 +1,4 @@
-/* $Id: ChangeLog,v 1.1505 2001-06-13 04:50:24 bird Exp $ */
+/* $Id: ChangeLog,v 1.1506 2001-06-13 04:52:54 bird Exp $ */
 
  2001-06-13: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - WIN16LDR: o Made it compile with Watcom and MSC60.
@@ -6,6 +6,8 @@
                   since there is no window libraries there.
                   Watcom links fine. But the result is not tested.
     - VDMDBG:   o Stubbed this DLL. (It's used by the NT TaskMgr.)
+                  (Documented in SDK, doc\misc\VDMDbg.Hlp. Which is included
+                   in the NT sdk distributed with Watcom v11 - %WATCOM\sdk.)
     - Win32k/Pe2Lx:
                 o Allowed loading of images using the NATIVE subsystem.
 
