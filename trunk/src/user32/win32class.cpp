@@ -1,4 +1,4 @@
-/* $Id: win32class.cpp,v 1.15 2000-02-22 19:15:20 sandervl Exp $ */
+/* $Id: win32class.cpp,v 1.16 2000-03-18 16:13:37 cbratschi Exp $ */
 /*
  * Win32 Window Class Managment Code for OS/2
  *
@@ -24,7 +24,7 @@
 #include <win32wnd.h>
 #include <win\winproc.h>
 
-#define DBG_LOCALLOG	DBG_win32class
+#define DBG_LOCALLOG    DBG_win32class
 #include "dbglocal.h"
 
 static fDestroyAll = FALSE;
@@ -62,13 +62,13 @@ Win32WndClass::Win32WndClass(WNDCLASSEXA *wndclass, BOOL fUnicode) : GenericObje
                 strcpy((char *)classNameA, wndclass->lpszClassName);
                 AsciiToUnicode(classNameA, classNameW);
         }
-    	classAtom = 0;
-    	//SvL: If a system control has already be registered, use that atom instead
+        classAtom = 0;
+        //SvL: If a system control has already be registered, use that atom instead
         //     of creating a new one
-    	if(wndclass->style & CS_GLOBALCLASS) {
-        	classAtom = GlobalFindAtomA(classNameA);
-    	}
-    	if(!classAtom) classAtom = GlobalAddAtomA(classNameA);
+        if(wndclass->style & CS_GLOBALCLASS) {
+                classAtom = GlobalFindAtomA(classNameA);
+        }
+        if(!classAtom) classAtom = GlobalAddAtomA(classNameA);
   }
   else {
         classNameA      = NULL;
@@ -76,7 +76,7 @@ Win32WndClass::Win32WndClass(WNDCLASSEXA *wndclass, BOOL fUnicode) : GenericObje
         classAtom       = (DWORD)wndclass->lpszClassName;
   }
   if(!(wndclass->style & CS_GLOBALCLASS)) {
-    	processId = GetCurrentProcess();
+        processId = GetCurrentProcess();
   }
   menuNameA = 0;
   menuNameW = 0;
@@ -99,6 +99,7 @@ Win32WndClass::Win32WndClass(WNDCLASSEXA *wndclass, BOOL fUnicode) : GenericObje
        dprintf(("USER32:  lpszMenuName %s\n", menuNameA));
   }
   else dprintf(("USER32:  wndclass->lpszMenuName %X\n", menuNameA));
+  dprintf(("USER32:  wndclass->hIconSm %X\n", wndclass->hIconSm));
 
   nrExtraClassWords     = wndclass->cbClsExtra;
   nrExtraWindowWords    = wndclass->cbWndExtra;
@@ -361,6 +362,8 @@ ULONG Win32WndClass::getClassLongA(int index, BOOL fUnicode)
                 return hCursor;
         case GCL_HICON:
                 return hIcon;
+        case GCL_HICONSM:
+                return hIconSm;
         case GCL_HMODULE:
                 return hInstance;
         case GCL_MENUNAME:
@@ -426,6 +429,10 @@ ULONG Win32WndClass::setClassLongA(int index, LONG lNewVal, BOOL fUnicode)
         case GCL_HICON:
                 rc = hIcon;
                 hIcon = lNewVal;
+                break;
+        case GCL_HICONSM:
+                rc = hIconSm;
+                hIconSm = lNewVal;
                 break;
         case GCL_HMODULE:
                 rc = hInstance;

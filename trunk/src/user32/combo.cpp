@@ -1,4 +1,4 @@
-/* $Id: combo.cpp,v 1.27 2000-03-14 15:00:58 sandervl Exp $ */
+/* $Id: combo.cpp,v 1.28 2000-03-18 16:13:26 cbratschi Exp $ */
 /*
  * Combo controls
  *
@@ -7,7 +7,7 @@
  *
  * FIXME: roll up in Netscape 3.01.
  *
- * Corel version: 20000212
+ * Corel version: 20000317
  * (WINE version: 991212)
  *
  * Status:  in progress
@@ -30,7 +30,7 @@
 char *GetMsgText(int Msg);
 #endif
 
-#define DBG_LOCALLOG	DBG_combo
+#define DBG_LOCALLOG    DBG_combo
 #include "dbglocal.h"
 
   /* bits in the dwKeyData */
@@ -1014,7 +1014,8 @@ static INT CBUpdateLBox( LPHEADCOMBO lphc )
 
    if( idx >= 0 )
    {
-       SendMessageA( lphc->hWndLBox, LB_SETTOPINDEX, (WPARAM)idx, 0 );
+       /* the LB_SETCARETINDEX message should scroll the list box if required
+          and sending LB_SETTOPINDEX can generate annoying behaviors  */
        /* probably superfluous but Windows sends this too */
        SendMessageA( lphc->hWndLBox, LB_SETCARETINDEX, (WPARAM)idx, 0 );
    }
@@ -1149,7 +1150,9 @@ static void CBDropDown( LPHEADCOMBO lphc )
      RedrawWindow( lphc->hwndself, NULL, 0, RDW_INVALIDATE |
                            RDW_ERASE | RDW_UPDATENOW | RDW_NOCHILDREN );
 
-   ShowWindow( lphc->hWndLBox, SW_SHOWNA );
+   EnableWindow( lphc->hWndLBox, TRUE );
+   ShowWindow( lphc->hWndLBox, SW_SHOW);
+
 }
 
 /***********************************************************************
@@ -1384,7 +1387,8 @@ static LRESULT COMBO_Command(HWND hwnd,WPARAM wParam,LPARAM lParam)
                 break;
 
            case (EN_UPDATE >> 8):
-		//SvL: Don't send updates either. (Realplayer 7 infinite loops)
+                //SvL: Don't send updates either. (Realplayer 7 infinite loops)
+                //CB: note: EN_UPDATE changes in Corel 20000317
                /*
                 * In some circumstances (when the selection of the combobox
                 * is changed for example) we don't wans the EN_CHANGE notification
@@ -1398,8 +1402,8 @@ static LRESULT COMBO_Command(HWND hwnd,WPARAM wParam,LPARAM lParam)
                 }
                 else
                 {
-                	CB_NOTIFY( lphc, CBN_EDITUPDATE );
-		}
+                  CB_NOTIFY( lphc, CBN_EDITUPDATE );
+                }
                 break;
 
            case (EN_ERRSPACE >> 8):
@@ -1903,14 +1907,17 @@ static LRESULT COMBO_DeleteString(HWND hwnd,WPARAM wParam,LPARAM lParam)
 static LRESULT COMBO_SelectString(HWND hwnd,WPARAM wParam,LPARAM lParam)
 {
   LPHEADCOMBO lphc = (LPHEADCOMBO)GetInfoPtr(hwnd);
+  INT CurSel = SendMessageA( lphc->hWndLBox, LB_GETCURSEL, 0, 0 );
   INT index = SendMessageA(lphc->hWndLBox,LB_SELECTSTRING,wParam,lParam);
 
   if( index >= 0 )
   {
     if( lphc->wState & CBF_EDIT )
-      CBUpdateEdit( lphc, index );
-    else
-      InvalidateRect(CB_HWND(lphc), &lphc->textRect, TRUE);
+    {
+      if (CurSel != index)
+        CBUpdateEdit( lphc, index );
+    } else
+        InvalidateRect(CB_HWND(lphc), &lphc->textRect, TRUE);
   }
 
   return (LRESULT)index;

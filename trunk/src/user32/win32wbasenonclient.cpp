@@ -1,4 +1,4 @@
-/* $Id: win32wbasenonclient.cpp,v 1.16 2000-03-01 13:30:06 sandervl Exp $ */
+/* $Id: win32wbasenonclient.cpp,v 1.17 2000-03-18 16:13:39 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (non-client methods)
  *
@@ -489,13 +489,7 @@ LONG Win32BaseWindow::HandleNCHitTest(POINT pt)
       if(dwStyle & WS_SYSMENU)
       {
         /* Check if there is an user icon */
-        HICON hSysIcon = hIconSm;
-        if(!hSysIcon) hSysIcon = (HICON) GetClassLongA(Win32Hwnd,GCL_HICONSM);
-
-        /* If there is an icon associated with the window OR              */
-        /* If there is no hIcon specified and this is not a modal dialog, */
-        /* there is a system menu icon.                                   */
-        if((hSysIcon != 0) || (!(dwStyle & DS_MODALFRAME)))
+        if (IconForWindow(ICON_SMALL))
           rect.left += GetSystemMetrics(SM_CYCAPTION) - 1;
       }
       if (pt.x < rect.left) return HTSYSMENU;
@@ -643,23 +637,8 @@ BOOL Win32BaseWindow::DrawSysButton(HDC hdc,RECT *rect)
   if (!rect) GetInsideRect(&r);
   else r = *rect;
 
-  hSysIcon = hIconSm;
+  hSysIcon = IconForWindow(ICON_SMALL);
 
-  /* if no small icon and no large icon, use class small icon */
-  if (!hSysIcon && !hIcon)
-    hSysIcon =  (HICON) GetClassLongA(Win32Hwnd, GCL_HICONSM);
-
-  /* otherwise use the large icon */
-  if (!hSysIcon) hSysIcon = hIcon;
-
-  /* if all else fails, use the application icon. */
-  if(!hSysIcon) hSysIcon = (HICON) GetClassLongA(Win32Hwnd, GCL_HICON);
-
-  /* If there is no hIcon specified or this is not a modal dialog, */
-  /* get the default one.                                          */
-  if(hSysIcon == 0)
-    if (!(dwStyle & DS_MODALFRAME))
-      hSysIcon = LoadImageA(0, MAKEINTRESOURCEA(OIC_ODINICON), IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR);
 //CB: todo: add icons (including Odin icon) to user32.rc
   if (hSysIcon)
     DrawIconEx(hdc,r.left+2,r.top+2,hSysIcon,
@@ -1405,21 +1384,9 @@ BOOL WIN32API DrawCaptionTemp(HWND hwnd,HDC hdc,const RECT *rect,HFONT hFont,HIC
       Win32BaseWindow *win32wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
 
       if (!win32wnd) return 0;
-
-      /* Get small icon. */
-      HICON hAppIcon = win32wnd->GetSmallIcon();
-
-      /* if no small icon and no large icon, use class small icon */
-      if (!hAppIcon && !win32wnd->GetIcon())
-        hAppIcon = (HICON) GetClassLongA(hwnd, GCL_HICONSM);
-
-      /* otherwise use the large icon it */
-      if (!hAppIcon) hAppIcon = win32wnd->GetIcon();
-
-      /* if all else fails, use the application icon. */
-      if(!hAppIcon) hAppIcon = (HICON) GetClassLongA(hwnd, GCL_HICON);
-
-      DrawIconEx (hdc, pt.x, pt.y, hAppIcon, GetSystemMetrics(SM_CXSMICON),
+	
+      DrawIconEx (hdc, pt.x, pt.y, win32wnd->IconForWindow(ICON_SMALL),
+                  GetSystemMetrics(SM_CXSMICON),
                   GetSystemMetrics(SM_CYSMICON), 0, 0, DI_NORMAL);
     }
 

@@ -1,4 +1,4 @@
-/* $Id: win32class.h,v 1.10 2000-02-20 18:28:34 cbratschi Exp $ */
+/* $Id: win32class.h,v 1.11 2000-03-18 16:13:38 cbratschi Exp $ */
 /*
  * Win32 Window Class Managment Code for OS/2
  *
@@ -44,6 +44,7 @@ public:
          DWORD  getExtraWndWords()      { return nrExtraWindowWords; };
 
          HICON  getIcon()               { return hIcon; };
+         HICON  getIconSm()             { return hIconSm; };
         HCURSOR getCursor()             { return hCursor; };
 
       HINSTANCE getInstance()           { return hInstance; };
@@ -86,7 +87,7 @@ private:
 
  PCHAR          classNameA;
  WCHAR         *classNameW;
- HICON          hIconSm;
+ HICON          hIconSm;                //GCW_HICONSM
  HDC            hdcClass;
 
  //User data class words/longs

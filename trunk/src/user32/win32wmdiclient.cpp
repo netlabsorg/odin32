@@ -1,11 +1,12 @@
-/* $Id: win32wmdiclient.cpp,v 1.25 2000-02-21 17:25:32 cbratschi Exp $ */
+/* $Id: win32wmdiclient.cpp,v 1.26 2000-03-18 16:13:40 cbratschi Exp $ */
 /*
  * Win32 MDI Client Window Class for OS/2
  *
  * Copyright 1998-1999 Sander van Leeuwen (sandervl@xs4all.nl)
  * Copyright 1999      Daniela Engert (dani@ngrt.de)
  *
- * Parts based on Wine (windows\mdi.c) (990815)
+ * Parts based on Corel WINE (window\mdi.c: 20000317)
+ * (Parts based on Wine (windows\mdi.c) (990815))
  *
  * Copyright 1994, Bob Amstadt
  *           1995,1996 Alex Korobka
@@ -856,18 +857,8 @@ BOOL Win32MDIClientWindow::augmentFrameMenu(Win32MDIChildWindow *child)
 
   // In Win 95 look, the system menu is replaced by the child icon
 
-  /* Find small icon */
-  HICON hIcon = child->GetSmallIcon();
-
-  /* If no small icon or overwridden large icon, use class small icon.. */
-  if (!hIcon && !child->GetIcon())
-    hIcon = GetClassLongA(child->getWindowHandle(),GCL_HICONSM);
-
-  /* Use large icon */
-  if (!hIcon) hIcon = child->GetIcon();
-
-  /* If all else fails, use large class icon. */
-  if (!hIcon) hIcon = GetClassLongA(child->getWindowHandle(),GCL_HICON);
+  /* Find icon */
+  HICON hIcon = child->IconForWindow(ICON_SMALL);
 
   if (hIcon)
   {

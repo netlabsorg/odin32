@@ -1,4 +1,4 @@
-/* $Id: edit.cpp,v 1.37 2000-03-06 22:39:03 sandervl Exp $ */
+/* $Id: edit.cpp,v 1.38 2000-03-18 16:13:26 cbratschi Exp $ */
 /*
  *      Edit control
  *
@@ -8,8 +8,8 @@
  *
  *      Copyright  1999 Christoph Bratschi
  *
- * Corel version: 20000212
- * WINE version: 991212
+ * Corel version: 20000317
+ * (WINE version: 991212)
  *
  * Status:  complete
  * Version: 5.00
@@ -589,10 +589,14 @@ LRESULT WINAPI EditWndProc( HWND hwnd, UINT msg,
 
         case WM_GETDLGCODE:
                 //DPRINTF_EDIT_MSG32("WM_GETDLGCODE");
-                result = (es->style & ES_MULTILINE) ?
-                                DLGC_WANTALLKEYS | DLGC_HASSETSEL | DLGC_WANTCHARS | DLGC_WANTARROWS :
-                                DLGC_HASSETSEL | DLGC_WANTCHARS | DLGC_WANTARROWS;
-                break;
+		result = DLGC_HASSETSEL | DLGC_WANTCHARS | DLGC_WANTARROWS;
+		if (es->style & ES_WANTRETURN)
+		{
+		   LPMSG msg = (LPMSG)lParam;
+		   if (msg && (msg->message == WM_KEYDOWN) && (msg->wParam == VK_RETURN))
+		      result |= DLGC_WANTMESSAGE;
+		}
+		break;
 
         case WM_CHAR:
                 //DPRINTF_EDIT_MSG32("WM_CHAR");
@@ -1258,12 +1262,12 @@ static BOOL EDIT_MakeFit(HWND hwnd, EDITSTATE *es, INT size)
 {
         HLOCAL hNew32;
 
-        if (size <= es->buffer_size)
-                return TRUE;
         if (size > es->buffer_limit) {
                 EDIT_NOTIFY_PARENT(hwnd, EN_MAXTEXT);
                 return FALSE;
         }
+        if (size <= es->buffer_size)
+                return TRUE;
         size = ((size / GROWLENGTH) + 1) * GROWLENGTH;
         if (size > es->buffer_limit)
                 size = es->buffer_limit;
@@ -2221,15 +2225,15 @@ static BOOL EDIT_EM_LineScroll(HWND hwnd, EDITSTATE *es, INT dx, INT dy)
                 dx = es->text_width - es->x_offset;
         nyoff = MAX(0, es->y_offset + dy);
 
-	//SvL: If nyoff > nr lines in control -> last line in control 
+        //SvL: If nyoff > nr lines in control -> last line in control
         //     window should show last line of control
         //     Wine code shows last line at the top of the control
         //     (Quake 3 startup edit control shows the problem)
         if (nyoff >= es->line_count) {
-		if(es->line_count <= vlc) {
-			nyoff = es->y_offset;	//no need to scroll
-		}
-		else    nyoff = es->line_count - vlc - 1;
+                if(es->line_count <= vlc) {
+                        nyoff = es->y_offset;   //no need to scroll
+                }
+                else    nyoff = es->line_count - vlc - 1;
         }
         dy = (es->y_offset - nyoff) * es->line_height;
         if (dx || dy)
@@ -4038,7 +4042,7 @@ static void EDIT_WM_SetText(HWND hwnd, EDITSTATE *es, LPCSTR text)
              the doc is WRONG. EN_CHANGE notification is sent
              while processing WM_SETTEXT */
           EDIT_NOTIFY_PARENT(hwnd, EN_CHANGE);
-          es->flags &= EF_UPDATE;
+          es->flags &= ~EF_UPDATE;
         }
 }
 
