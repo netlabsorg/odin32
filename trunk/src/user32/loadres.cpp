@@ -1,4 +1,4 @@
-/* $Id: loadres.cpp,v 1.12 1999-11-04 13:02:49 phaller Exp $ */
+/* $Id: loadres.cpp,v 1.13 1999-11-05 09:16:21 sandervl Exp $ */
 
 /*
  * Win32 resource API functions for OS/2
@@ -33,6 +33,13 @@ int WIN32API LoadStringA(HINSTANCE hinst, UINT wID, LPSTR lpBuffer, int cchBuffe
     winres = (Win32Resource *)FindResourceA(hinst, (LPSTR)wID, RT_STRINGA);
     if(winres == NULL) {
         dprintf(("LoadStringA NOT FOUND from %X, id %d buffersize %d\n", hinst, wID, cchBuffer));
+//TODO: BAD HACK!
+        if(cchBuffer > 3)
+        {
+          strcpy(lpBuffer, "XXX");
+          return 3;
+        }
+//TODO: BAD HACK!
         *lpBuffer = 0;
         return 0;
     }
