@@ -1,4 +1,4 @@
-/* $Id: OS2DDRAW.CPP,v 1.23 2000-08-31 17:57:09 sandervl Exp $ */
+/* $Id: OS2DDRAW.CPP,v 1.24 2000-08-31 21:03:14 sandervl Exp $ */
 
 /*
  * DX Draw base class implementation
@@ -147,9 +147,9 @@ OS2IDirectDraw::OS2IDirectDraw(GUID *lpGUID) :
 
   if(lpGUID && *lpGUID == IID_IDirect3D)
   {
-    dprintf(("DDRAW: D3D Interface\n"));
+    dprintf(("DDRAW: D3D Interface -> using V4 Interface"));
 
-    lpVtbl = (IDirectDraw4Vtbl *)&Vtbl3D;
+    lpVtbl = &Vtbl4;
   }
   else
   {
