@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2001-06-26 00:05:21 bird Exp $
+# $Id: makefile,v 1.3 2002-02-08 00:43:46 bird Exp $
 
 
 #
@@ -17,7 +17,6 @@ EXETARGET = 1
 #
 # include common definitions
 #
-#CCENV=EMX
 !include ../../../makefile.inc
 
 
@@ -96,7 +95,8 @@ $(OBJDIR)\c_950.$(OBJ) \
 $(OBJDIR)\c_936.$(OBJ) \
 $(OBJDIR)\c_949.$(OBJ) \
 $(OBJDIR)\casemap.$(OBJ) \
-$(OBJDIR)\wctype.$(OBJ)
+$(OBJDIR)\wctype.$(OBJ) \
+$(OBJDIR)\codepage.$(OBJ)
 
 
 #
