@@ -1,4 +1,4 @@
-/* $Id: menu.cpp,v 1.3 1999-06-10 17:08:54 phaller Exp $ */
+/* $Id: menu.cpp,v 1.4 1999-07-06 08:50:11 sandervl Exp $ */
 
 /*
  * PE2LX menu conversion code
@@ -13,6 +13,7 @@
 #define INCL_DOSERRORS           /* DOS Error values         */
 #define INCL_DOSPROCESS          /* DOS Process values       */
 #define INCL_DOSMISC             /* DOS Miscellanous values  */
+#define INCL_DOSNLS
 #define INCL_WIN
 #include <os2.h>
 #include <pmmenu.h>
@@ -26,25 +27,32 @@
 #include "menu.h"
 #include "misc.h"
 
-static int  ProcessSubMenu(PopupMenuItem *popupitem, MT_OS2 *os2menu, MTI_OS2 *menuitem, int size);
-static int  ProcessMenuItem(NormalMenuItem *popupitem, MT_OS2 *os2menu, MTI_OS2 *menuitem, int size);
+static int  ProcessSubMenu(PopupMenuItem *popupitem, MT_OS2 *os2menu, MTI_OS2 *menuitem, int size, int cp);
+static int  ProcessMenuItem(NormalMenuItem *popupitem, MT_OS2 *os2menu, MTI_OS2 *menuitem, int size, int cp);
 static void menustrcpy(char *dest, char *src);
 //******************************************************************************
 //******************************************************************************
-void ShowMenu(int id, MenuHeader *menu, int size)
+void ShowMenu(int id, MenuHeader *menu, int size, int cp)
 {
   PopupMenuItem  *popupitem = (PopupMenuItem *)((char *)menu + sizeof(MenuHeader));
   NormalMenuItem *normalitem = (NormalMenuItem *)((char *)menu + sizeof(MenuHeader));
   MT_OS2  *os2menu, *submenu;
   MTI_OS2 *menuitem;
   int newsize;
+  ULONG   ulCpSize, ulCP;
 
   //First save original win32 resource
   OS2Exe.StoreWin32Resource(id, RT_MENU, size, (char *)menu);
 
   os2menu           = (MT_OS2 *)malloc(size*4); //should always be sufficient
   os2menu->len      = sizeof(MT_OS2) - sizeof(MTI_OS2);
-  os2menu->codepage = 437;
+  if(cp == 0)
+    os2menu->codepage         = 437;
+  else
+  {
+    DosQueryCp(sizeof(ulCP), &ulCP, &ulCpSize);
+    os2menu->codepage = ulCP;
+  }
   os2menu->reserved = 4;
   os2menu->cMti     = 0;
   menuitem          = &os2menu->rgMti[0];
@@ -52,9 +60,9 @@ void ShowMenu(int id, MenuHeader *menu, int size)
   while(size > 4) {
     if(popupitem->fItemFlags & POPUP) {
         cout << "POPUP ";
-        newsize = ProcessSubMenu(popupitem, os2menu, menuitem, size);
+        newsize = ProcessSubMenu(popupitem, os2menu, menuitem, size, cp);
     }
-    else    newsize = ProcessMenuItem(normalitem, os2menu, menuitem, size);
+    else    newsize = ProcessMenuItem(normalitem, os2menu, menuitem, size, cp);
 
     if(popupitem->fItemFlags & ENDMENU) break;
 
@@ -69,7 +77,7 @@ void ShowMenu(int id, MenuHeader *menu, int size)
 }
 //******************************************************************************
 //******************************************************************************
-static int ProcessSubMenu(PopupMenuItem *popupitem, MT_OS2 *os2menu, MTI_OS2 *menuitem, int size)
+static int ProcessSubMenu(PopupMenuItem *popupitem, MT_OS2 *os2menu, MTI_OS2 *menuitem, int size, int cp)
 {
 NormalMenuItem *normalitem;
 MT_OS2             *submenu;
@@ -118,8 +126,8 @@ int             len = 0, newsize;
   }
   else {
     len = (UniStrlen(popupitem->szItemText)+1)*2;
-    cout << UnicodeToAscii(popupitem->szItemText) << endl;
-    menustrcpy(menuitem->c, UnicodeToAscii(popupitem->szItemText));
+    cout << UnicodeToAscii(popupitem->szItemText, cp) << endl;
+    menustrcpy(menuitem->c, UnicodeToAscii(popupitem->szItemText, cp));
   }
   os2menu->len += sizeof(MTI_OS2);
   if(len > 4) os2menu->len += (len/2 - sizeof(menuitem->c));
@@ -143,9 +151,9 @@ int             len = 0, newsize;
   while(size > 4) {
         if(normalitem->fItemFlags & POPUP) {
             cout << "POPUP ";
-            newsize = ProcessSubMenu((PopupMenuItem *)normalitem, submenu, menuitem, size);
+            newsize = ProcessSubMenu((PopupMenuItem *)normalitem, submenu, menuitem, size, cp);
         }
-        else    newsize = ProcessMenuItem(normalitem, submenu, menuitem, size);
+        else    newsize = ProcessMenuItem(normalitem, submenu, menuitem, size, cp);
 
                 menuitem = (MTI_OS2 *)((int)submenu + submenu->len);
         if(normalitem->fItemFlags & ENDMENU) {
@@ -160,7 +168,7 @@ int             len = 0, newsize;
 }
 //******************************************************************************
 //******************************************************************************
-static int ProcessMenuItem(NormalMenuItem *normalitem, MT_OS2 *os2menu, MTI_OS2 *menuitem, int size)
+static int ProcessMenuItem(NormalMenuItem *normalitem, MT_OS2 *os2menu, MTI_OS2 *menuitem, int size, int cp)
 {
 WCHAR          *menustring;
 int             len = 0;
@@ -225,8 +233,8 @@ int             len = 0;
         menuitem->c[1]     = 0;
     }
     else {
-        cout << UnicodeToAscii(normalitem->szItemText) << endl;
-        menustrcpy(menuitem->c, UnicodeToAscii(normalitem->szItemText));
+        cout << UnicodeToAscii(normalitem->szItemText, cp) << endl;
+        menustrcpy(menuitem->c, UnicodeToAscii(normalitem->szItemText, cp));
     }
   }
   os2menu->len += sizeof(MTI_OS2);

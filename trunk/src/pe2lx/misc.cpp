@@ -1,4 +1,4 @@
-/* $Id: misc.cpp,v 1.4 1999-07-05 12:36:12 sandervl Exp $ */
+/* $Id: misc.cpp,v 1.5 1999-07-06 08:50:11 sandervl Exp $ */
 
 /*
  * PE2LX ascii to unicode conversion
@@ -182,6 +182,8 @@ BOOL prepareCP(int cp)
       }
     }
   }
+  else	return FALSE;
+
   return TRUE;
 }
 //******************************************************************************
@@ -193,7 +195,10 @@ void convertCP(int cp, char *str)
 
   if(prepareCP(cp) == TRUE && CodePage > 0)
     while(*str != 0)
-      *str++ = transCP[*str];
+    {
+      *str = transCP[*str];
+      str++;
+    }
 }
 //******************************************************************************
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: pe.cpp,v 1.4 1999-06-21 01:15:40 buerkle Exp $ */
+/* $Id: pe.cpp,v 1.5 1999-07-06 08:50:11 sandervl Exp $ */
 
 /*
  * PE2LX PE image interpreter
@@ -57,11 +57,13 @@ char *hex(ULONG num)
 }
 /**/
 
-
+BOOL fUseCodePage = FALSE;
+int  WinCodePage;
+ 
 char INFO_BANNER[] =
-"Usage: PE2LX winfile \n\
-       OR\n\
-       PE2LX winfile os2file\n";
+"Usage: PE2LX winfile [os2file] [-cp]\n\
+        OR\n\
+        PE2LX winfile os2file [-cp]\n";
 
 char *ResTypes[MAX_RES] =
           {"niks", "CURSOR", "BITMAP", "ICON", "MENU", "DIALOG", "STRING",
@@ -94,14 +96,24 @@ int *ptrNames, *ptrAddress;
 USHORT *ptrOrd;
 PIMAGE_SECTION_HEADER    psh;
 int  nSections;
+char *winfile=NULL, *os2file=NULL;
 
-  if(argc != 2 && argc != 3) {
+  if(argc < 2 || argc > 4) {
         cout << "pe2lx v0.0." << PE2LX_VERSION << "alpha"<< endl;
         cout << INFO_BANNER << endl;
         return(0);
   }
+  for(i=1;i<argc;i++)
+  {
+      if(!stricmp(argv[i], "/CP") || !stricmp(argv[i], "-CP"))
+        fUseCodePage = TRUE;
+      else if(winfile == NULL)
+        winfile = argv[i];
+      else if(os2file == NULL)
+        os2file = argv[i];
+  }
 
-  rc = DosOpen(argv[1],                        /* File path name */
+  rc = DosOpen(winfile,                        /* File path name */
                &win32handle,                   /* File handle */
                &ulAction,                      /* Action taken */
                0L,                             /* File primary allocation */
@@ -162,13 +174,13 @@ int  nSections;
         cout << "Can't convert system files" << endl;
         return(1);
   }
-  if(argc == 2) {
+  if(os2file == NULL) {
         //ok, it's a PE file, so we can safely make a backup copy
-        char *newfile = (char *)malloc(strlen(argv[1])+1);
-        strcpy(newfile, argv[1]);
+        char *newfile = (char *)malloc(strlen(winfile)+1);
+        strcpy(newfile, winfile);
         newfile[strlen(newfile)-1]++;
         //save copy of win32 exe/dll (exe->exf, dll->dlk)
-        rc = DosMove(argv[1], newfile);
+        rc = DosMove(winfile, newfile);
         if(rc) {
                 cout << "Unable to save original win32 file to " << newfile << "(" << rc << ")" << endl;
                 free(newfile);
@@ -213,9 +225,9 @@ int  nSections;
 
   ////  OS2Exe.SetStackSize(oh.SizeOfStackCommit);
   OS2Exe.SetStackSize(max(oh.SizeOfStackCommit, oh.SizeOfStackReserve));
-  if(argc == 2)
-        OS2Exe.SetModuleName(argv[1]);
-  else  OS2Exe.SetModuleName(argv[2]);
+  if(os2file == NULL)
+        OS2Exe.SetModuleName(winfile);
+  else  OS2Exe.SetModuleName(os2file);
 
   nSections = NR_SECTIONS(win32file);
 
@@ -556,9 +568,9 @@ int  nSections;
          OS2Cursor::DestroyAll();
   }
   OS2Exe.SaveConvertedNames();
-  if(argc == 2)
-        OS2Exe.SaveNewExeFile(argv[1]);
-  else  OS2Exe.SaveNewExeFile(argv[2]);
+  if(os2file == NULL)
+        OS2Exe.SaveNewExeFile(winfile);
+  else  OS2Exe.SaveNewExeFile(os2file);
 
   return(0);
 }
@@ -616,11 +628,14 @@ void ProcessResSubDir(PIMAGE_RESOURCE_DIRECTORY prdType, int level,
                 cout << "Resource Data RVA " << hex(pData->OffsetToData - VirtualAddress) << endl;
                 cout << "Resource Data RVA " << hex(pData->OffsetToData) << endl;
                 cout << "Resource Data VA  " << hex(VirtualAddress) << endl;
-                cout << "Resource Codepage " << pData->CodePage << endl;
+                if(fUseCodePage == TRUE)
+                   	WinCodePage = pData->CodePage;
+                else    WinCodePage = 0;
+ 
                 if(pData->Size) {//winamp17 winzip archive has resource with size 0
                  switch(type) {
                         case NTRT_MENU:
-                                ShowMenu(id, (MenuHeader *)((char *)prdRoot + pData->OffsetToData - VirtualAddress), pData->Size);
+                                ShowMenu(id, (MenuHeader *)((char *)prdRoot + pData->OffsetToData - VirtualAddress), pData->Size, WinCodePage);
                                 break;
                         case NTRT_ICON:
                                 new OS2Icon(id, (WINBITMAPINFOHEADER *)((char *)prdRoot + pData->OffsetToData - VirtualAddress), pData->Size);
@@ -639,7 +654,7 @@ void ProcessResSubDir(PIMAGE_RESOURCE_DIRECTORY prdType, int level,
                                 ShowGroupCursor(id, (CursorHeader *)((char *)prdRoot + pData->OffsetToData - VirtualAddress), pData->Size);
                                 break;
                         case NTRT_DIALOG:
-                                ShowDialog(id, (DialogBoxHeader *)((char *)prdRoot + pData->OffsetToData - VirtualAddress), pData->Size);
+                                ShowDialog(id, (DialogBoxHeader *)((char *)prdRoot + pData->OffsetToData - VirtualAddress), pData->Size, WinCodePage);
                                 break;
                         case NTRT_VERSION:
 //Store version resource as OS/2 RT_RCDATA resource
@@ -654,7 +669,7 @@ void ProcessResSubDir(PIMAGE_RESOURCE_DIRECTORY prdType, int level,
 //upper 12 bits of resource id passed by user determines block (res id)
 //lower 4 bits are an index into the string table
 //Best solution is to split the strings up and store them as RCDATA
-                                ShowStrings(id, (char *)((char *)prdRoot + pData->OffsetToData - VirtualAddress), pData->Size);
+                                ShowStrings(id, (char *)((char *)prdRoot + pData->OffsetToData - VirtualAddress), pData->Size, WinCodePage);
                                 break;
                         case NTRT_ACCELERATORS:
                                 ShowAccelerator(id, (WINACCEL *)((char *)prdRoot + pData->OffsetToData - VirtualAddress), pData->Size);
