@@ -1,4 +1,4 @@
-/* $Id: dibsect.cpp,v 1.64 2003-02-06 19:20:03 sandervl Exp $ */
+/* $Id: dibsect.cpp,v 1.65 2003-04-01 15:57:05 sandervl Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -30,6 +30,7 @@
 
 #define DBG_LOCALLOG  DBG_dibsect
 #include "dbglocal.h"
+
 
 //******************************************************************************
 //******************************************************************************
@@ -82,7 +83,7 @@ DIBSection::DIBSection(BITMAPINFOHEADER_W *pbmi, char *pColors, DWORD iUsage, DW
    this->hSection = hSection;
    this->dwOffset = dwOffset;
    if(hSection) {
-        bmpBits = (char *)MapViewOfFile(hSection, FILE_MAP_ALL_ACCESS_W, 0, dwOffset, bmpsize*pbmi->biHeight);
+        bmpBits = (char *)MapViewOfFile(hSection, FILE_MAP_ALL_ACCESS_W, 0, dwOffset, bmpsize*pbmi->biHeight - dwOffset);
         if(!bmpBits) {
             dprintf(("Dibsection: mapViewOfFile %x failed!", hSection));
             DebugInt3();
@@ -521,7 +522,7 @@ BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nDestWidth,
   point[3].y = pOS2bmp->cy - nYsrc;
 #else
   point[2].y = nYsrc;
-  point[3].y = nYsrc + nSrcHeight - 1;
+  point[3].y = nYsrc + nSrcHeight;
 #endif
 
 #ifdef INVERT
@@ -554,6 +555,8 @@ BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nDestWidth,
         GpiEnableYInversion(hps, 0);
         fRestoryYInversion = TRUE;
   }
+#else
+  dprintf(("Sync destination dibsection: hdc y inversion = %d", GpiQueryYInversion(hdc)));
 #endif
 
   dprintf(("DIBSection::BitBlt (%d,%d)(%d,%d) from (%d,%d)(%d,%d) dim (%d,%d)(%d,%d)", point[0].x, point[0].y,
@@ -590,7 +593,11 @@ BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nDestWidth,
         os2mode = BBO_IGNORE;
         break;
   }
+#ifndef INVERT
+  if(!(fFlip & FLIP_VERT)) {
+#else
   if(fFlip & FLIP_VERT) {
+#endif
         //manually reverse bitmap data
         char *src = bmpBits + (pOS2bmp->cy-1)*dibinfo.dsBm.bmWidthBytes;
         char *dst = bmpBitsDblBuffer;
@@ -682,9 +689,15 @@ void DIBSection::sync(HDC hdc, DWORD nYdest, DWORD nDestHeight, BOOL orgYInversi
           GpiEnableYInversion(hdc, 0);
       }
   }
+#else
+  dprintf(("Sync destination dibsection: hdc y inversion = %d", GpiQueryYInversion(hdc)));
 #endif
 
+#ifndef INVERT
+  if(!(fFlip & FLIP_VERT)) {
+#else
   if(fFlip & FLIP_VERT) {
+#endif
         destBuf = bmpBitsDblBuffer + nYdest*dibinfo.dsBm.bmWidthBytes;
 
         //SvL: cbImage can be too small for compressed images; GpiQueryBitmapBits
@@ -694,7 +707,12 @@ void DIBSection::sync(HDC hdc, DWORD nYdest, DWORD nDestHeight, BOOL orgYInversi
         //     NOTE: The correct size will be returned by GpiQueryBitmapBits
         tmphdr->cbImage = dibinfo.dsBm.bmHeight*dibinfo.dsBm.bmWidthBytes;
 
-        rc = GpiQueryBitmapBits(hdc, nYdest, nDestHeight, destBuf,
+#ifdef INVERT
+        int dest = dibinfo.dsBm.bmHeight - nYdest - nDestHeight;
+#else
+        int dest = nYdest;
+#endif
+        rc = GpiQueryBitmapBits(hdc, dest, nDestHeight, destBuf,
                                 tmphdr);
         if(rc == GPI_ALTERROR) {
             dprintf(("ERROR: GpiQueryBitmapBits failed with %x", WinGetLastError(0)));
@@ -718,6 +736,12 @@ void DIBSection::sync(HDC hdc, DWORD nYdest, DWORD nDestHeight, BOOL orgYInversi
         tmphdr->cbImage = dibinfo.dsBm.bmHeight*dibinfo.dsBm.bmWidthBytes;
 
         destBuf = GetDIBObject() + nYdest*dibinfo.dsBm.bmWidthBytes;
+
+#ifdef INVERT
+        int dest = dibinfo.dsBm.bmHeight - nYdest - nDestHeight;
+#else
+        int dest = nYdest;
+#endif
         rc = GpiQueryBitmapBits(hdc, nYdest, nDestHeight, destBuf,
                                 tmphdr);
         if(rc == GPI_ALTERROR) {
@@ -735,19 +759,19 @@ void DIBSection::sync(HDC hdc, DWORD nYdest, DWORD nDestHeight, BOOL orgYInversi
   memcpy(pOS2bmp, tmphdr, os2bmphdrsize);
 
   if(dibinfo.dsBitfields[1] == 0x3E0) {//RGB 555?
-    dprintf(("DIBSection::sync: convert RGB 565 to RGB 555"));
+      dprintf(("DIBSection::sync: convert RGB 565 to RGB 555"));
 
-    destBuf = GetDIBObject() + nYdest*dibinfo.dsBm.bmWidthBytes;
+      destBuf = GetDIBObject() + nYdest*dibinfo.dsBm.bmWidthBytes;
 
-    if(CPUFeatures & CPUID_MMX) {
+      if(CPUFeatures & CPUID_MMX) {
             RGB565to555MMX((WORD *)destBuf, (WORD *)destBuf, (nDestHeight*dibinfo.dsBm.bmWidthBytes)/sizeof(WORD));
-    }
-    else    RGB565to555((WORD *)destBuf, (WORD *)destBuf, (nDestHeight*dibinfo.dsBm.bmWidthBytes)/sizeof(WORD));
+      }
+      else  RGB565to555((WORD *)destBuf, (WORD *)destBuf, (nDestHeight*dibinfo.dsBm.bmWidthBytes)/sizeof(WORD));
   }
 
   free(tmphdr);
   if(rc != nDestHeight) {
-    dprintf(("!WARNING!: GpiQueryBitmapBits returned %d instead of %d scanlines", rc, nDestHeight));
+      dprintf(("!WARNING!: GpiQueryBitmapBits returned %d instead of %d scanlines", rc, nDestHeight));
   }
 
 #ifdef INVERT
