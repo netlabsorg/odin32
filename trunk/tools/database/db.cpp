@@ -1,4 +1,4 @@
-/* $Id: db.cpp,v 1.14 2000-07-18 07:34:32 bird Exp $ *
+/* $Id: db.cpp,v 1.15 2000-07-18 17:56:50 bird Exp $ *
  *
  * DB - contains all database routines.
  *
@@ -395,8 +395,8 @@ BOOL            _System dbInsertUpdateFile(unsigned short usDll,
         }
 
         parow = mysql_fetch_row(pres);
-        if (parow != NULL)
-            lFile = getvalue(0, parow);
+        assert(parow);
+        lFile = getvalue(0, parow);
         mysql_free_result(pres);
 
         if (strcmp(parow[1], pszFilename) != 0) /* case might have changed... */
@@ -1928,7 +1928,8 @@ signed long _System dbGetNumberOfUpdatedFunction(signed long lDll)
  */
 static char *sqlstrcat(char *pszQuery, const char *pszBefore, const char *pszStr, const char *pszAfter)
 {
-    register char ch;
+    char *          pszLineStart = pszQuery;    
+    register char   ch;
 
     pszQuery += strlen(pszQuery);
 
@@ -1947,37 +1948,58 @@ static char *sqlstrcat(char *pszQuery, const char *pszBefore, const char *pszStr
     *pszQuery++ = '\'';
     while ((ch = *pszStr++) != '\0')
     {
-        if (ch == '\'')
+        switch (ch)
         {
-            *pszQuery++ = '\\';
-            *pszQuery++ = '\'';
+            case '\'':
+                *pszQuery++ = '\\';
+                *pszQuery++ = '\'';
+                break;
+
+            case '"':
+                *pszQuery++ = '\\';
+                *pszQuery++ = '"';
+                break;
+
+            case '\\':
+                *pszQuery++ = '\\';
+                *pszQuery++ = '\\';
+                break;
+
+            case '%':
+                *pszQuery++ = '\\';
+                *pszQuery++ = '%';
+                break;
+
+            case '_':
+                *pszQuery++ = '\\';
+                *pszQuery++ = '_';
+                break;
+
+            case '\n':
+                *pszQuery++ = '\\';
+                *pszQuery++ = 'r';
+                *pszQuery++ = '\\';
+                *pszQuery++ = 'n';
+                break;
+            
+            case '\t':
+                *pszQuery++ = '\\';
+                *pszQuery++ = 't';
+                break;
+
+            case '\r':
+                break;
+
+            default:
+                *pszQuery++ = ch;
         }
-        else if (ch == '\n')
+
+        /* Add new lines every 80 chars MySql don't like long lines. */
+        if (pszLineStart - pszQuery > 80)
         {
-            #if 0
-            *pszQuery++ = '\\';
-            *pszQuery++ = 'n';
-            #else
-            *pszQuery++ = '<';
-            *pszQuery++ = 'B';
-            *pszQuery++ = 'R';
-            *pszQuery++ = '>';
-            #endif
+            *pszQuery = '\n';
+            pszLineStart = pszQuery;
         }
-        else if (ch == '\r')
-        {
-            #if 0
-            *pszQuery++ = '\\';
-            *pszQuery++ = 'r';
-            #else
-            *pszQuery++ = '<';
-            *pszQuery++ = 'B';
-            *pszQuery++ = 'R';
-            *pszQuery++ = '>';
-            #endif
-        }
-        else
-            *pszQuery++ = ch;
     }
     *pszQuery++ = '\'';
 

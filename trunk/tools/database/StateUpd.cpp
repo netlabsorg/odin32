@@ -1,4 +1,4 @@
-/* $Id: StateUpd.cpp,v 1.24 2000-07-18 07:33:13 bird Exp $
+/* $Id: StateUpd.cpp,v 1.25 2000-07-18 17:56:50 bird Exp $
  *
  * StateUpd - Scans source files for API functions and imports data on them.
  *
@@ -67,8 +67,8 @@ inline char *trimR(char *psz);
 inline char *skip(const char *psz);
 static void  copy(char *psz, char *pszFrom, int iFrom, char *pszTo, int iTo, char **papszLines);
 static void  copy(char *psz, int jFrom, int iFrom, int jTo, int iTo, char **papszLines);
-static void  copyComment(char *psz, char *pszFrom, int iFrom, char **papszLines, BOOL fStrip);
-static void  copyComment(char *psz, int jFrom, int iFrom, char **papszLines, BOOL fStrip);
+static void  copyComment(char *psz, char *pszFrom, int iFrom, char **papszLines, BOOL fStrip, BOOL fHTML);
+static void  copyComment(char *psz, int jFrom, int iFrom, char **papszLines, BOOL fStrip, BOOL fHTML);
 static char *stristr(const char *pszStr, const char *pszSubStr);
 static char *skipBackwards(const char *pszStopAt, const char *pszFrom, int &iLine, char **papszLines);
 static int   findStrLine(const char *psz, int iStart, int iEnd, char **papszLines);
@@ -93,7 +93,8 @@ int main(int argc, char **argv)
     char          *pszDatabase = "Odin32";
     char          *pszUser     = "root";
     char          *pszPasswd   = "";
-    ULONG          ul0, ul1, ul2;
+    ULONG          ul1, ul2;
+    ULONG          cUpdated, cAll, cNotAliased;
 
     DosError(0x3);
     /*DosSetPriority(PRTYS_PROCESSTREE, PRTYC_REGULAR, 1, 0);*/
@@ -316,12 +317,13 @@ int main(int argc, char **argv)
         /* write status to log */
         if (!options.fIntegrityOnly)
         {
-            ul2 = dbGetNumberOfUpdatedFunction(options.lDllRefcode);
-            ul1 = dbCountFunctionInDll(options.lDllRefcode, FALSE);
-            ul0 = dbCountFunctionInDll(options.lDllRefcode, TRUE);
-            if (ul0 > ul2)
+            cUpdated    = dbGetNumberOfUpdatedFunction(options.lDllRefcode);
+            cAll        = dbCountFunctionInDll(options.lDllRefcode, FALSE);
+            cNotAliased = dbCountFunctionInDll(options.lDllRefcode, TRUE);
+            if (cNotAliased > cUpdated)
             {
-                fprintf(phSignal, "%d functions where not found (found=%d, total=%d).\n", ul0 - ul2, ul2, ul0);
+                fprintf(phSignal, "%d functions where not found (found=%d, total=%d).\n", 
+                        cNotAliased- cUpdated, cUpdated, cNotAliased);
                 ulRc += 0x00010000;
             }
             fprintf(phLog, "-------------------------------------------------\n");
@@ -329,8 +331,8 @@ int main(int argc, char **argv)
             dbGetNotUpdatedFunction(options.lDllRefcode, dbNotUpdatedCallBack);
             fprintf(phLog, "-------------------------------------------------\n");
             fprintf(phLog, "-------------------------------------------------\n\n");
-            fprintf(phLog,"Number of function in this DLL:        %4ld (%ld)\n", ul1, ul0);
-            fprintf(phLog,"Number of successfully processed APIs: %4ld (%ld)\n", (long)(0x0000FFFF & ulRc), ul2);
+            fprintf(phLog,"Number of function in this DLL:        %4ld (%ld)\n", cAll, cNotAliased);
+            fprintf(phLog,"Number of successfully processed APIs: %4ld (%ld)\n", (long)(0x0000FFFF & ulRc), cUpdated);
         }
         fprintf(phLog,"Number of signals:                     %4ld\n", (long)(ulRc >> 16));
 
@@ -343,8 +345,8 @@ int main(int argc, char **argv)
         /* warn if error during processing. */
         if (!options.fIntegrityOnly)
         {
-            fprintf(stdout,"Number of function in this DLL:        %4ld (%ld)\n", ul1, ul0);
-            fprintf(stdout,"Number of successfully processed APIs: %4ld (%ld)\n", (long)(0x0000FFFF & ulRc), ul2);
+            fprintf(stdout,"Number of function in this DLL:        %4ld (%ld)\n", cAll, cNotAliased);
+            fprintf(stdout,"Number of successfully processed APIs: %4ld (%ld)\n", (long)(0x0000FFFF & ulRc), cUpdated);
         }
         fprintf(stdout,"Number of signals:                     %4ld\n", (long)(ulRc >> 16));
         if ((int)(ulRc >> 16) > 0)
@@ -656,10 +658,11 @@ static unsigned long processModuleHeader(char **papszLines, int i, int &iRet, co
     char    szId[128];                  /* CVS Id keyword buffer. */
     char *  psz, *psz2;
     const char *    pszDBFilename;
-    char *          pszLastDateTime;
-    char *          pszRevision;
-    char *          pszAuthor;
-    signed long     lLastAuthor;
+    char *          pszLastDateTime = NULL;
+    char *          pszRevision     = NULL;
+    char *          pszAuthor       = NULL;
+    signed long     lLastAuthor     = 0;
+    unsigned long   ulRc            = 0;
 
     /*
      * Find the DB filename (skip path!)
@@ -688,67 +691,78 @@ static unsigned long processModuleHeader(char **papszLines, int i, int &iRet, co
     if (psz != NULL)
     {   /* found $Id: */
         psz2 = strchr(psz+3, '$');
-        strncpy(&szId[0], psz, psz2 - psz);
-        szId[psz2 - psz] = '\0';
-        iRet = i;
-
-        /* parse it! */
-        psz = strstr(szId+4, ",v ");
-        if (psz == NULL)
+        if (psz2 != NULL && psz2 - psz > 39 && psz2 - psz < 256)
         {
-            fprintf(phSignal, "%s, module header: $Id keyword is incorrect (or the parsing code is broken).\n", pszFilename);
-            return 0x00010000;
-        }
-        pszRevision = trim(psz + 3);
-        psz = strchr(pszRevision, ' ');
-        *psz++ = '\0';
-        trimR(pszRevision);
-
-        pszLastDateTime = trim(psz);
-        psz = strchr(strchr(pszLastDateTime, ' ') + 1, ' ');
-        *psz++ = '\0';
-        pszLastDateTime[4] = pszLastDateTime[7] = '-';
-        trimR(pszLastDateTime);
-
-        pszAuthor = trim(psz);
-        psz = strchr(pszAuthor, ' ');
-        *psz = '\0';
-        lLastAuthor = dbFindAuthor(pszAuthor, NULL);
-
-        /*
-         * Is there more stuff here, in this comment?
-         * Skip to end of the current comment and copy the contents to szDescription.
-         * if szDescription suddenly contains nothing.
-         */
-        psz = &szDescription[0];
-        copyComment(psz, psz2+1, i, papszLines, TRUE);
-        while (*psz == '\n' && *psz == ' ')
-            psz++;
-        if (*psz == '\0')
-        {   /*
-             * No description in the first comment. (The one with $Id.)
-             * Is there a comment following the first one?
-             */
-            while (papszLines[i] != NULL && strstr(papszLines[i++], "*/") == NULL)
-                i = i;
-            while (papszLines[i] != NULL)
+            strncpy(&szId[0], psz, psz2 - psz);
+            szId[psz2 - psz] = '\0';
+            iRet = i;
+    
+            /* parse it! */
+            psz = strstr(szId+4, ",v ");
+            if (psz != NULL)
             {
-                psz2 = papszLines[i];
-                while (*psz2 == ' ')
-                    psz2++;
-                if (*psz2 != '\0')
-                    break;
-                i++;
+                pszRevision = trim(psz + 3);
+                psz = strchr(pszRevision, ' ');
+                *psz++ = '\0';
+                trimR(pszRevision);
+
+                pszLastDateTime = trim(psz);
+                psz = strchr(strchr(pszLastDateTime, ' ') + 1, ' ');
+                *psz++ = '\0';
+                pszLastDateTime[4] = pszLastDateTime[7] = '-';
+                trimR(pszLastDateTime);
+
+                pszAuthor = trim(psz);
+                psz = strchr(pszAuthor, ' ');
+                *psz = '\0';
+                lLastAuthor = dbFindAuthor(pszAuthor, NULL);
             }
-            if (psz2 != NULL && strncmp(psz2, "/*", 2) == 0)
+            else
             {
-                psz = &szDescription[0];
-                copyComment(psz, psz2+1, i, papszLines, TRUE);
-                while (*psz == '\n' && *psz == ' ')
-                    psz++;
-                if (psz == '\0')
-                    szDescription[0] = '\0';
+                fprintf(phSignal, "%s, module header: $Id keyword is incorrect (2).\n", pszFilename);
+                ulRc += 0x00010000;
+            }
 
+
+            /*
+             * Is there more stuff here, in this comment?
+             * Skip to end of the current comment and copy the contents to szDescription.
+             * if szDescription suddenly contains nothing.
+             */
+            psz = &szDescription[0];
+            copyComment(psz, psz2+1, i, papszLines, TRUE, TRUE);
+            if (*psz == '\0')
+            {   /*
+                 * No description in the first comment. (The one with $Id.)
+                 * Is there a comment following the first one?
+                 */
+                while (papszLines[i] != NULL && strstr(papszLines[i++], "*/") == NULL)
+                    i = i;
+                while (papszLines[i] != NULL)
+                {
+                    psz2 = papszLines[i];
+                    while (*psz2 == ' ')
+                        psz2++;
+                    if (*psz2 != '\0')
+                        break;
+                    i++;
+                }
+                if (psz2 != NULL && strncmp(psz2, "/*", 2) == 0)
+                {
+                    psz = &szDescription[0];
+                    copyComment(psz, psz2+1, i, papszLines, TRUE, TRUE);
+                    while (*psz == '\n' && *psz == ' ')
+                        psz++;
+                    if (psz == '\0')
+                        szDescription[0] = '\0';
+
+                    /* Skip to line after comment end. */
+                    while (papszLines[i] != NULL && strstr(papszLines[i++], "*/") == NULL)
+                        i = i;
+                }
+            }
+            else
+            {
                 /* Skip to line after comment end. */
                 while (papszLines[i] != NULL && strstr(papszLines[i++], "*/") == NULL)
                     i = i;
@@ -756,11 +770,11 @@ static unsigned long processModuleHeader(char **papszLines, int i, int &iRet, co
         }
         else
         {
-            /* Skip to line after comment end. */
-            while (papszLines[i] != NULL && strstr(papszLines[i++], "*/") == NULL)
-                i = i;
+            fprintf(phSignal, "%s, module header: $Id keyword is incorrect (1).\n", pszFilename);
+            ulRc += 0x00010000;
         }
         iRet = i;
+
 
         /*
          * Information is collected.
@@ -773,7 +787,7 @@ static unsigned long processModuleHeader(char **papszLines, int i, int &iRet, co
              * Get file refcode.
              */
             pOptions->lFileRefcode = dbFindFile(pOptions->lDllRefcode, pszDBFilename);
-            if (pOptions->lFileRefcode <= 0)
+            if (pOptions->lFileRefcode < 0)
             {
                 fprintf(phSignal, "%s, module header: failed to find file in DB. %s\n",
                         pszDBFilename, dbGetLastErrorDesc());
@@ -835,7 +849,7 @@ static unsigned long processDesignNote(char **papszLines, int i, int &iRet, cons
             *strstr(psz, "*/") = '\0';
         }
         else
-            copyComment(&szBuffer[0], 0, i+1, papszLines, TRUE);
+            copyComment(&szBuffer[0], 0, i+1, papszLines, TRUE, TRUE);
 
         /* Update database */
         if (!dbAddDesignNote(pOptions->lDllRefcode, pOptions->lFileRefcode, psz, &szBuffer[0], lSeqNbr, pOptions->lSeqFile++))
@@ -1563,7 +1577,7 @@ static unsigned long analyseFnHdr(PFNDESC pFnDesc, char **papszLines, int i, con
 
                 /* find parameter */
                 for (j = 0; j < pFnDesc->cParams; j++)
-                    if (strcmp(pFnDesc->apszParamName[j], pszParam) != 0)
+                    if (strcmp(pFnDesc->apszParamName[j], pszParam) == 0)
                         break;
                 if (j < pFnDesc->cParams)
                 {
@@ -2531,9 +2545,9 @@ static void copy(char *psz, int jFrom, int iFrom, int jTo, int iTo, char **papsz
 /* copyComment: Wrapper for the other copyComment function.
  *
  */
-static void copyComment(char *psz, char *pszFrom, int iFrom, char **papszLines, BOOL fStrip)
+static void copyComment(char *psz, char *pszFrom, int iFrom, char **papszLines, BOOL fStrip, BOOL fHTML)
 {
-    copyComment(psz, pszFrom - papszLines[iFrom], iFrom, papszLines, fStrip);
+    copyComment(psz, pszFrom - papszLines[iFrom], iFrom, papszLines, fStrip, fHTML);
 }
 
 
@@ -2548,10 +2562,11 @@ static void copyComment(char *psz, char *pszFrom, int iFrom, char **papszLines, 
  * @param       iFrom       Starting position, index into papszLines.
  * @param       papszLines  Array of lines.
  * @param       fStrip      Strip blank lines at start and end + LICENCE notice (at end).
+ * @param       fHTML       Convert to HTML while copying.
  * @status      completely implemented.
  * @author      knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  */
-static void copyComment(char *psz, int jFrom, int iFrom, char **papszLines, BOOL fStrip)
+static void copyComment(char *psz, int jFrom, int iFrom, char **papszLines, BOOL fStrip, BOOL fHTML)
 {
     char *  pszStartBuffer = psz;       /* Start of the target buffer. */
     char *  pszStart = psz;             /* Start of current line. */
@@ -2586,7 +2601,16 @@ static void copyComment(char *psz, int jFrom, int iFrom, char **papszLines, BOOL
             if (pszStart + j == psz)
                 psz = pszStart;
             if (psz > pszStartBuffer || !fStrip)
+            {
+                if (fHTML)
+                {
+                    *psz++ = '<';
+                    *psz++ = 'B';
+                    *psz++ = 'R';
+                    *psz++ = '>';
+                }
                 *psz++ = '\n';
+            }
 
             /* next */
             i++;
@@ -2602,8 +2626,21 @@ static void copyComment(char *psz, int jFrom, int iFrom, char **papszLines, BOOL
      */
     if (fStrip)
     {
+        if (fHTML)
+        {
+            while (psz >= pszStartBuffer)
+            {
+                if (*psz == ' ' || *psz == '\n' || *psz == '\0')
+                    *psz-- = '\0';
+                else if (psz - 4 >= pszStartBuffer && strncmp(psz - 4, "<BR>", 4) == 0)
+                    *(psz -= 4) = '\0';
+                else
+                    break;
+            }
+        }
         while (psz >= pszStartBuffer && (*psz == ' ' || *psz == '\n' || *psz == '\0'))
             *psz-- = '\0';
+
 
         if (psz - 20 > pszStartBuffer && strstr(psz - 20, "LICENSE.TXT") != NULL)
         {
@@ -2611,6 +2648,18 @@ static void copyComment(char *psz, int jFrom, int iFrom, char **papszLines, BOOL
                 *psz-- = '\0';
         }
 
+        if (fHTML)
+        {
+            while (psz >= pszStartBuffer)
+            {
+                if (*psz == ' ' || *psz == '\n' || *psz == '\0')
+                    *psz-- = '\0';
+                else if (psz - 4 >= pszStartBuffer && strncmp(psz - 4, "<BR>", 4) == 0)
+                    *(psz -= 4) = '\0';
+                else
+                    break;
+            }
+        }
         while (psz >= pszStartBuffer && (*psz == ' ' || *psz == '\n' || *psz == '\0'))
             *psz-- = '\0';
     }
