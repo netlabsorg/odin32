@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.8 1999-07-07 17:08:42 cbratschi Exp $
+# $Id: makefile,v 1.9 1999-07-22 08:23:37 sandervl Exp $
 #
 # PD-Win32 API
 #
@@ -38,8 +38,8 @@ $(TARGET).dll: $(OBJS) $(TARGET).def
         $(CP) $@ $(PDWIN32_BIN)
 
 
-$(TARGET).lib: $(TARGET).dll
-        $(IMPLIB) $(IMPLIBFLAGS) $@ $(TARGET).dll
+$(TARGET).lib: $(TARGET)exp.def
+	$(IMPLIB) $(IMPLIBFLAGS) $@ $(TARGET)exp.def
         $(CP) $@ $(PDWIN32_LIB)
 
 comctl32.obj: comctl32.c
