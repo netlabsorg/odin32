@@ -1,7 +1,8 @@
-/* $Id: changelog,v 1.2345 2002-10-28 13:24:17 sandervl Exp $ */
+/* $Id: changelog,v 1.2346 2002-10-28 17:52:50 sandervl Exp $ */
 
  2002-10-28: Sander van Leeuwen <sandervl@innotek   >
     - GDI32:    o Workaround added for WGSS GetDIBits bug
+    - COMDLG32: o Use Wine printer dialog
 
  2002-10-28: Platon Fomichev <platon@innotek   >
     - USER32:   o Fix for WinPeekMsg bug (?); sometimes returns a message
