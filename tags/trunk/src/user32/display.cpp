@@ -1,4 +1,4 @@
-/* $Id: display.cpp,v 1.9 2000-10-05 13:47:06 sandervl Exp $ */
+/* $Id: display.cpp,v 1.10 2000-10-26 17:22:23 sandervl Exp $ */
 /*
  * Display/Monitor Win32 apis
  *
@@ -593,6 +593,43 @@ BOOL WIN32API EnumDisplayMonitors(
             hdcOptionalForPainting,
             &rcLimit,
             dwData);
+}
+/***********************************************************************
+ *           EnumDisplayDevicesA   (USER32.184)
+ */
+BOOL WINAPI EnumDisplayDevicesA(
+	LPVOID unused,DWORD i,LPDISPLAY_DEVICEA lpDisplayDevice,DWORD dwFlags) 
+{
+        dprintf(("EnumDisplayDevicesA: %x %d %x %x", unused, i, lpDisplayDevice, dwFlags));
+	if (i)
+		return FALSE;
+	
+	strcpy((char *)lpDisplayDevice->DeviceName,"OS/2-PM");
+	strcpy((char *)lpDisplayDevice->DeviceString,"OS/2 Presentation Manager Display");
+	lpDisplayDevice->StateFlags =
+			DISPLAY_DEVICE_ATTACHED_TO_DESKTOP	|
+			DISPLAY_DEVICE_PRIMARY_DEVICE		|
+			DISPLAY_DEVICE_VGA_COMPATIBLE;
+	return TRUE;
+}
+
+/***********************************************************************
+ *           EnumDisplayDevicesW   (USER32.185)
+ */
+BOOL WINAPI EnumDisplayDevicesW(
+	LPVOID unused,DWORD i,LPDISPLAY_DEVICEW lpDisplayDevice,DWORD dwFlags) 
+{
+        dprintf(("EnumDisplayDevicesW: %x %d %x %x", unused, i, lpDisplayDevice, dwFlags));
+	if (i)
+		return FALSE;
+
+	lstrcpyAtoW(lpDisplayDevice->DeviceName,"OS/2-PM");
+	lstrcpyAtoW(lpDisplayDevice->DeviceString,"OS/2 Presentation Manager Display");
+	lpDisplayDevice->StateFlags =
+			DISPLAY_DEVICE_ATTACHED_TO_DESKTOP	|
+			DISPLAY_DEVICE_PRIMARY_DEVICE		|
+			DISPLAY_DEVICE_VGA_COMPATIBLE;
+	return TRUE;
 }
 //******************************************************************************
 //******************************************************************************
