@@ -46,6 +46,8 @@ char *get_typename(resource_t* r)
 	case res_ver:	return "VERSIONINFO";
 	case res_dlginit: return "DLGINIT";
 	case res_toolbar: return "TOOLBAR";
+	case res_anicur:  return "CURSOR (animated)";
+	case res_aniico:  return "ICON (animated)";
 	default: 	return "Unknown";
 	}
 }
@@ -152,7 +154,7 @@ char *get_nameid_str(name_id_t *n)
  * Remarks	:
  *****************************************************************************
 */
-void dump_memopt(DWORD memopt)
+static void dump_memopt(DWORD memopt)
 {
 	printf("Memory/load options: ");
 	if(memopt & 0x0040)
@@ -183,7 +185,7 @@ void dump_memopt(DWORD memopt)
  * Remarks	:
  *****************************************************************************
 */
-void dump_lvc(lvc_t *l)
+static void dump_lvc(lvc_t *l)
 {
 	if(l->language)
 		printf("LANGUAGE %04x, %04x\n", l->language->id, l->language->sub);
@@ -212,9 +214,9 @@ void dump_lvc(lvc_t *l)
  * Remarks	:
  *****************************************************************************
 */
-void dump_raw_data(raw_data_t *d)
+static void dump_raw_data(raw_data_t *d)
 {
-	int n;
+	unsigned int n;
 	int i;
 	int j;
 
@@ -235,7 +237,7 @@ void dump_raw_data(raw_data_t *d)
 			{
 				printf("- ");
 				for(i = 0; i < 16; i++)
-					printf("%c", isprint(d->data[n-16+i]) ? d->data[n-16+i] : '.');
+					printf("%c", isprint(d->data[n-16+i] & 0xff) ? d->data[n-16+i] : '.');
 				printf("\n%08x: ", n);
 			}
 			else
@@ -248,7 +250,7 @@ void dump_raw_data(raw_data_t *d)
 	if(!j)
 		j = 16;
 	for(i = 0; i < j; i++)
-		printf("%c", isprint(d->data[n-j+i]) ? d->data[n-j+i] : '.');
+		printf("%c", isprint(d->data[n-j+i] & 0xff) ? d->data[n-j+i] : '.');
 	printf("\n");
 }
 
@@ -263,7 +265,7 @@ void dump_raw_data(raw_data_t *d)
  * Remarks	:
  *****************************************************************************
 */
-void dump_accelerator(accelerator_t *acc)
+static void dump_accelerator(accelerator_t *acc)
 {
 	event_t *ev = acc->events;
 
@@ -297,7 +299,7 @@ void dump_accelerator(accelerator_t *acc)
  * Remarks	:
  *****************************************************************************
 */
-void dump_cursor(cursor_t *cur)
+static void dump_cursor(cursor_t *cur)
 {
 	printf("Id: %d\n", cur->id);
 	printf("Width: %d\n", cur->width);
@@ -318,7 +320,7 @@ void dump_cursor(cursor_t *cur)
  * Remarks	:
  *****************************************************************************
 */
-void dump_cursor_group(cursor_group_t *curg)
+static void dump_cursor_group(cursor_group_t *curg)
 {
 	dump_memopt(curg->memopt);
 	printf("There are %d cursors in this group\n", curg->ncursor);
@@ -335,7 +337,7 @@ void dump_cursor_group(cursor_group_t *curg)
  * Remarks	:
  *****************************************************************************
 */
-void dump_icon(icon_t *ico)
+static void dump_icon(icon_t *ico)
 {
 	printf("Id: %d\n", ico->id);
 	printf("Width: %d\n", ico->width);
@@ -357,10 +359,28 @@ void dump_icon(icon_t *ico)
  * Remarks	:
  *****************************************************************************
 */
-void dump_icon_group(icon_group_t *icog)
+static void dump_icon_group(icon_group_t *icog)
 {
 	dump_memopt(icog->memopt);
 	printf("There are %d icons in this group\n", icog->nicon);
+}
+
+/*
+ *****************************************************************************
+ * Function	: dump_ani_curico
+ * Syntax	: void dump_ani_curico(ani_curico_t *ani)
+ * Input	:
+ *	ani	- Animated object resource descriptor
+ * Output	: nop
+ * Description	:
+ * Remarks	:
+ *****************************************************************************
+*/
+static void dump_ani_curico(ani_curico_t *ani)
+{
+	dump_memopt(ani->memopt);
+	dump_lvc(&ani->data->lvc);
+	dump_raw_data(ani->data);
 }
 
 /*
@@ -374,9 +394,10 @@ void dump_icon_group(icon_group_t *icog)
  * Remarks	:
  *****************************************************************************
 */
-void dump_font(font_t *fnt)
+static void dump_font(font_t *fnt)
 {
 	dump_memopt(fnt->memopt);
+	dump_lvc(&(fnt->data->lvc));
 	dump_raw_data(fnt->data);
 }
 
@@ -391,9 +412,10 @@ void dump_font(font_t *fnt)
  * Remarks	:
  *****************************************************************************
 */
-void dump_bitmap(bitmap_t *bmp)
+static void dump_bitmap(bitmap_t *bmp)
 {
 	dump_memopt(bmp->memopt);
+	dump_lvc(&(bmp->data->lvc));
 	dump_raw_data(bmp->data);
 }
 
@@ -408,9 +430,10 @@ void dump_bitmap(bitmap_t *bmp)
  * Remarks	:
  *****************************************************************************
 */
-void dump_rcdata(rcdata_t *rdt)
+static void dump_rcdata(rcdata_t *rdt)
 {
 	dump_memopt(rdt->memopt);
+	dump_lvc(&(rdt->data->lvc));
 	dump_raw_data(rdt->data);
 }
 
@@ -425,9 +448,10 @@ void dump_rcdata(rcdata_t *rdt)
  * Remarks	:
  *****************************************************************************
 */
-void dump_user(user_t *usr)
+static void dump_user(user_t *usr)
 {
 	dump_memopt(usr->memopt);
+	dump_lvc(&(usr->data->lvc));
 	printf("Class %s\n", get_nameid_str(usr->type));
 	dump_raw_data(usr->data);
 }
@@ -443,8 +467,10 @@ void dump_user(user_t *usr)
  * Remarks	:
  *****************************************************************************
 */
-void dump_messagetable(messagetable_t *msg)
+static void dump_messagetable(messagetable_t *msg)
 {
+	dump_memopt(msg->memopt);
+	dump_lvc(&(msg->data->lvc));
 	dump_raw_data(msg->data);
 }
 
@@ -459,7 +485,7 @@ void dump_messagetable(messagetable_t *msg)
  * Remarks	:
  *****************************************************************************
 */
-void dump_stringtable(stringtable_t *stt)
+static void dump_stringtable(stringtable_t *stt)
 {
 	int i;
 	for(; stt; stt = stt->next)
@@ -491,7 +517,7 @@ void dump_stringtable(stringtable_t *stt)
  * Remarks	:
  *****************************************************************************
 */
-void dump_control(control_t *ctrl)
+static void dump_control(control_t *ctrl)
 {
 	printf("Control {\n\tClass: %s\n", get_nameid_str(ctrl->ctlclass));
 	printf("\tText: "); get_nameid_str(ctrl->title); printf("\n");
@@ -530,7 +556,7 @@ void dump_control(control_t *ctrl)
  * Remarks	:
  *****************************************************************************
 */
-void dump_dialog(dialog_t *dlg)
+static void dump_dialog(dialog_t *dlg)
 {
 	control_t *c = dlg->controls;
 
@@ -580,7 +606,7 @@ void dump_dialog(dialog_t *dlg)
  * Remarks	:
  *****************************************************************************
 */
-void dump_dialogex(dialogex_t *dlgex)
+static void dump_dialogex(dialogex_t *dlgex)
 {
 	control_t *c = dlgex->controls;
 
@@ -630,7 +656,7 @@ void dump_dialogex(dialogex_t *dlgex)
  * Remarks	:
  *****************************************************************************
 */
-void dump_menu_item(menu_item_t *item)
+static void dump_menu_item(menu_item_t *item)
 {
 	while(item)
 	{
@@ -668,7 +694,7 @@ void dump_menu_item(menu_item_t *item)
  * Remarks	:
  *****************************************************************************
 */
-void dump_menu(menu_t *men)
+static void dump_menu(menu_t *men)
 {
 	dump_memopt(men->memopt);
 	dump_lvc(&(men->lvc));
@@ -685,7 +711,7 @@ void dump_menu(menu_t *men)
  * Remarks	:
  *****************************************************************************
 */
-void dump_menuex_item(menuex_item_t *item)
+static void dump_menuex_item(menuex_item_t *item)
 {
 	while(item)
 	{
@@ -738,7 +764,7 @@ void dump_menuex_item(menuex_item_t *item)
  * Remarks	:
  *****************************************************************************
 */
-void dump_menuex(menuex_t *menex)
+static void dump_menuex(menuex_t *menex)
 {
 	dump_memopt(menex->memopt);
 	dump_lvc(&(menex->lvc));
@@ -755,9 +781,10 @@ void dump_menuex(menuex_t *menex)
  * Remarks	:
  *****************************************************************************
 */
-void dump_ver_value(ver_value_t *val)
+static void dump_ver_block(ver_block_t *);	/* Forward ref */
+
+static void dump_ver_value(ver_value_t *val)
 {
-	extern void dump_ver_block(ver_block_t *);
 	if(val->type == val_str)
 	{
 		printf("VALUE ");
@@ -791,7 +818,7 @@ void dump_ver_value(ver_value_t *val)
  * Remarks	:
  *****************************************************************************
 */
-void dump_ver_block(ver_block_t *blk)
+static void dump_ver_block(ver_block_t *blk)
 {
 	ver_value_t *val = blk->values;
 	printf("BLOCK ");
@@ -816,9 +843,11 @@ void dump_ver_block(ver_block_t *blk)
  * Remarks	:
  *****************************************************************************
 */
-void dump_versioninfo(versioninfo_t *ver)
+static void dump_versioninfo(versioninfo_t *ver)
 {
 	ver_block_t *blk = ver->blocks;
+
+	dump_lvc(&(ver->lvc));
 
 	if(ver->gotit.fv)
 		printf("FILEVERSION %04x, %04x, %04x, %04x\n",
@@ -859,7 +888,7 @@ void dump_versioninfo(versioninfo_t *ver)
  * Remarks	:
  *****************************************************************************
 */
-void dump_toolbar_items(toolbar_item_t *items)
+static void dump_toolbar_items(toolbar_item_t *items)
 {
 	while(items)
 	{
@@ -885,7 +914,7 @@ void dump_toolbar_items(toolbar_item_t *items)
  * Remarks	:
  *****************************************************************************
 */
-void dump_toolbar(toolbar_t *toolbar)
+static void dump_toolbar(toolbar_t *toolbar)
 {
 	dump_memopt(toolbar->memopt);
 	dump_lvc(&(toolbar->lvc));
@@ -903,10 +932,10 @@ void dump_toolbar(toolbar_t *toolbar)
  * Remarks	:
  *****************************************************************************
 */
-void dump_dlginit(dlginit_t *dit)
+static void dump_dlginit(dlginit_t *dit)
 {
 	dump_memopt(dit->memopt);
-	dump_lvc(&(dit->lvc));
+	dump_lvc(&(dit->data->lvc));
 	dump_raw_data(dit->data);
 }
 
@@ -995,6 +1024,10 @@ void dump_resources(resource_t *top)
 			break;
 		case res_toolbar:
 			dump_toolbar(top->res.tbt);
+			break;
+		case res_anicur:
+		case res_aniico:
+			dump_ani_curico(top->res.ani);
 			break;
 		default:
 			printf("Report this: Unknown resource type parsed %08x\n", top->type);
