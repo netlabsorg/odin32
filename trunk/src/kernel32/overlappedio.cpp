@@ -1,4 +1,4 @@
-/* $Id: overlappedio.cpp,v 1.19 2002-08-04 15:26:52 sandervl Exp $ */
+/* $Id: overlappedio.cpp,v 1.20 2002-10-10 16:28:40 sandervl Exp $ */
 
 /*
  * Win32 overlapped IO class
@@ -387,12 +387,13 @@ BOOL OverlappedIOHandler::WriteFile(HANDLE        hHandle,
     }
     else index = ASYNC_INDEX_WRITE;
 
-    addRequest(index, lpRequest);
-
     lpOverlapped->Internal     = STATUS_PENDING;
     lpOverlapped->InternalHigh = 0;
     //reset overlapped semaphore to non-signalled
     ::ResetEvent(lpOverlapped->hEvent);
+
+    //Add request to queue; must make sure we do this right before waking the async thread
+    addRequest(index, lpRequest);
 
     //wake up async thread
     ::SetEvent((dwAsyncType & ASYNCIO_READWRITE) ? hEventRead : hEventWrite);
@@ -436,12 +437,13 @@ BOOL OverlappedIOHandler::ReadFile(HANDLE        hHandle,
     lpRequest->dwTimeOut           = dwTimeOut;
     lpRequest->next                = NULL;
 
-    addRequest(ASYNC_INDEX_READ, lpRequest);
-
     lpOverlapped->Internal     = STATUS_PENDING;
     lpOverlapped->InternalHigh = 0;
     //reset overlapped semaphore to non-signalled
     ::ResetEvent(lpOverlapped->hEvent);
+
+    //Add request to queue; must make sure we do this right before waking the async thread
+    addRequest(ASYNC_INDEX_READ, lpRequest);
 
     //wake up async thread
     ::SetEvent(hEventRead);
@@ -513,6 +515,7 @@ BOOL OverlappedIOHandler::WaitForEvent(HANDLE        hHandle,
         return (dwLastError == ERROR_SUCCESS);
     }
 
+    //add request to list; must make sure we do this right before waking the async thread
     addRequest(ASYNC_INDEX_POLL, lpRequest);
 
     //wake up async thread
