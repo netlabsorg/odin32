@@ -1,4 +1,4 @@
-/* $Id: winimagebase.h,v 1.4 1999-11-22 20:36:53 sandervl Exp $ */
+/* $Id: winimagebase.h,v 1.5 1999-11-26 00:04:33 sandervl Exp $ */
 
 /*
  * Win32 PE Image base class
@@ -77,6 +77,9 @@ static  BOOL  isPEImage(char *szFileName);
 
 	void  tlsAttachThread();	//setup TLS structures for new thread
 	void  tlsDetachThread();	//destroy TLS structures
+
+virtual	ULONG     getApi(char *name)  = 0;
+virtual ULONG     getApi(int ordinal) = 0;
 
 virtual BOOL  isDll() = 0;
 

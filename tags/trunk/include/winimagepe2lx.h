@@ -1,4 +1,4 @@
-/* $Id: winimagepe2lx.h,v 1.3 1999-10-17 01:52:20 bird Exp $ */
+/* $Id: winimagepe2lx.h,v 1.4 1999-11-26 00:04:33 sandervl Exp $ */
 
 /*
  * Win32 PE2LX Image base class
@@ -41,6 +41,10 @@ public:
     Win32Pe2LxImage(HINSTANCE hinstance, BOOL fWin32k);
     virtual ~Win32Pe2LxImage();
     virtual BOOL init();
+
+    /** @cat Exports */
+    virtual ULONG getApi(char *name);
+    virtual ULONG getApi(int ordinal);
 
 private:
     /** @cat constructor helpers */

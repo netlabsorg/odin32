@@ -1,4 +1,4 @@
-/* $Id: windllbase.h,v 1.4 1999-11-22 20:36:53 sandervl Exp $ */
+/* $Id: windllbase.h,v 1.5 1999-11-26 00:04:32 sandervl Exp $ */
 
 /*
  * Win32 Dll base class
@@ -60,9 +60,6 @@ static  void      tlsAttachThreadToAllDlls();
 
 //Destroy TLS structure for all dlls for a thread that's about to die
 static  void      tlsDetachThreadFromAllDlls();
-
-virtual	ULONG     getApi(char *name)  = 0;
-virtual ULONG     getApi(int ordinal) = 0;
 
 	BOOL      attachProcess();
 	BOOL      detachProcess();

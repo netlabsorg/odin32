@@ -1,4 +1,4 @@
-/* $Id: windllpe2lx.h,v 1.3 1999-10-17 01:52:19 bird Exp $ */
+/* $Id: windllpe2lx.h,v 1.4 1999-11-26 00:04:32 sandervl Exp $ */
 
 /*
  * Win32 PE2LX Dll class
@@ -27,10 +27,6 @@ public:
     Win32Pe2LxDll(HINSTANCE hinstance, BOOL fWin32k) throw(ULONG);
     virtual ~Win32Pe2LxDll();
     BOOL     init();
-
-    /** @cat Exports */
-    virtual ULONG getApi(char *name);
-    virtual ULONG getApi(int ordinal);
 
     /** @cat Query */
     virtual BOOL  isLxDll();
