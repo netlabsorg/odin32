@@ -1,4 +1,4 @@
-/* $Id: buildenv.cmd,v 1.24 2002-09-01 11:44:51 bird Exp $
+/* $Id: buildenv.cmd,v 1.25 2002-09-01 11:50:11 bird Exp $
  *
  * This is the master tools environment script. It contains environment
  * configurations for many development tools. Each tool can be installed
@@ -2988,7 +2988,7 @@ VAC308: procedure expose aCfg. aPath. sPathFile
     if (    \CfgVerifyFile(sPathCPP'\bin\icc.exe', fQuiet),
         |   \CfgVerifyFile(sPathCPP'\bin\ilib.exe', fQuiet),
         |   \CfgVerifyFile(sPathCPP'\bin\ilink.exe', fQuiet),
-        |   \CfgVerifyFile(sPathCPP'\bin\icsperf.exe', fQuiet),
+        |   \CfgVerifyFile(sPathCPP'\bin\icsperf.exe', fQuiet,1),
         |   \CfgVerifyFile(sPathCPP'\bin\icsdebug.exe', fQuiet),
         |   \CfgVerifyFile(sPathCPP'\bin\cppfilt.exe', fQuiet),
         |   \CfgVerifyFile(sPathCPP'\bin\dllrname.exe', fQuiet),
