@@ -1,4 +1,4 @@
-; $Id: USER32.DEF,v 1.17 1999-10-26 11:14:52 sandervl Exp $
+; $Id: USER32.DEF,v 1.18 1999-11-03 22:04:21 cbratschi Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY USER32 INITINSTANCE TERMINSTANCE
@@ -626,7 +626,8 @@ EXPORTS
     CreateWindowProc                    @2000
     GetOS2Callback__15Win32WindowProcFv = GetOS2Callback__Fv @2001
 
-; Wine helper function
+; Wine/Odin helper function
     GetSysColorPen              = _GetSysColorPen@4              @2002
+    TrackWin32Window            = _TrackWin32Window@8            @2003
 
     Win32ToOS2Handle__FUl      = Win32ToOS2Handle__15Win32BaseWindowFUl @2006

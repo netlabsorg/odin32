@@ -1,4 +1,4 @@
-/* $Id: pmframe.cpp,v 1.19 1999-11-03 19:51:43 sandervl Exp $ */
+/* $Id: pmframe.cpp,v 1.20 1999-11-03 22:04:22 cbratschi Exp $ */
 /*
  * Win32 Frame Managment Code for OS/2
  *
@@ -205,6 +205,18 @@ void DrawActivate(Win32BaseWindow *win32wnd, HWND hwnd)
 void FrameTrackFrame(Win32BaseWindow *win32wnd,BOOL lefttop)
 {
   INT flags = lefttop ? (TF_LEFT | TF_TOP):(TF_RIGHT | TF_BOTTOM);
+
+  WinSendMsg(win32wnd->getOS2FrameWindowHandle(),WM_TRACKFRAME,(MPARAM)flags,(MPARAM)0);
+}
+//******************************************************************************
+// used by statusbar control
+//******************************************************************************
+VOID WINAPI TrackWin32Window(HWND hwnd,BOOL lefttop)
+{
+  Win32BaseWindow *win32wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
+  INT flags = lefttop ? (TF_LEFT | TF_TOP):(TF_RIGHT | TF_BOTTOM);
+
+  if (!win32wnd) return;
 
   WinSendMsg(win32wnd->getOS2FrameWindowHandle(),WM_TRACKFRAME,(MPARAM)flags,(MPARAM)0);
 }
