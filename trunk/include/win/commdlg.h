@@ -1,4 +1,4 @@
-/* $Id: commdlg.h,v 1.6 2000-07-18 18:30:33 sandervl Exp $ */
+/* $Id: commdlg.h,v 1.7 2000-11-06 19:50:03 sandervl Exp $ */
 /* 
  * COMMDLG - Common Wine Dialog ... :-)
  */
@@ -36,6 +36,10 @@ extern "C" {
 #define OFN_EXPLORER                 0x00080000
 #define OFN_NODEREFERENCELINKS       0x00100000
 #define OFN_LONGNAMES                0x00200000
+#define OFN_ENABLEINCLUDENOTIFY      0x00400000
+#define OFN_ENABLESIZING             0x00800000
+#define OFN_DONTADDTORECENT          0x02000000
+#define OFN_FORCESHOWHIDDEN          0x10000000
 
 /* WINE internal flags */
 #define OFN_UNICODE		     0x40000000	/*to differ between 32W/A hook*/
