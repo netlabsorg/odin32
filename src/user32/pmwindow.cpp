@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.139 2001-07-08 15:51:42 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.140 2001-07-14 09:21:43 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -1353,6 +1353,7 @@ PosChangedEnd:
         goto RunDefFrameWndProc;
 
     case WM_TRACKFRAME:
+        dprintf(("PMFRAME: WM_TRACKFRAME %x %x %x", win32wnd->getWindowHandle(), mp1, mp2));
         if(fOS2Look) {//sent by titlebar control
             FrameTrackFrame(win32wnd, TF_MOVE);
         }
@@ -1385,6 +1386,10 @@ RunDefWndProc:
 }
 //******************************************************************************
 //TODO: Quickly moving a window two times doesn't force a repaint (1st time)
+//
+//
+BOOL (APIENTRY *WinTrackWindow)(HWND hwndTrack, PTRACKINFO pti) = NULL;
+//
 //******************************************************************************
 VOID FrameTrackFrame(Win32BaseWindow *win32wnd,DWORD flags)
 {
@@ -1393,7 +1398,18 @@ VOID FrameTrackFrame(Win32BaseWindow *win32wnd,DWORD flags)
   PRECT     pWindowRect, pClientRect;
   HWND      hwndTracking;
   LONG      parentHeight, parentWidth;
+  static    BOOL fInit = FALSE;
+  APIRET    rc;
+  BOOL      ret;
 
+    if(!fInit) {
+        HMODULE hModule;
+        char    buf[CCHMAXPATH];
+        rc = DosLoadModule(buf, sizeof(buf), "PMMERGE", &hModule);
+        rc = DosQueryProcAddr(hModule, 5466, NULL, (PFN *)&WinTrackWindow);
+        if(rc) WinTrackWindow = NULL;
+        fInit = TRUE;
+    }
     dprintf(("FrameTrackFrame: %x %x", win32wnd->getWindowHandle(), flags));
     track.cxBorder = 4;
     track.cyBorder = 4;  /* 4 pel wide lines used for rectangle */
@@ -1427,8 +1443,16 @@ VOID FrameTrackFrame(Win32BaseWindow *win32wnd,DWORD flags)
 
     track.fs = flags;
 
-    if(WinTrackRect(hwndTracking, NULL, &track) )
-    {
+    BOOL fDynamicDrag = WinQuerySysValue(HWND_DESKTOP, SVOS_DYNAMICDRAG);
+
+    SEL sel = RestoreOS2FS();
+    if(fDynamicDrag && WinTrackWindow) {
+         ret = WinTrackWindow(win32wnd->getOS2FrameWindowHandle(), &track);
+    }
+    else ret = WinTrackRect(hwndTracking, NULL, &track);
+    SetFS(sel);
+
+    if(ret) {
         /* if successful copy final position back */
         if(!WinEqualRect(0, &rcl, &track.rclTrack)) {
             dprintf(("FrameTrackFrame: new (os/2) window rect: (%d,%d)(%d,%d)", track.rclTrack.xLeft, track.rclTrack.yBottom, track.rclTrack.xRight - track.rclTrack.xLeft, track.rclTrack.yTop - track.rclTrack.yBottom));
