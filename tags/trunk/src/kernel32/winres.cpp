@@ -1,4 +1,4 @@
-/* $Id: winres.cpp,v 1.7 1999-08-19 12:53:19 sandervl Exp $ */
+/* $Id: winres.cpp,v 1.8 1999-08-19 14:19:15 sandervl Exp $ */
 
 /*
  * Win32 resource class
@@ -28,6 +28,7 @@
 #include <misc.h>
 #include <nameid.h>
 #include <winexe.h>
+#include "cvtresource.h"
 
 static ULONG CalcBitmapSize(ULONG cBits, LONG cx, LONG cy)
 {
@@ -195,7 +196,7 @@ PVOID Win32Resource::lockResource()
     case NTRT_BITMAP:
         rc = DosGetResource((HMODULE)module->hinstance, RT_BITMAP, id, (PPVOID)&resdata);
         if(rc)  return(NULL);
-        winresdata = ConvertBitmap((BITMAPFILEHEADER2 *)resdata);
+        winresdata = convertOS2Bitmap((BITMAPFILEHEADER2 *)resdata);
         break;
 
     case NTRT_ACCELERATORS:
@@ -272,15 +273,60 @@ PVOID Win32Resource::lockOS2Resource()
 
    dprintf(("Win32Resource::lockOS2Resource %d\n", id));
    if(os2resdata == NULL) {
-	rc = DosGetResource((HMODULE)module->hinstance, orgos2type, id, (PPVOID)&resdata);
-	if(rc)  return(NULL);
-	os2resdata = resdata;
+	if(resType == RSRC_PELOADER) {
+		os2resdata = convertResource(winresdata);
+	}
+	else {
+		rc = DosGetResource((HMODULE)module->hinstance, orgos2type, id, (PPVOID)&resdata);
+		if(rc)  return(NULL);
+		os2resdata = resdata;
+	}
    }
    return os2resdata;
 }
 //******************************************************************************
 //******************************************************************************
-PVOID Win32Resource::ConvertBitmap(void *bmpdata)
+PVOID Win32Resource::convertResource(void *win32res)
+{
+ ULONG cvtressize;
+
+  switch(type) {
+    case NTRT_NEWBITMAP:
+    case NTRT_BITMAP:
+	return ConvertBitmap((WINBITMAPINFOHEADER *)win32res, ressize, &ressize);
+
+    case NTRT_CURSOR:
+    case NTRT_GROUP_CURSOR:
+    case NTRT_GROUP_ICON:
+    case NTRT_ICON:
+	return ConvertIcon((WINBITMAPINFOHEADER *)win32res, ressize);
+
+    case NTRT_ACCELERATORS:
+	return ConvertAccelerator((WINACCEL *)win32res, ressize);
+
+    case NTRT_NEWMENU:
+    case NTRT_MENU:
+	return ConvertMenu((MenuHeader *)win32res, ressize);
+
+    case NTRT_NEWDIALOG:
+    case NTRT_DIALOG:
+	break;
+    case NTRT_FONTDIR:
+    case NTRT_FONT:
+    case NTRT_MESSAGETABLE:
+    case NTRT_STRING:
+    case NTRT_RCDATA:
+    case NTRT_VERSION:
+    default:
+        break;
+  }
+  dprintf(("Win32Resource::convertResource: Can't convert resource %d (type %d)", id, type));
+  return 0;
+}
+//******************************************************************************
+//NOTE: Will be removed once pe2lx rewrite has been completed
+//******************************************************************************
+PVOID Win32Resource::convertOS2Bitmap(void *bmpdata)
 {
  BITMAPFILEHEADER2   *bmphdr = (BITMAPFILEHEADER2 *)bmpdata;
  WINBITMAPINFOHEADER *winbmphdr;

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.19 1999-08-19 12:53:18 sandervl Exp $
+# $Id: makefile,v 1.20 1999-08-19 14:19:15 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -75,6 +75,10 @@ OBJS = KERNEL32.OBJ \
        atom.obj \
        disk.obj \
        directory.obj \
+       cvtbitmap.obj \
+       cvtmenu.obj \
+       cvtaccel.obj \
+       cvticon.obj \
        stubs.obj
 
 
@@ -348,6 +352,10 @@ windll.OBJ:    windll.cpp $(PDWIN32_INCLUDE)\winimage.h $(PDWIN32_INCLUDE)\windl
 winexe.OBJ:    winexe.cpp $(PDWIN32_INCLUDE)\winimage.h $(PDWIN32_INCLUDE)\windll.h $(PDWIN32_INCLUDE)\winexe.h
 stubs.obj:     stubs.cpp stubs.h
 
+cvtbitmap.obj: cvtbitmap.cpp $(PDWIN32_INCLUDE)\winicon.h $(PDWIN32_INCLUDE)\misc.h cvtresource.h
+cvtmenu.obj: cvtmenu.cpp $(PDWIN32_INCLUDE)\winmenu.h $(PDWIN32_INCLUDE)\misc.h cvtresource.h
+cvtaccel.obj: cvtaccel.cpp $(PDWIN32_INCLUDE)\winaccel.h $(PDWIN32_INCLUDE)\misc.h cvtresource.h
+cvticon.obj: cvticon.cpp $(PDWIN32_INCLUDE)\winicon.h $(PDWIN32_INCLUDE)\misc.h cvtresource.h
 
 clean:
         $(RM) *.OBJ *.LIB *.dll *~ *.map *.pch
