@@ -1,3 +1,4 @@
+# $Id: dplay.h,v 1.5 2000-09-24 22:47:40 hugh Exp $
 #ifndef __WINE_DPLAY_H
 #define __WINE_DPLAY_H
 

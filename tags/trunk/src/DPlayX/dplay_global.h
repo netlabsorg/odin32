@@ -1,11 +1,12 @@
+// $Id: dplay_global.h,v 1.2 2000-09-24 22:47:40 hugh Exp $
 #ifndef __WINE_DPLAY_GLOBAL_INCLUDED
 #define __WINE_DPLAY_GLOBAL_INCLUDED
 
 #include "dplaysp.h"
 #include "dplayx_queue.h"
 
-extern HRESULT DPL_EnumAddress( LPDPENUMADDRESSCALLBACK lpEnumAddressCallback, 
-                                LPCVOID lpAddress, DWORD dwAddressSize, 
+extern HRESULT DPL_EnumAddress( LPDPENUMADDRESSCALLBACK lpEnumAddressCallback,
+                                LPCVOID lpAddress, DWORD dwAddressSize,
                                 LPVOID lpContext );
 
 extern DWORD DP_CalcSessionDescSize( LPCDPSESSIONDESC2 lpSessDesc, BOOL bAnsi );
@@ -189,7 +190,7 @@ extern ICOM_VTABLE(IDirectPlay4) directPlay4WVT;
 
 HRESULT DP_HandleMessage( IDirectPlay2Impl* This, LPCVOID lpMessageBody,
                           DWORD  dwMessageBodySize, LPCVOID lpMessageHeader,
-                          WORD wCommandId, WORD wVersion, 
+                          WORD wCommandId, WORD wVersion,
                           LPVOID* lplpReply, LPDWORD lpdwMsgSize );
 
 

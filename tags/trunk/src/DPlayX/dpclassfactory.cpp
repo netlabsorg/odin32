@@ -1,3 +1,4 @@
+// $Id: dpclassfactory.cpp,v 1.2 2000-09-24 22:47:36 hugh Exp $
 #include <string.h>
 
 #include <odin.h>
