@@ -1,4 +1,4 @@
-/* $Id: virtual.cpp,v 1.35 2000-10-26 17:21:39 sandervl Exp $ */
+/* $Id: virtual.cpp,v 1.36 2000-11-10 10:14:25 sandervl Exp $ */
 
 /*
  * Win32 virtual memory functions
@@ -614,7 +614,7 @@ ODINFUNCTION3(DWORD, VirtualQuery, LPCVOID, lpvAddress,
   {
         dprintf(("VirtualQuery - OSLibDosQueryMem %x %x returned %d\n",
                   lpBase, cbLength, rc));
-    SetLastError(ERROR_INVALID_PARAMETER);
+        SetLastError(ERROR_INVALID_PARAMETER);
         return 0;
   }
 
@@ -650,6 +650,10 @@ ODINFUNCTION3(DWORD, VirtualQuery, LPCVOID, lpvAddress,
 
   if(!(dAttr & PAG_SHARED))
         pmbiBuffer->Type = MEM_PRIVATE;
+
+  // Pages can be committed but not necessarily accessible!!
+  if (!(dAttr & (PAG_READ | PAG_WRITE | PAG_EXECUTE | PAG_GUARD)))
+    pmbiBuffer->Protect = PAGE_NOACCESS;
 
   //TODO: This is not correct: AllocationProtect should contain the protection
   //      flags used in the initial call to VirtualAlloc
