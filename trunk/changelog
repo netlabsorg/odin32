@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.1906 2001-12-12 16:40:14 sandervl Exp $ */
+/* $Id: changelog,v 1.1907 2001-12-13 12:24:10 sandervl Exp $ */
+
+ 2001-12-13: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o Added function to override name of the PM keyboard hook dll
+                  (custombuild)
 
  2001-12-12: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Put back old windows key scancodes
