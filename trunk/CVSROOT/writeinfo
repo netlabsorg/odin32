@@ -1,5 +1,5 @@
 /                                          sandervl achimha bird
-/CVSROOT                                   ktk sandervl achimha bird
+/CVSROOT                                   sandervl ktk achimha bird
 /bin                                       sandervl bird
 /include                                   sandervl achimha bird
 /lib                                       sandervl bird
@@ -60,18 +60,20 @@
 /src/win32k/ldr                            bird sandervl
 /src/win32k/misc                           bird sandervl
 /src/win32k/pe2lx                          bird sandervl
-/tools/bin                                 sandervl bird
-/tools/common                              sandervl bird
+/tools/bin                                 bird sandervl
+/tools/common                              bird sandervl
 /tools/database/gd                         bird
 /tools/database/mysql                      bird
 /tools/database                            bird
-/tools/impdef                              sandervl bird
+/tools/impdef                              bird sandervl
 /tools/omfdumper                           bird sandervl
 /tools/wrc                                 sandervl bird
-/tools/fastdep                             sandervl bird
-/tools                                     sandervl bird
+/tools/cmdqd                               bird
+/tools/fastdep                             bird
+/tools                                     bird sandervl
 /src/comctl32                              sandervl achimha
 /src/opengl                                sandervl
 /src/opengl/glut                           sandervl
 /make                                      bird
 /make/testcase                             bird
+
