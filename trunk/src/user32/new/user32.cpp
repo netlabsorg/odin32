@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.5 1999-07-18 10:39:51 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.6 1999-07-18 13:57:47 cbratschi Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -18,6 +18,13 @@
  *             to their OS/2-specific counterparts as far as possible.
  *****************************************************************************/
 
+/*
+  CB:
+  - don't replace GDI functions (hdc), only convert window handle
+  - always use OSRECTL for PM functions
+  - POINT == POINTL
+*/
+
 #include <os2win.h>
 #include "misc.h"
 
@@ -30,6 +37,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <oslibwin.h>
+#include <win32wnd.h>
 
 //undocumented stuff
 // WIN32API CalcChildScroll
@@ -68,8 +76,54 @@
 // WIN32API WNDPROC_CALLBACK
 // WIN32API YieldTask
 
+//Window handle transformation
 
+inline HWND Win32ToOS2Handle(HWND hwnd)
+{
+  Win32Window *window;
 
+  window = Win32Window::GetWindowFromHandle(hwnd);
+  if (window) return window->getOS2WindowHandle();
+  else return hwnd; //already OS/2 handle?
+}
+
+inline HWND OS2ToWin32Handle(HWND hwnd)
+{
+  Win32Window *window;
+
+  window = Win32Window::GetWindowFromOS2Handle(hwnd);
+  if (window) return window->getWindowHandle();
+  else return hwnd; //OS/2 window
+}
+
+//Coordinate transformation
+
+inline void Win32ToOS2Rect(POSRECTL dest,PRECT source,ULONG windowH)
+{
+  dest->xLeft   = source->left;
+  dest->xRight  = source->right;
+  dest->yTop    = windowH-source->top;
+  dest->yBottom = windowH-source->bottom;
+}
+
+inline void OS2ToWin32Rect(PRECT dest,POSRECTL source,ULONG windowH)
+{
+  dest->left   = source->xLeft;
+  dest->right  = source->xRight;
+  dest->top    = windowH-source->yTop;
+  dest->bottom = windowH-source->yBottom;
+}
+
+inline void OS2ToWin32ScreenPos(POINT *dest,POINT *source)
+{
+  dest->x = source->x;
+  dest->y = OSLibWinQuerySysValue(OSLIB_HWND_DESKTOP,SVOS_CYSCREEN)-source->y;
+}
+
+inline void Win32ToOS2ScreenPos(POINT *dest,POINT *source)
+{
+  OS2ToWin32ScreenPos(dest,source); //transform back
+}
 
 //******************************************************************************
 //******************************************************************************
@@ -184,7 +238,7 @@ int __cdecl wsprintfW(LPWSTR lpOut, LPCWSTR lpFmt, ...)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API MessageBeep( UINT arg1)
+BOOL WIN32API MessageBeep( UINT uType)
 {
     INT flStyle;
 
@@ -192,28 +246,29 @@ BOOL WIN32API MessageBeep( UINT arg1)
     WriteLog("USER32:  MessageBeep\n");
 #endif
 
-    switch (arg1)
+    switch (uType)
     {
       case 0xFFFFFFFF:
         OSLibDosBeep(500,50);
         return TRUE;
       case MB_ICONASTERISK:
-        flStyle = WA_NOTE;
+        flStyle = WAOS_NOTE;
         break;
       case MB_ICONEXCLAMATION:
-        flStyle = WA_WARNING;
+        flStyle = WAOS_WARNING;
         break;
       case MB_ICONHAND:
       case MB_ICONQUESTION:
       case MB_OK:
-        flStyle = WA_NOTE;
+        flStyle = WAOS_NOTE;
         break;
       default:
-        flStyle = WA_ERROR; //CB: should be right
+        flStyle = WAOS_ERROR; //CB: should be right
         break;
     }
-    return OSLibWinAlarm(HWND_DESKTOP,flStyle);
+    return OSLibWinAlarm(OSLIB_HWND_DESKTOP,flStyle);
 }
+//******************************************************************************
 //******************************************************************************
 
 /*******************************************************************
@@ -230,24 +285,22 @@ int WIN32API InternalGetWindowText(HWND   hwnd,
 
     return GetWindowTextW(hwnd,lpString,nMaxCount);
 }
-
-
-//******************************************************************************
 //******************************************************************************
 //******************************************************************************
 HWND WIN32API GetFocus(void)
 {
+    HWND hwnd;
 //    dprintf(("USER32:  GetFocus\n"));
-    //return OS2LibWinQueryFocus(HWND_DESKTOP);
-    return O32_GetFocus();
+
+    hwnd = OSLibWinQueryFocus(OSLIB_HWND_DESKTOP);
+    return OS2ToWin32Handle(hwnd);
 }
 //******************************************************************************
 //******************************************************************************
 HWND WIN32API GetDesktopWindow(void)
 {
     dprintf(("USER32:  GetDesktopWindow\n"));
-    //return HWND_DESKTOP //CB: WinQueryDesktopWindow();, hab and hdc not available!
-    return O32_GetDesktopWindow();
+    return OSLIB_HWND_DESKTOP;
 }
 //******************************************************************************
 //******************************************************************************
@@ -257,7 +310,7 @@ BOOL WIN32API EnumThreadWindows(DWORD dwThreadId, WNDENUMPROC lpfn, LPARAM lPara
  EnumWindowCallback *callback = new EnumWindowCallback(lpfn, lParam);
 
   dprintf(("USER32:  EnumThreadWindows\n"));
-  //replace
+  //CB: replace
   rc = O32_EnumThreadWindows(dwThreadId, callback->GetOS2Callback(), (LPARAM)callback);
   if(callback)
     delete callback;
@@ -270,7 +323,6 @@ BOOL WIN32API OffsetRect( PRECT lprc, int x, int  y)
 #ifdef DEBUG
 ////    WriteLog("USER32:  OffsetRect\n");
 #endif
-    //CB: inc values
     if (lprc)
     {
       lprc->left   += x;
@@ -294,52 +346,72 @@ BOOL WIN32API CopyRect( PRECT lprcDst, const RECT * lprcSrc)
 }
 //******************************************************************************
 //******************************************************************************
-HWND WIN32API SetFocus( HWND arg1)
+HWND WIN32API SetFocus( HWND hwnd)
 {
+    HWND lastFocus;
+
     dprintf(("USER32:  SetFocus\n"));
-    //return OSLibWinSetFocus(HWND_DESKTOP,arg1);
-    return O32_SetFocus(arg1);
+
+    lastFocus = GetFocus();
+    hwnd = Win32ToOS2Handle(hwnd);
+    return (OSLibWinSetFocus(OSLIB_HWND_DESKTOP,hwnd)) ? lastFocus:0;
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API InvalidateRect(HWND arg1, const RECT *arg2, BOOL arg3)
+BOOL WIN32API InvalidateRect(HWND hWnd, const RECT *lpRect, BOOL bErase)
 {
 #ifdef DEBUG
-    if(arg2)
-        WriteLog("USER32:  InvalidateRect for window %X (%d,%d)(%d,%d) %d\n", arg1, arg2->left, arg2->top, arg2->right, arg2->bottom, arg3);
-    else    WriteLog("USER32:  InvalidateRect for window %X NULL, %d\n", arg1, arg3);
+    if(lpRect)
+        WriteLog("USER32:  InvalidateRect for window %X (%d,%d)(%d,%d) %d\n", hWnd, lpRect->left, lpRect->top, lpRect->right, lpRect->bottom, bErase);
+    else    WriteLog("USER32:  InvalidateRect for window %X NULL, %d\n", hWnd, bErase);
 #endif
-    //return OSLibWinInvalidateRect(arg1,arg2,arg3);
-    return O32_InvalidateRect(arg1, arg2, arg3);
+
+    //CB: bErase no quite the same
+    hWnd = Win32ToOS2Handle(hWnd);
+    if (lpRect)
+    {
+      OSRECTL rect;
+      ULONG windowH;
+
+      windowH = OSLibGetWindowHeight(hWnd);
+      Win32ToOS2Rect(&rect,(PRECT)lpRect,windowH);
+      return OSLibWinInvalidateRect(hWnd,&rect,bErase); //rect == RECTL
+    } else return OSLibWinInvalidateRect(hWnd,NULL,bErase);
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API GetUpdateRect( HWND arg1, PRECT arg2, BOOL  arg3)
+BOOL WIN32API GetUpdateRect( HWND hWnd, PRECT lpRect, BOOL  bErase)
 {
+    OSRECTL rect;
+    ULONG windowH;
+    BOOL rc;
+
 #ifdef DEBUG
     WriteLog("USER32:  GetUpdateRect\n");
 #endif
-    // OSLibWinQueryUpdateRect(arg1,arg2);
-    // translate top,bottom
-    return O32_GetUpdateRect(arg1, arg2, arg3);
+    if (!lpRect) return FALSE;
+    hWnd = Win32ToOS2Handle(hWnd);
+    rc = OSLibWinQueryUpdateRect(hWnd,&rect);
+    windowH = OSLibGetWindowHeight(hWnd);
+    OS2ToWin32Rect(lpRect,&rect,windowH);
+    return rc;
 }
 //******************************************************************************
 //******************************************************************************
-//******************************************************************************
-//******************************************************************************
-int WIN32API GetSystemMetrics(int arg1)
+int WIN32API GetSystemMetrics(int nIndex)
 {
- int rc;
+   int rc = 0;
 
-   switch(arg1) {
+   switch(nIndex) {
     case SM_CXICONSPACING: //TODO: size of grid cell for large icons
-        //rc = OSLibWinQuerySysValue(HWND_DESKTOP,SV_CXICON);
-        //CB: better: return standard windows icon size
-        rc = 32;
+        rc = OSLibWinQuerySysValue(OSLIB_HWND_DESKTOP,SVOS_CXICON);
+        //CB: return standard windows icon size?
+        //rc = 32;
         break;
     case SM_CYICONSPACING:
+        rc = OSLibWinQuerySysValue(OSLIB_HWND_DESKTOP,SVOS_CYICON);
         //read SM_CXICONSPACING comment
-        rc = 32;
+        //rc = 32;
         break;
     case SM_PENWINDOWS:
         rc = FALSE;
@@ -354,9 +426,11 @@ int WIN32API GetSystemMetrics(int arg1)
         rc = 1;
         break;
     case SM_CXMINSPACING: //can be SM_CXMINIMIZED or larger
+        //CB: replace with const
         rc = O32_GetSystemMetrics(SM_CXMINIMIZED);
         break;
     case SM_CYMINSPACING:
+        //CB: replace with const
         rc = GetSystemMetrics(SM_CYMINIMIZED);
         break;
     case SM_CXSMICON: //recommended size of small icons (TODO: adjust to screen res.)
@@ -389,11 +463,11 @@ int WIN32API GetSystemMetrics(int arg1)
         break;
     case SM_CXMAXTRACK: //max window size
     case SM_CXMAXIMIZED:    //max toplevel window size
-        rc = O32_GetSystemMetrics(SM_CXSCREEN);
+        rc = OSLibWinQuerySysValue(OSLIB_HWND_DESKTOP,SVOS_CXSCREEN);
         break;
     case SM_CYMAXTRACK:
     case SM_CYMAXIMIZED:
-        rc = O32_GetSystemMetrics(SM_CYSCREEN);
+        rc = OSLibWinQuerySysValue(OSLIB_HWND_DESKTOP,SVOS_CYSCREEN);
         break;
     case SM_NETWORK:
         rc = 0x01;  //TODO: default = yes
@@ -414,7 +488,7 @@ int WIN32API GetSystemMetrics(int arg1)
         rc = 4;     //TODO
         break;
     case SM_CYMENUCHECK:
-        rc = O32_GetSystemMetrics(SM_CYMENU);
+        rc = OSLibWinQuerySysValue(OSLIB_HWND_DESKTOP,SVOS_CYMENU);
         break;
     case SM_SLOWMACHINE:
         rc = FALSE; //even a slow machine is fast with OS/2 :)
@@ -423,46 +497,58 @@ int WIN32API GetSystemMetrics(int arg1)
         rc = FALSE;
         break;
     case SM_CMETRICS:
+        //CB: replace with const
         rc = O32_GetSystemMetrics(44);  //Open32 changed this one
         break;
     default:
-        rc = O32_GetSystemMetrics(arg1);
+        //better than nothing
+        rc = O32_GetSystemMetrics(nIndex);
         break;
     }
 #ifdef DEBUG
-    WriteLog("USER32:  GetSystemMetrics %d returned %d\n", arg1, rc);
+    WriteLog("USER32:  GetSystemMetrics %d returned %d\n", nIndex, rc);
 #endif
     return(rc);
 }
 //******************************************************************************
 //******************************************************************************
-UINT WIN32API SetTimer( HWND arg1, UINT arg2, UINT arg3, TIMERPROC  arg4)
+UINT WIN32API SetTimer( HWND hwnd, UINT idTimer, UINT uTimeout, TIMERPROC  tmprc)
 {
 #ifdef DEBUG
     WriteLog("USER32: SetTimer INCORRECT CALLING CONVENTION FOR HANDLER!!!!!\n");
 #endif
+    hwnd = Win32ToOS2Handle(hwnd);
     //SvL: Write callback handler class for this one
-    return O32_SetTimer(arg1, arg2, arg3, (TIMERPROC_O32)arg4);
+    //CB: replace
+    return O32_SetTimer(hwnd,idTimer,uTimeout,(TIMERPROC_O32)tmprc);
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API KillTimer(HWND arg1, UINT arg2)
+BOOL WIN32API KillTimer(HWND hWnd, UINT uIDEvent)
 {
 #ifdef DEBUG
     WriteLog("USER32:  KillTimer\n");
 #endif
+    hWnd = Win32ToOS2Handle(hWnd);
     //WinStopTimer
-    return O32_KillTimer(arg1, arg2);
+    //CB: replace
+    return O32_KillTimer(hWnd,uIDEvent);
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API InflateRect( PRECT arg1, int arg2, int  arg3)
+BOOL WIN32API InflateRect( PRECT lprc, int dx, int  dy)
 {
 #ifdef DEBUG
     WriteLog("USER32:  InflateRect\n");
 #endif
-    //don't know how Win32 handles this
-    return O32_InflateRect(arg1, arg2, arg3);
+    if (!lprc) return FALSE;
+    //right?
+    lprc->left   -= dx;
+    lprc->right  += dx;
+    lprc->top    -= dy;
+    lprc->bottom += dy;
+
+    return TRUE;
 }
 //******************************************************************************
 //TODO:How can we emulate this one in OS/2???
@@ -485,7 +571,7 @@ int WIN32API ShowCursor( BOOL arg1)
 #ifdef DEBUG
     WriteLog("USER32:  ShowCursor\n");
 #endif
-    //WinShowCursor(HWND_DESKTOP,arg1); //not the same
+    //WinShowCursor(OSLIB_HWND_DESKTOP,arg1); //CB: not the same
     return O32_ShowCursor(arg1);
 }
 //******************************************************************************
@@ -496,6 +582,7 @@ BOOL WIN32API SetRect( PRECT lprc, int nLeft, int nTop, int nRight, int  nBottom
     WriteLog("USER32:  SetRect\n");
 #endif
 
+    if (!lprc) return FALSE;
     lprc->left   = nLeft;
     lprc->top    = nTop;
     lprc->right  = nRight;
@@ -505,44 +592,49 @@ BOOL WIN32API SetRect( PRECT lprc, int nLeft, int nTop, int nRight, int  nBottom
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API WinHelpA( HWND arg1, LPCSTR arg2, UINT arg3, DWORD  arg4)
+BOOL WIN32API WinHelpA( HWND hwnd, LPCSTR lpszHelp, UINT uCommand, DWORD  dwData)
 {
 #ifdef DEBUG
-    WriteLog("USER32:  WinHelp not implemented %s\n", arg2);
+    WriteLog("USER32:  WinHelp not implemented %s\n", lpszHelp);
 #endif
+//    hwnd = Win32ToOS2Handle(hwnd);
 //    return O32_WinHelp(arg1, arg2, arg3, arg4);
+
     return(TRUE);
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API TranslateAcceleratorA(HWND arg1, HACCEL arg2, LPMSG  arg3)
+int WIN32API TranslateAcceleratorA(HWND hwnd, HACCEL haccel, LPMSG  lpmsg)
 {
 #ifdef DEBUG
 ////    WriteLog("USER32:  TranslateAccelerator\n");
 #endif
+    //CB: needs more work
     //WinTranslateAccel();
     //get hab, translate
-    return O32_TranslateAccelerator(arg1, arg2, arg3);
+    hwnd = Win32ToOS2Handle(hwnd);
+    return O32_TranslateAccelerator(hwnd,haccel,lpmsg);
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API SubtractRect( PRECT arg1, const RECT * arg2, const RECT * arg3)
+BOOL WIN32API SubtractRect( PRECT lprcDest, const RECT * lprcSrc1, const RECT * lprcSrc2)
 {
 #ifdef DEBUG
     WriteLog("USER32:  SubtractRect");
 #endif
-    // how?
-    return O32_SubtractRect(arg1, arg2, arg3);
+    //CB: how?
+    return O32_SubtractRect(lprcDest,lprcSrc1,lprcSrc2);
 }
 //******************************************************************************
 //SvL: 24-6-'97 - Added
 //******************************************************************************
-BOOL WIN32API ClipCursor(const RECT * arg1)
+BOOL WIN32API ClipCursor(const RECT * lpRect)
 {
 #ifdef DEBUG
     WriteLog("USER32:  ClipCursor\n");
 #endif
-    return O32_ClipCursor(arg1);
+    //CB: how to replace?
+    return O32_ClipCursor(lpRect);
 }
 //******************************************************************************
 //SvL: 24-6-'97 - Added
@@ -568,41 +660,48 @@ HCURSOR WIN32API GetCursor(void)
 //******************************************************************************
 //SvL: 24-6-'97 - Added
 //******************************************************************************
-BOOL WIN32API GetCursorPos( PPOINT arg1)
+BOOL WIN32API GetCursorPos( PPOINT lpPoint)
 {
+    BOOL rc;
+    POINT point;
 #ifdef DEBUG
 ////    WriteLog("USER32:  GetCursorPos\n");
 #endif
-    return O32_GetCursorPos(arg1);
+    if (!lpPoint) return FALSE;
+    if (OSLibWinQueryPointerPos(OSLIB_HWND_DESKTOP,&point)) //POINT == POINTL
+    {
+      OS2ToWin32ScreenPos(lpPoint,&point);
+      return TRUE;
+    } else return FALSE;
 }
 //******************************************************************************
 //SvL: 24-6-'97 - Added
 //******************************************************************************
-WORD WIN32API VkKeyScanA( char arg1)
+WORD WIN32API VkKeyScanA( char ch)
 {
 #ifdef DEBUG
     WriteLog("USER32:  VkKeyScanA\n");
 #endif
-    return O32_VkKeyScan(arg1);
+    return O32_VkKeyScan(ch);
 }
 //******************************************************************************
 //SvL: 24-6-'97 - Added
 //******************************************************************************
-SHORT WIN32API GetKeyState( int arg1)
+SHORT WIN32API GetKeyState( int nVirtKey)
 {
 #ifdef DEBUG
-    WriteLog("USER32:  GetKeyState %d\n", arg1);
+    WriteLog("USER32:  GetKeyState %d\n", nVirtKey);
 #endif
-    return O32_GetKeyState(arg1);
+    return O32_GetKeyState(nVirtKey);
 }
 //******************************************************************************
 //******************************************************************************
-HCURSOR WIN32API SetCursor( HCURSOR arg1)
+HCURSOR WIN32API SetCursor( HCURSOR hcur)
 {
 #ifdef DEBUG
     WriteLog("USER32:  SetCursor\n");
 #endif
-    return O32_SetCursor(arg1);
+    return O32_SetCursor(hcur);
 }
 //******************************************************************************
 //******************************************************************************
@@ -611,6 +710,7 @@ BOOL WIN32API SetCursorPos( int arg1, int  arg2)
 #ifdef DEBUG
     WriteLog("USER32:  SetCursorPos\n");
 #endif
+//CB:{a} stopped here
     return O32_SetCursorPos(arg1, arg2);
 }
 //******************************************************************************
@@ -620,6 +720,7 @@ BOOL WIN32API EnableScrollBar( HWND arg1, INT arg2, UINT  arg3)
 #ifdef DEBUG
     WriteLog("USER32:  EnableScrollBar\n");
 #endif
+    //CB: implement in window class
     return O32_EnableScrollBar(arg1, arg2, arg3);
 }
 //******************************************************************************
