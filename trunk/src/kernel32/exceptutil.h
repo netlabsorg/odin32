@@ -1,4 +1,4 @@
-/* $Id: exceptutil.h,v 1.8 2000-05-02 20:53:13 sandervl Exp $ */
+/* $Id: exceptutil.h,v 1.9 2000-09-04 18:24:42 sandervl Exp $ */
 
 /*
  * Exception + misc functions for OS/2
@@ -41,6 +41,8 @@ USHORT getSS();
 USHORT getES();
 USHORT getFS();
 USHORT getGS();
+
+void CDECL Mul32x32to64(PVOID result, DWORD op1, DWORD op2);
 
 #ifdef __cplusplus
 }

@@ -1,4 +1,4 @@
-/* $Id: oslibdos.h,v 1.20 2000-07-12 18:21:45 sandervl Exp $ */
+/* $Id: oslibdos.h,v 1.21 2000-09-04 18:24:43 sandervl Exp $ */
 
 /*
  * Wrappers for OS/2 Dos* API
@@ -181,6 +181,10 @@ BOOL  OSLibDosFindClose(DWORD hFindFile);
 
 DWORD OSLibDosQueryVolumeFS(int drive, LPSTR lpFileSystemNameBuffer, DWORD nFileSystemNameSize);
 DWORD OSLibDosQueryVolumeSerialAndName(int drive, LPDWORD lpVolumeSerialNumber, LPSTR lpVolumeNameBuffer, DWORD nVolumeNameSize);
+
+BOOL OSLibGetDiskFreeSpace(LPSTR lpRootPathName, LPDWORD lpSectorsPerCluster,
+                           LPDWORD lpBytesPerSector, LPDWORD lpNumberOfFreeClusters,
+                           LPDWORD lpTotalNumberOfClusters);
 
 
 #ifdef OS2DEF_INCLUDED

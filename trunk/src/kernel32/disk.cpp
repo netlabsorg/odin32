@@ -1,4 +1,4 @@
-/* $Id: disk.cpp,v 1.15 2000-09-03 09:32:13 sandervl Exp $ */
+/* $Id: disk.cpp,v 1.16 2000-09-04 18:24:42 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -20,6 +20,7 @@
 #include <string.h>
 #include "unicode.h"
 #include "oslibdos.h"
+#include "exceptutil.h"
 
 #define DBG_LOCALLOG  DBG_disk
 #include "dbglocal.h"
@@ -60,10 +61,11 @@ BOOL WIN32API GetDiskFreeSpaceA( LPCSTR arg1, PDWORD arg2, PDWORD arg3, PDWORD a
     DWORD dwBytesPerSector;	// address of bytes per sector
     DWORD dwNumberOfFreeClusters;	// address of number of free clusters
     DWORD dwTotalNumberOfClusters; 	// address of total number of clusters
-    dprintf(("KERNEL32:  OS2GetDiskFreeSpaceA %s, 0x%08X, 0x%08X, 0x%08X, 0x%08X,\n",
+    dprintf(("KERNEL32:  GetDiskFreeSpaceA %s, 0x%08X, 0x%08X, 0x%08X, 0x%08X,\n",
              arg1!=NULL?arg1:"NULL", arg2,arg3,arg4,arg5));
-    rc = O32_GetDiskFreeSpace(arg1, &dwSectorsPerCluster, &dwBytesPerSector,
-                              &dwNumberOfFreeClusters, &dwTotalNumberOfClusters);
+
+    rc = OSLibGetDiskFreeSpace((LPSTR)arg1, &dwSectorsPerCluster, &dwBytesPerSector,
+                               &dwNumberOfFreeClusters, &dwTotalNumberOfClusters);
     if(rc)
     {
       if (arg2!=NULL)
@@ -87,7 +89,7 @@ BOOL WIN32API GetDiskFreeSpaceW(LPCWSTR arg1, PDWORD arg2, PDWORD arg3, PDWORD a
 
     dprintf(("KERNEL32:  OS2GetDiskFreeSpaceW\n"));
     astring = UnicodeToAsciiString((LPWSTR)arg1);
-    rc = O32_GetDiskFreeSpace(astring, arg2, arg3, arg4, arg5);
+    rc = GetDiskFreeSpaceA(astring, arg2, arg3, arg4, arg5);
     FreeAsciiString(astring);
     return(rc);
 }
@@ -147,22 +149,21 @@ ODINFUNCTION4(BOOL,GetDiskFreeSpaceExA,
     DWORD dwNumberOfFreeClusters;	// address of number of free clusters
     DWORD dwTotalNumberOfClusters; 	// address of total number of clusters
 
-    rc = O32_GetDiskFreeSpace(lpDirectoryName, &dwSectorsPerCluster, &dwBytesPerSector,
-                              &dwNumberOfFreeClusters, &dwTotalNumberOfClusters);
+    rc = GetDiskFreeSpaceA(lpDirectoryName, &dwSectorsPerCluster, &dwBytesPerSector,
+                           &dwNumberOfFreeClusters, &dwTotalNumberOfClusters);
     if(rc)
     {
-        //TODO: Fill in high part (overflow possible)!!!!!!
       	if(lpFreeBytesAvailableToCaller!=NULL) {
-        	lpFreeBytesAvailableToCaller->LowPart  = dwNumberOfFreeClusters*dwSectorsPerCluster*dwBytesPerSector;
-		lpFreeBytesAvailableToCaller->HighPart = 0;
+		Mul32x32to64(lpFreeBytesAvailableToCaller, dwNumberOfFreeClusters, (dwSectorsPerCluster*dwBytesPerSector));
+		dprintf(("lpFreeBytesAvailableToCaller %x%x", lpFreeBytesAvailableToCaller->LowPart, lpFreeBytesAvailableToCaller->HighPart));
 	}
       	if(lpTotalNumberOfBytes!=NULL) {
-        	lpTotalNumberOfBytes->LowPart  = dwTotalNumberOfClusters*dwSectorsPerCluster*dwBytesPerSector;
-		lpTotalNumberOfBytes->HighPart = 0;
+		Mul32x32to64(lpTotalNumberOfBytes, dwTotalNumberOfClusters, (dwSectorsPerCluster*dwBytesPerSector));
+		dprintf(("lpTotalNumberOfBytes %x%x", lpTotalNumberOfBytes->LowPart, lpTotalNumberOfBytes->HighPart));
 	}
       	if(lpTotalNumberOfFreeBytes!=NULL) {
-        	lpTotalNumberOfFreeBytes->LowPart  = dwNumberOfFreeClusters*dwSectorsPerCluster*dwBytesPerSector;
-		lpTotalNumberOfFreeBytes->HighPart = 0;
+		memcpy(lpTotalNumberOfFreeBytes, lpFreeBytesAvailableToCaller, sizeof(*lpFreeBytesAvailableToCaller));
+		dprintf(("lpTotalNumberOfFreeBytes %x%x", lpTotalNumberOfFreeBytes->LowPart, lpTotalNumberOfFreeBytes->HighPart));
 	}
     }
     return rc;
