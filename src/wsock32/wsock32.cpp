@@ -1,4 +1,4 @@
-/* $Id: wsock32.cpp,v 1.47 2002-02-20 15:07:14 sandervl Exp $ */
+/* $Id: wsock32.cpp,v 1.48 2002-02-20 16:08:03 sandervl Exp $ */
 
 /*
  *
@@ -549,7 +549,7 @@ ODINFUNCTION3(SOCKET,OS2accept, SOCKET,           s,
 	//if this socket has an active async. select pending, then call WSAAsyncSelect
         //with the same parameters for the new socket (see docs)
 	if(QueryAsyncEvent(s, &mode, &notifyHandle, &notifyData, &lEvent) == TRUE) {
-        	if(WSAAsyncSelectWorker(s, mode, notifyHandle, notifyData, lEvent) == SOCKET_ERROR) {
+        	if(WSAAsyncSelectWorker(ret, mode, notifyHandle, notifyData, lEvent) == SOCKET_ERROR) {
             		ret = SOCKET_ERROR;
 		}
 	}
