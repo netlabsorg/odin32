@@ -1,4 +1,10 @@
- /* $Id: ChangeLog,v 1.834 2000-03-24 17:10:32 cbratschi Exp $ */
+ /* $Id: ChangeLog,v 1.835 2000-03-24 17:37:15 achimha Exp $ */
+
+ 2000-03-24: Achim Hasenmueller <achimha@innotek.de>
+	- WSOCK32\NEW: Made it compile with the TCP/IP V5
+	               header files.
+                       NOTE: should we rely on the 32bit
+	                     stack, is there any benefit for us?
 
  2000-03-24: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: fixed GetClipboardFormatNameW
