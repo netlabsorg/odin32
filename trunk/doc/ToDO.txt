@@ -1,9 +1,12 @@
-/* $Id: ToDO.txt,v 1.2 2000-07-09 22:36:49 phaller Exp $ */
+/* $Id: ToDO.txt,v 1.3 2000-07-10 20:35:38 phaller Exp $ */
 
 /* -- History --------------------------------------------------------------
 
    $Log: ToDO.txt,v $
-   Revision 1.2  2000-07-09 22:36:49  phaller
+   Revision 1.3  2000-07-10 20:35:38  phaller
+   Assigned some tasks as requested by the assignees
+
+   Revision 1.2  2000/07/09 22:36:49  phaller
    Created initial version
 
 
@@ -15,10 +18,10 @@ To Do list for ODIN:
 
 Assigned Status Topic -------------------------------------------------------
 
-NOONE           Handle named pipes via HandleManager
+PD              Handle named pipes via HandleManager
 
-NOONE           Do COM (serial port) support for ODIN (requires pseudo-device 
-                in HM)
+AH              Do COM (serial port) support for ODIN (requires
+                pseudo-device in HM)
 
 PH              Sync SHELL32 with WINE
 
@@ -29,7 +32,7 @@ JW              Put in correct FS:-wrappers in CRTDLL and MSVCRT
 JW              Improve CRTDLL and MSVCRT as this is one major show stopper 
                 currently
 
-NOONE           Remove GPI32 calls from the original FS: macros and replace 
+SvL             Remove GPI32 calls from the original FS: macros and replace
                 them with ODINFUNCTION wrappers. Internally call to ODIN_xxx
                 GPI functions to get much better performance.
 
