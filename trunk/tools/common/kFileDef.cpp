@@ -1,4 +1,4 @@
-/* $Id: kFileDef.cpp,v 1.11 2002-08-25 23:24:57 bird Exp $
+/* $Id: kFileDef.cpp,v 1.12 2002-08-29 07:55:43 bird Exp $
  *
  * kFileDef - Definition files.
  *
@@ -186,6 +186,7 @@ void kFileDef::read(kFile *pFile)
     char *pszTmp;
     char *psz;
     char  szBuffer[256];
+    char  ch;
 
     /* readloop */
     psz = readln(pFile, &szBuffer[0], sizeof(szBuffer));
@@ -262,6 +263,47 @@ void kFileDef::read(kFile *pFile)
             {
                 *pps = new DEFSEGMENT; memset(*pps, 0, sizeof(**pps));
                 (**pps).psz = dupeString(psz);
+
+                printf("debug: parsing: %s\n", psz);
+                /* seg name */
+                (**pps).pszName = ltrim((**pps).psz);
+                ch = *(**pps).pszName;
+                if (ch == '\'' || ch == '\"')
+                    pszTmp = strchr(++(**pps).pszName, ch);
+                else
+                    pszTmp = strpbrk((**pps).pszName, " \t");
+                if (pszTmp)
+                {
+                    *pszTmp = '\0';
+
+                    /* class ? */
+                    pszTmp = ltrim(pszTmp + 1);
+                    if (!strnicmp(pszTmp, "CLASS", 5))
+                    {
+                        (**pps).pszClass = ltrim(pszTmp + 5);
+                        ch = *(**pps).pszClass;
+                        if (ch == '\'' || ch == '\"')
+                            pszTmp = strchr(++(**pps).pszClass, ch);
+                        else
+                            pszTmp = strpbrk((**pps).pszClass, " \t");
+                        if (pszTmp)
+                        {
+                            *pszTmp++ = '\0';
+                        }
+                    }
+                    if (pszTmp)
+                    {
+                        /* attribs */
+                        (**pps).pszAttr = trim(pszTmp);
+                        if (!*(**pps).pszAttr)
+                            (**pps).pszAttr = NULL;
+                    }
+                }
+
+                printf("debug: pszName=%s\n", (**pps).pszName);
+                printf("debug: pszClass=%s\n", (**pps).pszClass);
+                printf("debug: pszAttr=%s\n", (**pps).pszAttr);
+                /* next */
                 pps = &(**pps).pNext;
             }
             fNext = FALSE;
@@ -764,7 +806,10 @@ KBOOL kFileDef::makeWatcomLinkFileAddtion(kFile *pOut, int enmOS)
     pSeg = pSegments;
     while (pSeg != NULL)
     {
-        pOut->printf("SEGMENT %s\n", pSeg->psz);
+        if (pSeg->pszName)
+            pOut->printf("SEGMENT %s %s\n", pSeg->pszName, pSeg->pszAttr ? pSeg->pszAttr : "");
+        if (pSeg->pszClass)
+            pOut->printf("SEGMENT CLASS %s %s\n", pSeg->pszClass, pSeg->pszAttr ? pSeg->pszAttr : "");
         pSeg = pSeg->pNext;
     }
 
