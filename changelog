@@ -1,4 +1,22 @@
- /* $Id: changelog,v 1.884 2000-04-13 18:51:43 sandervl Exp $ */
+ /* $Id: changelog,v 1.885 2000-04-14 22:57:02 sandervl Exp $ */
+
+ 2000-04-14: Sander van Leeuwen <sandervl@xs4all.nl>
+	- KERNEL32: Hardcoded system & windows dir
+		    system dir  = kernel32 dir
+		    windows dir = kernel32 dir\win
+                    Fixed dll attach for pe2lx/win32k & lx Odin executables
+                    Command line fixes (now starts with full path of exe)
+                    Search for dlls in:
+		    1) current dir
+                    2) win32 exe dir
+                    3) windows system dir
+                    4) path
+                    Append backslash if GetFileAttributes fails (and it's missing
+                    from the filename)
+        - PELDR/KERNEL32: Fixed starting of executable with spaces in name
+                          (might not be 100% complete yet)
+                          Fixes for relative path of executable
+	- ODIN.INI.TXT: Removed DIRECTORIES section
 
  2000-04-13: Sander van Leeuwen <sandervl@xs4all.nl>
         - USER32: Zero thread message structure before dispatching it
