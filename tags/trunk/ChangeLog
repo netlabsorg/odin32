@@ -1,4 +1,8 @@
-/* $Id: ChangeLog,v 1.1587 2001-07-10 16:47:33 bird Exp $ */
+/* $Id: ChangeLog,v 1.1588 2001-07-10 17:39:39 sandervl Exp $ */
+
+ 2001-07-10: Sander van Leeuwen <sandervl@xs4all.nl>
+    - COMDLG32: o Don't clear filename when selecting of switching
+                  directory is file open/save dialog.
 
  2001-07-10: knut st. osmundsen <kosmunds@csc.com>:
     - WIN32K:   o Made DosKillProcessEx framework.
