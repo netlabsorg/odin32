@@ -1,9 +1,12 @@
- /* $Id: ChangeLog,v 1.322 1999-10-14 19:31:59 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.323 1999-10-14 21:37:05 sandervl Exp $ */
 
  99-10-14: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Fixed WM_WINDOWPOSCHANGED (frame window rectangle)
 		  Partly implemented CopyImage (only simple copies of icons
                   and cursors; FAR FROM COMPLETE!)
+                  Removed FillRect during WM_PAINT in subclassed frame handler.
+                  (still some redraw problems with i.e. button.exe; a little
+                   worse than before)
 
  99-10-14: Patrick Haller <phaller@gmx.net>
 	- KERNEL32:	Fix: threads might need more memory in debug mode (thread.cpp)
