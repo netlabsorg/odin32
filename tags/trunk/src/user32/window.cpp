@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.21 1999-10-18 11:59:58 sandervl Exp $ */
+/* $Id: window.cpp,v 1.22 1999-10-20 22:35:54 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -317,7 +317,7 @@ HWND WIN32API GetParent( HWND hwnd)
         SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
-    dprintf(("GetParent %x", hwnd));
+//    dprintf(("GetParent %x", hwnd));
     return window->GetParent();
 }
 //******************************************************************************
@@ -714,7 +714,6 @@ BOOL WIN32API GetClientRect( HWND hwnd, PRECT pRect)
  BOOL rc;
  HWND hwndWin32 = hwnd;
 
-#if 1
  Win32BaseWindow *window;
 
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
@@ -727,12 +726,6 @@ BOOL WIN32API GetClientRect( HWND hwnd, PRECT pRect)
     OffsetRect(pRect, -pRect->left, -pRect->top);
     dprintf(("GetClientRect of %X returned (%d,%d) (%d,%d)\n", hwndWin32, pRect->left, pRect->top, pRect->right, pRect->bottom));
     return TRUE;
-#else
-    hwnd = Win32BaseWindow::Win32ToOS2Handle(hwnd);
-    rc = OSLibWinQueryWindowRect(hwnd, pRect);
-    dprintf(("GetClientRect of %X returned (%d,%d) (%d,%d)\n", hwndWin32, pRect->left, pRect->top, pRect->right, pRect->bottom));
-    return rc;
-#endif
 }
 //******************************************************************************
 //******************************************************************************
@@ -746,9 +739,6 @@ BOOL WIN32API AdjustWindowRectEx( PRECT rect, DWORD style, BOOL menu, DWORD exSt
 {
     dprintf(("AdjustWindowRectEx %x %x %d (%d,%d)(%d,%d)\n", style, exStyle, menu, rect->right, rect->top, rect->left, rect->bottom));
 
-#if 0
-    O32_AdjustWindowRectEx(rect, style, menu, exStyle);
-#else
     /* Correct the window style */
     if (!(style & (WS_POPUP | WS_CHILD)))  /* Overlapped window */
     style |= WS_CAPTION;
@@ -760,10 +750,86 @@ BOOL WIN32API AdjustWindowRectEx( PRECT rect, DWORD style, BOOL menu, DWORD exSt
 
     Win32BaseWindow::NC_AdjustRectOuter( rect, style, menu, exStyle );
     Win32BaseWindow::NC_AdjustRectInner( rect, style, exStyle );
-#endif
 
     dprintf(("AdjustWindowRectEx returned (%d,%d)(%d,%d)\n", rect->right, rect->top, rect->left, rect->bottom));
     return TRUE;
+}
+//******************************************************************************
+/* Coordinate Space and Transformation Functions */
+//******************************************************************************
+int WIN32API MapWindowPoints(HWND hwndFrom, HWND hwndTo, LPPOINT lpPoints,
+                             UINT cPoints)
+{
+ Win32BaseWindow *wndfrom, *wndto;
+ int retval = 0;
+ OSLIBPOINT point;
+
+    if(lpPoints == NULL || cPoints == 0) {
+        SetLastError(ERROR_INVALID_PARAMETER);
+        return 0;
+    }
+    if(hwndFrom)
+    {
+        wndfrom = Win32BaseWindow::GetWindowFromHandle(hwndFrom);
+        if(!wndfrom) {
+            dprintf(("MapWindowPoints, window %x not found", hwndFrom));
+            SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+            return 0;
+        }
+    }
+    else wndfrom = windowDesktop;
+
+    if(hwndTo)
+    {
+        wndto = Win32BaseWindow::GetWindowFromHandle(hwndTo);
+        if(!wndto) {
+            dprintf(("MapWindowPoints, window %x not found", hwndTo));
+            SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+            return 0;
+        }
+    }
+    else wndto = windowDesktop;
+
+    if(wndto == wndfrom)
+        return 0; //nothing to do
+
+    dprintf(("USER32: MapWindowPoints %x to %x (%d,%d) (%d)", hwndFrom, hwndTo, lpPoints->x, lpPoints->y, cPoints));
+    point.x = lpPoints->x;
+    point.y = wndfrom->getWindowHeight() - lpPoints->y;
+
+    OSLibWinMapWindowPoints(wndfrom->getOS2WindowHandle(), wndto->getOS2WindowHandle(), &point, 1);
+    point.y = wndto->getWindowHeight() - point.y;
+
+    WORD xinc = point.x - lpPoints->x;
+    WORD yinc = point.y - lpPoints->y;
+
+    for(int i=1;i<cPoints;i++)
+    {
+        lpPoints[i].x += xinc;
+        lpPoints[i].y += yinc;
+    }
+    retval = ((DWORD)yinc << 16) | xinc;
+    return retval;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API ScreenToClient (HWND hwnd, LPPOINT pt)
+{
+    Win32BaseWindow *wnd;
+    PRECT rcl;
+
+    dprintf(("ScreenToClient %x (%d,%d)\n", hwnd, pt->x, pt->y));
+
+    if (!hwnd) return (TRUE);
+    wnd = Win32BaseWindow::GetWindowFromHandle (hwnd);
+    if (!wnd) return (TRUE);
+
+    rcl   = wnd->getClientRect();
+    pt->y = ScreenHeight - pt->y;
+    OSLibWinMapWindowPoints (OSLIB_HWND_DESKTOP, wnd->getOS2WindowHandle(), (OSLIBPOINT *)pt, 1);
+    pt->y = (rcl->bottom - rcl->top) - pt->y;
+    dprintf(("ScreenToClient %x returned (%d,%d)\n", hwnd, pt->x, pt->y));
+    return (TRUE);
 }
 //******************************************************************************
 //******************************************************************************
@@ -1279,7 +1345,7 @@ BOOL WIN32API EnumChildWindows(HWND hwnd, WNDENUMPROC lpfn, LPARAM lParam)
  HWND   hwndNext;
 
   if(lpfn == NULL) {
-	dprintf(("EnumChildWindows invalid parameter %x %x\n", hwnd, lParam)); 
+    dprintf(("EnumChildWindows invalid parameter %x %x\n", hwnd, lParam));
         SetLastError(ERROR_INVALID_PARAMETER);
         return FALSE;
   }
