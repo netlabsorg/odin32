@@ -1,4 +1,4 @@
-; $Id: kernel32.def,v 1.32 1999-08-28 19:33:44 sandervl Exp $
+; $Id: kernel32.def,v 1.33 1999-08-31 14:36:44 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is Windows95 KERNEL32
@@ -1010,3 +1010,8 @@ EXPORTS
 
     OS2SetExceptionHandler   @1251
     OS2UnsetExceptionHandler @1252
+
+    __ct__12Win32MenuResFP10Win32ImageUlN22                       @1260
+    __ct__12Win32MenuResFP10Win32ImageUlN22Pc			  @1261
+    __ct__12Win32MenuResFPvi					  @1262
+    __ct__12Win32MenuResFUl					  @1263

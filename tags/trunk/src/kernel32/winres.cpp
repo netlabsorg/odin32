@@ -1,4 +1,4 @@
-/* $Id: winres.cpp,v 1.12 1999-08-21 19:11:56 sandervl Exp $ */
+/* $Id: winres.cpp,v 1.13 1999-08-31 14:36:46 sandervl Exp $ */
 
 /*
  * Win32 resource class
@@ -30,6 +30,9 @@
 #include <nameid.h>
 #include <winexe.h>
 #include "cvtresource.h"
+#include <vmutex.h>
+
+VMutex resmutex;
 
 //******************************************************************************
 //******************************************************************************
@@ -85,13 +88,32 @@ static ULONG CalcBitmapSize(ULONG cBits, LONG cx, LONG cy)
 
 //******************************************************************************
 //******************************************************************************
+Win32Resource::Win32Resource() :
+        os2resdata(NULL), winresdata(NULL), resType(RSRC_CUSTOMNODATA)
+{
+  resmutex.enter();
+  next           = module->winres;
+  module->winres = this;
+  resmutex.leave();
+
+  module     = NULL;
+  id         = -1;
+  type       = -1;
+  hres       = 0;
+  orgos2type = -1;
+  OS2ResHandle = 0;
+}
+//******************************************************************************
+//******************************************************************************
 Win32Resource::Win32Resource(Win32Image *module, HRSRC hRes, ULONG id, ULONG type) :
         os2resdata(NULL), winresdata(NULL), resType(RSRC_PE2LX)
 {
  APIRET rc;
 
+  resmutex.enter();
   next           = module->winres;
   module->winres = this;
+  resmutex.leave();
 
   this->module   = module;
   this->id       = id;
@@ -144,8 +166,10 @@ Win32Resource::Win32Resource(Win32Image *module, ULONG id, ULONG type,
                  ULONG size, char *resdata) : hres(NULL),
         os2resdata(NULL), winresdata(NULL), resType(RSRC_PELOADER)
 {
+  resmutex.enter();
   next           = module->winres;
   module->winres = this;
+  resmutex.leave();
 
   this->module   = module;
   this->id       = id;
@@ -177,6 +201,7 @@ Win32Resource::~Win32Resource()
 
   if(winresdata)    free(winresdata);
 
+  resmutex.enter();
   if(res == this) {
     module->winres = res->next;
   }
@@ -187,6 +212,7 @@ Win32Resource::~Win32Resource()
     if(res)
         res->next = next;
   }
+  resmutex.leave();
 }
 //******************************************************************************
 //******************************************************************************
@@ -284,7 +310,7 @@ PVOID Win32Resource::lockOS2Resource()
 
    dprintf(("Win32Resource::lockOS2Resource %d\n", id));
    if(os2resdata == NULL) {
-	if(resType == RSRC_PELOADER) {
+	if(resType == RSRC_PELOADER || resType == RSRC_CUSTOMINDIRECT) {
 		os2resdata = convertResource(winresdata);
 	}
 	else {
