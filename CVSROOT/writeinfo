@@ -16,7 +16,7 @@
 /src/kernel32/new                          sandervl phaller achimha bird buerkle dengert cbratschi
 /src/lz32                                  sandervl achimha phaller
 /src/mpr                                   sandervl phaller achimha bird
-/src/NTDLL                                 sandervl phaller achimha
+/src/NTDLL                                 sandervl phaller achimha jens
 /src/ole32                                 sandervl davidr achimha
 /src/oleaut32                              sandervl davidr
 /src/olesvr32                              sandervl davidr
