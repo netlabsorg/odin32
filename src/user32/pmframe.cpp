@@ -1,4 +1,4 @@
-/* $Id: pmframe.cpp,v 1.37 2000-01-18 20:10:43 sandervl Exp $ */
+/* $Id: pmframe.cpp,v 1.38 2000-01-20 16:48:55 cbratschi Exp $ */
 /*
  * Win32 Frame Managment Code for OS/2
  *
@@ -135,6 +135,12 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
       {
         win32wnd->setStyle(win32wnd->getStyle() & ~(WS_MINIMIZE_W | WS_MAXIMIZE_W));
       }
+      goto RunDefFrameProc;
+    }
+
+    case WM_QUERYTRACKINFO:
+    {
+      //CB: todo: use minmaxinfo
       goto RunDefFrameProc;
     }
 
@@ -289,6 +295,7 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
                 else    goto PosChangedEnd; //parent has just been destroyed
             }
         }
+
         OSLibMapSWPtoWINDOWPOSFrame(pswp, &wp, &swpOld, hParent, hwnd);
 
         if(pswp->fl & SWP_ACTIVATE)
