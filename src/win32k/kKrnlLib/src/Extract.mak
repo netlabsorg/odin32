@@ -1,4 +1,4 @@
-# $Id: Extract.mak,v 1.7 2002-08-20 05:04:42 bird Exp $
+# $Id: Extract.mak,v 1.8 2002-08-20 05:47:53 bird Exp $
 
 #
 # kKrnlLib/krnl makefile.
@@ -33,12 +33,12 @@ TARGET_STACKSIZE = 0x2000
 PREMAKEFILES = Extract16.mak
 
 TARGET_OBJS =\
-$(PATH_ROOT)\obj\$(NAME_1)$(NAME_2)mscv6\Extract16.$(EXT_LIB)\Extract.$(EXT_OBJ)\
+$(PATH_ROOT)\obj\$(SHT_TRGPLTFRM)$(SHT_BLDMD)mscv6-16\Extract16.$(EXT_LIB)\Extract.$(EXT_OBJ)\
 $(PATH_TARGET)\Extract32.$(EXT_OBJ)\
 $(PATH_TARGET)\krnlPrologs.$(EXT_OBJ)\
 
 TARGET_LIBS =\
-$(PATH_ROOT)\obj\$(NAME_1)$(NAME_2)mscv6\Extract16.$(EXT_LIB)\Extract16.$(EXT_LIB)\
+$(PATH_ROOT)\obj\$(SHT_TRGPLTFRM)$(SHT_BLDMD)mscv6-16\Extract16.$(EXT_LIB)\Extract16.$(EXT_LIB)\
 $(PATH_TOOLKIT)\lib\os2286.lib\
 $(PATH_MSC)\lib\clibcep.lib\
 !if "$(BUILD_ENV)" == "VAC308"

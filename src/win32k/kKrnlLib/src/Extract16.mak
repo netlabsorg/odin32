@@ -1,4 +1,4 @@
-# $Id: Extract16.mak,v 1.6 2002-08-20 05:04:42 bird Exp $
+# $Id: Extract16.mak,v 1.7 2002-08-20 05:47:53 bird Exp $
 
 #
 # Extract16 - 16-bit part of the kernel extract routine.
@@ -15,7 +15,7 @@
 #
 !if [SET INCLUDE=]
 !endif
-BUILD_ENV  = MSCV6
+BUILD_ENV_FORCE = MSCV6-16
 PATH_ROOT  = ..\..\..\..
 !include $(PATH_ROOT)\make\setup.mak
 !include ..\..\makefile.inc
