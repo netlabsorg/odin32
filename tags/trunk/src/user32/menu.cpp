@@ -1,4 +1,4 @@
-/* $Id: menu.cpp,v 1.44 2001-12-26 11:35:39 sandervl Exp $*/
+/* $Id: menu.cpp,v 1.45 2002-03-08 15:49:29 sandervl Exp $*/
 /*
  * Menu functions
  *
@@ -2874,6 +2874,14 @@ static INT MENU_TrackMenu(HMENU hmenu,UINT wFlags,INT x,INT y,HWND hwnd,BOOL inM
                         fEndMenu = TRUE;
                         break;
                     }
+#ifdef __WIN32OS2__
+                    if(IsIconic(hwnd)) {
+                        //double click on minimized icon -> restore parent window
+                        PostMessageA(hwnd, WM_SYSCOMMAND,SC_RESTORE, msg.lParam);
+                        fEndMenu = TRUE;
+                        break;
+                    }
+#endif
                     /* fall through */
                 case WM_LBUTTONDOWN:
                     /* If the message belongs to the menu, removes it from the queue */
@@ -3985,7 +3993,7 @@ HMENU WINAPI CreateMenu(void)
     menu->FocusedItem = NO_SELECTED_ITEM;
     menu->bTimeToHide = FALSE;
 
-    //TRACE("return %04x\n", hMenu );
+    dprintf(("CreateMenu returned %04x", hMenu ));
 
     return hMenu;
 }
@@ -4267,7 +4275,7 @@ HMENU WINAPI LoadMenuA( HINSTANCE instance, LPCSTR name )
 {
     HRSRC hrsrc = FindResourceA( instance, name, RT_MENUA );
 
-    dprintf(("USER32: LoadMenuA %x %x", instance, name));
+    dprintf(("USER32: LoadMenuA %x %x hrsrc %x", instance, name, hrsrc));
 
     if (!hrsrc) return 0;
     return LoadMenuIndirectA( (MENUITEMTEMPLATEHEADER*)LoadResource( instance, hrsrc ));
@@ -4281,7 +4289,7 @@ HMENU WINAPI LoadMenuW( HINSTANCE instance, LPCWSTR name )
 {
     HRSRC hrsrc = FindResourceW( instance, name, RT_MENUW );
 
-    dprintf(("USER32: LoadMenuW %x %x", instance, name));
+    dprintf(("USER32: LoadMenuW %x %x hrsrc %x", instance, name, hrsrc));
 
     if (!hrsrc) return 0;
     return LoadMenuIndirectW( (MENUITEMTEMPLATEHEADER*)LoadResource( instance, hrsrc ));
