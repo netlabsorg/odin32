@@ -1,9 +1,9 @@
- /* $Id: ChangeLog,v 1.53 1999-07-20 15:45:34 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.54 1999-07-20 17:49:51 sandervl Exp $ */
  99-07-20: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32/NEW: Added support for window icons and accelerators. 
-		      Both don't work correctly yet. (need new pe2lx changes
-                      which break old apps)
-           
+		      Accelerators don't work yet.
+	- PE2LX: Save icons in different format (BITMAPINFOHEADER2)           
+
  99-07-19: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Added method for retrieving converted OS/2 resource
                     (which will be changed later on)
