@@ -1,4 +1,4 @@
-/* $Id: OS2KVM.h,v 1.1 2000-02-15 16:26:06 bird Exp $
+/* $Id: OS2KVM.h,v 1.2 2000-02-15 23:39:19 bird Exp $
  *
  * OS/2 kernel VM functions.
  *
@@ -62,11 +62,11 @@ typedef struct _vmac
 APIRET KRNLCALL VMAllocMem(
     ULONG   cbSize,
     ULONG   SomeArg1,
-    ULONG   flFlags1
-    USHORT  hPTDA
-    USHORT  usVMOwnerId
-    USHORT  hMTE
-    ULONG   flFlags2
+    ULONG   flFlags1,
+    USHORT  hPTDA,
+    USHORT  usVMOwnerId,
+    USHORT  hMTE,
+    ULONG   flFlags2,
     ULONG   SomeArg2,
     PVMAC   pvmac);
 
