@@ -1,4 +1,4 @@
-/* $Id: critsect.cpp,v 1.12 2004-04-14 08:45:45 sandervl Exp $ */
+/* $Id: critsect.cpp,v 1.13 2004-11-30 19:08:23 sao2l02 Exp $ */
 /*
  * Critical sections in the Win32 sense
  *
@@ -219,13 +219,15 @@ testenter:
 
         // now wait for it
         APIRET rc = DosWaitEventSem(crit->hevLock, ulTimeout);
-        if(rc != NO_ERROR) {
+        if(rc == NO_ERROR) {
+            DosResetEventSem(crit->hevLock, &ulnrposts);
+            // multiple waiters could be running now. Repeat the logic so that
+            // only one actually can get the critical section
+#ifdef DEBUG
+        } else {
             DebugInt3();
-            return rc;
+#endif
         }
-        DosResetEventSem(crit->hevLock, &ulnrposts);
-        // multiple waiters could be running now. Repeat the logic so that
-        // only one actually can get the critical section
         goto testenter;
     }
     crit->RecursionCount = 1;
