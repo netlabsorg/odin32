@@ -1,4 +1,4 @@
-/* $Id: db.cpp,v 1.4 2000-02-10 22:10:40 bird Exp $ */
+/* $Id: db.cpp,v 1.5 2000-02-11 18:35:54 bird Exp $ */
 /*
  * DB - contains all database routines.
  *
@@ -28,7 +28,7 @@
 #define CheckFKError(table, msg)       \
     pres2 = mysql_store_result(pmysql);\
     if (rc < 0 || pres2 == NULL ||     \
-        mysql_num_rows(pres2) <= 0)    \
+        mysql_num_rows(pres2) == 0)    \
     {                                  \
         if (pszError[1] == '\xFE')     \
         {                              \
@@ -150,6 +150,59 @@ BOOL _System dbDisconnect(void)
     return TRUE;
 }
 
+/**
+ * Gets the refid for the give dll name.
+ * @returns   Dll refid. -1 on error.
+ * @param     pszDllName  Dll name.
+ */
+signed short _System dbGetDll(const char *pszDllName)
+{
+    int         rc;
+    char        szQuery[256];
+    MYSQL_RES * pres;
+
+    sprintf(&szQuery[0], "SELECT refcode FROM dll WHERE name = '%s'\n", pszDllName);
+    rc   = mysql_query(pmysql, &szQuery[0]);
+    pres = mysql_store_result(pmysql);
+
+    if (rc >= 0 && pres != NULL && mysql_num_rows(pres) == 1)
+        rc = (int)getvalue(0, mysql_fetch_row(pres));
+    else
+        rc = -1;
+    mysql_free_result(pres);
+    return (short)rc;
+}
+
+
+/**
+ * Count the function in a given dll.
+ * @returns  Number of functions. -1 on error.
+ * @param    usDll  Dll refcode.
+ */
+signed long     _System dbCountFunctionInDll(signed long ulDll)
+{
+    signed long rc;
+    char        szQuery[256];
+    MYSQL_RES * pres;
+
+    if (ulDll >= 0)
+    {
+        sprintf(&szQuery[0], "SELECT count(refcode) FROM function WHERE dll = %d\n", ulDll);
+        rc   = mysql_query(pmysql, &szQuery[0]);
+        pres = mysql_store_result(pmysql);
+
+        if (rc >= 0 && pres != NULL && mysql_num_rows(pres) == 1)
+            rc = (int)getvalue(0, mysql_fetch_row(pres));
+        else
+            rc = -1;
+        mysql_free_result(pres);
+    }
+    else
+        rc = -1;
+    return rc;
+}
+
+
 
 /**
  * Checks if dll exists. If not exists the dll is inserted.
@@ -160,9 +213,9 @@ BOOL _System dbDisconnect(void)
  */
 signed short _System dbCheckInsertDll(const char *pszDll)
 {
-    int  rc;
-    char szQuery[256];
-    MYSQL_RES *pres;
+    int         rc;
+    char        szQuery[256];
+    MYSQL_RES * pres;
 
     /* try find match */
     sprintf(&szQuery[0], "SELECT refcode, name FROM dll WHERE name = '%s'\n", pszDll);
@@ -229,11 +282,13 @@ unsigned short _System dbGet(const char *pszTable, const char *pszGetColumn,
  * Updates or inserts a function name into the database.
  * @returns   Success indicator. TRUE / FALSE.
  * @param     usDll           Dll refcode.
- * @param     pszFunction     Functionname.
+ * @param     pszFunction     Function name.
+ * @param     pszIntFunction  Internal function name.
  * @param     ulOrdinal       Ordinal value.
  * @param     fIgnoreOrdinal  Do not update ordinal value.
  */
-BOOL _System dbInsertUpdateFunction(unsigned short usDll, const char *pszFunction,
+BOOL _System dbInsertUpdateFunction(unsigned short usDll,
+                                    const char *pszFunction, const char *pszIntFunction,
                                     unsigned long ulOrdinal, BOOL fIgnoreOrdinal)
 {
     int  rc;
@@ -241,11 +296,15 @@ BOOL _System dbInsertUpdateFunction(unsigned short usDll, const char *pszFunctio
     char szQuery[256];
     MYSQL_RES *pres;
 
+    /* when no internal name, the exported name is the internal name too! */
+    if (pszIntFunction == NULL || *pszIntFunction == '\0')
+        pszIntFunction = pszFunction;
+
     /* try find function */
-    sprintf(&szQuery[0], "SELECT refcode FROM function WHERE dll = %d AND name = '%s'", usDll, pszFunction);
+    sprintf(&szQuery[0], "SELECT refcode, intname FROM function WHERE dll = %d AND name = '%s'", usDll, pszFunction);
     rc = mysql_query(pmysql, &szQuery[0]);
     pres = mysql_store_result(pmysql);
-    if (rc >= 0 && pres != NULL && mysql_num_rows(pres) > 0)
+    if (rc >= 0 && pres != NULL && mysql_num_rows(pres) != 0)
     {   /* update function (function is found) */
         MYSQL_ROW parow;
         if (mysql_num_rows(pres) > 1)
@@ -260,17 +319,25 @@ BOOL _System dbInsertUpdateFunction(unsigned short usDll, const char *pszFunctio
             lFunction = getvalue(0, parow);
         mysql_free_result(pres);
 
-        if (!fIgnoreOrdinal)
+        if (strcmp(parow[1], pszIntFunction) != 0)
+        {
+            sprintf(&szQuery[0], "UPDATE function SET intname = '%s' WHERE refcode = %ld",
+                    pszIntFunction, lFunction);
+            rc = mysql_query(pmysql, &szQuery[0]);
+        }
+
+        if (rc >= 0 && !fIgnoreOrdinal)
         {
             sprintf(&szQuery[0], "UPDATE function SET ordinal = %ld WHERE refcode = %ld",
                     ulOrdinal, lFunction);
             rc = mysql_query(pmysql, &szQuery[0]);
         }
+
     }
     else
     {   /* insert */
-        sprintf(&szQuery[0], "INSERT INTO function(dll, name, ordinal) VALUES(%d, '%s', %ld)",
-                usDll, pszFunction, ulOrdinal);
+        sprintf(&szQuery[0], "INSERT INTO function(dll, name, intname, ordinal) VALUES(%d, '%s', '%s', %ld)",
+                usDll, pszFunction, pszIntFunction, ulOrdinal);
         rc = mysql_query(pmysql, &szQuery[0]);
     }
 
@@ -294,7 +361,7 @@ static long getvalue(int iField, MYSQL_ROW papszRow)
 
 
 /**
- * Find occurences of a function, given by name.
+ * Find occurences of a function, given by internal name.
  * @returns   success indicator, TRUE / FALSE.
  * @param     pszFunctionName
  * @param     pFnFindBuf
@@ -306,7 +373,8 @@ BOOL _System dbFindFunction(const char *pszFunctionName, PFNFINDBUF pFnFindBuf)
     int          rc;
     char         szQuery[256];
 
-    sprintf(&szQuery[0], "SELECT refcode, dll FROM function WHERE name = '%s'", pszFunctionName);
+    sprintf(&szQuery[0], "SELECT refcode, dll FROM function WHERE intname = '%s'",
+            pszFunctionName, pszFunctionName);
 
     rc = mysql_query(pmysql, &szQuery[0]);
     if (rc >= 0)
@@ -415,119 +483,127 @@ unsigned long _System dbUpdateFunction(PFNDESC pFnDesc, char *pszError)
     char  szQuery[256];
     char *pszQuery = &szQuery[0];
     long  lCurrentState;
-    int   i,rc;
+    int   i,k,rc;
     unsigned long ulRc = 0;
     BOOL          f = FALSE;
 
-    lCurrentState = dbGetFunctionState(pFnDesc->lRefCode);
-    if (lCurrentState == -1)
+    for (k = 0; k < pFnDesc->cRefCodes; k++)
     {
-        strcpy(pszError, dbGetLastErrorDesc());
-        return 1;
-    }
+        /* set updated flag */
+        sprintf(pszQuery, "UPDATE function SET updated = updated + 1 WHERE refcode = %d",
+                pFnDesc->alRefCode[k]);
+        rc = mysql_query(pmysql, &szQuery[0]);
 
-    /* update function table first */
-    strcpy(pszQuery, "UPDATE function SET ");
-    pszQuery += strlen(pszQuery);
-    if (pFnDesc->lStatus != 99 || lCurrentState == 0)
-    {
-        sprintf(pszQuery, "state = %ld ", pFnDesc->lStatus);
-        f = TRUE;
-    }
-    pszQuery += strlen(pszQuery);
+        /* get current status */
+        lCurrentState = dbGetFunctionState(pFnDesc->alRefCode[k]);
+        if (lCurrentState == -1)
+        {
+            strcpy(pszError, dbGetLastErrorDesc());
+            return 1;
+        }
 
-    if (pFnDesc->pszReturnType != NULL)
-    {
+        /* update function table first */
+        strcpy(pszQuery, "UPDATE function SET ");
+        pszQuery += strlen(pszQuery);
+        if (pFnDesc->lStatus != 99 || lCurrentState == 0)
+        {
+            sprintf(pszQuery, "state = %ld ", pFnDesc->lStatus);
+            f = TRUE;
+        }
+        pszQuery += strlen(pszQuery);
+
+        if (pFnDesc->pszReturnType != NULL)
+        {
+            if (f)
+            {
+                strcat(pszQuery, ", ");
+                pszQuery += strlen(pszQuery);
+            }
+            sprintf(pszQuery, "return = '%s' ", pFnDesc->pszReturnType);
+            pszQuery += strlen(pszQuery);
+            f = TRUE;
+        }
+
         if (f)
         {
-            strcat(pszQuery, ", ");
-            pszQuery += strlen(pszQuery);
+            sprintf(pszQuery, "WHERE refcode = %ld", pFnDesc->alRefCode[k]);
+            rc = mysql_query(pmysql, &szQuery[0]);
+            if (rc < 0)
+            {
+                sprintf(pszError, "Updating functiontable failed with error: %s - (sql=%s) ",
+                        dbGetLastErrorDesc(), &szQuery[0]);
+                pszError += strlen(pszError) - 1;
+                ulRc++;
+            }
         }
-        sprintf(pszQuery, "return = '%s' ", pFnDesc->pszReturnType);
-        pszQuery += strlen(pszQuery);
-        f = TRUE;
-    }
 
-    if (f)
-    {
-        sprintf(pszQuery, "WHERE refcode = %ld", pFnDesc->lRefCode);
+        /* parameters */
+        pszQuery = &szQuery[0];
+        sprintf(pszQuery, "DELETE FROM parameter WHERE function = %ld", pFnDesc->alRefCode[k]);
         rc = mysql_query(pmysql, &szQuery[0]);
         if (rc < 0)
         {
-            sprintf(pszError, "Updating functiontable failed with error: %s - (sql=%s) ",
+            if (*pszError == ' ')
+                strcpy(pszError++, "\n\t");
+            sprintf(pszError, "Deleting old parameters failed with error: %s - (sql=%s) ",
                     dbGetLastErrorDesc(), &szQuery[0]);
             pszError += strlen(pszError) - 1;
             ulRc++;
         }
-    }
 
-    /* parameters */
-    pszQuery = &szQuery[0];
-    sprintf(pszQuery, "DELETE FROM parameter WHERE function = %ld", pFnDesc->lRefCode);
-    rc = mysql_query(pmysql, &szQuery[0]);
-    if (rc < 0)
-    {
-        if (*pszError == ' ')
-            strcpy(pszError++, "\n\t");
-        sprintf(pszError, "Deleting old parameters failed with error: %s - (sql=%s) ",
-                dbGetLastErrorDesc(), &szQuery[0]);
-        pszError += strlen(pszError) - 1;
-        ulRc++;
-    }
+        for (i = 0; i < pFnDesc->cParams; i++)
+        {
+            sprintf(pszQuery, "INSERT INTO parameter(function, sequencenbr, type, name) "
+                    "VALUES (%ld, %d, '%s', '%s')",
+                    pFnDesc->alRefCode[k], i,
+                    pFnDesc->apszParamType[i] != NULL ? pFnDesc->apszParamType[i] : "",
+                    pFnDesc->apszParamName[i] != NULL ? pFnDesc->apszParamName[i] : ""
+                    );
+            rc = mysql_query(pmysql, pszQuery);
+            if (rc < 0)
+            {
+                if (*pszError == ' ')
+                    strcpy(pszError++, "\n\t");
+                sprintf(pszError, "Inserting parameter %i failed with error: %s - (sql=%s) ",
+                        i, dbGetLastErrorDesc(), &szQuery[0]);
+                pszError += strlen(pszError) - 1;
+                ulRc++;
+            }
+        }
 
-    for (i = 0; i < pFnDesc->cParams; i++)
-    {
-        sprintf(pszQuery, "INSERT INTO parameter(function, sequencenbr, type, name) "
-                "VALUES (%ld, %d, '%s', '%s')",
-                pFnDesc->lRefCode, i,
-                pFnDesc->apszParamType[i] != NULL ? pFnDesc->apszParamType[i] : "",
-                pFnDesc->apszParamName[i] != NULL ? pFnDesc->apszParamName[i] : ""
-                );
-        rc = mysql_query(pmysql, pszQuery);
+        /* authors */
+        pszQuery = &szQuery[0];
+        sprintf(pszQuery, "DELETE FROM fnauthor WHERE function = %ld", pFnDesc->alRefCode[k]);
+        rc = mysql_query(pmysql, &szQuery[0]);
         if (rc < 0)
         {
             if (*pszError == ' ')
                 strcpy(pszError++, "\n\t");
-            sprintf(pszError, "Inserting parameter %i failed with error: %s - (sql=%s) ",
-                    i, dbGetLastErrorDesc(), &szQuery[0]);
+            sprintf(pszError, "Deleting old authors failed with error: %s - (sql=%s) ",
+                    dbGetLastErrorDesc(), &szQuery[0]);
             pszError += strlen(pszError) - 1;
             ulRc++;
         }
-    }
 
-    /* authors */
-    pszQuery = &szQuery[0];
-    sprintf(pszQuery, "DELETE FROM fnauthor WHERE function = %ld", pFnDesc->lRefCode);
-    rc = mysql_query(pmysql, &szQuery[0]);
-    if (rc < 0)
-    {
-        if (*pszError == ' ')
-            strcpy(pszError++, "\n\t");
-        sprintf(pszError, "Deleting old authors failed with error: %s - (sql=%s) ",
-                dbGetLastErrorDesc(), &szQuery[0]);
-        pszError += strlen(pszError) - 1;
-        ulRc++;
-    }
-
-    for (i = 0; i < pFnDesc->cAuthors; i++)
-    {
-        if (pFnDesc->alAuthorRefCode[i] == -1)
-            continue;
-        sprintf(pszQuery, "INSERT INTO fnauthor(author, function) "
-                "VALUES (%ld, %ld)",
-                pFnDesc->alAuthorRefCode[i], pFnDesc->lRefCode);
-        rc = mysql_query(pmysql, pszQuery);
-        if (rc < 0)
+        for (i = 0; i < pFnDesc->cAuthors; i++)
         {
-            if (*pszError == ' ')
-                strcpy(pszError++, "\n\t");
-            sprintf(pszError, "Inserting parameter %i failed with error: %s - (sql=%s) ",
-                    i, dbGetLastErrorDesc(), &szQuery[0]);
-            pszError += strlen(pszError) - 1;
-            ulRc++;
+            if (pFnDesc->alAuthorRefCode[i] == -1)
+                continue;
+            sprintf(pszQuery, "INSERT INTO fnauthor(author, function) "
+                    "VALUES (%ld, %ld)",
+                    pFnDesc->alAuthorRefCode[i], pFnDesc->alRefCode[k]);
+            rc = mysql_query(pmysql, pszQuery);
+            if (rc < 0)
+            {
+                if (*pszError == ' ')
+                    strcpy(pszError++, "\n\t");
+                sprintf(pszError, "Inserting parameter %i failed with error: %s - (sql=%s) ",
+                        i, dbGetLastErrorDesc(), &szQuery[0]);
+                pszError += strlen(pszError) - 1;
+                ulRc++;
+            }
         }
-    }
-
+    } /* for */
     return ulRc;
 }
 
@@ -907,7 +983,7 @@ static unsigned long CheckAuthorError(char * &pszError, const char *pszFieldName
 
     rc = mysql_query(pmysql, pszQuery);
     pres = mysql_store_result(pmysql);
-    if (rc < 0 || (pres != NULL && mysql_num_rows(pres) > 0))
+    if (rc < 0 || (pres != NULL && mysql_num_rows(pres) != 0))
     {   /* some kind of error has occurred */
         if (pszError[1] == '\xFE')
         {
@@ -1098,6 +1174,58 @@ BOOL _System dbDaysAfterChristToDate(signed long lDays, char *pszDate)
             do { row = mysql_fetch_row(pres); } while (row != NULL);
         }
     }
+
+    return fRet;
+}
+
+
+/**
+ * Display all functions for, the given dll, that is not updated.
+ * @returns   TRUE / FALSE.
+ * @param     lDll         Dll reference number.
+ * @param     dbFetchCall  Callback function which will be called once for each
+ *                         field for all the functions not updated.
+ *                         pvUser is NULL, pszValue field value, pszFieldName the field name.
+ */
+BOOL _System dbGetNotUpdatedFunction(signed long lDll, DBCALLBACKFETCH dbFetchCallBack)
+{
+    BOOL        fRet = FALSE;
+    void       *pres;
+    char        szQuery[128];
+
+    /* not updated names */
+    sprintf(&szQuery[0], "SELECT name, intname FROM function WHERE dll = %d AND updated = 0",
+            lDll);
+    pres = dbExecuteQuery(szQuery);
+    if (pres != NULL)
+    {
+        BOOL f;
+        do
+        {
+            f = dbFetch(pres, dbFetchCallBack, NULL);
+        } while (f);
+        dbFreeResult(pres);
+        fRet = TRUE;
+    }
+
+    /* warn about updated > 1 too */
+    sprintf(&szQuery[0], "SELECT updated, name, intname FROM function WHERE dll = %d AND updated > 1",
+            lDll);
+    pres = dbExecuteQuery(szQuery);
+    if (pres != NULL)
+    {
+        BOOL f;
+        do
+        {
+            f = dbFetch(pres, dbFetchCallBack, NULL);
+        } while (f);
+        dbFreeResult(pres);
+        fRet = TRUE;
+    }
+
+    sprintf(&szQuery[0], "UPDATE function SET updated = 0",
+            lDll);
+    mysql_query(pmysql, &szQuery[0]);
 
     return fRet;
 }

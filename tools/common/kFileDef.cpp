@@ -27,7 +27,7 @@
 *******************************************************************************/
 static char *dupeString(const char *psz);
 static char *trim(char *psz);
-
+static char *removeFnutts(char *pszStr);
 
 /**
  * Duplicates a string.
@@ -300,6 +300,8 @@ void kFileDef::read(FILE *phFile) throw (int)
                     }
                 }
 
+                removeFnutts((**ppe).pszIntName);
+                removeFnutts((**ppe).pszName);
                 ppe = &(**ppe).pNext;
             }
             fNext = FALSE;
@@ -493,3 +495,21 @@ BOOL  kFileDef::findNextExport(PEXPORTENTRY pExport)
 }
 
 
+/**
+ * Removes '"' and ''' at start and end of the string.
+ * @returns     pszStr!
+ * @param       pszStr  String that is to have "s and 's removed.
+ */
+static char *removeFnutts(char *pszStr)
+{
+    if (pszStr != NULL)
+    {
+        int cch = strlen(pszStr);
+        if (cch > 0 && (pszStr[cch-1] == '"' || pszStr[cch-1] == '\''))
+            pszStr[cch-1] = '\0';
+
+        if (*pszStr == '"' || *pszStr == '\'')
+            memmove(pszStr, pszStr+1, cch-1);
+    }
+    return pszStr;
+}

@@ -1,4 +1,4 @@
--- $Id: CreateTables.sql,v 1.1 1999-09-05 02:53:04 bird Exp $
+-- $Id: CreateTables.sql,v 1.2 2000-02-11 18:35:54 bird Exp $
 --
 -- Create all tables.
 --
@@ -29,12 +29,15 @@ CREATE TABLE function (
     refcode INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY,
     dll     TINYINT NOT NULL,
     name    VARCHAR(64) NOT NULL,
+    intname VARCHAR(64) NOT NULL,
     state   TINYINT NOT NULL DEFAULT 0,
     ordinal INTEGER NOT NULL,
     apigroup SMALLINT,
     return VARCHAR(64),
+    updated TINYINT NOT NULL DEFAULT 0,
     UNIQUE i1(refcode),
-    UNIQUE i2(name,dll)
+    UNIQUE i2(name,dll),
+    UNIQUE i3(intname, refcode)
 );
 
 CREATE TABLE apigroup (
