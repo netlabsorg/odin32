@@ -1,4 +1,4 @@
-# $Id: process.mak,v 1.5 2002-04-16 00:09:35 bird Exp $
+# $Id: process.mak,v 1.6 2002-04-22 00:27:54 bird Exp $
 
 #
 # Unix-like tools for OS/2
@@ -20,12 +20,47 @@
 !error Fatal error: You must include setup.mak before process.mak in the makefile.
 !endif
 !if "$(ENV_STATUS)" != "OK"
-!error Fatal error: The enironment is not valid. Bad setup.mak?
+!error Fatal error: The environment is not valid. Bad setup.mak?
 !endif
 
 !if "$(TARGET_NAME)" == ""
 !error Fatal error: TARGET_NAME is not defined! Should be set in the makefile.
 !endif
+
+!ifdef TARGET_MODE
+# Executable target mode.
+! if "$(TARGET_MODE)" != "EXE"
+# Dynamic Load Library target mode.
+!  if "$(TARGET_MODE)" != "DLL"
+# Dynamic Load Library target mode - Special variant for making custom C/C++ runtime DLL.
+!   if "$(TARGET_MODE)" != "CRT"
+# Drive (/ system software) target mode.
+!    if "$(TARGET_MODE)" != "SYS"
+# Installable File System Drive target mode. (Also called FSD, File System Driver.)
+!     if "$(TARGET_MODE)" != "IFS"
+# Virtual Device Driver target mode.
+!      if "$(TARGET_MODE)" != "VDD"
+# Object Library target mode.
+!       if "$(TARGET_MODE)" != "LIB"
+# Object Library target mode - Special variant which is to be linked with a SYS target.
+!        if "$(TARGET_MODE)" != "SYSLIB"
+# Object Library target mode - Special variant which is to be linked with an IFS target.
+!         if "$(TARGET_MODE)" != "IFSLIB"
+# Dummy/Hub/TopLevel empty makefile. This has no target.
+!          if "$(TARGET_MODE)" != "EMPTY"
+!           error Error: Bad TARGET_MODE="$(TARGET_MODE)". Valid ones are: EXE, DLL, CRT, EXE, SYS, IFS, VDD, LIB, SYSLIB, IFSLIB and EMPTY.
+!          endif
+!         endif
+!        endif
+!       endif
+!      endif
+!     endif
+!    endif
+!   endif
+!  endif
+! endif
+!endif
+
 
 # -----------------------------------------------------------------------------
 # Provide overridable defaults
@@ -38,23 +73,29 @@ TARGET_MODE = EXE
 
 # Default extension corresponds to the target mode.
 !ifndef TARGET_EXT
-! if "$(TARGET_MODE)" == "CRT" || "$(TARGET_MODE)" == "DLL"
+! if "$(TARGET_MODE)" == "DLL" || "$(TARGET_MODE)" == "CRT"
 TARGET_EXT  = $(EXT_DLL)
 ! endif
 ! if "$(TARGET_MODE)" == "SYS"
 TARGET_EXT  = $(EXT_SYS)
 ! endif
+! if "$(TARGET_MODE)" == "IFS"
+TARGET_EXT  = $(EXT_IFS)
+! endif
+! if "$(TARGET_MODE)" == "VDD"
+TARGET_EXT  = $(EXT_VDD)
+! endif
 ! if "$(TARGET_MODE)" == "EXE"
 TARGET_EXT  = $(EXT_EXE)
 ! endif
-! if "$(TARGET_MODE)" == "LIB" || "$(TARGET_MODE)" == "PUBLIB" || "$(TARGET_MODE)" == "SYSLIB"
+! if "$(TARGET_MODE)" == "LIB" || "$(TARGET_MODE)" == "SYSLIB" || "$(TARGET_MODE)" == "IFSLIB"
 TARGET_EXT  = $(EXT_LIB)
 ! endif
 ! if "$(TARGET_MODE)" == "EMPTY"
 TARGET_EXT  = empty
 ! endif
 ! ifndef TARGET_EXT
-!error Error: TARGET_EXT not set. (Probably invalid TARGET_MODE.)
+!error Internal Error: TARGET_EXT not set. Probably invalid TARGET_MODE. (TARGET_MODE="$(TARGET_MODE)")
 ! endif
 !endif
 
@@ -103,17 +144,30 @@ TARGET_LNK  = $(PATH_TARGET)\$(TARGET_NAME).lnk
 
 # Default import library file. (output)
 !ifndef TARGET_ILIB
-! if "$(TARGET_MODE)" == "CRT" || "$(TARGET_MODE)" == "DLL"
+! if "$(TARGET_MODE)" == "DLL" || "$(TARGET_MODE)" == "CRT"
 TARGET_ILIB =$(PATH_LIB)\$(TARGET_NAME).$(EXT_ILIB)
 ! endif
 !endif
 
-# Default public library name. (output)
-!ifndef TARGET_PUBLIB
-! if "$(TARGET_MODE)" == "PUBLIB"
-TARGET_PUBLIB=$(PATH_LIB)\$(TARGET_NAME).$(TARGET_EXT)
-! else
-TARGET_PUBLIB=
+# Default public name. (output)
+!ifndef TARGET_PUBNAME
+TARGET_PUBNAME=
+! ifdef TARGET_PUBLIC
+!  if "$(TARGET_MODE)" == "LIB" || "$(TARGET_MODE)" == "SYSLIB" || "$(TARGET_MODE)" == "IFSLIB"
+TARGET_PUBNAME=$(PATH_LIB)\$(TARGET_NAME).$(TARGET_EXT)
+!  endif
+!  if "$(TARGET_MODE)" == "EXE"
+TARGET_PUBNAME=$(PATH_EXE)\$(TARGET_NAME).$(TARGET_EXT)
+!  endif
+!  if "$(TARGET_MODE)" == "DLL" || "$(TARGET_MODE)" == "CRT"
+TARGET_PUBNAME=$(PATH_DLL)\$(TARGET_NAME).$(TARGET_EXT)
+!  endif
+!  if "$(TARGET_MODE)" == "SYS" || "$(TARGET_MODE)" == "IFS"
+TARGET_PUBNAME=$(PATH_SYS)\$(TARGET_NAME).$(TARGET_EXT)
+!  endif
+!  if "$(TARGET_MODE)" == "VDD"
+TARGET_PUBNAME=$(PATH_VDD)\$(TARGET_NAME).$(TARGET_EXT)
+!  endif
 ! endif
 !endif
 
@@ -193,26 +247,35 @@ TARGET_STACKSIZE=0x10000
 # Assembling assembly source.
 .asm{$(PATH_TARGET)}.$(EXT_OBJ):
     @$(ECHO) Assembling $(CLRFIL)$< $(CLRRST)
+!ifndef BUILD_VERBOSE
+    @ \
+!endif
 !if "$(TARGET_MODE)" == "SYS" || "$(TARGET_MODE)" == "SYSLIB" || "$(TARGET_MODE)" == "IFS" || "$(TARGET_MODE)" == "IFSLIB"
-    @$(AS) $(AS_FLAGS_SYS) $< $(AS_OBJ_OUT)$@
+    $(AS) $(AS_FLAGS_SYS) $< $(AS_OBJ_OUT)$@
 !else
-    @$(AS) $(AS_FLAGS) $< $(AS_OBJ_OUT)$@
+    $(AS) $(AS_FLAGS) $< $(AS_OBJ_OUT)$@
 !endif
 
 .asm.$(EXT_OBJ):
     @$(ECHO) Assembling $(CLRFIL)$< $(CLRRST)
+!ifndef BUILD_VERBOSE
+    @ \
+!endif
 !if "$(TARGET_MODE)" == "SYS" || "$(TARGET_MODE)" == "SYSLIB" || "$(TARGET_MODE)" == "IFS" || "$(TARGET_MODE)" == "IFSLIB"
-    @$(AS) $(AS_FLAGS_SYS) $< $(AS_OBJ_OUT)$(PATH_TARGET)\$(@F)
+    $(AS) $(AS_FLAGS_SYS) $< $(AS_OBJ_OUT)$(PATH_TARGET)\$(@F)
 !else
-    @$(AS) $(AS_FLAGS) $< $(AS_OBJ_OUT)$(PATH_TARGET)\$(@F)
+    $(AS) $(AS_FLAGS) $< $(AS_OBJ_OUT)$(PATH_TARGET)\$(@F)
 !endif
 
 
 # Compiling C++ source.
 .cpp{$(PATH_TARGET)}.$(EXT_OBJ):
     @$(ECHO) C++ Compiler $(CLRFIL)$< $(CLRRST)
-    @$(CXX) \
-!if "$(TARGET_MODE)" == "EXE" || "$(TARGET_MODE)" == "LIB"  || "$(TARGET_MODE)" == "PUBLIB"
+!ifndef BUILD_VERBOSE
+    @ \
+!endif
+    $(CXX) \
+!if "$(TARGET_MODE)" == "EXE" || "$(TARGET_MODE)" == "LIB"
         $(CXX_FLAGS_EXE) \
 !endif
 !if "$(TARGET_MODE)" == "CRT"
@@ -234,8 +297,11 @@ TARGET_STACKSIZE=0x10000
 
 .cpp.$(EXT_OBJ):
     @$(ECHO) C++ Compiler $(CLRFIL)$< $(CLRRST)
-    @$(CXX) \
-!if "$(TARGET_MODE)" == "EXE" || "$(TARGET_MODE)" == "LIB" || "$(TARGET_MODE)" == "PUBLIB"
+!ifndef BUILD_VERBOSE
+    @ \
+!endif
+    $(CXX) \
+!if "$(TARGET_MODE)" == "EXE" || "$(TARGET_MODE)" == "LIB"
         $(CXX_FLAGS_EXE) \
 !endif
 !if "$(TARGET_MODE)" == "CRT"
@@ -259,8 +325,11 @@ TARGET_STACKSIZE=0x10000
 # Pre-Compiling C++ source.
 .cpp.pre-cpp:
     @$(ECHO) C++ Compiler $(CLRFIL)$< $(CLRRST)
-    @$(CXX) \
-!if "$(TARGET_MODE)" == "EXE" || "$(TARGET_MODE)" == "LIB" || "$(TARGET_MODE)" == "PUBLIB"
+!ifndef BUILD_VERBOSE
+    @ \
+!endif
+    $(CXX) \
+!if "$(TARGET_MODE)" == "EXE" || "$(TARGET_MODE)" == "LIB"
         $(CXX_FLAGS_EXE) \
 !endif
 !if "$(TARGET_MODE)" == "CRT"
@@ -281,8 +350,11 @@ TARGET_STACKSIZE=0x10000
 # Compiling C source.
 .c{$(PATH_TARGET)}.$(EXT_OBJ):
     @$(ECHO) C Compiler $(CLRFIL)$< $(CLRRST)
-    @$(CC) \
-!if "$(TARGET_MODE)" == "EXE" || "$(TARGET_MODE)" == "LIB" || "$(TARGET_MODE)" == "PUBLIB"
+!ifndef BUILD_VERBOSE
+    @ \
+!endif
+    $(CC) \
+!if "$(TARGET_MODE)" == "EXE" || "$(TARGET_MODE)" == "LIB"
         $(CC_FLAGS_EXE) \
 !endif
 !if "$(TARGET_MODE)" == "CRT"
@@ -304,8 +376,11 @@ TARGET_STACKSIZE=0x10000
 
 .c.$(EXT_OBJ):
     @$(ECHO) C Compiler $(CLRFIL)$< $(CLRRST)
-    @$(CC) \
-!if "$(TARGET_MODE)" == "EXE" || "$(TARGET_MODE)" == "LIB" || "$(TARGET_MODE)" == "PUBLIB"
+!ifndef BUILD_VERBOSE
+    @ \
+!endif
+    $(CC) \
+!if "$(TARGET_MODE)" == "EXE" || "$(TARGET_MODE)" == "LIB"
         $(CC_FLAGS_EXE) \
 !endif
 !if "$(TARGET_MODE)" == "CRT"
@@ -329,8 +404,11 @@ TARGET_STACKSIZE=0x10000
 # Pre-Compiling C source.
 .c.pre-c:
     @$(ECHO) C PreCompiler $(CLRFIL)$< $(CLRRST)
-    @$(CC) \
-!if "$(TARGET_MODE)" == "EXE" || "$(TARGET_MODE)" == "LIB" || "$(TARGET_MODE)" == "PUBLIB"
+!ifndef BUILD_VERBOSE
+    @ \
+!endif
+    $(CC) \
+!if "$(TARGET_MODE)" == "EXE" || "$(TARGET_MODE)" == "LIB"
         $(CC_FLAGS_EXE) \
 !endif
 !if "$(TARGET_MODE)" == "CRT"
@@ -351,11 +429,17 @@ TARGET_STACKSIZE=0x10000
 # Compiling resources.
 .rc{$(PATH_TARGET)}.res:
     @$(ECHO) RC Compiler $(CLRFIL)$< $(CLRRST)
-    @$(RC) $(RC_FLAGS) $< $@
+!ifndef BUILD_VERBOSE
+    @ \
+!endif
+    $(RC) $(RC_FLAGS) $< $@
 
 .rc.res:
     @$(ECHO) RC Compiler $(CLRFIL)$< $(CLRRST)
-    @$(RC) $(RC_FLAGS) $< $(PATH_TARGET)\$(@F)
+!ifndef BUILD_VERBOSE
+    @ \
+!endif
+    $(RC) $(RC_FLAGS) $< $(PATH_TARGET)\$(@F)
 
 
 
@@ -385,7 +469,7 @@ $(PREMAKEFILES_BUILD):
     @$(TOOL_DOMAKES) "$(PREMAKEFILES)" $(TOOL_MAKE) build
 !endif
 
-build: $(SUBDIRS_BUILD) $(PREMAKEFILES_BUILD) $(TARGET) $(TARGET_ILIB) $(TARGET_PUBLIB)
+build: $(SUBDIRS_BUILD) $(PREMAKEFILES_BUILD) $(TARGET) $(TARGET_ILIB) $(TARGET_PUBNAME)
     @$(ECHO) Successfully Built $(CLRFIL)$(TARGET) $(TARGET_ILIB)$(CLRRST)
 !ifdef POSTMAKEFILES
     @$(TOOL_DOMAKES) "$(POSTMAKEFILES)" $(TOOL_MAKE) $@
@@ -410,7 +494,11 @@ $(PREMAKEFILES_LIB):
     @$(TOOL_DOMAKES) "$(PREMAKEFILES)" $(TOOL_MAKE) lib
 !endif
 
-lib: $(SUBDIRS_LIB)  $(TARGET_ILIB) $(TARGET_PUBLIB)
+!if "$(TARGET_MODE)" == "LIB" || "$(TARGET_MODE)" == "SYSLIB" || "$(TARGET_MODE)" == "IFSLIB"
+lib: $(SUBDIRS_LIB) $(TARGET_ILIB) $(TARGET_PUBNAME)
+!else
+lib: $(SUBDIRS_LIB) $(TARGET_ILIB)
+!endif
 !ifdef POSTMAKEFILES
     @$(TOOL_DOMAKES) "$(POSTMAKEFILES)" $(TOOL_MAKE) $@
 !endif
@@ -423,30 +511,29 @@ lib: $(SUBDIRS_LIB)  $(TARGET_ILIB) $(TARGET_PUBLIB)
 #   pre-makefiles are processed after this directory. This might be changed.
 # -----------------------------------------------------------------------------
 install:
-!if "$(TARGET_MODE)" == "EXE"
-    if exist $(TARGET) $(TOOL_COPY) $(TARGET) $(PATH_BIN)
-!endif
-!if "$(TARGET_MODE)" == "DLL" || "$(TARGET_MODE)" == "CRT"
-    if exist $(TARGET) $(TOOL_COPY) $(TARGET) $(PATH_DLL)
-!endif
-!if "$(TARGET_MODE)" == "SYS" || "$(TARGET_MODE)" == "IFS" || "$(TARGET_MODE)" == "IFSLIB"
-    if exist $(TARGET) $(TOOL_COPY) $(TARGET) $(PATH_SYS)
-!endif
-!if 0
-# Nothing to do here currently. These are either private or they're allready where they should be.
-#
-# TODO/BUGBUG/FIXME:
-#       The PUB stuff should be change to a separate variable.
-#       It will make life easier to just state that this target,
-#       what ever it is, should be public.
-#
-#       That's allow project to install targets during make without
-#       running the install command by setting some target modes
-#       public by default.
-#   (kso)
-#!if "$(TARGET_MODE)" == "LIB" || "$(TARGET_MODE)" == "PUBLIB" || "$(TARGET_MODE)" == "SYSLIB"
-#    if exist $(TARGET) $(TOOL_COPY) $(TARGET) $(PATH_LIB)
-#!endif
+!if "$(TARGET_PUBLIC)" == ""
+! if "$(TARGET_MODE)" == "EXE"
+    @$(ECHO) Installing $(CLRFIL)$(TARGET)$(CLRTXT) in directory $(CLRFIL)$(PATH_BIN)$(CLRRST)
+    @if not exist $(TARGET) $(ECHO) $(CLRERR)WARNING: $(CLRFIL)$(TARGET)$(CLRERR) doesn't exist. $(CLRRST)
+    @if exist $(TARGET)     $(TOOL_COPY) $(TARGET) $(PATH_BIN)
+! endif
+! if "$(TARGET_MODE)" == "DLL" || "$(TARGET_MODE)" == "CRT"
+    @$(ECHO) Installing $(CLRFIL)$(TARGET)$(CLRTXT) in directory $(CLRFIL)$(PATH_DLL)$(CLRRST)
+    @if not exist $(TARGET) $(ECHO) $(CLRERR)WARNING: $(CLRFIL)$(TARGET)$(CLRERR) doesn't exist. $(CLRRST)
+    @if exist $(TARGET)     $(TOOL_COPY) $(TARGET) $(PATH_DLL)
+! endif
+! if "$(TARGET_MODE)" == "SYS" || "$(TARGET_MODE)" == "IFS"
+    @$(ECHO) Installing $(CLRFIL)$(TARGET)$(CLRTXT) in directory $(CLRFIL)$(PATH_SYS)$(CLRRST)
+    @if not exist $(TARGET) $(ECHO) $(CLRERR)WARNING: $(CLRFIL)$(TARGET)$(CLRERR) doesn't exist. $(CLRRST)
+    @if exist $(TARGET)     $(TOOL_COPY) $(TARGET) $(PATH_SYS)
+! endif
+!if 1 # these targets are either TARGET_PUBLIC or all private.
+!  if "$(TARGET_MODE)" == "LIB" || "$(TARGET_MODE)" == "SYSLIB" || "$(TARGET_MODE)" == "IFSLIB"
+    @$(ECHO) Installing $(CLRFIL)$(TARGET)$(CLRTXT) in directory $(CLRFIL)$(PATH_LIB)$(CLRRST)
+    @if not exist $(TARGET) $(ECHO) $(CLRERR)WARNING: $(CLRFIL)$(TARGET)$(CLRERR) doesn't exist. $(CLRRST)
+    @if exist $(TARGET)     $(TOOL_COPY) $(TARGET) $(PATH_LIB)
+!  endif
+! endif
 !endif
 !if "$(TARGET_DOCS)" != ""
     $(TOOL_COPY) $(TARGET_DOCS) $(PATH_DOC)
@@ -468,7 +555,7 @@ install:
 #   Testcases are either a testcase.mak file or a testcase subdirectory.
 # -----------------------------------------------------------------------------
 !ifndef BUILD_OWN_TESTCASE_RULE
-testcase: install
+testcase:
 !if [$(TOOL_EXISTS) testcase] == 0
     @$(TOOL_DODIRS) "testcase" $(TOOL_MAKE) $@
 !endif
@@ -493,7 +580,10 @@ testcase: install
 # -----------------------------------------------------------------------------
 dep:
     @$(ECHO) Building dependencies $(CLRRST)
-    @$(TOOL_DEP) $(TOOL_DEP_FLAGS) -o$$(PATH_TARGET) -d$(TARGET_DEPEND)\
+!ifndef BUILD_VERBOSE
+    @ \
+!endif
+    $(TOOL_DEP) $(TOOL_DEP_FLAGS) -o$$(PATH_TARGET) -d$(TARGET_DEPEND)\
 !ifdef TARGET_NO_DEP
         -x$(TARGET_NO_DEP: =;)\
 !endif
@@ -549,9 +639,12 @@ clean:
 # -----------------------------------------------------------------------------
 # The $(TARGET) rule - For EXE, DLL, SYS and IFS targets
 # -----------------------------------------------------------------------------
-!if "$(TARGET_MODE)" == "EXE" || "$(TARGET_MODE)" == "DLL" || "$(TARGET_MODE)" == "CRT" || "$(TARGET_MODE)" == "SYS" || "$(TARGET_MODE)" == "IFS"
+!if "$(TARGET_MODE)" == "EXE" || "$(TARGET_MODE)" == "DLL" || "$(TARGET_MODE)" == "CRT" || "$(TARGET_MODE)" == "SYS" || "$(TARGET_MODE)" == "IFS" || "$(TARGET_MODE)" == "VDD"
 $(TARGET): $(TARGET_OBJS) $(TARGET_RES) $(TARGET_DEF) $(TARGET_LNK) $(TARGET_DEPS)
     @$(ECHO) Linking $(TARGET_MODE) $(CLRFIL)$@ $(CLRRST)
+!ifndef BUILD_VERBOSE
+    @ \
+!endif
 !ifdef TARGET_IGNORE_LINKER_WARNINGS
     -4 \
 !endif
@@ -559,20 +652,29 @@ $(TARGET): $(TARGET_OBJS) $(TARGET_RES) $(TARGET_DEF) $(TARGET_LNK) $(TARGET_DEP
     $(LINK_CMD_EXE)
 !endif
 !if "$(TARGET_MODE)" == "DLL" || "$(TARGET_MODE)" == "CRT"
-    @$(LINK_CMD_DLL)
+    $(LINK_CMD_DLL)
 !endif
 !if "$(TARGET_MODE)" == "SYS"
-    @$(LINK_CMD_SYS)
+    $(LINK_CMD_SYS)
 !endif
 !if "$(TARGET_MODE)" == "IFS"
-    @$(LINK_CMD_IFS)
+    $(LINK_CMD_IFS)
+!endif
+!if "$(TARGET_MODE)" == "VDD"
+    $(LINK_CMD_VDD)
 !endif
 !if "$(TARGET_RES)" != "" && "$(RL)" != ""
     @$(ECHO) Linking Resources $(CLRRST)
-    @$(RL) $(RL_FLAGS) $(TARGET_RES) $@
+! ifndef BUILD_VERBOSE
+    @ \
+! endif
+    $(RL) $(RL_FLAGS) $(TARGET_RES) $@
 !endif
 !if "$(TARGET_DLLRNAME)" != ""
     @$(ECHO) Dll Rename $(TARGET_DLLRNAME)
+! ifndef BUILD_VERBOSE
+    @ \
+! endif
     $(TOOL_DLLRNAME) $(TARGET) $(TARGET_DLLRNAME)
 !endif
 
@@ -588,17 +690,22 @@ $(LINK_LNK3)
 $(LINK_LNK4)
 $(LINK_LNK5)
 <<KEEP
-
+!endif
 
 
 # -----------------------------------------------------------------------------
-# The $(TARGET) rule - For LIB, PUBLIB, and SYSLIB targets.
+# The $(TARGET) rule - For LIB, SYSLIB, and IFSLIB targets.
 # -----------------------------------------------------------------------------
-!if "$(TARGET_MODE)" == "LIB" || "$(TARGET_MODE)" == "PUBLIB" || "$(TARGET_MODE)" == "SYSLIB" || "$(TARGET_MODE)" == "IFSLIB"
+!if "$(TARGET_MODE)" == "LIB" || "$(TARGET_MODE)" == "SYSLIB" || "$(TARGET_MODE)" == "IFSLIB"
 $(TARGET): $(TARGET_OBJS) $(TARGET_LNK) $(TARGET_DEPS)
     @$(ECHO) Creating Library $(CLRFIL)$@ $(CLRRST)
+!ifndef BUILD_VERBOSE
+    @$(TOOL_RM) $@
+    @$(AR_CMD)
+!else
     $(TOOL_RM) $@
     $(AR_CMD)
+!endif
 
 
 #
@@ -616,13 +723,15 @@ $(AR_LNK5)
 
 
 #
-# Copy rule for public libraries.
-#   BUGBUG/TODO/FIXME: get rid of the PUBLIB stuff. see commet in install.
+# Copy rule for public targets.
 #
-!if "$(TARGET_MODE)" == "PUBLIB"
-$(TARGET_PUBLIB): $(TARGET)
-    @$(ECHO) Copying $(CLRFIL)$(TARGET)$(CLRTXT) to the Library Directory $(CLRRST)
-    @$(TOOL_COPY) $** $@
+!if "$(TARGET_PUBNAME)" != ""
+$(TARGET_PUBNAME): $(TARGET)
+    @$(ECHO) Copying $(CLRFIL)$(TARGET)$(CLRTXT) to $(CLRFIL)$(@D)$(CLRRST)
+!ifndef BUILD_VERBOSE
+    @ \
+!endif
+    $(TOOL_COPY) $** $@
 !endif
 
 
@@ -643,8 +752,10 @@ $(TARGET):
 !ifdef TARGET_ILIB
 $(TARGET_ILIB): $(TARGET_IDEF)
     @$(ECHO) Creating Import Library $(CLRFIL)$@ $(CLRRST)
-    $(IMPLIB) $(IMPLIB_FLAGS) $@ $(TARGET_IDEF)
+!ifndef BUILD_VERBOSE
+    @ \
 !endif
+    $(IMPLIB) $(IMPLIB_FLAGS) $@ $(TARGET_IDEF)
 !endif
 
 
@@ -653,7 +764,11 @@ $(TARGET_ILIB): $(TARGET_IDEF)
 # The .force rule - Force a remake of something everytime.
 # -----------------------------------------------------------------------------
 .force:
+!ifndef BUILD_VERBOSE
     @$(ECHO) .
+!else
+    @$(ECHO) . (force) .
+!endif
 
 
 
