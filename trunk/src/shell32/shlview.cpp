@@ -1,4 +1,4 @@
-/* $Id: shlview.cpp,v 1.2 1999-10-09 11:17:06 sandervl Exp $ */
+/* $Id: shlview.cpp,v 1.3 1999-10-24 22:50:46 sandervl Exp $ */
 /*
  *	ShellView
  *
@@ -1284,8 +1284,9 @@ static HRESULT WINAPI IShellView_fnCreateViewWindow(
 	}
 
 	/*if our window class has not been registered, then do so*/
-	if(!GetClassInfoA(shell32_hInstance, SV_CLASS_NAME, &wc))
-	{
+//SvL: Don't check this now
+//	if(!GetClassInfoA(shell32_hInstance, SV_CLASS_NAME, &wc))
+//	{
 	  ZeroMemory(&wc, sizeof(wc));
 	  wc.style		= CS_HREDRAW | CS_VREDRAW;
 	  wc.lpfnWndProc	= (WNDPROC) ShellView_WndProc;
@@ -1300,7 +1301,7 @@ static HRESULT WINAPI IShellView_fnCreateViewWindow(
 
 	  if(!RegisterClassA(&wc))
 	    return E_FAIL;
-	}
+//	}
 
 	*phWnd = CreateWindowExA(0,
 				SV_CLASS_NAME,

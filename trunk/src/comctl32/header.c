@@ -1,4 +1,4 @@
-/* $Id: header.c,v 1.17 1999-10-07 21:00:41 cbratschi Exp $ */
+/* $Id: header.c,v 1.18 1999-10-24 22:49:43 sandervl Exp $ */
 /*
  *  Header control
  *
@@ -2490,7 +2490,8 @@ HEADER_Register (VOID)
 {
     WNDCLASSA wndClass;
 
-    if (GlobalFindAtomA (WC_HEADERA)) return;
+//SvL: Don't check this now
+//    if (GlobalFindAtomA (WC_HEADERA)) return;
 
     ZeroMemory (&wndClass, sizeof(WNDCLASSA));
     wndClass.style         = CS_GLOBALCLASS | CS_DBLCLKS;

@@ -1586,7 +1586,8 @@ MONTHCAL_Register (void)
 {
     WNDCLASSA wndClass;
 
-    if (GlobalFindAtomA (MONTHCAL_CLASSA)) return;
+//SvL: Don't check this now
+//    if (GlobalFindAtomA (MONTHCAL_CLASSA)) return;
 
     ZeroMemory (&wndClass, sizeof(WNDCLASSA));
     wndClass.style         = CS_GLOBALCLASS;

@@ -1,4 +1,4 @@
-/* $Id: tab.c,v 1.14 1999-10-22 18:04:12 sandervl Exp $ */
+/* $Id: tab.c,v 1.15 1999-10-24 22:49:47 sandervl Exp $ */
 /*
  * Tab control
  *
@@ -2019,7 +2019,8 @@ TAB_Register (VOID)
 {
   WNDCLASSA wndClass;
 
-  if (GlobalFindAtomA (WC_TABCONTROLA)) return;
+//SvL: Don't check this now
+//  if (GlobalFindAtomA (WC_TABCONTROLA)) return;
 
   ZeroMemory (&wndClass, sizeof(WNDCLASSA));
   wndClass.style         = CS_GLOBALCLASS | CS_DBLCLKS | CS_SAVEBITS;

@@ -1,4 +1,4 @@
-/* $Id: ipaddress.c,v 1.7 1999-08-14 16:13:11 cbratschi Exp $ */
+/* $Id: ipaddress.c,v 1.8 1999-10-24 22:49:44 sandervl Exp $ */
 /*
  * IP Address control
  *
@@ -658,7 +658,8 @@ IPADDRESS_Register (void)
 {
     WNDCLASSA wndClass;
 
-    if (GlobalFindAtomA (WC_IPADDRESSA)) return;
+//SvL: Don't check this now
+//    if (GlobalFindAtomA (WC_IPADDRESSA)) return;
 
     ZeroMemory (&wndClass, sizeof(WNDCLASSA));
     wndClass.style         = CS_GLOBALCLASS;

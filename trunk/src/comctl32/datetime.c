@@ -1,4 +1,4 @@
-/* $Id: datetime.c,v 1.4 1999-08-14 16:13:10 cbratschi Exp $ */
+/* $Id: datetime.c,v 1.5 1999-10-24 22:49:42 sandervl Exp $ */
 /*
  * Date and time picker control
  *
@@ -521,7 +521,8 @@ DATETIME_Register (void)
 {
     WNDCLASSA wndClass;
 
-    if (GlobalFindAtomA (DATETIMEPICK_CLASSA)) return;
+//SvL: Don't check this now
+//    if (GlobalFindAtomA (DATETIMEPICK_CLASSA)) return;
 
     ZeroMemory (&wndClass, sizeof(WNDCLASSA));
     wndClass.style         = CS_GLOBALCLASS;

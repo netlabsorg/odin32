@@ -1,4 +1,4 @@
-/* $Id: trackbar.c,v 1.20 1999-10-05 16:05:17 cbratschi Exp $ */
+/* $Id: trackbar.c,v 1.21 1999-10-24 22:49:49 sandervl Exp $ */
 /*
  * Trackbar control
  *
@@ -2490,7 +2490,8 @@ TRACKBAR_Register (VOID)
 {
     WNDCLASSA wndClass;
 
-    if (GlobalFindAtomA (TRACKBAR_CLASSA)) return;
+//SvL: Don't check this now
+//    if (GlobalFindAtomA (TRACKBAR_CLASSA)) return;
 
     ZeroMemory (&wndClass, sizeof(WNDCLASSA));
     wndClass.style         = CS_GLOBALCLASS;
