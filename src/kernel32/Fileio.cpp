@@ -1,4 +1,4 @@
-/* $Id: Fileio.cpp,v 1.70 2003-02-24 11:40:45 sandervl Exp $ */
+/* $Id: Fileio.cpp,v 1.71 2003-03-03 16:39:53 sandervl Exp $ */
 
 /*
  * Win32 File IO API functions for OS/2
@@ -34,6 +34,7 @@
 #include <heapstring.h>
 #include "handlemanager.h"
 #include "oslibdos.h"
+#include "oslibwps.h"
 
 #define DBG_LOCALLOG    DBG_fileio
 #include "dbglocal.h"
@@ -636,6 +637,17 @@ BOOL WIN32API DeleteFileA(LPCSTR lpszFile)
       return TRUE;
   }
 #endif
+
+  if(lpszFile == NULL) {
+      SetLastError(ERROR_INVALID_PARAMETER); //??
+      return FALSE;
+  }
+  //If the app is deleting a shellink file (.lnk), then we must delete the WPS object
+  if(OSLibIsShellLink((LPSTR)lpszFile)) 
+  {
+      OSLibWinDeleteObject((LPSTR)lpszFile);
+  }
+
   rc = OSLibDosDelete((LPSTR)lpszFile);
   if(!rc) {
     dprintf(("DeleteFileA %s returned FALSE; last error %x", lpszFile, GetLastError()));
