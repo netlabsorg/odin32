@@ -1,4 +1,4 @@
-/* $Id: async.cpp,v 1.8 2000-06-01 11:28:44 sandervl Exp $ */
+/* $Id: async.cpp,v 1.9 2000-09-15 13:24:29 sandervl Exp $ */
 
 /*
  * Win32 Asynchronous I/O Subsystem for OS/2
@@ -10,9 +10,6 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
-
-#ifndef _ASYNCIOSUBSYSTEM_H_
-#define _ASYNCIOSUBSYSTEM_H_
 
 
 /*****************************************************************************
@@ -113,4 +110,3 @@ DWORD WIN32API SleepEx(DWORD dwTimeout,
   return (0);
 }
 
-#endif /* _ASYNCIOSUBSYSTEM_H_ */
