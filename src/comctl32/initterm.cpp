@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.6 1999-08-16 16:55:32 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.7 1999-09-15 23:26:06 sandervl Exp $ */
 /*
  * COMCTL32 DLL entry point
  *
@@ -31,6 +31,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <misc.h>       /*PLF Wed  98-03-18 23:18:29*/
+#include <win32type.h>
+#include <odinlx.h>
 
 extern "C" {
 void CDECL _ctordtorInit( void );
@@ -78,6 +80,9 @@ unsigned long _System _DLL_InitTerm(unsigned long hModule, unsigned long
          /* are required and the runtime is dynamically linked.             */
          /*******************************************************************/
 
+	 if(RegisterLxDll(hModule, 0, 0) == FALSE) 
+		return 0UL;
+
          rc = DosExitList(0x0000F000|EXLST_ADD, cleanup);
          if(rc)
                 return 0UL;
@@ -89,6 +94,7 @@ unsigned long _System _DLL_InitTerm(unsigned long hModule, unsigned long
 
          break;
       case 1 :
+	 UnregisterLxDll(hModule);
          break;
       default  :
          return 0UL;
