@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.55 1999-11-23 19:34:19 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.56 1999-11-26 17:06:08 cbratschi Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -397,7 +397,7 @@ HCURSOR WIN32API LoadCursorFromFileA(LPCTSTR lpFileName)
   if (!HIWORD(lpFileName))
   {
     return LoadCursorA(NULL,lpFileName);
-  } 
+  }
   else
   {
     dprintf(("USER32:LoadCursorFromFileA (%s) not implemented.\n",
@@ -681,6 +681,36 @@ int WIN32API GetSystemMetrics(int nIndex)
    int rc = 0;
 
    switch(nIndex) {
+    case SM_CXSCREEN:
+        rc = ScreenWidth;
+        break;
+
+    case SM_CYSCREEN:
+        rc = ScreenHeight;
+        break;
+
+    case SM_CXVSCROLL:
+        rc = OSLibWinQuerySysValue(OSLIB_HWND_DESKTOP,SVOS_CXVSCROLL);
+        break;
+
+    case SM_CYHSCROLL:
+        rc = OSLibWinQuerySysValue(OSLIB_HWND_DESKTOP,SVOS_CYHSCROLL);
+        break;
+
+    case SM_CYCAPTION:
+        rc = OSLibWinQuerySysValue(OSLIB_HWND_DESKTOP,SVOS_CYTITLEBAR);
+        break;
+
+    case SM_CXBORDER:
+        rc = 1;
+        break;
+
+    case SM_CYBORDER:
+        rc = 1;
+        break;
+
+//CB: todo: add missing metrics
+
     case SM_CXICONSPACING: //TODO: size of grid cell for large icons
         rc = OSLibWinQuerySysValue(OSLIB_HWND_DESKTOP,SVOS_CXICON);
         //CB: return standard windows icon size?
@@ -697,7 +727,7 @@ int WIN32API GetSystemMetrics(int nIndex)
     case SM_DBCSENABLED:
         rc = FALSE;
         break;
-    case SM_CXEDGE: //size of 3D window edge (not supported)
+    case SM_CXEDGE: //size of 3D window edge
         rc = 1;
         break;
     case SM_CYEDGE:
@@ -788,11 +818,6 @@ int WIN32API GetSystemMetrics(int nIndex)
     case SM_YVIRTUALSCREEN:
         rc = 0;
         break;
-    case SM_CXSCREEN:
-
-	return ScreenWidth;
-    case SM_CYSCREEN:
-	return ScreenHeight;
 
     case SM_CXVIRTUALSCREEN:
         rc = OSLibWinQuerySysValue(OSLIB_HWND_DESKTOP,SVOS_CXSCREEN);

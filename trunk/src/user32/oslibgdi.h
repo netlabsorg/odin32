@@ -1,4 +1,4 @@
-/* $Id: oslibgdi.h,v 1.1 1999-09-15 23:18:53 sandervl Exp $ */
+/* $Id: oslibgdi.h,v 1.2 1999-11-26 17:06:07 cbratschi Exp $ */
 /*
  * Window GDI wrapper functions for OS/2
  *
@@ -54,7 +54,10 @@ BOOL  MapOS2ToWin32Point(HWND hwndParent, HWND hwndChild, OSLIBPOINT *point);
 //map os/2 rectangle to screen coordinates and convert to win32 rect
 BOOL  MapOS2ToWin32Rectl(HWND hwndParent, HWND hwndChild, PRECTLOS2 rectOS2, PRECT rectWin32);
 
-BOOL  MapOS2ToWin32Rectl(PRECTLOS2 rectOS2, PRECT rectWin32);
-BOOL  MapWin32ToOS2Rectl(PRECT rectWin32, PRECTLOS2 rectOS2);
+BOOL  MapOS2ToWin32Rectl(HWND hwnd,PRECTLOS2 rectOS2, PRECT rectWin32);
+BOOL  MapWin32ToOS2Rectl(HWND hwnd,PRECT rectWin32, PRECTLOS2 rectOS2);
+
+BOOL  MapOS2ToWin32WindowRect(PRECTLOS2 rectOS2,PRECT rectWin32);
+BOOL  MapWin32ToOS2WindowRect(PRECT rectWin32,PRECTLOS2 rectOS2);
 
 #endif //__OSLIBGDI_H__

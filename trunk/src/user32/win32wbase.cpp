@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.96 1999-11-26 00:05:49 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.97 1999-11-26 17:06:09 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1647,7 +1647,13 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
 
         rc = GetClipBox( (HDC)wParam, &rect );
         if ((rc == SIMPLEREGION) || (rc == COMPLEXREGION))
-            FillRect( (HDC)wParam, &rect, windowClass->getBackgroundBrush());
+        {
+          HBRUSH hBrush = windowClass->getBackgroundBrush();
+
+          if (hBrush <= (HBRUSH)(SYSCOLOR_GetLastColor()+1)) hBrush = GetSysColorBrush(hBrush-1);
+
+          FillRect( (HDC)wParam, &rect, hBrush);
+        }
 
         return 1;
     }

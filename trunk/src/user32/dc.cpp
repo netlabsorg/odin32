@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.22 1999-11-12 11:38:45 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.23 1999-11-26 17:06:06 cbratschi Exp $ */
 
 /*
  * DC functions for USER32
@@ -875,7 +875,7 @@ BOOL WIN32API RedrawWindow(HWND hwnd, const RECT* pRect, HRGN hrgn, DWORD redraw
    if (hwnd == NULLHANDLE)
    {
 #if 1
-	// Don't do this for now (causes lots of desktop repaints in WordPad)
+        // Don't do this for now (causes lots of desktop repaints in WordPad)
          O32_SetLastError (ERROR_INVALID_PARAMETER);
          return FALSE;
 #else
@@ -1272,7 +1272,7 @@ BOOL WIN32API ScrollWindow(HWND hwnd, int dx, int dy, const RECT *pScroll, const
         return 0;
     }
     dprintf(("ScrollWindow %x %d %d\n", hwnd, dx, dy));
-    MapWin32ToOS2Rectl(window->getClientRect(), (PRECTLOS2)&clientRect);
+    MapWin32ToOS2Rectl(window->getOS2WindowHandle(),window->getClientRect(), (PRECTLOS2)&clientRect);
     //Rectangle could be relative to parent window, so fix this
     if(clientRect.yBottom != 0) {
         clientRect.yTop   -= clientRect.yBottom;
@@ -1283,7 +1283,7 @@ BOOL WIN32API ScrollWindow(HWND hwnd, int dx, int dy, const RECT *pScroll, const
         clientRect.xLeft   = 0;
     }
     if(pScroll) {
-         MapWin32ToOS2Rectl((RECT *)pScroll, (PRECTLOS2)&scrollRect);
+         MapWin32ToOS2Rectl(window->getOS2WindowHandle(),(RECT *)pScroll, (PRECTLOS2)&scrollRect);
          pScrollRect = &scrollRect;
 
          //Scroll rectangle relative to client area
@@ -1296,7 +1296,7 @@ BOOL WIN32API ScrollWindow(HWND hwnd, int dx, int dy, const RECT *pScroll, const
     else scrollFlags |= SW_SCROLLCHILDREN;
 
     if(pClip) {
-         MapWin32ToOS2Rectl((RECT *)pClip, (PRECTLOS2)&clipRect);
+         MapWin32ToOS2Rectl(window->getOS2WindowHandle(),(RECT *)pClip, (PRECTLOS2)&clipRect);
          pClipRect = &clipRect;
 
          //Clip rectangle relative to client area
@@ -1340,8 +1340,8 @@ INT WIN32API ScrollWindowEx(HWND hwnd, int dx, int dy, const RECT *pScroll, cons
     if (scrollFlag & SW_INVALIDATE_W)      scrollFlags |= SW_INVALIDATERGN;
     if (scrollFlag & SW_SCROLLCHILDREN_W)  scrollFlags |= SW_SCROLLCHILDREN;
 
-    if(pScroll) MapWin32ToOS2Rectl((RECT *)pScroll, (PRECTLOS2)&scrollRect);
-    if(pClip)   MapWin32ToOS2Rectl((RECT *)pClip, (PRECTLOS2)&clipRect);
+    if(pScroll) MapWin32ToOS2Rectl(window->getOS2WindowHandle(),(RECT *)pScroll, (PRECTLOS2)&scrollRect);
+    if(pClip)   MapWin32ToOS2Rectl(window->getOS2WindowHandle(),(RECT *)pClip, (PRECTLOS2)&clipRect);
 
     RECTL rectlUpdate;
     HRGN  hrgn;
