@@ -1,4 +1,4 @@
-/* $Id: menu.cpp,v 1.33 2001-06-11 20:08:23 sandervl Exp $*/
+/* $Id: menu.cpp,v 1.34 2001-07-06 13:46:59 sandervl Exp $*/
 /*
  * Menu functions
  *
@@ -3703,7 +3703,7 @@ BOOL WINAPI InsertMenuA( HMENU hMenu, UINT pos, UINT flags,
     MENUITEM *item;
 
     if (IS_STRING_ITEM(flags) && str)
-        dprintf(("USER32: InsertMenuA %x %d %x %d %s", hMenu, pos, flags, id, str));
+        dprintf(("USER32: InsertMenuA %x %d %x %x %s", hMenu, pos, flags, id, str));
     //    TRACE("hMenu %04x, pos %d, flags %08x, "
     //                  "id %04x, str '%s'\n",
     //                  hMenu, pos, flags, id, str );
@@ -3753,7 +3753,7 @@ BOOL WINAPI InsertMenuW( HMENU hMenu, UINT pos, UINT flags,
 BOOL WINAPI AppendMenuA( HMENU hMenu, UINT flags,
                              UINT id, LPCSTR data )
 {
-    dprintf(("USER32: AppendMenuA %x %x %d %x", hMenu, flags, id, data));
+    dprintf(("USER32: AppendMenuA %x %x %x %x", hMenu, flags, id, data));
 
     return InsertMenuA( hMenu, -1, flags | MF_BYPOSITION, id, data );
 }
@@ -3765,7 +3765,7 @@ BOOL WINAPI AppendMenuA( HMENU hMenu, UINT flags,
 BOOL WINAPI AppendMenuW( HMENU hMenu, UINT flags,
                              UINT id, LPCWSTR data )
 {
-    dprintf(("USER32: AppendMenuW %x %x %d %x", hMenu, flags, id, data));
+    dprintf(("USER32: AppendMenuW %x %x %x %x", hMenu, flags, id, data));
 
     return InsertMenuW( hMenu, -1, flags | MF_BYPOSITION, id, data );
 }
@@ -4157,7 +4157,7 @@ HMENU WINAPI GetSubMenu( HMENU hMenu, INT nPos )
 {
     MENUITEM * lpmi;
 
-    dprintf(("USER32: GetSubMenu %x %d", nPos));
+    dprintf(("USER32: GetSubMenu %x %d", hMenu, nPos));
 
     if (!(lpmi = MENU_FindItem(&hMenu,(UINT*)&nPos,MF_BYPOSITION))) return 0;
     if (!(lpmi->fType & MF_POPUP)) return 0;
