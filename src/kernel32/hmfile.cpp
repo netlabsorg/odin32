@@ -1,4 +1,4 @@
-/* $Id: hmfile.cpp,v 1.35 2002-06-15 17:14:52 sandervl Exp $ */
+/* $Id: hmfile.cpp,v 1.36 2002-12-03 11:29:27 sandervl Exp $ */
 
 /*
  * File IO win32 apis
@@ -72,6 +72,9 @@ DWORD HMDeviceFileClass::CreateFile (LPCSTR        lpFileName,
            pHMHandleDataTemplate));
   
   ParsePath(lpFileName, filepath, sizeof(filepath));
+
+  //convert to long file name if in 8.3 hashed format
+  GetLongPathNameA(filepath, filepath, sizeof(filepath));
   lpFileName = filepath;
 
   // create from template
@@ -192,6 +195,10 @@ DWORD HMDeviceFileClass::OpenFile (LPCSTR        lpszFileName,
     }
     else {
         ParsePath(lpFileName, filepath, sizeof(filepath));
+
+        //convert to long file name if in 8.3 hashed format
+        GetLongPathNameA(filepath, filepath, sizeof(filepath));
+
         lpFileName = filepath;
     }
 
