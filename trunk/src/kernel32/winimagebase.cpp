@@ -1,4 +1,4 @@
-/* $Id: winimagebase.cpp,v 1.26 2000-09-12 22:45:19 bird Exp $ */
+/* $Id: winimagebase.cpp,v 1.27 2000-09-18 19:26:16 sandervl Exp $ */
 
 /*
  * Win32 PE Image base class
@@ -360,12 +360,12 @@ BOOL Win32ImageBase::matchModName(const char *pszFilename) const
            && ch != ':'
            )
     {
-        if (ch == '.' && pszModNameEnd != NULL)
-            pszModName = pszModName;
+        if (ch == '.' && pszModNameEnd == NULL)
+            pszModNameEnd = pszModName;
         pszModName--;
     }
     pszModName++;
-
+   
     /** @sketch
      * Compare the names caseinsensitivly.
      */
