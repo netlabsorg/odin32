@@ -1,4 +1,4 @@
-/* $Id: Win32kCC.c,v 1.7 2000-12-11 06:17:50 bird Exp $
+/* $Id: Win32kCC.c,v 1.8 2000-12-12 15:32:16 bird Exp $
  *
  * Win32CC - Win32k Control Center.
  *
@@ -350,7 +350,7 @@ MRESULT EXPENTRY Win32kCCDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
                     if (pThis->NewOptions.usCom == 0x3e8)       strcat(szArgs, " -C3");
                     if (pThis->NewOptions.usCom == 0x2e8)       strcat(szArgs, " -C4");
                     if (pThis->NewOptions.fPE == FLAGS_PE_PE2LX)strcat(szArgs, " -P:pe2lx");
-                    if (pThis->NewOptions.fPE == FLAGS_PE_MIXED)strcat(szArgs, " -P:mixed");
+                    /*if (pThis->NewOptions.fPE == FLAGS_PE_MIXED)strcat(szArgs, " -P:mixed"); - default */
                     if (pThis->NewOptions.fPE == FLAGS_PE_PE)   strcat(szArgs, " -P:pe");
                     if (pThis->NewOptions.fPE == FLAGS_PE_NOT)  strcat(szArgs, " -P:not");
                     if (pThis->NewOptions.ulInfoLevel != 0) /* -W0 is default */
@@ -360,7 +360,7 @@ MRESULT EXPENTRY Win32kCCDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
                     if (!pThis->NewOptions.fREXXScript)         strcat(szArgs, " -Rexx:N");
                     if (!pThis->NewOptions.fJava)               strcat(szArgs, " -Java:N");
                     if (pThis->NewOptions.fNoLoader)            strcat(szArgs, " -Noloader");
-                    if (pThis->NewOptions.fDllFixes)            strcat(szArgs, " -DllFixes");
+                    if (!pThis->NewOptions.fDllFixes)           strcat(szArgs, " -DllFixes:D"); /* default is enabled */
                     if (pThis->NewOptions.cbSwpHeapMax != CB_SWP_MAX)
                         sprintf(szArgs + strlen(szArgs), " -HeapMax:%d", pThis->NewOptions.cbSwpHeapMax); /* FIXME - to be changed */
                     if (pThis->NewOptions.cbResHeapMax != CB_RES_MAX)
