@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.109 2001-10-15 17:09:03 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.110 2001-11-30 13:53:49 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -1065,6 +1065,12 @@ BOOL OSLibWinGetMaxPosition(HWND hwndOS2, RECT *rect)
 BOOL OSLibWinShowPointer(BOOL fShow)
 {
     return WinShowPointer(HWND_DESKTOP, fShow);
+}
+//******************************************************************************
+//******************************************************************************
+ULONG  OSLibWinQuerySysColor(int index)
+{
+    return CONVERT_RGB(WinQuerySysColor(HWND_DESKTOP, index, 0));
 }
 //******************************************************************************
 //******************************************************************************
