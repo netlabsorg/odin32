@@ -1,4 +1,4 @@
-/* $Id: oslibres.cpp,v 1.17 2001-08-07 21:35:36 sandervl Exp $ */
+/* $Id: oslibres.cpp,v 1.18 2001-08-11 12:03:36 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -579,8 +579,13 @@ BOOL WIN32API OSLibWinCreateObject(LPSTR pszPath, LPSTR pszArgs,
    dprintf(("Link path %s", pszLink));
 
    GetSystemDirectoryA(szSystemDir, sizeof(szSystemDir));
-   strcpy(szWorkDir, pszPath);
-   OSLibStripFile(szWorkDir);
+   if(pszWorkDir && *pszWorkDir) {
+       strcpy(szWorkDir, pszWorkDir);
+   }
+   else {
+       strcpy(szWorkDir, pszPath);
+       OSLibStripFile(szWorkDir);
+   }
 
    pszSetupString = (LPSTR)malloc(128 + strlen(pszPath) + strlen(pszName) + 
                                   strlen(pszLink) + 2*strlen(szSystemDir) +
@@ -592,10 +597,6 @@ BOOL WIN32API OSLibWinCreateObject(LPSTR pszPath, LPSTR pszArgs,
    if(pszArgs && *pszArgs) {
        strcat(pszSetupString, " ");
        strcat(pszSetupString, pszArgs);
-   }
-   if(pszWorkDir && *pszWorkDir) {
-       sprintf(temp, " /OPT:[CURDIR=%s]", pszWorkDir);
-       strcat(pszSetupString, temp);
    }
    strcat(pszSetupString, ";");
 
